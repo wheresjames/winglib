@@ -89,7 +89,15 @@ SOURCE=.\circ_buf.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\data_packet.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\os\win32\fmap.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\opc\md5.cpp
 # End Source File
 # Begin Source File
 
@@ -117,11 +125,19 @@ SOURCE=.\circ_buf.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\data_packet.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\file_mapping.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\os\fmap.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\opc\md5.h
 # End Source File
 # Begin Source File
 
@@ -149,6 +165,10 @@ SOURCE=.\oexlib_debugging.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\oexlib_exceptions.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\oexlib_macros.h
 # End Source File
 # Begin Source File
@@ -162,6 +182,10 @@ SOURCE=.\oexlib_os_win32.h
 # Begin Source File
 
 SOURCE=.\oexlib_typedefs.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\oexlib_types.h
 # End Source File
 # Begin Source File
 

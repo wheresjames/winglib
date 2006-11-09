@@ -42,6 +42,8 @@ public:
 
 	static oexMUTEX osCreateMutex( oexCSTR x_pName );
 
+	static void osDestroyMutex( oexMUTEX x_pMutex );
+
 	static void osReleaseMutex( oexMUTEX x_pMutex );
 
 	static oexBOOL osSetEvent( oexMUTEX x_pMutex );

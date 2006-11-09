@@ -47,6 +47,39 @@
 	It has hooks for supporting packetizing, compression, and encryption.
 	Efficiency is maintained by allowing inplace operations on the data
 	through the use of views.
+
+
+	Basic test:
+  \code
+
+	oex::CCircBuf buf;
+
+	LPCTSTR cstrTest = "Hello World";
+	TCHAR szTemp[ 256 ] = "";
+	UINT uBufferedData = 0;
+	for ( UINT i = 0; i < 1000; i++ )
+	{
+		// Write several strings to the buffer
+		for ( UINT x = 0; x < 8; x++ )
+			buf.Write( cstrTest ), uBufferedData += strlen( cstrTest );
+
+		// Read a string
+		UINT uRead = 0;
+		buf.Read( szTemp, strlen( cstrTest ), &uRead );
+		szTemp[ uRead ] = 0;
+		uBufferedData -= strlen( cstrTest );
+
+		// Ensure correct data read
+		if ( strcmp( szTemp, cstrTest ) )
+			MessageBox( NULL, "Test Failed", "Error", MB_OK );
+	};
+
+	// Ensure correct number of bytes remain in the buffer
+	if ( uBufferedData != buf.GetMaxRead() )
+		MessageBox( NULL, "Test Failed", "Error", MB_OK );
+
+  \endcode
+
 */
 //==================================================================
 class CCircBuf  

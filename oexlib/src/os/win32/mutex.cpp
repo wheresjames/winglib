@@ -44,8 +44,12 @@ oexMUTEX CMutex::osCreateMutex( oexCSTR x_pName )
 {	return (void*)CreateMutex( NULL, FALSE, x_pName );
 }
 
-void CMutex::osReleaseMutex( oexMUTEX x_pMutex )
+void CMutex::osDestroyMutex( oexMUTEX x_pMutex )
 {	if ( x_pMutex ) CloseHandle( (HANDLE)x_pMutex );
+}
+
+void CMutex::osReleaseMutex( oexMUTEX x_pMutex )
+{	if ( x_pMutex ) ReleaseMutex( (HANDLE)x_pMutex );
 }
 
 oexBOOL CMutex::osSetEvent( oexMUTEX x_pMutex )

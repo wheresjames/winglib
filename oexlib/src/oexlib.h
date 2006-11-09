@@ -52,12 +52,17 @@ OEXLIB_START_NAMESPACE
 #include "oexlib_exceptions.h"
 
 // Include proper OS specific stuff
-#include "oexlib_os_win32.h"
+#ifdef OEXLIB_WIN32
+#	include "oexlib_os_win32.h"
+#endif
 
 // OS specific classes
 #include "os/mmap.h"
 #include "os/fmap.h"
 #include "os/mutex.h" 
+
+// Other People's Code
+#include "opc/md5.h"
 
 // Library Implementation
 #include "thread_safe.h"
@@ -65,6 +70,7 @@ OEXLIB_START_NAMESPACE
 #include "Memory.h"
 #include "RFun.h"
 #include "circ_buf.h"
+#include "data_packet.h"
 
 OEXLIB_END_NAMESPACE
 

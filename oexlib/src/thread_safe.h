@@ -62,7 +62,7 @@ public:
 	CTlLock( oexCSTR x_pName ) { m_bLocked = oexFALSE; m_uRef = 0; m_hMutex = CMutex::osCreateMutex( x_pName ); }
 
 	/// Destructor
-	~CTlLock() { if ( m_hMutex ) { CMutex::osReleaseMutex( m_hMutex ); m_hMutex = NULL; } }
+	~CTlLock() { if ( m_hMutex ) { CMutex::osDestroyMutex( m_hMutex ); m_hMutex = NULL; } }
 
 	//==============================================================
 	// Lock()
@@ -292,12 +292,12 @@ public:
 		// Close start handle
 		void* hTemp = m_hSignal;
 		m_hSignal = NULL;
-		if ( hTemp ) CMutex::osReleaseMutex( hTemp );
+		if ( hTemp ) CMutex::osDestroyMutex( hTemp );
 
 		// Close done handle
 		hTemp = m_hUnsignal;
 		m_hUnsignal = NULL;
-		if ( hTemp ) CMutex::osReleaseMutex( hTemp );
+		if ( hTemp ) CMutex::osDestroyMutex( hTemp );
 	}
 
 	//==============================================================
