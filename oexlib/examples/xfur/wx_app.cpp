@@ -43,7 +43,6 @@ IMPLEMENT_APP( CWxApp )
 
 CWxApp::CWxApp()
 {
-
 }
 
 CWxApp::~CWxApp()

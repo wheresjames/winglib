@@ -46,6 +46,61 @@
 	Use this class to provide serial communication packetizing.
 	Useful for sending data over any serial link such as Ethernet.
 	
+	In the following example, imagine the <b>tx</b> on one side of the 
+	data link and <b>rx</b> on the other.
+
+	Example use:
+
+  \code
+
+	oex::CDataPacket tx, rx;
+
+	LPCTSTR cstrTest = "Hello World";
+	TCHAR szTemp[ 256 ] = "";
+
+	UINT uTxed;
+	for ( uTxed = 0; uTxed < 8; uTxed++ )
+
+		// Write data packets to tx buffer
+		tx.WritePacket( 1, 1, cstrTest, strlen( cstrTest ) );
+	
+	UINT uRxed = 0, uRead;
+
+	// Bytes to send at a time
+	unsigned char ucBuf[ 8 ];
+
+	// Peek data from tx'er
+	while ( tx.Peek( &ucBuf, sizeof( ucBuf ), &uRead ) && uRead )
+	{
+		// *** Send ucBuf, uRead to target ***
+
+		// Remove bytes that were successfully transmitted
+		tx.AdvanceReadPtr( uRead );
+
+		// Decode received data
+		if ( rx.ReadPacket( ucBuf, uRead ) )
+			do	{
+				// Read string from packet
+				rx.ReadPacketString( 0, 1, szTemp, sizeof( szTemp ) );
+
+				// Ensure correct data read
+				if ( strcmp( szTemp, cstrTest ) )
+					MessageBox( NULL, "Test Failed", "Error", MB_OK );
+
+				// Count a packet
+				else uRxed++;
+
+			// Next packet
+			} while( rx.SkipPacket() );
+
+	} // end while
+
+	// Ensure correct number of packets received
+	if ( uTxed != uRxed )
+		MessageBox( NULL, "Test Failed", "Error", MB_OK );
+
+  \endcode
+
 */
 //==================================================================
 class CDataPacket : public CCircBuf
@@ -243,7 +298,7 @@ public:
 	
 		\see 
 	*/
-	oexBOOL WritePacket( oexUINT x_uPacketType, oexUINT x_uDataType, oexPVOID x_pData, oexUINT x_uData );
+	oexBOOL WritePacket( oexUINT x_uPacketType, oexUINT x_uDataType, oexCPVOID x_pData, oexUINT x_uData );
 
 	//==============================================================
 	// WriteMultiPacket()
@@ -304,7 +359,7 @@ public:
 	
 		\see 
 	*/
-	oexBOOL AddPacketData( oexUINT x_uType, oexPVOID x_pData, oexUINT x_uSize );
+	oexBOOL AddPacketData( oexUINT x_uType, oexCPVOID x_pData, oexUINT x_uSize );
 
 	//==============================================================
 	// WritePacketData()
@@ -319,7 +374,7 @@ public:
 	
 		\see 
 	*/
-	oexBOOL WritePacketData( oexPVOID x_pData, oexUINT x_uSize, oexUINT x_uEncode = 0 );
+	oexBOOL WritePacketData( oexCPVOID x_pData, oexUINT x_uSize, oexUINT x_uEncode = 0 );
 
 	//==============================================================
 	// InitPacket()
@@ -387,7 +442,7 @@ public:
 
 		\return Non-zero if GUIDs match
 	*/
-	oexBOOL IsEqualGUID( oexGUID &x_rGuid1, oexGUID &x_rGuid2 )
+	oexBOOL IsEqualGUID( const oexGUID &x_rGuid1, const oexGUID &x_rGuid2 )
 	{	return !memcmp( &x_rGuid1, &x_rGuid2, sizeof( oexGUID ) ); }
 
 private:

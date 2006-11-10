@@ -64,7 +64,7 @@ void CDataPacket::Destroy()
 
 // *** Packet Writing ***
 
-oexBOOL CDataPacket::WritePacket(oexUINT x_uPacketType, oexUINT x_uDataType, oexPVOID x_pData, oexUINT x_uData)
+oexBOOL CDataPacket::WritePacket(oexUINT x_uPacketType, oexUINT x_uDataType, oexCPVOID x_pData, oexUINT x_uData)
 {
 	// Lock the buffer
 	CTlLocalLock ll( *this );
@@ -172,7 +172,7 @@ oexBOOL CDataPacket::InitPacket( oexUINT x_uType, oexUINT x_uDataBlocks, oexUINT
 	return WritePacketData( &ph, sizeof( ph ));
 }
 
-oexBOOL CDataPacket::AddPacketData( oexUINT x_uType, oexPVOID x_pData, oexUINT x_uSize )
+oexBOOL CDataPacket::AddPacketData( oexUINT x_uType, oexCPVOID x_pData, oexUINT x_uSize )
 {
 	SDataHeader dh;
 	dh.uLength = x_uSize;
@@ -186,7 +186,7 @@ oexBOOL CDataPacket::AddPacketData( oexUINT x_uType, oexPVOID x_pData, oexUINT x
 	return WritePacketData( x_pData, x_uSize, m_uEncode );
 }
 
-oexBOOL CDataPacket::WritePacketData( oexPVOID x_pData, oexUINT x_uSize, oexUINT x_uEncode )
+oexBOOL CDataPacket::WritePacketData( oexCPVOID x_pData, oexUINT x_uSize, oexUINT x_uEncode )
 {
 	// Write out the packet header
 	if ( !Poke( x_pData, x_uSize, x_uEncode ) ) return oexFALSE;
