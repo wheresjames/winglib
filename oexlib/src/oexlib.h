@@ -60,6 +60,7 @@ OEXLIB_START_NAMESPACE
 #include "os/mmap.h"
 #include "os/fmap.h"
 #include "os/mutex.h" 
+#include "os/ip_socket.h"
 
 // Other People's Code
 #include "opc/md5.h"

@@ -41,6 +41,8 @@ OEXLIB_USING_NAMESPACE
 oexSTATIC_ASSERT( sizeof( oexHFILEMAP ) == sizeof( HANDLE ) );
 oexSTATIC_ASSERT( sizeof( oexHMEMMAP ) == sizeof( HANDLE ) );
 oexSTATIC_ASSERT( sizeof( oexMUTEX ) == sizeof( HANDLE ) );
+oexSTATIC_ASSERT( sizeof( oexSOCKET ) == sizeof( SOCKET ) );
+oexSTATIC_ASSERT( sizeof( oexSOCKETEVENT ) == sizeof( WSAEVENT ) );
 
 oexSTATIC_ASSERT( sizeof( oexGUID ) == sizeof( GUID ) );
 

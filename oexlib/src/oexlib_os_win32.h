@@ -36,6 +36,8 @@
 typedef void*	oexMUTEX;
 typedef void*	oexHFILEMAP;
 typedef void*	oexHMEMMAP;
+typedef void*	oexSOCKET;
+typedef void*	oexSOCKETEVENT;
 
 #ifdef OEXLIB_WIN32
 

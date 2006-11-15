@@ -48,6 +48,8 @@ template < const int T > class oex_static_assert{};
 #	define oexTRACE			
 #	define oexUNUSED( s )
 
+// +++ Only works for 32-bit processors
+//
 // 0xABABABAB	-	LocalAlloc()
 // 0xBAADF00D	-	LocalAlloc( LMEM_FIXED )
 // 0xCCCCCCCC	-	Uninitialized stack memory
@@ -60,6 +62,7 @@ template < const int T > class oex_static_assert{};
 // 0xDEADBEEF	-	Linux / Unix
 // 0xDEADBABE	-	Linux / Unix
 // 0xA5A5A5A5	-	Embedded
+// 0xFFFFFFFF	-	Invalid
 #	define oexVALIDATE_PTR_NULL_OK( ptr )									\
 				oexASSERT( (		( (oexTYPEOF_PTR)ptr != 0xABABABAB ) &&	\
 									( (oexTYPEOF_PTR)ptr != 0xBAADF00D ) &&	\
@@ -72,7 +75,8 @@ template < const int T > class oex_static_assert{};
 									( (oexTYPEOF_PTR)ptr != 0xDEADC0DE ) && \
 									( (oexTYPEOF_PTR)ptr != 0xDEADBEEF ) && \
 									( (oexTYPEOF_PTR)ptr != 0xDEADBABE ) && \
-									( (oexTYPEOF_PTR)ptr != 0xA5A5A5A5 ) ) )
+									( (oexTYPEOF_PTR)ptr != 0xA5A5A5A5 ) && \
+									( (oexTYPEOF_PTR)ptr != 0xFFFFFFFF ) ) )
 
 #	define oexVALIDATE_PTR( ptr )											\
 				(	oexASSERT( ( (oexTYPEOF_PTR)ptr != NULL ) ) &&			\

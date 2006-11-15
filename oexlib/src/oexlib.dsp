@@ -97,6 +97,10 @@ SOURCE=.\os\win32\fmap.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\os\win32\ip_socket.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\opc\md5.cpp
 # End Source File
 # Begin Source File
@@ -134,6 +138,10 @@ SOURCE=.\file_mapping.h
 # Begin Source File
 
 SOURCE=.\os\fmap.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\os\ip_socket.h
 # End Source File
 # Begin Source File
 
