@@ -319,7 +319,7 @@ void CMd5::MD5(unsigned char digest[16], const void *input, unsigned int inputLe
 	MD5Init( &ctx );
 
 	// Zero length means null terminated
-	if ( inputLen == 0 ) inputLen = strlen( (char*)input );
+	if ( inputLen == 0 ) inputLen = st::COsString::strlen( (char*)input );
 
 	// Crunch the numbers
 	MD5Update( &ctx, (unsigned char *)input, inputLen );
@@ -343,7 +343,8 @@ bool CMd5::vHash( unsigned char digest[16], unsigned int uBuffers, void **pArgs 
 			unsigned int  uSize = *(unsigned int*)( ptrExtra + 1 );
 
 			// Zero means NULL terminated
-			if ( uSize == 0 && pPtr != NULL ) uSize = strlen( (const char *)pPtr );
+			if ( uSize == 0 && pPtr != oexNULL ) 
+				uSize = st::COsString::strlen( (const char *)pPtr );
 
 			// Update
 			MD5Update( &ctx, pPtr, uSize );

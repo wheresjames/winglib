@@ -33,3 +33,5 @@
 
 #include "stdafx.h"
 
+#include "../../stlib/stlib_impl.cpp"
+

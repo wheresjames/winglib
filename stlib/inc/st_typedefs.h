@@ -78,7 +78,9 @@ const stBOOL stFALSE = false;
 const stBOOL stTRUE = true;
 
 // Our string type
-//typedef stlib_std::basic_string< stTCHAR > stString;							  
+//typedef stlib_std::basic_string< stTCHAR > stString;		
+
+//#define stString TString< stTCHAR >
 
 typedef struct _stGUID {
     unsigned long  Data1;

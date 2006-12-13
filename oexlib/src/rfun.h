@@ -248,7 +248,8 @@ private:
 	typedef CAutoMem< TRfCall< oexRESULT, __t_Context* > > __t_FunctionMapNode;
 
 	/// Function map type
-	typedef std::map< std::basic_string< T >, __t_FunctionMapNode > __t_FunctionMap;
+//	typedef std::map< std::basic_string< T >, __t_FunctionMapNode > __t_FunctionMap;
+	typedef st::TAssoList< st::TString< T >, __t_FunctionMapNode > __t_FunctionMap;
 		
 	/// Function map
 	__t_FunctionMap	__m_lstFunctionMap;

@@ -52,6 +52,9 @@ public:
 	CLinkedPtr( CLinkedPtr &rLp )
 	{	Insert( rLp );	}
 
+	CLinkedPtr( const CLinkedPtr &rLp )
+	{	Insert( rLp );	}
+
 	CLinkedPtr( CLinkedPtr *pLp )
 	{	if ( pLp ) Insert( *pLp ); }
 
@@ -60,17 +63,20 @@ public:
 	CLinkedPtr* operator = ( CLinkedPtr &rLp ) 
 	{	Insert( rLp ); return this; }
 
+	CLinkedPtr* operator = ( const CLinkedPtr &rLp ) 
+	{	Insert( rLp ); return this; }
+
 	CLinkedPtr* operator = ( CLinkedPtr *rLp ) 
 	{	if ( pLp ) Insert( *pLp ); return this; }
 
 	/// Obtains pointer and inserts us in the pointer chain
-	OBJ* Insert( CLinkedPtr &rLp )
+	OBJ* Insert( const CLinkedPtr &rLp )
 	{	
 		// Save object pointer
 		m_pObj = rLp.m_pObj;
 
 		// Insert us in the chain
-		m_pPrev = &rLp;
+		m_pPrev = (CLinkedPtr*)&rLp;
 		m_pNext = rLp.m_pNext;
 		rLp.m_pNext = this;
 		if ( m_pNext ) m_pNext->m_pPrev = this;
@@ -142,13 +148,13 @@ public:
 private:
 
 	/// Next element in the list
-	CLinkedPtr		*m_pNext;
+	mutable CLinkedPtr		*m_pNext;
 
 	/// Previous element in the list
-	CLinkedPtr		*m_pPrev;
+	mutable CLinkedPtr		*m_pPrev;
 
 	/// Object pointer
-	OBJ				*m_pObj;
+	OBJ						*m_pObj;
 };
 
 template < class OBJ > class TListNode
@@ -298,6 +304,33 @@ public:
 			m_obj = rNode.Obj();
 		}
 
+		iterator( TListNode< OBJ > *pNode )
+		{	m_pNode = pNode;
+			if ( pNode ) m_obj = pNode->Obj();
+		}
+
+		iterator( const iterator &it )
+		{	m_pNode = it.m_pNode;
+			m_obj = it.m_obj;
+		}
+
+		iterator( iterator &it )
+		{	m_pNode = it.m_pNode;
+			m_obj = it.m_obj;
+		}
+
+		iterator& operator = ( const iterator &it )
+		{	m_pNode = it.m_pNode;
+			m_obj = it.m_obj;
+			return *this;
+		}
+
+		iterator& operator = ( iterator &it )
+		{	m_pNode = it.m_pNode;
+			m_obj = it.m_obj;
+			return *this;
+		}
+
 		OBJ& operator = ( const OBJ &rObj )
 		{	m_obj = rObj;
 			return m_obj;
@@ -369,7 +402,7 @@ public:
 	{	TListNode< OBJ > *pNode = stNULL;
 		try { pNode = new TListNode< OBJ >( (OBJ*)pObj, m_pHead, TListNode< OBJ >::eInsert ); }
 		catch( ... ) { return iterator(); }
-		if ( pNode ) { m_uSize++; m_pHead = pNode; return *m_pHead; }
+		if ( pNode ) { m_uSize++; m_pHead = pNode; if ( !m_pTail ) m_pTail = pNode; return *m_pHead; }
 		return iterator();
 	}
 
@@ -383,7 +416,7 @@ public:
 	{	TListNode< OBJ > *pNode = stNULL;
 		try { pNode = new TListNode< OBJ >( (OBJ*)pObj, m_pTail, TListNode< OBJ >::eAppend ); }
 		catch( ... ) { return iterator(); }
-		if ( pNode ) { m_uSize++; m_pTail = pNode; return *m_pTail; }
+		if ( pNode ) { m_uSize++; m_pTail = pNode; if ( !m_pHead ) m_pHead = pNode; return *m_pTail; }
 		return iterator();
 	}
 
@@ -392,6 +425,10 @@ public:
 		if ( itNew.Ptr() ) itNew = rObj;
 		return itNew;
 	}
+
+	const iterator First() { return iterator( m_pHead ); }
+
+	const iterator Last() { return iterator( m_pTail ); }
 
 	stUINT Size() { return m_uSize; }
 

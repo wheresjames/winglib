@@ -85,7 +85,7 @@
 
 				// Ensure correct data read
 				if ( strcmp( szTemp, cstrTest ) )
-					MessageBox( NULL, "Test Failed", "Error", MB_OK );
+					MessageBox( oexNULL, "Test Failed", "Error", MB_OK );
 
 				// Count a packet
 				else uRxed++;
@@ -97,7 +97,7 @@
 
 	// Ensure correct number of packets received
 	if ( uTxed != uRxed )
-		MessageBox( NULL, "Test Failed", "Error", MB_OK );
+		MessageBox( oexNULL, "Test Failed", "Error", MB_OK );
 
   \endcode
 
@@ -192,7 +192,7 @@ public:
 	
 		\see 
 	*/
-	oexBOOL ReadPacketData( oexUINT x_uBlock, oexUINT x_uType, oexPVOID x_pBuf, oexUINT x_uMax, oexUINT *x_puRead = NULL, oexLONG x_lOffset = 0 );
+	oexBOOL ReadPacketData( oexUINT x_uBlock, oexUINT x_uType, oexPVOID x_pBuf, oexUINT x_uMax, oexUINT *x_puRead = oexNULL, oexLONG x_lOffset = 0 );
 
 	//==============================================================
 	// ReadPacketString()
@@ -333,7 +333,7 @@ public:
 	
 		\see 
 	*/
-	oexBOOL vWriteMultiPacket( oexUINT x_uPacketType, oexUINT x_uBuffers = 0, oexPVOID *x_pArgs = NULL );
+	oexBOOL vWriteMultiPacket( oexUINT x_uPacketType, oexUINT x_uBuffers = 0, oexPVOID *x_pArgs = oexNULL );
 
 	//==============================================================
 	// EndPacket()
@@ -443,7 +443,7 @@ public:
 		\return Non-zero if GUIDs match
 	*/
 	oexBOOL IsEqualGUID( const oexGUID &x_rGuid1, const oexGUID &x_rGuid2 )
-	{	return !memcmp( &x_rGuid1, &x_rGuid2, sizeof( oexGUID ) ); }
+	{	return !st::COsString::memcmp( &x_rGuid1, &x_rGuid2, sizeof( oexGUID ) ); }
 
 private:
 

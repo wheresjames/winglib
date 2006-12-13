@@ -33,9 +33,12 @@
 
 #pragma once
 
+// Include stack tracing
+#include "../../stlib/stlib.h"
+
 // STL
-#include <string>
-#include <map>
+//#include <string>
+//#include <map>
 
 // Use params are in this file
 #include "oexlib_config.h"

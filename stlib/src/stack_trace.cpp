@@ -31,7 +31,7 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#include "../stacktrace.h"
+#include "../stlib.h"
 
 STLIB_USING_NAMESPACE
 

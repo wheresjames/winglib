@@ -109,11 +109,12 @@ STLIB_START_NAMESPACE
 #include "inc/st_exceptions.h"
 
 // OS
+#include "src/os/os_string.h"
 #include "src/os/mutex.h" 
 #include "src/os/hq_timer.h"
 #include "src/os/tls.h"
-#include "src/os/string.h"
 
+#include "inc/string.h"
 #include "inc/asso_list.h"
 #include "inc/thread_safe.h"
 #include "inc/memory.h"

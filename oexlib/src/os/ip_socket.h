@@ -334,7 +334,7 @@ public:
 	
 		\see 
 	*/
-	oexUINT Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead = NULL, oexUINT x_uFlags = 0 );
+	oexUINT Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead = oexNULL, oexUINT x_uFlags = 0 );
 
 	//==============================================================
 	// Send()
@@ -350,7 +350,7 @@ public:
 	
 		\see 
 	*/
-	oexUINT Send( const oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent = NULL, oexUINT x_uFlags = 0 );
+	oexUINT Send( const oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 );
 
 	//==============================================================
 	// Send()
@@ -365,8 +365,8 @@ public:
 	
 		\see 
 	*/
-	oexUINT Send( oexCSTR x_pStr, oexUINT *x_puSent = NULL, oexUINT x_uFlags = 0 )
-	{	return Send( (oexPVOID)x_pStr, strlen( x_pStr ), x_puSent, x_uFlags ); }
+	oexUINT Send( oexCSTR x_pStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
+	{	return Send( (oexPVOID)x_pStr, st::COsString::strlen( x_pStr ), x_puSent, x_uFlags ); }
 
 public:
 
@@ -380,7 +380,7 @@ public:
 
 		\return Returns non-zero if success.
 	*/
-	oexBOOL GetPeerName( oexSTR x_pName, oexUINT *x_puPort = NULL ) { return 0; }
+	oexBOOL GetPeerName( oexSTR x_pName, oexUINT *x_puPort = oexNULL ) { return 0; }
 
 	//==============================================================
 	// GetSocketName()
@@ -392,7 +392,7 @@ public:
 
 		\return Returns non-zero if success.
 	*/
-	oexBOOL GetSocketName( oexSTR x_pName, oexUINT *x_puPort = NULL ) { return 0; }
+	oexBOOL GetSocketName( oexSTR x_pName, oexUINT *x_puPort = oexNULL ) { return 0; }
 
 
 private:

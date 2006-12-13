@@ -67,8 +67,12 @@ typedef oexCONST oexTCHAR*			oexCSTR;
 typedef void*						oexPVOID;
 typedef void oexCONST *				oexCPVOID;
 
+#define oexNULL						0
+
 // Our string type
-typedef oexstd::basic_string< oexTCHAR > oexString;
+//typedef oexstd::basic_string< oexTCHAR > oexString;
+
+typedef st::stString oexString;
 
 typedef struct _oexGUID {
     unsigned long  Data1;

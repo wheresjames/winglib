@@ -307,11 +307,11 @@ public:
 	T* Zero()
 	{
 		// Get buffer info
-		UINT uSize = Size();
+		stUINT uSize = Size();
 		T* pPtr = GetData();
 
 		// Zero memory
-		if ( uSize && pPtr ) memset( pPtr, uSize, 0 );
+		if ( uSize && pPtr ) st::COsString::memset( pPtr, uSize, 0 );
 
 		// Return a pointer to the buffer
 		return pPtr;

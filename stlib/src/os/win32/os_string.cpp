@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// tls.cpp
+// os_string.h
 // Copyright (c) 2006 
 // Robert Umbehant
 // winglib@wheresjames.com
@@ -36,15 +36,22 @@
 
 STLIB_USING_NAMESPACE
 
-const stINT32 CTls::c_Invalid = 0xFFFFFFFF;
+stUINT COsString::strlen( stCSTR pStr )
+{	return strlen( pStr );
+}
 
-stINT32 CTls::osAllocate()
-{	return TlsAlloc(); }
+stINT COsString::memcmp( stCPVOID pBuf1, stCPVOID pBuf2, stLONG lCount )
+{	return memcmp( pBuf1, pBuf2, lCount ); 
+}
 
-stBOOL CTls::osSetValue( stINT32 dwIndex, stPVOID pVal )
-{	return TlsSetValue( dwIndex, pVal ); }
+stPVOID COsString::memcpy( stCPVOID pBuf1, stCPVOID pBuf2, stLONG lCount )
+{	return memcpy( pBuf1, pBuf2, lCount ); 
+}
 
-stPVOID CTls::osGetValue( stINT32 dwIndex )
-{	return TlsGetValue( dwIndex ); }
+stPVOID memset( stCPVOID pDest, stINT ch, stLONG lCount )
+{	return memset( pDest, ch, lCount ); 
+}
 
-
+stUINT strtoul( stCSTR pStr, stSTR *pEndPtr, stINT nBase )
+{	return strtoul( pStr, pEndPtr, nBase );
+}

@@ -84,7 +84,7 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 
 	SetStatusText( _T( "This is a status text" ) );
 
-//	m_cWxImg.LoadFile( _T( "windsurfing.bmp" ) );
+	m_cWxImg.LoadFile( _T( "../media/windsurfing.bmp" ) );
 
 }
 
@@ -95,6 +95,8 @@ void CFrameWnd::OnExit( wxCommandEvent& x_wxCe )
 void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
 {
 	wxPaintDC dc( this );
+
+	m_cWxImg.GetData();
 
 	wxSize sizeClient = GetClientSize();
 	wxRect rect;
@@ -114,10 +116,27 @@ BOOL CFrameWnd::StretchDraw(wxDC &x_dc, wxImage &x_img, wxRect &x_rect)
 {
     if ( !x_img.Ok() ) return FALSE;
 
+	BITMAPINFO bi; 
+	ZeroMemory( &bi, sizeof( bi ) );
+	bi.bmiHeader.biSize = sizeof( bi );
+	bi.bmiHeader.biBitCount = 24;
+	bi.bmiHeader.biHeight = -x_img.GetHeight();
+	bi.bmiHeader.biWidth = x_img.GetWidth();
+	bi.bmiHeader.biPlanes = 1;
+	bi.bmiHeader.biSizeImage = bi.bmiHeader.biHeight * bi.bmiHeader.biWidth * 3;
+	bi.bmiHeader.biCompression = BI_RGB;
+
+	StretchDIBits(	(HDC)x_dc.GetHDC(), 
+					x_rect.GetLeft(), x_rect.GetTop(),
+					x_rect.GetWidth(), x_rect.GetHeight(),
+					0, 0, x_img.GetWidth(), x_img.GetHeight(),
+					x_img.GetData(), &bi, DIB_RGB_COLORS, SRCCOPY );
+
+
 	// The slow but portable way...
-	wxImage cWxImage = x_img.Copy();
-	cWxImage.Rescale( x_rect.GetWidth(), x_rect.GetHeight() );
-	x_dc.DrawBitmap( cWxImage, x_rect.x, x_rect.y );
+//	wxImage cWxImage = x_img.Copy();
+//	cWxImage.Rescale( x_rect.GetWidth(), x_rect.GetHeight() );
+//	x_dc.DrawBitmap( cWxImage, x_rect.x, x_rect.y );
 
 	return TRUE;
 }

@@ -31,12 +31,7 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#if !defined(AFX_HQTIMER_H__1DBB0229_BCE1_429E_874C_A2BBE79BF827__INCLUDED_)
-#define AFX_HQTIMER_H__1DBB0229_BCE1_429E_874C_A2BBE79BF827__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 //==================================================================
 // CHqTimer
@@ -162,4 +157,3 @@ private:
 
 };
 
-#endif // !defined(AFX_HQTIMER_H__1DBB0229_BCE1_429E_874C_A2BBE79BF827__INCLUDED_)

@@ -244,7 +244,7 @@ static BOOL CIpSocket_GetHostByName(LPCTSTR pHost, LPHOSTENT *pHe, LPIN_ADDR *pp
 	// Assume it is the number following ':' character
 	if ( puPort )
 	{	UINT i = 0; while ( pHost[ i ] && ':' != pHost[ i ] ) i++;
-		*puPort = pHost[ i ] ? strtoul( &pHost[ i + 1 ], NULL, 10 ) : 0;
+		*puPort = pHost[ i ] ? st::COsString::strtoul( &pHost[ i + 1 ] ) : 0;
 	} // end if
 
 	// Does the caller want the address?

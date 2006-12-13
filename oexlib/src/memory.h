@@ -95,7 +95,7 @@ public:
 public:
 	
 	/// Constructor
-	TMemory(void) { m_pMem = NULL; }
+	TMemory(void) { m_pMem = oexNULL; }
 
 	/// Constructor
 	/**
@@ -113,7 +113,7 @@ public:
 
 		\see Allocate()
 	*/
-	TMemory( oexUINT x_uSize, oexCSTR x_pName = NULL, oexBOOL *x_pbExists = NULL ) 
+	TMemory( oexUINT x_uSize, oexCSTR x_pName = oexNULL, oexBOOL *x_pbExists = oexNULL ) 
 	{	Allocate( uSize, pName, pbExists ); }
 
 	/// Destructor
@@ -130,7 +130,7 @@ public:
 		m_uSize = 0;
 		if ( m_pMem )
 		{	delete [] m_pMem;
-			m_pMem = NULL;
+			m_pMem = oexNULL;
 		} // end if	
 		
 		// Release any file mapping
@@ -144,7 +144,7 @@ public:
 	T* GetData()
 	{	if ( m_pMem ) return (T*)m_pMem;
 		if ( m_fm.Ptr() ) return (T*)( m_fm.Ptr() + sizeof( SMemoryHeader ) );
-		return NULL;
+		return oexNULL;
 	}
 
 	/// Returns a reference to the element at the specified offset
@@ -154,8 +154,8 @@ public:
 		\return Returns NULL if error, otherwise a reference to the element.
 	*/
 	T* GetAt( oexUINT x_uIndex )
-	{	if ( x_uIndex >= Size() ) return NULL;
-		T* p = GetData(); if ( !p ) return NULL;
+	{	if ( x_uIndex >= Size() ) return oexNULL;
+		T* p = GetData(); if ( !p ) return oexNULL;
 		return &p[ x_uIndex ];		
 	}
 
@@ -182,11 +182,11 @@ public:
 
 		\see TMemory()
 	*/
-	T* Allocate( oexUINT x_uSize, oexCSTR x_pName = NULL, oexBOOL *x_pbExists = NULL )
+	T* Allocate( oexUINT x_uSize, oexCSTR x_pName = oexNULL, oexBOOL *x_pbExists = oexNULL )
 	{
 		// Lock the memory
 		CTlLocalLock ll( this );
-		if ( !ll.IsLocked() ) return NULL;
+		if ( !ll.IsLocked() ) return oexNULL;
 
 		// Lose old memory
 		Destroy();
@@ -198,9 +198,9 @@ public:
 			{
 				// Allocate memory
 				m_pMem = (T*)new oexUCHAR[ x_uSize ];
-				if ( m_pMem == NULL ) return NULL;
+				if ( m_pMem == oexNULL ) return oexNULL;
 
-			} OEXLIB_CATCH_ALL { return NULL; }
+			} OEXLIB_CATCH_ALL { return oexNULL; }
 
 			// Save the size of the memory buffer
 			m_uSize = x_uSize;
@@ -212,13 +212,13 @@ public:
 
 		// Use shared memory
 		oexBOOL bExists = oexFALSE;
-		if ( NULL != m_fm.Create( x_pName, sizeof( SMemoryHeader ) + x_uSize, &bExists ) )
+		if ( oexNULL != m_fm.Create( x_pName, sizeof( SMemoryHeader ) + x_uSize, &bExists ) )
 		{
 			// Already existing?
 			if ( x_pbExists ) *x_pbExists = bExists;
 
 			// Must exist?
-			if ( x_uSize == 0 && !bExists ) { Destroy(); return NULL; }
+			if ( x_uSize == 0 && !bExists ) { Destroy(); return oexNULL; }
 
 			// Save new size
 			( (SMemoryHeader*)m_fm.Ptr() )->ulSize = x_uSize;
@@ -228,7 +228,7 @@ public:
 
 		} // end if
 
-		return NULL;
+		return oexNULL;
 	}
 
 	/// Attaches to existing memory
@@ -243,7 +243,7 @@ public:
 	{
 		// Lock the memory
 		CTlLocalLock ll( this );
-		if ( !ll.IsLocked() ) return NULL;
+		if ( !ll.IsLocked() ) return oexNULL;
 
 		// Lose previous
 		Destroy();
@@ -262,13 +262,13 @@ public:
 	{
 		// Lock the memory
 		CTlLocalLock ll( this );
-		if ( !ll.IsLocked() ) return NULL;
+		if ( !ll.IsLocked() ) return oexNULL;
 
 		// Lose the old buffer
 		Destroy();
 
 		// Punt if invalid buffer
-		if ( !x_pPtr || !x_uSize ) return NULL;
+		if ( !x_pPtr || !x_uSize ) return oexNULL;
 
 		// Save buffer pointer and buffer size
 		m_pMem = x_pPtr;
@@ -299,7 +299,7 @@ public:
 		m_fm.Destroy();
 
 		T* pPtr = m_pMem;
-		m_pMem = NULL;
+		m_pMem = oexNULL;
 		m_uSize = 0;
 
 		return pPtr;
@@ -311,7 +311,7 @@ public:
 	{
 		// Lock the memory
 		CTlLocalLock ll( this );
-		if ( !ll.IsLocked() ) return NULL;
+		if ( !ll.IsLocked() ) return oexNULL;
 
 		// Return the size of the raw buffer
 		if ( m_pMem ) return m_uSize;
@@ -328,7 +328,7 @@ public:
 	{
 		// Lock the memory
 		CTlLocalLock ll( this );
-		if ( !ll.IsLocked() ) return NULL;
+		if ( !ll.IsLocked() ) return oexNULL;
 
 		// Return the size of the raw buffer
 		if ( m_pMem ) return m_uSize;
@@ -345,7 +345,7 @@ public:
 	{
 		// Lock the memory
 		CTlLocalLock ll( this );
-		if ( !ll.IsLocked() ) return NULL;
+		if ( !ll.IsLocked() ) return oexNULL;
 
 		// Return the size of the raw buffer
 		if ( m_pMem ) return m_uSize;
@@ -410,16 +410,16 @@ public:
 		// Get buffer info
 		UINT uSize = Size();
 		T* pPtr = GetData();
-		if ( !uSize || !pPtr ) return NULL;
+		if ( !uSize || !pPtr ) return oexNULL;
 
 		// Valid start?
-		if ( x_uStart >= uSize ) return NULL;
+		if ( x_uStart >= uSize ) return oexNULL;
 
 		// Set valid end if needed
 		if ( x_uEnd >= uSize ) x_uEnd = uSize - 1;
 
 		// Anything to do?
-		if ( x_uStart >= x_uEnd ) return NULL;
+		if ( x_uStart >= x_uEnd ) return oexNULL;
 
 		// Where to start
 		pPtr = &( (char*)pPtr )[ x_uStart ];
@@ -437,16 +437,16 @@ public:
 		// Get buffer info
 		UINT uSize = Size();
 		T* pPtr = GetData();
-		if ( !uSize || !pPtr ) return NULL;
+		if ( !uSize || !pPtr ) return oexNULL;
 
 		// Valid start?
-		if ( uOffset >= uSize ) return NULL;
+		if ( uOffset >= uSize ) return oexNULL;
 
 		// Set valid end if needed
 		if ( x_uLen > ( uSize - uOffset ) ) x_uLen = uSize - x_uOffset;
 
 		// Anything to do?
-		if ( !x_uLen ) return NULL;
+		if ( !x_uLen ) return oexNULL;
 
 		// Where to start
 		pPtr = &( (LPBYTE)pPtr )[ x_uOffset ];

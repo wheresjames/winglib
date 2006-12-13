@@ -50,7 +50,7 @@ public:
 	// CTlLock()
 	//==============================================================
 	/// Creates default lock object
-	CTlLock() { m_bLocked = oexFALSE; m_uRef = 0; m_hMutex = CMutex::osCreateMutex( NULL ); }
+	CTlLock() { m_bLocked = oexFALSE; m_uRef = 0; m_hMutex = CMutex::osCreateMutex( oexNULL ); }
 
 	//==============================================================
 	// CTlLock()
@@ -62,7 +62,7 @@ public:
 	CTlLock( oexCSTR x_pName ) { m_bLocked = oexFALSE; m_uRef = 0; m_hMutex = CMutex::osCreateMutex( x_pName ); }
 
 	/// Destructor
-	~CTlLock() { if ( m_hMutex ) { CMutex::osDestroyMutex( m_hMutex ); m_hMutex = NULL; } }
+	~CTlLock() { if ( m_hMutex ) { CMutex::osDestroyMutex( m_hMutex ); m_hMutex = oexNULL; } }
 
 	//==============================================================
 	// Lock()
@@ -130,7 +130,7 @@ class CTlLocalLock
 public:
 
 	/// Default constructor
-	CTlLocalLock() { m_ptr = NULL; }
+	CTlLocalLock() { m_ptr = oexNULL; }
 
 	//==============================================================
 	// CTlLocalLock()
@@ -142,7 +142,7 @@ public:
 									wait for lock.
 	*/
 	CTlLocalLock( CTlLock *x_ptr, oexUINT x_uTimeout = 3000 ) 
-	{	m_ptr = NULL; if ( x_ptr != NULL ) if ( x_ptr->Lock( x_uTimeout ) ) m_ptr = x_ptr; }
+	{	m_ptr = oexNULL; if ( x_ptr != oexNULL ) if ( x_ptr->Lock( x_uTimeout ) ) m_ptr = x_ptr; }
 
 	//==============================================================
 	// CTlLocalLock()
@@ -154,7 +154,7 @@ public:
 									wait for lock.
 	*/
 	CTlLocalLock( CTlLock &x_lock, oexUINT x_uTimeout = 3000 ) 
-	{	m_ptr = NULL; if ( x_lock.Lock( x_uTimeout ) ) m_ptr = &x_lock; }
+	{	m_ptr = oexNULL; if ( x_lock.Lock( x_uTimeout ) ) m_ptr = &x_lock; }
 
 	/// Destructor - Unlocks the underlying lock
 	~CTlLocalLock() { Unlock(); }
@@ -163,7 +163,7 @@ public:
 	// IsLocked()
 	//==============================================================
 	/// Returns true if the local object is locked
-	oexBOOL IsLocked() { return ( m_ptr != NULL ); }
+	oexBOOL IsLocked() { return ( m_ptr != oexNULL ); }
 
 	//==============================================================
 	// Attach()
@@ -175,7 +175,7 @@ public:
 	// Detach()
 	//==============================================================
 	/// Detaches from CTlLock without unlocking
-	void Detach() { m_ptr = NULL; }
+	void Detach() { m_ptr = oexNULL; }
 
 	//==============================================================
 	// Lock()
@@ -192,7 +192,7 @@ public:
 	*/
 	oexBOOL Lock( CTlLock *x_ptr, oexUINT x_uTimeout = 3000 )
 	{	if ( x_ptr == m_ptr ) return oexTRUE;
-		if ( x_ptr ) { Unlock(); m_ptr = NULL; }
+		if ( x_ptr ) { Unlock(); m_ptr = oexNULL; }
 		if ( !x_ptr ) return oexFALSE;
 		if ( x_ptr->Lock( x_uTimeout ) ) m_ptr = x_ptr;
 		return IsLocked();
@@ -206,8 +206,8 @@ public:
 		\return Always returns non-zero
 	*/
 	oexBOOL Unlock()
-	{	if ( m_ptr == NULL ) return oexTRUE;
-		m_ptr->Unlock(); m_ptr = NULL;
+	{	if ( m_ptr == oexNULL ) return oexTRUE;
+		m_ptr->Unlock(); m_ptr = oexNULL;
 		return oexTRUE;
 	}
 
@@ -282,8 +282,8 @@ public:
 
 	/// Default constructor
 	CTlSignal()
-	{	m_hSignal = CMutex::osCreateMutex( NULL );
-		m_hUnsignal = CMutex::osCreateMutex( NULL );
+	{	m_hSignal = CMutex::osCreateMutex( oexNULL );
+		m_hUnsignal = CMutex::osCreateMutex( oexNULL );
 	}
 
 	/// Destructor
@@ -291,12 +291,12 @@ public:
 	{
 		// Close start handle
 		void* hTemp = m_hSignal;
-		m_hSignal = NULL;
+		m_hSignal = oexNULL;
 		if ( hTemp ) CMutex::osDestroyMutex( hTemp );
 
 		// Close done handle
 		hTemp = m_hUnsignal;
-		m_hUnsignal = NULL;
+		m_hUnsignal = oexNULL;
 		if ( hTemp ) CMutex::osDestroyMutex( hTemp );
 	}
 

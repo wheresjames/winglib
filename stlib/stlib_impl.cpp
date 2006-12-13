@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// tls.cpp
+// stacktrace_impl.cpp
 // Copyright (c) 2006 
 // Robert Umbehant
 // winglib@wheresjames.com
@@ -31,20 +31,17 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#include "../../../stlib.h"
-#include "stdwin.h"
+#pragma once
 
-STLIB_USING_NAMESPACE
+#include "src/stack_trace.cpp"
+//#include "src/stack_report.cpp"
 
-const stINT32 CTls::c_Invalid = 0xFFFFFFFF;
-
-stINT32 CTls::osAllocate()
-{	return TlsAlloc(); }
-
-stBOOL CTls::osSetValue( stINT32 dwIndex, stPVOID pVal )
-{	return TlsSetValue( dwIndex, pVal ); }
-
-stPVOID CTls::osGetValue( stINT32 dwIndex )
-{	return TlsGetValue( dwIndex ); }
-
+// Include proper OS specific stuff
+#ifdef STLIB_WIN32
+#	include "src/os/win32/mutex.cpp"
+#	include "src/os/win32/hq_timer.cpp"
+#	include "src/os/win32/tls.cpp"
+#	include "src/os/win32/string.cpp"
+#	include "src/os/win32/os_string.cpp"
+#endif
 

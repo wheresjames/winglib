@@ -53,8 +53,8 @@ CCircBuf::CCircBuf( oexBOOL x_bSync, oexUINT x_uSize, oexBOOL x_bAutoGrow )
 	m_bAutoGrow = x_bAutoGrow;
 	m_uMaxSize = CCIRCBUF_DEFAULT_MAXBUFFER;
 
-	if ( x_bSync ) m_hDataReady = CMutex::osCreateMutex( NULL );
-	else m_hDataReady = NULL;
+	if ( x_bSync ) m_hDataReady = CMutex::osCreateMutex( oexNULL );
+	else m_hDataReady = oexNULL;
 
 	if ( x_uSize ) Allocate( x_uSize );
 }
@@ -67,7 +67,7 @@ CCircBuf::~CCircBuf()
 	// Lose the sync
 	if ( m_hDataReady )
 	{	CMutex::osReleaseMutex( m_hDataReady );
-		m_hDataReady = NULL;
+		m_hDataReady = oexNULL;
 	} // end if
 }
 
@@ -122,7 +122,7 @@ oexUINT CCircBuf::Resize(oexUINT x_uNewSize)
 
 		// Read all the blocks into the buffer
 		while ( GetView( i++, m_uReadPtr, uUsed, m_buf, m_uSize, &pView, &uView ) )
-			memcpy( &( (oexUCHAR*)temp )[ uRead ], pView, uView ), uRead += uView;
+			st::COsString::memcpy( &( (oexUCHAR*)temp )[ uRead ], pView, uView ), uRead += uView;
 
 	} // end if
 
@@ -192,7 +192,7 @@ oexBOOL CCircBuf::Read( oexPVOID x_pvBuf, oexUINT x_uMax, oexUINT *x_puRead, oex
 	if ( !uSize ) return oexFALSE;
 
 	// Do they just want to know the size?
-	if ( x_pvBuf == NULL || x_uMax == 0 )
+	if ( x_pvBuf == oexNULL || x_uMax == 0 )
 	{	if ( x_puRead ) *x_puRead = uSize;
 		return oexTRUE;
 	} // end if
@@ -201,7 +201,7 @@ oexBOOL CCircBuf::Read( oexPVOID x_pvBuf, oexUINT x_uMax, oexUINT *x_puRead, oex
 	if ( uSize < x_uMax ) 
 	{
 		// Assume we MUST read dwMax if we can't tell the user otherwise
-		if ( x_puRead == NULL ) return oexFALSE;
+		if ( x_puRead == oexNULL ) return oexFALSE;
 
 	} // end if
 
@@ -213,14 +213,14 @@ oexBOOL CCircBuf::Read( oexPVOID x_pvBuf, oexUINT x_uMax, oexUINT *x_puRead, oex
 
 	} // end else
 
-	oexUCHAR *pView = NULL;
+	oexUCHAR *pView = oexNULL;
 	oexUINT i = 0, uRead = 0, uView;
 
 	// Read all the blocks into the buffer
 	while ( GetView( i, uPtr, uSize, m_buf, m_uSize, &pView, &uView ) )
 	{
 		// Copy the data
-		memcpy( &( (oexUCHAR*)x_pvBuf )[ uRead ], pView, uView );
+		st::COsString::memcpy( &( (oexUCHAR*)x_pvBuf )[ uRead ], pView, uView );
 
 		// Decode if needed
 		if ( x_uEncode ) OnDecode( x_uEncode, i, &( (oexUCHAR*)x_pvBuf )[ uRead ], uView );
@@ -267,7 +267,7 @@ oexBOOL CCircBuf::Write( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT *x_puPtr, o
 	while ( GetView( i, uPtr, x_uSize, m_buf, m_uSize, &pView, &uView ) )
 	{	
 		// Copy the data
-		memcpy( pView, &( (oexUCHAR*)x_pvBuf )[ uWritten ], uView );
+		st::COsString::memcpy( pView, &( (oexUCHAR*)x_pvBuf )[ uWritten ], uView );
 
 		// Encode if needed
 		if ( x_uEncode ) OnEncode( x_uEncode, i, pView, uView );
@@ -337,7 +337,7 @@ oexUINT CCircBuf::GetMaxWrite( oexUINT x_uReadPtr, oexUINT x_uWritePtr, oexUINT 
 oexBOOL CCircBuf::Write(oexCSTR x_pStr)
 {
 	// Write the string into the buffer
-	return Write( x_pStr, strlen( x_pStr ) );
+	return Write( x_pStr, st::COsString::strlen( x_pStr ) );
 }
 
 oexBOOL CCircBuf::Read(oexSTR x_pStr, oexUINT x_uMax)
@@ -407,8 +407,8 @@ oexUINT CCircBuf::NormalizePtr( oexUINT x_uPtr, oexUINT x_uMax )
 oexBOOL CCircBuf::GetView( oexUINT x_uView, oexUINT x_uPtr, oexUINT x_uSize, oexUCHAR *x_pucRing, oexUINT x_uMax, oexUCHAR **x_pucBuf, oexUINT *x_puSize )
 {
 	// Verify buffers
-	if ( x_pucRing == NULL || !x_uSize || !x_uMax ) return oexFALSE;
-	if ( x_pucBuf == NULL || x_puSize == NULL ) return oexFALSE;
+	if ( x_pucRing == oexNULL || !x_uSize || !x_uMax ) return oexFALSE;
+	if ( x_pucBuf == oexNULL || x_puSize == oexNULL ) return oexFALSE;
 	if ( x_uPtr >= x_uMax ) return oexFALSE;
 
 	// How many bytes left till the end of the buffer?

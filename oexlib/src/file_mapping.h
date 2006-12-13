@@ -57,13 +57,13 @@ public:
 	/// Unmaps the file and releases all associated resources
 	void Destroy()
 	{
-		m_pPtr = NULL;
+		m_pPtr = oexNULL;
 		m_sName.empty();
 
 		if ( m_hFile )
 		{	CMMap::osMUnMap( m_hFile );
 //			CloseHandle( m_hFile );
-			m_hFile = NULL;
+			m_hFile = oexNULL;
 		} // end if
 	}
 
@@ -97,7 +97,7 @@ public:
 		m_hFile = CFMap::osCreateFileMapping( (oexPVOID*)&m_pPtr, x_llSize, x_pName, x_uAccess, x_pbAlreadyExists );
 
 		// Did we get the handle
-		if ( CFMap::vFailed() == m_hFile ) return NULL;
+		if ( CFMap::vFailed() == m_hFile ) return oexNULL;
 
 		return m_pPtr;
 	}
@@ -122,11 +122,11 @@ public:
 
 		// Attempt to open the existing file mapping
 		m_hFile = OpenFileMapping( dwAccess, FALSE, pName );
-		if ( m_hFile == NULL ) return FALSE;
+		if ( m_hFile == oexNULL ) return FALSE;
 
 		// Get a pointer to the file data
 		m_pPtr = (T*)MapViewOfFile( m_hFile, dwAccess, 0, 0, 0 );
-		if ( !m_pPtr ) { Destroy(); return NULL; }
+		if ( !m_pPtr ) { Destroy(); return oexNULL; }
 
 		// Save the name if any
 		if ( pName && *pName ) m_sName = pName;
@@ -136,8 +136,8 @@ public:
 
 	/// Defualt constructor
 	TFileMapping()
-	{	m_pPtr = NULL;
-		m_hFile = NULL;
+	{	m_pPtr = oexNULL;
+		m_hFile = oexNULL;
 	}
 
 	/// Destructor

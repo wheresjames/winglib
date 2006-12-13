@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// tls.cpp
+// os_string.h
 // Copyright (c) 2006 
 // Robert Umbehant
 // winglib@wheresjames.com
@@ -31,20 +31,33 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#include "../../../stlib.h"
-#include "stdwin.h"
+#pragma once
 
-STLIB_USING_NAMESPACE
+//==================================================================
+// COsString
+//
+/// Generic string functions
+/**
+*/
+//==================================================================
+class COsString
+{
+private:
+	
+	/// Default Constructor
+	COsString() {}
 
-const stINT32 CTls::c_Invalid = 0xFFFFFFFF;
+public:
 
-stINT32 CTls::osAllocate()
-{	return TlsAlloc(); }
+	static stUINT strlen( stCSTR pStr );
 
-stBOOL CTls::osSetValue( stINT32 dwIndex, stPVOID pVal )
-{	return TlsSetValue( dwIndex, pVal ); }
+	static stINT memcmp( stCPVOID pBuf1, stCPVOID pBuf2, stLONG lCount );
 
-stPVOID CTls::osGetValue( stINT32 dwIndex )
-{	return TlsGetValue( dwIndex ); }
+	static stPVOID memcpy( stCPVOID pBuf1, stCPVOID pBuf2, stLONG lCount );
 
+	static stPVOID memset( stCPVOID pDest, stINT ch, stLONG lCount );
+
+	static stUINT strtoul( stCSTR pStr, stSTR *pEndPtr = stNULL, stINT nBase = 10 );
+
+};
 

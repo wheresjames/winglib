@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// tls.cpp
+// string.h
 // Copyright (c) 2006 
 // Robert Umbehant
 // winglib@wheresjames.com
@@ -30,21 +30,28 @@
 //   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
+#pragma once
 
-#include "../../../stlib.h"
-#include "stdwin.h"
+template < class T > class TString
+{
+public:	
 
-STLIB_USING_NAMESPACE
+public:
 
-const stINT32 CTls::c_Invalid = 0xFFFFFFFF;
+	TString() {}
 
-stINT32 CTls::osAllocate()
-{	return TlsAlloc(); }
+	TString( stCSTR pStr ) {}
 
-stBOOL CTls::osSetValue( stINT32 dwIndex, stPVOID pVal )
-{	return TlsSetValue( dwIndex, pVal ); }
+	virtual ~TString() {}
 
-stPVOID CTls::osGetValue( stINT32 dwIndex )
-{	return TlsGetValue( dwIndex ); }
+	static stUINT strlen( stCSTR pStr );
 
+	bool empty() { return true; }
 
+	long length() { return 0; }
+
+public:
+
+};
+
+typedef TString< stTCHAR > stString;

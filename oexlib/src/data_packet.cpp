@@ -97,8 +97,8 @@ oexBOOL CDataPacket::vWriteMultiPacket( oexUINT x_uPacketType, oexUINT x_uBuffer
 	{
 		OEXLIB_TRY // This could GPF if caller screws up
 		{
-			oexUINT		uType = *(oexUINT*)ptrExtra;
-			oexUCHAR	*pPtr = *(oexUCHAR**)( ptrExtra + 1 );
+//			oexUINT		uType = *(oexUINT*)ptrExtra;
+//			oexUCHAR	*pPtr = *(oexUCHAR**)( ptrExtra + 1 );
 			oexUINT		uSize = *(oexUINT*)( ptrExtra + 2 );
 
 			// Track the total size
@@ -299,7 +299,7 @@ oexBOOL CDataPacket::VerifyPacket()
 		// Enforce maximum packet size
 		if ( m_ph.uLength <= GetMaxSize() )
 		{
-			oexUCHAR *pBuf = NULL;
+			oexUCHAR *pBuf = oexNULL;
 			oexUINT  uSize = 0, uView = 0;
 
 			// Initialize the check sum
@@ -316,10 +316,10 @@ oexBOOL CDataPacket::VerifyPacket()
 			CMd5::MD5Final( csCur.md5, &m_md5Context );
 
 			// Read the checksum from the buffer
-			Peek( &csBuf, sizeof( csBuf ), NULL, m_ph.uLength - sizeof( SCheckSum ) );
+			Peek( &csBuf, sizeof( csBuf ), oexNULL, m_ph.uLength - sizeof( SCheckSum ) );
 
 			// Do the checksums match?
-			if ( !memcmp( &csCur, &csBuf, sizeof( SCheckSum ) ) )
+			if ( !st::COsString::memcmp( &csCur, &csBuf, sizeof( SCheckSum ) ) )
 			{	m_bValidPacket = oexTRUE;
 				return oexTRUE;
 			} // end if
@@ -372,7 +372,7 @@ oexBOOL CDataPacket::ReadPacketData(oexUINT x_uBlock, oexUINT x_uType, oexPVOID 
 				dh.uLength -= x_lOffset;
 
 				// Do they just want to know how many bytes or are there none?
-				if ( x_pBuf == NULL || x_uMax == 0 || dh.uLength == 0 )
+				if ( x_pBuf == oexNULL || x_uMax == 0 || dh.uLength == 0 )
 				{	if ( x_puRead ) *x_puRead = dh.uLength; return oexTRUE; }
 
 				// Truncate length if needed
@@ -398,7 +398,7 @@ oexBOOL CDataPacket::ReadPacketData(oexUINT x_uBlock, oexUINT x_uType, oexPVOID 
 oexBOOL CDataPacket::GetPacketDataHash( oexGUID *x_pGuid, oexUINT x_uBlock, oexUINT x_uType)
 {
 	// Ensure guid pointer
-	if ( x_pGuid == NULL ) return oexFALSE;
+	if ( x_pGuid == oexNULL ) return oexFALSE;
 
 	// Ensure valid packet
 	if ( !m_bValidPacket ) return oexFALSE;
@@ -436,7 +436,7 @@ oexBOOL CDataPacket::GetPacketDataHash( oexGUID *x_pGuid, oexUINT x_uBlock, oexU
 				CMd5::MD5Init( &ctx );
 
 				// Hash data in place
-				oexUCHAR *pBuf = NULL;
+				oexUCHAR *pBuf = oexNULL;
 				oexUINT  uView = 0, uSize = 0;
 				while ( GetReadView( uView++, 0, dh.uLength, &pBuf, &uSize ) )
 
