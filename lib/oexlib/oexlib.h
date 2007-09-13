@@ -435,6 +435,7 @@ namespace os
 #include "inc/file_mapping.h"
 #include "inc/memory.h"
 #include "inc/thread_safe.h"
+#include "inc/str.h"
 
 /*
 #include "inc/arb_delegates.h"

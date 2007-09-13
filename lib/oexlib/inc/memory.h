@@ -34,6 +34,19 @@
 
 #pragma once
 
+/// Generic memory allocator
+/**
+    Memory allocator.  Transparently supports regular and shared
+    memory.
+
+    \warning When using shared memory, constructors are called only
+             when the memory block is created.  The destructor is
+             called when the memory is actually freed.  If your
+             sharing memory between processes, this means the 
+             constructor may be called in one process, and the 
+             destructor in another.  So plan accordingly!
+    
+*/
 template < typename T > class TMem
 {
 public:
@@ -41,8 +54,6 @@ public:
     TMem() 
     {   
         m_pMem = oexNULL;
-        m_pName = oexNULL;
-        m_bConstructed = oexFALSE;
 
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
@@ -53,63 +64,62 @@ public:
     TMem( T* x_pMem, oexBOOL x_bConstructed = oexTRUE ) 
     {   
         m_pMem = x_pMem;
-        m_pName = oexNULL;
-        m_bConstructed = x_bConstructed;
 
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
     }
-
+    
+    /// Copy operator
+    TMem& operator = ( TMem &m )
+    {   return Assume( m ); }
+    
     virtual ~TMem()
-    {   SetName( oexNULL );
+    {   
         Delete();
     }
 
+    /// Sets the shared memory name
+    /**
+        \param [in] x_pName -   Shared memory name
+        \param [in] x_uLen  -   Length of the string in x_pName.
+                                Can be zero if the string is
+                                NULL terminated.
+        
+    */
     TMem& SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
-    {
-        // Lose the name
-        if ( m_pName )
-        {
-            OexAllocDelete( m_pName );            
-            m_pName = oexNULL;
-        } // end if
+    {   m_fm.SetName( x_pName, x_uLen ); return *this; }
 
-        if ( !x_pName )
-            return *this;
-
-        if ( !x_uLen )
-            x_uLen = zstr::Length( x_pName );
-
-        // Allocate
-        m_pName = OexAllocNew< TCHAR >( x_uLen + 1 );
-
-        str::Copy( m_pName, x_uLen + 1, x_pName, x_uLen );
-
-        return *this;
-    }
-
+    /// Detaches from memory pointer
+    /**
+        You can't detach from a shared memory pointer using this function!
+    */
     T* Detach()
-    {
-        T* pPtr = m_pMem;
+    {   T* pPtr = m_pMem;
         m_pMem = oexNULL;
         return pPtr;
     }
 
     
-    TMem& New( oexUINT x_uSize )
+    TMem& New( oexUINT x_uSize, oexBOOL x_bConstructed = oexFALSE )
     {
         // Lose old memory
         Delete();
 
         // Shared memory?
-        if ( m_pName )
-            m_fm.Create( oexNULL, m_pName, x_uSize );
+        if ( m_fm.GetName() )
+            m_fm.Create( oexNULL, oexNULL, x_uSize );
 
         // Allocate plain old memory
         else
             m_pMem = CAlloc()._Log( m_uLine, m_pFile ).New< T >( x_uSize );
+
+        // Save construction status if needed
+        if ( x_bConstructed )
+        {   T* pPtr = Ptr();
+            CAlloc::SetFlags( pPtr, CAlloc::eF1Constructed );
+        } // end if
 
         return *this;
     }   
@@ -125,22 +135,29 @@ public:
             return 0;
     }
 
+    /// Returns non-zero if the object was constructed
+    oexBOOL IsConstructed()
+    {   return ( CAlloc::eF1Constructed & CAlloc::GetFlags( Ptr() ) ) ? oexTRUE : oexFALSE;
+    }
+
+    /// Deletes the object
     void Delete()
     {
         // Do we need to destruct objects?
-        if ( m_bConstructed )
-        {
-            T* pPtr = Ptr();
+        T* pPtr = Ptr();
 
-            if ( pPtr )
+        // Destruct object if needed
+        if ( pPtr )
+        {
+            // Was the object constructed?
+            if ( CAlloc::eF1Constructed & CAlloc::GetFlags( pPtr ) 
+                 && 1 == CAlloc::GetRefCount( pPtr ) )
             {
                 oexUINT uSize = Size();
                 for ( oexUINT i = 0; i < uSize; i++ )
                     m_pMem[ i ].~T();
 
             } // end if
-
-            m_bConstructed = oexFALSE;
 
         } // end if
 
@@ -166,12 +183,23 @@ public:
     }
 
     /// Generic resize
-    T* Resize(oexINT x_nNewSize )
+    T* Resize(oexUINT x_uNewSize )
     {
         if ( !oexVERIFY_PTR( m_pMem ) )
             return oexNULL;
 
-        return TAlloc< T >().resize( m_pMem, x_nNewSize, m_uLine, m_pFile );
+        +++ Need to destroy old objects
+
+        return TAlloc< T >().resize( m_pMem, x_uNewSize, m_uLine, m_pFile );
+    }
+
+    /// Reallocates memory
+    T* Reallocate( oexUINT x_uNewSize )
+    {
+        +++
+        
+
+
     }
 
 	//==============================================================
@@ -236,14 +264,94 @@ public:
 
 public:
 
+    /// Adds a reference to the memory block
+    oexUINT AddRef()
+    {   return CAlloc().AddRef( Ptr() ); }
+
+    /// Returns the memory blocks reference count
+    oexUINT GetRefCount()
+    {   return CAlloc().GetRefCount( Ptr() ); }
+
+    /// Assumes control of another objects data
+    TMem& Assume( TMem &x_m )
+    {
+        // Drop current
+        Destroy();
+
+        // Assume the memory from this object
+        if ( x_m.m_pMem )
+        {   m_pMem = x_m.m_pMem; x_m.m_pMem = oexNULL;
+            m_fm = x_m.m_fm; x_m.m_fm.Detach();
+        } // end if
+
+        return *this;
+    }
+
+    /// Copies another objects data
+    TMem& Copy( TMem &x_m, oexCSTR x_pNewName = oexNULL, oexUINT x_uNameLen = 0 )
+    {
+        // Drop current
+        Destroy();
+
+        // Raw memory?
+        if ( x_m.m_pMem || ( x_pNewName && *x_pNewName ) )
+        {
+            oexUINT uSize = m.Size();
+            if ( uSize )
+            {
+                // Shared memory?
+                if ( x_pNewName && *x_pNewName )
+                    SetName( x_pNewName, x_uNameLen );
+
+                // Do we need to construct objects?
+                if ( x_m.IsConstructed() )
+                {
+                    // Create array of objects
+                    ConstructArray( uSize );
+
+                    // Copy objects
+                    for ( oexUINT i = 0; i < uSize; i++ )
+                        *Ptr( i ) = *x_m.Ptr( i );
+
+                } // end if
+
+                else
+                {
+                    // Allocate raw array
+                    New( uSize );
+
+                    // Just copy the memory
+                    os::CSys::MemCpy( Ptr(), x_m.Ptr(), uSize * sizeof( T ) );
+
+                } // end else
+
+            } // end if
+
+        } // end if
+
+        // Copy shared memory
+        else if ( x_m.m_fm.Ptr() )
+            m_fm.Copy( x_m.m_fm );
+
+        return *this;
+    }
+
+    /// Returns a copy of this object
+    TMem Copy( oexCSTR x_pNewName = oexNULL, oexUINT x_uNameLen = 0 )
+    {   TMem mem;
+        if ( Ptr() )
+            mem.Copy( *this, x_pNewName, x_uNameLen );
+        return mem;
+    }
+
+public:
+
     /// Construct object
     TMem& Construct()
     {
-        T* p = New( 1 ).Ptr();
+        T* p = New( 1, oexTRUE ).Ptr();
         if ( m_pMem || !m_fm.Existing() )
-        {   m_bConstructed = oexTRUE;
             oexPLACEMENT_NEW ( p ) T();
-        } // end if
 
         return *this;
     }
@@ -252,11 +360,9 @@ public:
     template< typename T_P1 >
         TMem& Construct( T_P1 p1 )
     {
-        T* p = New( 1 ).Ptr();
+        T* p = New( 1, oexTRUE ).Ptr();
         if ( m_pMem || !m_fm.Existing() )
-        {   m_bConstructed = oexTRUE;
             oexPLACEMENT_NEW ( p ) T( p1 );
-        } // end if
 
         return *this;
     }
@@ -265,11 +371,9 @@ public:
     template< typename T_P1, typename T_P2 >
         TMem& Construct( T_P1 p1, T_P2 p2 )
     {
-        T* p = New( 1 ).Ptr();
+        T* p = New( 1, oexTRUE ).Ptr();
         if ( m_pMem || !m_fm.Existing() )
-        {   m_bConstructed = oexTRUE;
             oexPLACEMENT_NEW ( p ) T( p1, p2 );
-        } // end if
 
         return *this;
     }
@@ -278,11 +382,9 @@ public:
     template< typename T_P1, typename T_P2, typename T_P3 >
         TMem& Construct( T_P1 p1, T_P2 p2, T_P3 p3 )
     {
-        T* p = New( 1 ).Ptr();
+        T* p = New( 1, oexTRUE ).Ptr();
         if ( m_pMem || !m_fm.Existing() )
-        {   m_bConstructed = oexTRUE;
             oexPLACEMENT_NEW ( p ) T( p1, p2, p3 );
-        } // end if
 
         return *this;
     }
@@ -291,11 +393,9 @@ public:
     template< typename T_P1, typename T_P2, typename T_P3, typename T_P4 >
         TMem& Construct( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4 )
     {
-        T* p = New( 1 ).Ptr();
+        T* p = New( 1, oexTRUE ).Ptr();
         if ( m_pMem || !m_fm.Existing() )
-        {   m_bConstructed = oexTRUE;
             oexPLACEMENT_NEW ( p ) T( p1, p2, p3, p4 );
-        } // end if
 
         return *this;
     }
@@ -304,11 +404,9 @@ public:
     template< typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5 >
         TMem& Construct( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5 )
     {
-        T* p = New( 1 ).Ptr();
+        T* p = New( 1, oexTRUE ).Ptr();
         if ( m_pMem || !m_fm.Existing() )
-        {   m_bConstructed = oexTRUE;
             oexPLACEMENT_NEW ( p ) T( p1, p2, p3, p4, p5 );
-        } // end if
 
         return *this;
     }
@@ -317,11 +415,9 @@ public:
     template< typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6 >
         TMem& Construct( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6 )
     {
-        T* p = New( 1 ).Ptr();
+        T* p = New( 1, oexTRUE ).Ptr();
         if ( m_pMem || !m_fm.Existing() )
-        {   m_bConstructed = oexTRUE;
             oexPLACEMENT_NEW ( p ) T( p1, p2, p3, p4, p5, p6 );
-        } // end if
 
         return *this;
     }
@@ -330,11 +426,9 @@ public:
     template< typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6, typename T_P7 >
         TMem& Construct( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7 )
     {
-        T* p = New( 1 ).Ptr();
+        T* p = New( 1, oexTRUE ).Ptr();
         if ( m_pMem || !m_fm.Existing() )
-        {   m_bConstructed = oexTRUE;
             oexPLACEMENT_NEW ( p ) T( p1, p2, p3, p4, p5, p6, p7 );
-        } // end if
 
         return *this;
     }
@@ -343,11 +437,9 @@ public:
     template< typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6, typename T_P7, typename T_P8 >
         TMem& Construct( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8 )
     {
-        T* p = New( 1 ).Ptr();
+        T* p = New( 1, oexTRUE ).Ptr();
         if ( m_pMem || !m_fm.Existing() )
-        {   m_bConstructed = oexTRUE;
             oexPLACEMENT_NEW ( p ) T( p1, p2, p3, p4, p5, p6, p7, p8 );
-        } // end if
 
         return *this;
     }
@@ -357,12 +449,10 @@ public:
     /// Construct object array
     TMem& ConstructArray( oexUINT x_uSize )
     {
-        T *p = New( x_uSize ).Ptr();
+        T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-        {   m_bConstructed = oexTRUE;
             for ( oexUINT i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T();
-        } // end if
 
         return *this;
     }
@@ -371,12 +461,10 @@ public:
     template< typename T_P1 >
         TMem& ConstructArray( oexUINT x_uSize, T_P1 p1 )
     {
-        T *p = New( x_uSize ).Ptr();
+        T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-        {   m_bConstructed = oexTRUE;
             for ( oexUINT i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1 );
-        } // end if
 
         return *this;
     }
@@ -385,12 +473,10 @@ public:
     template< typename T_P1, typename T_P2 >
         TMem& ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2 )
     {
-        T *p = New( x_uSize ).Ptr();
+        T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-        {   m_bConstructed = oexTRUE;
             for ( oexUINT i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1, p2 );
-        } // end if
 
         return *this;
     }
@@ -399,12 +485,10 @@ public:
     template< typename T_P1, typename T_P2, typename T_P3 >
         TMem& ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3 )
     {
-        T *p = New( x_uSize ).Ptr();
+        T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-        {   m_bConstructed = oexTRUE;
             for ( oexUINT i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1, p2, p3 );
-        } // end if
 
         return *this;
     }
@@ -413,12 +497,10 @@ public:
     template< typename T_P1, typename T_P2, typename T_P3, typename T_P4 >
         TMem& ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4 )
     {
-        T *p = New( x_uSize ).Ptr();
+        T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-        {   m_bConstructed = oexTRUE;
             for ( oexUINT i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1, p2, p3, p4 );
-        } // end if
 
         return *this;
     }
@@ -427,12 +509,10 @@ public:
     template< typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5 >
         TMem& ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5 )
     {
-        T *p = New( x_uSize ).Ptr();
+        T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-        {   m_bConstructed = oexTRUE;
             for ( oexUINT i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1, p2, p3, p4, p5 );
-        } // end if
 
         return *this;
     }
@@ -441,12 +521,10 @@ public:
     template< typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6 >
         TMem& ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6 )
     {
-        T *p = New( x_uSize ).Ptr();
+        T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-        {   m_bConstructed = oexTRUE;
             for ( oexUINT i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1, p2, p3, p4, p5, p6 );
-        } // end if
 
         return *this;
     }
@@ -455,12 +533,10 @@ public:
     template< typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6, typename T_P7 >
         TMem& ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7 )
     {
-        T *p = New( x_uSize ).Ptr();
+        T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-        {   m_bConstructed = oexTRUE;
             for ( oexUINT i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1, p2, p3, p4, p5, p6, p7 );
-        } // end if
 
         return *this;
     }
@@ -469,20 +545,15 @@ public:
     template< typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6, typename T_P7, typename T_P8 >
         TMem& ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8 )
     {
-        T *p = New( x_uSize ).Ptr();
+        T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-        {   m_bConstructed = oexTRUE;
             for ( oexUINT i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1, p2, p3, p4, p5, p6, p7, p8 );
-        } // end if
 
         return *this;
     }
 
 private:
-
-    /// Non zero if objects were constructed
-    oexBOOL                 m_bConstructed;
 
     /// Pointer to the memory
     T*                      m_pMem;
@@ -508,9 +579,6 @@ private:
 
     /// Holds the file name of the allocating call
     oexCSTR         m_pFile;
-
-    /// Shared memory name
-    oexCHAR         *m_pName;
 
 #endif
 

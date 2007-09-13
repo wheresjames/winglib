@@ -226,6 +226,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\inc\file_mapping.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\inc\os\fmap.h"
 				>
 			</File>
@@ -235,6 +239,10 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\os\mem.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\memory.h"
 				>
 			</File>
 			<File
@@ -283,6 +291,10 @@
 			</File>
 			<File
 				RelativePath="..\..\oexlib.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\str.h"
 				>
 			</File>
 			<File

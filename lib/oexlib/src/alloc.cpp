@@ -36,8 +36,6 @@
 
 OEX_USING_NAMESPACE
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-
 /// Underrun padding
 oexUCHAR CAlloc::m_ucUnderrunPadding[ 4 ] = 
 {
@@ -57,38 +55,46 @@ oexUCHAR CAlloc::m_ucOverrunPadding[ 24 ] =
 
 void CAlloc::ReportBlock( oexPVOID x_pMem, oexUINT uSize )
 {
-    if ( !oexVERIFY_PTR( x_pMem ) )
-        return;
+    // Could get an exception if it's not our memory block
+    // But we can't force people to use our allocation routines ;)
+    try
+    {
+        if ( !oexVERIFY_PTR( x_pMem ) )
+            return;
 
-    oexUCHAR *pBuf = (oexUCHAR*)x_pMem;
+        oexUCHAR *pBuf = (oexUCHAR*)x_pMem;
 
-    oexUINT uBlockSize = *(oexUINT*)pBuf;
-    pBuf += sizeof( oexUINT );
+        oexUINT uBlockSize = *(oexUINT*)pBuf;
+        pBuf += sizeof( oexUINT );
 
-    // Allocation information
-    SAllocInfo *pAi = (SAllocInfo*)pBuf;
-    pBuf += sizeof( SAllocInfo ) * eMaxAllocTrail;
+        SBlockHeader *pBh = (SBlockHeader*)pBuf;
+        pBuf += sizeof( SBlockHeader );
 
-    // Size of protected area
-	oexUINT uProtected = *(oexUINT*)pBuf;
+        oexTCHAR szMsg[ 1024 ] = oexEMPTY_STRING;
+        os::CSys::StrFmt( szMsg, sizeof( szMsg ), "Total: %lu, Block: %lu, Protected: %lu\n",
+                                                  uSize, uBlockSize, pBh->uSize );
 
-    oexTCHAR szMsg[ 1024 ] = oexEMPTY_STRING;
-    os::CSys::StrFmt( szMsg, sizeof( szMsg ), "Total: %lu, Block: %lu, Protected: %lu\n",
-                                              uSize, uBlockSize, uProtected );
+        if ( pBh->ai[ 0 ].pFile )
+            os::CSys::StrFmt( zstr::EndOfString( szMsg ), sizeof( szMsg ) - zstr::Length( szMsg ), 
+                              "%s(%lu) : Allocated\n", pBh->ai[ 0 ].pFile, pBh->ai[ 0 ].uLine );
 
-    if ( pAi[ 0 ].pFile )
-        os::CSys::StrFmt( zstr::EndOfString( szMsg ), sizeof( szMsg ) - zstr::Length( szMsg ), 
-                          "%s(%lu) : Allocated\n", pAi[ 0 ].pFile, pAi[ 0 ].uLine );
+        if ( pBh->ai[ 1 ].pFile )
+            os::CSys::StrFmt( zstr::EndOfString( szMsg ), sizeof( szMsg ) - zstr::Length( szMsg ), 
+                              "%s(%lu) : Resized\n", pBh->ai[ 1 ].pFile, pBh->ai[ 1 ].uLine );
 
-    if ( pAi[ 1 ].pFile )
-        os::CSys::StrFmt( zstr::EndOfString( szMsg ), sizeof( szMsg ) - zstr::Length( szMsg ), 
-                          "%s(%lu) : Resized\n", pAi[ 1 ].pFile, pAi[ 1 ].uLine );
+        if ( pBh->ai[ 2 ].pFile )
+            os::CSys::StrFmt( zstr::EndOfString( szMsg ), sizeof( szMsg ) - zstr::Length( szMsg ), 
+                              "%s(%lu) : Freed\n", pBh->ai[ 2 ].pFile, pBh->ai[ 2 ].uLine );
 
-    if ( pAi[ 2 ].pFile )
-        os::CSys::StrFmt( zstr::EndOfString( szMsg ), sizeof( szMsg ) - zstr::Length( szMsg ), 
-                          "%s(%lu) : Freed\n", pAi[ 2 ].pFile, pAi[ 2 ].uLine );
+        oexTRACE( szMsg );
 
-    oexTRACE( szMsg );
+    } // end try
+
+    catch( ... )
+    {
+        oexTRACE( "!!! Asserted while trying to interpret memory block.  Perhaps it's some other _CLIENT_BLOCK?\n" );
+
+    } // end catch
 
 }
 
@@ -105,17 +111,31 @@ oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUI
     *(oexUINT*)pBuf = uBlockSize;
     pBuf += sizeof( oexUINT );
 
-    // Initialize protected memory variables
-    os::CSys::Zero( pBuf, sizeof( SAllocInfo ) * eMaxAllocTrail + sizeof( oexUINT ) );
+    // Initialize block header
+    os::CSys::Zero( pBuf, sizeof( SBlockHeader ) );
 
     // Return protected memory area
-    return CAlloc::ProtectMem( pBuf, x_uSize, oexTRUE, x_uLine, x_pFile, x_uInfoIndex );
+    pBuf = (oexUCHAR*)CAlloc::ProtectMem( pBuf, x_uSize, oexTRUE, x_uLine, x_pFile, x_uInfoIndex );
+
+    // Increment the reference count on this memory block
+    AddRef( pBuf );
+
+    return pBuf;
 }
 
-void CAlloc::Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex )
+oexBOOL CAlloc::Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex )
 {
+    // Decrement the reference count
+    if ( 0 != DecRef( x_pBuf ) )
+        return oexFALSE;
+
+    // Verify the memory
+    oexPVOID pBuf = (oexUCHAR*)CAlloc::VerifyMem( x_pBuf, oexTRUE ) - sizeof( oexUINT );
+
     // Delete the memory
-    os::CMem::Delete( (oexUCHAR*)CAlloc::VerifyMem( x_pBuf, oexTRUE ) - sizeof( oexUINT ) );
+    os::CMem::Delete( pBuf );
+
+    return oexTRUE;
 }
 
 oexPVOID CAlloc::Resize( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex )
@@ -129,31 +149,20 @@ oexPVOID CAlloc::Resize( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, o
     return ProtectMem( VerifyMem( x_pBuf, oexTRUE ), x_uNewSize, oexTRUE, x_uLine, x_pFile, x_uInfoIndex );
 }
 
-oexUINT CAlloc::BlockSize( oexPVOID x_pBuf )
-{
-    if ( !oexVERIFY( x_pBuf ) )
-        return 0;
-
-    // Grab the size of the allocated buffer
-    return *(oexUINT*)( ( (oexUCHAR*)x_pBuf ) - sizeof( oexUINT )
-                                              - sizeof( m_ucUnderrunPadding )
-                                              - ( sizeof( SAllocInfo ) * eMaxAllocTrail )
-                                              - sizeof( oexUINT ) );
-}
-
 oexPVOID CAlloc::VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex )
 {
+    // Validate pointer
+    if ( !oexVERIFY_PTR( x_pBuf ) )
+        return 0;
+
     // Convert to byte pointer
     oexUCHAR *pBuf = (oexUCHAR*)x_pBuf;
 
-    // Pull out this pointer so we can see it from the debugger
-    SAllocInfo *pAi = (SAllocInfo*)( pBuf - sizeof( oexUINT ) 
-                                          - sizeof( m_ucUnderrunPadding )
-                                          - ( sizeof( SAllocInfo ) * eMaxAllocTrail ) );
+    // Grab a pointer to the block header
+    SBlockHeader *pBh = (SBlockHeader*)( pBuf - sizeof( SBlockHeader ) - sizeof( m_ucUnderrunPadding ) );    
 
     // Grab the size of the allocated buffer
-    oexUINT uSize = *(oexUINT*)( pBuf - sizeof( oexUINT )
-                                      - sizeof( m_ucUnderrunPadding ) );
+    oexUINT uSize = pBh->uSize;
 
     if ( x_puSize )
 	    *x_puSize = *( (oexUINT*)pBuf );
@@ -162,8 +171,8 @@ oexPVOID CAlloc::VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSiz
     if ( x_bUpdate && x_uInfoIndex < eMaxAllocTrail )
     {
         // Save allocation information
-        pAi[ x_uInfoIndex ].pFile = x_pFile;
-        pAi[ x_uInfoIndex ].uLine = x_uLine;
+        pBh->ai[ x_uInfoIndex ].pFile = x_pFile;
+        pBh->ai[ x_uInfoIndex ].uLine = x_uLine;
 
     } // end if
 
@@ -191,35 +200,14 @@ oexPVOID CAlloc::VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSiz
     	os::CSys::MemSet( pBuf, 0, sizeof( m_ucUnderrunPadding ) );
 
 	// Skip the size
-	pBuf -= sizeof( oexUINT );
+	pBuf -= sizeof( SBlockHeader );
 
 	// We don't want this value comming back to haunt us
     if ( x_bUpdate )
-    	*( (oexUINT*)pBuf ) = 0;
-
-    // Skip back over allocation information
-    pBuf -= sizeof( SAllocInfo ) * eMaxAllocTrail;
+    	pBh->uSize = 0;
 
 	// Return original buffer pointer
 	return pBuf;
-}
-
-oexUINT CAlloc::ProtectAreaSize()
-{
-	return  ( sizeof( SAllocInfo ) * eMaxAllocTrail ) 
-            + sizeof( oexUINT )
-            + sizeof( m_ucUnderrunPadding )
-            + sizeof( m_ucOverrunPadding );
-}
-
-oexUINT CAlloc::UsedSize( oexPVOID x_pBuf )
-{
-    if ( !oexVERIFY( x_pBuf ) )
-        return 0;
-
-    // Grab the size of the usable space
-    return *(oexUINT*)( ( (oexUCHAR*)x_pBuf ) - sizeof( oexUINT )
-                                              - sizeof( m_ucUnderrunPadding ) );
 }
 
 oexPVOID CAlloc::ProtectMem( oexPVOID x_pBuf, oexUINT x_uSize, oexBOOL x_bUpdate, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex )
@@ -227,27 +215,24 @@ oexPVOID CAlloc::ProtectMem( oexPVOID x_pBuf, oexUINT x_uSize, oexBOOL x_bUpdate
     // Convert to byte pointer
     oexUCHAR *pBuf = (oexUCHAR*)x_pBuf;
 
-    // Get pointer to allocation information
-    SAllocInfo *pAi = (SAllocInfo*)pBuf;
+    // Grab a pointer to the block header
+    SBlockHeader *pBh = (SBlockHeader*)pBuf;    
+
+    // Skip the allocation info
+    pBuf += sizeof( SBlockHeader );
 
     // Valid info index?
     if ( x_bUpdate && x_uInfoIndex < eMaxAllocTrail )
     {
         // Save allocation information
-        pAi[ x_uInfoIndex ].pFile = x_pFile;
-        pAi[ x_uInfoIndex ].uLine = x_uLine;
+        pBh->ai[ x_uInfoIndex ].pFile = x_pFile;
+        pBh->ai[ x_uInfoIndex ].uLine = x_uLine;
 
     } // end if
 
-    // Skip the allocation info
-    pBuf += sizeof( SAllocInfo ) * eMaxAllocTrail;
-
-    // Save size of buffer for later
+    // Save size of usable space for later
     if ( x_bUpdate )
-    	*( (oexUINT*)pBuf ) = x_uSize;
-
-	// Adjust to new start point
-	pBuf += sizeof( oexUINT );
+        pBh->uSize = x_uSize;
 
     // Copy under-run padding
     if ( x_bUpdate )
@@ -264,66 +249,3 @@ oexPVOID CAlloc::ProtectMem( oexPVOID x_pBuf, oexUINT x_uSize, oexBOOL x_bUpdate
 	return pBuf;
 }
 
-#else
-
-oexPVOID CAlloc::Alloc( oexUINT x_uSize )
-{
-    // Allocate memory in powers of two
-    oexUINT uBlockSize = cmn::NextPower2( sizeof( oexUINT ) + x_uSize );
-
-    oexUCHAR *pBuf;
-
-    // Allocate buffer
-    try
-    {
-        pBuf = oexNEW oexUCHAR[ uBlockSize ];
-        if ( !pBuf )
-            return oexNULL;
-
-    } // end try
-    catch( ... )
-    {
-        return oexNULL;
-
-    } // end catch
-
-    // Save block size
-    *(oexUINT*)pBuf = uBlockSize;
-    pBuf += sizeof( oexUINT );
-
-    // Return protected memory area
-    return pBuf;
-}
-
-void CAlloc::Free( oexPVOID x_pBuf )
-{
-    try
-    {
-        oexDELETE_ARR( (oexUCHAR*)pBuf - sizeof( oexUINT ) );
-
-    } // end try
-    catch( ... )
-    {
-        return;
-
-    } // end catch
-}
-
-oexPVOID CAlloc::Resize( oexPVOID x_pBuf, oexUINT x_uNewSize )
-{
-    // Do we have the space to resize?
-    oexUINT uBlockSize = BlockSize( x_pBuf );
-    if ( uBlockSize < x_uNewSize ) 
-        return oexNULL;
-
-    // Return pointer if there is enough room
-    return x_pBuf;
-}
-
-oexUINT CAlloc::BlockSize( oexPVOID x_pBuf )
-{
-    // Grab the size of the allocated buffer
-    return *(oexUINT*)( ( (oexUCHAR*)x_pBuf ) - sizeof( oexUINT ) );
-}
-
-#endif

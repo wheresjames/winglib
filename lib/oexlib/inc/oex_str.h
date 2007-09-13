@@ -795,20 +795,20 @@ namespace guid
 	    x_pGuid->Data1 = ul;
 
 	    if ( !ahtoui( &ul, &x_pString[ 9 ], 4 ) ) return oexNULL;
-	    x_pGuid->Data2 = (WORD)ul;
+	    x_pGuid->Data2 = (oexUINT16)ul;
 
 	    if ( !ahtoui( &ul, &x_pString[ 14 ], 4 ) ) return oexNULL;
-	    x_pGuid->Data3 = (WORD)ul;
+	    x_pGuid->Data3 = (oexUINT16)ul;
 
-	    DWORD i;
+	    oexUINT i;
 	    for ( i = 0; i < 2; i++ )
 	    {	if ( !ahtoui( &ul, &x_pString[ 19 + ( i << 1 ) ], 2 ) ) return oexNULL;
-		    x_pGuid->Data4[ i ] = (BYTE)ul;
+		    x_pGuid->Data4[ i ] = (oexUCHAR)ul;
 	    } // end for	
 
 	    for ( i = 0; i < 6; i++ )
 	    {	if ( !ahtoui( &ul, &x_pString[ 24 + ( i << 1 ) ], 2 ) ) return oexNULL;
-		    x_pGuid->Data4[ 2 + i ] = (BYTE)ul;
+		    x_pGuid->Data4[ 2 + i ] = (oexUCHAR)ul;
 	    } // end for
 
 	    return x_pGuid;

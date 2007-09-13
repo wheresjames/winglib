@@ -78,6 +78,14 @@ public:
         eMaxAllocTrail = 3
     };
 
+    // Allocation flags
+    enum
+    {
+        /// Set if the object was constructed
+        eF1Constructed = 0x00000001
+
+    };
+
     /// This structure contains information about where a memory block was allocated
     struct SAllocInfo
     {
@@ -99,6 +107,8 @@ public:
         /// Reference count
         oexUINT         uRef;
 
+        /// Memory block flags
+        oexUINT         uFlags;
     };
 
 	//==============================================================
@@ -128,14 +138,104 @@ public:
 	*/
 	static oexPVOID VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSize = oexNULL, oexUINT x_uLine = 0, oexCSTR x_pFile = oexNULL, oexUINT x_uInfoIndex = eMaxAllocTrail );
 
-    /// Returns the size of the memory protection overhead
-	static oexUINT ProtectAreaSize();
-
-    /// Returns the size of the usable block
-	static oexUINT UsedSize( oexPVOID x_pBuf );
-
     /// Dumps information on memory block
     static void ReportBlock( oexPVOID x_pMem, oexUINT uSize );
+
+    /// Returns the size of the memory protection overhead
+    static inline oexUINT ProtectAreaSize()
+    {
+	    return  sizeof( SBlockHeader )
+                + sizeof( m_ucUnderrunPadding )
+                + sizeof( m_ucOverrunPadding );
+    }
+
+    /// Returns the size of the allocated block
+    /**
+        \param [in] x_pBuf  -   Protected memory pointer
+    */
+    static inline oexUINT BlockSize( oexPVOID x_pBuf )
+    {
+        // Grab the size of the allocated buffer
+        return *(oexUINT*)( ( (oexUCHAR*)x_pBuf ) - sizeof( oexUINT ) 
+                                                  - sizeof( SBlockHeader )
+                                                  - sizeof( m_ucUnderrunPadding ) );
+    }
+
+    /// Returns the size of the usable block
+    /**
+        \param [in] x_pBuf  -   Protected memory pointer
+    */
+    static inline oexUINT UsableSize( oexPVOID x_pBuf )
+    {
+        // Return size of usable memory
+        return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
+                                  - sizeof( SBlockHeader ) 
+                                  - sizeof( m_ucUnderrunPadding ) ) )->uSize;
+    }
+
+    /// Sets flags
+    /**
+        \param [in] x_pBuf  -   Protected memory pointer
+    */
+    static inline oexUINT SetFlags( oexPVOID x_pBuf, oexUINT x_uFlags )
+    {
+        // Return size of usable memory
+        return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
+                                  - sizeof( SBlockHeader ) 
+                                  - sizeof( m_ucUnderrunPadding ) ) )->uFlags = x_uFlags;
+    }
+
+    /// Gets flags
+    /**
+        \param [in] x_pBuf  -   Protected memory pointer
+    */
+    static inline oexUINT GetFlags( oexPVOID x_pBuf )
+    {
+        // Return size of usable memory
+        return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
+                                  - sizeof( SBlockHeader ) 
+                                  - sizeof( m_ucUnderrunPadding ) ) )->uFlags;
+    }
+
+    /// Returns the reference count
+    /**
+        \param [in] x_pBuf  -   Protected memory pointer
+    */
+    static inline oexUINT GetRefCount( oexPVOID x_pBuf )
+    {
+        // Return size of usable memory
+        return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
+                                  - sizeof( SBlockHeader ) 
+                                  - sizeof( m_ucUnderrunPadding ) ) )->uRef;
+    }
+
+    /// Adds a reference to the block
+    /**
+        \param [in] x_pBuf  -   Protected memory pointer
+    */
+    static inline oexUINT AddRef( oexPVOID x_pBuf )
+    {
+        // Return size of usable memory
+        return ++( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
+                                    - sizeof( SBlockHeader ) 
+                                    - sizeof( m_ucUnderrunPadding ) ) )->uRef;
+    }
+
+protected:
+
+    /// Decreases the reference count on a memory block
+    /**
+        \param [in] x_pBuf  -   Protected memory pointer
+    */
+    static inline oexUINT DecRef( oexPVOID x_pBuf )
+    {
+        // Return size of usable memory
+        return --( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
+                                    - sizeof( SBlockHeader ) 
+                                    - sizeof( m_ucUnderrunPadding ) ) )->uRef;
+    }
+
+private:
 
     /// Under run padding
     static oexUCHAR m_ucUnderrunPadding[ 4 ];
@@ -147,35 +247,14 @@ public:
 
 public:
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-
     /// Genric block allocation
     static oexPVOID Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex );
 
     /// Generic block free
-    static void Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex );
+    static oexBOOL Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex );
 
     /// Resizes the buffer without reallocating if possible
     static oexPVOID Resize( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex );
-
-    /// Returns the size of the allocated block
-	static oexUINT BlockSize( oexPVOID x_pBuf );
-
-#else
-
-    /// Genric block allocation
-    static oexPVOID Alloc( oexUINT x_uSize );
-
-    /// Generic block free
-    static void Free( oexPVOID x_pBuf );
-
-    /// Resizes the buffer without reallocating if possible
-    static oexPVOID Resize( oexPVOID x_pBuf, oexUINT x_uNewSize );
-
-    /// Returns the size of the allocated block
-	static oexUINT BlockSize( oexPVOID x_pBuf );
-
-#endif
 
 public:
 
@@ -188,7 +267,7 @@ public:
 
     /// Generic delete
     template< typename T >
-        void Delete( T* x_pPtr )
+        oexBOOL Delete( T* x_pPtr )
     {
         return CAlloc().Free( x_pPtr, m_uLine, m_pFile, 2 );
     }
@@ -203,7 +282,7 @@ public:
     template< typename T >
         static oexUINT ArraySize( T* x_pPtr )
     {
-        oexUINT uSize = UsedSize( x_pPtr );
+        oexUINT uSize = UsableSize( x_pPtr );
         if ( sizeof( T ) ) 
             return uSize / sizeof( T );
         else 

@@ -50,7 +50,62 @@ template < class T > class TFileMapping
 {
 public:
 	
-	//==============================================================
+	/// Defualt constructor
+	TFileMapping()
+	{	m_pPtr = oexNULL;
+        m_hFile = os::CFMap::vFailed();
+        m_pName = oexNULL;
+	}
+
+    /// Copy operator
+    TFileMapping& operator = ( TFileMapping &m )
+    {   return Assume( m ); }
+
+	/// Destructor
+	virtual ~TFileMapping() 
+    {
+        SetName( oexNULL );
+        Destroy(); 
+    }	
+
+    /// Sets the shared memory name
+    /**
+        \param [in] x_pName -   Shared memory name
+        \param [in] x_uLen  -   Length of the string in x_pName.
+                                Can be zero if the string is
+                                NULL terminated.
+        
+    */
+    TFileMapping& SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
+    {
+        // Lose the previous name
+        if ( m_pName )
+        {   OexAllocDelete( m_pName );            
+            m_pName = oexNULL;
+        } // end if
+
+        // Ensure name
+        if ( !x_pName || !*x_pName )
+            return *this;
+
+        // Get the length
+        if ( !x_uLen )
+            x_uLen = zstr::Length( x_pName );
+
+        // Allocate
+        m_pName = OexAllocNew< oex::oexTCHAR >( x_uLen + 1 );
+
+        // Copy the shared memory name
+        str::Copy( m_pName, x_uLen + 1, x_pName, x_uLen );
+
+        return *this;
+    }
+
+    /// Returns the shared name, or NULL if none
+    oexCSTR GetName()
+    {   return m_pName; }
+
+    //==============================================================
 	// Destroy()
 	//==============================================================
 	/// Unmaps the file and releases all associated resources
@@ -90,6 +145,10 @@ public:
 		// Lose old file mapping
 		Destroy();
 
+        // Save name if any
+        if ( x_pName && *x_pName )
+            SetName( x_pName );
+
         // Multiply by size of object
         x_llSize *= sizeof( T );
 
@@ -99,7 +158,7 @@ public:
         llSize = cmn::NextPower2( llSize );
 
 		// Create file mapping
-		m_hFile = os::CFMap::osCreateFileMapping( x_pFile, (oexPVOID*)&m_pPtr, llSize, &llSize, x_pName, x_uAccess, &m_bExisting );
+		m_hFile = os::CFMap::osCreateFileMapping( x_pFile, (oexPVOID*)&m_pPtr, llSize, &llSize, m_pName, x_uAccess, &m_bExisting );
 
 		// Did we get the handle       
         if ( os::CFMap::vFailed() == m_hFile || !m_pPtr ) 
@@ -118,54 +177,6 @@ public:
 
         return m_pPtr;
 	}
-
-	//==============================================================
-	// Open()
-	//==============================================================
-	/// Opens an existing file mapping
-	/**
-		\param [in] x_pName	-	Name of the existing file mapping.
-
-		\param [in] x_uAccess -	Access permissions
-		
-		\return Pointer to file mapping memory of NULL if failure.
-	
-		\see 
-	*/
-	T* Open( oexCSTR x_pName, oexUINT x_uAccess = FILE_MAP_ALL_ACCESS )
-	{
-		// Lose any current file mapping
-		Destroy();
-
-        oexASSERT( 0 );
-
-		// Attempt to open the existing file mapping
-/*		m_hFile = OpenFileMapping( dwAccess, FALSE, pName );
-		if ( m_hFile == oexNULL ) 
-            return FALSE;
-
-		// Get a pointer to the file data
-		m_pPtr = (T*)MapViewOfFile( m_hFile, dwAccess, 0, 0, 0 );
-		if ( !m_pPtr ) 
-        {   Destroy(); 
-            return oexNULL; 
-        } // end if
-*/
-		// Save the name if any
-		if ( pName && *pName ) 
-            m_sName = pName;
-		
-		return m_pPtr;
-	}
-
-	/// Defualt constructor
-	TFileMapping()
-	{	m_pPtr = oexNULL;
-        m_hFile = os::CFMap::vFailed();
-	}
-
-	/// Destructor
-	virtual ~TFileMapping() { Destroy(); }	
 
 	//==============================================================
 	// T*()
@@ -219,12 +230,6 @@ public:
 	// GetName()
 	//==============================================================
 	/// Returns the name of the file mapping
-	oexCSTR GetName() { return m_sName; }
-
-	//==============================================================
-	// GetName()
-	//==============================================================
-	/// Returns the name of the file mapping
 	oexBOOL Existing() { return m_bExisting; }
 
     /// Returns the size of the file mapping
@@ -245,6 +250,57 @@ public:
         return CAlloc::BlockSize( m_pPtr );
     }
 
+    /// Assumes control of another objects data
+    TFileMapping& Assume( TFileMapping &m )
+    {
+        // Just drop our memory
+        Destroy();
+
+        if ( m.m_pPtr )            
+        {
+            // Assume the memory from this object
+            m_hFile = m.m_hFile; m.m_hFile = oexNULL;
+            m_pPtr = m.m_pPtr; m.m_pPtr = oexNULL;
+            m_pName = m.m_pName; m.m_pName = oexNULL;
+            m_bExisting = m.m_bExisting; m.m_bExisting = oexNULL;
+
+        } // end if
+
+        return *this;
+    }
+
+    /// Copies another object
+    TFileMapping& Copy( oexCONST TFileMapping &m )
+    {
+        // Just drop our memory
+        Destroy();
+
+        // Copy the share
+        if ( m.m_pPtr )
+            if ( !Create( oexNULL, m.GetName(), m.Size() ) )
+                return oexFALSE;
+
+        // Don't need to copy data, it's shared memory remember?
+
+        return *this;
+    }
+
+    /// Returns a copy of this object
+    TFileMapping Copy()
+    {   TFileMapping fm;
+        if ( m.m_pPtr )            
+            fm.Copy( *this );
+        return fm;
+    }
+
+    /// Detaches from memory
+    void Detach()
+    {
+        m_hFile = oexNULL;
+        m_pPtr = oexNULL;
+        m_bExisting = oexFALSE;
+        m_pName = oexNULL;
+    }
 
 private:
 
@@ -252,10 +308,14 @@ private:
 	os::CFMap::t_HFILEMAP		m_hFile;
 
 	/// Pointer to the file mapping data
-	T*						    m_pPtr;
+	T                           *m_pPtr;
 
     /// Set if the memory was already existing
     oexBOOL                     m_bExisting;
+
+    /// Shared memory name
+    /// Can't use a CStr here because CStr depends on this class!
+    oexCHAR                     *m_pName;
 
 };
 
