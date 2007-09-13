@@ -137,6 +137,19 @@ oex::oexRESULT TestAllocator()
 
     } // end scope
 
+    { // Scope
+
+        oex::TMem< CMyClass > mem;
+
+        if ( !oexVERIFY_PTR( mem.ConstructArray( 4 ).c_Ptr() ) )
+            return -17;
+
+        if ( !oexVERIFY( 2 == mem.Resize( 2 ).Size() ) )
+            return -18;
+        
+
+    } // end scope
+
     return oex::oexRES_OK;
 }
 
@@ -224,15 +237,57 @@ oex::oexRESULT TestGuids()
 
 oex::oexRESULT TestStrings()
 {      
-    oex::CStr str1;
+    oex::CStr str1, str2;
+    oex::oexSTR pStr;
 
-    if ( !oexVERIFY( str1.Allocate( 256 ) ) )
+    if ( !oexVERIFY_PTR( pStr = str1.Allocate( 12 ) ) )
         return -1;
+
+    oex::zstr::Copy( pStr, "Hello World!" );
+
+    if ( !oexVERIFY( !oex::os::CSys::MemCmp( str1.Ptr(), "Hello World!", str1.Length() ) ) )
+        return -2;
+
+    str1.Destroy();
+
+	if ( !oexVERIFY( 0 == str1.Length() ) )
+		return -1;
+	
+	str1 = oexT( "Hello World!" );
+	if ( !oexVERIFY( 12 == str1.Length() ) )
+		return -2;
+
+	str1 += oexT( " - Goodbye Bugs!" );
+	if ( !oexVERIFY( 28 == str1.Length() ) )
+		return -3;	
+
+	if ( !oexVERIFY( str1 == "Hello World! - Goodbye Bugs!" ) )
+		return -3;	
+
+    pStr = str1.Allocate( 4 );
+    oex::zstr::Copy( pStr, oexT( "wxyz" ) );
+	if ( !oexVERIFY( str1.Length() == 4 ) )
+		return -4;
+
+    // Test replace and binary compare
+	if (	!oexVERIFY_PTR( str1.Replace( 'w', '*' ).Ptr() ) || !oexVERIFY( str1 == oexT( "*xyz" ) )
+		 || !oexVERIFY_PTR( str1.Replace( 'y', '\x0' ).Ptr() ) || !oexVERIFY( !str1.Compare( "*x\x0z", 4 ) )
+		 || !oexVERIFY_PTR( str1.Replace( 'z', '*' ).Ptr() ) || !oexVERIFY( !str1.Compare( "*x\x0*", 4 ) ) )
+		return -5;
+
+    str1.Fmt( "lu = %lu, s = %s, f = %f", (oex::oexULONG)11, oexT( "String" ), (oex::oexDOUBLE)3.14f );
+	if ( !oexVERIFY( str1 == "lu = 11, s = String, f = 3.140000" ) )
+		return -6;
+
+    oex::oexGUID guid;
+	str1 = "850A51F0-2CF7-4412-BB83-1AEF68BAD88C";
+	if ( !oexVERIFY( str2.GuidToString( str1.StringToGuid( &guid ) ) == str1 ) )
+		return -23;
+
 
 
     return oex::oexRES_OK;
 }
-
 
 int main(int argc, char* argv[])
 {

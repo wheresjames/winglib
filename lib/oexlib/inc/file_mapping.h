@@ -102,7 +102,7 @@ public:
     }
 
     /// Returns the shared name, or NULL if none
-    oexCSTR GetName()
+    oexCSTR GetName() const
     {   return m_pName; }
 
     //==============================================================
@@ -233,7 +233,7 @@ public:
 	oexBOOL Existing() { return m_bExisting; }
 
     /// Returns the size of the file mapping
-    oexUINT Size()
+    oexUINT Size() const
     {
         if ( !m_pPtr )
             return 0;
@@ -270,15 +270,14 @@ public:
     }
 
     /// Copies another object
-    TFileMapping& Copy( oexCONST TFileMapping &m )
+    TFileMapping& Copy( oexCONST TFileMapping &x_m )
     {
         // Just drop our memory
         Destroy();
 
         // Copy the share
-        if ( m.m_pPtr )
-            if ( !Create( oexNULL, m.GetName(), m.Size() ) )
-                return oexFALSE;
+        if ( x_m.m_pPtr )
+            Create( oexNULL, x_m.GetName(), x_m.Size() );
 
         // Don't need to copy data, it's shared memory remember?
 

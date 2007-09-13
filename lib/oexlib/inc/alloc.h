@@ -254,7 +254,7 @@ public:
     static oexBOOL Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex );
 
     /// Resizes the buffer without reallocating if possible
-    static oexPVOID Resize( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex );
+    static oexPVOID ReAlloc( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex );
 
 public:
 
@@ -262,21 +262,21 @@ public:
     template< typename T >
         T* New( oexUINT x_uSize )
     {
-        return (T*)CAlloc().Alloc( x_uSize * sizeof( T ), m_uLine, m_pFile, 0 );
+        return (T*)Alloc( x_uSize * sizeof( T ), m_uLine, m_pFile, 0 );
     }
 
     /// Generic delete
     template< typename T >
         oexBOOL Delete( T* x_pPtr )
     {
-        return CAlloc().Free( x_pPtr, m_uLine, m_pFile, 2 );
+        return Free( x_pPtr, m_uLine, m_pFile, 2 );
     }
 
     /// Generic resize
     template< typename T >
         T* Resize( T* x_pPtr, oexUINT x_uNewSize )
     {
-        return (T*)CAlloc().Resize( x_pPtr, x_uNewSize * sizeof( T ), m_uLine, m_pFile, 1 );
+        return (T*)ReAlloc( x_pPtr, x_uNewSize * sizeof( T ), m_uLine, m_pFile, 1 );
     }
 
     template< typename T >

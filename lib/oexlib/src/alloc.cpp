@@ -138,7 +138,7 @@ oexBOOL CAlloc::Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT
     return oexTRUE;
 }
 
-oexPVOID CAlloc::Resize( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex )
+oexPVOID CAlloc::ReAlloc( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex )
 {
     // Do we have the space to resize?
     oexUINT uBlockSize = BlockSize( x_pBuf );

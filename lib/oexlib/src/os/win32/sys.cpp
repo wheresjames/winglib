@@ -218,7 +218,7 @@ oexPVOID CSys::MemCpy( oexPVOID x_pDst, oexCPVOID x_pSrc, oexUINT x_uSize )
 	return ::memcpy( x_pDst, x_pSrc, x_uSize );
 }
 
-oexINT CSys::MemCmp( oexPVOID x_pDst, oexCPVOID x_pSrc, oexUINT x_uSize )
+oexINT CSys::MemCmp( oexCPVOID x_pDst, oexCPVOID x_pSrc, oexUINT x_uSize )
 {
 	return ::memcmp( x_pDst, x_pSrc, x_uSize );
 }

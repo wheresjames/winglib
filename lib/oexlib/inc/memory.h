@@ -183,18 +183,80 @@ public:
     }
 
     /// Generic resize
-    T* Resize(oexUINT x_uNewSize )
+    TMem& Resize(oexUINT x_uNewSize )
     {
-        if ( !oexVERIFY_PTR( m_pMem ) )
-            return oexNULL;
+        // Shared memory cannot be resized
+        if ( !oexVERIFY( !m_fm.Ptr() ) )
+            return *this;
 
-        +++ Need to destroy old objects
+        // Do we have what we need?
+        oexUINT uSize = Size();
+        if ( uSize == x_uNewSize )
+            return *this;
 
-        return TAlloc< T >().resize( m_pMem, x_uNewSize, m_uLine, m_pFile );
+        // Anything to resize?
+        if ( !m_pMem )
+            return New( x_uNewSize );
+
+        // If we're shrinking
+        if ( x_uNewSize < uSize )
+        {
+            // Was the object constructed?
+            if ( CAlloc::eF1Constructed & CAlloc::GetFlags( m_pMem ) )
+                for ( oexUINT i = x_uNewSize; i < uSize; i++ )
+                    m_pMem[ i ].~T();
+
+            // We can make things smaller
+            m_pMem = CAlloc()._Log( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize );
+
+        } // end if
+
+        // We must be making it larger
+        else
+        {
+            // Will a simple resize work?
+            T* pMem = CAlloc()._Log( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize );
+            
+            if ( !pMem )
+            {
+                TMem< T > mem;
+                if ( !oexVERIFY_PTR( mem.New( x_uNewSize ).Ptr() ) )
+                    return *this;
+
+                // Constructed?
+                if ( CAlloc::eF1Constructed & CAlloc::GetFlags( m_pMem ) )
+                {
+                    // Initialize new array
+                    for ( oexUINT i = 0; i < x_uNewSize; i++ )
+
+                        if ( i < uSize ) 
+                            *mem.Ptr() = *Ptr();
+                        else
+                            oexPLACEMENT_NEW ( mem.Ptr( i ) ) T();
+
+                } // end if
+
+                // Just copy POD
+                else
+                    os::CSys::MemCpy( mem.Ptr(), Ptr(), uSize * sizeof( T ) );
+
+                // Assume this new array
+                Assume( mem );
+
+            } // end if
+
+            // Construct new objects if needed
+            else if ( CAlloc::eF1Constructed & CAlloc::GetFlags( m_pMem ) )
+                for ( oexUINT i = uSize; i < x_uNewSize; i++ )
+                    oexPLACEMENT_NEW ( &pMem[ i ] ) T();
+
+        } // end else
+
+        return *this;
     }
 
     /// Reallocates memory
-    T* Reallocate( oexUINT x_uNewSize )
+    TMem& Reallocate( oexUINT x_uNewSize )
     {
         +++
         
@@ -266,17 +328,21 @@ public:
 
     /// Adds a reference to the memory block
     oexUINT AddRef()
-    {   return CAlloc().AddRef( Ptr() ); }
+    {   if ( !Ptr() ) return 0;
+        return CAlloc().AddRef( Ptr() ); 
+    }
 
     /// Returns the memory blocks reference count
     oexUINT GetRefCount()
-    {   return CAlloc().GetRefCount( Ptr() ); }
+    {   if ( !Ptr() ) return 0;
+        return CAlloc().GetRefCount( Ptr() ); 
+    }
 
     /// Assumes control of another objects data
     TMem& Assume( TMem &x_m )
     {
         // Drop current
-        Destroy();
+        Delete();
 
         // Assume the memory from this object
         if ( x_m.m_pMem )
@@ -287,16 +353,34 @@ public:
         return *this;
     }
 
+    /// Copy data from a raw buffer
+    TMem& MemCpy( oexCONST T *x_pBuf, oexUINT x_uSize )
+    {
+        // Verify pointer
+        if ( !oexVERIFY_PTR( x_pBuf ) )
+            return *this;
+
+        // Do we need more space?
+        if ( Size() < x_uSize )
+            if ( !New( x_uSize ).Ptr() )
+                return *this;
+
+        // Copy data if all the stars align
+        os::CSys::MemCpy( Ptr(), x_pBuf, x_uSize );
+
+        return *this;
+    }
+
     /// Copies another objects data
     TMem& Copy( TMem &x_m, oexCSTR x_pNewName = oexNULL, oexUINT x_uNameLen = 0 )
     {
         // Drop current
-        Destroy();
+        Delete();
 
         // Raw memory?
         if ( x_m.m_pMem || ( x_pNewName && *x_pNewName ) )
         {
-            oexUINT uSize = m.Size();
+            oexUINT uSize = x_m.Size();
             if ( uSize )
             {
                 // Shared memory?

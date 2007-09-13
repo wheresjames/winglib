@@ -60,7 +60,7 @@ public:
 
 	static oexPVOID MemCpy( oexPVOID pDst, oexCPVOID pSrc, oexUINT uSize );
 
-	static oexINT MemCmp( oexPVOID pDst, oexCPVOID pSrc, oexUINT uSize );
+	static oexINT MemCmp( oexCPVOID pDst, oexCPVOID pSrc, oexUINT uSize );
 
 	static oexPVOID MemSet( oexPVOID pDst, oexINT nCh, oexUINT uSize );
 

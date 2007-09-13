@@ -96,6 +96,30 @@ namespace str
             return ln_dst + Copy( dst, sz_dst, src, sz_src );
         }
 
+    /// Replaces occurences a character in a string with another
+    /*
+        \param [in] x_tFind     -   Buffer that receives the string copy
+        \param [in] x_tReplace  -   Length of the string in dst
+    */
+    template< typename T >
+    	T* Replace( T *dst, oexINT ln_dst, oexCONST T x_tFind, oexCONST T x_tReplace )
+	{
+		if ( !ln_dst )
+			return dst;
+
+		while( ln_dst-- )
+		{
+			if ( *dst == x_tFind )
+				*dst = x_tReplace;
+
+			dst++;
+
+		} // end while
+
+		return dst;
+	}
+
+
     /// Returns the offset of the first character in s1 not in s2
     /**
         \param [in] s1  -   String of characters in which to search
