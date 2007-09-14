@@ -243,6 +243,16 @@ oex::oexRESULT TestStrings()
     oex::CStr str1, str2;
     oex::oexSTR pStr;
 
+		// Buffer over-run protection test 
+//		dslSTR pOvPtr = str1.Allocate( 4 );
+//		CRawStr::Copy( pOvPtr, "12345" );
+//		str1.Length();
+
+		// Buffer under-run protection test
+//		dslSTR pOvPtr = str1.Allocate( 4 );
+//		dslSTR pOvPtr = (dslSTR)str1.Ptr();
+//		pOvPtr--; *pOvPtr = 1;
+
     if ( !oexVERIFY_PTR( pStr = str1.Allocate( 12 ) ) )
         return -1;
 
@@ -344,6 +354,49 @@ oex::oexRESULT TestStrings()
     if ( !oexVERIFY( str1 == "ABC-+-DEF" ) )
         return -24;
 
+    str1.RTrim( "DEF" );
+    if ( !oexVERIFY( str1 == "ABC-+-" ) )
+        return -24;
+
+    if ( !oexVERIFY( 12345 == oex::CStr( "12345" ).ToNum() ) )
+        return -5;
+
+    if ( !oexVERIFY( -12345 == oex::CStr( "-12345" ).ToNum() ) )
+        return -6;
+
+    if ( !oexVERIFY( 0x1234abcd == oex::CStr( "1234abcd" ).ToNum( 0, 16 ) ) )
+        return -7;
+
+    if ( !oexVERIFY( 0x1234abcd == oex::CStr( "0x1234abcd").ToNum( 0, 16 ) ) )
+        return -8;
+
+    if ( !oexVERIFY( -0x1234abcd == oex::CStr( "-0x1234abcd" ).ToNum( 0, 16 ) ) )
+        return -9;
+
+    str1 = "1234abc";
+    oex::oexINT nEnd = 0;
+    if ( !oexVERIFY( 1234 == str1.ToNum( 0, 10, &nEnd, oex::oexTRUE ) ) )
+        return -10;
+
+    if ( !oexVERIFY( 4 == nEnd ) )
+        return -11;
+
+    if ( !oexVERIFY( str1 == "abc" ) )
+        return -12;
+
+    str1 = oexT( '1' );
+	if ( !oexVERIFY( str1.Length() == 1 ) || !oexVERIFY( str1 == "1" ) )
+		return -16;
+
+	str1.Allocate( 0 );
+	str1 = 1; str1 += ") PI = "; str1 += 3.14159;
+	if ( !oexVERIFY( str1 == "1) PI = 3.14159" ) )
+		return -7;
+	
+	str1.Allocate( 0 );
+	str1 << 2 << ") E = " << 2.71f;
+	if ( !oexVERIFY( str1 == "2) E = 2.71" ) )
+		return -8;
 
     return oex::oexRES_OK;
 }
