@@ -53,6 +53,53 @@ public:
         m_lLength = 0;
     }
 
+	TStr( TStr &str )
+	{	m_lLength = 0;
+		Set( str );
+//		if ( str.Length() ) Set( str.Ptr() );
+	}
+
+	TStr( oexCONST T *pStr )
+	{	m_lLength = 0;
+		Set( pStr );
+	}
+
+	TStr( oexCONST T *pStr, oexUINT uSize )
+	{	m_lLength = 0;
+		Set( pStr, uSize );
+	}
+
+	TStr( oexCONST T *pStr, oexINT nStart, oexUINT uLen )
+	{	m_lLength = 0;
+		Sub( pStr, nStart, uLen );
+	}
+
+	TStr( oexCONST T *pStr, oexUINT uSize, oexINT nStart, oexUINT uLen )
+	{	m_lLength = 0;
+		Sub( pStr, uSize, nStart, uLen );
+	}
+/*
+	TStr( oexCONST oexINT nVal )
+	{	m_lLength = 0;
+		SetNum( "%li", (oexLONG)nVal ); 
+	}
+
+	TStr( oexCONST oexUINT uVal )
+	{	m_lLength = 0;
+		SetNum( "%lu", (oexULONG)uVal ); 
+	}
+
+	TStr( oexCONST oexDOUBLE dStr )
+	{	m_lLength = 0;
+		SetNumTrim( "%f", oexNULL, "0", (oexDOUBLE)dStr ); 
+	}
+
+	TStr( oexCONST T tVal )
+	{	m_lLength = 0;
+		Set( tVal ); 
+	}
+*/
+
     /// Destructor
     ~TStr()
     {   Destroy();
@@ -69,6 +116,15 @@ public:
     }
 
 public:
+
+    /// Shares memory of another object
+    TStr& Share( oexCONST TStr &x_str )
+    {
+        // Share the memory
+        m_lLength = x_str.m_lLength;
+        m_mem.Share( x_str.m_mem );
+        return *this;
+    }
 
     /// Creates our own copy of a string if it's shared
 	oexBOOL Unshare()
@@ -235,15 +291,202 @@ public:
 
 public:
 
-	TStr& Set( TStr &x_str )
+	TStr& Sub( oexINT nStart, oexUINT uLen = 0 )
 	{
-		if ( x_str.Length() )
-		{	m_lLength = x_str.m_lLength;
-			m_mem = x_str.m_mem;
-		} // end if
-		else 
-			Destroy();
+		// Can't do an inplace copy if we don't own our memory
+		if ( 1 != m_mem.GetRefCount() )
+			return Set( SubStr( nStart, uLen ) );
 
+		oexUINT uSize = Length();
+		oexCONST T* pStr = m_mem.Ptr();
+
+		oexUINT uStart;
+		if ( 0 <= nStart ) uStart = (oexUINT)nStart;
+		else nStart = (oexUINT)( (oexINT)uSize - nStart );
+
+		// Sanity checks
+		if ( !oexVERIFY_PTR( pStr ) || !uSize || uStart >= uSize ) 
+		{	Allocate( 0 ); return *this; }
+
+		if ( !uLen ) 
+			uLen = uSize - uStart;
+
+		// Copy the string if the offset moved
+		if ( uStart ) 
+			m_mem.MemCpy( &pStr[ uStart ], uLen );
+
+		// This works because the sub string is always smaller
+		// And Allocate() doesn't make buffers smaller
+		oexCONST T* pMoved = Allocate( uLen );
+
+		// If this asserts, someone changed the allocator to realloc smaller sizes
+		// !!! Change it back, you can't win...
+		if ( !oexVERIFY( pMoved == pStr ) )
+		{	Allocate( 0 ); return *this; }
+
+        // Save the length
+        m_lLength = uLen;
+
+		return *this;
+	}
+
+	TStr& Sub( TStr &str, oexINT nStart, oexUINT uLen )
+	{	return Sub( str.Ptr(), str.Length(), nStart, uLen ); }
+
+	TStr& Sub( oexCONST T* pStr, oexINT nStart, oexUINT uLen )
+	{	return Sub( pStr, zstr::Length( pStr ), nStart, uLen ); }
+
+	TStr& Sub( oexCONST T* pStr, oexUINT uSize, oexINT nStart, oexUINT uLen )
+	{
+		oexUINT uStart;
+		if ( 0 <= nStart ) uStart = (oexUINT)nStart;
+		else nStart = (oexUINT)( (oexINT)uSize - nStart );
+
+		// Sanity checks
+		if ( !oexVERIFY_PTR( pStr ) || !uSize || uStart >= uSize ) 
+		{	Allocate( 0 ); return *this; }
+
+		// Was a length given?
+		if ( !uLen ) 
+			uLen = uSize - uStart;
+
+		if ( !oexVERIFY( Allocate( uLen ) ) )
+		{	Allocate( 0 ); return *this; }
+
+		// Copy the sub string
+		m_mem.MemCpy( &pStr[ uStart ], uLen );
+
+		// Save the new string length
+		m_lLength = uLen;
+
+		return *this;
+	}
+
+	/// Returns a sub string
+	TStr SubStr( oexINT nStart, oexUINT uLen )
+	{	return TStr( Ptr(), Length(), nStart, uLen );    
+    }
+
+public:
+
+	/// Moves part of the string from one place to another
+	/// May destroy the string if there is overlap
+	TStr& Move( oexUINT uFrom, oexUINT uTo, oexUINT uSize )
+	{	Move( _Ptr(), Length(), uFrom, uTo, uSize ); return *this; }
+	oexINT Move( T* pPtr, oexUINT uLen, oexUINT uFrom, oexUINT uTo, oexUINT uSize )
+	{
+		// Sanity check
+		if ( uFrom >= uLen || uTo >= uLen )
+			return 0;
+
+		// Ensure no buffer over-running
+		if ( ( uFrom + uSize ) > uLen )
+			uSize = uLen - uFrom;
+		if ( ( uTo + uSize ) > uLen )
+			uSize = uLen - uTo;
+
+		// Get buffer pointers
+		T *pFrom = &pPtr[ uFrom ];
+		T* pTo = &pPtr[ uTo ];
+
+		// Copy the data
+		for ( oexUINT i = 0; i < uSize; i++ )
+			pTo[ i ] = pFrom[ i ];
+
+		return uSize;
+	}
+
+	/// Removes characters in the specified range
+	TStr& DropRange( T tMin, T tMax, oexBOOL bIn )
+	{	
+		T* pPtr = _Ptr();
+		oexLONG lLen = Length();
+		oexINT g = -1, b = -1, i = 0, l = 0;
+		
+		if ( bIn )
+		{	for( i = 0; i < lLen; i++ )
+			{	if ( pPtr[ i ] < tMin || pPtr[ i ] > tMax )
+				{	if ( 0 > g ) g = i; l++; }
+				else
+				{	if ( 0 > b ) b = i, g = -1;
+					else if ( 0 <= g ) Move( pPtr, lLen, g, b, i - g ), b = l, g = -1;
+				} // end else
+			} // end for
+		} // end if
+
+		else
+		{	for( i = 0; i < lLen; i++ )
+			{	if ( pPtr[ i ] >= tMin && pPtr[ i ] <= tMax )
+				{	if ( 0 > g ) g = i; l++; }
+				else
+				{	if ( 0 > b ) b = i, g = -1;
+					else if ( 0 <= g ) Move( pPtr, lLen, g, b, i - g ), b = l, g = -1;
+				} // end else
+			} // end for
+		} // end if
+
+		// Anything change?
+		if ( 0 > b )
+			return *this;
+
+		// Move remainder if needed
+		if ( 0 <= g )
+			Move( pPtr, lLen, g, b, i - g ), b = i, g = -1;
+
+		// Change the length of the string
+		Allocate( l );
+		m_lLength = l;
+
+		return *this;
+	}
+
+	/// Removes characters in the specified array
+	TStr& Drop( oexCONST T *pChars, oexBOOL bIn )
+	{	
+		T* pPtr = _Ptr();
+		oexLONG lLen = Length();
+		oexINT g = -1, b = -1, i = 0, l = 0;
+        oexLONG lChars = zstr::Length( pChars );
+		
+		if ( bIn )
+		{	for( i = 0; i < lLen; i++ )
+			{	if ( 0 > str::FindCharacter( pChars, lChars, pPtr[ i ] ) )
+				{	if ( 0 > g ) g = i; l++; }
+				else
+				{	if ( 0 > b ) b = i, g = -1;
+					else if ( 0 <= g ) Move( pPtr, lLen, g, b, i - g ), b = l, g = -1;
+				} // end else
+			} // end for
+		} // end if
+
+		else
+		{	for( i = 0; i < lLen; i++ )
+			{	if ( 0 <= str::FindCharacter( pChars, lChars, pPtr[ i ] ) )
+				{	if ( 0 > g ) g = i; l++; }
+				else
+				{	if ( 0 > b ) b = i, g = -1;
+					else if ( 0 <= g ) Move( pPtr, lLen, g, b, i - g ), b = l, g = -1;
+				} // end else
+			} // end for
+		} // end if
+
+
+		// Move remainder if needed
+		if ( 0 <= g )
+			Move( pPtr, lLen, g, b, i - g ), b = i, g = -1;
+
+		// Change the length of the string
+		Allocate( l );
+		m_lLength = l;
+
+		return *this;
+	}
+
+
+public:
+
+	TStr& Set( oexCONST TStr &x_str )
+	{   Share( x_str );
 		return *this;
 	}
 
@@ -290,6 +533,9 @@ public:
 	TStr& operator = ( oexCONST T* pStr )
 	{	return Set( pStr ); }
 
+	/// Assignment operator
+	TStr& operator = ( oexCONST TStr &x_str )
+	{	return Set( x_str ); }
 
 	// Concatenation operator
 	TStr& Append( TStr &sStr )
@@ -336,6 +582,95 @@ public:
     /// Compare to const string
     oexINT Compare( oexCONST T *x_pPtr, oexUINT x_uLen )
     {   return str::Compare( Ptr(), Length(), x_pPtr, x_uLen ); }
+
+public:
+
+	/// Trims uChars from the left side of the buffer
+	/*
+		This is efficient, it does not re-allocate or copy.
+	*/
+	TStr& RTrim( oexUINT uChars )
+	{	
+		// Break share
+		Unshare();
+
+		// New length
+		oexUINT uLen = Length();
+		if ( uChars >= uLen ) uLen = 0;
+		else uLen -= uChars;
+
+		// Resize the buffer ( this clips the right side )
+		Allocate( uLen );
+		m_lLength = uLen;
+
+		return *this;
+	}
+
+	/// Drops the specified characters from the end of the string
+	TStr& RTrim( oexCONST T* pChars )
+	{	oexVALIDATE_PTR( pChars ); oexLONG lLen = Length();
+        oexINT i = str::RSkipCharacters( Ptr(), lLen, pChars, zstr::Length( pChars ) );
+		if ( !i || i >= lLen ) return *this;
+		RTrim( lLen - i - 1 );
+		return *this;
+	}
+
+	/// Trims uChars from the left side of the buffer
+	/*
+		This is efficient, it moves the string pointer 
+		without re-allocating or copying.
+	*/
+	TStr& LTrim( oexUINT uChars )
+	{
+		// Break share
+		Unshare();
+
+		// New length
+		oexUINT uLen = Length();
+		if ( uChars >= uLen ) uLen = 0;
+		else uLen -= uChars;
+
+		if ( uLen )
+		{
+			// Shift the buffer ( this clips the left side )
+//+++			m_mem.Shift( uChars );
+			m_lLength = uLen;
+
+		} // end if
+		
+		else Destroy();
+
+		return *this;
+	}
+
+	/// Drops the specified characters from the start of the string
+	TStr& LTrim( oexCONST T* pChars, oexCONST T* pEscape = oexNULL )
+	{	oexVALIDATE_PTR( pChars ); oexVALIDATE_PTR_NULL_OK( pEscape );
+        oexINT i = str::SkipCharacters( Ptr(), Length(), pChars, zstr::Length( pChars ) );
+		if ( 0 > i ) return *this;
+		LTrim( i );
+		return *this;
+	}
+
+	TStr& operator >>= ( oexUINT uChars )
+	{	return LTrim( uChars ); }
+
+	TStr& operator <<= ( oexUINT uChars )
+	{	return RTrim( uChars ); }
+
+	TStr& operator ++( int ) { return LTrim( 1 ); }
+
+	TStr& operator --( int ) { return RTrim( 1 ); }
+
+public:
+
+    /// Converts letters from upper case to lower case
+    TStr& ToLower()
+    {   if ( Length() ) str::ToLower( _Ptr(), Length() ); return *this; }
+
+    /// Converts letters from upper case to lower case
+    TStr& ToUpper()
+    {   if ( Length() ) str::ToUpper( _Ptr(), Length() ); return *this; }
 
 public:
 

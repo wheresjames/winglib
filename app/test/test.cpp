@@ -235,6 +235,9 @@ oex::oexRESULT TestGuids()
     return oex::oexRES_OK;
 }
 
+template < typename T > 
+	static T ReturnTest( T t ) { return t; }
+
 oex::oexRESULT TestStrings()
 {      
     oex::CStr str1, str2;
@@ -284,6 +287,62 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str2.GuidToString( str1.StringToGuid( &guid ) ) == str1 ) )
 		return -23;
 
+    if ( !oexVERIFY( oex::CStr( "TaBlE" ).ToLower() == "table" ) ||
+		 !oexVERIFY( oex::CStr( "cHaIr" ).ToUpper() == "CHAIR" ) )
+		return -18;
+
+	str1 = "Test String";
+	str2 = ReturnTest( str1 );
+	if ( !oexVERIFY( str1.Ptr() == str2.Ptr() ) )
+		return -9;
+
+	str1 += " - Make copy";
+	if ( !oexVERIFY( str1.Ptr() != str2.Ptr() ) ||
+ 		 !oexVERIFY( str1 == "Test String - Make copy" ) ||
+ 		 !oexVERIFY( str2 == "Test String" ) )
+		return -10;
+	
+	str2 = str1.SubStr( 5, 6 );
+	if ( !oexVERIFY( str2 == "String" ) )
+		return -11;
+
+	// Non-Shared version
+	str2 = "Hello World!";
+	str2.Sub( 6, 5 );
+	if ( !oexVERIFY( str2 == "World" ) )
+		return -12;
+
+	// Shared version ( should break the share )
+	str2 = str1;
+	str2.Sub( 5, 6 );
+	if ( !oexVERIFY( str2 == "String" ) )
+		return -13;
+
+	str1 = "123456789012345678901234567890";
+    if ( !oexVERIFY( str1.Drop( "15", oex::oexTRUE ) == "234678902346789023467890" ) )
+		return -19;
+
+	str1 = "123456789012345678901234567890";
+	if ( !oexVERIFY( str1.Drop( "15", oex::oexFALSE ) == "151515" ) )
+		return -20;
+
+	str1 = "123456789012345678901234567890";
+	if ( !oexVERIFY( str1.DropRange( '4', '6', oex::oexTRUE ) == "123789012378901237890" ) )
+		return -21;
+
+	str1 = "123456789012345678901234567890";
+	if ( !oexVERIFY( str1.DropRange( '4', '6', oex::oexFALSE ) == "456456456" ) )
+		return -22;
+
+    str1 = "-+-ABC-+-DEF-+-";
+
+    str1.RTrim( "-+" );
+    if ( !oexVERIFY( str1 == "-+-ABC-+-DEF" ) )
+        return -24;
+
+    str1.LTrim( "-+" );
+    if ( !oexVERIFY( str1 == "ABC-+-DEF" ) )
+        return -24;
 
 
     return oex::oexRES_OK;

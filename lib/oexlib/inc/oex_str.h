@@ -96,6 +96,50 @@ namespace str
             return ln_dst + Copy( dst, sz_dst, src, sz_src );
         }
 
+	/// Converts upper case letters to lower case
+    /**
+        \param [in] dst     -   String to modify
+        \param [in] ln_dst  -   Length of string in dst
+    */
+    template< typename T >
+	    T* ToLower( T *dst, oexINT ln_dst )
+	{
+        oexVALIDATE_PTR( dst );
+
+		while ( 0 < ln_dst-- )
+		{	
+            if ( *dst >= oexT( 'A' ) && *dst <= oexT( 'Z' ) )
+				*dst -= oexT( 'A' ) - oexT( 'a' );
+
+			dst++;
+
+		} // end while
+
+        return dst;
+	}
+
+	/// Converts lower case letters to upper case
+    /**
+        \param [in] dst     -   String to modify
+        \param [in] ln_dst  -   Length of string in dst
+    */
+    template< typename T >
+    	T* ToUpper( T *dst, oexINT ln_dst )
+	{
+        oexVALIDATE_PTR( dst );
+        
+		while ( 0 < ln_dst-- )
+		{
+            if ( *dst >= oexT( 'a' ) && *dst <= oexT( 'z' ) )
+				*dst += oexT( 'A' ) - oexT( 'a' );
+
+			dst++;
+
+		} // end while
+
+		return dst;
+	}
+
     /// Replaces occurences a character in a string with another
     /*
         \param [in] x_tFind     -   Buffer that receives the string copy

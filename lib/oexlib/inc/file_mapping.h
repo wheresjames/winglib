@@ -209,7 +209,8 @@ public:
 	// c_Ptr()
 	//==============================================================
 	/// Returns a pointer to the file mapping memory
-	oexCONST T* c_Ptr() { return m_pPtr; }
+	oexCONST T* c_Ptr() const 
+    {   return m_pPtr; }
 
 	//==============================================================
 	// c_Ptr()
@@ -218,7 +219,7 @@ public:
     /**
         \param [in] x_uOffset   -   Offset into the memory
     */
-    oexCONST T* c_Ptr( oexUINT x_uOffset )
+    oexCONST T* c_Ptr( oexUINT x_uOffset ) const
     {
         // Out of bounds
         oexASSERT( m_pPtr && Size() > x_uOffset );

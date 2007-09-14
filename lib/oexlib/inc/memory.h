@@ -101,6 +101,9 @@ public:
         return pPtr;
     }
 
+    /// Returns non-zero if memory mapping is being used
+    oexBOOL IsMapped() const
+    {   return 0 < m_fm.Size(); }
     
     TMem& New( oexUINT x_uSize, oexBOOL x_bConstructed = oexFALSE )
     {
@@ -124,7 +127,7 @@ public:
         return *this;
     }   
 
-    oexUINT Size()
+    oexUINT Size() const
     {
         if ( !m_pMem )
             return 0;
@@ -136,8 +139,8 @@ public:
     }
 
     /// Returns non-zero if the object was constructed
-    oexBOOL IsConstructed()
-    {   return ( CAlloc::eF1Constructed & CAlloc::GetFlags( Ptr() ) ) ? oexTRUE : oexFALSE;
+    oexBOOL IsConstructed() const
+    {   return ( CAlloc::eF1Constructed & CAlloc::GetFlags( c_Ptr() ) ) ? oexTRUE : oexFALSE;
     }
 
     /// Deletes the object
@@ -298,12 +301,12 @@ public:
 	// c_Ptr()
 	//==============================================================
 	/// Returns a pointer to the memory
-	oexCONST T* c_Ptr() 
+	oexCONST T* c_Ptr() const
     {
         if ( m_pMem ) 
             return m_pMem;
            
-        return m_fm.Ptr();
+        return m_fm.c_Ptr();
     }
 
 	//==============================================================
@@ -313,7 +316,7 @@ public:
     /**
         \param [in] x_uOffset   -   Offset into the memory
     */
-    oexCONST T* c_Ptr( oexUINT x_uOffset )
+    oexCONST T* c_Ptr( oexUINT x_uOffset ) const
     {
         // Out of bounds
         oexASSERT( m_pMem && Size() > x_uOffset );
@@ -321,7 +324,7 @@ public:
         if ( m_pMem ) 
             return &m_pMem[ x_uOffset ];
            
-        return m_fm.Ptr( x_uOffset );
+        return m_fm.c_Ptr( x_uOffset );
     }
 
 public:
@@ -372,7 +375,7 @@ public:
     }
 
     /// Copies another objects data
-    TMem& Copy( TMem &x_m, oexCSTR x_pNewName = oexNULL, oexUINT x_uNameLen = 0 )
+    TMem& Copy( oexCONST TMem &x_m, oexCSTR x_pNewName = oexNULL, oexUINT x_uNameLen = 0 )
     {
         // Drop current
         Delete();
@@ -395,7 +398,7 @@ public:
 
                     // Copy objects
                     for ( oexUINT i = 0; i < uSize; i++ )
-                        *Ptr( i ) = *x_m.Ptr( i );
+                        *Ptr( i ) = *x_m.c_Ptr( i );
 
                 } // end if
 
@@ -405,7 +408,7 @@ public:
                     New( uSize );
 
                     // Just copy the memory
-                    os::CSys::MemCpy( Ptr(), x_m.Ptr(), uSize * sizeof( T ) );
+                    os::CSys::MemCpy( Ptr(), x_m.c_Ptr(), uSize * sizeof( T ) );
 
                 } // end else
 
@@ -414,7 +417,7 @@ public:
         } // end if
 
         // Copy shared memory
-        else if ( x_m.m_fm.Ptr() )
+        else if ( x_m.m_fm.c_Ptr() )
             m_fm.Copy( x_m.m_fm );
 
         return *this;
@@ -426,6 +429,22 @@ public:
         if ( Ptr() )
             mem.Copy( *this, x_pNewName, x_uNameLen );
         return mem;
+    }
+
+    /// Causes this object to share memory with another
+    TMem& Share( oexCONST TMem &x_m )
+    {
+        Delete();
+
+        // Is it memory mapped, different kind of share ;)
+        if ( x_m.IsMapped() )
+            Copy( x_m );
+
+        // Just add a reference to the memory
+        else
+            CAlloc().AddRef( ( m_pMem = x_m.m_pMem ) );
+
+        return *this;
     }
 
 public:

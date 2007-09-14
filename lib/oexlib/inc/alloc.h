@@ -153,7 +153,7 @@ public:
     /**
         \param [in] x_pBuf  -   Protected memory pointer
     */
-    static inline oexUINT BlockSize( oexPVOID x_pBuf )
+    static inline oexUINT BlockSize( oexCPVOID x_pBuf )
     {
         // Grab the size of the allocated buffer
         return *(oexUINT*)( ( (oexUCHAR*)x_pBuf ) - sizeof( oexUINT ) 
@@ -165,7 +165,7 @@ public:
     /**
         \param [in] x_pBuf  -   Protected memory pointer
     */
-    static inline oexUINT UsableSize( oexPVOID x_pBuf )
+    static inline oexUINT UsableSize( oexCPVOID x_pBuf )
     {
         // Return size of usable memory
         return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
@@ -189,7 +189,7 @@ public:
     /**
         \param [in] x_pBuf  -   Protected memory pointer
     */
-    static inline oexUINT GetFlags( oexPVOID x_pBuf )
+    static inline oexUINT GetFlags( oexCPVOID x_pBuf )
     {
         // Return size of usable memory
         return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
@@ -201,7 +201,7 @@ public:
     /**
         \param [in] x_pBuf  -   Protected memory pointer
     */
-    static inline oexUINT GetRefCount( oexPVOID x_pBuf )
+    static inline oexUINT GetRefCount( oexCPVOID x_pBuf )
     {
         // Return size of usable memory
         return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
