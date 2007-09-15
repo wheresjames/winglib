@@ -25,7 +25,7 @@ CFG=oexlib - Win32 Debug
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
-CPP=xicl6.exe
+CPP=cl.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "oexlib - Win32 Release"
@@ -47,7 +47,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LIB32=xilink6.exe -lib
+LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
@@ -70,7 +70,7 @@ LIB32=xilink6.exe -lib
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LIB32=xilink6.exe -lib
+LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
@@ -83,10 +83,154 @@ LIB32=xilink6.exe -lib
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+# Begin Source File
+
+SOURCE=..\..\src\alloc.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\os\win32\debug.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\os\win32\event.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\os\win32\fmap.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\os\win32\hq_timer.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\os\win32\mem.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\os\win32\mutex.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\oex.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\os\win32\sys.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\os\win32\tls.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=..\..\inc\alloc.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\os\debug.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\os\event.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\file_mapping.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\os\fmap.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\os\hq_timer.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\list.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\os\mem.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\memory.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\os\mutex.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\oex_common.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\oex_config.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\oex_const.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\oex_debugging.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\oex_defines.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\oex_exceptions.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\oex_global.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\oex_namespace.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\oex_str.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\oex_typedefs.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\oexlib.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\os\win32\std_os.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\str.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\os\sys.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\thread_safe.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\inc\os\tls.h
+# End Source File
 # End Group
 # End Target
 # End Project

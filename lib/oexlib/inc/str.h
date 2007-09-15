@@ -953,8 +953,17 @@ private:
 /// Unicode / Multibyte string class
 typedef TStr< oexTCHAR >    CStr;
 
+#if ( _MSC_VER < 1300 )
+
+/// Unicode string class
+typedef TStr< unsigned short >     CStrW;
+
+#else
+
 /// Unicode string class
 typedef TStr< wchar_t >     CStrW;
+
+#endif
 
 /// 8 bit character string
 typedef TStr< oexCHAR >     CStr8;

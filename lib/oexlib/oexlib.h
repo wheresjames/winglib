@@ -540,21 +540,21 @@ public:
 
 		virtual ~CVerifyStartup()
 		{
-			if ( !COex::m_nStartupCode )
+			if ( !COex::GetStartupCode() )
 			{	oexTRACE( "! oexlib - oex::COex::Init() was not called!\n" );
 				oexBREAK( "oex::COex::Init() was not called!" );
 			} // end if
-			else if ( 0 > COex::m_nStartupCode )
-			{	oexTRACE( "! oexlib - oex::COex::Init() reported error code %li\n", COex::m_nStartupCode );
+			else if ( 0 > COex::GetStartupCode() )
+			{	oexTRACE( "! oexlib - oex::COex::Init() reported error code %li\n", COex::GetStartupCode() );
 				oexBREAK( "oex::COex::Init() reported an error" );
 			} // end else if
 
-			if ( !COex::m_nShutdownCode )
+			if ( !COex::GetShutdownCode() )
 			{	oexTRACE( "! oexlib - oex::COex::Uninit() was not called!\n" );
 				oexBREAK( "oex::COex::Uninit() was not called!" );
 			} // end if
-			else if ( 0 > COex::m_nShutdownCode )
-			{	oexTRACE( "! oexlib - oex::COex::Uninit() reported error code %li\n", COex::m_nShutdownCode );
+			else if ( 0 > COex::GetShutdownCode() )
+			{	oexTRACE( "! oexlib - oex::COex::Uninit() reported error code %li\n", COex::GetShutdownCode() );
 				oexBREAK( "oex::COex::Uninit() reported an error" );
 			} // end else if
 		}
@@ -594,6 +594,14 @@ public:
 		\see Init()
 	*/
 	static oexINT Uninit();
+
+	/// Returns the startup code
+	static oexINT GetStartupCode()
+	{	return m_nStartupCode; }
+
+	/// Returns the startup code
+	static oexINT GetShutdownCode()
+	{	return m_nShutdownCode; }
 
 private:
 

@@ -49,7 +49,8 @@ oex::oexRESULT TestAllocator()
     if ( !buf )
         return -1;
 
-    for ( int i = 0; i < 100; i++ )
+	int i;
+    for ( i = 0; i < 100; i++ )
         buf[ 0 ] = i;
 
     if ( !oexVERIFY( oex::CAlloc::ArraySize( buf ) == 100 ) )
@@ -68,7 +69,7 @@ oex::oexRESULT TestAllocator()
     if ( !oexVERIFY( oex::CAlloc::UsableSize( buf ) == sizeof( int ) * 50 ) )
         return -6;
 
-    for ( int i = 0; i < 50; i++ )
+    for ( i = 0; i < 50; i++ )
         buf[ 0 ] = i;
 
     OexAllocDelete( buf );

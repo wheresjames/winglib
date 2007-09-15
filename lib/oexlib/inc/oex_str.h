@@ -334,8 +334,8 @@ namespace str
     */
     template< class T >
         oexINT ICompare( T *s1, oexINT ln1, T *s2, oexINT ln2,
-                         T tSLow = oex( 'a' ), T tELow = oex( 'z' ), 
-                         T tSHi = oex( 'A' ), T tEHi = oex( 'Z' ) )
+                         T tSLow = oexT( 'a' ), T tELow = oexT( 'z' ), 
+                         T tSHi = oexT( 'A' ), T tEHi = oexT( 'Z' ) )
         {
             oexVALIDATE_PTR( s1 );
             oexVALIDATE_PTR( s2 );
@@ -377,8 +377,8 @@ namespace str
     */
     template< class T >
         oexINT ICompareLen( T *s1, oexINT ln1, T *s2, oexINT ln2, oexINT ln_cmp,
-                         T tSLow = oex( 'a' ), T tELow = oex( 'z' ), 
-                         T tSHi = oex( 'A' ), T tEHi = oex( 'Z' ) )
+                         T tSLow = oexT( 'a' ), T tELow = oexT( 'z' ), 
+                         T tSHi = oexT( 'A' ), T tEHi = oexT( 'Z' ) )
         {
             oexVALIDATE_PTR( s1 );
             oexVALIDATE_PTR( s2 );
@@ -443,8 +443,8 @@ namespace str
     */
 	template< class T >
 		oexINT IFindSubStr( T *s1, oexINT ln_s1, T *s2, oexINT ln_s2,
-                            T tSLow = oex( 'a' ), T tELow = oex( 'z' ), 
-                            T tSHi = oex( 'A' ), T tEHi = oex( 'Z' ) )
+                            T tSLow = oexT( 'a' ), T tELow = oexT( 'z' ), 
+                            T tSHi = oexT( 'A' ), T tEHi = oexT( 'Z' ) )
 	    {
 		    oexINT i = 0;
 		    while ( ln_s1 )

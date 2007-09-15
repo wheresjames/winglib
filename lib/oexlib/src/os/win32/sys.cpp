@@ -39,7 +39,15 @@
 
 #include <stdlib.h>
 #include <tchar.h>
-#include <strsafe.h>
+
+#if ( _MSC_VER >= 1300 )
+#	include <strsafe.h>
+#else
+#	include <stdio.h>
+#	include <wchar.h>
+#	include <stdarg.h>
+#endif
+
 #include <ObjBase.h>
 
 #include <WinSock2.h>
@@ -57,8 +65,18 @@ oexSTATIC_ASSERT( sizeof( CSys::t_WAITABLE ) == sizeof( HANDLE ) );
 oexSTATIC_ASSERT( !( sizeof( oexGUID ) % sizeof( oexUCHAR ) ) );
 
 const oexUINT		CSys::c_StrErr_OK = S_OK;
-const oexUINT		CSys::c_StrErr_INVALID_PARAMETER = STRSAFE_E_INVALID_PARAMETER;
-const oexUINT		CSys::c_StrErr_INSUFFICIENT_BUFFER = STRSAFE_E_INSUFFICIENT_BUFFER;
+
+#if ( _MSC_VER >= 1300 )
+
+	const oexUINT		CSys::c_StrErr_INVALID_PARAMETER = STRSAFE_E_INVALID_PARAMETER;
+	const oexUINT		CSys::c_StrErr_INSUFFICIENT_BUFFER = STRSAFE_E_INSUFFICIENT_BUFFER;
+
+#else
+
+	const oexUINT		CSys::c_StrErr_INVALID_PARAMETER = (oexUINT)-1;
+	const oexUINT		CSys::c_StrErr_INSUFFICIENT_BUFFER = (oexUINT)-2;
+
+#endif
 
 const oexUINT	    CSys::c_Infinite = INFINITE;
 
@@ -97,16 +115,46 @@ oexCSTR CSys::StrFmt( oexRESULT *x_pRes, oexSTR x_pDst, oexUINT x_uMax, oexCSTR 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
 oexCSTR CSys::vStrFmt( oexRESULT *x_pRes, oexSTR x_pDst, oexUINT x_uMax, oexCSTR x_pFmt, oexCPVOID x_pArgs )
 {
+	if ( x_pRes )
+		*x_pRes = 0;
+
 	// Verify data pointers
-	if ( !oexVERIFY_PTR( x_pDst ) || !oexVERIFY_PTR( x_pFmt ) )
+	if ( !oexVERIFY_PTR( x_pDst ) || !oexVERIFY_PTR( x_pFmt ) || !x_uMax )
+	{
+		if ( x_pRes )
+			*x_pRes = c_StrErr_INVALID_PARAMETER;
+
 		return x_pDst;
+	} // end if
+
+	oexRESULT res = 0;
+
+#if ( _MSC_VER >= 1300 )
 
 	// Create format string
-	oexRESULT res = StringCchVPrintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs );
+	res = StringCchVPrintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs );
+
+#else
+
+	// Create format string
+	if ( 0 > _vsntprintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
+	{
+		// Null terminate buffer
+		x_pDst[ x_uMax - 1 ] = 0;
+
+		// Let the user know what went wrong
+		res = c_StrErr_INSUFFICIENT_BUFFER;
+
+	} // end if
+
+#endif
 
 	// What to do with the result
-	if ( x_pRes ) *x_pRes = res;
-	else oexASSERT( S_OK == res );
+	if ( x_pRes ) 
+		*x_pRes = res;
+
+	else 
+		oexASSERT( 0 == res );
 
 	return x_pDst;
 }
