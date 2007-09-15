@@ -436,6 +436,7 @@ namespace os
 #include "inc/memory.h"
 #include "inc/thread_safe.h"
 #include "inc/str.h"
+#include "inc/list.h"
 
 /*
 #include "inc/arb_delegates.h"

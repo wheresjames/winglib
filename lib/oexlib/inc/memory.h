@@ -71,9 +71,29 @@ public:
 #endif
     }
     
+    TMem( oexCONST T& x_rMem, oexBOOL x_bConstructed = oexTRUE ) 
+    {   
+        m_pMem = oexNULL;
+
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
+        // Construct a copy
+        *this = x_rMem;
+    }
+    
     /// Copy operator
     TMem& operator = ( TMem &m )
     {   return Assume( m ); }
+    
+    /// Copy operator
+    TMem& operator = ( oexCONST T &x_rObj )
+    {   Construct();
+        if ( Ptr() )
+            *Ptr() = x_rObj;
+        return *this; 
+    }
     
     virtual ~TMem()
     {   
@@ -99,6 +119,13 @@ public:
     {   T* pPtr = m_pMem;
         m_pMem = oexNULL;
         return pPtr;
+    }
+
+    /// Attaches to a memory pointer
+    T* Attach( T* pPtr )
+    {   Delete();
+        m_pMem = pPtr;
+        return m_pMem;
     }
 
     /// Returns non-zero if memory mapping is being used

@@ -235,7 +235,7 @@ protected:
                                     - sizeof( m_ucUnderrunPadding ) ) )->uRef;
     }
 
-private:
+public:
 
     /// Under run padding
     static oexUCHAR m_ucUnderrunPadding[ 4 ];

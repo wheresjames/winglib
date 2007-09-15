@@ -28,6 +28,22 @@ public:
 
 oex::oexRESULT TestAllocator()
 {
+    // Veriry over-run / under-run protection
+    char* pChar = OexAllocNew< char >( 100 );
+
+    if ( !oexVERIFY( !oex::os::CSys::MemCmp( &pChar[ 100 ], 
+                        oex::CAlloc::m_ucOverrunPadding, 
+                        sizeof( oex::CAlloc::m_ucOverrunPadding ) ) ) )
+        return -1;
+
+    if ( !oexVERIFY( !oex::os::CSys::MemCmp( &pChar[ -(int)sizeof( oex::CAlloc::m_ucUnderrunPadding ) ], 
+                        oex::CAlloc::m_ucUnderrunPadding, 
+                        sizeof( oex::CAlloc::m_ucUnderrunPadding ) ) ) )
+        return -2;
+
+    OexAllocDelete( pChar );
+
+
     // Allocate generic array
     int * buf = OexAllocNew< int >( 100 );
     if ( !buf )
@@ -145,8 +161,7 @@ oex::oexRESULT TestAllocator()
             return -17;
 
         if ( !oexVERIFY( 2 == mem.Resize( 2 ).Size() ) )
-            return -18;
-        
+            return -18;        
 
     } // end scope
 
@@ -244,14 +259,13 @@ oex::oexRESULT TestStrings()
     oex::oexSTR pStr;
 
 		// Buffer over-run protection test 
-//		dslSTR pOvPtr = str1.Allocate( 4 );
-//		CRawStr::Copy( pOvPtr, "12345" );
-//		str1.Length();
+//        oex::oexSTR pOvPtr = str1.Allocate( 4 );
+//        oex::zstr::Copy( pOvPtr, "12345" );
+//        str1.Length();
 
 		// Buffer under-run protection test
-//		dslSTR pOvPtr = str1.Allocate( 4 );
-//		dslSTR pOvPtr = (dslSTR)str1.Ptr();
-//		pOvPtr--; *pOvPtr = 1;
+//        oex::oexSTR pOvPtr = str1.Allocate( 4 );
+//        pOvPtr--; *pOvPtr = 1;
 
     if ( !oexVERIFY_PTR( pStr = str1.Allocate( 12 ) ) )
         return -1;
@@ -401,6 +415,32 @@ oex::oexRESULT TestStrings()
     return oex::oexRES_OK;
 }
 
+
+oex::oexRESULT TestLists()
+{      
+	// List
+	oex::TList< int > lst;
+
+	// Iterator
+//	oex::TList< int >::iterator it = 
+		lst.Append( 4 );
+
+	// Add nodes
+	lst.Append( 8 );
+	lst.Append( 16 );
+	lst.Append( 32 );
+	lst.Append( 64 );
+
+	// *** Verify size
+	if ( !oexVERIFY( lst.Size() == 5 ) )
+		return -1;
+
+
+
+    return oex::oexRES_OK;
+}
+
+
 int main(int argc, char* argv[])
 {
 	// Initialize the oex library
@@ -413,6 +453,8 @@ int main(int argc, char* argv[])
     TestGuids();
 
     TestStrings();
+
+    TestLists();
 
 	// Initialize the oex library
     oexUNINIT();	

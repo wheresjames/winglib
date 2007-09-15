@@ -140,7 +140,7 @@ oexINT64 CSys::StrToNum( oexCSTR x_pStr, oexUINT x_uSize, oexUINT x_uRadix, oexI
         x_uSize = zstr::Length( x_pStr );
 
     oexINT i = 0;
-    oexINT64 lNum = 0;
+    oexINT64 llNum = 0;
     oexBOOL bErr = oexFALSE;
     oexBOOL bNeg = oexFALSE;
 
@@ -148,7 +148,7 @@ oexINT64 CSys::StrToNum( oexCSTR x_pStr, oexUINT x_uSize, oexUINT x_uRadix, oexI
     if ( !x_uSize ) 
     {    if ( x_pnEnd )
             *x_pnEnd = 0;
-        return lNum;
+        return llNum;
     } // end if
 
     // Check sign
@@ -189,8 +189,8 @@ oexINT64 CSys::StrToNum( oexCSTR x_pStr, oexUINT x_uSize, oexUINT x_uRadix, oexI
             else 
             {
                 // Accumulate number
-                lNum *= x_uRadix;
-                lNum += ch;
+                llNum *= x_uRadix;
+                llNum += ch;
 
             } // end else
 
@@ -204,13 +204,13 @@ oexINT64 CSys::StrToNum( oexCSTR x_pStr, oexUINT x_uSize, oexUINT x_uRadix, oexI
 
     // Is the value negative?
     if ( bNeg ) 
-        lNum = -lNum;
+        llNum = -llNum;
 
     // Does the caller care about errors?
     if ( x_pnEnd )
         *x_pnEnd = i;
 
-    return lNum;
+    return llNum;
 }
 
 oexPVOID CSys::MemCpy( oexPVOID x_pDst, oexCPVOID x_pSrc, oexUINT x_uSize )

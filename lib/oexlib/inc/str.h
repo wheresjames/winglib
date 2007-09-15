@@ -936,8 +936,6 @@ public:
 	TStr& Replace( oexCONST T x_tFind, oexCONST T x_tReplace )
     {   str::Replace( _Ptr(), Length(), x_tFind, x_tReplace ); return *this; }
 
-
-
 private:
 
     /// The string memory
@@ -952,8 +950,11 @@ private:
 };
 
 
-/// Unicode friendly string class
+/// Unicode / Multibyte string class
 typedef TStr< oexTCHAR >    CStr;
+
+/// Unicode string class
+typedef TStr< wchar_t >     CStrW;
 
 /// 8 bit character string
 typedef TStr< oexCHAR >     CStr8;
