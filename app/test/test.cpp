@@ -514,6 +514,47 @@ oex::oexRESULT TestLists()
 		 || !oexVERIFY( *itStr == szStr[ 0 ] ) )
 		return -8;
 
+    oex::TList< oex::CStr > strlst2( strlst );
+
+	// First list should be empty now
+	if ( !oexVERIFY( !strlst.Size() ) )
+		return -8;
+
+	// Verify assignment went ok
+	i = 0; 
+	for ( oex::TList< oex::CStr >::iterator itStr; szStr[ i ] && strlst2.Next( itStr ); i++ )
+		if ( !oexVERIFY( itStr->Cmp( szStr[ i ] ) ) )
+			return -9;
+
+	strlst2.Destroy();
+
+	// From string array
+	strlst.Append( szStr, 6 );
+	i = 0;
+    for ( oex::TList< oex::CStr >::iterator itStr; szStr[ i ] && strlst.Next( itStr ); i++ )
+		if ( !oexVERIFY( itStr->Cmp( szStr[ i ] ) ) )
+			return -10;
+
+	// Attempt to make a copy
+	strlst2 = strlst.Copy();
+    
+	i = 0;
+    for ( oex::TList< oex::CStr >::iterator itStr; szStr[ i ] && strlst.Next( itStr ); i++ )
+		if ( !oexVERIFY( itStr->Cmp( szStr[ i ] ) ) )
+			return -10;
+	i = 0;
+	for ( oex::TList< oex::CStr >::iterator itStr; szStr[ i ] && strlst2.Next( itStr ); i++ )
+		if ( !oexVERIFY( itStr->Cmp( szStr[ i ] ) ) )
+			return -10;
+
+	strlst.Destroy();
+
+	i = 0;
+	strlst << 1 << 3.14f << "String";
+    oex::oexCSTR szStr2[] = { "1", "3.14", "String", oexNULL };
+    for ( oex::TList< oex::CStr >::iterator itStr; szStr2[ i ] && strlst.Next( itStr ); i++ )
+		if ( !oexVERIFY( itStr->Cmp( szStr2[ i ] ) ) )
+			return -10;
 
     return oex::oexRES_OK;
 }

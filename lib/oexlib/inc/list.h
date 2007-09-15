@@ -581,6 +581,12 @@ public:
 		m_pHead = m_pTail = oexNULL; 
     }
 
+	TList( TList &x_rList )
+	{	m_uSize = 0;
+		m_pHead = m_pTail = oexNULL; 
+		Attach( x_rList ); 
+    }
+
     virtual ~TList()
     {   Destroy();
     }
@@ -683,6 +689,26 @@ public:
 
 		return itNew;
 	}
+
+	//==============================================================
+	// Append()
+	//==============================================================
+	/// Append an object array onto the list
+	/**
+		\param [in] x_pList		-	Pointer to object array
+		\param [in] x_uCount		-	Number of items in the array
+		
+		\return Reference to this list
+	
+		\see 
+	*/
+	template < class T >
+		TList& Append( T *x_pList, oexUINT x_uCount )
+	{	for( oexUINT i = 0; i < x_uCount; i++ )
+			Append( x_pList[ i ] );			
+		return *this;
+	}
+
 
 	//==============================================================
 	// First()
@@ -937,6 +963,92 @@ public:
 					return it;
 			return iterator();
 		}
+
+public:
+
+	//==============================================================
+	// operator =
+	//==============================================================
+	/// Assignes a list object from a list reference
+	/**
+		\param [in] x_rList 
+		
+		Note that this class just assumes the list.  A copy is not 
+		made.  After this function, x_rList will be empty.  
+
+		See Attach() for more details
+
+		\return Reference to this object
+	
+		\see 
+	*/
+	TList& operator = ( TList &x_rList )
+	{	return Attach( x_rList ); }
+
+	//==============================================================
+	// Attach()
+	//==============================================================
+	/// Assignes a list object from a list reference
+	/**
+		\param [in] x_rList 
+		
+		Note that this class just assumes the list.  A copy is not 
+		made.  After this function, x_rList will be empty.  
+
+		\code
+
+			TList< oexINT > lst1;
+
+			lst1 << 11;
+			lst1 << = 22;
+
+			TList< oexINT > lst2( lst1 );
+
+			// lst2 now contains the list, lst1 is empty
+
+			// If you want to make a copy, use...
+
+			TList< oexINT > lst2( lst1.Copy() );
+
+		\endcode
+
+		\return Reference to this object
+	
+		\see 
+	*/
+	TList& Attach ( TList &x_rList )
+	{
+		Destroy();
+
+		// Copy the list variables
+		m_uSize = x_rList.m_uSize;
+		m_pHead = x_rList.m_pHead;
+		m_pTail = x_rList.m_pTail;
+
+		// We own the list now
+		x_rList.m_uSize = 0;
+		x_rList.m_pHead = oexNULL;
+		x_rList.m_pTail = oexNULL;
+
+		return *this;
+	}
+
+	//==============================================================
+	// Copy()
+	//==============================================================
+	/// Returns a copy of the list
+	/**
+
+		\return TList object containing a copy of the list
+	
+		\see 
+	*/
+	TList Copy()
+	{	TList lst;
+		for ( TList< T_OBJ >::iterator it; Next( it ); )
+			lst.Append( *it );
+		return lst;
+	}
 
 
 public:
