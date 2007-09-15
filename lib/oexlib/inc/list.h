@@ -74,7 +74,13 @@ public:
 	TListNode( TListNode *x_pIt, oexINT x_nOpt )
 	{
 		m_pPrev = oexNULL; m_pNext = oexNULL; 
-		if ( x_pIt ) { if ( eAppend == x_nOpt ) Append( x_pIt ); else Insert( x_pIt ); }
+		if ( x_pIt ) 
+        {
+            if ( eAppend == x_nOpt ) 
+                Append( x_pIt ); 
+            else 
+                Insert( x_pIt ); 
+        } // end if
 	}
 
 	//==============================================================
@@ -96,9 +102,19 @@ public:
 	*/
 	TListNode( T_OBJ *x_pObj, TListNode *x_pIt, oexINT x_nOpt )
 	{
-        if ( x_pObj ) m_obj.Attach( x_pObj );
-		m_pPrev = oexNULL; m_pNext = oexNULL;
-		if ( x_pIt ) { if ( eAppend == x_nOpt ) Append( x_pIt ); else Insert( x_pIt ); }
+        if ( x_pObj )
+            m_obj = *x_pObj;
+
+		m_pPrev = oexNULL; 
+        m_pNext = oexNULL;
+
+		if ( x_pIt ) 
+        { 
+            if ( eAppend == x_nOpt ) 
+                Append( x_pIt ); 
+            else 
+                Insert( x_pIt ); 
+        } // end if
 	}
 
     /// Destructor
@@ -112,7 +128,6 @@ public:
 	/// Removes from the list and destroys the encapsulated object
 	void Destroy()
 	{	Remove(); 
-        m_obj.Delete(); 
 	}
 
 public:
@@ -124,7 +139,10 @@ public:
 	/**
 		\return Linked reference to the encapsulated object
 	*/
-	TMem< T_OBJ > operator ->() { return m_obj; }
+	T_OBJ* operator ->() 
+    {
+        return &m_obj; 
+    }
 
 	//==============================================================
 	// operator *()
@@ -133,7 +151,11 @@ public:
 	/**
 		\return Linked reference pointer to the encapsulated object
 	*/
-	operator TMem< T_OBJ >*() { return m_obj; }
+	T_OBJ& operator *() 
+    {
+        return m_obj; 
+    }
+
 
 	//==============================================================
 	// operator &()
@@ -142,7 +164,10 @@ public:
 	/**
 		\return Linked reference reference to the encapsulated object
 	*/
-	operator TMem< T_OBJ >&() { return m_obj; }
+	operator T_OBJ&() 
+    {
+        return m_obj; 
+    }
 
 	//==============================================================
 	// Obj()
@@ -151,7 +176,18 @@ public:
 	/**
 		\return Linked reference reference to the encapsulated object
 	*/
-	TMem< T_OBJ >& Obj() { return m_obj; }
+	T_OBJ& Obj() 
+    {
+        return m_obj; 
+    }
+
+    /// Assignment operator
+    TListNode& operator = ( oexCONST T_OBJ &x_rObj )
+    {
+        m_obj = x_rObj;
+
+        return *this;
+    }
 
 public:
 
@@ -186,17 +222,20 @@ public:
 	
 		\see Append()
 	*/
-	TMem< T_OBJ > Insert( TListNode *x_pIt )
+	TListNode& Insert( TListNode *x_pIt )
 	{
-		if ( !x_pIt ) return m_obj;
+		if ( !x_pIt ) 
+            return *this;
 
 		// Insert us
 		m_pNext = x_pIt;
 		m_pPrev = x_pIt->m_pPrev;
 		x_pIt->m_pPrev = this;
-		if ( m_pPrev ) m_pPrev->m_pNext = this;
 
-		return m_obj;			
+		if ( m_pPrev )
+            m_pPrev->m_pNext = this;
+
+		return *this;			
 	}
 
 	//==============================================================
@@ -210,17 +249,20 @@ public:
 	
 		\see Insert()
 	*/
-	TMem< T_OBJ > Append( TListNode *x_pIt )
+	TListNode& Append( TListNode *x_pIt )
 	{
-		if ( !x_pIt ) return m_obj;
+		if ( !x_pIt ) 
+            return *this;
 
 		// Insert us
 		m_pPrev = x_pIt;
 		m_pNext = x_pIt->m_pNext;
 		x_pIt->m_pNext = this;
-		if ( m_pNext ) m_pNext->m_pPrev = this;
 
-		return m_obj;			
+		if ( m_pNext ) 
+            m_pNext->m_pPrev = this;
+
+		return *this;			
 	}
 	
 	//==============================================================
@@ -234,11 +276,17 @@ public:
 
 		\see 
 	*/
-	TMem< T_OBJ > Remove()
-	{	if ( m_pPrev ) m_pPrev->m_pNext = m_pNext;
-		if ( m_pNext ) m_pNext->m_pPrev = m_pPrev;
+	TListNode& Remove()
+	{	
+        if ( m_pPrev ) 
+            m_pPrev->m_pNext = m_pNext;
+
+		if ( m_pNext ) 
+            m_pNext->m_pPrev = m_pPrev;
+
 		m_pPrev = m_pNext = oexNULL;
-		return m_obj;
+
+		return *this;
 	}
 
 	//==============================================================
@@ -248,11 +296,17 @@ public:
 	/**
 		\return Linked reference to the encapsulated object
 	*/
-	TMem< T_OBJ > MoveUp()
-	{	if ( !m_pPrev ) return m_obj;
+	TListNode& MoveUp()
+	{	
+        if ( !m_pPrev ) 
+            return *this;
+
 		TListNode *pPrev = m_pPrev;
-		Remove(); Insert( pPrev );
-		return m_obj;
+
+		Remove(); 
+        Insert( pPrev );
+
+		return *this;
 	}
 
 	//==============================================================
@@ -262,11 +316,17 @@ public:
 	/**
 		\return Linked reference to the encapsulated object
 	*/
-	TMem< T_OBJ > MoveDown()
-	{	if ( !m_pNext ) return m_obj;
+	TListNode& MoveDown()
+	{	
+        if ( !m_pNext ) 
+            return *this;
+
 		TListNode *pNext = m_pNext;
-		Remove(); Append( pNext );
-		return m_obj;
+		
+        Remove(); 
+        Append( pNext );
+
+		return *this;
 	}
 
 	//==============================================================
@@ -283,8 +343,12 @@ public:
 	
 		\see 
 	*/
-	TListNode* SetAt( TListNode *x_pPrev, TListNode *x_pNext )
-	{	m_pPrev = x_pPrev; m_pNext = x_pNext; return this; }
+	TListNode& SetAt( TListNode *x_pPrev, TListNode *x_pNext )
+	{	
+        m_pPrev = x_pPrev; 
+        m_pNext = x_pNext; 
+        return *this; 
+    }
 
 private:
     
@@ -295,17 +359,218 @@ private:
 	TListNode					*m_pPrev;
 
 	/// The actual encapsulated object
-	TMem< T_OBJ >			    m_obj;
+	T_OBJ       			    m_obj;
+
+};
+
+
+/// List iterator
+template< class T_OBJ, class T_NODE = TListNode< T_OBJ > > 
+    class TListIterator
+{
+public:
+
+    TListIterator() 
+    {
+    }
+
+    TListIterator( TListNode< T_OBJ > *x_pLn )
+    {
+        m_memListNode.Share( x_pLn );
+    }
+
+    TListIterator( TListIterator &x_rLi )
+    {
+        m_memListNode.Share( x_rLi.m_memListNode );
+    }
+
+    virtual ~TListIterator()
+    {
+        Destroy();
+    }
+
+    void Destroy()
+    {
+        m_memListNode.Delete();
+    }
+
+    TListIterator& operator = ( TListNode< T_OBJ > *x_pLn )
+    {
+        m_memListNode.Share( x_pLn );
+        return *this;
+    }
+
+    TListIterator& operator = ( TListIterator &x_rLi )
+    {
+        m_memListNode.Share( x_rLi.m_memListNode );
+        return *this;
+    }
+
+    T_OBJ* Ptr()
+    {
+        if ( !m_memListNode.Ptr() )
+            return oexNULL;
+
+        return &m_memListNode.Ptr()->Obj();
+    }
+
+	//==============================================================
+	// operator ->()
+	//==============================================================
+	/// Pointer difference operator
+	/**
+		\return Linked reference to the encapsulated object
+	*/
+	T_OBJ*  operator ->() 
+    { return Ptr(); }
+
+	//==============================================================
+	// operator *()
+	//==============================================================
+	/// Cast operator
+	/**
+		\return Linked reference pointer to the encapsulated object
+	*/
+	T_OBJ& operator *() 
+    {
+        return *Ptr(); 
+    }
+
+
+	//==============================================================
+	// Obj()
+	//==============================================================
+	/// Cast operator
+	/**
+		\return Returns reference to the encapsulated object
+	*/
+	T_OBJ& Obj() 
+    {
+        return *Ptr(); 
+    }
+
+
+    TListIterator& operator = ( oexCONST T_OBJ &x_rObj )
+    {
+        if ( m_memListNode.Ptr() )
+            *m_memListNode.Ptr() = x_rObj;
+        return *this;
+    }
+
+    oexBOOL operator == ( oexCONST T_OBJ &x_rObj )
+    {
+        if ( !m_memListNode.Ptr() )
+            return oexFALSE;
+        
+        return *m_memListNode.Ptr() == x_rObj;        
+    }
+
+public:
+
+	//==============================================================
+	// End()
+	//==============================================================
+	/// Returns non-zero if at the end of the list
+	oexBOOL End() 
+    {
+        return ( !m_memListNode.Ptr() || !m_memListNode.Ptr()->Next() );
+    }
+
+	//==============================================================
+	// Begin()
+	//==============================================================
+	/// Returns non-zero if at the beginning of the list
+	oexBOOL Begin() 
+    {
+        return ( !m_memListNode.Ptr() || !m_memListNode.Ptr()->Prev() );
+    }
+
+	//==============================================================
+	// Next()
+	//==============================================================
+	/// Advances to the next position in the list
+	oexBOOL Next() 
+	{
+        if ( !m_memListNode.Ptr() || !m_memListNode.Ptr()->Next() )
+            return oexFALSE;
+
+        m_memListNode.Share( m_memListNode.Ptr()->Next() );
+
+        return oexTRUE;
+
+	}
+
+    TListIterator GetNext()
+    {
+        if ( !m_memListNode.Ptr() )
+            return TListIterator();
+
+        return TListIterator( m_memListNode.Ptr()->Next() );
+    }
+
+	//==============================================================
+	// Prev()
+	//==============================================================
+	/// Advances to the previous position in the list
+	oexBOOL Prev() 
+	{
+        if ( !m_memListNode.Ptr() || !m_memListNode.Ptr()->Prev() )
+            return oexFALSE;
+
+        m_memListNode.Share( m_memListNode.Ptr()->Prev() );
+
+        return oexTRUE;
+
+	}
+
+    TListIterator GetPrev()
+    {
+        if ( !m_memListNode.Ptr() )
+            return TListIterator();
+
+        return TListIterator( m_memListNode.Ptr()->Prev() );
+    }
+
+	//==============================================================
+	// operator ++
+	//==============================================================
+	/// Advances to the next position in the list
+	TListIterator& operator ++( int )
+	{	Next();
+		return *this;
+	}
+
+	//==============================================================
+	// operator --
+	//==============================================================
+	/// Advances to the previous position in the list
+	TListIterator& operator --( int )
+	{	Prev();
+		return *this;
+	}
+
+
+private:
+
+    /// List node
+    TMem< T_NODE >      m_memListNode;
 
 };
 
 
 /// Linked list
 /**
+    
+
 */
 template< typename T_OBJ, typename T_NODE = TListNode< T_OBJ > >
     class TList
 {
+public:
+
+	/// TList iterator type
+	typedef TListIterator< T_OBJ, T_NODE > iterator;
+
 public:
 
     TList()
@@ -334,6 +599,9 @@ public:
             
             // Point to the next node
             m_pHead = pNode->Next();
+
+            // Just in case someone else is still hanging onto the memory
+            pNode->SetAt( oexNULL, oexNULL );                       
             
             // Delete this node
             OexAllocDelete( pNode );
@@ -353,15 +621,14 @@ public:
 
 		\return iterator containing object
 	*/
-//	iterator
-    T_NODE*
+	iterator
         Append( T_OBJ *x_pObj = oexNULL )
 	{
         T_NODE *pNode = oexNULL;
 
         pNode = OexAllocConstruct< T_NODE >( x_pObj, m_pTail, T_NODE::eAppend ); 
-//        if ( !pNode )
-//            return iterator();
+        if ( !pNode )
+            return iterator();
 
 		m_uSize++; 
 
@@ -383,20 +650,108 @@ public:
 
 		\return iterator containing object
 	*/
-//	iterator
-    T_NODE*
+	iterator
         Append( oexCONST T_OBJ &x_rObj )
 	{	
-        return Append();
+        iterator itNew = Append();
 
-//        iterator itNew = Append();
+		if ( itNew.Ptr() ) 
+            itNew = x_rObj;
 
-//		if ( itNew.Ptr() ) 
-//            itNew = x_rObj;
-
-//		return itNew;
+		return itNew;
 	}
 
+	//==============================================================
+	// First()
+	//==============================================================
+	/// Returns the iterator for the first list item
+	iterator First() 
+    { return iterator( m_pHead ); }
+
+	//==============================================================
+	// Last()
+	//==============================================================
+	/// Returns the iterator for the last list item
+	iterator Last() 
+    { return iterator( m_pTail ); }
+
+	//==============================================================
+	// Next()
+	//==============================================================
+	/// Sets the iterator to the next item in the list
+	/**
+		\param [in] x_it 
+
+		If it is an empty iterator, it is set to the first item
+		in the list.
+
+		If there are no more items in the list, this function
+		returns zero.
+	
+	  \code
+
+		// Walk the list forward
+		for ( oex::TList< int >::iterator it; lst.Next( it ); )
+			
+			Use( it );
+	
+	  \endcode
+
+		\return Non-zero if it points to the next item in the list
+	
+		\see Prev()
+	*/
+	oexCONST oexBOOL Next( iterator& x_it )
+	{	
+        if ( x_it.Ptr() )
+			return x_it.Next();
+
+		else if ( !m_pHead )
+			return oexFALSE;
+
+		x_it = m_pHead;
+
+		return oexTRUE;
+	}
+
+	//==============================================================
+	// Prev()
+	//==============================================================
+	/// Sets the iterator to the previous item in the list
+	/**
+		\param [in] x_it 
+
+		If it is an empty iterator, it is set to the last item
+		in the list.
+
+		If there are no more items in the list, this function
+		returns zero.
+	
+	  \code
+
+		// Walk the list backward
+		for ( oex::TList< int >::iterator it; lst.Prev( it ); )
+			
+			Use( it );
+	
+	  \endcode
+
+		\return Non-zero if it points to the previous list item
+	
+		\see Next()
+	*/
+	oexCONST oexBOOL Prev( iterator& x_it )
+	{	
+        if ( x_it.Ptr() )
+			return x_it.Prev();
+
+		else if ( !m_pTail )
+			return oexFALSE;
+
+		x_it = m_pTail;
+
+		return oexTRUE;
+	}
 
 	//==============================================================
 	// Size()

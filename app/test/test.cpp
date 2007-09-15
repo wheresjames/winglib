@@ -416,15 +416,14 @@ oex::oexRESULT TestStrings()
     return oex::oexRES_OK;
 }
 
-
 oex::oexRESULT TestLists()
 {      
 	// List
 	oex::TList< int > lst;
 
 	// Iterator
-//	oex::TList< int >::iterator it = 
-		lst.Append( 4 );
+	oex::TList< int >::iterator it = 
+	    lst.Append( 4 );
 
 	// Add nodes
 	lst.Append( 8 );
@@ -436,7 +435,68 @@ oex::oexRESULT TestLists()
 	if ( !oexVERIFY( lst.Size() == 5 ) )
 		return -1;
 
+	int a = *it;
+	int b = *(it++);
+	int c = *(it--);
+	int d = *(it--);
 
+	// *** Verify list values
+	if (	!oexVERIFY( 4 == a ) || !oexVERIFY( 8 == b )
+		 || !oexVERIFY( 4 == c ) || !oexVERIFY( 4 == d ) )
+		return -2;
+
+	// List values
+	int vals[] = { 4, 8, 16, 32, 64, -1 };
+
+	// *** iteration method #1
+	int i = 0;
+	do
+	{	
+		if ( !oexVERIFY( it == vals[ i++ ] ) )
+			return -3;
+
+	} while ( it.Next() );
+
+	// *** iteration method #2
+	i = 0;
+	for ( oex::TList< int >::iterator it2; lst.Next( it2 ); )
+	{
+		if ( !oexVERIFY( it2 == vals[ i++ ] ) )
+			return -4;
+
+	} // end if
+
+	// *** reverse iteration method #1
+	i = 4;
+	it = lst.Last();
+	do
+	{	
+		if ( !oexVERIFY( it == vals[ i-- ] ) ||
+             !oexVERIFY( -1 <= i ) )
+			return -5;
+
+	} while ( it.Prev() );
+
+	// *** reverse iteration method #2
+	i = 4;
+	for ( oex::TList< int >::iterator it3; lst.Prev( it3 ); )
+	{
+		if ( !oexVERIFY( it3 == vals[ i-- ] ) ||
+             !oexVERIFY( -1 <= i ) )
+			return -6;
+
+	} // end if
+
+    // Destroy the list
+	lst.Destroy();
+
+    // Iterator should not be in the list now
+	if ( !oexVERIFY( it.Begin() && it.End() ) )
+		return -7;
+
+    // Verify iterator still has valid memory
+	if ( !oexVERIFY( it == 4 ) )
+		return -8;
 
     return oex::oexRES_OK;
 }

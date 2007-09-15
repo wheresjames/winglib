@@ -423,9 +423,10 @@ public:
                     // Create array of objects
                     ConstructArray( uSize );
 
-                    // Copy objects
+                    // Copy objects 
+                    // +++ Casting away const
                     for ( oexUINT i = 0; i < uSize; i++ )
-                        *Ptr( i ) = *x_m.c_Ptr( i );
+                        *Ptr( i ) = *(T*)( x_m.c_Ptr( i ) );
 
                 } // end if
 
@@ -470,6 +471,19 @@ public:
         // Just add a reference to the memory
         else
             CAlloc().AddRef( ( m_pMem = x_m.m_pMem ) );
+
+        return *this;
+    }
+
+    /// Causes this object to share memory with another
+    TMem& Share( T *x_pMem )
+    {
+        // Lose old memory
+        Delete();
+
+        // Share this memory pointer
+        if ( x_pMem )
+            CAlloc().AddRef( ( m_pMem = x_pMem ) );
 
         return *this;
     }
