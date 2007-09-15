@@ -143,13 +143,7 @@ public:
 
         // Allocate plain old memory
         else
-            m_pMem = CAlloc()._Log( m_uLine, m_pFile ).New< T >( x_uSize );
-
-        // Save construction status if needed
-        if ( x_bConstructed )
-        {   T* pPtr = Ptr();
-            CAlloc::SetFlags( pPtr, CAlloc::eF1Constructed );
-        } // end if
+            m_pMem = CAlloc()._Log( m_uLine, m_pFile ).New< T >( x_uSize, x_bConstructed );
 
         return *this;
     }   
@@ -176,21 +170,6 @@ public:
         // Do we need to destruct objects?
         T* pPtr = Ptr();
 
-        // Destruct object if needed
-        if ( pPtr )
-        {
-            // Was the object constructed?
-            if ( CAlloc::eF1Constructed & CAlloc::GetFlags( pPtr ) 
-                 && 1 == CAlloc::GetRefCount( pPtr ) )
-            {
-                oexUINT uSize = Size();
-                for ( oexUINT i = 0; i < uSize; i++ )
-                    m_pMem[ i ].~T();
-
-            } // end if
-
-        } // end if
-
         // Allocation?
         if ( m_pMem )
         {
@@ -204,7 +183,20 @@ public:
 
         // Lose file mapping if any
         if ( m_fm.Ptr() )
+        {
+            // Was the object constructed?
+            if ( CAlloc::eF1Constructed & CAlloc::GetFlags( pPtr ) 
+                 && 1 == CAlloc::GetRefCount( pPtr ) )
+            {
+                oexUINT uSize = Size();
+                for ( oexUINT i = 0; i < uSize; i++ )
+                    m_pMem[ i ].~T();
+
+            } // end if
+
             m_fm.Destroy();
+
+        } // end if
     }
 
     void Destruct()

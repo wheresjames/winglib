@@ -260,15 +260,38 @@ public:
 
     /// Generic new function
     template< typename T >
-        T* New( oexUINT x_uSize )
+        T* New( oexUINT x_uSize, oexBOOL x_bConstructed = oexFALSE )
     {
-        return (T*)Alloc( x_uSize * sizeof( T ), m_uLine, m_pFile, 0 );
+        T* pPtr = (T*)Alloc( x_uSize * sizeof( T ), m_uLine, m_pFile, 0 );
+        if ( !pPtr )
+            return oexFALSE;
+
+        // Save construction status if needed
+        if ( x_bConstructed )
+            CAlloc::SetFlags( pPtr, CAlloc::eF1Constructed );
+
+        return pPtr;
     }
 
     /// Generic delete
     template< typename T >
         oexBOOL Delete( T* x_pPtr )
     {
+        // Destruct object if needed
+        if ( x_pPtr )
+        {
+            // Was the object constructed?
+            if ( CAlloc::eF1Constructed & CAlloc::GetFlags( x_pPtr ) 
+                 && 1 == CAlloc::GetRefCount( x_pPtr ) )
+            {
+                oexUINT uSize = ArraySize( x_pPtr );
+                for ( oexUINT i = 0; i < uSize; i++ )
+                    x_pPtr[ i ].~T();
+
+            } // end if
+
+        } // end if
+
         return Free( x_pPtr, m_uLine, m_pFile, 2 );
     }
 
@@ -295,63 +318,63 @@ public:
     template< typename T >
         T* Construct()
     {
-        return oexPLACEMENT_NEW ( New< T >( 1 ) ) T();
+        return oexPLACEMENT_NEW ( New< T >( 1, oexTRUE ) ) T();
     }
 
     /// Construct object, 1 param
     template< typename T, typename T_P1 >
         T* Construct( T_P1 p1 )
     {
-        return oexPLACEMENT_NEW ( New< T >( 1 ) ) T( p1 );
+        return oexPLACEMENT_NEW ( New< T >( 1, oexTRUE ) ) T( p1 );
     }
 
     /// Construct object, 2 params
     template< typename T, typename T_P1, typename T_P2 >
         T* Construct( T_P1 p1, T_P2 p2 )
     {
-        return oexPLACEMENT_NEW ( New< T >( 1 ) ) T( p1, p2 );
+        return oexPLACEMENT_NEW ( New< T >( 1, oexTRUE ) ) T( p1, p2 );
     }
 
     /// Construct object, 3 params
     template< typename T, typename T_P1, typename T_P2, typename T_P3 >
         T* Construct( T_P1 p1, T_P2 p2, T_P3 p3 )
     {
-        return oexPLACEMENT_NEW ( New< T >( 1 ) ) T( p1, p2, p3 );
+        return oexPLACEMENT_NEW ( New< T >( 1, oexTRUE ) ) T( p1, p2, p3 );
     }
 
     /// Construct object, 4 params
     template< typename T, typename T_P1, typename T_P2, typename T_P3, typename T_P4 >
         T* Construct( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4 )
     {
-        return oexPLACEMENT_NEW ( New< T >( 1 ) ) T( p1, p2, p3, p4 );
+        return oexPLACEMENT_NEW ( New< T >( 1, oexTRUE ) ) T( p1, p2, p3, p4 );
     }
 
     /// Construct object, 5 params
     template< typename T, typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5 >
         T* Construct( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5 )
     {
-        return oexPLACEMENT_NEW ( New< T >( 1 ) ) T( p1, p2, p3, p4, p5 );
+        return oexPLACEMENT_NEW ( New< T >( 1, oexTRUE ) ) T( p1, p2, p3, p4, p5 );
     }
 
     /// Construct object, 6 params
     template< typename T, typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6 >
         T* Construct( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6 )
     {
-        return oexPLACEMENT_NEW ( New< T >( 1 ) ) T( p1, p2, p3, p4, p5, p6 );
+        return oexPLACEMENT_NEW ( New< T >( 1, oexTRUE ) ) T( p1, p2, p3, p4, p5, p6 );
     }
 
     /// Construct object, 7 params
     template< typename T, typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6, typename T_P7 >
         T* Construct( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7 )
     {
-        return oexPLACEMENT_NEW ( New< T >( 1 ) ) T( p1, p2, p3, p4, p5, p6, p7 );
+        return oexPLACEMENT_NEW ( New< T >( 1, oexTRUE ) ) T( p1, p2, p3, p4, p5, p6, p7 );
     }
 
     /// Construct object, 8 params
     template< typename T, typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6, typename T_P7, typename T_P8 >
         T* Construct( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8 )
     {
-        return oexPLACEMENT_NEW ( New< T >( 1 ) ) T( p1, p2, p3, p4, p5, p6, p7, p8 );
+        return oexPLACEMENT_NEW ( New< T >( 1, oexTRUE ) ) T( p1, p2, p3, p4, p5, p6, p7, p8 );
     }
 
 public:
@@ -360,7 +383,7 @@ public:
     template< typename T >
         T* ConstructArray( oexUINT x_uSize )
     {
-        T *p = New< T >( x_uSize );
+        T *p = New< T >( x_uSize, oexTRUE );
         if ( !oexVERIFY( p ) )
             return oexNULL;
 
@@ -374,7 +397,7 @@ public:
     template< typename T, typename T_P1 >
         T* ConstructArray( oexUINT x_uSize, T_P1 p1 )
     {
-        T *p = New< T >( x_uSize );
+        T *p = New< T >( x_uSize, oexTRUE );
         if ( !oexVERIFY( p ) )
             return oexNULL;
 
@@ -389,7 +412,7 @@ public:
     template< typename T, typename T_P1, typename T_P2 >
         T* ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2 )
     {
-        T *p = New< T >( x_uSize );
+        T *p = New< T >( x_uSize, oexTRUE );
         if ( !oexVERIFY( p ) )
             return oexNULL;
 
@@ -403,7 +426,7 @@ public:
     template< typename T, typename T_P1, typename T_P2, typename T_P3 >
         T* ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3 )
     {
-        T *p = New< T >( x_uSize );
+        T *p = New< T >( x_uSize, oexTRUE );
         if ( !oexVERIFY( p ) )
             return oexNULL;
 
@@ -417,7 +440,7 @@ public:
     template< typename T, typename T_P1, typename T_P2, typename T_P3, typename T_P4 >
         T* ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4 )
     {
-        T *p = New< T >( x_uSize );
+        T *p = New< T >( x_uSize, oexTRUE );
         if ( !oexVERIFY( p ) )
             return oexNULL;
 
@@ -431,7 +454,7 @@ public:
     template< typename T, typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5 >
         T* ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5 )
     {
-        T *p = New< T >( x_uSize );
+        T *p = New< T >( x_uSize, oexTRUE );
         if ( !oexVERIFY( p ) )
             return oexNULL;
 
@@ -445,7 +468,7 @@ public:
     template< typename T, typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6 >
         T* ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6 )
     {
-        T *p = New< T >( x_uSize );
+        T *p = New< T >( x_uSize, oexTRUE );
         if ( !oexVERIFY( p ) )
             return oexNULL;
 
@@ -459,7 +482,7 @@ public:
     template< typename T, typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6, typename T_P7 >
         T* ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7 )
     {
-        T *p = New< T >( x_uSize );
+        T *p = New< T >( x_uSize, oexTRUE );
         if ( !oexVERIFY( p ) )
             return oexNULL;
 
@@ -473,7 +496,7 @@ public:
     template< typename T, typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6, typename T_P7, typename T_P8 >
         T* ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8 )
     {
-        T *p = New< T >( x_uSize );
+        T *p = New< T >( x_uSize, oexTRUE );
         if ( !oexVERIFY( p ) )
             return oexNULL;
 
@@ -485,25 +508,18 @@ public:
 
 public:
 
-    /// destruct object
+    /// Destruct object
     template< typename T >
         void Destruct( T* x_pPtr )
     {   
-        // Get the allocated size
-        oexUINT uSize = ArraySize( x_pPtr ); 
-        if ( !oexVERIFY( uSize ) )
+        if ( !x_pPtr )
             return;
 
-        if ( x_pPtr )
-        {
-            // Destroy each object
-            for ( oexUINT i = 0; i < uSize; i++ )
-                x_pPtr[ i ].~T(); 
+        // Set constructed flag
+        CAlloc::SetFlags( x_pPtr, CAlloc::eF1Constructed );
 
-            // Free the memory block
-            Delete( x_pPtr );
-
-        } // end if
+        // Free the memory block
+        Delete( x_pPtr );
     }
 
 private:

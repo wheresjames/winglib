@@ -394,6 +394,10 @@ public:
         m_memListNode.Delete();
     }
 
+    oexBOOL IsValid()
+    {   return m_memListNode.Ptr() ? oexTRUE : oexFALSE;
+    }
+
     TListIterator& operator = ( TListNode< T_OBJ > *x_pLn )
     {
         m_memListNode.Share( x_pLn );
@@ -549,7 +553,6 @@ public:
 		return *this;
 	}
 
-
 private:
 
     /// List node
@@ -608,6 +611,26 @@ public:
 
 		} // end while
 
+	}
+
+	//==============================================================
+	// operator <<
+	//==============================================================
+	/// Appends the object to the back of the list
+	/**
+		\param [in] x_rObj		-	Reference to object that is used
+									to initialize the new list item.
+
+		\return iterator containing object
+	*/
+	TList& operator << ( oexCONST T_OBJ &x_rObj )
+	{	
+        iterator itNew = Append();
+
+		if ( itNew.Ptr() ) 
+            itNew = x_rObj;
+
+		return *this;
 	}
 
 	//==============================================================
@@ -703,7 +726,7 @@ public:
 	*/
 	oexCONST oexBOOL Next( iterator& x_it )
 	{	
-        if ( x_it.Ptr() )
+        if ( x_it.IsValid() )
 			return x_it.Next();
 
 		else if ( !m_pHead )
@@ -742,7 +765,7 @@ public:
 	*/
 	oexCONST oexBOOL Prev( iterator& x_it )
 	{	
-        if ( x_it.Ptr() )
+        if ( x_it.IsValid() )
 			return x_it.Prev();
 
 		else if ( !m_pTail )
@@ -752,6 +775,171 @@ public:
 
 		return oexTRUE;
 	}
+
+	//==============================================================
+	// Erase()
+	//==============================================================
+	/// Erases the specified iterator from the list
+	/**
+		\param [in] x_it		-	iterator to erase
+		\param [in] x_bForward	-	Non-zero to return the previous
+									list item, zero to return the
+									next list item.
+
+		Use this function to remove an item from the list.
+
+		As a convinience, the previous or next item can be returned.
+		By assigning this return value to the iterator, you can
+		continue an iteration loop
+
+	\code
+
+		// Forward
+		for ( oex::TList< int >::iterator it; lst.Next( it ); )
+		{
+			if ( WantErase( it ) )
+
+				it = lst.Erase( it );
+
+		} // end if
+
+		// Backward
+		for ( oex::TList< int >::iterator it; lst.Prev( it ); )
+		{
+			if ( WantErase( it ) )
+
+				it = lst.Erase( it, oexFALSE );
+
+		} // end if
+
+	\endcode
+		
+		\return 
+	
+		\see 
+	*/
+	iterator Erase( iterator x_it, oexBOOL x_bForward = oexTRUE )
+	{
+		// Ensure valid iterator
+		if ( !x_it.IsValid() ) 
+            return iterator();
+
+        T_NODE *pThis = x_it.Node();
+		T_NODE *pNext = x_it.GetNext().Node();
+		T_NODE *pPrev = x_it.GetPrev().Node();
+
+		// Update head pointer if needed
+		if ( x_it.Node() == m_pHead )
+			m_pHead = pNext;
+
+		// Update tail pointer if needed
+		if ( x_it.Node() == m_pTail )
+			m_pTail = pPrev;
+
+        // Unlink the item
+        Unlink( x_it );
+
+        // One less item
+        if ( m_uSize ) 
+            m_uSize--;
+
+        // Delete the node
+        OEX_TRY { delete pThis; }
+        OEX_CATCH_ALL { oexASSERT( 0 ); }
+
+		// Are we going backward?
+		if ( !x_bForward ) 
+			return pNext;
+
+		return pPrev;
+	}
+
+protected:
+
+	//==============================================================
+	// Unlink()
+	//==============================================================
+    /// Use this function to unlink a list item when it is erased
+    /**
+        This is used by TAssoList for instance, to remove the 
+        item from the index when it is erased.
+    */
+    virtual void Unlink( iterator x_it ) {}
+
+public:
+
+	//==============================================================
+	// SearchValue()
+	//==============================================================
+	/// Searches for the specified value by comparing each item
+	/**
+		\param [in] x_tObj	-	Item for comparison
+
+		This function searches every list item, comparing each one
+		to x_tObj until a match is found
+
+		Can we say sloooooow!
+
+		You should use TAssoList<> if you require random access.  
+		There are special circumstances for this function.
+		
+		\return iterator to matching object or empty iterator.
+	
+		\see 
+	*/
+	template < class T_CMPOBJ >
+		iterator SearchValue( oexCONST T_CMPOBJ x_tObj )
+		{	for ( iterator it; Next( it ); )
+				if ( *it == x_tObj )
+					return it;
+			return iterator();
+		}
+
+	//==============================================================
+	// SearchValue()
+	//==============================================================
+	/// Searches for the specified key by comparing each item
+	/**
+		\param [in] x_tObj	-	Item for comparison
+		\param [in] x_fCmp	-	Function for comparison
+
+		This function searches every list item, comparing each one
+		to x_tObj using the specified function x_fCmp() until a match 
+		is found.
+
+		Obviously, this is slow.
+
+		You should use TAssoList<> if you require random access.  
+		There are special circumstances for this function.
+
+		\code
+
+			// Compare function
+			oexBOOL MyCompare( oexINT a, oexINT b )
+			{	return a == b; 
+			}
+
+			// ...
+
+			// Find item using custom compare function
+			TList< oexINT > it = lst.SearchKey( 2, MyCompare );
+
+		\endcode
+		
+		\return iterator to matching object or empty iterator.
+	
+		\see 
+	*/
+	template< class T_CMPOBJ, class T_CMPFUNC >
+		iterator SearchValue( oexCONST T_CMPOBJ tObj, T_CMPFUNC fCmp )
+		{	for ( iterator it; Next( it ); )
+				if ( 0 <= fCmp( *it, tObj ) )
+					return it;
+			return iterator();
+		}
+
+
+public:
 
 	//==============================================================
 	// Size()

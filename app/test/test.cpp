@@ -498,6 +498,23 @@ oex::oexRESULT TestLists()
 	if ( !oexVERIFY( it == 4 ) )
 		return -8;
 
+    oex::TList< oex::CStr > strlst;
+	oex::oexCSTR szStr[] = { oexT( "This" ), oexT( "is" ), oexT( "a" ), oexT( "list" ), oexT( "of" ), oexT( "strings" ) , oexNULL };
+
+	// Create list
+	strlst << oexT( "This" ) << oexT( "is" ) << oexT( "a" ) << oexT( "list" ) << oexT( "of" ) << oexT( "strings" );
+
+	i = 0;
+	for ( oex::TList< oex::CStr >::iterator itStr; szStr[ i ] && strlst.Next( itStr ); i++ )
+		if ( !oexVERIFY( itStr->Cmp( szStr[ i ] ) ) )
+			return -7;
+
+	oex::TList< oex::CStr >::iterator itStr;
+	if ( !oexVERIFY( ( itStr = strlst.SearchValue( "hi", oex::CStr::CmpSubStr ) ).IsValid() ) 
+		 || !oexVERIFY( *itStr == szStr[ 0 ] ) )
+		return -8;
+
+
     return oex::oexRES_OK;
 }
 

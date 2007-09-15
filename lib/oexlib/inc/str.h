@@ -838,9 +838,12 @@ public:
 	{	return Cmp( pStr, zstr::Length( pStr ) ); }
 
 	oexBOOL Cmp( oexCONST T* pStr, oexUINT uSize )
-	{	if ( uSize != Length() ) return oexFALSE;
-		if ( !uSize ) return oexTRUE;
-		return !os::CSys::MemCmp( m_memStr->Ptr(), pStr, uSize );
+	{	
+        if ( uSize != Length() ) 
+            return oexFALSE;
+		if ( !uSize ) 
+            return oexTRUE;
+		return !os::CSys::MemCmp( m_mem.Ptr(), pStr, uSize );
 	}
 
 	oexBOOL ICmp( TStr &str )
@@ -854,7 +857,7 @@ public:
 		if ( uSize != Length() ) return oexFALSE;
 		if ( !uSize ) return oexTRUE;
 
-		T* pPtr = m_memStr->Ptr();
+		T* pPtr = m_mem.Ptr();
 
 		T a, b;
 		oexBOOL bMatch = oexTRUE;
@@ -887,7 +890,7 @@ public:
 	oexBOOL CmpLen( oexCONST T* pStr, oexUINT uSize )
 	{	if ( (oexINT)uSize > Length() ) return oexFALSE;
 		if ( !uSize ) return oexTRUE;
-		return !os::CSys::MemCmp( m_memStr->Ptr(), pStr, uSize );
+		return !os::CSys::MemCmp( m_mem.Ptr(), pStr, uSize );
 	}
 
 	oexBOOL ICmpLen( TStr &str )
@@ -901,7 +904,7 @@ public:
 		if ( (oexINT)uSize > Length() ) return oexFALSE;
 		if ( !uSize ) return oexTRUE;
 
-		T* pPtr = m_memStr->Ptr();
+		T* pPtr = m_mem.Ptr();
 
 		T a, b;
 		oexBOOL bMatch = oexTRUE;
@@ -935,6 +938,17 @@ public:
 	/// Replaces single characters in a string
 	TStr& Replace( oexCONST T x_tFind, oexCONST T x_tReplace )
     {   str::Replace( _Ptr(), Length(), x_tFind, x_tReplace ); return *this; }
+
+
+	//==============================================================
+	// Compare functions
+	//==============================================================
+	static oexINT CmpCompare( TStr pStr1, TStr pStr2 )
+    {	return str::Compare( pStr1.Ptr(), pStr1.Length(), pStr2.Ptr(), pStr2.Length() ); }
+
+	static oexINT CmpSubStr( TStr pStr1, TStr pStr2 )
+	{	return str::FindSubStr( pStr1.Ptr(), pStr1.Length(), pStr2.Ptr(), pStr2.Length() ); }
+
 
 private:
 
