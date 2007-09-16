@@ -184,9 +184,15 @@ public:
     /// Assignment operator
     TListNode& operator = ( oexCONST T_OBJ &x_rObj )
     {
-        m_obj = x_rObj;
+        m_obj = (T_OBJ&)x_rObj;
 
         return *this;
+    }
+
+    /// Assignment operator
+    oexBOOL operator == ( oexCONST T_OBJ &x_rObj )
+    {
+        return m_obj == (T_OBJ&)x_rObj;
     }
 
 public:
@@ -374,7 +380,7 @@ public:
     {
     }
 
-    TListIterator( TListNode< T_OBJ > *x_pLn )
+    TListIterator( T_NODE *x_pLn )
     {
         m_memListNode.Share( x_pLn );
     }
@@ -397,8 +403,14 @@ public:
     oexBOOL IsValid()
     {   return m_memListNode.Ptr() ? oexTRUE : oexFALSE;
     }
-
+/*
     TListIterator& operator = ( TListNode< T_OBJ > *x_pLn )
+    {
+        m_memListNode.Share( x_pLn );
+        return *this;
+    }
+*/
+    TListIterator& operator = ( T_NODE *x_pLn )
     {
         m_memListNode.Share( x_pLn );
         return *this;
@@ -498,7 +510,7 @@ public:
         if ( !m_memListNode.Ptr() || !m_memListNode.Ptr()->Next() )
             return oexFALSE;
 
-        m_memListNode.Share( m_memListNode.Ptr()->Next() );
+//        m_memListNode.Share( m_memListNode.Ptr()->Next() );
 
         return oexTRUE;
 
@@ -552,6 +564,18 @@ public:
 	{	Prev();
 		return *this;
 	}
+
+	//==============================================================
+	// Node()
+	//==============================================================
+	/// Returns a pointer to the list node
+    T_NODE* Node()
+    {   
+        if ( !m_memListNode.Ptr() )
+            return oexNULL;
+        return m_memListNode.Ptr();
+    }
+
 
 private:
 
@@ -607,7 +631,8 @@ public:
             T_NODE *pNode = m_pHead;
             
             // Point to the next node
-            m_pHead = pNode->Next();
+            m_pHead = (T_NODE*)pNode->Next();
+//			m_pHead = dynamic_cast<T_NODE*>( pNode->Next() );
 
             // Just in case someone else is still hanging onto the memory
             pNode->SetAt( oexNULL, oexNULL );                       
@@ -1031,6 +1056,17 @@ public:
 		x_rList.m_pTail = oexNULL;
 
 		return *this;
+	}
+
+	//==============================================================
+	// Detach()
+	//==============================================================
+	/// Detaches from the list without releasing list items
+	virtual void Detach()
+	{
+		m_uSize = 0;
+		m_pHead = oexNULL;
+		m_pTail = oexNULL;
 	}
 
 	//==============================================================

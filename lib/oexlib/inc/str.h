@@ -383,8 +383,21 @@ public:
     {   return !Compare( x_pStr, zstr::Length( x_pStr ) ); }
 
     /// Compare to other object
-    oexBOOL operator == ( TStr &str )
-    {   return !Compare( str.Ptr(), str.Length() ); }
+    oexBOOL operator == ( oexCONST TStr &x_str )
+    {   
+        TStr &rStr = (TStr&)x_str;
+
+        // See if we're sharing the same memory
+        if ( rStr.m_mem.c_Ptr() == m_mem.c_Ptr() )
+            return oexTRUE;
+
+        // Lengths must match
+        if ( Length() != rStr.Length() )
+            return oexFALSE;
+
+        // I suppose we'll have to actually compare the strings
+        return !Compare( rStr.m_mem.c_Ptr(), rStr.Length() );
+    }
 
 
 public:

@@ -437,6 +437,8 @@ namespace os
 #include "inc/thread_safe.h"
 #include "inc/str.h"
 #include "inc/list.h"
+#include "inc/asso_list.h"
+#include "inc/property_bag.h"
 
 /*
 #include "inc/arb_delegates.h"
@@ -473,6 +475,7 @@ namespace os
 //------------------------------------------------------------------
 // Implementation
 //------------------------------------------------------------------
+#include "inc/parser.h"
 /*
 #include "inc/dispatch.h"
 #include "inc/file.h"

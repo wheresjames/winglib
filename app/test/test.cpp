@@ -559,6 +559,168 @@ oex::oexRESULT TestLists()
     return oex::oexRES_OK;
 }
 
+oex::oexRESULT TestAssoLists()
+{      
+    oex::TAssoList< oex::oexINT, oex::oexINT > alii;
+
+	alii[ 4 ] = 11;
+	alii[ 5000 ] = 22;
+	alii[ 600000 ] = 33;
+
+	if ( !oexVERIFY( 3 == alii.Size() ) )
+		return -1;
+
+	if (	!oexVERIFY( 11 == alii[4 ] ) 
+			|| !oexVERIFY( 22 == alii[ 5000 ] )
+			|| !oexVERIFY( 33 == alii[ 600000 ] ) )
+		return -2;
+
+
+	oex::TAssoList< oex::CStr, oex::oexINT > alsi;
+
+	alsi[ "Idx 1" ] = 11;
+	alsi[ "Idx 2" ] = 22;
+	alsi[ "Idx 3" ] = 33;
+
+	if ( !oexVERIFY( 3 == alsi.Size() ) )
+		return -3;
+
+	if (	!oexVERIFY( 11 == alsi[ "Idx 1" ] ) 
+			|| !oexVERIFY( 22 == alsi[ "Idx 2" ] )
+			|| !oexVERIFY( 33 == alsi[ "Idx 3" ] ) )
+		return -4;
+
+	oex::TAssoList< oex::CStr, oex::CStr > alss;
+
+	alss[ "Idx 1" ] = "11";
+	alss[ "Idx 2" ] = "22";
+	alss[ "Idx 3" ] = 33;
+	alss[ "Idx 4" ] = 3.141f;
+
+//	if ( !oexVERIFY( CParser::Implode( alss.Copy(), "," ) == "11,22,33,3.141" ) )
+//		return -5;
+
+/*	oex::TAssoList< oex::CStr, oex::CStr >::iterator itSs;
+    if ( !oexVERIFY( ( itSs = alss.SearchKey( "2", oex::CStr::CmpSubStr ) ).IsValid() ) 
+		 || !oexVERIFY( *itSs == "22" ) )
+		return -6;
+
+	if ( !oexVERIFY( 4 == alss.Size() ) )
+		return -7;
+
+	if (	!oexVERIFY( alss[ "Idx 1" ] == "11" ) 
+			|| !oexVERIFY( alss[ "Idx 2" ] == "22" )
+			|| !oexVERIFY( alss[ "Idx 3" ].ToLong() == 33 )
+			|| !oexVERIFY( alss[ "Idx 4" ].ToDouble() > 3 )
+			|| !oexVERIFY( alss[ "Idx 4" ].ToDouble() < 4 ) )
+		return -8;
+
+	oex::TAssoList< oex::CStr, oex::CStr > alss2 = alss;
+
+	if ( !oexVERIFY( !alss.Size() ) )
+		return -9;
+
+	if (	!oexVERIFY( alss2[ "Idx 1" ] == "11" ) 
+			|| !oexVERIFY( alss2[ "Idx 2" ] == "22" )
+			|| !oexVERIFY( alss2[ "Idx 3" ].ToLong() == 33 )
+			|| !oexVERIFY( alss2[ "Idx 4" ].ToDouble() > 3 )
+			|| !oexVERIFY( alss2[ "Idx 4" ].ToDouble() < 4 ) )
+		return -10;
+
+	oex::TAssoList< oex::CStr, oex::CStr > alss3 = alss2.Copy();
+
+	if ( !oexVERIFY( 4 == alss2.Size() ) || !oexVERIFY( 4 == alss3.Size() ) )
+		return -11;
+
+	if (	!oexVERIFY( alss2[ "Idx 1" ] == "11" ) 
+			|| !oexVERIFY( alss2[ "Idx 2" ] == "22" )
+			|| !oexVERIFY( alss2[ "Idx 3" ].ToLong() == 33 )
+			|| !oexVERIFY( alss2[ "Idx 4" ].ToDouble() > 3 )
+			|| !oexVERIFY( alss2[ "Idx 4" ].ToDouble() < 4 ) )
+		return -12;
+
+	if (	!oexVERIFY( alss3[ "Idx 1" ] == "11" ) 
+			|| !oexVERIFY( alss3[ "Idx 2" ] == "22" )
+			|| !oexVERIFY( alss3[ "Idx 3" ].ToLong() == 33 )
+			|| !oexVERIFY( alss3[ "Idx 4" ].ToDouble() > 3 )
+			|| !oexVERIFY( alss3[ "Idx 4" ].ToDouble() < 4 ) )
+		return -13;
+
+	oex::TAssoList< oex::CStr, oex::TAssoList< oex::CStr, oex::CStr > > alsss;
+
+	alsss[ "1" ][ "a" ] = "1a";
+	alsss[ "1" ][ "b" ] = "1b";
+	alsss[ "2" ][ "a" ] = "2a";
+	alsss[ "3" ][ "a" ] = "3a";
+
+	if ( !oexVERIFY( 2 == alsss[ "1" ].Size() ) 
+		 || !oexVERIFY( 1 == alsss[ "2" ].Size() )
+		 || !oexVERIFY( 1 == alsss[ "3" ].Size() )  )
+		return -14;
+
+	if (	!oexVERIFY( alsss[ "1" ][ "a" ] == "1a" ) 
+		 || !oexVERIFY( alsss[ "1" ][ "b" ] == "1b" ) 
+		 || !oexVERIFY( alsss[ "2" ][ "a" ] == "2a" ) 
+		 || !oexVERIFY( alsss[ "3" ][ "a" ] == "3a" ) )
+		 return -15;
+
+    if ( !oexVERIFY( alsss.IsKey( "1" ) ) )
+        return -16;
+
+//    if ( !oexVERIFY( alsss.Unset( "1" ) ) )
+//        return -17;
+
+    if ( !oexVERIFY( !alsss.IsKey( "1" ) ) )
+        return -18;
+*/
+    return oex::oexRES_OK;
+}
+
+oex::oexRESULT TestPropertyBag()
+{      
+/*    oex::CPropertyBag pb;
+
+	pb[ "1" ] = "1";
+	pb[ "1" ][ "a" ] = "1a";
+	pb[ "1" ][ "b" ] = "1b";
+	pb[ "1" ][ "c" ] = "1c";
+	pb[ "2" ][ "a" ] = "2a";
+	pb[ "2" ][ "b" ] = "2b";
+
+	pb[ "n" ][ 1 ] = 11;
+	pb[ "n" ][ 2 ] = 22;
+
+	pb[ "c" ][ "pi" ] = 3.14159f;
+	pb[ "c" ][ "e" ] = 2.71828f;
+	pb[ "c" ][ "phi" ] = 1.618f;
+			
+	if ( !oexVERIFY( pb[ "1" ] == "1" ) )
+		return -1;
+
+	if ( !oexVERIFY( pb[ "n" ][ 1 ].ToLong() == 11 ) )
+		return -2;
+	
+    if ( !oexVERIFY( pb[ "n" ][ 2 ] == 22 ) )
+        return -2;
+
+	if ( !oexVERIFY( pb[ "c" ][ "pi" ] == 3.14159f ) )
+		return -3;
+
+//	if ( !oexVERIFY( CParser::Implode( pb[ "1" ].List(), "," ) == "1a,1b,1c" ) )
+//		return -4;
+
+
+	oex::TPropertyBag< oex::oexINT, oex::oexINT > pbii;
+
+	pbii[ 2 ] = 2;
+
+
+	oex::TPropertyBag< oex::oexINT, oex::CStr > pbis;
+
+	pbis[ 2 ] = "2";
+*/
+    return oex::oexRES_OK;
+}
 
 int main(int argc, char* argv[])
 {
@@ -574,6 +736,10 @@ int main(int argc, char* argv[])
     TestStrings();
 
     TestLists();
+
+    TestAssoLists();
+
+    TestPropertyBag();
 
 	// Initialize the oex library
     oexUNINIT();	

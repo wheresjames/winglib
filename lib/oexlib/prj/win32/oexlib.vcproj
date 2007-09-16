@@ -173,6 +173,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\asso_list.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\os\win32\debug.cpp"
 				>
 			</File>
@@ -201,6 +205,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\parser.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\os\win32\sys.cpp"
 				>
 			</File>
@@ -215,6 +223,10 @@
 			>
 			<File
 				RelativePath="..\..\inc\alloc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\asso_list.h"
 				>
 			</File>
 			<File
@@ -291,6 +303,10 @@
 			</File>
 			<File
 				RelativePath="..\..\oexlib.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\parser.h"
 				>
 			</File>
 			<File

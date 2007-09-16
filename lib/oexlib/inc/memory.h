@@ -121,13 +121,6 @@ public:
         return pPtr;
     }
 
-    /// Attaches to a memory pointer
-    T* Attach( T* pPtr )
-    {   Delete();
-        m_pMem = pPtr;
-        return m_pMem;
-    }
-
     /// Returns non-zero if memory mapping is being used
     oexBOOL IsMapped() const
     {   return 0 < m_fm.Size(); }
@@ -468,14 +461,14 @@ public:
     }
 
     /// Causes this object to share memory with another
-    TMem& Share( T *x_pMem )
+    TMem& Share( oexCONST T *x_pMem )
     {
         // Lose old memory
         Delete();
 
         // Share this memory pointer
         if ( x_pMem )
-            CAlloc().AddRef( ( m_pMem = x_pMem ) );
+            CAlloc().AddRef( ( m_pMem = (T*)x_pMem ) );
 
         return *this;
     }
