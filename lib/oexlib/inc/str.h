@@ -131,7 +131,7 @@ public:
 
     /// Shares memory of another object
     TStr& Share( oexCONST TStr &x_str )
-    {
+    {      
         // Share the memory
         m_lLength = x_str.m_lLength;
         m_lOffset = x_str.m_lOffset;
@@ -961,6 +961,327 @@ public:
 
 	static oexINT CmpSubStr( TStr pStr1, TStr pStr2 )
 	{	return str::FindSubStr( pStr1.Ptr(), pStr1.Length(), pStr2.Ptr(), pStr2.Length() ); }
+
+
+public:
+
+    //==============================================================
+	// Parsing functions
+	//==============================================================
+
+    /// Trims white-space from the front and end of the string
+    TStr& TrimWhiteSpace()
+    {   return SkipWhiteSpace().RSkipWhiteSpace(); }
+
+	/// Skips white-space characters
+	/// White space characters 'c' where ( '!' > c > '~' )
+	TStr& SkipWhiteSpace()
+	{	return FindInRange( oexT( '!' ), oexT( '~' ) ); }
+
+	/// Skips white-space characters
+	/// White space characters 'c' where ( '!' > c > '~' )
+	TStr& RSkipWhiteSpace()
+	{	return RFindInRange( oexT( '!' ), oexT( '~' ) ); }
+
+	/// Skips any non-white space characters
+	/// Non-white space characters 'c' where ( '!' <= c <= '~' )
+	TStr& SkipNonWhiteSpace()
+	{	return SkipInRange( oexT( '!' ), oexT( '~' ) ); }
+
+	/// Skips any non-white space characters
+	/// Non-white space characters 'c' where ( '!' <= c <= '~' )
+	TStr& RSkipNonWhiteSpace()
+	{	return RSkipInRange( oexT( '!' ), oexT( '~' ) ); }
+
+	/// Skips to the next line, current line is removed from the string.
+	TStr& NextLine()
+	{	Find( oexT( "\r\n" ) ); return Skip( oexT( "\r\n" ) ); }
+
+	/// Removes white space from the string
+	TStr& DropWhiteSpace()
+	{	return DropRange( oexT( '!' ), oexT( '~' ), oexFALSE ); }
+
+	/// Skips any character 'c' where ( tMin > c > tMax )
+	/// Out of range characters are removed from the string
+	TStr& FindInRange( T tMin, T tMax )
+	{	oexINT p = str::FindInRange( Ptr(), Length(), tMin, tMax );
+		if ( 0 < p ) LTrim( p ); else if ( 0 > p ) Destroy();
+		return *this;
+	}
+
+	/// Skips any character 'c' where ( tMin > c > tMax )
+	/// Out of range characters are removed from the string
+	TStr& RFindInRange( T tMin, T tMax )
+	{	oexINT lLen = Length(); if ( !lLen ) return *this;
+        oexINT p = str::RFindInRange( Ptr(), lLen, tMin, tMax );
+		if ( 0 <= p && p < lLen ) RTrim( lLen - p - 1 ); else if ( 0 > p ) Destroy();
+		return *this;
+	}
+
+	/// Skips any character 'c' where ( tMin <= c <= tMax )
+	/// In range characters are removed from the string
+	TStr& SkipInRange( T tMin, T tMax )
+	{	oexUINT uLen = Length();
+		oexINT p = str::SkipInRange( Ptr(), Length(), tMin, tMax );
+		if ( 0 < p ) LTrim( p ); else if ( 0 > p ) Destroy();
+		return *this;
+	}
+
+	/// Skips any character 'c' where ( tMin <= c <= tMax )
+	/// In range characters are removed from the string
+	TStr& RSkipInRange( T tMin, T tMax )
+	{	oexINT lLen = Length(); if ( !lLen ) return *this;
+		oexINT p = str::RSkipInRange( Ptr(), lLen, tMin, tMax );
+		if ( 0 <= p && p < lLen ) RTrim( lLen - p - 1 ); else if ( 0 > p ) Destroy();
+		return *this;
+	}
+
+	/// Skips any characters not in pChars and removes
+	/// them from the string
+	TStr& Find( oexCONST T* pChars )
+	{	oexINT p = str::FindCharacters( Ptr(), Length(), pChars, zstr::Length( pChars ) );
+		if ( 0 < p ) LTrim( p ); else if ( 0 > p ) Destroy();
+		return *this;
+	}
+
+	/// Skips any characters in pChars and removes them from
+	/// the string.
+	TStr& Skip( oexCONST T* pChars )
+    {	oexINT p = str::SkipCharacters( Ptr(), Length(), pChars, zstr::Length( pChars ) );
+		if ( 0 < p ) LTrim( p ); else if ( 0 > p ) Destroy();
+		return *this;
+	}
+
+	/// Splits off a token and returns it
+	TStr ParseQuoted( oexCONST T *pOpen, oexCONST T *pClose, oexCONST T *pEscape = oexNULL )
+    {	oexVERIFY_PTR_NULL_OK( pEscape );
+        oexINT i = str::ParseQuoted(    Ptr(), Length(), 
+                                        pOpen, zstr::Length( pOpen ), 
+                                        pClose, zstr::Length( pOpen ), 
+                                        pEscape, pEscape ? zstr::Length( pEscape ) ? 0 );
+		if ( 0 >= i ) return TStr();
+		TStr str = SubStr( 1, i - 1 );
+		LTrim( i + 1 );
+		return str;
+	}
+
+	/// Splits off a token and returns it
+	TStr ParseToken( oexCONST T* pValid )
+	{	oexVALIDATE_PTR( pValid );
+		oexINT i = 0;
+		TStr str = Token( pValid, &i );
+		if ( i ) LTrim( i );
+		return str;
+	}
+
+	/// Splits off a token and returns it
+	TStr ParseNextToken( oexCONST T* pValid )
+	{	oexVALIDATE_PTR( pValid );
+		oexINT i = 0;
+		TStr str = NextToken( pValid, &i );
+		if ( i ) LTrim( i );
+		return str;
+	}
+
+	/// Splits off a token and returns it
+	TStr ParseNextToken( T tMin = oexT( '!' ), T tMax = oexT( '~' ) )
+	{	oexINT i = 0;
+		TStr str = NextToken( tMin, tMax, &i );
+		if ( i ) LTrim( i );
+		return str;
+	}
+
+	/// Splits off a string up any of the terminator characters,
+	/// Ignores terminator characters if preceeded by any character
+	/// in the escape string.
+	TStr Parse( oexCONST T* pTerm, oexCONST T* pEscape = oexNULL )
+	{	oexVALIDATE_PTR( pTerm ); oexVALIDATE_PTR_NULL_OK( pEscape );
+        oexINT i = str::FindTerm( Ptr(), Length(), pTerm, zstr::Length( pTerm ), pEscape, pEscape ? zstr::Length( pEscape ) : 0 );
+		if ( 0 > i ) return TStr();
+		TStr str( Ptr(), 0, i );
+		LTrim( i );
+		return str;
+	}
+
+	/// Splits off a string up any of the terminator characters,
+	/// Ignores terminator characters if preceeded by any character
+	/// in the escape string.
+	TStr RParse( oexCONST T* pTerm )
+	{	oexVALIDATE_PTR( pTerm );
+        oexINT lLen = Length();
+        oexINT i = str::RFindTerm( Ptr(), lLen, pTerm, zstr::Length( pTerm ) );
+		if ( 0 > i ) return TStr();
+		TStr str( Ptr( i ) );
+		RTrim( lLen - i );
+		return str;
+	}
+
+	oexBOOL IsMatchAt( oexUINT i, oexCONST T* pChars )
+	{	oexVALIDATE_PTR( pChars ); 
+        return 0 <= str::FindCharacter( pChars, zstr::Length( pChars ), *Ptr( i ) ); 
+	}
+
+    oexBOOL IsInRangeAt( oexUINT i, T tMin, T tMax )
+	{   T ch = *Ptr( i );
+        return tMin <= ch && tMax >= ch;
+	}
+
+    oexBOOL IsWhiteSpaceAt( oexUINT i )
+    {   return !IsInRangeAt( i, oexT( '!' ), oexT( '~' ) ); }
+
+	/// Finds the first token in a string and returns it
+	TStr NextToken( T tMin, T tMax, oexINT *puI = oexNULL )
+	{	return NextToken( Ptr(), Length(), tMin, tMax, puI ); }
+
+	static TStr NextToken( oexCONST T* pStr, T tMin, T tMax, oexINT *puI = oexNULL )
+	{	return NextToken( pStr, CRawStr::Length( pStr ), tMin, tMax, puI ); }
+
+	static TStr NextToken( TStr str, T tMin, T tMax, oexINT *puI = oexNULL )
+	{	return NextToken( str.Ptr(), str.Length(), tMin, tMax, puI ); }
+
+	static TStr NextToken( oexCONST T* pStr, oexUINT uSize, T tMin, T tMax, oexINT *puI  = oexNULL )
+	{
+		// Sanity check
+		if ( !oexVERIFY_PTR( pStr ) )
+			return CStr();
+
+		oexUINT i = 0;
+
+		// Ensure valid index pointer
+		if ( !oexVERIFY_PTR_NULL_OK( puI ) ) 
+			puI = oexNULL;
+
+		// Start at this index
+		else if ( puI ) 
+			i = *puI;
+
+		// Ensure we're not beyond the buffer
+		if ( i >= uSize ) 
+			return CStr();
+
+		// Skip to previous position
+		pStr += i;
+		uSize -= i;
+
+		// Find the start of a token
+        oexINT nStart = str::FindInRange( pStr, uSize, tMin, tMax );
+		if ( 0 > nStart ) 
+			return CStr();
+
+		// Find the end of the token
+		oexINT nEnd = str::SkipInRange( &pStr[ nStart ], uSize - nStart, tMin, tMax );
+		if ( 0 >= nEnd ) 
+			return CStr();
+
+		// Add offset
+		if ( puI ) 
+			*puI += nStart + nEnd;
+
+		return CStr( &pStr[ nStart ], 0, nEnd );
+	}
+
+
+	/// Finds the first token in a string and returns it
+	TStr NextToken( oexCONST T* pValid, oexINT *puI = oexNULL )
+	{	return NextToken( Ptr(), Length(), pValid, puI ); }
+
+	static TStr NextToken( oexCONST T* pStr, oexCONST T* pValid, oexINT *puI = oexNULL )
+	{	return NextToken( pStr, zstr::Length( pStr ), pValid, puI ); }
+
+	static TStr NextToken( TStr str, oexCONST T* pValid, oexINT *puI = oexNULL )
+	{	return NextToken( str.Ptr(), str.Length(), pValid, puI ); }
+
+	static TStr NextToken( oexCONST T* pStr, oexUINT uSize, oexCSTR pValid, oexINT *puI  = oexNULL )
+	{
+		// Sanity check
+		if ( !oexVERIFY_PTR( pStr ) || !oexVERIFY_PTR_NULL_OK( pValid ) )
+			return CStr();
+
+		if ( !pValid )
+			return CStr( pStr, uSize );		
+
+		oexUINT i = 0;
+		oexUINT uValid = zstr::Length( pValid );
+
+		// Ensure valid index pointer
+		if ( !oexVERIFY_PTR_NULL_OK( puI ) ) 
+			puI = oexNULL;
+
+		// Start at this index
+		else if ( puI ) 
+			i = *puI;
+
+		// Ensure we're not beyond the buffer
+		if ( i >= uSize ) 
+			return CStr();
+
+		// Skip to previous position
+		pStr += i;
+		uSize -= i;
+
+		// Find the start of a token
+		oexINT nStart = str::FindCharacters( pStr, uSize, pValid, uValid );
+		if ( 0 > nStart ) 
+			return CStr();
+
+		// Find the end of the token
+		oexINT nEnd = str::SkipCharacters( &pStr[ nStart ], uSize - nStart, pValid, uValid );
+		if ( 0 >= nEnd ) 
+			return CStr();
+
+		// Add offset
+		if ( puI ) 
+			*puI += nStart + nEnd;
+
+		return CStr( &pStr[ nStart ], 0, nEnd );
+	}
+
+	/// Returns the token at the current point in the string
+	TStr Token( oexCONST T* pValid, oexINT *puI = oexNULL )
+	{	return Token( Ptr(), Length(), pValid, puI ); }
+	static TStr Token( oexCONST T* pStr, oexCONST T* pValid, oexINT *puI = oexNULL )
+	{	return Token( pStr, zstr::Length( pStr ), pValid, puI ); }
+	static TStr Token( TStr str, oexCONST T* pValid, oexINT *puI = oexNULL )
+	{	return Token( str.Ptr(), str.Length(), pValid, puI ); }
+	static TStr Token( oexCONST T* pStr, oexUINT uSize, oexCSTR pValid, oexINT *puI  = oexNULL )
+	{
+		// Sanity check
+		if ( !oexVERIFY_PTR( pStr ) || !oexVERIFY_PTR_NULL_OK( pValid ) )
+			return CStr();
+
+		if ( !pValid )
+			return CStr( pStr, uSize );		
+
+		oexUINT i = 0;
+		oexUINT uValid = zstr::Length( pValid );
+
+		// Ensure valid index pointer
+		if ( !oexVERIFY_PTR_NULL_OK( puI ) ) 
+			puI = oexNULL;
+
+		// Start at this index
+		else if ( puI ) 
+			i = *puI;
+
+		// Ensure we're not beyond the buffer
+		if ( i >= uSize ) 
+			return CStr();
+
+		// Skip to previous position
+		pStr += i;
+		uSize -= i;
+
+		// Find the end of the token
+		oexINT nEnd = str::SkipCharacters( pStr, uSize, pValid, uValid );
+		if ( 0 >= nEnd ) 
+			return CStr();
+
+		// Add offset
+		if ( puI ) 
+			*puI += nEnd;
+
+		return CStr( pStr, 0, nEnd );
+	}
 
 
 private:

@@ -251,20 +251,8 @@ template < class T_KEY, class T_OBJ = T_KEY, class T_HASH = CCrcHash, class T_NO
 {
 public:
 
-	//==================================================================
-	// SAssoTableItem
-	//
-	/// The hash table is just an array of these structures.
-	//==================================================================
-	struct SAssoTableItem
-	{
-		/// Link to the list item
-		iterator					obj;
-	};
-
 	/// The type of iterator for this list
 	typedef typename TList< T_OBJ, T_NODE >::iterator iterator;
-
 
 public:
 
@@ -539,7 +527,7 @@ public:
 		TList< iterator >::iterator it = m_table.Ptr( i )->Append();
 		
 		// Create object
-		it = Append();
+		*it = Append();
 
 		// We must get a node
 		oexASSERT( it->Node() );
@@ -583,9 +571,9 @@ public:
 		oexUINT i = GetIndex( x_key );
 
 		// Search sub list for an exact match
-		for ( TList< iterator >::iterator it; m_table[ i ].Next( it ); )
+		for ( TList< iterator >::iterator it; m_table.Ptr( i )->Next( it ); )
 			if ( IsEqual( it->Node()->key, x_key ) )     			     
-				return it;
+				return it->Node();
 
 		return iterator();
 	}
@@ -654,9 +642,11 @@ public:
 	*/
 	template< class T_CMPOBJ, class T_CMPFUNC >
 		iterator SearchKey( oexCONST T_CMPOBJ x_tObj, T_CMPFUNC x_fCmp )
-		{	for ( iterator it; Next( it ); )
-				if ( 0 <= x_fCmp( it.Node()->key, x_tObj ) )
+		{
+            for ( iterator it; Next( it ); )
+    			if ( 0 <= x_fCmp( it.Node()->key, x_tObj ) )
 					return it;
+
 			return iterator();
 		}
 
@@ -729,7 +719,7 @@ protected:
 
 		// Search sub list for an exact match
 		for ( TList< iterator >::iterator it; m_table.Ptr( i ) && m_table.Ptr( i )->Next( it ); )
-			if ( *it == *x_it )
+			if ( it->Node()->key == x_it.Node()->key )
             {   m_table.Ptr( i )->Erase( it ); 
                 return; 
             } // end if

@@ -125,7 +125,7 @@ public:
 	//==============================================================
 	// Destroy()
 	//==============================================================
-	/// Removes from the list and destroys the encapsulated object
+	/// Removes from the list
 	void Destroy()
 	{	Remove(); 
 	}
@@ -164,21 +164,33 @@ public:
 	/**
 		\return Linked reference reference to the encapsulated object
 	*/
-	operator T_OBJ&() 
+/*	operator T_OBJ&() 
     {
         return m_obj; 
     }
-
+*/
 	//==============================================================
 	// Obj()
 	//==============================================================
-	/// Returns object pointer
+	/// Returns object reference
 	/**
 		\return Linked reference reference to the encapsulated object
 	*/
 	T_OBJ& Obj() 
     {
         return m_obj; 
+    }
+
+	//==============================================================
+	// Ptr()
+	//==============================================================
+	/// Returns object reference
+	/**
+		\return Linked reference reference to the encapsulated object
+	*/
+	T_OBJ* Ptr() 
+    {
+        return &m_obj; 
     }
 
     /// Assignment operator
@@ -189,10 +201,16 @@ public:
         return *this;
     }
 
-    /// Assignment operator
+    /// Comparison operator
     oexBOOL operator == ( oexCONST T_OBJ &x_rObj )
     {
         return m_obj == (T_OBJ&)x_rObj;
+    }
+
+    /// Comparison operator
+    oexBOOL operator != ( oexCONST T_OBJ &x_rObj )
+    {
+        return m_obj != (T_OBJ&)x_rObj;
     }
 
 public:
@@ -224,7 +242,7 @@ public:
 	/**
 		\param [in] x_pIt	-	Pointer to node object
 		
-		\return Linked reference to inserted object
+		\return Reference to this item
 	
 		\see Append()
 	*/
@@ -232,6 +250,9 @@ public:
 	{
 		if ( !x_pIt ) 
             return *this;
+
+        // Remove this item from the list
+        Remove();
 
 		// Insert us
 		m_pNext = x_pIt;
@@ -251,7 +272,7 @@ public:
 	/**
 		\param [in] x_pIt	-	Pointer to node object
 		
-		\return Linked reference to inserted object
+		\return Reference to this item
 	
 		\see Insert()
 	*/
@@ -259,6 +280,9 @@ public:
 	{
 		if ( !x_pIt ) 
             return *this;
+
+        // Remove us from the list
+        Remove();
 
 		// Insert us
 		m_pPrev = x_pIt;
@@ -300,17 +324,12 @@ public:
 	//==============================================================
 	/// Moves the item up in the list
 	/**
-		\return Linked reference to the encapsulated object
+		\return Reference to this item
 	*/
 	TListNode& MoveUp()
 	{	
-        if ( !m_pPrev ) 
-            return *this;
-
-		TListNode *pPrev = m_pPrev;
-
-		Remove(); 
-        Insert( pPrev );
+        if ( m_pPrev ) 
+            Insert( m_pPrev );
 
 		return *this;
 	}
@@ -320,17 +339,12 @@ public:
 	//==============================================================
 	/// Moves the item down in the list
 	/**
-		\return Linked reference to the encapsulated object
+		\return Reference to this item
 	*/
 	TListNode& MoveDown()
 	{	
-        if ( !m_pNext ) 
-            return *this;
-
-		TListNode *pNext = m_pNext;
-		
-        Remove(); 
-        Append( pNext );
+        if ( m_pNext ) 
+            Append( m_pNext );
 
 		return *this;
 	}
@@ -345,7 +359,7 @@ public:
 		
 		Sets this nodes explicit position in the list
 
-		\return Pointer to this object
+		\return Reference to this item
 	
 		\see 
 	*/
@@ -380,7 +394,7 @@ public:
     {
     }
 
-    TListIterator( T_NODE *x_pLn )
+    TListIterator( oexCONST T_NODE *x_pLn )
     {
         m_memListNode.Share( x_pLn );
     }
@@ -410,7 +424,7 @@ public:
         return *this;
     }
 */
-    TListIterator& operator = ( T_NODE *x_pLn )
+    TListIterator& operator = ( oexCONST T_NODE *x_pLn )
     {
         m_memListNode.Share( x_pLn );
         return *this;
@@ -427,7 +441,7 @@ public:
         if ( !m_memListNode.Ptr() )
             return oexNULL;
 
-        return &m_memListNode.Ptr()->Obj();
+        return m_memListNode.Ptr()->Ptr();
     }
 
 	//==============================================================
@@ -437,8 +451,10 @@ public:
 	/**
 		\return Linked reference to the encapsulated object
 	*/
-	T_OBJ*  operator ->() 
-    { return Ptr(); }
+	T_OBJ* operator ->() 
+    {
+        return Ptr(); 
+    }
 
 	//==============================================================
 	// operator *()
@@ -452,7 +468,6 @@ public:
         return *Ptr(); 
     }
 
-
 	//==============================================================
 	// Obj()
 	//==============================================================
@@ -464,12 +479,12 @@ public:
     {
         return *Ptr(); 
     }
-
-
+/*
     TListIterator& operator = ( oexCONST T_OBJ &x_rObj )
     {
         if ( m_memListNode.Ptr() )
-            *m_memListNode.Ptr() = x_rObj;
+            m_memListNode.Ptr()->Obj() = x_rObj;
+
         return *this;
     }
 
@@ -478,9 +493,9 @@ public:
         if ( !m_memListNode.Ptr() )
             return oexFALSE;
         
-        return *m_memListNode.Ptr() == x_rObj;        
+        return m_memListNode.Ptr()->Obj() == x_rObj;        
     }
-
+*/
 public:
 
 	//==============================================================
@@ -510,10 +525,9 @@ public:
         if ( !m_memListNode.Ptr() || !m_memListNode.Ptr()->Next() )
             return oexFALSE;
 
-//        m_memListNode.Share( m_memListNode.Ptr()->Next() );
+        m_memListNode.Share( (T_NODE*)m_memListNode.Ptr()->Next() );
 
         return oexTRUE;
-
 	}
 
     TListIterator GetNext()
@@ -521,7 +535,7 @@ public:
         if ( !m_memListNode.Ptr() )
             return TListIterator();
 
-        return TListIterator( m_memListNode.Ptr()->Next() );
+        return TListIterator( (T_NODE*)m_memListNode.Ptr()->Next() );
     }
 
 	//==============================================================
@@ -533,7 +547,7 @@ public:
         if ( !m_memListNode.Ptr() || !m_memListNode.Ptr()->Prev() )
             return oexFALSE;
 
-        m_memListNode.Share( m_memListNode.Ptr()->Prev() );
+        m_memListNode.Share( (T_NODE*)m_memListNode.Ptr()->Prev() );
 
         return oexTRUE;
 
@@ -544,7 +558,7 @@ public:
         if ( !m_memListNode.Ptr() )
             return TListIterator();
 
-        return TListIterator( m_memListNode.Ptr()->Prev() );
+        return TListIterator( (T_NODE*)m_memListNode.Ptr()->Prev() );
     }
 
 	//==============================================================
@@ -588,7 +602,6 @@ private:
 /// Linked list
 /**
     
-
 */
 template< typename T_OBJ, typename T_NODE = TListNode< T_OBJ > >
     class TList
@@ -659,7 +672,7 @@ public:
         iterator itNew = Append();
 
 		if ( itNew.Ptr() ) 
-            itNew = x_rObj;
+            itNew.Obj() = x_rObj;
 
 		return *this;
 	}
@@ -710,7 +723,7 @@ public:
         iterator itNew = Append();
 
 		if ( itNew.Ptr() ) 
-            itNew = x_rObj;
+            itNew.Obj() = x_rObj;
 
 		return itNew;
 	}
@@ -895,7 +908,7 @@ public:
             m_uSize--;
 
         // Delete the node
-        OEX_TRY { delete pThis; }
+        OEX_TRY { OexAllocDelete( pThis ); }
         OEX_CATCH_ALL { oexASSERT( 0 ); }
 
 		// Are we going backward?

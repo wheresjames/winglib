@@ -250,6 +250,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\inc\list.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\inc\os\mem.h"
 				>
 			</File>

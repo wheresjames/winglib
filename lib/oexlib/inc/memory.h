@@ -160,14 +160,11 @@ public:
     /// Deletes the object
     void Delete()
     {
-        // Do we need to destruct objects?
-        T* pPtr = Ptr();
-
         // Allocation?
         if ( m_pMem )
         {
             // Free the memory
-            CAlloc()._Log( m_uLine, m_pFile ).Delete( m_pMem );
+            CAlloc( m_uLine, m_pFile ).Delete( m_pMem );
 
             // Lose the pointer
             m_pMem = oexNULL;
@@ -177,13 +174,16 @@ public:
         // Lose file mapping if any
         if ( m_fm.Ptr() )
         {
+            // Do we need to destruct objects?
+            T* pPtr = m_fm.Ptr();
+
             // Was the object constructed?
             if ( CAlloc::eF1Constructed & CAlloc::GetFlags( pPtr ) 
                  && 1 == CAlloc::GetRefCount( pPtr ) )
             {
                 oexUINT uSize = Size();
                 for ( oexUINT i = 0; i < uSize; i++ )
-                    m_pMem[ i ].~T();
+                    pPtr[ i ].~T();
 
             } // end if
 
@@ -222,7 +222,7 @@ public:
                     m_pMem[ i ].~T();
 
             // We can make things smaller
-            m_pMem = CAlloc()._Log( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize );
+            m_pMem = CAlloc( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize );
 
         } // end if
 
@@ -230,7 +230,7 @@ public:
         else
         {
             // Will a simple resize work?
-            T* pMem = CAlloc()._Log( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize );
+            T* pMem = CAlloc( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize );
             
             if ( !pMem )
             {
@@ -454,7 +454,7 @@ public:
             Copy( x_m );
 
         // Just add a reference to the memory
-        else
+        else if ( x_m.m_pMem )
             CAlloc().AddRef( ( m_pMem = x_m.m_pMem ) );
 
         return *this;

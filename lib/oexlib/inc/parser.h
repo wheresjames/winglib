@@ -33,7 +33,7 @@
 //----------------------------------------------------------------*/
 
 #pragma once
-/*
+
 // Special List types
 typedef TList< CStr > CStrList;
 typedef TAssoList< CStr, CStr > CStrAssoList;
@@ -139,4 +139,4 @@ protected:
 
 };
 
-*/
+

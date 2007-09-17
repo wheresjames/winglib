@@ -452,7 +452,7 @@ oex::oexRESULT TestLists()
 	int i = 0;
 	do
 	{	
-		if ( !oexVERIFY( it == vals[ i++ ] ) )
+		if ( !oexVERIFY( it.Obj() == vals[ i++ ] ) )
 			return -3;
 
 	} while ( it.Next() );
@@ -461,7 +461,7 @@ oex::oexRESULT TestLists()
 	i = 0;
 	for ( oex::TList< int >::iterator it2; lst.Next( it2 ); )
 	{
-		if ( !oexVERIFY( it2 == vals[ i++ ] ) )
+		if ( !oexVERIFY( it2.Obj() == vals[ i++ ] ) )
 			return -4;
 
 	} // end if
@@ -471,7 +471,7 @@ oex::oexRESULT TestLists()
 	it = lst.Last();
 	do
 	{	
-		if ( !oexVERIFY( it == vals[ i-- ] ) ||
+		if ( !oexVERIFY( it.Obj() == vals[ i-- ] ) ||
              !oexVERIFY( -1 <= i ) )
 			return -5;
 
@@ -481,7 +481,7 @@ oex::oexRESULT TestLists()
 	i = 4;
 	for ( oex::TList< int >::iterator it3; lst.Prev( it3 ); )
 	{
-		if ( !oexVERIFY( it3 == vals[ i-- ] ) ||
+		if ( !oexVERIFY( it3.Obj() == vals[ i-- ] ) ||
              !oexVERIFY( -1 <= i ) )
 			return -6;
 
@@ -495,7 +495,7 @@ oex::oexRESULT TestLists()
 		return -7;
 
     // Verify iterator still has valid memory
-	if ( !oexVERIFY( it == 4 ) )
+	if ( !oexVERIFY( it.Obj() == 4 ) )
 		return -8;
 
     oex::TList< oex::CStr > strlst;
@@ -600,7 +600,7 @@ oex::oexRESULT TestAssoLists()
 //	if ( !oexVERIFY( CParser::Implode( alss.Copy(), "," ) == "11,22,33,3.141" ) )
 //		return -5;
 
-/*	oex::TAssoList< oex::CStr, oex::CStr >::iterator itSs;
+	oex::TAssoList< oex::CStr, oex::CStr >::iterator itSs;
     if ( !oexVERIFY( ( itSs = alss.SearchKey( "2", oex::CStr::CmpSubStr ) ).IsValid() ) 
 		 || !oexVERIFY( *itSs == "22" ) )
 		return -6;
@@ -667,18 +667,16 @@ oex::oexRESULT TestAssoLists()
     if ( !oexVERIFY( alsss.IsKey( "1" ) ) )
         return -16;
 
-//    if ( !oexVERIFY( alsss.Unset( "1" ) ) )
-//        return -17;
-
+    alsss.Unset( "1" );
     if ( !oexVERIFY( !alsss.IsKey( "1" ) ) )
         return -18;
-*/
+
     return oex::oexRES_OK;
 }
 
 oex::oexRESULT TestPropertyBag()
 {      
-/*    oex::CPropertyBag pb;
+    oex::CPropertyBag pb;
 
 	pb[ "1" ] = "1";
 	pb[ "1" ][ "a" ] = "1a";
@@ -706,9 +704,8 @@ oex::oexRESULT TestPropertyBag()
 	if ( !oexVERIFY( pb[ "c" ][ "pi" ] == 3.14159f ) )
 		return -3;
 
-//	if ( !oexVERIFY( CParser::Implode( pb[ "1" ].List(), "," ) == "1a,1b,1c" ) )
-//		return -4;
-
+    if ( !oexVERIFY( oex::CParser::Implode( pb[ "1" ].List(), "," ) == "1a,1b,1c" ) )
+		return -4;
 
 	oex::TPropertyBag< oex::oexINT, oex::oexINT > pbii;
 
@@ -718,7 +715,169 @@ oex::oexRESULT TestPropertyBag()
 	oex::TPropertyBag< oex::oexINT, oex::CStr > pbis;
 
 	pbis[ 2 ] = "2";
+
+    return oex::oexRES_OK;
+}
+
+oex::oexRESULT TestParser()
+{      
+	// Test explode function
+    oex::oexCSTR szStr[] = { "This", "is", "a", "string", 0 };
+
+    oex::TList< oex::CStr > lst = oex::CParser::Explode( "This---is---a---string", "---" );
+
+	oex::oexUINT i = 0;
+	for ( oex::TList< oex::CStr >::iterator it; szStr[ i ] && lst.Next( it ); i++ )
+		if ( !oexVERIFY( it->Cmp( szStr[ i ] ) ) )
+			return -1;
+
+	// Test single char splitting
+	lst = oex::CParser::Explode( "1234567890", "" );
+	if ( !oexVERIFY( lst.Size() == 10 ) )
+		return -2;
+
+	// Implode check
+	if ( !oexVERIFY( oex::CParser::Implode( lst.Copy(), "," ) == "1,2,3,4,5,6,7,8,9,0" ) )
+		return -3;
+
+	oex::oexINT tp = 0;
+	oex::CStr str1 = oex::CStr::NextToken( "1234567890", "45", &tp );
+	if ( !oexVERIFY( str1 == "45" ) || !oexVERIFY( 5 == tp ) )
+		return -17;
+
+	lst = oex::CParser::GetTokens( "we12 can 34 read56the789__numbers", "1234567890" );
+	if ( !oexVERIFY( oex::CParser::Implode( lst.Copy(), "," ) == "12,34,56,789" ) )
+		return -18;
+
+	lst = oex::CParser::Split( "This&is#a??sentence", "&#?" );
+	if ( !oexVERIFY( oex::CParser::Implode( lst, "," ) == "This,is,a,sentence" ) )
+		return -19;
+
+	oex::oexCSTR pStr = "Hello World !@#$%^&*()-=";
+	if ( !oexVERIFY( oex::CParser::UrlDecode( oex::CParser::UrlEncode( pStr ) ) == pStr ) )
+		return -20;
+
+	pStr = "a=b&c=d&e=";
+	if ( !oexVERIFY( oex::CParser::EncodeUrlParams( oex::CParser::DecodeUrlParams( pStr ) ) == pStr ) )
+		return -21;
+
+	pStr = "a=b&c=d&e=hello%20world";
+	if ( !oexVERIFY( oex::CParser::EncodeUrlParams( oex::CParser::DecodeUrlParams( pStr ) ) == pStr ) )
+		return -22;
+
+    oex::CPropertyBag pb;
+
+    pb[ "1" ] = "111";
+    pb[ "2" ] = "222";
+    pb[ "3" ] = "333";
+
+    oex::CStr sStr = oex::CParser::Serialize( pb );
+    oex::CPropertyBag pb2 = oex::CParser::Deserialize( sStr );
+    if ( !oexVERIFY( oex::CParser::Serialize( pb2 ) == sStr ) )
+        return -23;
+
+    pb.Destroy();
+/*
+	pb[ "1" ] = "1";
+	pb[ "1" ][ "a" ] = "1a";
+	pb[ "1" ][ "b" ] = "1b";
+	pb[ "1" ][ "c" ] = "1c";
+	pb[ "2" ][ "a" ] = "2a";
+	pb[ "2" ][ "b" ] = "2b";
+
+	pb[ "n" ][ 1 ] = 11;
+	pb[ "n" ][ 2 ] = 22;
+
+	pb[ "c" ][ "pi" ] = 3.14159f;
+	pb[ "c" ][ "e" ] = 2.71828f;
+	pb[ "c" ][ "phi" ] = 1.618f;
+
+    sStr = oex::CParser::Serialize( pb );
+    pb2 = oex::CParser::Deserialize( sStr );
+    oex::CStr sStr2 = oex::CParser::Serialize( pb2 );
+
+/*    if ( !oexVERIFY( oex::CParser::Serialize( pb2 ) == sStr ) )
+       return -24;
+
+    pb.Destroy();
+    pb[ "1" ] = "111";
+    pb[ "2" ] = "222";
+    pb[ "3" ] = "333";
+
+    pb2[ "x" ] = pb;
+
+    if ( !oexVERIFY( pb2[ "x" ][ "1" ] == 111 ) )
+        return -23;
+
+    if ( !oexVERIFY( 5 == pb2.Size() ) || !oexVERIFY( 0 == pb.Size() ) )
+        return -24;
+
+    sStr = oex::CParser::Serialize( pb2 );
+
+    pb = ReturnTest( pb2 );
+
+    if ( !oexVERIFY( 5 == pb.Size() ) || !oexVERIFY( 0 == pb2.Size() ) )
+        return -25;
+
+    if ( !oexVERIFY( oex::CParser::Serialize( pb ) == sStr ) )
+        return -26;
+
+    pb2 = ReturnTest( pb.Copy() );
+
+    if ( !oexVERIFY( oex::CParser::Serialize( pb ) == sStr ) )
+        return -27;
+
+    if ( !oexVERIFY( oex::CParser::Serialize( pb2 ) == sStr ) )
+        return -28;
+
+    pb = oex::CParser::Deserialize( "x{a=b}" );
+
+    if ( !oexVERIFY( pb.IsKey( "x" ) ) )
+        return -29;
+
+    if ( !oexVERIFY( pb[ "x" ].IsKey( "a" ) ) )
+        return -30;
+
+    oex::CStr s = pb[ "x" ][ "a" ].ToString();
+    if ( !oexVERIFY( pb[ "x" ][ "a" ].ToString() == "b" ) )
+        return -31;
+        
+
+/*
+	CPropertyBag url = oex::CParser::DecodeUrlParams( "a=b&c=d&e=&f" );
+
+	CPropertyBag url_enc = oex::CParser::CompileTemplate( "_pre_ : [url] = {url} / _sep_ . _end_ ;" );
+
+	oexTRACE( "%s\n", oex::CParser::Encode( url, url_enc ).Ptr() );
+
+	// "begin . []={} . sep . end"
+
+	// "pre / []={} . sep / post"
+
+	// "(open) []={} / sep (post)"
+
+	// "pre : []={} / sep . post
+
+	oex::CPropertyBag pb;
+
+	pb[ "1" ] = "1";
+	pb[ "1" ][ "a" ] = "1a";
+	pb[ "1" ][ "b" ] = "1b";
+	pb[ "1" ][ "c" ] = "1c";
+	pb[ "2" ][ "a" ] = "2a";
+	pb[ "2" ][ "b" ] = "2b";
+
+	oex::CPropertyBag ini_enc = 
+		oex::CParser::CompileTemplate(	"		<[> [url] <]> _%n_ {#sub} _%n_ .;"	oexNL
+									"#sub +	[url] = {url} /_%n_ .;"				oexNL
+									"#sub -	<*> = {url} /_%n_ .;"				oexNL
+								);
+
+	oexTRACE( "%s\n", ini_enc.PrintR().Ptr() );
+
+//		oexTRACE( "%s\n", oex::CParser::Encode( pb, ini_enc ).Ptr() );
 */
+
     return oex::oexRES_OK;
 }
 
@@ -740,6 +899,8 @@ int main(int argc, char* argv[])
     TestAssoLists();
 
     TestPropertyBag();
+
+    TestParser();
 
 	// Initialize the oex library
     oexUNINIT();	

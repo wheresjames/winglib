@@ -35,7 +35,7 @@
 #include "../oexlib.h"
 
 OEX_USING_NAMESPACE
-/*
+
 CStrList CParser::Explode( oexCSTR x_pStr, oexUINT x_uSize, oexCSTR x_pSep, oexUINT x_uSep )
 {
 	CStrList lst;
@@ -82,13 +82,13 @@ CStr CParser::GetToken( CStr &x_sStr, CStrList x_lst, oexBOOL x_bCaseSensitive )
     if ( x_bCaseSensitive )
     {   for ( CStrList::iterator it; x_lst.Next( it ); )
             if ( x_sStr.Cmp( it->Ptr(), it->Length() ) )
-                return it;
+                return it.Obj();
     } // end if
 
     else
 	    for ( CStrList::iterator it; x_lst.Next( it ); )
             if ( x_sStr.ICmp( it->Ptr(), it->Length() ) )
-                return it;
+                return it.Obj();
 
     return CStr();
 }
@@ -102,13 +102,13 @@ CStr CParser::ParseToken( CStr &x_sStr, CStrList x_lst, oexBOOL x_bCaseSensitive
     if ( x_bCaseSensitive )
     {   for ( CStrList::iterator it; x_lst.Next( it ); )
             if ( x_sStr.CmpLen( it->Ptr(), it->Length() ) )
-            {   x_sStr.LTrim( it->Length() ); return it; }
+            {   x_sStr.LTrim( it->Length() ); return it.Obj(); }
     } // end if
 
     else
 	    for ( CStrList::iterator it; x_lst.Next( it ); )
             if ( x_sStr.ICmpLen( it->Ptr(), it->Length() ) )
-            {   x_sStr.LTrim( it->Length() ); return it; }
+            {   x_sStr.LTrim( it->Length() ); return it.Obj(); }
 
     return CStr();
 }
@@ -191,7 +191,7 @@ CPropertyBag CParser::DecodeUrlParams( CStr x_str )
 	{
 		key = UrlDecode( it->Parse( "=" ) );
 		if ( key.Length() ) (*it)++;
-		val = UrlDecode( it );
+		val = UrlDecode( it.Obj() );
 
 		// Key value pair
 		if ( key.Length() && val.Length() )
