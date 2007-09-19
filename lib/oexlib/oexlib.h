@@ -459,12 +459,12 @@ namespace os
 //------------------------------------------------------------------
 namespace os
 {
-/*
-#   include "inc/os/ip_address.h"
-#   include "inc/os/ip_socket.h"
-#   include "inc/os/thread.h"    
+
+//#   include "inc/os/ip_address.h"
+//#   include "inc/os/ip_socket.h"
+//#   include "inc/os/thread.h"    
 #   include "inc/os/base_file.h"
-*/
+
 };
 
 //------------------------------------------------------------------
@@ -476,6 +476,10 @@ namespace os
 // Implementation
 //------------------------------------------------------------------
 #include "inc/parser.h"
+#include "inc/file.h"
+#include "inc/zip.h"
+#include "inc/unzip.h"
+#include "inc/find_files.h"
 /*
 #include "inc/dispatch.h"
 #include "inc/file.h"

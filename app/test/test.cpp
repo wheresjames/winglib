@@ -910,6 +910,54 @@ oex::oexRESULT TestParser()
     return oex::oexRES_OK;
 }
 
+oex::oexRESULT TestFile()
+{      
+    oex::CFile f;
+    oex::CStr sFileName, sContents = "Safe to delete this file.";
+
+    // Create file name
+    sFileName << "C:/" << oex::CStr().GuidToString() << ".txt";
+
+    if ( !oexVERIFY( f.CreateNew( sFileName.Ptr() ).IsOpen() ) )
+        return -1;
+
+    if ( !oexVERIFY( f.Write( sContents ) ) )
+        return -2;
+
+    f.SetPtrPosBegin( 0 );
+
+    if ( !oexVERIFY( f.Read() == sContents ) )
+        return -4;
+
+    if ( !oexVERIFY( f.Delete() ) )
+        return -5;
+
+    // WARNING: Recursive delete test!
+//        CFile::DeletePath( "C:/temp" );
+
+    return oex::oexRES_OK;
+}
+
+oex::oexRESULT TestZip()
+{      
+    oex::CStr sStr = "This string will be compressed.  It has to be fairly long or the"
+                "compression library won't really be able to compress it much.  "
+                "I also had to add more text so I could get a zero in the compressed data.  "
+                "Now is the time for all good men to come to the aid of their country";
+
+    oex::CStr sCmp = oex::zip::CCompress::Compress( sStr );
+
+    if ( !oexVERIFY( sCmp.Length() ) || !oexVERIFY( sCmp.Length() < sStr.Length() ) )
+        return -1;
+
+    // Verify raw compression
+    if ( !oexVERIFY( sStr == oex::zip::CUncompress::Uncompress( sCmp ) ) )
+        return -2;
+
+    return oex::oexRES_OK;
+}
+
+
 int main(int argc, char* argv[])
 {
 	// Initialize the oex library
@@ -930,6 +978,10 @@ int main(int argc, char* argv[])
     TestPropertyBag();
 
     TestParser();
+
+    TestFile();
+
+    TestZip();
 
 	// Initialize the oex library
     oexUNINIT();	

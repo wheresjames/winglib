@@ -177,11 +177,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\os\win32\base_file.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\os\win32\debug.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\os\win32\event.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\file.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\find_files.cpp"
 				>
 			</File>
 			<File
@@ -216,6 +228,14 @@
 				RelativePath="..\..\src\os\win32\tls.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\unzip.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\zip.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -230,6 +250,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\inc\os\base_file.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\inc\os\debug.h"
 				>
 			</File>
@@ -238,7 +262,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\inc\file.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\inc\file_mapping.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\find_files.h"
 				>
 			</File>
 			<File
@@ -314,6 +346,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\inc\property_bag.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\inc\str.h"
 				>
 			</File>
@@ -323,6 +359,14 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\os\tls.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\unzip.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\zip.h"
 				>
 			</File>
 		</Filter>
