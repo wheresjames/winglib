@@ -219,6 +219,7 @@ public:
 		Unshare();
 
         T* pMem;
+        oexBOOL bExisting = oexNULL != m_mem.Ptr();
 
         // Do we already have the memory
         if ( m_mem.Size() == ( x_uSize + 1 ) )
@@ -231,6 +232,10 @@ public:
 			    return oexNULL;
 
         } // end if
+
+        // Set empty string if new buffer
+        if ( !bExisting )
+            pMem[ 0 ] = 0;
 
 		// Null terminate our new buffer
 		pMem[ x_uSize ] = 0;
@@ -907,80 +912,39 @@ public:
 	{	return ICmp( pStr, zstr::Length( pStr ) ); }
 
 	oexBOOL ICmp( oexCONST T* pStr, oexUINT uSize )
-	{
-		if ( uSize != Length() ) return oexFALSE;
-		if ( !uSize ) return oexTRUE;
+    {   return !str::ICompare( Ptr(), Length(), pStr, uSize ); }
 
-		T* pPtr = m_mem.Ptr();
+	oexBOOL CmpLen( TStr &str, oexINT x_lLen = -1 )
+	{	if ( 0 > x_lLen ) x_lLen = str.Length();
+        return CmpLen( str.Ptr(), str.Length(), x_lLen ); 
+    }
 
-		T a, b;
-		oexBOOL bMatch = oexTRUE;
-		while ( uSize-- && bMatch )
-		{
-			a = *pPtr; b = *pStr;
+	oexBOOL CmpLen( oexCONST T* pStr, oexINT x_lLen = -1 )
+	{	oexINT lLen = zstr::Length( pStr );
+        if ( 0 > x_lLen ) x_lLen = lLen;
+		return CmpLen( pStr, lLen, x_lLen ); 
+    }
 
-			if ( a >= 'A' && a <= 'Z' ) 
-				a -= 'A' - 'a';
+	oexBOOL CmpLen( oexCONST T* pStr, oexUINT uSize, oexINT x_lLen = -1 )
+    {   if ( 0 > x_lLen ) x_lLen = uSize;
+        return !str::CompareLen( Ptr(), Length(), pStr, uSize, x_lLen ); 
+    }
 
-			if ( b >= 'A' && b <= 'Z' ) 
-				b -= 'A' - 'a';
+	oexBOOL ICmpLen( TStr &str, oexINT x_lLen = -1 )
+	{	if ( 0 > x_lLen ) x_lLen = str.Length();
+	 	return ICmpLen( str.Ptr(), str.Length(), x_lLen ); 
+    }
 
-			if ( a != b ) 
-				bMatch = oexFALSE;
+	oexBOOL ICmpLen( oexCONST T* pStr, oexINT x_lLen = -1 )
+	{	oexINT lLen = zstr::Length( pStr );
+        if ( 0 > x_lLen ) x_lLen = lLen;
+		return ICmpLen( pStr, lLen, x_lLen ); 
+    }
 
-			else pPtr++, pStr++;
-
-		} // end while
-
-		return *pPtr ? oexFALSE : oexTRUE;
-	}
-
-	oexBOOL CmpLen( TStr &str )
-	{	return CmpLen( str.Ptr(), str.Length() ); }
-
-	oexBOOL CmpLen( oexCONST T* pStr )
-	{	return CmpLen( pStr, zstr::Length( pStr ) ); }
-
-	oexBOOL CmpLen( oexCONST T* pStr, oexUINT uSize )
-	{	if ( (oexINT)uSize > Length() ) return oexFALSE;
-		if ( !uSize ) return oexTRUE;
-		return !os::CSys::MemCmp( m_mem.Ptr(), pStr, uSize );
-	}
-
-	oexBOOL ICmpLen( TStr &str )
-	{	return ICmpLen( str.Ptr(), str.Length() ); }
-
-	oexBOOL ICmpLen( oexCONST T* pStr )
-	{	return ICmpLen( pStr, zstr::Length( pStr ) ); }
-
-	oexBOOL ICmpLen( oexCONST T* pStr, oexUINT uSize )
-	{
-		if ( (oexINT)uSize > Length() ) return oexFALSE;
-		if ( !uSize ) return oexTRUE;
-
-		T* pPtr = m_mem.Ptr();
-
-		T a, b;
-		oexBOOL bMatch = oexTRUE;
-		while ( uSize-- && bMatch )
-		{
-			a = *pPtr; b = *pStr;
-
-			if ( a >= 'A' && a <= 'Z' ) 
-				a -= 'A' - 'a';
-
-			if ( b >= 'A' && b <= 'Z' ) 
-				b -= 'A' - 'a';
-
-			if ( a != b ) 
-				bMatch = oexFALSE;
-
-			else pPtr++, pStr++;
-
-		} // end while
-
-		return bMatch;
-	}
+	oexBOOL ICmpLen( oexCONST T* pStr, oexUINT uSize, oexINT x_lLen = -1 )
+    {   if ( 0 > x_lLen ) x_lLen = uSize;
+        return !str::ICompareLen( Ptr(), Length(), pStr, uSize, x_lLen ); 
+    }
 
 	/// Returns the offset of pSub in the string, or
     /// -1 if a pStr is not found.

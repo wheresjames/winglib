@@ -957,6 +957,172 @@ oex::oexRESULT TestZip()
     return oex::oexRES_OK;
 }
 
+oex::oexRESULT Test_CSysTime()
+{      
+    oex::CSysTime st;
+
+    st.SetTime( 1997, 12, 25, 16, 15, 30, 500, 4 );
+
+//        oexTRACE( "%s\n", st.FormatTime( "%W, %B %D, %Y - %h:%m:%s %A" ).Ptr() );
+//        oexTRACE( "%s\n", st.FormatTime( "%Y/%c/%d - %g:%m:%s.%l" ).Ptr() );
+//        oexTRACE( "%s\n", st.FormatTime( "%w, %d %b %Y %g:%m:%s GMT" ).Ptr() );
+
+    if ( !oexVERIFY( st.FormatTime( "%W, %B %D, %Y - %h:%m:%s %A" ) == "Thursday, December 25, 1997 - 04:15:30 PM" ) )
+        return -1;
+    
+    if ( !oexVERIFY( st.FormatTime( "%Y/%c/%d - %g:%m:%s.%l" ) == "1997/12/25 - 16:15:30.500" ) )
+        return -2;
+
+    if ( !oexVERIFY( st.FormatTime( "%w, %d %b %Y %g:%m:%s GMT" ) == "Thu, 25 Dec 1997 16:15:30 GMT" ) )
+        return -3;
+
+    oex::CSysTime st2;
+
+    st2.SetMilliSecond( 500 );
+
+    if ( !oexVERIFY( st2.ParseTime( "%W, %B %D, %Y - %h:%m:%s %A", "Thursday, December 25, 1997 - 04:15:30 PM" ) ) )
+        return -4;
+
+    if ( !oexVERIFY( st2.GetYear() == 1997 && st2.GetMonth() == 12 && st2.GetDay() == 25
+                     && st2.Get12Hour() == 4 && st2.GetHour() == 16 && st2.GetMinute() == 15 && st2.GetSecond() == 30 ) )
+        return -5;
+
+    if ( !oexVERIFY( st2 == st ) )
+        return -6;
+
+    if ( !oexVERIFY( st2.ParseTime( "%Y/%c/%d - %g:%m:%s.%l", "1997/12/25 - 16:15:30.500" ) ) )
+        return -7;
+
+    if ( !oexVERIFY( st2 == st ) )
+        return -8;
+
+    if ( !oexVERIFY( st2.ParseTime( "%w, %d %b %Y %g:%m:%s GMT", "Thu, 25 Dec 1997 16:15:30 GMT" ) ) )
+        return -9;
+
+    if ( !oexVERIFY( st2 == st ) )
+        return -10;
+
+    return oex::oexRES_OK;
+}
+
+
+oex::oexRESULT Test_CIpAddress()
+{
+    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
+        return -1;
+
+    oex::oexCSTR pUrl = "http://user:password@server.com:1111/my/path/doc.php?a=b&c=d";
+    oex::CPropertyBag pbUrl = oex::os::CIpAddress::ParseUrl( pUrl );        
+
+    // Verify each component
+    if ( !oexVERIFY( pbUrl[ "scheme" ] == "http" )
+         || !oexVERIFY( pbUrl[ "username" ] == "user" )
+         || !oexVERIFY( pbUrl[ "password" ] == "password" )
+         || !oexVERIFY( pbUrl[ "host" ] == "server.com" )
+         || !oexVERIFY( pbUrl[ "port" ] == "1111" )
+         || !oexVERIFY( pbUrl[ "path" ] == "/my/path/doc.php" )
+         || !oexVERIFY( pbUrl[ "extra" ] == "a=b&c=d" ) )
+        return -2;
+
+    if ( !oexVERIFY( oex::os::CIpAddress::BuildUrl( pbUrl ) == pUrl ) )
+        return -3;
+
+    oex::os::CIpAddress ia;
+
+    if ( !oexVERIFY( ia.LookupUrl( "http://user:password@localhost:1111/my/path/doc.php?a=b&c=d" ) ) 
+         || !oexVERIFY( ia.GetDotAddress() == "127.0.0.1" ) 
+         || !oexVERIFY( ia.GetPort() == 1111 ) )
+        return -4;
+        
+    if ( !oexVERIFY( ia.LookupHost( "localhost", 2222 ) ) 
+         || !oexVERIFY( ia.GetDotAddress() == "127.0.0.1" )
+         || !oexVERIFY( ia.GetPort() == 2222 ) )
+        return -5;
+
+    ia.LookupHost( "google.com", 80 );
+    oexTRACE( "%s\n", ia.GetId().Ptr() );
+
+    oex::os::CIpSocket::UninitSockets();
+
+    return oex::oexRES_OK;
+}
+
+oex::oexRESULT Test_CIpSocket()
+{
+    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
+        return -1;
+
+    // *** TCP
+
+    oex::os::CIpSocket server, session, client;
+
+    if ( !oexVERIFY( server.Bind( 23456 ) ) )
+        return -2;
+
+    if ( !oexVERIFY( server.Listen() ) )
+        return -3;
+
+    if ( !oexVERIFY( client.Connect( "localhost", 23456 ) ) )
+        return -4;
+
+    if ( !oexVERIFY( server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, oexDEFAULT_TIMEOUT ) ) )
+        return -5;
+
+    if ( !oexVERIFY( server.Accept( session ) ) )
+        return -6;
+
+    if ( !oexVERIFY( session.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_TIMEOUT ) ) 
+         || !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_TIMEOUT ) ) )
+        return -7;
+
+    oex::oexCSTR pStr = "B6F5FF3D-E9A5-46ca-ADB8-D655427EB94D";
+
+    if ( !oexVERIFY( session.Send( pStr ) ) )
+        return -8;
+
+    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eReadEvent, oexDEFAULT_TIMEOUT ) ) )
+        return -9;
+
+    if ( !oexVERIFY( client.Recv() == pStr ) )
+        return -10;
+
+    client.Destroy();
+    if ( !oexVERIFY( session.WaitEvent( oex::os::CIpSocket::eCloseEvent, oexDEFAULT_TIMEOUT ) ) )
+        return -11;
+            
+    session.Destroy();
+    server.Destroy();
+
+
+    // *** UDP
+
+    if ( !oexVERIFY( server.Create( oex::os::CIpSocket::eAfInet, oex::os::CIpSocket::eTypeDgram, oex::os::CIpSocket::eProtoUdp ) )
+         || !oexVERIFY( server.Bind( 12345 ) ) )
+        return -12;
+
+    if ( !oexVERIFY( client.Create( oex::os::CIpSocket::eAfInet, oex::os::CIpSocket::eTypeDgram, oex::os::CIpSocket::eProtoUdp ) ) )
+        return -13;
+
+    if ( !oexVERIFY( client.PeerAddress().LookupHost( "localhost", 12345 ) ) )
+        return -14;
+
+    if ( !oexVERIFY( client.SendTo( pStr ) ) )
+        return -15;
+
+    if ( !oexVERIFY( server.WaitEvent( oex::os::CIpSocket::eReadEvent, oexDEFAULT_TIMEOUT ) ) )
+        return -16;
+
+    if ( !oexVERIFY( server.RecvFrom() == pStr ) )
+        return -17;
+
+    client.Destroy();
+    server.Destroy();
+
+    oex::os::CIpSocket::UninitSockets();
+
+    return oex::oexRES_OK;
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -982,6 +1148,12 @@ int main(int argc, char* argv[])
     TestFile();
 
     TestZip();
+
+    Test_CSysTime();
+    
+    Test_CIpAddress();
+
+    Test_CIpSocket();
 
 	// Initialize the oex library
     oexUNINIT();	

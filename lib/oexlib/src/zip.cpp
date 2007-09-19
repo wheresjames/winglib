@@ -52,10 +52,10 @@ CZip::~CZip()
 }
 
 /// Yup, more indirection
-class CDslZipLibCompress : public CZipLibCompress
+class COexZipLibCompress : public CZipLibCompress
 {
 public:
-    CDslZipLibCompress( CCompress *p ) { m_p = p; }
+    COexZipLibCompress( CCompress *p ) { m_p = p; }
     virtual unsigned OnRead( char *buf, unsigned size )
     {   return m_p->OnRead( buf, size ); }
     virtual unsigned OnWrite( const char *buf, unsigned *size )
@@ -65,19 +65,19 @@ private:
 };
 
 CCompress::CCompress()
-{   m_pCompress = new CDslZipLibCompress( this );
+{   m_pCompress = new COexZipLibCompress( this );
 }
 
 CCompress::~CCompress()
 {   if ( m_pCompress )
-    {   delete (CDslZipLibCompress*)m_pCompress;
+    {   delete (COexZipLibCompress*)m_pCompress;
         m_pCompress = oexNULL;
     } // end if
     Destroy();
 }
 
 CStr CCompress::Compress()
-{   const char *pErr = ( (CDslZipLibCompress*)m_pCompress )->Compress();
+{   const char *pErr = ( (COexZipLibCompress*)m_pCompress )->Compress();
     if ( !pErr ) return "";
     return pErr;
 }
@@ -120,4 +120,4 @@ unsigned CCompress::OnWrite( const char *buf, unsigned *size )
 
 
 
-#endif // DSL_ENABLE_ZIP
+#endif // OEX_ENABLE_ZIP

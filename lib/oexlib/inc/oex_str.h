@@ -333,7 +333,7 @@ namespace str
         Returns zero if the two strings match
     */
     template< class T >
-        oexINT ICompare( T *s1, oexINT ln1, T *s2, oexINT ln2,
+        oexINT ICompare( oexCONST T *s1, oexINT ln1, oexCONST T *s2, oexINT ln2,
                          T tSLow = oexT( 'a' ), T tELow = oexT( 'z' ), 
                          T tSHi = oexT( 'A' ), T tEHi = oexT( 'Z' ) )
         {
@@ -353,8 +353,8 @@ namespace str
                 if ( ch2 >= tSHi && ch2 <= tEHi )
                     ch2 -= tOff;
 
-                if ( *ch1 != *ch2 )
-                    return ( *ch1 > *ch2 ) ? 1 : -1;
+                if ( ch1 != ch2 )
+                    return ( ch1 > ch2 ) ? 1 : -1;
 
                 s1++;
                 s2++;
@@ -376,7 +376,7 @@ namespace str
         Returns zero if the two strings match
     */
     template< class T >
-        oexINT ICompareLen( T *s1, oexINT ln1, T *s2, oexINT ln2, oexINT ln_cmp,
+        oexINT ICompareLen( oexCONST T *s1, oexINT ln1, oexCONST T *s2, oexINT ln2, oexINT ln_cmp,
                          T tSLow = oexT( 'a' ), T tELow = oexT( 'z' ), 
                          T tSHi = oexT( 'A' ), T tEHi = oexT( 'Z' ) )
         {
@@ -397,8 +397,8 @@ namespace str
                 if ( ch2 >= tSHi && ch2 <= tEHi )
                     ch2 -= tOff;
 
-                if ( *ch1 != *ch2 )
-                    return ( *ch1 > *ch2 ) ? 1 : -1;
+                if ( ch1 != ch2 )
+                    return ( ch1 > ch2 ) ? 1 : -1;
 
                 s1++;
                 s2++;

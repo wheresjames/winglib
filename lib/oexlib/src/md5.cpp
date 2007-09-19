@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// zip.h
+// md5.cpp
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -32,70 +32,43 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#pragma once
+#include "../oexlib.h"
 
-#if defined( OEX_ENABLE_ZIP )
+// Include md5 functions
+#include "../oss/md5/md5rsa.cpp"
 
-namespace zip
+OEX_USING_NAMESPACE
+using namespace OEX_NAMESPACE::oss;
+
+oexSTATIC_ASSERT( sizeof( oexGUID ) == sizeof( oexUCHAR[ 16 ] ) );
+oexSTATIC_ASSERT( sizeof( CMd5::SContext ) == sizeof( MD5_CTX ) );
+
+void CMd5::Init()
 {
+    CMd5Rsa::MD5Init( (MD5_CTX*)&m_md5Context );
+}
 
-class CZip
+void CMd5::Update( oexCPVOID x_pBuf, oexUINT x_uSize )
 {
-public:
-    CZip();
-    ~CZip();
+	CMd5Rsa::MD5Update( (MD5_CTX*)&m_md5Context, (oexUCHAR*)x_pBuf, x_uSize );
+}
 
-private:
-
-};
-
-class CCompress
+void CMd5::Final( oexGUID *x_pGuid )
 {
-public:
+	CMd5Rsa::MD5Final( m_md5.ucBuf, (MD5_CTX*)&m_md5Context );
+    if ( x_pGuid ) guid::CopyGuid( x_pGuid, &m_md5.guid );
+}
 
-    CCompress();
-    ~CCompress();
+/// Calculates an md5 in one step
+oexGUID* CMd5::Transform( oexGUID *x_pGuid, oexCPVOID x_pBuf, oexUINT x_uSize )
+{
+    SContext m_md5Context;
+    CMd5Rsa::MD5Init( (MD5_CTX*)&m_md5Context );
+	CMd5Rsa::MD5Update( (MD5_CTX*)&m_md5Context, (oexUCHAR*)x_pBuf, x_uSize );
+	CMd5Rsa::MD5Final( x_pGuid->ucBuf, (MD5_CTX*)&m_md5Context );
 
-    void Destroy()
-    {   m_fInput.Destroy();
-        m_sInput.Destroy();
-        m_fOutput.Destroy();
-        m_sOutput.Destroy();
-    }
-    
-    unsigned OnRead( char *buf, unsigned size );
-    unsigned OnWrite( const char *buf, unsigned *size );
+    return x_pGuid;
+}
 
-    CStr Compress();
 
-    // Set input method
-    oexBOOL SetStrInput( CStr &x_sStr ) { m_sInput = x_sStr; return 0 < m_sInput.Length(); }
-    oexBOOL SetFileInput( oexCSTR x_pFile ) { return m_fInput.OpenExisting( x_pFile ).IsOpen(); }
 
-    // Set output method
-    oexBOOL SetOutputFile( oexCSTR x_pFile ) { return m_fOutput.OpenExisting( x_pFile ).IsOpen(); }
-
-    /// Returns a reference to the output string object
-    CStr& GetOutputStr() { return m_sOutput; }
-
-    /// Returns a reference to the output file object
-    CFile& GetOutputFile() { return m_fOutput; }
-
-    /// One step string compress
-    static CStr Compress( CStr &x_sStr )
-    {   CCompress cmp; cmp.SetStrInput( x_sStr ); cmp.Compress(); return cmp.m_sOutput; }
-
-private:
-
-    oexPVOID    m_pCompress;
-
-    CStr        m_sInput;
-    CFile       m_fInput;
-
-    CStr        m_sOutput;
-    CFile       m_fOutput;
-};
-
-};
-
-#endif // OEX_ENABLE_ZIP

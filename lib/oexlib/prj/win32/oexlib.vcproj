@@ -205,6 +205,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\os\win32\ip_address.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\os\win32\ip_socket.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\md5.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\os\win32\mem.cpp"
 				>
 			</File>
@@ -222,6 +234,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\os\win32\sys.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\sys_time.cpp"
 				>
 			</File>
 			<File
@@ -282,7 +298,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\inc\os\ip_address.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\os\ip_socket.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\inc\list.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\md5.h"
 				>
 			</File>
 			<File
@@ -355,6 +383,10 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\os\sys.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\sys_time.h"
 				>
 			</File>
 			<File

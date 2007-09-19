@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// zip.h
+// md5.h
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -34,68 +34,68 @@
 
 #pragma once
 
-#if defined( OEX_ENABLE_ZIP )
 
-namespace zip
+namespace oss
 {
 
-class CZip
-{
-public:
-    CZip();
-    ~CZip();
-
-private:
-
-};
-
-class CCompress
+class CMd5
 {
 public:
 
-    CCompress();
-    ~CCompress();
+    /// Context for CMd5Rsa class
+    struct SContext
+    {   oexUINT32       uState[ 4 ];
+        oexUINT32       uCount[ 2 ];
+        oexUCHAR        ucBuf[ 64 ];
+    };
 
-    void Destroy()
-    {   m_fInput.Destroy();
-        m_sInput.Destroy();
-        m_fOutput.Destroy();
-        m_sOutput.Destroy();
-    }
-    
-    unsigned OnRead( char *buf, unsigned size );
-    unsigned OnWrite( const char *buf, unsigned *size );
+    struct SDigest
+    {
+        union
+        {   oexGUID     guid;
+            oexUCHAR    ucBuf[ 16 ];
+        };
+    };
 
-    CStr Compress();
+public:
 
-    // Set input method
-    oexBOOL SetStrInput( CStr &x_sStr ) { m_sInput = x_sStr; return 0 < m_sInput.Length(); }
-    oexBOOL SetFileInput( oexCSTR x_pFile ) { return m_fInput.OpenExisting( x_pFile ).IsOpen(); }
+    /// Default constructor
+    CMd5() { Init(); }
 
-    // Set output method
-    oexBOOL SetOutputFile( oexCSTR x_pFile ) { return m_fOutput.OpenExisting( x_pFile ).IsOpen(); }
+    /// Default destructor
+    virtual ~CMd5() {}
 
-    /// Returns a reference to the output string object
-    CStr& GetOutputStr() { return m_sOutput; }
+    /// Initialize the md5
+    void Init();
 
-    /// Returns a reference to the output file object
-    CFile& GetOutputFile() { return m_fOutput; }
+    /// Update the md5
+    void Update( oexCPVOID x_pBuf, oexUINT x_uSize );
 
-    /// One step string compress
-    static CStr Compress( CStr &x_sStr )
-    {   CCompress cmp; cmp.SetStrInput( x_sStr ); cmp.Compress(); return cmp.m_sOutput; }
+    /// Finalize the md5
+    void Final( oexGUID *x_pGuid  = oexNULL );
+
+    /// Calculates an md5 in one step
+    static oexGUID* Transform( oexGUID *x_pGuid, oexCPVOID x_pBuf, oexUINT x_uSize );
+
+    /// Returns hash as a guid
+    oexGUID& GetGuid() { return m_md5.guid; }
+
+    /// Returns hash as a guid
+    operator oexGUID&() { return m_md5.guid; }
+
+    /// Returns hash as a guid
+    operator oexGUID*() { return &m_md5.guid; }
+
+    /// Returns the md5 hash buffer
+    oexCPVOID GetBuffer() { return m_md5.ucBuf; }
 
 private:
 
-    oexPVOID    m_pCompress;
+    /// MD5 context
+    SContext            m_md5Context;
 
-    CStr        m_sInput;
-    CFile       m_fInput;
-
-    CStr        m_sOutput;
-    CFile       m_fOutput;
+    /// The actual md5 hash
+    SDigest             m_md5;
 };
 
 };
-
-#endif // OEX_ENABLE_ZIP

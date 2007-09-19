@@ -98,4 +98,4 @@ private:
 
 };
 
-#endif // DSL_ENABLE_ZIP
+#endif // OEX_ENABLE_ZIP

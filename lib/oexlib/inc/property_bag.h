@@ -258,11 +258,13 @@ public:
     }
 
 	/// Converts to a string
-	CStr ToString() 
+	CStr& ToString() 
     { 
+        // Create an object if we don't have one
         if ( !m_t.Ptr() )
-            return 0;
-        return m_t.Ptr()->ToString(); 
+            m_t.OexConstruct();
+
+        return *m_t.Ptr(); 
     }
 
 	//==============================================================
