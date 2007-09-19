@@ -52,11 +52,20 @@ public:
     {
         m_lLength = 0;
         m_lOffset = 0;
+
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
     }
 
 	TStr( TStr &str )
 	{	m_lLength = 0;
         m_lOffset = 0;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
 		Set( str );
 //		if ( str.Length() ) Set( str.Ptr() );
 	}
@@ -64,48 +73,80 @@ public:
 	TStr( oexCONST T *pStr )
 	{	m_lLength = 0;
         m_lOffset = 0;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
 		Set( pStr );
 	}
 
 	TStr( oexCONST T *pStr, oexUINT uSize )
 	{	m_lLength = 0;
         m_lOffset = 0;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
 		Set( pStr, uSize );
 	}
 
 	TStr( oexCONST T *pStr, oexINT nStart, oexUINT uLen )
 	{	m_lLength = 0;
         m_lOffset = 0;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
 		Sub( pStr, nStart, uLen );
 	}
 
 	TStr( oexCONST T *pStr, oexUINT uSize, oexINT nStart, oexUINT uLen )
 	{	m_lLength = 0;
         m_lOffset = 0;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
 		Sub( pStr, uSize, nStart, uLen );
 	}
 
 	TStr( oexCONST oexINT nVal )
 	{	m_lLength = 0;
         m_lOffset = 0;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
 		SetNum( "%li", (oexLONG)nVal ); 
 	}
 
 	TStr( oexCONST oexUINT uVal )
 	{	m_lLength = 0;
         m_lOffset = 0;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
 		SetNum( "%lu", (oexULONG)uVal ); 
 	}
 
 	TStr( oexCONST oexDOUBLE dStr )
 	{	m_lLength = 0;
         m_lOffset = 0;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
 		SetNumTrim( "%f", oexNULL, "0", (oexDOUBLE)dStr ); 
 	}
 
 	TStr( oexCONST T tVal )
 	{	m_lLength = 0;
         m_lOffset = 0;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
 		Set( tVal ); 
 	}
 
@@ -124,7 +165,7 @@ public:
         m_lOffset = 0;
 
         // Lose the string memory
-        m_mem.Delete();
+        m_mem.OexDelete();
     }
 
 public:
@@ -185,7 +226,7 @@ public:
 
         else
         {
-            pMem = m_mem.Resize( x_uSize + 1 ).Ptr();
+            pMem = m_mem._Log( m_uLine, m_pFile ).Resize( x_uSize + 1 ).Ptr();
 		    if ( !oexVERIFY_PTR( pMem ) )
 			    return oexNULL;
 
@@ -208,7 +249,7 @@ public:
 	{	
 		// Ensure string
 		if ( !m_mem.Size() )
-			Allocate( 0 );
+			OexAllocate( 0 );
 
 		return m_mem.Ptr( m_lOffset );
 	}
@@ -227,7 +268,7 @@ public:
     {	
 		// Ensure string
 		if ( !m_mem.Size() )
-			Allocate( 0 );
+			OexAllocate( 0 );
 
         if ( x_lOffset )
         {
@@ -297,7 +338,7 @@ public:
     oexLONG SetLength( oexLONG x_lLength )
     {
         // Ensure we have that much data
-        if ( !Allocate( m_lOffset + x_lLength ) )
+        if ( !OexAllocate( m_lOffset + x_lLength ) )
             return 0;
 
         // Just accept the callers size
@@ -425,7 +466,7 @@ public:
 
         // Do we need to adjust the length?
         if ( x_uLen && x_uLen < ( uSize - x_uStart ) )
-        {   Allocate( m_lOffset + x_uLen );
+        {   OexAllocate( m_lOffset + x_uLen );
             m_lLength = m_lOffset + x_uLen;
         } // end if
 
@@ -447,15 +488,15 @@ public:
 
 		// Sanity checks
 		if ( !oexVERIFY_PTR( pStr ) || !uSize || uStart >= uSize ) 
-		{	Allocate( 0 ); return *this; }
+		{	OexAllocate( 0 ); return *this; }
 
 		// Was a length given?
 		if ( !uLen ) 
 			uLen = uSize - uStart;
 
         // Allocate memory for sub string
-		if ( !oexVERIFY( Allocate( uLen ) ) )
-		{	Allocate( 0 ); return *this; }
+		if ( !oexVERIFY( OexAllocate( uLen ) ) )
+		{	OexAllocate( 0 ); return *this; }
 
 		// Copy the sub string
 		m_mem.MemCpy( &pStr[ uStart ], uLen );
@@ -538,7 +579,7 @@ public:
 			Move( pPtr, lLen, g, b, i - g ), b = i, g = -1;
 
 		// Change the length of the string
-		Allocate( l );
+		OexAllocate( l );
 		m_lLength = l;
 
 		return *this;
@@ -580,7 +621,7 @@ public:
 			Move( pPtr, lLen, g, b, i - g ), b = i, g = -1;
 
 		// Change the length of the string
-		Allocate( l );
+		OexAllocate( l );
 		m_lLength = l;
 
 		return *this;
@@ -607,7 +648,7 @@ public:
         m_lOffset = 0;
 
 		// Allocate space for new string
-		if ( !oexVERIFY_PTR( Allocate( uSize ) ) || !uSize )
+		if ( !oexVERIFY_PTR( OexAllocate( uSize ) ) || !uSize )
 			return *this;
 		
 		// Copy the string data
@@ -622,13 +663,13 @@ public:
 	TStr& Set( oexCONST T x_chVal )
 	{
 		if ( !x_chVal )
-		{	Allocate( 0 ); return *this; }
+		{	OexAllocate( 0 ); return *this; }
 
         // Ditch the offset
         m_lOffset = 0;
 
 		// Allocate space for new string
-		T* pPtr = Allocate( 1 );
+		T* pPtr = OexAllocate( 1 );
 		if ( !oexVERIFY( pPtr ) )
 			return *this;
 
@@ -652,7 +693,7 @@ public:
 	{
 		// Allocate space for new string
 		oexUINT uOldSize = Length();
-		if ( !oexVERIFY( Allocate( uOldSize + uSize ) ) )
+		if ( !oexVERIFY( OexAllocate( uOldSize + uSize ) ) )
 			return *this;
 
 		// Append string
@@ -739,7 +780,7 @@ public:
 	{
 		// Verify input string
 		if ( !oexVERIFY( x_pFmt ) )
-		{	Allocate( 0 ); return *this; }
+		{	OexAllocate( 0 ); return *this; }
 
 		T* pPt = oexNULL;
 		oexRESULT res;
@@ -748,7 +789,7 @@ public:
 		{	
 			// Allocate buffer
 			// The - 1 is a performance boost, this keeps us under the TMemory block size.
-			T* pPtr = Allocate( uSize - 1 ); 
+			T* pPtr = OexAllocate( uSize - 1 ); 
 			if ( !oexVERIFY_PTR( pPtr ) )
 				return *this;
 
@@ -785,7 +826,7 @@ public:
 	/// Truncates results larger than 256 characters
     /// Optional pre and post trimming
 	TStr& SetNumTrim( oexCONST T* pFmt, oexCONST T* pLTrim, oexCONST T* pRTrim, ... )
-	{   os::CSys::vStrFmt( Allocate( 256 ), 256, pFmt, ( ( (oexPVOID*)&pRTrim ) + 1 ) );
+	{   os::CSys::vStrFmt( OexAllocate( 256 ), 256, pFmt, ( ( (oexPVOID*)&pRTrim ) + 1 ) );
         if ( pLTrim ) LTrim( pLTrim );
         if ( pRTrim ) RTrim( pRTrim );
         return *this;
@@ -804,7 +845,7 @@ public:
     /// Optional pre and post trimming
 	TStr& AppendNumTrim( oexCONST T* pFmt, oexCONST T* pLTrim, oexCONST T* pRTrim, ... )
 	{   TStr str;        
-   		os::CSys::vStrFmt( str.Allocate( 256 ), 256, pFmt, ( ( (oexPVOID*)&pRTrim ) + 1 ) );
+   		os::CSys::vStrFmt( str.OexAllocate( 256 ), 256, pFmt, ( ( (oexPVOID*)&pRTrim ) + 1 ) );
         if ( pLTrim ) str.LTrim( pLTrim );
         if ( pRTrim ) str.RTrim( pRTrim );
         return Append( str );
@@ -816,7 +857,7 @@ public:
 
 	/// Converts a GUID to a string, if pGuid is NULL, a unique GUID is created
 	TStr& GuidToString( oexCONST oexGUID *x_pGuid = oexNULL )
-	{	guid::GuidToString( Allocate( 36 /* + 1 is implicit*/ ), 37, x_pGuid ); 
+	{	guid::GuidToString( OexAllocate( 36 /* + 1 is implicit*/ ), 37, x_pGuid ); 
 		oexVERIFY( Length() == 36 );
 		return *this; 		
 	}
@@ -1295,6 +1336,27 @@ private:
     /// Offset into the string, this is invaluable for text parsing
     oexINT          m_lOffset;
     
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+
+public:
+    
+    /// Registers the source file and line number
+    TStr& _Log( oexUINT x_uLine, oexCSTR x_pFile )
+    {   m_uLine = x_uLine;
+        m_pFile = x_pFile;
+        return *this;
+    }
+
+private:
+
+    /// Holds the line number of the allocating call
+    oexUINT         m_uLine;
+
+    /// Holds the file name of the allocating call
+    oexCSTR         m_pFile;
+
+#endif
+
 };
 
 

@@ -161,6 +161,16 @@ public:
                                                   - sizeof( m_ucUnderrunPadding ) );
     }
 
+    /// Returns the block header
+    /**
+        \param [in] x_pBuf  -   Protected memory pointer
+    */
+    static inline SBlockHeader* GetBlockHeader( oexCPVOID x_pBuf )
+    {
+        return (SBlockHeader*)( (oexUCHAR*)x_pBuf - sizeof( m_ucUnderrunPadding )
+                                                  - sizeof( SBlockHeader ) );
+    }
+
     /// Returns the size of the usable block
     /**
         \param [in] x_pBuf  -   Protected memory pointer
@@ -270,6 +280,10 @@ public:
         if ( x_bConstructed )
             CAlloc::SetFlags( pPtr, CAlloc::eF1Constructed );
 
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
         return pPtr;
     }
 
@@ -292,14 +306,27 @@ public:
 
         } // end if
 
-        return Free( x_pPtr, m_uLine, m_pFile, 2 );
+        oexBOOL bRet = Free( x_pPtr, m_uLine, m_pFile, 2 );
+
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
+
+        return bRet;
     }
 
     /// Generic resize
     template< typename T >
         T* Resize( T* x_pPtr, oexUINT x_uNewSize )
     {
-        return (T*)ReAlloc( x_pPtr, x_uNewSize * sizeof( T ), m_uLine, m_pFile, 1 );
+        T* pPtr = (T*)ReAlloc( x_pPtr, x_uNewSize * sizeof( T ), m_uLine, m_pFile, 1 );
+
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
+        return pPtr;
     }
 
     template< typename T >

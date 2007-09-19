@@ -110,7 +110,7 @@ oex::oexRESULT TestAllocator()
 
         oex::TMem< char > mem;
         
-        if ( !oexVERIFY_PTR( mem.New( 13 ).c_Ptr() ) )
+        if ( !oexVERIFY_PTR( mem.OexNew( 13 ).c_Ptr() ) )
             return -10;
 
         // Check overrun protection
@@ -124,26 +124,26 @@ oex::oexRESULT TestAllocator()
 
         oex::TMem< CMyClass > mem;
 
-        if ( !oexVERIFY_PTR( mem.Construct().c_Ptr() ) )
+        if ( !oexVERIFY_PTR( mem.OexConstruct().c_Ptr() ) )
             return -11;
 
         if ( !oexVERIFY( 1234 == mem.Ptr()->x ) )
             return -12;
 
-        if ( !oexVERIFY_PTR( mem.Construct( 10 ).c_Ptr() ) )
+        if ( !oexVERIFY_PTR( mem.OexConstruct( 10 ).c_Ptr() ) )
             return -13;
 
         if ( !oexVERIFY( 10 == mem.Ptr()->x ) )
             return -14;
 
-        if ( !oexVERIFY_PTR( mem.ConstructArray( 2, 12 ).c_Ptr() ) )
+        if ( !oexVERIFY_PTR( mem.OexConstructArray( 2, 12 ).c_Ptr() ) )
             return -15;
 
         if ( !oexVERIFY( 12 == mem.Ptr( 0 )->x && 12 == mem.Ptr( 1 )->x ) )
             return -16;
 
         // Strange allocation method
-        CMyClass *pMc = oex::TMem< CMyClass >().Construct().Detach();
+        CMyClass *pMc = oex::TMem< CMyClass >().OexConstruct().Detach();
 
         oex::TMem< CMyClass >( pMc ).Delete();
 
@@ -158,11 +158,33 @@ oex::oexRESULT TestAllocator()
 
         oex::TMem< CMyClass > mem;
 
-        if ( !oexVERIFY_PTR( mem.ConstructArray( 4 ).c_Ptr() ) )
+        if ( !oexVERIFY_PTR( mem.OexConstructArray( 4 ).c_Ptr() ) )
             return -17;
 
         if ( !oexVERIFY( 2 == mem.Resize( 2 ).Size() ) )
             return -18;        
+
+    } // end scope
+
+    { // Scope
+
+        oex::TMem< char > mem;
+
+        // Work out the resize function
+        const oex::oexUINT uTestSize = 1000;
+        for ( oex::oexUINT i = 0; i < uTestSize; i++ )
+        {
+            if ( !oexVERIFY_PTR( mem.OexResize( i + 1 ).c_Ptr() ) )
+                return -20;
+
+            *mem.Ptr( i ) = (char)i;
+
+        } // end for
+
+        // Verify the memory data
+        for ( oex::oexUINT i = 0; i < uTestSize; i++ )
+            if ( !oexVERIFY( *mem.Ptr( i ) == (char)i ) )
+                return -21;
 
     } // end scope
 
@@ -268,7 +290,7 @@ oex::oexRESULT TestStrings()
 //        oex::oexSTR pOvPtr = str1.Allocate( 4 );
 //        pOvPtr--; *pOvPtr = 1;
 
-    if ( !oexVERIFY_PTR( pStr = str1.Allocate( 12 ) ) )
+    if ( !oexVERIFY_PTR( pStr = str1.OexAllocate( 12 ) ) )
         return -1;
 
     oex::zstr::Copy( pStr, "Hello World!" );
@@ -776,8 +798,16 @@ oex::oexRESULT TestParser()
     if ( !oexVERIFY( oex::CParser::Serialize( pb2 ) == sStr ) )
         return -23;
 
-    pb.Destroy();
-/*
+    pb2 = ReturnTest( pb );
+
+    if ( !oexVERIFY( oex::CParser::Serialize( pb2 ) == sStr ) )
+        return -24;
+
+    if ( !oexVERIFY( !pb.Size() ) )
+        return -25;    
+     
+    pb2.Destroy();
+
 	pb[ "1" ] = "1";
 	pb[ "1" ][ "a" ] = "1a";
 	pb[ "1" ][ "b" ] = "1b";
@@ -796,7 +826,7 @@ oex::oexRESULT TestParser()
     pb2 = oex::CParser::Deserialize( sStr );
     oex::CStr sStr2 = oex::CParser::Serialize( pb2 );
 
-/*    if ( !oexVERIFY( oex::CParser::Serialize( pb2 ) == sStr ) )
+    if ( !oexVERIFY( oex::CParser::Serialize( pb2 ) == sStr ) )
        return -24;
 
     pb.Destroy();
@@ -842,11 +872,10 @@ oex::oexRESULT TestParser()
     if ( !oexVERIFY( pb[ "x" ][ "a" ].ToString() == "b" ) )
         return -31;
         
-
 /*
-	CPropertyBag url = oex::CParser::DecodeUrlParams( "a=b&c=d&e=&f" );
+    oex::CPropertyBag url = oex::CParser::DecodeUrlParams( "a=b&c=d&e=&f" );
 
-	CPropertyBag url_enc = oex::CParser::CompileTemplate( "_pre_ : [url] = {url} / _sep_ . _end_ ;" );
+	oex::CPropertyBag url_enc = oex::CParser::CompileTemplate( "_pre_ : [url] = {url} / _sep_ . _end_ ;" );
 
 	oexTRACE( "%s\n", oex::CParser::Encode( url, url_enc ).Ptr() );
 

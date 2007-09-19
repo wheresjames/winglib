@@ -53,6 +53,8 @@
 #define OexConstructArray       _Log( __LINE__, __FILE__ ).ConstructArray
 #define OexDestruct             _Log( __LINE__, __FILE__ ).Destruct
 
+#define OexAllocate             _Log( __LINE__, __FILE__ ).Allocate
+
 template < class T_BASE > class TClassFactoryBase
 {
 public:

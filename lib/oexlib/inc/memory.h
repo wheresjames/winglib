@@ -55,6 +55,10 @@ public:
     {   
         m_pMem = oexNULL;
 
+#if defined ( _DEBUG )
+        m_pBh = oexNULL;
+#endif
+
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -64,6 +68,13 @@ public:
     TMem( T* x_pMem, oexBOOL x_bConstructed = oexTRUE ) 
     {   
         m_pMem = x_pMem;
+
+#if defined ( _DEBUG )
+        if ( m_pMem )
+            m_pBh = oexNULL;
+        else
+            m_pBh = CAlloc::GetBlockHeader( m_pMem );
+#endif
 
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
@@ -75,6 +86,10 @@ public:
     {   
         m_pMem = oexNULL;
 
+#if defined ( _DEBUG )
+        m_pBh = oexNULL;
+#endif
+
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -85,13 +100,18 @@ public:
     
     /// Copy operator
     TMem& operator = ( TMem &m )
-    {   return Assume( m ); }
+    {
+        return Assume( m ); 
+    }
     
     /// Copy operator
     TMem& operator = ( oexCONST T &x_rObj )
-    {   Construct();
+    {
+        Construct();
+
         if ( Ptr() )
             *Ptr() = x_rObj;
+
         return *this; 
     }
     
@@ -109,7 +129,10 @@ public:
         
     */
     TMem& SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
-    {   m_fm.SetName( x_pName, x_uLen ); return *this; }
+    {   
+        m_fm.SetName( x_pName, x_uLen ); 
+        return *this; 
+    }
 
     /// Detaches from memory pointer
     /**
@@ -136,8 +159,19 @@ public:
 
         // Allocate plain old memory
         else
-            m_pMem = CAlloc()._Log( m_uLine, m_pFile ).New< T >( x_uSize, x_bConstructed );
+            m_pMem = CAlloc( m_uLine, m_pFile ).New< T >( x_uSize, x_bConstructed );
 
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
+
+#if defined ( _DEBUG )
+        if ( !Ptr() )
+            m_pBh = oexNULL;
+        else
+            m_pBh = CAlloc::GetBlockHeader( Ptr() );
+#endif
         return *this;
     }   
 
@@ -190,6 +224,7 @@ public:
             m_fm.Destroy();
 
         } // end if
+
     }
 
     void Destruct()
@@ -235,7 +270,7 @@ public:
             if ( !pMem )
             {
                 TMem< T > mem;
-                if ( !oexVERIFY_PTR( mem.New( x_uNewSize ).Ptr() ) )
+                if ( !oexVERIFY_PTR( mem._Log( m_uLine, m_pFile ).New( x_uNewSize ).Ptr() ) )
                     return *this;
 
                 // Constructed?
@@ -267,16 +302,12 @@ public:
 
         } // end else
 
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
+
         return *this;
-    }
-
-    /// Reallocates memory
-    TMem& Reallocate( oexUINT x_uNewSize )
-    {
-        +++
-        
-
-
     }
 
 	//==============================================================
@@ -365,6 +396,12 @@ public:
             m_fm = x_m.m_fm; x_m.m_fm.Detach();
         } // end if
 
+#if defined ( _DEBUG )
+        if ( !Ptr() )
+            m_pBh = oexNULL;
+        else
+            m_pBh = CAlloc::GetBlockHeader( Ptr() );
+#endif
         return *this;
     }
 
@@ -406,7 +443,7 @@ public:
                 if ( x_m.IsConstructed() )
                 {
                     // Create array of objects
-                    ConstructArray( uSize );
+                    OexConstructArray( uSize );
 
                     // Copy objects 
                     // +++ Casting away const
@@ -457,6 +494,12 @@ public:
         else if ( x_m.m_pMem )
             CAlloc().AddRef( ( m_pMem = x_m.m_pMem ) );
 
+#if defined ( _DEBUG )
+        if ( !Ptr() )
+            m_pBh = oexNULL;
+        else
+            m_pBh = CAlloc::GetBlockHeader( Ptr() );
+#endif
         return *this;
     }
 
@@ -470,6 +513,12 @@ public:
         if ( x_pMem )
             CAlloc().AddRef( ( m_pMem = (T*)x_pMem ) );
 
+#if defined ( _DEBUG )
+        if ( !Ptr() )
+            m_pBh = oexNULL;
+        else
+            m_pBh = CAlloc::GetBlockHeader( Ptr() );
+#endif
         return *this;
     }
 
@@ -689,6 +738,13 @@ private:
 
     /// File mapping object for shared memory
     TFileMapping< T >       m_fm;
+
+#if defined( _DEBUG )
+
+    /// This is pulled out in the debug version just for debugging
+    CAlloc::SBlockHeader    *m_pBh;
+
+#endif
 
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 

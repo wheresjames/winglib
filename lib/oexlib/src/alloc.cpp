@@ -100,6 +100,14 @@ void CAlloc::ReportBlock( oexPVOID x_pMem, oexUINT uSize )
 
 oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex )
 {
+    // If this asserts you didn't use the logging macro
+    // Instead of Allocate, use OexAllocate
+    // Instead of New use OexNew 
+    // Construct to OexConstruct
+    // ConstructArray to OexConstructArray
+    // etc...
+    oexVERIFY( x_pFile );
+
     // Allocate memory in powers of two
     oexUINT uBlockSize = cmn::NextPower2( sizeof( oexUINT ) + x_uSize + ProtectAreaSize() );
 
@@ -142,7 +150,7 @@ oexPVOID CAlloc::ReAlloc( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, 
 {
     // Do we have the space to resize?
     oexUINT uBlockSize = BlockSize( x_pBuf );
-    if ( uBlockSize < x_uNewSize ) 
+    if ( uBlockSize < ( x_uNewSize + ProtectAreaSize() + sizeof( oexUINT ) ) ) 
         return oexNULL;
 
     // Resize the protected memory area
