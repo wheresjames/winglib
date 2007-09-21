@@ -733,7 +733,6 @@ oex::oexRESULT TestPropertyBag()
 
 	pbii[ 2 ] = 2;
 
-
 	oex::TPropertyBag< oex::oexINT, oex::CStr > pbis;
 
 	pbis[ 2 ] = "2";
@@ -825,11 +824,11 @@ oex::oexRESULT TestParser()
     sStr = oex::CParser::Serialize( pb );
     pb2 = oex::CParser::Deserialize( sStr );
     oex::CStr sStr2 = oex::CParser::Serialize( pb2 );
-
     if ( !oexVERIFY( oex::CParser::Serialize( pb2 ) == sStr ) )
        return -24;
 
     pb.Destroy();
+
     pb[ "1" ] = "111";
     pb[ "2" ] = "222";
     pb[ "3" ] = "333";
@@ -868,7 +867,6 @@ oex::oexRESULT TestParser()
     if ( !oexVERIFY( pb[ "x" ].IsKey( "a" ) ) )
         return -30;
 
-    oex::CStr s = pb[ "x" ][ "a" ].ToString();
     if ( !oexVERIFY( pb[ "x" ][ "a" ].ToString() == "b" ) )
         return -31;
         
@@ -1123,6 +1121,128 @@ oex::oexRESULT Test_CIpSocket()
     return oex::oexRES_OK;
 }
 
+oex::oexRESULT Test_CCircBuf()
+{
+    oex::CCircBuf cb;
+
+    oex::oexCSTR pStr = oexT( "Hello World" );
+    oex::oexUINT uStr = oex::zstr::Length( pStr );
+    oex::oexUINT uBufferedData = 0;
+
+    for ( oex::oexUINT i = 0; i < 1000; i++ )
+    {
+        for ( oex::oexUINT x = 0; x < 8; x++ )
+            cb.Write( pStr ), uBufferedData += uStr;
+
+        if ( !oexVERIFY( cb.Read( uStr ) == pStr ) )
+            return -1;
+
+        uBufferedData -= uStr;
+
+    } // end for
+
+    if ( !oexVERIFY( cb.GetMaxRead() == uBufferedData ) )
+        return -2;
+
+    // Shared memory buffer test
+    oex::CCircBuf sb1, sb2;
+
+    oex::CStr str; str.GuidToString();
+    sb1.SetName( str.Ptr() );
+    sb2.SetName( str.Ptr() );
+
+    sb1.Allocate( 100000 );
+    sb2.Allocate( 100000 );
+
+    uBufferedData = 0;
+    for ( oex::oexUINT i = 0; i < 1000; i++ )
+    {
+        for ( oex::oexUINT x = 0; x < 8; x++ )
+            sb1.Write( pStr ), uBufferedData += uStr;
+
+        if ( !oexVERIFY( sb2.Read( uStr ) == pStr ) )
+            return -3;
+
+        uBufferedData -= uStr;
+
+    } // end for
+
+    if ( !oexVERIFY( sb1.GetMaxRead() == uBufferedData ) )
+        return -4;
+
+    return oex::oexRES_OK;
+}
+
+oex::oexRESULT Test_CFifoSync()
+{
+    oex::CFifoSync fs;
+
+    oex::oexCSTR pStr = oexT( "Hello World" );
+    oex::oexUINT uStr = oex::zstr::Length( pStr );
+    oex::oexUINT uBufferedData = 0;
+
+    for ( oex::oexUINT i = 0; i < 10; i++ )
+    {
+        for ( oex::oexUINT x = 0; x < 8; x++ )
+            fs.Write( pStr, uStr ), uBufferedData++;
+
+        if ( !oexVERIFY( fs.Read() == pStr ) )
+            return -1;
+
+        uBufferedData--;
+
+    } // end for
+
+  	if ( !oexVERIFY( fs.GetUsedBuffers() == uBufferedData ) )
+        return -2;
+
+    return oex::oexRES_OK;
+}
+
+oex::oexRESULT Test_CDataPacket()
+{
+    oex::CDataPacket dp1, dp2;
+
+    oex::CStr sStr1 = "This is the first data string";
+    oex::CStr sStr2 = "This is the second data string";
+
+    // Write a packet of data
+    if ( !oexVERIFY( dp1.WritePacket( 1, 1, sStr1 ) )
+         || !oexVERIFY( dp1.WritePacket( 1, 2, sStr2 ) ) )
+        return -1;
+
+    // 'Transmit' packet
+    if ( !oexVERIFY( dp2.ReadPacket( dp1.Read() ) ) )
+        return -2;
+
+    // Verify the data
+    if ( !oexVERIFY( dp2.ReadPacketString( 0, 1 ) == sStr1 ) 
+         || !oexVERIFY( dp2.SkipPacket() )
+         || !oexVERIFY( dp2.ReadPacketString( 0, 2 ) == sStr2 ) )
+        return -3;
+
+    dp1.Destroy();
+    dp2.Destroy();
+    
+    // Write a packet of data
+    if ( !oexVERIFY( dp1.InitPacket( 1, 2, sStr1.Length() + sStr2.Length() ) )
+         || !oexVERIFY( dp1.AddPacketData( 1, sStr1 ) )
+         || !oexVERIFY( dp1.AddPacketData( 2, sStr2 ) ) 
+         || !oexVERIFY( dp1.EndPacket() ) )
+        return -1;
+
+    // 'Transmit' packet
+    if ( !oexVERIFY( dp2.ReadPacket( dp1.Read() ) ) )
+        return -2;
+
+    // Verify the data
+    if ( !oexVERIFY( dp2.ReadPacketString( 0, 1 ) == sStr1 )              
+         || !oexVERIFY( dp2.ReadPacketString( 0, 2 ) == sStr2 ) )
+        return -3;
+
+    return oex::oexRES_OK;
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -1151,9 +1271,15 @@ int main(int argc, char* argv[])
 
     Test_CSysTime();
     
+    Test_CCircBuf();
+
     Test_CIpAddress();
 
     Test_CIpSocket();
+
+    Test_CFifoSync();
+
+    Test_CDataPacket();
 
 	// Initialize the oex library
     oexUNINIT();	

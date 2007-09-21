@@ -74,12 +74,33 @@ public:
 	/// Destructor
 	virtual ~CTlLock() 
     { 
-        if ( m_hMutex ) 
-        { 
-            os::CMutex::osDestroyMutex( m_hMutex ); 
-            m_hMutex = oexNULL; 
+        Destroy();
+    }
 
+    void Destroy()
+    {
+        if ( m_hMutex ) 
+        {   os::CMutex::osDestroyMutex( m_hMutex ); 
+            m_hMutex = oexNULL; 
         } // end if
+    }
+
+	//==============================================================
+	// Create()
+	//==============================================================
+	/// Creates named lock object
+	/**
+		\param [in] x_pName	-	Name for mutex
+	*/
+	oexBOOL Create( oexCSTR x_pName = oexNULL ) 
+    { 
+        // Lose the old lock
+        Destroy();
+
+        m_bLocked = oexFALSE; 
+        m_uRef = 0; 
+        m_hMutex = os::CMutex::osCreateMutex( x_pName ); 
+        return os::CMutex::vInvalid() != m_hMutex;
     }
 
 	//==============================================================

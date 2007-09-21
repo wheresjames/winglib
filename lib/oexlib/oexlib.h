@@ -499,6 +499,11 @@ namespace os
 #include "inc/zip.h"
 #include "inc/unzip.h"
 #include "inc/find_files.h"
+#include "inc/circ_buf.h"
+#include "inc/fifo_sync.h"
+#include "inc/data_packet.h"
+
+
 /*
 #include "inc/dispatch.h"
 #include "inc/file.h"

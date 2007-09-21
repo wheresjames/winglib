@@ -181,11 +181,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\circ_buf.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\data_packet.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\os\win32\debug.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\os\win32\event.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\fifo_sync.cpp"
 				>
 			</File>
 			<File
@@ -270,11 +282,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\inc\circ_buf.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\data_packet.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\inc\os\debug.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\inc\os\event.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\fifo_sync.h"
 				>
 			</File>
 			<File
@@ -387,6 +411,10 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\sys_time.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\thread_safe.h"
 				>
 			</File>
 			<File

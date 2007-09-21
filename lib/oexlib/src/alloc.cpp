@@ -98,7 +98,7 @@ void CAlloc::ReportBlock( oexPVOID x_pMem, oexUINT uSize )
 
 }
 
-oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex )
+oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex, oexBOOL x_bUseFullBlock )
 {
     // If this asserts you didn't use the logging macro
     // Instead of Allocate, use OexAllocate
@@ -111,6 +111,13 @@ oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUI
     // Allocate memory in powers of two
     oexUINT uBlockSize = cmn::NextPower2( sizeof( oexUINT ) + x_uSize + ProtectAreaSize() );
 
+    // Does user want all allocated space?
+    if ( x_bUseFullBlock )
+
+        // Maximum useable space for the block size
+        x_uSize = uBlockSize - ( sizeof( oexUINT ) + ProtectAreaSize() );
+   
+    // Ok, get the memory
     oexUCHAR *pBuf = (oexUCHAR*)os::CMem::New( uBlockSize, x_uLine, x_pFile );
     if ( !pBuf )
         return oexNULL;

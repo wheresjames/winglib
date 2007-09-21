@@ -36,8 +36,7 @@
 
 /// Generic memory allocator
 /**
-    Memory allocator.  Transparently supports regular and shared
-    memory.
+    Memory allocator.  Transparently supports heap and file mapping.
 
     \warning When using shared memory, constructors are called only
              when the memory block is created.  The destructor is
@@ -134,6 +133,12 @@ public:
         return *this; 
     }
 
+    /// Returns the shared name
+    oexCSTR GetName()
+    {
+        return m_fm.GetName();
+    }
+
     /// Detaches from memory pointer
     /**
         You can't detach from a shared memory pointer using this function!
@@ -148,7 +153,7 @@ public:
     oexBOOL IsMapped() const
     {   return 0 < m_fm.Size(); }
     
-    TMem& New( oexUINT x_uSize, oexBOOL x_bConstructed = oexFALSE )
+    TMem& New( oexUINT x_uSize, oexBOOL x_bConstructed = oexFALSE, oexBOOL x_bUseFullBlock = oexFALSE )
     {
         // Lose old memory
         Delete();
@@ -159,7 +164,7 @@ public:
 
         // Allocate plain old memory
         else
-            m_pMem = CAlloc( m_uLine, m_pFile ).New< T >( x_uSize, x_bConstructed );
+            m_pMem = CAlloc( m_uLine, m_pFile ).New< T >( x_uSize, x_bConstructed, x_bUseFullBlock );
 
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
@@ -177,11 +182,13 @@ public:
 
     oexUINT Size() const
     {
-        if ( !m_pMem )
+        oexCONST T *pPtr = c_Ptr();
+
+        if ( !pPtr )
             return 0;
 
         if ( sizeof( T ) )
-            return CAlloc().ArraySize( m_pMem );
+            return CAlloc().ArraySize( pPtr );
         else
             return 0;
     }
@@ -331,13 +338,15 @@ public:
     */
     T* Ptr( oexUINT x_uOffset )
     {
-        // Out of bounds
-        oexASSERT( m_pMem && Size() > x_uOffset );
+        T* pPtr = Ptr();
 
-        if ( m_pMem ) 
-            return &m_pMem[ x_uOffset ];
-           
-        return m_fm.Ptr( x_uOffset );
+        // Out of bounds
+        oexASSERT( pPtr && Size() > x_uOffset );
+
+        if ( !pPtr ) 
+            return oexNULL;
+        
+        return &pPtr[ x_uOffset ];          
     }
 
 	//==============================================================
@@ -361,13 +370,39 @@ public:
     */
     oexCONST T* c_Ptr( oexUINT x_uOffset ) const
     {
-        // Out of bounds
-        oexASSERT( m_pMem && Size() > x_uOffset );
+        oexCONST T* pPtr = c_Ptr();
 
-        if ( m_pMem ) 
-            return &m_pMem[ x_uOffset ];
-           
-        return m_fm.c_Ptr( x_uOffset );
+        // Out of bounds
+        oexASSERT( pPtr && Size() > x_uOffset );
+
+        if ( !pPtr ) 
+            return oexNULL;
+        
+        return &pPtr[ x_uOffset ];          
+    }
+
+	//==============================================================
+	// Ptr()
+	//==============================================================
+	/// Returns a reference to the element
+    /**
+        I didn't want to provide this function since it is so easy 
+        to abuse.  You should really make sure the index exists
+        before you call this function.
+    */
+    T& operator [] ( oexUINT x_uOffset )
+    {
+        // Ensure index
+        if ( Size() <= x_uOffset )
+            Resize( x_uOffset );
+
+        // Really ensure
+        if ( Size() <= x_uOffset )
+        {   oexASSERT( 0 );
+            x_uOffset = 0;
+        } // end if
+
+        return *Ptr( x_uOffset ); 
     }
 
 public:

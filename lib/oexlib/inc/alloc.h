@@ -258,7 +258,7 @@ public:
 public:
 
     /// Genric block allocation
-    static oexPVOID Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex );
+    static oexPVOID Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex, oexBOOL x_bUseFullBlock = oexFALSE );
 
     /// Generic block free
     static oexBOOL Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex );
@@ -270,9 +270,9 @@ public:
 
     /// Generic new function
     template< typename T >
-        T* New( oexUINT x_uSize, oexBOOL x_bConstructed = oexFALSE )
+        T* New( oexUINT x_uSize, oexBOOL x_bConstructed = oexFALSE, oexBOOL x_bUseFullBlock = oexFALSE )
     {
-        T* pPtr = (T*)Alloc( x_uSize * sizeof( T ), m_uLine, m_pFile, 0 );
+        T* pPtr = (T*)Alloc( x_uSize * sizeof( T ), m_uLine, m_pFile, 0, x_bUseFullBlock );
         if ( !pPtr )
             return oexFALSE;
 
