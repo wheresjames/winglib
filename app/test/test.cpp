@@ -3,28 +3,50 @@
 
 #include "stdafx.h"
 
-class CMyClass
-{
-public:
+    class CTestMonitor
+    {   public: 
+        CTestMonitor() { m_uConstructed = m_uDestructed = 0; m_uValue = 0; }
+        void Reset() { m_uConstructed = m_uDestructed = 0; m_uValue = 0; }
+        oex::oexUINT m_uConstructed;
+        oex::oexUINT m_uDestructed;
+        oex::oexUINT m_uValue;
+    };
 
-    int x;
+    // Base test object
+    class CBaseTestObject
+    {   public:
+        CBaseTestObject()
+        {   m_bConstructed = oex::oexTRUE; 
+            m_pMon = oexNULL; 
+            m_uValue = 0; 
+        }
+        CBaseTestObject( CTestMonitor *pMon )
+        {   m_bConstructed = oex::oexTRUE; 
+            m_uValue = 0; 
+            m_pMon = pMon; 
+            if ( m_pMon ) 
+                m_pMon->m_uConstructed++; 
+        }
+        ~CBaseTestObject()
+        {   if ( m_pMon ) 
+                m_pMon->m_uDestructed++; 
+        }
+        void SetMonitor( CTestMonitor *pMon )
+        {   m_pMon = pMon; }
+        void SetValue( oex::oexUINT uValue ) 
+        {   m_uValue = uValue; 
+            if ( m_pMon ) 
+                m_pMon->m_uValue += uValue; 
+        }        
+        oex::oexUINT GetValue() { return m_uValue; }        
+    private:
+        CTestMonitor        *m_pMon;
+        oex::oexBOOL         m_bConstructed;
+        oex::oexUINT         m_uValue;
+    };
 
-    CMyClass()
-    {
-        x = 1234;
-    }
-
-    CMyClass( int x_x )
-    {
-        x = x_x;
-    }
-
-    ~CMyClass()
-    {
-        x = 5678;
-    }
-
-};
+    template < typename T > 
+    	static T ReturnTest( T t ) { return t; }
 
 oex::oexRESULT TestAllocator()
 {
@@ -88,23 +110,35 @@ oex::oexRESULT TestAllocator()
     OexAllocDelete( buf );
 
     // Allocate single object
-    CMyClass *p = OexAllocConstruct< CMyClass >( 11 );
+    CTestMonitor tm;
+    CBaseTestObject *p = OexAllocConstruct< CBaseTestObject >( &tm );
 
     if ( !oexVERIFY_PTR( p ) )
         return -7;
 
-    if ( !oexVERIFY( 11 == p->x ) )
+    if ( !oexVERIFY( 1 == tm.m_uConstructed ) )
         return -8;
 
     OexAllocDestruct( p );
 
+    if ( !oexVERIFY( 1 == tm.m_uDestructed ) )
+        return -9;
+
 
     // Allocate array
-    p = OexAllocConstructArray< CMyClass >( 3, 12 );
+    tm.Reset();
+    p = OexAllocConstructArray< CBaseTestObject >( 3, &tm );
+
     if ( !oexVERIFY( p ) )
         return -9;
 
+    if ( !oexVERIFY( 3 == tm.m_uConstructed ) )
+        return -8;
+
     OexAllocDestruct( p );
+
+    if ( !oexVERIFY( 3 == tm.m_uDestructed ) )
+        return -9;
 
     { // Scope
 
@@ -122,30 +156,33 @@ oex::oexRESULT TestAllocator()
 
     { // Scope
 
-        oex::TMem< CMyClass > mem;
+        CTestMonitor tm;
+        oex::TMem< CBaseTestObject > mem;
 
-        if ( !oexVERIFY_PTR( mem.OexConstruct().c_Ptr() ) )
+        if ( !oexVERIFY_PTR( mem.OexConstruct( &tm ).c_Ptr() ) )
             return -11;
 
-        if ( !oexVERIFY( 1234 == mem.Ptr()->x ) )
+        if ( !oexVERIFY( 1 == tm.m_uConstructed ) )
             return -12;
 
-        if ( !oexVERIFY_PTR( mem.OexConstruct( 10 ).c_Ptr() ) )
+        tm.Reset();
+        if ( !oexVERIFY_PTR( mem.OexConstruct( &tm ).c_Ptr() ) )
             return -13;
 
-        if ( !oexVERIFY( 10 == mem.Ptr()->x ) )
+        if ( !oexVERIFY( 1 == tm.m_uConstructed ) )
             return -14;
 
-        if ( !oexVERIFY_PTR( mem.OexConstructArray( 2, 12 ).c_Ptr() ) )
+        tm.Reset();
+        if ( !oexVERIFY_PTR( mem.OexConstructArray( 2, &tm ).c_Ptr() ) )
             return -15;
 
-        if ( !oexVERIFY( 12 == mem.Ptr( 0 )->x && 12 == mem.Ptr( 1 )->x ) )
+        if ( !oexVERIFY( 2 == tm.m_uConstructed ) )
             return -16;
 
         // Strange allocation method
-        CMyClass *pMc = oex::TMem< CMyClass >().OexConstruct().Detach();
+        CBaseTestObject *pBto = oex::TMem< CBaseTestObject >().OexConstruct().Detach();
 
-        oex::TMem< CMyClass >( pMc ).Delete();
+        oex::TMem< CBaseTestObject >( pBto ).Delete();
 
         // Check overrun protection
 //        mem.OexResize( 12 );
@@ -156,13 +193,20 @@ oex::oexRESULT TestAllocator()
 
     { // Scope
 
-        oex::TMem< CMyClass > mem;
+        CTestMonitor tm;
+        oex::TMem< CBaseTestObject > mem;
 
-        if ( !oexVERIFY_PTR( mem.OexConstructArray( 4 ).c_Ptr() ) )
+        if ( !oexVERIFY_PTR( mem.OexConstructArray( 4, &tm ).c_Ptr() ) )
             return -17;
 
         if ( !oexVERIFY( 2 == mem.Resize( 2 ).Size() ) )
             return -18;        
+
+        if ( !oexVERIFY( 4 == tm.m_uConstructed ) )
+            return -12;
+
+        if ( !oexVERIFY( 2 == tm.m_uDestructed ) )
+            return -12;
 
     } // end scope
 
@@ -196,7 +240,7 @@ oex::oexRESULT TestFileMapping()
     oex::TFileMapping< char > fm;
 
     const oex::oexUINT uSize = 150;
-    if ( !oexVERIFY( fm.Create( 0, "Test", uSize ) ) )
+    if ( !oexVERIFY( fm.Create( 0, 0, "Test", uSize ) ) )
         return -1;
     
     if ( !oexVERIFY( fm.Size() == uSize ) )
@@ -214,7 +258,7 @@ oex::oexRESULT TestFileMapping()
 
 
     oex::TFileMapping< char > fm2;
-    if ( !oexVERIFY( fm2.Create( 0, "Test", uSize ) ) )
+    if ( !oexVERIFY( fm2.Create( 0, 0, "Test", uSize ) ) )
         return -5;
 
     if ( !oexVERIFY( fm.Size() == uSize ) )
@@ -224,13 +268,28 @@ oex::oexRESULT TestFileMapping()
         return -7;
 
 
-    oex::TMem< CMyClass > mm, mm2;
+    CTestMonitor tm;
+    oex::TMem< CBaseTestObject > mm, mm2;
     
-    if ( !oexVERIFY( 10 == mm.SetName( "Name" ).Construct( 10 ).Ptr()->x ) )
+    if ( !oexVERIFY(  mm.SetName( "Name" ).Construct( &tm ).Ptr() ) )
         return -8;
 
-    if ( !oexVERIFY( 10 == mm2.SetName( "Name" ).Construct( 11 ).Ptr()->x ) )
+    mm.Ptr()->SetValue( 111 );
+
+    if ( !oexVERIFY( mm2.SetName( "Name" ).Construct( &tm ).Ptr() ) )
         return -9;
+
+    if ( !oexVERIFY( 1 == tm.m_uConstructed ) )
+        return -12;
+
+    if ( !oexVERIFY( 111 == mm2.Ptr()->GetValue() ) )
+        return -9;
+
+    mm.Delete();
+    mm2.Delete();
+
+    if ( !oexVERIFY( 1 == tm.m_uDestructed ) )
+        return -12;
 
     return oex::oexRES_OK;
 }
@@ -272,9 +331,6 @@ oex::oexRESULT TestGuids()
 
     return oex::oexRES_OK;
 }
-
-template < typename T > 
-	static T ReturnTest( T t ) { return t; }
 
 oex::oexRESULT TestStrings()
 {      
@@ -1147,9 +1203,8 @@ oex::oexRESULT Test_CCircBuf()
     // Shared memory buffer test
     oex::CCircBuf sb1, sb2;
 
-    oex::CStr str; str.GuidToString();
-    sb1.SetName( str.Ptr() );
-    sb2.SetName( str.Ptr() );
+    sb1.SetName( oex::CStr().GuidToString().Ptr() );
+    sb2.SetName( sb1.GetName() );
 
     sb1.Allocate( 100000 );
     sb2.Allocate( 100000 );
@@ -1177,6 +1232,8 @@ oex::oexRESULT Test_CFifoSync()
 {
     oex::CFifoSync fs;
 
+    fs.SetMaxBuffers( 10000 );
+
     oex::oexCSTR pStr = oexT( "Hello World" );
     oex::oexUINT uStr = oex::zstr::Length( pStr );
     oex::oexUINT uBufferedData = 0;
@@ -1193,7 +1250,34 @@ oex::oexRESULT Test_CFifoSync()
 
     } // end for
 
+    oex::oexUINT uUsed = fs.GetUsedBuffers();
   	if ( !oexVERIFY( fs.GetUsedBuffers() == uBufferedData ) )
+        return -2;
+
+
+    // Shared memory buffer test
+    oex::CFifoSync fs1, fs2;
+
+    fs1.SetName( oex::CStr().GuidToString().Ptr() );
+    fs2.SetName( fs1.GetName() );
+
+    fs1.Allocate( 100000, 10000 );
+    fs2.Allocate( 100000, 10000 );
+
+    uBufferedData = 0;
+    for ( oex::oexUINT i = 0; i < 1000; i++ )
+    {
+        for ( oex::oexUINT x = 0; x < 8; x++ )
+            fs1.Write( pStr ), uBufferedData++;
+
+        if ( !oexVERIFY( fs2.Read() == pStr ) )
+            return -3;
+
+        uBufferedData--;
+
+    } // end for
+
+  	if ( !oexVERIFY( fs1.GetUsedBuffers() == uBufferedData ) )
         return -2;
 
     return oex::oexRES_OK;
@@ -1201,7 +1285,7 @@ oex::oexRESULT Test_CFifoSync()
 
 oex::oexRESULT Test_CDataPacket()
 {
-    oex::CDataPacket dp1, dp2;
+    oex::CDataPacket dp1, dp2, dp3;
 
     oex::CStr sStr1 = "This is the first data string";
     oex::CStr sStr2 = "This is the second data string";
@@ -1239,6 +1323,35 @@ oex::oexRESULT Test_CDataPacket()
     if ( !oexVERIFY( dp2.ReadPacketString( 0, 1 ) == sStr1 )              
          || !oexVERIFY( dp2.ReadPacketString( 0, 2 ) == sStr2 ) )
         return -3;
+
+    dp1.Destroy();
+    dp2.Destroy();
+
+    // Shared memory version
+    dp1.SetName( oex::CStr().GuidToString().Ptr() );
+    dp2.SetName( dp1.GetName() );
+
+    dp1.Allocate( 10000 );
+    dp2.Allocate( 10000 );
+
+    if ( !oexVERIFY( dp1.WritePacket( 1, 1, sStr1 ) )
+         || !oexVERIFY( dp1.WritePacket( 1, 2, sStr2 ) ) )
+        return -1;
+
+    if ( !oexVERIFY( dp3.ReadPacket( dp2.Read() ) ) )
+        return -2;
+
+    // Verify the data
+    if ( !oexVERIFY( dp3.ReadPacketString( 0, 1 ) == sStr1 ) 
+         || !oexVERIFY( dp3.SkipPacket() )
+         || !oexVERIFY( dp3.ReadPacketString( 0, 2 ) == sStr2 ) )
+        return -3;
+
+    return oex::oexRES_OK;
+}
+
+oex::oexRESULT Test_CThreadPool()
+{
 
     return oex::oexRES_OK;
 }
@@ -1280,6 +1393,8 @@ int main(int argc, char* argv[])
     Test_CFifoSync();
 
     Test_CDataPacket();
+
+    Test_CThreadPool();
 
 	// Initialize the oex library
     oexUNINIT();	

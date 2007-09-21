@@ -253,6 +253,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\os\win32\thread.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\os\win32\tls.cpp"
 				>
 			</File>
@@ -271,6 +275,10 @@
 			>
 			<File
 				RelativePath="..\..\inc\alloc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\arb_delegates.h"
 				>
 			</File>
 			<File
@@ -411,6 +419,10 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\sys_time.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\..\..\_Praesidium2_003\lib\dsl\inc\os\thread.h"
 				>
 			</File>
 			<File

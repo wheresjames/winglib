@@ -44,6 +44,35 @@
 	A real bummer is that it is apparently not straight forward to
 	get the size of an existing file mapping.  To counter this,
 	the size is saved in the mapping
+
+        {
+            // Do we need to destruct objects?
+            T* pPtr = m_fm.Ptr();
+
+            // Was the object constructed?
+            if ( CAlloc::eF1Constructed & CAlloc::GetFlags( pPtr ) 
+                 && 1 == CAlloc::GetRefCount( pPtr ) )
+            {
+                oexUINT uSize = Size();
+                for ( oexUINT i = 0; i < uSize; i++ )
+                    pPtr[ i ].~T();
+
+            } // end if
+
+            T* pPtr = m_fm.Ptr();
+            if ( pPtr )
+            {
+                // Add a reference to the memory
+                CAlloc::AddRef( pPtr );
+
+                // Save construction status if needed
+                if ( x_bConstructed )
+                    CAlloc::SetFlags( pPtr, CAlloc::eF1Constructed );
+
+            } // end if
+
+        } // end if
+
 */
 //==================================================================
 template < class T > class TFileMapping  
@@ -113,7 +142,18 @@ public:
 	{
 		if ( m_hFile && m_pPtr )
 		{
-            m_pPtr = (T*)CAlloc::VerifyMem( m_pPtr, !m_bExisting );
+            oexBOOL bDestroy = !CAlloc::DecRef( m_pPtr );
+
+            // Was the object constructed?
+            if ( bDestroy && CAlloc::eF1Constructed & CAlloc::GetFlags( m_pPtr ) )
+            {
+                oexUINT uSize = Size();
+                for ( oexUINT i = 0; i < uSize; i++ )
+                    m_pPtr[ i ].~T();
+
+            } // end if
+
+            m_pPtr = (T*)CAlloc::VerifyMem( m_pPtr, bDestroy );
             m_pPtr -= sizeof( oexUINT );
             
             os::CFMap::osReleaseFileMapping( m_hFile, m_pPtr );
@@ -140,7 +180,7 @@ public:
 	
 		\see 
 	*/
-    T* Create( oexCSTR x_pFile, oexCSTR x_pName, oexINT64 x_llSize, os::CFMap::etAccess x_uAccess = os::CFMap::eAccessAll )
+    T* Create( oexBOOL x_bConstructed, oexCSTR x_pFile, oexCSTR x_pName, oexINT64 x_llSize, os::CFMap::etAccess x_uAccess = os::CFMap::eAccessAll )
 	{
 		// Lose old file mapping
 		Destroy();
@@ -174,6 +214,13 @@ public:
         // Verify existing block
         if ( m_bExisting )
             CAlloc::VerifyMem( m_pPtr, oexFALSE );
+
+        // Set constructed flags if needed
+        else if ( x_bConstructed )
+            CAlloc::SetFlags( m_pPtr, CAlloc::eF1Constructed );
+
+        // Add a reference to the memory
+        CAlloc::AddRef( m_pPtr );
 
         return m_pPtr;
 	}
@@ -278,7 +325,7 @@ public:
 
         // Copy the share
         if ( x_m.m_pPtr )
-            Create( oexNULL, x_m.GetName(), x_m.Size() );
+            Create( oexFALSE, oexNULL, x_m.GetName(), x_m.Size() );
 
         // Don't need to copy data, it's shared memory remember?
 

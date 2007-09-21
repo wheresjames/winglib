@@ -231,8 +231,6 @@ public:
                                     - sizeof( m_ucUnderrunPadding ) ) )->uRef;
     }
 
-protected:
-
     /// Decreases the reference count on a memory block
     /**
         \param [in] x_pBuf  -   Protected memory pointer

@@ -125,10 +125,10 @@ public:
                                 NULL terminated.
         
     */
-    CCircBuf& SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
+    virtual oexCSTR SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
     {   NameEvents( x_pName );
         m_memBuffer.SetName( x_pName, x_uLen ); 
-        return *this; 
+        return x_pName; 
     }
 
 	//==============================================================
@@ -491,7 +491,7 @@ public:
 	// Destroy()
 	//==============================================================
 	/// Releases all resources associated with the circular buffer.
-	void Destroy();
+	virtual void Destroy();
 	
 	//==============================================================
 	// Write()
@@ -727,7 +727,7 @@ public:
 	
 		\see 
 	*/
-	oexBOOL Allocate( oexUINT x_uSize );
+	virtual oexBOOL Allocate( oexUINT x_uSize );
 
 	//==============================================================
 	// CCircBuf()

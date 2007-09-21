@@ -39,16 +39,35 @@ OEX_USING_NAMESPACE
 CFifoSync::CFifoSync()
 {
     // Must be power of two
-    m_uMaxBuffers = cmn::NextPower2( 256 );
+    m_uMaxBuffers = cmn::NextPower2( (oexUINT)eDefaultMaxBuffers );
 
-	m_uHeadPtr = 0;
-	m_uTailPtr = 0;
+    m_pBi = oexNULL;
+    m_pBuf = oexNULL;
 }
 
 CFifoSync::~CFifoSync()
-{
-
+{   Destroy2();
 }
+
+void CFifoSync::Destroy2()
+{
+	// Lock the buffer
+	CTlLocalLock ll( *this );
+	if ( !ll.IsLocked() ) 
+        return;
+
+    m_pBi = oexNULL;
+    m_pBuf = oexNULL;
+    m_auSize.Delete();
+
+    Destroy();
+}
+
+void CFifoSync::Destroy()
+{
+    CCircBuf::Destroy();
+}
+
 
 oexBOOL CFifoSync::Write( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT x_uEncode )
 {
@@ -77,10 +96,27 @@ oexBOOL CFifoSync::AllocateBuffers()
         return oexFALSE;
 
     // Ensure size tag space
-	if ( m_auSize.Size() != m_uMaxBuffers )
-//		if ( !m_auSize.ReSize( m_uMaxBuffers ) )        // +++ Would have to defrag the circular buffer
-            if ( !m_auSize.OexNew( m_uMaxBuffers ).Ptr() )
-			    return oexFALSE;
+	if ( m_auSize.Size() > m_uMaxBuffers )
+        return oexTRUE;
+
+    // Can' resize a mapped buffer
+    if ( m_pBi && m_auSize.IsMapped() )
+        return oexTRUE;
+
+
+//	if ( !m_auSize.ReSize( m_uMaxBuffers ) )        // +++ Would have to defrag the circular buffer
+        if ( !m_auSize.OexNew( m_uMaxBuffers + sizeof( SBufferInfo ) ).Ptr() )
+    	    return oexFALSE;
+
+    // Get a block info
+    m_pBi = (SBufferInfo*)m_auSize.Ptr();
+
+    // Get buffer pointer
+    m_pBuf = m_auSize.Ptr( sizeof( SBufferInfo ) );
+
+    // Save head and tail pointer
+    m_pBi->uHeadPtr = 0;
+    m_pBi->uTailPtr = 0;
 
 	return oexTRUE;
 }
@@ -92,12 +128,15 @@ oexBOOL CFifoSync::AddFifo( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT x_uEncode
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 
+    if ( !m_pBi )
+        return oexFALSE;
+
     // Poke the data into the buffer
 	if ( !Poke( x_pBuf, x_uSize, x_uEncode ) )
 		return oexFALSE;
 
 	// Keep track of the size of this sub buffer
-	m_auSize[ m_uHeadPtr ] += x_uSize;
+	m_pBuf[ m_pBi->uHeadPtr ] += x_uSize;
 
 	return oexTRUE;
 }
@@ -114,20 +153,24 @@ oexBOOL CFifoSync::InitFifoWrite()
         return oexFALSE;
 
 	// Do we have a buffer?
-	if ( !GetMaxWrite( m_uTailPtr, m_uHeadPtr, m_uMaxBuffers ) )
+	if ( !GetMaxWrite( m_pBi->uTailPtr, m_pBi->uHeadPtr, m_uMaxBuffers ) )
     {   
+        // Can't grow shared memory
+        if ( m_auSize.IsMapped() )
+            return oexFALSE;
+
         // Attempt to get more space
-        m_uMaxBuffers = cmn::NextPower2( m_uMaxBuffers + 1 );
+        m_uMaxBuffers = cmn::NextPower2( m_uMaxBuffers * 2 );
         if ( !AllocateBuffers() )
             return oexFALSE;
 
     } // end if
 
 	// Normalize the head pointer
-	m_uHeadPtr = NormalizePtr( m_uHeadPtr, m_uMaxBuffers );
+	m_pBi->uHeadPtr = NormalizePtr( m_pBi->uHeadPtr, m_uMaxBuffers );
 
 	// Initialize buffer pointers
-	m_auSize[ m_uHeadPtr ] = 0;
+	m_pBuf[ m_pBi->uHeadPtr ] = 0;
 
 	// Get ready to poke the buffer
 	InitPoke();
@@ -142,8 +185,11 @@ oexBOOL CFifoSync::EndFifoWrite()
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 
+    if ( !m_pBi )
+        return oexFALSE;
+
     // Advance the head pointer
-	m_uHeadPtr = AdvancePtr( m_uHeadPtr, 1, m_uMaxBuffers );
+	m_pBi->uHeadPtr = AdvancePtr( m_pBi->uHeadPtr, 1, m_uMaxBuffers );
 
 	return EndPoke();
 }
@@ -153,6 +199,9 @@ oexBOOL CFifoSync::Read( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oe
 	// Lock the buffer
 	CTlLocalLock ll( *this );
 	if ( !ll.IsLocked() ) 
+        return oexFALSE;
+
+    if ( !m_pBi )
         return oexFALSE;
 
     // Read the data block
@@ -170,6 +219,9 @@ oexBOOL CFifoSync::Read( CStr &x_sStr, oexUINT x_uMax )
 	// Lock the buffer
 	CTlLocalLock ll( *this );
 	if ( !ll.IsLocked() ) 
+        return oexFALSE;
+
+    if ( !m_pBi )
         return oexFALSE;
 
     oexUINT uRead = 0;
@@ -208,6 +260,9 @@ oexBOOL CFifoSync::Peek( CStr &x_sStr, oexUINT x_uMax )
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 
+    if ( !m_pBi )
+        return oexFALSE;
+
     oexUINT uRead = 0;
     oexBOOL bRet = Peek( oexNULL, 0, &uRead );
 
@@ -243,19 +298,22 @@ oexBOOL CFifoSync::SkipBlock()
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 
+    if ( !m_pBi )
+        return oexFALSE;
+
 	// Anything to read?
-	if ( !GetMaxRead( m_uTailPtr, m_uHeadPtr, m_uMaxBuffers ) )
+	if ( !GetMaxRead( m_pBi->uTailPtr, m_pBi->uHeadPtr, m_uMaxBuffers ) )
 		return oexFALSE;
 
 	// Skip to the next block
-	AdvanceReadPtr( m_auSize[ m_uTailPtr ] );
+	AdvanceReadPtr( m_pBuf[ m_pBi->uTailPtr ] );
 
 	// Advance the tail pointer
-	m_uTailPtr = NormalizePtr( AdvancePtr( m_uTailPtr, 1, m_uMaxBuffers ), m_uMaxBuffers );
+	m_pBi->uTailPtr = NormalizePtr( AdvancePtr( m_pBi->uTailPtr, 1, m_uMaxBuffers ), m_uMaxBuffers );
 
 	// Wrap pointers if buffer is empty
-	if ( m_uTailPtr == NormalizePtr( m_uHeadPtr, m_uMaxBuffers ) && m_uTailPtr == 0 )
-		m_uTailPtr = m_uHeadPtr = 0;
+	if ( m_pBi->uTailPtr == NormalizePtr( m_pBi->uHeadPtr, m_uMaxBuffers ) && m_pBi->uTailPtr == 0 )
+		m_pBi->uTailPtr = m_pBi->uHeadPtr = 0;
 
 	return oexTRUE;
 }
@@ -267,8 +325,11 @@ oexBOOL CFifoSync::Peek( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oe
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 
+    if ( !m_pBi )
+        return oexFALSE;
+
 	// Anything to read?
-	if ( !GetMaxRead( m_uTailPtr, m_uHeadPtr, m_uMaxBuffers ) )
+	if ( !GetMaxRead( m_pBi->uTailPtr, m_pBi->uHeadPtr, m_uMaxBuffers ) )
 		return oexFALSE;
 
 	// Are they asking for the size?
@@ -278,7 +339,7 @@ oexBOOL CFifoSync::Peek( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oe
             return oexFALSE;
 
 		// Get the buffer size
-		*x_puRead = m_auSize[ m_uTailPtr ];
+		*x_puRead = m_pBuf[ m_pBi->uTailPtr ];
 
 		// Correct for offset
 		if ( x_lOffset > (long)*x_puRead ) 
@@ -291,8 +352,8 @@ oexBOOL CFifoSync::Peek( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oe
 	} // end if
 
 	// What's the maximum amount of data in this block
-	if ( x_uSize > m_auSize[ m_uTailPtr ] ) 
-		x_uSize = m_auSize[ m_uTailPtr ];
+	if ( x_uSize > m_pBuf[ m_pBi->uTailPtr ] ) 
+		x_uSize = m_pBuf[ m_pBi->uTailPtr ];
 
 	// Anything left to read?
 	if ( x_uSize <= (oexUINT)x_lOffset ) 

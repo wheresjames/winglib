@@ -47,6 +47,95 @@ class CFifoSync : public CCircBuf
 {
 public:
 
+    enum
+    {
+        /// The default number of max buffers
+        eDefaultMaxBuffers = 1024
+    };
+
+    struct SBufferInfo
+    {
+	    /// Fifo head pointer
+	    oexUINT				        uHeadPtr;
+
+	    /// Fifo tail pointer
+	    oexUINT				        uTailPtr;
+    };
+
+public:
+
+	//==============================================================
+	// SetName()
+	//==============================================================
+    /// Sets the shared memory name
+    /**
+        \param [in] x_pName -   Shared memory name
+        \param [in] x_uLen  -   Length of the string in x_pName.
+                                Can be zero if the string is
+                                NULL terminated.
+        
+    */
+    virtual oexCSTR SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
+    {   
+        if ( x_pName && !x_uLen ) 
+            x_uLen = zstr::Length( x_pName );
+        
+        // Set shared name for the block sizes
+        if ( !x_pName || !*x_pName )
+            m_auSize.SetName( oexNULL );
+        else
+            m_auSize.SetName( CStr( x_pName, x_uLen ).Append( oexT( "_block" ) ).Ptr() );
+
+        return CCircBuf::SetName( x_pName, x_uLen );
+    }
+
+	//==============================================================
+	// Allocate()
+	//==============================================================
+	/// Pre allocates the specified amount of data for the circular buffer
+	/**
+		\param [in] x_uSize		-	Number of bytes to allocate.
+		
+		\return Non-zero if success
+	
+		\see 
+	*/
+	virtual oexBOOL Allocate( oexUINT x_uSize )
+    {
+        if ( !CCircBuf::Allocate( x_uSize ) )
+            return oexFALSE;
+
+        return AllocateBuffers();
+    }
+
+	//==============================================================
+	// Allocate()
+	//==============================================================
+	/// Pre allocates the specified amount of data for the circular buffer
+	/**
+		\param [in] x_uSize		    -	Number of bytes to allocate.
+        \param [in] x_uMaxBuffers   -   Maximum number of buffers
+		
+		\return Non-zero if success
+	
+		\see 
+	*/
+	virtual oexBOOL Allocate( oexUINT x_uSize, oexUINT x_uMaxBuffers )
+    {
+        if ( !CCircBuf::Allocate( x_uSize ) )
+            return oexFALSE;
+
+        m_uMaxBuffers = cmn::NextPower2( x_uMaxBuffers );
+
+        return AllocateBuffers();
+    }
+
+	//==============================================================
+	// Destroy2()
+	//==============================================================
+    /// Destroys the fifo sync
+    void CFifoSync::Destroy2();
+
 	//==============================================================
 	// SkipBlock()
 	//==============================================================
@@ -103,6 +192,12 @@ public:
 
 	/// Destructor
 	virtual ~CFifoSync();
+
+  	//==============================================================
+	// Destroy()
+	//==============================================================
+	/// Releases all resources associated with the circular buffer.
+	virtual void Destroy();
 
 	//==============================================================
 	// Write()
@@ -204,16 +299,23 @@ public:
 	/**
 		\param [in] x_uMaxBuffers	-	Number of buffers
 	*/
-	void SetMaxBuffers( oexUINT x_uMaxBuffers ) { m_uMaxBuffers = x_uMaxBuffers; }
+	void SetMaxBuffers( oexUINT x_uMaxBuffers ) 
+    {   m_uMaxBuffers = cmn::NextPower2( x_uMaxBuffers ); }
 
 	//==============================================================
 	// GetUsedBuffers()
 	//==============================================================
 	/// Returns the number of buffer slots in the fifo that are in use
 	oexUINT GetUsedBuffers()
-	{   CTlLocalLock ll( *this );
-	    if ( !ll.IsLocked() ) return oexFALSE;
-        return GetMaxRead( m_uTailPtr, m_uHeadPtr, m_uMaxBuffers ); 
+	{   
+        CTlLocalLock ll( *this );
+	    if ( !ll.IsLocked() ) 
+            return oexFALSE;
+
+        if ( !m_pBi )
+            return oexFALSE;
+
+        return GetMaxRead( m_pBi->uTailPtr, m_pBi->uHeadPtr, m_uMaxBuffers ); 
     }
 
 private:
@@ -221,11 +323,11 @@ private:
 	/// Maximum fifo buffer size
 	oexUINT				        m_uMaxBuffers;
 
-	/// Fifo head pointer
-	oexUINT				        m_uHeadPtr;
+    /// Buffer information
+    SBufferInfo                 *m_pBi;
 
-	/// Fifo tail pointer
-	oexUINT				        m_uTailPtr;
+    /// Pointer to size buffer
+    oexUINT                     *m_pBuf;
 
 	/// Fifo block size values
 	TMem< oexUINT >             m_auSize;

@@ -457,6 +457,7 @@ namespace os
 //------------------------------------------------------------------
 // Supporting classes
 //------------------------------------------------------------------
+#include "inc/arb_delegates.h"
 #include "inc/oex_str.h"
 #include "inc/alloc.h"
 #include "inc/file_mapping.h"
@@ -482,7 +483,7 @@ namespace os
 #   include "inc/os/base_file.h"
 #   include "inc/os/ip_address.h"
 #   include "inc/os/ip_socket.h"
-//#   include "inc/os/thread.h"    
+#   include "inc/os/thread.h"    
 
 };
 

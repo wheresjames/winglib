@@ -160,7 +160,9 @@ public:
 
         // Shared memory?
         if ( m_fm.GetName() )
-            m_fm.Create( oexNULL, oexNULL, x_uSize );
+
+            // Create memory mapping
+            m_fm.Create( x_bConstructed, oexNULL, oexNULL, x_uSize );
 
         // Allocate plain old memory
         else
@@ -214,23 +216,7 @@ public:
 
         // Lose file mapping if any
         if ( m_fm.Ptr() )
-        {
-            // Do we need to destruct objects?
-            T* pPtr = m_fm.Ptr();
-
-            // Was the object constructed?
-            if ( CAlloc::eF1Constructed & CAlloc::GetFlags( pPtr ) 
-                 && 1 == CAlloc::GetRefCount( pPtr ) )
-            {
-                oexUINT uSize = Size();
-                for ( oexUINT i = 0; i < uSize; i++ )
-                    pPtr[ i ].~T();
-
-            } // end if
-
             m_fm.Destroy();
-
-        } // end if
 
     }
 
