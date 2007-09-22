@@ -42,10 +42,38 @@
 #define oexNULL						0
 
 #ifdef UNICODE
-#	define oexT( x )				L( x )
+
+#	define oexT( x )				( L##x )
+#	define oexTEXT( x )				oexT( x )
+
+#   define oexToStr8( s )           oex::CStr8().Set( s )
+#   define oexToStr8Ptr( s )        oex::CStr8().Set( s ).Ptr()
+#   define oexToStrW( s )           ( s )
+#   define oexToStrWPtr( s )        ( s )
+
+#   define oexStr8ToStr( s )        oex::CStr().Set( s )
+#   define oexStr8ToStrPtr( s )     oex::CStr().Set( s ).Ptr()
+#   define oexStrWToStr( s )        ( s )
+#   define oexStrWToStrPtr( s )     ( s )
+
 #else
+
 #	define oexT( x )				x
+#	define oexTEXT( x )				x
+
+#   define oexToStr8( s )           ( s )
+#   define oexToStr8Ptr( s )        ( s )
+#   define oexToStrW( s )           oex::CStrW().Set( s )
+#   define oexToStrWPtr( s )        oex::CStrW().Set( s ).Ptr()
+
+#   define oexStr8ToStr( s )        ( s )
+#   define oexStr8ToStrPtr( s )     ( s )
+#   define oexStrWToStr( s )        oex::CStr().Set( s )
+#   define oexStrWToStrPtr( s )     oex::CStr().Set( s ).Ptr()
+
+
 #endif
+
 
 #define oexEMPTY_STRING             oexT( "" )
 

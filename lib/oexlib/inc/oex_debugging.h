@@ -44,16 +44,16 @@ template < const int T > class oex_static_assert{};
 
 #	define oexVERIFY_PTR_NULL_OK( ptr )     oexVERIFY( oexVerifyPtrNullOk( ptr ) )
 #	define oexVERIFY_PTR( ptr )             oexVERIFY( oex::oexVerifyPtr( ptr ) )
-#	define oexVERIFY( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, __FILE__, __LINE__, #s ), OEX_NAMESPACE::oexFALSE ) )
+#	define oexVERIFY( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( __FILE__ ), __LINE__, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
 
 #ifdef _DEBUG
 
 #	define oexVALIDATE_PTR_NULL_OK( ptr )   oexVERIFY( oexVerifyPtrNullOk( ptr ) )
 #	define oexVALIDATE_PTR( ptr )           oexVERIFY( oexVerifyPtr( ptr ) )
-#	define oexASSERT( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, __FILE__, __LINE__, #s ), OEX_NAMESPACE::oexFALSE ) )
+#	define oexASSERT( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0,oexTEXT( __FILE__ ), __LINE__, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
 #	define oexTRACE				            OEX_NAMESPACE::os::CDebug::FmtTrace
 #	define oexUNUSED( s )
-#	define oexBREAK( s )		            ( OEX_NAMESPACE::os::CDebug::Break( 0, __FILE__, __LINE__, s ), OEX_NAMESPACE::oexFALSE )
+#	define oexBREAK( s )		            ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( __FILE__ ), __LINE__, s ), OEX_NAMESPACE::oexFALSE )
 
 #else
 

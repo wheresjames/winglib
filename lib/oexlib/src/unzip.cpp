@@ -55,9 +55,9 @@ class COexZipLibUncompress : public CZipLibUncompress
 {
 public:
     COexZipLibUncompress( CUncompress *p ) { m_p = p; }
-    virtual unsigned OnRead( char *buf, unsigned size )
+    virtual unsigned OnRead( oexSTR buf, unsigned size )
     {   return m_p->OnRead( buf, size ); }
-    virtual unsigned OnWrite( const char *buf, unsigned *size )
+    virtual unsigned OnWrite( oexCSTR buf, unsigned *size )
     {   return m_p->OnWrite( buf, size ); }
 private:
     CUncompress *m_p;
@@ -76,12 +76,10 @@ CUncompress::~CUncompress()
 }
 
 CStr CUncompress::Uncompress()
-{   const char *pErr = ( (COexZipLibUncompress*)m_pCompress )->Uncompress();
-    if ( !pErr ) return "";
-    return pErr;
+{   return ( (COexZipLibUncompress*)m_pCompress )->Uncompress();
 }
 
-unsigned CUncompress::OnRead( char *buf, unsigned size )
+unsigned CUncompress::OnRead( oexSTR buf, unsigned size )
 {
     // From file?
     if ( m_fInput.IsOpen() )
@@ -100,7 +98,7 @@ unsigned CUncompress::OnRead( char *buf, unsigned size )
     return nCopied;
 }
 
-unsigned CUncompress::OnWrite( const char *buf, unsigned *size )
+unsigned CUncompress::OnWrite( oexCSTR buf, unsigned *size )
 {
     // To file?
     if ( m_fOutput.IsOpen() )

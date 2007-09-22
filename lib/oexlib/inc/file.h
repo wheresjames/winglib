@@ -264,7 +264,7 @@ public:
 
     /// Concatinates two strings into a path
     static CStr BuildPath( CStr x_sRoot, CStr x_sPath, oexTCHAR tSep = oexT( '/' ) )
-    {   return x_sRoot.RTrim( "\\/" ) << tSep << x_sPath.LTrim( "\\/" ); }
+    {   return x_sRoot.RTrim( oexT( "\\/" ) ) << tSep << x_sPath.LTrim( oexT( "\\/" ) ); }
 
     /// Deletes the specified file
     static oexBOOL Delete( oexCSTR x_pFile )
@@ -282,13 +282,13 @@ public:
 
     /// Returns the root path of str
     static CStr RootPath( CStr str )
-    {   str.RParse( "\\/" ); 
+    {   str.RParse( oexT( "\\/" ) ); 
         return str;
     }
 
     /// Returns the root path of str
     static CStr ChopFileName( CStr str )
-    {   return str.RParse( "\\/" )++; 
+    {   return str.RParse( oexT( "\\/" ) )++; 
     }
 
 private:

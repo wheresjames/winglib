@@ -67,6 +67,12 @@ public:
     static oexPVOID Zero( oexPVOID pDst, oexUINT uSize )
     {   return MemSet( pDst, 0, uSize ); }
 
+    /// Converts to int64
+    static oexINT64 StrToInt64( oexCSTR x_pStr, oexUINT x_uRadix );
+
+    /// Converts to uint64
+    static oexUINT64 StrToUInt64( oexCSTR x_pStr, oexUINT x_uRadix );
+
 	/// Converts to long
 	static oexLONG StrToLong( oexCSTR pStr, oexUINT uRadix = 10 );
 

@@ -464,6 +464,7 @@ namespace os
 #include "inc/memory.h"
 #include "inc/thread_safe.h"
 #include "inc/str.h"
+#include "inc/auto_str.h"
 #include "inc/list.h"
 #include "inc/asso_list.h"
 #include "inc/property_bag.h"
@@ -503,6 +504,7 @@ namespace os
 #include "inc/circ_buf.h"
 #include "inc/fifo_sync.h"
 #include "inc/data_packet.h"
+#include "inc/dispatch.h"
 
 
 /*
@@ -573,21 +575,21 @@ public:
 		virtual ~CVerifyStartup()
 		{
 			if ( !COex::GetStartupCode() )
-			{	oexTRACE( "! oexlib - oex::COex::Init() was not called!\n" );
-				oexBREAK( "oex::COex::Init() was not called!" );
+			{	oexTRACE( oexT( "! oexlib - oex::COex::Init() was not called!\n" ) );
+				oexBREAK( oexT( "oex::COex::Init() was not called!" ) );
 			} // end if
 			else if ( 0 > COex::GetStartupCode() )
-			{	oexTRACE( "! oexlib - oex::COex::Init() reported error code %li\n", COex::GetStartupCode() );
-				oexBREAK( "oex::COex::Init() reported an error" );
+			{	oexTRACE( oexT( "! oexlib - oex::COex::Init() reported error code %li\n" ), COex::GetStartupCode() );
+				oexBREAK( oexT( "oex::COex::Init() reported an error" ) );
 			} // end else if
 
 			if ( !COex::GetShutdownCode() )
-			{	oexTRACE( "! oexlib - oex::COex::Uninit() was not called!\n" );
-				oexBREAK( "oex::COex::Uninit() was not called!" );
+			{	oexTRACE( oexT( "! oexlib - oex::COex::Uninit() was not called!\n" ) );
+				oexBREAK( oexT( "oex::COex::Uninit() was not called!" ) );
 			} // end if
 			else if ( 0 > COex::GetShutdownCode() )
-			{	oexTRACE( "! oexlib - oex::COex::Uninit() reported error code %li\n", COex::GetShutdownCode() );
-				oexBREAK( "oex::COex::Uninit() reported an error" );
+			{	oexTRACE( oexT( "! oexlib - oex::COex::Uninit() reported error code %li\n" ), COex::GetShutdownCode() );
+				oexBREAK( oexT( "oex::COex::Uninit() reported an error" ) );
 			} // end else if
 		}
 	};

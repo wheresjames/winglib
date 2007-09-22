@@ -159,6 +159,18 @@ oexCSTR CSys::vStrFmt( oexRESULT *x_pRes, oexSTR x_pDst, oexUINT x_uMax, oexCSTR
 	return x_pDst;
 }
 
+oexINT64 CSys::StrToInt64( oexCSTR x_pStr, oexUINT x_uRadix ) 
+{	if ( !oexVERIFY_PTR( x_pStr ) )
+		return 0;
+	return _tcstoi64( x_pStr, NULL, x_uRadix ); 
+}
+
+oexUINT64 CSys::StrToUInt64( oexCSTR x_pStr, oexUINT x_uRadix ) 
+{	if ( !oexVERIFY_PTR( x_pStr ) )
+		return 0;
+	return _tcstoui64( x_pStr, NULL, x_uRadix ); 
+}
+
 oexLONG CSys::StrToLong( oexCSTR x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;

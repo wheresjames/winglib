@@ -101,7 +101,7 @@ oexBOOL CIpAddress::SetDotAddress( oexCSTR x_pDotAddress, oexINT32 x_uPort, oexI
         return oexFALSE;
 
     // Convert the dot address
-    u_long ip = ntohl( inet_addr( x_pDotAddress ) );
+    u_long ip = ntohl( inet_addr( oexToStr8Ptr( x_pDotAddress ) ) );
     if ( INADDR_NONE == ip ) 
         return oexFALSE;
 
@@ -118,7 +118,7 @@ CStr CIpAddress::GetDotAddress()
     ia.S_un.S_addr = htonl( (u_long)GetIpv4() );
 
 	// Create dot address if needed
-	return inet_ntoa( ia );
+	return oexStr8ToStr( inet_ntoa( ia ) );
 }
 
 oexCONST oexGUID* CIpAddress::GetId( oexGUID *x_pGuid )
@@ -139,37 +139,37 @@ CStr CIpAddress::BuildUrl( CPropertyBag &x_pbUi )
     os::CSys::Zero( &uc, sizeof( uc ) );
     uc.dwStructSize = sizeof( URL_COMPONENTS );
 
-    uc.dwSchemeLength = x_pbUi[ "scheme" ].ToString().Length();
-    uc.lpszScheme = x_pbUi[ "scheme" ].ToString()._Ptr();
+    uc.dwSchemeLength = x_pbUi[ oexT( "scheme" ) ].ToString().Length();
+    uc.lpszScheme = x_pbUi[ oexT( "scheme" ) ].ToString()._Ptr();
 
-    uc.dwHostNameLength = x_pbUi[ "host" ].ToString().Length();
-    uc.lpszHostName = x_pbUi[ "host" ].ToString()._Ptr();
+    uc.dwHostNameLength = x_pbUi[ oexT( "host" ) ].ToString().Length();
+    uc.lpszHostName = x_pbUi[ oexT( "host" ) ].ToString()._Ptr();
 
-    uc.dwUserNameLength = x_pbUi[ "username" ].ToString().Length();
-    uc.lpszUserName = x_pbUi[ "username" ].ToString()._Ptr();
+    uc.dwUserNameLength = x_pbUi[ oexT( "username" ) ].ToString().Length();
+    uc.lpszUserName = x_pbUi[ oexT( "username" ) ].ToString()._Ptr();
 
-    uc.dwPasswordLength = x_pbUi[ "password" ].ToString().Length();
-    uc.lpszPassword = x_pbUi[ "password" ].ToString()._Ptr();
+    uc.dwPasswordLength = x_pbUi[ oexT( "password" ) ].ToString().Length();
+    uc.lpszPassword = x_pbUi[ oexT( "password" ) ].ToString()._Ptr();
 
-    uc.dwUrlPathLength = x_pbUi[ "path" ].ToString().Length();
-    uc.lpszUrlPath = x_pbUi[ "path" ].ToString()._Ptr();
+    uc.dwUrlPathLength = x_pbUi[ oexT( "path" ) ].ToString().Length();
+    uc.lpszUrlPath = x_pbUi[ oexT( "path" ) ].ToString()._Ptr();
 
     // !!! Right or wrong, I'm going to hide this detail.
     CStr extra; 
-    if ( x_pbUi[ "extra" ].ToString().Length() )
-    {   extra << "?" << x_pbUi[ "extra" ].ToString();
+    if ( x_pbUi[ oexT( "extra" ) ].ToString().Length() )
+    {   extra << oexT( "?" ) << x_pbUi[ oexT( "extra" ) ].ToString();
         uc.dwExtraInfoLength = extra.Length();
         uc.lpszExtraInfo = extra._Ptr();
     } // end if
 
     else
-    {   uc.dwExtraInfoLength = x_pbUi[ "extra" ].ToString().Length();
-        uc.lpszExtraInfo = x_pbUi[ "extra" ].ToString()._Ptr();
+    {   uc.dwExtraInfoLength = x_pbUi[ oexT( "extra" ) ].ToString().Length();
+        uc.lpszExtraInfo = x_pbUi[ oexT( "extra" ) ].ToString()._Ptr();
     } // end else    
 
-    uc.nScheme = (INTERNET_SCHEME)x_pbUi[ "scheme_id" ].ToLong();
+    uc.nScheme = (INTERNET_SCHEME)x_pbUi[ oexT( "scheme_id" ) ].ToLong();
 
-    uc.nPort = (INTERNET_PORT)x_pbUi[ "port" ].ToLong();
+    uc.nPort = (INTERNET_PORT)x_pbUi[ oexT( "port" ) ].ToLong();
 
     CStr str;
     DWORD dwLen = oexSTRSIZE;
@@ -214,34 +214,34 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
     uc.dwStructSize = sizeof( URL_COMPONENTS );
 
     uc.dwSchemeLength = uMaxBufferSize;
-    uc.lpszScheme = pb[ "scheme" ].ToString().OexAllocate( uMaxBufferSize );
+    uc.lpszScheme = pb[ oexT( "scheme" ) ].ToString().OexAllocate( uMaxBufferSize );
     
     uc.dwHostNameLength = uMaxBufferSize;
-    uc.lpszHostName = pb[ "host" ].ToString().OexAllocate( uMaxBufferSize );
+    uc.lpszHostName = pb[ oexT( "host" ) ].ToString().OexAllocate( uMaxBufferSize );
 
     uc.dwUserNameLength = uMaxBufferSize;
-    uc.lpszUserName = pb[ "username" ].ToString().OexAllocate( uMaxBufferSize );
+    uc.lpszUserName = pb[ oexT( "username" ) ].ToString().OexAllocate( uMaxBufferSize );
 
     uc.dwPasswordLength = uMaxBufferSize;
-    uc.lpszPassword = pb[ "password" ].ToString().OexAllocate( uMaxBufferSize );
+    uc.lpszPassword = pb[ oexT( "password" ) ].ToString().OexAllocate( uMaxBufferSize );
 
     uc.dwUrlPathLength = uMaxBufferSize;
-    uc.lpszUrlPath = pb[ "path" ].ToString().OexAllocate( uMaxBufferSize );
+    uc.lpszUrlPath = pb[ oexT( "path" ) ].ToString().OexAllocate( uMaxBufferSize );
 
     uc.dwExtraInfoLength = uMaxBufferSize;
-    uc.lpszExtraInfo = pb[ "extra" ].ToString().OexAllocate( uMaxBufferSize );
+    uc.lpszExtraInfo = pb[ oexT( "extra" ) ].ToString().OexAllocate( uMaxBufferSize );
 
     // Attempt to crack the url
     if ( !InternetCrackUrl( pUrl, uLen, ICU_DECODE | ICU_ESCAPE, &uc ) )
         return CPropertyBag();
 
     // Grab the port and scheme id
-    pb[ "scheme_id" ] = uc.nScheme;
-    pb[ "port" ] = uc.nPort;
+    pb[ oexT( "scheme_id" ) ] = uc.nScheme;
+    pb[ oexT( "port" ) ] = uc.nPort;
 
     // !!! What a pain... See the above hack to hide this detail
-    if ( oexT( '?' ) == *pb[ "extra" ].ToString().Ptr() )
-        pb[ "extra" ].ToString().LTrim( 1 );
+    if ( oexT( '?' ) == *pb[ oexT( "extra" ) ].ToString().Ptr() )
+        pb[ oexT( "extra" ) ].ToString().LTrim( 1 );
 
     return pb;
 }
@@ -261,17 +261,17 @@ oexBOOL CIpAddress::LookupUrl( oexCSTR x_pUrl, oexINT32 x_uPort, oexINT32 x_uTyp
         return oexFALSE;
     
     // Did we get a host name?
-    if ( !pbUrl[ "host" ].ToString().Length() )
+    if ( !pbUrl[ oexT( "host" ) ].ToString().Length() )
         return oexFALSE;
 
     // Get the port
     if ( !x_uPort )
-        x_uPort = pbUrl[ "port" ].ToLong();
+        x_uPort = pbUrl[ oexT( "port" ) ].ToLong();
 
     // Save the type
     m_uType = x_uType;
 
-    return LookupHost( pbUrl[ "host" ].ToString().Ptr(), x_uPort );
+    return LookupHost( pbUrl[ oexT( "host" ) ].ToString().Ptr(), x_uPort );
 }
 
 oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_uType )
@@ -284,10 +284,10 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
         return oexFALSE;
 
 	// First try to interpret as dot address
-	ULONG uAddr = inet_addr( x_pServer );
+	ULONG uAddr = inet_addr( oexToStr8Ptr( x_pServer ) );
 	if ( INADDR_NONE == uAddr )
     {
-        LPHOSTENT pHe = gethostbyname( x_pServer );
+        LPHOSTENT pHe = gethostbyname( oexToStr8Ptr( x_pServer ) );
 
         if ( !pHe )
             return oexFALSE;

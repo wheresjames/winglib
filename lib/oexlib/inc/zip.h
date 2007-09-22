@@ -63,8 +63,8 @@ public:
         m_sOutput.Destroy();
     }
     
-    unsigned OnRead( char *buf, unsigned size );
-    unsigned OnWrite( const char *buf, unsigned *size );
+    unsigned OnRead( oexSTR buf, unsigned size );
+    unsigned OnWrite( oexCSTR buf, unsigned *size );
 
     CStr Compress();
 

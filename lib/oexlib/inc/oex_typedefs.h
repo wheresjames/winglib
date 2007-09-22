@@ -69,11 +69,9 @@ typedef char						oexCHAR;
 typedef unsigned char				oexUCHAR;
 								
 #ifdef UNICODE
-	typedef short					oexTCHAR;
-	typedef unsigned short			oexTUCHAR;
+	typedef wchar_t					oexTCHAR;
 #else
 	typedef char					oexTCHAR;
-	typedef unsigned char			oexTUCHAR;
 #endif
 
 typedef oexTCHAR*					oexSTR;

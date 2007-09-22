@@ -820,7 +820,7 @@ namespace guid
 	    // Example GUID : DD05F574-2D69-4463-95DD-F76C9F7C5E6D
 
         return os::CSys::StrFmt( x_pStr, x_uMax, 
-                                 "%0.8lX-%0.4lX-%0.4lX-%0.2lX%0.2lX-%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX",
+                                 oexT( "%0.8lX-%0.4lX-%0.4lX-%0.2lX%0.2lX-%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX" ),
  							     (oexUINT) x_pGuid->Data1, 
 							     (oexUINT) x_pGuid->Data2,
 							     (oexUINT) x_pGuid->Data3,

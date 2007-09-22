@@ -117,7 +117,7 @@ public:
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
-		SetNum( "%li", (oexLONG)nVal ); 
+		SetNum( oexT( "%li" ), (oexLONG)nVal ); 
 	}
 
 	TStr( oexCONST oexUINT uVal )
@@ -127,7 +127,7 @@ public:
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
-		SetNum( "%lu", (oexULONG)uVal ); 
+		SetNum( oexT( "%lu" ), (oexULONG)uVal ); 
 	}
 
 	TStr( oexCONST oexDOUBLE dStr )
@@ -137,7 +137,7 @@ public:
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
-		SetNumTrim( "%f", oexNULL, "0", (oexDOUBLE)dStr ); 
+		SetNumTrim( oexT( "%f" ), oexNULL, oexT( "0" ), (oexDOUBLE)dStr ); 
 	}
 
 	TStr( oexCONST T tVal )
@@ -151,7 +151,7 @@ public:
 	}
 
     /// Destructor
-    ~TStr()
+    virtual ~TStr()
     {   Destroy();
     }
 
@@ -376,22 +376,22 @@ public:
 
 
 	TStr& operator = ( oexCONST oexINT nVal )
-	{	return SetNum( "%li", (oexLONG)nVal ); }
+	{	return SetNum( oexT( "%li" ), (oexLONG)nVal ); }
 
 	TStr& operator = ( oexCONST oexUINT uVal )
-	{	return SetNum( "%lu", (oexULONG)uVal ); }
+	{	return SetNum( oexT( "%lu" ), (oexULONG)uVal ); }
 
 	TStr& operator = ( oexCONST oexDOUBLE dStr )
-	{	return SetNumTrim( "%f", oexNULL, "0", (oexDOUBLE)dStr ); }
+	{	return SetNumTrim( oexT( "%f" ), oexNULL, oexT( "0" ), (oexDOUBLE)dStr ); }
 
 	TStr& operator += ( oexCONST oexINT nVal )
-	{	return AppendNum( "%li", (oexLONG)nVal ); }
+	{	return AppendNum( oexT( "%li" ), (oexLONG)nVal ); }
 
 	TStr& operator += ( oexCONST oexUINT uVal )
-	{	return AppendNum( "%lu", (oexULONG)uVal ); }
+	{	return AppendNum( oexT( "%lu" ), (oexULONG)uVal ); }
 
 	TStr& operator += ( oexCONST oexDOUBLE dVal )
-	{	return AppendNumTrim( "%f", oexNULL, "0", (oexDOUBLE)dVal ); }
+	{	return AppendNumTrim( oexT( "%f" ), oexNULL, oexT( "0" ), (oexDOUBLE)dVal ); }
 
 	TStr& operator += ( oexCONST T chVal )
 	{	return Append( &chVal, 1 ); }
@@ -400,13 +400,13 @@ public:
 	{	return Append( str.Ptr() ); }
 
 	TStr& operator << ( oexCONST oexINT nVal )
-	{	return AppendNum( "%li", (oexLONG)nVal ); }
+	{	return AppendNum( oexT( "%li" ), (oexLONG)nVal ); }
 
 	TStr& operator << ( oexCONST oexUINT uVal )
-	{	return AppendNum( "%lu", (oexULONG)uVal ); }
+	{	return AppendNum( oexT( "%lu" ), (oexULONG)uVal ); }
 
 	TStr& operator << ( oexCONST oexDOUBLE dVal )
-	{	return AppendNumTrim( "%f", oexNULL, "0", (oexDOUBLE)dVal ); }
+	{	return AppendNumTrim( oexT( "%f" ), oexNULL, oexT( "0" ), (oexDOUBLE)dVal ); }
 
 	TStr& operator << ( oexCSTR pStr )
 	{	return Append( pStr ); }
@@ -445,6 +445,23 @@ public:
         return !Compare( rStr.m_mem.c_Ptr(), rStr.Length() );
     }
 
+    oexBOOL operator == ( oexCONST oexINT x_nVal )
+    {   return ToInt() == x_nVal; }
+
+    oexBOOL operator == ( oexCONST oexUINT x_uVal )
+    {   return ToUInt() == x_uVal; }
+
+    oexBOOL operator == ( oexCONST oexLONG x_lVal )
+    {   return ToLong() == x_lVal; }
+
+    oexBOOL operator == ( oexCONST oexULONG x_ulVal )
+    {   return ToULong() == x_ulVal; }
+
+    oexBOOL operator == ( oexCONST oexFLOAT x_fVal )
+    {   return ToFloat() == x_fVal; }
+
+    oexBOOL operator == ( oexCONST oexDOUBLE x_dVal )
+    {   return ToDouble() == x_dVal; }
 
 public:
 
@@ -685,6 +702,33 @@ public:
 		return *this;
 	}
 
+    template< typename T_STR >
+        TStr& Set( oexCONST T_STR *x_pStr, oexUINT x_uLen = 0 )
+    {
+		if ( !x_pStr || !x_pStr )
+		{	OexAllocate( 0 ); 
+            return *this; 
+        } // end if
+
+        if ( !x_uLen )
+            x_uLen = zstr::Length( x_pStr );
+        
+        if ( !x_uLen )
+		{	OexAllocate( 0 ); 
+            return *this; 
+        } // end if
+
+        // Allocate buffer
+        if ( !OexAllocate( x_uLen ) )
+            return *this;
+
+        // Copy bytes one by one
+        for ( oexUINT i = 0; i < x_uLen; i++ )
+            *_Ptr( i ) = (T)x_pStr[ i ];
+
+        return *this;
+    }
+
 	// Concatenation operator
 	TStr& Append( TStr &sStr )
 	{	return Append( sStr.Ptr(), sStr.Length() ); }
@@ -879,12 +923,27 @@ public:
     }
 
 	/// Converts to long
+	oexINT ToInt64( oexUINT uRadix = 10 ) { return os::CSys::StrToInt64( Ptr(), uRadix ); }
+
+	/// Converts to unsigned long
+	oexUINT ToUInt64( oexUINT uRadix = 10 ) { return os::CSys::StrToUInt64( Ptr(), uRadix ); }
+
+	/// Converts to long
+	oexINT ToInt( oexUINT uRadix = 10 ) { return (oexINT)os::CSys::StrToInt64( Ptr(), uRadix ); }
+
+	/// Converts to unsigned long
+	oexUINT ToUInt( oexUINT uRadix = 10 ) { return (oexUINT)os::CSys::StrToUInt64( Ptr(), uRadix ); }
+
+    /// Converts to long
 	oexLONG ToLong( oexUINT uRadix = 10 ) { return os::CSys::StrToLong( Ptr(), uRadix ); }
 
 	/// Converts to unsigned long
 	oexULONG ToULong( oexUINT uRadix = 10 ) { return os::CSys::StrToULong( Ptr(), uRadix ); }
 
 	/// Converts to double
+	oexFLOAT ToFloat() { return (oexFLOAT)os::CSys::StrToDouble( Ptr( 0 ) ); }
+
+    /// Converts to double
 	oexDOUBLE ToDouble() { return os::CSys::StrToDouble( Ptr( 0 ) ); }
     
     /// Converts to a string, 

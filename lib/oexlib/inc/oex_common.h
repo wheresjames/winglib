@@ -35,25 +35,25 @@
 #pragma once
 
 // For tracking allocations
-#define OexAllocNew             oex::CAlloc( __LINE__, __FILE__ ).New
-#define OexAllocDelete          oex::CAlloc( __LINE__, __FILE__ ).Delete
-#define OexAllocResize          oex::CAlloc( __LINE__, __FILE__ ).Resize
+#define OexAllocNew             oex::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).New
+#define OexAllocDelete          oex::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Delete
+#define OexAllocResize          oex::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Resize
 
-#define OexAllocConstruct       oex::CAlloc( __LINE__, __FILE__ ).Construct
-#define OexAllocConstructArray  oex::CAlloc( __LINE__, __FILE__ ).ConstructArray
-#define OexAllocDestruct        oex::CAlloc( __LINE__, __FILE__ ).Destruct
+#define OexAllocConstruct       oex::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Construct
+#define OexAllocConstructArray  oex::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).ConstructArray
+#define OexAllocDestruct        oex::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Destruct
 
 
 // Object function macros
-#define OexNew                  _Log( __LINE__, __FILE__ ).New
-#define OexDelete               _Log( __LINE__, __FILE__ ).Delete
-#define OexResize               _Log( __LINE__, __FILE__ ).Resize
+#define OexNew                  _Log( __LINE__, oexTEXT( __FILE__ ) ).New
+#define OexDelete               _Log( __LINE__, oexTEXT( __FILE__ ) ).Delete
+#define OexResize               _Log( __LINE__, oexTEXT( __FILE__ ) ).Resize
 
-#define OexConstruct            _Log( __LINE__, __FILE__ ).Construct
-#define OexConstructArray       _Log( __LINE__, __FILE__ ).ConstructArray
-#define OexDestruct             _Log( __LINE__, __FILE__ ).Destruct
+#define OexConstruct            _Log( __LINE__, oexTEXT( __FILE__ ) ).Construct
+#define OexConstructArray       _Log( __LINE__, oexTEXT( __FILE__ ) ).ConstructArray
+#define OexDestruct             _Log( __LINE__, oexTEXT( __FILE__ ) ).Destruct
 
-#define OexAllocate             _Log( __LINE__, __FILE__ ).Allocate
+#define OexAllocate             _Log( __LINE__, oexTEXT( __FILE__ ) ).Allocate
 
 template < class T_BASE > class TClassFactoryBase
 {

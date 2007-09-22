@@ -91,15 +91,15 @@ oexINT COex::Uninit()
     
 #if defined( OEX_CRT_LEAK_DETECTION ) && defined( _DEBUG )
 
-    oexTRACE( "\n-------------------------------- oexlib is dumping memory leaks ---\n" );
+    oexTRACE( oexT( "\n-------------------------------- oexlib is dumping memory leaks ---\n" ) );
     
     oex::os::CMem::DumpLeaks();
 
-      oexTRACE( "-------------------------------- Memory Report --------------------\n" );
+      oexTRACE( oexT( "-------------------------------- Memory Report --------------------\n" ) );
 
     oex::os::CMem::MemReport();
 
-      oexTRACE( "-------------------------------- End oexlib memory report ---------\n\n" );
+      oexTRACE( oexT( "-------------------------------- End oexlib memory report ---------\n\n" ) );
 #endif
     
 	return m_nShutdownCode;

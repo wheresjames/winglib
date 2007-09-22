@@ -362,7 +362,7 @@ private:
 
     /// Shared memory name
     /// Can't use a CStr here because CStr depends on this class!
-    oexCHAR                     *m_pName;
+    oexTCHAR                     *m_pName;
 
 };
 

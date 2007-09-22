@@ -84,8 +84,8 @@ public:
     {
 	    // Ensure valid filename
 	    return ( m_fd.sName.Length() &&
-             !m_fd.sName.CmpLen( ".", 1 ) &&
-             !m_fd.sName.CmpLen( "..", 2 ) );
+             !m_fd.sName.CmpLen( oexT( "." ), 1 ) &&
+             !m_fd.sName.CmpLen( oexT( ".." ), 2 ) );
     }
 
 
@@ -110,7 +110,7 @@ public:
 	
 		\see 
 	*/
-	oexBOOL FindFirst( oexCSTR x_pDir, oexCSTR x_pMask = "*.*" );
+	oexBOOL FindFirst( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*.*" ) );
 
 	/// Constructor
 	CFindFiles();
@@ -127,7 +127,7 @@ public:
 	
 		\see 
 	*/
-	CFindFiles( oexCSTR x_pDir, oexCSTR x_pMask = "*.*" );
+	CFindFiles( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*.*" ) );
 
 	/// Destructor
 	virtual ~CFindFiles();
@@ -137,21 +137,21 @@ public:
 	//==============================================================
 	/// Returns the path to the found file
 	CStr GetPath() 
-    {   if ( !IsValid() ) return ""; return m_sPath; }
+    {   if ( !IsValid() ) return oexT( "" ); return m_sPath; }
 
 	//==============================================================
 	// GetFullPath()
 	//==============================================================
 	/// Returns the complete filename for the found file
     CStr GetFullPath() 
-    {   if ( !IsValid() ) return ""; return CFile::BuildPath( m_sPath.Ptr(), m_fd.sName ); }
+    {   if ( !IsValid() ) return oexT( "" ); return CFile::BuildPath( m_sPath.Ptr(), m_fd.sName ); }
 
 	//==============================================================
 	// GetFileName()
 	//==============================================================
 	/// Returns the filename for the current matching file
 	CStr GetFileName() 
-    {   if ( !IsValid() ) return ""; return m_fd.sName; }
+    {   if ( !IsValid() ) return oexT( "" ); return m_fd.sName; }
 
 	//==============================================================
 	// GetFileAttributes()
@@ -258,7 +258,7 @@ public:
 	
 		\see 
 	*/
-	TRecursiveFindFiles( oexCSTR x_pDir, oexCSTR x_pMask = "*.*" )
+	TRecursiveFindFiles( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*.*" ) )
 	{	m_uDepth = 0; FindFirst( x_pDir, x_pMask ); }
 
 	//==============================================================
@@ -357,7 +357,7 @@ public:
 	
 		\see 
 	*/
-	oexBOOL FindFirst( oexCSTR x_pDir, oexCSTR x_pMask = "*.*" )
+	oexBOOL FindFirst( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*.*" ) )
 	{
         if ( !oexVERIFY_PTR( x_pDir ) || !oexVERIFY_PTR( x_pMask ) )
             return oexFALSE;

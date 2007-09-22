@@ -77,7 +77,7 @@ oexBOOL CFile::DeletePath( oexCSTR x_pPath, oexBOOL x_bEmpty )
 	CFindFiles ff;
 
     // Are there any files in the directory?
-	if ( !ff.FindFirst( x_pPath, "*.*" ) )
+	if ( !ff.FindFirst( x_pPath, oexT( "*.*" ) ) )
         return os::CBaseFile::DeleteDirectory( x_pPath );
 
     // Dump everything in the directory
@@ -100,7 +100,7 @@ oexBOOL CFile::DeletePath( oexCSTR x_pPath, oexBOOL x_bEmpty )
 
 oexBOOL CFile::CreatePath( oexCSTR x_pPath )
 {
-    CStrList lst = CParser::Split( x_pPath, "\\/" );
+    CStrList lst = CParser::Split( x_pPath, oexT( "\\/" ) );
     if ( !lst.Size() )
         return oexFALSE;
 

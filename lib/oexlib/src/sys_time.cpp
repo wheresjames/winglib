@@ -44,12 +44,12 @@ OEX_USING_NAMESPACE
 // 1970 = 1601 + 11644473600
 // 1980 = 1601 + 11960010000
 
-static oexCSTR s_days[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Inv" };
-static oexCSTR s_months[] = {	"Inv",	"Jan", "Feb", "Mar", "Apr", "May", "Jun", 
-								"Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-static oexCSTR s_fdays[] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Invalid" };
-static oexCSTR s_fmonths[] = {	"Invalid",	"January", "February", "March", "April", "May", "June", 
-									"July", "August", "September", "October", "November", "December" };
+static oexCSTR s_days[] = { oexT( "Sun" ), oexT( "Mon" ), oexT( "Tue" ), oexT( "Wed" ), oexT( "Thu" ), oexT( "Fri" ), oexT( "Sat" ), oexT( "Inv" ) };
+static oexCSTR s_months[] = { oexT( "Inv" ), oexT( "Jan" ), oexT( "Feb" ), oexT( "Mar" ), oexT( "Apr" ), oexT( "May" ), oexT( "Jun" ), 
+							  oexT( "Jul" ), oexT( "Aug" ), oexT( "Sep" ), oexT( "Oct" ), oexT( "Nov" ), oexT( "Dec" ) };
+static oexCSTR s_fdays[] = { oexT( "Sunday" ), oexT( "Monday" ), oexT( "Tuesday" ), oexT( "Wednesday" ), oexT( "Thursday" ), oexT( "Friday" ), oexT( "Saturday" ), oexT( "Invalid" ) };
+static oexCSTR s_fmonths[] = { oexT( "Invalid" ), oexT( "January" ), oexT( "February" ), oexT( "March" ), oexT( "April" ), oexT( "May" ), oexT( "June" ), 
+							   oexT( "July" ), oexT( "August" ), oexT( "September" ), oexT( "October" ), oexT( "November" ), oexT( "December" ) };
 static oexUINT g_mdays[] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 #define FTOFF_1900		9435484800
@@ -223,45 +223,45 @@ CStr CSysTime::FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors )
 		// Replace escape sequence
 		else switch( x_sTmpl[ ++x ] )
 		{
-			case 'h' : str.AppendNum( "%0.2lu", (oexUINT)Get12Hour() ); break;
+			case 'h' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)Get12Hour() ); break;
 
-			case 'H' : str.AppendNum( "%lu", (oexUINT)Get12Hour() ); break;
+			case 'H' : str.AppendNum( oexT( "%lu" ), (oexUINT)Get12Hour() ); break;
 
-			case 'g' : str.AppendNum( "%0.2lu", (oexUINT)m_time.uHour ); break;
+			case 'g' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uHour ); break;
 
-			case 'G' : str.AppendNum( "%lu", (oexUINT)m_time.uHour ); break;
+			case 'G' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uHour ); break;
 
-			case 'm' : str.AppendNum( "%0.2lu", (oexUINT)m_time.uMinute ); break;
+			case 'm' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uMinute ); break;
 
-			case 'M' : str.AppendNum( "%lu", (oexUINT)m_time.uMinute ); break;
+			case 'M' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMinute ); break;
 
-			case 's' : str.AppendNum( "%0.2lu", (oexUINT)m_time.uSecond ); break;
+			case 's' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uSecond ); break;
 
-			case 'S' : str.AppendNum( "%lu", (oexUINT)m_time.uSecond ); break;
+			case 'S' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uSecond ); break;
 
-			case 'l' : str.AppendNum( "%0.3lu", (oexUINT)m_time.uMillisecond ); break;
+			case 'l' : str.AppendNum( oexT( "%0.3lu" ), (oexUINT)m_time.uMillisecond ); break;
 
-			case 'L' : str.AppendNum( "%lu", (oexUINT)m_time.uMillisecond ); break;
+			case 'L' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMillisecond ); break;
 
-			case 'c' : str.AppendNum( "%0.2lu", (oexUINT)m_time.uMonth ); break;
+			case 'c' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uMonth ); break;
 
-			case 'C' : str.AppendNum( "%lu", (oexUINT)m_time.uMonth ); break;
+			case 'C' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMonth ); break;
 
-			case 'd' : str.AppendNum( "%0.2lu", (oexUINT)m_time.uDay ); break;
+			case 'd' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uDay ); break;
 
-			case 'D' : str.AppendNum( "%lu", (oexUINT)m_time.uDay ); break;
+			case 'D' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uDay ); break;
 
-			case 'i' : str.AppendNum( "%lu", (oexUINT)m_time.uDayOfWeek ); break;
+			case 'i' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uDayOfWeek ); break;
 
-			case 'I' : str.AppendNum( "%lu", (oexUINT)m_time.uDayOfWeek + 1 ); break;
+			case 'I' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uDayOfWeek + 1 ); break;
 
-			case 'y' : str.AppendNum( "%0.2lu", (oexUINT)m_time.uYear ); break;
+			case 'y' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uYear ); break;
 
-			case 'Y' : str.AppendNum( "%lu", (oexUINT)m_time.uYear ); break;
+			case 'Y' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uYear ); break;
 
-            case 'a' : str << ( IsPM() ? "pm" : "am" ); break;
+            case 'a' : str << ( IsPM() ? oexT( "pm" ) : oexT( "am" ) ); break;
 
-			case 'A' : str << ( IsPM() ? "PM" : "AM" ); break;
+			case 'A' : str << ( IsPM() ? oexT( "PM" ) : oexT( "AM" ) ); break;
 
 			case 'w' : str << GetAbrDayName( m_time.uDayOfWeek ); break;
 
@@ -277,13 +277,13 @@ CStr CSysTime::FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors )
 				{
 					case 's' : case 'S' : str << ( ( 0 > m_time.nTzBias ) ? '-' : '+' ); break;
 
-                    case 'h' : str.AppendNum( "%0.2lu", (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) / 60 ); break;
+                    case 'h' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) / 60 ); break;
 
-					case 'H' : str.AppendNum( "%lu", (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) / 60 ); break;
+					case 'H' : str.AppendNum( oexT( "%lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) / 60 ); break;
 
-					case 'm' : str.AppendNum( "%0.2lu", (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) % 60 ); break;
+					case 'm' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) % 60 ); break;
 
-					case 'M' : str.AppendNum( "%lu", (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) % 60 ); break;
+					case 'M' : str.AppendNum( oexT( "%lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) % 60 ); break;
 
 					// Unknown escape sequence
 					default : 
@@ -444,9 +444,9 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 			case 'a' : 
 			case 'A' : 
             {   oexBOOL bInvalid = oexFALSE;
-                if ( x_sStr.ICmpLen( "pm", 2 ) )
+                if ( x_sStr.ICmpLen( oexT( "pm" ), 2 ) )
                     uHour = ( uHour + 12 ) % 24;
-                else if ( !x_sStr.ICmpLen( "am", 2 ) )
+                else if ( !x_sStr.ICmpLen( oexT( "am" ), 2 ) )
                     bInvalid = bErrors = oexTRUE;
                 if ( !bInvalid ) x_sStr.LTrim( 2 );
             } break;

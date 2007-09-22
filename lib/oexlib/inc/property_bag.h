@@ -140,8 +140,10 @@ public:
 	TPropertyBag& operator = ( oexCONST T_R x_t ) 
     {
         if ( !m_t.Ptr() )
-            if ( m_t.OexConstruct().Ptr() )
-                *m_t.Ptr() = x_t; 
+            m_t.OexConstruct().Ptr();
+
+        if ( m_t.Ptr() )
+            *m_t.Ptr() = x_t; 
 
         return *this; 
     }
@@ -211,7 +213,7 @@ public:
 	// IsSet()
 	//==============================================================
 	/// Returns non-zero if there is a valid data object
-	oexBOOL IsSet() { return IsArray() || m_t->Length(); }
+	oexBOOL IsSet() { return IsArray() || m_t.Ptr()->Length(); }
 
 	//==============================================================
 	// IsDefaultValue()
@@ -238,6 +240,7 @@ public:
     { 
         if ( !m_t.Ptr() )
             return 0;
+
         return m_t.Ptr()->ToLong(); 
     }
 

@@ -4172,7 +4172,7 @@ CZipLibUncompress::~CZipLibUncompress()
 { if ( pstream ) { delete (z_stream*)pstream; pstream = NULL; } }
 
 
-const char* CZipLibUncompress::Uncompress()
+oex::oexCSTR CZipLibUncompress::Uncompress()
 {
     if ( !pstream ) pstream = new z_stream;
     z_stream *stream = (z_stream*)pstream;
@@ -4192,7 +4192,7 @@ const char* CZipLibUncompress::Uncompress()
     {
         // Get more data if we're out
         if ( !stream->avail_in )
-        {   stream->avail_in = OnRead( buf_in, sizeof( buf_in ) );
+        {   stream->avail_in = OnRead( buf_in, sizeof( buf_in ) ) * sizeof( buf_in[ 0 ] );
             stream->next_in = (Byte*)buf_in;
         } // end if
 
@@ -4223,6 +4223,7 @@ const char* CZipLibUncompress::Uncompress()
     if ( Z_STREAM_END == err )
         return NULL;
 
-    else return stream->msg;
+    else 
+        return oexStr8ToStrPtr( stream->msg );
 }
 

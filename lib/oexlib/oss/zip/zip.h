@@ -208,17 +208,17 @@ public:
     CZipLibCompress() { state = 0; }
     ~CZipLibCompress();
 
-    static unsigned _OnRead( void *param, char *buf,unsigned size );
-    virtual unsigned OnRead( char *buf, unsigned size ) = 0;
+    static unsigned _OnRead( void *param, char* buf,unsigned size );
+    virtual unsigned OnRead( oex::oexSTR buf, unsigned size ) = 0;
 
-    static unsigned _OnWrite( void *param, const char *buf, unsigned *size );
-    virtual unsigned OnWrite( const char *buf, unsigned *size ) = 0;
+    static unsigned _OnWrite( void *param, const char* buf, unsigned *size );
+    virtual unsigned OnWrite( oex::oexCSTR buf, unsigned *size ) = 0;
 
     const char* Compress();
 
 private:
     
-    char            buf[ 16384 ];
+    oex::oexTCHAR   buf[ 16384 ];
     TState          *state;
 };
 

@@ -111,9 +111,18 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 {
 #if defined( _DEBUG )
 
-//+++	if ( 1 == _CrtDbgReport( _CRT_ASSERT, x_pFile, x_uLine, x_pModule, ( (CStr)x_pStr ).Replace( '%', '.' ).Ptr() ) )
+#if defined( _UNICODE )
 
-	if ( 1 == _CrtDbgReport( _CRT_ASSERT, x_pFile, x_uLine, x_pModule, x_pStr ) )
+	if ( 1 == _CrtDbgReport( _CRT_ASSERT, oexToStr8( x_pFile ).Ptr(), x_uLine, 
+                             oexToStr8( x_pModule ).Replace( '%', '.' ).Ptr(), 
+                             oexToStr8( x_pStr ).Ptr() ) )
+
+#else
+
+    if ( 1 == _CrtDbgReport( _CRT_ASSERT, x_pFile, x_uLine, x_pModule, 
+                             ( (CStr)x_pStr ).Replace( '%', '.' ).Ptr() ), x_pStr )
+
+#endif
 
 #else	
 

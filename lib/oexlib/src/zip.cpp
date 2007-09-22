@@ -56,9 +56,9 @@ class COexZipLibCompress : public CZipLibCompress
 {
 public:
     COexZipLibCompress( CCompress *p ) { m_p = p; }
-    virtual unsigned OnRead( char *buf, unsigned size )
+    virtual unsigned OnRead( oexSTR buf, unsigned size )
     {   return m_p->OnRead( buf, size ); }
-    virtual unsigned OnWrite( const char *buf, unsigned *size )
+    virtual unsigned OnWrite( oexCSTR buf, unsigned *size )
     {   return m_p->OnWrite( buf, size ); }
 private:
     CCompress *m_p;
@@ -77,12 +77,10 @@ CCompress::~CCompress()
 }
 
 CStr CCompress::Compress()
-{   const char *pErr = ( (COexZipLibCompress*)m_pCompress )->Compress();
-    if ( !pErr ) return "";
-    return pErr;
+{   return oexStr8ToStrPtr( ( (COexZipLibCompress*)m_pCompress )->Compress() );
 }
 
-unsigned CCompress::OnRead( char *buf, unsigned size )
+unsigned CCompress::OnRead( oexSTR buf, unsigned size )
 {
     // From file?
     if ( m_fInput.IsOpen() )
@@ -94,14 +92,15 @@ unsigned CCompress::OnRead( char *buf, unsigned size )
 
     // From string
     oexINT nCopied = str::Copy( buf, size, m_sInput.Ptr(), m_sInput.Length() );
-    if ( 0 > nCopied ) return 0;
+    if ( 0 > nCopied ) 
+        return 0;
 
     // Trim from the string
     m_sInput.LTrim( nCopied );
     return nCopied;
 }
 
-unsigned CCompress::OnWrite( const char *buf, unsigned *size )
+unsigned CCompress::OnWrite( oexCSTR buf, unsigned *size )
 {
     // To file?
     if ( m_fOutput.IsOpen() )

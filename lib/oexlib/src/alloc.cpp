@@ -71,20 +71,20 @@ void CAlloc::ReportBlock( oexPVOID x_pMem, oexUINT uSize )
         pBuf += sizeof( SBlockHeader );
 
         oexTCHAR szMsg[ 1024 ] = oexEMPTY_STRING;
-        os::CSys::StrFmt( szMsg, sizeof( szMsg ), "Total: %lu, Block: %lu, Protected: %lu\n",
+        os::CSys::StrFmt( szMsg, sizeof( szMsg ), oexT( "Total: %lu, Block: %lu, Protected: %lu\n" ),
                                                   uSize, uBlockSize, pBh->uSize );
 
         if ( pBh->ai[ 0 ].pFile )
             os::CSys::StrFmt( zstr::EndOfString( szMsg ), sizeof( szMsg ) - zstr::Length( szMsg ), 
-                              "%s(%lu) : Allocated\n", pBh->ai[ 0 ].pFile, pBh->ai[ 0 ].uLine );
+                              oexT( "%s(%lu) : Allocated\n" ), pBh->ai[ 0 ].pFile, pBh->ai[ 0 ].uLine );
 
         if ( pBh->ai[ 1 ].pFile )
             os::CSys::StrFmt( zstr::EndOfString( szMsg ), sizeof( szMsg ) - zstr::Length( szMsg ), 
-                              "%s(%lu) : Resized\n", pBh->ai[ 1 ].pFile, pBh->ai[ 1 ].uLine );
+                              oexT( "%s(%lu) : Resized\n" ), pBh->ai[ 1 ].pFile, pBh->ai[ 1 ].uLine );
 
         if ( pBh->ai[ 2 ].pFile )
             os::CSys::StrFmt( zstr::EndOfString( szMsg ), sizeof( szMsg ) - zstr::Length( szMsg ), 
-                              "%s(%lu) : Freed\n", pBh->ai[ 2 ].pFile, pBh->ai[ 2 ].uLine );
+                              oexT( "%s(%lu) : Freed\n" ), pBh->ai[ 2 ].pFile, pBh->ai[ 2 ].uLine );
 
         oexTRACE( szMsg );
 
@@ -92,7 +92,7 @@ void CAlloc::ReportBlock( oexPVOID x_pMem, oexUINT uSize )
 
     catch( ... )
     {
-        oexTRACE( "!!! Asserted while trying to interpret memory block.  Perhaps it's some other _CLIENT_BLOCK?\n" );
+        oexTRACE( oexT( "!!! Asserted while trying to interpret memory block.  Perhaps it's some other _CLIENT_BLOCK?\n" ) );
 
     } // end catch
 

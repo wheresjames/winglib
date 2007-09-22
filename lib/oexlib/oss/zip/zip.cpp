@@ -2844,13 +2844,13 @@ CZipLibCompress::~CZipLibCompress()
 unsigned CZipLibCompress::_OnRead(void *param,char *buf,unsigned size)
 {   CZipLibCompress *pZc = (CZipLibCompress*)param;
     if ( !pZc ) return 0;
-    return pZc->OnRead( buf, size );
+    return pZc->OnRead( (oex::oexSTR)buf, size ) / sizeof( oex::oexTCHAR );
 }
 
 unsigned CZipLibCompress::_OnWrite(void *param,const char *buf, unsigned *size)
 {   CZipLibCompress *pZc = (CZipLibCompress*)param;
     if ( !pZc ) return 0;
-    return pZc->OnWrite( buf, size );
+    return pZc->OnWrite( (oex::oexCSTR)buf, size ) / sizeof( oex::oexTCHAR );
 }
 
 const char* CZipLibCompress::Compress()
@@ -2867,7 +2867,7 @@ const char* CZipLibCompress::Compress()
   state->ds.window_size=0;
   //  I think that covers everything that needs to be initted.
   //
-  bi_init(*state,buf, sizeof(buf), TRUE); // it used to be just 1024-size, not 16384 as here
+  bi_init(*state,(char*)buf, sizeof(buf), TRUE); // it used to be just 1024-size, not 16384 as here
   ush att = BINARY;
   ct_init(*state,&att);
   ush flg = 0;

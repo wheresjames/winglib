@@ -568,171 +568,171 @@ oexUINT CIpSocket::GetEventBit( oexLONG x_lEventMask )
 
 oexCSTR CIpSocket::GetErrorMsg( oexUINT x_uErr )
 {
-	oexCSTR ptr = "Unknown Winsock error";;
+	oexCSTR ptr = oexT( "Unknown Winsock error" );
 
 	switch( x_uErr )
 	{
 		case WSAEACCES:
-			ptr = "Access Denied";
+			ptr = oexT( "Access Denied" );
 			break;
 		case WSAEADDRINUSE:
-			ptr = "Address already in use";
+			ptr = oexT( "Address already in use" );
 			break;
 		case WSAEADDRNOTAVAIL:
-			ptr = "Cannot assign requested address";
+			ptr = oexT( "Cannot assign requested address" );
 			break;
 		case WSAEAFNOSUPPORT:
-			ptr = "Address family not supported by protocol family";
+			ptr = oexT( "Address family not supported by protocol family" );
 			break;
 		case WSAEALREADY:
-			ptr = "Operation already in progress";
+			ptr = oexT( "Operation already in progress" );
 			break;
 		case WSAECONNABORTED:
-			ptr = "Software caused connection abort";
+			ptr = oexT( "Software caused connection abort" );
 			break;
 		case WSAECONNREFUSED:
-			ptr = "Connection refused";
+			ptr = oexT( "Connection refused" );
 			break;
 		case WSAECONNRESET:
-			ptr = "Connection reset by peer";
+			ptr =oexT( "Connection reset by peer" );
 			break;
 		case WSAEDESTADDRREQ:
-			ptr = "Destination addres required";
+			ptr =oexT( "Destination addres required" );
 			break;
 		case WSAEFAULT:
-			ptr = "Bad Address";
+			ptr =oexT( "Bad Address" );
 			break;
 		case WSAEHOSTDOWN:
-			ptr = "Host is down";
+			ptr =oexT( "Host is down" );
 			break;
 		case WSAEHOSTUNREACH:
-			ptr = "Host is unreachable";
+			ptr =oexT( "Host is unreachable" );
 			break;
 		case WSAEINPROGRESS:
-			ptr = "Operation is now in progress";
+			ptr =oexT( "Operation is now in progress" );
 			break;
 		case WSAEINTR:
-			ptr = "Interrupted function call";
+			ptr =oexT( "Interrupted function call" );
 			break;
 		case WSAEINVAL:
-			ptr = "Invalid argument";
+			ptr =oexT( "Invalid argument" );
 			break;
 		case WSAEISCONN:
-			ptr = "Socket is already connected";
+			ptr =oexT( "Socket is already connected" );
 			break;
 		case WSAEMFILE:
-			ptr = "Too many open files";
+			ptr =oexT( "Too many open files" );
 			break;
 		case WSAEMSGSIZE:
-			ptr = "Message is too long";
+			ptr =oexT( "Message is too long" );
 			break;
 		case WSAENETDOWN:
-			ptr = "Network is down";
+			ptr =oexT( "Network is down" );
 			break;
 		case WSAENETRESET:
-			ptr = "Network dropped connection on reset";
+			ptr =oexT( "Network dropped connection on reset" );
 			break;
 		case WSAENETUNREACH:
-			ptr = "Network is unreachable";
+			ptr =oexT( "Network is unreachable" );
 			break;
 		case WSAENOBUFS:
-			ptr = "Insufficient buffer space is available";
+			ptr =oexT( "Insufficient buffer space is available" );
 			break;
 		case WSAENOPROTOOPT:
-			ptr = "Bad protocol option";
+			ptr =oexT( "Bad protocol option" );
 			break;
 		case WSAENOTCONN:
-			ptr = "Socket is not connected";
+			ptr =oexT( "Socket is not connected" );
 			break;
 		case WSAENOTSOCK:
-			ptr = "Socket operation on non-socket";
+			ptr =oexT( "Socket operation on non-socket" );
 			break;
 		case WSAEOPNOTSUPP:
-			ptr = "Operation not supported";
+			ptr =oexT( "Operation not supported" );
 			break;
 		case WSAEPFNOSUPPORT:
-			ptr = "Protocol family not supported";
+			ptr =oexT( "Protocol family not supported" );
 			break;
 		case WSAEPROCLIM:
-			ptr = "Too many processes";
+			ptr =oexT( "Too many processes" );
 			break;
 		case WSAEPROTONOSUPPORT:
-			ptr = "Protocol not supported";
+			ptr =oexT( "Protocol not supported" );
 			break;
 		case WSAEPROTOTYPE:
-			ptr = "Protocol wrong type for socket";
+			ptr =oexT( "Protocol wrong type for socket" );
 			break;
 		case WSAESHUTDOWN:
-			ptr = "Cannot send after socket shutdown";
+			ptr =oexT( "Cannot send after socket shutdown" );
 			break;
 		case WSAESOCKTNOSUPPORT:
-			ptr = "Socket type not supported";
+			ptr =oexT( "Socket type not supported" );
 			break;
 		case WSAETIMEDOUT:
-			ptr = "Connection timed out";
+			ptr =oexT( "Connection timed out" );
 			break;
 		case WSATYPE_NOT_FOUND:
-			ptr = "Class type not found";
+			ptr =oexT( "Class type not found" );
 			break;
 		case WSAEWOULDBLOCK:
-			ptr = "Resource temporarily unavailable (Would block)";
+			ptr =oexT( "Resource temporarily unavailable (Would block)" );
 			break;
 		case WSAHOST_NOT_FOUND:
-			ptr = "Host not found";
+			ptr =oexT( "Host not found" );
 			break;
 		case WSA_INVALID_HANDLE:
-			ptr = "Specified event object handle is invalid";
+			ptr =oexT( "Specified event object handle is invalid" );
 			break;
 		case WSA_INVALID_PARAMETER:
-			ptr = "One or mor parameters are invalid";
+			ptr =oexT( "One or mor parameters are invalid" );
 			break;
 //		case WSAINVALIDPROCTABLE;
-//			ptr = "Invalid procedure table from service provider";
+//			ptr =oexT( "Invalid procedure table from service provider" );
 //			break;
 //		case WSAINVALIDPROVIDER:
-//			ptr = "Invalid service provider version number";
+//			ptr =oexT( "Invalid service provider version number" );
 //			break;
 		case WSA_IO_INCOMPLETE:
-			ptr = "Overlapped I/O event object not in signaled state";
+			ptr =oexT( "Overlapped I/O event object not in signaled state" );
 			break;
 		case WSA_IO_PENDING:
-			ptr = "Overlapped I/O operations will complete later";
+			ptr =oexT( "Overlapped I/O operations will complete later" );
 			break;
 		case WSA_NOT_ENOUGH_MEMORY:
-			ptr = "Insufficient memory available";
+			ptr =oexT( "Insufficient memory available" );
 			break;
 		case WSANOTINITIALISED: 
-			ptr = "Successful WSAStartup not yet performed";
+			ptr =oexT( "Successful WSAStartup not yet performed" );
 			break;
 		case WSANO_DATA:
-			ptr = "Valid name, no data record of requested type";
+			ptr =oexT( "Valid name, no data record of requested type" );
 			break;
 		case WSANO_RECOVERY:
-			ptr = "Non-recoverable error has occured";
+			ptr =oexT( "Non-recoverable error has occured" );
 			break;
 //		case WSAPROVIDERFAILEDINIT:
-//			ptr = "Unable to initialize a service provider";
+//			ptr =oexT( "Unable to initialize a service provider" );
 //			break;
 		case WSASYSCALLFAILURE:
-			ptr = "System call failure";
+			ptr =oexT( "System call failure" );
 			break;
 		case WSASYSNOTREADY:
-			ptr = "Network subsystem is unavailable";
+			ptr =oexT( "Network subsystem is unavailable" );
 			break;
 		case WSATRY_AGAIN:
-			ptr = "Non-authoritative host not found";
+			ptr =oexT( "Non-authoritative host not found" );
 			break;
 		case WSAVERNOTSUPPORTED:
-			ptr = "WINSOCK.DLL version not supported";
+			ptr =oexT( "WINSOCK.DLL version not supported" );
 			break;
 		case WSAEDISCON:
-			ptr = "Graceful shutdown in progress";
+			ptr =oexT( "Graceful shutdown in progress" );
 			break;
 		case WSA_OPERATION_ABORTED:
-			ptr = "Overlapped I/O operation has been aborted";
+			ptr =oexT( "Overlapped I/O operation has been aborted" );
 			break;
 //		case WSAE:
-//			ptr = "";
+//			ptr =oexT( "" );
 //			break;
 
 	} // end switch
@@ -916,7 +916,7 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
     CIpSocket_SetAddressInfo( &m_addrPeer, &si );
 
     // Send the data
-    int nRet = sendto( (SOCKET)m_hSocket, (LPCTSTR)x_pData, (int)x_uSize, 
+    int nRet = sendto( (SOCKET)m_hSocket, (LPCSTR)x_pData, (int)x_uSize, 
                        (int)x_uFlags, (LPSOCKADDR)&si, sizeof( si ) );
 
 	// Get the last error code
@@ -957,7 +957,7 @@ oexUINT CIpSocket::Send( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_
         return 0;
 
 	// Attempt to send the data
-	int nRet = send( (SOCKET)m_hSocket, (LPCTSTR)x_pData, (int)x_uSize, (int)x_uFlags );
+	int nRet = send( (SOCKET)m_hSocket, (LPCSTR)x_pData, (int)x_uSize, (int)x_uFlags );
 
 	// Get the last error code
 	m_uLastError = WSAGetLastError();

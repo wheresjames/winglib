@@ -218,17 +218,17 @@ public:
     CZipLibUncompress() { pstream = NULL; }
     ~CZipLibUncompress();
 
-    virtual unsigned OnRead( char *buf, unsigned size ) = 0;
-    virtual unsigned OnWrite( const char *buf, unsigned *size ) = 0;
+    virtual unsigned OnRead( oex::oexSTR buf, unsigned size ) = 0;
+    virtual unsigned OnWrite( oex::oexCSTR buf, unsigned *size ) = 0;
 
-    const char* Uncompress();
+    oex::oexCSTR Uncompress();
 
 private:
 
-    void            *pstream;
+    void                *pstream;
     
-    char            buf_in[ 16384 ];
-    char            buf_out[ 16384 ];
+    oex::oexTCHAR        buf_in[ 16384 ];
+    oex::oexTCHAR        buf_out[ 16384 ];
 };
 
 

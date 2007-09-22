@@ -185,11 +185,11 @@ CPropertyBag CParser::DecodeUrlParams( CStr x_str )
 	CPropertyBag pb;
 	CStr key, val;
 
-	CStrList lst = CParser::Split( x_str, "&" );
+	CStrList lst = CParser::Split( x_str, oexT( "&" ) );
 
 	for ( CStrList::iterator it; lst.Next( it ); )
 	{
-		key = UrlDecode( it->Parse( "=" ) );
+		key = UrlDecode( it->Parse( oexT( "=" ) ) );
 		if ( key.Length() ) (*it)++;
 		val = UrlDecode( it.Obj() );
 
@@ -199,11 +199,11 @@ CPropertyBag CParser::DecodeUrlParams( CStr x_str )
 
 		// NULL key assignment
 		else if ( key.Length() )
-			pb[ key ] = "";
+			pb[ key ] = oexT( "" );
 
 		// Assume NULL key assignment
 		else if ( val.Length() )
-			pb[ val ] = "";
+			pb[ val ] = oexT( "" );
 
 	} // end while
 
@@ -218,7 +218,7 @@ CStr CParser::EncodeUrlParams( CPropertyBag x_pb )
 	{
 		if ( str.Length() ) str << '&';
 
-		str << UrlEncode( it.Node()->key ) << "=" << UrlEncode( it->ToString() );
+		str << UrlEncode( it.Node()->key ) << oexT( "=" ) << UrlEncode( it->ToString() );
 
 	} // end for
 
@@ -288,12 +288,12 @@ CPropertyBag CParser::DecodeMIME( CStr &x_sStr )
 
     while ( x_sStr.Length() )
     {
-        CStr sKey = x_sStr.Parse( ":" ), sVal;
+        CStr sKey = x_sStr.Parse( oexT(  ":" ) ), sVal;
         if ( *x_sStr == ':' ) x_sStr++;
 
         // Read value string
         do
-        {   sVal << x_sStr.SkipWhiteSpace().Parse( "\r\n" );
+        {   sVal << x_sStr.SkipWhiteSpace().Parse( oexT( "\r\n" ) );
             x_sStr.NextLine();
         } while ( x_sStr.Length() && x_sStr.IsWhiteSpaceAt( 0 ) );
        
@@ -315,7 +315,7 @@ CStr CParser::EncodeMime( CPropertyBag &x_pb )
 
         if ( it.Node()->key.Length() && it->ToString().Length() )
 
-            str << UrlEncode( it.Node()->key ) << ": " << UrlEncode( it->ToString() ) << "\r\n";
+            str << UrlEncode( it.Node()->key ) << oexT( ": " ) << UrlEncode( it->ToString() ) << oexT( "\r\n" );
 
 	return str;
 }

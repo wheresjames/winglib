@@ -21,7 +21,7 @@
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="0"
+			CharacterSet="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS,_UNICODE,UNICODE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -286,6 +286,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\inc\auto_str.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\inc\os\base_file.h"
 				>
 			</File>
@@ -299,6 +303,10 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\os\debug.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\dispatch.h"
 				>
 			</File>
 			<File

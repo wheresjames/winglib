@@ -47,8 +47,20 @@ oexPVOID CMem::New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
 
     try
     {
+        // +++ Figure out how to get the unicode file name into new without this conversion
+
+#ifdef _UNICODE
+
+        // Allocate buffer
+        pBuf = oexNEW oexUCHAR[ x_uSize ];
+
+#else
+
         // Allocate buffer
         pBuf = oexNEWAT( x_uLine, x_pFile ) oexUCHAR[ x_uSize ];
+
+#endif
+
         if ( !oexVERIFY( pBuf ) )
             return oexNULL;
 
