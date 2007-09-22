@@ -439,7 +439,7 @@ public:
                 return *this;
 
         // Copy data if all the stars align
-        os::CSys::MemCpy( Ptr(), x_pBuf, x_uSize );
+        os::CSys::MemCpy( Ptr(), x_pBuf, x_uSize * sizeof( T ) );
 
         return *this;
     }

@@ -68,7 +68,7 @@ namespace str
             if ( ( ln_src + 1 ) > sz_dst ) 
                 ln_src = sz_dst - 1;
 
-            os::CSys::MemCpy( dst, src, ln_src );
+            os::CSys::MemCpy( dst, src, ln_src * sizeof( T ) );
 
             dst[ ln_src ] = 0;
 

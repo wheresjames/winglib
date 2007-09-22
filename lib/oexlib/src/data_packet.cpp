@@ -216,10 +216,10 @@ oexBOOL CDataPacket::EndPacket()
 
 	// Get the md5
     m_md5.Final( &cs );
-//	CMd5Rsa::MD5Final( cs.md5, &m_md5Context );
 
 	// Write out the check sum
-	if ( !Poke( &cs, sizeof( cs ) ) ) return oexFALSE;
+	if ( !Poke( &cs, sizeof( cs ) ) ) 
+        return oexFALSE;
 
 	// Commit the data
 	EndPoke();
@@ -291,7 +291,8 @@ oexBOOL CDataPacket::FindPacket( LPSPacketHeader pPh, oexUINT *x_puAvailable )
 oexBOOL CDataPacket::VerifyPacket()
 {
 	// Do we already know there is a valid packet?
-	if ( m_bValidPacket ) return oexTRUE;
+	if ( m_bValidPacket ) 
+        return oexTRUE;
 
 	oexUINT uAvailable = 0;
 
@@ -302,7 +303,8 @@ oexBOOL CDataPacket::VerifyPacket()
 			return oexFALSE;
 
 		// Verify the length of the packet is available
-		if ( m_ph.dwLength > uAvailable ) return oexFALSE;
+		if ( m_ph.dwLength > uAvailable ) 
+            return oexFALSE;
 
 		// Enforce maximum packet size
 		if ( m_ph.dwLength <= GetMaxSize() )

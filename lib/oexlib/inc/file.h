@@ -134,7 +134,7 @@ public:
 	
 		\see 
 	*/
-    CStr Read( oexUINT x_uSize = 0 );
+    CStr8 Read( oexUINT x_uSize = 0 );
 
 	//==============================================================
 	// Write()
@@ -165,11 +165,12 @@ public:
 	
 		\see 
 	*/
-    oexBOOL Write( CStr x_sStr, oexUINT *x_puWritten = oexNULL )
-    {   return Write( x_sStr.Ptr(), x_sStr.Length(), x_puWritten ); }
+    oexBOOL Write( CStr8 x_sStr, oexUINT *x_puWritten = oexNULL )
+    {   return Write( x_sStr.Ptr(), x_sStr.LengthInBytes(), x_puWritten ); 
+    }
 
     /// File write operator
-    CFile& operator << ( CStr x_sStr ) { Write( x_sStr ); return *this; }
+    CFile& operator << ( CStr8 x_sStr ) { Write( x_sStr ); return *this; }
 
     /// Returns the file name
     CStr GetFileName() { return m_sFileName; }

@@ -50,8 +50,8 @@ public:
     /// Default constructor
     TStr()
     {
-        m_lLength = 0;
-        m_lOffset = 0;
+        m_nLength = 0;
+        m_uOffset = 0;
 
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
@@ -60,8 +60,8 @@ public:
     }
 
 	TStr( TStr &str )
-	{	m_lLength = 0;
-        m_lOffset = 0;
+	{	m_nLength = 0;
+        m_uOffset = 0;
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -71,8 +71,8 @@ public:
 	}
 
 	TStr( oexCONST T *pStr )
-	{	m_lLength = 0;
-        m_lOffset = 0;
+	{	m_nLength = 0;
+        m_uOffset = 0;
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -81,8 +81,8 @@ public:
 	}
 
 	TStr( oexCONST T *pStr, oexUINT uSize )
-	{	m_lLength = 0;
-        m_lOffset = 0;
+	{	m_nLength = 0;
+        m_uOffset = 0;
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -91,8 +91,8 @@ public:
 	}
 
 	TStr( oexCONST T *pStr, oexINT nStart, oexUINT uLen )
-	{	m_lLength = 0;
-        m_lOffset = 0;
+	{	m_nLength = 0;
+        m_uOffset = 0;
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -101,8 +101,8 @@ public:
 	}
 
 	TStr( oexCONST T *pStr, oexUINT uSize, oexINT nStart, oexUINT uLen )
-	{	m_lLength = 0;
-        m_lOffset = 0;
+	{	m_nLength = 0;
+        m_uOffset = 0;
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -111,8 +111,8 @@ public:
 	}
 
 	TStr( oexCONST oexINT nVal )
-	{	m_lLength = 0;
-        m_lOffset = 0;
+	{	m_nLength = 0;
+        m_uOffset = 0;
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -121,8 +121,8 @@ public:
 	}
 
 	TStr( oexCONST oexUINT uVal )
-	{	m_lLength = 0;
-        m_lOffset = 0;
+	{	m_nLength = 0;
+        m_uOffset = 0;
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -131,8 +131,8 @@ public:
 	}
 
 	TStr( oexCONST oexDOUBLE dStr )
-	{	m_lLength = 0;
-        m_lOffset = 0;
+	{	m_nLength = 0;
+        m_uOffset = 0;
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -141,8 +141,8 @@ public:
 	}
 
 	TStr( oexCONST T tVal )
-	{	m_lLength = 0;
-        m_lOffset = 0;
+	{	m_nLength = 0;
+        m_uOffset = 0;
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -159,10 +159,10 @@ public:
     void Destroy()
     {
         // Zero length
-        m_lLength = 0;
+        m_nLength = 0;
 
         // Reset the offset
-        m_lOffset = 0;
+        m_uOffset = 0;
 
         // Lose the string memory
         m_mem.OexDelete();
@@ -174,8 +174,8 @@ public:
     TStr& Share( oexCONST TStr &x_str )
     {      
         // Share the memory
-        m_lLength = x_str.m_lLength;
-        m_lOffset = x_str.m_lOffset;
+        m_nLength = x_str.m_nLength;
+        m_uOffset = x_str.m_uOffset;
         m_mem.Share( x_str.m_mem );
         return *this;
     }
@@ -241,10 +241,12 @@ public:
 		pMem[ x_uSize ] = 0;
 
 		// User can't possibly copy any data
-		if ( !x_uSize ) m_lLength = 0;
+		if ( !x_uSize ) 
+            m_nLength = 0;
 
 		// We'll scan for the length of the buffer later
-		else m_lLength = -1;
+		else 
+            m_nLength = -1;
 
 		return pMem;
     }
@@ -256,37 +258,32 @@ public:
 		if ( !m_mem.Size() )
 			OexAllocate( 0 );
 
-		return m_mem.Ptr( m_lOffset );
+		return m_mem.Ptr( m_uOffset );
 	}
 
 	/// Returns a const pointer to the internal string buffer
     /**
-        !!! Possibly strange behavior, this function evaluates
-            the length of the string if lOffset is not zero, so
-            the open buffer you get form Allocate() will be
-            canceled if you call this function with a non-zero
-            offset.  I decided not to have it evaluate the string
-            length when lOffset is zero to avoid needing an external 
-            pointer when using open buffers and Allocate().
+        \param [in] x_lOffset   -   Offset into the string
     */
-	oexCONST T* Ptr( oexLONG x_lOffset )
+	oexCONST T* Ptr( oexUINT x_uOffset )
     {	
+        oexUINT uSize = m_mem.Size();
+
 		// Ensure string
-		if ( !m_mem.Size() )
+		if ( !uSize )
 			OexAllocate( 0 );
 
-        if ( x_lOffset )
+        if ( x_uOffset )
         {
 		    // Check for offset beyond the end of the buffer
-		    oexASSERT( Length() >= x_lOffset );
+		    oexASSERT( uSize >= x_uOffset );
 
-    		// Don't point beyond the end of the buffer
-	    	if ( x_lOffset > Length() ) 
-                x_lOffset = m_lLength;
+            if ( x_uOffset >= uSize ) 
+                x_uOffset = uSize - 1;
 
         } // end if
 
-		return m_mem.Ptr( x_lOffset + m_lOffset );
+		return m_mem.Ptr( x_uOffset + m_uOffset );
 	}
 
 	/// Returns a writable pointer (use with care)
@@ -294,26 +291,26 @@ public:
 	{	return (T*)Ptr(); }
 
 	/// Returns a writable pointer (use with care)
-	T* _Ptr( oexLONG x_lOffset )
-	{	return (T*)Ptr( x_lOffset ); }
+	T* _Ptr( oexUINT x_uOffset )
+	{	return (T*)Ptr( x_uOffset ); }
 
 	/// Returns the specified character
-	T& operator []( oexLONG x_lOffset )
-	{	return *_Ptr( x_lOffset ); }
+	T& operator []( oexUINT x_uOffset )
+	{	return *_Ptr( x_uOffset ); }
 
 	/// Returns the first character in the buffer
 	oexCONST T& operator *() 
     { return *Ptr(); }
 
 	/// Calculates the length of the string by finding the NULL terminator
-	oexLONG CalculateLength()
+	oexINT CalculateLength()
 	{
-		m_lLength = 0;
-		oexLONG lMax = m_mem.Size();
+		m_nLength = 0;
+		oexINT lMax = m_mem.Size();
 
 		// Do we have a buffer?
 		if ( 0 >= lMax )
-			return m_lLength;
+			return m_nLength;
 
 		// Get a pointer to the whole string buffer
 		T* pStr = m_mem.Ptr();
@@ -322,34 +319,44 @@ public:
 		pStr[ lMax - 1 ] = 0;
 
         // Get the length
-        m_lLength = str::Length( pStr, lMax );
+        m_nLength = str::Length( pStr, lMax );
 
 		// Resize the memory block ( this adds over-run protection )
-		m_mem.Resize( m_lLength + 1 );
+		m_mem.Resize( m_nLength + 1 );
 
 		// Return the length of the buffer
-		return m_lLength;
+		return m_nLength;
 	}
 
 	/// Returns the length of the string, calculates if needed.
-	oexLONG Length() 
-	{	if ( 0 > m_lLength ) 
+	oexINT Length() 
+	{	if ( 0 > m_nLength ) 
 			return CalculateLength();
-		return m_lLength - m_lOffset; 
+		return m_nLength - m_uOffset; 
 	}
 
     /// Manually sets the length
     /// !!! This allows NULL characters to be in the string.
-    oexLONG SetLength( oexLONG x_lLength )
+    oexINT SetLength( oexINT x_nLength )
     {
         // Ensure we have that much data
-        if ( !OexAllocate( m_lOffset + x_lLength ) )
+        if ( !OexAllocate( m_uOffset + x_nLength ) )
             return 0;
 
         // Just accept the callers size
-        m_lLength = x_lLength;
+        m_nLength = x_nLength;
 
-        return m_lLength;
+        return m_nLength;
+    }
+
+    /// Returns the size in bytes, of a single character
+    oexINT SizeOfChar()
+    {   return sizeof( T ); }
+
+    /// Returns the length of the string in bytes
+    oexINT LengthInBytes()
+    {
+        return Length() * SizeOfChar();
     }
 
 public:
@@ -376,7 +383,7 @@ public:
 
 
 	TStr& operator = ( oexCONST oexINT nVal )
-	{	return SetNum( oexT( "%li" ), (oexLONG)nVal ); }
+	{	return SetNum( oexT( "%li" ), (oexINT)nVal ); }
 
 	TStr& operator = ( oexCONST oexUINT uVal )
 	{	return SetNum( oexT( "%lu" ), (oexULONG)uVal ); }
@@ -385,7 +392,7 @@ public:
 	{	return SetNumTrim( oexT( "%f" ), oexNULL, oexT( "0" ), (oexDOUBLE)dStr ); }
 
 	TStr& operator += ( oexCONST oexINT nVal )
-	{	return AppendNum( oexT( "%li" ), (oexLONG)nVal ); }
+	{	return AppendNum( oexT( "%li" ), (oexINT)nVal ); }
 
 	TStr& operator += ( oexCONST oexUINT uVal )
 	{	return AppendNum( oexT( "%lu" ), (oexULONG)uVal ); }
@@ -400,7 +407,7 @@ public:
 	{	return Append( str.Ptr() ); }
 
 	TStr& operator << ( oexCONST oexINT nVal )
-	{	return AppendNum( oexT( "%li" ), (oexLONG)nVal ); }
+	{	return AppendNum( oexT( "%li" ), (oexINT)nVal ); }
 
 	TStr& operator << ( oexCONST oexUINT uVal )
 	{	return AppendNum( oexT( "%lu" ), (oexULONG)uVal ); }
@@ -484,12 +491,12 @@ public:
         {   Destroy(); return *this; }
 
         // Shift the start of the string
-        m_lOffset += x_uStart;
+        m_uOffset += x_uStart;
 
         // Do we need to adjust the length?
         if ( x_uLen && x_uLen < ( uSize - x_uStart ) )
-        {   OexAllocate( m_lOffset + x_uLen );
-            m_lLength = m_lOffset + x_uLen;
+        {   OexAllocate( m_uOffset + x_uLen );
+            m_nLength = m_uOffset + x_uLen;
         } // end if
 
 		return *this;
@@ -524,7 +531,7 @@ public:
 		m_mem.MemCpy( &pStr[ uStart ], uLen );
 
 		// Save the new string length
-		m_lLength = uLen;
+		m_nLength = uLen;
 
 		return *this;
 	}
@@ -567,7 +574,7 @@ public:
 	TStr& DropRange( T tMin, T tMax, oexBOOL bIn )
 	{	
 		T* pPtr = _Ptr();
-		oexLONG lLen = Length();
+		oexINT lLen = Length();
 		oexINT g = -1, b = -1, i = 0, l = 0;
 		
 		if ( bIn )
@@ -602,7 +609,7 @@ public:
 
 		// Change the length of the string
 		OexAllocate( l );
-		m_lLength = l;
+		m_nLength = l;
 
 		return *this;
 	}
@@ -611,9 +618,9 @@ public:
 	TStr& Drop( oexCONST T *pChars, oexBOOL bIn )
 	{	
 		T* pPtr = _Ptr();
-		oexLONG lLen = Length();
+		oexINT lLen = Length();
 		oexINT g = -1, b = -1, i = 0, l = 0;
-        oexLONG lChars = zstr::Length( pChars );
+        oexINT lChars = zstr::Length( pChars );
 		
 		if ( bIn )
 		{	for( i = 0; i < lLen; i++ )
@@ -644,7 +651,7 @@ public:
 
 		// Change the length of the string
 		OexAllocate( l );
-		m_lLength = l;
+		m_nLength = l;
 
 		return *this;
 	}
@@ -658,16 +665,28 @@ public:
 	}
 
 	TStr& Set( oexCONST T* x_pStr )
-	{	return Set( x_pStr, zstr::Length( x_pStr ) ); }
+	{
+        if ( !x_pStr || !*x_pStr )
+            Destroy();
+        else
+            Set( x_pStr, zstr::Length( x_pStr ) ); 
+        return *this;
+    }
 
 	TStr& Set( oexCONST T* x_pStr, oexUINT uSize )
 	{
+		// Verify pointer
+        if ( !x_pStr || !uSize )
+        {   Destroy();
+			return *this;
+        } // end if
+
 		// Verify pointer
 		if ( !oexVERIFY_PTR( x_pStr ) )
 			return *this;
 
         // Ditch the offset
-        m_lOffset = 0;
+        m_uOffset = 0;
 
 		// Allocate space for new string
 		if ( !oexVERIFY_PTR( OexAllocate( uSize ) ) || !uSize )
@@ -677,7 +696,7 @@ public:
 		m_mem.MemCpy( x_pStr, uSize );
 
 		// Save the new string length
-		m_lLength = uSize;
+		m_nLength = uSize;
 
 		return *this;
 	}
@@ -688,7 +707,7 @@ public:
 		{	OexAllocate( 0 ); return *this; }
 
         // Ditch the offset
-        m_lOffset = 0;
+        m_uOffset = 0;
 
 		// Allocate space for new string
 		T* pPtr = OexAllocate( 1 );
@@ -697,13 +716,13 @@ public:
 
 		pPtr[ 0 ] = x_chVal;
 
-		m_lLength = 1;
+		m_nLength = 1;
 
 		return *this;
 	}
 
     template< typename T_STR >
-        TStr& Set( oexCONST T_STR *x_pStr, oexUINT x_uLen = 0 )
+        TStr& Cnv( oexCONST T_STR *x_pStr, oexUINT x_uLen = 0 )
     {
 		if ( !x_pStr || !x_pStr )
 		{	OexAllocate( 0 ); 
@@ -726,6 +745,99 @@ public:
         for ( oexUINT i = 0; i < x_uLen; i++ )
             *_Ptr( i ) = (T)x_pStr[ i ];
 
+        // Save the length
+        m_nLength = x_uLen;
+
+        return *this;
+    }
+
+    template< typename T_CHAR>
+        TStr& Cnv( TStr< T_CHAR > &x_sStr )
+    {
+        oexUINT uLen = x_sStr.Length();
+
+		if ( !uLen )
+		{	OexAllocate( 0 ); 
+            return *this; 
+        } // end if
+
+        // Allocate buffer
+        if ( !OexAllocate( uLen ) )
+            return *this;
+
+        // Copy bytes one by one
+        for ( oexUINT i = 0; i < uLen; i++ )
+            *_Ptr( i ) = (T)( *x_sStr.Ptr( i ) );
+
+        // Save the length
+        m_nLength = uLen;
+
+        return *this;
+    }
+
+    template< typename T_STR >
+        TStr& Bin( oexCONST T_STR *x_pStr, oexUINT x_uLen = 0 )
+    {
+		if ( !x_pStr || !x_pStr )
+		{	OexAllocate( 0 ); 
+            return *this; 
+        } // end if
+
+        if ( !x_uLen )
+            x_uLen = zstr::Length( x_pStr );
+        
+        if ( !x_uLen )
+		{	OexAllocate( 0 ); 
+            return *this; 
+        } // end if
+
+        // Get length of in comming string in bytes
+        oexUINT uBytes = x_uLen * sizeof( T_STR );
+
+        // Calculate whole bytes and remainder
+        oexUINT uT = uBytes / sizeof( T );
+        oexUINT uR = uBytes - ( uT * sizeof( T ) );
+
+        // Allocate enough space
+        if ( !OexAllocate( uT + uR ) )
+            return *this;
+
+        // Binary copy
+        os::CSys::MemCpy( _Ptr(), x_pStr, uBytes );
+
+        // Save length
+        m_nLength = uT + uR;
+
+        return *this;
+    }
+
+    template< typename T_CHAR>
+        TStr& Bin( TStr< T_CHAR > &x_sStr )
+    {
+        oexUINT uLen = x_sStr.Length();
+
+		if ( !uLen )
+		{	OexAllocate( 0 ); 
+            return *this; 
+        } // end if
+
+        // Get length of in comming string in bytes
+        oexUINT uBytes = uLen * sizeof( T_CHAR );
+
+        // Calculate whole bytes and remainder
+        oexUINT uT = uBytes / sizeof( T );
+        oexUINT uR = uBytes - ( uT * sizeof( T ) );
+
+        // Allocate enough space
+        if ( !OexAllocate( uT + uR ) )
+            return *this;
+
+        // Binary copy
+        os::CSys::MemCpy( _Ptr(), x_sStr.Ptr(), uBytes );
+
+        // Save length
+        m_nLength = uT + uR;
+
         return *this;
     }
 
@@ -746,10 +858,10 @@ public:
 			return *this;
 
 		// Append string
-		os::CSys::MemCpy( m_mem.Ptr( uOldSize ), pStr, uSize );
+		os::CSys::MemCpy( m_mem.Ptr( uOldSize ), pStr, uSize * sizeof( T ) );
 
 		// Add new string length
-		m_lLength = uOldSize + uSize;
+		m_nLength = uOldSize + uSize;
 
 		return *this;
 	}
@@ -772,7 +884,7 @@ public:
 
 	/// Drops the specified characters from the end of the string
 	TStr& RTrim( oexCONST T* pChars )
-	{	oexVALIDATE_PTR( pChars ); oexLONG lLen = Length();
+	{	oexVALIDATE_PTR( pChars ); oexINT lLen = Length();
         oexINT i = str::RSkipCharacters( Ptr(), lLen, pChars, zstr::Length( pChars ) );
 		if ( !i || i >= lLen ) return *this;
 		RTrim( lLen - i - 1 );
@@ -825,7 +937,7 @@ public:
 
 public:
 
-	TStr& vFmt( oexCONST T* x_pFmt, oexCPVOID x_pArgs )
+	TStr& vFmt( oexCSTR x_pFmt, oexCPVOID x_pArgs )
 	{
 		// Verify input string
 		if ( !oexVERIFY( x_pFmt ) )
@@ -860,21 +972,21 @@ public:
 	}
 
 	/// Formats a string
-	TStr& Fmt( oexCONST T* pFmt, ... )
+	TStr& Fmt( oexCSTR pFmt, ... )
 	{	return vFmt( pFmt, ( (oexPVOID*)&pFmt ) + 1 ); }
 
 	/// Sets a number into the string using rules of Fmt()
 	/// Truncates results larger than 256 characters
-	TStr& SetNum( oexCONST T* pFmt, ... )
-	{	T tBuf[ 256 ] = oexT( "" );
-		os::CSys::vStrFmt( tBuf, sizeof( tBuf ), pFmt, ( ( (oexPVOID*)&pFmt ) + 1 ) );
-		return Set( tBuf );
+	TStr& SetNum( oexCSTR pFmt, ... )
+	{	oexTCHAR tBuf[ 256 ] = oexT( "" );
+		os::CSys::vStrFmt( tBuf, oexSizeofArray( tBuf ), pFmt, ( ( (oexPVOID*)&pFmt ) + 1 ) );
+		return Cnv( tBuf );
 	}
 
 	/// Sets a number into the string using rules of Fmt()
 	/// Truncates results larger than 256 characters
     /// Optional pre and post trimming
-	TStr& SetNumTrim( oexCONST T* pFmt, oexCONST T* pLTrim, oexCONST T* pRTrim, ... )
+	TStr& SetNumTrim( oexCSTR pFmt, oexCONST T* pLTrim, oexCONST T* pRTrim, ... )
 	{   os::CSys::vStrFmt( OexAllocate( 256 ), 256, pFmt, ( ( (oexPVOID*)&pRTrim ) + 1 ) );
         if ( pLTrim ) LTrim( pLTrim );
         if ( pRTrim ) RTrim( pRTrim );
@@ -883,16 +995,16 @@ public:
 
 	/// Appends a formatted number to the string using rules of Fmt()
 	/// Truncates results larger than 256 characters
-	TStr& AppendNum( oexCONST T* pFmt, ... )
+	TStr& AppendNum( oexCSTR pFmt, ... )
 	{	T tBuf[ 256 ] = oexT( "" );
-		os::CSys::vStrFmt( tBuf, sizeof( tBuf ), pFmt, ( ( (oexPVOID*)&pFmt ) + 1 ) );
+		os::CSys::vStrFmt( tBuf, oexSizeofArray( tBuf ), pFmt, ( ( (oexPVOID*)&pFmt ) + 1 ) );
 		return Append( tBuf );		
 	}
 
     /// Sets a number into the string using rules of Fmt()
 	/// Truncates results larger than 256 characters
     /// Optional pre and post trimming
-	TStr& AppendNumTrim( oexCONST T* pFmt, oexCONST T* pLTrim, oexCONST T* pRTrim, ... )
+	TStr& AppendNumTrim( oexCSTR pFmt, oexCONST T* pLTrim, oexCONST T* pRTrim, ... )
 	{   TStr str;        
    		os::CSys::vStrFmt( str.OexAllocate( 256 ), 256, pFmt, ( ( (oexPVOID*)&pRTrim ) + 1 ) );
         if ( pLTrim ) str.LTrim( pLTrim );
@@ -1354,10 +1466,10 @@ private:
     TMem< T >       m_mem;
 
     /// The length of the string
-    oexINT          m_lLength;
+    oexINT          m_nLength;
     
     /// Offset into the string, this is invaluable for text parsing
-    oexINT          m_lOffset;
+    oexINT          m_uOffset;
     
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 

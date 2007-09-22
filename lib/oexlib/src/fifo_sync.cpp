@@ -214,7 +214,7 @@ oexBOOL CFifoSync::Read( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oe
 	return bRet;
 }
 
-oexBOOL CFifoSync::Read( CStr &x_sStr, oexUINT x_uMax )
+oexBOOL CFifoSync::Read( CStr8 &x_sStr, oexUINT x_uMax )
 {
 	// Lock the buffer
 	CTlLocalLock ll( *this );
@@ -253,7 +253,7 @@ oexBOOL CFifoSync::Read( CStr &x_sStr, oexUINT x_uMax )
 }
 
 
-oexBOOL CFifoSync::Peek( CStr &x_sStr, oexUINT x_uMax )
+oexBOOL CFifoSync::Peek( CStr8 &x_sStr, oexUINT x_uMax )
 {
 	// Lock the buffer
 	CTlLocalLock ll( *this );

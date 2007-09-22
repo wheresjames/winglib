@@ -793,14 +793,14 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 	return nRet;
 }
 
-CStr CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
+CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
 {   
     // Do we have a size limit?
     if ( x_uMax )
     {
         // Allocate buffer
-        CStr sBuf; 
-        oexTCHAR *pBuf = sBuf.Allocate( x_uMax ); 
+        CStr8 sBuf; 
+        oexCHAR *pBuf = sBuf.Allocate( x_uMax ); 
 
         // Attempt to read data
         oexUINT uRead = RecvFrom( sBuf._Ptr(), x_uMax, oexNULL, x_uFlags );
@@ -813,13 +813,26 @@ CStr CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
     } // end if
 
     // Allocate buffer
-    CStr sBuf; 
-    oexUINT uRead;
-    oexTCHAR ucBuf[ oexSTRSIZE ];
+    CStr8 sBuf; 
+    oexUINT uRead = 0, uOffset = 0;
+
+    // Allocate space
+    if ( !sBuf.OexAllocate( oexSTRSIZE ) )
+        return sBuf;
 
     // Read all available data
-    while ( 0 < ( uRead = RecvFrom( ucBuf, sizeof( ucBuf ), oexNULL, x_uFlags ) ) )
-        sBuf.Append( ucBuf, uRead );
+    while ( 0 < ( uRead = RecvFrom( sBuf._Ptr( uOffset ), oexSTRSIZE, oexNULL, x_uFlags ) ) 
+            && uRead >= oexSTRSIZE )
+    {
+        // Allocate more space
+        uOffset += uRead;        
+        if ( !sBuf.Allocate( uOffset + oexSTRSIZE ) )
+            return sBuf;
+        
+    } // end while
+
+    // Set the length
+    sBuf.SetLength( uOffset + uRead );
 
     return sBuf;
 }
@@ -867,14 +880,14 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 	return nRet;
 }
 
-CStr CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
+CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
 {   
     // Do we have a size limit?
     if ( x_uMax )
     {
         // Allocate buffer
-        CStr sBuf; 
-        oexTCHAR *pBuf = sBuf.Allocate( x_uMax ); 
+        CStr8 sBuf; 
+        oexCHAR *pBuf = sBuf.Allocate( x_uMax ); 
 
         // Attempt to read data
         oexUINT uRead = Recv( sBuf._Ptr(), x_uMax, oexNULL, x_uFlags );
@@ -886,6 +899,8 @@ CStr CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
 
     } // end if
 
+/*  // +++ Old method
+
     // Allocate buffer
     CStr sBuf; 
     oexUINT uRead;
@@ -894,6 +909,31 @@ CStr CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
     // Read all available data
     while ( 0 < ( uRead = Recv( ucBuf, sizeof( ucBuf ), oexNULL, x_uFlags ) ) )
         sBuf.Append( ucBuf, uRead );
+
+    return sBuf;
+*/
+
+    // Allocate buffer
+    CStr8 sBuf; 
+    oexUINT uRead = 0, uOffset = 0;
+
+    // Allocate space
+    if ( !sBuf.OexAllocate( oexSTRSIZE ) )
+        return sBuf;
+
+    // Read all available data
+    while ( 0 < ( uRead = Recv( sBuf._Ptr( uOffset ), oexSTRSIZE, oexNULL, x_uFlags ) ) 
+            && uRead >= oexSTRSIZE )
+    {
+        // Allocate more space
+        uOffset += uRead;        
+        if ( !sBuf.Allocate( uOffset + oexSTRSIZE ) )
+            return sBuf;
+        
+    } // end while
+
+    // Set the length
+    sBuf.SetLength( uOffset + uRead );
 
     return sBuf;
 }

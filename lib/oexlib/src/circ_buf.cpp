@@ -249,7 +249,7 @@ void CCircBuf::Destroy()
 
 }
 
-oexBOOL CCircBuf::Read( CStr &x_sStr, oexUINT x_uMax )
+oexBOOL CCircBuf::Read( CStr8 &x_sStr, oexUINT x_uMax )
 {
 	// Lock the buffer
 	CTlLocalLock ll( &m_lock );
@@ -457,13 +457,13 @@ oexUINT CCircBuf::GetMaxWrite( oexUINT x_uReadPtr, oexUINT x_uWritePtr, oexUINT 
 	return x_uReadPtr - uNWritePtr;
 }
 
-oexBOOL CCircBuf::Write(oexCSTR x_pStr)
+oexBOOL CCircBuf::Write(oexCSTR8 x_pStr)
 {
 	// Write the string into the buffer
     return Write( x_pStr, zstr::Length( x_pStr ) );
 }
 
-oexBOOL CCircBuf::Read(oexSTR x_pStr, oexUINT x_uMax)
+oexBOOL CCircBuf::Read(oexSTR8 x_pStr, oexUINT x_uMax)
 {
 	oexUINT uRead = 0;
 
@@ -505,7 +505,7 @@ oexBOOL CCircBuf::Peek( oexPVOID x_pvBuf, oexUINT x_uMax, oexUINT *x_puRead, oex
 	return Read( x_pvBuf, x_uMax, x_puRead, &uReadPtr, x_uEncode );
 }
 
-oexBOOL CCircBuf::Peek( CStr &x_sStr, oexUINT x_uMax )
+oexBOOL CCircBuf::Peek( CStr8 &x_sStr, oexUINT x_uMax )
 {
 	// Lock the buffer
 	CTlLocalLock ll( &m_lock );

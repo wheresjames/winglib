@@ -225,7 +225,7 @@ public:
 	
 		\see 
 	*/
-	virtual oexBOOL Write( oexCSTR x_pStr )
+	virtual oexBOOL Write( oexCSTR8 x_pStr )
     {   return Write( x_pStr, zstr::Length( x_pStr ) ); }
 
 	//==============================================================
@@ -239,7 +239,7 @@ public:
 	
 		\see 
 	*/
-	virtual oexBOOL Write( CStr x_sStr )
+	virtual oexBOOL Write( CStr8 x_sStr )
     {   return Write( x_sStr.Ptr(), x_sStr.Length() ); }
 
 	//==============================================================
@@ -258,10 +258,10 @@ public:
 	*/
 	virtual oexBOOL Read( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oexUINT x_uEncode = 0 );
 
-    virtual oexBOOL Read( CStr &x_sStr, oexUINT x_uMax = 0 );
+    virtual oexBOOL Read( CStr8 &x_sStr, oexUINT x_uMax = 0 );
 
-    virtual CStr Read( oexUINT x_uMax = 0 )
-    {   CStr str; Read( str, x_uMax ); return str; }
+    virtual CStr8 Read( oexUINT x_uMax = 0 )
+    {   CStr8 str; Read( str, x_uMax ); return str; }
 
 
 	//==============================================================
@@ -281,10 +281,10 @@ public:
 	*/
 	virtual oexBOOL Peek( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oexLONG x_lOffset = 0, oexUINT x_uEncode = 0 );
 
-    virtual oexBOOL Peek( CStr &x_sStr, oexUINT x_uMax = 0 );
+    virtual oexBOOL Peek( CStr8 &x_sStr, oexUINT x_uMax = 0 );
 
-    virtual CStr Peek( oexUINT x_uMax = 0 )
-    {   CStr str; Peek( str, x_uMax ); return str; }
+    virtual CStr8 Peek( oexUINT x_uMax = 0 )
+    {   CStr8 str; Peek( str, x_uMax ); return str; }
 
 	//==============================================================
 	// GetMaxBuffers()

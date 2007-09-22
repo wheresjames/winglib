@@ -63,36 +63,36 @@ public:
         m_sOutput.Destroy();
     }
     
-    unsigned OnRead( oexSTR buf, unsigned size );
-    unsigned OnWrite( oexCSTR buf, unsigned *size );
+    unsigned OnRead( oexSTR8 buf, unsigned size );
+    unsigned OnWrite( oexCSTR8 buf, unsigned *size );
 
-    CStr Compress();
+    CStr8 Compress();
 
     // Set input method
-    oexBOOL SetStrInput( CStr &x_sStr ) { m_sInput = x_sStr; return 0 < m_sInput.Length(); }
+    oexBOOL SetStrInput( CStr8 &x_sStr ) { m_sInput = x_sStr; return 0 < m_sInput.Length(); }
     oexBOOL SetFileInput( oexCSTR x_pFile ) { return m_fInput.OpenExisting( x_pFile ).IsOpen(); }
 
     // Set output method
     oexBOOL SetOutputFile( oexCSTR x_pFile ) { return m_fOutput.OpenExisting( x_pFile ).IsOpen(); }
 
     /// Returns a reference to the output string object
-    CStr& GetOutputStr() { return m_sOutput; }
+    CStr8& GetOutputStr() { return m_sOutput; }
 
     /// Returns a reference to the output file object
     CFile& GetOutputFile() { return m_fOutput; }
 
     /// One step string compress
-    static CStr Compress( CStr &x_sStr )
+    static CStr8 Compress( CStr8 &x_sStr )
     {   CCompress cmp; cmp.SetStrInput( x_sStr ); cmp.Compress(); return cmp.m_sOutput; }
 
 private:
 
     oexPVOID    m_pCompress;
 
-    CStr        m_sInput;
+    CStr8       m_sInput;
     CFile       m_fInput;
 
-    CStr        m_sOutput;
+    CStr8       m_sOutput;
     CFile       m_fOutput;
 };
 

@@ -216,7 +216,8 @@ CStr CParser::EncodeUrlParams( CPropertyBag x_pb )
 
 	for( CPropertyBag::iterator it; x_pb.List().Next( it ); )
 	{
-		if ( str.Length() ) str << '&';
+		if ( str.Length() ) 
+            str << oexT( '&' );
 
 		str << UrlEncode( it.Node()->key ) << oexT( "=" ) << UrlEncode( it->ToString() );
 

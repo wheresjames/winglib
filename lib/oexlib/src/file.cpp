@@ -53,13 +53,13 @@ oexBOOL CFile::Destroy()
     return bRet;
 }
 
-CStr CFile::Read( oexUINT x_uSize )
+CStr8 CFile::Read( oexUINT x_uSize )
 {   
     oexINT64 llSize = Size();
     if ( x_uSize == 0 || x_uSize > llSize )
         x_uSize = (oexUINT)llSize;
 
-    CStr str;
+    CStr8 str;
     if ( !str.OexAllocate( x_uSize ) )
         return oexFALSE;
 

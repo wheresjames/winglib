@@ -2844,13 +2844,13 @@ CZipLibCompress::~CZipLibCompress()
 unsigned CZipLibCompress::_OnRead(void *param,char *buf,unsigned size)
 {   CZipLibCompress *pZc = (CZipLibCompress*)param;
     if ( !pZc ) return 0;
-    return pZc->OnRead( (oex::oexSTR)buf, size ) / sizeof( oex::oexTCHAR );
+    return pZc->OnRead( buf, size );
 }
 
 unsigned CZipLibCompress::_OnWrite(void *param,const char *buf, unsigned *size)
 {   CZipLibCompress *pZc = (CZipLibCompress*)param;
     if ( !pZc ) return 0;
-    return pZc->OnWrite( (oex::oexCSTR)buf, size ) / sizeof( oex::oexTCHAR );
+    return pZc->OnWrite( buf, size );
 }
 
 const char* CZipLibCompress::Compress()

@@ -101,7 +101,7 @@ oexBOOL CIpAddress::SetDotAddress( oexCSTR x_pDotAddress, oexINT32 x_uPort, oexI
         return oexFALSE;
 
     // Convert the dot address
-    u_long ip = ntohl( inet_addr( oexToStr8Ptr( x_pDotAddress ) ) );
+    u_long ip = ntohl( inet_addr( oexStrToStr8Ptr( x_pDotAddress ) ) );
     if ( INADDR_NONE == ip ) 
         return oexFALSE;
 
@@ -284,10 +284,10 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
         return oexFALSE;
 
 	// First try to interpret as dot address
-	ULONG uAddr = inet_addr( oexToStr8Ptr( x_pServer ) );
+	ULONG uAddr = inet_addr( oexStrToStr8Ptr( x_pServer ) );
 	if ( INADDR_NONE == uAddr )
     {
-        LPHOSTENT pHe = gethostbyname( oexToStr8Ptr( x_pServer ) );
+        LPHOSTENT pHe = gethostbyname( oexStrToStr8Ptr( x_pServer ) );
 
         if ( !pHe )
             return oexFALSE;

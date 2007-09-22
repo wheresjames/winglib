@@ -157,24 +157,24 @@ public:
 	
 		\see 
 	*/
-	oexBOOL ReadPacketString( oexUINT x_uBlock, oexUINT x_uType, oexSTR x_pStr, oexUINT x_uMax )
+	oexBOOL ReadPacketString( oexUINT x_uBlock, oexUINT x_uType, oexSTR8 x_pStr, oexUINT x_uMax )
 	{	oexUINT uLen = 0;
 		oexBOOL bRes = ReadPacketData( x_uBlock, x_uType, x_pStr, x_uMax, &uLen );
 		if ( uLen >= x_uMax ) uLen = x_uMax - 1; x_pStr[ uLen ] = 0; 
 		return bRes;
 	}
 
-    CStr ReadPacketString( oexUINT x_uBlock, oexUINT x_uType )
+    CStr8 ReadPacketString( oexUINT x_uBlock, oexUINT x_uType )
     {
         // See how large the buffer is
         oexUINT uLen = 0;
         if ( !ReadPacketData( x_uBlock, x_uType, oexNULL, 0, &uLen ) || !uLen )
-            return CStr();
+            return CStr8();
 
         // Allocate space
-        CStr str;
+        CStr8 str;
         if ( !str.OexAllocate( uLen ) )
-            return CStr();
+            return CStr8();
 
         // Read in the data
         ReadPacketData( x_uBlock, x_uType, str._Ptr(), uLen, &uLen );
@@ -253,7 +253,7 @@ public:
 	
 		\see 
 	*/
-	oexBOOL ReadPacket( CStr x_sStr )
+	oexBOOL ReadPacket( CStr8 x_sStr )
     {   return ReadPacket( x_sStr.Ptr(), x_sStr.Length() ); }
 
 
@@ -297,7 +297,7 @@ public:
 	
 		\see 
 	*/
-    oexBOOL WritePacket( oexUINT x_uPacketType, oexUINT x_uDataType, CStr &x_sStr )
+    oexBOOL WritePacket( oexUINT x_uPacketType, oexUINT x_uDataType, CStr8 &x_sStr )
     {   return WritePacket( x_uPacketType, x_uDataType, x_sStr.Ptr(), x_sStr.Length() ); }
 
 
@@ -374,7 +374,7 @@ public:
 	
 		\see 
 	*/
-    oexBOOL AddPacketData( oexUINT x_uType, CStr &x_sStr )
+    oexBOOL AddPacketData( oexUINT x_uType, CStr8 &x_sStr )
     {   return AddPacketData( x_uType, x_sStr.Ptr(), x_sStr.Length() ); }
 
 	//==============================================================

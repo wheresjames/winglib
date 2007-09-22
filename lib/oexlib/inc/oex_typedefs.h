@@ -67,7 +67,21 @@ typedef double						oexDOUBLE;
 typedef bool						oexBOOL;
 typedef char						oexCHAR;
 typedef unsigned char				oexUCHAR;
-								
+
+// String types
+typedef char                        oexCHAR8;
+typedef oexCHAR8 *                  oexSTR8;
+typedef const oexCHAR8 *            oexCSTR8;
+typedef short                       oexCHAR16;
+typedef oexCHAR16 *                 oexSTR16;
+typedef const oexCHAR16 *           oexCSTR16;
+typedef long                        oexCHAR32;
+typedef oexCHAR32 *                 oexSTR32;
+typedef const oexCHAR32 *           oexCSTR32;
+typedef wchar_t                     oexCHARW;
+typedef oexCHARW *                  oexSTRW;
+typedef const oexCHARW *            oexCSTRW;
+
 #ifdef UNICODE
 	typedef wchar_t					oexTCHAR;
 #else

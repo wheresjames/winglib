@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS,_UNICODE,UNICODE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -427,10 +427,6 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\sys_time.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\..\..\_Praesidium2_003\lib\dsl\inc\os\thread.h"
 				>
 			</File>
 			<File

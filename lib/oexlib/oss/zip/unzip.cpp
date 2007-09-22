@@ -4172,7 +4172,7 @@ CZipLibUncompress::~CZipLibUncompress()
 { if ( pstream ) { delete (z_stream*)pstream; pstream = NULL; } }
 
 
-oex::oexCSTR CZipLibUncompress::Uncompress()
+oex::oexCSTR8 CZipLibUncompress::Uncompress()
 {
     if ( !pstream ) pstream = new z_stream;
     z_stream *stream = (z_stream*)pstream;
@@ -4224,6 +4224,6 @@ oex::oexCSTR CZipLibUncompress::Uncompress()
         return NULL;
 
     else 
-        return oexStr8ToStrPtr( stream->msg );
+        return stream->msg;
 }
 

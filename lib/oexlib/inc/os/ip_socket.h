@@ -486,7 +486,7 @@ public:
 	
 		\see 
 	*/
-    CStr RecvFrom( oexUINT x_uMax = 0, oexUINT x_uFlags = 0 );
+    CStr8 RecvFrom( oexUINT x_uMax = 0, oexUINT x_uFlags = 0 );
 
 
 	//==============================================================
@@ -518,7 +518,7 @@ public:
 	
 		\see 
 	*/
-    CStr Recv( oexUINT x_uMax = 0, oexUINT x_uFlags = 0 );
+    CStr8 Recv( oexUINT x_uMax = 0, oexUINT x_uFlags = 0 );
 
 	//==============================================================
 	// SendTo()
@@ -549,7 +549,7 @@ public:
 	
 		\see 
 	*/
-	oexUINT SendTo( oexCSTR x_pStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
+	oexUINT SendTo( oexCSTR8 x_pStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
     {	return SendTo( (oexPVOID)x_pStr, zstr::Length( x_pStr ), x_puSent, x_uFlags ); }
 
 	//==============================================================
@@ -565,7 +565,7 @@ public:
 	
 		\see 
 	*/
-	oexUINT SendTo( CStr &x_sStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
+	oexUINT SendTo( CStr8 &x_sStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
     {	return SendTo( (oexPVOID)x_sStr.Ptr(), x_sStr.Length(), x_puSent, x_uFlags ); }
 
 
@@ -598,7 +598,7 @@ public:
 	
 		\see 
 	*/
-	oexUINT Send( oexCSTR x_pStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
+	oexUINT Send( oexCSTR8 x_pStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
     {	return Send( (oexPVOID)x_pStr, zstr::Length( x_pStr ), x_puSent, x_uFlags ); }
 
 	//==============================================================
@@ -614,7 +614,7 @@ public:
 	
 		\see 
 	*/
-	oexUINT Send( CStr &x_sStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
+	oexUINT Send( CStr8 &x_sStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
     {	return Send( (oexPVOID)x_sStr.Ptr(), x_sStr.Length(), x_puSent, x_uFlags ); }
 
 public:
