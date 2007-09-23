@@ -505,6 +505,9 @@ namespace os
 #include "inc/fifo_sync.h"
 #include "inc/data_packet.h"
 #include "inc/dispatch.h"
+#include "inc/worker_thread.h"
+#include "inc/auto_socket.h"
+#include "inc/wsp_stream.h"
 
 
 /*

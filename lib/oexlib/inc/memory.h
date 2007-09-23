@@ -97,10 +97,26 @@ public:
         *this = x_rMem;
     }
     
+    TMem( TMem &x_m ) 
+    {   
+        m_pMem = oexNULL;
+
+#if defined ( _DEBUG )
+        m_pBh = oexNULL;
+#endif
+
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
+        // Construct a copy
+        Share( x_m ); 
+    }
+    
     /// Copy operator
-    TMem& operator = ( TMem &m )
+    TMem& operator = ( TMem &x_m )
     {
-        return Assume( m ); 
+        return Share( x_m ); 
     }
     
     /// Copy operator
@@ -302,6 +318,10 @@ public:
 
         return *this;
     }
+
+    /// Returns pointer to the memory
+    T* operator ->()
+    {   return Ptr(); }
 
 	//==============================================================
 	// Ptr()

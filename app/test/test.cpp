@@ -565,6 +565,33 @@ oex::oexRESULT TestLists()
 
 	} // end if
 
+    lst.Insert( 11 );
+
+    if( !oexVERIFY( lst.First().Obj() == 11 ) )
+        return -7;
+
+	oex::TList< int > lst2;
+
+    oex::TList< int >::iterator itMove = lst.First();
+
+    lst.Remove( itMove );
+    lst2.Insert( itMove );
+
+    if( !oexVERIFY( lst.First().Obj() == 4 ) )
+        return -8;
+
+    if( !oexVERIFY( lst2.First().Obj() == 11 ) )
+        return -9;
+
+    // Append second list onto the first
+    lst.Append( lst2 );
+
+    if( !oexVERIFY( lst.Last().Obj() == 11 ) )
+        return -10;
+
+    if( !oexVERIFY( !lst2.Size() ) )
+        return -11;
+
     // Destroy the list
 	lst.Destroy();
 
@@ -1377,8 +1404,11 @@ oex::oexRESULT Test_TArbDelegate()
     oex::TArbDelegate< oex::CAutoStr > ad;
 
     ad.Register( &cc, &CCallbackClass::Add );
-
     if ( !oexVERIFY( ad( 1, 2 ) == 3 ) )
+        return -1;
+
+    ad.Register( &cc, &CCallbackClass::Return );
+    if ( !oexVERIFY( ad( oexT( "Hello" ) ) == oexT( "Hello" ) ) )
         return -1;
 
     return oex::oexRES_OK;
@@ -1388,28 +1418,167 @@ oex::oexRESULT Test_CDispatch()
 {
     CCallbackClass cc;
 
-    if ( !oexVERIFY( oex::CDispatch::Call( oexT( "Add" ), 1, 2 ) == oexT( "f=Add,p{0=1,1=2}" ) ) )
+    if ( !oexVERIFY( oexCall( oexT( "Add" ), 1, 2 ) == oexT( "f=Add,p{0=1,1=2}" ) ) )
         return -1;
 
     // Set delegates
     oex::CDispatch dsp;
-    dsp.Register( oexT( "Add" ), oex::TArbDelegate< oex::CAutoStr >( &cc, &CCallbackClass::Add ) );
-    dsp.Register( oexT( "Return" ), oex::TArbDelegate< oex::CAutoStr >( &cc, &CCallbackClass::Return ) );
+    dsp.OexRpcRegisterPtr( &cc, CCallbackClass, Add );
+    dsp.OexRpcRegisterPtr( &cc, CCallbackClass, Return );
 
-    if ( !oexVERIFY( dsp.Execute( dsp.Call( oexT( "Add" ), 1, 2 ) ) == 3 ) )
+    oex::CStr sRet;
+    if ( !oexVERIFY( dsp.Execute( oexCall( oexT( "Add" ), 1, 2 ), &sRet ) && sRet == 3 ) )
         return -2;
 
-    if ( !oexVERIFY( dsp.Execute( dsp.Call( oexT( "Return" ), oexT( "Hello" ) ) ) == oexT( "Hello" ) ) )
+    if ( !oexVERIFY( dsp.Execute( oexCall( oexT( "Return" ), oexT( "Hello" ) ), &sRet ) && sRet == oexT( "Hello" ) ) )
         return -3;
 
+    CBaseTestObject bto;
+
+    bto.SetValue( 11 );
+
+    dsp.OexRpcRegisterPtr( &bto, CBaseTestObject, SetValue );
+
+    dsp.Queue( dsp.Call( oexT( "SetValue" ), 22 ) );
+
+    dsp.ProcessQueue();
+
+    if ( !oexVERIFY( 22 == bto.GetValue() ) )
+        return -4;
+
     return oex::oexRES_OK;
 }
 
-oex::oexRESULT Test_CThreadPool()
+class CThreadTest : public oex::CWorkerThread
 {
+public:
 
+    CThreadTest()
+    {
+        OexRpcRegister( CThreadTest, Add );
+
+    }
+
+    int Add( int a, int b )
+    {
+        return a + b;
+    }
+
+};
+
+oex::oexRESULT Test_CThread()
+{
+    CThreadTest tt;
+
+    if ( !oexVERIFY( tt.Start() ) )
+        return -1;
+    
+    oex::CReply reply( tt.Queue( oexCall( oexT( "Add" ), 1, 2 ) ) );
+
+    if ( !oexVERIFY( reply.Wait( 3000 ) ) )
+        return -2;
+
+    if ( !oexVERIFY( *reply == 3 ) )
+        return -3;
+    
     return oex::oexRES_OK;
 }
+
+
+oex::oexRESULT Test_CAutoSocket()
+{
+    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
+        return -1;
+
+//    oex::TAutoSocket< oex::CWspStream > as;
+
+
+    oex::os::CIpSocket::UninitSockets();
+
+/*
+    if ( !oexVERIFY( CIpSocket::InitSockets() ) )
+        return -1;
+
+    CProxy pxClient = oexCREATE_THREAD2( TAutoSocket< CWspStream > );
+
+    CIpSocket server, session;
+
+    if ( !oexVERIFY( server.Bind( 23456 ) ) )
+        return -2;
+
+    if ( !oexVERIFY( server.Listen() ) )
+        return -3;
+
+    if ( !oexVERIFY( pxClient.Invoke( "Connect", "localhost", 23456 ).ReturnValue().ToLong() ) )
+        return -4;
+
+    if ( !oexVERIFY( server.WaitEvent( CIpSocket::eAcceptEvent, oexDEFAULT_TIMEOUT ) ) )
+        return -5;
+
+    if ( !oexVERIFY( server.Accept( session ) ) )
+        return -6;
+
+    if ( !oexVERIFY( session.WaitEvent( CIpSocket::eConnectEvent, oexDEFAULT_TIMEOUT ) ) )
+        return -7;
+
+    oexCSTR pStr = "B6F5FF3D-E9A5-46ca-ADB8-D655427EB94D";
+
+    if ( !oexVERIFY( session.Send( pStr ) ) )
+        return -8; 
+    
+    if ( !oexVERIFY( pxClient.Invoke( "WaitData", oexDEFAULT_TIMEOUT ).ReturnValue().ToLong() ) )
+        return -9;
+
+    if ( !oexVERIFY( pxClient.Invoke( "AsyncRead" ).ReturnValue().ToString() == pStr ) )
+        return -10;
+
+    oexUINT uRxed = 0;
+    TMemory< oexUCHAR > mBuf;
+    if ( !oexVERIFY( mBuf.DslAllocate( 1000 ) ) )
+        return -11;
+
+    // Fill with data
+    for ( oexUINT i = 0; i < mBuf.Size(); i++ )
+        mBuf[ i ] = i;
+
+    if ( !oexVERIFY( session.Send( mBuf.Ptr(), mBuf.Size() ) ) )
+        return -12;
+            
+    while ( uRxed < mBuf.Size() )
+    {
+        // Wait for data
+        if ( !oexVERIFY( pxClient.Invoke( "WaitData", oexDEFAULT_TIMEOUT ).ReturnValue().ToLong() ) )
+            return -13;
+
+        CStr sData = pxClient.Invoke( "AsyncRead", 99 ).ReturnValue().ToString();
+
+        if ( !oexVERIFY( sData.Length() ) )
+            return -14;
+
+        if ( !oexVERIFY( !os::CSys::MemCmp( mBuf.Ptr( uRxed ), sData.Ptr(), sData.Length() ) ) )
+            return -16;
+
+        uRxed += sData.Length();
+
+    } // end while
+
+    if ( !oexVERIFY( uRxed == mBuf.Size() ) )
+        return -17;
+
+    pxClient.Invoke( "Shutdown" );
+    if ( !oexVERIFY( session.WaitEvent( CIpSocket::eCloseEvent, oexDEFAULT_TIMEOUT ) ) )
+        return -18;
+            
+    session.Destroy();
+    server.Destroy();
+
+    CIpSocket::UninitSockets();
+
+	return oexRES_OK;
+*/  
+    return oex::oexRES_OK;
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -1452,7 +1621,9 @@ int main(int argc, char* argv[])
 
     Test_CDispatch();
 
-    Test_CThreadPool();
+    Test_CThread();
+
+    Test_CAutoSocket();
 
 	// Initialize the oex library
     oexUNINIT();	

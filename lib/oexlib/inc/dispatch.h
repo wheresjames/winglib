@@ -35,6 +35,89 @@
 #pragma once
 
 
+#define OexRpcRegisterPtr( p, c, f )    Register( oexT( #f ), oex::TArbDelegate< oex::CAutoStr >( p, &c::f ) );
+#define OexRpcRegister( c, f )          OexRpcRegisterPtr( this, c, f )
+
+#define oexCall                         oex::CDispatch::Call
+
+
+struct CReplyInfo
+{
+public:
+
+    /// Default constructor
+    CReplyInfo() {}
+
+    /// Constructor
+    CReplyInfo( CStr x_sCmd )
+    {   sCmd = x_sCmd; }
+
+    /// Copy constructor
+    CReplyInfo( CReplyInfo &x_rRi )
+    {   sCmd = x_rRi.sCmd; sReturn = x_rRi.sReturn; evReady = x_rRi.evReady; }
+
+    /// Copy operator
+    CReplyInfo& operator = ( CReplyInfo &x_rRi )
+    {   sCmd = x_rRi.sCmd; sReturn = x_rRi.sReturn; evReady = x_rRi.evReady; return *this; }
+
+    /// Command string
+    CStr            sCmd;
+
+    /// Set when the reply is ready
+    CTlEvent        evReady;
+
+    /// Return event id
+    CStr            sReturn;
+};
+
+
+
+class CReply
+{
+public:
+
+    /// Default constructor
+    CReply()
+    {
+    }
+
+    /// Reply constructor
+    CReply( TMem< CReplyInfo > &x_rRi )
+    {
+        m_ri.Share( x_rRi );
+    }
+
+    /// Destructor
+    virtual ~CReply()
+    {
+    }
+
+    /// Returns non-zero if the reply is ready
+    oexBOOL Wait( oexUINT x_uTimeout )
+    {   return m_ri.Ptr() && m_ri.Ptr()->evReady.Wait( x_uTimeout ); }
+
+    /// Returns non-zero if the reply is ready
+    oexBOOL IsReady()
+    {   return Wait( 0 ); }
+
+    /// Returns the reply value
+    CStr GetReply()
+    {
+        if ( !IsReady() )
+            return oexT( "" );
+
+        // Return the reply value
+        return m_ri.Ptr()->sReturn;
+    }
+
+    /// Returns the reply value
+    CStr operator *() 
+    {   return GetReply(); }
+
+    /// Reply information
+    TMem< CReplyInfo >      m_ri;
+};
+
 /// Event dispatch class
 /**
     Event dispatching
@@ -53,7 +136,7 @@ public:
     typedef TAssoList< CStr, TArbDelegate< CAutoStr > > t_EventHandlerList;
 
     /// Command buffer
-    typedef TList< CStr > t_CmdBufferList;
+    typedef TList< TMem< CReplyInfo > > t_CmdBufferList;
 
 public:
 
@@ -81,13 +164,11 @@ public:
 
             CTlLocalLock ll( m_lockCmd );
             if ( ll.IsLocked() )
-            {
-                m_lstCmd.Destroy();
+            {   m_lstCmd.Destroy();
                 m_lstEventHandlers.Destroy();
             } // end if
 
         } // end scope
-
     }
 
     /// Registers a callback function
@@ -103,8 +184,96 @@ public:
         return oexTRUE;
     }
 
-    /// Registers a callback function
-    CAutoStr Execute( CStr x_sCmd, CStr x_sDef = oexT( "" ) )
+    /// Puts a function call into the queue
+    /**
+        Returns a unique id for the return event
+    */
+    CReply Queue( CStr x_sCmd )
+    {
+        CTlLocalLock ll( m_lockPre );
+        if ( !ll.IsLocked() )
+            return CReply();
+
+        // Append command
+        t_CmdBufferList::iterator it = m_lstPre.Append();
+
+        // Create command
+        it.Obj().OexConstruct( x_sCmd );
+
+        // Signal that a command is waiting
+        m_evCmd.Set();
+
+        // Return the event id
+        return it.Obj();
+    }    
+
+    /// Processes the function queue
+    /**
+        \param [in] uMax    -   Maximum number of commands to execute
+
+        \return Number of commands executed.
+    */
+    oexUINT ProcessQueue( oexINT nMax = -1 )
+    {
+        // Lock the command buffer
+        CTlLocalLock ll( m_lockCmd );
+        if ( !ll.IsLocked() )
+            return 0;
+
+        { // Copy commands from pre-stage buffer
+
+            CTlLocalLock ll( m_lockPre );
+            if ( ll.IsLocked() )
+                m_lstCmd.Append( m_lstPre );
+
+        } // end copy commands
+
+        oexUINT uCmds = 0;
+
+        // Execute commands
+        for ( t_CmdBufferList::iterator it; nMax-- && m_lstCmd.Next( it ); )
+        {
+            // Ensure valid command
+            if ( it.Obj().Ptr() )
+            {
+                // Execute the command
+                Execute( it.Obj().Ptr()->sCmd, &it.Obj().Ptr()->sReturn );
+
+                // Signal that reply is ready
+                it.Obj().Ptr()->evReady.Set();
+
+                // Count commands
+                uCmds++;
+
+            } // end if
+
+            // Drop this command
+            it = m_lstCmd.Erase( it );      
+
+        } // end for
+
+        { // Copy commands from pre-stage buffer
+
+            CTlLocalLock ll( m_lockPre );
+            if ( ll.IsLocked() )
+            {
+                // Reset event if no more commands
+                if ( !m_lstCmd.Size() && !m_lstPre.Size() )
+                    m_evCmd.Reset();
+
+                // Just to make sure
+                else
+                    m_evCmd.Set();
+
+            } // end if
+
+        } // end copy commands
+
+        return uCmds;
+    }
+
+    /// Executes the specified function call
+    oexBOOL Execute( CStr x_sCmd, CStr *x_pReturn = oexNULL )
     {
         CTlLocalLock ll( m_lockCmd );
         if ( !ll.IsLocked() )
@@ -114,55 +283,85 @@ public:
         CPropertyBag pb = CParser::Deserialize( x_sCmd );
 
         if ( !pb[ oexT( "f" ) ].IsSet() )
-            return x_sDef;
+            return oexFALSE;
 
         t_EventHandlerList::iterator it = m_lstEventHandlers.Find( pb[ oexT( "f" ) ].ToString() );
         if ( !it.IsValid() )
-            return x_sDef;
+            return oexFALSE;
+
+        CStr ret;
 
         // 0 params
         if ( !pb[ oexT( "p" ) ].IsKey( 0 ) )
-        {   
-            if ( !oexVERIFY( 0 == it->GetNumParams() ) )
-                return x_sDef;
-
-             return it.Obj()();
-
-        } // end if
+        {
+            if ( oexVERIFY( 0 == it->GetNumParams() ) )
+                ret = it.Obj()();
+        } // end else if
 
         // 1 params
-        if ( !pb[ oexT( "p" ) ].IsKey( 1 ) )
-        {   
-            if ( !oexVERIFY( 1 == it->GetNumParams() ) )
-                return x_sDef;
-
-            return it.Obj()( pb[ oexT( "p" ) ][ 0 ].ToString() );
-
-        } // end if
+        else if ( !pb[ oexT( "p" ) ].IsKey( 1 ) )
+        {
+            if ( oexVERIFY( 1 == it->GetNumParams() ) )
+                ret = it.Obj()( pb[ oexT( "p" ) ][ 0 ].ToString() );
+        } // end else if
 
         // 2 params
-        if ( !pb[ oexT( "p" ) ].IsKey( 2 ) )
-        {   
-            if ( !oexVERIFY( 2 == it->GetNumParams() ) )
-                return x_sDef;
+        else if ( !pb[ oexT( "p" ) ].IsKey( 2 ) )
+        {
+            if ( oexVERIFY( 2 == it->GetNumParams() ) )
+                ret = it.Obj()( pb[ oexT( "p" ) ][ 0 ].ToString(), pb[ oexT( "p" ) ][ 1 ].ToString() );
+        } // end else if
 
-            return it.Obj()( pb[ oexT( "p" ) ][ 0 ].ToString(), pb[ oexT( "p" ) ][ 1 ].ToString() );
+        // 3 params
+        else if ( !pb[ oexT( "p" ) ].IsKey( 3 ) )
+        {
+            if ( oexVERIFY( 3 == it->GetNumParams() ) )
+                ret = it.Obj()( pb[ oexT( "p" ) ][ 0 ].ToString(), pb[ oexT( "p" ) ][ 1 ].ToString(),
+                                pb[ oexT( "p" ) ][ 2 ].ToString() );
+        } // end else if
 
-        } // end if
+        // 4 params
+        else if ( !pb[ oexT( "p" ) ].IsKey( 4 ) )
+        {
+            if ( oexVERIFY( 4 == it->GetNumParams() ) )
+                ret = it.Obj()( pb[ oexT( "p" ) ][ 0 ].ToString(), pb[ oexT( "p" ) ][ 1 ].ToString(),
+                                pb[ oexT( "p" ) ][ 2 ].ToString(), pb[ oexT( "p" ) ][ 3 ].ToString() );
+        } // end else if
 
-        return x_sDef;
-    }
+        // 5 params
+        else if ( !pb[ oexT( "p" ) ].IsKey( 5 ) )
+        {
+            if ( oexVERIFY( 5 == it->GetNumParams() ) )
+                ret = it.Obj()( pb[ oexT( "p" ) ][ 0 ].ToString(), pb[ oexT( "p" ) ][ 1 ].ToString(),
+                                pb[ oexT( "p" ) ][ 2 ].ToString(), pb[ oexT( "p" ) ][ 3 ].ToString(),
+                                pb[ oexT( "p" ) ][ 4 ].ToString() );
+        } // end else if
 
-    /// Registers a callback function
-    oexBOOL Queue( CStr x_sCmd )
-    {
-        CTlLocalLock ll( m_lockPre );
-        if ( !ll.IsLocked() )
+        // 6 params
+        else if ( !pb[ oexT( "p" ) ].IsKey( 6 ) )
+        {
+            if ( oexVERIFY( 6 == it->GetNumParams() ) )
+                ret = it.Obj()( pb[ oexT( "p" ) ][ 0 ].ToString(), pb[ oexT( "p" ) ][ 1 ].ToString(),
+                                pb[ oexT( "p" ) ][ 2 ].ToString(), pb[ oexT( "p" ) ][ 3 ].ToString(),
+                                pb[ oexT( "p" ) ][ 4 ].ToString(), pb[ oexT( "p" ) ][ 5 ].ToString() );
+        } // end else if
+
+        else 
             return oexFALSE;
 
-        m_lstPre.Append( x_sCmd );
+        // Does the caller want the return value?
+        if ( x_pReturn )
+            *x_pReturn = ret;
 
         return oexTRUE;
+    }
+
+    static CStr Call( CStr sF )
+    {
+        CPropertyBag pb;
+        pb[ oexT( "f" ) ] = sF;
+
+        return CParser::Serialize( pb );
     }
 
     template< typename T_P1 >
@@ -186,6 +385,64 @@ public:
         return CParser::Serialize( pb );
     }
 
+    template< typename T_P1, typename T_P2, typename T_P3 >
+        static CStr Call( CStr sF, T_P1 p1, T_P2 p2, T_P3 p3 )
+    {
+        CPropertyBag pb;
+        pb[ oexT( "f" ) ] = sF;
+        pb[ oexT( "p" ) ][ 0 ] = p1;
+        pb[ oexT( "p" ) ][ 1 ] = p2;
+        pb[ oexT( "p" ) ][ 2 ] = p3;
+
+        return CParser::Serialize( pb );
+    }
+
+    template< typename T_P1, typename T_P2, typename T_P3, typename T_P4 >
+        static CStr Call( CStr sF, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4 )
+    {
+        CPropertyBag pb;
+        pb[ oexT( "f" ) ] = sF;
+        pb[ oexT( "p" ) ][ 0 ] = p1;
+        pb[ oexT( "p" ) ][ 1 ] = p2;
+        pb[ oexT( "p" ) ][ 2 ] = p3;
+        pb[ oexT( "p" ) ][ 3 ] = p4;
+
+        return CParser::Serialize( pb );
+    }
+
+    template< typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5 >
+        static CStr Call( CStr sF, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5 )
+    {
+        CPropertyBag pb;
+        pb[ oexT( "f" ) ] = sF;
+        pb[ oexT( "p" ) ][ 0 ] = p1;
+        pb[ oexT( "p" ) ][ 1 ] = p2;
+        pb[ oexT( "p" ) ][ 2 ] = p3;
+        pb[ oexT( "p" ) ][ 3 ] = p4;
+        pb[ oexT( "p" ) ][ 4 ] = p5;
+
+        return CParser::Serialize( pb );
+    }
+
+    template< typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6 >
+        static CStr Call( CStr sF, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6 )
+    {
+        CPropertyBag pb;
+        pb[ oexT( "f" ) ] = sF;
+        pb[ oexT( "p" ) ][ 0 ] = p1;
+        pb[ oexT( "p" ) ][ 1 ] = p2;
+        pb[ oexT( "p" ) ][ 2 ] = p3;
+        pb[ oexT( "p" ) ][ 3 ] = p4;
+        pb[ oexT( "p" ) ][ 4 ] = p5;
+        pb[ oexT( "p" ) ][ 5 ] = p6;
+
+        return CParser::Serialize( pb );
+    }
+
+    /// Returns a reference to the command waiting event
+    CTlEvent& GetCmdEvent()
+    {   return m_evCmd; }
+
 private:
 
     /// Thread lock
@@ -202,6 +459,9 @@ private:
 
     /// Pre queue
     t_CmdBufferList             m_lstPre;
+    
+    /// Command waiting signal
+    CTlEvent                    m_evCmd;
 
 };
 

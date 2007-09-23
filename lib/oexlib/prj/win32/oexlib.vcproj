@@ -177,6 +177,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\auto_socket.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\os\win32\base_file.cpp"
 				>
 			</File>
@@ -283,6 +287,10 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\asso_list.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\auto_socket.h"
 				>
 			</File>
 			<File
@@ -439,6 +447,10 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\unzip.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\worker_thread.h"
 				>
 			</File>
 			<File

@@ -680,6 +680,112 @@ public:
 	//==============================================================
 	// Append()
 	//==============================================================
+	/// Appends a list onto this one
+	/**
+		\param [in] x_lst		-	List to append
+
+		\return Reference to this list
+	*/
+	TList& Append( TList &x_lst )
+    {
+        // Ensure valid list
+        if ( !x_lst.Size() || !x_lst.m_pHead || !x_lst.m_pTail )
+            return *this;
+
+        // Update our tail pointer if any
+        if ( m_pTail )
+            m_pTail->SetAt( m_pTail->Prev(), x_lst.m_pHead );
+
+        // Update our head pointer
+        if ( !m_pHead )
+            m_pHead = x_lst.m_pHead;
+
+        // Update our tail pointer
+        m_pTail = x_lst.m_pTail;
+
+        // Relieve the list of it's burden
+        x_lst.Detach();
+
+        return *this;
+    }
+
+	//==============================================================
+	// Insert()
+	//==============================================================
+	/// Insert a list into this one
+	/**
+		\param [in] x_lst		-	List to insert
+
+		\return Reference to this list
+	*/
+	TList& Insert( TList &x_lst )
+    {
+        // Ensure valid list
+        if ( !x_lst.Size() || !x_lst.m_pHead || !x_lst.m_pTail )
+            return *this;
+
+        // Update our tail pointer if any
+        if ( m_pHead )
+            m_pHead->SetAt( x_lst.m_pTail, m_pTail->Next() );
+
+        // Update our head pointer
+        if ( !m_pTail )
+            m_pTail = x_lst.m_pTail;
+
+        // Update our tail pointer
+        m_pHead = x_lst.m_pHead;
+
+        // Relieve the list of it's burden
+        x_lst.Detach();
+
+        return *this;
+    }
+
+	//==============================================================
+	// Append()
+	//==============================================================
+	/// Appends the object to the back of the list
+	/**
+		\param [in] x_it		-	Node to append.  Must not be a
+                                    member of another list.
+                                    
+
+		\return iterator containing object
+	*/
+	iterator Append( iterator x_it )
+    {   if ( x_it.Node() )
+            Append( *x_it.Node() );
+        return x_it;
+    }
+
+	//==============================================================
+	// Append()
+	//==============================================================
+	/// Appends the object to the back of the list
+	/**
+		\param [in] x_rNode		-	Node to append.  Must not be a
+                                    member of another list.
+
+		\return iterator containing object
+	*/
+	iterator Append( T_NODE &x_rNode )
+    {
+        x_rNode.Append( m_pTail );
+
+		m_uSize++; 
+
+		m_pTail = &x_rNode; 
+
+		if ( !m_pHead ) 
+			m_pHead = &x_rNode; 
+
+		return m_pTail; 
+
+    }
+
+	//==============================================================
+	// Append()
+	//==============================================================
 	/// Appends the object to the back of the list
 	/**
 		\param [in] x_pObj		-	Pointer to object to insert.
@@ -688,8 +794,7 @@ public:
 
 		\return iterator containing object
 	*/
-	iterator
-        Append( T_OBJ *x_pObj = oexNULL )
+	iterator Append( T_OBJ *x_pObj = oexNULL )
 	{
         T_NODE *pNode = oexNULL;
 
@@ -707,6 +812,8 @@ public:
 		return m_pTail; 
 	}
 
+
+
 	//==============================================================
 	// Append()
 	//==============================================================
@@ -717,8 +824,7 @@ public:
 
 		\return iterator containing object
 	*/
-	iterator
-        Append( oexCONST T_OBJ &x_rObj )
+	iterator Append( oexCONST T_OBJ &x_rObj )
 	{	
         iterator itNew = Append();
 
@@ -744,6 +850,116 @@ public:
 		TList& Append( T *x_pList, oexUINT x_uCount )
 	{	for( oexUINT i = 0; i < x_uCount; i++ )
 			Append( x_pList[ i ] );			
+		return *this;
+	}
+
+
+	//==============================================================
+	// Insert()
+	//==============================================================
+	/// Inserts the object to the front of the list
+	/**
+		\param [in] x_it		-	Node to append.  Must not be a
+                                    member of another list.
+
+		\return iterator containing object
+	*/
+	iterator Insert( iterator x_it )
+    {   if ( x_it.Node() )
+            Insert( *x_it.Node() );
+        return x_it;
+    }
+
+	//==============================================================
+	// Insert()
+	//==============================================================
+	/// Inserts the object to the front of the list
+	/**
+		\param [in] x_rNode		-	Node to insert.  Must not be a
+                                    member of another list.
+
+		\return iterator containing object
+	*/
+	iterator Insert( T_NODE &x_rNode )
+    {
+        x_rNode.Insert( m_pHead );
+
+		m_uSize++; 
+
+		m_pHead = &x_rNode; 
+
+		if ( !m_pTail ) 
+			m_pTail = &x_rNode; 
+
+		return m_pHead; 
+
+    }
+
+	//==============================================================
+	// Insert()
+	//==============================================================
+	/// Inserts the object to the back of the list
+	/**
+		\param [in] x_pObj		-	Pointer to object to insert.
+									If x_pObj is NULL, a new object
+									is created and inserted.
+
+		\return iterator containing object
+	*/
+	iterator Insert( T_OBJ *x_pObj = oexNULL )
+	{
+        T_NODE *pNode = oexNULL;
+
+        pNode = OexAllocConstruct< T_NODE >( x_pObj, m_pHead, T_NODE::eInsert ); 
+        if ( !pNode )
+            return iterator();
+
+		m_uSize++; 
+
+		m_pHead = pNode; 
+
+		if ( !m_pTail ) 
+			m_pTail = pNode; 
+
+		return m_pHead; 
+	}
+
+	//==============================================================
+	// Insert()
+	//==============================================================
+	/// Inserts the object to the back of the list
+	/**
+		\param [in] x_rObj		-	Reference to object that is used
+									to initialize the new list item.
+
+		\return iterator containing object
+	*/
+	iterator Insert( oexCONST T_OBJ &x_rObj )
+	{	
+        iterator itNew = Insert();
+
+		if ( itNew.Ptr() ) 
+            itNew.Obj() = x_rObj;
+
+		return itNew;
+	}
+
+	//==============================================================
+	// Insert()
+	//==============================================================
+	/// Inserts an object array into the list
+	/**
+		\param [in] x_pList		-	Pointer to object array
+		\param [in] x_uCount		-	Number of items in the array
+		
+		\return Reference to this list
+	
+		\see 
+	*/
+	template < class T >
+		TList& Insert( T *x_pList, oexUINT x_uCount )
+	{	for( oexUINT i = 0; i < x_uCount; i++ )
+			Insert( x_pList[ i ] );			
 		return *this;
 	}
 
@@ -841,6 +1057,38 @@ public:
 	}
 
 	//==============================================================
+	// Remove()
+	//==============================================================
+    /// Removes a node from the list without deleting it
+	iterator Remove( iterator x_it )
+	{
+		// Ensure valid iterator
+		if ( !x_it.IsValid() ) 
+            return iterator();
+
+        T_NODE *pThis = x_it.Node();
+		T_NODE *pNext = x_it.GetNext().Node();
+		T_NODE *pPrev = x_it.GetPrev().Node();
+
+		// Update head pointer if needed
+		if ( pThis == m_pHead )
+			m_pHead = pNext;
+
+		// Update tail pointer if needed
+		if ( pThis == m_pTail )
+			m_pTail = pPrev;
+
+        // Remove from the list
+        pThis->Remove();
+
+        // Unlink the item
+        Unlink( x_it );
+
+        return x_it;
+    }
+
+
+	//==============================================================
 	// Erase()
 	//==============================================================
 	/// Erases the specified iterator from the list
@@ -893,11 +1141,11 @@ public:
 		T_NODE *pPrev = x_it.GetPrev().Node();
 
 		// Update head pointer if needed
-		if ( x_it.Node() == m_pHead )
+		if ( pThis == m_pHead )
 			m_pHead = pNext;
 
 		// Update tail pointer if needed
-		if ( x_it.Node() == m_pTail )
+		if ( pThis == m_pTail )
 			m_pTail = pPrev;
 
         // Unlink the item

@@ -51,6 +51,13 @@ public:
     TAutoStr() : TStr() {}
     TAutoStr( oexCONST TStr &str ) : TStr( (TStr&)str ) {}
     TAutoStr( oexCONST TAutoStr &str ) : TStr( (TStr&)str ) {}
+
+#ifdef _UNICODE
+    TAutoStr( oexCONST CStr8 &str ) { Cnv( (CStr8&)str ); }
+#else
+    TAutoStr( oexCONST CStrW &str ) { Cnv( (CStrW&)str ); }
+#endif
+
     TAutoStr( oexCONST T *pStr ) : TStr( pStr ) {}
     TAutoStr( oexCONST T *pStr, oexUINT uSize ) : TStr( pStr, uSize ) {}
     TAutoStr( oexCONST T *pStr, oexINT nStart, oexUINT uLen ) : TStr( pStr, nStart, uLen ) {}
@@ -72,6 +79,12 @@ public:
     operator oexCONST oexFLOAT() { return ToFloat(); }
     operator oexCONST oexDOUBLE() { return ToDouble(); }
     operator oexCONST oexCSTR() { return ToString(); }
+
+#ifdef _UNICODE
+    operator CStr8() { return oexStrToStr8( *this ); }
+#else
+    operator CStrW() { return oexStrToStrW( *this ); }
+#endif
 
 };
 
