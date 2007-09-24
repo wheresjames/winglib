@@ -38,30 +38,27 @@ OEX_USING_NAMESPACE
 
 CAutoSocket::CAutoSocket()
 {
-    // Register user callable functions
-    OexRpcRegister( CAutoSocket, Connect );
-    OexRpcRegister( CAutoSocket, Shutdown );
-    OexRpcRegister( CAutoSocket, Bind );
-    OexRpcRegister( CAutoSocket, Listen );
-
     // Socket is not connected
     m_uStatus = eStatusDisconnected;
 }
 
 CAutoSocket::~CAutoSocket()
 {
+    Destroy();
+}
+
+void CAutoSocket::Destroy()
+{
     // Kill off the socket
     m_is.Destroy();
 }
+
 
 oexBOOL CAutoSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort )
 {
     // Open the socket
     if ( !m_is.Connect( x_pAddress, x_uPort ) )
         return oexFALSE;
-
-    // Register socket event callback function
-//    oexON_EVENT( m_is.GetEventHandle(), CAutoSocket, OnSocketEvent );
 
     return oexTRUE;
 }
@@ -71,115 +68,14 @@ oexBOOL CAutoSocket::Shutdown()
 }
 
 oexBOOL CAutoSocket::Bind( oexUINT x_uPort )
-{   return m_is.Bind( x_uPort );
+{   
+    return m_is.Bind( x_uPort );
 }
 
 oexBOOL CAutoSocket::Listen( oexUINT x_uMax )
-{   return m_is.Listen( x_uMax );
+{   
+    return m_is.Listen( x_uMax );
 }
-
-
-
-/*
-
-        m_is.Connect( pb[ "addr" ].ToString().Ptr(), pb[ "port" ].ToLong() );
-
-    else if ( pb[ "cmd" ].ToLong() == eCmdClose )
-    {
-        oexUINT uDelay = DelayClose();
-        if ( uDelay )
-            m_uCloseDelay = uDelay + os::CHqTimer::GetBootCount();
-        else if ( pb[ "delay" ].ToLong() )
-            m_uCloseDelay = pb[ "delay" ].ToLong() + os::CHqTimer::GetBootCount();
-        else m_is.Shutdown();
-    } // end else if
-
-    else if ( pb[ "cmd" ].ToLong() == eCmdBind )
-        m_is.Bind( pb[ "port" ].ToLong() );
-
-    else if ( pb[ "cmd" ].ToLong() == eCmdListen )
-    {   m_is.Listen( pb[ "max" ].ToLong() );
-    os::CSys::Sleep( 250 );
-        m_evListen.Set();
-    } // end else if
-
-    else if ( pb[ "cmd" ].ToLong() == eCmdMsg )
-        OnSocketMessage( pb[ "msg" ].ToULong() );
-
-
-oexBOOL CAutoSocket::InitThread( oexPVOID x_pData )
-{
-    m_uCloseDelay = 0;
-
-    return oexTRUE;
-}
-
-oexBOOL CAutoSocket::DoThread( oexPVOID x_pData )
-{
-    os::CSys::t_WAITABLE phEvents[ 4 ];
-
-    // Get events
-    phEvents[ 0 ] = m_evQuit.GetHandle();
-	phEvents[ 1 ] = m_fifo.GetDataReadyHandle();
-    phEvents[ 2 ] = m_is.GetEventHandle();
-    phEvents[ 3 ] = IsConnected() ? GetDataReadyHandle() : oexNULL;
-
-    // How many valid handles
-    oexUINT uHandles = !phEvents[ 2 ] ? 2 : !phEvents[ 3 ] ? 3 : 4;
-
-    oexUINT uWait = os::CSys::vInfinite();;
-    if ( m_uCloseDelay )
-    {   oexUINT uTick = os::CHqTimer::GetBootCount();
-        if ( uTick >= m_uCloseDelay )
-        {   oexUINT uDelay = DelayClose();
-            if ( !uDelay )
-                m_is.Shutdown();
-            else m_uCloseDelay = uDelay + os::CHqTimer::GetBootCount();
-        } // end if
-        else uWait = m_uCloseDelay - uTick;
-    } // end if
-
-    // Wait for something to happen
-    oexINT nRet = os::CSys::WaitForMultipleObjects( uHandles, phEvents, oexFALSE, uWait );
-
-    // Stop command?
-    if ( 0 == nRet ) 
-    {   NotifyShutdown();
-        return oexFALSE;
-    } // end if
-
-    // Command?
-    else if ( 1 == nRet )
-
-        // Process the command
-        OnCommand();
-
-    // Write data waiting to go out?
-    else if ( 2 == nRet )
-
-        // Process socket event
-        OnSocketEvent();
-
-    // Write data waiting to go out?
-    else if ( 3 == nRet )
-
-        // Process socket event
-        if ( IsConnected() ) 
-            OnDataReady();
-
-    return oexTRUE;
-}
-
-oexINT CAutoSocket::EndThread( oexPVOID x_pData )
-{
-    m_is.Destroy();
-
-    m_evListen.Reset();
-    m_evConnected.Reset();
-
-    return oexTRUE;
-}
-*/
 
 oexINT CAutoSocket::OnSocketEvent()
 {
@@ -240,8 +136,6 @@ oexINT CAutoSocket::OnSocketEvent()
         {	m_uStatus = eStatusDisconnected;
             if ( !m_is.GetLastError() ) OnRead( 0 );
             OnClose( m_is.GetLastError() );
-//            DestroyObject();
-//            NotifyShutdown();
         } // end if
 
     } // end while
@@ -249,136 +143,3 @@ oexINT CAutoSocket::OnSocketEvent()
     return oexRES_OK;
 }
 
-/*
-oexBOOL CAutoSocket::OnCommand()
-{	
-    CPropertyBag pb = CParser::Deserialize( m_fifo.Read() );
-    oexASSERT( pb.Size() );
-
-    if ( pb[ "cmd" ].ToLong() == eCmdOpen )
-        m_is.Connect( pb[ "addr" ].ToString().Ptr(), pb[ "port" ].ToLong() );
-
-    else if ( pb[ "cmd" ].ToLong() == eCmdClose )
-    {
-        oexUINT uDelay = DelayClose();
-        if ( uDelay )
-            m_uCloseDelay = uDelay + os::CHqTimer::GetBootCount();
-        else if ( pb[ "delay" ].ToLong() )
-            m_uCloseDelay = pb[ "delay" ].ToLong() + os::CHqTimer::GetBootCount();
-        else m_is.Shutdown();
-    } // end else if
-
-    else if ( pb[ "cmd" ].ToLong() == eCmdBind )
-        m_is.Bind( pb[ "port" ].ToLong() );
-
-    else if ( pb[ "cmd" ].ToLong() == eCmdListen )
-    {   m_is.Listen( pb[ "max" ].ToLong() );
-    os::CSys::Sleep( 250 );
-        m_evListen.Set();
-    } // end else if
-
-    else if ( pb[ "cmd" ].ToLong() == eCmdMsg )
-        OnSocketMessage( pb[ "msg" ].ToULong() );
-
-    return oexTRUE;
-}
-
-oexBOOL CAutoSocket::Connect( oexCSTR pIpAddress, oexUINT uPort )
-{
-    if ( !pIpAddress || !*pIpAddress ) 
-        return oexFALSE;
-
-    // Lock the fifo buffer
-    CTlLocalLock ll( m_fifo );
-    if ( !ll.IsLocked() ) 
-        return oexFALSE;
-
-    CPropertyBag pb;
-    pb[ "cmd" ] = eCmdOpen;
-    pb[ "port" ] = uPort;
-    pb[ "addr" ] = pIpAddress;
-
-    if ( !m_fifo.Write( CParser::Serialize( pb ) ) )
-        return oexFALSE;
-
-    // Start the thread if needed
-    if ( !IsRunning() ) Start();
-
-    return oexTRUE;
-}
-
-oexBOOL CAutoSocket::Close( oexUINT x_uDelay )
-{
-    if ( !IsRunning() ) 
-        return oexFALSE;
-
-    // Lock the fifo buffer
-    CTlLocalLock ll( m_fifo );
-    if ( !ll.IsLocked() ) 
-        return oexFALSE;
-
-    CPropertyBag pb;
-    pb[ "cmd" ] = eCmdClose;
-    pb[ "delay" ] = x_uDelay;
-
-    return m_fifo.Write( CParser::Serialize( pb ) );
-}
-
-oexBOOL CAutoSocket::Bind( oexUINT x_uPort )
-{
-    // Lock the fifo buffer
-    CTlLocalLock ll( m_fifo );
-    if ( !ll.IsLocked() ) 
-        return oexFALSE;
-
-    CPropertyBag pb;
-    pb[ "cmd" ] = eCmdBind;
-    pb[ "port" ] = x_uPort;
-
-    if ( !m_fifo.Write( CParser::Serialize( pb ) ) )
-        return oexFALSE;
-
-    // Start the thread if needed
-    if ( !IsRunning() ) Start();
-
-    return oexTRUE;
-}
-
-oexBOOL CAutoSocket::Listen( oexUINT x_uMax )
-{
-    // Lock the fifo buffer
-    CTlLocalLock ll( m_fifo );
-    if ( !ll.IsLocked() ) 
-        return oexFALSE;
-
-    CPropertyBag pb;
-    pb[ "cmd" ] = eCmdListen;
-    pb[ "max" ] = x_uMax;
-
-    if ( !m_fifo.Write( CParser::Serialize( pb ) ) )
-        return oexFALSE;
-
-    // Start the thread if needed
-    if ( !IsRunning() ) Start();
-
-    return oexTRUE;
-}
-
-oexBOOL CAutoSocket::SocketMessage( oexUINT uMsg )
-{
-    // Lock the fifo buffer
-    CTlLocalLock ll( m_fifo );
-    if ( !ll.IsLocked() ) 
-        return oexFALSE;
-
-    CPropertyBag pb;
-    pb[ "cmd" ] = eCmdMsg;
-    pb[ "msg" ] = uMsg;
-
-    if ( !m_fifo.Write( CParser::Serialize( pb ) ) )
-        return oexFALSE;
-
-    return oexTRUE;
-}
-
-*/

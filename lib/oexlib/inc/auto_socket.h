@@ -39,17 +39,10 @@
 //
 /// Provides asynchronous socket communications.
 /**
-	This class uses CIpSocket and provides a thread to handle
-	socket data.	
 
-	You can derive from this class or more preferably, derive from
-	CSocketProtocol and provide custom protocol handling.  This
-	scheme should work well for both TCP and UDP based protocols.
-
-	\see TAutoSocket, CWinSocketProtocol, CWinSocket
 */
 //==================================================================
-class CAutoSocket : public CDispatch
+class CAutoSocket
 {
 public:
 
@@ -72,6 +65,10 @@ public:
 
 	/// Destructor
 	virtual ~CAutoSocket();
+
+    /// Releases resources
+    virtual void Destroy();
+
 
 	//==============================================================
 	// Connect()
@@ -120,6 +117,19 @@ public:
 		\return Non-zero if command was queued
 	*/
     oexBOOL Listen( oexUINT x_uMax = 0 );
+
+
+	//==============================================================
+	// Accept()
+	//==============================================================
+	/// Accepts an incomming connection on the specified socket
+    /*
+        \param [in] x_is    -   Socket that accepts the incomming
+                                connection.
+    */
+    oexBOOL Accept( os::CIpSocket &x_is )
+    {   return m_is.Accept( x_is ); }
+
 
 protected:
 
@@ -308,63 +318,29 @@ protected:
 	/// Returns non-zero if the socket is connecting
 	oexBOOL IsConnecting() { return eStatusConnecting == m_uStatus; }
 
+public:
+
 	//==============================================================
-	// ForceOnConnect()
+	// GetEventHandle()
 	//==============================================================
-	/// Forces an on connect message
-/*    oexBOOL ForceOnConnect( oexINT x_nErr )
-    {   if ( x_nErr ) m_uStatus = eStatusDisconnected;
-        else m_uStatus = eStatusConnected;
-        return OnConnect( x_nErr );
-    }
+	/// Retuns the current event handle
+    os::CIpSocket::t_SOCKETEVENT GetEventHandle() 
+    { return m_is.GetEventHandle(); }
 
-    /// Sends a socket message
-    oexBOOL SocketMessage( oexUINT x_uMsg );
-
-    /// Over-ride to receive custom messages
-    virtual oexBOOL OnSocketMessage( oexUINT x_uMsg ) { return oexFALSE; }
-*/
-    /// Sets the parent socket
-//    void SetParent( CAutoSocket *x_pParent )
-//    {   m_pParent = x_pParent; }
-
-    /// Returns non-zero if the thread is quitting
-//    oexBOOL IsQuitting() { return m_evQuit.Wait( 0 ); }
-
-    /// Wait for connection
-//    oexBOOL WaitConnect( oexUINT x_uTimeout = oexDEFAULT_TIMEOUT )
-//    {   return m_evConnected.Wait( x_uTimeout ); }
-
-    /// Wait for listen
-//    oexBOOL WaitListen( oexUINT x_uTimeout = oexDEFAULT_TIMEOUT )
-//    {   return m_evListen.Wait( x_uTimeout ); }
-
-    /// Sends notifications that this socket is shutting down
-/*    oexBOOL NotifyShutdown()
-    {   // Send child close notification to parent
-        if ( m_pParent )
-        {   m_pParent->SocketMessage( eCmdChildClose );
-            m_pParent = oexNULL;
-        } // end if
-        return oexTRUE;
-    }
-*/
 	//==============================================================
-	// DelayClose()
+	// GetIpSocket()
 	//==============================================================
-    /// Called in response to processing a close command
-	/**
-        You can over-ride this and return the number of milliseconds
-        you want to wait before closing the connection.  This is
-        usefull if your pending some command or waiting for data
-        to go out.
+    /// Returns the CIpSocket class
+    os::CIpSocket& GetIpSocket()
+    {   return m_is; }
 
-		\return Return non-zero if handled
-	*/
-//    virtual oexUINT DelayClose() { return 0; }
+	//==============================================================
+	// operator os::CIpSocket&
+	//==============================================================
+    /// CIpSocket reference operator
+    operator os::CIpSocket&() 
+    {   return m_is; }
 
-    /// Returns the thread lock
-//    operator CTlLock&() { return m_lock; }
 
 private:
 
@@ -374,23 +350,6 @@ private:
 	/// Windows socket class
 	os::CIpSocket			    m_is;
 
-	/// Thread sync command buffer
-//	CFifoSync					m_fifo;
-
-    /// Parent socket that is notified when we close
-//    CAutoSocket                 *m_pParent;
-
-    /// Close delay
-//    oexUINT                     m_uCloseDelay;
-
-    /// Signals when the socket is connected
-//    CTlEvent                    m_evConnected;
-
-    /// Signals when a listen command is finished
-//    CTlEvent                    m_evListen;
-
-    /// Thread sync lock
-//    CTlLock                     m_lock;
 };
 
 

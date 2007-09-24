@@ -1439,7 +1439,7 @@ oex::oexRESULT Test_CDispatch()
 
     dsp.OexRpcRegisterPtr( &bto, CBaseTestObject, SetValue );
 
-    dsp.Queue( dsp.Call( oexT( "SetValue" ), 22 ) );
+    dsp.Queue( oexNULL, dsp.Call( oexT( "SetValue" ), 22 ) );
 
     dsp.ProcessQueue();
 
@@ -1473,7 +1473,7 @@ oex::oexRESULT Test_CThread()
     if ( !oexVERIFY( tt.Start() ) )
         return -1;
     
-    oex::CReply reply( tt.Queue( oexCall( oexT( "Add" ), 1, 2 ) ) );
+    oex::CReply reply( tt.Queue( oexNULL, oexCall( oexT( "Add" ), 1, 2 ) ) );
 
     if ( !oexVERIFY( reply.Wait( 3000 ) ) )
         return -2;
@@ -1492,6 +1492,27 @@ oex::oexRESULT Test_CAutoSocket()
 
 //    oex::TAutoSocket< oex::CWspStream > as;
 
+    oex::TNetServer< oex::CIpPort, oex::TNetSession< oex::CIpPort, oex::CNetProtocol > > server;
+
+    // Start the server thread
+    server.Start();
+
+    // Start the server
+    server.Queue( oexNULL, oexCall( oexT( "Bind" ), 23456 ) );
+    oex::CReply reply( server.Queue( oexNULL, oexCall( oexT( "Listen" ), 0 ) ) );
+    if ( !reply.Wait( oexDEFAULT_TIMEOUT ) )
+        return -1;
+
+    oex::os::CIpSocket client;
+
+    if ( !oexVERIFY( client.Connect( oexT( "localhost" ), 23456 ) ) )
+        return -2;
+
+    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_TIMEOUT ) ) )
+        return -3;
+    
+    client.Destroy();
+    server.Destroy();
 
     oex::os::CIpSocket::UninitSockets();
 

@@ -283,7 +283,10 @@ public:
 		+++ I don't like having the reference to CStr here, so I really
 		should figure out another way.  Any suggestions?
 	*/
-	template <> oexUINT GetKeySize< CStr >( CStr &x_obj ) { return x_obj.Length(); }
+	template <> oexUINT GetKeySize< CStrW >( CStrW &x_obj ) { return x_obj.LengthInBytes(); }
+	template <> oexUINT GetKeySize< CStr8 >( CStr8 &x_obj ) { return x_obj.LengthInBytes(); }
+	template <> oexUINT GetKeySize< CStr16 >( CStr16 &x_obj ) { return x_obj.LengthInBytes(); }
+	template <> oexUINT GetKeySize< CStr32 >( CStr32 &x_obj ) { return x_obj.LengthInBytes(); }
 
 	//==============================================================
 	// GetKeyPtr()
@@ -308,15 +311,28 @@ public:
 		
 		+++ It would be nice to eliminate the ref to CStr here.
 	*/
-	template <> oexPVOID GetKeyPtr< CStr >( CStr *x_ptr ) { return (oexPVOID)x_ptr->Ptr(); }
+	template <> oexPVOID GetKeyPtr< CStrW >( CStrW *x_ptr ) { return (oexPVOID)x_ptr->Ptr(); }
+	template <> oexPVOID GetKeyPtr< CStr8 >( CStr8 *x_ptr ) { return (oexPVOID)x_ptr->Ptr(); }
+	template <> oexPVOID GetKeyPtr< CStr16 >( CStr16 *x_ptr ) { return (oexPVOID)x_ptr->Ptr(); }
+	template <> oexPVOID GetKeyPtr< CStr32 >( CStr32 *x_ptr ) { return (oexPVOID)x_ptr->Ptr(); }
 
+	//==============================================================
+	// IsEqual()
+	//==============================================================
+    /// Compares two keys
     template < typename T >
         oexBOOL IsEqual( T &k1, T &k2 )
         {   return !os::CSys::MemCmp( &k1, &k2, sizeof( T_KEY ) );
         }
 
-    // Special overload for CStr
-    template <> oexBOOL IsEqual< CStr >( CStr &k1, CStr &k2 ) { return k1 == k2; }
+    /// Special overload for CStr
+    template <> oexBOOL IsEqual< CStrW >( CStrW &k1, CStrW &k2 ) { return k1 == k2; }
+    template <> oexBOOL IsEqual< CStr8 >( CStr8 &k1, CStr8 &k2 ) { return k1 == k2; }
+    template <> oexBOOL IsEqual< CStr16 >( CStr16 &k1, CStr16 &k2 ) { return k1 == k2; }
+    template <> oexBOOL IsEqual< CStr32 >( CStr32 &k1, CStr32 &k2 ) { return k1 == k2; }
+
+    /// Special overload for guid ( slightly faster than memcmp() )
+    template <> oexBOOL IsEqual< oexGUID >( oexGUID &k1, oexGUID &k2 ) { return guid::CmpGuid( &k1, &k2 ); }
 
 public:
 
@@ -481,7 +497,7 @@ public:
 	
 		\see 
 	*/
-	oexUINT GetIndex( T_KEY x_key )
+	oexUINT GetIndex( T_KEY &x_key )
 	{
 		if ( !m_uTableSize )
 			if ( !CreateTable() )
@@ -514,7 +530,7 @@ public:
 	
 		\see 
 	*/
-	iterator Get( T_KEY x_key )
+	iterator Get( T_KEY &x_key )
 	{
 		oexUINT i = GetIndex( x_key );
 
@@ -563,7 +579,7 @@ public:
 	
 		\see 
 	*/
-	iterator Find( T_KEY x_key )
+	iterator Find( T_KEY &x_key )
 	{
 		if ( !Size() )
 			return iterator();
@@ -719,7 +735,7 @@ protected:
 
 		// Search sub list for an exact match
 		for ( TList< iterator >::iterator it; m_table.Ptr( i ) && m_table.Ptr( i )->Next( it ); )
-			if ( it->Node()->key == x_it.Node()->key )
+			if ( IsEqual( it->Node()->key, x_it.Node()->key ) )
             {   m_table.Ptr( i )->Erase( it ); 
                 return; 
             } // end if

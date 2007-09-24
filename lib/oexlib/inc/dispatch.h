@@ -36,7 +36,7 @@
 
 
 #define OexRpcRegisterPtr( p, c, f )    Register( oexT( #f ), oex::TArbDelegate< oex::CAutoStr >( p, &c::f ) );
-#define OexRpcRegister( c, f )          OexRpcRegisterPtr( this, c, f )
+#define OexRpcRegister( c, f )          OexRpcRegisterPtr( (c*)this, c, f )
 
 #define oexCall                         oex::CDispatch::Call
 
@@ -188,11 +188,16 @@ public:
     /**
         Returns a unique id for the return event
     */
-    CReply Queue( CStr x_sCmd )
+    CReply Queue( oexCSTR x_pId, CStr x_sCmd )
     {
         CTlLocalLock ll( m_lockPre );
         if ( !ll.IsLocked() )
             return CReply();
+
+        // Attempt to map the message
+        CReply reply;
+        if ( OnMap( x_pId, x_sCmd, reply ) )
+            return reply;
 
         // Append command
         t_CmdBufferList::iterator it = m_lstPre.Append();
@@ -206,6 +211,10 @@ public:
         // Return the event id
         return it.Obj();
     }    
+
+    /// Over-ride to provide message mapping
+    virtual oexBOOL OnMap( oexCSTR x_pId, CStr x_sCmd, CReply &x_rReply )
+    {   return oexFALSE; }
 
     /// Processes the function queue
     /**

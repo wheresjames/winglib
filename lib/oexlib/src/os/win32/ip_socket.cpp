@@ -155,8 +155,8 @@ CIpSocket::~CIpSocket()
 oexBOOL CIpSocket::InitSockets()
 {
 	// Quit if already initialized
-	if ( m_lInit == 0 ) return 
-		TRUE;
+	if ( m_lInit == 0 ) 
+        return oexTRUE;
 
 	WSADATA wd;
 

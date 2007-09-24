@@ -249,6 +249,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\port.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\os\win32\sys.cpp"
 				>
 			</File>
@@ -419,6 +423,10 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\parser.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\port.h"
 				>
 			</File>
 			<File

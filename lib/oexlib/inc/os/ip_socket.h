@@ -649,15 +649,15 @@ public:
 public:
 
 	/// Invalid socket handle value
-    oexCONST t_SOCKET vInvalidSocket()
+    static oexCONST t_SOCKET vInvalidSocket()
     {   return c_InvalidSocket; }
 
     /// Invalid socket event value
-    oexCONST t_SOCKETEVENT vInvalidEvent()
+    static oexCONST t_SOCKETEVENT vInvalidEvent()
     {   return c_InvalidEvent; }
 
     /// Invalid socket event value
-    oexCONST t_SOCKET vSocketError()
+    static oexCONST t_SOCKET vSocketError()
     {   return c_SocketError; }
 
 private:

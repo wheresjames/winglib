@@ -32,220 +32,164 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-// 0 Parameters
-#define ARBDEL_TPARAM0
-#define ARBDEL_PPARAM0
-#define ARBDEL_QPARAM0
-#define ARBDEL_DPARAM0
-#define ARBDEL_FPARAM0
-#define ARBDEL_UPARAM0
-#define ARBDEL_CPARAM0
+#define TARB_PARAM_A_0      
+#define TARB_PARAM_B_0      
+#define TARB_PARAM_C_0      
+#define TARB_PARAM_D_0      
+#define TARB_PARAM_E_0      
+#define TARB_PARAM_F_0      
+#define TARB_PARAM_G_0      
+#define TARB_PARAM_H_0      
+#define TARB_PARAM_I_0
 
-// 1 Parameters
-#define ARBDEL_TPARAM1      , typename T_P1
-#define ARBDEL_PPARAM1      T_P1
-#define ARBDEL_QPARAM1      , ARBDEL_PPARAM1
-#define ARBDEL_FPARAM1      T_ARB p1
-#define ARBDEL_DPARAM1      , ARBDEL_FPARAM1
-#define ARBDEL_UPARAM1      p1
-#define ARBDEL_CPARAM1      , ARBDEL_UPARAM1
+#define TARB_PARAM_A_1      typename T_P1,
+#define TARB_PARAM_B_1      T_P1
+#define TARB_PARAM_C_1      , T_P1
+#define TARB_PARAM_D_1      T_P1,
+#define TARB_PARAM_E_1      T_ARB p1
+#define TARB_PARAM_F_1      , T_ARB p1
+#define TARB_PARAM_G_1      , p1
+#define TARB_PARAM_H_1      p1
+#define TARB_PARAM_I_1      , T_ARB
 
-// 2 Parameters
-#define ARBDEL_TPARAM2      , typename T_P1, typename T_P2
-#define ARBDEL_PPARAM2      T_P1, T_P2
-#define ARBDEL_QPARAM2      , ARBDEL_PPARAM2
-#define ARBDEL_FPARAM2      T_ARB p1, T_ARB p2
-#define ARBDEL_DPARAM2      , ARBDEL_FPARAM2
-#define ARBDEL_UPARAM2      p1, p2
-#define ARBDEL_CPARAM2      , ARBDEL_UPARAM2
+#define TARB_PARAM_A_2      typename T_P1, typename T_P2,
+#define TARB_PARAM_B_2      T_P1, T_P2
+#define TARB_PARAM_C_2      , T_P1, T_P2
+#define TARB_PARAM_D_2      T_P1, T_P2,
+#define TARB_PARAM_E_2      T_ARB p1, T_ARB p2
+#define TARB_PARAM_F_2      , T_ARB p1, T_ARB p2
+#define TARB_PARAM_G_2      , p1, p2
+#define TARB_PARAM_H_2      p1, p2
+#define TARB_PARAM_I_2      , T_ARB, T_ARB
 
-// 3 Parameters
-#define ARBDEL_TPARAM3      , typename T_P1, typename T_P2, typename T_P3
-#define ARBDEL_PPARAM3      T_P1, T_P2, T_P3
-#define ARBDEL_QPARAM3      , ARBDEL_PPARAM3
-#define ARBDEL_FPARAM3      T_ARB p1, T_ARB p2, T_ARB p3
-#define ARBDEL_DPARAM3      , ARBDEL_FPARAM3
-#define ARBDEL_UPARAM3      p1, p2, p3
-#define ARBDEL_CPARAM3      , ARBDEL_UPARAM3
+#define TARB_PARAM_A_3      typename T_P1, typename T_P2, typename T_P3,
+#define TARB_PARAM_B_3      T_P1, T_P2, T_P3
+#define TARB_PARAM_C_3      , T_P1, T_P2, T_P3
+#define TARB_PARAM_D_3      T_P1, T_P2, T_P3,
+#define TARB_PARAM_E_3      T_ARB p1, T_ARB p2, T_ARB p3
+#define TARB_PARAM_F_3      , T_ARB p1, T_ARB p2, T_ARB p3
+#define TARB_PARAM_G_3      , p1, p2, p3
+#define TARB_PARAM_H_3      p1, p2, p3
+#define TARB_PARAM_I_3      , T_ARB, T_ARB, T_ARB
 
-// 4 Parameters
-#define ARBDEL_TPARAM4      , typename T_P1, typename T_P2, typename T_P3, typename T_P4
-#define ARBDEL_PPARAM4      T_P1, T_P2, T_P3, T_P4
-#define ARBDEL_QPARAM4      , ARBDEL_PPARAM4
-#define ARBDEL_FPARAM4      T_ARB p1, T_ARB p2, T_ARB p3, T_ARB p4
-#define ARBDEL_DPARAM4      , ARBDEL_FPARAM4
-#define ARBDEL_UPARAM4      p1, p2, p3, p4
-#define ARBDEL_CPARAM4      , ARBDEL_UPARAM4
+#define TARB_PARAM_A_4      typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+#define TARB_PARAM_B_4      T_P1, T_P2, T_P3, T_P4
+#define TARB_PARAM_C_4      , T_P1, T_P2, T_P3, T_P4
+#define TARB_PARAM_D_4      T_P1, T_P2, T_P3, T_P4,
+#define TARB_PARAM_E_4      T_ARB p1, T_ARB p2, T_ARB p3, T_ARB p4
+#define TARB_PARAM_F_4      , T_ARB p1, T_ARB p2, T_ARB p3, T_ARB p4
+#define TARB_PARAM_G_4      , p1, p2, p3, p4
+#define TARB_PARAM_H_4      p1, p2, p3, p4
+#define TARB_PARAM_I_4      , T_ARB, T_ARB, T_ARB, T_ARB
 
-// 5 Parameters
-#define ARBDEL_TPARAM5      , typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5
-#define ARBDEL_PPARAM5      T_P1, T_P2, T_P3, T_P4, T_P5
-#define ARBDEL_QPARAM5      , ARBDEL_PPARAM5
-#define ARBDEL_FPARAM5      T_ARB p1, T_ARB p2, T_ARB p3, T_ARB p4, T_ARB p5
-#define ARBDEL_DPARAM5      , ARBDEL_FPARAM5
-#define ARBDEL_UPARAM5      p1, p2, p3, p4, p5
-#define ARBDEL_CPARAM5      , ARBDEL_UPARAM5
+#define TARB_PARAM_A_5      typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5,
+#define TARB_PARAM_B_5      T_P1, T_P2, T_P3, T_P4, T_P5
+#define TARB_PARAM_C_5      , T_P1, T_P2, T_P3, T_P4, T_P5
+#define TARB_PARAM_D_5      T_P1, T_P2, T_P3, T_P4, T_P5,
+#define TARB_PARAM_E_5      T_ARB p1, T_ARB p2, T_ARB p3, T_ARB p4, T_ARB p5
+#define TARB_PARAM_F_5      , T_ARB p1, T_ARB p2, T_ARB p3, T_ARB p4, T_ARB p5
+#define TARB_PARAM_G_5      , p1, p2, p3, p4, p5
+#define TARB_PARAM_H_5      p1, p2, p3, p4, p5
+#define TARB_PARAM_I_5      , T_ARB, T_ARB, T_ARB, T_ARB, T_ARB
 
-// 6 Parameters
-#define ARBDEL_TPARAM6      , typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6
-#define ARBDEL_PPARAM6      T_P1, T_P2, T_P3, T_P4, T_P5, T_P6
-#define ARBDEL_QPARAM6      , ARBDEL_PPARAM6
-#define ARBDEL_FPARAM6      T_ARB p1, T_ARB p2, T_ARB p3, T_ARB p4, T_ARB p5, T_ARB p6
-#define ARBDEL_DPARAM6      , ARBDEL_FPARAM6
-#define ARBDEL_UPARAM6      p1, p2, p3, p4, p5, p6
-#define ARBDEL_CPARAM6      , ARBDEL_UPARAM6
+#define TARB_PARAM_A_6      typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6,
+#define TARB_PARAM_B_6      T_P1, T_P2, T_P3, T_P4, T_P5, T_P6
+#define TARB_PARAM_C_6      , T_P1, T_P2, T_P3, T_P4, T_P5, T_P6
+#define TARB_PARAM_D_6      T_P1, T_P2, T_P3, T_P4, T_P5, T_P6,
+#define TARB_PARAM_E_6      T_ARB p1, T_ARB p2, T_ARB p3, T_ARB p4, T_ARB p5, T_ARB p6
+#define TARB_PARAM_F_6      , T_ARB p1, T_ARB p2, T_ARB p3, T_ARB p4, T_ARB p5, T_ARB p6
+#define TARB_PARAM_G_6      , p1, p2, p3, p4, p5, p6
+#define TARB_PARAM_H_6      p1, p2, p3, p4, p5, p6
+#define TARB_PARAM_I_6      , T_ARB, T_ARB, T_ARB, T_ARB, T_ARB, T_ARB
 
-#define ARBDEL_TYPEDEF_THUNK( n ) \
-    typedef T_ARB (*t_Thunk##n)( void *pClass, void *pFunction ARBDEL_DPARAM##n );
-
-#define ARBDEL_FUNCTION_OPERATOR( n ) \
-    T_ARB operator ()( ARBDEL_FPARAM##n )                                   \
-    {   oexASSERT( n == m_nParams );                                        \
-        if ( n != m_nParams ) return 0;                                     \
-        return (*((t_Thunk##n)m_pThunk))( m_pClass, 0 ARBDEL_CPARAM##n );   \
-    }
-
-#define ARBDEL_STATIC_ADDRESS( n ) \
-    template < typename T_RT, class T_CLASS ARBDEL_TPARAM##n >                  \
-        static void* Address##n( T_RT (T_CLASS::*pF)( ARBDEL_PPARAM##n ) )      \
-        {   typedef T_RT (T_CLASS::*t_f)( ARBDEL_PPARAM##n );                   \
-            static t_f s_pF = 0; if ( pF && !s_pF ) s_pF = pF; return &s_pF;    \
-        }
-
-#define ARBDEL_THUNK( n ) \
-    template < typename T_RT > struct SThunk##n {                                                       \
-        template < typename T_RT, class T_CLASS ARBDEL_TPARAM##n >                                      \
-            static T_ARB Thunk##n( void *pClass, void *f ARBDEL_DPARAM##n )                             \
-            {   typedef T_RT (T_CLASS::*t_f)( ARBDEL_PPARAM##n );                                       \
-                return ( ( (T_CLASS*)pClass )->*( *(t_f*)                                               \
-                            Address##n< T_RT, T_CLASS ARBDEL_QPARAM##n >( 0 ) ) )( ARBDEL_UPARAM##n );  \
-        }                                                                                               \
+// Delegate function body
+#define TARB_BODY( n )                                                                                  \
+public:                                                                                                 \
+    template < typename T_RET, TARB_PARAM_A_##n typename T_CLASS >                                      \
+        TArbDelegate( T_CLASS *x_pC, T_RET(T_CLASS::*x_pF)( TARB_PARAM_B_##n ) )                        \
+    {   _Register< T_RET TARB_PARAM_C_##n >( x_pC, x_pF ); }                                            \
+    template < typename T_RET, TARB_PARAM_A_##n typename T_CLASS >                                      \
+        void Register( T_CLASS *x_pC, T_RET(T_CLASS::*x_pF)( TARB_PARAM_B_##n ) )                       \
+    {   _Register< T_RET TARB_PARAM_C_##n >( x_pC, x_pF ); }                                            \
+    T_ARB operator ()( TARB_PARAM_E_##n )                                                               \
+    {   typedef T_ARB (*t_Thunk)( oexPVOID, oexPVOID TARB_PARAM_I_##n );                                \
+        return ((t_Thunk)m_pThunk)( m_pClass, m_pFunction TARB_PARAM_G_##n ); }                         \
+private:                                                                                                \
+    template < typename T_RET, TARB_PARAM_A_##n typename T_CLASS, typename T_FUNCTION >                 \
+        void _Register( T_CLASS *x_pC, T_FUNCTION x_pF )                                                \
+    {   m_uParams = n;                                                                                  \
+        m_pClass = x_pC;                                                                                \
+        m_pFunction = *(void**)&x_pF;                                                                   \
+        typedef T_ARB (*t_Thunk)( oexPVOID, oexPVOID TARB_PARAM_I_##n );                                \
+        m_pThunk = (t_Thunk)&SThunk_##n< T_RET >::Thunk< T_RET, TARB_PARAM_D_##n T_CLASS, T_FUNCTION >; \
+    }                                                                                                   \
+    template< typename T_RET > struct SThunk_##n                                                        \
+    {   template < typename T_RET, TARB_PARAM_A_##n typename T_CLASS, typename T_FUNCTION >             \
+            static T_ARB Thunk( void* x_pC, void* x_pF TARB_PARAM_F_##n )                               \
+        {   return ( ( (T_CLASS*)x_pC )->*( *( (T_FUNCTION*)&x_pF ) ) )( TARB_PARAM_H_##n ); }          \
     };                                                                                                  \
-    template <> struct SThunk##n< void > {                                                              \
-        template < typename T_RT, class T_CLASS ARBDEL_TPARAM##n >                                      \
-            static T_ARB Thunk##n( void *pClass, void *f ARBDEL_DPARAM##n )                             \
-            {   typedef T_RT (T_CLASS::*t_f)( ARBDEL_PPARAM##n );                                       \
-                ( ( (T_CLASS*)pClass )->*( *(t_f*)                                                      \
-                            Address##n< T_RT, T_CLASS ARBDEL_QPARAM##n >( 0 ) ) )( ARBDEL_UPARAM##n );  \
-                return 0;                                                                               \
-             }                                                                                          \
-        };
-
-#define ARBDEL_REGISTER( n ) \
-    template < typename T_RT, class T_CLASS ARBDEL_TPARAM##n >                                              \
-        void Register( T_CLASS *pClass, T_RT (T_CLASS::*pF)( ARBDEL_PPARAM##n ) )                           \
-        {   m_nParams = n;                                                                                  \
-            m_pClass = pClass; Address##n< T_RT, T_CLASS ARBDEL_QPARAM##n >( pF );                          \
-            m_pThunk = (void*)(t_Thunk##n)&SThunk##n< T_RT >::Thunk##n< T_RT, T_CLASS ARBDEL_QPARAM##n >;   \
-        }
-
-#define ARBDEL_CONSTRUCT( c, n ) \
-    template < typename T_RT, class T_CLASS ARBDEL_TPARAM##n >                          \
-        c( T_CLASS *pClass, T_RT (T_CLASS::*pF)( ARBDEL_PPARAM##n ) )                   \
-        {   Register( pClass, pF ); }
-
-#define ARBDEL_PARAM( c, n )    \
-    ARBDEL_TYPEDEF_THUNK( n ); ARBDEL_FUNCTION_OPERATOR( n );   \
-    ARBDEL_STATIC_ADDRESS( n ); ARBDEL_THUNK( n );              \
-    ARBDEL_REGISTER( n ); ARBDEL_CONSTRUCT( c, n );
-
-/// Delegates template that invokes functions using an arbitration class
-/**
-
-    Example:
-
-  \code
-
-    #include <stdio.h>
-    #include <tchar.h>
-    #include <string.h>
-    #include <comutil.h>
-    #include "ArbDelegates.h"
-
-    // Turn off Microsoft's promotional material
-    #pragma warning ( disable : 4996 )
-
-    // Define our custom delegates class
-    typedef adel::TArbDelegate< _variant_t > CDelegate;
-
-    // Class containing functions we will call
-    class CMyClass
-    { 
-    public:    
-        int Add2( int a, int b ) { return a + b; } 
-        float Add3( float a, float b, float c ) { return a + b + c; } 
-        void Trace( TCHAR *pMsg ) { TRACE0( pMsg ); }
-        TCHAR* GetString() { return "SomeString\n\n"; }
+    template <> struct SThunk_##n< void >                                                               \
+    {   template < typename T_RET, TARB_PARAM_A_##n typename T_CLASS, typename T_FUNCTION >             \
+            static T_ARB Thunk( void* x_pC, void* x_pF TARB_PARAM_F_##n )                               \
+        {   ( ( (T_CLASS*)x_pC )->*( *( (T_FUNCTION*)&x_pF ) ) )( TARB_PARAM_H_##n ); return 0; }       \
     };
 
-    // Test the delegates
-    void test_delegates()
-    {
-        CMyClass mc;
 
-        // Call CMyClass::Add1()
-        CDelegate d;
-        d.Register( &mc, &CMyClass::Add2 );
-        int x = d( 2, 3 );
-
-        // Call CMyClass::Add2()
-        CDelegate d2( &mc, &CMyClass::Add3 );
-        float y = d2( 1.5, 2.5, 3.5 );
-
-        // Call CMyClass::Trace
-        CDelegate d3( &mc, &CMyClass::Trace );
-        d3( _T( "\nHello World!\n\n" ) );
-
-        // Call CMyClass::GetString
-        CDelegate d4( &mc, &CMyClass::GetString );
-        TRACE0( d4() );
-
-        return;
-    }
-
-  \endcode
-
-*/
-template < class T_ARB > class TArbDelegate
+template < typename T_ARB >
+    class TArbDelegate
 {
 public:
 
-    /// Default constructor
-    TArbDelegate() 
-    {   m_pClass = 0; 
-        m_pThunk = 0;
-        m_nParams = -1;
+    /// Constructor
+    TArbDelegate()
+    {   m_uParams = 0;
+        m_pClass = m_pFunction = m_pThunk = oexNULL;        
     }
 
-    /// Copy Constructor
-    TArbDelegate( TArbDelegate &rAd )
-    {   m_pClass = rAd.m_pClass; 
-        m_pThunk = rAd.m_pThunk; 
-        m_nParams = rAd.m_nParams; 
+    /// Copy constructor
+    TArbDelegate( TArbDelegate &x_rD )
+    {   m_uParams = x_rD.m_uParams;
+        m_pClass = x_rD.m_pClass;
+        m_pFunction = x_rD.m_pFunction;
+        m_pThunk = x_rD.m_pThunk;
     }
 
-    // Delcare a set for each number of parameters
-    ARBDEL_PARAM( TArbDelegate, 0 );
-    ARBDEL_PARAM( TArbDelegate, 1 );
-    ARBDEL_PARAM( TArbDelegate, 2 );
-    ARBDEL_PARAM( TArbDelegate, 3 );
-    ARBDEL_PARAM( TArbDelegate, 4 );
-    ARBDEL_PARAM( TArbDelegate, 5 );
-    ARBDEL_PARAM( TArbDelegate, 6 );
+    /// Copy constructor
+    TArbDelegate& operator = ( TArbDelegate &x_rD )
+    {   m_uParams = x_rD.m_uParams;
+        m_pClass = x_rD.m_pClass;
+        m_pFunction = x_rD.m_pFunction;
+        m_pThunk = x_rD.m_pThunk;
+        return *this;
+    }
 
-    /// Returns the number of parameters
-    int GetNumParams() 
-    {   return m_nParams; }
-    
-private:
+    // For each possible number of parameters
+    TARB_BODY( 0 );
+    TARB_BODY( 1 );
+    TARB_BODY( 2 );
+    TARB_BODY( 3 );
+    TARB_BODY( 4 );
+    TARB_BODY( 5 );
+    TARB_BODY( 6 );
+
+public:
+
+    /// Returns the number of parameters the function has
+    oexUINT GetNumParams()
+    {   return m_uParams; }
+
+protected:
 
     /// Class pointer
-    void    *m_pClass;
+    oexPVOID                m_pClass;
 
-    /// Static function containing the actual member function call
-    void    *m_pThunk;
+    /// Function pointer
+    oexPVOID                m_pFunction;
 
-    /// The number of parameters for the wrapped function
-    int     m_nParams;
+    /// Thunk
+    oexPVOID                m_pThunk;
+
+    /// Number of params
+    oexUINT                 m_uParams;
 };
 
