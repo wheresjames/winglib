@@ -109,7 +109,7 @@ oexBOOL CFile::CreatePath( oexCSTR x_pPath )
     {   
         // Build path up to this level
         if ( !sPath.Length() ) sPath = *it;
-        else sPath = CFile::BuildPath( sPath, *it );
+        else sPath = CStr::BuildPath( sPath, *it );
 
         // Create this part of the path if it doesn't exist
         if ( !os::CBaseFile::DoesExist( sPath.Ptr() ) )

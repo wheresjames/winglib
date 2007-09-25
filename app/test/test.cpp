@@ -1490,9 +1490,8 @@ oex::oexRESULT Test_CAutoSocket()
     if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
         return -1;
 
-//    oex::TAutoSocket< oex::CWspStream > as;
-
-    oex::TNetServer< oex::CIpPort, oex::TNetSession< oex::CIpPort, oex::CNetProtocol > > server;
+    // Create echo server
+    oex::TNetServer< oex::CAutoSocket, oex::TNetSession< oex::TEchoProtocol< oex::CAutoSocket > > > server;
 
     // Start the server thread
     server.Start();
@@ -1511,92 +1510,36 @@ oex::oexRESULT Test_CAutoSocket()
     if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_TIMEOUT ) ) )
         return -3;
     
+    oex::oexCSTR pStr = oexT( "779684C3-94CB-4b66-8C74-7ADC70BA1AC9" );
+    
+    if ( !oexVERIFY( client.Send( oexStrToBin( pStr ) ) ) )
+        return -4;
+
+    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eReadEvent, oexDEFAULT_TIMEOUT ) ) )
+        return -5;
+
+    if ( !oexVERIFY( oexBinToStr( client.Recv() ) == pStr ) )
+        return -6;
+
     client.Destroy();
     server.Destroy();
 
     oex::os::CIpSocket::UninitSockets();
 
-/*
-    if ( !oexVERIFY( CIpSocket::InitSockets() ) )
+    return oex::oexRES_OK;
+}
+
+oex::oexRESULT Test_CFtpSession()
+{
+    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
         return -1;
 
-    CProxy pxClient = oexCREATE_THREAD2( TAutoSocket< CWspStream > );
+    // FTP server
+//    oex::TNetServer< oex::CAutoSocket, CFtpSession  > ftp_server;
 
-    CIpSocket server, session;
 
-    if ( !oexVERIFY( server.Bind( 23456 ) ) )
-        return -2;
+    oex::os::CIpSocket::UninitSockets();
 
-    if ( !oexVERIFY( server.Listen() ) )
-        return -3;
-
-    if ( !oexVERIFY( pxClient.Invoke( "Connect", "localhost", 23456 ).ReturnValue().ToLong() ) )
-        return -4;
-
-    if ( !oexVERIFY( server.WaitEvent( CIpSocket::eAcceptEvent, oexDEFAULT_TIMEOUT ) ) )
-        return -5;
-
-    if ( !oexVERIFY( server.Accept( session ) ) )
-        return -6;
-
-    if ( !oexVERIFY( session.WaitEvent( CIpSocket::eConnectEvent, oexDEFAULT_TIMEOUT ) ) )
-        return -7;
-
-    oexCSTR pStr = "B6F5FF3D-E9A5-46ca-ADB8-D655427EB94D";
-
-    if ( !oexVERIFY( session.Send( pStr ) ) )
-        return -8; 
-    
-    if ( !oexVERIFY( pxClient.Invoke( "WaitData", oexDEFAULT_TIMEOUT ).ReturnValue().ToLong() ) )
-        return -9;
-
-    if ( !oexVERIFY( pxClient.Invoke( "AsyncRead" ).ReturnValue().ToString() == pStr ) )
-        return -10;
-
-    oexUINT uRxed = 0;
-    TMemory< oexUCHAR > mBuf;
-    if ( !oexVERIFY( mBuf.DslAllocate( 1000 ) ) )
-        return -11;
-
-    // Fill with data
-    for ( oexUINT i = 0; i < mBuf.Size(); i++ )
-        mBuf[ i ] = i;
-
-    if ( !oexVERIFY( session.Send( mBuf.Ptr(), mBuf.Size() ) ) )
-        return -12;
-            
-    while ( uRxed < mBuf.Size() )
-    {
-        // Wait for data
-        if ( !oexVERIFY( pxClient.Invoke( "WaitData", oexDEFAULT_TIMEOUT ).ReturnValue().ToLong() ) )
-            return -13;
-
-        CStr sData = pxClient.Invoke( "AsyncRead", 99 ).ReturnValue().ToString();
-
-        if ( !oexVERIFY( sData.Length() ) )
-            return -14;
-
-        if ( !oexVERIFY( !os::CSys::MemCmp( mBuf.Ptr( uRxed ), sData.Ptr(), sData.Length() ) ) )
-            return -16;
-
-        uRxed += sData.Length();
-
-    } // end while
-
-    if ( !oexVERIFY( uRxed == mBuf.Size() ) )
-        return -17;
-
-    pxClient.Invoke( "Shutdown" );
-    if ( !oexVERIFY( session.WaitEvent( CIpSocket::eCloseEvent, oexDEFAULT_TIMEOUT ) ) )
-        return -18;
-            
-    session.Destroy();
-    server.Destroy();
-
-    CIpSocket::UninitSockets();
-
-	return oexRES_OK;
-*/  
     return oex::oexRES_OK;
 }
 
@@ -1645,6 +1588,8 @@ int main(int argc, char* argv[])
     Test_CThread();
 
     Test_CAutoSocket();
+
+    Test_CFtpSession();
 
 	// Initialize the oex library
     oexUNINIT();	

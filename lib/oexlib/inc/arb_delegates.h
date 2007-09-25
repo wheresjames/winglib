@@ -112,7 +112,7 @@ public:                                                                         
         void Register( T_CLASS *x_pC, T_RET(T_CLASS::*x_pF)( TARB_PARAM_B_##n ) )                       \
     {   _Register< T_RET TARB_PARAM_C_##n >( x_pC, x_pF ); }                                            \
     T_ARB operator ()( TARB_PARAM_E_##n )                                                               \
-    {   typedef T_ARB (*t_Thunk)( oexPVOID, oexPVOID TARB_PARAM_I_##n );                                \
+    {   typedef T_ARB (*t_Thunk)( void*, void* TARB_PARAM_I_##n );                                      \
         return ((t_Thunk)m_pThunk)( m_pClass, m_pFunction TARB_PARAM_G_##n ); }                         \
 private:                                                                                                \
     template < typename T_RET, TARB_PARAM_A_##n typename T_CLASS, typename T_FUNCTION >                 \
@@ -120,7 +120,7 @@ private:                                                                        
     {   m_uParams = n;                                                                                  \
         m_pClass = x_pC;                                                                                \
         m_pFunction = *(void**)&x_pF;                                                                   \
-        typedef T_ARB (*t_Thunk)( oexPVOID, oexPVOID TARB_PARAM_I_##n );                                \
+        typedef T_ARB (*t_Thunk)( void*, void* TARB_PARAM_I_##n );                                      \
         m_pThunk = (t_Thunk)&SThunk_##n< T_RET >::Thunk< T_RET, TARB_PARAM_D_##n T_CLASS, T_FUNCTION >; \
     }                                                                                                   \
     template< typename T_RET > struct SThunk_##n                                                        \
@@ -143,7 +143,7 @@ public:
     /// Constructor
     TArbDelegate()
     {   m_uParams = 0;
-        m_pClass = m_pFunction = m_pThunk = oexNULL;        
+        m_pClass = m_pFunction = m_pThunk = 0;        
     }
 
     /// Copy constructor
@@ -175,21 +175,25 @@ public:
 public:
 
     /// Returns the number of parameters the function has
-    oexUINT GetNumParams()
+    unsigned int GetNumParams()
     {   return m_uParams; }
+
+    /// Returns non-zero if the delegate appears to be set
+    unsigned int IsValid()
+    {   return 0 != m_pThunk; }
 
 protected:
 
     /// Class pointer
-    oexPVOID                m_pClass;
+    void*                   m_pClass;
 
     /// Function pointer
-    oexPVOID                m_pFunction;
+    void*                   m_pFunction;
 
     /// Thunk
-    oexPVOID                m_pThunk;
+    void*                   m_pThunk;
 
     /// Number of params
-    oexUINT                 m_uParams;
+    unsigned int            m_uParams;
 };
 

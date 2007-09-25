@@ -37,7 +37,10 @@ class CSys
 {
 private:
 
+    /// Constructor
 	CSys() {}
+
+    /// Destructor
 	virtual ~CSys() {}
 
 public:	
@@ -48,15 +51,63 @@ public:
     /// Cleans up os system stuff
     static oexBOOL Uninit();
 
+    /// Call to terminate the application
 	static void Exit( oexINT nRet );
 
-	static oexCSTR StrFmt( oexSTR pDst, oexUINT uMax, oexCSTR pFmt, ... );
 
-	static oexCSTR vStrFmt( oexSTR pDst, oexUINT uMax, oexCSTR pFmt, oexCPVOID pArgs );
+    // Multi-byte
+public:
 
-	static oexCSTR StrFmt( oexRESULT *pRes, oexSTR pDst, oexUINT uMax, oexCSTR pFmt, ... );
+	static oexCSTR8 StrFmt( oexSTR8 pDst, oexUINT uMax, oexCSTR8 pFmt, ... );
 
-	static oexCSTR vStrFmt( oexRESULT *pRes, oexSTR pDst, oexUINT uMax, oexCSTR pFmt, oexCPVOID pArgs );
+	static oexCSTR8 vStrFmt( oexSTR8 pDst, oexUINT uMax, oexCSTR8 pFmt, oexCPVOID pArgs );
+
+	static oexCSTR8 StrFmt( oexRESULT *pRes, oexSTR8 pDst, oexUINT uMax, oexCSTR8 pFmt, ... );
+
+	static oexCSTR8 vStrFmt( oexRESULT *pRes, oexSTR8 pDst, oexUINT uMax, oexCSTR8 pFmt, oexCPVOID pArgs );
+
+    /// Converts to int64
+    static oexINT64 StrToInt64( oexCSTR8 x_pStr, oexUINT x_uRadix );
+
+    /// Converts to uint64
+    static oexUINT64 StrToUInt64( oexCSTR8 x_pStr, oexUINT x_uRadix );
+
+	/// Converts to long
+	static oexLONG StrToLong( oexCSTR8 pStr, oexUINT uRadix = 10 );
+
+	/// Converts to unsigned long
+	static oexULONG StrToULong( oexCSTR8 pStr, oexUINT uRadix = 10 );
+
+	/// Converts to double
+	static oexDOUBLE StrToDouble( oexCSTR8 pStr );
+
+    // Unicode
+public:
+
+	static oexCSTRW StrFmt( oexSTRW pDst, oexUINT uMax, oexCSTRW pFmt, ... );
+
+	static oexCSTRW vStrFmt( oexSTRW pDst, oexUINT uMax, oexCSTRW pFmt, oexCPVOID pArgs );
+
+	static oexCSTRW StrFmt( oexRESULT *pRes, oexSTRW pDst, oexUINT uMax, oexCSTRW pFmt, ... );
+
+	static oexCSTRW vStrFmt( oexRESULT *pRes, oexSTRW pDst, oexUINT uMax, oexCSTRW pFmt, oexCPVOID pArgs );
+
+    /// Converts to int64
+    static oexINT64 StrToInt64( oexCSTRW x_pStr, oexUINT x_uRadix );
+
+    /// Converts to uint64
+    static oexUINT64 StrToUInt64( oexCSTRW x_pStr, oexUINT x_uRadix );
+
+	/// Converts to long
+	static oexLONG StrToLong( oexCSTRW pStr, oexUINT uRadix = 10 );
+
+	/// Converts to unsigned long
+	static oexULONG StrToULong( oexCSTRW pStr, oexUINT uRadix = 10 );
+
+	/// Converts to double
+	static oexDOUBLE StrToDouble( oexCSTRW pStr );
+
+public:
 
 	static oexPVOID MemCpy( oexPVOID pDst, oexCPVOID pSrc, oexUINT uSize );
 
@@ -65,22 +116,7 @@ public:
 	static oexPVOID MemSet( oexPVOID pDst, oexINT nCh, oexUINT uSize );
 
     static oexPVOID Zero( oexPVOID pDst, oexUINT uSize )
-    {   return MemSet( pDst, 0, uSize ); }
-
-    /// Converts to int64
-    static oexINT64 StrToInt64( oexCSTR x_pStr, oexUINT x_uRadix );
-
-    /// Converts to uint64
-    static oexUINT64 StrToUInt64( oexCSTR x_pStr, oexUINT x_uRadix );
-
-	/// Converts to long
-	static oexLONG StrToLong( oexCSTR pStr, oexUINT uRadix = 10 );
-
-	/// Converts to unsigned long
-	static oexULONG StrToULong( oexCSTR pStr, oexUINT uRadix = 10 );
-
-	/// Converts to double
-	static oexDOUBLE StrToDouble( oexCSTR pStr );
+    {   return MemSet( pDst, 0, uSize ); }  
 
     /// Creates a guid
     static oexGUID * CreateGuid( oexGUID *pGuid );
@@ -197,11 +233,6 @@ private:
 
 	/// Infinite timeout value
 	static oexCONST oexUINT		c_Infinite;
-
-public:
-
-    /// Converts a string to a number
-    static oexINT64 StrToNum( oexCSTR x_pStr, oexUINT x_uSize = 0, oexUINT x_uRadix = 10, oexINT *x_pnEnd = oexNULL );
 
 public:
 

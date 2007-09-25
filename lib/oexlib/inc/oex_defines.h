@@ -41,10 +41,14 @@
 
 #define oexNULL						0
 
-#ifdef UNICODE
+#define oexTT( c, s )				( 1 == sizeof( c ) ? ( ( c* )s ) : ( ( c* )L##s ) )
+//#define oexTT( c, s )				( s )
+#define oexTTEXT( c, s )			oexTT( c, s )
 
-#	define oexT( x )				( L##x )
-#	define oexTEXT( x )				oexT( x )
+#ifdef _UNICODE
+
+#	define oexT( s )				( L##s )
+#	define oexTEXT( s )				oexT( s )
 
 #   define oexStrToStr8( s )        oex::CStr8().Cnv( s )
 #   define oexStrToStr8Ptr( s )     oex::CStr8().Cnv( s ).Ptr()
@@ -62,8 +66,8 @@
 
 #else
 
-#	define oexT( x )				x
-#	define oexTEXT( x )				x
+#	define oexT( s )				s
+#	define oexTEXT( s )				s
 
 #   define oexStrToStr8( s )        ( s )
 #   define oexStrToStr8Ptr( s )     ( s )

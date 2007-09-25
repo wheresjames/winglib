@@ -79,7 +79,7 @@ public:
     /// Destroys the network
     void Destroy()
     {
-        Stop();
+        
     }
 
 public:
@@ -110,7 +110,7 @@ public:
         oexUINT uHandles = oexSizeofArray( phEvents );
 
         // Don't look at the port handle if invalid
-        if ( !IsValidEventHandle() )
+        if ( os::CEvent::vInvalid() == phEvents[ 2 ] )
             uHandles--;
 
         // Wait for something to happen
@@ -126,7 +126,7 @@ public:
 
         // Port event
         else if ( 2 == nRet )
-            T_PORT::OnPortEvent();
+            T_PORT::ProcessEvents();
 
         return oexTRUE; 
     }
@@ -149,8 +149,16 @@ public:
     // Accept incomming connections
 	virtual oexBOOL OnAccept( oexINT x_nErr )
     {
+        // Get a new session object
+        t_Session session = AddSession( oexNULL );
+        if ( !session.IsValid() )
+            return oexFALSE;
+
         // Accept the incomming connection
-        T_PORT::Accept( AddSession( oexNULL ).Obj() );
+        T_PORT::Accept( session.Obj().Protocol() );
+
+        // Start the session thread
+        session.Obj().Start();
 
         return oexTRUE;
 
@@ -165,7 +173,7 @@ public:
         // Lock the session list
         CTlLocalLock ll( m_lockSession );
         if ( !ll.IsLocked() )
-            return t_SessionList::iterator();
+            return t_Session();
 
         // Create a unique id if none provided
         oexGUID guid;
@@ -174,7 +182,6 @@ public:
             x_pGuid = &guid;
         } // end if
 
-        // Return a session
         return m_sessions.Get( *x_pGuid );
     }
 
@@ -218,11 +225,10 @@ private:
 
 */
 //==================================================================
-template < typename T_PORT, typename T_PROTOCOL > 
+template < typename T_PROTOCOL > 
     class TNetSession : 
         public os::CThread,
-        public CDispatch,
-        public T_PORT
+        public CDispatch
 {
 public:
 
@@ -230,13 +236,17 @@ public:
 	TNetSession()
     {
         // Register functions
-        T_PORT::RegisterFunctions( this );
         m_cProtocol.RegisterFunctions( this );
     }
 
 	/// Destructor
 	virtual ~TNetSession()
     {   Stop();
+    }
+
+    /// Returns protocol pointer
+    T_PROTOCOL& Protocol()
+    {   return m_cProtocol;
     }
 
     /// Over-ride to provide message mapping
@@ -272,14 +282,14 @@ public:
             GetCmdEvent().GetHandle(),
 
             // 2 == Port events
-            T_PORT::GetEventHandle()
+            m_cProtocol.GetEventHandle()
         };
 
         // How many valid handles
         oexUINT uHandles = oexSizeofArray( phEvents );
 
         // Don't look at the port handle if invalid
-        if ( !IsValidEventHandle() )
+        if ( os::CEvent::vInvalid() == phEvents[ 2 ] )
             uHandles--;
 
         // Wait for something to happen
@@ -295,7 +305,7 @@ public:
 
         // Port event
         else if ( 2 == nRet )
-            T_PORT::OnPortEvent();
+            m_cProtocol.ProcessEvents();
 
         return oexTRUE; 
     }
@@ -304,7 +314,7 @@ public:
 	virtual oexINT EndThread( oexPVOID x_pData ) 
     {
         // Kill ther server
-        T_PORT::Destroy();
+        m_cProtocol.Destroy();
 
         return 0; 
     }
@@ -313,75 +323,129 @@ private:
 
     /// Protocol class
     T_PROTOCOL              m_cProtocol;
+};
+
+/// Basic port class
+template < typename T_PORT, typename T_BUFFER = CCircBuf >
+    class TBufferedPort : public T_PORT
+{
+public:
+
+    /// Default constructor
+    TBufferedPort()
+    {
+        m_bBlocking = oexFALSE;
+    }
+
+    /// Destructor
+    ~TBufferedPort()
+    {
+
+    }   
+
+    // When data is read
+	virtual oexBOOL OnRead( oexINT x_nErr )
+    {
+        // Buffer the data
+        return Rx().Write( Recv() );
+    }
+
+    // When data is written
+    virtual oexBOOL OnWrite( oexINT x_nErr )
+    {
+	    // Lock the transmit buffer
+	    CTlLocalLock ll( Tx() );
+	    if ( !ll.IsLocked() ) 
+		    return oexFALSE;
+
+	    // Not blocking now
+	    m_bBlocking = oexFALSE;
+
+	    // Send more data
+	    OnTx( 0 );
+
+	    return oexTRUE;
+    }
+
+    // When data is written
+    virtual oexBOOL OnTx( oexINT x_nErr )
+    {
+	    // Lock the transmit buffer
+	    CTlLocalLock ll( Tx() );
+	    if ( !ll.IsLocked() ) 
+		    return oexFALSE;
+
+	    // Punt if we're blocking
+	    if ( m_bBlocking ) 
+            return oexTRUE;
+
+	    oexUCHAR buf[ 1024 ];
+	    oexUINT uReady = 0;
+
+	    // Read blocks of data
+	    while ( Tx().Peek( buf, sizeof( buf ), &uReady ) )
+	    {
+            // Send data
+            oexINT res = Send( buf, uReady );
+
+            // Returns zero if tx'er is full
+            if ( !res )
+            {
+                m_bBlocking = oexTRUE;
+
+                return oexFALSE;
+
+            } // end if
+
+		    // Remove the number of bytes sent from the buffer
+		    else 
+                Tx().AdvanceReadPtr( res );
+
+	    } // end while
+
+        return oexTRUE;
+    }
+
+public:
+
+    /// Returns a reference to the rx buffer
+    T_BUFFER& Rx() { return m_rx; }
+
+    /// Returns a reference to the tx buffer
+    T_BUFFER& Tx() { return m_tx; }    
+
+private:
+
+    /// Non-zero if tx'er is blocking
+    oexBOOL                     m_bBlocking;
+
+    /// Rx buffer
+    T_BUFFER                    m_rx;
+
+    /// Tx buffer
+    T_BUFFER                    m_tx;
 
 };
 
 
 /// Generic ip port
-class CIpPort : public CAutoSocket
+template < typename T_PORT >
+    class TEchoProtocol : public T_PORT
 {
 public:
-
-    CIpPort()
-    {
-    }
-
-    virtual ~CIpPort()
-    {
-        Destroy();
-    }
-
-    void RegisterFunctions( CDispatch *x_pDispatch )
-    {
-        // Sanity check
-        if ( !x_pDispatch )
-            return;
-
-        // Register user callable functions
-        x_pDispatch->OexRpcRegister( CAutoSocket, Connect );
-        x_pDispatch->OexRpcRegister( CAutoSocket, Shutdown );
-        x_pDispatch->OexRpcRegister( CAutoSocket, Bind );
-        x_pDispatch->OexRpcRegister( CAutoSocket, Listen );
-    }
-
-    void OnPortEvent()
-    {   OnSocketEvent(); 
-    }
-
-    oexBOOL IsValidEventHandle()
-    {   return GetEventHandle() != os::CIpSocket::vInvalidEvent();
-    }
 
 	virtual oexBOOL OnRead( oexINT x_nErr ) 
     {
+	    // Process the incomming data
+        T_PORT::OnRead( x_nErr );
 
-
-        return oexTRUE; 
+        // Just echo the data
+        Send( Recv() );
+        
+        return oexFALSE; 
     }
 
 private:
-
-};
-
-
-class CNetProtocol
-{
-public:
-
-    CNetProtocol()
-    {
-    }
-
-    virtual ~CNetProtocol()
-    {
-    }
-
-    void RegisterFunctions( CDispatch *x_pDispatch )
-    {
-        // Sanity check
-        if ( !x_pDispatch )
-            return;
-    }
 
 };
 

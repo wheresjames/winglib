@@ -372,7 +372,7 @@ public:
 
 		\see Create(), Bind(), Connect()
 	*/
-	oexBOOL Listen( oexUINT x_uMaxConnections = 32 );
+	oexBOOL Listen( oexUINT x_uMaxConnections = 0 );
 
 	//==============================================================
 	// Connect()

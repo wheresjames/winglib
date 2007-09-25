@@ -231,7 +231,7 @@ CBaseFile::t_HFIND CBaseFile::FindFirst( oexCSTR x_pPath, oexCSTR x_pMask, CBase
     ZeroMemory( &wfd, sizeof( wfd ) );
     
     // Find first file
-    HANDLE hFind = ::FindFirstFile( CFile::BuildPath( x_pPath, x_pMask ).Ptr(), &wfd );
+    HANDLE hFind = ::FindFirstFile( CStr::BuildPath( x_pPath, x_pMask ).Ptr(), &wfd );
     if ( INVALID_HANDLE_VALUE == hFind )
         return CBaseFile::c_InvalidFindHandle;
 

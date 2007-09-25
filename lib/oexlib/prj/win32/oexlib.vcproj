@@ -217,6 +217,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\ftp_session.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\os\win32\hq_timer.cpp"
 				>
 			</File>
@@ -343,6 +347,10 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\os\fmap.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\ftp_session.h"
 				>
 			</File>
 			<File

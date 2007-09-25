@@ -117,7 +117,7 @@ public:
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
-		SetNum( oexT( "%li" ), (oexLONG)nVal ); 
+		SetNum( oexTT( T, "%li" ), (oexLONG)nVal ); 
 	}
 
 	TStr( oexCONST oexUINT uVal )
@@ -127,7 +127,7 @@ public:
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
-		SetNum( oexT( "%lu" ), (oexULONG)uVal ); 
+		SetNum( oexTT( T, "%lu" ), (oexULONG)uVal ); 
 	}
 
 	TStr( oexCONST oexDOUBLE dStr )
@@ -137,7 +137,7 @@ public:
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
-		SetNumTrim( oexT( "%f" ), oexNULL, oexT( "0" ), (oexDOUBLE)dStr ); 
+		SetNumTrim( oexTT( T, "%f" ), oexNULL, oexTT( T, "0" ), (oexDOUBLE)dStr ); 
 	}
 
 	TStr( oexCONST T tVal )
@@ -383,22 +383,22 @@ public:
 
 
 	TStr& operator = ( oexCONST oexINT nVal )
-	{	return SetNum( oexT( "%li" ), (oexINT)nVal ); }
+	{	return SetNum( oexTT( T, "%li" ), (oexINT)nVal ); }
 
 	TStr& operator = ( oexCONST oexUINT uVal )
-	{	return SetNum( oexT( "%lu" ), (oexULONG)uVal ); }
+	{	return SetNum( oexTT( T, "%lu" ), (oexULONG)uVal ); }
 
 	TStr& operator = ( oexCONST oexDOUBLE dStr )
-	{	return SetNumTrim( oexT( "%f" ), oexNULL, oexT( "0" ), (oexDOUBLE)dStr ); }
+	{	return SetNumTrim( oexTT( T, "%f" ), oexNULL, oexTT( T, "0" ), (oexDOUBLE)dStr ); }
 
 	TStr& operator += ( oexCONST oexINT nVal )
-	{	return AppendNum( oexT( "%li" ), (oexINT)nVal ); }
+	{	return AppendNum( oexTT( T, "%li" ), (oexINT)nVal ); }
 
 	TStr& operator += ( oexCONST oexUINT uVal )
-	{	return AppendNum( oexT( "%lu" ), (oexULONG)uVal ); }
+	{	return AppendNum( oexTT( T, "%lu" ), (oexULONG)uVal ); }
 
 	TStr& operator += ( oexCONST oexDOUBLE dVal )
-	{	return AppendNumTrim( oexT( "%f" ), oexNULL, oexT( "0" ), (oexDOUBLE)dVal ); }
+	{	return AppendNumTrim( oexTT( T, "%f" ), oexNULL, oexTT( T, "0" ), (oexDOUBLE)dVal ); }
 
 	TStr& operator += ( oexCONST T chVal )
 	{	return Append( &chVal, 1 ); }
@@ -407,15 +407,15 @@ public:
 	{	return Append( str.Ptr() ); }
 
 	TStr& operator << ( oexCONST oexINT nVal )
-	{	return AppendNum( oexT( "%li" ), (oexINT)nVal ); }
+	{	return AppendNum( oexTT( T, "%li" ), (oexINT)nVal ); }
 
 	TStr& operator << ( oexCONST oexUINT uVal )
-	{	return AppendNum( oexT( "%lu" ), (oexULONG)uVal ); }
+	{	return AppendNum( oexTT( T, "%lu" ), (oexULONG)uVal ); }
 
 	TStr& operator << ( oexCONST oexDOUBLE dVal )
-	{	return AppendNumTrim( oexT( "%f" ), oexNULL, oexT( "0" ), (oexDOUBLE)dVal ); }
+	{	return AppendNumTrim( oexTT( T, "%f" ), oexNULL, oexTT( T, "0" ), (oexDOUBLE)dVal ); }
 
-	TStr& operator << ( oexCSTR pStr )
+	TStr& operator << ( oexCONST T *pStr )
 	{	return Append( pStr ); }
 
 	TStr& operator << ( TStr &str )
@@ -937,7 +937,7 @@ public:
 
 public:
 
-	TStr& vFmt( oexCSTR x_pFmt, oexCPVOID x_pArgs )
+	TStr& vFmt( oexCONST T *x_pFmt, oexCPVOID x_pArgs )
 	{
 		// Verify input string
 		if ( !oexVERIFY( x_pFmt ) )
@@ -972,13 +972,13 @@ public:
 	}
 
 	/// Formats a string
-	TStr& Fmt( oexCSTR pFmt, ... )
+	TStr& Fmt( oexCONST T *pFmt, ... )
 	{	return vFmt( pFmt, ( (oexPVOID*)&pFmt ) + 1 ); }
 
 	/// Sets a number into the string using rules of Fmt()
 	/// Truncates results larger than 256 characters
-	TStr& SetNum( oexCSTR pFmt, ... )
-	{	oexTCHAR tBuf[ 256 ] = oexT( "" );
+	TStr& SetNum( oexCONST T *pFmt, ... )
+	{	T tBuf[ 256 ];
 		os::CSys::vStrFmt( tBuf, oexSizeofArray( tBuf ), pFmt, ( ( (oexPVOID*)&pFmt ) + 1 ) );
 		return Cnv( tBuf );
 	}
@@ -986,7 +986,7 @@ public:
 	/// Sets a number into the string using rules of Fmt()
 	/// Truncates results larger than 256 characters
     /// Optional pre and post trimming
-	TStr& SetNumTrim( oexCSTR pFmt, oexCONST T* pLTrim, oexCONST T* pRTrim, ... )
+	TStr& SetNumTrim( oexCONST T *pFmt, oexCONST T* pLTrim, oexCONST T* pRTrim, ... )
 	{   os::CSys::vStrFmt( OexAllocate( 256 ), 256, pFmt, ( ( (oexPVOID*)&pRTrim ) + 1 ) );
         if ( pLTrim ) LTrim( pLTrim );
         if ( pRTrim ) RTrim( pRTrim );
@@ -995,8 +995,8 @@ public:
 
 	/// Appends a formatted number to the string using rules of Fmt()
 	/// Truncates results larger than 256 characters
-	TStr& AppendNum( oexCSTR pFmt, ... )
-	{	T tBuf[ 256 ] = oexT( "" );
+	TStr& AppendNum( oexCONST T *pFmt, ... )
+	{	T tBuf[ 256 ];
 		os::CSys::vStrFmt( tBuf, oexSizeofArray( tBuf ), pFmt, ( ( (oexPVOID*)&pFmt ) + 1 ) );
 		return Append( tBuf );		
 	}
@@ -1004,7 +1004,7 @@ public:
     /// Sets a number into the string using rules of Fmt()
 	/// Truncates results larger than 256 characters
     /// Optional pre and post trimming
-	TStr& AppendNumTrim( oexCSTR pFmt, oexCONST T* pLTrim, oexCONST T* pRTrim, ... )
+	TStr& AppendNumTrim( oexCONST T *pFmt, oexCONST T* pLTrim, oexCONST T* pRTrim, ... )
 	{   TStr str;        
    		os::CSys::vStrFmt( str.OexAllocate( 256 ), 256, pFmt, ( ( (oexPVOID*)&pRTrim ) + 1 ) );
         if ( pLTrim ) str.LTrim( pLTrim );
@@ -1028,7 +1028,7 @@ public:
     /// Converts to a number
     oexINT64 ToNum( oexINT x_nMax = 0, oexUINT x_uRadix = 10, oexINT *x_pnEnd = oexNULL, oexBOOL x_bTrim = oexFALSE )
     {   if ( !x_nMax || x_nMax > Length() ) x_nMax = Length();
-        oexINT nEnd = 0; oexINT64 llNum = os::CSys::StrToNum( Ptr(), x_nMax, x_uRadix, &nEnd ); 
+        oexINT nEnd = 0; oexINT64 llNum = str::StrToNum( Ptr(), x_nMax, x_uRadix, &nEnd ); 
         if ( x_bTrim ) LTrim( nEnd );
         if ( x_pnEnd ) *x_pnEnd = nEnd;
         return llNum;
@@ -1171,7 +1171,7 @@ public:
 
 	/// Skips to the next line, current line is removed from the string.
 	TStr& NextLine()
-	{	Find( oexT( "\r\n" ) ); return Skip( oexT( "\r\n" ) ); }
+	{	Find( oexTT( T, "\r\n" ) ); return Skip( oexTT( T, "\r\n" ) ); }
 
 	/// Removes white space from the string
 	TStr& DropWhiteSpace()
@@ -1319,7 +1319,7 @@ public:
 	{
 		// Sanity check
 		if ( !oexVERIFY_PTR( pStr ) )
-			return CStr();
+			return TStr();
 
 		oexUINT i = 0;
 
@@ -1333,7 +1333,7 @@ public:
 
 		// Ensure we're not beyond the buffer
 		if ( i >= uSize ) 
-			return CStr();
+			return TStr();
 
 		// Skip to previous position
 		pStr += i;
@@ -1342,18 +1342,18 @@ public:
 		// Find the start of a token
         oexINT nStart = str::FindInRange( pStr, uSize, tMin, tMax );
 		if ( 0 > nStart ) 
-			return CStr();
+			return TStr();
 
 		// Find the end of the token
 		oexINT nEnd = str::SkipInRange( &pStr[ nStart ], uSize - nStart, tMin, tMax );
 		if ( 0 >= nEnd ) 
-			return CStr();
+			return TStr();
 
 		// Add offset
 		if ( puI ) 
 			*puI += nStart + nEnd;
 
-		return CStr( &pStr[ nStart ], 0, nEnd );
+		return TStr( &pStr[ nStart ], 0, nEnd );
 	}
 
 
@@ -1367,14 +1367,14 @@ public:
 	static TStr NextToken( TStr str, oexCONST T* pValid, oexINT *puI = oexNULL )
 	{	return NextToken( str.Ptr(), str.Length(), pValid, puI ); }
 
-	static TStr NextToken( oexCONST T* pStr, oexUINT uSize, oexCSTR pValid, oexINT *puI  = oexNULL )
+	static TStr NextToken( oexCONST T* pStr, oexUINT uSize, oexCONST T *pValid, oexINT *puI  = oexNULL )
 	{
 		// Sanity check
 		if ( !oexVERIFY_PTR( pStr ) || !oexVERIFY_PTR_NULL_OK( pValid ) )
-			return CStr();
+			return TStr();
 
 		if ( !pValid )
-			return CStr( pStr, uSize );		
+			return TStr( pStr, uSize );		
 
 		oexUINT i = 0;
 		oexUINT uValid = zstr::Length( pValid );
@@ -1389,7 +1389,7 @@ public:
 
 		// Ensure we're not beyond the buffer
 		if ( i >= uSize ) 
-			return CStr();
+			return TStr();
 
 		// Skip to previous position
 		pStr += i;
@@ -1398,18 +1398,18 @@ public:
 		// Find the start of a token
 		oexINT nStart = str::FindCharacters( pStr, uSize, pValid, uValid );
 		if ( 0 > nStart ) 
-			return CStr();
+			return TStr();
 
 		// Find the end of the token
 		oexINT nEnd = str::SkipCharacters( &pStr[ nStart ], uSize - nStart, pValid, uValid );
 		if ( 0 >= nEnd ) 
-			return CStr();
+			return TStr();
 
 		// Add offset
 		if ( puI ) 
 			*puI += nStart + nEnd;
 
-		return CStr( &pStr[ nStart ], 0, nEnd );
+		return TStr( &pStr[ nStart ], 0, nEnd );
 	}
 
 	/// Returns the token at the current point in the string
@@ -1419,14 +1419,14 @@ public:
 	{	return Token( pStr, zstr::Length( pStr ), pValid, puI ); }
 	static TStr Token( TStr str, oexCONST T* pValid, oexINT *puI = oexNULL )
 	{	return Token( str.Ptr(), str.Length(), pValid, puI ); }
-	static TStr Token( oexCONST T* pStr, oexUINT uSize, oexCSTR pValid, oexINT *puI  = oexNULL )
+	static TStr Token( oexCONST T* pStr, oexUINT uSize, oexCONST T *pValid, oexINT *puI  = oexNULL )
 	{
 		// Sanity check
 		if ( !oexVERIFY_PTR( pStr ) || !oexVERIFY_PTR_NULL_OK( pValid ) )
-			return CStr();
+			return TStr();
 
 		if ( !pValid )
-			return CStr( pStr, uSize );		
+			return TStr( pStr, uSize );		
 
 		oexUINT i = 0;
 		oexUINT uValid = zstr::Length( pValid );
@@ -1441,7 +1441,7 @@ public:
 
 		// Ensure we're not beyond the buffer
 		if ( i >= uSize ) 
-			return CStr();
+			return TStr();
 
 		// Skip to previous position
 		pStr += i;
@@ -1450,15 +1450,38 @@ public:
 		// Find the end of the token
 		oexINT nEnd = str::SkipCharacters( pStr, uSize, pValid, uValid );
 		if ( 0 >= nEnd ) 
-			return CStr();
+			return TStr();
 
 		// Add offset
 		if ( puI ) 
 			*puI += nEnd;
 
-		return CStr( pStr, 0, nEnd );
+		return TStr( pStr, 0, nEnd );
 	}
 
+public:
+
+    /// Concatinates two strings into a path
+    static TStr BuildPath( TStr x_sRoot, TStr x_sPath, oexTCHAR tSep = oexT( '/' ) )
+    {   return x_sRoot.RTrim( oexTT( T, "\\/" ) ) << tSep << x_sPath.LTrim( oexTT( T, "\\/" ) ); }
+
+    /// Concatinates two strings into a path
+    TStr& BuildPath( TStr x_sPath, oexTCHAR tSep = oexT( '/' ) )
+    {   RTrim( oexTT( T, "\\/" ) );
+        *this << tSep << x_sPath.LTrim( oexTT( T, "\\/" ) ); 
+        return *this;
+    }
+
+    /// Returns the root path of str
+    TStr GetPath()
+    {   TStr str( *this ).RParse( oexTT( T, "\\/" ) ); 
+        return str;
+    }
+
+    /// Returns the root path of str
+    TStr GetFileName( TStr str )
+    {   return RParse( oexTT( T, "\\/" ) )++; 
+    }
 
 private:
 

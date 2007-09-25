@@ -144,7 +144,7 @@ public:
 	//==============================================================
 	/// Returns the complete filename for the found file
     CStr GetFullPath() 
-    {   if ( !IsValid() ) return oexT( "" ); return CFile::BuildPath( m_sPath.Ptr(), m_fd.sName ); }
+    {   if ( !IsValid() ) return oexT( "" ); return CStr::BuildPath( m_sPath.Ptr(), m_fd.sName ); }
 
 	//==============================================================
 	// GetFileName()

@@ -36,7 +36,16 @@
 
 // Special List types
 typedef TList< CStr > CStrList;
+typedef TList< CStrW > CStrWList;
+typedef TList< CStr8 > CStr8List;
+typedef TList< CStr16 > CStr16List;
+typedef TList< CStr32 > CStr32List;
+
 typedef TAssoList< CStr, CStr > CStrAssoList;
+typedef TAssoList< CStrW, CStrW > CStrWAssoList;
+typedef TAssoList< CStr8, CStr8 > CStr8AssoList;
+typedef TAssoList< CStr16, CStr16 > CStr16AssoList;
+typedef TAssoList< CStr32, CStr32 > CStr32AssoList;
 
 class CParser
 {

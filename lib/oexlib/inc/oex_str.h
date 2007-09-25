@@ -721,6 +721,91 @@ namespace str
 		    return -1;
 	    }
 
+    /// Converts a string to a number
+	template< class T >
+        oexINT64 StrToNum( oexCONST T *x_pStr, oexUINT x_uSize = 0, oexUINT x_uRadix = 10, oexINT *x_pnEnd = oexNULL )
+    {
+        oexASSERT( x_uRadix < 36 );
+        if ( 0 >= x_uRadix || 36 < x_uRadix )
+            x_uRadix = 10;
+
+        // Zero size means NULL terminated
+        if( !x_uSize ) 
+            x_uSize = zstr::Length( x_pStr );
+
+        oexINT i = 0;
+        oexINT64 llNum = 0;
+        oexBOOL bErr = oexFALSE;
+        oexBOOL bNeg = oexFALSE;
+
+        // Anything to do?
+        if ( !x_uSize ) 
+        {    if ( x_pnEnd )
+                *x_pnEnd = 0;
+            return llNum;
+        } // end if
+
+        // Check sign
+        if ( x_pStr[ i ] == oexT( '+' ) )
+            i++, bNeg = oexFALSE;
+        else if ( x_pStr[ i ] == oexT( '-' ) )
+            i++, bNeg = oexTRUE;
+
+        // Make special exception for the 0x in front of hex numbers
+        if ( 16 == x_uRadix && i + 2 <= (oexINT)x_uSize )
+            if ( oexT( '0' ) == x_pStr[ i ] && 
+                 ( oexT( 'x' ) == x_pStr[ i + 1 ] || oexT( 'X' ) == x_pStr[ i + 1 ] ) )
+                i += 2;
+
+        // Decode the number
+        while ( !bErr && (oexUINT)i < x_uSize )
+        {
+            oexINT ch = (oexINT)x_pStr[ i ];
+
+            if ( oexT( '0' ) <= ch && oexT( '9' ) >= ch )
+                ch -= oexT( '0' );
+
+            else if ( oexT( 'a' ) <= ch && oexT( 'z' ) >= ch )
+                ch -= oexT( 'a' ) - 10;
+
+            else if ( oexT( 'A' ) <= ch && oexT( 'A' ) >= ch )
+                ch -= oexT( 'A' ) - 10;
+
+            else bErr = oexTRUE;
+        
+            // Next character
+            if ( !bErr ) 
+            {
+                // Verify it's within the radix
+                if ( ch >= (oexINT)x_uRadix )
+                    bErr = oexTRUE;
+
+                else 
+                {
+                    // Accumulate number
+                    llNum *= x_uRadix;
+                    llNum += ch;
+
+                } // end else
+
+            } // end if
+
+            // Next char
+            if ( !bErr )
+                i++;
+
+        } // end while
+
+        // Is the value negative?
+        if ( bNeg ) 
+            llNum = -llNum;
+
+        // Does the caller care about errors?
+        if ( x_pnEnd )
+            *x_pnEnd = i;
+
+        return llNum;
+    }
 
 };
 

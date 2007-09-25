@@ -263,10 +263,6 @@ public:
 
 public:
 
-    /// Concatinates two strings into a path
-    static CStr BuildPath( CStr x_sRoot, CStr x_sPath, oexTCHAR tSep = oexT( '/' ) )
-    {   return x_sRoot.RTrim( oexT( "\\/" ) ) << tSep << x_sPath.LTrim( oexT( "\\/" ) ); }
-
     /// Deletes the specified file
     static oexBOOL Delete( oexCSTR x_pFile )
     {   return os::CBaseFile::Delete( x_pFile ); }
@@ -280,17 +276,6 @@ public:
     /// Returns non-zero if the path exists
     static oexBOOL Exists( oexCSTR x_pPath )
     {   return os::CBaseFile::DoesExist( x_pPath ); }
-
-    /// Returns the root path of str
-    static CStr RootPath( CStr str )
-    {   str.RParse( oexT( "\\/" ) ); 
-        return str;
-    }
-
-    /// Returns the root path of str
-    static CStr ChopFileName( CStr str )
-    {   return str.RParse( oexT( "\\/" ) )++; 
-    }
 
 private:
     

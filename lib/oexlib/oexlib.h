@@ -508,7 +508,7 @@ namespace os
 #include "inc/worker_thread.h"
 #include "inc/auto_socket.h"
 #include "inc/port.h"
-//#include "inc/wsp_stream.h"
+#include "inc/ftp_session.h"
 
 
 /*

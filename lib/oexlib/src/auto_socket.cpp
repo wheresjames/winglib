@@ -50,92 +50,68 @@ CAutoSocket::~CAutoSocket()
 void CAutoSocket::Destroy()
 {
     // Kill off the socket
-    m_is.Destroy();
-}
-
-
-oexBOOL CAutoSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort )
-{
-    // Open the socket
-    if ( !m_is.Connect( x_pAddress, x_uPort ) )
-        return oexFALSE;
-
-    return oexTRUE;
-}
-
-oexBOOL CAutoSocket::Shutdown()
-{    return m_is.Shutdown();
-}
-
-oexBOOL CAutoSocket::Bind( oexUINT x_uPort )
-{   
-    return m_is.Bind( x_uPort );
-}
-
-oexBOOL CAutoSocket::Listen( oexUINT x_uMax )
-{   
-    return m_is.Listen( x_uMax );
+    CIpSocket::Destroy();
 }
 
 oexINT CAutoSocket::OnSocketEvent()
 {
     // Must have a socket handle
-    if ( !m_is.IsSocket() ) 
+    if ( !IsSocket() ) 
         return -1;
 
     // Dispatch events
     oexUINT uEventMask;
-    while ( uEventMask = m_is.WaitEvent( ~0, 0 ) )
+    while ( uEventMask = WaitEvent( ~0, 0 ) )
     {
         // !!! These messages are sent in a purposeful order
 
         // Ensure connect messages are first
         if ( 0 != ( uEventMask & os::CIpSocket::eConnectEvent ) )
-        {   if ( m_is.GetLastError() ) m_uStatus = eStatusDisconnected;
+        {   if ( GetLastError() ) m_uStatus = eStatusDisconnected;
             else m_uStatus = eStatusConnected; //, m_evConnected.Set();
-            OnConnect( m_is.GetLastError() );
+            OnConnect( GetLastError() );
         } // end if
 
         if ( 0 != ( uEventMask & os::CIpSocket::eAcceptEvent ) )
         {	m_uStatus = eStatusConnected;
-            OnAccept( m_is.GetLastError() );
+            OnAccept( GetLastError() );
         } // end if
         
         if ( 0 != ( uEventMask & os::CIpSocket::eOobEvent ) )
         {	m_uStatus = eStatusConnected;
-            OnOOB( m_is.GetLastError() );
+            OnOOB( GetLastError() );
         } // end if
 
         if ( 0 != ( uEventMask & os::CIpSocket::eQosEvent ) )
         {	m_uStatus = eStatusConnected;
-            OnQOS( m_is.GetLastError() );
+            OnQOS( GetLastError() );
         } // end if
 
         if ( 0 != ( uEventMask & os::CIpSocket::eGroupQosEvent ) )
         {	m_uStatus = eStatusConnected;
-            OnGroupQOS( m_is.GetLastError() );
+            OnGroupQOS( GetLastError() );
         } // end if
 
         if ( 0 != ( uEventMask & os::CIpSocket::eRoutingInterfaceChangeEvent ) )
         {	m_uStatus = eStatusConnected;
-            OnRoutingInterfaceChange( m_is.GetLastError() );
+            OnRoutingInterfaceChange( GetLastError() );
         } // end if
 
         if ( 0 != ( uEventMask & os::CIpSocket::eWriteEvent ) )
         {	m_uStatus = eStatusConnected;
-            OnWrite( m_is.GetLastError() );
+            OnWrite( GetLastError() );
         } // end if
 
         if ( 0 != ( uEventMask & os::CIpSocket::eReadEvent ) )
         {	m_uStatus = eStatusConnected;
-            OnRead( m_is.GetLastError() );
+            OnRead( GetLastError() );
         } // end if
 
         // Ensure close messages are last
         if ( 0 != ( uEventMask & os::CIpSocket::eCloseEvent ) )
         {	m_uStatus = eStatusDisconnected;
-            if ( !m_is.GetLastError() ) OnRead( 0 );
-            OnClose( m_is.GetLastError() );
+            if ( !GetLastError() ) OnRead( 0 );
+            OnClose( GetLastError() );
         } // end if
 
     } // end while
