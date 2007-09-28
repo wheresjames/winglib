@@ -41,8 +41,8 @@
 
 #define oexNULL						0
 
-#define oexTT( c, s )				( 1 == sizeof( c ) ? ( ( c* )s ) : ( ( c* )L##s ) )
-//#define oexTT( c, s )				( s )
+#define oexTT( c, s )				( 1 == sizeof( c ) ? ( ( c* )( s ) ) : ( ( c* )( L##s ) ) )
+#define oexTC( c, s )				( 1 == sizeof( c ) ? ( ( c )( s ) ) : ( ( c )( L##s ) ) )
 #define oexTTEXT( c, s )			oexTT( c, s )
 
 #ifdef _UNICODE

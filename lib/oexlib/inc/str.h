@@ -440,17 +440,23 @@ public:
     {   
         TStr &rStr = (TStr&)x_str;
 
-        // See if we're sharing the same memory
-        if ( rStr.m_mem.c_Ptr() == m_mem.c_Ptr() )
-            return oexTRUE;
-
         // Lengths must match
         if ( Length() != rStr.Length() )
             return oexFALSE;
 
+        // See if we're sharing the same memory
+        if ( rStr.m_mem.c_Ptr() == m_mem.c_Ptr() 
+             && rStr.m_uOffset == m_uOffset )
+            return oexTRUE;
+
         // I suppose we'll have to actually compare the strings
         return !Compare( rStr.m_mem.c_Ptr(), rStr.Length() );
     }
+
+    /// Compare to other object
+    oexBOOL operator != ( oexCONST TStr &x_str )
+    {   return !( *this == x_str ); }
+
 
     oexBOOL operator == ( oexCONST oexINT x_nVal )
     {   return ToInt() == x_nVal; }
@@ -469,6 +475,34 @@ public:
 
     oexBOOL operator == ( oexCONST oexDOUBLE x_dVal )
     {   return ToDouble() == x_dVal; }
+
+    oexBOOL operator != ( oexCONST oexINT x_nVal )
+    {   return ToInt() != x_nVal; }
+
+    oexBOOL operator != ( oexCONST oexUINT x_uVal )
+    {   return ToUInt() != x_uVal; }
+
+    oexBOOL operator != ( oexCONST oexLONG x_lVal )
+    {   return ToLong() != x_lVal; }
+
+    oexBOOL operator != ( oexCONST oexULONG x_ulVal )
+    {   return ToULong() != x_ulVal; }
+
+    oexBOOL operator != ( oexCONST oexFLOAT x_fVal )
+    {   return ToFloat() != x_fVal; }
+
+    oexBOOL operator != ( oexCONST oexDOUBLE x_dVal )
+    {   return ToDouble() != x_dVal; }
+
+    oexBOOL operator !()
+    {   oexBOOL b = ( !Length() 
+                      || ( *Ptr() >= oexTC( T, '0' ) 
+                           && *Ptr() <= oexTC( T, '9' )
+                           && !ToDouble()
+                         )
+                    );
+        return b;
+    }
 
 public:
 
@@ -660,7 +694,11 @@ public:
 public:
 
 	TStr& Set( oexCONST TStr &x_str )
-	{   Share( x_str );
+	{
+        // To share or not to share?
+        if ( *this != x_str )
+            Share( x_str );
+
 		return *this;
 	}
 
@@ -1462,11 +1500,11 @@ public:
 public:
 
     /// Concatinates two strings into a path
-    static TStr BuildPath( TStr x_sRoot, TStr x_sPath, oexTCHAR tSep = oexT( '/' ) )
+    static TStr BuildPath( TStr x_sRoot, TStr x_sPath, T tSep = oexTC( T, '/' ) )
     {   return x_sRoot.RTrim( oexTT( T, "\\/" ) ) << tSep << x_sPath.LTrim( oexTT( T, "\\/" ) ); }
 
     /// Concatinates two strings into a path
-    TStr& BuildPath( TStr x_sPath, oexTCHAR tSep = oexT( '/' ) )
+    TStr& BuildPath( TStr x_sPath, T tSep = oexTC( T, '/' ) )
     {   RTrim( oexTT( T, "\\/" ) );
         *this << tSep << x_sPath.LTrim( oexTT( T, "\\/" ) ); 
         return *this;

@@ -93,18 +93,25 @@ public:
     }
 
     /// Returns non-zero if the reply is ready
-    oexBOOL Wait( oexUINT x_uTimeout )
-    {   return m_ri.Ptr() && m_ri.Ptr()->evReady.Wait( x_uTimeout ); }
+    CReply& Wait( oexUINT x_uTimeout )
+    {
+        // Wait for reply if we have an object
+        if ( m_ri.Ptr() )
+            m_ri.Ptr()->evReady.Wait( x_uTimeout ); 
+
+        return *this;
+    }
 
     /// Returns non-zero if the reply is ready
-    oexBOOL IsReady()
-    {   return Wait( 0 ); }
+    oexBOOL IsDone()
+    {   return m_ri.Ptr() && m_ri.Ptr()->evReady.Wait( 0 ); 
+    }
 
     /// Returns the reply value
-    CStr GetReply()
+    CStr GetReply( oexCSTR x_pDef = oexT( "" ) )
     {
-        if ( !IsReady() )
-            return oexT( "" );
+        if ( !IsDone() )
+            return x_pDef;
 
         // Return the reply value
         return m_ri.Ptr()->sReturn;

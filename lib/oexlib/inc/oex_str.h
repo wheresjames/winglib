@@ -981,7 +981,7 @@ namespace guid
     }
 
     template< typename T_GUID1, typename T_GUID2 >
-        oexBOOL CmpGuid( T_GUID1 *pGuid1, oexCONST T_GUID2 *pGuid2 )
+        oexBOOL CmpGuid( oexCONST T_GUID1 *pGuid1, oexCONST T_GUID2 *pGuid2 )
     {
         oexVALIDATE_PTR( pGuid1 );
         oexVALIDATE_PTR( pGuid2 );

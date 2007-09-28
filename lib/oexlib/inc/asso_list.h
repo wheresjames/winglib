@@ -268,7 +268,7 @@ public:
 								    returned.
 	*/
 	template < typename T >
-		oexUINT GetKeySize( T &x_obj ) { return sizeof( T ); }
+		oexUINT GetKeySize( oexCONST T &x_obj ) { return sizeof( T ); }
 
 	//==============================================================
 	// GetKeySize()
@@ -283,10 +283,10 @@ public:
 		+++ I don't like having the reference to CStr here, so I really
 		should figure out another way.  Any suggestions?
 	*/
-	template <> oexUINT GetKeySize< CStrW >( CStrW &x_obj ) { return x_obj.LengthInBytes(); }
-	template <> oexUINT GetKeySize< CStr8 >( CStr8 &x_obj ) { return x_obj.LengthInBytes(); }
-	template <> oexUINT GetKeySize< CStr16 >( CStr16 &x_obj ) { return x_obj.LengthInBytes(); }
-	template <> oexUINT GetKeySize< CStr32 >( CStr32 &x_obj ) { return x_obj.LengthInBytes(); }
+	template <> oexUINT GetKeySize< CStrW >( oexCONST CStrW &x_obj ) { return ( (CStrW&)x_obj ).LengthInBytes(); }
+	template <> oexUINT GetKeySize< CStr8 >( oexCONST CStr8 &x_obj ) { return ( (CStr8&)x_obj ).LengthInBytes(); }
+	template <> oexUINT GetKeySize< CStr16 >( oexCONST CStr16 &x_obj ) { return ( (CStr16&)x_obj ).LengthInBytes(); }
+	template <> oexUINT GetKeySize< CStr32 >( oexCONST CStr32 &x_obj ) { return ( (CStr32&)x_obj ).LengthInBytes(); }
 
 	//==============================================================
 	// GetKeyPtr()
@@ -297,7 +297,7 @@ public:
 									returned.
 	*/
 	template < typename T >
-		oexPVOID GetKeyPtr( T *x_ptr ) { return (oexPVOID)x_ptr; }
+		oexPVOID GetKeyPtr( oexCONST T *x_ptr ) { return (oexPVOID)x_ptr; }
 
 	//==============================================================
 	// GetKeyPtr()
@@ -311,28 +311,28 @@ public:
 		
 		+++ It would be nice to eliminate the ref to CStr here.
 	*/
-	template <> oexPVOID GetKeyPtr< CStrW >( CStrW *x_ptr ) { return (oexPVOID)x_ptr->Ptr(); }
-	template <> oexPVOID GetKeyPtr< CStr8 >( CStr8 *x_ptr ) { return (oexPVOID)x_ptr->Ptr(); }
-	template <> oexPVOID GetKeyPtr< CStr16 >( CStr16 *x_ptr ) { return (oexPVOID)x_ptr->Ptr(); }
-	template <> oexPVOID GetKeyPtr< CStr32 >( CStr32 *x_ptr ) { return (oexPVOID)x_ptr->Ptr(); }
+	template <> oexPVOID GetKeyPtr< CStrW >( oexCONST CStrW *x_ptr ) { return (oexPVOID)( (CStrW*)x_ptr )->Ptr(); }
+	template <> oexPVOID GetKeyPtr< CStr8 >( oexCONST CStr8 *x_ptr ) { return (oexPVOID)( (CStr8*)x_ptr )->Ptr(); }
+	template <> oexPVOID GetKeyPtr< CStr16 >( oexCONST CStr16 *x_ptr ) { return (oexPVOID)( (CStr16*)x_ptr )->Ptr(); }
+	template <> oexPVOID GetKeyPtr< CStr32 >( oexCONST CStr32 *x_ptr ) { return (oexPVOID)( (CStr32*)x_ptr )->Ptr(); }
 
 	//==============================================================
 	// IsEqual()
 	//==============================================================
     /// Compares two keys
     template < typename T >
-        oexBOOL IsEqual( T &k1, T &k2 )
+        oexBOOL IsEqual( oexCONST T &k1,oexCONST T &k2 )
         {   return !os::CSys::MemCmp( &k1, &k2, sizeof( T_KEY ) );
         }
 
     /// Special overload for CStr
-    template <> oexBOOL IsEqual< CStrW >( CStrW &k1, CStrW &k2 ) { return k1 == k2; }
-    template <> oexBOOL IsEqual< CStr8 >( CStr8 &k1, CStr8 &k2 ) { return k1 == k2; }
-    template <> oexBOOL IsEqual< CStr16 >( CStr16 &k1, CStr16 &k2 ) { return k1 == k2; }
-    template <> oexBOOL IsEqual< CStr32 >( CStr32 &k1, CStr32 &k2 ) { return k1 == k2; }
+    template <> oexBOOL IsEqual< CStrW >( oexCONST CStrW &k1, oexCONST CStrW &k2 ) { return (CStrW&)k1 == (CStrW&)k2; }
+    template <> oexBOOL IsEqual< CStr8 >( oexCONST CStr8 &k1, oexCONST CStr8 &k2 ) { return (CStr8&)k1 == (CStr8&)k2; }
+    template <> oexBOOL IsEqual< CStr16 >( oexCONST CStr16 &k1, oexCONST CStr16 &k2 ) { return (CStr16&)k1 == (CStr16&)k2; }
+    template <> oexBOOL IsEqual< CStr32 >( oexCONST CStr32 &k1, oexCONST CStr32 &k2 ) { return (CStr32&)k1 == (CStr32&)k2; }
 
     /// Special overload for guid ( slightly faster than memcmp() )
-    template <> oexBOOL IsEqual< oexGUID >( oexGUID &k1, oexGUID &k2 ) { return guid::CmpGuid( &k1, &k2 ); }
+    template <> oexBOOL IsEqual< oexGUID >( oexCONST oexGUID &k1, oexCONST oexGUID &k2 ) { return guid::CmpGuid( &k1, &k2 ); }
 
 public:
 
@@ -497,7 +497,7 @@ public:
 	
 		\see 
 	*/
-	oexUINT GetIndex( T_KEY &x_key )
+	oexUINT GetIndex( oexCONST T_KEY &x_key )
 	{
 		if ( !m_uTableSize )
 			if ( !CreateTable() )
@@ -530,7 +530,7 @@ public:
 	
 		\see 
 	*/
-	iterator Get( T_KEY &x_key )
+	iterator Get( oexCONST T_KEY &x_key )
 	{
 		oexUINT i = GetIndex( x_key );
 
@@ -551,8 +551,7 @@ public:
 		// Set the key
 		it->Node()->key = x_key;
 
-		return it->Node();
-
+        return it->Node();
 	}
 
 	//==============================================================
@@ -579,7 +578,7 @@ public:
 	
 		\see 
 	*/
-	iterator Find( T_KEY &x_key )
+	iterator Find( oexCONST T_KEY &x_key )
 	{
 		if ( !Size() )
 			return iterator();
@@ -707,7 +706,7 @@ public:
 	
 		\see 
 	*/
-	iterator Unset( T_KEY x_key, oexBOOL x_bForward = oexTRUE )
+	iterator Unset( oexCONST T_KEY x_key, oexBOOL x_bForward = oexTRUE )
     {   iterator it = Find( x_key );
         if ( !it.IsValid() )
             return it;

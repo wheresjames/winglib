@@ -92,7 +92,7 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnRead( oexINT x_nErr ) { return oexFALSE; }
+	virtual oexBOOL OnRead( oexINT x_nErr ) { return oexTRUE; }
 
 	//==============================================================
 	// OnWrite()
@@ -103,7 +103,7 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnWrite( oexINT x_nErr ) { return oexFALSE; }
+	virtual oexBOOL OnWrite( oexINT x_nErr ) { return oexTRUE; }
 	
 	//==============================================================
 	// OnOOB()
@@ -114,7 +114,7 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnOOB( oexINT x_nErr ) { return oexFALSE; }
+	virtual oexBOOL OnOOB( oexINT x_nErr ) { return oexTRUE; }
 	
 	//==============================================================
 	// OnAccept()
@@ -127,7 +127,7 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnAccept( oexINT x_nErr ) { return oexFALSE; }
+	virtual oexBOOL OnAccept( oexINT x_nErr ) { return oexTRUE; }
 	
 	//==============================================================
 	// OnConnect()
@@ -138,7 +138,7 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnConnect( oexINT x_nErr ) { return oexFALSE; }
+	virtual oexBOOL OnConnect( oexINT x_nErr ) { return oexTRUE; }
 	
 	//==============================================================
 	// OnClose()
@@ -149,7 +149,7 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnClose( oexINT x_nErr ) { return oexFALSE; }
+	virtual oexBOOL OnClose( oexINT x_nErr ) { return oexTRUE; }
 	
 	//==============================================================
 	// OnQOS()
@@ -160,7 +160,7 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnQOS( oexINT x_nErr ) { return oexFALSE; }
+	virtual oexBOOL OnQOS( oexINT x_nErr ) { return oexTRUE; }
 	
 	//==============================================================
 	// OnGroupQOS()
@@ -171,7 +171,7 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnGroupQOS( oexINT x_nErr ) { return oexFALSE; }
+	virtual oexBOOL OnGroupQOS( oexINT x_nErr ) { return oexTRUE; }
 	
 	//==============================================================
 	// OnRoutingInterfaceChange()
@@ -182,7 +182,7 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnRoutingInterfaceChange( oexINT x_nErr ) { return oexFALSE; }
+	virtual oexBOOL OnRoutingInterfaceChange( oexINT x_nErr ) { return oexTRUE; }
 	
 	//==============================================================
 	// OnAddressListChange()
@@ -193,7 +193,7 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnAddressListChange( oexINT x_nErr ) { return oexFALSE; }
+	virtual oexBOOL OnAddressListChange( oexINT x_nErr ) { return oexTRUE; }
 	
 	//==============================================================
 	// OnError()
@@ -204,7 +204,7 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnError( oexUSHORT uwEvent ) { return oexFALSE; }
+	virtual oexBOOL OnError( oexUSHORT uwEvent ) { return oexTRUE; }
 
 public:
 
@@ -251,6 +251,8 @@ public:
         x_pDispatch->OexRpcRegister( os::CIpSocket, Shutdown );
         x_pDispatch->OexRpcRegister( os::CIpSocket, Bind );
         x_pDispatch->OexRpcRegister( os::CIpSocket, Listen );
+
+        x_pDispatch->OexRpcRegister( CAutoSocket, GetStatus );
     }
 
 private:

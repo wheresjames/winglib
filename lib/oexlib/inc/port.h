@@ -35,6 +35,156 @@
 #pragma once
 
 //==================================================================
+// TNetSession
+//
+/// Implements a data connection session
+/**
+
+    The T_PROTOCOL class MUST implement
+    
+    - void RegisterFunctions( CDispatch *x_pDispatch );
+        
+        Called to register protocol specific functions
+
+    - t_SOCKETEVENT GetEventHandle();
+
+        Should return a waitable event handle or NULL.        
+
+    - void ProcessEvents();
+
+        Called when the event handle returned by GetEventHandle() is set.
+
+    - void Destroy();
+
+        Free all resources
+
+
+    * If your T_PROTOCOL class inherits from CAutoSocket, these
+      functions will already be provided.
+
+  \code
+
+    // Example of a more or less minimal protocol.
+    class CEchoProtocol : 
+            public CProtocol,
+            public TBufferedPort< CAutoSocket >
+    {
+    public:
+
+        virtual oexBOOL OnRead( oexINT x_nErr ) 
+        {
+            // Process the incomming data
+            if ( !T_PORT::OnRead( x_nErr ) )
+                return oexFALSE;
+
+            // Just echo the data
+            Send( Recv() );
+            
+            return oexFALSE; 
+        }
+
+        /// Closes the session when the socket closes
+        virtual oexBOOL OnClose( oexINT x_nErr )
+        {   CloseSession();
+            return oexTRUE
+        }
+
+    };
+
+  \endcode
+
+*/
+//==================================================================
+template < typename T_PROTOCOL > 
+    class TNetSession : 
+        public os::CThread,
+        public CDispatch
+{
+public:
+
+	/// Default constructor
+	TNetSession()
+    {
+        // Register functions
+        m_cProtocol.RegisterFunctions( this );
+    }
+
+	/// Destructor
+	virtual ~TNetSession()
+    {   Stop();
+    }
+
+    /// Returns protocol pointer
+    T_PROTOCOL& Protocol()
+    {   return m_cProtocol;
+    }
+
+public:
+
+    /// Thread initialization
+	virtual oexBOOL InitThread( oexPVOID x_pData ) 
+    {
+        return oexTRUE; 
+    }
+
+    /// Thread main loop
+	virtual oexBOOL DoThread( oexPVOID x_pData ) 
+    {
+        // Get events
+        os::CSys::t_WAITABLE phEvents[] = 
+        {
+            // 0 == Quit thread
+            m_evQuit.GetHandle(),
+
+            // 1 == Command waiting
+            GetCmdEvent().GetHandle(),
+
+            // 2 == Port events
+            m_cProtocol.GetEventHandle()
+        };
+
+        // How many valid handles
+        oexUINT uHandles = oexSizeofArray( phEvents );
+
+        // Don't look at the port handle if invalid
+        if ( os::CEvent::vInvalid() == phEvents[ 2 ] )
+            uHandles--;
+
+        // Wait for something to happen
+        oexINT nRet = os::CSys::WaitForMultipleObjects( uHandles, phEvents, oexFALSE, os::CSys::vInfinite() );
+
+        // Time to quit?
+        if ( !nRet )
+            return oexFALSE;
+
+        // Messages in the queue?
+        else if ( 1 == nRet )
+            ProcessQueue();
+
+        // Port event
+        else if ( 2 == nRet )
+            m_cProtocol.ProcessEvents();
+
+        return oexTRUE; 
+    }
+
+    /// Thread shutdown
+	virtual oexINT EndThread( oexPVOID x_pData ) 
+    {
+        // Kill ther server
+        m_cProtocol.Destroy();
+
+        return 0; 
+    }
+
+private:
+
+    /// Protocol class
+    T_PROTOCOL              m_cProtocol;
+};
+
+
+//==================================================================
 // TNetServer
 //
 /// Implements a connection server
@@ -42,13 +192,25 @@
 
   \code
   
-    TNetServer< CIpPort, TNetSession< CMyProtocol > > server;
+    /// Example
+    TNetServer< CAutoPort, CMyProtocol > server;
+
+    // Start the server thread
+    server.Start();
+
+    // Interact with CAutoPort through the thread buffer, i.e. CDispatch
+    server.Queue( oexCall( oexT( "Bind" ), 80 ) );
+    CReply reply = server.Queue( oexCall( oexT( "Listen" ), 0 ) );
+
+    // Wait for listen to complete
+    if ( !reply.Wait( oexDEFAULT_TIMEOUT ).GetReply() )
+        ; // Error
 
   \endcode
 
 */
 //==================================================================
-template < typename T_PORT, typename T_SESSION > 
+template < typename T_PORT, typename T_PROTOCOL > 
     class TNetServer : 
         public os::CThread,
         public CDispatch,
@@ -57,7 +219,7 @@ template < typename T_PORT, typename T_SESSION >
 public:
 
     /// Session list type
-    typedef TAssoList< oexGUID, T_SESSION >     t_SessionList;
+    typedef TAssoList< oexGUID, TNetSession< T_PROTOCOL > >     t_SessionList;
 
     /// Session type
     typedef typename t_SessionList::iterator    t_Session;
@@ -67,8 +229,11 @@ public:
 	/// Default constructor
 	TNetServer()
     {
-        // Register server functions
+        // Register port functions
         T_PORT::RegisterFunctions( this );
+
+        // Register server functions
+        OexRpcRegister( TNetServer, CloseSession );
     }
 
 	/// Destructor
@@ -79,7 +244,7 @@ public:
     /// Destroys the network
     void Destroy()
     {
-        
+        os::CThread::Stop();
     }
 
 public:
@@ -164,7 +329,6 @@ public:
 
     } // end else
 
-
 public:
 
     /// Adds a session
@@ -182,7 +346,18 @@ public:
             x_pGuid = &guid;
         } // end if
 
-        return m_sessions.Get( *x_pGuid );
+        // Create the session
+        t_Session session = m_sessions.Get( *x_pGuid );
+
+        // Set dispatch obect
+        if ( !session.IsValid() )
+            return session;
+
+        // Set session information
+        session.Obj().Protocol().SetServerDispatch( this );
+        session.Obj().Protocol().SetSessionId( CStr().GuidToString( x_pGuid ) );
+
+        return session;
     }
 
     /// Adds a session
@@ -201,6 +376,34 @@ public:
         return m_sessions.Find( *x_pGuid );
     }
 
+    /// Adds a session
+    oexBOOL CloseSession( oexCSTR x_pId )
+    {
+        // Ensure we have a valid guid
+        if ( !x_pId || !*x_pId )
+            return oexFALSE;
+
+        // Lock the session list
+        CTlLocalLock ll( m_lockSession );
+        if ( !ll.IsLocked() )
+            return oexFALSE;
+
+        // Delete the session if it exists
+        oexGUID guid;
+        if ( CStr( x_pId ).StringToGuid( &guid ) )
+            m_sessions.Unset( guid );
+
+        return oexTRUE;
+    }
+
+    /// Session list
+    t_SessionList& GetSessionList()
+    {   return m_sessions; }
+
+    /// Lock for th session list
+    operator CTlLock&() 
+    {   return m_lockSession; }
+
 private:
 
     /// Session lock
@@ -211,119 +414,6 @@ private:
 
 };
 
-
-//==================================================================
-// TNetSession
-//
-/// Implements a data connection session
-/**
-
-  \code
-
-
-  \endcode
-
-*/
-//==================================================================
-template < typename T_PROTOCOL > 
-    class TNetSession : 
-        public os::CThread,
-        public CDispatch
-{
-public:
-
-	/// Default constructor
-	TNetSession()
-    {
-        // Register functions
-        m_cProtocol.RegisterFunctions( this );
-    }
-
-	/// Destructor
-	virtual ~TNetSession()
-    {   Stop();
-    }
-
-    /// Returns protocol pointer
-    T_PROTOCOL& Protocol()
-    {   return m_cProtocol;
-    }
-
-    /// Over-ride to provide message mapping
-    virtual oexBOOL OnMap( oexCSTR x_pId, CStr x_sCmd, CReply &x_rReply )
-    {
-        // Check for local message
-        if ( !x_pId || !*x_pId )
-            return oexFALSE;
-
-        // +++ Map to destination
-
-        return oexTRUE; 
-    }
-
-public:
-
-    /// Thread initialization
-	virtual oexBOOL InitThread( oexPVOID x_pData ) 
-    {
-        return oexTRUE; 
-    }
-
-    /// Thread main loop
-	virtual oexBOOL DoThread( oexPVOID x_pData ) 
-    {
-        // Get events
-        os::CSys::t_WAITABLE phEvents[] = 
-        {
-            // 0 == Quit thread
-            m_evQuit.GetHandle(),
-
-            // 1 == Command waiting
-            GetCmdEvent().GetHandle(),
-
-            // 2 == Port events
-            m_cProtocol.GetEventHandle()
-        };
-
-        // How many valid handles
-        oexUINT uHandles = oexSizeofArray( phEvents );
-
-        // Don't look at the port handle if invalid
-        if ( os::CEvent::vInvalid() == phEvents[ 2 ] )
-            uHandles--;
-
-        // Wait for something to happen
-        oexINT nRet = os::CSys::WaitForMultipleObjects( uHandles, phEvents, oexFALSE, os::CSys::vInfinite() );
-
-        // Time to quit?
-        if ( !nRet )
-            return oexFALSE;
-
-        // Messages in the queue?
-        else if ( 1 == nRet )
-            ProcessQueue();
-
-        // Port event
-        else if ( 2 == nRet )
-            m_cProtocol.ProcessEvents();
-
-        return oexTRUE; 
-    }
-
-    /// Thread shutdown
-	virtual oexINT EndThread( oexPVOID x_pData ) 
-    {
-        // Kill ther server
-        m_cProtocol.Destroy();
-
-        return 0; 
-    }
-
-private:
-
-    /// Protocol class
-    T_PROTOCOL              m_cProtocol;
-};
 
 /// Basic port class
 template < typename T_PORT, typename T_BUFFER = CCircBuf >
@@ -346,6 +436,10 @@ public:
     // When data is read
 	virtual oexBOOL OnRead( oexINT x_nErr )
     {
+        // Process the incomming data
+        if ( !T_PORT::OnRead( x_nErr ) )
+	        return oexFALSE;
+
         // Buffer the data
         return Rx().Write( Recv() );
     }
@@ -408,6 +502,60 @@ public:
 
 public:
 
+	//==============================================================
+	// Write()
+	//==============================================================
+	/// Writes data to buffer
+	/**
+		\param [in] x_pData		-	Buffer containing write data
+		\param [in] x_uSize		-	Size of the buffer in pData
+		
+		\return Non-zero if data was written to buffer
+	
+		\see 
+	*/
+	oexBOOL Write( oexCONST oexPVOID x_pData, oexUINT x_uSize )
+    {
+        // Buffer the data
+        if ( !m_tx.Write( x_pData, x_uSize ) )
+            return oexFALSE;
+
+        // Start the tx'er
+        OnTx( 0 );
+
+        return oexTRUE;
+    }
+
+	//==============================================================
+	// Write()
+	//==============================================================
+	/// Writes a NULL terminated string to buffer
+	/**
+		\param [in] x_pStr		-	Pointer to NULL terminated string
+		
+		\return Non-zero if data was written to buffer
+	
+		\see 
+	*/
+	oexBOOL Write( oexCSTR8 x_pStr )
+    {	return Write( (oexPVOID)x_pStr, zstr::Length( x_pStr ) ); }
+
+	//==============================================================
+	// Write()
+	//==============================================================
+	/// Writes a string to buffer
+	/**
+		\param [in] x_sStr		-	String to be sent
+		
+		\return Non-zero if data was written to buffer
+	
+		\see 
+	*/
+	oexBOOL Write( CStr8 &x_sStr )
+    {	return Write( (oexPVOID)x_sStr.Ptr(), x_sStr.Length() ); }
+
+public:
+
     /// Returns a reference to the rx buffer
     T_BUFFER& Rx() { return m_rx; }
 
@@ -427,25 +575,75 @@ private:
 
 };
 
+/// Inherit from this class to implement a network protocol
+class CProtocol
+{
+public:
+
+    /// Default constructor
+    CProtocol()
+    {   m_pDispatch = oexNULL; }
+
+    /// Returns a pointer to the server dispatch object
+    CDispatch* Server()
+    {   return m_pDispatch; }
+
+    /// Set dispatch object
+    void SetServerDispatch( CDispatch *pDispatch )
+    {   m_pDispatch = pDispatch; }
+
+    /// Sets the session id
+    void SetSessionId( CStr &sId )
+    {   m_sSessionId = sId; }
+
+    /// Returns the session id
+    CStr& GetSessionId()
+    {   return m_sSessionId; }
+
+    /// Closes the session
+    void CloseSession()
+    {
+        if ( m_pDispatch )
+            m_pDispatch->Queue( 0, oexCall( oexT( "CloseSession" ), m_sSessionId ) );
+    }
+
+private:
+
+    /// Pointer to server dispatch object
+    CDispatch           *m_pDispatch;
+
+    /// Session id
+    CStr                m_sSessionId;
+
+};
+
 
 /// Generic ip port
 template < typename T_PORT >
-    class TEchoProtocol : public T_PORT
+    class TEchoProtocol : 
+        public CProtocol,
+        public T_PORT
 {
 public:
 
 	virtual oexBOOL OnRead( oexINT x_nErr ) 
     {
-	    // Process the incomming data
-        T_PORT::OnRead( x_nErr );
+        // Process the incomming data
+        if ( !T_PORT::OnRead( x_nErr ) )
+	        return oexFALSE;
 
         // Just echo the data
         Send( Recv() );
         
-        return oexFALSE; 
+        return oexTRUE; 
     }
 
-private:
+    /// Closes the session when the socket closes
+	virtual oexBOOL OnClose( oexINT x_nErr )
+    {
+        CloseSession();
 
+        return oexTRUE;
+    }
 };
 

@@ -415,6 +415,15 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str2 == oexT( "World" ) ) )
 		return -12;
 
+    str2 = oexT( "  hello  " );
+    str2.TrimWhiteSpace();
+    if ( !oexVERIFY( str2 == oexT( "hello" ) ) )
+        return -13;
+
+    str2 = str2;
+    if ( !oexVERIFY( str2 == oexT( "hello" ) ) )
+        return -13;
+
 	// Shared version ( should break the share )
 	str2 = str1;
 	str2.Sub( 5, 6 );
@@ -1418,6 +1427,7 @@ oex::oexRESULT Test_CDispatch()
 {
     CCallbackClass cc;
 
+    // +++ Change "f=Add,p{0=1,1=2}" to "Add{0=1,1=2}"
     if ( !oexVERIFY( oexCall( oexT( "Add" ), 1, 2 ) == oexT( "f=Add,p{0=1,1=2}" ) ) )
         return -1;
 
@@ -1466,6 +1476,7 @@ public:
 
 };
 
+
 oex::oexRESULT Test_CThread()
 {
     CThreadTest tt;
@@ -1475,7 +1486,7 @@ oex::oexRESULT Test_CThread()
     
     oex::CReply reply( tt.Queue( oexNULL, oexCall( oexT( "Add" ), 1, 2 ) ) );
 
-    if ( !oexVERIFY( reply.Wait( 3000 ) ) )
+    if ( !oexVERIFY( reply.Wait( 3000 ).IsDone() ) )
         return -2;
 
     if ( !oexVERIFY( *reply == 3 ) )
@@ -1491,7 +1502,7 @@ oex::oexRESULT Test_CAutoSocket()
         return -1;
 
     // Create echo server
-    oex::TNetServer< oex::CAutoSocket, oex::TNetSession< oex::TEchoProtocol< oex::CAutoSocket > > > server;
+    oex::TNetServer< oex::CAutoSocket, oex::TEchoProtocol< oex::CAutoSocket > > server;
 
     // Start the server thread
     server.Start();
@@ -1499,7 +1510,7 @@ oex::oexRESULT Test_CAutoSocket()
     // Start the server
     server.Queue( oexNULL, oexCall( oexT( "Bind" ), 23456 ) );
     oex::CReply reply( server.Queue( oexNULL, oexCall( oexT( "Listen" ), 0 ) ) );
-    if ( !reply.Wait( oexDEFAULT_TIMEOUT ) )
+    if ( !reply.Wait( oexDEFAULT_TIMEOUT ).IsDone() )
         return -1;
 
     oex::os::CIpSocket client;
@@ -1529,24 +1540,38 @@ oex::oexRESULT Test_CAutoSocket()
     return oex::oexRES_OK;
 }
 
+
 oex::oexRESULT Test_CFtpSession()
 {
     if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
         return -1;
 
     // FTP server
-//    oex::TNetServer< oex::CAutoSocket, CFtpSession  > ftp_server;
+    oex::TNetServer< oex::CAutoSocket, oex::CFtpSession > ftp_server;
 
+    // Start the server
+    ftp_server.Start();
+    ftp_server.Queue( oexNULL, oexCall( oexT( "Bind" ), 21111 ) );
+    ftp_server.Queue( oexNULL, oexCall( oexT( "Listen" ), 0 ) );
+
+    // Wait for connection
+    while ( !ftp_server.GetSessionList().Size() )
+        oex::os::CSys::Sleep( 100 );
+
+    while ( ftp_server.GetSessionList().Size() )
+        oex::os::CSys::Sleep( 100 );
+
+    // Just wait forever
+//    oex::os::CSys::Sleep( 60 * 60 * 1000 );
 
     oex::os::CIpSocket::UninitSockets();
 
     return oex::oexRES_OK;
 }
 
-
 int main(int argc, char* argv[])
 {
-	// Initialize the oex library
+    // Initialize the oex library
 	oexINIT();
 
     TestAllocator();
@@ -1587,7 +1612,7 @@ int main(int argc, char* argv[])
 
     Test_CThread();
 
-    Test_CAutoSocket();
+//    Test_CAutoSocket();
 
     Test_CFtpSession();
 

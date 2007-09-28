@@ -152,7 +152,7 @@ public:
 	oexBOOL Init();
 
 	//==============================================================
-	// GetWriteView()
+	// WaitData()
 	//==============================================================
 	/// Waits for data to be written to the circular buffer
 	/**
@@ -163,6 +163,19 @@ public:
 		\see 
 	*/
 	oexBOOL WaitData( oexUINT x_uTimeout = os::CEvent::vInfinite() );
+
+	//==============================================================
+	// WaitEmpty()
+	//==============================================================
+	/// Waits for the buffer to become empty
+	/**
+		\param [in] x_uTimeout	-	Maximum number of milliseconds to wait for data. 
+		
+		\return Non-zero if data was received before timeout expired.
+	
+		\see 
+	*/
+	oexBOOL WaitEmpty( oexUINT x_uTimeout = os::CEvent::vInfinite() );
 
 	//==============================================================
 	// GetWriteView()
@@ -524,6 +537,11 @@ public:
 	*/
 	virtual oexBOOL Write( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT x_uEncode = 0 )
 	{	
+	    // Lock the buffer
+	    CTlLocalLock ll( &m_lock );
+	    if ( !ll.IsLocked() ) 
+            return oexFALSE;
+
         if ( m_bAutoGrow ) 
         {   
             if ( !m_pBi )
@@ -875,7 +893,10 @@ public:
 	/// Call this function to signal that data is ready to be read.
 	void DataReady() 
 	{	m_bEmpty = oexFALSE;
-		if ( m_hDataReady ) os::CEvent::osSetEvent( m_hDataReady ); 
+		if ( m_hDataReady )
+            os::CEvent::osSetEvent( m_hDataReady ); 
+		if ( m_hEmpty )
+            os::CEvent::osResetEvent( m_hEmpty ); 
 	}
 
 	//==============================================================
@@ -883,6 +904,12 @@ public:
 	//==============================================================
 	/// Returns the data ready event handle
     os::CSys::t_WAITABLE GetDataReadyHandle() { return m_hDataReady; }
+
+	//==============================================================
+	// GetEmptyHandle()
+	//==============================================================
+	/// Returns the buffer empty event handle
+    os::CSys::t_WAITABLE GetEmptyHandle() { return m_hEmpty; }
 
 	//==============================================================
 	// Empty()
@@ -901,7 +928,13 @@ public:
 
 		m_bEmpty = oexTRUE;
 		m_pBi->uWritePtr = m_pBi->uReadPtr = 0;
-		os::CEvent::osResetEvent( m_hDataReady );
+
+        if ( m_hDataReady )
+            os::CEvent::osResetEvent( m_hDataReady );
+
+		if ( m_hEmpty )
+            os::CEvent::osSetEvent( m_hEmpty ); 
+
 		return oexTRUE;
 	}
 
@@ -985,6 +1018,9 @@ private:
 
 	/// Data ready event
     os::CEvent::t_EVENT		m_hDataReady;
+
+	/// Data ready event
+    os::CEvent::t_EVENT		m_hEmpty;
 
 	/// Non-zero if buffer is empty
 	oexBOOL					m_bEmpty;

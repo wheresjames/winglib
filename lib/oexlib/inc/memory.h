@@ -233,7 +233,6 @@ public:
         // Lose file mapping if any
         if ( m_fm.Ptr() )
             m_fm.Destroy();
-
     }
 
     void Destruct()

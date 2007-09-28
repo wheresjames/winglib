@@ -86,7 +86,7 @@ http://www.networksorcery.com/enp/protocol/ftp.htm
 CFtpSession::CFtpSession()
 {
     // Passive mode
-    m_uPasvPort = 3110 + os::CHqTimer::GetBootCount() % 1000;
+    m_uPasvPort = 3110 + os::CHqTimer::GetBootCount() % 500;
 
     // Root folder
     m_sRoot = "c:/ftp";
@@ -95,7 +95,7 @@ CFtpSession::CFtpSession()
 oexBOOL CFtpSession::OnConnect( oexINT x_nErr ) 
 {
     // Send greetings
-    Tx().Write( "220 FTP Server Ready.\n" );
+    Write( "220 FTP Server Ready.\n" );
 
     return oexTRUE;
 }
@@ -103,7 +103,7 @@ oexBOOL CFtpSession::OnConnect( oexINT x_nErr )
 oexBOOL CFtpSession::OnRead( oexINT x_nErr )
 {
     // Process the incomming data
-    if ( !OnRead( x_nErr ) )
+    if ( !TBufferedPort::OnRead( x_nErr ) )
 	    return oexFALSE;
 
     // Grab the data
@@ -115,49 +115,49 @@ oexBOOL CFtpSession::OnRead( oexINT x_nErr )
     // USER
     if ( sCmd == "USER" )
     {   m_sUser = sData.ParseNextToken();
-        Tx().Write( CStr8( "331 Password required for " ) << m_sUser << ".\n" );
+        Write( CStr8( "331 Password required for " ) << m_sUser << ".\n" );
     } // end if
 
     // PASS
     else if ( sCmd == "PASS" )
-    {   m_sUser = sData.ParseNextToken();
-        Tx().Write( CStr8( "230 User \'" ) << m_sUser << "\' logged in at " << oexStrToStr8( CSysTime( 2 ).FormatTime( oexT( "GMT : %Y/%c/%d - %g:%m:%s.%l" ) ) ) << ".\n" );
+    {   m_sPassword = sData.ParseNextToken();
+        Write( CStr8( "230 User \'" ) << m_sUser << "\' logged in at " << oexStrToStr8( CSysTime( 2 ).FormatTime( oexT( "GMT : %Y/%c/%d - %g:%m:%s.%l" ) ) ) << ".\n" );
     } // end else if
 
     // SYST
     else if ( sCmd == "SYST" )
-        Tx().Write( "215 Windows_NT\n" );
+        Write( "215 Windows_NT\n" );
 
     // PWD
     else if ( sCmd == "PWD" )
     {   if ( !m_sCurrent.Length() ) m_sCurrent = "/";
-        Tx().Write( CStr8( "257 \"" ) << m_sCurrent << "\" is current directory.\n" );
+        Write( CStr8( "257 \"" ) << m_sCurrent << "\" is current directory.\n" );
     } // end else if
 
     // CWD
     else if ( sCmd == "CWD" )
-    {   sData = sData.TrimWhiteSpace();        
+    {   sData.TrimWhiteSpace();        
         if ( *sData != '/' && *sData != '\\' )
             sData = CStr8::BuildPath( m_sCurrent, sData );
         if ( CFile::Exists( oexStr8ToStrPtr( CStr8::BuildPath( m_sRoot, sData ) ) ) )
             m_sCurrent = sData;
-        Tx().Write( "250 CWD command successful.\n" );
+        Write( "250 CWD command successful.\n" );
     } // end else if
 
     // CDUP
     else if ( sCmd == "CDUP" )
     {   m_sCurrent.RParse( "/\\" );
-        Tx().Write( "250 CDUP command successful.\n" );
+        Write( "250 CDUP command successful.\n" );
     } // end else if
 
     // NOOP
     else if ( sCmd == "NOOP" )
-        Tx().Write( "200 Ok.\n" );
+        Write( "200 Ok.\n" );
 
     // NOOP
     else if ( sCmd == "REST" )
-    {   m_asData.Destroy();
-        Tx().Write( "200 Ok.\n" );
+    {   m_nsData.Destroy();
+        Write( "200 Ok.\n" );
     } // end else if
 
     // PASV
@@ -167,7 +167,7 @@ oexBOOL CFtpSession::OnRead( oexINT x_nErr )
     // TYPE
     else if ( sCmd == "TYPE" )
     {   m_sType = sData.ParseNextToken();
-        Tx().Write( CStr8( "200 Type set to " ) << m_sType << ".\n" );
+        Write( CStr8( "200 Type set to " ) << m_sType << ".\n" );
     } // end else if
 
     // LIST
@@ -187,123 +187,157 @@ oexBOOL CFtpSession::OnRead( oexINT x_nErr )
     {   sData = CStr8::BuildPath( CurrentPath(), sData.TrimWhiteSpace() );
         if ( CFile::Exists( oexStr8ToStrPtr( sData ) ) )
             CFile::Delete( oexStr8ToStrPtr( sData ) );
-        Tx().Write( "250 DELE command successful.\n" );
+        Write( "250 DELE command successful.\n" );
     } // end if
 
     // QUIT
     else if ( sCmd == "QUIT" )
-    {   Tx().Write( "221 Goodbye.\n" );
-        Destroy();
+    {   Write( "221 Goodbye.\n" );        
+        CloseSession();
     }
 
     // Error...
     else
-        Tx().Write( CStr8( "500 \'" ) << sCmd << "\': Huh?\n" );
+        Write( CStr8( "500 \'" ) << sCmd << "\': Huh?\n" );
 
     return oexTRUE;
 }
 
 oexBOOL CFtpSession::CmdPasv()
 {   
-/*
-    // See if the server is running already
-    if ( !m_asData.IsConnected() && !m_asData.IsConnecting() )
+    oexBOOL bStarted = oexFALSE;
+
+    // Loop through port numbers
+    if ( m_uPasvPort >= 3900 )
+        m_uPasvPort = 3110;
+
+    while ( m_uPasvPort < 4000 && !bStarted )
     {
-        // Kill port
-        m_asData.Destroy();
+        // Next port
+        m_uPasvPort++;
 
-        // Loop through port numbers
-        if ( m_uPasvPort >= 4000 )
-            m_uPasvPort = 3110;
+        /// +++ Should only need to start the thread if it's not running.
+        ///     Doesn't work though, because the socket won't re-establish.
 
-        // +++
+        // Reset the port
+        m_nsData.Destroy();
+        m_nsData.Start();
 
-        // Attempt to start a server somewhere
-//        while ( m_uPasvPort < 4000 && !m_asData.StartServer( m_uPasvPort ) )
-//                m_uPasvPort++;
+//            if ( !m_nsData.IsRunning() )
+//               m_nsData.Start();
 
-    } // end if
+        // Bind to port
+        m_nsData.Queue( 0, oexCall( oexT( "Bind" ), m_uPasvPort ) );
 
+        // Start the server listening
+        if ( m_nsData.Queue( 0, oexCall( oexT( "Listen" ), 0 ) ).Wait( oexDEFAULT_TIMEOUT ).GetReply().ToInt() )
+            bStarted = oexTRUE;
+
+    } // end while
+        
     // Did we get a server?
-    if ( m_asData.IsConnected() || m_asData.IsConnecting() )
+    if ( bStarted )
     {
-        // Ensure the server gets on it's feet
-        if ( !m_asData.WaitListen() )
-        {   Tx().Write( oexT( "425 Error creating server.\n" ) );
-            return oexFALSE;
-        } // end if
-
-        CStr sAddress = GetSocket()->LocalAddress().GetDotAddress().Replace( '.', ',' );
-        Tx().Write( CStr8().Fmt( "227 Entering Passive Mode (%s,%lu,%lu).\n", 
+        // Tell the client where the server is
+        CStr8 sAddress = oexStrToStr8( LocalAddress().GetDotAddress().Replace( '.', ',' ) );
+        Write( CStr8().Fmt( "227 Entering Passive Mode (%s,%lu,%lu).\n", 
                             sAddress.Ptr(), m_uPasvPort >> 8 & 0xff, m_uPasvPort & 0xff ) );
     } // end if
+        
+    else
+        Write( "425 Error creating server.\n" );
 
-    else Tx().Write( "425 Error creating server.\n" );
-*/
     return oexTRUE;
 }
-/*
-TAutoServer< CFtpDataConnection >::t_SessionList::iterator CFtpSession::GetPassiveConnection()
+
+CFtpSession::t_FtpDataConnection::t_Session CFtpSession::GetPassiveConnection()
 {
+    CTlLocalLock ll( m_nsData );
+    if ( !ll.IsLocked() )
+    {   Write( "425 Failed to acquire lock.\n" );
+        return t_FtpDataConnection::t_Session();
+    } // end if
+
     // Get the first session in the list
-    TAutoServer< CFtpDataConnection >::t_SessionList::iterator it = 
-        m_asData.SessionList().First();
+    t_FtpDataConnection::t_Session session = 
+        m_nsData.GetSessionList().First();
 
     // Wait for client to connect
-    if ( !it.IsValid() )
+    if ( !session.IsValid() )
     {
-        Tx().Write( "150 Waiting connection...\n" );
+        Write( "150 Waiting connection...\n" );
 
         os::CHqTimer to( oexTRUE );
-        while ( 8 > to.ElapsedSeconds() && !it.IsValid() )
+        while ( 8 > to.ElapsedSeconds() && !session.IsValid() )
         {   os::CSys::Sleep( 15 );
-            it = m_asData.SessionList().First();
+            session = m_nsData.GetSessionList().First();
         } // end while
 
     } // end if
-    else Tx().Write( "125 Data connection already open; Transfer starting.\n" );
+
+    else 
+        Write( "125 Data connection already open; Transfer starting.\n" );
 
     // Did we get a connection?
-    if ( !it.IsValid() )
-        Tx().Write( "426 Timed out, I never heard from you!\n" );
+    if ( !session.IsValid() )
+        Write( "426 Timed out, I never heard from you!\n" );
 
-    return it;
+    return session;
 }
-*/
+
 oexBOOL CFtpSession::CmdList()
 {       
-/*    TAutoServer< CFtpDataConnection >::t_SessionList::iterator it = GetPassiveConnection();
-    if ( !it.IsValid() ) return oexFALSE;
+    CTlLocalLock ll( m_nsData );
+    if ( !ll.IsLocked() )
+    {   Write( "425 Failed to acquire lock.\n" );
+        return oexFALSE;
+    } // end if
 
-    CStr sStr;
+    // Get connection
+    t_FtpDataConnection::t_Session session = 
+        GetPassiveConnection();
+
+    if ( !session.IsValid() )
+        return oexFALSE;
+
+    CStr8 sStr;
    	CFindFiles ff;
 
     // Build file list
-    if ( ff.FindFirst( CurrentPath().Ptr() ) )
+    if ( ff.FindFirst( oexStr8ToStrPtr( CurrentPath() ) ) )
     {
         do
         {
             // Format file information
-            sStr << CStr8().Fmt( "%crwxrwxrwx    1 user     group %lu %s %s\n",
+            sStr << CStr8().Fmt(  "%crwxrwxrwx    1 user     group %lu %s %s\n",
                                   ( ff.GetFileAttributes() & os::CBaseFile::eFileAttribDirectory ) ? 'd' : '-',
                                   (oexUINT)ff.FileData().llSize,
-                                  oexStrToStr8( CSysTime( CSysTime::eFmtFile, ff.FileData().ftLastModified )
-                                    .FormatTime( oexT( "%b %d %Y" ) ) ).Ptr(),
-                                  ff.GetFileName().Ptr() );
+                                  oexStrToStr8Ptr( 
+                                    CSysTime( CSysTime::eFmtFile, ff.FileData().ftLastModified ).
+                                        FormatTime( oexT( "%b %d %Y" ) ) 
+                                    ),
+                                  oexStrToStr8Ptr( ff.GetFileName() ) );
 
         } while ( ff.FindNext() );
 
         // Write the file list to client
-        it->Protocol()->Write( sStr );
+        session->Protocol().Write( sStr );
 
     } // end if
 
-    // Close the passive connection
-    it->Close( 1000 );
+    // Wait for the data to go out
+    oexBOOL bWritten = session->Protocol().Tx().WaitEmpty( oexDEFAULT_TIMEOUT );
+
+    // Lose the session
+    m_nsData.GetSessionList().Erase( session );
 
     // All done
-    Tx().Write( "226 Transfer complete.\n" );
-*/
+    if ( bWritten ) 
+        Write( "226 Transfer complete.\n" );
+
+    else
+        Write( "426 Timed out, I'm tired of waiting for the data to go out\n" );
+
     return oexTRUE;
 }
 
@@ -311,7 +345,7 @@ oexBOOL CFtpSession::CmdRetr( oexCSTR8 x_pFile )
 {       
     CFile f;
     if ( !f.OpenExisting( oexStr8ToStrPtr( CStr8::BuildPath( CurrentPath(), x_pFile ) ) ).IsOpen() )
-    {   Tx().Write( "451 Requested file action aborted; local error in processing.\n" );
+    {   Write( "451 Requested file action aborted; local error in processing.\n" );
         return oexTRUE;
     } // end if
 /*
@@ -326,7 +360,7 @@ oexBOOL CFtpSession::CmdRetr( oexCSTR8 x_pFile )
     it->Close( 1000 );
 
     // All done
-    Tx().Write( "226 Transfer complete.\n" );
+    Write( "226 Transfer complete.\n" );
 */
     return oexTRUE;
 }
@@ -338,12 +372,12 @@ oexBOOL CFtpSession::CmdStor( oexCSTR8 x_pFile )
 
     // Open the data file
     if ( !it->Protocol()->m_fData.CreateAlways( CFile::BuildPath( CurrentPath(), x_pFile ).Ptr() ).IsOpen() )
-    {   Tx().Write( "451 Requested file action aborted; local error in processing.\n" );
+    {   Write( "451 Requested file action aborted; local error in processing.\n" );
         return oexTRUE;
     } // end if
     
     // All done
-    Tx().Write( "226 Transfer complete.\n" );
+    Write( "226 Transfer complete.\n" );
 */
     return oexTRUE;
 }

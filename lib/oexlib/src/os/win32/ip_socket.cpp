@@ -448,7 +448,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
         // What's the event state
         if ( 0 == ( m_uEventState & x_lEventId ) )
         {
-//            if ( x_uTimeout )
+            if ( x_uTimeout )
             {
 		        // Wait for event
 		        UINT uRet = WaitForSingleObject( m_hSocketEvent, x_uTimeout );

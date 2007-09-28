@@ -42,7 +42,9 @@
 /**
 */
 //==================================================================
-class CFtpDataConnection : public TBufferedPort< CAutoSocket >
+class CFtpDataConnection : 
+    public CProtocol,
+    public TBufferedPort< CAutoSocket >
 {
 public:
 
@@ -70,6 +72,23 @@ public:
 	    return oexTRUE;
     }
 
+	//==============================================================
+	// OnClose()
+	//==============================================================
+	/// Called when socket connection has been closed or aborted.
+	/**
+		\param [in] nErr	-	Zero if no error, otherwise socket error value.
+
+		\return Return non-zero if handled
+	*/
+	virtual oexBOOL OnClose( oexINT x_nErr )
+    {   CloseSession();
+        return oexTRUE;
+    }
+
+private:
+
+    /// Disk file
     CFile           m_fData;
 };
 
@@ -82,8 +101,15 @@ public:
 
 */
 //==================================================================
-class CFtpSession : public TBufferedPort< CAutoSocket >
+class CFtpSession : 
+    public CProtocol,
+    public TBufferedPort< CAutoSocket >
 {
+public:
+
+    /// FTP data connection
+    typedef TNetServer< oex::CAutoSocket, CFtpDataConnection > t_FtpDataConnection;
+
 public:
 	
     /// Constructor
@@ -118,11 +144,25 @@ public:
 	*/
     virtual oexBOOL OnConnect( oexINT x_nErr );
 
+	//==============================================================
+	// OnClose()
+	//==============================================================
+	/// Called when socket connection has been closed or aborted.
+	/**
+		\param [in] nErr	-	Zero if no error, otherwise socket error value.
+
+		\return Return non-zero if handled
+	*/
+	virtual oexBOOL OnClose( oexINT x_nErr )
+    {   CloseSession();
+        return oexTRUE;
+    }
+
     /// Returns a reference to the users list
     CStrList& GetUserList() { return m_lstUsers; }
 
     /// Creates a passive connection
-//    TAutoServer< CFtpDataConnection >::t_SessionList::iterator GetPassiveConnection();
+    t_FtpDataConnection::t_Session GetPassiveConnection();
 
     /// Sends file list
     oexBOOL CmdList();
@@ -152,27 +192,27 @@ public:
 private:
 
     /// Root folder
-    CStr8                                m_sRoot;
+    CStr8                               m_sRoot;
 
     /// Current folder
-    CStr8                                m_sCurrent;
+    CStr8                               m_sCurrent;
 
     /// User list
     CStrList                            m_lstUsers;
 
     /// Currently logged in user
-    CStr8                                m_sUser;
+    CStr8                               m_sUser;
 
     /// Current users password string
-    CStr8                                m_sPassword;
+    CStr8                               m_sPassword;
 
     /// Transfer type
-    CStr8                                m_sType;
+    CStr8                               m_sType;
 
     /// Passive FTP port
     oexUINT                             m_uPasvPort;
     
     /// Server for passive mode
-    CFtpDataConnection                  m_asData;
+    t_FtpDataConnection                 m_nsData;
 };
 

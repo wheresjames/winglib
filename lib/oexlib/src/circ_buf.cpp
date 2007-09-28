@@ -54,9 +54,13 @@ CCircBuf::CCircBuf( oexBOOL x_bSync, oexUINT x_uSize, oexBOOL x_bAutoGrow )
     m_uPokePtr = 0;
 
 	if ( x_bSync ) 
-        m_hDataReady = os::CEvent::osCreateEvent( oexNULL, oexTRUE );
+    {   m_hDataReady = os::CEvent::osCreateEvent( oexNULL, oexTRUE );
+        m_hEmpty = os::CEvent::osCreateEvent( oexNULL, oexTRUE );
+    } // end if
 	else 
-        m_hDataReady = oexNULL;
+    {   m_hDataReady = oexNULL;
+        m_hEmpty = oexNULL;
+    } // end else
 
 	if ( x_uSize ) 
         Allocate( x_uSize );
@@ -369,12 +373,20 @@ oexBOOL CCircBuf::Write( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT *x_puPtr, o
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 
-    if ( !m_pBi )
-        return oexFALSE;
-
 	// Just ignore a NULL write
 	if ( x_uSize == 0 ) 
         return oexTRUE;
+
+    // Attempt to allocate space if none
+    if ( !m_pBi )
+    {
+        if ( !Allocate( x_uSize ) )
+            return oexFALSE;
+
+        if ( !m_pBi )
+            return oexFALSE;
+
+    } // end if
 
 	// Where to start?
 	oexUINT uPtr = NormalizePtr( x_puPtr ? *x_puPtr : 0, m_uSize );
@@ -393,7 +405,8 @@ oexBOOL CCircBuf::Write( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT *x_puPtr, o
 		os::CSys::MemCpy( pView, &( (oexUCHAR*)x_pvBuf )[ uWritten ], uView );
 
 		// Encode if needed
-		if ( x_uEncode ) OnEncode( x_uEncode, i, pView, uView );
+		if ( x_uEncode ) 
+            OnEncode( x_uEncode, i, pView, uView );
 
 		// For inspecting the actual Write data
 		OnInspectWrite( i, pView, uView );
@@ -406,9 +419,9 @@ oexBOOL CCircBuf::Write( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT *x_puPtr, o
 
 	} // end while
 
-
 	// Update the pointer if required
-	if ( x_puPtr ) *x_puPtr = AdvancePtr( uPtr, x_uSize, m_uSize );
+	if ( x_puPtr ) 
+        *x_puPtr = AdvancePtr( uPtr, x_uSize, m_uSize );
 
 	return oexTRUE;
 }
@@ -624,6 +637,15 @@ oexBOOL CCircBuf::WaitData(oexUINT x_uTimeout)
 {
 	// Wait for data
 	if ( os::CSys::waitSuccess != os::CSys::WaitForSingleObject( m_hDataReady, x_uTimeout ) )
+		return oexFALSE;
+
+	return oexTRUE;
+}
+
+oexBOOL CCircBuf::WaitEmpty(oexUINT x_uTimeout)
+{
+	// Wait for data
+	if ( os::CSys::waitSuccess != os::CSys::WaitForSingleObject( m_hEmpty, x_uTimeout ) )
 		return oexFALSE;
 
 	return oexTRUE;
