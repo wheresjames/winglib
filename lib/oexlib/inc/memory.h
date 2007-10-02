@@ -122,7 +122,7 @@ public:
     /// Copy operator
     TMem& operator = ( oexCONST T &x_rObj )
     {
-        Construct();
+        OexConstruct();
 
         if ( Ptr() )
             *Ptr() = x_rObj;

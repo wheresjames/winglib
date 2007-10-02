@@ -92,7 +92,8 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnRead( oexINT x_nErr ) { return oexTRUE; }
+	virtual oexBOOL OnRead( oexINT x_nErr ) 
+    {   return oexTRUE; }
 
 	//==============================================================
 	// OnWrite()
@@ -103,7 +104,8 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnWrite( oexINT x_nErr ) { return oexTRUE; }
+	virtual oexBOOL OnWrite( oexINT x_nErr ) 
+    {   return oexTRUE; }
 	
 	//==============================================================
 	// OnOOB()
@@ -114,7 +116,8 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnOOB( oexINT x_nErr ) { return oexTRUE; }
+	virtual oexBOOL OnOOB( oexINT x_nErr ) 
+    {   return oexTRUE; }
 	
 	//==============================================================
 	// OnAccept()
@@ -127,7 +130,8 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnAccept( oexINT x_nErr ) { return oexTRUE; }
+	virtual oexBOOL OnAccept( oexINT x_nErr ) 
+    {   return oexTRUE; }
 	
 	//==============================================================
 	// OnConnect()
@@ -138,7 +142,8 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnConnect( oexINT x_nErr ) { return oexTRUE; }
+	virtual oexBOOL OnConnect( oexINT x_nErr ) 
+    {   return oexTRUE; }
 	
 	//==============================================================
 	// OnClose()
@@ -149,7 +154,8 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnClose( oexINT x_nErr ) { return oexTRUE; }
+	virtual oexBOOL OnClose( oexINT x_nErr ) 
+    {   return oexTRUE; }
 	
 	//==============================================================
 	// OnQOS()
@@ -160,7 +166,8 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnQOS( oexINT x_nErr ) { return oexTRUE; }
+	virtual oexBOOL OnQOS( oexINT x_nErr ) 
+    {   return oexTRUE; }
 	
 	//==============================================================
 	// OnGroupQOS()
@@ -171,7 +178,8 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnGroupQOS( oexINT x_nErr ) { return oexTRUE; }
+	virtual oexBOOL OnGroupQOS( oexINT x_nErr ) 
+    {   return oexTRUE; }
 	
 	//==============================================================
 	// OnRoutingInterfaceChange()
@@ -182,7 +190,8 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnRoutingInterfaceChange( oexINT x_nErr ) { return oexTRUE; }
+	virtual oexBOOL OnRoutingInterfaceChange( oexINT x_nErr ) 
+    {   return oexTRUE; }
 	
 	//==============================================================
 	// OnAddressListChange()
@@ -193,7 +202,8 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnAddressListChange( oexINT x_nErr ) { return oexTRUE; }
+	virtual oexBOOL OnAddressListChange( oexINT x_nErr ) 
+    {   return oexTRUE; }
 	
 	//==============================================================
 	// OnError()
@@ -204,7 +214,8 @@ protected:
 
 		\return Return non-zero if handled
 	*/
-	virtual oexBOOL OnError( oexUSHORT uwEvent ) { return oexTRUE; }
+	virtual oexBOOL OnError( oexUSHORT uwEvent ) 
+    {   return oexTRUE; }
 
 public:
 
@@ -212,19 +223,22 @@ public:
 	// GetStatus()
 	//==============================================================
 	/// Gets the socket connection status
-	oexUINT GetStatus() { return m_uStatus; }
+	oexUINT GetStatus() 
+    {   return m_uStatus; }
 
 	//==============================================================
 	// IsConnected()
 	//==============================================================
 	/// Returns non-zero if the socket is connected
-	oexBOOL IsConnected() { return eStatusConnected == m_uStatus; }
+	oexBOOL IsConnected() 
+    {   return eStatusConnected == m_uStatus; }
 
 	//==============================================================
 	// IsConnecting()
 	//==============================================================
 	/// Returns non-zero if the socket is connecting
-	oexBOOL IsConnecting() { return eStatusConnecting == m_uStatus; }
+	oexBOOL IsConnecting() 
+    {   return eStatusConnecting == m_uStatus; }
 
 public:
 
@@ -240,7 +254,7 @@ public:
 	// RegisterFunctions()
 	//==============================================================
 	/// Registers public functions
-    void RegisterFunctions( CDispatch *x_pDispatch )
+    virtual void RegisterFunctions( CDispatch *x_pDispatch )
     {
         // Sanity check
         if ( !x_pDispatch )

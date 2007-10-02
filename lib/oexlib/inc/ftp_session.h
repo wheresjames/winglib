@@ -43,8 +43,8 @@
 */
 //==================================================================
 class CFtpDataConnection : 
-    public CProtocol,
-    public TBufferedPort< CAutoSocket >
+    public TBufferedPort< CAutoSocket >,
+    public CProtocol
 {
 public:
 
@@ -86,6 +86,28 @@ public:
         return oexTRUE;
     }
 
+    virtual void OnRegisterFunctions( CDispatch *x_pDispatch )
+    {
+        if ( !x_pDispatch )
+            return;
+
+        // Call the base class
+        CProtocol::OnRegisterFunctions( x_pDispatch );
+
+        // Export functions
+        x_pDispatch->OexRpcRegister( CFtpDataConnection, WriteStr );
+        x_pDispatch->OexRpcRegister( CFtpDataConnection, WaitTxEmpty );
+    }
+
+    /// Exported Function
+	oexBOOL WriteStr( CStr8 x_sStr )
+    {	return Write( (oexPVOID)x_sStr.Ptr(), x_sStr.Length() ); }
+
+    /// Returns non-zero if the tx'er is empty
+    oexBOOL WaitTxEmpty( oexUINT x_uTimeout )
+    {   return Tx().WaitEmpty( x_uTimeout ); }
+
+
 private:
 
     /// Disk file
@@ -102,8 +124,8 @@ private:
 */
 //==================================================================
 class CFtpSession : 
-    public CProtocol,
-    public TBufferedPort< CAutoSocket >
+    public TBufferedPort< CAutoSocket >,
+    public CProtocol
 {
 public:
 
@@ -159,10 +181,11 @@ public:
     }
 
     /// Returns a reference to the users list
-    CStrList& GetUserList() { return m_lstUsers; }
+    CStrList& GetUserList() 
+    {   return m_lstUsers; }
 
     /// Creates a passive connection
-    t_FtpDataConnection::t_Session GetPassiveConnection();
+    CDispatch GetPassiveConnection();
 
     /// Sends file list
     oexBOOL CmdList();

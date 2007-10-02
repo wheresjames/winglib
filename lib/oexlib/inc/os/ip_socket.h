@@ -235,7 +235,8 @@ public:
 	// IsInitialized()
 	//==============================================================
 	/// Returns non-zero if the Socket API was successfully initialized.
-	static oexBOOL IsInitialized() { return ( m_lInit == 0 ); }
+	static oexBOOL IsInitialized() 
+    {   return ( m_lInit == 0 ); }
 
 public:
 	
@@ -254,19 +255,22 @@ public:
 	// Detach()
 	//==============================================================
 	/// Detaches from existing socket handle without releasing it.
-	void Detach() { m_hSocket = c_InvalidSocket; }
+	void Detach() 
+    {   m_hSocket = c_InvalidSocket; }
 	
 	//==============================================================
 	// IsSocket()
 	//==============================================================
 	/// Returns non-zero if the class contains a valid socket handle
-	oexBOOL IsSocket() { return ( m_hSocket != c_InvalidSocket ); }
+	oexBOOL IsSocket() 
+    {   return ( m_hSocket != c_InvalidSocket ); }
 					 
 	//==============================================================
 	// GetSocketHandle()
 	//==============================================================
 	/// Returns a handle to the socket
-	t_SOCKET GetSocketHandle() { return m_hSocket; }
+	t_SOCKET GetSocketHandle() 
+    {   return m_hSocket; }
 
 	//==============================================================
 	// Create()
@@ -287,7 +291,8 @@ public:
 	// GetLastError()
 	//==============================================================
 	/// Returns the most recent error code
-	oexUINT GetLastError() { return m_uLastError; }
+	oexUINT GetLastError() 
+    {   return m_uLastError; }
 
 	//==============================================================
 	// GetErrorMsg()
@@ -405,13 +410,15 @@ public:
 	// GetEventHandle()
 	//==============================================================
 	/// Retuns the current event handle
-	t_SOCKETEVENT GetEventHandle() { return m_hSocketEvent; }
+	t_SOCKETEVENT GetEventHandle() 
+    {   return m_hSocketEvent; }
 
 	//==============================================================
 	// IsEventHandle()
 	//==============================================================
 	/// Returns non-zero if there is a valid event handle
-    oexBOOL IsEventHandle() { return vInvalidEvent() != GetEventHandle() ? oexTRUE : oexFALSE; }
+    oexBOOL IsEventHandle() 
+    {   return vInvalidEvent() != GetEventHandle() ? oexTRUE : oexFALSE; }
 
 	//==============================================================
 	// CreateEventHandle()
@@ -440,7 +447,7 @@ public:
 	
 		\see 
 	*/
-	oexUINT WaitEvent( oexLONG x_lEventId = ~0, oexUINT x_uTimeout = ~0 );
+	oexUINT WaitEvent( oexLONG x_lEventId = ~0, oexUINT x_uTimeout = oexDEFAULT_TIMEOUT );
 
 	//==============================================================
 	// GetEventBit()

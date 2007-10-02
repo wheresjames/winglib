@@ -62,8 +62,6 @@ oexSTATIC_ASSERT( sizeof( GUID ) == sizeof( oexGUID ) );
 
 oexSTATIC_ASSERT( sizeof( CSys::t_WAITABLE ) == sizeof( HANDLE ) );
 
-oexSTATIC_ASSERT( !( sizeof( oexGUID ) % sizeof( oexUCHAR ) ) );
-
 const oexUINT		CSys::c_StrErr_OK = S_OK;
 
 #if ( _MSC_VER >= 1300 )
@@ -97,16 +95,7 @@ oexCSTR8 CSys::StrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, ... )
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
 oexCSTR8 CSys::vStrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, oexCPVOID x_pArgs )
 {
-	// Verify data pointers
-	if ( !oexVERIFY_PTR( x_pDst ) || !oexVERIFY_PTR( x_pFmt ) )
-		return x_pDst;
-
-	vStrFmt( oexNULL, x_pDst, x_uMax, x_pFmt, x_pArgs );
-
-//	// Create format string
-//	oexASSERT( S_OK == StringCchVPrintf( pDst, uMax, pFmt, (va_list)pArgs ) );
-
-	return x_pDst;
+	return vStrFmt( oexNULL, x_pDst, x_uMax, x_pFmt, x_pArgs );
 }
 
 oexCSTR8 CSys::StrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, ... )
@@ -134,13 +123,11 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 #if ( _MSC_VER >= 1300 )
 
 	// Create format string
-//	res = StringCchVPrintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs );
 	res = StringCchVPrintfA( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs );
 
 #else
 
 	// Create format string
-//	if ( 0 > _vsntprintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
 	if ( 0 > _vsnprintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
 	{
 		// Null terminate buffer
@@ -166,35 +153,30 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 oexINT64 CSys::StrToInt64( oexCSTR8 x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return _tcstoi64( x_pStr, NULL, x_uRadix ); 
     return _strtoi64( x_pStr, NULL, x_uRadix ); 
 }
 
 oexUINT64 CSys::StrToUInt64( oexCSTR8 x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return _tcstoui64( x_pStr, NULL, x_uRadix ); 
     return _strtoui64( x_pStr, NULL, x_uRadix ); 
 }
 
 oexLONG CSys::StrToLong( oexCSTR8 x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return _tcstol( x_pStr, NULL, x_uRadix ); 
 	return strtol( x_pStr, NULL, x_uRadix ); 
 }
 
 oexULONG CSys::StrToULong( oexCSTR8 x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return _tcstoul( x_pStr, NULL, x_uRadix ); 
 	return strtoul( x_pStr, NULL, x_uRadix ); 
 }
 
 oexDOUBLE CSys::StrToDouble( oexCSTR8 x_pStr ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return _tcstod( x_pStr, NULL ); 
 	return strtod( x_pStr, NULL ); 
 }
 
@@ -208,16 +190,7 @@ oexCSTRW CSys::StrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, ... )
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
 oexCSTRW CSys::vStrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, oexCPVOID x_pArgs )
 {
-	// Verify data pointers
-	if ( !oexVERIFY_PTR( x_pDst ) || !oexVERIFY_PTR( x_pFmt ) )
-		return x_pDst;
-
-	vStrFmt( oexNULL, x_pDst, x_uMax, x_pFmt, x_pArgs );
-
-//	// Create format string
-//	oexASSERT( S_OK == StringCchVPrintf( pDst, uMax, pFmt, (va_list)pArgs ) );
-
-	return x_pDst;
+	return vStrFmt( oexNULL, x_pDst, x_uMax, x_pFmt, x_pArgs );
 }
 
 oexCSTRW CSys::StrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, ... )
@@ -245,13 +218,11 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 #if ( _MSC_VER >= 1300 )
 
 	// Create format string
-//	res = StringCchVPrintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs );
 	res = StringCchVPrintfW( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs );
 
 #else
 
 	// Create format string
-//	if ( 0 > _vsntprintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
 	if ( 0 > _vsnwprintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
 	{
 		// Null terminate buffer
@@ -277,35 +248,30 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 oexINT64 CSys::StrToInt64( oexCSTRW x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return _tcstoi64( x_pStr, NULL, x_uRadix ); 
 	return _wcstoi64( x_pStr, NULL, x_uRadix ); 
 }
 
 oexUINT64 CSys::StrToUInt64( oexCSTRW x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return _tcstoui64( x_pStr, NULL, x_uRadix ); 
 	return _wcstoui64( x_pStr, NULL, x_uRadix ); 
 }
 
 oexLONG CSys::StrToLong( oexCSTRW x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return _tcstol( x_pStr, NULL, x_uRadix ); 
 	return wcstol( x_pStr, NULL, x_uRadix ); 
 }
 
 oexULONG CSys::StrToULong( oexCSTRW x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return _tcstoul( x_pStr, NULL, x_uRadix ); 
 	return wcstoul( x_pStr, NULL, x_uRadix ); 
 }
 
 oexDOUBLE CSys::StrToDouble( oexCSTRW x_pStr ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return _tcstod( x_pStr, NULL ); 
 	return wcstod( x_pStr, NULL ); 
 }
 
@@ -402,9 +368,6 @@ oexBOOL CSys::MicroSleep( oexUINT uMicroseconds, oexUINT uSeconds )
 
 oexBOOL CSys::Init()
 {
-//    if ( !CSys_InitMicroSleep() )
-//        return oexFALSE;
-
     return oexTRUE;
 }
 
@@ -416,8 +379,10 @@ oexBOOL CSys::Uninit()
 
 oexINT CSys::WaitForSingleObject( CSys::t_WAITABLE x_pHandle, oexUINT x_uTimeout )
 {	DWORD dwRet = ::WaitForSingleObject( (HANDLE)x_pHandle, (DWORD)x_uTimeout );
-	if ( WAIT_OBJECT_0 == dwRet ) return waitSuccess;
-	else if ( WAIT_TIMEOUT == dwRet ) return waitTimeout;
+	if ( WAIT_OBJECT_0 == dwRet ) 
+        return waitSuccess;
+	else if ( WAIT_TIMEOUT == dwRet ) 
+        return waitTimeout;
 	return waitFailed;
 }
 
@@ -437,7 +402,7 @@ oexINT CSys::WaitForMultipleObjects( oexUINT x_uObjects, CSys::t_WAITABLE *x_pHa
 //        return dwRet - WAIT_OBJECT_0;
 	
 	if ( ( WAIT_OBJECT_0 + x_uObjects ) > dwRet ) 
-        return (etWait)( dwRet - WAIT_OBJECT_0 );
+        return (etWait)dwRet;
 
 	else if ( WAIT_TIMEOUT == dwRet ) 
         return waitTimeout;

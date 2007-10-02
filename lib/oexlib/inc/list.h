@@ -231,7 +231,8 @@ public:
 	/**
 		\return Pointer to the previous node in the list
 	*/
-	TListNode* Prev() { return m_pPrev; }
+	TListNode* Prev() 
+    {   return m_pPrev; }
 
 public:
 
@@ -969,14 +970,14 @@ public:
 	//==============================================================
 	/// Returns the iterator for the first list item
 	iterator First() 
-    { return iterator( m_pHead ); }
+    {   return iterator( m_pHead ); }
 
 	//==============================================================
 	// Last()
 	//==============================================================
 	/// Returns the iterator for the last list item
 	iterator Last() 
-    { return iterator( m_pTail ); }
+    {   return iterator( m_pTail ); }
 
 	//==============================================================
 	// Next()
@@ -1176,9 +1177,24 @@ protected:
         This is used by TAssoList for instance, to remove the 
         item from the index when it is erased.
     */
-    virtual void Unlink( iterator x_it ) {}
+    virtual void Unlink( iterator x_it ) 
+    {}
 
 public:
+
+	//==============================================================
+	// GetByIndex()
+	//==============================================================
+	/// Returns the list item by index
+    /**
+        \warning n time
+    */
+    iterator GetByIndex( oexUINT uIndex )
+	{	for ( iterator it; Next( it ); )
+            if ( !uIndex-- )
+                return it;
+		return iterator();
+    }
 
 	//==============================================================
 	// SearchValue()
@@ -1354,7 +1370,8 @@ public:
 	// Size()
 	//==============================================================
 	/// Returns the number of items in the list
-	oexUINT Size() { return m_uSize; }
+	oexUINT Size() 
+    {   return m_uSize; }
 
 private:
     

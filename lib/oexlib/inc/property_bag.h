@@ -86,7 +86,6 @@ public:
 	TPropertyBag( oexULONG v ) { *m_t = v; }
 	TPropertyBag( oexCSTR v ) { *m_t = v; }
 	TPropertyBag( oexDOUBLE v ) { *m_t = v; }
-	TPropertyBag( CStr v ) { *m_t = v; }
 
     /// Assignment constructor
     TPropertyBag( TPropertyBag &x_rPb )
@@ -147,6 +146,30 @@ public:
 
         return *this; 
     }
+
+#if defined( _UNICODE )
+
+	TPropertyBag& operator = ( CStr8 &v ) 
+    {
+        if ( !m_t.Ptr() )
+            m_t.OexConstruct().Ptr();
+
+        m_t = oexStr8ToStr( v ); 
+        return *this;
+    }
+
+#else
+
+	TPropertyBag& operator = ( CStrW &v ) 
+    {   
+        if ( !m_t.Ptr() )
+            m_t.OexConstruct().Ptr();
+
+        m_t = oexStrWToStr( v ); 
+        return *this;
+    }
+
+#endif
 
 	//==============================================================
 	// operator =

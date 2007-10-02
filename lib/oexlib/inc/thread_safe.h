@@ -385,10 +385,12 @@ public:
 	}
 
     /// Returns a handle to the event
-    os::CSys::t_WAITABLE GetHandle() { return m_hEvent; }
+    os::CSys::t_WAITABLE GetHandle() 
+    {   return m_hEvent; }
 
     /// Cast operator
-    operator os::CSys::t_WAITABLE () { return m_hEvent; }
+    operator os::CSys::t_WAITABLE () 
+    {   return m_hEvent; }
 
     /// Attach to event
     os::CEvent::t_EVENT Attach( os::CEvent::t_EVENT hEvent )
@@ -485,25 +487,29 @@ public:
 		// Close start handle
 		void* hTemp = m_hSignal;
 		m_hSignal = oexNULL;
-		if ( hTemp ) os::CEvent::osDestroyEvent( hTemp );
+		if ( hTemp ) 
+            os::CEvent::osDestroyEvent( hTemp );
 
 		// Close done handle
 		hTemp = m_hUnsignal;
 		m_hUnsignal = oexNULL;
-		if ( hTemp ) os::CEvent::osDestroyEvent( hTemp );
+		if ( hTemp ) 
+            os::CEvent::osDestroyEvent( hTemp );
 	}
 
 	//==============================================================
 	// GetSignalEvent()
 	//==============================================================
 	/// Returns the handle to the signal event
-	os::CEvent::t_EVENT GetSignalEvent() { return m_hSignal; }
+	os::CEvent::t_EVENT GetSignalEvent() 
+    {   return m_hSignal; }
 
 	//==============================================================
 	// GetUnsignalEvent()
 	//==============================================================
 	/// Returns the handle to the unsignal event
-	os::CEvent::t_EVENT GetUnsignalEvent() { return m_hUnsignal; }
+	os::CEvent::t_EVENT GetUnsignalEvent() 
+    {   return m_hUnsignal; }
 
 	//==============================================================
 	// Signal()
@@ -527,13 +533,15 @@ public:
 	// ResetSignal()
 	//==============================================================
 	/// Resets the signal event signal
-	oexBOOL ResetSignal() { return os::CEvent::osResetEvent( m_hSignal ); }
+	oexBOOL ResetSignal() 
+    {   return os::CEvent::osResetEvent( m_hSignal ); }
 
 	//==============================================================
 	// ResetUnsignal()
 	//==============================================================
 	/// Resets the unsignal event signal
-	oexBOOL ResetUnsignal() { return os::CEvent::osResetEvent( m_hUnsignal ); }
+	oexBOOL ResetUnsignal() 
+    {   return os::CEvent::osResetEvent( m_hUnsignal ); }
 
 	//==============================================================
 	// WaitSignal()

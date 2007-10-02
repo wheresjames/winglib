@@ -102,31 +102,36 @@ public:
 	// IsReset()
 	//==============================================================
 	/// Returns non-zero if timer is reset
-	oexBOOL IsReset() { return ( !m_llStart && !m_llStop ); }
+	oexBOOL IsReset() 
+    {   return ( !m_llStart && !m_llStop ); }
 
 	//==============================================================
 	// IsRunning()
 	//==============================================================
 	/// Returns non-zero if timer is running
-	oexBOOL IsRunning() { return ( m_llStart && !m_llStop ); }
+	oexBOOL IsRunning() 
+    {   return ( m_llStart && !m_llStop ); }
 
 	//==============================================================
 	// IsStopped()
 	//==============================================================
 	/// Returns non-zero if timer is stopped
-	oexBOOL IsStopped() { return ( m_llStart && m_llStop ); }
+	oexBOOL IsStopped() 
+    {   return ( m_llStart && m_llStop ); }
 
 	//==============================================================
 	// Reset()
 	//==============================================================
 	/// Resets internal values
-	void Reset() { m_llStart = m_llStop = 0; }
+	void Reset() 
+    {   m_llStart = m_llStop = 0; }
 
 	//==============================================================
 	// Start()
 	//==============================================================
 	/// Saves the current time as start time
-	oexINT64 Start() { return m_llStart = GetTimer(); }
+	oexINT64 Start() 
+    {   return m_llStart = GetTimer(); }
 
 	//==============================================================
 	// Start()
@@ -135,13 +140,15 @@ public:
 	/**
 		\param [in] x_ll	-	Start time
 	*/
-	oexINT64 Start( oexINT64 x_ll ) { return m_llStart = x_ll; }
+	oexINT64 Start( oexINT64 x_ll ) 
+    {   return m_llStart = x_ll; }
 
 	//==============================================================
 	// Stop()
 	//==============================================================
 	/// Saves the current time as stop time
-	oexINT64 Stop() { return m_llStop = GetTimer(); }
+	oexINT64 Stop() 
+    {   return m_llStop = GetTimer(); }
 
 	//==============================================================
 	// Stop()
@@ -150,7 +157,8 @@ public:
 	/**
 		\param [in] ll	-	Stop time
 	*/
-	oexINT64 Stop( oexINT64 x_ll ) { return m_llStop = x_ll; }
+	oexINT64 Stop( oexINT64 x_ll ) 
+    {   return m_llStop = x_ll; }
 	
 	//==============================================================
 	// Ellapsed()
@@ -171,7 +179,8 @@ public:
 	// EllapsedSeconds()
 	//==============================================================
 	/// Returns ellapsed time in seconds
-	oexDOUBLE ElapsedSeconds() { return ( (oexDOUBLE)Elapsed() / (oexDOUBLE)GetTimerFrequency() ); }
+	oexDOUBLE ElapsedSeconds() 
+    {   return ( (oexDOUBLE)Elapsed() / (oexDOUBLE)GetTimerFrequency() ); }
 
 	//==============================================================
 	// GetBootCount()

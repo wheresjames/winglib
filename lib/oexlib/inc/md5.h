@@ -60,10 +60,12 @@ public:
 public:
 
     /// Default constructor
-    CMd5() { Init(); }
+    CMd5() 
+    {   Init(); }
 
     /// Default destructor
-    virtual ~CMd5() {}
+    virtual ~CMd5() 
+    {}
 
     /// Initialize the md5
     void Init();
@@ -78,16 +80,20 @@ public:
     static oexGUID* Transform( oexGUID *x_pGuid, oexCPVOID x_pBuf, oexUINT x_uSize );
 
     /// Returns hash as a guid
-    oexGUID& GetGuid() { return m_md5.guid; }
+    oexGUID& GetGuid() 
+    {   return m_md5.guid; }
 
     /// Returns hash as a guid
-    operator oexGUID&() { return m_md5.guid; }
+    operator oexGUID&() 
+    {   return m_md5.guid; }
 
     /// Returns hash as a guid
-    operator oexGUID*() { return &m_md5.guid; }
+    operator oexGUID*() 
+    {   return &m_md5.guid; }
 
     /// Returns the md5 hash buffer
-    oexCPVOID GetBuffer() { return m_md5.ucBuf; }
+    oexCPVOID GetBuffer() 
+    {   return m_md5.ucBuf; }
 
 private:
 

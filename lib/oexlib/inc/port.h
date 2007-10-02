@@ -106,7 +106,7 @@ public:
 	TNetSession()
     {
         // Register functions
-        m_cProtocol.RegisterFunctions( this );
+        m_cProtocol.OnRegisterFunctions( this );
     }
 
 	/// Destructor
@@ -114,7 +114,7 @@ public:
     {   Stop();
     }
 
-    /// Returns protocol pointer
+    /// Returns protocol reference
     T_PROTOCOL& Protocol()
     {   return m_cProtocol;
     }
@@ -130,6 +130,10 @@ public:
     /// Thread main loop
 	virtual oexBOOL DoThread( oexPVOID x_pData ) 
     {
+        // Ensure event handle
+        if ( !GetCmdEvent() )
+            return oexFALSE;
+
         // Get events
         os::CSys::t_WAITABLE phEvents[] = 
         {
@@ -137,7 +141,7 @@ public:
             m_evQuit.GetHandle(),
 
             // 1 == Command waiting
-            GetCmdEvent().GetHandle(),
+            GetCmdEvent()->GetHandle(),
 
             // 2 == Port events
             m_cProtocol.GetEventHandle()
@@ -234,6 +238,7 @@ public:
 
         // Register server functions
         OexRpcRegister( TNetServer, CloseSession );
+        OexRpcRegister( TNetServer, Reset );
     }
 
 	/// Destructor
@@ -258,6 +263,10 @@ public:
     /// Thread main loop
 	virtual oexBOOL DoThread( oexPVOID x_pData ) 
     {
+        // Ensure event handle
+        if ( !GetCmdEvent() )
+            return oexFALSE;
+
         // Get events
         os::CSys::t_WAITABLE phEvents[] = 
         {
@@ -265,7 +274,7 @@ public:
             m_evQuit.GetHandle(),
 
             // 1 == Command waiting
-            GetCmdEvent().GetHandle(),
+            GetCmdEvent()->GetHandle(),
 
             // 2 == Port events
             T_PORT::GetEventHandle()
@@ -348,50 +357,76 @@ public:
 
         // Create the session
         t_Session session = m_sessions.Get( *x_pGuid );
-
-        // Set dispatch obect
         if ( !session.IsValid() )
             return session;
 
         // Set session information
         session.Obj().Protocol().SetServerDispatch( this );
-        session.Obj().Protocol().SetSessionId( CStr().GuidToString( x_pGuid ) );
+        session.Obj().Protocol().SetSessionId( *x_pGuid );
 
         return session;
     }
 
     /// Adds a session
-    t_Session FindSession( oexGUID *x_pGuid )
+    CDispatch FindSession( oexCONST oexGUID &x_rGuid )
     {
-        // Ensure we have a valid guid
-        if ( !x_pGuid || !*x_pGuid )
-            return t_Session;
-
         // Lock the session list
         CTlLocalLock ll( m_lockSession );
         if ( !ll.IsLocked() )
-            return t_SessionList::iterator();
+            return CDispatch();
+
+        t_Session session = m_sessions.Find( x_rGuid );
+        if ( !session.IsValid() )
+            return CDispatch;
 
         // Return a session
-        return m_sessions.Find( *x_pGuid );
+        return session.Obj();
+    }
+
+    /// Returns the specified session by index
+    CDispatch GetSession( oexUINT uIndex )
+    {
+        // Lock the session list
+        CTlLocalLock ll( m_lockSession );
+        if ( !ll.IsLocked() )
+            return CDispatch();
+
+        // Get the session by index
+        t_Session session = m_sessions.GetByIndex( uIndex );
+        if ( !session.IsValid() )
+            return CDispatch();
+
+        // Return a session
+        return session.Obj();
     }
 
     /// Adds a session
-    oexBOOL CloseSession( oexCSTR x_pId )
+    oexBOOL CloseSession( oexCONST oexGUID &x_rGuid )
     {
-        // Ensure we have a valid guid
-        if ( !x_pId || !*x_pId )
-            return oexFALSE;
-
         // Lock the session list
         CTlLocalLock ll( m_lockSession );
         if ( !ll.IsLocked() )
             return oexFALSE;
 
         // Delete the session if it exists
-        oexGUID guid;
-        if ( CStr( x_pId ).StringToGuid( &guid ) )
-            m_sessions.Unset( guid );
+        m_sessions.Unset( x_rGuid );
+
+        return oexTRUE;
+    }
+
+    /// Closes the server and all sessions
+    oexBOOL Reset()
+    {
+        // Lock the session list
+        CTlLocalLock ll( m_lockSession );
+        if ( !ll.IsLocked() )
+            return oexFALSE;
+
+        // Kill ther server
+        T_PORT::Destroy();
+
+        // Lose the session list
+        m_sessions.Destroy();
 
         return oexTRUE;
     }
@@ -428,7 +463,7 @@ public:
     }
 
     /// Destructor
-    ~TBufferedPort()
+    virtual ~TBufferedPort()
     {
 
     }   
@@ -540,6 +575,7 @@ public:
 	oexBOOL Write( oexCSTR8 x_pStr )
     {	return Write( (oexPVOID)x_pStr, zstr::Length( x_pStr ) ); }
 
+
 	//==============================================================
 	// Write()
 	//==============================================================
@@ -557,10 +593,12 @@ public:
 public:
 
     /// Returns a reference to the rx buffer
-    T_BUFFER& Rx() { return m_rx; }
+    T_BUFFER& Rx() 
+    {   return m_rx; }
 
     /// Returns a reference to the tx buffer
-    T_BUFFER& Tx() { return m_tx; }    
+    T_BUFFER& Tx() 
+    {   return m_tx; }    
 
 private:
 
@@ -593,18 +631,27 @@ public:
     {   m_pDispatch = pDispatch; }
 
     /// Sets the session id
-    void SetSessionId( CStr &sId )
-    {   m_sSessionId = sId; }
+    void SetSessionId( oexGUID &x_guid )
+    {   guid::CopyGuid( &m_guidSessionId, &x_guid ); }
 
     /// Returns the session id
-    CStr& GetSessionId()
-    {   return m_sSessionId; }
+    oexGUID& GetSessionId()
+    {   return m_guidSessionId; }
 
     /// Closes the session
     void CloseSession()
     {
         if ( m_pDispatch )
-            m_pDispatch->Queue( 0, oexCall( oexT( "CloseSession" ), m_sSessionId ) );
+            m_pDispatch->Queue( 0, oexCall( oexT( "CloseSession" ), m_guidSessionId ) );
+    }
+
+    /// Over-ride to register interface functions
+    virtual void OnRegisterFunctions( CDispatch *x_pDispatch )
+    {
+        if ( !x_pDispatch )
+            return;
+
+        x_pDispatch->OexRpcRegister( CProtocol, CloseSession );
     }
 
 private:
@@ -613,7 +660,7 @@ private:
     CDispatch           *m_pDispatch;
 
     /// Session id
-    CStr                m_sSessionId;
+    oexGUID             m_guidSessionId;
 
 };
 
@@ -625,6 +672,15 @@ template < typename T_PORT >
         public T_PORT
 {
 public:
+
+    virtual void OnRegisterFunctions( CDispatch *x_pDispatch )
+    {
+        // Call the base class
+        CProtocol::OnRegisterFunctions( x_pDispatch );
+
+        // Register interface functions
+        T_PORT::RegisterFunctions( x_pDispatch );
+    }
 
 	virtual oexBOOL OnRead( oexINT x_nErr ) 
     {

@@ -150,6 +150,16 @@ public:
 		Set( tVal ); 
 	}
 
+	TStr( oexCONST oexGUID &guid )
+	{	m_nLength = 0;
+        m_uOffset = 0;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
+		GuidToString( &guid );
+	}
+
     /// Destructor
     virtual ~TStr()
     {   Destroy();
@@ -373,6 +383,10 @@ public:
 	TStr& operator = ( oexCONST T chVal )
 	{	return Set( chVal ); }
 
+    /// Assignment operator
+	TStr& operator = ( oexCONST oexGUID &guid )
+	{	return StringToGuid( &guid ); }
+
 	/// Concatenation operator
 	TStr& operator += ( oexCONST T* pStr )
 	{	return Append( pStr ); }
@@ -406,6 +420,9 @@ public:
 	TStr& operator += ( oexCONST TStr &str )
 	{	return Append( str.Ptr() ); }
 
+	TStr& operator += ( oexCONST oexGUID &guid )
+	{	return Append( TStr().GuidToString( guid ) ); }
+
 	TStr& operator << ( oexCONST oexINT nVal )
 	{	return AppendNum( oexTT( T, "%li" ), (oexINT)nVal ); }
 
@@ -423,6 +440,10 @@ public:
 
 	TStr& operator << ( oexCONST T chVal )
 	{	return Append( &chVal, 1 ); }
+
+    /// Assignment operator
+	TStr& operator << ( oexCONST oexGUID &guid )
+	{	return Append( TStr().GuidToString( guid ) ); }
 
 	TStr& Chr( oexUINT uCh )
 	{	return Set( (T)uCh ); }
@@ -476,6 +497,9 @@ public:
     oexBOOL operator == ( oexCONST oexDOUBLE x_dVal )
     {   return ToDouble() == x_dVal; }
 
+    oexBOOL operator == ( oexCONST oexGUID &x_guid )
+    {   oexGUID guid; return guid::CmpGuid( StringToGuid( &guid ), &x_guid ); }
+
     oexBOOL operator != ( oexCONST oexINT x_nVal )
     {   return ToInt() != x_nVal; }
 
@@ -493,6 +517,9 @@ public:
 
     oexBOOL operator != ( oexCONST oexDOUBLE x_dVal )
     {   return ToDouble() != x_dVal; }
+
+    oexBOOL operator != ( oexCONST oexGUID &x_guid )
+    {   oexGUID guid; return !guid::CmpGuid( StringToGuid( &guid ), &x_guid ); }
 
     oexBOOL operator !()
     {   oexBOOL b = ( !Length() 
@@ -1051,7 +1078,7 @@ public:
 	}
 
 	/// Converts the string to a GUID, returns oexNULL if this string does not contain a GUID
-	oexCONST oexGUID * StringToGuid( oexGUID *x_pGuid )
+	oexGUID * StringToGuid( oexGUID *x_pGuid )
     {	return guid::StringToGuid( x_pGuid, Ptr(), Length() ); }
 
 	/// Converts a GUID to a string, if pGuid is NULL, a unique GUID is created

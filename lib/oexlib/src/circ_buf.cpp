@@ -238,7 +238,8 @@ void CCircBuf::Destroy()
 {
 	// Lock the buffer
 	CTlLocalLock ll( &m_lock );
-	if ( !ll.IsLocked() ) return;
+	if ( !ll.IsLocked() ) 
+        return;
 	
 	// Empty the buffer
 	Empty();
@@ -358,10 +359,12 @@ oexBOOL CCircBuf::Read( oexPVOID x_pvBuf, oexUINT x_uMax, oexUINT *x_puRead, oex
 	} // end while
 
 	// Update the pointer if required
-	if ( x_puPtr ) *x_puPtr = NormalizePtr( AdvancePtr( uPtr, uSize, m_uSize ), m_uSize );
+	if ( x_puPtr ) 
+        *x_puPtr = NormalizePtr( AdvancePtr( uPtr, uSize, m_uSize ), m_uSize );
 
 	// How many bytes were read?
-	if ( x_puRead ) *x_puRead = uRead;
+	if ( x_puRead ) 
+        *x_puRead = uRead;
 
 	return oexTRUE;
 }
@@ -430,10 +433,12 @@ oexBOOL CCircBuf::Write( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT *x_puPtr, o
 oexUINT CCircBuf::GetMaxRead( oexUINT x_uReadPtr, oexUINT x_uWritePtr, oexUINT x_uMax )
 {
 	// Do we have a buffer?
-	if ( x_uMax == 0 ) return 0;
+	if ( x_uMax == 0 ) 
+        return 0;
 
 	// Is the buffer empty?
-	if ( x_uReadPtr == x_uWritePtr ) return 0;
+	if ( x_uReadPtr == x_uWritePtr ) 
+        return 0;
 
 	// Check for inside use
 	if ( x_uWritePtr > x_uReadPtr ) 
@@ -445,11 +450,13 @@ oexUINT CCircBuf::GetMaxRead( oexUINT x_uReadPtr, oexUINT x_uWritePtr, oexUINT x
 
 oexUINT CCircBuf::GetMaxWrite( oexUINT x_uReadPtr, oexUINT x_uWritePtr, oexUINT x_uMax )
 {	// Do we have a buffer?
-	if ( x_uMax == 0 ) return 0;
+	if ( x_uMax == 0 ) 
+        return 0;
 
 	// Must normalize the write pointer
 	oexUINT uNWritePtr = x_uWritePtr;
-	if ( uNWritePtr >= x_uMax ) uNWritePtr %= x_uMax;
+	if ( uNWritePtr >= x_uMax ) 
+        uNWritePtr %= x_uMax;
 
 	// Is the buffer empty?
 	if ( x_uReadPtr == uNWritePtr ) 
@@ -484,7 +491,8 @@ oexBOOL CCircBuf::Read(oexSTR8 x_pStr, oexUINT x_uMax)
 	Read( x_pStr, x_uMax, &uRead );
 
 	// NULL terminate string
-	if ( uRead >= x_uMax ) uRead = x_uMax - 1;
+	if ( uRead >= x_uMax ) 
+        uRead = x_uMax - 1;
 	x_pStr[ uRead ] = 0;
 
 	return oexTRUE;

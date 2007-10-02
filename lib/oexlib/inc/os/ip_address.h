@@ -138,25 +138,32 @@ public:
     oexBOOL LookupHost( oexCSTR x_pServer, oexINT32 uPort, oexINT32 uType = eAddrTypeIpv4 );
 
     /// Returns the binary ip address value
-    oexINT64 GetIpv6() { return m_llIpv6; }
+    oexINT64 GetIpv6() 
+    {   return m_llIpv6; }
 
     /// Returns the lo part of the ip address
-    oexINT32 GetIpv4() { return m_uIpv4; }
+    oexINT32 GetIpv4() 
+    {   return m_uIpv4; }
 
     /// Returns the port number
-    oexINT32 GetPort() { return m_uPort; }
+    oexINT32 GetPort() 
+    {   return m_uPort; }
 
     /// Returns the port number
-    oexINT32 GetType() { return m_uType; }
+    oexINT32 GetType() 
+    {   return m_uType; }
 
     /// Returns the address check sum
-    oexINT32 GetCrc() { return m_uCrc; }
+    oexINT32 GetCrc() 
+    {   return m_uCrc; }
 
     /// Returns the GUID
-    oexGUID& GetGuid() { return m_guid; }
+    oexGUID& GetGuid() 
+    {   return m_guid; }
 
     /// Guid structure
-    operator oexGUID*() { return &m_guid; }
+    operator oexGUID*() 
+    {   return &m_guid; }
 
     /// Copy another address
     CIpAddress& Copy( CIpAddress &rIa )

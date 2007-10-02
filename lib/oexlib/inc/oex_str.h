@@ -185,7 +185,8 @@ namespace str
 			    while ( start && ln_start-- )
                     if ( *s1 == *start ) 
                         start = 0;
-                    else start++;
+                    else 
+                        start++;
 
 			    if ( start )
 				    return i;
@@ -221,7 +222,8 @@ namespace str
 			    while ( start && ln_start-- )
                     if ( s1[ ln1 ] == *start ) 
                         start = 0;
-                    else start++;
+                    else 
+                        start++;
 
 			    if ( start )
 				    return ln1;
@@ -851,6 +853,9 @@ namespace zstr
 
 namespace guid
 {
+    // We've assumed this structure is 16 bytes
+    oexSTATIC_ASSERT(  sizeof( oexGUID ) == 16 );
+
     template< typename T_STR >
         oexBOOL ahtoui( oexUINT *x_puNum, oexCONST T_STR *x_pBuffer, oexUINT x_uBytes, oexBOOL x_bSkipInvalid = oexFALSE )
     {
@@ -872,14 +877,16 @@ namespace guid
 			    num = ( num << 4 ) + ( x_pBuffer[ i ] - 'a' ) + 10;
 
 		    // Do we just skip invalid digits?
-		    else if ( !x_bSkipInvalid ) return oexFALSE;
+		    else if ( !x_bSkipInvalid ) 
+                return oexFALSE;
 
 		    x_uBytes--;
 
 	    } // end for
 
 	    // Save number
-	    if ( x_puNum ) *x_puNum = num;
+	    if ( x_puNum ) 
+            *x_puNum = num;
 
 	    return oexTRUE;
     }
@@ -905,22 +912,22 @@ namespace guid
 	    // Example GUID : DD05F574-2D69-4463-95DD-F76C9F7C5E6D
 
         return os::CSys::StrFmt( x_pStr, x_uMax, 
-                                 oexT( "%0.8lX-%0.4lX-%0.4lX-%0.2lX%0.2lX-%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX" ),
- 							     (oexUINT) x_pGuid->Data1, 
-							     (oexUINT) x_pGuid->Data2,
-							     (oexUINT) x_pGuid->Data3,
-							     (oexUINT) x_pGuid->Data4[ 0 ],
-							     (oexUINT) x_pGuid->Data4[ 1 ],
-							     (oexUINT) x_pGuid->Data4[ 2 ],
-							     (oexUINT) x_pGuid->Data4[ 3 ],
-							     (oexUINT) x_pGuid->Data4[ 4 ],
-							     (oexUINT) x_pGuid->Data4[ 5 ],
-							     (oexUINT) x_pGuid->Data4[ 6 ],
-							     (oexUINT) x_pGuid->Data4[ 7 ] );
+                 oexT( "%0.8lX-%0.4lX-%0.4lX-%0.2lX%0.2lX-%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX" ),
+			     (oexUINT) x_pGuid->Data1, 
+			     (oexUINT) x_pGuid->Data2,
+			     (oexUINT) x_pGuid->Data3,
+			     (oexUINT) x_pGuid->Data4[ 0 ],
+			     (oexUINT) x_pGuid->Data4[ 1 ],
+			     (oexUINT) x_pGuid->Data4[ 2 ],
+			     (oexUINT) x_pGuid->Data4[ 3 ],
+			     (oexUINT) x_pGuid->Data4[ 4 ],
+			     (oexUINT) x_pGuid->Data4[ 5 ],
+			     (oexUINT) x_pGuid->Data4[ 6 ],
+			     (oexUINT) x_pGuid->Data4[ 7 ] );
     }
 
     template< typename T_STR, typename T_GUID >
-        oexCONST T_GUID * StringToGuid( T_GUID *x_pGuid, T_STR *x_pString, oexUINT x_uMax )
+        T_GUID * StringToGuid( T_GUID *x_pGuid, T_STR *x_pString, oexUINT x_uMax )
     {
 	    if ( !oexVERIFY_PTR( x_pGuid ) )
 		    return oexNULL;
@@ -944,23 +951,28 @@ namespace guid
 
 	    // Convert each component
 	    oexUINT ul = 0;
-	    if ( !ahtoui( &ul, x_pString, 8 ) ) return oexNULL;
+	    if ( !ahtoui( &ul, x_pString, 8 ) ) 
+            return oexNULL;
 	    x_pGuid->Data1 = ul;
 
-	    if ( !ahtoui( &ul, &x_pString[ 9 ], 4 ) ) return oexNULL;
+	    if ( !ahtoui( &ul, &x_pString[ 9 ], 4 ) ) 
+            return oexNULL;
 	    x_pGuid->Data2 = (oexUINT16)ul;
 
-	    if ( !ahtoui( &ul, &x_pString[ 14 ], 4 ) ) return oexNULL;
+	    if ( !ahtoui( &ul, &x_pString[ 14 ], 4 ) ) 
+            return oexNULL;
 	    x_pGuid->Data3 = (oexUINT16)ul;
 
 	    oexUINT i;
 	    for ( i = 0; i < 2; i++ )
-	    {	if ( !ahtoui( &ul, &x_pString[ 19 + ( i << 1 ) ], 2 ) ) return oexNULL;
+	    {	if ( !ahtoui( &ul, &x_pString[ 19 + ( i << 1 ) ], 2 ) ) 
+                return oexNULL;
 		    x_pGuid->Data4[ i ] = (oexUCHAR)ul;
 	    } // end for	
 
 	    for ( i = 0; i < 6; i++ )
-	    {	if ( !ahtoui( &ul, &x_pString[ 24 + ( i << 1 ) ], 2 ) ) return oexNULL;
+	    {	if ( !ahtoui( &ul, &x_pString[ 24 + ( i << 1 ) ], 2 ) ) 
+                return oexNULL;
 		    x_pGuid->Data4[ 2 + i ] = (oexUCHAR)ul;
 	    } // end for
 

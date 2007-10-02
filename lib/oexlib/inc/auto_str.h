@@ -68,6 +68,7 @@ public:
     TAutoStr( oexCONST oexFLOAT fStr ) : TStr( (oexDOUBLE)fStr ) {}
     TAutoStr( oexCONST oexDOUBLE dStr ) : TStr( dStr ) {}
     TAutoStr( oexCONST T tVal ) : TStr( tVal ) {}
+    TAutoStr( oexCONST oexGUID &guid ) : TStr( guid ) {}
     
 public:
 
@@ -79,6 +80,7 @@ public:
     operator oexCONST oexFLOAT() { return ToFloat(); }
     operator oexCONST oexDOUBLE() { return ToDouble(); }
     operator oexCONST oexCSTR() { return ToString(); }
+    operator oexAUTOGUID() { oexGUID guid; return TStr::StringToGuid( &guid ); }
 
 #ifdef _UNICODE
     operator CStr8() { return oexStrToStr8( *this ); }

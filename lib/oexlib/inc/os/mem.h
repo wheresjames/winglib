@@ -37,8 +37,10 @@
 class CMem
 {
 private:
-	CMem() {}
-	virtual ~CMem() {}
+	CMem() 
+    {}
+	virtual ~CMem() 
+    {}
 
 public:
 

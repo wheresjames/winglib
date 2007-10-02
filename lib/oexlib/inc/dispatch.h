@@ -49,8 +49,8 @@ public:
     CReplyInfo() {}
 
     /// Constructor
-    CReplyInfo( CStr x_sCmd )
-    {   sCmd = x_sCmd; }
+    CReplyInfo( CStr x_sCmd, oexUINT x_uTime = 0 )
+    {   sCmd = x_sCmd; uTime = x_uTime; }
 
     /// Copy constructor
     CReplyInfo( CReplyInfo &x_rRi )
@@ -68,8 +68,10 @@ public:
 
     /// Return event id
     CStr            sReturn;
-};
 
+    /// Execution time
+    oexUINT         uTime;
+};
 
 
 class CReply
@@ -121,9 +123,80 @@ public:
     CStr operator *() 
     {   return GetReply(); }
 
+    /// Returns the desired execution time
+    oexUINT GetTime()
+    {   if ( !m_ri.Ptr() )
+            return 0;
+        return m_ri.Ptr()->uTime;
+    }
+
+private:
+    
     /// Reply information
     TMem< CReplyInfo >      m_ri;
 };
+
+/// Holds the shared information between CDispatch objects
+class CDispatchInfo
+{
+public:
+
+    /// Event handler list type
+    typedef TAssoList< CStr, TArbDelegate< CAutoStr > > t_EventHandlerList;
+
+    /// Command buffer
+    typedef TList< TMem< CReplyInfo > > t_CmdBufferList;
+    
+public:
+
+    /// Destructor
+    ~CDispatchInfo()
+    {   Destroy(); }
+
+    /// Destroys the object
+    void Destroy()
+    {
+        { // Scope
+
+            CTlLocalLock ll( lockPre );
+            if ( ll.IsLocked() )
+                lstPre.Destroy();
+
+        } // end scope
+
+        { // Scope
+
+            CTlLocalLock ll( lockCmd );
+            if ( ll.IsLocked() )
+            {   lstCmd.Destroy();
+                lstEventHandlers.Destroy();
+            } // end if
+
+        } // end scope
+    }
+
+
+public:
+
+    /// Thread lock
+    CTlLock                     lockCmd;
+
+    /// Thread lock
+    CTlLock                     lockPre;
+
+    /// List of event handlers
+    t_EventHandlerList          lstEventHandlers;
+
+    /// Command buffer
+    t_CmdBufferList             lstCmd;
+
+    /// Pre queue
+    t_CmdBufferList             lstPre;
+    
+    /// Command waiting signal
+    CTlEvent                    evCmd;
+};
+
 
 /// Event dispatch class
 /**
@@ -139,17 +212,22 @@ class CDispatch
 {
 public:
 
-    /// Event handler list type
-    typedef TAssoList< CStr, TArbDelegate< CAutoStr > > t_EventHandlerList;
-
-    /// Command buffer
-    typedef TList< TMem< CReplyInfo > > t_CmdBufferList;
-
-public:
-
     /// Constructor
     CDispatch() 
     {
+        // Construct data object
+        m_di.OexConstruct();
+    }
+
+    /// Copy constructor
+    CDispatch( CDispatch &rD )
+    {   m_di.Share( rD.m_di );
+    }
+
+    /// Copy operator
+    CDispatch& operator = ( CDispatch &rD )
+    {   m_di.Share( rD.m_di );
+        return *this;
     }
 
     /// Destructor
@@ -157,68 +235,66 @@ public:
     {   Destroy();
     }
 
+    /// Releases resources
     void Destroy()
     {
-        { // Scope
-
-            CTlLocalLock ll( m_lockPre );
-            if ( ll.IsLocked() )
-                m_lstPre.Destroy();
-
-        } // end scope
-
-        { // Scope
-
-            CTlLocalLock ll( m_lockCmd );
-            if ( ll.IsLocked() )
-            {   m_lstCmd.Destroy();
-                m_lstEventHandlers.Destroy();
-            } // end if
-
-        } // end scope
+        // Lose info object
+        m_di.Delete();
     }
 
     /// Registers a callback function
     oexBOOL Register( CStr x_sName, TArbDelegate< CAutoStr > &x_adFunction )
     {
-        CTlLocalLock ll( m_lockCmd );
+        // Ensure valid object
+        if ( !IsValid() )
+            return oexFALSE;
+
+        // Lock the command buffer
+        CTlLocalLock ll( m_di.Ptr()->lockCmd );
         if ( !ll.IsLocked() )
             return oexFALSE;
 
         // Add to the list
-        m_lstEventHandlers[ x_sName ] = x_adFunction;
+        m_di.Ptr()->lstEventHandlers[ x_sName ] = x_adFunction;
 
         return oexTRUE;
     }
 
     /// Puts a function call into the queue
     /**
-        Returns a unique id for the return event
+        \param [in] x_pId   -   Id of the message target, interpreted by OnMap()
+        \param [in] x_sCmd  -   Actual command string, use oexCall to generate.
+        \param [in] x_uTime -   Time the command should be executed, zero for
+                                immediate execution.
+        
+
+        Returns a CReply object
     */
-    CReply Queue( oexCSTR x_pId, CStr x_sCmd )
+    CReply Queue( oexCSTR x_pId, CStr x_sCmd, oexUINT x_uTime = 0 )
     {
-        CTlLocalLock ll( m_lockPre );
+        // Ensure valid data object
+        if ( !IsValid() )
+            return CReply();
+
+        // Lock the pre-queue
+        CTlLocalLock ll( m_di.Ptr()->lockPre );
         if ( !ll.IsLocked() )
             return CReply();
 
-        // Attempt to map the message
-        CReply reply;
-        if ( OnMap( x_pId, x_sCmd, reply ) )
-            return reply;
-
         // Append command
-        t_CmdBufferList::iterator it = m_lstPre.Append();
+        CDispatchInfo::t_CmdBufferList::iterator it = m_di.Ptr()->lstPre.Append();
 
         // Create command
-        it.Obj().OexConstruct( x_sCmd );
+        it.Obj().OexConstruct( x_sCmd, x_uTime );
 
         // Signal that a command is waiting
-        m_evCmd.Set();
+        m_di.Ptr()->evCmd.Set();
 
-        // Return the event id
+        // Return the reply event
         return it.Obj();
     }    
 
+    // +++ Need to add the mapping code to Execute()
     /// Over-ride to provide message mapping
     virtual oexBOOL OnMap( oexCSTR x_pId, CStr x_sCmd, CReply &x_rReply )
     {   return oexFALSE; }
@@ -231,55 +307,80 @@ public:
     */
     oexUINT ProcessQueue( oexINT nMax = -1 )
     {
+        // Ensure valid data object
+        if ( !IsValid() )
+            return 0;
+
         // Lock the command buffer
-        CTlLocalLock ll( m_lockCmd );
+        CTlLocalLock ll( m_di.Ptr()->lockCmd );
         if ( !ll.IsLocked() )
             return 0;
 
         { // Copy commands from pre-stage buffer
 
-            CTlLocalLock ll( m_lockPre );
+            CTlLocalLock ll( m_di.Ptr()->lockPre );
             if ( ll.IsLocked() )
-                m_lstCmd.Append( m_lstPre );
+                m_di.Ptr()->lstCmd.Append( m_di.Ptr()->lstPre );
 
         } // end copy commands
 
+        // Number of commands executed
         oexUINT uCmds = 0;
 
+        // Count waits
+        oexUINT uWaits = 0;
+
+        // What we think the current time is
+        oexCONST oexUINT uCurrentTime = CSysTime( CSysTime::eGmtTime ).GetUnixTime();
+
         // Execute commands
-        for ( t_CmdBufferList::iterator it; nMax-- && m_lstCmd.Next( it ); )
+        for ( CDispatchInfo::t_CmdBufferList::iterator it; nMax-- && m_di.Ptr()->lstCmd.Next( it ); )
         {
             // Ensure valid command
             if ( it.Obj().Ptr() )
             {
-                // Execute the command
-                Execute( it.Obj().Ptr()->sCmd, &it.Obj().Ptr()->sReturn );
+                // Ensure it's time
+                oexUINT uTime = it.Obj().Ptr()->uTime;
+                if ( !uTime || uCurrentTime > uTime )
+                {
+                    // Execute the command
+                    Execute( it.Obj().Ptr()->sCmd, &it.Obj().Ptr()->sReturn );
 
-                // Signal that reply is ready
-                it.Obj().Ptr()->evReady.Set();
+                    // Signal that reply is ready
+                    it.Obj().Ptr()->evReady.Set();
 
-                // Count commands
-                uCmds++;
+                    // Count commands
+                    uCmds++;
+
+                    // Erase the command
+                    it = m_di.Ptr()->lstCmd.Erase( it );
+
+                } // end if
+
+                // Waiting on this command
+                else
+                    uWaits++;
 
             } // end if
 
             // Drop this command
-            it = m_lstCmd.Erase( it );      
+            else
+                it = m_di.Ptr()->lstCmd.Erase( it );
 
         } // end for
 
         { // Copy commands from pre-stage buffer
 
-            CTlLocalLock ll( m_lockPre );
+            CTlLocalLock ll( m_di.Ptr()->lockPre );
             if ( ll.IsLocked() )
             {
                 // Reset event if no more commands
-                if ( !m_lstCmd.Size() && !m_lstPre.Size() )
-                    m_evCmd.Reset();
+                if ( !uWaits && !m_di.Ptr()->lstCmd.Size() && !m_di.Ptr()->lstPre.Size() )
+                    m_di.Ptr()->evCmd.Reset();
 
                 // Just to make sure
                 else
-                    m_evCmd.Set();
+                    m_di.Ptr()->evCmd.Set();
 
             } // end if
 
@@ -291,7 +392,11 @@ public:
     /// Executes the specified function call
     oexBOOL Execute( CStr x_sCmd, CStr *x_pReturn = oexNULL )
     {
-        CTlLocalLock ll( m_lockCmd );
+        // Ensure valid data object
+        if ( !IsValid() )
+            return oexFALSE;
+
+        CTlLocalLock ll( m_di.Ptr()->lockCmd );
         if ( !ll.IsLocked() )
             return oexFALSE;
 
@@ -301,7 +406,9 @@ public:
         if ( !pb[ oexT( "f" ) ].IsSet() )
             return oexFALSE;
 
-        t_EventHandlerList::iterator it = m_lstEventHandlers.Find( pb[ oexT( "f" ) ].ToString() );
+        CDispatchInfo::t_EventHandlerList::iterator it = 
+            m_di.Ptr()->lstEventHandlers.Find( pb[ oexT( "f" ) ].ToString() );
+
         if ( !it.IsValid() )
             return oexFALSE;
 
@@ -455,218 +562,24 @@ public:
         return CParser::Serialize( pb );
     }
 
-    /// Returns a reference to the command waiting event
-    CTlEvent& GetCmdEvent()
-    {   return m_evCmd; }
+    /// Returns a pointer to the command waiting event
+    CTlEvent* GetCmdEvent()
+    {   
+        if ( !IsValid() )
+            return oexNULL;
+        
+        return &m_di.Ptr()->evCmd; 
+    }
+
+    /// Returns non-zero if object is valid
+    oexBOOL IsValid()
+    {   return m_di.Size() ? oexTRUE : oexFALSE; }
 
 private:
 
-    /// Thread lock
-    CTlLock                     m_lockCmd;
-
-    /// Thread lock
-    CTlLock                     m_lockPre;
-
-    /// List of event handlers
-    t_EventHandlerList          m_lstEventHandlers;
-
-    /// Command buffer
-    t_CmdBufferList             m_lstCmd;
-
-    /// Pre queue
-    t_CmdBufferList             m_lstPre;
-    
-    /// Command waiting signal
-    CTlEvent                    m_evCmd;
+    /// Shared dispatch information
+    TMem< CDispatchInfo >       m_di;
 
 };
-
-
-
-/*
-
-    CCallbackClass cc;
-
-//    oex::TDelegate< int, int, int > d;
-
-    oex::TArbDelegate< oex::CAutoStr > d;
-
-    d.Set( &cc, &CCallbackClass::Add );
-
-    int x = d( 1, 2 );
-
-
-    int y = 0;
-
-//    void *pD = oex::CDelegate::CreateDelegate( &cc, &CCallbackClass::Add );
-
-
-template < typename T_ARB >
-    class TDelegate
-{
-public:
-
-    /// Two param callback
-    typedef T_ARB (*t_Call2)( oexPVOID, oexPVOID, oexPVOID, T_ARB, T_ARB );
-
-public:
-
-    /// Constructor
-    TDelegate()
-    {
-        m_pClass = m_pFunction = oexNULL;        
-    }
-
-    /// Set delegate
-    template < typename T_RET, typename T_P1, typename T_P2, typename T_CLASS > 
-        void Set( T_CLASS *x_pC, T_RET(T_CLASS::*x_pF)( T_P1, T_P2 ) )
-    {
-        _Set< T_RET, T_P1, T_P2 >( x_pC, x_pF );
-    }
-
-public:
-
-    /// Thunk
-    template < typename T_RET, typename T_P1, typename T_P2, typename T_CLASS, typename T_FUNCTION > 
-        static T_RET Thunk( void* x_pC, void* x_pF, T_P1 p1, T_P2 p2 )
-    {   return ( ( (T_CLASS*)x_pC )->*( *( (T_FUNCTION*)&x_pF ) ) )( p1, p2 ); }
-
-    /// Sets delegate target
-    template < typename T_RET, typename T_P1, typename T_P2, typename T_CLASS, typename T_FUNCTION > 
-        void _Set( T_CLASS *x_pC, T_FUNCTION x_pF )
-    {
-        /// Thunk function type
-        union UThunk { T_RET (*pThunk)( void*, void*, T_P1, T_P2 ); };
-        oexSTATIC_ASSERT( sizeof( m_rawThunk ) == sizeof( UThunk ) );
-
-        m_pClass = x_pC;
-        m_pFunction = *(void**)&x_pF;
-
-        ( (UThunk*)m_rawThunk )->pThunk = &Thunk< T_RET, T_P1, T_P2, T_CLASS, T_FUNCTION >;
-
-        m_pCall2 = &Call< T_RET, T_P1, T_P2 >;
-    }
-
-    template < typename T_RET, typename T_P1, typename T_P2 > 
-        static T_ARB Call( oexPVOID x_pT, oexPVOID x_pC, oexPVOID x_pF, T_ARB p1, T_ARB p2 )
-    {
-        /// Thunk function type
-        union UThunk { T_RET (*pThunk)( void*, void*, T_P1, T_P2 ); };
-//        oexSTATIC_ASSERT( sizeof( m_rawThunk ) == sizeof( UThunk ) );
-
-        return ( ( (UThunk*)x_pT )->pThunk )( x_pC, x_pF, p1, p2 );
-    } 
-
-    T_ARB operator ()( T_ARB p1, T_ARB p2 )
-    {
-        return m_pCall2( m_rawThunk, m_pClass, m_pFunction, p1, p2 );
-    }
-
-/*
-    /// Call delegate
-    template < typename T_RET, typename T_P1, typename T_P2 > 
-        T_RET Call( T_P1 p1, T_P2 p2 )
-    {     
-        /// Thunk function type
-        union UThunk { T_RET (*pThunk)( void*, void*, T_P1, T_P2 ); };
-        oexSTATIC_ASSERT( sizeof( m_rawThunk ) == sizeof( UThunk ) );
-
-        return ( ( (UThunk*)m_rawThunk )->pThunk )( m_pClass, m_pFunction, p1, p2 ); 
-    }
-* /
-
-protected:
-
-    /// Class pointer
-    oexPVOID        m_pClass;
-
-    /// Function pointer
-    oexPVOID        m_pFunction;
-
-    /// Thunk
-    oexUCHAR        m_rawThunk[ sizeof( void (TDelegate::*)() ) ];
-
-    t_Call2         m_pCall2;
-};
-
-
-/*
-template< typename T_RET, typename T_P1, typename T_P2 >
-    class TDelegate : public CDelegate
-{
-public:
-
-    /// Thunk function type
-    typedef T_RET (*t_Thunk)( void*, void*, T_P1, T_P2 );
-
-    /// Thunking function
-    union UThunk
-    {
-        t_Thunk         pThunk;
-    };
-
-public:
-
-    /// Thunk
-    template < typename T_CLASS, typename T_FUNCTION > 
-        static int Thunk( void* x_pC, void* x_pF, T_P1 p1, T_P2 p2 )
-    {   return ( ( (T_CLASS*)x_pC )->*( *( (T_FUNCTION*)&x_pF ) ) )( p1, p2 ); }
-
-    /// Function call operator
-    T_RET operator()( T_P1 p1, T_P2 p2 )
-    {     
-        return ( ( (UThunk*)m_rawThunk )->pThunk )( m_pClass, m_pFunction, p1, p2 ); 
-
-//        t_Thunk f = (t_Thunk)m_pThunk;
-//        t_Thunk f = ( ( (UThunk*)m_rawThunk )->pThunk );
-//        return m_pThunk( m_pClass, m_pFunction, p1, p2 ); 
-    }
-
-    /// Sets delegate target
-    template < typename T_CLASS, typename T_FUNCTION > 
-        void Set( T_CLASS *x_pC, T_FUNCTION x_pF )
-    {   m_pClass = x_pC;
-        m_pFunction = *(void**)&x_pF;
-        ( (UThunk*)m_rawThunk )->pThunk = &Thunk< T_CLASS, T_FUNCTION >;
-    }
-
-private:
-
-/*    /// Class pointer
-    oexPVOID        m_pClass;
-
-    /// Function pointer
-    oexPVOID        m_pFunction;
-
-    /// Thunking function
-    union
-    {
-        t_Thunk         m_pThunk;
-
-        char            m_rawThunk[ sizeof( t_Thunk ) ];
-    };
-* /
-//    T_RET (*m_pThunk)( void*, void*, T_P1, T_P2 );
-
-//    oexPVOID m_pThunk;
-};
-
-/*
-class CDelegate
-{
-public:
-
-    template< typename T_CLASS, typename T_RET, typename T_P1, typename T_P2 >
-        static void* CreateDelegate( T_CLASS *x_pC, T_RET (T_CLASS::*x_pF)( T_P1, T_P2 ) )
-        {
-            TDelegate< T_RET, T_P1, T_P2 > *p = new TDelegate< T_RET, T_P1, T_P2 >();
-            p->Set( x_pC, x_pF );
-            return (void*)p;
-        }
-
-};
-*/
-
-
 
 

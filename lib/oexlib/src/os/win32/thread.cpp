@@ -256,7 +256,8 @@ oexBOOL CThreadMgr::DoThread( oexPVOID x_pData )
 
         // Acquire lock
         CTlLocalLock ll( m_lock );
-        if ( !ll.IsLocked() ) return oexFALSE;
+        if ( !ll.IsLocked() ) 
+            return oexFALSE;
 
         // Find a thread that needs dropping
         while ( m_lstThreadMgr.Next( it ) )
@@ -276,7 +277,8 @@ oexBOOL CThreadMgr::Destroy()
 
     // Acquire lock
     CTlLocalLock ll( m_lock );
-    if ( !ll.IsLocked() ) return oexFALSE;
+    if ( !ll.IsLocked() ) 
+        return oexFALSE;
 
     // Stop all remaining threads
     oexBOOL bError = oexFALSE;
@@ -287,7 +289,8 @@ oexBOOL CThreadMgr::Destroy()
             it = m_lstThreadMgr.Erase( it );
 
         // Couldn't be stopped
-        else bError = oexTRUE;
+        else 
+            bError = oexTRUE;
 
     return !bError;
 }

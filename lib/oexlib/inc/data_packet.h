@@ -160,7 +160,8 @@ public:
 	oexBOOL ReadPacketString( oexUINT x_uBlock, oexUINT x_uType, oexSTR8 x_pStr, oexUINT x_uMax )
 	{	oexUINT uLen = 0;
 		oexBOOL bRes = ReadPacketData( x_uBlock, x_uType, x_pStr, x_uMax, &uLen );
-		if ( uLen >= x_uMax ) uLen = x_uMax - 1; x_pStr[ uLen ] = 0; 
+		if ( uLen >= x_uMax ) 
+            uLen = x_uMax - 1; x_pStr[ uLen ] = 0; 
 		return bRes;
 	}
 
@@ -444,7 +445,8 @@ public:
 	// GetEncoding()
 	//==============================================================
 	/// Returns the type of packet data encoding
-	oexUINT GetEncoding() { return m_uEncode; }
+	oexUINT GetEncoding() 
+    {   return m_uEncode; }
 
 private:
 

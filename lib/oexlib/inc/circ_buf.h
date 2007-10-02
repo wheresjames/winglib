@@ -677,7 +677,8 @@ public:
 
 		\see 
 	*/
-	virtual oexBOOL OnWrite() { DataReady(); return oexTRUE; }
+	virtual oexBOOL OnWrite() 
+    {   DataReady(); return oexTRUE; }
 
 	//==============================================================
 	// Read()
@@ -817,7 +818,8 @@ public:
     }
 
 	/// Returns a pointer for the buffers thread locking class
-	operator CTlLock*() { return &m_lock; }
+	operator CTlLock*() 
+    {   return &m_lock; }
 
 	//==============================================================
 	// SetMaxSize()
@@ -830,7 +832,8 @@ public:
 
 		\see SetAutoGrow(), SetAutoGrow(), SetMaxSize() 
 	*/
-	void SetMaxSize( oexUINT x_uMaxSize ) { m_uMaxSize = x_uMaxSize; }
+	void SetMaxSize( oexUINT x_uMaxSize ) 
+    {   m_uMaxSize = x_uMaxSize; }
 
 	//==============================================================
 	// GetMaxSize()
@@ -841,7 +844,8 @@ public:
 	
 		\see GetAutoGrow(), SetAutoGrow(), SetMaxSize() 
 	*/
-	oexUINT GetMaxSize() { return m_uMaxSize; }
+	oexUINT GetMaxSize() 
+    {   return m_uMaxSize; }
 
 	//==============================================================
 	// SetAutoGrow()
@@ -876,7 +880,8 @@ public:
 	
 		\see SetAutoGrow(), SetMaxSize(), GetMaxSize()
 	*/
-	oexBOOL GetAutoGrow() { return m_bAutoGrow; }
+	oexBOOL GetAutoGrow() 
+    {   return m_bAutoGrow; }
 
 	//==============================================================
 	// IsEmpty()
@@ -885,7 +890,8 @@ public:
 	/**
 		\return Non-zero if data can be read from the buffer.
 	*/
-	oexBOOL IsEmpty() { return m_bEmpty; }
+	oexBOOL IsEmpty() 
+    {   return m_bEmpty; }
 
 	//==============================================================
 	// DataReady()
@@ -903,13 +909,15 @@ public:
 	// GetDataReadyHandle()
 	//==============================================================
 	/// Returns the data ready event handle
-    os::CSys::t_WAITABLE GetDataReadyHandle() { return m_hDataReady; }
+    os::CSys::t_WAITABLE GetDataReadyHandle() 
+    {   return m_hDataReady; }
 
 	//==============================================================
 	// GetEmptyHandle()
 	//==============================================================
 	/// Returns the buffer empty event handle
-    os::CSys::t_WAITABLE GetEmptyHandle() { return m_hEmpty; }
+    os::CSys::t_WAITABLE GetEmptyHandle() 
+    {   return m_hEmpty; }
 
 	//==============================================================
 	// Empty()
@@ -951,7 +959,8 @@ public:
 	
 		\see 
 	*/
-	virtual oexBOOL OnInspectRead( oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize ) { return oexTRUE; }
+	virtual oexBOOL OnInspectRead( oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize ) 
+    {   return oexTRUE; }
 
 	//==============================================================
 	// OnInspectWrite()
@@ -966,7 +975,8 @@ public:
 	
 		\see 
 	*/
-	virtual oexBOOL OnInspectWrite( oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize ) { return oexTRUE; }
+	virtual oexBOOL OnInspectWrite( oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize ) 
+    {   return oexTRUE; }
 
 	/// Over-ride this function to enable generic block encoding
 	//==============================================================
@@ -983,7 +993,8 @@ public:
 	
 		\see 
 	*/
-	virtual oexBOOL OnEncode( oexUINT x_uType, oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize ) { return oexTRUE; }
+	virtual oexBOOL OnEncode( oexUINT x_uType, oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize ) 
+    {   return oexTRUE; }
 
 	/// Over-ride this function to enable generic block decoding
 	//==============================================================
@@ -1000,7 +1011,8 @@ public:
 	
 		\see 
 	*/
-	virtual oexBOOL OnDecode( oexUINT x_uType, oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize ) { return oexTRUE; }
+	virtual oexBOOL OnDecode( oexUINT x_uType, oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize ) 
+    {   return oexTRUE; }
 
 	//==============================================================
 	// GetBufferSize()
@@ -1009,7 +1021,8 @@ public:
 	/**		
 		\return	Total size of the circular buffer
 	*/
-	oexUINT GetBufferSize() { return m_uSize; }
+	oexUINT GetBufferSize() 
+    {   return m_uSize; }
 
 private:
 

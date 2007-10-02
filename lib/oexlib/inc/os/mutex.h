@@ -93,7 +93,8 @@ public:
 	// vInvalid()
 	//==============================================================
 	/// Value representing an invalid mutex handle value
-	static oexCONST t_MUTEX vInvalid() { return c_Invalid; }
+	static oexCONST t_MUTEX vInvalid() 
+    {   return c_Invalid; }
 
 private:
 

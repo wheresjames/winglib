@@ -107,6 +107,10 @@ private:
 
 	virtual oexBOOL DoThread( oexPVOID x_pData ) 
     {
+        // Punt if no event handle
+        if ( !GetCmdEvent() )
+            return oexFALSE;
+
         // Get events
         os::CSys::t_WAITABLE phEvents[ 2 ] = 
         {
@@ -114,7 +118,7 @@ private:
             m_evQuit.GetHandle(),
 
             // 1 == Command waiting
-            GetCmdEvent().GetHandle()
+            GetCmdEvent()->GetHandle()
 
         };
 

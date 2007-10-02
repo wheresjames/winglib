@@ -97,7 +97,7 @@ typedef void oexCONST *				oexCPVOID;
 typedef oexUINT						oexTYPEOF_PTR;
 
 
-typedef struct _oexGUID 
+struct oexGUID 
 {
     union
     {
@@ -112,5 +112,71 @@ typedef struct _oexGUID
         oexUCHAR        ucBuf[ 16 ];
     };
 
-} oexGUID;
+};
+
+
+/// Finger saver ;)
+/// This class can be used efficiently as a return type
+class oexAUTOGUID : public oexGUID
+{
+public:
+
+    /// Default constructor
+    oexAUTOGUID() {}
+    
+    /// Copy constructor
+    oexAUTOGUID( oexCONST oexGUID &r ) 
+    {   Copy( r ); }
+    
+    /// Copy constructor
+    oexAUTOGUID( oexCONST oexGUID *p ) 
+    {   Copy( p ); }
+
+    /// Copy constructor
+    oexAUTOGUID( oexCONST oexAUTOGUID &r ) 
+    {   Copy( (oexGUID&)r ); }
+    
+    /// Copy constructor
+    oexAUTOGUID( oexCONST oexAUTOGUID *p ) 
+    {   Copy( (oexGUID*)p ); }
+
+    /// Copy operator
+    oexAUTOGUID& operator = ( oexCONST oexGUID &r ) 
+    {   return Copy( r ); }
+
+    /// Copy operator
+    oexAUTOGUID& operator = ( oexCONST oexGUID *p ) 
+    {   return Copy( p ); }
+    
+    /// Copy operator
+    oexAUTOGUID& operator = ( oexCONST oexAUTOGUID &r ) 
+    {   Copy( (oexGUID&)r ); }
+
+    /// Copy operator
+    oexAUTOGUID& operator = ( oexCONST oexAUTOGUID *p ) 
+    {   Copy( (oexGUID*)p ); }
+
+    /// Copies guid
+    oexAUTOGUID& Copy( oexCONST oexGUID &r )
+    {   *(oexINT64*)this = *(oexINT64*)&r;
+        ( (oexINT64*)this )[ 1 ] = ( (oexINT64*)&r )[ 1 ];
+        return *this;
+    }
+
+    /// Copies guid
+    oexAUTOGUID& Copy( oexCONST oexGUID *p )
+    {   *(oexINT64*)this = *(oexINT64*)p;
+        ( (oexINT64*)this )[ 1 ] = ( (oexINT64*)p )[ 1 ];
+        return *this;
+    }
+
+    /// GUID reference
+    operator oexGUID& ()
+    {   return *this; }
+
+    /// GUID pointer
+    operator oexGUID* ()
+    {   return this; }
+
+};
 

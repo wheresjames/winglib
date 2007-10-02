@@ -131,7 +131,8 @@ public:
 
     static oexBOOL Close( t_HFILE x_hFile, oexUINT *x_puErr );
 
-    static t_HFILE vInvalid() { return c_Invalid; }
+    static t_HFILE vInvalid() 
+    {   return c_Invalid; }
 
     static oexBOOL Write( t_HFILE hFile, oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puWritten, oexUINT *x_puErr );
 
@@ -171,6 +172,7 @@ public:
 
     static oexBOOL FindClose( t_HFIND x_hFind );
 
-    static t_HFIND vInvalidFindHandle() { return c_InvalidFindHandle; }
+    static t_HFIND vInvalidFindHandle() 
+    {   return c_InvalidFindHandle; }
 
 };

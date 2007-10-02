@@ -50,8 +50,11 @@ public:
 	typedef oexPVOID		t_EVENT;
 
 private:
-	CEvent() {}
-	virtual ~CEvent() {}
+	CEvent() 
+    {}
+
+	virtual ~CEvent() 
+    {}
 
 public:
 
@@ -168,13 +171,15 @@ public:
 	/**
 		Use with wait functions
 	*/
-	static oexCONST oexUINT vInfinite() { return c_Infinite; }
+	static oexCONST oexUINT vInfinite() 
+    {   return c_Infinite; }
 
 	//==============================================================
 	// vInvalid()
 	//==============================================================
 	/// Value representing an invalid event handle value
-	static oexCONST t_EVENT vInvalid() { return c_Invalid; }
+	static oexCONST t_EVENT vInvalid() 
+    {   return c_Invalid; }
 
 private:
 

@@ -60,6 +60,9 @@ public:
     enum
     {
         /// Value indicating local time
+        eNullTime  = 0,
+
+        /// Value indicating local time
         eLocalTime  = 1,
 
         /// Value indicating GMT time
@@ -85,11 +88,11 @@ public:
 
     /// Constructor
     /**
-        \param [in] x_uInitTime -   0   =   Null time
+        \param [in] x_uInitTime -   0   =   Uninitialized
                                     1   =   Local time
                                     2   =   GMT time
     */
-    CSysTime( oexUINT x_uInitTime = 0 )
+    CSysTime( oexUINT x_uInitTime = eNullTime )
     {   
         if ( eLocalTime == x_uInitTime )
             GetLocalTime();
