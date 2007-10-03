@@ -643,6 +643,10 @@ oexBOOL CCircBuf::GetView( oexUINT x_uView, oexUINT x_uPtr, oexUINT x_uSize, oex
 
 oexBOOL CCircBuf::WaitData(oexUINT x_uTimeout)
 {
+    // No data if no buffer
+    if ( !m_pBi )
+        return oexFALSE;
+
 	// Wait for data
 	if ( os::CSys::waitSuccess != os::CSys::WaitForSingleObject( m_hDataReady, x_uTimeout ) )
 		return oexFALSE;
@@ -652,6 +656,10 @@ oexBOOL CCircBuf::WaitData(oexUINT x_uTimeout)
 
 oexBOOL CCircBuf::WaitEmpty(oexUINT x_uTimeout)
 {
+    // Empty if no buffer
+    if ( !m_pBi )
+        return oexTRUE;
+
 	// Wait for data
 	if ( os::CSys::waitSuccess != os::CSys::WaitForSingleObject( m_hEmpty, x_uTimeout ) )
 		return oexFALSE;

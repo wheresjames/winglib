@@ -337,8 +337,7 @@ public:
     /// Creates an event
     os::CEvent::t_EVENT Create( oexCSTR x_pName = oexNULL, oexBOOL x_bManualReset = oexTRUE )
     {	return ( m_hEvent = os::CEvent::osCreateEvent( x_pName, x_bManualReset ) ); }
-
-
+    
 	//==============================================================
 	// Set()
 	//==============================================================

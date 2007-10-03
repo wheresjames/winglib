@@ -46,7 +46,7 @@
     };
 
     template < typename T > 
-    	static T ReturnTest( T t ) { return t; }
+    	static T ReturnTest( const T t ) { return (T)t; }
 
 oex::oexRESULT TestAllocator()
 {
@@ -302,7 +302,7 @@ oex::oexRESULT TestGuids()
 
     oex::oexGUID    guid1, guid2;
     oex::oexTCHAR   szGuid1[ 1024 ] = oexT( "" );
-    oex::oexTCHAR   szGuid2[ 1024 ] = oexT( "" );
+//    oex::oexTCHAR   szGuid2[ 1024 ] = oexT( "" );
 
     // Guid / String conversions
     oex::guid::GuidToString( szGuid1, oexSizeofArray( szGuid1 ), &guidTest );
@@ -920,7 +920,6 @@ oex::oexRESULT TestParser()
 
     sStr = oex::CParser::Serialize( pb );
     pb2 = oex::CParser::Deserialize( sStr );
-    oex::CStr sStr2 = oex::CParser::Serialize( pb2 );
     if ( !oexVERIFY( oex::CParser::Serialize( pb2 ) == sStr ) )
        return -24;
 
@@ -1276,7 +1275,6 @@ oex::oexRESULT Test_CFifoSync()
     fs.SetMaxBuffers( 10000 );
 
     oex::oexCSTR pStr = oexT( "Hello World" );
-    oex::oexUINT uStr = oex::zstr::Length( pStr );
     oex::oexUINT uBufferedData = 0;
 
     for ( oex::oexUINT i = 0; i < 10; i++ )

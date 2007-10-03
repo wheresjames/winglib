@@ -49,8 +49,8 @@ public:
 
     /// Constructor
     TAutoStr() : TStr() {}
-    TAutoStr( oexCONST TStr &str ) : TStr( (TStr&)str ) {}
-    TAutoStr( oexCONST TAutoStr &str ) : TStr( (TStr&)str ) {}
+    TAutoStr( oexCONST TStr< T > &str ) : TStr< T >( (TStr< T >&)str ) {}
+    TAutoStr( oexCONST TAutoStr &str ) : TStr< T >( (TStr< T >&)str ) {}
 
 #ifdef _UNICODE
     TAutoStr( oexCONST CStr8 &str ) { Cnv( (CStr8&)str ); }
@@ -58,17 +58,17 @@ public:
     TAutoStr( oexCONST CStrW &str ) { Cnv( (CStrW&)str ); }
 #endif
 
-    TAutoStr( oexCONST T *pStr ) : TStr( pStr ) {}
-    TAutoStr( oexCONST T *pStr, oexUINT uSize ) : TStr( pStr, uSize ) {}
-    TAutoStr( oexCONST T *pStr, oexINT nStart, oexUINT uLen ) : TStr( pStr, nStart, uLen ) {}
-    TAutoStr( oexCONST T *pStr, oexUINT uSize, oexINT nStart, oexUINT uLen ) : TStr( pStr, uSize, nStart, uLen ) {}
+    TAutoStr( oexCONST T *pStr ) : TStr< T >( pStr ) {}
+    TAutoStr( oexCONST T *pStr, oexUINT uSize ) : TStr< T >( pStr, uSize ) {}
+    TAutoStr( oexCONST T *pStr, oexINT nStart, oexUINT uLen ) : TStr< T >( pStr, nStart, uLen ) {}
+    TAutoStr( oexCONST T *pStr, oexUINT uSize, oexINT nStart, oexUINT uLen ) : TStr< T >( pStr, uSize, nStart, uLen ) {}
     
-    TAutoStr( oexCONST oexINT nVal ) : TStr( nVal ) {}
-    TAutoStr( oexCONST oexUINT uVal ) : TStr( uVal ) {}
-    TAutoStr( oexCONST oexFLOAT fStr ) : TStr( (oexDOUBLE)fStr ) {}
-    TAutoStr( oexCONST oexDOUBLE dStr ) : TStr( dStr ) {}
-    TAutoStr( oexCONST T tVal ) : TStr( tVal ) {}
-    TAutoStr( oexCONST oexGUID &guid ) : TStr( guid ) {}
+    TAutoStr( oexCONST oexINT nVal ) : TStr< T >( nVal ) {}
+    TAutoStr( oexCONST oexUINT uVal ) : TStr< T >( uVal ) {}
+    TAutoStr( oexCONST oexFLOAT fStr ) : TStr< T >( (oexDOUBLE)fStr ) {}
+    TAutoStr( oexCONST oexDOUBLE dStr ) : TStr< T >( dStr ) {}
+    TAutoStr( oexCONST T tVal ) : TStr< T >( tVal ) {}
+    TAutoStr( oexCONST oexGUID &guid ) : TStr< T >( guid ) {}
     
 public:
 

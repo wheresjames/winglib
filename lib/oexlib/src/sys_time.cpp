@@ -50,7 +50,7 @@ static oexCSTR s_months[] = { oexT( "Inv" ), oexT( "Jan" ), oexT( "Feb" ), oexT(
 static oexCSTR s_fdays[] = { oexT( "Sunday" ), oexT( "Monday" ), oexT( "Tuesday" ), oexT( "Wednesday" ), oexT( "Thursday" ), oexT( "Friday" ), oexT( "Saturday" ), oexT( "Invalid" ) };
 static oexCSTR s_fmonths[] = { oexT( "Invalid" ), oexT( "January" ), oexT( "February" ), oexT( "March" ), oexT( "April" ), oexT( "May" ), oexT( "June" ), 
 							   oexT( "July" ), oexT( "August" ), oexT( "September" ), oexT( "October" ), oexT( "November" ), oexT( "December" ) };
-static oexUINT g_mdays[] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+// static oexUINT g_mdays[] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 #define FTOFF_1900		9435484800
 #define FTOFF_1970		11644473600

@@ -106,32 +106,32 @@
 #define TARB_BODY( n )                                                                                  \
 public:                                                                                                 \
     template < typename T_RET, TARB_PARAM_A_##n typename T_CLASS >                                      \
-        TArbDelegate( T_CLASS *x_pC, T_RET(T_CLASS::*x_pF)( TARB_PARAM_B_##n ) )                        \
+        TArbDelegate( const T_CLASS *x_pC, T_RET(T_CLASS::*x_pF)( TARB_PARAM_B_##n ) )                  \
     {   TArbDelegate(); _Register< T_RET TARB_PARAM_C_##n >( x_pC, x_pF ); }                            \
     template < typename T_RET, TARB_PARAM_A_##n typename T_CLASS >                                      \
-        void Register( T_CLASS *x_pC, T_RET(T_CLASS::*x_pF)( TARB_PARAM_B_##n ) )                       \
+        void Register( const T_CLASS *x_pC, T_RET(T_CLASS::*x_pF)( TARB_PARAM_B_##n ) )                 \
     {   _Register< T_RET TARB_PARAM_C_##n >( x_pC, x_pF ); }                                            \
     T_ARB operator ()( TARB_PARAM_E_##n )                                                               \
-    {   typedef T_ARB (*t_Thunk)( void*, void* TARB_PARAM_I_##n );                                      \
+    {   typedef T_ARB (*t_Thunk)( const void*, void* TARB_PARAM_I_##n );                                \
         return ((t_Thunk)m_pThunk)( m_pClass, &m_rawFunction TARB_PARAM_G_##n ); }                      \
 private:                                                                                                \
     template < typename T_RET, TARB_PARAM_A_##n typename T_CLASS, typename T_FUNCTION >                 \
-        void _Register( T_CLASS *x_pC, T_FUNCTION x_pF )                                                \
+        void _Register( const T_CLASS *x_pC, const T_FUNCTION x_pF )                                    \
     {   m_uParams = n;                                                                                  \
         m_pClass = x_pC;                                                                                \
         *(T_FUNCTION*)(void*)m_rawFunction = x_pF;                                                      \
-        typedef T_ARB (*t_Thunk)( void*, void* TARB_PARAM_I_##n );                                      \
+        typedef T_ARB (*t_Thunk)( const void*, void* TARB_PARAM_I_##n );                                \
         m_pThunk = (t_Thunk)&SThunk_##n< T_RET >::Thunk< T_RET, TARB_PARAM_D_##n T_CLASS, T_FUNCTION >; \
     }                                                                                                   \
     template< typename T_RET > struct SThunk_##n                                                        \
     {   template < typename T_RET, TARB_PARAM_A_##n typename T_CLASS, typename T_FUNCTION >             \
-            static T_ARB Thunk( void* x_pC, void* x_pF TARB_PARAM_F_##n )                               \
+            static T_ARB Thunk( const void* x_pC, void* x_pF TARB_PARAM_F_##n )                         \
         {   return ( ( (T_CLASS*)x_pC )->*( *( (T_FUNCTION*)x_pF ) ) )( TARB_PARAM_H_##n ); }           \
     };                                                                                                  \
     template <> struct SThunk_##n< void >                                                               \
     {   template < typename T_RET, TARB_PARAM_A_##n typename T_CLASS, typename T_FUNCTION >             \
-            static T_ARB Thunk( void* x_pC, void* x_pF TARB_PARAM_F_##n )                               \
-        {   ( ( (T_CLASS*)x_pC )->*( *( (T_FUNCTION*)x_pF ) ) )( TARB_PARAM_H_##n ); return 0; }       \
+            static T_ARB Thunk( const void* x_pC, void* x_pF TARB_PARAM_F_##n )                         \
+        {   ( ( (T_CLASS*)x_pC )->*( *( (T_FUNCTION*)x_pF ) ) )( TARB_PARAM_H_##n ); return 0; }        \
     };
 
 
@@ -158,7 +158,7 @@ public:
     }
 
     /// Copy constructor
-    TArbDelegate& operator = ( TArbDelegate &x_rD )
+    TArbDelegate& operator = ( const TArbDelegate &x_rD )
     {   m_uParams = x_rD.m_uParams;
         m_pClass = x_rD.m_pClass;
         m_pThunk = x_rD.m_pThunk;
@@ -189,7 +189,7 @@ public:
 protected:
 
     /// Class pointer
-    void*                   m_pClass;
+    const void*             m_pClass;
 
     /// Function pointer buffer
     char                    m_rawFunction[ 16 ];

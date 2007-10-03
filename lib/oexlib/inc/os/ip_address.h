@@ -86,14 +86,18 @@ public:
     //==============================================================
     /// Generates a guid describing the connection.
     CStr GetId()
-    {   return CStr().GuidToString( GetId( &oexGUID() ) ); }
+    {   oexGUID guid;
+        return CStr().GuidToString( GetId( &guid ) ); 
+    }
 
     /// Sets the address from an ID
     CIpAddress& SetId( oexCONST oexGUID *x_pGuid );
 
     /// Sets the address from an ID
     CIpAddress& SetId( CStr &sId )
-    {   return SetId( sId.StringToGuid( &oexGUID() ) ); }
+    {   oexGUID guid;
+        return SetId( sId.StringToGuid( &guid ) ); 
+    }
 
     /// Builds a url from the given information
     static CStr BuildUrl( CPropertyBag &x_pbUi );

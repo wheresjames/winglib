@@ -152,23 +152,19 @@ oexBOOL CThread::Start( oexUINT x_uSleep, oexPVOID x_pData )
     m_evInit.Reset();
 
 	// Create a thread
-    DWORD dwThreadId;
 	m_hThread = CreateThread(	(LPSECURITY_ATTRIBUTES)NULL,
 								0,
                                 CThreadProcImpl::ThreadProc,
 								(LPVOID)this,	
 								0, 
-								&dwThreadId );
+								(LPDWORD)&m_uThreadId );
 
     // Developer will probably want to hear about this
     oexASSERT( c_InvalidThread != m_hThread);
 
     // Did we get our thread?
     if ( c_InvalidThread == m_hThread )
-    {   Stop(); return oexFALSE; }
-
-    // Save the thread id
-    m_uThreadId = (oexUINT)dwThreadId;
+    {   Stop(); m_uThreadId = 0; return oexFALSE; }
 
     return oexTRUE;
 }
@@ -233,7 +229,6 @@ void CThread::DecRunningThreadCount()
 {   if ( oexVERIFY( m_lRunningThreadCount ) )
         CSys::InterlockedDecrement( &m_lRunningThreadCount ); 
 }
-
 
 /*
 oexBOOL CThreadMgr::DoThread( oexPVOID x_pData )

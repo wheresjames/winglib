@@ -79,16 +79,16 @@ public:
 
 	/// Default constructor
 	TPropertyBag() {}
-
+/*
 	TPropertyBag( oexUINT v ) { *m_t = v; }
 	TPropertyBag( oexINT v ) { *m_t = v; }
 	TPropertyBag( oexLONG v ) { *m_t = v; }
 	TPropertyBag( oexULONG v ) { *m_t = v; }
 	TPropertyBag( oexCSTR v ) { *m_t = v; }
 	TPropertyBag( oexDOUBLE v ) { *m_t = v; }
-
+*/
     /// Assignment constructor
-    TPropertyBag( TPropertyBag &x_rPb )
+    TPropertyBag( oexCONST TPropertyBag &x_rPb )
     {   Assume( x_rPb ); }
 
 	/// Destructor
@@ -136,7 +136,7 @@ public:
 	
 		\see 
 	*/
-	TPropertyBag& operator = ( oexCONST T_R x_t ) 
+	TPropertyBag& operator = ( T_R x_t ) 
     {
         if ( !m_t.Ptr() )
             m_t.OexConstruct().Ptr();
@@ -175,7 +175,7 @@ public:
 	// operator =
 	//==============================================================
     /// Assumes control of the contents of another property bag
-    TPropertyBag& operator = ( TPropertyBag &x_rPb )
+    TPropertyBag& operator = ( oexCONST TPropertyBag &x_rPb )
     {   return Assume( x_rPb ); }
 
 	//==============================================================
@@ -302,11 +302,11 @@ public:
 	*/
 	CStr PrintR() { return PrintR( *this, CStr() ); }
 
-    TPropertyBag& Assume( TPropertyBag &x_pb )
+    TPropertyBag& Assume( oexCONST TPropertyBag &x_pb )
     {
         // Swip values
-        m_t.Assume( x_pb.m_t );
-        m_lstPb = x_pb.m_lstPb;
+        m_t.Assume( ( (TPropertyBag&)x_pb ).m_t );
+        m_lstPb = ( (TPropertyBag&)x_pb ).m_lstPb;
         return *this;
     }
 

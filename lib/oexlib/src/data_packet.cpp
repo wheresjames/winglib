@@ -96,8 +96,8 @@ oexBOOL CDataPacket::vWriteMultiPacket( oexUINT x_uPacketType, oexUINT x_uBuffer
 	{
 		OEX_TRY // This could GPF if caller screws up
 		{
-			oexUINT	    uType = *(oexUINT*)ptrExtra;
-			oexUCHAR	*pPtr = *(oexUCHAR**)( ptrExtra + 1 );
+//			oexUINT	    uType = *(oexUINT*)ptrExtra;
+//			oexUCHAR	*pPtr = *(oexUCHAR**)( ptrExtra + 1 );
 			oexUINT 	uSize = *(oexUINT*)( ptrExtra + 2 );
 
 			// Track the total size

@@ -103,7 +103,7 @@ oexBOOL CFtpSession::OnConnect( oexINT x_nErr )
 oexBOOL CFtpSession::OnRead( oexINT x_nErr )
 {
     // Process the incomming data
-    if ( !TBufferedPort::OnRead( x_nErr ) )
+    if ( !TBufferedPort< CAutoSocket >::OnRead( x_nErr ) )
 	    return oexFALSE;
 
     // Grab the data
@@ -217,24 +217,20 @@ oexBOOL CFtpSession::CmdPasv()
         // Next port
         m_uPasvPort++;
 
-        /// +++ Should only need to start the thread if it's not running.
-        ///     Doesn't work though, because the socket won't re-establish.
-
-        // Reset the port
-//        m_nsData.Destroy();
-//        m_nsData.Start();
-
+        // Ensure the thread is running
         if ( !m_nsData.IsRunning() )
             m_nsData.Start();
 
         // Reset server
-        m_nsData.Queue( 0, oexCall( oexT( "Reset" ) ) ).Wait( oexDEFAULT_TIMEOUT );
+        m_nsData.Queue( 0, oexCall( oexT( "Reset" ) ) );
 
         // Bind to port
-        m_nsData.Queue( 0, oexCall( oexT( "Bind" ), m_uPasvPort ) );
+        if ( m_nsData.Queue( 0, oexCall( oexT( "Bind" ), m_uPasvPort ) )
+                .Wait( oexDEFAULT_TIMEOUT ).GetReply().ToInt() 
 
-        // Start the server listening
-        if ( m_nsData.Queue( 0, oexCall( oexT( "Listen" ), 0 ) ).Wait( oexDEFAULT_TIMEOUT ).GetReply().ToInt() )
+             && m_nsData.Queue( 0, oexCall( oexT( "Listen" ), 0 ) )
+                .Wait( oexDEFAULT_TIMEOUT ).GetReply().ToInt() )
+
             bStarted = oexTRUE;
 
     } // end while
@@ -256,55 +252,38 @@ oexBOOL CFtpSession::CmdPasv()
 
 CDispatch CFtpSession::GetPassiveConnection()
 {
-/*  CTlLocalLock ll( m_nsData );
-    if ( !ll.IsLocked() )
-    {   Write( "425 Failed to acquire lock.\n" );
-        return t_FtpDataConnection::t_Session();
-    } // end if
-*/
     // Get the first session
     CDispatch session = m_nsData.GetSession( 0 );
 
-    // Get the first session in the list
-//    t_FtpDataConnection::t_Session session = 
-//        m_nsData.GetSessionList().First();
-
     // Wait for client to connect
-    if ( !session.IsValid() )
+    if ( session.IsConnected() )
     {
         Write( "150 Waiting connection...\n" );
 
         os::CHqTimer to( oexTRUE );
-        while ( 8 > to.ElapsedSeconds() && !session.IsValid() )
+        while ( 8 > to.ElapsedSeconds() && !session.IsConnected() )
         {   os::CSys::Sleep( 15 );
             session = m_nsData.GetSession( 0 );
         } // end while
+
+        // Did we get a connection?
+        if ( !session.IsConnected() )
+            Write( "426 Timed out, I never heard from you!\n" );
 
     } // end if
 
     else 
         Write( "125 Data connection already open; Transfer starting.\n" );
 
-    // Did we get a connection?
-    if ( !session.IsValid() )
-        Write( "426 Timed out, I never heard from you!\n" );
-
     return session;
 }
 
 oexBOOL CFtpSession::CmdList()
 {       
-/*  
-    CTlLocalLock ll( m_nsData );
-    if ( !ll.IsLocked() )
-    {   Write( "425 Failed to acquire lock.\n" );
-        return oexFALSE;
-    } // end if
-*/
     // Get connection
     CDispatch session = GetPassiveConnection();
 
-    if ( !session.IsValid() )
+    if ( !session.IsConnected() )
         return oexFALSE;
 
     CStr8 sStr;
@@ -320,34 +299,52 @@ oexBOOL CFtpSession::CmdList()
                                   ( ff.GetFileAttributes() & os::CBaseFile::eFileAttribDirectory ) ? 'd' : '-',
                                   (oexUINT)ff.FileData().llSize,
                                   oexStrToStr8Ptr( 
-                                    CSysTime( CSysTime::eFmtFile, ff.FileData().ftLastModified ).
-                                        FormatTime( oexT( "%b %d %Y" ) ) 
-                                    ),
+                                    CSysTime( CSysTime::eFmtFile, ff.FileData().ftLastModified )
+                                        .FormatTime( oexT( "%b %d %Y" ) ) ),
                                   oexStrToStr8Ptr( ff.GetFileName() ) );
 
         } while ( ff.FindNext() );
 
         // Write the file list to client
-//        session->Protocol().Write( sStr );
         session.Queue( 0, oexCall( oexT( "WriteStr" ), sStr ) );
 
     } // end if
 
     // Wait for the data to go out
-    oexINT nWritten = session.Queue( 0, oexCall( oexT( "WaitTxEmpty" ), oexDEFAULT_TIMEOUT ) )
-                            .Wait( oexDEFAULT_TIMEOUT ).GetReply().ToInt();
+    oexUINT nWritten = 0;
+    oexCONST oexUINT uTimeout = 8;
+    os::CHqTimer to( oexTRUE );
+    double dTime = 0;
+    
+    oexUINT uRef1 = session.GetRefCount();
 
-    // Close the session
-//    m_nsData.CloseSession( session->Protocol().GetSessionId() );
+    // Attempt to write data
+    while ( !nWritten && uTimeout > ( dTime = to.ElapsedSeconds() ) && session.IsConnected() )
+    {
+        nWritten = session.Queue( 0, oexCall( oexT( "WaitTxEmpty" ), 0 ) )
+                            .Wait( uTimeout * 1000 ).GetReply().ToInt();
+        
+        if ( !nWritten )
+            os::CSys::Sleep( 15 );
 
-    session.Queue( 0, oexCall( oexT( "CloseSession" ) ) );
+    } // end while
+
+    oexUINT uRef2 = session.GetRefCount();
+
+    // Shutdown the connection
+    m_nsData.Queue( 0, oexCall( oexT( "Reset" ) ) ).Wait( oexDEFAULT_TIMEOUT );
 
     // All done
     if ( nWritten ) 
         Write( "226 Transfer complete.\n" );
 
-    else
+    // Timeout?
+    else if ( uTimeout < to.ElapsedSeconds() )
         Write( "426 Timed out, I'm tired of waiting for the data to go out\n" );
+
+    // Connection dropped
+    else
+        Write( "426 Connection dropped.\n" );
 
     return oexTRUE;
 }
@@ -359,6 +356,13 @@ oexBOOL CFtpSession::CmdRetr( oexCSTR8 x_pFile )
     {   Write( "451 Requested file action aborted; local error in processing.\n" );
         return oexTRUE;
     } // end if
+
+    // Get connection
+    CDispatch session = GetPassiveConnection();
+
+    if ( !session.IsConnected() )
+        return oexFALSE;
+
 /*
     TAutoServer< CFtpDataConnection >::t_SessionList::iterator it = GetPassiveConnection();
     if ( !it.IsValid() ) 

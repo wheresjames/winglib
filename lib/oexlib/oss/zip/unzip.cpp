@@ -1,6 +1,10 @@
 
 #include <Windows.h>
-#pragma warning ( disable : 4996 )
+#ifdef __INTEL_COMPILER
+#   pragma warning( disable : 1786 )
+#else
+#   pragma warning ( disable : 4996 )
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>

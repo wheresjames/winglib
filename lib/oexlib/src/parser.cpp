@@ -125,7 +125,7 @@ CStrList CParser::GetTokens( oexCSTR x_pStr, oexCSTR x_pValid )
 
 	do
 	{	
-		str = CStr::NextToken( x_pStr, x_pValid, &p );
+		str = CStr::NextToken( x_pStr, l, x_pValid, &p );
 		
 		if ( str.Length() ) 
 			lst << str;
@@ -321,7 +321,7 @@ CStr CParser::EncodeMime( CPropertyBag &x_pb )
 	return str;
 }
 
-oexLONG CParser::Deserialize( CStr &x_sStr, CPropertyBag &x_pb, oexBOOL x_bMerge, oexLONG *x_pLast )
+oexLONG CParser::Deserialize( oexCONST CStr &x_sStr, CPropertyBag &x_pb, oexBOOL x_bMerge, oexLONG *x_pLast )
 {
     // Lose previous contents
     if ( !x_bMerge ) 

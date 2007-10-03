@@ -122,12 +122,12 @@ public:
 	/// I think I should be able to choose to automatically 
 	/// inherit constructor arguments
 	TAssoListNode( TAssoListNode *x_pIt, oexINT x_nOpt )
-		: TListNode( x_pIt, x_nOpt )
+		: TListNode< T_OBJ >( x_pIt, x_nOpt )
 	{}
 
 	/// Ditto on the wish list above
 	TAssoListNode( T_OBJ *x_pObj, TAssoListNode *x_pIt, oexINT x_nOpt )
-		: TListNode( x_pObj, x_pIt, x_nOpt )
+		: TListNode< T_OBJ >( x_pObj, x_pIt, x_nOpt )
 	{}
 
 	/// Key value for this list node
@@ -438,7 +438,7 @@ public:
 		m_uTableMask = 0;
 		m_uTableSize = 0;
 		m_table.Delete();
-		TList::Destroy();
+		TList< T_OBJ, T_NODE >::Destroy();
 	}
 
 	//==============================================================
@@ -710,7 +710,7 @@ public:
     {   iterator it = Find( x_key );
         if ( !it.IsValid() )
             return it;
-        return TList::Erase( it, x_bForward );
+        return TList< T_OBJ, T_NODE >::Erase( it, x_bForward );
     }
 
 protected:
@@ -832,7 +832,7 @@ public:
 			return *this;
 
 		// First get the list
-		TList::Attach( (TList&)x_lst );
+		TList< T_OBJ, T_NODE >::Attach( (TList< T_OBJ, T_NODE >&)x_lst );
 
 		// Grab the indexing metrics
 		m_uTableSize = x_lst.m_uTableSize;
@@ -854,7 +854,7 @@ public:
 	/// Detaches from the list items without releasing them
 	virtual void Detach()
 	{
-		TList::Detach();
+		TList< T_OBJ, T_NODE >::Detach();
 
 		// Disconnect the list
 		m_uTableSize = 0;
@@ -877,7 +877,7 @@ public:
 	*/
 	TAssoList Copy()
 	{	TAssoList lst;
-		for ( TList::iterator it; Next( it ); )
+		for ( TList< T_OBJ, T_NODE >::iterator it; Next( it ); )
 			lst[ it.Node()->key ] = *it;
 		return lst;
 	}

@@ -979,6 +979,17 @@ namespace guid
 	    return x_pGuid;
     }
 
+    template< typename T_GUID1 >
+        T_GUID1 * ZeroGuid( T_GUID1 *pDst )
+    {
+        oexVALIDATE_PTR( pDst );
+
+        *(oexINT64*)pDst = 0;
+        ( (oexINT64*)pDst )[ 1 ] = 0;
+
+        return pDst;
+    }
+
     template< typename T_GUID1, typename T_GUID2 >
         T_GUID1 * CopyGuid( T_GUID1 *pDst, oexCONST T_GUID2 *pSrc )
     {

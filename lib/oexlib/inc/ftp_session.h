@@ -43,8 +43,8 @@
 */
 //==================================================================
 class CFtpDataConnection : 
-    public TBufferedPort< CAutoSocket >,
-    public CProtocol
+    public CProtocol,
+    public TBufferedPort< CAutoSocket >
 {
 public:
 
@@ -62,7 +62,7 @@ public:
     virtual oexBOOL OnRead( oexINT x_nErr )
     {
 	    // Process the incomming data
-        if ( !TBufferedPort::OnRead( x_nErr ) )
+        if ( !TBufferedPort< CAutoSocket >::OnRead( x_nErr ) )
 		    return oexFALSE;
 
         // Write out the data
@@ -124,8 +124,8 @@ private:
 */
 //==================================================================
 class CFtpSession : 
-    public TBufferedPort< CAutoSocket >,
-    public CProtocol
+    public CProtocol,
+    public TBufferedPort< CAutoSocket >
 {
 public:
 
@@ -214,6 +214,9 @@ public:
 
 private:
 
+    /// Server for passive mode
+    t_FtpDataConnection                 m_nsData;
+
     /// Root folder
     CStr8                               m_sRoot;
 
@@ -234,8 +237,6 @@ private:
 
     /// Passive FTP port
     oexUINT                             m_uPasvPort;
-    
-    /// Server for passive mode
-    t_FtpDataConnection                 m_nsData;
+   
 };
 

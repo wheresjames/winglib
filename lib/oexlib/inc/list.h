@@ -431,7 +431,7 @@ public:
         return *this;
     }
 
-    TListIterator& operator = ( TListIterator &x_rLi )
+    TListIterator& operator = ( oexCONST TListIterator &x_rLi )
     {
         m_memListNode.Share( x_rLi.m_memListNode );
         return *this;
@@ -1284,7 +1284,7 @@ public:
 	
 		\see 
 	*/
-	TList& operator = ( TList &x_rList )
+	TList& operator = ( oexCONST TList &x_rList )
 	{	return Attach( x_rList ); }
 
 	//==============================================================
@@ -1318,7 +1318,7 @@ public:
 	
 		\see 
 	*/
-	TList& Attach ( TList &x_rList )
+	TList& Attach ( oexCONST TList &x_rList )
 	{
 		Destroy();
 
@@ -1328,9 +1328,9 @@ public:
 		m_pTail = x_rList.m_pTail;
 
 		// We own the list now
-		x_rList.m_uSize = 0;
-		x_rList.m_pHead = oexNULL;
-		x_rList.m_pTail = oexNULL;
+		( (TList&)x_rList ).m_uSize = 0;
+		( (TList&)x_rList ).m_pHead = oexNULL;
+		( (TList&)x_rList ).m_pTail = oexNULL;
 
 		return *this;
 	}

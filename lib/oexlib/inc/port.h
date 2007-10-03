@@ -459,7 +459,7 @@ public:
     /// Default constructor
     TBufferedPort()
     {
-        m_bBlocking = oexFALSE;
+        m_bTxBlocking = oexFALSE;
     }
 
     /// Destructor
@@ -488,7 +488,7 @@ public:
 		    return oexFALSE;
 
 	    // Not blocking now
-	    m_bBlocking = oexFALSE;
+	    m_bTxBlocking = oexFALSE;
 
 	    // Send more data
 	    OnTx( 0 );
@@ -505,7 +505,7 @@ public:
 		    return oexFALSE;
 
 	    // Punt if we're blocking
-	    if ( m_bBlocking ) 
+	    if ( m_bTxBlocking ) 
             return oexTRUE;
 
 	    oexUCHAR buf[ 1024 ];
@@ -520,7 +520,7 @@ public:
             // Returns zero if tx'er is full
             if ( !res )
             {
-                m_bBlocking = oexTRUE;
+                m_bTxBlocking = oexTRUE;
 
                 return oexFALSE;
 
@@ -603,7 +603,7 @@ public:
 private:
 
     /// Non-zero if tx'er is blocking
-    oexBOOL                     m_bBlocking;
+    oexBOOL                     m_bTxBlocking;
 
     /// Rx buffer
     T_BUFFER                    m_rx;
@@ -620,7 +620,9 @@ public:
 
     /// Default constructor
     CProtocol()
-    {   m_pDispatch = oexNULL; }
+    {   m_pDispatch = oexNULL; 
+        guid::ZeroGuid( &m_guidSessionId );
+    }
 
     /// Returns a pointer to the server dispatch object
     CDispatch* Server()
@@ -656,11 +658,11 @@ public:
 
 private:
 
-    /// Pointer to server dispatch object
-    CDispatch           *m_pDispatch;
-
     /// Session id
     oexGUID             m_guidSessionId;
+
+    /// Pointer to server dispatch object
+    CDispatch           *m_pDispatch;
 
 };
 

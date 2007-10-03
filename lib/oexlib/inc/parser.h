@@ -118,14 +118,18 @@ public:
 
     /// Generic property bag deserializing
     static CPropertyBag Deserialize( oexCSTR x_pStr )
-    {   CPropertyBag pb; Deserialize( CStr( x_pStr ), pb ); return pb; }
+    {   CPropertyBag pb; 
+        CStr str( x_pStr );
+        Deserialize( str, pb ); 
+        return pb; 
+    }
 
     /// Generic property bag deserializing
-    static CPropertyBag Deserialize( CStr &x_sStr )
+    static CPropertyBag Deserialize( oexCONST CStr &x_sStr )
     {   CPropertyBag pb; Deserialize( x_sStr, pb ); return pb; }
 
     /// Generic property bag deserializing
-    static oexLONG Deserialize( CStr &x_sStr, CPropertyBag &x_pb, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL );
+    static oexLONG Deserialize( oexCONST CStr &x_sStr, CPropertyBag &x_pb, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL );
 
     /// Generic property bag serializing
     static CStr Serialize( CPropertyBag &x_pb );

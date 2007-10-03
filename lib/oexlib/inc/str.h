@@ -59,7 +59,7 @@ public:
 #endif
     }
 
-	TStr( TStr &str )
+	TStr( oexCONST TStr &str )
 	{	m_nLength = 0;
         m_uOffset = 0;
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
@@ -262,26 +262,26 @@ public:
     }
 
 	/// Returns a const pointer to the internal string buffer
-	oexCONST T* Ptr()
+	oexCONST T* Ptr() const
 	{	
 		// Ensure string
 		if ( !m_mem.Size() )
-			OexAllocate( 0 );
+			( (TStr*)this )->OexAllocate( 0 );
 
-		return m_mem.Ptr( m_uOffset );
+		return ( (TStr*)this )->m_mem.Ptr( m_uOffset );
 	}
 
 	/// Returns a const pointer to the internal string buffer
     /**
         \param [in] x_lOffset   -   Offset into the string
     */
-	oexCONST T* Ptr( oexUINT x_uOffset )
+	oexCONST T* Ptr( oexUINT x_uOffset ) const
     {	
-        oexUINT uSize = m_mem.Size();
+        oexUINT uSize = ( (TStr*)this )->m_mem.Size();
 
 		// Ensure string
 		if ( !uSize )
-			OexAllocate( 0 );
+			( (TStr*)this )->OexAllocate( 0 );
 
         if ( x_uOffset )
         {
@@ -293,19 +293,19 @@ public:
 
         } // end if
 
-		return m_mem.Ptr( x_uOffset + m_uOffset );
+		return ( (TStr*)this )->m_mem.Ptr( x_uOffset + m_uOffset );
 	}
 
 	/// Returns a writable pointer (use with care)
-	T* _Ptr()
+	T* _Ptr() const
 	{	return (T*)Ptr(); }
 
 	/// Returns a writable pointer (use with care)
-	T* _Ptr( oexUINT x_uOffset )
+	T* _Ptr( oexUINT x_uOffset ) const
 	{	return (T*)Ptr( x_uOffset ); }
 
 	/// Returns the specified character
-	T& operator []( oexUINT x_uOffset )
+	T& operator []( oexUINT x_uOffset ) const
 	{	return *_Ptr( x_uOffset ); }
 
 	/// Returns the first character in the buffer
@@ -339,9 +339,9 @@ public:
 	}
 
 	/// Returns the length of the string, calculates if needed.
-	oexINT Length() 
+	oexINT Length() const
 	{	if ( 0 > m_nLength ) 
-			return CalculateLength();
+			return ( (TStr*)this )->CalculateLength();
 		return m_nLength - m_uOffset; 
 	}
 
@@ -392,9 +392,8 @@ public:
 	{	return Append( pStr ); }
 
 	/// Concatenation operator
-	TStr operator += ( TStr &str )
+	TStr& operator += ( oexCONST TStr &str )
 	{	return Append( str ); }
-
 
 	TStr& operator = ( oexCONST oexINT nVal )
 	{	return SetNum( oexTT( T, "%li" ), (oexINT)nVal ); }
@@ -417,9 +416,6 @@ public:
 	TStr& operator += ( oexCONST T chVal )
 	{	return Append( &chVal, 1 ); }
 
-	TStr& operator += ( oexCONST TStr &str )
-	{	return Append( str.Ptr() ); }
-
 	TStr& operator += ( oexCONST oexGUID &guid )
 	{	return Append( TStr().GuidToString( guid ) ); }
 
@@ -435,8 +431,8 @@ public:
 	TStr& operator << ( oexCONST T *pStr )
 	{	return Append( pStr ); }
 
-	TStr& operator << ( TStr &str )
-	{	return Append( str.Ptr(), str.Length() ); }
+	TStr& operator << ( oexCONST TStr &str )
+	{	return Append( str ); }
 
 	TStr& operator << ( oexCONST T chVal )
 	{	return Append( &chVal, 1 ); }
@@ -817,7 +813,7 @@ public:
     }
 
     template< typename T_CHAR>
-        TStr& Cnv( TStr< T_CHAR > &x_sStr )
+        TStr& Cnv( oexCONST TStr< T_CHAR > &x_sStr )
     {
         oexUINT uLen = x_sStr.Length();
 
@@ -877,7 +873,7 @@ public:
     }
 
     template< typename T_CHAR>
-        TStr& Bin( TStr< T_CHAR > &x_sStr )
+        TStr& Bin( oexCONST TStr< T_CHAR > &x_sStr )
     {
         oexUINT uLen = x_sStr.Length();
 
@@ -907,8 +903,8 @@ public:
     }
 
 	// Concatenation operator
-	TStr& Append( TStr &sStr )
-	{	return Append( sStr.Ptr(), sStr.Length() ); }
+	TStr& Append( oexCONST TStr &sStr )
+	{	return Append( ( (TStr&)sStr ).Ptr(), ( (TStr&)sStr ).Length() ); }
 
 	// Concatenation operator
 	TStr& Append( oexCONST T* pStr )
@@ -1008,7 +1004,6 @@ public:
 		if ( !oexVERIFY( x_pFmt ) )
 		{	OexAllocate( 0 ); return *this; }
 
-		T* pPt = oexNULL;
 		oexRESULT res;
 		oexUINT uSize = oexSTRSIZE;
 		do

@@ -35,8 +35,8 @@
 #pragma once
 
 
-#define OexRpcRegisterPtr( p, c, f )    Register( oexT( #f ), oex::TArbDelegate< oex::CAutoStr >( p, &c::f ) );
-#define OexRpcRegister( c, f )          OexRpcRegisterPtr( (c*)this, c, f )
+#define OexRpcRegisterPtr( p, c, f )    Register( oexT( #f ), oex::TArbDelegate< oex::CAutoStr >( (const c*)p, &c::f ) );
+#define OexRpcRegister( c, f )          OexRpcRegisterPtr( this, c, f )
 
 #define oexCall                         oex::CDispatch::Call
 
@@ -84,9 +84,15 @@ public:
     }
 
     /// Reply constructor
-    CReply( TMem< CReplyInfo > &x_rRi )
+    CReply( oexCONST TMem< CReplyInfo > &x_rRi )
     {
         m_ri.Share( x_rRi );
+    }
+
+    /// Reply constructor
+    CReply( oexCONST CReply &x_rR )
+    {
+        m_ri.Share( x_rR.m_ri );
     }
 
     /// Destructor
@@ -129,6 +135,14 @@ public:
             return 0;
         return m_ri.Ptr()->uTime;
     }
+
+    /// Returns non-zerof if valid object
+    oexBOOL IsValid()
+    {   return m_ri.Size() ? oexTRUE : oexFALSE; }
+
+    /// Returns the ref count on the underlying object
+    oexUINT GetRefCount()
+    {   return m_ri.GetRefCount(); }
 
 private:
     
@@ -243,7 +257,7 @@ public:
     }
 
     /// Registers a callback function
-    oexBOOL Register( CStr x_sName, TArbDelegate< CAutoStr > &x_adFunction )
+    oexBOOL Register( CStr x_sName, const TArbDelegate< CAutoStr > &x_adFunction )
     {
         // Ensure valid object
         if ( !IsValid() )
@@ -270,7 +284,7 @@ public:
 
         Returns a CReply object
     */
-    CReply Queue( oexCSTR x_pId, CStr x_sCmd, oexUINT x_uTime = 0 )
+    CReply Queue( oexCSTR x_pId, oexCONST CStr x_sCmd, oexUINT x_uTime = 0 )
     {
         // Ensure valid data object
         if ( !IsValid() )
@@ -574,6 +588,14 @@ public:
     /// Returns non-zero if object is valid
     oexBOOL IsValid()
     {   return m_di.Size() ? oexTRUE : oexFALSE; }
+
+    /// Returns the ref count on the underlying object
+    oexUINT GetRefCount()
+    {   return m_di.GetRefCount(); }
+    
+    /// Returns non-zero if there is at least one other shared object
+    oexBOOL IsConnected()
+    {   return 1 < m_di.GetRefCount(); }
 
 private:
 
