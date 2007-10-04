@@ -233,6 +233,8 @@ public:
 	/// Default constructor
 	TNetServer()
     {
+        m_uTotalConnections = 0;
+
         // Register port functions
         T_PORT::RegisterFunctions( this );
 
@@ -250,6 +252,8 @@ public:
     void Destroy()
     {
         os::CThread::Stop();
+
+        m_uTotalConnections = 0;
     }
 
 public:
@@ -334,6 +338,9 @@ public:
         // Start the session thread
         session.Obj().Start();
 
+        // Count a connection
+        m_uTotalConnections++;
+
         return oexTRUE;
 
     } // end else
@@ -341,7 +348,7 @@ public:
 public:
 
     /// Adds a session
-    t_Session AddSession( oexGUID *x_pGuid )
+    t_Session AddSession( oexGUID *x_pGuid = oexNULL )
     {
         // Lock the session list
         CTlLocalLock ll( m_lockSession );
@@ -383,6 +390,27 @@ public:
         return session.Obj();
     }
 
+    /// Returns existing session or adds a new one if needed
+    CDispatch GetSession( oexCONST oexGUID &x_rGuid )
+    {
+        // Lock the session list
+        CTlLocalLock ll( m_lockSession );
+        if ( !ll.IsLocked() )
+            return CDispatch();
+
+        // Find existing session
+        CDispatch session = FindSession( x_rGuid );
+        if ( session.IsValid() )
+            return session;
+
+        // Just add a new one
+        t_Session itSession = AddSession( &x_rGuid );
+        if ( !itSession.IsValid() )
+            return session;
+
+        return itSession.Obj();
+    }
+
     /// Returns the specified session by index
     CDispatch GetSession( oexUINT uIndex )
     {
@@ -422,7 +450,7 @@ public:
         if ( !ll.IsLocked() )
             return oexFALSE;
 
-        // Kill ther server
+        // Kill the server port
         T_PORT::Destroy();
 
         // Lose the session list
@@ -439,6 +467,10 @@ public:
     operator CTlLock&() 
     {   return m_lockSession; }
 
+    /// Returns the total number of connections since the server started
+    oexUINT GetTotalConnections()
+    {   return m_uTotalConnections; }
+
 private:
 
     /// Session lock
@@ -446,6 +478,9 @@ private:
 
     /// Session list
     t_SessionList                   m_sessions;
+
+    /// Total number of connections the server has handled
+    oexUINT                         m_uTotalConnections;
 
 };
 

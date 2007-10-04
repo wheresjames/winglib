@@ -127,13 +127,14 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 #else	
 
 	CStr str;
-	str << "Module : " << x_pModule << oexNL;
-	str << "File : " << x_pFile << oexNL;
-	str << "Line : " << x_uLine << oexNL oexNL;
-	str << "Expression : " << x_pStr;
+
+	str << oexT( "Module : " ) << x_pModule << oexNL;
+	str << oexT( "File : " ) << x_pFile << oexNL;
+	str << oexT( "Line : " ) << x_uLine << oexNL << oexNL;
+	str << oexT( "Expression : " ) << x_pStr;
 
 	// Simulate the _CrtDbgReport box
-	int nRet = MessageBox( NULL, str.Ptr(), "Program Self Verification Error", MB_ICONSTOP | MB_ABORTRETRYIGNORE );
+	int nRet = MessageBox( NULL, str.Ptr(), oexT( "Program Self Verification Error" ), MB_ICONSTOP | MB_ABORTRETRYIGNORE );
 
 	// Does the user want to quit?
 	if ( IDABORT == nRet )

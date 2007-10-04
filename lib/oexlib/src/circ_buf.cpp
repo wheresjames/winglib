@@ -114,7 +114,7 @@ oexBOOL CCircBuf::Allocate( oexUINT x_uSize )
 	Destroy(); 
 	
 	// Create a new buffer
-	if ( !m_memBuffer.OexNew( x_uSize, oexFALSE, oexTRUE ).Ptr() ) 
+	if ( !m_memBuffer.OexNew( x_uSize + sizeof( SBufferInfo ), oexFALSE, oexTRUE ).Ptr() ) 
 		return oexFALSE; 
 	
     // Get the buffer info pointer
@@ -542,7 +542,7 @@ oexBOOL CCircBuf::Peek( CStr8 &x_sStr, oexUINT x_uMax )
         return oexFALSE;
 
     // Allocate memory
-    if ( !x_sStr.Allocate( x_uMax ) )
+    if ( !x_sStr.OexAllocate( x_uMax ) )
         return oexFALSE;
 
 	oexUINT uRead = 0;

@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// ftp_session.cpp
+// vfs_ftp_session.cpp
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -83,24 +83,24 @@ http://www.networksorcery.com/enp/protocol/ftp.htm
 
 */
 
-CFtpSession::CFtpSession()
+CVfsFtpSession::CVfsFtpSession()
 {
     // Passive mode
     m_uPasvPort = 3110 + os::CHqTimer::GetBootCount() % 500;
 
     // Root folder
-    m_sRoot = "c:/ftp";
+    m_sRoot = "_root_";
 }
 
-oexBOOL CFtpSession::OnConnect( oexINT x_nErr ) 
+oexBOOL CVfsFtpSession::OnConnect( oexINT x_nErr ) 
 {
     // Send greetings
-    Write( "220 FTP Server Ready.\n" );
+    Write( "220 Nebula Server Ready.\n" );
 
     return oexTRUE;
 }
 
-oexBOOL CFtpSession::OnRead( oexINT x_nErr )
+oexBOOL CVfsFtpSession::OnRead( oexINT x_nErr )
 {
     // Process the incomming data
     if ( !TBufferedPort< CAutoSocket >::OnRead( x_nErr ) )
@@ -137,12 +137,29 @@ oexBOOL CFtpSession::OnRead( oexINT x_nErr )
 
     // CWD
     else if ( sCmd == "CWD" )
-    {   sData.TrimWhiteSpace();        
+    {   sData = sData.TrimWhiteSpace();        
         if ( *sData != '/' && *sData != '\\' )
             sData = CStr8::BuildPath( m_sCurrent, sData );
-        if ( CFile::Exists( oexStr8ToStr( CStr8::BuildPath( m_sRoot, sData ) ).Ptr() ) )
-            m_sCurrent = sData;
+        m_sCurrent = sData;
         Write( "250 CWD command successful.\n" );
+    } // end else if
+
+    // MKD
+    else if ( sCmd == "MKD" )
+    {   sData = sData.TrimWhiteSpace();        
+        if ( *sData != '/' && *sData != '\\' )
+            sData = CStr8::BuildPath( m_sCurrent, sData );
+        m_vfs.MakeFolder( CStr8::BuildPath( m_sRoot, sData ).Ptr() ); 
+        Write( "250 MKD command successful.\n" );
+    } // end else if
+
+    // RMD
+    else if ( sCmd == "RMD" )
+    {   sData = sData.TrimWhiteSpace();        
+        if ( *sData != '/' && *sData != '\\' )
+            sData = CStr8::BuildPath( m_sCurrent, sData );
+        m_vfs.Delete( CStr8::BuildPath( m_sRoot, sData ).Ptr() ); 
+        Write( "250 RMD command successful.\n" );
     } // end else if
 
     // CDUP
@@ -185,9 +202,10 @@ oexBOOL CFtpSession::OnRead( oexINT x_nErr )
 
     // DELE
     else if ( sCmd == "DELE" )
-    {   sData = CStr8::BuildPath( CurrentPath(), sData.TrimWhiteSpace() );
-        if ( CFile::Exists( oexStr8ToStr( sData ).Ptr() ) )
-             CFile::Delete( oexStr8ToStr( sData ).Ptr() );
+    {   sData = sData.TrimWhiteSpace();        
+        if ( *sData != '/' && *sData != '\\' )
+            sData = CStr8::BuildPath( m_sCurrent, sData );
+        m_vfs.Delete( CStr8::BuildPath( m_sRoot, sData ).Ptr() ); 
         Write( "250 DELE command successful.\n" );
     } // end if
 
@@ -204,7 +222,7 @@ oexBOOL CFtpSession::OnRead( oexINT x_nErr )
     return oexTRUE;
 }
 
-oexBOOL CFtpSession::CmdPasv()
+oexBOOL CVfsFtpSession::CmdPasv()
 {   
     oexBOOL bStarted = oexFALSE;
 
@@ -250,7 +268,7 @@ oexBOOL CFtpSession::CmdPasv()
     return oexTRUE;
 }
 
-CDispatch CFtpSession::GetPassiveConnection()
+CDispatch CVfsFtpSession::GetPassiveConnection()
 {
     // Get the first session
     CDispatch session = m_nsData.GetSession( 0 );
@@ -278,7 +296,7 @@ CDispatch CFtpSession::GetPassiveConnection()
     return session;
 }
 
-oexBOOL CFtpSession::CmdList()
+oexBOOL CVfsFtpSession::CmdList()
 {       
     // Get connection
     CDispatch session = GetPassiveConnection();
@@ -289,31 +307,25 @@ oexBOOL CFtpSession::CmdList()
     } // end if
 
     CStr8 sStr;
-   	CFindFiles ff;
+    CPropertyBag8 pb = m_vfs.ReadIndex( CurrentPath() );
 
-    // Build file list
-    if ( ff.FindFirst( oexStr8ToStr( CurrentPath() ).Ptr() ) )
+    // Create file list
+    for ( CPropertyBag8::iterator itPb; pb.List().Next( itPb ); )
     {
-        do
-        {
-            // Format file information
-            sStr << CStr8().Fmt(  "%crwxrwxrwx    1 user     group %lu %s %s\n",
-                                  ( ff.GetFileAttributes() & os::CBaseFile::eFileAttribDirectory ) ? 'd' : '-',
-                                  (oexUINT)ff.FileData().llSize,
-                                  oexStrToStr8Ptr( 
-                                    CSysTime( CSysTime::eFmtFile, ff.FileData().ftLastModified )
-                                        .FormatTime( oexT( "%b %d %Y" ) ) ),
-                                  oexStrToStr8Ptr( ff.GetFileName() ) );
+        // Format file information
+        sStr << CStr8().Fmt( "%crwxrwxrwx    1 user     group %lu %s %s\n",
+                              ( itPb.Obj()[ "type" ].ToLong() == 2 ) ? 'd' : '-',
+                              (oexUINT)itPb.Obj()[ "size" ].ToLong(),
+                              oexStrToStr8Ptr( 
+                                CSysTime( CSysTime::eFmtFile, 0 )
+                                    .FormatTime( oexT( "%b %d %Y" ) ) ),
+                              itPb.Node()->key.Ptr() );
 
-        } while ( ff.FindNext() );
+    } // end for
 
-        // +++ Make the queue binary compatible
-
-        // Write the file list to client
-        if ( sStr.Length() )
-            session.Queue( 0, oexCall( oexT( "WriteStr" ), oexStr8ToStr( sStr ) ) );
-
-    } // end if
+    // Write the file list to client
+    if ( sStr.Length() )
+        session.Queue( 0, oexCall( oexT( "WriteStr" ), oexStr8ToStr( sStr ) ) );
 
     // Wait for the data to go out
     oexUINT nWritten = 0;
@@ -350,12 +362,12 @@ oexBOOL CFtpSession::CmdList()
     return oexTRUE;
 }
 
-oexBOOL CFtpSession::CmdRetr( oexCSTR8 x_pFile )
+oexBOOL CVfsFtpSession::CmdRetr( oexCSTR8 x_pFile )
 {       
-    CFile f;
-    if ( !f.OpenExisting( oexStr8ToStr( CStr8::BuildPath( CurrentPath(), x_pFile ) ).Ptr() ).IsOpen() )
+    CStr8 sContent = m_vfs.LoadFile( CStr8::BuildPath( CurrentPath(), x_pFile ).Ptr() );
+    if ( !sContent.Length() )
     {   Write( "451 Requested file action aborted; local error in processing.\n" );
-        return oexTRUE;
+        return oexFALSE;
     } // end if
 
     // Get connection
@@ -364,9 +376,8 @@ oexBOOL CFtpSession::CmdRetr( oexCSTR8 x_pFile )
     if ( !session.IsConnected() )
         return oexFALSE;
 
-    CStr8 sBlock;
-    while ( session.IsConnected() && ( sBlock = f.Read( 1024 ) ).Length() )
-        session.Queue( 0, oexCall( oexT( "WriteStr" ), oexStr8ToStr( sBlock ) ) );
+    if ( sContent.Length() )
+        session.Queue( 0, oexCall( oexT( "WriteStr" ), oexStr8ToStr( sContent ) ) );
 
     // Shutdown all connections
     m_nsData.Queue( 0, oexCall( oexT( "Reset" ) ) ).Wait( oexDEFAULT_TIMEOUT );
@@ -377,7 +388,7 @@ oexBOOL CFtpSession::CmdRetr( oexCSTR8 x_pFile )
     return oexTRUE;
 }
 
-oexBOOL CFtpSession::CmdStor( oexCSTR8 x_pFile )
+oexBOOL CVfsFtpSession::CmdStor( oexCSTR8 x_pFile )
 {       
     // Get connection
     CDispatch session = GetPassiveConnection();
@@ -385,12 +396,11 @@ oexBOOL CFtpSession::CmdStor( oexCSTR8 x_pFile )
     if ( !session.IsConnected() )
         return oexFALSE;
 
-    if ( !session.Queue( 0, oexCall( oexT( "CreateFile" ), 
-                            CStr::BuildPath( oexStr8ToStr( CurrentPath() ), oexStr8ToStr( x_pFile ) ).Ptr() ) )
-                    .Wait( oexDEFAULT_TIMEOUT ).GetReply() )
-    {   Write( "451 Requested file action aborted; error accessing file.\n" );
-        return oexTRUE;
-    } // end if
+    // Set the file name
+    session.Queue( 0, oexCall( oexT( "SetFile" ), oexStr8ToStr( CStr8::BuildPath( CurrentPath(), x_pFile ) ) ) );
+
+    // Open the vfs
+    session.Queue( 0, oexCall( oexT( "OpenVfs" ),  oexStr8ToStr( m_vfs.GetRoot() ) ) );
 
     // Wait for data to be tx'ed
     while ( session.IsConnected() )
@@ -399,18 +409,5 @@ oexBOOL CFtpSession::CmdStor( oexCSTR8 x_pFile )
     // All done
     Write( "226 Transfer complete.\n" );
 
-/*  
-    TAutoServer< CFtpDataConnection >::t_SessionList::iterator it = GetPassiveConnection();
-    if ( !it.IsValid() ) return oexFALSE;
-
-    // Open the data file
-    if ( !it->Protocol()->m_fData.CreateAlways( CFile::BuildPath( CurrentPath(), x_pFile ).Ptr() ).IsOpen() )
-    {   Write( "451 Requested file action aborted; local error in processing.\n" );
-        return oexTRUE;
-    } // end if
-    
-    // All done
-    Write( "226 Transfer complete.\n" );
-*/
     return oexTRUE;
 }

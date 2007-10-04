@@ -237,8 +237,12 @@ public:
 
         else
         {
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
             pMem = m_mem._Log( m_uLine, m_pFile ).Resize( x_uSize + 1 ).Ptr();
-		    if ( !oexVERIFY_PTR( pMem ) )
+#else
+            pMem = m_mem.Resize( x_uSize + 1 ).Ptr();
+#endif                   
+            if ( !oexVERIFY_PTR( pMem ) )
 			    return oexNULL;
 
         } // end if
@@ -945,7 +949,7 @@ public:
 
 	/// Drops the specified characters from the end of the string
 	TStr& RTrim( oexCONST T* pChars )
-	{	oexVALIDATE_PTR( pChars ); oexINT lLen = Length();
+	{	oexASSERT_PTR( pChars ); oexINT lLen = Length();
         oexINT i = str::RSkipCharacters( Ptr(), lLen, pChars, zstr::Length( pChars ) );
 		if ( !i || i >= lLen ) return *this;
 		RTrim( lLen - i - 1 );
@@ -969,7 +973,7 @@ public:
 
 	/// Drops the specified characters from the start of the string
 	TStr& LTrim( oexCONST T* pChars, oexCONST T* pEscape = oexNULL )
-	{	oexVALIDATE_PTR( pChars ); oexVALIDATE_PTR_NULL_OK( pEscape );
+	{	oexASSERT_PTR( pChars ); oexASSERT_PTR_NULL_OK( pEscape );
         oexINT i = str::SkipCharacters( Ptr(), Length(), pChars, zstr::Length( pChars ) );
 		if ( 0 > i ) return *this;
 		LTrim( i );
@@ -1331,7 +1335,7 @@ public:
 	/// Ignores terminator characters if preceeded by any character
 	/// in the escape string.
 	TStr Parse( oexCONST T* pTerm, oexCONST T* pEscape = oexNULL )
-	{	oexVALIDATE_PTR( pTerm ); oexVALIDATE_PTR_NULL_OK( pEscape );
+	{	oexASSERT_PTR( pTerm ); oexASSERT_PTR_NULL_OK( pEscape );
         oexINT i = str::FindTerm( Ptr(), Length(), pTerm, zstr::Length( pTerm ), pEscape, pEscape ? zstr::Length( pEscape ) : 0 );
 		if ( 0 > i ) return TStr();
 		TStr str( Ptr(), 0, i );
@@ -1343,17 +1347,18 @@ public:
 	/// Ignores terminator characters if preceeded by any character
 	/// in the escape string.
 	TStr RParse( oexCONST T* pTerm )
-	{	oexVALIDATE_PTR( pTerm );
+	{	oexASSERT_PTR( pTerm );
         oexINT lLen = Length();
         oexINT i = str::RFindTerm( Ptr(), lLen, pTerm, zstr::Length( pTerm ) );
 		if ( 0 > i ) return TStr();
+        /// +++ Replace with SubStr()
 		TStr str( Ptr( i ) );
 		RTrim( lLen - i );
 		return str;
 	}
 
 	oexBOOL IsMatchAt( oexUINT i, oexCONST T* pChars )
-	{	oexVALIDATE_PTR( pChars ); 
+	{	oexASSERT_PTR( pChars ); 
         return 0 <= str::FindCharacter( pChars, zstr::Length( pChars ), *Ptr( i ) ); 
 	}
 
@@ -1430,7 +1435,7 @@ public:
 	static TStr NextToken( oexCONST T* pStr, oexUINT uSize, oexCONST T *pValid, oexINT *puI  = oexNULL )
 	{
 		// Sanity check
-		if ( !oexVERIFY_PTR( pStr ) || !oexVERIFY_PTR_NULL_OK( pValid ) )
+		if ( !oexCHECK_PTR( pStr ) || !oexCHECK_PTR_NULL_OK( pValid ) )
 			return TStr();
 
 		if ( !pValid )
@@ -1482,7 +1487,7 @@ public:
 	static TStr Token( oexCONST T* pStr, oexUINT uSize, oexCONST T *pValid, oexINT *puI  = oexNULL )
 	{
 		// Sanity check
-		if ( !oexVERIFY_PTR( pStr ) || !oexVERIFY_PTR_NULL_OK( pValid ) )
+		if ( !oexCHECK_PTR( pStr ) || !oexCHECK_PTR_NULL_OK( pValid ) )
 			return TStr();
 
 		if ( !pValid )
@@ -1534,13 +1539,15 @@ public:
 
     /// Returns the root path of str
     TStr GetPath()
-    {   TStr str( *this ).RParse( oexTT( T, "\\/" ) ); 
-        return str;
+    {   TStr str( *this );
+        str.RParse( oexTT( T, "\\/" ) );
+        return str.RTrim( oexTT( T, "\\/" ) );
     }
 
     /// Returns the root path of str
-    TStr GetFileName( TStr str )
-    {   return RParse( oexTT( T, "\\/" ) )++; 
+    TStr GetFileName()
+    {   TStr str( *this );
+        return str.RParse( oexTT( T, "\\/" ) )++; 
     }
 
 private:

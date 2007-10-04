@@ -65,8 +65,6 @@ class CAlloc
 {
 public:
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-	
     enum
     {
         /// Maximum number of allocation indexes
@@ -145,8 +143,11 @@ public:
     static inline oexUINT ProtectAreaSize()
     {
 	    return  sizeof( SBlockHeader )
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
                 + sizeof( m_ucUnderrunPadding )
-                + sizeof( m_ucOverrunPadding );
+                + sizeof( m_ucOverrunPadding )
+#endif
+                ;
     }
 
     /// Returns the size of the allocated block
@@ -158,7 +159,10 @@ public:
         // Grab the size of the allocated buffer
         return *(oexUINT*)( ( (oexUCHAR*)x_pBuf ) - sizeof( oexUINT ) 
                                                   - sizeof( SBlockHeader )
-                                                  - sizeof( m_ucUnderrunPadding ) );
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+                                                  - sizeof( m_ucUnderrunPadding ) 
+#endif
+                                                  );
     }
 
     /// Returns the block header
@@ -167,7 +171,10 @@ public:
     */
     static inline SBlockHeader* GetBlockHeader( oexCPVOID x_pBuf )
     {
-        return (SBlockHeader*)( (oexUCHAR*)x_pBuf - sizeof( m_ucUnderrunPadding )
+        return (SBlockHeader*)( (oexUCHAR*)x_pBuf 
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+                                                  - sizeof( m_ucUnderrunPadding )
+#endif
                                                   - sizeof( SBlockHeader ) );
     }
 
@@ -180,7 +187,10 @@ public:
         // Return size of usable memory
         return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
                                   - sizeof( SBlockHeader ) 
-                                  - sizeof( m_ucUnderrunPadding ) ) )->uSize;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+                                  - sizeof( m_ucUnderrunPadding ) 
+#endif
+                                  ) )->uSize;
     }
 
     /// Sets flags
@@ -192,7 +202,10 @@ public:
         // Return size of usable memory
         return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
                                   - sizeof( SBlockHeader ) 
-                                  - sizeof( m_ucUnderrunPadding ) ) )->uFlags = x_uFlags;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+                                  - sizeof( m_ucUnderrunPadding ) 
+#endif
+                                  ) )->uFlags = x_uFlags;
     }
 
     /// Gets flags
@@ -204,7 +217,10 @@ public:
         // Return size of usable memory
         return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
                                   - sizeof( SBlockHeader ) 
-                                  - sizeof( m_ucUnderrunPadding ) ) )->uFlags;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+                                  - sizeof( m_ucUnderrunPadding ) 
+#endif
+                                  ) )->uFlags;
     }
 
     /// Returns the reference count
@@ -216,7 +232,10 @@ public:
         // Return size of usable memory
         return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
                                   - sizeof( SBlockHeader ) 
-                                  - sizeof( m_ucUnderrunPadding ) ) )->uRef;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+                                  - sizeof( m_ucUnderrunPadding ) 
+#endif
+                                  ) )->uRef;
     }
 
     /// Adds a reference to the block
@@ -228,7 +247,10 @@ public:
         // Return size of usable memory
         return ++( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
                                     - sizeof( SBlockHeader ) 
-                                    - sizeof( m_ucUnderrunPadding ) ) )->uRef;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+                                    - sizeof( m_ucUnderrunPadding ) 
+#endif
+                                    ) )->uRef;
     }
 
     /// Decreases the reference count on a memory block
@@ -240,11 +262,16 @@ public:
         // Return size of usable memory
         return --( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
                                     - sizeof( SBlockHeader ) 
-                                    - sizeof( m_ucUnderrunPadding ) ) )->uRef;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+                                    - sizeof( m_ucUnderrunPadding ) 
+#endif
+                                    ) )->uRef;
     }
 
 public:
 
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+	
     /// Under run padding
     static oexUCHAR m_ucUnderrunPadding[ 4 ];
 
@@ -270,7 +297,13 @@ public:
     template< typename T >
         T* New( oexUINT x_uSize, oexBOOL x_bConstructed = oexFALSE, oexBOOL x_bUseFullBlock = oexFALSE )
     {
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         T* pPtr = (T*)Alloc( x_uSize * sizeof( T ), m_uLine, m_pFile, 0, x_bUseFullBlock );
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#else
+        T* pPtr = (T*)Alloc( x_uSize * sizeof( T ), 0, 0, 0, x_bUseFullBlock );
+#endif
         if ( !pPtr )
             return oexFALSE;
 
@@ -278,10 +311,6 @@ public:
         if ( x_bConstructed )
             CAlloc::SetFlags( pPtr, CAlloc::eF1Constructed );
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-        m_pFile = oexNULL;
-        m_uLine = 0;
-#endif
         return pPtr;
     }
 
@@ -304,11 +333,12 @@ public:
 
         } // end if
 
-        oexBOOL bRet = Free( x_pPtr, m_uLine, m_pFile, 2 );
-
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        oexBOOL bRet = Free( x_pPtr, m_uLine, m_pFile, 2 );
         m_pFile = oexNULL;
         m_uLine = 0;
+#else
+        oexBOOL bRet = Free( x_pPtr, 0, 0, 2 );
 #endif
 
         return bRet;
@@ -318,11 +348,12 @@ public:
     template< typename T >
         T* Resize( T* x_pPtr, oexUINT x_uNewSize )
     {
-        T* pPtr = (T*)ReAlloc( x_pPtr, x_uNewSize * sizeof( T ), m_uLine, m_pFile, 1 );
-
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        T* pPtr = (T*)ReAlloc( x_pPtr, x_uNewSize * sizeof( T ), m_uLine, m_pFile, 1 );
         m_pFile = oexNULL;
         m_uLine = 0;
+#else
+        T* pPtr = (T*)ReAlloc( x_pPtr, x_uNewSize * sizeof( T ), 0, 0, 1 );
 #endif
         return pPtr;
     }
@@ -547,6 +578,8 @@ public:
         Delete( x_pPtr );
     }
 
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+
 private:
 
     /// Holds the line number of the allocating call
@@ -570,6 +603,8 @@ public:
         m_pFile = x_pFile;
         return *this;
     }
+
+#endif
 
     /// Destructor
     virtual ~CAlloc() {}

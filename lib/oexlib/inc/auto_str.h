@@ -83,9 +83,11 @@ public:
     operator oexAUTOGUID() { oexGUID guid; return TStr::StringToGuid( &guid ); }
 
 #ifdef _UNICODE
-    operator CStr8() { return oexStrToStr8( *this ); }
+    operator CStr8() 
+    { return oexStrToStr8( *this ); }
 #else
-    operator CStrW() { return oexStrToStrW( *this ); }
+    operator CStrW() 
+    { return oexStrToStrW( *this ); }
 #endif
 
 };

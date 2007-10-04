@@ -34,6 +34,7 @@
 
 #pragma once
 
+// This stuff is like CORBA in a bottle ;)
 
 #define OexRpcRegisterPtr( p, c, f )    Register( oexT( #f ), oex::TArbDelegate< oex::CAutoStr >( (const c*)p, &c::f ) );
 #define OexRpcRegister( c, f )          OexRpcRegisterPtr( this, c, f )
@@ -41,24 +42,37 @@
 #define oexCall                         oex::CDispatch::Call
 
 
-struct CReplyInfo
+template< typename T_DISPATCH >
+    struct CMessageInfo
 {
 public:
 
     /// Default constructor
-    CReplyInfo() {}
+    CMessageInfo() { uTime = 0; }
 
     /// Constructor
-    CReplyInfo( CStr x_sCmd, oexUINT x_uTime = 0 )
+    CMessageInfo( CStr x_sCmd, oexUINT x_uTime = 0 )
     {   sCmd = x_sCmd; uTime = x_uTime; }
 
     /// Copy constructor
-    CReplyInfo( CReplyInfo &x_rRi )
-    {   sCmd = x_rRi.sCmd; sReturn = x_rRi.sReturn; evReady = x_rRi.evReady; }
+    CMessageInfo( CMessageInfo &x_rRi )
+    {   sCmd = x_rRi.sCmd; 
+        sReturn = x_rRi.sReturn; 
+        evReady = x_rRi.evReady; 
+        cDispatch = x_rRi.cDispatch; 
+    }
 
     /// Copy operator
-    CReplyInfo& operator = ( CReplyInfo &x_rRi )
-    {   sCmd = x_rRi.sCmd; sReturn = x_rRi.sReturn; evReady = x_rRi.evReady; return *this; }
+    CMessageInfo& operator = ( CMessageInfo &x_rRi )
+    {   sCmd = x_rRi.sCmd; 
+        sReturn = x_rRi.sReturn; 
+        evReady = x_rRi.evReady; 
+        cDispatch = x_rRi.cDispatch; 
+        return *this; 
+    }
+
+    /// Command id, usually describes the destination
+    CStr            sMap;
 
     /// Command string
     CStr            sCmd;
@@ -69,50 +83,60 @@ public:
     /// Return event id
     CStr            sReturn;
 
+    /// Priority
+    oexUINT         uPriority;
+
+    /// Priority
+    oexUINT         uAccess;
+
     /// Execution time
     oexUINT         uTime;
+
+    /// Dispatch object
+    T_DISPATCH      cDispatch;
 };
 
-
-class CReply
+/// Holds reply information
+template< typename T_DISPATCH >
+    class CMessageImpl
 {
 public:
 
     /// Default constructor
-    CReply()
-    {
+    CMessageImpl()
+    {   m_mi.OexConstruct();
     }
 
     /// Reply constructor
-    CReply( oexCONST TMem< CReplyInfo > &x_rRi )
+    CMessageImpl( oexCONST TMem< CMessageInfo< T_DISPATCH > > &x_rRi )
     {
-        m_ri.Share( x_rRi );
+        m_mi.Share( x_rRi );
     }
 
     /// Reply constructor
-    CReply( oexCONST CReply &x_rR )
+    CMessageImpl( oexCONST CMessageImpl &x_rR )
     {
-        m_ri.Share( x_rR.m_ri );
+        m_mi.Share( x_rR.m_mi );
     }
 
     /// Destructor
-    virtual ~CReply()
+    virtual ~CMessageImpl()
     {
     }
 
     /// Returns non-zero if the reply is ready
-    CReply& Wait( oexUINT x_uTimeout )
+    CMessageImpl& Wait( oexUINT x_uTimeout )
     {
         // Wait for reply if we have an object
-        if ( m_ri.Ptr() )
-            m_ri.Ptr()->evReady.Wait( x_uTimeout ); 
+        if ( m_mi.Ptr() )
+            m_mi.Ptr()->evReady.Wait( x_uTimeout ); 
 
         return *this;
     }
 
     /// Returns non-zero if the reply is ready
     oexBOOL IsDone()
-    {   return m_ri.Ptr() && m_ri.Ptr()->evReady.Wait( 0 ); 
+    {   return m_mi.Ptr() && m_mi.Ptr()->evReady.Wait( 0 ); 
     }
 
     /// Returns the reply value
@@ -122,7 +146,7 @@ public:
             return x_pDef;
 
         // Return the reply value
-        return m_ri.Ptr()->sReturn;
+        return m_mi.Ptr()->sReturn;
     }
 
     /// Returns the reply value
@@ -131,27 +155,37 @@ public:
 
     /// Returns the desired execution time
     oexUINT GetTime()
-    {   if ( !m_ri.Ptr() )
+    {   if ( !m_mi.Ptr() )
             return 0;
-        return m_ri.Ptr()->uTime;
+        return m_mi.Ptr()->uTime;
     }
 
     /// Returns non-zerof if valid object
     oexBOOL IsValid()
-    {   return m_ri.Size() ? oexTRUE : oexFALSE; }
+    {   return m_mi.Size() ? oexTRUE : oexFALSE; }
 
     /// Returns the ref count on the underlying object
     oexUINT GetRefCount()
-    {   return m_ri.GetRefCount(); }
+    {   return m_mi.GetRefCount(); }
+
+    /// Returns reply dispatch pointer
+    T_DISPATCH* GetDispatch()
+    {   return &m_mi.Ptr()->cDispatch;
+    }
+
+    /// Returns reply info object
+    CMessageInfo< T_DISPATCH >* Mi()
+    {   return m_mi.Ptr(); }
 
 private:
     
     /// Reply information
-    TMem< CReplyInfo >      m_ri;
+    TMem< CMessageInfo< T_DISPATCH > >      m_mi;
 };
 
 /// Holds the shared information between CDispatch objects
-class CDispatchInfo
+template< typename T_MSGINFO >
+    class CDispatchInfo
 {
 public:
 
@@ -159,7 +193,7 @@ public:
     typedef TAssoList< CStr, TArbDelegate< CAutoStr > > t_EventHandlerList;
 
     /// Command buffer
-    typedef TList< TMem< CReplyInfo > > t_CmdBufferList;
+    typedef TList< T_MSGINFO > t_CmdBufferList;
     
 public:
 
@@ -172,14 +206,6 @@ public:
     {
         { // Scope
 
-            CTlLocalLock ll( lockPre );
-            if ( ll.IsLocked() )
-                lstPre.Destroy();
-
-        } // end scope
-
-        { // Scope
-
             CTlLocalLock ll( lockCmd );
             if ( ll.IsLocked() )
             {   lstCmd.Destroy();
@@ -189,24 +215,20 @@ public:
         } // end scope
     }
 
-
 public:
 
     /// Thread lock
     CTlLock                     lockCmd;
 
+    /// Command buffer
+    t_CmdBufferList             lstCmd;
+
     /// Thread lock
-    CTlLock                     lockPre;
+    CTlLock                     lockEventHandlers;
 
     /// List of event handlers
     t_EventHandlerList          lstEventHandlers;
 
-    /// Command buffer
-    t_CmdBufferList             lstCmd;
-
-    /// Pre queue
-    t_CmdBufferList             lstPre;
-    
     /// Command waiting signal
     CTlEvent                    evCmd;
 };
@@ -226,27 +248,56 @@ class CDispatch
 {
 public:
 
+    /// Reply type
+    typedef CMessageImpl< CDispatch >     CMessage;
+
+public:
+
     /// Constructor
     CDispatch() 
     {
-        // Construct data object
-        m_di.OexConstruct();
+        // +++ Here's the deal, I really don't want to call Create in the
+        //     constructor because many times, the memory won't be used.
+        //     However, it's the only thread safe place to do it.  Another
+        //     alternative would be to create a lock in this class to
+        //     synchronized createion.  This would be better for the 
+        //     objects that didn't use the memory, but worse for the
+        //     ones that did.
+        Create();
     }
 
     /// Copy constructor
     CDispatch( CDispatch &rD )
-    {   m_di.Share( rD.m_di );
+    {
+        if ( !rD.IsValid() )
+            rD.Create();
+        
+        m_di.Share( rD.m_di );
     }
 
     /// Copy operator
     CDispatch& operator = ( CDispatch &rD )
-    {   m_di.Share( rD.m_di );
+    {
+        if ( !rD.IsValid() )
+            rD.Create();
+
+        m_di.Share( rD.m_di );
+
         return *this;
     }
 
     /// Destructor
     virtual ~CDispatch()
     {   Destroy();
+    }
+
+    /// Creates the memory object
+    oexBOOL Create()
+    {
+        // Construct data object
+        m_di.OexConstruct();
+
+        return IsValid();
     }
 
     /// Releases resources
@@ -261,10 +312,11 @@ public:
     {
         // Ensure valid object
         if ( !IsValid() )
-            return oexFALSE;
+//            if ( !Create() )
+                return oexFALSE;
 
         // Lock the command buffer
-        CTlLocalLock ll( m_di.Ptr()->lockCmd );
+        CTlLocalLock ll( m_di.Ptr()->lockEventHandlers );
         if ( !ll.IsLocked() )
             return oexFALSE;
 
@@ -276,30 +328,88 @@ public:
 
     /// Puts a function call into the queue
     /**
-        \param [in] x_pId   -   Id of the message target, interpreted by OnMap()
-        \param [in] x_sCmd  -   Actual command string, use oexCall to generate.
-        \param [in] x_uTime -   Time the command should be executed, zero for
-                                immediate execution.
-        
+        \param [in] x_pMap      -   Describes the message target, interpreted by OnMap()
+        \param [in] x_sCmd      -   Actual command string, use oexCall to generate.
+        \param [in] x_uPriority -   Priority level of the command.  It will be queued
+                                    ahead of lower priority messages.
+        \param [in] x_uAccess   -   Access level.  Must be at or above executing objects
+                                    level.
+        \param [in] x_uTime     -   Time the command should be executed, zero for
+                                    immediate execution.        
 
-        Returns a CReply object
+        Returns a CMessage object
     */
-    CReply Queue( oexCSTR x_pId, oexCONST CStr x_sCmd, oexUINT x_uTime = 0 )
+    CMessage Queue( oexCSTR x_pMap, oexCONST CStr x_sCmd, oexUINT x_uPriority = 0, oexUINT x_uAccess = 0, oexUINT x_uTime = 0 )
     {
         // Ensure valid data object
         if ( !IsValid() )
-            return CReply();
+//            if ( !Create() )
+                return CMessage();
 
-        // Lock the pre-queue
-        CTlLocalLock ll( m_di.Ptr()->lockPre );
+        // Lock the queue
+        CTlLocalLock ll( m_di.Ptr()->lockCmd );
         if ( !ll.IsLocked() )
-            return CReply();
+            return CMessage();
 
         // Append command
-        CDispatchInfo::t_CmdBufferList::iterator it = m_di.Ptr()->lstPre.Append();
+        CDispatchInfo< CMessage >::t_CmdBufferList::iterator it;
+        
+        // Lowest priority?
+        if ( !x_uPriority )
+            it = m_di.Ptr()->lstCmd.Append();
 
-        // Create command
-        it.Obj().OexConstruct( x_sCmd, x_uTime );
+        else
+        {
+            // Priority based insert
+            oexBOOL bInserted = oexFALSE;
+            for ( CDispatchInfo< CMessage >::t_CmdBufferList::iterator itInsert; 
+                  !bInserted && m_di.Ptr()->lstCmd.Next( itInsert ); )
+            {
+                // Look for a lower priority object
+                if ( itInsert.Obj().Mi()->uPriority < x_uPriority )
+                {
+                    // Put the command ahead of this item
+                    it = m_di.Ptr()->lstCmd.Append();
+                    
+                    // Did we get a valid object?
+                    if ( it.IsValid() )
+                    {
+                        // Move to correct location
+                        m_di.Ptr()->lstCmd.MoveBefore( it, itInsert );
+
+                        // Check the result
+                        bInserted = oexTRUE;
+
+                    } // end if
+
+                } // end if
+
+            } // end for
+
+            // Just stick it on the end if we couldn't find a spot
+            if ( !bInserted )
+                it = m_di.Ptr()->lstCmd.Append();
+
+        } // end else
+
+        if ( !it.IsValid() )
+            return CMessage();
+
+        // Set mapping information
+        if ( x_pMap )
+            it.Obj().Mi()->sMap = x_pMap;
+
+        // Set command string
+        it.Obj().Mi()->sCmd = x_sCmd;
+
+        // Save time string
+        it.Obj().Mi()->uPriority = x_uPriority;
+
+        // Save time string
+        it.Obj().Mi()->uAccess = x_uAccess;
+
+        // Save time string
+        it.Obj().Mi()->uTime = x_uTime;
 
         // Signal that a command is waiting
         m_di.Ptr()->evCmd.Set();
@@ -308,35 +418,26 @@ public:
         return it.Obj();
     }    
 
-    // +++ Need to add the mapping code to Execute()
-    /// Over-ride to provide message mapping
-    virtual oexBOOL OnMap( oexCSTR x_pId, CStr x_sCmd, CReply &x_rReply )
-    {   return oexFALSE; }
+    /// Over-ride to provide message mapping or handling
+    /**
+        \param [in] x_pMsg   -   The message information
+    */
+    virtual oexBOOL OnMap( CMessage* x_pMsg )
+    {   return oexFALSE; 
+    }
 
     /// Processes the function queue
     /**
-        \param [in] uMax    -   Maximum number of commands to execute
+        \param [in] uMax    -   Maximum number of commands to execute,
+                                zero for all.
 
         \return Number of commands executed.
     */
-    oexUINT ProcessQueue( oexINT nMax = -1 )
+    oexUINT ProcessQueue( oexINT nMax = 0 )
     {
         // Ensure valid data object
         if ( !IsValid() )
             return 0;
-
-        // Lock the command buffer
-        CTlLocalLock ll( m_di.Ptr()->lockCmd );
-        if ( !ll.IsLocked() )
-            return 0;
-
-        { // Copy commands from pre-stage buffer
-
-            CTlLocalLock ll( m_di.Ptr()->lockPre );
-            if ( ll.IsLocked() )
-                m_di.Ptr()->lstCmd.Append( m_di.Ptr()->lstPre );
-
-        } // end copy commands
 
         // Number of commands executed
         oexUINT uCmds = 0;
@@ -346,59 +447,79 @@ public:
 
         // What we think the current time is
         oexCONST oexUINT uCurrentTime = CSysTime( CSysTime::eGmtTime ).GetUnixTime();
+         
+        oexBOOL bErase = oexFALSE;
+        CDispatchInfo< CMessage >::t_CmdBufferList::iterator it;
 
-        // Execute commands
-        for ( CDispatchInfo::t_CmdBufferList::iterator it; nMax-- && m_di.Ptr()->lstCmd.Next( it ); )
-        {
-            // Ensure valid command
-            if ( it.Obj().Ptr() )
-            {
-                // Ensure it's time
-                oexUINT uTime = it.Obj().Ptr()->uTime;
-                if ( !uTime || uCurrentTime > uTime )
-                {
-                    // Execute the command
-                    Execute( it.Obj().Ptr()->sCmd, &it.Obj().Ptr()->sReturn );
+        // Process through the messages
+        do
+        {           
+            { // Scope, don't leave the buffer locked while we execute commands
 
-                    // Signal that reply is ready
-                    it.Obj().Ptr()->evReady.Set();
+                // Lock the command buffer
+                CTlLocalLock ll( m_di.Ptr()->lockCmd );
+                if ( !ll.IsLocked() )
+                    return 0;
 
-                    // Count commands
-                    uCmds++;
+                // Do we want to erase?
+                if ( bErase && it.IsValid() )
 
-                    // Erase the command
+                    // Erase message and get the next one
                     it = m_di.Ptr()->lstCmd.Erase( it );
 
-                } // end if
+                // Clear erase flag
+                bErase = oexFALSE;
 
-                // Waiting on this command
-                else
-                    uWaits++;
+                // Grab the next message
+                m_di.Ptr()->lstCmd.Next( it );
 
-            } // end if
+            } // end scope  
 
-            // Drop this command
-            else
-                it = m_di.Ptr()->lstCmd.Erase( it );
-
-        } // end for
-
-        { // Copy commands from pre-stage buffer
-
-            CTlLocalLock ll( m_di.Ptr()->lockPre );
-            if ( ll.IsLocked() )
+            // Did we get a command?
+            if ( it.IsValid() )
             {
-                // Reset event if no more commands
-                if ( !uWaits && !m_di.Ptr()->lstCmd.Size() && !m_di.Ptr()->lstPre.Size() )
-                    m_di.Ptr()->evCmd.Reset();
+                // Attempt to map it
+                if ( OnMap( it.Ptr() ) )
 
-                // Just to make sure
+                    bErase = oexTRUE;
+
                 else
-                    m_di.Ptr()->evCmd.Set();
+                {
+                    // Ensure it's time
+                    oexUINT uTime = it.Obj().Mi()->uTime;
+                    if ( !uTime || uCurrentTime > uTime )
+                    {
+                        // Execute the command locally
+                        Execute( it.Obj().Mi()->sCmd, &it.Obj().Mi()->sReturn );
+
+                        // Signal that reply is ready
+                        it.Obj().Mi()->evReady.Set();
+
+                        // Count commands
+                        uCmds++;
+
+                        // Erase this command
+                        bErase = oexTRUE;
+
+                    } // end if
+
+                    // Waiting on this command
+                    else
+                        uWaits++;
+
+                } // end else
 
             } // end if
 
-        } // end copy commands
+        } while( it.IsValid() && --nMax );
+
+        // Reset command event
+        if ( !uWaits && !m_di.Ptr()->lstCmd.Size() )
+            m_di.Ptr()->evCmd.Reset();
+
+        // Just to make sure
+        else
+            m_di.Ptr()->evCmd.Set();
 
         return uCmds;
     }
@@ -407,29 +528,38 @@ public:
     oexBOOL Execute( CStr x_sCmd, CStr *x_pReturn = oexNULL )
     {
         // Ensure valid data object
-        if ( !IsValid() )
-            return oexFALSE;
-
-        CTlLocalLock ll( m_di.Ptr()->lockCmd );
-        if ( !ll.IsLocked() )
+        if ( !IsValid() || !x_sCmd.Length() )
             return oexFALSE;
 
         // Deserialize the command
         CPropertyBag pb = CParser::Deserialize( x_sCmd );
 
-        if ( !pb[ oexT( "f" ) ].IsSet() )
+        if ( !pb.IsKey( oexT( "f" ) ) )
             return oexFALSE;
 
-        CDispatchInfo::t_EventHandlerList::iterator it = 
-            m_di.Ptr()->lstEventHandlers.Find( pb[ oexT( "f" ) ].ToString() );
+        // Event handler
+        CDispatchInfo< CMessage >::t_EventHandlerList::iterator it;
 
+        { // Scope
+
+            // Lock the event handlers
+            CTlLocalLock ll( m_di.Ptr()->lockEventHandlers );
+            if ( !ll.IsLocked() )
+                return oexFALSE;
+            
+            // Grab the event handler
+            it = m_di.Ptr()->lstEventHandlers.Find( pb[ oexT( "f" ) ].ToString() );
+
+        } // end scope
+
+        // How did it go
         if ( !it.IsValid() )
             return oexFALSE;
 
         CStr ret;
 
         // 0 params
-        if ( !pb[ oexT( "p" ) ].IsKey( 0 ) )
+        if ( !pb.IsKey( oexT( "p" ) ) || !pb[ oexT( "p" ) ].IsKey( 0 ) )
         {
             if ( oexVERIFY( 0 == it->GetNumParams() ) )
                 ret = it.Obj()();
@@ -600,7 +730,7 @@ public:
 private:
 
     /// Shared dispatch information
-    TMem< CDispatchInfo >       m_di;
+    TMem< CDispatchInfo< CMessage > >       m_di;
 
 };
 

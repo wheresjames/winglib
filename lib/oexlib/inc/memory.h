@@ -182,12 +182,14 @@ public:
 
         // Allocate plain old memory
         else
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
             m_pMem = CAlloc( m_uLine, m_pFile ).New< T >( x_uSize, x_bConstructed, x_bUseFullBlock );
-
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-        m_pFile = oexNULL;
-        m_uLine = 0;
+            m_pFile = oexNULL;
+            m_uLine = 0;
+#else
+            m_pMem = CAlloc().New< T >( x_uSize, x_bConstructed, x_bUseFullBlock );
 #endif
+
 
 #if defined ( _DEBUG )
         if ( !Ptr() )
@@ -223,8 +225,11 @@ public:
         if ( m_pMem )
         {
             // Free the memory
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
             CAlloc( m_uLine, m_pFile ).Delete( m_pMem );
-
+#else
+            CAlloc().Delete( m_pMem );
+#endif
             // Lose the pointer
             m_pMem = oexNULL;
 
@@ -265,7 +270,11 @@ public:
                     m_pMem[ i ].~T();
 
             // We can make things smaller
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
             m_pMem = CAlloc( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize );
+#else
+            m_pMem = CAlloc().Resize( m_pMem, x_uNewSize );
+#endif
 
         } // end if
 
@@ -273,12 +282,20 @@ public:
         else
         {
             // Will a simple resize work?
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
             T* pMem = CAlloc( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize );
+#else
+            T* pMem = CAlloc().Resize( m_pMem, x_uNewSize );
+#endif
             
             if ( !pMem )
             {
                 TMem< T > mem;
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
                 if ( !oexVERIFY_PTR( mem._Log( m_uLine, m_pFile ).New( x_uNewSize ).Ptr() ) )
+#else
+                if ( !oexVERIFY_PTR( mem.New( x_uNewSize ).Ptr() ) )
+#endif
                     return *this;
 
                 // Constructed?

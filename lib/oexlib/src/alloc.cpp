@@ -36,6 +36,8 @@
 
 OEX_USING_NAMESPACE
 
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+
 /// Underrun padding
 oexUCHAR CAlloc::m_ucUnderrunPadding[ 4 ] = 
 {
@@ -52,6 +54,8 @@ oexUCHAR CAlloc::m_ucOverrunPadding[ 24 ] =
 	0x95, 0x52, 0xa9, 0x29,
 	0xc5, 0xcd, 0x00, 0x00
 };
+
+#endif
 
 void CAlloc::ReportBlock( oexPVOID x_pMem, oexUINT uSize )
 {
@@ -106,7 +110,7 @@ oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUI
     // Construct to OexConstruct
     // ConstructArray to OexConstructArray
     // etc...
-    oexVERIFY( x_pFile );
+    oexASSERT( x_pFile );
 
     // Allocate memory in powers of two
     oexUINT uBlockSize = cmn::NextPower2( sizeof( oexUINT ) + x_uSize + ProtectAreaSize() );
@@ -174,7 +178,11 @@ oexPVOID CAlloc::VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSiz
     oexUCHAR *pBuf = (oexUCHAR*)x_pBuf;
 
     // Grab a pointer to the block header
-    SBlockHeader *pBh = (SBlockHeader*)( pBuf - sizeof( SBlockHeader ) - sizeof( m_ucUnderrunPadding ) );    
+    SBlockHeader *pBh = (SBlockHeader*)( pBuf - sizeof( SBlockHeader ) 
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+                                         - sizeof( m_ucUnderrunPadding ) 
+#endif
+                                         );    
 
     // Grab the size of the allocated buffer
     oexUINT uSize = pBh->uSize;
@@ -191,6 +199,8 @@ oexPVOID CAlloc::VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSiz
 
     } // end if
 
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+	
 	// Ensure overrun buffers match
 	// *** If this asserts, you probably over-ran the buffer!
 	//     i.e. buffer overflow
@@ -214,7 +224,9 @@ oexPVOID CAlloc::VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSiz
     if ( x_bUpdate )
     	os::CSys::MemSet( pBuf, 0, sizeof( m_ucUnderrunPadding ) );
 
-	// Skip the size
+#endif
+
+	// Skip the block header
 	pBuf -= sizeof( SBlockHeader );
 
 	// We don't want this value comming back to haunt us
@@ -249,6 +261,8 @@ oexPVOID CAlloc::ProtectMem( oexPVOID x_pBuf, oexUINT x_uSize, oexBOOL x_bUpdate
     if ( x_bUpdate )
         pBh->uSize = x_uSize;
 
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+
     // Copy under-run padding
     if ( x_bUpdate )
     	os::CSys::MemCpy( pBuf, m_ucUnderrunPadding, sizeof( m_ucUnderrunPadding ) );
@@ -259,6 +273,8 @@ oexPVOID CAlloc::ProtectMem( oexPVOID x_pBuf, oexUINT x_uSize, oexBOOL x_bUpdate
 	// Copy overrun padding
     if ( x_bUpdate )
     	os::CSys::MemCpy( &pBuf[ x_uSize ], m_ucOverrunPadding, sizeof( m_ucOverrunPadding ) );
+
+#endif
 
 	// New protected memory area pointer
 	return pBuf;

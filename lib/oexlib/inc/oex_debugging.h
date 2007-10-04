@@ -42,27 +42,64 @@ template < const int T > class oex_static_assert{};
 	typedef oex_static_assert< sizeof( int[ ( s ) ? 1 : -1 ] ) >	\
 		oex_typedef_static_assert;
 
-#	define oexVERIFY_PTR_NULL_OK( ptr )     oexVERIFY( oexVerifyPtrNullOk( ptr ) )
-#	define oexVERIFY_PTR( ptr )             oexVERIFY( oex::oexVerifyPtr( ptr ) )
-#	define oexVERIFY( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( __FILE__ ), __LINE__, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
-
 #ifdef _DEBUG
 
-#	define oexVALIDATE_PTR_NULL_OK( ptr )   oexVERIFY( oexVerifyPtrNullOk( ptr ) )
-#	define oexVALIDATE_PTR( ptr )           oexVERIFY( oexVerifyPtr( ptr ) )
-#	define oexASSERT( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0,oexTEXT( __FILE__ ), __LINE__, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
 #	define oexTRACE				            OEX_NAMESPACE::os::CDebug::FmtTrace
 #	define oexUNUSED( s )
 #	define oexBREAK( s )		            ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( __FILE__ ), __LINE__, s ), OEX_NAMESPACE::oexFALSE )
 
 #else
 
-#	define oexVALIDATE_PTR( ptr )
-#	define oexVALIDATE_PTR_NULL_OK( ptr )
-#	define oexASSERT( s )
 #	define oexTRACE
 #	define oexUNUSED( s )
 #	define oexBREAK( s )
+
+#endif
+
+
+/**
+    Macro behavior
+
+    - Macro -               - Release -             - Debug -
+
+    oexASSERT               1 =                     1 = 1
+                            0 =                     0 = Shows debug dialog box
+
+    oexCHECK                1 = 1                   1 = 1 
+                            0 = 0                   0 = Shows debug dialog box
+
+    oexVERIFY               1 = 1                   1 = 1
+                            0 = Shows dialog box    0 = Shows debug dialog box
+
+
+    These macros have no side effects.
+
+*/
+
+// Verify macros show a dialog box even in release mode
+#	define oexVERIFY_PTR_NULL_OK( ptr )     oexVERIFY( oexVerifyPtrNullOk( ptr ) )
+#	define oexVERIFY_PTR( ptr )             oexVERIFY( oex::oexVerifyPtr( ptr ) )
+#	define oexVERIFY( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( __FILE__ ), __LINE__, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
+
+#ifdef _DEBUG
+
+#	define oexASSERT_PTR_NULL_OK( ptr )     oexVERIFY( oexVerifyPtrNullOk( ptr ) )
+#	define oexASSERT_PTR( ptr )             oexVERIFY( oexVerifyPtr( ptr ) )
+#	define oexASSERT( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0,oexTEXT( __FILE__ ), __LINE__, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
+
+#	define oexCHECK_PTR_NULL_OK( ptr )      oexVERIFY_PTR_NULL_OK( ptr )
+#	define oexCHECK_PTR( ptr )              oexVERIFY_PTR( ptr )
+#	define oexCHECK( s )		            oexVERIFY( s )
+
+#else
+
+#	define oexASSERT_PTR( ptr )
+#	define oexASSERT_PTR_NULL_OK( ptr )
+#	define oexASSERT( s )
+
+#	define oexCHECK_PTR_NULL_OK( ptr )      oexCHECK( oexVerifyPtrNullOk( ptr ) )
+#	define oexCHECK_PTR( ptr )              oexCHECK( oex::oexVerifyPtr( ptr ) )
+#	define oexCHECK( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE :  OEX_NAMESPACE::oexFALSE )
 
 #endif
 

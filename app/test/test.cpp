@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "stdio.h"
 
     class CTestMonitor
     {   public: 
@@ -51,6 +52,8 @@
 oex::oexRESULT TestAllocator()
 {
     // Veriry over-run / under-run protection
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+
     char* pChar = OexAllocNew< char >( 100 );
 
     if ( !oexVERIFY( !oex::os::CSys::MemCmp( &pChar[ 100 ], 
@@ -65,6 +68,7 @@ oex::oexRESULT TestAllocator()
 
     OexAllocDelete( pChar );
 
+#endif
 
     // Allocate generic array
     int * buf = OexAllocNew< int >( 100 );
@@ -500,6 +504,22 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str1 == oexT( "2) E = 2.71" ) ) )
 		return -8;
 
+    str1 = oexT( "c:/temp/myfile.txt" );
+
+    if ( !oexVERIFY( str1.GetPath() == oexT( "c:/temp" ) ) )
+		return -9;
+
+    if ( !oexVERIFY( str1.GetFileName() == oexT( "myfile.txt" ) ) )
+		return -10;
+
+    str1 = oexT( "c:/temp//\\/myfile.txt" );
+
+    if ( !oexVERIFY( str1.GetPath() == oexT( "c:/temp" ) ) )
+		return -9;
+
+    if ( !oexVERIFY( str1.GetFileName() == oexT( "myfile.txt" ) ) )
+		return -10;
+
     return oex::oexRES_OK;
 }
 
@@ -600,7 +620,7 @@ oex::oexRESULT TestLists()
 
     if( !oexVERIFY( !lst2.Size() ) )
         return -11;
-
+    
     // Destroy the list
 	lst.Destroy();
 
@@ -612,8 +632,38 @@ oex::oexRESULT TestLists()
 	if ( !oexVERIFY( it.Obj() == 4 ) )
 		return -8;
 
+    // String list test
     oex::TList< oex::CStr > strlst;
 	oex::oexCSTR szStr[] = { oexT( "This" ), oexT( "is" ), oexT( "a" ), oexT( "list" ), oexT( "of" ), oexT( "strings" ) , oexNULL };
+
+    // Add two items to the list
+    strlst.Append( vals, 2 );
+
+	if ( !oexVERIFY( oex::CParser::Implode( strlst, oexT( "," ) ) == oexT( "4,8" ) ) )
+		return -9;
+
+    // Swap
+    strlst.MoveBefore( strlst.Last(), strlst.First() );
+	if ( !oexVERIFY( oex::CParser::Implode( strlst, oexT( "," ) ) == oexT( "8,4" ) ) )
+		return -10;
+
+    // Swap
+    strlst.MoveAfter( strlst.First(), strlst.Last() );
+	if ( !oexVERIFY( oex::CParser::Implode( strlst, oexT( "," ) ) == oexT( "4,8" ) ) )
+		return -11;
+
+    // Swap
+    strlst.MoveDown( strlst.First() );
+	if ( !oexVERIFY( oex::CParser::Implode( strlst, oexT( "," ) ) == oexT( "8,4" ) ) )
+		return -12;
+
+    // Swap
+    strlst.MoveUp( strlst.Last() );
+	if ( !oexVERIFY( oex::CParser::Implode( strlst, oexT( "," ) ) == oexT( "4,8" ) ) )
+		return -13;
+
+    // Lose the list
+    strlst.Destroy();
 
 	// Create list
 	strlst << oexT( "This" ) << oexT( "is" ) << oexT( "a" ) << oexT( "list" ) << oexT( "of" ) << oexT( "strings" );
@@ -1280,7 +1330,11 @@ oex::oexRESULT Test_CFifoSync()
     for ( oex::oexUINT i = 0; i < 10; i++ )
     {
         for ( oex::oexUINT x = 0; x < 8; x++ )
-            fs.Write( oexStrToBin( pStr ) ), uBufferedData++;
+        {
+            uBufferedData++;
+            fs.Write( oexStrToBin( pStr ) );
+
+        } // end for
 
         if ( !oexVERIFY( oexBinToStr( fs.Read() ) == pStr ) )
             return -1;
@@ -1454,6 +1508,25 @@ oex::oexRESULT Test_CDispatch()
     if ( !oexVERIFY( 22 == bto.GetValue() ) )
         return -4;
 
+    // Test single execute
+    dsp.Queue( oexNULL, dsp.Call( oexT( "SetValue" ), 33 ) );
+    dsp.Queue( oexNULL, dsp.Call( oexT( "SetValue" ), 44 ) );
+
+    dsp.ProcessQueue( 1 );
+    if ( !oexVERIFY( 33 == bto.GetValue() ) )
+        return -5;
+
+    dsp.ProcessQueue();
+    if ( !oexVERIFY( 44 == bto.GetValue() ) )
+        return -6;
+
+    // Test priority
+    dsp.Queue( oexNULL, dsp.Call( oexT( "SetValue" ), 33 ) );
+    dsp.Queue( oexNULL, dsp.Call( oexT( "SetValue" ), 44 ), 1 );
+    dsp.ProcessQueue();
+    if ( !oexVERIFY( 33 == bto.GetValue() ) )
+        return -7;
+
     return oex::oexRES_OK;
 }
 
@@ -1482,7 +1555,7 @@ oex::oexRESULT Test_CThread()
     if ( !oexVERIFY( tt.Start() ) )
         return -1;
     
-    oex::CReply reply( tt.Queue( oexNULL, oexCall( oexT( "Add" ), 1, 2 ) ) );
+    oex::CDispatch::CMessage reply( tt.Queue( oexNULL, oexCall( oexT( "Add" ), 1, 2 ) ) );
 
     if ( !oexVERIFY( reply.Wait( 3000 ).IsDone() ) )
         return -2;
@@ -1507,7 +1580,7 @@ oex::oexRESULT Test_CAutoSocket()
 
     // Start the server
     server.Queue( oexNULL, oexCall( oexT( "Bind" ), 23456 ) );
-    oex::CReply reply( server.Queue( oexNULL, oexCall( oexT( "Listen" ), 0 ) ) );
+    oex::CDispatch::CMessage reply( server.Queue( oexNULL, oexCall( oexT( "Listen" ), 0 ) ) );
     if ( !reply.Wait( oexDEFAULT_TIMEOUT ).IsDone() )
         return -1;
 
@@ -1549,13 +1622,14 @@ oex::oexRESULT Test_CFtpSession()
 
     // Start the server
     ftp_server.Start();
-    ftp_server.Queue( oexNULL, oexCall( oexT( "Bind" ), 21111 ) );
+    ftp_server.Queue( oexNULL, oexCall( oexT( "Bind" ), 2111 ) );
     ftp_server.Queue( oexNULL, oexCall( oexT( "Listen" ), 0 ) );
 
     // Wait for connection
-    while ( !ftp_server.GetSessionList().Size() )
+    while ( !ftp_server.GetTotalConnections() )
         oex::os::CSys::Sleep( 100 );
 
+    // Wait for disconnect
     while ( ftp_server.GetSessionList().Size() )
         oex::os::CSys::Sleep( 100 );
 
@@ -1566,6 +1640,65 @@ oex::oexRESULT Test_CFtpSession()
 
     return oex::oexRES_OK;
 }
+
+oex::oexRESULT Test_CHttpSession()
+{
+    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
+        return -1;
+
+    // FTP server
+    oex::TNetServer< oex::CAutoSocket, oex::CHttpSession > http_server;
+
+    // Start the server
+    http_server.Start();
+    http_server.Queue( oexNULL, oexCall( oexT( "Bind" ), 8111 ) );
+    http_server.Queue( oexNULL, oexCall( oexT( "Listen" ), 0 ) );
+
+    // Wait for connection
+    while ( !http_server.GetTotalConnections() )
+        oex::os::CSys::Sleep( 100 );
+
+    // Wait for disconnect
+    while ( http_server.GetSessionList().Size() )
+        oex::os::CSys::Sleep( 100 );
+
+    // Just wait forever
+//    oex::os::CSys::Sleep( 60 * 60 * 1000 );
+
+    oex::os::CIpSocket::UninitSockets();
+
+    return oex::oexRES_OK;
+}
+
+oex::oexRESULT Test_CVfsSession()
+{
+    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
+        return -1;
+
+    // FTP server
+    oex::TNetServer< oex::CAutoSocket, oex::CVfsFtpSession > vfs_server;
+
+    // Start the server
+    vfs_server.Start();
+    vfs_server.Queue( oexNULL, oexCall( oexT( "Bind" ), 2111 ) );
+    vfs_server.Queue( oexNULL, oexCall( oexT( "Listen" ), 0 ) );
+
+    // Wait for connection
+    while ( !vfs_server.GetTotalConnections() )
+        oex::os::CSys::Sleep( 100 );
+
+    // Wait for disconnect
+    while ( vfs_server.GetSessionList().Size() )
+        oex::os::CSys::Sleep( 100 );
+
+    // Just wait forever
+//    oex::os::CSys::Sleep( 60 * 60 * 1000 );
+
+    oex::os::CIpSocket::UninitSockets();
+
+    return oex::oexRES_OK;
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -1610,9 +1743,11 @@ int main(int argc, char* argv[])
 
     Test_CThread();
 
-//    Test_CAutoSocket();
+//    Test_CFtpSession();
 
-    Test_CFtpSession();
+//    Test_CHttpSession();
+
+      Test_CVfsSession();
 
 	// Initialize the oex library
     oexUNINIT();	

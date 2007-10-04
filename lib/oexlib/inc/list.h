@@ -969,14 +969,14 @@ public:
 	// First()
 	//==============================================================
 	/// Returns the iterator for the first list item
-	iterator First() 
+	iterator First() oexCONST
     {   return iterator( m_pHead ); }
 
 	//==============================================================
 	// Last()
 	//==============================================================
 	/// Returns the iterator for the last list item
-	iterator Last() 
+	iterator Last() oexCONST
     {   return iterator( m_pTail ); }
 
 	//==============================================================
@@ -1005,7 +1005,7 @@ public:
 	
 		\see Prev()
 	*/
-	oexCONST oexBOOL Next( iterator& x_it )
+	oexCONST oexBOOL Next( iterator& x_it ) oexCONST
 	{	
         if ( x_it.IsValid() )
 			return x_it.Next();
@@ -1044,7 +1044,7 @@ public:
 	
 		\see Next()
 	*/
-	oexCONST oexBOOL Prev( iterator& x_it )
+	oexCONST oexBOOL Prev( iterator& x_it ) oexCONST
 	{	
         if ( x_it.IsValid() )
 			return x_it.Prev();
@@ -1056,6 +1056,129 @@ public:
 
 		return oexTRUE;
 	}
+
+	//==============================================================
+	// MoveUp()
+	//==============================================================
+	/// Moves a node closer to the start of the list
+	/**
+		\param [in] x_itMove	-	Node to move.
+
+		\return iterator containing object
+	*/
+	iterator MoveUp( iterator x_itMove )
+    {   
+        // Sanity checks
+        if ( !x_itMove.IsValid() )
+            return x_itMove;
+
+        // Update head pointer if needed
+        if ( x_itMove.Node()->Prev() == m_pHead )
+            m_pHead = x_itMove.Node();
+        
+        // Update tail pointer if needed
+        if ( x_itMove.Node() == m_pTail )
+            m_pTail = x_itMove.Node()->Prev();
+
+        // Put us up
+        x_itMove.Node()->MoveUp();
+
+        return x_itMove;
+    }
+
+
+	//==============================================================
+	// MoveDown()
+	//==============================================================
+	/// Moves a node closer to the end of the list
+	/**
+		\param [in] x_itMove	-	Node to move.
+
+		\return iterator containing object
+	*/
+	iterator MoveDown( iterator x_itMove )
+    {   
+        // Sanity checks
+        if ( !x_itMove.IsValid() )
+            return x_itMove;
+
+        // Update head pointer if needed
+        if ( x_itMove.Node() == m_pHead )
+            m_pHead = x_itMove.Node()->Next();
+
+        // Update tail pointer if needed
+        if ( x_itMove.Node()->Next() == m_pTail )
+            m_pTail = x_itMove.Node();
+        
+        // Put us up
+        x_itMove.Node()->MoveDown();
+
+        return x_itMove;
+    }
+
+
+	//==============================================================
+	// MoveBefore()
+	//==============================================================
+	/// Inserts the object to the front of the list
+	/**
+		\param [in] x_itMove	-	Node to move.
+        \param [in] x_itRef     -   Reference node.
+
+		\return iterator containing object
+	*/
+	iterator MoveBefore( iterator x_itMove, iterator x_itRef )
+    {   
+        // Sanity checks
+        if ( !x_itRef.IsValid() || !x_itMove.IsValid() )
+            return x_itMove;
+
+        // Put us in front of this node
+        x_itMove.Node()->Insert( x_itRef.Node() );
+
+        // Update head pointer if needed
+        if ( x_itRef.Node() == m_pHead )
+            m_pHead = x_itMove.Node();
+        
+        // Update tail pointer if needed
+        if ( x_itMove.Node() == m_pTail )
+            m_pTail = x_itRef.Node();
+
+        return x_itMove;
+    }
+
+
+	//==============================================================
+	// MoveAfter()
+	//==============================================================
+	/// Inserts the object to the front of the list
+	/**
+		\param [in] x_itMove	-	Node to move.
+        \param [in] x_itRef     -   Reference node.
+
+		\return iterator containing object
+	*/
+	iterator MoveAfter( iterator x_itMove, iterator x_itRef )
+    {   
+        // Sanity checks
+        if ( !x_itRef.IsValid() || !x_itMove.IsValid() )
+            return x_itMove;
+
+        // Put us in front of this node
+        x_itMove.Node()->Append( x_itRef.Node() );
+
+        // Update head pointer if needed
+        if ( x_itMove.Node() == m_pHead )
+            m_pHead = x_itRef.Node();
+        
+        // Update tail pointer if needed
+        if ( x_itRef.Node() == m_pTail )
+            m_pTail = x_itMove.Node();
+
+        return x_itMove;
+    }
+
+
 
 	//==============================================================
 	// Remove()

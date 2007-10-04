@@ -50,19 +50,19 @@
 #	define oexT( s )				( L##s )
 #	define oexTEXT( s )				oexT( s )
 
-#   define oexStrToStr8( s )        oex::CStr8().Cnv( s )
-#   define oexStrToStr8Ptr( s )     oex::CStr8().Cnv( s ).Ptr()
+#   define oexStrToStr8( s )        OEX_NAMESPACE::CStr8().Cnv( s )
+#   define oexStrToStr8Ptr( s )     OEX_NAMESPACE::CStr8().Cnv( s ).Ptr()
 #   define oexStrToStrW( s )        ( s )
 #   define oexStrToStrWPtr( s )     ( s )
-#   define oexStrToBin( s )         oex::CStr8().Bin( s )
-#   define oexStrToBinPtr( s )      oex::CStr8().Bin( s ).Ptr()
+#   define oexStrToBin( s )         OEX_NAMESPACE::CStr8().Bin( s )
+#   define oexStrToBinPtr( s )      OEX_NAMESPACE::CStr8().Bin( s ).Ptr()
 
-#   define oexStr8ToStr( s )        oex::CStr().Cnv( s )
-#   define oexStr8ToStrPtr( s )     oex::CStr().Cnv( s ).Ptr()
+#   define oexStr8ToStr( s )        OEX_NAMESPACE::CStr().Cnv( s )
+#   define oexStr8ToStrPtr( s )     OEX_NAMESPACE::CStr().Cnv( s ).Ptr()
 #   define oexStrWToStr( s )        ( s )
 #   define oexStrWToStrPtr( s )     ( s )
-#   define oexBinToStr( s )         oex::CStr().Bin( s )
-#   define oexBinToStrPtr( s )      oex::CStr().Bin( s ).Ptr()
+#   define oexBinToStr( s )         OEX_NAMESPACE::CStr().Bin( s )
+#   define oexBinToStrPtr( s )      OEX_NAMESPACE::CStr().Bin( s ).Ptr()
 
 #else
 
@@ -71,15 +71,15 @@
 
 #   define oexStrToStr8( s )        ( s )
 #   define oexStrToStr8Ptr( s )     ( s )
-#   define oexStrToStrW( s )        oex::CStrW().Set( s )
-#   define oexStrToStrWPtr( s )     oex::CStrW().Set( s ).Ptr()
+#   define oexStrToStrW( s )        OEX_NAMESPACE::CStrW().Set( s )
+#   define oexStrToStrWPtr( s )     OEX_NAMESPACE::CStrW().Set( s ).Ptr()
 #   define oexStrToBin( s )         ( s )
 #   define oexStrToBinPtr( s )      ( s )
 
 #   define oexStr8ToStr( s )        ( s )
 #   define oexStr8ToStrPtr( s )     ( s )
-#   define oexStrWToStr( s )        oex::CStr().Set( s )
-#   define oexStrWToStrPtr( s )     oex::CStr().Set( s ).Ptr()
+#   define oexStrWToStr( s )        OEX_NAMESPACE::CStr().Set( s )
+#   define oexStrWToStrPtr( s )     OEX_NAMESPACE::CStr().Set( s ).Ptr()
 #   define oexBinToStr( s )         ( s )
 #   define oexBinToStrPtr( s )      ( s )
 
@@ -89,7 +89,7 @@
 
 #define oexEMPTY_STRING             oexT( "" )
 
-#define oexNL						"\r\n"
+#define oexNL						oexT( "\r\n" )
 
 #define oexINIT()                   OEX_NAMESPACE::COex::Init()
 #define oexUNINIT()                 OEX_NAMESPACE::COex::Uninit()

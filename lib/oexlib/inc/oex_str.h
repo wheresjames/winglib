@@ -47,7 +47,7 @@ namespace str
     template < typename T >
         oexUINT Length( oexCONST T *s, oexINT sz )
         {   oexUINT l = 0;
-            oexVALIDATE_PTR( s );
+            oexASSERT_PTR( s );
             while ( sz-- && *s ) s++, l++;
             return l;
         }
@@ -104,7 +104,7 @@ namespace str
     template< typename T >
 	    T* ToLower( T *dst, oexINT ln_dst )
 	{
-        oexVALIDATE_PTR( dst );
+        oexASSERT_PTR( dst );
 
 		while ( 0 < ln_dst-- )
 		{	
@@ -126,7 +126,7 @@ namespace str
     template< typename T >
     	T* ToUpper( T *dst, oexINT ln_dst )
 	{
-        oexVALIDATE_PTR( dst );
+        oexASSERT_PTR( dst );
         
 		while ( 0 < ln_dst-- )
 		{
@@ -174,8 +174,8 @@ namespace str
 	template< class T >
 		static oexINT SkipCharacters( T *s1, oexINT ln1, T *s2, oexINT ln2 )
 	    {
-            oexVALIDATE_PTR( s1 );
-            oexVALIDATE_PTR( s2 );
+            oexASSERT_PTR( s1 );
+            oexASSERT_PTR( s2 );
 
 		    oexINT i = 0;
 		    while ( ln1 )
@@ -209,8 +209,8 @@ namespace str
 	template< class T >
 		oexINT RSkipCharacters( oexCONST T *s1, oexUINT ln1, oexCONST T *s2, oexUINT ln2 )
 	    {
-            oexVALIDATE_PTR( s1 );
-            oexVALIDATE_PTR( s2 );
+            oexASSERT_PTR( s1 );
+            oexASSERT_PTR( s2 );
             
             if ( !ln1 || !ln2 )
                 return -1;
@@ -242,7 +242,7 @@ namespace str
 	template< class T >
 		oexINT FindCharacter( oexCONST T *s, oexUINT ln, T ch )
 		{
-            oexVALIDATE_PTR( s );
+            oexASSERT_PTR( s );
 
 			oexINT i = 0;
 			while ( ln )
@@ -269,8 +269,8 @@ namespace str
     template< class T >
         oexINT Compare( T *s1, oexINT ln1, T *s2, oexINT ln2 )
         {
-            oexVALIDATE_PTR( s1 );
-            oexVALIDATE_PTR( s2 );
+            oexASSERT_PTR( s1 );
+            oexASSERT_PTR( s2 );
 
             if ( ln1 != ln2 )
                 return ( ln1 >= ln2 ) ? 1 : -1;
@@ -302,8 +302,8 @@ namespace str
     template< class T >
         oexINT CompareLen( T *s1, oexINT ln1, T *s2, oexINT ln2, oexINT ln_cmp )
         {
-            oexVALIDATE_PTR( s1 );
-            oexVALIDATE_PTR( s2 );
+            oexASSERT_PTR( s1 );
+            oexASSERT_PTR( s2 );
 
             // Enough bytes to compare?
             if ( ln_cmp > ln1 || ln_cmp > ln2 )
@@ -339,8 +339,8 @@ namespace str
                          T tSLow = oexT( 'a' ), T tELow = oexT( 'z' ), 
                          T tSHi = oexT( 'A' ), T tEHi = oexT( 'Z' ) )
         {
-            oexVALIDATE_PTR( s1 );
-            oexVALIDATE_PTR( s2 );
+            oexASSERT_PTR( s1 );
+            oexASSERT_PTR( s2 );
 
             if ( ln1 != ln2 )
                 return ( ln1 >= ln2 ) ? 1 : -1;
@@ -382,8 +382,8 @@ namespace str
                          T tSLow = oexT( 'a' ), T tELow = oexT( 'z' ), 
                          T tSHi = oexT( 'A' ), T tEHi = oexT( 'Z' ) )
         {
-            oexVALIDATE_PTR( s1 );
-            oexVALIDATE_PTR( s2 );
+            oexASSERT_PTR( s1 );
+            oexASSERT_PTR( s2 );
 
             // Enough bytes to compare?
             if ( ln_cmp > ln1 || ln_cmp > ln2 )
@@ -472,8 +472,8 @@ namespace str
 	template< class T >
 		oexINT FindCharacters( T *s1, oexINT ln1, T *s2, oexINT ln2 )
 	    {
-            oexVALIDATE_PTR( s1 );
-            oexVALIDATE_PTR( s2 );
+            oexASSERT_PTR( s1 );
+            oexASSERT_PTR( s2 );
 
 		    oexINT i = 0;
 		    while ( ln1 )
@@ -503,8 +503,8 @@ namespace str
 	template< class T >
 		oexINT RFindCharacters( oexCONST T *s1, oexUINT ln1, oexCONST T *s2, oexUINT ln2 )
 	    {
-            oexVALIDATE_PTR( s1 );
-            oexVALIDATE_PTR( s2 );
+            oexASSERT_PTR( s1 );
+            oexASSERT_PTR( s2 );
             
             if ( !ln1 || !ln2 )
                 return -1;
@@ -535,9 +535,9 @@ namespace str
 	template< class T >
 		oexINT FindTerm( oexCONST T *s, oexINT ln, oexCONST T *term, oexINT ln_term, oexCONST T *esc = oexNULL, oexINT ln_esc = 0 )
 	    {
-            oexVALIDATE_PTR( s );
-            oexVALIDATE_PTR( term );
-            oexVALIDATE_PTR_NULL_OK( esc );
+            oexASSERT_PTR( s );
+            oexASSERT_PTR( term );
+            oexASSERT_PTR_NULL_OK( esc );
 
 		    oexINT i = 0;
 		    while ( ln )
@@ -574,7 +574,7 @@ namespace str
 	template< class T >
 		oexINT RFindTerm( oexCONST T *s, oexINT ln, oexCONST T *term, oexINT ln_term )
 	    {
-            oexVALIDATE_PTR( s );
+            oexASSERT_PTR( s );
 
 		    oexINT i = 0;
 		    while ( ln-- )
@@ -608,7 +608,7 @@ namespace str
 	template< class T >
 		oexINT ParseQuoted( oexCONST T* s, oexINT ln, oexCONST T* open, oexINT ln_open, oexCONST T *close, oexINT ln_close, oexCONST T *esc = oexNULL, oexINT ln_esc = 0 )
 	    {
-            oexVALIDATE_PTR( s );
+            oexASSERT_PTR( s );
 
             // Must have at least two characters to be quoted
             if ( ln < 2 )
@@ -638,7 +638,7 @@ namespace str
 	template< class T >
 		static oexINT FindInRange( oexCONST T *s, oexINT ln, T min, T max )
 	{
-        oexVALIDATE_PTR( s );
+        oexASSERT_PTR( s );
 
 		oexINT i = 0;
 		while ( ln )
@@ -663,7 +663,7 @@ namespace str
 	template< class T >
 		static oexINT RFindInRange( oexCONST T *s, oexINT ln, T min, T max )
 	{
-        oexVALIDATE_PTR( s );
+        oexASSERT_PTR( s );
 
 		while ( ln-- )
 		{
@@ -710,7 +710,7 @@ namespace str
 	template< class T >
 		static oexINT RSkipInRange( oexCONST T *s, oexINT ln, T min, T max )
     	{
-            oexVALIDATE_PTR( s );
+            oexASSERT_PTR( s );
 
 		    while ( ln-- )
 		    {
@@ -822,7 +822,7 @@ namespace zstr
     template < typename T >
         oexUINT Length( oexCONST T *s )
         {   oexUINT l = 0;
-            oexVALIDATE_PTR( s );
+            oexASSERT_PTR( s );
             while ( *s ) s++, l++;
             return l;
         }
@@ -891,11 +891,11 @@ namespace guid
 	    return oexTRUE;
     }
 
-    template< typename T_STR, typename T_GUID >
-        oexCONST T_STR* GuidToString( T_STR *x_pStr, oexUINT x_uMax, oexCONST T_GUID *x_pGuid )
+    template< typename T_CHAR, typename T_GUID >
+        oexCONST T_CHAR* GuidToString( T_CHAR *x_pStr, oexUINT x_uMax, oexCONST T_GUID *x_pGuid )
     {
 	    // Sanity checks
-	    if ( !oexVERIFY_PTR( x_pStr ) || !oexVERIFY( x_uMax ) )
+	    if ( !oexCHECK_PTR( x_pStr ) || !oexCHECK( x_uMax ) )
 		    return oexNULL;
 
 	    // Verify there is enough room for the string
@@ -912,7 +912,7 @@ namespace guid
 	    // Example GUID : DD05F574-2D69-4463-95DD-F76C9F7C5E6D
 
         return os::CSys::StrFmt( x_pStr, x_uMax, 
-                 oexT( "%0.8lX-%0.4lX-%0.4lX-%0.2lX%0.2lX-%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX" ),
+                 oexTT( T_CHAR, "%0.8lX-%0.4lX-%0.4lX-%0.2lX%0.2lX-%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX" ),
 			     (oexUINT) x_pGuid->Data1, 
 			     (oexUINT) x_pGuid->Data2,
 			     (oexUINT) x_pGuid->Data3,
@@ -926,10 +926,10 @@ namespace guid
 			     (oexUINT) x_pGuid->Data4[ 7 ] );
     }
 
-    template< typename T_STR, typename T_GUID >
-        T_GUID * StringToGuid( T_GUID *x_pGuid, T_STR *x_pString, oexUINT x_uMax )
+    template< typename T_CHAR, typename T_GUID >
+        T_GUID * StringToGuid( T_GUID *x_pGuid, oexCONST T_CHAR *x_pString, oexUINT x_uMax )
     {
-	    if ( !oexVERIFY_PTR( x_pGuid ) )
+	    if ( !oexCHECK_PTR( x_pGuid ) )
 		    return oexNULL;
 
         // Does the caller want a new GUID?
@@ -982,7 +982,7 @@ namespace guid
     template< typename T_GUID1 >
         T_GUID1 * ZeroGuid( T_GUID1 *pDst )
     {
-        oexVALIDATE_PTR( pDst );
+        oexASSERT_PTR( pDst );
 
         *(oexINT64*)pDst = 0;
         ( (oexINT64*)pDst )[ 1 ] = 0;
@@ -993,8 +993,8 @@ namespace guid
     template< typename T_GUID1, typename T_GUID2 >
         T_GUID1 * CopyGuid( T_GUID1 *pDst, oexCONST T_GUID2 *pSrc )
     {
-        oexVALIDATE_PTR( pDst );
-        oexVALIDATE_PTR( pSrc );
+        oexASSERT_PTR( pDst );
+        oexASSERT_PTR( pSrc );
 
         // This should be fast
         *(oexINT64*)pDst = *(oexINT64*)pSrc;
@@ -1006,8 +1006,8 @@ namespace guid
     template< typename T_GUID1, typename T_GUID2 >
         oexBOOL CmpGuid( oexCONST T_GUID1 *pGuid1, oexCONST T_GUID2 *pGuid2 )
     {
-        oexVALIDATE_PTR( pGuid1 );
-        oexVALIDATE_PTR( pGuid2 );
+        oexASSERT_PTR( pGuid1 );
+        oexASSERT_PTR( pGuid2 );
 
         // This should be fast
         return ( *(oexINT64*)pGuid1 == *(oexINT64*)pGuid2
@@ -1032,8 +1032,8 @@ namespace guid
     template< typename T_GUID1, typename T_GUID2 >
         T_GUID1 * XorGuid( T_GUID1 *pGuid1, oexCONST T_GUID2 *pGuid2 )
     {
-        oexVALIDATE_PTR( pGuid1 );
-        oexVALIDATE_PTR( pGuid2 );
+        oexASSERT_PTR( pGuid1 );
+        oexASSERT_PTR( pGuid2 );
 
         *(oexINT64*)pGuid1 ^= *(oexINT64*)pGuid2;
         ( (oexINT64*)pGuid1 )[ 1 ] ^= ( (oexINT64*)pGuid2 )[ 1 ];
@@ -1044,8 +1044,8 @@ namespace guid
     template< typename T_GUID1, typename T_GUID2 >
         T_GUID1 * AndGuid( T_GUID1 *pGuid1, oexCONST T_GUID2 *pGuid2 )
     {
-        oexVALIDATE_PTR( pGuid1 );
-        oexVALIDATE_PTR( pGuid2 );
+        oexASSERT_PTR( pGuid1 );
+        oexASSERT_PTR( pGuid2 );
 
         *(oexINT64*)pGuid1 &= *(oexINT64*)pGuid2;
         ( (oexINT64*)pGuid1 )[ 1 ] &= ( (oexINT64*)pGuid2 )[ 1 ];
@@ -1056,8 +1056,8 @@ namespace guid
     template< typename T_GUID1, typename T_GUID2 >
         T_GUID1 * OrGuid( T_GUID1 *pGuid1, oexCONST T_GUID2 *pGuid2 )
     {
-        oexVALIDATE_PTR( pGuid1 );
-        oexVALIDATE_PTR( pGuid2 );
+        oexASSERT_PTR( pGuid1 );
+        oexASSERT_PTR( pGuid2 );
 
         *(oexINT64*)pGuid1 |= *(oexINT64*)pGuid2;
         ( (oexINT64*)pGuid1 )[ 1 ] |= ( (oexINT64*)pGuid2 )[ 1 ];
@@ -1068,7 +1068,7 @@ namespace guid
     template< typename T_GUID, typename T >
         T_GUID * SetGuid( T_GUID *pGuid1, oexCONST T pVal, oexUINT uOffset, oexUINT uCount )
     {
-        oexVALIDATE_PTR( pGuid1 );
+        oexASSERT_PTR( pGuid1 );
 
         // Set GUID values
         T *p = &( (T*)pGuid1 )[ uOffset ];

@@ -471,8 +471,7 @@ namespace os
 #include "inc/sys_time.h"
 #include "inc/md5.h"
 
-/*
-*/
+// +++ Get stack tracing working sometime
 //#include "src/stack_trace.h"
 
 //------------------------------------------------------------------
@@ -509,27 +508,9 @@ namespace os
 #include "inc/auto_socket.h"
 #include "inc/port.h"
 #include "inc/ftp_session.h"
-
-
-/*
-#include "inc/dispatch.h"
-#include "inc/file.h"
-#include "inc/zip.h"
-#include "inc/unzip.h"
-#include "inc/parser.h"
-#include "inc/find_files.h"
-#include "inc/circ_buf.h"
-#include "inc/fifo_sync.h"
-#include "inc/data_packet.h"
-//#include "inc/thread_pool.h"
-//#include "inc/auto_socket.h"
-//#include "inc/auto_server.h"
-//#include "inc/wsp_stream.h"
-//#include "inc/http_session.h"
-//#include "inc/ftp_session.h"
-//#include "inc/virtual_fs.h"
-//#include "inc/vfs_ftp_session.h"
-*/
+#include "inc/http_session.h"
+#include "inc/virtual_fs.h"
+#include "inc/vfs_ftp_session.h"
 
 //------------------------------------------------------------------
 // Init / Uninit

@@ -69,7 +69,7 @@ public:
 		\see 
 	*/
 	static oexBOOL Hash( oexPVOID x_pHash, oexPVOID x_pBuf, oexUINT x_uSize )
-	{   oexVALIDATE_PTR( x_pHash );
+	{   oexASSERT_PTR( x_pHash );
         *( (oexUINT*)x_pHash ) = CCrcHash::CRC32( 0, (oexUCHAR*)x_pBuf, x_uSize ); 
         return oexTRUE;
     }

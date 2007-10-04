@@ -45,8 +45,8 @@
 //#undef OEX_ENABLE_TESTS
 
 // Enables buffer over-run/under-run checking in release mode
-#define OEX_ENABLE_RELEASE_MODE_MEM_CHECK
-// #undef OEX_ENABLE_RELEASE_MODE_MEM_CHECK
+//#define OEX_ENABLE_RELEASE_MODE_MEM_CHECK
+ #undef OEX_ENABLE_RELEASE_MODE_MEM_CHECK
 
 // Are we using windows?
 #ifdef WIN32

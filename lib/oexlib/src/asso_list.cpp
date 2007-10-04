@@ -100,7 +100,7 @@ oexUINT CCrcHash::m_crc_table[ 256 ] =
 
 oexUINT CCrcHash::CRC32( oexUINT x_crc, oexUCHAR *x_buf, oexUINT x_size )
 {
-	oexVALIDATE_PTR( x_buf );
+	oexASSERT_PTR( x_buf );
 
 	x_crc = x_crc ^ 0xffffffffL; 
 

@@ -79,14 +79,7 @@ public:
 
 	/// Default constructor
 	TPropertyBag() {}
-/*
-	TPropertyBag( oexUINT v ) { *m_t = v; }
-	TPropertyBag( oexINT v ) { *m_t = v; }
-	TPropertyBag( oexLONG v ) { *m_t = v; }
-	TPropertyBag( oexULONG v ) { *m_t = v; }
-	TPropertyBag( oexCSTR v ) { *m_t = v; }
-	TPropertyBag( oexDOUBLE v ) { *m_t = v; }
-*/
+
     /// Assignment constructor
     TPropertyBag( oexCONST TPropertyBag &x_rPb )
     {   Assume( x_rPb ); }
@@ -146,7 +139,7 @@ public:
 
         return *this; 
     }
-
+/*
 #if defined( _UNICODE )
 
 	TPropertyBag& operator = ( CStr8 &v ) 
@@ -170,6 +163,7 @@ public:
     }
 
 #endif
+*/
 
 	//==============================================================
 	// operator =
@@ -284,7 +278,7 @@ public:
     }
 
 	/// Converts to a string
-	CStr& ToString() 
+	T_L& ToString() 
     { 
         // Create an object if we don't have one
         if ( !m_t.Ptr() )
@@ -300,7 +294,7 @@ public:
 	/**
 		\return Human readable representation of the contents
 	*/
-	CStr PrintR() { return PrintR( *this, CStr() ); }
+	T_L PrintR() { return PrintR( *this, T_L() ); }
 
     TPropertyBag& Assume( oexCONST TPropertyBag &x_pb )
     {
@@ -332,14 +326,14 @@ public:
 	
 		\see 
 	*/
-	CStr PrintR( TPropertyBag &pb, CStr &key, oexUINT uDepth = 0 )
+	T_L PrintR( TPropertyBag &pb, T_L &key, oexUINT uDepth = 0 )
 	{
-		CStr tabs; 
+		T_L tabs; 
 		for ( oexUINT t = 0; t < uDepth; t++ )
 			tabs << "  ";
 		uDepth++;
 
-		CStr str;
+		T_L str;
 		if ( pb.IsArray() )
 		{
 			if ( key.Length() ) 
@@ -422,3 +416,11 @@ private:
 */
 //==================================================================
 typedef TPropertyBag< CStr > CPropertyBag;
+
+typedef TPropertyBag< CStrW > CPropertyBagW;
+
+typedef TPropertyBag< CStr8 > CPropertyBag8;
+
+typedef TPropertyBag< CStr16 > CPropertyBag16;
+
+typedef TPropertyBag< CStr32 > CPropertyBag32;

@@ -45,9 +45,9 @@ oexCONST CFMap::t_HFILEMAP CFMap::c_Failed = NULL;
 
 CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, oexCSTR x_pName, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists )
 {
-	// Validation
-	oexVALIDATE_PTR( x_pMem );
-	oexVALIDATE_PTR_NULL_OK( x_pName );
+    // Sanity checks
+    if ( !oexCHECK_PTR( x_pMem ) || !oexCHECK_PTR_NULL_OK( x_pName ) )
+        return oexFALSE;
 
 	// Initialize pointer
 	if ( x_pMem ) *x_pMem = NULL;
@@ -111,14 +111,10 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 
 oexBOOL CFMap::osReleaseFileMapping( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem )
 {
-	// Ensure valid pointer
-	oexVALIDATE_PTR_NULL_OK( x_pMem );
-	oexVALIDATE_PTR_NULL_OK( x_hFileMap );
-
-	if ( x_pMem )
+	if ( x_pMem && oexCHECK_PTR( x_pMem ) )
 		UnmapViewOfFile( (LPCVOID)x_pMem );
 
-	if ( c_Failed != x_hFileMap )
+	if ( c_Failed != x_hFileMap && oexCHECK_PTR( x_hFileMap ) )
 		CloseHandle( (HANDLE)x_hFileMap );
 
 	return oexTRUE;

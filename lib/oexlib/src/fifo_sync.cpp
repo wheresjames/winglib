@@ -77,7 +77,7 @@ oexBOOL CFifoSync::Write( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT x_uEncode )
         return oexFALSE;
 
 	// Prepare to write data
-	if ( !InitFifoWrite() ) 
+	if ( !InitFifoWrite( x_uSize ) ) 
 		return oexFALSE;
 
 	// Add data to the buffer
@@ -141,7 +141,7 @@ oexBOOL CFifoSync::AddFifo( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT x_uEncode
 	return oexTRUE;
 }
 
-oexBOOL CFifoSync::InitFifoWrite()
+oexBOOL CFifoSync::InitFifoWrite( oexUINT x_uSize )
 {
 	// Lock the buffer
 	CTlLocalLock ll( *this );
@@ -149,8 +149,8 @@ oexBOOL CFifoSync::InitFifoWrite()
         return oexFALSE;
 
     // Ensure buffer space
-	if ( !AllocateBuffers() )
-        return oexFALSE;
+    if ( !m_pBi )
+        Allocate( x_uSize );
 
 	// Do we have a buffer?
 	if ( !GetMaxWrite( m_pBi->uTailPtr, m_pBi->uHeadPtr, m_uMaxBuffers ) )
@@ -161,7 +161,7 @@ oexBOOL CFifoSync::InitFifoWrite()
 
         // Attempt to get more space
         m_uMaxBuffers = cmn::NextPower2( m_uMaxBuffers * 2 );
-        if ( !AllocateBuffers() )
+        if ( !Allocate( x_uSize ) )
             return oexFALSE;
 
     } // end if

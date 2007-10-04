@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// ftp_session.h
+// vfs_ftp_session.h
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -36,17 +36,24 @@
 
 
 //==================================================================
-// CFtpDataConnection
+// CVfsFtpDataConnection
 //
-/// FTP data connection
+/// VFS FTP data connection
 /**
 */
 //==================================================================
-class CFtpDataConnection : 
+class CVfsFtpDataConnection : 
     public CProtocol,
     public TBufferedPort< CAutoSocket >
 {
 public:
+
+    ~CVfsFtpDataConnection()
+    {
+        // Save any data that needs to go to the vfs
+        if ( m_vfs.IsOpen() && m_sFile.Length() && Rx().GetMaxRead() )
+            m_vfs.SaveFile( m_sFile.Ptr(), Rx().Read() );
+    }
 
 	//==============================================================
 	// OnRead()
@@ -65,9 +72,9 @@ public:
         if ( !TBufferedPort< CAutoSocket >::OnRead( x_nErr ) )
 		    return oexFALSE;
 
-        // Write out the data
-        if ( m_fData.IsOpen() )
-            m_fData.Write( Rx().Read() );
+        // Grab the data from the buffer
+//        if ( m_vfs.IsOpen() )
+//            m_buf.Write( Rx().Read() );
 
 	    return oexTRUE;
     }
@@ -95,9 +102,10 @@ public:
         CProtocol::OnRegisterFunctions( x_pDispatch );
 
         // Export functions
-        x_pDispatch->OexRpcRegister( CFtpDataConnection, WriteStr );
-        x_pDispatch->OexRpcRegister( CFtpDataConnection, WaitTxEmpty );
-        x_pDispatch->OexRpcRegister( CFtpDataConnection, CreateFile );
+        x_pDispatch->OexRpcRegister( CVfsFtpDataConnection, WriteStr );
+        x_pDispatch->OexRpcRegister( CVfsFtpDataConnection, WaitTxEmpty );
+        x_pDispatch->OexRpcRegister( CVfsFtpDataConnection, SetFile );
+        x_pDispatch->OexRpcRegister( CVfsFtpDataConnection, OpenVfs );
     }
 
     /// Exported Function
@@ -109,41 +117,51 @@ public:
     {   return Tx().WaitEmpty( x_uTimeout ); }
 
     /// Opens a new file
-    oexBOOL CreateFile( CStr x_sFile )
-    {   return m_fData.CreateAlways( x_sFile.Ptr() ).IsOpen(); }
+    oexBOOL SetFile( CStr8 x_sFile )
+    {   m_sFile = x_sFile; return oexTRUE; }
+
+    /// Opens the VFS
+    oexBOOL OpenVfs( CStr8 x_sRoot )
+    {   return m_vfs.Open( x_sRoot.Ptr() );
+    }
 
 
 private:
 
-    /// Disk file
-    CFile           m_fData;
+    /// File name
+    CStr8               m_sFile;
+
+    /// VFS object
+    CVirtualFs          m_vfs;
 };
 
 
 //==================================================================
-// CFtpSession
+// CVfsFtpSession
 //
-/// Encapsulates basic FTP server functionality
+/// Encapsulates basic FTP server functionality for VFS
 /**
 
 */
 //==================================================================
-class CFtpSession : 
+class CVfsFtpSession : 
     public CProtocol,
     public TBufferedPort< CAutoSocket >
 {
 public:
 
     /// FTP data connection
-    typedef TNetServer< oex::CAutoSocket, CFtpDataConnection > t_FtpDataConnection;
+    typedef TNetServer< oex::CAutoSocket, CVfsFtpDataConnection > t_FtpDataConnection;
 
 public:
 	
     /// Constructor
-    CFtpSession();
+    CVfsFtpSession();
 
     /// Destructor
-    virtual ~CFtpSession() {}
+    virtual ~CVfsFtpSession() 
+    {
+    }
 
 	//==============================================================
 	// OnRead()
@@ -243,5 +261,7 @@ private:
     /// Passive FTP port
     oexUINT                             m_uPasvPort;
    
+    /// Virtual file system
+    CVirtualFs                          m_vfs;
 };
 

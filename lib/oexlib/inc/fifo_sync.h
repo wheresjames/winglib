@@ -161,7 +161,7 @@ public:
 	/**		
 		\return Non-zero if success
 	*/
-	oexBOOL InitFifoWrite();
+	oexBOOL InitFifoWrite( oexUINT x_uSize );
 
 	//==============================================================
 	// AddFifo()

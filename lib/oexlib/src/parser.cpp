@@ -92,7 +92,7 @@ CStr CParser::GetToken( CStr &x_sStr, CStrList x_lst, oexBOOL x_bCaseSensitive )
 
     return CStr();
 }
-
+/*
 CStr CParser::ParseToken( CStr &x_sStr, CStrList x_lst, oexBOOL x_bCaseSensitive )
 {
     if ( !x_lst.Size() )
@@ -112,7 +112,7 @@ CStr CParser::ParseToken( CStr &x_sStr, CStrList x_lst, oexBOOL x_bCaseSensitive
 
     return CStr();
 }
-
+*/
 CStrList CParser::GetTokens( oexCSTR x_pStr, oexCSTR x_pValid )
 {
 	CStrList lst;
@@ -134,7 +134,7 @@ CStrList CParser::GetTokens( oexCSTR x_pStr, oexCSTR x_pValid )
 
 	return lst;
 }
-
+/*
 CStrList CParser::Split( oexCSTR x_pStr, oexUINT x_uSize, oexCSTR x_pSep )
 {
 	CStrList lst;
@@ -180,36 +180,6 @@ CStrList CParser::Split( oexCSTR x_pStr, oexUINT x_uSize, oexCSTR x_pSep )
 	return lst;
 }
 
-CPropertyBag CParser::DecodeUrlParams( CStr x_str )
-{
-	CPropertyBag pb;
-	CStr key, val;
-
-	CStrList lst = CParser::Split( x_str, oexT( "&" ) );
-
-	for ( CStrList::iterator it; lst.Next( it ); )
-	{
-		key = UrlDecode( it->Parse( oexT( "=" ) ) );
-		if ( key.Length() ) (*it)++;
-		val = UrlDecode( it.Obj() );
-
-		// Key value pair
-		if ( key.Length() && val.Length() )
-			pb[ key ] = val;
-
-		// NULL key assignment
-		else if ( key.Length() )
-			pb[ key ] = oexT( "" );
-
-		// Assume NULL key assignment
-		else if ( val.Length() )
-			pb[ val ] = oexT( "" );
-
-	} // end while
-
-	return pb;
-}
-
 CStr CParser::EncodeUrlParams( CPropertyBag x_pb )
 {
 	CStr str;
@@ -225,7 +195,7 @@ CStr CParser::EncodeUrlParams( CPropertyBag x_pb )
 
 	return str;
 }
-
+* /
 oexBOOL CParser::IsUrlChar( oexTCHAR x_ch ) 
 {   return  ( oexT( 'a' ) <= x_ch && oexT( 'z' ) >= x_ch ) ||
             ( oexT( 'A' ) <= x_ch && oexT( 'Z' ) >= x_ch ) ||
@@ -234,7 +204,7 @@ oexBOOL CParser::IsUrlChar( oexTCHAR x_ch )
             oexT( '.' ) == x_ch;
 }
 
-
+/*
 CStr CParser::UrlEncode( CStr x_str )
 {
 	CStr ret, num;
@@ -282,7 +252,7 @@ CStr CParser::UrlDecode( CStr x_str )
 
 	return ret;
 }
-
+/*
 CPropertyBag CParser::DecodeMIME( CStr &x_sStr )
 {
     CPropertyBag pb;
@@ -320,7 +290,7 @@ CStr CParser::EncodeMime( CPropertyBag &x_pb )
 
 	return str;
 }
-
+* /
 oexLONG CParser::Deserialize( oexCONST CStr &x_sStr, CPropertyBag &x_pb, oexBOOL x_bMerge, oexLONG *x_pLast )
 {
     // Lose previous contents

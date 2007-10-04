@@ -95,6 +95,7 @@
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -125,6 +126,7 @@
 				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -225,6 +227,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\http_session.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\os\win32\ip_address.cpp"
 				>
 			</File>
@@ -274,6 +280,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\unzip.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\vfs_ ftp_session.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\virtual_fs.cpp"
 				>
 			</File>
 			<File
@@ -355,6 +369,10 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\os\hq_timer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\http_session.h"
 				>
 			</File>
 			<File
@@ -463,6 +481,14 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\unzip.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\vfs_ftp_session.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\virtual_fs.h"
 				>
 			</File>
 			<File
