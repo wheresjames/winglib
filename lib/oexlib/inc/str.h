@@ -302,19 +302,19 @@ public:
 
 	/// Returns a writable pointer (use with care)
 	T* _Ptr() const
-	{	return (T*)Ptr(); }
+	{	( (TStr*)this )->Unshare(); return (T*)Ptr(); }
 
 	/// Returns a writable pointer (use with care)
 	T* _Ptr( oexUINT x_uOffset ) const
-	{	return (T*)Ptr( x_uOffset ); }
+	{	( (TStr*)this )->Unshare(); return (T*)Ptr( x_uOffset ); }
 
 	/// Returns the specified character
 	T& operator []( oexUINT x_uOffset ) const
-	{	return *_Ptr( x_uOffset ); }
+	{	( (TStr*)this )->Unshare(); return *_Ptr( x_uOffset ); }
 
 	/// Returns the first character in the buffer
-	oexCONST T& operator *() 
-    { return *Ptr(); }
+	oexCONST T& operator *() const
+    {   return *Ptr(); }
 
 	/// Calculates the length of the string by finding the NULL terminator
 	oexINT CalculateLength()
@@ -353,6 +353,10 @@ public:
     /// !!! This allows NULL characters to be in the string.
     oexINT SetLength( oexINT x_nLength )
     {
+        // Do we already have the correct length?
+        if ( x_nLength == m_nLength )
+            return m_nLength;
+
         // Ensure we have that much data
         if ( !OexAllocate( m_uOffset + x_nLength ) )
             return 0;
@@ -368,9 +372,13 @@ public:
     {   return sizeof( T ); }
 
     /// Returns the length of the string in bytes
-    oexINT LengthInBytes()
+    /**
+        \param x_uAdd   -   Number of *characters* to
+                            add to the returned length
+    */
+    oexINT LengthInBytes( oexUINT x_uAdd = 0 )
     {
-        return Length() * SizeOfChar();
+        return ( Length() + x_uAdd ) * SizeOfChar();
     }
 
 public:
@@ -1611,3 +1619,78 @@ typedef TStr< oexINT32 >    CStr32;
 
 /// 64 bit character string
 typedef TStr< oexINT64 >    CStr64;
+
+
+/// Compare
+namespace obj
+{
+    // iii Unfortunately, Doxygen craps out on these next 
+    //     function templates.
+
+	//==============================================================
+	// Size()
+	//==============================================================
+	/// Specialized for CStr
+	/**
+		\param [in] x_obj		-	The object whose size will be 
+								    returned.
+
+		This just specializes for the case of CStr.
+
+		+++ I don't like having the reference to CStr here, so I really
+		should figure out another way.  Any suggestions?
+	*/
+	template <> static oexUINT Size< CStrW >( oexCONST CStrW *x_obj ) 
+    {   return ( (CStrW*)x_obj )->LengthInBytes(); }
+
+	template <> static oexUINT Size< CStr8 >( oexCONST CStr8 *x_obj ) 
+    {   return ( (CStr8*)x_obj )->LengthInBytes(); }
+
+	template <> static oexUINT Size< CStr16 >( oexCONST CStr16 *x_obj ) 
+    {   return ( (CStr16*)x_obj )->LengthInBytes(); }
+
+//	template <> static oexUINT Size< CStr32 >( oexCONST CStr32 *x_obj ) 
+//    {   return ( (CStr32&)x_obj ).LengthInBytes(); }
+
+	//==============================================================
+	// Ptr()
+	//==============================================================
+	/// Specialized for CStr
+	/**
+		\param [in] x_ptr		-	The object whose size will be 
+									returned.
+
+		This just specializes for the case of CStr.
+		
+		+++ It would be nice to eliminate the ref to CStr here.
+	*/
+	template <> static oexPVOID Ptr< CStrW >( oexCONST CStrW *x_ptr ) 
+    {   return (oexPVOID)( (CStrW*)x_ptr )->Ptr(); }
+
+	template <> static oexPVOID Ptr< CStr8 >( oexCONST CStr8 *x_ptr ) 
+    {   return (oexPVOID)( (CStr8*)x_ptr )->Ptr(); }
+
+	template <> static oexPVOID Ptr< CStr16 >( oexCONST CStr16 *x_ptr ) 
+    {   return (oexPVOID)( (CStr16*)x_ptr )->Ptr(); }
+
+//	template <> static oexPVOID Ptr< CStr32 >( oexCONST CStr32 *x_ptr ) 
+//    {   return (oexPVOID)( (CStr32*)x_ptr )->Ptr(); }
+
+	//==============================================================
+	// Compare()
+	//==============================================================
+    /// Special overload for CStr
+
+    template <> static oexBOOL Compare< CStrW >( oexCONST CStrW &k1, oexCONST CStrW &k2 ) 
+    {   return (CStrW&)k1 == (CStrW&)k2; }
+
+    template <> static oexBOOL Compare< CStr8 >( oexCONST CStr8 &k1, oexCONST CStr8 &k2 ) 
+    {   return (CStr8&)k1 == (CStr8&)k2; }
+
+    template <> static oexBOOL Compare< CStr16 >( oexCONST CStr16 &k1, oexCONST CStr16 &k2 ) 
+    {   return (CStr16&)k1 == (CStr16&)k2; }
+
+//    template <> static oexBOOL Compare< CStr32 >( oexCONST CStr32 &k1, oexCONST CStr32 &k2 ) 
+//    {   return (CStr32&)k1 == (CStr32&)k2; }
+
+};

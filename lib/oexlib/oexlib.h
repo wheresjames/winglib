@@ -455,16 +455,22 @@ namespace os
 };
 
 //------------------------------------------------------------------
+// Template functions
+//------------------------------------------------------------------
+#include "inc/oex_str.h"
+#include "inc/oex_obj.h"
+
+//------------------------------------------------------------------
 // Supporting classes
 //------------------------------------------------------------------
 #include "inc/arb_delegates.h"
-#include "inc/oex_str.h"
 #include "inc/alloc.h"
 #include "inc/file_mapping.h"
 #include "inc/memory.h"
 #include "inc/thread_safe.h"
 #include "inc/str.h"
 #include "inc/auto_str.h"
+
 #include "inc/list.h"
 #include "inc/asso_list.h"
 #include "inc/property_bag.h"
@@ -503,13 +509,18 @@ namespace os
 #include "inc/circ_buf.h"
 #include "inc/fifo_sync.h"
 #include "inc/data_packet.h"
+#include "inc/msg.h"
 #include "inc/dispatch.h"
 #include "inc/worker_thread.h"
 #include "inc/auto_socket.h"
-#include "inc/port.h"
+#include "inc/net_session.h"
+#include "inc/net_server.h"
+#include "inc/net_protocol.h"
+#include "inc/net_port.h"
 #include "inc/ftp_session.h"
 #include "inc/http_session.h"
 #include "inc/virtual_fs.h"
+#include "inc/ftp_disk_session.h"
 #include "inc/vfs_ftp_session.h"
 
 //------------------------------------------------------------------

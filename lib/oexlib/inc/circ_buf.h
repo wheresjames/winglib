@@ -90,6 +90,8 @@ public:
         eDefaultMaxBufferSize = ( 32 * 1048576 )
     };
 
+#pragma pack( push, 1 )
+
     /// Contains information about the buffer
     struct SBufferInfo
     {
@@ -99,6 +101,8 @@ public:
 	    /// The position of the next character slot available for writing
 	    oexUINT					uWritePtr;
     };
+
+#pragma pack( pop )
 
 protected:
 
@@ -818,8 +822,8 @@ public:
     }
 
 	/// Returns a pointer for the buffers thread locking class
-	operator CTlLock*() 
-    {   return &m_lock; }
+	operator CTlLock&() 
+    {   return m_lock; }
 
 	//==============================================================
 	// SetMaxSize()

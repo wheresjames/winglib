@@ -34,7 +34,6 @@
 
 #pragma once
 
-
 //==================================================================
 // CFtpDataConnection
 //
@@ -47,30 +46,6 @@ class CFtpDataConnection :
     public TBufferedPort< CAutoSocket >
 {
 public:
-
-	//==============================================================
-	// OnRead()
-	//==============================================================
-	/// Called when new data arrives
-	/**
-		\param [in] x_nErr	-	Error code
-		
-		\return Non-zero if success
-	
-		\see 
-	*/
-    virtual oexBOOL OnRead( oexINT x_nErr )
-    {
-	    // Process the incomming data
-        if ( !TBufferedPort< CAutoSocket >::OnRead( x_nErr ) )
-		    return oexFALSE;
-
-        // Write out the data
-        if ( m_fData.IsOpen() )
-            m_fData.Write( Rx().Read() );
-
-	    return oexTRUE;
-    }
 
 	//==============================================================
 	// OnClose()
@@ -96,27 +71,35 @@ public:
 
         // Export functions
         x_pDispatch->OexRpcRegister( CFtpDataConnection, WriteStr );
+        x_pDispatch->OexRpcRegister( CFtpDataConnection, ReadStr );
         x_pDispatch->OexRpcRegister( CFtpDataConnection, WaitTxEmpty );
-        x_pDispatch->OexRpcRegister( CFtpDataConnection, CreateFile );
     }
 
     /// Exported Function
 	oexBOOL WriteStr( CStr8 x_sStr )
     {	return Write( (oexPVOID)x_sStr.Ptr(), x_sStr.Length() ); }
 
-    /// Returns non-zero if the tx'er is empty
+    /// Reads the specifed amount of data from the input buffer
+    CStr8 ReadStr( oexUINT x_uSize )
+    {   return Rx().Read( x_uSize ); }
+
+    /// Reads the specifed amount of data from the input buffer
     oexBOOL WaitTxEmpty( oexUINT x_uTimeout )
     {   return Tx().WaitEmpty( x_uTimeout ); }
 
-    /// Opens a new file
-    oexBOOL CreateFile( CStr x_sFile )
-    {   return m_fData.CreateAlways( x_sFile.Ptr() ).IsOpen(); }
+    virtual oexBOOL OnRead( oexINT x_nErr )
+    {
+	    // Process the incomming data
+        if ( !TBufferedPort< CAutoSocket >::OnRead( x_nErr ) )
+		    return oexFALSE;
 
+
+
+	    return oexTRUE;
+    }
 
 private:
 
-    /// Disk file
-    CFile           m_fData;
 };
 
 
@@ -136,6 +119,56 @@ public:
 
     /// FTP data connection
     typedef TNetServer< oex::CAutoSocket, CFtpDataConnection > t_FtpDataConnection;
+
+public:
+
+    /// Return non-zero if folder is valid
+    virtual oexBOOL OnValidateUser( oexCSTR8 x_pUser, oexCSTR8 x_pPassword )
+    {   return oexTRUE; }
+
+    /// Return non-zero if folder is valid
+    virtual oexBOOL OnValidateFolder( oexCSTR8 x_pFolder )
+    {   return oexTRUE; }
+
+    /// Called when the specified file needs deleting
+    virtual oexBOOL OnDeleteFile( oexCSTR8 x_pFile )
+    {   return oexFALSE; }
+
+    /// Called to create the specified folder
+    virtual oexBOOL OnCreateFolder( oexCSTR8 x_pFolder )
+    {   return oexFALSE; }
+
+    /// Called to remove the specified folder
+    virtual oexBOOL OnRemoveFolder( oexCSTR8 x_pFolder )
+    {   return oexFALSE; }
+
+    /// Called to remove the specified folder
+    virtual CStr8 OnGetFileList( oexCSTR8 x_pFolder )
+    {   return CStr8(); }
+
+    /// Called to remove the specified folder
+    virtual oexBOOL OnReadStart( oexCSTR8 x_pFile )
+    {   return oexFALSE; }
+
+    /// Called to remove the specified folder
+    virtual CStr8 OnReadData( oexINT64 x_llBytes )
+    {   return oexFALSE; }
+
+    /// Called to complete the read
+    virtual oexBOOL OnReadEnd()
+    {   return oexFALSE; }
+
+    /// Called to remove the specified folder
+    virtual oexBOOL OnWriteStart( oexCSTR8 x_pFile )
+    {   return oexFALSE; }
+
+    /// Called to remove the specified folder
+    virtual CStr8 OnWriteData( CStr8 x_sData )
+    {   return oexFALSE; }
+
+    /// Called to complete the read
+    virtual oexBOOL OnWriteEnd()
+    {   return oexFALSE; }
 
 public:
 	
@@ -215,9 +248,11 @@ public:
     /// Returns the root folder
     CStr8& GetRoot( oexCSTR8 x_pRoot )
     {   return m_sRoot = x_pRoot; }
-
-
+    
 private:
+
+    /// Non-zero if user is logged in
+    oexBOOL                             m_bLoggedIn;
 
     /// Server for passive mode
     t_FtpDataConnection                 m_nsData;

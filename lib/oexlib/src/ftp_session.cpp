@@ -85,11 +85,10 @@ http://www.networksorcery.com/enp/protocol/ftp.htm
 
 CFtpSession::CFtpSession()
 {
+    m_bLoggedIn = oexFALSE;
+
     // Passive mode
     m_uPasvPort = 3110 + os::CHqTimer::GetBootCount() % 500;
-
-    // Root folder
-    m_sRoot = "c:/ftp";
 }
 
 oexBOOL CFtpSession::OnConnect( oexINT x_nErr ) 
@@ -121,8 +120,16 @@ oexBOOL CFtpSession::OnRead( oexINT x_nErr )
     // PASS
     else if ( sCmd == "PASS" )
     {   m_sPassword = sData.ParseNextToken();
-        Write( CStr8( "230 User \'" ) << m_sUser << "\' logged in at " << oexStrToStr8( CSysTime( 2 ).FormatTime( oexT( "GMT : %Y/%c/%d - %g:%m:%s.%l" ) ) ) << ".\n" );
+        if ( OnValidateUser( m_sUser.Ptr(), m_sPassword.Ptr() ) )
+        {   m_bLoggedIn = oexTRUE;
+            Write( CStr8( "230 User \'" ) << m_sUser << "\' logged in at " << oexStrToStr8( CSysTime( 2 ).FormatTime( oexT( "GMT : %Y/%c/%d - %g:%m:%s.%l" ) ) ) << ".\n" );
+        } // end if
+        else
+            Write( "530 Login Failed: Invalid username or password.\n" );
     } // end else if
+
+    else if ( !m_bLoggedIn )
+        Write( "530 Please login.\n" );
 
     // SYST
     else if ( sCmd == "SYST" )
@@ -140,9 +147,31 @@ oexBOOL CFtpSession::OnRead( oexINT x_nErr )
     {   sData.TrimWhiteSpace();        
         if ( *sData != '/' && *sData != '\\' )
             sData = CStr8::BuildPath( m_sCurrent, sData );
-        if ( CFile::Exists( oexStr8ToStr( CStr8::BuildPath( m_sRoot, sData ) ).Ptr() ) )
+        if ( OnValidateFolder( CStr8::BuildPath( m_sRoot, sData ).Ptr() ) )
             m_sCurrent = sData;
         Write( "250 CWD command successful.\n" );
+    } // end else if
+
+    // MKD
+    else if ( sCmd == "MKD" )
+    {   sData = sData.TrimWhiteSpace();        
+        if ( *sData != '/' && *sData != '\\' )
+            sData = CStr8::BuildPath( m_sCurrent, sData );
+        if ( OnCreateFolder( CStr8::BuildPath( m_sRoot, sData ).Ptr() ) )
+            Write( "250 MKD command successful.\n" );
+        else
+            Write( "500 MKD Failed.\n" );
+    } // end else if
+
+    // RMD
+    else if ( sCmd == "RMD" )
+    {   sData = sData.TrimWhiteSpace();        
+        if ( *sData != '/' && *sData != '\\' )
+            sData = CStr8::BuildPath( m_sCurrent, sData );
+        if ( OnRemoveFolder( CStr8::BuildPath( m_sRoot, sData ).Ptr() ) )
+            Write( "250 RMD command successful.\n" );
+        else
+            Write( "500 RMD Failed.\n" );
     } // end else if
 
     // CDUP
@@ -155,7 +184,7 @@ oexBOOL CFtpSession::OnRead( oexINT x_nErr )
     else if ( sCmd == "NOOP" )
         Write( "200 Ok.\n" );
 
-    // NOOP
+    // REST
     else if ( sCmd == "REST" )
     {   m_nsData.Destroy();
         Write( "200 Ok.\n" );
@@ -186,9 +215,10 @@ oexBOOL CFtpSession::OnRead( oexINT x_nErr )
     // DELE
     else if ( sCmd == "DELE" )
     {   sData = CStr8::BuildPath( CurrentPath(), sData.TrimWhiteSpace() );
-        if ( CFile::Exists( oexStr8ToStr( sData ).Ptr() ) )
-             CFile::Delete( oexStr8ToStr( sData ).Ptr() );
-        Write( "250 DELE command successful.\n" );
+        if ( OnDeleteFile( sData.Ptr() ) )
+            Write( "250 DELE command successful.\n" );
+        else
+            Write( "500 DELE Failed.\n" );
     } // end if
 
     // QUIT
@@ -288,32 +318,13 @@ oexBOOL CFtpSession::CmdList()
         return oexFALSE;
     } // end if
 
-    CStr8 sStr;
-   	CFindFiles ff;
+    CStr8 sStr = OnGetFileList( CurrentPath().Ptr() );
 
-    // Build file list
-    if ( ff.FindFirst( oexStr8ToStr( CurrentPath() ).Ptr() ) )
-    {
-        do
-        {
-            // Format file information
-            sStr << CStr8().Fmt(  "%crwxrwxrwx    1 user     group %lu %s %s\n",
-                                  ( ff.GetFileAttributes() & os::CBaseFile::eFileAttribDirectory ) ? 'd' : '-',
-                                  (oexUINT)ff.FileData().llSize,
-                                  oexStrToStr8Ptr( 
-                                    CSysTime( CSysTime::eFmtFile, ff.FileData().ftLastModified )
-                                        .FormatTime( oexT( "%b %d %Y" ) ) ),
-                                  oexStrToStr8Ptr( ff.GetFileName() ) );
+    // +++ Make the queue binary compatible
 
-        } while ( ff.FindNext() );
-
-        // +++ Make the queue binary compatible
-
-        // Write the file list to client
-        if ( sStr.Length() )
-            session.Queue( 0, oexCall( oexT( "WriteStr" ), oexStr8ToStr( sStr ) ) );
-
-    } // end if
+    // Write the file list to client
+    if ( sStr.Length() )
+        session.Queue( 0, oexCall( oexT( "WriteStr" ), oexStr8ToStr( sStr ) ) );
 
     // Wait for the data to go out
     oexUINT nWritten = 0;
@@ -341,7 +352,7 @@ oexBOOL CFtpSession::CmdList()
 
     // Timeout?
     else if ( uTimeout < to.ElapsedSeconds() )
-        Write( "426 Timed out, I'm tired of waiting for the data to go out\n" );
+        Write( "426 Timed out, I'm tired of waiting for the data to go out.\n" );
 
     // Connection dropped
     else
@@ -352,21 +363,23 @@ oexBOOL CFtpSession::CmdList()
 
 oexBOOL CFtpSession::CmdRetr( oexCSTR8 x_pFile )
 {       
-    CFile f;
-    if ( !f.OpenExisting( oexStr8ToStr( CStr8::BuildPath( CurrentPath(), x_pFile ) ).Ptr() ).IsOpen() )
-    {   Write( "451 Requested file action aborted; local error in processing.\n" );
-        return oexTRUE;
-    } // end if
-
     // Get connection
     CDispatch session = GetPassiveConnection();
-
     if ( !session.IsConnected() )
         return oexFALSE;
 
+    // Open the file
+    if ( !OnReadStart( CStr8::BuildPath( CurrentPath(), x_pFile ).Ptr() ) )
+    {   Write( "451 Invalid file request.\n" );
+        return oexFALSE;
+    } // end if
+
     CStr8 sBlock;
-    while ( session.IsConnected() && ( sBlock = f.Read( 1024 ) ).Length() )
+    while ( session.IsConnected() && ( sBlock = OnReadData( 16 * 1024 ) ).Length() )
         session.Queue( 0, oexCall( oexT( "WriteStr" ), oexStr8ToStr( sBlock ) ) );
+
+    // Complete the read
+    OnReadEnd();
 
     // Shutdown all connections
     m_nsData.Queue( 0, oexCall( oexT( "Reset" ) ) ).Wait( oexDEFAULT_TIMEOUT );
@@ -381,16 +394,64 @@ oexBOOL CFtpSession::CmdStor( oexCSTR8 x_pFile )
 {       
     // Get connection
     CDispatch session = GetPassiveConnection();
-
     if ( !session.IsConnected() )
         return oexFALSE;
 
-    if ( !session.Queue( 0, oexCall( oexT( "CreateFile" ), 
-                            CStr::BuildPath( oexStr8ToStr( CurrentPath() ), oexStr8ToStr( x_pFile ) ).Ptr() ) )
-                    .Wait( oexDEFAULT_TIMEOUT ).GetReply() )
-    {   Write( "451 Requested file action aborted; error accessing file.\n" );
-        return oexTRUE;
+    // Attempt to open the file
+    if ( !OnWriteStart( CStr8::BuildPath( CurrentPath(), x_pFile ).Ptr() ) )
+    {   Write( "451 Requested file action aborted; local error in processing.\n" );
+        return oexFALSE;
     } // end if
+
+    // Wait for data
+    while ( session.IsConnected() )
+        os::CSys::Sleep( 30 );
+
+    CStr8 sData;
+    while ( ( sData = oexStrToStr8( session.Queue( 0, oexCall( oexT( "ReadStr" ), 16 * 1024 ) )
+                                .Wait( oexDEFAULT_TIMEOUT ).GetReply() ) ).Length() )
+        OnWriteData( sData );
+        
+
+    
+/*
+    oexBOOL bWait = oexTRUE;
+    oexBOOL bDataRxed = oexFALSE;
+    os::CHqTimer to( oexTRUE );
+
+    // Read available data
+    while ( bWait )
+    {
+        // Are we connected
+        bWait = session.IsConnected();
+
+        // Give the system a few seconds to start sending data
+        if ( !bWait && !bDataRxed && 8 > to.ElapsedSeconds() )
+            bWait = oexTRUE;
+
+        // Read string                
+        CDispatch::CMessage reply = 
+            session.Queue( 0, oexCall( oexT( "ReadStr" ), 16 * 1024 ) );
+
+        // Wait for data
+        while ( !reply.Wait( oexDEFAULT_TIMEOUT ).IsDone() )
+            ;
+
+        // Save the data block
+        if ( reply.GetReply().Length() )
+        {   bWait = oexTRUE;
+            bDataRxed = oexTRUE;
+            OnWriteData( oexStrToStr8( reply.GetReply() ) );
+        } // end if            
+
+        else
+            os::CSys::Sleep( 30 );
+
+    } // end while
+*/
+
+    // Complete the write
+    OnWriteEnd();
 
     // Wait for data to be tx'ed
     while ( session.IsConnected() )
@@ -399,18 +460,5 @@ oexBOOL CFtpSession::CmdStor( oexCSTR8 x_pFile )
     // All done
     Write( "226 Transfer complete.\n" );
 
-/*  
-    TAutoServer< CFtpDataConnection >::t_SessionList::iterator it = GetPassiveConnection();
-    if ( !it.IsValid() ) return oexFALSE;
-
-    // Open the data file
-    if ( !it->Protocol()->m_fData.CreateAlways( CFile::BuildPath( CurrentPath(), x_pFile ).Ptr() ).IsOpen() )
-    {   Write( "451 Requested file action aborted; local error in processing.\n" );
-        return oexTRUE;
-    } // end if
-    
-    // All done
-    Write( "226 Transfer complete.\n" );
-*/
     return oexTRUE;
 }

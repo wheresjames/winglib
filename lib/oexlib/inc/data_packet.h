@@ -64,7 +64,9 @@ public:
 
 public:
 
-	/// This structure defines a serial packet header.
+#pragma pack( push, 1 )
+
+    /// This structure defines a serial packet header.
 	struct SPacketHeader
 	{
 		/// Unique ID identifying the start of packet
@@ -92,6 +94,8 @@ public:
 		oexUINT32			dwType;
 
 	}; typedef SDataHeader* LPSDataHeader; 
+
+#pragma pack( pop )
 
 public:
 

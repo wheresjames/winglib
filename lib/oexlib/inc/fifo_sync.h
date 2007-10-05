@@ -53,6 +53,8 @@ public:
         eDefaultMaxBuffers = 1024
     };
 
+#pragma pack( push, 1 )
+
     struct SBufferInfo
     {
 	    /// Fifo head pointer
@@ -61,6 +63,8 @@ public:
 	    /// Fifo tail pointer
 	    oexUINT				        uTailPtr;
     };
+
+#pragma pack( pop )
 
 public:
 

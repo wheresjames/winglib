@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// port.cpp
+// ftp_disk_session.cpp
 //
 // Copyright (c) 1997
 // Robert Umbehant

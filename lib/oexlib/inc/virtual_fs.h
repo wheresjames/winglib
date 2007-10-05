@@ -57,12 +57,16 @@ public:
         eBlockSize = 64 * 1024
     };
 
+#pragma pack( push, 1 )
+
     struct SBlockHeader
     {   oexINT32        uSize;
         oexINT32        uType;
         oexINT32        uFlags;
         oexINT32        uBlocks;
     };
+
+#pragma pack( pop )
         
 public:
 

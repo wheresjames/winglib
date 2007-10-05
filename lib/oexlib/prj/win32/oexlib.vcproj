@@ -219,6 +219,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\ftp_disk_session.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\ftp_session.cpp"
 				>
 			</File>
@@ -256,10 +260,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\parser.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\port.cpp"
 				>
 			</File>
 			<File
@@ -364,6 +364,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\inc\ftp_disk_session.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\inc\ftp_session.h"
 				>
 			</File>
@@ -400,7 +404,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\inc\msg.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\inc\os\mutex.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\net_port.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\net_protocol.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\net_server.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\net_session.h"
 				>
 			</File>
 			<File
@@ -449,10 +473,6 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\parser.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\inc\port.h"
 				>
 			</File>
 			<File

@@ -64,6 +64,7 @@ typedef short						oexSHORT;
 typedef unsigned short				oexUSHORT;
 typedef float						oexFLOAT;
 typedef double						oexDOUBLE;
+typedef long double 				oexLONGDOUBLE;
 typedef bool						oexBOOL;
 typedef char						oexCHAR;
 typedef unsigned char				oexUCHAR;

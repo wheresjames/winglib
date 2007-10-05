@@ -157,7 +157,7 @@ oexBOOL CBaseFile::Delete( oexCSTR x_pFile )
     return ::DeleteFile( x_pFile ) ? oexTRUE : oexFALSE;
 }
 
-oexBOOL CBaseFile::DeleteDirectory( oexCSTR x_pDir )
+oexBOOL CBaseFile::RemoveFolder( oexCSTR x_pDir )
 {	::SetFileAttributes( x_pDir, FILE_ATTRIBUTE_NORMAL );
     return ::RemoveDirectory( x_pDir ) ? oexTRUE : oexFALSE;
 }

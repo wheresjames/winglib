@@ -1457,6 +1457,10 @@ public:
     {   return str; 
     }
 
+    oex::oexUINT ReturnPtr( oex::oexCSTR ptr, oex::oexUINT uSize )
+    {   return (oex::oexUINT)ptr; 
+    }
+
 };
 
 oex::oexRESULT Test_TArbDelegate()
@@ -1526,6 +1530,30 @@ oex::oexRESULT Test_CDispatch()
     dsp.ProcessQueue();
     if ( !oexVERIFY( 33 == bto.GetValue() ) )
         return -7;
+
+    return oex::oexRES_OK;
+}
+
+oex::oexRESULT Test_CMsg()
+{
+    CCallbackClass cc;
+
+    oex::CMsg msg = oexMsg( oexNULL, oexT( "Add" ), 1, 2 );
+    oex::CStr8 sData = msg.Serialize();
+
+    oex::CMsgTarget target;
+    target.Register( &cc, &CCallbackClass::Add );
+
+    // Call the function
+    if ( !oexVERIFY( target( msg )[ 0 ] == 3 ) )
+        return -1;
+
+    // Test string
+    target.Register( &cc, &CCallbackClass::ReturnPtr );
+    
+    msg = oexMsg( oexNULL, oexT( "ReturnPtr" ), oexT( "Hello World!" ), 12 );
+
+    oex::oexUINT uPtr = target( msg )[ 0 ];
 
     return oex::oexRES_OK;
 }
@@ -1618,7 +1646,7 @@ oex::oexRESULT Test_CFtpSession()
         return -1;
 
     // FTP server
-    oex::TNetServer< oex::CAutoSocket, oex::CFtpSession > ftp_server;
+    oex::TNetServer< oex::CAutoSocket, oex::CFtpDiskSession > ftp_server;
 
     // Start the server
     ftp_server.Start();
@@ -1741,13 +1769,15 @@ int main(int argc, char* argv[])
 
     Test_CDispatch();
 
+    Test_CMsg();
+
     Test_CThread();
 
 //    Test_CFtpSession();
 
 //    Test_CHttpSession();
 
-      Test_CVfsSession();
+//      Test_CVfsSession();
 
 	// Initialize the oex library
     oexUNINIT();	

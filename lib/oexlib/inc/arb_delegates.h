@@ -107,7 +107,7 @@
 public:                                                                                                 \
     template < typename T_RET, TARB_PARAM_A_##n typename T_CLASS >                                      \
         TArbDelegate( const T_CLASS *x_pC, T_RET(T_CLASS::*x_pF)( TARB_PARAM_B_##n ) )                  \
-    {   TArbDelegate(); _Register< T_RET TARB_PARAM_C_##n >( x_pC, x_pF ); }                            \
+    {   _Register< T_RET TARB_PARAM_C_##n >( x_pC, x_pF ); }                            \
     template < typename T_RET, TARB_PARAM_A_##n typename T_CLASS >                                      \
         void Register( const T_CLASS *x_pC, T_RET(T_CLASS::*x_pF)( TARB_PARAM_B_##n ) )                 \
     {   _Register< T_RET TARB_PARAM_C_##n >( x_pC, x_pF ); }                                            \

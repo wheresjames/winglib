@@ -68,7 +68,7 @@ public:
 	
 		\see 
 	*/
-	static oexBOOL Hash( oexPVOID x_pHash, oexPVOID x_pBuf, oexUINT x_uSize )
+	static oexBOOL Hash( oexPVOID x_pHash, oexCPVOID x_pBuf, oexUINT x_uSize )
 	{   oexASSERT_PTR( x_pHash );
         *( (oexUINT*)x_pHash ) = CCrcHash::CRC32( 0, (oexUCHAR*)x_pBuf, x_uSize ); 
         return oexTRUE;
@@ -256,86 +256,6 @@ public:
 
 public:
 
-    // +++ Unfortunately, Doxygen craps out on these next 
-    //     function templates.
-
-	//==============================================================
-	// GetKeySize()
-	//==============================================================
-	/// Returns the size of the key
-	/**
-		\param [in] x_obj		-	The object whose size will be 
-								    returned.
-	*/
-	template < typename T >
-		oexUINT GetKeySize( oexCONST T &x_obj ) { return sizeof( T ); }
-
-	//==============================================================
-	// GetKeySize()
-	//==============================================================
-	/// Specialized for CStr
-	/**
-		\param [in] x_obj		-	The object whose size will be 
-								    returned.
-
-		This just specializes for the case of CStr.
-
-		+++ I don't like having the reference to CStr here, so I really
-		should figure out another way.  Any suggestions?
-	*/
-	template <> oexUINT GetKeySize< CStrW >( oexCONST CStrW &x_obj ) { return ( (CStrW&)x_obj ).LengthInBytes(); }
-	template <> oexUINT GetKeySize< CStr8 >( oexCONST CStr8 &x_obj ) { return ( (CStr8&)x_obj ).LengthInBytes(); }
-	template <> oexUINT GetKeySize< CStr16 >( oexCONST CStr16 &x_obj ) { return ( (CStr16&)x_obj ).LengthInBytes(); }
-	template <> oexUINT GetKeySize< CStr32 >( oexCONST CStr32 &x_obj ) { return ( (CStr32&)x_obj ).LengthInBytes(); }
-
-	//==============================================================
-	// GetKeyPtr()
-	//==============================================================
-	/// Returns a pointer to the key memory
-	/**
-		\param [in] x_ptr		-	The object whose size will be 
-									returned.
-	*/
-	template < typename T >
-		oexPVOID GetKeyPtr( oexCONST T *x_ptr ) { return (oexPVOID)x_ptr; }
-
-	//==============================================================
-	// GetKeyPtr()
-	//==============================================================
-	/// Specialized for CStr
-	/**
-		\param [in] x_ptr		-	The object whose size will be 
-									returned.
-
-		This just specializes for the case of CStr.
-		
-		+++ It would be nice to eliminate the ref to CStr here.
-	*/
-	template <> oexPVOID GetKeyPtr< CStrW >( oexCONST CStrW *x_ptr ) { return (oexPVOID)( (CStrW*)x_ptr )->Ptr(); }
-	template <> oexPVOID GetKeyPtr< CStr8 >( oexCONST CStr8 *x_ptr ) { return (oexPVOID)( (CStr8*)x_ptr )->Ptr(); }
-	template <> oexPVOID GetKeyPtr< CStr16 >( oexCONST CStr16 *x_ptr ) { return (oexPVOID)( (CStr16*)x_ptr )->Ptr(); }
-	template <> oexPVOID GetKeyPtr< CStr32 >( oexCONST CStr32 *x_ptr ) { return (oexPVOID)( (CStr32*)x_ptr )->Ptr(); }
-
-	//==============================================================
-	// IsEqual()
-	//==============================================================
-    /// Compares two keys
-    template < typename T >
-        oexBOOL IsEqual( oexCONST T &k1,oexCONST T &k2 )
-        {   return !os::CSys::MemCmp( &k1, &k2, sizeof( T_KEY ) );
-        }
-
-    /// Special overload for CStr
-    template <> oexBOOL IsEqual< CStrW >( oexCONST CStrW &k1, oexCONST CStrW &k2 ) { return (CStrW&)k1 == (CStrW&)k2; }
-    template <> oexBOOL IsEqual< CStr8 >( oexCONST CStr8 &k1, oexCONST CStr8 &k2 ) { return (CStr8&)k1 == (CStr8&)k2; }
-    template <> oexBOOL IsEqual< CStr16 >( oexCONST CStr16 &k1, oexCONST CStr16 &k2 ) { return (CStr16&)k1 == (CStr16&)k2; }
-    template <> oexBOOL IsEqual< CStr32 >( oexCONST CStr32 &k1, oexCONST CStr32 &k2 ) { return (CStr32&)k1 == (CStr32&)k2; }
-
-    /// Special overload for guid ( slightly faster than memcmp() )
-    template <> oexBOOL IsEqual< oexGUID >( oexCONST oexGUID &k1, oexCONST oexGUID &k2 ) { return guid::CmpGuid( &k1, &k2 ); }
-
-public:
-
 	/// Default constructor
 	TAssoList() 
 	{	m_uTableSize = 0;
@@ -507,7 +427,7 @@ public:
         oexUCHAR ucHash[ T_HASH::eHashSize + sizeof( oexUINT ) ];
 
 		// Calculate the hash
-		if ( !oexVERIFY( m_hash.Hash( ucHash, GetKeyPtr( &x_key ), GetKeySize( x_key ) ) ) )
+        if ( !oexVERIFY( m_hash.Hash( ucHash, obj::Ptr( &x_key ), obj::Size( &x_key ) ) ) )
             return 0;
 
         // +++ Change this, it depends on the processor being little endian
@@ -536,7 +456,7 @@ public:
 
 		// Search sub list for an exact match
 		for ( TList< iterator >::iterator it; m_table.Ptr( i )->Next( it ); )
-			if ( IsEqual( it->Node()->key, x_key ) )
+            if ( obj::Compare( it->Node()->key, x_key ) )
 				return it->Node();
 
 		// Add container to list
@@ -587,7 +507,7 @@ public:
 
 		// Search sub list for an exact match
 		for ( TList< iterator >::iterator it; m_table.Ptr( i )->Next( it ); )
-			if ( IsEqual( it->Node()->key, x_key ) )     			     
+            if ( obj::Compare( it->Node()->key, x_key ) )     			     
 				return it->Node();
 
 		return iterator();
@@ -734,7 +654,7 @@ protected:
 
 		// Search sub list for an exact match
 		for ( TList< iterator >::iterator it; m_table.Ptr( i ) && m_table.Ptr( i )->Next( it ); )
-			if ( IsEqual( it->Node()->key, x_it.Node()->key ) )
+            if ( obj::Compare( it->Node()->key, x_it.Node()->key ) )
             {   m_table.Ptr( i )->Erase( it ); 
                 return; 
             } // end if

@@ -142,7 +142,7 @@ public:
 
     static oexINT64 SetPointer( t_HFILE hFile, oexINT64 llMove, oexINT nMethod );
 
-    static oexBOOL DeleteDirectory( oexCSTR x_pDir );
+    static oexBOOL RemoveFolder( oexCSTR x_pDir );
 
     static oexBOOL Delete( oexCSTR x_pFile );
 

@@ -98,7 +98,7 @@ oexUINT CThread::ThreadProc( oexPVOID x_pData )
     // If you get stopped here, 
     // you're thread was shutdown before it could start
     oexINT nRet = -1111;
-    if ( oexVERIFY( uThreadId ) )
+//    if ( oexVERIFY( uThreadId ) )
     {
         // Initialize thread
         if ( pThread->InitThread( pData ) )
@@ -129,7 +129,7 @@ oexUINT CThread::ThreadProc( oexPVOID x_pData )
     } // end if
 
     // Early shutdown
-    else nRet = -2222;
+//    else nRet = -2222;
 
     /// Decrement the running thread count
     CThread::DecRunningThreadCount();
