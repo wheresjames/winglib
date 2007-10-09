@@ -794,8 +794,8 @@ public:
 		return *this;
 	}
 
-    template< typename T_STR >
-        TStr& Cnv( oexCONST T_STR *x_pStr, oexUINT x_uLen = 0 )
+    template< typename T_CHAR >
+        TStr& Cnv( oexCONST T_CHAR *x_pStr, oexUINT x_uLen = 0 )
     {
 		if ( !x_pStr || !x_pStr )
 		{	OexAllocate( 0 ); 

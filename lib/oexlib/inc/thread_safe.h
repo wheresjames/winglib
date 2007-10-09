@@ -313,7 +313,13 @@ class CTlEvent
 {
 public:
 
-	/// Default constructor
+	/// Constructor
+	CTlEvent( oexBOOL x_bNoCreate )
+	{	
+        m_hEvent = oexNULL;		
+	}
+
+	/// Constructor
 	CTlEvent( oexCSTR x_pName = oexNULL, oexBOOL x_bManualReset = oexTRUE )
 	{	
         m_hEvent = os::CEvent::osCreateEvent( x_pName, x_bManualReset );		

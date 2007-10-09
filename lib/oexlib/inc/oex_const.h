@@ -41,3 +41,11 @@ oexCONST oexLONG oexSTRSIZE = 1024;
 
 oexCONST oexRESULT oexRES_OK = 0;
 oexCONST oexRESULT oexRES_FAIL = -1;
+
+// {00000000-0000-0000-0000-000000000000}
+static const oexGUID IID_ZEROS = 
+{ 0x00000000, 0x0000, 0x0000, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+
+// {FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF}
+static const oexGUID IID_ONES = 
+{ 0xffffffff, 0xffff, 0xffff, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff } };

@@ -655,7 +655,7 @@ protected:
 		// Search sub list for an exact match
 		for ( TList< iterator >::iterator it; m_table.Ptr( i ) && m_table.Ptr( i )->Next( it ); )
             if ( obj::Compare( it->Node()->key, x_it.Node()->key ) )
-            {   m_table.Ptr( i )->Erase( it ); 
+            {   m_table.Ptr( i )->Erase( it );
                 return; 
             } // end if
     }

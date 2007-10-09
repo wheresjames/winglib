@@ -251,6 +251,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\msg.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\os\win32\mutex.cpp"
 				>
 			</File>

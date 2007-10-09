@@ -1457,10 +1457,6 @@ public:
     {   return str; 
     }
 
-    oex::oexUINT ReturnPtr( oex::oexCSTR ptr, oex::oexUINT uSize )
-    {   return (oex::oexUINT)ptr; 
-    }
-
 };
 
 oex::oexRESULT Test_TArbDelegate()
@@ -1534,26 +1530,78 @@ oex::oexRESULT Test_CDispatch()
     return oex::oexRES_OK;
 }
 
+class CMsgTest : public oex::CMsgCom
+{
+public:
+
+    CMsgTest()
+    {
+        oexMsgRegisterThisFunction( CMsgTest, Add );
+//        oexMsgRegisterThisFunction( CMsgTest, Return );
+        oexMsgRegisterThisFunction( CMsgTest, ReturnPtr );
+    }
+
+    int Add( int p1, int p2 )
+    {
+        return p1 + p2;
+    }
+
+    oex::CStr Return( oex::CStr str )
+    {   return str; 
+    }
+
+    oex::CStr ReturnPtr( oex::oexCSTR ptr, oex::oexUINT uSize )
+    {   return ptr; 
+    }
+};
+
 oex::oexRESULT Test_CMsg()
 {
-    CCallbackClass cc;
+    oex::oexUINT len = oex::obj::Size( oexT( "This is a test string." ) );
 
-    oex::CMsg msg = oexMsg( oexNULL, oexT( "Add" ), 1, 2 );
-    oex::CStr8 sData = msg.Serialize();
-
+    CMsgTest mt;
     oex::CMsgTarget target;
-    target.Register( &cc, &CCallbackClass::Add );
+    target.Register( &mt, &CMsgTest::Add );
+
+    oex::CMsg msg = oexMsg( 0, oexTo( "Add" ), 1, 2 );
+
+    // Routed version
+//    oex::CMsg msg = oexMsg( "neb://192.168.2.69/device_1", 
+//                                oexT( "Add" ), 1, 2 );
+
+    if ( !oexVERIFY( msg[ 0 ] == 1 ) )
+        return -1;
+
+    if ( !oexVERIFY( msg[ 1 ] == 2 ) )
+        return -2;
 
     // Call the function
     if ( !oexVERIFY( target( msg )[ 0 ] == 3 ) )
-        return -1;
+        return -3;
 
     // Test string
-    target.Register( &cc, &CCallbackClass::ReturnPtr );
+    target.Register( &mt, &CMsgTest::ReturnPtr );
     
-    msg = oexMsg( oexNULL, oexT( "ReturnPtr" ), oexT( "Hello World!" ), 12 );
+    msg = oexMsg( 0, oexTo( "ReturnPtr" ), oexT( "Hello World!" ), 12 );
 
-    oex::oexUINT uPtr = target( msg )[ 0 ];
+    if ( !oexVERIFY( target( msg )[ 0 ] == oexT( "Hello World!" ) ) )
+        return -4;
+
+
+    // Send a message to the object
+    oex::CMsg reply = oexNet.Send( oexMsg( 0, oexTo( "Add", &mt.oexMsgId() ), 1, 2 ) );
+
+    if ( !oexVERIFY( !reply.WaitReady( 0 ) ) )
+        return -4;
+
+    if ( !oexVERIFY( 1 == mt.ProcessQueue() ) )
+        return -5;
+    
+    if ( !oexVERIFY( reply.WaitReady( 0 ) ) )
+        return -6;
+
+    if ( !oexVERIFY( reply[ 0 ] == 3 ) )
+        return -7;
 
     return oex::oexRES_OK;
 }

@@ -36,10 +36,32 @@
 
 // This stuff is like CORBA in a bottle ;)
 
-#define OexMsgRegisterFunction( p, c, f )       Register( oexT( #f ), oex::TArbDelegate< oex::CAutoStr >( (const c*)p, &c::f ) );
-#define OexMsgRegisterThisFunction( c, f )      OexMsgRegisterFunction( this, c, f )
+/// Creates a guid by hashing the parameter
+#define oexCreateMsgId( s, g )                  oex::oss::CMd5::Transform( g, oex::obj::Ptr( s ), oex::obj::Size( s ) )
+#define oexCreateTempMsgId( s )                 oex::oss::CMd5::Transform( &oex::oexGUID(), oex::obj::Ptr( s ), oex::obj::Size( s ) )
 
+/// Registers a class pointer and function 
+#define oexMsgRegisterFunction( p, c, f )       oexRegister( *oexCreateTempMsgId( oexT( #f ) ), \
+                                                             oex::CMsgTarget( (const c*)p, &c::f ) );
+
+/// Registers a function using the 'this' pointer
+#define oexMsgRegisterThisFunction( c, f )      oexMsgRegisterFunction( this, c, f )
+
+/// Use to create a CMsg object
 #define oexMsg                                  oex::CMsg::Msg
+
+/// Creates a CMsgAddress address object
+#define oexTo                                   &oex::CMsgAddress
+
+/// Routes a message
+#define oexNet                                 oex::CMsgMgr::Mm()
+
+/// Message priority mask
+#define oexMsgPriorityMask                      0x0000ffff
+
+/// Set the flag to indicate a reply is not required
+#define oexMsgReply                             0x80000000
+#define oexMsgNoReply                           0x40000000
 
 #pragma pack( push, 1 )
 
@@ -51,6 +73,87 @@ public:
     /// Default constructor
     CMsgAddress()
     {   os::CSys::Zero( this, sizeof( CMsgAddress ) ); 
+    }
+
+    /// Copy operator
+    CMsgAddress( oexCONST oexGUID *x_pguidId, 
+                 oexCONST oexGUID *x_pguidInstance = oexNULL, 
+                 oexCONST oexGUID *x_pguidProcess = oexNULL, 
+                 oexCONST oexGUID *x_pguidNetwork = oexNULL )
+    {   
+        if ( x_pguidId )
+            guid::CopyGuid( &guidId, x_pguidId ); 
+        else
+            guid::ZeroGuid( &guidId ); 
+        
+        if ( x_pguidInstance )
+            guid::CopyGuid( &guidInstance, x_pguidInstance ); 
+        else
+            guid::ZeroGuid( &guidInstance ); 
+        
+        if ( x_pguidProcess )
+            guid::CopyGuid( &guidProcess, x_pguidProcess ); 
+        else
+            guid::ZeroGuid( &guidProcess ); 
+
+        if ( x_pguidNetwork )
+            guid::CopyGuid( &guidNetwork, x_pguidNetwork ); 
+        else
+            guid::ZeroGuid( &guidNetwork ); 
+    }
+
+    /// Copy operator
+    CMsgAddress( oexCSTRW x_pId, 
+                 oexCONST oexGUID *x_pguidInstance = oexNULL, 
+                 oexCONST oexGUID *x_pguidProcess = oexNULL, 
+                 oexCONST oexGUID *x_pguidNetwork = oexNULL )
+    {   
+        if ( x_pId )
+            guid::CopyGuid( &guidId, oexCreateTempMsgId( x_pId ) ); 
+        else
+            guid::ZeroGuid( &guidId ); 
+        
+        if ( x_pguidInstance )
+            guid::CopyGuid( &guidInstance, x_pguidInstance ); 
+        else
+            guid::ZeroGuid( &guidInstance ); 
+        
+        if ( x_pguidProcess )
+            guid::CopyGuid( &guidProcess, x_pguidProcess ); 
+        else
+            guid::ZeroGuid( &guidProcess ); 
+
+        if ( x_pguidNetwork )
+            guid::CopyGuid( &guidNetwork, x_pguidNetwork ); 
+        else
+            guid::ZeroGuid( &guidNetwork ); 
+    }
+
+    /// Copy operator
+    CMsgAddress( oexCSTR8 x_pId, 
+                 oexCONST oexGUID *x_pguidInstance = oexNULL, 
+                 oexCONST oexGUID *x_pguidProcess = oexNULL, 
+                 oexCONST oexGUID *x_pguidNetwork = oexNULL )
+    {   
+        if ( x_pId )
+            guid::CopyGuid( &guidId, oexCreateTempMsgId( CStrW().Cnv( x_pId ).Ptr() ) ); 
+        else
+            guid::ZeroGuid( &guidId ); 
+        
+        if ( x_pguidInstance )
+            guid::CopyGuid( &guidInstance, x_pguidInstance ); 
+        else
+            guid::ZeroGuid( &guidInstance ); 
+        
+        if ( x_pguidProcess )
+            guid::CopyGuid( &guidProcess, x_pguidProcess ); 
+        else
+            guid::ZeroGuid( &guidProcess ); 
+
+        if ( x_pguidNetwork )
+            guid::CopyGuid( &guidNetwork, x_pguidNetwork ); 
+        else
+            guid::ZeroGuid( &guidNetwork ); 
     }
 
     /// Copy constructor
@@ -133,6 +236,12 @@ public:
 
         /// Number of parameters
         oexUINT         uParams;
+
+        /// Priority
+        oexUINT         uFlags;
+
+        /// Desired execute time, GMT Unix timestamp, 0 for immediate
+        oexUINT         uTime;
     };  
 
     /// Param descriptor
@@ -150,7 +259,7 @@ public:
 public:
 
     /// Default constructor
-    CMsgInfo()
+    CMsgInfo() : m_evReady( oexTRUE )
     {
         m_uUsed = 0;
         m_pDst = oexNULL;
@@ -194,7 +303,7 @@ public:
     }
 
     /// Starts the data packet
-    oexBOOL Open( oexUINT x_uParams, oexUINT x_uTotalSize )
+    oexBOOL Open( oexUINT x_uFlags, oexUINT x_uParams, oexUINT x_uTotalSize )
     {   
         // Lose old message
         Destroy();
@@ -218,6 +327,7 @@ public:
         // Initialize block header
         os::CSys::Zero( m_pBh, sizeof( SBlockHeader ) );
         m_pBh->uParams = x_uParams;
+        m_pBh->uFlags = x_uFlags;
 
         // Initialize param info
         os::CSys::Zero( m_pPh, sizeof( SParamHeader ) * x_uParams );
@@ -279,7 +389,7 @@ public:
         m_sBin.SetLength( uSize );
 
         // Update CRC
-        CCrcHash::Hash( m_pBh->ucCrc, &m_pData[ sizeof( m_pBh->ucCrc ) ], uSize - sizeof( m_pBh->ucCrc ) );
+        CCrcHash::Hash( m_pBh->ucCrc, m_pData, m_uUsed );
 
         return oexTRUE;
     }
@@ -352,6 +462,21 @@ public:
 
     }
 
+    oexBOOL VerifyPacket()
+    {
+        // Ensure length is correct
+        if ( m_sBin.Length() != OverheadSize() + m_uUsed )
+            return oexFALSE;
+
+        // Validate the crc
+        oexUCHAR ucCrc[ CCrcHash::eHashSize ];
+        CCrcHash::Hash( ucCrc, m_pData, m_uUsed );
+        if ( os::CSys::MemCmp( ucCrc, m_pBh->ucCrc, sizeof( ucCrc ) ) )
+            return oexFALSE;
+
+        return oexTRUE;
+    }
+
     /// Deserializes buffer
     /**
         Whole separate version because this one shares the memory
@@ -361,16 +486,6 @@ public:
         // Lose previous message
         Destroy();
 
-        // Get data params
-        oexSTR8 pBin = (oexSTR8)x_sBin.Ptr();
-        oexUINT uSize = x_sBin.Length();
-
-        // Validate the crc
-        oexUCHAR ucCrc[ CCrcHash::eHashSize ];
-        CCrcHash::Hash( ucCrc, &pBin[ sizeof( ucCrc ) ], uSize - sizeof( ucCrc ) );
-        if ( os::CSys::MemCmp( ucCrc, pBin, sizeof( ucCrc ) ) )
-            return oexFALSE;
-
         /// Set the buffer
         m_sBin.Set( x_sBin );
 
@@ -378,6 +493,11 @@ public:
             return oexFALSE;
 
         m_uUsed = m_sBin.Length() - OverheadSize();
+
+        if ( !VerifyPacket() )
+        {   Destroy();
+            return oexFALSE;
+        } // end if
 
         return oexTRUE;
     }
@@ -388,12 +508,6 @@ public:
         // Lose previous message
         Destroy();
 
-        // Validate the crc
-        oexUCHAR ucCrc[ CCrcHash::eHashSize ];
-        CCrcHash::Hash( ucCrc, &x_pBin[ sizeof( ucCrc ) ], x_uSize - sizeof( ucCrc ) );
-        if ( os::CSys::MemCmp( ucCrc, x_pBin, sizeof( ucCrc ) ) )
-            return oexFALSE;
-
         /// Set the buffer
         m_sBin.Set( x_pBin, x_uSize );
 
@@ -401,6 +515,11 @@ public:
             return oexFALSE;
 
         m_uUsed = m_sBin.Length() - OverheadSize();
+
+        if ( !VerifyPacket() )
+        {   Destroy();
+            return oexFALSE;
+        } // end if
 
         return oexTRUE;
     }
@@ -417,7 +536,63 @@ public:
     CMsgAddress* Src()
     {   return m_pSrc; }
 
- private:
+    /// Returns the message priority level
+    oexUINT GetPriority()
+    {   if ( !m_pBh )
+            return 0;
+        return m_pBh->uFlags & oexMsgPriorityMask;
+    }
+
+    /// Returns the message priority level
+    oexUINT GetTime()
+    {   if ( !m_pBh )
+            return 0;
+        return m_pBh->uTime;
+    }
+
+    /// Returns the number of parameters
+    oexUINT GetNumParams()
+    {   if ( !m_pBh )
+            return 0;
+        return m_pBh->uParams;
+    }
+
+    /// Set to enable reply
+    oexBOOL EnableReplyEvent( oexBOOL x_bEnable )
+    {
+        if ( x_bEnable )
+            m_evReady.Create();
+        else
+            m_evReady.Destroy();
+
+        return oexTRUE;
+    }
+
+    /// Signal reply is ready
+    oexBOOL WantReply()
+    {
+        if ( !m_pBh )
+            return oexFALSE;
+
+        return !( m_pBh->uFlags & ( oexMsgReply | oexMsgNoReply ) );
+    }
+
+    oexBOOL SetReadyEvent( oexBOOL x_bSet )
+    {
+        if ( x_bSet )
+            m_evReady.Set();
+        else
+            m_evReady.Reset();
+
+        return oexTRUE;
+    }
+
+    oexBOOL WaitReady( oexUINT x_uTimeout )
+    {
+        return m_evReady.Wait( x_uTimeout );
+    }
+
+private:
 
     /// Holds *binary* message data
     CStr8           m_sBin;
@@ -439,42 +614,45 @@ public:
 
     /// Bytes used
     oexUINT         m_uUsed;
+
+    /// Event to be signaled when the message is ready
+    CTlEvent        m_evReady;
 };
 
-class CMsgAdapter
+class CMsg;
+class CMsgTypeAdapter
 {
 public:
 
-    CMsgAdapter()
+    CMsgTypeAdapter()
     {   m_uSize = 0;
         m_uType = 0;
         m_pMem = oexNULL;
+        m_pMsg = oexNULL;
     }
 
     /// Constructor
-    CMsgAdapter( oexPVOID x_pMem, oexUINT x_uSize, oexUINT x_uType )
+    CMsgTypeAdapter( CMsg *x_pMsg, oexPVOID x_pMem, oexUINT x_uSize, oexUINT x_uType )
     {   m_pMem = x_pMem;        
         m_uSize = x_uSize;
         m_uType = x_uType;
-    }
-/*
-    /// Copy constructor
-    CMsgAdapter( oexCONST CMsgAdapter &x_rMa )
-    {   m_pMem = x_rMa.m_pMem;
-        m_uSize = x_rMa.m_uSize;
+        m_pMsg = oexNULL;
     }
 
-    /// Copy constructor
-    CMsgAdapter& operator = ( oexCONST CMsgAdapter &x_rMa )
+    /// Copy 
+    CMsgTypeAdapter& Copy( oexCONST CMsgTypeAdapter &x_rMa )
     {   m_pMem = x_rMa.m_pMem;
         m_uSize = x_rMa.m_uSize;
+        m_uType = x_rMa.m_uType;
+        m_pMsg = x_rMa.m_pMsg;
         return *this;
     }
-*/
+
     /// Sets the memory info
-    void Set( oexPVOID x_pMem, oexUINT x_uSize )
+    void Set( CMsg *x_pMsg, oexPVOID x_pMem, oexUINT x_uSize, oexUINT x_uType )
     {   m_pMem = x_pMem;
         m_uSize = x_uSize;
+        m_uType = x_uType;
     }
 
 public:
@@ -582,10 +760,10 @@ public:
     {   return eTypeStr8; }
 
     template<> static oexUINT GetType< oexCSTR8 >()
-    {   return eTypeStrW; }
+    {   return eTypeStr8; }
 
     template<> static oexUINT GetType< oexCSTRW >()
-    {   return eTypeStr8; }
+    {   return eTypeStrW; }
 
     template<> static oexUINT GetType< oexGUID >()
     {   return eTypeGuid; }
@@ -803,29 +981,104 @@ public:
         return CastInteger( &ret ) ? ret : ( CastStrToDouble( &ret ) ? ret : 0 );
     }
 
+    template< typename T >
+        oexBOOL CastNumberToString( T *p, oexUINT sz )
+        {
+            if ( !m_pMem )
+                return oexFALSE;
+
+            if ( eTypeInt8 == m_uType )
+            {   if ( !oexCHECK( sizeof( oexCHAR ) == m_uSize ) )
+                    return oexFALSE;
+                os::CSys::StrFmt( p, sz, oexTT( T, "%li" ), (oexLONG)*(oexCHAR*)m_pMem );
+            } // end if
+
+            else if ( eTypeUInt8 == m_uType )
+            {   if ( !oexCHECK( sizeof( oexUCHAR ) == m_uSize ) )
+                    return oexFALSE;
+                os::CSys::StrFmt( p, sz, oexTT( T, "%lu" ), (oexULONG)*(oexUCHAR*)m_pMem );
+            } // end if
+
+            else if ( eTypeInt16 == m_uType )
+            {   if ( !oexCHECK( sizeof( oexSHORT ) == m_uSize ) )
+                    return oexFALSE;
+                os::CSys::StrFmt( p, sz, oexTT( T, "%li" ), (oexLONG)*(oexSHORT*)m_pMem );
+            } // end if
+
+            else if ( eTypeUInt16 == m_uType )
+            {   if ( !oexCHECK( sizeof( oexUSHORT ) == m_uSize ) )
+                    return oexFALSE;
+                os::CSys::StrFmt( p, sz, oexTT( T, "%lu" ), (oexULONG)*(oexUSHORT*)m_pMem );
+            } // end if
+
+            else if ( eTypeInt32 == m_uType )
+            {   if ( !oexCHECK( sizeof( oexLONG ) == m_uSize ) )
+                    return oexFALSE;
+                os::CSys::StrFmt( p, sz, oexTT( T, "%li" ), (oexLONG)*(oexLONG*)m_pMem );
+            } // end if
+
+            else if ( eTypeUInt32 == m_uType )
+            {   if ( !oexCHECK( sizeof( oexULONG ) == m_uSize ) )
+                    return oexFALSE;
+                os::CSys::StrFmt( p, sz, oexTT( T, "%lu" ), (oexULONG)*(oexULONG*)m_pMem );
+            } // end if
+
+            else if ( eTypeFloat == m_uType )
+            {   if ( !oexCHECK( sizeof( oexFLOAT ) == m_uSize ) )
+                    return oexFALSE;
+                os::CSys::StrFmt( p, sz, oexTT( T, "%f" ), (oexDOUBLE)*(oexFLOAT*)m_pMem );
+            } // end if
+
+            else if ( eTypeDouble == m_uType )
+            {   if ( !oexCHECK( sizeof( oexDOUBLE ) == m_uSize ) )
+                    return oexFALSE;
+                os::CSys::StrFmt( p, sz, oexTT( T, "%f" ), (oexDOUBLE)*(oexDOUBLE*)m_pMem );
+            } // end if
+
+            else
+                return oexFALSE;
+
+            return oexTRUE;
+        }
+
     oexBOOL operator == ( oexCSTR8 v )
     {   return !str::Compare( (oexCSTR8)*this, m_uSize / sizeof( oexCSTR8 ), v, zstr::Length( v ) ); }
 
     operator oexCSTR8()
     {
         // Types must match here
-        if ( GetType< oexCSTR8 >() != m_uType )
-            return oexNULL;
+        if ( GetType< oexCSTR8 >() == m_uType )
+            return (oexCSTR8)m_pMem;        
 
-        return (oexCSTR8)m_pMem;        
+        // Pointer to buffer
+        oexSTR8 pStr = m_ucNumBuf;
+        *pStr = 0;
+
+        CastNumberToString( pStr, sizeof( m_ucNumBuf ) / sizeof( pStr[ 0 ] ) );
+
+        return pStr;
     }
 
     oexBOOL operator == ( oexCSTRW v )
-    {   return !str::Compare( (oexCSTRW)*this, m_uSize / sizeof( oexCSTRW ), v, zstr::Length( v ) ); }
+    {   return !str::Compare( (oexCSTRW)*this, m_uSize / sizeof( oexCHARW ), v, zstr::Length( v ) ); }
 
     operator oexCSTRW()
     {
         // Types must match here
-        if ( GetType< oexCSTRW >() != m_uType )
-            return oexNULL;
+        if ( GetType< oexCSTRW >() == m_uType )
+            return (oexCSTRW)m_pMem;
 
-        return (oexCSTRW)m_pMem;        
+        // Pointer to buffer
+        oexSTRW pStr = (oexSTRW)m_ucNumBuf;
+        *pStr = 0;
+
+        CastNumberToString( pStr, sizeof( m_ucNumBuf ) / sizeof( pStr[ 0 ] ) );
+
+        return pStr;
     }
+
+    operator CMsg* ()
+    {   return m_pMsg; }
 
 private:
     
@@ -837,6 +1090,15 @@ private:
 
     /// Type
     oexUINT         m_uType;
+
+    /// Pointer to message object
+    CMsg            *m_pMsg;
+
+    /// Buffer, handles conversions, sharing, etc...
+//    CStr8           m_sBin;
+
+    /// Buffer for holding number conversions
+    oexCHAR8        m_ucNumBuf[ 256 ];
 };
 
 
@@ -897,21 +1159,17 @@ public:
 public:
 
     /// Creates a message object
-    static CMsg Msg( CMsgAddress *x_pDst, oexCSTR x_pF )
+    static CMsg Msg( oexUINT x_uFlags, CMsgAddress *x_pDst )
     {
         CMsg msg;
 
         // Start packet
-        if ( !msg.Mi().Open( 0, 0 ) )
+        if ( !msg.Mi().Open( x_uFlags, 0, 0 ) )
             return msg;
 
         // Set destination address
         if ( x_pDst )
             *msg.Mi().Dst() = *x_pDst;
-
-        // Set the function id if needed
-        if ( x_pF && *x_pF )
-            oss::CMd5::Transform( &msg.Mi().Dst()->guidId, x_pF, zstr::Length( x_pF ) * sizeof( oexTCHAR ) );
 
         msg.Mi().End();
 
@@ -921,24 +1179,20 @@ public:
 
     /// Creates a message object
     template< typename T_P1 >
-        static CMsg Msg( CMsgAddress *x_pDst, oexCSTR x_pF, T_P1 p1 )
+        static CMsg Msg( oexUINT x_uFlags, CMsgAddress *x_pDst, T_P1 p1 )
     {
         CMsg msg;
 
         // Start packet
-        if ( !msg.Mi().Open( 1,   obj::Size( &p1 ) ) )
+        if ( !msg.Mi().Open( x_uFlags, 1, obj::Size( &p1 ) ) )
             return msg;
 
         // Set destination address
         if ( x_pDst )
             *msg.Mi().Dst() = *x_pDst;
 
-        // Set the function id if needed
-        if ( x_pF && *x_pF )
-            oss::CMd5::Transform( &msg.Mi().Dst()->guidId, x_pF, zstr::Length( x_pF ) * sizeof( oexTCHAR ) );
-
         // Add params
-        if ( !oexCHECK( msg.Mi().AddParam( CMsgAdapter::GetType< T_P1 >(), obj::Ptr( &p1 ), obj::Size( &p1 ) ) ) )
+        if ( !oexCHECK( msg.Mi().AddParam( CMsgTypeAdapter::GetType< T_P1 >(), obj::Ptr( &p1 ), obj::Size( &p1 ) ) ) )
             return CMsg();
 
         msg.Mi().End();
@@ -949,28 +1203,24 @@ public:
 
     /// Creates a message object
     template< typename T_P1, typename T_P2 >
-        static CMsg Msg( CMsgAddress *x_pDst, oexCSTR x_pF, T_P1 p1, T_P2 p2 )
+        static CMsg Msg( oexUINT x_uFlags, CMsgAddress *x_pDst, T_P1 p1, T_P2 p2 )
     {
         CMsg msg;
 
         // Start packet
-        if ( !msg.Mi().Open( 2,   obj::Size( &p1 )
-                                + obj::Size( &p2 ) ) )
+        if ( !msg.Mi().Open( x_uFlags, 2,   obj::Size( &p1 )
+                                             + obj::Size( &p2 ) ) )
             return msg;
 
         // Set destination address
         if ( x_pDst )
             *msg.Mi().Dst() = *x_pDst;
 
-        // Set the function id if needed
-        if ( x_pF && *x_pF )
-            oss::CMd5::Transform( &msg.Mi().Dst()->guidId, x_pF, zstr::Length( x_pF ) * sizeof( oexTCHAR ) );
-
         // Add params
-        if ( !oexCHECK( msg.Mi().AddParam( CMsgAdapter::GetType< T_P1 >(), obj::Ptr( &p1 ), obj::Size( &p1 ) ) ) )
+        if ( !oexCHECK( msg.Mi().AddParam( CMsgTypeAdapter::GetType< T_P1 >(), obj::Ptr( &p1 ), obj::Size( &p1 ) ) ) )
             return CMsg();
 
-        if ( !oexCHECK( msg.Mi().AddParam( CMsgAdapter::GetType< T_P2 >(), obj::Ptr( &p2 ), obj::Size( &p2 ) ) ) )
+        if ( !oexCHECK( msg.Mi().AddParam( CMsgTypeAdapter::GetType< T_P2 >(), obj::Ptr( &p2 ), obj::Size( &p2 ) ) ) )
             return CMsg();
 
         msg.Mi().End();
@@ -992,7 +1242,7 @@ public:
         if ( !Mi().GetParamInfo( x_uIndex, oexNULL, &uData, &uType ) )
             return oexFALSE;
 
-        // Verify the param
+        // Verify the param type  iii commented out because we're converting on the fly
 //        oexASSERT( GetType< T >() == uType && obj::Size( (T*)0 ) == uData );
 
         return oexTRUE;
@@ -1000,19 +1250,67 @@ public:
 
 public:
 
-    CMsgAdapter operator [] ( oexUINT x_uIndex )
+    CMsgTypeAdapter operator [] ( oexUINT x_uIndex )
     {
         if ( !IsValid() )
-            return CMsgAdapter();
+            return CMsgTypeAdapter();
 
         oexUINT uData = 0;
         oexUINT uType = 0;
         oexSTR8 pData = oexNULL;
         if ( !Mi().GetParamInfo( x_uIndex, &pData, &uData, &uType ) )
-            return CMsgAdapter();
+            return CMsgTypeAdapter();
 
         // Return data wrapper
-        return CMsgAdapter( pData, uData, uType );
+        return CMsgTypeAdapter( this, pData, uData, uType );
+    }
+
+    oexUINT GetPriority()
+    {
+        if ( !IsValid() )
+            return 0;
+
+        return m_cMi.Ptr()->GetPriority();
+    }
+
+    oexUINT GetTime()
+    {
+        if ( !IsValid() )
+            return 0;
+
+        return m_cMi.Ptr()->GetTime();
+    }
+
+    oexBOOL EnableReplyEvent( oexBOOL x_bEnable )
+    {
+        if ( !IsValid() )
+            return oexFALSE;
+
+        return m_cMi.Ptr()->EnableReplyEvent( x_bEnable );
+    }
+
+    oexBOOL WantReply()
+    {
+        if ( !IsValid() )
+            return oexFALSE;
+
+        return m_cMi.Ptr()->WantReply();
+    }
+
+    oexBOOL SetReadyEvent( oexBOOL x_bSet )
+    {
+        if ( !IsValid() )
+            return oexFALSE;
+
+        return m_cMi.Ptr()->SetReadyEvent( x_bSet );
+    }
+
+    oexBOOL WaitReady( oexUINT x_uTimeout )
+    {
+        if ( !IsValid() )
+            return oexFALSE;
+
+        return m_cMi.Ptr()->WaitReady( x_uTimeout );
     }
 
 private:
@@ -1093,7 +1391,7 @@ private:
                  || !oexCHECK( x_params.VerifyParam< T_P2 >( 1 ) ) )
                 return CMsg();
 
-            return oexMsg( x_params.Mi().Src(), oexNULL,
+            return oexMsg( x_params.GetPriority() | oexMsgReply, x_params.Mi().Src(),
                            ( ( (T_CLASS*)x_pC )->*( *( (T_FUNCTION*)x_pF ) ) )
                                 ( x_params[ 0 ], x_params[ 1 ] ) ); 
         }
@@ -1110,42 +1408,395 @@ private:
 
             ( ( (T_CLASS*)x_pC )->*( *( (T_FUNCTION*)x_pF ) ) )( x_params[ 0 ] ); 
 
-            return CMsg( x_params.Mi().Src() ); 
+            return CMsg( x_params.GetPriority() | oexMsgReply, 
+                         x_params.Mi().Src() ); 
         }
     };
+
+public:
+
+    /// Returns non zero if there is a target set
+    oexBOOL IsValid()
+    {   return m_pClass ? oexTRUE : oexFALSE; }
+
+    /// Returns the number of parameters
+    oexUINT GetNumParams()
+    {   return m_uParams; }
 
 private:
 
     /// Class pointer
-    const void*             m_pClass;
+    const void              *m_pClass;
 
     /// Function pointer buffer
     char                    m_rawFunction[ 16 ];
 
     /// Thunk
-    void*                   m_pThunk;
+    void                    *m_pThunk;
 
     /// Number of params
     unsigned int            m_uParams; 
 };
 
 
+/// Message communication port
+class CMsgCom
+{
+public:
+
+    /// Event handler list type
+    typedef TAssoList< oexGUID, CMsgTarget >    t_MsgHandlerList;
+
+    /// Message queue
+    typedef TList< CMsg >                       t_MsgQueue;
+
+public:
+
+    /// Default constructor
+    CMsgCom();
+
+    /// Destructor
+    virtual ~CMsgCom();
+
+    /// Returns the object id
+    oexGUID& oexMsgId()
+    {   return _m_guidId; }
+
+    /// Registers a callback function
+    oexBOOL oexRegister( oexGUID &x_rGuid, oexCONST CMsgTarget &x_adFunction );
+
+    /// Registers a communication port
+    oexBOOL oexUnregister( oexGUID &x_rGuid );
+
+    /// Routes the message to a remote or local destination
+    CMsg Send( CMsg &x_rMsg );
+
+    /// Routes the message to a local destination
+    oexBOOL Recv( CMsg &x_rMsg );
+
+    /// Processes the function queue
+    /**
+        \param [in] uMax    -   Maximum number of commands to execute,
+                                zero for all.
+
+        \return Number of commands executed.
+    */
+    oexUINT ProcessQueue( oexINT nMax = 0 );
+
+    CMsg Execute( CMsg &x_rMsg );
+
+    /// Wait for message
+    oexBOOL WaitMsg( oexUINT x_uTimeout )
+    {   return _m_evMsgWaiting.Wait( x_uTimeout ); }
+
+private:
+
+    /// Thread lock
+    CTlLock                     _m_lockMsgHandlers;
+
+    /// Thread lock
+    CTlLock                     _m_lockMsgQueue;
+
+    /// Our address
+    oexGUID                     _m_guidId;
+
+    /// List of event handlers
+    t_MsgHandlerList            _m_lstMsgHandlers;
+
+    /// Message queue
+    t_MsgQueue                  _m_lstMsgQueue;
+
+    /// Message queue status event
+    CTlEvent                    _m_evMsgWaiting;
+};
+
+
 /// Manages the message network
 class CMsgMgr
 {
+
+public:
+
+    /// Event handler list type
+    typedef TAssoList< oexGUID, CMsgCom* > t_MsgComList;
+
+    /// Event handler list type
+    typedef TAssoList< oexGUID, CMsg >     t_MsgReplyList;
+
 public:
 
     /// Default constructor
     CMsgMgr()
-    {}
+    {
+        os::CSys::CreateGuid( &m_guidId );
+    }
 
     /// Destructor
     virtual ~CMsgMgr()
-    {}
+    {        
+        Destroy();
+    }
+
+    oexBOOL Destroy()
+    {
+        // Lock the handler list
+        CTlLocalLock ll( m_lock );
+        if ( !ll.IsLocked() )
+            return oexFALSE;
+
+        // Lose the lists
+        m_lstMsgCom.Destroy();
+        m_lstReply.Destroy();
+
+        return oexTRUE;
+    }
+
+    /// Returns the object id
+    oexGUID& GetId()
+    {   return m_guidId; }
+
+    /// Registers a communication port
+    oexBOOL Register( CMsgCom *x_pMc )
+    {
+        if ( !oexCHECK_PTR( x_pMc ) )
+            return oexFALSE;
+
+        CTlLocalLock ll( m_lock );
+        if ( !ll.IsLocked() )
+            return oexFALSE;
+
+        // Save address
+        m_lstMsgCom[ x_pMc->oexMsgId() ] = x_pMc;
+
+        return oexTRUE;
+    }
+
+    /// Registers a communication port
+    oexBOOL Unregister( CMsgCom *x_pMc )
+    {
+        if ( !oexCHECK_PTR( x_pMc ) )
+            return oexFALSE;
+
+        CTlLocalLock ll( m_lock );
+        if ( !ll.IsLocked() )
+            return oexFALSE;
+
+        // Erase address
+        m_lstMsgCom.Unset( x_pMc->oexMsgId() );
+
+        return oexTRUE;
+    }
+
+    /// Registers a communication port
+    oexBOOL Unregister( oexGUID &x_rGuid )
+    {
+        CTlLocalLock ll( m_lock );
+        if ( !ll.IsLocked() )
+            return oexFALSE;
+
+        // Erase address
+        m_lstMsgCom.Unset( x_rGuid );
+
+        return oexTRUE;
+    }
+
+    /// Routes the message to a remote or local destination
+    CMsg Send( CMsg &x_rMsg )
+    {
+        // Sanity check
+        if ( !x_rMsg.IsValid() )
+            return CMsg();
+
+        // Can't be routed without an id
+        if ( guid::CmpGuid( &IID_ZEROS, &x_rMsg.Mi().Dst()->GetId() ) )
+            return CMsg();
+
+        // Can't route without an instance id
+        if ( guid::CmpGuid( &IID_ZEROS, &x_rMsg.Mi().Dst()->GetInstance() ) )
+            return CMsg();
+
+        // Register reply object if needed
+        if ( x_rMsg.WantReply() )
+            RegisterReply( x_rMsg );
+
+        // Bound for somewhere else?
+        if ( !guid::CmpGuid( &IID_ZEROS, &x_rMsg.Mi().Dst()->GetProcess() )
+             && !guid::CmpGuid( &m_guidId, &x_rMsg.Mi().Dst()->GetProcess() ) )
+        {
+            // Attempt to route
+            if ( !OnRouteProcess( x_rMsg ) )
+            {   CancelReply( x_rMsg.Mi().Src()->GetId() );
+                return CMsg();
+            } // end if
+
+        } // end if
+
+        // Route back down
+        else if ( !Recv( x_rMsg ) )
+        {   CancelReply( x_rMsg.Mi().Src()->GetId() );
+            return CMsg();
+        } // end if
+
+        return x_rMsg;
+    }
+
+    /// Routes the message to a local destination
+    oexBOOL Recv( CMsg &x_rMsg )
+    {
+        // Sanity check
+        if ( !x_rMsg.IsValid() )
+            return oexFALSE;
+
+        // Can't route without an instance id
+        if ( guid::CmpGuid( &IID_ZEROS, &x_rMsg.Mi().Dst()->GetInstance() ) )
+            return oexFALSE;
+
+        // Lock the handler list
+        CTlLocalLock ll( m_lock );
+        if ( !ll.IsLocked() )
+            return oexFALSE;
+
+        // First, check to see if it's a reply
+        if ( OnReply( x_rMsg ) )
+            return oexTRUE;
+
+        // Find a message reciever by that id
+        t_MsgComList::iterator it = m_lstMsgCom.Find( x_rMsg.Mi().Dst()->GetInstance() );
+        if ( !it.IsValid() )
+            return oexFALSE;
+
+        // See if we have a destination for this address
+        CMsgCom *pMc = it.Obj();            
+        if ( !oexCHECK_PTR( pMc ) )
+            return oexFALSE;
+
+        // Hand down
+        return pMc->Recv( x_rMsg );
+    }
+
+    /// Route to other process
+    virtual oexBOOL OnRouteProcess( CMsg &x_rMsg )
+    {
+        // Is this packet bound for another machine?
+        if ( !guid::CmpGuid( &IID_ZEROS, &x_rMsg.Mi().Dst()->GetNetwork() ) )
+            return OnRouteNetwork( x_rMsg );
+
+        return oexFALSE;
+    }
+
+    /// Route to other network
+    virtual oexBOOL OnRouteNetwork( CMsg &x_rMsg )
+    {
+
+        return oexFALSE;
+    }
+
+    /// Route to other network
+    virtual oexBOOL OnReply( CMsg &x_rMsg )
+    {
+        // Lock the handler list
+        CTlLocalLock ll( m_lock );
+        if ( !ll.IsLocked() )
+            return oexFALSE;
+
+        // Is it a reply?
+        t_MsgReplyList::iterator itReply = m_lstReply.Find( x_rMsg.Mi().Dst()->GetId() );
+        if ( !itReply.IsValid() )
+            return oexFALSE;
+
+        // +++ Copy the data
+        itReply.Obj().Mi().Deserialize( x_rMsg.Mi().Serialize() );
+
+        // Signal that a reply was received
+        itReply.Obj().SetReadyEvent( oexTRUE );
+
+        // Remove the reply object
+        m_lstReply.Erase( itReply );
+
+        return oexTRUE;
+    }
+
+    /// Registers the object to be signaled when a reply is recieved
+    oexBOOL RegisterReply( CMsg &x_rMsg )
+    {
+        // Ensure valid message
+        if ( !x_rMsg.IsValid() )
+            return oexFALSE;
+
+        // Create reply signal
+        x_rMsg.EnableReplyEvent( oexTRUE );
+
+        // Create unique id for reply
+        oexGUID guid;
+        x_rMsg.Mi().Src()->SetId( os::CSys::CreateGuid( &guid ) );
+
+        // Set the instance id
+        x_rMsg.Mi().Src()->SetInstance( &m_guidId );
+        
+        CTlLocalLock ll( m_lock );
+        if ( !ll.IsLocked() )
+            return oexFALSE;
+
+        // Save away the reply object
+        m_lstReply[ guid ] = x_rMsg;
+
+        return oexTRUE;
+    }
+
+    /// Cancel the reply object
+    oexBOOL CancelReply( oexGUID &guidId )
+    {
+        CTlLocalLock ll( m_lock );
+        if ( !ll.IsLocked() )
+            return oexFALSE;
+
+        // Erase reply object
+        m_lstReply.Unset( guidId );
+
+        return oexTRUE;
+    }
+
+    /// Call to signal that a relpy was recieved
+    oexBOOL SignalReply( oexGUID &guidId )
+    {
+        CTlLocalLock ll( m_lock );
+        if ( !ll.IsLocked() )
+            return oexFALSE;
+
+        // Signal that a reply was received
+        t_MsgReplyList::iterator it = m_lstReply.Find( guidId );
+        if ( !it.IsValid() )
+            return oexFALSE;
+
+        // Signal that a reply was received
+        it.Obj().Mi().SetReadyEvent( oexTRUE );
+
+        // Erase reply object
+        m_lstReply.Erase( it );
+
+        return oexTRUE;
+    }
+
+    /// Returns the static instance
+    static CMsgMgr& Mm()
+    {   return m_cMsgMgr; }
 
 private:
 
+    /// Thread lock
+    CTlLock                     m_lock;
+
+    /// Our address
+    oexGUID                     m_guidId;
+
+    /// List of event handlers
+    t_MsgComList                m_lstMsgCom;
+
+    /// Reply objects
+    t_MsgReplyList              m_lstReply;
+
+
+    /// The single instance
+    static CMsgMgr              m_cMsgMgr;
 };
-
-
 
