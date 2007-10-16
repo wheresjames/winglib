@@ -42,17 +42,17 @@ public:
 
     /// Default constructor
     CProtocol()
-    {   m_pDispatch = oexNULL; 
+    {   m_pMc = oexNULL; 
         guid::ZeroGuid( &m_guidSessionId );
     }
 
     /// Returns a pointer to the server dispatch object
-    CDispatch* Server()
-    {   return m_pDispatch; }
+    CMsgCom* Server()
+    {   return m_pMc; }
 
     /// Set dispatch object
-    void SetServerDispatch( CDispatch *pDispatch )
-    {   m_pDispatch = pDispatch; }
+    void SetServerMsgCom( CMsgCom *x_pMc )
+    {   m_pMc = x_pMc; }
 
     /// Sets the session id
     void SetSessionId( oexGUID &x_guid )
@@ -65,17 +65,17 @@ public:
     /// Closes the session
     void CloseSession()
     {
-        if ( m_pDispatch )
-            m_pDispatch->Queue( 0, oexCall( oexT( "CloseSession" ), m_guidSessionId ) );
+        if ( m_pMc )
+            m_pMc->msgSend( oexMsg( 0, oexTo( oexT( "CloseSession" ) ), m_guidSessionId ) ); //->Queue( 0, oexCall( oexT( "CloseSession" ), m_guidSessionId ) );
     }
 
     /// Over-ride to register interface functions
-    virtual void OnRegisterFunctions( CDispatch *x_pDispatch )
+    virtual void OnRegisterFunctions( CMsgCom *x_pMc )
     {
-        if ( !x_pDispatch )
+        if ( !x_pMc )
             return;
 
-        x_pDispatch->OexRpcRegister( CProtocol, CloseSession );
+        x_pMc->oexMsgRegisterThisFunction( CProtocol, CloseSession );
     }
 
 private:
@@ -84,7 +84,7 @@ private:
     oexGUID             m_guidSessionId;
 
     /// Pointer to server dispatch object
-    CDispatch           *m_pDispatch;
+    CMsgCom             *m_pMc;
 
 };
 
@@ -97,13 +97,13 @@ template < typename T_PORT >
 {
 public:
 
-    virtual void OnRegisterFunctions( CDispatch *x_pDispatch )
+    virtual void OnRegisterFunctions( CMsgCom *x_pMc )
     {
         // Call the base class
-        CProtocol::OnRegisterFunctions( x_pDispatch );
+        CProtocol::OnRegisterFunctions( x_pMc );
 
         // Register interface functions
-        T_PORT::RegisterFunctions( x_pDispatch );
+        T_PORT::RegisterFunctions( x_pMc );
     }
 
 	virtual oexBOOL OnRead( oexINT x_nErr ) 

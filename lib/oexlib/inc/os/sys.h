@@ -154,6 +154,12 @@ public:
 		waitFailed = -2
 	};
 
+    enum 
+    {
+        /// Maximum number of handles that can be passed to WaitForMultipleObjects()
+        eMaximumWaitObjects = 64
+    };
+
     /// Waitable handle type
     typedef oexCPVOID t_WAITABLE;
 
@@ -227,12 +233,26 @@ public:
 	/**
 		Use with wait functions
 	*/
-	static oexCONST oexUINT vInfinite() { return c_Infinite; }
+	static oexCONST oexUINT vInfinite() 
+    {   return c_Infinite; }
+
+	//==============================================================
+	// vInfinite()
+	//==============================================================
+    /// Maximum number of objects that can be passed to WaitForMultipleObjects()
+	/**
+		Use with wait functions
+	*/
+	static oexCONST oexUINT vMaximumWaitObjects() 
+    {   return c_uMaximumWaitObjects; }
 
 private:
 
 	/// Infinite timeout value
 	static oexCONST oexUINT		c_Infinite;
+
+    /// Maximum number of objects that can be passed to WaitForMultipleObjects()
+	static oexCONST oexUINT		c_uMaximumWaitObjects;
 
 public:
 

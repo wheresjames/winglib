@@ -140,7 +140,7 @@ public:
         return *this; 
     }
 /*
-#if defined( _UNICODE )
+#if defined( oexUNICODE )
 
 	TPropertyBag& operator = ( CStr8 &v ) 
     {

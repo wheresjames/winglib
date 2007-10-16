@@ -45,7 +45,7 @@
 #define oexTC( c, s )				( 1 == sizeof( c ) ? ( ( c )( s ) ) : ( ( c )( L##s ) ) )
 #define oexTTEXT( c, s )			oexTT( c, s )
 
-#ifdef _UNICODE
+#if defined( oexUNICODE )
 
 #	define oexT( s )				( L##s )
 #	define oexTEXT( s )				oexT( s )

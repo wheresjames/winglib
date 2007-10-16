@@ -485,12 +485,10 @@ namespace os
 //------------------------------------------------------------------
 namespace os
 {
-
 #   include "inc/os/base_file.h"
 #   include "inc/os/ip_address.h"
 #   include "inc/os/ip_socket.h"
 #   include "inc/os/thread.h"    
-
 };
 
 //------------------------------------------------------------------
@@ -509,19 +507,35 @@ namespace os
 #include "inc/circ_buf.h"
 #include "inc/fifo_sync.h"
 #include "inc/data_packet.h"
-#include "inc/msg.h"
 #include "inc/dispatch.h"
-#include "inc/worker_thread.h"
+
+// Messaging
+#include "inc/msg_defines.h"
+#include "inc/msg_address.h"
+#include "inc/msg_info.h"
+#include "inc/msg_adapter.h"
+#include "inc/msg.h"
+#include "inc/msg_target.h"
+#include "inc/msg_com.h"
+#include "inc/msg_mgr.h"
+#include "inc/msg_proxy.h"
+#include "inc/msg_thread.h"
+
+// Base network
 #include "inc/auto_socket.h"
 #include "inc/net_session.h"
 #include "inc/net_server.h"
 #include "inc/net_protocol.h"
 #include "inc/net_port.h"
-#include "inc/ftp_session.h"
-#include "inc/http_session.h"
-#include "inc/virtual_fs.h"
-#include "inc/ftp_disk_session.h"
-#include "inc/vfs_ftp_session.h"
+
+// Base protocol
+//#include "inc/ftp_session.h"
+//#include "inc/http_session.h"
+
+// Protocol implementations
+//#include "inc/virtual_fs.h"
+//#include "inc/ftp_disk_session.h"
+//#include "inc/vfs_ftp_session.h"
 
 //------------------------------------------------------------------
 // Init / Uninit

@@ -1306,6 +1306,20 @@ protected:
 public:
 
 	//==============================================================
+	// operator []
+	//==============================================================
+	/// Returns the list item by index
+    /**
+        \warning n time
+    */
+    iterator operator[]( oexUINT uIndex )
+	{	for ( iterator it; Next( it ); )
+            if ( !uIndex-- )
+                return it;
+		return iterator();
+    }
+
+	//==============================================================
 	// GetByIndex()
 	//==============================================================
 	/// Returns the list item by index

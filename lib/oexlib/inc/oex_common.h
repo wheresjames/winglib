@@ -37,13 +37,13 @@
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
 
 // For tracking allocations
-#   define OexAllocNew             oex::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).New
-#   define OexAllocDelete          oex::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Delete
-#   define OexAllocResize          oex::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Resize
+#   define OexAllocNew             OEX_NAMESPACE::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).New
+#   define OexAllocDelete          OEX_NAMESPACE::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Delete
+#   define OexAllocResize          OEX_NAMESPACE::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Resize
 
-#   define OexAllocConstruct       oex::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Construct
-#   define OexAllocConstructArray  oex::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).ConstructArray
-#   define OexAllocDestruct        oex::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Destruct
+#   define OexAllocConstruct       OEX_NAMESPACE::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Construct
+#   define OexAllocConstructArray  OEX_NAMESPACE::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).ConstructArray
+#   define OexAllocDestruct        OEX_NAMESPACE::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Destruct
 
 
 // Object function macros
@@ -60,13 +60,13 @@
 #else
 
 // For tracking allocations
-#   define OexAllocNew             oex::CAlloc().New
-#   define OexAllocDelete          oex::CAlloc().Delete
-#   define OexAllocResize          oex::CAlloc().Resize
+#   define OexAllocNew             OEX_NAMESPACE::CAlloc().New
+#   define OexAllocDelete          OEX_NAMESPACE::CAlloc().Delete
+#   define OexAllocResize          OEX_NAMESPACE::CAlloc().Resize
 
-#   define OexAllocConstruct       oex::CAlloc().Construct
-#   define OexAllocConstructArray  oex::CAlloc().ConstructArray
-#   define OexAllocDestruct        oex::CAlloc().Destruct
+#   define OexAllocConstruct       OEX_NAMESPACE::CAlloc().Construct
+#   define OexAllocConstructArray  OEX_NAMESPACE::CAlloc().ConstructArray
+#   define OexAllocDestruct        OEX_NAMESPACE::CAlloc().Destruct
 
 
 // Object function macros

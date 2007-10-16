@@ -1530,20 +1530,19 @@ oex::oexRESULT Test_CDispatch()
     return oex::oexRES_OK;
 }
 
-class CMsgTest : public oex::CMsgCom
+class CMsgTest : public oex::CMsgObject
 {
 public:
 
     CMsgTest()
     {
-        oexMsgRegisterThisFunction( CMsgTest, Add );
-//        oexMsgRegisterThisFunction( CMsgTest, Return );
-        oexMsgRegisterThisFunction( CMsgTest, ReturnPtr );
+        msgRegisterThisFunction( CMsgTest, Add );
+        msgRegisterThisFunction( CMsgTest, Return );
+        msgRegisterThisFunction( CMsgTest, ReturnPtr );
     }
 
     int Add( int p1, int p2 )
-    {
-        return p1 + p2;
+    {   return p1 + p2;
     }
 
     oex::CStr Return( oex::CStr str )
@@ -1555,6 +1554,46 @@ public:
     }
 };
 
+
+oex::oexRESULT Test_CMsg()
+{
+    CMsgTest mt;
+
+    oex::CMsg reply = mt.msgSend( msgCreate( 0, msgTo( "Add" ), 1, 2 ) );
+
+    mt.msgProcessQueue();
+
+    if ( !oexVERIFY( reply.Wait( 3000 ).IsReplyReady() ) )
+        return -3;
+
+    if ( !oexVERIFY( reply.GetReply() == 3 ) )
+        return -4;
+
+
+//    CMsgProxy mp = msgCreateObject( "CMsgTest" );
+
+//  CMsgProxy mp = msgCreateObject( "npp://server/CMsgTest" );
+/*
+    if ( !oexVERIFY( mp.IsConnected() ) )
+        return -1
+
+    if ( !oexVERIFY( mp.Wait( 3000 ) ) )
+        return -2;
+
+    CMsg reply = mp.Send( msgCreate( "Add", 1, 2 ) );
+
+    if ( !oexVERIFY( reply.Wait( 3000 ) ) )
+        return -3;
+
+    if ( !oexVERIFY( reply.GetReply() == 3 ) )
+        return -4;
+*/
+
+    return oex::oexRES_OK;
+}
+
+
+/*
 oex::oexRESULT Test_CMsg()
 {
     oex::oexUINT len = oex::obj::Size( oexT( "This is a test string." ) );
@@ -1591,13 +1630,13 @@ oex::oexRESULT Test_CMsg()
     // Send a message to the object
     oex::CMsg reply = oexNet.Send( oexMsg( 0, oexTo( "Add", &mt.oexMsgId() ), 1, 2 ) );
 
-    if ( !oexVERIFY( !reply.WaitReady( 0 ) ) )
+    if ( !oexVERIFY( !reply.Wait( 0 ) ) )
         return -4;
 
     if ( !oexVERIFY( 1 == mt.ProcessQueue() ) )
         return -5;
     
-    if ( !oexVERIFY( reply.WaitReady( 0 ) ) )
+    if ( !oexVERIFY( reply.Wait( 0 ) ) )
         return -6;
 
     if ( !oexVERIFY( reply[ 0 ] == 3 ) )
@@ -1605,14 +1644,16 @@ oex::oexRESULT Test_CMsg()
 
     return oex::oexRES_OK;
 }
+*/
 
-class CThreadTest : public oex::CWorkerThread
+class CThreadTest : public oex::CMsgThread
 {
 public:
 
     CThreadTest()
     {
-        OexRpcRegister( CThreadTest, Add );
+        msgRegisterThisFunction( CThreadTest, Add );
+        msgRegisterThisFunction( CThreadTest, SetCallback );
 
     }
 
@@ -1621,6 +1662,12 @@ public:
         return a + b;
     }
 
+    void SetCallback( oex::CMsgAddress ma )
+    {   m_maCallback = ma; }
+
+private:
+
+    oex::CMsgAddress         m_maCallback;
 };
 
 
@@ -1631,18 +1678,18 @@ oex::oexRESULT Test_CThread()
     if ( !oexVERIFY( tt.Start() ) )
         return -1;
     
-    oex::CDispatch::CMessage reply( tt.Queue( oexNULL, oexCall( oexT( "Add" ), 1, 2 ) ) );
+    oex::CMsg reply = tt.msgSend( msgCreate( 0, msgTo( "Add" ), 1, 2 ) );
 
-    if ( !oexVERIFY( reply.Wait( 3000 ).IsDone() ) )
+    if ( !oexVERIFY( reply.Wait( 3000 ).IsReplyReady() ) )
         return -2;
 
-    if ( !oexVERIFY( *reply == 3 ) )
+    if ( !oexVERIFY( reply[ 0 ] == 3 ) )
         return -3;
     
     return oex::oexRES_OK;
 }
 
-
+/*
 oex::oexRESULT Test_CAutoSocket()
 {
     if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
@@ -1774,7 +1821,7 @@ oex::oexRESULT Test_CVfsSession()
 
     return oex::oexRES_OK;
 }
-
+*/
 
 int main(int argc, char* argv[])
 {
@@ -1825,7 +1872,7 @@ int main(int argc, char* argv[])
 
 //    Test_CHttpSession();
 
-//      Test_CVfsSession();
+//    Test_CVfsSession();
 
 	// Initialize the oex library
     oexUNINIT();	

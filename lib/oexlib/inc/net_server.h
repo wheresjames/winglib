@@ -63,7 +63,7 @@
 template < typename T_PORT, typename T_PROTOCOL > 
     class TNetServer : 
         public os::CThread,
-        public CDispatch,
+        public CMsgCom,
         public T_PORT
 {
 public:
@@ -85,8 +85,8 @@ public:
         T_PORT::RegisterFunctions( this );
 
         // Register server functions
-        OexRpcRegister( TNetServer, CloseSession );
-        OexRpcRegister( TNetServer, Reset );
+        oexMsgRegisterThisFunction( TNetServer, CloseSession );
+        oexMsgRegisterThisFunction( TNetServer, Reset );
     }
 
 	/// Destructor
@@ -113,18 +113,14 @@ public:
     /// Thread main loop
 	virtual oexBOOL DoThread( oexPVOID x_pData ) 
     {
-        // Ensure event handle
-        if ( !GetCmdEvent() )
-            return oexFALSE;
-
         // Get events
         os::CSys::t_WAITABLE phEvents[] = 
         {
             // 0 == Quit thread
             m_evQuit.GetHandle(),
 
-            // 1 == Command waiting
-            GetCmdEvent()->GetHandle(),
+            // 1 == Message waiting
+            msgGetMsgEvent().GetHandle(),
 
             // 2 == Port events
             T_PORT::GetEventHandle()
@@ -146,7 +142,7 @@ public:
 
         // Messages in the queue?
         else if ( 1 == nRet )
-            ProcessQueue();
+            msgProcessQueue();
 
         // Port event
         else if ( 2 == nRet )
@@ -214,12 +210,12 @@ public:
             return session;
 
         // Set session information
-        session.Obj().Protocol().SetServerDispatch( this );
+        session.Obj().Protocol().SetServerMsgCom( this );
         session.Obj().Protocol().SetSessionId( *x_pGuid );
 
         return session;
     }
-
+/*
     /// Adds a session
     CDispatch FindSession( oexCONST oexGUID &x_rGuid )
     {
@@ -256,19 +252,19 @@ public:
 
         return itSession.Obj();
     }
-
+*/
     /// Returns the specified session by index
-    CDispatch GetSession( oexUINT uIndex )
+    CMsgAddress GetSession( oexUINT uIndex )
     {
         // Lock the session list
         CTlLocalLock ll( m_lockSession );
         if ( !ll.IsLocked() )
-            return CDispatch();
+            return CMsgAddress();
 
         // Get the session by index
         t_Session session = m_sessions.GetByIndex( uIndex );
         if ( !session.IsValid() )
-            return CDispatch();
+            return CMsgAddress();
 
         // Return a session
         return session.Obj();

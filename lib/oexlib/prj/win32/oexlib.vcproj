@@ -219,19 +219,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\ftp_disk_session.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\ftp_session.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\os\win32\hq_timer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\http_session.cpp"
 				>
 			</File>
 			<File
@@ -251,7 +239,19 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\msg.cpp"
+				RelativePath="..\..\src\msg_com.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\msg_info.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\msg_mgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\msg_object.cpp"
 				>
 			</File>
 			<File
@@ -284,14 +284,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\unzip.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\vfs_ ftp_session.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\virtual_fs.cpp"
 				>
 			</File>
 			<File
@@ -412,6 +404,42 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\inc\msg_adapter.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\msg_address.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\msg_com.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\msg_defines.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\msg_info.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\msg_mgr.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\msg_proxy.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\msg_target.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\inc\msg_thread.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\inc\os\mutex.h"
 				>
 			</File>
@@ -513,10 +541,6 @@
 			</File>
 			<File
 				RelativePath="..\..\inc\virtual_fs.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\inc\worker_thread.h"
 				>
 			</File>
 			<File

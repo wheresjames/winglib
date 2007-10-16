@@ -252,13 +252,15 @@ oexBOOL CFtpSession::CmdPasv()
             m_nsData.Start();
 
         // Reset server
-        m_nsData.Queue( 0, oexCall( oexT( "Reset" ) ) );
+//        m_nsData.Queue( 0, oexCall( oexT( "Reset" ) ) );
+
+        m_nsData.msgSend( oexMsg( 0, oexTo( oexT( "Reset" ) ) ) );
 
         // Bind to port
-        if ( m_nsData.Queue( 0, oexCall( oexT( "Bind" ), m_uPasvPort ) )
+        if ( m_nsData.msgSend( oexMsg( 0, oexTo( oexT( "Bind" ) ) ) ) //Queue( 0, oexCall( oexT( "Bind" ), m_uPasvPort ) )
                 .Wait( oexDEFAULT_TIMEOUT ).GetReply().ToInt() 
 
-             && m_nsData.Queue( 0, oexCall( oexT( "Listen" ), 0 ) )
+             && m_nsData.msgSend( oexMsg( 0, oexTo( oexT( "Listen" ) ) ) ) // Queue( 0, oexCall( oexT( "Listen" ), 0 ) )
                 .Wait( oexDEFAULT_TIMEOUT ).GetReply().ToInt() )
 
             bStarted = oexTRUE;
@@ -280,24 +282,24 @@ oexBOOL CFtpSession::CmdPasv()
     return oexTRUE;
 }
 
-CDispatch CFtpSession::GetPassiveConnection()
+CMsgAddress CFtpSession::GetPassiveConnection()
 {
     // Get the first session
-    CDispatch session = m_nsData.GetSession( 0 );
+    CMsgAddress session = m_nsData.GetSession( 0 );
 
     // Wait for client to connect
-    if ( !session.IsConnected() )
+    if ( !session.IsSet() )
     {
         Write( "150 Waiting connection...\n" );
 
         os::CHqTimer to( oexTRUE );
-        while ( 8 > to.ElapsedSeconds() && !session.IsConnected() )
+        while ( 8 > to.ElapsedSeconds() && !session.IsSet() )
         {   os::CSys::Sleep( 15 );
             session = m_nsData.GetSession( 0 );
         } // end while
 
         // Did we get a connection?
-        if ( !session.IsConnected() )
+        if ( !session.IsSet() )
             Write( "426 Timed out, I never heard from you!\n" );
 
     } // end if
@@ -344,7 +346,7 @@ oexBOOL CFtpSession::CmdList()
     } // end while
 
     // Shutdown all connections
-    m_nsData.Queue( 0, oexCall( oexT( "Reset" ) ) ).Wait( oexDEFAULT_TIMEOUT );
+    m_nsData.msgSend( oexMsg( 0, oexTo( oexT( "Reset" ) ) ) ).Wait( oexDEFAULT_TIMEOUT ); //Queue( 0, oexCall( oexT( "Reset" ) ) ).Wait( oexDEFAULT_TIMEOUT );
 
     // All done
     if ( nWritten ) 
@@ -382,7 +384,7 @@ oexBOOL CFtpSession::CmdRetr( oexCSTR8 x_pFile )
     OnReadEnd();
 
     // Shutdown all connections
-    m_nsData.Queue( 0, oexCall( oexT( "Reset" ) ) ).Wait( oexDEFAULT_TIMEOUT );
+    m_nsData.msgSend( oexMsg( 0, oexTo( oexT( "Reset" ) ) ) ).Wait( oexDEFAULT_TIMEOUT ); //Queue( 0, oexCall( oexT( "Reset" ) ) ).Wait( oexDEFAULT_TIMEOUT );
 
     // All done
     Write( "226 Transfer complete.\n" );

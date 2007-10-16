@@ -63,7 +63,7 @@ oexCPVOID CDebug::GetInstanceHandle()
 void CDebug::Trace( oexCSTR x_pStr )
 {
 /*
-#if defined( _UNICODE )
+#if defined( oexUNICODE )
 #   define TRACE0( s )  _CrtDbgReportW( _CRT_WARN, 0, 0, NULL, x_pStr )
 #else
 #   define TRACE0( s )  _CrtDbgReport( _CRT_WARN, 0, 0, NULL, x_pStr )
@@ -111,7 +111,7 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 {
 #if defined( _DEBUG )
 
-#if defined( _UNICODE )
+#if defined( oexUNICODE )
 
 	if ( 1 == _CrtDbgReport( _CRT_ASSERT, oexStrToStr8( x_pFile ).Ptr(), x_uLine, 
                              oexStrToStr8( x_pModule ).Replace( '%', '.' ).Ptr(), 

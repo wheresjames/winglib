@@ -52,7 +52,7 @@ public:
     TAutoStr( oexCONST TStr< T > &str ) : TStr< T >( (TStr< T >&)str ) {}
     TAutoStr( oexCONST TAutoStr &str ) : TStr< T >( (TStr< T >&)str ) {}
 
-#ifdef _UNICODE
+#if defined( oexUNICODE )
     TAutoStr( oexCONST CStr8 &str ) { Cnv( (CStr8&)str ); }
 #else
     TAutoStr( oexCONST CStrW &str ) { Cnv( (CStrW&)str ); }
@@ -82,7 +82,7 @@ public:
     operator oexCONST oexCSTR() { return ToString(); }
     operator oexAUTOGUID() { oexGUID guid; return TStr::StringToGuid( &guid ); }
 
-#ifdef _UNICODE
+#if defined( oexUNICODE )
     operator CStr8() 
     { return oexStrToStr8( *this ); }
 #else

@@ -36,10 +36,10 @@
 
 // This stuff is like CORBA in a bottle ;)
 
-#define OexRpcRegisterPtr( p, c, f )    Register( oexT( #f ), oex::TArbDelegate< oex::CAutoStr >( (const c*)p, &c::f ) );
+#define OexRpcRegisterPtr( p, c, f )    Register( oexT( #f ), OEX_NAMESPACE::TArbDelegate< OEX_NAMESPACE::CAutoStr >( (const c*)p, &c::f ) );
 #define OexRpcRegister( c, f )          OexRpcRegisterPtr( this, c, f )
 
-#define oexCall                         oex::CDispatch::Call
+#define oexCall                         OEX_NAMESPACE::CDispatch::Call
 
 
 template< typename T_DISPATCH >

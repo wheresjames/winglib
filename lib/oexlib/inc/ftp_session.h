@@ -61,18 +61,18 @@ public:
         return oexTRUE;
     }
 
-    virtual void OnRegisterFunctions( CDispatch *x_pDispatch )
+    virtual void OnRegisterFunctions( CMsgCom *x_pMc )
     {
-        if ( !x_pDispatch )
+        if ( !x_pMc )
             return;
 
         // Call the base class
-        CProtocol::OnRegisterFunctions( x_pDispatch );
+        CProtocol::OnRegisterFunctions( x_pMc );
 
         // Export functions
-        x_pDispatch->OexRpcRegister( CFtpDataConnection, WriteStr );
-        x_pDispatch->OexRpcRegister( CFtpDataConnection, ReadStr );
-        x_pDispatch->OexRpcRegister( CFtpDataConnection, WaitTxEmpty );
+        x_pMc->oexMsgRegisterThisFunction( CFtpDataConnection, WriteStr );
+        x_pMc->oexMsgRegisterThisFunction( CFtpDataConnection, ReadStr );
+        x_pMc->oexMsgRegisterThisFunction( CFtpDataConnection, WaitTxEmpty );
     }
 
     /// Exported Function
@@ -118,7 +118,7 @@ class CFtpSession :
 public:
 
     /// FTP data connection
-    typedef TNetServer< oex::CAutoSocket, CFtpDataConnection > t_FtpDataConnection;
+    typedef TNetServer< CAutoSocket, CFtpDataConnection > t_FtpDataConnection;
 
 public:
 

@@ -78,7 +78,7 @@ template < const int T > class oex_static_assert{};
 
 // Verify macros show a dialog box even in release mode
 #	define oexVERIFY_PTR_NULL_OK( ptr )     oexVERIFY( oexVerifyPtrNullOk( ptr ) )
-#	define oexVERIFY_PTR( ptr )             oexVERIFY( oex::oexVerifyPtr( ptr ) )
+#	define oexVERIFY_PTR( ptr )             oexVERIFY( OEX_NAMESPACE::oexVerifyPtr( ptr ) )
 #	define oexVERIFY( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( __FILE__ ), __LINE__, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
 
 #ifdef _DEBUG
@@ -98,7 +98,7 @@ template < const int T > class oex_static_assert{};
 #	define oexASSERT( s )
 
 #	define oexCHECK_PTR_NULL_OK( ptr )      oexCHECK( oexVerifyPtrNullOk( ptr ) )
-#	define oexCHECK_PTR( ptr )              oexCHECK( oex::oexVerifyPtr( ptr ) )
+#	define oexCHECK_PTR( ptr )              oexCHECK( OEX_NAMESPACE::oexVerifyPtr( ptr ) )
 #	define oexCHECK( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE :  OEX_NAMESPACE::oexFALSE )
 
 #endif

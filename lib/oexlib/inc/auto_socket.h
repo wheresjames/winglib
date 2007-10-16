@@ -254,19 +254,19 @@ public:
 	// RegisterFunctions()
 	//==============================================================
 	/// Registers public functions
-    virtual void RegisterFunctions( CDispatch *x_pDispatch )
+    virtual void RegisterFunctions( CMsgCom *x_pMc )
     {
         // Sanity check
-        if ( !x_pDispatch )
+        if ( !x_pMc )
             return;
 
         // Register user callable functions
-        x_pDispatch->OexRpcRegister( os::CIpSocket, Connect );
-        x_pDispatch->OexRpcRegister( os::CIpSocket, Shutdown );
-        x_pDispatch->OexRpcRegister( os::CIpSocket, Bind );
-        x_pDispatch->OexRpcRegister( os::CIpSocket, Listen );
+        x_pMc->oexMsgRegisterThisFunction( os::CIpSocket, Connect );
+        x_pMc->oexMsgRegisterThisFunction( os::CIpSocket, Shutdown );
+        x_pMc->oexMsgRegisterThisFunction( os::CIpSocket, Bind );
+        x_pMc->oexMsgRegisterThisFunction( os::CIpSocket, Listen );
 
-        x_pDispatch->OexRpcRegister( CAutoSocket, GetStatus );
+        x_pMc->oexMsgRegisterThisFunction( CAutoSocket, GetStatus );
     }
 
 private:

@@ -42,7 +42,7 @@
 #pragma comment( lib, "WinInet.lib" )
 
 OEX_USING_NAMESPACE
-using namespace oex::os;
+using namespace OEX_NAMESPACE::os;
 
 //////////////////////////////////////////////////////////////////////
 // Helper functions

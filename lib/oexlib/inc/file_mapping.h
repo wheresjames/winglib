@@ -122,7 +122,7 @@ public:
             x_uLen = zstr::Length( x_pName );
 
         // Allocate
-        m_pName = OexAllocNew< oex::oexTCHAR >( x_uLen + 1 );
+        m_pName = OexAllocNew< oexTCHAR >( x_uLen + 1 );
 
         // Copy the shared memory name
         str::Copy( m_pName, x_uLen + 1, x_pName, x_uLen );

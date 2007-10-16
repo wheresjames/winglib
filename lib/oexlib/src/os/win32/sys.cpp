@@ -78,6 +78,9 @@ const oexUINT		CSys::c_StrErr_OK = S_OK;
 
 const oexUINT	    CSys::c_Infinite = INFINITE;
 
+const oexUINT       CSys::c_uMaximumWaitObjects = MAXIMUM_WAIT_OBJECTS;
+
+oexSTATIC_ASSERT( CSys::eMaximumWaitObjects == MAXIMUM_WAIT_OBJECTS );
 
 void CSys::Exit( oexINT x_nRet )
 {

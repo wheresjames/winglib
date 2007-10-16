@@ -98,7 +98,7 @@
 template < typename T_PROTOCOL > 
     class TNetSession : 
         public os::CThread,
-        public CDispatch
+        public CMsgCom
 {
 public:
 
@@ -131,7 +131,7 @@ public:
 	virtual oexBOOL DoThread( oexPVOID x_pData ) 
     {
         // Ensure event handle
-        if ( !GetCmdEvent() )
+        if ( !msgGetMsgEvent().GetHandle() )
             return oexFALSE;
 
         // Get events
@@ -140,8 +140,8 @@ public:
             // 0 == Quit thread
             m_evQuit.GetHandle(),
 
-            // 1 == Command waiting
-            GetCmdEvent()->GetHandle(),
+            // 1 == Message waiting
+            msgGetMsgEvent().GetHandle(),
 
             // 2 == Port events
             m_cProtocol.GetEventHandle()
@@ -163,7 +163,7 @@ public:
 
         // Messages in the queue?
         else if ( 1 == nRet )
-            ProcessQueue();
+            msgProcessQueue();
 
         // Port event
         else if ( 2 == nRet )

@@ -82,6 +82,9 @@ oexINT COex::Uninit()
 //    if ( !oexVERIFY( COexThreadPool::Stop() ) )
 //        m_nShutdownCode |= -4;
 
+    if ( !oexVERIFY( msgOrb.Destroy() ) )
+        m_nShutdownCode |= -1;
+
     if ( !oexVERIFY( oexNet.Destroy() ) )
         m_nShutdownCode |= -1;
 
@@ -96,11 +99,11 @@ oexINT COex::Uninit()
 
     oexTRACE( oexT( "\n-------------------------------- oexlib is dumping memory leaks ---\n" ) );
     
-    oex::os::CMem::DumpLeaks();
+    os::CMem::DumpLeaks();
 
       oexTRACE( oexT( "-------------------------------- Memory Report --------------------\n" ) );
 
-    oex::os::CMem::MemReport();
+    os::CMem::MemReport();
 
       oexTRACE( oexT( "-------------------------------- End oexlib memory report ---------\n\n" ) );
 #endif

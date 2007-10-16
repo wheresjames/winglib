@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// oex_config.h
+// msg_defines.h
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -34,40 +34,34 @@
 
 #pragma once
 
-// Compile messages
-#define OEX_VERBOSE_COMPILE
+// This stuff is like CORBA in a bottle ;)
 
-// The namespace to use
-#define OEX_NAMESPACE		oex
+/// Creates a guid by hashing the parameter
+#define oexCreateMsgId( s, g )                  OEX_NAMESPACE::oss::CMd5::Transform( g, OEX_NAMESPACE::obj::Ptr( s ), OEX_NAMESPACE::obj::Size( s ) )
+#define oexCreateTempMsgId( s )                 OEX_NAMESPACE::oss::CMd5::Transform( &OEX_NAMESPACE::oexGUID(), OEX_NAMESPACE::obj::Ptr( s ), OEX_NAMESPACE::obj::Size( s ) )
 
-// Do we want class testing enabled?
-#define OEX_ENABLE_TESTS
-//#undef OEX_ENABLE_TESTS
+/// Registers a class pointer and function 
+#define oexMsgRegisterFunction( p, c, f )       msgRegister( *oexCreateTempMsgId( oexT( #f ) ), \
+                                                             OEX_NAMESPACE::CMsgTarget( (const c*)p, &c::f ) );
 
-// Enables buffer over-run/under-run checking in release mode
-//#define OEX_ENABLE_RELEASE_MODE_MEM_CHECK
- #undef OEX_ENABLE_RELEASE_MODE_MEM_CHECK
+/// Registers a function using the 'this' pointer
+#define oexMsgRegisterThisFunction( c, f )      oexMsgRegisterFunction( this, c, f )
 
-// Are we using windows?
-#ifdef WIN32
-#	define OEX_WIN32
-#endif
+/// Use to create a CMsg object
+#define oexMsg                                  OEX_NAMESPACE::CMsg::Msg
 
-#ifdef _UNICODE
-#   define oexUNICODE
-#endif
+/// Creates a CMsgAddress address object
+#define oexTo                                   &OEX_NAMESPACE::CMsgAddress
 
-// By default, the thread locks time out and usually the function
-// will give up and treat it as an error, sixty seconds should be 
-// plenty, but you may have some reason, like a reeeeaaaallllyyy
-// slow system and you need longer waits.  I really don't recommend
-// you set this lower.  If you're timing out that indicates a serious
-// error (deadlocks, race conditions and such) and you should fix it.
-#define oexDEFAULT_TIMEOUT           60000
+/// Routes a message
+#define oexNet                                  OEX_NAMESPACE::CMsgMgr::Mm()
 
-// Enable CRT leak detection
-#define OEX_CRT_LEAK_DETECTION
+/// Message priority mask
+#define oexMsgPriorityMask                      0x0000ffff
 
-// Enable zip file support
-#define OEX_ENABLE_ZIP
+/// Set the flag to indicate a reply is not required
+#define oexMsgReply                             0x80000000
+#define oexMsgNoReply                           0x40000000
+#define oexMsgDirectReply                       0x20000000
+
 
