@@ -202,6 +202,33 @@ public:
     CMsgTypeAdapter GetReply()
     {   return ( *this )[ 0 ]; }
 
+    /// Return destination address structure
+    oexBOOL Create( oexUINT x_uFlags )
+    {
+        if ( !IsValid() )
+            return oexFALSE;
+
+        return m_cMi.Ptr()->Create( x_uFlags );
+    }
+
+    /// Return destination address structure
+    CMsgAddress* Dst()
+    {
+        if ( !IsValid() )
+            return 0;
+
+        return m_cMi.Ptr()->Dst();
+    }
+
+    /// Return source address structure
+    CMsgAddress* Src()
+    {
+        if ( !IsValid() )
+            return 0;
+
+        return m_cMi.Ptr()->Src();
+    }
+
     /// Returns the message priority level
     oexUINT GetPriority()
     {

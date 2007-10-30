@@ -107,6 +107,9 @@ public:
     }
 
     /// Starts the data packet
+    oexBOOL Create( oexUINT x_uFlags );
+
+    /// Starts the data packet
     oexBOOL Open( oexUINT x_uFlags, oexUINT x_uParams, oexUINT x_uTotalSize );
 
     /// Add a parameter to the call

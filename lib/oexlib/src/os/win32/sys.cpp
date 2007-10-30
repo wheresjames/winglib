@@ -379,6 +379,19 @@ oexBOOL CSys::Uninit()
     return CSys_ReleaseMicroSleep();
 }
 
+void CSys::CloseHandle( t_WAITABLE x_pHandle )
+{	if ( x_pHandle ) CloseHandle( (HANDLE)x_pHandle );
+}
+
+CSys::t_WAITABLE CSys::DuplicateHandle( t_WAITABLE x_pHandle )
+{
+    HANDLE hDup = NULL;
+    if ( !::DuplicateHandle( GetCurrentProcess(), (HANDLE)x_pHandle, 
+                             GetCurrentProcess(), &hDup,
+                             0, FALSE, DUPLICATE_SAME_ACCESS ) )
+        return NULL;
+    return (t_WAITABLE)hDup;
+}
 
 oexINT CSys::WaitForSingleObject( CSys::t_WAITABLE x_pHandle, oexUINT x_uTimeout )
 {	DWORD dwRet = ::WaitForSingleObject( (HANDLE)x_pHandle, (DWORD)x_uTimeout );

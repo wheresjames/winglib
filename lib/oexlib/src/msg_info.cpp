@@ -47,6 +47,32 @@ void CMsgInfo::Destroy()
     m_sBin.Destroy();
 }
 
+oexBOOL CMsgInfo::Create( oexUINT x_uFlags )
+{   
+    // Lose old message
+    Destroy();
+
+    /// Pointer to buffer
+    if ( !m_sBin.SetLength( OverheadSize( 0 ) ) )
+        return oexFALSE;
+
+    // Set pointers
+    SetPointers( (oexINT)0 );
+
+    // Destination address
+    os::CSys::Zero( m_pDst, sizeof( CMsgAddress ) );
+
+    // Source address
+    os::CSys::Zero( m_pSrc, sizeof( CMsgAddress ) );
+
+    // Initialize block header
+    os::CSys::Zero( m_pBh, sizeof( SBlockHeader ) );
+    m_pBh->uParams = 0;
+    m_pBh->uFlags = x_uFlags;
+
+    return oexTRUE;
+}
+
 oexBOOL CMsgInfo::Open( oexUINT x_uFlags, oexUINT x_uParams, oexUINT x_uTotalSize )
 {   
     // Lose old message

@@ -519,6 +519,15 @@ public:
     operator CMsg* ()
     {   return m_pMsg; }
 
+    operator CMsgAddress()
+    {
+#if defined( oexUNICODE )
+        return CMsgAddress( (oexCSTRW)*this );
+#else
+        return CMsgAddress( (oexCSTR8)*this );
+#endif        
+    }
+
 private:
     
     /// Pointer to memory

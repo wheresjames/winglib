@@ -542,6 +542,93 @@ public:
 	    return str;
     }
 
+    /// Creates a list of all permutations of the specified character string
+    /**
+        \param [in] x_sStr  -   String of characters in which to permutate
+
+        \return List of permutations
+
+      \code
+
+        CStrList lst;
+        int nNumPermutations = StringPermutations( _T( "abc" ), s );
+
+      \endcode
+    */
+    template < typename T >
+        static TList< TStr< T > > StringPermutations( TStr< T > x_sStr )        
+        {
+            // It really isn't practical to go higher
+            oexASSERT( x_sStr.Length() <= 8 );
+
+            TList< TStr< T > > lst;
+            oexUINT u = StringPermutations( lst, (T*)x_sStr.Ptr(), (T*)0 ); 
+
+            oexASSERT( u == lst.Size() );
+            
+#if defined( _DEBUG )            
+            // Verify known lengths
+            switch( x_sStr.Length() )
+            {
+                case 0 : oexASSERT( 0 == u ); break;
+                case 1 : oexASSERT( 1 == u ); break;
+                case 2 : oexASSERT( 2 == u ); break;
+                case 3 : oexASSERT( 6 == u ); break;
+                case 4 : oexASSERT( 24 == u ); break;
+                case 5 : oexASSERT( 120 == u ); break;
+                case 6 : oexASSERT( 720 == u ); break;
+                case 7 : oexASSERT( 5040 == u ); break;
+                case 8 : oexASSERT( 40320 == u ); break;
+                case 9 : oexASSERT( 362880 == u ); break;
+                case 10 : oexASSERT( 3628800 == u ); break;
+            };
+#endif
+            return lst;
+        }
+
+
+    /// Creates a list of all permutations of the specified character string
+    /**
+        \param [in] x_lst   -   List that will contain permutations
+        \param [in] x_sStr  -   String of characters in which to permutate
+        \param [in] p       -   Internal parameter used for recursion
+
+      \code
+
+        CStrList lst;
+        TCHAR s[] = _T( "abc" );
+        int nNumPermutations = StringPermutations( lst, s );
+
+      \endcode
+    */
+    template < typename T >
+        static int StringPermutations( TList< TStr< T > > &x_lst, T *s, T *p = 0 )
+    {
+        if ( !p )
+            p = s;
+
+        int t = 0;
+        T *n = p;
+        while ( *p && *n )
+        {
+            cmn::Swap( *p, *n );
+
+            if ( *( p + 1 ) && *( p + 2 ) )
+                t += StringPermutations( x_lst, s, p + 1 );
+            else
+                t++, x_lst << s;
+
+            cmn::Swap( *p, *n );
+
+            n++;
+
+        } // end while
+
+        return t;
+    }
+
+
+
 
 protected:
 

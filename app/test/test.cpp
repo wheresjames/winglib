@@ -398,6 +398,9 @@ oex::oexRESULT TestStrings()
 		 !oexVERIFY( oex::CStr( oexT( "cHaIr" ) ).ToUpper() == oexT( "CHAIR" ) ) )
 		return -18;
 
+    if ( !oexVERIFY( oex::CStr( oexT( "Hello" ) ).Reverse() == oexT( "olleH" ) ) )
+        return -19;
+
 	str1 = oexT( "Test String" );
 	str2 = ReturnTest( str1 );
 	if ( !oexVERIFY( str1.Ptr() == str2.Ptr() ) )
@@ -427,7 +430,7 @@ oex::oexRESULT TestStrings()
     str2 = str2;
     if ( !oexVERIFY( str2 == oexT( "hello" ) ) )
         return -13;
-
+    
 	// Shared version ( should break the share )
 	str2 = str1;
 	str2.Sub( 5, 6 );
@@ -519,7 +522,7 @@ oex::oexRESULT TestStrings()
 
     if ( !oexVERIFY( str1.GetFileName() == oexT( "myfile.txt" ) ) )
 		return -10;
-
+    
     return oex::oexRES_OK;
 }
 
@@ -932,6 +935,14 @@ oex::oexRESULT TestParser()
 	pStr = oexT( "a=b&c=d&e=hello%20world" );
 	if ( !oexVERIFY( oex::CParser::EncodeUrlParams( oex::CParser::DecodeUrlParams( pStr ) ) == pStr ) )
 		return -22;
+
+    oex::CStrList sl1 = oex::CParser::StringPermutations( oex::CStr( oexT( "abc" ) ) );
+    if ( !oexVERIFY( 6 == sl1.Size() ) )
+        return -23;
+
+    if ( !oexVERIFY( oex::CParser::Implode( sl1, oexT( "," ) ) == oexT( "abc,acb,bac,bca,cba,cab" ) ) )
+        return -24;
+
 
     oex::CPropertyBag pb;
 
@@ -1454,7 +1465,8 @@ public:
     }
 
     oex::CStr Return( oex::CStr str )
-    {   return str; 
+    {
+        return str; 
     }
 
 };
@@ -1475,6 +1487,13 @@ oex::oexRESULT Test_TArbDelegate()
     return oex::oexRES_OK;
 }
 
+//------------------------------------------------------------------
+//------------------------------------------------------------------
+//------------------------------------------------------------------
+//------------------------------------------------------------------
+//------------------------------------------------------------------
+
+/*
 oex::oexRESULT Test_CDispatch()
 {
     CCallbackClass cc;
@@ -1529,7 +1548,7 @@ oex::oexRESULT Test_CDispatch()
 
     return oex::oexRES_OK;
 }
-
+*/
 class CMsgTest : public oex::CMsgObject
 {
 public:
@@ -1663,7 +1682,8 @@ public:
     }
 
     void SetCallback( oex::CMsgAddress ma )
-    {   m_maCallback = ma; }
+    {   m_maCallback = ma; 
+    }
 
 private:
 
@@ -1685,7 +1705,15 @@ oex::oexRESULT Test_CThread()
 
     if ( !oexVERIFY( reply[ 0 ] == 3 ) )
         return -3;
+
+    oex::CMsg callback;
+    msgOrb.RegisterReply( callback );
+
+    tt.msgSend( msgCreate( 0, msgTo( "SetCallback" ), callback.Src() ) );
     
+    if ( !oexVERIFY( callback.Wait( 3000 ).IsReplyReady() ) )
+        return -2;
+
     return oex::oexRES_OK;
 }
 
@@ -1862,7 +1890,7 @@ int main(int argc, char* argv[])
 
     Test_TArbDelegate();
 
-    Test_CDispatch();
+//    Test_CDispatch();
 
     Test_CMsg();
 

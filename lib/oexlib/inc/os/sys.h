@@ -164,6 +164,30 @@ public:
     typedef oexCPVOID t_WAITABLE;
 
 	//==============================================================
+	// CloseHandle()
+	//==============================================================
+	/// Free a event object created by osCreateEvent()
+	/**
+		\param [in] x_hHandle	-	Handle to close
+
+		\see 		
+	*/
+	static void CloseHandle( t_WAITABLE x_pHandle );
+
+	//==============================================================
+	// osDuplicateHandle()
+	//==============================================================
+	/// Creates a event object
+	/**
+		\param [in] x_hEvent		 -	Handle to duplicate
+
+		\return Duplicate handle to object
+	
+		\see osCreateEvent()
+	*/
+	static t_WAITABLE DuplicateHandle( t_WAITABLE x_pHandle );
+
+	//==============================================================
 	// WaitForSingleObject()
 	//==============================================================
 	/// Waits for a waitable object to become signaled

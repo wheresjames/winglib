@@ -610,6 +610,12 @@ public:
 	{	return TStr( Ptr(), Length(), nStart, uLen );    
     }
 
+    /// Reverses the string
+    TStr& Reverse()
+    {   str::Reverse( _Ptr(), Length() );
+        return *this;
+    }
+
 public:
 
 	/// Moves part of the string from one place to another

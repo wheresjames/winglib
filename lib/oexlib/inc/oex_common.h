@@ -185,15 +185,20 @@ namespace cmn
         void Swap( T &a, T &b )
     {   T t = a; a = b; b = t; }
 
-    /// Swaps value a and b without a temporary
+    /// Swaps values a, b, and c.  a = b, b = c, c = a
     template < typename T >
-        void SwapNoTemp( T &a, T &b )
-    {   a += b; b = a - b; a -= b; }
+        void Swap( T &a, T &b, T &c )
+    {   T t = a; a = b; b = c; c = t; }
 
-    /// Swaps integer value a and b without a temporary
+    /// Swaps values a, b, c, and d.  a = b, b = c, c = d, d = a
     template < typename T >
-        void SwapXor( T &a, T &b )
-    {   a ^= b ^= a ^= b; }
+        void Swap( T &a, T &b, T &c, T &d )
+    {   T t = a; a = b; b = c; c = d; d = t; }
+
+    /// Swaps values a, b, c, d, and e.  a = b, b = c, c = d, d = e, e = a
+    template < typename T >
+        void Swap( T &a, T &b, T &c, T &d, T &e )
+    {   T t = a; a = b; b = c; c = d; d = e; e = t; }
 
     /// Values for pi
     oexCONST oexDOUBLE c_PI = 3.141592654;
@@ -284,7 +289,6 @@ namespace cmn
     /// Copies bits number of bits from src[ soff ] to dst[ doff ]
     /// where doff and soff are offsets in bits.
     /**
-
         +++ This could probably be made a little more efficient by using
             masks and copying multiple bits at once, but that would make my 
             brain hurt at the moment.

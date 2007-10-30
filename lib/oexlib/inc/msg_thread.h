@@ -45,8 +45,19 @@ class CMsgThread : public CMsgObject, public os::CThread
 {
 public:
 
+    /// Handler info
+    struct SHandlerInfo
+    {
+        /// Handle to event that triggers callback
+        os::CSys::t_WAITABLE    hEvent;
+
+        /// Callback address
+        CMsgAddress             cMsgAddress;
+    };
+
+
     /// Event handler list type
-    typedef TAssoList< os::CSys::t_WAITABLE, CMsgAddress >    t_EventHandlerList;
+    typedef TAssoList< os::CSys::t_WAITABLE, SHandlerInfo >    t_EventHandlerList;
 
 public:
 
@@ -136,7 +147,7 @@ private:
                 for ( t_EventHandlerList::iterator it; 
                       os::CSys::vMaximumWaitObjects() > uHandles 
                       && m_lstEventHandlers.Next( it ); )
-                    phEvents[ uHandles++ ] = it.Node()->key;
+                    phEvents[ uHandles++ ] = it->hEvent;
 
         } // end scope
 
@@ -163,7 +174,7 @@ private:
 
             // Send the event message if we found a handler
             if ( it.IsValid() )
-                msgOrb.Send( msgCreate( 0, it.Ptr() ) );
+                msgOrb.Send( msgCreate( 0, &it.Ptr()->cMsgAddress ) );
 
             // Reset event object
             os::CEvent::osResetEvent( (oex::os::CEvent::t_EVENT)phEvents[ nRet ] );
@@ -187,8 +198,19 @@ private:
         if ( !ll.IsLocked() )
             return oexFALSE;
 
+        // Must duplicate handle so it doesn't get yanked
+        os::CSys::t_WAITABLE hHandle = os::CSys::DuplicateHandle( x_hEvent );
+        if ( !hHandle )
+            return oexFALSE;       
+
         // Add event handler
-        m_lstEventHandlers[ x_hEvent ] = x_Ma;
+        t_EventHandlerList::iterator it = m_lstEventHandlers.Get( x_hEvent );
+        if ( !it.IsValid() )
+            return oexFALSE;
+
+        // Save info
+        it->hEvent = hHandle;
+        it->cMsgAddress = x_Ma;
 
         // Change things
         m_evChange.Set();
@@ -201,6 +223,14 @@ private:
         CTlLocalLock ll( m_lock );
         if ( !ll.IsLocked() )
             return oexFALSE;
+
+        // Find this event
+        t_EventHandlerList::iterator it = m_lstEventHandlers.Find( x_hEvent );
+        if ( !it.IsValid() )
+            return oexFALSE;
+
+        // Close the wait handle
+        os::CSys::CloseHandle( it->hEvent );
 
         // Remove event handler
         m_lstEventHandlers.Unset( x_hEvent );

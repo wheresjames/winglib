@@ -65,8 +65,8 @@ public:
     /// Closes the session
     void CloseSession()
     {
-        if ( m_pMc )
-            m_pMc->msgSend( oexMsg( 0, oexTo( oexT( "CloseSession" ) ), m_guidSessionId ) ); //->Queue( 0, oexCall( oexT( "CloseSession" ), m_guidSessionId ) );
+//        if ( m_pMc )
+//            m_pMc->msgSend( oexMsg( 0, oexTo( oexT( "CloseSession" ) ), m_guidSessionId ) ); //->Queue( 0, oexCall( oexT( "CloseSession" ), m_guidSessionId ) );
     }
 
     /// Over-ride to register interface functions

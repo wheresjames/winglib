@@ -723,6 +723,27 @@ namespace str
 		    return -1;
 	    }
 
+
+    /// Reverses the specified string
+    /**
+        \param [in] s       -   String of characters in which to search
+        \param [in] ln      -   Length of the string in s
+    */
+    template < typename T >
+        oexINT Reverse( T *s, oexINT ln )        
+        {   
+            oexASSERT_PTR( s );
+
+            if ( !*s || !ln )
+                return 0;
+
+            T * e = s + ln - 1;
+            while ( s < e )
+                cmn::Swap( *( s++ ), *( e-- ) );
+
+            return ln;
+        }
+
     /// Converts a string to a number
 	template< class T >
         oexINT64 StrToNum( oexCONST T *x_pStr, oexUINT x_uSize = 0, oexUINT x_uRadix = 10, oexINT *x_pnEnd = oexNULL )

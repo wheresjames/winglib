@@ -52,7 +52,7 @@
 #define msgTo                                   &OEX_NAMESPACE::CMsgAddress
 
 /// Object manager
-#define msgOrb                                  CMsgObjectMgr::Mm()
+#define msgOrb                                  oex::CMsgObjectMgr::Mm()
 
 /// 
 class CMsgObjectInfo
@@ -196,7 +196,6 @@ private:
 };
 
 
-
 /// 
 /**
 */
@@ -227,6 +226,8 @@ private:
     /// Shared object
     TMem< CMsgObjectInfo >      __m_lstMoi;
 };
+
+
 
 /// 
 /**
@@ -428,6 +429,9 @@ public:
         // Ensure valid message
         if ( !x_rMsg.IsValid() )
             return oexFALSE;
+
+        // New message object
+        x_rMsg.Create( 0 );
 
         // Create reply signal
         x_rMsg.EnableReplyEvent( oexTRUE );

@@ -133,8 +133,8 @@ public:
     {   os::CSys::MemCpy( this, &x_rMa, sizeof( CMsgAddress ) ); }
 
     /// Constructs address from a url
-    CMsgAddress( oexCSTR x_sStr )
-    {   Deserialize( x_sStr ); }
+//    CMsgAddress( oexCSTR x_sStr )
+//    {   Deserialize( x_sStr ); }
 
     /// Copy operator
     CMsgAddress& operator = ( oexCONST CMsgAddress &x_rMa )
