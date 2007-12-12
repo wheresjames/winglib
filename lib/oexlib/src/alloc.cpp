@@ -178,11 +178,11 @@ oexPVOID CAlloc::VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSiz
     oexUCHAR *pBuf = (oexUCHAR*)x_pBuf;
 
     // Grab a pointer to the block header
-    SBlockHeader *pBh = (SBlockHeader*)( pBuf - sizeof( SBlockHeader ) 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
-                                         - sizeof( m_ucUnderrunPadding ) 
+    SBlockHeader *pBh = (SBlockHeader*)( pBuf - sizeof( SBlockHeader )
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+                                         - sizeof( m_ucUnderrunPadding )
 #endif
-                                         );    
+                                         );
 
     // Grab the size of the allocated buffer
     oexUINT uSize = pBh->uSize;

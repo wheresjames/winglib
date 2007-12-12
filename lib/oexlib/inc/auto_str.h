@@ -48,14 +48,14 @@ template < typename T > class TAutoStr :
 public:
 
     /// Constructor
-    TAutoStr() : TStr() {}
+    TAutoStr() : TStr< T >() {}
     TAutoStr( oexCONST TStr< T > &str ) : TStr< T >( (TStr< T >&)str ) {}
     TAutoStr( oexCONST TAutoStr &str ) : TStr< T >( (TStr< T >&)str ) {}
 
 #if defined( oexUNICODE )
-    TAutoStr( oexCONST CStr8 &str ) { Cnv( (CStr8&)str ); }
+    TAutoStr( oexCONST CStr8 &str ) { TStr< T >::Cnv( (CStr8&)str ); }
 #else
-    TAutoStr( oexCONST CStrW &str ) { Cnv( (CStrW&)str ); }
+    TAutoStr( oexCONST CStrW &str ) { TStr< T >::Cnv( (CStrW&)str ); }
 #endif
 
     TAutoStr( oexCONST T *pStr ) : TStr< T >( pStr ) {}
@@ -73,14 +73,14 @@ public:
 public:
 
     // Implicit cast
-    operator oexCONST oexINT() { return ToInt(); }
-    operator oexCONST oexUINT() { return ToUInt(); }
-    operator oexCONST oexLONG() { return ToLong(); }
-    operator oexCONST oexULONG() { return ToULong(); }
-    operator oexCONST oexFLOAT() { return ToFloat(); }
-    operator oexCONST oexDOUBLE() { return ToDouble(); }
-    operator oexCONST oexCSTR() { return ToString(); }
-    operator oexAUTOGUID() { oexGUID guid; return TStr::StringToGuid( &guid ); }
+    operator oexCONST oexINT() { return TStr< T >::ToInt(); }
+    operator oexCONST oexUINT() { return TStr< T >::ToUInt(); }
+    operator oexCONST oexLONG() { return TStr< T >::ToLong(); }
+    operator oexCONST oexULONG() { return TStr< T >::ToULong(); }
+    operator oexCONST oexFLOAT() { return TStr< T >::ToFloat(); }
+    operator oexCONST oexDOUBLE() { return TStr< T >::ToDouble(); }
+    operator oexCONST oexCSTR() { return TStr< T >::ToString(); }
+    operator oexAUTOGUID() { oexGUID guid; return TStr< T >::StringToGuid( &guid ); }
 
 #if defined( oexUNICODE )
     operator CStr8() 

@@ -619,7 +619,8 @@ public:
 		m_pHead = m_pTail = oexNULL; 
     }
 
-	TList( TList &x_rList )
+	// +++ Added const for g++
+	TList( oexCONST TList &x_rList )
 	{	m_uSize = 0;
 		m_pHead = m_pTail = oexNULL; 
 		Attach( x_rList ); 
@@ -1495,7 +1496,7 @@ public:
 	*/
 	TList Copy()
 	{	TList lst;
-		for ( TList< T_OBJ >::iterator it; Next( it ); )
+		for ( iterator it; Next( it ); )
 			lst.Append( *it );
 		return lst;
 	}

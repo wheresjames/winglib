@@ -73,7 +73,7 @@ public:
 	typedef TAssoList< T_L, TPropertyBag< T_L, T_R > > t_PbArray;
 
 	/// Iterator type
-	typedef typename TAssoList< T_L, TPropertyBag< T_L, T_R > >::iterator iterator;
+	typedef typename t_PbArray::iterator iterator;
 
 public:
 
@@ -308,7 +308,7 @@ public:
     TPropertyBag Copy()
     {   TPropertyBag pb;
         pb.m_t.Copy( m_t );
-		for ( t_PbArray::iterator it; m_lstPb.Next( it ); )
+		for ( iterator it; m_lstPb.Next( it ); )
 			pb[ it.Node()->key ] = it->Copy();
         return pb;
     }
@@ -351,7 +351,7 @@ public:
 
 			str << tabs << "Array()" oexNL << tabs << "{" oexNL;
 
-			for ( CPropertyBag::iterator it; pb.List().Next( it ); )
+			for ( iterator it; pb.List().Next( it ); )
 				str << PrintR( it, it.Node()->key, uDepth );
 
 			str << tabs << "}" oexNL;

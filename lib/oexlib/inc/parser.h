@@ -57,7 +57,7 @@ private:
 
 public:
 
-	/// Parsers a list by breaking it at separator strings
+/*	/// Parsers a list by breaking it at separator strings
 	static CStrList Explode( oexCSTR pStr, oexUINT uSize, oexCSTR pSep, oexUINT uSep );
 	
     static CStrList Explode( oexCSTR pStr, oexCSTR pSep )
@@ -68,11 +68,12 @@ public:
 	
     static CStrList Explode( CStr sStr, CStr sSep )
 	{	return Explode( sStr.Ptr(), sStr.Length(), sSep.Ptr(), sSep.Length() ); }
+*/
 
-	template < class T_LIST >
+	template < typename T_LIST >
 		static CStr Implode( oexCONST T_LIST &lst, oexCSTR pSep )
 	{	CStr str;
-		for ( T_LIST::iterator it; lst.Next( it ); )
+		for ( typename T_LIST::iterator it; lst.Next( it ); )
 		{	if ( str.Length() ) str << pSep;
 			str << it->ToString();
 		} // end for
@@ -135,7 +136,7 @@ public:
 	{	return Split< T >( pStr, zstr::Length( pStr ), pSep ); }
 
     template < typename T >
-    	static TList< TStr< T > > Split( TStr< T > str, oexCONST T *pSep )
+    	static TList< TStr< T > > Split( TStr< T > &str, oexCONST T *pSep )
 	{	return Split< T >( str.Ptr(), str.Length(), pSep ); }
 
 	/// Parses an array template
@@ -175,7 +176,7 @@ public:
 
 	    TList< TStr< T > > lst = CParser::Split< T >( x_str, oexTT( T, "&" ) );
 
-	    for ( TList< TStr< T > >::iterator it; lst.Next( it ); )
+	    for ( typename TList< TStr< T > >::iterator it; lst.Next( it ); )
 	    {
 		    key = UrlDecode( it->Parse( oexTT( T, "=" ) ) );
 		    if ( key.Length() ) (*it)++;
@@ -207,7 +208,7 @@ public:
     {
 	    TStr< T > str;
 
-	    for( TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+	    for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
 	    {
 		    if ( str.Length() ) 
                 str << oexTC( T, '&' );
@@ -446,7 +447,7 @@ public:
             return TStr< T >();
 
         TStr< T > sStr;
-        for ( TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+        for ( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
         {
             // Add separator if needed
             if ( sStr.Length() )
@@ -483,13 +484,13 @@ public:
 
         // Case sensitive?
         if ( x_bCaseSensitive )
-        {   for ( TList< TStr< T > >::iterator it; x_lst.Next( it ); )
+        {   for ( typename TList< TStr< T > >::iterator it; x_lst.Next( it ); )
                 if ( x_sStr.CmpLen( it->Ptr(), it->Length() ) )
                 {   x_sStr.LTrim( it->Length() ); return it.Obj(); }
         } // end if
 
         else
-	        for ( TList< TStr< T > >::iterator it; x_lst.Next( it ); )
+	        for ( typename TList< TStr< T > >::iterator it; x_lst.Next( it ); )
                 if ( x_sStr.ICmpLen( it->Ptr(), it->Length() ) )
                 {   x_sStr.LTrim( it->Length() ); return it.Obj(); }
 
@@ -533,7 +534,7 @@ public:
 	    TStr< T > str;
 
         // Write out each value
-	    for( TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+	    for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
 
             if ( it.Node()->key.Length() && it->ToString().Length() )
 

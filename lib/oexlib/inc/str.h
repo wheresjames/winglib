@@ -1312,7 +1312,7 @@ public:
         oexINT i = str::ParseQuoted(    Ptr(), Length(), 
                                         pOpen, zstr::Length( pOpen ), 
                                         pClose, zstr::Length( pOpen ), 
-                                        pEscape, pEscape ? zstr::Length( pEscape ) ? 0 );
+                                        pEscape, pEscape ? zstr::Length( pEscape ) : 0 );
 		if ( 0 >= i ) return TStr();
 		TStr str = SubStr( 1, i - 1 );
 		LTrim( i + 1 );
@@ -1389,7 +1389,7 @@ public:
 	{	return NextToken( Ptr(), Length(), tMin, tMax, puI ); }
 
 	static TStr NextToken( oexCONST T* pStr, T tMin, T tMax, oexINT *puI = oexNULL )
-	{	return NextToken( pStr, CRawStr::Length( pStr ), tMin, tMax, puI ); }
+	{	return NextToken( pStr, zstr::Length( pStr ), tMin, tMax, puI ); }
 
 	static TStr NextToken( TStr str, T tMin, T tMax, oexINT *puI = oexNULL )
 	{	return NextToken( str.Ptr(), str.Length(), tMin, tMax, puI ); }

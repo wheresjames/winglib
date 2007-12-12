@@ -268,7 +268,7 @@ public:
 	void Destroy()
 	{
 		// Validate depth
-		if ( c_lMaxDepth <= m_dwDepth )
+		if ( c_lMaxDepth <= m_uDepth )
 			m_uDepth = c_lMaxDepth;
 
 		do 
@@ -301,7 +301,7 @@ public:
 	oexBOOL FindNext()
 	{
 		// Ensure valid depth
-		if ( c_lMaxDepth <= m_dwDepth ) 
+		if ( c_lMaxDepth <= m_uDepth ) 
 			m_uDepth = c_lMaxDepth - 1;
 
 		// Recurse into directory if this is one

@@ -38,7 +38,8 @@
 
 /// Creates a guid by hashing the parameter
 #define oexCreateMsgId( s, g )                  OEX_NAMESPACE::oss::CMd5::Transform( g, OEX_NAMESPACE::obj::Ptr( s ), OEX_NAMESPACE::obj::Size( s ) )
-#define oexCreateTempMsgId( s )                 OEX_NAMESPACE::oss::CMd5::Transform( &OEX_NAMESPACE::oexGUID(), OEX_NAMESPACE::obj::Ptr( s ), OEX_NAMESPACE::obj::Size( s ) )
+#define oexCreateTempMsgId( s )                 oexCreateMsgId( s, &OEX_NAMESPACE::oexGUID() )
+//#define oexCreateTempMsgId( s )                 OEX_NAMESPACE::oss::CMd5::Transform( OEX_NAMESPACE::oexGUID(), OEX_NAMESPACE::obj::Ptr( s ), OEX_NAMESPACE::obj::Size( s ) )
 
 /// Registers a class pointer and function 
 #define oexMsgRegisterFunction( p, c, f )       msgRegister( *oexCreateTempMsgId( oexT( #f ) ), \

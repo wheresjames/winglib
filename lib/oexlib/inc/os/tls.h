@@ -50,6 +50,6 @@ public:
 
 private:
 
-	static const oexINT32 CThreadLocalStorage::c_Invalid;
+	static const oexINT32 c_Invalid;
 
 };

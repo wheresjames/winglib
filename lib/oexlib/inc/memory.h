@@ -241,7 +241,8 @@ public:
     }
 
     void Destruct()
-    {   m_bConstructed = oexTRUE;
+    {
+		CAlloc::SetFlags( m_pMem, CAlloc::eF1Constructed | CAlloc::GetFlags( m_pMem ) );
         Delete();
     }
 

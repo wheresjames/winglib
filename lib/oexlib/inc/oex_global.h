@@ -35,11 +35,10 @@
 #pragma once
 
 /// Placement new
-inline void *__cdecl operator new( unsigned int, void *p ) { return p; }
-
+inline void *CDECL operator new( unsigned int, void *p ) { return p; }
 /// Placement delete
-#if _MSC_VER >= 1200
-inline void __cdecl operator delete(void *, void *) { return; }
+#if !defined( _MSC_VER ) || _MSC_VER >= 1200
+inline void CDECL operator delete(void *, void *) { return; }
 #endif
 
 // For detecting memory leaks

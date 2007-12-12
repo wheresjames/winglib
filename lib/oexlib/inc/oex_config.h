@@ -71,3 +71,10 @@
 // Enable zip file support
 #define OEX_ENABLE_ZIP
 
+#ifdef WIN32
+#	define CDECL	_cdecl
+#else
+#	define CDECL
+#endif
+
+

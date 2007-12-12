@@ -321,7 +321,7 @@ public:
 	
 		\see 
 	*/
-	oexBOOL _cdecl WriteMultiPacket( oexUINT x_uPacketType, oexUINT x_uBuffers = 0, ... )
+	oexBOOL CDECL WriteMultiPacket( oexUINT x_uPacketType, oexUINT x_uBuffers = 0, ... )
 	{	return vWriteMultiPacket( x_uPacketType, x_uBuffers, ( (oexPVOID*)&x_uBuffers ) + 1 ); }
 
 	//==============================================================

@@ -95,10 +95,10 @@ private:
 	
 		\see 
 	*/
-	static oexUINT CCrcHash::CRC32( oexUINT x_crc, oexUCHAR *x_buf, oexUINT x_size );
+	static oexUINT CRC32( oexUINT x_crc, oexUCHAR *x_buf, oexUINT x_size );
 
 	/// 32 bit CRC table, this speeds up the CRC algorithm
-	static oexUINT CCrcHash::m_crc_table[ 256 ];
+	static oexUINT m_crc_table[ 256 ];
 };
 
 
@@ -251,8 +251,15 @@ template < class T_KEY, class T_OBJ = T_KEY, class T_HASH = CCrcHash, class T_NO
 {
 public:
 
+	/// Fully qualified 
+	typedef TList< T_OBJ, T_NODE > q_TList;
+
+	
 	/// The type of iterator for this list
 	typedef typename TList< T_OBJ, T_NODE >::iterator iterator;
+
+	/// Iterator type for the sub lists	
+	typedef typename TList< iterator >::iterator sub_iterator;
 
 public:
 
@@ -455,15 +462,15 @@ public:
 		oexUINT i = GetIndex( x_key );
 
 		// Search sub list for an exact match
-		for ( TList< iterator >::iterator it; m_table.Ptr( i )->Next( it ); )
+		for ( sub_iterator it; m_table.Ptr( i )->Next( it ); )
             if ( obj::Compare( it->Node()->key, x_key ) )
 				return it->Node();
 
 		// Add container to list
-		TList< iterator >::iterator it = m_table.Ptr( i )->Append();
+		sub_iterator it = m_table.Ptr( i )->Append();
 		
 		// Create object
-		*it = Append();
+		*it = q_TList::Append();
 
 		// We must get a node
 		oexASSERT( it->Node() );
@@ -500,13 +507,13 @@ public:
 	*/
 	iterator Find( oexCONST T_KEY &x_key )
 	{
-		if ( !Size() )
+		if ( !q_TList::Size() )
 			return iterator();
 
 		oexUINT i = GetIndex( x_key );
 
 		// Search sub list for an exact match
-		for ( TList< iterator >::iterator it; m_table.Ptr( i )->Next( it ); )
+		for ( sub_iterator it; m_table.Ptr( i )->Next( it ); )
             if ( obj::Compare( it->Node()->key, x_key ) )     			     
 				return it->Node();
 
@@ -595,13 +602,13 @@ public:
 	*/
 	oexBOOL IsKey( T_KEY x_key )
 	{
-		if ( !Size() )
+		if ( !q_TList::Size() )
 			return oexFALSE;
 
 		oexUINT i = GetIndex( x_key );
 
 		// Search sub list for an exact match
-		for ( TList< iterator >::iterator it; m_table.Ptr( i )->Next( it ); )
+		for ( sub_iterator it; m_table.Ptr( i )->Next( it ); )
 			if ( it->Node()->key == x_key )
 				return oexTRUE;
 
@@ -630,7 +637,7 @@ public:
     {   iterator it = Find( x_key );
         if ( !it.IsValid() )
             return it;
-        return TList< T_OBJ, T_NODE >::Erase( it, x_bForward );
+        return q_TList::Erase( it, x_bForward );
     }
 
 protected:
@@ -646,14 +653,14 @@ protected:
     */
     virtual void Unlink( iterator x_it ) 
     {   
-		if ( !Size() || !x_it.Node() )
+		if ( !q_TList::Size() || !x_it.Node() )
 			return;
 
         // Get the index
 		oexUINT i = GetIndex( x_it.Node()->key );
 
 		// Search sub list for an exact match
-		for ( TList< iterator >::iterator it; m_table.Ptr( i ) && m_table.Ptr( i )->Next( it ); )
+		for ( sub_iterator it; m_table.Ptr( i ) && m_table.Ptr( i )->Next( it ); )
             if ( obj::Compare( it->Node()->key, x_it.Node()->key ) )
             {   m_table.Ptr( i )->Erase( it );
                 return; 
@@ -797,7 +804,7 @@ public:
 	*/
 	TAssoList Copy()
 	{	TAssoList lst;
-		for ( TList< T_OBJ, T_NODE >::iterator it; Next( it ); )
+		for ( iterator it; Next( it ); )
 			lst[ it.Node()->key ] = *it;
 		return lst;
 	}

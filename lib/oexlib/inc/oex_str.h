@@ -34,6 +34,30 @@
 
 #pragma once
 
+/// !!! This namespace contains functions that depend 
+///     on strings being NULL terminated.
+/**
+    The NULL terminated string is evil, if you use these
+    functions, you take your code into your own hands!
+*/
+namespace zstr
+{
+    template < typename T >
+        oexUINT Length( oexCONST T *s )
+        {   oexUINT l = 0;
+            oexASSERT_PTR( s );
+            while ( *s ) s++, l++;
+            return l;
+        }
+
+    template < typename T >
+        T* EndOfString( T *s )
+        {   return &s[ Length( s ) ];
+        }
+
+};
+
+
 /// This namespace contains string functions that do *not* depend
 /// on the string being NULL terminated.  These are the *good*
 /// string functions ;)
@@ -514,7 +538,7 @@ namespace str
 			    T *start = s2;
 			    while ( ln2-- )
 			    {	if ( s1[ ln1 ] == *start )				
-					    return i;
+					    return ln1;
 				    start++;
 			    } // end while
 
@@ -841,19 +865,6 @@ namespace str
 namespace zstr
 {
     template < typename T >
-        oexUINT Length( oexCONST T *s )
-        {   oexUINT l = 0;
-            oexASSERT_PTR( s );
-            while ( *s ) s++, l++;
-            return l;
-        }
-
-    template < typename T >
-        T* EndOfString( T *s )
-        {   return &s[ Length( s ) ];
-        }
-
-    template < typename T >
         oexUINT Copy( T *dst, oexCONST T *src )
         {   oexUINT uLen = Length( src );
             return str::Copy( dst, uLen + 1, src, uLen );
@@ -1027,6 +1038,8 @@ namespace guid
     template< typename T_GUID1, typename T_GUID2 >
         oexBOOL CmpGuid( oexCONST T_GUID1 *pGuid1, oexCONST T_GUID2 *pGuid2 )
     {
+	oexSTATIC_ASSERT( sizeof( T_GUID1 ) == ( sizeof( oexINT64 ) * 2 ) );
+	    
         oexASSERT_PTR( pGuid1 );
         oexASSERT_PTR( pGuid2 );
 
@@ -1038,12 +1051,15 @@ namespace guid
     template< typename T_GUID1, typename T_GUID2, typename T_GUID3 >
         oexBOOL CmpGuid( T_GUID1 *pGuid1, oexCONST T_GUID2 *pGuid2, oexCONST T_GUID3 *pMask )
     {
+	oexSTATIC_ASSERT(    sizeof( T_GUID1 ) == sizeof( T_GUID2 ) 
+	                  && sizeof( T_GUID1 ) == sizeof( T_GUID3 ) );
+	    
         oexBOOL bMatch = oexTRUE;
         oexUCHAR *p1 = (oexUCHAR*)pGuid1;
         oexUCHAR *p2 = (oexUCHAR*)pGuid2;
         oexUCHAR *m = (oexUCHAR*)pMask;
 
-        for ( oexUINT i = 0; bMatch && i < sizeof( T_GUID ) / sizeof( oexUCHAR ); i++ )
+        for ( oexUINT i = 0; bMatch && i < sizeof( T_GUID1 ) / sizeof( oexUCHAR ); i++ )
             if ( p1[ i ] ^ p2[ i ] & m[ i ] )
                 bMatch = oexFALSE;
 

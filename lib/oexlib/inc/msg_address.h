@@ -34,7 +34,6 @@
 
 #pragma once
 
-
 #pragma pack( push, 1 )
 
 /// Network address structure
@@ -80,8 +79,10 @@ public:
                  oexCONST oexGUID *x_pguidProcess = oexNULL, 
                  oexCONST oexGUID *x_pguidNetwork = oexNULL )
     {   
+		oexGUID guidTmp;
+		
         if ( x_pId )
-            guid::CopyGuid( &guidId, oexCreateTempMsgId( x_pId ) ); 
+            guid::CopyGuid( &guidId, oexCreateMsgId( x_pId, &guidTmp ) ); 
         else
             guid::ZeroGuid( &guidId ); 
         
@@ -107,8 +108,10 @@ public:
                  oexCONST oexGUID *x_pguidProcess = oexNULL, 
                  oexCONST oexGUID *x_pguidNetwork = oexNULL )
     {   
+		oexGUID guidTmp;
+
         if ( x_pId )
-            guid::CopyGuid( &guidId, oexCreateTempMsgId( CStrW().Cnv( x_pId ).Ptr() ) ); 
+            guid::CopyGuid( &guidId, oexCreateMsgId( CStrW().Cnv( x_pId ).Ptr(), &guidTmp ) ); 
         else
             guid::ZeroGuid( &guidId ); 
         

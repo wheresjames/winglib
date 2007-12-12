@@ -463,7 +463,7 @@ namespace os
 //------------------------------------------------------------------
 // Supporting classes
 //------------------------------------------------------------------
-#include "inc/arb_delegates.h"
+//#include "inc/arb_delegates.h"
 #include "inc/alloc.h"
 #include "inc/file_mapping.h"
 #include "inc/memory.h"
@@ -507,7 +507,7 @@ namespace os
 #include "inc/circ_buf.h"
 #include "inc/fifo_sync.h"
 #include "inc/data_packet.h"
-#include "inc/dispatch.h"
+//#include "inc/dispatch.h"
 
 // Messaging
 #include "inc/msg_defines.h"

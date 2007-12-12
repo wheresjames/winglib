@@ -115,7 +115,7 @@ public:
     oexBOOL SetRawAddress( oexINT64 x_llIp, oexINT32 x_uPort, oexINT32 x_uType = eAddrTypeIpv4 );
 
     /// Validates the address check sum
-    oexBOOL CIpAddress::ValidateAddress();
+    oexBOOL ValidateAddress();
 
     //==============================================================
     // LookupUrl()

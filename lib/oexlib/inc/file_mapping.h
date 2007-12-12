@@ -335,7 +335,7 @@ public:
     /// Returns a copy of this object
     TFileMapping Copy()
     {   TFileMapping fm;
-        if ( m.m_pPtr )            
+        if ( m_pPtr )            
             fm.Copy( *this );
         return fm;
     }
