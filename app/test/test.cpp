@@ -128,7 +128,6 @@ oex::oexRESULT TestAllocator()
     if ( !oexVERIFY( 1 == tm.m_uDestructed ) )
         return -9;
 
-
     // Allocate array
     tm.Reset();
     p = OexAllocConstructArray< CBaseTestObject >( 3, &tm );
@@ -290,6 +289,10 @@ oex::oexRESULT TestFileMapping()
         return -9;
 
     mm.Delete();
+
+    if ( !oexVERIFY( 0 == tm.m_uDestructed ) )
+        return -11;
+
     mm2.Delete();
 
     if ( !oexVERIFY( 1 == tm.m_uDestructed ) )
@@ -306,7 +309,6 @@ oex::oexRESULT TestGuids()
 
     oex::oexGUID    guid1, guid2;
     oex::oexTCHAR   szGuid1[ 1024 ] = oexT( "" );
-//    oex::oexTCHAR   szGuid2[ 1024 ] = oexT( "" );
 
     // Guid / String conversions
     oex::guid::GuidToString( szGuid1, oexSizeofArray( szGuid1 ), &guidTest );
@@ -1470,7 +1472,7 @@ public:
     }
 
 };
-
+/*
 oex::oexRESULT Test_TArbDelegate()
 {
     CCallbackClass cc;
@@ -1486,7 +1488,7 @@ oex::oexRESULT Test_TArbDelegate()
 
     return oex::oexRES_OK;
 }
-
+*/
 //------------------------------------------------------------------
 //------------------------------------------------------------------
 //------------------------------------------------------------------
@@ -1706,13 +1708,13 @@ oex::oexRESULT Test_CThread()
     if ( !oexVERIFY( reply[ 0 ] == 3 ) )
         return -3;
 
-    oex::CMsg callback;
-    msgOrb.RegisterReply( callback );
+//    oex::CMsg callback;
+//    msgOrb.RegisterReply( callback );
 
-    tt.msgSend( msgCreate( 0, msgTo( "SetCallback" ), callback.Src() ) );
+//    tt.msgSend( msgCreate( 0, msgTo( "SetCallback" ), callback.Src() ) );
     
-    if ( !oexVERIFY( callback.Wait( 3000 ).IsReplyReady() ) )
-        return -2;
+//    if ( !oexVERIFY( callback.Wait( 3000 ).IsReplyReady() ) )
+//        return -2;
 
     return oex::oexRES_OK;
 }
@@ -1888,7 +1890,7 @@ int main(int argc, char* argv[])
 
     Test_CDataPacket();
 
-    Test_TArbDelegate();
+//    Test_TArbDelegate();
 
 //    Test_CDispatch();
 

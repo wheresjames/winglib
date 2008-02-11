@@ -69,6 +69,55 @@ public:
     static CStrList Explode( CStr sStr, CStr sSep )
 	{	return Explode( sStr.Ptr(), sStr.Length(), sSep.Ptr(), sSep.Length() ); }
 */
+    template < typename T >
+        static TList< TStr< T > > Explode( oexCONST T * pStr, oexCONST T * pSep )
+	{	return Explode( pStr, zstr::Length( pStr ), pSep, zstr::Length( pSep ) ); }
+	
+    template < typename T >
+        static TList< TStr< T > > Explode( TStr< T > sStr, oexCONST T * pSep )
+	{	return Explode( sStr.Ptr(), sStr.Length(), pSep, zstr::Length( pSep ) ); }
+	
+    template < typename T >
+        static TList< TStr< T > > Explode( TStr< T > sStr, TStr< T > sSep )
+	{	return Explode( sStr.Ptr(), sStr.Length(), sSep.Ptr(), sSep.Length() ); }
+
+    template < typename T >
+        static TList< TStr< T > > Explode( oexCONST T *x_pStr, oexUINT x_uSize, oexCONST T *x_pSep, oexUINT x_uSep )
+    {
+	    TList< TStr< T > > lst;
+	    if ( !oexVERIFY_PTR( x_pStr ) )
+		    return lst;
+
+	    if ( !x_pSep ) x_uSep = 0;
+	    else if ( !oexVERIFY_PTR( x_pSep ) )
+		    return lst;
+
+	    // Breaking down to chars?
+	    if ( !x_uSep )
+	    {	while ( *x_pStr )
+			    lst << *x_pStr, x_pStr++;
+		    return lst;
+	    } // end if
+    	
+	    oexUINT i = 0;		
+	    while ( x_uSize )
+	    {
+		    // Separator?
+		    if ( !str::CompareLen( &x_pStr[ i ], x_uSize, x_pSep, x_uSep, x_uSep ) )
+		    {	lst << CStr( x_pStr, 0, i );
+			    x_pStr = &x_pStr[ i + x_uSep ];
+			    x_uSize -= x_uSep; i = 0;
+		    } // end if
+
+		    else i++, x_uSize--;
+
+	    } // end while
+
+	    // Add last item
+	    if ( i ) lst << CStr( x_pStr, 0, i );
+
+	    return lst;
+    }
 
 	template < typename T_LIST >
 		static CStr Implode( oexCONST T_LIST &lst, oexCSTR pSep )
@@ -79,6 +128,18 @@ public:
 		} // end for
 		return str;
 	}
+
+/*
+	template < typename T >
+		static TStr< T > Implode( oexCONST TList< TStr< T > > &lst, oexCONST T *pSep )
+	{	TStr< T > str;
+		for ( typename TList< TStr< T > >::iterator it; lst.Next( it ); )
+		{	if ( str.Length() ) str << pSep;
+			str << it->ToString();
+		} // end for
+		return str;
+	}
+*/
 
 	/// Returns a list of tokens from a string
 	static CStrList GetTokens( oexCSTR pStr, oexCSTR pValid );

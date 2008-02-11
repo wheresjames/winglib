@@ -121,14 +121,14 @@ public:
         {   oexASSERT( 0 );
             return eTypeInvalid; 
         }
-/*
+
     template<> static oexUINT GetType< oexCHAR >()
     {   return eTypeInt8; }
 
     template<> static oexUINT GetType< oexUCHAR >()
     {   return eTypeUInt8; }
 
-   template<> static oexUINT GetType< oexSHORT >()
+    template<> static oexUINT GetType< oexSHORT >()
     {   return eTypeInt16; }
 
     template<> static oexUINT GetType< oexUSHORT >()
@@ -182,7 +182,7 @@ public:
 
     template<> static oexUINT GetType< oexGUID >()
     {   return eTypeGuid; }
-*/
+
 public:
 
     template< typename T >
@@ -548,11 +548,4 @@ private:
     /// Buffer for holding number conversions
     oexCHAR8        m_ucNumBuf[ 256 ];
 };
-
-template<> static oexUINT CMsgTypeAdapter::GetType< oexCHAR >()
-{   return eTypeInt8; }
-
-template<> static oexUINT CMsgTypeAdapter::GetType< CStrW >()
-{   return eTypeStrW; }
-
 

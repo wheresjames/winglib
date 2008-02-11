@@ -36,6 +36,7 @@
 
 OEX_USING_NAMESPACE
 
+/*
 CStrList CParser::Explode( oexCSTR x_pStr, oexUINT x_uSize, oexCSTR x_pSep, oexUINT x_uSep )
 {
 	CStrList lst;
@@ -72,7 +73,7 @@ CStrList CParser::Explode( oexCSTR x_pStr, oexUINT x_uSize, oexCSTR x_pSep, oexU
 
 	return lst;
 }
-
+*/
 CStr CParser::GetToken( CStr &x_sStr, CStrList x_lst, oexBOOL x_bCaseSensitive )
 {
     if ( !x_lst.Size() )
