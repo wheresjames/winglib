@@ -1,0 +1,1 @@
+start make.bat win32_ming "MinGW Makefiles"

@@ -816,8 +816,7 @@ public:
 	{
         T_NODE *pNode = oexNULL;
 
-		// +++
-//        pNode = OexAllocConstruct< T_NODE >( x_pObj, m_pTail, T_NODE::eAppend ); 
+        pNode = OexAllocConstruct< T_NODE >( x_pObj, m_pTail, T_NODE::eAppend ); 
         if ( !pNode )
             return (T_NODE*)oexNULL;
 

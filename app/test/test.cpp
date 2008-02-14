@@ -1550,7 +1550,7 @@ oex::oexRESULT Test_CDispatch()
 
     return oex::oexRES_OK;
 }
-*/
+* /
 class CMsgTest : public oex::CMsgObject
 {
 public:
@@ -1608,7 +1608,7 @@ oex::oexRESULT Test_CMsg()
 
     if ( !oexVERIFY( reply.GetReply() == 3 ) )
         return -4;
-*/
+* /
 
     return oex::oexRES_OK;
 }
@@ -1665,7 +1665,7 @@ oex::oexRESULT Test_CMsg()
 
     return oex::oexRES_OK;
 }
-*/
+* /
 
 class CThreadTest : public oex::CMsgThread
 {
@@ -1894,9 +1894,9 @@ int main(int argc, char* argv[])
 
 //    Test_CDispatch();
 
-    Test_CMsg();
+//    Test_CMsg();
 
-    Test_CThread();
+//    Test_CThread();
 
 //    Test_CFtpSession();
 
