@@ -1,0 +1,153 @@
+The system is: Windows - 5.1 - x86
+Determining if the C compiler is GNU failed with the following output:
+Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 14.00.50727.762 for 80x86
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+CMakeTestGNU.c
+#line 1 "C:/Program Files/CMake 2.4/share/cmake-2.4/Modules/CMakeTestGNU.c"
+
+
+#line 4 "C:/Program Files/CMake 2.4/share/cmake-2.4/Modules/CMakeTestGNU.c"
+
+Determining if the C++ compiler is GNU failed with the following output:
+Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 14.00.50727.762 for 80x86
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+CMakeTestGNU.c
+#line 1 "C:/Program Files/CMake 2.4/share/cmake-2.4/Modules/CMakeTestGNU.c"
+
+
+#line 4 "C:/Program Files/CMake 2.4/share/cmake-2.4/Modules/CMakeTestGNU.c"
+
+Determining the version of compiler passed with the following output:
+CMakeTestNMakeCLVersion.c
+
+VERSION=1400
+
+Determining if this is a free VC compiler passed with the following output:
+CMakeTestForFreeVC.cxx
+
+Determining if this is a 32 bit system passed:
+CMakeTestForFreeVC.cxx
+C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\xlocale(326) : warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\xlocale(341) : warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\xlocale(358) : warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\istream(1075) : warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\ostream(520) : warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+        C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\ostream(512) : while compiling class template member function 'std::basic_ostream<_Elem,_Traits> &std::basic_ostream<_Elem,_Traits>::put(_Elem)'
+        with
+        [
+            _Elem=char,
+            _Traits=std::char_traits<char>
+        ]
+        C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\ostream(971) : see reference to class template instantiation 'std::basic_ostream<_Elem,_Traits>' being compiled
+        with
+        [
+            _Elem=char,
+            _Traits=std::char_traits<char>
+        ]
+C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\ostream(520) : warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+        C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\ostream(512) : while compiling class template member function 'std::basic_ostream<_Elem,_Traits> &std::basic_ostream<_Elem,_Traits>::put(_Elem)'
+        with
+        [
+            _Elem=wchar_t,
+            _Traits=std::char_traits<wchar_t>
+        ]
+        C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\ostream(980) : see reference to class template instantiation 'std::basic_ostream<_Elem,_Traits>' being compiled
+        with
+        [
+            _Elem=wchar_t,
+            _Traits=std::char_traits<wchar_t>
+        ]
+C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\istream(102) : warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+        C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\istream(92) : while compiling class template member function 'bool std::basic_istream<_Elem,_Traits>::_Ipfx(bool)'
+        with
+        [
+            _Elem=char,
+            _Traits=std::char_traits<char>
+        ]
+        C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\istream(1065) : see reference to class template instantiation 'std::basic_istream<_Elem,_Traits>' being compiled
+        with
+        [
+            _Elem=char,
+            _Traits=std::char_traits<char>
+        ]
+C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\istream(102) : warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+        C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\istream(92) : while compiling class template member function 'bool std::basic_istream<_Elem,_Traits>::_Ipfx(bool)'
+        with
+        [
+            _Elem=wchar_t,
+            _Traits=std::char_traits<wchar_t>
+        ]
+        C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\istream(1100) : see reference to class template instantiation 'std::basic_istream<_Elem,_Traits>' being compiled
+        with
+        [
+            _Elem=wchar_t,
+            _Traits=std::char_traits<wchar_t>
+        ]
+C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\ostream(144) : warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+        C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\ostream(143) : while compiling class template member function 'void std::basic_ostream<_Elem,_Traits>::_Osfx(void)'
+        with
+        [
+            _Elem=char,
+            _Traits=std::char_traits<char>
+        ]
+C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\ostream(144) : warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+        C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\ostream(143) : while compiling class template member function 'void std::basic_ostream<_Elem,_Traits>::_Osfx(void)'
+        with
+        [
+            _Elem=wchar_t,
+            _Traits=std::char_traits<wchar_t>
+        ]
+C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\xstring(2009) : warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+        C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\xstring(2000) : while compiling class template member function 'void std::basic_string<_Elem,_Traits,_Ax>::_Copy(unsigned int,unsigned int)'
+        with
+        [
+            _Elem=char,
+            _Traits=std::char_traits<char>,
+            _Ax=std::allocator<char>
+        ]
+        C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE\stdexcept(48) : see reference to class template instantiation 'std::basic_string<_Elem,_Traits,_Ax>' being compiled
+        with
+        [
+            _Elem=char,
+            _Traits=std::char_traits<char>,
+            _Ax=std::allocator<char>
+        ]
+
+Determining if the C compiler works passed with the following output:
+	"c:\Program Files\Microsoft Visual Studio 8\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir/build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.4\bin\cmake.exe" -E cmake_progress_report M:\Code\_temp\winglib\lib\oexlib\prj\win32_nmake\CMakeFiles\CMakeTmp\CMakeFiles 1
+[32mBuilding C object CMakeFiles/cmTryCompileExec.dir/testCCompiler.obj
+[0m	C:\PROGRA~1\MICROS~2\VC\bin\cl.exe  @C:/DOCUME~1/RUB67E~1.DUO/LOCALS~1/Temp\nm642.tmp
+testCCompiler.c
+[31m[1mLinking C executable cmTryCompileExec.exe
+[0m	"C:\Program Files\CMake 2.4\bin\cmake.exe" -P CMakeFiles\cmTryCompileExec.dir\cmake_clean_target.cmake
+	C:\PROGRA~1\MICROS~2\VC\bin\cl.exe  /nologo @C:/DOCUME~1/RUB67E~1.DUO/LOCALS~1/Temp\nm647.tmp
+	"C:\Program Files\CMake 2.4\bin\cmake.exe" -DTARGET=cmTryCompileExec.exe -DCMAKE_CL_NOLOGO=/nologo -P "C:/Program Files/CMake 2.4/share/cmake-2.4/Modules/CMakeVCManifestExe.cmake"
+
+
+Determining size of void* passed with the following output:
+	"c:\Program Files\Microsoft Visual Studio 8\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir/build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.4\bin\cmake.exe" -E cmake_progress_report M:\Code\_temp\winglib\lib\oexlib\prj\win32_nmake\CMakeFiles\CMakeTmp\CMakeFiles 1
+[32mBuilding C object CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.obj
+[0m	C:\PROGRA~1\MICROS~2\VC\bin\cl.exe  @C:/DOCUME~1/RUB67E~1.DUO/LOCALS~1/Temp\nm64B.tmp
+CheckTypeSize.c
+[31m[1mLinking C executable cmTryCompileExec.exe
+[0m	"C:\Program Files\CMake 2.4\bin\cmake.exe" -P CMakeFiles\cmTryCompileExec.dir\cmake_clean_target.cmake
+	C:\PROGRA~1\MICROS~2\VC\bin\cl.exe  /nologo @C:/DOCUME~1/RUB67E~1.DUO/LOCALS~1/Temp\nm64C.tmp
+	"C:\Program Files\CMake 2.4\bin\cmake.exe" -DTARGET=cmTryCompileExec.exe -DCMAKE_CL_NOLOGO=/nologo -P "C:/Program Files/CMake 2.4/share/cmake-2.4/Modules/CMakeVCManifestExe.cmake"
+
+
+Determining if the CXX compiler works passed with the following output:
+	"c:\Program Files\Microsoft Visual Studio 8\VC\BIN\nmake.exe" -f CMakeFiles\cmTryCompileExec.dir/build.make /nologo -L                  CMakeFiles\cmTryCompileExec.dir\build
+	"C:\Program Files\CMake 2.4\bin\cmake.exe" -E cmake_progress_report M:\Code\_temp\winglib\lib\oexlib\prj\win32_nmake\CMakeFiles\CMakeTmp\CMakeFiles 1
+[32mBuilding CXX object CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.obj
+[0m	C:\PROGRA~1\MICROS~2\VC\bin\cl.exe   @C:/DOCUME~1/RUB67E~1.DUO/LOCALS~1/Temp\nm654.tmp
+testCXXCompiler.cxx
+[31m[1mLinking CXX executable cmTryCompileExec.exe
+[0m	"C:\Program Files\CMake 2.4\bin\cmake.exe" -P CMakeFiles\cmTryCompileExec.dir\cmake_clean_target.cmake
+	C:\PROGRA~1\MICROS~2\VC\bin\cl.exe  /nologo @C:/DOCUME~1/RUB67E~1.DUO/LOCALS~1/Temp\nm655.tmp
+	"C:\Program Files\CMake 2.4\bin\cmake.exe" -DTARGET=cmTryCompileExec.exe -DCMAKE_CL_NOLOGO=/nologo -P "C:/Program Files/CMake 2.4/share/cmake-2.4/Modules/CMakeVCManifestExe.cmake"
+
+
