@@ -394,17 +394,27 @@ public:
     TListIterator() 
     {
     }
-
+/*
+    TListIterator( T_NODE *x_pLn )
+    {
+        m_memListNode.Share( x_pLn );
+    }
+*/
     TListIterator( oexCONST T_NODE *x_pLn )
     {
         m_memListNode.Share( x_pLn );
     }
 
-    TListIterator( TListIterator &x_rLi )
+    TListIterator( oexCONST TListIterator &x_rLi )
     {
         m_memListNode.Share( x_rLi.m_memListNode );
     }
-
+/*
+    TListIterator( TListIterator *x_pLi )
+    {
+        m_memListNode.Share( x_pLi->m_memListNode );
+    }
+*/
     virtual ~TListIterator()
     {
         Destroy();
@@ -422,6 +432,12 @@ public:
     TListIterator& operator = ( TListNode< T_OBJ > *x_pLn )
     {
         m_memListNode.Share( x_pLn );
+        return *this;
+    }
+
+    TListIterator& operator = ( oexCONST T_NODE &x_rLn )
+    {
+        m_memListNode.Share( &x_rLn );
         return *this;
     }
 */
@@ -671,7 +687,7 @@ public:
 	*/
 	TList& operator << ( oexCONST T_OBJ &x_rObj )
 	{	
-        iterator itNew = Append();
+        iterator itNew( Append() );
 
 		if ( itNew.Ptr() ) 
             itNew.Obj() = x_rObj;
@@ -800,9 +816,10 @@ public:
 	{
         T_NODE *pNode = oexNULL;
 
-        pNode = OexAllocConstruct< T_NODE >( x_pObj, m_pTail, T_NODE::eAppend ); 
+		// +++
+//        pNode = OexAllocConstruct< T_NODE >( x_pObj, m_pTail, T_NODE::eAppend ); 
         if ( !pNode )
-            return iterator();
+            return (T_NODE*)oexNULL;
 
 		m_uSize++; 
 

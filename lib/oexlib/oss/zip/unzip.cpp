@@ -1,5 +1,9 @@
 
-#include <Windows.h>
+#ifdef WIN32
+#	include <Windows.h>
+#endif
+
+
 #ifdef __INTEL_COMPILER
 #   pragma warning( disable : 1786 )
 #else
@@ -9,10 +13,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <tchar.h>
+#ifdef WIN32
+#	include <tchar.h>
+#	include <crtdbg.h>
+#else
+#	define MAX_PATH		( 1024 * 4 )
+	typedef unsigned long DWORD;
+#	ifdef _UNICODE
+		typedef wchar_t TCHAR;
+#	else
+		typedef char TCHAR;
+#	endif
+	typedef struct _FILETIME {
+	  DWORD dwLowDateTime;
+	  DWORD dwHighDateTime;
+	} FILETIME, 
+	 *PFILETIME;
+#	define HANDLE	void*
+#	define DECLARE_HANDLE(name) typedef void * name
+#endif
 #include "unzip.h"
 
-#include <crtdbg.h>
 #ifdef _DEBUG
 #   define new oexNEW
 #endif
@@ -3737,7 +3758,7 @@ int unzCloseCurrentFile (unzFile file);
 typedef unsigned __int32 lutime_t;       // define it ourselves since we don't include time.h
 
 FILETIME timet2filetime(const lutime_t t)
-{ LONGLONG i = Int32x32To64(t,10000000) + 116444736000000000;
+{ LONGLONG i = Int32x32To64(t,10000000LL) + 116444736000000000LL;
   FILETIME ft;
   ft.dwLowDateTime = (DWORD) i;
   ft.dwHighDateTime = (DWORD)(i >>32);

@@ -52,9 +52,9 @@ static oexCSTR s_fmonths[] = { oexT( "Invalid" ), oexT( "January" ), oexT( "Febr
 							   oexT( "July" ), oexT( "August" ), oexT( "September" ), oexT( "October" ), oexT( "November" ), oexT( "December" ) };
 // static oexUINT g_mdays[] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-#define FTOFF_1900		9435484800
-#define FTOFF_1970		11644473600
-#define FTOFF_1980		11960010000
+#define FTOFF_1900		9435484800LL
+#define FTOFF_1970		11644473600LL
+#define FTOFF_1980		11960010000LL
 
 oexUINT CSysTime::DivideSeconds(oexUINT totalseconds, oexUINT *days, oexUINT *hours, oexUINT *mins, oexUINT *secs)
 {
@@ -94,7 +94,7 @@ oexUINT CSysTime::GetUnixTime()
 {
     oexINT64 ll = os::CSys::SystemTimeToFileTime( m_time );
 
-	ll /= (oexINT64)10000000;
+	ll /= (oexINT64)10000000LL;
 	ll -= (oexINT64)FTOFF_1970;
 
 	return (oexUINT)ll;

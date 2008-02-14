@@ -28,7 +28,7 @@ documentation and/or software.
 /* Constants for MD5Transform routine.
  */
 
-#include "Md5Rsa.h"
+#include "md5rsa.h"
 
 #define S11 7
 #define S12 12
