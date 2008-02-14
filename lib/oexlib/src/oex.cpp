@@ -82,11 +82,11 @@ oexINT COex::Uninit()
 //    if ( !oexVERIFY( COexThreadPool::Stop() ) )
 //        m_nShutdownCode |= -4;
 
-    if ( !oexVERIFY( msgOrb.Destroy() ) )
-        m_nShutdownCode |= -1;
+//    if ( !oexVERIFY( msgOrb.Destroy() ) )
+//        m_nShutdownCode |= -1;
 
-    if ( !oexVERIFY( oexNet.Destroy() ) )
-        m_nShutdownCode |= -1;
+//    if ( !oexVERIFY( oexNet.Destroy() ) )
+//        m_nShutdownCode |= -1;
 
     // Uninit the system stuff
     if ( !oexVERIFY( os::CSys::Uninit() ) )

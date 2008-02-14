@@ -508,7 +508,7 @@ namespace os
 #include "inc/fifo_sync.h"
 #include "inc/data_packet.h"
 //#include "inc/dispatch.h"
-
+/*
 // Messaging
 #include "inc/msg_defines.h"
 #include "inc/msg_address.h"
@@ -536,7 +536,7 @@ namespace os
 //#include "inc/virtual_fs.h"
 //#include "inc/ftp_disk_session.h"
 //#include "inc/vfs_ftp_session.h"
-
+*/
 //------------------------------------------------------------------
 // Init / Uninit
 //------------------------------------------------------------------
