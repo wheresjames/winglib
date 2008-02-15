@@ -42,11 +42,13 @@ set( oexlib_src
 				../../src/oex.cpp 
 				../../src/parser.cpp 
 				../../src/sys_time.cpp 
-				../../src/unzip.cpp 
-				../../src/zip.cpp 				
    )
 		   
-set( oexlib_os ../../src/os/win32 )		   
+if( _WINDOWS )
+	set( oexlib_os ../../src/os/win32 )		   
+else( _WINDOWS )
+	set( oexlib_os ../../src/os/linux )		   
+endif( _WINDOWS )
 set( oexlib_os_src
 				${oexlib_os}/base_file.cpp
 				${oexlib_os}/debug.cpp
