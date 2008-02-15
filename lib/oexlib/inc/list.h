@@ -67,19 +67,17 @@ public:
 		Inserts this node into the list by inserting or appending to
 		the object in x_pIt.
 		
-		\return 
-	
 		\see 
 	*/
-	TListNode( TListNode *x_pIt, oexINT x_nOpt )
+	TListNode( oexCONST TListNode *x_pIt, oexCONST oexINT x_nOpt )
 	{
 		m_pPrev = oexNULL; m_pNext = oexNULL; 
 		if ( x_pIt ) 
         {
             if ( eAppend == x_nOpt ) 
-                Append( x_pIt ); 
+                Append( (TListNode*)x_pIt ); 
             else 
-                Insert( x_pIt ); 
+                Insert( (TListNode*)x_pIt ); 
         } // end if
 	}
 
@@ -96,24 +94,22 @@ public:
 		Inserts this node into the list by inserting or appending to
 		the object in x_pIt.
 		
-		\return 
-	
 		\see 
 	*/
-	TListNode( T_OBJ *x_pObj, TListNode *x_pIt, oexINT x_nOpt )
+	TListNode( oexCONST T_OBJ *x_pObj, oexCONST TListNode *x_pIt, oexCONST oexINT x_nOpt )
 	{
         if ( x_pObj )
             m_obj = *x_pObj;
 
-		m_pPrev = oexNULL; 
+		m_pPrev = oexNULL; (TListNode*)
         m_pNext = oexNULL;
 
 		if ( x_pIt ) 
         { 
             if ( eAppend == x_nOpt ) 
-                Append( x_pIt ); 
+                Append( (TListNode*)x_pIt ); 
             else 
-                Insert( x_pIt ); 
+                Insert( (TListNode*)x_pIt ); 
         } // end if
 	}
 
@@ -816,21 +812,45 @@ public:
 	{
         T_NODE *pNode = oexNULL;
 
-        pNode = OexAllocConstruct< T_NODE >( x_pObj, m_pTail, T_NODE::eAppend ); 
-        if ( !pNode )
-            return (T_NODE*)oexNULL;
+//========================================
+// +++ Doesn't work with g++ ???
+//========================================
 
+//        pNode = OexAllocConstruct< T_NODE >( x_pObj, m_pTail, T_NODE::eAppend ); 
+//        if ( !pNode )
+//            return (T_NODE*)oexNULL;
+
+//========================================
+// --- So using this instead
+//========================================
+
+		pNode = OexAllocConstruct< T_NODE >();
+	    if ( !pNode )
+	        return (T_NODE*)oexNULL;
+
+		// Assign object
+		pNode->Obj() = *x_pObj;
+
+		// Append to list
+		if ( m_pTail )
+			pNode->Append( m_pTail );
+
+//========================================
+// --- End doesn't work with g++
+//========================================
+	
+		// One node bigger now
 		m_uSize++; 
 
+		// New tail pointer
 		m_pTail = pNode; 
 
+		// Assigne head pointer if list is empty
 		if ( !m_pHead ) 
 			m_pHead = pNode; 
 
 		return m_pTail; 
 	}
-
-
 
 	//==============================================================
 	// Append()
