@@ -829,7 +829,8 @@ public:
 	        return (T_NODE*)oexNULL;
 
 		// Assign object
-		pNode->Obj() = *x_pObj;
+		if ( x_pObj )
+			pNode->Obj() = *x_pObj;
 
 		// Append to list
 		if ( m_pTail )
@@ -845,7 +846,7 @@ public:
 		// New tail pointer
 		m_pTail = pNode; 
 
-		// Assigne head pointer if list is empty
+		// Assign head pointer if list is empty
 		if ( !m_pHead ) 
 			m_pHead = pNode; 
 

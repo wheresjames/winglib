@@ -508,6 +508,10 @@ namespace os
 #include "inc/fifo_sync.h"
 #include "inc/data_packet.h"
 //#include "inc/dispatch.h"
+
+// Messaging
+#include "inc/msg_params.h"
+
 /*
 // Messaging
 #include "inc/msg_defines.h"

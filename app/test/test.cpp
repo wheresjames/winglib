@@ -744,7 +744,6 @@ oex::oexRESULT TestAssoLists()
 			|| !oexVERIFY( 33 == alii[ 600000 ] ) )
 		return -2;
 
-
 	oex::TAssoList< oex::CStr, oex::oexINT > alsi;
 
 	alsi[ oexT( "Idx 1" ) ] = 11;
@@ -1086,8 +1085,8 @@ oex::oexRESULT TestFile()
     if ( !oexVERIFY( oexBinToStr( f.Read() ) == sContents ) )
         return -4;
 
-    if ( !oexVERIFY( f.Delete() ) )
-        return -5;
+//    if ( !oexVERIFY( f.Delete() ) )
+//        return -5;
 
     // WARNING: Recursive delete test!
 //        CFile::DeletePath( oexT( "C:/temp" );
@@ -1472,6 +1471,14 @@ public:
     }
 
 };
+
+oex::oexRESULT Test_MsgParams()
+{
+//	oex::CMsgParams mp( 1, 2 );		
+
+
+}
+
 /*
 oex::oexRESULT Test_TArbDelegate()
 {
@@ -1889,6 +1896,8 @@ int main(int argc, char* argv[])
     Test_CFifoSync();
 
     Test_CDataPacket();
+
+	Test_MsgParams();
 
 //    Test_TArbDelegate();
 
