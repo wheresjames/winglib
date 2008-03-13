@@ -919,6 +919,93 @@ public:
 
         return *this;
     }
+/*
+	// Converts the string to wide character
+    template< typename T_CHAR>
+        TStr& ToWc( oexCONST TStr< T_CHAR > &x_sStr )
+    {
+    	OexAllocate( 0 );
+    	return *this;
+    }
+    
+	template<> 
+		TStr& ToWc< oexCHARW >( oexCONST TStr< oexCHARW > &x_sStr )
+	{
+		*this = x_sStr;
+		return *this;
+	}
+	
+	template<> 
+		TStr& ToWc< oexCHAR8 >( oexCONST TStr< oexCHAR8 > &x_sStr )
+*/		
+	TStr& ToWc( oexCONST TStr< oexCHAR8 > &x_sStr )
+	{
+		if ( !oexCHECK( sizeof( T ) == sizeof( wchar_t ) ) )
+			return *this;
+	
+        oexUINT uLen = x_sStr.Length();
+
+		if ( !uLen )
+		{	OexAllocate( 0 ); 
+            return *this; 
+        } // end if
+        
+        // Get length of in comming string in bytes
+        oexUINT uConv = os::CSys::MbsToWcs( oexNULL, 0, x_sStr.Ptr(), uLen );
+
+        // Allocate enough space
+        if ( !OexAllocate( uConv + 1 ) )
+            return *this;
+
+		// Do the conversion
+		uConv = os::CSys::MbsToWcs( _Ptr(), uConv, x_sStr.Ptr(), uLen );
+
+		if ( !oexVERIFY( uConv <= m_nLength ) )
+		{
+			Destroy();
+			return *this;
+		}
+
+        // Save length
+        m_nLength = uConv;
+
+        return *this;   	
+    }
+	
+	TStr& ToMb( oexCONST TStr< oexCHARW > &x_sStr )
+	{
+		if ( !oexCHECK( sizeof( T ) == sizeof( char ) ) )
+			return *this;
+			
+        oexUINT uLen = x_sStr.Length();
+
+		if ( !uLen )
+		{	OexAllocate( 0 ); 
+            return *this; 
+        } // end if
+        
+        // Get length of in comming string in bytes
+        oexUINT uConv = os::CSys::WcsToMbs( oexNULL, 0, x_sStr.Ptr(), uLen );
+
+        // Allocate enough space
+        if ( !OexAllocate( uConv + 1 ) )
+            return *this;
+
+		// Do the conversion
+		uConv = os::CSys::WcsToMbs( _Ptr(), uConv, x_sStr.Ptr(), uLen );
+
+		if ( !oexVERIFY( uConv <= m_nLength ) )
+		{
+			Destroy();
+			return *this;
+		}
+
+        // Save length
+        m_nLength = uConv;
+
+        return *this;   	
+    }
+	
 
 	// Concatenation operator
 	TStr& Append( oexCONST TStr &sStr )
@@ -1602,17 +1689,8 @@ private:
 /// Unicode / Multibyte string class
 typedef TStr< oexTCHAR >    CStr;
 
-#if ( _MSC_VER < 1300 )
-
 /// Unicode string class
-typedef TStr< unsigned short >     CStrW;
-
-#else
-
-/// Unicode string class
-typedef TStr< wchar_t >     CStrW;
-
-#endif
+typedef TStr< oexCHARW >    CStrW;
 
 /// 8 bit character string
 typedef TStr< oexCHAR >     CStr8;

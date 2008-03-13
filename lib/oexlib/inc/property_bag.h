@@ -313,6 +313,7 @@ public:
         return pb;
     }
 
+#ifdef WIN32
 	//==============================================================
 	// PrintR()
 	//==============================================================
@@ -363,6 +364,7 @@ public:
 
 		return str;
 	}
+#endif
 
     /// Erases the specified key
     iterator Unset( T_L key )

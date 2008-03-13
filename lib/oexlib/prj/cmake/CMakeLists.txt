@@ -31,7 +31,7 @@ set( header_files
 if( WIN32 )
 	set( src_os		../../src/os/win32 )		   
 else( WIN32 )
-	set( src_os		../../src/os/linux )		   
+	set( src_os		../../src/os/posix )		   
 endif( WIN32 )
 set( src_files_os
 					${src_os}/base_file.cpp

@@ -55,6 +55,16 @@ public:
 	static void Exit( oexINT nRet );
 
 
+	// String conversion
+public:
+
+	static oexUINT WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen );
+
+	static oexUINT MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen );
+
+	static oexCSTR SetLocale( oexINT nCategory, oexCSTR pLocal );
+
+
     // Multi-byte
 public:
 
