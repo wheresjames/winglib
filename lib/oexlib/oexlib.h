@@ -509,8 +509,7 @@ namespace os
 #include "inc/data_packet.h"
 //#include "inc/dispatch.h"
 
-// Messaging
-#include "inc/msg_params.h"
+#include "inc/msg_sink.h"
 
 /*
 // Messaging
@@ -525,6 +524,7 @@ namespace os
 #include "inc/msg_proxy.h"
 #include "inc/msg_thread.h"
 
+/*
 // Base network
 #include "inc/auto_socket.h"
 #include "inc/net_session.h"

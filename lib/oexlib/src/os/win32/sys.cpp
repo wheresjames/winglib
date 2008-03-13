@@ -64,7 +64,18 @@ oexSTATIC_ASSERT( sizeof( CSys::t_WAITABLE ) == sizeof( HANDLE ) );
 
 const oexUINT		CSys::c_StrErr_OK = S_OK;
 
-#if ( _MSC_VER >= 1300 )
+// Disable microsoft security warnings
+// Wouldn't have to do this but StringCchVPrintfW() has issues.
+#pragma warning( disable : 4995 4996 )
+
+//#if ( _MSC_VER >= 1300 )
+#if 0
+#	define AWESOMENEWFULLOFBUGSWINDOWSSTRINGFUNCTION
+#else
+#	undef AWESOMENEWFULLOFBUGSWINDOWSSTRINGFUNCTION
+#endif
+
+#if defined( AWESOMENEWFULLOFBUGSWINDOWSSTRINGFUNCTION )
 
 	const oexUINT		CSys::c_StrErr_INVALID_PARAMETER = STRSAFE_E_INVALID_PARAMETER;
 	const oexUINT		CSys::c_StrErr_INSUFFICIENT_BUFFER = STRSAFE_E_INSUFFICIENT_BUFFER;
@@ -123,7 +134,7 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 
 	oexRESULT res = 0;
 
-#if ( _MSC_VER >= 1300 )
+#if defined( AWESOMENEWFULLOFBUGSWINDOWSSTRINGFUNCTION )
 
 	// Create format string
 	res = StringCchVPrintfA( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs );
@@ -218,7 +229,7 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 
 	oexRESULT res = 0;
 
-#if ( _MSC_VER >= 1300 )
+#if defined( AWESOMENEWFULLOFBUGSWINDOWSSTRINGFUNCTION )
 
 	// Create format string
 	res = StringCchVPrintfW( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs );

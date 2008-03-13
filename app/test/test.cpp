@@ -1477,6 +1477,7 @@ oex::oexRESULT Test_MsgParams()
 //	oex::CMsgParams mp( 1, 2 );		
 
 
+	return oex::oexRES_OK;
 }
 
 /*
@@ -1557,19 +1558,19 @@ oex::oexRESULT Test_CDispatch()
 
     return oex::oexRES_OK;
 }
-* /
-class CMsgTest : public oex::CMsgObject
+*/
+class CMsgTest : public oex::CMsgSink // : public oex::CMsgObject
 {
 public:
 
     CMsgTest()
     {
-        msgRegisterThisFunction( CMsgTest, Add );
-        msgRegisterThisFunction( CMsgTest, Return );
-        msgRegisterThisFunction( CMsgTest, ReturnPtr );
+//        msgRegisterThisFunction( CMsgTest, Add );
+//        msgRegisterThisFunction( CMsgTest, Return );
+//        msgRegisterThisFunction( CMsgTest, ReturnPtr );
     }
 
-    int Add( int p1, int p2 )
+    virtual int Add( int p1, int p2 )
     {   return p1 + p2;
     }
 
@@ -1585,6 +1586,54 @@ public:
 
 oex::oexRESULT Test_CMsg()
 {
+
+/*
+    oex::oexUINT len = oex::obj::Size( oexT( "This is a test string." ) );
+
+    CMsgTest mt;
+    oex::CMsgTarget target;
+    target.Register( &mt, &CMsgTest::Add );
+
+    oex::CMsg msg = oexMsg( 0, oexTo( "Add" ), 1, 2 );
+
+    // Routed version
+//    oex::CMsg msg = oexMsg( "neb://192.168.2.69/device_1", 
+//                                oexT( "Add" ), 1, 2 );
+
+    if ( !oexVERIFY( msg[ 0 ] == 1 ) )
+        return -1;
+
+    if ( !oexVERIFY( msg[ 1 ] == 2 ) )
+        return -2;
+
+    // Call the function
+    if ( !oexVERIFY( target( msg )[ 0 ] == 3 ) )
+        return -3;
+
+    // Test string
+    target.Register( &mt, &CMsgTest::ReturnPtr );
+    
+    msg = oexMsg( 0, oexTo( "ReturnPtr" ), oexT( "Hello World!" ), 12 );
+
+    if ( !oexVERIFY( target( msg )[ 0 ] == oexT( "Hello World!" ) ) )
+        return -4;
+
+    // Send a message to the object
+    oex::CMsg reply = oexNet.Send( oexMsg( 0, oexTo( "Add", &mt.msgId() ), 1, 2 ) );
+
+    if ( !oexVERIFY( !reply.Wait( 0 ).IsReplyReady() ) )
+        return -4;
+
+    if ( !oexVERIFY( 1 == mt.msgProcessQueue() ) )
+        return -5;
+    
+    if ( !oexVERIFY( reply.Wait( 0 ).IsReplyReady() ) )
+        return -6;
+
+    if ( !oexVERIFY( reply[ 0 ] == 3 ) )
+        return -7;
+
+/*
     CMsgTest mt;
 
     oex::CMsg reply = mt.msgSend( msgCreate( 0, msgTo( "Add" ), 1, 2 ) );
@@ -1596,7 +1645,6 @@ oex::oexRESULT Test_CMsg()
 
     if ( !oexVERIFY( reply.GetReply() == 3 ) )
         return -4;
-
 
 //    CMsgProxy mp = msgCreateObject( "CMsgTest" );
 
@@ -1615,7 +1663,7 @@ oex::oexRESULT Test_CMsg()
 
     if ( !oexVERIFY( reply.GetReply() == 3 ) )
         return -4;
-* /
+*/
 
     return oex::oexRES_OK;
 }
@@ -1903,7 +1951,7 @@ int main(int argc, char* argv[])
 
 //    Test_CDispatch();
 
-//    Test_CMsg();
+    Test_CMsg();
 
 //    Test_CThread();
 
