@@ -46,16 +46,26 @@ oexINT64 CHqTimer::m_llFreq = CHqTimer::osGetTimerFreq();
 
 oexINT64 CHqTimer::osGetTimerFreq()
 {
-	oexINT64 llFreq = 0;
+	return 1000000LL;
 
-	if ( !QueryPerformanceFrequency( (LARGE_INTEGER*)&llFreq ) )
-		llFreq = 1000;
+//	oexINT64 llFreq = 0;
 
-	return llFreq;
+//	if ( !QueryPerformanceFrequency( (LARGE_INTEGER*)&llFreq ) )
+//		llFreq = 1000;
+
+//	return llFreq;
 }
 
 oexINT64 CHqTimer::osGetTimerValue()
 {
+	struct timeval tv;
+	struct timezone tz;
+
+	gettimeofday( &tv, &tz );
+	
+	return ( tv.tv_sec * 1000000 ) + tv.tv_usec;
+
+/*
 	if ( m_llFreq != 1000 )
 	{
 		oexINT64 ll;
@@ -67,6 +77,7 @@ oexINT64 CHqTimer::osGetTimerValue()
 	} // end if
 
 	return (oexINT64)GetTickCount();
+*/
 }
 
 oexINT64 CHqTimer::Elapsed( oexINT64 llStart, oexINT64 llStop )
@@ -80,6 +91,7 @@ oexINT64 CHqTimer::Elapsed( oexINT64 llStart, oexINT64 llStop )
 }
 
 oexUINT CHqTimer::GetBootCount()
-{   return ::GetTickCount();
+{
+	tms tm;
+	return times(&tm);
 }
-

@@ -82,6 +82,45 @@ const oexUINT       CSys::c_uMaximumWaitObjects = MAXIMUM_WAIT_OBJECTS;
 
 oexSTATIC_ASSERT( CSys::eMaximumWaitObjects == MAXIMUM_WAIT_OBJECTS );
 
+static SResInfo* Create( oexCSTR x_pName )
+{
+	SResInfo *pRi = new SResInfo;
+	if ( !oexCHECK( pRi ) )
+		return oexNULL;
+		
+	// Initialize event structure
+	oex::os::Zero( pRi, sizeof( SResInfo ) );
+
+	if ( x_pName && *x_pName )
+	{	
+		// Save name
+		pRi->pName = new CStr( x_pName );
+		if ( !oexCHECK( pRi->m_pName ) )
+		{	SResInfo::Release( pRi );
+			return oexNULL;
+		} // end if
+		
+	} // end if
+	
+	return pRi;	
+}	
+
+static void Release( SResInfo *x_pRi )	
+{
+	if ( !x_pRi )
+		return;
+		
+	oexVALIDATE_PTR( x_pRi );
+		
+	// Lose any name object
+	if ( x_pRi->m_pName )
+	{	oexVALIDATE_PTR( x_pRi->m_pName );			
+		delete x_pRi->m_pName;		
+	} // end if
+	
+	delete x_pRi;
+}
+
 void CSys::Exit( oexINT x_nRet )
 {
 	exit( x_nRet );

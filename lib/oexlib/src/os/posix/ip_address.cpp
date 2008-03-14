@@ -35,12 +35,6 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
-#include <WinSock2.h>
-#pragma comment( lib, "WS2_32.lib" )
-
-#include <WinInet.h>
-#pragma comment( lib, "WinInet.lib" )
-
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
@@ -111,14 +105,16 @@ oexBOOL CIpAddress::SetDotAddress( oexCSTR x_pDotAddress, oexINT32 x_uPort, oexI
 }
 
 CStr CIpAddress::GetDotAddress()
-{   
-    in_addr ia;
+{ 
+	return CStr();
+  
+//    in_addr ia;
 
     // Put the address in the structure
-    ia.S_un.S_addr = htonl( (u_long)GetIpv4() );
+//    ia.S_un.S_addr = htonl( (u_long)GetIpv4() );
 
 	// Create dot address if needed
-	return oexStr8ToStr( inet_ntoa( ia ) );
+//	return oexStr8ToStr( inet_ntoa( ia ) );
 }
 
 oexCONST oexGUID* CIpAddress::GetId( oexGUID *x_pGuid )
@@ -135,6 +131,9 @@ CIpAddress& CIpAddress::SetId( oexCONST oexGUID *x_pGuid )
 
 CStr CIpAddress::BuildUrl( CPropertyBag &x_pbUi )
 {
+	return CStr();
+
+/*
     URL_COMPONENTS uc;
     os::CSys::Zero( &uc, sizeof( uc ) );
     uc.dwStructSize = sizeof( URL_COMPONENTS );
@@ -176,6 +175,7 @@ CStr CIpAddress::BuildUrl( CPropertyBag &x_pbUi )
     if ( !str.OexAllocate( oexSTRSIZE ) )    
         return CStr();
 
+
     // Attempt to create url
     if ( !InternetCreateUrl( &uc, ICU_ESCAPE, str._Ptr(), &dwLen ) )
     {
@@ -194,10 +194,14 @@ CStr CIpAddress::BuildUrl( CPropertyBag &x_pbUi )
     } // end if
 
     return str;
+ */
 }
 
 CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
 {
+	return CPropertyBag();
+
+/*
     CPropertyBag pb;
 
     if ( !oexVERIFY( pUrl ) )
@@ -232,7 +236,7 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
     uc.lpszExtraInfo = pb[ oexT( "extra" ) ].ToString().OexAllocate( uMaxBufferSize );
 
     // Attempt to crack the url
-    if ( !InternetCrackUrl( pUrl, uLen, ICU_DECODE | ICU_ESCAPE, &uc ) )
+//    if ( !InternetCrackUrl( pUrl, uLen, ICU_DECODE | ICU_ESCAPE, &uc ) )
         return CPropertyBag();
 
     // Grab the port and scheme id
@@ -244,6 +248,7 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
         pb[ oexT( "extra" ) ].ToString().LTrim( 1 );
 
     return pb;
+*/
 }
 
 oexBOOL CIpAddress::LookupUrl( oexCSTR x_pUrl, oexINT32 x_uPort, oexINT32 x_uType )
@@ -282,7 +287,9 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
     // Ensure we have a valid pointer
     if ( !oexVERIFY_PTR( x_pServer ) )
         return oexFALSE;
-
+        
+    return oexFALSE;
+/*
 	// First try to interpret as dot address
 	ULONG uAddr = inet_addr( oexStrToStr8Ptr( x_pServer ) );
 	if ( INADDR_NONE == uAddr )
@@ -304,5 +311,6 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
     SetRawAddress( ntohl( uAddr ), x_uPort, x_uType );
 
     return oexTRUE;
+*/
 }
 

@@ -316,13 +316,50 @@ public:
     /// Converts a file time to an STime structure
     static void FileTimeToSystemTime( STime &x_st, oexINT64 x_ft );
 
-    /// Returns the local timezone bias
+    /// Returns the local timezone bias in seconds
     static oexINT GetLocalTzBias();
 
 public:
 
 
 };
+
+//==================================================================
+/// SResInfo
+//==================================================================
+/// Holds information about resources
+/**
+	The idea here is to unify resource handles and functions so
+	we can more closely emulate Windows.
+*/
+typedef struct tagSResInfo
+{
+	// Resource type
+	oexUINT					uType;
+	
+	// Pointer to resource
+	oexPVOID				pRes;
+
+	// CStr object containing name
+	oexPVOID				pName;
+	
+	// Resource state
+	oexINT					nState;
+	
+public:
+	
+	enum
+	{
+		eInvalid = 0,
+		eNamedEvent
+	};	
+	
+	static tagSResInfo* Create( oexCSTR x_pName );
+	
+	static void Release( tagSResInfo *x_pRi );
+	
+} SResInfo;
+
 
 /*
 	static float TriangleArea( float a, float b, float c )

@@ -35,18 +35,15 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
-#include <WinSock2.h>
-#pragma comment( lib, "WS2_32.lib" )
-
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
 // A few verifications
-oexSTATIC_ASSERT( sizeof( CIpSocket::t_SOCKET ) == sizeof( SOCKET ) );
-oexSTATIC_ASSERT( sizeof( CIpSocket::t_SOCKETEVENT ) == sizeof( WSAEVENT ) );
+oexSTATIC_ASSERT( sizeof( CIpSocket::t_SOCKET ) == sizeof( int ) );
+//oexSTATIC_ASSERT( sizeof( CIpSocket::t_SOCKETEVENT ) == sizeof( WSAEVENT ) );
 
 // Socket version we will use
-oexCONST WORD c_MinSocketVersion = MAKEWORD( 1, 1 );
+//oexCONST WORD c_MinSocketVersion = MAKEWORD( 1, 1 );
 
 //////////////////////////////////////////////////////////////////////
 // Helper functions
@@ -60,14 +57,14 @@ oexCONST WORD c_MinSocketVersion = MAKEWORD( 1, 1 );
 	\param [in] x_pIa	-	Address structure to be filled in.
 	\param [in] x_pSai 	-	Address information
 */
-static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, SOCKADDR_IN *x_pSai )
+static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, sockaddr_in *x_pSai )
 {
     // Verify pointers
     if ( !oexVERIFY_PTR( x_pSai ) || !oexVERIFY_PTR( x_pIa ) )
         return oexFALSE;
 
     // Sets the raw address value
-    x_pIa->SetRawAddress( ntohl( *(DWORD*)&x_pSai->sin_addr.S_un.S_addr ), ntohs( x_pSai->sin_port ) );
+//    x_pIa->SetRawAddress( ntohl( *(DWORD*)&x_pSai->sin_addr.S_un.S_addr ), ntohs( x_pSai->sin_port ) );
 
     return oexTRUE;
 }
@@ -80,8 +77,10 @@ static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, SOCKADDR_IN *x_pSai 
 	\param [in] x_pIa	-	Address structure to be filled in.
 	\param [in] x_pSa 	-	Address information
 */
-static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, SOCKADDR *x_pSa )
-{   return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa ); }
+static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, sockaddr *x_pSa )
+{
+//   return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa ); 
+}
 
 //==============================================================
 // CIpSocket_SetAddressInfo()
@@ -91,17 +90,17 @@ static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, SOCKADDR *x_pSa )
 	\param [in] x_pIa	-	Address information
 	\param [in] x_pSai 	-	Structure to be filled in
 */
-static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, SOCKADDR_IN *x_pSai )
+static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, sockaddr_in *x_pSai )
 {
     // Verify pointers
     if ( !oexVERIFY_PTR( x_pSai ) || !oexVERIFY_PTR( x_pIa ) )
         return oexFALSE;
 
     // Set the ip address
-    *(DWORD*)&x_pSai->sin_addr.S_un.S_addr = htonl( (DWORD)x_pIa->GetIpv4() );
+//    *(DWORD*)&x_pSai->sin_addr.S_un.S_addr = htonl( (DWORD)x_pIa->GetIpv4() );
 
     // Set the port
-    x_pSai->sin_port = htons( (short)x_pIa->GetPort() );
+//    x_pSai->sin_port = htons( (short)x_pIa->GetPort() );
 
     return oexTRUE;
 }
@@ -114,8 +113,10 @@ static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, SOCKADDR_IN *x_pSai 
 	\param [in] x_pIa	-	Address information
 	\param [in] x_pSai 	-	Structure to be filled in
 */
-static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, SOCKADDR *x_pSa )
-{   return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa ); }
+static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, sockaddr *x_pSa )
+{
+//   return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa ); 
+}
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -123,9 +124,9 @@ static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, SOCKADDR *x_pSa )
 
 oexLONG CIpSocket::m_lInit = -1;
 
-oexCONST CIpSocket::t_SOCKET CIpSocket::c_InvalidSocket = (CIpSocket::t_SOCKET)INVALID_SOCKET;
-oexCONST CIpSocket::t_SOCKETEVENT CIpSocket::c_InvalidEvent = (CIpSocket::t_SOCKETEVENT)WSA_INVALID_EVENT;
-oexCONST CIpSocket::t_SOCKET CIpSocket::c_SocketError = (CIpSocket::t_SOCKET)SOCKET_ERROR;
+oexCONST CIpSocket::t_SOCKET CIpSocket::c_InvalidSocket = (CIpSocket::t_SOCKET)-1;
+oexCONST CIpSocket::t_SOCKETEVENT CIpSocket::c_InvalidEvent = (CIpSocket::t_SOCKETEVENT)-1;
+oexCONST CIpSocket::t_SOCKET CIpSocket::c_SocketError = (CIpSocket::t_SOCKET)-1;
 
 
 CIpSocket::CIpSocket()
@@ -158,10 +159,10 @@ oexBOOL CIpSocket::InitSockets()
 	if ( m_lInit == 0 ) 
         return oexTRUE;
 
-	WSADATA wd;
+//	WSADATA wd;
 
 	// Attempt to initialize the Socket library
-	m_lInit = WSAStartup( c_MinSocketVersion, &wd );
+//	m_lInit = WSAStartup( c_MinSocketVersion, &wd );
 
 	return IsInitialized();
 }
@@ -176,7 +177,7 @@ void CIpSocket::UninitSockets()
 	m_lInit	= -1;
 
 	// Clean up socket lib
-	WSACleanup();
+//	WSACleanup();
 }
 
 void CIpSocket::Destroy()
@@ -189,7 +190,7 @@ void CIpSocket::Destroy()
 	CloseEventHandle();
 
 	// Save socket pointer to socket
-	SOCKET hSocket = (SOCKET)m_hSocket;
+//	SOCKET hSocket = (SOCKET)m_hSocket;
 
 	// Ditch member variable
 	m_hSocket = c_InvalidSocket;
@@ -208,14 +209,15 @@ void CIpSocket::Destroy()
     m_uSocketProtocol = 0;
 
 	// Ensure valid socket handle
-	if ( INVALID_SOCKET == hSocket ) 
-		return;
+//	if ( c_InvalidSocket == hSocket ) 
+//		return;
 
 	// Close the socket
-	closesocket( hSocket );
+//	closesocket( hSocket );
 
 	// Save the last error code
-	m_uLastError = WSAGetLastError();
+//	m_uLastError = WSAGetLastError();
+	
 }
 
 oexBOOL CIpSocket::Shutdown()
@@ -224,7 +226,7 @@ oexBOOL CIpSocket::Shutdown()
         return oexFALSE;
 
     // Shut down the socket
-    shutdown( (SOCKET)m_hSocket, SD_BOTH );
+//    shutdown( (SOCKET)m_hSocket, SD_BOTH );
 
     return oexTRUE;
 }
@@ -234,7 +236,7 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 {
 	// Punt if not initialized
 	if ( !IsInitialized() ) 
-		return FALSE;
+		return oexFALSE;
 
 	// Close any open socket
 	Destroy();
@@ -243,7 +245,7 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 	m_hSocket = (t_SOCKET)socket( (int)x_af, (int)x_type, (int)x_protocol );
 	
 	// Save the last error code
-	m_uLastError = WSAGetLastError();
+	m_uLastError = errno;
 
     // Was there an error?
     if ( c_InvalidSocket == m_hSocket )
@@ -264,25 +266,25 @@ oexBOOL CIpSocket::Bind( oexUINT x_uPort )
 {
 	// Punt if not initialized
 	if ( !IsInitialized() ) 
-		return FALSE;
+		return oexFALSE;
 
 	// Create socket if there is none
 	if ( !IsSocket() && !Create() ) 
-	{	Destroy(); return FALSE; }
+	{	Destroy(); return oexFALSE; }
 
 	sockaddr_in sai;
-	ZeroMemory( &sai, sizeof( sai ) );
+	oexZeroMemory( &sai, sizeof( sai ) );
 	sai.sin_family = PF_INET;
-	sai.sin_port = htons( (WORD)x_uPort );
+	sai.sin_port = htons( (oexUSHORT)x_uPort );
 
 	// Attempt to bind the socket
-	int nRet = bind( (SOCKET)m_hSocket, (sockaddr*)&sai, sizeof( sockaddr_in ) );
+	int nRet = bind( (int)m_hSocket, (sockaddr*)&sai, sizeof( sockaddr_in ) );
 
     // Grab the address
     CIpSocket_GetAddressInfo( &m_addrLocal, &sai );
 
 	// Save the last error code
-	m_uLastError = WSAGetLastError();
+	m_uLastError = errno;
 
 	return !nRet;
 }
@@ -291,21 +293,21 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 {
 	// Punt if not initialized
 	if ( !IsInitialized() )
-		return FALSE;
+		return oexFALSE;
 
 	// Must have socket
 	if ( !IsSocket() ) 
-        return FALSE;
+        return oexFALSE;
 
 	// Valid number of connections?
 	if ( x_uMaxConnections == 0 ) 
         x_uMaxConnections = SOMAXCONN;
 
 	// Start the socket listening
-	int nRet = listen( (SOCKET)m_hSocket, (int)x_uMaxConnections );
+	int nRet = listen( (int)m_hSocket, (int)x_uMaxConnections );
 
 	// Save the last error code
-	m_uLastError = WSAGetLastError();
+	m_uLastError = errno;
 
     // Return the result
 	return c_SocketError != (t_SOCKET)nRet;
@@ -323,7 +325,7 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
 
 	// Create socket if there is none
 	if ( !IsSocket() && !Create() ) 
-	{	Destroy(); return FALSE; }
+	{	Destroy(); return oexFALSE; }
 
     // Were we passed a URL?
     if ( !x_uPort && !m_addrPeer.LookupUrl( x_pAddress ) )
@@ -333,18 +335,18 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
     else if ( !m_addrPeer.LookupHost( x_pAddress, x_uPort ) )
         return oexFALSE;
 
-    SOCKADDR_IN si;
-    os::CSys::Zero( &si, sizeof( si ) );
+    sockaddr_in si;
+    oexZeroMemory( &si, sizeof( si ) );
     si.sin_family = m_uSocketFamily;
     CIpSocket_SetAddressInfo( &m_addrPeer, &si );
 
     // Attempt to connect
-    int nRet = connect( (SOCKET)m_hSocket, (PSOCKADDR)&si, sizeof( si ) );
+    int nRet = connect( (int)m_hSocket, (sockaddr*)&si, sizeof( si ) );
 
 	// Save the last error code
-	m_uLastError = WSAGetLastError();
+	m_uLastError = errno;
 
-    if ( nRet && WSAEWOULDBLOCK != m_uLastError )
+    if ( nRet && EINPROGRESS != m_uLastError )
         return oexFALSE;
 
 	return oexTRUE;
@@ -363,21 +365,22 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 {
     // Punt if no socket
 	if ( !IsSocket() ) 
-		return FALSE;
+		return oexFALSE;
 
     // Lose any current connection there might be
     x_is.Destroy();
 
 	// Accept the connection
-	SOCKADDR saAddr; int iAddr = sizeof( saAddr );
+	sockaddr saAddr; 
+	socklen_t iAddr = sizeof( saAddr );
 
 	// Accept and encapsulate the socket
-	BOOL bSuccess = x_is.Attach( (t_SOCKET)accept( (SOCKET)m_hSocket, &saAddr, &iAddr ) );
+	oexBOOL bSuccess = x_is.Attach( (t_SOCKET)accept( (int)m_hSocket, &saAddr, &iAddr ) );
 
     // Check for error
     if ( !bSuccess )
-  	{   m_uLastError = WSAGetLastError(); 
-        return FALSE; 
+  	{   m_uLastError = errno; 
+        return oexFALSE; 
     } // end if
 
     // Grab the address
@@ -396,7 +399,7 @@ oexBOOL CIpSocket::CreateEventHandle()
         return oexTRUE;
 
     // Create socket event
-    m_hSocketEvent = WSACreateEvent();
+    m_hSocketEvent = m_hSocket;
 
     // How did it turn out?
     return c_InvalidEvent != m_hSocketEvent;
@@ -404,23 +407,15 @@ oexBOOL CIpSocket::CreateEventHandle()
 
 void CIpSocket::CloseEventHandle()
 {
-    // Do we have a valid handle?
-    if ( c_InvalidEvent != m_hSocketEvent )
-    {
-        // Close the event handle
-        WSACloseEvent( m_hSocketEvent );
-
-        // Invalid handle value
-        m_hSocketEvent = c_InvalidEvent;
-
-    } // end if
+    // Invalid handle value
+    m_hSocketEvent = c_InvalidEvent;
 }
 
 oexBOOL CIpSocket::EventSelect( oexLONG x_lEvents )
 {	
     // Punt if no socket
 	if ( !IsSocket() ) 
-		return FALSE;
+		return oexFALSE;
 
     // Must have event handle
     if ( !IsEventHandle() )
@@ -1044,7 +1039,7 @@ oexBOOL CIpSocket::GetPeerAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
 
 	// Get the socket info
 	if ( getpeername( (SOCKET)x_hSocket, (sockaddr*)&sai, &len ) )
-		return FALSE;
+		return oexFALSE;
 
     // Format the info
     return CIpSocket_GetAddressInfo( x_pIa, &sai );
@@ -1069,7 +1064,7 @@ oexBOOL CIpSocket::GetLocalAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
 
 	// Get the socket info
 	if ( getsockname( (SOCKET)x_hSocket, (sockaddr*)&sai, &len ) )
-		return FALSE;
+		return oexFALSE;
 
     // Format the info
     return CIpSocket_GetAddressInfo( x_pIa, &sai );

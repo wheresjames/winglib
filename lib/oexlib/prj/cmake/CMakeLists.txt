@@ -19,8 +19,8 @@ set( src_files
 					../../src/oex.cpp 
 					../../src/parser.cpp 
 					../../src/sys_time.cpp 
-					../../src/zip.cpp 
-					../../src/unzip.cpp 
+#					../../src/zip.cpp 
+#					../../src/unzip.cpp 
    )
 		   
 set( header_files

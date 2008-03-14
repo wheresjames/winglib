@@ -39,14 +39,37 @@ OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
 // Ensure size
-oexSTATIC_ASSERT( sizeof( CEvent::t_EVENT ) == sizeof( pthread_mutex_t* ) );
+oexSTATIC_ASSERT( sizeof( CEvent::t_EVENT ) == sizeof( FILE* ) );
 
 const CEvent::t_EVENT	CEvent::c_Invalid = NULL;
 
 const oexUINT	CEvent::c_Infinite = 0xffffffff;
 									 
 CEvent::t_EVENT CEvent::osCreateEvent( oexCSTR x_pName, oexBOOL x_bManualReset )
-{	
+{
+	SResInfo *pRi = SResInfo::Create( x_pName );
+	if ( !oexCHECK( pRi ) )
+		return oexNULL;
+			
+	if ( x_pName && x_pName )
+	{
+		// Create named pipe
+		mknod( oexStrToMbPtr( x_pName ), S_IFIFO | 0666, 0 );
+
+		// Open pipe		
+		FILE *pFile = fopen( oexStrToMbPtr( x_pName ), 0 ); // O_WRONLY );
+		if ( !pFile )
+		{	SResInfo::Release( pRi );
+			return oexNULL;
+		} // end if
+	
+		// Save resource type
+		pRi->uType = SResInfo::eNamedEvent;
+		
+	} // end if	
+		
+
+/*
 	// +++ Must figure out a way to get named events
 	pthread_cond_t *hSig = new pthread_cond_t;
 	if ( !hSig )
@@ -65,7 +88,8 @@ CEvent::t_EVENT CEvent::osCreateEvent( oexCSTR x_pName, oexBOOL x_bManualReset )
 
 void CEvent::osDestroyEvent( t_EVENT x_pEvent )
 {
-	if ( !oexCHECK_PTR( x_pEvent ) )
+
+/*	if ( !oexCHECK_PTR( x_pEvent ) )
 		return;
 	
 	pthread_cond_t *hSig = (pthread_cond_t*)x_pEvent;
@@ -82,30 +106,40 @@ void CEvent::osDestroyEvent( t_EVENT x_pEvent )
 }
 
 oexBOOL CEvent::osSetEvent( t_EVENT x_pEvent )
-{	
-	if ( !oexCHECK_PTR( x_pEvent ) )
+{
+	return oexFALSE;
+	
+/*	if ( !oexCHECK_PTR( x_pEvent ) )
 		return FALSE;
 
 	pthread_cond_signal( (pthread_cond_t*)x_pEvent ) 
 	
 	return SetEvent( (HANDLE)x_pEvent ) ? oexTRUE : oexFALSE; 
+*/
 }
 
 oexBOOL CEvent::osResetEvent( t_EVENT x_pEvent )
 {
-	return ResetEvent( (HANDLE)x_pEvent ) ? oexTRUE : oexFALSE; 
+	return oexFALSE;
+	
+//	return ResetEvent( (HANDLE)x_pEvent ) ? oexTRUE : oexFALSE; 
 }
 
 oexINT CEvent::osWaitForSingleObject( t_EVENT x_pEvent, oexUINT x_uTimeout )
 {
-	DWORD dwRet = WaitForSingleObject( (HANDLE)x_pEvent, (DWORD)x_uTimeout );
+	return oexFALSE;
+
+/*	DWORD dwRet = WaitForSingleObject( (HANDLE)x_pEvent, (DWORD)x_uTimeout );
 	if ( WAIT_OBJECT_0 == dwRet ) return waitSuccess;
 	else if ( WAIT_TIMEOUT == dwRet ) return waitTimeout;
 	return waitFailed;
+*/
 }
 
 oexINT CEvent::osWaitForMultipleObjects( oexUINT x_uObjects, t_EVENT *x_pEvent, oexBOOL x_bWaitAll, oexUINT x_uTimeout )
 {
+	return oexFALSE;
+/*
 	DWORD dwRet = WaitForMultipleObjects( (DWORD)x_uObjects, (CONST HANDLE*)x_pEvent, x_bWaitAll, x_uTimeout );
 
 	// WAIT_OBJECT_0 should be zero
@@ -119,5 +153,6 @@ oexINT CEvent::osWaitForMultipleObjects( oexUINT x_uObjects, t_EVENT *x_pEvent, 
 	else if ( WAIT_TIMEOUT == dwRet ) return waitTimeout;
 
 	return waitFailed;
+*/
 }
 

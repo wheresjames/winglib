@@ -39,7 +39,7 @@ OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
 // Ensure size
-oexSTATIC_ASSERT( sizeof( CFMap::t_HFILEMAP ) == sizeof( HANDLE ) );
+oexSTATIC_ASSERT( sizeof( CFMap::t_HFILEMAP ) == sizeof( FILE* ) );
 
 oexCONST CFMap::t_HFILEMAP CFMap::c_Failed = NULL;
 
@@ -49,6 +49,9 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
     if ( !oexCHECK_PTR( x_pMem ) || !oexCHECK_PTR_NULL_OK( x_pName ) )
         return oexFALSE;
 
+	return oexNULL;        
+        
+/*
 	// Initialize pointer
 	if ( x_pMem ) *x_pMem = NULL;
 
@@ -107,15 +110,19 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 
 	// Use pointer as handle
 	return (t_HFILEMAP)hFile;
+*/
 }
 
 oexBOOL CFMap::osReleaseFileMapping( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem )
 {
-	if ( x_pMem && oexCHECK_PTR( x_pMem ) )
+	return oexFALSE;
+
+/*	if ( x_pMem && oexCHECK_PTR( x_pMem ) )
 		UnmapViewOfFile( (LPCVOID)x_pMem );
 
 	if ( c_Failed != x_hFileMap && oexCHECK_PTR( x_hFileMap ) )
 		CloseHandle( (HANDLE)x_hFileMap );
 
 	return oexTRUE;
+*/
 }

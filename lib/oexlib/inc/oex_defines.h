@@ -95,6 +95,8 @@
 
 #define oexSizeofArray( a )         ( sizeof( a ) / sizeof( a[ 0 ] ) )
 
+#define oexZeroMemory( p, sz )		os::CSys::Zero( p, sz );
+
 #define oexEMPTY_STRING             oexT( "" )
 
 #define oexNL						oexT( "\r\n" )
