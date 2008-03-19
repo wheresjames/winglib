@@ -36,7 +36,7 @@
 
 
 #include "std_os.h"
-
+/*
 #include <stdlib.h>
 #include <tchar.h>
 
@@ -52,35 +52,24 @@
 
 #include <WinSock2.h>
 #pragma comment( lib, "WS2_32.lib" )
-
+*/
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
-oexSTATIC_ASSERT( oexSTRSIZE >= MAX_PATH );
+//oexSTATIC_ASSERT( oexSTRSIZE >= MAX_PATH );
 
-oexSTATIC_ASSERT( sizeof( GUID ) == sizeof( oexGUID ) );
+//oexSTATIC_ASSERT( sizeof( uuid_t ) == sizeof( oexGUID ) );
 
-oexSTATIC_ASSERT( sizeof( CSys::t_WAITABLE ) == sizeof( HANDLE ) );
+//oexSTATIC_ASSERT( sizeof( CSys::t_WAITABLE ) == sizeof( HANDLE ) );
 
-const oexUINT		CSys::c_StrErr_OK = S_OK;
+const oexUINT		CSys::c_StrErr_OK = 0;
+const oexUINT		CSys::c_StrErr_INVALID_PARAMETER = (oexUINT)-1;
+const oexUINT		CSys::c_StrErr_INSUFFICIENT_BUFFER = (oexUINT)-2;
 
-#if ( _MSC_VER >= 1300 )
+//const oexUINT	    CSys::c_Infinite = INFINITE;
+//const oexUINT		CSys::c_uMaximumWaitObjects = MAXIMUM_WAIT_OBJECTS;
 
-	const oexUINT		CSys::c_StrErr_INVALID_PARAMETER = STRSAFE_E_INVALID_PARAMETER;
-	const oexUINT		CSys::c_StrErr_INSUFFICIENT_BUFFER = STRSAFE_E_INSUFFICIENT_BUFFER;
-
-#else
-
-	const oexUINT		CSys::c_StrErr_INVALID_PARAMETER = (oexUINT)-1;
-	const oexUINT		CSys::c_StrErr_INSUFFICIENT_BUFFER = (oexUINT)-2;
-
-#endif
-
-const oexUINT	    CSys::c_Infinite = INFINITE;
-
-const oexUINT       CSys::c_uMaximumWaitObjects = MAXIMUM_WAIT_OBJECTS;
-
-oexSTATIC_ASSERT( CSys::eMaximumWaitObjects == MAXIMUM_WAIT_OBJECTS );
+//oexSTATIC_ASSERT( CSys::eMaximumWaitObjects == MAXIMUM_WAIT_OBJECTS );
 
 static SResInfo* Create( oexCSTR x_pName )
 {
@@ -89,13 +78,13 @@ static SResInfo* Create( oexCSTR x_pName )
 		return oexNULL;
 		
 	// Initialize event structure
-	oex::os::Zero( pRi, sizeof( SResInfo ) );
+	oexZeroMemory( pRi, sizeof( SResInfo ) );
 
 	if ( x_pName && *x_pName )
 	{	
 		// Save name
 		pRi->pName = new CStr( x_pName );
-		if ( !oexCHECK( pRi->m_pName ) )
+		if ( !oexCHECK( pRi->pName ) )
 		{	SResInfo::Release( pRi );
 			return oexNULL;
 		} // end if
@@ -110,12 +99,12 @@ static void Release( SResInfo *x_pRi )
 	if ( !x_pRi )
 		return;
 		
-	oexVALIDATE_PTR( x_pRi );
+	oexVERIFY_PTR( x_pRi );
 		
 	// Lose any name object
-	if ( x_pRi->m_pName )
-	{	oexVALIDATE_PTR( x_pRi->m_pName );			
-		delete x_pRi->m_pName;		
+	if ( x_pRi->pName )
+	{	oexVERIFY_PTR( x_pRi->pName );			
+		delete (CStr*)x_pRi->pName;		
 	} // end if
 	
 	delete x_pRi;
@@ -131,7 +120,7 @@ void CSys::Exit( oexINT x_nRet )
 
 oexCSTR8 CSys::StrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, ... )
 {
-	return vStrFmt( x_pDst, x_uMax, x_pFmt, ( ( (LPVOID*)&x_pFmt ) + 1 ) );
+	return vStrFmt( x_pDst, x_uMax, x_pFmt, ( ( (oexPVOID*)&x_pFmt ) + 1 ) );
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
@@ -142,7 +131,7 @@ oexCSTR8 CSys::vStrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, oexCPVO
 
 oexCSTR8 CSys::StrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, ... )
 {
-	return vStrFmt( x_pRes, x_pDst, x_uMax, x_pFmt, ( ( (LPVOID*)&x_pFmt ) + 1 ) );
+	return vStrFmt( x_pRes, x_pDst, x_uMax, x_pFmt, ( ( (oexPVOID*)&x_pFmt ) + 1 ) );
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
@@ -162,15 +151,8 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 
 	oexRESULT res = 0;
 
-#if ( _MSC_VER >= 1300 )
-
 	// Create format string
-	res = StringCchVPrintfA( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs );
-
-#else
-
-	// Create format string
-	if ( 0 > _vsnprintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
+	if ( 0 > vsnprintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
 	{
 		// Null terminate buffer
 		x_pDst[ x_uMax - 1 ] = 0;
@@ -179,8 +161,6 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 		res = c_StrErr_INSUFFICIENT_BUFFER;
 
 	} // end if
-
-#endif
 
 	// What to do with the result
 	if ( x_pRes ) 
@@ -195,38 +175,43 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 oexINT64 CSys::StrToInt64( oexCSTR8 x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-    return _strtoi64( x_pStr, NULL, x_uRadix ); 
+//    return _strtoi64( x_pStr, NULL, x_uRadix ); 
+	return 0;
 }
 
 oexUINT64 CSys::StrToUInt64( oexCSTR8 x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-    return _strtoui64( x_pStr, NULL, x_uRadix ); 
+//    return _strtoui64( x_pStr, NULL, x_uRadix ); 
+	return 0;
 }
 
 oexLONG CSys::StrToLong( oexCSTR8 x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-	return strtol( x_pStr, NULL, x_uRadix ); 
+//	return strtol( x_pStr, NULL, x_uRadix ); 
+	return 0;
 }
 
 oexULONG CSys::StrToULong( oexCSTR8 x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-	return strtoul( x_pStr, NULL, x_uRadix ); 
+//	return strtoul( x_pStr, NULL, x_uRadix ); 
+	return 0;
 }
 
 oexDOUBLE CSys::StrToDouble( oexCSTR8 x_pStr ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-	return strtod( x_pStr, NULL ); 
+//	return strtod( x_pStr, NULL ); 
+	return 0;
 }
 
 // **** Unicode
 
 oexCSTRW CSys::StrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, ... )
 {
-	return vStrFmt( x_pDst, x_uMax, x_pFmt, ( ( (LPVOID*)&x_pFmt ) + 1 ) );
+	return vStrFmt( x_pDst, x_uMax, x_pFmt, ( ( (oexPVOID*)&x_pFmt ) + 1 ) );
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
@@ -237,7 +222,7 @@ oexCSTRW CSys::vStrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, oexCPVO
 
 oexCSTRW CSys::StrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, ... )
 {
-	return vStrFmt( x_pRes, x_pDst, x_uMax, x_pFmt, ( ( (LPVOID*)&x_pFmt ) + 1 ) );
+	return vStrFmt( x_pRes, x_pDst, x_uMax, x_pFmt, ( ( (oexPVOID*)&x_pFmt ) + 1 ) );
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
@@ -257,15 +242,8 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 
 	oexRESULT res = 0;
 
-#if ( _MSC_VER >= 1300 )
-
 	// Create format string
-	res = StringCchVPrintfW( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs );
-
-#else
-
-	// Create format string
-	if ( 0 > _vsnwprintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
+//	if ( 0 > vsnwprintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
 	{
 		// Null terminate buffer
 		x_pDst[ x_uMax - 1 ] = 0;
@@ -274,8 +252,6 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 		res = c_StrErr_INSUFFICIENT_BUFFER;
 
 	} // end if
-
-#endif
 
 	// What to do with the result
 	if ( x_pRes ) 
@@ -290,31 +266,36 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 oexINT64 CSys::StrToInt64( oexCSTRW x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-	return _wcstoi64( x_pStr, NULL, x_uRadix ); 
+//	return _wcstoi64( x_pStr, NULL, x_uRadix ); 
+	return 0;
 }
 
 oexUINT64 CSys::StrToUInt64( oexCSTRW x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-	return _wcstoui64( x_pStr, NULL, x_uRadix ); 
+//	return _wcstoui64( x_pStr, NULL, x_uRadix ); 
+	return 0;
 }
 
 oexLONG CSys::StrToLong( oexCSTRW x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-	return wcstol( x_pStr, NULL, x_uRadix ); 
+//	return wcstol( x_pStr, NULL, x_uRadix ); 
+	return 0;
 }
 
 oexULONG CSys::StrToULong( oexCSTRW x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-	return wcstoul( x_pStr, NULL, x_uRadix ); 
+//	return wcstoul( x_pStr, NULL, x_uRadix ); 
+	return 0;
 }
 
 oexDOUBLE CSys::StrToDouble( oexCSTRW x_pStr ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-	return wcstod( x_pStr, NULL ); 
+//	return wcstod( x_pStr, NULL ); 
+	return 0;
 }
 
 oexPVOID CSys::MemCpy( oexPVOID x_pDst, oexCPVOID x_pSrc, oexUINT x_uSize )
@@ -334,78 +315,23 @@ oexPVOID CSys::MemSet( oexPVOID x_pDst, oexINT x_nCh, oexUINT x_uSize )
 
 oexGUID * CSys::CreateGuid( oexGUID *pGuid )
 {
-    CoCreateGuid( (GUID*)pGuid );
+//    CoCreateGuid( (GUID*)pGuid );
+//	uuid_generate( (uuid_t*)pGuid );
     return pGuid;
 }
 
 
 void CSys::Sleep( oexUINT uMilliseconds, oexUINT uSeconds )
-{   ::Sleep( uMilliseconds + ( uSeconds * 1000 ) );
+{   ::sleep( uMilliseconds + ( uSeconds * 1000 ) );
 }
 
-static timeval  g_tv_microsleep_socket;
-static fd_set   g_fd_set_microsleep_socket;
-static oexINT   g_microsleep_socket_init = -1;
-static SOCKET   g_microsleep_socket = INVALID_SOCKET;
-
-static oexBOOL CSys_ReleaseMicroSleep()
-{
-    if ( INVALID_SOCKET != g_microsleep_socket )
-    {   closesocket( g_microsleep_socket );
-        g_microsleep_socket = INVALID_SOCKET;
-    } // end if
-
-    if ( 0 <= g_microsleep_socket_init )
-    {   WSACleanup();
-        g_microsleep_socket_init = -1;
-    } // end if
-
-    return oexTRUE;
-}
-
-static oexBOOL CSys_InitMicroSleep()
-{
-    if ( 0 <= g_microsleep_socket_init )
-        return oexTRUE;   
-
-	WSADATA wd;
-	if ( 0 != WSAStartup( 0x0101, &wd ) )
-    {   oexASSERT( 0 ); return oexFALSE; }
-
-    g_microsleep_socket_init = 0;
-
-    g_microsleep_socket = socket( AF_INET, SOCK_RAW, 0 );
-    if ( INVALID_SOCKET == g_microsleep_socket )
-    {   oexASSERT( 0 );
-        CSys_ReleaseMicroSleep();         
-        return oexFALSE; 
-    } // end if
-
-    // Set the fd_set structure
-    g_fd_set_microsleep_socket.fd_count = 1;
-    g_fd_set_microsleep_socket.fd_array[ 0 ] = g_microsleep_socket;
-
-    return oexTRUE;
-}
-
-// +++ Anyone know of another accurate microsecond wait on Windows?
 oexBOOL CSys::MicroSleep( oexUINT uMicroseconds, oexUINT uSeconds )
 {
-    // Ensure we're initialized
-    if ( 0 > g_microsleep_socket_init )
-        if ( !CSys_InitMicroSleep() )
-        {   Sleep( uMicroseconds / 1000, uSeconds ); 
-            return oexFALSE; 
-        } // end if
-
-    // Fill in wait structure
-    g_tv_microsleep_socket.tv_sec = uSeconds;
-    g_tv_microsleep_socket.tv_usec = uMicroseconds;
-
-    // Let the socket do the waiting
-    return 0 == select( 0, NULL, NULL, 
-                        &g_fd_set_microsleep_socket, 
-                        &g_tv_microsleep_socket ) ? oexTRUE : oexFALSE;
+	if ( uSeconds )
+		CSys::Sleep( 0, uSeconds );
+		
+	if ( uMicroseconds )
+		::usleep( uMicroseconds ); 	
 }
 
 oexBOOL CSys::Init()
@@ -415,35 +341,41 @@ oexBOOL CSys::Init()
 
 oexBOOL CSys::Uninit()
 {
-    return CSys_ReleaseMicroSleep();
+	return oexTRUE;
 }
 
 void CSys::CloseHandle( t_WAITABLE x_pHandle )
-{	if ( x_pHandle ) CloseHandle( (HANDLE)x_pHandle );
+{	
+//	if ( x_pHandle )
+//		CloseHandle( (HANDLE)x_pHandle );
 }
 
 CSys::t_WAITABLE CSys::DuplicateHandle( t_WAITABLE x_pHandle )
 {
-    HANDLE hDup = NULL;
+/*    HANDLE hDup = oexNULL;
     if ( !::DuplicateHandle( GetCurrentProcess(), (HANDLE)x_pHandle, 
                              GetCurrentProcess(), &hDup,
-                             0, FALSE, DUPLICATE_SAME_ACCESS ) )
-        return NULL;
+                             0, oexFALSE, DUPLICATE_SAME_ACCESS ) )
+        return oexNULL;
     return (t_WAITABLE)hDup;
+*/
 }
 
 oexINT CSys::WaitForSingleObject( CSys::t_WAITABLE x_pHandle, oexUINT x_uTimeout )
-{	DWORD dwRet = ::WaitForSingleObject( (HANDLE)x_pHandle, (DWORD)x_uTimeout );
+{
+/*
+	DWORD dwRet = ::WaitForSingleObject( (HANDLE)x_pHandle, (DWORD)x_uTimeout );
 	if ( WAIT_OBJECT_0 == dwRet ) 
         return waitSuccess;
 	else if ( WAIT_TIMEOUT == dwRet ) 
         return waitTimeout;
+*/
 	return waitFailed;
 }
 
 oexINT CSys::WaitForMultipleObjects( oexUINT x_uObjects, CSys::t_WAITABLE *x_pHandle, oexBOOL x_bWaitAll, oexUINT x_uTimeout )
 {
-    // Currently 64, don't blame me, this is a Windows limitation...
+/*    // Currently 64, don't blame me, this is a Windows limitation...
     oexASSERT( MAXIMUM_WAIT_OBJECTS >= x_uObjects );
 
     // Do the wait
@@ -461,18 +393,22 @@ oexINT CSys::WaitForMultipleObjects( oexUINT x_uObjects, CSys::t_WAITABLE *x_pHa
 
 	else if ( WAIT_TIMEOUT == dwRet ) 
         return waitTimeout;
-
+*/
 	return waitFailed;
 }
 
 oexULONG CSys::InterlockedIncrement( oexLONG *x_puVal )
-{	return ::InterlockedIncrement( x_puVal );
+{	
+	//return ::InterlockedIncrement( x_puVal );
+	return (*x_puVal)++;
 }
 
 oexULONG CSys::InterlockedDecrement( oexLONG *x_puVal )
-{	return ::InterlockedDecrement( x_puVal );
+{
+//	return ::InterlockedDecrement( x_puVal );
+	return (*x_puVal)--;
 }
-
+/*
 void CSys_SystemTimeToSTime( SYSTEMTIME &st, CSys::STime &t )
 {
     t.uYear = st.wYear;
@@ -496,10 +432,10 @@ void CSys_STimeToSystemTime( CSys::STime &t, SYSTEMTIME &st )
     st.wSecond = t.uSecond;
     st.wMilliseconds = t.uMillisecond;
 }
-
+*/
 oexBOOL CSys::GetLocalTime( STime &t )
 {
-    CSys::Zero( &t, sizeof( t ) );
+/*    CSys::Zero( &t, sizeof( t ) );
 
     SYSTEMTIME st;
     CSys::Zero( &st, sizeof( st ) );
@@ -512,22 +448,25 @@ oexBOOL CSys::GetLocalTime( STime &t )
 
     ::GetTimeZoneInformation( &tz ); 
     t.nTzBias = tz.Bias;
-
+*/
     return oexTRUE;
 }
 
 oexINT CSys::GetLocalTzBias()
 {
-    TIME_ZONE_INFORMATION tz;
+/*    TIME_ZONE_INFORMATION tz;
     CSys::Zero( &tz, sizeof( tz ) );
 
     ::GetTimeZoneInformation( &tz ); 
     return tz.Bias;
+*/
+	return 0;
 }
 
 
 oexBOOL CSys::GetSystemTime( STime &t )
 {
+/*
     CSys::Zero( &t, sizeof( t ) );
 
     SYSTEMTIME st;
@@ -535,13 +474,14 @@ oexBOOL CSys::GetSystemTime( STime &t )
 
     ::GetSystemTime( &st ); 
     CSys_SystemTimeToSTime( st, t );
-
+*/
     return oexTRUE;
 }
 
 /// Converts an STime structure to file time
 oexINT64 CSys::SystemTimeToFileTime( STime &x_st )
 {
+/*
     SYSTEMTIME st;
     CSys_STimeToSystemTime( x_st, st );
 
@@ -549,11 +489,14 @@ oexINT64 CSys::SystemTimeToFileTime( STime &x_st )
     ::SystemTimeToFileTime( &st, &ft );
 
     return (oexINT64)ft.dwLowDateTime | ( (oexINT64)ft.dwHighDateTime << 32 );
+*/
+	return 0;
 }
 
 /// Converts a file time to an STime structure
 void CSys::FileTimeToSystemTime( STime &x_st, oexINT64 x_ft )
 {
+/*
     FILETIME ft;
     ft.dwLowDateTime = (oexINT32)( x_ft & 0xffffffff );
     ft.dwHighDateTime = (oexINT32)( ( x_ft >> 32 ) & 0xffffffff );
@@ -562,32 +505,37 @@ void CSys::FileTimeToSystemTime( STime &x_st, oexINT64 x_ft )
     ::FileTimeToSystemTime( &ft, &st );
 
     CSys_SystemTimeToSTime( st, x_st );
-}
-oexUINT WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen )
-{
-	if ( !pSrc !uLen )
-		return 0;
-
-	// Ensure source is NULL terminated
-	pSrc[ uLen - 1 ] = 0;
-		
-	return wcstombs( pDst, pSrc, uMax );
+*/
 }
 
-oexUINT MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen )
+
+oexUINT CSys::WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen )
 {
 	if ( !pSrc || !uLen )
 		return 0;
 
-	// Ensure source is NULL terminated
-	pSrc[ uLen - 1 ] = 0;
+	// +++ Ensure source is NULL terminated
+//	pSrc[ uLen - 1 ] = 0;
+		
+	return wcstombs( pDst, pSrc, uMax );
+}
+
+oexUINT CSys::MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen )
+{
+	if ( !pSrc || !uLen )
+		return 0;
+
+	// +++ Ensure source is NULL terminated
+//	pSrc[ uLen - 1 ] = 0;
 		
 	return mbstowcs( pDst, pSrc, uMax );
 }
 
 oexCSTR SetLocale( oexINT nCategory, oexCSTR pLocal )
 {
-	return setlocale( nCategory, pLocal );
+//  +++ Resolve temporary string problem
+//	return setlocale( nCategory, oexStrToMbPtr( pLocal ) );
+	return oexT( "" );
 }
 
 

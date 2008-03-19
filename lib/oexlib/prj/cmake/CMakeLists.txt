@@ -90,7 +90,7 @@ source_group( "${CMAKE_SYSTEM_NAME} OS Source Files" FILES ${src_files_os} )
 if( WIN32 )
 	add_library( ${project_name} STATIC ${src_files} ${src_files_os} ${header_files} )
 else( WIN32 )
-	add_library( ${project_name} ${src_files} ${src_files_os} ${header_files} )
+	add_library( ${project_name} STATIC ${src_files} ${src_files_os} ${header_files} )
 endif( WIN32 )	
 
 #-------------------------------------------------------------------
@@ -99,7 +99,6 @@ endif( WIN32 )
 
 target_link_libraries( 
 						${project_name} 
-						${wxWidgets_LIBRARIES}
 					  )
 						 
 

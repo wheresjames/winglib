@@ -35,7 +35,7 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
-#include <crtdbg.h>
+//#include <crtdbg.h>
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
@@ -81,10 +81,10 @@ void CMem::Delete( oexPVOID x_pMem )
         return;
 
     if ( x_pMem )
-        oexDELETE_ARR( x_pMem );
+        oexDELETE_ARR( (oexUCHAR*)x_pMem );
 }
 
-static void __cdecl oex_DumpHook( void * pUserData, size_t nBytes )
+static void /*_cdecl*/ oex_DumpHook( void * pUserData, size_t nBytes )
 {
     CAlloc::ReportBlock( pUserData, nBytes );
 }
@@ -111,7 +111,7 @@ oexBOOL CMem::DumpLeaks()
 
 #endif
 
-    oexBOOL bLeaks = _CrtDumpMemoryLeaks() ? oexTRUE : oexFALSE;
+    oexBOOL bLeaks = oexFALSE; //_CrtDumpMemoryLeaks() ? oexTRUE : oexFALSE;
 
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 

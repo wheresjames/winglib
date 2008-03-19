@@ -39,11 +39,11 @@ OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
 // Ensure our type is large enough to hold the thread value
-oexSTATIC_ASSERT( sizeof( CThread::t_HTHREAD ) == sizeof( HANDLE ) );
+//oexSTATIC_ASSERT( sizeof( CThread::t_HTHREAD ) == sizeof( HANDLE ) );
 
 /// Invalid thread handle value.
 // I swear I thought this used to be INVALID_HANDLE_VALUE?
-oexCONST CThread::t_HTHREAD CThread::c_InvalidThread = NULL;
+oexCONST CThread::t_HTHREAD CThread::c_InvalidThread = oexNULL;
 
 CThread::CThread()
 {
@@ -73,14 +73,17 @@ CThread::~CThread()
 class CThread::CThreadProcImpl
 {
 public:
-    static DWORD WINAPI ThreadProc( LPVOID x_pData )
-    {    return (DWORD)CThread::ThreadProc( x_pData );
+//    static DWORD WINAPI ThreadProc( LPVOID x_pData )
+	static oexUINT ThreadProc( oexPVOID x_pData )
+    {    return (oexUINT)CThread::ThreadProc( x_pData );
     }
 };
 
 oexUINT CThread::ThreadProc( oexPVOID x_pData )
 {
-    // Get pointer
+	return 0;
+
+/*    // Get pointer
     CThread *pThread = (CThread*)x_pData;
     if ( !oexVERIFY_PTR( x_pData ) )
         return -1;
@@ -135,6 +138,7 @@ oexUINT CThread::ThreadProc( oexPVOID x_pData )
     CThread::DecRunningThreadCount();
 
     return nRet;
+*/
 }
 
 oexBOOL CThread::Start( oexUINT x_uSleep, oexPVOID x_pData )
@@ -150,7 +154,7 @@ oexBOOL CThread::Start( oexUINT x_uSleep, oexPVOID x_pData )
     // Give the thread a fighting chance
     m_evQuit.Reset();
     m_evInit.Reset();
-
+/*
 	// Create a thread
 	m_hThread = CreateThread(	(LPSECURITY_ATTRIBUTES)NULL,
 								0,
@@ -158,7 +162,7 @@ oexBOOL CThread::Start( oexUINT x_uSleep, oexPVOID x_pData )
 								(LPVOID)this,	
 								0, 
 								(LPDWORD)&m_uThreadId );
-
+*/
     // Developer will probably want to hear about this
     oexASSERT( c_InvalidThread != m_hThread);
 
@@ -195,14 +199,14 @@ oexBOOL CThread::Stop( oexBOOL x_bKill, oexUINT x_uWait )
         return oexTRUE;
 
     // Wait for the thead to exit
-    if ( !oexVERIFY( WAIT_OBJECT_0 == WaitForSingleObject( hThread, x_uWait ) ) )
+//    if ( !oexVERIFY( WAIT_OBJECT_0 == WaitForSingleObject( hThread, x_uWait ) ) )
     {
         // iii  This should not happen, don't ignore the problem,
         //      figure out how to shut this thread down properly!
 		oexTRACE( oexT( "!! TerminateThread() being called !!\n" ) );
 
         // Kill the thread
-		TerminateThread( hThread, -1111 );
+//		TerminateThread( hThread, -1111 );
 
     } // end if
 
@@ -229,70 +233,5 @@ void CThread::DecRunningThreadCount()
 {   if ( oexVERIFY( m_lRunningThreadCount ) )
         CSys::InterlockedDecrement( &m_lRunningThreadCount ); 
 }
-
-/*
-oexBOOL CThreadMgr::DoThread( oexPVOID x_pData )
-{
-    // List iterator
-    TAssoList< oexPVOID, TLinkedPtr< CThread > >::iterator it;
-
-    // iii  If your trying to figure out why you still have threads
-    //      that weren't shut down, this is *NOT* the thread your
-    //      looking for.
-    //      There should be no *other* threads rooted in 
-    //      oex::CThread::CThreadProcImpl::ThreadProc() when the
-    //      app shuts down.
-
-    // Wait for something to happen
-    if ( m_evCleanup.Wait( 1000, m_evQuit ) )
-    {
-        // Reset cleanup event
-        m_evCleanup.Reset();
-
-        // Acquire lock
-        CTlLocalLock ll( m_lock );
-        if ( !ll.IsLocked() ) 
-            return oexFALSE;
-
-        // Find a thread that needs dropping
-        while ( m_lstThreadMgr.Next( it ) )
-            if ( !(*it)->IsRunning() && WAIT_TIMEOUT != WaitForSingleObject( it.Node()->key, 0 ) )
-                it = m_lstThreadMgr.Erase( it );
-
-    } // end while
-
-    return oexTRUE;
-}
-
-oexBOOL CThreadMgr::Destroy()
-{
-    // Stop the thread manager thread
-    if ( !oexVERIFY( Stop( oexTRUE, oexDEFAULT_TIMEOUT ) ) )
-        return oexFALSE;
-
-    // Acquire lock
-    CTlLocalLock ll( m_lock );
-    if ( !ll.IsLocked() ) 
-        return oexFALSE;
-
-    // Stop all remaining threads
-    oexBOOL bError = oexFALSE;
-    for ( TAssoList< oexPVOID, TLinkedPtr< CThread > >::iterator it; m_lstThreadMgr.Next( it ); )
-
-        // Stop the thread
-        if ( oexVERIFY( (*it)->Stop( oexTRUE, oexDEFAULT_TIMEOUT ) ) )
-            it = m_lstThreadMgr.Erase( it );
-
-        // Couldn't be stopped
-        else 
-            bError = oexTRUE;
-
-    return !bError;
-}
-
-/// Thread manager instance
-CThreadMgr CoexThreadMgr::m_tp;
-
-*/
 
 

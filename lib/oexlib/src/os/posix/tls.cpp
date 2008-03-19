@@ -41,12 +41,21 @@ using namespace OEX_NAMESPACE::os;
 const oexINT32 CThreadLocalStorage::c_Invalid = 0xFFFFFFFF;
 
 oexINT32 CThreadLocalStorage::osAllocate()
-{	return TlsAlloc(); }
+{
+	return 0;	
+//	return TlsAlloc(); 
+}
 
 oexBOOL CThreadLocalStorage::osSetValue( oexINT32 dwIndex, oexPVOID pVal )
-{	return TlsSetValue( dwIndex, pVal ) ? oexTRUE : oexFALSE; }
+{
+	return oexFALSE;
+//	return TlsSetValue( dwIndex, pVal ) ? oexTRUE : oexFALSE; 
+}
 
 oexPVOID CThreadLocalStorage::osGetValue( oexINT32 dwIndex )
-{	return TlsGetValue( dwIndex ); }
+{
+	return 0;
+//	return TlsGetValue( dwIndex ); 
+}
 
 

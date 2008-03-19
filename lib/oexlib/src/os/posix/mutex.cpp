@@ -39,20 +39,29 @@ OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
 // Ensure size
-oexSTATIC_ASSERT( sizeof( CMutex::t_MUTEX ) == sizeof( HANDLE ) );
+//oexSTATIC_ASSERT( sizeof( CMutex::t_MUTEX ) == sizeof( HANDLE ) );
 
 const CMutex::t_MUTEX	CMutex::c_Invalid = NULL;
 									 
 CMutex::t_MUTEX CMutex::osCreateMutex( oexCSTR x_pName )
-{	return (void*)CreateMutex( NULL, FALSE, x_pName );
+{
+/*
+	return (void*)CreateMutex( NULL, FALSE, x_pName );
+*/
 }
 
 void CMutex::osDestroyMutex( t_MUTEX x_pMutex )
-{	if ( x_pMutex ) CloseHandle( (HANDLE)x_pMutex );
+{
+/*
+	if ( x_pMutex ) CloseHandle( (HANDLE)x_pMutex );
+*/
 }
 
 void CMutex::osReleaseMutex( t_MUTEX x_pMutex )
-{	if ( x_pMutex ) ReleaseMutex( (HANDLE)x_pMutex );
+{
+/*
+	if ( x_pMutex ) ReleaseMutex( (HANDLE)x_pMutex );
+*/
 }
 
 

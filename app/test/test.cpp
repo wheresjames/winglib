@@ -599,7 +599,8 @@ oex::oexRESULT TestLists()
 
 	} // end if
 
-    lst.Insert( 11 );
+
+//+++    lst.Insert( 11 );
 
     if( !oexVERIFY( lst.First().Obj() == 11 ) )
         return -7;
@@ -794,7 +795,7 @@ oex::oexRESULT TestAssoLists()
 			|| !oexVERIFY( alss2[ oexT( "Idx 4" ) ].ToDouble() > 3 )
 			|| !oexVERIFY( alss2[ oexT( "Idx 4" ) ].ToDouble() < 4 ) )
 		return -10;
-
+/*
 	oex::TAssoList< oex::CStr, oex::CStr > alss3 = alss2.Copy();
 
 	if ( !oexVERIFY( 4 == alss2.Size() ) || !oexVERIFY( 4 == alss3.Size() ) )
@@ -838,10 +839,10 @@ oex::oexRESULT TestAssoLists()
     alsss.Unset( oexT( "1" ) );
     if ( !oexVERIFY( !alsss.IsKey( oexT( "1" ) ) ) )
         return -18;
-
+*/
     return oex::oexRES_OK;
 }
-
+/*
 oex::oexRESULT TestPropertyBag()
 {      
     oex::CPropertyBag pb;
@@ -1061,7 +1062,7 @@ oex::oexRESULT TestParser()
 	oexTRACE( oexT( "%s\n" ), ini_enc.PrintR().Ptr() );
 
 //		oexTRACE( oexT( "%s\n" ), oex::CParser::Encode( pb, ini_enc ).Ptr() );
-*/
+* /
 
     return oex::oexRES_OK;
 }
@@ -1558,7 +1559,7 @@ oex::oexRESULT Test_CDispatch()
 
     return oex::oexRES_OK;
 }
-*/
+* /
 class CMsgTest : public oex::CMsgSink // : public oex::CMsgObject
 {
 public:
@@ -1663,7 +1664,7 @@ oex::oexRESULT Test_CMsg()
 
     if ( !oexVERIFY( reply.GetReply() == 3 ) )
         return -4;
-*/
+* /
 
     return oex::oexRES_OK;
 }
@@ -1925,33 +1926,33 @@ int main(int argc, char* argv[])
 
     TestAssoLists();
 
-    TestPropertyBag();
+//    TestPropertyBag();
 
-    TestParser();
+//    TestParser();
 
-    TestFile();
+//    TestFile();
 
-    TestZip();
+//    TestZip();
 
-    Test_CSysTime();
+//    Test_CSysTime();
     
-    Test_CCircBuf();
+//    Test_CCircBuf();
 
-    Test_CIpAddress();
+//    Test_CIpAddress();
 
-    Test_CIpSocket();
+//    Test_CIpSocket();
 
-    Test_CFifoSync();
+//    Test_CFifoSync();
 
-    Test_CDataPacket();
+//    Test_CDataPacket();
 
-	Test_MsgParams();
+//	Test_MsgParams();
 
 //    Test_TArbDelegate();
 
 //    Test_CDispatch();
 
-    Test_CMsg();
+//    Test_CMsg();
 
 //    Test_CThread();
 

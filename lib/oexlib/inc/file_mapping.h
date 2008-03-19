@@ -84,6 +84,7 @@ public:
 	{	m_pPtr = oexNULL;
         m_hFile = os::CFMap::vFailed();
         m_pName = oexNULL;
+        m_llOpenSize = 0;
 	}
 
     /// Copy operator
@@ -156,11 +157,12 @@ public:
             m_pPtr = (T*)CAlloc::VerifyMem( m_pPtr, bDestroy );
             m_pPtr -= sizeof( oexUINT );
             
-            os::CFMap::osReleaseFileMapping( m_hFile, m_pPtr );
+            os::CFMap::osReleaseFileMapping( m_hFile, m_pPtr, m_llOpenSize );
 
 		} // end if
 		m_pPtr = oexNULL;
     	m_hFile = oexNULL;
+    	m_llOpenSize = 0;
 	}
 
 	//==============================================================
@@ -204,6 +206,9 @@ public:
         if ( os::CFMap::vFailed() == m_hFile || !m_pPtr ) 
             return oexNULL;
 
+		// Save size used to create the mapping
+		m_llOpenSize = llSize;
+
         // Save block size
         *(oexUINT*)m_pPtr = (oexUINT)llSize;
         m_pPtr += sizeof( oexUINT );               
@@ -231,7 +236,7 @@ public:
 	/// Returns a pointer to the file mapping memory
 	operator T*() { return m_pPtr; }
 
-	//==============================================================
+	//===================================m_llOpenSize===========================
 	// Ptr()
 	//==============================================================
 	/// Returns a pointer to the file mapping memory
@@ -364,5 +369,7 @@ private:
     /// Can't use a CStr here because CStr depends on this class!
     oexTCHAR                    *m_pName;
 
+	/// Size that was passed to CreateFileMapping()
+	oexINT64					m_llOpenSize;
 };
 

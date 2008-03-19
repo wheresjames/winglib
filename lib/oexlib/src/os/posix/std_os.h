@@ -36,12 +36,16 @@
 
 //#define _LARGE_FILES
 
+#include <stdlib.h>
 #include <cstdio>
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/stat.h>
 //#include <stdio.h>
 //#include <wchar.h>
+#include <string.h>
+//#include <inttypes.h>
+
 #include <errno.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -49,6 +53,11 @@
 #include <sys/time.h>
 #include <sys/times.h>
 #include <time.h>
+#include <locale.h>
+
+#include <sys/mman.h>
+
+//#include <uuid/uuid.h>
 
 #include <arpa/inet.h>
 

@@ -47,9 +47,30 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 {
     // Sanity checks
     if ( !oexCHECK_PTR( x_pMem ) || !oexCHECK_PTR_NULL_OK( x_pName ) )
-        return oexFALSE;
+        return oexNULL;
 
-	return oexNULL;        
+	// Create path
+	CStr8 sPath = oexStrToMb( x_pFile );
+	sPath.RTrim( PATH_MAX );		
+	mkstemp( sPath.Allocate( PATH_MAX * 2 ) );
+
+	FILE *fd = fopen( sPath.Ptr(), "w+b" );
+	if ( !fd )
+		return oexNULL;
+
+	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, (int)fd, 0 );
+	if ( !pMem )
+	{	fclose( fd );
+		return oexNULL;
+	} // end if
+
+	if ( x_pMem )
+		*x_pMem = pMem;
+		
+	if ( x_pllSize )
+		*x_pllSize = x_llSize;
+
+	return (t_HFILEMAP)fd;
         
 /*
 	// Initialize pointer
@@ -113,9 +134,18 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 */
 }
 
-oexBOOL CFMap::osReleaseFileMapping( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem )
+oexBOOL CFMap::osReleaseFileMapping( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexINT64 x_llSize )
 {
 	return oexFALSE;
+
+	if ( x_pMem && oexCHECK_PTR( x_pMem ) )
+		munmap( x_pMem, x_llSize );
+
+	if ( c_Failed != x_hFileMap && oexCHECK_PTR( x_hFileMap ) )
+		fclose( (FILE*)x_hFileMap );
+
+	return oexTRUE;
+
 
 /*	if ( x_pMem && oexCHECK_PTR( x_pMem ) )
 		UnmapViewOfFile( (LPCVOID)x_pMem );
