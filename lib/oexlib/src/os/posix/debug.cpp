@@ -56,14 +56,17 @@ void CDebug::Trace( oexCSTR x_pStr )
 	printf( oexStrToMbPtr( x_pStr ) );
 }
 
+
 void CDebug::FmtTrace( oexCSTR x_pFmt, ... )
 {
-	vFmtTrace( x_pFmt, ( ( (oexPVOID*)&x_pFmt ) + 1 ) );
+	oexVaList ap; oexVaStart( ap, x_pFmt );	
+	vFmtTrace( x_pFmt, ap );
+	oexVaEnd( ap );
 }
 
-void CDebug::vFmtTrace( oexCSTR x_pFmt, oexCPVOID x_pArgs )
+void CDebug::vFmtTrace( oexCSTR x_pFmt, oexVaList &x_pArgs )
 {
-//  This is just for when the string class is malfunctioning ;)
+//  This is just for when the string class is malfunctioning ;-)
 //    oexTCHAR tcMsg[ oexSTRSIZE ] = oexT( "" );
 //    os::CSys::vStrFmt( tcMsg, oexSTRSIZE, x_pFmt, x_pArgs );
 //    Trace( tcMsg );
@@ -84,8 +87,11 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 	if ( br_init( &error ) )
 	{	
 		char *pPath = br_find_exe( oexNULL );
+		
 		if ( pPath )
 			sPath = oexStr8ToStr( pPath );			
+			
+		int x = 0;
 	
 	} // end if
 	
@@ -96,12 +102,17 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 {
 	CStr str;
 
-	str << oexT( "Module : " ) << x_pModule << oexNL;
-	str << oexT( "File : " ) << x_pFile << oexNL;
-	str << oexT( "Line : " ) << x_uLine << oexNL << oexNL;
-	str << oexT( "Expression : " ) << x_pStr;
+	str << oexNL;
+	str << oexT( "==========================" ) << oexNL;
+	str << oexT( "  CDebug::Break() Called  " ) << oexNL;
+	str << oexT( "==========================" ) << oexNL;
+	str << oexT( "Module     : " ) << x_pModule << oexNL;
+	str << oexT( "File       : " ) << x_pFile << oexNL;
+	str << oexT( "Line       : " ) << x_uLine << oexNL;
+	str << oexT( "Expression : " ) << x_pStr << oexNL;
+	str << oexNL;
 
-	printf( oexStrToMbPtr( str ) );
+	printf( oexStrToMbPtr( str.Ptr() ) );
 
 	Break();
 }

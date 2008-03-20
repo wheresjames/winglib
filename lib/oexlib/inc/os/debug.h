@@ -79,7 +79,7 @@ public:
 		\param [in] x_pArgs	-	Optional arguments, see sprintf() for
 								details.
 	*/
-	static void vFmtTrace( oexCSTR x_pFmt, oexCPVOID x_pArgs );
+	static void vFmtTrace( oexCSTR x_pFmt, oexVaList &x_pArgs );
 
 	//==============================================================
 	// Break()

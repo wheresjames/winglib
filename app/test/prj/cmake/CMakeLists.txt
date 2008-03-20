@@ -5,7 +5,7 @@
 set( project_name 	test )
 
 set( output_dir 	../../bin ) 
-add_definitions( -DUNICODE -D_UNICODE )
+#add_definitions( -DUNICODE -D_UNICODE )
 
 set( src_files
 					../../stdafx.cpp 

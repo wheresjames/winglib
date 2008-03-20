@@ -24,6 +24,8 @@
 #ifndef _binreloc_2008_02_08
 #define _binreloc_2008_02_08
 
+#define ENABLE_BINRELOC
+
 /*** INCLUDE BEGIN */
 #ifdef ENABLE_BINRELOC
 	#include <sys/types.h>

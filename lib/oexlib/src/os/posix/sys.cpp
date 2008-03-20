@@ -120,22 +120,26 @@ void CSys::Exit( oexINT x_nRet )
 
 oexCSTR8 CSys::StrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, ... )
 {
-	return vStrFmt( x_pDst, x_uMax, x_pFmt, ( ( (oexPVOID*)&x_pFmt ) + 1 ) );
+	oexVaList ap; oexVaStart( ap, x_pFmt );	
+	oexCSTR8 pStr = vStrFmt( x_pDst, x_uMax, x_pFmt, ap );
+	oexVaEnd( ap );
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
-oexCSTR8 CSys::vStrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, oexCPVOID x_pArgs )
+oexCSTR8 CSys::vStrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, oexVaList &x_pArgs )
 {
 	return vStrFmt( oexNULL, x_pDst, x_uMax, x_pFmt, x_pArgs );
 }
 
 oexCSTR8 CSys::StrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, ... )
 {
-	return vStrFmt( x_pRes, x_pDst, x_uMax, x_pFmt, ( ( (oexPVOID*)&x_pFmt ) + 1 ) );
+	oexVaList ap; oexVaStart( ap, x_pFmt );	
+	oexCSTR8 pStr = vStrFmt( x_pRes, x_pDst, x_uMax, x_pFmt, ap );
+	oexVaEnd( ap );
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
-oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, oexCPVOID x_pArgs )
+oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, oexVaList &x_pArgs )
 {
 	if ( x_pRes )
 		*x_pRes = 0;
@@ -211,22 +215,26 @@ oexDOUBLE CSys::StrToDouble( oexCSTR8 x_pStr )
 
 oexCSTRW CSys::StrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, ... )
 {
-	return vStrFmt( x_pDst, x_uMax, x_pFmt, ( ( (oexPVOID*)&x_pFmt ) + 1 ) );
+	oexVaList ap; oexVaStart( ap, x_pFmt );	
+	oexCSTRW pStr = vStrFmt( x_pDst, x_uMax, x_pFmt, ap );
+	oexVaEnd( ap );
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
-oexCSTRW CSys::vStrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, oexCPVOID x_pArgs )
+oexCSTRW CSys::vStrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, oexVaList &x_pArgs )
 {
 	return vStrFmt( oexNULL, x_pDst, x_uMax, x_pFmt, x_pArgs );
 }
 
 oexCSTRW CSys::StrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, ... )
 {
-	return vStrFmt( x_pRes, x_pDst, x_uMax, x_pFmt, ( ( (oexPVOID*)&x_pFmt ) + 1 ) );
+	oexVaList ap; oexVaStart( ap, x_pFmt );	
+	oexCSTRW pStr = vStrFmt( x_pRes, x_pDst, x_uMax, x_pFmt, ap );
+	oexVaEnd( ap );
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
-oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, oexCPVOID x_pArgs )
+oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, oexVaList &x_pArgs )
 {
 	if ( x_pRes )
 		*x_pRes = 0;

@@ -117,7 +117,7 @@ public:
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
-		SetNum( oexTT( T, "%li" ), (oexLONG)nVal ); 
+		SetNum( oexTT( T, "%i" ), (oexINT)nVal ); 
 	}
 
 	TStr( oexCONST oexUINT uVal )
@@ -127,7 +127,7 @@ public:
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
-		SetNum( oexTT( T, "%lu" ), (oexULONG)uVal ); 
+		SetNum( oexTT( T, "%u" ), (oexUINT)uVal ); 
 	}
 
 	TStr( oexCONST oexDOUBLE dStr )
@@ -223,7 +223,7 @@ public:
 	/// Allocates at least the number of bytes specified
 	T* Allocate( oexUINT x_uSize )
 	{	
-//		oexTRACE( "TStr::Allocate( %lu )\n", uSize );
+//		oexTRACE( "TStr::Allocate( %u )\n", (oexUINT)uSize );
 
 		// Break any existing share
 		Unshare();
@@ -408,19 +408,19 @@ public:
 	{	return Append( str ); }
 
 	TStr& operator = ( oexCONST oexINT nVal )
-	{	return SetNum( oexTT( T, "%li" ), (oexINT)nVal ); }
+	{	return SetNum( oexTT( T, "%i" ), (oexINT)nVal ); }
 
 	TStr& operator = ( oexCONST oexUINT uVal )
-	{	return SetNum( oexTT( T, "%lu" ), (oexULONG)uVal ); }
+	{	return SetNum( oexTT( T, "%u" ), (oexUINT)uVal ); }
 
 	TStr& operator = ( oexCONST oexDOUBLE dStr )
 	{	return SetNumTrim( oexTT( T, "%f" ), oexNULL, oexTT( T, "0" ), (oexDOUBLE)dStr ); }
 
 	TStr& operator += ( oexCONST oexINT nVal )
-	{	return AppendNum( oexTT( T, "%li" ), (oexINT)nVal ); }
+	{	return AppendNum( oexTT( T, "%i" ), (oexINT)nVal ); }
 
 	TStr& operator += ( oexCONST oexUINT uVal )
-	{	return AppendNum( oexTT( T, "%lu" ), (oexULONG)uVal ); }
+	{	return AppendNum( oexTT( T, "%u" ), (oexUINT)uVal ); }
 
 	TStr& operator += ( oexCONST oexDOUBLE dVal )
 	{	return AppendNumTrim( oexTT( T, "%f" ), oexNULL, oexTT( T, "0" ), (oexDOUBLE)dVal ); }
@@ -432,10 +432,10 @@ public:
 	{	return Append( TStr().GuidToString( guid ) ); }
 
 	TStr& operator << ( oexCONST oexINT nVal )
-	{	return AppendNum( oexTT( T, "%li" ), (oexINT)nVal ); }
+	{	return AppendNum( oexTT( T, "%i" ), (oexINT)nVal ); }
 
 	TStr& operator << ( oexCONST oexUINT uVal )
-	{	return AppendNum( oexTT( T, "%lu" ), (oexULONG)uVal ); }
+	{	return AppendNum( oexTT( T, "%u" ), (oexUINT)uVal ); }
 
 	TStr& operator << ( oexCONST oexDOUBLE dVal )
 	{	return AppendNumTrim( oexTT( T, "%f" ), oexNULL, oexTT( T, "0" ), (oexDOUBLE)dVal ); }
@@ -1103,7 +1103,7 @@ public:
 
 public:
 
-	TStr& vFmt( oexCONST T *x_pFmt, oexCPVOID x_pArgs )
+	TStr& vFmt( oexCONST T *x_pFmt, oexVaList x_pArgs )
 	{
 		// Verify input string
 		if ( !oexVERIFY( x_pFmt ) )
@@ -1138,21 +1138,38 @@ public:
 
 	/// Formats a string
 	TStr& Fmt( oexCONST T *pFmt, ... )
-	{	return vFmt( pFmt, ( (oexPVOID*)&pFmt ) + 1 ); }
+	{
+		oexVaList ap; 
+		oexVaStart( ap, pFmt );
+		vFmt( pFmt, ap ); 
+		oexVaEnd( ap );
+	
+//		return vFmt( pFmt, ( (oexPVOID*)&pFmt ) + 1 ); 
+	}
 
 	/// Sets a number into the string using rules of Fmt()
 	/// Truncates results larger than 256 characters
 	TStr& SetNum( oexCONST T *pFmt, ... )
-	{	T tBuf[ 256 ];
-		os::CSys::vStrFmt( tBuf, oexSizeofArray( tBuf ), pFmt, ( ( (oexPVOID*)&pFmt ) + 1 ) );
+	{
+		T tBuf[ 256 ];
+		
+		oexVaList ap; oexVaStart( ap, pFmt );
+		os::CSys::vStrFmt( tBuf, oexSizeofArray( tBuf ), pFmt, ap );
+		oexVaEnd( ap );
+		
 		return Cnv( tBuf );
+		
 	}
 
 	/// Sets a number into the string using rules of Fmt()
 	/// Truncates results larger than 256 characters
     /// Optional pre and post trimming
 	TStr& SetNumTrim( oexCONST T *pFmt, oexCONST T* pLTrim, oexCONST T* pRTrim, ... )
-	{   os::CSys::vStrFmt( OexAllocate( 256 ), 256, pFmt, ( ( (oexPVOID*)&pRTrim ) + 1 ) );
+	{
+		oexVaList ap; oexVaStart( ap, pRTrim );
+	    os::CSys::vStrFmt( OexAllocate( 256 ), 256, pFmt, ap );
+		oexVaEnd( ap );
+	   
         if ( pLTrim ) LTrim( pLTrim );
         if ( pRTrim ) RTrim( pRTrim );
         return *this;
@@ -1162,7 +1179,9 @@ public:
 	/// Truncates results larger than 256 characters
 	TStr& AppendNum( oexCONST T *pFmt, ... )
 	{	T tBuf[ 256 ];
-		os::CSys::vStrFmt( tBuf, oexSizeofArray( tBuf ), pFmt, ( ( (oexPVOID*)&pFmt ) + 1 ) );
+		oexVaList ap; oexVaStart( ap, pFmt );	
+		os::CSys::vStrFmt( tBuf, oexSizeofArray( tBuf ), pFmt, ap );
+		oexVaEnd( ap );
 		return Append( tBuf );		
 	}
 
@@ -1170,8 +1189,10 @@ public:
 	/// Truncates results larger than 256 characters
     /// Optional pre and post trimming
 	TStr& AppendNumTrim( oexCONST T *pFmt, oexCONST T* pLTrim, oexCONST T* pRTrim, ... )
-	{   TStr str;        
-   		os::CSys::vStrFmt( str.OexAllocate( 256 ), 256, pFmt, ( ( (oexPVOID*)&pRTrim ) + 1 ) );
+	{   TStr str;     
+		oexVaList ap; oexVaStart( ap, pRTrim );	
+   		os::CSys::vStrFmt( str.OexAllocate( 256 ), 256, pFmt, ap );
+   		oexVaEnd( ap );   		
         if ( pLTrim ) str.LTrim( pLTrim );
         if ( pRTrim ) str.RTrim( pRTrim );
         return Append( str );

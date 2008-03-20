@@ -41,6 +41,19 @@
 
 #define oexNULL						0
 
+#if defined( OEX_WIN32 )
+#	define oexVaList				oexPVOID
+#	define oexVaStart( v, p )		( v = ( ( (oexPVOID*)&p ) + 1 ) )
+#	define oexVaEnd( v )
+#	define oexVaArg( v, t )			( (t)( v++ ) )
+#else
+#	define oexVaList				__builtin_va_list
+#	define oexVaStart				__builtin_va_start
+#	define oexVaEnd					__builtin_va_end
+#	define oexVaArg					__builtin_va_arg
+#endif
+
+
 #define oexTT( c, s )				( 1 == sizeof( c ) ? ( ( c* )( s ) ) : ( ( c* )( L##s ) ) )
 #define oexTC( c, s )				( 1 == sizeof( c ) ? ( ( c )( s ) ) : ( ( c )( L##s ) ) )
 #define oexTTEXT( c, s )			oexTT( c, s )

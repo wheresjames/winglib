@@ -41,7 +41,7 @@ using namespace OEX_NAMESPACE::os;
 // Ensure size
 oexSTATIC_ASSERT( sizeof( CFMap::t_HFILEMAP ) == sizeof( FILE* ) );
 
-oexCONST CFMap::t_HFILEMAP CFMap::c_Failed = NULL;
+oexCONST CFMap::t_HFILEMAP CFMap::c_Failed = oexNULL;
 
 CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, oexCSTR x_pName, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists )
 {
