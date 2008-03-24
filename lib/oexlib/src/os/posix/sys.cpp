@@ -123,6 +123,7 @@ oexCSTR8 CSys::StrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, ... )
 	oexVaList ap; oexVaStart( ap, x_pFmt );	
 	oexCSTR8 pStr = vStrFmt( x_pDst, x_uMax, x_pFmt, ap );
 	oexVaEnd( ap );
+	return pStr;
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
@@ -136,6 +137,7 @@ oexCSTR8 CSys::StrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCST
 	oexVaList ap; oexVaStart( ap, x_pFmt );	
 	oexCSTR8 pStr = vStrFmt( x_pRes, x_pDst, x_uMax, x_pFmt, ap );
 	oexVaEnd( ap );
+	return pStr;
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
@@ -218,6 +220,7 @@ oexCSTRW CSys::StrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, ... )
 	oexVaList ap; oexVaStart( ap, x_pFmt );	
 	oexCSTRW pStr = vStrFmt( x_pDst, x_uMax, x_pFmt, ap );
 	oexVaEnd( ap );
+	return pStr;
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
@@ -231,6 +234,7 @@ oexCSTRW CSys::StrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCST
 	oexVaList ap; oexVaStart( ap, x_pFmt );	
 	oexCSTRW pStr = vStrFmt( x_pRes, x_pDst, x_uMax, x_pFmt, ap );
 	oexVaEnd( ap );
+	return pStr;
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );

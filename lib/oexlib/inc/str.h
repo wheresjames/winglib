@@ -1143,8 +1143,7 @@ public:
 		oexVaStart( ap, pFmt );
 		vFmt( pFmt, ap ); 
 		oexVaEnd( ap );
-	
-//		return vFmt( pFmt, ( (oexPVOID*)&pFmt ) + 1 ); 
+		return *this;
 	}
 
 	/// Sets a number into the string using rules of Fmt()

@@ -109,8 +109,10 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 	return (t_HFILEMAP)hFile;
 }
 
-oexBOOL CFMap::osReleaseFileMapping( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem )
+oexBOOL CFMap::osReleaseFileMapping( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexINT64 x_llSize )
 {
+	oexUNUSED( x_llSize );
+
 	if ( x_pMem && oexCHECK_PTR( x_pMem ) )
 		UnmapViewOfFile( (LPCVOID)x_pMem );
 

@@ -75,10 +75,12 @@ void CDebug::Trace( oexCSTR x_pStr )
 
 void CDebug::FmtTrace( oexCSTR x_pFmt, ... )
 {
-	vFmtTrace( x_pFmt, ( ( (LPVOID*)&x_pFmt ) + 1 ) );
+	oexVaList ap; oexVaStart( ap, x_pFmt );	
+	vFmtTrace( x_pFmt, ap );
+	oexVaEnd( ap );
 }
 
-void CDebug::vFmtTrace( oexCSTR x_pFmt, oexCPVOID x_pArgs )
+void CDebug::vFmtTrace( oexCSTR x_pFmt, oexVaList &x_pArgs )
 {
     oexTCHAR tcMsg[ oexSTRSIZE ] = oexT( "" );
     os::CSys::vStrFmt( tcMsg, oexSTRSIZE, x_pFmt, x_pArgs );
