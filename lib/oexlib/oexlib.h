@@ -509,9 +509,6 @@ namespace os
 #include "inc/data_packet.h"
 //#include "inc/dispatch.h"
 
-//#include "inc/msg_sink.h"
-
-/*
 // Messaging
 #include "inc/msg_defines.h"
 #include "inc/msg_address.h"

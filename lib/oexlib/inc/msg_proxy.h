@@ -431,7 +431,7 @@ public:
             return oexFALSE;
 
         // New message object
-        x_rMsg.Create( 0 );
+//        x_rMsg.Create( 0 );
 
         // Create reply signal
         x_rMsg.EnableReplyEvent( oexTRUE );

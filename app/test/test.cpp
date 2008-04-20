@@ -884,7 +884,6 @@ oex::oexRESULT TestPropertyBag()
     if ( !oexVERIFY( pbii[ 2 ] == 3 ) )
         return -5;
 
-
 	oex::TPropertyBag< oex::oexINT, oex::CStr > pbis;
 
 	pbis[ 2 ] = oexT( "2" );
@@ -944,7 +943,6 @@ oex::oexRESULT TestParser()
 
     if ( !oexVERIFY( oex::CParser::Implode( sl1, oexT( "," ) ) == oexT( "abc,acb,bac,bca,cba,cab" ) ) )
         return -24;
-
 
     oex::CPropertyBag pb;
 
@@ -1291,7 +1289,8 @@ oex::oexRESULT Test_CCircBuf()
     for ( oex::oexUINT i = 0; i < 1000; i++ )
     {
         for ( oex::oexUINT x = 0; x < 8; x++ )
-            cb.Write( oexStrToStr8Ptr( pStr ) ), uBufferedData += uStr;
+            cb.Write( oexStrToStr8Ptr( pStr ) ), 
+			uBufferedData += uStr;
 
         if ( !oexVERIFY( oexStr8ToStr( cb.Read( uStr ) ) == pStr ) )
             return -1;
@@ -1316,7 +1315,8 @@ oex::oexRESULT Test_CCircBuf()
     for ( oex::oexUINT i = 0; i < 1000; i++ )
     {
         for ( oex::oexUINT x = 0; x < 8; x++ )
-            sb1.Write( oexStrToStr8( pStr ) ), uBufferedData += uStr;
+            sb1.Write( oexStrToStr8( pStr ) ), 
+			uBufferedData += uStr;
 
         if ( !oexVERIFY( oexStr8ToStr( sb2.Read( uStr ) ) == pStr ) )
             return -3;
@@ -1360,7 +1360,6 @@ oex::oexRESULT Test_CFifoSync()
   	if ( !oexVERIFY( fs.GetUsedBuffers() == uBufferedData ) )
         return -2;
 
-
     // Shared memory buffer test
     oex::CFifoSync fs1, fs2;
 
@@ -1374,7 +1373,8 @@ oex::oexRESULT Test_CFifoSync()
     for ( oex::oexUINT i = 0; i < 1000; i++ )
     {
         for ( oex::oexUINT x = 0; x < 8; x++ )
-            fs1.Write( oexStrToBin( pStr ) ), uBufferedData++;
+            fs1.Write( oexStrToBin( pStr ) ), 
+			uBufferedData++;
 
         if ( !oexVERIFY( oexBinToStr( fs2.Read() ) == pStr ) )
             return -3;
@@ -1457,6 +1457,7 @@ oex::oexRESULT Test_CDataPacket()
     return oex::oexRES_OK;
 }
 
+
 class CCallbackClass
 {
 public:
@@ -1504,13 +1505,13 @@ oex::oexRESULT Test_TArbDelegate()
 //------------------------------------------------------------------
 //------------------------------------------------------------------
 
-/*
+
 oex::oexRESULT Test_CDispatch()
 {
-    CCallbackClass cc;
+/*    CCallbackClass cc;
 
     // +++ Change "f=Add,p{0=1,1=2}" to "Add{0=1,1=2}"
-    if ( !oexVERIFY( oexCall( oexT( "Add" ), 1, 2 ) == oexT( "f=Add,p{0=1,1=2}" ) ) )
+    if ( !oexVERIFY( msgCall( oexT( "Add" ), 1, 2 ) == oexT( "f=Add,p{0=1,1=2}" ) ) )
         return -1;
 
     // Set delegates
@@ -1519,10 +1520,10 @@ oex::oexRESULT Test_CDispatch()
     dsp.OexRpcRegisterPtr( &cc, CCallbackClass, Return );
 
     oex::CStr sRet;
-    if ( !oexVERIFY( dsp.Execute( oexCall( oexT( "Add" ), 1, 2 ), &sRet ) && sRet == 3 ) )
+    if ( !oexVERIFY( dsp.Execute( msgCall( oexT( "Add" ), 1, 2 ), &sRet ) && sRet == 3 ) )
         return -2;
 
-    if ( !oexVERIFY( dsp.Execute( oexCall( oexT( "Return" ), oexT( "Hello" ) ), &sRet ) && sRet == oexT( "Hello" ) ) )
+    if ( !oexVERIFY( dsp.Execute( msgCall( oexT( "Return" ), oexT( "Hello" ) ), &sRet ) && sRet == oexT( "Hello" ) ) )
         return -3;
 
     CBaseTestObject bto;
@@ -1556,11 +1557,11 @@ oex::oexRESULT Test_CDispatch()
     dsp.ProcessQueue();
     if ( !oexVERIFY( 33 == bto.GetValue() ) )
         return -7;
-
+*/
     return oex::oexRES_OK;
 }
-* /
-class CMsgTest : public oex::CMsgSink // : public oex::CMsgObject
+
+class CMsgTest : public oex::CMsgObject
 {
 public:
 
@@ -1584,11 +1585,16 @@ public:
     }
 };
 
-
-oex::oexRESULT Test_CMsg()
+oex::oexRESULT Test_ CMsgParam
 {
 
+
+    return oex::oexRES_OK;
+}
+
 /*
+oex::oexRESULT Test_CMsg()
+{
     oex::oexUINT len = oex::obj::Size( oexT( "This is a test string." ) );
 
     CMsgTest mt;
@@ -1620,7 +1626,7 @@ oex::oexRESULT Test_CMsg()
         return -4;
 
     // Send a message to the object
-    oex::CMsg reply = oexNet.Send( oexMsg( 0, oexTo( "Add", &mt.msgId() ), 1, 2 ) );
+    oex::CMsg reply = msgOrb.Send( oexMsg( 0, oexTo( "Add", &mt.msgId() ), 1, 2 ) );
 
     if ( !oexVERIFY( !reply.Wait( 0 ).IsReplyReady() ) )
         return -4;
@@ -1950,9 +1956,9 @@ int main(int argc, char* argv[])
 
 //    Test_TArbDelegate();
 
-//    Test_CDispatch();
+    Test_CDispatch();
 
-//    Test_CMsg();
+    Test_CMsg();
 
 //    Test_CThread();
 

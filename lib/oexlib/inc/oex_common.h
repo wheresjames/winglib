@@ -200,6 +200,35 @@ namespace cmn
         void Swap( T &a, T &b, T &c, T &d, T &e )
     {   T t = a; a = b; b = c; c = d; d = e; e = t; }
 
+	/// Reverses the byte order
+	template < typename T >
+		T* RevBytes( T* p, oexUINT uLen )
+	{
+		oexUINT i = 0;
+		if ( !uLen )
+			return p;
+
+		nLen--;
+		while ( i < nLen )
+			Swap( ( (oexPBYTE)p )[ i++ ], ( (oexPBYTE)p )[ nLen-- ] );
+
+		return p;
+	}
+
+	template < typename T >
+		T& RevObj( T& r )
+	{
+		oexPBYTE	p = (LPBYTE)&r;
+		oexUINT		s = sizeof( T ) - 1;
+		oexUINT		i = 0;
+
+		while ( i < s )
+			Swap( ( p )[ i++ ], ( p )[ s-- ] );
+
+		return r;
+	}
+
+
     /// Values for pi
     oexCONST oexDOUBLE c_PI = 3.141592654;
     oexCONST oexDOUBLE c_PI2 = c_PI * (oexDOUBLE)2;

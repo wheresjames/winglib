@@ -72,9 +72,11 @@
 #define OEX_ENABLE_ZIP
 
 #ifdef WIN32
-#	define CDECL	_cdecl
+#	define oexCDECL	_cdecl
 #else
-#	define CDECL
+#	define oexCDECL
 #endif
 
+// Not big endian
+#define OEX_BIGENDIAN		0
 

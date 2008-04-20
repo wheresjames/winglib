@@ -2,55 +2,26 @@
 # Setup
 #-------------------------------------------------------------------
 
-set( project_name 	oexlib )
+set( project_name 	AviScan )
 
 set( output_dir 	../../bin ) 
-#add_definitions( -DUNICODE -D_UNICODE )
+
+#add_definitions( -DUNICODE=1 -D_UNICODE=1 )
 
 set( src_files
-					../../src/alloc.cpp 
-					../../src/asso_list.cpp 
-					../../src/circ_buf.cpp 
-					../../src/data_packet.cpp 
-					../../src/fifo_sync.cpp 
-					../../src/file.cpp 
-					../../src/find_files.cpp 
-					../../src/md5.cpp 
-					../../src/oex.cpp 
-					../../src/parser.cpp 
-					../../src/sys_time.cpp 
-					../../src/zip.cpp 
-					../../src/unzip.cpp 
-					../../src/msg.cpp 
-					../../src/msg_com.cpp 
-					../../src/msg_info.cpp 
-					../../src/msg_mgr.cpp 
-					../../src/msg_object.cpp 
+					../../stdafx.cpp 
+					../../main_app.cpp 
+					../../frame_wnd.cpp 
+					
+					../../vid/riff_file.cpp
    )
 		   
 set( header_files
-					../../inc/alloc.h
-					../../inc/arb_delegates.h
-   )
-
-if( WIN32 )
-	set( src_os		../../src/os/win32 )		   
-else( WIN32 )
-	set( src_os		../../src/os/posix )		   
-endif( WIN32 )
-set( src_files_os
-					${src_os}/base_file.cpp
-					${src_os}/debug.cpp
-					${src_os}/event.cpp
-					${src_os}/fmap.cpp
-					${src_os}/hq_timer.cpp
-					${src_os}/ip_address.cpp
-					${src_os}/ip_socket.cpp
-					${src_os}/mem.cpp
-					${src_os}/mutex.cpp
-					${src_os}/sys.cpp
-					${src_os}/thread.cpp
-					${src_os}/tls.cpp
+					../../stdafx.h
+					../../main_app.h
+					../../frame_wnd.h
+					
+					../../vid/riff_file.h
    )
 
 #-------------------------------------------------------------------
@@ -74,6 +45,15 @@ project( ${project_name} )
 #find_package( OpenGL )
 #find_package( JPEG )
 
+#set( wxWidgets_USE_UNICODE 1 )
+set( wxWidgets_USE_LIBS base core gl net )
+#set( wxWidgets_CONFIGURATION mswu )
+find_package( wxWidgets )
+if( wxWidgets_FOUND )
+	include( ${wxWidgets_USE_FILE} )
+	include_directories( ${wxWidgets_INCLUDE_DIRS} )
+endif( wxWidgets_FOUND )
+
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
@@ -89,21 +69,28 @@ source_group( "Header Files" FILES ${header_files} )
 # Add source files to group
 source_group( "Source Files" FILES ${src_files} )
 
-# OS source files
-source_group( "${CMAKE_SYSTEM_NAME} OS Source Files" FILES ${src_files_os} )
-
-if( WIN32 )
-	add_library( ${project_name} STATIC ${src_files} ${src_files_os} ${header_files} )
-else( WIN32 )
-	add_library( ${project_name} STATIC ${src_files} ${src_files_os} ${header_files} )
-endif( WIN32 )	
+if( _WINDOWS )
+	add_executable( ${project_name} WIN32 ${src_files} ${header_files} )
+else( _WINDOWS )
+	add_executable( ${project_name} WIN32 ${src_files} ${header_files} )
+endif( _WINDOWS )	
 
 #-------------------------------------------------------------------
 # build
 #-------------------------------------------------------------------
 
+#set( exe_targets, ${project_name} )
+#set( lib_targets, )
+
+#if( wxWidgets_FOUND )
+#	set( targets, ${lib_targets} ${wxWidgets_LIBRARIES} )
+#endif( wxWidgets_FOUND )
+
+#target_link_libraries( ${targets} ${lib_targets} )
+
 target_link_libraries( 
 						${project_name} 
+						${wxWidgets_LIBRARIES}
 					  )
 						 
 

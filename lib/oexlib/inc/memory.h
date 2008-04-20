@@ -46,7 +46,7 @@
              destructor in another.  So plan accordingly!
     
 */
-template < typename T > class TMem
+template < typename T, typename T_AS = T > class TMem
 {
 public:
 
@@ -337,19 +337,19 @@ public:
     }
 
     /// Returns pointer to the memory
-    T* operator ->()
+    T_AS* operator ->()
     {   return Ptr(); }
 
 	//==============================================================
 	// Ptr()
 	//==============================================================
 	/// Returns a pointer to the memory
-    T* Ptr()
+    T_AS* Ptr()
     {
         if ( m_pMem ) 
-            return m_pMem;
+            return (T_AS*)m_pMem;
            
-        return m_fm.Ptr();
+        return (T_AS*)m_fm.Ptr();
     }
 
 	//==============================================================
@@ -359,12 +359,12 @@ public:
     /**
         \param [in] x_uOffset   -   Offset into the memory
     */
-    T* Ptr( oexUINT x_uOffset )
+    T_AS* Ptr( oexUINT x_uOffset )
     {
-        T* pPtr = Ptr();
-
+        T_AS* pPtr = Ptr();
+		
         // Out of bounds
-        oexASSERT( pPtr && Size() > x_uOffset );
+        oexASSERT( pPtr && ( Size() * sizeof( T_AS ) / sizeof( T ) ) > x_uOffset );
 
         if ( !pPtr ) 
             return oexNULL;
@@ -413,14 +413,14 @@ public:
         to abuse.  You should really make sure the index exists
         before you call this function.
     */
-    T& operator [] ( oexUINT x_uOffset )
+    T_AS& operator [] ( oexUINT x_uOffset )
     {
         // Ensure index
-        if ( Size() <= x_uOffset )
-            Resize( x_uOffset );
+        if ( ( Size() * sizeof( T_AS ) / sizeof( T ) ) <= x_uOffset )
+            Resize( x_uOffset * sizeof( T ) / sizeof( T_AS ) );
 
         // Really ensure
-        if ( Size() <= x_uOffset )
+        if ( Size() * sizeof( T_AS ) / sizeof( T ) <= x_uOffset )
         {   oexASSERT( 0 );
             x_uOffset = 0;
         } // end if
@@ -792,7 +792,11 @@ public:
 private:
 
     /// Pointer to the memory
-    T*                      m_pMem;
+	union
+	{
+		T*                      m_pMem;
+		T_AS*					m_pMemAs;
+	};
 
     /// File mapping object for shared memory
     TFileMapping< T >       m_fm;

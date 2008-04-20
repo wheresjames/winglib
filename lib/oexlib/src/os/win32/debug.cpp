@@ -82,11 +82,11 @@ void CDebug::FmtTrace( oexCSTR x_pFmt, ... )
 
 void CDebug::vFmtTrace( oexCSTR x_pFmt, oexVaList &x_pArgs )
 {
-    oexTCHAR tcMsg[ oexSTRSIZE ] = oexT( "" );
-    os::CSys::vStrFmt( tcMsg, oexSTRSIZE, x_pFmt, x_pArgs );
-    Trace( tcMsg );
+//    oexTCHAR tcMsg[ oexSTRSIZE ] = oexT( "" );
+//    os::CSys::vStrFmt( tcMsg, oexSTRSIZE, x_pFmt, x_pArgs );
+//    Trace( tcMsg );
 
-//+++   Trace( CStr().vFmt( x_pFmt, x_pArgs ).Ptr() );
+    Trace( CStr().vFmt( x_pFmt, x_pArgs ).Ptr() );
 }
 
 void CDebug::Break()

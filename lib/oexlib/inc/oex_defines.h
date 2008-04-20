@@ -53,7 +53,6 @@
 #	define oexVaArg					__builtin_va_arg
 #endif
 
-
 #define oexTT( c, s )				( 1 == sizeof( c ) ? ( ( c* )( s ) ) : ( ( c* )( L##s ) ) )
 #define oexTC( c, s )				( 1 == sizeof( c ) ? ( ( c )( s ) ) : ( ( c )( L##s ) ) )
 #define oexTTEXT( c, s )			oexTT( c, s )
@@ -122,4 +121,11 @@
 #define oexINIT_SOCKETS()           OEX_NAMESPACE::os::CIpSocket::InitSockets()
 #define oexUNINIT_SOCKETS()         OEX_NAMESPACE::os::CIpSocket::InitSockets()
 
+#if OEX_BIGENDIAN
+#	define oexLittleEndian( l )		cmn::RevBytes( l )
+#	define oexBigEndian( l )		( l )
+#else
+#	define oexLittleEndian( l )		( l )
+#	define oexBigEndian( l )		cmn::RevBytes( l )
+#endif
 

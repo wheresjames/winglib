@@ -47,6 +47,58 @@ class CFile
 {
 public:
 
+	/// Restores the file position when the class is destroyed
+	class CRestoreFilePos
+	{
+	public:
+
+		/// Constructor
+		CRestoreFilePos( CFile *x_pF )
+		{	m_pf = x_pF;
+			if ( m_pf ) m_llPos = x_pF->GetPtrPos(); 
+		}
+
+		/// Destructor
+		~CRestoreFilePos()
+		{	Restore(); }
+
+		/// Restores file position
+		oexBOOL Restore()
+		{	CFile *pF = m_pf;
+			m_pf = oexNULL;
+			if ( !pF || !pF->IsOpen() ) 
+				return oexFALSE;
+			pF->SetPtrPosBegin( m_llPos ); 
+			return oexTRUE;
+		}
+
+		/// Returns the stored set point
+		oexINT64 Get() { return m_llPos; }
+
+		/// Sets the restore point
+		void Set( oexINT64 llPos ) { m_llPos = llPos; }
+
+		/// Sets the file handle
+		void SetFileObject( CFile *x_pF ) { m_pf = x_pF; }
+
+		/// Returns the file handle
+		CFile* GetFileObject() { return m_pf; }
+
+		/// Cancels the restore
+		void Cancel() {	m_pf = oexNULL; }
+
+	private:
+
+		/// File handle
+		CFile			*m_pf;
+
+		/// Previous position
+		oexINT64		m_llPos;
+	};
+
+
+public:
+
     /// Default constructor
     CFile()
     {
@@ -261,6 +313,10 @@ public:
         return Delete( s.Ptr() );
     }
 
+	/// Returns the last error code
+	oexUINT GetLastError()
+	{	return m_uLastError; }
+
 public:
 
     /// Deletes the specified file
@@ -276,7 +332,7 @@ public:
     /// Returns non-zero if the path exists
     static oexBOOL Exists( oexCSTR x_pPath )
     {   return os::CBaseFile::DoesExist( x_pPath ); }
-
+	
 private:
     
     /// File handle
