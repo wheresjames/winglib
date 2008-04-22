@@ -7,6 +7,8 @@ CRiffFile::CRiffFile()
 	m_llAmhOffset = 0;
 	m_llAshOffset = 0;
 	m_llWfeOffset = 0;
+
+	m_bValidHeaders = FALSE;
 }
 
 CRiffFile::~CRiffFile()
@@ -27,6 +29,8 @@ void CRiffFile::Destroy()
 	m_llAmhOffset = 0;
 	m_llAshOffset = 0;
 	m_llWfeOffset = 0;
+
+	m_bValidHeaders = FALSE;
 }
 
 BOOL CRiffFile::Create( LPCTSTR pFile )
@@ -54,6 +58,9 @@ BOOL CRiffFile::Open( LPCTSTR pFile )
 		return FALSE;
 	} // end if
 
+	LONGLONG llP = m_file.FindInFile( "2004", 4, 1000 );
+
+
 	if ( !m_file.Read( &m_rfh, sizeof( m_rfh ) ) )
 	{	oexTRACE( oexT( "%s : %lu" ), __FUNCTION__, (unsigned long)m_file.GetLastError() );
 		Destroy();
@@ -75,12 +82,11 @@ BOOL CRiffFile::Open( LPCTSTR pFile )
 	} // end if
 
 	// Verify four cc
-	if ( ReadAviHeaders() )
+	if ( !ReadAviHeaders() )
 	{	oexTRACE( oexT( "%s : Improper headers" ), __FUNCTION__ );
 		Destroy();
 		return FALSE;
 	} // end if
-
 
 	return TRUE;
 }
@@ -133,7 +139,8 @@ BOOL CRiffFile::FindChunk( unsigned long fccType, SRiffChunk *pRc )
 	return FALSE;
 }
 
-BOOL CRiffFile::ReadList()
+
+BOOL CRiffFile::ReadHeadersFromList()
 {
 	if ( !m_file.IsOpen() )
 		return FALSE;
@@ -146,7 +153,76 @@ BOOL CRiffFile::ReadList()
 		return FALSE;
 
 	// Must at least have a four cc, also, ignore huge blocks
-	if ( 4 > oexLittleEndian( rc.lDataSize ) || 1024 * 1024 < oexLittleEndian( rc.lDataSize ) )
+	if ( 4 > oexLittleEndian( rc.lDataSize ) || ( 16 * 1024 ) < oexLittleEndian( rc.lDataSize ) )
+		return FALSE;
+
+	// Verify it is a list
+	if ( eFccList != oexLittleEndian( rc.fccType ) )
+		return FALSE;
+
+	// Verify AVI header block
+	unsigned long fcc = 0;
+	if ( !m_file.Read( &fcc, 4 ) || eAviHeader != oexLittleEndian( fcc ) )
+		return FALSE;
+
+	// Next comes the avi header
+	LONGLONG llPos = m_file.GetPtrPos();
+	if ( !m_file.Read( &rc, sizeof( rc ) ) || eAviMainHeader != oexLittleEndian( rc.fccType ) )
+		return FALSE;
+
+	// Allocate space for avi header
+	if ( sizeof( SAviMainHeader ) < rc.lDataSize || !m_amh.New( rc.lDataSize ).Ptr() )
+		return FALSE;
+
+	// Read in the header data
+	m_file.SetPtrPosBegin( llPos );
+	if ( !m_file.Read( m_amh.Ptr(), rc.lDataSize + 8 ) )
+		return FALSE;
+
+	// Verify list data containing stream info
+	SRiffChunk rcStream;
+	if ( !m_file.Read( &rcStream, sizeof( rcStream ) ) || eFccList != oexLittleEndian( rcStream.fccType ) )
+		return FALSE;
+
+	// Verify stream info block
+	if ( !m_file.Read( &fcc, 4 ) || eAviStreamInfo != oexLittleEndian( fcc ) )
+		return FALSE;
+
+	// Stream header?
+	llPos = m_file.GetPtrPos();
+	if ( !m_file.Read( &rc, sizeof( rc ) ) || eAviStreamHeader != oexLittleEndian( rc.fccType ) )
+		return FALSE;
+
+	// Allocate space for avi header
+	if ( sizeof( SAviStreamHeader ) < rc.lDataSize || !m_ash.New( rc.lDataSize ).Ptr() )
+		return FALSE;
+
+	// Read the stream header
+	m_file.SetPtrPosBegin( llPos );
+	if ( !m_file.Read( m_ash.Ptr(), rc.lDataSize + 8 ) )
+		return FALSE;
+
+	// Stream format info should be next
+	if ( !m_file.Read( &rc, sizeof( rc ) ) || eAviStreamFormat != oexLittleEndian( rc.fccType ) )
+		return FALSE;
+
+	
+
+	// We have valid headers
+	m_bValidHeaders = TRUE;
+
+	return TRUE;
+
+/*
+	// Restore file position after this
+	oex::CFile::CRestoreFilePos rfp( &m_file );
+
+	SRiffChunk rc;
+	if ( !m_file.Read( &rc, sizeof( rc ) ) )
+		return FALSE;
+
+	// Must at least have a four cc, also, ignore huge blocks
+	if ( 4 > oexLittleEndian( rc.lDataSize ) || ( 1024 * 1024 ) < oexLittleEndian( rc.lDataSize ) )
 		return FALSE;
 
 	// Verify it is a list
@@ -197,17 +273,24 @@ BOOL CRiffFile::ReadList()
 	} // end if
 
 	return TRUE;
+*/
 }
 
 BOOL CRiffFile::ReadAviHeaders()
 {
-	SRiffChunk rc;
+	// Forget the old headers
+	m_bValidHeaders = FALSE;
 
+	SRiffChunk rc;
 	while ( ReadChunkHeader( &rc ) )
 	{
 		// Look for a list
 		if ( eFccList == oexLittleEndian( rc.fccType ) )
-			ReadList();
+			ReadHeadersFromList();
+
+		// Punt
+		if ( m_bValidHeaders )
+			return TRUE;
 
 		// Next chunk
 		if ( !SkipChunk() )

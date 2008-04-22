@@ -116,6 +116,9 @@ oexBOOL CBaseFile::Read( CBaseFile::t_HFILE hFile, oexPVOID x_pData, oexUINT x_u
     if ( x_puRead )
         *x_puRead = dwRead;
 
+	else if ( dwRead != x_uSize )
+		bRet = FALSE;
+
     if ( x_puErr )
     {   if ( bRet ) *x_puErr = 0;
         else *x_puErr = GetLastError();

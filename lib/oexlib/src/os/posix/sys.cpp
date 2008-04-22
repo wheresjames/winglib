@@ -32,6 +32,15 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
+/*
+   oOoOo
+,==|||||
+|| |||||
+|| |||||
+'==#####
+
+*/
+
 #include "../../../oexlib.h"
 
 
@@ -472,6 +481,7 @@ oexINT CSys::GetLocalTzBias()
     ::GetTimeZoneInformation( &tz ); 
     return tz.Bias;
 */
+
 	return 0;
 }
 

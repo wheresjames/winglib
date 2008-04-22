@@ -54,6 +54,7 @@ public:
 
 		eAviHeader			= MAKE_FOURCC( 'hdrl' ),
 		eAviMainHeader		= MAKE_FOURCC( 'avih' ),
+		eAviStreamInfo		= MAKE_FOURCC( 'strl' ),
 		eAviStreamHeader	= MAKE_FOURCC( 'strh' ),
 		eAviStreamFormat	= MAKE_FOURCC( 'strf' ),
 		eAviExtraHeaderData	= MAKE_FOURCC( 'strd' ),
@@ -230,8 +231,8 @@ public:
 	/// Reads in the avi file headers
 	BOOL ReadAviHeaders();
 
-	/// Read the list
-	BOOL ReadList();
+	/// Read headers from list
+	BOOL ReadHeadersFromList();
 
 private:
 
@@ -243,6 +244,9 @@ private:
 
 	/// File offset of main header
 	LONGLONG								m_llAmhOffset;
+
+	/// Set to non-zero if header structures are valid
+	BOOL									m_bValidHeaders;
 
 	/// AVI main header
 	oex::TMem< char, SAviMainHeader >		m_amh;

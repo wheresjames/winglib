@@ -76,7 +76,7 @@ public:
 		oexINT64 Get() { return m_llPos; }
 
 		/// Sets the restore point
-		void Set( oexINT64 llPos ) { m_llPos = llPos; }
+		oexINT64 Set( oexINT64 llPos ) { return m_llPos = llPos; }
 
 		/// Sets the file handle
 		void SetFileObject( CFile *x_pF ) { m_pf = x_pF; }
@@ -316,6 +316,22 @@ public:
 	/// Returns the last error code
 	oexUINT GetLastError()
 	{	return m_uLastError; }
+
+	/// Finds the specified string of characters in the file
+	/**
+		\param [in]	x_pStr	- Pointer to the sequence of characters to find
+		\param [in] x_uLen	- The number of characters in x_pStr
+		\param [in] x_uMax	- The maximum number of characters to search from
+							  the current file pointer position.  If set to
+							  zero or less, search continues until the end of
+							  the file is reached.
+
+		\return If the string is found, the function returns the offset
+		        of the string from the start of the file and sets the file
+				pointer to the start of the string.  If the string is not found
+				the function returns -1 and the file pointer is not changed.
+	*/
+	oexINT64 FindInFile( oexPVOID x_pStr, oexUINT x_uLen, oexINT64 x_llMax = 0 );
 
 public:
 

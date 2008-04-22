@@ -107,11 +107,14 @@
 
 #define oexSizeofArray( a )         ( sizeof( a ) / sizeof( a[ 0 ] ) )
 
-#define oexZeroMemory( p, sz )		os::CSys::Zero( p, sz );
+#define oexZeroMemory( p, sz )		OEX_NAMESPACE::os::CSys::Zero( p, sz );
 
 #define oexEMPTY_STRING             oexT( "" )
 
 #define oexNL						oexT( "\r\n" )
+
+#define oexMemCmp					OEX_NAMESPACE::os::CSys::MemCmp
+#define oexMemCpy					OEX_NAMESPACE::os::CSys::MemCpy
 
 #define oexINIT()                   OEX_NAMESPACE::COex::Init()
 #define oexUNINIT()                 OEX_NAMESPACE::COex::Uninit()
@@ -122,10 +125,10 @@
 #define oexUNINIT_SOCKETS()         OEX_NAMESPACE::os::CIpSocket::InitSockets()
 
 #if OEX_BIGENDIAN
-#	define oexLittleEndian( l )		cmn::RevBytes( l )
+#	define oexLittleEndian( l )		OEX_NAMESPACE::cmn::RevBytes( l )
 #	define oexBigEndian( l )		( l )
 #else
 #	define oexLittleEndian( l )		( l )
-#	define oexBigEndian( l )		cmn::RevBytes( l )
+#	define oexBigEndian( l )		OEX_NAMESPACE::cmn::RevBytes( l )
 #endif
 

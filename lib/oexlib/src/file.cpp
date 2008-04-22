@@ -121,3 +121,52 @@ oexBOOL CFile::CreatePath( oexCSTR x_pPath )
     return oexTRUE;
 }
 
+oexINT64 CFile::FindInFile( oexPVOID x_pStr, oexUINT x_uLen, oexINT64 x_llMax )
+{
+	if ( !x_pStr || !x_uLen || ( x_llMax > 0 && x_llMax < x_uLen ) )
+		return -1;
+
+	TMem< char > buf;
+	if ( !buf.OexNew( x_uLen + 1024 ).Ptr() )
+		return -1;
+
+	// Restore file position after this
+	CFile::CRestoreFilePos rfp( this );
+
+	// First just check to see if we're there already
+	oexUINT uRead = 0;
+	if ( !Read( buf.Ptr(), x_uLen, &uRead ) || uRead != x_uLen )
+		return -1;
+
+	// Current position if it matches
+	if ( !oexMemCmp( x_pStr, buf.Ptr(), x_uLen ) )
+		return rfp.Get();
+
+	oexUINT uSize = buf.Size();
+	if ( !Read( buf.Ptr( x_uLen ), uSize - x_uLen, &uRead ) || !uRead )
+		return -1;
+
+	uSize = uRead + x_uLen;
+	oexINT64 llFile = 0;
+	for ( ; uSize >= x_uLen; )
+	{
+		// Check for string
+		oexUINT i;
+		for ( i = 0; ( uSize - i ) >= x_uLen; i++ )
+			if ( !oexMemCmp( x_pStr, buf.Ptr( i ), x_uLen ) )
+				return rfp.Set( llFile + i );
+
+		// Get more data from file
+		oexMemCpy( buf.Ptr(), buf.Ptr( i ), uSize - i );
+		if ( !Read( buf.Ptr( uSize - i ), i, &uRead ) || !uRead )
+			return -1;
+
+		// New buffer size
+		uSize = ( uSize - i ) + uRead;
+		llFile += i;
+
+	} // end for	
+
+	return -1;
+
+}
