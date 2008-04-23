@@ -246,6 +246,29 @@ public:
         Delete();
     }
 
+	/// Generic resize
+    TMem& Zero()
+    {
+        oexUINT uSize = Size();
+        if ( !m_pMem || !uSize )
+			return *this;
+
+        // Constructed?
+        if ( CAlloc::eF1Constructed & CAlloc::GetFlags( m_pMem ) )
+
+			// For each element
+            for ( oexUINT i = 0; i < uSize; i++ )
+
+	            // Set to new object
+				*Ptr( i ) = T_AS();
+
+        // Just copy POD
+        else
+            oexZeroMemory( m_pMem, uSize * sizeof( T ) );
+
+		return *this;
+	}
+
     /// Generic resize
     TMem& Resize(oexUINT x_uNewSize )
     {

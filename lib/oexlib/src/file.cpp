@@ -148,7 +148,7 @@ oexINT64 CFile::FindInFile( oexPVOID x_pStr, oexUINT x_uLen, oexINT64 x_llMax )
 
 	uSize = uRead + x_uLen;
 	oexINT64 llFile = 0;
-	for ( ; uSize >= x_uLen; )
+	while ( uSize >= x_uLen )
 	{
 		// Check for string
 		oexUINT i;
@@ -165,7 +165,7 @@ oexINT64 CFile::FindInFile( oexPVOID x_pStr, oexUINT x_uLen, oexINT64 x_llMax )
 		uSize = ( uSize - i ) + uRead;
 		llFile += i;
 
-	} // end for	
+	} // end while	
 
 	return -1;
 

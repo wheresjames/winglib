@@ -48,6 +48,12 @@ public:
 
 	enum
 	{
+		/// How many frames to cache from the index
+		eIndexCacheSize		= 4
+	};
+
+	enum
+	{
 		eFccRiff			= MAKE_FOURCC( 'RIFF' ),
 		eFccAvi				= MAKE_FOURCC( 'AVI ' ),
 		eFccList			= MAKE_FOURCC( 'LIST' ),
@@ -60,7 +66,13 @@ public:
 		eAviExtraHeaderData	= MAKE_FOURCC( 'strd' ),
 		eAviStreamName		= MAKE_FOURCC( 'strn' ),
 
+		eAviStream			= MAKE_FOURCC( 'movi' ),
+
+		/// Version 1 AVI index
 		eAviIndex			= MAKE_FOURCC( 'idx1' ),
+
+		/// Version 2 AVI index
+		eAviIndex2			= MAKE_FOURCC( 'indx' ),
 	};
 
 // AVI structures are packed on word bounderies
@@ -95,6 +107,27 @@ public:
 
 		/// Size of the data in the chunk
 		unsigned long		lDataSize;
+	};
+
+	/// RIFF chunk header
+	struct SRiffChunkEx
+	{
+		/// Chunk type
+		union
+		{
+			unsigned long		fccType;
+			char				chFccType[ 4 ];
+		};
+
+		/// Size of the data in the chunk
+		unsigned long		lDataSize;
+
+		/// Chunk type
+		union
+		{
+			unsigned long		fccSub;
+			char				chFccSub[ 4 ];
+		};
 	};
 
 	struct SAviMainHeader
@@ -200,6 +233,37 @@ public:
 		unsigned short			cbSize;
 	};
 
+
+	/// Format of version 1 avi index entry
+	struct SAviIndex 
+	{
+		enum
+		{
+			eFlagList		= 0x00000001,
+			eFlagKeyFrame	= 0x00000010,
+			eFlagNoTime		= 0x00000100,
+			eFlagCompressor = 0x0fff0000
+		};
+
+		union
+		{
+			unsigned long		fcc;
+			char				chFcc[ 4 ];
+		};
+		unsigned long   cb;
+
+	   struct SAviIndexEntry 
+	   {
+		  unsigned long   dwChunkId;
+		  unsigned long   dwFlags;
+		  unsigned long   dwOffset;
+		  unsigned long   dwSize;
+
+	  } aIndex[ 1 ];
+
+	};
+
+
 #pragma pack( pop )
 
 public:
@@ -234,6 +298,49 @@ public:
 	/// Read headers from list
 	BOOL ReadHeadersFromList();
 
+	/// Writes headers to file
+	BOOL WriteAviHeaders();
+
+	/// Updates the avi headers
+	BOOL UpdateAviHeaders();
+
+	/// Locates the start of the data stream
+	BOOL StartStream();
+
+	/// Locates the index within the file
+	BOOL FindIndex();
+
+	/// Rebases the memory index cache to include the specified frame
+	/**
+		\param [in] x_llFrame	- The new index base for the cache
+		\param [in] x_bForward	- If non-zero, frames including and
+								  after x_llFrame will be cached.  If
+								  zero, x_llFrame and preceding frames
+								  will be cached.
+	*/
+	BOOL CacheFrame( LONGLONG x_llFrame, BOOL x_bForward = TRUE );
+
+	/// Returns information about the specified frame.
+	/**
+		\param [in] x_llFrame	- The new index base for the cache
+		\param [in] x_bForward	- If non-zero, frames including and
+								  after x_llFrame will be cached.  If
+								  zero, x_llFrame and preceding frames
+								  will be cached.
+
+		\return Pointer to SAviIndex structure if frame info
+		        is available, otherwise zero.
+	*/
+	SAviIndex::SAviIndexEntry* GetFrameInfo( LONGLONG llFrame, BOOL bForward = TRUE )
+	{	if ( !CacheFrame( llFrame, bForward ) )
+			return FALSE;
+		oexASSERT( llFrame >= m_llIndexBase && llFrame < ( m_llIndexBase + eIndexCacheSize ) );
+		return m_memAviIndex.Ptr( llFrame - m_llIndexBase );
+	}
+
+	/// Returns the data for the specified frame
+	BOOL GetFrameData( LONGLONG llFrame, LPVOID *pData, LONGLONG *pllSize, BOOL bForward = TRUE );
+
 private:
 
 	/// File handle
@@ -242,27 +349,49 @@ private:
 	/// Riff file header
 	SRiffFileHeader							m_rfh;
 
-	/// File offset of main header
-	LONGLONG								m_llAmhOffset;
+	/// Type of the index
+	UINT									m_uIndexType;
+
+	/// Offset of the start of the index
+	LONGLONG								m_llIndex;
+
+	/// Size of the index chunk
+	LONGLONG								m_llIndexSize;
+
+	/// Offset to start of data stream
+	LONGLONG								m_llStreamOffset;
 
 	/// Set to non-zero if header structures are valid
 	BOOL									m_bValidHeaders;
+	
+	/// File offset of main header
+	LONGLONG								m_llAmhOffset;
 
 	/// AVI main header
 	oex::TMem< char, SAviMainHeader >		m_amh;
-//	SAviMainHeader			*m_pAmh;
 
 	/// File offset of stream header
 	LONGLONG								m_llAshOffset;
 
 	/// Stream header
 	oex::TMem< char, SAviStreamHeader >		m_ash;
-//	SAviStreamHeader		*m_pAsh;
 
 	/// File offset of audio stream header
 	LONGLONG								m_llWfeOffset;
 
 	/// Audio stream header
 	oex::TMem< char, SWaveFormatEx >		m_wfe;
-//	SWaveFormatEx			*m_pWfe;	
+
+	/// Index base
+	LONGLONG								m_llIndexBase;
+
+	/// Index version 1
+	oex::TMem< SAviIndex::SAviIndexEntry >	m_memAviIndex;
+
+	/// Size of the data in m_memFrame
+	LONGLONG								m_llFrameSize;
+
+	/// Holds data for a single frame
+	oex::TMem< char >						m_memFrame;
+
 };

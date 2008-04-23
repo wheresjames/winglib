@@ -61,7 +61,9 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 	SetStatusText( _T( "This is a status text" ) );
 
 	// Open the avi file
-	m_cAviFile.Open( _T( "c:/TestClip.avi" ) );
+//	m_cAviFile.Open( _T( "c:/TestClip.avi" ) );
+
+	m_cAviFile.Create( _T( "c:/TestOut.avi" ) );
 
 }
 
