@@ -316,6 +316,10 @@ public:
 	oexCONST T& operator *() const
     {   return *Ptr(); }
 
+	/// TMem object
+	operator TMem< T >&() const
+	{	return m_mem; }
+
 	/// Calculates the length of the string by finding the NULL terminator
 	oexINT CalculateLength()
 	{

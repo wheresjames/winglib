@@ -9,6 +9,7 @@ CRiffFile::CRiffFile()
 {
 	m_llAmhOffset = 0;
 	m_llAshOffset = 0;
+	m_llBiOffset = 0;
 	m_llWfeOffset = 0;
 
 	m_bValidHeaders = FALSE;
@@ -21,6 +22,8 @@ CRiffFile::CRiffFile()
 	m_llStreamOffset = 0;
 
 	m_llFrameSize = 0;
+
+	m_bRefreshIndex = FALSE;
 }
 
 CRiffFile::~CRiffFile()
@@ -30,12 +33,17 @@ CRiffFile::~CRiffFile()
 
 void CRiffFile::Destroy()
 {
+	// Update the AVI headers if needed
+	if ( m_llNextFrame )
+		UpdateAviHeaders();
+
 	// Close any open file
 	m_file.Close();
 
 	// Release headers
 	m_amh.OexDelete();
 	m_ash.OexDelete();
+	m_bi.OexDelete();
 	m_wfe.OexDelete();
 
 	// Lose the index
@@ -46,6 +54,7 @@ void CRiffFile::Destroy()
 
 	m_llAmhOffset = 0;
 	m_llAshOffset = 0;
+	m_llBiOffset = 0;
 	m_llWfeOffset = 0;
 
 	m_bValidHeaders = FALSE;
@@ -57,6 +66,8 @@ void CRiffFile::Destroy()
 	m_llStreamOffset = 0;
 
 	m_llFrameSize = 0;
+
+	m_bRefreshIndex = FALSE;
 }
 
 BOOL CRiffFile::Create( LPCTSTR pFile )
@@ -65,7 +76,7 @@ BOOL CRiffFile::Create( LPCTSTR pFile )
 	Destroy();
 
 	// Open new file
-	if ( !m_file.CreateNew( pFile ).IsOpen() )
+	if ( !m_file.CreateAlways( pFile ).IsOpen() )
 	{	oexTRACE( oexT( " : %lu" ), (unsigned long)m_file.GetLastError() );
 		return FALSE;
 	} // end if
@@ -75,11 +86,10 @@ BOOL CRiffFile::Create( LPCTSTR pFile )
 		return FALSE;
 	} // end if
 
-
 	return TRUE;
 }
 
-BOOL CRiffFile::Open( LPCTSTR pFile )
+BOOL CRiffFile::Open( LPCTSTR pFile, BOOL bAllowAppend )
 {
 	// Lose current file
 	Destroy();
@@ -125,30 +135,11 @@ BOOL CRiffFile::Open( LPCTSTR pFile )
 	} // end if
 
 	// Ensure there is a stream in the file
-	if ( !StartStream() )
+	if ( !StartStream( 0, bAllowAppend ) )
 	{	oexTRACE( oexT( "%s : Data stream not found" ), __FUNCTION__ );
 		Destroy();
 		return FALSE;
 	} // end if
-
-	LPVOID pData = NULL;
-	LONGLONG llSize = 0;
-
-	for ( DWORD i = 0; i < 10; i++ )
-	{
-		BOOL bRet = GetFrameData( i, &pData, &llSize );
-
-		oex::CFile f;
-
-		if ( f.CreateNew( oex::CStr().Fmt( oexT( "Frame %lu.jpg" ), i ).Ptr() ).IsOpen() )
-			f.Write( pData, llSize );
-
-	} // end for
-
-
-//	SAviIndex::SAviIndexEntry *pAi = GetFrameInfo( 0 );
-//	pAi = GetFrameInfo( 1 );
-//	pAi = GetFrameInfo( 2 );
 
 	return TRUE;
 }
@@ -201,6 +192,8 @@ BOOL CRiffFile::FindChunk( unsigned long fccType, SRiffChunk *pRc )
 	return FALSE;
 }
 
+/// +++ I totally screwed this up, this won't really work right
+///     Unless the file has ONLY one stream.  Please re-work!
 BOOL CRiffFile::ReadHeadersFromList()
 {
 	if ( !m_file.IsOpen() )
@@ -264,13 +257,34 @@ BOOL CRiffFile::ReadHeadersFromList()
 	if ( !m_file.Read( &rc, sizeof( rc ) ) || eAviStreamFormat != oexLittleEndian( rc.fccType ) )
 		return FALSE;
 
-	// Allocate space for audio format information
-	if ( sizeof( SWaveFormatEx ) > rc.lDataSize || !m_wfe.OexNew( rc.lDataSize ).Ptr() )
-		return FALSE;
+	// Check for video stream
+	if ( SAviStreamHeader::eAshStreamTypeVideo == m_ash.Ptr()->fccType )
+	{
+		// Allocate space for audio format information
+		if ( sizeof( SBitmapInfo::SBitmapInfoHeader ) > rc.lDataSize || !m_bi.OexNew( rc.lDataSize ).Ptr() )
+			return FALSE;
 
-	// Read in the audio data
-	m_llWfeOffset = m_file.GetPtrPos();
-	if ( !m_file.Read( m_wfe.Ptr(), rc.lDataSize ) )
+		// Read in the audio data
+		m_llBiOffset = m_file.GetPtrPos();
+		if ( !m_file.Read( m_bi.Ptr(), rc.lDataSize ) )
+			return FALSE;
+	} // end if
+
+	// Check for audio stream
+	else if ( SAviStreamHeader::eAshStreamTypeAudio == m_ash.Ptr()->fccType )
+	{
+		// Allocate space for audio format information
+		if ( sizeof( SWaveFormatEx ) > rc.lDataSize || !m_wfe.OexNew( rc.lDataSize ).Ptr() )
+			return FALSE;
+
+		// Read in the audio data
+		m_llWfeOffset = m_file.GetPtrPos();
+		if ( !m_file.Read( m_wfe.Ptr(), rc.lDataSize ) )
+			return FALSE;
+
+	} // end else if
+
+	else
 		return FALSE;
 
 	// We have valid headers
@@ -314,6 +328,58 @@ BOOL CRiffFile::ReadAviHeaders()
 	return FALSE;
 }
 
+BOOL CRiffFile::UpdateAviHeaders()
+{
+	// Refresh the index
+	WriteIndex();
+
+	// Calculate values
+	Amh()->dwMaxBytesPerSec = GetFrameRate() * Amh()->dwSuggestedBufferSize;
+
+	// Update main avi header
+	if ( m_amh.Ptr() && m_llAmhOffset )
+	{	m_file.SetPtrPosBegin( m_llAmhOffset );
+		if ( !m_file.Write( m_amh.Ptr(), m_amh.Size() ) )
+			return FALSE;
+	} // end if
+
+	// Update AVI stream header
+	if ( m_ash.Ptr() && m_llAshOffset )
+	{	m_file.SetPtrPosBegin( m_llAshOffset );
+		if ( !m_file.Write( m_ash.Ptr(), m_ash.Size() ) )
+			return FALSE;
+	} // end if
+
+	// Update AVI format header
+	if ( m_bi.Ptr() && m_llBiOffset )
+	{	m_file.SetPtrPosBegin( m_llBiOffset );
+		if ( !m_file.Write( m_bi.Ptr(), m_bi.Size() ) )
+			return FALSE;
+	} // end if
+
+	// Update AVI format header
+	if ( m_wfe.Ptr() && m_llWfeOffset )
+	{	m_file.SetPtrPosBegin( m_llWfeOffset );
+		if ( !m_file.Write( m_wfe.Ptr(), m_wfe.Size() ) )
+			return FALSE;
+	} // end if
+
+	// Set pointer to start of file
+	m_file.SetPtrPosEnd( 0 );
+	LONGLONG llEnd = m_file.GetPtrPos();
+
+	// Write RIFF header
+	m_rfh.fccRiff = oexLittleEndian( eFccRiff );
+	m_rfh.lFileDataSize = oexLittleEndian( llEnd - 8 );
+	m_rfh.fccType =  oexLittleEndian( eFccAvi );
+
+	m_file.SetPtrPosBegin( 0 );
+	if ( !m_file.Write( &m_rfh, sizeof( m_rfh ) ) )
+		return FALSE;
+
+	return TRUE;
+}
+
 BOOL CRiffFile::WriteAviHeaders()
 {
 	// Set pointer to start of file
@@ -335,20 +401,11 @@ BOOL CRiffFile::WriteAviHeaders()
 	if ( !m_file.Write( &rcList, sizeof( rcList ) ) )
 		return FALSE;
 
-/*	// Write out riff file header block info
-	SRiffChunk rc;
-	rc.fccType = oexLittleEndian( eAviMainHeader );
-	rc.lDataSize = oexLittleEndian( sizeof( SAviMainHeader ) - 8 );
-	if ( !m_file.Write( &rc, sizeof( rc ) ) )
-		return FALSE;
-*/
 	// Ensure header
-	if ( !m_amh.Ptr() )
-		if ( !m_amh.OexNew( sizeof( SAviMainHeader ) ).Ptr() )
-			return FALSE;
+	if ( !Amh() )
+		return FALSE;
 
 	// Zero structure
-	oexZeroMemory( m_amh.Ptr(), m_amh.Size() );
 	m_amh->fcc = oexLittleEndian( eAviMainHeader );
 	m_amh->cb = oexLittleEndian( m_amh.Size() - 8 );
 
@@ -365,21 +422,15 @@ BOOL CRiffFile::WriteAviHeaders()
 	LONGLONG llList2 = m_file.GetPtrPos();
 	if ( !m_file.Write( &rcList2, sizeof( rcList2 ) ) )
 		return FALSE;
-/*
-	rc.fccType = oexLittleEndian( eAviStreamHeader );
-	rc.lDataSize = sizeof( SAviStreamHeader );
-	if ( !m_file.Write( &rc, sizeof( rc ) ) )
-		return FALSE;
-*/
-	// Ensure header
-	if ( !m_ash.Ptr() )
-		if ( !m_ash.OexNew( sizeof( SAviStreamHeader ) ).Ptr() )
-			return FALSE;
 
-	// Zero structure
-	oexZeroMemory( m_ash.Ptr(), m_ash.Size() );
-	m_amh->fcc = oexLittleEndian( eAviStreamHeader );
-	m_amh->cb = oexLittleEndian( m_ash.Size() - 8 );
+	// Ensure header
+	if ( !Ash() )
+		return FALSE;
+
+	// Fill in info
+	m_ash->fcc = oexLittleEndian( eAviStreamHeader );
+	m_ash->cb = oexLittleEndian( m_ash.Size() - 8 );	
+	m_ash->fccType = SAviStreamHeader::eAshStreamTypeVideo;
 
 	// Write to file
 	m_llAshOffset = m_file.GetPtrPos();
@@ -388,33 +439,45 @@ BOOL CRiffFile::WriteAviHeaders()
 
 	SRiffChunk rc;
 	rc.fccType = oexLittleEndian( eAviStreamFormat );
-	rc.lDataSize = sizeof( SWaveFormatEx );
+	rc.lDataSize = sizeof( SBitmapInfo::SBitmapInfoHeader );
 	if ( !m_file.Write( &rc, sizeof( rc ) ) )
 		return FALSE;
 
 	// Ensure header
-	if ( !m_wfe.Ptr() )
-		if ( !m_wfe.OexNew( sizeof( SWaveFormatEx ) ).Ptr() )
-			return FALSE;
-
-	// Zero structure
-	oexZeroMemory( m_wfe.Ptr(), m_wfe.Size() );
-
-	// Write to file
-	m_llWfeOffset = m_file.GetPtrPos();
-	if ( !m_file.Write( m_wfe.Ptr(), m_wfe.Size() ) )
+	if ( !Bi() )
 		return FALSE;
 
-	LONGLONG llEnd = m_file.GetPtrPos();
+	// Set size
+	m_bi->bmiHeader.biSize = sizeof( SBitmapInfo::SBitmapInfoHeader );
+
+	// Write to file
+	m_llBiOffset = m_file.GetPtrPos();
+	if ( !m_file.Write( m_bi.Ptr(), m_bi.Size() ) )
+		return FALSE;
+
+	SRiffChunkEx rcStream;
+	rcStream.fccType = oexLittleEndian( eFccList );
+	rcStream.lDataSize = oexLittleEndian( 0 );
+	rcStream.fccSub = oexLittleEndian( eAviStream );
+
+	if ( !m_file.Write( &rcStream, sizeof( rcStream ) ) )
+		return FALSE;
+
+	// Save start of stream data
+	m_llStreamOffset = m_file.GetPtrPos();
+	m_llNextFrame = m_llStreamOffset;
+
+	// End of the header data
+	LONGLONG llEnd = m_llStreamOffset - sizeof( rcStream );
 
 	// Update first list size
-	rcList.lDataSize = llEnd - llList;
+	rcList.lDataSize = llEnd - llList - 8;
 	m_file.SetPtrPosBegin( llList );
 	if ( !m_file.Write( &rcList, sizeof( rcList ) ) )
 		return FALSE;
 
 	// Update second list size
-	rcList2.lDataSize = llEnd - llList2;
+	rcList2.lDataSize = llEnd - llList2 - 8;
 	m_file.SetPtrPosBegin( llList2 );
 	if ( !m_file.Write( &rcList2, sizeof( rcList2 ) ) )
 		return FALSE;
@@ -422,9 +485,171 @@ BOOL CRiffFile::WriteAviHeaders()
 	return TRUE;
 }
 
-
-BOOL CRiffFile::StartStream()
+BOOL CRiffFile::WriteIndex()
 {
+	if ( !m_bRefreshIndex )
+		return TRUE;
+
+	// Must have a file
+	if ( !m_file.IsOpen() )
+		return FALSE;
+
+	// Find the offset
+	if ( !m_llStreamOffset )
+		StartStream( 0, TRUE );
+
+	// Do we have an append point?
+	if ( !m_llNextFrame )
+		return FALSE;
+
+	// Update the stream header
+	SRiffChunkEx rcStream;
+	rcStream.fccType = oexLittleEndian( eFccList );
+	rcStream.lDataSize = oexLittleEndian( m_llNextFrame - m_llStreamOffset + 4 );
+	rcStream.fccSub = oexLittleEndian( eAviStream );
+
+	// Update the position
+	m_file.SetPtrPosBegin( m_llStreamOffset - sizeof( rcStream ) );
+	if ( !m_file.Write( &rcStream, sizeof( rcStream ) ) )
+		return FALSE;
+	
+	// Allocate memory for index data
+	if ( m_memAviIndex.Size() != eIndexCacheSize )
+		if ( !m_memAviIndex.OexNew( eIndexCacheSize ).Ptr() )
+			return FALSE;
+
+	// Start the AVI index
+	SRiffChunk rc;
+	rc.fccType = oexLittleEndian( eAviIndex );
+	rc.lDataSize = oexLittleEndian( 0 );
+	m_file.SetPtrPosBegin( m_llNextFrame );
+	if ( !m_file.Write( &rc, sizeof( rc ) ) )
+		return FALSE;
+
+	UINT uFrame = 0;
+	UINT uTotalFrames = 0;
+	LONGLONG llIdxPos = m_file.GetPtrPos();
+	LONGLONG llPos = m_llStreamOffset;
+	LONGLONG llMaxSize = 0;
+
+	// For each frame
+	SRiffChunk rcFrame;
+	while ( llPos < m_llNextFrame )
+	{
+		// Count a frame
+		uTotalFrames++;
+
+		// Read this frame data
+		m_file.SetPtrPosBegin( llPos );
+		if ( !m_file.Read( &rcFrame, sizeof( rcFrame ) ) )
+			return FALSE;
+
+		// Fill in index data
+		m_memAviIndex.Ptr( uFrame )->dwChunkId	= oexLittleEndian( rcFrame.fccType );
+		m_memAviIndex.Ptr( uFrame )->dwFlags	= oexLittleEndian( SAviIndexEntry::eFlagKeyFrame );
+		m_memAviIndex.Ptr( uFrame )->dwOffset	= oexLittleEndian( llPos - m_llStreamOffset + 4 );
+		m_memAviIndex.Ptr( uFrame )->dwSize		= oexLittleEndian( rcFrame.lDataSize );
+
+		if ( rcFrame.lDataSize > llMaxSize )
+			llMaxSize = rcFrame.lDataSize;
+
+		// Point to next frame
+		llPos += sizeof( rcFrame ) + rcFrame.lDataSize + ( 1 & rcFrame.lDataSize );
+
+		// Update index if cache is full
+		if ( ++uFrame >= eIndexCacheSize )
+		{
+			m_file.SetPtrPosBegin( llIdxPos );
+			if ( !m_file.Write( m_memAviIndex.Ptr(), m_memAviIndex.SizeInBytes() ) )
+				return FALSE;
+
+			uFrame = 0;
+			llIdxPos += m_memAviIndex.SizeInBytes();
+
+		} // end if
+
+	} // end while
+
+	// Write left over frames in the index
+	if ( uFrame )
+	{	m_file.SetPtrPosBegin( llIdxPos );
+		if ( !m_file.Write( m_memAviIndex.Ptr(), m_memAviIndex.Size() ) )
+			return FALSE;
+	} // end if
+
+	rc.fccType = oexLittleEndian( eAviIndex );
+	rc.lDataSize = oexLittleEndian( m_file.GetPtrPos() - m_llNextFrame - sizeof( rc ) );
+	m_file.SetPtrPosBegin( m_llNextFrame );
+	if ( !m_file.Write( &rc, sizeof( rc ) ) )
+		return FALSE;
+
+	// Update header values
+	Amh()->dwTotalFrames = uTotalFrames;
+	Amh()->dwFlags |= SAviMainHeader::eAmhHasIndex;
+	Amh()->dwSuggestedBufferSize = oexLittleEndian( (DWORD)llMaxSize );	
+
+	Ash()->dwLength = uTotalFrames;
+	Ash()->dwSuggestedBufferSize = oexLittleEndian( (DWORD)llMaxSize );
+
+	m_bRefreshIndex = FALSE;
+
+	return TRUE;
+}
+
+BOOL CRiffFile::AddFrame( UINT x_uType, UINT x_uStream, LPCVOID x_pData, UINT x_uSize )
+{
+	// Ensure valid pointers
+	if ( !x_pData || !x_uSize )
+		return FALSE;
+
+	// Must have a file
+	if ( !m_file.IsOpen() )
+		return FALSE;
+
+	// Do we have a next frame pointer
+	if ( !m_llStreamOffset || !m_llNextFrame )
+		return FALSE;
+
+	SRiffChunk rc;
+	rc.fccType = x_uType;
+	rc.lDataSize = x_uSize;
+
+	if ( x_uStream )
+	{	oex::CStr sStream( oex::CStr().Fmt( "%lu", x_uStream ) );
+		rc.chFccType[ 0 ] = sStream[ 0 ];
+		rc.chFccType[ 1 ] = sStream[ 1 ];
+	} // end if
+
+	// Start of frame
+	m_file.SetPtrPosBegin( m_llNextFrame );
+
+	// Write the frame header
+	if ( !m_file.Write( &rc, sizeof( rc ) ) )
+		return FALSE;
+
+	// Write the frame data
+	if ( !m_file.Write( x_pData, x_uSize ) )
+		return FALSE;
+
+	// Pad to word boundry
+	if ( 1 & x_uSize )
+		if ( !m_file.Write( &x_uSize, 1 ) )
+			return FALSE;
+
+	// Remeber where the next frame goes
+	m_llNextFrame += sizeof( rc ) + x_uSize + ( 1 & x_uSize );
+
+	// We must update the index
+	m_bRefreshIndex = TRUE;
+
+	return TRUE;
+}
+
+BOOL CRiffFile::StartStream( UINT uStream, BOOL bAllowAppend )
+{
+	// Lose stream info
+	m_llStreamOffset = m_llNextFrame = 0;
+
 	if ( !m_file.IsOpen() )
 		return FALSE;
 
@@ -444,7 +669,9 @@ BOOL CRiffFile::StartStream()
 			SRiffChunk rc;
 			if ( m_file.Read( &rc, sizeof( rc ) ) && eFccList == oexLittleEndian( rc.fccType ) )
 				if ( m_file.Read( &rc, sizeof( rc ) ) && eAviStream == oexLittleEndian( rc.fccType ) )	
-				{	m_llStreamOffset = m_file.GetPtrPos();
+				{	m_llStreamOffset = m_file.GetPtrPos();					
+					if ( bAllowAppend )
+						m_llNextFrame = m_llStreamOffset + rc.lDataSize;
 					rfp.Cancel();
 					return TRUE;
 				} // end if
@@ -510,9 +737,7 @@ BOOL CRiffFile::FindIndex()
 BOOL CRiffFile::CacheFrame( LONGLONG x_llFrame, BOOL bForward )
 {
 	if ( !m_file.IsOpen() )
-	{	m_memAviIndex.Delete();
 		return FALSE;
-	} // end if
 
 	// Version 1 index
 	if ( eAviIndex != m_uIndexType )
@@ -543,14 +768,14 @@ BOOL CRiffFile::CacheFrame( LONGLONG x_llFrame, BOOL bForward )
 			return FALSE;
 
 	// File offset
-	LONGLONG ll = m_llIndex + ( x_llFrame * sizeof( SAviIndex::SAviIndexEntry ) );
+	LONGLONG ll = m_llIndex + ( x_llFrame * sizeof( SAviIndexEntry ) );
 
 	// Offset into index
 	if ( !m_file.SetPtrPosBegin( ll ) )
 		return FALSE;
 
 	// Read in this portion of the index
-	if ( !m_file.Read( m_memAviIndex.Ptr(), eIndexCacheSize * sizeof( SAviIndex::SAviIndexEntry ) ) )
+	if ( !m_file.Read( m_memAviIndex.Ptr(), eIndexCacheSize * sizeof( SAviIndexEntry ) ) )
 		return FALSE;
 
 	return TRUE;
@@ -558,7 +783,7 @@ BOOL CRiffFile::CacheFrame( LONGLONG x_llFrame, BOOL bForward )
 
 BOOL CRiffFile::GetFrameData( LONGLONG llFrame, LPVOID *pData, LONGLONG *pllSize, BOOL bForward )
 {
-	SAviIndex::SAviIndexEntry* pAie = GetFrameInfo( llFrame, bForward );
+	SAviIndexEntry* pAie = GetFrameInfo( llFrame, bForward );
 	if ( !pAie )
 		return FALSE;
 

@@ -49,22 +49,58 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 
 	wxMenuBar *pcMenuBar = new wxMenuBar;
 	if ( pcMenuBar ) 
-	{
-		pcMenuBar->Append( pcMenuFile, _T( "&File" ) );
-
+		pcMenuBar->Append( pcMenuFile, _T( "&File" ) ),
 		SetMenuBar( pcMenuBar );
-
-	} // end if
 
 	CreateStatusBar();
 
 	SetStatusText( _T( "This is a status text" ) );
 
-	// Open the avi file
-//	m_cAviFile.Open( _T( "c:/TestClip.avi" ) );
+	UINT		uCopy = 1000;
+	CRiffFile	in, out;
 
-	m_cAviFile.Create( _T( "c:/TestOut.avi" ) );
+	// Open the input avi file
+	if ( !in.Open( _T( "c:/TestClip.avi" ), FALSE ) )
+		return;
 
+	// Output avi
+	if ( !out.Create( _T( "c:/TestOut.avi" ) ) )
+		return;
+
+	// Set avi frame rate
+	out.SetFrameRate( 15.f );
+
+	// Fill in main header
+	out.Amh()->dwWidth					= oexLittleEndian( 320 );
+	out.Amh()->dwHeight					= oexLittleEndian( 240 );
+	out.Amh()->dwStreams				= oexLittleEndian( 1 );
+	out.Amh()->dwTotalFrames			= oexLittleEndian( uCopy );
+	out.Amh()->dwFlags					= oexLittleEndian( CRiffFile::SAviMainHeader::eAmhTrustCkType );
+
+	// Stream header
+	out.Ash()->fccType					= CRiffFile::SAviStreamHeader::eAshStreamTypeVideo;
+	out.Ash()->fccHandler				= oexLittleEndian( MAKE_FOURCC( 'DIB ' ) );
+	out.Ash()->dwLength					= oexLittleEndian( uCopy );
+	out.Ash()->rcFrame.left				= 0;
+	out.Ash()->rcFrame.top				= 0;
+	out.Ash()->rcFrame.right			= oexLittleEndian( 320 );
+	out.Ash()->rcFrame.bottom			= oexLittleEndian( 240 );
+
+	// Bitmap info
+	out.Bi()->bmiHeader.biWidth			= oexLittleEndian( 320 );
+	out.Bi()->bmiHeader.biHeight		= oexLittleEndian( 240 );
+	out.Bi()->bmiHeader.biCompression	= oexLittleEndian( MAKE_FOURCC( 'MJPG' ) );
+	out.Bi()->bmiHeader.biPlanes		= oexLittleEndian( 1 );
+
+	// Copy frames
+	LPVOID pData = NULL;
+	LONGLONG llSize = 0;
+	for ( DWORD i = 0; i < uCopy; i++ )
+	{
+		if ( in.GetFrameData( i, &pData, &llSize ) )
+			out.AddFrame( CRiffFile::eFtUncompressedVideo, 0, pData, llSize );
+
+	} // end for
 }
 
 void CFrameWnd::OnExit( wxCommandEvent& x_wxCe )
@@ -84,8 +120,7 @@ void CFrameWnd::OnOpen( wxCommandEvent& x_wxCe )
 		return;
 
 	// Open the avi file
-	m_cAviFile.Open( fd.GetPath() );
-
+	m_cAviFile.Open( fd.GetPath(), TRUE );
 }
 
 void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
@@ -106,6 +141,8 @@ void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
 
 void CFrameWnd::OnEraseBackground( wxEraseEvent& x_wxEe )
 {
+
+
 }
 
 bool CFrameWnd::StretchDraw(wxDC &x_dc, wxImage &x_img, wxRect &x_rect)

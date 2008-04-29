@@ -213,6 +213,11 @@ public:
             return 0;
     }
 
+	oexUINT SizeInBytes() const
+	{
+		return Size() * sizeof( T );
+	}
+
     /// Returns non-zero if the object was constructed
     oexBOOL IsConstructed() const
     {   return ( CAlloc::eF1Constructed & CAlloc::GetFlags( c_Ptr() ) ) ? oexTRUE : oexFALSE;
