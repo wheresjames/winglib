@@ -49,9 +49,8 @@
 
 // For detecting memory leaks
 #if defined( OEX_CRT_LEAK_DETECTION ) && defined( _DEBUG )
-//#   include <crtdbg.h>
-#   define oexNEW                   new( _CLIENT_BLOCK, __FILE__, __LINE__ )
-#   define oexNEWAT( l, f )         new( _CLIENT_BLOCK, f, l ) 
+#   define oexNEW                   new( _NORMAL_BLOCK, __FILE__, __LINE__ )
+#   define oexNEWAT( l, f )         new( _NORMAL_BLOCK, f, l ) 
 #else
 #   define oexNEW			        new
 #   define oexNEWAT( l, f )         new

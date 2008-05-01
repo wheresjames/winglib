@@ -56,9 +56,9 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 
 	SetStatusText( _T( "This is a status text" ) );
 
-	UINT		uCopy = 1000;
-	CRiffFile	in, out;
-
+	UINT				uCopy = 100;
+	oex::vid::CAviFile	in, out;
+	
 	// Open the input avi file
 	if ( !in.Open( _T( "c:/TestClip.avi" ), FALSE ) )
 		return;
@@ -75,12 +75,14 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 	out.Amh()->dwHeight					= oexLittleEndian( 240 );
 	out.Amh()->dwStreams				= oexLittleEndian( 1 );
 	out.Amh()->dwTotalFrames			= oexLittleEndian( uCopy );
-	out.Amh()->dwFlags					= oexLittleEndian( CRiffFile::SAviMainHeader::eAmhTrustCkType );
+	out.Amh()->dwFlags					= oexLittleEndian( oex::vid::CAviFile::SAviMainHeader::eAmhTrustCkType );
 
 	// Stream header
-	out.Ash()->fccType					= CRiffFile::SAviStreamHeader::eAshStreamTypeVideo;
-	out.Ash()->fccHandler				= oexLittleEndian( MAKE_FOURCC( 'DIB ' ) );
+	out.Ash()->fccType					= oex::vid::CAviFile::SAviStreamHeader::eAshStreamTypeVideo;
+//	out.Ash()->fccHandler				= oexLittleEndian( MAKE_FOURCC( 'DIB ' ) );
+	out.Ash()->fccHandler				= oexLittleEndian( MAKE_FOURCC( 'MP42' ) );
 	out.Ash()->dwLength					= oexLittleEndian( uCopy );
+	out.Ash()->dwQuality				= oexLittleEndian( 0xffffffff );
 	out.Ash()->rcFrame.left				= 0;
 	out.Ash()->rcFrame.top				= 0;
 	out.Ash()->rcFrame.right			= oexLittleEndian( 320 );
@@ -89,8 +91,13 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 	// Bitmap info
 	out.Bi()->bmiHeader.biWidth			= oexLittleEndian( 320 );
 	out.Bi()->bmiHeader.biHeight		= oexLittleEndian( 240 );
-	out.Bi()->bmiHeader.biCompression	= oexLittleEndian( MAKE_FOURCC( 'MJPG' ) );
+//	out.Bi()->bmiHeader.biCompression	= oexLittleEndian( MAKE_FOURCC( 'MJPG' ) );
+	out.Bi()->bmiHeader.biCompression	= oexLittleEndian( MAKE_FOURCC( 'MP42' ) );
 	out.Bi()->bmiHeader.biPlanes		= oexLittleEndian( 1 );
+	out.Bi()->bmiHeader.biBitCount		= oexLittleEndian( 24 );
+	out.Bi()->bmiHeader.biSizeImage		= oexLittleEndian( oex::cmn::Align4( out.Bi()->bmiHeader.biWidth )
+														   * oex::cmn::Abs( out.Bi()->bmiHeader.biHeight )
+														   * oex::cmn::FitTo( out.Bi()->bmiHeader.biBitCount, 8 ) );
 
 	// Copy frames
 	LPVOID pData = NULL;
@@ -98,7 +105,7 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 	for ( DWORD i = 0; i < uCopy; i++ )
 	{
 		if ( in.GetFrameData( i, &pData, &llSize ) )
-			out.AddFrame( CRiffFile::eFtUncompressedVideo, 0, pData, llSize );
+			out.AddFrame( oex::vid::CAviFile::eFtUncompressedVideo, 0, pData, llSize );
 
 	} // end for
 }

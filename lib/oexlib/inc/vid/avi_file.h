@@ -1,3 +1,36 @@
+/*------------------------------------------------------------------
+// avi_file.h
+//
+// Copyright (c) 1997
+// Robert Umbehant
+// winglib@wheresjames.com
+// http://www.wheresjames.com
+//
+// Redistribution and use in source and binary forms, with or 
+// without modification, are permitted for commercial and 
+// non-commercial purposes, provided that the following 
+// conditions are met:
+//
+// * Redistributions of source code must retain the above copyright 
+//   notice, this list of conditions and the following disclaimer.
+// * The names of the developers or contributors may not be used to 
+//   endorse or promote products derived from this software without 
+//   specific prior written permission.
+//
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//----------------------------------------------------------------*/
 
 #pragma once
 
@@ -10,39 +43,11 @@
 							)
 
 
-/// CRiffFile - Reading and writting RIFF (or avi) files
+/// CAviFile - Reading and writting RIFF (or avi) files
 /**
-	heres the general layout of an AVI riff file (new format)
 
-	RIFF (3F??????) AVI       <- not more than 1 GB in size
-		LIST (size) hdrl
-			avih (0038)
-			LIST (size) strl
-				strh (0038)
-				strf (????)
-				indx (3ff8)   <- size may vary, should be sector sized
-			LIST (size) strl
-				strh (0038)
-				strf (????)
-				indx (3ff8)   <- size may vary, should be sector sized
-			LIST (size) odml
-				dmlh (????)
-			JUNK (size)       <- fill to align to sector - 12
-		LIST (7f??????) movi  <- aligned on sector - 12
-			00dc (size)       <- sector aligned
-			01wb (size)       <- sector aligned
-			ix00 (size)       <- sector aligned
-		idx1 (00??????)       <- sector aligned
-	RIFF (7F??????) AVIX
-		JUNK (size)           <- fill to align to sector -12
-		LIST (size) movi
-			00dc (size)       <- sector aligned
-	RIFF (7F??????) AVIX      <- not more than 2GB in size
-		JUNK (size)           <- fill to align to sector - 12
-		LIST (size) movi
-			00dc (size)       <- sector aligned
 */
-class CRiffFile
+class CAviFile
 {
 public:
 
@@ -299,46 +304,46 @@ public:
 public:
 
 	/// Default constructor
-	CRiffFile();
+	CAviFile();
 	
 	/// Destructor
-	~CRiffFile();
+	~CAviFile();
 
 	/// Closes open file and releases resources
 	void Destroy();
 
 	/// Creates a new file
-	BOOL Create( LPCTSTR pFile );
+	oexBOOL Create( oexCSTR pFile );
 
 	/// Opens an existing file
-	BOOL Open( LPCTSTR pFile, BOOL bAllowAppend );
+	oexBOOL Open( oexCSTR pFile, oexBOOL bAllowAppend );
 
 	/// Reads in a chunk header and returns the file pointer to the start of the chunk
-	BOOL ReadChunkHeader( SRiffChunk *pRc );
+	oexBOOL ReadChunkHeader( SRiffChunk *pRc );
 
 	/// Skips the current chunk
-	BOOL SkipChunk();
+	oexBOOL SkipChunk();
 
 	/// Skips chunks looking for a matching fcc
-	BOOL FindChunk( unsigned long fccFcc, SRiffChunk *pRc );
+	oexBOOL FindChunk( unsigned long fccFcc, SRiffChunk *pRc );
 
 	/// Reads in the avi file headers
-	BOOL ReadAviHeaders();
+	oexBOOL ReadAviHeaders();
 
 	/// Read headers from list
-	BOOL ReadHeadersFromList();
+	oexBOOL ReadHeadersFromList();
 
 	/// Writes headers to file
-	BOOL WriteAviHeaders();
+	oexBOOL WriteAviHeaders();
 
 	/// Updates the avi headers
-	BOOL UpdateAviHeaders();
+	oexBOOL UpdateAviHeaders();
 
 	/// Locates the start of the data stream
-	BOOL StartStream( UINT uStream, BOOL bAllowAppend );
+	oexBOOL StartStream( oexUINT uStream, oexBOOL bAllowAppend );
 
 	/// Locates the index within the file
-	BOOL FindIndex();
+	oexBOOL FindIndex();
 
 	/// Rebases the memory index cache to include the specified frame
 	/**
@@ -348,7 +353,7 @@ public:
 								  zero, x_llFrame and preceding frames
 								  will be cached.
 	*/
-	BOOL CacheFrame( LONGLONG x_llFrame, BOOL x_bForward = TRUE );
+	oexBOOL CacheFrame( oexINT64 x_llFrame, oexBOOL x_bForward = oexTRUE );
 
 	/// Returns information about the specified frame.
 	/**
@@ -361,31 +366,31 @@ public:
 		\return Pointer to SAviIndex structure if frame info
 		        is available, otherwise zero.
 	*/
-	SAviIndexEntry* GetFrameInfo( LONGLONG llFrame, BOOL bForward = TRUE )
+	SAviIndexEntry* GetFrameInfo( oexINT64 llFrame, oexBOOL bForward = oexTRUE )
 	{	if ( !CacheFrame( llFrame, bForward ) )
-			return FALSE;
+			return oexFALSE;
 		oexASSERT( llFrame >= m_llIndexBase && llFrame < ( m_llIndexBase + eIndexCacheSize ) );
-		return m_memAviIndex.Ptr( llFrame - m_llIndexBase );
+		return m_memAviIndex.Ptr( (oexUINT)( llFrame - m_llIndexBase ) );
 	}
 
 	/// Returns the data for the specified frame
-	BOOL GetFrameData( LONGLONG llFrame, LPVOID *pData, LONGLONG *pllSize, BOOL bForward = TRUE );
+	oexBOOL GetFrameData( oexINT64 llFrame, oexPVOID *pData, oexINT64 *pllSize, oexBOOL bForward = oexTRUE );
 
 	/// Writes a new index into the file
-	BOOL WriteIndex();
+	oexBOOL WriteIndex();
 
 	template < typename T >
-		BOOL AddFrame( UINT x_uType, UINT x_uStream, oex::TStr< T > &x_sMem )
+		oexBOOL AddFrame( oexUINT x_uType, oexUINT x_uStream, oex::TStr< T > &x_sMem )
 		{	return AddFrame( x_uType, x_uStream, x_sMem.Ptr(), x_sMem.LengthInBytes() ); }
 
 	/// Adds a video frame to the AVI
-	BOOL AddFrame( UINT x_uType, UINT x_uStream, LPCVOID x_pData, UINT x_uSize );
+	oexBOOL AddFrame( oexUINT x_uType, oexUINT x_uStream, oexCPVOID x_pData, oexUINT x_uSize );
 
 	/// Returns a pointer to the AVI main header
 	SAviMainHeader* Amh()
 	{	if ( !m_amh.Ptr() )
 			if ( !oexVERIFY( m_amh.OexNew( sizeof( SAviMainHeader ) ).Ptr() ) )
-				return NULL;
+				return oexNULL;
 			else
 				oexZeroMemory( m_amh.Ptr(), m_amh.Size() );
 		return m_amh.Ptr();
@@ -395,7 +400,7 @@ public:
 	SAviStreamHeader* Ash()
 	{	if ( !m_ash.Ptr() )
 			if ( !oexVERIFY( m_ash.OexNew( sizeof( SAviStreamHeader ) ).Ptr() ) )
-				return NULL;
+				return oexNULL;
 			else
 				oexZeroMemory( m_ash.Ptr(), m_ash.Size() );
 		return m_ash.Ptr();
@@ -405,7 +410,7 @@ public:
 	SBitmapInfo* Bi()
 	{	if ( !m_bi.Ptr() )
 			if ( !oexVERIFY( m_bi.OexNew( sizeof( SBitmapInfo::SBitmapInfoHeader ) ).Ptr() ) )
-				return NULL;
+				return oexNULL;
 			else
 				oexZeroMemory( m_bi.Ptr(), m_bi.Size() );
 		return m_bi.Ptr();
@@ -415,7 +420,7 @@ public:
 	SWaveFormatEx* Wfe()
 	{	if ( !m_wfe.Ptr() )
 			if ( !oexVERIFY( m_wfe.OexNew( sizeof( SWaveFormatEx ) ).Ptr() ) )
-				return NULL;
+				return oexNULL;
 			else
 				oexZeroMemory( m_wfe.Ptr(), m_wfe.Size() );
 		return m_wfe.Ptr();
@@ -427,7 +432,7 @@ public:
 	*/
 	void SetFrameRate( float fRate )
 	{	Ash()->dwRate = oexLittleEndian( 1000000 );
-		Ash()->dwScale = oexLittleEndian( (DWORD)( (float)Ash()->dwRate / 15.f ) );
+		Ash()->dwScale = oexLittleEndian( (oexUINT)( (float)Ash()->dwRate / 15.f ) );
 		Amh()->dwMicroSecPerFrame = Ash()->dwScale;
 	}
 
@@ -435,6 +440,10 @@ public:
 	float GetFrameRate()
 	{	return (float)Ash()->dwRate / (float)Ash()->dwScale;
 	}
+
+	/// Returns the last file error
+	oexUINT GetLastError()
+	{	return m_file.GetLastError(); }
 
 private:
 
@@ -445,60 +454,60 @@ private:
 	SRiffFileHeader							m_rfh;
 
 	/// Type of the index
-	UINT									m_uIndexType;
+	oexUINT									m_uIndexType;
 
 	/// Offset of the start of the index
-	LONGLONG								m_llIndex;
+	oexINT64								m_llIndex;
 
 	/// Size of the index chunk
-	LONGLONG								m_llIndexSize;
+	oexINT64								m_llIndexSize;
 
 	/// Offset to start of data stream
-	LONGLONG								m_llStreamOffset;
+	oexINT64								m_llStreamOffset;
 
 	/// Offset to next frame
-	LONGLONG								m_llNextFrame;
+	oexINT64								m_llNextFrame;
 
 	/// Set to non-zero if header structures are valid
-	BOOL									m_bValidHeaders;
+	oexBOOL									m_bValidHeaders;
 	
 	/// File offset of main header
-	LONGLONG								m_llAmhOffset;
+	oexINT64								m_llAmhOffset;
 
 	/// AVI main header
 	oex::TMem< char, SAviMainHeader >		m_amh;
 
 	/// File offset of stream header
-	LONGLONG								m_llAshOffset;
+	oexINT64								m_llAshOffset;
 
 	/// Stream header
 	oex::TMem< char, SAviStreamHeader >		m_ash;
 
 	/// File offset of audio stream header
-	LONGLONG								m_llBiOffset;
+	oexINT64								m_llBiOffset;
 
 	/// Audio stream header
 	oex::TMem< char, SBitmapInfo >			m_bi;
 
 	/// File offset of audio stream header
-	LONGLONG								m_llWfeOffset;
+	oexINT64								m_llWfeOffset;
 
 	/// Audio stream header
 	oex::TMem< char, SWaveFormatEx >		m_wfe;
 
 	/// Index base
-	LONGLONG								m_llIndexBase;
+	oexINT64								m_llIndexBase;
 
 	/// Index version 1
 	oex::TMem< SAviIndexEntry >				m_memAviIndex;
 
 	/// Size of the data in m_memFrame
-	LONGLONG								m_llFrameSize;
+	oexINT64								m_llFrameSize;
 
 	/// Holds data for a single frame
-	oex::TMem< char >						m_memFrame;
+	oex::TMem< oexCHAR >					m_memFrame;
 
 	/// Set when the index needs refreshing
-	BOOL									m_bRefreshIndex;
+	oexBOOL									m_bRefreshIndex;
 
 };

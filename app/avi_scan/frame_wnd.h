@@ -9,8 +9,6 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "vid/riff_file.h"
-
 class CFrameWnd : public wxFrame  
 {
 public:
@@ -58,9 +56,9 @@ public:
 
 private:
 
-	wxImage				m_cWxImg;
+	wxImage					m_cWxImg;
 
-	CRiffFile			m_cAviFile;
+	oex::vid::CAviFile		m_cAviFile;
 
 };
 

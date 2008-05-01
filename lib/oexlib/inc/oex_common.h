@@ -100,6 +100,18 @@ public:
 
 namespace cmn
 {
+	/// Returns the number of units required for val
+	/**
+		Example: How many 8-bit bytes needed to hold 42 bits
+
+		required_bytes = FitTo( 42, 8 );
+	*/
+	oexINT static FitTo( oexINT val, oexINT unit )
+	{	if ( !unit ) return 0;			
+		oexINT i = val / unit;
+		return ( ( i * unit ) >= val ) ? i : i + 1;
+	}
+
     /// Returns the largest of a or b
     template < typename T >
         T Max( T a, T b )
@@ -159,6 +171,17 @@ namespace cmn
     template < typename T >
         T Abs( T v )
     {   return ( v >= 0 ) ? v : -v; }
+
+	/// Returns the modulus
+	template < typename T >
+		static T Mod( T x, T y )
+		{	return ( ( x ) - ( (oexINT)( ( x ) / ( y ) ) ) * ( y ) ); }
+	template <>
+		static oexINT Mod< oexINT >( oexINT x, oexINT y )
+		{	return x % y; }
+	template <>
+		static oexUINT Mod< oexUINT >( oexUINT x, oexUINT y )
+		{	return x % y; }
 
     /// Scales a value v from range( 0, cur ) to range( 0, tgt )
     template < typename T >

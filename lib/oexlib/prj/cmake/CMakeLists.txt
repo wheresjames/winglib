@@ -19,18 +19,38 @@ set( src_files
 					../../src/oex.cpp 
 					../../src/parser.cpp 
 					../../src/sys_time.cpp 
-					../../src/zip.cpp 
-					../../src/unzip.cpp 
+#					../../src/zip.cpp 
+#					../../src/unzip.cpp 
 					../../src/msg.cpp 
 					../../src/msg_com.cpp 
 					../../src/msg_info.cpp 
 					../../src/msg_mgr.cpp 
 					../../src/msg_object.cpp 
+					
+					../../src/vid/avi_file.cpp
    )
 		   
 set( header_files
+					../../oexlib.h 
+					
 					../../inc/alloc.h
-					../../inc/arb_delegates.h
+					../../inc/asso_list.h 
+					../../inc/circ_buf.h 
+					../../inc/data_packet.h 
+					../../inc/fifo_sync.h 
+					../../inc/file.h 
+					../../inc/find_files.h 
+					../../inc/md5.h 
+					../../inc/parser.h 
+					../../inc/sys_time.h 
+					../../inc/zip.h 
+					../../inc/unzip.h 
+					../../inc/msg.h 
+					../../inc/msg_com.h 
+					../../inc/msg_info.h 
+					../../inc/msg_mgr.h 
+
+					../../inc/vid/avi_file.h
    )
 
 if( WIN32 )
