@@ -122,19 +122,19 @@ public:
             return eTypeInvalid; 
         }
 
-    template<> static oexUINT GetType< oexCHAR >()
+    template<> oexITS oexUINT GetType< oexCHAR >()
     {   return eTypeInt8; }
 
-    template<> static oexUINT GetType< oexUCHAR >()
+    template<> oexITS oexUINT GetType< oexUCHAR >()
     {   return eTypeUInt8; }
 
-    template<> static oexUINT GetType< oexSHORT >()
+    template<> oexITS oexUINT GetType< oexSHORT >()
     {   return eTypeInt16; }
 
-    template<> static oexUINT GetType< oexUSHORT >()
+    template<> oexITS oexUINT GetType< oexUSHORT >()
     {   return eTypeUInt16; }
 
-    template<> static oexUINT GetType< oexINT >()
+    template<> oexITS oexUINT GetType< oexINT >()
     {   if ( 4 == sizeof( oexINT ) )
             return eTypeInt32; 
         else if ( 8 == sizeof( oexINT ) )
@@ -143,9 +143,10 @@ public:
             return eTypeInt16; 
         else if ( 1 == sizeof( oexINT ) )
             return eTypeInt8; 
+		return eTypeInvalid;
     }
 
-    template<> static oexUINT GetType< oexUINT >()
+    template<> oexITS oexUINT GetType< oexUINT >()
     {   if ( 4 == sizeof( oexUINT ) )
             return eTypeInt32; 
         else if ( 8 == sizeof( oexUINT ) )
@@ -154,33 +155,34 @@ public:
             return eTypeInt16; 
         else if ( 1 == sizeof( oexUINT ) )
             return eTypeInt8; 
+		return eTypeInvalid;
     }
 
-    template<> static oexUINT GetType< oexLONG >()
+    template<> oexITS oexUINT GetType< oexLONG >()
     {   return eTypeInt32; }
 
-    template<> static oexUINT GetType< oexULONG >()
+    template<> oexITS oexUINT GetType< oexULONG >()
     {   return eTypeUInt32; }
 
-    template<> static oexUINT GetType< oexFLOAT >()
+    template<> oexITS oexUINT GetType< oexFLOAT >()
     {   return eTypeFloat; }
 
-    template<> static oexUINT GetType< oexDOUBLE >()
+    template<> oexITS oexUINT GetType< oexDOUBLE >()
     {   return eTypeDouble; }
 
-    template<> static oexUINT GetType< CStrW >()
+    template<> oexITS oexUINT GetType< CStrW >()
     {   return eTypeStrW; }
 
-    template<> static oexUINT GetType< CStr8 >()
+    template<> oexITS oexUINT GetType< CStr8 >()
     {   return eTypeStr8; }
 
-    template<> static oexUINT GetType< oexCSTR8 >()
+    template<> oexITS oexUINT GetType< oexCSTR8 >()
     {   return eTypeStr8; }
 
-    template<> static oexUINT GetType< oexCSTRW >()
+    template<> oexITS oexUINT GetType< oexCSTRW >()
     {   return eTypeStrW; }
 
-    template<> static oexUINT GetType< oexGUID >()
+    template<> oexITS oexUINT GetType< oexGUID >()
     {   return eTypeGuid; }
 
 public:

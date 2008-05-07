@@ -308,6 +308,9 @@ public:
         return oexTRUE;
     }
 
+	CMsg Send( const CMsg &x_rMsg )
+	{	return Send( (CMsg&)x_rMsg ); }
+
     CMsg Send( CMsg &x_rMsg )
     {
         // Sanity check

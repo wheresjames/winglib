@@ -51,23 +51,23 @@ namespace obj
 	template < typename T >
 		static oexUINT Size( oexCONST T *x_obj ) 
         {   return sizeof( T ); }
-
-    // +++ These next two are dangerous since they could be invoked actual pointers to chars
-    //     as opposed to strings.  Please fix!
-    template<> static oexUINT Size< oexCHAR8 >( oexCONST oexCHAR8 *x_obj )
+		
+    // +++ These next two are dangerous since they could be invoked by actual 
+	//     pointers to chars as opposed to strings.  Please fix!
+    template<> oexITS oexUINT Size< oexCHAR8 >( oexCONST oexCHAR8 *x_obj )
     {   return zstr::Length( x_obj ); }
 
-    template<> static oexUINT Size< oexCHARW >( oexCONST oexCHARW *x_obj )
+    template<> oexITS oexUINT Size< oexCHARW >( oexCONST oexCHARW *x_obj )
     {   return zstr::Length( x_obj ) * sizeof( oexCHARW ); }
 
 	template < typename T >
 		static oexUINT Size( oexCONST T **x_obj ) 
         {   return sizeof( T ); }
 
-    template<> static oexUINT Size< oexCHAR8 >( oexCONST oexCHAR8 **x_obj )
+    template<> oexITS oexUINT Size< oexCHAR8 >( oexCONST oexCHAR8 **x_obj )
     {   return zstr::Length( *x_obj ); }
 
-    template<> static oexUINT Size< oexCHARW >( oexCONST oexCHARW **x_obj )
+    template<> oexITS oexUINT Size< oexCHARW >( oexCONST oexCHARW **x_obj )
     {   return zstr::Length( *x_obj ) * sizeof( oexCHARW ); }
 
 	//==============================================================
@@ -83,10 +83,10 @@ namespace obj
 		static oexUINT Terminator( oexCONST T *x_obj ) 
         {   return 0; }
 
-    template<> static oexUINT Terminator< oexCSTR8 >( oexCONST oexCSTR8 *x_obj )
+    template<> oexITS oexUINT Terminator< oexCSTR8 >( oexCONST oexCSTR8 *x_obj )
     {   return 1; }
 
-    template<> static oexUINT Terminator< oexCSTRW >( oexCONST oexCSTRW *x_obj )
+    template<> oexITS oexUINT Terminator< oexCSTRW >( oexCONST oexCSTRW *x_obj )
     {   return 2; }
 
 	//==============================================================
@@ -105,10 +105,10 @@ namespace obj
 		static oexPVOID Ptr( oexCONST T **x_ptr ) 
         {   return (oexPVOID)x_ptr; }
 
-    template<> static oexPVOID Ptr< oexCHAR8 >( oexCONST oexCHAR8 **x_ptr ) 
+    template<> oexITS oexPVOID Ptr< oexCHAR8 >( oexCONST oexCHAR8 **x_ptr ) 
     {   return (oexPVOID)*x_ptr; }
 
-    template<> static oexPVOID Ptr< oexCHARW >( oexCONST oexCHARW **x_ptr ) 
+    template<> oexITS oexPVOID Ptr< oexCHARW >( oexCONST oexCHARW **x_ptr ) 
     {   return (oexPVOID)*x_ptr; }
 
 	//==============================================================
@@ -120,10 +120,10 @@ namespace obj
         {   return !os::CSys::MemCmp( &k1, &k2, sizeof( T ) );
         }
 
-    template<> static oexBOOL Compare< oexCSTR8 >( oexCONST oexCSTR8 &k1, oexCONST oexCSTR8 &k2 )
+    template<> oexITS oexBOOL Compare< oexCSTR8 >( oexCONST oexCSTR8 &k1, oexCONST oexCSTR8 &k2 )
     {   return !str::Compare( k1, zstr::Length( k1 ), k2, zstr::Length( k2 ) ); }
 
-    template<> static oexBOOL Compare< oexCSTRW >( oexCONST oexCSTRW &k1, oexCONST oexCSTRW &k2 )
+    template<> oexITS oexBOOL Compare< oexCSTRW >( oexCONST oexCSTRW &k1, oexCONST oexCSTRW &k2 )
     {   return !str::Compare( k1, zstr::Length( k1 ), k2, zstr::Length( k2 ) ); }
 
 

@@ -68,6 +68,10 @@ const oexUINT		CSys::c_StrErr_OK = S_OK;
 // Wouldn't have to do this but StringCchVPrintfW() has issues.
 #pragma warning( disable : 4995 4996 )
 
+#ifdef __INTEL_COMPILER
+#	pragma warning( disable : 1786 )
+#endif
+
 //#if ( _MSC_VER >= 1300 )
 #if 0
 #	define AWESOMENEWFULLOFBUGSWINDOWSSTRINGFUNCTION

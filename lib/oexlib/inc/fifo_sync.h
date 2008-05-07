@@ -246,6 +246,9 @@ public:
 	virtual oexBOOL Write( CStr8 x_sStr )
     {   return Write( x_sStr.Ptr(), x_sStr.Length() ); }
 
+	// Import read functions
+	using CCircBuf::Read;
+
 	//==============================================================
 	// Read()
 	//==============================================================

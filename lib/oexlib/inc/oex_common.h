@@ -177,10 +177,10 @@ namespace cmn
 		static T Mod( T x, T y )
 		{	return ( ( x ) - ( (oexINT)( ( x ) / ( y ) ) ) * ( y ) ); }
 	template <>
-		static oexINT Mod< oexINT >( oexINT x, oexINT y )
+		inline oexINT Mod< oexINT >( oexINT x, oexINT y )
 		{	return x % y; }
 	template <>
-		static oexUINT Mod< oexUINT >( oexUINT x, oexUINT y )
+		inline oexUINT Mod< oexUINT >( oexUINT x, oexUINT y )
 		{	return x % y; }
 
     /// Scales a value v from range( 0, cur ) to range( 0, tgt )

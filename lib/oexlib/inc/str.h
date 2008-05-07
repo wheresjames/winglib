@@ -1748,16 +1748,16 @@ namespace obj
 		+++ I don't like having the reference to CStr here, so I really
 		should figure out another way.  Any suggestions?
 	*/
-	template <> static oexUINT Size< CStrW >( oexCONST CStrW *x_obj ) 
+	template <> oexITS oexUINT Size< CStrW >( oexCONST CStrW *x_obj ) 
     {   return ( (CStrW*)x_obj )->LengthInBytes(); }
 
-	template <> static oexUINT Size< CStr8 >( oexCONST CStr8 *x_obj ) 
+	template <> oexITS oexUINT Size< CStr8 >( oexCONST CStr8 *x_obj ) 
     {   return ( (CStr8*)x_obj )->LengthInBytes(); }
 
-	template <> static oexUINT Size< CStr16 >( oexCONST CStr16 *x_obj ) 
+	template <> oexITS oexUINT Size< CStr16 >( oexCONST CStr16 *x_obj ) 
     {   return ( (CStr16*)x_obj )->LengthInBytes(); }
 
-//	template <> static oexUINT Size< CStr32 >( oexCONST CStr32 *x_obj ) 
+//	template <> oexITS oexUINT Size< CStr32 >( oexCONST CStr32 *x_obj ) 
 //    {   return ( (CStr32&)x_obj ).LengthInBytes(); }
 
 	//==============================================================
@@ -1772,16 +1772,16 @@ namespace obj
 		
 		+++ It would be nice to eliminate the ref to CStr here.
 	*/
-	template <> static oexPVOID Ptr< CStrW >( oexCONST CStrW *x_ptr ) 
+	template <> oexITS oexPVOID Ptr< CStrW >( oexCONST CStrW *x_ptr ) 
     {   return (oexPVOID)( (CStrW*)x_ptr )->Ptr(); }
 
-	template <> static oexPVOID Ptr< CStr8 >( oexCONST CStr8 *x_ptr ) 
+	template <> oexITS oexPVOID Ptr< CStr8 >( oexCONST CStr8 *x_ptr ) 
     {   return (oexPVOID)( (CStr8*)x_ptr )->Ptr(); }
 
-	template <> static oexPVOID Ptr< CStr16 >( oexCONST CStr16 *x_ptr ) 
+	template <> oexITS oexPVOID Ptr< CStr16 >( oexCONST CStr16 *x_ptr ) 
     {   return (oexPVOID)( (CStr16*)x_ptr )->Ptr(); }
 
-//	template <> static oexPVOID Ptr< CStr32 >( oexCONST CStr32 *x_ptr ) 
+//	template <> oexITS oexPVOID Ptr< CStr32 >( oexCONST CStr32 *x_ptr ) 
 //    {   return (oexPVOID)( (CStr32*)x_ptr )->Ptr(); }
 
 	//==============================================================
@@ -1789,16 +1789,16 @@ namespace obj
 	//==============================================================
     /// Special overload for CStr
 
-    template <> static oexBOOL Compare< CStrW >( oexCONST CStrW &k1, oexCONST CStrW &k2 ) 
+    template <> oexITS oexBOOL Compare< CStrW >( oexCONST CStrW &k1, oexCONST CStrW &k2 ) 
     {   return (CStrW&)k1 == (CStrW&)k2; }
 
-    template <> static oexBOOL Compare< CStr8 >( oexCONST CStr8 &k1, oexCONST CStr8 &k2 ) 
+    template <> oexITS oexBOOL Compare< CStr8 >( oexCONST CStr8 &k1, oexCONST CStr8 &k2 ) 
     {   return (CStr8&)k1 == (CStr8&)k2; }
 
-    template <> static oexBOOL Compare< CStr16 >( oexCONST CStr16 &k1, oexCONST CStr16 &k2 ) 
+    template <> oexITS oexBOOL Compare< CStr16 >( oexCONST CStr16 &k1, oexCONST CStr16 &k2 ) 
     {   return (CStr16&)k1 == (CStr16&)k2; }
 
-//    template <> static oexBOOL Compare< CStr32 >( oexCONST CStr32 &k1, oexCONST CStr32 &k2 ) 
+//    template <> oexITS oexBOOL Compare< CStr32 >( oexCONST CStr32 &k1, oexCONST CStr32 &k2 ) 
 //    {   return (CStr32&)k1 == (CStr32&)k2; }
 
 };

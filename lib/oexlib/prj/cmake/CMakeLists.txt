@@ -86,6 +86,9 @@ endif( CMAKE_SIZEOF_VOID_P MATCHES "8" )
 
 project( ${project_name} )
 
+set( CMAKE_USE_RELATIVE_PATHS 1 )
+set( CMAKE_SUPPRESS_REGENERATION 1 )
+
 #-------------------------------------------------------------------
 # Packages
 #-------------------------------------------------------------------

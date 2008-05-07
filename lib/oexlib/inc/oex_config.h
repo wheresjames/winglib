@@ -49,7 +49,7 @@
  #undef OEX_ENABLE_RELEASE_MODE_MEM_CHECK
 
 // Are we using windows?
-#ifdef WIN32
+#if defined( WIN32 ) || defined( _WIN32 )
 #	define OEX_WIN32
 #endif
 
@@ -71,7 +71,7 @@
 // Enable zip file support
 #define OEX_ENABLE_ZIP
 
-#ifdef WIN32
+#ifdef OEX_WIN32
 #	define oexCDECL	_cdecl
 #else
 #	define oexCDECL
@@ -80,3 +80,5 @@
 // Not big endian
 #define OEX_BIGENDIAN		0
 
+// Inline template specialization
+#define oexITS inline

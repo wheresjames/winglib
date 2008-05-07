@@ -54,7 +54,7 @@ public:
 	enum
 	{
 		/// How many frames to cache from the index
-		eIndexCacheSize		= 4
+		eIndexCacheSize		= 128
 	};
 
 	enum

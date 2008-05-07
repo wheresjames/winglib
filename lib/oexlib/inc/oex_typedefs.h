@@ -151,11 +151,11 @@ public:
     
     /// Copy operator
     oexAUTOGUID& operator = ( oexCONST oexAUTOGUID &r ) 
-    {   Copy( (oexGUID&)r ); }
+    {   return Copy( (oexGUID&)r ); }
 
     /// Copy operator
     oexAUTOGUID& operator = ( oexCONST oexAUTOGUID *p ) 
-    {   Copy( (oexGUID*)p ); }
+    {   return Copy( (oexGUID*)p ); }
 
     /// Copies guid
     oexAUTOGUID& Copy( oexCONST oexGUID &r )
@@ -172,8 +172,8 @@ public:
     }
 
     /// GUID reference
-    operator oexGUID& ()
-    {   return *this; }
+//    operator oexGUID& ()
+//    {   return *this; }
 
     /// GUID pointer
     operator oexGUID* ()

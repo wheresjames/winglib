@@ -68,12 +68,12 @@ public:
 
     /// Routes the message to a local destination
     oexBOOL msgRecv( CMsg &x_rMsg );
-
+/*
     operator CMsgAddress&()
     {
 
     }
-
+*/
 protected:
 
     /// Processes the function queue
