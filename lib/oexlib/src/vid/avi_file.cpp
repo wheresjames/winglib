@@ -49,6 +49,7 @@ CAviFile::CAviFile()
 	m_uIndexType = 0;
 	m_llIndexSize = 0;
 	m_llIndexBase = 0;
+	m_llIndexFrameOffset = 0;
 
 	m_llNextFrame = 0;
 	m_llStreamOffset = 0;
@@ -94,6 +95,7 @@ void CAviFile::Destroy()
 	m_llIndex = 0;
 	m_uIndexType = 0;
 	m_llIndexSize = 0;
+	m_llIndexFrameOffset = 0;
 
 	m_llNextFrame = 0;
 	m_llStreamOffset = 0;
@@ -756,6 +758,21 @@ oexBOOL CAviFile::FindIndex()
 			// Save index position
 			m_llIndex = m_file.GetPtrPos() + sizeof( SRiffChunk );
 
+			SAviIndexEntry aie;
+			m_file.SetPtrPosBegin( m_llIndex );
+			while ( m_file.Read( &aie, sizeof( aie ) ) )
+			{
+				// Acceptable type?
+				if ( ( 0xffff0000 & eFtUncompressedVideo ) == ( 0xffff0000 & aie.dwChunkId )
+					 || ( 0xffff0000 & eFtCompressedVideo ) == ( 0xffff0000 & aie.dwChunkId )
+					 || ( 0xffff0000 & eFtPaletteChange ) == ( 0xffff0000 & aie.dwChunkId )
+					 || ( 0xffff0000 & eFtAudioData ) == ( 0xffff0000 & aie.dwChunkId ) )
+					return oexTRUE;
+
+				m_llIndexFrameOffset++;
+
+			} // end while
+
 			return oexTRUE;
 
 		} // end if
@@ -801,7 +818,8 @@ oexBOOL CAviFile::CacheFrame( oexINT64 x_llFrame, oexBOOL bForward )
 			return oexFALSE;
 
 	// File offset
-	oexINT64 ll = m_llIndex + ( x_llFrame * sizeof( SAviIndexEntry ) );
+	oexINT64 ll = ( m_llIndex + ( m_llIndexFrameOffset * sizeof( SAviIndexEntry ) ) ) 
+		          + ( x_llFrame * sizeof( SAviIndexEntry ) );
 
 	// Offset into index
 	if ( !m_file.SetPtrPosBegin( ll ) )
@@ -817,7 +835,7 @@ oexBOOL CAviFile::CacheFrame( oexINT64 x_llFrame, oexBOOL bForward )
 oexBOOL CAviFile::GetFrameData( oexINT64 llFrame, oexPVOID *pData, oexINT64 *pllSize, oexBOOL bForward )
 {
 	SAviIndexEntry* pAie = GetFrameInfo( llFrame, bForward );
-	if ( !pAie )
+	if ( !pAie || !pAie->dwSize )
 		return oexFALSE;
 
 	// Allocate memory for frame data

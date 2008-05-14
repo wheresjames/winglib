@@ -9,7 +9,6 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-
 // Event table
 BEGIN_EVENT_TABLE( CFrameWnd, wxFrame )
 
@@ -62,7 +61,7 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 	// Open the input avi file
 	if ( !in.Open( _T( "c:/TestClip.avi" ), FALSE ) )
 		return;
-
+	
 	// Output avi
 	if ( !out.Create( _T( "c:/TestOut.avi" ) ) )
 		return;
@@ -108,6 +107,12 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 			out.AddFrame( oex::vid::CAviFile::eFtUncompressedVideo, 0, pData, llSize );
 
 	} // end for
+
+	in.Destroy();
+	out.Destroy();
+	
+	m_cAviFile.Open( _T( "c:/TestClip.avi" ), FALSE );
+
 }
 
 void CFrameWnd::OnExit( wxCommandEvent& x_wxCe )
@@ -141,9 +146,26 @@ void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
 	rect.width = sizeClient.GetWidth();
 	rect.height = sizeClient.GetHeight();
 
-	dc.DrawRectangle( rect.x, rect.y, rect.width, rect.height );
+	LPVOID pData = NULL;
+	LONGLONG llSize = 0;
+	
+	// Open the input avi file
+	if ( !m_cAviFile.IsOpen() || !m_cAviFile.GetFrameData( 0, &pData, &llSize ) )
+	{	dc.SetBrush( wxBrush( wxColor( 255, 0, 0 ) ) );
+		dc.DrawRectangle( rect.x, rect.y, rect.width, rect.height );
+		return;
+	} // end if
+
+	wxImage		imgMem( 100, 100, (unsigned char*)pData, true );
+	wxBitmap	bmMem( imgMem );
+
+	// Create a memory DC
+	wxMemoryDC dcMem;
+	dcMem.SelectObject( bmMem );
+	dc.Blit( 0, 0, 100, 100, &dcMem, 0, 0 );
 
 //	StretchDraw( dc, m_cWxImg, rect );
+
 }
 
 void CFrameWnd::OnEraseBackground( wxEraseEvent& x_wxEe )

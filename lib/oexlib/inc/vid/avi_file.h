@@ -432,7 +432,7 @@ public:
 	*/
 	void SetFrameRate( float fRate )
 	{	Ash()->dwRate = oexLittleEndian( 1000000 );
-		Ash()->dwScale = oexLittleEndian( (oexUINT)( (float)Ash()->dwRate / 15.f ) );
+		Ash()->dwScale = oexLittleEndian( (oexUINT)( (float)Ash()->dwRate / fRate ) );
 		Amh()->dwMicroSecPerFrame = Ash()->dwScale;
 	}
 
@@ -444,6 +444,10 @@ public:
 	/// Returns the last file error
 	oexUINT GetLastError()
 	{	return m_file.GetLastError(); }
+
+	/// Returns non-zero if an AVI file is open
+	oexBOOL IsOpen()
+	{	return m_file.IsOpen(); }
 
 private:
 
@@ -467,6 +471,9 @@ private:
 
 	/// Offset to next frame
 	oexINT64								m_llNextFrame;
+
+	/// Offset into the index of the first frame
+	oexINT64								m_llIndexFrameOffset;
 
 	/// Set to non-zero if header structures are valid
 	oexBOOL									m_bValidHeaders;

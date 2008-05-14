@@ -12,16 +12,12 @@ set( src_files
 					../../stdafx.cpp 
 					../../main_app.cpp 
 					../../frame_wnd.cpp 
-					
-					../../vid/riff_file.cpp
    )
 		   
 set( header_files
 					../../stdafx.h
 					../../main_app.h
 					../../frame_wnd.h
-					
-					../../vid/riff_file.h
    )
 
 #-------------------------------------------------------------------
