@@ -6,7 +6,7 @@ set( project_name 	AviScan )
 
 set( output_dir 	../../bin ) 
 
-#add_definitions( -DUNICODE=1 -D_UNICODE=1 )
+add_definitions( -DUNICODE=1 -D_UNICODE=1 )
 
 set( src_files
 					../../stdafx.cpp 
@@ -41,14 +41,14 @@ project( ${project_name} )
 #find_package( OpenGL )
 #find_package( JPEG )
 
-#set( wxWidgets_USE_UNICODE 1 )
+set( wxUSE_UNICODE 1 )
 set( wxWidgets_USE_LIBS base core gl net )
-#set( wxWidgets_CONFIGURATION mswu )
 find_package( wxWidgets )
-if( wxWidgets_FOUND )
+#if( wxWidgets_FOUND )
 	include( ${wxWidgets_USE_FILE} )
 	include_directories( ${wxWidgets_INCLUDE_DIRS} )
-endif( wxWidgets_FOUND )
+#endif( wxWidgets_FOUND )
+
 
 #-------------------------------------------------------------------
 # Project
@@ -87,6 +87,7 @@ endif( _WINDOWS )
 target_link_libraries( 
 						${project_name} 
 						${wxWidgets_LIBRARIES}
+						/home/user/code/lib/winglib/lib/oexlib/bin/liboexlib.a
 					  )
 						 
 

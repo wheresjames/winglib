@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 
-#pragma comment( lib, "../../../../lib/oexlib/bin/debug/oexlib_d.lib" )
+//#pragma comment( lib, "../../../../lib/oexlib/bin/debug/oexlib_d.lib" )
 
 /*
 // Required by WxWidgets
@@ -50,3 +50,4 @@
 
 #endif // _UNICODE
 */
+

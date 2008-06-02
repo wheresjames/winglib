@@ -54,12 +54,12 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 	CreateStatusBar();
 
 	SetStatusText( _T( "This is a status text" ) );
-
-	UINT				uCopy = 100;
+/*
+	oex::oexUINT		uCopy = 100;
 	oex::vid::CAviFile	in, out;
 	
 	// Open the input avi file
-	if ( !in.Open( _T( "c:/TestClip.avi" ), FALSE ) )
+	if ( !in.Open( _T( "c:/TestClip.avi" ), oex::oexFALSE ) )
 		return;
 	
 	// Output avi
@@ -78,8 +78,8 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 
 	// Stream header
 	out.Ash()->fccType					= oex::vid::CAviFile::SAviStreamHeader::eAshStreamTypeVideo;
-//	out.Ash()->fccHandler				= oexLittleEndian( MAKE_FOURCC( 'DIB ' ) );
-	out.Ash()->fccHandler				= oexLittleEndian( MAKE_FOURCC( 'MP42' ) );
+//	out.Ash()->fccHandler				= oexLittleEndian( MAKE_FOURCC( 'D', 'I', 'B', ' ' ) );
+	out.Ash()->fccHandler				= oexLittleEndian( MAKE_FOURCC( 'M', 'P', '4', '2' ) );
 	out.Ash()->dwLength					= oexLittleEndian( uCopy );
 	out.Ash()->dwQuality				= oexLittleEndian( 0xffffffff );
 	out.Ash()->rcFrame.left				= 0;
@@ -90,8 +90,8 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 	// Bitmap info
 	out.Bi()->bmiHeader.biWidth			= oexLittleEndian( 320 );
 	out.Bi()->bmiHeader.biHeight		= oexLittleEndian( 240 );
-//	out.Bi()->bmiHeader.biCompression	= oexLittleEndian( MAKE_FOURCC( 'MJPG' ) );
-	out.Bi()->bmiHeader.biCompression	= oexLittleEndian( MAKE_FOURCC( 'MP42' ) );
+//	out.Bi()->bmiHeader.biCompression	= oexLittleEndian( MAKE_FOURCC( 'M', 'J', 'P', 'G' ) );
+	out.Bi()->bmiHeader.biCompression	= oexLittleEndian( MAKE_FOURCC( 'M', 'P', '4', '2' ) );
 	out.Bi()->bmiHeader.biPlanes		= oexLittleEndian( 1 );
 	out.Bi()->bmiHeader.biBitCount		= oexLittleEndian( 24 );
 	out.Bi()->bmiHeader.biSizeImage		= oexLittleEndian( oex::cmn::Align4( out.Bi()->bmiHeader.biWidth )
@@ -99,8 +99,8 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 														   * oex::cmn::FitTo( out.Bi()->bmiHeader.biBitCount, 8 ) );
 
 	// Copy frames
-	LPVOID pData = NULL;
-	LONGLONG llSize = 0;
+	oex::oexPVOID pData = NULL;
+	oex::oexINT64 llSize = 0;
 	for ( DWORD i = 0; i < uCopy; i++ )
 	{
 		if ( in.GetFrameData( i, &pData, &llSize ) )
@@ -112,7 +112,7 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 	out.Destroy();
 	
 	m_cAviFile.Open( _T( "c:/TestClip.avi" ), FALSE );
-
+*/
 }
 
 void CFrameWnd::OnExit( wxCommandEvent& x_wxCe )
@@ -132,7 +132,8 @@ void CFrameWnd::OnOpen( wxCommandEvent& x_wxCe )
 		return;
 
 	// Open the avi file
-	m_cAviFile.Open( fd.GetPath(), TRUE );
+	// +++ Check this cast
+//	m_cAviFile.Open( (oex::oexCSTR)fd.GetPath().c_str(), TRUE );
 }
 
 void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
@@ -146,11 +147,11 @@ void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
 	rect.width = sizeClient.GetWidth();
 	rect.height = sizeClient.GetHeight();
 
-	LPVOID pData = NULL;
-	LONGLONG llSize = 0;
-	
+	oex::oexPVOID pData = NULL;
+	oex::oexINT64 llSize = 0;
+
 	// Open the input avi file
-	if ( !m_cAviFile.IsOpen() || !m_cAviFile.GetFrameData( 0, &pData, &llSize ) )
+//	if ( !m_cAviFile.IsOpen() || !m_cAviFile.GetFrameData( 0, &pData, &llSize ) )
 	{	dc.SetBrush( wxBrush( wxColor( 255, 0, 0 ) ) );
 		dc.DrawRectangle( rect.x, rect.y, rect.width, rect.height );
 		return;

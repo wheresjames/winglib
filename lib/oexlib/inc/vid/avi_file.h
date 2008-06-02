@@ -35,11 +35,19 @@
 #pragma once
 
 // Creates a four cc from characters
+/*
 #define MAKE_FOURCC( str )  (													  \
 								  ( ( (unsigned long)(str) & 0x000000ff ) << 24 ) \
 								| ( ( (unsigned long)(str) & 0x0000ff00 ) <<  8 ) \
 								| ( ( (unsigned long)(str) & 0x00ff0000 ) >>  8 ) \
 								| ( ( (unsigned long)(str) & 0xff000000 ) >> 24 ) \
+							)
+*/
+#define MAKE_FOURCC( a, b, c, d )  (													  \
+								  ( ( (unsigned long)a ) << 24 ) \
+								| ( ( (unsigned long)b ) <<  8 ) \
+								| ( ( (unsigned long)c ) >>  8 ) \
+								| ( ( (unsigned long)d ) >> 24 ) \
 							)
 
 
@@ -59,33 +67,33 @@ public:
 
 	enum
 	{
-		eFccRiff				= MAKE_FOURCC( 'RIFF' ),
-		eFccAvi					= MAKE_FOURCC( 'AVI ' ),
-		eFccList				= MAKE_FOURCC( 'LIST' ),
+		eFccRiff				= MAKE_FOURCC( 'R', 'I', 'F', 'F' ),
+		eFccAvi					= MAKE_FOURCC( 'A', 'V', 'I', ' ' ),
+		eFccList				= MAKE_FOURCC( 'L', 'I', 'S', 'T' ),
 
-		eAviHeader				= MAKE_FOURCC( 'hdrl' ),
-		eAviMainHeader			= MAKE_FOURCC( 'avih' ),
-		eAviStreamInfo			= MAKE_FOURCC( 'strl' ),
-		eAviStreamHeader		= MAKE_FOURCC( 'strh' ),
-		eAviStreamFormat		= MAKE_FOURCC( 'strf' ),
-		eAviExtraHeaderData		= MAKE_FOURCC( 'strd' ),
-		eAviStreamName			= MAKE_FOURCC( 'strn' ),
+		eAviHeader				= MAKE_FOURCC( 'h', 'd', 'r', 'l' ),
+		eAviMainHeader			= MAKE_FOURCC( 'a', 'v', 'i', 'h' ),
+		eAviStreamInfo			= MAKE_FOURCC( 's', 't', 'r', 'l' ),
+		eAviStreamHeader		= MAKE_FOURCC( 's', 't', 'r', 'h' ),
+		eAviStreamFormat		= MAKE_FOURCC( 's', 't', 'r', 'f' ),
+		eAviExtraHeaderData		= MAKE_FOURCC( 's', 't', 'r', 'd' ),
+		eAviStreamName			= MAKE_FOURCC( 's', 't', 'r', 'n' ),
 
-		eAviStream				= MAKE_FOURCC( 'movi' ),
+		eAviStream				= MAKE_FOURCC( 'm', 'o', 'v', 'i' ),
 
 		/// Version 1 AVI index
-		eAviIndex				= MAKE_FOURCC( 'idx1' ),
+		eAviIndex				= MAKE_FOURCC( 'i', 'd', 'x', '1' ),
 
 		/// Version 2 AVI index
-		eAviIndex2				= MAKE_FOURCC( 'indx' ),
+		eAviIndex2				= MAKE_FOURCC( 'i', 'n', 'd', 'x' ),
 	};
 
 	enum
 	{
-		eFtUncompressedVideo	= MAKE_FOURCC( '00db' ),
-		eFtCompressedVideo		= MAKE_FOURCC( '00dc' ),
-		eFtPaletteChange		= MAKE_FOURCC( '00pc' ),
-		eFtAudioData			= MAKE_FOURCC( '00wb' )
+		eFtUncompressedVideo	= MAKE_FOURCC( '0', '0', 'd', 'b' ),
+		eFtCompressedVideo		= MAKE_FOURCC( '0', '0', 'd', 'c' ),
+		eFtPaletteChange		= MAKE_FOURCC( '0', '0', 'p', 'c' ),
+		eFtAudioData			= MAKE_FOURCC( '0', '0', 'w', 'b' )
 	};
 
 // AVI structures are packed on word bounderies
@@ -181,10 +189,10 @@ public:
 	{
 		enum
 		{
-			eAshStreamTypeVideo		= MAKE_FOURCC( 'vids' ),
-			eAshStreamTypeAudio		= MAKE_FOURCC( 'auds' ),
-			eAshStreamTypeMidi		= MAKE_FOURCC( 'mids' ),
-			eAshStreamTypeText		= MAKE_FOURCC( 'txts' )
+			eAshStreamTypeVideo		= MAKE_FOURCC( 'v', 'i', 'd', 's' ),
+			eAshStreamTypeAudio		= MAKE_FOURCC( 'a', 'u', 'd', 's' ),
+			eAshStreamTypeMidi		= MAKE_FOURCC( 'm', 'i', 'd', 's' ),
+			eAshStreamTypeText		= MAKE_FOURCC( 't', 'x', 't', 's' )
 		};
 
 		enum

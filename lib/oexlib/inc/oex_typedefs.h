@@ -52,7 +52,7 @@ typedef unsigned short              oexUINT16;
 typedef int				 	        oexINT32;
 typedef unsigned int    			oexUINT32;
 typedef long long			   		oexINT64;
-typedef unsigned long long			oexUINT64;
+typedef unsigned long long		    oexUINT64;
 #endif
 		
 		
@@ -83,7 +83,7 @@ typedef wchar_t                     oexCHARW;
 typedef oexCHARW *                  oexSTRW;
 typedef const oexCHARW *            oexCSTRW;
 
-#ifdef UNICODE
+#ifdef oexUNICODE
 	typedef wchar_t					oexTCHAR;
 #else
 	typedef char					oexTCHAR;
@@ -94,6 +94,9 @@ typedef oexCONST oexTCHAR*			oexCSTR;
 
 typedef void*						oexPVOID;
 typedef void oexCONST *				oexCPVOID;
+
+typedef unsigned char				oexBYTE;
+typedef oexBYTE*					oexPBYTE;
 
 typedef oexUINT						oexTYPEOF_PTR;
 

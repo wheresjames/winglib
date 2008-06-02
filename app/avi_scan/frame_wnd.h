@@ -2,12 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_FRAMEWND_H__17157451_4597_497E_A568_60C3007F3590__INCLUDED_)
-#define AFX_FRAMEWND_H__17157451_4597_497E_A568_60C3007F3590__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 class CFrameWnd : public wxFrame  
 {
@@ -58,8 +53,8 @@ private:
 
 	wxImage					m_cWxImg;
 
-	oex::vid::CAviFile		m_cAviFile;
+//	oex::vid::CAviFile		m_cAviFile;
 
 };
 
-#endif // !defined(AFX_FRAMEWND_H__17157451_4597_497E_A568_60C3007F3590__INCLUDED_)
+

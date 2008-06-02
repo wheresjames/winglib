@@ -231,9 +231,9 @@ namespace cmn
 		if ( !uLen )
 			return p;
 
-		nLen--;
-		while ( i < nLen )
-			Swap( ( (oexPBYTE)p )[ i++ ], ( (oexPBYTE)p )[ nLen-- ] );
+		uLen--;
+		while ( i < uLen )
+			Swap( ( (oexPBYTE)p )[ i++ ], ( (oexPBYTE)p )[ uLen-- ] );
 
 		return p;
 	}
@@ -241,7 +241,7 @@ namespace cmn
 	template < typename T >
 		T& RevObj( T& r )
 	{
-		oexPBYTE	p = (LPBYTE)&r;
+		oexPBYTE	p = (oexPBYTE)&r;
 		oexUINT		s = sizeof( T ) - 1;
 		oexUINT		i = 0;
 

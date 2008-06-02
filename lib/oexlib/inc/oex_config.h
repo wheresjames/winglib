@@ -53,7 +53,7 @@
 #	define OEX_WIN32
 #endif
 
-#ifdef _UNICODE
+#if defined( UNICODE )
 #   define oexUNICODE
 #endif
 

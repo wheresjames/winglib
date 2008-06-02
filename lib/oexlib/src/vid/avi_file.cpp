@@ -650,7 +650,7 @@ oexBOOL CAviFile::AddFrame( oexUINT x_uType, oexUINT x_uStream, oexCPVOID x_pDat
 	rc.lDataSize = x_uSize;
 
 	if ( x_uStream )
-	{	oex::CStr sStream( oex::CStr().Fmt( "%lu", x_uStream ) );
+	{	oex::CStr sStream( oex::CStr().Fmt( oexT( "%lu" ), x_uStream ) );
 		rc.chFccType[ 0 ] = sStream[ 0 ];
 		rc.chFccType[ 1 ] = sStream[ 1 ];
 	} // end if
