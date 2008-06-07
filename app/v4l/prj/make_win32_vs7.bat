@@ -1,0 +1,1 @@
+start make.bat win32_vs7 "Visual Studio 7"
