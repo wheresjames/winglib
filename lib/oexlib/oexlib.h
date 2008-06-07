@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 /*! \mainpage oex - Base classes
@@ -59,7 +59,7 @@
     -   Provide optional Squirrel-Script hooks.
 
   \subsection sec_tips Tips and Guidlines
-    
+
     -   Create tests for new classes.  See <b>test_functions.h</b>.
         Before fixing a bug, create a test that exemplifies it, then
         fix the bug.
@@ -68,17 +68,17 @@
         to get a list of known issues and task list.
 
     -   !!! is used to mark hacks that may cause trouble or flags other important
-        information.  Sometimes a perfect solution doesn't reaveal itself.  This 
+        information.  Sometimes a perfect solution doesn't reaveal itself.  This
         marks things that may need further work.
 
     -   iii Flags some important bit of information about how the code works.
 
-    -   Maintain a 'clean' namespace, do not require the introduction 
-        of OS or library specific declarations in the namespace.  Don't 
-        add things like <b>#include &lt;Windows.h&gt;</b> or <b>#include &lt;string&gt;</b> to 
+    -   Maintain a 'clean' namespace, do not require the introduction
+        of OS or library specific declarations in the namespace.  Don't
+        add things like <b>#include &lt;Windows.h&gt;</b> or <b>#include &lt;string&gt;</b> to
         header files.  Isolate dependencies into the <b>os</b> folder.
 
-    -   Do *not* use tabs.  Use spaces only.  This library is meant to be cross 
+    -   Do *not* use tabs.  Use spaces only.  This library is meant to be cross
         platform and all editors do not support tabs the same way.
 
     -   All functionality should be well documented using Doxygen.
@@ -119,8 +119,8 @@
         -   fn      =   function
         -   it      =   iterator
         -   h       =   handle
-        -   x       =   Cartesian x value 
-        -   y       =   Cartesian y value 
+        -   x       =   Cartesian x value
+        -   y       =   Cartesian y value
         -   pt      =   Point
         -   rt      =   Rectangle
 
@@ -140,10 +140,10 @@
   \subsection sub_linking Linking to your project
 
 		-	It is recommended you add something to the following
-			to your projects main header or <b> StdAfx.h </b> file.  
+			to your projects main header or <b> StdAfx.h </b> file.
 
 		\code
-		
+
 	#include "../../lib/oexlib/oexlib.h"
 
 		\endcode
@@ -162,12 +162,12 @@
 
 		-	You could also add the <b> oexlib </b> folder to
 			your include path.  Add the libs to your project
-			settings, and add to your headers something to 
+			settings, and add to your headers something to
 			the effect of...
 
 		\code
-	
-	#include "oexlib.h"	
+
+	#include "oexlib.h"
 
 		\endcode
 
@@ -175,7 +175,7 @@
 
 	Before using any functions in this library, be sure and call
 	oex::COex::Init().  Before your program shuts down,
-	call oex::COex::Uninit().  You may also want to run the 
+	call oex::COex::Uninit().  You may also want to run the
     self test functions after initialization, at least in the debug
 	mode.
 
@@ -188,14 +188,14 @@
 	oex::CTestManager::Run();
 
 
-	// ... Use oexlib ... 
+	// ... Use oexlib ...
 
 
 	// Cleanup oexlib
 	oex::COex::Uninit();
 
 	\endcode
-				
+
 
   \subsection sub_compile Compiling this library.
 
@@ -241,7 +241,7 @@
 		- CORBA / ACE / TAO
 			-	http://www.cs.wustl.edu/~schmidt/corba.html
 
-		- STLport - You may wish to use this library instead of the 
+		- STLport - You may wish to use this library instead of the
 					one included with your compiler.
 			-	http://www.stlport.org/
 
@@ -253,58 +253,58 @@
 
 	Guiding principles that provide direction when facing real world problems.
 
-	- <b> Simpler is better </b> - 
-		Usually simpler implementations are better. There should not be features 
-		added to the code base that are not needed to complete the application. 
-		Some problems are inherently complex. For these situations, complexity 
-		should be isolated as much as possible. Attempt to reduce complex problems 
+	- <b> Simpler is better </b> -
+		Usually simpler implementations are better. There should not be features
+		added to the code base that are not needed to complete the application.
+		Some problems are inherently complex. For these situations, complexity
+		should be isolated as much as possible. Attempt to reduce complex problems
 		to simple interfaces.
 
-	- <b> Make extensive use of existing libraries </b> - 
-		Don't re-invent the wheel. Lot's of good free libraries exist. These 
-		should be utilized as often as possible. Many times it is better to accept 
-		slightly less functionality for an already proven and developed framework 
-		and idea.   Be sure you know where the value of your product lies. It will 
+	- <b> Make extensive use of existing libraries </b> -
+		Don't re-invent the wheel. Lot's of good free libraries exist. These
+		should be utilized as often as possible. Many times it is better to accept
+		slightly less functionality for an already proven and developed framework
+		and idea.   Be sure you know where the value of your product lies. It will
 		help in making these decisions.
 
-	- <b> Prevent unmaintainable code </b> - 
-		Hacked together code is far more trouble than it's worth. Debugging times 
-		far exceed the time it takes to develop good design.  Throwing away source 
-		code can be good.  Especially when the new functionality is significantly 
+	- <b> Prevent unmaintainable code </b> -
+		Hacked together code is far more trouble than it's worth. Debugging times
+		far exceed the time it takes to develop good design.  Throwing away source
+		code can be good.  Especially when the new functionality is significantly
 		different than existing functionality.  It can be faster, more productive,
         more reliable, ( and often more enjoyable ) to just start over on a design.
 
-	- <b> New releases often have less source code then their predecessors </b> - 
+	- <b> New releases often have less source code then their predecessors </b> -
 		Trimming away features that are not used will simplify the code base and make
-		software easier to maintain and extend. Features that are later determined to 
+		software easier to maintain and extend. Features that are later determined to
 		be useless should be dropped and not supported endlessly.  After all, it's
         in source control should you need it again, right, right???
-		
-	- <b> Open architecture results in higher levels of functionality and reliability </b> - 
-		The basic framework of an application does not usually hold any significant 
-		commercial value, however does pose significant possibility for bugs and 
-		limitations. Open frameworks and architectures provide great amounts of 
-		productivity by leveraging the work of others.  Look at Boost for example.  
+
+	- <b> Open architecture results in higher levels of functionality and reliability </b> -
+		The basic framework of an application does not usually hold any significant
+		commercial value, however does pose significant possibility for bugs and
+		limitations. Open frameworks and architectures provide great amounts of
+		productivity by leveraging the work of others.  Look at Boost for example.
         Consider carefully the option of using existing open frameworks.
 
-	- <b> Modular architecture supports high source code reuse </b> - 
-		Code that is broken down into modules and libraries is easier to maintain and 
+	- <b> Modular architecture supports high source code reuse </b> -
+		Code that is broken down into modules and libraries is easier to maintain and
 		extend.  Libraries are easier to debug than large single code bases.
 
-	- <b> When in doubt, throw away and rewrite </b> - 
-		Experience says, usually throwing out questionable code is faster and better 
-		than attempting to 'code around' it's limitations. Failing to heed this will 
+	- <b> When in doubt, throw away and rewrite </b> -
+		Experience says, usually throwing out questionable code is faster and better
+		than attempting to 'code around' it's limitations. Failing to heed this will
 		surely result in many problems and long painful debugging.
 
-	- <b> Design based on functionality </b> - 
-		Design should be based on required functionality. Spending the time up front 
-		to eliminate features that are not needed will pay off in the long run in 
+	- <b> Design based on functionality </b> -
+		Design should be based on required functionality. Spending the time up front
+		to eliminate features that are not needed will pay off in the long run in
 		shorter development and debugging cycles.
 
-	- <b> Focus on customer goals </b> - 
+	- <b> Focus on customer goals </b> -
 		Decisions should always be made with your customers goals in mind.  To often,
-		time and money is spent on features customers don't need or won't use, and 
-        sometimes, don't want.  These efforts are a waste of time and money, and 
+		time and money is spent on features customers don't need or won't use, and
+        sometimes, don't want.  These efforts are a waste of time and money, and
         eventually a liability when bugs crop up in and around these useless features.
 
 
@@ -312,65 +312,65 @@
 
 	These items require specific actions or describe implementation details.
 
-	- <b> Have a complete feature list in hand before starting </b> - 
-		Work out all the requirements, at the macro level before starting development. 
-		This includes installation, documentation, and deployment. Then try hard to 
-		resist changes.  It's much better to roll changes into the next version which 
-		can come quickly if there is diligent restraint to making changes to the feature 
+	- <b> Have a complete feature list in hand before starting </b> -
+		Work out all the requirements, at the macro level before starting development.
+		This includes installation, documentation, and deployment. Then try hard to
+		resist changes.  It's much better to roll changes into the next version which
+		can come quickly if there is diligent restraint to making changes to the feature
 		list.
 
-	- <b> Zero bug policy </b> - 
-		Fix existing bugs before adding new features. Bugs get harder and more expensive 
+	- <b> Zero bug policy </b> -
+		Fix existing bugs before adding new features. Bugs get harder and more expensive
 		to fix as time goes on. In extreme cases, unfixed bugs can doom an entire project,
-		forcing a complete re-design before the opportunity to capitalize on any of the 
-        current effort.  
-		
-	- <b> Debugging plan </b> - 
-		This is a very important element that is often forgotten. Before implementing a 
-		product, plan out how it will be deployed and used. Devise a strategy for collecting 
-		customer feedback, memory dumps, stack traces, error logs, etc... This should be as 
-		automated as possible. Adding this as an after thought can be very time consuming 
+		forcing a complete re-design before the opportunity to capitalize on any of the
+        current effort.
+
+	- <b> Debugging plan </b> -
+		This is a very important element that is often forgotten. Before implementing a
+		product, plan out how it will be deployed and used. Devise a strategy for collecting
+		customer feedback, memory dumps, stack traces, error logs, etc... This should be as
+		automated as possible. Adding this as an after thought can be very time consuming
 		and can extend project time-lines significantly.  <em>PS: The tighter your deadlines,
 		the more you'll be needing this ;)</em>
 
-	- <b> Installation and documentation </b> - 
+	- <b> Installation and documentation </b> -
 		Even if the developers are not responsible for this, a plan should be in place and
-		implications known before starting development. If tech-writers are available, it 
-		is possible for developers to create Doxygen-like commenting that is sufficient for 
-		techwriters to transcribe into final documentation. This can greatly streamline an 
+		implications known before starting development. If tech-writers are available, it
+		is possible for developers to create Doxygen-like commenting that is sufficient for
+		techwriters to transcribe into final documentation. This can greatly streamline an
 		area that developers notoriously find tedious.
 
-	- <b> Automatic testing in libraries </b> - 
-		If libraries are to be maintained and reused. Automatic testing will make it much 
-		easier to extend without breaking current functionality. When a bug is found in a 
+	- <b> Automatic testing in libraries </b> -
+		If libraries are to be maintained and reused. Automatic testing will make it much
+		easier to extend without breaking current functionality. When a bug is found in a
 		library, a test should first be written that identifies the bug. Then fix the bug.
 
-	- <b> Code based documentation system </b> - 
+	- <b> Code based documentation system </b> -
 		Doxygen-like documentation is probably the easiest documentation method for
 		programmers since the documentation is in the actual source code.   Take note
-		here programmers.  Much of the time spent writting technical descriptions for 
-		tech writers can be done here much less painfully.  The professionalism alone 
+		here programmers.  Much of the time spent writting technical descriptions for
+		tech writers can be done here much less painfully.  The professionalism alone
 		makes this worth while.
 
-	- <b> Code versioning system </b> - 
+	- <b> Code versioning system </b> -
 		The days of logging changes in file headers and source comments are over. As is
 		saving backups into zip files. Code versioning systems such as Subversion, CVS and
 		Source Safe not only backup code, but provide huge debugging help by allowing you to
 		see when and where changes to code were made, and by who.
 
-	- <b> Automatic builds </b> - 
-		For large projects it is vital that builds be made by a single batch file or utility. 
-		It is worth the time it takes to set this up and maintain it. Complicating the build 
-		cycle will result in 'stupid' mistakes and eat up enormous amounts of time trying to 
-		get the build 'right' from memory. Check lists are also inadequate, mistakes will be 
-		made and it is too time consuming. Shot for nothing less than complete automation. In 
-		fact, having a dedicated machine that executes completely autonomous nightly builds 
-		from the code versioning system is becoming the norm. This helps greatly when trying 
+	- <b> Automatic builds </b> -
+		For large projects it is vital that builds be made by a single batch file or utility.
+		It is worth the time it takes to set this up and maintain it. Complicating the build
+		cycle will result in 'stupid' mistakes and eat up enormous amounts of time trying to
+		get the build 'right' from memory. Check lists are also inadequate, mistakes will be
+		made and it is too time consuming. Shot for nothing less than complete automation. In
+		fact, having a dedicated machine that executes completely autonomous nightly builds
+		from the code versioning system is becoming the norm. This helps greatly when trying
 		to determine exactly when a bug is introduced.
 
-	- <b> Automatic bug tracking </b> - 
-		A list of current issues cannot be kept in your head. Some method of bug tracking needs 
-		to be in place. Ideally, an automated way of gathering this information from users would 
+	- <b> Automatic bug tracking </b> -
+		A list of current issues cannot be kept in your head. Some method of bug tracking needs
+		to be in place. Ideally, an automated way of gathering this information from users would
 		be used.
 
 
@@ -485,10 +485,11 @@ namespace os
 //------------------------------------------------------------------
 namespace os
 {
+#	include "inc/os/trace.h"
 #   include "inc/os/base_file.h"
 #   include "inc/os/ip_address.h"
 #   include "inc/os/ip_socket.h"
-#   include "inc/os/thread.h"    
+#   include "inc/os/thread.h"
 };
 
 //------------------------------------------------------------------
@@ -503,6 +504,7 @@ namespace os
 #include "inc/file.h"
 #include "inc/zip.h"
 #include "inc/unzip.h"
+#include "inc/log.h"
 #include "inc/find_files.h"
 #include "inc/circ_buf.h"
 #include "inc/fifo_sync.h"
@@ -575,14 +577,14 @@ namespace vid
 	oex::CTestManager::Run();
 
 
-	// ... Use oexlib ... 
+	// ... Use oexlib ...
 
 
 	// Cleanup oexlib
 	oex::COexlib::Uninit();
 
 	\endcode
-	
+
 */
 //==================================================================
 class COex
@@ -630,10 +632,10 @@ public:
 	/**
 
 		Call before using any oexlib functionality.
-		
+
 		\return Positive non-zero value on success.  If this function
 				fails, the return value is negative.
-	
+
 		\see Uninit()
 	*/
 	static oexINT Init();
@@ -644,10 +646,10 @@ public:
 	/// Call this function to clean up the oex library
 	/**
 		Call this function before your program shuts down.
-		
+
 		\return Positive non-zero value on success.  If this function
 				fails, the return value is negative.
-	
+
 		\see Init()
 	*/
 	static oexINT Uninit();

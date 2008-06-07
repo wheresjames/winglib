@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// std_os.h
+// log.cpp
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -32,38 +32,28 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#pragma once
+#include "../oexlib.h"
 
-//#define _LARGE_FILES
+OEX_USING_NAMESPACE
 
-#include <stdlib.h>
-#include <stdarg.h>
-#include <cstdio>
-#include <sys/types.h>
-#include <dirent.h>
-#include <sys/stat.h>
-//#include <stdio.h>
-#include <wchar.h>
-#include <string.h>
-//#include <inttypes.h>
+CLog CLog::m_logGlobal;
 
+oexBOOL CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uErr, oexCSTR x_pErr )
+{
+	// Create log file if needed
+	if ( !m_file.IsOpen() )
+		if ( !m_file.CreateNew( oexT( "/home/landshark/code/debug.log" ) ).IsOpen() )
+			return oexFALSE;
 
-#include <errno.h>
-#include <unistd.h>
-#include <pthread.h>
+	// Do we have a source file name?
+	if ( x_pFile )
+		m_file.Write( CStr().Fmt( oexT( "%s:(%u) " ), x_pFile, x_nLine ) );
 
-#include <sys/time.h>
-#include <sys/times.h>
-#include <time.h>
-#include <locale.h>
+	// Ensure error is not null
+	if ( !x_pErr )
+		x_pErr = oexT( "Unspecified" );
 
-#include <sys/mman.h>
-
-//#include <uuid/uuid.h>
-
-#include <arpa/inet.h>
-
-#include <execinfo.h>
-
-
-
+	// Write out the log
+	return m_file.Write( CStr().Fmt( oexT( "0x%X (%u) : %s\r\n%s\r\n" ),
+								 	 x_uErr, x_uErr, x_pErr, os::CTrace::GetBacktrace().Ptr() ) );
+}

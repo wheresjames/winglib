@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 #pragma once
@@ -43,7 +43,7 @@ private:
     /// Destructor
 	virtual ~CSys() {}
 
-public:	
+public:
 
     /// Initializes os system stuff
     static oexBOOL Init();
@@ -126,7 +126,7 @@ public:
 	static oexPVOID MemSet( oexPVOID pDst, oexINT nCh, oexUINT uSize );
 
     static oexPVOID Zero( oexPVOID pDst, oexUINT uSize )
-    {   return MemSet( pDst, 0, uSize ); }  
+    {   return MemSet( pDst, 0, uSize ); }
 
     /// Creates a guid
     static oexGUID * CreateGuid( oexGUID *pGuid );
@@ -153,7 +153,7 @@ public:
 public:
 
 	enum etWait
-	{	
+	{
 		/// Value indicating wait succeeded
 		waitSuccess = 0,
 
@@ -164,7 +164,7 @@ public:
 		waitFailed = -2
 	};
 
-    enum 
+    enum
     {
         /// Maximum number of handles that can be passed to WaitForMultipleObjects()
         eMaximumWaitObjects = 64
@@ -180,7 +180,7 @@ public:
 	/**
 		\param [in] x_hHandle	-	Handle to close
 
-		\see 		
+		\see
 	*/
 	static void CloseHandle( t_WAITABLE x_pHandle );
 
@@ -192,7 +192,7 @@ public:
 		\param [in] x_hEvent		 -	Handle to duplicate
 
 		\return Duplicate handle to object
-	
+
 		\see osCreateEvent()
 	*/
 	static t_WAITABLE DuplicateHandle( t_WAITABLE x_pHandle );
@@ -205,10 +205,10 @@ public:
 		\param [in] x_pHandle	-	Handle to waitable object
 		\param [in] x_uTimeout	-	Maximum amount of time, in
 									milli-seconds, to wait.
-		
+
 		\return Zero if success, otherwise waitTimeout or waitFailed
-	
-		\see 
+
+		\see
 	*/
 	static oexINT WaitForSingleObject( t_WAITABLE x_pHandle, oexUINT x_uTimeout );
 
@@ -220,17 +220,17 @@ public:
 		\param [in] x_uObjects	-	Number of waitable objects
 		\param [in] x_pHandle	-	Array of waitable objects
 		\param [in] x_bWaitAll	-	Non-zero if you wish to wait for
-									all objects to become signaled. 
+									all objects to become signaled.
 									Otherwise this function returns
 									as soon as any objects are in
 									the signaled state.
-		\param [in] x_uTimeout	-	Maximum amount of time, in 
+		\param [in] x_uTimeout	-	Maximum amount of time, in
 									milli-seconds, to wait.
-		
-		\return Zero based index of object that is signaled if success, 
+
+		\return Zero based index of object that is signaled if success,
 				otherwise waitTimeout or waitFailed
-	
-		\see 
+
+		\see
 	*/
 	static oexINT WaitForMultipleObjects( oexUINT x_uObjects, t_WAITABLE *x_pHandle, oexBOOL x_bWaitAll, oexUINT x_uTimeout );
 
@@ -240,10 +240,10 @@ public:
 	/// Thread safe value increment.
 	/**
 		\param [in] x_puVal		-	Pointer to value to increment.
-		
+
 		\return Value *before* incrementing.
-	
-		\see 
+
+		\see
 	*/
 	static oexULONG InterlockedIncrement( oexLONG *x_puVal );
 
@@ -253,10 +253,10 @@ public:
 	/// Thread safe value increment.
 	/**
 		\param [in] x_puVal		-	Pointer to value to decrement
-		
+
 		\return Value *before* decrementing.
-	
-		\see 
+
+		\see
 	*/
 	static oexULONG InterlockedDecrement( oexLONG *x_puVal );
 
@@ -267,7 +267,7 @@ public:
 	/**
 		Use with wait functions
 	*/
-	static oexCONST oexUINT vInfinite() 
+	static oexCONST oexUINT vInfinite()
     {   return c_Infinite; }
 
 	//==============================================================
@@ -277,7 +277,7 @@ public:
 	/**
 		Use with wait functions
 	*/
-	static oexCONST oexUINT vMaximumWaitObjects() 
+	static oexCONST oexUINT vMaximumWaitObjects()
     {   return c_uMaximumWaitObjects; }
 
 private:
@@ -321,7 +321,6 @@ public:
 
 public:
 
-
 };
 
 //==================================================================
@@ -336,28 +335,28 @@ typedef struct tagSResInfo
 {
 	// Resource type
 	oexUINT					uType;
-	
+
 	// Pointer to resource
 	oexPVOID				pRes;
 
 	// CStr object containing name
 	oexPVOID				pName;
-	
+
 	// Resource state
 	oexINT					nState;
-	
+
 public:
-	
+
 	enum
 	{
 		eInvalid = 0,
 		eNamedEvent
-	};	
-	
+	};
+
 	static tagSResInfo* Create( oexCSTR x_pName );
-	
+
 	static void Release( tagSResInfo *x_pRi );
-	
+
 } SResInfo;
 
 

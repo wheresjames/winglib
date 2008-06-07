@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// std_os.h
+// trace.h
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -31,39 +31,38 @@
 //   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
-
 #pragma once
 
-//#define _LARGE_FILES
+//==================================================================
+// CTrace
+//
+/// Os independent stack tracing functions
+/**
 
-#include <stdlib.h>
-#include <stdarg.h>
-#include <cstdio>
-#include <sys/types.h>
-#include <dirent.h>
-#include <sys/stat.h>
-//#include <stdio.h>
-#include <wchar.h>
-#include <string.h>
-//#include <inttypes.h>
+*/
+//==================================================================
+class CTrace
+{
+private:
+	CTrace() {}
+	virtual ~CTrace() {}
+
+public:
+
+	//==============================================================
+	// GetBacktrace()
+	//==============================================================
+	/// Returns a human readable stacktrace
+	/**
+		\param [in] x_uSkip - Number of functions to skip from the
+							  top of the stack.
+		\param [in] x_uMax	- Maximum number of functions to return
+
+		\return Module instance handle
+
+		\see
+	*/
+	static CStr GetBacktrace( oexUINT x_uSkip = 0, oexUINT x_uMax = 100 );
 
 
-#include <errno.h>
-#include <unistd.h>
-#include <pthread.h>
-
-#include <sys/time.h>
-#include <sys/times.h>
-#include <time.h>
-#include <locale.h>
-
-#include <sys/mman.h>
-
-//#include <uuid/uuid.h>
-
-#include <arpa/inet.h>
-
-#include <execinfo.h>
-
-
-
+};

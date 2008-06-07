@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// std_os.h
+// trace.cpp
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -26,44 +26,42 @@
 //   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
 //   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 //   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   HOWEVER CAUSED AND ON ANY #include "opc/breloc/basic.c"THEORY OF LIABILITY, WHETHER IN
 //   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 //   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#pragma once
+#include "../../../oexlib.h"
+#include "std_os.h"
 
-//#define _LARGE_FILES
+OEX_USING_NAMESPACE
+using namespace OEX_NAMESPACE::os;
 
-#include <stdlib.h>
-#include <stdarg.h>
-#include <cstdio>
-#include <sys/types.h>
-#include <dirent.h>
-#include <sys/stat.h>
-//#include <stdio.h>
-#include <wchar.h>
-#include <string.h>
-//#include <inttypes.h>
+CStr CTrace::GetBacktrace( oexUINT x_uSkip, oexUINT x_uMax )
+{
+	// Allocate space for pointers
+	TMem< void* > memPtrs;
+	if ( !memPtrs.OexNew( x_uMax ).Ptr() )
+		return CStr();
 
+	// Get backtrace
+	oexINT nPtrs = backtrace( memPtrs.Ptr(), x_uMax );
+	if ( !nPtrs )
+		return CStr();
 
-#include <errno.h>
-#include <unistd.h>
-#include <pthread.h>
+	// Get function symbols
+	char ** sStrings = backtrace_symbols( memPtrs.Ptr(), nPtrs );
 
-#include <sys/time.h>
-#include <sys/times.h>
-#include <time.h>
-#include <locale.h>
+	CStr str;
 
-#include <sys/mman.h>
+	for ( oexINT i = x_uSkip; i < nPtrs; i++ )
 
-//#include <uuid/uuid.h>
+		if ( sStrings && sStrings[ i ] )
+			str += CStr().Fmt( oexT( "[0x%X] %s\r\n" ), (oexUINT)memPtrs.Ptr( i ), sStrings[ i ] );
+		else
+			str += CStr().Fmt( oexT( "[0x%X] ???\r\n" ), (oexUINT)memPtrs.Ptr( i ) );
 
-#include <arpa/inet.h>
-
-#include <execinfo.h>
-
-
+	return str;
+}
 

@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// std_os.h
+// log.h
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -34,36 +34,65 @@
 
 #pragma once
 
-//#define _LARGE_FILES
 
-#include <stdlib.h>
-#include <stdarg.h>
-#include <cstdio>
-#include <sys/types.h>
-#include <dirent.h>
-#include <sys/stat.h>
-//#include <stdio.h>
-#include <wchar.h>
-#include <string.h>
-//#include <inttypes.h>
+//==================================================================
+// CLog
+//
+/// Provides generic logging
+/**
 
+*/
+//==================================================================
+class CLog
+{
+public:
 
-#include <errno.h>
-#include <unistd.h>
-#include <pthread.h>
+public:
 
-#include <sys/time.h>
-#include <sys/times.h>
-#include <time.h>
-#include <locale.h>
+    /// Default constructor
+    CLog()
+    {
+    }
 
-#include <sys/mman.h>
+    /// Destructor
+    ~CLog()
+    {
+    }
 
-//#include <uuid/uuid.h>
+	//==============================================================
+	// Log()
+	//==============================================================
+	/// Writes a string to the file
+	/**
+		\param [in] x_pFile		- Source file name
+		\param [in] x_uLine		- Source file line number
+		\param [in] x_uErr		- Error code
+		\param [in] x_pErr		- Error string
 
-#include <arpa/inet.h>
+		\return Non-zero if success
 
-#include <execinfo.h>
+		\see
+	*/
+    oexBOOL Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uErr, oexCSTR x_pErr );
 
+private:
 
+	/// Log file
+	CFile								m_file;
+
+public:
+
+	//==============================================================
+	// GlobalLog()
+	//==============================================================
+	/// Returns a pointer to the global log object
+	static CLog& GlobalLog()
+	{	return m_logGlobal;
+	}
+
+private:
+
+	/// Global log file
+	static CLog							m_logGlobal;
+};
 

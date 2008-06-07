@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -40,7 +40,7 @@
 //
 /// File access
 /**
-	
+
 */
 //==================================================================
 class CFile
@@ -55,7 +55,7 @@ public:
 		/// Constructor
 		CRestoreFilePos( CFile *x_pF )
 		{	m_pf = x_pF;
-			if ( m_pf ) m_llPos = x_pF->GetPtrPos(); 
+			if ( m_pf ) m_llPos = x_pF->GetPtrPos();
 		}
 
 		/// Destructor
@@ -66,9 +66,9 @@ public:
 		oexBOOL Restore()
 		{	CFile *pF = m_pf;
 			m_pf = oexNULL;
-			if ( !pF || !pF->IsOpen() ) 
+			if ( !pF || !pF->IsOpen() )
 				return oexFALSE;
-			pF->SetPtrPosBegin( m_llPos ); 
+			pF->SetPtrPosBegin( m_llPos );
 			return oexTRUE;
 		}
 
@@ -114,34 +114,34 @@ public:
     {   Destroy(); }
 
     /// Creates a new file, fails if file already exists
-    CFile& CreateNew(      oexCSTR x_pFile, 
-                            oexUINT x_eAccess = os::CBaseFile::eAccessRead | os::CBaseFile::eAccessWrite, 
+    CFile& CreateNew(      oexCSTR x_pFile,
+                            oexUINT x_eAccess = os::CBaseFile::eAccessRead | os::CBaseFile::eAccessWrite,
                             oexUINT x_eShare = os::CBaseFile::eShareRead | os::CBaseFile::eShareWrite )
     {   return Create( x_pFile, os::CBaseFile::eDisCreateNew, x_eAccess, x_eShare ); }
 
     /// Creates a new file, truncates any existing file
-    CFile& CreateAlways(   oexCSTR x_pFile, 
-                            oexUINT x_eAccess = os::CBaseFile::eAccessRead | os::CBaseFile::eAccessWrite, 
+    CFile& CreateAlways(   oexCSTR x_pFile,
+                            oexUINT x_eAccess = os::CBaseFile::eAccessRead | os::CBaseFile::eAccessWrite,
                             oexUINT x_eShare = os::CBaseFile::eShareRead | os::CBaseFile::eShareWrite )
     {   return Create( x_pFile, os::CBaseFile::eDisCreateAlways, x_eAccess, x_eShare ); }
 
     /// Opens an existing file, fails if file doesn't exist
-    CFile& OpenExisting(   oexCSTR x_pFile, 
-                            oexUINT x_eAccess = os::CBaseFile::eAccessRead | os::CBaseFile::eAccessWrite, 
+    CFile& OpenExisting(   oexCSTR x_pFile,
+                            oexUINT x_eAccess = os::CBaseFile::eAccessRead | os::CBaseFile::eAccessWrite,
                             oexUINT x_eShare = os::CBaseFile::eShareRead | os::CBaseFile::eShareWrite )
     {   return Create( x_pFile, os::CBaseFile::eDisOpenExisting, x_eAccess, x_eShare ); }
 
     /// Opens an existing file, creats if file doesn't exist
-    CFile& OpenAlways(     oexCSTR x_pFile, 
-                            oexUINT x_eAccess = os::CBaseFile::eAccessRead | os::CBaseFile::eAccessWrite, 
+    CFile& OpenAlways(     oexCSTR x_pFile,
+                            oexUINT x_eAccess = os::CBaseFile::eAccessRead | os::CBaseFile::eAccessWrite,
                             oexUINT x_eShare = os::CBaseFile::eShareRead | os::CBaseFile::eShareWrite )
     {   return Create( x_pFile, os::CBaseFile::eDisOpenAlways, x_eAccess, x_eShare ); }
 
     /// Creates file
     CFile& Create(     oexCSTR x_pFile, oexUINT x_eDisposition,
-                            oexUINT x_eAccess = os::CBaseFile::eAccessRead | os::CBaseFile::eAccessWrite, 
+                            oexUINT x_eAccess = os::CBaseFile::eAccessRead | os::CBaseFile::eAccessWrite,
                             oexUINT x_eShare = os::CBaseFile::eShareRead | os::CBaseFile::eShareWrite )
-    {   Destroy(); 
+    {   Destroy();
         m_hFile = os::CBaseFile::Create( x_pFile, x_eDisposition, x_eAccess, x_eShare, 0, &m_uLastError );
         if ( os::CBaseFile::vInvalid != m_hFile ) m_sFileName = x_pFile;
         return *this;
@@ -165,14 +165,14 @@ public:
 		\param [out] x_pBuf			-	Receives data read from file
 		\param [in]  x_uSize		-	Size of buffer in x_pBuf
 		\param [out] x_puRead		-	Receives number of bytes read
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
     oexBOOL Read( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead = oexNULL )
     {   if ( os::CBaseFile::vInvalid() == m_hFile ) return oexFALSE;
-        return os::CBaseFile::Read( m_hFile, x_pBuf, x_uSize, x_puRead, &m_uLastError ); 
+        return os::CBaseFile::Read( m_hFile, x_pBuf, x_uSize, x_puRead, &m_uLastError );
     }
 
 	//==============================================================
@@ -181,10 +181,10 @@ public:
 	/// Reads data from file
 	/**
 		\param [in]  x_uSize		-	Number of bytes to read
-		
+
 		\return CStr object containing the data
-	
-		\see 
+
+		\see
 	*/
     CStr8 Read( oexUINT x_uSize = 0 );
 
@@ -196,14 +196,14 @@ public:
 		\param [in]  x_pBuf			-	Data to write
 		\param [in]  x_uSize		-	Number of bytes to write
 		\param [out] x_puWritten    -	Receives number of bytes written
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
     oexBOOL Write( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puWritten = oexNULL )
     {   if ( os::CBaseFile::vInvalid() == m_hFile ) return oexFALSE;
-        return os::CBaseFile::Write( m_hFile, x_pBuf, x_uSize, x_puWritten, &m_uLastError ); 
+        return os::CBaseFile::Write( m_hFile, x_pBuf, x_uSize, x_puWritten, &m_uLastError );
     }
 
 	//==============================================================
@@ -212,13 +212,28 @@ public:
 	/// Writes a string to the file
 	/**
 		\param [in] x_sStr			-	Data to write
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
-    oexBOOL Write( CStr8 x_sStr, oexUINT *x_puWritten = oexNULL )
-    {   return Write( x_sStr.Ptr(), x_sStr.LengthInBytes(), x_puWritten ); 
+    oexBOOL Write( oexCONST CStr8 x_sStr, oexUINT *x_puWritten = oexNULL )
+    {   return Write( x_sStr.Ptr(), x_sStr.LengthInBytes(), x_puWritten );
+    }
+
+	//==============================================================
+	// Write()
+	//==============================================================
+	/// Writes a string to the file
+	/**
+		\param [in] x_sStr			-	Data to write
+
+		\return Non-zero if success
+
+		\see
+	*/
+    oexBOOL Write( oexCONST CStrW x_sStr, oexUINT *x_puWritten = oexNULL )
+    {   return Write( CStr8().ToMb( x_sStr ), x_puWritten );
     }
 
     /// File write operator
@@ -234,12 +249,12 @@ public:
 	/// Returns the current 64-bit file pointer position
 	/**
 		\return 64-bit file pointer position
-	
-		\see 
+
+		\see
 	*/
 	oexINT64 GetPtrPos()
     {   if ( os::CBaseFile::vInvalid() == m_hFile ) return -1;
-        return os::CBaseFile::SetPointer( m_hFile, 0, os::CBaseFile::eFileOffsetCurrent ); 
+        return os::CBaseFile::SetPointer( m_hFile, 0, os::CBaseFile::eFileOffsetCurrent );
     }
 
 	//==============================================================
@@ -249,14 +264,14 @@ public:
 	/**
 		\param [in] x_llPos	    -	64-bit file offset pointer
 		\param [in] x_nMethod	-	Relative specifier for offset
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
     oexINT64 SetPtrPos( oexINT64 x_llPos, oexINT x_nMethod )
     {   if ( os::CBaseFile::vInvalid() == m_hFile ) return -1;
-        return os::CBaseFile::SetPointer( m_hFile, x_llPos, x_nMethod ); 
+        return os::CBaseFile::SetPointer( m_hFile, x_llPos, x_nMethod );
     }
 
     //==============================================================
@@ -265,10 +280,10 @@ public:
 	/// Sets the 64-bit file pointer position relative to the beginning of the file
 	/**
 		\param [in] offset	-	64-bit file offset pointer
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
     oexINT64 SetPtrPosBegin( oexINT64 x_llPos )
     {   return SetPtrPos( x_llPos, os::CBaseFile::eFileOffsetBegin ); }
@@ -279,10 +294,10 @@ public:
 	/// Sets the 64-bit file pointer position relative to the end of the file
 	/**
 		\param [in] x_llPos	-	64-bit file offset pointer
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
     oexINT64 SetPtrPosEnd( oexINT64 x_llPos )
     {   return SetPtrPos( x_llPos, os::CBaseFile::eFileOffsetEnd ); }
@@ -293,19 +308,19 @@ public:
 	/// Sets the 64-bit file pointer position relative to the current file pointer
 	/**
 		\param [in] x_llPos	-	64-bit file offset pointer
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
     oexINT64 SetPtrPosCur( oexINT64 x_llPos )
     {   return SetPtrPos( x_llPos, os::CBaseFile::eFileOffsetCurrent ); }
 
     /// Returns non-zero if the specified file is open
-    oexBOOL IsOpen() { return os::CBaseFile::vInvalid() != m_hFile; } 
+    oexBOOL IsOpen() { return os::CBaseFile::vInvalid() != m_hFile; }
 
     /// Closes and deletes the current file
-    oexBOOL Delete() 
+    oexBOOL Delete()
     {   if ( !IsOpen() )
             return oexFALSE;
         CStr s = GetFileName();
@@ -348,9 +363,9 @@ public:
     /// Returns non-zero if the path exists
     static oexBOOL Exists( oexCSTR x_pPath )
     {   return os::CBaseFile::DoesExist( x_pPath ); }
-	
+
 private:
-    
+
     /// File handle
     os::CBaseFile::t_HFILE              m_hFile;
 
