@@ -1,1 +1,0 @@
-start make.bat win32_vs9 "Visual Studio 9 2008"
