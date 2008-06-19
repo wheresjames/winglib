@@ -134,3 +134,15 @@
 #	define oexBigEndian( l )		OEX_NAMESPACE::cmn::RevBytes( l )
 #endif
 
+// File functions
+#define oexDeletePath				OEX_NAMESPACE::os::CFile::DeletePath
+#define oexCreatePath				OEX_NAMESPACE::os::CFile::CreatePath
+#define oexDelete					OEX_NAMESPACE::os::CFile::Delete
+#define oexExists					OEX_NAMESPACE::os::CFile::Exists
+#define oexBuildPath				OEX_NAMESPACE::CStr::BuildPath
+#define oexGetModuleFileName		OEX_NAMESPACE::os::CBaseFile::GetModuleFileName
+#define oexGetModulePath			OEX_NAMESPACE::os::CBaseFile::GetModulePath
+
+// Time functions
+#define oexLocalTimeStr				OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eLocalTime ).FormatTime
+#define oexGmtTimeStr				OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eGmtTime ).FormatTime

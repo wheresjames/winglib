@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// log.cpp
+// image.cpp
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -36,35 +36,48 @@
 
 OEX_USING_NAMESPACE
 
-CLog CLog::m_logGlobal;
-
-oexBOOL CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uErr, oexCSTR x_pErr, oexUINT x_uSkip )
+oexBOOL CImage::Destroy()
 {
-	// Create log file if needed
-	if ( !m_file.IsOpen() )
-	{
-		// Open new log file
-		if ( !m_file.CreateNew( oexGetModulePath( oexT( "debug.log" ) ).Ptr() ).IsOpen() )
-			return oexFALSE;
+	/// Destroy the image buffer
+	m_image.Destroy();
 
-		// Create log header
-		m_file.Write( CStr().Fmt( oexT( "; Log file\r\n; Date : %s\r\n; Application : %s\r\n\r\n" ),
-								  oexStrToMbPtr( oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() ),
-								  oexStrToMbPtr( oexGetModuleFileName().Ptr() ) ) );
+	return oexTRUE;
+}
 
-	} // end if
+oexBOOL CImage::Create( oexCSTR x_pShared, oexINT x_lWidth, oexINT x_lHeight, oexINT x_lBpp )
+{
+	// Lose any current image
+	Destroy();
 
-	// Do we have a source file name?
-	if ( x_pFile )
-		m_file.Write( CStr().Fmt( oexT( "%s:(%u) " ), oexStrToMbPtr( x_pFile ), x_nLine ) );
+	// Calculate the size of the image
+	oexINT lImageSize = GetScanWidth( x_lWidth, x_lBpp ) * cmn::Abs( x_lHeight );
+	if ( !lImageSize )
+		return oexFALSE;
 
-	// Ensure error is not null
-	if ( !x_pErr )
-		x_pErr = oexT( "Unspecified" );
+	// Set shared name
+	if ( x_pShared && *x_pShared )
+		m_image.SetName( x_pShared );
 
-	// Write out the log
-	return m_file.Write( CStr().Fmt( oexT( "0x%X (%d) : %s\r\n\t%s\r\n" ),
-								 	 x_uErr, x_uErr, oexStrToMbPtr( x_pErr ),
-								 	 oexStrToMbPtr( os::CTrace::GetBacktrace( x_uSkip ).Replace( oexT( "\n" ), oexT( "\n\t" ) ).Ptr() ) ) );
+	// Allocate memory for the shared memory
+	if ( !m_image.OexNew( sizeof( SImageData ) + lImageSize ).Ptr() )
+		return oexFALSE;
+
+	return oexTRUE;
+}
+
+oexBOOL CImage::Create( os::CFMap::t_HFILEMAP x_hShared, oexINT x_lWidth, oexINT x_lHeight, oexINT x_lBpp )
+{
+	// Lose any current image
+	Destroy();
+
+	// Set shared name
+	if ( x_hShared )
+		m_image.SetShareHandle( x_hShared );
+
+	// Allocate memory for the shared memory
+	if ( !m_image.OexNew( 1 ).Ptr() )
+		return oexFALSE;
+
+	return oexTRUE;
 }
 

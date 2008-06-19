@@ -6,35 +6,35 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
 #pragma once
 
-/// !!! This namespace contains functions that depend 
+/// !!! This namespace contains functions that depend
 ///     on strings being NULL terminated.
 /**
     The NULL terminated string is evil, if you use these
@@ -89,7 +89,7 @@ namespace str
             if ( 0 >= sz_dst )
                 return 0;
 
-            if ( ( ln_src + 1 ) > sz_dst ) 
+            if ( ( ln_src + 1 ) > sz_dst )
                 ln_src = sz_dst - 1;
 
             os::CSys::MemCpy( dst, src, ln_src * sizeof( T ) );
@@ -110,10 +110,10 @@ namespace str
     template< typename T >
         oexUINT Append( T *dst, oexINT ln_dst, oexINT sz_dst, oexCONST T* src, oexINT sz_src )
         {
-            if ( ln_dst >= sz_dst ) 
+            if ( ln_dst >= sz_dst )
                 return ln_dst;
 
-            dst += ln_dst; 
+            dst += ln_dst;
 
             sz_dst -= ln_dst;
 
@@ -131,7 +131,7 @@ namespace str
         oexASSERT_PTR( dst );
 
 		while ( 0 < ln_dst-- )
-		{	
+		{
             if ( *dst >= oexT( 'A' ) && *dst <= oexT( 'Z' ) )
 				*dst -= oexT( 'A' ) - oexT( 'a' );
 
@@ -151,7 +151,7 @@ namespace str
     	T* ToUpper( T *dst, oexINT ln_dst )
 	{
         oexASSERT_PTR( dst );
-        
+
 		while ( 0 < ln_dst-- )
 		{
             if ( *dst >= oexT( 'a' ) && *dst <= oexT( 'z' ) )
@@ -166,8 +166,10 @@ namespace str
 
     /// Replaces occurences a character in a string with another
     /*
-        \param [in] x_tFind     -   Buffer that receives the string copy
-        \param [in] x_tReplace  -   Length of the string in dst
+        \param [in] dst     	-   Buffer that receives the string copy
+        \param [in] ln_dst  	-   Length of the string in dst
+        \param [in] x_tFind 	-	Character to find
+        \param [in] x_tReplace	- 	Replacement character
     */
     template< typename T >
     	T* Replace( T *dst, oexINT ln_dst, oexCONST T x_tFind, oexCONST T x_tReplace )
@@ -207,9 +209,9 @@ namespace str
 			    T *start = s2;
                 oexINT ln_start = ln2;
 			    while ( start && ln_start-- )
-                    if ( *s1 == *start ) 
+                    if ( *s1 == *start )
                         start = 0;
-                    else 
+                    else
                         start++;
 
 			    if ( start )
@@ -235,7 +237,7 @@ namespace str
 	    {
             oexASSERT_PTR( s1 );
             oexASSERT_PTR( s2 );
-            
+
             if ( !ln1 || !ln2 )
                 return -1;
 
@@ -244,9 +246,9 @@ namespace str
 			    oexCONST T *start = s2;
                 oexINT ln_start = ln2;
 			    while ( start && ln_start-- )
-                    if ( s1[ ln1 ] == *start ) 
+                    if ( s1[ ln1 ] == *start )
                         start = 0;
-                    else 
+                    else
                         start++;
 
 			    if ( start )
@@ -312,7 +314,7 @@ namespace str
 
             return 0;
         }
-        
+
     /// Compares two strings
     /**
         \param [in] s1  -       First string
@@ -346,7 +348,7 @@ namespace str
 
             return 0;
         }
-        
+
 
     /// Compares two strings ignoring case
     /**
@@ -360,7 +362,7 @@ namespace str
     */
     template< class T >
         oexINT ICompare( oexCONST T *s1, oexINT ln1, oexCONST T *s2, oexINT ln2,
-                         T tSLow = oexT( 'a' ), T tELow = oexT( 'z' ), 
+                         T tSLow = oexT( 'a' ), T tELow = oexT( 'z' ),
                          T tSHi = oexT( 'A' ), T tEHi = oexT( 'Z' ) )
         {
             oexASSERT_PTR( s1 );
@@ -390,7 +392,7 @@ namespace str
 
             return 0;
         }
-        
+
     /// Compares two strings ignoring case
     /**
         \param [in] s1   -       First string
@@ -403,7 +405,7 @@ namespace str
     */
     template< class T >
         oexINT ICompareLen( oexCONST T *s1, oexINT ln1, oexCONST T *s2, oexINT ln2, oexINT ln_cmp,
-                         T tSLow = oexT( 'a' ), T tELow = oexT( 'z' ), 
+                         T tSLow = oexT( 'a' ), T tELow = oexT( 'z' ),
                          T tSHi = oexT( 'A' ), T tEHi = oexT( 'Z' ) )
         {
             oexASSERT_PTR( s1 );
@@ -434,7 +436,7 @@ namespace str
 
             return 0;
         }
-        
+
 
     /// Finds the sub string s2 in s1
     /**
@@ -450,7 +452,7 @@ namespace str
 		    while ( ln_s1 )
 		    {
 			    // Match here?
-			    if ( !CompareLen( s1, ln_s1, s2, ln_s2, ln_s2 ) ) 
+			    if ( !CompareLen( s1, ln_s1, s2, ln_s2, ln_s2 ) )
 				    return i;
 
 			    i++; s1++; ln_s1--;
@@ -469,14 +471,14 @@ namespace str
     */
 	template< class T >
 		oexINT IFindSubStr( T *s1, oexINT ln_s1, T *s2, oexINT ln_s2,
-                            T tSLow = oexT( 'a' ), T tELow = oexT( 'z' ), 
+                            T tSLow = oexT( 'a' ), T tELow = oexT( 'z' ),
                             T tSHi = oexT( 'A' ), T tEHi = oexT( 'Z' ) )
 	    {
 		    oexINT i = 0;
 		    while ( ln_s1 )
 		    {
 			    // Match here?
-			    if ( !ICompareLen( s1, ln_s1, s2, ln_s2, ln_s2, tSLow, tELow, tSHi, tEHi ) ) 
+			    if ( !ICompareLen( s1, ln_s1, s2, ln_s2, ln_s2, tSLow, tELow, tSHi, tEHi ) )
 				    return i;
 
 			    i++; s1++; ln_s1--;
@@ -505,7 +507,7 @@ namespace str
 			    T *start = s2;
                 oexINT ln_start = ln2;
 			    while ( ln_start-- )
-			    {	if ( *s1 == *start )				
+			    {	if ( *s1 == *start )
 					    return i;
 				    start++;
 			    } // end while
@@ -529,7 +531,7 @@ namespace str
 	    {
             oexASSERT_PTR( s1 );
             oexASSERT_PTR( s2 );
-            
+
             if ( !ln1 || !ln2 )
                 return -1;
 
@@ -537,7 +539,7 @@ namespace str
 		    {
 			    T *start = s2;
 			    while ( ln2-- )
-			    {	if ( s1[ ln1 ] == *start )				
+			    {	if ( s1[ ln1 ] == *start )
 					    return ln1;
 				    start++;
 			    } // end while
@@ -644,8 +646,8 @@ namespace str
 			    return -1;
 
 		    s++;
-            oexINT i = FindTerm( s, ln - 1, close[ q ], 1, esc, ln_esc ); 
-		    if ( 0 > i ) 
+            oexINT i = FindTerm( s, ln - 1, close[ q ], 1, esc, ln_esc );
+		    if ( 0 > i )
 			    return -1;
 
 		    return i + 1;
@@ -754,8 +756,8 @@ namespace str
         \param [in] ln      -   Length of the string in s
     */
     template < typename T >
-        oexINT Reverse( T *s, oexINT ln )        
-        {   
+        oexINT Reverse( T *s, oexINT ln )
+        {
             oexASSERT_PTR( s );
 
             if ( !*s || !ln )
@@ -777,7 +779,7 @@ namespace str
             x_uRadix = 10;
 
         // Zero size means NULL terminated
-        if( !x_uSize ) 
+        if( !x_uSize )
             x_uSize = zstr::Length( x_pStr );
 
         oexINT i = 0;
@@ -786,7 +788,7 @@ namespace str
         oexBOOL bNeg = oexFALSE;
 
         // Anything to do?
-        if ( !x_uSize ) 
+        if ( !x_uSize )
         {    if ( x_pnEnd )
                 *x_pnEnd = 0;
             return llNum;
@@ -800,7 +802,7 @@ namespace str
 
         // Make special exception for the 0x in front of hex numbers
         if ( 16 == x_uRadix && i + 2 <= (oexINT)x_uSize )
-            if ( oexT( '0' ) == x_pStr[ i ] && 
+            if ( oexT( '0' ) == x_pStr[ i ] &&
                  ( oexT( 'x' ) == x_pStr[ i + 1 ] || oexT( 'X' ) == x_pStr[ i + 1 ] ) )
                 i += 2;
 
@@ -819,15 +821,15 @@ namespace str
                 ch -= oexT( 'A' ) - 10;
 
             else bErr = oexTRUE;
-        
+
             // Next character
-            if ( !bErr ) 
+            if ( !bErr )
             {
                 // Verify it's within the radix
                 if ( ch >= (oexINT)x_uRadix )
                     bErr = oexTRUE;
 
-                else 
+                else
                 {
                     // Accumulate number
                     llNum *= x_uRadix;
@@ -844,7 +846,7 @@ namespace str
         } // end while
 
         // Is the value negative?
-        if ( bNeg ) 
+        if ( bNeg )
             llNum = -llNum;
 
         // Does the caller care about errors?
@@ -856,7 +858,7 @@ namespace str
 
 };
 
-/// !!! This namespace contains functions that depend 
+/// !!! This namespace contains functions that depend
 ///     on strings being NULL terminated.
 /**
     The NULL terminated string is evil, if you use these
@@ -899,7 +901,7 @@ namespace guid
 		    // Convert ASCII Digit Between 0 And 9
 		    if ( x_pBuffer[ i ] >= '0' && x_pBuffer[ i ] <= '9' )
 			    num = ( num << 4 ) + ( x_pBuffer[ i ] - '0' );
-    		
+
 		    // Convert ASCII Digit Between A And F
 		    else if ( x_pBuffer[ i ] >= 'A' && x_pBuffer[ i ] <= 'F' )
 			    num = ( num << 4 ) + ( x_pBuffer[ i ] - 'A' ) + 10;
@@ -909,7 +911,7 @@ namespace guid
 			    num = ( num << 4 ) + ( x_pBuffer[ i ] - 'a' ) + 10;
 
 		    // Do we just skip invalid digits?
-		    else if ( !x_bSkipInvalid ) 
+		    else if ( !x_bSkipInvalid )
                 return oexFALSE;
 
 		    x_uBytes--;
@@ -917,7 +919,7 @@ namespace guid
 	    } // end for
 
 	    // Save number
-	    if ( x_puNum ) 
+	    if ( x_puNum )
             *x_puNum = num;
 
 	    return oexTRUE;
@@ -935,7 +937,7 @@ namespace guid
 	    {	*x_pStr = 0; return x_pStr; }
 
 	    // Create new guid if one is not provided
-	    T_GUID guid; 
+	    T_GUID guid;
 	    if ( !x_pGuid )
 	    {	x_pGuid = &guid;
             os::CSys::CreateGuid( &guid );
@@ -943,9 +945,9 @@ namespace guid
 
 	    // Example GUID : DD05F574-2D69-4463-95DD-F76C9F7C5E6D
 
-        return os::CSys::StrFmt( x_pStr, x_uMax, 
+        return os::CSys::StrFmt( x_pStr, x_uMax,
                  oexTT( T_CHAR, "%0.8lX-%0.4lX-%0.4lX-%0.2lX%0.2lX-%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX" ),
-			     (oexUINT) x_pGuid->Data1, 
+			     (oexUINT) x_pGuid->Data1,
 			     (oexUINT) x_pGuid->Data2,
 			     (oexUINT) x_pGuid->Data3,
 			     (oexUINT) x_pGuid->Data4[ 0 ],
@@ -983,27 +985,27 @@ namespace guid
 
 	    // Convert each component
 	    oexUINT ul = 0;
-	    if ( !ahtoui( &ul, x_pString, 8 ) ) 
+	    if ( !ahtoui( &ul, x_pString, 8 ) )
             return oexNULL;
 	    x_pGuid->Data1 = ul;
 
-	    if ( !ahtoui( &ul, &x_pString[ 9 ], 4 ) ) 
+	    if ( !ahtoui( &ul, &x_pString[ 9 ], 4 ) )
             return oexNULL;
 	    x_pGuid->Data2 = (oexUINT16)ul;
 
-	    if ( !ahtoui( &ul, &x_pString[ 14 ], 4 ) ) 
+	    if ( !ahtoui( &ul, &x_pString[ 14 ], 4 ) )
             return oexNULL;
 	    x_pGuid->Data3 = (oexUINT16)ul;
 
 	    oexUINT i;
 	    for ( i = 0; i < 2; i++ )
-	    {	if ( !ahtoui( &ul, &x_pString[ 19 + ( i << 1 ) ], 2 ) ) 
+	    {	if ( !ahtoui( &ul, &x_pString[ 19 + ( i << 1 ) ], 2 ) )
                 return oexNULL;
 		    x_pGuid->Data4[ i ] = (oexUCHAR)ul;
-	    } // end for	
+	    } // end for
 
 	    for ( i = 0; i < 6; i++ )
-	    {	if ( !ahtoui( &ul, &x_pString[ 24 + ( i << 1 ) ], 2 ) ) 
+	    {	if ( !ahtoui( &ul, &x_pString[ 24 + ( i << 1 ) ], 2 ) )
                 return oexNULL;
 		    x_pGuid->Data4[ 2 + i ] = (oexUCHAR)ul;
 	    } // end for
@@ -1039,7 +1041,7 @@ namespace guid
         oexBOOL CmpGuid( oexCONST T_GUID1 *pGuid1, oexCONST T_GUID2 *pGuid2 )
     {
 	oexSTATIC_ASSERT( sizeof( T_GUID1 ) == ( sizeof( oexINT64 ) * 2 ) );
-	    
+
         oexASSERT_PTR( pGuid1 );
         oexASSERT_PTR( pGuid2 );
 
@@ -1051,9 +1053,9 @@ namespace guid
     template< typename T_GUID1, typename T_GUID2, typename T_GUID3 >
         oexBOOL CmpGuid( T_GUID1 *pGuid1, oexCONST T_GUID2 *pGuid2, oexCONST T_GUID3 *pMask )
     {
-	oexSTATIC_ASSERT(    sizeof( T_GUID1 ) == sizeof( T_GUID2 ) 
+	oexSTATIC_ASSERT(    sizeof( T_GUID1 ) == sizeof( T_GUID2 )
 	                  && sizeof( T_GUID1 ) == sizeof( T_GUID3 ) );
-	    
+
         oexBOOL bMatch = oexTRUE;
         oexUCHAR *p1 = (oexUCHAR*)pGuid1;
         oexUCHAR *p2 = (oexUCHAR*)pGuid2;

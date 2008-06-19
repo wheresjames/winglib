@@ -40,8 +40,9 @@
 #include <stdarg.h>
 #include <cstdio>
 #include <sys/types.h>
-#include <dirent.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <dirent.h>
 //#include <stdio.h>
 #include <wchar.h>
 #include <string.h>
@@ -54,9 +55,14 @@
 
 #include <sys/time.h>
 #include <sys/times.h>
-#include <time.h>
-#include <locale.h>
 
+#include <time.h>
+void tzset (void);
+extern char *tzname[ 2 ];
+extern long timezone;
+extern int daylight;
+
+#include <locale.h>
 #include <sys/mman.h>
 
 //#include <uuid/uuid.h>
@@ -65,5 +71,18 @@
 
 #include <execinfo.h>
 
+#include <sys/ioctl.h>
+#include <linux/types.h>
+#include <linux/videodev.h>
+#include <linux/videodev2.h>
 
 
+/*
+#include <sys/ioctl.h>
+#include <linux/types.h>
+#include <linux/videodev.h>
+#include <linux/videodev2.h>
+#include <sys/mman.h>
+
+#include <errno.h>
+*/

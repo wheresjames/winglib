@@ -90,8 +90,6 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 		if ( pPath )
 			sPath = oexStr8ToStr( pPath );
 
-		int x = 0;
-
 	} // end if
 
 	Break( x_nType, x_pFile, x_uLine, sPath.Ptr(), x_pStr );

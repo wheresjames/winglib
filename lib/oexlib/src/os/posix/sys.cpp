@@ -429,47 +429,45 @@ oexULONG CSys::InterlockedDecrement( oexLONG *x_puVal )
 //	return ::InterlockedDecrement( x_puVal );
 	return (*x_puVal)--;
 }
-/*
-void CSys_SystemTimeToSTime( SYSTEMTIME &st, CSys::STime &t )
+
+void CSys_SystemTimeToSTime( struct tm* tinfo, CSys::STime &t )
 {
-    t.uYear = st.wYear;
-    t.uMonth = st.wMonth;
-    t.uDayOfWeek = st.wDayOfWeek;
-    t.uDay = st.wDay;
-    t.uHour = st.wHour;
-    t.uMinute = st.wMinute;
-    t.uSecond = st.wSecond;
-    t.uMillisecond = st.wMilliseconds;
+    t.uYear = 1900 + tinfo->tm_year;
+    t.uMonth = tinfo->tm_mon;
+    t.uDayOfWeek = tinfo->tm_wday;
+    t.uDay = tinfo->tm_mday;
+    t.uHour = tinfo->tm_hour;
+    t.uMinute = tinfo->tm_min;
+    t.uSecond = tinfo->tm_sec;
+    t.uMillisecond = 0;
 }
 
-void CSys_STimeToSystemTime( CSys::STime &t, SYSTEMTIME &st )
+void CSys_STimeToSystemTime( CSys::STime &t, struct tm* tinfo )
 {
-    st.wYear = t.uYear;
-    st.wMonth = t.uMonth;
-    st.wDayOfWeek = t.uDayOfWeek;
-    st.wDay = t.uDay;
-    st.wHour = t.uHour;
-    st.wMinute = t.uMinute;
-    st.wSecond = t.uSecond;
-    st.wMilliseconds = t.uMillisecond;
+    tinfo->tm_year = t.uYear - 1900;
+    tinfo->tm_mon = t.uMonth;
+    tinfo->tm_wday = t.uDayOfWeek;
+    tinfo->tm_mday = t.uDay;
+    tinfo->tm_hour = t.uHour;
+    tinfo->tm_min = t.uMinute;
+    tinfo->tm_sec = t.uSecond;
+//   = t.uMillisecond;
 }
-*/
+
 oexBOOL CSys::GetLocalTime( STime &t )
 {
-/*    CSys::Zero( &t, sizeof( t ) );
+	oexZeroMemory( &t, sizeof( t ) );
 
-    SYSTEMTIME st;
-    CSys::Zero( &st, sizeof( st ) );
+	time_t current_time;
+	time( &current_time );
+	struct tm tinfo;
+	localtime_r( &current_time, &tinfo );
 
-    ::GetLocalTime( &st );
-    CSys_SystemTimeToSTime( st, t );
+	CSys_SystemTimeToSTime( &tinfo, t );
 
-    TIME_ZONE_INFORMATION tz;
-    CSys::Zero( &tz, sizeof( tz ) );
+	// +++ Add time zone crap
+//	t.nTzBias = tz.Bias;
 
-    ::GetTimeZoneInformation( &tz );
-    t.nTzBias = tz.Bias;
-*/
     return oexTRUE;
 }
 
@@ -488,21 +486,37 @@ oexINT CSys::GetLocalTzBias()
 
 oexBOOL CSys::GetSystemTime( STime &t )
 {
-/*
-    CSys::Zero( &t, sizeof( t ) );
+	oexZeroMemory( &t, sizeof( t ) );
 
-    SYSTEMTIME st;
-    CSys::Zero( &st, sizeof( st ) );
+	time_t current_time;
+	time( &current_time );
+	struct tm tinfo;
+	gmtime_r( &current_time, &tinfo );
 
-    ::GetSystemTime( &st );
-    CSys_SystemTimeToSTime( st, t );
-*/
+	CSys_SystemTimeToSTime( &tinfo, t );
+
     return oexTRUE;
 }
+
+// Some helpful delta's
+// 1970 = 1900 + 2208988800
+// 1980 = 1970 + 315536400
+// 1980 = 1900 + 2524525200
+// 1900 = 1601 + 9435484800
+// 1970 = 1601 + 11644473600
+// 1980 = 1601 + 11960010000
+
+#define FTOFF_1900		9435484800LL
+#define FTOFF_1970		11644473600LL
+#define FTOFF_1980		11960010000LL
 
 /// Converts an STime structure to file time
 oexINT64 CSys::SystemTimeToFileTime( STime &x_st )
 {
+	struct tm tinfo;
+	CSys_STimeToSystemTime( x_st, &tinfo );
+	return (oexINT64)mktime( &tinfo ) + FTOFF_1970;
+
 /*
     SYSTEMTIME st;
     CSys_STimeToSystemTime( x_st, st );
@@ -512,12 +526,17 @@ oexINT64 CSys::SystemTimeToFileTime( STime &x_st )
 
     return (oexINT64)ft.dwLowDateTime | ( (oexINT64)ft.dwHighDateTime << 32 );
 */
-	return 0;
 }
 
 /// Converts a file time to an STime structure
 void CSys::FileTimeToSystemTime( STime &x_st, oexINT64 x_ft )
 {
+	time_t tTime = x_ft - FTOFF_1970;
+	struct tm tinfo;
+	gmtime_r( &tTime, &tinfo );
+
+	CSys_SystemTimeToSTime( &tinfo, x_st );
+
 /*
     FILETIME ft;
     ft.dwLowDateTime = (oexINT32)( x_ft & 0xffffffff );

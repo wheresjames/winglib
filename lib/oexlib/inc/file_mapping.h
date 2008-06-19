@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -39,7 +39,7 @@
 //
 /// Encapsulates a file map
 /**
-	This class provides the functionality of the file mapping API.	
+	This class provides the functionality of the file mapping API.
 
 	A real bummer is that it is apparently not straight forward to
 	get the size of an existing file mapping.  To counter this,
@@ -50,7 +50,7 @@
             T* pPtr = m_fm.Ptr();
 
             // Was the object constructed?
-            if ( CAlloc::eF1Constructed & CAlloc::GetFlags( pPtr ) 
+            if ( CAlloc::eF1Constructed & CAlloc::GetFlags( pPtr )
                  && 1 == CAlloc::GetRefCount( pPtr ) )
             {
                 oexUINT uSize = Size();
@@ -75,14 +75,15 @@
 
 */
 //==================================================================
-template < class T > class TFileMapping  
+template < class T > class TFileMapping
 {
 public:
-	
+
 	/// Defualt constructor
 	TFileMapping()
 	{	m_pPtr = oexNULL;
         m_hFile = os::CFMap::vFailed();
+        m_hShareHandle = os::CFMap::vFailed();
         m_pName = oexNULL;
         m_llOpenSize = 0;
 	}
@@ -92,11 +93,11 @@ public:
     {   return Assume( m ); }
 
 	/// Destructor
-	virtual ~TFileMapping() 
+	virtual ~TFileMapping()
     {
         SetName( oexNULL );
-        Destroy(); 
-    }	
+        Destroy();
+    }
 
     /// Sets the shared memory name
     /**
@@ -104,13 +105,13 @@ public:
         \param [in] x_uLen  -   Length of the string in x_pName.
                                 Can be zero if the string is
                                 NULL terminated.
-        
+
     */
     TFileMapping& SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
     {
         // Lose the previous name
         if ( m_pName )
-        {   OexAllocDelete( m_pName );            
+        {   OexAllocDelete( m_pName );
             m_pName = oexNULL;
         } // end if
 
@@ -135,6 +136,21 @@ public:
     oexCSTR GetName() const
     {   return m_pName; }
 
+	/// Sets an external share handle
+	/**
+		\param [in] x_hFh		- OS specific file handle used to
+								  create the shared memory
+	*/
+	TFileMapping& SetShareHandle( os::CFMap::t_HFILEMAP x_hFh = os::CFMap::vFailed() )
+	{	m_hShareHandle = x_hFh;
+		return *this;
+	}
+
+	/// Returns the external share handle
+	os::CFMap::t_HFILEMAP SetShareHandle()
+	{	return m_hShareHandle; }
+
+
     //==============================================================
 	// Destroy()
 	//==============================================================
@@ -156,7 +172,7 @@ public:
 
             m_pPtr = (T*)CAlloc::VerifyMem( m_pPtr, bDestroy );
             m_pPtr -= sizeof( oexUINT );
-            
+
             os::CFMap::osReleaseFileMapping( m_hFile, m_pPtr, m_llOpenSize );
 
 		} // end if
@@ -170,17 +186,17 @@ public:
 	//==============================================================
 	/// Creates a file mapping
 	/**
-		\param [in]  x_pFile				-	file to map, NULL for 
+		\param [in]  x_pFile				-	file to map, NULL for
 												shared memory.
 		\param [in]  x_pName				-	Name of the mapping, can
 												be NULL.
 		\param [in]  x_llSize				-	Size of the file mapping.
 		\param [in]  x_uAccess				-	Specifes the memory access
 												level.
-		
+
 		\return Pointer to the memory or NULL if failure.
-	
-		\see 
+
+		\see
 	*/
     T* Create( oexBOOL x_bConstructed, oexCSTR x_pFile, oexCSTR x_pName, oexINT64 x_llSize, os::CFMap::etAccess x_uAccess = os::CFMap::eAccessAll )
 	{
@@ -202,8 +218,8 @@ public:
 		// Create file mapping
 		m_hFile = os::CFMap::osCreateFileMapping( x_pFile, (oexPVOID*)&m_pPtr, llSize, &llSize, m_pName, x_uAccess, &m_bExisting );
 
-		// Did we get the handle       
-        if ( os::CFMap::vFailed() == m_hFile || !m_pPtr ) 
+		// Did we get the handle
+        if ( os::CFMap::vFailed() == m_hFile || !m_pPtr )
             return oexNULL;
 
 		// Save size used to create the mapping
@@ -211,7 +227,7 @@ public:
 
         // Save block size
         *(oexUINT*)m_pPtr = (oexUINT)llSize;
-        m_pPtr += sizeof( oexUINT );               
+        m_pPtr += sizeof( oexUINT );
 
         // Protect memory area
         m_pPtr = (T*)CAlloc::ProtectMem( m_pPtr, (oexUINT)x_llSize, !m_bExisting );
@@ -261,7 +277,7 @@ public:
 	// c_Ptr()
 	//==============================================================
 	/// Returns a pointer to the file mapping memory
-	oexCONST T* c_Ptr() const 
+	oexCONST T* c_Ptr() const
     {   return m_pPtr; }
 
 	//==============================================================
@@ -309,7 +325,7 @@ public:
         // Just drop our memory
         Destroy();
 
-        if ( m.m_pPtr )            
+        if ( m.m_pPtr )
         {
             // Assume the memory from this object
             m_hFile = m.m_hFile; m.m_hFile = oexNULL;
@@ -340,7 +356,7 @@ public:
     /// Returns a copy of this object
     TFileMapping Copy()
     {   TFileMapping fm;
-        if ( m_pPtr )            
+        if ( m_pPtr )
             fm.Copy( *this );
         return fm;
     }
@@ -371,5 +387,9 @@ private:
 
 	/// Size that was passed to CreateFileMapping()
 	oexINT64					m_llOpenSize;
+
+	/// External file handle for share
+	os::CFMap::t_HFILEMAP		m_hShareHandle;
+
 };
 

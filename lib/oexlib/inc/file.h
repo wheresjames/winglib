@@ -111,7 +111,9 @@ public:
 
     /// Destructor
     ~CFile()
-    {   Destroy(); }
+    {
+    	Destroy();
+    }
 
     /// Creates a new file, fails if file already exists
     CFile& CreateNew(      oexCSTR x_pFile,

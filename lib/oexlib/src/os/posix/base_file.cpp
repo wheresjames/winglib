@@ -6,34 +6,37 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
 #include "../../../oexlib.h"
 #include "std_os.h"
+
+// BinReloc library
+#include "opc/breloc/binreloc.h"
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
@@ -47,7 +50,7 @@ const CBaseFile::t_HFIND CBaseFile::c_InvalidFindHandle = NULL;
 CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, oexUINT x_eAccess, oexUINT x_eShare, oexUINT x_uFlags, oexUINT *x_puError )
 {
 	// Select mode string
-	oexCSTR pMode = oexT( "" );	
+	oexCSTR pMode = oexT( "" );
     switch( x_eDisposition )
     {   case eDisCreateNew : pMode = oexT( "w+b" ); break;
         case eDisCreateAlways : pMode = oexT( "w+b" ); break;
@@ -61,12 +64,12 @@ CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, o
 	if ( x_puError )
 	{
 		if ( !hFile )
-			*x_puError = errno;		
+			*x_puError = errno;
 		else
-			hFile = 0;
+			*x_puError = 0;
 	} // end if
 
-	return hFile;	
+	return hFile;
 }
 
 oexBOOL CBaseFile::Close( CBaseFile::t_HFILE x_hFile, oexUINT *x_puErr )
@@ -87,7 +90,7 @@ oexBOOL CBaseFile::Close( CBaseFile::t_HFILE x_hFile, oexUINT *x_puErr )
 oexBOOL CBaseFile::Write( CBaseFile::t_HFILE hFile, oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puWritten, oexUINT *x_puErr )
 {
     oexUINT uWritten = fwrite( x_pData, 1, x_uSize, (FILE*)hFile );
-    
+
     if ( x_puWritten )
         *x_puWritten = uWritten;
 
@@ -102,7 +105,7 @@ oexBOOL CBaseFile::Write( CBaseFile::t_HFILE hFile, oexCPVOID x_pData, oexUINT x
 oexBOOL CBaseFile::Read( CBaseFile::t_HFILE hFile, oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, oexUINT *x_puErr )
 {
 	oexUINT uRead = fread( x_pData, 1, x_uSize, (FILE*)hFile );
-    
+
     if ( x_puRead )
         *x_puRead = uRead;
 
@@ -118,11 +121,11 @@ oexINT64 CBaseFile::Size( t_HFILE hFile )
 {
 	struct stat64 s64;
 
-	// +++ Ensure this works correctly	
+	// +++ Ensure this works correctly
 	if ( fstat64( (int)hFile, &s64 ) )
 		return 0;
-		
-	return s64.st_size;	
+
+	return s64.st_size;
 }
 
 oexINT64 CBaseFile::SetPointer( t_HFILE hFile, oexINT64 llMove, oexINT nMethod )
@@ -133,18 +136,18 @@ oexINT64 CBaseFile::SetPointer( t_HFILE hFile, oexINT64 llMove, oexINT nMethod )
     else if ( nMethod == eFileOffsetCurrent ) nOrigin = SEEK_CUR;
     else if ( nMethod == eFileOffsetEnd ) nOrigin = SEEK_END;
     else return -1;
-    
+
     // Set new file position
     int ret = fseeko64( (FILE*)hFile, llMove, nOrigin );
 
 	// Grab the current file  position so we can report it
 	oexINT64 llPos = ftello64( (FILE*)hFile );
-	
+
 	if ( 0 > llPos )
 		return 0;
 
     // Return the result
-    return llPos;   
+    return llPos;
 }
 
 oexBOOL CBaseFile::Delete( oexCSTR x_pFile )
@@ -157,7 +160,7 @@ oexBOOL CBaseFile::Delete( oexCSTR x_pFile )
 }
 
 oexBOOL CBaseFile::RemoveFolder( oexCSTR x_pDir )
-{	
+{
 	if ( !oexCHECK_PTR( x_pDir ) )
 		return oexFALSE;
 
@@ -188,7 +191,7 @@ static oexUINT g_ConvBaseFileAttribToWinAttrib[] =
 static DWORD CBaseFile_ToFileAttributes( oexUINT uAttrib )
 {
     DWORD dwAttrib = 0;
-    for( oexUINT i = 0; -1 != g_ConvBaseFileAttribToWinAttrib[ i ] 
+    for( oexUINT i = 0; -1 != g_ConvBaseFileAttribToWinAttrib[ i ]
                         && -1 != g_ConvBaseFileAttribToWinAttrib[ i + 1 ];
                         i += 2 )
     if ( 0 != ( uAttrib & g_ConvBaseFileAttribToWinAttrib[ i ] ) )
@@ -200,7 +203,7 @@ static DWORD CBaseFile_ToFileAttributes( oexUINT uAttrib )
 static oexUINT CBaseFile_ToCBaseFileAttributes( DWORD dwAttrib )
 {
     DWORD uAttrib = 0;
-    for( oexUINT i = 0; -1 != g_ConvBaseFileAttribToWinAttrib[ i ] 
+    for( oexUINT i = 0; -1 != g_ConvBaseFileAttribToWinAttrib[ i ]
                         && -1 != g_ConvBaseFileAttribToWinAttrib[ i + 1 ];
                         i += 2 )
     if ( 0 != ( dwAttrib & g_ConvBaseFileAttribToWinAttrib[ i + 1 ] ) )
@@ -237,7 +240,7 @@ CBaseFile::t_HFIND CBaseFile::FindFirst( oexCSTR x_pPath, oexCSTR x_pMask, CBase
 	if ( CBaseFile::c_InvalidFindHandle == hDir )
 		return CBaseFile::c_InvalidFindHandle;
 
-	errno = 0;		
+	errno = 0;
 	struct dirent *pD = readdir( hDir );
 	if ( !pD || errno )
 	{	closedir( hDir );
@@ -245,9 +248,9 @@ CBaseFile::t_HFIND CBaseFile::FindFirst( oexCSTR x_pPath, oexCSTR x_pMask, CBase
 	} // end if
 
 	CBaseFile_InitFindData( x_pFd );
-	
+
 	x_pFd->sName = oexMbToStr( pD->d_name );
-	
+
     return (CBaseFile::t_HFIND)hDir;
 }
 
@@ -255,16 +258,16 @@ oexBOOL CBaseFile::FindNext( t_HFIND x_hFind, CBaseFile::SFindData *x_pFd )
 {
 	DIR *hDir = (DIR*)x_hFind;
 
-	errno = 0;		
+	errno = 0;
 	struct dirent *pD = readdir( hDir );
 	if ( !pD || errno )
 	{	closedir( hDir );
 		return oexFALSE;
 	} // end if
 
-	CBaseFile_InitFindData( x_pFd );	
+	CBaseFile_InitFindData( x_pFd );
 	x_pFd->sName = oexMbToStr( pD->d_name );
-	
+
     return oexTRUE;
 }
 
@@ -279,7 +282,48 @@ oexBOOL CBaseFile::DoesExist( oexCSTR x_pPath )
 }
 
 oexBOOL CBaseFile::CreateFolder( oexCSTR x_pPath )
-{   return mkdir( oexStrToMbPtr( x_pPath ), 0 ) ? oexFALSE : oexTRUE; 
+{   return mkdir( oexStrToMbPtr( x_pPath ), 0 ) ? oexFALSE : oexTRUE;
+}
+
+CStr CBaseFile::GetModulePath( oexCSTR x_pPath )
+{
+	BrInitError error;
+	if ( br_init( &error ) )
+	{
+		char *pPath = br_find_exe( oexNULL );
+
+		if ( pPath )
+		{
+			if ( x_pPath && *x_pPath )
+				return oexBuildPath( oexStr8ToStr( pPath ).GetPath(), x_pPath );
+
+			else
+				return oexStr8ToStr( pPath ).GetPath();
+
+		} // end if
+
+	} // end if
+
+	// Don't really know if this is the best thing to do or not...
+	if ( x_pPath && *x_pPath )
+		return x_pPath;
+
+	return CStr();
+}
+
+CStr CBaseFile::GetModuleFileName()
+{
+	BrInitError error;
+	if ( br_init( &error ) )
+	{
+		char *pPath = br_find_exe( oexNULL );
+
+		if ( pPath )
+			return oexStr8ToStr( pPath );
+
+	} // end if
+
+	return CStr();
 }
 
 

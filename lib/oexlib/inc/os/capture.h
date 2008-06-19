@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// log.cpp
+// capture.h
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -32,39 +32,84 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#include "../oexlib.h"
+#pragma once
 
-OEX_USING_NAMESPACE
+//==================================================================
+// CCapture
+//
+/// Generic video capture
+/**
 
-CLog CLog::m_logGlobal;
 
-oexBOOL CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uErr, oexCSTR x_pErr, oexUINT x_uSkip )
+*/
+//==================================================================
+class CCapture
 {
-	// Create log file if needed
-	if ( !m_file.IsOpen() )
+public:
+
+	/// Contains information about available capture devices
+	struct SDeviceInfo
 	{
-		// Open new log file
-		if ( !m_file.CreateNew( oexGetModulePath( oexT( "debug.log" ) ).Ptr() ).IsOpen() )
-			return oexFALSE;
+		/// Capture device name
+		CStr			sName;
 
-		// Create log header
-		m_file.Write( CStr().Fmt( oexT( "; Log file\r\n; Date : %s\r\n; Application : %s\r\n\r\n" ),
-								  oexStrToMbPtr( oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() ),
-								  oexStrToMbPtr( oexGetModuleFileName().Ptr() ) ) );
+		/// Device id
+		oexINT			nId;
 
-	} // end if
+		/// Capture device type
+		oexINT			nType;
 
-	// Do we have a source file name?
-	if ( x_pFile )
-		m_file.Write( CStr().Fmt( oexT( "%s:(%u) " ), oexStrToMbPtr( x_pFile ), x_nLine ) );
+		/// Number of channels
+		oexINT			nChannels;
+	};
 
-	// Ensure error is not null
-	if ( !x_pErr )
-		x_pErr = oexT( "Unspecified" );
+public:
 
-	// Write out the log
-	return m_file.Write( CStr().Fmt( oexT( "0x%X (%d) : %s\r\n\t%s\r\n" ),
-								 	 x_uErr, x_uErr, oexStrToMbPtr( x_pErr ),
-								 	 oexStrToMbPtr( os::CTrace::GetBacktrace( x_uSkip ).Replace( oexT( "\n" ), oexT( "\n\t" ) ).Ptr() ) ) );
-}
+	/// Default constructor
+	CCapture();
+
+	/// Destructor
+	virtual ~CCapture();
+
+	/// Closes the capture device and releases resources
+	void Destroy();
+
+	/// Opens the specified capture device
+	/**
+		\param [in] x_sDevice	- Name of the capture device to open
+
+		\return Non-zero if success.
+	*/
+	oexBOOL Open( oexCSTR x_sDevice );
+
+	/// Returns non-zero if a capture device is currently open
+	oexBOOL IsOpen()
+	{	return ( oexNULL != m_pDevice ); }
+
+	/// Starts video capture
+	oexBOOL StartCapture();
+
+	/// Stops video capture
+	oexBOOL StopCapture();
+
+	/// Waits for a new video frame to become available
+	oexBOOL WaitForFrame( oexUINT x_uTimeout = 0 );
+
+	/// Returns a pointer to the video buffer
+	oexCHAR* GetBuffer();
+
+	/// Returns the size of the video buffer
+	oexUINT GetBufferSize();
+
+	/// Returns an image object containing the video frame
+	CImage* GetImage();
+
+public:
+
+
+private:
+
+	/// System specific capture device class
+	oexPVOID			m_pDevice;
+};
 

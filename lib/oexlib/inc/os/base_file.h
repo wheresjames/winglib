@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -41,11 +41,13 @@ public:
     /// File handle type
     typedef oexPVOID t_HFILE;
 
+	/// Find files type
     typedef oexPVOID t_HFIND;
 
-    /// Invalid handle value
+    /// Invalid file handle value
 	static const t_HFILE c_Invalid;
 
+	/// Invalid find files handle value
 	static const t_HFIND c_InvalidFindHandle;
 
     enum
@@ -114,7 +116,7 @@ public:
         eFileAttribTemporary = 0x00000100,
         eFileAttribSparseFile = 0x00000200,
         eFileAttribReparsePoint = 0x00000400,
-        eFileAttribCompressed = 0x00000800,  
+        eFileAttribCompressed = 0x00000800,
         eFileAttribOffline = 0x00001000,
         eFileAttribNotContentIndexed = 0x00002000,
         eFileAttribEncrypted = 0x00004000
@@ -122,38 +124,60 @@ public:
     };
 
 private:
+
+	/// Default constructor
 	CBaseFile() {}
+
+	/// Destructor
     ~CBaseFile() {}
 
 public:
 
+	/// Creates or opens the specified file
     static t_HFILE Create( oexCSTR x_pFile, oexUINT x_eDisposition, oexUINT x_eAccess, oexUINT x_eShare, oexUINT x_uFlags, oexUINT *x_puError );
 
+	/// Closes the specified file handle
     static oexBOOL Close( t_HFILE x_hFile, oexUINT *x_puErr );
 
-    static t_HFILE vInvalid() 
+	/// Invalid file handle value
+    static t_HFILE vInvalid()
     {   return c_Invalid; }
 
+	/// Writes data to a file handle
     static oexBOOL Write( t_HFILE hFile, oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puWritten, oexUINT *x_puErr );
 
+	/// Reads data from a file handle
     static oexBOOL Read( t_HFILE hFile, oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, oexUINT *x_puErr );
 
+	/// Returns the size of the specified file
     static oexINT64 Size( t_HFILE hFile );
 
+	/// Sets the file pointer
     static oexINT64 SetPointer( t_HFILE hFile, oexINT64 llMove, oexINT nMethod );
 
+	/// Removes the specified folder
     static oexBOOL RemoveFolder( oexCSTR x_pDir );
 
+	/// Deletes the specified file
     static oexBOOL Delete( oexCSTR x_pFile );
 
+	/// Gets file attributes
     static oexUINT GetFileAttrib( oexCSTR x_pFile );
 
+	/// Sets file attributes
     static oexBOOL SetFileAttrib( oexCSTR x_pFile, oexUINT x_uAttrib );
 
+	/// Returns non-zero if the specified file or directory exists
     static oexBOOL DoesExist( oexCSTR x_pPath );
 
+	/// Recursively creates the specified folder
     static oexBOOL CreateFolder( oexCSTR x_pPath );
 
+	/// Returns the fully qualified path to the current module
+	static CStr GetModulePath( oexCSTR x_pPath = oexNULL );
+
+	/// Returns the fully qualified file name the to the current module
+	static CStr GetModuleFileName();
 
 public:
 
@@ -172,7 +196,7 @@ public:
 
     static oexBOOL FindClose( t_HFIND x_hFind );
 
-    static t_HFIND vInvalidFindHandle() 
+    static t_HFIND vInvalidFindHandle()
     {   return c_InvalidFindHandle; }
 
 };

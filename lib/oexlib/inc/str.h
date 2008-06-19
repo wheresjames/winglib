@@ -610,7 +610,7 @@ public:
 	}
 
 	/// Returns a sub string
-	TStr SubStr( oexINT nStart, oexUINT uLen )
+	TStr SubStr( oexINT nStart, oexUINT uLen ) oexCONST
 	{	return TStr( Ptr(), Length(), nStart, uLen );
     }
 
@@ -1317,6 +1317,47 @@ public:
 	TStr& Replace( oexCONST T x_tFind, oexCONST T x_tReplace )
     {   str::Replace( _Ptr(), Length(), x_tFind, x_tReplace ); return *this; }
 
+	/// Replaces sub strings with another
+	TStr Replace( oexCONST TStr &x_sFind, oexCONST TStr &x_sReplace ) oexCONST
+	{
+		TStr str;
+		oexINT lf = x_sFind.Length();
+		if ( !lf )
+			return *this;
+
+		oexINT s = 0, e = Length(), lr = x_sReplace.Length(), m;
+		do
+		{
+			// See if we can find the string
+			m = str::FindSubStr( Ptr( s ), e - s, x_sFind.Ptr(), lf );
+
+			// Punt if we got nothing
+			if ( 0 > m )
+			{
+				// Sub string never found?
+				if ( !s )
+					return *this;
+
+				// Return final string
+				str += SubStr( s, e - s );
+				return str;
+
+			} // end if
+
+			// Append non-matching stuff
+			str += SubStr( s, m );
+
+			// Replace with other string if needed
+			if ( lr )
+				str += x_sReplace;
+
+			// Next point
+			s += m + lf;
+
+		} while ( s < e );
+
+		return str;
+	}
 
 	//==============================================================
 	// Compare functions

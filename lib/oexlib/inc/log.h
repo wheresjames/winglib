@@ -73,7 +73,24 @@ public:
 
 		\see
 	*/
-    oexBOOL Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uErr, oexCSTR x_pErr );
+    oexBOOL Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uErr, oexCSTR x_pErr, oexUINT x_uSkip = 2 );
+
+	//==============================================================
+	// Log()
+	//==============================================================
+	/// Writes a string to the file
+	/**
+		\param [in] x_pFile		- Source file name
+		\param [in] x_uLine		- Source file line number
+		\param [in] x_uErr		- Error code
+		\param [in] x_pErr		- Error string
+
+		\return Non-zero if success
+
+		\see
+	*/
+    oexBOOL Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uErr, CStr x_sErr )
+    {	return Log( x_pFile, x_nLine, x_uErr, x_sErr.Ptr(), 3 ); }
 
 private:
 

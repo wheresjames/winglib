@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -45,10 +45,10 @@ OEX_USING_NAMESPACE
 // 1980 = 1601 + 11960010000
 
 static oexCSTR s_days[] = { oexT( "Sun" ), oexT( "Mon" ), oexT( "Tue" ), oexT( "Wed" ), oexT( "Thu" ), oexT( "Fri" ), oexT( "Sat" ), oexT( "Inv" ) };
-static oexCSTR s_months[] = { oexT( "Inv" ), oexT( "Jan" ), oexT( "Feb" ), oexT( "Mar" ), oexT( "Apr" ), oexT( "May" ), oexT( "Jun" ), 
+static oexCSTR s_months[] = { oexT( "Inv" ), oexT( "Jan" ), oexT( "Feb" ), oexT( "Mar" ), oexT( "Apr" ), oexT( "May" ), oexT( "Jun" ),
 							  oexT( "Jul" ), oexT( "Aug" ), oexT( "Sep" ), oexT( "Oct" ), oexT( "Nov" ), oexT( "Dec" ) };
 static oexCSTR s_fdays[] = { oexT( "Sunday" ), oexT( "Monday" ), oexT( "Tuesday" ), oexT( "Wednesday" ), oexT( "Thursday" ), oexT( "Friday" ), oexT( "Saturday" ), oexT( "Invalid" ) };
-static oexCSTR s_fmonths[] = { oexT( "Invalid" ), oexT( "January" ), oexT( "February" ), oexT( "March" ), oexT( "April" ), oexT( "May" ), oexT( "June" ), 
+static oexCSTR s_fmonths[] = { oexT( "Invalid" ), oexT( "January" ), oexT( "February" ), oexT( "March" ), oexT( "April" ), oexT( "May" ), oexT( "June" ),
 							   oexT( "July" ), oexT( "August" ), oexT( "September" ), oexT( "October" ), oexT( "November" ), oexT( "December" ) };
 // static oexUINT g_mdays[] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
@@ -84,7 +84,7 @@ oexUINT CSysTime::DivideSeconds(oexUINT totalseconds, oexUINT *days, oexUINT *ho
 oexUINT CSysTime::IntegrateSeconds(oexUINT days, oexUINT hours, oexUINT mins, oexUINT secs)
 {
 	// Tally total seconds
-	return (	( days * ( 60 * 60 * 24 ) ) + 
+	return (	( days * ( 60 * 60 * 24 ) ) +
 				( hours * ( 60 * 60 ) ) +
 				( mins * 60 ) +
 				  secs );
@@ -223,72 +223,73 @@ CStr CSysTime::FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors )
 		// Replace escape sequence
 		else switch( x_sTmpl[ ++x ] )
 		{
-			case 'h' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)Get12Hour() ); break;
+			case oexT( 'h' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)Get12Hour() ); break;
 
-			case 'H' : str.AppendNum( oexT( "%lu" ), (oexUINT)Get12Hour() ); break;
+			case oexT( 'H' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)Get12Hour() ); break;
 
-			case 'g' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uHour ); break;
+			case oexT( 'g' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uHour ); break;
 
-			case 'G' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uHour ); break;
+			case oexT( 'G' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uHour ); break;
 
-			case 'm' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uMinute ); break;
+			case oexT( 'm' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uMinute ); break;
 
-			case 'M' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMinute ); break;
+			case oexT( 'M' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMinute ); break;
 
-			case 's' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uSecond ); break;
+			case oexT( 's' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uSecond ); break;
 
-			case 'S' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uSecond ); break;
+			case oexT( 'S' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uSecond ); break;
 
-			case 'l' : str.AppendNum( oexT( "%0.3lu" ), (oexUINT)m_time.uMillisecond ); break;
+			case oexT( 'l' ) : str.AppendNum( oexT( "%0.3lu" ), (oexUINT)m_time.uMillisecond ); break;
 
-			case 'L' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMillisecond ); break;
+			case oexT( 'L' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMillisecond ); break;
 
-			case 'c' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uMonth ); break;
+			case oexT( 'c' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uMonth ); break;
 
-			case 'C' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMonth ); break;
+			case oexT( 'C' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMonth ); break;
 
-			case 'd' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uDay ); break;
+			case oexT( 'd' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uDay ); break;
 
-			case 'D' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uDay ); break;
+			case oexT( 'D' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uDay ); break;
 
-			case 'i' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uDayOfWeek ); break;
+			case oexT( 'i' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uDayOfWeek ); break;
 
-			case 'I' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uDayOfWeek + 1 ); break;
+			case oexT( 'I' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uDayOfWeek + 1 ); break;
 
-			case 'y' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uYear ); break;
+			case oexT( 'y' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uYear ); break;
 
-			case 'Y' : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uYear ); break;
+			case oexT( 'Y' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uYear ); break;
 
-            case 'a' : str << ( IsPM() ? oexT( "pm" ) : oexT( "am" ) ); break;
+            case oexT( 'a' ) : str << ( IsPM() ? oexT( "pm" ) : oexT( "am" ) ); break;
 
-			case 'A' : str << ( IsPM() ? oexT( "PM" ) : oexT( "AM" ) ); break;
+			case oexT( 'A' ) : str << ( IsPM() ? oexT( "PM" ) : oexT( "AM" ) ); break;
 
-			case 'w' : str << GetAbrDayName( m_time.uDayOfWeek ); break;
+			case oexT( 'w' ) : str << GetAbrDayName( m_time.uDayOfWeek ); break;
 
-			case 'W' : str << GetDayName( m_time.uDayOfWeek ); break;
+			case oexT( 'W' ) : str << GetDayName( m_time.uDayOfWeek ); break;
 
-			case 'b' : str << GetAbrMonthName( m_time.uMonth ); break;
+			case oexT( 'b' ) : str << GetAbrMonthName( m_time.uMonth ); break;
 
-			case 'B' : str << GetMonthName( m_time.uMonth ); break;
+			case oexT( 'B' ) : str << GetMonthName( m_time.uMonth ); break;
 
-			case 'Z' : case 'z' :
+			case oexT( 'Z' ) : case oexT( 'z' ) :
 			{
 				switch( x_sTmpl[ ++x ] )
 				{
-					case 's' : case 'S' : str << ( ( 0 > m_time.nTzBias ) ? '-' : '+' ); break;
+					case oexT( 's' ) :
+					case oexT( 'S' ) : str << ( ( 0 > m_time.nTzBias ) ? oexT( '-' ) : oexT( '+' ) ); break;
 
-                    case 'h' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) / 60 ); break;
+                    case oexT( 'h' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) / 60 ); break;
 
-					case 'H' : str.AppendNum( oexT( "%lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) / 60 ); break;
+					case oexT( 'H' ) : str.AppendNum( oexT( "%lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) / 60 ); break;
 
-					case 'm' : str.AppendNum( oexT( "%0.2lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) % 60 ); break;
+					case oexT( 'm' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) % 60 ); break;
 
-					case 'M' : str.AppendNum( oexT( "%lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) % 60 ); break;
+					case oexT( 'M' ) : str.AppendNum( oexT( "%lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) % 60 ); break;
 
 					// Unknown escape sequence
-					default : 
+					default :
                         oexASSERT( 0 );
-                        if ( x_bErrors ) *x_bErrors = oexTRUE; 
+                        if ( x_bErrors ) *x_bErrors = oexTRUE;
                         break;
 
 				} // end switch
@@ -306,7 +307,7 @@ CStr CSysTime::FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors )
                 str << x_sTmpl[ x ];
 
 				break;
-		
+
 		}; // end switch
 
 		// Next character
@@ -340,10 +341,10 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 	while ( x_sTmpl[ x ] != 0 )
     {
 		// If not the escape character
-		if ( x_sTmpl[ x ] != '%' ) 
-		{	
+		if ( x_sTmpl[ x ] != '%' )
+		{
             // Check character
-			if ( x_sTmpl[ x ] != '*' && x_sTmpl[ x ] != '?' && *x_sStr != x_sTmpl[ x ] ) 
+			if ( x_sTmpl[ x ] != '*' && x_sTmpl[ x ] != '?' && *x_sStr != x_sTmpl[ x ] )
                 bErrors = oexTRUE;
 
             x_sStr++;
@@ -351,98 +352,98 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 
         else switch ( x_sTmpl[ ++x ] )
         {
-            case 'h' : 
-                uHour = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE ); 
-                if ( 2 != nEnd || 1 > uHour || 12 < uHour ) bErrors = oexTRUE; 
+            case oexT( 'h' ) :
+                uHour = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE );
+                if ( 2 != nEnd || 1 > uHour || 12 < uHour ) bErrors = oexTRUE;
                 break;
 
-            case 'H' : 
+            case oexT( 'H' ) :
                 uHour = (oexUINT)x_sStr.ToNum( 0, 10, &nEnd, oexTRUE );
-                if ( !nEnd || 1 > uHour || 12 < uHour ) bErrors = oexTRUE; 
+                if ( !nEnd || 1 > uHour || 12 < uHour ) bErrors = oexTRUE;
                 break;
 
-            case 'g' : 
-                uHour = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE ); 
-                if ( 2 != nEnd || 24 < uHour ) bErrors = oexTRUE; 
+            case oexT( 'g' ) :
+                uHour = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE );
+                if ( 2 != nEnd || 24 < uHour ) bErrors = oexTRUE;
                 break;
 
-            case 'G' : 
+            case oexT( 'G' ) :
                 uHour = (oexUINT)x_sStr.ToNum( 0, 10, &nEnd, oexTRUE );
-                if ( !nEnd || 24 < uHour ) bErrors = oexTRUE; 
+                if ( !nEnd || 24 < uHour ) bErrors = oexTRUE;
                 break;
 
-            case 'm' : 
-                uMinute = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE ); 
-                if ( 2 != nEnd || 60 < uMinute ) bErrors = oexTRUE; 
+            case oexT( 'm' ) :
+                uMinute = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE );
+                if ( 2 != nEnd || 60 < uMinute ) bErrors = oexTRUE;
                 break;
 
-            case 'M' : 
+            case oexT( 'M' ) :
                 uMinute = (oexUINT)x_sStr.ToNum( 0, 10, &nEnd, oexTRUE );
-                if ( !nEnd || 60 < uMinute ) bErrors = oexTRUE; 
+                if ( !nEnd || 60 < uMinute ) bErrors = oexTRUE;
                 break;
 
-            case 's' : 
-                uSecond = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE ); 
-                if ( 2 != nEnd || 60 < uSecond ) bErrors = oexTRUE; 
+            case oexT( 's' ) :
+                uSecond = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE );
+                if ( 2 != nEnd || 60 < uSecond ) bErrors = oexTRUE;
                 break;
 
-            case 'S' : 
+            case oexT( 'S' ) :
                 uSecond = (oexUINT)x_sStr.ToNum( 0, 10, &nEnd, oexTRUE );
-                if ( !nEnd || 60 < uSecond ) bErrors = oexTRUE; 
+                if ( !nEnd || 60 < uSecond ) bErrors = oexTRUE;
                 break;
 
-            case 'l' : 
-                uMillisecond = (oexUINT)x_sStr.ToNum( 3, 10, &nEnd, oexTRUE ); 
-                if ( 3 != nEnd || 1000 < uMillisecond ) bErrors = oexTRUE; 
+            case oexT( 'l' ) :
+                uMillisecond = (oexUINT)x_sStr.ToNum( 3, 10, &nEnd, oexTRUE );
+                if ( 3 != nEnd || 1000 < uMillisecond ) bErrors = oexTRUE;
                 break;
 
-            case 'L' : 
+            case oexT( 'L' ) :
                 uMillisecond = (oexUINT)x_sStr.ToNum( 0, 10, &nEnd, oexTRUE );
-                if ( !nEnd || 1000 < uMillisecond ) bErrors = oexTRUE; 
+                if ( !nEnd || 1000 < uMillisecond ) bErrors = oexTRUE;
                 break;
 
-            case 'c' : 
-                uMonth = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE ); 
-                if ( 2 != nEnd || 12 < uMonth ) bErrors = oexTRUE; 
+            case oexT( 'c' ) :
+                uMonth = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE );
+                if ( 2 != nEnd || 12 < uMonth ) bErrors = oexTRUE;
                 break;
 
-            case 'C' : 
+            case oexT( 'C' ) :
                 uMonth = (oexUINT)x_sStr.ToNum( 0, 10, &nEnd, oexTRUE );
-                if ( !nEnd || 12 < uMonth ) bErrors = oexTRUE; 
+                if ( !nEnd || 12 < uMonth ) bErrors = oexTRUE;
                 break;
 
-            case 'd' : 
-                uDay = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE ); 
-                if ( 2 != nEnd || 31 < uDay ) bErrors = oexTRUE; 
+            case oexT( 'd' ) :
+                uDay = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE );
+                if ( 2 != nEnd || 31 < uDay ) bErrors = oexTRUE;
                 break;
 
-            case 'D' : 
+            case oexT( 'D' ) :
                 uDay = (oexUINT)x_sStr.ToNum( 0, 10, &nEnd, oexTRUE );
-                if ( !nEnd || 31 < uDay ) bErrors = oexTRUE; 
+                if ( !nEnd || 31 < uDay ) bErrors = oexTRUE;
                 break;
 
-            case 'i' : 
-                uDayOfWeek = (oexUINT)x_sStr.ToNum( 1, 10, &nEnd, oexTRUE ); 
-                if ( 1 != nEnd || 6 < uDayOfWeek ) bErrors = oexTRUE; 
-                break;
-
-            case 'I' : 
+            case oexT( 'i' ) :
                 uDayOfWeek = (oexUINT)x_sStr.ToNum( 1, 10, &nEnd, oexTRUE );
-                if ( 1 != nEnd || 7 < uDayOfWeek ) bErrors = oexTRUE; 
+                if ( 1 != nEnd || 6 < uDayOfWeek ) bErrors = oexTRUE;
                 break;
 
-            case 'y' : 
-                uYear = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE ); 
-                if ( 2 != nEnd ) bErrors = oexTRUE; 
+            case oexT( 'I' ) :
+                uDayOfWeek = (oexUINT)x_sStr.ToNum( 1, 10, &nEnd, oexTRUE );
+                if ( 1 != nEnd || 7 < uDayOfWeek ) bErrors = oexTRUE;
                 break;
 
-            case 'Y' : 
+            case oexT( 'y' ) :
+                uYear = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE );
+                if ( 2 != nEnd ) bErrors = oexTRUE;
+                break;
+
+            case oexT( 'Y' ) :
                 uYear = (oexUINT)x_sStr.ToNum( 4, 10, &nEnd, oexTRUE );
-                if ( 4 != nEnd ) bErrors = oexTRUE; 
+                if ( 4 != nEnd ) bErrors = oexTRUE;
                 break;
 
-			case 'a' : 
-			case 'A' : 
+			case oexT( 'a' ) :
+			case oexT( 'A' ) :
             {   oexBOOL bInvalid = oexFALSE;
                 if ( x_sStr.ICmpLen( oexT( "pm" ), 2 ) )
                     uHour = ( uHour + 12 ) % 24;
@@ -451,7 +452,7 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
                 if ( !bInvalid ) x_sStr.LTrim( 2 );
             } break;
 
-			case 'w' : 
+			case oexT( 'w' ) :
             {   oexUINT k;
                 for ( k = 1; k <= 7; k++ )
                     if ( x_sStr.ICmpLen( GetAbrDayName( k ) ) )
@@ -459,15 +460,15 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
                 if ( k < 99 ) bErrors = oexTRUE;
             } break;
 
-			case 'W' : 
+			case oexT( 'W' ) :
             {   oexUINT k;
                 for ( k = 1; k <= 7; k++ )
                     if ( x_sStr.ICmpLen( GetDayName( k ) ) )
                     {   uDayOfWeek = k; x_sStr.LTrim( zstr::Length( GetDayName( k ) ) ); k = 99; }
                 if ( k < 99 ) bErrors = oexTRUE;
             } break;
-            
-			case 'b' : 
+
+			case oexT( 'b' ) :
             {   oexUINT k;
                 for ( k = 1; k <= 12; k++ )
                     if ( x_sStr.ICmpLen( GetAbrMonthName( k ) ) )
@@ -475,7 +476,7 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
                 if ( k < 99 ) bErrors = oexTRUE;
             } break;
 
-			case 'B' : 
+			case oexT( 'B' ) :
             {   oexUINT k;
                 for ( k = 1; k <= 12; k++ )
                     if ( x_sStr.ICmpLen( GetMonthName( k ) ) )
@@ -483,34 +484,34 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
                 if ( k < 99 ) bErrors = oexTRUE;
             } break;
 
-			case 'Z' : case 'z' :
+			case oexT( 'Z' ) : case oexT( 'z' ) :
 			{
 				switch( x_sTmpl[ ++x ] )
 				{
-					case 's' : case 'S' :
+					case oexT( 's' ) : case oexT( 'S' ) :
 						if ( '+' == *x_sStr ) x_sStr++, bTzNeg = oexFALSE;
 						else if ( '-' == *x_sStr ) x_sStr++, bTzNeg = oexTRUE;
                         else bErrors = oexTRUE;
 						break;
 
-                    case 'h' : 
-                        nHBias = (oexINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE ); 
-                        if ( 2 != nEnd ) bErrors = oexTRUE; 
+                    case oexT( 'h' ) :
+                        nHBias = (oexINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE );
+                        if ( 2 != nEnd ) bErrors = oexTRUE;
                         break;
 
-                    case 'H' : 
-                        nHBias = (oexINT)x_sStr.ToNum( 0, 10, &nEnd, oexTRUE ); 
-                        if ( !nEnd ) bErrors = oexTRUE; 
+                    case oexT( 'H' ) :
+                        nHBias = (oexINT)x_sStr.ToNum( 0, 10, &nEnd, oexTRUE );
+                        if ( !nEnd ) bErrors = oexTRUE;
                         break;
 
-                    case 'm' : 
-                        nMBias = (oexINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE ); 
-                        if ( 2 != nEnd ) bErrors = oexTRUE; 
+                    case oexT( 'm' ) :
+                        nMBias = (oexINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE );
+                        if ( 2 != nEnd ) bErrors = oexTRUE;
                         break;
 
-                    case 'M' : 
-                        nMBias = (oexINT)x_sStr.ToNum( 0, 10, &nEnd, oexTRUE ); 
-                        if ( !nEnd ) bErrors = oexTRUE; 
+                    case oexT( 'M' ) :
+                        nMBias = (oexINT)x_sStr.ToNum( 0, 10, &nEnd, oexTRUE );
+                        if ( !nEnd ) bErrors = oexTRUE;
                         break;
 
 					default :
@@ -532,7 +533,7 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 
     } // end while
 
-    // If this asserts you're time stamp did not match 
+    // If this asserts you're time stamp did not match
     // the template passed to CSysTime::ParseTime()
     oexASSERT( !bErrors );
 
@@ -544,7 +545,7 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 
 	// Set valid parts of the time
 	SetTime( uYear, uMonth, uDay, uHour, uMinute, uSecond, uMillisecond, uDayOfWeek, nTzBias );
-    
+
     return oexTRUE;
 }
 

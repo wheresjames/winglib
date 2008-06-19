@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -41,17 +41,17 @@
     \warning When using shared memory, constructors are called only
              when the memory block is created.  The destructor is
              called when the memory is actually freed.  If your
-             sharing memory between processes, this means the 
-             constructor may be called in one process, and the 
+             sharing memory between processes, this means the
+             constructor may be called in one process, and the
              destructor in another.  So plan accordingly!
-    
+
 */
 template < typename T, typename T_AS = T > class TMem
 {
 public:
 
-    TMem() 
-    {   
+    TMem()
+    {
         m_pMem = oexNULL;
 
 #if defined ( _DEBUG )
@@ -64,8 +64,8 @@ public:
 #endif
     }
 
-    TMem( T* x_pMem, oexBOOL x_bConstructed = oexTRUE ) 
-    {   
+    TMem( T* x_pMem, oexBOOL x_bConstructed = oexTRUE )
+    {
         m_pMem = x_pMem;
 
 #if defined ( _DEBUG )
@@ -80,9 +80,9 @@ public:
         m_uLine = 0;
 #endif
     }
-    
-    TMem( oexCONST T& x_rMem, oexBOOL x_bConstructed = oexTRUE ) 
-    {   
+
+    TMem( oexCONST T& x_rMem, oexBOOL x_bConstructed = oexTRUE )
+    {
         m_pMem = oexNULL;
 
 #if defined ( _DEBUG )
@@ -96,9 +96,9 @@ public:
         // Construct a copy
         *this = x_rMem;
     }
-    
-    TMem( TMem &x_m ) 
-    {   
+
+    TMem( TMem &x_m )
+    {
         m_pMem = oexNULL;
 
 #if defined ( _DEBUG )
@@ -110,15 +110,15 @@ public:
         m_uLine = 0;
 #endif
         // Construct a copy
-        Share( x_m ); 
+        Share( x_m );
     }
-    
+
     /// Copy operator
     TMem& operator = ( TMem &x_m )
     {
-        return Share( x_m ); 
+        return Share( x_m );
     }
-    
+
     /// Copy operator
     TMem& operator = ( oexCONST T &x_rObj )
     {
@@ -127,13 +127,25 @@ public:
         if ( Ptr() )
             *Ptr() = x_rObj;
 
-        return *this; 
+        return *this;
     }
-    
+
+	/// Destructor
     virtual ~TMem()
-    {   
+    {
         Delete();
     }
+
+	/// Releases the memory.
+	// This is just a standard function for me ;)
+    void Destroy()
+    {
+    	Delete();
+	}
+
+	/// Returns non-zero if there is a valid memory pointer
+	oexBOOL IsValid()
+	{	return ( oexNULL != Ptr() ); }
 
     /// Sets the shared memory name
     /**
@@ -141,19 +153,26 @@ public:
         \param [in] x_uLen  -   Length of the string in x_pName.
                                 Can be zero if the string is
                                 NULL terminated.
-        
+
     */
     TMem& SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
-    {   
-        m_fm.SetName( x_pName, x_uLen ); 
-        return *this; 
+    {   m_fm.SetName( x_pName, x_uLen );
+        return *this;
     }
 
-    /// Returns the shared name
-    oexCSTR GetName()
-    {
-        return m_fm.GetName();
-    }
+	/// Returns the shared name
+	oexCSTR GetName()
+	{	return m_fm.GetName(); }
+
+	/// Sets a file handle for shared memory
+    TMem& SetShareHandle( os::CFMap::t_HFILEMAP x_hHandle )
+    {  	m_fm.SetShareHandle( x_hHandle );
+    	return *this;
+	}
+
+	/// Returns the shared file handle
+	os::CFMap::t_HFILEMAP GetShareHandle()
+	{	return m_fm.GetShareHandle(); }
 
     /// Detaches from memory pointer
     /**
@@ -168,7 +187,7 @@ public:
     /// Returns non-zero if memory mapping is being used
     oexBOOL IsMapped() const
     {   return 0 < m_fm.Size(); }
-    
+
     TMem& New( oexUINT x_uSize, oexBOOL x_bConstructed = oexFALSE, oexBOOL x_bUseFullBlock = oexFALSE )
     {
         // Lose old memory
@@ -182,7 +201,7 @@ public:
 
         // Allocate plain old memory
         else
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
             m_pMem = CAlloc( m_uLine, m_pFile ).New< T >( x_uSize, x_bConstructed, x_bUseFullBlock );
             m_pFile = oexNULL;
             m_uLine = 0;
@@ -198,7 +217,7 @@ public:
             m_pBh = CAlloc::GetBlockHeader( Ptr() );
 #endif
         return *this;
-    }   
+    }
 
     oexUINT Size() const
     {
@@ -230,7 +249,7 @@ public:
         if ( m_pMem )
         {
             // Free the memory
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
             CAlloc( m_uLine, m_pFile ).Delete( m_pMem );
 #else
             CAlloc().Delete( m_pMem );
@@ -299,7 +318,7 @@ public:
                     m_pMem[ i ].~T();
 
             // We can make things smaller
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
             m_pMem = CAlloc( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize );
 #else
             m_pMem = CAlloc().Resize( m_pMem, x_uNewSize );
@@ -311,16 +330,16 @@ public:
         else
         {
             // Will a simple resize work?
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
             T* pMem = CAlloc( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize );
 #else
             T* pMem = CAlloc().Resize( m_pMem, x_uNewSize );
 #endif
-            
+
             if ( !pMem )
             {
                 TMem< T > mem;
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
                 if ( !oexVERIFY_PTR( mem._Log( m_uLine, m_pFile ).New( x_uNewSize ).Ptr() ) )
 #else
                 if ( !oexVERIFY_PTR( mem.New( x_uNewSize ).Ptr() ) )
@@ -333,7 +352,7 @@ public:
                     // Initialize new array
                     for ( oexUINT i = 0; i < x_uNewSize; i++ )
 
-                        if ( i < uSize ) 
+                        if ( i < uSize )
                             *mem.Ptr() = *Ptr();
                         else
                             oexPLACEMENT_NEW ( mem.Ptr( i ) ) T();
@@ -374,9 +393,9 @@ public:
 	/// Returns a pointer to the memory
     T_AS* Ptr()
     {
-        if ( m_pMem ) 
+        if ( m_pMem )
             return (T_AS*)m_pMem;
-           
+
         return (T_AS*)m_fm.Ptr();
     }
 
@@ -390,14 +409,14 @@ public:
     T_AS* Ptr( oexUINT x_uOffset )
     {
         T_AS* pPtr = Ptr();
-		
+
         // Out of bounds
         oexASSERT( pPtr && ( Size() * sizeof( T_AS ) / sizeof( T ) ) > x_uOffset );
 
-        if ( !pPtr ) 
+        if ( !pPtr )
             return oexNULL;
-        
-        return &pPtr[ x_uOffset ];          
+
+        return &pPtr[ x_uOffset ];
     }
 
 	//==============================================================
@@ -406,9 +425,9 @@ public:
 	/// Returns a pointer to the memory
 	oexCONST T* c_Ptr() const
     {
-        if ( m_pMem ) 
+        if ( m_pMem )
             return m_pMem;
-           
+
         return m_fm.c_Ptr();
     }
 
@@ -426,10 +445,10 @@ public:
         // Out of bounds
         oexASSERT( pPtr && Size() > x_uOffset );
 
-        if ( !pPtr ) 
+        if ( !pPtr )
             return oexNULL;
-        
-        return &pPtr[ x_uOffset ];          
+
+        return &pPtr[ x_uOffset ];
     }
 
 	//==============================================================
@@ -437,7 +456,7 @@ public:
 	//==============================================================
 	/// Returns a reference to the element
     /**
-        I didn't want to provide this function since it is so easy 
+        I didn't want to provide this function since it is so easy
         to abuse.  You should really make sure the index exists
         before you call this function.
     */
@@ -453,7 +472,7 @@ public:
             x_uOffset = 0;
         } // end if
 
-        return *Ptr( x_uOffset ); 
+        return *Ptr( x_uOffset );
     }
 
 public:
@@ -461,13 +480,13 @@ public:
     /// Adds a reference to the memory block
     oexUINT AddRef()
     {   if ( !Ptr() ) return 0;
-        return CAlloc().AddRef( Ptr() ); 
+        return CAlloc().AddRef( Ptr() );
     }
 
     /// Returns the memory blocks reference count
     oexUINT GetRefCount()
     {   if ( !Ptr() ) return 0;
-        return CAlloc().GetRefCount( Ptr() ); 
+        return CAlloc().GetRefCount( Ptr() );
     }
 
     /// Assumes control of another objects data
@@ -531,7 +550,7 @@ public:
                     // Create array of objects
                     OexConstructArray( uSize );
 
-                    // Copy objects 
+                    // Copy objects
                     // +++ Casting away const
                     for ( oexUINT i = 0; i < uSize; i++ )
                         *Ptr( i ) = *(T*)( x_m.c_Ptr( i ) );
@@ -839,7 +858,7 @@ private:
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 
 public:
-    
+
     /// Registers the source file and line number
     TMem& _Log( oexUINT x_uLine, oexCSTR x_pFile )
     {   m_uLine = x_uLine;

@@ -6,36 +6,35 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
 #include "../oexlib.h"
 
 OEX_USING_NAMESPACE
-
 
 oexBOOL CFile::Destroy()
 {
@@ -54,7 +53,7 @@ oexBOOL CFile::Destroy()
 }
 
 CStr8 CFile::Read( oexUINT x_uSize )
-{   
+{
     oexINT64 llSize = Size();
     if ( x_uSize == 0 || x_uSize > llSize )
         x_uSize = (oexUINT)llSize;
@@ -65,11 +64,11 @@ CStr8 CFile::Read( oexUINT x_uSize )
 
     oexUINT uRead = 0;
     oexBOOL bRet = Read( str._Ptr(), x_uSize, &uRead );
-    
+
     if ( !bRet ) str.Destroy();
     else str.SetLength( uRead );
 
-    return str;        
+    return str;
 }
 
 oexBOOL CFile::DeletePath( oexCSTR x_pPath, oexBOOL x_bEmpty )
@@ -83,9 +82,9 @@ oexBOOL CFile::DeletePath( oexCSTR x_pPath, oexBOOL x_bEmpty )
     // Dump everything in the directory
 	do
 	{
-        if ( ff.IsDirectory() ) 
+        if ( ff.IsDirectory() )
             DeletePath( ff.GetFullPath().Ptr(), oexFALSE );
-		else 
+		else
             os::CBaseFile::Delete( ff.GetFullPath().Ptr() );
 
 	} while ( ff.FindNext() );
@@ -106,7 +105,7 @@ oexBOOL CFile::CreatePath( oexCSTR x_pPath )
 
     CStr sPath;
     for ( CStrList::iterator it; lst.Next( it ); )
-    {   
+    {
         // Build path up to this level
         if ( !sPath.Length() ) sPath = *it;
         else sPath = CStr::BuildPath( sPath, *it );
@@ -115,7 +114,7 @@ oexBOOL CFile::CreatePath( oexCSTR x_pPath )
         if ( !os::CBaseFile::DoesExist( sPath.Ptr() ) )
             if ( !os::CBaseFile::CreateFolder( sPath.Ptr() ) )
                 return oexFALSE;
-        
+
     } // end for
 
     return oexTRUE;
@@ -165,7 +164,7 @@ oexINT64 CFile::FindInFile( oexPVOID x_pStr, oexUINT x_uLen, oexINT64 x_llMax )
 		uSize = ( uSize - i ) + uRead;
 		llFile += i;
 
-	} // end while	
+	} // end while
 
 	return -1;
 

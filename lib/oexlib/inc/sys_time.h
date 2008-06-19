@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -42,16 +42,16 @@
 	Provides time manipulation functions.  I'm not especially proud
 	of the time zone handling, though it works properly.  However,
 	the functions to convert to and from time strings have been
-	priceless.  Not to mention conversion between UNIX, DOS, Net, 
+	priceless.  Not to mention conversion between UNIX, DOS, Net,
 	and File times.
 
 */
 //==================================================================
-class CSysTime  
+class CSysTime
 {
 public:
 
-    enum 
+    enum
     {
         /// Invalid time component
         eInvalid = (oexINT)0x7fffffff
@@ -59,7 +59,7 @@ public:
 
     enum
     {
-        /// Value indicating local time
+        /// Value indicating uninitialized time
         eNullTime  = 0,
 
         /// Value indicating local time
@@ -93,7 +93,7 @@ public:
                                     2   =   GMT time
     */
     CSysTime( oexUINT x_uInitTime = eNullTime )
-    {   
+    {
         if ( eLocalTime == x_uInitTime )
             GetLocalTime();
 
@@ -101,7 +101,7 @@ public:
             GetSystemTime();
 
         else
-            os::CSys::Zero( &m_time, sizeof( m_time ) ); 
+            os::CSys::Zero( &m_time, sizeof( m_time ) );
     }
 
     CSysTime( oexINT x_nTimeFormat, oexINT64 x_llTime, oexINT x_lTzBias = eInvalid )
@@ -143,7 +143,7 @@ public:
 		\param [in] dwSecond		-	Second of the minute ( 0 - 59 )
 		\param [in] dwMilliseconds	-	Millisecond value ( 0 - 999 )
 		\param [in] dwDayOfWeek		-	Day of the week ( 1 - 7 )
-		\param [in] lTzBias			-	Time zone bias, MAXLONG for 
+		\param [in] lTzBias			-	Time zone bias, MAXLONG for
 										none.
 	*/
 	CSysTime& SetTime(	oexUINT uYear = eInvalid, oexUINT uMonth = eInvalid, oexUINT uDay = eInvalid,
@@ -167,7 +167,7 @@ public:
 	//==============================================================
 	/// Returns the four digit year
 	oexUINT GetYear() { return m_time.uYear; }
-    oexUINT SetYear( oexUINT y ) 
+    oexUINT SetYear( oexUINT y )
     {   if ( y > 9999 ) y = 9999; return m_time.uYear = y; }
 
 	//==============================================================
@@ -175,7 +175,7 @@ public:
 	//==============================================================
 	/// Returns the month ( 1 - 12 )
 	oexUINT GetMonth() { return m_time.uMonth; }
-    oexUINT SetMonth( oexUINT m ) 
+    oexUINT SetMonth( oexUINT m )
     {   if ( m > 12 ) m = 1; return m_time.uMonth = m; }
 
 	//==============================================================
@@ -183,25 +183,25 @@ public:
 	//==============================================================
 	/// Returns the day ( 1 - 31 )
 	oexUINT GetDay() { return m_time.uDay; }
-    oexUINT SetDay( oexUINT d ) 
+    oexUINT SetDay( oexUINT d )
     {   if ( d > 31 ) d = 1; return m_time.uDay = d; }
-	
+
 	//==============================================================
 	// GetDayOfWeek()
 	//==============================================================
 	/// Returns the day of the week ( 1 - 7 )
 	oexUINT GetDayOfWeek() { return m_time.uDayOfWeek; }
-    oexUINT SetDayOfWeek( oexUINT d ) 
+    oexUINT SetDayOfWeek( oexUINT d )
     {   if ( d > 7 ) d = 1; return m_time.uDayOfWeek = d; }
-	
+
 	//==============================================================
 	// GetHour()
 	//==============================================================
 	/// Returns the hour ( 0 - 23 ).  For 12-hour value, see Get12Hour()
 	oexUINT GetHour() { return m_time.uHour; }
-    oexUINT SetHour( oexUINT h ) 
+    oexUINT SetHour( oexUINT h )
     {   if ( h >= 24 ) h %= 24; return m_time.uHour = h; }
-	
+
 	//==============================================================
 	// Get12Hour()
 	//==============================================================
@@ -210,9 +210,9 @@ public:
 	{	oexUINT hour = m_time.uHour;
 		if ( hour > 12 ) hour -= 12;
 		else if ( hour == 0 ) hour = 12;
-		return hour; 
+		return hour;
 	}
-    oexUINT Set12Hour( oexUINT h ) 
+    oexUINT Set12Hour( oexUINT h )
     {   if ( h < 1 || h > 12 ) h %= 12, h++; return m_time.uHour = h; }
 
 	//==============================================================
@@ -220,23 +220,23 @@ public:
 	//==============================================================
 	/// Returns the minute ( 0 - 59 )
 	oexUINT GetMinute() { return m_time.uMinute; }
-    oexUINT SetMinute( oexUINT m ) 
+    oexUINT SetMinute( oexUINT m )
     {   if ( m >= 60 ) m %= 60; return m_time.uMinute = m; }
-	
+
 	//==============================================================
 	// GetSecond()
 	//==============================================================
 	/// Returns the second ( 0 - 59 )
-	oexUINT GetSecond() { return m_time.uSecond; }	
-    oexUINT SetSecond( oexUINT s ) 
+	oexUINT GetSecond() { return m_time.uSecond; }
+    oexUINT SetSecond( oexUINT s )
     {   if ( s >= 60 ) s %= 60; return m_time.uSecond = s; }
-	
+
 	//==============================================================
 	// GetMilliSecond()
 	//==============================================================
 	/// Returns the milli-second value ( 0 - 999 )
 	oexUINT GetMilliSecond() { return m_time.uMillisecond; }
-    oexUINT SetMilliSecond( oexUINT m ) 
+    oexUINT SetMilliSecond( oexUINT m )
     {   if ( m >= 1000 ) m %= 1000; return m_time.uMillisecond = m; }
 
 	//==============================================================
@@ -244,34 +244,34 @@ public:
 	//==============================================================
 	/// Returns non-zero if the time is 'Post Meridiem' or 'after noon'.
 	/**
-		
-		This function incorrectly returns non-zero for the time 12:00:00. 		
-		Technically it is not PM until 12:00:01.  12:00:00 is not AM or 
+
+		This function incorrectly returns non-zero for the time 12:00:00.
+		Technically it is not PM until 12:00:01.  12:00:00 is not AM or
 		PM.  Same for 00:00:00.  But this is the common use.
 
 		\return Non-zero if the time is 'Post Meridiem' or 'after noon'.
-	
-		\see 
+
+		\see
 	*/
-	oexBOOL IsPM() { return ( m_time.uHour >= 12 ); } 
+	oexBOOL IsPM() { return ( m_time.uHour >= 12 ); }
 
 	//==============================================================
 	// SetTzBias()
 	//==============================================================
 	/// Sets the current timezone bias.
 	/**
-		\param [in] lTzBias 
+		\param [in] lTzBias
 
 		\return The value in lTzBias
 	*/
-	oexINT SetTzBias( oexINT nTzBias ) 
+	oexINT SetTzBias( oexINT nTzBias )
 	{	return ( m_time.nTzBias = nTzBias ); }
 
 	//==============================================================
 	// GetTzBias()
 	//==============================================================
 	/// Returns the current timezone bias
-	oexINT GetTzBias() 
+	oexINT GetTzBias()
 	{	return m_time.nTzBias; }
 
     /// Divide seconds
@@ -317,7 +317,7 @@ public:
     /// Sets the file time format
     void SetFileTime( oexINT64 x_llFt, oexINT x_lTzBias )
     {   if ( eInvalid != x_lTzBias ) m_time.nTzBias = x_lTzBias;
-        os::CSys::FileTimeToSystemTime( m_time, x_llFt ); 
+        os::CSys::FileTimeToSystemTime( m_time, x_llFt );
     }
 
 
@@ -332,7 +332,7 @@ public:
                                     detected while decoding.
 
 		Formats a time string based on the specified template.
-        
+
 		-	\%h = hour 12 hour fixed 2 digits
 		-	\%H = hour 12 hour
 		-	\%g = hour 24 hour fixed 2 digits
@@ -368,7 +368,7 @@ public:
 		-	\%ZH = Minutes of offset in time zone
 		-	\%Zz = Time zone offset in minutes with leading +/-
 		-	\%ZZ = Time zone offset in seconds with leading +/-
-		 
+
         Some examples:
 
         -   "%W, %B %D, %Y - %h:%m:%s %A"  = Thursday, December 25, 1997 - 04:15:30 PM
@@ -376,7 +376,7 @@ public:
         -   "%w, %d %b %Y %g:%m:%s GMT" = Thu, 25 Dec 1997 16:15:30 GMT
 
 		\return Formated string
-	
+
 		\see ParseString()
 	*/
     CStr FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors = oexNULL );
@@ -384,12 +384,12 @@ public:
 	//==============================================================
 	// ParseString()
 	//==============================================================
-	/// 
+	///
 	/**
 		\param [in] x_sTmpl	-	Template string
 		\param [in] x_sStr  -   String to parse
 
-		This function decomposes an existing time string based 
+		This function decomposes an existing time string based
 		on the template string.
 
 		-	\%h = hour 12 hour fixed 2 digits
@@ -427,11 +427,11 @@ public:
 		-	\%ZH = Minutes of offset in time zone
 		-	\%Zz = Time zone offset in minutes with leading +/-
 		-	\%ZZ = Time zone offset in seconds with leading +/-
-		 
+
 		For timezones, leading +/- is optional. + is the default.
-		
+
 		\return This function returns Zero if the format does not match the template
-	
+
 		\see GetString()
 	*/
     oexBOOL ParseTime( oexCSTR x_sTmpl, CStr x_sStr );
