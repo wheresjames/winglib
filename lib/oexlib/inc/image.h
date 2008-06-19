@@ -208,6 +208,26 @@ public:
 		return Image()->bih.biHeight;
 	}
 
+	/// Returns the image buffer
+	oexPVOID GetBuffer()
+	{
+		if ( !m_image.IsValid() )
+			return oexNULL;
+
+		return ( (oexCHAR*)m_image.Ptr() ) + sizeof( SImageData );
+	}
+
+	/// Returns the size of the image buffer
+	oexINT GetBufferSize()
+	{
+		if ( !m_image.IsValid() )
+			return oexNULL;
+
+		/// Calculate image buffer size
+		return GetScanWidth( Image()->bih.biWidth, Image()->bih.biBitCount )
+		       * cmn::Abs( Image()->bih.biHeight );
+	}
+
 private:
 
 	/// Image memory

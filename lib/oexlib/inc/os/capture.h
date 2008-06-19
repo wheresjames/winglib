@@ -96,7 +96,7 @@ public:
 	oexBOOL WaitForFrame( oexUINT x_uTimeout = 0 );
 
 	/// Returns a pointer to the video buffer
-	oexCHAR* GetBuffer();
+	oexPVOID GetBuffer();
 
 	/// Returns the size of the video buffer
 	oexUINT GetBufferSize();

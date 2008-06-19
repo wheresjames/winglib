@@ -66,7 +66,6 @@ public:
 		m_nFd = -1;
 		m_nVersion = 0;
 		m_nIoMode = eIoAuto;
-		m_pFrameBuffer = oexNULL;
 		m_llFrame = 0;
 	}
 
@@ -133,9 +132,12 @@ public:
 		// Close the file
 		close( m_nFd );
 
+		// Lose the image buffer
+		m_img.Destroy();
+
 		m_nFd = -1;
 		m_nVersion = 0;
-		m_pFrameBuffer = oexNULL;
+//		m_pFrameBuffer = oexNULL;
 		m_llFrame = 0;
 
 	}
@@ -190,6 +192,16 @@ public:
 				return oexFALSE;
 			} // end if
 
+			// Create the image buffer
+			if ( !m_img.Create( (os::CFMap::t_HFILEMAP)m_nFd, 320, 240, 24 ) )
+			{	oexLOG( errno, oexT( "Failed to create shared memory buffer" ) );
+				m_nIoMode = eIoReadWrite;
+			} // end if
+
+			else
+				m_nIoMode = eIoAsync;
+
+/*
 			// Allocate a frame buffer
 			m_pFrameBuffer = (oexCHAR*)mmap( 0, m_buf1.size,
 											 PROT_READ | PROT_WRITE,
@@ -204,6 +216,7 @@ public:
 
 			else
 				m_nIoMode = eIoAsync;
+*/
 
 		} // end if
 
@@ -309,12 +322,12 @@ public:
 	}
 
 	/// Returns a pointer to the video buffer
-	oexCHAR* GetBuffer()
-	{	return m_pFrameBuffer; }
+	oexPVOID GetBuffer()
+	{	return m_img.GetBuffer(); }
 
 	/// +++ Should return the size of the video buffer
 	oexUINT GetBufferSize()
-	{	return 320 * 240 * 3; }
+	{	return m_img.GetBufferSize(); }
 
 	/// Returns an image object
 	CImage* GetImage()
@@ -344,9 +357,11 @@ private:
 	/// Video buffer 1 format
 	video_mbuf			m_buf1;
 
-	/// Frame buffer
-	oexCHAR				*m_pFrameBuffer;
+	/// Image buffer
+	CImage				m_img;
 
+	/// Frame buffer
+//	oexCHAR				*m_pFrameBuffer;
 
 	/// Cropping capabilities
 //	v4l2_cropcap		m_cropcap;
@@ -425,7 +440,7 @@ oexBOOL CCapture::StopCapture()
 	return ( (CV4lCapture*)m_pDevice )->StopCapture();
 }
 
-oexCHAR* CCapture::GetBuffer()
+oexPVOID CCapture::GetBuffer()
 {
 	if ( !m_pDevice )
 		return oexFALSE;

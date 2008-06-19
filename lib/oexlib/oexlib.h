@@ -509,6 +509,8 @@ namespace os
 #include "inc/circ_buf.h"
 #include "inc/fifo_sync.h"
 #include "inc/data_packet.h"
+#include "inc/image.h"
+
 //#include "inc/dispatch.h"
 
 /*
@@ -549,6 +551,7 @@ namespace os
 namespace vid
 {
 #include "inc/vid/avi_file.h"
+#include "inc/os/capture.h"
 };
 
 

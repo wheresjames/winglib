@@ -70,12 +70,17 @@ oexBOOL CImage::Create( os::CFMap::t_HFILEMAP x_hShared, oexINT x_lWidth, oexINT
 	// Lose any current image
 	Destroy();
 
+	// Calculate the size of the image
+	oexINT lImageSize = GetScanWidth( x_lWidth, x_lBpp ) * cmn::Abs( x_lHeight );
+	if ( !lImageSize )
+		return oexFALSE;
+
 	// Set shared name
 	if ( x_hShared )
 		m_image.SetShareHandle( x_hShared );
 
 	// Allocate memory for the shared memory
-	if ( !m_image.OexNew( 1 ).Ptr() )
+	if ( !m_image.OexNew( sizeof( SImageData ) + lImageSize ).Ptr() )
 		return oexFALSE;
 
 	return oexTRUE;
