@@ -20,6 +20,7 @@ set( src_files
 					../../src/parser.cpp
 					../../src/sys_time.cpp
 					../../src/log.cpp
+					../../src/image.cpp
 
 					../../src/vid/avi_file.cpp
 
@@ -74,6 +75,7 @@ set( src_files_os
 					${src_os}/thread.cpp
 					${src_os}/tls.cpp
 					${src_os}/trace.cpp
+					${src_os}/capture.cpp
    )
 
 #-------------------------------------------------------------------

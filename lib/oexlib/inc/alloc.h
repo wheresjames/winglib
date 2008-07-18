@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -38,7 +38,7 @@
 /// Allocator
 /**
     Memory allocation
-    
+
   \code
 
     // *** Create / resize / destroy generic buffer
@@ -100,7 +100,7 @@ public:
         SAllocInfo      ai[ eMaxAllocTrail ];
 
         /// Protected area size
-        oexUINT         uSize;        
+        oexUINT         uSize;
 
         /// Reference count
         oexUINT         uRef;
@@ -114,7 +114,7 @@ public:
 	//==============================================================
 	/// Protects an area of memory by adding padding around it.
 	/**
-		\param [in] x_pBuf		 -	Memory area to protect 
+		\param [in] x_pBuf		 -	Memory area to protect
 									should be at least ( x_uSize + ProtectAreaSize() )
 		\param [in] x_uSize		 -	The size of the memory being allocated
         \param [in] x_bUpdate    -  Non-zero to update memory structure
@@ -129,7 +129,7 @@ public:
 	//==============================================================
 	/// Verifys the memory block boundry markers
 	/**
-		\param [in] x_pBuf		-	Memory area to protect 
+		\param [in] x_pBuf		-	Memory area to protect
 									should be at least ( x_uSize + ProtectAreaSize() )
         \param [in] x_bUpdate   -   Non-zero to update memory structure
         \param [out] x_puSize   -   Size of the allocated memory block
@@ -143,7 +143,7 @@ public:
     static inline oexUINT ProtectAreaSize()
     {
 	    return  sizeof( SBlockHeader )
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
                 + sizeof( m_ucUnderrunPadding )
                 + sizeof( m_ucOverrunPadding )
 #endif
@@ -157,10 +157,10 @@ public:
     static inline oexUINT BlockSize( oexCPVOID x_pBuf )
     {
         // Grab the size of the allocated buffer
-        return *(oexUINT*)( ( (oexUCHAR*)x_pBuf ) - sizeof( oexUINT ) 
+        return *(oexUINT*)( ( (oexUCHAR*)x_pBuf ) - sizeof( oexUINT )
                                                   - sizeof( SBlockHeader )
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
-                                                  - sizeof( m_ucUnderrunPadding ) 
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+                                                  - sizeof( m_ucUnderrunPadding )
 #endif
                                                   );
     }
@@ -171,8 +171,8 @@ public:
     */
     static inline SBlockHeader* GetBlockHeader( oexCPVOID x_pBuf )
     {
-        return (SBlockHeader*)( (oexUCHAR*)x_pBuf 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+        return (SBlockHeader*)( (oexUCHAR*)x_pBuf
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
                                                   - sizeof( m_ucUnderrunPadding )
 #endif
                                                   - sizeof( SBlockHeader ) );
@@ -185,10 +185,10 @@ public:
     static inline oexUINT UsableSize( oexCPVOID x_pBuf )
     {
         // Return size of usable memory
-        return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
-                                  - sizeof( SBlockHeader ) 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
-                                  - sizeof( m_ucUnderrunPadding ) 
+        return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf
+                                  - sizeof( SBlockHeader )
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+                                  - sizeof( m_ucUnderrunPadding )
 #endif
                                   ) )->uSize;
     }
@@ -200,10 +200,10 @@ public:
     static inline oexUINT SetFlags( oexPVOID x_pBuf, oexUINT x_uFlags )
     {
         // Return size of usable memory
-        return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
-                                  - sizeof( SBlockHeader ) 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
-                                  - sizeof( m_ucUnderrunPadding ) 
+        return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf
+                                  - sizeof( SBlockHeader )
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+                                  - sizeof( m_ucUnderrunPadding )
 #endif
                                   ) )->uFlags = x_uFlags;
     }
@@ -215,10 +215,10 @@ public:
     static inline oexUINT GetFlags( oexCPVOID x_pBuf )
     {
         // Return size of usable memory
-        return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
-                                  - sizeof( SBlockHeader ) 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
-                                  - sizeof( m_ucUnderrunPadding ) 
+        return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf
+                                  - sizeof( SBlockHeader )
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+                                  - sizeof( m_ucUnderrunPadding )
 #endif
                                   ) )->uFlags;
     }
@@ -230,10 +230,10 @@ public:
     static inline oexUINT GetRefCount( oexCPVOID x_pBuf )
     {
         // Return size of usable memory
-        return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
-                                  - sizeof( SBlockHeader ) 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
-                                  - sizeof( m_ucUnderrunPadding ) 
+        return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf
+                                  - sizeof( SBlockHeader )
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+                                  - sizeof( m_ucUnderrunPadding )
 #endif
                                   ) )->uRef;
     }
@@ -245,10 +245,10 @@ public:
     static inline oexUINT AddRef( oexPVOID x_pBuf )
     {
         // Return size of usable memory
-        return ++( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
-                                    - sizeof( SBlockHeader ) 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
-                                    - sizeof( m_ucUnderrunPadding ) 
+        return ++( (SBlockHeader*)( (oexUCHAR*)x_pBuf
+                                    - sizeof( SBlockHeader )
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+                                    - sizeof( m_ucUnderrunPadding )
 #endif
                                     ) )->uRef;
     }
@@ -260,10 +260,10 @@ public:
     static inline oexUINT DecRef( oexPVOID x_pBuf )
     {
         // Return size of usable memory
-        return --( (SBlockHeader*)( (oexUCHAR*)x_pBuf 
-                                    - sizeof( SBlockHeader ) 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
-                                    - sizeof( m_ucUnderrunPadding ) 
+        return --( (SBlockHeader*)( (oexUCHAR*)x_pBuf
+                                    - sizeof( SBlockHeader )
+#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+                                    - sizeof( m_ucUnderrunPadding )
 #endif
                                     ) )->uRef;
     }
@@ -271,7 +271,7 @@ public:
 public:
 
 #if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-	
+
     /// Under run padding
     static oexUCHAR m_ucUnderrunPadding[ 4 ];
 
@@ -322,7 +322,7 @@ public:
         if ( x_pPtr )
         {
             // Was the object constructed?
-            if ( CAlloc::eF1Constructed & CAlloc::GetFlags( x_pPtr ) 
+            if ( CAlloc::eF1Constructed & CAlloc::GetFlags( x_pPtr )
                  && 1 == CAlloc::GetRefCount( x_pPtr ) )
             {
                 oexUINT uSize = ArraySize( x_pPtr );
@@ -362,14 +362,14 @@ public:
         static oexUINT ArraySize( T* x_pPtr )
     {
         oexUINT uSize = UsableSize( x_pPtr );
-        if ( sizeof( T ) ) 
+        if ( sizeof( T ) )
             return uSize / sizeof( T );
-        else 
+        else
             return 0;
     }
 
 public:
-    
+
     /// Construct object
     template< typename T >
         T* Construct()
@@ -567,7 +567,7 @@ public:
     /// Destruct object
     template< typename T >
         void Destruct( T* x_pPtr )
-    {   
+    {
         if ( !x_pPtr )
             return;
 

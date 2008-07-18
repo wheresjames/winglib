@@ -58,7 +58,6 @@
              sharing memory between processes, this means the
              constructor may be called in one process, and the
              destructor in another.  So plan accordingly!
-
 */
 template < typename T, typename T_AS = T > class TMem
 {
@@ -208,10 +207,10 @@ public:
         Delete();
 
         // Shared memory?
-        if ( m_fm.GetName() )
+        if ( m_fm.GetName() || m_fm.GetShareHandle() )
 
             // Create memory mapping
-            m_fm.Create( x_bConstructed, oexNULL, oexNULL, x_uSize );
+            m_fm.Create( x_bConstructed, oexNULL, oexNULL, oexNULL, x_uSize );
 
         // Allocate plain old memory
         else
@@ -412,7 +411,6 @@ public:
 
         return (T_AS*)m_fm.Ptr();
     }
-
 
 	//==============================================================
 	// Ptr()

@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -43,21 +43,13 @@ oexSTATIC_ASSERT( sizeof( CFMap::t_HFILEMAP ) == sizeof( FILE* ) );
 
 oexCONST CFMap::t_HFILEMAP CFMap::c_Failed = oexNULL;
 
-CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, oexCSTR x_pName, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists )
+CFMap::t_HFILEMAP CFMap::osCreateFileMapping( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists )
 {
     // Sanity checks
-    if ( !oexCHECK_PTR( x_pMem ) || !oexCHECK_PTR_NULL_OK( x_pName ) )
-        return oexNULL;
+    if ( !oexCHECK_PTR( x_pMem ) || CFMap::c_Failed == x_hFile )
+        return CFMap::c_Failed;
 
-	// Create path
-	CStr8 sPath = oexStrToMb( x_pFile );
-	sPath.RTrim( PATH_MAX );		
-	mkstemp( sPath.Allocate( PATH_MAX * 2 ) );
-
-	FILE *fd = fopen( sPath.Ptr(), "w+b" );
-	if ( !fd )
-		return oexNULL;
-
+	FILE *fd = (FILE*)x_hFile;
 	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, (int)fd, 0 );
 	if ( !pMem )
 	{	fclose( fd );
@@ -66,12 +58,42 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 
 	if ( x_pMem )
 		*x_pMem = pMem;
-		
+
 	if ( x_pllSize )
 		*x_pllSize = x_llSize;
 
 	return (t_HFILEMAP)fd;
-        
+}
+
+CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, oexCSTR x_pName, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists )
+{
+    // Sanity checks
+    if ( !oexCHECK_PTR( x_pMem ) || !oexCHECK_PTR_NULL_OK( x_pName ) )
+        return CFMap::c_Failed;
+
+	// Create path
+	CStr8 sPath = oexStrToMb( x_pFile );
+	sPath.RTrim( PATH_MAX );
+	mkstemp( sPath.Allocate( PATH_MAX * 2 ) );
+
+	FILE *fd = fopen( sPath.Ptr(), "w+b" );
+	if ( !fd )
+		return CFMap::c_Failed;
+
+	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, (int)fd, 0 );
+	if ( !pMem )
+	{	fclose( fd );
+		return CFMap::c_Failed;
+	} // end if
+
+	if ( x_pMem )
+		*x_pMem = pMem;
+
+	if ( x_pllSize )
+		*x_pllSize = x_llSize;
+
+	return (t_HFILEMAP)fd;
+
 /*
 	// Initialize pointer
 	if ( x_pMem ) *x_pMem = NULL;
@@ -80,12 +102,12 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 	DWORD dwMemAccess = 0;
 
 	// Figure out the access levels
-	if ( eAccessRead & x_eAccess ) 
-	{	if ( eAccessWrite & x_eAccess ) 
+	if ( eAccessRead & x_eAccess )
+	{	if ( eAccessWrite & x_eAccess )
 			dwAccess = PAGE_READWRITE, dwMemAccess = FILE_MAP_ALL_ACCESS;
 		else dwAccess = PAGE_READONLY, dwMemAccess = FILE_MAP_READ;
 	} // end if
-	else if ( eAccessWrite & x_eAccess ) 
+	else if ( eAccessWrite & x_eAccess )
 		dwAccess = PAGE_READWRITE, dwMemAccess = FILE_MAP_WRITE;
 
 	HANDLE hFileHandle = oexNULL;
@@ -93,7 +115,7 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 	{	hFileHandle = CreateFile( x_pFile, GENERIC_READ | GENERIC_WRITE,
 									 FILE_SHARE_READ | FILE_SHARE_WRITE,
 									 NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
-		if ( !oexVERIFY( INVALID_HANDLE_VALUE != hFileHandle ) ) 
+		if ( !oexVERIFY( INVALID_HANDLE_VALUE != hFileHandle ) )
 			return c_Failed;
 
 		if ( !x_llSize )
@@ -105,7 +127,7 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 	else hFileHandle = (HANDLE)0xffffffff;
 
 	// Create the file mapping
-	HANDLE hFile = CreateFileMapping( hFileHandle, NULL, dwAccess, 
+	HANDLE hFile = CreateFileMapping( hFileHandle, NULL, dwAccess,
 			    					  (DWORD)( x_llSize >> 32 ), (DWORD)( x_llSize & 0xffffffff ), x_pName );
 
 	// Do they want to know if it was pre-existing?
@@ -117,9 +139,9 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 		CloseHandle( hFileHandle );
 
 	// Did we get the handle
-	if ( NULL == hFile ) 
+	if ( NULL == hFile )
 		return c_Failed;
-	
+
 	// Get a pointer to the file data
 	oexPVOID pMem = (oexPVOID)MapViewOfFile( hFile, dwMemAccess, 0, 0, 0 );
 

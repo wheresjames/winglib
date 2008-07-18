@@ -86,25 +86,25 @@ public:
 	{
 		// Sanity checks
 		if ( !x_pDevice || !*x_pDevice )
-		{	oexLOG( -1, CStr().Fmt( oexT( "Invalid device name" ) ) );
+		{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device name" ) ) );
 			return oexFALSE;
 		} // end if
 
 		struct stat st;
 		if ( 0 > stat( oexStrToMbPtr( x_pDevice ), &st ) )
-		{	oexLOG( errno, CStr().Fmt( oexT( "Device name is invalid : %s" ), x_pDevice ) );
+		{	oexERROR( errno, CStr().Fmt( oexT( "Device name is invalid : %s" ), x_pDevice ) );
 			return oexFALSE;
 		} // end if
 
 		if ( !S_ISCHR( st.st_mode ) )
-		{	oexLOG( -1, CStr().Fmt( oexT( "Device name is invalid : %s" ), x_pDevice ) );
+		{	oexERROR( -1, CStr().Fmt( oexT( "Device name is invalid : %s" ), x_pDevice ) );
 			return oexFALSE;
 		} // end if
 
 		// Attempt to open the device
 		m_nFd = open( oexStrToMbPtr( x_pDevice ), O_RDWR, 0 ); // | O_NONBLOCK, 0 );
 		if ( 0 > m_nFd )
-		{	oexLOG( errno, CStr().Fmt( oexT( "Unable to open file : %s" ), x_pDevice ) );
+		{	oexERROR( errno, CStr().Fmt( oexT( "Unable to open file : %s" ), x_pDevice ) );
 			return oexFALSE;
 		} // end if
 
@@ -169,11 +169,11 @@ public:
 		if ( -1 == IoCtl( m_nFd, VIDIOC_QUERYCAP, &m_cap2 ) )
 		{
 			// Log V2 failure
-			oexLOG( errno, CStr().Fmt( oexT( "VIDEOC_QUERYCAP : Invalid V4L2 device, %u" ), m_nFd ) );
+			oexNOTICE( errno, CStr().Fmt( oexT( "VIDEOC_QUERYCAP : Invalid V4L2 device, %u" ), m_nFd ) );
 
 			// V1 Device?
 			if ( -1 == IoCtl( m_nFd, VIDIOCGCAP, &m_cap1 ) )
-			{	oexLOG( errno, CStr().Fmt( oexT( "VIDEOCGCAP : Invalid V4L1 device, %u" ), m_nFd ) );
+			{	oexERROR( errno, CStr().Fmt( oexT( "VIDEOCGCAP : Invalid V4L1 device, %u" ), m_nFd ) );
 				return oexFALSE;
 			} // end if
 
@@ -182,19 +182,19 @@ public:
 
 			// Ensure it's a capture device
 			if ( !( m_cap1.type & VID_TYPE_CAPTURE ) )
-			{	oexLOG( -1, CStr().Fmt( oexT( "VID_TYPE_CAPTURE : Not a capture device : type = %X" ), m_cap1.type ) );
+			{	oexERROR( -1, CStr().Fmt( oexT( "VID_TYPE_CAPTURE : Not a capture device : type = %X" ), m_cap1.type ) );
 				return oexFALSE;
 			} // end if
 
 			// Set video buffer
 			if ( -1 == IoCtl( m_nFd, VIDIOCGMBUF, &m_buf1 ) )
-			{	oexLOG( errno, CStr().Fmt( oexT( "VIDIOCGMBUF : Unable to set video buffer, %u" ), m_nFd ) );
+			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOCGMBUF : Unable to set video buffer, %u" ), m_nFd ) );
 				return oexFALSE;
 			} // end if
 
 			// Create the image buffer
-			if ( !m_img.Create( (os::CFMap::t_HFILEMAP)m_nFd, 320, 240, 24 ) )
-			{	oexLOG( errno, oexT( "Failed to create shared memory buffer" ) );
+			if ( !m_img.Create( oexNULL, (os::CFMap::t_HFILEMAP)m_nFd, 320, 240, 24 ) )
+			{	oexERROR( errno, oexT( "Failed to create shared memory buffer" ) );
 				m_nIoMode = eIoReadWrite;
 			} // end if
 
@@ -227,7 +227,7 @@ public:
 
 			// Ensure it's actually a capture device
 			if ( !( m_cap2.capabilities & V4L2_CAP_VIDEO_CAPTURE ) )
-			{	oexLOG( -1, CStr().Fmt( oexT( "V4L2_CAP_VIDEO_CAPTURE : Not a capture device : capabilities = %X" ), m_cap2.capabilities ) );
+			{	oexERROR( -1, CStr().Fmt( oexT( "V4L2_CAP_VIDEO_CAPTURE : Not a capture device : capabilities = %X" ), m_cap2.capabilities ) );
 				return oexFALSE;
 			} // end if
 
@@ -240,7 +240,7 @@ public:
 			{
 				case eIoReadWrite :
 					if ( !( m_cap2.capabilities & V4L2_CAP_READWRITE ) )
-					{	oexLOG( -1, CStr().Fmt( oexT( "V4L2_CAP_READWRITE : Read/Write IO not supported" ) ) );
+					{	oexERROR( -1, CStr().Fmt( oexT( "V4L2_CAP_READWRITE : Read/Write IO not supported" ) ) );
 						return oexFALSE;
 					} // end if
 
@@ -249,11 +249,11 @@ public:
 				case eIoAsync :
 
 					if ( !( m_cap2.capabilities & V4L2_CAP_ASYNCIO ) )
-					{	oexLOG( -1, CStr().Fmt( oexT( "V4L2_CAP_ASYNCIO : Async IO not supported" ) ) );
+					{	oexERROR( -1, CStr().Fmt( oexT( "V4L2_CAP_ASYNCIO : Async IO not supported" ) ) );
 						return oexFALSE;
 					} // end if
 
-					oexLOG( -1, CStr().Fmt( oexT( "V4L2_CAP_ASYNCIO : +++ Not Implemented" ) ) );
+					oexERROR( -1, CStr().Fmt( oexT( "V4L2_CAP_ASYNCIO : +++ Not Implemented" ) ) );
 					return oexFALSE;
 
 					break;
@@ -261,14 +261,14 @@ public:
 				case eIoStreaming :
 
 					if ( !( m_cap2.capabilities & V4L2_CAP_STREAMING ) )
-					{	oexLOG( -1, CStr().Fmt( oexT( "V4L2_CAP_STREAMING : Stream based IO not supported" ) ) );
+					{	oexERROR( -1, CStr().Fmt( oexT( "V4L2_CAP_STREAMING : Stream based IO not supported" ) ) );
 						return oexFALSE;
 					} // end if
 
 					break;
 
 				default :
-					oexLOG( -1, CStr().Fmt( oexT( "Invalid mode" ) ) );
+					oexERROR( -1, CStr().Fmt( oexT( "Invalid mode" ) ) );
 					return oexFALSE;
 					break;
 
@@ -293,7 +293,7 @@ public:
 				vm.format = VIDEO_PALETTE_RGB24;
 
 				if ( -1 == IoCtl( m_nFd, VIDIOCMCAPTURE, &vm ) )
-				{	oexLOG( errno, CStr().Fmt( oexT( "VIDIOCMCAPTURE : Capture frame failed : %u" ), m_nFd ) );
+				{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOCMCAPTURE : Capture frame failed : %u" ), m_nFd ) );
 					return oexFALSE;
 				} // end if
 
@@ -314,7 +314,7 @@ public:
 	{
 		oexINT nFrame = (oexINT)m_llFrame;
 		if ( -1 == IoCtl( m_nFd, VIDIOCSYNC, &nFrame ) )
-		{	oexLOG( errno, CStr().Fmt( oexT( "VIDIOCSYNC : Failed to wait for frame sync, %u" ), m_nFd ) );
+		{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOCSYNC : Failed to wait for frame sync, %u" ), m_nFd ) );
 			return oexFALSE;
 		} // end if
 

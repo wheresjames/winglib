@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -53,26 +53,34 @@ public:
 
 public:
 
+	struct SThreadData
+	{
+		/// Thread context, posix only so far
+		oexPVOID				pContext;
+	};
+
+public:
+
 	/// Default Constructor
 	CThread();
 
 	/// Destrucotr
 	virtual ~CThread();
-	
+
 	//==============================================================
 	// Start()
 	//==============================================================
 	/// Starts the thread
 	/**
-        \param [in] x_uSleep        -   Sleep time in mSec.  If not 
-                                        zero, a sleep of this length 
+        \param [in] x_uSleep        -   Sleep time in mSec.  If not
+                                        zero, a sleep of this length
                                         will be injected after every
                                         call to DoThread().
 		\param [in] x_pData			-	Custom data passed on to thread
-		
+
 		\return Non-zero if thread was started.
-	
-		\see 
+
+		\see
 	*/
 	virtual oexBOOL Start( oexUINT x_uSleep = 30, oexPVOID x_pData = oexNULL );
 
@@ -81,14 +89,14 @@ public:
 	//==============================================================
 	/// Stops any running thread
 	/**
-		\param [in] x_bKill	    -	Set to non-zero to kill thread if 
+		\param [in] x_bKill	    -	Set to non-zero to kill thread if
                                     it fails to stop gracefully.
-		\param [in] x_dwWait    -	Time in milli-seconds to wait for 
+		\param [in] x_dwWait    -	Time in milli-seconds to wait for
 								    thread to stop before killing it.
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
 	virtual oexBOOL Stop( oexBOOL x_bKill = oexTRUE, oexUINT x_uWait = oexDEFAULT_TIMEOUT );
 
@@ -100,7 +108,7 @@ protected:
 	/// Do thread initialization here
 	/**
 		\param [in] x_pData - User defined data
-		
+
 		The pData value passed to these functions represent the original value
 		in m_pvoidData when the thread started.  Changing m_pvoidData in these
 		functions does not affect the passed value to the next function.
@@ -116,7 +124,7 @@ protected:
 		return zero to end the thread now
 
 		\return Non-zero to continue thread, zero to terminate thread execution.
-	
+
 		\see DoThread(), EndThread(), GhostThread()
 	*/
 	virtual oexBOOL InitThread( oexPVOID x_pData ) { return oexTRUE; }
@@ -127,21 +135,21 @@ protected:
 	/// Normal thread work
 	/**
 		\param [in] x_pData	-	User defined value
-		
+
 		Overide this function to provide custom thread work
 
 		This function is called over and over until it returns zero
 		or Stop() is called
 
 		x_pData - whatever was passed to Start()
-		
-        return non-zero if you want more processing 
+
+        return non-zero if you want more processing
         (i.e. DoThread() will be called again )
 
 		return zero to end the thread
 
 		\return Non-zero to continue thread, zero to terminate thread execution.
-	
+
 		\see InitThread(), EndThread(), GhostThread()
 	*/
 	virtual oexBOOL DoThread( oexPVOID x_pData ) { return oexFALSE; }
@@ -152,7 +160,7 @@ protected:
 	/// Do thread cleanup here
 	/**
 		\param [in] x_pData	-	User defined value
-		
+
 		Overide this function to provide custom cleanup
 
 		x_pData - whatever was passed to StartThread()
@@ -161,7 +169,7 @@ protected:
 		if you want to return a thread value then set m_dwThreadReturn
 
 		\return Return value is the return value for the thread
-	
+
 		\see InitThread(), DoThread(), GhostThread()
 	*/
 	virtual oexINT EndThread( oexPVOID x_pData ) { return 0; }
@@ -169,7 +177,7 @@ protected:
 public:
 
     /// Returns the running state of the thread
-    oexBOOL IsRunning() 
+    oexBOOL IsRunning()
     {   return m_hThread != vInvalidThread(); }
 
 	/// Invalid socket handle value
@@ -191,8 +199,8 @@ public:
 		the number of threads started using this class.
 
 		\return Number of threads started using this class
-	
-		\see 
+
+		\see
 	*/
 	static oexUINT GetThreadCount();
 
@@ -205,8 +213,8 @@ public:
 		the number of threads currently running using this class.
 
 		\return Number of threads running using this class
-	
-		\see 
+
+		\see
 	*/
 	static oexUINT GetRunningThreadCount();
 
@@ -244,16 +252,20 @@ protected:
 private:
 
     /// The thread procedure
-    static oexUINT ThreadProc( oexPVOID x_pData );
+    static oexPVOID ThreadProc( oexPVOID x_pData );
 
     // Protect access to ThreadProc()
     class CThreadProcImpl;
+
     friend class CThreadProcImpl;
 
 private:
 
     /// Handle to the thread
     t_HTHREAD                               m_hThread;
+
+	/// Thread data
+	SThreadData								m_td;
 
     /// The thread id
     oexUINT                                 m_uThreadId;

@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -42,7 +42,6 @@ using namespace OEX_NAMESPACE::os;
 //oexSTATIC_ASSERT( sizeof( CThread::t_HTHREAD ) == sizeof( HANDLE ) );
 
 /// Invalid thread handle value.
-// I swear I thought this used to be INVALID_HANDLE_VALUE?
 oexCONST CThread::t_HTHREAD CThread::c_InvalidThread = oexNULL;
 
 CThread::CThread()
@@ -51,10 +50,11 @@ CThread::CThread()
     m_uSleep = 0;
     m_hThread = oexNULL;
     m_uThreadId = 0;
+    oexZeroMemory( &m_td, sizeof( m_td ) );
 }
 
 CThread::~CThread()
-{   Stop();   
+{   Stop();
 }
 
 //==============================================================
@@ -64,29 +64,27 @@ CThread::~CThread()
 /**
 	\param [in] x_pData		-	CThread class pointer
 
-    I went ahead and left the signature as DWORD(*)(LPVOID);
-    This means I had to do this stub since DWORD and LPVOID
-    aren't in the header name space.
+	I'm just going to leave this adapter in here in case the
+	thread signature ever includes some custom variables.
 
 	\return Thread return value
 */
 class CThread::CThreadProcImpl
 {
 public:
-//    static DWORD WINAPI ThreadProc( LPVOID x_pData )
-	static oexUINT ThreadProc( oexPVOID x_pData )
-    {    return (oexUINT)CThread::ThreadProc( x_pData );
-    }
+
+	static oexPVOID ThreadProc( oexPVOID x_pData )
+	{	return CThread::ThreadProc( x_pData );
+	}
+
 };
 
-oexUINT CThread::ThreadProc( oexPVOID x_pData )
+oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 {
-	return 0;
-
-/*    // Get pointer
+    // Get pointer
     CThread *pThread = (CThread*)x_pData;
     if ( !oexVERIFY_PTR( x_pData ) )
-        return -1;
+        return (oexPVOID)-1;
 
     // Count one thread
     CThread::IncThreadCount();
@@ -98,7 +96,7 @@ oexUINT CThread::ThreadProc( oexPVOID x_pData )
     oexUINT uThreadId = (oexUINT)pThread->GetThreadHandle();
 
     // Verify thread handle
-    // If you get stopped here, 
+    // If you get stopped here,
     // you're thread was shutdown before it could start
     oexINT nRet = -1111;
 //    if ( oexVERIFY( uThreadId ) )
@@ -137,8 +135,8 @@ oexUINT CThread::ThreadProc( oexPVOID x_pData )
     /// Decrement the running thread count
     CThread::DecRunningThreadCount();
 
-    return nRet;
-*/
+    return (oexPVOID)nRet;
+
 }
 
 oexBOOL CThread::Start( oexUINT x_uSleep, oexPVOID x_pData )
@@ -154,13 +152,23 @@ oexBOOL CThread::Start( oexUINT x_uSleep, oexPVOID x_pData )
     // Give the thread a fighting chance
     m_evQuit.Reset();
     m_evInit.Reset();
+
+	// Allocate thread data
+	m_td.pContext = (oexPVOID)OexAllocNew< pthread_t >( 1 );
+	if ( !m_td.pContext )
+		return oexFALSE;
+
+	// Create the thread
+	m_hThread = (oexPVOID)pthread_create( (pthread_t*)m_td.pContext, NULL,
+									      CThreadProcImpl::ThreadProc, this );
+
 /*
 	// Create a thread
 	m_hThread = CreateThread(	(LPSECURITY_ATTRIBUTES)NULL,
 								0,
                                 CThreadProcImpl::ThreadProc,
-								(LPVOID)this,	
-								0, 
+								(LPVOID)this,
+								0,
 								(LPDWORD)&m_uThreadId );
 */
     // Developer will probably want to hear about this
@@ -179,7 +187,7 @@ oexBOOL CThread::Stop( oexBOOL x_bKill, oexUINT x_uWait )
     t_HTHREAD hThread = m_hThread;
 
     // Valid thread?
-    if ( c_InvalidThread == hThread )
+    if ( c_InvalidThread == hThread || !m_td.pContext )
         return oexTRUE;
 
     // Wait for thread to completely initialize
@@ -199,16 +207,21 @@ oexBOOL CThread::Stop( oexBOOL x_bKill, oexUINT x_uWait )
         return oexTRUE;
 
     // Wait for the thead to exit
-//    if ( !oexVERIFY( WAIT_OBJECT_0 == WaitForSingleObject( hThread, x_uWait ) ) )
+	if ( pthread_join( *(pthread_t*)m_td.pContext, oexNULL ) )
     {
         // iii  This should not happen, don't ignore the problem,
         //      figure out how to shut this thread down properly!
 		oexTRACE( oexT( "!! TerminateThread() being called !!\n" ) );
 
         // Kill the thread
-//		TerminateThread( hThread, -1111 );
+        pthread_cancel( *(pthread_t*)m_td.pContext );
 
     } // end if
+
+	if ( m_td.pContext )
+		OexAllocDelete( (pthread_t*)m_td.pContext );
+
+    oexZeroMemory( &m_td, sizeof( m_td ) );
 
     return oexTRUE;
 }
@@ -223,15 +236,15 @@ oexUINT CThread::GetThreadCount()
 oexUINT CThread::GetRunningThreadCount()
 {   return m_lRunningThreadCount; }
 
-void CThread::IncThreadCount() 
+void CThread::IncThreadCount()
 {   CSys::InterlockedIncrement( &m_lThreadCount ); }
 
-void CThread::IncRunningThreadCount() 
+void CThread::IncRunningThreadCount()
 {   CSys::InterlockedIncrement( &m_lRunningThreadCount ); }
 
-void CThread::DecRunningThreadCount() 
+void CThread::DecRunningThreadCount()
 {   if ( oexVERIFY( m_lRunningThreadCount ) )
-        CSys::InterlockedDecrement( &m_lRunningThreadCount ); 
+        CSys::InterlockedDecrement( &m_lRunningThreadCount );
 }
 
 

@@ -147,9 +147,20 @@ public:
 	}
 
 	/// Returns the external share handle
-	os::CFMap::t_HFILEMAP SetShareHandle()
+	os::CFMap::t_HFILEMAP GetShareHandle() oexCONST
 	{	return m_hShareHandle; }
 
+	/// Returns non-zero if a share handle has been specified
+	oexBOOL IsShareHandle()
+	{	return os::CFMap::vFailed() != m_hShareHandle; }
+
+	void ClearShares()
+	{	m_hShareHandle = os::CFMap::vFailed();
+        if ( m_pName )
+        {   OexAllocDelete( m_pName );
+            m_pName = oexNULL;
+        } // end if
+	}
 
     //==============================================================
 	// Destroy()
@@ -186,10 +197,15 @@ public:
 	//==============================================================
 	/// Creates a file mapping
 	/**
+		\param [in]	 x_bConstructed			-	non-zero if the object
+												should be constructed.
 		\param [in]  x_pFile				-	file to map, NULL for
-												shared memory.
+												shared memory.  Ignored
+												if x_hFile is not NULL.
+		\param [in]  x_hFile				-   Handle of file to use.
 		\param [in]  x_pName				-	Name of the mapping, can
-												be NULL.
+												be NULL.  Ignored if x_hFile
+												is not NULL.
 		\param [in]  x_llSize				-	Size of the file mapping.
 		\param [in]  x_uAccess				-	Specifes the memory access
 												level.
@@ -198,14 +214,10 @@ public:
 
 		\see
 	*/
-    T* Create( oexBOOL x_bConstructed, oexCSTR x_pFile, oexCSTR x_pName, oexINT64 x_llSize, os::CFMap::etAccess x_uAccess = os::CFMap::eAccessAll )
+    T* Create( oexBOOL x_bConstructed, oexCSTR x_pFile, os::CFMap::t_HFILEMAP x_hFile, oexCSTR x_pName, oexINT64 x_llSize, os::CFMap::etAccess x_uAccess = os::CFMap::eAccessAll )
 	{
 		// Lose old file mapping
 		Destroy();
-
-        // Save name if any
-        if ( x_pName && *x_pName )
-            SetName( x_pName );
 
         // Multiply by size of object
         x_llSize *= sizeof( T );
@@ -215,8 +227,24 @@ public:
         llSize += sizeof( oexUINT ) + CAlloc::ProtectAreaSize();
         llSize = cmn::NextPower2( llSize );
 
-		// Create file mapping
-		m_hFile = os::CFMap::osCreateFileMapping( x_pFile, (oexPVOID*)&m_pPtr, llSize, &llSize, m_pName, x_uAccess, &m_bExisting );
+		// Did we get a file handle to use?
+        if ( x_hFile )
+        	m_hShareHandle = x_hFile;
+
+		// Do we have a shared file handle?
+        if ( m_hShareHandle )
+			m_hFile = os::CFMap::osCreateFileMapping( m_hShareHandle, (oexPVOID*)&m_pPtr, llSize, &llSize, x_uAccess, &m_bExisting );
+
+		else
+		{
+			// Save name if any
+			if ( x_pName && *x_pName )
+				SetName( x_pName );
+
+			// Create file mapping
+			m_hFile = os::CFMap::osCreateFileMapping( x_pFile, (oexPVOID*)&m_pPtr, llSize, &llSize, m_pName, x_uAccess, &m_bExisting );
+
+		} // end else
 
 		// Did we get the handle
         if ( os::CFMap::vFailed() == m_hFile || !m_pPtr )
@@ -346,7 +374,7 @@ public:
 
         // Copy the share
         if ( x_m.m_pPtr )
-            Create( oexFALSE, oexNULL, x_m.GetName(), x_m.Size() );
+            Create( oexFALSE, oexNULL, x_m.GetShareHandle(), x_m.GetName(), x_m.Size() );
 
         // Don't need to copy data, it's shared memory remember?
 

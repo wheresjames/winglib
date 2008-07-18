@@ -41,7 +41,11 @@
 
 #define oexNULL						0
 
-#define oexLOG( e, s )				CLog::GlobalLog().Log( oexStr8ToStrPtr( __FILE__ ), __LINE__, e, s )
+#define oexLOG( l, e, s )			OEX_NAMESPACE::CLog::GlobalLog().Log( oexStr8ToStrPtr( __FILE__ ), __LINE__, l, e, s )
+#define oexNOTICE( e, s )			oexLOG( OEX_NAMESPACE::CLog::eNotice, e, s )
+#define oexWARNING( e, s )			oexLOG( OEX_NAMESPACE::CLog::eWarning, e, s )
+#define oexERROR( e, s )			oexLOG( OEX_NAMESPACE::CLog::eError, e, s )
+#define oexHALT( e, s )				oexLOG( OEX_NAMESPACE::CLog::eHalt, e, s )
 
 #if defined( OEX_WIN32 )
 #	define oexVaList				oexPVOID

@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -52,8 +52,8 @@ public:
 
     /// Default constructor
     TListNode()
-	{	m_pPrev = oexNULL; 
-		m_pNext = oexNULL; 
+	{	m_pPrev = oexNULL;
+		m_pNext = oexNULL;
     }
 
 	//==============================================================
@@ -66,18 +66,18 @@ public:
 
 		Inserts this node into the list by inserting or appending to
 		the object in x_pIt.
-		
-		\see 
+
+		\see
 	*/
 	TListNode( oexCONST TListNode *x_pIt, oexCONST oexINT x_nOpt )
 	{
-		m_pPrev = oexNULL; m_pNext = oexNULL; 
-		if ( x_pIt ) 
+		m_pPrev = oexNULL; m_pNext = oexNULL;
+		if ( x_pIt )
         {
-            if ( eAppend == x_nOpt ) 
-                Append( (TListNode*)x_pIt ); 
-            else 
-                Insert( (TListNode*)x_pIt ); 
+            if ( eAppend == x_nOpt )
+                Append( (TListNode*)x_pIt );
+            else
+                Insert( (TListNode*)x_pIt );
         } // end if
 	}
 
@@ -93,8 +93,8 @@ public:
 
 		Inserts this node into the list by inserting or appending to
 		the object in x_pIt.
-		
-		\see 
+
+		\see
 	*/
 	TListNode( oexCONST T_OBJ *x_pObj, oexCONST TListNode *x_pIt, oexCONST oexINT x_nOpt )
 	{
@@ -104,12 +104,12 @@ public:
 		m_pPrev = oexNULL; (TListNode*)
         m_pNext = oexNULL;
 
-		if ( x_pIt ) 
-        { 
-            if ( eAppend == x_nOpt ) 
-                Append( (TListNode*)x_pIt ); 
-            else 
-                Insert( (TListNode*)x_pIt ); 
+		if ( x_pIt )
+        {
+            if ( eAppend == x_nOpt )
+                Append( (TListNode*)x_pIt );
+            else
+                Insert( (TListNode*)x_pIt );
         } // end if
 	}
 
@@ -123,7 +123,7 @@ public:
 	//==============================================================
 	/// Removes from the list
 	void Destroy()
-	{	Remove(); 
+	{	Remove();
 	}
 
 public:
@@ -135,9 +135,9 @@ public:
 	/**
 		\return Linked reference to the encapsulated object
 	*/
-	T_OBJ* operator ->() 
+	T_OBJ* operator ->()
     {
-        return &m_obj; 
+        return &m_obj;
     }
 
 	//==============================================================
@@ -147,9 +147,9 @@ public:
 	/**
 		\return Linked reference pointer to the encapsulated object
 	*/
-	T_OBJ& operator *() 
+	T_OBJ& operator *()
     {
-        return m_obj; 
+        return m_obj;
     }
 
 
@@ -160,9 +160,9 @@ public:
 	/**
 		\return Linked reference reference to the encapsulated object
 	*/
-/*	operator T_OBJ&() 
+/*	operator T_OBJ&()
     {
-        return m_obj; 
+        return m_obj;
     }
 */
 	//==============================================================
@@ -172,9 +172,9 @@ public:
 	/**
 		\return Linked reference reference to the encapsulated object
 	*/
-	T_OBJ& Obj() 
+	T_OBJ& Obj()
     {
-        return m_obj; 
+        return m_obj;
     }
 
 	//==============================================================
@@ -184,9 +184,9 @@ public:
 	/**
 		\return Linked reference reference to the encapsulated object
 	*/
-	T_OBJ* Ptr() 
+	T_OBJ* Ptr()
     {
-        return &m_obj; 
+        return &m_obj;
     }
 
     /// Assignment operator
@@ -227,7 +227,7 @@ public:
 	/**
 		\return Pointer to the previous node in the list
 	*/
-	TListNode* Prev() 
+	TListNode* Prev()
     {   return m_pPrev; }
 
 public:
@@ -238,14 +238,14 @@ public:
 	/// Inserts the item at the beginning of the list
 	/**
 		\param [in] x_pIt	-	Pointer to node object
-		
+
 		\return Reference to this item
-	
+
 		\see Append()
 	*/
 	TListNode& Insert( TListNode *x_pIt )
 	{
-		if ( !x_pIt ) 
+		if ( !x_pIt )
             return *this;
 
         // Remove this item from the list
@@ -259,7 +259,7 @@ public:
 		if ( m_pPrev )
             m_pPrev->m_pNext = this;
 
-		return *this;			
+		return *this;
 	}
 
 	//==============================================================
@@ -268,14 +268,14 @@ public:
 	/// Appends the item to the end of a list
 	/**
 		\param [in] x_pIt	-	Pointer to node object
-		
+
 		\return Reference to this item
-	
+
 		\see Insert()
 	*/
 	TListNode& Append( TListNode *x_pIt )
 	{
-		if ( !x_pIt ) 
+		if ( !x_pIt )
             return *this;
 
         // Remove us from the list
@@ -286,29 +286,29 @@ public:
 		m_pNext = x_pIt->m_pNext;
 		x_pIt->m_pNext = this;
 
-		if ( m_pNext ) 
+		if ( m_pNext )
             m_pNext->m_pPrev = this;
 
-		return *this;			
+		return *this;
 	}
-	
+
 	//==============================================================
 	// Remove()
 	//==============================================================
 	/// Removes the item from the list without deleting it
-	/**			
+	/**
 		\return Linked reference to the encapsulated object
-	
+
 		\warning This does not delete the item!
 
-		\see 
+		\see
 	*/
 	TListNode& Remove()
-	{	
-        if ( m_pPrev ) 
+	{
+        if ( m_pPrev )
             m_pPrev->m_pNext = m_pNext;
 
-		if ( m_pNext ) 
+		if ( m_pNext )
             m_pNext->m_pPrev = m_pPrev;
 
 		m_pPrev = m_pNext = oexNULL;
@@ -324,8 +324,8 @@ public:
 		\return Reference to this item
 	*/
 	TListNode& MoveUp()
-	{	
-        if ( m_pPrev ) 
+	{
+        if ( m_pPrev )
             Insert( m_pPrev );
 
 		return *this;
@@ -339,8 +339,8 @@ public:
 		\return Reference to this item
 	*/
 	TListNode& MoveDown()
-	{	
-        if ( m_pNext ) 
+	{
+        if ( m_pNext )
             Append( m_pNext );
 
 		return *this;
@@ -353,22 +353,22 @@ public:
 	/**
 		\param [in] x_pPrev		-	Pointer to previous node object
 		\param [in] x_pNext		-	Pointer to next node object
-		
+
 		Sets this nodes explicit position in the list
 
 		\return Reference to this item
-	
-		\see 
+
+		\see
 	*/
 	TListNode& SetAt( TListNode *x_pPrev, TListNode *x_pNext )
-	{	
-        m_pPrev = x_pPrev; 
-        m_pNext = x_pNext; 
-        return *this; 
+	{
+        m_pPrev = x_pPrev;
+        m_pNext = x_pNext;
+        return *this;
     }
 
 private:
-    
+
 	/// Pointer to the next list node
 	TListNode					*m_pNext;
 
@@ -382,12 +382,12 @@ private:
 
 
 /// List iterator
-template< class T_OBJ, class T_NODE = TListNode< T_OBJ > > 
+template< class T_OBJ, class T_NODE = TListNode< T_OBJ > >
     class TListIterator
 {
 public:
 
-    TListIterator() 
+    TListIterator()
     {
     }
 /*
@@ -464,9 +464,9 @@ public:
 	/**
 		\return Linked reference to the encapsulated object
 	*/
-	T_OBJ* operator ->() 
+	T_OBJ* operator ->()
     {
-        return Ptr(); 
+        return Ptr();
     }
 
 	//==============================================================
@@ -476,9 +476,9 @@ public:
 	/**
 		\return Linked reference pointer to the encapsulated object
 	*/
-	T_OBJ& operator *() 
+	T_OBJ& operator *()
     {
-        return *Ptr(); 
+        return *Ptr();
     }
 
 	//==============================================================
@@ -488,9 +488,9 @@ public:
 	/**
 		\return Returns reference to the encapsulated object
 	*/
-	T_OBJ& Obj() 
+	T_OBJ& Obj()
     {
-        return *Ptr(); 
+        return *Ptr();
     }
 /*
     TListIterator& operator = ( oexCONST T_OBJ &x_rObj )
@@ -505,8 +505,8 @@ public:
     {
         if ( !m_memListNode.Ptr() )
             return oexFALSE;
-        
-        return m_memListNode.Ptr()->Obj() == x_rObj;        
+
+        return m_memListNode.Ptr()->Obj() == x_rObj;
     }
 */
 public:
@@ -515,7 +515,7 @@ public:
 	// End()
 	//==============================================================
 	/// Returns non-zero if at the end of the list
-	oexBOOL End() 
+	oexBOOL End()
     {
         return ( !m_memListNode.Ptr() || !m_memListNode.Ptr()->Next() );
     }
@@ -524,7 +524,7 @@ public:
 	// Begin()
 	//==============================================================
 	/// Returns non-zero if at the beginning of the list
-	oexBOOL Begin() 
+	oexBOOL Begin()
     {
         return ( !m_memListNode.Ptr() || !m_memListNode.Ptr()->Prev() );
     }
@@ -533,7 +533,7 @@ public:
 	// Next()
 	//==============================================================
 	/// Advances to the next position in the list
-	oexBOOL Next() 
+	oexBOOL Next()
 	{
         if ( !m_memListNode.Ptr() || !m_memListNode.Ptr()->Next() )
             return oexFALSE;
@@ -555,7 +555,7 @@ public:
 	// Prev()
 	//==============================================================
 	/// Advances to the previous position in the list
-	oexBOOL Prev() 
+	oexBOOL Prev()
 	{
         if ( !m_memListNode.Ptr() || !m_memListNode.Ptr()->Prev() )
             return oexFALSE;
@@ -597,7 +597,7 @@ public:
 	//==============================================================
 	/// Returns a pointer to the list node
     T_NODE* Node()
-    {   
+    {
         if ( !m_memListNode.Ptr() )
             return oexNULL;
         return m_memListNode.Ptr();
@@ -614,7 +614,7 @@ private:
 
 /// Linked list
 /**
-    
+
 */
 template< typename T_OBJ, typename T_NODE = TListNode< T_OBJ > >
     class TList
@@ -628,14 +628,14 @@ public:
 
     TList()
 	{	m_uSize = 0;
-		m_pHead = m_pTail = oexNULL; 
+		m_pHead = m_pTail = oexNULL;
     }
 
 	// +++ Added const for g++
 	TList( oexCONST TList &x_rList )
 	{	m_uSize = 0;
-		m_pHead = m_pTail = oexNULL; 
-		Attach( x_rList ); 
+		m_pHead = m_pTail = oexNULL;
+		Attach( x_rList );
     }
 
     virtual ~TList()
@@ -656,14 +656,14 @@ public:
 		{
             // Save pointer
             T_NODE *pNode = m_pHead;
-            
+
             // Point to the next node
             m_pHead = (T_NODE*)pNode->Next();
 //			m_pHead = dynamic_cast<T_NODE*>( pNode->Next() );
 
             // Just in case someone else is still hanging onto the memory
-            pNode->SetAt( oexNULL, oexNULL );                       
-            
+            pNode->SetAt( oexNULL, oexNULL );
+
             // Delete this node
             OexAllocDelete( pNode );
 
@@ -682,10 +682,10 @@ public:
 		\return iterator containing object
 	*/
 	TList& operator << ( oexCONST T_OBJ &x_rObj )
-	{	
+	{
         iterator itNew( Append() );
 
-		if ( itNew.Ptr() ) 
+		if ( itNew.Ptr() )
             itNew.Obj() = x_rObj;
 
 		return *this;
@@ -762,7 +762,7 @@ public:
 	/**
 		\param [in] x_it		-	Node to append.  Must not be a
                                     member of another list.
-                                    
+
 
 		\return iterator containing object
 	*/
@@ -786,14 +786,14 @@ public:
     {
         x_rNode.Append( m_pTail );
 
-		m_uSize++; 
+		m_uSize++;
 
-		m_pTail = &x_rNode; 
+		m_pTail = &x_rNode;
 
-		if ( !m_pHead ) 
-			m_pHead = &x_rNode; 
+		if ( !m_pHead )
+			m_pHead = &x_rNode;
 
-		return m_pTail; 
+		return m_pTail;
 
     }
 
@@ -816,7 +816,7 @@ public:
 // +++ Doesn't work with g++ ???
 //========================================
 
-//        pNode = OexAllocConstruct< T_NODE >( x_pObj, m_pTail, T_NODE::eAppend ); 
+//        pNode = OexAllocConstruct< T_NODE >( x_pObj, m_pTail, T_NODE::eAppend );
 //        if ( !pNode )
 //            return (T_NODE*)oexNULL;
 
@@ -839,18 +839,18 @@ public:
 //========================================
 // --- End doesn't work with g++
 //========================================
-	
+
 		// One node bigger now
-		m_uSize++; 
+		m_uSize++;
 
 		// New tail pointer
-		m_pTail = pNode; 
+		m_pTail = pNode;
 
 		// Assign head pointer if list is empty
-		if ( !m_pHead ) 
-			m_pHead = pNode; 
+		if ( !m_pHead )
+			m_pHead = pNode;
 
-		return m_pTail; 
+		return m_pTail;
 	}
 
 	//==============================================================
@@ -864,10 +864,10 @@ public:
 		\return iterator containing object
 	*/
 	iterator Append( oexCONST T_OBJ &x_rObj )
-	{	
+	{
         iterator itNew = Append();
 
-		if ( itNew.Ptr() ) 
+		if ( itNew.Ptr() )
             itNew.Obj() = x_rObj;
 
 		return itNew;
@@ -880,15 +880,15 @@ public:
 	/**
 		\param [in] x_pList		-	Pointer to object array
 		\param [in] x_uCount		-	Number of items in the array
-		
+
 		\return Reference to this list
-	
-		\see 
+
+		\see
 	*/
 	template < class T >
 		TList& Append( T *x_pList, oexUINT x_uCount )
 	{	for( oexUINT i = 0; i < x_uCount; i++ )
-			Append( x_pList[ i ] );			
+			Append( x_pList[ i ] );
 		return *this;
 	}
 
@@ -923,14 +923,14 @@ public:
     {
         x_rNode.Insert( m_pHead );
 
-		m_uSize++; 
+		m_uSize++;
 
-		m_pHead = &x_rNode; 
+		m_pHead = &x_rNode;
 
-		if ( !m_pTail ) 
-			m_pTail = &x_rNode; 
+		if ( !m_pTail )
+			m_pTail = &x_rNode;
 
-		return m_pHead; 
+		return m_pHead;
 
     }
 
@@ -949,18 +949,42 @@ public:
 	{
         T_NODE *pNode = oexNULL;
 
-        pNode = OexAllocConstruct< T_NODE >( x_pObj, m_pHead, T_NODE::eInsert ); 
-        if ( !pNode )
-            return iterator();
+//========================================
+// +++ Doesn't work with g++ ???
+//========================================
 
-		m_uSize++; 
+//        pNode = OexAllocConstruct< T_NODE >( x_pObj, m_pHead, T_NODE::eInsert );
+//        if ( !pNode )
+//            return iterator();
 
-		m_pHead = pNode; 
+//========================================
+// --- So using this instead
+//========================================
 
-		if ( !m_pTail ) 
-			m_pTail = pNode; 
+		pNode = OexAllocConstruct< T_NODE >();
+	    if ( !pNode )
+	        return (T_NODE*)oexNULL;
 
-		return m_pHead; 
+		// Assign object
+		if ( x_pObj )
+			pNode->Obj() = *x_pObj;
+
+		// Insert into list
+		if ( m_pHead )
+			pNode->Insert( m_pHead );
+
+//========================================
+// --- End doesn't work with g++
+//========================================
+
+		m_uSize++;
+
+		m_pHead = pNode;
+
+		if ( !m_pTail )
+			m_pTail = pNode;
+
+		return m_pHead;
 	}
 
 	//==============================================================
@@ -971,13 +995,14 @@ public:
 		\param [in] x_rObj		-	Reference to object that is used
 									to initialize the new list item.
 
+
 		\return iterator containing object
 	*/
 	iterator Insert( oexCONST T_OBJ &x_rObj )
-	{	
+	{
         iterator itNew = Insert();
 
-		if ( itNew.Ptr() ) 
+		if ( itNew.Ptr() )
             itNew.Obj() = x_rObj;
 
 		return itNew;
@@ -990,15 +1015,15 @@ public:
 	/**
 		\param [in] x_pList		-	Pointer to object array
 		\param [in] x_uCount		-	Number of items in the array
-		
+
 		\return Reference to this list
-	
-		\see 
+
+		\see
 	*/
 	template < class T >
 		TList& Insert( T *x_pList, oexUINT x_uCount )
 	{	for( oexUINT i = 0; i < x_uCount; i++ )
-			Insert( x_pList[ i ] );			
+			Insert( x_pList[ i ] );
 		return *this;
 	}
 
@@ -1022,29 +1047,29 @@ public:
 	//==============================================================
 	/// Sets the iterator to the next item in the list
 	/**
-		\param [in] x_it 
+		\param [in] x_it
 
 		If it is an empty iterator, it is set to the first item
 		in the list.
 
 		If there are no more items in the list, this function
 		returns zero.
-	
+
 	  \code
 
 		// Walk the list forward
 		for ( oex::TList< int >::iterator it; lst.Next( it ); )
-			
+
 			Use( it );
-	
+
 	  \endcode
 
 		\return Non-zero if it points to the next item in the list
-	
+
 		\see Prev()
 	*/
 	oexCONST oexBOOL Next( iterator& x_it ) oexCONST
-	{	
+	{
         if ( x_it.IsValid() )
 			return x_it.Next();
 
@@ -1061,29 +1086,29 @@ public:
 	//==============================================================
 	/// Sets the iterator to the previous item in the list
 	/**
-		\param [in] x_it 
+		\param [in] x_it
 
 		If it is an empty iterator, it is set to the last item
 		in the list.
 
 		If there are no more items in the list, this function
 		returns zero.
-	
+
 	  \code
 
 		// Walk the list backward
 		for ( oex::TList< int >::iterator it; lst.Prev( it ); )
-			
+
 			Use( it );
-	
+
 	  \endcode
 
 		\return Non-zero if it points to the previous list item
-	
+
 		\see Next()
 	*/
 	oexCONST oexBOOL Prev( iterator& x_it ) oexCONST
-	{	
+	{
         if ( x_it.IsValid() )
 			return x_it.Prev();
 
@@ -1105,7 +1130,7 @@ public:
 		\return iterator containing object
 	*/
 	iterator MoveUp( iterator x_itMove )
-    {   
+    {
         // Sanity checks
         if ( !x_itMove.IsValid() )
             return x_itMove;
@@ -1113,7 +1138,7 @@ public:
         // Update head pointer if needed
         if ( x_itMove.Node()->Prev() == m_pHead )
             m_pHead = x_itMove.Node();
-        
+
         // Update tail pointer if needed
         if ( x_itMove.Node() == m_pTail )
             m_pTail = x_itMove.Node()->Prev();
@@ -1135,7 +1160,7 @@ public:
 		\return iterator containing object
 	*/
 	iterator MoveDown( iterator x_itMove )
-    {   
+    {
         // Sanity checks
         if ( !x_itMove.IsValid() )
             return x_itMove;
@@ -1147,7 +1172,7 @@ public:
         // Update tail pointer if needed
         if ( x_itMove.Node()->Next() == m_pTail )
             m_pTail = x_itMove.Node();
-        
+
         // Put us up
         x_itMove.Node()->MoveDown();
 
@@ -1166,7 +1191,7 @@ public:
 		\return iterator containing object
 	*/
 	iterator MoveBefore( iterator x_itMove, iterator x_itRef )
-    {   
+    {
         // Sanity checks
         if ( !x_itRef.IsValid() || !x_itMove.IsValid() )
             return x_itMove;
@@ -1177,7 +1202,7 @@ public:
         // Update head pointer if needed
         if ( x_itRef.Node() == m_pHead )
             m_pHead = x_itMove.Node();
-        
+
         // Update tail pointer if needed
         if ( x_itMove.Node() == m_pTail )
             m_pTail = x_itRef.Node();
@@ -1197,7 +1222,7 @@ public:
 		\return iterator containing object
 	*/
 	iterator MoveAfter( iterator x_itMove, iterator x_itRef )
-    {   
+    {
         // Sanity checks
         if ( !x_itRef.IsValid() || !x_itMove.IsValid() )
             return x_itMove;
@@ -1208,7 +1233,7 @@ public:
         // Update head pointer if needed
         if ( x_itMove.Node() == m_pHead )
             m_pHead = x_itRef.Node();
-        
+
         // Update tail pointer if needed
         if ( x_itRef.Node() == m_pTail )
             m_pTail = x_itMove.Node();
@@ -1225,7 +1250,7 @@ public:
 	iterator Remove( iterator x_it )
 	{
 		// Ensure valid iterator
-		if ( !x_it.IsValid() ) 
+		if ( !x_it.IsValid() )
             return iterator();
 
         T_NODE *pThis = x_it.Node();
@@ -1287,15 +1312,15 @@ public:
 		} // end if
 
 	\endcode
-		
-		\return 
-	
-		\see 
+
+		\return
+
+		\see
 	*/
 	iterator Erase( iterator x_it, oexBOOL x_bForward = oexTRUE )
 	{
 		// Ensure valid iterator
-		if ( !x_it.IsValid() ) 
+		if ( !x_it.IsValid() )
             return iterator();
 
         T_NODE *pThis = x_it.Node();
@@ -1314,7 +1339,7 @@ public:
         Unlink( x_it );
 
         // One less item
-        if ( m_uSize ) 
+        if ( m_uSize )
             m_uSize--;
 
         // Delete the node
@@ -1322,7 +1347,7 @@ public:
         OEX_CATCH_ALL { oexASSERT( 0 ); }
 
 		// Are we going backward?
-		if ( !x_bForward ) 
+		if ( !x_bForward )
 			return pNext;
 
 		return pPrev;
@@ -1335,10 +1360,10 @@ protected:
 	//==============================================================
     /// Use this function to unlink a list item when it is erased
     /**
-        This is used by TAssoList for instance, to remove the 
+        This is used by TAssoList for instance, to remove the
         item from the index when it is erased.
     */
-    virtual void Unlink( iterator x_it ) 
+    virtual void Unlink( iterator x_it )
     {}
 
 public:
@@ -1383,12 +1408,12 @@ public:
 
 		Can we say sloooooow!
 
-		You should use TAssoList<> if you require random access.  
+		You should use TAssoList<> if you require random access.
 		There are special circumstances for this function.
-		
+
 		\return iterator to matching object or empty iterator.
-	
-		\see 
+
+		\see
 	*/
 	template < class T_CMPOBJ >
 		iterator SearchValue( oexCONST T_CMPOBJ x_tObj )
@@ -1407,19 +1432,19 @@ public:
 		\param [in] x_fCmp	-	Function for comparison
 
 		This function searches every list item, comparing each one
-		to x_tObj using the specified function x_fCmp() until a match 
+		to x_tObj using the specified function x_fCmp() until a match
 		is found.
 
 		Obviously, this is slow.
 
-		You should use TAssoList<> if you require random access.  
+		You should use TAssoList<> if you require random access.
 		There are special circumstances for this function.
 
 		\code
 
 			// Compare function
 			oexBOOL MyCompare( oexINT a, oexINT b )
-			{	return a == b; 
+			{	return a == b;
 			}
 
 			// ...
@@ -1428,10 +1453,10 @@ public:
 			TList< oexINT > it = lst.SearchKey( 2, MyCompare );
 
 		\endcode
-		
+
 		\return iterator to matching object or empty iterator.
-	
-		\see 
+
+		\see
 	*/
 	template< class T_CMPOBJ, class T_CMPFUNC >
 		iterator SearchValue( oexCONST T_CMPOBJ tObj, T_CMPFUNC fCmp )
@@ -1448,16 +1473,16 @@ public:
 	//==============================================================
 	/// Assignes a list object from a list reference
 	/**
-		\param [in] x_rList 
-		
-		Note that this class just assumes the list.  A copy is not 
-		made.  After this function, x_rList will be empty.  
+		\param [in] x_rList
+
+		Note that this class just assumes the list.  A copy is not
+		made.  After this function, x_rList will be empty.
 
 		See Attach() for more details
 
 		\return Reference to this object
-	
-		\see 
+
+		\see
 	*/
 	TList& operator = ( oexCONST TList &x_rList )
 	{	return Attach( x_rList ); }
@@ -1467,10 +1492,10 @@ public:
 	//==============================================================
 	/// Assignes a list object from a list reference
 	/**
-		\param [in] x_rList 
-		
-		Note that this class just assumes the list.  A copy is not 
-		made.  After this function, x_rList will be empty.  
+		\param [in] x_rList
+
+		Note that this class just assumes the list.  A copy is not
+		made.  After this function, x_rList will be empty.
 
 		\code
 
@@ -1490,8 +1515,8 @@ public:
 		\endcode
 
 		\return Reference to this object
-	
-		\see 
+
+		\see
 	*/
 	TList& Attach ( oexCONST TList &x_rList )
 	{
@@ -1528,8 +1553,8 @@ public:
 	/**
 
 		\return TList object containing a copy of the list
-	
-		\see 
+
+		\see
 	*/
 	TList Copy()
 	{	TList lst;
@@ -1545,11 +1570,11 @@ public:
 	// Size()
 	//==============================================================
 	/// Returns the number of items in the list
-	oexUINT Size() 
+	oexUINT Size()
     {   return m_uSize; }
 
 private:
-    
+
 	/// Holds the size of the list
 	oexUINT					m_uSize;
 

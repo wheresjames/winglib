@@ -4,14 +4,14 @@
 
 set( project_name 	test )
 
-set( output_dir 	../../bin ) 
+set( output_dir 	../../bin )
 add_definitions( -DUNICODE -D_UNICODE )
 
 set( src_files
-					../../stdafx.cpp 
-					../../test.cpp 
+					../../stdafx.cpp
+					../../test.cpp
    )
-		   
+
 set( header_files
 					../../stdafx.h
    )
@@ -52,17 +52,17 @@ source_group( "Header Files" FILES ${header_files} )
 # Add source files to group
 source_group( "Source Files" FILES ${src_files} )
 
-if( WIN32 )	
+if( WIN32 )
 	add_executable( ${project_name} ${src_files} ${header_files} )
 else( WIN32 )
 	add_executable( ${project_name} ${src_files} ${header_files} )
-endif( WIN32 )	
+endif( WIN32 )
 
 #-------------------------------------------------------------------
 # build
 #-------------------------------------------------------------------
 
-target_link_libraries( 
-						${project_name} 
-						${CMAKE_CURRENT_BINARY_DIR}/../../../../lib/oexlib/bin/debug/oexlib_d.lib
+target_link_libraries(
+						${project_name}
+						${CMAKE_CURRENT_BINARY_DIR}/../../../../lib/oexlib/bin/liboexlib_d.a
 					  )

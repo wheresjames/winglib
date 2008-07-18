@@ -38,14 +38,18 @@ OEX_USING_NAMESPACE
 
 CLog CLog::m_logGlobal;
 
-oexBOOL CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uErr, oexCSTR x_pErr, oexUINT x_uSkip )
+oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uErr, oexUINT x_uLevel, oexCSTR x_pErr, oexUINT x_uSkip )
 {
+	// Ensure valid reporting level
+	if ( x_uLevel < m_uLevel )
+		return x_uErr;
+
 	// Create log file if needed
 	if ( !m_file.IsOpen() )
 	{
 		// Open new log file
 		if ( !m_file.CreateNew( oexGetModulePath( oexT( "debug.log" ) ).Ptr() ).IsOpen() )
-			return oexFALSE;
+			return x_uErr;
 
 		// Create log header
 		m_file.Write( CStr().Fmt( oexT( "; Log file\r\n; Date : %s\r\n; Application : %s\r\n\r\n" ),
@@ -63,8 +67,10 @@ oexBOOL CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uErr, oexCSTR x_pE
 		x_pErr = oexT( "Unspecified" );
 
 	// Write out the log
-	return m_file.Write( CStr().Fmt( oexT( "0x%X (%d) : %s\r\n\t%s\r\n" ),
-								 	 x_uErr, x_uErr, oexStrToMbPtr( x_pErr ),
-								 	 oexStrToMbPtr( os::CTrace::GetBacktrace( x_uSkip ).Replace( oexT( "\n" ), oexT( "\n\t" ) ).Ptr() ) ) );
+	m_file.Write( CStr().Fmt( oexT( "0x%X (%d) : %s\r\n\t%s\r\n" ),
+							 	 x_uErr, x_uErr, oexStrToMbPtr( x_pErr ),
+							 	 oexStrToMbPtr( os::CTrace::GetBacktrace( x_uSkip ).Replace( oexT( "\n" ), oexT( "\n\t" ) ).Ptr() ) ) );
+
+	return x_uErr;
 }
 

@@ -111,6 +111,8 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 
 	printf( oexStrToMbPtr( str.Ptr() ) );
 
+	printf( oexStrToMbPtr( os::CTrace::GetBacktrace( 0 ).Ptr() ) );
+
 	Break();
 }
 

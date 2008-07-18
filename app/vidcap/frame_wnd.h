@@ -29,6 +29,7 @@ public:
 
 
 public:
+
 	bool StretchDraw(wxDC &x_dc, wxImage &x_img, wxRect &x_rect);
 
 	/// Default Constructor

@@ -152,21 +152,6 @@ public:
 	/// Creates an empty image
 	/**
 		\param [in]  x_pShared	- Shared memory name
-		\param [in]  x_lWidth	- Image width
-		\param [in]  x_lHeight	- Image height
-		\param [in]  x_lBpp		- Image bits per pixel
-
-		\return Non-zero if success
-
-		\see
-	*/
-    oexBOOL Create( oexCSTR x_pShared, oexINT x_lWidth, oexINT x_lHeight, oexINT x_lBpp );
-
-	//==============================================================
-	// Create()
-	//==============================================================
-	/// Creates an empty image
-	/**
 		\param [in]  x_hShared	- Shared memory file handle
 		\param [in]  x_lWidth	- Image width
 		\param [in]  x_lHeight	- Image height
@@ -176,7 +161,7 @@ public:
 
 		\see
 	*/
-    oexBOOL Create( os::CFMap::t_HFILEMAP x_hShared, oexINT x_lWidth, oexINT x_lHeight, oexINT x_lBpp );
+    oexBOOL Create( oexCSTR x_pShared, os::CFMap::t_HFILEMAP x_hShared, oexINT x_lWidth, oexINT x_lHeight, oexINT x_lBpp );
 
 	/// Returns the scan width for the specified values
 	static oexINT GetScanWidth( oexINT lWidth, oexINT lBpp )

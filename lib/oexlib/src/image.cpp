@@ -44,7 +44,7 @@ oexBOOL CImage::Destroy()
 	return oexTRUE;
 }
 
-oexBOOL CImage::Create( oexCSTR x_pShared, oexINT x_lWidth, oexINT x_lHeight, oexINT x_lBpp )
+oexBOOL CImage::Create( oexCSTR x_pShared, os::CFMap::t_HFILEMAP x_hShared, oexINT x_lWidth, oexINT x_lHeight, oexINT x_lBpp )
 {
 	// Lose any current image
 	Destroy();
@@ -58,25 +58,8 @@ oexBOOL CImage::Create( oexCSTR x_pShared, oexINT x_lWidth, oexINT x_lHeight, oe
 	if ( x_pShared && *x_pShared )
 		m_image.SetName( x_pShared );
 
-	// Allocate memory for the shared memory
-	if ( !m_image.OexNew( sizeof( SImageData ) + lImageSize ).Ptr() )
-		return oexFALSE;
-
-	return oexTRUE;
-}
-
-oexBOOL CImage::Create( os::CFMap::t_HFILEMAP x_hShared, oexINT x_lWidth, oexINT x_lHeight, oexINT x_lBpp )
-{
-	// Lose any current image
-	Destroy();
-
-	// Calculate the size of the image
-	oexINT lImageSize = GetScanWidth( x_lWidth, x_lBpp ) * cmn::Abs( x_lHeight );
-	if ( !lImageSize )
-		return oexFALSE;
-
 	// Set shared name
-	if ( x_hShared )
+	else if ( x_hShared )
 		m_image.SetShareHandle( x_hShared );
 
 	// Allocate memory for the shared memory

@@ -109,6 +109,7 @@ void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
 	rect.width = sizeClient.GetWidth();
 	rect.height = sizeClient.GetHeight();
 
+	m_cCapture.WaitForFrame();
 	if ( !m_cCapture.IsOpen() || !m_cCapture.GetBuffer() )
 	{
 		dc.SetBrush( wxBrush( wxColor( 255, 0, 0 ) ) );
@@ -126,7 +127,6 @@ void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
 	wxMemoryDC dcMem;
 	dcMem.SelectObject( bmMem );
 	dc.Blit( 0, 0, 320, 240, &dcMem, 0, 0 );
-
 /*
 
 	// Attempt to open the device

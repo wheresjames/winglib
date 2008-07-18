@@ -47,11 +47,20 @@ class CLog
 {
 public:
 
+	enum
+	{
+		eNotice 		= 0x00000001,
+		eWarning 		= 0x00000002,
+		eError			= 0x00000004,
+		eHalt			= 0x00000008
+	};
+
 public:
 
     /// Default constructor
     CLog()
     {
+    	m_uLevel = eWarning;
     }
 
     /// Destructor
@@ -66,14 +75,15 @@ public:
 	/**
 		\param [in] x_pFile		- Source file name
 		\param [in] x_uLine		- Source file line number
+		\param [in] x_uLevel	- Error level
 		\param [in] x_uErr		- Error code
 		\param [in] x_pErr		- Error string
 
-		\return Non-zero if success
+		\return Returns x_uErr
 
 		\see
 	*/
-    oexBOOL Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uErr, oexCSTR x_pErr, oexUINT x_uSkip = 2 );
+    oexUINT Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uLevel, oexUINT x_uErr, oexCSTR x_pErr, oexUINT x_uSkip = 2 );
 
 	//==============================================================
 	// Log()
@@ -82,15 +92,32 @@ public:
 	/**
 		\param [in] x_pFile		- Source file name
 		\param [in] x_uLine		- Source file line number
+		\param [in] x_uLevel	- Error level
 		\param [in] x_uErr		- Error code
 		\param [in] x_pErr		- Error string
 
-		\return Non-zero if success
+		This function returns x_uErr in all cases
+
+		\return Returns x_uErr
 
 		\see
 	*/
-    oexBOOL Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uErr, CStr x_sErr )
-    {	return Log( x_pFile, x_nLine, x_uErr, x_sErr.Ptr(), 3 ); }
+    oexUINT Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uLevel, oexUINT x_uErr, CStr x_sErr )
+    {	if ( x_uLevel < m_uLevel ) return x_uErr;
+    	return Log( x_pFile, x_nLine, x_uLevel, x_uErr, x_sErr.Ptr(), 3 );
+    }
+
+	//==============================================================
+	// Log()
+	//==============================================================
+	/// Writes a string to the file
+	/**
+		\param [in] x_uLevel	- Error level
+
+		This function returns x_uErr in all cases
+	*/
+    void SetReportingLevel( oexUINT x_uLevel )
+    {  	m_uLevel = x_uLevel; }
 
 private:
 
@@ -108,6 +135,9 @@ public:
 	}
 
 private:
+
+	/// Error reporting level
+	oexUINT								m_uLevel;
 
 	/// Global log file
 	static CLog							m_logGlobal;
