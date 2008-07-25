@@ -67,11 +67,11 @@ public:
     {
         m_pMem = oexNULL;
 
-#if defined ( _DEBUG )
+#if defined ( oexDEBUG )
         m_pBh = oexNULL;
 #endif
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -81,14 +81,14 @@ public:
     {
         m_pMem = x_pMem;
 
-#if defined ( _DEBUG )
+#if defined ( oexDEBUG )
         if ( m_pMem )
             m_pBh = oexNULL;
         else
             m_pBh = CAlloc::GetBlockHeader( m_pMem );
 #endif
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -98,11 +98,11 @@ public:
     {
         m_pMem = oexNULL;
 
-#if defined ( _DEBUG )
+#if defined ( oexDEBUG )
         m_pBh = oexNULL;
 #endif
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -114,11 +114,11 @@ public:
     {
         m_pMem = oexNULL;
 
-#if defined ( _DEBUG )
+#if defined ( oexDEBUG )
         m_pBh = oexNULL;
 #endif
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -214,7 +214,7 @@ public:
 
         // Allocate plain old memory
         else
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
             m_pMem = CAlloc( m_uLine, m_pFile ).New< T >( x_uSize, x_bConstructed, x_bUseFullBlock );
             m_pFile = oexNULL;
             m_uLine = 0;
@@ -223,7 +223,7 @@ public:
 #endif
 
 
-#if defined ( _DEBUG )
+#if defined ( oexDEBUG )
         if ( !Ptr() )
             m_pBh = oexNULL;
         else
@@ -262,7 +262,7 @@ public:
         if ( m_pMem )
         {
             // Free the memory
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
             CAlloc( m_uLine, m_pFile ).Delete( m_pMem );
 #else
             CAlloc().Delete( m_pMem );
@@ -331,7 +331,7 @@ public:
                     m_pMem[ i ].~T();
 
             // We can make things smaller
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
             m_pMem = CAlloc( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize );
 #else
             m_pMem = CAlloc().Resize( m_pMem, x_uNewSize );
@@ -343,7 +343,7 @@ public:
         else
         {
             // Will a simple resize work?
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
             T* pMem = CAlloc( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize );
 #else
             T* pMem = CAlloc().Resize( m_pMem, x_uNewSize );
@@ -352,7 +352,7 @@ public:
             if ( !pMem )
             {
                 TMem< T > mem;
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
                 if ( !oexVERIFY_PTR( mem._Log( m_uLine, m_pFile ).New( x_uNewSize ).Ptr() ) )
 #else
                 if ( !oexVERIFY_PTR( mem.New( x_uNewSize ).Ptr() ) )
@@ -388,7 +388,7 @@ public:
 
         } // end else
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -514,7 +514,7 @@ public:
             m_fm = x_m.m_fm; x_m.m_fm.Detach();
         } // end if
 
-#if defined ( _DEBUG )
+#if defined ( oexDEBUG )
         if ( !Ptr() )
             m_pBh = oexNULL;
         else
@@ -612,7 +612,7 @@ public:
         else if ( x_m.m_pMem )
             CAlloc().AddRef( ( m_pMem = x_m.m_pMem ) );
 
-#if defined ( _DEBUG )
+#if defined ( oexDEBUG )
         if ( !Ptr() )
             m_pBh = oexNULL;
         else
@@ -631,7 +631,7 @@ public:
         if ( x_pMem )
             CAlloc().AddRef( ( m_pMem = (T*)x_pMem ) );
 
-#if defined ( _DEBUG )
+#if defined ( oexDEBUG )
         if ( !Ptr() )
             m_pBh = oexNULL;
         else
@@ -861,14 +861,14 @@ private:
     /// File mapping object for shared memory
     TFileMapping< T >       m_fm;
 
-#if defined( _DEBUG )
+#if defined( oexDEBUG )
 
     /// This is pulled out in the debug version just for debugging
     CAlloc::SBlockHeader    *m_pBh;
 
 #endif
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 
 public:
 

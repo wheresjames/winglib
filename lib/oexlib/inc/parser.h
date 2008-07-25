@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -59,24 +59,24 @@ public:
 
 /*	/// Parsers a list by breaking it at separator strings
 	static CStrList Explode( oexCSTR pStr, oexUINT uSize, oexCSTR pSep, oexUINT uSep );
-	
+
     static CStrList Explode( oexCSTR pStr, oexCSTR pSep )
 	{	return Explode( pStr, zstr::Length( pStr ), pSep, zstr::Length( pSep ) ); }
-	
+
     static CStrList Explode( CStr sStr, oexCSTR pSep )
 	{	return Explode( sStr.Ptr(), sStr.Length(), pSep, zstr::Length( pSep ) ); }
-	
+
     static CStrList Explode( CStr sStr, CStr sSep )
 	{	return Explode( sStr.Ptr(), sStr.Length(), sSep.Ptr(), sSep.Length() ); }
 */
     template < typename T >
         static TList< TStr< T > > Explode( oexCONST T * pStr, oexCONST T * pSep )
 	{	return Explode( pStr, zstr::Length( pStr ), pSep, zstr::Length( pSep ) ); }
-	
+
     template < typename T >
         static TList< TStr< T > > Explode( TStr< T > sStr, oexCONST T * pSep )
 	{	return Explode( sStr.Ptr(), sStr.Length(), pSep, zstr::Length( pSep ) ); }
-	
+
     template < typename T >
         static TList< TStr< T > > Explode( TStr< T > sStr, TStr< T > sSep )
 	{	return Explode( sStr.Ptr(), sStr.Length(), sSep.Ptr(), sSep.Length() ); }
@@ -98,8 +98,8 @@ public:
 			    lst << *x_pStr, x_pStr++;
 		    return lst;
 	    } // end if
-    	
-	    oexUINT i = 0;		
+
+	    oexUINT i = 0;
 	    while ( x_uSize )
 	    {
 		    // Separator?
@@ -165,17 +165,17 @@ public:
 			    lst << *x_pStr, x_pStr++;
 		    return lst;
 	    } // end if
-    	
+
 	    while ( x_uSize )
 	    {
 		    // Find a separator
 		    oexINT nSep = str::FindCharacters( x_pStr, x_uSize, x_pSep, x_uSep );
-    		
-		    if ( 0 > nSep ) 
-		    {	lst << x_pStr; 
-			    return lst; 
+
+		    if ( 0 > nSep )
+		    {	lst << x_pStr;
+			    return lst;
 		    } // end if
-    		
+
 		    else
 		    {	x_uSize -= nSep;
                 lst << TStr< T >( x_pStr, 0, nSep );
@@ -191,7 +191,7 @@ public:
 
 	    return lst;
     }
-    
+
     template < typename T >
         static TList< TStr< T > > Split( oexCONST T *pStr, oexCONST T *pSep )
 	{	return Split< T >( pStr, zstr::Length( pStr ), pSep ); }
@@ -225,11 +225,11 @@ public:
 //    static CPropertyBagW DecodeUrlParams( CStrW &str )
 //    {   return DecodeUrlParams< oexCHARW >( str ); }
 
-    template< typename T > 
+    template< typename T >
         static TPropertyBag< TStr< T > > DecodeUrlParams( oexCONST T *x_pStr )
         {   return DecodeUrlParams( TStr< T >( x_pStr ) ); }
 
-    template< typename T > 
+    template< typename T >
         static TPropertyBag< TStr< T > > DecodeUrlParams( TStr< T > x_str )
     {
         TPropertyBag< TStr< T > > pb;
@@ -264,14 +264,14 @@ public:
 	/// Encodes url type params such as "a=b&c=d"
 //	static CStr EncodeUrlParams( CPropertyBag pb );
 
-    template< typename T > 
+    template< typename T >
         static TStr< T > EncodeUrlParams( TPropertyBag< TStr< T > > x_pb )
     {
 	    TStr< T > str;
 
 	    for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
 	    {
-		    if ( str.Length() ) 
+		    if ( str.Length() )
                 str << oexTC( T, '&' );
 
 		    str << UrlEncode( it.Node()->key ) << oexTT( T, "=" ) << UrlEncode( it->ToString() );
@@ -285,11 +285,11 @@ public:
 //	static oexBOOL CParser::IsUrlChar( oexTCHAR ch );
 
     template< typename T >
-        static oexBOOL IsUrlChar( T x_ch ) 
+        static oexBOOL IsUrlChar( T x_ch )
     {   return  ( oexTC( T, 'a' ) <= x_ch && oexTC( T, 'z' ) >= x_ch ) ||
                 ( oexTC( T, 'A' ) <= x_ch && oexTC( T, 'Z' ) >= x_ch ) ||
                 ( oexTC( T, '0' ) <= x_ch && oexTC( T, '9' ) >= x_ch ) ||
-                oexTC( T, '_' ) == x_ch || oexTC( T, '-' ) == x_ch || 
+                oexTC( T, '_' ) == x_ch || oexTC( T, '-' ) == x_ch ||
                 oexTC( T, '.' ) == x_ch;
     }
 
@@ -300,11 +300,11 @@ public:
 	/// Decodes a url string "Hello%20World" -> "Hello World"
 //	static CStr CParser::UrlDecode( CStr str );
 
-    template< typename T > 
+    template< typename T >
         static TStr< T > UrlEncode( oexCONST T *x_pStr )
         {   return UrlEncode( TStr< T >( x_pStr ) ); }
 
-    template< typename T > 
+    template< typename T >
         static TStr< T > UrlEncode( TStr< T > x_str )
     {
 	    TStr< T > ret, num;
@@ -324,11 +324,11 @@ public:
 	    return ret;
     }
 
-    template< typename T > 
+    template< typename T >
         static TStr< T > UrlDecode( oexCONST T *x_pStr )
         {   return UrlDecode( TStr< T >( x_pStr ) ); }
 
-    template< typename T > 
+    template< typename T >
         static TStr< T > UrlDecode( TStr< T > x_str )
     {
 	    TStr< T > ret, num;
@@ -361,10 +361,10 @@ public:
 /*
     /// Generic property bag deserializing
     static CPropertyBag Deserialize( oexCSTR x_pStr )
-    {   CPropertyBag pb; 
+    {   CPropertyBag pb;
         CStr str( x_pStr );
-        Deserialize( str, pb ); 
-        return pb; 
+        Deserialize( str, pb );
+        return pb;
     }
 
     /// Generic property bag deserializing
@@ -379,24 +379,24 @@ public:
 */
 
     /// Generic property bag deserializing
-    template< typename T > 
+    template< typename T >
         static TPropertyBag< TStr< T > > Deserialize( oexCONST T *x_pStr, oexBOOL x_bMerge = oexFALSE )
-    {   TPropertyBag< TStr< T > > pb; 
+    {   TPropertyBag< TStr< T > > pb;
         TStr< T > str( x_pStr );
-        Deserialize( str, pb, x_bMerge ); 
-        return pb; 
+        Deserialize( str, pb, x_bMerge );
+        return pb;
     }
 
     /// Generic property bag deserializing
-    template< typename T > 
+    template< typename T >
         static TPropertyBag< TStr< T > > Deserialize( oexCONST TStr< T > &x_sStr, oexBOOL x_bMerge = oexFALSE )
     {   TPropertyBag< TStr< T > > pb; Deserialize( x_sStr, pb, x_bMerge ); return pb; }
 
-    template< typename T > 
+    template< typename T >
         static oexLONG Deserialize( oexCONST TStr< T > &x_sStr, TPropertyBag< TStr< T > > &x_pb, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
     {
         // Lose previous contents
-        if ( !x_bMerge ) 
+        if ( !x_bMerge )
             x_pb.Destroy();
 
         // Punt if null string
@@ -415,19 +415,19 @@ public:
                     if ( 1 < e - s )
                     {
                         // Find '='
-                        oexLONG a = s; 
+                        oexLONG a = s;
                         while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] ) a++;
 
                         TStr< T > sKey, sVal;
 
                         // First character is separator
-                        if ( a == s ) 
+                        if ( a == s )
                             sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ) );
 
                         else sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ) );
-                        
+
                         // Single token
-                        if ( 1 >= e - a ) 
+                        if ( 1 >= e - a )
                             x_pb[ sKey ] = oexTT( T, "" );
 
                         // Both tokens present
@@ -448,23 +448,23 @@ public:
                 } break;
 
                 case oexTC( T, '{' ) :
-                {              
+                {
                     // Get key
                     TStr< T > sKey;
-                    
+
                     // Find '='
-                    oexLONG a = s; 
+                    oexLONG a = s;
                     while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] ) a++;
 
                     // First character is separator
-                    if ( a == s ) 
+                    if ( a == s )
                         sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ) );
 
                     // No default value
                     else if ( a >= e )
                         sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), e - s ) );
 
-                    else if ( a < e ) 
+                    else if ( a < e )
                     {   sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ) );
                         x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ) );
                         lItems++;
@@ -477,7 +477,7 @@ public:
                         oexLONG lEnd = 0;
 
                         // Get the sub array
-                        lItems += Deserialize(  TStr< T >( x_sStr.Ptr( e + 1 ) ), 
+                        lItems += Deserialize(  TStr< T >( x_sStr.Ptr( e + 1 ) ),
                                                 x_pb[ sKey ], oexTRUE, &lEnd );
 
                         // Skip the array we just decoded
@@ -486,7 +486,7 @@ public:
                     } // end if
 
                     // Skip this token
-                    s = e + 1; 
+                    s = e + 1;
 
                 } break;
 
@@ -500,7 +500,7 @@ public:
         return lItems;
     }
 
-    template< typename T > 
+    template< typename T >
         static TStr< T > Serialize( TPropertyBag< TStr< T > > &x_pb )
     {
         // Just return default value if not an array
@@ -526,7 +526,7 @@ public:
                 sStr << oexTC( T, '{' ) << Serialize( *it ) << oexTC( T, '}' );
 
         } // end for
-            
+
         return sStr;
     }
 
@@ -579,7 +579,7 @@ public:
             {   sVal << x_sStr.SkipWhiteSpace().Parse( oexTT( T, "\r\n" ) );
                 x_sStr.NextLine();
             } while ( x_sStr.Length() && x_sStr.IsWhiteSpaceAt( 0 ) );
-           
+
             // Ensure valid strings
             if ( sKey.Length() && sVal.Length() )
                 pb[ UrlDecode( sKey ) ] = UrlDecode( sVal );
@@ -618,17 +618,17 @@ public:
       \endcode
     */
     template < typename T >
-        static TList< TStr< T > > StringPermutations( TStr< T > x_sStr )        
+        static TList< TStr< T > > StringPermutations( TStr< T > x_sStr )
         {
             // It really isn't practical to go higher
             oexASSERT( x_sStr.Length() <= 8 );
 
             TList< TStr< T > > lst;
-            oexUINT u = StringPermutations( lst, (T*)x_sStr.Ptr(), (T*)0 ); 
+            oexUINT u = StringPermutations( lst, (T*)x_sStr.Ptr(), (T*)0 );
 
             oexASSERT( u == lst.Size() );
-            
-#if defined( _DEBUG )            
+
+#if defined( oexDEBUG )
             // Verify known lengths
             switch( x_sStr.Length() )
             {

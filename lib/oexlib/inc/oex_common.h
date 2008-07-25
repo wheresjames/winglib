@@ -6,35 +6,35 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
 #pragma once
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 
 // For tracking allocations
 #   define OexAllocNew             OEX_NAMESPACE::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).New
@@ -96,7 +96,7 @@ public:
 	virtual T_BASE* New() { return (T_BASE*)( oexNEW T_DERIVED ); }
 	virtual void Delete( T_BASE* p ) { oexDELETE ( (T_DERIVED*)p ); }
     virtual oexBOOL IsValid() { return oexTRUE; }
-};		
+};
 
 namespace cmn
 {
@@ -107,7 +107,7 @@ namespace cmn
 		required_bytes = FitTo( 42, 8 );
 	*/
 	oexINT static FitTo( oexINT val, oexINT unit )
-	{	if ( !unit ) return 0;			
+	{	if ( !unit ) return 0;
 		oexINT i = val / unit;
 		return ( ( i * unit ) >= val ) ? i : i + 1;
 	}
@@ -277,11 +277,11 @@ namespace cmn
         {   dif = ( m - dif ) / 2;
             avg = ( dif > a ) ? b + dif : a - dif;
         } // end if
-        else avg = a + dif / 2;        
+        else avg = a + dif / 2;
         if ( dif == h && avg >= h ) avg -= h;
         return avg;
     }
-        
+
     /// Aligns value on 16 bit boundry
     template < typename T >
         T Align2( T val )
@@ -327,12 +327,12 @@ namespace cmn
 	}
 
     /// Returns the state of the specified bit in buf
-    template < typename T > 
+    template < typename T >
         oexBOOL GetBit( T *buf, oexUINT bit )
     {   return 0 != ( ( (oexUCHAR*)buf)[ bit >> 3 ] & ( 1 << ( bit & 7 ) ) ) ? oexTRUE : oexFALSE; }
 
     /// Sets the state of the specified bit in buf
-    template < typename T > 
+    template < typename T >
         void SetBit( T *buf, oexUINT bit, oexBOOL set )
     {   if ( set ) ( (oexUCHAR*)buf)[ bit >> 3 ] |= ( 1 << ( bit & 7 ) );
         else ( (oexUCHAR*)buf)[ bit >> 3 ] &= ~( 1 << ( bit & 7 ) );
@@ -342,7 +342,7 @@ namespace cmn
     /// where doff and soff are offsets in bits.
     /**
         +++ This could probably be made a little more efficient by using
-            masks and copying multiple bits at once, but that would make my 
+            masks and copying multiple bits at once, but that would make my
             brain hurt at the moment.
     */
     template < typename T >

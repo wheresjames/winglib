@@ -53,7 +53,7 @@ public:
         m_nLength = 0;
         m_uOffset = 0;
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -62,7 +62,7 @@ public:
 	TStr( oexCONST TStr &str )
 	{	m_nLength = 0;
         m_uOffset = 0;
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -73,7 +73,7 @@ public:
 	TStr( oexCONST T *pStr )
 	{	m_nLength = 0;
         m_uOffset = 0;
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -83,7 +83,7 @@ public:
 	TStr( oexCONST T *pStr, oexUINT uSize )
 	{	m_nLength = 0;
         m_uOffset = 0;
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -93,7 +93,7 @@ public:
 	TStr( oexCONST T *pStr, oexINT nStart, oexUINT uLen )
 	{	m_nLength = 0;
         m_uOffset = 0;
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -103,7 +103,7 @@ public:
 	TStr( oexCONST T *pStr, oexUINT uSize, oexINT nStart, oexUINT uLen )
 	{	m_nLength = 0;
         m_uOffset = 0;
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -113,7 +113,7 @@ public:
 	TStr( oexCONST oexINT nVal )
 	{	m_nLength = 0;
         m_uOffset = 0;
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -123,7 +123,7 @@ public:
 	TStr( oexCONST oexUINT uVal )
 	{	m_nLength = 0;
         m_uOffset = 0;
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -133,7 +133,7 @@ public:
 	TStr( oexCONST oexDOUBLE dStr )
 	{	m_nLength = 0;
         m_uOffset = 0;
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -143,7 +143,7 @@ public:
 	TStr( oexCONST T tVal )
 	{	m_nLength = 0;
         m_uOffset = 0;
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -153,7 +153,7 @@ public:
 	TStr( oexCONST oexGUID &guid )
 	{	m_nLength = 0;
         m_uOffset = 0;
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
@@ -237,7 +237,7 @@ public:
 
         else
         {
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
             pMem = m_mem._Log( m_uLine, m_pFile ).Resize( x_uSize + 1 ).Ptr();
 #else
             pMem = m_mem.Resize( x_uSize + 1 ).Ptr();
@@ -1727,7 +1727,7 @@ private:
     /// Offset into the string, this is invaluable for text parsing
     oexINT          m_uOffset;
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 
 public:
 

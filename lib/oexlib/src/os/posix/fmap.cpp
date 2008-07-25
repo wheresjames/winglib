@@ -51,7 +51,7 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( CFMap::t_HFILEMAP x_hFile, oexPVOI
 
 	FILE *fd = (FILE*)x_hFile;
 	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, (int)fd, 0 );
-	if ( !pMem )
+	if ( !pMem || MAP_FAILED == pMem )
 	{	fclose( fd );
 		return oexNULL;
 	} // end if
@@ -72,16 +72,63 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
         return CFMap::c_Failed;
 
 	// Create path
-	CStr8 sPath = oexStrToMb( x_pFile );
-	sPath.RTrim( PATH_MAX );
-	mkstemp( sPath.Allocate( PATH_MAX * 2 ) );
+	CStr8 sPath;
 
-	FILE *fd = fopen( sPath.Ptr(), "w+b" );
+	if ( x_pFile )
+		sPath = oexStrToMb( x_pFile );
+
+	else if ( x_pName )
+	{
+		// Convert name to multi-byte
+		CStr8 sName = oexStrToMb( x_pName );
+		if ( !sName.Length() )
+			return CFMap::c_Failed;
+
+		// Attempt to allocate space
+		oexSTR8 pPath = sPath.OexAllocate( sName.Length() + PATH_MAX * 2 );
+		if ( !pPath )
+			return CFMap::c_Failed;
+
+		// Attempt to create a temporary file
+//		zstr::Copy( pPath, oexT( "/tmp/oex.tmp.XXXXXXXX" ) );
+
+		// Make a temporary file
+//		mkstemp( sPath._Ptr() );
+
+		// Attempt to build a file name
+		zstr::Copy( pPath, "/tmp/oex.shared.016dc44e-1208-4a38-9a48-9f97df77250b." );
+		zstr::Append( pPath, sName.Ptr() );
+
+	} // end if
+
+	else
+		return CFMap::c_Failed;
+
+//	FILE *fd = fopen( sPath.Ptr(), "w+b" );
+	FILE *fd = (FILE*)open( sPath.Ptr(), O_RDWR );
 	if ( !fd )
 		return CFMap::c_Failed;
 
+	// Set the file size
+	char buf[ 1024 ];
+	oexMemSet( buf, 0, sizeof( buf ) );
+
+	oexINT nSize = x_llSize;
+	while ( nSize )
+	{
+		oexINT nWrite = nSize;
+		if ( nWrite > sizeof( buf ) )
+			nWrite = sizeof( buf );
+
+		write( (int)fd, buf, nWrite );
+		nSize -= nWrite;
+
+	} // end while
+
+
+	// Map memory
 	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, (int)fd, 0 );
-	if ( !pMem )
+	if ( !pMem || MAP_FAILED == pMem )
 	{	fclose( fd );
 		return CFMap::c_Failed;
 	} // end if

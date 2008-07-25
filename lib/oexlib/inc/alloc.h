@@ -143,7 +143,7 @@ public:
     static inline oexUINT ProtectAreaSize()
     {
 	    return  sizeof( SBlockHeader )
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
                 + sizeof( m_ucUnderrunPadding )
                 + sizeof( m_ucOverrunPadding )
 #endif
@@ -159,7 +159,7 @@ public:
         // Grab the size of the allocated buffer
         return *(oexUINT*)( ( (oexUCHAR*)x_pBuf ) - sizeof( oexUINT )
                                                   - sizeof( SBlockHeader )
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
                                                   - sizeof( m_ucUnderrunPadding )
 #endif
                                                   );
@@ -172,7 +172,7 @@ public:
     static inline SBlockHeader* GetBlockHeader( oexCPVOID x_pBuf )
     {
         return (SBlockHeader*)( (oexUCHAR*)x_pBuf
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
                                                   - sizeof( m_ucUnderrunPadding )
 #endif
                                                   - sizeof( SBlockHeader ) );
@@ -187,7 +187,7 @@ public:
         // Return size of usable memory
         return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf
                                   - sizeof( SBlockHeader )
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
                                   - sizeof( m_ucUnderrunPadding )
 #endif
                                   ) )->uSize;
@@ -202,7 +202,7 @@ public:
         // Return size of usable memory
         return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf
                                   - sizeof( SBlockHeader )
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
                                   - sizeof( m_ucUnderrunPadding )
 #endif
                                   ) )->uFlags = x_uFlags;
@@ -217,7 +217,7 @@ public:
         // Return size of usable memory
         return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf
                                   - sizeof( SBlockHeader )
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
                                   - sizeof( m_ucUnderrunPadding )
 #endif
                                   ) )->uFlags;
@@ -232,7 +232,7 @@ public:
         // Return size of usable memory
         return ( (SBlockHeader*)( (oexUCHAR*)x_pBuf
                                   - sizeof( SBlockHeader )
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
                                   - sizeof( m_ucUnderrunPadding )
 #endif
                                   ) )->uRef;
@@ -247,7 +247,7 @@ public:
         // Return size of usable memory
         return ++( (SBlockHeader*)( (oexUCHAR*)x_pBuf
                                     - sizeof( SBlockHeader )
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
                                     - sizeof( m_ucUnderrunPadding )
 #endif
                                     ) )->uRef;
@@ -262,7 +262,7 @@ public:
         // Return size of usable memory
         return --( (SBlockHeader*)( (oexUCHAR*)x_pBuf
                                     - sizeof( SBlockHeader )
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
                                     - sizeof( m_ucUnderrunPadding )
 #endif
                                     ) )->uRef;
@@ -270,7 +270,7 @@ public:
 
 public:
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 
     /// Under run padding
     static oexUCHAR m_ucUnderrunPadding[ 4 ];
@@ -297,7 +297,7 @@ public:
     template< typename T >
         T* New( oexUINT x_uSize, oexBOOL x_bConstructed = oexFALSE, oexBOOL x_bUseFullBlock = oexFALSE )
     {
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         T* pPtr = (T*)Alloc( x_uSize * sizeof( T ), m_uLine, m_pFile, 0, x_bUseFullBlock );
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -333,7 +333,7 @@ public:
 
         } // end if
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         oexBOOL bRet = Free( x_pPtr, m_uLine, m_pFile, 2 );
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -348,7 +348,7 @@ public:
     template< typename T >
         T* Resize( T* x_pPtr, oexUINT x_uNewSize )
     {
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         T* pPtr = (T*)ReAlloc( x_pPtr, x_uNewSize * sizeof( T ), m_uLine, m_pFile, 1 );
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -578,7 +578,7 @@ public:
         Delete( x_pPtr );
     }
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 
 private:
 

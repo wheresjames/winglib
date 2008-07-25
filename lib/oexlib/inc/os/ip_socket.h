@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -41,7 +41,7 @@
 /**
 	Provides synchronous socket support
 
-	For most advanced applications, you will probably want the 
+	For most advanced applications, you will probably want the
 	asynchronous capability of TWinAsyncSocket.
 
 	Example:
@@ -53,7 +53,7 @@
     CIpSocket is;
 
     if ( !is.Connect( "google.com", 80 )
-         || !is.WaitEvent( CIpSocket::eConnectEvent, oexDEFAULT_TIMEOUT ) )
+         || !is.WaitEvent( CIpSocket::eConnectEvent, oexDEFAULT_WAIT_TIMEOUT ) )
     {   oexTRACE( "CIpSocket::Connect() : %s\n", is.GetLastErrorMsg().Ptr() );
         return -2;
     } // end if
@@ -64,7 +64,7 @@
     } // end if
 
 	// Wait for data
-    if ( is.WaitEvent( CIpSocket::eReadEvent, oexDEFAULT_TIMEOUT ) )
+    if ( is.WaitEvent( CIpSocket::eReadEvent, oexDEFAULT_WAIT_TIMEOUT ) )
         oexTRACE( "%s\n", is.Recv().Ptr() );
 
     oexTRACE( "Peer: %s\n", is.PeerAddress().GetDotAddress().Ptr() );
@@ -84,7 +84,7 @@ public:
 	/// Address Family
 	enum
 	{
-		/// Unspecified 
+		/// Unspecified
 		eAfUnspec		= 0,
 
 		/// Unix sockets
@@ -215,7 +215,7 @@ public:
 	//==============================================================
 	/// Initializes the Socket API
 	/**
-		\warning	You must call this function before any other 
+		\warning	You must call this function before any other
 					socket functions!  Best if called from your
 					application startup code.  Call UninitSockets()
 					before your application shuts down and after
@@ -229,17 +229,17 @@ public:
 	// UninitSockets()
 	//==============================================================
 	/// Uninitializes the Windows Socket API
-	static void UninitSockets();	
+	static void UninitSockets();
 
 	//==============================================================
 	// IsInitialized()
 	//==============================================================
 	/// Returns non-zero if the Socket API was successfully initialized.
-	static oexBOOL IsInitialized() 
+	static oexBOOL IsInitialized()
     {   return ( m_lInit == 0 ); }
 
 public:
-	
+
 	//==============================================================
 	// Attach()
 	//==============================================================
@@ -247,7 +247,7 @@ public:
 	/**
 		\param [in] x_hSocket		-	Existing socket handle
 
-		\return Returns non-zero if success		
+		\return Returns non-zero if success
 	*/
 	oexBOOL Attach( t_SOCKET x_hSocket );
 
@@ -255,21 +255,21 @@ public:
 	// Detach()
 	//==============================================================
 	/// Detaches from existing socket handle without releasing it.
-	void Detach() 
+	void Detach()
     {   m_hSocket = c_InvalidSocket; }
-	
+
 	//==============================================================
 	// IsSocket()
 	//==============================================================
 	/// Returns non-zero if the class contains a valid socket handle
-	oexBOOL IsSocket() 
+	oexBOOL IsSocket()
     {   return ( m_hSocket != c_InvalidSocket ); }
-					 
+
 	//==============================================================
 	// GetSocketHandle()
 	//==============================================================
 	/// Returns a handle to the socket
-	t_SOCKET GetSocketHandle() 
+	t_SOCKET GetSocketHandle()
     {   return m_hSocket; }
 
 	//==============================================================
@@ -291,7 +291,7 @@ public:
 	// GetLastError()
 	//==============================================================
 	/// Returns the most recent error code
-	oexUINT GetLastError() 
+	oexUINT GetLastError()
     {   return m_uLastError; }
 
 	//==============================================================
@@ -304,7 +304,7 @@ public:
 	// GetErrorMsg()
 	//==============================================================
 	/// Returns a human readable description of the last error
-    CStr GetLastErrorMsg() 
+    CStr GetLastErrorMsg()
     {   return GetErrorMsg( GetLastError() ); }
 
 	//==============================================================
@@ -338,17 +338,17 @@ public:
     static oexBOOL GetLocalAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa );
 
     /// Returns peer address information
-    CIpAddress& PeerAddress() 
-    {   if ( !m_addrPeer.GetIpv4() )   
+    CIpAddress& PeerAddress()
+    {   if ( !m_addrPeer.GetIpv4() )
             GetPeerAddress( m_hSocket, &m_addrPeer );
-        return m_addrPeer; 
+        return m_addrPeer;
     }
 
     /// Returns local address information
     CIpAddress& LocalAddress()
-    {   if ( !m_addrLocal.GetIpv4() )   
+    {   if ( !m_addrLocal.GetIpv4() )
             GetLocalAddress( m_hSocket, &m_addrLocal );
-        return m_addrLocal; 
+        return m_addrLocal;
     }
 
 public:
@@ -402,22 +402,22 @@ public:
 
 		\return Returns non-zero if success.
 	*/
-	oexBOOL EventSelect( oexLONG x_lEvents =	eReadEvent | eWriteEvent 
-								    			| eAcceptEvent | eConnectEvent 
+	oexBOOL EventSelect( oexLONG x_lEvents =	eReadEvent | eWriteEvent
+								    			| eAcceptEvent | eConnectEvent
 									    		| eCloseEvent );
 
 	//==============================================================
 	// GetEventHandle()
 	//==============================================================
 	/// Retuns the current event handle
-	t_SOCKETEVENT GetEventHandle() 
+	t_SOCKETEVENT GetEventHandle()
     {   return m_hSocketEvent; }
 
 	//==============================================================
 	// IsEventHandle()
 	//==============================================================
 	/// Returns non-zero if there is a valid event handle
-    oexBOOL IsEventHandle() 
+    oexBOOL IsEventHandle()
     {   return vInvalidEvent() != GetEventHandle() ? oexTRUE : oexFALSE; }
 
 	//==============================================================
@@ -441,13 +441,13 @@ public:
 									for.
 		\param [in] x_uTimeout	-	Maximum time to wait in milli-
 									seconds.
-		
+
 		\return The mask of the event that triggered the return. Zero
                 if timed out waiting for event.
-	
-		\see 
+
+		\see
 	*/
-	oexUINT WaitEvent( oexLONG x_lEventId = ~0, oexUINT x_uTimeout = oexDEFAULT_TIMEOUT );
+	oexUINT WaitEvent( oexLONG x_lEventId = ~0, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT );
 
 	//==============================================================
 	// GetEventBit()
@@ -455,10 +455,10 @@ public:
 	/// Returns the bit offset for the specified event
 	/**
 		\param [in] x_lEventMask	-	Event mask
-		
+
 		\return Bit offset for specified event
-	
-		\see 
+
+		\see
 	*/
 	static oexUINT GetEventBit( oexLONG x_lEventMask );
 
@@ -473,10 +473,10 @@ public:
 		\param [in] x_uSize		-	Size of buffer in pData
 		\param [in] x_puRead	-	Receives the number of bytes read
 		\param [in] x_uFlags	-	Socket receive flags
-		
+
 		\return Number of bytes read or c_InvalidSocket if failure.
-	
-		\see 
+
+		\see
 	*/
 	oexUINT RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead = oexNULL, oexUINT x_uFlags = 0 );
 
@@ -488,10 +488,10 @@ public:
 	/**
 		\param [in] x_uMax		-   Maximum amount of data to return
 		\param [in] x_uFlags	-	Socket receive flags
-		
+
 		\return CStr containing data
-	
-		\see 
+
+		\see
 	*/
     CStr8 RecvFrom( oexUINT x_uMax = 0, oexUINT x_uFlags = 0 );
 
@@ -505,10 +505,10 @@ public:
 		\param [in] x_uSize		-	Size of buffer in pData
 		\param [in] x_puRead	-	Receives the number of bytes read
 		\param [in] x_uFlags	-	Socket receive flags
-		
+
 		\return Number of bytes read or c_InvalidSocket if failure.
-	
-		\see 
+
+		\see
 	*/
 	oexUINT Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead = oexNULL, oexUINT x_uFlags = 0 );
 
@@ -520,10 +520,10 @@ public:
 	/**
 		\param [in] x_uMax		-   Maximum amount of data to return
 		\param [in] x_uFlags	-	Socket receive flags
-		
+
 		\return CStr containing data
-	
-		\see 
+
+		\see
 	*/
     CStr8 Recv( oexUINT x_uMax = 0, oexUINT x_uFlags = 0 );
 
@@ -536,10 +536,10 @@ public:
 		\param [in] x_uSize		-	Size of the buffer in pData
 		\param [in] x_puSent	-	Receives the number of bytes written
 		\param [in] x_uFlags	-	Socket write flags
-		
+
 		\return Number of bytes sent or c_InvalidSocket if failure.
-	
-		\see 
+
+		\see
 	*/
 	oexUINT SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 );
 
@@ -551,10 +551,10 @@ public:
 		\param [in] x_pStr		-	Pointer to NULL terminated string
 		\param [in] x_puSent	-	Number of bytes sent
 		\param [in] x_uFlags	-	Socket write flags
-		
+
 		\return Number of bytes sent or c_InvalidSocket if failure.
-	
-		\see 
+
+		\see
 	*/
 	oexUINT SendTo( oexCSTR8 x_pStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
     {	return SendTo( (oexPVOID)x_pStr, zstr::Length( x_pStr ), x_puSent, x_uFlags ); }
@@ -567,10 +567,10 @@ public:
 		\param [in] x_sStr		-	String to be sent
 		\param [in] x_puSent	-	Number of bytes sent
 		\param [in] x_uFlags	-	Socket write flags
-		
+
 		\return Number of bytes sent or c_InvalidSocket if failure.
-	
-		\see 
+
+		\see
 	*/
 	oexUINT SendTo( CStr8 &x_sStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
     {	return SendTo( (oexPVOID)x_sStr.Ptr(), x_sStr.Length(), x_puSent, x_uFlags ); }
@@ -585,10 +585,10 @@ public:
 		\param [in] x_uSize		-	Size of the buffer in pData
 		\param [in] x_puSent	-	Receives the number of bytes written
 		\param [in] x_uFlags	-	Socket write flags
-		
+
 		\return Number of bytes sent or c_InvalidSocket if failure.
-	
-		\see 
+
+		\see
 	*/
 	oexUINT Send( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 );
 
@@ -600,10 +600,10 @@ public:
 		\param [in] x_pStr		-	Pointer to NULL terminated string
 		\param [in] x_puSent	-	Number of bytes sent
 		\param [in] x_uFlags	-	Socket write flags
-		
+
 		\return Number of bytes sent or c_InvalidSocket if failure.
-	
-		\see 
+
+		\see
 	*/
 	oexUINT Send( oexCSTR8 x_pStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
     {	return Send( (oexPVOID)x_pStr, zstr::Length( x_pStr ), x_puSent, x_uFlags ); }
@@ -616,10 +616,10 @@ public:
 		\param [in] x_sStr		-	String to be sent
 		\param [in] x_puSent	-	Number of bytes sent
 		\param [in] x_uFlags	-	Socket write flags
-		
+
 		\return Number of bytes sent or c_InvalidSocket if failure.
-	
-		\see 
+
+		\see
 	*/
 	oexUINT Send( oexCONST CStr8 &x_sStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
     {	return Send( (oexPVOID)x_sStr.Ptr(), x_sStr.Length(), x_puSent, x_uFlags ); }
@@ -680,7 +680,7 @@ private:
 
     /// String used to connect
     CStr                    m_sConnect;
-    
+
     /// Peer address structure
     CIpAddress              m_addrPeer;
 

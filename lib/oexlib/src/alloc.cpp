@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -36,16 +36,16 @@
 
 OEX_USING_NAMESPACE
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 
 /// Underrun padding
-oexUCHAR CAlloc::m_ucUnderrunPadding[ 4 ] = 
+oexUCHAR CAlloc::m_ucUnderrunPadding[ 4 ] =
 {
 	'U',  'N',  'D',  'R'
 };
 
 /// Overrun padding {20981ECD-F285-4da0-9552-A929C5CD7971}
-oexUCHAR CAlloc::m_ucOverrunPadding[ 24 ] = 
+oexUCHAR CAlloc::m_ucOverrunPadding[ 24 ] =
 {
 	'O',  'V',  'E',  'R',
 	'R',  'U',  'N',  '!',
@@ -79,15 +79,15 @@ void CAlloc::ReportBlock( oexPVOID x_pMem, oexUINT uSize )
                                                   uSize, uBlockSize, pBh->uSize );
 
         if ( pBh->ai[ 0 ].pFile )
-            os::CSys::StrFmt( zstr::EndOfString( szMsg ), sizeof( szMsg ) - zstr::Length( szMsg ), 
+            os::CSys::StrFmt( zstr::EndOfString( szMsg ), sizeof( szMsg ) - zstr::Length( szMsg ),
                               oexT( "%s(%lu) : Allocated\n" ), pBh->ai[ 0 ].pFile, pBh->ai[ 0 ].uLine );
 
         if ( pBh->ai[ 1 ].pFile )
-            os::CSys::StrFmt( zstr::EndOfString( szMsg ), sizeof( szMsg ) - zstr::Length( szMsg ), 
+            os::CSys::StrFmt( zstr::EndOfString( szMsg ), sizeof( szMsg ) - zstr::Length( szMsg ),
                               oexT( "%s(%lu) : Resized\n" ), pBh->ai[ 1 ].pFile, pBh->ai[ 1 ].uLine );
 
         if ( pBh->ai[ 2 ].pFile )
-            os::CSys::StrFmt( zstr::EndOfString( szMsg ), sizeof( szMsg ) - zstr::Length( szMsg ), 
+            os::CSys::StrFmt( zstr::EndOfString( szMsg ), sizeof( szMsg ) - zstr::Length( szMsg ),
                               oexT( "%s(%lu) : Freed\n" ), pBh->ai[ 2 ].pFile, pBh->ai[ 2 ].uLine );
 
         oexTRACE( szMsg );
@@ -106,7 +106,7 @@ oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUI
 {
     // If this asserts you didn't use the logging macro
     // Instead of Allocate, use OexAllocate
-    // Instead of New use OexNew 
+    // Instead of New use OexNew
     // Construct to OexConstruct
     // ConstructArray to OexConstructArray
     // etc...
@@ -120,7 +120,7 @@ oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUI
 
         // Maximum useable space for the block size
         x_uSize = uBlockSize - ( sizeof( oexUINT ) + ProtectAreaSize() );
-   
+
     // Ok, get the memory
     oexUCHAR *pBuf = (oexUCHAR*)os::CMem::New( uBlockSize, x_uLine, x_pFile );
     if ( !pBuf )
@@ -161,7 +161,7 @@ oexPVOID CAlloc::ReAlloc( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, 
 {
     // Do we have the space to resize?
     oexUINT uBlockSize = BlockSize( x_pBuf );
-    if ( uBlockSize < ( x_uNewSize + ProtectAreaSize() + sizeof( oexUINT ) ) ) 
+    if ( uBlockSize < ( x_uNewSize + ProtectAreaSize() + sizeof( oexUINT ) ) )
         return oexNULL;
 
     // Resize the protected memory area
@@ -179,7 +179,7 @@ oexPVOID CAlloc::VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSiz
 
     // Grab a pointer to the block header
     SBlockHeader *pBh = (SBlockHeader*)( pBuf - sizeof( SBlockHeader )
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
                                          - sizeof( m_ucUnderrunPadding )
 #endif
                                          );
@@ -199,8 +199,8 @@ oexPVOID CAlloc::VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSiz
 
     } // end if
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-	
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+
 	// Ensure overrun buffers match
 	// *** If this asserts, you probably over-ran the buffer!
 	//     i.e. buffer overflow
@@ -215,7 +215,7 @@ oexPVOID CAlloc::VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSiz
 	pBuf -= sizeof( m_ucUnderrunPadding );
 
 	// Ensure underrun buffers match / underflow protection
-	// *** If this asserts, you likely either under-ran the buffer, 
+	// *** If this asserts, you likely either under-ran the buffer,
     //     or the block before this one over ran
     if ( !oexVERIFY( !os::CSys::MemCmp( pBuf, m_ucUnderrunPadding, sizeof( m_ucUnderrunPadding ) ) ) )
 		return oexNULL;
@@ -243,7 +243,7 @@ oexPVOID CAlloc::ProtectMem( oexPVOID x_pBuf, oexUINT x_uSize, oexBOOL x_bUpdate
     oexUCHAR *pBuf = (oexUCHAR*)x_pBuf;
 
     // Grab a pointer to the block header
-    SBlockHeader *pBh = (SBlockHeader*)pBuf;    
+    SBlockHeader *pBh = (SBlockHeader*)pBuf;
 
     // Skip the allocation info
     pBuf += sizeof( SBlockHeader );
@@ -261,7 +261,7 @@ oexPVOID CAlloc::ProtectMem( oexPVOID x_pBuf, oexUINT x_uSize, oexBOOL x_bUpdate
     if ( x_bUpdate )
         pBh->uSize = x_uSize;
 
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )	
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 
     // Copy under-run padding
     if ( x_bUpdate )

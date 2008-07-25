@@ -878,10 +878,16 @@ namespace zstr
         }
 
     template< typename T >
+        oexUINT Append( T *dst, oexCONST T* src )
+        {   oexUINT uLenSrc = Length( src );
+        	oexUINT uLenDst = Length( dst );
+            return str::Append( dst, uLenDst, uLenDst + uLenSrc + 1, src, uLenSrc );
+        }
+
+    template< typename T >
         oexUINT Append( T *dst, oexINT sz_dst, oexCONST T* src )
         {   return str::Append( dst, Length( dst ), sz_dst, src, Length( src ) );
         }
-
 };
 
 

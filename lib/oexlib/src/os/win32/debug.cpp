@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -75,7 +75,7 @@ void CDebug::Trace( oexCSTR x_pStr )
 
 void CDebug::FmtTrace( oexCSTR x_pFmt, ... )
 {
-	oexVaList ap; oexVaStart( ap, x_pFmt );	
+	oexVaList ap; oexVaStart( ap, x_pFmt );
 	vFmtTrace( x_pFmt, ap );
 	oexVaEnd( ap );
 }
@@ -91,8 +91,8 @@ void CDebug::vFmtTrace( oexCSTR x_pFmt, oexVaList &x_pArgs )
 
 void CDebug::Break()
 {
-#ifdef _DEBUG
-		
+#ifdef oexDEBUG
+
 	_CrtDbgBreak();
 
 #else
@@ -111,22 +111,22 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 
 void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pModule, oexCSTR x_pStr )
 {
-#if defined( _DEBUG )
+#if defined( oexDEBUG )
 
 #if defined( oexUNICODE )
 
-	if ( 1 == _CrtDbgReport( _CRT_ASSERT, oexStrToStr8( x_pFile ).Ptr(), x_uLine, 
-                             oexStrToStr8( x_pModule ).Replace( '%', '.' ).Ptr(), 
+	if ( 1 == _CrtDbgReport( _CRT_ASSERT, oexStrToStr8( x_pFile ).Ptr(), x_uLine,
+                             oexStrToStr8( x_pModule ).Replace( '%', '.' ).Ptr(),
                              oexStrToStr8( x_pStr ).Ptr() ) )
 
 #else
 
-    if ( 1 == _CrtDbgReport( _CRT_ASSERT, x_pFile, x_uLine, x_pModule, 
+    if ( 1 == _CrtDbgReport( _CRT_ASSERT, x_pFile, x_uLine, x_pModule,
                              ( (CStr)x_pStr ).Replace( '%', '.' ).Ptr() ), x_pStr )
 
 #endif
 
-#else	
+#else
 
 	CStr str;
 

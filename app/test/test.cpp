@@ -52,7 +52,7 @@
 oex::oexRESULT TestAllocator()
 {
     // Veriry over-run / under-run protection
-#if defined( _DEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 
     char* pChar = OexAllocNew< char >( 100 );
 
@@ -1221,14 +1221,14 @@ oex::oexRESULT Test_CIpSocket()
     if ( !oexVERIFY( client.Connect( oexT( "localhost" ), 23456 ) ) )
         return -4;
 
-    if ( !oexVERIFY( server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, oexDEFAULT_TIMEOUT ) ) )
+    if ( !oexVERIFY( server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
         return -5;
 
     if ( !oexVERIFY( server.Accept( session ) ) )
         return -6;
 
-    if ( !oexVERIFY( session.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_TIMEOUT ) )
-         || !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_TIMEOUT ) ) )
+    if ( !oexVERIFY( session.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_WAIT_TIMEOUT ) )
+         || !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
         return -7;
 
     oex::oexCSTR pStr = oexT( "B6F5FF3D-E9A5-46ca-ADB8-D655427EB94D" );
@@ -1236,14 +1236,14 @@ oex::oexRESULT Test_CIpSocket()
     if ( !oexVERIFY( session.Send( oexStrToBin( pStr ) ) ) )
         return -8;
 
-    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eReadEvent, oexDEFAULT_TIMEOUT ) ) )
+    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eReadEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
         return -9;
 
     if ( !oexVERIFY( oexBinToStr( client.Recv() ) == pStr ) )
         return -10;
 
     client.Destroy();
-    if ( !oexVERIFY( session.WaitEvent( oex::os::CIpSocket::eCloseEvent, oexDEFAULT_TIMEOUT ) ) )
+    if ( !oexVERIFY( session.WaitEvent( oex::os::CIpSocket::eCloseEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
         return -11;
 
     session.Destroy();
@@ -1265,7 +1265,7 @@ oex::oexRESULT Test_CIpSocket()
     if ( !oexVERIFY( client.SendTo( oexStrToBin( pStr ) ) ) )
         return -15;
 
-    if ( !oexVERIFY( server.WaitEvent( oex::os::CIpSocket::eReadEvent, oexDEFAULT_TIMEOUT ) ) )
+    if ( !oexVERIFY( server.WaitEvent( oex::os::CIpSocket::eReadEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
         return -16;
 
     if ( !oexVERIFY( oexBinToStr( server.RecvFrom() ) == pStr ) )
@@ -1798,7 +1798,7 @@ oex::oexRESULT Test_CAutoSocket()
     // Start the server
     server.Queue( oexNULL, oexCall( oexT( "Bind" ), 23456 ) );
     oex::CDispatch::CMessage reply( server.Queue( oexNULL, oexCall( oexT( "Listen" ), 0 ) ) );
-    if ( !reply.Wait( oexDEFAULT_TIMEOUT ).IsDone() )
+    if ( !reply.Wait( oexDEFAULT_WAIT_TIMEOUT ).IsDone() )
         return -1;
 
     oex::os::CIpSocket client;
@@ -1806,7 +1806,7 @@ oex::oexRESULT Test_CAutoSocket()
     if ( !oexVERIFY( client.Connect( oexT( "localhost" ), 23456 ) ) )
         return -2;
 
-    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_TIMEOUT ) ) )
+    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
         return -3;
 
     oex::oexCSTR pStr = oexT( "779684C3-94CB-4b66-8C74-7ADC70BA1AC9" );
@@ -1814,7 +1814,7 @@ oex::oexRESULT Test_CAutoSocket()
     if ( !oexVERIFY( client.Send( oexStrToBin( pStr ) ) ) )
         return -4;
 
-    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eReadEvent, oexDEFAULT_TIMEOUT ) ) )
+    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eReadEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
         return -5;
 
     if ( !oexVERIFY( oexBinToStr( client.Recv() ) == pStr ) )
@@ -1924,9 +1924,9 @@ int main(int argc, char* argv[])
 
     TestAllocator();
 
-    TestFileMapping();
-
     TestStrings();
+
+    TestFileMapping();
 
     TestGuids();
 

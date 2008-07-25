@@ -121,6 +121,7 @@
 
 #define oexMemCmp					OEX_NAMESPACE::os::CSys::MemCmp
 #define oexMemCpy					OEX_NAMESPACE::os::CSys::MemCpy
+#define oexMemSet					OEX_NAMESPACE::os::CSys::MemSet
 
 #define oexINIT()                   OEX_NAMESPACE::COex::Init()
 #define oexUNINIT()                 OEX_NAMESPACE::COex::Uninit()

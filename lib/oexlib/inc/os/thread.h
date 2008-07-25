@@ -98,7 +98,7 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL Stop( oexBOOL x_bKill = oexTRUE, oexUINT x_uWait = oexDEFAULT_TIMEOUT );
+	virtual oexBOOL Stop( oexBOOL x_bKill = oexTRUE, oexUINT x_uWait = oexDEFAULT_WAIT_TIMEOUT );
 
 protected:
 
@@ -222,11 +222,11 @@ public:
     t_HTHREAD GetThreadHandle() { return m_hThread; }
 
     /// Waits for thread to initialize
-    oexBOOL WaitInit( oexUINT x_uTimeout = oexDEFAULT_TIMEOUT )
+    oexBOOL WaitInit( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
     {   return m_evInit.Wait( x_uTimeout ); }
 
     /// Waits for the thread to quit
-    oexBOOL WaitThreadStop( oexUINT x_uTimeout = oexDEFAULT_TIMEOUT )
+    oexBOOL WaitThreadStop( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
     {   return os::CSys::waitSuccess == os::CSys::WaitForSingleObject( m_hThread, x_uTimeout ); }
 
 protected:
