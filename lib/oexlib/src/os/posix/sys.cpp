@@ -420,14 +420,16 @@ oexINT CSys::WaitForMultipleObjects( oexUINT x_uObjects, CSys::t_WAITABLE *x_pHa
 
 oexULONG CSys::InterlockedIncrement( oexLONG *x_puVal )
 {
+	// +++ Need this functionality
 	//return ::InterlockedIncrement( x_puVal );
-	return (*x_puVal)++;
+	return ++(*x_puVal);
 }
 
 oexULONG CSys::InterlockedDecrement( oexLONG *x_puVal )
 {
+	// +++ Need this functionality
 //	return ::InterlockedDecrement( x_puVal );
-	return (*x_puVal)--;
+	return --(*x_puVal);
 }
 
 void CSys_SystemTimeToSTime( struct tm* tinfo, CSys::STime &t )
@@ -516,16 +518,6 @@ oexINT64 CSys::SystemTimeToFileTime( STime &x_st )
 	struct tm tinfo;
 	CSys_STimeToSystemTime( x_st, &tinfo );
 	return (oexINT64)mktime( &tinfo ) + FTOFF_1970;
-
-/*
-    SYSTEMTIME st;
-    CSys_STimeToSystemTime( x_st, st );
-
-    FILETIME ft;
-    ::SystemTimeToFileTime( &st, &ft );
-
-    return (oexINT64)ft.dwLowDateTime | ( (oexINT64)ft.dwHighDateTime << 32 );
-*/
 }
 
 /// Converts a file time to an STime structure
@@ -536,17 +528,6 @@ void CSys::FileTimeToSystemTime( STime &x_st, oexINT64 x_ft )
 	gmtime_r( &tTime, &tinfo );
 
 	CSys_SystemTimeToSTime( &tinfo, x_st );
-
-/*
-    FILETIME ft;
-    ft.dwLowDateTime = (oexINT32)( x_ft & 0xffffffff );
-    ft.dwHighDateTime = (oexINT32)( ( x_ft >> 32 ) & 0xffffffff );
-
-    SYSTEMTIME st;
-    ::FileTimeToSystemTime( &ft, &st );
-
-    CSys_SystemTimeToSTime( st, x_st );
-*/
 }
 
 
@@ -572,11 +553,25 @@ oexUINT CSys::MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen 
 	return mbstowcs( pDst, pSrc, uMax );
 }
 
-oexCSTR SetLocale( oexINT nCategory, oexCSTR pLocal )
+oexCSTR CSys::SetLocale( oexINT nCategory, oexCSTR pLocal )
 {
 //  +++ Resolve temporary string problem
 //	return setlocale( nCategory, oexStrToMbPtr( pLocal ) );
 	return oexT( "" );
+}
+
+/// printf function
+int CSys::printf( oexCSTR x_pFmt, ... )
+{
+	oexVaList ap; oexVaStart( ap, x_pFmt );
+	int ret = CSys::vprintf( x_pFmt, ap );
+	oexVaEnd( ap );
+	return ret;
+}
+
+/// vprintf
+int CSys::vprintf( oexCSTR x_pFmt, oexVaList &pArgs )
+{	return ::vprintf( x_pFmt, pArgs );
 }
 
 

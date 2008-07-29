@@ -44,32 +44,43 @@ oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uErr, oexUINT x_uL
 	if ( x_uLevel < m_uLevel )
 		return x_uErr;
 
-	// Create log file if needed
-	if ( !m_file.IsOpen() )
+	// Log count
+	if ( 1 == os::CSys::InterlockedIncrement( &m_lInLog ) )
 	{
-		// Open new log file
-		if ( !m_file.CreateNew( oexGetModulePath( oexT( "debug.log" ) ).Ptr() ).IsOpen() )
-			return x_uErr;
+		// Create log file if needed
+		if ( !m_file.IsOpen() )
+		{
+			// Show log file location
+			os::CSys::printf( oexGetModulePath( oexT( "debug.log\n" ) ).Ptr() );
 
-		// Create log header
-		m_file.Write( CStr().Fmt( oexT( "; Log file\r\n; Date : %s\r\n; Application : %s\r\n\r\n" ),
-								  oexStrToMbPtr( oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() ),
-								  oexStrToMbPtr( oexGetModuleFileName().Ptr() ) ) );
+			// Open new log file
+			if ( !m_file.CreateNew( oexGetModulePath( oexT( "debug.log" ) ).Ptr() ).IsOpen() )
+				return x_uErr;
+
+			// Create log header
+			m_file.Write( CStr().Fmt( oexT( "; Log file\r\n; Date : %s\r\n; Application : %s\r\n\r\n" ),
+									  oexStrToMbPtr( oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() ),
+									  oexStrToMbPtr( oexGetModuleFileName().Ptr() ) ) );
+
+		} // end if
+
+		// Do we have a source file name?
+		if ( x_pFile )
+			m_file.Write( CStr().Fmt( oexT( "%s:(%u) " ), oexStrToMbPtr( x_pFile ), x_nLine ) );
+
+		// Ensure error is not null
+		if ( !x_pErr )
+			x_pErr = oexT( "Unspecified" );
+
+		// Write out the log
+		m_file.Write( CStr().Fmt( oexT( "0x%X (%d) : %s\r\n\t%s\r\n" ),
+									 x_uErr, x_uErr, oexStrToMbPtr( x_pErr ),
+									 oexStrToMbPtr( os::CTrace::GetBacktrace( x_uSkip ).Replace( oexT( "\n" ), oexT( "\n\t" ) ).Ptr() ) ) );
 
 	} // end if
 
-	// Do we have a source file name?
-	if ( x_pFile )
-		m_file.Write( CStr().Fmt( oexT( "%s:(%u) " ), oexStrToMbPtr( x_pFile ), x_nLine ) );
-
-	// Ensure error is not null
-	if ( !x_pErr )
-		x_pErr = oexT( "Unspecified" );
-
-	// Write out the log
-	m_file.Write( CStr().Fmt( oexT( "0x%X (%d) : %s\r\n\t%s\r\n" ),
-							 	 x_uErr, x_uErr, oexStrToMbPtr( x_pErr ),
-							 	 oexStrToMbPtr( os::CTrace::GetBacktrace( x_uSkip ).Replace( oexT( "\n" ), oexT( "\n\t" ) ).Ptr() ) ) );
+	// Reduce log count
+	os::CSys::InterlockedDecrement( &m_lInLog );
 
 	return x_uErr;
 }

@@ -66,7 +66,12 @@ endif( WIN32 )
 # build
 #-------------------------------------------------------------------
 
+#add_library( imp_rt STATIC IMPORTED )
+#set_property( TARGET imp_rt PROPERTY
+#              IMPORTED_LOCATION /usr/lib/librt.a )
+
 target_link_libraries(
 						${project_name}
 						${CMAKE_CURRENT_BINARY_DIR}/../../../../lib/oexlib/bin/liboexlib_d.a
+						/usr/lib/librt.a
 					  )

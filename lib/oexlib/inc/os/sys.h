@@ -321,6 +321,12 @@ public:
 
 public:
 
+	/// printf function
+	static int printf( oexCSTR x_pFmt, ... );
+
+	/// vprintf
+	static int vprintf( oexCSTR x_pFmt, oexVaList &pArgs );
+
 };
 
 //==================================================================

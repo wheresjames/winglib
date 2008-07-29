@@ -232,7 +232,7 @@ public:
         	m_hShareHandle = x_hFile;
 
 		// Do we have a shared file handle?
-        if ( m_hShareHandle )
+        if ( IsShareHandle() )
 			m_hFile = os::CFMap::osCreateFileMapping( m_hShareHandle, (oexPVOID*)&m_pPtr, llSize, &llSize, x_uAccess, &m_bExisting );
 
 		else

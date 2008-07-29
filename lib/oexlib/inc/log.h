@@ -60,6 +60,7 @@ public:
     /// Default constructor
     CLog()
     {
+    	m_lInLog = 0;
     	m_uLevel = eWarning;
     }
 
@@ -135,6 +136,9 @@ public:
 	}
 
 private:
+
+	/// Flag to prevent re-entrant logging
+	oexLONG								m_lInLog;
 
 	/// Error reporting level
 	oexUINT								m_uLevel;

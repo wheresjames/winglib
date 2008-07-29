@@ -41,18 +41,21 @@ using namespace OEX_NAMESPACE::os;
 // Ensure size
 oexSTATIC_ASSERT( sizeof( CFMap::t_HFILEMAP ) == sizeof( FILE* ) );
 
-oexCONST CFMap::t_HFILEMAP CFMap::c_Failed = oexNULL;
+oexCONST CFMap::t_HFILEMAP CFMap::c_Failed = (oexCONST CFMap::t_HFILEMAP)-1;
 
 CFMap::t_HFILEMAP CFMap::osCreateFileMapping( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists )
 {
     // Sanity checks
     if ( !oexCHECK_PTR( x_pMem ) || CFMap::c_Failed == x_hFile )
+	{	oexERROR( -1, oexT( "Bad parameter" ) );
         return CFMap::c_Failed;
+	} // end if
 
-	FILE *fd = (FILE*)x_hFile;
-	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, (int)fd, 0 );
-	if ( !pMem || MAP_FAILED == pMem )
-	{	fclose( fd );
+	int fd = (int)x_hFile;
+	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, fd, 0 );
+	if ( c_Failed == pMem )
+	{	oexERROR( errno, CStr().Fmt( oexT( "mmap failed to allocate block : handle=%l, size=%l" ), fd, (int)x_llSize ) );
+		close( fd );
 		return oexNULL;
 	} // end if
 
@@ -69,7 +72,9 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 {
     // Sanity checks
     if ( !oexCHECK_PTR( x_pMem ) || !oexCHECK_PTR_NULL_OK( x_pName ) )
+	{	oexERROR( -1, oexT( "Bad parameter" ) );
         return CFMap::c_Failed;
+	} // end if
 
 	// Create path
 	CStr8 sPath;
@@ -82,12 +87,16 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 		// Convert name to multi-byte
 		CStr8 sName = oexStrToMb( x_pName );
 		if ( !sName.Length() )
+		{	oexERROR( -1, oexT( "file mapping name is zero length" ) );
 			return CFMap::c_Failed;
+		} // end if
 
 		// Attempt to allocate space
 		oexSTR8 pPath = sPath.OexAllocate( sName.Length() + PATH_MAX * 2 );
 		if ( !pPath )
+		{	oexERROR( errno, oexT( "Error allocating memory for file path string" ) );
 			return CFMap::c_Failed;
+		} // end if
 
 		// Attempt to create a temporary file
 //		zstr::Copy( pPath, oexT( "/tmp/oex.tmp.XXXXXXXX" ) );
@@ -96,42 +105,70 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 //		mkstemp( sPath._Ptr() );
 
 		// Attempt to build a file name
-		zstr::Copy( pPath, "/tmp/oex.shared.016dc44e-1208-4a38-9a48-9f97df77250b." );
+		zstr::Copy( pPath, "/oex.mem.016dc44e-1208-4a38-9a48-9f97df77250b." );
+//		zstr::Copy( pPath, "/tmp/oex.shared." );
 		zstr::Append( pPath, sName.Ptr() );
 
 	} // end if
 
 	else
+	{	oexERROR( -1, oexT( "neither valid file or name specified" ) );
 		return CFMap::c_Failed;
+	} // end else
 
-//	FILE *fd = fopen( sPath.Ptr(), "w+b" );
-	FILE *fd = (FILE*)open( sPath.Ptr(), O_RDWR );
-	if ( !fd )
-		return CFMap::c_Failed;
-
-	// Set the file size
-	char buf[ 1024 ];
-	oexMemSet( buf, 0, sizeof( buf ) );
-
-	oexINT nSize = x_llSize;
-	while ( nSize )
+	// Attempt to open existing file
+	int fd = shm_open( sPath.Ptr(), O_RDWR, 0777 );
+	if ( (int)c_Failed == fd )
 	{
-		oexINT nWrite = nSize;
-		if ( nWrite > sizeof( buf ) )
-			nWrite = sizeof( buf );
+		// Create file
+		fd = shm_open( sPath.Ptr(), O_RDWR | O_CREAT, 0777 );
+		if ( (int)c_Failed == fd )
+		{	oexERROR( errno, CStr().Fmt( oexT( "open failed to open file : %s" ), oexStrToMbPtr( sPath.Ptr() ) ) );
+			return CFMap::c_Failed;
+		} // end if
 
-		write( (int)fd, buf, nWrite );
-		nSize -= nWrite;
+		// File did not exist
+		if ( x_pbAlreadyExists )
+			*x_pbAlreadyExists = oexFALSE;
 
-	} // end while
+		if ( -1 == ftruncate( fd, x_llSize ) )
+		{	oexERROR( errno, CStr().Fmt( oexT( "Unable to size shared memory file : %s : size=%d" ), oexStrToMbPtr( sPath.Ptr() ), (int)x_llSize ) );
+			shm_unlink( sPath.Ptr() );
+			return CFMap::c_Failed;
+		} // end if
 
+/*		// Set the file size
+		char buf[ 1024 ];
+		oexMemSet( buf, 0, sizeof( buf ) );
+
+		oexINT nSize = x_llSize;
+		while ( nSize )
+		{
+			oexINT nWrite = nSize;
+			if ( nWrite > sizeof( buf ) )
+				nWrite = sizeof( buf );
+
+			write( fd, buf, nWrite );
+			nSize -= nWrite;
+
+		} // end while
+*/
+	} // end if
+
+	// File already existed
+	else if ( x_pbAlreadyExists )
+		*x_pbAlreadyExists = oexTRUE;
 
 	// Map memory
-	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, (int)fd, 0 );
-	if ( !pMem || MAP_FAILED == pMem )
-	{	fclose( fd );
+	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, fd, 0 );
+	if ( c_Failed == pMem )
+	{	oexERROR( errno, CStr().Fmt( oexT( "mmap failed to allocate block : size=%l" ), (int)x_llSize ) );
+		shm_unlink( sPath.Ptr() );
 		return CFMap::c_Failed;
 	} // end if
+
+	// Go ahead and unlink
+	shm_unlink( sPath.Ptr() );
 
 	if ( x_pMem )
 		*x_pMem = pMem;
@@ -211,17 +248,9 @@ oexBOOL CFMap::osReleaseFileMapping( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pM
 		munmap( x_pMem, x_llSize );
 
 	if ( c_Failed != x_hFileMap && oexCHECK_PTR( x_hFileMap ) )
-		fclose( (FILE*)x_hFileMap );
+	;
+//		shm_unlink( (int)x_hFileMap );
+//		close( (int)x_hFileMap );
 
 	return oexTRUE;
-
-
-/*	if ( x_pMem && oexCHECK_PTR( x_pMem ) )
-		UnmapViewOfFile( (LPCVOID)x_pMem );
-
-	if ( c_Failed != x_hFileMap && oexCHECK_PTR( x_hFileMap ) )
-		CloseHandle( (HANDLE)x_hFileMap );
-
-	return oexTRUE;
-*/
 }

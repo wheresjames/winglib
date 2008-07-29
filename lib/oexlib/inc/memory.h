@@ -207,7 +207,7 @@ public:
         Delete();
 
         // Shared memory?
-        if ( m_fm.GetName() || m_fm.GetShareHandle() )
+        if ( m_fm.GetName() || m_fm.IsShareHandle() )
 
             // Create memory mapping
             m_fm.Create( x_bConstructed, oexNULL, oexNULL, oexNULL, x_uSize );

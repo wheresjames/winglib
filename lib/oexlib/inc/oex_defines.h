@@ -34,7 +34,7 @@
 
 #pragma once
 
-#define oexSUCCEEDED( r )			( 0 <= r )
+#define oexPASSED( r )				( 0 <= r )
 #define oexFAILED( r )				( 0 > r )
 
 #define oexCONST					const

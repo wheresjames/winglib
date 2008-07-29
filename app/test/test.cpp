@@ -349,8 +349,8 @@ oex::oexRESULT TestStrings()
 //        str1.Length();
 
 		// Buffer under-run protection test
-//        oex::oexSTR pOvPtr = str1.Allocate( 4 );
-//        pOvPtr--; *pOvPtr = 1;
+//        oex::oexSTR pUnPtr = str1.Allocate( 4 );
+//        pUnPtr--; *pUnPtr = 1;
 
     if ( !oexVERIFY_PTR( pStr = str1.OexAllocate( 12 ) ) )
         return -1;
