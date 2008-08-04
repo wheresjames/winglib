@@ -68,6 +68,9 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( CFMap::t_HFILEMAP x_hFile, oexPVOI
 	return (t_HFILEMAP)fd;
 }
 
+// +++ Total hack, and currently not thread safe, replace soon please!!!
+static TAssoList< oexINT, CStr8 > g_lstFileMappingInfo;
+
 CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, oexCSTR x_pName, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists )
 {
     // Sanity checks
@@ -105,7 +108,7 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 //		mkstemp( sPath._Ptr() );
 
 		// Attempt to build a file name
-		zstr::Copy( pPath, "/oex.mem.016dc44e-1208-4a38-9a48-9f97df77250b." );
+		zstr::Copy( pPath, "/oex.mem.027ed44e-1208-4a38-9a48-9f97df77250b." );
 //		zstr::Copy( pPath, "/tmp/oex.shared." );
 		zstr::Append( pPath, sName.Ptr() );
 
@@ -115,6 +118,9 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 	{	oexERROR( -1, oexT( "neither valid file or name specified" ) );
 		return CFMap::c_Failed;
 	} // end else
+
+	// Assume doesn't exist
+	oexBOOL bExists = oexFALSE;
 
 	// Attempt to open existing file
 	int fd = shm_open( sPath.Ptr(), O_RDWR, 0777 );
@@ -127,37 +133,17 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 			return CFMap::c_Failed;
 		} // end if
 
-		// File did not exist
-		if ( x_pbAlreadyExists )
-			*x_pbAlreadyExists = oexFALSE;
-
 		if ( -1 == ftruncate( fd, x_llSize ) )
 		{	oexERROR( errno, CStr().Fmt( oexT( "Unable to size shared memory file : %s : size=%d" ), oexStrToMbPtr( sPath.Ptr() ), (int)x_llSize ) );
 			shm_unlink( sPath.Ptr() );
 			return CFMap::c_Failed;
 		} // end if
 
-/*		// Set the file size
-		char buf[ 1024 ];
-		oexMemSet( buf, 0, sizeof( buf ) );
-
-		oexINT nSize = x_llSize;
-		while ( nSize )
-		{
-			oexINT nWrite = nSize;
-			if ( nWrite > sizeof( buf ) )
-				nWrite = sizeof( buf );
-
-			write( fd, buf, nWrite );
-			nSize -= nWrite;
-
-		} // end while
-*/
 	} // end if
 
 	// File already existed
-	else if ( x_pbAlreadyExists )
-		*x_pbAlreadyExists = oexTRUE;
+	else
+		bExists = oexTRUE;
 
 	// Map memory
 	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, fd, 0 );
@@ -167,14 +153,25 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 		return CFMap::c_Failed;
 	} // end if
 
+	// Ensure ref count is not zero for existing memory
+//	if ( bExists && !CAlloc::GetRefCount( pMem ) )
+//		bExists = oexFALSE;
+
 	// Go ahead and unlink
-	shm_unlink( sPath.Ptr() );
+//	shm_unlink( sPath.Ptr() );
+
+	// Add file mapping name to list
+	g_lstFileMappingInfo[ fd ] = sPath;
 
 	if ( x_pMem )
 		*x_pMem = pMem;
 
 	if ( x_pllSize )
 		*x_pllSize = x_llSize;
+
+	// Save exists flag
+	if ( x_pbAlreadyExists )
+		*x_pbAlreadyExists = bExists;
 
 	return (t_HFILEMAP)fd;
 
@@ -242,13 +239,25 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 
 oexBOOL CFMap::osReleaseFileMapping( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexINT64 x_llSize )
 {
-	return oexFALSE;
-
+	// Do we have a valid memory pointer
 	if ( x_pMem && oexCHECK_PTR( x_pMem ) )
+
+		// Unmap the memory
 		munmap( x_pMem, x_llSize );
 
-	if ( c_Failed != x_hFileMap && oexCHECK_PTR( x_hFileMap ) )
-	;
+	// Unlink
+	if ( c_Failed != x_hFileMap )
+	{
+		// Attempt to retrieve path
+		CStr8 sPath = g_lstFileMappingInfo[ (int)x_hFileMap ];
+
+		// Unlink this name
+		if ( sPath.Length() )
+			shm_unlink( sPath.Ptr() );
+
+	} // end if
+
+
 //		shm_unlink( (int)x_hFileMap );
 //		close( (int)x_hFileMap );
 

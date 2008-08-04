@@ -43,6 +43,8 @@
     private:
         CTestMonitor        *m_pMon;
         oex::oexBOOL         m_bConstructed;
+
+    public:
         oex::oexUINT         m_uValue;
     };
 
@@ -274,18 +276,19 @@ oex::oexRESULT TestFileMapping()
     CTestMonitor tm;
     oex::TMem< CBaseTestObject > mm, mm2;
 
-    if ( !oexVERIFY(  mm.SetName( oexT( "Name" ) ).Construct( &tm ).Ptr() ) )
+    if ( !oexVERIFY(  mm.SetName( oexT( "Name" ) ).OexConstruct( &tm ).Ptr() ) )
         return -8;
 
-    mm.Ptr()->SetValue( 111 );
+//    mm->SetValue( 111 );
+    mm->m_uValue = 111;
 
-    if ( !oexVERIFY( mm2.SetName( oexT( "Name" ) ).Construct( &tm ).Ptr() ) )
+    if ( !oexVERIFY( mm2.SetName( oexT( "Name" ) ).OexConstruct( &tm ).Ptr() ) )
         return -9;
 
     if ( !oexVERIFY( 1 == tm.m_uConstructed ) )
         return -12;
 
-    if ( !oexVERIFY( 111 == mm2.Ptr()->GetValue() ) )
+    if ( !oexVERIFY( 111 == mm2->GetValue() ) )
         return -9;
 
     mm.Delete();
@@ -300,6 +303,27 @@ oex::oexRESULT TestFileMapping()
 
     return oex::oexRES_OK;
 }
+
+/*
+class Wangle
+{ 	public:
+		int i;
+		bool operator == ( Wangle &x ) { return x.i == i; }
+		bool operator != ( Wangle &x ) { return x.i == i; }
+		bool operator == ( int x ) { return x == i; }
+};
+
+void Function( Wangle wangle )
+{
+	Wangle i, x;
+	if ( i == 0 )
+		Wangle i;
+
+	else
+		wangle != x;
+
+} // end wangle()
+*/
 
 oex::oexRESULT TestGuids()
 {
@@ -796,7 +820,7 @@ oex::oexRESULT TestAssoLists()
 			|| !oexVERIFY( alss2[ oexT( "Idx 4" ) ].ToDouble() < 4 ) )
 		return -10;
 
-	oex::TAssoList< oex::CStr, oex::CStr > alss3 = alss2;//.Copy();
+	oex::TAssoList< oex::CStr, oex::CStr > alss3 = alss2.Copy();
 
 	if ( !oexVERIFY( 4 == alss2.Size() ) || !oexVERIFY( 4 == alss3.Size() ) )
 		return -11;

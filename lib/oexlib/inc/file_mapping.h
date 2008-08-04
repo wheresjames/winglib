@@ -257,6 +257,10 @@ public:
         *(oexUINT*)m_pPtr = (oexUINT)llSize;
         m_pPtr += sizeof( oexUINT );
 
+		// Look for abandoned blocks ( this mostly for Linux )
+		if ( m_bExisting && !CAlloc::GetRefCount( CAlloc::RawToPtr( m_pPtr ) ) )
+			m_bExisting = oexFALSE;
+
         // Protect memory area
         m_pPtr = (T*)CAlloc::ProtectMem( m_pPtr, (oexUINT)x_llSize, !m_bExisting );
 
@@ -280,7 +284,7 @@ public:
 	/// Returns a pointer to the file mapping memory
 	operator T*() { return m_pPtr; }
 
-	//===================================m_llOpenSize===========================
+	//==============================================================
 	// Ptr()
 	//==============================================================
 	/// Returns a pointer to the file mapping memory
@@ -418,6 +422,5 @@ private:
 
 	/// External file handle for share
 	os::CFMap::t_HFILEMAP		m_hShareHandle;
-
 };
 

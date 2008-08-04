@@ -223,6 +223,28 @@ public:
                                   ) )->uFlags;
     }
 
+	/// Returns the data pointer from the raw allocation pointer
+	static inline oexCPVOID RawToPtr( oexCPVOID x_pRaw )
+	{
+        return ( (oexUCHAR*)x_pRaw
+                            + sizeof( SBlockHeader )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+                            + sizeof( m_ucUnderrunPadding )
+#endif
+							);
+	}
+
+	/// Returns the raw allocation pointer from the data pointer
+	static inline oexCPVOID PtrToRaw( oexCPVOID x_pBuf )
+	{
+        return ( (oexUCHAR*)x_pBuf
+                            - sizeof( SBlockHeader )
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+                            - sizeof( m_ucUnderrunPadding )
+#endif
+							);
+	}
+
     /// Returns the reference count
     /**
         \param [in] x_pBuf  -   Protected memory pointer

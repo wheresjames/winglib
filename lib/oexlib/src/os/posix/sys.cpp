@@ -204,22 +204,22 @@ oexUINT64 CSys::StrToUInt64( oexCSTR8 x_pStr, oexUINT x_uRadix )
 oexLONG CSys::StrToLong( oexCSTR8 x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return strtol( x_pStr, NULL, x_uRadix );
-	return 0;
+	return strtol( x_pStr, NULL, x_uRadix );
+//	return 0;
 }
 
 oexULONG CSys::StrToULong( oexCSTR8 x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return strtoul( x_pStr, NULL, x_uRadix );
-	return 0;
+	return strtoul( x_pStr, NULL, x_uRadix );
+//	return 0;
 }
 
 oexDOUBLE CSys::StrToDouble( oexCSTR8 x_pStr )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return strtod( x_pStr, NULL );
-	return 0;
+	return strtod( x_pStr, NULL );
+//	return 0;
 }
 
 // **** Unicode
