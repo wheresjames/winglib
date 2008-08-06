@@ -1095,7 +1095,11 @@ oex::oexRESULT TestFile()
     oex::CStr sFileName, sContents = oexT( "Safe to delete this file." );
 
     // Create file name
+#if defined( OEX_WIN32 )
     sFileName << oexT( "C:/" ) << oex::CStr().GuidToString() << oexT( ".txt" );
+#else
+    sFileName << oexT( "/tmp/" ) << oex::CStr().GuidToString() << oexT( ".txt" );
+#endif
 
     if ( !oexVERIFY( f.CreateNew( sFileName.Ptr() ).IsOpen() ) )
         return -1;
@@ -1970,13 +1974,13 @@ int main(int argc, char* argv[])
 
     Test_CCircBuf();
 
-    Test_CIpAddress();
-
-    Test_CIpSocket();
-
     Test_CFifoSync();
 
     Test_CDataPacket();
+
+    Test_CIpAddress();
+
+    Test_CIpSocket();
 
 //	Test_MsgParams();
 

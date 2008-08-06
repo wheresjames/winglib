@@ -165,16 +165,16 @@ public:
 	/// Reads data from file
 	/**
 		\param [out] x_pBuf			-	Receives data read from file
-		\param [in]  x_uSize		-	Size of buffer in x_pBuf
-		\param [out] x_puRead		-	Receives number of bytes read
+		\param [in]  x_llSize		-	Size of buffer in x_pBuf
+		\param [out] x_pllRead		-	Receives number of bytes read
 
 		\return Non-zero if success
 
 		\see
 	*/
-    oexBOOL Read( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead = oexNULL )
+    oexBOOL Read( oexPVOID x_pBuf, oexINT64 x_llSize, oexINT64 *x_pllRead = oexNULL )
     {   if ( os::CBaseFile::vInvalid() == m_hFile ) return oexFALSE;
-        return os::CBaseFile::Read( m_hFile, x_pBuf, x_uSize, x_puRead, &m_uLastError );
+        return os::CBaseFile::Read( m_hFile, x_pBuf, x_llSize, x_pllRead, &m_uLastError );
     }
 
 	//==============================================================
@@ -188,7 +188,7 @@ public:
 
 		\see
 	*/
-    CStr8 Read( oexUINT x_uSize = 0 );
+    CStr8 Read( oexINT64 x_llSize = 0 );
 
 	//==============================================================
 	// Write()
@@ -203,9 +203,9 @@ public:
 
 		\see
 	*/
-    oexBOOL Write( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puWritten = oexNULL )
+    oexBOOL Write( oexCPVOID x_pBuf, oexINT64 x_llSize, oexINT64 *x_pllWritten = oexNULL )
     {   if ( os::CBaseFile::vInvalid() == m_hFile ) return oexFALSE;
-        return os::CBaseFile::Write( m_hFile, x_pBuf, x_uSize, x_puWritten, &m_uLastError );
+        return os::CBaseFile::Write( m_hFile, x_pBuf, x_llSize, x_pllWritten, &m_uLastError );
     }
 
 	//==============================================================
@@ -219,8 +219,8 @@ public:
 
 		\see
 	*/
-    oexBOOL Write( oexCONST CStr8 x_sStr, oexUINT *x_puWritten = oexNULL )
-    {   return Write( x_sStr.Ptr(), x_sStr.LengthInBytes(), x_puWritten );
+    oexBOOL Write( oexCONST CStr8 x_sStr, oexINT64 *x_pllWritten = oexNULL )
+    {   return Write( x_sStr.Ptr(), x_sStr.LengthInBytes(), x_pllWritten );
     }
 
 	//==============================================================
@@ -234,8 +234,8 @@ public:
 
 		\see
 	*/
-    oexBOOL Write( oexCONST CStrW x_sStr, oexUINT *x_puWritten = oexNULL )
-    {   return Write( CStr8().ToMb( x_sStr ), x_puWritten );
+    oexBOOL Write( oexCONST CStrW x_sStr, oexINT64 *x_pllWritten = oexNULL )
+    {   return Write( CStr8().ToMb( x_sStr ), x_pllWritten );
     }
 
     /// File write operator
@@ -337,8 +337,8 @@ public:
 	/// Finds the specified string of characters in the file
 	/**
 		\param [in]	x_pStr	- Pointer to the sequence of characters to find
-		\param [in] x_uLen	- The number of characters in x_pStr
-		\param [in] x_uMax	- The maximum number of characters to search from
+		\param [in] x_llLen	- The number of characters in x_pStr
+		\param [in] x_llMax	- The maximum number of characters to search from
 							  the current file pointer position.  If set to
 							  zero or less, search continues until the end of
 							  the file is reached.
@@ -348,7 +348,7 @@ public:
 				pointer to the start of the string.  If the string is not found
 				the function returns -1 and the file pointer is not changed.
 	*/
-	oexINT64 FindInFile( oexPVOID x_pStr, oexUINT x_uLen, oexINT64 x_llMax = 0 );
+	oexINT64 FindInFile( oexPVOID x_pStr, oexINT64 x_llLen, oexINT64 x_llMax = 0 );
 
 public:
 

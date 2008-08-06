@@ -144,16 +144,16 @@ public:
     {   return c_Invalid; }
 
 	/// Writes data to a file handle
-    static oexBOOL Write( t_HFILE hFile, oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puWritten, oexUINT *x_puErr );
+    static oexBOOL Write( t_HFILE x_hFile, oexCPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllWritten, oexUINT *x_puErr );
 
 	/// Reads data from a file handle
-    static oexBOOL Read( t_HFILE hFile, oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, oexUINT *x_puErr );
+    static oexBOOL Read( t_HFILE x_hFile, oexPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllRead, oexUINT *x_puErr );
 
 	/// Returns the size of the specified file
     static oexINT64 Size( t_HFILE hFile );
 
 	/// Sets the file pointer
-    static oexINT64 SetPointer( t_HFILE hFile, oexINT64 llMove, oexINT nMethod );
+    static oexINT64 SetPointer( t_HFILE x_hFile, oexINT64 llMove, oexINT nMethod );
 
 	/// Removes the specified folder
     static oexBOOL RemoveFolder( oexCSTR x_pDir );

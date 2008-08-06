@@ -320,11 +320,11 @@ public:
 		\endcode
 
 	*/
-	TAssoList( TAssoList &x_rList )
+	TAssoList( oexCONST TAssoList &x_rList )
 	{	m_uTableSize = 0;
 		m_uTableBits = 0;
 		m_uTableMask = 0;
-		Attach( x_rList );
+		Attach( (TAssoList&)x_rList );
 	}
 
 

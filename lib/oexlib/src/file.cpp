@@ -52,21 +52,25 @@ oexBOOL CFile::Destroy()
     return bRet;
 }
 
-CStr8 CFile::Read( oexUINT x_uSize )
+CStr8 CFile::Read( oexINT64 x_llSize )
 {
     oexINT64 llSize = Size();
-    if ( x_uSize == 0 || x_uSize > llSize )
-        x_uSize = (oexUINT)llSize;
+    if ( x_llSize == 0 || x_llSize > llSize )
+        x_llSize = (oexUINT)llSize;
+
+	// Punt if no
+	if ( !x_llSize )
+		return oexEMPTY_STRING;
 
     CStr8 str;
-    if ( !str.OexAllocate( x_uSize ) )
-        return oexFALSE;
+    if ( !str.OexAllocate( x_llSize ) )
+        return oexEMPTY_STRING;
 
-    oexUINT uRead = 0;
-    oexBOOL bRet = Read( str._Ptr(), x_uSize, &uRead );
+    oexINT64 llRead = 0;
+    oexBOOL bRet = Read( str._Ptr(), x_llSize, &llRead );
 
     if ( !bRet ) str.Destroy();
-    else str.SetLength( uRead );
+    else str.SetLength( llRead );
 
     return str;
 }
@@ -120,48 +124,48 @@ oexBOOL CFile::CreatePath( oexCSTR x_pPath )
     return oexTRUE;
 }
 
-oexINT64 CFile::FindInFile( oexPVOID x_pStr, oexUINT x_uLen, oexINT64 x_llMax )
+oexINT64 CFile::FindInFile( oexPVOID x_pStr, oexINT64 x_llLen, oexINT64 x_llMax )
 {
-	if ( !x_pStr || !x_uLen || ( x_llMax > 0 && x_llMax < x_uLen ) )
+	if ( !x_pStr || !x_llLen || ( x_llMax > 0 && x_llMax < x_llLen ) )
 		return -1;
 
 	TMem< char > buf;
-	if ( !buf.OexNew( x_uLen + 1024 ).Ptr() )
+	if ( !buf.OexNew( x_llLen + 1024 ).Ptr() )
 		return -1;
 
 	// Restore file position after this
 	CFile::CRestoreFilePos rfp( this );
 
 	// First just check to see if we're there already
-	oexUINT uRead = 0;
-	if ( !Read( buf.Ptr(), x_uLen, &uRead ) || uRead != x_uLen )
+	oexINT64 llRead = 0;
+	if ( !Read( buf.Ptr(), x_llLen, &llRead ) || llRead != x_llLen )
 		return -1;
 
 	// Current position if it matches
-	if ( !oexMemCmp( x_pStr, buf.Ptr(), x_uLen ) )
+	if ( !oexMemCmp( x_pStr, buf.Ptr(), x_llLen ) )
 		return rfp.Get();
 
-	oexUINT uSize = buf.Size();
-	if ( !Read( buf.Ptr( x_uLen ), uSize - x_uLen, &uRead ) || !uRead )
+	oexINT64 llSize = buf.Size();
+	if ( !Read( buf.Ptr( x_llLen ), llSize - x_llLen, &llRead ) || !llRead )
 		return -1;
 
-	uSize = uRead + x_uLen;
+	llSize = llRead + x_llLen;
 	oexINT64 llFile = 0;
-	while ( uSize >= x_uLen )
+	while ( llSize >= x_llLen )
 	{
 		// Check for string
-		oexUINT i;
-		for ( i = 0; ( uSize - i ) >= x_uLen; i++ )
-			if ( !oexMemCmp( x_pStr, buf.Ptr( i ), x_uLen ) )
+		oexINT64 i;
+		for ( i = 0; ( llSize - i ) >= x_llLen; i++ )
+			if ( !oexMemCmp( x_pStr, buf.Ptr( i ), x_llLen ) )
 				return rfp.Set( llFile + i );
 
 		// Get more data from file
-		oexMemCpy( buf.Ptr(), buf.Ptr( i ), uSize - i );
-		if ( !Read( buf.Ptr( uSize - i ), i, &uRead ) || !uRead )
+		oexMemCpy( buf.Ptr(), buf.Ptr( i ), llSize - i );
+		if ( !Read( buf.Ptr( llSize - i ), i, &llRead ) || !llRead )
 			return -1;
 
 		// New buffer size
-		uSize = ( uSize - i ) + uRead;
+		llSize = ( llSize - i ) + llRead;
 		llFile += i;
 
 	} // end while

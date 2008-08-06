@@ -115,6 +115,9 @@ public:
 	*/
 	oexBOOL Lock( oexULONG x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
 	{
+		oexTRACE( oexT( "Lock not implemented!\n" ) );
+		return oexTRUE;
+
         m_bLocked = ( os::CSys::waitSuccess == os::CSys::WaitForSingleObject( m_hMutex, x_uTimeout ) );
 
 		if ( m_bLocked )
@@ -335,7 +338,7 @@ public:
     {
 		// Close event handle
 		void* hTemp = m_hEvent;
-        m_hEvent = os::CEvent::vInvalid();
+        m_hEvent = os::CResource::cInvalid();
 		if ( hTemp )
             os::CEvent::osDestroyEvent( hTemp );
     }
@@ -408,7 +411,7 @@ public:
     /// Detaches from event handle
     os::CEvent::t_EVENT Detach()
     {   os::CEvent::t_EVENT hEvent = m_hEvent;
-        m_hEvent = os::CEvent::vInvalid();
+        m_hEvent = os::CResource::cInvalid();
         return hEvent;
     }
 

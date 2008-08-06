@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -80,7 +80,7 @@
 
 */
 //==================================================================
-class CCircBuf  
+class CCircBuf
 {
 public:
 
@@ -112,7 +112,7 @@ protected:
     /// Sets the shared memory name for sync events
     /**
         \param [in] x_pName -   Shared memory base name
-        
+
     */
     oexBOOL NameEvents( oexCSTR x_pBaseName );
 
@@ -127,12 +127,12 @@ public:
         \param [in] x_uLen  -   Length of the string in x_pName.
                                 Can be zero if the string is
                                 NULL terminated.
-        
+
     */
     virtual oexCSTR SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
     {   NameEvents( x_pName );
-        m_memBuffer.SetName( x_pName, x_uLen ); 
-        return x_pName; 
+        m_memBuffer.SetName( x_pName, x_uLen );
+        return x_pName;
     }
 
 	//==============================================================
@@ -148,10 +148,10 @@ public:
 	// Init()
 	//==============================================================
 	/// Initializes the circular buffer
-	/**		
+	/**
 		\return Non-zero if success.
-	
-		\see 
+
+		\see
 	*/
 	oexBOOL Init();
 
@@ -160,26 +160,26 @@ public:
 	//==============================================================
 	/// Waits for data to be written to the circular buffer
 	/**
-		\param [in] x_uTimeout	-	Maximum number of milliseconds to wait for data. 
-		
+		\param [in] x_uTimeout	-	Maximum number of milliseconds to wait for data.
+
 		\return Non-zero if data was received before timeout expired.
-	
-		\see 
+
+		\see
 	*/
-	oexBOOL WaitData( oexUINT x_uTimeout = os::CEvent::vInfinite() );
+	oexBOOL WaitData( oexUINT x_uTimeout = os::CResource::cInfinite() );
 
 	//==============================================================
 	// WaitEmpty()
 	//==============================================================
 	/// Waits for the buffer to become empty
 	/**
-		\param [in] x_uTimeout	-	Maximum number of milliseconds to wait for data. 
-		
+		\param [in] x_uTimeout	-	Maximum number of milliseconds to wait for data.
+
 		\return Non-zero if data was received before timeout expired.
-	
-		\see 
+
+		\see
 	*/
-	oexBOOL WaitEmpty( oexUINT x_uTimeout = os::CEvent::vInfinite() );
+	oexBOOL WaitEmpty( oexUINT x_uTimeout = os::CResource::cInfinite() );
 
 	//==============================================================
 	// GetWriteView()
@@ -191,19 +191,19 @@ public:
 		\param [in] x_uSize		-	Total size of data segment
 		\param [out] x_ppucBuf	-	Pointer receives pointer to start of view
 		\param [out] x_puSize	-	Receives the size of this view.
-		
+
 		To view all of data segment, call with dwView set to 0, increment
 		on each call until GetWriteView() returns zero.
 
 		\return Non-zero if success.
-	
+
 		\see GetReadView
 	*/
 	oexBOOL GetWriteView( oexUINT x_uView, oexUINT x_uOffset, oexUINT x_uSize, oexUCHAR **x_ppucBuf, oexUINT *x_puSize )
-	{	
+	{
         if ( !m_pBi )
             return oexFALSE;
-        return GetView( x_uView, NormalizePtr( m_pBi->uWritePtr + x_uOffset, m_uSize ), x_uSize, m_pBuf, m_uSize, x_ppucBuf, x_puSize ); 
+        return GetView( x_uView, NormalizePtr( m_pBi->uWritePtr + x_uOffset, m_uSize ), x_uSize, m_pBuf, m_uSize, x_ppucBuf, x_puSize );
     }
 
 	//==============================================================
@@ -216,20 +216,20 @@ public:
 		\param [in] x_uSize		-	Total size of data segment
 		\param [out] x_ppucBuf	-	Pointer receives pointer to start of view
 		\param [out] x_puSize	-	Receives the size of this view.
-		
+
 		To view all of data segment, call with dwView set to 0, increment
 		on each call until GetReadView() returns zero.
 
 		\return Non-zero if success.
-	
+
 		\see GetWriteView
 	*/
 	oexBOOL GetReadView( oexUINT x_uView, oexUINT x_uOffset, oexUINT x_uSize, oexUCHAR **x_ppucBuf, oexUINT *x_puSize )
-	{   
-        if ( !m_pBi ) 
+	{
+        if ( !m_pBi )
             return oexFALSE;
 
-        return GetView( x_uView, NormalizePtr( m_pBi->uReadPtr + x_uOffset, m_uSize ), x_uSize, m_pBuf, m_uSize, x_ppucBuf, x_puSize ); 
+        return GetView( x_uView, NormalizePtr( m_pBi->uReadPtr + x_uOffset, m_uSize ), x_uSize, m_pBuf, m_uSize, x_ppucBuf, x_puSize );
     }
 
 	//==============================================================
@@ -239,12 +239,12 @@ public:
 	/**
 		\param [in] x_uPtr	-	Pointer position
 		\param [in] x_uMax	-	Maximum buffer position
-		
+
 		The pointer may point to the byte after the buffer, this wraps it
 
 		\return Returns dwPtr wrapped to dwMax
-	
-		\see 
+
+		\see
 	*/
 	oexUINT NormalizePtr( oexUINT x_uPtr, oexUINT x_uMax );
 
@@ -254,20 +254,20 @@ public:
 	/// Advances the read pointer
 	/**
 		\param [in] x_lStep	-	Number of bytes to advance read pointer.
-		
+
 		\return Non-zero if success, otherwise zero.
-	
-		\see 
+
+		\see
 	*/
 	oexBOOL AdvanceReadPtr( oexLONG x_lStep )
 	{   CTlLocalLock ll( &m_lock );
-		if ( !ll.IsLocked() ) 
-            return oexFALSE;		
+		if ( !ll.IsLocked() )
+            return oexFALSE;
         if ( !m_pBi )
             return oexFALSE;
-		if ( !GetMaxRead() ) 
+		if ( !GetMaxRead() )
             return oexFALSE;
-		m_pBi->uReadPtr = NormalizePtr( AdvancePtr( m_pBi->uReadPtr, x_lStep, m_uSize ), m_uSize ); 
+		m_pBi->uReadPtr = NormalizePtr( AdvancePtr( m_pBi->uReadPtr, x_lStep, m_uSize ), m_uSize );
 		Defrag();
 		return oexTRUE;
 	}
@@ -278,23 +278,23 @@ public:
 	/// Advances the write pointer
 	/**
 		\param [in] x_lStep	-	Number of bytes to advance write pointer
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
 	oexBOOL AdvanceWritePtr( oexLONG x_lStep )
 	{	CTlLocalLock ll( &m_lock );
-		if ( !ll.IsLocked() ) 
-            return oexFALSE;		
+		if ( !ll.IsLocked() )
+            return oexFALSE;
         if ( !m_pBi )
             return oexFALSE;
-		if ( !GetMaxWrite() ) 
+		if ( !GetMaxWrite() )
             return oexFALSE;
 		m_pBi->uWritePtr = AdvancePtr( m_pBi->uWritePtr, x_lStep, m_uSize );
 		return oexTRUE;
 	}
-	
+
 	//==============================================================
 	// AdvancePtr()
 	//==============================================================
@@ -303,10 +303,10 @@ public:
 		\param [in] x_uPtr	-	Current pointer value
 		\param [in] x_lStep	-	Amount to add to pointer
 		\param [in] x_uMax	-	Maximum size of buffer
-		
+
 		\return New pointer value
-	
-		\see 
+
+		\see
 	*/
 	static oexUINT AdvancePtr( oexUINT x_uPtr, oexLONG x_lStep, oexUINT x_uMax );
 
@@ -322,10 +322,10 @@ public:
 		\param [in] x_uMax		-	Size of the buffer
 		\param [out] x_pucBuf	-	Pointer to start of view
 		\param [out] x_puSize	-	Size of this view segment.
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
 	static oexBOOL GetView( oexUINT x_uView, oexUINT x_uPtr, oexUINT x_uSize, oexUCHAR *x_pucRing, oexUINT x_uMax, oexUCHAR **x_pucBuf, oexUINT *x_puSize );
 
@@ -344,17 +344,17 @@ public:
 	//==============================================================
 	/// Ensures space is available for write by growing buffer if needed.
 	/**
-		\param [in] x_uSize		-	Number of bytes required. 
+		\param [in] x_uSize		-	Number of bytes required.
 		\param [in] x_uReadPtr	-	Position of read pointer.
 		\param [in] x_uWritePtr	-	Position of write pointer.
 		\param [in] x_uMax		-	Maximum size of buffer.
-		
+
 		Checks to ensure the specified amount of space is available for writing.
 		If it is not, the function creates it without losing data that is in the buffer.
 
 		\return Space available
-	
-		\see 
+
+		\see
 	*/
 	oexUINT EnsureWriteSpace( oexUINT x_uSize, oexUINT x_uReadPtr, oexUINT x_uWritePtr, oexUINT x_uMax );
 
@@ -364,10 +364,10 @@ public:
 	/// Resizes the buffer without losing the data within
 	/**
 		\param [in] x_uNewSize	-	New size for circular buffer
-		
+
 		\return	New size of buffer
-	
-		\see 
+
+		\see
 	*/
 	oexUINT Resize( oexUINT x_uNewSize );
 
@@ -378,10 +378,10 @@ public:
 	/**
 		\param [in] x_pStr	-	Buffer to hold string
 		\param [in] x_uMax	-	Size of buffer in pStr.
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
 	virtual oexBOOL Read( oexSTR8 x_pStr, oexUINT x_uMax );
 
@@ -392,10 +392,10 @@ public:
 	/**
 		\param [in] x_uMax	-   Number of bytes to retrieve, zero for
                                 all available.
-		
+
 		\return CStr object containing the data
-	
-		\see 
+
+		\see
 	*/
     virtual CStr8 Read( oexUINT x_uMax = 0 )
     {   CStr8 str; Read( str, x_uMax ); return str; }
@@ -408,15 +408,15 @@ public:
         \param [out] str    -   Receives the string
 		\param [in] x_uMax	-   Number of bytes to retrieve, zero for
                                 all available.
-		
+
         This version is more efficient than the one that returns the
         string if you will be calling multiple times.  Calling this
         function multiple times with the same CStr object will reuse
         the previously allocated memory.
 
 		\return CStr object containing the data
-	
-		\see 
+
+		\see
 	*/
     virtual oexBOOL Read( CStr8 &x_sStr, oexUINT x_uMax = 0 );
 
@@ -426,10 +426,10 @@ public:
 	/// Write a string to the buffer
 	/**
 		\param [in] x_pStr	-	String value to write to buffer
-		
+
 		\return Non-zero if success.
-	
-		\see 
+
+		\see
 	*/
 	virtual oexBOOL Write( oexCSTR8 x_pStr );
 
@@ -439,10 +439,10 @@ public:
 	/// Write a string to the buffer
 	/**
 		\param [in] x_sStr	-	String to write
-		
+
 		\return Non-zero if success.
-	
-		\see 
+
+		\see
 	*/
 	virtual oexBOOL Write( CStr8 x_sStr )
     {   return Write( x_sStr.Ptr(), x_sStr.Length() ); }
@@ -456,10 +456,10 @@ public:
 		\param [in] x_uReadPtr	-	Position of read pointer.
 		\param [in] x_uWritePtr	-	Position of write pointer.
 		\param [in] x_uMax		-	Total size of circular buffer
-		
+
 		\return Number of bytes that can be written
-	
-		\see 
+
+		\see
 	*/
 	static oexUINT GetMaxWrite( oexUINT x_uReadPtr, oexUINT x_uWritePtr, oexUINT x_uMax );
 
@@ -470,24 +470,24 @@ public:
 	/**
 		\return Number of bytes that can be written
 	*/
-	oexUINT GetMaxWrite() 
+	oexUINT GetMaxWrite()
     {   if ( !m_pBi )
             return oexFALSE;
-        return GetMaxWrite( m_pBi->uReadPtr, m_pBi->uWritePtr, m_uSize ); 
+        return GetMaxWrite( m_pBi->uReadPtr, m_pBi->uWritePtr, m_uSize );
     }
 
 	//==============================================================
 	// GetMaxRead()
 	//==============================================================
-	/// Returns the maximum amount of data that can be read from the buffer	
+	/// Returns the maximum amount of data that can be read from the buffer
 	/**
 		\param [in] x_uReadPtr	-	Position of read pointer.
 		\param [in] x_uWritePtr	-	Position of write pointer.
 		\param [in] x_uMax		-	Total size of circular buffer
-		
+
 		\return Number of bytes that can be read
-	
-		\see 
+
+		\see
 	*/
 	static oexUINT GetMaxRead( oexUINT x_uReadPtr, oexUINT x_uWritePtr, oexUINT x_uMax );
 
@@ -498,10 +498,10 @@ public:
 	/**
 		\return Number of bytes that can be read
 	*/
-	oexUINT GetMaxRead() 
+	oexUINT GetMaxRead()
     {   if ( !m_pBi )
             return oexFALSE;
-        return GetMaxRead( m_pBi->uReadPtr, m_pBi->uWritePtr, m_uSize ); 
+        return GetMaxRead( m_pBi->uReadPtr, m_pBi->uWritePtr, m_uSize );
     }
 
 	//==============================================================
@@ -509,7 +509,7 @@ public:
 	//==============================================================
 	/// Releases all resources associated with the circular buffer.
 	virtual void Destroy();
-	
+
 	//==============================================================
 	// Write()
 	//==============================================================
@@ -519,10 +519,10 @@ public:
 		\param [in] x_uSize		-	Size of the buffer in pBuf.
 		\param [in] x_puPtr		-	Write pointer position
 		\param [in] x_uEncode	-	Optional encoding
-				
+
 		\return Non-zero on success.
-	
-		\see 
+
+		\see
 	*/
 	oexBOOL Write( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT *x_puPtr, oexUINT x_uEncode = 0 );
 
@@ -534,20 +534,20 @@ public:
 		\param [in] x_pvBuf		-	Pointer to buffer containing data to be written.
 		\param [in] x_uSize		-	Size of the buffer in pBuf.
 		\param [in] x_uEncode	-	Optional encoding
-				
+
 		\return Non-zero on success
-	
-		\see 
+
+		\see
 	*/
 	virtual oexBOOL Write( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT x_uEncode = 0 )
-	{	
+	{
 	    // Lock the buffer
 	    CTlLocalLock ll( &m_lock );
-	    if ( !ll.IsLocked() ) 
+	    if ( !ll.IsLocked() )
             return oexFALSE;
 
-        if ( m_bAutoGrow ) 
-        {   
+        if ( m_bAutoGrow )
+        {
             if ( !m_pBi )
                 Allocate( x_uSize );
             else
@@ -558,7 +558,7 @@ public:
         if ( !m_pBi )
             return oexFALSE;
 
-		if ( !Write( x_pvBuf, x_uSize, &m_pBi->uWritePtr, x_uEncode ) ) 
+		if ( !Write( x_pvBuf, x_uSize, &m_pBi->uWritePtr, x_uEncode ) )
             return oexFALSE;
 
 		return OnWrite();
@@ -574,12 +574,12 @@ public:
 
 		\see CancelPoke(), Poke(), EndPoke(), GetPokeSize()
 	*/
-	oexBOOL InitPoke() 
+	oexBOOL InitPoke()
     {
         if ( !m_pBi )
             return oexFALSE;
 
-        m_uPokePtr = m_pBi->uWritePtr; 
+        m_uPokePtr = m_pBi->uWritePtr;
 
         return oexTRUE;
     }
@@ -591,12 +591,12 @@ public:
 	/**
 		\see InitPoke(), Poke(), EndPoke(), GetPokeSize()
 	*/
-	oexBOOL CancelPoke() 
+	oexBOOL CancelPoke()
     {
         if ( !m_pBi )
             return oexFALSE;
 
-        m_uPokePtr = m_pBi->uWritePtr; 
+        m_uPokePtr = m_pBi->uWritePtr;
 
         return oexTRUE;
     }
@@ -609,15 +609,15 @@ public:
 		\param [in] x_pvBuf		-	Data to poke into write buffer
 		\param [in] x_uSize		-	Size of pBuf
 		\param [in] x_uEncode	-	Optional data encoding
-		
+
 		\return Non-zero if success
-	
+
 		\see InitPoke(), CancelPoke(), EndPoke(), GetPokeSize()
 	*/
 	oexBOOL Poke( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT x_uEncode = 0 )
-	{	
-        if ( m_bAutoGrow ) 
-        {   
+	{
+        if ( m_bAutoGrow )
+        {
             if ( !m_pBi )
                 Allocate( x_uSize );
             else
@@ -635,13 +635,13 @@ public:
 	// EndPoke()
 	//==============================================================
 	/// Committs the poked data to the buffer
-	/**		
+	/**
 		\return Non-zero if success
-	
+
 		\see InitPoke(), CancelPoke(), Poke(), GetPokeSize()
 	*/
-	oexBOOL EndPoke() 
-	{	
+	oexBOOL EndPoke()
+	{
         if ( !m_pBi )
             return oexFALSE;
 
@@ -651,23 +651,23 @@ public:
 			return OnWrite();
 		} // end if
 
-		return oexFALSE;		
+		return oexFALSE;
 	}
 
 	//==============================================================
 	// GetPokeSize()
 	//==============================================================
 	/// Returns the size of currently poked data
-	/**		
+	/**
 		\return Number of bytes currently poked
-	
+
 		\see InitPoke(), CancelPoke(), Poke(), EndPoke()
 	*/
-	oexUINT GetPokeSize() 
-	{ 
+	oexUINT GetPokeSize()
+	{
         if ( !m_pBi )
             return 0;
-        return GetMaxRead( m_pBi->uReadPtr, m_uPokePtr, m_uSize ); 
+        return GetMaxRead( m_pBi->uReadPtr, m_uPokePtr, m_uSize );
     }
 
 	//==============================================================
@@ -676,12 +676,12 @@ public:
 	/// Called when data is written to the circular buffer
 	/**
 		\return Non-zero if success
-		
+
 		Over-ride this function to provide write data handling.
 
-		\see 
+		\see
 	*/
-	virtual oexBOOL OnWrite() 
+	virtual oexBOOL OnWrite()
     {   DataReady(); return oexTRUE; }
 
 	//==============================================================
@@ -694,10 +694,10 @@ public:
 		\param [out] x_puRead	-	Receives number of bytes read
 		\param [out] x_puPtr	-	Receives read pointer
 		\param [in] x_uEncode	-	Optional decoding
-		
+
 		\return Non-zero if success, otherwise zero.
-	
-		\see 
+
+		\see
 	*/
 	oexBOOL Read( oexPVOID x_pvBuf, oexUINT x_uMax, oexUINT *x_puRead, oexUINT *x_puPtr, oexUINT x_uEncode = 0 );
 
@@ -710,10 +710,10 @@ public:
 		\param [in] x_uMax		-	Size of buffer in pBuf
 		\param [out] x_puRead	-	Receives number of bytes read
 		\param [in] x_uEncode	-	Optional decoding
-		
+
 		\return Non-zero if success, otherwise zero.
-	
-		\see 
+
+		\see
 	*/
 	virtual oexBOOL Read( oexPVOID x_pvBuf, oexUINT x_uMax, oexUINT *x_puRead, oexUINT x_uEncode = 0 );
 
@@ -727,10 +727,10 @@ public:
 		\param [in] x_puRead	-	Number of bytes read into pBuf
 		\param [in] x_lOffset	-	Offset from read pointer to start
 		\param [in] x_uEncode	-	Optional data decoding
-		
+
 		\return Non-zero if success.
-	
-		\see 
+
+		\see
 	*/
 	oexBOOL Peek( oexPVOID x_pvBuf, oexUINT x_uMax, oexUINT *x_puRead, oexLONG x_lOffset = 0, oexUINT x_uEncode = 0 );
 
@@ -745,10 +745,10 @@ public:
 	/// Pre allocates the specified amount of data for the circular buffer
 	/**
 		\param [in] x_uSize		-	Number of bytes to allocate.
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
 	virtual oexBOOL Allocate( oexUINT x_uSize );
 
@@ -773,14 +773,14 @@ public:
 	/**
 		\param [in] x_uPtr	-	New value for read pointer.
 	*/
-	oexBOOL SetReadPtr( oexUINT x_uPtr ) 
-    { 
+	oexBOOL SetReadPtr( oexUINT x_uPtr )
+    {
         if ( !m_pBi )
             return oexFALSE;
-        m_pBi->uReadPtr = x_uPtr; 
+        m_pBi->uReadPtr = x_uPtr;
         return oexTRUE;
     }
-	
+
 	//==============================================================
 	// GetReadPtr()
 	//==============================================================
@@ -788,10 +788,10 @@ public:
 	/**
 		\return read pointer position
 	*/
-	oexUINT GetReadPtr() 
+	oexUINT GetReadPtr()
     {   if ( !m_pBi )
             return 0;
-        return m_pBi->uReadPtr; 
+        return m_pBi->uReadPtr;
     }
 
 	//==============================================================
@@ -801,10 +801,10 @@ public:
 	/**
 		\param [in] x_uPtr	-	New value for write pointer.
 	*/
-	oexBOOL SetWritePtr( oexUINT x_uPtr ) 
+	oexBOOL SetWritePtr( oexUINT x_uPtr )
     {   if ( !m_pBi )
             return oexFALSE;
-        m_pBi->uWritePtr = x_uPtr; 
+        m_pBi->uWritePtr = x_uPtr;
         return oexTRUE;
     }
 
@@ -815,14 +815,14 @@ public:
 	/**
 		\return write pointer position
 	*/
-	oexUINT GetWritePtr() 
+	oexUINT GetWritePtr()
     {   if ( !m_pBi )
             return 0;
-        return m_pBi->uWritePtr; 
+        return m_pBi->uWritePtr;
     }
 
 	/// Returns a pointer for the buffers thread locking class
-	operator CTlLock&() 
+	operator CTlLock&()
     {   return m_lock; }
 
 	//==============================================================
@@ -831,24 +831,24 @@ public:
 	/// Sets the maximum size the buffer can grow
 	/**
 		\param [in] dwMaxSize	-	Sets the maximum size for the circular buffer
-		
+
 		\warning This should really be set to something reasonable!
 
-		\see SetAutoGrow(), SetAutoGrow(), SetMaxSize() 
+		\see SetAutoGrow(), SetAutoGrow(), SetMaxSize()
 	*/
-	void SetMaxSize( oexUINT x_uMaxSize ) 
+	void SetMaxSize( oexUINT x_uMaxSize )
     {   m_uMaxSize = x_uMaxSize; }
 
 	//==============================================================
 	// GetMaxSize()
 	//==============================================================
 	/// Returns the maximum size the buffer can grow
-	/**			
+	/**
 		\return Returns the maximum size for the circular buffer.
-	
-		\see GetAutoGrow(), SetAutoGrow(), SetMaxSize() 
+
+		\see GetAutoGrow(), SetAutoGrow(), SetMaxSize()
 	*/
-	oexUINT GetMaxSize() 
+	oexUINT GetMaxSize()
     {   return m_uMaxSize; }
 
 	//==============================================================
@@ -857,20 +857,20 @@ public:
 	/// Enables / disables the auto resizing feature of CCircBuf
 	/**
 		\param [in] b	-	Non-zero to enable resizing, zero to disable.
-		
+
 		Sets auto grow enable / disable. If auto grow is enabled, the buffer will
 		automatically resized to accomidate any write less than m_dwMaxSize.
 
 		\see GetAutoGrow(), SetMaxSize(), GetMaxSize()
 	*/
-	oexBOOL SetAutoGrow( oexBOOL b ) 
+	oexBOOL SetAutoGrow( oexBOOL b )
     {
         // Can't resize shared memory
         if ( m_memBuffer.IsMapped() )
             m_bAutoGrow = oexFALSE;
 
         else
-            m_bAutoGrow = b; 
+            m_bAutoGrow = b;
 
         return m_bAutoGrow;
     }
@@ -879,12 +879,12 @@ public:
 	// GetAutoGrow()
 	//==============================================================
 	/// Returns the auto grow status
-	/**			
+	/**
 		\return Non-zero if auto-grow is enabled.
-	
+
 		\see SetAutoGrow(), SetMaxSize(), GetMaxSize()
 	*/
-	oexBOOL GetAutoGrow() 
+	oexBOOL GetAutoGrow()
     {   return m_bAutoGrow; }
 
 	//==============================================================
@@ -894,33 +894,33 @@ public:
 	/**
 		\return Non-zero if data can be read from the buffer.
 	*/
-	oexBOOL IsEmpty() 
+	oexBOOL IsEmpty()
     {   return m_bEmpty; }
 
 	//==============================================================
 	// DataReady()
 	//==============================================================
 	/// Call this function to signal that data is ready to be read.
-	void DataReady() 
+	void DataReady()
 	{	m_bEmpty = oexFALSE;
 		if ( m_hDataReady )
-            os::CEvent::osSetEvent( m_hDataReady ); 
+            os::CEvent::osSetEvent( m_hDataReady );
 		if ( m_hEmpty )
-            os::CEvent::osResetEvent( m_hEmpty ); 
+            os::CEvent::osResetEvent( m_hEmpty );
 	}
 
 	//==============================================================
 	// GetDataReadyHandle()
 	//==============================================================
 	/// Returns the data ready event handle
-    os::CSys::t_WAITABLE GetDataReadyHandle() 
+    os::CSys::t_WAITABLE GetDataReadyHandle()
     {   return m_hDataReady; }
 
 	//==============================================================
 	// GetEmptyHandle()
 	//==============================================================
 	/// Returns the buffer empty event handle
-    os::CSys::t_WAITABLE GetEmptyHandle() 
+    os::CSys::t_WAITABLE GetEmptyHandle()
     {   return m_hEmpty; }
 
 	//==============================================================
@@ -932,8 +932,8 @@ public:
 	*/
 	oexBOOL Empty()
 	{	CTlLocalLock ll( &m_lock );
-		if ( !ll.IsLocked() ) 
-            return oexFALSE;		
+		if ( !ll.IsLocked() )
+            return oexFALSE;
 
         if ( !m_pBi )
             return oexTRUE;
@@ -945,7 +945,7 @@ public:
             os::CEvent::osResetEvent( m_hDataReady );
 
 		if ( m_hEmpty )
-            os::CEvent::osSetEvent( m_hEmpty ); 
+            os::CEvent::osSetEvent( m_hEmpty );
 
 		return oexTRUE;
 	}
@@ -958,12 +958,12 @@ public:
 		\param [in] x_uBlock	-	Index of block
 		\param [in] x_pucBuf	-	Pointer to data
 		\param [in] x_uSize		-	Size of buffer in pBuf
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
-	virtual oexBOOL OnInspectRead( oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize ) 
+	virtual oexBOOL OnInspectRead( oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize )
     {   return oexTRUE; }
 
 	//==============================================================
@@ -974,58 +974,58 @@ public:
 		\param [in] x_uBlock	-	Index of block
 		\param [in] x_pucBuf	-	Pointer to data
 		\param [in] x_uSize		-	Size of buffer in pBuf
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
-	virtual oexBOOL OnInspectWrite( oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize ) 
+	virtual oexBOOL OnInspectWrite( oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize )
     {   return oexTRUE; }
 
 	/// Over-ride this function to enable generic block encoding
 	//==============================================================
 	// OnEncode()
 	//==============================================================
-	/// 
+	///
 	/**
 		\param [in] x_uType		-	Type of encoding to perform
 		\param [in] x_uBlock	-	Index of block
 		\param [in] x_pucBuf	-	Pointer to data
 		\param [in] x_uSize		-	Size of buffer in pBuf
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
-	virtual oexBOOL OnEncode( oexUINT x_uType, oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize ) 
+	virtual oexBOOL OnEncode( oexUINT x_uType, oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize )
     {   return oexTRUE; }
 
 	/// Over-ride this function to enable generic block decoding
 	//==============================================================
 	// OnDecode()
 	//==============================================================
-	/// 
+	///
 	/**
 		\param [in] x_uType		-	Type of encoding to perform
 		\param [in] x_uBlock	-	Index of block
 		\param [in] x_pucBuf	-	Pointer to data
 		\param [in] x_uSize		-	Size of buffer in pBuf
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
-	virtual oexBOOL OnDecode( oexUINT x_uType, oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize ) 
+	virtual oexBOOL OnDecode( oexUINT x_uType, oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize )
     {   return oexTRUE; }
 
 	//==============================================================
 	// GetBufferSize()
 	//==============================================================
 	/// Returns the size of the buffer
-	/**		
+	/**
 		\return	Total size of the circular buffer
 	*/
-	oexUINT GetBufferSize() 
+	oexUINT GetBufferSize()
     {   return m_uSize; }
 
 private:
@@ -1059,7 +1059,7 @@ private:
 
 	/// Position of data that is being poked into the buffer
 	oexUINT					m_uPokePtr;
-	
+
 	/// Encapsulates the actual circular buffer memory
 	TMem< oexUCHAR >		m_memBuffer;
 

@@ -50,16 +50,29 @@ const CBaseFile::t_HFIND CBaseFile::c_InvalidFindHandle = NULL;
 CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, oexUINT x_eAccess, oexUINT x_eShare, oexUINT x_uFlags, oexUINT *x_puError )
 {
 	// Select mode string
-	oexCSTR pMode = oexT( "" );
+/*	oexCSTR pMode = oexT( "" );
     switch( x_eDisposition )
     {   case eDisCreateNew : pMode = oexT( "w+b" ); break;
         case eDisCreateAlways : pMode = oexT( "w+b" ); break;
         case eDisOpenExisting : pMode = oexT( "rb" ); break;
         case eDisOpenAlways : pMode = oexT( "a+b" ); break;
     } // end switch
+*/
+
+	// +++ Fix this stuff
+	oexINT nMode = O_RDWR; // O_WRONLY O_RDONLY
+	switch( x_eDisposition )
+    {   case eDisCreateNew : nMode |= O_CREAT | O_EXCL; break;
+        case eDisCreateAlways : nMode |= O_CREAT; break;
+        case eDisOpenExisting : break;
+        case eDisOpenAlways : nMode |= O_CREAT; break;
+	} // end switch
+
+	// +++ Fix file permissions
 
 	// Attempt to open the file
-	t_HFILE hFile =	fopen( oexStrToMbPtr( x_pFile ), oexStrToMbPtr( pMode ) );
+//	t_HFILE hFile =	fopen( oexStrToMbPtr( x_pFile ), oexStrToMbPtr( pMode ) );
+	t_HFILE hFile =	(t_HFILE)open( oexStrToMbPtr( x_pFile ), nMode, 0777 );
 
 	if ( x_puError )
 	{
@@ -77,44 +90,59 @@ oexBOOL CBaseFile::Close( CBaseFile::t_HFILE x_hFile, oexUINT *x_puErr )
     if ( CBaseFile::c_InvalidFindHandle == x_hFile )
         return oexFALSE;
 
-    oexBOOL bRet = fclose( (FILE*)x_hFile ) ? oexFALSE : oexTRUE;
+    oexBOOL bRet = close( (int)x_hFile ) ? oexFALSE : oexTRUE;
 
     if ( x_puErr )
-    {   if ( bRet ) *x_puErr = 0;
-        else *x_puErr = errno;
+    {
+    	if ( bRet )
+    		*x_puErr = 0;
+        else
+        	*x_puErr = errno;
+
     } // end if
 
     return bRet;
 }
 
-oexBOOL CBaseFile::Write( CBaseFile::t_HFILE hFile, oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puWritten, oexUINT *x_puErr )
+oexBOOL CBaseFile::Write( CBaseFile::t_HFILE x_hFile, oexCPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllWritten, oexUINT *x_puErr )
 {
-    oexUINT uWritten = fwrite( x_pData, 1, x_uSize, (FILE*)hFile );
+//    oexUINT uWritten = write( x_pData, 1, x_uSize, (FILE*)hFile );
+	oexINT64 llWritten = write( (int)x_hFile, x_pData, x_llSize );
 
-    if ( x_puWritten )
-        *x_puWritten = uWritten;
+    if ( x_pllWritten )
+        *x_pllWritten = llWritten;
 
     if ( x_puErr )
-    {   if ( x_uSize == uWritten ) *x_puErr = 0;
-        else *x_puErr = errno;
+    {
+    	if ( x_llSize == llWritten )
+    		*x_puErr = 0;
+        else
+        	*x_puErr = errno;
+
     } // end if
 
-    return ( x_uSize == uWritten );
+    return ( x_llSize == llWritten );
 }
 
-oexBOOL CBaseFile::Read( CBaseFile::t_HFILE hFile, oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, oexUINT *x_puErr )
+oexBOOL CBaseFile::Read( CBaseFile::t_HFILE x_hFile, oexPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllRead, oexUINT *x_puErr )
 {
-	oexUINT uRead = fread( x_pData, 1, x_uSize, (FILE*)hFile );
+//	oexUINT uRead = fread( x_pData, 1, x_uSize, (FILE*)hFile );
+	oexINT64 llRead = read( (int)x_hFile, x_pData, x_llSize );
 
-    if ( x_puRead )
-        *x_puRead = uRead;
+	if ( 0 > llRead )
+	{
+	    if ( x_puErr )
+    		*x_puErr = errno;
 
-	oexINT nErr = ferror( (FILE*)hFile );
+		if ( x_pllRead )
+			*x_pllRead = 0;
 
-    if ( x_puErr )
-    	*x_puErr = nErr;
+	} // end if
 
-    return !nErr;
+    else if ( x_pllRead )
+        *x_pllRead = (oexUINT)llRead;
+
+    return ( 0 <= llRead );
 }
 
 oexINT64 CBaseFile::Size( t_HFILE hFile )
@@ -128,7 +156,7 @@ oexINT64 CBaseFile::Size( t_HFILE hFile )
 	return s64.st_size;
 }
 
-oexINT64 CBaseFile::SetPointer( t_HFILE hFile, oexINT64 llMove, oexINT nMethod )
+oexINT64 CBaseFile::SetPointer( t_HFILE x_hFile, oexINT64 llMove, oexINT nMethod )
 {
     // Get method
     oexINT nOrigin = 0;
@@ -138,10 +166,7 @@ oexINT64 CBaseFile::SetPointer( t_HFILE hFile, oexINT64 llMove, oexINT nMethod )
     else return -1;
 
     // Set new file position
-    int ret = fseeko64( (FILE*)hFile, llMove, nOrigin );
-
-	// Grab the current file  position so we can report it
-	oexINT64 llPos = ftello64( (FILE*)hFile );
+	oexINT64 llPos = lseek( (int)x_hFile, llMove, nOrigin );
 
 	if ( 0 > llPos )
 		return 0;

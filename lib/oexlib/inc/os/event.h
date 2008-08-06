@@ -6,33 +6,294 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
+/*
+Crimson flames tied through my ears
+Rollin' high and mighty traps
+Pounced with fire on flaming roads
+Using ideas as my maps
+"We'll meet on edges, soon," said I
+Proud 'neath heated brow.
+Ah, but I was so much older then,
+I'm younger than that now.
+
+Half-wracked prejudice leaped forth
+"Rip down all hate," I screamed
+Lies that life is black and white
+Spoke from my skull. I dreamed
+Romantic facts of musketeers
+Foundationed deep, somehow.
+Ah, but I was so much older then,
+I'm younger than that now.
+
+Girls' faces formed the forward path
+From phony jealousy
+To memorizing politics
+Of ancient history
+Flung down by corpse evangelists
+Unthought of, though, somehow.
+Ah, but I was so much older then,
+I'm younger than that now.
+
+A self-ordained professor's tongue
+Too serious to fool
+Spouted out that liberty
+Is just equality in school
+"Equality," I spoke the word
+As if a wedding vow.
+Ah, but I was so much older then,
+I'm younger than that now.
+
+In a soldier's stance, I aimed my hand
+At the mongrel dogs who teach
+Fearing not that I'd become my enemy
+In the instant that I preach
+My pathway led by confusion boats
+Mutiny from stern to bow.
+Ah, but I was so much older then,
+I'm younger than that now.
+
+Yes, my guard stood hard when abstract threats
+Too noble to neglect
+Deceived me into thinking
+I had something to protect
+Good and bad, I define these terms
+Quite clear, no doubt, somehow.
+Ah, but I was so much older then,
+I'm younger than that now.
+
+- Bob Dylan
+*/
+
 #pragma once
+
+//==================================================================
+// CResource
+//
+/// Encapsulates a system resource handle
+/**
+	Ok, the idea here, right or wrong, is to encapsulate all the
+	different types of handles like files, threads, mutexes, etc
+	into a single structure so that they can be released, and most
+	importantly to me at the moment, 'waited on' in a unified
+	matter.  Windows already does this to a large extent,
+	unfortunately, Linux does not.
+
+*/
+//==================================================================
+class CResource
+{
+public:
+
+	enum
+	{
+		/// Invalid resource type
+		eRtInvalid 			= 0,
+
+		/// System file
+		eRtFile				= 1,
+
+		/// Network socket
+		eRtSocket			= 2,
+
+		/// Process thread
+		eRtThread			= 3,
+
+		/// Thread mutex
+		eRtMutex			= 4
+	};
+
+	enum etWait
+	{
+		/// Value indicating wait succeeded
+		waitSuccess = 0,
+
+		/// Value indicating wait timed out
+		waitTimeout = -1,
+
+		/// Value indicating wait expired
+		waitFailed = -2
+	};
+
+public:
+
+	/// Handle type
+	typedef oexPVOID		t_HANDLE;
+
+public:
+
+	/// Constructor
+	CResource()
+	{
+		m_hHandle = c_Invalid;
+		m_nType = eRtInvalid;
+	}
+
+	CResource( oexINT x_nType )
+	{
+		m_hHandle = c_Invalid;
+		m_nType = eRtInvalid;
+
+		// Create specified type
+		Init( x_nType );
+	}
+
+	/// Destructor
+	~CResource()
+	{
+		Destroy();
+	}
+
+	//==============================================================
+	// Init()
+	//==============================================================
+	/// Releases the handle
+	/*
+		\param [in] x_nType		-	The type of resource to create.
+
+		\return Zero if success, else error code
+
+	*/
+	oexINT Init( oexINT x_nType );
+
+	//==============================================================
+	// Destroy()
+	//==============================================================
+	/// Releases the handle
+	/*
+		\param [in] x_puErr		-	If not null, receives the error
+									code for the release operation.
+									Zero if success, -1 if the
+									operation could not be performed.
+	*/
+	void Destroy( oexUINT *x_puErr = oexNULL );
+
+	//==============================================================
+	// Wait()
+	//==============================================================
+	/// Waits for the handle to signal
+	/*
+		\param [in] x_uTimeout 		-	Maximum time to wait for signal
+		\param [in] x_uType			-	Type of signal to wait for
+
+		This is a consolidated wait function.  It's exact characteristics
+		depend on the type of object being waited on.
+
+		\return Returns zero if success, otherwise an error code is
+				returned.
+	*/
+	oexINT Wait( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT, oexUINT x_uType = 0 );
+
+	//==============================================================
+	// vInfinite()
+	//==============================================================
+	/// Value representing infinite timeout.
+	/**
+		Use with wait functions
+	*/
+	static oexCONST oexUINT cInfinite()
+    {
+		return c_Infinite;
+    }
+
+	//==============================================================
+	// vInvalid()
+	//==============================================================
+	/// Value corresponding to an invalid handle value
+	static oexCONST t_HANDLE cInvalid()
+    {
+    	return c_Invalid;
+    }
+
+	//==============================================================
+	// IsValidHandle()
+	//==============================================================
+	/// Returns the os dependent handle for the resource
+    BOOL IsValidHandle()
+    {
+    	return ( c_Invalid != m_hHandle );
+	}
+
+	//==============================================================
+	// GetHandle()
+	//==============================================================
+	/// Returns the os dependent handle for the resource
+    t_HANDLE GetHandle()
+    {
+		oexVERIFY( c_Invalid != m_hHandle && eRtInvalid != m_uType );
+    	return m_hHandle;
+	}
+
+	//==============================================================
+	// SetHandle()
+	//==============================================================
+	/// Sets the os dependent handle for the resource
+    void SetHandle( t_HANDLE x_hHandle )
+    {
+    	m_hHandle = x_hHandle;
+	}
+
+	//==============================================================
+	// GetType()
+	//==============================================================
+	/// Returns the type of the os dependent resource
+    oexINT GetType()
+    {
+    	return m_nType;
+	}
+
+	//==============================================================
+	// SetType()
+	//==============================================================
+	/// Sets the type of the os dependent resource
+    void SetType( oexINT x_nType )
+    {
+    	m_nType = x_nType;
+	}
+
+private:
+
+	/// Invalid event handle value
+	static oexCONST t_HANDLE	c_Invalid;
+
+	/// Infinite timeout value
+	static oexCONST oexUINT		c_Infinite;
+
+private:
+
+	/// The resource handle
+	t_HANDLE				m_hHandle;
+
+	/// Resource type
+	oexINT					m_nType;
+
+};
+
 
 //==================================================================
 // CEvent
@@ -40,7 +301,7 @@
 /// OS independent event
 /**
 	Functions for creating os independent event objects
-	
+
 */
 //==================================================================
 class CEvent
@@ -50,10 +311,10 @@ public:
 	typedef oexPVOID		t_EVENT;
 
 private:
-	CEvent() 
+	CEvent()
     {}
 
-	virtual ~CEvent() 
+	virtual ~CEvent()
     {}
 
 public:
@@ -71,9 +332,9 @@ public:
                                         be automatically reset after
                                         a single thread is released from
                                         a wait function.
-		
+
 		\return Handle to a event object
-	
+
 		\see osDestroyEvent()
 	*/
 	static t_EVENT osCreateEvent( oexCSTR x_pName, oexBOOL x_bManualReset );
@@ -85,7 +346,7 @@ public:
 	/**
 		\param [in] x_pEvent	-	Handle to event object
 
-		\see osCreateEvent()		
+		\see osCreateEvent()
 	*/
 	static void osDestroyEvent( t_EVENT x_pEvent );
 
@@ -95,37 +356,25 @@ public:
 	/// Sets the event object to the signaled state
 	/**
 		\param [in] x_pEvent	-	Handle to event object
-		
+
 		\return Non-zero if success
 
 		\see osResetEvent()
 	*/
 	static oexBOOL osSetEvent( t_EVENT x_pEvent );
-	
+
 	//==============================================================
 	// osResetEvent()
 	//==============================================================
 	/// Sets the event object to the un-signaled state
 	/**
 		\param [in] x_pEvent	-	Handle to event object
-		
+
 		\return Non-zero if success
-	
+
 		\see osSetEvent()
 	*/
 	static oexBOOL osResetEvent( t_EVENT x_pEvent );
-
-	enum etWait
-	{	
-		/// Value indicating wait succeeded
-		waitSuccess = 0,
-
-		/// Value indicating wait timed out
-		waitTimeout = -1,
-
-		/// Value indicating wait expired
-		waitFailed = -2
-	};
 
 	//==============================================================
 	// osWaitForSingleObject()
@@ -135,10 +384,10 @@ public:
 		\param [in] x_pEvent	-	Handle to event object
 		\param [in] x_uTimeout	-	Maximum amount of time, in
 									milli-seconds, to wait.
-		
+
 		\return Zero if success, otherwise waitTimeout or waitFailed
-	
-		\see 
+
+		\see
 	*/
 	static oexINT osWaitForSingleObject( t_EVENT x_pEvent, oexUINT x_uTimeout );
 
@@ -150,44 +399,22 @@ public:
 		\param [in] x_uObjects	-	Number of event objects
 		\param [in] x_pEvent	-	Array of event objects
 		\param [in] x_bWaitAll	-	Non-zero if you wish to wait for
-									all objects to become signaled. 
+									all objects to become signaled.
 									Otherwise this function returns
 									as soon as any objects are in
 									the signaled state.
-		\param [in] x_uTimeout	-	Maximum amount of time, in 
+		\param [in] x_uTimeout	-	Maximum amount of time, in
 									milli-seconds, to wait.
-		
-		\return Zero based index of object that is signaled if success, 
+
+		\return Zero based index of object that is signaled if success,
 				otherwise waitTimeout or waitFailed
-	
-		\see 
+
+		\see
 	*/
 	static oexINT osWaitForMultipleObjects( oexUINT x_uObjects, t_EVENT *x_pEvent, oexBOOL x_bWaitAll, oexUINT x_uTimeout );
 
-	//==============================================================
-	// vInfinite()
-	//==============================================================
-	/// Value representing infinite timeout.
-	/**
-		Use with wait functions
-	*/
-	static oexCONST oexUINT vInfinite() 
-    {   return c_Infinite; }
-
-	//==============================================================
-	// vInvalid()
-	//==============================================================
-	/// Value representing an invalid event handle value
-	static oexCONST t_EVENT vInvalid() 
-    {   return c_Invalid; }
 
 private:
-
-	/// Invalid event handle value
-	static oexCONST t_EVENT		c_Invalid;
-
-	/// Infinite timeout value
-	static oexCONST oexUINT		c_Infinite;
 
 };
 

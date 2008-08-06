@@ -75,6 +75,8 @@ extern int daylight;
 #include <linux/videodev.h>
 #include <linux/videodev2.h>
 
+#include <sys/sem.h>
+
 /*
 #include <sys/ioctl.h>
 #include <linux/types.h>
