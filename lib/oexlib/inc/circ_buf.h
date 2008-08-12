@@ -166,7 +166,7 @@ public:
 
 		\see
 	*/
-	oexBOOL WaitData( oexUINT x_uTimeout = os::CResource::cInfinite() );
+	oexBOOL WaitData( oexUINT x_uTimeout = CResource::cInfinite() );
 
 	//==============================================================
 	// WaitEmpty()
@@ -179,7 +179,7 @@ public:
 
 		\see
 	*/
-	oexBOOL WaitEmpty( oexUINT x_uTimeout = os::CResource::cInfinite() );
+	oexBOOL WaitEmpty( oexUINT x_uTimeout = CResource::cInfinite() );
 
 	//==============================================================
 	// GetWriteView()

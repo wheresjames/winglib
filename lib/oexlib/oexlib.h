@@ -407,7 +407,7 @@
 //------------------------------------------------------------------
 // External Dependencies
 //------------------------------------------------------------------
-// Please don't pollute the namespace ;)
+// Please don't pollute the namespace ;-)
 
 //------------------------------------------------------------------
 // Configuration
@@ -439,6 +439,9 @@ namespace os
 };
 
 #include "inc/oex_debugging.h"
+
+/// Common resource handle
+#include "inc/resource.h"
 
 //------------------------------------------------------------------
 // OS Specific

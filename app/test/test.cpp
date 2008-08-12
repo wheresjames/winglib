@@ -1189,7 +1189,6 @@ oex::oexRESULT Test_CSysTime()
     return oex::oexRES_OK;
 }
 
-
 oex::oexRESULT Test_CIpAddress()
 {
     if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
@@ -1197,6 +1196,8 @@ oex::oexRESULT Test_CIpAddress()
 
     oex::oexCSTR pUrl = oexT( "http://user:password@server.com:1111/my/path/doc.php?a=b&c=d" );
     oex::CPropertyBag pbUrl = oex::os::CIpAddress::ParseUrl( pUrl );
+
+//    oexTRACE( pbUrl[ oexT( "scheme" ) ].ToString().Ptr() );
 
     // Verify each component
     if ( !oexVERIFY( pbUrl[ oexT( "scheme" ) ] == oexT( "http" ) )
@@ -1213,18 +1214,18 @@ oex::oexRESULT Test_CIpAddress()
 
     oex::os::CIpAddress ia;
 
-    if ( !oexVERIFY( ia.LookupUrl( oexT( "http://user:password@localhost:1111/my/path/doc.php?a=b&c=d" ) ) )
-         || !oexVERIFY( ia.GetDotAddress() == oexT( "127.0.0.1" ) )
-         || !oexVERIFY( ia.GetPort() == 1111 ) )
-        return -4;
-
     if ( !oexVERIFY( ia.LookupHost( oexT( "localhost" ), 2222 ) )
          || !oexVERIFY( ia.GetDotAddress() == oexT( "127.0.0.1" ) )
          || !oexVERIFY( ia.GetPort() == 2222 ) )
         return -5;
 
+    if ( !oexVERIFY( ia.LookupUrl( oexT( "http://user:password@localhost:1111/my/path/doc.php?a=b&c=d" ) ) )
+         || !oexVERIFY( ia.GetDotAddress() == oexT( "127.0.0.1" ) )
+         || !oexVERIFY( ia.GetPort() == 1111 ) )
+        return -4;
+
     ia.LookupHost( oexT( "google.com" ), 80 );
-    oexTRACE( oexT( "%s\n" ), ia.GetId().Ptr() );
+    oexTRACE( oexT( "google.com = %s = %s\n" ), ia.GetDotAddress().Ptr(), ia.GetId().Ptr() );
 
     oex::os::CIpSocket::UninitSockets();
 
@@ -1255,24 +1256,26 @@ oex::oexRESULT Test_CIpSocket()
     if ( !oexVERIFY( server.Accept( session ) ) )
         return -6;
 
-    if ( !oexVERIFY( session.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_WAIT_TIMEOUT ) )
-         || !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
-        return -7;
+    if ( !oexVERIFY( session.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
+    	return -7;
+
+    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
+        return -8;
 
     oex::oexCSTR pStr = oexT( "B6F5FF3D-E9A5-46ca-ADB8-D655427EB94D" );
 
     if ( !oexVERIFY( session.Send( oexStrToBin( pStr ) ) ) )
-        return -8;
-
-    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eReadEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
         return -9;
 
-    if ( !oexVERIFY( oexBinToStr( client.Recv() ) == pStr ) )
+    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eReadEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
         return -10;
+
+    if ( !oexVERIFY( oexBinToStr( client.Recv() ) == pStr ) )
+        return -11;
 
     client.Destroy();
     if ( !oexVERIFY( session.WaitEvent( oex::os::CIpSocket::eCloseEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
-        return -11;
+        return -12;
 
     session.Destroy();
     server.Destroy();
@@ -1282,22 +1285,22 @@ oex::oexRESULT Test_CIpSocket()
 
     if ( !oexVERIFY( server.Create( oex::os::CIpSocket::eAfInet, oex::os::CIpSocket::eTypeDgram, oex::os::CIpSocket::eProtoUdp ) )
          || !oexVERIFY( server.Bind( 12345 ) ) )
-        return -12;
-
-    if ( !oexVERIFY( client.Create( oex::os::CIpSocket::eAfInet, oex::os::CIpSocket::eTypeDgram, oex::os::CIpSocket::eProtoUdp ) ) )
         return -13;
 
-    if ( !oexVERIFY( client.PeerAddress().LookupHost( oexT( "localhost" ), 12345 ) ) )
+    if ( !oexVERIFY( client.Create( oex::os::CIpSocket::eAfInet, oex::os::CIpSocket::eTypeDgram, oex::os::CIpSocket::eProtoUdp ) ) )
         return -14;
 
-    if ( !oexVERIFY( client.SendTo( oexStrToBin( pStr ) ) ) )
+    if ( !oexVERIFY( client.PeerAddress().LookupHost( oexT( "localhost" ), 12345 ) ) )
         return -15;
 
-    if ( !oexVERIFY( server.WaitEvent( oex::os::CIpSocket::eReadEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
+    if ( !oexVERIFY( client.SendTo( oexStrToBin( pStr ) ) ) )
         return -16;
 
-    if ( !oexVERIFY( oexBinToStr( server.RecvFrom() ) == pStr ) )
+    if ( !oexVERIFY( server.WaitEvent( oex::os::CIpSocket::eReadEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
         return -17;
+
+    if ( !oexVERIFY( oexBinToStr( server.RecvFrom() ) == pStr ) )
+        return -18;
 
     client.Destroy();
     server.Destroy();

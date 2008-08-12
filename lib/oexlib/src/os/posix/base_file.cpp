@@ -47,7 +47,7 @@ oexSTATIC_ASSERT( sizeof( CBaseFile::t_HFIND ) == sizeof( DIR* ) );
 const CBaseFile::t_HFILE CBaseFile::c_Invalid = NULL;
 const CBaseFile::t_HFIND CBaseFile::c_InvalidFindHandle = NULL;
 
-CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, oexUINT x_eAccess, oexUINT x_eShare, oexUINT x_uFlags, oexUINT *x_puError )
+CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, oexUINT x_eAccess, oexUINT x_eShare, oexUINT x_uFlags, oexINT *x_pnError )
 {
 	// Select mode string
 /*	oexCSTR pMode = oexT( "" );
@@ -74,37 +74,37 @@ CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, o
 //	t_HFILE hFile =	fopen( oexStrToMbPtr( x_pFile ), oexStrToMbPtr( pMode ) );
 	t_HFILE hFile =	(t_HFILE)open( oexStrToMbPtr( x_pFile ), nMode, 0777 );
 
-	if ( x_puError )
+	if ( x_pnError )
 	{
 		if ( !hFile )
-			*x_puError = errno;
+			*x_pnError = errno;
 		else
-			*x_puError = 0;
+			*x_pnError = 0;
 	} // end if
 
 	return hFile;
 }
 
-oexBOOL CBaseFile::Close( CBaseFile::t_HFILE x_hFile, oexUINT *x_puErr )
+oexBOOL CBaseFile::Close( CBaseFile::t_HFILE x_hFile, oexINT *x_pnErr )
 {
     if ( CBaseFile::c_InvalidFindHandle == x_hFile )
         return oexFALSE;
 
     oexBOOL bRet = close( (int)x_hFile ) ? oexFALSE : oexTRUE;
 
-    if ( x_puErr )
+    if ( x_pnErr )
     {
     	if ( bRet )
-    		*x_puErr = 0;
+    		*x_pnErr = 0;
         else
-        	*x_puErr = errno;
+        	*x_pnErr = errno;
 
     } // end if
 
     return bRet;
 }
 
-oexBOOL CBaseFile::Write( CBaseFile::t_HFILE x_hFile, oexCPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllWritten, oexUINT *x_puErr )
+oexBOOL CBaseFile::Write( CBaseFile::t_HFILE x_hFile, oexCPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllWritten, oexINT *x_pnErr )
 {
 //    oexUINT uWritten = write( x_pData, 1, x_uSize, (FILE*)hFile );
 	oexINT64 llWritten = write( (int)x_hFile, x_pData, x_llSize );
@@ -112,27 +112,27 @@ oexBOOL CBaseFile::Write( CBaseFile::t_HFILE x_hFile, oexCPVOID x_pData, oexINT6
     if ( x_pllWritten )
         *x_pllWritten = llWritten;
 
-    if ( x_puErr )
+    if ( x_pnErr )
     {
     	if ( x_llSize == llWritten )
-    		*x_puErr = 0;
+    		*x_pnErr = 0;
         else
-        	*x_puErr = errno;
+        	*x_pnErr = errno;
 
     } // end if
 
     return ( x_llSize == llWritten );
 }
 
-oexBOOL CBaseFile::Read( CBaseFile::t_HFILE x_hFile, oexPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllRead, oexUINT *x_puErr )
+oexBOOL CBaseFile::Read( CBaseFile::t_HFILE x_hFile, oexPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllRead, oexINT *x_pnErr )
 {
 //	oexUINT uRead = fread( x_pData, 1, x_uSize, (FILE*)hFile );
 	oexINT64 llRead = read( (int)x_hFile, x_pData, x_llSize );
 
 	if ( 0 > llRead )
 	{
-	    if ( x_puErr )
-    		*x_puErr = errno;
+	    if ( x_pnErr )
+    		*x_pnErr = errno;
 
 		if ( x_pllRead )
 			*x_pllRead = 0;

@@ -180,6 +180,13 @@ public:
 		eAllEvents						= ( ( 1 << eNumEvents ) - 1 )
 	};
 
+	enum
+	{
+		/// Maximum number of events handled on a single call to
+		/// epoll_wait() (linux only)
+		eMaxEvents						= 1000
+	};
+
     /// Socket handle type
     typedef oexPVOID t_SOCKET;
 
@@ -667,6 +674,12 @@ public:
     static oexCONST t_SOCKET vSocketError()
     {   return c_SocketError; }
 
+	/// Converts windows event flags to unix event flags
+	static oexINT FlagWinToNix( oexINT x_nFlag );
+
+	/// Converts unix event flags to windows event flags
+	static oexINT FlagNixToWin( oexINT x_nFlag );
+
 private:
 
 	/// Socket API initialization return code
@@ -698,6 +711,9 @@ private:
 
     /// Event status flags
     oexUINT                 m_uEventStatus[ eNumEvents ];
+
+	/// Pointer to event object (UNIX only)
+	oexPVOID				m_pEventObject;
 
     /// Socket family
     oexUINT                 m_uSocketFamily;

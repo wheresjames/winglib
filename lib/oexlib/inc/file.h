@@ -105,7 +105,7 @@ public:
         // Start with an invalid file handle
         m_hFile = os::CBaseFile::vInvalid();
 
-        m_uLastError = 0;
+        m_nLastError = 0;
 
     }
 
@@ -144,7 +144,7 @@ public:
                             oexUINT x_eAccess = os::CBaseFile::eAccessRead | os::CBaseFile::eAccessWrite,
                             oexUINT x_eShare = os::CBaseFile::eShareRead | os::CBaseFile::eShareWrite )
     {   Destroy();
-        m_hFile = os::CBaseFile::Create( x_pFile, x_eDisposition, x_eAccess, x_eShare, 0, &m_uLastError );
+        m_hFile = os::CBaseFile::Create( x_pFile, x_eDisposition, x_eAccess, x_eShare, 0, &m_nLastError );
         if ( os::CBaseFile::vInvalid != m_hFile ) m_sFileName = x_pFile;
         return *this;
     }
@@ -174,7 +174,7 @@ public:
 	*/
     oexBOOL Read( oexPVOID x_pBuf, oexINT64 x_llSize, oexINT64 *x_pllRead = oexNULL )
     {   if ( os::CBaseFile::vInvalid() == m_hFile ) return oexFALSE;
-        return os::CBaseFile::Read( m_hFile, x_pBuf, x_llSize, x_pllRead, &m_uLastError );
+        return os::CBaseFile::Read( m_hFile, x_pBuf, x_llSize, x_pllRead, &m_nLastError );
     }
 
 	//==============================================================
@@ -205,7 +205,7 @@ public:
 	*/
     oexBOOL Write( oexCPVOID x_pBuf, oexINT64 x_llSize, oexINT64 *x_pllWritten = oexNULL )
     {   if ( os::CBaseFile::vInvalid() == m_hFile ) return oexFALSE;
-        return os::CBaseFile::Write( m_hFile, x_pBuf, x_llSize, x_pllWritten, &m_uLastError );
+        return os::CBaseFile::Write( m_hFile, x_pBuf, x_llSize, x_pllWritten, &m_nLastError );
     }
 
 	//==============================================================
@@ -331,8 +331,8 @@ public:
     }
 
 	/// Returns the last error code
-	oexUINT GetLastError()
-	{	return m_uLastError; }
+	oexINT GetLastError()
+	{	return m_nLastError; }
 
 	/// Finds the specified string of characters in the file
 	/**
@@ -375,7 +375,7 @@ private:
     CStr                                m_sFileName;
 
     /// Last error value
-    oexUINT                             m_uLastError;
+    oexINT                              m_nLastError;
 
 };
 

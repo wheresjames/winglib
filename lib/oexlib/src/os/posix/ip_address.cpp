@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -51,12 +51,12 @@ using namespace OEX_NAMESPACE::os;
 oexBOOL CIpAddress::SetRawAddress( oexINT64 x_llIp, oexINT32 x_uPort, oexINT32 x_uType )
 {
     // Set the ip address
-    if ( x_uType == eAddrTypeIpv4 ) 
+    if ( x_uType == eAddrTypeIpv4 )
         m_uIpv4 = (oexUINT32)x_llIp, m_uIpv4Extra = 0;
     else m_llIpv6 = x_llIp;
 
     // Port number
-    m_uPort = x_uPort; 
+    m_uPort = x_uPort;
 
     // Type information
     m_uType = x_uType;
@@ -74,7 +74,7 @@ oexBOOL CIpAddress::ValidateAddress()
 {
     // Save the crc
     oexUINT uCrc = m_uCrc;
-    
+
     // Create hash
     oexUCHAR ucHash[ CCrcHash::eHashSize ];
     CCrcHash::Hash( &ucHash, &m_guid, sizeof( m_guid ) );
@@ -96,7 +96,7 @@ oexBOOL CIpAddress::SetDotAddress( oexCSTR x_pDotAddress, oexINT32 x_uPort, oexI
 
     // Convert the dot address
     u_long ip = ntohl( inet_addr( oexStrToStr8Ptr( x_pDotAddress ) ) );
-    if ( INADDR_NONE == ip ) 
+    if ( INADDR_NONE == ip )
         return oexFALSE;
 
     SetRawAddress( ip, x_uPort, x_uType );
@@ -105,16 +105,14 @@ oexBOOL CIpAddress::SetDotAddress( oexCSTR x_pDotAddress, oexINT32 x_uPort, oexI
 }
 
 CStr CIpAddress::GetDotAddress()
-{ 
-	return CStr();
-  
-//    in_addr ia;
+{
+    in_addr ia;
 
     // Put the address in the structure
-//    ia.S_un.S_addr = htonl( (u_long)GetIpv4() );
+    ia.s_addr = htonl( (u_long)GetIpv4() );
 
 	// Create dot address if needed
-//	return oexStr8ToStr( inet_ntoa( ia ) );
+	return oexStr8ToStr( inet_ntoa( ia ) );
 }
 
 oexCONST oexGUID* CIpAddress::GetId( oexGUID *x_pGuid )
@@ -131,124 +129,113 @@ CIpAddress& CIpAddress::SetId( oexCONST oexGUID *x_pGuid )
 
 CStr CIpAddress::BuildUrl( CPropertyBag &x_pbUi )
 {
-	return CStr();
+	CStr str;
 
-/*
-    URL_COMPONENTS uc;
-    os::CSys::Zero( &uc, sizeof( uc ) );
-    uc.dwStructSize = sizeof( URL_COMPONENTS );
+	// Scheme
+	if ( x_pbUi[ oexT( "scheme" ) ].ToString().Length() )
+		str << x_pbUi[ oexT( "scheme" ) ].ToString() << oexT( "://" );
 
-    uc.dwSchemeLength = x_pbUi[ oexT( "scheme" ) ].ToString().Length();
-    uc.lpszScheme = x_pbUi[ oexT( "scheme" ) ].ToString()._Ptr();
+	// Username and password?
+	if ( x_pbUi[ oexT( "username" ) ].ToString().Length() )
+	{
+		if ( x_pbUi[ oexT( "password" ) ].ToString().Length() )
+			str << x_pbUi[ oexT( "username" ) ].ToString()
+			    << oexT( ":" )
+			    << x_pbUi[ oexT( "password" ) ].ToString()
+			    << oexT( "@" );
+		else
+			str << x_pbUi[ oexT( "username" ) ].ToString() << oexT( "@" );
 
-    uc.dwHostNameLength = x_pbUi[ oexT( "host" ) ].ToString().Length();
-    uc.lpszHostName = x_pbUi[ oexT( "host" ) ].ToString()._Ptr();
+	} // end if
 
-    uc.dwUserNameLength = x_pbUi[ oexT( "username" ) ].ToString().Length();
-    uc.lpszUserName = x_pbUi[ oexT( "username" ) ].ToString()._Ptr();
+	// Username and password?
+	if ( x_pbUi[ oexT( "host" ) ].ToString().Length() )
+	{
+		if ( x_pbUi[ oexT( "host" ) ].ToString().Length() )
+			str << x_pbUi[ oexT( "host" ) ].ToString()
+			    << oexT( ":" )
+			    << x_pbUi[ oexT( "port" ) ].ToString();
+		else
+			str << x_pbUi[ oexT( "host" ) ].ToString();
 
-    uc.dwPasswordLength = x_pbUi[ oexT( "password" ) ].ToString().Length();
-    uc.lpszPassword = x_pbUi[ oexT( "password" ) ].ToString()._Ptr();
+	} // end if
 
-    uc.dwUrlPathLength = x_pbUi[ oexT( "path" ) ].ToString().Length();
-    uc.lpszUrlPath = x_pbUi[ oexT( "path" ) ].ToString()._Ptr();
+	// Ensure separator
+	if ( oexT( '/' ) != *x_pbUi[ oexT( "path" ) ].ToString().Ptr()
+	     && oexT( '\\' ) != *x_pbUi[ oexT( "path" ) ].ToString().Ptr() )
+		str << oexT( '/' );
 
-    // !!! Right or wrong, I'm going to hide this detail.
-    CStr extra; 
-    if ( x_pbUi[ oexT( "extra" ) ].ToString().Length() )
-    {   extra << oexT( "?" ) << x_pbUi[ oexT( "extra" ) ].ToString();
-        uc.dwExtraInfoLength = extra.Length();
-        uc.lpszExtraInfo = extra._Ptr();
-    } // end if
+	// Append the path
+	str << x_pbUi[ oexT( "path" ) ].ToString();
 
-    else
-    {   uc.dwExtraInfoLength = x_pbUi[ oexT( "extra" ) ].ToString().Length();
-        uc.lpszExtraInfo = x_pbUi[ oexT( "extra" ) ].ToString()._Ptr();
-    } // end else    
+	// Adding separator
+	if ( x_pbUi[ oexT( "extra" ) ].ToString().Length() )
+		str << oexT( "?" ) << x_pbUi[ oexT( "extra" ) ].ToString();
 
-    uc.nScheme = (INTERNET_SCHEME)x_pbUi[ oexT( "scheme_id" ) ].ToLong();
-
-    uc.nPort = (INTERNET_PORT)x_pbUi[ oexT( "port" ) ].ToLong();
-
-    CStr str;
-    DWORD dwLen = oexSTRSIZE;
-    if ( !str.OexAllocate( oexSTRSIZE ) )    
-        return CStr();
-
-
-    // Attempt to create url
-    if ( !InternetCreateUrl( &uc, ICU_ESCAPE, str._Ptr(), &dwLen ) )
-    {
-        // Was the buffer too small?
-        if ( ERROR_INSUFFICIENT_BUFFER != GetLastError() )
-            return CStr();
-
-        dwLen += 2;
-        if ( !str.Allocate( dwLen ) )
-            return CStr();
-
-        // Try again
-        if ( !InternetCreateUrl( &uc, ICU_ESCAPE, str._Ptr(), &dwLen ) )
-            return CStr();
-
-    } // end if
-
-    return str;
- */
+	return str;
 }
 
+// Assuming formating like...
+//  http://user:password@www.somesite.com/directory/somefile.php?param=1&param=2
 CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
 {
-	return CPropertyBag();
-
-/*
     CPropertyBag pb;
 
     if ( !oexVERIFY( pUrl ) )
         return CPropertyBag();
 
-    oexUINT uLen = zstr::Length( pUrl );
-                    
-    // I assume the components can't be longer than the url
-    if ( !uMaxBufferSize )
-        uMaxBufferSize = uLen + 2;
+    CStr str = pUrl;
 
-    URL_COMPONENTS uc;
-    os::CSys::Zero( &uc, sizeof( uc ) );
-    uc.dwStructSize = sizeof( URL_COMPONENTS );
+	// Read in the scheme
+	pb[ oexT( "scheme" ) ].ToString() = str.Parse( oexT( ":" ) );
 
-    uc.dwSchemeLength = uMaxBufferSize;
-    uc.lpszScheme = pb[ oexT( "scheme" ) ].ToString().OexAllocate( uMaxBufferSize );
-    
-    uc.dwHostNameLength = uMaxBufferSize;
-    uc.lpszHostName = pb[ oexT( "host" ) ].ToString().OexAllocate( uMaxBufferSize );
+	// Trim off leading forward slashes
+	str.LTrim( oexT( ":/" ) );
 
-    uc.dwUserNameLength = uMaxBufferSize;
-    uc.lpszUserName = pb[ oexT( "username" ) ].ToString().OexAllocate( uMaxBufferSize );
+	// Is there a username / password?
+	CStr tmp = str.Parse( oexT( "@" ) );
+	if ( tmp.Length() )
+	{
+		// Skip the @
+		str++;
 
-    uc.dwPasswordLength = uMaxBufferSize;
-    uc.lpszPassword = pb[ oexT( "password" ) ].ToString().OexAllocate( uMaxBufferSize );
+		// Divide username and password
+		CStr s = tmp.Parse( oexT( ":" ) );
+		if ( s.Length () )
+		{	pb[ oexT( "username" ) ].ToString() = s;
+			tmp++; pb[ oexT( "password" ) ].ToString() = tmp;
+		} // end if
+		else
+			pb[ oexT( "username" ) ].ToString() = tmp;
 
-    uc.dwUrlPathLength = uMaxBufferSize;
-    uc.lpszUrlPath = pb[ oexT( "path" ) ].ToString().OexAllocate( uMaxBufferSize );
+	} // end if
 
-    uc.dwExtraInfoLength = uMaxBufferSize;
-    uc.lpszExtraInfo = pb[ oexT( "extra" ) ].ToString().OexAllocate( uMaxBufferSize );
+	// Is there a username / password?
+	tmp = str.Parse( oexT( "/" ) );
+	if ( tmp.Length() )
+	{
+		CStr s = tmp.Parse( oexT( ":" ) );
+		if ( s.Length () )
+		{	pb[ oexT( "host" ) ].ToString() = s;
+			tmp++; pb[ oexT( "port" ) ].ToString() = tmp;
+		} // end if
+		else
+			pb[ oexT( "host" ) ].ToString() = tmp;
 
-    // Attempt to crack the url
-//    if ( !InternetCrackUrl( pUrl, uLen, ICU_DECODE | ICU_ESCAPE, &uc ) )
-        return CPropertyBag();
+	} // end if
 
-    // Grab the port and scheme id
-    pb[ oexT( "scheme_id" ) ] = uc.nScheme;
-    pb[ oexT( "port" ) ] = uc.nPort;
+	// Grab the path
+	pb[ oexT( "path" ) ].ToString() = str.Parse( oexT( "?" ) );
 
-    // !!! What a pain... See the above hack to hide this detail
-    if ( oexT( '?' ) == *pb[ oexT( "extra" ) ].ToString().Ptr() )
-        pb[ oexT( "extra" ) ].ToString().LTrim( 1 );
+	// Trim separator if any
+    if ( oexT( '?' ) == *str.Ptr() )
+        str.LTrim( 1 );
 
-    return pb;
-*/
+	// Anything left over?
+	if ( str.Length() )
+		pb[ oexT( "extra" ) ].ToString() = str;
+
+	return pb;
 }
 
 oexBOOL CIpAddress::LookupUrl( oexCSTR x_pUrl, oexINT32 x_uPort, oexINT32 x_uType )
@@ -264,7 +251,7 @@ oexBOOL CIpAddress::LookupUrl( oexCSTR x_pUrl, oexINT32 x_uPort, oexINT32 x_uTyp
     CPropertyBag pbUrl = ParseUrl( x_pUrl );
     if ( !pbUrl.Size() )
         return oexFALSE;
-    
+
     // Did we get a host name?
     if ( !pbUrl[ oexT( "host" ) ].ToString().Length() )
         return oexFALSE;
@@ -287,30 +274,27 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
     // Ensure we have a valid pointer
     if ( !oexVERIFY_PTR( x_pServer ) )
         return oexFALSE;
-        
-    return oexFALSE;
-/*
+
 	// First try to interpret as dot address
-	ULONG uAddr = inet_addr( oexStrToStr8Ptr( x_pServer ) );
+	oexULONG uAddr = inet_addr( oexStrToStr8Ptr( x_pServer ) );
 	if ( INADDR_NONE == uAddr )
     {
-        LPHOSTENT pHe = gethostbyname( oexStrToStr8Ptr( x_pServer ) );
+        struct hostent *pHe = gethostbyname( oexStrToStr8Ptr( x_pServer ) );
 
         if ( !pHe )
             return oexFALSE;
 
-        LPIN_ADDR pia = (LPIN_ADDR)*pHe->h_addr_list;
+        in_addr *pia = (in_addr*)*pHe->h_addr_list;
         if ( !oexVERIFY_PTR( pia ) )
             return oexFALSE;
 
         // Grab the address
-        uAddr = *(DWORD*)&pia->S_un.S_addr;
+        uAddr = *(oexULONG*)&pia->s_addr;
 
     } // end if
 
     SetRawAddress( ntohl( uAddr ), x_uPort, x_uType );
 
     return oexTRUE;
-*/
 }
 

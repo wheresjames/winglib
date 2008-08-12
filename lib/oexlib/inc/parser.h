@@ -612,8 +612,7 @@ public:
 
       \code
 
-        CStrList lst;
-        int nNumPermutations = StringPermutations( _T( "abc" ), s );
+        CStrList lst = StringPermutations( _T( "abc" ) );
 
       \endcode
     */

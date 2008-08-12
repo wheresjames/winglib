@@ -42,7 +42,7 @@ oexBOOL CFile::Destroy()
 
     // Close any open file
     if ( os::CBaseFile::vInvalid() != m_hFile )
-    {   bRet = os::CBaseFile::Close( m_hFile, &m_uLastError );
+    {   bRet = os::CBaseFile::Close( m_hFile, &m_nLastError );
         m_hFile = os::CBaseFile::vInvalid();
     } // end if
 

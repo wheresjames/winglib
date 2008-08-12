@@ -134,20 +134,20 @@ private:
 public:
 
 	/// Creates or opens the specified file
-    static t_HFILE Create( oexCSTR x_pFile, oexUINT x_eDisposition, oexUINT x_eAccess, oexUINT x_eShare, oexUINT x_uFlags, oexUINT *x_puError );
+    static t_HFILE Create( oexCSTR x_pFile, oexUINT x_eDisposition, oexUINT x_eAccess, oexUINT x_eShare, oexUINT x_uFlags, oexINT *x_pnError );
 
 	/// Closes the specified file handle
-    static oexBOOL Close( t_HFILE x_hFile, oexUINT *x_puErr );
+    static oexBOOL Close( t_HFILE x_hFile, oexINT *x_pnErr );
 
 	/// Invalid file handle value
     static t_HFILE vInvalid()
     {   return c_Invalid; }
 
 	/// Writes data to a file handle
-    static oexBOOL Write( t_HFILE x_hFile, oexCPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllWritten, oexUINT *x_puErr );
+    static oexBOOL Write( t_HFILE x_hFile, oexCPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllWritten, oexINT *x_pnErr );
 
 	/// Reads data from a file handle
-    static oexBOOL Read( t_HFILE x_hFile, oexPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllRead, oexUINT *x_puErr );
+    static oexBOOL Read( t_HFILE x_hFile, oexPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllRead, oexINT *x_pnErr );
 
 	/// Returns the size of the specified file
     static oexINT64 Size( t_HFILE hFile );

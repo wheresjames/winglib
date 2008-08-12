@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -64,7 +64,7 @@ static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, sockaddr_in *x_pSai 
         return oexFALSE;
 
     // Sets the raw address value
-//    x_pIa->SetRawAddress( ntohl( *(DWORD*)&x_pSai->sin_addr.S_un.S_addr ), ntohs( x_pSai->sin_port ) );
+    x_pIa->SetRawAddress( ntohl( *(oexULONG*)&x_pSai->sin_addr.s_addr ), ntohs( x_pSai->sin_port ) );
 
     return oexTRUE;
 }
@@ -79,7 +79,7 @@ static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, sockaddr_in *x_pSai 
 */
 static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, sockaddr *x_pSa )
 {
-//   return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa ); 
+   return CIpSocket_GetAddressInfo( x_pIa, (sockaddr_in*)x_pSa );
 }
 
 //==============================================================
@@ -97,10 +97,10 @@ static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, sockaddr_in *x_pSai 
         return oexFALSE;
 
     // Set the ip address
-//    *(DWORD*)&x_pSai->sin_addr.S_un.S_addr = htonl( (DWORD)x_pIa->GetIpv4() );
+    *(oexULONG*)&x_pSai->sin_addr.s_addr = htonl( (oexULONG)x_pIa->GetIpv4() );
 
     // Set the port
-//    x_pSai->sin_port = htons( (short)x_pIa->GetPort() );
+    x_pSai->sin_port = htons( (short)x_pIa->GetPort() );
 
     return oexTRUE;
 }
@@ -115,7 +115,7 @@ static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, sockaddr_in *x_pSai 
 */
 static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, sockaddr *x_pSa )
 {
-//   return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa ); 
+   return CIpSocket_GetAddressInfo( x_pIa, (sockaddr_in*)x_pSa );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -128,6 +128,57 @@ oexCONST CIpSocket::t_SOCKET CIpSocket::c_InvalidSocket = (CIpSocket::t_SOCKET)-
 oexCONST CIpSocket::t_SOCKETEVENT CIpSocket::c_InvalidEvent = (CIpSocket::t_SOCKETEVENT)-1;
 oexCONST CIpSocket::t_SOCKET CIpSocket::c_SocketError = (CIpSocket::t_SOCKET)-1;
 
+oexINT CIpSocket::FlagWinToNix( oexINT x_nFlag )
+{
+	oexINT nRet = 0;
+
+	if ( eReadEvent & x_nFlag )
+		nRet |= EPOLLIN | EPOLLPRI;
+
+	if ( eWriteEvent & x_nFlag )
+		nRet |= EPOLLOUT;
+
+	if ( eConnectEvent & x_nFlag )
+		nRet |= EPOLLIN | EPOLLPRI | EPOLLOUT;
+
+	if ( eCloseEvent & x_nFlag )
+		nRet |= EPOLLHUP | EPOLLRDHUP;
+
+//	if ( eCreateEvent & x_nFlag )
+//		nRet |= ;
+
+	// +++ I think the accept flag is the same as the read or write ???
+	if ( eAcceptEvent & x_nFlag )
+		nRet |= EPOLLIN | EPOLLPRI | EPOLLOUT;
+
+	return nRet;
+}
+
+oexINT CIpSocket::FlagNixToWin( oexINT x_nFlag )
+{
+	oexINT nRet = 0;
+
+	if ( ( EPOLLIN | EPOLLPRI ) & x_nFlag )
+		nRet |= eReadEvent;
+
+	if ( EPOLLOUT & x_nFlag )
+		nRet |= eWriteEvent;
+
+	if ( ( EPOLLIN | EPOLLPRI | EPOLLOUT ) & x_nFlag )
+		nRet |= eConnectEvent;
+
+	if ( ( EPOLLHUP | EPOLLRDHUP ) & x_nFlag )
+		nRet |= eCloseEvent;
+
+//	if(  & x_nFlag )
+//		nRet |= eCreateEvent;
+
+	// +++ I think the accept flag is the same as the read ???
+	if ( ( EPOLLIN | EPOLLPRI | EPOLLOUT ) & x_nFlag )
+		nRet |= eAcceptEvent;
+
+	return nRet;
+}
 
 CIpSocket::CIpSocket()
 {
@@ -145,10 +196,12 @@ CIpSocket::CIpSocket()
     m_uSocketFamily = 0;
     m_uSocketType = 0;
     m_uSocketProtocol = 0;
+
+    m_pEventObject = oexNULL;
 }
 
 CIpSocket::~CIpSocket()
-{	
+{
 	/// Lose the current socket
 	Destroy();
 }
@@ -156,7 +209,7 @@ CIpSocket::~CIpSocket()
 oexBOOL CIpSocket::InitSockets()
 {
 	// Quit if already initialized
-	if ( m_lInit == 0 ) 
+	if ( m_lInit == 0 )
         return oexTRUE;
 
 //	WSADATA wd;
@@ -164,13 +217,16 @@ oexBOOL CIpSocket::InitSockets()
 	// Attempt to initialize the Socket library
 //	m_lInit = WSAStartup( c_MinSocketVersion, &wd );
 
+	/// +++ Don't need init in linux?
+	m_lInit = 0;
+
 	return IsInitialized();
 }
 
 void CIpSocket::UninitSockets()
 {
 	// Punt if not initialized
-	if ( !IsInitialized() ) 
+	if ( !IsInitialized() )
 		return;
 
 	// Not initialized
@@ -183,14 +239,14 @@ void CIpSocket::UninitSockets()
 void CIpSocket::Destroy()
 {
 	// Punt if not initialized
-	if ( !IsInitialized() ) 
+	if ( !IsInitialized() )
 		return;
 
 	// Ditch the event handle
 	CloseEventHandle();
 
 	// Save socket pointer to socket
-//	SOCKET hSocket = (SOCKET)m_hSocket;
+	t_SOCKET hSocket = m_hSocket;
 
 	// Ditch member variable
 	m_hSocket = c_InvalidSocket;
@@ -209,15 +265,15 @@ void CIpSocket::Destroy()
     m_uSocketProtocol = 0;
 
 	// Ensure valid socket handle
-//	if ( c_InvalidSocket == hSocket ) 
-//		return;
+	if ( c_InvalidSocket == hSocket )
+		return;
 
 	// Close the socket
-//	closesocket( hSocket );
+	shutdown( (int)hSocket, SHUT_RDWR );
 
 	// Save the last error code
-//	m_uLastError = WSAGetLastError();
-	
+	m_uLastError = errno;
+
 }
 
 oexBOOL CIpSocket::Shutdown()
@@ -226,7 +282,7 @@ oexBOOL CIpSocket::Shutdown()
         return oexFALSE;
 
     // Shut down the socket
-//    shutdown( (SOCKET)m_hSocket, SD_BOTH );
+    shutdown( (int)m_hSocket, SHUT_RDWR );
 
     return oexTRUE;
 }
@@ -235,7 +291,7 @@ oexBOOL CIpSocket::Shutdown()
 oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 {
 	// Punt if not initialized
-	if ( !IsInitialized() ) 
+	if ( !IsInitialized() )
 		return oexFALSE;
 
 	// Close any open socket
@@ -243,7 +299,7 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 
 	// Create a scocket
 	m_hSocket = (t_SOCKET)socket( (int)x_af, (int)x_type, (int)x_protocol );
-	
+
 	// Save the last error code
 	m_uLastError = errno;
 
@@ -265,11 +321,11 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 oexBOOL CIpSocket::Bind( oexUINT x_uPort )
 {
 	// Punt if not initialized
-	if ( !IsInitialized() ) 
+	if ( !IsInitialized() )
 		return oexFALSE;
 
 	// Create socket if there is none
-	if ( !IsSocket() && !Create() ) 
+	if ( !IsSocket() && !Create() )
 	{	Destroy(); return oexFALSE; }
 
 	sockaddr_in sai;
@@ -296,11 +352,11 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 		return oexFALSE;
 
 	// Must have socket
-	if ( !IsSocket() ) 
+	if ( !IsSocket() )
         return oexFALSE;
 
 	// Valid number of connections?
-	if ( x_uMaxConnections == 0 ) 
+	if ( x_uMaxConnections == 0 )
         x_uMaxConnections = SOMAXCONN;
 
 	// Start the socket listening
@@ -310,9 +366,8 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 	m_uLastError = errno;
 
     // Return the result
-	return c_SocketError != (t_SOCKET)nRet;
+	return !nRet;
 }
-
 
 oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
 {
@@ -324,7 +379,7 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
 		return oexFALSE;
 
 	// Create socket if there is none
-	if ( !IsSocket() && !Create() ) 
+	if ( !IsSocket() && !Create() )
 	{	Destroy(); return oexFALSE; }
 
     // Were we passed a URL?
@@ -352,26 +407,26 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
 	return oexTRUE;
 }
 
-oexBOOL CIpSocket::Attach( t_SOCKET x_hSocket ) 
-{	
-    Destroy(); 
-	
-    m_hSocket = x_hSocket; 
+oexBOOL CIpSocket::Attach( t_SOCKET x_hSocket )
+{
+    Destroy();
 
-    return IsSocket(); 
+    m_hSocket = x_hSocket;
+
+    return IsSocket();
 }
 
 oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 {
     // Punt if no socket
-	if ( !IsSocket() ) 
+	if ( !IsSocket() )
 		return oexFALSE;
 
     // Lose any current connection there might be
     x_is.Destroy();
 
 	// Accept the connection
-	sockaddr saAddr; 
+	sockaddr saAddr;
 	socklen_t iAddr = sizeof( saAddr );
 
 	// Accept and encapsulate the socket
@@ -379,8 +434,8 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 
     // Check for error
     if ( !bSuccess )
-  	{   m_uLastError = errno; 
-        return oexFALSE; 
+  	{   m_uLastError = errno;
+        return oexFALSE;
     } // end if
 
     // Grab the address
@@ -398,8 +453,11 @@ oexBOOL CIpSocket::CreateEventHandle()
     if ( IsEventHandle() )
         return oexTRUE;
 
-    // Create socket event
-    m_hSocketEvent = m_hSocket;
+	// Create an event handle
+	m_hSocketEvent = (oexPVOID)epoll_create( 1 );
+
+	// Create event object
+	m_pEventObject = new epoll_event[ eMaxEvents ];
 
     // How did it turn out?
     return c_InvalidEvent != m_hSocketEvent;
@@ -407,37 +465,67 @@ oexBOOL CIpSocket::CreateEventHandle()
 
 void CIpSocket::CloseEventHandle()
 {
-    // Invalid handle value
-    m_hSocketEvent = c_InvalidEvent;
+	if ( c_InvalidEvent != m_hSocketEvent )
+	{
+		// Close event handle
+		close( (int)m_hSocketEvent );
+		m_hSocketEvent = c_InvalidEvent;
+
+	} // end if
+
+	// Release event object
+	if ( m_pEventObject )
+	{
+		// Lose the event object memory
+		delete [] (epoll_event*)m_pEventObject;
+		m_pEventObject = oexNULL;
+
+	} // end if
 }
 
 oexBOOL CIpSocket::EventSelect( oexLONG x_lEvents )
-{	
+{
     // Punt if no socket
-	if ( !IsSocket() ) 
+	if ( !IsSocket() )
 		return oexFALSE;
 
     // Must have event handle
-    if ( !IsEventHandle() )
+    if ( !IsEventHandle() || !m_pEventObject )
         CreateEventHandle();
 
-//	return ( WSAEventSelect( (SOCKET)m_hSocket, (WSAEVENT)m_hSocketEvent, x_lEvents ) == 0 ); 
+	// Clear events
+	m_uEventState = 0;
 
-	return oexFALSE;
+	epoll_event ev;
+	ev.data.fd = (int)m_hSocket;
+	ev.events = EPOLLERR | FlagWinToNix( x_lEvents );
+
+	// Set the event masks
+	int nRes = epoll_ctl( (int)m_hSocketEvent, EPOLL_CTL_ADD, (int)m_hSocket, &ev );
+
+	// Save last error
+	m_uLastError = nRes ? errno : 0;
+
+	return !nRes;
 }
 
 oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 {
 	// Must have a socket handle
-	if ( !IsSocket() ) 
+	if ( !IsSocket() )
         return 0;
 
     // Must have event handle
-    if ( !IsEventHandle() )
+    if ( !IsEventHandle() || !m_pEventObject )
     {   if ( !CreateEventHandle() || !EventSelect() )
             return 0;
     } // end if
-/*
+
+	// +++ Ensure our event is being waited on?
+
+	// Grab pointer to event object
+	epoll_event *pev = (epoll_event*)m_pEventObject;
+
 	// Save start time
 	oexUINT uEnd = CHqTimer::GetBootCount() + x_uTimeout;
 	for( ; ; )
@@ -445,53 +533,53 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
         // What's the event state
         if ( 0 == ( m_uEventState & x_lEventId ) )
         {
-            if ( x_uTimeout )
-            {
-		        // Wait for event
-		        oexUINT uRet = WaitForSingleObject( m_hSocketEvent, x_uTimeout );
+			// Wait for events
+			oexINT nRes = epoll_wait( (int)m_hSocketEvent, pev, eMaxEvents, x_uTimeout );
 
-		        // Check for timeout or error
-		        if ( uRet != WAIT_OBJECT_0 ) 
-                    return 0;
+			if ( 0 > nRes )
+			{
+				// Save last error
+				m_uLastError = errno;
 
-            } // end if
+				return 0;
 
-		    // Reset the network event
-		    ResetEvent( m_hSocketEvent );
+			} // end if
 
-		    // Get network events
-            WSANETWORKEVENTS wne; oexZeroMemory( &wne, sizeof( wne ) );
-		    if ( SOCKET_ERROR == WSAEnumNetworkEvents( (SOCKET)m_hSocket, m_hSocketEvent, &wne ) )
-			    return 0;
+			// Process all events
+			if ( nRes )
+				for ( oexINT i = 0; i < nRes; i++ )
+				{
+					// Convert to windows flags
+					oexUINT uFlags = FlagNixToWin( pev[ i ].events );
 
-            // Save the status of all events
-            for ( oexUINT uMask = 1; uMask < eAllEvents; uMask <<= 1 )
-                if ( wne.lNetworkEvents & uMask )
-                {   
-                    // Get bit offset
-                    oexUINT uOffset = GetEventBit( uMask );
-                    
-                    // Save the event info
-                    m_uEventState |= uMask;
-                    m_uEventStatus[ uOffset ] = wne.iErrorCode[ uOffset ];
-                    
-                    // Signal activity
-                    m_uConnectState |= 1;
+					// Save the status of all events
+					if ( pev[ i ].data.fd == (int)m_hSocket )
+						for ( oexUINT uMask = 1; uMask < eAllEvents; uMask <<= 1 )
+							if ( uFlags & uMask )
+							{
+								// Get bit offset
+								oexUINT uOffset = GetEventBit( uMask );
 
-                    // Signal when we get a connect message
-                    if ( 0 != ( FD_CONNECT & wne.lNetworkEvents ) )
-                        m_uConnectState |= 2;
+								// Save the event info
+								m_uEventState |= uMask;
+								m_uEventStatus[ uOffset ] = 0;
 
-                } // end if
+								// Signal activity
+								m_uConnectState |= 1;
+
+								// +++ Signal when we get a connect message
+//								if ( 0 != ( ( EPOLLIN | EPOLLOUT ) & uMask ) )
+//									m_uConnectState |= 2;
+
+							} // end if
+
+				} // end for
 
             // !!!  Kludge around missing connect message
-            //      If we're accepting a connection, we don't
-            //      get a connect message.  ( At least on Windows )
             if ( !( m_uConnectState & 2 ) && ( m_uConnectState & 1 ) )
             {   m_uConnectState |= 2;
-                wne.lNetworkEvents |= FD_CONNECT;
-                m_uEventState |= FD_CONNECT;
-                m_uEventStatus[ FD_CONNECT_BIT ] = 0;
+                m_uEventState |= eConnectEvent;
+                m_uEventStatus[ eConnectBit ] = 0;
             } // end if
 
         } // end if
@@ -515,15 +603,15 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 		} // end if
 
 		// Have we timed out?
-		oexUINT uTick = GetTickCount();
-		if ( uEnd <= uTick ) 
+		oexUINT uTick = CHqTimer::GetBootCount();
+		if ( uEnd <= uTick )
             return 0;
 
 		// Adjust timeout
 		x_uTimeout = uEnd - uTick;
 
 	} // end if
-*/
+
 	// Can't get here...
 	return 0;
 }
@@ -533,31 +621,31 @@ oexUINT CIpSocket::GetEventBit( oexLONG x_lEventMask )
     // !!!  Events will be returned by WaitEvent() in the order
     //      they appear below.
 /*
-	if ( 0 != ( FD_CONNECT & x_lEventMask ) ) 
+	if ( 0 != ( FD_CONNECT & x_lEventMask ) )
         return FD_CONNECT_BIT;
 
-	if ( 0 != ( FD_ACCEPT & x_lEventMask ) ) 
-        return FD_ACCEPT_BIT;	
+	if ( 0 != ( FD_ACCEPT & x_lEventMask ) )
+        return FD_ACCEPT_BIT;
 
-	if ( 0 != ( FD_WRITE & x_lEventMask ) ) 
+	if ( 0 != ( FD_WRITE & x_lEventMask ) )
         return FD_WRITE_BIT;
 
-	if ( 0 != ( FD_READ & x_lEventMask ) ) 
-        return FD_READ_BIT;	
+	if ( 0 != ( FD_READ & x_lEventMask ) )
+        return FD_READ_BIT;
 
-	if ( 0 != ( FD_OOB & x_lEventMask ) ) 
-        return FD_OOB_BIT;	
+	if ( 0 != ( FD_OOB & x_lEventMask ) )
+        return FD_OOB_BIT;
 
-	if ( 0 != ( FD_QOS & x_lEventMask ) ) 
+	if ( 0 != ( FD_QOS & x_lEventMask ) )
         return FD_QOS_BIT;
 
-	if ( 0 != ( FD_GROUP_QOS & x_lEventMask ) ) 
+	if ( 0 != ( FD_GROUP_QOS & x_lEventMask ) )
         return FD_GROUP_QOS_BIT;
 
-	if ( 0 != ( FD_ROUTING_INTERFACE_CHANGE & x_lEventMask ) ) 
+	if ( 0 != ( FD_ROUTING_INTERFACE_CHANGE & x_lEventMask ) )
         return FD_ROUTING_INTERFACE_CHANGE_BIT;
 
-	if ( 0 != ( FD_CLOSE & x_lEventMask ) ) 
+	if ( 0 != ( FD_CLOSE & x_lEventMask ) )
         return FD_CLOSE_BIT;
 */
 	return 0;
@@ -700,7 +788,7 @@ oexCSTR CIpSocket::GetErrorMsg( oexUINT x_uErr )
 		case WSA_NOT_ENOUGH_MEMORY:
 			ptr =oexT( "Insufficient memory available" );
 			break;
-		case WSANOTINITIALISED: 
+		case WSANOTINITIALISED:
 			ptr =oexT( "Successful WSAStartup not yet performed" );
 			break;
 		case WSANO_DATA:
@@ -745,45 +833,37 @@ oexCSTR CIpSocket::GetErrorMsg( oexUINT x_uErr )
 oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, oexUINT x_uFlags )
 {
 	// Initialize bytes read
-	if ( x_puRead ) 
+	if ( x_puRead )
         *x_puRead = 0;
 
 	// Must have a socket handle
-	if ( !IsSocket() ) 
+	if ( !IsSocket() )
         return oexFALSE;
 
-
-	return oexFALSE;
-/*	
-
-    SOCKADDR_IN si;
-    int nSize = sizeof( si );
+    sockaddr_in si;
+    socklen_t nSize = sizeof( si );
     os::CSys::Zero( &si, sizeof( si ) );
     si.sin_family = m_uSocketFamily;
 
 	// Receive data from socket
-	int nRet = recvfrom( (SOCKET)m_hSocket, (LPSTR)x_pData, (int)x_uSize, 
-                         (int)x_uFlags, (LPSOCKADDR)&si, &nSize );
+	int nRet = recvfrom( (int)m_hSocket, x_pData, (int)x_uSize,
+                         (int)x_uFlags, (sockaddr*)&si, &nSize );
 
     // Grab the last error code
-    m_uLastError = WSAGetLastError();
+    m_uLastError = errno;
 
     // Save the address
     CIpSocket_GetAddressInfo( &m_addrPeer, &si );
 
 	// Check for closed socket
-	if ( !nRet ) 
+	if ( !nRet )
         return 0;
 
 	// Check for socket error
-	if ( SOCKET_ERROR == nRet || x_uSize < (oexUINT)nRet  || 0 > nRet )
+	if ( -1 == nRet || x_uSize < (oexUINT)nRet  || 0 > nRet )
 	{
-		// Is the socket blocking?
-		if ( WSAEWOULDBLOCK != m_uLastError )
-			return 0;
-
 		// Nothing read
-		if ( x_puRead ) 
+		if ( x_puRead )
             *x_puRead = 0;
 
 		return 0;
@@ -791,36 +871,33 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 	} // end if
 
 	// Save the number of bytes read
-	if ( x_puRead ) 
+	if ( x_puRead )
         *x_puRead = nRet;
 
 	return nRet;
-*/
 }
 
 CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
-{   
-	return CStr8();
-/*
+{
     // Do we have a size limit?
     if ( x_uMax )
     {
         // Allocate buffer
-        CStr8 sBuf; 
-        oexCHAR *pBuf = sBuf.Allocate( x_uMax ); 
+        CStr8 sBuf;
+        oexCHAR *pBuf = sBuf.Allocate( x_uMax );
 
         // Attempt to read data
         oexUINT uRead = RecvFrom( sBuf._Ptr(), x_uMax, oexNULL, x_uFlags );
 
         // Accept as the length
-        sBuf.SetLength( uRead ); 
+        sBuf.SetLength( uRead );
 
         return sBuf;
 
     } // end if
 
     // Allocate buffer
-    CStr8 sBuf; 
+    CStr8 sBuf;
     oexUINT uRead = 0, uOffset = 0;
 
     // Allocate space
@@ -828,55 +905,48 @@ CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
         return sBuf;
 
     // Read all available data
-    while ( 0 < ( uRead = RecvFrom( sBuf._Ptr( uOffset ), oexSTRSIZE, oexNULL, x_uFlags ) ) 
+    while ( 0 < ( uRead = RecvFrom( sBuf._Ptr( uOffset ), oexSTRSIZE, oexNULL, x_uFlags ) )
             && uRead >= oexSTRSIZE )
     {
         // Allocate more space
-        uOffset += uRead;        
+        uOffset += uRead;
         if ( !sBuf.Allocate( uOffset + oexSTRSIZE ) )
             return sBuf;
-        
+
     } // end while
 
     // Set the length
     sBuf.SetLength( uOffset + uRead );
 
     return sBuf;
-*/
 }
 
 
 oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, oexUINT x_uFlags )
 {
 	// Initialize bytes read
-	if ( x_puRead ) 
+	if ( x_puRead )
         *x_puRead = 0;
 
 	// Must have a socket handle
-	if ( !IsSocket() ) 
+	if ( !IsSocket() )
         return oexFALSE;
-        
-    return 0;
-/*
+
 	// Receive data from socket
-	int nRet = recv( (SOCKET)m_hSocket, (LPSTR)x_pData, (int)x_uSize, (int)x_uFlags );
+	int nRet = recv( (int)m_hSocket, x_pData, (int)x_uSize, (int)x_uFlags );
 
     // Grab the last error code
-    m_uLastError = WSAGetLastError();
+    m_uLastError = errno;
 
 	// Check for closed socket
-	if ( !nRet ) 
+	if ( !nRet )
         return 0;
 
 	// Check for socket error
-	if ( SOCKET_ERROR == nRet || x_uSize < (oexUINT)nRet  || 0 > nRet )
+	if ( -1 == nRet || x_uSize < (oexUINT)nRet  || 0 > nRet )
 	{
-		// Is the socket blocking?
-		if ( WSAEWOULDBLOCK != m_uLastError )
-			return 0;
-
 		// Nothing read
-		if ( x_puRead ) 
+		if ( x_puRead )
             *x_puRead = 0;
 
 		return 0;
@@ -884,37 +954,33 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 	} // end if
 
 	// Save the number of bytes read
-	if ( x_puRead ) 
+	if ( x_puRead )
         *x_puRead = nRet;
 
 	return nRet;
-*/
 }
 
 CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
-{   
-	return CStr8();
-
-/*
+{
     // Do we have a size limit?
     if ( x_uMax )
     {
         // Allocate buffer
-        CStr8 sBuf; 
-        oexCHAR *pBuf = sBuf.Allocate( x_uMax ); 
+        CStr8 sBuf;
+        oexCHAR *pBuf = sBuf.Allocate( x_uMax );
 
         // Attempt to read data
         oexUINT uRead = Recv( sBuf._Ptr(), x_uMax, oexNULL, x_uFlags );
 
         // Accept as the length
-        sBuf.SetLength( uRead ); 
+        sBuf.SetLength( uRead );
 
         return sBuf;
 
     } // end if
 
     // Allocate buffer
-    CStr8 sBuf; 
+    CStr8 sBuf;
     oexUINT uRead = 0, uOffset = 0;
 
     // Allocate space
@@ -922,115 +988,101 @@ CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
         return sBuf;
 
     // Read all available data
-    while ( 0 < ( uRead = Recv( sBuf._Ptr( uOffset ), oexSTRSIZE, oexNULL, x_uFlags ) ) 
+    while ( 0 < ( uRead = Recv( sBuf._Ptr( uOffset ), oexSTRSIZE, oexNULL, x_uFlags ) )
             && uRead >= oexSTRSIZE )
     {
         // Allocate more space
-        uOffset += uRead;        
+        uOffset += uRead;
         if ( !sBuf.Allocate( uOffset + oexSTRSIZE ) )
             return sBuf;
-        
+
     } // end while
 
     // Set the length
     sBuf.SetLength( uOffset + uRead );
 
     return sBuf;
-*/
 }
-
 
 oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, oexUINT x_uFlags )
 {
 	// Initialize bytes sent
-	if ( x_puSent ) 
+	if ( x_puSent )
         *x_puSent = 0;
 
 	// Must have a socket handle
-	if ( !IsSocket() ) 
+	if ( !IsSocket() )
         return 0;
-        
-    return 0;
-/*
+
     // Use the peer address
-    SOCKADDR_IN si;
+    sockaddr_in si;
     os::CSys::Zero( &si, sizeof( si ) );
     si.sin_family = m_uSocketFamily;
     CIpSocket_SetAddressInfo( &m_addrPeer, &si );
 
     // Send the data
-    int nRet = sendto( (SOCKET)m_hSocket, (LPCSTR)x_pData, (int)x_uSize, 
-                       (int)x_uFlags, (LPSOCKADDR)&si, sizeof( si ) );
+    int nRet = sendto( (int)m_hSocket, x_pData, (int)x_uSize,
+                       (int)x_uFlags, (sockaddr*)&si, sizeof( si ) );
 
 	// Get the last error code
-	m_uLastError = WSAGetLastError();
+	m_uLastError = errno;
 
 	// Check for error
-	if ( SOCKET_ERROR == nRet )
+	if ( -1 == nRet )
 	{
-		// Is the socket blocking?
-		if ( WSAEWOULDBLOCK != m_uLastError )
-			return 0;
-
 		// Number of bytes sent
-		if ( x_puSent ) 
+		if ( x_puSent )
             *x_puSent = 0;
-			
+
 		// Error
 		return 0;
 
 	} // end if
 
 	// Save the number of bytes sent
-	if ( x_puSent ) 
+	if ( x_puSent )
         *x_puSent = nRet;
 
 	return nRet;
-*/
 }
-
 
 oexUINT CIpSocket::Send( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, oexUINT x_uFlags )
 {
 	// Initialize bytes sent
-	if ( x_puSent ) 
+	if ( x_puSent )
         *x_puSent = 0;
 
 	// Must have a socket handle
-	if ( !IsSocket() ) 
+	if ( !IsSocket() )
         return 0;
-        
-    return 0;
-    
-/*
+
 	// Attempt to send the data
-	int nRet = send( (SOCKET)m_hSocket, (LPCSTR)x_pData, (int)x_uSize, (int)x_uFlags );
+	int nRet = send( (int)m_hSocket, x_pData, (int)x_uSize, (int)x_uFlags );
 
 	// Get the last error code
-	m_uLastError = WSAGetLastError();
+	m_uLastError = errno;
 
 	// Check for error
-	if ( SOCKET_ERROR == nRet )
+	if ( -1 == nRet )
 	{
 		// Is the socket blocking?
-		if ( WSAEWOULDBLOCK != m_uLastError )
-			return 0;
+//		if ( WSAEWOULDBLOCK != m_uLastError )
+//			return 0;
 
 		// Number of bytes sent
-		if ( x_puSent ) 
+		if ( x_puSent )
             *x_puSent = 0;
-			
+
 		// Error
 		return 0;
 
 	} // end if
 
 	// Save the number of bytes sent
-	if ( x_puSent ) 
+	if ( x_puSent )
         *x_puSent = nRet;
 
-	return nRet;	
-*/
+	return nRet;
 }
 
 oexBOOL CIpSocket::GetPeerAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
@@ -1038,9 +1090,6 @@ oexBOOL CIpSocket::GetPeerAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
     if ( !oexVERIFY_PTR( x_pIa ) )
         return oexFALSE;
 
-	return oexFALSE;
-	
-/*
     // Reset address information
     x_pIa->Destroy();
 
@@ -1049,27 +1098,24 @@ oexBOOL CIpSocket::GetPeerAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
         return oexFALSE;
 
     // Init socket structure
-	SOCKADDR_IN sai; 
+	sockaddr_in sai;
     os::CSys::Zero( &sai, sizeof( sai ) );
-	int len = sizeof( sai );
+	socklen_t len = sizeof( sai );
 
 	// Get the socket info
-	if ( getpeername( (SOCKET)x_hSocket, (sockaddr*)&sai, &len ) )
+	if ( getpeername( (int)x_hSocket, (sockaddr*)&sai, &len ) )
 		return oexFALSE;
 
     // Format the info
     return CIpSocket_GetAddressInfo( x_pIa, &sai );
-*/ 
+
 }
 
 oexBOOL CIpSocket::GetLocalAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
 {
     if ( !oexVERIFY_PTR( x_pIa ) )
         return oexFALSE;
-        
-    return oexFALSE;
-    
-/*
+
     // Reset address information
     x_pIa->Destroy();
 
@@ -1078,15 +1124,14 @@ oexBOOL CIpSocket::GetLocalAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
         return oexFALSE;
 
     // Init socket structure
-	SOCKADDR_IN sai; 
+	sockaddr_in sai;
     os::CSys::Zero( &sai, sizeof( sai ) );
-	int len = sizeof( sai );
+	socklen_t len = sizeof( sai );
 
 	// Get the socket info
-	if ( getsockname( (SOCKET)x_hSocket, (sockaddr*)&sai, &len ) )
+	if ( getsockname( (int)x_hSocket, (sockaddr*)&sai, &len ) )
 		return oexFALSE;
 
     // Format the info
     return CIpSocket_GetAddressInfo( x_pIa, &sai );
-*/
 }

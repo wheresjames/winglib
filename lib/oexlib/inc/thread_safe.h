@@ -115,7 +115,8 @@ public:
 	*/
 	oexBOOL Lock( oexULONG x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
 	{
-		oexTRACE( oexT( "Lock not implemented!\n" ) );
+		// +++ Implement this lock!
+//		oexTRACE( oexT( "Lock not implemented!\n" ) );
 		return oexTRUE;
 
         m_bLocked = ( os::CSys::waitSuccess == os::CSys::WaitForSingleObject( m_hMutex, x_uTimeout ) );
@@ -338,7 +339,7 @@ public:
     {
 		// Close event handle
 		void* hTemp = m_hEvent;
-        m_hEvent = os::CResource::cInvalid();
+        m_hEvent = CResource::cInvalid();
 		if ( hTemp )
             os::CEvent::osDestroyEvent( hTemp );
     }
@@ -373,7 +374,7 @@ public:
 		\see
 	*/
 	oexBOOL Wait( oexUINT x_uTimeout )
-	{	return os::CEvent::waitSuccess == os::CEvent::osWaitForSingleObject( m_hEvent, x_uTimeout ); }
+	{	return CResource::waitSuccess == os::CEvent::osWaitForSingleObject( m_hEvent, x_uTimeout ); }
 
 	//==============================================================
 	// Wait()
@@ -389,7 +390,7 @@ public:
 	*/
 	oexUINT Wait( oexUINT x_uTimeout, CTlEvent &x_rOtherEvent )
     {	os::CEvent::t_EVENT hEvents[ 2 ] = { m_hEvent, x_rOtherEvent.m_hEvent };
-		return os::CEvent::waitSuccess == os::CEvent::osWaitForMultipleObjects( 2, hEvents, oexFALSE, x_uTimeout );
+		return CResource::waitSuccess == os::CEvent::osWaitForMultipleObjects( 2, hEvents, oexFALSE, x_uTimeout );
 	}
 
     /// Returns a handle to the event
@@ -411,7 +412,7 @@ public:
     /// Detaches from event handle
     os::CEvent::t_EVENT Detach()
     {   os::CEvent::t_EVENT hEvent = m_hEvent;
-        m_hEvent = os::CResource::cInvalid();
+        m_hEvent = CResource::cInvalid();
         return hEvent;
     }
 
@@ -563,7 +564,7 @@ public:
 		\see
 	*/
 	oexBOOL WaitSignal( oexUINT x_uTimeout )
-	{	return os::CEvent::waitSuccess == os::CEvent::osWaitForSingleObject( m_hSignal, x_uTimeout ); }
+	{	return CResource::waitSuccess == os::CEvent::osWaitForSingleObject( m_hSignal, x_uTimeout ); }
 
 	//==============================================================
 	// WaitUnsignal()
@@ -577,7 +578,7 @@ public:
 		\see
 	*/
 	oexBOOL WaitUnsignal( oexUINT x_uTimeout )
-	{	return os::CEvent::waitSuccess == os::CEvent::osWaitForSingleObject( m_hUnsignal, x_uTimeout ); }
+	{	return CResource::waitSuccess == os::CEvent::osWaitForSingleObject( m_hUnsignal, x_uTimeout ); }
 
 	//==============================================================
 	// WaitSignal()
@@ -593,7 +594,7 @@ public:
 	*/
 	oexUINT WaitSignal( oexUINT x_uTimeout, os::CEvent::t_EVENT x_hOtherEvent )
 	{	os::CEvent::t_EVENT hEvents[ 2 ] = { m_hSignal, x_hOtherEvent };
-		return os::CEvent::waitSuccess == os::CEvent::osWaitForMultipleObjects( 2, hEvents, oexFALSE, x_uTimeout );
+		return CResource::waitSuccess == os::CEvent::osWaitForMultipleObjects( 2, hEvents, oexFALSE, x_uTimeout );
 	}
 
 	//==============================================================
@@ -610,7 +611,7 @@ public:
 	*/
     oexUINT WaitUnsignal( oexUINT x_uTimeout, os::CEvent::t_EVENT x_hOtherEvent )
 	{	os::CEvent::t_EVENT hEvents[ 2 ] = { m_hUnsignal, x_hOtherEvent };
-        return os::CEvent::waitSuccess == os::CEvent::osWaitForMultipleObjects( 2, hEvents, oexFALSE, x_uTimeout );
+        return CResource::waitSuccess == os::CEvent::osWaitForMultipleObjects( 2, hEvents, oexFALSE, x_uTimeout );
 	}
 
 private:
