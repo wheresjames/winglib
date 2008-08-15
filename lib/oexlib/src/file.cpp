@@ -60,11 +60,11 @@ CStr8 CFile::Read( oexINT64 x_llSize )
 
 	// Punt if no
 	if ( !x_llSize )
-		return oexEMPTY_STRING;
+		return CStr8();
 
     CStr8 str;
     if ( !str.OexAllocate( x_llSize ) )
-        return oexEMPTY_STRING;
+        return CStr8();
 
     oexINT64 llRead = 0;
     oexBOOL bRet = Read( str._Ptr(), x_llSize, &llRead );

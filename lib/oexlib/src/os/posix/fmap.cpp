@@ -129,12 +129,12 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 		// Create file
 		fd = shm_open( sPath.Ptr(), O_RDWR | O_CREAT, 0777 );
 		if ( (int)c_Failed == fd )
-		{	oexERROR( errno, CStr().Fmt( oexT( "shm_open failed : %s" ), oexStrToMbPtr( sPath.Ptr() ) ) );
+		{	oexERROR( errno, CStr().Fmt( oexT( "shm_open failed : %s" ), sPath.Ptr() ) );
 			return CFMap::c_Failed;
 		} // end if
 
 		if ( -1 == ftruncate( fd, x_llSize ) )
-		{	oexERROR( errno, CStr().Fmt( oexT( "ftruncate failed : Unable to size shared memory file : %s : size=%d" ), oexStrToMbPtr( sPath.Ptr() ), (int)x_llSize ) );
+		{	oexERROR( errno, CStr().Fmt( oexT( "ftruncate failed : Unable to size shared memory file : %s : size=%d" ), sPath.Ptr(), (int)x_llSize ) );
 			shm_unlink( sPath.Ptr() );
 			return CFMap::c_Failed;
 		} // end if

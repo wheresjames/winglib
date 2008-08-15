@@ -50,8 +50,10 @@ oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uErr, oexUINT x_uL
 		// Create log file if needed
 		if ( !m_file.IsOpen() )
 		{
+#if defined( oexDEBUG )
 			// Show log file location
-			os::CSys::printf( oexGetModulePath( oexT( "debug.log\n" ) ).Ptr() );
+			os::CSys::printf( oexStrToMb( oexGetModulePath( oexT( "debug.log\n" ) ) ).Ptr() );
+#endif
 
 			// Open new log file
 			if ( !m_file.CreateNew( oexGetModulePath( oexT( "debug.log" ) ).Ptr() ).IsOpen() )

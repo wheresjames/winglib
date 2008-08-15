@@ -320,10 +320,10 @@ CStr CBaseFile::GetModulePath( oexCSTR x_pPath )
 		if ( pPath )
 		{
 			if ( x_pPath && *x_pPath )
-				return oexBuildPath( oexStr8ToStr( CStr( pPath ) ).GetPath(), x_pPath );
+				return oexBuildPath( oexStr8ToStr( CStr8( pPath ) ).GetPath(), x_pPath );
 
 			else
-				return oexStr8ToStr( CStr( pPath ) ).GetPath();
+				return oexStr8ToStr( CStr8( pPath ) ).GetPath();
 
 		} // end if
 

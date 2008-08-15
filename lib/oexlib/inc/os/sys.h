@@ -322,10 +322,10 @@ public:
 public:
 
 	/// printf function
-	static int printf( oexCSTR x_pFmt, ... );
+	static int printf( oexCSTR8 x_pFmt, ... );
 
 	/// vprintf
-	static int vprintf( oexCSTR x_pFmt, oexVaList &pArgs );
+	static int vprintf( oexCSTR8 x_pFmt, oexVaList &pArgs );
 
 };
 

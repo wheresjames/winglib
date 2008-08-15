@@ -561,7 +561,7 @@ oexCSTR CSys::SetLocale( oexINT nCategory, oexCSTR pLocal )
 }
 
 /// printf function
-int CSys::printf( oexCSTR x_pFmt, ... )
+int CSys::printf( oexCSTR8 x_pFmt, ... )
 {
 	oexVaList ap; oexVaStart( ap, x_pFmt );
 	int ret = CSys::vprintf( x_pFmt, ap );
@@ -570,7 +570,7 @@ int CSys::printf( oexCSTR x_pFmt, ... )
 }
 
 /// vprintf
-int CSys::vprintf( oexCSTR x_pFmt, oexVaList &pArgs )
+int CSys::vprintf( oexCSTR8 x_pFmt, oexVaList &pArgs )
 {	return ::vprintf( x_pFmt, pArgs );
 }
 

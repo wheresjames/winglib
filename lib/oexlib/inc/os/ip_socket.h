@@ -37,12 +37,9 @@
 //==================================================================
 // CIpSocket
 //
-/// Windows Socket API wrapper class
+/// Socket API wrapper class
 /**
-	Provides synchronous socket support
-
-	For most advanced applications, you will probably want the
-	asynchronous capability of TWinAsyncSocket.
+	Provides wrapper for os specific socket support
 
 	Example:
 	\code
