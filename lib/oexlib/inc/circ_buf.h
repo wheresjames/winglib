@@ -129,10 +129,10 @@ public:
                                 NULL terminated.
 
     */
-    virtual oexCSTR SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
+    virtual CCircBuf& SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
     {   NameEvents( x_pName );
         m_memBuffer.SetName( x_pName, x_uLen );
-        return x_pName;
+        return *this;
     }
 
 	//==============================================================

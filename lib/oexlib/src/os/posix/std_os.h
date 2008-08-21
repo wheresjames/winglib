@@ -64,7 +64,7 @@ extern int daylight;
 #include <locale.h>
 #include <sys/mman.h>
 
-//#include <uuid/uuid.h>
+#include <uuid/uuid.h>
 
 #include <sys/socket.h>
 #include <sys/epoll.h>

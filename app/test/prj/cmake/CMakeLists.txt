@@ -5,11 +5,11 @@
 set( project_name 	test )
 
 # if debug build
-#set( CMAKE_BUILD_TYPE debug )
-#add_definitions( -D_DEBUG -DDEBUG )
+set( CMAKE_BUILD_TYPE debug )
+add_definitions( -D_DEBUG -DDEBUG )
 
 set( output_dir 	../../bin )
-#add_definitions( -DUNICODE -D_UNICODE )
+add_definitions( -DUNICODE -D_UNICODE )
 
 set( src_files
 					../../stdafx.cpp
@@ -74,4 +74,5 @@ target_link_libraries(
 						${project_name}
 						${CMAKE_CURRENT_BINARY_DIR}/../../../../lib/oexlib/bin/liboexlib_d.a
 						/usr/lib/librt.a
+						uuid
 					  )

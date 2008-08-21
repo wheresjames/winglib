@@ -304,26 +304,6 @@ oex::oexRESULT TestFileMapping()
     return oex::oexRES_OK;
 }
 
-/*
-class Wangle
-{ 	public:
-		int i;
-		bool operator == ( Wangle &x ) { return x.i == i; }
-		bool operator != ( Wangle &x ) { return x.i == i; }
-		bool operator == ( int x ) { return x == i; }
-};
-
-void Function( Wangle wangle )
-{
-	Wangle i, x;
-	if ( i == 0 )
-		Wangle i;
-
-	else
-		wangle != x;
-
-} // end wangle()
-*/
 
 oex::oexRESULT TestGuids()
 {
@@ -342,22 +322,22 @@ oex::oexRESULT TestGuids()
 
     oex::guid::CopyGuid( &guid2, &guid1 );
     if ( !oexVERIFY( oex::guid::CmpGuid( &guid1, &guid2 ) ) )
-        return -3;
+        return -2;
 
     oex::guid::SetGuid( &guid1, 0, 0, sizeof( guid1 ) );
     oex::guid::OrGuid( &guid1, &guid2 );
     if ( !oexVERIFY( oex::guid::CmpGuid( &guid1, &guid2 ) ) )
-        return -4;
+        return -3;
 
     oex::guid::SetGuid( &guid1, 0xffffffff, 0, sizeof( guid1 ) );
     oex::guid::AndGuid( &guid1, &guid2 );
     if ( !oexVERIFY( oex::guid::CmpGuid( &guid1, &guid2 ) ) )
-        return -5;
+        return -4;
 
     oex::guid::XorGuid( &guid1, &guid2 );
     oex::guid::SetGuid( &guid2, 0, 0, sizeof( guid1 ) );
     if ( !oexVERIFY( oex::guid::CmpGuid( &guid1, &guid2 ) ) )
-        return -6;
+        return -5;
 
     return oex::oexRES_OK;
 }
@@ -387,97 +367,97 @@ oex::oexRESULT TestStrings()
     str1.Destroy();
 
 	if ( !oexVERIFY( 0 == str1.Length() ) )
-		return -1;
+		return -3;
 
 	str1 = oexT( "Hello World!" );
 	if ( !oexVERIFY( 12 == str1.Length() ) )
-		return -2;
+		return -4;
 
 	str1 += oexT( " - Goodbye Bugs!" );
 	if ( !oexVERIFY( 28 == str1.Length() ) )
-		return -3;
+		return -5;
 
 	if ( !oexVERIFY( str1 == oexT( "Hello World! - Goodbye Bugs!" ) ) )
-		return -3;
+		return -6;
 
     pStr = str1.Allocate( 4 );
     oex::zstr::Copy( pStr, oexT( "wxyz" ) );
 	if ( !oexVERIFY( str1.Length() == 4 ) )
-		return -4;
+		return -7;
 
     // Test replace and binary compare
 	if (	!oexVERIFY_PTR( str1.Replace( 'w', '*' ).Ptr() ) || !oexVERIFY( str1 == oexT( "*xyz" ) )
 		 || !oexVERIFY_PTR( str1.Replace( 'y', '\x0' ).Ptr() ) || !oexVERIFY( !str1.Compare( oexT( "*x\x0z" ), 4 ) )
 		 || !oexVERIFY_PTR( str1.Replace( 'z', '*' ).Ptr() ) || !oexVERIFY( !str1.Compare( oexT( "*x\x0*" ), 4 ) ) )
-		return -5;
+		return -8;
 
-    str1.Fmt( oexT( "lu = %lu, s = %s, f = %f" ), (oex::oexULONG)11, oexT( "String" ), (oex::oexDOUBLE)3.14f );
+    str1.Fmt( oexT( "lu = %lu, s = %s, f = %f" ), (oex::oexULONG)11, "String", (oex::oexDOUBLE)3.14f );
 	if ( !oexVERIFY( str1 == oexT( "lu = 11, s = String, f = 3.140000" ) ) )
-		return -6;
+		return -9;
 
     oex::oexGUID guid;
 	str1 = oexT( "850A51F0-2CF7-4412-BB83-1AEF68BAD88C" );
 	if ( !oexVERIFY( str2.GuidToString( str1.StringToGuid( &guid ) ) == str1 ) )
-		return -23;
+		return -10;
 
     if ( !oexVERIFY( oex::CStr( oexT( "TaBlE" ) ).ToLower() == oexT( "table" ) ) ||
 		 !oexVERIFY( oex::CStr( oexT( "cHaIr" ) ).ToUpper() == oexT( "CHAIR" ) ) )
-		return -18;
+		return -11;
 
     if ( !oexVERIFY( oex::CStr( oexT( "Hello" ) ).Reverse() == oexT( "olleH" ) ) )
-        return -19;
+        return -12;
 
 	str1 = oexT( "Test String" );
 	str2 = ReturnTest( str1 );
 	if ( !oexVERIFY( str1.Ptr() == str2.Ptr() ) )
-		return -9;
+		return -13;
 
 	str1 += oexT( " - Make copy" );
 	if ( !oexVERIFY( str1.Ptr() != str2.Ptr() ) ||
  		 !oexVERIFY( str1 == oexT( "Test String - Make copy" ) ) ||
  		 !oexVERIFY( str2 == oexT( "Test String" ) ) )
-		return -10;
+		return -14;
 
 	str2 = str1.SubStr( 5, 6 );
 	if ( !oexVERIFY( str2 == oexT( "String" ) ) )
-		return -11;
+		return -15;
 
 	// Non-Shared version
 	str2 = oexT( "Hello World!" );
 	str2.Sub( 6, 5 );
 	if ( !oexVERIFY( str2 == oexT( "World" ) ) )
-		return -12;
+		return -16;
 
     str2 = oexT( "  hello  " );
     str2.TrimWhiteSpace();
     if ( !oexVERIFY( str2 == oexT( "hello" ) ) )
-        return -13;
+        return -17;
 
     str2 = str2;
     if ( !oexVERIFY( str2 == oexT( "hello" ) ) )
-        return -13;
+        return -18;
 
 	// Shared version ( should break the share )
 	str2 = str1;
 	str2.Sub( 5, 6 );
 	if ( !oexVERIFY( str2 == oexT( "String" ) ) )
-		return -13;
-
-	str1 = oexT( "123456789012345678901234567890" );
-    if ( !oexVERIFY( str1.Drop( oexT( "15" ), oex::oexTRUE ) == oexT( "234678902346789023467890" ) ) )
 		return -19;
 
 	str1 = oexT( "123456789012345678901234567890" );
-	if ( !oexVERIFY( str1.Drop( oexT( "15" ), oex::oexFALSE ) == oexT( "151515" ) ) )
+    if ( !oexVERIFY( str1.Drop( oexT( "15" ), oex::oexTRUE ) == oexT( "234678902346789023467890" ) ) )
 		return -20;
 
 	str1 = oexT( "123456789012345678901234567890" );
-	if ( !oexVERIFY( str1.DropRange( '4', '6', oex::oexTRUE ) == oexT( "123789012378901237890" ) ) )
+	if ( !oexVERIFY( str1.Drop( oexT( "15" ), oex::oexFALSE ) == oexT( "151515" ) ) )
 		return -21;
 
 	str1 = oexT( "123456789012345678901234567890" );
-	if ( !oexVERIFY( str1.DropRange( '4', '6', oex::oexFALSE ) == oexT( "456456456" ) ) )
+	if ( !oexVERIFY( str1.DropRange( '4', '6', oex::oexTRUE ) == oexT( "123789012378901237890" ) ) )
 		return -22;
+
+	str1 = oexT( "123456789012345678901234567890" );
+	if ( !oexVERIFY( str1.DropRange( '4', '6', oex::oexFALSE ) == oexT( "456456456" ) ) )
+		return -23;
 
     str1 = oexT( "-+-ABC-+-DEF-+-" );
 
@@ -487,67 +467,97 @@ oex::oexRESULT TestStrings()
 
     str1.LTrim( oexT( "-+" ) );
     if ( !oexVERIFY( str1 == oexT( "ABC-+-DEF" ) ) )
-        return -24;
+        return -25;
 
     str1.RTrim( oexT( "DEF" ) );
     if ( !oexVERIFY( str1 == oexT( "ABC-+-" ) ) )
-        return -24;
+        return -26;
 
     if ( !oexVERIFY( 12345 == oex::CStr( oexT( "12345" ) ).ToNum() ) )
-        return -5;
+        return -27;
 
     if ( !oexVERIFY( -12345 == oex::CStr( oexT( "-12345" ) ).ToNum() ) )
-        return -6;
+        return -28;
 
     if ( !oexVERIFY( 0x1234abcd == oex::CStr( oexT( "1234abcd" ) ).ToNum( 0, 16 ) ) )
-        return -7;
+        return -29;
 
     if ( !oexVERIFY( 0x1234abcd == oex::CStr( oexT( "0x1234abcd" ) ).ToNum( 0, 16 ) ) )
-        return -8;
+        return -30;
 
     if ( !oexVERIFY( -0x1234abcd == oex::CStr( oexT( "-0x1234abcd" ) ).ToNum( 0, 16 ) ) )
-        return -9;
+        return -31;
 
     str1 = oexT( "1234abc" );
     oex::oexINT nEnd = 0;
     if ( !oexVERIFY( 1234 == str1.ToNum( 0, 10, &nEnd, oex::oexTRUE ) ) )
-        return -10;
+        return -32;
 
     if ( !oexVERIFY( 4 == nEnd ) )
-        return -11;
+        return -33;
 
     if ( !oexVERIFY( str1 == oexT( "abc" ) ) )
-        return -12;
+        return -34;
 
     str1 = oexT( '1' );
 	if ( !oexVERIFY( str1.Length() == 1 ) || !oexVERIFY( str1 == oexT( "1" ) ) )
-		return -16;
+		return -35;
 
 	str1.Allocate( 0 );
 	str1 = 1; str1 += oexT( ") PI = " ); str1 += 3.14159;
 	if ( !oexVERIFY( str1 == oexT( "1) PI = 3.14159" ) ) )
-		return -7;
+		return -36;
 
 	str1.Allocate( 0 );
 	str1 << 2 << oexT( ") E = " ) << 2.71f;
 	if ( !oexVERIFY( str1 == oexT( "2) E = 2.71" ) ) )
-		return -8;
+		return -37;
 
     str1 = oexT( "c:/temp/myfile.txt" );
 
     if ( !oexVERIFY( str1.GetPath() == oexT( "c:/temp" ) ) )
-		return -9;
+		return -38;
 
     if ( !oexVERIFY( str1.GetFileName() == oexT( "myfile.txt" ) ) )
-		return -10;
+		return -39;
 
     str1 = oexT( "c:/temp//\\/myfile.txt" );
 
     if ( !oexVERIFY( str1.GetPath() == oexT( "c:/temp" ) ) )
-		return -9;
+		return -40;
 
     if ( !oexVERIFY( str1.GetFileName() == oexT( "myfile.txt" ) ) )
-		return -10;
+		return -41;
+
+	// Test string conversions
+	str2 = str1.GuidToString();
+	if ( !oexVERIFY( str2 == oexMbToStr( oexStrToMb( str1 ) ) ) )
+		return -42;
+
+	if ( !oexVERIFY( !oex::zstr::Compare( str2.Ptr(), oexMbToStrPtr( oexStrToMbPtr( str1.Ptr() ) ) ) ) )
+		return -43;
+
+	str2 = str1.GuidToString();
+	if ( !oexVERIFY( str2 == oexStr8ToStr( oexStrToStr8( str1 ) ) ) )
+		return -44;
+
+	if ( !oexVERIFY( !oex::zstr::Compare( str2.Ptr(), oexStr8ToStrPtr( oexStrToStr8Ptr( str1.Ptr() ) ) ) ) )
+		return -45;
+
+	str2 = str1.GuidToString();
+	if ( !oexVERIFY( str2 == oexStrWToStr( oexStrToStrW( str1 ) ) ) )
+		return -46;
+
+	if ( !oexVERIFY( !oex::zstr::Compare( str2.Ptr(), oexStrWToStrPtr( oexStrToStrWPtr( str1.Ptr() ) ) ) ) )
+		return -47;
+
+	str2 = str1.GuidToString();
+	if ( !oexVERIFY( str2 == oexBinToStr( oexStrToBin( str1 ) ) ) )
+		return -48;
+
+	// +++ Check into why this fails, at least in unicode
+//	if ( !oexVERIFY( !oex::zstr::Compare( str2.Ptr(), oexBinToStrPtr( oexStrToBinPtr( str1.Ptr() ) ) ) ) )
+//		return -49;
 
     return oex::oexRES_OK;
 }
@@ -1225,7 +1235,7 @@ oex::oexRESULT Test_CIpAddress()
         return -4;
 
     ia.LookupHost( oexT( "google.com" ), 80 );
-    oexTRACE( oexT( "google.com = %s = %s\n" ), ia.GetDotAddress().Ptr(), ia.GetId().Ptr() );
+    oexTRACE( oexT( "google.com = %s = %s\n" ), oexStrToMbPtr( ia.GetDotAddress().Ptr() ), oexStrToMbPtr( ia.GetId().Ptr() ) );
 
     oex::os::CIpSocket::UninitSockets();
 
@@ -1398,8 +1408,8 @@ oex::oexRESULT Test_CFifoSync()
     fs1.SetName( oex::CStr().GuidToString().Ptr() );
     fs2.SetName( fs1.GetName() );
 
-    fs1.Allocate( 200000, 10000 );
-    fs2.Allocate( 200000, 10000 );
+    fs1.Allocate( 400000, 20000 );
+    fs2.Allocate( 400000, 20000 );
 
     uBufferedData = 0;
     for ( oex::oexUINT i = 0; i < 1000; i++ )

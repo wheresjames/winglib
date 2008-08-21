@@ -34,6 +34,20 @@
 
 #pragma once
 
+/*
+      _______________________END
+     |     |        |        |
+     |__   |_____   |  ______|
+     |        |        |     |
+     |  ___   |_____   |     |
+     |  |  |           |  |  |
+     |  |  |  ___      |  |  |
+     |  |        |  |  |  |  |
+     |  |_____   |__|__|__|  |
+     |  |                    |
+Start|__|____________________|
+
+*/
 
 /// Generic string class
 /**
@@ -958,7 +972,7 @@ public:
         oexUINT uConv = os::CSys::MbsToWcs( oexNULL, 0, x_sStr.Ptr(), uLen );
 
         // Allocate enough space
-        if ( !OexAllocate( uConv + 1 ) )
+        if ( !OexAllocate( uConv ) )
             return *this;
 
 		// Do the conversion
@@ -992,7 +1006,7 @@ public:
         oexUINT uConv = os::CSys::WcsToMbs( oexNULL, 0, x_sStr.Ptr(), uLen );
 
         // Allocate enough space
-        if ( !OexAllocate( uConv + 1 ) )
+        if ( !OexAllocate( uConv ) )
             return *this;
 
 		// Do the conversion

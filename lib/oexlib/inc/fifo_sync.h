@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -77,20 +77,23 @@ public:
         \param [in] x_uLen  -   Length of the string in x_pName.
                                 Can be zero if the string is
                                 NULL terminated.
-        
+
     */
-    virtual oexCSTR SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
-    {   
-        if ( x_pName && !x_uLen ) 
+    virtual CFifoSync& SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
+    {
+        if ( x_pName && !x_uLen )
             x_uLen = zstr::Length( x_pName );
-        
+
         // Set shared name for the block sizes
         if ( !x_pName || !*x_pName )
             m_auSize.SetName( oexNULL );
         else
             m_auSize.SetName( CStr( x_pName, x_uLen ).Append( oexT( "_block" ) ).Ptr() );
 
-        return CCircBuf::SetName( x_pName, x_uLen );
+		// Set the name
+        CCircBuf::SetName( x_pName, x_uLen );
+
+        return *this;
     }
 
 	//==============================================================
@@ -99,10 +102,10 @@ public:
 	/// Pre allocates the specified amount of data for the circular buffer
 	/**
 		\param [in] x_uSize		-	Number of bytes to allocate.
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
 	virtual oexBOOL Allocate( oexUINT x_uSize )
     {
@@ -119,10 +122,10 @@ public:
 	/**
 		\param [in] x_uSize		    -	Number of bytes to allocate.
         \param [in] x_uMaxBuffers   -   Maximum number of buffers
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
 	virtual oexBOOL Allocate( oexUINT x_uSize, oexUINT x_uMaxBuffers )
     {
@@ -153,7 +156,7 @@ public:
 	// EndFifoWrite()
 	//==============================================================
 	/// Advances head fifo head pointer, i.e. commits write
-	/**		
+	/**
 		\return Non-zero if success
 	*/
 	oexBOOL EndFifoWrite();
@@ -162,7 +165,7 @@ public:
 	// InitFifoWrite()
 	//==============================================================
 	/// Ensures space for a fifo write
-	/**		
+	/**
 		\return Non-zero if success
 	*/
 	oexBOOL InitFifoWrite( oexUINT x_uSize );
@@ -175,10 +178,10 @@ public:
 		\param [in] x_pBuf		-	Pointer to the data to add
 		\param [in] x_uSize		-	Size of the data in x_pBuf
 		\param [in] x_uEncode	-	Optional encoding
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
 	oexBOOL AddFifo( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT x_uEncode = 0 );
 
@@ -186,7 +189,7 @@ public:
 	// AllocateBuffers()
 	//==============================================================
 	/// Allocates buffers for fifo
-	/**							  		
+	/**
 		\return Non-zero if success
 	*/
 	oexBOOL AllocateBuffers();
@@ -211,10 +214,10 @@ public:
 		\param [in] x_pBuf		-	Pointer to the data block
 		\param [in] x_uSize		-	Size of the data in x_pBuf
 		\param [in] x_uEncode	-	Optional encoding
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
 	virtual oexBOOL Write( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT x_uEncode = 0 );
 
@@ -224,10 +227,10 @@ public:
 	/// Write a string to the buffer
 	/**
 		\param [in] x_pStr	-	String value to write to buffer
-		
+
 		\return Non-zero if success.
-	
-		\see 
+
+		\see
 	*/
 	virtual oexBOOL Write( oexCSTR8 x_pStr )
     {   return Write( x_pStr, zstr::Length( x_pStr ) ); }
@@ -238,10 +241,10 @@ public:
 	/// Write a string to the buffer
 	/**
 		\param [in] x_sStr	-	String to write
-		
+
 		\return Non-zero if success.
-	
-		\see 
+
+		\see
 	*/
 	virtual oexBOOL Write( CStr8 x_sStr )
     {   return Write( x_sStr.Ptr(), x_sStr.Length() ); }
@@ -258,10 +261,10 @@ public:
 		\param [in] x_uSize		-	Size of buffer in x_pBuf
 		\param [in] x_puRead	-	Number of bytes read into x_pBuf
 		\param [in] x_uEncode	-	Optional decoding
-		
+
 		\return Non-zero if success
-	
-		\see 
+
+		\see
 	*/
 	virtual oexBOOL Read( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oexUINT x_uEncode = 0 );
 
@@ -281,10 +284,10 @@ public:
 		\param [in] x_puRead	-	Number of bytes read into x_pBuf
 		\param [in] x_lOffset	-	Offset from first byte to start read
 		\param [in] x_uEncode	-	Optional decoding
-		
-		\return 
-	
-		\see 
+
+		\return
+
+		\see
 	*/
 	virtual oexBOOL Peek( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oexLONG x_lOffset = 0, oexUINT x_uEncode = 0 );
 
@@ -306,7 +309,7 @@ public:
 	/**
 		\param [in] x_uMaxBuffers	-	Number of buffers
 	*/
-	void SetMaxBuffers( oexUINT x_uMaxBuffers ) 
+	void SetMaxBuffers( oexUINT x_uMaxBuffers )
     {   m_uMaxBuffers = cmn::NextPower2( x_uMaxBuffers ); }
 
 	//==============================================================
@@ -314,15 +317,15 @@ public:
 	//==============================================================
 	/// Returns the number of buffer slots in the fifo that are in use
 	oexUINT GetUsedBuffers()
-	{   
+	{
         CTlLocalLock ll( *this );
-	    if ( !ll.IsLocked() ) 
+	    if ( !ll.IsLocked() )
             return oexFALSE;
 
         if ( !m_pBi )
             return oexFALSE;
 
-        return GetMaxRead( m_pBi->uTailPtr, m_pBi->uHeadPtr, m_uMaxBuffers ); 
+        return GetMaxRead( m_pBi->uTailPtr, m_pBi->uHeadPtr, m_uMaxBuffers );
     }
 
 private:

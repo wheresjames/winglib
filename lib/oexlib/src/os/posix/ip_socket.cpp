@@ -32,6 +32,38 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
+/*
+I've got a little black book with my poems in
+I've got a bag with a toothbrush and a comb
+When I'm a good dog they sometimes throw me a bone
+I got elastic bands keeping my shoes on
+Got those swollen hand blues.
+Got thirteen channels of shit on the TV to choose from
+I've got electric light
+And I've got second sight
+I've got amazing powers of observation
+
+And that is how I know
+When I try to get through
+On the telephone to you
+There'll be nobody home
+
+I've got the obligatory Hendrix perm
+And I've got the inevitable pinhole burns
+All down the front of my favorite satin shirt
+I've got nicotine stains on my fingers
+I've got a silver spoon on a chain
+I've got a grand piano to prop up my mortal remains
+I've got wild staring eyes
+I've got a strong urge to fly
+But I've got nowhere to fly to
+Ooooh Babe when I pick up the phone
+There's still nobody home
+
+I've got a pair of Gohills boots
+And I've got fading roots.
+*/
+
 #include "../../../oexlib.h"
 #include "std_os.h"
 
@@ -212,11 +244,6 @@ oexBOOL CIpSocket::InitSockets()
 	if ( m_lInit == 0 )
         return oexTRUE;
 
-//	WSADATA wd;
-
-	// Attempt to initialize the Socket library
-//	m_lInit = WSAStartup( c_MinSocketVersion, &wd );
-
 	/// +++ Don't need init in linux?
 	m_lInit = 0;
 
@@ -231,9 +258,6 @@ void CIpSocket::UninitSockets()
 
 	// Not initialized
 	m_lInit	= -1;
-
-	// Clean up socket lib
-//	WSACleanup();
 }
 
 void CIpSocket::Destroy()
@@ -1065,10 +1089,6 @@ oexUINT CIpSocket::Send( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_
 	// Check for error
 	if ( -1 == nRet )
 	{
-		// Is the socket blocking?
-//		if ( WSAEWOULDBLOCK != m_uLastError )
-//			return 0;
-
 		// Number of bytes sent
 		if ( x_puSent )
             *x_puSent = 0;

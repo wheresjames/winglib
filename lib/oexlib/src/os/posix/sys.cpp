@@ -190,36 +190,31 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 oexINT64 CSys::StrToInt64( oexCSTR8 x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//    return _strtoi64( x_pStr, NULL, x_uRadix );
-	return 0;
+    return strtoll( x_pStr, NULL, x_uRadix );
 }
 
 oexUINT64 CSys::StrToUInt64( oexCSTR8 x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//    return _strtoui64( x_pStr, NULL, x_uRadix );
-	return 0;
+    return strtoll( x_pStr, NULL, x_uRadix );
 }
 
 oexLONG CSys::StrToLong( oexCSTR8 x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 	return strtol( x_pStr, NULL, x_uRadix );
-//	return 0;
 }
 
 oexULONG CSys::StrToULong( oexCSTR8 x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 	return strtoul( x_pStr, NULL, x_uRadix );
-//	return 0;
 }
 
 oexDOUBLE CSys::StrToDouble( oexCSTR8 x_pStr )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 	return strtod( x_pStr, NULL );
-//	return 0;
 }
 
 // **** Unicode
@@ -287,36 +282,31 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 oexINT64 CSys::StrToInt64( oexCSTRW x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return _wcstoi64( x_pStr, NULL, x_uRadix );
-	return 0;
+	return wcstoll( x_pStr, NULL, x_uRadix );
 }
 
 oexUINT64 CSys::StrToUInt64( oexCSTRW x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return _wcstoui64( x_pStr, NULL, x_uRadix );
-	return 0;
+	return wcstoll( x_pStr, NULL, x_uRadix );
 }
 
 oexLONG CSys::StrToLong( oexCSTRW x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return wcstol( x_pStr, NULL, x_uRadix );
-	return 0;
+	return wcstol( x_pStr, NULL, x_uRadix );
 }
 
 oexULONG CSys::StrToULong( oexCSTRW x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return wcstoul( x_pStr, NULL, x_uRadix );
-	return 0;
+	return wcstoul( x_pStr, NULL, x_uRadix );
 }
 
 oexDOUBLE CSys::StrToDouble( oexCSTRW x_pStr )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-//	return wcstod( x_pStr, NULL );
-	return 0;
+	return wcstod( x_pStr, NULL );
 }
 
 oexPVOID CSys::MemCpy( oexPVOID x_pDst, oexCPVOID x_pSrc, oexUINT x_uSize )
@@ -336,8 +326,7 @@ oexPVOID CSys::MemSet( oexPVOID x_pDst, oexINT x_nCh, oexUINT x_uSize )
 
 oexGUID * CSys::CreateGuid( oexGUID *pGuid )
 {
-//    CoCreateGuid( (GUID*)pGuid );
-//	uuid_generate( (uuid_t*)pGuid );
+	uuid_generate( (unsigned char*)pGuid );
     return pGuid;
 }
 

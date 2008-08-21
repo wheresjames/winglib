@@ -46,7 +46,8 @@ namespace zstr
         oexUINT Length( oexCONST T *s )
         {   oexUINT l = 0;
             oexASSERT_PTR( s );
-            while ( *s ) s++, l++;
+            while ( *s )
+            	s++, l++;
             return l;
         }
 
@@ -72,7 +73,8 @@ namespace str
         oexUINT Length( oexCONST T *s, oexINT sz )
         {   oexUINT l = 0;
             oexASSERT_PTR( s );
-            while ( sz-- && *s ) s++, l++;
+            while ( sz-- && *s )
+            	s++, l++;
             return l;
         }
 
@@ -888,6 +890,19 @@ namespace zstr
         oexUINT Append( T *dst, oexINT sz_dst, oexCONST T* src )
         {   return str::Append( dst, Length( dst ), sz_dst, src, Length( src ) );
         }
+
+    /// Compares two strings
+    /**
+        \param [in] s1  -   First string
+        \param [in] s2  -   Second string
+
+        Returns zero if the two strings match
+    */
+    template< class T >
+        oexINT Compare( T *s1, T *s2 )
+        {	return str::Compare( s1, Length( s1 ), s2, Length( s2 ) );
+		}
+
 };
 
 
