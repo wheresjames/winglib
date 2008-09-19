@@ -75,4 +75,5 @@ target_link_libraries(
 						${CMAKE_CURRENT_BINARY_DIR}/../../../../lib/oexlib/bin/liboexlib_d.a
 						/usr/lib/librt.a
 						uuid
+						pthread
 					  )

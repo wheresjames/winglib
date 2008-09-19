@@ -58,11 +58,24 @@ CEvent::t_EVENT CEvent::osCreateEvent( oexCSTR x_pName, oexBOOL x_bManualReset )
 	if ( !oexCHECK( pRi ) )
 		return oexNULL;
 
-	if ( x_pName && x_pName )
+	if ( x_pName && *x_pName )
 	{
+		key_t key = ftok();
+
+
+/*
+		shm_id = shmget(key(), volume, 0600|IPC_CREAT|IPC_EXCL);
+		if(-1 == shm_id)  Throw(ERROR__IPC_GET);
+		address = shmat(shm_id, NULL, 0);
+		if((int)address == -1)  Throw(ERROR__IPC_ATTACH);
+*/
+
+
+//		sem_t semOne;
+
 		// Create named pipe
 //		if ( mknod( oexStrToMbPtr( x_pName ), S_IFIFO | 0777, 0 ) )
-		if ( mkfifo( oexStrToMbPtr( x_pName ), 0777 ) )
+/*		if ( mkfifo( oexStrToMbPtr( x_pName ), 0777 ) )
 		{	oexERROR( -1, CStr().Fmt( oexT( "mknod failed : %d" ), (int)errno ) );
 			return oexNULL;
 		} // end if
@@ -73,7 +86,7 @@ CEvent::t_EVENT CEvent::osCreateEvent( oexCSTR x_pName, oexBOOL x_bManualReset )
 		{	SResInfo::Release( pRi );
 			return oexNULL;
 		} // end if
-
+*/
 		// Save resource type
 		pRi->uType = SResInfo::eNamedEvent;
 

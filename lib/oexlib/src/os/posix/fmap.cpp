@@ -104,7 +104,7 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 		// Attempt to create a temporary file
 //		zstr::Copy( pPath, oexT( "/tmp/oex.tmp.XXXXXXXX" ) );
 
-		// Make a temporary file
+		// Make a temporary file #406080
 //		mkstemp( sPath._Ptr() );
 
 		// Attempt to build a file name

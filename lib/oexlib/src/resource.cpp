@@ -34,7 +34,9 @@
 
 #include "../oexlib.h"
 
-const CResource::t_HANDLE	CResource::c_Invalid = 0xffffffff;
+OEX_USING_NAMESPACE
+
+const CResource::t_HANDLE CResource::c_Invalid = (oexPVOID)0xffffffff;
 
 const oexUINT CResource::c_Infinite = 0xffffffff;
 

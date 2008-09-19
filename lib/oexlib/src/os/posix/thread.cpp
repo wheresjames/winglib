@@ -32,6 +32,17 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
+/*
+						   ,-.        _.---._
+						  |  `\.__.-''       `.
+						   \  _        _  ,.   \
+	 ,+++=._________________)_||______|_|_||    |
+	(_.ooo.===================||======|=|=||    |
+	   ~~'                 |  ~'      `~' o o  /
+							\   /~`\     o o  /
+							 `~'    `-.____.-'
+*/
+
 #include "../../../oexlib.h"
 #include "std_os.h"
 
@@ -65,7 +76,7 @@ CThread::~CThread()
 	\param [in] x_pData		-	CThread class pointer
 
 	I'm just going to leave this adapter in here in case the
-	thread signature ever includes some custom variables.
+	thread signature ever includes custom variables.
 
 	\return Thread return value
 */
@@ -123,7 +134,8 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
             } // end if
 
             // Early shutdown
-            else nRet = -3333;
+            else
+            	nRet = -3333;
 
         } // end if
 
@@ -170,6 +182,12 @@ oexBOOL CThread::Start( oexUINT x_uSleep, oexPVOID x_pData )
 								(LPVOID)this,
 								0,
 								(LPDWORD)&m_uThreadId );
+
+
+	a = b / ( b - c )
+
+	b = ac/(a-1)
+
 */
     // Developer will probably want to hear about this
     oexASSERT( c_InvalidThread != m_hThread);

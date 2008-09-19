@@ -25,6 +25,7 @@ set( src_files
 					../../src/sys_time.cpp
 					../../src/log.cpp
 					../../src/image.cpp
+					../../src/resource.cpp
 
 					../../src/vid/avi_file.cpp
 
@@ -50,6 +51,7 @@ set( header_files
 					../../inc/md5.h
 					../../inc/parser.h
 					../../inc/sys_time.h
+					../../inc/resource.h
 #					../../inc/zip.h
 #					../../inc/unzip.h
 #					../../inc/msg.h
