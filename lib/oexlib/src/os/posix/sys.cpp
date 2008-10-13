@@ -326,7 +326,15 @@ oexPVOID CSys::MemSet( oexPVOID x_pDst, oexINT x_nCh, oexUINT x_uSize )
 
 oexGUID * CSys::CreateGuid( oexGUID *pGuid )
 {
+// +++ Need implementation for the ARM
+#if !defined( OEX_ARM )
+
 	uuid_generate( (unsigned char*)pGuid );
+
+#else
+	
+#endif
+	
     return pGuid;
 }
 

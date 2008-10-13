@@ -75,7 +75,9 @@ void CDebug::vFmtTrace( oexCSTR x_pFmt, oexVaList &x_pArgs )
 
 void CDebug::Break()
 {
+#ifndef OEX_ARM
 	asm ( "int $3" );
+#endif
 }
 
 void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pStr )

@@ -95,8 +95,8 @@
 #	define oexStrToMbPtr( s )		( s )
 #   define oexStrToStr8( s )        ( s )
 #   define oexStrToStr8Ptr( s )     ( s )
-#   define oexStrToStrW( s )        OEX_NAMESPACE::CStrW().Set( s )
-#   define oexStrToStrWPtr( s )     OEX_NAMESPACE::CStrW().Set( s ).Ptr()
+#   define oexStrToStrW( s )        OEX_NAMESPACE::CStrW().ToWc( s )
+#   define oexStrToStrWPtr( s )     OEX_NAMESPACE::CStrW().ToWc( s ).Ptr()
 #   define oexStrToBin( s )         ( s )
 #   define oexStrToBinPtr( s )      ( s )
 
@@ -104,8 +104,8 @@
 #	define oexMbToStrPtr( s )		( s )
 #   define oexStr8ToStr( s )        ( s )
 #   define oexStr8ToStrPtr( s )     ( s )
-#   define oexStrWToStr( s )        OEX_NAMESPACE::CStr().Set( s )
-#   define oexStrWToStrPtr( s )     OEX_NAMESPACE::CStr().Set( s ).Ptr()
+#   define oexStrWToStr( s )        OEX_NAMESPACE::CStr().ToMb( s )
+#   define oexStrWToStrPtr( s )     OEX_NAMESPACE::CStr().ToMb( s ).Ptr()
 #   define oexBinToStr( s )         ( s )
 #   define oexBinToStrPtr( s )      ( s )
 

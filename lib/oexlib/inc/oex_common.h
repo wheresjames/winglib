@@ -251,7 +251,6 @@ namespace cmn
 		return r;
 	}
 
-
     /// Values for pi
     oexCONST oexDOUBLE c_PI = 3.141592654;
     oexCONST oexDOUBLE c_PI2 = c_PI * (oexDOUBLE)2;

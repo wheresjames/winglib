@@ -51,8 +51,9 @@ namespace zstr
             return l;
         }
 
+	/// Returns end of string
     template < typename T >
-        T* EndOfString( T *s )
+        T* eos( T *s )
         {   return &s[ Length( s ) ];
         }
 

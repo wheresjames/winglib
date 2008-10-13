@@ -690,7 +690,6 @@ oex::oexRESULT TestLists()
 
 	} // end if
 
-
     lst.Insert( 11 );
 
     if( !oexVERIFY( lst.First().Obj() == 11 ) )
@@ -1191,10 +1190,11 @@ oex::oexRESULT TestFile()
 oex::oexRESULT TestZip()
 {
 /*
-    oex::CStr sStr = oexT( "This string will be compressed.  It has to be fairly long or the \
-                            compression library won't really be able to compress it much.   \
+    oex::CStr sStr = oexT( "This string will be compressed.  It has to be fairly long or the 			\
+                            compression library won't really be able to compress it much.   			\
                             I also had to add more text so I could get a zero in the compressed data.   \
-                            Now is the time for all good men to come to the aid of their country" );
+                            Now is the time for all good men to come to the aid of their country.		\
+                            Ha, that was kinda random." );
 
     oex::CStr8 sCmp = oex::zip::CCompress::Compress( oexStrToBin( sStr ) );
 
@@ -2053,7 +2053,7 @@ oex::oexRESULT Test_CVfsSession()
 
 int main(int argc, char* argv[])
 {
-    // Initialize the oex library
+/*    // Initialize the oex library
 	oexINIT();
 
     TestAllocator();
@@ -2108,7 +2108,7 @@ int main(int argc, char* argv[])
 
 	// Initialize the oex library
     oexUNINIT();
-
+*/
 	return 0;
 }
 

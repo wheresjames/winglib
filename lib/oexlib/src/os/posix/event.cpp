@@ -60,7 +60,7 @@ CEvent::t_EVENT CEvent::osCreateEvent( oexCSTR x_pName, oexBOOL x_bManualReset )
 
 	if ( x_pName && *x_pName )
 	{
-		key_t key = ftok();
+//		key_t key = ftok();
 
 
 /*
