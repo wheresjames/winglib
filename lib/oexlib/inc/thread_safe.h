@@ -54,7 +54,7 @@ public:
     {
         m_bLocked = oexFALSE;
         m_uRef = 0;
-        m_hMutex = os::CMutex::osCreateMutex( oexNULL );
+        m_hMutex.Create( os::CResource::eRtMutex );
     }
 
 	//==============================================================
@@ -65,10 +65,9 @@ public:
 		\param [in] x_pName	-	Name for mutex
 	*/
 	CTlLock( oexCSTR x_pName )
-    {
-        m_bLocked = oexFALSE;
+    {   m_bLocked = oexFALSE;
         m_uRef = 0;
-        m_hMutex = os::CMutex::osCreateMutex( x_pName );
+        m_hMutex.Create( os::CResource::eRtMutex, x_pName );
     }
 
 	/// Destructor
@@ -79,10 +78,7 @@ public:
 
     void Destroy()
     {
-        if ( m_hMutex )
-        {   os::CMutex::osDestroyMutex( m_hMutex );
-            m_hMutex = oexNULL;
-        } // end if
+        m_hMutex.Destroy();
     }
 
 	//==============================================================
@@ -99,8 +95,8 @@ public:
 
         m_bLocked = oexFALSE;
         m_uRef = 0;
-        m_hMutex = os::CMutex::osCreateMutex( x_pName );
-        return os::CMutex::vInvalid() != m_hMutex;
+        m_hMutex.Create( os::CResource::eRtMutex, x_pName );
+        return m_hMutex.IsValid();
     }
 
 	//==============================================================
@@ -117,9 +113,9 @@ public:
 	{
 		// +++ Implement this lock!
 //		oexTRACE( oexT( "Lock not implemented!\n" ) );
-		return oexTRUE;
+//		return oexTRUE;
 
-        m_bLocked = ( os::CSys::waitSuccess == os::CSys::WaitForSingleObject( m_hMutex, x_uTimeout ) );
+        m_bLocked = m_hMutex.Wait( x_uTimeout );
 
 		if ( m_bLocked )
 			m_uRef++;
@@ -135,7 +131,7 @@ public:
 	/// Unlocks the object
 	oexBOOL Unlock()
 	{
-        os::CMutex::osReleaseMutex( m_hMutex );
+        m_hMutex.Reset();
 
 		if ( m_uRef )
 		{
@@ -163,10 +159,10 @@ private:
 	oexULONG					m_uRef;
 
 	/// Handle to mutex object
-	os::CMutex::t_MUTEX			m_hMutex;
+	os::CResource					m_hMutex;
 
 	/// Non-zero if locked
-	oexBOOL					m_bLocked;
+	oexBOOL						m_bLocked;
 };
 
 //==================================================================
@@ -320,13 +316,13 @@ public:
 	/// Constructor
 	CTlEvent( oexBOOL x_bNoCreate )
 	{
-        m_hEvent = oexNULL;
 	}
 
 	/// Constructor
 	CTlEvent( oexCSTR x_pName = oexNULL, oexBOOL x_bManualReset = oexTRUE )
 	{
-        m_hEvent = os::CEvent::osCreateEvent( x_pName, x_bManualReset );
+		m_hEvent.Create( os::CResource::eRtEvent );
+//        os::CEvent::Create( m_hEvent, x_pName, x_bManualReset );
 	}
 
 	/// Destructor
@@ -338,29 +334,26 @@ public:
     void Destroy()
     {
 		// Close event handle
-		void* hTemp = m_hEvent;
-        m_hEvent = CResource::cInvalid();
-		if ( hTemp )
-            os::CEvent::osDestroyEvent( hTemp );
+        m_hEvent.Destroy();
     }
 
     /// Creates an event
-    os::CEvent::t_EVENT Create( oexCSTR x_pName = oexNULL, oexBOOL x_bManualReset = oexTRUE )
-    {	return ( m_hEvent = os::CEvent::osCreateEvent( x_pName, x_bManualReset ) ); }
+    oexRESULT Create( oexCSTR x_pName = oexNULL, oexBOOL x_bManualReset = oexTRUE )
+    {	return os::CEvent::Create( m_hEvent, x_pName, x_bManualReset ); }
 
 	//==============================================================
 	// Set()
 	//==============================================================
 	/// Sets the event
 	oexBOOL Set()
-	{   return os::CEvent::osSetEvent( m_hEvent ); }
+	{   return os::CEvent::SetEvent( m_hEvent ); }
 
 	//==============================================================
 	// Reset()
 	//==============================================================
 	/// Resets the event
 	oexBOOL Reset()
-    { 	return os::CEvent::osResetEvent( m_hEvent ); }
+    { 	return os::CEvent::ResetEvent( m_hEvent ); }
 
 	//==============================================================
 	// Wait()
@@ -374,7 +367,7 @@ public:
 		\see
 	*/
 	oexBOOL Wait( oexUINT x_uTimeout )
-	{	return CResource::waitSuccess == os::CEvent::osWaitForSingleObject( m_hEvent, x_uTimeout ); }
+	{	return m_hEvent.Wait( x_uTimeout ); }
 
 	//==============================================================
 	// Wait()
@@ -389,37 +382,39 @@ public:
 		\see
 	*/
 	oexUINT Wait( oexUINT x_uTimeout, CTlEvent &x_rOtherEvent )
-    {	os::CEvent::t_EVENT hEvents[ 2 ] = { m_hEvent, x_rOtherEvent.m_hEvent };
-		return CResource::waitSuccess == os::CEvent::osWaitForMultipleObjects( 2, hEvents, oexFALSE, x_uTimeout );
+    {
+//    	os::CResource *hEvents[ 2 ] = { &m_hEvent, &x_rOtherEvent.m_hEvent };
+//		return os::CResource::waitSuccess == os::CEvent::WaitForMultipleObjects( 2, hEvents, oexFALSE, x_uTimeout );
+		return os::CResource::waitFailed;
 	}
 
     /// Returns a handle to the event
-    os::CSys::t_WAITABLE GetHandle()
+    os::CResource& GetHandle()
     {   return m_hEvent; }
 
     /// Cast operator
-    operator os::CSys::t_WAITABLE ()
+    operator os::CResource& ()
     {   return m_hEvent; }
-
+/*
     /// Attach to event
-    os::CEvent::t_EVENT Attach( os::CEvent::t_EVENT hEvent )
+    os::CResource& Attach( os::CResource& x_rEvent )
     {
         Destroy();
-        m_hEvent = hEvent;
+        m_hEvent = x_rEvent;
         return m_hEvent;
     }
 
     /// Detaches from event handle
-    os::CEvent::t_EVENT Detach()
+    os::CResource Detach()
     {   os::CEvent::t_EVENT hEvent = m_hEvent;
-        m_hEvent = CResource::cInvalid();
+        m_hEvent = os::CResource::cInvalid();
         return hEvent;
     }
-
+*/
 private:
 
 	/// Event handle
-    os::CEvent::t_EVENT				m_hEvent;
+    os::CResource				m_hEvent;
 
 };
 
@@ -486,38 +481,32 @@ public:
 
 	/// Default constructor
 	CTlSignal()
-	{	m_hSignal = os::CEvent::osCreateEvent( oexNULL, oexTRUE );
-		m_hUnsignal = os::CEvent::osCreateEvent( oexNULL, oexTRUE );
+	{	os::CEvent::Create( m_hSignal, oexNULL, oexTRUE );
+		os::CEvent::Create( m_hUnsignal, oexNULL, oexTRUE );
 	}
 
 	/// Destructor
 	virtual ~CTlSignal()
 	{
 		// Close start handle
-		void* hTemp = m_hSignal;
-		m_hSignal = oexNULL;
-		if ( hTemp )
-            os::CEvent::osDestroyEvent( hTemp );
+		m_hSignal.Destroy();
 
 		// Close done handle
-		hTemp = m_hUnsignal;
-		m_hUnsignal = oexNULL;
-		if ( hTemp )
-            os::CEvent::osDestroyEvent( hTemp );
+		m_hUnsignal.Destroy();
 	}
 
 	//==============================================================
 	// GetSignalEvent()
 	//==============================================================
 	/// Returns the handle to the signal event
-	os::CEvent::t_EVENT GetSignalEvent()
+	os::CResource& GetSignalEvent()
     {   return m_hSignal; }
 
 	//==============================================================
 	// GetUnsignalEvent()
 	//==============================================================
 	/// Returns the handle to the unsignal event
-	os::CEvent::t_EVENT GetUnsignalEvent()
+	os::CResource& GetUnsignalEvent()
     {   return m_hUnsignal; }
 
 	//==============================================================
@@ -525,8 +514,8 @@ public:
 	//==============================================================
 	/// Sets the signal
 	oexBOOL Signal()
-	{ 	os::CEvent::osResetEvent( m_hUnsignal );
-		return os::CEvent::osSetEvent( m_hSignal );
+	{ 	os::CEvent::ResetEvent( m_hUnsignal );
+		return os::CEvent::SetEvent( m_hSignal );
 	}
 
 	//==============================================================
@@ -534,8 +523,8 @@ public:
 	//==============================================================
 	/// Sets the done event signal
 	oexBOOL Unsignal()
-	{ 	os::CEvent::osResetEvent( m_hSignal );
-		return os::CEvent::osSetEvent( m_hUnsignal );
+	{ 	os::CEvent::ResetEvent( m_hSignal );
+		return os::CEvent::SetEvent( m_hUnsignal );
 	}
 
 	//==============================================================
@@ -543,14 +532,14 @@ public:
 	//==============================================================
 	/// Resets the signal event signal
 	oexBOOL ResetSignal()
-    {   return os::CEvent::osResetEvent( m_hSignal ); }
+    {   return os::CEvent::ResetEvent( m_hSignal ); }
 
 	//==============================================================
 	// ResetUnsignal()
 	//==============================================================
 	/// Resets the unsignal event signal
 	oexBOOL ResetUnsignal()
-    {   return os::CEvent::osResetEvent( m_hUnsignal ); }
+    {   return os::CEvent::ResetEvent( m_hUnsignal ); }
 
 	//==============================================================
 	// WaitSignal()
@@ -564,7 +553,7 @@ public:
 		\see
 	*/
 	oexBOOL WaitSignal( oexUINT x_uTimeout )
-	{	return CResource::waitSuccess == os::CEvent::osWaitForSingleObject( m_hSignal, x_uTimeout ); }
+	{	return m_hSignal.Wait( x_uTimeout ); }
 
 	//==============================================================
 	// WaitUnsignal()
@@ -578,7 +567,7 @@ public:
 		\see
 	*/
 	oexBOOL WaitUnsignal( oexUINT x_uTimeout )
-	{	return CResource::waitSuccess == os::CEvent::osWaitForSingleObject( m_hUnsignal, x_uTimeout ); }
+	{	return m_hUnsignal.Wait( x_uTimeout ); }
 
 	//==============================================================
 	// WaitSignal()
@@ -592,9 +581,11 @@ public:
 
 		\see
 	*/
-	oexUINT WaitSignal( oexUINT x_uTimeout, os::CEvent::t_EVENT x_hOtherEvent )
-	{	os::CEvent::t_EVENT hEvents[ 2 ] = { m_hSignal, x_hOtherEvent };
-		return CResource::waitSuccess == os::CEvent::osWaitForMultipleObjects( 2, hEvents, oexFALSE, x_uTimeout );
+	oexUINT WaitSignal( oexUINT x_uTimeout, os::CResource &x_hOtherEvent )
+	{
+//		os::CResource *hEvents[ 2 ] = { &m_hSignal, &x_hOtherEvent };
+//		return os::CResource::waitSuccess == os::CEvent::WaitForMultipleObjects( 2, hEvents, oexFALSE, x_uTimeout );
+		return os::CResource::waitFailed;
 	}
 
 	//==============================================================
@@ -609,17 +600,19 @@ public:
 
 		\see
 	*/
-    oexUINT WaitUnsignal( oexUINT x_uTimeout, os::CEvent::t_EVENT x_hOtherEvent )
-	{	os::CEvent::t_EVENT hEvents[ 2 ] = { m_hUnsignal, x_hOtherEvent };
-        return CResource::waitSuccess == os::CEvent::osWaitForMultipleObjects( 2, hEvents, oexFALSE, x_uTimeout );
+    oexUINT WaitUnsignal( oexUINT x_uTimeout, os::CResource &x_hOtherEvent )
+	{
+//		os::CResource *hEvents[ 2 ] = { &m_hUnsignal, &x_hOtherEvent };
+//      return os::CResource::waitSuccess == os::CEvent::WaitForMultipleObjects( 2, hEvents, oexFALSE, x_uTimeout );
+		return os::CResource::waitFailed;
 	}
 
 private:
 
 	/// Signal event
-    os::CEvent::t_EVENT				m_hSignal;
+    os::CResource				m_hSignal;
 
 	/// Unsignal event
-	os::CEvent::t_EVENT				m_hUnsignal;
+	os::CResource				m_hUnsignal;
 };
 

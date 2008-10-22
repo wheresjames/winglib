@@ -164,7 +164,6 @@ oex::oexRESULT TestAllocator()
 
     OexAllocDelete( buf );
 
-
     // Test reference counting
     buf = OexAllocNew< int >( 100 );
     if ( !buf )
@@ -301,6 +300,7 @@ oex::oexRESULT TestAllocator()
 
     return oex::oexRES_OK;
 }
+
 
 oex::oexRESULT TestFileMapping()
 {
@@ -1576,9 +1576,7 @@ public:
 	}
 
 	oex::oexINT 		m_val;
-
 };
-
 
 oex::oexRESULT Test_Threads()
 {
@@ -1586,8 +1584,6 @@ oex::oexRESULT Test_Threads()
 
 	if ( !oexVERIFY( t.Start() ) )
 		return -1;
-
-
 
 	return oex::oexRES_OK;
 }
@@ -1607,7 +1603,6 @@ public:
     }
 
 };
-
 
 oex::oexRESULT Test_MsgParams()
 {
@@ -2053,7 +2048,7 @@ oex::oexRESULT Test_CVfsSession()
 
 int main(int argc, char* argv[])
 {
-/*    // Initialize the oex library
+    // Initialize the oex library
 	oexINIT();
 
     TestAllocator();
@@ -2108,7 +2103,7 @@ int main(int argc, char* argv[])
 
 	// Initialize the oex library
     oexUNINIT();
-*/
+
 	return 0;
 }
 

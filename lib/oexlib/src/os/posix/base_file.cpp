@@ -193,59 +193,6 @@ oexBOOL CBaseFile::RemoveFolder( oexCSTR x_pDir )
 	return rmdir( oexStrToMbPtr( x_pDir ) ) ? oexFALSE : oexTRUE;
 }
 
-/*
-static oexUINT g_ConvBaseFileAttribToWinAttrib[] =
-{
-    CBaseFile::eFileAttribReadOnly,             FILE_ATTRIBUTE_READONLY,
-    CBaseFile::eFileAttribHidden,               FILE_ATTRIBUTE_HIDDEN,
-    CBaseFile::eFileAttribSystem,               FILE_ATTRIBUTE_SYSTEM,
-    CBaseFile::eFileAttribDirectory,            FILE_ATTRIBUTE_DIRECTORY,
-    CBaseFile::eFileAttribArchive,              FILE_ATTRIBUTE_ARCHIVE,
-    CBaseFile::eFileAttribDevice,               FILE_ATTRIBUTE_DEVICE,
-    CBaseFile::eFileAttribNormal,               FILE_ATTRIBUTE_NORMAL,
-    CBaseFile::eFileAttribTemporary,            FILE_ATTRIBUTE_TEMPORARY,
-    CBaseFile::eFileAttribSparseFile,           FILE_ATTRIBUTE_SPARSE_FILE,
-    CBaseFile::eFileAttribReparsePoint,         FILE_ATTRIBUTE_REPARSE_POINT,
-    CBaseFile::eFileAttribCompressed,           FILE_ATTRIBUTE_COMPRESSED,
-    CBaseFile::eFileAttribOffline,              FILE_ATTRIBUTE_OFFLINE,
-    CBaseFile::eFileAttribNotContentIndexed,    FILE_ATTRIBUTE_NOT_CONTENT_INDEXED,
-    CBaseFile::eFileAttribEncrypted,            FILE_ATTRIBUTE_ENCRYPTED,
-    -1, -1
-};
-
-static DWORD CBaseFile_ToFileAttributes( oexUINT uAttrib )
-{
-    DWORD dwAttrib = 0;
-    for( oexUINT i = 0; -1 != g_ConvBaseFileAttribToWinAttrib[ i ]
-                        && -1 != g_ConvBaseFileAttribToWinAttrib[ i + 1 ];
-                        i += 2 )
-    if ( 0 != ( uAttrib & g_ConvBaseFileAttribToWinAttrib[ i ] ) )
-        dwAttrib |= g_ConvBaseFileAttribToWinAttrib[ i + 1 ];
-
-    return dwAttrib;
-}
-
-static oexUINT CBaseFile_ToCBaseFileAttributes( DWORD dwAttrib )
-{
-    DWORD uAttrib = 0;
-    for( oexUINT i = 0; -1 != g_ConvBaseFileAttribToWinAttrib[ i ]
-                        && -1 != g_ConvBaseFileAttribToWinAttrib[ i + 1 ];
-                        i += 2 )
-    if ( 0 != ( dwAttrib & g_ConvBaseFileAttribToWinAttrib[ i + 1 ] ) )
-        uAttrib |= g_ConvBaseFileAttribToWinAttrib[ i ];
-
-    return uAttrib;
-}
-
-
-oexUINT CBaseFile::GetFileAttrib( oexCSTR x_pFile )
-{   return CBaseFile_ToCBaseFileAttributes( ::GetFileAttributes( x_pFile ) ); }
-
-oexBOOL CBaseFile::SetFileAttrib( oexCSTR x_pFile, oexUINT x_uAttrib )
-{   return ::SetFileAttributes( x_pFile, x_uAttrib ) ? oexTRUE : oexFALSE; }
-
-*/
-
 void CBaseFile_InitFindData( CBaseFile::SFindData *x_pFd )
 {   x_pFd->llSize = 0;
     x_pFd->sName.Destroy();

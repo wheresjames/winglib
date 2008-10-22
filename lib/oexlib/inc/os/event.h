@@ -103,10 +103,6 @@ I'm younger than that now.
 //==================================================================
 class CEvent
 {
-public:
-
-	typedef oexPVOID		t_EVENT;
-
 private:
 	CEvent()
     {}
@@ -117,10 +113,11 @@ private:
 public:
 
 	//==============================================================
-	// osCreateEvent()
+	// Create()
 	//==============================================================
 	/// Creates a event object
 	/**
+		\param [in] x_rEvent	-	Handle to event object
 		\param [in] x_pName		    -	Optional name for the event object,
 									    this value can be NULL.
 
@@ -134,81 +131,44 @@ public:
 
 		\see osDestroyEvent()
 	*/
-	static t_EVENT osCreateEvent( oexCSTR x_pName, oexBOOL x_bManualReset );
+	static oexRESULT Create( CResource &x_rEvent, oexCSTR x_pName, oexBOOL x_bManualReset );
 
 	//==============================================================
-	// osDestroyEvent()
+	// Destroy()
 	//==============================================================
 	/// Free a event object created by osCreateEvent()
 	/**
-		\param [in] x_pEvent	-	Handle to event object
+		\param [in] x_rEvent	-	Handle to event object
 
 		\see osCreateEvent()
 	*/
-	static void osDestroyEvent( t_EVENT x_pEvent );
+	static void Destroy( CResource &x_rEvent );
 
 	//==============================================================
-	// osSetEvent()
+	// SetEvent()
 	//==============================================================
 	/// Sets the event object to the signaled state
 	/**
-		\param [in] x_pEvent	-	Handle to event object
+		\param [in] x_rEvent	-	Handle to event object
 
 		\return Non-zero if success
 
 		\see osResetEvent()
 	*/
-	static oexBOOL osSetEvent( t_EVENT x_pEvent );
+	static oexBOOL SetEvent( CResource &x_rEvent );
 
 	//==============================================================
-	// osResetEvent()
+	// ResetEvent()
 	//==============================================================
 	/// Sets the event object to the un-signaled state
 	/**
-		\param [in] x_pEvent	-	Handle to event object
+		\param [in] x_rEvent	-	Handle to event object
 
 		\return Non-zero if success
 
 		\see osSetEvent()
 	*/
-	static oexBOOL osResetEvent( t_EVENT x_pEvent );
-
-	//==============================================================
-	// osWaitForSingleObject()
-	//==============================================================
-	/// Waits for a event object to become signaled
-	/**
-		\param [in] x_pEvent	-	Handle to event object
-		\param [in] x_uTimeout	-	Maximum amount of time, in
-									milli-seconds, to wait.
-
-		\return Zero if success, otherwise waitTimeout or waitFailed
-
-		\see
-	*/
-	static oexINT osWaitForSingleObject( t_EVENT x_pEvent, oexUINT x_uTimeout );
-
-	//==============================================================
-	// osWaitForMultipleObjects()
-	//==============================================================
-	/// Waits for multiple event objects
-	/**
-		\param [in] x_uObjects	-	Number of event objects
-		\param [in] x_pEvent	-	Array of event objects
-		\param [in] x_bWaitAll	-	Non-zero if you wish to wait for
-									all objects to become signaled.
-									Otherwise this function returns
-									as soon as any objects are in
-									the signaled state.
-		\param [in] x_uTimeout	-	Maximum amount of time, in
-									milli-seconds, to wait.
-
-		\return Zero based index of object that is signaled if success,
-				otherwise waitTimeout or waitFailed
-
-		\see
-	*/
-	static oexINT osWaitForMultipleObjects( oexUINT x_uObjects, t_EVENT *x_pEvent, oexBOOL x_bWaitAll, oexUINT x_uTimeout );
+	static oexBOOL ResetEvent( CResource &x_rEvent );
 
 
 private:

@@ -52,7 +52,7 @@ using namespace OEX_NAMESPACE::os;
 // Ensure size
 oexSTATIC_ASSERT( sizeof( CResource::t_HANDLE ) == sizeof( void* ) );
 
-CEvent::t_EVENT CEvent::osCreateEvent( oexCSTR x_pName, oexBOOL x_bManualReset )
+oexRESULT CEvent::Create( CResource &x_rEvent, oexCSTR x_pName, oexBOOL x_bManualReset )
 {
 	SResInfo *pRi = SResInfo::Create( x_pName );
 	if ( !oexCHECK( pRi ) )
@@ -60,8 +60,8 @@ CEvent::t_EVENT CEvent::osCreateEvent( oexCSTR x_pName, oexBOOL x_bManualReset )
 
 	if ( x_pName && *x_pName )
 	{
-//		key_t key = ftok();
 
+//		key_t key = ftok();
 
 /*
 		shm_id = shmget(key(), volume, 0600|IPC_CREAT|IPC_EXCL);
@@ -110,7 +110,7 @@ CEvent::t_EVENT CEvent::osCreateEvent( oexCSTR x_pName, oexBOOL x_bManualReset )
 */
 }
 
-void CEvent::osDestroyEvent( t_EVENT x_pEvent )
+void CEvent::Destroy( CResource &x_rEvent )
 {
 
 /*	if ( !oexCHECK_PTR( x_pEvent ) )
@@ -129,7 +129,7 @@ void CEvent::osDestroyEvent( t_EVENT x_pEvent )
 */
 }
 
-oexBOOL CEvent::osSetEvent( t_EVENT x_pEvent )
+oexBOOL CEvent::SetEvent( CResource &x_rEvent )
 {
 	return oexFALSE;
 
@@ -142,41 +142,10 @@ oexBOOL CEvent::osSetEvent( t_EVENT x_pEvent )
 */
 }
 
-oexBOOL CEvent::osResetEvent( t_EVENT x_pEvent )
+oexBOOL CEvent::ResetEvent( CResource &x_rEvent )
 {
 	return oexFALSE;
 
 //	return ResetEvent( (HANDLE)x_pEvent ) ? oexTRUE : oexFALSE;
-}
-
-oexINT CEvent::osWaitForSingleObject( t_EVENT x_pEvent, oexUINT x_uTimeout )
-{
-	return oexFALSE;
-
-/*	DWORD dwRet = WaitForSingleObject( (HANDLE)x_pEvent, (DWORD)x_uTimeout );
-	if ( WAIT_OBJECT_0 == dwRet ) return waitSuccess;
-	else if ( WAIT_TIMEOUT == dwRet ) return waitTimeout;
-	return waitFailed;
-*/
-}
-
-oexINT CEvent::osWaitForMultipleObjects( oexUINT x_uObjects, t_EVENT *x_pEvent, oexBOOL x_bWaitAll, oexUINT x_uTimeout )
-{
-	return oexFALSE;
-/*
-	DWORD dwRet = WaitForMultipleObjects( (DWORD)x_uObjects, (CONST HANDLE*)x_pEvent, x_bWaitAll, x_uTimeout );
-
-	// WAIT_OBJECT_0 should be zero
-	oexSTATIC_ASSERT( WAIT_OBJECT_0 == 0 );
-
-	// Use this line if WAIT_OBJECT_0 is not zero
-//	if ( WAIT_OBJECT_0 <= dwRet && ( WAIT_OBJECT_0 + x_uObjects ) > dwRet ) return dwRet - WAIT_OBJECT_0;
-
-	if ( ( WAIT_OBJECT_0 + x_uObjects ) > dwRet ) return (etWait)( dwRet - WAIT_OBJECT_0 );
-
-	else if ( WAIT_TIMEOUT == dwRet ) return waitTimeout;
-
-	return waitFailed;
-*/
 }
 

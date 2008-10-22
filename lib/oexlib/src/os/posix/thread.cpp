@@ -116,7 +116,6 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
         if ( pThread->InitThread( pData ) )
         {
             // Ensure they haven't already killed us
-            // Again, just ensuring we haven't been stopped
             if ( oexVERIFY( !pThread->m_evQuit.Wait( 0 ) ) )
             {
                 // Signal that we're initialized

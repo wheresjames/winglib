@@ -166,7 +166,7 @@ public:
 
 		\see
 	*/
-	oexBOOL WaitData( oexUINT x_uTimeout = CResource::cInfinite() );
+	oexBOOL WaitData( oexUINT x_uTimeout = os::CResource::cInfinite() );
 
 	//==============================================================
 	// WaitEmpty()
@@ -179,7 +179,7 @@ public:
 
 		\see
 	*/
-	oexBOOL WaitEmpty( oexUINT x_uTimeout = CResource::cInfinite() );
+	oexBOOL WaitEmpty( oexUINT x_uTimeout = os::CResource::cInfinite() );
 
 	//==============================================================
 	// GetWriteView()
@@ -903,24 +903,24 @@ public:
 	/// Call this function to signal that data is ready to be read.
 	void DataReady()
 	{	m_bEmpty = oexFALSE;
-		if ( m_hDataReady )
-            os::CEvent::osSetEvent( m_hDataReady );
-		if ( m_hEmpty )
-            os::CEvent::osResetEvent( m_hEmpty );
+		if ( m_hDataReady.IsValid() )
+            os::CEvent::SetEvent( m_hDataReady );
+		if ( m_hEmpty.IsValid() )
+            os::CEvent::ResetEvent( m_hEmpty );
 	}
 
 	//==============================================================
 	// GetDataReadyHandle()
 	//==============================================================
 	/// Returns the data ready event handle
-    os::CSys::t_WAITABLE GetDataReadyHandle()
+    os::CResource& GetDataReadyHandle()
     {   return m_hDataReady; }
 
 	//==============================================================
 	// GetEmptyHandle()
 	//==============================================================
 	/// Returns the buffer empty event handle
-    os::CSys::t_WAITABLE GetEmptyHandle()
+    os::CResource& GetEmptyHandle()
     {   return m_hEmpty; }
 
 	//==============================================================
@@ -941,11 +941,11 @@ public:
 		m_bEmpty = oexTRUE;
 		m_pBi->uWritePtr = m_pBi->uReadPtr = 0;
 
-        if ( m_hDataReady )
-            os::CEvent::osResetEvent( m_hDataReady );
+        if ( m_hDataReady.IsValid() )
+            os::CEvent::ResetEvent( m_hDataReady );
 
-		if ( m_hEmpty )
-            os::CEvent::osSetEvent( m_hEmpty );
+		if ( m_hEmpty.IsValid() )
+            os::CEvent::SetEvent( m_hEmpty );
 
 		return oexTRUE;
 	}
@@ -1034,10 +1034,10 @@ private:
 	CTlLock					m_lock;
 
 	/// Data ready event
-    os::CEvent::t_EVENT		m_hDataReady;
+    os::CResource			m_hDataReady;
 
 	/// Data ready event
-    os::CEvent::t_EVENT		m_hEmpty;
+    os::CResource			m_hEmpty;
 
 	/// Non-zero if buffer is empty
 	oexBOOL					m_bEmpty;

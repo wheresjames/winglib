@@ -25,7 +25,6 @@ set( src_files
 					../../src/sys_time.cpp
 					../../src/log.cpp
 					../../src/image.cpp
-					../../src/resource.cpp
 
 					../../src/vid/avi_file.cpp
 
@@ -76,7 +75,7 @@ set( src_files_os
 					${src_os}/ip_address.cpp
 					${src_os}/ip_socket.cpp
 					${src_os}/mem.cpp
-					${src_os}/mutex.cpp
+					${src_os}/resource.cpp
 					${src_os}/sys.cpp
 					${src_os}/thread.cpp
 					${src_os}/tls.cpp

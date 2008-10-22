@@ -12,17 +12,20 @@ LIBS :=
 
 # Flags
 #LFLAGS := -g -lstdc++ -lrt -luuid
-LFLAGS := -lrt 
+LFLAGS := -lrt -static 
 CFLAGS := -c
 SFLAGS := $(CFLAGS) -S -MMD
 AFLAGS := rcs
 
 # Compiler / Linker
 #CC := g++
-CC := /home/landshark/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-linux-gnueabi-g++
+#CC := /home/landshark/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-linux-gnueabi-g++
+CC := /home/landshark/code/arm/usr/local/bin/arm-linux-g++
 #LD := g++
-LD := /home/landshark/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-linux-gnueabi-g++
-AR := /home/landshark/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-linux-gnueabi-ar
+#LD := /home/landshark/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-linux-gnueabi-g++
+LD := /home/landshark/code/arm/usr/local/bin/arm-linux-g++
+#AR := /home/landshark/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-linux-gnueabi-ar
+AR := /home/landshark/code/arm/usr/local/bin/arm-linux-ar
 DP := makedepend
 
 #-------------------------------------------------------------------
