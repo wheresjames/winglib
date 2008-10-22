@@ -52,7 +52,7 @@ class CResource
 {
 public:
 
-	enum
+	enum E_RESOURCE_TYPE
 	{
 		/// Invalid resource type
 		eRtInvalid 			= 0,
@@ -67,20 +67,26 @@ public:
 		eRtThread			= 3,
 
 		/// Thread mutex
-		eRtMutex			= 4
+		eRtMutex			= 4,
+
+		/// Event
+		eRtEvent			= 5
 	};
 
 	enum etWait
 	{
 		/// Value indicating wait succeeded
-		waitSuccess = 0,
+		waitSuccess 		= 0,
 
 		/// Value indicating wait timed out
-		waitTimeout = -1,
+		waitTimeout 		= -1,
 
 		/// Value indicating wait expired
-		waitFailed = -2
+		waitFailed 			= -2
 	};
+
+	/// The wait resolution in micro-seconds
+	enum { eWaitResolution = 15000 };
 
 public:
 
@@ -92,18 +98,23 @@ public:
 	/// Constructor
 	CResource()
 	{
-		m_hHandle = c_Invalid;
-		m_nType = eRtInvalid;
+		m_hHandle = cInvalid();
+		m_eType = eRtInvalid;
 	}
 
 	/// Constructor
-	CResource( oexINT x_nType )
+	/*
+		\param [in] x_nType		-	The type of resource to create.
+		\param [in] x_sName		-	Names the resource if resource
+
+	*/
+	CResource( E_RESOURCE_TYPE x_eType, oexCSTR x_sName = oexNULL )
 	{
 		m_hHandle = c_Invalid;
-		m_nType = eRtInvalid;
+		m_eType = eRtInvalid;
 
 		// Create specified type
-		Init( x_nType );
+		Create( x_eType, x_sName );
 	}
 
 	/// Destructor
@@ -113,28 +124,28 @@ public:
 	}
 
 	//==============================================================
-	// Init()
+	// Create()
 	//==============================================================
 	/// Releases the handle
 	/*
 		\param [in] x_nType		-	The type of resource to create.
+		\param [in] x_sName		-	Names the resource if resource
+									type supports it.
 
 		\return Zero if success, else error code
 
 	*/
-	oexINT Init( oexINT x_nType );
+	oexRESULT Create( E_RESOURCE_TYPE x_eType, oexCSTR x_sName = oexNULL );
 
 	//==============================================================
 	// Destroy()
 	//==============================================================
 	/// Releases the handle
 	/*
-		\param [in] x_puErr		-	If not null, receives the error
-									code for the release operation.
-									Zero if success, -1 if the
-									operation could not be performed.
+		return	error code for the release operation.   Zero if
+				success, -1 if the operation could not be performed.
 	*/
-	void Destroy( oexINT *x_pnErr = oexNULL );
+	oexRESULT Destroy();
 
 	//==============================================================
 	// Wait()
@@ -150,7 +161,27 @@ public:
 		\return Returns zero if success, otherwise an error code is
 				returned.
 	*/
-	oexINT Wait( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT, oexINT x_nType = 0 );
+	oexRESULT Wait( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT );
+
+	//==============================================================
+	// Signal()
+	//==============================================================
+	/// Signals the handle if the resource type supports it
+	/*
+		\return Returns zero if success, otherwise an error code is
+				returned.
+	*/
+	oexRESULT Signal();
+
+	//==============================================================
+	// Signal()
+	//==============================================================
+	/// Resets the signaled state if the resource type supports it
+	/*
+		\return Returns zero if success, otherwise an error code is
+				returned.
+	*/
+	oexRESULT Reset();
 
 	//==============================================================
 	// vInfinite()
@@ -174,12 +205,12 @@ public:
     }
 
 	//==============================================================
-	// IsValidHandle()
+	// IsValid()
 	//==============================================================
 	/// Returns the os dependent handle for the resource
-    oexBOOL IsValidHandle()
+    oexBOOL IsValid()
     {
-    	return ( c_Invalid != m_hHandle );
+    	return ( cInvalid() != m_hHandle );
 	}
 
 	//==============================================================
@@ -188,7 +219,7 @@ public:
 	/// Returns the os dependent handle for the resource
     t_HANDLE GetHandle()
     {
-		oexVERIFY( c_Invalid != m_hHandle && eRtInvalid != m_nType );
+		oexVERIFY( c_Invalid != m_hHandle && eRtInvalid != m_eType );
     	return m_hHandle;
 	}
 
@@ -205,18 +236,18 @@ public:
 	// GetType()
 	//==============================================================
 	/// Returns the type of the os dependent resource
-    oexINT GetType()
+    E_RESOURCE_TYPE GetType()
     {
-    	return m_nType;
+    	return m_eType;
 	}
 
 	//==============================================================
 	// SetType()
 	//==============================================================
 	/// Sets the type of the os dependent resource
-    void SetType( oexINT x_nType )
+    void SetType( E_RESOURCE_TYPE x_eType )
     {
-    	m_nType = x_nType;
+    	m_eType = x_eType;
 	}
 
 private:
@@ -233,6 +264,6 @@ private:
 	t_HANDLE				m_hHandle;
 
 	/// Resource type
-	oexINT					m_nType;
+	E_RESOURCE_TYPE			m_eType;
 };
 
