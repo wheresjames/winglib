@@ -301,109 +301,6 @@ oex::oexRESULT TestAllocator()
     return oex::oexRES_OK;
 }
 
-
-oex::oexRESULT TestFileMapping()
-{
-    oex::TFileMapping< oex::oexTCHAR > fm;
-
-    const oex::oexUINT uSize = 150;
-    if ( !oexVERIFY( fm.Create( 0, 0, 0, oexT( "Test" ), uSize ) ) )
-        return -1;
-
-    if ( !oexVERIFY( fm.Size() == uSize ) )
-        return -2;
-
-    // !!! This won't pass for every case, make sure there is
-    //     enough room beyond uSize for the block overhead
-//    if ( !oexVERIFY( oex::cmn::NextPower2( uSize * sizeof( oex::oexTCHAR ) ) == fm.BlockSize() ) )
-//        return -3;
-
-    oex::zstr::Copy( fm.Ptr(), oexT( "Hello World!" ) );
-
-    if ( !oexVERIFY( !oex::str::Compare( fm.c_Ptr(), 12, oexT( "Hello World!" ), 12 ) ) )
-        return -4;
-
-
-    oex::TFileMapping< oex::oexTCHAR > fm2;
-    if ( !oexVERIFY( fm2.Create( 0, 0, 0, oexT( "Test" ), uSize ) ) )
-        return -5;
-
-    if ( !oexVERIFY( fm.Size() == uSize ) )
-        return -6;
-
-    if ( !oexVERIFY( !oex::str::Compare( fm.c_Ptr(), 12, oexT( "Hello World!" ), 12 ) ) )
-        return -7;
-
-
-    CTestMonitor tm;
-    oex::TMem< CBaseTestObject > mm, mm2;
-
-    if ( !oexVERIFY(  mm.SetName( oexT( "Name" ) ).OexConstruct( &tm ).Ptr() ) )
-        return -8;
-
-//    mm->SetValue( 111 );
-    mm->m_uValue = 111;
-
-    if ( !oexVERIFY( mm2.SetName( oexT( "Name" ) ).OexConstruct( &tm ).Ptr() ) )
-        return -9;
-
-    if ( !oexVERIFY( 1 == tm.m_uConstructed ) )
-        return -12;
-
-    if ( !oexVERIFY( 111 == mm2->GetValue() ) )
-        return -9;
-
-    mm.Delete();
-
-    if ( !oexVERIFY( 0 == tm.m_uDestructed ) )
-        return -11;
-
-    mm2.Delete();
-
-    if ( !oexVERIFY( 1 == tm.m_uDestructed ) )
-        return -12;
-
-    return oex::oexRES_OK;
-}
-
-
-oex::oexRESULT TestGuids()
-{
-    // {6674C3D8-BB11-4a58-BCE0-A34DC74365AF}
-    static const oex::oexGUID guidTest =
-    { 0x6674c3d8, 0xbb11, 0x4a58, { 0xbc, 0xe0, 0xa3, 0x4d, 0xc7, 0x43, 0x65, 0xaf } };
-
-    oex::oexGUID    guid1, guid2;
-    oex::oexTCHAR   szGuid1[ 1024 ] = oexT( "" );
-
-    // Guid / String conversions
-    oex::guid::GuidToString( szGuid1, oexSizeofArray( szGuid1 ), &guidTest );
-    oex::guid::StringToGuid( &guid1, szGuid1, oexSizeofArray( szGuid1 ) );
-    if ( !oexVERIFY( oex::guid::CmpGuid( &guidTest, &guid1 ) ) )
-        return -1;
-
-    oex::guid::CopyGuid( &guid2, &guid1 );
-    if ( !oexVERIFY( oex::guid::CmpGuid( &guid1, &guid2 ) ) )
-        return -2;
-
-    oex::guid::SetGuid( &guid1, 0, 0, sizeof( guid1 ) );
-    oex::guid::OrGuid( &guid1, &guid2 );
-    if ( !oexVERIFY( oex::guid::CmpGuid( &guid1, &guid2 ) ) )
-        return -3;
-
-    oex::guid::SetGuid( &guid1, 0xffffffff, 0, sizeof( guid1 ) );
-    oex::guid::AndGuid( &guid1, &guid2 );
-    if ( !oexVERIFY( oex::guid::CmpGuid( &guid1, &guid2 ) ) )
-        return -4;
-
-    oex::guid::XorGuid( &guid1, &guid2 );
-    oex::guid::SetGuid( &guid2, 0, 0, sizeof( guid1 ) );
-    if ( !oexVERIFY( oex::guid::CmpGuid( &guid1, &guid2 ) ) )
-        return -5;
-
-    return oex::oexRES_OK;
-}
-
 oex::oexRESULT TestStrings()
 {
     oex::CStr str1, str2;
@@ -615,6 +512,108 @@ oex::oexRESULT TestStrings()
 	// +++ Check into why this fails, at least in unicode
 //	if ( !oexVERIFY( !oex::zstr::Compare( str2.Ptr(), oexBinToStrPtr( oexStrToBinPtr( str1.Ptr() ) ) ) ) )
 //		return -49;
+
+    return oex::oexRES_OK;
+}
+
+oex::oexRESULT TestFileMapping()
+{
+    oex::TFileMapping< oex::oexTCHAR > fm;
+
+    const oex::oexUINT uSize = 150;
+    if ( !oexVERIFY( fm.Create( 0, 0, 0, oexT( "Test" ), uSize ) ) )
+        return -1;
+
+    if ( !oexVERIFY( fm.Size() == uSize ) )
+        return -2;
+
+    // !!! This won't pass for every case, make sure there is
+    //     enough room beyond uSize for the block overhead
+//    if ( !oexVERIFY( oex::cmn::NextPower2( uSize * sizeof( oex::oexTCHAR ) ) == fm.BlockSize() ) )
+//        return -3;
+
+    oex::zstr::Copy( fm.Ptr(), oexT( "Hello World!" ) );
+
+    if ( !oexVERIFY( !oex::str::Compare( fm.c_Ptr(), 12, oexT( "Hello World!" ), 12 ) ) )
+        return -4;
+
+
+    oex::TFileMapping< oex::oexTCHAR > fm2;
+    if ( !oexVERIFY( fm2.Create( 0, 0, 0, oexT( "Test" ), uSize ) ) )
+        return -5;
+
+    if ( !oexVERIFY( fm.Size() == uSize ) )
+        return -6;
+
+    if ( !oexVERIFY( !oex::str::Compare( fm.c_Ptr(), 12, oexT( "Hello World!" ), 12 ) ) )
+        return -7;
+
+
+    CTestMonitor tm;
+    oex::TMem< CBaseTestObject > mm, mm2;
+
+    if ( !oexVERIFY(  mm.SetName( oexT( "Name" ) ).OexConstruct( &tm ).Ptr() ) )
+        return -8;
+
+//    mm->SetValue( 111 );
+    mm->m_uValue = 111;
+
+    if ( !oexVERIFY( mm2.SetName( oexT( "Name" ) ).OexConstruct( &tm ).Ptr() ) )
+        return -9;
+
+    if ( !oexVERIFY( 1 == tm.m_uConstructed ) )
+        return -12;
+
+    if ( !oexVERIFY( 111 == mm2->GetValue() ) )
+        return -9;
+
+    mm.Delete();
+
+    if ( !oexVERIFY( 0 == tm.m_uDestructed ) )
+        return -11;
+
+    mm2.Delete();
+
+    if ( !oexVERIFY( 1 == tm.m_uDestructed ) )
+        return -12;
+
+    return oex::oexRES_OK;
+}
+
+
+oex::oexRESULT TestGuids()
+{
+    // {6674C3D8-BB11-4a58-BCE0-A34DC74365AF}
+    static const oex::oexGUID guidTest =
+    	oex::oexAUTOGUID( 0x6674c3d8, 0xbb11, 0x4a58, 0xbc, 0xe0, 0xa3, 0x4d, 0xc7, 0x43, 0x65, 0xaf );
+
+    oex::oexGUID    guid1, guid2;
+    oex::oexTCHAR   szGuid1[ 1024 ] = oexT( "" );
+
+    // Guid / String conversions
+    oex::guid::GuidToString( szGuid1, oexSizeofArray( szGuid1 ), &guidTest );
+    oex::guid::StringToGuid( &guid1, szGuid1, oexSizeofArray( szGuid1 ) );
+    if ( !oexVERIFY( oex::guid::CmpGuid( &guidTest, &guid1 ) ) )
+        return -1;
+
+    oex::guid::CopyGuid( &guid2, &guid1 );
+    if ( !oexVERIFY( oex::guid::CmpGuid( &guid1, &guid2 ) ) )
+        return -2;
+
+    oex::guid::SetGuid( &guid1, 0, 0, sizeof( guid1 ) );
+    oex::guid::OrGuid( &guid1, &guid2 );
+    if ( !oexVERIFY( oex::guid::CmpGuid( &guid1, &guid2 ) ) )
+        return -3;
+
+    oex::guid::SetGuid( &guid1, 0xffffffff, 0, sizeof( guid1 ) );
+    oex::guid::AndGuid( &guid1, &guid2 );
+    if ( !oexVERIFY( oex::guid::CmpGuid( &guid1, &guid2 ) ) )
+        return -4;
+
+    oex::guid::XorGuid( &guid1, &guid2 );
+    oex::guid::SetGuid( &guid2, 0, 0, sizeof( guid1 ) );
+    if ( !oexVERIFY( oex::guid::CmpGuid( &guid1, &guid2 ) ) )
+        return -5;
 
     return oex::oexRES_OK;
 }
@@ -2073,11 +2072,15 @@ int main(int argc, char* argv[])
 
     Test_CSysTime();
 
+#ifndef OEX_LOWRAM
+
     Test_CCircBuf();
 
     Test_CFifoSync();
 
     Test_CDataPacket();
+
+#endif
 
     Test_CIpAddress();
 

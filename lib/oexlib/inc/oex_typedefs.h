@@ -144,6 +144,24 @@ public:
     oexAUTOGUID( oexCONST oexAUTOGUID *p ) 
     {   Copy( (oexGUID*)p ); }
 
+	/// Create GUID from components
+    oexAUTOGUID( oexUINT32 x_Data1, oexUINT16 x_Data2, oexUINT16 x_Data3,
+                 oexUCHAR x_Data4_0, oexUCHAR x_Data4_1, oexUCHAR x_Data4_2, oexUCHAR x_Data4_3,
+                 oexUCHAR x_Data4_4, oexUCHAR x_Data4_5, oexUCHAR x_Data4_6, oexUCHAR x_Data4_7 ) 
+	{
+		Data1 = x_Data1;
+		Data2 = x_Data2;
+		Data3 = x_Data3;
+		Data4[ 0 ] = x_Data4_0; 	
+		Data4[ 1 ] = x_Data4_1; 	
+		Data4[ 2 ] = x_Data4_2; 	
+		Data4[ 3 ] = x_Data4_3; 	
+		Data4[ 4 ] = x_Data4_4; 	
+		Data4[ 5 ] = x_Data4_5; 	
+		Data4[ 6 ] = x_Data4_6; 	
+		Data4[ 7 ] = x_Data4_7; 			
+	}
+
     /// Copy operator
     oexAUTOGUID& operator = ( oexCONST oexGUID &r ) 
     {   return Copy( r ); }

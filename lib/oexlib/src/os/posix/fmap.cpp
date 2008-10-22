@@ -73,6 +73,10 @@ static TAssoList< oexINT, CStr8 > g_lstFileMappingInfo;
 
 CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, oexCSTR x_pName, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists )
 {
+
+// +++ Need to get some equivalent on the arm
+#ifndef OEX_ARM
+
     // Sanity checks
     if ( !oexCHECK_PTR( x_pMem ) || !oexCHECK_PTR_NULL_OK( x_pName ) )
 	{	oexERROR( -1, oexT( "Bad parameter" ) );
@@ -174,71 +178,18 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 		*x_pbAlreadyExists = bExists;
 
 	return (t_HFILEMAP)fd;
+#else
 
-/*
-	// Initialize pointer
-	if ( x_pMem ) *x_pMem = NULL;
+	return CFMap::c_Failed;
 
-	DWORD dwAccess = 0;
-	DWORD dwMemAccess = 0;
-
-	// Figure out the access levels
-	if ( eAccessRead & x_eAccess )
-	{	if ( eAccessWrite & x_eAccess )
-			dwAccess = PAGE_READWRITE, dwMemAccess = FILE_MAP_ALL_ACCESS;
-		else dwAccess = PAGE_READONLY, dwMemAccess = FILE_MAP_READ;
-	} // end if
-	else if ( eAccessWrite & x_eAccess )
-		dwAccess = PAGE_READWRITE, dwMemAccess = FILE_MAP_WRITE;
-
-	HANDLE hFileHandle = oexNULL;
-	if ( x_pFile )
-	{	hFileHandle = CreateFile( x_pFile, GENERIC_READ | GENERIC_WRITE,
-									 FILE_SHARE_READ | FILE_SHARE_WRITE,
-									 NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
-		if ( !oexVERIFY( INVALID_HANDLE_VALUE != hFileHandle ) )
-			return c_Failed;
-
-		if ( !x_llSize )
-		{	DWORD dwHi, dwLo = GetFileSize( hFileHandle, &dwHi );
-			x_llSize = (oexINT64)dwLo | ( (oexINT64)dwHi << 32 );
-		} // end if
-
-	} // end if
-	else hFileHandle = (HANDLE)0xffffffff;
-
-	// Create the file mapping
-	HANDLE hFile = CreateFileMapping( hFileHandle, NULL, dwAccess,
-			    					  (DWORD)( x_llSize >> 32 ), (DWORD)( x_llSize & 0xffffffff ), x_pName );
-
-	// Do they want to know if it was pre-existing?
-	if ( x_pbAlreadyExists )
-		*x_pbAlreadyExists = ( ERROR_ALREADY_EXISTS == GetLastError() );
-
-	// Close the file handle
-	if ( x_pFile )
-		CloseHandle( hFileHandle );
-
-	// Did we get the handle
-	if ( NULL == hFile )
-		return c_Failed;
-
-	// Get a pointer to the file data
-	oexPVOID pMem = (oexPVOID)MapViewOfFile( hFile, dwMemAccess, 0, 0, 0 );
-
-	// Set memory pointer
-	if ( x_pMem ) *x_pMem = pMem;
-
-	// Save the final size
-	if ( x_pllSize ) *x_pllSize = x_llSize;
-
-	// Use pointer as handle
-	return (t_HFILEMAP)hFile;
-*/
+#endif
 }
 
 oexBOOL CFMap::osReleaseFileMapping( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexINT64 x_llSize )
 {
+// +++ Need to get some equivalent on the arm
+#ifndef OEX_ARM
+
 	// Do we have a valid memory pointer
 	if ( x_pMem && oexCHECK_PTR( x_pMem ) )
 
@@ -262,4 +213,10 @@ oexBOOL CFMap::osReleaseFileMapping( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pM
 //		close( (int)x_hFileMap );
 
 	return oexTRUE;
+
+#else
+
+	return oexFALSE;
+
+#endif
 }

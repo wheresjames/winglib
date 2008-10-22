@@ -28,8 +28,7 @@ else
 
 	PLATFORM := posix
 
-	#LIBS := 
-	LIBS := -L../../../../lib/oexlib/bin/$(PLATFORM)-$(OS)-$(PROC)-$(TOOLS)/ -loexlib_d
+	LIBS := -L$(LIBROOT)/lib/oexlib/bin/$(TARGET)/ -loexlib_d
 
 	# Flags
 	#LFLAGS := -g -lstdc++ -lrt -luuid
@@ -45,7 +44,7 @@ else
 			AR := $(CODEROOT)/arm/usr/local/bin/arm-linux-ar
 			DP := $(CODEROOT)/arm/usr/local/bin/arm-linux-makedepend
 
-			LFLAGS := -lrt -pthread -static $(LDEBUG)
+			LFLAGS := -lrt -static $(LDEBUG)
 			CFLAGS := -c -DOEX_ARM -DOEX_LOWRAM -DOEX_SNAPGEAR -DOEX_VFL1 $(CDEBUG)
 			SFLAGS := $(CFLAGS) -S -MMD
 			AFLAGS := cq
@@ -58,7 +57,7 @@ else
 			AR := $(CODEROOT)/../CodeSourcery/Sourcery_G++_Lite/bin/arm-none-linux-gnueabi-ar
 			DP := $(CODEROOT)/../CodeSourcery/Sourcery_G++_Lite/bin/arm-none-linux-gnueabi-makedepend
 
-			LFLAGS := -lrt -pthread -static $(LDEBUG)
+			LFLAGS := -lrt -static $(LDEBUG)
 			CFLAGS := -c -DOEX_ARM -DOEX_LOWRAM $(CDEBUG)
 			SFLAGS := $(CFLAGS) -S -MMD
 			AFLAGS := cq
@@ -73,23 +72,29 @@ else
 		AR := ar
 		DP := makedepend
 
-		LFLAGS := -lrt -pthread -uuid $(LDEBUG)
+		LFLAGS := -lrt $(LDEBUG)
 		CFLAGS := -c $(CDEBUG)
 		SFLAGS := $(CFLAGS) -S -MMD
 		AFLAGS := cq
-
-	endif
+		
+	endif	
 
 endif
 
+# Flags
+#LFLAGS := -g -static-libgcc -Wl,-static -la
+#CFLAGS := -g -c
+#SFLAGS := $(CFLAGS) -S -MMD
+#AFLAGS := rcs
+#AFLAGS := cq
 
 #-------------------------------------------------------------------
 # Vars
 #-------------------------------------------------------------------
-NAME_PRJ := test
+NAME_PRJ := oexlib
 
-FILE_EXE := $(NAME_PRJ)
-PATH_SRC := ../..
+FILE_EXE := lib$(NAME_PRJ)_d.a
+PATH_SRC := ../../src
 PATH_BIN := ../../bin
 PATH_OUT := $(PATH_BIN)/$(PLATFORM)-$(OS)-$(PROC)-$(TOOLS)
 PATH_OBJ := $(PATH_OUT)/obj
@@ -100,10 +105,37 @@ PATH_LNK := /usr/bin
 #-------------------------------------------------------------------
 # Sources
 #-------------------------------------------------------------------
-SOURCES :=	$(PATH_SRC)/stdafx.cpp 					\
-			$(PATH_SRC)/test.cpp
+SOURCES :=	$(PATH_SRC)/alloc.cpp 						\
+			$(PATH_SRC)/asso_list.cpp					\
+			$(PATH_SRC)/circ_buf.cpp					\
+			$(PATH_SRC)/data_packet.cpp					\
+			$(PATH_SRC)/fifo_sync.cpp					\
+			$(PATH_SRC)/file.cpp						\
+			$(PATH_SRC)/find_files.cpp					\
+			$(PATH_SRC)/image.cpp						\
+			$(PATH_SRC)/log.cpp							\
+			$(PATH_SRC)/md5.cpp							\
+			$(PATH_SRC)/oex.cpp							\
+			$(PATH_SRC)/parser.cpp						\
+			$(PATH_SRC)/sys_time.cpp
+			
+OS_SOURCES:= $(PATH_SRC)/os/$(PLATFORM)/base_file.cpp	\
+			 $(PATH_SRC)/os/$(PLATFORM)/capture.cpp		\
+ 			 $(PATH_SRC)/os/$(PLATFORM)/debug.cpp		\
+			 $(PATH_SRC)/os/$(PLATFORM)/event.cpp		\
+			 $(PATH_SRC)/os/$(PLATFORM)/fmap.cpp		\
+			 $(PATH_SRC)/os/$(PLATFORM)/hq_timer.cpp	\
+			 $(PATH_SRC)/os/$(PLATFORM)/ip_address.cpp	\
+			 $(PATH_SRC)/os/$(PLATFORM)/ip_socket.cpp	\
+			 $(PATH_SRC)/os/$(PLATFORM)/mem.cpp			\
+			 $(PATH_SRC)/os/$(PLATFORM)/resource.cpp	\
+			 $(PATH_SRC)/os/$(PLATFORM)/sys.cpp			\
+			 $(PATH_SRC)/os/$(PLATFORM)/thread.cpp		\
+			 $(PATH_SRC)/os/$(PLATFORM)/tls.cpp			\
+			 $(PATH_SRC)/os/$(PLATFORM)/trace.cpp
 
 OBJECTS := $(subst $(PATH_SRC),$(PATH_OBJ), $(SOURCES:.cpp=.o) )
+OS_OBJECTS := $(subst $(PATH_SRC)/os/$(PLATFORM),$(PATH_OBJ)/os, $(OS_SOURCES:.cpp=.o) )
 
 TARGETS := $(PATH_EXE)
 
@@ -119,13 +151,14 @@ setup:
 	@-mkdir -p $(PATH_BIN)
 	@-mkdir -p $(PATH_OUT)
 	@-mkdir -p $(PATH_OBJ)
+	@-mkdir -p $(PATH_OBJ)/os
 
 clean:
 	@rm -rf $(PATH_OUT)
 	
 install:
 	@-mkdir -p "$(PATH_INS)"
-	cp "$(PAT  H_EXE)" "$(PATH_INS)/$(FILE_EXE)"
+	cp "$(PATH_EXE)" "$(PATH_INS)/$(FILE_EXE)"
 	ln -s "$(PATH_INS)/$(FILE_EXE)" "$(PATH_LNK)/$(FILE_EXE)"
 
 uninstall:	
@@ -136,13 +169,16 @@ uninstall:
 # Auto
 #-------------------------------------------------------------------
 
-$(PATH_EXE): $(OBJECTS)	$(SOURCES)
-	$(LD) $(LFLAGS) -o $@ $(OBJECTS) $(LIBS) 
+$(PATH_EXE): $(OBJECTS)	$(OS_OBJECTS)
+	$(AR) $(AFLAGS) $@ $(OBJECTS) $(OS_OBJECTS)
+#	$(LD) $(LFLAGS) -o $@ $(OBJECTS) 
 
-$(PATH_OBJ)/%.o: 
+$(PATH_OBJ)/os/%.o:
+	$(CC) $(CFLAGS) $(subst $(PATH_OBJ)/os,$(PATH_SRC)/os/$(PLATFORM), $(subst .o,.cpp, $@)) -o $@
+	- $(CC) $(SFLAGS) $(subst $(PATH_OBJ)/os,$(PATH_SRC)/os/$(PLATFORM), $(subst .o,.cpp, $@)) -o $(subst .o,.asm, $@)
+
+$(PATH_OBJ)/%.o:
 	$(CC) $(CFLAGS) $(subst $(PATH_OBJ),$(PATH_SRC), $(subst .o,.cpp, $@)) -o $@
 	- $(CC) $(SFLAGS) $(subst $(PATH_OBJ),$(PATH_SRC), $(subst .o,.cpp, $@)) -o $(subst .o,.asm, $@)
-
-
 	
 

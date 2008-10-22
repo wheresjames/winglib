@@ -41,6 +41,8 @@
 
 #define oexNULL						0
 
+#define oexIGNORE					(void)
+
 #define oexLOG( l, e, s )			OEX_NAMESPACE::CLog::GlobalLog().Log( oexStr8ToStrPtr( __FILE__ ), __LINE__, l, e, s )
 #define oexNOTICE( e, s )			oexLOG( OEX_NAMESPACE::CLog::eNotice, e, s )
 #define oexWARNING( e, s )			oexLOG( OEX_NAMESPACE::CLog::eWarning, e, s )

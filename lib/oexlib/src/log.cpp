@@ -38,7 +38,7 @@ OEX_USING_NAMESPACE
 
 CLog CLog::m_logGlobal;
 
-oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexUINT x_uErr, oexUINT x_uLevel, oexCSTR x_pErr, oexUINT x_uSkip )
+oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexINT x_uErr, oexINT x_uLevel, oexCSTR x_pErr, oexUINT x_uSkip )
 {
 	// Ensure valid reporting level
 	if ( x_uLevel < m_uLevel )

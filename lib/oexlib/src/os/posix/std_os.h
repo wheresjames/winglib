@@ -78,7 +78,10 @@ extern int daylight;
 #include <sys/ioctl.h>
 #include <linux/types.h>
 #include <linux/videodev.h>
-#include <linux/videodev2.h>
+
+#ifndef OEX_SNAPGEAR
+#	include <linux/videodev2.h>
+#endif
 
 #include <sys/sem.h>
 

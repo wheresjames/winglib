@@ -219,7 +219,7 @@ public:
 	/// Returns the os dependent handle for the resource
     t_HANDLE GetHandle()
     {
-		oexVERIFY( c_Invalid != m_hHandle && eRtInvalid != m_eType );
+		oexIGNORE oexVERIFY( c_Invalid != m_hHandle && eRtInvalid != m_eType );
     	return m_hHandle;
 	}
 

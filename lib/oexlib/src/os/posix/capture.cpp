@@ -166,7 +166,11 @@ public:
 	oexBOOL Init()
 	{
 		// V2 query device capabilities
+#ifndef OEX_VFL1
 		if ( -1 == IoCtl( m_nFd, VIDIOC_QUERYCAP, &m_cap2 ) )
+#else
+		if ( 1 )
+#endif
 		{
 			// Log V2 failure
 			oexNOTICE( errno, CStr().Fmt( oexT( "VIDEOC_QUERYCAP : Invalid V4L2 device, %u" ), m_nFd ) );
@@ -220,6 +224,7 @@ public:
 
 		} // end if
 
+#ifndef OEX_VFL1
 		else
 		{
 			// Version 2
@@ -275,6 +280,7 @@ public:
 			} // end switch
 
 		} // end if
+#endif
 
 		return oexTRUE;
 	}
@@ -352,7 +358,10 @@ private:
 
 	/// Device capabilities
 	video_capability	m_cap1;
+
+#ifndef OEX_VFL1
 	v4l2_capability		m_cap2;
+#endif
 
 	/// Video buffer 1 format
 	video_mbuf			m_buf1;
