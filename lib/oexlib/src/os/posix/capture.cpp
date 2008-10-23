@@ -412,7 +412,7 @@ oexBOOL CCapture::Open( oexCSTR x_sDevice )
 	Destroy();
 
 	// Allocate a new capture device
-	m_pDevice = OexAllocNew< CV4lCapture >( 1 );
+	m_pDevice = OexAllocConstruct< CV4lCapture >();
 	if ( !m_pDevice )
 		return oexFALSE;
 

@@ -11,14 +11,14 @@ OS		 := linux
 PROC	 := arm
 
 #TOOLS	 := debian
-TOOLS	 := android
-#TOOLS	 := snapgear
+#TOOLS	 := android
+TOOLS	 := snapgear
 
 CODEROOT := ../../../../../..
 LIBROOT := ../../../..
 
-CDEBUG	 := -DDEBUG -D_DEBUG -g
-LDEBUG	 := 
+CDEBUG	 := -g -DDEBUG -D_DEBUG
+LDEBUG	 := -g
 
 ifeq ($(OS),win32)
 
@@ -45,7 +45,7 @@ else
 			AR := $(CODEROOT)/arm/usr/local/bin/arm-linux-ar
 			DP := $(CODEROOT)/arm/usr/local/bin/arm-linux-makedepend
 
-			LFLAGS := -lrt -pthread -static $(LDEBUG)
+			LFLAGS := $(LDEBUG) -static -lrt -pthread
 			CFLAGS := -c -DOEX_ARM -DOEX_LOWRAM -DOEX_SNAPGEAR -DOEX_VFL1 $(CDEBUG)
 			SFLAGS := $(CFLAGS) -S -MMD
 			AFLAGS := cq
@@ -58,7 +58,7 @@ else
 			AR := $(CODEROOT)/../CodeSourcery/Sourcery_G++_Lite/bin/arm-none-linux-gnueabi-ar
 			DP := $(CODEROOT)/../CodeSourcery/Sourcery_G++_Lite/bin/arm-none-linux-gnueabi-makedepend
 
-			LFLAGS := -lrt -pthread -static $(LDEBUG)
+			LFLAGS := $(LDEBUG) -static -lrt -pthread 
 			CFLAGS := -c -DOEX_ARM -DOEX_LOWRAM $(CDEBUG)
 			SFLAGS := $(CFLAGS) -S -MMD
 			AFLAGS := cq
@@ -73,8 +73,8 @@ else
 		AR := ar
 		DP := makedepend
 
-		LFLAGS := -lrt -pthread -uuid $(LDEBUG)
-		CFLAGS := -c $(CDEBUG)
+		LFLAGS := $(LDEBUG) -lrt -pthread -luuid
+		CFLAGS := -c $(CDEBUG) -DOEX_VFL1
 		SFLAGS := $(CFLAGS) -S -MMD
 		AFLAGS := cq
 

@@ -2045,6 +2045,39 @@ oex::oexRESULT Test_CVfsSession()
 }
 */
 
+oex::oexRESULT Test_CCapture()
+{
+	oex::vid::CCapture cCapture;
+
+	// Open the capture device
+	if ( !oexVERIFY( cCapture.Open( "/dev/video0" ) ) ) //oex::CStr().Fmt( oexT( "/dev/video%d" ), 0 ).Ptr() ) ) )
+		return -1;
+
+	if ( !oexVERIFY( cCapture.IsOpen() ) )
+		return -2;
+
+	if ( !oexVERIFY( cCapture.StartCapture() ) )
+		return -3;
+
+	for ( int i = 0; i < 1; i++ )
+	{
+		if ( !oexVERIFY( cCapture.WaitForFrame() ) )
+			return -4;
+
+		if ( !oexVERIFY( cCapture.GetBuffer() ) )
+			return -5;
+
+		oex::CFile().CreateNew( oex::CStr().Fmt( oexT( "./img_%d" ), 0 ).Ptr() )
+			.Write( cCapture.GetBuffer(), cCapture.GetBufferSize() );
+
+	} // end for
+
+	if ( !oexVERIFY( cCapture.StopCapture() ) )
+		return -6;
+
+    return oex::oexRES_OK;
+}
+
 int main(int argc, char* argv[])
 {
     // Initialize the oex library
@@ -2084,15 +2117,15 @@ int main(int argc, char* argv[])
 
     Test_CIpAddress();
 
-    Test_CIpSocket();
+//    Test_CIpSocket();
 
-	Test_Threads();
+//	Test_Threads();
 
 //	Test_MsgParams();
 
 //    Test_TArbDelegate();
 
-    Test_CDispatch();
+//    Test_CDispatch();
 
 //    Test_CMsg();
 
@@ -2103,6 +2136,8 @@ int main(int argc, char* argv[])
 //    Test_CHttpSession();
 
 //    Test_CVfsSession();
+
+    Test_CCapture();
 
 	// Initialize the oex library
     oexUNINIT();

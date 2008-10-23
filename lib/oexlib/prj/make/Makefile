@@ -11,14 +11,14 @@ OS		 := linux
 PROC	 := arm
 
 #TOOLS	 := debian
-TOOLS	 := android
-#TOOLS	 := snapgear
+#TOOLS	 := android
+TOOLS	 := snapgear
 
 CODEROOT := ../../../../../..
 LIBROOT := ../../../..
 
 CDEBUG	 := -DDEBUG -D_DEBUG -g
-LDEBUG	 := 
+LDEBUG	 := -g
 
 ifeq ($(OS),win32)
 
@@ -72,7 +72,7 @@ else
 		AR := ar
 		DP := makedepend
 
-		LFLAGS := -lrt $(LDEBUG)
+		LFLAGS := -lrt -luuid $(LDEBUG)
 		CFLAGS := -c $(CDEBUG)
 		SFLAGS := $(CFLAGS) -S -MMD
 		AFLAGS := cq
@@ -82,7 +82,7 @@ else
 endif
 
 # Flags
-#LFLAGS := -g -static-libgcc -Wl,-static -la
+#LFLAGS := -g -static -libgcc -Wl,-static -la
 #CFLAGS := -g -c
 #SFLAGS := $(CFLAGS) -S -MMD
 #AFLAGS := rcs
