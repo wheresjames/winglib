@@ -2050,7 +2050,7 @@ oex::oexRESULT Test_CCapture()
 	oex::vid::CCapture cCapture;
 
 	// Open the capture device
-	if ( !oexVERIFY( cCapture.Open( "/dev/video0" ) ) ) //oex::CStr().Fmt( oexT( "/dev/video%d" ), 0 ).Ptr() ) ) )
+	if ( !oexVERIFY( cCapture.Open( oex::CStr().Fmt( oexT( "/dev/video%d" ), 0 ).Ptr() ) ) )
 		return -1;
 
 	if ( !oexVERIFY( cCapture.IsOpen() ) )
@@ -2064,10 +2064,11 @@ oex::oexRESULT Test_CCapture()
 		if ( !oexVERIFY( cCapture.WaitForFrame() ) )
 			return -4;
 
-		if ( !oexVERIFY( cCapture.GetBuffer() ) )
+		if ( !oexVERIFY( cCapture.GetBuffer() && cCapture.GetBufferSize() ) )
 			return -5;
 
 		oex::CFile().CreateNew( oex::CStr().Fmt( oexT( "./img_%d" ), 0 ).Ptr() )
+//			.Write( "hello world!", 11 );
 			.Write( cCapture.GetBuffer(), cCapture.GetBufferSize() );
 
 	} // end for

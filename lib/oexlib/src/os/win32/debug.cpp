@@ -133,7 +133,7 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 	str << oexT( "Module : " ) << x_pModule << oexNL;
 	str << oexT( "File : " ) << x_pFile << oexNL;
 	str << oexT( "Line : " ) << x_uLine << oexNL << oexNL;
-	str << oexT( "Expression : " ) << x_pStr;
+	str << oexT( "Expression : " ) << CStr( x_pStr ).Replace( oexT( "%" ), oexT( "%%" ) );
 
 	// Simulate the _CrtDbgReport box
 	int nRet = MessageBox( NULL, str.Ptr(), oexT( "Program Self Verification Error" ), MB_ICONSTOP | MB_ABORTRETRYIGNORE );

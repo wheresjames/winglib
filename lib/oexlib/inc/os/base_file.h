@@ -179,6 +179,9 @@ public:
 	/// Returns the fully qualified file name the to the current module
 	static CStr GetModuleFileName();
 
+	/// Flushes file data to disk
+	static oexBOOL Flush( t_HFILE x_hFile );
+
 public:
 
     struct SFindData

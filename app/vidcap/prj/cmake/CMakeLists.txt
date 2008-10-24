@@ -87,7 +87,7 @@ endif( _WINDOWS )
 target_link_libraries(
 						${project_name}
 						${wxWidgets_LIBRARIES}
-						/home/landshark/code/lib/winglib/lib/oexlib/bin/liboexlib_d.a
+						/home/landshark/code/lib/winglib/lib/oexlib/bin/posix-linux-i386-debian/liboexlib_d.a
 					  )
 
 

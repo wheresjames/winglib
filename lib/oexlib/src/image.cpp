@@ -44,7 +44,7 @@ oexBOOL CImage::Destroy()
 	return oexTRUE;
 }
 
-oexBOOL CImage::Create( oexCSTR x_pShared, os::CFMap::t_HFILEMAP x_hShared, oexINT x_lWidth, oexINT x_lHeight, oexINT x_lBpp )
+oexBOOL CImage::Create( oexCSTR x_pShared, os::CFMap::t_HFILEMAP x_hShared, oexINT x_lWidth, oexINT x_lHeight, oexINT x_lBpp, oexBOOL x_bInit )
 {
 	// Lose any current image
 	Destroy();
@@ -56,15 +56,44 @@ oexBOOL CImage::Create( oexCSTR x_pShared, os::CFMap::t_HFILEMAP x_hShared, oexI
 
 	// Set shared name
 	if ( x_pShared && *x_pShared )
+	{	m_image.PlainShare( oexTRUE );
 		m_image.SetName( x_pShared );
+	} // end if
 
 	// Set shared name
 	else if ( x_hShared )
+	{	m_image.PlainShare( oexTRUE );
 		m_image.SetShareHandle( x_hShared );
+	} // end else if
 
 	// Allocate memory for the shared memory
 	if ( !m_image.OexNew( sizeof( SImageData ) + lImageSize ).Ptr() )
+	{	oexERROR( -1, CStr().Fmt( oexT( "Error allocating image data : s=%s, fm=%d, w=%d, h=%d, bpp=%d" ), oexStrToMbPtr( x_pShared ), (oexINT)x_hShared, x_lWidth, x_lHeight, x_lBpp ) );
 		return oexFALSE;
+	} // end if
+
+	if ( x_bInit )
+	{
+		// Get a pointer to the image data
+		SImageData *pId = Image();
+		if ( !oexCHECK_PTR( pId ) )
+		{	oexERROR( -1, CStr().Fmt( oexT( "Invalid image data pointer : s=%s, fm=%d, w=%d, h=%d, bpp=%d" ), oexStrToMbPtr( x_pShared ), (oexINT)x_hShared, x_lWidth, x_lHeight, x_lBpp ) );
+			return oexFALSE;
+		} // end if
+
+		// Assume zero
+		oexZeroMemory( pId, sizeof( SImageData ) );
+
+		// Initialize image metrics
+		pId->bih.biSize = sizeof( SImageData );
+		pId->bih.biWidth = x_lWidth;
+		pId->bih.biHeight = x_lHeight;
+		pId->bih.biPlanes = 1;
+		pId->bih.biBitCount = x_lBpp;
+		pId->bih.biCompression = SBitmapInfoHeader::eBiRgb;
+		pId->bih.biSizeImage = lImageSize;
+
+	} // end if
 
 	return oexTRUE;
 }

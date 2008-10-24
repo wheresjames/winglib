@@ -120,6 +120,10 @@ public:
     void SetReportingLevel( oexUINT x_uLevel )
     {  	m_uLevel = x_uLevel; }
 
+	/// Flushes the log to disk
+	void Flush()
+	{	m_file.Flush(); }
+
 private:
 
 	/// Log file

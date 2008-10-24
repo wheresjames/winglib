@@ -75,8 +75,11 @@ void CDebug::vFmtTrace( oexCSTR x_pFmt, oexVaList &x_pArgs )
 
 void CDebug::Break()
 {
+	// Flush the log file contents
+	CLog::GlobalLog().Flush();
+
 #ifndef OEX_ARM
-	asm ( "int $3" );
+//	asm ( "int $3" );
 #endif
 }
 
@@ -108,7 +111,7 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 	str << oexT( "Module     : " ) << x_pModule << oexNL;
 	str << oexT( "File       : " ) << x_pFile << oexNL;
 	str << oexT( "Line       : " ) << x_uLine << oexNL;
-	str << oexT( "Expression : " ) << x_pStr << oexNL;
+	str << oexT( "Expression : " ) << CStr( x_pStr ).Replace( oexT( "%" ), oexT( "%%" ) ).Ptr() << oexNL;
 	str << oexNL;
 
 	printf( oexStrToMbPtr( str.Ptr() ) );

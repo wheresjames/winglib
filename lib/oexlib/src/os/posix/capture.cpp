@@ -197,7 +197,7 @@ public:
 			} // end if
 
 			// Create the image buffer
-			if ( !m_img.Create( oexNULL, (os::CFMap::t_HFILEMAP)m_nFd, 320, 240, 24 ) )
+			if ( !m_img.Create( oexNULL, (os::CFMap::t_HFILEMAP)m_nFd, 320, 240, 24, 1 ) )
 			{	oexERROR( errno, oexT( "Failed to create shared memory buffer" ) );
 				m_nIoMode = eIoReadWrite;
 			} // end if
@@ -307,6 +307,7 @@ public:
 
 		} // end if
 
+		return oexTRUE;
 	}
 
 	/// Stops video capture
@@ -399,7 +400,7 @@ void CCapture::Destroy()
 {
 	/// Lose device if any
 	if ( m_pDevice )
-	{	OexAllocDelete( (CV4lCapture*)m_pDevice );
+	{	OexAllocDelete< CV4lCapture >( (CV4lCapture*)m_pDevice );
 		m_pDevice = oexNULL;
 	} // end if
 }
@@ -428,7 +429,9 @@ oexBOOL CCapture::Open( oexCSTR x_sDevice )
 oexBOOL CCapture::WaitForFrame( oexUINT x_uTimeout )
 {
 	if ( !m_pDevice )
+	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
 		return oexFALSE;
+	} // end if
 
 	return ( (CV4lCapture*)m_pDevice )->WaitForFrame( x_uTimeout );
 }
@@ -436,7 +439,9 @@ oexBOOL CCapture::WaitForFrame( oexUINT x_uTimeout )
 oexBOOL CCapture::StartCapture()
 {
 	if ( !m_pDevice )
+	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
 		return oexFALSE;
+	} // end if
 
 	return ( (CV4lCapture*)m_pDevice )->StartCapture();
 }
@@ -444,7 +449,9 @@ oexBOOL CCapture::StartCapture()
 oexBOOL CCapture::StopCapture()
 {
 	if ( !m_pDevice )
+	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
 		return oexFALSE;
+	} // end if
 
 	return ( (CV4lCapture*)m_pDevice )->StopCapture();
 }
@@ -452,7 +459,9 @@ oexBOOL CCapture::StopCapture()
 oexPVOID CCapture::GetBuffer()
 {
 	if ( !m_pDevice )
+	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
 		return oexFALSE;
+	} // end if
 
 	return ( (CV4lCapture*)m_pDevice )->GetBuffer();
 }
@@ -460,7 +469,9 @@ oexPVOID CCapture::GetBuffer()
 oexUINT CCapture::GetBufferSize()
 {
 	if ( !m_pDevice )
+	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
 		return oexFALSE;
+	} // end if
 
 	return ( (CV4lCapture*)m_pDevice )->GetBufferSize();
 }
@@ -468,7 +479,9 @@ oexUINT CCapture::GetBufferSize()
 CImage* CCapture::GetImage()
 {
 	if ( !m_pDevice )
+	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
 		return oexFALSE;
+	} // end if
 
 	return ( (CV4lCapture*)m_pDevice )->GetImage();
 }

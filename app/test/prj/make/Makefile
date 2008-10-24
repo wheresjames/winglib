@@ -7,12 +7,12 @@ default_target: all
 OS		 := linux
 #OS		 := win32
 
-#PROC	 := i386
-PROC	 := arm
+PROC	 := i386
+#PROC	 := arm
 
-#TOOLS	 := debian
+TOOLS	 := debian
 #TOOLS	 := android
-TOOLS	 := snapgear
+#TOOLS	 := snapgear
 
 CODEROOT := ../../../../../..
 LIBROOT := ../../../..
@@ -141,7 +141,7 @@ $(PATH_EXE): $(OBJECTS)	$(SOURCES)
 
 $(PATH_OBJ)/%.o: 
 	$(CC) $(CFLAGS) $(subst $(PATH_OBJ),$(PATH_SRC), $(subst .o,.cpp, $@)) -o $@
-	- $(CC) $(SFLAGS) $(subst $(PATH_OBJ),$(PATH_SRC), $(subst .o,.cpp, $@)) -o $(subst .o,.asm, $@)
+#	- $(CC) $(SFLAGS) $(subst $(PATH_OBJ),$(PATH_SRC), $(subst .o,.cpp, $@)) -o $(subst .o,.asm, $@)
 
 
 	

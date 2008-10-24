@@ -51,7 +51,12 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( CFMap::t_HFILEMAP x_hFile, oexPVOI
         return CFMap::c_Failed;
 	} // end if
 
-	int fd = (int)x_hFile;
+	int fd = dup( (int)x_hFile );
+	if ( 0 > fd )
+	{	oexERROR( -1, oexT( "dup() returned error : unable to duplicate file handle" ) );
+		return CFMap::c_Failed;
+	} // end if
+
 	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, fd, 0 );
 	if ( c_Failed == pMem )
 	{	oexERROR( errno, CStr().Fmt( oexT( "mmap failed to allocate block : handle=%l, size=%l" ), fd, (int)x_llSize ) );

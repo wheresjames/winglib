@@ -238,6 +238,18 @@ public:
     {   return Write( CStr8().ToMb( x_sStr ), x_pllWritten );
     }
 
+	//==============================================================
+	// Flush()
+	//==============================================================
+	/// Syncs file memory cache with disk
+	/**
+		\return Non-zero if success
+
+		\see
+	*/
+    oexBOOL Flush()
+    {   return os::CBaseFile::Flush( m_hFile );}
+
     /// File write operator
     CFile& operator << ( CStr8 x_sStr ) { Write( x_sStr ); return *this; }
 

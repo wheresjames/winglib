@@ -86,6 +86,8 @@ public:
         m_hShareHandle = os::CFMap::vFailed();
         m_pName = oexNULL;
         m_llOpenSize = 0;
+        m_bPlain = oexFALSE;
+        m_bExisting = oexFALSE;
 	}
 
     /// Copy operator
@@ -170,19 +172,23 @@ public:
 	{
 		if ( m_hFile && m_pPtr )
 		{
-            oexBOOL bDestroy = !CAlloc::DecRef( m_pPtr );
+			if ( !m_bPlain )
+			{
+				oexBOOL bDestroy = !CAlloc::DecRef( m_pPtr );
 
-            // Was the object constructed?
-            if ( bDestroy && CAlloc::eF1Constructed & CAlloc::GetFlags( m_pPtr ) )
-            {
-                oexUINT uSize = Size();
-                for ( oexUINT i = 0; i < uSize; i++ )
-                    m_pPtr[ i ].~T();
+				// Was the object constructed?
+				if ( bDestroy && CAlloc::eF1Constructed & CAlloc::GetFlags( m_pPtr ) )
+				{
+					oexUINT uSize = Size();
+					for ( oexUINT i = 0; i < uSize; i++ )
+						m_pPtr[ i ].~T();
 
-            } // end if
+				} // end if
 
-            m_pPtr = (T*)CAlloc::VerifyMem( m_pPtr, bDestroy );
-            m_pPtr -= sizeof( oexUINT );
+				m_pPtr = (T*)CAlloc::VerifyMem( m_pPtr, bDestroy );
+				m_pPtr -= sizeof( oexUINT );
+
+			} // end if
 
             os::CFMap::osReleaseFileMapping( m_hFile, m_pPtr, m_llOpenSize );
 
@@ -190,6 +196,7 @@ public:
 		m_pPtr = oexNULL;
     	m_hFile = oexNULL;
     	m_llOpenSize = 0;
+        m_bExisting = oexFALSE;
 	}
 
 	//==============================================================
@@ -222,14 +229,19 @@ public:
         // Multiply by size of object
         x_llSize *= sizeof( T );
 
-        // Calculate the actual size we'll need
-        oexINT64 llSize = x_llSize;
-        llSize += sizeof( oexUINT ) + CAlloc::ProtectAreaSize();
-        llSize = cmn::NextPower2( llSize );
-
 		// Did we get a file handle to use?
         if ( x_hFile )
         	m_hShareHandle = x_hFile;
+
+		oexINT64 llSize = x_llSize;
+
+		if ( !m_bPlain )
+		{
+			// Calculate the actual size we'll need
+			llSize += sizeof( oexUINT ) + CAlloc::ProtectAreaSize();
+			llSize = cmn::NextPower2( llSize );
+
+		} // end if
 
 		// Do we have a shared file handle?
         if ( IsShareHandle() )
@@ -255,25 +267,30 @@ public:
 
         // Save block size
         *(oexUINT*)m_pPtr = (oexUINT)llSize;
-        m_pPtr += sizeof( oexUINT );
 
-		// Look for abandoned blocks ( this mostly for Linux )
-		if ( m_bExisting && !CAlloc::GetRefCount( CAlloc::RawToPtr( m_pPtr ) ) )
-			m_bExisting = oexFALSE;
+		if ( !m_bPlain )
+		{
+			m_pPtr += sizeof( oexUINT );
 
-        // Protect memory area
-        m_pPtr = (T*)CAlloc::ProtectMem( m_pPtr, (oexUINT)x_llSize, !m_bExisting );
+			// Look for abandoned blocks ( this mostly for Linux )
+			if ( m_bExisting && !CAlloc::GetRefCount( CAlloc::RawToPtr( m_pPtr ) ) )
+				m_bExisting = oexFALSE;
 
-        // Verify existing block
-        if ( m_bExisting )
-            CAlloc::VerifyMem( m_pPtr, oexFALSE );
+			// Protect memory area
+			m_pPtr = (T*)CAlloc::ProtectMem( m_pPtr, (oexUINT)x_llSize, !m_bExisting );
 
-        // Set constructed flags if needed
-        else if ( x_bConstructed )
-            CAlloc::SetFlags( m_pPtr, CAlloc::eF1Constructed );
+			// Verify existing block
+			if ( m_bExisting )
+				CAlloc::VerifyMem( m_pPtr, oexFALSE );
 
-        // Add a reference to the memory
-        CAlloc::AddRef( m_pPtr );
+			// Set constructed flags if needed
+			else if ( x_bConstructed )
+				CAlloc::SetFlags( m_pPtr, CAlloc::eF1Constructed );
+
+			// Add a reference to the memory
+			CAlloc::AddRef( m_pPtr );
+
+		} // end if
 
         return m_pPtr;
 	}
@@ -339,6 +356,9 @@ public:
         if ( !m_pPtr )
             return 0;
 
+		if ( m_bPlain )
+			return m_llOpenSize;
+
         return CAlloc::ArraySize( m_pPtr );
     }
 
@@ -347,6 +367,9 @@ public:
     {
         if ( !m_pPtr )
             return 0;
+
+		if ( m_bPlain )
+			return m_llOpenSize;
 
         return CAlloc::BlockSize( m_pPtr );
     }
@@ -364,6 +387,9 @@ public:
             m_pPtr = m.m_pPtr; m.m_pPtr = oexNULL;
             m_pName = m.m_pName; m.m_pName = oexNULL;
             m_bExisting = m.m_bExisting; m.m_bExisting = oexNULL;
+			m_llOpenSize = m.m_llOpenSize; m.m_llOpenSize = 0;
+			m_hShareHandle = m.m_hShareHandle; m.m_hShareHandle = os::CFMap::vFailed();
+			m_bPlain = m.m_bPlain; m.m_bPlain = oexFALSE;
 
         } // end if
 
@@ -375,6 +401,9 @@ public:
     {
         // Just drop our memory
         Destroy();
+
+		// Set plain flag
+		m_bPlain = x_m.m_bPlain;
 
         // Copy the share
         if ( x_m.m_pPtr )
@@ -400,7 +429,17 @@ public:
         m_pPtr = oexNULL;
         m_bExisting = oexFALSE;
         m_pName = oexNULL;
+        m_llOpenSize = 0;
+        m_hShareHandle = os::CFMap::vFailed();
     }
+
+	/// Sets the plain memory flag
+    void Plain( oexBOOL x_bPlain )
+    {	m_bPlain = x_bPlain; }
+
+	/// Returns non-zero if plain share
+    oexBOOL IsPlain()
+    {	return m_bPlain; }
 
 private:
 
@@ -422,5 +461,8 @@ private:
 
 	/// External file handle for share
 	os::CFMap::t_HFILEMAP		m_hShareHandle;
+
+	/// Set to non-zero for a plain file mapping (without any memory protection)
+	oexBOOL						m_bPlain;
 };
 

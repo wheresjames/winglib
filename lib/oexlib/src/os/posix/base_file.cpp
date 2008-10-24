@@ -145,6 +145,12 @@ oexBOOL CBaseFile::Read( CBaseFile::t_HFILE x_hFile, oexPVOID x_pData, oexINT64 
     return ( 0 <= llRead );
 }
 
+oexBOOL CBaseFile::Flush( t_HFILE x_hFile )
+{
+	return !fsync( (int)x_hFile );
+}
+
+
 oexINT64 CBaseFile::Size( t_HFILE hFile )
 {
 	struct stat64 s64;

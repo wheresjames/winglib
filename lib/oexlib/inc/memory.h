@@ -849,6 +849,14 @@ public:
         return *this;
     }
 
+	/// Enables plain share mode
+	void PlainShare( oexBOOL x_bPlain )
+	{	m_fm.Plain( x_bPlain ); }
+
+	/// Returns non-zero if plain share
+	oexBOOL IsPlainShare()
+	{	return m_fm.IsPlain(); }
+
 private:
 
     /// Pointer to the memory

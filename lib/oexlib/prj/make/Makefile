@@ -7,12 +7,12 @@ default_target: all
 OS		 := linux
 #OS		 := win32
 
-#PROC	 := i386
-PROC	 := arm
+PROC	 := i386
+#PROC	 := arm
 
-#TOOLS	 := debian
+TOOLS	 := debian
 #TOOLS	 := android
-TOOLS	 := snapgear
+#TOOLS	 := snapgear
 
 CODEROOT := ../../../../../..
 LIBROOT := ../../../..
@@ -73,7 +73,7 @@ else
 		DP := makedepend
 
 		LFLAGS := -lrt -luuid $(LDEBUG)
-		CFLAGS := -c $(CDEBUG)
+		CFLAGS := -c $(CDEBUG) -DOEX_VFL1 -DUNICODE -D_UNICODE
 		SFLAGS := $(CFLAGS) -S -MMD
 		AFLAGS := cq
 		
@@ -175,10 +175,10 @@ $(PATH_EXE): $(OBJECTS)	$(OS_OBJECTS)
 
 $(PATH_OBJ)/os/%.o:
 	$(CC) $(CFLAGS) $(subst $(PATH_OBJ)/os,$(PATH_SRC)/os/$(PLATFORM), $(subst .o,.cpp, $@)) -o $@
-	- $(CC) $(SFLAGS) $(subst $(PATH_OBJ)/os,$(PATH_SRC)/os/$(PLATFORM), $(subst .o,.cpp, $@)) -o $(subst .o,.asm, $@)
+#	- $(CC) $(SFLAGS) $(subst $(PATH_OBJ)/os,$(PATH_SRC)/os/$(PLATFORM), $(subst .o,.cpp, $@)) -o $(subst .o,.asm, $@)
 
 $(PATH_OBJ)/%.o:
 	$(CC) $(CFLAGS) $(subst $(PATH_OBJ),$(PATH_SRC), $(subst .o,.cpp, $@)) -o $@
-	- $(CC) $(SFLAGS) $(subst $(PATH_OBJ),$(PATH_SRC), $(subst .o,.cpp, $@)) -o $(subst .o,.asm, $@)
+#	- $(CC) $(SFLAGS) $(subst $(PATH_OBJ),$(PATH_SRC), $(subst .o,.cpp, $@)) -o $(subst .o,.asm, $@)
 	
 

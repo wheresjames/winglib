@@ -156,12 +156,14 @@ public:
 		\param [in]  x_lWidth	- Image width
 		\param [in]  x_lHeight	- Image height
 		\param [in]  x_lBpp		- Image bits per pixel
+		\param [in]  x_bInit	- Non-zero if the image header should
+								  be initialized
 
 		\return Non-zero if success
 
 		\see
 	*/
-    oexBOOL Create( oexCSTR x_pShared, os::CFMap::t_HFILEMAP x_hShared, oexINT x_lWidth, oexINT x_lHeight, oexINT x_lBpp );
+    oexBOOL Create( oexCSTR x_pShared, os::CFMap::t_HFILEMAP x_hShared, oexINT x_lWidth, oexINT x_lHeight, oexINT x_lBpp, oexBOOL m_bInit );
 
 	/// Returns the scan width for the specified values
 	static oexINT GetScanWidth( oexINT lWidth, oexINT lBpp )

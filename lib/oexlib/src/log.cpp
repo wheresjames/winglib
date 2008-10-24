@@ -57,7 +57,9 @@ oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexINT x_uErr, oexINT x_uLev
 
 			// Open new log file
 			if ( !m_file.CreateNew( oexGetModulePath( oexT( "debug.log" ) ).Ptr() ).IsOpen() )
+			{	os::CSys::InterlockedDecrement( &m_lInLog );
 				return x_uErr;
+			} // end if
 
 			// Create log header
 			m_file.Write( CStr().Fmt( oexT( "; Log file\r\n; Date : %s\r\n; Application : %s\r\n\r\n" ),
