@@ -56,7 +56,13 @@ template < const int T > class oex_static_assert{};
 
 #endif
 
-#define oexLOG( l, e, s )			OEX_NAMESPACE::CLog::GlobalLog().Log( oexStr8ToStrPtr( __FILE__ ), __LINE__, l, e, s )
+// \note __FILE__ seems to always be type char*
+
+// !!! e has to be last in the parameter list to Log(), that way, it is
+//     evaulated first.  This ensures that in case e is a global
+//     variable like 'errno', it is not destroyed by the other
+//     arguments.
+#define oexLOG( l, e, s )			OEX_NAMESPACE::CLog::GlobalLog().Log( oexTEXT( __FILE__ ), __LINE__, l, s, e )
 #define oexNOTICE( e, s )			oexLOG( OEX_NAMESPACE::CLog::eNotice, e, s )
 #define oexWARNING( e, s )			oexLOG( OEX_NAMESPACE::CLog::eWarning, e, s )
 #define oexERROR( e, s )			oexLOG( OEX_NAMESPACE::CLog::eError, e, s )
@@ -67,14 +73,14 @@ template < const int T > class oex_static_assert{};
 
     - Macro -               - Release -             - Debug -
 
-    oexASSERT               1 =                     1 = 1
-                            0 =                     0 = Shows debug dialog box
+    oexASSERT               <removed>               1 = 1
+                            <removed>               0 = Shows debug string
 
     oexCHECK                1 = 1                   1 = 1
-                            0 = 0                   0 = Shows debug dialog box
+                            0 = 0                   0 = Shows debug string
 
     oexVERIFY               1 = 1                   1 = 1
-                            0 = Shows dialog box    0 = Shows debug dialog box
+                            0 = Shows debug string  0 = Shows debug string
 
 
     These macros have no side effects.

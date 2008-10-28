@@ -64,6 +64,21 @@ CStr CTrace::GetBacktrace( oexUINT x_uSkip, oexUINT x_uMax )
 		else
 			str += oexT( "[0x????????] ???\r\n" );
 
+	// Release the memory
+	if ( oexCHECK_PTR( sStrings ) )
+		free( sStrings );
+
 	return str;
 }
+
+
+CStr CTrace::GetErrorMsg( oexINT x_nErr )
+{
+	oexSTR8 pErr = strerror( x_nErr );
+	if ( !oexCHECK_PTR( pErr ) )
+		return CStr( oexT( "Undefined error" ) );
+
+	return CStr( oexMbToStr( pErr ) );
+}
+
 

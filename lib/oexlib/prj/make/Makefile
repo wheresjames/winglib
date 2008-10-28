@@ -7,18 +7,18 @@ default_target: all
 OS		 := linux
 #OS		 := win32
 
-PROC	 := i386
-#PROC	 := arm
+#PROC	 := i386
+PROC	 := arm
 
-TOOLS	 := debian
+#TOOLS	 := debian
 #TOOLS	 := android
-#TOOLS	 := snapgear
+TOOLS	 := snapgear
 
 CODEROOT := ../../../../../..
 LIBROOT := ../../../..
 
-CDEBUG	 := -DDEBUG -D_DEBUG -g
-LDEBUG	 := -g
+CDEBUG	 := -ggdb -DDEBUG -D_DEBUG 
+LDEBUG	 := -ggdb
 
 ifeq ($(OS),win32)
 

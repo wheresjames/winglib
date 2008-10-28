@@ -77,14 +77,18 @@ public:
 		\param [in] x_pFile		- Source file name
 		\param [in] x_uLine		- Source file line number
 		\param [in] x_uLevel	- Error level
-		\param [in] x_uErr		- Error code
 		\param [in] x_pErr		- Error string
+		\param [in] x_uErr		- Error code
+
+		\warning x_uErr should be the last parameter, if it is
+		         a global variable like 'errno', it could possibly,
+		         be destroyed by side effects of other parameters.
 
 		\return Returns x_uErr
 
 		\see
 	*/
-    oexUINT Log( oexCSTR x_pFile, oexINT x_nLine, oexINT x_uLevel, oexINT x_uErr, oexCSTR x_pErr, oexUINT x_uSkip = 2 );
+    oexUINT Log( oexCSTR x_pFile, oexINT x_nLine, oexINT x_uLevel, oexCSTR x_pErr, oexINT x_uErr, oexUINT x_uSkip = 2 );
 
 	//==============================================================
 	// Log()
@@ -99,13 +103,17 @@ public:
 
 		This function returns x_uErr in all cases
 
+		\warning x_uErr should be the last parameter, if it is
+		         a global variable like 'errno', it could possibly,
+		         be destroyed by side effects of other parameters.
+
 		\return Returns x_uErr
 
 		\see
 	*/
-    oexUINT Log( oexCSTR x_pFile, oexINT x_nLine, oexINT x_uLevel, oexINT x_uErr, CStr x_sErr )
+    oexUINT Log( oexCSTR x_pFile, oexINT x_nLine, oexINT x_uLevel, CStr x_sErr, oexINT x_uErr )
     {	if ( x_uLevel < m_uLevel ) return x_uErr;
-    	return Log( x_pFile, x_nLine, x_uLevel, x_uErr, x_sErr.Ptr(), 3 );
+    	return Log( x_pFile, x_nLine, x_uLevel, x_sErr.Ptr(), x_uErr, 3 );
     }
 
 	//==============================================================

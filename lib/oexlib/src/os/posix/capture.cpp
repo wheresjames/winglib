@@ -58,6 +58,12 @@ public:
 		eIoStreaming
 	};
 
+	enum
+	{
+		// Capture buffer to use
+		eCaptureBuffer = 0
+	};
+
 public:
 
 	/// Default contructor
@@ -67,6 +73,10 @@ public:
 		m_nVersion = 0;
 		m_nIoMode = eIoAuto;
 		m_llFrame = 0;
+		m_nWidth = 0;
+		m_nHeight = 0;
+		m_nBpp = 24;
+		m_fFps = 0;
 	}
 
 	/// Destructor
@@ -82,7 +92,7 @@ public:
 		\param [in] x_pDevice	-	Video device name
 										- Example: /dev/video0
 	*/
-	oexBOOL Open( oexCSTR x_pDevice )
+	oexBOOL Open( oexCSTR x_pDevice, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
 	{
 		// Sanity checks
 		if ( !x_pDevice || !*x_pDevice )
@@ -110,6 +120,10 @@ public:
 
 		// Save device name
 		m_sDeviceName = x_pDevice;
+		m_nWidth = x_nWidth;
+		m_nHeight = x_nHeight;
+		m_nBpp = x_nBpp;
+		m_fFps = x_fFps;
 
 		// Attempt to initialize the device
 		if ( !Init() )
@@ -133,13 +147,15 @@ public:
 		close( m_nFd );
 
 		// Lose the image buffer
-		m_img.Destroy();
+		m_image.Destroy();
 
 		m_nFd = -1;
 		m_nVersion = 0;
-//		m_pFrameBuffer = oexNULL;
 		m_llFrame = 0;
-
+		m_nWidth = 0;
+		m_nHeight = 0;
+		m_nBpp = 24;
+		m_fFps = 0;
 	}
 
 public:
@@ -175,6 +191,9 @@ public:
 			// Log V2 failure
 			oexNOTICE( errno, CStr().Fmt( oexT( "VIDEOC_QUERYCAP : Invalid V4L2 device, %u" ), m_nFd ) );
 
+			// Initialize the structure
+			oexZeroMemory( &m_cap1, sizeof( m_cap1 ) );
+
 			// V1 Device?
 			if ( -1 == IoCtl( m_nFd, VIDIOCGCAP, &m_cap1 ) )
 			{	oexERROR( errno, CStr().Fmt( oexT( "VIDEOCGCAP : Invalid V4L1 device, %u" ), m_nFd ) );
@@ -196,8 +215,16 @@ public:
 				return oexFALSE;
 			} // end if
 
-			// Create the image buffer
-			if ( !m_img.Create( oexNULL, (os::CFMap::t_HFILEMAP)m_nFd, 320, 240, 24, 1 ) )
+			oexINT lImageSize = GetImageSize();
+			if ( 0 >= lImageSize )
+			{	oexERROR( errno, CStr().Fmt( oexT( "Invalid Imaeg size : %d x %d x %d" ), m_nWidth, m_nHeight, m_nBpp ) );
+				return oexFALSE;
+			} // end if
+
+			m_image.PlainShare( oexTRUE );
+			m_image.SetShareHandle( (os::CFMap::t_HFILEMAP)m_nFd );
+
+			if ( !m_image.OexNew( lImageSize ).Ptr() )
 			{	oexERROR( errno, oexT( "Failed to create shared memory buffer" ) );
 				m_nIoMode = eIoReadWrite;
 			} // end if
@@ -236,9 +263,20 @@ public:
 				return oexFALSE;
 			} // end if
 
-			// +++ Detect io mode if eIoAuto
+			// +++ Detect io mode if eIoAuto / not sure what the prefered order should be.
+			//     Should probably do some performance testing...
 			if ( eIoAuto == m_nIoMode )
-				m_nIoMode = eIoReadWrite;
+			{
+				if ( ( m_cap2.capabilities & V4L2_CAP_READWRITE ) )
+					m_nIoMode = eIoReadWrite;
+
+				else if ( ( m_cap2.capabilities & V4L2_CAP_ASYNCIO ) )
+					m_nIoMode = eIoAsync;
+
+				else if ( ( m_cap2.capabilities & V4L2_CAP_STREAMING ) )
+					m_nIoMode = eIoStreaming;
+
+			} // end if
 
 			// Verify image transfer mode is supported
 			switch( m_nIoMode )
@@ -293,9 +331,9 @@ public:
 			if ( eIoAsync == m_nIoMode )
 			{
 				video_mmap vm;
-				vm.frame = ++m_llFrame;
-				vm.width = 320;
-				vm.height = 240;
+				vm.frame = eCaptureBuffer;
+				vm.width = m_nWidth;
+				vm.height = m_nHeight;
 				vm.format = VIDEO_PALETTE_RGB24;
 
 				if ( -1 == IoCtl( m_nFd, VIDIOCMCAPTURE, &vm ) )
@@ -319,26 +357,49 @@ public:
 	/// Waits for a new frame of video
 	oexBOOL WaitForFrame( oexUINT x_uTimeout = 0 )
 	{
-		oexINT nFrame = (oexINT)m_llFrame;
+		oexINT nFrame = eCaptureBuffer;
 		if ( -1 == IoCtl( m_nFd, VIDIOCSYNC, &nFrame ) )
 		{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOCSYNC : Failed to wait for frame sync, %u" ), m_nFd ) );
 			return oexFALSE;
 		} // end if
+
+		// Count a frame
+		m_llFrame++;
 
 		return oexTRUE;
 	}
 
 	/// Returns a pointer to the video buffer
 	oexPVOID GetBuffer()
-	{	return m_img.GetBuffer(); }
+	{	return m_image.Ptr(); }
 
 	/// +++ Should return the size of the video buffer
-	oexUINT GetBufferSize()
-	{	return m_img.GetBufferSize(); }
+	oexINT GetImageSize()
+	{	return CImage::GetScanWidth( m_nWidth, m_nBpp ) * cmn::Abs( m_nHeight ); }
 
 	/// Returns an image object
 	CImage* GetImage()
 	{	return oexNULL; }
+
+	/// Returns the image width
+	oexINT GetWidth()
+	{	return m_nWidth; }
+
+	/// Returns the image height
+	oexINT GetHeight()
+	{	return m_nHeight; }
+
+	/// Returns the bits-per-pixel of the current image format
+	oexINT GetBpp()
+	{	return m_nBpp; }
+
+	/// Returns the frame rate in frames per second
+	oexFLOAT GetFps()
+	{	return m_fFps; }
+
+	/// Returns the current frame index
+	oexINT64 GetFrame()
+	{	return m_llFrame; }
 
 private:
 
@@ -367,8 +428,19 @@ private:
 	/// Video buffer 1 format
 	video_mbuf			m_buf1;
 
+	/// Image memory
+	TMem< oexCHAR >		m_image;
+
+	oexINT				m_nWidth;
+
+	oexINT				m_nHeight;
+
+	oexINT				m_nBpp;
+
+	oexFLOAT			m_fFps;
+
 	/// Image buffer
-	CImage				m_img;
+//	CImage				m_img;
 
 	/// Frame buffer
 //	oexCHAR				*m_pFrameBuffer;
@@ -383,7 +455,6 @@ private:
 //	v4l2_format			m_fmt;
 
 };
-
 
 CCapture::CCapture()
 {
@@ -407,7 +478,7 @@ void CCapture::Destroy()
 
 //	CV4lCapture				m_v4lCap;
 
-oexBOOL CCapture::Open( oexCSTR x_sDevice )
+oexBOOL CCapture::Open( oexCSTR x_sDevice, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
 {
 	// Lose previous device
 	Destroy();
@@ -418,7 +489,7 @@ oexBOOL CCapture::Open( oexCSTR x_sDevice )
 		return oexFALSE;
 
 	// Attempt to open the capture device
-	if ( !( (CV4lCapture*)m_pDevice )->Open( x_sDevice ) )
+	if ( !( (CV4lCapture*)m_pDevice )->Open( x_sDevice, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
 	{	Destroy();
 		return oexFALSE;
 	} // end if
@@ -466,14 +537,14 @@ oexPVOID CCapture::GetBuffer()
 	return ( (CV4lCapture*)m_pDevice )->GetBuffer();
 }
 
-oexUINT CCapture::GetBufferSize()
+oexINT CCapture::GetImageSize()
 {
 	if ( !m_pDevice )
 	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
 		return oexFALSE;
 	} // end if
 
-	return ( (CV4lCapture*)m_pDevice )->GetBufferSize();
+	return ( (CV4lCapture*)m_pDevice )->GetImageSize();
 }
 
 CImage* CCapture::GetImage()
@@ -485,4 +556,55 @@ CImage* CCapture::GetImage()
 
 	return ( (CV4lCapture*)m_pDevice )->GetImage();
 }
+
+oexINT CCapture::GetWidth()
+{
+	if ( !m_pDevice )
+	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
+		return oexFALSE;
+	} // end if
+
+	return ( (CV4lCapture*)m_pDevice )->GetWidth();
+}
+
+oexINT CCapture::GetHeight()
+{
+	if ( !m_pDevice )
+	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
+		return oexFALSE;
+	} // end if
+
+	return ( (CV4lCapture*)m_pDevice )->GetHeight();
+}
+
+oexINT CCapture::GetBpp()
+{
+	if ( !m_pDevice )
+	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
+		return oexFALSE;
+	} // end if
+
+	return ( (CV4lCapture*)m_pDevice )->GetBpp();
+}
+
+oexFLOAT CCapture::GetFps()
+{
+	if ( !m_pDevice )
+	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
+		return oexFALSE;
+	} // end if
+
+	return ( (CV4lCapture*)m_pDevice )->GetFps();
+}
+
+oexINT64 CCapture::GetFrame()
+{
+	if ( !m_pDevice )
+	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
+		return oexFALSE;
+	} // end if
+
+	return ( (CV4lCapture*)m_pDevice )->GetFrame();
+}
+
 

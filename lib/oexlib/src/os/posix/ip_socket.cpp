@@ -297,10 +297,10 @@ void CIpSocket::Destroy()
 		return;
 
 	// Close the socket
-	shutdown( (int)hSocket, SHUT_RDWR );
-
-	// Save the last error code
-	m_uLastError = errno;
+	if ( -1 == shutdown( (int)hSocket, SHUT_RDWR ) )
+	{	m_uLastError = errno;
+		oexERROR( errno, oexT( "shutdown() failed" ) );
+	} // end if
 
 }
 
@@ -310,7 +310,10 @@ oexBOOL CIpSocket::Shutdown()
         return oexFALSE;
 
     // Shut down the socket
-    shutdown( (int)m_hSocket, SHUT_RDWR );
+    if ( -1 == shutdown( (int)m_hSocket, SHUT_RDWR ) )
+    {	m_uLastError = errno;
+		oexERROR( errno, oexT( "shutdown() failed" ) );
+	} // end if
 
     return oexTRUE;
 }
@@ -328,12 +331,13 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 	// Create a scocket
 	m_hSocket = (t_SOCKET)socket( (int)x_af, (int)x_type, (int)x_protocol );
 
-	// Save the last error code
-	m_uLastError = errno;
+	if ( c_InvalidSocket == m_hSocket )
+    {	m_uLastError = errno;
+		oexERROR( errno, oexT( "socket() failed" ) );
+		return oexFALSE;
+	} // end if
 
-    // Was there an error?
-    if ( c_InvalidSocket == m_hSocket )
-        return oexFALSE;
+	m_uLastError = 0;
 
     // Save socket connect params
     m_uSocketFamily = x_af;
@@ -364,11 +368,18 @@ oexBOOL CIpSocket::Bind( oexUINT x_uPort )
 	// Attempt to bind the socket
 	int nRet = bind( (int)m_hSocket, (sockaddr*)&sai, sizeof( sockaddr_in ) );
 
-    // Grab the address
-    CIpSocket_GetAddressInfo( &m_addrLocal, &sai );
+	if ( -1 == nRet )
+    {	m_uLastError = errno;
+		oexERROR( errno, oexT( "bind() failed" ) );
+	} // end if
+	else
+	{
+		m_uLastError = 0;
 
-	// Save the last error code
-	m_uLastError = errno;
+	    // Grab the address
+    	CIpSocket_GetAddressInfo( &m_addrLocal, &sai );
+
+	} // end if
 
 	return !nRet;
 }
@@ -390,8 +401,13 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 	// Start the socket listening
 	int nRet = listen( (int)m_hSocket, (int)x_uMaxConnections );
 
-	// Save the last error code
-	m_uLastError = errno;
+	if ( -1 == nRet )
+    {	m_uLastError = errno;
+		oexERROR( errno, oexT( "listen() failed" ) );
+		return oexFALSE;
+	} // end if
+
+	m_uLastError = 0;
 
     // Return the result
 	return !nRet;
@@ -426,8 +442,13 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
     // Attempt to connect
     int nRet = connect( (int)m_hSocket, (sockaddr*)&si, sizeof( si ) );
 
-	// Save the last error code
-	m_uLastError = errno;
+	if ( -1 == nRet )
+    {	m_uLastError = errno;
+		oexERROR( errno, oexT( "connect() failed" ) );
+	} // end if
+
+	else
+		m_uLastError = 0;
 
     if ( nRet && EINPROGRESS != m_uLastError )
         return oexFALSE;
@@ -460,11 +481,13 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 	// Accept and encapsulate the socket
 	oexBOOL bSuccess = x_is.Attach( (t_SOCKET)accept( (int)m_hSocket, &saAddr, &iAddr ) );
 
-    // Check for error
-    if ( !bSuccess )
-  	{   m_uLastError = errno;
-        return oexFALSE;
-    } // end if
+	if ( !bSuccess )
+    {	m_uLastError = errno;
+		oexERROR( errno, oexT( "accept() failed" ) );
+	} // end if
+
+	else
+		m_uLastError = 0;
 
     // Grab the address
     CIpSocket_GetAddressInfo( &m_addrPeer, &saAddr );
@@ -484,6 +507,14 @@ oexBOOL CIpSocket::CreateEventHandle()
 	// Create an event handle
 	m_hSocketEvent = (oexPVOID)epoll_create( 1 );
 
+	if ( -1 == (int)m_hSocketEvent )
+    {	m_uLastError = errno;
+		oexERROR( errno, oexT( "epoll_create() failed" ) );
+	} // end if
+
+	else
+		m_uLastError = 0;
+
 	// Create event object
 	m_pEventObject = new epoll_event[ eMaxEvents ];
 
@@ -496,7 +527,14 @@ void CIpSocket::CloseEventHandle()
 	if ( c_InvalidEvent != m_hSocketEvent )
 	{
 		// Close event handle
-		close( (int)m_hSocketEvent );
+		if ( -1 == close( (int)m_hSocketEvent ) )
+		{	m_uLastError = errno;
+			oexERROR( errno, oexT( "close() failed" ) );
+		} // end if
+
+		else
+			m_uLastError = 0;
+
 		m_hSocketEvent = c_InvalidEvent;
 
 	} // end if
@@ -531,6 +569,12 @@ oexBOOL CIpSocket::EventSelect( oexLONG x_lEvents )
 	// Set the event masks
 	int nRes = epoll_ctl( (int)m_hSocketEvent, EPOLL_CTL_ADD, (int)m_hSocket, &ev );
 
+	if ( -1 == nRes )
+    {	m_uLastError = errno;
+		oexERROR( errno, oexT( "epoll_ctl() failed" ) );
+		return oexFALSE;
+	} // end if
+
 	// Save last error
 	m_uLastError = nRes ? errno : 0;
 
@@ -564,13 +608,10 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 			// Wait for events
 			oexINT nRes = epoll_wait( (int)m_hSocketEvent, pev, eMaxEvents, x_uTimeout );
 
-			if ( 0 > nRes )
-			{
-				// Save last error
-				m_uLastError = errno;
-
-				return 0;
-
+			if ( -1 == nRes )
+			{	m_uLastError = errno;
+				oexERROR( errno, oexT( "epoll_ctl() failed" ) );
+				return oexFALSE;
 			} // end if
 
 			// Process all events
@@ -874,21 +915,28 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
     si.sin_family = m_uSocketFamily;
 
 	// Receive data from socket
-	int nRet = recvfrom( (int)m_hSocket, x_pData, (int)x_uSize,
+	int nRes = recvfrom( (int)m_hSocket, x_pData, (int)x_uSize,
                          (int)x_uFlags, (sockaddr*)&si, &nSize );
 
-    // Grab the last error code
-    m_uLastError = errno;
+	if ( -1 == nRes )
+    {	m_uLastError = errno;
+		oexERROR( errno, oexT( "recvfrom() failed" ) );
+		if ( x_puRead )
+            *x_puRead = 0;
+		return oexFALSE;
+	} // end if
+
+	m_uLastError = 0;
 
     // Save the address
     CIpSocket_GetAddressInfo( &m_addrPeer, &si );
 
 	// Check for closed socket
-	if ( !nRet )
+	if ( !nRes )
         return 0;
 
 	// Check for socket error
-	if ( -1 == nRet || x_uSize < (oexUINT)nRet  || 0 > nRet )
+	if ( -1 == nRes || x_uSize < (oexUINT)nRes  || 0 > nRes )
 	{
 		// Nothing read
 		if ( x_puRead )
@@ -900,9 +948,9 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 
 	// Save the number of bytes read
 	if ( x_puRead )
-        *x_puRead = nRet;
+        *x_puRead = nRes;
 
-	return nRet;
+	return nRes;
 }
 
 CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
@@ -961,17 +1009,24 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
         return oexFALSE;
 
 	// Receive data from socket
-	int nRet = recv( (int)m_hSocket, x_pData, (int)x_uSize, (int)x_uFlags );
+	int nRes = recv( (int)m_hSocket, x_pData, (int)x_uSize, (int)x_uFlags );
 
-    // Grab the last error code
-    m_uLastError = errno;
+	if ( -1 == nRes )
+    {	m_uLastError = errno;
+		oexERROR( errno, oexT( "recv() failed" ) );
+		if ( x_puRead )
+            *x_puRead = 0;
+		return oexFALSE;
+	} // end if
+
+    m_uLastError = 0;
 
 	// Check for closed socket
-	if ( !nRet )
+	if ( !nRes )
         return 0;
 
 	// Check for socket error
-	if ( -1 == nRet || x_uSize < (oexUINT)nRet  || 0 > nRet )
+	if ( -1 == nRes || x_uSize < (oexUINT)nRes  || 0 > nRes )
 	{
 		// Nothing read
 		if ( x_puRead )
@@ -983,9 +1038,9 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 
 	// Save the number of bytes read
 	if ( x_puRead )
-        *x_puRead = nRet;
+        *x_puRead = nRes;
 
-	return nRet;
+	return nRes;
 }
 
 CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
@@ -1049,15 +1104,17 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
     CIpSocket_SetAddressInfo( &m_addrPeer, &si );
 
     // Send the data
-    int nRet = sendto( (int)m_hSocket, x_pData, (int)x_uSize,
+    int nRes = sendto( (int)m_hSocket, x_pData, (int)x_uSize,
                        (int)x_uFlags, (sockaddr*)&si, sizeof( si ) );
 
-	// Get the last error code
-	m_uLastError = errno;
-
 	// Check for error
-	if ( -1 == nRet )
+	if ( -1 == nRes )
 	{
+		// Get the last error code
+		m_uLastError = errno;
+
+		oexERROR( errno, oexT( "sendto() failed" ) );
+
 		// Number of bytes sent
 		if ( x_puSent )
             *x_puSent = 0;
@@ -1067,11 +1124,13 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
 
 	} // end if
 
+	m_uLastError = 0;
+
 	// Save the number of bytes sent
 	if ( x_puSent )
-        *x_puSent = nRet;
+        *x_puSent = nRes;
 
-	return nRet;
+	return nRes;
 }
 
 oexUINT CIpSocket::Send( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, oexUINT x_uFlags )
@@ -1085,14 +1144,16 @@ oexUINT CIpSocket::Send( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_
         return 0;
 
 	// Attempt to send the data
-	int nRet = send( (int)m_hSocket, x_pData, (int)x_uSize, (int)x_uFlags );
-
-	// Get the last error code
-	m_uLastError = errno;
+	int nRes = send( (int)m_hSocket, x_pData, (int)x_uSize, (int)x_uFlags );
 
 	// Check for error
-	if ( -1 == nRet )
+	if ( -1 == nRes )
 	{
+		// Get the last error code
+		m_uLastError = errno;
+
+		oexERROR( errno, oexT( "send() failed" ) );
+
 		// Number of bytes sent
 		if ( x_puSent )
             *x_puSent = 0;
@@ -1102,11 +1163,13 @@ oexUINT CIpSocket::Send( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_
 
 	} // end if
 
+	m_uLastError = 0;
+
 	// Save the number of bytes sent
 	if ( x_puSent )
-        *x_puSent = nRet;
+        *x_puSent = nRes;
 
-	return nRet;
+	return nRes;
 }
 
 oexBOOL CIpSocket::GetPeerAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
@@ -1127,8 +1190,8 @@ oexBOOL CIpSocket::GetPeerAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
 	socklen_t len = sizeof( sai );
 
 	// Get the socket info
-	if ( getpeername( (int)x_hSocket, (sockaddr*)&sai, &len ) )
-		return oexFALSE;
+	if ( -1 == getpeername( (int)x_hSocket, (sockaddr*)&sai, &len ) )
+		oexERROR( errno, oexT( "getpeername() failed" ) );
 
     // Format the info
     return CIpSocket_GetAddressInfo( x_pIa, &sai );
@@ -1153,8 +1216,8 @@ oexBOOL CIpSocket::GetLocalAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
 	socklen_t len = sizeof( sai );
 
 	// Get the socket info
-	if ( getsockname( (int)x_hSocket, (sockaddr*)&sai, &len ) )
-		return oexFALSE;
+	if ( -1 == getsockname( (int)x_hSocket, (sockaddr*)&sai, &len ) )
+		oexERROR( errno, oexT( "getsockname() failed" ) );
 
     // Format the info
     return CIpSocket_GetAddressInfo( x_pIa, &sai );

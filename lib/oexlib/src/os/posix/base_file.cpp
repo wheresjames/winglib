@@ -58,14 +58,29 @@ CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, o
         case eDisOpenAlways : pMode = oexT( "a+b" ); break;
     } // end switch
 */
+	// Ensure proper file pointer
+	if ( !oexCHECK_PTR( x_pFile ) )
+		return CBaseFile::c_InvalidFindHandle;
 
 	// +++ Fix this stuff
 	oexINT nMode = O_RDWR; // O_WRONLY O_RDONLY
 	switch( x_eDisposition )
-    {   case eDisCreateNew : nMode |= O_CREAT | O_EXCL; break;
-        case eDisCreateAlways : nMode |= O_CREAT; break;
-        case eDisOpenExisting : break;
-        case eDisOpenAlways : nMode |= O_CREAT; break;
+    {
+    	case eDisCreateNew :
+    		nMode |= O_CREAT | O_EXCL;
+    		break;
+
+        case eDisCreateAlways :
+        	nMode |= O_CREAT;
+        	break;
+
+        case eDisOpenExisting :
+        	break;
+
+        case eDisOpenAlways :
+        	nMode |= O_CREAT;
+        	break;
+
 	} // end switch
 
 	// +++ Fix file permissions
@@ -76,11 +91,16 @@ CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, o
 
 	if ( x_pnError )
 	{
-		if ( !hFile )
+		if ( CBaseFile::c_InvalidFindHandle == hFile )
 			*x_pnError = errno;
 		else
 			*x_pnError = 0;
 	} // end if
+
+	// No data should be left in the file
+	if ( ( eDisCreateAlways == x_eDisposition || eDisCreateNew == x_eDisposition )
+		 && CBaseFile::c_InvalidFindHandle != hFile )
+		ftruncate( (int)hFile, 0 );
 
 	return hFile;
 }

@@ -432,7 +432,7 @@ oexULONG CSys::InterlockedDecrement( oexLONG *x_puVal )
 void CSys_SystemTimeToSTime( struct tm* tinfo, CSys::STime &t )
 {
     t.uYear = 1900 + tinfo->tm_year;
-    t.uMonth = tinfo->tm_mon;
+    t.uMonth = tinfo->tm_mon + 1;
     t.uDayOfWeek = tinfo->tm_wday;
     t.uDay = tinfo->tm_mday;
     t.uHour = tinfo->tm_hour;
@@ -444,7 +444,7 @@ void CSys_SystemTimeToSTime( struct tm* tinfo, CSys::STime &t )
 void CSys_STimeToSystemTime( CSys::STime &t, struct tm* tinfo )
 {
     tinfo->tm_year = t.uYear - 1900;
-    tinfo->tm_mon = t.uMonth;
+    tinfo->tm_mon = t.uMonth ? t.uMonth - 1 : 0;
     tinfo->tm_wday = t.uDayOfWeek;
     tinfo->tm_mday = t.uDay;
     tinfo->tm_hour = t.uHour;

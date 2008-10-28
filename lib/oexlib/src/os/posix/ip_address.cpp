@@ -272,21 +272,28 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
     Destroy();
 
     // Ensure we have a valid pointer
-    if ( !oexVERIFY_PTR( x_pServer ) )
+    if ( !oexCHECK_PTR( x_pServer ) )
         return oexFALSE;
 
 	// First try to interpret as dot address
 	oexULONG uAddr = inet_addr( oexStrToStr8Ptr( x_pServer ) );
 	if ( INADDR_NONE == uAddr )
     {
-        struct hostent *pHe = gethostbyname( oexStrToStr8Ptr( x_pServer ) );
+        struct hostent *pHe;
 
-        if ( !pHe )
+		// Get host address
+		oexDO( pHe = gethostbyname( oexStrToStr8Ptr( x_pServer ) ), !pHe && EINTR == h_errno );
+
+        if ( !pHe || !pHe->h_addr_list )
+        {  	oexERROR( h_errno, CStr().Fmt( oexT( "gethostbyname( '%s' ) failed" ), x_pServer ).Ptr() );
             return oexFALSE;
+		} // end if
 
         in_addr *pia = (in_addr*)*pHe->h_addr_list;
-        if ( !oexVERIFY_PTR( pia ) )
+        if ( !oexCHECK_PTR( pia ) )
+        {  	oexERROR( h_errno, CStr().Fmt( oexT( "gethostbyname( %s ) failed, h_addr_list is NULL" ), x_pServer ).Ptr() );
             return oexFALSE;
+		} // end if
 
         // Grab the address
         uAddr = *(oexULONG*)&pia->s_addr;

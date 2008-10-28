@@ -63,7 +63,7 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 //	SetStatusText( _T( "This is a status text" ) );
 
 	// Open the capture device
-	if ( !m_cCapture.Open( oex::CStr().Fmt( oexT( "/dev/video%d" ), 0 ).Ptr() ) )
+	if ( !m_cCapture.Open( oex::CStr().Fmt( oexT( "/dev/video%d" ), 0 ).Ptr(), 640, 480, 24, 15 ) )
 		SetStatusText( _T( "Failed to open catpure device" ) );
 
 	else
@@ -120,13 +120,13 @@ void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
 	dc.SetBrush( wxBrush( wxColor( 0, 255, 0 ) ) );
 	dc.DrawRectangle( rect.x, rect.y, rect.width, rect.height );
 
-	wxImage		imgMem( 320, 240, (unsigned char*)m_cCapture.GetBuffer(), true );
+	wxImage		imgMem( m_cCapture.GetWidth(), m_cCapture.GetHeight(), (unsigned char*)m_cCapture.GetBuffer(), true );
 	wxBitmap	bmMem( imgMem );
 
 	// Create a memory DC
 	wxMemoryDC dcMem;
 	dcMem.SelectObject( bmMem );
-	dc.Blit( 0, 0, 320, 240, &dcMem, 0, 0 );
+	dc.Blit( 0, 0, dcMem.GetSize().GetWidth(), dcMem.GetSize().GetHeight(), &dcMem, 0, 0 );
 /*
 
 	// Attempt to open the device

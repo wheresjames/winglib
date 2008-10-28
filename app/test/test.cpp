@@ -2050,26 +2050,36 @@ oex::oexRESULT Test_CCapture()
 	oex::vid::CCapture cCapture;
 
 	// Open the capture device
-	if ( !oexVERIFY( cCapture.Open( oex::CStr().Fmt( oexT( "/dev/video%d" ), 0 ).Ptr() ) ) )
+	if ( !oexVERIFY( cCapture.Open( oex::CStr().Fmt( oexT( "/dev/video%d" ), 0 ).Ptr(),
+								    320, 240, 24, 15 ) ) )
 		return -1;
 
 	if ( !oexVERIFY( cCapture.IsOpen() ) )
 		return -2;
 
-	if ( !oexVERIFY( cCapture.StartCapture() ) )
-		return -3;
+//	if ( !oexVERIFY( cCapture.StartCapture() ) )
+//		return -3;
+
+	cCapture.StartCapture();
+
+	oex::os::CSys::Sleep( 1 );
 
 	for ( int i = 0; i < 1; i++ )
 	{
 		if ( !oexVERIFY( cCapture.WaitForFrame() ) )
 			return -4;
 
-		if ( !oexVERIFY( cCapture.GetBuffer() && cCapture.GetBufferSize() ) )
+		if ( !oexVERIFY( cCapture.GetBuffer() && cCapture.GetImageSize() ) )
 			return -5;
 
-		oex::CFile().CreateNew( oex::CStr().Fmt( oexT( "./img_%d" ), 0 ).Ptr() )
-//			.Write( "hello world!", 11 );
-			.Write( cCapture.GetBuffer(), cCapture.GetBufferSize() );
+		oex::CImage img;
+		if ( !oexVERIFY( img.Create( oexNULL, oexNULL, cCapture.GetWidth(), cCapture.GetHeight(), cCapture.GetBpp(), 1 ) ) )
+			return -6;
+
+		if ( !oexVERIFY( oex::CImage::SaveDibFile( oex::CStr().Fmt( oexT( "./img_%d.bmp" ), 0 ).Ptr(),
+												   img.GetImageHeader(), cCapture.GetBuffer(), cCapture.GetImageSize() ) ) )
+			return -7;
+
 
 	} // end for
 

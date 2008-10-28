@@ -7,18 +7,18 @@ default_target: all
 OS		 := linux
 #OS		 := win32
 
-PROC	 := i386
-#PROC	 := arm
+#PROC	 := i386
+PROC	 := arm
 
-TOOLS	 := debian
+#TOOLS	 := debian
 #TOOLS	 := android
-#TOOLS	 := snapgear
+TOOLS	 := snapgear
 
 CODEROOT := ../../../../../..
 LIBROOT := ../../../..
 
-CDEBUG	 := -g -DDEBUG -D_DEBUG
-LDEBUG	 := -g
+CDEBUG	 := -ggdb -DDEBUG -D_DEBUG
+LDEBUG	 := -ggdb -rdynamic
 
 ifeq ($(OS),win32)
 
@@ -74,7 +74,7 @@ else
 		DP := makedepend
 
 		LFLAGS := $(LDEBUG) -lrt -pthread -luuid
-		CFLAGS := -c $(CDEBUG) -DOEX_VFL1
+		CFLAGS := -c $(CDEBUG) -DOEX_VFL1 -DUNICODE -D_UNICODE
 		SFLAGS := $(CFLAGS) -S -MMD
 		AFLAGS := cq
 
@@ -112,6 +112,7 @@ TARGETS := $(PATH_EXE)
 #-------------------------------------------------------------------
 
 all: setup $(TARGETS)
+	cp $(PATH_EXE) ~/Public
 
 rebuild: clean all
 

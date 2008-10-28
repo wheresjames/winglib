@@ -125,11 +125,13 @@ public:
 	/// Returns the module instance handle
 	/**
 		In Windows, this is the application instance handle.
+		In Linux, this is the process ID
 
 		\return Module instance handle
 
 		\see
 	*/
 	static oexCPVOID GetInstanceHandle();
+
 
 };

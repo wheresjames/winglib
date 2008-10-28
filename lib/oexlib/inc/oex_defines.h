@@ -145,5 +145,32 @@
 #define oexGetModulePath			OEX_NAMESPACE::os::CBaseFile::GetModulePath
 
 // Time functions
+#define oexLocalTime				OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eLocalTime )
+#define oexGmtTime					OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eGmtTime )
 #define oexLocalTimeStr				OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eLocalTime ).FormatTime
 #define oexGmtTimeStr				OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eGmtTime ).FormatTime
+
+/// oexRETRY() - Retry something up to m times
+/**
+	\param [in] m - maximum number of times to retry
+	\param [in] s - statement to retry
+	\param [in] w - failure condition i.e. 'while( w )'
+
+	This is mostly for linux where lot's of functions return EINTR and must be retried
+
+	example: to call gethostbyname() properly
+
+    struct hostent *pHe;
+	oexRETRY( 100, pHe = gethostbyname( oexStrToStr8Ptr( x_pServer ) ), !pHe && EINTR == h_errno );
+
+	if ( !pHe )
+		// handle failure
+		;
+
+*/
+#define oexRETRY( m, s, w )			{ oexUINT um = m, max = (oexUINT)( um ? um : 1 ); do { s; } while ( --max && w ); \
+								 	if ( !max ) { oexERROR( -1, CStr().Fmt( oexT( "oexRETRY( %s ) failed after %d attempts" ), #s, um ) ); } }
+
+/// Same as above, but with a default of 1000 times
+#define oexDO( s, w )				oexRETRY( 1000, s, w )
+

@@ -6,6 +6,10 @@ set( project_name 	vidcap )
 
 set( output_dir 	../../bin )
 
+set( CMAKE_BUILD_TYPE debug )
+#add_definitions( -D_DEBUG -DDEBUG )
+add_definitions( -DDEBUG -D_DEBUG -D__WXDEBUG__=1 -DWXDEBUG=1)
+
 add_definitions( -DUNICODE=1 -D_UNICODE=1 )
 
 set( src_files
@@ -42,8 +46,13 @@ project( ${project_name} )
 #find_package( JPEG )
 
 set( wxUSE_UNICODE 1 )
+set( wxWidgets_USE_UNICODE 1 )
+set( wxUSE_DEBUG 1 )
+set( wxWidgets_USE_DEBUG 1 )
+
 set( wxWidgets_USE_LIBS base core gl net )
 find_package( wxWidgets )
+
 #if( wxWidgets_FOUND )
 	include( ${wxWidgets_USE_FILE} )
 	include_directories( ${wxWidgets_INCLUDE_DIRS} )

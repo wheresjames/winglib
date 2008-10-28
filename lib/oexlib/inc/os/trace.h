@@ -65,4 +65,17 @@ public:
 	static CStr GetBacktrace( oexUINT x_uSkip = 0, oexUINT x_uMax = 100 );
 
 
+	//==============================================================
+	// GetErrorMsg()
+	//==============================================================
+	/// Returns a human readable description of the error code
+	/**
+		\param [in] x_nErr		-	Error code to look up.
+
+		\return Returns the error code
+
+		\see
+	*/
+	static CStr GetErrorMsg( oexINT x_nErr );
+
 };

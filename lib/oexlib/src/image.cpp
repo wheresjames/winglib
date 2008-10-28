@@ -85,7 +85,7 @@ oexBOOL CImage::Create( oexCSTR x_pShared, os::CFMap::t_HFILEMAP x_hShared, oexI
 		oexZeroMemory( pId, sizeof( SImageData ) );
 
 		// Initialize image metrics
-		pId->bih.biSize = sizeof( SImageData );
+		pId->bih.biSize = sizeof( SBitmapInfoHeader );
 		pId->bih.biWidth = x_lWidth;
 		pId->bih.biHeight = x_lHeight;
 		pId->bih.biPlanes = 1;
@@ -94,6 +94,59 @@ oexBOOL CImage::Create( oexCSTR x_pShared, os::CFMap::t_HFILEMAP x_hShared, oexI
 		pId->bih.biSizeImage = lImageSize;
 
 	} // end if
+
+	return oexTRUE;
+}
+
+oexBOOL CImage::SaveDibFile( oexCSTR x_pFile, SImageData *x_pId, oexCPVOID x_pData, oexINT x_nData )
+{
+	if ( !oexCHECK_PTR( x_pFile ) || !*x_pFile || !oexCHECK_PTR( x_pId ) || !oexCHECK_PTR( x_pData ) || !x_nData )
+	{	oexERROR( -1, oexT( "Invalid parameter" ) );
+		return oexFALSE;
+	} // end if
+
+	oex::CFile cFile;
+	if ( !cFile.CreateAlways( x_pFile ).IsOpen() )
+	{	oexERROR( cFile.GetLastError(), CStr().Fmt( oexT( "Error creating file : %s" ), oexStrToMbPtr( x_pFile ) ) );
+		return oexFALSE;
+	} // end if
+
+	// Fill in header info
+	SDIBFileHeader dfh;
+	dfh.uMagicNumber = SDIBFileHeader::eMagicNumber;
+	dfh.uSize = sizeof( SDIBFileHeader ) + x_pId->bih.biSize + x_nData;
+	dfh.uReserved1 = 0;
+	dfh.uReserved2 = 0;
+	dfh.uOffset = sizeof( SDIBFileHeader ) + x_pId->bih.biSize;
+
+	if ( !cFile.Write( &dfh, sizeof( dfh ) ) )
+	{	oexERROR( cFile.GetLastError(), CStr().Fmt( oexT( "Error writing DIB header: %s" ), oexStrToMbPtr( x_pFile ) ) );
+		return oexFALSE;
+	} // end if
+
+	// In case the size is not right
+	OEX_TRY
+	{	if ( !cFile.Write( x_pId, x_pId->bih.biSize ) )
+		{	oexERROR( cFile.GetLastError(), CStr().Fmt( oexT( "Error writing image header: %s" ), oexStrToMbPtr( x_pFile ) ) );
+			return oexFALSE;
+		} // end if
+	} // end try
+	OEX_CATCH_ALL
+	{	oexERROR( cFile.GetLastError(), CStr().Fmt( oexT( "Exception!  Perhaps biSize is not set correctly?: %s" ), oexStrToMbPtr( x_pFile ) ) );
+		return oexFALSE;
+	} // end catchall
+
+	OEX_TRY
+	{
+		if ( !cFile.Write( x_pData, x_nData ) )
+		{	oexERROR( cFile.GetLastError(), CStr().Fmt( oexT( "Error writing image data: %s" ), oexStrToMbPtr( x_pFile ) ) );
+			return oexFALSE;
+		} // end if
+	}
+	OEX_CATCH_ALL
+	{	oexERROR( cFile.GetLastError(), CStr().Fmt( oexT( "Exception! Bad image buffer pointer?: %s" ), oexStrToMbPtr( x_pFile ) ) );
+		return oexFALSE;
+	} // end catchall
 
 	return oexTRUE;
 }

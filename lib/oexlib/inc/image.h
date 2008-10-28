@@ -49,6 +49,29 @@ public:
 
 #pragma pack( push, 1 )
 
+	/// Header for a standard dib file (.bmp)
+	struct SDIBFileHeader
+	{
+		// The magic number ASCII 'BM'
+		enum { eMagicNumber = 0x4d42 };
+
+		/// Magic number, must be 0x42 0xFD (BM)
+		oexUSHORT 		uMagicNumber;
+
+		/// Size of the file in bytes
+		oexULONG		uSize;
+
+		/// Reserved
+		oexUSHORT		uReserved1;
+
+		/// Reserved
+		oexUSHORT		uReserved2;
+
+		/// Offset to start of image data
+		oexULONG		uOffset;
+
+	};
+
 	/// Standard bitmap structure
 	struct SBitmapInfoHeader
 	{
@@ -121,7 +144,7 @@ public:
 		SBitmapInfoHeader		bih;
 
 		/// Image data
-		oexCHAR					aImage[ 1 ];
+		oexCHAR					aImage[1];
 	};
 
 #pragma pack( pop )
@@ -174,12 +197,24 @@ public:
 		return m_image.IsValid();
 	}
 
-	/// Returns a pointer to the image data
+	/// Returns a pointer to the image header
 	SImageData* Image()
 	{	if ( !m_image.IsValid() )
 			return oexNULL;
 		return m_image.Ptr();
 	}
+
+	/// Returns a pointer to the image header
+	SImageData* GetImageHeader()
+	{	if ( !m_image.IsValid() )
+			return oexNULL;
+		return m_image.Ptr();
+	}
+
+	/// Returns the size of the image header
+	oexINT GetImageHeaderSize()
+	{	return sizeof( SImageData ); }
+
 
 	/// Returns the image width
 	oexINT GetWidth()
@@ -201,7 +236,7 @@ public:
 		if ( !m_image.IsValid() )
 			return oexNULL;
 
-		return ( (oexCHAR*)m_image.Ptr() ) + sizeof( SImageData );
+		return ( (oexCHAR*)m_image.Ptr() ) + Image()->bih.biSize;
 	}
 
 	/// Returns the size of the image buffer
@@ -215,10 +250,13 @@ public:
 		       * cmn::Abs( Image()->bih.biHeight );
 	}
 
+	/// Writes a DIB file to disk
+	static oexBOOL SaveDibFile( oexCSTR x_pFile, SImageData *x_pId, oexCPVOID x_pData, oexINT x_nData );
+
 private:
 
 	/// Image memory
-	TMem< oexCHAR, SImageData >		m_image;
+	TMem< oexCHAR, SImageData > m_image;
 
 };
 

@@ -80,7 +80,7 @@ public:
 
 		\return Non-zero if success.
 	*/
-	oexBOOL Open( oexCSTR x_sDevice );
+	oexBOOL Open( oexCSTR x_sDevice, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps );
 
 	/// Returns non-zero if a capture device is currently open
 	oexBOOL IsOpen()
@@ -99,10 +99,25 @@ public:
 	oexPVOID GetBuffer();
 
 	/// Returns the size of the video buffer
-	oexUINT GetBufferSize();
+	oexINT GetImageSize();
 
 	/// Returns an image object containing the video frame
 	CImage* GetImage();
+
+	/// Returns the image width
+	oexINT GetWidth();
+
+	/// Returns the image height
+	oexINT GetHeight();
+
+	/// Returns the bits-per-pixel of the current image format
+	oexINT GetBpp();
+
+	/// Returns the frame rate in frames per second
+	oexFLOAT GetFps();
+
+	/// Returns the current frame index
+	oexINT64 GetFrame();
 
 public:
 

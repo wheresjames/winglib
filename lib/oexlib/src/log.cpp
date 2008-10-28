@@ -38,7 +38,7 @@ OEX_USING_NAMESPACE
 
 CLog CLog::m_logGlobal;
 
-oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexINT x_uErr, oexINT x_uLevel, oexCSTR x_pErr, oexUINT x_uSkip )
+oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexINT x_uLevel, oexCSTR x_pErr, oexINT x_uErr, oexUINT x_uSkip )
 {
 	// Ensure valid reporting level
 	if ( x_uLevel < m_uLevel )
@@ -56,7 +56,7 @@ oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexINT x_uErr, oexINT x_uLev
 #endif
 
 			// Open new log file
-			if ( !m_file.CreateNew( oexGetModulePath( oexT( "debug.log" ) ).Ptr() ).IsOpen() )
+			if ( !m_file.CreateAlways( oexGetModulePath( oexT( "debug.log" ) ).Ptr() ).IsOpen() )
 			{	os::CSys::InterlockedDecrement( &m_lInLog );
 				return x_uErr;
 			} // end if
@@ -69,17 +69,22 @@ oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexINT x_uErr, oexINT x_uLev
 		} // end if
 
 		// Do we have a source file name?
-		if ( x_pFile )
+		if ( oexCHECK_PTR( x_pFile ) )
 			m_file.Write( CStr().Fmt( oexT( "%s:(%u) " ), oexStrToMbPtr( x_pFile ), x_nLine ) );
 
 		// Ensure error is not null
-		if ( !x_pErr )
+		if ( !oexCHECK_PTR( x_pErr ) || !*x_pErr )
 			x_pErr = oexT( "Unspecified" );
 
-		// Write out the log
-		m_file.Write( CStr().Fmt( oexT( "0x%X (%d) : %s\r\n\t%s\r\n" ),
-									 x_uErr, x_uErr, oexStrToMbPtr( x_pErr ),
-									 oexStrToMbPtr( os::CTrace::GetBacktrace( x_uSkip ).Replace( oexT( "\n" ), oexT( "\n\t" ) ).Ptr() ) ) );
+		// Write out the user error string
+		m_file.Write( CStr().Fmt( oexT( " : %s\r\n" ), oexStrToMbPtr( x_pErr ) ) );
+
+		// Write out the system error code and string if not zero
+		if ( x_uErr )
+			m_file.Write( CStr().Fmt( oexT( "> 0x%X (%d) : %s\r\n" ), x_uErr, x_uErr, oexStrToMbPtr( os::CTrace::GetErrorMsg( x_uErr ).Ptr() ) ) );
+
+		// Write out the backtrace
+		m_file.Write( CStr().Fmt( oexT( "\t%s\r\n" ), oexStrToMbPtr( os::CTrace::GetBacktrace( x_uSkip ).Replace( oexT( "\n" ), oexT( "\n\t" ) ).Ptr() ) ) );
 
 	} // end if
 
