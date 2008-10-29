@@ -112,7 +112,6 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 	str << oexT( "File       : " ) << x_pFile << oexNL;
 	str << oexT( "Line       : " ) << x_uLine << oexNL;
 	str << oexT( "Expression : " ) << CStr( x_pStr ).Replace( oexT( "%" ), oexT( "%%" ) ).Ptr() << oexNL;
-	str << oexNL;
 
 	printf( oexStrToMbPtr( str.Ptr() ) );
 	oexERROR( 0, str.Ptr() );

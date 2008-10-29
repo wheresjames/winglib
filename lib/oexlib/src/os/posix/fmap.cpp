@@ -59,7 +59,7 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( CFMap::t_HFILEMAP x_hFile, oexPVOI
 
 	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, fd, 0 );
 	if ( c_Failed == pMem )
-	{	oexERROR( errno, CStr().Fmt( oexT( "mmap failed to allocate block : handle=%l, size=%l" ), fd, (int)x_llSize ) );
+	{	oexERROR( errno, CStr().Fmt( oexT( "mmap failed to allocate block : handle=%d, size=%d" ), fd, (int)x_llSize ) );
 		close( fd );
 		return oexNULL;
 	} // end if
@@ -157,7 +157,7 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 	// Map memory
 	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, fd, 0 );
 	if ( c_Failed == pMem )
-	{	oexERROR( errno, CStr().Fmt( oexT( "mmap failed to allocate block : size=%l" ), (int)x_llSize ) );
+	{	oexERROR( errno, CStr().Fmt( oexT( "mmap failed to allocate block : size=%d" ), (int)x_llSize ) );
 		shm_unlink( sPath.Ptr() );
 		return CFMap::c_Failed;
 	} // end if

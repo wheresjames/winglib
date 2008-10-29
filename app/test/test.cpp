@@ -1313,7 +1313,7 @@ oex::oexRESULT Test_CIpSocket()
     if ( !oexVERIFY( server.Listen() ) )
         return -3;
 
-    if ( !oexVERIFY( client.Connect( oexT( "localhost" ), 23456 ) ) )
+    if ( !oexVERIFY( client.Connect( oexT( "127.0.0.1" ), 23456 ) ) )
         return -4;
 
     if ( !oexVERIFY( server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
@@ -1356,7 +1356,7 @@ oex::oexRESULT Test_CIpSocket()
     if ( !oexVERIFY( client.Create( oex::os::CIpSocket::eAfInet, oex::os::CIpSocket::eTypeDgram, oex::os::CIpSocket::eProtoUdp ) ) )
         return -14;
 
-    if ( !oexVERIFY( client.PeerAddress().LookupHost( oexT( "localhost" ), 12345 ) ) )
+    if ( !oexVERIFY( client.PeerAddress().LookupHost( oexT( "127.0.0.1" ), 12345 ) ) )
         return -15;
 
     if ( !oexVERIFY( client.SendTo( oexStrToBin( pStr ) ) ) )
@@ -1884,7 +1884,6 @@ private:
     oex::CMsgAddress         m_maCallback;
 };
 
-
 oex::oexRESULT Test_CThread()
 {
     CThreadTest tt;
@@ -2080,7 +2079,6 @@ oex::oexRESULT Test_CCapture()
 												   img.GetImageHeader(), cCapture.GetBuffer(), cCapture.GetImageSize() ) ) )
 			return -7;
 
-
 	} // end for
 
 	if ( !oexVERIFY( cCapture.StopCapture() ) )
@@ -2128,7 +2126,7 @@ int main(int argc, char* argv[])
 
     Test_CIpAddress();
 
-//    Test_CIpSocket();
+    Test_CIpSocket();
 
 //	Test_Threads();
 

@@ -47,6 +47,47 @@ class CCapture
 {
 public:
 
+	enum
+	{
+		// QVGA
+		eQVGAWidth = 320,
+		eQVGAHeight = 240,
+
+		// VGA
+		eVGAWidth = 640,
+		eVGAHeight = 480,
+
+		// Standard NTSC video size
+		eNTSCWidth = 720,
+		eNTSCHeight = 576,
+
+		// Standard PAL video size
+		ePALWidth = 768,
+		ePALHeight = 576,
+
+		// CIF video size
+		eCIFWidth = 352,
+		eCIFHeight = 240,
+
+		// 4CIF video size
+		e4CIFWidth = 704,
+		e4CIFHeight = 576,
+
+		// 9CIF video size
+		e9CIFWidth = 1056,
+		e9CIFHeight = 864,
+
+		// 16CIF video size
+		e16CIFWidth = 1408,
+		e16CIFHeight = 1152,
+
+		// 1080i/p video size
+		e1080Width = 1920,
+		e1080Height = 1080
+	};
+
+public:
+
 	/// Contains information about available capture devices
 	struct SDeviceInfo
 	{

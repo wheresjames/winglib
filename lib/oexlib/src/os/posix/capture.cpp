@@ -191,63 +191,50 @@ public:
 			// Log V2 failure
 			oexNOTICE( errno, CStr().Fmt( oexT( "VIDEOC_QUERYCAP : Invalid V4L2 device, %u" ), m_nFd ) );
 
+			// Version 1
+			m_nVersion = 1;
+
 			// Initialize the structure
 			oexZeroMemory( &m_cap1, sizeof( m_cap1 ) );
 
 			// V1 Device?
 			if ( -1 == IoCtl( m_nFd, VIDIOCGCAP, &m_cap1 ) )
-			{	oexERROR( errno, CStr().Fmt( oexT( "VIDEOCGCAP : Invalid V4L1 device, %u" ), m_nFd ) );
-				return oexFALSE;
-			} // end if
+				oexWARNING( errno, CStr().Fmt( oexT( "VIDEOCGCAP : Failed! fd=%u, assuming V4L1 device and continuing." ), m_nFd ) );
 
-			// Version 1
-			m_nVersion = 1;
+			else
+			{
+				// Ensure it's a capture device
+				if ( !( m_cap1.type & VID_TYPE_CAPTURE ) )
+				{	oexERROR( -1, CStr().Fmt( oexT( "VID_TYPE_CAPTURE : Not a capture device : type = %X" ), m_cap1.type ) );
+					return oexFALSE;
+				} // end if
 
-			// Ensure it's a capture device
-			if ( !( m_cap1.type & VID_TYPE_CAPTURE ) )
-			{	oexERROR( -1, CStr().Fmt( oexT( "VID_TYPE_CAPTURE : Not a capture device : type = %X" ), m_cap1.type ) );
-				return oexFALSE;
-			} // end if
+			} // end else
+
+			m_buf1.size = 1 * GetImageSize();
+			m_buf1.frames = 1;
+			m_buf1.offsets[ 0 ] = 0;
 
 			// Set video buffer
 			if ( -1 == IoCtl( m_nFd, VIDIOCGMBUF, &m_buf1 ) )
-			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOCGMBUF : Unable to set video buffer, %u" ), m_nFd ) );
-				return oexFALSE;
-			} // end if
+				oexWARNING( errno, CStr().Fmt( oexT( "VIDIOCGMBUF : Failed! Unable to set video buffer, fd=%u, ignoring error" ), m_nFd ) );
 
 			oexINT lImageSize = GetImageSize();
 			if ( 0 >= lImageSize )
-			{	oexERROR( errno, CStr().Fmt( oexT( "Invalid Imaeg size : %d x %d x %d" ), m_nWidth, m_nHeight, m_nBpp ) );
+			{	oexERROR( errno, CStr().Fmt( oexT( "Invalid Image size %d : %d x %d x %d" ), lImageSize, m_nWidth, m_nHeight, m_nBpp ) );
 				return oexFALSE;
 			} // end if
 
+			// Allocate shared memory
 			m_image.PlainShare( oexTRUE );
 			m_image.SetShareHandle( (os::CFMap::t_HFILEMAP)m_nFd );
-
 			if ( !m_image.OexNew( lImageSize ).Ptr() )
-			{	oexERROR( errno, oexT( "Failed to create shared memory buffer" ) );
+			{	oexERROR( errno, CStr().Fmt( oexT( "Failed to allocate shared image buffer size=%d : %d x %d x %d" ), lImageSize, m_nWidth, m_nHeight, m_nBpp ) );
 				m_nIoMode = eIoReadWrite;
 			} // end if
 
 			else
 				m_nIoMode = eIoAsync;
-
-/*
-			// Allocate a frame buffer
-			m_pFrameBuffer = (oexCHAR*)mmap( 0, m_buf1.size,
-											 PROT_READ | PROT_WRITE,
-											 MAP_SHARED,
-											 m_nFd, 0 );
-
-			// Did we get the frame buffer
-			if ( -1 == (oexINT)m_pFrameBuffer )
-			{	oexLOG( errno, oexT( "mmap failed : cannot use shared memory" ) );
-				m_nIoMode = eIoReadWrite;
-			} // end if
-
-			else
-				m_nIoMode = eIoAsync;
-*/
 
 		} // end if
 

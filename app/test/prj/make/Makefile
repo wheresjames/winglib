@@ -17,8 +17,10 @@ TOOLS	 := snapgear
 CODEROOT := ../../../../../..
 LIBROOT := ../../../..
 
-CDEBUG	 := -ggdb -DDEBUG -D_DEBUG
-LDEBUG	 := -ggdb -rdynamic
+#CDEBUG	 := -ggdb -DDEBUG -D_DEBUG
+#LDEBUG	 := -ggdb -rdynamic
+CDEBUG	 := -s
+LDEBUG	 := -s
 
 ifeq ($(OS),win32)
 

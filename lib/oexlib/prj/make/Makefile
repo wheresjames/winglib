@@ -17,8 +17,14 @@ TOOLS	 := snapgear
 CODEROOT := ../../../../../..
 LIBROOT := ../../../..
 
-CDEBUG	 := -ggdb -DDEBUG -D_DEBUG 
-LDEBUG	 := -ggdb
+# libc.so.6 == glibc
+# libc.so.0 == uClibc
+
+
+#CDEBUG	 := -ggdb -DDEBUG -D_DEBUG 
+#LDEBUG	 := -ggdb
+CDEBUG	 := -s
+LDEBUG	 := -s
 
 ifeq ($(OS),win32)
 
