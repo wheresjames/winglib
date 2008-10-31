@@ -61,7 +61,7 @@ public:
 	};
 
 	//==============================================================
-	// osCreateFileMapping()
+	// Create()
 	//==============================================================
 	/// Creates a file mapping
 	/**
@@ -80,15 +80,16 @@ public:
 											status.  A non-zero value will
 											be written to this variable if
 											the memory was already existing.
+		\param [in] x_llOffset			-	Offset into memory segment
 
 		\return Handle to file mapping
 
 		\see
 	*/
-	static t_HFILEMAP osCreateFileMapping( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists );
+	static t_HFILEMAP Create( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists, oexINT64 x_llOffset = 0 );
 
 	//==============================================================
-	// osCreateFileMapping()
+	// Create()
 	//==============================================================
 	/// Creates a file mapping
 	/**
@@ -110,12 +111,13 @@ public:
 											status.  A non-zero value will
 											be written to this variable if
 											the memory was already existing.
+		\param [in] x_llOffset			-	Offset into memory segment
 
 		\return Handle to file mapping
 
 		\see
 	*/
-	static t_HFILEMAP osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, oexCSTR x_pName, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists );
+	static t_HFILEMAP Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, oexCSTR x_pName, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists, oexINT64 x_llOffset = 0 );
 
 	//==============================================================
 	// osReleaseFileMapping()

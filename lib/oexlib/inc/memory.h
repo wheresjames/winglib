@@ -857,6 +857,14 @@ public:
 	oexBOOL IsPlainShare()
 	{	return m_fm.IsPlain(); }
 
+	/// Sets the file mapping segment offset
+	void SetOffset( oexINT64 x_llOffset )
+	{	m_fm.SetOffset( x_llOffset ); }
+
+	/// Gets the file mapping segment offset
+	oexINT64 GetOffset()
+	{	return m_fm.GetOffset(); }
+
 private:
 
     /// Pointer to the memory

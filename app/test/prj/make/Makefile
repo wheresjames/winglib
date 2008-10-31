@@ -48,7 +48,7 @@ else
 			DP := $(CODEROOT)/arm/usr/local/bin/arm-linux-makedepend
 
 			LFLAGS := $(LDEBUG) -static -lrt -pthread
-			CFLAGS := -c -DOEX_ARM -DOEX_LOWRAM -DOEX_SNAPGEAR -DOEX_VFL1 $(CDEBUG)
+			CFLAGS := -c -DOEX_ARM -DOEX_LOWRAM -DOEX_SNAPGEAR $(CDEBUG)
 			SFLAGS := $(CFLAGS) -S -MMD
 			AFLAGS := cq
 			

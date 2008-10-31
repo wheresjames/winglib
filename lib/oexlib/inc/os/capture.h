@@ -139,8 +139,11 @@ public:
 	/// Returns a pointer to the video buffer
 	oexPVOID GetBuffer();
 
-	/// Returns the size of the video buffer
+	/// Returns the size of the valid image data
 	oexINT GetImageSize();
+
+	/// Returns the size of the video buffer
+	oexINT GetBufferSize();
 
 	/// Returns an image object containing the video frame
 	CImage* GetImage();
@@ -159,6 +162,9 @@ public:
 
 	/// Returns the current frame index
 	oexINT64 GetFrame();
+
+	/// Returns a string describing the supported formats
+	CStr GetSupportedFormats();
 
 public:
 

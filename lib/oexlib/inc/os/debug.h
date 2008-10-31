@@ -95,10 +95,11 @@ public:
 		\param [in] x_nType		-	The type of break
 		\param [in] x_pFile		-	File generating the break
 		\param [in] x_uLine		-	File line number
+		\param [in] x_pFunction	-	Function generating the break
 		\param [in] x_pStr		-	String describing the operation
 									that caused the break.
 	*/
-	static void Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pStr );
+	static void Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pStr );
 
 	//==============================================================
 	// Break()
@@ -108,6 +109,7 @@ public:
 		\param [in] x_nType		-	The type of break
 		\param [in] x_pFile		-	File generating the break
 		\param [in] x_uLine		-	File line number
+		\param [in] x_pFunction	-	Function generating the break
 		\param [in] x_pModule	-	The module name that caused the
 									break.
 		\param [in] x_pStr		-	String describing the operation
@@ -117,7 +119,7 @@ public:
 
 		\see
 	*/
-	static void Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pModule, oexCSTR x_pStr );
+	static void Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr );
 
 	//==============================================================
 	// GetInstanceHandle()

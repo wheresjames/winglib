@@ -245,7 +245,7 @@ public:
 
 		// Do we have a shared file handle?
         if ( IsShareHandle() )
-			m_hFile = os::CFMap::osCreateFileMapping( m_hShareHandle, (oexPVOID*)&m_pPtr, llSize, &llSize, x_uAccess, &m_bExisting );
+			m_hFile = os::CFMap::Create( m_hShareHandle, (oexPVOID*)&m_pPtr, llSize, &llSize, x_uAccess, &m_bExisting, m_llOffset );
 
 		else
 		{
@@ -254,7 +254,7 @@ public:
 				SetName( x_pName );
 
 			// Create file mapping
-			m_hFile = os::CFMap::osCreateFileMapping( x_pFile, (oexPVOID*)&m_pPtr, llSize, &llSize, m_pName, x_uAccess, &m_bExisting );
+			m_hFile = os::CFMap::Create( x_pFile, (oexPVOID*)&m_pPtr, llSize, &llSize, m_pName, x_uAccess, &m_bExisting, m_llOffset );
 
 		} // end else
 
@@ -441,6 +441,14 @@ public:
     oexBOOL IsPlain()
     {	return m_bPlain; }
 
+	/// Sets the nmap offset
+    void SetOffset( oexINT64 x_llOffset )
+    {	m_llOffset = x_llOffset; }
+
+	/// Gets the nmap offset
+    oexINT64 GetOffset()
+    {	return m_llOffset; }
+
 private:
 
 	/// Handle to file mapping
@@ -461,6 +469,9 @@ private:
 
 	/// External file handle for share
 	os::CFMap::t_HFILEMAP		m_hShareHandle;
+
+	/// Share offset
+	oexINT64					m_llOffset;
 
 	/// Set to non-zero for a plain file mapping (without any memory protection)
 	oexBOOL						m_bPlain;

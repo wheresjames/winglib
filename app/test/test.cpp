@@ -1141,9 +1141,9 @@ oex::oexRESULT TestParser()
 	pb[ oexT( "2" ) ][ oexT( "b" ) ] = oexT( "2b" );
 
 	oex::CPropertyBag ini_enc =
-		oex::CParser::CompileTemplate(	"		<[> [url] <]> _%n_ {#sub} _%n_ .;"	oexNL
-									"#sub +	[url] = {url} /_%n_ .;"				oexNL
-									"#sub -	<*> = {url} /_%n_ .;"				oexNL
+		oex::CParser::CompileTemplate(	"		<[> [url] <]> _%d_ {#sub} _%d_ .;"	oexNL
+									"#sub +	[url] = {url} /_%d_ .;"				oexNL
+									"#sub -	<*> = {url} /_%d_ .;"				oexNL
 								);
 
 	oexTRACE( oexT( "%s\n" ), ini_enc.PrintR().Ptr() );
@@ -2050,7 +2050,7 @@ oex::oexRESULT Test_CCapture()
 
 	// Open the capture device
 	if ( !oexVERIFY( cCapture.Open( oex::CStr().Fmt( oexT( "/dev/video%d" ), 0 ).Ptr(),
-								    320, 240, 24, 15 ) ) )
+								    1280, 1024, 24, 15 ) ) )
 		return -1;
 
 	if ( !oexVERIFY( cCapture.IsOpen() ) )
@@ -2059,24 +2059,41 @@ oex::oexRESULT Test_CCapture()
 //	if ( !oexVERIFY( cCapture.StartCapture() ) )
 //		return -3;
 
+//	printf( oexT( "Supported Formats : \n%s\n" ), oexStrToMbPtr( cCapture.GetSupportedFormats().Ptr() ) );
+
+	printf( oexT( "Starting capture\n" ) );
+
 	cCapture.StartCapture();
 
 	oex::os::CSys::Sleep( 1 );
 
 	for ( int i = 0; i < 1; i++ )
 	{
+		printf( oexT( "Going to wait for frame\n" ) );
+
 		if ( !oexVERIFY( cCapture.WaitForFrame() ) )
 			return -4;
 
-		if ( !oexVERIFY( cCapture.GetBuffer() && cCapture.GetImageSize() ) )
+		if ( !oexVERIFY( cCapture.GetBuffer() && cCapture.GetBufferSize() ) )
 			return -5;
 
 		oex::CImage img;
-		if ( !oexVERIFY( img.Create( oexNULL, oexNULL, cCapture.GetWidth(), cCapture.GetHeight(), cCapture.GetBpp(), 1 ) ) )
+		if ( !oexVERIFY( img.Create( oexNULL, oexNULL, 1312, 1024, 24, 1 ) ) )
 			return -6;
 
+		// Convert to RGB
+		img.CopySBGGR8( cCapture.GetBuffer() );
+//		img.CopyGrey( cCapture.GetBuffer() );
+
+		printf( oexT( "Writing image to disk\n" ) );
+
+		int nImageSize = oex::CImage::GetScanWidth( cCapture.GetWidth(), 24 )
+		       				* oex::cmn::Abs( cCapture.GetHeight() );
+
+		printf( oexT( "w=%d, h=%d, Buffer Size = %d, Image Size = %d\n" ), cCapture.GetWidth(), cCapture.GetHeight(), cCapture.GetBufferSize(), nImageSize );
+
 		if ( !oexVERIFY( oex::CImage::SaveDibFile( oex::CStr().Fmt( oexT( "./img_%d.bmp" ), 0 ).Ptr(),
-												   img.GetImageHeader(), cCapture.GetBuffer(), cCapture.GetImageSize() ) ) )
+												   img.GetImageHeader(), img.GetBuffer(), nImageSize ) ) ) // cCapture.GetBufferSize() ) ) )
 			return -7;
 
 	} // end for

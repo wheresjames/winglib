@@ -38,7 +38,7 @@ OEX_USING_NAMESPACE
 
 CLog CLog::m_logGlobal;
 
-oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexINT x_uLevel, oexCSTR x_pErr, oexINT x_uErr, oexUINT x_uSkip )
+oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x_uLevel, oexCSTR x_pErr, oexINT x_uErr, oexUINT x_uSkip )
 {
 	// Ensure valid reporting level
 	if ( x_uLevel < m_uLevel )
@@ -68,23 +68,41 @@ oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexINT x_uLevel, oexCSTR x_p
 
 		} // end if
 
-		// Do we have a source file name?
-		if ( oexCHECK_PTR( x_pFile ) )
-			m_file.Write( CStr().Fmt( oexT( "%s:(%u) " ), oexStrToMbPtr( x_pFile ), x_nLine ) );
+		if ( !oexCHECK_PTR( x_pFile ) )
+			x_pFile = oexT( "???" );
+
+		if ( !oexCHECK_PTR( x_pFunction ) )
+			x_pFunction = oexT( "???" );
+
+		oexCSTR pLevel = oexT( "" );
+		if ( eHalt == x_uLevel )
+			pLevel = oexT( "Halt" );
+		else if ( eError == x_uLevel )
+			pLevel = oexT( "Error" );
+		else if ( eWarning == x_uLevel )
+			pLevel = oexT( "Warning" );
+		else if ( eNotice == x_uLevel )
+			pLevel = oexT( "Notice" );
 
 		// Ensure error is not null
 		if ( !oexCHECK_PTR( x_pErr ) || !*x_pErr )
 			x_pErr = oexT( "Unspecified" );
 
-		// Write out the user error string
-		m_file.Write( CStr().Fmt( oexT( " : %s\r\n" ), oexStrToMbPtr( x_pErr ) ) );
+		// Write out the error line '<file>:<line> : <function>() : <error level> : <error string>'
+		m_file.Write( CStr().Fmt( oexT( "%s:(%u) : %s() : %s  : %s\r\n" ),
+					              oexStrToMbPtr( x_pFile ), x_nLine,
+					              oexStrToMbPtr( x_pFunction ),
+					              oexStrToMbPtr( pLevel ),
+					              oexStrToMbPtr( x_pErr ) ) );
 
 		// Write out the system error code and string if not zero
 		if ( x_uErr )
 			m_file.Write( CStr().Fmt( oexT( "> 0x%X (%d) : %s\r\n" ), x_uErr, x_uErr, oexStrToMbPtr( os::CTrace::GetErrorMsg( x_uErr ).Ptr() ) ) );
 
+#ifdef oexBACKTRACE_IN_LOG
 		// Write out the backtrace
 		m_file.Write( CStr().Fmt( oexT( "\t%s\r\n" ), oexStrToMbPtr( os::CTrace::GetBacktrace( x_uSkip ).Replace( oexT( "\n" ), oexT( "\n\t" ) ).Ptr() ) ) );
+#endif
 
 	} // end if
 

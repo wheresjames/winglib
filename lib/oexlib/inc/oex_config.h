@@ -88,4 +88,12 @@
 #define OEX_BIGENDIAN		0
 
 // Inline template specialization
-#define oexITS inline
+#define oexITS 				inline
+
+// Define to include backtraces for log entries
+//#define oexBACKTRACE_IN_LOG
+
+// debug macros
+#define oexFILE				__FILE__
+#define oexLINE				__LINE__
+#define oexFUNCTION			__FUNCTION__

@@ -282,16 +282,16 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
         struct hostent *pHe;
 
 		// Get host address
-		oexDO( pHe = gethostbyname( oexStrToStr8Ptr( x_pServer ) ), !pHe && EINTR == h_errno );
+		oexDO( pHe = gethostbyname( oexStrToStr8Ptr( x_pServer ) ), !pHe && EINTR == h_errno, pHe );
 
         if ( !pHe || !pHe->h_addr_list )
-        {  	oexERROR( h_errno, CStr().Fmt( oexT( "gethostbyname( '%s' ) failed" ), x_pServer ).Ptr() );
+        {  	oexERROR( h_errno, CStr().Fmt( oexT( "gethostbyname( '%s' ) failed" ), oexStrToMb( x_pServer ) ).Ptr() );
             return oexFALSE;
 		} // end if
 
         in_addr *pia = (in_addr*)*pHe->h_addr_list;
         if ( !oexCHECK_PTR( pia ) )
-        {  	oexERROR( h_errno, CStr().Fmt( oexT( "gethostbyname( %s ) failed, h_addr_list is NULL" ), x_pServer ).Ptr() );
+        {  	oexERROR( h_errno, CStr().Fmt( oexT( "gethostbyname( '%s' ) failed, h_addr_list is NULL" ), oexStrToMb( x_pServer ) ).Ptr() );
             return oexFALSE;
 		} // end if
 

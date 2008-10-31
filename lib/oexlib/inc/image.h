@@ -253,6 +253,12 @@ public:
 	/// Writes a DIB file to disk
 	static oexBOOL SaveDibFile( oexCSTR x_pFile, SImageData *x_pId, oexCPVOID x_pData, oexINT x_nData );
 
+	/// Convert image
+	oexBOOL CopySBGGR8( oexPVOID x_pData );
+
+	/// Convert from grey scale image
+	oexBOOL CImage::CopyGrey( oexPVOID x_pData );
+
 private:
 
 	/// Image memory

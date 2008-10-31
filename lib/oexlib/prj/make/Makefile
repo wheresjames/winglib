@@ -20,7 +20,6 @@ LIBROOT := ../../../..
 # libc.so.6 == glibc
 # libc.so.0 == uClibc
 
-
 #CDEBUG	 := -ggdb -DDEBUG -D_DEBUG 
 #LDEBUG	 := -ggdb
 CDEBUG	 := -s
@@ -51,7 +50,7 @@ else
 			DP := $(CODEROOT)/arm/usr/local/bin/arm-linux-makedepend
 
 			LFLAGS := -lrt -static $(LDEBUG)
-			CFLAGS := -c -DOEX_ARM -DOEX_LOWRAM -DOEX_SNAPGEAR -DOEX_VFL1 $(CDEBUG)
+			CFLAGS := -c -DOEX_ARM -DOEX_LOWRAM -DOEX_SNAPGEAR $(CDEBUG)
 			SFLAGS := $(CFLAGS) -S -MMD
 			AFLAGS := cq
 			

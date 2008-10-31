@@ -43,7 +43,7 @@ oexSTATIC_ASSERT( sizeof( CFMap::t_HFILEMAP ) == sizeof( FILE* ) );
 
 oexCONST CFMap::t_HFILEMAP CFMap::c_Failed = (oexCONST CFMap::t_HFILEMAP)-1;
 
-CFMap::t_HFILEMAP CFMap::osCreateFileMapping( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists )
+CFMap::t_HFILEMAP CFMap::Create( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists, oexINT64 x_llOffset )
 {
     // Sanity checks
     if ( !oexCHECK_PTR( x_pMem ) || CFMap::c_Failed == x_hFile )
@@ -51,18 +51,22 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( CFMap::t_HFILEMAP x_hFile, oexPVOI
         return CFMap::c_Failed;
 	} // end if
 
-	int fd = dup( (int)x_hFile );
+	int fd = (int)x_hFile; //dup( (int)x_hFile );
 	if ( 0 > fd )
 	{	oexERROR( -1, oexT( "dup() returned error : unable to duplicate file handle" ) );
 		return CFMap::c_Failed;
 	} // end if
 
-	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, fd, 0 );
+	printf( "before mmap()\n" );
+
+	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, x_llOffset );
 	if ( c_Failed == pMem )
 	{	oexERROR( errno, CStr().Fmt( oexT( "mmap failed to allocate block : handle=%d, size=%d" ), fd, (int)x_llSize ) );
 		close( fd );
 		return oexNULL;
 	} // end if
+
+	printf( "after mmap()\n" );
 
 	if ( x_pMem )
 		*x_pMem = pMem;
@@ -76,7 +80,7 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( CFMap::t_HFILEMAP x_hFile, oexPVOI
 // +++ Total hack, and currently not thread safe, replace soon please!!!
 static TAssoList< oexINT, CStr8 > g_lstFileMappingInfo;
 
-CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, oexCSTR x_pName, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists )
+CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, oexCSTR x_pName, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists, oexINT64 x_llOffset )
 {
 
 // +++ Need to get some equivalent on the arm
@@ -155,7 +159,7 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 		bExists = oexTRUE;
 
 	// Map memory
-	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, fd, 0 );
+	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, fd, x_llOffset );
 	if ( c_Failed == pMem )
 	{	oexERROR( errno, CStr().Fmt( oexT( "mmap failed to allocate block : size=%d" ), (int)x_llSize ) );
 		shm_unlink( sPath.Ptr() );
@@ -185,6 +189,8 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 	return (t_HFILEMAP)fd;
 #else
 
+	oexERROR( -1, oexT( "Not yet supported on the arm" ) );
+
 	return CFMap::c_Failed;
 
 #endif
@@ -192,14 +198,14 @@ CFMap::t_HFILEMAP CFMap::osCreateFileMapping( oexCSTR x_pFile, oexPVOID *x_pMem,
 
 oexBOOL CFMap::osReleaseFileMapping( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexINT64 x_llSize )
 {
-// +++ Need to get some equivalent on the arm
-#ifndef OEX_ARM
-
 	// Do we have a valid memory pointer
 	if ( x_pMem && oexCHECK_PTR( x_pMem ) )
 
 		// Unmap the memory
 		munmap( x_pMem, x_llSize );
+
+// +++ Need to get some equivalent on the arm
+#ifndef OEX_ARM
 
 	// Unlink
 	if ( c_Failed != x_hFileMap )
@@ -213,15 +219,10 @@ oexBOOL CFMap::osReleaseFileMapping( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pM
 
 	} // end if
 
-
-//		shm_unlink( (int)x_hFileMap );
-//		close( (int)x_hFileMap );
-
-	return oexTRUE;
-
-#else
-
-	return oexFALSE;
+// +++ Do we need to release the file handle here?
+//	close( (int)x_hFileMap );
 
 #endif
+
+	return oexTRUE;
 }

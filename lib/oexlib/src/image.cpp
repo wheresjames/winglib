@@ -36,6 +36,14 @@
 
 OEX_USING_NAMESPACE
 
+// +++ Packing on the arm compiler is broken!!!
+#ifndef OEX_ARM
+	oexSTATIC_ASSERT( 14 == sizeof( CImage::SDIBFileHeader ) );
+#	define sizeof_SDIBFileHeader sizeof( CImage::SDIBFileHeader )
+#else
+#	define sizeof_SDIBFileHeader 14
+#endif
+
 oexBOOL CImage::Destroy()
 {
 	/// Destroy the image buffer
@@ -98,6 +106,92 @@ oexBOOL CImage::Create( oexCSTR x_pShared, os::CFMap::t_HFILEMAP x_hShared, oexI
 	return oexTRUE;
 }
 
+#define u8		char
+#define u32	unsigned long
+
+#define R(x,y,w) pRGB24[0 + 3 * ((x) + w * (y))]
+#define G(x,y,w) pRGB24[1 + 3 * ((x) + w * (y))]
+#define B(x,y,w) pRGB24[2 + 3 * ((x) + w * (y))]
+
+#define Bay(x,y,w) pBay[(x) + w * (y)]
+
+static void bayer_copy(u8 *pBay, u8 *pRGB24, int x, int y, int w)
+{
+	G(x + 0, y + 0, w) = Bay(x + 0, y + 0, w);
+	G(x + 1, y + 1, w) = Bay(x + 1, y + 1, w);
+	G(x + 0, y + 1, w) = G(x + 1, y + 0, w) = ((u32)Bay(x + 0, y + 0, w) + (u32)Bay(x + 1, y + 1, w)) / 2;
+	R(x + 0, y + 0, w) = R(x + 1, y + 0, w) = R(x + 1, y + 1, w) = R(x + 0, y + 1, w) = Bay(x + 0, y + 1, w);
+	B(x + 1, y + 1, w) = B(x + 0, y + 0, w) = B(x + 0, y + 1, w) = B(x + 1, y + 0, w) = Bay(x + 1, y + 0, w);
+}
+
+static void bayer_bilinear(u8 *pBay, u8 *pRGB24, int x, int y, int w)
+{
+	R(x + 0, y + 0, w) = ((u32)Bay(x + 0, y + 1, w) + (u32)Bay(x + 0, y - 1, w)) / 2;
+	G(x + 0, y + 0, w) = Bay(x + 0, y + 0, w);
+	B(x + 0, y + 0, w) = ((u32)Bay(x - 1, y + 0, w) + (u32)Bay(x + 1, y + 0, w)) / 2;
+
+	R(x + 0, y + 1, w) = Bay(x + 0, y + 1, w);
+	G(x + 0, y + 1, w) = ((u32)Bay(x + 0, y + 0, w) + (u32)Bay(x + 0, y + 2, w)
+			 			 + (u32)Bay(x - 1, y + 1, w) + (u32)Bay(x + 1, y + 1, w)) / 4;
+	B(x + 0, y + 1, w) = ((u32)Bay(x + 1, y + 0, w) + (u32)Bay(x - 1, y + 0, w)
+			 			 + (u32)Bay(x + 1, y + 2, w) + (u32)Bay(x - 1, y + 2, w)) / 4;
+
+	R(x + 1, y + 0, w) = ((u32)Bay(x + 0, y + 1, w) + (u32)Bay(x + 2, y + 1, w)
+			 			 + (u32)Bay(x + 0, y - 1, w) + (u32)Bay(x + 2, y - 1, w)) / 4;
+	G(x + 1, y + 0, w) = ((u32)Bay(x + 0, y + 0, w) + (u32)Bay(x + 2, y + 0, w)
+			 			 + (u32)Bay(x + 1, y - 1, w) + (u32)Bay(x + 1, y + 1, w)) / 4;
+	B(x + 1, y + 0, w) = Bay(x + 1, y + 0, w);
+
+	R(x + 1, y + 1, w) = ((u32)Bay(x + 0, y + 1, w) + (u32)Bay(x + 2, y + 1, w)) / 2;
+	G(x + 1, y + 1, w) = Bay(x + 1, y + 1, w);
+	B(x + 1, y + 1, w) = ((u32)Bay(x + 1, y + 0, w) + (u32)Bay(x + 1, y + 2, w)) / 2;
+}
+
+static void bayer_to_rgb24(u8 *pBay, u8 *pRGB24, int w, int h)
+{
+	int i, j;
+
+	for (i = 0; i < w; i += 2)
+		for (j = 0; j < h; j += 2)
+			if (i == 0 || j == 0 || i == w - 2 || j == h - 2)
+				bayer_copy(pBay, pRGB24, i, j, w);
+			else
+				bayer_bilinear(pBay, pRGB24, i, j, w);
+}
+
+oexBOOL CImage::CopySBGGR8( oexPVOID x_pData )
+{
+	if ( !m_image.IsValid() )
+		return oexFALSE;
+
+	// Copy data
+	bayer_to_rgb24( (u8*)x_pData, (u8*)GetBuffer(), GetWidth(), GetHeight() );
+
+	return oexTRUE;
+}
+
+oexBOOL CImage::CopyGrey( oexPVOID x_pData )
+{
+	if ( !m_image.IsValid() )
+		return oexFALSE;
+
+	oexCHAR *pSrc = (oexCHAR*)x_pData;
+	oexCHAR *pDst = (oexCHAR*)GetBuffer();
+
+	int w = GetWidth(), h = GetHeight();//, sw = GetScanWidth( w, 24 ) - w;
+
+	for( int y = 0; y < h; y++ /*, pDst += sw */ )
+		for( int x = 0; x < w; x++, pSrc++, pDst += 3 )
+		{
+			pDst[ 0 ] = pSrc[ 0 ];
+			pDst[ 1 ] = pSrc[ 0 ];
+			pDst[ 2 ] = pSrc[ 0 ];
+
+		} // end for
+
+	return oexTRUE;
+}
+
 oexBOOL CImage::SaveDibFile( oexCSTR x_pFile, SImageData *x_pId, oexCPVOID x_pData, oexINT x_nData )
 {
 	if ( !oexCHECK_PTR( x_pFile ) || !*x_pFile || !oexCHECK_PTR( x_pId ) || !oexCHECK_PTR( x_pData ) || !x_nData )
@@ -114,12 +208,14 @@ oexBOOL CImage::SaveDibFile( oexCSTR x_pFile, SImageData *x_pId, oexCPVOID x_pDa
 	// Fill in header info
 	SDIBFileHeader dfh;
 	dfh.uMagicNumber = SDIBFileHeader::eMagicNumber;
-	dfh.uSize = sizeof( SDIBFileHeader ) + x_pId->bih.biSize + x_nData;
+	dfh.uSize = sizeof_SDIBFileHeader + x_pId->bih.biSize + x_nData;
 	dfh.uReserved1 = 0;
 	dfh.uReserved2 = 0;
-	dfh.uOffset = sizeof( SDIBFileHeader ) + x_pId->bih.biSize;
+	dfh.uOffset = sizeof_SDIBFileHeader + x_pId->bih.biSize;
 
-	if ( !cFile.Write( &dfh, sizeof( dfh ) ) )
+//	os::CSys::printf( "sizeof( SDIBFileHeader ) = %d\n", (int)sizeof( SDIBFileHeader ) );
+
+	if ( !cFile.Write( &dfh, sizeof_SDIBFileHeader ) )
 	{	oexERROR( cFile.GetLastError(), CStr().Fmt( oexT( "Error writing DIB header: %s" ), oexStrToMbPtr( x_pFile ) ) );
 		return oexFALSE;
 	} // end if

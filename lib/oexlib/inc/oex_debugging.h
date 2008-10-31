@@ -46,7 +46,7 @@ template < const int T > class oex_static_assert{};
 
 #	define oexTRACE				            OEX_NAMESPACE::os::CDebug::FmtTrace
 #	define oexUNUSED( s )
-#	define oexBREAK( s )		            ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( __FILE__ ), __LINE__, s ), OEX_NAMESPACE::oexFALSE )
+#	define oexBREAK( s )		            ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexTEXT( oexFUNCTION ), s ), OEX_NAMESPACE::oexFALSE )
 
 #else
 
@@ -62,7 +62,7 @@ template < const int T > class oex_static_assert{};
 //     evaulated first.  This ensures that in case e is a global
 //     variable like 'errno', it is not destroyed by the other
 //     arguments.
-#define oexLOG( l, e, s )			OEX_NAMESPACE::CLog::GlobalLog().Log( oexTEXT( __FILE__ ), __LINE__, l, s, e )
+#define oexLOG( l, e, s )			OEX_NAMESPACE::CLog::GlobalLog().Log( oexTEXT( oexFILE ), oexLINE, oexTEXT( oexFUNCTION ), l, s, e )
 #define oexNOTICE( e, s )			oexLOG( OEX_NAMESPACE::CLog::eNotice, e, s )
 #define oexWARNING( e, s )			oexLOG( OEX_NAMESPACE::CLog::eWarning, e, s )
 #define oexERROR( e, s )			oexLOG( OEX_NAMESPACE::CLog::eError, e, s )
@@ -90,13 +90,13 @@ template < const int T > class oex_static_assert{};
 // Verify macros show a dialog box even in release mode
 #	define oexVERIFY_PTR_NULL_OK( ptr )     oexVERIFY( oexVerifyPtrNullOk( ptr ) )
 #	define oexVERIFY_PTR( ptr )             oexVERIFY( OEX_NAMESPACE::oexVerifyPtr( ptr ) )
-#	define oexVERIFY( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( __FILE__ ), __LINE__, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
+#	define oexVERIFY( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexTEXT( oexFUNCTION ), oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
 
 #ifdef oexDEBUG
 
 #	define oexASSERT_PTR_NULL_OK( ptr )     oexVERIFY( oexVerifyPtrNullOk( ptr ) )
 #	define oexASSERT_PTR( ptr )             oexVERIFY( oexVerifyPtr( ptr ) )
-#	define oexASSERT( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0,oexTEXT( __FILE__ ), __LINE__, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
+#	define oexASSERT( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexTEXT( oexFUNCTION ), oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
 
 #	define oexCHECK_PTR_NULL_OK( ptr )      oexVERIFY_PTR_NULL_OK( ptr )
 #	define oexCHECK_PTR( ptr )              oexVERIFY_PTR( ptr )
