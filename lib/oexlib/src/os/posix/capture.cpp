@@ -317,6 +317,7 @@ public:
 	{
 		if ( 1 == m_nVersion )
 		{
+
 		} // end else if
 
 		else if ( 2 == m_nVersion )
@@ -327,7 +328,7 @@ public:
 				oexTCHAR		sId[ 256 ];
 			};
 
-			#define FORMAT_DESC( s )	{ s, #s }
+			#define FORMAT_DESC( s )	{ s, oexT( #s ) }
 
 			static SFormatDesc l_formats[] =
 			{

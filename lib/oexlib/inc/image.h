@@ -34,7 +34,6 @@
 
 #pragma once
 
-
 //==================================================================
 // CImage
 //
@@ -257,7 +256,7 @@ public:
 	oexBOOL CopySBGGR8( oexPVOID x_pData );
 
 	/// Convert from grey scale image
-	oexBOOL CImage::CopyGrey( oexPVOID x_pData );
+	oexBOOL CopyGrey( oexPVOID x_pData );
 
 private:
 

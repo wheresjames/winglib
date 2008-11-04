@@ -15,7 +15,7 @@ PROC	 := arm
 TOOLS	 := snapgear
 
 CODEROOT := ../../../../../..
-LIBROOT := ../../../..
+LIBROOT  := ../../../..
 
 #CDEBUG	 := -ggdb -DDEBUG -D_DEBUG
 #LDEBUG	 := -ggdb -rdynamic

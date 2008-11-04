@@ -96,4 +96,4 @@
 // debug macros
 #define oexFILE				__FILE__
 #define oexLINE				__LINE__
-#define oexFUNCTION			__FUNCTION__
+#define oexFUNCTION			""

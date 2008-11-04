@@ -2061,7 +2061,7 @@ oex::oexRESULT Test_CCapture()
 
 //	printf( oexT( "Supported Formats : \n%s\n" ), oexStrToMbPtr( cCapture.GetSupportedFormats().Ptr() ) );
 
-	printf( oexT( "Starting capture\n" ) );
+	printf( "Starting capture\n" );
 
 	cCapture.StartCapture();
 
@@ -2069,7 +2069,7 @@ oex::oexRESULT Test_CCapture()
 
 	for ( int i = 0; i < 1; i++ )
 	{
-		printf( oexT( "Going to wait for frame\n" ) );
+		printf( "Going to wait for frame\n" );
 
 		if ( !oexVERIFY( cCapture.WaitForFrame() ) )
 			return -4;
@@ -2085,16 +2085,17 @@ oex::oexRESULT Test_CCapture()
 		img.CopySBGGR8( cCapture.GetBuffer() );
 //		img.CopyGrey( cCapture.GetBuffer() );
 
-		printf( oexT( "Writing image to disk\n" ) );
+		printf( "Writing image to disk\n" );
 
 		int nImageSize = oex::CImage::GetScanWidth( cCapture.GetWidth(), 24 )
 		       				* oex::cmn::Abs( cCapture.GetHeight() );
 
-		printf( oexT( "w=%d, h=%d, Buffer Size = %d, Image Size = %d\n" ), cCapture.GetWidth(), cCapture.GetHeight(), cCapture.GetBufferSize(), nImageSize );
+		printf( "w=%d, h=%d, Buffer Size = %d, Image Size = %d\n", cCapture.GetWidth(), cCapture.GetHeight(), cCapture.GetBufferSize(), nImageSize );
 
 		if ( !oexVERIFY( oex::CImage::SaveDibFile( oex::CStr().Fmt( oexT( "./img_%d.bmp" ), 0 ).Ptr(),
 												   img.GetImageHeader(), img.GetBuffer(), nImageSize ) ) ) // cCapture.GetBufferSize() ) ) )
 			return -7;
+
 
 	} // end for
 
@@ -2103,6 +2104,9 @@ oex::oexRESULT Test_CCapture()
 
     return oex::oexRES_OK;
 }
+
+//int wmain( int argc, wchar_t *argv[] )
+//int wmain( int argc, wchar_t *argv[], wchar_t *envp[] )
 
 int main(int argc, char* argv[])
 {

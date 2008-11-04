@@ -205,6 +205,7 @@ oexBOOL CImage::SaveDibFile( oexCSTR x_pFile, SImageData *x_pId, oexCPVOID x_pDa
 		return oexFALSE;
 	} // end if
 
+
 	// Fill in header info
 	SDIBFileHeader dfh;
 	dfh.uMagicNumber = SDIBFileHeader::eMagicNumber;
