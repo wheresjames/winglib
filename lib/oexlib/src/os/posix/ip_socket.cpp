@@ -77,7 +77,7 @@ oexSTATIC_ASSERT( sizeof( CIpSocket::t_SOCKET ) == sizeof( int ) );
 // Socket version we will use
 //oexCONST WORD c_MinSocketVersion = MAKEWORD( 1, 1 );
 
-#ifdef OEX_ARM
+#ifndef EPOLLRDHUP
 #	define EPOLLRDHUP	0x2000
 #endif
 

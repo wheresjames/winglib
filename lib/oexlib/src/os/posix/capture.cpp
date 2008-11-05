@@ -317,7 +317,6 @@ public:
 	{
 		if ( 1 == m_nVersion )
 		{
-
 		} // end else if
 
 		else if ( 2 == m_nVersion )

@@ -84,7 +84,7 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_l
 {
 
 // +++ Need to get some equivalent on the arm
-#ifndef OEX_ARM
+#ifndef OEX_NOSHM
 
     // Sanity checks
     if ( !oexCHECK_PTR( x_pMem ) || !oexCHECK_PTR_NULL_OK( x_pName ) )
@@ -205,7 +205,7 @@ oexBOOL CFMap::osReleaseFileMapping( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pM
 		munmap( x_pMem, x_llSize );
 
 // +++ Need to get some equivalent on the arm
-#ifndef OEX_ARM
+#ifndef OEX_NOSHM
 
 	// Unlink
 	if ( c_Failed != x_hFileMap )

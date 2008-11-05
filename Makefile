@@ -1,4 +1,3 @@
-include ./make.def
 
 # Directories to build
 LIBDIRS := lib/oexlib 

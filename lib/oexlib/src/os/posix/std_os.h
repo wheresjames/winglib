@@ -64,7 +64,7 @@ extern int daylight;
 #include <locale.h>
 #include <sys/mman.h>
 
-#ifndef OEX_ARM
+#ifndef OEX_NOUUID
 #	include <uuid/uuid.h>
 #endif
 

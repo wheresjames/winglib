@@ -262,6 +262,5 @@ private:
 
 	/// Image memory
 	TMem< oexCHAR, SImageData > m_image;
-
 };
 
