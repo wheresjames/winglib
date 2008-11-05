@@ -78,8 +78,9 @@ else
 endif
 
 # Tools
-CC := $(TOOLPREFIX)g++
+PP := $(TOOLPREFIX)g++
 LD := $(TOOLPREFIX)g++
+CC := $(TOOLPREFIX)gcc
 AR := $(TOOLPREFIX)ar
 DP := $(TOOLPREFIX)makedepend
 

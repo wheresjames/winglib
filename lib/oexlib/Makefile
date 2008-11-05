@@ -3,7 +3,7 @@
 
 default_target: all
 OFFSET_ROOT := ../..
-include $(OFFSET_ROOT)/stdinc.mk
+include $(OFFSET_ROOT)/config.mk
 
 NAME_PRJ := oexlib
 TYPE_PRJ := lib

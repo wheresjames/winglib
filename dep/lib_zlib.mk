@@ -1,25 +1,26 @@
 
-# test
+# zlib
 
 default_target: all
-OFFSET_ROOT := ../..
+OFFSET_ROOT := ..
 include $(OFFSET_ROOT)/config.mk
 
-NAME_PRJ := test
-TYPE_PRJ := exe
+#CFLAGS := $(CFLAGS) -I$(LIBROOT)/
+
+NAME_PRJ := zlib
+TYPE_PRJ := lib
 
 export LOC_TAG := def
+LOC_CXX_def := c
+LOC_INC_def := $(LIBROOT)/zlib
+LOC_SRC_def := $(LIBROOT)/zlib
 include $(OFFSET_ROOT)/build.mk
 
 all: all_def $(PATH_EXE_def) 
 rebuild: rebuild_def $(PATH_EXE_def)
 rebuild: clean_def
 
-LIBS 	 := -L$(BINROOT) -loexlib$(DPOSTFIX)
-DEPENDS  := $(BINROOT)/liboexlib$(DPOSTFIX).a
-.PHONY $(BINROOT)/liboexlib$(DPOSTFIX).a:
-
 $(PATH_EXE_def): $(OBJECTS_def) $(DEPENDS)
-	$(LD) $(LFLAGS) $(OBJECTS_def) -o $@ $(LIBS) 
+	$(AR) $(AFLAGS) $@ $(OBJECTS_def)
 
 

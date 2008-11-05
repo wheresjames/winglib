@@ -1,10 +1,6 @@
 
-# Directories to build
-LIBDIRS := lib/oexlib 
-APPDIRS := app/test
-
 # Total dependencies
-BUILDDIRS := $(LIBDIRS) $(APPDIRS)
+BUILDDIRS := lib/oexlib app/test
 
 action_all   = $(patsubst %,all-%,$(BUILDDIRS))
 action_rebuild = $(patsubst %,rebuild-%,$(BUILDDIRS))

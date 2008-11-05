@@ -12,11 +12,17 @@ FILE_EXE := $(NAME_PRJ)$(DPOSTFIX)
 endif
 endif
 
-ifndef LOC_CPP_$(LOC_TAG)
-	LOC_CPP_$(LOC_TAG) := cpp
+ifndef LOC_CXX_$(LOC_TAG)
+	LOC_CXX_$(LOC_TAG) := cpp
 endif
 ifndef LOC_H_$(LOC_TAG)
 	LOC_H_$(LOC_TAG) := h
+endif
+
+ifeq ($(LOC_CXX_$(LOC_TAG)),c)
+COMPILER := $(CC)
+else
+COMPILER := $(PP)
 endif
 
 ifdef LOC_SRC_$(LOC_TAG)
@@ -47,8 +53,8 @@ PATH_LNK_$(LOC_TAG) := /usr/bin
 # Sources
 #-------------------------------------------------------------------
 HEADERS_$(LOC_TAG) 	:= $(wildcard $(PATH_INC_$(LOC_TAG))/*.$(LOC_H_$(LOC_TAG)))
-SOURCES_$(LOC_TAG) 	:= $(wildcard $(PATH_SRC_$(LOC_TAG))/*.$(LOC_CPP_$(LOC_TAG)))
-OBJECTS_$(LOC_TAG) 	:= $(subst $(PATH_SRC_$(LOC_TAG))/,$(PATH_OBJ_$(LOC_TAG))/, $(SOURCES_$(LOC_TAG):.cpp=.o) )
+SOURCES_$(LOC_TAG) 	:= $(wildcard $(PATH_SRC_$(LOC_TAG))/*.$(LOC_CXX_$(LOC_TAG)))
+OBJECTS_$(LOC_TAG) 	:= $(subst $(PATH_SRC_$(LOC_TAG))/,$(PATH_OBJ_$(LOC_TAG))/, $(SOURCES_$(LOC_TAG):.$(LOC_CXX_$(LOC_TAG))=.o) )
 
 include $(wildcard $(PATH_OBJ_$(LOC_TAG))/*.d)
 
@@ -72,8 +78,8 @@ clean_$(LOC_TAG):
 # Build
 #-------------------------------------------------------------------
 
-$(PATH_OBJ_$(LOC_TAG))/%.o : $(PATH_SRC_$(LOC_TAG))/%.cpp
-	$(CC) $(CFLAGS) $< -o $@
-#	- $(CC) $(SFLAGS) $< -o $(subst .o,.asm, $@)
+$(PATH_OBJ_$(LOC_TAG))/%.o : $(PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
+	$(COMPILER) $(CFLAGS) $< -o $@
+#	- $(COMPILER) $(SFLAGS) $< -o $(subst .o,.asm, $@)
 
 
