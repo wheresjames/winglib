@@ -8,7 +8,6 @@ include $(OFFSET_ROOT)/config.mk
 CFLAGS := $(CFLAGS) -I$(LIBROOT)/opencv/cxcore/include
 CFLAGS := $(CFLAGS) -I$(LIBROOT)/opencv/cv/include
 CFLAGS := $(CFLAGS) -I$(LIBROOT)/opencv/cv/src
-CFLAGS := $(CFLAGS) -I$(LIBROOT)/opencv/cvaux/include
 
 NAME_PRJ := cvaux
 TYPE_PRJ := lib

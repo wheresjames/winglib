@@ -6,7 +6,6 @@ OFFSET_ROOT := ..
 include $(OFFSET_ROOT)/config.mk
 
 CFLAGS := $(CFLAGS) -I$(LIBROOT)/opencv/cxcore/include
-CFLAGS := $(CFLAGS) -I$(LIBROOT)/opencv/cv/include
 
 NAME_PRJ := cv
 TYPE_PRJ := lib

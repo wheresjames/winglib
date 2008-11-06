@@ -5,7 +5,7 @@ default_target: all
 OFFSET_ROOT := ..
 include $(OFFSET_ROOT)/config.mk
 
-CFLAGS := $(CFLAGS) -I$(LIBROOT)/opencv/cxcore/include
+#CFLAGS := $(CFLAGS) -I$(LIBROOT)/
 
 NAME_PRJ := cxcore
 TYPE_PRJ := lib

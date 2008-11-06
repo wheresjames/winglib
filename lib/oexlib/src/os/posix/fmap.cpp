@@ -161,7 +161,7 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_l
 	// Map memory
 	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, fd, x_llOffset );
 	if ( c_Failed == pMem )
-	{	oexERROR( errno, CStr().Fmt( oexT( "mmap failed to allocate block : size=%d" ), (int)x_llSize ) );
+	{	oexERROR( errno, CStr().Fmt( oexT( "mmap failed to allocate block : size=%d, fd=%d, offset=%d" ), (int)x_llSize, (int)fd, (int)x_llOffset ) );
 		shm_unlink( sPath.Ptr() );
 		return CFMap::c_Failed;
 	} // end if

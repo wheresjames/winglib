@@ -9,14 +9,13 @@ ifeq ($(OS),win32)
 CFLAGS := $(CFLAGS) /DIRRLICHT_EXPORTS
 endif
 
-CFLAGS := $(CFLAGS) -I$(LIBROOT)/irrlicht/include
 CFLAGS := $(CFLAGS) -I$(LIBROOT)/irrlicht/source/Irrlicht/zlib
 
 NAME_PRJ := irrlicht
 TYPE_PRJ := lib
 
 export LOC_TAG := def
-LOC_INC_def := $(LIBROOT)/irrlicht/source/Irrlicht
+LOC_INC_def := $(LIBROOT)/irrlicht/include
 LOC_SRC_def := $(LIBROOT)/irrlicht/source/Irrlicht
 include $(OFFSET_ROOT)/build.mk
 

@@ -32,6 +32,7 @@ else
 COMPILER := $(PP)
 endif
 
+# Using full paths helps IDE editors to locate the file when there's an error ;)
 ifdef LOC_SRC_$(LOC_TAG)
 PATH_SRC_$(LOC_TAG) := $(CUR_ROOT)/$(LOC_SRC_$(LOC_TAG))
 else
@@ -59,7 +60,6 @@ PATH_LNK_$(LOC_TAG) := /usr/bin
 #-------------------------------------------------------------------
 # Sources
 #-------------------------------------------------------------------
-HEADERS_$(LOC_TAG) 	:= $(wildcard $(PATH_INC_$(LOC_TAG))/*.$(LOC_H_$(LOC_TAG)))
 SOURCES_$(LOC_TAG) 	:= $(wildcard $(PATH_SRC_$(LOC_TAG))/*.$(LOC_CXX_$(LOC_TAG)))
 OBJECTS_$(LOC_TAG) 	:= $(subst $(PATH_SRC_$(LOC_TAG))/,$(PATH_OBJ_$(LOC_TAG))/, $(SOURCES_$(LOC_TAG):.$(LOC_CXX_$(LOC_TAG))=.$(OBJ_EXT)) )
 
@@ -105,7 +105,7 @@ $(PATH_OBJ_$(LOC_TAG))/%.$(OBJ_EXT) : $(PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_T
 else
 
 $(PATH_OBJ_$(LOC_TAG))/%.$(OBJ_EXT) : $(PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
-	$(COMPILER) $(CFLAGS) $< -o $@
+	$(COMPILER) $(CFLAGS) -I$(PATH_INC_$(LOC_TAG)) $< -o $@
 #	- $(COMPILER) $(SFLAGS) $< -o $(subst .o,.asm, $@)
 
 endif
