@@ -100,7 +100,7 @@ endif
 ifeq ($(OS),win32)
 
 $(PATH_OBJ_$(LOC_TAG))/%.$(OBJ_EXT) : $(PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
-	$(COMPILER) $(CFLAGS) $< $(CC_OUT)$@
+	$(COMPILER) $(CFLAGS) -I$(PATH_INC_$(LOC_TAG)) $< $(CC_OUT)$@
 
 else
 

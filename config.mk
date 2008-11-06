@@ -28,6 +28,8 @@ ifdef UNICODE
 CEXTRA := $(CEXTRA) -DUNICODE -D_UNICODE
 endif
 
+ONESPACE := $(nullstring) # end of the line
+
 ifeq ($(OS),win32)
 
 	PLATFORM := windows
@@ -89,7 +91,7 @@ else
 		CFLAGS := -c -MMD $(CEXTRA) -DOEX_VFL1
 		SFLAGS := $(CFLAGS) -S -MMD
 		AFLAGS := cq
-
+		
 	endif
 
 	# Tools
@@ -101,6 +103,8 @@ else
 	MD := mkdir -p
 	RM := rm -rf
 	
+	CC_OUT := -o$(ONE_SPACE)
+
 	OBJ_EXT := o
 	CUR_ROOT := $(shell pwd)
 	
@@ -117,6 +121,5 @@ BUILD_TYPE := $(BUILD_TYPE)-debug
 endif
 
 BINROOT  := $(LIBROOT)/bin/$(BUILD_TYPE)
-
 
 
