@@ -551,3 +551,46 @@ void CSys::FileTimeToSystemTime( STime &x_st, oexINT64 x_ft )
 
     CSys_SystemTimeToSTime( st, x_st );
 }
+
+oexUINT CSys::WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen )
+{
+	if ( !pSrc || !uLen )
+		return 0;
+
+	// +++ Ensure source is NULL terminated
+//	pSrc[ uLen - 1 ] = 0;
+
+	return wcstombs( pDst, pSrc, uMax );
+}
+
+oexUINT CSys::MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen )
+{
+	if ( !pSrc || !uLen )
+		return 0;
+
+	// +++ Ensure source is NULL terminated
+//	pSrc[ uLen - 1 ] = 0;
+
+	return mbstowcs( pDst, pSrc, uMax );
+}
+
+oexCSTR CSys::SetLocale( oexINT nCategory, oexCSTR pLocal )
+{
+//  +++ Resolve temporary string problem
+//	return setlocale( nCategory, oexStrToMbPtr( pLocal ) );
+	return oexT( "" );
+}
+
+/// printf function
+int CSys::printf( oexCSTR8 x_pFmt, ... )
+{
+	oexVaList ap; oexVaStart( ap, x_pFmt );
+	int ret = CSys::vprintf( x_pFmt, ap );
+	oexVaEnd( ap );
+	return ret;
+}
+
+/// vprintf
+int CSys::vprintf( oexCSTR8 x_pFmt, oexVaList &pArgs )
+{	return ::vprintf( x_pFmt, (va_list)pArgs );
+}

@@ -44,7 +44,7 @@ oexSTATIC_ASSERT( sizeof( CBaseFile::t_HFIND ) == sizeof( HANDLE ) );
 const CBaseFile::t_HFILE CBaseFile::c_Invalid = INVALID_HANDLE_VALUE;
 const CBaseFile::t_HFIND CBaseFile::c_InvalidFindHandle = INVALID_HANDLE_VALUE;
 
-CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, oexUINT x_eAccess, oexUINT x_eShare, oexUINT x_uFlags, oexUINT *x_puError )
+CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, oexUINT x_eAccess, oexUINT x_eShare, oexUINT x_uFlags, oexINT *x_pnError )
 {
     DWORD dwDisposition = OPEN_EXISTING;
     switch( x_eDisposition )
@@ -66,62 +66,62 @@ CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, o
 
     t_HFILE hFile = ::CreateFile( x_pFile, dwAccess, dwShare, NULL, dwDisposition, x_uFlags, NULL );
 
-    if ( x_puError )
+    if ( x_pnError )
     {   if ( INVALID_HANDLE_VALUE == hFile )
-            *x_puError = GetLastError();
-        else *x_puError = 0;
+            *x_pnError = GetLastError();
+        else *x_pnError = 0;
     } // end if
 
     return hFile;        
 }
 
 
-oexBOOL CBaseFile::Close( CBaseFile::t_HFILE x_hFile, oexUINT *x_puErr )
+oexBOOL CBaseFile::Close( CBaseFile::t_HFILE x_hFile, oexINT *x_pnErr )
 {
     if ( INVALID_HANDLE_VALUE == x_hFile )
         return oexFALSE;
 
     oexBOOL bRet = ::CloseHandle( x_hFile ) ? oexTRUE : oexFALSE;
 
-    if ( x_puErr )
-    {   if ( bRet ) *x_puErr = 0;
-        else *x_puErr = GetLastError();
+    if ( x_pnErr )
+    {   if ( bRet ) *x_pnErr = 0;
+        else *x_pnErr = GetLastError();
     } // end if
 
     return bRet;
 }
 
 
-oexBOOL CBaseFile::Write( CBaseFile::t_HFILE hFile, oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puWritten, oexUINT *x_puErr )
+oexBOOL CBaseFile::Write( CBaseFile::t_HFILE x_hFile, oexCPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllWritten, oexINT *x_pnErr )
 {
     DWORD dwWritten = 0;
-    oexBOOL bRet = ::WriteFile( hFile, x_pData, x_uSize, &dwWritten, NULL ) ? oexTRUE : oexFALSE;
+    oexBOOL bRet = ::WriteFile( x_hFile, x_pData, x_llSize, &dwWritten, NULL ) ? oexTRUE : oexFALSE;
     
-    if ( x_puWritten )
-        *x_puWritten = dwWritten;
+    if ( x_pllWritten )
+        *x_pllWritten = dwWritten;
 
-    if ( x_puErr )
-    {   if ( bRet ) *x_puErr = 0;
-        else *x_puErr = GetLastError();
+    if ( x_pnErr )
+    {   if ( bRet ) *x_pnErr = 0;
+        else *x_pnErr = GetLastError();
     } // end if
 
     return bRet;
 }
 
-oexBOOL CBaseFile::Read( CBaseFile::t_HFILE hFile, oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, oexUINT *x_puErr )
+oexBOOL CBaseFile::Read( CBaseFile::t_HFILE x_hFile, oexPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllRead, oexINT *x_pnErr )
 {
     DWORD dwRead = 0;
-    oexBOOL bRet = ::ReadFile( hFile, x_pData, x_uSize, &dwRead, NULL ) ? oexTRUE : oexFALSE;
+    oexBOOL bRet = ::ReadFile( x_hFile, x_pData, x_llSize, &dwRead, NULL ) ? oexTRUE : oexFALSE;
     
-    if ( x_puRead )
-        *x_puRead = dwRead;
+    if ( x_pllRead )
+        *x_pllRead = dwRead;
 
-	else if ( dwRead != x_uSize )
+	else if ( dwRead != x_llSize )
 		bRet = FALSE;
 
-    if ( x_puErr )
-    {   if ( bRet ) *x_puErr = 0;
-        else *x_puErr = GetLastError();
+    if ( x_pnErr )
+    {   if ( bRet ) *x_pnErr = 0;
+        else *x_pnErr = GetLastError();
     } // end if
 
     return bRet;
@@ -287,3 +287,21 @@ oexBOOL CBaseFile::DoesExist( oexCSTR x_pPath )
 
 oexBOOL CBaseFile::CreateFolder( oexCSTR x_pPath )
 {   return ::CreateDirectory( x_pPath, NULL ) ? oexTRUE : oexFALSE; }
+
+CStr CBaseFile::GetModPath( oexCSTR x_pPath )
+{
+	return CBaseFile::GetModFileName().GetPath();
+}
+
+CStr CBaseFile::GetModFileName()
+{
+	oexTCHAR szFilename[ oexSTRSIZE ] = { 0 };
+
+	// Get the module file name
+	GetModuleFileName( oexNULL, szFilename, oexSTRSIZE );
+
+	// Ensure it's NULL terminated
+	szFilename[ oexSTRSIZE - 1 ] = 0;
+
+	return szFilename;
+}

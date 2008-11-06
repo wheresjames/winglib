@@ -102,14 +102,14 @@ void CDebug::Break()
 #endif
 }
 
-void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pStr )
+void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pStr )
 {
 	oexTCHAR tcModule[ oexSTRSIZE ] = oexT( "" );
 	GetModuleFileName( (HMODULE)GetInstanceHandle(), tcModule, sizeof( tcModule ) );
-	Break( x_nType, x_pFile, x_uLine, tcModule, x_pStr );
+	Break( x_nType, x_pFile, x_uLine, x_pFunction, tcModule, x_pStr );
 }
 
-void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pModule, oexCSTR x_pStr )
+void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr )
 {
 #if defined( oexDEBUG )
 
@@ -133,6 +133,7 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 	str << oexT( "Module : " ) << x_pModule << oexNL;
 	str << oexT( "File : " ) << x_pFile << oexNL;
 	str << oexT( "Line : " ) << x_uLine << oexNL << oexNL;
+	str << oexT( "Function : " ) << x_pFunction << oexNL << oexNL;
 	str << oexT( "Expression : " ) << CStr( x_pStr ).Replace( oexT( "%" ), oexT( "%%" ) );
 
 	// Simulate the _CrtDbgReport box

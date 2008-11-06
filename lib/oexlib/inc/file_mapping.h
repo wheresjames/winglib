@@ -190,7 +190,7 @@ public:
 
 			} // end if
 
-            os::CFMap::osReleaseFileMapping( m_hFile, m_pPtr, m_llOpenSize );
+            os::CFMap::Release( m_hFile, m_pPtr, m_llOpenSize );
 
 		} // end if
 		m_pPtr = oexNULL;

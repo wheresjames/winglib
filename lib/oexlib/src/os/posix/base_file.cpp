@@ -283,7 +283,7 @@ oexBOOL CBaseFile::CreateFolder( oexCSTR x_pPath )
 {   return mkdir( oexStrToMbPtr( x_pPath ), 0 ) ? oexFALSE : oexTRUE;
 }
 
-CStr CBaseFile::GetModulePath( oexCSTR x_pPath )
+CStr CBaseFile::GetModPath( oexCSTR x_pPath )
 {
 	BrInitError error;
 	if ( br_init( &error ) )
@@ -309,7 +309,7 @@ CStr CBaseFile::GetModulePath( oexCSTR x_pPath )
 	return CStr();
 }
 
-CStr CBaseFile::GetModuleFileName()
+CStr CBaseFile::GetModFileName()
 {
 	BrInitError error;
 	if ( br_init( &error ) )

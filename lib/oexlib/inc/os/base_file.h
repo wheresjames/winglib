@@ -174,10 +174,10 @@ public:
     static oexBOOL CreateFolder( oexCSTR x_pPath );
 
 	/// Returns the fully qualified path to the current module
-	static CStr GetModulePath( oexCSTR x_pPath = oexNULL );
+	static CStr GetModPath( oexCSTR x_pPath = oexNULL );
 
 	/// Returns the fully qualified file name the to the current module
-	static CStr GetModuleFileName();
+	static CStr GetModFileName();
 
 	/// Flushes file data to disk
 	static oexBOOL Flush( t_HFILE x_hFile );

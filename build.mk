@@ -3,13 +3,20 @@
 # Vars
 #-------------------------------------------------------------------
 
-ifndef FILE_EXE
-
-ifeq ($(TYPE_PRJ),lib)
-FILE_EXE := lib$(NAME_PRJ)$(DPOSTFIX).a
-else
-FILE_EXE := $(NAME_PRJ)$(DPOSTFIX)
-endif
+ifndef FILE_EXE		 
+	ifeq ($(TYPE_PRJ),lib)
+		ifeq ($(OS),win32)
+			FILE_EXE := $(NAME_PRJ)$(DPOSTFIX).lib
+		else
+			FILE_EXE := lib$(NAME_PRJ)$(DPOSTFIX).a
+		endif
+	else
+		ifeq ($(OS),win32)
+			FILE_EXE := $(NAME_PRJ)$(DPOSTFIX).exe
+		else
+			FILE_EXE := $(NAME_PRJ)$(DPOSTFIX)
+		endif
+	endif
 endif
 
 ifndef LOC_CXX_$(LOC_TAG)
@@ -54,7 +61,7 @@ PATH_LNK_$(LOC_TAG) := /usr/bin
 #-------------------------------------------------------------------
 HEADERS_$(LOC_TAG) 	:= $(wildcard $(PATH_INC_$(LOC_TAG))/*.$(LOC_H_$(LOC_TAG)))
 SOURCES_$(LOC_TAG) 	:= $(wildcard $(PATH_SRC_$(LOC_TAG))/*.$(LOC_CXX_$(LOC_TAG)))
-OBJECTS_$(LOC_TAG) 	:= $(subst $(PATH_SRC_$(LOC_TAG))/,$(PATH_OBJ_$(LOC_TAG))/, $(SOURCES_$(LOC_TAG):.$(LOC_CXX_$(LOC_TAG))=.o) )
+OBJECTS_$(LOC_TAG) 	:= $(subst $(PATH_SRC_$(LOC_TAG))/,$(PATH_OBJ_$(LOC_TAG))/, $(SOURCES_$(LOC_TAG):.$(LOC_CXX_$(LOC_TAG))=.$(OBJ_EXT)) )
 
 include $(wildcard $(PATH_OBJ_$(LOC_TAG))/*.d)
 
@@ -68,18 +75,39 @@ rebuild_$(LOC_TAG): clean_$(LOC_TAG) all_$(LOC_TAG)
 
 setup_$(LOC_TAG): $(PATH_OBJ_$(LOC_TAG))
 
-$(PATH_OBJ_$(LOC_TAG)):
-	mkdir -p $@
+ifeq ($(OS),win32)
 
-clean_$(LOC_TAG):
-	@rm -rf $(PATH_OUT_$(LOC_TAG))
+$(PATH_OBJ_$(LOC_TAG)):
+	$(MD) $(subst /,\,$@)
 	
+clean_$(LOC_TAG):
+	- $(RM) "$(subst /,\,$(PATH_OBJ_$(LOC_TAG)))"
+	
+else
+
+$(PATH_OBJ_$(LOC_TAG)):
+	$(MD) $@
+	
+clean_$(LOC_TAG):
+	- $(RM) $(PATH_OBJ_$(LOC_TAG))
+
+endif
+
 #-------------------------------------------------------------------
 # Build
 #-------------------------------------------------------------------
 
-$(PATH_OBJ_$(LOC_TAG))/%.o : $(PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
+ifeq ($(OS),win32)
+
+$(PATH_OBJ_$(LOC_TAG))/%.$(OBJ_EXT) : $(PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
+	$(COMPILER) $(CFLAGS) $< $(CC_OUT)$@
+
+else
+
+$(PATH_OBJ_$(LOC_TAG))/%.$(OBJ_EXT) : $(PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
 	$(COMPILER) $(CFLAGS) $< -o $@
 #	- $(COMPILER) $(SFLAGS) $< -o $(subst .o,.asm, $@)
+
+endif
 
 

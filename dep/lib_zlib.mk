@@ -21,6 +21,6 @@ rebuild: rebuild_def $(PATH_EXE_def)
 rebuild: clean_def
 
 $(PATH_EXE_def): $(OBJECTS_def) $(DEPENDS)
-	$(AR) $(AFLAGS) $@ $(OBJECTS_def)
+	$(AR) $(AFLAGS) $(AR_OUT)$@ $(OBJECTS_def)
 
 

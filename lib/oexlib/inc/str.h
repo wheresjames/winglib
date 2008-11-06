@@ -1003,7 +1003,7 @@ public:
         } // end if
 
         // Get length of in comming string in bytes
-        oexUINT uConv = os::CSys::WcsToMbs( oexNULL, 0, x_sStr.Ptr(), uLen );
+        oexINT uConv = os::CSys::WcsToMbs( oexNULL, 0, x_sStr.Ptr(), uLen );
 
         // Allocate enough space
         if ( !OexAllocate( uConv ) )

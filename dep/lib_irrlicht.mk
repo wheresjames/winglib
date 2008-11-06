@@ -5,6 +5,10 @@ default_target: all
 OFFSET_ROOT := ..
 include $(OFFSET_ROOT)/config.mk
 
+ifeq ($(OS),win32)
+CFLAGS := $(CFLAGS) /DIRRLICHT_EXPORTS
+endif
+
 CFLAGS := $(CFLAGS) -I$(LIBROOT)/irrlicht/include
 CFLAGS := $(CFLAGS) -I$(LIBROOT)/irrlicht/source/Irrlicht/zlib
 
@@ -21,6 +25,6 @@ rebuild: rebuild_def $(PATH_EXE_def)
 rebuild: clean_def
 
 $(PATH_EXE_def): $(OBJECTS_def) $(DEPENDS)
-	$(AR) $(AFLAGS) $@ $(OBJECTS_def)
+	$(AR) $(AFLAGS) $(AR_OUT)$@ $(OBJECTS_def)
 
 

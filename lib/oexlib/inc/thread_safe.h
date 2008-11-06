@@ -115,7 +115,7 @@ public:
 //		oexTRACE( oexT( "Lock not implemented!\n" ) );
 //		return oexTRUE;
 
-        m_bLocked = m_hMutex.Wait( x_uTimeout );
+		m_bLocked = os::CResource::waitSuccess == m_hMutex.Wait( x_uTimeout );
 
 		if ( m_bLocked )
 			m_uRef++;
@@ -367,7 +367,7 @@ public:
 		\see
 	*/
 	oexBOOL Wait( oexUINT x_uTimeout )
-	{	return m_hEvent.Wait( x_uTimeout ); }
+	{	return os::CResource::waitSuccess == m_hEvent.Wait( x_uTimeout ); }
 
 	//==============================================================
 	// Wait()
@@ -553,7 +553,7 @@ public:
 		\see
 	*/
 	oexBOOL WaitSignal( oexUINT x_uTimeout )
-	{	return m_hSignal.Wait( x_uTimeout ); }
+	{	return os::CResource::waitSuccess == m_hSignal.Wait( x_uTimeout ); }
 
 	//==============================================================
 	// WaitUnsignal()
@@ -567,7 +567,7 @@ public:
 		\see
 	*/
 	oexBOOL WaitUnsignal( oexUINT x_uTimeout )
-	{	return m_hUnsignal.Wait( x_uTimeout ); }
+	{	return os::CResource::waitSuccess == m_hUnsignal.Wait( x_uTimeout ); }
 
 	//==============================================================
 	// WaitSignal()

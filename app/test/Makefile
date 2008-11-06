@@ -15,11 +15,16 @@ all: all_def $(PATH_EXE_def)
 rebuild: rebuild_def $(PATH_EXE_def)
 rebuild: clean_def
 
+ifeq ($(OS),win32)
+LIBS	 := /LIBPATH:$(BINROOT) oexlib$(DPOSTFIX).lib 
+LIBS	 := $(LIBS) ole32.lib user32.lib
+else
 LIBS 	 := -L$(BINROOT) -loexlib$(DPOSTFIX)
 DEPENDS  := $(BINROOT)/liboexlib$(DPOSTFIX).a
 .PHONY $(BINROOT)/liboexlib$(DPOSTFIX).a:
+endif
 
 $(PATH_EXE_def): $(OBJECTS_def) $(DEPENDS)
-	$(LD) $(LFLAGS) $(OBJECTS_def) -o $@ $(LIBS) 
+	$(LD) $(LFLAGS) $(OBJECTS_def) $(LD_OUT)$@ $(LIBS)
 
 

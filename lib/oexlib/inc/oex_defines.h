@@ -141,8 +141,8 @@
 #define oexDelete					OEX_NAMESPACE::os::CFile::Delete
 #define oexExists					OEX_NAMESPACE::os::CFile::Exists
 #define oexBuildPath				OEX_NAMESPACE::CStr::BuildPath
-#define oexGetModuleFileName		OEX_NAMESPACE::os::CBaseFile::GetModuleFileName
-#define oexGetModulePath			OEX_NAMESPACE::os::CBaseFile::GetModulePath
+#define oexGetModuleFileName		OEX_NAMESPACE::os::CBaseFile::GetModFileName
+#define oexGetModulePath			OEX_NAMESPACE::os::CBaseFile::GetModPath
 
 // Time functions
 #define oexLocalTime				OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eLocalTime )

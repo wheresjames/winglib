@@ -78,12 +78,12 @@ public:
     }
 };
 
-oexUINT CThread::ThreadProc( oexPVOID x_pData )
+oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 {
     // Get pointer
     CThread *pThread = (CThread*)x_pData;
     if ( !oexVERIFY_PTR( x_pData ) )
-        return -1;
+        return (oexPVOID)-1;
 
     // Count one thread
     CThread::IncThreadCount();
@@ -134,7 +134,7 @@ oexUINT CThread::ThreadProc( oexPVOID x_pData )
     /// Decrement the running thread count
     CThread::DecRunningThreadCount();
 
-    return nRet;
+    return (oexPVOID)nRet;
 }
 
 oexBOOL CThread::Start( oexUINT x_uSleep, oexPVOID x_pData )

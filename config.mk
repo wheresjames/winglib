@@ -12,7 +12,6 @@ TOOLS	 := local
 #TOOLS	 := android
 #TOOLS	 := snapgear
 
-CUR_ROOT := $(shell pwd)
 TOOLROOT := $(OFFSET_ROOT)/../..
 LIBROOT  := $(OFFSET_ROOT)/..
 
@@ -32,6 +31,24 @@ endif
 ifeq ($(OS),win32)
 
 	PLATFORM := windows
+
+	# Tools
+	PP := cl /nologo /DWIN32 /wd4996
+	LD := link /NOLOGO
+	CC := cl /nologo /DWIN32 /wd4996
+	AR := lib /nologo
+	DP := cl /nologo
+	MD := md
+	RM := rmdir /s /q
+
+	CC_OUT := /Fo
+	LD_OUT := /OUT:
+	AR_OUT := /OUT:
+
+	CFLAGS := /EHsc /c
+
+	OBJ_EXT := obj
+	CUR_ROOT := $(shell cd)
 
 else
 
@@ -75,14 +92,19 @@ else
 
 	endif
 
+	# Tools
+	PP := $(TOOLPREFIX)g++
+	LD := $(TOOLPREFIX)g++
+	CC := $(TOOLPREFIX)gcc
+	AR := $(TOOLPREFIX)ar
+	DP := $(TOOLPREFIX)makedepend
+	MD := mkdir -p
+	RM := rm -rf
+	
+	OBJ_EXT := o
+	CUR_ROOT := $(shell pwd)
+	
 endif
-
-# Tools
-PP := $(TOOLPREFIX)g++
-LD := $(TOOLPREFIX)g++
-CC := $(TOOLPREFIX)gcc
-AR := $(TOOLPREFIX)ar
-DP := $(TOOLPREFIX)makedepend
 
 BUILD_TYPE := $(PLATFORM)-$(OS)-$(PROC)-$(TOOLS)
 

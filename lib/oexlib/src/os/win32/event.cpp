@@ -37,28 +37,25 @@
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
-
-// Ensure size
-oexSTATIC_ASSERT( sizeof( CEvent::t_EVENT ) == sizeof( HANDLE ) );
-
-const CEvent::t_EVENT	CEvent::c_Invalid = NULL;
-
-const oexUINT	CEvent::c_Infinite = 0xffffffff;
-									 
-CEvent::t_EVENT CEvent::osCreateEvent( oexCSTR x_pName, oexBOOL x_bManualReset )
-{	return (void*)CreateEvent( NULL, x_bManualReset, FALSE, x_pName );
+							 
+oexRESULT CEvent::Create( CResource &x_rEvent, oexCSTR x_pName, oexBOOL x_bManualReset )
+{	x_rEvent.SetHandle( CreateEvent( NULL, x_bManualReset, FALSE, x_pName ) );
+	return CResource::cInvalid() != x_rEvent.GetHandle();
 }
 
-void CEvent::osDestroyEvent( t_EVENT x_pEvent )
-{	if ( x_pEvent ) CloseHandle( (HANDLE)x_pEvent );
+void CEvent::Destroy( CResource &x_rEvent )
+{	if ( CResource::cInvalid() != x_rEvent.GetHandle() ) 
+		CloseHandle( (HANDLE)x_rEvent.GetHandle() );
+	x_rEvent.SetHandle( CResource::cInvalid() );
 }
 
-oexBOOL CEvent::osSetEvent( t_EVENT x_pEvent )
-{	return SetEvent( (HANDLE)x_pEvent ) ? oexTRUE : oexFALSE; }
+oexBOOL CEvent::SetEvent( CResource &x_rEvent )
+{	return ::SetEvent( (HANDLE)x_rEvent.GetHandle() ) ? oexTRUE : oexFALSE; }
 
-oexBOOL CEvent::osResetEvent( t_EVENT x_pEvent )
-{	return ResetEvent( (HANDLE)x_pEvent ) ? oexTRUE : oexFALSE; }
+oexBOOL CEvent::ResetEvent( CResource &x_rEvent )
+{	return ::ResetEvent( (HANDLE)x_rEvent.GetHandle() ) ? oexTRUE : oexFALSE; }
 
+/*
 oexINT CEvent::osWaitForSingleObject( t_EVENT x_pEvent, oexUINT x_uTimeout )
 {	DWORD dwRet = WaitForSingleObject( (HANDLE)x_pEvent, (DWORD)x_uTimeout );
 	if ( WAIT_OBJECT_0 == dwRet ) return waitSuccess;
@@ -82,4 +79,4 @@ oexINT CEvent::osWaitForMultipleObjects( oexUINT x_uObjects, t_EVENT *x_pEvent, 
 
 	return waitFailed;
 }
-
+*/

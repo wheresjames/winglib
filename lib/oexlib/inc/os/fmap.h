@@ -134,7 +134,7 @@ public:
 
 		\see
 	*/
-	static oexBOOL osReleaseFileMapping( t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexINT64 x_llSize );
+	static oexBOOL Release( t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexINT64 x_llSize );
 
 	//==============================================================
 	// vFailed()
