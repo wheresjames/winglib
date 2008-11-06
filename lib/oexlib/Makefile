@@ -24,7 +24,7 @@ rebuild: rebuild_def rebuild_os $(PATH_EXE_def)
 clean: clean_def clean_os
 
 $(PATH_EXE_def): $(OBJECTS_def) $(OBJECTS_os)
-	$(AR) $(AFLAGS) $@ $(OBJECTS_def) $(OBJECTS_os)
+	$(AR) $(AFLAGS) $(AR_OUT)$@ $(OBJECTS_def) $(OBJECTS_os)
 
 
 
