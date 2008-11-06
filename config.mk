@@ -103,7 +103,7 @@ else
 	MD := mkdir -p
 	RM := rm -rf
 	
-	CC_OUT := -o$(ONE_SPACE)
+	LD_OUT := -o $(ONE_SPACE)
 
 	OBJ_EXT := o
 	CUR_ROOT := $(shell pwd)
