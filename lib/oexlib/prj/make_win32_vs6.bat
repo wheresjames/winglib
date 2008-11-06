@@ -1,1 +1,0 @@
-start make.bat win32_vs6 "Visual Studio 6"
