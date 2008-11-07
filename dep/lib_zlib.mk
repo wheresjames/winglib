@@ -1,26 +1,32 @@
 
-# zlib
-
 default_target: all
-OFFSET_ROOT := ..
-include $(OFFSET_ROOT)/config.mk
 
-#CFLAGS := $(CFLAGS) -I$(LIBROOT)/
+#-------------------------------------------------------------------
+# Project
+#-------------------------------------------------------------------
+PRJ_NAME := zlib
+PRJ_TYPE := lib
+PRJ_INCS := 
+PRJ_LIBS := 
 
-NAME_PRJ := zlib
-TYPE_PRJ := lib
+PRJ_LIBROOT := ..
 
+#-------------------------------------------------------------------
+# Configure build
+#-------------------------------------------------------------------
+include $(PRJ_LIBROOT)/config.mk
+
+#-------------------------------------------------------------------
+# File locations
+#-------------------------------------------------------------------
 export LOC_TAG := def
 LOC_CXX_def := c
-LOC_INC_def := $(LIBROOT)/zlib
-LOC_SRC_def := $(LIBROOT)/zlib
-include $(OFFSET_ROOT)/build.mk
+LOC_INC_def := $(CFG_LIBROOT)/zlib
+LOC_SRC_def := $(CFG_LIBROOT)/zlib
+include $(PRJ_LIBROOT)/build.mk
 
-all: all_def $(PATH_EXE_def) 
-rebuild: rebuild_def $(PATH_EXE_def)
-rebuild: clean_def
-
-$(PATH_EXE_def): $(OBJECTS_def) $(DEPENDS)
-	$(AR) $(AFLAGS) $(AR_OUT)$@ $(OBJECTS_def)
-
+#-------------------------------------------------------------------
+# Execute the build
+#-------------------------------------------------------------------
+include $(PRJ_LIBROOT)/go.mk
 

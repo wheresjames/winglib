@@ -1,25 +1,32 @@
 
-# CxImage
-
 default_target: all
-OFFSET_ROOT := ..
-include $(OFFSET_ROOT)/config.mk
 
-CFLAGS := $(CFLAGS) -I$(LIBROOT)/zlib
+#-------------------------------------------------------------------
+# Project
+#-------------------------------------------------------------------
+PRJ_NAME := cximage
+PRJ_TYPE := lib
+PRJ_INCS := lib/zlib
+PRJ_LIBS := 
 
-NAME_PRJ := cximage
-TYPE_PRJ := lib
+PRJ_LIBROOT := ..
 
+#-------------------------------------------------------------------
+# Configure build
+#-------------------------------------------------------------------
+include $(PRJ_LIBROOT)/config.mk
+
+#-------------------------------------------------------------------
+# File locations
+#-------------------------------------------------------------------
 export LOC_TAG := def
-LOC_INC_def := $(LIBROOT)/CxImage
-LOC_SRC_def := $(LIBROOT)/CxImage
-include $(OFFSET_ROOT)/build.mk
+LOC_INC_def := $(CFG_LIBROOT)/CxImage
+LOC_SRC_def := $(CFG_LIBROOT)/CxImage
+include $(PRJ_LIBROOT)/build.mk
 
-all: all_def $(PATH_EXE_def) 
-rebuild: rebuild_def $(PATH_EXE_def)
-rebuild: clean_def
-
-$(PATH_EXE_def): $(OBJECTS_def) $(DEPENDS)
-	$(AR) $(AFLAGS) $(AR_OUT)$@ $(OBJECTS_def)
+#-------------------------------------------------------------------
+# Execute the build
+#-------------------------------------------------------------------
+include $(PRJ_LIBROOT)/go.mk
 
 

@@ -1,4 +1,5 @@
 
+# config.mk
 # Cross compiler config
 
 OS		 := linux
@@ -12,45 +13,48 @@ TOOLS	 := local
 #TOOLS	 := android
 #TOOLS	 := snapgear
 
-TOOLROOT := $(OFFSET_ROOT)/../..
-LIBROOT  := $(OFFSET_ROOT)/..
+CFG_ROOT := $(PRJ_LIBROOT)/../..
+CFG_TOOLROOT := $(PRJ_LIBROOT)/../..
+CFG_LIBROOT  := $(PRJ_LIBROOT)/..
 
 ifdef DBG
-CEXTRA	 := -g -DDEBUG -D_DEBUG
-LEXTRA	 := -g -rdynamic
-DPOSTFIX := _d
+CFG_CEXTRA	 := -g -DDEBUG -D_DEBUG
+CFG_LEXTRA	 := -g -rdynamic
+CFG_DPOSTFIX := _d
 else
-CEXTRA	 := -s
-LEXTRA	 := -s
+CFG_CEXTRA	 := -s
+CFG_LEXTRA	 := -s
 endif
 
 ifdef UNICODE
-CEXTRA := $(CEXTRA) -DUNICODE -D_UNICODE
+CFG_CEXTRA := $(CFG_CEXTRA) -DUNICODE -D_UNICODE
 endif
-
-ONESPACE := $(nullstring) # end of the line
 
 ifeq ($(OS),win32)
 
 	PLATFORM := windows
 
 	# Tools
-	PP := cl /nologo /DWIN32 /wd4996
-	LD := link /NOLOGO
-	CC := cl /nologo /DWIN32 /wd4996
-	AR := lib /nologo
-	DP := cl /nologo
-	MD := md
-	RM := rmdir /s /q
+	CFG_PP := cl /nologo /DWIN32 /wd4996
+	CFG_LD := link /NOLOGO
+	CFG_CC := cl /nologo /DWIN32 /wd4996
+	CFG_AR := lib /nologo
+	CFG_DP := cl /nologo
+	CFG_MD := md
+	CFG_RM := rmdir /s /q
 
-	CC_OUT := /Fo
-	LD_OUT := /OUT:
-	AR_OUT := /OUT:
+	CFG_CC_OUT := /Fo
+	CFG_LD_OUT := /OUT:
+	CFG_AR_OUT := /OUT:
 
-	CFLAGS := /EHsc /c
+	CFG_CFLAGS := /EHsc /c
 
-	OBJ_EXT := obj
-	CUR_ROOT := $(shell cd)
+	CFG_OBJ_EXT := obj
+	CFG_CUR_ROOT := $(shell cd)
+
+	CFG_LIB_PRE	 :=
+	CFG_LIB_POST := .lib
+	CFG_EXE_POST := .exe
 
 else
 
@@ -62,64 +66,73 @@ else
 		ifeq ($(TOOLS),snapgear)
 		
 			# Snapgear
-			TOOLPREFIX := $(TOOLROOT)/tools/snapgear/usr/local/bin/arm-linux-
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/tools/snapgear/usr/local/bin/arm-linux-
 
-			LFLAGS := $(LEXTRA) -static -lrt -pthread
-			CFLAGS := -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOUUID -DOEX_NOSHM $(CEXTRA)
-			SFLAGS := $(CFLAGS) -S -MMD
-			AFLAGS := cq
+			CFG_LFLAGS := $(CFG_LEXTRA) -static -lrt -pthread
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOUUID -DOEX_NOSHM
+			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
+			CFG_AFLAGS := cq
 			
 		else
 		
 			# Google Android
 			TOOLS := android
-			TOOLPREFIX := $(TOOLROOT)/tools/android/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-linux-gnueabi-
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/tools/android/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-linux-gnueabi-
 
-			LFLAGS := $(LEXTRA) -static -lrt -pthread 
-			CFLAGS := -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOUUID $(CEXTRA)
-			SFLAGS := $(CFLAGS) -S -MMD
-			AFLAGS := cq
+			CFG_LFLAGS := $(CFG_LEXTRA) -static -lrt -pthread 
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOUUID
+			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
+			CFG_AFLAGS := cq
 			
 		endif
 
 	else
 
 		# Local platform
-		TOOLPREFIX := 
+		CFG_TOOLPREFIX := 
 
-		LFLAGS := $(LEXTRA) -lrt -pthread -luuid
-		CFLAGS := -c -MMD $(CEXTRA) -DOEX_VFL1
-		SFLAGS := $(CFLAGS) -S -MMD
-		AFLAGS := cq
+		CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread -luuid
+		CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD
+		CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
+		CFG_AFLAGS := cq
 		
 	endif
 
 	# Tools
-	PP := $(TOOLPREFIX)g++
-	LD := $(TOOLPREFIX)g++
-	CC := $(TOOLPREFIX)gcc
-	AR := $(TOOLPREFIX)ar
-	DP := $(TOOLPREFIX)makedepend
-	MD := mkdir -p
-	RM := rm -rf
+	CFG_PP := $(CFG_TOOLPREFIX)g++
+	CFG_LD := $(CFG_TOOLPREFIX)g++
+	CFG_CC := $(CFG_TOOLPREFIX)gcc
+	CFG_AR := $(CFG_TOOLPREFIX)ar
+	CFG_DP := $(CFG_TOOLPREFIX)makedepend
+	CFG_MD := mkdir -p
+	CFG_RM := rm -rf
 	
-	LD_OUT := -o $(ONE_SPACE)
+	CFG_LD_OUT := -o $(nullstring)
 
-	OBJ_EXT := o
-	CUR_ROOT := $(shell pwd)
+	CFG_OBJ_EXT := o
+	CFG_CUR_ROOT := $(shell pwd)
+	
+	CFG_LIB_PRE	 := lib
+	CFG_LIB_POST := .a
 	
 endif
 
-BUILD_TYPE := $(PLATFORM)-$(OS)-$(PROC)-$(TOOLS)
+CFG_BUILD_TYPE := $(PLATFORM)-$(OS)-$(PROC)-$(TOOLS)
 
 ifdef UNICODE
-BUILD_TYPE := $(BUILD_TYPE)-unicode
+CFG_BUILD_TYPE := $(CFG_BUILD_TYPE)-unicode
 endif
 
 ifdef DBG
-BUILD_TYPE := $(BUILD_TYPE)-debug
+CFG_BUILD_TYPE := $(CFG_BUILD_TYPE)-debug
 endif
 
-BINROOT  := $(LIBROOT)/bin/$(BUILD_TYPE)
+CFG_BINROOT  := $(CFG_LIBROOT)/bin/$(CFG_BUILD_TYPE)
+
+ifdef PRJ_BINROOT
+CFG_OUTROOT := $(PRJ_BINROOT)/bin/$(CFG_BUILD_TYPE)
+else
+CFG_OUTROOT  := $(CFG_BINROOT)
+endif
 
 

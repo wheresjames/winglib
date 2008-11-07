@@ -1,30 +1,37 @@
 
-# j2k
-
 default_target: all
-OFFSET_ROOT := ..
-include $(OFFSET_ROOT)/config.mk
+
+#-------------------------------------------------------------------
+# Project
+#-------------------------------------------------------------------
+PRJ_NAME := j2k
+PRJ_TYPE := lib
+PRJ_INCS := 
+PRJ_LIBS := 
 
 ifeq ($(OS),win32)
 CFLAGS := $(CFLAGS) /DLIBJ2K_EXPORTS
 endif
 
-#CFLAGS := $(CFLAGS) -I$(LIBROOT)/
+PRJ_LIBROOT := ..
 
-NAME_PRJ := j2k
-TYPE_PRJ := lib
+#-------------------------------------------------------------------
+# Configure build
+#-------------------------------------------------------------------
+include $(PRJ_LIBROOT)/config.mk
 
+#-------------------------------------------------------------------
+# File locations
+#-------------------------------------------------------------------
 export LOC_TAG := def
 LOC_CXX_def := c
-LOC_INC_def := $(LIBROOT)/j2k
-LOC_SRC_def := $(LIBROOT)/j2k
-include $(OFFSET_ROOT)/build.mk
+LOC_INC_def := $(CFG_LIBROOT)/j2k
+LOC_SRC_def := $(CFG_LIBROOT)/j2k
+include $(PRJ_LIBROOT)/build.mk
 
-all: all_def $(PATH_EXE_def) 
-rebuild: rebuild_def $(PATH_EXE_def)
-rebuild: clean_def
-
-$(PATH_EXE_def): $(OBJECTS_def) $(DEPENDS)
-	$(AR) $(AFLAGS) $(AR_OUT)$@ $(OBJECTS_def)
+#-------------------------------------------------------------------
+# Execute the build
+#-------------------------------------------------------------------
+include $(PRJ_LIBROOT)/go.mk
 
 

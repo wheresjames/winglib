@@ -1,29 +1,32 @@
 
-# irrlicht
-
 default_target: all
-OFFSET_ROOT := ..
-include $(OFFSET_ROOT)/config.mk
 
-ifeq ($(OS),win32)
-CFLAGS := $(CFLAGS) /DIRRLICHT_EXPORTS
-endif
+#-------------------------------------------------------------------
+# Project
+#-------------------------------------------------------------------
+PRJ_NAME := irrlicht
+PRJ_TYPE := lib
+PRJ_INCS := lib/irrlicht/source/Irrlicht/zlib
+PRJ_LIBS := 
 
-CFLAGS := $(CFLAGS) -I$(LIBROOT)/irrlicht/source/Irrlicht/zlib
+PRJ_LIBROOT := ..
 
-NAME_PRJ := irrlicht
-TYPE_PRJ := lib
+#-------------------------------------------------------------------
+# Configure build
+#-------------------------------------------------------------------
+include $(PRJ_LIBROOT)/config.mk
 
+#-------------------------------------------------------------------
+# File locations
+#-------------------------------------------------------------------
 export LOC_TAG := def
-LOC_INC_def := $(LIBROOT)/irrlicht/include
-LOC_SRC_def := $(LIBROOT)/irrlicht/source/Irrlicht
-include $(OFFSET_ROOT)/build.mk
+LOC_INC_def := $(CFG_LIBROOT)/irrlicht/include
+LOC_SRC_def := $(CFG_LIBROOT)/irrlicht/source/Irrlicht
+include $(PRJ_LIBROOT)/build.mk
 
-all: all_def $(PATH_EXE_def) 
-rebuild: rebuild_def $(PATH_EXE_def)
-rebuild: clean_def
-
-$(PATH_EXE_def): $(OBJECTS_def) $(DEPENDS)
-	$(AR) $(AFLAGS) $(AR_OUT)$@ $(OBJECTS_def)
+#-------------------------------------------------------------------
+# Execute the build
+#-------------------------------------------------------------------
+include $(PRJ_LIBROOT)/go.mk
 
 

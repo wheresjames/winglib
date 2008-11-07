@@ -1,69 +1,67 @@
 
-#-------------------------------------------------------------------
-# Vars
-#-------------------------------------------------------------------
+# build.mk
 
-ifndef FILE_EXE		 
-	ifeq ($(TYPE_PRJ),lib)
-		ifeq ($(OS),win32)
-			FILE_EXE := $(NAME_PRJ)$(DPOSTFIX).lib
-		else
-			FILE_EXE := lib$(NAME_PRJ)$(DPOSTFIX).a
-		endif
+ifndef BLD_FILE_EXE
+	ifdef PRJ_FILE_EXE		 
+		BLD_FILE_EXE := $(PRJ_FILE_EXE)
 	else
-		ifeq ($(OS),win32)
-			FILE_EXE := $(NAME_PRJ)$(DPOSTFIX).exe
+		ifeq ($(PRJ_TYPE),lib)
+			BLD_FILE_EXE := $(CFG_LIB_PRE)$(PRJ_NAME)$(CFG_DPOSTFIX)$(CFG_LIB_POST)
 		else
-			FILE_EXE := $(NAME_PRJ)$(DPOSTFIX)
+			BLD_FILE_EXE := $(CFG_EXE_PRE)$(PRJ_NAME)$(CFG_DPOSTFIX)$(CFG_EXE_POST)
 		endif
 	endif
+	BLD_PATH_EXE := $(CFG_OUTROOT)/$(BLD_FILE_EXE)	
 endif
 
 ifndef LOC_CXX_$(LOC_TAG)
 	LOC_CXX_$(LOC_TAG) := cpp
 endif
+
 ifndef LOC_H_$(LOC_TAG)
 	LOC_H_$(LOC_TAG) := h
 endif
 
 ifeq ($(LOC_CXX_$(LOC_TAG)),c)
-COMPILER := $(CC)
+BLD_COMPILER := $(CFG_CC)
 else
-COMPILER := $(PP)
+BLD_COMPILER := $(CFG_PP)
 endif
 
 # Using full paths helps IDE editors to locate the file when there's an error ;)
 ifdef LOC_SRC_$(LOC_TAG)
-PATH_SRC_$(LOC_TAG) := $(CUR_ROOT)/$(LOC_SRC_$(LOC_TAG))
+BLD_PATH_SRC_$(LOC_TAG) := $(CFG_CUR_ROOT)/$(LOC_SRC_$(LOC_TAG))
 else
-PATH_SRC_$(LOC_TAG) := $(CUR_ROOT)
+BLD_PATH_SRC_$(LOC_TAG) := $(CFG_CUR_ROOT)
 endif
 
 ifdef LOC_INC_$(LOC_TAG)
-PATH_INC_$(LOC_TAG) := $(CUR_ROOT)/$(LOC_INC_$(LOC_TAG))
+BLD_PATH_INC_$(LOC_TAG) := $(CFG_CUR_ROOT)/$(LOC_INC_$(LOC_TAG))
 else
-PATH_INC_$(LOC_TAG) := $(CUR_ROOT)
+BLD_PATH_INC_$(LOC_TAG) := $(CFG_CUR_ROOT)
 endif
 
 ifdef LOC_OUT_$(LOC_TAG)
-PATH_BIN_$(LOC_TAG) := $(BINROOT)/_$(NAME_PRJ)/$(LOC_OUT_$(LOC_TAG))
+BLD_PATH_BIN_$(LOC_TAG) := $(CFG_OUTROOT)/_$(PRJ_NAME)/$(LOC_OUT_$(LOC_TAG))
 else
-PATH_BIN_$(LOC_TAG) := $(BINROOT)/_$(NAME_PRJ)
+BLD_PATH_BIN_$(LOC_TAG) := $(CFG_OUTROOT)/_$(PRJ_NAME)
 endif
 
-PATH_OBJ_$(LOC_TAG) := $(PATH_BIN_$(LOC_TAG))/obj
-PATH_EXE_$(LOC_TAG) := $(BINROOT)/$(FILE_EXE)
-PATH_INS_$(LOC_TAG) := /usr/share/$(NAME_PRJ)
-PATH_LNK_$(LOC_TAG) := /usr/bin
+BLD_PATH_OBJ_$(LOC_TAG) := $(BLD_PATH_BIN_$(LOC_TAG))/obj
+BLD_PATH_INS_$(LOC_TAG) := /usr/share/$(PRJ_NAME)
+BLD_PATH_LNK_$(LOC_TAG) := /usr/bin
 
 
 #-------------------------------------------------------------------
 # Sources
 #-------------------------------------------------------------------
-SOURCES_$(LOC_TAG) 	:= $(wildcard $(PATH_SRC_$(LOC_TAG))/*.$(LOC_CXX_$(LOC_TAG)))
-OBJECTS_$(LOC_TAG) 	:= $(subst $(PATH_SRC_$(LOC_TAG))/,$(PATH_OBJ_$(LOC_TAG))/, $(SOURCES_$(LOC_TAG):.$(LOC_CXX_$(LOC_TAG))=.$(OBJ_EXT)) )
+BLD_SOURCES_$(LOC_TAG) 	:= $(wildcard $(BLD_PATH_SRC_$(LOC_TAG))/*.$(LOC_CXX_$(LOC_TAG)))
+BLD_OBJECTS_$(LOC_TAG) 	:= $(subst $(BLD_PATH_SRC_$(LOC_TAG))/,$(BLD_PATH_OBJ_$(LOC_TAG))/, $(BLD_SOURCES_$(LOC_TAG):.$(LOC_CXX_$(LOC_TAG))=.$(CFG_OBJ_EXT)) )
+BLD_INCS			    := -I$(BLD_PATH_INC_$(LOC_TAG)) $(foreach inc,$(PRJ_INCS), -I$(CFG_ROOT)/$(inc))
 
-include $(wildcard $(PATH_OBJ_$(LOC_TAG))/*.d)
+BLD_OBJECTS_TOTAL := $(BLD_OBJECTS_TOTAL) $(BLD_OBJECTS_$(LOC_TAG))
+
+include $(wildcard $(BLD_PATH_OBJ_$(LOC_TAG))/*.d)
 
 #-------------------------------------------------------------------
 # Options
@@ -73,25 +71,30 @@ all_$(LOC_TAG): setup_$(LOC_TAG)
 
 rebuild_$(LOC_TAG): clean_$(LOC_TAG) all_$(LOC_TAG)
 
-setup_$(LOC_TAG): $(PATH_OBJ_$(LOC_TAG))
+setup_$(LOC_TAG): $(BLD_PATH_OBJ_$(LOC_TAG))
 
 ifeq ($(OS),win32)
 
-$(PATH_OBJ_$(LOC_TAG)):
-	$(MD) $(subst /,\,$@)
+$(BLD_PATH_OBJ_$(LOC_TAG)):
+	$(CFG_MD) $(subst /,\,$@)
 	
 clean_$(LOC_TAG):
-	- $(RM) "$(subst /,\,$(PATH_OBJ_$(LOC_TAG)))"
+	- $(CFG_RM) "$(subst /,\,$(PATH_OBJ_$(LOC_TAG)))"
 	
 else
 
-$(PATH_OBJ_$(LOC_TAG)):
-	$(MD) $@
+$(BLD_PATH_OBJ_$(LOC_TAG)):
+	$(CFG_MD) $@
 	
 clean_$(LOC_TAG):
-	- $(RM) $(PATH_OBJ_$(LOC_TAG))
+	- $(CFG_RM) $(BLD_PATH_OBJ_$(LOC_TAG))
 
 endif
+
+BLD_ALL := $(BLD_ALL) all_$(LOC_TAG)
+BLD_REBUILD := $(BLD_REBUID) rebuild_$(LOC_TAG)
+BLD_SETUP := $(BLD_SETUP) setup_$(LOC_TAG)
+BLD_CLEAN := $(BLD_CLEAN) clean_$(LOC_TAG)
 
 #-------------------------------------------------------------------
 # Build
@@ -99,14 +102,13 @@ endif
 
 ifeq ($(OS),win32)
 
-$(PATH_OBJ_$(LOC_TAG))/%.$(OBJ_EXT) : $(PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
-	$(COMPILER) $(CFLAGS) -I$(PATH_INC_$(LOC_TAG)) $< $(CC_OUT)$@
+$(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
+	$(BLD_COMPILER) $(CFG_CFLAGS) $(BLD_INCS) $< $(CFG_CC_OUT)$@
 
 else
 
-$(PATH_OBJ_$(LOC_TAG))/%.$(OBJ_EXT) : $(PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
-	$(COMPILER) $(CFLAGS) -I$(PATH_INC_$(LOC_TAG)) $< -o $@
-#	- $(COMPILER) $(SFLAGS) $< -o $(subst .o,.asm, $@)
+$(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
+	$(BLD_COMPILER) $(CFG_CFLAGS) $(BLD_INCS) $< -o $@
 
 endif
 
