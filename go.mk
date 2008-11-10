@@ -1,10 +1,20 @@
 
 # go.mk
 
-GO_LIBS	 := $(foreach lib,$(PRJ_LIBS),-l$(lib)$(CFG_DPOSTFIX))
-GO_LIBS	 := $(GO_LIBS) $(foreach lib,$(PRJ_OSLB),-l$(lib))
+ifndef PRJ_OSLB
+PRJ_OSLB :=	$(CFG_STDLIBS)
+endif
 
+ifeq ($(OS),win32)
+GO_LIBS	 := $(foreach lib,$(PRJ_LIBS), $(CFG_LIB_PRE)$(lib)$(CFG_DPOSTFIX)$(CFG_LIB_POST))
+GO_LIBS	 := $(GO_LIBS) $(PRJ_OSLB)
+GO_LIBPATHS := /LIBPATH:$(CFG_BINROOT)
+else
+GO_LIBS	 := $(foreach lib,$(PRJ_LIBS),-l$(lib)$(CFG_DPOSTFIX))
+GO_LIBS	 := $(GO_LIBS) $(foreach lib,$(PRJ_OSLB), -l$(lib))
 GO_LIBPATHS := -L$(CFG_BINROOT)
+endif
+
 ifneq ($(CFG_BINROOT),$(CFG_OUTROOT))
 	GO_LIBPATHS := $(GO_LIBPATHS) -L$(CFG_OUTROOT)
 endif

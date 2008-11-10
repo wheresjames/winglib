@@ -8,12 +8,9 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := test
 PRJ_TYPE := exe
-PRJ_INCS := lib/winglib/lib/oexlib
+PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib
-
-ifeq ($(OS),win32)
-PRJ_OSLB :=	ole32.lib user32.lib
-endif
+PRJ_OSLB := $(CFG_STDLIBS)
 
 PRJ_LIBROOT := ../..
 

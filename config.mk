@@ -17,15 +17,6 @@ CFG_ROOT := $(PRJ_LIBROOT)/../..
 CFG_TOOLROOT := $(PRJ_LIBROOT)/../..
 CFG_LIBROOT  := $(PRJ_LIBROOT)/..
 
-ifdef DBG
-CFG_CEXTRA	 := -g -DDEBUG -D_DEBUG
-CFG_LEXTRA	 := -g -rdynamic
-CFG_DPOSTFIX := _d
-else
-CFG_CEXTRA	 := -s
-CFG_LEXTRA	 := -s
-endif
-
 ifdef UNICODE
 CFG_CEXTRA := $(CFG_CEXTRA) -DUNICODE -D_UNICODE
 endif
@@ -33,6 +24,18 @@ endif
 ifeq ($(OS),win32)
 
 	PLATFORM := windows
+
+	ifdef DBG
+		CFG_CEXTRA	 := /DDEBUG /D_DEBUG /D_MT /MTd
+		CFG_LEXTRA	 := 
+		CFG_DPOSTFIX := _d
+		CFG_STDLIBS	 := ole32.lib user32.lib
+	else
+		CFG_CEXTRA	 := /MT		
+		CFG_LEXTRA	 := 
+		CFG_STDLIBS	 := ole32.lib user32.lib
+	endif
+
 
 	# Tools
 	CFG_PP := cl /nologo /DWIN32 /wd4996
@@ -46,8 +49,10 @@ ifeq ($(OS),win32)
 	CFG_CC_OUT := /Fo
 	CFG_LD_OUT := /OUT:
 	CFG_AR_OUT := /OUT:
+	CFG_CC_INC := /I
 
-	CFG_CFLAGS := /EHsc /c
+	CFG_CFLAGS := /EHsc /c $(CFG_CEXTRA)
+	CFG_LFLAGS := $(CFG_LEXTRA)
 
 	CFG_OBJ_EXT := obj
 	CFG_CUR_ROOT := $(shell cd)
@@ -59,6 +64,15 @@ ifeq ($(OS),win32)
 else
 
 	PLATFORM := posix
+
+	ifdef DBG
+		CFG_CEXTRA	 := -g -DDEBUG -D_DEBUG
+		CFG_LEXTRA	 := -g -rdynamic
+		CFG_DPOSTFIX := _d
+	else
+		CFG_CEXTRA	 := -s
+		CFG_LEXTRA	 := -s
+	endif
 
 	# Arm compiler
 	ifeq ($(PROC),arm)
@@ -111,6 +125,8 @@ else
 
 	CFG_OBJ_EXT := o
 	CFG_CUR_ROOT := $(shell pwd)
+	
+	CFG_CC_INC := -I
 	
 	CFG_LIB_PRE	 := lib
 	CFG_LIB_POST := .a
