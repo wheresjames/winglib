@@ -54,7 +54,6 @@ oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT 
 			// Show log file location
 			os::CSys::printf( oexStrToMb( oexGetModulePath( oexT( "debug.log\n" ) ) ).Ptr() );
 #endif
-
 			// Open new log file
 			if ( !m_file.CreateAlways( oexGetModulePath( oexT( "debug.log" ) ).Ptr() ).IsOpen() )
 			{	os::CSys::InterlockedDecrement( &m_lInLog );

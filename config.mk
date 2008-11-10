@@ -45,6 +45,7 @@ ifeq ($(OS),win32)
 	CFG_DP := cl /nologo
 	CFG_MD := md
 	CFG_RM := rmdir /s /q
+	CFG_DEL:= del /f /q
 
 	CFG_CC_OUT := /Fo
 	CFG_LD_OUT := /OUT:
@@ -120,7 +121,9 @@ else
 	CFG_DP := $(CFG_TOOLPREFIX)makedepend
 	CFG_MD := mkdir -p
 	CFG_RM := rm -rf
+	CFG_DEL:= rm -f
 	
+	CFG_CC_OUT := -o $(nullstring)
 	CFG_LD_OUT := -o $(nullstring)
 
 	CFG_OBJ_EXT := o

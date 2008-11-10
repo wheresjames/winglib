@@ -101,7 +101,7 @@ BLD_CLEAN := $(BLD_CLEAN) clean_$(LOC_TAG)
 #-------------------------------------------------------------------
 
 $(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
+	- $(CFG_DEL) $@
 	$(BLD_COMPILER) $(CFG_CFLAGS) $(BLD_INCS) $< $(CFG_CC_OUT)$@
-
 
 

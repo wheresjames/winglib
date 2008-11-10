@@ -61,7 +61,7 @@ public:
     CLog()
     {
     	m_lInLog = 0;
-    	m_uLevel = eWarning;
+    	m_uLevel = eNotice;
     }
 
     /// Destructor

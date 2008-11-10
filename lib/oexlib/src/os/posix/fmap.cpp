@@ -51,22 +51,19 @@ CFMap::t_HFILEMAP CFMap::Create( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oe
         return CFMap::c_Failed;
 	} // end if
 
-	int fd = (int)x_hFile; //dup( (int)x_hFile );
+//	int fd = (int)x_hFile;
+	int fd = dup( (int)x_hFile );
 	if ( 0 > fd )
 	{	oexERROR( -1, oexT( "dup() returned error : unable to duplicate file handle" ) );
 		return CFMap::c_Failed;
 	} // end if
 
-	printf( "before mmap()\n" );
-
 	oexPVOID pMem = mmap( oexNULL, x_llSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, x_llOffset );
 	if ( c_Failed == pMem )
-	{	oexERROR( errno, CStr().Fmt( oexT( "mmap failed to allocate block : handle=%d, size=%d" ), fd, (int)x_llSize ) );
+	{	oexERROR( errno, CStr().Fmt( oexT( "mmap failed to allocate block : handle=%d, size=%d, offset=%d" ), fd, (int)x_llSize, (int)x_llOffset ) );
 		close( fd );
 		return oexNULL;
 	} // end if
-
-	printf( "after mmap()\n" );
 
 	if ( x_pMem )
 		*x_pMem = pMem;
