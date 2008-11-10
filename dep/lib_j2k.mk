@@ -9,10 +9,6 @@ PRJ_TYPE := lib
 PRJ_INCS := 
 PRJ_LIBS := 
 
-ifeq ($(OS),win32)
-CFLAGS := $(CFLAGS) /DLIBJ2K_EXPORTS
-endif
-
 PRJ_LIBROOT := ..
 
 #-------------------------------------------------------------------
@@ -23,6 +19,10 @@ include $(PRJ_LIBROOT)/config.mk
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------
+ifeq ($(OS),win32)
+CFG_CFLAGS := $(CFG_CFLAGS) /DLIBJ2K_EXPORTS
+endif
+
 export LOC_TAG := def
 LOC_CXX_def := c
 LOC_INC_def := $(CFG_LIBROOT)/j2k

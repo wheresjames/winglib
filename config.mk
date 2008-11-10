@@ -26,12 +26,12 @@ ifeq ($(OS),win32)
 	PLATFORM := windows
 
 	ifdef DBG
-		CFG_CEXTRA	 := /DDEBUG /D_DEBUG /D_MT /MTd
+		CFG_CEXTRA	 := /DDEBUG /D_DEBUG /D_MT /MTd $(CFG_CEXTRA)
 		CFG_LEXTRA	 := 
 		CFG_DPOSTFIX := _d
 		CFG_STDLIBS	 := ole32.lib user32.lib
 	else
-		CFG_CEXTRA	 := /MT		
+		CFG_CEXTRA	 := /MT $(CFG_CEXTRA)
 		CFG_LEXTRA	 := 
 		CFG_STDLIBS	 := ole32.lib user32.lib
 	endif
@@ -66,11 +66,11 @@ else
 	PLATFORM := posix
 
 	ifdef DBG
-		CFG_CEXTRA	 := -g -DDEBUG -D_DEBUG
+		CFG_CEXTRA	 := -g -DDEBUG -D_DEBUG $(CFG_CEXTRA) 
 		CFG_LEXTRA	 := -g -rdynamic
 		CFG_DPOSTFIX := _d
 	else
-		CFG_CEXTRA	 := -s
+		CFG_CEXTRA	 := -s $(CFG_CEXTRA) 
 		CFG_LEXTRA	 := -s
 	endif
 

@@ -6,7 +6,7 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := cximage
 PRJ_TYPE := lib
-PRJ_INCS := lib/zlib
+PRJ_INCS := zlib
 PRJ_LIBS := 
 
 PRJ_LIBROOT := ..

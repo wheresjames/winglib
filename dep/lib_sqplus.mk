@@ -6,7 +6,7 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := sqplus
 PRJ_TYPE := lib
-PRJ_INCS := lib/SqPlus/include
+PRJ_INCS := SqPlus/include
 PRJ_LIBS :=
 
 PRJ_LIBROOT := ..
