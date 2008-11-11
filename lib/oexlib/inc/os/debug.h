@@ -98,8 +98,11 @@ public:
 		\param [in] x_pFunction	-	Function generating the break
 		\param [in] x_pStr		-	String describing the operation
 									that caused the break.
+		\param [in] x_nRes		-	Result of the espression causing
+									the error code.
+		\param [in] x_nErr		-	Related error code.
 	*/
-	static void Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pStr );
+	static void Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pStr, oexINT x_nRes = 0, oexINT x_nErr = 0 );
 
 	//==============================================================
 	// Break()
@@ -114,12 +117,15 @@ public:
 									break.
 		\param [in] x_pStr		-	String describing the operation
 									that caused the break.
+		\param [in] x_nRes		-	Result of the espression causing
+									the error code.
+		\param [in] x_nErr		-	Related error code.
 
 		\return
 
 		\see
 	*/
-	static void Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr );
+	static void Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr, oexINT x_nRes = 0, oexINT x_nErr = 0 );
 
 	//==============================================================
 	// GetInstanceHandle()

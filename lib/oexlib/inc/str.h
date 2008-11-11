@@ -958,7 +958,7 @@ public:
 */
 	TStr& ToWc( oexCONST TStr< oexCHAR8 > &x_sStr )
 	{
-		if ( !oexCHECK( sizeof( T ) == sizeof( wchar_t ) ) )
+		if ( !oexCHECK( sizeof( T ) == sizeof( oexCHARW ) ) )
 			return *this;
 
         oexUINT uLen = x_sStr.Length();
@@ -992,7 +992,7 @@ public:
 
 	TStr& ToMb( oexCONST TStr< oexCHARW > &x_sStr )
 	{
-		if ( !oexCHECK( sizeof( T ) == sizeof( char ) ) )
+		if ( !oexCHECK( sizeof( T ) == sizeof( oexCHAR8 ) ) )
 			return *this;
 
         oexUINT uLen = x_sStr.Length();
@@ -1456,6 +1456,12 @@ public:
 		return *this;
 	}
 
+	/// Returns the offset of the first character in pChars found in the string
+	/// Returns -1 if no characters found
+	oexINT FindChars( oexCONST T* pChars )
+	{	return str::FindCharacters( Ptr(), Length(), pChars, zstr::Length( pChars ) );
+	}
+
 	/// Skips any characters not in pChars and removes
 	/// them from the string
 	TStr& Find( oexCONST T* pChars )
@@ -1728,6 +1734,15 @@ public:
     TStr GetFileName()
     {   TStr str( *this );
         return str.RParse( oexTT( T, "\\/" ) )++;
+    }
+
+    /// Returns the file extension of the file path
+    TStr GetFileExtension()
+    {	TStr sFilename = GetFileName();
+		oexINT nOffset = sFilename.FindChars( oexTT( T, "." ) );
+		if ( 0 > nOffset )
+			return TStr();
+		return sFilename.LTrim( nOffset + 1 );
     }
 
 private:

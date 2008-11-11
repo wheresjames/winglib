@@ -91,6 +91,8 @@ template < const int T > class oex_static_assert{};
 #	define oexVERIFY_PTR_NULL_OK( ptr )     oexVERIFY( oexVerifyPtrNullOk( ptr ) )
 #	define oexVERIFY_PTR( ptr )             oexVERIFY( OEX_NAMESPACE::oexVerifyPtr( ptr ) )
 #	define oexVERIFY( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexTEXT( oexFUNCTION ), oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
+#	define oexVERIFYPOS( s )	            ({ OEX_NAMESPACE::oexRESULT r = s; ( 0 <= r ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexTEXT( oexFUNCTION ), oexT( #s ), r ), OEX_NAMESPACE::oexFALSE ); })
+#	define oexVERIFYZERO( s )	            ({ OEX_NAMESPACE::oexRESULT r = s; ( !r ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexTEXT( oexFUNCTION ), oexT( #s ), r ), OEX_NAMESPACE::oexFALSE ); })
 
 #ifdef oexDEBUG
 

@@ -2077,7 +2077,7 @@ oex::oexRESULT Test_CCapture()
 		if ( !oexVERIFY( cCapture.GetBuffer() && cCapture.GetBufferSize() ) )
 			return -5;
 
-		oex::CImage img;
+		oex::CDib img;
 		if ( !oexVERIFY( img.Create( oexNULL, oexNULL, 1312, 1024, 24, 1 ) ) )
 			return -6;
 
@@ -2092,7 +2092,7 @@ oex::oexRESULT Test_CCapture()
 
 		printf( "w=%d, h=%d, Buffer Size = %d, Image Size = %d\n", cCapture.GetWidth(), cCapture.GetHeight(), cCapture.GetBufferSize(), nImageSize );
 
-		if ( !oexVERIFY( oex::CImage::SaveDibFile( oex::CStr().Fmt( oexT( "./img_%d.bmp" ), 0 ).Ptr(),
+		if ( !oexVERIFY( oex::CDib::SaveDibFile( oex::CStr().Fmt( oexT( "./img_%d.bmp" ), 0 ).Ptr(),
 												   img.GetImageHeader(), img.GetBuffer(), nImageSize ) ) ) // cCapture.GetBufferSize() ) ) )
 			return -7;
 

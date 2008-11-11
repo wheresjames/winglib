@@ -350,6 +350,21 @@ namespace cmn
             SetBit( dst, doff++, GetBit( src, soff++ ) );
     }
 
+	template < typename T >
+		oexINT RW( T *pRect )
+	{	return pRect->right - pRect->left; }
+
+	template < typename T >
+		oexINT RW( T pRect )
+	{	return pRect.right - pRect.left; }
+
+	template < typename T >
+		oexINT RH( T *pRect )
+	{	return pRect->bottom - pRect->top; }
+
+	template < typename T >
+		oexINT RH( T pRect )
+	{	return pRect.bottom - pRect.top; }
 };
 
 

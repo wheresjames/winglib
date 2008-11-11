@@ -83,7 +83,7 @@ void CDebug::Break()
 #endif
 }
 
-void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pStr )
+void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pStr, oexINT x_nRes, oexINT x_nErr )
 {
 	CStr sPath;
 
@@ -97,10 +97,10 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 
 	} // end if
 
-	Break( x_nType, x_pFile, x_uLine, x_pFunction, sPath.Ptr(), x_pStr );
+	Break( x_nType, x_pFile, x_uLine, x_pFunction, sPath.Ptr(), x_pStr, x_nRes, x_nErr );
 }
 
-void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr )
+void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr, oexINT x_nRes, oexINT x_nErr )
 {
 	CStr str;
 
@@ -113,6 +113,10 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 	str << oexT( "Line       : " ) << x_uLine << oexNL;
 	str << oexT( "Function   : " ) << ( oexCHECK_PTR( x_pFunction ) ? x_pFunction : oexT( "" ) ) << oexNL;
 	str << oexT( "Expression : " ) << CStr( x_pStr ).Replace( oexT( "%" ), oexT( "%%" ) ).Ptr() << oexNL;
+	if ( x_nRes )
+		str << oexT( "Result     : " ) << x_nRes << oexT( " sys:\"" ) << os::CTrace::GetErrorMsg( x_nRes ).Replace( oexT( "%" ), oexT( "%%" ) ).Ptr() << oexT( "\"" ) << oexNL;
+	if ( x_nErr )
+		str << oexT( "Error Code : " ) << x_nErr << oexT( " sys:\"" ) << os::CTrace::GetErrorMsg( x_nErr ).Replace( oexT( "%" ), oexT( "%%" ) ).Ptr() << oexT( "\"" ) << oexNL;
 
 	printf( oexStrToMbPtr( str.Ptr() ) );
 	oexERROR( 0, str.Ptr() );

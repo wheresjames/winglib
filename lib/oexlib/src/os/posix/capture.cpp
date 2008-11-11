@@ -78,6 +78,7 @@ public:
 		m_nBpp = 24;
 		m_fFps = 0;
 		m_nBufferSize = 0;
+		m_pFrameBuffer = 0;
 	}
 
 	/// Destructor
@@ -158,6 +159,7 @@ public:
 		m_nBpp = 24;
 		m_fFps = 0;
 		m_nBufferSize = 0;
+		m_pFrameBuffer = 0;
 	}
 
 public:
@@ -230,7 +232,7 @@ public:
 			// Allocate shared memory
 			m_image.PlainShare( oexTRUE );
 			m_image.SetShareHandle( (os::CFMap::t_HFILEMAP)m_nFd );
-			if ( !m_image.OexNew( lImageSize ).Ptr() )
+			if ( !oexCHECK_PTR( m_image.OexNew( lImageSize ).Ptr() ) )
 			{	oexERROR( errno, CStr().Fmt( oexT( "Failed to allocate shared image buffer size=%d : %d x %d x %d" ), lImageSize, m_nWidth, m_nHeight, m_nBpp ) );
 				m_nIoMode = eIoReadWrite;
 			} // end if
@@ -516,7 +518,7 @@ public:
 */
 			// Buffer size
 			m_nBufferSize = buf.length;
-//			printf( oexT( "offset = %d\n" ), (int)buf.m.offset );
+			printf( oexT( "offset = %d\n" ), (int)buf.m.offset );
 
 			// Allocate shared memory
 			m_image.PlainShare( oexTRUE );
@@ -608,14 +610,23 @@ public:
 
 	/// Returns a pointer to the video buffer
 	oexPVOID GetBuffer()
-	{	return m_image.Ptr(); } //return m_pFrameBuffer; } // return m_image.Ptr(); }
+	{
+		if ( m_pFrameBuffer )
+			return m_pFrameBuffer;
+
+		return m_image.Ptr();
+	}
 
 	/// +++ Should return the size of the video buffer
 	oexINT GetImageSize()
 	{	return CImage::GetScanWidth( m_nWidth, m_nBpp ) * cmn::Abs( m_nHeight ); }
 
 	oexINT GetBufferSize()
-	{	return m_nBufferSize; }
+	{
+		if ( m_pFrameBuffer )
+			return m_nBufferSize;
+		return GetImageSize();
+	}
 
 	/// Returns an image object
 	CImage* GetImage()

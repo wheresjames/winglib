@@ -51,8 +51,8 @@ CFMap::t_HFILEMAP CFMap::Create( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oe
         return CFMap::c_Failed;
 	} // end if
 
-//	int fd = (int)x_hFile;
-	int fd = dup( (int)x_hFile );
+	int fd = (int)x_hFile;
+//	int fd = dup( (int)x_hFile );
 	if ( 0 > fd )
 	{	oexERROR( -1, oexT( "dup() returned error : unable to duplicate file handle" ) );
 		return CFMap::c_Failed;

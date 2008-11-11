@@ -470,6 +470,7 @@ namespace os
 #include "inc/thread_safe.h"
 #include "inc/str.h"
 #include "inc/auto_str.h"
+#include "inc/dib.h"
 
 #include "inc/list.h"
 #include "inc/asso_list.h"

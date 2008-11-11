@@ -78,6 +78,9 @@
 // Enable zip file support
 #define OEX_ENABLE_ZIP
 
+// Enable image support, requires CxImage
+#define OEX_ENABLE_XIMAGE
+
 #ifdef OEX_WIN32
 #	define oexCDECL	_cdecl
 #else

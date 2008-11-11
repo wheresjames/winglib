@@ -198,7 +198,6 @@ public:
     	m_hFile = oexNULL;
     	m_llOpenSize = 0;
         m_bExisting = oexFALSE;
-        m_llOffset = 0;
 	}
 
 	//==============================================================

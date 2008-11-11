@@ -52,10 +52,10 @@ oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT 
 		{
 #if defined( oexDEBUG )
 			// Show log file location
-			os::CSys::printf( oexStrToMb( oexGetModulePath( oexT( "debug.log\n" ) ) ).Ptr() );
+			os::CSys::printf( oexStrToMb( ( oexGetModuleFileName() += oexT( ".debug.log\n" ) ) ).Ptr() );
 #endif
 			// Open new log file
-			if ( !m_file.CreateAlways( oexGetModulePath( oexT( "debug.log" ) ).Ptr() ).IsOpen() )
+			if ( !m_file.CreateAlways( ( oexGetModuleFileName() += oexT( ".debug.log" ) ).Ptr() ).IsOpen() )
 			{	os::CSys::InterlockedDecrement( &m_lInLog );
 				return x_uErr;
 			} // end if
@@ -73,6 +73,7 @@ oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT 
 		if ( !oexCHECK_PTR( x_pFunction ) )
 			x_pFunction = oexT( "???" );
 
+		CStr sLevel;
 		oexCSTR pLevel = oexT( "" );
 		if ( eHalt == x_uLevel )
 			pLevel = oexT( "Halt" );
@@ -82,15 +83,19 @@ oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT 
 			pLevel = oexT( "Warning" );
 		else if ( eNotice == x_uLevel )
 			pLevel = oexT( "Notice" );
+		else
+			pLevel = sLevel.Fmt( "%d", (int)x_uLevel ).Ptr();
 
 		// Ensure error is not null
 		if ( !oexCHECK_PTR( x_pErr ) || !*x_pErr )
 			x_pErr = oexT( "Unspecified" );
 
 		// Write out the error line '<file>:<line> : <function>() : <error level> : <error string>'
-		m_file.Write( CStr().Fmt( oexT( "%s:(%u) : %s() : %s  : %s\r\n" ),
+		m_file.Write( CStr().Fmt( oexT( "%s:(%u)%s : %s : %s\r\n" ),
 					              oexStrToMbPtr( x_pFile ), x_nLine,
-					              oexStrToMbPtr( x_pFunction ),
+					              ( ( x_pFunction && *x_pFunction )
+					              	? oexStrToMbPtr( CStr().Fmt( oexT( " : %s()" ), oexStrToMbPtr( x_pFunction ) ).Ptr() )
+					              	: "" ),
 					              oexStrToMbPtr( pLevel ),
 					              oexStrToMbPtr( x_pErr ) ) );
 
