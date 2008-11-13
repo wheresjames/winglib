@@ -168,8 +168,8 @@
 		;
 
 */
-#define oexRETRY( m, s, w, r )		( { oexUINT um = m, max = (oexUINT)( um ? um : 1 ); do { s; } while ( --max && w ); \
-								 	  if ( !max ) { oexERROR( -1, CStr().Fmt( oexT( "oexRETRY( %s ) failed after %d attempts" ), #s, um ) ); } r; } )
+#define oexRETRY( m, s, w, r )		( { OEX_NAMESPACE::oexUINT um = m, max = (OEX_NAMESPACE::oexUINT)( um ? um : 1 ); do { s; } while ( --max && w ); \
+								 	  if ( !max ) { oexERROR( -1, OEX_NAMESPACE::CStr().Fmt( oexT( "oexRETRY( %s ) failed after %d attempts" ), #s, um ) ); } r; } )
 
 /// Same as above, but with a default of 1000 times
 #define oexDO( s, w, r )			oexRETRY( 1000, s, w, r )

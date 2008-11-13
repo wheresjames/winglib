@@ -582,7 +582,7 @@ public:
 
             // Ensure valid strings
             if ( sKey.Length() && sVal.Length() )
-                pb[ UrlDecode( sKey ) ] = UrlDecode( sVal );
+                pb[ UrlDecode( sKey ) ] = sVal; // UrlDecode( sVal );
 
         } // end while
 
@@ -599,7 +599,8 @@ public:
 
             if ( it.Node()->key.Length() && it->ToString().Length() )
 
-                str << UrlEncode( it.Node()->key ) << oexTT( T, ": " ) << UrlEncode( it->ToString() ) << oexTT( T, "\r\n" );
+                str << it.Node()->key << oexTT( T, ": " ) << it->ToString() << oexTT( T, "\r\n" );
+//                str << UrlEncode( it.Node()->key ) << oexTT( T, ": " ) << UrlEncode( it->ToString() ) << oexTT( T, "\r\n" );
 
 	    return str;
     }

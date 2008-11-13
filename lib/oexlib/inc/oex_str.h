@@ -206,6 +206,9 @@ namespace str
             oexASSERT_PTR( s1 );
             oexASSERT_PTR( s2 );
 
+			if ( !ln1 || !ln2 )
+				return -1;
+
 		    oexINT i = 0;
 		    while ( ln1 )
 		    {
@@ -224,7 +227,7 @@ namespace str
 
 		    } // end while
 
-		    return -1;
+		    return i;
 	    }
 
     /// Reverse skip, Returns the offset of the first character in s1 not in s2

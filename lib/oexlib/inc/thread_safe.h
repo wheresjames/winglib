@@ -229,7 +229,9 @@ public:
 	/// Returns true if the local object is locked
 	oexBOOL IsLocked()
     {
-        return ( m_ptr != oexNULL );
+    	// +++ Get this working one day
+    	return oexTRUE;
+//        return ( m_ptr != oexNULL );
     }
 
 	//==============================================================

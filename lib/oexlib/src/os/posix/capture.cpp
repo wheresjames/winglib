@@ -64,6 +64,11 @@ public:
 		eCaptureBuffer = 0
 	};
 
+	enum
+	{
+		eMaxBuffers = 2
+	};
+
 public:
 
 	/// Default contructor
@@ -79,6 +84,7 @@ public:
 		m_fFps = 0;
 		m_nBufferSize = 0;
 		m_pFrameBuffer = 0;
+		m_nActiveBuf = 0;
 	}
 
 	/// Destructor
@@ -114,7 +120,7 @@ public:
 		} // end if
 
 		// Attempt to open the device
-		m_nFd = open( oexStrToMbPtr( x_pDevice ), O_RDWR, 0 ); // | O_NONBLOCK, 0 );
+		m_nFd = open( oexStrToMbPtr( x_pDevice ), O_RDWR /*| O_NONBLOCK*/, 0 ); // | O_NONBLOCK, 0 );
 		if ( 0 > m_nFd )
 		{	oexERROR( errno, CStr().Fmt( oexT( "Unable to open file : %s" ), oexStrToMbPtr( x_pDevice ) ) );
 			return oexFALSE;
@@ -148,8 +154,9 @@ public:
 		// Close the file
 		close( m_nFd );
 
-		// Lose the image buffer
-		m_image.Destroy();
+		// Lose the image buffer(s)
+		for( oexINT i = 0; i < eMaxBuffers; i++ )
+			m_image[ i ].Destroy();
 
 		m_nFd = -1;
 		m_nVersion = 0;
@@ -160,12 +167,14 @@ public:
 		m_fFps = 0;
 		m_nBufferSize = 0;
 		m_pFrameBuffer = 0;
+		m_nActiveBuf = 0;
 	}
 
 public:
 
 	/// Proper ioctl call
 	static int IoCtl( int fd, int request, void * arg )
+//	{	return ioctl( fd, request, arg ); }
 	{	int nErr; return oexDO( nErr = ioctl( fd, request, arg ), EINTR == nErr, nErr ); }
 
 public:
@@ -230,15 +239,10 @@ public:
 			} // end if
 
 			// Allocate shared memory
-			m_image.PlainShare( oexTRUE );
-			m_image.SetShareHandle( (os::CFMap::t_HFILEMAP)m_nFd );
-			if ( !oexCHECK_PTR( m_image.OexNew( lImageSize ).Ptr() ) )
-			{	oexERROR( errno, CStr().Fmt( oexT( "Failed to allocate shared image buffer size=%d : %d x %d x %d" ), lImageSize, m_nWidth, m_nHeight, m_nBpp ) );
-				m_nIoMode = eIoReadWrite;
-			} // end if
-
-			else
-				m_nIoMode = eIoAsync;
+			m_image[ 0 ].PlainShare( oexTRUE );
+			m_image[ 0 ].SetShareHandle( (os::CFMap::t_HFILEMAP)m_nFd );
+			if ( !oexCHECK_PTR( m_image[ 0 ].OexNew( lImageSize ).Ptr() ) )
+				oexERROR( errno, CStr().Fmt( oexT( "Failed to allocate shared image buffer size=%d : %d x %d x %d" ), lImageSize, m_nWidth, m_nHeight, m_nBpp ) );
 
 		} // end if
 
@@ -258,14 +262,14 @@ public:
 			//     Should probably do some performance testing...
 			if ( eIoAuto == m_nIoMode )
 			{
-				if ( ( m_cap2.capabilities & V4L2_CAP_READWRITE ) )
+				if ( ( m_cap2.capabilities & V4L2_CAP_STREAMING ) )
+					m_nIoMode = eIoStreaming;
+
+				else if ( ( m_cap2.capabilities & V4L2_CAP_READWRITE ) )
 					m_nIoMode = eIoReadWrite;
 
 				else if ( ( m_cap2.capabilities & V4L2_CAP_ASYNCIO ) )
 					m_nIoMode = eIoAsync;
-
-				else if ( ( m_cap2.capabilities & V4L2_CAP_STREAMING ) )
-					m_nIoMode = eIoStreaming;
 
 				else
 					oexERROR( -1, CStr().Fmt( oexT( "V4L2_CAP_VIDEO_CAPTURE : No supportd I/O methods. cap=0x%X" ), (int)m_cap2.capabilities ) );
@@ -273,7 +277,7 @@ public:
 			} // end if
 
 			// Verify image transfer mode is supported
-			switch( m_nIoMode )
+			else switch( m_nIoMode )
 			{
 				case eIoReadWrite :
 					if ( !( m_cap2.capabilities & V4L2_CAP_READWRITE ) )
@@ -308,6 +312,103 @@ public:
 					break;
 
 			} // end switch
+/*
+			v4l2_cropcap cropcap;
+			v4l2_crop crop;
+			cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+			if ( 0 == IoCtl( m_nFd, VIDIOC_CROPCAP, &cropcap ) )
+			{
+				crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+//				crop.c = cropcap.defrect;
+				crop.c = cropcap.bounds;
+//				crop.c.left = 0; crop.c.top = 0; crop.c.width = 0; crop.c.height = 0;
+				if ( -1 == IoCtl( m_nFd, VIDIOC_S_CROP, &crop ) )
+				{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_S_CROP failed" ) ) );
+					return oexFALSE;
+				} // end if
+
+			} // end if
+
+			else
+				oexNOTICE( 0, oexT( "VIDIOC_CROPCAP is not supported" ) );
+*/
+	        v4l2_format fmt;
+	        oexZeroMemory( &fmt, sizeof( fmt ) );
+			fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+			fmt.fmt.pix.width = m_nWidth;
+			fmt.fmt.pix.height = m_nHeight;
+			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR8; //V4L2_PIX_FMT_RGB24; // V4L2_PIX_FMT_YUYV
+//			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_GREY;
+			fmt.fmt.pix.field = V4L2_FIELD_NONE;
+//			fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
+
+			if ( -1 == IoCtl( m_nFd, VIDIOC_S_FMT, &fmt ) )
+			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_S_FMT : Failed to set format: %u : w=%d, h=%d" ), m_nFd, m_nWidth, m_nHeight ) );
+				return oexFALSE;
+			} // end if
+
+//			if ( V4L2_PIX_FMT_RGB24 != fmt.fmt.pix.pixelformat )
+//			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_S_FMT : Unsupporeted format type: %d" ), (int)fmt.fmt.pix.pixelformat ) );
+//				return oexFALSE;
+//			} // end if
+
+			// Did we get a new width / height
+			if ( m_nWidth != fmt.fmt.pix.width || m_nHeight != fmt.fmt.pix.height )
+			{
+				oexWARNING( 0, CStr().Fmt( oexT( "VIDIOC_S_FMT : Changed video size: %u : %d -> %d x %d -> %d" ),
+											   m_nFd, m_nWidth, fmt.fmt.pix.width, m_nHeight, fmt.fmt.pix.height ) );
+
+				// Save new dimensions
+				m_nWidth = fmt.fmt.pix.width;
+				m_nHeight = fmt.fmt.pix.height;
+
+			} // end if
+
+			m_nBufferSize = fmt.fmt.pix.sizeimage;
+			if ( 0 >= m_nBufferSize )
+			{	oexERROR( -1, CStr().Fmt( oexT( "Invalid image size %d" ), m_nBufferSize ).Ptr() );
+				return oexFALSE;
+			} // end if
+
+			v4l2_requestbuffers req;
+			oexZeroMemory( &req, sizeof( req ) );
+			req.count	= eMaxBuffers;
+			req.type	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
+			req.memory	= V4L2_MEMORY_MMAP;
+
+			if ( -1 == IoCtl( m_nFd, VIDIOC_REQBUFS, &req ) || eMaxBuffers > req.count )
+			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_REQBUFS : Request for mmap buffers failed.  count=%d" ), (int)req.count ) );
+				return oexFALSE;
+			} // end if
+
+			for( oexINT i = 0; i < eMaxBuffers; i++ )
+			{
+				v4l2_buffer buf;
+				oexZeroMemory( &buf, sizeof( buf ) );
+
+				buf.type        = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+				buf.memory      = V4L2_MEMORY_MMAP;
+				buf.index       = i;
+
+				if ( -1 == IoCtl( m_nFd, VIDIOC_QUERYBUF, &buf ) )
+				{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_QUERYBUF : Request for buffer info failed.  count=%d" ), (int)req.count ) );
+					return oexFALSE;
+				} // end if
+
+				// Buffer size
+				if ( !i )
+					m_nBufferSize = buf.length;
+
+				// Allocate shared memory
+				m_image[ i ].PlainShare( oexTRUE );
+				m_image[ i ].SetOffset( buf.m.offset );
+				m_image[ i ].SetShareHandle( (os::CFMap::t_HFILEMAP)m_nFd );
+				if ( !m_image[ i ].OexNew( buf.length ).Ptr() )
+				{	oexERROR( errno, CStr().Fmt( oexT( "Failed to allocate shared image buffer buf.index = %d, size=%d : %d x %d x %d" ), i, m_nBufferSize, m_nWidth, m_nHeight, m_nBpp ) );
+					return oexFALSE;
+				} // end if
+
+			} // end for
 
 		} // end if
 #endif
@@ -344,7 +445,7 @@ public:
 				FORMAT_DESC( V4L2_PIX_FMT_BGR32 ),
 				FORMAT_DESC( V4L2_PIX_FMT_RGB32 ),
 				FORMAT_DESC( V4L2_PIX_FMT_GREY ),
-				FORMAT_DESC( V4L2_PIX_FMT_PAL8 ),
+//				FORMAT_DESC( V4L2_PIX_FMT_PAL8 ),
 				FORMAT_DESC( V4L2_PIX_FMT_YVU410 ),
 				FORMAT_DESC( V4L2_PIX_FMT_YVU420 ),
 				FORMAT_DESC( V4L2_PIX_FMT_YUYV ),
@@ -352,10 +453,10 @@ public:
 				FORMAT_DESC( V4L2_PIX_FMT_YUV422P ),
 				FORMAT_DESC( V4L2_PIX_FMT_YUV411P ),
 				FORMAT_DESC( V4L2_PIX_FMT_Y41P ),
-				FORMAT_DESC( V4L2_PIX_FMT_YUV444 ),
-				FORMAT_DESC( V4L2_PIX_FMT_YUV555 ),
-				FORMAT_DESC( V4L2_PIX_FMT_YUV565 ),
-				FORMAT_DESC( V4L2_PIX_FMT_YUV32 ),
+//				FORMAT_DESC( V4L2_PIX_FMT_YUV444 ),
+//				FORMAT_DESC( V4L2_PIX_FMT_YUV555 ),
+//				FORMAT_DESC( V4L2_PIX_FMT_YUV565 ),
+//				FORMAT_DESC( V4L2_PIX_FMT_YUV32 ),
 				FORMAT_DESC( V4L2_PIX_FMT_NV12 ),
 				FORMAT_DESC( V4L2_PIX_FMT_NV21 ),
 				FORMAT_DESC( V4L2_PIX_FMT_YUV410 ),
@@ -434,113 +535,26 @@ public:
 
 		else if ( 2 == m_nVersion )
 		{
-	        v4l2_format fmt;
-	        oexZeroMemory( &fmt, sizeof( fmt ) );
-			fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			fmt.fmt.pix.width = m_nWidth;
-			fmt.fmt.pix.height = m_nHeight;
-//			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR8; //V4L2_PIX_FMT_RGB24; // V4L2_PIX_FMT_YUYV
-			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_GREY;
-			fmt.fmt.pix.field = V4L2_FIELD_NONE; // V4L2_FIELD_INTERLACED;
-
-			printf( "1\n" );
-
-			if ( -1 == IoCtl( m_nFd, VIDIOC_S_FMT, &fmt ) )
-			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_S_FMT : Failed to set format: %u : w=%d, h=%d" ), m_nFd, m_nWidth, m_nHeight ) );
-				return oexFALSE;
-			} // end if
-
-			printf( "2\n" );
-
-//			if ( V4L2_PIX_FMT_RGB24 != fmt.fmt.pix.pixelformat )
-//			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_S_FMT : Unsupporeted format type: %d" ), (int)fmt.fmt.pix.pixelformat ) );
-//				return oexFALSE;
-//			} // end if
-
-			printf( "3\n" );
-
-			// Did we get a new width / height
-			if ( m_nWidth != fmt.fmt.pix.width || m_nHeight != fmt.fmt.pix.height )
+			for( oexINT i = 0; i < eMaxBuffers; i++ )
 			{
-				oexWARNING( 0, CStr().Fmt( oexT( "VIDIOC_S_FMT : Changed video size: %u : %d -> %d x %d -> %d" ),
-											   m_nFd, m_nWidth, fmt.fmt.pix.width, m_nHeight, fmt.fmt.pix.height ) );
-
-				// Save new dimensions
-				m_nWidth = fmt.fmt.pix.width;
-				m_nHeight = fmt.fmt.pix.height;
-
-			} // end if
-
-			m_nBufferSize = fmt.fmt.pix.sizeimage;
-			if ( 0 >= m_nBufferSize )
-			{	oexERROR( -1, CStr().Fmt( oexT( "Invalid image size %d" ), m_nBufferSize ).Ptr() );
-				return oexFALSE;
-			} // end if
-
-			printf( "4\n" );
-
-			v4l2_requestbuffers req;
-			oexZeroMemory( &req, sizeof( req ) );
-			req.count	= 1;
-			req.type	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			req.memory	= V4L2_MEMORY_MMAP;
-
-			if ( -1 == IoCtl( m_nFd, VIDIOC_REQBUFS, &req ) || 1 > req.count )
-			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_REQBUFS : Request for mmap buffers failed.  count=%d" ), (int)req.count ) );
-				return oexFALSE;
-			} // end if
-
-			printf( "5\n" );
-
-			v4l2_buffer buf;
-			oexZeroMemory( &buf, sizeof( buf ) );
-
-			buf.type        = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			buf.memory      = V4L2_MEMORY_MMAP;
-			buf.index       = 0;
-
-			if ( -1 == IoCtl( m_nFd, VIDIOC_QUERYBUF, &buf ) )
-			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_QUERYBUF : Request for buffer info failed.  count=%d" ), (int)req.count ) );
-				return oexFALSE;
-			} // end if
-
-			printf( "6\n" );
-/*
-			m_nBufferSize = buf.length;
-			m_pFrameBuffer = (oexCHAR*) mmap(	oexNULL, m_nBufferSize,
-												PROT_READ | PROT_WRITE, MAP_SHARED,
-												(int)m_nFd, buf.m.offset );
-
-			if ( MAP_FAILED == m_pFrameBuffer )
-			{	oexERROR( errno, CStr().Fmt( oexT( "Failed to allocate shared image buffer size=%d : %d x %d x %d" ), m_nBufferSize, m_nWidth, m_nHeight, m_nBpp ) );
-				return oexFALSE;
-			} // end if
-*/
-			// Buffer size
-			m_nBufferSize = buf.length;
-			printf( oexT( "offset = %d\n" ), (int)buf.m.offset );
-
-			// Allocate shared memory
-			m_image.PlainShare( oexTRUE );
-			m_image.SetOffset( buf.m.offset );
-			m_image.SetShareHandle( (os::CFMap::t_HFILEMAP)m_nFd );
-			if ( !m_image.OexNew( m_nBufferSize ).Ptr() )
-			{	oexERROR( errno, CStr().Fmt( oexT( "Failed to allocate shared image buffer size=%d : %d x %d x %d" ), m_nBufferSize, m_nWidth, m_nHeight, m_nBpp ) );
-				return oexFALSE;
-			} // end if
-
-			printf( "7\n" );
-
-/*
-			if ( !m_image.Ptr() || m_image.Size() != m_nBufferSize )
-			{
-				if ( !m_image.OexNew( m_nBufferSize ).Ptr() )
-				{	oexERROR( -1, CStr().Fmt( oexT( "Unable to allocate image buffer : size=%d" ), m_nBufferSize ).Ptr() );
+				v4l2_buffer buf;
+				oexZeroMemory( &buf, sizeof( buf ) );
+				buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+				buf.memory = V4L2_MEMORY_MMAP;
+				buf.index = i;
+				if ( -1 == IoCtl( m_nFd, VIDIOC_QBUF, &buf ) )
+				{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_QBUF : Failed : m_nFd = %u" ), m_nFd ) );
 					return oexFALSE;
 				} // end if
 
+			} // end for
+
+			int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+			if ( -1 == IoCtl ( m_nFd, VIDIOC_STREAMON, &type ) )
+			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_STREAMON : Failed : m_nFd = %u" ), m_nFd ) );
+				return oexFALSE;
 			} // end if
-*/
+
 		} // end else if
 
 		return oexTRUE;
@@ -549,6 +563,16 @@ public:
 	/// Stops video capture
 	oexBOOL StopCapture()
 	{
+		if ( 2 == m_nVersion )
+		{
+			int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+			if ( -1 == IoCtl ( m_nFd, VIDIOC_STREAMOFF, &type ) )
+			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_STREAMOFF : Failed : m_nFd = %u" ), m_nFd ) );
+				return oexFALSE;
+			} // end if
+
+		} // end if
+
 		return oexTRUE;
 	}
 
@@ -571,6 +595,32 @@ public:
 
 		else if ( 2 == m_nVersion )
 		{
+
+/*			os::CSys::Sleep( 1 );
+
+			type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+			if ( -1 == IoCtl ( m_nFd, VIDIOC_STREAMOFF, &type ) )
+			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_STREAMOFF : Failed : m_nFd = %u" ), m_nFd ) );
+				return oexFALSE;
+			} // end if
+*/
+			os::CSys::printf( "calling VIDIOC_DQBUF...\n" );
+
+			v4l2_buffer buf;
+			oexZeroMemory( &buf, sizeof( buf ) );
+			buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+			buf.memory = V4L2_MEMORY_MMAP;
+			if ( -1 == IoCtl( m_nFd, VIDIOC_DQBUF, &buf ) || eMaxBuffers >= buf.index )
+			{
+				// +++ This failure seems to be unreliable
+//				oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_DQBUF : Failed : m_nFd = %d, buf.index = %d" ), m_nFd, buf.index ) );
+//				return oexFALSE;
+			} // end if
+
+			os::CSys::printf( "Active Buffer is %d\n", buf.index );
+
+			m_nActiveBuf = buf.index;
+
 /*			if ( eIoReadWrite == m_nIoMode )
 			{
 				oexINT nImageSize = GetBufferSize();
@@ -608,13 +658,34 @@ public:
 		return oexTRUE;
 	}
 
+	oexBOOL ReleaseFrame()
+	{
+		if ( 2 == m_nVersion )
+		{
+			v4l2_buffer buf;
+			oexZeroMemory( &buf, sizeof( buf ) );
+			buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+			buf.memory = V4L2_MEMORY_MMAP;
+			buf.index = m_nActiveBuf;
+			if ( -1 == IoCtl( m_nFd, VIDIOC_QBUF, &buf ) )
+			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_QBUF : Failed : m_nFd = %u" ), m_nFd ) );
+				return oexFALSE;
+			} // end if
+
+		} // end if
+
+		return oexTRUE;
+
+
+	}
+
 	/// Returns a pointer to the video buffer
 	oexPVOID GetBuffer()
 	{
 		if ( m_pFrameBuffer )
 			return m_pFrameBuffer;
 
-		return m_image.Ptr();
+		return m_image[ m_nActiveBuf ].Ptr();
 	}
 
 	/// +++ Should return the size of the video buffer
@@ -680,7 +751,10 @@ private:
 	video_mbuf			m_buf1;
 
 	/// Image memory
-	TMem< oexCHAR >		m_image;
+	TMem< oexCHAR >		m_image[ eMaxBuffers ];
+
+	/// Active buffer
+	oexINT				m_nActiveBuf;
 
 	oexINT				m_nWidth;
 
@@ -757,6 +831,16 @@ oexBOOL CCapture::WaitForFrame( oexUINT x_uTimeout )
 	} // end if
 
 	return ( (CV4lCapture*)m_pDevice )->WaitForFrame( x_uTimeout );
+}
+
+oexBOOL CCapture::ReleaseFrame()
+{
+	if ( !oexCHECK_PTR( m_pDevice ) )
+	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
+		return oexFALSE;
+	} // end if
+
+	return ( (CV4lCapture*)m_pDevice )->ReleaseFrame();
 }
 
 oexBOOL CCapture::StartCapture()

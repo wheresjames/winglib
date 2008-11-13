@@ -827,7 +827,7 @@ public:
 	//==============================================================
 	/// Releases memory allocated by InitEncodeJpg()
 	/**
-		This function will be called when this CWinDc object is
+		This function will be called when this CImage object is
 		destroyed, so it is not necessary to call this function.
 
 		\see InitEncodeJpg(), EncodeJpg()

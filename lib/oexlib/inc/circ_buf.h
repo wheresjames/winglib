@@ -431,7 +431,8 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL Write( oexCSTR8 x_pStr );
+	virtual oexBOOL Write( oexCSTR8 x_pStr )
+	{	return Write( x_pStr, zstr::Length( x_pStr ) ); }
 
 	//==============================================================
 	// Write()
@@ -541,6 +542,10 @@ public:
 	*/
 	virtual oexBOOL Write( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT x_uEncode = 0 )
 	{
+		// Sanity check
+		if ( !oexCHECK_PTR( x_pvBuf ) || !x_uSize )
+			return oexFALSE;
+
 	    // Lock the buffer
 	    CTlLocalLock ll( &m_lock );
 	    if ( !ll.IsLocked() )

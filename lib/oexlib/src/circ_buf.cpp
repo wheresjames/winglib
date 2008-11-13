@@ -440,7 +440,8 @@ oexUINT CCircBuf::GetMaxRead( oexUINT x_uReadPtr, oexUINT x_uWritePtr, oexUINT x
 }
 
 oexUINT CCircBuf::GetMaxWrite( oexUINT x_uReadPtr, oexUINT x_uWritePtr, oexUINT x_uMax )
-{	// Do we have a buffer?
+{
+	// Do we have a buffer?
 	if ( x_uMax == 0 )
         return 0;
 
@@ -466,12 +467,6 @@ oexUINT CCircBuf::GetMaxWrite( oexUINT x_uReadPtr, oexUINT x_uWritePtr, oexUINT 
 
 	// Outside use
 	return x_uReadPtr - uNWritePtr;
-}
-
-oexBOOL CCircBuf::Write(oexCSTR8 x_pStr)
-{
-	// Write the string into the buffer
-    return Write( x_pStr, zstr::Length( x_pStr ) );
 }
 
 oexBOOL CCircBuf::Read(oexSTR8 x_pStr, oexUINT x_uMax)

@@ -1057,7 +1057,11 @@ public:
 		This is efficient, it does not re-allocate or copy.
 	*/
 	TStr& RTrim( oexINT nChars )
-	{   oexINT lLen = Length();
+	{
+		if ( !nChars )
+			return *this;
+
+		oexINT lLen = Length();
         if ( lLen <= nChars )
             Destroy();
         else
@@ -1081,7 +1085,11 @@ public:
 		without re-allocating or copying.
 	*/
 	TStr& LTrim( oexINT nChars )
-	{   oexINT lLen = Length();
+	{
+		if ( !nChars )
+			return *this;
+
+		oexINT lLen = Length();
         if ( lLen <= nChars )
             Destroy();
         else
@@ -1720,6 +1728,7 @@ public:
     TStr& BuildPath( TStr x_sPath, T tSep = oexTC( T, '/' ) )
     {   RTrim( oexTT( T, "\\/" ) );
         *this << tSep << x_sPath.LTrim( oexTT( T, "\\/" ) );
+        RTrim( oexTT( T, "\\/" ) );
         return *this;
     }
 

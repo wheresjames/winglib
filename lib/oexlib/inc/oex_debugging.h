@@ -42,17 +42,21 @@ template < const int T > class oex_static_assert{};
 	typedef oex_static_assert< sizeof( int[ ( s ) ? 1 : -1 ] ) >	\
 		oex_typedef_static_assert;
 
+#define oexSHOWVAL( v, t )				OEX_NAMESPACE::os::CSys::printf( #v " = " t, v )
+
 #ifdef oexDEBUG
 
 #	define oexTRACE				            OEX_NAMESPACE::os::CDebug::FmtTrace
 #	define oexUNUSED( s )
 #	define oexBREAK( s )		            ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexTEXT( oexFUNCTION ), s ), OEX_NAMESPACE::oexFALSE )
+#	define oexDEBUGVAL( v, t )				oexSHOWVAR( v, t )
 
 #else
 
 #	define oexTRACE
 #	define oexUNUSED( s )
 #	define oexBREAK( s )
+#	define oexDEBUGVAL( v, t )
 
 #endif
 

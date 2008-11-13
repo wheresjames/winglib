@@ -512,6 +512,9 @@ namespace os
 #include "inc/data_packet.h"
 #include "inc/image.h"
 
+#include "inc/http_session.h"
+
+
 //#include "inc/dispatch.h"
 
 /*
@@ -537,7 +540,6 @@ namespace os
 
 // Base protocol
 //#include "inc/ftp_session.h"
-//#include "inc/http_session.h"
 
 // Protocol implementations
 //#include "inc/virtual_fs.h"

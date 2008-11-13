@@ -307,7 +307,7 @@ oexINT CImage::Encode( oexPBYTE *x_buf, oexINT *x_pnSize, oexCSTR x_pType )
 		*x_pnSize = m_nMem;
 
 	// Verify memory
-	if ( oexCHECK_PTR( m_pMem ) || m_nMem == 0 )
+	if ( !oexCHECK_PTR( m_pMem ) || m_nMem == 0 )
 		return 0;
 
 	return m_nMem;
@@ -766,6 +766,12 @@ oexBOOL CImage::Create(oexINT x_w, oexINT x_h, oexINT x_bpp)
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
+
+	// Just just return if we already have the image they want
+	if ( pimg->GetWidth() == x_w
+	     && pimg->GetHeight() == x_h
+	     && pimg->GetBpp() == x_bpp )
+		return TRUE;
 
 	return ( pimg->Create( x_w, x_h, x_bpp ) != NULL );
 }

@@ -136,6 +136,13 @@ public:
 	/// Waits for a new video frame to become available
 	oexBOOL WaitForFrame( oexUINT x_uTimeout = 0 );
 
+	/// Releases current capture frame
+	/**
+		You must call this after calling WaitForFrame()
+	 	when you are done with the video frame.
+	*/
+	oexBOOL ReleaseFrame();
+
 	/// Returns a pointer to the video buffer
 	oexPVOID GetBuffer();
 

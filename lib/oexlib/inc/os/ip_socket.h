@@ -541,6 +541,22 @@ public:
     CStr8 Recv( oexUINT x_uMax = 0, oexUINT x_uFlags = 0 );
 
 	//==============================================================
+	// Read()
+	//==============================================================
+	/// Reads data from the socket and returns a CStr object
+	/**
+		\param [in] x_uMax		-   Maximum amount of data to return
+		\param [in] x_uFlags	-	Socket receive flags
+
+		\return CStr containing data
+
+		\see
+	*/
+    CStr8 Read( oexUINT x_uMax = 0, oexUINT x_uFlags = 0 )
+	{	return Recv( x_uMax, x_uFlags ); }
+
+
+	//==============================================================
 	// SendTo()
 	//==============================================================
 	/// Writes data to the socket
@@ -637,6 +653,23 @@ public:
 	oexUINT Send( oexCONST CStr8 &x_sStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
     {	return Send( (oexPVOID)x_sStr.Ptr(), x_sStr.Length(), x_puSent, x_uFlags ); }
 
+	//==============================================================
+	// Write()
+	//==============================================================
+	/// Writes a string to the socket
+	/**
+		\param [in] x_sStr		-	String to be sent
+		\param [in] x_puSent	-	Number of bytes sent
+		\param [in] x_uFlags	-	Socket write flags
+
+		\return Number of bytes sent or c_InvalidSocket if failure.
+
+		\see
+	*/
+	oexUINT Write( oexCONST CStr8 &x_sStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
+    {	return Send( (oexPVOID)x_sStr.Ptr(), x_sStr.Length(), x_puSent, x_uFlags ); }
+
+
 public:
 
 	//==============================================================
@@ -731,4 +764,5 @@ private:
     oexUINT                 m_uSocketProtocol;
 
 };
+
 

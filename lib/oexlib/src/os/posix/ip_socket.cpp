@@ -72,10 +72,6 @@ using namespace OEX_NAMESPACE::os;
 
 // A few verifications
 oexSTATIC_ASSERT( sizeof( CIpSocket::t_SOCKET ) == sizeof( int ) );
-//oexSTATIC_ASSERT( sizeof( CIpSocket::t_SOCKETEVENT ) == sizeof( WSAEVENT ) );
-
-// Socket version we will use
-//oexCONST WORD c_MinSocketVersion = MAKEWORD( 1, 1 );
 
 #ifndef EPOLLRDHUP
 #	define EPOLLRDHUP	0x2000
@@ -1026,7 +1022,7 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
         return 0;
 
 	// Check for socket error
-	if ( -1 == nRes || x_uSize < (oexUINT)nRes  || 0 > nRes )
+	if ( x_uSize < (oexUINT)nRes  || 0 > nRes )
 	{
 		// Nothing read
 		if ( x_puRead )
@@ -1038,7 +1034,7 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 
 	// Save the number of bytes read
 	if ( x_puRead )
-        *x_puRead = nRes;
+        *x_puRead = (oexUINT)nRes;
 
 	return nRes;
 }
@@ -1074,6 +1070,9 @@ CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
     while ( 0 < ( uRead = Recv( sBuf._Ptr( uOffset ), oexSTRSIZE, oexNULL, x_uFlags ) )
             && uRead >= oexSTRSIZE )
     {
+		if ( uRead > oexSTRSIZE )
+			uRead = oexSTRSIZE;
+
         // Allocate more space
         uOffset += uRead;
         if ( !sBuf.Allocate( uOffset + oexSTRSIZE ) )
