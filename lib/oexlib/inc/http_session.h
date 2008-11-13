@@ -285,7 +285,7 @@ public:
 		if ( m_pbRequest[ "path" ].ToString().Length() )
 		{   if ( *sPath == '?' )
 				sPath++;
-			m_pbRequest[ "params" ] = CParser::DecodeUrlParams( sPath );
+			m_pbGet = CParser::DecodeUrlParams( sPath );
 		} // end if
 		else m_pbRequest[ "path" ].ToString() = sPath;
 
@@ -517,6 +517,12 @@ public:
 	CPropertyBag8& TxHeaders()
 	{	return m_pbTxHeaders; }
 
+	CPropertyBag8& Get()
+	{	return m_pbGet; }
+
+	CPropertyBag8& Post()
+	{	return m_pbPost; }
+
 private:
 
 	/// Our port
@@ -530,6 +536,9 @@ private:
 
     /// Request information
     CPropertyBag8       m_pbRequest;
+
+    /// Get variables
+    CPropertyBag8       m_pbGet;
 
     /// Post variables
     CPropertyBag8       m_pbPost;

@@ -13,6 +13,9 @@ TOOLS	 := local
 #TOOLS	 := android
 #TOOLS	 := snapgear
 
+LIBLINK	 := static
+#LIBLINK := shared
+
 CFG_ROOT := $(PRJ_LIBROOT)/../..
 CFG_TOOLROOT := $(PRJ_LIBROOT)/../..
 CFG_LIBROOT  := $(PRJ_LIBROOT)/..
@@ -64,6 +67,9 @@ ifeq ($(OS),win32)
 
 else
 
+	# --with-sysroot
+	# --with-headers
+
 	PLATFORM := posix
 
 	ifdef DBG
@@ -74,7 +80,11 @@ else
 		CFG_CEXTRA	 := -O2 -s $(CFG_CEXTRA) 
 		CFG_LEXTRA	 := -s
 	endif
-
+	
+	ifeq ($(LIBLINK),static)
+		CFG_LEXTRA := $(CFG_LEXTRA) -static
+	endif
+	
 	# Arm compiler
 	ifeq ($(PROC),arm)
 
@@ -83,7 +93,7 @@ else
 			# Snapgear
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/tools/snapgear/usr/local/bin/arm-linux-
 
-			CFG_LFLAGS := $(CFG_LEXTRA) -static -lrt -pthread
+			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOUUID -DOEX_NOSHM
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
@@ -94,7 +104,7 @@ else
 			TOOLS := android
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/tools/android/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-linux-gnueabi-
 
-			CFG_LFLAGS := $(CFG_LEXTRA) -static -lrt -pthread 
+			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread 
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOUUID
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
@@ -112,7 +122,11 @@ else
 		CFG_AFLAGS := cq
 		
 	endif
-
+	
+	ifneq ($(LIBLINK),static)
+		CFG_LFLAGS := $(CFG_LFLAGS) -ldl
+	endif
+	
 	# Tools
 	CFG_PP := $(CFG_TOOLPREFIX)g++
 	CFG_LD := $(CFG_TOOLPREFIX)g++
@@ -144,6 +158,12 @@ endif
 
 ifdef DBG
 CFG_BUILD_TYPE := $(CFG_BUILD_TYPE)-debug
+endif
+
+ifeq ($(LIBLINK),static)
+CFG_BUILD_TYPE := $(CFG_BUILD_TYPE)-static
+else
+CFG_BUILD_TYPE := $(CFG_BUILD_TYPE)-shared
 endif
 
 CFG_BINROOT  := $(CFG_LIBROOT)/bin/$(CFG_BUILD_TYPE)

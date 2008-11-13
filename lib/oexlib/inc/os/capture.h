@@ -34,6 +34,48 @@
 
 #pragma once
 
+#define oexVIDSUB_AUTO		0
+
+// Linux
+#define oexVIDSUB_VFL1		oexFOURCC( '1', 'V', 'F', 'L' )
+#define oexVIDSUB_VFL2		oexFOURCC( '2', 'V', 'F', 'L' )
+#define oexVIDSUB_DAVINCI	oexFOURCC( '1', 'D', 'A', 'V' )
+
+// Windows
+#define oexVIDSUB_VFW		oexFOURCC( '1', 'V', 'F', 'W' )
+#define oexVIDSUB_DSHOW		oexFOURCC( '1', 'D', 'S', 'H' )
+
+//==================================================================
+// CCaptureTmpl
+//
+/// Defines the capture class interface
+/**
+
+
+*/
+//==================================================================
+class CCaptureTmpl
+{
+public:
+	virtual oexBOOL Destroy() = 0;
+	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_sDevice, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps ) = 0;
+	virtual oexBOOL IsOpen() = 0;
+	virtual oexBOOL StartCapture() = 0;
+	virtual oexBOOL StopCapture() = 0;
+	virtual oexBOOL WaitForFrame( oexUINT x_uTimeout ) = 0;
+	virtual oexBOOL ReleaseFrame() = 0;
+	virtual oexPVOID GetBuffer() = 0;
+	virtual oexINT GetImageSize() = 0;
+	virtual oexINT GetBufferSize() = 0;
+	virtual CImage* GetImage() = 0;
+	virtual oexINT GetWidth() = 0;
+	virtual oexINT GetHeight() = 0;
+	virtual oexINT GetBpp() = 0;
+	virtual oexFLOAT GetFps() = 0;
+	virtual oexINT64 GetFrame() = 0;
+	virtual CStr GetSupportedFormats() = 0;
+};
+
 //==================================================================
 // CCapture
 //
@@ -43,7 +85,7 @@
 
 */
 //==================================================================
-class CCapture
+class CCapture : public CCaptureTmpl
 {
 public:
 
@@ -113,7 +155,7 @@ public:
 	virtual ~CCapture();
 
 	/// Closes the capture device and releases resources
-	void Destroy();
+	virtual oexBOOL Destroy();
 
 	/// Opens the specified capture device
 	/**
@@ -121,64 +163,153 @@ public:
 
 		\return Non-zero if success.
 	*/
-	oexBOOL Open( oexCSTR x_sDevice, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps );
+	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_sDevice, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps );
 
 	/// Returns non-zero if a capture device is currently open
-	oexBOOL IsOpen()
-	{	return ( oexNULL != m_pDevice ); }
+	virtual oexBOOL IsOpen()
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->IsOpen();
+	}
 
 	/// Starts video capture
-	oexBOOL StartCapture();
+	virtual oexBOOL StartCapture()
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->StartCapture();
+	}
 
 	/// Stops video capture
-	oexBOOL StopCapture();
+	virtual oexBOOL StopCapture()
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->StopCapture();
+	}
 
 	/// Waits for a new video frame to become available
-	oexBOOL WaitForFrame( oexUINT x_uTimeout = 0 );
+	virtual oexBOOL WaitForFrame( oexUINT x_uTimeout = 0 )
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->WaitForFrame( x_uTimeout );
+	}
 
 	/// Releases current capture frame
 	/**
 		You must call this after calling WaitForFrame()
 	 	when you are done with the video frame.
 	*/
-	oexBOOL ReleaseFrame();
+	virtual oexBOOL ReleaseFrame()
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->ReleaseFrame();
+	}
 
 	/// Returns a pointer to the video buffer
-	oexPVOID GetBuffer();
+	virtual oexPVOID GetBuffer()
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->GetBuffer();
+	}
 
 	/// Returns the size of the valid image data
-	oexINT GetImageSize();
+	virtual oexINT GetImageSize()
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->GetImageSize();
+	}
 
 	/// Returns the size of the video buffer
-	oexINT GetBufferSize();
+	virtual oexINT GetBufferSize()
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->GetBufferSize();
+	}
 
 	/// Returns an image object containing the video frame
-	CImage* GetImage();
+	virtual CImage* GetImage()
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->GetImage();
+	}
 
 	/// Returns the image width
-	oexINT GetWidth();
+	virtual oexINT GetWidth()
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->GetWidth();
+	}
 
 	/// Returns the image height
-	oexINT GetHeight();
+	virtual oexINT GetHeight()
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->GetHeight();
+	}
 
 	/// Returns the bits-per-pixel of the current image format
-	oexINT GetBpp();
+	virtual oexINT GetBpp()
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->GetBpp();
+	}
 
 	/// Returns the frame rate in frames per second
-	oexFLOAT GetFps();
+	virtual oexFLOAT GetFps()
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->GetFps();
+	}
 
 	/// Returns the current frame index
-	oexINT64 GetFrame();
+	virtual oexINT64 GetFrame()
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->GetFrame();
+	}
 
 	/// Returns a string describing the supported formats
-	CStr GetSupportedFormats();
+	virtual CStr GetSupportedFormats()
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
 
-public:
-
+		return m_pDevice->GetSupportedFormats();
+	}
 
 private:
 
 	/// System specific capture device class
-	oexPVOID			m_pDevice;
+	CCaptureTmpl		*m_pDevice;
+
+	/// The type of capture system being used
+	oexUINT				m_uType;
 };
 

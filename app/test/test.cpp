@@ -2049,7 +2049,7 @@ oex::oexRESULT Test_CCapture()
 	oex::vid::CCapture cCapture;
 
 	// Open the capture device
-	if ( !oexVERIFY( cCapture.Open( oex::CStr().Fmt( oexT( "/dev/video%d" ), 0 ).Ptr(),
+	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_AUTO, oex::CStr().Fmt( oexT( "/dev/video%d" ), 0 ).Ptr(),
 								    1280, 1024, 24, 15 ) ) )
 		return -1;
 
