@@ -978,7 +978,8 @@ public:
 		// Do the conversion
 		uConv = os::CSys::MbsToWcs( _Ptr(), uConv, x_sStr.Ptr(), uLen );
 
-		if ( !oexVERIFY( uConv <= m_nLength ) )
+		// Length may not be the same
+		if ( !oexCHECK( 0 <= uConv ) )
 		{
 			Destroy();
 			return *this;
@@ -1012,11 +1013,13 @@ public:
 		// Do the conversion
 		uConv = os::CSys::WcsToMbs( _Ptr(), uConv, x_sStr.Ptr(), uLen );
 
-		if ( !oexVERIFY( uConv <= m_nLength ) )
+		// Actually, it may not be the same length
+		if ( !oexCHECK( 0 <= uConv ) )
 		{
 			Destroy();
 			return *this;
 		}
+
 
         // Save length
         m_nLength = uConv;
@@ -1367,7 +1370,8 @@ public:
 			} // end if
 
 			// Append non-matching stuff
-			str += SubStr( s, m );
+			if ( s != m )
+				str += SubStr( s, m );
 
 			// Replace with other string if needed
 			if ( lr )

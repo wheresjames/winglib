@@ -61,11 +61,15 @@ oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT 
 			} // end if
 
 			// Create log header
-			m_file.Write( CStr().Fmt( oexT( "; Log file\r\n; Date : %s\r\n; Application : %s\r\n\r\n" ),
+			m_file.Write( CStr().Fmt( oexT( ";====================================================================" ) oexNL
+									  oexT( "; Log file" ) oexNL
+									  oexT( "; Date : %s" ) oexNL
+									  oexT( "; Application : %s" ) oexNL oexNL,
 									  oexStrToMbPtr( oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() ),
 									  oexStrToMbPtr( oexGetModuleFileName().Ptr() ) ) );
 
 		} // end if
+
 
 		if ( !oexCHECK_PTR( x_pFile ) )
 			x_pFile = oexT( "???" );
@@ -86,27 +90,45 @@ oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT 
 		else
 			pLevel = sLevel.Fmt( "%d", (int)x_uLevel ).Ptr();
 
-		// Ensure error is not null
-		if ( !oexCHECK_PTR( x_pErr ) || !*x_pErr )
-			x_pErr = oexT( "Unspecified" );
+		CStr sLog;
 
-		// Write out the error line '<file>:<line> : <function>() : <error level> : <error string>'
-		m_file.Write( CStr().Fmt( oexT( "%s:(%u)%s : %s : %s\r\n" ),
-					              oexStrToMbPtr( x_pFile ), x_nLine,
-					              ( ( x_pFunction && *x_pFunction )
-					              	? oexStrToMbPtr( CStr().Fmt( oexT( " : %s()" ), oexStrToMbPtr( x_pFunction ) ).Ptr() )
-					              	: "" ),
-					              oexStrToMbPtr( pLevel ),
-					              oexStrToMbPtr( x_pErr ) ) );
+		// Add file / line number
+		sLog << x_pFile << oexT( ":(" ) << x_nLine << oexT( ")" ) oexNL;
 
-		// Write out the system error code and string if not zero
+		// Write out the time
+		sLog << oexGmtTimeStr( oexT( " -> %w, %d %b %Y %g:%m:%s GMT" ) )
+		     << oexLocalTimeStr( oexT( " -- Local: %Y/%c/%d - %g:%m:%s.%l" ) oexNL );
+
+		// Add error level
+		sLog << oexT( " -> " ) << pLevel;
+
+		// Add system error info
 		if ( x_uErr )
-			m_file.Write( CStr().Fmt( oexT( "> 0x%X (%d) : %s\r\n" ), x_uErr, x_uErr, oexStrToMbPtr( os::CTrace::GetErrorMsg( x_uErr ).Ptr() ) ) );
+			sLog << CStr().Fmt( oexT( " : 0x%X (%d) : " ), x_uErr, x_uErr )
+			 	 << os::CTrace::GetErrorMsg( x_uErr );
+
+		sLog << oexNL;
+
+		// Add function name if available
+		if ( x_pFunction && *x_pFunction )
+			sLog << oexT( " -> " ) << x_pFunction << oexT( "()" ) oexNL;
+
+		// Write out the user error string if available
+		if ( oexCHECK_PTR( x_pErr ) )
+			sLog << oexT( " -> " ) << CStr( x_pErr ).Replace( oexNL, oexNL oexT( " -> " ) ) << oexNL;
 
 #ifdef oexBACKTRACE_IN_LOG
 		// Write out the backtrace
-		m_file.Write( CStr().Fmt( oexT( "\t%s\r\n" ), oexStrToMbPtr( os::CTrace::GetBacktrace( x_uSkip ).Replace( oexT( "\n" ), oexT( "\n\t" ) ).Ptr() ) ) );
+		sLog << oexT( " -> " )
+		     << os::CTrace::GetBacktrace( x_uSkip ).Replace( oexNL, oexNL oexT( " -> " ) )
+		     << oexNL;
 #endif
+
+		// Just to space things out
+		sLog << oexNL;
+
+		// Write out the string to the file
+		m_file.Write( oexStrToMb( sLog ) );
 
 	} // end if
 

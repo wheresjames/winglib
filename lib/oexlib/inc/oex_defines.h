@@ -113,7 +113,11 @@
 
 #define oexEMPTY_STRING             oexT( "" )
 
-#define oexNL						oexT( "\r\n" )
+#if defined( OEX_WIN32 )
+#	define oexNL						oexT( "\r\n" )
+#else
+#	define oexNL						oexT( "\n" )
+#endif
 
 #define oexMemCmp					OEX_NAMESPACE::os::CSys::MemCmp
 #define oexMemCpy					OEX_NAMESPACE::os::CSys::MemCpy

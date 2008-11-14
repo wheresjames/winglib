@@ -51,11 +51,12 @@
 // Are we using windows?
 #if defined( WIN32 ) || defined( _WIN32 )
 #	define OEX_WIN32
+#else
+#	define OEX_LINUX
 #endif
 
-// +++ Get the debug tag working in linux!
 // Debug build?
-#if defined ( _DEBUG ) // && defined( OEX_WIN32 )
+#if defined ( _DEBUG )
 #	define oexDEBUG
 #endif
 
@@ -81,7 +82,7 @@
 // Enable image support, requires CxImage
 #define OEX_ENABLE_XIMAGE
 
-#ifdef OEX_WIN32
+#if defined( OEX_WIN32 )
 #	define oexCDECL	_cdecl
 #else
 #	define oexCDECL
@@ -99,4 +100,11 @@
 // debug macros
 #define oexFILE				__FILE__
 #define oexLINE				__LINE__
-#define oexFUNCTION			""
+
+#if defined( OEX_LINUX )
+#	define oexFUNCTION			__FUNCTION__
+#	define oexPRETTYFUNCTION	__PRETTY_FUNCTION__
+#else
+#	define oexFUNCTION			__FUNCTION__
+#	define oexPRETTYFUNCTION	__FUNCTION__ oexT( "()" )
+#endif

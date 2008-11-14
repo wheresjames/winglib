@@ -370,14 +370,10 @@ public:
 				return oexFALSE;
 			} // end if
 
-
-			// ======================================================
-			// +++ Pick up here, the code below is locking VIDIOC_DQBUF
-			// ======================================================
-
-
-
 			// Queue the buffer into the driver
+			buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+			buf.memory = V4L2_MEMORY_MMAP;
+			buf.index = i;
 			if ( -1 == IoCtl( m_nFd, VIDIOC_QBUF, &buf ) )
 			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_QBUF : Failed : m_nFd = %u" ), m_nFd ) );
 				return oexFALSE;
@@ -512,6 +508,7 @@ public:
 		oexZeroMemory( &buf, sizeof( buf ) );
 		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory = V4L2_MEMORY_MMAP;
+
 		if ( -1 == IoCtl( m_nFd, VIDIOC_DQBUF, &buf ) || eMaxBuffers >= buf.index )
 		{
 			// +++ This failure seems to be unreliable
@@ -519,7 +516,10 @@ public:
 //			return oexFALSE;
 		} // end if
 
-		os::CSys::Sleep( 0, 3 );
+		else
+			os::CSys::printf( "VIDIOC_DQBUF actually succeeded - errno=%d\n" );
+
+//		os::CSys::Sleep( 3000 );
 
 		os::CSys::printf( "Active Buffer is %d\n", buf.index );
 

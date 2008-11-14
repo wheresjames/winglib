@@ -340,7 +340,12 @@ oexGUID * CSys::CreateGuid( oexGUID *pGuid )
 
 
 void CSys::Sleep( oexUINT uMilliseconds, oexUINT uSeconds )
-{   ::sleep( uMilliseconds + ( uSeconds * 1000 ) );
+{
+	if ( uSeconds )
+		::sleep( uSeconds );
+
+	if ( uMilliseconds )
+		::usleep( uMilliseconds * 1000 );
 }
 
 oexBOOL CSys::MicroSleep( oexUINT uMicroseconds, oexUINT uSeconds )

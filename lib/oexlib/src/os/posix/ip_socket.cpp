@@ -340,6 +340,10 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
     m_uSocketType = x_type;
     m_uSocketProtocol = x_protocol;
 
+	int on = 1;
+	if ( -1 == setsockopt( (int)m_hSocket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on) ) )
+		oexWARNING( errno, oexT( "socket interface does not support SO_REUSEADDR" ) );
+
 	// Capture all events
 	EventSelect();
 
@@ -605,13 +609,24 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 			oexINT nRes = epoll_wait( (int)m_hSocketEvent, pev, eMaxEvents, x_uTimeout );
 
 			if ( -1 == nRes )
-			{	m_uLastError = errno;
+			{
+				// Log error
+				m_uLastError = errno;
 				oexERROR( errno, oexT( "epoll_ctl() failed" ) );
-				return oexFALSE;
+
+				// Just ditch if they aren't waiting for the close event
+				m_uEventState |= eCloseEvent;
+				if ( !( x_lEventId & eCloseEvent ) )
+					return 0;
+
 			} // end if
 
+			// Check for closed socket
+//			if ( !nRes )
+//				m_uEventState |= eCloseEvent;
+
 			// Process all events
-			if ( nRes )
+			if ( 0 < nRes )
 				for ( oexINT i = 0; i < nRes; i++ )
 				{
 					// Convert to windows flags
@@ -916,6 +931,7 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 
 	if ( -1 == nRes )
     {	m_uLastError = errno;
+		m_uEventState |= eCloseEvent;
 		oexERROR( errno, oexT( "recvfrom() failed" ) );
 		if ( x_puRead )
             *x_puRead = 0;
@@ -1009,6 +1025,7 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 
 	if ( -1 == nRes )
     {	m_uLastError = errno;
+		m_uEventState |= eCloseEvent;
 		oexERROR( errno, oexT( "recv() failed" ) );
 		if ( x_puRead )
             *x_puRead = 0;
@@ -1019,7 +1036,9 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 
 	// Check for closed socket
 	if ( !nRes )
+	{	m_uEventState |= eCloseEvent;
         return 0;
+	} // end if
 
 	// Check for socket error
 	if ( x_uSize < (oexUINT)nRes  || 0 > nRes )
@@ -1112,6 +1131,8 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
 		// Get the last error code
 		m_uLastError = errno;
 
+		m_uEventState |= eCloseEvent;
+
 		oexERROR( errno, oexT( "sendto() failed" ) );
 
 		// Number of bytes sent
@@ -1150,6 +1171,8 @@ oexUINT CIpSocket::Send( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_
 	{
 		// Get the last error code
 		m_uLastError = errno;
+
+		m_uEventState |= eCloseEvent;
 
 		oexERROR( errno, oexT( "send() failed" ) );
 

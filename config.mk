@@ -117,7 +117,7 @@ else
 		CFG_TOOLPREFIX := 
 
 		CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread -luuid
-		CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD
+		CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_NOSHM
 		CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 		CFG_AFLAGS := cq
 		

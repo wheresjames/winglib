@@ -359,8 +359,8 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str2.GuidToString( str1.StringToGuid( &guid ) ) == str1 ) )
 		return -10;
 
-    if ( !oexVERIFY( oex::CStr( oexT( "TaBlE" ) ).ToLower() == oexT( "table" ) ) ||
-		 !oexVERIFY( oex::CStr( oexT( "cHaIr" ) ).ToUpper() == oexT( "CHAIR" ) ) )
+    if ( !oexVERIFY( oex::CStr( oexT( "TaBlE" ) ).ToLower() == oexT( "table" ) )
+         || !oexVERIFY( oex::CStr( oexT( "cHaIr" ) ).ToUpper() == oexT( "CHAIR" ) ) )
 		return -11;
 
     if ( !oexVERIFY( oex::CStr( oexT( "Hello" ) ).Reverse() == oexT( "olleH" ) ) )
@@ -512,6 +512,19 @@ oex::oexRESULT TestStrings()
 	// +++ Check into why this fails, at least in unicode
 //	if ( !oexVERIFY( !oex::zstr::Compare( str2.Ptr(), oexBinToStrPtr( oexStrToBinPtr( str1.Ptr() ) ) ) ) )
 //		return -49;
+
+	str1 = oexT( "ABCDEFGHIJKLMNOPQRSTUVWXYZ" );
+	if ( !oexVERIFY( str1.Replace( oexT( "ABC" ), oexT( "123" ) ) == oexT( "123DEFGHIJKLMNOPQRSTUVWXYZ" ) )
+	     || !oexVERIFY( str1.Replace( oexT( "LMNO" ), oexT( "1234" ) ) == oexT( "ABCDEFGHIJK1234PQRSTUVWXYZ" ) )
+	     || !oexVERIFY( str1.Replace( oexT( "XYZ" ), oexT( "123" ) ) == oexT( "ABCDEFGHIJKLMNOPQRSTUVW123" ) )
+	     || !oexVERIFY( str1.Replace( oexT( "ABCDEFGHIJKLMNOPQRSTUVWXYZ" ), oexT( "123" ) ) == oexT( "123" ) ) )
+		return -49;
+
+	if ( !oexVERIFY( !oex::CStr( oexT( "/" ) ).LTrim( oexT( "/" ) ).Length() )
+	     || !oexVERIFY( !oex::CStr( oexT( "/\\\\" ) ).LTrim( oexT( "/\\" ) ).Length() )
+	     || !oexVERIFY( !oex::CStr( oexT( "/" ) ).RTrim( oexT( "/" ) ).Length() )
+	     || !oexVERIFY( !oex::CStr( oexT( "/\\\\" ) ).RTrim( oexT( "/\\" ) ).Length() ) )
+		return -50;
 
     return oex::oexRES_OK;
 }
@@ -1298,6 +1311,9 @@ oex::oexRESULT Test_CIpAddress()
     return oex::oexRES_OK;
 }
 
+// Three seconds should be more than enough for our test
+#define SOCKET_TIMEOUT	( 3 * 1000 )
+
 oex::oexRESULT Test_CIpSocket()
 {
     if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
@@ -1316,16 +1332,16 @@ oex::oexRESULT Test_CIpSocket()
     if ( !oexVERIFY( client.Connect( oexT( "127.0.0.1" ), 23456 ) ) )
         return -4;
 
-    if ( !oexVERIFY( server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
+    if ( !oexVERIFY( server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, SOCKET_TIMEOUT ) ) )
         return -5;
 
     if ( !oexVERIFY( server.Accept( session ) ) )
         return -6;
 
-    if ( !oexVERIFY( session.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
+    if ( !oexVERIFY( session.WaitEvent( oex::os::CIpSocket::eConnectEvent, SOCKET_TIMEOUT ) ) )
     	return -7;
 
-    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
+    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, SOCKET_TIMEOUT ) ) )
         return -8;
 
     oex::oexCSTR pStr = oexT( "B6F5FF3D-E9A5-46ca-ADB8-D655427EB94D" );
@@ -1333,14 +1349,14 @@ oex::oexRESULT Test_CIpSocket()
     if ( !oexVERIFY( session.Send( oexStrToBin( pStr ) ) ) )
         return -9;
 
-    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eReadEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
+    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eReadEvent, SOCKET_TIMEOUT ) ) )
         return -10;
 
     if ( !oexVERIFY( oexBinToStr( client.Recv() ) == pStr ) )
         return -11;
 
     client.Destroy();
-    if ( !oexVERIFY( session.WaitEvent( oex::os::CIpSocket::eCloseEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
+    if ( !oexVERIFY( session.WaitEvent( oex::os::CIpSocket::eCloseEvent, SOCKET_TIMEOUT ) ) )
         return -12;
 
     session.Destroy();
@@ -1362,7 +1378,7 @@ oex::oexRESULT Test_CIpSocket()
     if ( !oexVERIFY( client.SendTo( oexStrToBin( pStr ) ) ) )
         return -16;
 
-    if ( !oexVERIFY( server.WaitEvent( oex::os::CIpSocket::eReadEvent, oexDEFAULT_WAIT_TIMEOUT ) ) )
+    if ( !oexVERIFY( server.WaitEvent( oex::os::CIpSocket::eReadEvent, SOCKET_TIMEOUT ) ) )
         return -17;
 
     if ( !oexVERIFY( oexBinToStr( server.RecvFrom() ) == pStr ) )
@@ -2167,7 +2183,7 @@ int main(int argc, char* argv[])
 
 //    Test_CVfsSession();
 
-    Test_CCapture();
+//    Test_CCapture();
 
 	// Initialize the oex library
     oexUNINIT();

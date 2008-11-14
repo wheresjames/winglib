@@ -111,7 +111,7 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 	str << oexT( "Module     : " ) << ( oexCHECK_PTR( x_pModule ) ? x_pModule : oexT( "" ) ) << oexNL;
 	str << oexT( "File       : " ) << ( oexCHECK_PTR( x_pFile ) ? x_pFile : oexT( "" ) ) << oexNL;
 	str << oexT( "Line       : " ) << x_uLine << oexNL;
-	str << oexT( "Function   : " ) << ( oexCHECK_PTR( x_pFunction ) ? x_pFunction : oexT( "" ) ) << oexNL;
+	str << oexT( "Function   : " ) << ( oexCHECK_PTR( x_pFunction ) ? x_pFunction : oexT( "???" ) ) << oexT( "()" ) << oexNL;
 	str << oexT( "Expression : " ) << CStr( x_pStr ).Replace( oexT( "%" ), oexT( "%%" ) ).Ptr() << oexNL;
 	if ( x_nRes )
 		str << oexT( "Result     : " ) << x_nRes << oexT( " sys:\"" ) << os::CTrace::GetErrorMsg( x_nRes ).Replace( oexT( "%" ), oexT( "%%" ) ).Ptr() << oexT( "\"" ) << oexNL;

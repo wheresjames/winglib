@@ -323,7 +323,7 @@ public:
 
 		// Add timestamp
 		m_pbTxHeaders[ "Date" ] =
-			oexStrToStr8( CSysTime().GetSystemTime().FormatTime( oexT( "%w, %d %b %Y %g:%m:%s GMT" ) ) );
+			oexStrToStr8( oexGmtTimeStr( oexT( "%w, %d %b %Y %g:%m:%s GMT" ) ) );
 
 		// Last modified
 		m_pbTxHeaders[ "Last-modified" ] = "";
