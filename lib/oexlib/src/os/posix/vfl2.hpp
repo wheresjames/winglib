@@ -502,7 +502,7 @@ public:
 	/// Waits for a new frame of video
 	oexBOOL WaitForFrame( oexUINT x_uTimeout = 0 )
 	{
-		os::CSys::printf( "calling VIDIOC_DQBUF...\n" );
+//		os::CSys::printf( "calling VIDIOC_DQBUF...\n" );
 
 		v4l2_buffer buf;
 		oexZeroMemory( &buf, sizeof( buf ) );
@@ -521,7 +521,7 @@ public:
 
 //		os::CSys::Sleep( 3000 );
 
-		os::CSys::printf( "Active Buffer is %d\n", buf.index );
+//		os::CSys::printf( "Active Buffer is %d\n", buf.index );
 
 		m_nActiveBuf = buf.index;
 

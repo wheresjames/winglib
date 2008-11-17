@@ -97,7 +97,11 @@ oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT 
 
 		// Write out the time
 		sLog << oexGmtTimeStr( oexT( " -> %w, %d %b %Y %g:%m:%s GMT" ) )
-		     << oexLocalTimeStr( oexT( " -- Local: %Y/%c/%d - %g:%m:%s.%l" ) oexNL );
+#ifdef OEX_NANOSECONDS
+		     << oexLocalTimeStr( oexT( " -- Local: %Y/%c/%d - %g:%m:%s.%l.%u.%n" ) oexNL );
+#else
+		     << oexLocalTimeStr( oexT( " -- Local: %Y/%c/%d - %g:%m:%s.%l.%u" ) oexNL );
+#endif
 
 		// Add error level
 		sLog << oexT( " -> " ) << pLevel;

@@ -195,15 +195,20 @@ public:
 
 		} // end else
 
-		m_buf1.size = 1 * GetImageSize();
-		m_buf1.frames = 1;
-		m_buf1.offsets[ 0 ] = 0;
+		oexINT nImageSize = GetImageSize();
+
+		m_buf1.size = eMaxBuffers * nImageSize;
+		m_buf1.frames = eMaxBuffers;
+
+		for ( oexINT i = 0; i < eMaxBuffers; i++ )
+			m_buf1.offsets[ i ] = i * nImageSize;
 
 		// Set video buffer
 		if ( -1 == IoCtl( m_nFd, VIDIOCGMBUF, &m_buf1 ) )
 			oexWARNING( errno, CStr().Fmt( oexT( "VIDIOCGMBUF : Failed! Unable to set video buffer, fd=%u, ignoring error" ), m_nFd ) );
 
 		oexINT lImageSize = GetImageSize();
+//		oexINT lImageSize = m_buf1.size;
 		if ( 0 >= lImageSize )
 		{	oexERROR( errno, CStr().Fmt( oexT( "Invalid Image size %d : %d x %d x %d" ), lImageSize, m_nWidth, m_nHeight, m_nBpp ) );
 			return oexFALSE;
@@ -259,7 +264,10 @@ public:
 	/// Waits for a new frame of video
 	virtual oexBOOL WaitForFrame( oexUINT x_uTimeout = 0 )
 	{
-		oexINT nFrame = 0;
+		if ( eMaxBuffers <= ++m_nActiveBuf )
+			m_nActiveBuf = 0;
+
+		oexINT nFrame = m_nActiveBuf;
 		if ( -1 == IoCtl( m_nFd, VIDIOCSYNC, &nFrame ) )
 		{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOCSYNC : Failed to wait for frame sync, %u" ), m_nFd ) );
 			return oexFALSE;
@@ -282,7 +290,7 @@ public:
 		if ( m_pFrameBuffer )
 			return m_pFrameBuffer;
 
-		return m_image[ m_nActiveBuf ].Ptr();
+		return m_image[ 0 ].Ptr() + ( m_nActiveBuf * GetImageSize() );
 	}
 
 	/// +++ Should return the size of the video buffer

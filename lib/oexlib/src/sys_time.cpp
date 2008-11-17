@@ -243,6 +243,14 @@ CStr CSysTime::FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors )
 
 			case oexT( 'L' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMillisecond ); break;
 
+			case oexT( 'u' ) : str.AppendNum( oexT( "%0.3lu" ), (oexUINT)m_time.uMicrosecond ); break;
+
+			case oexT( 'U' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMicrosecond ); break;
+
+			case oexT( 'n' ) : str.AppendNum( oexT( "%0.3lu" ), (oexUINT)m_time.uNanosecond ); break;
+
+			case oexT( 'N' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uNanosecond ); break;
+
 			case oexT( 'c' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uMonth ); break;
 
 			case oexT( 'C' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMonth ); break;
@@ -328,6 +336,8 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 	oexUINT uMinute = eInvalid;
 	oexUINT uSecond = eInvalid;
 	oexUINT uMillisecond = eInvalid;
+	oexUINT uMicrosecond = eInvalid;
+	oexUINT uNanosecond = eInvalid;
 	oexUINT uDayOfWeek = eInvalid;
 
 	oexBOOL bTzNeg = oexFALSE;
@@ -400,6 +410,26 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
             case oexT( 'L' ) :
                 uMillisecond = (oexUINT)x_sStr.ToNum( 0, 10, &nEnd, oexTRUE );
                 if ( !nEnd || 1000 < uMillisecond ) bErrors = oexTRUE;
+                break;
+
+            case oexT( 'u' ) :
+                uMicrosecond = (oexUINT)x_sStr.ToNum( 3, 10, &nEnd, oexTRUE );
+                if ( 3 != nEnd || 1000 < uMicrosecond ) bErrors = oexTRUE;
+                break;
+
+            case oexT( 'U' ) :
+                uMicrosecond = (oexUINT)x_sStr.ToNum( 0, 10, &nEnd, oexTRUE );
+                if ( !nEnd || 1000 < uMicrosecond ) bErrors = oexTRUE;
+                break;
+
+            case oexT( 'n' ) :
+                uNanosecond = (oexUINT)x_sStr.ToNum( 3, 10, &nEnd, oexTRUE );
+                if ( 3 != nEnd || 1000 < uNanosecond ) bErrors = oexTRUE;
+                break;
+
+            case oexT( 'N' ) :
+                uNanosecond = (oexUINT)x_sStr.ToNum( 0, 10, &nEnd, oexTRUE );
+                if ( !nEnd || 1000 < uNanosecond ) bErrors = oexTRUE;
                 break;
 
             case oexT( 'c' ) :
@@ -544,7 +574,7 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 	if ( eInvalid != nTzBias && bTzNeg ) nTzBias = -nTzBias;
 
 	// Set valid parts of the time
-	SetTime( uYear, uMonth, uDay, uHour, uMinute, uSecond, uMillisecond, uDayOfWeek, nTzBias );
+	SetTime( uYear, uMonth, uDay, uHour, uMinute, uSecond, uMillisecond, uMicrosecond, uNanosecond, uDayOfWeek, nTzBias );
 
     return oexTRUE;
 }

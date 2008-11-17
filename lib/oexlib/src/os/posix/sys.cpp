@@ -444,6 +444,8 @@ void CSys_SystemTimeToSTime( struct tm* tinfo, CSys::STime &t )
     t.uMinute = tinfo->tm_min;
     t.uSecond = tinfo->tm_sec;
     t.uMillisecond = 0;
+    t.uMicrosecond = 0;
+    t.uNanosecond = 0;
 }
 
 void CSys_STimeToSystemTime( CSys::STime &t, struct tm* tinfo )
@@ -456,6 +458,8 @@ void CSys_STimeToSystemTime( CSys::STime &t, struct tm* tinfo )
     tinfo->tm_min = t.uMinute;
     tinfo->tm_sec = t.uSecond;
 //   = t.uMillisecond;
+//   = t.uMicrosecond;
+//   = t.uNanosecond;
 }
 
 oexBOOL CSys::GetLocalTime( STime &t )
@@ -468,6 +472,19 @@ oexBOOL CSys::GetLocalTime( STime &t )
 	localtime_r( &current_time, &tinfo );
 
 	CSys_SystemTimeToSTime( &tinfo, t );
+
+#ifdef OEX_NANOSECONDS
+	struct timespec	ts;
+	clock_gettime( CLOCK_REALTIME, &ts );
+	t.uMillisecond = ts.tv_nsec / 1000 / 1000;
+	t.uMicrosecond = ts.tv_nsec / 1000 % 1000;
+	t.uNanosecond = ts.tv_nsec % 1000;
+#else
+	struct timeval tp;
+	gettimeofday( &tp, oexNULL );
+	t.uMillisecond = tp.tv_usec / 1000;
+	t.uMicrosecond = tp.tv_usec % 1000;
+#endif
 
 	// +++ Add time zone crap
 //	t.nTzBias = tz.Bias;
@@ -497,7 +514,13 @@ oexBOOL CSys::GetSystemTime( STime &t )
 	struct tm tinfo;
 	gmtime_r( &current_time, &tinfo );
 
+	struct timeval tp;
+	gettimeofday( &tp, oexNULL );
+
 	CSys_SystemTimeToSTime( &tinfo, t );
+
+	t.uMillisecond = tp.tv_usec / 1000;
+	t.uMicrosecond = tp.tv_usec % 1000;
 
     return oexTRUE;
 }

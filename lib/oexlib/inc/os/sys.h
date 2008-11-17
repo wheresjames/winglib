@@ -301,6 +301,8 @@ public:
         oexUINT         uMinute;
         oexUINT         uSecond;
         oexUINT         uMillisecond;
+        oexUINT			uMicrosecond;
+        oexUINT			uNanosecond;
         oexINT          nTzBias;
     };
 

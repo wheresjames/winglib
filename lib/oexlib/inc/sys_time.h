@@ -135,21 +135,23 @@ public:
 	//==============================================================
 	/// Sets the specified time
 	/**
-		\param [in] dwYear			-	Four digit year
-		\param [in] dwMonth			-	Month ( 1 - 12 )
-		\param [in] dwDay			-	Day of the month ( 1 - 31 )
-		\param [in] dwHour			-	Hour of the day ( 0 - 23 )
-		\param [in] dwMinute		-	Minute of the hour ( 0 - 59 )
-		\param [in] dwSecond		-	Second of the minute ( 0 - 59 )
-		\param [in] dwMilliseconds	-	Millisecond value ( 0 - 999 )
-		\param [in] dwDayOfWeek		-	Day of the week ( 1 - 7 )
+		\param [in] uYear			-	Four digit year
+		\param [in] uMonth			-	Month ( 1 - 12 )
+		\param [in] uDay			-	Day of the month ( 1 - 31 )
+		\param [in] uHour			-	Hour of the day ( 0 - 23 )
+		\param [in] uMinute			-	Minute of the hour ( 0 - 59 )
+		\param [in] uSecond			-	Second of the minute ( 0 - 59 )
+		\param [in] uMilliseconds	-	Millisecond value ( 0 - 999 )
+		\param [in] uMicroseconds	-	Microsecond value ( 0 - 999 )
+		\param [in] uNanoseconds	-	Nanosecond value ( 0 - 999 )
+		\param [in] uDayOfWeek		-	Day of the week ( 1 - 7 )
 		\param [in] lTzBias			-	Time zone bias, MAXLONG for
 										none.
 	*/
 	CSysTime& SetTime(	oexUINT uYear = eInvalid, oexUINT uMonth = eInvalid, oexUINT uDay = eInvalid,
 					oexUINT uHour = eInvalid, oexUINT uMinute = eInvalid, oexUINT uSecond = eInvalid,
-					oexUINT uMilliseconds = eInvalid, oexUINT uDayOfWeek = eInvalid,
-					oexINT nTzBias = eInvalid )
+					oexUINT uMilliseconds = eInvalid, oexUINT uMicrosecond = eInvalid, oexUINT uNanoseconds = eInvalid,
+					oexUINT uDayOfWeek = eInvalid, oexINT nTzBias = eInvalid )
 	{	if ( uYear != eInvalid ) m_time.uYear = uYear;
 		if ( uMonth != eInvalid ) m_time.uMonth = uMonth;
 		if ( uDay != eInvalid ) m_time.uDay = uDay;
@@ -238,6 +240,22 @@ public:
 	oexUINT GetMilliSecond() { return m_time.uMillisecond; }
     oexUINT SetMilliSecond( oexUINT m )
     {   if ( m >= 1000 ) m %= 1000; return m_time.uMillisecond = m; }
+
+	//==============================================================
+	// GetMicroSecond()
+	//==============================================================
+	/// Returns the micro-second value ( 0 - 999 )
+	oexUINT GetMicroSecond() { return m_time.uMicrosecond; }
+    oexUINT SetMicroSecond( oexUINT m )
+    {   if ( m >= 1000 ) m %= 1000; return m_time.uMicrosecond = m; }
+
+	//==============================================================
+	// GetNanoSecond()
+	//==============================================================
+	/// Returns the nano-second value ( 0 - 999 )
+	oexUINT GetNanoSecond() { return m_time.uNanosecond; }
+    oexUINT SetNanoSecond( oexUINT m )
+    {   if ( m >= 1000 ) m %= 1000; return m_time.uNanosecond = m; }
 
 	//==============================================================
 	// IsPM()
@@ -343,6 +361,10 @@ public:
 		-	\%S = second
 		-	\%l = milli seconds fixed 3 digits
 		-	\%L = milli seconds
+		-	\%u = micro seconds fixed 3 digits
+		-	\%U = micro seconds
+		-	\%n = nano seconds fixed 3 digits
+		-	\%N = nano seconds
 		-	\%a = am/pm
 		-	\%A = AM/PM
 		-	\%c = Month [01-12] fixed 2 digits
@@ -402,6 +424,10 @@ public:
 		-	\%S = second
 		-	\%l = milli seconds fixed 3 digits
 		-	\%L = milli seconds
+		-	\%u = micro seconds fixed 3 digits
+		-	\%U = micro seconds
+		-	\%n = nano seconds fixed 3 digits
+		-	\%N = nano seconds
 		-	\%a = am/pm
 		-	\%A = AM/PM
 		-	\%c = Month [01-12] fixed 2 digits
