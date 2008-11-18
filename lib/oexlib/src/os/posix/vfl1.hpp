@@ -141,8 +141,7 @@ public:
 		close( m_nFd );
 
 		// Lose the image buffer(s)
-		for( oexINT i = 0; i < eMaxBuffers; i++ )
-			m_image[ i ].Destroy();
+		m_image.Destroy();
 
 		m_nFd = -1;
 		m_llFrame = 0;
@@ -159,7 +158,8 @@ public:
 
 	/// Proper ioctl call
 	static int IoCtl( int fd, int request, void * arg )
-	{	int nErr; return oexDO( nErr = ioctl( fd, request, arg ), EINTR == nErr, nErr ); }
+	{	int nErr; while ( -1 == ( nErr = ioctl( fd, request, arg ) ) && EINTR == errno ); }
+//	{	int nErr; return oexDO( nErr = ioctl( fd, request, arg ), EINTR == nErr, nErr ); }
 
 public:
 
@@ -195,11 +195,10 @@ public:
 
 		} // end else
 
+		// Init structure
 		oexINT nImageSize = GetImageSize();
-
 		m_buf1.size = eMaxBuffers * nImageSize;
 		m_buf1.frames = eMaxBuffers;
-
 		for ( oexINT i = 0; i < eMaxBuffers; i++ )
 			m_buf1.offsets[ i ] = i * nImageSize;
 
@@ -207,7 +206,7 @@ public:
 		if ( -1 == IoCtl( m_nFd, VIDIOCGMBUF, &m_buf1 ) )
 			oexWARNING( errno, CStr().Fmt( oexT( "VIDIOCGMBUF : Failed! Unable to set video buffer, fd=%u, ignoring error" ), m_nFd ) );
 
-		oexINT lImageSize = GetImageSize();
+		oexINT lImageSize = m_buf1.size;
 //		oexINT lImageSize = m_buf1.size;
 		if ( 0 >= lImageSize )
 		{	oexERROR( errno, CStr().Fmt( oexT( "Invalid Image size %d : %d x %d x %d" ), lImageSize, m_nWidth, m_nHeight, m_nBpp ) );
@@ -215,10 +214,11 @@ public:
 		} // end if
 
 		// Allocate shared memory
-		m_image[ 0 ].PlainShare( oexTRUE );
-		m_image[ 0 ].SetShareHandle( (os::CFMap::t_HFILEMAP)m_nFd );
-		if ( !oexCHECK_PTR( m_image[ 0 ].OexNew( lImageSize ).Ptr() ) )
-			oexERROR( errno, CStr().Fmt( oexT( "Failed to allocate shared image buffer size=%d : %d x %d x %d" ), lImageSize, m_nWidth, m_nHeight, m_nBpp ) );
+		m_image.PlainShare( oexTRUE );
+		m_image.SetShareHandle( (os::CFMap::t_HFILEMAP)m_nFd );
+		if ( !oexCHECK_PTR( m_image.OexNew( lImageSize ).Ptr() ) )
+			oexERROR( errno, CStr().Fmt( oexT( "Failed to allocate shared image buffer size=%d : %d x %d x %d" ),
+										 lImageSize, m_nWidth, m_nHeight, m_nBpp ) );
 
 		return oexTRUE;
 	}
@@ -268,7 +268,7 @@ public:
 			m_nActiveBuf = 0;
 
 		oexINT nFrame = m_nActiveBuf;
-		if ( -1 == IoCtl( m_nFd, VIDIOCSYNC, &nFrame ) )
+		if ( -1 == IoCtl( m_nFd, VIDIOCSYNC, &nFrame ) && EAGAIN != errno )
 		{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOCSYNC : Failed to wait for frame sync, %u" ), m_nFd ) );
 			return oexFALSE;
 		} // end if
@@ -290,7 +290,7 @@ public:
 		if ( m_pFrameBuffer )
 			return m_pFrameBuffer;
 
-		return m_image[ 0 ].Ptr() + ( m_nActiveBuf * GetImageSize() );
+		return m_image.Ptr() + m_buf1.offsets[ m_nActiveBuf ];
 	}
 
 	/// +++ Should return the size of the video buffer
@@ -349,7 +349,7 @@ private:
 	video_mbuf			m_buf1;
 
 	/// Image memory
-	TMem< oexCHAR >		m_image[ eMaxBuffers ];
+	TMem< oexCHAR >		m_image;
 
 	/// Active buffer
 	oexINT				m_nActiveBuf;

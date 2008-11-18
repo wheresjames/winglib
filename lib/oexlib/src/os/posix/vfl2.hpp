@@ -32,7 +32,6 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-
 class CV4l2 : public CCaptureTmpl
 {
 public:
@@ -107,7 +106,7 @@ public:
 		} // end if
 
 		// Attempt to open the device
-		m_nFd = open( oexStrToMbPtr( x_pDevice ), O_RDWR | O_NONBLOCK, 0 ); // | O_NONBLOCK, 0 );
+		m_nFd = open( oexStrToMbPtr( x_pDevice ), O_RDWR | O_NONBLOCK, 0 );
 		if ( 0 > m_nFd )
 		{	oexERROR( errno, CStr().Fmt( oexT( "Unable to open device : %s" ), oexStrToMbPtr( x_pDevice ) ) );
 			return oexFALSE;
@@ -160,7 +159,8 @@ public:
 
 	/// Proper ioctl call
 	static int IoCtl( int fd, int request, void * arg )
-	{	int nErr; return oexDO( nErr = ioctl( fd, request, arg ), EINTR == nErr, nErr ); }
+	{	int nErr; while ( -1 == ( nErr = ioctl( fd, request, arg ) ) && EINTR == errno ); return nErr; }
+//	{	int nErr; return oexDO( nErr = ioctl( fd, request, arg ), EINTR == nErr, nErr ); }
 
 public:
 
@@ -267,8 +267,9 @@ public:
 		fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		fmt.fmt.pix.width = m_nWidth;
 		fmt.fmt.pix.height = m_nHeight;
-//		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR8; //V4L2_PIX_FMT_RGB24; // V4L2_PIX_FMT_YUYV
-		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_GREY;
+		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR8; //V4L2_PIX_FMT_RGB24; // V4L2_PIX_FMT_YUYV
+//		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_GREY;
+//		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
 		fmt.fmt.pix.field = V4L2_FIELD_NONE;
 //		fmt.fmt.pix.field = V4L2_FIELD_ANY;
 //		fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
@@ -297,7 +298,8 @@ public:
 
 		m_nBufferSize = fmt.fmt.pix.sizeimage;
 		if ( 0 >= m_nBufferSize )
-		{	oexERROR( -1, CStr().Fmt( oexT( "Invalid image size %d" ), m_nBufferSize ).Ptr() );
+		{	oexERROR( -1, CStr().Fmt( oexT( "Invalid image size %d - %d x %d" ),
+						              m_nBufferSize, m_nWidth, m_nHeight ).Ptr() );
 			return oexFALSE;
 		} // end if
 
@@ -371,14 +373,14 @@ public:
 			} // end if
 
 			// Queue the buffer into the driver
-			buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+/*			buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 			buf.memory = V4L2_MEMORY_MMAP;
 			buf.index = i;
 			if ( -1 == IoCtl( m_nFd, VIDIOC_QBUF, &buf ) )
 			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_QBUF : Failed : m_nFd = %u" ), m_nFd ) );
 				return oexFALSE;
 			} // end if
-
+*/
 		} // end for
 
 		return oexTRUE;
@@ -464,7 +466,7 @@ public:
 
 	virtual oexBOOL StartCapture()
 	{
-/*		for( oexINT i = 0; i < eMaxBuffers; i++ )
+		for( oexINT i = 0; i < eMaxBuffers; i++ )
 		{
 			v4l2_buffer buf;
 			oexZeroMemory( &buf, sizeof( buf ) );
@@ -477,7 +479,7 @@ public:
 			} // end if
 
 		} // end for
-*/
+
 		int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if ( -1 == IoCtl ( m_nFd, VIDIOC_STREAMON, &type ) )
 		{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_STREAMON : Failed : m_nFd = %u" ), m_nFd ) );
@@ -509,6 +511,7 @@ public:
 		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory = V4L2_MEMORY_MMAP;
 
+		errno = 0;
 		if ( -1 == IoCtl( m_nFd, VIDIOC_DQBUF, &buf ) || eMaxBuffers >= buf.index )
 		{
 			// +++ This failure seems to be unreliable

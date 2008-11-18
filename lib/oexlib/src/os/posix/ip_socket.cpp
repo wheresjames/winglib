@@ -298,6 +298,10 @@ void CIpSocket::Destroy()
 		oexERROR( errno, oexT( "shutdown() failed" ) );
 	} // end if
 
+    if ( -1 == close( (int)hSocket ) )
+    {	m_uLastError = errno;
+		oexERROR( errno, oexT( "close() failed" ) );
+	} // end if
 }
 
 oexBOOL CIpSocket::Shutdown()

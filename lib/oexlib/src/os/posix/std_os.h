@@ -85,6 +85,8 @@ extern int daylight;
 
 #include <sys/sem.h>
 
+#include <signal.h>
+
 /*
 #include <sys/ioctl.h>
 #include <linux/types.h>
