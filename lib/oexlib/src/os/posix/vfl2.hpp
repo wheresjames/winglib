@@ -512,15 +512,10 @@ public:
 		buf.memory = V4L2_MEMORY_MMAP;
 
 		errno = 0;
-		if ( -1 == IoCtl( m_nFd, VIDIOC_DQBUF, &buf ) || eMaxBuffers >= buf.index )
-		{
-			// +++ This failure seems to be unreliable
-			oexNOTICE( errno, CStr().Fmt( oexT( "VIDIOC_DQBUF : Failed : m_nFd = %d, buf.index = %d, buf.flags = %x" ), m_nFd, buf.index, buf.flags ) );
-//			return oexFALSE;
+		if ( -1 == IoCtl( m_nFd, VIDIOC_DQBUF, &buf ) || 0 > buf.index || eMaxBuffers <= buf.index )
+		{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_DQBUF : Failed : m_nFd = %d, buf.index = %d, buf.flags = %x" ), m_nFd, buf.index, buf.flags ) );
+			return oexFALSE;
 		} // end if
-
-		else
-			os::CSys::printf( "VIDIOC_DQBUF actually succeeded - errno=%d\n" );
 
 //		os::CSys::Sleep( 3000 );
 
