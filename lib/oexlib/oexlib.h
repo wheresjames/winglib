@@ -491,6 +491,8 @@ namespace os
 #   include "inc/os/ip_address.h"
 #   include "inc/os/ip_socket.h"
 #   include "inc/os/thread.h"
+#	include "inc/os/module.h"
+#   include "inc/os/service.h"
 };
 
 //------------------------------------------------------------------

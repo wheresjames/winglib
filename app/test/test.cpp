@@ -526,6 +526,15 @@ oex::oexRESULT TestStrings()
 	     || !oexVERIFY( !oex::CStr( oexT( "/\\\\" ) ).RTrim( oexT( "/\\" ) ).Length() ) )
 		return -50;
 
+	if ( !oexVERIFY( ( oex::CStr( oexT( "123" ) ) << oexT( "456" ) ) == oexT( "123456" ) ) )
+		return -51;
+
+	if ( !oexVERIFY( ( oex::CStr( oexT( "abc/def" ) ).GetFileName() << oexT( "ghi" ) ) == oexT( "defghi" ) ) )
+		return -52;
+
+	if ( !oexVERIFY( oexGetModuleFileName().GetFileName() == oexT( "test" ) ) )
+		return -53;
+
     return oex::oexRES_OK;
 }
 
@@ -1224,9 +1233,9 @@ oex::oexRESULT Test_CSysTime()
 {
     oex::CSysTime st;
 
-    st.SetTime( 1997, 12, 25, 16, 15, 30, 500, 4 );
+    st.SetTime( 1997, 12, 25, 16, 15, 30, 500, 0, 0, 4 );
 
-//        oexTRACE( oexT( "%s\n" ), st.FormatTime( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ).Ptr() );
+//        oexTRACE( oexT( "%s\n" ), st.FormatTime( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() );
 //        oexTRACE( oexT( "%s\n" ), st.FormatTime( oexT( "%Y/%c/%d - %g:%m:%s.%l" ).Ptr() );
 //        oexTRACE( oexT( "%s\n" ), st.FormatTime( oexT( "%w, %d %b %Y %g:%m:%s GMT" ).Ptr() );
 

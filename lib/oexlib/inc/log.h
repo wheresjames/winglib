@@ -67,7 +67,14 @@ public:
     /// Destructor
     ~CLog()
     {
+    	Destroy();
     }
+
+    void Destroy()
+    {  	m_file.Flush();
+		m_file.Destroy();
+		m_lInLog = 0;
+	}
 
 	//==============================================================
 	// Log()
@@ -89,7 +96,7 @@ public:
 
 		\see
 	*/
-    oexUINT Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x_uLevel, oexCSTR x_pErr, oexINT x_uErr, oexUINT x_uSkip = 2 );
+    oexINT Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x_uLevel, oexCSTR x_pErr, oexINT x_nErr, oexUINT x_uSkip = 2 );
 
 	//==============================================================
 	// Log()
@@ -113,13 +120,38 @@ public:
 
 		\see
 	*/
-    oexUINT Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x_uLevel, CStr x_sErr, oexINT x_uErr )
-    {	if ( x_uLevel < m_uLevel ) return x_uErr;
-    	return Log( x_pFile, x_nLine, x_pFunction, x_uLevel, x_sErr.Ptr(), x_uErr, 3 );
+    oexINT Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x_uLevel, CStr x_sErr, oexINT x_nErr )
+    {	if ( x_uLevel < m_uLevel ) return x_nErr;
+    	return Log( x_pFile, x_nLine, x_pFunction, x_uLevel, x_sErr.Ptr(), x_nErr, 3 );
     }
 
 	//==============================================================
-	// Log()
+	// OpenLogFile()
+	//==============================================================
+	/// Writes a string to the file
+	/**
+		\param [in] x_pPath			- Path for the log file
+		\param [in] x_pFile			- Log file name
+		\param [in] x_pExtension	- Extension to add to log file
+
+		This function opens the specified file and directs errors
+		to this file.  It is not normally necesary to call this file,
+		a file will automatically be created with the first call
+		to log.  You may want to use this function to keep sequential
+		logs or for some other purpose.
+
+		\warning x_uErr should be the last parameter, if it is
+		         a global variable like 'errno', it could possibly,
+		         be destroyed by side effects of other parameters.
+
+		\return Returns non-zero if success
+
+		\see
+	*/
+    oexBOOL OpenLogFile( oexCSTR x_pPath = oexNULL, oexCSTR x_pFile = oexNULL, oexCSTR x_pExtension = oexNULL );
+
+	//==============================================================
+	// SetReportingLevel()
 	//==============================================================
 	/// Writes a string to the file
 	/**

@@ -64,6 +64,7 @@ ifeq ($(OS),win32)
 	CFG_LIB_PRE	 :=
 	CFG_LIB_POST := .lib
 	CFG_EXE_POST := .exe
+	CFG_DLL_POST := .dll
 
 else
 
@@ -78,11 +79,17 @@ else
 		CFG_DPOSTFIX := _d
 	else
 		CFG_CEXTRA	 := -O2 -s $(CFG_CEXTRA) 
-		CFG_LEXTRA	 := -s
+		ifneq ($(PRJ_TYPE),dll)
+			CFG_LEXTRA	 := -s
+		endif
 	endif
 	
-	ifeq ($(LIBLINK),static)
-		CFG_LEXTRA := $(CFG_LEXTRA) -static
+	ifeq ($(PRJ_TYPE),dll)
+		CFG_LEXTRA := $(CFG_LEXTRA) -shared
+	else	
+		ifeq ($(LIBLINK),static)
+			CFG_LEXTRA := $(CFG_LEXTRA) -static
+		endif
 	endif
 	
 	# Arm compiler
@@ -147,6 +154,8 @@ else
 	
 	CFG_LIB_PRE	 := lib
 	CFG_LIB_POST := .a
+	CFG_DLL_PRE	 := lib
+	CFG_DLL_POST := .so
 	
 endif
 

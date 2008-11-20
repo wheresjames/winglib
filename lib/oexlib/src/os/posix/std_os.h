@@ -41,6 +41,7 @@
 #include <cstdio>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 #include <fcntl.h>
 #include <dirent.h>
 //#include <stdio.h>
@@ -62,7 +63,6 @@ extern long timezone;
 extern int daylight;
 
 #include <locale.h>
-#include <sys/mman.h>
 
 #ifndef OEX_NOUUID
 #	include <uuid/uuid.h>
@@ -84,6 +84,8 @@ extern int daylight;
 #endif
 
 #include <sys/sem.h>
+
+#include <dlfcn.h>
 
 #include <signal.h>
 

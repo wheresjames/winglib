@@ -1541,16 +1541,14 @@ public:
 		return str;
 	}
 
-	/// Splits off a string up any of the terminator characters,
-	/// Ignores terminator characters if preceeded by any character
-	/// in the escape string.
+	/// Splits off a string up to any of the terminator characters
 	TStr RParse( oexCONST T* pTerm )
 	{	oexASSERT_PTR( pTerm );
         oexINT lLen = Length();
         oexINT i = str::RFindTerm( Ptr(), lLen, pTerm, zstr::Length( pTerm ) );
-		if ( 0 > i ) return TStr();
-        /// +++ Replace with SubStr()
-		TStr str( Ptr( i ) );
+		if ( 0 > i )
+			return TStr();
+		TStr str( Ptr( i + 1 ), lLen - i - 1 );
 		RTrim( lLen - i );
 		return str;
 	}
@@ -1746,7 +1744,7 @@ public:
     /// Returns the root path of str
     TStr GetFileName()
     {   TStr str( *this );
-        return str.RParse( oexTT( T, "\\/" ) )++;
+        return str.RParse( oexTT( T, "\\/" ) );
     }
 
     /// Returns the file extension of the file path

@@ -38,38 +38,69 @@ OEX_USING_NAMESPACE
 
 CLog CLog::m_logGlobal;
 
-oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x_uLevel, oexCSTR x_pErr, oexINT x_uErr, oexUINT x_uSkip )
+oexBOOL CLog::OpenLogFile( oexCSTR x_pPath, oexCSTR x_pFile, oexCSTR x_pExtension )
+{
+	// Lose old log file
+	Destroy();
+
+	CStr sFile;
+
+	if ( oexCHECK_PTR( x_pPath ) && *x_pPath )
+		sFile = x_pPath;
+	else
+		sFile = oexGetModulePath();
+
+	if ( oexCHECK_PTR( x_pFile ) && *x_pFile )
+		sFile.BuildPath( x_pFile );
+	else
+		sFile.BuildPath( oexGetModuleFileName().GetFileName() );
+
+	if ( oexCHECK_PTR( x_pExtension ) && *x_pExtension )
+		sFile << x_pExtension;
+	else
+		sFile << oexT( ".debug.log" );
+
+#if defined( oexDEBUG )
+	// Show log file location
+	os::CSys::printf( oexStrToMbPtr( sFile.Ptr() ) );
+#endif
+
+	// See if there is an existing log file
+//	if ( m_file.OpenExisting( sFile.Ptr() ).IsOpen() )
+//		m_file.SetPtrPosEnd( 0 );
+
+	// Open new log file
+//	else
+		if ( !m_file.CreateAlways( sFile.Ptr() ).IsOpen() )
+			return oexFALSE;
+
+	// Create log header
+	m_file.Write( CStr().Fmt( oexT( ";====================================================================" ) oexNL
+							  oexT( "; Log file : %s" ) oexNL
+							  oexT( "; Date : %s" ) oexNL
+							  oexT( "; Application : %s" ) oexNL oexNL,
+							  oexStrToMbPtr( sFile.Ptr() ),
+							  oexStrToMbPtr( oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() ),
+							  oexStrToMbPtr( oexGetModuleFileName().Ptr() ) ) );
+
+	return oexTRUE;
+}
+
+oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x_uLevel, oexCSTR x_pErr, oexINT x_nErr, oexUINT x_uSkip )
 {
 	// Ensure valid reporting level
 	if ( x_uLevel < m_uLevel )
-		return x_uErr;
+		return x_nErr;
 
 	// Log count
 	if ( 1 == os::CSys::InterlockedIncrement( &m_lInLog ) )
 	{
 		// Create log file if needed
 		if ( !m_file.IsOpen() )
-		{
-#if defined( oexDEBUG )
-			// Show log file location
-			os::CSys::printf( oexStrToMb( ( oexGetModuleFileName() += oexT( ".debug.log\n" ) ) ).Ptr() );
-#endif
-			// Open new log file
-			if ( !m_file.CreateAlways( ( oexGetModuleFileName() += oexT( ".debug.log" ) ).Ptr() ).IsOpen() )
+			if ( !OpenLogFile() )
 			{	os::CSys::InterlockedDecrement( &m_lInLog );
-				return x_uErr;
+				return x_nErr;
 			} // end if
-
-			// Create log header
-			m_file.Write( CStr().Fmt( oexT( ";====================================================================" ) oexNL
-									  oexT( "; Log file" ) oexNL
-									  oexT( "; Date : %s" ) oexNL
-									  oexT( "; Application : %s" ) oexNL oexNL,
-									  oexStrToMbPtr( oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() ),
-									  oexStrToMbPtr( oexGetModuleFileName().Ptr() ) ) );
-
-		} // end if
-
 
 		if ( !oexCHECK_PTR( x_pFile ) )
 			x_pFile = oexT( "???" );
@@ -107,9 +138,9 @@ oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT 
 		sLog << oexT( " -> " ) << pLevel;
 
 		// Add system error info
-		if ( x_uErr )
-			sLog << CStr().Fmt( oexT( " : 0x%X (%d) : " ), x_uErr, x_uErr )
-			 	 << os::CTrace::GetErrorMsg( x_uErr );
+		if ( x_nErr )
+			sLog << CStr().Fmt( oexT( " : 0x%X (%d) : " ), x_nErr, x_nErr )
+			 	 << os::CTrace::GetErrorMsg( x_nErr );
 
 		sLog << oexNL;
 
@@ -139,6 +170,6 @@ oexUINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT 
 	// Reduce log count
 	os::CSys::InterlockedDecrement( &m_lInLog );
 
-	return x_uErr;
+	return x_nErr;
 }
 
