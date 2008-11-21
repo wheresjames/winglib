@@ -1482,6 +1482,18 @@ public:
 		return *this;
 	}
 
+	/// Returns the offset of the specified string, or less than zero if not found
+	oexINT FindSubStr( TStr pStr )
+	{	return str::FindSubStr( Ptr(), Length(), pStr.Ptr(), pStr.Length() ); }
+
+	/// Returns the offset of the specified string, or less than zero if not found
+	oexINT FindSubStr( oexCONST T* pStr )
+	{	return str::FindSubStr( Ptr(), Length(), pStr, zstr::Length( pStr ) ); }
+
+	/// Returns the offset of the specified string, or less than zero if not found
+	oexINT FindSubStr( oexCONST T* pStr, oexINT nLen )
+	{	return str::FindSubStr( Ptr(), Length(), pStr, nLen ); }
+
 	/// Skips any characters in pChars and removes them from
 	/// the string.
 	TStr& Skip( oexCONST T* pChars )

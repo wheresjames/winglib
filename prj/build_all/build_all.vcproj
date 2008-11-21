@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="build_all"
 	ProjectGUID="{DC2772E5-4496-4053-920C-B52FBB27A409}"
+	RootNamespace="build_all"
 	Keyword="MakeFileProj"
 	>
 	<Platforms>
@@ -16,9 +17,10 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(InputDir)"
+			IntermediateDirectory="$(InputDir)"
 			ConfigurationType="0"
+			BuildLogFile="$(InputDir)/BuildLog.htm"
 			>
 			<Tool
 				Name="VCNMakeTool"
@@ -36,9 +38,10 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(InputDir)"
+			IntermediateDirectory="$(InputDir)"
 			ConfigurationType="0"
+			BuildLogFile="$(InputDir)\BuildLog.htm"
 			>
 			<Tool
 				Name="VCNMakeTool"

@@ -39,9 +39,13 @@ OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 using namespace OEX_NAMESPACE::vid;
 
+// Include capture classes
+//#include "vfw1.hpp"
+//#include "vfw2.hpp"
 
 CCapture::CCapture()
 {
+	m_uType = oexVIDSUB_AUTO;
 	m_pDevice = oexNULL;
 }
 
@@ -51,148 +55,79 @@ CCapture::~CCapture()
 	Destroy();
 }
 
-void CCapture::Destroy()
+oexBOOL CCapture::Destroy()
 {
 	/// Lose device if any
-	if ( m_pDevice )
+	if ( oexCHECK_PTR( m_pDevice ) )
 	{
-//		OexAllocDelete( (CV4lCapture*)m_pDevice );
-		m_pDevice = oexNULL;
+		switch( m_uType )
+		{
+			case oexVIDSUB_VFW :
+//				OexAllocDelete< CV4l1 >( (CV4l1*)m_pDevice );
+				break;
+
+			case oexVIDSUB_DSHOW :
+//				OexAllocDelete< CV4l2 >( (CV4l2*)m_pDevice );
+				break;
+
+		} // end switch
+
 	} // end if
+
+	m_uType = oexVIDSUB_AUTO;
+	m_pDevice = oexNULL;
+
+	return oexTRUE;
 }
 
-//	CV4lCapture				m_v4lCap;
-
-oexBOOL CCapture::Open( oexCSTR x_sDevice, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_sDevice, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
 {
 	// Lose previous device
 	Destroy();
 
 	// Allocate a new capture device
-//	m_pDevice = OexAllocNew< CV4lCapture >( 1 );
-	if ( !m_pDevice )
+	switch( x_uType )
+	{
+		case oexVIDSUB_AUTO :
+
+//			m_pDevice = OexAllocConstruct< CV4w2 >();
+			if ( !oexCHECK_PTR( m_pDevice ) )
+			{	Destroy();
+				return oexFALSE;
+			} // end if
+
+			// Try VFL2
+			if ( m_pDevice->Open( x_uType, x_sDevice, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
+			{	m_uType = oexVIDSUB_VFL2;
+				return oexTRUE;
+			} // end if
+
+//			OexAllocDelete< CV4w2 >( (CV4w2*)m_pDevice );
+			m_pDevice = oexNULL;
+
+		case oexVIDSUB_VFW :
+			m_uType = x_uType;
+//			m_pDevice = OexAllocConstruct< CV4w1 >();
+			break;
+
+		case oexVIDSUB_DSHOW :
+			m_uType = x_uType;
+//			m_pDevice = OexAllocConstruct< CV4w2 >();
+			break;
+
+	} // end switch
+
+	if ( !oexCHECK_PTR( m_pDevice ) )
+	{	Destroy();
 		return oexFALSE;
+	} // end if
+
+	// Attempt to open the capture device
+	if ( !m_pDevice->Open( x_uType, x_sDevice, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
+	{	Destroy();
+		return oexFALSE;
+	} // end if
 
 	return oexTRUE;
-}
-
-oexBOOL CCapture::WaitForFrame( oexUINT x_uTimeout )
-{
-	if ( !oexCHECK_PTR( m_pDevice ) )
-	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
-		return oexFALSE;
-	} // end if
-
-	return oexFALSE;
-}
-
-oexBOOL CCapture::StartCapture()
-{
-	if ( !oexCHECK_PTR( m_pDevice ) )
-	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
-		return oexFALSE;
-	} // end if
-
-	return oexFALSE;
-}
-
-oexBOOL CCapture::StopCapture()
-{
-	if ( !oexCHECK_PTR( m_pDevice ) )
-	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
-		return oexFALSE;
-	} // end if
-
-	return oexFALSE;
-}
-
-oexPVOID CCapture::GetBuffer()
-{
-	if ( !oexCHECK_PTR( m_pDevice ) )
-	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
-		return oexFALSE;
-	} // end if
-
-	return oexFALSE;
-}
-
-oexINT CCapture::GetBufferSize()
-{
-	if ( !oexCHECK_PTR( m_pDevice ) )
-	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
-		return oexFALSE;
-	} // end if
-
-	return 0;
-}
-
-CImage* CCapture::GetImage()
-{
-	if ( !oexCHECK_PTR( m_pDevice ) )
-	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
-		return oexFALSE;
-	} // end if
-
-	return oexFALSE;
-}
-
-oexINT CCapture::GetWidth()
-{
-	if ( !oexCHECK_PTR( m_pDevice ) )
-	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
-		return oexFALSE;
-	} // end if
-
-	return oexFALSE;
-}
-
-oexINT CCapture::GetHeight()
-{
-	if ( !oexCHECK_PTR( m_pDevice ) )
-	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
-		return oexFALSE;
-	} // end if
-
-	return oexFALSE;
-}
-
-oexINT CCapture::GetBpp()
-{
-	if ( !oexCHECK_PTR( m_pDevice ) )
-	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
-		return oexFALSE;
-	} // end if
-
-	return oexFALSE;
-}
-
-oexFLOAT CCapture::GetFps()
-{
-	if ( !oexCHECK_PTR( m_pDevice ) )
-	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
-		return oexFALSE;
-	} // end if
-
-	return oexFALSE;
-}
-
-oexINT64 CCapture::GetFrame()
-{
-	if ( !oexCHECK_PTR( m_pDevice ) )
-	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
-		return oexFALSE;
-	} // end if
-
-	return oexFALSE;
-}
-
-CStr CCapture::GetSupportedFormats()
-{
-	if ( !oexCHECK_PTR( m_pDevice ) )
-	{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device pointer : %d" ), m_pDevice ) );
-		return CStr();
-	} // end if
-
-	return oexFALSE;
 }
 

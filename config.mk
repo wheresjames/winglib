@@ -1,4 +1,6 @@
 
+SHELL = /bin/sh
+
 # config.mk
 # Cross compiler config
 

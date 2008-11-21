@@ -18,11 +18,11 @@ ifndef BLD_FILE_EXE
 	BLD_PATH_EXE := $(CFG_OUTROOT)/$(BLD_FILE_EXE)	
 endif
 
-ifndef LOC_CXX_$(LOC_TAG)
+ifeq ($(LOC_CXX_$(LOC_TAG)),)
 	LOC_CXX_$(LOC_TAG) := cpp
 endif
 
-ifndef LOC_H_$(LOC_TAG)
+ifeq ($(LOC_H_$(LOC_TAG)),)
 	LOC_H_$(LOC_TAG) := h
 endif
 
@@ -33,19 +33,19 @@ BLD_COMPILER := $(CFG_PP)
 endif
 
 # Using full paths helps IDE editors to locate the file when there's an error ;)
-ifdef LOC_SRC_$(LOC_TAG)
+ifneq ($(LOC_SRC_$(LOC_TAG)),)
 BLD_PATH_SRC_$(LOC_TAG) := $(CFG_CUR_ROOT)/$(LOC_SRC_$(LOC_TAG))
 else
 BLD_PATH_SRC_$(LOC_TAG) := $(CFG_CUR_ROOT)
 endif
 
-ifdef LOC_INC_$(LOC_TAG)
+ifneq ($(LOC_INC_$(LOC_TAG)),)
 BLD_PATH_INC_$(LOC_TAG) := $(CFG_CUR_ROOT)/$(LOC_INC_$(LOC_TAG))
 else
 BLD_PATH_INC_$(LOC_TAG) := $(CFG_CUR_ROOT)
 endif
 
-ifdef LOC_OUT_$(LOC_TAG)
+ifneq ($(LOC_OUT_$(LOC_TAG)),)
 BLD_PATH_BIN_$(LOC_TAG) := $(CFG_OUTROOT)/_$(PRJ_NAME)/$(LOC_OUT_$(LOC_TAG))
 else
 BLD_PATH_BIN_$(LOC_TAG) := $(CFG_OUTROOT)/_$(PRJ_NAME)
@@ -65,7 +65,9 @@ BLD_INCS			    := $(CFG_CC_INC)$(BLD_PATH_INC_$(LOC_TAG)) $(foreach inc,$(PRJ_IN
 
 BLD_OBJECTS_TOTAL := $(BLD_OBJECTS_TOTAL) $(BLD_OBJECTS_$(LOC_TAG))
 
+ifneq ($(OS),win32)
 include $(wildcard $(BLD_PATH_OBJ_$(LOC_TAG))/*.d)
+endif
 
 #-------------------------------------------------------------------
 # Options
@@ -104,8 +106,18 @@ BLD_CLEAN := $(BLD_CLEAN) clean_$(LOC_TAG)
 # Build
 #-------------------------------------------------------------------
 
+$(print this is a test)
+$(print BLD_OBJECTS_$(LOC_TAG) )
+$(print $(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) )
+
+ifeq ($(OS),win32)	  
+$(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
+	- $(CFG_DEL) $(subst /,\,$@)
+	$(BLD_COMPILER) $(CFG_CFLAGS) $(BLD_INCS) $< $(CFG_CC_OUT)$@
+else
 $(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
 	- $(CFG_DEL) $@
 	$(BLD_COMPILER) $(CFG_CFLAGS) $(BLD_INCS) $< $(CFG_CC_OUT)$@
+endif
 
 

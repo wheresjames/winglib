@@ -77,6 +77,8 @@ oexBOOL CCapture::Destroy()
 
 	m_uType = oexVIDSUB_AUTO;
 	m_pDevice = oexNULL;
+
+	return oexTRUE;
 }
 
 //	CV4lCapture				m_v4lCap;

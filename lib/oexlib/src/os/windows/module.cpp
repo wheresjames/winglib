@@ -38,7 +38,7 @@
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
-oexSTATIC_ASSERT( sizeof( oexPVOID ) == sizeof( HANDLE ) );
+oexSTATIC_ASSERT( sizeof( oexPVOID ) == sizeof( HMODULE ) );
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -46,7 +46,6 @@ oexSTATIC_ASSERT( sizeof( oexPVOID ) == sizeof( HANDLE ) );
 
 CModule::CModule()
 {
-	m_nSize = 0;
 	m_hModule = oexNULL;
 }
 
@@ -87,14 +86,12 @@ oexBOOL CModule::Load( oexCSTR x_pFile )
 
 void CModule::Destroy()
 {
-	m_nSize = 0;
-
 	// Lose the pointers
 	m_ptrs.Destroy();
 
 	// Free library
 	if ( m_hModule )
-	{	::FreeLibrary( m_hModule );
+	{	::FreeLibrary( (HMODULE)m_hModule );
 		m_hModule = oexNULL;
 	} // end if
 
@@ -110,12 +107,12 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 	if ( oexCHECK_PTR( pf ) )
 		return pf;
 
-	pf = ::GetProcAddress( m_hModule, x_pFunctionName );
+	pf = ::GetProcAddress( (HMODULE)m_hModule, x_pFunctionName );
 	if ( !oexCHECK_PTR( pf ) )
 		return oexFALSE;
 
 	// Save index
-	oexINT index = m_nSize;
+	oexINT index = Size();
 
 	// Re allocate space for pointers
 	if ( m_ptrs.Size() <= index )

@@ -127,6 +127,11 @@ oexBOOL CBaseFile::Read( CBaseFile::t_HFILE x_hFile, oexPVOID x_pData, oexINT64 
     return bRet;
 }
 
+oexBOOL CBaseFile::Flush( t_HFILE x_hFile )
+{
+	return ::FlushFileBuffers( x_hFile );
+}
+
 oexINT64 CBaseFile::Size( t_HFILE hFile )
 {   if ( c_Invalid == hFile ) return 0;
     DWORD dwHi = 0, dwLo = ::GetFileSize( hFile, &dwHi );

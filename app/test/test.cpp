@@ -532,8 +532,12 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( ( oex::CStr( oexT( "abc/def" ) ).GetFileName() << oexT( "ghi" ) ) == oexT( "defghi" ) ) )
 		return -52;
 
-	if ( !oexVERIFY( oexGetModuleFileName().GetFileName() == oexT( "test" ) ) )
+	str1 = oexT( "ABCDEFGHIJKLMNOPQRSTUVWXYZ" );
+	if ( !oexVERIFY( 0 <= str1.FindSubStr( oexT(  "DEFG" ) ) ) )
 		return -53;
+
+	if ( !oexVERIFY( 0 <= oexGetModuleFileName().GetFileName().FindSubStr( oexT( "test" ) ) ) )
+		return -54;
 
     return oex::oexRES_OK;
 }

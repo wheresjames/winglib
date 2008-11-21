@@ -102,14 +102,14 @@ void CDebug::Break()
 #endif
 }
 
-void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pStr )
+void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pStr, oexINT x_nRes, oexINT x_nErr )
 {
 	oexTCHAR tcModule[ oexSTRSIZE ] = oexT( "" );
 	GetModuleFileName( (HMODULE)GetInstanceHandle(), tcModule, sizeof( tcModule ) );
 	Break( x_nType, x_pFile, x_uLine, x_pFunction, tcModule, x_pStr );
 }
 
-void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr )
+void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr, oexINT x_nRes, oexINT x_nErr )
 {
 #if defined( oexDEBUG )
 
@@ -135,6 +135,10 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 	str << oexT( "Line : " ) << x_uLine << oexNL << oexNL;
 	str << oexT( "Function : " ) << x_pFunction << oexNL << oexNL;
 	str << oexT( "Expression : " ) << CStr( x_pStr ).Replace( oexT( "%" ), oexT( "%%" ) );
+	if ( x_nRes )
+		str << oexT( "Result     : " ) << x_nRes << oexT( " sys:\"" ) << os::CTrace::GetErrorMsg( x_nRes ).Replace( oexT( "%" ), oexT( "%%" ) ).Ptr() << oexT( "\"" ) << oexNL;
+	if ( x_nErr )
+		str << oexT( "Error Code : " ) << x_nErr << oexT( " sys:\"" ) << os::CTrace::GetErrorMsg( x_nErr ).Replace( oexT( "%" ), oexT( "%%" ) ).Ptr() << oexT( "\"" ) << oexNL;
 
 	// Simulate the _CrtDbgReport box
 	int nRet = MessageBox( NULL, str.Ptr(), oexT( "Program Self Verification Error" ), MB_ICONSTOP | MB_ABORTRETRYIGNORE );
