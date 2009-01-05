@@ -88,6 +88,9 @@ oexINT COex::Uninit()
 //    if ( !oexVERIFY( oexNet.Destroy() ) )
 //       m_nShutdownCode |= -1;
 
+	// Close the log file
+	CLog::GlobalLog().Destroy();
+
     // Uninit the system stuff
     if ( !oexVERIFY( os::CSys::Uninit() ) )
         m_nShutdownCode |= -8;

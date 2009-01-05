@@ -38,7 +38,7 @@
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
-oexINT CService::Fork( CStr x_sWorkingDirectory )
+oexINT CService::Fork( CStr x_sWorkingDirectory, oexCSTR x_pLogFile )
 {
 	pid_t pid, sid;
 
@@ -51,9 +51,7 @@ oexINT CService::Fork( CStr x_sWorkingDirectory )
 
 	// Exit parent process
 	if ( 0 < pid )
-	{	CStr sStr = CStr().Fmt( oexT( "fork() = %d (0x%x);" ), (int)pid, (int)pid );
-		oexNOTICE( 0, sStr.Ptr() );
-		CSys::printf( ( sStr << oexT( "\n" ) ).Ptr() );
+	{	oexNOTICE( 0, CStr().Fmt( oexT( "fork() = %d (0x%x);" ), (int)pid, (int)pid ).Ptr() );
 		return pid;
 	} // end if
 
@@ -68,10 +66,13 @@ oexINT CService::Fork( CStr x_sWorkingDirectory )
 	} // end if
 
 	// Switch to custom log file
-	CLog::GlobalLog().OpenLogFile( oexNULL, oexNULL, oexT( ".fork.debug.log" ) );
+	if ( oexCHECK_PTR( x_pLogFile ) && *x_pLogFile )
+		CLog::GlobalLog().OpenLogFile( oexNULL, x_pLogFile, oexT( ".fork.debug.log" ) );
+	else
+		CLog::GlobalLog().OpenLogFile( oexNULL, oexNULL, oexT( ".fork.debug.log" ) );
 
 	// Log child sid
-	oexNOTICE( 0, CStr().Fmt( oexT( "Child fork() from %s : setsid() = %n" ), (int)sid ) );
+	oexNOTICE( 0, CStr().Fmt( oexT( "Child fork() : setsid() = %d" ), (int)sid ) );
 
 	// Use the module path as the current working directory
 	if ( x_sWorkingDirectory.Length() )
@@ -92,20 +93,110 @@ oexINT CService::Fork( CStr x_sWorkingDirectory )
 	return 0;
 }
 
-oexINT CService::Run( CStr x_sModule )
+oexINT CService::Run( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay, oexINT x_nFlags )
 {
 	// Fork the process, return if parent or failure
 	if ( oexINT nRet = Fork( x_sModule.GetPath() ) )
 		return nRet;
 
-	// We're in the child fork() now...
+	// *** We're in the child fork() now...
 
 	// Load the module
 	CModule mod;
 	if ( !mod.Load( x_sModule.Ptr() ) )
+	{	oexERROR( errno, CStr().Fmt( oexT( "Failed to load module %s" ),
+	                     			 oexStrToMbPtr( x_sModule.Ptr() ) ) );
 		return -1;
+	} // end if
 
+	service::PFN_SRV_GetModuleInfo pGetModuleInfo =
+		(service::PFN_SRV_GetModuleInfo)mod.AddFunction( oexT( "SRV_GetModuleInfo" ) );
+	if ( !oexCHECK_PTR( pGetModuleInfo ) )
+	{	oexERROR( errno, CStr().Fmt( oexT( "Module '%s' does not contain symbol SRV_GetModuleInfo()" ),
+					     			 oexStrToMbPtr( x_sModule.Ptr() ) ) );
+		return -2;
+	} // end if
 
+	// Get module information
+	service::SSrvInfo si;
+	oexZeroMemory( &si, sizeof( si ) );
+	if ( !pGetModuleInfo( &si ) )
+	{	oexERROR( errno, CStr().Fmt( oexT( "In module '%s', SRV_GetModuleInfo() failed" ),
+					     			 oexStrToMbPtr( x_sModule.Ptr() ) ) );
+		return -3;
+	} // end if
+
+	// Verify correct module type
+	if ( oexCHECK_PTR( x_pguidType ) && !guid::CmpGuid( x_pguidType, &si.guidType ) )
+	{	oexERROR( errno, CStr().Fmt( oexT( "In module '%s', incorrect module type, %s != %s" ),
+									 oexStrToMbPtr( x_sModule.Ptr() ),
+									 oexStrToMbPtr( CStr().GuidToString( x_pguidType ).Ptr() ),
+									 oexStrToMbPtr( CStr().GuidToString( &si.guidType ).Ptr() ) ) );
+		return -4;
+	} // end if
+
+	// Log information about the module
+	oexNOTICE( 0, CStr().Fmt( oexT( "Module Loaded:  '%s'\r\n"
+								    "Name:           %s\r\n"
+								    "Version:        %d.%d\r\n"
+								    "Description:    %s\r\n"
+								    "Type:           %s\r\n"
+								    "ID:             %s\r\n"
+								    "Instance:       %s\r\n" ),
+							   oexStrToMbPtr( x_sModule.Ptr() ),
+							   si.szName,
+							   oexVERSION_MAJOR( si.lVer ), oexVERSION_MINOR( si.lVer ),
+							   si.szDesc,
+							   oexStrToMbPtr( CStr().GuidToString( &si.guidType ).Ptr() ),
+							   oexStrToMbPtr( CStr().GuidToString( &si.guidId ).Ptr() ),
+							   oexStrToMbPtr( CStr().GuidToString( &si.guidInstance ).Ptr() ) ) );
+
+	// Load start function
+	service::PFN_SRV_Start pStart =
+		(service::PFN_SRV_Start)mod.AddFunction( oexT( "SRV_Start" ) );
+	if ( !oexCHECK_PTR( pStart ) )
+	{	oexWARNING( errno, CStr().Fmt( oexT( "Symbol SRV_Start() not found in module '%s'" ),
+					       			   oexStrToMbPtr( x_sModule.Ptr() ) ) );
+		return 0;
+	} // end if
+
+	// Call start function if provided
+	else if ( !pStart( x_sModule.Ptr(), x_pData ) )
+	{	oexNOTICE( 0, CStr().Fmt( oexT( "Exiting because SRV_Start() returned 0 in module %s" ),
+					   			  oexStrToMbPtr( x_sModule.Ptr() ) ) );
+		return -5;
+	} // end if
+
+	oexNOTICE( 0, CStr().Fmt( oexT( "Module '%s' started successfully" ),
+					       	  oexStrToMbPtr( x_sModule.Ptr() ) ) );
+
+	// Load start function
+	service::PFN_SRV_Idle pIdle =
+		(service::PFN_SRV_Idle)mod.AddFunction( oexT( "SRV_Idle" ) );
+	if ( !oexCHECK_PTR( pIdle ) )
+		oexWARNING( errno, CStr().Fmt( oexT( "Symbol SRV_Idle() not found in module '%s'" ),
+					       			   oexStrToMbPtr( x_sModule.Ptr() ) ) );
+
+	// Run idle loop if function provided
+	if ( oexCHECK_PTR( pIdle ) )
+		while ( pIdle() )
+			os::CSys::Sleep( x_nIdleDelay );
+
+	// Forever
+	else for( ; ; )
+		os::CSys::Sleep( 60000 );
+
+	// Check for stop function
+	service::PFN_SRV_Stop pStop =
+		(service::PFN_SRV_Stop)mod.AddFunction( oexT( "SRV_Stop" ) );
+	if ( !oexCHECK_PTR( pStop ) )
+	{	oexWARNING( errno, CStr().Fmt( oexT( "Symbol SRV_Stop() not found in module '%s'" ),
+					       			   oexStrToMbPtr( x_sModule.Ptr() ) ) );
+		return 0;
+	} // end if
+
+	// Call stop function
+	pStop();
 
 	return 0;
 }

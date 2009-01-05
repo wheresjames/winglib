@@ -34,6 +34,10 @@
 
 #pragma once
 
+/**
+	The functions below define a simple module interface.
+
+*/
 namespace service
 {
 	//==============================================================
@@ -41,20 +45,23 @@ namespace service
 	//==============================================================
 	/// Called when module is loaded.  Do all initialization here.
 	/**
-		This function does not have to be provided
+	 	\param [in] x_pPath	- Path to the module
+	 	\param [in] x_pData	- User defined string
+
+		This function does not need to be provided.
 
 		\return Zero if module load should be aborted.
 
 		\see
 	*/
-	typedef oexBOOL (*PFN_SRV_Start)();
+	typedef oexBOOL (*PFN_SRV_Start)( oexCSTR x_pPath, oexCPVOID x_pData );
 
 	//==============================================================
 	// SRV_Stop()
 	//==============================================================
 	/// Called when module is unloaded.  Do final shutdown here.
 	/**
-		This function does not have to be provided
+		This function does not need to be provided.
 
 		\return Ignored
 
@@ -62,13 +69,16 @@ namespace service
 	*/
 	typedef oexBOOL (*PFN_SRV_Stop)();
 
-
 	//==============================================================
 	// SRV_Idle()
 	//==============================================================
 	/// Called while loader is idling
 	/**
-		This function does not have to be provided
+		This function does not need to be provided.
+
+		Sleep is called after each call to SRV_Idle().  It
+		is not required this function return until program
+		termination is desired.
 
 		\return Zero if module should terminate
 
@@ -110,7 +120,7 @@ namespace service
 	/**
 		\param [in] pDi		-	Pointer to SDtpInfo structure
 
-		This function must be provided
+		This function must be provided.
 
 		\return Non-zero if success
 
@@ -132,9 +142,6 @@ namespace service
 */
 class CService
 {
-public:
-
-
 private:
 
 	/// Default constructor
@@ -145,22 +152,67 @@ private:
 
 public:
 
-	/// Service module
+	//==============================================================
+	// Run()
+	//==============================================================
+	/// Starts the module in a forked process.
 	/**
-		Starts the module in a forked process.
+	 	\param [in] x_sModule		- Path to module to fork
+	 	\param [in] x_pData			- User data to pass on to module
+	 	\param [in] x_pguidType		- GUID specifying the required type
+	 							  	  of the module.  An error will be
+	 							  	  returned if the module type does
+	 							  	  not match.  Pass NULL if the module
+	 							  	  type is to be ignored.
+	 	\param [in] x_nIdleDelay	- Delay between calls to the modules
+	 								  Idle() function.
+	 	\param [in] x_nFlags		- Module load flags.  These flags
+	 								  are passed to dlopen().
+
+		Module can optionally provide the functions.
+
+		SRV_GetModuleInfo() 	- Must be provided.  The module should fill
+								  in the appropriate fields of the SSrvInfo
+								  structure.
+
+		SRV_Start()				- This function is called to initialize the
+								  module.  It is not required that this
+								  function be provided.  If this function
+								  returns zero, the process will exit and
+								  SRV_Idle() and SRV_Stop() will not be called.
+
+	    SRV_Idle()				- This function is called repetedly.  This
+	    						  function does need not be provided.  Sleep()
+	    						  is called after each call to SRV_Idle() with
+	    						  the wait value of x_nIdleDelay so long as a
+	    						  non-zero value is returned.  If this SRV_Idle()
+	    						  returns zero, the process will exit.  It is
+	    						  not required that this function return until
+	    						  process termination is desired.
+
+	    SRV_Stop()				- This function is called after SRV_Idle()
+	    						  returns zero.  Use this function to clean
+	    						  up.  This function need not be provided.
+	    						  The return value is ignored.
 
 		\return Less than zero if failure, zero if child, greater
 				than zero on return from parent.
 	*/
-	static oexINT Run( CStr x_sModule );
+	static oexINT Run( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay = 10, oexINT x_nFlags = -1 );
 
+	//==============================================================
+	// Fork()
+	//==============================================================
 	/// Fork current process
 	/**
+		\param [in] x_sWorkingDirectory	- Working directory for the
+									      newly forked process.
+		\param [in] x_pLogFile			- token used in creating the
+										  new log file.
 
 		\return Less than zero if failure, zero if child, greater
 				than zero on return from parent.
 	*/
-	static oexINT Fork( CStr x_sWorkingDirectory );
-
+	static oexINT Fork( CStr x_sWorkingDirectory, oexCSTR x_pLogFile = oexNULL );
 
 };

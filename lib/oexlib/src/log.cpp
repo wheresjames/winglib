@@ -134,6 +134,10 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x
 		     << oexLocalTimeStr( oexT( " -- Local: %Y/%c/%d - %g:%m:%s.%l.%u" ) oexNL );
 #endif
 
+		// Add function name if available
+		if ( x_pFunction && *x_pFunction )
+			sLog << oexT( " -> " ) << x_pFunction << oexT( "()" ) oexNL;
+
 		// Add error level
 		sLog << oexT( " -> " ) << pLevel;
 
@@ -143,10 +147,6 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x
 			 	 << os::CTrace::GetErrorMsg( x_nErr );
 
 		sLog << oexNL;
-
-		// Add function name if available
-		if ( x_pFunction && *x_pFunction )
-			sLog << oexT( " -> " ) << x_pFunction << oexT( "()" ) oexNL;
 
 		// Write out the user error string if available
 		if ( oexCHECK_PTR( x_pErr ) )

@@ -53,7 +53,7 @@ oexCPVOID CDebug::GetInstanceHandle()
 
 void CDebug::Trace( oexCSTR x_pStr )
 {
-	printf( oexStrToMbPtr( x_pStr ) );
+	puts( oexStrToMbPtr( x_pStr ) );
 }
 
 void CDebug::FmtTrace( oexCSTR x_pFmt, ... )
@@ -118,7 +118,7 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 	if ( x_nErr )
 		str << oexT( "Error Code : " ) << x_nErr << oexT( " sys:\"" ) << os::CTrace::GetErrorMsg( x_nErr ).Replace( oexT( "%" ), oexT( "%%" ) ).Ptr() << oexT( "\"" ) << oexNL;
 
-	printf( oexStrToMbPtr( str.Ptr() ) );
+	puts( oexStrToMbPtr( str.Ptr() ) );
 	oexERROR( 0, str.Ptr() );
 
 #ifdef oexBACKTRACE_IN_LOG

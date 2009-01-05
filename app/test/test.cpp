@@ -315,7 +315,8 @@ oex::oexRESULT TestStrings()
 //        oex::oexSTR pUnPtr = str1.Allocate( 4 );
 //        pUnPtr--; *pUnPtr = 1;
 
-    if ( !oexVERIFY_PTR( pStr = str1.OexAllocate( 12 ) ) )
+	pStr = str1.OexAllocate( 12 );
+    if ( !oexVERIFY_PTR( pStr ) )
         return -1;
 
     oex::zstr::Copy( pStr, oexT( "Hello World!" ) );

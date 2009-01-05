@@ -52,6 +52,7 @@ CModule::CModule()
 CModule::CModule( oexCSTR x_pFile )
 {
 	CModule();
+
 	Load( x_pFile );
 }
 
@@ -60,7 +61,7 @@ CModule::~CModule()
 	Destroy();
 }
 
-oexBOOL CModule::Load( oexCSTR x_pFile )
+oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 {
 	// Do we already have this module loaded?
 	if ( oexNULL != m_hModule && x_pFile && m_sFile == x_pFile )
@@ -71,15 +72,22 @@ oexBOOL CModule::Load( oexCSTR x_pFile )
 
 	// Punt if bad filename
 	if ( !oexCHECK_PTR( x_pFile ) || !*x_pFile )
+	{	oexERROR( EINVAL, "Invalid function argument" );
 		return oexFALSE;
+	} // end if
 
 	// Save file name
 	m_sFile = x_pFile;
 
+	if ( -1 == x_nFlags )
+		x_nFlags = RTLD_LAZY;
+
 	// Load the module
-	m_hModule = dlopen( x_pFile, 0 );
+	m_hModule = dlopen( x_pFile, x_nFlags );
 	if ( m_hModule == oexNULL )
+	{	oexERROR( errno, CStr().Fmt( "dlopen( '%s' )", oexStrToMbPtr( x_pFile ) ) );
 		return oexFALSE;
+	} // end if
 
 	return oexTRUE;
 }
@@ -95,17 +103,20 @@ void CModule::Destroy()
 	{	dlclose( m_hModule );
 		m_hModule = oexNULL;
 	} // end if
-
 }
 
 oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 {
 	// Sanity check
-	if ( x_pFunctionName )
+	if ( !oexCHECK_PTR( x_pFunctionName ) )
+	{	oexERROR( EINVAL, "Invalid function argument" );
 		return oexNULL;
+	} // end if
 
 	if ( !m_hModule )
+	{	oexERROR( EINVAL, "Module not loaded" );
 		return oexNULL;
+	} // end if
 
 	oexPVOID pf = Addr( x_pFunctionName );
 	if ( oexCHECK_PTR( pf ) )
@@ -113,14 +124,22 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 
 	pf = dlsym( m_hModule, x_pFunctionName );
 	if ( !oexCHECK_PTR( pf ) )
-		return oexFALSE;
+	{	oexERROR( errno, CStr().Fmt( "dlsym( %d, '%s' )", (int)m_hModule, oexStrToMbPtr( x_pFunctionName ) ) );
+		return oexNULL;
+	} // end if
 
 	// Save index
 	oexINT index = m_map.Size();
 
 	// Re allocate space for pointers
-	if ( m_ptrs.Size() <= index )
-		m_ptrs.Resize( m_ptrs.Size() * 2 );
+	oexUINT uSize = m_ptrs.Size();
+	if ( !uSize ) uSize = 8;
+	while ( uSize <= index )
+		uSize <<= 1;
+
+	// Resize the pointer array
+	if ( !m_ptrs.Resize( uSize ).Ptr() )
+		return oexNULL;
 
 	// Save address into table
 	m_ptrs[ index ] = pf;
@@ -131,14 +150,19 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 oexPVOID CModule::Addr( oexINT i )
 {
 	if ( i >= Size() )
+	{	oexERROR( EINVAL, CStr().Fmt( oexT( "Invalid function index : %d" ), i ) );
 		return oexNULL;
+	} // end if
+
 	return m_ptrs[ i ];
 }
 
 oexPVOID CModule::Addr( oexCSTR x_pFunctionName )
 {
 	if ( !oexCHECK_PTR( x_pFunctionName ) || !*x_pFunctionName )
+	{	oexERROR( EINVAL, "Invalid function name pointer" );
 		return oexNULL;
+	} // end if
 
 	if ( !m_map.IsKey( x_pFunctionName ) )
 		return oexNULL;

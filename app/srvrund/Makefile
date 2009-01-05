@@ -8,7 +8,7 @@ PRJ_NAME := srvrund
 PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib
-PRJ_OSLB := $(CFG_STDLIBS)
+PRJ_OSLB :=
 
 PRJ_LIBROOT := ../..
 

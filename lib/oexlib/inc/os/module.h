@@ -104,7 +104,7 @@ public:
 
 		\see
 	*/
-	oexBOOL Load( oexCSTR x_pFile );
+	oexBOOL Load( oexCSTR x_pFile, oexINT x_nFlags = -1 );
 
 	//==============================================================
 	// GetLibraryPath()

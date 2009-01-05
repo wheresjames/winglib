@@ -43,6 +43,10 @@
 
 #define oexIGNORE					(void)
 
+#define oexVERSION( h, l )			( ( h << 16 ) | l )
+#define oexVERSION_MINOR( v )		( v & 0xffff )
+#define oexVERSION_MAJOR( v )		( ( v >> 16 ) & 0xffff )
+
 #if defined( OEX_WIN32 )
 #	define oexVaList				oexPVOID
 #	define oexVaStart( v, p )		( v = ( ( (oexPVOID*)&p ) + 1 ) )
@@ -153,6 +157,9 @@
 #define oexGmtTime					OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eGmtTime )
 #define oexLocalTimeStr				OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eLocalTime ).FormatTime
 #define oexGmtTimeStr				OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eGmtTime ).FormatTime
+
+#define oexGuidToString				OEX_NAMESPACE::CStr().GuidToString
+#define oexStringToGuid				OEX_NAMESPACE::CStr().GuidToString
 
 /// oexRETRY() - Retry something up to m times
 /**
