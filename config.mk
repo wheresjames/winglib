@@ -56,9 +56,15 @@ ifeq ($(OS),win32)
 	CFG_LD_OUT := /OUT:
 	CFG_AR_OUT := /OUT:
 	CFG_CC_INC := /I
+	
+	CFG_FLAG_EXPORT := /EXPORT:
 
 	CFG_CFLAGS := /EHsc /c $(CFG_CEXTRA)
 	CFG_LFLAGS := $(CFG_LEXTRA)
+	
+	ifeq ($(PRJ_TYPE),dll)
+		CFG_LFLAGS := $(CFG_LFLAGS) /DLL
+	endif
 
 	CFG_OBJ_EXT := obj
 	CFG_CUR_ROOT := $(shell cd)
@@ -67,7 +73,7 @@ ifeq ($(OS),win32)
 	CFG_LIB_POST := .lib
 	CFG_EXE_POST := .exe
 	CFG_DLL_POST := .dll
-
+	
 else
 
 	# --with-sysroot

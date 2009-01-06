@@ -8,7 +8,9 @@ PRJ_NAME := srvmod
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib
-PRJ_OSLB := 
+PRJ_OSLB :=
+ 
+PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start
 
 PRJ_LIBROOT := ../..
 

@@ -76,11 +76,13 @@ oexBOOL CLog::OpenLogFile( oexCSTR x_pPath, oexCSTR x_pFile, oexCSTR x_pExtensio
 
 	// Create log header
 	m_file.Write( CStr().Fmt( oexT( ";====================================================================" ) oexNL
-							  oexT( "; Log file : %s" ) oexNL
-							  oexT( "; Date : %s" ) oexNL
+							  oexT( "; Log file    : %s" ) oexNL
+							  oexT( "; Local Time  : %s" ) oexNL
+							  oexT( "; GMT Time    : %s" ) oexNL
 							  oexT( "; Application : %s" ) oexNL oexNL,
 							  oexStrToMbPtr( sFile.Ptr() ),
 							  oexStrToMbPtr( oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() ),
+							  oexStrToMbPtr( oexGmtTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() ),
 							  oexStrToMbPtr( oexGetModuleFileName().Ptr() ) ) );
 
 	return oexTRUE;
@@ -127,11 +129,10 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x
 		sLog << x_pFile << oexT( ":(" ) << x_nLine << oexT( ")" ) oexNL;
 
 		// Write out the time
-		sLog << oexGmtTimeStr( oexT( " -> %w, %d %b %Y %g:%m:%s GMT" ) )
 #ifdef OEX_NANOSECONDS
-		     << oexLocalTimeStr( oexT( " -- Local: %Y/%c/%d - %g:%m:%s.%l.%u.%n" ) oexNL );
+		sLog << oexLocalTimeStr( oexT( " -> Local Time: %Y/%c/%d - %g:%m:%s.%l.%u.%n" ) oexNL );
 #else
-		     << oexLocalTimeStr( oexT( " -- Local: %Y/%c/%d - %g:%m:%s.%l.%u" ) oexNL );
+		sLog << oexLocalTimeStr( oexT( " -> Local Time: %Y/%c/%d - %g:%m:%s.%l.%u" ) oexNL );
 #endif
 
 		// Add function name if available

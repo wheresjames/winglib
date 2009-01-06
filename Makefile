@@ -1,6 +1,6 @@
 
 # Total dependencies
-BUILDDIRS := lib/oexlib app/test
+BUILDDIRS := lib/oexlib app/test app/srvrund app/srvmod
 
 ifdef BUILDDEP
 	BUILDDIRS := dep $(BUILDDIRS)

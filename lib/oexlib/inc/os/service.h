@@ -153,9 +153,24 @@ private:
 public:
 
 	//==============================================================
+	// Fork()
+	//==============================================================
+	/// Fork current process
+	/**
+		\param [in] x_sWorkingDirectory	- Working directory for the
+									      newly forked process.
+		\param [in] x_pLogFile			- token used in creating the
+										  new log file.
+
+		\return Less than zero if failure, zero if child, greater
+				than zero on return from parent.
+	*/
+	static oexINT Fork( CStr x_sWorkingDirectory, oexCSTR x_pLogFile = oexNULL );
+
+	//==============================================================
 	// Run()
 	//==============================================================
-	/// Starts the module in a forked process.
+	/// Starts the module in a seperate process.
 	/**
 	 	\param [in] x_sModule		- Path to module to fork
 	 	\param [in] x_pData			- User data to pass on to module
@@ -195,24 +210,16 @@ public:
 	    						  up.  This function need not be provided.
 	    						  The return value is ignored.
 
+		\see RunModule()
+
 		\return Less than zero if failure, zero if child, greater
 				than zero on return from parent.
 	*/
 	static oexINT Run( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay = 10, oexINT x_nFlags = -1 );
 
-	//==============================================================
-	// Fork()
-	//==============================================================
-	/// Fork current process
+	/// Runs the module in the current process
 	/**
-		\param [in] x_sWorkingDirectory	- Working directory for the
-									      newly forked process.
-		\param [in] x_pLogFile			- token used in creating the
-										  new log file.
-
-		\return Less than zero if failure, zero if child, greater
-				than zero on return from parent.
+		\see Run()
 	*/
-	static oexINT Fork( CStr x_sWorkingDirectory, oexCSTR x_pLogFile = oexNULL );
-
+	static oexINT RunModule( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay = 10, oexINT x_nFlags = -1 );
 };

@@ -10,12 +10,34 @@ int main(int argc, char* argv[])
 	// Start a log file
 	oexNOTICE( 0, "Application startup" );
 
+	oex::CStr sModule;
+
+	if ( argc > 2 )
+		sModule = argv[ 1 ];
+
+	if ( !sModule.Length() )
+#if defined( _DEBUG )
+#	if defined( OEX_WIN32 )
+		sModule = oexT( "srvmod_d.dll" );
+#	else
+		sModule = oexT( "srvmod_d.so" );
+#	endif
+#else
+#	if defined( OEX_WIN32 )
+		sModule = oexT( "srvmod.dll" );
+#	else
+		sModule = oexT( "srvmod.so" );
+#	endif
+#endif
+
 	oex::os::CSys::printf( "Starting...\n" );
 
-	int nRet = oex::os::CService::Run( oexGetModulePath( oexT( "libsrvmod.so" ) ), oexNULL, oexNULL );
+	int nRet = oex::os::CService::Run( oexGetModulePath().BuildPath( sModule.Ptr() ), oexNULL, oexNULL );
 
-	if ( 0 > nRet )
-		return -1;
+	if ( 0 <= nRet )
+	{	oexERROR( 0, "Failed to start service module..." );
+		oex::os::CSys::printf( "Failed to start service module...\n" );
+	} // end if
 
 	else if ( 0 < nRet )
 	{	oexNOTICE( 0, "Return from parent..." );

@@ -38,69 +38,23 @@
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
+/// +++ Possibly we can somehow create another process and call this function ???
+extern "C" oex::oexRESULT OEX_SRVMODULE_20081230192357EST_Run( oex::oexCSTR x_pPath )
+{	
+
+	return -1;
+}
+
 oexINT CService::Fork( CStr x_sWorkingDirectory, oexCSTR x_pLogFile )
 {
-	pid_t pid, sid;
+	// Hmmmmm
+	oexERROR( 0, "Cant fork() on Windows" );
 
-	// Fork from the parent
-	pid = fork();
-	if ( 0 > pid )
-	{	oexERROR( errno, oexT( "fork() failed" ) );
-		return -1;
-	} // end if
-
-	// Exit parent process
-	if ( 0 < pid )
-	{	oexNOTICE( 0, CStr().Fmt( oexT( "fork() = %d (0x%x);" ), (int)pid, (int)pid ).Ptr() );
-		return pid;
-	} // end if
-
-	// Change file mode mask
-	umask( 0 );
-
-	// Child process needs a SID
-	sid = setsid();
-	if ( 0 > sid )
-	{	oexERROR( errno, oexT( "setsid() failed" ) );
-		return -1;
-	} // end if
-
-	// Switch to custom log file
-	if ( oexCHECK_PTR( x_pLogFile ) && *x_pLogFile )
-		CLog::GlobalLog().OpenLogFile( oexNULL, x_pLogFile, oexT( ".fork.debug.log" ) );
-	else
-		CLog::GlobalLog().OpenLogFile( oexNULL, oexNULL, oexT( ".fork.debug.log" ) );
-
-	// Log child sid
-	oexNOTICE( 0, CStr().Fmt( oexT( "Child fork() : setsid() = %d" ), (int)sid ) );
-
-	// Use the module path as the current working directory
-	if ( x_sWorkingDirectory.Length() )
-		if ( 0 > chdir( oexStrToMbPtr( x_sWorkingDirectory.Ptr() ) ) )
-		{	oexERROR( errno, CStr().Fmt( oexT( "chdir( '%s' ) failed" ), oexStrToMbPtr( x_sWorkingDirectory.Ptr() ) ).Ptr() );
-			return -1;
-		} // end if
-
-	// No more terminals
-	if ( 0 > close( STDIN_FILENO ) )
-		oexWARNING( errno, oexT( "Unable to close STDIN_FILENO" ) );
-	if ( 0 > close( STDOUT_FILENO ) )
-		oexWARNING( errno, oexT( "Unable to close STDIN_FILENO" ) );
-	if ( 0 > close( STDERR_FILENO ) )
-		oexWARNING( errno, oexT( "Unable to close STDIN_FILENO" ) );
-
-	// Return from child process
-	return 0;
+	return -1;
 }
 
 oexINT CService::Run( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay, oexINT x_nFlags )
 {
-	// Fork the process, return if parent or failure
-	if ( oexINT nRet = Fork( x_sModule.GetPath() ) )
-		return nRet;
-
-	// *** We're in the child fork() now...
-
 	return RunModule( x_sModule, x_pData, x_pguidType, x_nIdleDelay, x_nFlags );
 }
 
@@ -110,7 +64,7 @@ oexINT CService::RunModule( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidT
 	CModule mod;
 	if ( !mod.Load( x_sModule.Ptr() ) )
 	{	oexERROR( 0, CStr().Fmt( oexT( "Failed to load module %s" ),
-	                   			 oexStrToMbPtr( x_sModule.Ptr() ) ) );
+	                     	     oexStrToMbPtr( x_sModule.Ptr() ) ) );
 		return -1;
 	} // end if
 
@@ -118,7 +72,7 @@ oexINT CService::RunModule( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidT
 		(service::PFN_SRV_GetModuleInfo)mod.AddFunction( oexT( "SRV_GetModuleInfo" ) );
 	if ( !oexCHECK_PTR( pGetModuleInfo ) )
 	{	oexERROR( 0, CStr().Fmt( oexT( "Module '%s' does not contain symbol SRV_GetModuleInfo()" ),
-				    			 oexStrToMbPtr( x_sModule.Ptr() ) ) );
+					     		 oexStrToMbPtr( x_sModule.Ptr() ) ) );
 		return -2;
 	} // end if
 

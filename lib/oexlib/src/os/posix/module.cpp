@@ -108,7 +108,7 @@ void CModule::Destroy()
 oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 {
 	// Sanity check
-	if ( !oexCHECK_PTR( x_pFunctionName ) )
+	if ( !oexCHECK_PTR( x_pFunctionName ) || !*x_pFunctionName )
 	{	oexERROR( EINVAL, "Invalid function argument" );
 		return oexNULL;
 	} // end if
@@ -130,16 +130,21 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 
 	// Save index
 	oexINT index = m_map.Size();
-
+	
 	// Re allocate space for pointers
 	oexUINT uSize = m_ptrs.Size();
-	if ( !uSize ) uSize = 8;
-	while ( uSize <= index )
-		uSize <<= 1;
+	if ( uSize <= index )
+	{
+		// What size to use?
+		uSize = index;
+		if ( 8 > uSize ) uSize = 8;
+		uSize = cmn::NextPower2( uSize + 1 );
 
-	// Resize the pointer array
-	if ( !m_ptrs.Resize( uSize ).Ptr() )
-		return oexNULL;
+		// Resize the pointer array
+		if ( !m_ptrs.OexResize( uSize ).Ptr() )
+			return oexNULL;
+
+	} // end if
 
 	// Save address into table
 	m_ptrs[ index ] = pf;

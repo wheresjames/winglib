@@ -773,14 +773,17 @@ public:
 	TStr& Set( oexCONST T* x_pStr, oexUINT uSize )
 	{
 		// Verify pointer
-        if ( !x_pStr || !uSize )
+        if ( !x_pStr || !oexVERIFY_PTR( x_pStr ) || !uSize )
         {   Destroy();
 			return *this;
         } // end if
 
 		// Verify pointer
 		if ( !oexVERIFY_PTR( x_pStr ) )
+		{	Destroy();
+			oexWARNING( 0, "Bad pointer" );
 			return *this;
+		} // end if
 
         // Ditch the offset
         m_uOffset = 0;

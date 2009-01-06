@@ -61,6 +61,10 @@
 	<References>
 	</References>
 	<Files>
+		<File
+			RelativePath="..\..\Makefile"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
