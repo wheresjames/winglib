@@ -227,11 +227,12 @@ public:
 	// SetHandle()
 	//==============================================================
 	/// Sets the os dependent handle for the resource
-    void SetHandle( t_HANDLE x_hHandle )
+    void SetHandle( t_HANDLE x_hHandle, E_RESOURCE_TYPE x_eType )
     {
     	m_hHandle = x_hHandle;
+		m_eType = x_eType;
 	}
-
+	
 	//==============================================================
 	// GetType()
 	//==============================================================

@@ -60,7 +60,7 @@ CModule::~CModule()
 	Destroy();
 }
 
-oexBOOL CModule::Load( oexCSTR x_pFile )
+oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 {
 	// Do we already have this module loaded?
 	if ( oexNULL != m_hModule && x_pFile && m_sFile == x_pFile )

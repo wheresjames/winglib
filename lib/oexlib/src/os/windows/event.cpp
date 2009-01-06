@@ -39,14 +39,14 @@ OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 							 
 oexRESULT CEvent::Create( CResource &x_rEvent, oexCSTR x_pName, oexBOOL x_bManualReset )
-{	x_rEvent.SetHandle( CreateEvent( NULL, x_bManualReset, FALSE, x_pName ) );
-	return CResource::cInvalid() != x_rEvent.GetHandle();
+{	x_rEvent.SetHandle( CreateEvent( NULL, x_bManualReset, FALSE, x_pName ), CResource::eRtEvent );
+	return CResource::cInvalid() != x_rEvent.GetHandle() ? 0 : -1;
 }
 
 void CEvent::Destroy( CResource &x_rEvent )
 {	if ( CResource::cInvalid() != x_rEvent.GetHandle() ) 
 		CloseHandle( (HANDLE)x_rEvent.GetHandle() );
-	x_rEvent.SetHandle( CResource::cInvalid() );
+	x_rEvent.SetHandle( CResource::cInvalid(), CResource::eRtInvalid );
 }
 
 oexBOOL CEvent::SetEvent( CResource &x_rEvent )

@@ -79,6 +79,12 @@ namespace str
             return l;
         }
 
+	/// Returns end of string
+    template < typename T >
+        T* eos( T *s, oexINT sz )
+        {   return &s[ Length( s, sz ) ];
+        }
+
     /// Copies string, returns the number of bytes copied
     /**
         \param [out] dst    -   Buffer that receives the string copy
@@ -766,7 +772,7 @@ namespace str
         {
             oexASSERT_PTR( s );
 
-            if ( !*s || !ln )
+            if ( 0 >= ln )
                 return 0;
 
             T * e = s + ln - 1;
