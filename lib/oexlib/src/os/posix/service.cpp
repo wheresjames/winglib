@@ -42,16 +42,19 @@ oexINT CService::Fork( CStr x_sWorkingDirectory, oexCSTR x_pLogFile )
 {
 	pid_t pid, sid;
 
+	oexLM();
+
 	// Fork from the parent
 	pid = fork();
 	if ( 0 > pid )
 	{	oexERROR( errno, oexT( "fork() failed" ) );
-		return -1;
+		return pid;
 	} // end if
 
 	// Exit parent process
 	if ( 0 < pid )
-	{	oexNOTICE( 0, CStr().Fmt( oexT( "fork() = %d (0x%x);" ), (int)pid, (int)pid ).Ptr() );
+	{	//CLog::GlobalLog().OpenLogFile( oexNULL, oexNULL, oexNULL );
+		oexNOTICE( 0, CStr().Fmt( oexT( "fork() = %d (0x%x)" ), (int)pid, (int)pid ) );
 		return pid;
 	} // end if
 
@@ -160,16 +163,14 @@ oexINT CService::RunModule( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidT
 	service::PFN_SRV_Start pStart =
 		(service::PFN_SRV_Start)mod.AddFunction( oexT( "SRV_Start" ) );
 	if ( !oexCHECK_PTR( pStart ) )
-	{	oexWARNING( 0, CStr().Fmt( oexT( "Symbol SRV_Start() not found in module '%s'" ),
+		oexWARNING( 0, CStr().Fmt( oexT( "Symbol SRV_Start() not found in module '%s'" ),
 					   			   oexStrToMbPtr( x_sModule.Ptr() ) ) );
-		return 0;
-	} // end if
 
 	// Call start function if provided
 	else if ( !pStart( x_sModule.Ptr(), x_pData ) )
 	{	oexNOTICE( 0, CStr().Fmt( oexT( "Exiting because SRV_Start() returned 0 in module %s" ),
 					   			  oexStrToMbPtr( x_sModule.Ptr() ) ) );
-		return -5;
+		return 0;
 	} // end if
 
 	oexNOTICE( 0, CStr().Fmt( oexT( "Module '%s' started successfully" ),

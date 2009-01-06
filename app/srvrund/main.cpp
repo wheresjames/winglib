@@ -20,13 +20,13 @@ int main(int argc, char* argv[])
 #	if defined( OEX_WIN32 )
 		sModule = oexT( "srvmod_d.dll" );
 #	else
-		sModule = oexT( "srvmod_d.so" );
+		sModule = oexT( "libsrvmod_d.so" );
 #	endif
 #else
 #	if defined( OEX_WIN32 )
 		sModule = oexT( "srvmod.dll" );
 #	else
-		sModule = oexT( "srvmod.so" );
+		sModule = oexT( "libsrvmod.so" );
 #	endif
 #endif
 
@@ -34,8 +34,8 @@ int main(int argc, char* argv[])
 
 	int nRet = oex::os::CService::Run( oexGetModulePath().BuildPath( sModule.Ptr() ), oexNULL, oexNULL );
 
-	if ( 0 <= nRet )
-	{	oexERROR( 0, "Failed to start service module..." );
+	if ( 0 > nRet )
+	{	oexERROR( nRet, "Failed to start service module..." );
 		oex::os::CSys::printf( "Failed to start service module...\n" );
 	} // end if
 

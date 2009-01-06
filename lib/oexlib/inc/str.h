@@ -781,7 +781,6 @@ public:
 		// Verify pointer
 		if ( !oexVERIFY_PTR( x_pStr ) )
 		{	Destroy();
-			oexWARNING( 0, "Bad pointer" );
 			return *this;
 		} // end if
 
