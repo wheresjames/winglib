@@ -294,7 +294,8 @@ oexBOOL CBaseFile::CreateFolder( oexCSTR x_pPath )
 {   return ::CreateDirectory( x_pPath, NULL ) ? oexTRUE : oexFALSE; }
 
 CStr CBaseFile::GetModPath( oexCSTR x_pPath )
-{
+{	if ( oexCHECK_PTR( x_pPath ) )
+		return CBaseFile::GetModFileName().GetPath().BuildPath( x_pPath );
 	return CBaseFile::GetModFileName().GetPath();
 }
 

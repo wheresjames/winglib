@@ -65,43 +65,43 @@ oexBOOL CCapture::Destroy()
 			case oexVIDSUB_VFW :
 //				OexAllocDelete< CV4l1 >( (CV4l1*)m_pDevice );
 				break;
-
+				
 			case oexVIDSUB_DSHOW :
 				OexAllocDelete< CV4w2 >( (CV4w2*)m_pDevice );
 				break;
-
+				
 		} // end switch
 
 	} // end if
-
+	
 	m_uType = oexVIDSUB_AUTO;
 	m_pDevice = oexNULL;
 
 	return oexTRUE;
 }
 
-oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_sDevice, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
 {
 	// Lose previous device
-	Destroy();
+	Destroy();				
 
 	// Allocate a new capture device
 	switch( x_uType )
 	{
 		case oexVIDSUB_AUTO :
-
+			
 			m_pDevice = OexAllocConstruct< CV4w2 >();
 			if ( !oexCHECK_PTR( m_pDevice ) )
 			{	Destroy();
 				return oexFALSE;
 			} // end if
-
+			
 			// Try VFW2
-			if ( m_pDevice->Open( x_uType, x_sDevice, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
+			if ( S_OK == m_pDevice->Open( x_uType, x_uDevice, x_uSource, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
 			{	m_uType = oexVIDSUB_DSHOW;
 				return oexTRUE;
 			} // end if
-
+			
 			OexAllocDelete< CV4w2 >( (CV4w2*)m_pDevice );
 			m_pDevice = oexNULL;
 
@@ -123,7 +123,58 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_sDevice, oexINT x_nWidth, oex
 	} // end if
 
 	// Attempt to open the capture device
-	if ( !m_pDevice->Open( x_uType, x_sDevice, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
+	if ( !m_pDevice->Open( x_uType, x_uDevice, x_uSource, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
+	{	Destroy();
+		return oexFALSE;
+	} // end if
+
+	return oexTRUE;
+}
+
+oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+{
+	// Lose previous device
+	Destroy();				
+
+	// Allocate a new capture device
+	switch( x_uType )
+	{
+		case oexVIDSUB_AUTO :
+			
+			m_pDevice = OexAllocConstruct< CV4w2 >();
+			if ( !oexCHECK_PTR( m_pDevice ) )
+			{	Destroy();
+				return oexFALSE;
+			} // end if
+			
+			// Try VFW2
+			if ( S_OK == m_pDevice->Open( x_uType, x_pFile, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
+			{	m_uType = oexVIDSUB_DSHOW;
+				return oexTRUE;
+			} // end if
+			
+			OexAllocDelete< CV4w2 >( (CV4w2*)m_pDevice );
+			m_pDevice = oexNULL;
+
+		case oexVIDSUB_VFW :
+			m_uType = x_uType;
+//			m_pDevice = OexAllocConstruct< CV4w1 >();
+			break;
+
+		case oexVIDSUB_DSHOW :
+			m_uType = x_uType;
+			m_pDevice = OexAllocConstruct< CV4w2 >();
+			break;
+
+	} // end switch
+
+	if ( !oexCHECK_PTR( m_pDevice ) )
+	{	Destroy();
+		return oexFALSE;
+	} // end if
+
+	// Attempt to open the capture device
+	if ( !m_pDevice->Open( x_uType, x_pFile, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
 	{	Destroy();
 		return oexFALSE;
 	} // end if

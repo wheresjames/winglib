@@ -2079,9 +2079,15 @@ oex::oexRESULT Test_CCapture()
 	oex::vid::CCapture cCapture;
 
 	// Open the capture device
-	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_AUTO, oex::CStr().Fmt( oexT( "/dev/video%d" ), 0 ).Ptr(),
-								    1280, 1024, 24, 15 ) ) )
+//	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_AUTO, oex::CStr().Fmt( oexT( "/dev/video%d" ), 0 ).Ptr(),
+//								    1280, 1024, 24, 15 ) ) )
+//		return -1;
+
+	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_AUTO, 0, 0, 320, 240, 24, 15 ) ) )
 		return -1;
+
+//	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_AUTO, oexGetModulePath( oexT( "test.avi" ) ).Ptr(), 320, 240, 24, 15 ) ) )
+//		return -1;
 
 	if ( !oexVERIFY( cCapture.IsOpen() ) )
 		return -2;
@@ -2093,7 +2099,10 @@ oex::oexRESULT Test_CCapture()
 
 	printf( "Starting capture\n" );
 
-	cCapture.StartCapture();
+	if ( !oexVERIFY( cCapture.StartCapture() ) )
+		return -3;
+
+//	cCapture.StartCapture();
 
 	oex::os::CSys::Sleep( 1 );
 
@@ -2101,18 +2110,19 @@ oex::oexRESULT Test_CCapture()
 	{
 		printf( "Going to wait for frame\n" );
 
-		if ( !oexVERIFY( cCapture.WaitForFrame() ) )
+		if ( !oexVERIFY( cCapture.WaitForFrame( 3000 ) ) )
 			return -4;
 
 		if ( !oexVERIFY( cCapture.GetBuffer() && cCapture.GetBufferSize() ) )
 			return -5;
 
 		oex::CDib img;
-		if ( !oexVERIFY( img.Create( oexNULL, oexNULL, 1312, 1024, 24, 1 ) ) )
+		if ( !oexVERIFY( img.Create( oexNULL, oexNULL, cCapture.GetWidth(), cCapture.GetHeight(), 24, 1 ) ) )
 			return -6;
 
 		// Convert to RGB
-		img.CopySBGGR8( cCapture.GetBuffer() );
+		img.Copy( cCapture.GetBuffer(), cCapture.GetBufferSize() );
+//		img.CopySBGGR8( cCapture.GetBuffer() );
 //		img.CopyGrey( cCapture.GetBuffer() );
 
 		printf( "Writing image to disk\n" );
@@ -2122,8 +2132,8 @@ oex::oexRESULT Test_CCapture()
 
 		printf( "w=%d, h=%d, Buffer Size = %d, Image Size = %d\n", cCapture.GetWidth(), cCapture.GetHeight(), cCapture.GetBufferSize(), nImageSize );
 
-		if ( !oexVERIFY( oex::CDib::SaveDibFile( oex::CStr().Fmt( oexT( "./img_%d.bmp" ), 0 ).Ptr(),
-												   img.GetImageHeader(), img.GetBuffer(), nImageSize ) ) ) // cCapture.GetBufferSize() ) ) )
+		oex::CStr sFile = oexGetModulePath( oex::CStr().Fmt( oexT( "./img_%d.bmp" ), 0 ).Ptr() );
+		if ( !oexVERIFY( oex::CDib::SaveDibFile( sFile.Ptr(), img.GetImageHeader(), img.GetBuffer(), nImageSize ) ) )
 			return -7;
 
 
@@ -2167,11 +2177,11 @@ int main(int argc, char* argv[])
 
 #ifndef OEX_LOWRAM
 
-    Test_CCircBuf();
+//    Test_CCircBuf();
 
-    Test_CFifoSync();
+//    Test_CFifoSync();
 
-    Test_CDataPacket();
+//    Test_CDataPacket();
 
 #endif
 
@@ -2197,7 +2207,7 @@ int main(int argc, char* argv[])
 
 //    Test_CVfsSession();
 
-//    Test_CCapture();
+    Test_CCapture();
 
 	// Initialize the oex library
     oexUNINIT();

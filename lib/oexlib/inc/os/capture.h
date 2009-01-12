@@ -58,7 +58,8 @@ class CCaptureTmpl
 {
 public:
 	virtual oexBOOL Destroy() = 0;
-	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_sDevice, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps ) = 0;
+	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps ) = 0;
+	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps ) = 0;
 	virtual oexBOOL IsOpen() = 0;
 	virtual oexBOOL StartCapture() = 0;
 	virtual oexBOOL StopCapture() = 0;
@@ -159,11 +160,31 @@ public:
 
 	/// Opens the specified capture device
 	/**
-		\param [in] x_sDevice	- Name of the capture device to open
+		\param [in] x_uType		- Capture API to use
+		\param [in] x_uDevice	- Index of the capture device to open
+		\param [in] x_uSource	- Index of video stream to open
+		\param [in] x_nWidth	- Desired video width
+		\param [in] x_nHeight	- Desired video height
+		\param [in] x_nBpp		- Desired bits per pixel
+		\param [in] x_fFps		- Desired capture frame rate
 
 		\return Non-zero if success.
 	*/
-	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_sDevice, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps );
+	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps );
+
+	/// Opens the specified file
+	/**
+		\param [in] x_uType		- Capture API to use
+		\param [in] x_uDevice	- Index of the capture device to open
+		\param [in] x_uSource	- Index of video stream to open
+		\param [in] x_nWidth	- Desired video width
+		\param [in] x_nHeight	- Desired video height
+		\param [in] x_nBpp		- Desired bits per pixel
+		\param [in] x_fFps		- Desired capture frame rate
+
+		\return Non-zero if success.
+	*/
+	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps );
 
 	/// Returns non-zero if a capture device is currently open
 	virtual oexBOOL IsOpen()
@@ -173,7 +194,7 @@ public:
 
 		return m_pDevice->IsOpen();
 	}
-
+	
 	/// Starts video capture
 	virtual oexBOOL StartCapture()
 	{

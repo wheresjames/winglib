@@ -122,6 +122,9 @@ public:
 		m_nScanWidth = 0;
 
 		m_llFrame = 0;
+
+		m_cbfOnFrame = oexNULL;
+		m_pUser = oexNULL;
 	}
 
 	/// Destructor
@@ -160,7 +163,7 @@ public:
 																  oexStrToMb( CStr().GuidToString( (oexGUID*)pmt->Type() ).Ptr() ) ) );
 
 		// Save video parameters
-		SetMediaType( pmt );
+//		SetMediaType( pmt );
 
 		return S_OK;
 	}
@@ -258,28 +261,53 @@ public:
 	/// Constructor
 	CDsCapture()
 	{
+#if defined( OEX_DEBUG )
 		m_dwRotId = 0;
+#endif
 
-		m_lWidth = 160;
-		m_lHeight = 120;
+		m_nWidth = 320;
+		m_nHeight = 240;
 		m_dFrameRate = 15;
 
 		m_dwBaseTime = 0;
 
 		m_pVideoRenderer = NULL;
+
+		m_hrInitialized = -1;
 	}
 
 	/// Destructor
 	virtual ~CDsCapture()
 	{	Destroy();
+		if ( S_OK == m_hrInitialized )
+		{	m_hrInitialized = -1;
+			CoUninitialize();
+		} // end if
 	}
 
+	oexRESULT Init()
+	{
+		// Already done that?
+		if ( S_OK == m_hrInitialized )
+			return S_OK;
+
+		// Initialize COM
+		m_hrInitialized = ::CoInitialize( NULL );
+		if ( S_OK != m_hrInitialized )
+			return oexERROR( m_hrInitialized, "CoInitialize() failed" );
+
+		return S_OK;
+	}
+	
 	/// Releases all resources
 	void Destroy()
 	{
+		// Stop the graph
+		Stop();
+
 		// *** Capture
 
-		// Remove video renderer
+		// Lose video renderer pointer
 		if ( m_pVideoRenderer )
 			m_pVideoRenderer = NULL;
 
@@ -292,18 +320,24 @@ public:
 #if defined( OEX_DEBUG )
 		// Remove from GraphEdit
 		RemoveFromRot( m_dwRotId );
+		m_dwRotId = 0;
 #endif
-		// Stop the graph
-		Stop();
 
 		// Release interfaces
-		if ( m_cpFilterGraph2.p ) m_cpFilterGraph2.Release();
-		if ( m_cpMediaControl.p ) m_cpMediaControl.Release();
-		if ( m_cpMediaPosition.p ) m_cpMediaPosition.Release();
-		if ( m_cpMediaEvent.p ) m_cpMediaEvent.Release();
-		if ( m_cpMediaFilter.p ) m_cpMediaFilter.Release();
-		if ( m_cpCaptureGraphBuilder2.p ) m_cpCaptureGraphBuilder2.Release();
-		if ( m_cpGraphBuilder.p ) m_cpGraphBuilder.Release();
+		if ( m_cpFilterGraph2.p ) 
+			m_cpFilterGraph2.Release();
+		if ( m_cpMediaControl.p ) 
+			m_cpMediaControl.Release();
+		if ( m_cpMediaPosition.p ) 
+			m_cpMediaPosition.Release();
+		if ( m_cpMediaEvent.p ) 
+			m_cpMediaEvent.Release();
+		if ( m_cpMediaFilter.p ) 
+			m_cpMediaFilter.Release();
+		if ( m_cpCaptureGraphBuilder2.p ) 
+			m_cpCaptureGraphBuilder2.Release();
+		if ( m_cpGraphBuilder.p ) 
+			m_cpGraphBuilder.Release();
 
 	}
 
@@ -314,8 +348,16 @@ public:
 		\param [in[ cbfOnFrame	- Callback function that receives video frames
 
 	*/
-	HRESULT Capture( DWORD dwDevice, DWORD dwSource, CDsRenderer::cbf_OnFrame cbfOnFrame = 0, oexPVOID pUser = 0 )
+	HRESULT Capture( DWORD dwDevice, DWORD dwSource, oexINT nWidth, oexINT nHeight, CDsRenderer::cbf_OnFrame cbfOnFrame = 0, oexPVOID pUser = 0 )
 	{	HRESULT hr = -1;
+
+		// Lose old graph
+		Destroy();
+
+		// iii Some things in Windows crash on sizes smaller than this!
+		if ( 80 > nWidth || 60 > nHeight )
+		{	Destroy(); return oexERROR( ERROR_INVALID_PARAMETER, CStr().Fmt( oexT( "Invalid capture size : %d x %d" ), nWidth, nHeight ) ); 
+		} // end if
 
 		// Create capture graph
 		if ( FAILED( hr = Create() ) )
@@ -339,8 +381,12 @@ public:
 			apCrossbar.Detach();
 		} // end if		   
 
+		// Save width and height
+		m_nWidth = nWidth;
+		m_nHeight = nHeight;
+
 		// Set the filter size
-		SetFilterSize( m_cpCaptureSource, GetWidth(), GetHeight() );
+		SetFilterSize( m_cpCaptureSource, nWidth, nHeight );
 
 		// Set filter frame rate
 		SetFilterFrameRate( m_cpCaptureSource, GetFrameRate() );
@@ -392,7 +438,11 @@ public:
 	HRESULT Capture( oexCSTR pFile, CDsRenderer::cbf_OnFrame cbfOnFrame = 0, oexPVOID pUser = 0 )
 	{	HRESULT hr = -1;
 
+		// Lose old graph
+		Destroy();
+
 		if ( !oexCHECK_PTR( pFile ) )
+			return oexERROR( ERROR_INVALID_PARAMETER, oexT( "Invalid parameter" ) );
 
 		// Create capture graph
 		if ( FAILED( hr = Create() ) )
@@ -400,7 +450,7 @@ public:
 
 		// Add source file
 		CComPtr< IBaseFilter > cpBf;
-		if ( FAILED( hr = AddFileSource( pFile, &cpBf ) ) )
+		if ( S_OK != ( hr = AddFileSource( pFile, &cpBf ) ) )
 			return oexERROR( hr, CStr().Fmt( oexT( "Error opening file %s" ), oexStrToMbPtr( pFile ) ) );
 
 		// Render any audio
@@ -447,14 +497,14 @@ public:
 	}
 
 	/// Set capture width and height
-	void SetSize( long lWidth, long lHeight )
-	{	m_lWidth = lWidth; m_lHeight = lHeight; }
+	void SetSize( oexINT x_nWidth, oexINT x_nHeight )
+	{	m_nWidth = x_nWidth; m_nHeight = x_nHeight; }
 
 	/// Get capture width
-	long GetWidth() { return m_lWidth; }
+	oexINT GetWidth() { return m_nWidth; }
 
 	/// Get capture height
-	long GetHeight() { return m_lHeight; }
+	oexINT GetHeight() { return m_nHeight; }
 
 	/// Set capture frame rate
 	void SetFrameRate( double dFrameRate ) { m_dFrameRate = dFrameRate; }
@@ -599,6 +649,10 @@ public:
 	HRESULT Create()
 	{	HRESULT hr = -1;
 
+		// Initialize
+		if ( S_OK != ( hr = Init() ) )
+			return hr;
+
 		CComPtr< IGraphBuilder > cpGb;
 		if ( FAILED( hr = CoCreateInstance(	CLSID_FilterGraph, NULL, 
 											CLSCTX_INPROC, IID_IGraphBuilder, 
@@ -611,8 +665,13 @@ public:
 								CLSCTX_INPROC_SERVER, IID_ICaptureGraphBuilder2, 
 								(void **)&cpCgb2 );
 
-		// Set the filter graph
-		cpCgb2->SetFiltergraph( cpGb );
+		if ( FAILED( hr ) )
+			oexWARNING( hr, "Unable to create IID_ICaptureGraphBuilder2 interface" );
+
+		else
+			// Set the filter graph
+			if ( FAILED( hr = cpCgb2->SetFiltergraph( cpGb ) ) )
+				oexWARNING( hr, "SetFiltergraph( IID_ICaptureGraphBuilder2 ) failed" );
 
 		// Attach to the object
 		return Attach( cpGb.Detach(), cpCgb2.Detach() );
@@ -641,7 +700,8 @@ public:
 		m_cpGraphBuilder.Attach( pGraphBuilder );
 
 		// Capture from the graph
-		if ( pCaptureGraphBuilder2 ) m_cpCaptureGraphBuilder2.Attach( pCaptureGraphBuilder2 );
+		if ( pCaptureGraphBuilder2 ) 
+			m_cpCaptureGraphBuilder2.Attach( pCaptureGraphBuilder2 );
 
 		hr = m_cpGraphBuilder->QueryInterface( IID_IMediaControl, (void**)& m_cpMediaControl );
 		if ( FAILED( hr ) ) 
@@ -745,7 +805,9 @@ public:
 		try
 		{
 			// Sanity check
-			if ( !ppSrcFilter) return ERROR_INVALID_PARAMETER;
+			if ( !ppSrcFilter) 
+				return oexERROR( ERROR_INVALID_PARAMETER, "Invalid parameter" );
+
 			*ppSrcFilter = NULL;
 	  
 			// Create the system device enumerator
@@ -763,7 +825,8 @@ public:
 
 			// If there are no enumerators for the requested type, then 
 			// CreateClassEnumerator will succeed, but pClassEnum will be NULL.
-			if ( cpClassEnum == NULL ) return S_FALSE;
+			if ( cpClassEnum == NULL ) 
+				return oexERROR( -1, "CreateClassEnumerator( CLSID_VideoInputDeviceCategory ) returned NULL pointer" );
 
 			// Start with the first device
 			cpClassEnum->Reset();
@@ -774,21 +837,18 @@ public:
 			// check that the return code is S_OK instead of using SUCCEEDED() macro.
 			ULONG cFetched = 0;
 			CComPtr< IMoniker > cpMoniker;	
-			dwDevice++; while ( dwDevice )
-			{
-				// Get the next device
-				if ( FAILED( hr = cpClassEnum->Next( 1, &cpMoniker, &cFetched ) ) )
-					return oexERROR( hr, "IEnumMoniker::Next() failed" );
 
-				if ( cpMoniker == NULL ) 
-					return oexERROR( hr, "cpMoniker is NULL" );
+			// Skip to the device we want
+			if ( dwDevice ) 
+				if ( FAILED( hr = cpClassEnum->Skip( dwDevice ) ) )
+				return oexERROR( hr, CStr().Fmt( oexT( "IEnumMoniker::Skip( %d ) failed" ), (int)dwDevice ) );
 
-				// Please come back and re-write this later
-				// Even though there are only a few devices,
-				// This is just inefficient...
-				if ( --dwDevice ) cpMoniker.Release();
+			// Get the next device
+			if ( FAILED( hr = cpClassEnum->Next( 1, &cpMoniker, &cFetched ) ) )
+				return oexERROR( hr, "IEnumMoniker::Next() failed" );
 
-			} // end while
+			if ( cpMoniker == NULL ) 
+				return oexERROR( hr, "cpMoniker is NULL" );
 
 			// Bind Moniker to a filter object
 			CComPtr< IBaseFilter > cpSrc;
@@ -1074,6 +1134,15 @@ public:
 	HRESULT AddFileSource(LPCTSTR pFile, IBaseFilter **ppSrcFilter)
 	{	HRESULT hr = -1;
 
+		// Ensure file name is valid
+		DWORD dwAttrib = ::GetFileAttributes( pFile );
+		if ( INVALID_FILE_ATTRIBUTES == dwAttrib )
+			return oexERROR( ERROR_INVALID_PARAMETER, CStr().Fmt( oexT( "GetFileAttributes() failed, no such file, %s" ), pFile ) );
+
+		// Make sure it's not a directory
+		if ( FILE_ATTRIBUTE_DIRECTORY & dwAttrib )
+			return oexERROR( ERROR_INVALID_PARAMETER, CStr().Fmt( oexT( "Path is a directory, %s" ), pFile ) );
+
 		// Filter name
 		std::string sFilterName( "A/V File" );
 
@@ -1187,14 +1256,22 @@ public:
 
 	/// Starts the graph
 	HRESULT Start()
-	{	if ( m_cpMediaControl == NULL ) return ERROR_INVALID_DATA;
-		return m_cpMediaControl->Run();
+	{	if ( m_cpMediaControl == NULL ) 
+			return ERROR_INVALID_DATA;
+		HRESULT hr = m_cpMediaControl->Run();
+		if ( FAILED( hr ) )
+			return oexERROR( hr, oexT( "IMediaControl::Run() failed" ) );
+		return S_OK;
 	}
 
 	/// Stops the graph
 	HRESULT Stop()
-	{	if ( m_cpMediaControl == NULL ) return ERROR_INVALID_DATA;
-		return m_cpMediaControl->Stop();
+	{	if ( m_cpMediaControl == NULL ) 
+			return ERROR_INVALID_DATA;
+		HRESULT hr = m_cpMediaControl->Stop();
+		if ( FAILED( hr ) )
+			return oexERROR( hr, oexT( "IMediaControl::Stop() failed" ) );
+		return S_OK;
 	}
 
 	/// Returns non-zero if the graph is running
@@ -1214,11 +1291,14 @@ public:
 
 private:
 
+	/// Result returned from CoInitialized()
+	HRESULT								m_hrInitialized;
+
 	/// Capture width
-	long								m_lWidth;
+	oexINT								m_nWidth;
 
 	/// Capture height
-	long								m_lHeight;
+	oexINT								m_nHeight;
 
 	/// Capture frame rate
 	double								m_dFrameRate;
@@ -1232,7 +1312,9 @@ private:
 	// *** Graph
 
 	// ROT id for graph edit
+#if defined( OEX_DEBUG )
 	DWORD								m_dwRotId;
+#endif
 
 	// File base time
 	DWORD								m_dwBaseTime;
@@ -1260,24 +1342,18 @@ public:
 	/// Default contructor
 	CV4w2()
 	{
+		m_pFi = oexNULL;
+		m_nWidth = 0;
+		m_nHeight = 0;
+		m_nBpp = 0;
+		m_fFps = 0;
+		m_bReady = FALSE;
 	}
 
 	/// Destructor
 	~CV4w2()
 	{
 		Destroy();
-	}
-
-	//==============================================================
-	// Open()
-	//==============================================================
-	/**
-		\param [in] x_pDevice	-	Video device name
-										- Example: /dev/video0
-	*/
-	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pDevice, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
-	{
-		return oexFALSE;
 	}
 
 	/// Static callback
@@ -1290,6 +1366,13 @@ public:
 	/// Handles video frame callbacks
 	oexRESULT OnFrame( CDsRenderer::SFrameInfo *pFi, LPVOID pUser )
 	{
+		m_pFi = pFi;
+		m_bReady = oexTRUE;
+
+		while ( m_bReady )
+			Sleep( 0 );
+
+		m_pFi = oexNULL;
 
 		return 0;
 	}
@@ -1302,9 +1385,52 @@ public:
 	*/
 	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
 	{
-		return S_OK == m_cap.Capture( x_uDevice, x_uSource, _OnFrame );
+		Destroy();
+
+		HRESULT hr = m_cap.Capture( x_uDevice, x_uSource, x_nWidth, x_nHeight, CV4w2::_OnFrame, this );
+		if ( S_OK != hr )
+		{	oexERROR( hr, "Failed to open capture device" );
+			return hr;
+		} // end if
+
+		// Save information
+		m_nWidth = x_nWidth;
+		m_nHeight = x_nHeight;
+		m_nBpp = x_nBpp;
+		m_fFps = x_fFps;
+
+		return S_OK;
 	}
 
+	//==============================================================
+	// Open()
+	//==============================================================
+	/**
+		\param [in] x_pFile		- Video file to open
+	*/
+	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+	{
+		if ( !oexCHECK_PTR( x_pFile ) )
+		{	oexERROR( ERROR_INVALID_PARAMETER, "Invalid pointer" );
+			return oexFALSE;
+		} // end if
+
+		Destroy();
+
+		HRESULT hr = m_cap.Capture( x_pFile, CV4w2::_OnFrame, this );
+		if ( S_OK != hr )
+		{	oexERROR( hr, "Failed to open capture device" );
+			return hr;
+		} // end if
+
+		// Save information
+		m_nWidth = x_nWidth;
+		m_nHeight = x_nHeight;
+		m_nBpp = x_nBpp;
+		m_fFps = x_fFps;
+
+		return S_OK;
+	}
 
 	//==============================================================
 	// Destroy()
@@ -1314,6 +1440,13 @@ public:
 	{
 		// Close the capture device
 		m_cap.Destroy();
+
+		m_pFi = oexNULL;
+		m_nWidth = 0;
+		m_nHeight = 0;
+		m_nBpp = 0;
+		m_fFps = 0;
+		m_bReady = FALSE;
 
 		return oexTRUE;
 	}
@@ -1332,12 +1465,12 @@ public:
 	//==============================================================
 	// Init()
 	//==============================================================
-	/// Initializes the device
+	/// Initializes capture system
 	/**
 	*/
 	virtual oexBOOL Init()
 	{
-		return oexTRUE;
+		return S_OK == m_cap.Init();
 	}
 
 	//==============================================================
@@ -1355,8 +1488,7 @@ public:
 	//==============================================================
 	virtual oexBOOL StartCapture()
 	{
-
-		return oexTRUE;
+		return S_OK == m_cap.Start();
 	}
 
 	//==============================================================
@@ -1365,8 +1497,7 @@ public:
 	/// Stops video capture
 	virtual oexBOOL StopCapture()
 	{
-
-		return oexTRUE;
+		return S_OK == m_cap.Stop();
 	}
 
 	//==============================================================
@@ -1374,8 +1505,10 @@ public:
 	//==============================================================
 	/// Waits for a new frame of video
 	oexBOOL WaitForFrame( oexUINT x_uTimeout = 0 )
-	{
-		return oexTRUE;
+	{	CTimeout to; to.SetMs( x_uTimeout );
+		while ( !m_bReady && to.IsValid() )
+			Sleep( 0 );
+		return m_bReady;
 	}
 
 	//==============================================================
@@ -1383,6 +1516,7 @@ public:
 	//==============================================================
 	virtual oexBOOL ReleaseFrame()
 	{
+		m_bReady = FALSE;
 
 		return oexTRUE;
 	}
@@ -1393,7 +1527,9 @@ public:
 	/// Returns a pointer to the video buffer
 	virtual oexPVOID GetBuffer()
 	{
-		return 0;
+		if ( !m_pFi )
+			return oexNULL;
+		return m_pFi->pBuf;
 	}
 
 	//==============================================================
@@ -1410,7 +1546,9 @@ public:
 	//==============================================================
 	oexINT GetBufferSize()
 	{
-		return 0;
+		if ( !m_pFi )
+			return 0;
+		return m_pFi->lImageSize;
 	}
 
 	//==============================================================
@@ -1458,25 +1596,32 @@ public:
 private:
 
 	/// Name of the device
-	CStr				m_sDeviceName;
+	CStr							m_sDeviceName;
 
 	/// The current frame number
-	oexINT64			m_llFrame;
+	oexINT64						m_llFrame;
 
 	/// Image width
-	oexINT				m_nWidth;
+	oexINT							m_nWidth;
 
 	/// Image height
-	oexINT				m_nHeight;
+	oexINT							m_nHeight;
 
 	/// Bits per pixel
-	oexINT				m_nBpp;
+	oexINT							m_nBpp;
 
 	/// Frames per second
-	oexFLOAT			m_fFps;
+	oexFLOAT						m_fFps;
 
 	/// The Direct Show capture class
-	CDsCapture			m_cap;
+	CDsCapture						m_cap;
+
+	/// Holds image frame info during callback
+	CDsRenderer::SFrameInfo			*m_pFi;
+
+	/// +++ Replace with signal
+	volatile BOOL					m_bReady;
+	
 };
 
 

@@ -145,7 +145,7 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x
 		// Add system error info
 		if ( x_nErr )
 			sLog << CStr().Fmt( oexT( " : 0x%X (%d) : " ), x_nErr, x_nErr )
-			 	 << os::CTrace::GetErrorMsg( x_nErr );
+			 	 << os::CTrace::GetErrorMsg( x_nErr ).RTrim( "\r\n" );
 
 		sLog << oexNL;
 

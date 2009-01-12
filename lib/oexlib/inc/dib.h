@@ -252,6 +252,9 @@ public:
 	/// Writes a DIB file to disk
 	static oexBOOL SaveDibFile( oexCSTR x_pFile, SImageData *x_pId, oexCPVOID x_pData, oexINT x_nData );
 
+	/// Raw image data copy
+	oexBOOL Copy( oexPVOID x_pData, oexINT x_nSize );
+
 	/// Convert image
 	oexBOOL CopySBGGR8( oexPVOID x_pData );
 

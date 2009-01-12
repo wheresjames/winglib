@@ -99,6 +99,17 @@ public:
 	{	return osGetTimerValue(); }
 
 	//==============================================================
+	// GetTimer()
+	//==============================================================
+	/// Return the current timer value
+	static oexDOUBLE GetTimerSeconds() 
+	{	oexINT64 freq = osGetTimerFreq();
+		if ( !freq ) return 0;
+		oexINT64 val = osGetTimerValue();
+		return val / freq;
+	}
+
+	//==============================================================
 	// IsReset()
 	//==============================================================
 	/// Returns non-zero if timer is reset
@@ -200,5 +211,58 @@ private:
 	/// Stop time marker
 	oexINT64				m_llStop;
 
+};
+
+//==================================================================
+// CTimeout
+//
+/// Tracks timeout
+/**
+
+*/
+//==================================================================
+class CTimeout  
+{
+public:
+
+	/// Default constructor
+	CTimeout() 
+	{	m_timeout = 0; }
+
+	/// Sets the timeout value in seconds
+	CTimeout( double x_dTimeout )
+	{	Set( x_dTimeout ); }
+
+	/// Destructor
+	~CTimeout() { }
+
+	/// Clears the timer value
+	void Clear()
+	{	m_timeout = 0; }
+
+	/// Sets the timeout value in seconds
+	void Set( double x_dTimeout )
+	{	m_timeout = CHqTimer::GetTimerSeconds() + x_dTimeout; }
+
+	/// Sets the timeout value in milli-seconds
+	void SetMs( oexUINT x_uTimeout )
+	{	Set( (double)x_uTimeout / (double)1000 ); }
+
+	/// Retuns non-zero if timer set and not expired
+	oexBOOL IsValid()
+	{	return ( 1 < m_timeout && CHqTimer::GetTimerSeconds() < m_timeout ); }
+
+	/// Returns non-zero if the timer has been set
+	oexBOOL IsSet()
+	{	return 1 < m_timeout ; }
+
+	/// Returns non-zero if the timer is set and has expired
+	oexBOOL IsExpired()
+	{	return ( 1 < m_timeout && CHqTimer::GetTimerSeconds() > m_timeout ); }
+
+private:
+
+	/// Timeout value
+	double				m_timeout;
 };
 

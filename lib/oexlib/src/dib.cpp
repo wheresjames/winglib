@@ -169,6 +169,23 @@ oexBOOL CDib::SBGGR8toRGB24( oexPVOID x_pDst, oexPVOID x_pSrc, oexINT x_nWidth, 
 	return oexTRUE;
 }
 
+oexBOOL CDib::Copy( oexPVOID x_pData, oexINT x_nSize )
+{
+	if ( !oexCHECK_PTR( x_pData ) || !x_nSize )
+		return oexFALSE;
+
+	if ( !m_image.IsValid() )
+		return oexFALSE;
+
+	if ( GetBufferSize() < x_nSize )
+		x_nSize = GetBufferSize();
+
+	oexMemCpy( GetBuffer(), x_pData, x_nSize );
+
+	return oexTRUE;
+}
+
+
 oexBOOL CDib::CopySBGGR8( oexPVOID x_pData )
 {
 	if ( !m_image.IsValid() )

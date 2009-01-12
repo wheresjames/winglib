@@ -239,7 +239,7 @@ static BOOL GetWSAErrorMsg(LPSTR pMsg, DWORD err)
 //			ptr =oexT( "" );
 //			break;
 		default: 
-			strcpy( pMsg,oexT( "Unknown Winsock error" ) );
+			strcpy( pMsg,oexT( "Unspecified error" ) );
 			return FALSE;
 			break;
 
