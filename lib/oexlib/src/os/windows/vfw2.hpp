@@ -38,18 +38,13 @@
 #include <comutil.h>
 
 // VFW
-#include <vfw.h>
-
-// Direct-X stuff
-#include <dshow.h>
-#include <D3d9.h>
-#include <Vmr9.h>
-#include <d3dx9tex.h>
-#include <dxerr9.h>
+#include <Vfw.h>
 
 // DirectShow
+#include <DShow.h>
 #include <streams.h>
-#ifdef _DEBUG
+
+#ifdef oexDEBUG
 #pragma comment( lib, "strmbasd.lib" )
 #else
 #pragma comment( lib, "strmbase.lib" )
@@ -74,39 +69,6 @@ static const GUID IID_DsRenderer =
 class CDsRenderer : 
 		public CBaseVideoRenderer
 {
-public:
-
-	/// Structure describes the frame information
-	struct SFrameInfo
-	{
-		/// Size of this structure
-		oexINT32			lSize;
-
-		/// Pointer to the buffer containing the image data
-		oexPVOID			pBuf;
-
-		/// Size of the data in pBuf
-		oexINT32			lImageSize;
-
-		/// The frame index
-		oexINT64			llFrame;
-
-		/// Image width
-		oexINT32			lWidth;
-
-		/// Image height
-		oexINT32			lHeight;
-
-		/// Width of the data in one horizontal row of the image
-		oexINT32			lScanWidth;
-
-		/// Pointer to the renderer that created the frame
-		CDsRenderer			*pDsRenderer;
-	};
-
-	// Frame callback function type
-	typedef oexRESULT (*cbf_OnFrame)( SFrameInfo *pFi, oexPVOID pUser );
-
 public:
 
 	/// Constructor
@@ -195,7 +157,7 @@ public:
 		// Do we have a callback function?
 		if ( oexCHECK_PTR( m_cbfOnFrame ) )
 		{
-			SFrameInfo si;
+			CCaptureTmpl::SFrameInfo si;
 			oexZeroMemory( &si, sizeof( si ) );
 
 			si.lSize = sizeof( si );
@@ -204,7 +166,6 @@ public:
 			si.lWidth = m_nWidth;
 			si.lHeight = m_nHeight;
 			si.llFrame = m_llFrame;
-			si.pDsRenderer = this;
 
 			// Make the callback
 			m_cbfOnFrame( &si, m_pUser );
@@ -224,7 +185,7 @@ public:
 	long GetHeight() { return m_nHeight; }
 
 	/// Set frame callback function
-	void SetFrameCallback( cbf_OnFrame &f, oexPVOID u ) 
+	void SetFrameCallback( CCaptureTmpl::cbf_OnFrame &f, oexPVOID u ) 
 	{	m_cbfOnFrame = f; m_pUser = u; }
 
 private:
@@ -242,7 +203,7 @@ private:
 	oexINT64							m_llFrame;
 
 	/// Frame callback function pointer
-	cbf_OnFrame							m_cbfOnFrame;
+	CCaptureTmpl::cbf_OnFrame			m_cbfOnFrame;
 
 	/// User data passed to callback function
 	oexPVOID							m_pUser;
@@ -348,7 +309,7 @@ public:
 		\param [in[ cbfOnFrame	- Callback function that receives video frames
 
 	*/
-	HRESULT Capture( DWORD dwDevice, DWORD dwSource, oexINT nWidth, oexINT nHeight, CDsRenderer::cbf_OnFrame cbfOnFrame = 0, oexPVOID pUser = 0 )
+	HRESULT Capture( DWORD dwDevice, DWORD dwSource, oexINT nWidth, oexINT nHeight, CCaptureTmpl::cbf_OnFrame cbfOnFrame = 0, oexPVOID pUser = 0 )
 	{	HRESULT hr = -1;
 
 		// Lose old graph
@@ -435,7 +396,7 @@ public:
 		\param [in[ cbfOnFrame	- Callback function that receives video frames
 
 	*/
-	HRESULT Capture( oexCSTR pFile, CDsRenderer::cbf_OnFrame cbfOnFrame = 0, oexPVOID pUser = 0 )
+	HRESULT Capture( oexCSTR pFile, CCaptureTmpl::cbf_OnFrame cbfOnFrame = 0, oexPVOID pUser = 0 )
 	{	HRESULT hr = -1;
 
 		// Lose old graph
@@ -1357,14 +1318,14 @@ public:
 	}
 
 	/// Static callback
-	static oexRESULT _OnFrame( CDsRenderer::SFrameInfo *pFi, LPVOID pUser )
-	{	CV4w2 *pV4w2 = (CV4w2*)pUser;
-		if ( !pV4w2 ) return ERROR_INVALID_PARAMETER;
-		return pV4w2->OnFrame( pFi, pUser );
+	static oexRESULT _OnFrame( CCaptureTmpl::SFrameInfo *pFi, LPVOID pUser )
+	{	CV4w2 *pThis = (CV4w2*)pUser;
+		if ( !pThis ) return ERROR_INVALID_PARAMETER;
+		return pThis->OnFrame( pFi, pUser );
 	}
 
 	/// Handles video frame callbacks
-	oexRESULT OnFrame( CDsRenderer::SFrameInfo *pFi, LPVOID pUser )
+	oexRESULT OnFrame( CCaptureTmpl::SFrameInfo *pFi, LPVOID pUser )
 	{
 		m_pFi = pFi;
 		m_bReady = oexTRUE;
@@ -1390,7 +1351,7 @@ public:
 		HRESULT hr = m_cap.Capture( x_uDevice, x_uSource, x_nWidth, x_nHeight, CV4w2::_OnFrame, this );
 		if ( S_OK != hr )
 		{	oexERROR( hr, "Failed to open capture device" );
-			return hr;
+			return oexFALSE;
 		} // end if
 
 		// Save information
@@ -1399,7 +1360,7 @@ public:
 		m_nBpp = x_nBpp;
 		m_fFps = x_fFps;
 
-		return S_OK;
+		return oexTRUE;
 	}
 
 	//==============================================================
@@ -1420,7 +1381,7 @@ public:
 		HRESULT hr = m_cap.Capture( x_pFile, CV4w2::_OnFrame, this );
 		if ( S_OK != hr )
 		{	oexERROR( hr, "Failed to open capture device" );
-			return hr;
+			return oexFALSE;
 		} // end if
 
 		// Save information
@@ -1429,7 +1390,7 @@ public:
 		m_nBpp = x_nBpp;
 		m_fFps = x_fFps;
 
-		return S_OK;
+		return oexTRUE;
 	}
 
 	//==============================================================
@@ -1617,7 +1578,7 @@ private:
 	CDsCapture						m_cap;
 
 	/// Holds image frame info during callback
-	CDsRenderer::SFrameInfo			*m_pFi;
+	CCaptureTmpl::SFrameInfo		*m_pFi;
 
 	/// +++ Replace with signal
 	volatile BOOL					m_bReady;

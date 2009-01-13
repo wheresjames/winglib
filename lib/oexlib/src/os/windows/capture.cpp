@@ -40,7 +40,7 @@ using namespace OEX_NAMESPACE::os;
 using namespace OEX_NAMESPACE::vid;
 
 // Include capture classes
-//#include "vfw1.hpp"
+#include "vfw1.hpp"
 #include "vfw2.hpp"
 
 CCapture::CCapture()
@@ -59,11 +59,11 @@ oexBOOL CCapture::Destroy()
 {
 	/// Lose device if any
 	if ( oexCHECK_PTR( m_pDevice ) )
-	{
+	{	
 		switch( m_uType )
 		{
 			case oexVIDSUB_VFW :
-//				OexAllocDelete< CV4l1 >( (CV4l1*)m_pDevice );
+				OexAllocDelete< CV4w1 >( (CV4w1*)m_pDevice );
 				break;
 				
 			case oexVIDSUB_DSHOW :
@@ -76,7 +76,7 @@ oexBOOL CCapture::Destroy()
 	
 	m_uType = oexVIDSUB_AUTO;
 	m_pDevice = oexNULL;
-
+	
 	return oexTRUE;
 }
 
@@ -84,7 +84,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 {
 	// Lose previous device
 	Destroy();				
-
+	
 	// Allocate a new capture device
 	switch( x_uType )
 	{
@@ -107,7 +107,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 
 		case oexVIDSUB_VFW :
 			m_uType = x_uType;
-//			m_pDevice = OexAllocConstruct< CV4w1 >();
+			m_pDevice = OexAllocConstruct< CV4w1 >();
 			break;
 
 		case oexVIDSUB_DSHOW :
@@ -121,7 +121,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 	{	Destroy();
 		return oexFALSE;
 	} // end if
-
+	
 	// Attempt to open the capture device
 	if ( !m_pDevice->Open( x_uType, x_uDevice, x_uSource, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
 	{	Destroy();
@@ -160,7 +160,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexIN
 			m_uType = x_uType;
 //			m_pDevice = OexAllocConstruct< CV4w1 >();
 			break;
-
+			
 		case oexVIDSUB_DSHOW :
 			m_uType = x_uType;
 			m_pDevice = OexAllocConstruct< CV4w2 >();

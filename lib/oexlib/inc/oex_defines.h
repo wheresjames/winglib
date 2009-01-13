@@ -186,10 +186,10 @@
 #define oexDO( s, w, r )			oexRETRY( 1000, s, w, r )
 
 /// Creates a four character code
-#define oexFOURCC( a, b, c, d )  ( (oexULONG)(						\
-								  	  ( ( (oexULONG)a ) << 24 ) 	\
-									| ( ( (oexULONG)b ) <<  8 ) 	\
-									| ( ( (oexULONG)c ) >>  8 ) 	\
-									| ( ( (oexULONG)d ) >> 24 ) 	\
+#define oexFOURCC( a, b, c, d )  ( (OEX_NAMESPACE::oexULONG)(						\
+								  	  ( ( (OEX_NAMESPACE::oexULONG)a ) << 24 ) 	\
+									| ( ( (OEX_NAMESPACE::oexULONG)b ) <<  8 ) 	\
+									| ( ( (OEX_NAMESPACE::oexULONG)c ) >>  8 ) 	\
+									| ( ( (OEX_NAMESPACE::oexULONG)d ) >> 24 ) 	\
 								 ) )
 

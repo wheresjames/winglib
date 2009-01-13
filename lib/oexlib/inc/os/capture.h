@@ -57,6 +57,36 @@
 class CCaptureTmpl
 {
 public:
+
+	/// Structure describes the frame information
+	struct SFrameInfo
+	{
+		/// Size of this structure
+		oexINT32			lSize;
+
+		/// Pointer to the buffer containing the image data
+		oexPVOID			pBuf;
+
+		/// Size of the data in pBuf
+		oexINT32			lImageSize;
+
+		/// The frame index
+		oexINT64			llFrame;
+
+		/// Image width
+		oexINT32			lWidth;
+
+		/// Image height
+		oexINT32			lHeight;
+
+		/// Width of the data in one horizontal row of the image
+		oexINT32			lScanWidth;
+	};
+
+	// Frame callback function type
+	typedef oexRESULT (*cbf_OnFrame)( SFrameInfo *pFi, oexPVOID pUser );
+
+public:
 	virtual oexBOOL Destroy() = 0;
 	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps ) = 0;
 	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps ) = 0;

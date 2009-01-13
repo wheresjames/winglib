@@ -2083,7 +2083,10 @@ oex::oexRESULT Test_CCapture()
 //								    1280, 1024, 24, 15 ) ) )
 //		return -1;
 
-	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_AUTO, 0, 0, 320, 240, 24, 15 ) ) )
+//	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_AUTO, 0, 0, 320, 240, 24, 15 ) ) )
+//		return -1;
+
+	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_VFW, 0, 0, 320, 240, 24, 15 ) ) )
 		return -1;
 
 //	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_AUTO, oexGetModulePath( oexT( "test.avi" ) ).Ptr(), 320, 240, 24, 15 ) ) )
@@ -2136,11 +2139,16 @@ oex::oexRESULT Test_CCapture()
 		if ( !oexVERIFY( oex::CDib::SaveDibFile( sFile.Ptr(), img.GetImageHeader(), img.GetBuffer(), nImageSize ) ) )
 			return -7;
 
+		if ( !oexVERIFY( cCapture.ReleaseFrame() ) )
+			return -8;
 
 	} // end for
 
 	if ( !oexVERIFY( cCapture.StopCapture() ) )
-		return -6;
+		return -9;
+
+	if ( !oexVERIFY( cCapture.Destroy() ) )
+		return -10;
 
     return oex::oexRES_OK;
 }
