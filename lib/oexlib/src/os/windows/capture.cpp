@@ -77,6 +77,14 @@ oexBOOL CCapture::Destroy()
 	m_uType = oexVIDSUB_AUTO;
 	m_pDevice = oexNULL;
 	
+#if defined( OEX_WIN32 )
+
+	// In Windows, you can't immediately reopen the capture device, 
+	// so this is just to make sure no one tries
+	os::CSys::Sleep( 1000 );
+
+#endif
+	
 	return oexTRUE;
 }
 
@@ -97,7 +105,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 			} // end if
 			
 			// Try VFW2
-			if ( S_OK == m_pDevice->Open( x_uType, x_uDevice, x_uSource, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
+			if ( m_pDevice->Open( x_uType, x_uDevice, x_uSource, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
 			{	m_uType = oexVIDSUB_DSHOW;
 				return oexTRUE;
 			} // end if
@@ -158,7 +166,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexIN
 
 		case oexVIDSUB_VFW :
 			m_uType = x_uType;
-//			m_pDevice = OexAllocConstruct< CV4w1 >();
+			m_pDevice = OexAllocConstruct< CV4w1 >();
 			break;
 			
 		case oexVIDSUB_DSHOW :

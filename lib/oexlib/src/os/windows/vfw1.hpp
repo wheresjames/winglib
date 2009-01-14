@@ -153,14 +153,14 @@ public:
 	{
 		Destroy();
 
-		if ( m_hStop )
+		if ( INVALID_HANDLE_VALUE != m_hStop )
 		{	CloseHandle( m_hStop );
-			m_hStop = NULL;
+			m_hStop = INVALID_HANDLE_VALUE;
 		} // end if
 
-		if ( m_hSuccess )
+		if ( INVALID_HANDLE_VALUE != m_hSuccess )
 		{	CloseHandle( m_hSuccess );
-			m_hStop = NULL;
+			m_hStop = INVALID_HANDLE_VALUE;
 		} // end if
 	}
 
@@ -277,7 +277,7 @@ public:
 		capDriverGetCaps( m_hWnd, &m_cdc, sizeof( m_cdc ) );
 
 		// Initialize draw dib
-		m_hDrawDib = DrawDibOpen();
+//		m_hDrawDib = DrawDibOpen();
 
 		return TRUE;		
 	}
@@ -291,25 +291,36 @@ public:
 		// Disconnect from driver
 		Disconnect();
 
-		if ( m_hWnd && ::IsWindow( m_hWnd ) )
-			::DestroyWindow( m_hWnd );
-		m_hWnd = NULL;
+		// Funny things seem to happen when the capture driver is
+		// already in use.  It seems we can open it again, it just
+		// doesn't do anything and crashes a lot on shutdown.
+		try
+		{
+			if ( m_hWnd && ::IsWindow( m_hWnd ) )
+				::DestroyWindow( m_hWnd );
+			m_hWnd = NULL;
 
-		if ( m_hGrab != NULL )
-		{	CloseHandle( m_hGrab );
-			m_hGrab = NULL;
-		} // end if
-		
-		// Release allocated buffers
-		ReleaseVideoFormatData();
-		ReleaseAudioFormatData();
+			if ( m_hGrab != NULL )
+			{	CloseHandle( m_hGrab );
+				m_hGrab = NULL;
+			} // end if
+			
+			// Release allocated buffers
+			ReleaseVideoFormatData();
+			ReleaseAudioFormatData();
+
+		} // end try
+
+		catch( ... )
+		{	oexERROR( 0, "Assert while releasing capture window, check for misbehaving capture driver." );
+		} // end catch
 
 		// Reset vars
 		m_dwCurrentDriver = eInvalidDriver;
 		m_dwNumDrivers = 0;
 
-		// Windows default filename
-		strcpy( m_szCaptureFileName, "C:\\CAPTURE.AVI" );
+		// Lose capture filename
+		*m_szCaptureFileName = 0;
 
 		m_dwOnStatus = 0;
 		m_dwOnError = 0;
@@ -350,7 +361,11 @@ public:
 		Close();
 		
 		// Attempt to create a capture window
-		m_hWnd = capCreateCaptureWindow( pTitle, dwStyle, x, y, width, height, hwndParent, nID );
+//#if defined( OEX_DEBUG )
+//		m_hWnd = capCreateCaptureWindow( pTitle, dwStyle, 0, 0, 320, 240, hwndParent, nID );
+//#else
+		m_hWnd = capCreateCaptureWindow( pTitle, 0, 0, 0, 1, 1, hwndParent, nID );
+//#endif
 
 		if ( !IsWnd() )
 		{	oexERROR( GetLastError(), "Unable to create capture window" );
@@ -1084,6 +1099,20 @@ protected:
 	}
 
 	//==============================================================
+	// StreamCallbackProc()
+	//==============================================================
+	/// Static function proxies video frame callbacks
+	static LRESULT CALLBACK StreamCallbackProc(HWND hWnd, LPVIDEOHDR lpVHdr)
+	{
+		// Retrieve our class pointer
+		CVfwCap *pCap = (CVfwCap*)GetWindowLong( hWnd, GWL_USERDATA );
+		if ( pCap == NULL ) return 0;
+
+		return pCap->OnStream( lpVHdr );
+	}
+
+
+	//==============================================================
 	// OnStatus()
 	//==============================================================
 	/// Resolved video status callback
@@ -1173,6 +1202,36 @@ protected:
 		VHDR_KEYFRAME	Set by the device driver to indicate a key frame.  
 	*/
 	virtual BOOL OnFrame( LPVIDEOHDR pVHdr )
+	{
+		// Do we have a callback function?
+		if ( oexCHECK_PTR( pVHdr ) && oexCHECK_PTR( m_cbfOnFrame ) )
+		{
+			CCaptureTmpl::SFrameInfo si;
+			oexZeroMemory( &si, sizeof( si ) );
+
+			si.lSize = sizeof( si );
+			si.pBuf = pVHdr->lpData;
+			si.lImageSize = (long)( pVHdr->dwBytesUsed ? pVHdr->dwBytesUsed : pVHdr->dwBufferLength );
+			si.lWidth = m_nWidth;
+			si.lHeight = m_nHeight;
+			si.llFrame = m_llFrame;
+
+			// Make the callback
+			m_cbfOnFrame( &si, m_pUser );
+
+		} // end if	   
+
+		// Count frames
+		m_llFrame++;
+
+		return TRUE;
+	}
+
+	//==============================================================
+	// OnStream()
+	//==============================================================
+	/// Resolved video stream callback
+	virtual BOOL OnStream( LPVIDEOHDR pVHdr )
 	{
 		// Do we have a callback function?
 		if ( oexCHECK_PTR( pVHdr ) && oexCHECK_PTR( m_cbfOnFrame ) )
@@ -1436,8 +1495,7 @@ public:
 			} // end if
 
 			if ( m_hDrawDib != NULL ) 
-			{
-				DrawDibClose( m_hDrawDib );
+			{	DrawDibClose( m_hDrawDib );
 				m_hDrawDib = NULL;
 			} // end if
 
@@ -1445,7 +1503,7 @@ public:
 
 		catch( ... )
 		{
-			oexERROR( 0, oexT( "Capture driver crashed" ) );
+			oexERROR( 0, oexT( "Capture driver crashed on shutdown - check for mis-behaving capture driver." ) );
 
 		} // end catch
 	}
@@ -1461,6 +1519,9 @@ public:
 		capSetCallbackOnError( m_hWnd, NULL );
 		capSetCallbackOnStatus( m_hWnd, NULL );
 		capSetCallbackOnFrame( m_hWnd, NULL );
+		capSetCallbackOnVideoStream( m_hWnd, NULL );
+
+		Sleep( 1000 );
 	}
 
 	//==============================================================
@@ -1500,6 +1561,9 @@ public:
 
 		// Enable frame callbacks
 		capSetCallbackOnFrame( m_hWnd, CVfwCap::FrameCallbackProc );
+
+		// Enable stream callbacks
+		capSetCallbackOnVideoStream( m_hWnd, CVfwCap::StreamCallbackProc );
 
 		return TRUE;
 	}
@@ -1644,7 +1708,8 @@ public:
 	//==============================================================
 	/// Opens the capture device and starts the capture
 	BOOL Open( oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight,
-			   oexINT x_nBpp, oexFLOAT x_fFps, CCaptureTmpl::cbf_OnFrame x_cbfOnFrame, oexPVOID x_pUser )
+			   oexINT x_nBpp, oexFLOAT x_fFps, CCaptureTmpl::cbf_OnFrame x_cbfOnFrame, 
+			   oexPVOID x_pUser, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
 	{
 		Destroy();
 
@@ -1673,7 +1738,7 @@ public:
 		} // end if
 
 		HANDLE hEvents[] = { m_hSuccess, m_hThread };
-		if ( WAIT_OBJECT_0 != ::WaitForMultipleObjects( 2, hEvents, FALSE, oexDEFAULT_WAIT_TIMEOUT ) )
+		if ( WAIT_OBJECT_0 != ::WaitForMultipleObjects( 2, hEvents, FALSE, x_uTimeout ) )
 		{	oexERROR( 0, "Failed to open capture device" );
 			Destroy();
 			return oexFALSE;
@@ -1708,6 +1773,13 @@ public:
 			TerminateThread( hThread, FALSE );
 	}
 
+	/// Returns non-zero if thread is running
+	BOOL IsRunning()
+	{	if ( INVALID_HANDLE_VALUE == m_hThread ) return FALSE;
+		if ( INVALID_HANDLE_VALUE == m_hStop ) return FALSE;
+		return WAIT_OBJECT_0 != ::WaitForSingleObject( m_hStop, 0 ); 
+	}
+
 private:
 
 	static DWORD WINAPI _CaptureThread( LPVOID pData )
@@ -1719,7 +1791,7 @@ private:
 		return pVfwCap->CaptureThread( pData );
 	}
 
-	BOOL MessagePump()
+	static BOOL MessagePump()
 	{
 		MSG msg;
 
@@ -1786,12 +1858,18 @@ private:
 		// Let creator know we succeeded
 		SetEvent( m_hSuccess );
 
+		if ( !CaptureSequenceNoFile() )
+//		if ( !GrabFrame() )
+		{	oexERROR( GetLastError(), CStr().Fmt( oexT( "Failed to get image : %d" ), (int)m_fFps ) );
+			Close(); return -6;
+		} // end if
+
 		DWORD dwDelay = (DWORD)( m_fFps / 2 );
 		if ( 1 > dwDelay ) dwDelay = 1;
 
 		// If there is a message
-		while (	/*MessagePump()
-			    &&*/ WAIT_OBJECT_0 != ::WaitForSingleObject( m_hStop, dwDelay ) )
+		while (	MessagePump()
+			    && WAIT_OBJECT_0 != ::WaitForSingleObject( m_hStop, dwDelay ) )
 			int x = 0;
 
 		// Kill the capture stuff
@@ -1854,12 +1932,19 @@ public:
 		m_pFi = pFi;
 		m_bReady = oexTRUE;
 
-		while ( m_bReady )
+		while ( m_bReady && m_cap.IsRunning() )
 			Sleep( 0 );
 
 		m_pFi = oexNULL;
 
 		return 0;
+	}
+
+	/// Static callback
+	static oexRESULT _OnStream( CCaptureTmpl::SFrameInfo *pFi, LPVOID pUser )
+	{	CV4w1 *pThis = (CV4w1*)pUser;
+		if ( !pThis ) return ERROR_INVALID_PARAMETER;
+		return pThis->OnFrame( pFi, pUser );
 	}
 
 	//==============================================================

@@ -2074,7 +2074,7 @@ oex::oexRESULT Test_CVfsSession()
 }
 */
 
-oex::oexRESULT Test_CCapture()
+oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sName )
 {
 	oex::vid::CCapture cCapture;
 
@@ -2083,11 +2083,11 @@ oex::oexRESULT Test_CCapture()
 //								    1280, 1024, 24, 15 ) ) )
 //		return -1;
 
-//	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_AUTO, 0, 0, 320, 240, 24, 15 ) ) )
-//		return -1;
-
-	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_VFW, 0, 0, 320, 240, 24, 15 ) ) )
+	if ( !oexVERIFY( cCapture.Open( uApi, 0, 0, 320, 240, 24, 15 ) ) )
 		return -1;
+
+//	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_VFW, 0, 0, 320, 240, 24, 15 ) ) )
+//		return -1;
 
 //	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_AUTO, oexGetModulePath( oexT( "test.avi" ) ).Ptr(), 320, 240, 24, 15 ) ) )
 //		return -1;
@@ -2111,7 +2111,7 @@ oex::oexRESULT Test_CCapture()
 
 	for ( int i = 0; i < 1; i++ )
 	{
-		printf( "Going to wait for frame\n" );
+		printf( "Waiting for frame...\n" );
 
 		if ( !oexVERIFY( cCapture.WaitForFrame( 3000 ) ) )
 			return -4;
@@ -2135,7 +2135,7 @@ oex::oexRESULT Test_CCapture()
 
 		printf( "w=%d, h=%d, Buffer Size = %d, Image Size = %d\n", cCapture.GetWidth(), cCapture.GetHeight(), cCapture.GetBufferSize(), nImageSize );
 
-		oex::CStr sFile = oexGetModulePath( oex::CStr().Fmt( oexT( "./img_%d.bmp" ), 0 ).Ptr() );
+		oex::CStr sFile = oexGetModulePath( oex::CStr().Fmt( oexT( "./img_%s_%d.bmp" ), oexStrToMbPtr( sName.Ptr() ), 0 ).Ptr() );
 		if ( !oexVERIFY( oex::CDib::SaveDibFile( sFile.Ptr(), img.GetImageHeader(), img.GetBuffer(), nImageSize ) ) )
 			return -7;
 
@@ -2149,6 +2149,15 @@ oex::oexRESULT Test_CCapture()
 
 	if ( !oexVERIFY( cCapture.Destroy() ) )
 		return -10;
+
+	return 0;
+}
+
+oex::oexRESULT Test_CCapture()
+{
+	Test_CaptureApi( oexVIDSUB_AUTO, oexT( "Auto" ) );
+	Test_CaptureApi( oexVIDSUB_DSHOW, oexT( "DirectShow" ) );
+	Test_CaptureApi( oexVIDSUB_VFW, oexT( "Vfw" ) );
 
     return oex::oexRES_OK;
 }
