@@ -235,12 +235,15 @@ public:
 		m_pVideoRenderer = NULL;
 
 		m_hrInitialized = -1;
+
+		m_bStop = FALSE;
+
 	}
 
 	/// Destructor
 	virtual ~CDsCapture()
 	{	Destroy();
-		if ( S_OK == m_hrInitialized )
+		if ( SUCCEEDED( m_hrInitialized ) )
 		{	m_hrInitialized = -1;
 			CoUninitialize();
 		} // end if
@@ -254,7 +257,7 @@ public:
 
 		// Initialize COM
 		m_hrInitialized = ::CoInitialize( NULL );
-		if ( S_OK != m_hrInitialized )
+		if ( FAILED( m_hrInitialized ) )
 			return oexERROR( m_hrInitialized, "CoInitialize() failed" );
 
 		return S_OK;
@@ -299,7 +302,6 @@ public:
 			m_cpCaptureGraphBuilder2.Release();
 		if ( m_cpGraphBuilder.p ) 
 			m_cpGraphBuilder.Release();
-
 	}
 
 	/// Initializes capture device
@@ -334,13 +336,17 @@ public:
 		{	Destroy(); return oexERROR( hr, oexT( "Error adding capture filter to graph" ) ); 
 		} // end if
 
-		// Set the crossbar
-		CComPtr< IAMCrossbar > apCrossbar;
-		if ( SUCCEEDED( hr = m_cpCaptureGraphBuilder2->FindInterface(	&LOOK_UPSTREAM_ONLY, NULL, m_cpCaptureSource,
-																		IID_IAMCrossbar, (void**)&apCrossbar) ) && apCrossbar )
-		{	apCrossbar->Route( 0, dwSource );
-			apCrossbar.Detach();
-		} // end if		   
+		if ( m_cpCaptureGraphBuilder2.p )
+		{
+			// Set the crossbar
+			CComPtr< IAMCrossbar > apCrossbar;
+			if ( SUCCEEDED( hr = m_cpCaptureGraphBuilder2->FindInterface(	&LOOK_UPSTREAM_ONLY, NULL, m_cpCaptureSource,
+																			IID_IAMCrossbar, (void**)&apCrossbar) ) && apCrossbar )
+			{	apCrossbar->Route( 0, dwSource );
+				apCrossbar.Detach();
+			} // end if		   
+
+		} // end if
 
 		// Save width and height
 		m_nWidth = nWidth;
@@ -958,6 +964,9 @@ public:
 	*/
 	HRESULT GetIAMStreamConfig(IBaseFilter *pBaseFilter, IAMStreamConfig **pIAMStreamConfig)
 	{	HRESULT hr = -1;
+		
+		if ( !m_cpCaptureGraphBuilder2.p )
+			return E_NOTIMPL;
 
 		if ( FAILED( hr = m_cpCaptureGraphBuilder2->FindInterface(	NULL, NULL, pBaseFilter,
 																	IID_IAMStreamConfig,
@@ -980,6 +989,9 @@ public:
 	*/
 	HRESULT RenderStream( const GUID *pType, IBaseFilter *pSrc, IBaseFilter *pMid, IBaseFilter *pDst )
 	{
+		if ( !m_cpCaptureGraphBuilder2.p )
+			return E_NOTIMPL;
+
 		ICaptureGraphBuilder2 *pCgb2 = m_cpCaptureGraphBuilder2;
 		return m_cpCaptureGraphBuilder2->RenderStream( NULL, pType, pSrc, pMid, pDst );
 	}
@@ -1217,7 +1229,8 @@ public:
 
 	/// Starts the graph
 	HRESULT Start()
-	{	if ( m_cpMediaControl == NULL ) 
+	{	m_bStop = FALSE;
+		if ( m_cpMediaControl == NULL ) 
 			return ERROR_INVALID_DATA;
 		HRESULT hr = m_cpMediaControl->Run();
 		if ( FAILED( hr ) )
@@ -1227,7 +1240,8 @@ public:
 
 	/// Stops the graph
 	HRESULT Stop()
-	{	if ( m_cpMediaControl == NULL ) 
+	{	m_bStop = TRUE;
+		if ( m_cpMediaControl == NULL ) 
 			return ERROR_INVALID_DATA;
 		HRESULT hr = m_cpMediaControl->Stop();
 		if ( FAILED( hr ) )
@@ -1238,6 +1252,7 @@ public:
 	/// Returns non-zero if the graph is running
 	BOOL IsRunning()
 	{
+		if ( m_bStop ) return FALSE;
 		if ( !IsGraph() ) return FALSE;
 		if ( m_cpMediaControl == NULL ) return FALSE;
 
@@ -1263,6 +1278,9 @@ private:
 
 	/// Capture frame rate
 	double								m_dFrameRate;
+
+	/// Set to non-zero if graph should stop
+	BOOL								m_bStop;
 
 	/// Capture graph source
 	CComPtr< IBaseFilter >				m_cpCaptureSource;
@@ -1330,7 +1348,7 @@ public:
 		m_pFi = pFi;
 		m_bReady = oexTRUE;
 
-		while ( m_bReady )
+		while ( m_bReady && m_cap.IsRunning() )
 			Sleep( 0 );
 
 		m_pFi = oexNULL;

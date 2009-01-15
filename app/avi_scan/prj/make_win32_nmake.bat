@@ -1,1 +1,0 @@
-start make.bat win32_nmake "NMake Makefiles"

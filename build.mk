@@ -55,11 +55,15 @@ BLD_PATH_OBJ_$(LOC_TAG) := $(BLD_PATH_BIN_$(LOC_TAG))/obj
 BLD_PATH_INS_$(LOC_TAG) := /usr/share/$(PRJ_NAME)
 BLD_PATH_LNK_$(LOC_TAG) := /usr/bin
 
-
 #-------------------------------------------------------------------
 # Sources
 #-------------------------------------------------------------------
 BLD_SOURCES_$(LOC_TAG) 	:= $(wildcard $(BLD_PATH_SRC_$(LOC_TAG))/*.$(LOC_CXX_$(LOC_TAG)))
+ifneq ($(LOC_EXC_$(LOC_TAG)),)
+BLD_EXCLUDE_$(LOC_TAG) 	:= $(foreach file,$(LOC_EXC_$(LOC_TAG)),$(BLD_PATH_SRC_$(LOC_TAG))/$(file).$(LOC_CXX_$(LOC_TAG)))
+BLD_SOURCES_$(LOC_TAG) := $(filter-out $(BLD_EXCLUDE_$(LOC_TAG)),$(BLD_SOURCES_$(LOC_TAG)))
+endif
+
 BLD_OBJECTS_$(LOC_TAG) 	:= $(subst $(BLD_PATH_SRC_$(LOC_TAG))/,$(BLD_PATH_OBJ_$(LOC_TAG))/, $(BLD_SOURCES_$(LOC_TAG):.$(LOC_CXX_$(LOC_TAG))=.$(CFG_OBJ_EXT)) )
 BLD_INCS			    := $(CFG_CC_INC)$(BLD_PATH_INC_$(LOC_TAG)) $(foreach inc,$(PRJ_INCS), $(CFG_CC_INC)$(CFG_LIBROOT)/$(inc))
 
