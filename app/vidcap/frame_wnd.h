@@ -24,9 +24,6 @@ public:
 
 	bool StretchDraw(wxDC &x_dc, wxImage &x_img, wxRect &x_rect);
 
-	/// Default Constructor
-	CFrameWnd();
-
 	/// Destructor
 	virtual ~CFrameWnd();
 
@@ -49,6 +46,8 @@ public:
 
 	void OnOpen( wxCommandEvent &x_wxCe );
 
+	void OnTimer( wxTimerEvent &x_wxTe );
+
 	void OnPaint( wxPaintEvent& x_wxPe );
 
 	void OnEraseBackground( wxEraseEvent& x_wxEe );
@@ -61,4 +60,7 @@ private:
 
 	/// Capture device
 	oex::vid::CCapture		m_cCapture;
+
+	/// +++ Hack, need to get callbacks going
+	wxTimer					*m_pTimer;
 };

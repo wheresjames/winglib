@@ -45,9 +45,9 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="make -C ../.. OS=win32 BUILDDEP=1"
-				ReBuildCommandLine="make -C ../.. OS=win32 BUILDDEP=1 BUILDTYPE=rebuild"
-				CleanCommandLine="make -C ../.. OS=win32 BUILDDEP=1 BUILDTYPE=clean"
+				BuildCommandLine="make -C ../.. OS=win32 BUILDDEP=1 LIBLINK=shared"
+				ReBuildCommandLine="make -C ../.. OS=win32 BUILDDEP=1 BUILDTYPE=rebuild LIBLINK=shared"
+				CleanCommandLine="make -C ../.. OS=win32 BUILDDEP=1 BUILDTYPE=clean LIBLINK=shared"
 				Output=""
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				IncludeSearchPath=""
@@ -55,6 +55,67 @@
 				AssemblySearchPath=""
 				ForcedUsingAssemblies=""
 				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release (Shared)|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 	</Configurations>

@@ -1933,7 +1933,7 @@ public:
 		m_bReady = oexTRUE;
 
 		while ( m_bReady && m_cap.IsRunning() )
-			Sleep( 0 );
+			Sleep( 15 );
 
 		m_pFi = oexNULL;
 
@@ -2066,7 +2066,7 @@ public:
 	oexBOOL WaitForFrame( oexUINT x_uTimeout = 0 )
 	{	CTimeout to; to.SetMs( x_uTimeout );
 		while ( !m_bReady && to.IsValid() )
-			Sleep( 0 );
+			Sleep( 15 );
 		return m_bReady;
 	}
 

@@ -27,15 +27,16 @@ BEGIN_EVENT_TABLE( CFrameWnd, wxFrame )
 
 	EVT_ERASE_BACKGROUND( CFrameWnd::OnEraseBackground )
 
+	EVT_TIMER( wxID_ANY, CFrameWnd::OnTimer )
+
 END_EVENT_TABLE()
-
-CFrameWnd::CFrameWnd()
-{
-
-}
 
 CFrameWnd::~CFrameWnd()
 {
+	if ( m_pTimer )
+	{	delete m_pTimer;
+		m_pTimer = NULL;
+	} // end if
 
 }
 
@@ -43,6 +44,8 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 	: wxFrame( (wxFrame*)NULL, -1, x_sTitle, x_ptWin, x_sizeWin,
 				wxFULL_REPAINT_ON_RESIZE | wxDEFAULT_FRAME_STYLE )
 {
+	m_pTimer = NULL;
+
 //	SetIcon( wxIcon( mondrian_xpm ) );
 
 	wxImage::AddHandler( new wxJPEGHandler );
@@ -64,17 +67,23 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 
 	// Open the capture device
 	if ( !m_cCapture.Open( oexVIDSUB_AUTO, 0, 0, 320, 240, 24, 15 ) )
+//	if ( !m_cCapture.Open( oexVIDSUB_DSHOW, 0, 0, 320, 240, 24, 15 ) )
+//	if ( !m_cCapture.Open( oexVIDSUB_VFW, 0, 0, 320, 240, 24, 15 ) )
 		SetStatusText( _T( "Failed to open catpure device" ) );
 
 	else
-		SetStatusText( _T( "hahaha" ) );
+		SetStatusText( oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() );
 
 	if ( m_cCapture.IsOpen() )
 	{	//m_cCapture.WaitForFrame();
 		m_cCapture.StartCapture();
+		
+		// +++ Just a hack till we get the callbacks going
+		m_pTimer = new wxTimer( this );
+		m_pTimer->Start( 1000 / 15 );
+
 	} // end if
 
-	SetStatusText( oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() );
 
 //	wxMessageBox( oex::os::CTrace::GetBacktrace().Ptr(), _T( "Stack Trace" ), wxOK, this );
 
@@ -118,14 +127,20 @@ void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
 		return;
 	} // end if
 
-	dc.SetBrush( wxBrush( wxColor( 0, 255, 0 ) ) );
-	dc.DrawRectangle( rect.x, rect.y, rect.width, rect.height );
+//	dc.SetBrush( wxBrush( wxColor( 0, 255, 0 ) ) );
+//	dc.DrawRectangle( rect.x, rect.y, rect.width, rect.height );
 
-	wxImage		imgMem( m_cCapture.GetWidth(), m_cCapture.GetHeight(), (unsigned char*)m_cCapture.GetBuffer(), true );
-	wxBitmap	bmMem( imgMem );
+	wxImage imgMem( m_cCapture.GetWidth(), m_cCapture.GetHeight(), 
+		            (unsigned char*)m_cCapture.GetBuffer(), true );
 
 	// Go ahead and release the video buffer
 	m_cCapture.ReleaseFrame();
+
+	StretchDraw( dc, imgMem, rect );
+/*
+
+	wxBitmap	bmMem( imgMem );
+
 
 	// Create a memory DC
 	wxMemoryDC dcMem;
@@ -197,6 +212,13 @@ void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
 //	StretchDraw( dc, m_cWxImg, rect );
 
 }
+
+void CFrameWnd::OnTimer( wxTimerEvent &x_wxTe )
+{
+	Refresh();
+
+}
+
 
 void CFrameWnd::OnEraseBackground( wxEraseEvent& x_wxEe )
 {
