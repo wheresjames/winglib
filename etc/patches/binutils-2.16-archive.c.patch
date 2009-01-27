@@ -1,0 +1,29 @@
+--- binutils-2.16/bfd/archive.c.orig	2005-03-03 06:40:56.000000000 -0500
++++ binutils-2.16/bfd/archive.c	2009-01-21 13:21:27.000000000 -0500
+@@ -1660,7 +1660,7 @@
+       memset (&hdr, 0, sizeof (struct ar_hdr));
+       strcpy (hdr.ar_name, ename);
+       /* Round size up to even number in archive header.  */
+-      sprintf (&(hdr.ar_size[0]), "%-10d",
++      snprintf (&(hdr.ar_size[0]), sizeof(hdr.ar_size), "%-10d",
+ 	       (int) ((elength + 1) & ~(bfd_size_type) 1));
+       strncpy (hdr.ar_fmag, ARFMAG, 2);
+       for (i = 0; i < sizeof (struct ar_hdr); i++)
+@@ -2068,12 +2068,12 @@
+ 
+   memset (&hdr, 0, sizeof (struct ar_hdr));
+   hdr.ar_name[0] = '/';
+-  sprintf (hdr.ar_size, "%-10d", (int) mapsize);
+-  sprintf (hdr.ar_date, "%ld", (long) time (NULL));
++  snprintf (hdr.ar_size, sizeof(hdr.ar_size), "%-10d", (int) mapsize);
++  snprintf (hdr.ar_date, sizeof(hdr.ar_date), "%ld", (long) time (NULL));
+   /* This, at least, is what Intel coff sets the values to.  */
+-  sprintf ((hdr.ar_uid), "%d", 0);
+-  sprintf ((hdr.ar_gid), "%d", 0);
+-  sprintf ((hdr.ar_mode), "%-7o", (unsigned) 0);
++  snprintf ((hdr.ar_uid), sizeof(hdr.ar_uid), "%d", 0);
++  snprintf ((hdr.ar_gid), sizeof(hdr.ar_gid), "%d", 0);
++  snprintf ((hdr.ar_mode), sizeof(hdr.ar_mode), "%-7o", (unsigned) 0);
+   strncpy (hdr.ar_fmag, ARFMAG, 2);
+ 
+   for (i = 0; i < sizeof (struct ar_hdr); i++)
