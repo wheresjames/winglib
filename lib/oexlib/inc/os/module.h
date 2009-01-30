@@ -148,7 +148,9 @@ public:
 	oexPVOID operator [] ( oexINT i )
 	{	oexPVOID ptr = Addr( i );
 		if ( !ptr )
-			throw oexT( "0:CModule: Invalid function pointer" );
+		{	oexTHROW( oexT( "0:CModule: Invalid function pointer" ) );
+			return oexNULL;
+		} // end if
 		return ptr;
 	}
 

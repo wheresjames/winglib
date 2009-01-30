@@ -94,6 +94,9 @@
 // Inline template specialization
 #define oexITS 				inline
 
+//#define oexUSE_EXCEPTIONS
+#undef oexUSE_EXCEPTIONS
+
 // Define to include backtraces for log entries
 //#define oexBACKTRACE_IN_LOG
 

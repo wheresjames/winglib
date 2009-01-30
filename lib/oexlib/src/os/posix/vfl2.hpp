@@ -86,34 +86,30 @@ public:
 		\param [in] x_pDevice	-	Video device name
 										- Example: /dev/video0
 	*/
-	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pDevice, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
 	{
-		// Sanity checks
-		if ( !oexCHECK_PTR( x_pDevice ) || !*x_pDevice )
-		{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device name" ) ) );
-			return oexFALSE;
-		} // end if
+		CStr sDevice = CStr().Fmt( "/dev/video%d", x_uDevice );
 
 		struct stat st;
-		if ( 0 > stat( oexStrToMbPtr( x_pDevice ), &st ) )
-		{	oexERROR( errno, CStr().Fmt( oexT( "Device name is invalid : %s" ), oexStrToMbPtr( x_pDevice ) ) );
+		if ( 0 > stat( oexStrToMbPtr( sDevice.Ptr() ), &st ) )
+		{	oexERROR( errno, CStr().Fmt( oexT( "Device name is invalid : %s" ), oexStrToMbPtr( sDevice.Ptr() ) ) );
 			return oexFALSE;
 		} // end if
 
 		if ( !S_ISCHR( st.st_mode ) )
-		{	oexERROR( -1, CStr().Fmt( oexT( "Device name is invalid : %s" ), oexStrToMbPtr( x_pDevice ) ) );
+		{	oexERROR( -1, CStr().Fmt( oexT( "Device name is invalid : %s" ), oexStrToMbPtr( sDevice.Ptr() ) ) );
 			return oexFALSE;
 		} // end if
 
 		// Attempt to open the device
-		m_nFd = open( oexStrToMbPtr( x_pDevice ), O_RDWR | O_NONBLOCK, 0 );
+		m_nFd = open( oexStrToMbPtr( sDevice.Ptr() ), O_RDWR | O_NONBLOCK, 0 );
 		if ( 0 > m_nFd )
-		{	oexERROR( errno, CStr().Fmt( oexT( "Unable to open device : %s" ), oexStrToMbPtr( x_pDevice ) ) );
+		{	oexERROR( errno, CStr().Fmt( oexT( "Unable to open device : %s" ), oexStrToMbPtr( sDevice.Ptr() ) ) );
 			return oexFALSE;
 		} // end if
 
 		// Save device name
-		m_sDeviceName = x_pDevice;
+		m_sDeviceName = sDevice;
 		m_nWidth = x_nWidth;
 		m_nHeight = x_nHeight;
 		m_nBpp = x_nBpp;
@@ -127,6 +123,13 @@ public:
 
 		return oexTRUE;
 	}
+
+	/// Open file
+	oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+	{
+		return oexFALSE;
+	}
+
 
 	/////////////////////////////////////////////////////////////////
 	// Destroy()
@@ -399,7 +402,7 @@ public:
 		static SFormatDesc l_formats[] =
 		{
 			FORMAT_DESC( V4L2_PIX_FMT_RGB332 ),
-			FORMAT_DESC( V4L2_PIX_FMT_RGB444 ),
+//			FORMAT_DESC( V4L2_PIX_FMT_RGB444 ),
 			FORMAT_DESC( V4L2_PIX_FMT_RGB555 ),
 			FORMAT_DESC( V4L2_PIX_FMT_RGB565 ),
 			FORMAT_DESC( V4L2_PIX_FMT_RGB555X ),
@@ -427,7 +430,7 @@ public:
 			FORMAT_DESC( V4L2_PIX_FMT_YUV420 ),
 			FORMAT_DESC( V4L2_PIX_FMT_YYUV ),
 			FORMAT_DESC( V4L2_PIX_FMT_HI240 ),
-			FORMAT_DESC( V4L2_PIX_FMT_HM12 ),
+//			FORMAT_DESC( V4L2_PIX_FMT_HM12 ),
 			FORMAT_DESC( V4L2_PIX_FMT_SBGGR8 ),
 			FORMAT_DESC( V4L2_PIX_FMT_MJPEG ),
 			FORMAT_DESC( V4L2_PIX_FMT_JPEG ),
@@ -435,9 +438,9 @@ public:
 			FORMAT_DESC( V4L2_PIX_FMT_MPEG ),
 			FORMAT_DESC( V4L2_PIX_FMT_WNVA ),
 			FORMAT_DESC( V4L2_PIX_FMT_SN9C10X ),
-			FORMAT_DESC( V4L2_PIX_FMT_PWC1 ),
-			FORMAT_DESC( V4L2_PIX_FMT_PWC2 ),
-			FORMAT_DESC( V4L2_PIX_FMT_ET61X251 )
+//			FORMAT_DESC( V4L2_PIX_FMT_PWC1 ),
+//			FORMAT_DESC( V4L2_PIX_FMT_PWC2 ),
+//			FORMAT_DESC( V4L2_PIX_FMT_ET61X251 )
 		};
 
 		v4l2_format fmt;
@@ -451,11 +454,11 @@ public:
 			fmt.fmt.pix.pixelformat = l_formats[ i ].nId;
 			fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 
-			try
+			oexTRY
 			{	if ( !IoCtl( m_nFd, VIDIOC_S_FMT, &fmt ) )
 					sStr += CStr().Fmt( oexT( "%s : (0x%X)\n" ), oexStrToMbPtr( l_formats[ i ].sId ), l_formats[ i ].nId );
 			} // end try
-			catch( ... )
+			oexCATCH_ALL()
 			{
 			} // end catch
 

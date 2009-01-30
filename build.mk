@@ -1,4 +1,3 @@
-
 # build.mk
 
 ifndef BLD_FILE_EXE
@@ -121,7 +120,7 @@ $(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC
 else
 $(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
 	- $(CFG_DEL) $@
-	$(BLD_COMPILER) $(CFG_CFLAGS) $(BLD_INCS) $< $(CFG_CC_OUT)$@
+	$(BLD_COMPILER) $(CFG_CFLAGS) $(PRJ_EXTC) $(BLD_INCS) $< $(CFG_CC_OUT)$@
 endif
 
 

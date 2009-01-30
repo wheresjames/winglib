@@ -12,14 +12,15 @@ PROC	 := i386
 
 TOOLS	 := local
 #TOOLS	 := debian
-#TOOLS	 := android
+#TOOLS	 := codesourcery
 #TOOLS	 := snapgear
+#TOOLS	 := mingw32
 
 LIBLINK	 := static
 #LIBLINK := shared
 
 CFG_ROOT := $(PRJ_LIBROOT)/../..
-CFG_TOOLROOT := $(PRJ_LIBROOT)/../..
+CFG_TOOLROOT := $(PRJ_LIBROOT)/../tools
 CFG_LIBROOT  := $(PRJ_LIBROOT)/..
 
 ifdef UNICODE
@@ -106,35 +107,81 @@ else
 		ifeq ($(TOOLS),snapgear)
 		
 			# Snapgear
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/tools/snapgear/usr/local/bin/arm-linux-
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/usr/local/bin/arm-linux-
 
 			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOUUID -DOEX_NOSHM
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 			
-		else
+		else ifeq ($(TOOLS),codesourcery)
 		
 			# Google Android
-			TOOLS := android
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/tools/android/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-linux-gnueabi-
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-none-linux-gnueabi-
 
 			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread 
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOUUID
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 			
+		else ifeq ($(TOOLS),nihilism)
+		
+			# nihilism
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-unknown-linux-gnu-
+
+			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread 
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOUUID -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOVIDEO
+			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
+			CFG_AFLAGS := cq
+			
+		else ifeq ($(TOOLS),uclinux)
+		
+			# uclinux
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-linux-
+
+			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread 
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOUUID -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOVIDEO
+			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
+			CFG_AFLAGS := cq
+			
+		else
+	
+			# Custom tools
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-linux-
+			override TOOLS := custom
+
+			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOUUID -DOEX_NOSHM -fno-exceptions
+			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
+			CFG_AFLAGS := cq
+			
 		endif
 
 	else
+	
+		ifeq ($(TOOLS),mingw32)
 
-		# Local platform
-		CFG_TOOLPREFIX := 
+			# Cross compile for windows
+			CFG_TOOLPREFIX := i586-mingw32msvc- 
 
-		CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread -luuid
-		CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD
-		CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
-		CFG_AFLAGS := cq
+			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread -luuid
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD
+			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
+			CFG_AFLAGS := cq
+
+		else
+		
+			# Local platform
+			CFG_TOOLPREFIX := 
+
+			# -lregex -lpng -ljpeg -lzlib -ltiff -lstdc++ -lgcc -lodbc32 -lwsock32 -lwinspool -lwinmm -lshell32 -lcomctl32 -lctl3d32 -lodbc32 -ladvapi32 -lodbc32 -lwsock32 -lopengl32 -lglu32 -lole32 -loleaut32 -luuid
+			
+			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread -luuid
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD
+			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
+			CFG_AFLAGS := cq
+
+		endif
 		
 	endif
 	

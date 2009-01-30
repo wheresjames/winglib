@@ -36,7 +36,7 @@
 
 OEX_USING_NAMESPACE
 
-// +++ Packing on the arm compiler is broken!!!
+// +++ Packing on the some arm compilers are broken!!!
 #ifndef OEX_PACKBROKEN
 	oexSTATIC_ASSERT( 14 == sizeof( CDib::SDIBFileHeader ) );
 #	define sizeof_SDIBFileHeader sizeof( CDib::SDIBFileHeader )

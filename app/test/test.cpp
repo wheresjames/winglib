@@ -2156,8 +2156,14 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sName )
 oex::oexRESULT Test_CCapture()
 {
 	Test_CaptureApi( oexVIDSUB_AUTO, oexT( "Auto" ) );
+
+#if defined( OEX_LINUX )
+	Test_CaptureApi( oexVIDSUB_VFL1, oexT( "Vfl1" ) );
+	Test_CaptureApi( oexVIDSUB_VFL2, oexT( "Vfl2" ) );
+#else
 	Test_CaptureApi( oexVIDSUB_DSHOW, oexT( "DirectShow" ) );
 	Test_CaptureApi( oexVIDSUB_VFW, oexT( "Vfw" ) );
+#endif
 
     return oex::oexRES_OK;
 }

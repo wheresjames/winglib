@@ -192,4 +192,16 @@
 									| ( ( (OEX_NAMESPACE::oexULONG)c ) >>  8 ) 	\
 									| ( ( (OEX_NAMESPACE::oexULONG)d ) >> 24 ) 	\
 								 ) )
+								 
+#if defined( oexUSE_EXCEPTIONS )
+#	define oexTRY				try
+#	define oexCATCH( s )		catch( s )
+#	define oexCATCH_ALL()		catch( ... )
+#	define oexTHROW( s )		throw( s )
+#else
+#	define oexTRY
+#	define oexCATCH( s )		if ( 0 )
+#	define oexCATCH_ALL() 		if ( 0 )
+#	define oexTHROW( s )
+#endif
 

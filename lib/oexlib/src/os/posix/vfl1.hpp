@@ -86,34 +86,32 @@ public:
 		\param [in] x_pDevice	-	Video device name
 										- Example: /dev/video0
 	*/
-	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pDevice, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
 	{
-		// Sanity checks
-		if ( !oexCHECK_PTR( x_pDevice ) || !*x_pDevice )
-		{	oexERROR( -1, CStr().Fmt( oexT( "Invalid device name" ) ) );
-			return oexFALSE;
-		} // end if
+		CStr sDevice = CStr().Fmt( oexT( "/dev/video%d" ), x_uDevice );
+
+		CSys::printf( "device = %s\n", sDevice.Ptr() );
 
 		struct stat st;
-		if ( 0 > stat( oexStrToMbPtr( x_pDevice ), &st ) )
-		{	oexERROR( errno, CStr().Fmt( oexT( "Device name is invalid : %s" ), oexStrToMbPtr( x_pDevice ) ) );
+		if ( 0 > stat( oexStrToMbPtr( sDevice.Ptr() ), &st ) )
+		{	oexERROR( errno, CStr().Fmt( oexT( "Device name is invalid : %s" ), oexStrToMbPtr( sDevice.Ptr() ) ) );
 			return oexFALSE;
 		} // end if
 
 		if ( !S_ISCHR( st.st_mode ) )
-		{	oexERROR( -1, CStr().Fmt( oexT( "Device name is invalid : %s" ), oexStrToMbPtr( x_pDevice ) ) );
+		{	oexERROR( -1, CStr().Fmt( oexT( "Device name is invalid : %s" ), oexStrToMbPtr( sDevice.Ptr() ) ) );
 			return oexFALSE;
 		} // end if
 
 		// Attempt to open the device
-		m_nFd = open( oexStrToMbPtr( x_pDevice ), O_RDWR | O_NONBLOCK, 0 ); // | O_NONBLOCK, 0 );
+		m_nFd = open( oexStrToMbPtr( sDevice.Ptr() ), O_RDWR | O_NONBLOCK, 0 ); // | O_NONBLOCK, 0 );
 		if ( 0 > m_nFd )
-		{	oexERROR( errno, CStr().Fmt( oexT( "Unable to open file : %s" ), oexStrToMbPtr( x_pDevice ) ) );
+		{	oexERROR( errno, CStr().Fmt( oexT( "Unable to open file : %s" ), oexStrToMbPtr( sDevice.Ptr() ) ) );
 			return oexFALSE;
 		} // end if
 
 		// Save device name
-		m_sDeviceName = x_pDevice;
+		m_sDeviceName = sDevice;
 		m_nWidth = x_nWidth;
 		m_nHeight = x_nHeight;
 		m_nBpp = x_nBpp;
@@ -128,6 +126,13 @@ public:
 		return oexTRUE;
 	}
 
+	/// Open file
+	oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+	{
+		return oexFALSE;
+	}
+
+
 	/////////////////////////////////////////////////////////////////
 	// Destroy()
 	/////////////////////////////////////////////////////////////////
@@ -137,11 +142,14 @@ public:
 		if ( 0 > m_nFd )
 			return oexTRUE;
 
-		// Close the file
-		close( m_nFd );
+		// Halt capture
+		StopCapture();
 
 		// Lose the image buffer(s)
 		m_image.Destroy();
+
+		// Close the file
+		close( m_nFd );
 
 		m_nFd = -1;
 		m_llFrame = 0;
@@ -217,8 +225,10 @@ public:
 		m_image.PlainShare( oexTRUE );
 		m_image.SetShareHandle( (os::CFMap::t_HFILEMAP)m_nFd );
 		if ( !oexCHECK_PTR( m_image.OexNew( lImageSize ).Ptr() ) )
-			oexERROR( errno, CStr().Fmt( oexT( "Failed to allocate shared image buffer size=%d : %d x %d x %d" ),
+		{	oexERROR( errno, CStr().Fmt( oexT( "Failed to allocate shared image buffer size=%d : %d x %d x %d" ),
 										 lImageSize, m_nWidth, m_nHeight, m_nBpp ) );
+			return oexFALSE;
+		} // end if
 
 		return oexTRUE;
 	}
@@ -238,14 +248,14 @@ public:
 			vm.height = m_nHeight;
 			vm.format = VIDEO_PALETTE_RGB24;
 
-			try
+			oexTRY
 			{
 				if ( -1 == IoCtl( m_nFd, VIDIOCMCAPTURE, &vm ) )
 				{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOCMCAPTURE : Capture frame failed : %u" ), m_nFd ) );
 					return oexFALSE;
 				} // end if
 			} // end try
-			catch( ... )
+			oexCATCH_ALL()
 			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOCMCAPTURE : Exception occured!  Capture frame failed : %u" ), m_nFd ) );
 				return oexFALSE;
 			} // end catch
@@ -258,6 +268,22 @@ public:
 	/// Stops video capture
 	virtual oexBOOL StopCapture()
 	{
+		if ( eIoAsync == m_nIoMode )
+		{
+			oexTRY
+			{
+				if ( -1 == IoCtl( m_nFd, VIDIOCMCAPTURE, 0 ) )
+				{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOCMCAPTURE : Capture frame failed : %u" ), m_nFd ) );
+					return oexFALSE;
+				} // end if
+			} // end try
+			oexCATCH_ALL()
+			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOCMCAPTURE : Exception occured!  Capture frame failed : %u" ), m_nFd ) );
+				return oexFALSE;
+			} // end catch
+
+		} // end if
+
 		return oexTRUE;
 	}
 

@@ -39,9 +39,11 @@ OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 using namespace OEX_NAMESPACE::vid;
 
+#ifndef OEX_NOVIDEO
 // Include capture classes
-#include "vfl1.hpp"
-#include "vfl2.hpp"
+#	include "vfl1.hpp"
+#	include "vfl2.hpp"
+#endif
 
 CCapture::CCapture()
 {
@@ -57,6 +59,10 @@ CCapture::~CCapture()
 
 oexBOOL CCapture::Destroy()
 {
+#ifdef OEX_NOVIDEO
+	return oexFALSE;
+#else
+
 	/// Lose device if any
 	if ( oexCHECK_PTR( m_pDevice ) )
 	{
@@ -78,13 +84,19 @@ oexBOOL CCapture::Destroy()
 	m_uType = oexVIDSUB_AUTO;
 	m_pDevice = oexNULL;
 
+	CSys::Sleep( 1000 );
+
 	return oexTRUE;
+#endif
 }
 
 //	CV4lCapture				m_v4lCap;
 
-oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_sDevice, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
 {
+#ifdef OEX_NOVIDEO
+	return oexFALSE;
+#else
 	// Lose previous device
 	Destroy();
 
@@ -100,7 +112,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_sDevice, oexINT x_nWidth, oex
 			} // end if
 
 			// Try VFL2
-			if ( m_pDevice->Open( x_uType, x_sDevice, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
+			if ( m_pDevice->Open( x_uType, x_uDevice, x_uSource, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
 			{	m_uType = oexVIDSUB_VFL2;
 				return oexTRUE;
 			} // end if
@@ -127,11 +139,17 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_sDevice, oexINT x_nWidth, oex
 	} // end if
 
 	// Attempt to open the capture device
-	if ( !m_pDevice->Open( x_uType, x_sDevice, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
+	if ( !m_pDevice->Open( x_uType, x_uDevice, x_uSource, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
 	{	Destroy();
 		return oexFALSE;
 	} // end if
 
 	return oexTRUE;
+#endif
+}
+
+oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+{
+	return oexFALSE;
 }
 

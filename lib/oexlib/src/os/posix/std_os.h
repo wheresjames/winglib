@@ -38,7 +38,7 @@
 
 #include <stdlib.h>
 #include <stdarg.h>
-#include <cstdio>
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -78,9 +78,11 @@ extern int daylight;
 #include <sys/ioctl.h>
 #include <linux/types.h>
 
-#include <linux/videodev.h>
-#ifndef OEX_VFL1
-#	include <linux/videodev2.h>
+#ifndef OEX_NOVIDEO
+#	include <linux/videodev.h>
+#	ifndef OEX_VFL1
+#		include <linux/videodev2.h>
+#	endif
 #endif
 
 #include <sys/sem.h>

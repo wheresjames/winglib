@@ -61,7 +61,7 @@ void CAlloc::ReportBlock( oexPVOID x_pMem, oexUINT uSize )
 {
     // Could get an exception if it's not our memory block
     // But we can't force people to use our allocation routines ;)
-    try
+    oexTRY
     {
         if ( !oexVERIFY_PTR( x_pMem ) )
             return;
@@ -94,7 +94,7 @@ void CAlloc::ReportBlock( oexPVOID x_pMem, oexUINT uSize )
 
     } // end try
 
-    catch( ... )
+    oexCATCH_ALL()
     {
         oexTRACE( oexT( "!!! Asserted while trying to interpret memory block.  Perhaps it's some other _CLIENT_BLOCK?\n" ) );
 

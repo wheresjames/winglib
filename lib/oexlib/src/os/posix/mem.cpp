@@ -45,7 +45,7 @@ oexPVOID CMem::New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
 {
     oexUCHAR *pBuf;
 
-    try
+	oexTRY
     {
         // +++ Figure out how to get the unicode file name into new without conversion
 
@@ -66,7 +66,7 @@ oexPVOID CMem::New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
 
     } // end try
 
-    catch( ... )
+	oexCATCH_ALL()
     {
         return oexNULL;
 
