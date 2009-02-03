@@ -48,8 +48,8 @@
 #define oexVERSION_MAJOR( v )		( ( v >> 16 ) & 0xffff )
 
 #if defined( OEX_WIN32 )
-#	define oexVaList				oexPVOID
-#	define oexVaStart( v, p )		( v = ( ( (oexPVOID*)&p ) + 1 ) )
+#	define oexVaList				OEX_NAMESPACE::oexPVOID
+#	define oexVaStart( v, p )		( v = ( ( (OEX_NAMESPACE::oexPVOID*)&p ) + 1 ) )
 #	define oexVaEnd( v )
 #	define oexVaArg( v, t )			( (t)( v++ ) )
 #else

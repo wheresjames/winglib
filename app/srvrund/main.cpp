@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
 
 	oex::CStr sModule;
 
-	if ( argc > 2 )
+	if ( argc > 1 )
 		sModule = argv[ 1 ];
 
 	if ( !sModule.Length() )
@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 
 	oex::os::CSys::printf( "Starting...\n" );
 
-	int nRet = oex::os::CService::Run( oexGetModulePath().BuildPath( sModule.Ptr() ), oexNULL, oexNULL );
+	int nRet = oex::os::CService::Run( oexGetModulePath().BuildPath( sModule.Ptr() ), oexNULL, oexNULL, oexNULL );
 
 	if ( 0 > nRet )
 	{	oexERROR( nRet, "Failed to start service module..." );

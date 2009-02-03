@@ -25,7 +25,19 @@ ifeq ($(LOC_H_$(LOC_TAG)),)
 	LOC_H_$(LOC_TAG) := h
 endif
 
-ifeq ($(LOC_CXX_$(LOC_TAG)),c)
+ifeq ($(LOC_BLD_$(LOC_TAG)),)
+	LOC_BLD_$(LOC_TAG) := $(LOC_CXX_$(LOC_TAG))
+else
+	ifeq ($(LOC_BLD_$(LOC_TAG)),c)
+		BLD_MSFLAGS := /Tc
+	else
+		ifeq ($(LOC_BLD_$(LOC_TAG)),cpp)
+			BLD_MSFLAGS := /Tp
+		endif
+	endif
+endif
+
+ifeq ($(LOC_BLD_$(LOC_TAG)),c)
 BLD_COMPILER := $(CFG_CC)
 else
 BLD_COMPILER := $(CFG_PP)
@@ -116,11 +128,11 @@ $(print $(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) )
 ifeq ($(OS),win32)	  
 $(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
 	- $(CFG_DEL) $(subst /,\,$@)
-	$(BLD_COMPILER) $(CFG_CFLAGS) $(BLD_INCS) $< $(CFG_CC_OUT)$@
+	$(BLD_COMPILER) $(CFG_CFLAGS) $(CFG_DEFS) $(BLD_INCS) $(BLD_MSFLAGS) $< $(CFG_CC_OUT)$@
 else
 $(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
 	- $(CFG_DEL) $@
-	$(BLD_COMPILER) $(CFG_CFLAGS) $(PRJ_EXTC) $(BLD_INCS) $< $(CFG_CC_OUT)$@
+	$(BLD_COMPILER) $(CFG_CFLAGS) $(CFG_DEFS) $(PRJ_EXTC) $(BLD_INCS) $< $(CFG_CC_OUT)$@
 endif
 
 

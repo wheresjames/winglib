@@ -75,6 +75,10 @@ ifeq ($(OS),win32)
 	CFG_EXE_POST := .exe
 	CFG_DLL_POST := .dll
 	
+	ifdef PRJ_DEFS
+		CFG_DEFS := $(foreach def,$(PRJ_DEFS),/D$(def) )
+	endif	
+	
 else
 
 	# --with-sysroot
@@ -113,9 +117,10 @@ else
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOUUID -DOEX_NOSHM
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
-			
-		else ifeq ($(TOOLS),codesourcery)
-		
+
+		endif
+		ifeq ($(TOOLS),codesourcery)
+
 			# Google Android
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-none-linux-gnueabi-
 
@@ -123,9 +128,10 @@ else
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOUUID
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
-			
-		else ifeq ($(TOOLS),nihilism)
-		
+
+		endif
+		ifeq ($(TOOLS),nihilism)
+
 			# nihilism
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-unknown-linux-gnu-
 
@@ -133,9 +139,10 @@ else
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOUUID -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOVIDEO
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
-			
-		else ifeq ($(TOOLS),uclinux)
-		
+
+		endif
+		ifeq ($(TOOLS),uclinux)
+
 			# uclinux
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-linux-
 
@@ -211,6 +218,10 @@ else
 	CFG_LIB_POST := .a
 	CFG_DLL_PRE	 := lib
 	CFG_DLL_POST := .so
+	
+	ifdef PRJ_DEFS
+		CFG_DEFS := $(foreach def,$(PRJ_DEFS),-D$(def) )
+	endif	
 	
 endif
 

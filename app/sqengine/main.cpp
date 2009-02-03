@@ -17,6 +17,24 @@ extern "C" oex::oexRESULT SRV_Start( oex::oexCSTR x_pPath, oex::oexCSTR x_pComma
 
 	// Start a log file
 	oexNOTICE( 0, "Module startup" );
+	
+//	if ( !x_nCommandLine || !oexCHECK_PTR( x_pCommandLine ) || !oex::CFile::Exists( x_pCommandLine ) )
+//		oexERROR( 0, "Script not specified" );
+//	else
+	{
+		sqbind::CSqEngine sq;
+
+		if ( !sq.Init() )
+			oexERROR( 0, "Unable to initialize Squirrel-Script engine" );
+		else
+		{
+//			sq.Load( "MessageBox( \"Hello World!\" );", oex::oexFALSE );
+			if ( !sq.Run( "_self.MessageBox( \"Hello World!\" );" ) )
+				oexERROR( 0, oex::CStr().Fmt( oexT( "Squirrel-Script : %s" ), sq.GetLastError().c_str() ) );
+			
+		} // end else
+
+	} // end else
 
 	// Uninitialize the oex library
 	oexUNINIT();
@@ -29,19 +47,20 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 {
 	if ( !oexCHECK_PTR( pDi ) )
 	{	oexERROR( EINVAL, "Invalid function argument" );
-		return -1;
+		return 0;
 	} // end if
 
 	// Clear structure
 	oexZeroMemory( pDi, sizeof( oex::os::service::SSrvInfo ) );
 
 	// Module name
-	strncpy( pDi->szName, "Test Module", sizeof( pDi->szName ) - 1 );
+	strncpy( pDi->szName, "Squirrel Engine", sizeof( pDi->szName ) - 1 );
 
 	// Module description
-	strncpy( pDi->szDesc, "This is just a test module", sizeof( pDi->szDesc ) - 1 );
+	strncpy( pDi->szDesc, "Supplies Squirrel-Script processing capabilities", sizeof( pDi->szDesc ) - 1 );
 
-	// pDi->guidType = ;
+	// Set the Squirrel engine type
+	pDi->guidType = sqbind::SQBIND_ENGINE_IID;
 
 	// pDi->guidId = ;
 
@@ -51,7 +70,6 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 	// Set version
 	pDi->lVer = oexVERSION( 1, 0 );
 
-	return 0;
+	return 1;
 }
-
 

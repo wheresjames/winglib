@@ -39,11 +39,13 @@ OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
 /// +++ Possibly we can somehow create another process and call this function ???
+/*
 extern "C" oex::oexRESULT OEX_SRVMODULE_20081230192357EST_Run( oex::oexCSTR x_pPath )
 {	
 
 	return -1;
 }
+*/
 
 oexINT CService::Fork( CStr x_sWorkingDirectory, oexCSTR x_pLogFile )
 {
@@ -53,12 +55,12 @@ oexINT CService::Fork( CStr x_sWorkingDirectory, oexCSTR x_pLogFile )
 	return -1;
 }
 
-oexINT CService::Run( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay, oexINT x_nFlags )
+oexINT CService::Run( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay, oexINT x_nFlags )
 {
-	return RunModule( x_sModule, x_pData, x_pguidType, x_nIdleDelay, x_nFlags );
+	return RunModule( x_sModule, x_sCommandLine, x_pData, x_pguidType, x_nIdleDelay, x_nFlags );
 }
 
-oexINT CService::RunModule( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay, oexINT x_nFlags )
+oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay, oexINT x_nFlags )
 {
 	// Load the module
 	CModule mod;
@@ -120,7 +122,7 @@ oexINT CService::RunModule( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidT
 	} // end if
 
 	// Call start function if provided
-	else if ( !pStart( x_sModule.Ptr(), x_pData ) )
+	else if ( !pStart( x_sModule.Ptr(), x_sCommandLine.Ptr(), x_sCommandLine.Length(), x_pData ) )
 	{	oexNOTICE( 0, CStr().Fmt( oexT( "Exiting because SRV_Start() returned 0 in module %s" ),
 					   			  oexStrToMbPtr( x_sModule.Ptr() ) ) );
 		return -5;

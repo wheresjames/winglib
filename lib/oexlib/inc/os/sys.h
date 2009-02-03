@@ -54,6 +54,11 @@ public:
     /// Call to terminate the application
 	static void Exit( oexINT nRet );
 
+	/// Displays a system message to the user
+	static oexINT ShowMessageBox( oexCSTR x_pTitle, oexCSTR x_pStr );
+
+	/// Indicates that the application should exit
+	static oexINT Quit( oexINT x_nReturnCode );
 
 	// String conversion
 public:
@@ -279,6 +284,16 @@ public:
 	*/
 	static oexCONST oexUINT vMaximumWaitObjects()
     {   return c_uMaximumWaitObjects; }
+
+	//==============================================================
+	// GetCurrentThreadId()
+	//==============================================================
+    /// Returns the Id of the current thread
+	/**
+		
+	*/
+	static oexUINT GetCurrentThreadId();
+
 
 private:
 

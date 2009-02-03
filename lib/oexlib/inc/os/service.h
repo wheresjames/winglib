@@ -34,6 +34,14 @@
 
 #pragma once
 
+/// This scheme just helps to ensure that a service function is defined correctly
+#define oexDECLARE_SRV_Start( f ) OEX_NAMESPACE::oexRESULT f( OEX_NAMESPACE::oexCSTR x_pPath, OEX_NAMESPACE::oexCSTR x_pCommandLine, OEX_NAMESPACE::oexINT x_nCommandLine, OEX_NAMESPACE::oexCPVOID x_pData )
+#define oexDECLARE_SRV_Stop( f ) OEX_NAMESPACE::oexRESULT f()
+#define oexDECLARE_SRV_Idle( f ) OEX_NAMESPACE::oexRESULT f()
+#define oexDECLARE_SRV_GetModuleInfo( f ) OEX_NAMESPACE::oexRESULT f( OEX_NAMESPACE::os::service::SSrvInfo *pDi )
+#define oexDECLARE_SRV_FUNCTION( f ) oexDECLARE_##f( f )
+
+
 /**
 	The functions below define a simple module interface.
 
@@ -45,8 +53,10 @@ namespace service
 	//==============================================================
 	/// Called when module is loaded.  Do all initialization here.
 	/**
-	 	\param [in] x_pPath	- Path to the module
-	 	\param [in] x_pData	- User defined string
+	 	\param [in] x_pPath			- Path to the module
+		\param [in] x_pCommandLine	- Parameters passed on command line
+		\param [in] x_nCommandLine  - Bytes of data in x_pCommandLine
+		\param [in] x_pData			- User defined data pointer
 
 		This function does not need to be provided.
 
@@ -54,7 +64,8 @@ namespace service
 
 		\see
 	*/
-	typedef oexBOOL (*PFN_SRV_Start)( oexCSTR x_pPath, oexCPVOID x_pData );
+	typedef oexDECLARE_SRV_Start( (*PFN_SRV_Start) );
+//		oexRESULT (*PFN_SRV_Start)( oexCSTR x_pPath, oexCSTR x_pCommandLine, oexINT x_nCommandLine, oexCPVOID x_pData );
 
 	//==============================================================
 	// SRV_Stop()
@@ -67,7 +78,7 @@ namespace service
 
 		\see
 	*/
-	typedef oexBOOL (*PFN_SRV_Stop)();
+	typedef oexDECLARE_SRV_Stop( (*PFN_SRV_Stop) );
 
 	//==============================================================
 	// SRV_Idle()
@@ -84,7 +95,7 @@ namespace service
 
 		\see
 	*/
-	typedef oexBOOL (*PFN_SRV_Idle)();
+	typedef oexDECLARE_SRV_Idle( (*PFN_SRV_Idle) );
 
 	//==============================================================
 	// SSrvInfo
@@ -126,7 +137,7 @@ namespace service
 
 		\see
 	*/
-	typedef oexBOOL (*PFN_SRV_GetModuleInfo)( SSrvInfo *pDi );
+	typedef oexDECLARE_SRV_GetModuleInfo( (*PFN_SRV_GetModuleInfo) );
 
 };
 
@@ -173,6 +184,8 @@ public:
 	/// Starts the module in a seperate process.
 	/**
 	 	\param [in] x_sModule		- Path to module to fork
+		\param [in] x_sCommandLine	- Command line to be processed by
+									  the module.
 	 	\param [in] x_pData			- User data to pass on to module
 	 	\param [in] x_pguidType		- GUID specifying the required type
 	 							  	  of the module.  An error will be
@@ -215,11 +228,11 @@ public:
 		\return Less than zero if failure, zero if child, greater
 				than zero on return from parent.
 	*/
-	static oexINT Run( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay = 10, oexINT x_nFlags = -1 );
+	static oexINT Run( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay = 10, oexINT x_nFlags = -1 );
 
 	/// Runs the module in the current process
 	/**
 		\see Run()
 	*/
-	static oexINT RunModule( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay = 10, oexINT x_nFlags = -1 );
+	static oexINT RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay = 10, oexINT x_nFlags = -1 );
 };

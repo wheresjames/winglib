@@ -24,7 +24,7 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="make -C ../.. OS=win32 DBG=1"
+				BuildCommandLine="make -C ../.. OS=win32 BUILDDEP=1 DBG=1"
 				ReBuildCommandLine="make -C ../.. OS=win32 BUILDDEP=1 BUILDTYPE=rebuild DBG=1"
 				CleanCommandLine="make -C ../.. OS=win32 BUILDDEP=1 BUILDTYPE=clean DBG=1"
 				Output=""
@@ -45,9 +45,9 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="make -C ../.. OS=win32 BUILDDEP=1 LIBLINK=shared"
-				ReBuildCommandLine="make -C ../.. OS=win32 BUILDDEP=1 BUILDTYPE=rebuild LIBLINK=shared"
-				CleanCommandLine="make -C ../.. OS=win32 BUILDDEP=1 BUILDTYPE=clean LIBLINK=shared"
+				BuildCommandLine="make -C ../.. OS=win32 BUILDDEP=1"
+				ReBuildCommandLine="make -C ../.. OS=win32 BUILDDEP=1 BUILDTYPE=rebuild"
+				CleanCommandLine="make -C ../.. OS=win32 BUILDDEP=1 BUILDTYPE=clean"
 				Output=""
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				IncludeSearchPath=""

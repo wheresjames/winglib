@@ -74,10 +74,10 @@
 TARGET=arm-linux
 #VER_BINUTILS=binutils-2.16
 VER_BINUTILS=binutils-2.19
-#VER_GCC=gcc-3.4.4
-VER_GCC=gcc-4.2.4
-#VER_GLIBC=glibc-2.3.5
-VER_GLIBC=glibc-2.7
+VER_GCC=gcc-3.4.3
+#VER_GCC=gcc-4.2.4
+VER_GLIBC=glibc-2.3.5
+#VER_GLIBC=glibc-2.7
 #VER_GLIBC_THREADS=glibc-linuxthreads-2.3.5
 VER_GLIBC_THREADS=glibc-linuxthreads-2.5
 VER_LINUX=linux-davinci-2.6

@@ -97,6 +97,18 @@ const oexUINT       CSys::c_uMaximumWaitObjects = MAXIMUM_WAIT_OBJECTS;
 
 oexSTATIC_ASSERT( CSys::eMaximumWaitObjects == MAXIMUM_WAIT_OBJECTS );
 
+oexINT CSys::ShowMessageBox( oexCSTR x_pTitle, oexCSTR x_pStr )
+{	if ( !oexCHECK_PTR( x_pTitle ) )
+		x_pTitle = oexT( "" );
+ 	if ( !oexCHECK_PTR( x_pStr ) )
+		x_pStr = oexT( "" );
+	return ::MessageBox( NULL, x_pStr, x_pTitle, MB_OK ); 
+}
+
+oexINT CSys::Quit( oexINT x_nReturnCode )
+{	return PostThreadMessage( 0, WM_QUIT, x_nReturnCode, 0L );
+}
+
 void CSys::Exit( oexINT x_nRet )
 {
 	exit( x_nRet );
@@ -594,3 +606,8 @@ int CSys::printf( oexCSTR8 x_pFmt, ... )
 int CSys::vprintf( oexCSTR8 x_pFmt, oexVaList &pArgs )
 {	return ::vprintf( x_pFmt, (va_list)pArgs );
 }
+
+oexUINT CSys::GetCurrentThreadId()
+{	return ::GetCurrentThreadId();
+}
+

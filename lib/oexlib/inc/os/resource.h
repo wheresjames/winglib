@@ -120,7 +120,7 @@ public:
 	/// Destructor
 	~CResource()
 	{
-		Destroy();
+//		Destroy();
 	}
 
 	//==============================================================
@@ -136,6 +136,10 @@ public:
 
 	*/
 	oexRESULT Create( E_RESOURCE_TYPE x_eType, oexCSTR x_sName = oexNULL );
+
+	/// Creates an event object
+	oexRESULT CreateEvent( oexCSTR x_sName = oexNULL )
+	{	return Create( eRtEvent, x_sName ); }
 
 	//==============================================================
 	// Destroy()
