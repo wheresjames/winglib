@@ -125,14 +125,18 @@ oexINT CSys::ShowMessageBox( oexCSTR x_pTitle, oexCSTR x_pStr )
 		x_pTitle = oexT( "" );
  	if ( !oexCHECK_PTR( x_pStr ) )
 		x_pStr = oexT( "" );
-		
+
 	printf( oexT( "%s : %s" ), x_pTitle, x_pStr );
-		
+
 	return -1;
 }
 
 oexINT CSys::Quit( oexINT x_nReturnCode )
 {	return -1;
+}
+
+oexINT CSys::Flush_stdout()
+{	return fflush( stdout );
 }
 
 void CSys::Exit( oexINT x_nRet )

@@ -60,6 +60,10 @@ public:
 	/// Indicates that the application should exit
 	static oexINT Quit( oexINT x_nReturnCode );
 
+	/// Flushes the standard output buffer
+	static oexINT Flush_stdout();
+
+
 	// String conversion
 public:
 
@@ -290,7 +294,7 @@ public:
 	//==============================================================
     /// Returns the Id of the current thread
 	/**
-		
+
 	*/
 	static oexUINT GetCurrentThreadId();
 
