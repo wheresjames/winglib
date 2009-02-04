@@ -80,12 +80,13 @@ oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 	m_sFile = x_pFile;
 
 	if ( -1 == x_nFlags )
-		x_nFlags = RTLD_LAZY;
+		x_nFlags = RTLD_LAZY | RTLD_GLOBAL;
+//		x_nFlags = RTLD_NOW;
 
 	// Load the module
 	m_hModule = dlopen( x_pFile, x_nFlags );
-	if ( m_hModule == oexNULL )
-	{	oexERROR( errno, CStr().Fmt( "dlopen( '%s' )", oexStrToMbPtr( x_pFile ) ) );
+	if ( oexNULL == m_hModule )
+	{	oexERROR( errno, CStr().Fmt( "dlopen( '%s' )\r\n: %s", oexStrToMbPtr( x_pFile ), dlerror() ) );
 		return oexFALSE;
 	} // end if
 
@@ -130,7 +131,7 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 
 	// Save index
 	oexINT index = m_map.Size();
-	
+
 	// Re allocate space for pointers
 	oexUINT uSize = m_ptrs.Size();
 	if ( uSize <= index )

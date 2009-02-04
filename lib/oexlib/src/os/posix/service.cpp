@@ -42,8 +42,6 @@ oexINT CService::Fork( CStr x_sWorkingDirectory, oexCSTR x_pLogFile )
 {
 	pid_t pid, sid;
 
-	oexLM();
-
 	// Fork from the parent
 	pid = fork();
 	if ( 0 > pid )
@@ -96,7 +94,7 @@ oexINT CService::Fork( CStr x_sWorkingDirectory, oexCSTR x_pLogFile )
 	return 0;
 }
 
-oexINT CService::Run( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay, oexINT x_nFlags )
+oexINT CService::Run( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay, oexINT x_nFlags )
 {
 	// Fork the process, return if parent or failure
 	if ( oexINT nRet = Fork( x_sModule.GetPath() ) )
@@ -104,10 +102,10 @@ oexINT CService::Run( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidType, o
 
 	// *** We're in the child fork() now...
 
-	return RunModule( x_sModule, x_pData, x_pguidType, x_nIdleDelay, x_nFlags );
+	return RunModule( x_sModule, x_sCommandLine, x_pData, x_pguidType, x_nIdleDelay, x_nFlags );
 }
 
-oexINT CService::RunModule( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay, oexINT x_nFlags )
+oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay, oexINT x_nFlags )
 {
 	// Load the module
 	CModule mod;
@@ -128,8 +126,8 @@ oexINT CService::RunModule( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidT
 	// Get module information
 	service::SSrvInfo si;
 	oexZeroMemory( &si, sizeof( si ) );
-	if ( !pGetModuleInfo( &si ) )
-	{	oexERROR( 0, CStr().Fmt( oexT( "In module '%s', SRV_GetModuleInfo() failed" ),
+	if ( oexINT ret = pGetModuleInfo( &si ) )
+	{	oexERROR( ret, CStr().Fmt( oexT( "In module '%s', SRV_GetModuleInfo() failed by returning non-zero" ),
 				     			 oexStrToMbPtr( x_sModule.Ptr() ) ) );
 		return -3;
 	} // end if
@@ -145,6 +143,7 @@ oexINT CService::RunModule( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidT
 
 	// Log information about the module
 	oexNOTICE( 0, CStr().Fmt( oexT( "Module Loaded:  '%s'\r\n"
+								    "Command Line:   '%s'\r\n"
 								    "Name:           %s\r\n"
 								    "Version:        %d.%d\r\n"
 								    "Description:    %s\r\n"
@@ -152,6 +151,7 @@ oexINT CService::RunModule( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidT
 								    "ID:             %s\r\n"
 								    "Instance:       %s\r\n" ),
 							   oexStrToMbPtr( x_sModule.Ptr() ),
+							   oexStrToMbPtr( x_sCommandLine.Ptr() ),
 							   si.szName,
 							   oexVERSION_MAJOR( si.lVer ), oexVERSION_MINOR( si.lVer ),
 							   si.szDesc,
@@ -167,8 +167,8 @@ oexINT CService::RunModule( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidT
 					   			   oexStrToMbPtr( x_sModule.Ptr() ) ) );
 
 	// Call start function if provided
-	else if ( !pStart( x_sModule.Ptr(), x_pData ) )
-	{	oexNOTICE( 0, CStr().Fmt( oexT( "Exiting because SRV_Start() returned 0 in module %s" ),
+	else if ( oexINT ret = pStart( x_sModule.Ptr(), x_sCommandLine.Ptr(), x_sCommandLine.Length(), x_pData ) )
+	{	oexNOTICE( ret, CStr().Fmt( oexT( "Exiting because SRV_Start() returned non-zero in module %s" ),
 					   			  oexStrToMbPtr( x_sModule.Ptr() ) ) );
 		return 0;
 	} // end if
@@ -202,7 +202,5 @@ oexINT CService::RunModule( CStr x_sModule, oexCPVOID x_pData, oexGUID *x_pguidT
 	} // end if
 
 	// Call stop function
-	pStop();
-
-	return 0;
+	return pStop();
 }

@@ -41,7 +41,7 @@ using namespace OEX_NAMESPACE::os;
 /// +++ Possibly we can somehow create another process and call this function ???
 /*
 extern "C" oex::oexRESULT OEX_SRVMODULE_20081230192357EST_Run( oex::oexCSTR x_pPath )
-{	
+{
 
 	return -1;
 }
@@ -81,8 +81,8 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 	// Get module information
 	service::SSrvInfo si;
 	oexZeroMemory( &si, sizeof( si ) );
-	if ( !pGetModuleInfo( &si ) )
-	{	oexERROR( 0, CStr().Fmt( oexT( "In module '%s', SRV_GetModuleInfo() failed" ),
+	if ( oexINT ret = pGetModuleInfo( &si ) )
+	{	oexERROR( ret, CStr().Fmt( oexT( "In module '%s', SRV_GetModuleInfo() failed by returning non-zero" ),
 				     			 oexStrToMbPtr( x_sModule.Ptr() ) ) );
 		return -3;
 	} // end if
@@ -122,8 +122,8 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 	} // end if
 
 	// Call start function if provided
-	else if ( !pStart( x_sModule.Ptr(), x_sCommandLine.Ptr(), x_sCommandLine.Length(), x_pData ) )
-	{	oexNOTICE( 0, CStr().Fmt( oexT( "Exiting because SRV_Start() returned 0 in module %s" ),
+	else if ( oexINT ret = pStart( x_sModule.Ptr(), x_sCommandLine.Ptr(), x_sCommandLine.Length(), x_pData ) )
+	{	oexNOTICE( ret, CStr().Fmt( oexT( "Exiting because SRV_Start() returned non-zero in module %s" ),
 					   			  oexStrToMbPtr( x_sModule.Ptr() ) ) );
 		return -5;
 	} // end if
@@ -140,12 +140,12 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 
 	// Run idle loop if function provided
 	if ( oexCHECK_PTR( pIdle ) )
-		while ( pIdle() )
+		while ( !pIdle() )
 			os::CSys::Sleep( x_nIdleDelay );
 
 	// Forever
-	else for( ; ; )
-		os::CSys::Sleep( 60000 );
+//	else for( ; ; )
+//		os::CSys::Sleep( 60000 );
 
 	// Check for stop function
 	service::PFN_SRV_Stop pStop =
@@ -157,7 +157,5 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 	} // end if
 
 	// Call stop function
-	pStop();
-
-	return 0;
+	return pStop();
 }

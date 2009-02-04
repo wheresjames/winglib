@@ -35,7 +35,7 @@
 #pragma once
 
 #ifdef SQBIND_SQPLUS
-#   include <SqPlus.h>
+#   include <sqplus.h>
 #   define SQBIND_REGISTER_CLASS_BEGIN( c )  				void __SqReg_##c( SquirrelVM *vm ) { \
                                            					SqPlus::SQClassDef< c >( *vm, _T( #c ) )
 #   define SQBIND_REGISTER_CLASS_END()       				; }

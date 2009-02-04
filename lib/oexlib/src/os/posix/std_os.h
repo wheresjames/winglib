@@ -41,7 +41,6 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/mman.h>
 #include <fcntl.h>
 #include <dirent.h>
 //#include <stdio.h>
@@ -52,6 +51,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <sys/mman.h>
 
 #include <sys/time.h>
 #include <sys/times.h>
@@ -91,12 +91,3 @@ extern int daylight;
 
 #include <signal.h>
 
-/*
-#include <sys/ioctl.h>
-#include <linux/types.h>
-#include <linux/videodev.h>
-#include <linux/videodev2.h>
-#include <sys/mman.h>
-
-#include <errno.h>
-*/

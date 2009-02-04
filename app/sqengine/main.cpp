@@ -17,7 +17,7 @@ extern "C" oex::oexRESULT SRV_Start( oex::oexCSTR x_pPath, oex::oexCSTR x_pComma
 
 	// Start a log file
 	oexNOTICE( 0, "Module startup" );
-	
+
 //	if ( !x_nCommandLine || !oexCHECK_PTR( x_pCommandLine ) || !oex::CFile::Exists( x_pCommandLine ) )
 //		oexERROR( 0, "Script not specified" );
 //	else
@@ -31,7 +31,7 @@ extern "C" oex::oexRESULT SRV_Start( oex::oexCSTR x_pPath, oex::oexCSTR x_pComma
 //			sq.Load( "MessageBox( \"Hello World!\" );", oex::oexFALSE );
 			if ( !sq.Run( "_self.MessageBox( \"Hello World!\" );" ) )
 				oexERROR( 0, oex::CStr().Fmt( oexT( "Squirrel-Script : %s" ), sq.GetLastError().c_str() ) );
-			
+
 		} // end else
 
 	} // end else
@@ -70,6 +70,15 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 	// Set version
 	pDi->lVer = oexVERSION( 1, 0 );
 
-	return 1;
+	return 0;
+}
+/*
+extern "C" void sqstd_seterrorhandlers(HSQUIRRELVM v)
+{
 }
 
+extern "C" SQRESULT sqstd_register_iolib(HSQUIRRELVM v)
+{
+	return 0;
+}
+*/

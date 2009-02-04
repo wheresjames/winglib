@@ -88,7 +88,7 @@ else
 
 	ifdef DBG
 		CFG_CEXTRA	 := -g -DDEBUG -D_DEBUG $(CFG_CEXTRA) 
-		CFG_LEXTRA	 := -g -rdynamic
+		CFG_LEXTRA	 := -g
 		CFG_DPOSTFIX := _d
 	else
 		CFG_CEXTRA	 := -O2 -s $(CFG_CEXTRA) 
@@ -98,7 +98,7 @@ else
 	endif
 	
 	ifeq ($(PRJ_TYPE),dll)
-		CFG_LEXTRA := $(CFG_LEXTRA) -shared
+		CFG_LEXTRA := $(CFG_LEXTRA) -shared --export-dynamic
 	else	
 		ifeq ($(LIBLINK),static)
 			CFG_LEXTRA := $(CFG_LEXTRA) -static
@@ -113,7 +113,8 @@ else
 			# Snapgear
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/usr/local/bin/arm-linux-
 
-			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread
+			CFG_STDLIB := -lrt -pthread
+			CFG_LFLAGS := $(CFG_LEXTRA)
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOUUID -DOEX_NOSHM
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
@@ -124,7 +125,8 @@ else
 			# Google Android
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-none-linux-gnueabi-
 
-			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread 
+			CFG_STDLIB := -lrt -pthread
+			CFG_LFLAGS := $(CFG_LEXTRA)
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOUUID
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
@@ -135,7 +137,8 @@ else
 			# nihilism
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-unknown-linux-gnu-
 
-			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread 
+			CFG_STDLIB := -lrt -pthread
+			CFG_LFLAGS := $(CFG_LEXTRA)
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOUUID -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOVIDEO
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
@@ -146,7 +149,8 @@ else
 			# uclinux
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-linux-
 
-			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread 
+			CFG_STDLIB := -lrt -pthread
+			CFG_LFLAGS := $(CFG_LEXTRA)
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOUUID -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOVIDEO
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
@@ -157,7 +161,8 @@ else
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-linux-
 			override TOOLS := custom
 
-			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread
+			CFG_STDLIB := -lrt -pthread
+			CFG_LFLAGS := $(CFG_LEXTRA)
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOUUID -DOEX_NOSHM -fno-exceptions
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
@@ -171,7 +176,8 @@ else
 			# Cross compile for windows
 			CFG_TOOLPREFIX := i586-mingw32msvc- 
 
-			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread -luuid
+			CFG_STDLIB := -lrt -pthread -luuid
+			CFG_LFLAGS := $(CFG_LEXTRA)
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
@@ -183,17 +189,14 @@ else
 
 			# -lregex -lpng -ljpeg -lzlib -ltiff -lstdc++ -lgcc -lodbc32 -lwsock32 -lwinspool -lwinmm -lshell32 -lcomctl32 -lctl3d32 -lodbc32 -ladvapi32 -lodbc32 -lwsock32 -lopengl32 -lglu32 -lole32 -loleaut32 -luuid
 			
-			CFG_LFLAGS := $(CFG_LEXTRA) -lrt -pthread -luuid
+			CFG_STDLIB := -lrt -pthread -luuid -ldl
+			CFG_LFLAGS := $(CFG_LEXTRA) -rdynamic
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
 		endif
 		
-	endif
-	
-	ifneq ($(LIBLINK),static)
-		CFG_LFLAGS := $(CFG_LFLAGS) -ldl
 	endif
 	
 	# Tools
@@ -222,7 +225,7 @@ else
 	ifdef PRJ_DEFS
 		CFG_DEFS := $(foreach def,$(PRJ_DEFS),-D$(def) )
 	endif	
-	
+
 endif
 
 CFG_BUILD_TYPE := $(PLATFORM)-$(OS)-$(PROC)-$(TOOLS)

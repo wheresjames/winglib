@@ -38,11 +38,11 @@
 #define _CRT_SECURE_NO_DEPRECATE 1
 #pragma warning( disable : 4996 )
 
-// We'll use std strings
-#include <string>
-#include <list>
-#include <map>
-#include <vector>
+// You must include these files in your project before sqbind.h
+//#include <string>
+//#include <list>
+//#include <map>
+//#include <vector>
 
 namespace std { typedef basic_string< oex::oexTCHAR > tstring; }
 

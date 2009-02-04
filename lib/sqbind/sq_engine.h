@@ -42,8 +42,8 @@ namespace sqbind
 	//
 	/// This base class is imported in to the squirrel environment
 	//==================================================================
-	class CSqEngineExport 
-	{            
+	class CSqEngineExport
+	{
 	public:
 
 		enum
@@ -56,7 +56,7 @@ namespace sqbind
 
 		// Simple alert function
 		int alert( const std::tstring &sMsg )
-		{	return oex::os::CSys::ShowMessageBox( sMsg.c_str(), _T( "Notice" ) ); 
+		{	return oex::os::CSys::ShowMessageBox( sMsg.c_str(), _T( "Notice" ) );
 		}
 
 		int import( const std::tstring &sClass )
@@ -104,7 +104,7 @@ namespace sqbind
 
 		virtual SquirrelObject OnSpawn( const std::tstring &sName, const std::tstring &sScript, int bFile )
 		{   return SquirrelObject( NULL ); }
-	    
+
 		virtual SquirrelObject OnExecute( const std::tstring &sName, const std::tstring &sFunction )
 		{   return SquirrelObject( NULL ); }
 		virtual SquirrelObject OnExecute1( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1 )
@@ -123,7 +123,7 @@ namespace sqbind
 
 		/// Either a file name or actual script
 		std::tstring        m_sScript;
-	    
+
 	};
 
 };
@@ -216,13 +216,13 @@ namespace sqbind
 		}
 
 		/// Intercepts errors
-		static SQInteger CSqEngine::SqErrorHandler( HSQUIRRELVM v )
+		static SQInteger SqErrorHandler( HSQUIRRELVM v )
 		{
-			if( 0 >= sq_gettop( v ) ) 
+			if( 0 >= sq_gettop( v ) )
 				return 0;
 
 			const SQChar *sErr = 0;
-			if( SQ_SUCCEEDED( sq_getstring( v, -1, &sErr ) ) ) 
+			if( SQ_SUCCEEDED( sq_getstring( v, -1, &sErr ) ) )
 				throw SScriptErrorInfo( sErr, _T( "" ), 0, 0 );
 
 			else
@@ -232,20 +232,20 @@ namespace sqbind
 		}
 
 		/// Handles a script compiler error
-		static void CSqEngine::SqCompilerErrorHandler( HSQUIRRELVM v, const SQChar *sErr, const SQChar *sSource, SQInteger line, SQInteger column )
+		static void SqCompilerErrorHandler( HSQUIRRELVM v, const SQChar *sErr, const SQChar *sSource, SQInteger line, SQInteger column )
 		{
 			throw SScriptErrorInfo( sErr, sSource, line, column );
 		}
 
 		/// Auxiliary error handler
-		static SQInteger CSqEngine::SqAuxErrorHandler( HSQUIRRELVM v )
+		static SQInteger SqAuxErrorHandler( HSQUIRRELVM v )
 		{
-			if( 0 >= sq_gettop( v ) ) 
+			if( 0 >= sq_gettop( v ) )
 				return 0;
 
 			std::tstring sErr;
 			const SQChar *pErr = 0;
-			if( SQ_SUCCEEDED( sq_getstring( v, -1, &pErr ) ) ) 
+			if( SQ_SUCCEEDED( sq_getstring( v, -1, &pErr ) ) )
 				sErr = pErr;
 			else
 				sErr = _T( "Unknown Error" );
@@ -254,15 +254,15 @@ namespace sqbind
 			SQStackInfos si;
 			if ( SQ_SUCCEEDED( sq_stackinfos( v, 1, &si ) ) )
 			{   std::tstring sMsg;
-				if ( si.funcname ) 
-				{   sMsg += si.funcname; 
-					sMsg += _T( "() : " ); 
+				if ( si.funcname )
+				{   sMsg += si.funcname;
+					sMsg += _T( "() : " );
 				} // end if
 				sMsg += sErr;
 				throw SScriptErrorInfo( sMsg.c_str(), si.source ? si.source : _T( "" ), si.line, 0 );
 			} // end if
 
-			else 
+			else
 				throw SScriptErrorInfo( sErr.c_str(), _T( "" ), 0, 0 );
 
 			return 0;
@@ -272,8 +272,8 @@ namespace sqbind
 
 		/// Default constructor
 		CSqEngine() :
-		    m_vm( SquirrelVM::StdLib_All ), 
-			m_script( m_vm.GetVMHandle() ) 
+		    m_vm( SquirrelVM::StdLib_All ),
+			m_script( m_vm.GetVMHandle() )
 		{
 			m_bLoaded = oex::oexFALSE;
 		}
@@ -303,7 +303,7 @@ namespace sqbind
 
 			You don't need to call this directly, it is called by Load().
 		*/
-		oex::oexBOOL CSqEngine::Init()
+		oex::oexBOOL Init()
 		{
 			Destroy();
 
@@ -313,18 +313,18 @@ namespace sqbind
 				m_vm.Init();
 
 				// Set compiler error handler
-				sq_setcompilererrorhandler( m_vm.GetVMHandle(), &CSqEngine::SqCompilerErrorHandler );
+//				sq_setcompilererrorhandler( m_vm.GetVMHandle(), &CSqEngine::SqCompilerErrorHandler );
 
 				// Set print function
-				sq_setprintfunc( m_vm.GetVMHandle(), CSqEngine::SqPrint );
+//				sq_setprintfunc( m_vm.GetVMHandle(), CSqEngine::SqPrint );
 
 				// Set run time error handler
 		//        sq_newclosure( m_vm.GetVMHandle(), &CSqEngine::SqErrorHandler, 0 );
 
 				// Set auxiliary error handler
-    			sq_newclosure( m_vm.GetVMHandle(), &CSqEngine::SqAuxErrorHandler, 0 );
+//    			sq_newclosure( m_vm.GetVMHandle(), &CSqEngine::SqAuxErrorHandler, 0 );
 
-				sq_seterrorhandler( m_vm.GetVMHandle() );
+//				sq_seterrorhandler( m_vm.GetVMHandle() );
 
 				// Bind Squirrel variables
 				sqbind::SqBindAll( m_vm );
@@ -374,7 +374,7 @@ namespace sqbind
 		*/
 		BOOL Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oexBOOL bRelative = FALSE, oex::oexBOOL bStart = TRUE )
 		{
-			if ( !oexCHECK_PTR( pScript ) || !*pScript ) 
+			if ( !oexCHECK_PTR( pScript ) || !*pScript )
 				return oex::oexFALSE;
 
 			if ( !Init() )
@@ -398,13 +398,13 @@ namespace sqbind
 				} // end if
 
 				// Load the script
-				m_script = bFile ? m_vm.CompileScript( pScript ) 
+				m_script = bFile ? m_vm.CompileScript( pScript )
 	 							 : m_vm.CompileBuffer( pScript );
 
 				if ( bStart )
 				{
 					// Initialize the script
-					m_vm.RunScript( m_script ); 
+					m_vm.RunScript( m_script );
 
 					// Execute init function
 					Execute( SQEXE_FN_INIT );
@@ -438,7 +438,7 @@ namespace sqbind
 			try
 			{
 				// Initialize the script
-				m_vm.RunScript( m_script ); 
+				m_vm.RunScript( m_script );
 
 				// Execute init function
 				Execute( SQEXE_FN_INIT );
@@ -455,7 +455,7 @@ namespace sqbind
 	    /// Executes the specified buffer
 		oex::oexBOOL Run( oex::oexCSTR pScript )
 		{
-			if ( !oexCHECK_PTR( pScript ) || !*pScript ) 
+			if ( !oexCHECK_PTR( pScript ) || !*pScript )
 				return oex::oexFALSE;
 
 			try
@@ -484,7 +484,7 @@ namespace sqbind
 			void BindRootVariable( T *pVar, oex::oexCSTR pName, oex::oexCSTR pImport = NULL, SqPlus::VarAccessType access = SqPlus::VAR_ACCESS_READ_WRITE )
 			{   if ( pImport && *pImport ) import( pImport );
 				SquirrelObject root = m_vm.GetRootTable();
-				SqPlus::BindVariable( m_vm, root, pVar, pName, access ); 
+				SqPlus::BindVariable( m_vm, root, pVar, pName, access );
 			}
 
 		/// Binds functions to the root table
@@ -515,7 +515,7 @@ namespace sqbind
 
 			try
 			{
-				SqPlus::SquirrelFunction< void > f( m_vm, m_vm.GetRootTable(), pFunction );            
+				SqPlus::SquirrelFunction< void > f( m_vm, m_vm.GetRootTable(), pFunction );
 
 				if ( f.func.IsNull() )
 				{   m_sErr = _T( "Function not found : " ); m_sErr += pFunction;

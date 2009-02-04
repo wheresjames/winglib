@@ -34,7 +34,8 @@
 
 #pragma once
 
-#ifndef _NEW
+
+#if !defined(_NEW)
 #	ifndef __PLACEMENT_NEW_INLINE
 #		define __PLACEMENT_NEW_INLINE
 

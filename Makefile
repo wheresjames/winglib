@@ -1,6 +1,10 @@
 
 # Total dependencies
-BUILDDIRS := lib/oexlib app/test app/srvrund app/srvmod	app/vidcap app/avi_scan app/sqengine
+BUILDDIRS := lib/oexlib app/test app/srvrund app/srvmod	app/sqengine
+
+ifdef GUI
+	BUILDDIRS := $(BUILDDIRS) app/vidcap app/avi_scan
+endif
 
 ifdef BUILDDEP
 	BUILDDIRS := dep $(BUILDDIRS)

@@ -199,7 +199,7 @@ namespace sqbind
         }
 
         /// Returns non-zero if pPattern matches pString
-        static bool match_pattern( const TCHAR *pString, const TCHAR *pPattern)
+        static bool match_pattern( const oex::oexTCHAR *pString, const oex::oexTCHAR *pPattern)
         {
 	        if ( !pString || !pPattern ) 
                 return false;
