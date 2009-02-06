@@ -1,0 +1,27 @@
+--- gcc-3.4.4/gcc/config/arm/t-linux	2003-09-20 17:09:07.000000000 -0400
++++ gcc-3.4.4.works/gcc/config/arm/t-linux	2005-05-25 20:44:07.000000000 -0400
+@@ -18,3 +18,24 @@
+ 
+ # LIBGCC = stmp-multilib
+ # INSTALL_LIBGCC = install-multilib
++
++EXTRA_MULTILIB_PARTS = crtbegin.o crtend.o crti.o crtn.o
++
++# If EXTRA_MULTILIB_PARTS is not defined above then define EXTRA_PARTS here
++# EXTRA_PARTS = crtbegin.o crtend.o crti.o crtn.o
++
++LIBGCC = stmp-multilib
++INSTALL_LIBGCC = install-multilib
++
++# Assemble startup files.
++$(T)crti.o: $(srcdir)/config/arm/crti.asm $(GCC_PASSES)
++	$(GCC_FOR_TARGET) $(GCC_CFLAGS) $(MULTILIB_CFLAGS) $(INCLUDES) \
++	-c -o $(T)crti.o -x assembler-with-cpp $(srcdir)/config/arm/crti.asm
++
++$(T)crtn.o: $(srcdir)/config/arm/crtn.asm $(GCC_PASSES)
++	$(GCC_FOR_TARGET) $(GCC_CFLAGS) $(MULTILIB_CFLAGS) $(INCLUDES) \
++	-c -o $(T)crtn.o -x assembler-with-cpp $(srcdir)/config/arm/crtn.asm
++
++# Disable libc link
++
++SHLIB_LC =
