@@ -77,25 +77,12 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 }
 
 // !!! Never call this function !!!
-// This is just a dummy function to pull in these functions
+// This is just a dummy function to pull in these function definitions
 extern "C" void dummy_to_import_symbols()
-{
-	HSQUIRRELVM 	*hvm;
-	SQVM 			*svm; 
-	
-	sqstd_seterrorhandlers( *hvm );	
-	sqstd_register_iolib( svm );	
+{	HSQUIRRELVM 	*hvm;
+	SQVM 			*svm;
+	sqstd_seterrorhandlers( *hvm );
+	sqstd_register_iolib( svm );
 	sqstd_register_stringlib( *hvm );
 	sqstd_register_mathlib( *hvm );
 }
-
-/*
-extern "C" void sqstd_seterrorhandlers(HSQUIRRELVM v)
-{
-}
-
-extern "C" SQRESULT sqstd_register_iolib(HSQUIRRELVM v)
-{
-	return 0;
-}
-*/

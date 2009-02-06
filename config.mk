@@ -163,7 +163,7 @@ else
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA)
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOUUID -DOEX_NOSHM -fno-exceptions
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -fexceptions -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOUUID -DOEX_NOSHM
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 			
@@ -197,12 +197,22 @@ else
 
 		endif
 		
-	# you can't use -ldl with static linking!
-	ifeq ($(LIBLINK),shared)
-		CFG_STDLIB := $(CFG_STDLIB) -ldl
-	endif		
+		# you can't use -ldl with static linking!
+		ifeq ($(LIBLINK),shared)
+			CFG_STDLIB := $(CFG_STDLIB) -ldl
+		endif		
 		
 	endif
+	
+#	ifeq ($(PRJ_TYPE),dll)
+#		CFG_LD := $(CFG_TOOLPREFIX)ld -E --export-dynamic
+#	else
+#		ifeq ($(PRJ_TYPE),lib)
+#			CFG_LD := $(CFG_TOOLPREFIX)ld -E --export-dynamic
+#		else
+#			CFG_LD := $(CFG_TOOLPREFIX)g++ -rdynamic -Wl,-E -Wl,--export-dynamic
+#		endif
+#	endif
 	
 	# Tools
 	CFG_PP := $(CFG_TOOLPREFIX)g++
