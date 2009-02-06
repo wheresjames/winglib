@@ -40,9 +40,6 @@ CLog CLog::m_logGlobal;
 
 oexBOOL CLog::OpenLogFile( oexCSTR x_pPath, oexCSTR x_pFile, oexCSTR x_pExtension )
 {
-	// Lose old log file
-	Destroy();
-
 	CStr sFile;
 
 	if ( oexCHECK_PTR( x_pPath ) && *x_pPath )
@@ -59,31 +56,76 @@ oexBOOL CLog::OpenLogFile( oexCSTR x_pPath, oexCSTR x_pFile, oexCSTR x_pExtensio
 		sFile << x_pExtension;
 	else
 		sFile << oexT( ".debug.log" );
+		
+	return Open( sFile.Ptr() );
+}
+
+oexBOOL CLog::Open( oexCSTR x_pPath )
+{
+	if ( !oexCHECK_PTR( x_pPath ) )
+		return oexFALSE;
+
+	// Lose old log file
+	Destroy();
+
+	// Save away the file name		
+	m_sPath = x_pPath;
 
 #if defined( oexDEBUG )
 	// Show log file location
-	os::CSys::printf( oexStrToMbPtr( sFile.Ptr() ) );
+	os::CSys::printf( oexStrToMbPtr( x_pPath ) );
+#endif
+
+	// Open new log file
+	if ( !m_file.CreateAlways( x_pPath ).IsOpen() )
+		return oexFALSE;
+
+	// Create log header
+	m_file.Write( oexMks(	oexT( ";====================================================================" ) oexNL
+							oexT( "; Log file    : " ), x_pPath, oexNL
+							oexT( "; Local Time  : " ), oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL
+							oexT( "; GMT Time    : " ), oexGmtTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL
+							oexT( "; Application : " ), oexGetModuleFileName(), oexNL oexNL
+						) );
+
+	return oexTRUE;
+}
+
+oexBOOL CLog::Resume( oexCSTR x_pPath )
+{
+	if ( !oexCHECK_PTR( x_pPath ) )
+		return oexFALSE;
+
+	// Lose old log file
+	Destroy();
+
+	// Save away the file name		
+	m_sPath = x_pPath;
+
+#if defined( oexDEBUG )
+	// Show log file location
+	os::CSys::printf( oexStrToMbPtr( x_pPath ) );
 #endif
 
 	// See if there is an existing log file
-//	if ( m_file.OpenExisting( sFile.Ptr() ).IsOpen() )
-//		m_file.SetPtrPosEnd( 0 );
+	if ( m_file.OpenExisting( x_pPath ).IsOpen() )
+		m_file.SetPtrPosEnd( 0 );
 
 	// Open new log file
-//	else
-		if ( !m_file.CreateAlways( sFile.Ptr() ).IsOpen() )
+	else
+	{
+		if ( !m_file.CreateAlways( x_pPath ).IsOpen() )
 			return oexFALSE;
 
-	// Create log header
-	m_file.Write( CStr().Fmt( oexT( ";====================================================================" ) oexNL
-							  oexT( "; Log file    : %s" ) oexNL
-							  oexT( "; Local Time  : %s" ) oexNL
-							  oexT( "; GMT Time    : %s" ) oexNL
-							  oexT( "; Application : %s" ) oexNL oexNL,
-							  oexStrToMbPtr( sFile.Ptr() ),
-							  oexStrToMbPtr( oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() ),
-							  oexStrToMbPtr( oexGmtTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() ),
-							  oexStrToMbPtr( oexGetModuleFileName().Ptr() ) ) );
+		// Create log header
+		m_file.Write( oexMks(	oexT( ";====================================================================" ) oexNL
+								oexT( "; Log file    : " ), x_pPath, oexNL
+								oexT( "; Local Time  : " ), oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL
+								oexT( "; GMT Time    : " ), oexGmtTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL
+								oexT( "; Application : " ), oexGetModuleFileName(), oexNL oexNL
+							) );
+							
+	} // end else
 
 	return oexTRUE;
 }
@@ -121,7 +163,7 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x
 		else if ( eNotice == x_uLevel )
 			pLevel = oexT( "Notice" );
 		else
-			pLevel = sLevel.Fmt( "%d", (int)x_uLevel ).Ptr();
+			pLevel = sLevel.Mks( (int)x_uLevel ).Ptr();
 
 		CStr sLog;
 
@@ -144,7 +186,7 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x
 
 		// Add system error info
 		if ( x_nErr )
-			sLog << CStr().Fmt( oexT( " : 0x%X (%d) : " ), x_nErr, x_nErr )
+			sLog << CStr().Print( oexT( " : 0x%X (%d) : " ), x_nErr, x_nErr )
 			 	 << os::CTrace::GetErrorMsg( x_nErr ).RTrim( "\r\n" );
 
 		sLog << oexNL;

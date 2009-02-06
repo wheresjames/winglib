@@ -88,7 +88,7 @@ public:
 	*/
 	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
 	{
-		CStr sDevice = CStr().Fmt( oexT( "/dev/video%d" ), x_uDevice );
+		CStr sDevice = oexMks( oexT( "/dev/video" ), x_uDevice );
 
 		CSys::printf( "device = %s\n", sDevice.Ptr() );
 

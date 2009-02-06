@@ -51,6 +51,12 @@ namespace std { typedef basic_string< oex::oexTCHAR > tstring; }
 #define SQBIND_SQPLUS
 //#define SQBIND_JKBIND
 
+#include <squirrel.h>
+#include <sqstdio.h>
+#include <sqstdstring.h>
+#include <sqstdmath.h>
+#include <sqstdaux.h>
+
 #include "sq_defines.h"
 
 // Squirrel stl exports

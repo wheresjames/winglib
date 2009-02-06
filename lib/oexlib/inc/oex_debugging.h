@@ -42,6 +42,8 @@ template < const int T > class oex_static_assert{};
 	typedef oex_static_assert< sizeof( int[ ( s ) ? 1 : -1 ] ) >	\
 		oex_typedef_static_assert;
 
+#define oexSHOW( v )					OEX_NAMESPACE::os::CSys::printf( oexMks( #v oexT( " = " ), v ).Ptr(), oexNL )
+#define oexSHOWL( v )					OEX_NAMESPACE::os::CSys::printf( oexMks( #v oexT( " = " ), v ).Ptr(), oexNL ), oexNOTICE( 0, oexMks( #v oexT( " = " ), v ) )
 #define oexSHOWVAL( v, t )				OEX_NAMESPACE::os::CSys::printf( #v " = " t, v )
 #define oexM()							OEX_NAMESPACE::os::CSys::printf( oexT( "%s:(%d) : **** Marker ****" ), oexFILE, oexLINE )
 #define oexLM()							oexM(), oexNOTICE( 0, oexT( "**** Marker ****" ) )

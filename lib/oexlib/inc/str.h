@@ -1134,7 +1134,7 @@ public:
 
 public:
 
-	TStr& vFmt( oexCONST T *x_pFmt, oexVaList x_pArgs )
+	TStr& vPrint( oexCONST T *x_pFmt, oexVaList x_pArgs )
 	{
 		// Verify input string
 		if ( !oexVERIFY( x_pFmt ) )
@@ -1168,14 +1168,410 @@ public:
 	}
 
 	/// Formats a string
+	TStr& Print( oexCONST T *pFmt, ... )
+	{
+		oexVaList ap;
+		oexVaStart( ap, pFmt );
+		vPrint( pFmt, ap );
+		oexVaEnd( ap );
+		return *this;
+	}
+
+	TStr& vAppendPrint( oexCONST T *x_pFmt, oexVaList x_pArgs )
+	{
+		// Verify input string
+		if ( !oexCHECK_PTR( x_pFmt ) )
+			return *this;
+
+		oexRESULT res;
+		oexUINT uSize = oexSTRSIZE;
+		oexUINT uLen = Length();
+		do
+		{
+			// Allocate buffer
+			// The - 1 is a performance boost, this keeps us under the TMemory block size.
+			T* pPtr = OexAllocate( uLen + uSize - 1 );
+			if ( !oexCHECK_PTR( pPtr ) )
+				return *this;
+
+			// Attempt to format the string
+			os::CSys::vStrFmt( &res, &pPtr[ uLen ], uSize - 1, x_pFmt, x_pArgs );
+
+			// Shift up size
+			uSize <<= 1;
+
+		} while ( uSize && os::CSys::c_StrErr_INSUFFICIENT_BUFFER == res );
+
+		// Verfiy that the string was copied correctly
+		oexASSERT( os::CSys::c_StrErr_OK == res );
+
+		// Set the length of the string
+		Length();
+
+		return *this;
+	}
+
+	/// Formats a string
+	TStr& AppendPrint( oexCONST T *pFmt, ... )
+	{
+		oexVaList ap;
+		oexVaStart( ap, pFmt );
+		vAppendPrint( pFmt, ap );
+		oexVaEnd( ap );
+		return *this;
+	}
+
+	template < typename T_P1 >
+		TStr& Mks( T_P1 p1 )
+		{	*this += p1;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2 >
+		TStr& Mks( T_P1 p1, T_P2 p2 )
+		{	*this += p1;
+			*this += p2;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9, typename T_P10 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9, T_P10 p10 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			*this += p10;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9, typename T_P10, typename T_P11 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9, T_P10 p10, T_P11 p11 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			*this += p10;
+			*this += p11;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9, typename T_P10, typename T_P11, typename T_P12 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9, T_P10 p10, T_P11 p11, T_P12 p12 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			*this += p10;
+			*this += p11;
+			*this += p12;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
+	           typename T_P13 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9, T_P10 p10, T_P11 p11, T_P12 p12, T_P13 p13 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			*this += p10;
+			*this += p11;
+			*this += p12;
+			*this += p13;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
+	           typename T_P13, typename T_P14 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9, T_P10 p10, T_P11 p11, T_P12 p12, T_P13 p13, T_P14 p14 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			*this += p10;
+			*this += p11;
+			*this += p12;
+			*this += p13;
+			*this += p14;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
+	           typename T_P13, typename T_P14, typename T_P15 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9, T_P10 p10, T_P11 p11, T_P12 p12, T_P13 p13, T_P14 p14, T_P15 p15 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			*this += p10;
+			*this += p11;
+			*this += p12;
+			*this += p13;
+			*this += p14;
+			*this += p15;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
+	           typename T_P13, typename T_P14, typename T_P15, typename T_P16 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9, T_P10 p10, T_P11 p11, T_P12 p12, T_P13 p13, T_P14 p14, T_P15 p15, T_P16 p16 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			*this += p10;
+			*this += p11;
+			*this += p12;
+			*this += p13;
+			*this += p14;
+			*this += p15;
+			*this += p16;
+			return *this;
+		}
+
+	// +++ sprintf functionality, to eventually be type safe
+	TStr& vFmt( oexCONST T *x_pFmt, oexVaList x_pArgs )
+	{	return vPrint( x_pFmt, x_pArgs );
+	}
+
+	// +++ sprintf functionality, to eventually be type safe
 	TStr& Fmt( oexCONST T *pFmt, ... )
 	{
 		oexVaList ap;
 		oexVaStart( ap, pFmt );
-		vFmt( pFmt, ap );
+		vPrint( pFmt, ap );
 		oexVaEnd( ap );
 		return *this;
 	}
+
+/*
+// +++ Sometime, it'd be great to have a type safe sprintf,
+//     When I can find the time ;)
+
+	TStr& Fmt( oexCONST T *pFmt )
+	{
+		if ( !oexCHECK_PTR( pFmt ) )
+			Empty();
+		else
+			*this = pFmt;
+
+		return *this;
+	}
+
+	oexCONST T* FindEndFmt( oexCONST T *pFmt, oexINT *pSize )
+	{
+		if ( _TT( T, '%' ) != *pFmt )
+			return pFmt;
+
+		// Skip format parameters
+		while ( ( _TT( T, '0' ) <= *pFmt && _TT( T, '9' ) >= *pFmt )
+		        || _TT( T, '+' ) == *pFmt
+		        || _TT( T, '-' ) == *pFmt
+		        || _TT( T, '.' ) == *pFmt
+		        || _TT( T, '#' ) == *pFmt
+		        || _TT( T, '*' ) == *pFmt )
+			pFmt++;
+
+		// Single character
+		switch( *pFmt )
+		{
+			case _TT( T, 'c' ) :
+				if ( pType )
+					pType = eTypeChar;
+				break;
+
+			case _TT( T, 'd' ) :
+			case _TT( T, 'i' ) :
+				if ( pType )
+					pType = eTypeInt8;
+				break;
+
+
+		} // end switch
+
+	}
+
+	template < typename T_P1 >
+		oexCONST T* FmtAppend( oexCONST T *pFmt, T_P1 p1 )
+		{
+			if ( !oexCHECK_PTR( pFmt ) )
+				return oexFALSE;
+
+			// Find an escape sequence
+			oexCONST T *pIns = pFmt;
+			do
+			{
+				// Check for literal '%'
+				if ( _TT( T, '%' ) == *pFmt && _TT( T, '%' ) == *( pFmt + 1 ) )
+				{	Append( pFmt, ++pIns - pFmt );
+					pFmt = ++pIns;
+				} // end if
+
+			} while ( *pIns && _TT( T, '%' ) != *pFmt );
+
+			// Did we find an escape sequence?
+			if ( !*pIns )
+			{	Append( pFmt ); return pIns; }
+
+			// Append the string up to the escape sequence if needed
+			if ( pIns > pFmt )
+				Append( pFmt, pIns - pFmt );
+
+			oexINT nSize = 0;
+			pFmt = FindEndFmt( pIns, &nSize );
+
+			// Do it if the sizes match
+			if ( obj::Size( &p1 ) == nSize )
+				AppendPrint( TStr( pIns, pFmt - pIns ).Ptr(), p1 );
+
+			// Just show the escape sequence
+			else
+				Append( pIns, pFmt - pIns );
+
+			// Return next character after the escape sequence
+			return pFmt;
+		}
+*/
 
 	/// Sets a number into the string using rules of Fmt()
 	/// Truncates results larger than 256 characters

@@ -74,6 +74,7 @@ public:
     {  	m_file.Flush();
 		m_file.Destroy();
 		m_lInLog = 0;
+		m_sPath.Destroy();
 	}
 
 	//==============================================================
@@ -151,6 +152,33 @@ public:
     oexBOOL OpenLogFile( oexCSTR x_pPath = oexNULL, oexCSTR x_pFile = oexNULL, oexCSTR x_pExtension = oexNULL );
 
 	//==============================================================
+	// Open()
+	//==============================================================
+	/// Opens the specified file for writing
+	/**
+		\param [in] x_pPath			- Path for the log file
+		Opens the specified path for logging
+		\return Returns non-zero if success
+
+		\see
+	*/
+    oexBOOL Open( oexCSTR x_pPath );
+
+	//==============================================================
+	// Resume()
+	//==============================================================
+	/// Opens the specified file and appends to the end
+	/**
+		\param [in] x_pPath			- Path for the log file
+
+		Opens the specified path for logging
+		\return Returns non-zero if success
+
+		\see
+	*/
+    oexBOOL Resume( oexCSTR x_pPath );
+
+	//==============================================================
 	// SetReportingLevel()
 	//==============================================================
 	/// Writes a string to the file
@@ -166,11 +194,18 @@ public:
 	void Flush()
 	{	m_file.Flush(); }
 
+	/// Returns the path for the log file
+	CStr GetPath() 
+	{	return m_sPath; }
+	
 private:
 
 	/// Log file
 	CFile								m_file;
-
+	
+	/// Log file path
+	CStr								m_sPath;
+	
 public:
 
 	//==============================================================

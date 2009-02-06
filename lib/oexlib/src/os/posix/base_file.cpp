@@ -98,8 +98,7 @@ CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, o
 	} // end if
 
 	if ( CBaseFile::c_Invalid == hFile )
-	{	oexERROR( errno, CStr().Fmt( oexT( "open( '%s', %d ) failed" ),
-				  				     oexStrToMbPtr( x_pFile ), nMode ) );
+	{	oexERROR( errno, oexMks( oexT( "open( '" ), x_pFile, oexT( "', " ), nMode , oexT( " ) failed" ) ) );
 		return hFile;
 	} // end if
 
@@ -107,7 +106,7 @@ CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, o
 	if ( ( eDisCreateAlways == x_eDisposition || eDisCreateNew == x_eDisposition )
 		 && CBaseFile::c_Invalid != hFile )
 		if ( -1 == ftruncate( (int)hFile, 0 ) )
-			oexWARNING( errno, CStr().Fmt( oexT( "ftruncate( %d, '%s' ) failed" ), (int)hFile, oexStrToMbPtr( x_pFile ) ) );
+			oexWARNING( errno, oexMks( oexT( "ftruncate( " ), (int)hFile, oexT( ", '" ), x_pFile, oexT( "' ) failed" ) ) );
 
 	return hFile;
 }

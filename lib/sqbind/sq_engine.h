@@ -313,18 +313,18 @@ namespace sqbind
 				m_vm.Init();
 
 				// Set compiler error handler
-//				sq_setcompilererrorhandler( m_vm.GetVMHandle(), &CSqEngine::SqCompilerErrorHandler );
+				sq_setcompilererrorhandler( m_vm.GetVMHandle(), &CSqEngine::SqCompilerErrorHandler );
 
 				// Set print function
-//				sq_setprintfunc( m_vm.GetVMHandle(), CSqEngine::SqPrint );
+				sq_setprintfunc( m_vm.GetVMHandle(), CSqEngine::SqPrint );
 
 				// Set run time error handler
 		//        sq_newclosure( m_vm.GetVMHandle(), &CSqEngine::SqErrorHandler, 0 );
 
 				// Set auxiliary error handler
-//    			sq_newclosure( m_vm.GetVMHandle(), &CSqEngine::SqAuxErrorHandler, 0 );
+    			sq_newclosure( m_vm.GetVMHandle(), &CSqEngine::SqAuxErrorHandler, 0 );
 
-//				sq_seterrorhandler( m_vm.GetVMHandle() );
+				sq_seterrorhandler( m_vm.GetVMHandle() );
 
 				// Bind Squirrel variables
 				sqbind::SqBindAll( m_vm );
@@ -458,10 +458,19 @@ namespace sqbind
 			if ( !oexCHECK_PTR( pScript ) || !*pScript )
 				return oex::oexFALSE;
 
+			oexLM();
+
+			oexSHOWL( pScript );
+			
 			try
 			{
-				m_vm.RunScript( m_vm.CompileBuffer( pScript ) );
-
+				SquirrelObject script( m_vm.GetVMHandle() );
+			oexLM();
+				script = m_vm.CompileBuffer( pScript );			
+			oexLM();
+				m_vm.RunScript( script );
+			oexLM();
+			
 			} // end try
 
 			catch( SScriptErrorInfo &e )
@@ -469,6 +478,8 @@ namespace sqbind
 			catch( SquirrelError &e )
 			{	m_sErr = e.desc; return oex::oexFALSE; }
 
+			oexLM();
+			
 			return oex::oexTRUE;
 		}
 

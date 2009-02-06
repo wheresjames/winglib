@@ -83,8 +83,23 @@ oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 		x_nFlags = RTLD_LAZY | RTLD_GLOBAL;
 //		x_nFlags = RTLD_NOW;
 
+	// We may need to open the log file again
+	CStr sLogFile = CLog::GlobalLog().GetPath();
+
 	// Load the module
-	m_hModule = dlopen( x_pFile, x_nFlags );
+	try
+	{
+		m_hModule = dlopen( x_pFile, x_nFlags );
+		
+	} // end try
+	catch( ... )
+	{	oexERROR( errno, CStr().Fmt( "Exception!!! dlopen( '%s' )\r\n: %s", oexStrToMbPtr( x_pFile ), dlerror() ) );
+		return oexFALSE;
+	} // end catch
+		
+	// The module we loaded could possible screw up our logging
+	CLog::GlobalLog().Resume( sLogFile.Ptr() );
+	
 	if ( oexNULL == m_hModule )
 	{	oexERROR( errno, CStr().Fmt( "dlopen( '%s' )\r\n: %s", oexStrToMbPtr( x_pFile ), dlerror() ) );
 		return oexFALSE;

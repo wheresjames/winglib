@@ -65,9 +65,6 @@
 #DIR_LINUX=v2.6
 #CFG_LINUX=custom_davinci_all_defconfig
 
-# http://ftp.gnu.org/gnu/binutils/binutils-2.19.tar.bz2
-# http://ftp.gnu.org/gnu/binutils/binutils-2.19.tar.bz2
-
 #************************************************
 # MontaVista build
 #************************************************
@@ -155,7 +152,10 @@ cd ${BUILDROOT}
 find ${PATCHES} -name ${VER_BINUTILS}-*.patch | xargs -rtI {} cat {} | patch -d ${VER_BINUTILS} -p1
 mkdir -p BUILD/${VER_BINUTILS}
 cd BUILD/${VER_BINUTILS}
-../../${VER_BINUTILS}/configure --prefix=${PREFIX} --target=${TARGET} --with-sysroot=${SYSROOT} 2>&1 | tee -a ${BUILDROOT}/logs/10.${VER_BINUTILS}.configure.log
+../../${VER_BINUTILS}/configure --prefix=${PREFIX} \
+                                --target=${TARGET} \
+                                --with-sysroot=${SYSROOT} \
+                                2>&1 | tee -a ${BUILDROOT}/logs/10.${VER_BINUTILS}.configure.log
 make 2>&1 | tee -a ${BUILDROOT}/logs/11.${VER_BINUTILS}.make.log
 make install 2>&1 | tee -a ${BUILDROOT}/logs/12.${VER_BINUTILS}.make.install.log
 
@@ -192,7 +192,11 @@ find ${PATCHES} -name ${VER_GLIBC_THREADS}-*.patch | xargs -rtI {} cat {} | patc
 cd ..
 mkdir BUILD/${VER_GLIBC}-headers
 cd BUILD/${VER_GLIBC}-headers
-../../${VER_GLIBC}/configure --prefix=/usr --target=${TARGET} --enable-add-ons=${ENABLE_ADD_ONS} --with-headers=${SYSROOT}/usr/include 2>&1 | tee ${BUILDROOT}/logs/30.${VER_GLIBC}.configure.headers.log
+../../${VER_GLIBC}/configure --prefix=/usr \
+							 --host=${TARGET} \
+							 --enable-add-ons=${ENABLE_ADD_ONS} \
+							 --with-headers=${SYSROOT}/usr/include \
+							 2>&1 | tee ${BUILDROOT}/logs/30.${VER_GLIBC}.configure.headers.log
 make cross-compiling=yes install_root=${SYSROOT} install-headers 2>&1 | tee ${BUILDROOT}/logs/31.${VER_GLIBC}.make.headers.log
 touch ${SYSROOT}/usr/include/gnu/stubs.h
 touch ${SYSROOT}/usr/include/bits/stdio_lim.h
@@ -205,7 +209,11 @@ cd ${BUILDROOT}
 find ${PATCHES} -name ${VER_GCC}-*.patch | xargs -rtI {} cat {} | patch -d ${VER_GCC} -p1
 mkdir -p BUILD/${VER_GCC}-stage1
 cd BUILD/${VER_GCC}-stage1
-../../${VER_GCC}/configure --prefix=${PREFIX} --target=${TARGET} --enable-languages=c --with-sysroot=${SYSROOT} 2>&1 | tee ${BUILDROOT}/logs/40.${VER_GCC}.configure.stage1.log
+../../${VER_GCC}/configure --prefix=${PREFIX} \
+						   --target=${TARGET} \
+						   --enable-languages=c \
+						   --with-sysroot=${SYSROOT} \
+						   2>&1 | tee ${BUILDROOT}/logs/40.${VER_GCC}.configure.stage1.log
 make 2>&1 | tee ${BUILDROOT}/logs/41.${VER_GCC}.make.stage1.log
 make install 2>&1 | tee -a ${BUILDROOT}/logs/42.${VER_GCC}.make.stage1.install.log
 
@@ -215,7 +223,19 @@ make install 2>&1 | tee -a ${BUILDROOT}/logs/42.${VER_GCC}.make.stage1.install.l
 cd ${BUILDROOT}
 mkdir BUILD/${VER_GLIBC}
 cd BUILD/${VER_GLIBC}
-BUILD_CC=gcc CC=${CROSS_COMPILE}gcc AR=${CROSS_COMPILE}ar RANLIB=${CROSS_COMPILE}ranlib AS=${CROSS_COMPILE}as LD=${CROSS_COMPILE}ld ../../${VER_GLIBC}/configure --prefix=/usr --target=${TARGET} --without-__thread --enable-add-ons=${ENABLE_ADD_ONS} --with-headers=${SYSROOT}/usr/include 2>&1 | tee ${BUILDROOT}/logs/50.${VER_GLIBC}.configure.log
+BUILD_CC=gcc \
+	CC=${CROSS_COMPILE}gcc \
+	AR=${CROSS_COMPILE}ar \
+	RANLIB=${CROSS_COMPILE}ranlib \
+	AS=${CROSS_COMPILE}as \
+	LD=${CROSS_COMPILE}ld \
+	../../${VER_GLIBC}/configure --prefix=/usr \
+								 --build=${BUILD} \
+								 --host=${TARGET} \
+								 --without-__thread \
+								 --enable-add-ons=${ENABLE_ADD_ONS} \
+								 --with-headers=${SYSROOT}/usr/include \
+								 2>&1 | tee ${BUILDROOT}/logs/50.${VER_GLIBC}.configure.log
 make 2>&1 | tee ${BUILDROOT}/logs/51.${VER_GLIBC}.make.log
 make install_root=${SYSROOT} install | tee -a ${BUILDROOT}/logs/52.${VER_GLIBC}.make.install.log
 
@@ -225,7 +245,11 @@ make install_root=${SYSROOT} install | tee -a ${BUILDROOT}/logs/52.${VER_GLIBC}.
 cd ${BUILDROOT}
 mkdir BUILD/${VER_GCC}
 cd BUILD/${VER_GCC}
-../../${VER_GCC}/configure --prefix=${PREFIX} --target=${TARGET} --enable-languages=c,c++ --with-sysroot=${SYSROOT} 2>&1 | tee ${BUILDROOT}/logs/60.${VER_GCC}.configure.stage2.log
+../../${VER_GCC}/configure --prefix=${PREFIX} \
+						   --target=${TARGET} \
+						   --enable-languages=c,c++ \
+						   --with-sysroot=${SYSROOT} \
+						   2>&1 | tee ${BUILDROOT}/logs/60.${VER_GCC}.configure.stage2.log
 make 2>&1 | tee ${BUILDROOT}/logs/61.${VER_GCC}.make.stage2.log
 make install 2>&1 | tee -a ${BUILDROOT}/logs/62.${VER_GCC}.make.stage2.install.log
 

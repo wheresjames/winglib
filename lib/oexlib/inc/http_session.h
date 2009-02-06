@@ -472,7 +472,7 @@ public:
 
 		CFile f;
 		if ( !f.OpenExisting( x_pFile ).IsOpen() )
-		{	oexERROR( f.GetLastError(), CStr().Fmt( oexT( "Failed to open file %s" ), x_pFile ) );
+		{	oexERROR( f.GetLastError(), oexMks( oexT( "Failed to open file " ), x_pFile ) );
 			return oexFALSE;
 		} // end if
 

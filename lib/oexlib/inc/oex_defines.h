@@ -143,6 +143,9 @@
 #	define oexBigEndian( l )		OEX_NAMESPACE::cmn::RevBytes( l )
 #endif
 
+// String functions
+#define oexMks						OEX_NAMESPACE::CStr().Mks
+
 // File functions
 #define oexDeletePath				OEX_NAMESPACE::os::CFile::DeletePath
 #define oexCreatePath				OEX_NAMESPACE::os::CFile::CreatePath
@@ -192,7 +195,7 @@
 									| ( ( (OEX_NAMESPACE::oexULONG)c ) >>  8 ) 	\
 									| ( ( (OEX_NAMESPACE::oexULONG)d ) >> 24 ) 	\
 								 ) )
-								 
+
 #if defined( oexUSE_EXCEPTIONS )
 #	define oexTRY				try
 #	define oexCATCH( s )		catch( s )

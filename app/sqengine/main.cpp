@@ -29,8 +29,11 @@ extern "C" oex::oexRESULT SRV_Start( oex::oexCSTR x_pPath, oex::oexCSTR x_pComma
 		else
 		{
 //			sq.Load( "MessageBox( \"Hello World!\" );", oex::oexFALSE );
-			if ( !sq.Run( "_self.MessageBox( \"Hello World!\" );" ) )
-				oexERROR( 0, oex::CStr().Fmt( oexT( "Squirrel-Script : %s" ), sq.GetLastError().c_str() ) );
+//			if ( !sq.Run( "_self.MessageBox( \"Hello World!\" );" ) )
+			if ( !sq.Run( "print( \"Hello World!\" );" ) )
+				oexERROR( 0, oexMks( oexT( "Squirrel-Script : " ), sq.GetLastError().c_str() ) );
+			else
+				oexNOTICE( 0, oexT( "It Worked!" ) );
 
 		} // end else
 
@@ -72,6 +75,20 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 
 	return 0;
 }
+
+// !!! Never call this function !!!
+// This is just a dummy function to pull in these functions
+extern "C" void dummy_to_import_symbols()
+{
+	HSQUIRRELVM 	*hvm;
+	SQVM 			*svm; 
+	
+	sqstd_seterrorhandlers( *hvm );	
+	sqstd_register_iolib( svm );	
+	sqstd_register_stringlib( *hvm );
+	sqstd_register_mathlib( *hvm );
+}
+
 /*
 extern "C" void sqstd_seterrorhandlers(HSQUIRRELVM v)
 {

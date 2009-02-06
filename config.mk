@@ -98,7 +98,7 @@ else
 	endif
 	
 	ifeq ($(PRJ_TYPE),dll)
-		CFG_LEXTRA := $(CFG_LEXTRA) -shared --export-dynamic
+		CFG_LEXTRA := $(CFG_LEXTRA) -shared
 	else	
 		ifeq ($(LIBLINK),static)
 			CFG_LEXTRA := $(CFG_LEXTRA) -static
@@ -189,13 +189,18 @@ else
 
 			# -lregex -lpng -ljpeg -lzlib -ltiff -lstdc++ -lgcc -lodbc32 -lwsock32 -lwinspool -lwinmm -lshell32 -lcomctl32 -lctl3d32 -lodbc32 -ladvapi32 -lodbc32 -lwsock32 -lopengl32 -lglu32 -lole32 -loleaut32 -luuid
 			
-			CFG_STDLIB := -lrt -pthread -luuid -ldl
-			CFG_LFLAGS := $(CFG_LEXTRA) -rdynamic
+			CFG_STDLIB := -lrt -pthread -luuid
+			CFG_LFLAGS := $(CFG_LEXTRA) -rdynamic -Wl,-E -Wl,--export-dynamic
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
 		endif
+		
+	# you can't use -ldl with static linking!
+	ifeq ($(LIBLINK),shared)
+		CFG_STDLIB := $(CFG_STDLIB) -ldl
+	endif		
 		
 	endif
 	
