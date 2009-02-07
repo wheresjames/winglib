@@ -46,7 +46,7 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 	// pDi->guidId = ;
 
 	// Create random guid
-	oexStringToGuid( &pDi->guidInstance );
+	oexUniqueGuid( &pDi->guidInstance );
 
 	// Set version
 	pDi->lVer = oexVERSION( 1, 0 );

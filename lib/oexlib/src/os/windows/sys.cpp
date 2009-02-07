@@ -114,6 +114,10 @@ void CSys::Exit( oexINT x_nRet )
 	exit( x_nRet );
 }
 
+oexINT CSys::Flush_stdout()
+{	return fflush( stdout );
+}
+
 
 // **** Multi-byte
 

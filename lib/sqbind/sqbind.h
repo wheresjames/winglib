@@ -51,36 +51,21 @@ namespace std { typedef basic_string< oex::oexTCHAR > tstring; }
 #define SQBIND_SQPLUS
 //#define SQBIND_JKBIND
 
+// Include squirrel headers
 #include <squirrel.h>
 #include <sqstdio.h>
 #include <sqstdstring.h>
 #include <sqstdmath.h>
 #include <sqstdaux.h>
 
+// sqbind defines
 #include "sq_defines.h"
 
-// Squirrel stl exports
+// stl classes we will export to squirrel
 #include "sq_vector.h"
 #include "sq_map.h"
 #include "sq_list.h"
 
-// Squirrel message queue
-#include "msg_queue.h"
-
-namespace sqbind
-{
-    /// Bind all squirrel functions
-    static void SqBindAll( SquirrelVM &x_vm )
-    {
-        CSqVector::Register( x_vm );
-        CSqMap::Register( x_vm );
-    };
-};
-
-// The engine
-#include "sq_engine.h"
-
-// module exports
 namespace sqbind
 {
 	/// Squirrel Engine ID {DBD585B7-9B61-475e-9DB5-0CC25C698814}
@@ -97,6 +82,30 @@ namespace sqbind
 	typedef oex::oexRESULT ( *SQBIND_Execute ) ( oex::oexCSTR x_sScript, oex::oexBOOL x_bFile );
 	
 	/// This function exports the Squirrel functions contained in the module
-    typedef oex::oexRESULT ( *SQBIND_Export ) ( sqbind::VM *x_vm, oex::oexCPVOID x_pHeap );
+	/**
+		\param [out] x_vm			- Pointer to the Squirrel Virtual Machine in which functions
+									  will be exported.
+		\param [in] x_pHeapCheck	- Pointer to malloc() function.  The function is not actually
+									  called, this is used to ensure that the same heap is in use.
+									  !!! You *MUST* use shared linkage for this scheme to work.
+
+		The heap check just allows us to fail gracefully instead of spectacularly ;)
+
+	*/
+    typedef oex::oexRESULT ( *PFN_SQBIND_Export ) ( sqbind::VM *x_vm, oex::oexCPVOID x_pHeapCheck );
+
+    /// Bind native squirrel functions
+    static void SqBindAll( SquirrelVM &x_vm )
+    {
+        CSqVector::Register( x_vm );
+        CSqMap::Register( x_vm );
+        CSqList::Register( x_vm );
+    };
+
+	#include "module_manager.h"
 };
 
+// The meat of the engine
+#include "msg_queue.h"
+#include "sq_engine.h"
+#include "script_thread.h"

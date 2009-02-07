@@ -32,31 +32,30 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-
 #pragma once
 
-class CMsgQueue
+class CSqMsgQueue
 {
 public:
 
-    enum
-    {
-        /// Thread lock timeout value
-        eLockTimeout    = 60000
-    };
+	enum
+	{
+		/// Thread lock timeout value
+		eLockTimeout    = 60000
+	};
 
-    /// Parameter object type
-    typedef std::map< std::tstring, std::tstring >    t_Params;
+	/// Parameter object type
+	typedef std::map< std::tstring, std::tstring >    t_Params;
 
 public:
 
-    /// Default constructor
-    CMsgQueue()
+	/// Default constructor
+	CSqMsgQueue()
 	{
 	}
 
-    /// Destructor
-    virtual ~CMsgQueue()
+	/// Destructor
+	virtual ~CSqMsgQueue()
 	{
 		// Acquire lock
 		oex::CTlLocalLock ll( m_cLock );
@@ -66,8 +65,8 @@ public:
 		Destroy(); 
 	}
 
-    /// Releases resources
-    virtual void Destroy()
+	/// Releases resources
+	virtual void Destroy()
 	{
 		// Acquire lock
 		oex::CTlLocalLock ll( m_cLock );
@@ -81,15 +80,15 @@ public:
 		m_evtMsgWaiting.Reset();
 	}
 
-    /// Sends a command to the thread
-    /**
-        \param [in]     sMsg        -   Command
-        \param [in]     mapParams   -   Parameters
-        \param [out]    pmapReply   -   Receives reply
+	/// Sends a command to the thread
+	/**
+		\param [in]     sMsg        -   Command
+		\param [in]     mapParams   -   Parameters
+		\param [out]    pmapReply   -   Receives reply
 
-        If pmapReply is not NULL, the function waits for a reply
-        from the thread.
-    */
+		If pmapReply is not NULL, the function waits for a reply
+		from the thread.
+	*/
 	oex::oexBOOL Msg( std::tstring sMsg, t_Params *pmapParams = oexNULL, t_Params *pmapReply = oexNULL, oex::oexUINT uTimeout = eLockTimeout )
 	{
 		oex::os::CResource hReply;
@@ -178,43 +177,47 @@ public:
 public:
   
 
-    /// Thread message structure
-    struct SMsg
-    {
-        /// Default Constructor
-        SMsg() { pmapReply = NULL; }
+	/// Thread message structure
+	struct SMsg
+	{
+		/// Default Constructor
+		SMsg() { pmapReply = NULL; }
 
-        /// Initializer
-        SMsg( std::tstring x_sMsg, t_Params *x_pmapParams, oex::os::CResource x_hReply, t_Params *x_pmapReply )
-        {   sMsg = x_sMsg; 
-            if ( x_pmapParams ) 
-                mapParams = *x_pmapParams; 
-            hReply = x_hReply; 
-            pmapReply = x_pmapReply; 
-        }
+		/// Initializer
+		SMsg( std::tstring x_sMsg, t_Params *x_pmapParams, oex::os::CResource x_hReply, t_Params *x_pmapReply )
+		{   sMsg = x_sMsg; 
+			if ( x_pmapParams ) 
+				mapParams = *x_pmapParams; 
+			hReply = x_hReply; 
+			pmapReply = x_pmapReply; 
+		}
 
-        /// Command
-        std::tstring                                sMsg;
+		/// Command
+		std::tstring                                sMsg;
 
-        /// Params
-        t_Params                                    mapParams;
+		/// Params
+		t_Params                                    mapParams;
 
-        /// Reply event
+		/// Reply event
 		oex::os::CResource							hReply;
 
-        /// Reply object
-        t_Params                                    *pmapReply;
+		/// Reply object
+		t_Params                                    *pmapReply;
 
-    };
+	};
 
 protected:
 
-    /// Process messages
-    BOOL ProcessMsgs()
+	/// Process messages
+	BOOL ProcessMsgs()
 	{
 		// Acquire lock
 		oex::CTlLocalLock ll( &m_cLock );
 		if ( !ll.IsLocked() )
+			return FALSE;
+
+		// Any messages waiting?
+		if ( m_lstMsgQueue.begin() == m_lstMsgQueue.end() )
 			return TRUE;
 
 		// Process messages
@@ -253,17 +256,17 @@ protected:
 		return TRUE;
 	}
 
-    /// Process a single message from the queue
-    virtual BOOL ProcessMsg( std::tstring &sMsg, t_Params &mapParams, t_Params *pmapReply )
+	/// Process a single message from the queue
+	virtual oex::oexBOOL ProcessMsg( std::tstring &sMsg, t_Params &mapParams, t_Params *pmapReply )
 	{
 		return TRUE;
 	}
 
-    /// Returns a handle to the message wait function
-    oex::os::CResource GetMsgWaitHandle() { return m_evtMsgWaiting; }
+	/// Returns a handle to the message wait function
+	oex::os::CResource GetMsgWaitHandle() { return m_evtMsgWaiting; }
 
-    /// Over-ride for thread killing function
-    virtual void KillThread() {}
+	/// Over-ride for thread killing function
+	virtual void KillThread() {}
 
 private:
 
@@ -272,17 +275,18 @@ private:
 	/// Our thread id
 	oex::oexUINT								m_uCurrentThreadId;
 
-    /// Set when a message is waiting in the queue
+	/// Set when a message is waiting in the queue
 	oex::CTlEvent								m_evtMsgWaiting;
 
-    /// Message queue lock
+	/// Message queue lock
 	oex::CTlLock                                m_cLock;
 
-    /// Message list type
-    typedef std::list< SMsg >                   t_MsgQueue;
+	/// Message list type
+	typedef std::list< SMsg >                   t_MsgQueue;
 
-    /// The message queue
-    t_MsgQueue                                  m_lstMsgQueue;
+	/// The message queue
+	t_MsgQueue                                  m_lstMsgQueue;
 };
 
-DECLARE_INSTANCE_TYPE( CMsgQueue );
+
+DECLARE_INSTANCE_TYPE( CSqMsgQueue );

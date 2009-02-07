@@ -4,15 +4,15 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := sqengine
+PRJ_NAME := sqmod_test
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
 PRJ_LIBS := oexlib squirrel sqstdlib sqplus
 PRJ_OSLB :=
  
-PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Idle SRV_Stop
+PRJ_EXPORTS := SRV_GetModuleInfo SQBIND_Export
 
-PRJ_LIBROOT := ../..
+PRJ_LIBROOT := ../../..
 
 #-------------------------------------------------------------------
 # Configure build

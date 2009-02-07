@@ -34,101 +34,97 @@
 
 #pragma once
 
-// namespace
-namespace sqbind
+//==================================================================
+// CSqEngineExport
+//
+/// This base class is imported in to the squirrel environment
+//==================================================================
+class CSqEngineExport
 {
-	//==================================================================
-	// CSqEngineExport
-	//
-	/// This base class is imported in to the squirrel environment
-	//==================================================================
-	class CSqEngineExport
+public:
+
+	enum
 	{
-	public:
-
-		enum
-		{
-			/// Size of a standard string
-			eStrSize = 1024
-		};
-
-	public:
-
-		// Simple alert function
-		int alert( const std::tstring &sMsg )
-		{	return oex::os::CSys::ShowMessageBox( sMsg.c_str(), _T( "Notice" ) );
-		}
-
-		int import( const std::tstring &sClass )
-		{   return OnImport( sClass ); }
-
-		int load_module( const std::tstring &sModule, oex::oexBOOL bRelative )
-		{   return OnLoadModule( sModule, bRelative ); }
-
-		void quit( int nExitCode )
-		{   oex::os::CSys::Exit( nExitCode );
-		}
-
-		std::tstring path( const std::tstring &sPath )
-		{   return OnPath( sPath ); }
-
-		SquirrelObject spawn( const std::tstring &sName, const std::tstring &sScript, int bFile )
-		{   return OnSpawn( sName, sScript, bFile ); }
-
-		SquirrelObject execute( const std::tstring &sName, const std::tstring &sFunction )
-		{   return OnExecute( sName, sFunction ); }
-
-		SquirrelObject execute1( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1 )
-		{   return OnExecute1( sName, sFunction, sP1 ); }
-
-		SquirrelObject execute2( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1, const std::tstring &sP2 )
-		{   return OnExecute2( sName, sFunction, sP1, sP2 ); }
-
-		SquirrelObject execute3( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1, const std::tstring &sP2, const std::tstring &sP3 )
-		{   return OnExecute3( sName, sFunction, sP1, sP2, sP3 ); }
-
-		void sleep( int nMsTime )
-		{   oex::os::CSys::Sleep( nMsTime ); }
-
-		// _self.queue()
-		CMsgQueue* queue()
-		{   return OnGetQueue(); }
-
-	protected:
-
-		virtual int OnImport( const std::tstring &sClass ) { return 0; }
-
-		virtual int OnLoadModule( const std::tstring &sModule, BOOL bRelative  ) { return 0; }
-
-		virtual std::tstring OnPath( std::tstring sPath ) { return std::tstring(); }
-
-		virtual SquirrelObject OnSpawn( const std::tstring &sName, const std::tstring &sScript, int bFile )
-		{   return SquirrelObject( NULL ); }
-
-		virtual SquirrelObject OnExecute( const std::tstring &sName, const std::tstring &sFunction )
-		{   return SquirrelObject( NULL ); }
-		virtual SquirrelObject OnExecute1( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1 )
-		{   return SquirrelObject( NULL ); }
-		virtual SquirrelObject OnExecute2( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1, const std::tstring &sP2 )
-		{   return SquirrelObject( NULL ); }
-		virtual SquirrelObject OnExecute3( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1, const std::tstring &sP2, const std::tstring &sP3 )
-		{   return SquirrelObject( NULL ); }
-
-		virtual CMsgQueue* OnGetQueue() { return NULL; }
-
-	protected:
-
-		/// Non-zero if loaded from file
-		oex::oexBOOL        m_bFile;
-
-		/// Either a file name or actual script
-		std::tstring        m_sScript;
-
+		/// Size of a standard string
+		eStrSize = 1024
 	};
 
+public:
+
+	// Simple alert function
+	int alert( const std::tstring &sMsg )
+	{	return oex::os::CSys::ShowMessageBox( _T( "Notice" ), sMsg.c_str() );
+	}
+
+	int import( const std::tstring &sClass )
+	{   return OnImport( sClass ); }
+
+	int load_module( const std::tstring &sModule, int bRelative )
+	{   return OnLoadModule( sModule, bRelative ); }
+
+	void quit( int nExitCode )
+	{   oex::os::CSys::Exit( nExitCode );
+	}
+
+	std::tstring path( const std::tstring &sPath )
+	{   return OnPath( sPath ); }
+
+	SquirrelObject spawn( const std::tstring &sName, const std::tstring &sScript, int bFile )
+	{   return OnSpawn( sName, sScript, bFile ); }
+
+	SquirrelObject execute( const std::tstring &sName, const std::tstring &sFunction )
+	{   return OnExecute( sName, sFunction ); }
+
+	SquirrelObject execute1( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1 )
+	{   return OnExecute1( sName, sFunction, sP1 ); }
+
+	SquirrelObject execute2( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1, const std::tstring &sP2 )
+	{   return OnExecute2( sName, sFunction, sP1, sP2 ); }
+
+	SquirrelObject execute3( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1, const std::tstring &sP2, const std::tstring &sP3 )
+	{   return OnExecute3( sName, sFunction, sP1, sP2, sP3 ); }
+
+	void sleep( int nMsTime )
+	{   oex::os::CSys::Sleep( nMsTime ); }
+
+	// _self.queue()
+	CSqMsgQueue* queue()
+	{   return OnGetQueue(); }
+
+protected:
+
+	virtual int OnImport( const std::tstring &sClass ) { return 0; }
+
+	virtual int OnLoadModule( const std::tstring &sModule, BOOL bRelative  ) { return 0; }
+
+	virtual std::tstring OnPath( std::tstring sPath ) { return std::tstring(); }
+
+	virtual SquirrelObject OnSpawn( const std::tstring &sName, const std::tstring &sScript, int bFile )
+	{   return SquirrelObject( NULL ); }
+
+	virtual SquirrelObject OnExecute( const std::tstring &sName, const std::tstring &sFunction )
+	{   return SquirrelObject( NULL ); }
+	virtual SquirrelObject OnExecute1( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1 )
+	{   return SquirrelObject( NULL ); }
+	virtual SquirrelObject OnExecute2( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1, const std::tstring &sP2 )
+	{   return SquirrelObject( NULL ); }
+	virtual SquirrelObject OnExecute3( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1, const std::tstring &sP2, const std::tstring &sP3 )
+	{   return SquirrelObject( NULL ); }
+
+	virtual CSqMsgQueue* OnGetQueue() { return NULL; }
+
+protected:
+
+	/// Non-zero if loaded from file
+	oex::oexBOOL        m_bFile;
+
+	/// Either a file name or actual script
+	std::tstring        m_sScript;
+
 };
-	// Declare class functions
-	DECLARE_INSTANCE_TYPE( sqbind::CSqEngineExport );
+
+// Declare class functions
+DECLARE_INSTANCE_TYPE( CSqEngineExport );
 
 namespace sqbind
 {
@@ -138,6 +134,7 @@ namespace sqbind
 	public:
 
 		#define     SQEXE_FN_INIT       oexT( "_init" )
+		#define     SQEXE_FN_IDLE       oexT( "_idle" )
 		#define     SQEXE_FN_END        oexT( "_end" )
 		#define     SQEXE_SELF          oexT( "_self" )
 
@@ -223,10 +220,10 @@ namespace sqbind
 
 			const SQChar *sErr = 0;
 			if( SQ_SUCCEEDED( sq_getstring( v, -1, &sErr ) ) )
-				throw SScriptErrorInfo( sErr, _T( "" ), 0, 0 );
+				_oexTHROW( SScriptErrorInfo( sErr, _T( "" ), 0, 0 ) );
 
 			else
-				throw SScriptErrorInfo( _T( "Unknown error" ), _T( "" ), 0, 0 );
+				_oexTHROW( SScriptErrorInfo( _T( "Unknown error" ), _T( "" ), 0, 0 ) );
 
 			return 0;
 		}
@@ -259,11 +256,11 @@ namespace sqbind
 					sMsg += _T( "() : " );
 				} // end if
 				sMsg += sErr;
-				throw SScriptErrorInfo( sMsg.c_str(), si.source ? si.source : _T( "" ), si.line, 0 );
+				_oexTHROW( SScriptErrorInfo( sMsg.c_str(), si.source ? si.source : _T( "" ), si.line, 0 ) );
 			} // end if
 
 			else
-				throw SScriptErrorInfo( sErr.c_str(), _T( "" ), 0, 0 );
+				_oexTHROW( SScriptErrorInfo( sErr.c_str(), _T( "" ), 0, 0 ) );
 
 			return 0;
 		}
@@ -284,7 +281,7 @@ namespace sqbind
 		/// Destroys the virtual machine and prepares the class for re-use
 		void Destroy()
 		{
-//			Execute( SQEXE_FN_END );
+			Execute( SQEXE_FN_END );
 
 			m_script.Reset();
 
@@ -307,7 +304,7 @@ namespace sqbind
 		{
 			Destroy();
 
-			try
+			_oexTRY
 			{
 				// Initialize the virtual machine
 				m_vm.Init();
@@ -330,7 +327,7 @@ namespace sqbind
 				sqbind::SqBindAll( m_vm );
 
 				// Squirrel must understand CMsgQueue
-				SqPlus::SQClassDef< CMsgQueue > ( m_vm, _T( "CMsgQueue" ) )												  ;
+				SqPlus::SQClassDef< CSqMsgQueue > ( m_vm, _T( "CSqMsgQueue" ) )												  ;
 
 				// Define our base class
 				SqPlus::SQClassDef< CSqEngineExport > ( m_vm, _T( "CSqEngineExport" ) )
@@ -356,9 +353,9 @@ namespace sqbind
 
 			} // end try
 
-			catch( SScriptErrorInfo &e )
+			_oexCATCH( SScriptErrorInfo &e )
 			{	return LogError( oex::oexFALSE, e ); }
-			catch( SquirrelError &e )
+			_oexCATCH( SquirrelError &e )
 			{	m_sErr = e.desc; return oex::oexFALSE; }
 
 			m_bLoaded = TRUE;
@@ -380,7 +377,7 @@ namespace sqbind
 			if ( !Init() )
 				return oex::oexFALSE;
 
-			try
+			_oexTRY
 			{
 				// Save away root path
 				m_sRoot = oexGetModulePath().Ptr();
@@ -413,9 +410,9 @@ namespace sqbind
 
 			} // end try
 
-			catch( SScriptErrorInfo &e )
+			_oexCATCH( SScriptErrorInfo &e )
 			{	return LogError( oex::oexFALSE, e ); }
-			catch( SquirrelError &e )
+			_oexCATCH( SquirrelError &e )
 			{	m_sErr = e.desc; return oex::oexFALSE; }
 
 			// Save script source information
@@ -435,7 +432,7 @@ namespace sqbind
 			if ( !IsScript() )
 				return oex::oexFALSE;
 
-			try
+			_oexTRY
 			{
 				// Initialize the script
 				m_vm.RunScript( m_script );
@@ -444,13 +441,20 @@ namespace sqbind
 				Execute( SQEXE_FN_INIT );
 
 			} // end try
-			catch( SScriptErrorInfo &e )
+			_oexCATCH( SScriptErrorInfo &e )
 			{	return LogError( oex::oexFALSE, e ); }
-			catch( SquirrelError &e )
+			_oexCATCH( SquirrelError &e )
 			{	m_sErr = e.desc; return oex::oexFALSE; }
 
 			return oex::oexTRUE;
 		}
+
+		/// Destroys the virtual machine and prepares the class for re-use
+		oex::oexBOOL Idle()
+		{
+			return Execute( SQEXE_FN_IDLE );
+		}
+
 
 	    /// Executes the specified buffer
 		oex::oexBOOL Run( oex::oexCSTR pScript )
@@ -458,27 +462,18 @@ namespace sqbind
 			if ( !oexCHECK_PTR( pScript ) || !*pScript )
 				return oex::oexFALSE;
 
-			oexLM();
-
-			oexSHOWL( pScript );
-			
-			try
+			_oexTRY
 			{
 				SquirrelObject script( m_vm.GetVMHandle() );
-			oexLM();
 				script = m_vm.CompileBuffer( pScript );			
-			oexLM();
 				m_vm.RunScript( script );
-			oexLM();
 			
 			} // end try
 
-			catch( SScriptErrorInfo &e )
+			_oexCATCH( SScriptErrorInfo &e )
 			{	return LogError( oex::oexFALSE, e ); }
-			catch( SquirrelError &e )
+			_oexCATCH( SquirrelError &e )
 			{	m_sErr = e.desc; return oex::oexFALSE; }
-
-			oexLM();
 			
 			return oex::oexTRUE;
 		}
@@ -516,20 +511,17 @@ namespace sqbind
 		/**
 			\param [in] pFunction   -   Name of the function to execute
 		*/
-		BOOL Execute( oex::oexCSTR pFunction )
+		oex::oexBOOL Execute( oex::oexCSTR x_pFunction )
 		{
-			if ( !IsScript() )
+			if ( !IsScript() || !x_pFunction  )
 				return oex::oexFALSE;
 
-			if ( !pFunction )
-				return oex::oexFALSE;;
-
-			try
+			_oexTRY
 			{
-				SqPlus::SquirrelFunction< void > f( m_vm, m_vm.GetRootTable(), pFunction );
+				SqPlus::SquirrelFunction< void > f( m_vm, m_vm.GetRootTable(), x_pFunction );
 
 				if ( f.func.IsNull() )
-				{   m_sErr = _T( "Function not found : " ); m_sErr += pFunction;
+				{   m_sErr = _T( "Function not found : " ); m_sErr += x_pFunction;
 					return oex::oexFALSE;
 				} // end if
 
@@ -538,14 +530,231 @@ namespace sqbind
 
 			} // end try
 
-			catch( SScriptErrorInfo &e )
+			_oexCATCH( SScriptErrorInfo &e )
 			{	return LogError( oex::oexFALSE, e ); }
-			catch( SquirrelError &e )
+			_oexCATCH( SquirrelError &e )
+			{	m_sErr = e.desc; return oex::oexFALSE; }
+
+			return oex::oexTRUE; 
+		}
+
+	template< typename T_P1 >
+		oex::oexBOOL Execute( oex::oexCSTR x_pFunction, T_P1 p1 )
+		{
+			if ( !IsScript() || !x_pFunction  )
+				return oex::oexFALSE;
+
+			_oexTRY
+			{
+				SqPlus::SquirrelFunction< void > f( m_vm, m_vm.GetRootTable(), x_pFunction );
+
+				if ( f.func.IsNull() )
+				{   m_sErr = _T( "Function not found : " ); m_sErr += x_pFunction;
+					return oex::oexFALSE;
+				} // end if
+
+				// Call the function
+				f( p1 );
+
+			} // end try
+
+			_oexCATCH( SScriptErrorInfo &e )
+			{	return LogError( oex::oexFALSE, e ); }
+			_oexCATCH( SquirrelError &e )
+			{	m_sErr = e.desc; return oex::oexFALSE; }
+
+			return oex::oexTRUE; 
+		}
+
+	template< typename T_P1, typename T_P2 >
+		oex::oexBOOL Execute( oex::oexCSTR x_pFunction, T_P1 p1, T_P2 p2 )
+		{
+			if ( !IsScript() || !x_pFunction  )
+				return oex::oexFALSE;
+
+			_oexTRY
+			{
+				SqPlus::SquirrelFunction< void > f( m_vm, m_vm.GetRootTable(), x_pFunction );
+
+				if ( f.func.IsNull() )
+				{   m_sErr = _T( "Function not found : " ); m_sErr += x_pFunction;
+					return oex::oexFALSE;
+				} // end if
+
+				// Call the function
+				f( p1, p2 );
+
+			} // end try
+
+			_oexCATCH( SScriptErrorInfo &e )
+			{	return LogError( oex::oexFALSE, e ); }
+			_oexCATCH( SquirrelError &e )
+			{	m_sErr = e.desc; return oex::oexFALSE; }
+
+			return oex::oexTRUE; 
+		}
+
+	template< typename T_P1, typename T_P2, typename T_P3 >
+		oex::oexBOOL Execute( oex::oexCSTR x_pFunction, T_P1 p1, T_P2 p2, T_P3 p3 )
+		{
+			if ( !IsScript() || !x_pFunction  )
+				return oex::oexFALSE;
+
+			_oexTRY
+			{
+				SqPlus::SquirrelFunction< void > f( m_vm, m_vm.GetRootTable(), x_pFunction );
+
+				if ( f.func.IsNull() )
+				{   m_sErr = _T( "Function not found : " ); m_sErr += x_pFunction;
+					return oex::oexFALSE;
+				} // end if
+
+				// Call the function
+				f( p1, p2, p3 );
+
+			} // end try
+
+			_oexCATCH( SScriptErrorInfo &e )
+			{	return LogError( oex::oexFALSE, e ); }
+			_oexCATCH( SquirrelError &e )
+			{	m_sErr = e.desc; return oex::oexFALSE; }
+
+			return oex::oexTRUE; 
+		}
+
+	template< typename T_RET >
+		oex::oexBOOL ExecuteRet( oex::oexCSTR x_pFunction, T_RET *x_pRet )
+        {
+            if ( !IsScript() )
+                return FALSE;
+
+            if ( !x_pFunction )
+                return FALSE;;
+
+            _oexTRY
+            {
+                SqPlus::SquirrelFunction< T_RET > f( m_vm, m_vm.GetRootTable(), x_pFunction );            
+
+                if ( f.func.IsNull() )
+                {   m_sErr = oexT( "Function not found : " ); m_sErr += x_pFunction;
+					return oex::oexFALSE;
+                } // end if
+
+                if ( x_pRet )
+                    *x_pRet = f();
+                else
+                    f();
+
+            } // end try
+
+			_oexCATCH( SScriptErrorInfo &e )
+			{	return LogError( oex::oexFALSE, e ); }
+			_oexCATCH( SquirrelError &e )
 			{	m_sErr = e.desc; return oex::oexFALSE; }
 
 			return oex::oexTRUE;
+        }
 
+	public:
+
+		/// Sets pointer to the module manager
+		void SetModuleManager( CModuleManager *x_pMm )
+		{   m_pModuleManager = x_pMm; }
+
+		/// Registers library classes
+		virtual int OnImport( const std::tstring &sClass )
+		{
+			return -1;
 		}
+
+		/// Loads the specified module
+		virtual int OnLoadModule( const std::tstring &sModule, BOOL bRelative )
+		{
+			if ( !sModule.length() )
+				return -1;
+		    
+			if ( !m_pModuleManager )
+				return -2;
+
+			// Attempt to load the module
+			CModuleInstance *pMi = m_pModuleManager->Load( sModule.c_str() );
+			if ( !pMi )
+				return -3;
+
+			// Export functionality
+			if ( !pMi->Export( &m_vm ) )
+				return -4;
+
+			return 0;
+		}
+
+		/// Sets the pointer to the thread message queue
+		void SetMessageQueue( CSqMsgQueue *pMq )
+		{   m_pMsgQueue = pMq; }
+
+		/// Return message queue pointer
+		virtual CSqMsgQueue* OnGetQueue() 
+		{	return m_pMsgQueue; }
+
+		/// Spawns a child script process
+		virtual SquirrelObject OnSpawn( const std::tstring &sName, const std::tstring &sScript, int bFile )
+		{
+			if ( m_pMsgQueue )
+			{
+				CSqMsgQueue::t_Params params;
+				params[ _T( "name" ) ] = sName;
+				params[ _T( "script" ) ] = sScript;
+				params[ _T( "file" ) ] = bFile ? _T( "1" ) : _T( "0" );
+
+				m_pMsgQueue->Msg( _T( "spawn" ), &params );
+
+			} // end if
+
+			return SquirrelObject( m_vm.GetVMHandle() );
+		}
+
+		/// Routes a message to the proper script
+		SquirrelObject RouteMsg( const std::tstring &sMsg, CSqMsgQueue::t_Params &rParams )
+		{	if ( m_pMsgQueue )
+				m_pMsgQueue->Msg( oexT( "msg" ), &rParams );
+			return SquirrelObject( m_vm.GetVMHandle() );
+		}
+
+		/// Call to send a message to a child script
+		virtual SquirrelObject OnExecute( const std::tstring &sName, const std::tstring &sFunction )
+		{	CSqMsgQueue::t_Params params;
+			params[ oexT( "name" ) ] = sName;
+			params[ oexT( "execute" ) ] = sFunction;
+			return RouteMsg( oexT( "msg" ), params );
+		}
+
+		virtual SquirrelObject OnExecute1( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1 )
+		{	CSqMsgQueue::t_Params params;
+			params[ oexT( "name" ) ] = sName;
+			params[ oexT( "execute1" ) ] = sFunction;
+			params[ oexT( "p1" ) ] = sP1;
+			return RouteMsg( oexT( "msg" ), params );
+		}
+
+		virtual SquirrelObject OnExecute2( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1, const std::tstring &sP2 )
+		{	CSqMsgQueue::t_Params params;
+			params[ oexT( "name" ) ] = sName;
+			params[ oexT( "execute2" ) ] = sFunction;
+			params[ oexT( "p1" ) ] = sP1;
+			params[ oexT( "p2" ) ] = sP2;
+			return RouteMsg( oexT( "msg" ), params );
+		}
+
+		virtual SquirrelObject OnExecute3( const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1, const std::tstring &sP2, const std::tstring &sP3 )
+		{	CSqMsgQueue::t_Params params;
+			params[ oexT( "name" ) ] = sName;
+			params[ oexT( "execute3" ) ] = sFunction;
+			params[ oexT( "p1" ) ] = sP1;
+			params[ oexT( "p2" ) ] = sP2;
+			params[ oexT( "p3" ) ] = sP3;
+			return RouteMsg( oexT( "msg" ), params );
+		}
+
 
 	private:
 
@@ -554,6 +763,9 @@ namespace sqbind
 
 		/// Squirrel virtual machine
 		SquirrelVM              m_vm;
+
+	    /// Pointer to module manager object
+		CModuleManager          *m_pModuleManager;
 
 		/// Squirrel script
 		SquirrelObject          m_script;
@@ -567,6 +779,8 @@ namespace sqbind
 		/// Root path
 		std::tstring            m_sRoot;
 
+		/// Thread message queue pointer
+		CSqMsgQueue             *m_pMsgQueue;
 	};
 
 }; // end namespace

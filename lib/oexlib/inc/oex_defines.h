@@ -162,7 +162,7 @@
 #define oexGmtTimeStr				OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eGmtTime ).FormatTime
 
 #define oexGuidToString				OEX_NAMESPACE::CStr().GuidToString
-#define oexStringToGuid				OEX_NAMESPACE::CStr().GuidToString
+#define oexUniqueGuid( g )			OEX_NAMESPACE::guid::StringToGuid( g, (OEX_NAMESPACE::oexCSTR)NULL, 0 )
 
 /// oexRETRY() - Retry something up to m times
 /**
@@ -196,7 +196,7 @@
 									| ( ( (OEX_NAMESPACE::oexULONG)d ) >> 24 ) 	\
 								 ) )
 
-#if defined( oexUSE_EXCEPTIONS )
+#if defined( oexUSE_EXCEPTIONS ) && !defined( OEX_NOEXCEPTIONS )
 #	define oexTRY				try
 #	define oexCATCH( s )		catch( s )
 #	define oexCATCH_ALL()		catch( ... )
@@ -206,5 +206,19 @@
 #	define oexCATCH( s )		if ( 0 )
 #	define oexCATCH_ALL() 		if ( 0 )
 #	define oexTHROW( s )
+#endif
+
+// This is for things that *must* be caught, like 3rd party libraries,
+// of course, sometimes, exceptions just aren't available, ;)
+#if !defined( OEX_NOEXCEPTIONS )
+#	define _oexTRY				try
+#	define _oexCATCH( s )		catch( s )
+#	define _oexCATCH_ALL()		catch( ... )
+#	define _oexTHROW( s )		throw( s )
+#else
+#	define _oexTRY
+#	define _oexCATCH( s )		if ( 0 )
+#	define _oexCATCH_ALL() 		if ( 0 )
+#	define _oexTHROW( s )
 #endif
 

@@ -107,10 +107,10 @@ public:
 	oexBOOL Load( oexCSTR x_pFile, oexINT x_nFlags = -1 );
 
 	//==============================================================
-	// GetLibraryPath()
+	// GetPath()
 	//==============================================================
 	/// Returns the file path of the currently loaded module.
-	CStr GetLibraryPath() { return m_sFile; }
+	CStr GetPath() { return m_sFile; }
 
 	/// Default constructor
 	CModule();

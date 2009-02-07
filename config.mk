@@ -32,12 +32,28 @@ ifeq ($(OS),win32)
 	PLATFORM := windows
 
 	ifdef DBG
-		CFG_CEXTRA	 := /DDEBUG /D_DEBUG /D_MT /MTd /Zi $(CFG_CEXTRA)
-		CFG_LEXTRA	 := /DEBUG
+		ifeq ($(LIBLINK),static)	
+			CFG_CEXTRA	 := /DDEBUG /D_DEBUG /D_MT /MTd /Zi $(CFG_CEXTRA)
+		else
+			ifeq ($(PRJ_TYPE),dll)
+				CFG_CEXTRA	 := /DDEBUG /D_DEBUG /D_MT /MDd /Zi $(CFG_CEXTRA)
+			else
+				CFG_CEXTRA	 := /DDEBUG /D_DEBUG /D_MT /MDd /Zi $(CFG_CEXTRA)
+			endif
+		endif
+		ifeq ($(LIBLINK),static)	
+			CFG_LEXTRA	 := /DEBUG
+		else
+			CFG_LEXTRA	 := /DEBUG /NODEFAULTLIB:libcmtd
+		endif
 		CFG_DPOSTFIX := _d
 		CFG_STDLIBS	 := ole32.lib user32.lib
 	else
-		CFG_CEXTRA	 := /MT /O2 $(CFG_CEXTRA)
+		ifeq ($(LIBLINK),static)	
+			CFG_CEXTRA	 := /MT /O2 $(CFG_CEXTRA)
+		else
+			CFG_CEXTRA	 := /MD /O2 $(CFG_CEXTRA)
+		endif
 		CFG_LEXTRA	 := 
 		CFG_STDLIBS	 := ole32.lib user32.lib
 	endif

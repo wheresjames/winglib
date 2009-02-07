@@ -4,6 +4,44 @@
 #include "string.h"
 #include "errno.h"
 
+extern "C" oexDECLARE_SRV_FUNCTION( SRV_GetModuleInfo );
+extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
+{
+	if ( !oexCHECK_PTR( pDi ) )
+	{	oexERROR( EINVAL, oexT( "Invalid function argument" ) );
+		return 0;
+	} // end if
+
+	// Clear structure
+	oexZeroMemory( pDi, sizeof( oex::os::service::SSrvInfo ) );
+
+	// Module name
+	strncpy( pDi->szName, oexT( "Squirrel Engine" ), sizeof( pDi->szName ) - 1 );
+
+	// Module description
+	strncpy( pDi->szDesc, oexT( "Supplies Squirrel-Script processing capabilities" ), sizeof( pDi->szDesc ) - 1 );
+
+	// Set the Squirrel engine type
+	pDi->guidType = sqbind::SQBIND_ENGINE_IID;
+
+	// pDi->guidId = ;
+		
+	// Create random guid
+	oexUniqueGuid( &pDi->guidInstance );
+	
+	// Set version
+	pDi->lVer = oexVERSION( 1, 0 );
+
+	return 0;
+}
+
+//sqbind::CSqEngine		g_sqEngine;
+//CSqMsgQueue				g_sqMsgQueue;
+
+CScriptThread			g_sqScriptThread;
+sqbind::CModuleManager	g_sqModuleManager;
+
+
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Start );
 extern "C" oex::oexRESULT SRV_Start( oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
 {
@@ -16,25 +54,57 @@ extern "C" oex::oexRESULT SRV_Start( oex::oexCSTR x_pPath, oex::oexCSTR x_pComma
 		oex::CLog::GlobalLog().OpenLogFile( oexNULL, oexNULL, oexT( ".module.debug.log" ) );
 
 	// Start a log file
-	oexNOTICE( 0, "Module startup" );
+	oexNOTICE( 0, oexT( "Module startup" ) );
 
-//	if ( !x_nCommandLine || !oexCHECK_PTR( x_pCommandLine ) || !oex::CFile::Exists( x_pCommandLine ) )
-//		oexERROR( 0, "Script not specified" );
-//	else
+	if ( !x_nCommandLine || !oexCHECK_PTR( x_pCommandLine ) )
+		oexERROR( 0, oexT( "Script not specified" ) );
+	
+	else
 	{
-		sqbind::CSqEngine sq;
+		// Attempt to find the file
+		oex::CStr sFile = x_pCommandLine;
+		if ( !oex::CFile::Exists( sFile.Ptr() ) )
+			sFile = oexGetModulePath( x_pCommandLine );
 
-		if ( !sq.Init() )
-			oexERROR( 0, "Unable to initialize Squirrel-Script engine" );
+		if ( !oex::CFile::Exists( sFile.Ptr() ) )
+			oexERROR( 0, oexMks( oexT( "File not found : " ), sFile ) );
+
 		else
 		{
-//			sq.Load( "MessageBox( \"Hello World!\" );", oex::oexFALSE );
-//			if ( !sq.Run( "_self.MessageBox( \"Hello World!\" );" ) )
-			if ( !sq.Run( "print( \"Hello World!\" );" ) )
-				oexERROR( 0, oexMks( oexT( "Squirrel-Script : " ), sq.GetLastError().c_str() ) );
-			else
-				oexNOTICE( 0, oexT( "It Worked!" ) );
+			// Log the script name
+			oexNOTICE( 0, oexMks( "Running script : ", x_pCommandLine ) );
 
+			g_sqScriptThread.SetModuleManager( &g_sqModuleManager );
+
+			g_sqScriptThread.SetScript( sFile.Ptr(), oex::oexTRUE );
+
+			if ( !g_sqScriptThread.Start() )
+				oexERROR( 0, "Failed to start script thread" );
+
+			else
+				return 0;
+
+/*
+			// Set pointer to the module manager
+			g_sqEngine.SetModuleManager( &g_sqModuleManager );
+
+			// Set pointer to the module message queue
+			g_sqEngine.SetMessageQueue( &g_sqMsgQueue );
+
+			// Initialize the script engine
+			if ( !g_sqEngine.Init() )
+				oexERROR( 0, oexT( "Unable to initialize Squirrel-Script engine" ) );
+
+			// Attempt to load the script
+			else if ( !g_sqEngine.Load( sFile.Ptr(), oex::oexTRUE ) )
+			{	oexERROR( 0, oexMks( oexT( "Squirrel-Script : " ), g_sqEngine.GetLastError().c_str() ) );
+				oexERROR( 0, oexMks( oexT( "Error executing : " ), sFile ) );
+			} // end else if
+
+			// Success
+			else 
+				return 0;
+*/
 		} // end else
 
 	} // end else
@@ -42,36 +112,30 @@ extern "C" oex::oexRESULT SRV_Start( oex::oexCSTR x_pPath, oex::oexCSTR x_pComma
 	// Uninitialize the oex library
 	oexUNINIT();
 
+	return -1;
+}
+
+extern "C" oexDECLARE_SRV_FUNCTION( SRV_Idle );
+extern "C" oex::oexRESULT SRV_Idle()
+{
+	// Attempt to execute idle function
+	if ( !g_sqScriptThread.IsRunning() )
+		return 1;
+
 	return 0;
 }
 
-extern "C" oexDECLARE_SRV_FUNCTION( SRV_GetModuleInfo );
-extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
+extern "C" oexDECLARE_SRV_FUNCTION( SRV_Stop );
+extern "C" oex::oexRESULT SRV_Stop()
 {
-	if ( !oexCHECK_PTR( pDi ) )
-	{	oexERROR( EINVAL, "Invalid function argument" );
-		return 0;
-	} // end if
+	// Attempt to execute idle function
+	g_sqScriptThread.Destroy();
 
-	// Clear structure
-	oexZeroMemory( pDi, sizeof( oex::os::service::SSrvInfo ) );
+	// Lose the modules
+	g_sqModuleManager.Destroy();
 
-	// Module name
-	strncpy( pDi->szName, "Squirrel Engine", sizeof( pDi->szName ) - 1 );
-
-	// Module description
-	strncpy( pDi->szDesc, "Supplies Squirrel-Script processing capabilities", sizeof( pDi->szDesc ) - 1 );
-
-	// Set the Squirrel engine type
-	pDi->guidType = sqbind::SQBIND_ENGINE_IID;
-
-	// pDi->guidId = ;
-
-	// Create random guid
-	oexStringToGuid( &pDi->guidInstance );
-
-	// Set version
-	pDi->lVer = oexVERSION( 1, 0 );
+	// Uninitialize the oex library
+	oexUNINIT();
 
 	return 0;
 }
@@ -79,8 +143,8 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 // !!! Never call this function !!!
 // This is just a dummy function to pull in these function definitions
 extern "C" void dummy_to_import_symbols()
-{	HSQUIRRELVM 	*hvm;
-	SQVM 			*svm;
+{	HSQUIRRELVM 	*hvm = 0;
+	SQVM 			*svm = 0;
 	sqstd_seterrorhandlers( *hvm );
 	sqstd_register_iolib( svm );
 	sqstd_register_stringlib( *hvm );
