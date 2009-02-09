@@ -17,13 +17,9 @@ void SQBIND_Export( sqbind::VM *x_vm )
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
 
-	oexLM();
-
 	SqPlus::SQClassDef< CTestClass > ( *x_vm, oexT( "CTestClass" ) )
 										.func( &CTestClass::Add,             _T( "Add" ) )
 									  ;
-	oexLM();
-
 //    SQBIND_EXPORT( x_vm, CTestClass );
 }
 
