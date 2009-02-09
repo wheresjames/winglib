@@ -25,10 +25,10 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 	pDi->guidType = sqbind::SQBIND_ENGINE_IID;
 
 	// pDi->guidId = ;
-		
+
 	// Create random guid
 	oexUniqueGuid( &pDi->guidInstance );
-	
+
 	// Set version
 	pDi->lVer = oexVERSION( 1, 0 );
 
@@ -58,7 +58,7 @@ extern "C" oex::oexRESULT SRV_Start( oex::oexCSTR x_pPath, oex::oexCSTR x_pComma
 
 	if ( !x_nCommandLine || !oexCHECK_PTR( x_pCommandLine ) )
 		oexERROR( 0, oexT( "Script not specified" ) );
-	
+
 	else
 	{
 		// Attempt to find the file
@@ -102,7 +102,7 @@ extern "C" oex::oexRESULT SRV_Start( oex::oexCSTR x_pPath, oex::oexCSTR x_pComma
 			} // end else if
 
 			// Success
-			else 
+			else
 				return 0;
 */
 		} // end else
@@ -120,7 +120,9 @@ extern "C" oex::oexRESULT SRV_Idle()
 {
 	// Attempt to execute idle function
 	if ( !g_sqScriptThread.IsRunning() )
+	{	oexNOTICE( 0, "Script thread has terminated" );
 		return 1;
+	} // end if
 
 	return 0;
 }

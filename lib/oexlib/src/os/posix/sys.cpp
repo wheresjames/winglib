@@ -126,9 +126,20 @@ oexINT CSys::ShowMessageBox( oexCSTR x_pTitle, oexCSTR x_pStr )
  	if ( !oexCHECK_PTR( x_pStr ) )
 		x_pStr = oexT( "" );
 
-	printf( oexT( "%s : %s" ), x_pTitle, x_pStr );
+//	printf( oexT( "%s : %s" ), x_pTitle, x_pStr );
 
-	return -1;
+	oexINT nRet = system( oexStrToMbPtr( oexMks( oexT( "xmessage -center \"" ), x_pTitle, oexT( " : " ), x_pStr, oexT( "\"" ) ).Ptr() ) );
+	if ( -1 == nRet )
+	{	oexERROR( errno, oexT( "Failed to dislay dialog box" ) );
+		oexNOTICE( 0, oexMks( x_pTitle, oexT( " : " ), x_pStr ) );
+		return -1;
+	} // end if
+
+	// +++ how's this work???
+	if ( WIFSIGNALED( nRet ) && ( WTERMSIG( nRet ) == SIGINT || WTERMSIG( nRet ) == SIGQUIT ) )
+		return 0;
+
+	return -2;
 }
 
 oexINT CSys::Quit( oexINT x_nReturnCode )
@@ -617,6 +628,10 @@ int CSys::printf( oexCSTR8 x_pFmt, ... )
 /// vprintf
 int CSys::vprintf( oexCSTR8 x_pFmt, oexVaList &pArgs )
 {	return ::vprintf( x_pFmt, pArgs );
+}
+
+oexUINT CSys::GetCurrentThreadId()
+{	return ::pthread_self();
 }
 
 

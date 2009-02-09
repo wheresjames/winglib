@@ -41,22 +41,22 @@ public:
     /// Initializes the module instance
     CModuleInstance()
 	{
-		m_fGetId = NULL;
-		m_fExport = NULL;
+		m_fGetId = oexNULL;
+		m_fExportSymbols = oexNULL;
 	}
 
     /// Destructor
     virtual ~CModuleInstance()
 	{	Destroy(); }
-    
+
 public:
 
     /// Unloads the modules and frees all resources
     void Destroy()
 	{
 		// Lose the function pointers
-		m_fGetId = NULL;
-		m_fExport = NULL;
+		m_fGetId = oexNULL;
+		m_fExportSymbols = oexNULL;
 
 		// Lose the module
 		m_cModule.Destroy();
@@ -84,19 +84,19 @@ public:
 		{	Destroy();
 			return oex::oexFALSE;
 		} // end if
-	    
+
 		return oex::oexTRUE;
 	}
- 
+
     /// Loads exported function pointers
-    oex::oexBOOL CModuleInstance::LoadFunctions()
+    oex::oexBOOL LoadFunctions()
 	{
 		// Ensure module
 		if ( !IsLoaded() )
 			return oex::oexFALSE;
 
 		// Get id function address
-		m_fGetId = 
+		m_fGetId =
 			(oex::os::service::PFN_SRV_GetModuleInfo)m_cModule.AddFunction( oexT( "SRV_GetModuleInfo" ) );
 		if ( !m_fGetId )
 		{	oexERROR( 0, oex::CStr().Fmt( oexT( "In module '%s', SRV_GetModuleInfo() not found" ),
@@ -120,12 +120,12 @@ public:
 										  oexStrToMbPtr( oexGuidToString( &si.guidType ).Ptr() ) ) );
 			return oex::oexFALSE;
 		} // end if
-    
+
 		// Get export function
-		m_fExport = 
-			(sqbind::PFN_SQBIND_Export)m_cModule.AddFunction( oexT( "SQBIND_Export" ) );
-		if ( !m_fExport )
-		{	oexERROR( 0, oex::CStr().Fmt( oexT( "In module '%s', SQBIND_Export() not found" ),
+		m_fExportSymbols =
+			(sqbind::PFN_SQBIND_Export_Symbols)m_cModule.AddFunction( oexT( "SQBIND_Export_Symbols" ) );
+		if ( !m_fExportSymbols )
+		{	oexERROR( 0, oex::CStr().Fmt( oexT( "In module '%s', SQBIND_Export_Symbols() not found" ),
 				     			          oexStrToMbPtr( m_cModule.GetPath().Ptr() ) ) );
 			return oex::oexFALSE;
 		} // end if
@@ -140,11 +140,12 @@ public:
     oex::oexBOOL Export( SquirrelVM *pVm )
 	{
 		// Ensure we have an export function
-		if ( !m_fExport )
+		if ( !m_fExportSymbols )
 			return oex::oexFALSE;
 
 		// Attempt to export the functionality
-		oex::oexINT nRet = m_fExport( pVm, &malloc );
+		sqbind::SSqAllocator sa = { &malloc, &realloc, &free };
+		oex::oexINT nRet = m_fExportSymbols( pVm, &sa );
 
 		if ( nRet == -1 )
 		{	oexERROR( 0, oex::CStr().Fmt( oexT( "In module '%s', SQBIND_Export() failed because heaps do not match, use shared linking" ),
@@ -166,10 +167,10 @@ private:
     /// Module class
 	oex::os::CModule							m_cModule;
 
-    /// GetId() function pointer    
+    /// GetId() function pointer
 	oex::os::service::PFN_SRV_GetModuleInfo		m_fGetId;
 
     /// Export() function pointer
-    sqbind::PFN_SQBIND_Export					m_fExport;
+    sqbind::PFN_SQBIND_Export_Symbols			m_fExportSymbols;
 
 };

@@ -22,6 +22,7 @@ include $(PRJ_LIBROOT)/config.mk
 export LOC_TAG := def
 LOC_INC_def := $(CFG_LIBROOT)/SqPlus/squirrel
 LOC_SRC_def := $(CFG_LIBROOT)/SqPlus/squirrel
+LOC_EXC_def := sqmem
 include $(PRJ_LIBROOT)/build.mk
 
 #-------------------------------------------------------------------

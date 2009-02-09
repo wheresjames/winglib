@@ -141,7 +141,7 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 					   			   oexStrToMbPtr( x_sModule.Ptr() ) ) );
 
 	// Run idle loop if function provided
-	if ( oexCHECK_PTR( pIdle ) )
+	else
 		while ( !pIdle() )
 			os::CSys::Sleep( x_nIdleDelay );
 

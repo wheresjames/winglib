@@ -46,11 +46,11 @@ public:
 public:
 
     /// Default constructor
-	CModuleManager() 
+	CModuleManager()
 	{}
 
     /// Destructor
-	virtual ~CModuleManager() 
+	virtual ~CModuleManager()
 	{	Destroy(); }
 
     /// Unloads all modules
@@ -80,13 +80,18 @@ public:
 			} // end if
 
 			// Drop this module
-			it = m_lstModules.erase( it );
+			t_ModuleList::iterator nx = it; nx++;
+			m_lstModules.erase( it );
+			it = nx;
+
+			// ???
+//			it = m_lstModules.erase( it );
 
 		} // end for
 	}
 
 public:
-  
+
     /// Loads the specified module if needed and returns an instance object
 	CModuleInstance* Load( oex::oexCSTR x_pFile )
 	{
@@ -105,14 +110,14 @@ public:
 
 		// Try to create an instance
 		CModuleInstance *pMi = OexAllocConstruct< CModuleInstance >();
-		if ( !pMi ) 
+		if ( !pMi )
 			return oexNULL;
 
 		// Did we load ok?
 		if ( !pMi->Load( x_pFile ) )
 		{   OexAllocDestruct( pMi );
 			return oex::oexFALSE;
-		} // end if    
+		} // end if
 
 		// Save the pointer into the list
 		m_lstModules[ x_pFile ] = pMi;

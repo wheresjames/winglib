@@ -34,6 +34,9 @@
 
 #pragma once
 
+// Include engine requirements
+#include "sqeng_extern.hpp"
+
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_GetModuleInfo );
 extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 {
@@ -55,47 +58,34 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 	pDi->guidType = sqbind::SQBIND_MODULE_IID;
 
 	// pDi->guidId = ;
-		
+
 	// Create random guid
 	oexUniqueGuid( &pDi->guidInstance );
-	
+
 	// Set version
 	pDi->lVer = oexVERSION( 1, 0 );
 
 	return 0;
 }
 
-#if defined( _MSC_VER )
-#include <Windows.h>
-static oex::oexCPVOID GetModuleBaseAddress( oex::oexCPVOID x_pPtr )
-{   MEMORY_BASIC_INFORMATION mbi;
-    VirtualQuery( x_pPtr, &mbi, sizeof( mbi ) );
-    return (HMODULE)mbi.AllocationBase;
-}
-#endif
-
-extern "C" oex::oexRESULT SQBIND_Export( sqbind::VM *x_vm, oex::oexCPVOID x_pHeapCheck )
+extern "C" oex::oexRESULT SQBIND_Export_Symbols( sqbind::VM *x_vm, sqbind::SSqAllocator *x_pAllocator )
 {
-	// !!!Heaps must match 
-	/**
-		If this fails, you probably didn't use shared linking.
+	// Set the memory allocator
+	SQBIND_SetAllocator( x_pAllocator );
 
-		The squirren engine must be able to create and destroy objects, since the engine
-		is linking across module boundry, each module must use the same heap.  With the
-		current design of the squirrel engine, this is a limitation of this modular 
-		architecture.	
+	/* !!! NOTICE !!!
+
+		If you get the error that SQBIND_Export() is not defined,
+		it's your fault.  You need to provide SQBIND_Export() in
+		your application before including this file.
+
+		In the project examples this is done in stdafx.cpp.
+		Your project may be different.
+
 	*/
 
-#if defined( _MSC_VER )
-	if ( !oexVERIFY( GetModuleBaseAddress( &malloc ) == GetModuleBaseAddress( x_pHeapCheck ) ) )
-		return -1;
-#else
-	if ( !oexVERIFY( x_pHeapCheck != (oex::oexCPVOID)&malloc ) )
-		return -1;
-#endif
-
     // Call user export function
-    SQMOD_Export( x_vm );
+    SQBIND_Export( x_vm );
 
 	return 0;
 }

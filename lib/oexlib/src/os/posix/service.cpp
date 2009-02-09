@@ -113,7 +113,7 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 	{	oexERROR( 0, oexMks( oexT( "Failed to load module " ), x_sModule ) );
 		return -1;
 	} // end if
-	
+
 	service::PFN_SRV_GetModuleInfo pGetModuleInfo =
 		(service::PFN_SRV_GetModuleInfo)mod.AddFunction( oexT( "SRV_GetModuleInfo" ) );
 	if ( !oexCHECK_PTR( pGetModuleInfo ) )
@@ -131,7 +131,7 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 
 	// Verify correct module type
 	if ( oexCHECK_PTR( x_pguidType ) && !guid::CmpGuid( x_pguidType, &si.guidType ) )
-	{	oexERROR( 0, oexMks( oexT( "Module '" ), x_sModule, oexT( "', incorrect module type, " ), 
+	{	oexERROR( 0, oexMks( oexT( "Module '" ), x_sModule, oexT( "', incorrect module type, " ),
 	                         CStr().GuidToString( x_pguidType ), oexT( " != " ),  CStr().GuidToString( &si.guidType ) ) );
 		return -4;
 	} // end if
@@ -179,13 +179,13 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 					   			   oexStrToMbPtr( x_sModule.Ptr() ) ) );
 
 	// Run idle loop if function provided
-	if ( oexCHECK_PTR( pIdle ) )
-		while ( pIdle() )
+	else
+		while ( !pIdle() )
 			os::CSys::Sleep( x_nIdleDelay );
 
 	// Forever
-	else for( ; ; )
-		os::CSys::Sleep( 60000 );
+//	else for( ; ; )
+//		os::CSys::Sleep( 60000 );
 
 	// Check for stop function
 	service::PFN_SRV_Stop pStop =

@@ -34,8 +34,8 @@
 
 #pragma once
 
-class CScriptThread : 
-		public oex::os::CThread, 
+class CScriptThread :
+		public oex::os::CThread,
 		public CSqMsgQueue
 {
 public:
@@ -53,7 +53,7 @@ public:
 	}
 
     /// Destructor
-	virtual ~CScriptThread() 
+	virtual ~CScriptThread()
 	{	Destroy(); }
 
     /// Releases resources
@@ -166,7 +166,12 @@ protected:
 				it->second = oexNULL;
 			} // end if
 
-			it = m_lstScript.erase( it );
+			t_ScriptList::iterator nx = it; nx++;
+			m_lstScript.erase( it );
+			it = nx;
+
+			// ???
+//			it = m_lstScript.erase( it );
 
 		} // end while
 	}
@@ -220,7 +225,7 @@ protected:
 			pSt->SetModuleManager( m_pModuleManager );
 
 			// Load script information
-			pSt->SetScript( mapParams[ oexT( "script" ) ].c_str(), 
+			pSt->SetScript( mapParams[ oexT( "script" ) ].c_str(),
 							0 != oex::CStr( mapParams[ oexT( "file" ) ].c_str() ).ToULong() );
 
 			// Create the thread
@@ -234,7 +239,7 @@ protected:
 	{
 		// Grab the path
 		std::tstring sPath = mapParams[ oexT( "name" ) ];
-	    
+
 		// Is it bound for another computer
 		int pos = sPath.find_first_of( oexT( ":" ), -1 );
 		if ( 0 <= pos )
@@ -251,9 +256,11 @@ protected:
 
 		} // end if
 
+		std::tstring sOnMsg( oexT( "onmsg" ) );
+
 		// Message to self
 		if ( sPath == _T( "." ) )
-			ProcessMsg( std::tstring( oexT( "onmsg" ) ), mapParams, pmapReply );
+			ProcessMsg( sOnMsg, mapParams, pmapReply );
 
 		// All the way to the top?
 		else if ( sPath == oexT( "/" ) || sPath == oexT( "\\" ) )
@@ -263,8 +270,8 @@ protected:
 				m_pParentScript->Msg( oexT( "msg" ), &mapParams, pmapReply );
 
 			// I guess it's ours
-			else 
-				ProcessMsg( std::tstring( oexT( "onmsg" ) ), mapParams, pmapReply );
+			else
+				ProcessMsg( sOnMsg, mapParams, pmapReply );
 
 			return;
 
@@ -273,9 +280,9 @@ protected:
 		// Find path separator
 		std::tstring sToken = sPath.substr( 0, sPath.find_first_of( oexT( '\\' ) ) );
 		if ( !sToken.length() ) sToken = sPath.substr( 0, sPath.find_first_of( oexT( '/' ) ) );
-	    
+
 		// Did we get a token
-		if ( sPath.length() > sToken.length() ) 
+		if ( sPath.length() > sToken.length() )
 		{
 			// Skip the token
 			sPath = sPath.substr( sToken.length() + 1 );
@@ -303,7 +310,7 @@ protected:
 
 			} // end if
 
-		} // end if           
+		} // end if
 
 		// Route to child
 		else

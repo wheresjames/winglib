@@ -170,24 +170,16 @@ oexBOOL CThread::Start( oexUINT x_uSleep, oexPVOID x_pData )
 		return oexFALSE;
 
 	// Create the thread
-	m_hThread = (oexPVOID)pthread_create( (pthread_t*)m_td.pContext, NULL,
-									      CThreadProcImpl::ThreadProc, this );
+	oexINT nRet = pthread_create( (pthread_t*)m_td.pContext, oexNULL,
+							      CThreadProcImpl::ThreadProc, this );
+	if ( nRet )
+	{	oexERROR( nRet, "Error creating thread" );
+		return oexFALSE;
+	} // end if
 
-/*
-	// Create a thread
-	m_hThread = CreateThread(	(LPSECURITY_ATTRIBUTES)NULL,
-								0,
-                                CThreadProcImpl::ThreadProc,
-								(LPVOID)this,
-								0,
-								(LPDWORD)&m_uThreadId );
+	m_hThread = (oexPVOID)m_td.pContext;
+	m_uThreadId = (oexUINT)m_td.pContext;
 
-
-	a = b / ( b - c )
-
-	b = ac/(a-1)
-
-*/
     // Developer will probably want to hear about this
     oexASSERT( c_InvalidThread != m_hThread);
 
@@ -242,6 +234,16 @@ oexBOOL CThread::Stop( oexBOOL x_bKill, oexUINT x_uWait )
 
     return oexTRUE;
 }
+
+oexBOOL CThread::IsRunning()
+{
+	if ( m_hThread == vInvalidThread() || !m_td.pContext)
+		return oexFALSE;
+	if ( pthread_kill( *(pthread_t*)m_td.pContext, 0 ) )
+		return oexFALSE;
+	return oexTRUE;
+}
+
 
 // The number of threads running
 oexLONG CThread::m_lThreadCount = 0;

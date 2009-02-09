@@ -47,7 +47,7 @@
 #   define SQBIND_STATIC_FUNCTION( c, f )    				.staticFunc ( &##c::##f,  _T( #f ) )
 
 #   define SQBIND_CLASS_CONSTRUCTOR( n, c )					.staticFunc( &_sq_construct_##c_##n, _T( "constructor" ) )
-#   define SQBIND_BEGIN_CLASS_CONSTRUCTOR( n, c, ... )		static int _sq_construct_##c_##n( __VA_ARGS__, HSQUIRRELVM v ) { 
+#   define SQBIND_BEGIN_CLASS_CONSTRUCTOR( n, c, ... )		static int _sq_construct_##c_##n( __VA_ARGS__, HSQUIRRELVM v ) {
 #   define SQBIND_END_CLASS_CONSTRUCTOR( c, ... )			return SqPlus::PostConstruct< c >( v, new c( __VA_ARGS__ ), SqPlus::ReleaseClassPtr< c >::release ); }
 
 namespace sqbind { typedef SquirrelVM VM; }

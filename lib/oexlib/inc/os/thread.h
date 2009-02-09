@@ -177,8 +177,7 @@ protected:
 public:
 
     /// Returns the running state of the thread
-    oexBOOL IsRunning()
-    {   return m_hThread != vInvalidThread(); }
+    oexBOOL IsRunning();
 
 	/// Invalid socket handle value
     oexCONST t_HTHREAD vInvalidThread()
