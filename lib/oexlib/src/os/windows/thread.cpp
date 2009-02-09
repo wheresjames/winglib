@@ -51,6 +51,8 @@ CThread::CThread()
     m_uSleep = 0;
     m_hThread = oexNULL;
     m_uThreadId = 0;
+
+	m_evInit.Create();
 }
 
 CThread::~CThread()
@@ -229,6 +231,20 @@ void CThread::DecRunningThreadCount()
 {   if ( oexVERIFY( m_lRunningThreadCount ) )
         CSys::InterlockedDecrement( &m_lRunningThreadCount ); 
 }
+
+oexBOOL CThread::IsRunning()
+{
+	// Valid handle?
+    if ( c_InvalidThread == m_hThread )
+        return oexFALSE;
+
+	// See if the thread has quit
+	if ( WAIT_OBJECT_0 == WaitForSingleObject( m_hThread, 0 ) )
+		return oexFALSE;
+
+	return oexTRUE;
+}
+
 
 /*
 oexBOOL CThreadMgr::DoThread( oexPVOID x_pData )

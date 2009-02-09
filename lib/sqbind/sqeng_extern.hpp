@@ -64,7 +64,9 @@ void *sq_vm_realloc( void *p, SQUnsignedInteger oldsize, SQUnsignedInteger size 
 void sq_vm_free( void *p, SQUnsignedInteger size )
 {
 	if ( oexCHECK_PTR( g_SqAllocator.fnFree ) )
-		g_SqAllocator.fnFree( p );
+	{	g_SqAllocator.fnFree( p );
+		return;
+	} // end if
 
 	free( p );
 }

@@ -63,7 +63,7 @@ public:
 	{   return OnLoadModule( sModule, bRelative ); }
 
 	void quit( int nExitCode )
-	{   oex::os::CSys::Exit( nExitCode );
+	{   oex::os::CSys::Quit( nExitCode );
 	}
 
 	std::tstring path( const std::tstring &sPath )
