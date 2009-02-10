@@ -49,53 +49,29 @@
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
-// Ensure our type is large enough to hold the thread value
-//oexSTATIC_ASSERT( sizeof( CThread::t_HTHREAD ) == sizeof( HANDLE ) );
-
-/// Invalid thread handle value.
-oexCONST CThread::t_HTHREAD CThread::c_InvalidThread = oexNULL;
-
 CThread::CThread()
 {
     m_pData = 0;
     m_uSleep = 0;
-    m_hThread = oexNULL;
-    m_uThreadId = 0;
-    oexZeroMemory( &m_td, sizeof( m_td ) );
+
+	// Create sync events
+    m_evInit.AutoRelease().CreateEvent();
+    m_evStop.AutoRelease().CreateEvent();
 }
 
 CThread::~CThread()
-{   Stop();
+{	Stop();
 }
-
-//==============================================================
-// CThread::CThreadProcImpl
-//==============================================================
-/// This is just a function stub that calls CThread::ThreadProc()
-/**
-	\param [in] x_pData		-	CThread class pointer
-
-	I'm just going to leave this adapter in here in case the
-	thread signature ever includes custom variables.
-
-	\return Thread return value
-*/
-class CThread::CThreadProcImpl
-{
-public:
-
-	static oexPVOID ThreadProc( oexPVOID x_pData )
-	{	return CThread::ThreadProc( x_pData );
-	}
-
-};
 
 oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 {
     // Get pointer
     CThread *pThread = (CThread*)x_pData;
-    if ( !oexVERIFY_PTR( x_pData ) )
-        return (oexPVOID)-1;
+    if ( !oexCHECK_PTR( x_pData ) )
+        return (oexPVOID)-1111;
+
+	// Bad init value
+    oexINT nRet = -2222;
 
     // Count one thread
     CThread::IncThreadCount();
@@ -104,44 +80,25 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
     // Get user params
     oexPVOID pData = pThread->GetUserData();
     oexUINT uSleep = pThread->GetSleepTime();
-    oexUINT uThreadId = (oexUINT)pThread->GetThreadHandle();
 
-    // Verify thread handle
-    // If you get stopped here,
-    // you're thread was shutdown before it could start
-    oexINT nRet = -1111;
-//    if ( oexVERIFY( uThreadId ) )
-    {
-        // Initialize thread
-        if ( pThread->InitThread( pData ) )
-        {
-            // Ensure they haven't already killed us
-            if ( oexVERIFY( !pThread->m_evQuit.Wait( 0 ) ) )
-            {
-                // Signal that we're initialized
-                pThread->m_evInit.Set();
+	// Initialize thread
+	oexBOOL bInit = pThread->InitThread( pData );
 
-                // *** Now it's ok to get shutdown ***
+	// Signal that we're initialized
+	pThread->m_evInit.Signal();
 
-                // Do the work
-                while ( pThread->DoThread( pData ) &&
-                        !pThread->m_evQuit.Wait( uSleep ) );
+	// Was initialization a success?
+	if ( bInit )
+	{
+		// Loop while we're not supposed to stop
+		if ( bInit && pThread->m_evStop.Wait( 0 ) )
+			while ( pThread->DoThread( pData ) &&
+					pThread->m_evStop.Wait( uSleep ) );
 
-                // Kill the thread
-                nRet = pThread->EndThread( pData );
+		// Kill the thread
+		nRet = pThread->EndThread( pData );
 
-            } // end if
-
-            // Early shutdown
-            else
-            	nRet = -3333;
-
-        } // end if
-
-    } // end if
-
-    // Early shutdown
-//    else nRet = -2222;
+	} // end if
 
     /// Decrement the running thread count
     CThread::DecRunningThreadCount();
@@ -150,100 +107,58 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 
 }
 
-oexBOOL CThread::Start( oexUINT x_uSleep, oexPVOID x_pData )
+oexRESULT CThread::Start( oexPVOID x_pData, oexUINT x_uSleep )
 {
     // Are we already running?
     if ( IsRunning() )
-        return oexTRUE;
+        return 0;
 
     // Save users data
     m_pData = x_pData;
     m_uSleep = x_uSleep;
 
     // Give the thread a fighting chance
-    m_evQuit.Reset();
+    m_evStop.Reset();
     m_evInit.Reset();
 
-	// Allocate thread data
-	m_td.pContext = (oexPVOID)OexAllocNew< pthread_t >( 1 );
-	if ( !m_td.pContext )
-		return oexFALSE;
+	// Attempt to create the thread
+	if ( CResource::CreateThread( CThread::ThreadProc, this ) )
+		return -1;
 
-	// Create the thread
-	oexINT nRet = pthread_create( (pthread_t*)m_td.pContext, oexNULL,
-							      CThreadProcImpl::ThreadProc, this );
-	if ( nRet )
-	{	oexERROR( nRet, "Error creating thread" );
-		return oexFALSE;
-	} // end if
-
-	m_hThread = (oexPVOID)m_td.pContext;
-	m_uThreadId = (oexUINT)m_td.pContext;
-
-    // Developer will probably want to hear about this
-    oexASSERT( c_InvalidThread != m_hThread);
-
-    // Did we get our thread?
-    if ( c_InvalidThread == m_hThread )
-    {   Stop(); m_uThreadId = 0; return oexFALSE; }
-
-    return oexTRUE;
+    return 0;
 }
 
-oexBOOL CThread::Stop( oexBOOL x_bKill, oexUINT x_uWait )
+oexRESULT CThread::Stop( oexUINT x_uWait, oexBOOL x_bKill )
 {
-    // Save the thread handle
-    t_HTHREAD hThread = m_hThread;
+	// Ensure thread resource is valid
+	if ( !CResource::IsValid() )
+		return 0;
 
-    // Valid thread?
-    if ( c_InvalidThread == hThread || !m_td.pContext )
-        return oexTRUE;
+	// Signal that the thread should exit
+	m_evStop.Signal();
 
-    // Wait for thread to completely initialize
-    oexVERIFY( !x_uWait || m_evInit.Wait( x_uWait ) );
+	// Kill the thread
+	CResource::Destroy( x_uWait, x_bKill );
 
     // Clear thread data
     m_pData = 0;
     m_uSleep = 0;
-    m_hThread = oexNULL;
-    m_uThreadId = 0;
 
-    // Tell the thread to stop
-    m_evQuit.Set();
-
-    // Punt if we don't want to wait for the thread do shutdown
-    if ( !x_uWait )
-        return oexTRUE;
-
-    // Wait for the thead to exit
-	if ( pthread_join( *(pthread_t*)m_td.pContext, oexNULL ) )
-    {
-        // iii  This should not happen, don't ignore the problem,
-        //      figure out how to shut this thread down properly!
-		oexTRACE( oexT( "!! TerminateThread() being called !!\n" ) );
-
-        // Kill the thread
-        pthread_cancel( *(pthread_t*)m_td.pContext );
-
-    } // end if
-
-	if ( m_td.pContext )
-		OexAllocDelete( (pthread_t*)m_td.pContext );
-
-    oexZeroMemory( &m_td, sizeof( m_td ) );
-
-    return oexTRUE;
+    return 0;
 }
 
 oexBOOL CThread::IsRunning()
 {
-	if ( m_hThread == vInvalidThread() || !m_td.pContext)
+	// Ensure valid thread handle
+	if ( !CResource::IsValid() )
 		return oexFALSE;
-	if ( pthread_kill( *(pthread_t*)m_td.pContext, 0 ) )
+
+	// See if the thread is still alive
+	if ( waitSuccess != CResource::Wait( 0 ) )
 		return oexFALSE;
+
 	return oexTRUE;
 }
-
 
 // The number of threads running
 oexLONG CThread::m_lThreadCount = 0;

@@ -56,7 +56,7 @@ oexBOOL CLog::OpenLogFile( oexCSTR x_pPath, oexCSTR x_pFile, oexCSTR x_pExtensio
 		sFile << x_pExtension;
 	else
 		sFile << oexT( ".debug.log" );
-		
+
 	return Open( sFile.Ptr() );
 }
 
@@ -68,7 +68,7 @@ oexBOOL CLog::Open( oexCSTR x_pPath )
 	// Lose old log file
 	Destroy();
 
-	// Save away the file name		
+	// Save away the file name
 	m_sPath = x_pPath;
 
 #if defined( oexDEBUG )
@@ -99,7 +99,7 @@ oexBOOL CLog::Resume( oexCSTR x_pPath )
 	// Lose old log file
 	Destroy();
 
-	// Save away the file name		
+	// Save away the file name
 	m_sPath = x_pPath;
 
 #if defined( oexDEBUG )
@@ -124,7 +124,7 @@ oexBOOL CLog::Resume( oexCSTR x_pPath )
 								oexT( "; GMT Time    : " ), oexGmtTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL
 								oexT( "; Application : " ), oexGetModuleFileName(), oexNL oexNL
 							) );
-							
+
 	} // end else
 
 	return oexTRUE;
@@ -139,74 +139,79 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x
 	// Log count
 	if ( 1 == os::CSys::InterlockedIncrement( &m_lInLog ) )
 	{
-		// Create log file if needed
-		if ( !m_file.IsOpen() )
-			if ( !OpenLogFile() )
-			{	os::CSys::InterlockedDecrement( &m_lInLog );
-				return x_nErr;
-			} // end if
+		_oexTRY
+		{
+			// Create log file if needed
+			if ( !m_file.IsOpen() )
+				if ( !OpenLogFile() )
+				{	os::CSys::InterlockedDecrement( &m_lInLog );
+					return x_nErr;
+				} // end if
 
-		if ( !oexCHECK_PTR( x_pFile ) )
-			x_pFile = oexT( "???" );
+			if ( !oexCHECK_PTR( x_pFile ) )
+				x_pFile = oexT( "???" );
 
-		if ( !oexCHECK_PTR( x_pFunction ) )
-			x_pFunction = oexT( "???" );
+			if ( !oexCHECK_PTR( x_pFunction ) )
+				x_pFunction = oexT( "???" );
 
-		CStr sLevel;
-		oexCSTR pLevel = oexT( "" );
-		if ( eHalt == x_uLevel )
-			pLevel = oexT( "Halt" );
-		else if ( eError == x_uLevel )
-			pLevel = oexT( "Error" );
-		else if ( eWarning == x_uLevel )
-			pLevel = oexT( "Warning" );
-		else if ( eNotice == x_uLevel )
-			pLevel = oexT( "Notice" );
-		else
-			pLevel = sLevel.Mks( (int)x_uLevel ).Ptr();
+			CStr sLevel;
+			oexCSTR pLevel = oexT( "" );
+			if ( eHalt == x_uLevel )
+				pLevel = oexT( "Halt" );
+			else if ( eError == x_uLevel )
+				pLevel = oexT( "Error" );
+			else if ( eWarning == x_uLevel )
+				pLevel = oexT( "Warning" );
+			else if ( eNotice == x_uLevel )
+				pLevel = oexT( "Notice" );
+			else
+				pLevel = sLevel.Mks( (int)x_uLevel ).Ptr();
 
-		CStr sLog;
+			CStr sLog;
 
-		// Add file / line number
-		sLog << x_pFile << oexT( ":(" ) << x_nLine << oexT( ")" ) oexNL;
+			// Add file / line number
+			sLog << x_pFile << oexT( ":(" ) << x_nLine << oexT( ")" ) oexNL;
 
-		// Write out the time
+			// Write out the time
 #ifdef OEX_NANOSECONDS
-		sLog << oexLocalTimeStr( oexT( " -> Local Time: %Y/%c/%d - %g:%m:%s.%l.%u.%n" ) oexNL );
+			sLog << oexLocalTimeStr( oexT( " -> Local Time: %Y/%c/%d - %g:%m:%s.%l.%u.%n" ) oexNL );
 #else
-		sLog << oexLocalTimeStr( oexT( " -> Local Time: %Y/%c/%d - %g:%m:%s.%l.%u" ) oexNL );
+			sLog << oexLocalTimeStr( oexT( " -> Local Time: %Y/%c/%d - %g:%m:%s.%l.%u" ) oexNL );
 #endif
+			// Add function name if available
+			if ( x_pFunction && *x_pFunction )
+				sLog << oexT( " -> " ) << x_pFunction << oexT( "()" ) oexNL;
 
-		// Add function name if available
-		if ( x_pFunction && *x_pFunction )
-			sLog << oexT( " -> " ) << x_pFunction << oexT( "()" ) oexNL;
+			// Add error level
+			sLog << oexT( " -> " ) << pLevel;
 
-		// Add error level
-		sLog << oexT( " -> " ) << pLevel;
+			// Add system error info
+			if ( x_nErr )
+				sLog << CStr().Print( oexT( " : 0x%X (%d) : " ), x_nErr, x_nErr )
+					 << os::CTrace::GetErrorMsg( x_nErr ).RTrim( "\r\n" );
 
-		// Add system error info
-		if ( x_nErr )
-			sLog << CStr().Print( oexT( " : 0x%X (%d) : " ), x_nErr, x_nErr )
-			 	 << os::CTrace::GetErrorMsg( x_nErr ).RTrim( "\r\n" );
+			sLog << oexNL;
 
-		sLog << oexNL;
-
-		// Write out the user error string if available
-		if ( oexCHECK_PTR( x_pErr ) )
-			sLog << oexT( " -> " ) << CStr( x_pErr ).Replace( oexNL, oexNL oexT( " -> " ) ) << oexNL;
+			// Write out the user error string if available
+			if ( oexCHECK_PTR( x_pErr ) )
+				sLog << oexT( " -> " ) << CStr( x_pErr ).Replace( oexNL, oexNL oexT( " -> " ) ) << oexNL;
 
 #ifdef oexBACKTRACE_IN_LOG
-		// Write out the backtrace
-		sLog << oexT( " -> " )
-		     << os::CTrace::GetBacktrace( x_uSkip ).Replace( oexNL, oexNL oexT( " -> " ) )
-		     << oexNL;
+			// Write out the backtrace
+			sLog << oexT( " -> " )
+				 << os::CTrace::GetBacktrace( x_uSkip ).Replace( oexNL, oexNL oexT( " -> " ) )
+				 << oexNL;
 #endif
 
-		// Just to space things out
-		sLog << oexNL;
+			// Just to space things out
+			sLog << oexNL;
 
-		// Write out the string to the file
-		m_file.Write( oexStrToMb( sLog ) );
+			// Write out the string to the file
+			m_file.Write( oexStrToMb( sLog ) );
+		}
+		_oexCATCH( ... )
+		{
+		} // end catch
 
 	} // end if
 

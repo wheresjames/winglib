@@ -16,8 +16,12 @@ TOOLS	 := local
 #TOOLS	 := snapgear
 #TOOLS	 := mingw32
 
-LIBLINK	 := static
-#LIBLINK := shared
+
+ifeq ($(OS),win32)
+	LIBLINK	 := static
+else
+	LIBLINK := shared
+endif
 
 CFG_ROOT := $(PRJ_LIBROOT)/../..
 CFG_TOOLROOT := $(PRJ_LIBROOT)/../tools
@@ -213,7 +217,8 @@ else
 
 		endif
 		
-		# you can't use -ldl with static linking!
+		# you can't use dlopen() [-ldl] with static linking!
+		# http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/d/dlopen.html
 		ifeq ($(LIBLINK),shared)
 			CFG_STDLIB := $(CFG_STDLIB) -ldl
 		endif		

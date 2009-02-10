@@ -87,21 +87,28 @@ oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 	CStr sLogFile = CLog::GlobalLog().GetPath();
 
 	// Load the module
-	try
+	_oexTRY
 	{
+		oexLM();
+
+		// Attempt to open the dynamic library
 		m_hModule = dlopen( x_pFile, x_nFlags );
-		
+
+		oexLM();
+
 	} // end try
-	catch( ... )
+	_oexCATCH( ... )
 	{	oexERROR( errno, CStr().Fmt( "Exception!!! dlopen( '%s' )\r\n: %s", oexStrToMbPtr( x_pFile ), dlerror() ) );
+		Destroy();
 		return oexFALSE;
 	} // end catch
-		
+
 	// The module we loaded could possible screw up our logging
 	CLog::GlobalLog().Resume( sLogFile.Ptr() );
-	
+
 	if ( oexNULL == m_hModule )
 	{	oexERROR( errno, CStr().Fmt( "dlopen( '%s' )\r\n: %s", oexStrToMbPtr( x_pFile ), dlerror() ) );
+		Destroy();
 		return oexFALSE;
 	} // end if
 
@@ -138,11 +145,20 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 	if ( oexCHECK_PTR( pf ) )
 		return pf;
 
-	pf = dlsym( m_hModule, x_pFunctionName );
-	if ( !oexCHECK_PTR( pf ) )
-	{	oexERROR( errno, CStr().Fmt( "dlsym( %d, '%s' )", (int)m_hModule, oexStrToMbPtr( x_pFunctionName ) ) );
-		return oexNULL;
-	} // end if
+	_oexTRY
+	{
+		// Attempt to find function entry point
+		pf = dlsym( m_hModule, x_pFunctionName );
+		if ( !oexCHECK_PTR( pf ) )
+		{	oexERROR( errno, CStr().Fmt( "dlsym( %d, '%s' )", (int)m_hModule, oexStrToMbPtr( x_pFunctionName ) ) );
+			return oexNULL;
+		} // end if
+	} // end try
+
+	_oexCATCH( ... )
+	{	oexERROR( errno, CStr().Fmt( "Exception!!! dlsym( '%s', %s )\r\n: %s", oexStrToMbPtr( m_sFile.Ptr() ), oexStrToMbPtr( x_pFunctionName ), dlerror() ) );
+		return oexFALSE;
+	} // end catch
 
 	// Save index
 	oexINT index = m_map.Size();

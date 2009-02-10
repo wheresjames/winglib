@@ -62,7 +62,7 @@ public:
 		if ( !ll.IsLocked() )
 			return;
 
-		Destroy(); 
+		Destroy();
 	}
 
 	/// Releases resources
@@ -105,7 +105,7 @@ public:
 				return ProcessMsg( sMsg, params, pmapReply );
 			} // end else
 
-		} // end if                
+		} // end if
 
 		{ // Stuff message into buffer
 
@@ -139,7 +139,7 @@ public:
 
 		// Wait for relpy if needed
 		if ( pmapReply )
-		{   
+		{
 			// Wait for reply
 //			BOOL bSuccess = ::WaitForSingleObject( hReply, uTimeout ) == WAIT_OBJECT_0;
 			oex::oexBOOL bSuccess = hReply.Wait( uTimeout );
@@ -150,7 +150,7 @@ public:
 			// Punt if we got the reply
 			if ( bSuccess )
 				return TRUE;
-	        
+
 			// Acquire lock
 			oex::CTlLocalLock ll( &m_cLock );
 			if ( !ll.IsLocked() )
@@ -175,7 +175,7 @@ public:
 	}
 
 public:
-  
+
 
 	/// Thread message structure
 	struct SMsg
@@ -185,11 +185,11 @@ public:
 
 		/// Initializer
 		SMsg( std::tstring x_sMsg, t_Params *x_pmapParams, oex::os::CResource x_hReply, t_Params *x_pmapReply )
-		{   sMsg = x_sMsg; 
-			if ( x_pmapParams ) 
-				mapParams = *x_pmapParams; 
-			hReply = x_hReply; 
-			pmapReply = x_pmapReply; 
+		{   sMsg = x_sMsg;
+			if ( x_pmapParams )
+				mapParams = *x_pmapParams;
+			hReply = x_hReply;
+			pmapReply = x_pmapReply;
 		}
 
 		/// Command
@@ -209,7 +209,7 @@ public:
 protected:
 
 	/// Process messages
-	BOOL ProcessMsgs()
+	oex::oexBOOL ProcessMsgs()
 	{
 		// Acquire lock
 		oex::CTlLocalLock ll( &m_cLock );
@@ -263,7 +263,7 @@ protected:
 	}
 
 	/// Returns a handle to the message wait function
-	oex::os::CResource GetMsgWaitHandle() { return m_evtMsgWaiting; }
+//	oex::os::CResource GetMsgWaitHandle() { return m_evtMsgWaiting; }
 
 	/// Over-ride for thread killing function
 	virtual void KillThread() {}

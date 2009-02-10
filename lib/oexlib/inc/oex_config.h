@@ -71,7 +71,8 @@
 // slow system and you need longer waits.  I really don't recommend
 // you set this lower.  If you're timing out that indicates a serious
 // error (deadlocks, race conditions and such) and you should fix it.
-#define oexDEFAULT_WAIT_TIMEOUT           60000
+//#define oexDEFAULT_WAIT_TIMEOUT           60000
+#define oexDEFAULT_WAIT_TIMEOUT           3000
 
 // Enable CRT leak detection
 #define OEX_CRT_LEAK_DETECTION

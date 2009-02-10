@@ -617,16 +617,16 @@ oexCSTR CSys::SetLocale( oexINT nCategory, oexCSTR pLocal )
 }
 
 /// printf function
-int CSys::printf( oexCSTR8 x_pFmt, ... )
+int CSys::Printf( oexCSTR8 x_pFmt, ... )
 {
 	oexVaList ap; oexVaStart( ap, x_pFmt );
-	int ret = CSys::vprintf( x_pFmt, ap );
+	int ret = vprintf( x_pFmt, ap );
 	oexVaEnd( ap );
 	return ret;
 }
 
 /// vprintf
-int CSys::vprintf( oexCSTR8 x_pFmt, oexVaList &pArgs )
+int CSys::vPrintf( oexCSTR8 x_pFmt, oexVaList &pArgs )
 {	return ::vprintf( x_pFmt, pArgs );
 }
 

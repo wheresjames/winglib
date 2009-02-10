@@ -73,7 +73,6 @@ public:
     void Destroy()
     {  	m_file.Flush();
 		m_file.Destroy();
-		m_lInLog = 0;
 		m_sPath.Destroy();
 	}
 
@@ -195,17 +194,17 @@ public:
 	{	m_file.Flush(); }
 
 	/// Returns the path for the log file
-	CStr GetPath() 
+	CStr GetPath()
 	{	return m_sPath; }
-	
+
 private:
 
 	/// Log file
 	CFile								m_file;
-	
+
 	/// Log file path
 	CStr								m_sPath;
-	
+
 public:
 
 	//==============================================================

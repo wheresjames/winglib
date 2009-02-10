@@ -1594,25 +1594,103 @@ public:
 		m_val = 0;
 	}
 
+	virtual oex::oexBOOL InitThread( oex::oexPVOID x_pData )
+	{	m_val++;
+		return oex::oexTRUE;
+	}
+
+	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
+	{	m_val++;
+		return oex::oexFALSE;
+	}
+
+	virtual oex::oexINT EndThread( oex::oexPVOID x_pData )
+	{	m_val++;
+		return oex::oexFALSE;
+	}
+
+	oex::oexINT 		m_val;
+};
+
+class CMyThread2 : public oex::os::CThread
+{
+public:
+
+	CMyThread2()
+	{
+		m_val = 0;
+		m_evInc.AutoRelease().CreateEvent();
+		m_evDone.AutoRelease().CreateEvent();
+	}
+
 	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
 	{
-		m_val = 1;
+		if ( m_evInc.Wait() )
+			return oex::oexFALSE;
 
-		// Stop our thread
-		Stop( oex::oexFALSE, 0 );
+		if ( m_evInc.Reset() )
+			return oex::oexFALSE;
+
+		m_val++;
+
+		if ( m_evDone.Signal() )
+			return oex::oexFALSE;
 
 		return oex::oexTRUE;
 	}
 
 	oex::oexINT 		m_val;
+
+	oex::os::CResource	m_evInc;
+	oex::os::CResource	m_evDone;
 };
 
 oex::oexRESULT Test_Threads()
 {
 	CMyThread t;
 
-	if ( !oexVERIFY( t.Start() ) )
+	if ( !oexVERIFY( !t.Start() ) )
 		return -1;
+
+	if ( !oexVERIFY( !t.Stop() ) )
+		return -2;
+
+	if ( !oexVERIFY( 3 == t.m_val ) )
+		return -3;
+
+	// *** Event test
+
+	CMyThread2 t2;
+
+	if ( !oexVERIFY( !t2.Start( 0, 0 ) ) )
+		return -4;
+
+	oex::CStr str;
+	while ( 10 > t2.m_val )
+	{
+		if ( !oexVERIFY( !t2.IsRunning() ) )
+			return -5;
+
+		if ( !oexVERIFY( !t2.m_evInc.Signal() ) )
+			return -6;
+
+		if ( !oexVERIFY( !t2.m_evDone.Wait() ) )
+			return -7;
+
+		if ( !oexVERIFY( !t2.m_evDone.Reset() ) )
+			return -8;
+
+		str << t2.m_val << oexT( "," );
+
+		oex::os::CSys::Sleep( 100 );
+
+	} // end while
+
+	if ( !oexVERIFY( !t.Stop() ) )
+		return -6;
+
+	if ( !oexVERIFY( str == oexT( "1,2,3,4,5,6,7,8,9,10," ) ) )
+		return -7;
 
 	return oex::oexRES_OK;
 }
@@ -2176,6 +2254,11 @@ int main(int argc, char* argv[])
     // Initialize the oex library
 	oexINIT();
 
+	oexNOTICE( 0, "Tests started" );
+
+	Test_Threads();
+
+
     TestAllocator();
 
     TestStrings();
@@ -2230,7 +2313,7 @@ int main(int argc, char* argv[])
 
 //    Test_CVfsSession();
 
-    Test_CCapture();
+//    Test_CCapture();
 
 	// Initialize the oex library
     oexUNINIT();

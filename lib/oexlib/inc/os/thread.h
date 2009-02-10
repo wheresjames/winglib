@@ -41,23 +41,8 @@
 /**
 */
 //==================================================================
-class CThread
+class CThread : public CResource
 {
-public:
-
-    /// Thread handle
-    typedef oexPVOID t_HTHREAD;
-
-	/// Invalid socket value
-	static oexCONST t_HTHREAD c_InvalidThread;
-
-public:
-
-	struct SThreadData
-	{
-		/// Thread context, posix only so far
-		oexPVOID				pContext;
-	};
 
 public:
 
@@ -72,33 +57,33 @@ public:
 	//==============================================================
 	/// Starts the thread
 	/**
+		\param [in] x_pData			-	Custom data passed on to thread
         \param [in] x_uSleep        -   Sleep time in mSec.  If not
                                         zero, a sleep of this length
                                         will be injected after every
                                         call to DoThread().
-		\param [in] x_pData			-	Custom data passed on to thread
 
 		\return Non-zero if thread was started.
 
 		\see
 	*/
-	virtual oexBOOL Start( oexUINT x_uSleep = 30, oexPVOID x_pData = oexNULL );
+	virtual oexRESULT Start( oexPVOID x_pData = oexNULL, oexUINT x_uSleep = 30 );
 
 	//==============================================================
 	// Stop()
 	//==============================================================
 	/// Stops any running thread
 	/**
+		\param [in] x_uWait    	-	Time in milli-seconds to wait for
+								    thread to stop before killing it.
 		\param [in] x_bKill	    -	Set to non-zero to kill thread if
                                     it fails to stop gracefully.
-		\param [in] x_dwWait    -	Time in milli-seconds to wait for
-								    thread to stop before killing it.
 
 		\return Non-zero if success
 
 		\see
 	*/
-	virtual oexBOOL Stop( oexBOOL x_bKill = oexTRUE, oexUINT x_uWait = oexDEFAULT_WAIT_TIMEOUT );
+	virtual oexRESULT Stop( oexUINT x_uWait = oexDEFAULT_WAIT_TIMEOUT, oexBOOL x_bKill = oexTRUE );
 
 protected:
 
@@ -179,10 +164,6 @@ public:
     /// Returns the running state of the thread
     oexBOOL IsRunning();
 
-	/// Invalid socket handle value
-    oexCONST t_HTHREAD vInvalidThread()
-    {   return c_InvalidThread; }
-
     /// Returns the user value passed to Start()
     oexPVOID GetUserData() { return m_pData; }
 
@@ -217,16 +198,17 @@ public:
 	*/
 	static oexUINT GetRunningThreadCount();
 
-    /// Returns the encapsulated thread handle
-    t_HTHREAD GetThreadHandle() { return m_hThread; }
-
     /// Waits for thread to initialize
     oexBOOL WaitInit( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
-    {   return m_evInit.Wait( x_uTimeout ); }
+    {   return CResource::waitSuccess == m_evInit.Wait( x_uTimeout ); }
 
-    /// Waits for the thread to quit
-    oexBOOL WaitThreadStop( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
-    {   return os::CSys::waitSuccess == os::CSys::WaitForSingleObject( m_hThread, x_uTimeout ); }
+private:
+
+	//==============================================================
+	// ThreadProc()
+	//==============================================================
+	/// Static thread callback function
+	static oexPVOID ThreadProc( oexPVOID x_pData );
 
 protected:
 
@@ -250,25 +232,6 @@ protected:
 
 private:
 
-    /// The thread procedure
-    static oexPVOID ThreadProc( oexPVOID x_pData );
-
-    // Protect access to ThreadProc()
-    class CThreadProcImpl;
-
-    friend class CThreadProcImpl;
-
-private:
-
-    /// Handle to the thread
-    t_HTHREAD                               m_hThread;
-
-	/// Thread data
-	SThreadData								m_td;
-
-    /// The thread id
-    oexUINT                                 m_uThreadId;
-
     /// Users data
     oexPVOID                                m_pData;
 
@@ -284,10 +247,10 @@ private:
 protected:
 
     /// Quit signal
-    CTlEvent                                m_evQuit;
+	CResource								m_evStop;
 
     /// Signals when the thread has initialized
-    CTlEvent                                m_evInit;
+	CResource								m_evInit;
 
 };
 

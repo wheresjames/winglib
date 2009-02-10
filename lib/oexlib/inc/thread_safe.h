@@ -54,7 +54,7 @@ public:
     {
         m_bLocked = oexFALSE;
         m_uRef = 0;
-        m_hMutex.Create( os::CResource::eRtMutex );
+        m_hMutex.AutoRelease().CreateMutex();
     }
 
 	//==============================================================
@@ -67,7 +67,7 @@ public:
 	CTlLock( oexCSTR x_pName )
     {   m_bLocked = oexFALSE;
         m_uRef = 0;
-        m_hMutex.Create( os::CResource::eRtMutex, x_pName );
+        m_hMutex.AutoRelease().CreateMutex( x_pName );
     }
 
 	/// Destructor
@@ -95,7 +95,7 @@ public:
 
         m_bLocked = oexFALSE;
         m_uRef = 0;
-        m_hMutex.Create( os::CResource::eRtMutex, x_pName );
+        m_hMutex.AutoRelease().CreateMutex( x_pName );
         return m_hMutex.IsValid();
     }
 
@@ -323,8 +323,7 @@ public:
 	/// Constructor
 	CTlEvent( oexCSTR x_pName = oexNULL, oexBOOL x_bManualReset = oexTRUE )
 	{
-		m_hEvent.Create( os::CResource::eRtEvent );
-//        os::CEvent::Create( m_hEvent, x_pName, x_bManualReset );
+		m_hEvent.AutoRelease().CreateEvent( x_pName, x_bManualReset );
 	}
 
 	/// Destructor

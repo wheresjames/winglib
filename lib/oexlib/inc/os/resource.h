@@ -44,7 +44,14 @@
 	into a single structure so that they can be released, and most
 	importantly to me at the moment, 'waited on' in a unified
 	manner.  Windows already does this to a large extent,
-	unfortunately, Linux does not.
+	unfortunately, Posix does not.
+
+	This class acts as a true handle, there is no memory management.
+	You must call Destroy() manually when your done with this resource.
+
+	This may be better implemented if CResource were a super class
+	and subing out the specifics.  Not sure, I have my reasons for
+	doing it this way atm. ;)
 
 */
 //==================================================================
@@ -70,7 +77,10 @@ public:
 		eRtMutex			= 4,
 
 		/// Event
-		eRtEvent			= 5
+		eRtEvent			= 5,
+
+		/// Lock
+		eRtLock				= 6
 	};
 
 	enum etWait
@@ -88,6 +98,9 @@ public:
 	/// The wait resolution in micro-seconds
 	enum { eWaitResolution = 15000 };
 
+	/// Thread callback function
+	typedef oexPVOID (*PFN_ThreadProc)( oexPVOID x_pData );
+
 public:
 
 	/// Handle type
@@ -96,68 +109,109 @@ public:
 public:
 
 	/// Constructor
-	CResource()
-	{
+	CResource( oexBOOL x_bRelease = oexFALSE )
+	{	m_bRelease = x_bRelease;
 		m_hHandle = cInvalid();
 		m_eType = eRtInvalid;
-	}
-
-	/// Constructor
-	/*
-		\param [in] x_nType		-	The type of resource to create.
-		\param [in] x_sName		-	Names the resource if resource
-
-	*/
-	CResource( E_RESOURCE_TYPE x_eType, oexCSTR x_sName = oexNULL )
-	{
-		m_hHandle = c_Invalid;
-		m_eType = eRtInvalid;
-
-		// Create specified type
-		Create( x_eType, x_sName );
 	}
 
 	/// Destructor
 	~CResource()
 	{
-//		Destroy();
+		if ( m_bRelease )
+			Destroy();
 	}
 
-	//==============================================================
-	// Create()
-	//==============================================================
-	/// Releases the handle
-	/*
-		\param [in] x_nType		-	The type of resource to create.
-		\param [in] x_sName		-	Names the resource if resource
-									type supports it.
+	/// Copy constructor
+	CResource( CResource &x_r )
+	{	m_bRelease = oexFALSE;
+		m_hHandle = x_r.m_hHandle;
+		m_eType = x_r.m_eType;
+	}
 
-		\return Zero if success, else error code
+	// Assignment operator
+	CResource& operator =( CResource &x_r )
+	{	m_bRelease = oexFALSE;
+		m_hHandle = x_r.m_hHandle;
+		m_eType = x_r.m_eType;
+		return *this;
+	}
 
-	*/
-	oexRESULT Create( E_RESOURCE_TYPE x_eType, oexCSTR x_sName = oexNULL );
+	/// Enables auto release
+	CResource& AutoRelease()
+	{	m_bRelease = oexTRUE;
+		return *this;
+	}
 
-	/// Creates an event object
-	oexRESULT CreateEvent( oexCSTR x_sName = oexNULL )
-	{	return Create( eRtEvent, x_sName ); }
+	// Disables auto release
+	CResource& NoAutoRelease()
+	{	m_bRelease = oexFALSE;
+		return *this;
+	}
 
 	//==============================================================
 	// Destroy()
 	//==============================================================
 	/// Releases the handle
-	/*
+	/**
+		\param [in] x_uTimeout	-	Maximum amount of time to wait for
+									the resource to be released
+									gracefully.
+		\param [in] x_bForce	-	If x_uTimeout expires, and x_bForce
+									is non-zero, the resource will be
+									forcefully removed.  If x_uTimeout
+									expires and x_bForce is zero, the
+									resource will be abandoned.
+
 		return	error code for the release operation.   Zero if
 				success, -1 if the operation could not be performed.
 	*/
-	oexRESULT Destroy();
+	oexRESULT Destroy( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT, oexBOOL x_bForce = oexTRUE );
+
+	/// Creates a mutex object
+	/**
+		\param [in] x_sName 		-	Name for the mutex
+		\param [in] x_bInitialOwner	-	Non-zero if the calling thread
+										should take ownership before
+										the function returns.
+	*/
+	oexRESULT CreateMutex( oexCSTR x_sName = oexNULL, oexBOOL x_bInitialOwner = oexFALSE );
+
+	/// Creates an event object
+	/**
+		\param [in] x_sName			-	Event name, NULL for unamed event.
+		\param [in] x_bManualReset	-	TRUE if the event must be manually
+										reset
+		\param [in] x_bInitialState	-	The initial state of the event,
+										non-zero for signaled.
+	*/
+	oexRESULT CreateEvent( oexCSTR x_sName = oexNULL, oexBOOL x_bManualReset = oexTRUE, oexBOOL x_bInitialState = oexFALSE );
+
+	/// Creates a thread
+	/**
+		\param [in] x_fnCallback	-	Thread callback function
+		\param [in] x_pData			-	User data passed to thread
+										callback function
+	*/
+	oexRESULT CreateThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData );
+
+private:
+
+    /// The thread procedure
+    static oexPVOID ThreadProc( oexPVOID x_pData );
+
+    // Protect access to ThreadProc()
+    class CThreadProcImpl;
+    friend class CThreadProcImpl;
+
+public:
 
 	//==============================================================
 	// Wait()
 	//==============================================================
 	/// Waits for the handle to signal
-	/*
+	/**
 		\param [in] x_uTimeout 		-	Maximum time to wait for signal
-		\param [in] x_uType			-	Type of signal to wait for
 
 		This is a consolidated wait function.  It's exact characteristics
 		depend on the type of object being waited on.
@@ -171,21 +225,29 @@ public:
 	// Signal()
 	//==============================================================
 	/// Signals the handle if the resource type supports it
-	/*
+	/**
+		\param [in] x_uTimeout	- Maximum amount of time to wait for
+								  the signal to become available for
+								  signaling.
+
 		\return Returns zero if success, otherwise an error code is
 				returned.
 	*/
-	oexRESULT Signal();
+	oexRESULT Signal( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT );
 
 	//==============================================================
-	// Signal()
+	// Reset()
 	//==============================================================
 	/// Resets the signaled state if the resource type supports it
-	/*
+	/**
+		\param [in] x_uTimeout	- Maximum amount of time to wait for
+								  the signal to become available for
+								  resetting.
+
 		\return Returns zero if success, otherwise an error code is
 				returned.
 	*/
-	oexRESULT Reset();
+	oexRESULT Reset( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT );
 
 	//==============================================================
 	// vInfinite()
@@ -237,7 +299,7 @@ public:
     	m_hHandle = x_hHandle;
 		m_eType = x_eType;
 	}
-	
+
 	//==============================================================
 	// GetType()
 	//==============================================================
@@ -271,5 +333,8 @@ private:
 
 	/// Resource type
 	E_RESOURCE_TYPE			m_eType;
+
+	/// Auto Release
+	oexBOOL					m_bRelease;
 };
 

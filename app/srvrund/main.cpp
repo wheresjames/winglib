@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 #	endif
 #endif
 
-	oex::os::CSys::printf( "Starting...\n" );
+	oex::os::CSys::Printf( "Starting...\n" );
 
 	oex::CStr sCommandLine;
 	if ( argc > 2 && oexCHECK_PTR( argv[ 2 ] ) )
@@ -40,17 +40,17 @@ int main(int argc, char* argv[])
 
 	if ( 0 > nRet )
 	{	oexERROR( nRet, "Failed to start service module..." );
-		oex::os::CSys::printf( "Failed to start service module...\n" );
+		oex::os::CSys::Printf( "Failed to start service module...\n" );
 	} // end if
 
 	else if ( 0 < nRet )
 	{	oexNOTICE( 0, "Return from parent..." );
-		oex::os::CSys::printf( "Return from parent...\n" );
+		oex::os::CSys::Printf( "Return from parent...\n" );
 	} // end else if
 
 	else
 	{	oexNOTICE( 0, "Return from child..." );
-		oex::os::CSys::printf( "Return from child...\n" );
+		oex::os::CSys::Printf( "Return from child...\n" );
 	} // end else
 
 	// Initialize the oex library

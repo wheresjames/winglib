@@ -90,8 +90,6 @@ public:
 	{
 		CStr sDevice = oexMks( oexT( "/dev/video" ), x_uDevice );
 
-		CSys::printf( "device = %s\n", sDevice.Ptr() );
-
 		struct stat st;
 		if ( 0 > stat( oexStrToMbPtr( sDevice.Ptr() ), &st ) )
 		{	oexERROR( errno, CStr().Fmt( oexT( "Device name is invalid : %s" ), oexStrToMbPtr( sDevice.Ptr() ) ) );
