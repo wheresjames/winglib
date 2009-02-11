@@ -1318,7 +1318,7 @@ oex::oexRESULT Test_CIpAddress()
         return -4;
 
     ia.LookupHost( oexT( "google.com" ), 80 );
-    oexTRACE( oexT( "google.com = %s = %s\n" ), oexStrToMbPtr( ia.GetDotAddress().Ptr() ), oexStrToMbPtr( ia.GetId().Ptr() ) );
+    oexPrintf( oexT( "google.com = %s = %s\n" ), oexStrToMbPtr( ia.GetDotAddress().Ptr() ), oexStrToMbPtr( ia.GetId().Ptr() ) );
 
     oex::os::CIpSocket::UninitSockets();
 
@@ -1592,23 +1592,32 @@ public:
 	CMyThread()
 	{
 		m_val = 0;
+		m_evDone.CreateEvent();
 	}
 
 	virtual oex::oexBOOL InitThread( oex::oexPVOID x_pData )
-	{	m_val++;
+	{	m_val++; // 1
 		return oex::oexTRUE;
 	}
 
 	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
-	{	m_val++;
+	{	m_val++; // 2
 		return oex::oexFALSE;
 	}
 
 	virtual oex::oexINT EndThread( oex::oexPVOID x_pData )
-	{	m_val++;
+	{
+		m_val++; // 3
+
+		m_evDone.Signal();
+		WaitStopSignal();
+
+		m_val++; // 4
+
 		return oex::oexFALSE;
 	}
 
+	oex::os::CResource  m_evDone;
 	oex::oexINT 		m_val;
 };
 
@@ -1619,14 +1628,17 @@ public:
 	CMyThread2()
 	{
 		m_val = 0;
-		m_evInc.AutoRelease().CreateEvent();
-		m_evDone.AutoRelease().CreateEvent();
+		m_evInc.CreateEvent();
+		m_evDone.CreateEvent();
 	}
 
 	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
 	{
-		if ( m_evInc.Wait() )
+		if ( m_evInc.Wait( 1000 ) )
+		{
+			oexM();
 			return oex::oexFALSE;
+		} // end if
 
 		if ( m_evInc.Reset() )
 			return oex::oexFALSE;
@@ -1635,6 +1647,8 @@ public:
 
 		if ( m_evDone.Signal() )
 			return oex::oexFALSE;
+
+//		oexSleep( 1000 );
 
 		return oex::oexTRUE;
 	}
@@ -1649,48 +1663,62 @@ oex::oexRESULT Test_Threads()
 {
 	CMyThread t;
 
-	if ( !oexVERIFY( !t.Start() ) )
+	if ( !oexVERIFY( 0 == t.Start() ) )
 		return -1;
 
-	if ( !oexVERIFY( !t.Stop() ) )
+	if ( !oexVERIFY( t.IsRunning() ) )
 		return -2;
 
-	if ( !oexVERIFY( 3 == t.m_val ) )
+	if ( !oexVERIFY( 0 == t.m_evDone.Wait() ) )
 		return -3;
 
-	// *** Event test
+	if ( !oexVERIFY( 3 == t.m_val ) )
+		return -4;
+
+	if ( !oexVERIFY( 0 == t.Stop() ) )
+		return -5;
+
+	if ( !oexVERIFY( 4 == t.m_val ) )
+		return -6;
+
+	// *** Event / Mutex test
 
 	CMyThread2 t2;
 
 	if ( !oexVERIFY( !t2.Start( 0, 0 ) ) )
-		return -4;
+		return -10;
 
 	oex::CStr str;
 	while ( 10 > t2.m_val )
 	{
-		if ( !oexVERIFY( !t2.IsRunning() ) )
-			return -5;
+		if ( !oexVERIFY( t2.IsRunning() ) )
+			return -11;
 
-		if ( !oexVERIFY( !t2.m_evInc.Signal() ) )
-			return -6;
+		if ( !oexVERIFY( 0 == t2.m_evInc.Signal() ) )
+			return -12;
 
-		if ( !oexVERIFY( !t2.m_evDone.Wait() ) )
-			return -7;
+		if ( !oexVERIFY( 0 == t2.m_evDone.Wait() ) )
+			return -13;
 
-		if ( !oexVERIFY( !t2.m_evDone.Reset() ) )
-			return -8;
+		if ( !oexVERIFY( 0 == t2.m_evDone.Reset() ) )
+			return -14;
 
 		str << t2.m_val << oexT( "," );
 
-		oex::os::CSys::Sleep( 100 );
+		oexSleep( 100 );
 
 	} // end while
 
-	if ( !oexVERIFY( !t.Stop() ) )
-		return -6;
+	if ( !oexVERIFY( 0 == t.Stop( 10000 ) ) )
+		return -15;
 
 	if ( !oexVERIFY( str == oexT( "1,2,3,4,5,6,7,8,9,10," ) ) )
-		return -7;
+		return -16;
+
+
+	// *** Lock test
+
+
 
 	return oex::oexRES_OK;
 }
@@ -2256,9 +2284,6 @@ int main(int argc, char* argv[])
 
 	oexNOTICE( 0, "Tests started" );
 
-	Test_Threads();
-
-
     TestAllocator();
 
     TestStrings();
@@ -2295,7 +2320,7 @@ int main(int argc, char* argv[])
 
     Test_CIpSocket();
 
-//	Test_Threads();
+	Test_Threads();
 
 //	Test_MsgParams();
 

@@ -160,9 +160,15 @@
 #define oexGmtTime					OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eGmtTime )
 #define oexLocalTimeStr				OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eLocalTime ).FormatTime
 #define oexGmtTimeStr				OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eGmtTime ).FormatTime
+#define oexSleep					OEX_NAMESPACE::os::CSys::Sleep
+#define oexMicroSleep				OEX_NAMESPACE::os::CSys::MicroSleep
+#define oexPrintf					OEX_NAMESPACE::os::CSys::Printf
 
 #define oexGuidToString				OEX_NAMESPACE::CStr().GuidToString
 #define oexUniqueGuid( g )			OEX_NAMESPACE::guid::StringToGuid( g, (OEX_NAMESPACE::oexCSTR)NULL, 0 )
+
+// Threads
+#define oexGetCurrentThreadId		OEX_NAMESPACE::os::CSys::GetCurrentThreadId
 
 /// oexRETRY() - Retry something up to m times
 /**

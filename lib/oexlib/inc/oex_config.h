@@ -99,7 +99,7 @@
 #undef oexUSE_EXCEPTIONS
 
 // Define to include backtraces for log entries
-//#define oexBACKTRACE_IN_LOG
+#define oexBACKTRACE_IN_LOG
 
 // debug macros
 #define oexFILE				__FILE__

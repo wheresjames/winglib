@@ -295,7 +295,8 @@ void CIpSocket::Destroy()
 	// Close the socket
 	if ( -1 == shutdown( (int)hSocket, SHUT_RDWR ) )
 	{	m_uLastError = errno;
-		oexERROR( errno, oexT( "shutdown() failed" ) );
+		if ( ENOTCONN != errno )
+			oexERROR( errno, oexT( "shutdown() failed" ) );
 	} // end if
 
     if ( -1 == close( (int)hSocket ) )
@@ -1217,7 +1218,8 @@ oexBOOL CIpSocket::GetPeerAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
 
 	// Get the socket info
 	if ( -1 == getpeername( (int)x_hSocket, (sockaddr*)&sai, &len ) )
-		oexERROR( errno, oexT( "getpeername() failed" ) );
+		if ( ENOTCONN != errno )
+			oexERROR( errno, oexT( "getpeername() failed" ) );
 
     // Format the info
     return CIpSocket_GetAddressInfo( x_pIa, &sai );

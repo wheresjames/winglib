@@ -72,8 +72,10 @@ oexBOOL CLog::Open( oexCSTR x_pPath )
 	m_sPath = x_pPath;
 
 #if defined( oexDEBUG )
+
 	// Show log file location
-	os::CSys::printf( oexStrToMbPtr( x_pPath ) );
+	oexPrintf( oexStrToMbPtr( x_pPath ) );
+
 #endif
 
 	// Open new log file
@@ -103,8 +105,10 @@ oexBOOL CLog::Resume( oexCSTR x_pPath )
 	m_sPath = x_pPath;
 
 #if defined( oexDEBUG )
+
 	// Show log file location
-	os::CSys::printf( oexStrToMbPtr( x_pPath ) );
+	oexPrintf( oexStrToMbPtr( x_pPath ) );
+
 #endif
 
 	// See if there is an existing log file

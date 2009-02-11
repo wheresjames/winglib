@@ -38,52 +38,56 @@
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
-const CResource::t_HANDLE CResource::c_Invalid = (oexPVOID)0xffffffff;
+const CResource::t_HANDLE CResource::c_Invalid = (oexPVOID)0;
 
 const oexUINT CResource::c_Infinite = 0xffffffff;
 
-struct SEventInfo
+namespace OEX_NAMESPACE
 {
-	CResource						cMutex;
-	pthread_cond_t					cond;
-	oexBOOL							bManualReset;
-	oexBOOL							bSignaled;
+	namespace os
+	{
+		/// Contains OS specific information about a resource
+		struct SResourceInfo
+		{
+			CResource							cSync;
+			oexINT								nOwner;
+
+			pthread_mutex_t						hMutex;
+			pthread_cond_t						hCond;
+
+			// Event info
+			oexBOOL								bManualReset;
+			oexBOOL								bSignaled;
+
+			// Thread info
+			pthread_t							hThread;
+			oexPVOID							pData;
+			CResource::PFN_ThreadProc			fnCallback;
+
+			// Lock info
+			oexINT								nCount;
+		};
+	};
 };
 
-struct SThreadInfo
+static SResourceInfo* CreateRi()
 {
-	pthread_t						hThread;
-	oexPVOID						pData;
-	CResource::PFN_ThreadProc		fnCallback;
-};
-/*
-#define oexWAIT_UNTIL( to, st )									\
-( { oexBOOL bRet = oexFALSE;										\
-	if ( to )														\
-	{	oexUINT uTimeout = (oexUINT)to;								\
-		struct timeval tmStart;										\
-		struct timeval tmNow;										\
-		gettimeofday( &tmStart, 0 );								\
-		while ( uTimeout && !( bRet = ( st ) ) )					\
-		{	oexUINT uWait = uTimeout * 1000;						\
-			if ( uWait > eWaitResolution )							\
-				uWait = eWaitResolution;							\
-			usleep( uWait );										\
-			gettimeofday( &tmNow, 0 );								\
-			oexINT dif = 0;											\
-			if ( tmNow.tv_sec > tmStart.tv_sec )					\
-				dif += ( tmNow.tv_sec - tmStart.tv_sec ) * 1000;	\
-			if ( tmNow.tv_usec > tmStart.tv_usec )					\
-				dif += ( tmNow.tv_usec - tmStart.tv_usec ) / 1000;	\
-			if ( uTimeout > dif )									\
-				uTimeout -= dif;									\
-			else													\
-				uTimeout = 0;										\
-		}															\
-	} else bRet = ( st );											\
-	bRet;															\
-} )
-*/
+	SResourceInfo *pRi = OexAllocConstruct< SResourceInfo >();
+	if ( !pRi )
+	{	oexERROR( ENOMEM, oexT( "Out of memory" ) );
+		return oexNULL;
+	} // end if
+
+	pRi->nOwner = 0;
+	pRi->pData = 0;
+	pRi->bManualReset = 1;
+	pRi->bSignaled = 0;
+	pRi->fnCallback = 0;
+	pRi->nCount = 0;
+
+	return pRi;
+}
+
 #define oexWAIT_UNTIL( to, st )									\
 ( { oexBOOL bRet = oexFALSE;										\
 	if ( to )														\
@@ -101,12 +105,24 @@ struct SThreadInfo
 
 oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 {
+	// Any resources to release?
+	if ( cInvalid() == m_hHandle || eRtInvalid == m_eType )
+		return 0;
+
+	// Get pointer to resource information
+	SResourceInfo *pRi = (SResourceInfo*)m_hHandle;
+	if ( !oexCHECK_PTR( pRi ) )
+	{	m_hHandle = c_Invalid;
+		m_eType = eRtInvalid;
+		oexERROR( 0, oexT( "Invalid resource info object pointer" ) );
+		return -1;
+	} // end if
+
 	// Error code
 	oexINT nErr = 0;
 
 	// Execute proper release function if valid handle
-	if ( cInvalid() != m_hHandle && eRtInvalid != m_eType )
-		switch( m_eType )
+	switch( m_eType )
 	{
 		case eRtInvalid :
 			break;
@@ -120,70 +136,61 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 
 		case eRtThread :
 		{
-			SThreadInfo *pTi = (SThreadInfo*)m_hHandle;
-			if ( !oexCHECK_PTR( pTi ) )
-				oexERROR( 0, oexT( "Invalid thread object" ) );
-			else
+			// Usually the creator will be the destructor
+			if ( pRi->nOwner != oexGetCurrentThreadId() )
+				oexWARNING( 0, "Thread not being destroyed by owner!" );
+
+			// Wait for thread to exit
+			if ( waitSuccess != Wait( x_uTimeout ) )
 			{
-				// Wait for thread to exit
-				if ( waitSuccess != Wait( x_uTimeout ) )
-				{
-					// iii  This should not happen, don't ignore the problem,
-					//      figure out how to shut this thread down properly!
-					oexWARNING( nErr, oexT( "!! Terminating thread !!" ) );
+				// iii  This should not happen, don't ignore the problem,
+				//      figure out how to shut this thread down properly!
+				oexWARNING( nErr, oexT( "!! Terminating thread !!" ) );
 
-					// Kill the thread
-					if ( nErr = pthread_cancel( pTi->hThread ) )
-						oexERROR( nErr, oexT( "pthread_cancel() failed" ) );
+				// Kill the thread
+				if ( nErr = pthread_cancel( pRi->hThread ) )
+					oexERROR( nErr, oexT( "pthread_cancel() failed" ) );
 
-				} // end if
+			} // end if
 
-				// Attempt to join the thread
-				else if ( oexINT nErr = pthread_join( pTi->hThread, oexNULL ) )
-					oexERROR( nErr, oexT( "pthread_join() failed" ) );
-
-				// Drop the memory
-				OexAllocDelete( pTi );
-
-			} // end else
+			// Attempt to join the thread
+			else if ( oexINT nErr = pthread_join( pRi->hThread, oexNULL ) )
+				oexERROR( nErr, oexT( "pthread_join() failed" ) );
 
 		} break;
 
 		case eRtMutex :
 
-			if ( !oexCHECK_PTR( m_hHandle ) )
-				oexERROR( 0, oexT( "Invalid mutex object" ) );
-			else
-			{
+//			do
+//			{
 				// Initiailze mutex object
-				if ( nErr = pthread_mutex_destroy( (pthread_mutex_t*)m_hHandle ) )
-					return oexERROR( nErr, oexT( "pthread_mutex_destroy() failed : Error releasing mutex object" ) );
+				nErr = pthread_mutex_destroy( &pRi->hMutex );
 
-				// Drop the memory
-				OexAllocDelete( (pthread_mutex_t*)m_hHandle );
+//				if ( EBUSY == nErr )
+//					pthread_mutex_unlock( &pRi->hMutex );
+//				else
+					if ( nErr )
+						oexERROR( nErr, oexT( "pthread_mutex_destroy() failed : Error releasing mutex object" ) );
 
-			} // end else
+//			} while ( EBUSY == nErr );
 
 			break;
 
 		case eRtEvent :
 		{
-			SEventInfo *pEi = (SEventInfo*)m_hHandle;
-			if ( !oexCHECK_PTR( pEi ) )
-				oexERROR( 0, oexT( "Invalid event object" ) );
-			else
-			{
-				// Release mutex object
-				pEi->cMutex.Destroy();
+			// Release Lock
+			pRi->cSync.Destroy();
 
-				// Release mutex object
-				if ( nErr = pthread_cond_destroy( &pEi->cond ) )
-					oexERROR( nErr, oexT( "pthread_cond_destroy() failed : Error releasing pthread_cond object" ) );
+			// Release condition object
+			if ( nErr = pthread_cond_destroy( &pRi->hCond ) )
+				oexERROR( nErr, oexT( "pthread_cond_destroy() failed : Error releasing pthread_cond object" ) );
 
-				// Drop the memory
-				OexAllocDelete( pEi );
+		} break;
 
-			} // end else
+		case eRtLock :
+		{
+			// Release mutex object
+			pRi->cSync.Destroy();
 
 		} break;
 
@@ -197,30 +204,45 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 	m_hHandle = c_Invalid;
 	m_eType = eRtInvalid;
 
-	return 0;
+	// Drop the memory
+	OexAllocDelete( pRi );
+
+	return nErr;
+}
+
+oexINT CResource::GetOwner()
+{
+	SResourceInfo *pRi = (SResourceInfo*)m_hHandle;
+	if ( !oexCHECK_PTR( pRi ) )
+		return 0;
+
+	return pRi->nOwner;
 }
 
 oexRESULT CResource::CreateEvent( oexCSTR x_sName, oexBOOL x_bManualReset, oexBOOL x_bInitialState )
 {
-	SEventInfo *pEi = OexAllocNew< SEventInfo >( 1 );
-	if ( !pEi )
+	// Out with the old
+	Destroy();
+
+	SResourceInfo *pRi = CreateRi();
+	if ( !pRi )
 		return oexERROR( ENOMEM, oexT( "Out of memory" ) );
-	oexZeroMemory( pEi, sizeof( SEventInfo ) );
 
 	// Initialize member variables
 	m_eType = eRtEvent;
-	m_hHandle = (CResource::t_HANDLE)pEi;
+	m_hHandle = (CResource::t_HANDLE)pRi;
+	EnableAutoRelease();
 
 	// Initialize structure
-	pEi->bManualReset = x_bManualReset;
-	pEi->bSignaled = x_bInitialState;
+	pRi->bManualReset = x_bManualReset;
+	pRi->bSignaled = x_bInitialState;
 
 	// Create the mutex object
-	if ( oexINT nErr = pEi->cMutex.CreateMutex() )
+	if ( oexINT nErr = pRi->cSync.CreateMutex() )
 	{	Destroy(); return oexERROR( nErr, oexT( "Create mutex failed" ) ); }
 
 	// Create condition object
-	if ( oexINT nErr = pthread_cond_init( &pEi->cond, 0 ) )
+	if ( oexINT nErr = pthread_cond_init( &pRi->hCond, 0 ) )
 	{	Destroy(); return oexERROR( nErr, oexT( "pthread_cond_init: failed" ) ); }
 
 	return 0;
@@ -231,18 +253,17 @@ oexRESULT CResource::CreateMutex( oexCSTR x_sName, oexBOOL x_bInitialOwner )
 	// Out with the old
 	Destroy();
 
-	// Allocate memory for mutex object
-	pthread_mutex_t *pTm = OexAllocNew< pthread_mutex_t >( 1 );
-	if ( !pTm )
+	SResourceInfo *pRi = CreateRi();
+	if ( !pRi )
 		return oexERROR( ENOMEM, oexT( "Out of memory" ) );
-	oexZeroMemory( pTm, sizeof( pthread_mutex_t ) );
 
 	// Save information
 	m_eType = eRtMutex;
-	m_hHandle = (CResource::t_HANDLE)pTm;
+	m_hHandle = (CResource::t_HANDLE)pRi;
+	EnableAutoRelease();
 
 	// Initiailze mutex object
-	if ( oexINT nErr = pthread_mutex_init( pTm, 0 ) )
+	if ( oexINT nErr = pthread_mutex_init( &pRi->hMutex, 0 ) )
 	{	Destroy(); return oexERROR( nErr, oexT( "ptherad_mutex_init() failed" ) ); }
 
 	if ( x_bInitialOwner )
@@ -256,21 +277,31 @@ oexRESULT CResource::CreateThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData
 	// Out with the old
 	Destroy();
 
-	SThreadInfo *pTi = OexAllocNew< SThreadInfo >( 1 );
-	if ( !pTi )
+	SResourceInfo *pRi = CreateRi();
+	if ( !pRi )
 		return oexERROR( ENOMEM, oexT( "Out of memory" ) );
-	oexZeroMemory( pTi, sizeof( SThreadInfo ) );
 
 	m_eType = eRtThread;
-	m_hHandle = (CResource::t_HANDLE)pTi;
+	m_hHandle = (CResource::t_HANDLE)pRi;
+	EnableAutoRelease();
 
 	// Save user data
-	pTi->pData = x_pData;
-	pTi->fnCallback = x_fnCallback;
+	pRi->pData = x_pData;
+	pRi->fnCallback = x_fnCallback;
+	pRi->nOwner = oexGetCurrentThreadId();
+
+	// Make thread joinable
+	pthread_attr_t attr;
+	pthread_attr_init( &attr );
+	pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_JOINABLE );
 
 	// Create the thread
-	oexINT nRet = pthread_create( &pTi->hThread, oexNULL,
-							      CResource::ThreadProc, pTi );
+	oexINT nRet = pthread_create( &pRi->hThread, &attr,
+							      CResource::ThreadProc, pRi );
+
+	// Lose attributes structure
+	pthread_attr_destroy( &attr );
+
 	if ( nRet )
 	{	oexERROR( nRet, "Error creating thread" );
 		Destroy();
@@ -282,19 +313,62 @@ oexRESULT CResource::CreateThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData
 
 oexPVOID CResource::ThreadProc( oexPVOID x_pData )
 {
-	SThreadInfo *pTi = (SThreadInfo*)x_pData;
-	if ( !pTi )
+	// Get pointer to resource information
+	SResourceInfo *pRi = (SResourceInfo*)x_pData;
+	if ( !oexCHECK_PTR( pRi ) )
+	{	oexERROR( 0, oexT( "Invalid resource info object pointer" ) );
 		return (oexPVOID)-1;
+	} // end if
 
 	// Call user thread
-	return pTi->fnCallback( pTi->pData );
+	oexPVOID pRet = pRi->fnCallback( pRi->pData );
+
+	// Quit thread
+	pthread_exit( pRet );
+
+	return pRet;
+}
+
+oexRESULT CResource::CreateLock( oexCSTR x_sName, oexBOOL x_bInitialOwner )
+{
+	// Out with the old
+	Destroy();
+
+	SResourceInfo *pRi = CreateRi();
+	if ( !pRi )
+		return oexERROR( ENOMEM, oexT( "Out of memory" ) );
+
+	// Initialize member variables
+	m_eType = eRtLock;
+	m_hHandle = (CResource::t_HANDLE)pRi;
+	EnableAutoRelease();
+
+	// Initialize structure
+	pRi->nCount = 0;
+	pRi->nOwner = 0;
+
+	// Create the mutex object
+	if ( oexINT nErr = pRi->cSync.CreateMutex() )
+	{	Destroy(); return oexERROR( nErr, oexT( "Create mutex failed" ) ); }
+
+	return 0;
 }
 
 oexRESULT CResource::Wait( oexUINT x_uTimeout )
 {
+	// Verify information
+	if ( cInvalid() == m_hHandle || eRtInvalid == m_eType )
+		return -1;
+
+	// Get pointer to resource information
+	SResourceInfo *pRi = (SResourceInfo*)m_hHandle;
+	if ( !oexCHECK_PTR( pRi ) )
+	{	oexERROR( 0, oexT( "Invalid resource info object pointer" ) );
+		return -1;
+	} // end if
+
 	// Execute proper release function if valid handle
-	if ( cInvalid() != m_hHandle )
-		switch( m_eType )
+	switch( m_eType )
 	{
 		case eRtInvalid :
 			break;
@@ -307,12 +381,7 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 
 		case eRtThread :
 		{
-			SThreadInfo *pTi = (SThreadInfo*)m_hHandle;
-			if ( !oexCHECK_PTR( pTi ) )
-				return waitFailed;
-
-			oexINT nErr = 0;
-			if ( oexWAIT_UNTIL( x_uTimeout, ( nErr = pthread_kill( pTi->hThread, 0 ) ) ) )
+			if ( oexWAIT_UNTIL( x_uTimeout, pthread_kill( pRi->hThread, 0 ) ) )
 				return waitSuccess;
 
 			return waitTimeout;
@@ -321,62 +390,11 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 
 		case eRtMutex :
 		{
-			pthread_mutex_t* pTm = (pthread_mutex_t*)m_hHandle;
-			if ( !oexCHECK_PTR( pTm ) )
-				return waitFailed;
-/*
 			oexINT nErr = 0;
-			oexUINT to = x_uTimeout;
-			{
-				if ( to )
-				{
-					oexUINT uTimeout = (oexUINT)to;
-					struct timeval tmStart;
-					struct timeval tmNow;
-					gettimeofday( &tmStart, 0 );
-
-					while ( uTimeout && ( nErr = pthread_mutex_trylock( pTm ) ) )
-					{
-						oexM();
-
-						oexUINT uWait = uTimeout;
-						if ( uWait > eWaitResolution )
-							uWait = eWaitResolution;
-
-						usleep( uWait );
-						gettimeofday( &tmNow, 0 );
-						oexINT dif = 0;
-
-						if ( tmNow.tv_sec > tmStart.tv_sec )
-							dif += ( tmNow.tv_sec - tmStart.tv_sec ) * 1000;
-						if ( tmNow.tv_usec > tmStart.tv_usec )
-							dif += ( tmNow.tv_usec - tmStart.tv_usec ) / 1000;
-						if ( uTimeout > dif )
-							uTimeout -= dif;
-						else
-							uTimeout = 0;
-					}
-				}
-				else
-					nErr = pthread_mutex_trylock( pTm );
-
-				oexSHOW( nErr );
-			}
-
-			if ( !nErr )
+			if ( oexWAIT_UNTIL( x_uTimeout, !( nErr = pthread_mutex_trylock( &pRi->hMutex ) ) || EDEADLK == nErr ) )
+			{	pRi->nOwner = oexGetCurrentThreadId();
 				return waitSuccess;
-
-*/
-			oexINT nErr;
-			if ( oexWAIT_UNTIL( x_uTimeout, !( nErr = pthread_mutex_trylock( pTm ) ) ) )
-				return waitSuccess;
-
-
-//			oexINT nErr = 0;
-//			if ( oexWAIT_WHILE( x_uTimeout, ( nErr = pthread_mutex_trylock( pTm ) ) ) )
-//				return waitSuccess;
-//				if ( !nErr || EDEADLK == nErr )
-	//				return waitSuccess;
+			} // end if
 
 			return waitTimeout;
 
@@ -384,14 +402,74 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 
 		case eRtEvent :
 		{
-			SEventInfo *pEi = (SEventInfo*)m_hHandle;
-			if ( !oexCHECK_PTR( pEi ) )
-				return oexERROR( -1, oexT( "Invalid event object" ) );
+			// Verify mutex data pointer
+			if ( !oexCHECK_PTR( pRi->cSync.GetRi() ) )
+			{	oexERROR( 0, "Invalid mutex data pointer" );
+				return waitFailed;
+			} // end if
 
-			if ( oexWAIT_UNTIL( x_uTimeout, pEi->bSignaled ) )
+			CAutoLock al( pRi->cSync, x_uTimeout );
+			if ( !al.IsLocked() )
+				return waitTimeout;
+
+			// Is the thing signaled?
+			if ( pRi->bSignaled )
 				return waitSuccess;
 
+			// We have to give pthread_cond_timedwait() time to react
+			if ( 0 == x_uTimeout )
+				x_uTimeout = eWaitResolution / 1000;
+
+			// Calculate a timeout
+			struct timespec to;
+			if ( oexINT nErr = clock_gettime( CLOCK_REALTIME, &to ) )
+				return oexERROR( nErr, "clock_gettime() failed" );
+			to.tv_sec += x_uTimeout / 1000;
+			to.tv_nsec += ( x_uTimeout - ( x_uTimeout / 1000 * 1000 ) ) * 1000000;
+
+			// Wait for the signal
+			if ( !pthread_cond_timedwait( &pRi->hCond, &pRi->cSync.GetRi()->hMutex, &to ) )
+			{
+				oexBOOL bSignaled = pRi->bSignaled;
+
+				// Auto reset?
+				if ( pRi->bSignaled && !pRi->bManualReset )
+					pRi->bSignaled = oexFALSE;
+
+				oexM();
+
+				// Return the signaled state
+				return bSignaled ? waitSuccess : waitFailed;
+
+			} // end if
+
+			oexM();
+
 			return waitTimeout;
+
+		} break;
+
+		case eRtLock :
+		{
+			// Verify mutex data pointer
+			if ( !oexCHECK_PTR( pRi->cSync.GetRi() ) )
+			{	oexERROR( 0, "Invalid mutex data pointer" );
+				return waitFailed;
+			} // end if
+
+			// Lock the mutex
+			CAutoLock al( pRi->cSync, x_uTimeout );
+			if ( !al.IsLocked() )
+				return waitTimeout;
+
+			oexINT nId = oexGetCurrentThreadId();
+			if ( pRi->nOwner && pRi->nOwner != nId )
+				return waitTimeout;
+
+			pRi->nOwner = nId;
+			pRi->nCount++;
+
+			return waitSuccess;
 
 		} break;
 
@@ -405,8 +483,19 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 
 oexRESULT CResource::Signal( oexUINT x_uTimeout )
 {
+	// Verify information
+	if ( cInvalid() == m_hHandle || eRtInvalid == m_eType )
+		return -1;
+
+	// Get pointer to resource information
+	SResourceInfo *pRi = (SResourceInfo*)m_hHandle;
+	if ( !oexCHECK_PTR( pRi ) )
+	{	oexERROR( 0, oexT( "Invalid resource info object pointer" ) );
+		return -1;
+	} // end if
+
 	// Error code
-	oexINT nErr = -1;
+	oexINT nErr = 0;
 
 	// Execute proper release function if valid handle
 	if ( cInvalid() != m_hHandle )
@@ -425,34 +514,35 @@ oexRESULT CResource::Signal( oexUINT x_uTimeout )
 			break;
 
 		case eRtMutex :
-			return waitSuccess == Wait( x_uTimeout );
+			return Wait( x_uTimeout );
+			break;
+
+		case eRtLock :
+			return Wait( x_uTimeout );
 			break;
 
 		case eRtEvent :
 		{
-			SEventInfo *pEi = (SEventInfo*)m_hHandle;
-			if ( !oexCHECK_PTR( pEi ) )
-				return oexERROR( -1, oexT( "Invalid event object" ) );
-
-			if ( pEi->cMutex.Wait( x_uTimeout ) )
+			CAutoLock al( pRi->cSync, x_uTimeout );
+			if ( !al.IsLocked() )
 				return oexERROR( nErr, oexT( "Unable to acquire lock to signal event object" ) );
 
+			// Save thread id on first signal
+			if ( !pRi->bSignaled )
+				pRi->nOwner = oexGetCurrentThreadId();
+
 			// Set state to signaled
-			pEi->bSignaled = oexTRUE;
+			pRi->bSignaled = oexTRUE;
 
 			// Unblock everyone if manual reset
-			if ( pEi->bManualReset )
-			{	if ( nErr = pthread_cond_broadcast( &pEi->cond ) )
-					return oexERROR( nErr, oexT( "pthread_cond_signal failed" ) );
+			if ( pRi->bManualReset )
+			{	if ( nErr = pthread_cond_broadcast( &pRi->hCond ) )
+					return oexERROR( nErr, oexT( "pthread_cond_broadcast() failed" ) );
 			} // end if
 
 			// Unblock single waiting thread if auto
-			else if ( nErr = pthread_cond_signal( &pEi->cond ) )
-				return oexERROR( nErr, oexT( "pthread_cond_signal failed" ) );
-
-			// Clear lock
-			if ( nErr = pEi->cMutex.Reset() )
-				return oexERROR( nErr, oexT( "Failed to release lock on event object" ) );
+			else if ( nErr = pthread_cond_signal( &pRi->hCond ) )
+				return oexERROR( nErr, oexT( "pthread_cond_signal() failed" ) );
 
 		} break;
 
@@ -467,8 +557,19 @@ oexRESULT CResource::Signal( oexUINT x_uTimeout )
 
 oexRESULT CResource::Reset( oexUINT x_uTimeout )
 {
+	// Verify information
+	if ( cInvalid() == m_hHandle || eRtInvalid == m_eType )
+		return -1;
+
+	// Get pointer to resource information
+	SResourceInfo *pRi = (SResourceInfo*)m_hHandle;
+	if ( !oexCHECK_PTR( pRi ) )
+	{	oexERROR( 0, oexT( "Invalid resource info object pointer" ) );
+		return -1;
+	} // end if
+
 	// Error code
-	oexINT nErr = -1;
+	oexINT nErr = 0;
 
 	// Execute proper release function if valid handle
 	if ( cInvalid() != m_hHandle )
@@ -487,30 +588,52 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 			break;
 
 		case eRtMutex :
-		{
-			pthread_mutex_t* pTm = (pthread_mutex_t*)m_hHandle;
-			if ( !oexCHECK_PTR( pTm ) )
-				return -1;
-
-			nErr = pthread_mutex_unlock( pTm );
-
-		} break;
+			nErr = pthread_mutex_unlock( &pRi->hMutex );
+			pRi->nOwner = 0;
+			break;
 
 		case eRtEvent :
 		{
-			SEventInfo *pEi = (SEventInfo*)m_hHandle;
-			if ( !oexCHECK_PTR( pEi ) )
-				return oexERROR( -1, oexT( "Invalid event object" ) );
+			// Verify mutex data pointer
+			if ( !oexCHECK_PTR( pRi->cSync.GetRi() ) )
+			{	oexERROR( 0, "Invalid mutex data pointer" );
+				return waitFailed;
+			} // end if
 
-			if ( nErr = pEi->cMutex.Wait( x_uTimeout ) )
+			CAutoLock al( pRi->cSync, x_uTimeout );
+			if ( !al.IsLocked() )
 				return oexERROR( nErr, oexT( "Unable to acquire lock to signal event object" ) );
 
 			// Set state to signaled
-			pEi->bSignaled = oexFALSE;
+			pRi->bSignaled = oexFALSE;
+			pRi->nOwner = 0;
 
-			// Clear lock
-			if ( nErr = pEi->cMutex.Reset() )
-				return oexERROR( nErr, oexT( "Failed to release lock on event object" ) );
+		} break;
+
+		case eRtLock :
+		{
+			// Verify mutex data pointer
+			if ( !oexCHECK_PTR( pRi->cSync.GetRi() ) )
+			{	oexERROR( 0, "Invalid mutex data pointer" );
+				return waitFailed;
+			} // end if
+
+			// Lock the mutex
+			CAutoLock al( pRi->cSync, x_uTimeout );
+			if ( !al.IsLocked() )
+				return waitTimeout;
+
+			oexINT nId = oexGetCurrentThreadId();
+			if ( pRi->nOwner && pRi->nOwner != nId )
+				return waitFailed;
+
+			if ( 0 >= pRi->nCount )
+				return waitFailed;
+
+			if ( 0 == --pRi->nCount )
+				pRi->nOwner = 0;
+
+			return waitSuccess;
 
 		} break;
 

@@ -122,7 +122,7 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 	oexERROR( 0, str.Ptr() );
 
 #ifdef oexBACKTRACE_IN_LOG
-	printf( oexStrToMbPtr( os::CTrace::GetBacktrace( 0 ).Ptr() ) );
+	oexPrintf( oexStrToMbPtr( os::CTrace::GetBacktrace( 0 ).Ptr() ) );
 #endif
 
 	Break();

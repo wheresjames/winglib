@@ -53,10 +53,6 @@ CThread::CThread()
 {
     m_pData = 0;
     m_uSleep = 0;
-
-	// Create sync events
-    m_evInit.AutoRelease().CreateEvent();
-    m_evStop.AutoRelease().CreateEvent();
 }
 
 CThread::~CThread()
@@ -118,8 +114,8 @@ oexRESULT CThread::Start( oexPVOID x_pData, oexUINT x_uSleep )
     m_uSleep = x_uSleep;
 
     // Give the thread a fighting chance
-    m_evStop.Reset();
-    m_evInit.Reset();
+    m_evStop.CreateEvent();
+    m_evInit.CreateEvent();
 
 	// Attempt to create the thread
 	if ( CResource::CreateThread( CThread::ThreadProc, this ) )
@@ -137,28 +133,41 @@ oexRESULT CThread::Stop( oexUINT x_uWait, oexBOOL x_bKill )
 	// Signal that the thread should exit
 	m_evStop.Signal();
 
+	// Wait for thread to stop
+	if ( !WaitThreadExit( x_uWait ) )
+		oexERROR( 0, "Thread failed to shutdown gracefully" );
+
 	// Kill the thread
-	CResource::Destroy( x_uWait, x_bKill );
+	oexINT nErr = CResource::Destroy( x_uWait, x_bKill );
+
+	// Lose the events
+    m_evStop.Destroy();
+    m_evInit.Destroy();
 
     // Clear thread data
     m_pData = 0;
     m_uSleep = 0;
 
-    return 0;
+    return nErr;
 }
 
 oexBOOL CThread::IsRunning()
+{	return !WaitThreadExit( 0 );
+}
+
+oexBOOL CThread::WaitThreadExit( oexUINT x_uTimeout )
 {
 	// Ensure valid thread handle
 	if ( !CResource::IsValid() )
-		return oexFALSE;
+		return oexTRUE;
 
 	// See if the thread is still alive
-	if ( waitSuccess != CResource::Wait( 0 ) )
+	if ( CResource::waitSuccess != CResource::Wait( x_uTimeout ) )
 		return oexFALSE;
 
 	return oexTRUE;
 }
+
 
 // The number of threads running
 oexLONG CThread::m_lThreadCount = 0;

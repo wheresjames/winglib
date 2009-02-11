@@ -202,6 +202,13 @@ public:
     oexBOOL WaitInit( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
     {   return CResource::waitSuccess == m_evInit.Wait( x_uTimeout ); }
 
+    /// Waits for thread to initialize
+    oexBOOL WaitStopSignal( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+    {   return CResource::waitSuccess == m_evStop.Wait( x_uTimeout ); }
+
+    /// Waits for thread to initialize
+    oexBOOL WaitThreadExit( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT );
+
 private:
 
 	//==============================================================

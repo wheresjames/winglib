@@ -55,6 +55,7 @@
 
 */
 //==================================================================
+struct SResourceInfo;
 class CResource
 {
 public:
@@ -138,15 +139,27 @@ public:
 	}
 
 	/// Enables auto release
-	CResource& AutoRelease()
+	CResource& EnableAutoRelease()
 	{	m_bRelease = oexTRUE;
 		return *this;
 	}
 
 	// Disables auto release
-	CResource& NoAutoRelease()
-	{	m_bRelease = oexFALSE;
-		return *this;
+	CResource* Detach( CResource *pRes = oexNULL )
+	{
+		// Pass on traits if needed
+		if ( oexCHECK_PTR( pRes ) )
+		{	pRes->m_bRelease = m_bRelease;
+			pRes->m_hHandle = m_hHandle;
+			pRes->m_eType = m_eType;
+		} // end if
+
+		// Detach from resource
+		m_bRelease = oexFALSE;
+		m_hHandle = oexNULL;
+		m_eType = eRtInvalid;
+
+		return pRes;
 	}
 
 	//==============================================================
@@ -194,6 +207,16 @@ public:
 										callback function
 	*/
 	oexRESULT CreateThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData );
+
+	/// Creates a thread lock
+	/**
+		\param [in] x_sName			-	Event name, NULL for unamed event.
+		\param [in] x_bInitialOwner	-	Non-zero if the calling thread
+										should take ownership before
+										the function returns.
+	*/
+	oexRESULT CreateLock( oexCSTR x_sName = oexNULL, oexBOOL x_bInitialOwner = oexFALSE );
+
 
 private:
 
@@ -284,11 +307,29 @@ public:
 	//==============================================================
 	/// Returns the os dependent handle for the resource
     t_HANDLE GetHandle()
-    {
-		// +++ Not sure if this should be here or not
-//		oexIGNORE oexVERIFY( c_Invalid != m_hHandle && eRtInvalid != m_eType );
-    	return m_hHandle;
+    {	return m_hHandle;
 	}
+
+	//==============================================================
+	// GetOwner()
+	//==============================================================
+	/// Returns the thread id of the resource owner
+	/**
+		For threads this is the creator.
+
+		For Mutexes and Locks, it is the thread that has it locked.
+
+		For Events, it is the thread that last signaled it
+
+	*/
+    oexINT GetOwner();
+
+	//==============================================================
+	// GetRi()
+	//==============================================================
+	/// Returns m_hHandle as SResourceInfo pointer
+	SResourceInfo* GetRi()
+	{	return (SResourceInfo*)m_hHandle; }
 
 	//==============================================================
 	// SetHandle()
@@ -336,5 +377,175 @@ private:
 
 	/// Auto Release
 	oexBOOL					m_bRelease;
+};
+
+
+//==================================================================
+// CLock
+//
+/// Generic thread lock
+//==================================================================
+class CLock
+{
+public:
+
+	/// Default constructor
+	CLock( oexCSTR x_pName = oexNULL )
+	{
+		m_lock.CreateLock( x_pName );
+	}
+
+	/// Casts to CResource handle
+	operator CResource&() { return m_lock; }
+
+private:
+
+	/// The actual lock
+	CResource	m_lock;
+};
+
+
+//==================================================================
+// CAutoLock
+//
+/// Use this to lock and automatically unlock CResource objects
+/**
+	Use this to lock and automatically unlock CResource objects
+*/
+//==================================================================
+class CAutoLock
+{
+
+public:
+
+	/// Default constructor
+	CAutoLock()
+    {
+        m_ptr = oexNULL;
+    }
+
+	//==============================================================
+	// CAutoLock()
+	//==============================================================
+	/// Constructor - Takes a CResource pointer
+	/**
+		\param [in] x_ptr		-	Pointer to CResource object
+		\param [in] x_uTimeout	-	Maximum time in milli-seconds to
+									wait for lock.
+	*/
+	CAutoLock( CResource *x_ptr, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	{   m_ptr = oexNULL;
+		if ( oexCHECK_PTR( x_ptr ) )
+            if ( !x_ptr->Wait( x_uTimeout ) )
+                m_ptr = x_ptr;
+    }
+
+	//==============================================================
+	// CAutoLock()
+	//==============================================================
+	/// Constructor - Takes a CResource reference
+	/**
+		\param [in] x_lock		-	Reference to CResource object
+		\param [in] x_uTimeout	-	Maximum time in milli-seconds to
+									wait for lock.
+	*/
+	CAutoLock( CResource &x_lock, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	{
+        m_ptr = oexNULL;
+        if ( !x_lock.Wait( x_uTimeout ) )
+            m_ptr = &x_lock;
+    }
+
+	/// Destructor - Unlocks the underlying CResource object
+	virtual ~CAutoLock()
+    {
+        Unlock();
+    }
+
+	//==============================================================
+	// IsLocked()
+	//==============================================================
+	/// Returns true if the local object is locked
+	oexBOOL IsLocked()
+    {
+		if ( !oexCHECK_PTR( m_ptr ) )
+			return oexFALSE;
+
+		return m_ptr->GetOwner() == oexGetCurrentThreadId();
+    }
+
+	//==============================================================
+	// Attach()
+	//==============================================================
+	/// Attaches to an existing CResource without locking
+	void Attach( CResource *x_ptr )
+    {
+        Unlock();
+        m_ptr = x_ptr;
+    }
+
+	//==============================================================
+	// Detach()
+	//==============================================================
+	/// Detaches from CResource without unlocking
+	void Detach()
+    {
+        m_ptr = oexNULL;
+    }
+
+	//==============================================================
+	// Lock()
+	//==============================================================
+	/// Locks a CResource object.  Returns true only if lock was achieved
+	/**
+		\param [in] x_ptr		-	Pointer to CResource object
+		\param [in] x_uTimeout	-	Maximum time in milli-seconds to
+									wait for lock.
+
+		\return Non-zero if lock was acquired.
+
+		\see
+	*/
+	oexBOOL Lock( CResource *x_ptr, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	{
+		// Do we already have the lock?
+        if ( x_ptr == m_ptr )
+            return oexTRUE;
+
+		// Unlock existing
+        Unlock();
+
+		if ( !oexCHECK_PTR( x_ptr ) )
+            return oexFALSE;
+
+		if ( !x_ptr->Wait( x_uTimeout ) )
+            m_ptr = x_ptr;
+
+		return IsLocked();
+	}
+
+	//==============================================================
+	// Unlock()
+	//==============================================================
+	/// Unlocks attached CResource object
+	/**
+		\return Always returns non-zero
+	*/
+	oexBOOL Unlock()
+	{
+		if ( !oexCHECK_PTR( m_ptr ) )
+            return oexTRUE;
+
+		m_ptr->Reset();
+        m_ptr = oexNULL;
+
+		return oexTRUE;
+	}
+
+private:
+
+	/// Pointer to CResource object
+	CResource		*m_ptr;
+
 };
 
