@@ -184,12 +184,20 @@ public:
 		SMsg() { pmapReply = NULL; }
 
 		/// Initializer
-		SMsg( std::tstring x_sMsg, t_Params *x_pmapParams, oex::os::CResource x_hReply, t_Params *x_pmapReply )
+		SMsg( const std::tstring x_sMsg, t_Params *x_pmapParams, oex::os::CResource x_hReply, t_Params *x_pmapReply )
 		{   sMsg = x_sMsg;
 			if ( x_pmapParams )
 				mapParams = *x_pmapParams;
 			hReply = x_hReply;
 			pmapReply = x_pmapReply;
+		}
+
+		// Copy constructor
+		SMsg( const SMsg &x_rMsg )
+		{   sMsg = x_rMsg.sMsg;
+			mapParams = x_rMsg.mapParams;
+			hReply = x_rMsg.hReply;
+			pmapReply = x_rMsg.pmapReply;
 		}
 
 		/// Command

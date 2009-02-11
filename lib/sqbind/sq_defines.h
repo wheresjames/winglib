@@ -37,16 +37,16 @@
 #ifdef SQBIND_SQPLUS
 #   include <sqplus.h>
 #   define SQBIND_REGISTER_CLASS_BEGIN( c )  				void __SqReg_##c( SquirrelVM *vm ) { \
-                                           					SqPlus::SQClassDef< c >( *vm, _T( #c ) )
+                                           					SqPlus::SQClassDef< c >( *vm, oexT( #c ) )
 #   define SQBIND_REGISTER_CLASS_END()       				; }
 #   define SQBIND_EXPORT( vm, c )            				__SqReg_##c( vm )
-#   define SQBIND_MEMBER_FUNCTION( c, f )    				.func ( &##c::##f,        _T( #f ) )
-#   define SQBIND_CONST( c, e )              				.enumInt ( (int)c::##e,   _T( #e ) )
-#   define SQBIND_GLOBALCONST( e )           				.enumInt ( (int)##e,	  _T( #e ) )
-#   define SQBIND_MEMBER_VARIABLE( c, v )    				.var ( &##c::##v,         _T( #v ) )
-#   define SQBIND_STATIC_FUNCTION( c, f )    				.staticFunc ( &##c::##f,  _T( #f ) )
+#   define SQBIND_MEMBER_FUNCTION( c, f )    				.func ( &c::f,        	  oexT( #f ) )
+#   define SQBIND_CONST( c, e )              				.enumInt ( (int)c::##e,   oexT( #e ) )
+#   define SQBIND_GLOBALCONST( e )           				.enumInt ( (int)##e,	  oexT( #e ) )
+#   define SQBIND_MEMBER_VARIABLE( c, v )    				.var ( &##c::##v,         oexT( #v ) )
+#   define SQBIND_STATIC_FUNCTION( c, f )    				.staticFunc ( &##c::##f,  oexT( #f ) )
 
-#   define SQBIND_CLASS_CONSTRUCTOR( n, c )					.staticFunc( &_sq_construct_##c_##n, _T( "constructor" ) )
+#   define SQBIND_CLASS_CONSTRUCTOR( n, c )					.staticFunc( &_sq_construct_##c_##n, oexT( "constructor" ) )
 #   define SQBIND_BEGIN_CLASS_CONSTRUCTOR( n, c, ... )		static int _sq_construct_##c_##n( __VA_ARGS__, HSQUIRRELVM v ) {
 #   define SQBIND_END_CLASS_CONSTRUCTOR( c, ... )			return SqPlus::PostConstruct< c >( v, new c( __VA_ARGS__ ), SqPlus::ReleaseClassPtr< c >::release ); }
 

@@ -123,14 +123,14 @@ public:
 	}
 
 	/// Copy constructor
-	CResource( CResource &x_r )
+	CResource( oexCONST CResource &x_r )
 	{	m_bRelease = oexFALSE;
 		m_hHandle = x_r.m_hHandle;
 		m_eType = x_r.m_eType;
 	}
 
 	// Assignment operator
-	CResource& operator =( CResource &x_r )
+	CResource& operator =( oexCONST CResource &x_r )
 	{	m_bRelease = oexFALSE;
 		m_hHandle = x_r.m_hHandle;
 		m_eType = x_r.m_eType;
