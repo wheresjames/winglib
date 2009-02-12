@@ -169,6 +169,8 @@
 
 // Threads
 #define oexGetCurrentThreadId		OEX_NAMESPACE::os::CSys::GetCurrentThreadId
+#define oexLock						OEX_NAMESPACE::os::CLock
+#define oexAutoLock					OEX_NAMESPACE::os::CAutoLock
 
 /// oexRETRY() - Retry something up to m times
 /**

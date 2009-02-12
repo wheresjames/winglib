@@ -78,7 +78,7 @@ extern "C" oex::oexRESULT SRV_Start( oex::oexCSTR x_pPath, oex::oexCSTR x_pComma
 
 			g_sqScriptThread.SetScript( sFile.Ptr(), oex::oexTRUE );
 
-			if ( !g_sqScriptThread.Start() )
+			if ( g_sqScriptThread.Start() )
 				oexERROR( 0, "Failed to start script thread" );
 
 			else

@@ -35,6 +35,14 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
+
+// +++ Not sure what to do here, it would seem that
+//     pthread_cond_timedwait() is subjet to malfunctioning if the
+//     system clock changes.  I may just rely on polling for now. :(
+#undef OEX_COND_EVENTS
+//#define OEX_COND_EVENTS
+
+
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
@@ -50,7 +58,8 @@ namespace OEX_NAMESPACE
 		struct SResourceInfo
 		{
 			CResource							cSync;
-			oexINT								nOwner;
+			oexUINT								uOwner;
+			oexUINT								uLastOwner;
 
 			pthread_mutex_t						hMutex;
 			pthread_cond_t						hCond;
@@ -78,7 +87,7 @@ static SResourceInfo* CreateRi()
 		return oexNULL;
 	} // end if
 
-	pRi->nOwner = 0;
+	pRi->uOwner = 0;
 	pRi->pData = 0;
 	pRi->bManualReset = 1;
 	pRi->bSignaled = 0;
@@ -97,7 +106,7 @@ static SResourceInfo* CreateRi()
 			if ( uWait > eWaitResolution )							\
 				uWait = eWaitResolution;							\
 			uTimeout -= uWait;										\
-			usleep( uWait );										\
+			oexMicroSleep( uWait );									\
 		}															\
 	} else bRet = ( st );											\
 	bRet;															\
@@ -137,7 +146,7 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 		case eRtThread :
 		{
 			// Usually the creator will be the destructor
-			if ( pRi->nOwner != oexGetCurrentThreadId() )
+			if ( pRi->uOwner != oexGetCurrentThreadId() )
 				oexWARNING( 0, "Thread not being destroyed by owner!" );
 
 			// Wait for thread to exit
@@ -161,18 +170,9 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 
 		case eRtMutex :
 
-//			do
-//			{
-				// Initiailze mutex object
-				nErr = pthread_mutex_destroy( &pRi->hMutex );
-
-//				if ( EBUSY == nErr )
-//					pthread_mutex_unlock( &pRi->hMutex );
-//				else
-					if ( nErr )
-						oexERROR( nErr, oexT( "pthread_mutex_destroy() failed : Error releasing mutex object" ) );
-
-//			} while ( EBUSY == nErr );
+			// Initiailze mutex object
+			if ( nErr = pthread_mutex_destroy( &pRi->hMutex ) )
+				oexERROR( nErr, oexT( "pthread_mutex_destroy() failed : Error releasing mutex object" ) );
 
 			break;
 
@@ -210,13 +210,13 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 	return nErr;
 }
 
-oexINT CResource::GetOwner()
+oexUINT CResource::GetOwner()
 {
 	SResourceInfo *pRi = (SResourceInfo*)m_hHandle;
 	if ( !oexCHECK_PTR( pRi ) )
 		return 0;
 
-	return pRi->nOwner;
+	return pRi->uOwner;
 }
 
 oexRESULT CResource::CreateEvent( oexCSTR x_sName, oexBOOL x_bManualReset, oexBOOL x_bInitialState )
@@ -237,9 +237,19 @@ oexRESULT CResource::CreateEvent( oexCSTR x_sName, oexBOOL x_bManualReset, oexBO
 	pRi->bManualReset = x_bManualReset;
 	pRi->bSignaled = x_bInitialState;
 
+#ifdef OEX_COND_EVENTS
+
 	// Create the mutex object
 	if ( oexINT nErr = pRi->cSync.CreateMutex() )
 	{	Destroy(); return oexERROR( nErr, oexT( "Create mutex failed" ) ); }
+
+#else
+
+	// Create the mutex object
+	if ( oexINT nErr = pRi->cSync.CreateLock() )
+	{	Destroy(); return oexERROR( nErr, oexT( "Create mutex failed" ) ); }
+
+#endif
 
 	// Create condition object
 	if ( oexINT nErr = pthread_cond_init( &pRi->hCond, 0 ) )
@@ -288,7 +298,11 @@ oexRESULT CResource::CreateThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData
 	// Save user data
 	pRi->pData = x_pData;
 	pRi->fnCallback = x_fnCallback;
-	pRi->nOwner = oexGetCurrentThreadId();
+	pRi->uOwner = oexGetCurrentThreadId();
+
+	// Create event object to indicate when thread has shut down properly
+	if ( oexINT nErr = pRi->cSync.CreateEvent() )
+	{	Destroy(); return oexERROR( nErr, oexT( "Create event failed" ) ); }
 
 	// Make thread joinable
 	pthread_attr_t attr;
@@ -323,8 +337,14 @@ oexPVOID CResource::ThreadProc( oexPVOID x_pData )
 	// Call user thread
 	oexPVOID pRet = pRi->fnCallback( pRi->pData );
 
+	// Signal that we're done
+	pRi->cSync.Signal();
+
 	// Quit thread
 	pthread_exit( pRet );
+
+	// ???
+	oexERROR( 0, "pthread_exit() returned!" );
 
 	return pRet;
 }
@@ -345,7 +365,7 @@ oexRESULT CResource::CreateLock( oexCSTR x_sName, oexBOOL x_bInitialOwner )
 
 	// Initialize structure
 	pRi->nCount = 0;
-	pRi->nOwner = 0;
+	pRi->uOwner = 0;
 
 	// Create the mutex object
 	if ( oexINT nErr = pRi->cSync.CreateMutex() )
@@ -381,18 +401,28 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 
 		case eRtThread :
 		{
-			if ( oexWAIT_UNTIL( x_uTimeout, pthread_kill( pRi->hThread, 0 ) ) )
+			// Check to see if the thread has signaled a safe shutdown
+			if ( 0 == pRi->cSync.Wait( 0 ) )
 				return waitSuccess;
 
+			// Wait on the thread handle
+			if ( oexWAIT_UNTIL( x_uTimeout, pthread_kill( pRi->hThread, 0 ) ) )
+				return waitSuccess;
 			return waitTimeout;
 
 		} break;
 
 		case eRtMutex :
 		{
+			// Have to give other threads polling time to grab the mutex
+			// Otherwise this one could just hog it all the time
+			oexUINT uId = oexGetCurrentThreadId();
+//			if ( pRi->uLastOwner == uId )
+//				oexMicroSleep( eWaitResolution );
+
 			oexINT nErr = 0;
 			if ( oexWAIT_UNTIL( x_uTimeout, !( nErr = pthread_mutex_trylock( &pRi->hMutex ) ) || EDEADLK == nErr ) )
-			{	pRi->nOwner = oexGetCurrentThreadId();
+			{	pRi->uOwner = uId;
 				return waitSuccess;
 			} // end if
 
@@ -408,6 +438,14 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 				return waitFailed;
 			} // end if
 
+#ifndef OEX_COND_EVENTS
+
+			// Just poll the signal
+			if ( oexWAIT_UNTIL( x_uTimeout, pRi->bSignaled ) )
+				return waitSuccess;
+			return waitTimeout;
+
+#else
 			CAutoLock al( pRi->cSync, x_uTimeout );
 			if ( !al.IsLocked() )
 				return waitTimeout;
@@ -436,16 +474,13 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 				if ( pRi->bSignaled && !pRi->bManualReset )
 					pRi->bSignaled = oexFALSE;
 
-				oexM();
-
 				// Return the signaled state
 				return bSignaled ? waitSuccess : waitFailed;
 
 			} // end if
 
-			oexM();
-
 			return waitTimeout;
+#endif
 
 		} break;
 
@@ -457,19 +492,41 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 				return waitFailed;
 			} // end if
 
-			// Lock the mutex
-			CAutoLock al( pRi->cSync, x_uTimeout );
-			if ( !al.IsLocked() )
-				return waitTimeout;
+			// Have to give other threads polling time to grab the mutex
+			// Otherwise this one could just hog it all the time
+			oexUINT uId = oexGetCurrentThreadId();
+			if ( pRi->uLastOwner == uId )
+				oexMicroSleep( eWaitResolution );
 
-			oexINT nId = oexGetCurrentThreadId();
-			if ( pRi->nOwner && pRi->nOwner != nId )
-				return waitTimeout;
+			while ( x_uTimeout )
+			{
+				{ // Lock scope
 
-			pRi->nOwner = nId;
-			pRi->nCount++;
+					// Lock the mutex
+					CAutoLock al( pRi->cSync, eWaitResolution );
+					if ( al.IsLocked() )
+					{
+						// Is it owned?
+						if ( !pRi->uOwner || pRi->uOwner == uId )
+						{	pRi->nCount++;
+							pRi->uOwner = uId;
+							return waitSuccess;
+						} // end if
 
-			return waitSuccess;
+					} // end if
+
+				} // end lock scope
+
+				// Wait a bit
+				oexUINT uDelay = x_uTimeout * 1000;
+				if ( uDelay > eWaitResolution )
+					uDelay = eWaitResolution;
+				x_uTimeout -= uDelay / 1000;
+				oexMicroSleep( uDelay );
+
+			} // end if
+
+			return waitTimeout;
 
 		} break;
 
@@ -529,10 +586,12 @@ oexRESULT CResource::Signal( oexUINT x_uTimeout )
 
 			// Save thread id on first signal
 			if ( !pRi->bSignaled )
-				pRi->nOwner = oexGetCurrentThreadId();
+				pRi->uOwner = oexGetCurrentThreadId();
 
 			// Set state to signaled
 			pRi->bSignaled = oexTRUE;
+
+#ifndef OEX_COND_EVENTS
 
 			// Unblock everyone if manual reset
 			if ( pRi->bManualReset )
@@ -543,6 +602,7 @@ oexRESULT CResource::Signal( oexUINT x_uTimeout )
 			// Unblock single waiting thread if auto
 			else if ( nErr = pthread_cond_signal( &pRi->hCond ) )
 				return oexERROR( nErr, oexT( "pthread_cond_signal() failed" ) );
+#endif
 
 		} break;
 
@@ -588,8 +648,8 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 			break;
 
 		case eRtMutex :
-			nErr = pthread_mutex_unlock( &pRi->hMutex );
-			pRi->nOwner = 0;
+			if ( !( nErr = pthread_mutex_unlock( &pRi->hMutex ) ) )
+				pRi->uOwner = 0;
 			break;
 
 		case eRtEvent :
@@ -606,7 +666,7 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 
 			// Set state to signaled
 			pRi->bSignaled = oexFALSE;
-			pRi->nOwner = 0;
+			pRi->uOwner = 0;
 
 		} break;
 
@@ -623,15 +683,16 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 			if ( !al.IsLocked() )
 				return waitTimeout;
 
-			oexINT nId = oexGetCurrentThreadId();
-			if ( pRi->nOwner && pRi->nOwner != nId )
+			if ( pRi->uOwner && pRi->uOwner != oexGetCurrentThreadId() )
 				return waitFailed;
 
 			if ( 0 >= pRi->nCount )
 				return waitFailed;
 
 			if ( 0 == --pRi->nCount )
-				pRi->nOwner = 0;
+			{	pRi->uLastOwner = pRi->uOwner;
+				pRi->uOwner = 0;
+			} // end if
 
 			return waitSuccess;
 

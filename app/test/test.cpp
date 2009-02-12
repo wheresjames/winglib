@@ -1635,10 +1635,7 @@ public:
 	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
 	{
 		if ( m_evInc.Wait( 1000 ) )
-		{
-			oexM();
 			return oex::oexFALSE;
-		} // end if
 
 		if ( m_evInc.Reset() )
 			return oex::oexFALSE;
@@ -1647,8 +1644,6 @@ public:
 
 		if ( m_evDone.Signal() )
 			return oex::oexFALSE;
-
-//		oexSleep( 1000 );
 
 		return oex::oexTRUE;
 	}
@@ -1659,8 +1654,41 @@ public:
 	oex::os::CResource	m_evDone;
 };
 
+class CMyThread3 : public oex::os::CThread
+{
+public:
+
+	CMyThread3( oexLock *x_lock, oex::oexINT *x_val, oex::oexINT *x_count, oex::oexINT x_id )
+	{	m_lock = x_lock; m_val = x_val; m_count = x_count; m_id = x_id; }
+
+	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
+	{
+		oexAutoLock al( m_lock );
+
+		m_count[ m_id ]++;
+		(*m_val)++;
+
+		if ( !al.IsLocked() )
+			return oex::oexFALSE;
+
+		oexSleep( 15 );
+
+		if ( 1 != *m_val )
+			return oex::oexFALSE;
+
+		(*m_val)--;
+		return oex::oexTRUE;
+	}
+
+	oexLock  		*m_lock;
+	oex::oexINT 	*m_val;
+	oex::oexINT		*m_count;
+	oex::oexINT		m_id;
+};
+
 oex::oexRESULT Test_Threads()
 {
+
 	CMyThread t;
 
 	if ( !oexVERIFY( 0 == t.Start() ) )
@@ -1685,7 +1713,7 @@ oex::oexRESULT Test_Threads()
 
 	CMyThread2 t2;
 
-	if ( !oexVERIFY( !t2.Start( 0, 0 ) ) )
+	if ( !oexVERIFY( 0 == t2.Start( 0, 0 ) ) )
 		return -10;
 
 	oex::CStr str;
@@ -1709,16 +1737,46 @@ oex::oexRESULT Test_Threads()
 
 	} // end while
 
-	if ( !oexVERIFY( 0 == t.Stop( 10000 ) ) )
+	if ( !oexVERIFY( 0 == t2.Stop( 10000 ) ) )
 		return -15;
 
 	if ( !oexVERIFY( str == oexT( "1,2,3,4,5,6,7,8,9,10," ) ) )
 		return -16;
 
-
 	// *** Lock test
 
+	oexLock lock;
+	oex::oexINT val = 0;
+	oex::oexINT count[ 4 ] = { 0, 0, 0, 0 };
 
+	CMyThread3 tl1( &lock, &val, count, 0 ),
+			   tl2( &lock, &val, count, 1 ),
+			   tl3( &lock, &val, count, 2 ),
+			   tl4( &lock, &val, count, 3 );
+
+	if ( !oexVERIFY( 0 == tl1.Start( 0, 0 )
+	                 && 0 == tl2.Start( 0, 0 )
+	                 && 0 == tl3.Start( 0, 0 )
+	                 && 0 == tl4.Start( 0, 0 ) ) )
+		return -20;
+
+	oexSleep( 1000 );
+
+	if ( !oexVERIFY( 0 == tl1.Stop()
+	                 && 0 == tl2.Stop()
+	                 && 0 == tl3.Stop()
+	                 && 0 == tl4.Stop() ) )
+	    return -21;
+
+
+	if ( !oexVERIFY( 0 == val ) )
+		return -22;
+
+	if ( !oexVERIFY( 10 < count[ 0 ]
+	                 && 10 < count[ 1 ]
+	                 && 10 < count[ 2 ]
+	                 && 10 < count[ 3 ] ) )
+	    return -23;
 
 	return oex::oexRES_OK;
 }

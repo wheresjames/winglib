@@ -97,7 +97,7 @@ public:
 	};
 
 	/// The wait resolution in micro-seconds
-	enum { eWaitResolution = 15000 };
+	enum { eWaitResolution = oexWAIT_RESOLUTION };
 
 	/// Thread callback function
 	typedef oexPVOID (*PFN_ThreadProc)( oexPVOID x_pData );
@@ -322,7 +322,7 @@ public:
 		For Events, it is the thread that last signaled it
 
 	*/
-    oexINT GetOwner();
+    oexUINT GetOwner();
 
 	//==============================================================
 	// GetRi()
@@ -370,13 +370,13 @@ private:
 private:
 
 	/// The resource handle
-	t_HANDLE				m_hHandle;
+	t_HANDLE					m_hHandle;
 
 	/// Resource type
-	E_RESOURCE_TYPE			m_eType;
+	E_RESOURCE_TYPE				m_eType;
 
 	/// Auto Release
-	oexBOOL					m_bRelease;
+	oexBOOL						m_bRelease;
 };
 
 
@@ -391,12 +391,16 @@ public:
 
 	/// Default constructor
 	CLock( oexCSTR x_pName = oexNULL )
-	{
-		m_lock.CreateLock( x_pName );
-	}
+	{	m_lock.CreateLock( x_pName ); }
 
-	/// Casts to CResource handle
+	/// Casts to CResource object
 	operator CResource&() { return m_lock; }
+
+	/// Returns a reference to the CResource object
+	CResource& Obj() { return m_lock; }
+
+	/// Returns a pointer to the CResource object
+	CResource* Ptr() { return &m_lock; }
 
 private:
 
@@ -424,6 +428,12 @@ public:
         m_ptr = oexNULL;
     }
 
+	/// Destructor - Unlocks the underlying CResource object
+	virtual ~CAutoLock()
+    {
+        Unlock();
+    }
+
 	//==============================================================
 	// CAutoLock()
 	//==============================================================
@@ -436,7 +446,7 @@ public:
 	CAutoLock( CResource *x_ptr, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
 	{   m_ptr = oexNULL;
 		if ( oexCHECK_PTR( x_ptr ) )
-            if ( !x_ptr->Wait( x_uTimeout ) )
+            if ( 0 == x_ptr->Wait( x_uTimeout ) )
                 m_ptr = x_ptr;
     }
 
@@ -450,28 +460,37 @@ public:
 									wait for lock.
 	*/
 	CAutoLock( CResource &x_lock, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
-	{
-        m_ptr = oexNULL;
-        if ( !x_lock.Wait( x_uTimeout ) )
+	{   m_ptr = oexNULL;
+        if ( 0 == x_lock.Wait( x_uTimeout ) )
             m_ptr = &x_lock;
     }
 
-	/// Destructor - Unlocks the underlying CResource object
-	virtual ~CAutoLock()
-    {
-        Unlock();
+	//==============================================================
+	// CAutoLock()
+	//==============================================================
+	/// Constructor - Takes a CResource reference
+	/**
+		\param [in] x_ptr		-	Pointer to CResource object
+		\param [in] x_uTimeout	-	Maximum time in milli-seconds to
+									wait for lock.
+	*/
+	CAutoLock( CLock *x_ptr, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	{   m_ptr = oexNULL;
+		if ( oexCHECK_PTR( x_ptr ) )
+            if ( 0 == x_ptr->Obj().Wait( x_uTimeout ) )
+                m_ptr = x_ptr->Ptr();
     }
 
 	//==============================================================
 	// IsLocked()
 	//==============================================================
 	/// Returns true if the local object is locked
-	oexBOOL IsLocked()
+	oexBOOL IsLocked( oexUINT x_uWho = oexGetCurrentThreadId() )
     {
 		if ( !oexCHECK_PTR( m_ptr ) )
 			return oexFALSE;
 
-		return m_ptr->GetOwner() == oexGetCurrentThreadId();
+		return m_ptr->GetOwner() == x_uWho;
     }
 
 	//==============================================================
@@ -515,13 +534,19 @@ public:
 		// Unlock existing
         Unlock();
 
+		// Ensure valid lock pointer
 		if ( !oexCHECK_PTR( x_ptr ) )
             return oexFALSE;
 
-		if ( !x_ptr->Wait( x_uTimeout ) )
-            m_ptr = x_ptr;
+		// Attempt to acquire the lock
+		if ( x_ptr->Wait( x_uTimeout ) )
+			return oexFALSE;
 
-		return IsLocked();
+		oexM();
+
+        m_ptr = x_ptr;
+
+		return oexTRUE;
 	}
 
 	//==============================================================
