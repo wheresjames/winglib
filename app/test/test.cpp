@@ -1592,7 +1592,6 @@ public:
 	CMyThread()
 	{
 		m_val = 0;
-		m_evDone.NewEvent();
 	}
 
 	virtual oex::oexBOOL InitThread( oex::oexPVOID x_pData )
@@ -1610,14 +1609,14 @@ public:
 		m_val++; // 3
 
 		m_evDone.Signal();
-		WaitStopSignal();
+		GetStopEvent().Wait();
 
 		m_val++; // 4
 
 		return oex::oexFALSE;
 	}
 
-	oex::os::CResource  m_evDone;
+	oexEvent			m_evDone;
 	oex::oexINT 		m_val;
 };
 
@@ -1628,21 +1627,16 @@ public:
 	CMyThread2()
 	{
 		m_val = 0;
-		m_evInc.NewEvent();
-		m_evDone.NewEvent();
 	}
 
 	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
-	{
-		if ( m_evInc.Wait( 1000 ) )
-			return oex::oexFALSE;
-
-		if ( m_evInc.Reset() )
+	{	
+		if ( 0 >= GetStopEvent().Wait( m_sigInc ) )
 			return oex::oexFALSE;
 
 		m_val++;
 
-		if ( m_evDone.Signal() )
+		if ( m_sigInc.Reset() )
 			return oex::oexFALSE;
 
 		return oex::oexTRUE;
@@ -1650,8 +1644,7 @@ public:
 
 	oex::oexINT 		m_val;
 
-	oex::os::CResource	m_evInc;
-	oex::os::CResource	m_evDone;
+	oexSignal			m_sigInc;
 };
 
 class CMyThread3 : public oex::CThread
@@ -1722,14 +1715,11 @@ oex::oexRESULT Test_Threads()
 		if ( !oexVERIFY( t2.IsRunning() ) )
 			return -11;
 
-		if ( !oexVERIFY( 0 == t2.m_evInc.Signal() ) )
+		if ( !oexVERIFY( 0 == t2.m_sigInc.Signal() ) )
 			return -12;
 
-		if ( !oexVERIFY( 0 == t2.m_evDone.Wait() ) )
+		if ( !oexVERIFY( 0 == t2.m_sigInc.GetResetEvent().Wait() ) )
 			return -13;
-
-		if ( !oexVERIFY( 0 == t2.m_evDone.Reset() ) )
-			return -14;
 
 		str << t2.m_val << oexT( "," );
 

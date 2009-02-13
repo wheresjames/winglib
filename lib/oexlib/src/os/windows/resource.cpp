@@ -444,3 +444,45 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 
 	return -1;
 }
+
+oexINT CResource::WaitMultiple( oexINT x_nCount, CResource **x_pResources, oexUINT x_uTimeout, oexBOOL x_nMin )
+{
+	oexINT nNumHandles = 0;
+	HANDLE hHandles[ MAXIMUM_WAIT_OBJECTS ];
+	oexINT nRealIndex[ MAXIMUM_WAIT_OBJECTS ];
+
+	if ( x_nCount > MAXIMUM_WAIT_OBJECTS )
+		oexWARNING( 0, "Number of handles specified is beyond system capabilities!!!" );
+
+	// Loop through the handles
+	for( oexINT i = 0; i < x_nCount && nNumHandles < MAXIMUM_WAIT_OBJECTS; i++ )
+	{
+		if ( !x_pResources[ i ]->IsValid() )
+			oexWARNING( 0, "Invalid handle specified to WaitMultiple()" );
+		else
+		{
+			SResourceInfo *pRi = (SResourceInfo*)x_pResources[ i ]->GetHandle();
+			if ( !oexCHECK_PTR( pRi ) )
+				oexERROR( 0, "Invalid data pointer" );
+
+			else
+				hHandles[ nNumHandles ] = pRi->hHandle, nRealIndex[ nNumHandles++ ] = i;
+
+		} // end else
+
+	} // end for
+
+	// Wait for signal or timeout
+	oexINT nRet = WaitForMultipleObjects( nNumHandles, hHandles, 0 != x_nMin, x_uTimeout );
+
+	// Error?
+	if ( 0 > nRet )
+		return nRet;
+
+	// Index out of range?
+	else if ( nRet >= nNumHandles )
+		return -1;
+
+	// Return the index of the signaled object
+	return nRealIndex[ nRet ];
+}

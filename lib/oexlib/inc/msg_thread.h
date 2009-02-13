@@ -41,7 +41,7 @@
 /**
 */
 //==================================================================
-class CMsgThread : public CMsgObject, public os::CThread
+class CMsgThread : public CMsgObject, public CThread
 {
 public:
 

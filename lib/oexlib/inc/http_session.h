@@ -127,6 +127,8 @@ public:
 		HTTP_VERSION_NOT_SUPPORTED = 505,
 	};
 
+	/// Server callback
+	typedef oexINT (*PFN_OnProcessRequest)( THttpSession< T_PORT > *x_pSesion );
 
 public:
 
@@ -342,6 +344,7 @@ public:
 
 		// +++ Add MIME types
 		if ( sExt == "jpg" ) return "image/jpeg";
+		else if ( sExt == "png" ) return "image/png";
 		else if ( sExt == "gif" ) return "image/gif";
 		else if ( sExt == "htm" ) return "text/html";
 		else if ( sExt == "html" ) return "text/html";
@@ -558,6 +561,4 @@ private:
 	/// Receive buffer
     CCircBuf			m_rx;
 
-    /// Transmit buffer
-//    CCircBuf			m_tx;
 };

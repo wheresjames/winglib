@@ -179,7 +179,7 @@ public:
 		return	error code for the release operation.   Zero if
 				success, -1 if the operation could not be performed.
 	*/
-	oexRESULT Destroy( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT, oexBOOL x_bForce = oexTRUE );
+	virtual oexRESULT Destroy( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT, oexBOOL x_bForce = oexTRUE );
 
 	/// Creates a mutex object
 	/**
@@ -242,7 +242,7 @@ public:
 		\return Returns zero if success, otherwise an error code is
 				returned.
 	*/
-	oexRESULT Wait( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT );
+	virtual oexRESULT Wait( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT );
 
 	//==============================================================
 	// Signal()
@@ -256,7 +256,7 @@ public:
 		\return Returns zero if success, otherwise an error code is
 				returned.
 	*/
-	oexRESULT Signal( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT );
+	virtual oexRESULT Signal( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT );
 
 	//==============================================================
 	// Reset()
@@ -270,7 +270,7 @@ public:
 		\return Returns zero if success, otherwise an error code is
 				returned.
 	*/
-	oexRESULT Reset( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT );
+	virtual oexRESULT Reset( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT );
 
 	//==============================================================
 	// vInfinite()
@@ -359,6 +359,91 @@ public:
     	m_eType = x_eType;
 	}
 
+public:
+
+	//==============================================================
+	// WaitMultiple()
+	//==============================================================
+	/// Waits for multiple resources to become signaled
+	/**
+		\param [in] x_nCount		-	Number of CResource objects in 
+										x_pResources
+		\param [in] x_pResources	-	Array of CResource object pointers
+		\param [in] x_uTimeout 		-	Maximum time to wait for signal
+		\param [in] x_nMin			-	Minimum number of events to become
+										signaled.  This only works on posix
+										systems.  On Windows, if x_nMin is
+										zero, WaitMultiple() will return when
+										ANY of the events become signaled,
+										if x_nMin is non-zero, it will only
+										return once ALL events become signaled.
+
+		This is a consolidated wait function.  It's exact characteristics
+		depend on the type of object being waited on.
+
+		\return Returns negative number if failure, otherwise, returns the index of a
+				signaled object.
+	*/
+	static oexINT WaitMultiple( oexINT x_nCount, CResource **x_pResources,
+			   	  			    oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT, oexBOOL x_nMin = oexFALSE );
+
+
+	/// Waits for the specified events or the stop signal
+	oexINT Wait( CResource& rRes1, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	{	CResource* p[] = { this, &rRes1 };
+		return CResource::WaitMultiple( 2, p, x_uTimeout );
+	}
+
+	/// Waits for the specified events or the stop signal
+	oexINT Wait( CResource& rRes1, CResource& rRes2, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	{	CResource* p[] = { this, &rRes1, &rRes2 };
+		return CResource::WaitMultiple( 3, p, x_uTimeout );
+	}
+
+	/// Waits for the specified events or the stop signal
+	oexINT Wait( CResource& rRes1, CResource& rRes2, CResource& rRes3, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	{	CResource* p[] = { this, &rRes1, &rRes2, &rRes3 };
+		return CResource::WaitMultiple( 4, p, x_uTimeout );
+	}
+
+	/// Waits for the specified events or the stop signal
+	oexINT Wait( CResource& rRes1, CResource& rRes2, CResource& rRes3, CResource& rRes4, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	{	CResource* p[] = { this, &rRes1, &rRes2, &rRes3, &rRes4 };
+		return CResource::WaitMultiple( 5, p, x_uTimeout );
+	}
+
+	/// Waits for the specified events or the stop signal
+	oexINT Wait( CResource& rRes1, CResource& rRes2, CResource& rRes3, CResource& rRes4, 
+				 CResource& rRes5,
+					oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	{	CResource* p[] = { this, &rRes1, &rRes2, &rRes3, &rRes4, &rRes5 };
+		return CResource::WaitMultiple( 6, p, x_uTimeout );
+	}
+
+	/// Waits for the specified events or the stop signal
+	oexINT Wait( CResource& rRes1, CResource& rRes2, CResource& rRes3, CResource& rRes4, 
+				 CResource& rRes5, CResource &rRes6,
+					oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	{	CResource* p[] = { this, &rRes1, &rRes2, &rRes3, &rRes4, &rRes5, &rRes6 };
+		return CResource::WaitMultiple( 7, p, x_uTimeout );
+	}
+
+	/// Waits for the specified events or the stop signal
+	oexINT Wait( CResource& rRes1, CResource& rRes2, CResource& rRes3, CResource& rRes4, 
+				 CResource& rRes5, CResource &rRes6, CResource& rRes7,
+					oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	{	CResource* p[] = { this, &rRes1, &rRes2, &rRes3, &rRes4, &rRes5, &rRes6, &rRes7 };
+		return CResource::WaitMultiple( 8, p, x_uTimeout );
+	}
+
+	/// Waits for the specified events or the stop signal
+	oexINT Wait( CResource& rRes1, CResource& rRes2, CResource& rRes3, CResource& rRes4, 
+				 CResource& rRes5, CResource &rRes6, CResource& rRes7, CResource& rRes8,
+					oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	{	CResource* p[] = { this, &rRes1, &rRes2, &rRes3, &rRes4, &rRes5, &rRes6, &rRes7, &rRes8 };
+		return CResource::WaitMultiple( 9, p, x_uTimeout );
+	}
+
 private:
 
 	/// Invalid event handle value
@@ -379,264 +464,4 @@ private:
 	oexBOOL						m_bRelease;
 };
 
-
-//==================================================================
-// CLock
-//
-/// Generic thread lock
-//==================================================================
-class CLock
-{
-public:
-
-	/// Default constructor
-	CLock( oexCSTR x_pName = oexNULL )
-	{	m_lock.NewLock( x_pName ); }
-
-	/// Create lock
-	oexRESULT Create( oexCSTR x_pName = oexNULL )
-	{	return m_lock.NewLock( x_pName ); }
-
-	/// Destroys the event
-	void Destroy() { m_lock.Destroy(); }
-
-	/// Casts to CResource object
-	operator CResource&() { return m_lock; }
-
-	/// Returns a reference to the CResource object
-	CResource& Obj() { return m_lock; }
-
-	/// Returns a pointer to the CResource object
-	CResource* Ptr() { return &m_lock; }
-
-private:
-
-	/// The actual lock
-	CResource	m_lock;
-};
-
-
-//==================================================================
-// CScopeLock
-//
-/// Use this to lock and automatically unlock CResource objects
-/**
-	Use this to lock and automatically unlock CResource objects
-*/
-//==================================================================
-class CScopeLock
-{
-
-public:
-
-	/// Default constructor
-	CScopeLock()
-    {
-        m_ptr = oexNULL;
-    }
-
-	/// Destructor - Unlocks the underlying CResource object
-	virtual ~CScopeLock()
-    {
-        Unlock();
-    }
-
-	//==============================================================
-	// CScopeLock()
-	//==============================================================
-	/// Constructor - Takes a CResource pointer
-	/**
-		\param [in] x_ptr		-	Pointer to CResource object
-		\param [in] x_uTimeout	-	Maximum time in milli-seconds to
-									wait for lock.
-	*/
-	CScopeLock( CResource *x_ptr, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
-	{   m_ptr = oexNULL;
-		if ( oexCHECK_PTR( x_ptr ) )
-            if ( 0 == x_ptr->Wait( x_uTimeout ) )
-                m_ptr = x_ptr;
-    }
-
-	//==============================================================
-	// CScopeLock()
-	//==============================================================
-	/// Constructor - Takes a CResource reference
-	/**
-		\param [in] x_lock		-	Reference to CResource object
-		\param [in] x_uTimeout	-	Maximum time in milli-seconds to
-									wait for lock.
-	*/
-	CScopeLock( CResource &x_lock, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
-	{   m_ptr = oexNULL;
-        if ( 0 == x_lock.Wait( x_uTimeout ) )
-            m_ptr = &x_lock;
-    }
-
-	//==============================================================
-	// CScopeLock()
-	//==============================================================
-	/// Constructor - Takes a CResource reference
-	/**
-		\param [in] x_ptr		-	Pointer to CResource object
-		\param [in] x_uTimeout	-	Maximum time in milli-seconds to
-									wait for lock.
-	*/
-	CScopeLock( CLock *x_ptr, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
-	{   m_ptr = oexNULL;
-		if ( oexCHECK_PTR( x_ptr ) )
-            if ( 0 == x_ptr->Obj().Wait( x_uTimeout ) )
-                m_ptr = x_ptr->Ptr();
-    }
-
-	//==============================================================
-	// CScopeLock()
-	//==============================================================
-	/// Constructor - Takes a CResource reference
-	/**
-		\param [in] x_lock		-	Reference to CLock object
-		\param [in] x_uTimeout	-	Maximum time in milli-seconds to
-									wait for lock.
-	*/
-	CScopeLock( CLock &x_lock, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
-	{   m_ptr = oexNULL;
-        if ( 0 == x_lock.Obj().Wait( x_uTimeout ) )
-            m_ptr = x_lock.Ptr();
-    }
-
-	//==============================================================
-	// IsLocked()
-	//==============================================================
-	/// Returns true if the local object is locked
-	oexBOOL IsLocked( oexUINT x_uWho = oexGetCurrentThreadId() )
-    {
-		if ( !oexCHECK_PTR( m_ptr ) )
-			return oexFALSE;
-
-		return m_ptr->GetOwner() == x_uWho;
-    }
-
-	//==============================================================
-	// Attach()
-	//==============================================================
-	/// Attaches to an existing CResource without locking
-	void Attach( CResource *x_ptr )
-    {
-        Unlock();
-        m_ptr = x_ptr;
-    }
-
-	//==============================================================
-	// Detach()
-	//==============================================================
-	/// Detaches from CResource without unlocking
-	void Detach()
-    {
-        m_ptr = oexNULL;
-    }
-
-	//==============================================================
-	// Lock()
-	//==============================================================
-	/// Locks a CResource object.  Returns true only if lock was achieved
-	/**
-		\param [in] x_ptr		-	Pointer to CResource object
-		\param [in] x_uTimeout	-	Maximum time in milli-seconds to
-									wait for lock.
-
-		\return Non-zero if lock was acquired.
-
-		\see
-	*/
-	oexBOOL Lock( CResource *x_ptr, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
-	{
-		// Do we already have the lock?
-        if ( x_ptr == m_ptr )
-            return oexTRUE;
-
-		// Unlock existing
-        Unlock();
-
-		// Ensure valid lock pointer
-		if ( !oexCHECK_PTR( x_ptr ) )
-            return oexFALSE;
-
-		// Attempt to acquire the lock
-		if ( x_ptr->Wait( x_uTimeout ) )
-			return oexFALSE;
-
-		oexM();
-
-        m_ptr = x_ptr;
-
-		return oexTRUE;
-	}
-
-	//==============================================================
-	// Unlock()
-	//==============================================================
-	/// Unlocks attached CResource object
-	/**
-		\return Always returns non-zero
-	*/
-	oexBOOL Unlock()
-	{
-		if ( !oexCHECK_PTR( m_ptr ) )
-            return oexTRUE;
-
-		m_ptr->Reset();
-        m_ptr = oexNULL;
-
-		return oexTRUE;
-	}
-
-private:
-
-	/// Pointer to CResource object
-	CResource		*m_ptr;
-
-};
-
-//==================================================================
-// CEvent
-//
-/// Thread event
-//==================================================================
-class CEvent
-{
-public:
-
-	/// Default constructor
-	CEvent( oexCSTR x_pName = oexNULL )
-	{	m_event.NewEvent( x_pName ); }
-
-	/// Create lock
-	oexRESULT Create( oexCSTR x_pName = oexNULL )
-	{	return m_event.NewEvent( x_pName ); }
-
-	/// Destroys the event
-	void Destroy() { m_event.Destroy(); }
-
-	/// Casts to CResource object
-	operator CResource&() { return m_event; }
-
-	/// Returns a reference to the CResource object
-	CResource& Obj() { return m_event; }
-
-	/// Returns a pointer to the CResource object
-	CResource* Ptr() { return &m_event; }
-
-	/// Signals the event
-	oexBOOL Signal() { return 0 == m_event.Signal(); }
-
-	/// Resets the event
-	oexBOOL Reset() { return 0 == m_event.Reset(); }
-
-	/// Waits for the event to become signaled
-	oexBOOL Wait( oexUINT x_uTimeout ) { return 0 == m_event.Wait( x_uTimeout ); }
-
-private:
-
-	/// The actual lock
-	CResource	m_event;
-};
 

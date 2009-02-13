@@ -916,14 +916,14 @@ public:
 	// GetDataReadyHandle()
 	//==============================================================
 	/// Returns the data ready event handle
-    os::CEvent& GetDataReadyHandle()
+    oexEvent& GetDataReadyHandle()
     {   return m_evDataReady; }
 
 	//==============================================================
 	// GetEmptyHandle()
 	//==============================================================
 	/// Returns the buffer empty event handle
-    os::CEvent& GetEmptyHandle()
+    oexEvent& GetEmptyHandle()
     {   return m_evEmpty; }
 
 	//==============================================================
@@ -1034,10 +1034,10 @@ private:
 	oexLock					m_lock;
 
 	/// Data ready event
-	os::CEvent				m_evDataReady;
+	oexEvent				m_evDataReady;
 
 	/// Data ready event
-    os::CEvent				m_evEmpty;
+    oexEvent				m_evEmpty;
 
 	/// Non-zero if buffer is empty
 	oexBOOL					m_bEmpty;

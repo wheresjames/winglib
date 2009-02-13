@@ -706,3 +706,4 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 
 	return nErr;
 }
+

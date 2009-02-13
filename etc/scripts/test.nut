@@ -8,7 +8,7 @@ function _init()
 	_self.alert( tc.Add( 2, 2 ).tostring() );
 
 	// Spawn child
-	_self.spawn( "child_0", "_self.alert( \"This is another thread\"", 0 );
+	_self.spawn( "child_0", "_self.alert( \"This is another thread\" );", 0 );
 
 	// Spawn child
 //	_self.spawn( "child_1", "function ShowMsg( msg ) { _self.execute1( \"..\", \"Talk\", msg ); }", 0 );
@@ -20,9 +20,9 @@ function _init()
 
 function _idle()
 {
-	_self.alert( "Executing" );
+	_self.alert( "Waiting..." );
 
-	return 0;
+	return 1;
 }
 
 function Talk( msg )

@@ -467,7 +467,6 @@ namespace os
 #include "inc/file_mapping.h"
 #include "inc/memory.h"
 #include "inc/thread.h"
-//#include "inc/thread_safe.h"
 #include "inc/str.h"
 #include "inc/auto_str.h"
 #include "inc/dib.h"
@@ -479,7 +478,7 @@ namespace os
 #include "inc/md5.h"
 
 // +++ Get stack tracing working sometime
-//#include "src/stack_trace.h"
+//#include "inc/stack_trace.h"
 
 //------------------------------------------------------------------
 // Dependent OS Specific
@@ -514,6 +513,7 @@ namespace os
 #include "inc/image.h"
 
 #include "inc/http_session.h"
+#include "inc/http_server.h"
 
 //#include "inc/dispatch.h"
 

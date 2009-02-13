@@ -36,8 +36,8 @@
 
 #ifdef SQBIND_SQPLUS
 #   include <sqplus.h>
-#   define SQBIND_REGISTER_CLASS_BEGIN( c )  				void __SqReg_##c( SquirrelVM *vm ) { \
-                                           					SqPlus::SQClassDef< c >( *vm, oexT( #c ) )
+#   define SQBIND_REGISTER_CLASS_BEGIN( c, s ) 				void __SqReg_##c( SquirrelVM *vm ) { \
+                                           					SqPlus::SQClassDef< c >( *vm, oexT( s ) )
 #   define SQBIND_REGISTER_CLASS_END()       				; }
 #   define SQBIND_EXPORT( vm, c )            				__SqReg_##c( vm )
 #   define SQBIND_MEMBER_FUNCTION( c, f )    				.func ( &c::f,        	  oexT( #f ) )

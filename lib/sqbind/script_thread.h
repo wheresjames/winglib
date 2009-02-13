@@ -77,7 +77,7 @@ public:
 
 protected:
 
-    /// Initialize Irrlicht engine
+    /// Initialize Squirrel engine
 	virtual oex::oexBOOL InitThread( oex::oexPVOID x_pData )
 	{
 		// +++ Ensure script
@@ -125,7 +125,7 @@ protected:
 		return 0 == nRet;
 	}
 
-    /// Shutdown Irrlicht engine
+    /// Shutdown Squirrel engine
 	virtual oex::oexINT EndThread( oex::oexPVOID x_pData )
 	{
 		// Lose child scripts
@@ -162,7 +162,8 @@ protected:
 		while ( m_lstScript.end() != it )
 		{
 			if ( it->second )
-			{	OexAllocDestruct( it->second );
+			{	it->second->Stop();
+				OexAllocDestruct( it->second );
 				it->second = oexNULL;
 			} // end if
 
