@@ -4,8 +4,8 @@ function _init()
 	_self.alert( "sqmod_test_d.dll" );
 	_self.load_module( "sqmod_test_d.dll", 0 );
 
-	local tc = CTestClass();
-	_self.alert( tc.Add( 2, 2 ).tostring() );
+//	local tc = CTestClass();
+//	_self.alert( tc.Add( 2, 2 ).tostring() );
 
 	// Spawn child
 	_self.spawn( "child_0", "_self.alert( \"This is another thread\" );", 0 );
