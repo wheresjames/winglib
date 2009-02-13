@@ -50,6 +50,10 @@ const CResource::t_HANDLE CResource::c_Invalid = (oexPVOID)0;
 
 const oexUINT CResource::c_Infinite = 0xffffffff;
 
+// This is currently the limit in Windows.   Tho there is no real
+// limit in Posix, We want things to be cross platform right? ;)
+#define MAXIMUM_WAIT_OBJECTS	64
+
 namespace OEX_NAMESPACE
 {
 	namespace os
@@ -498,12 +502,12 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 			if ( pRi->uLastOwner == uId )
 				oexMicroSleep( eWaitResolution );
 
-			while ( x_uTimeout )
+			while ( x_uTimeout > eWaitResolution )
 			{
 				{ // Lock scope
 
 					// Lock the mutex
-					CAutoLock al( pRi->cSync, eWaitResolution );
+					oexAutoLock al( pRi->cSync, eWaitResolution );
 					if ( al.IsLocked() )
 					{
 						// Is it owned?
@@ -580,7 +584,7 @@ oexRESULT CResource::Signal( oexUINT x_uTimeout )
 
 		case eRtEvent :
 		{
-			CAutoLock al( pRi->cSync, x_uTimeout );
+			oexAutoLock al( pRi->cSync, x_uTimeout );
 			if ( !al.IsLocked() )
 				return oexERROR( nErr, oexT( "Unable to acquire lock to signal event object" ) );
 
@@ -660,7 +664,7 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 				return waitFailed;
 			} // end if
 
-			CAutoLock al( pRi->cSync, x_uTimeout );
+			oexAutoLock al( pRi->cSync, x_uTimeout );
 			if ( !al.IsLocked() )
 				return oexERROR( nErr, oexT( "Unable to acquire lock to signal event object" ) );
 
@@ -679,7 +683,7 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 			} // end if
 
 			// Lock the mutex
-			CAutoLock al( pRi->cSync, x_uTimeout );
+			oexAutoLock al( pRi->cSync, x_uTimeout );
 			if ( !al.IsLocked() )
 				return waitTimeout;
 
@@ -707,3 +711,55 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 	return nErr;
 }
 
+oexINT CResource::WaitMultiple( oexINT x_nCount, CResource **x_pResources, oexUINT x_uTimeout, oexBOOL x_nMin )
+{
+	oexINT nNumHandles = 0;
+	CResource *pRes[ MAXIMUM_WAIT_OBJECTS ];
+	oexINT nRealIndex[ MAXIMUM_WAIT_OBJECTS ];
+	oexINT nSignaled[ MAXIMUM_WAIT_OBJECTS ];
+	oexZeroMemory( nSignaled, sizeof( nSignaled ) );
+
+	if ( x_nCount > MAXIMUM_WAIT_OBJECTS )
+		oexWARNING( 0, "Number of handles specified is beyond MS Windows system capabilities!!!" );
+
+	// Loop through the handles
+	for( oexINT i = 0; i < x_nCount && nNumHandles < MAXIMUM_WAIT_OBJECTS; i++ )
+	{
+		if ( !x_pResources[ i ]->IsValid() )
+			oexWARNING( 0, "Invalid handle specified to WaitMultiple()" );
+		else
+		{
+			SResourceInfo *pRi = (SResourceInfo*)x_pResources[ i ]->GetHandle();
+			if ( !oexCHECK_PTR( pRi ) )
+				oexERROR( 0, "Invalid data pointer" );
+
+			else
+				pRes[ nNumHandles ] = x_pResources[ i ], nRealIndex[ nNumHandles++ ] = i;
+
+		} // end else
+
+	} // end for
+
+	oexINT nNumSignaled = 0;
+	while ( x_uTimeout > eWaitResolution )
+	{
+		// See who's signaled
+		for ( oexINT i = 0; i < nNumHandles; i++ )
+			if ( !nSignaled[ i ] )
+				if ( waitSuccess == pRes[ i ]->Wait( 0 ) )
+				{	nSignaled[ i ]++;
+					if ( ++nNumSignaled >= x_nMin )
+						return nRealIndex[ i ];
+				} // end if
+
+		// Wait a bit
+		oexUINT uDelay = x_uTimeout * 1000;
+		if ( uDelay > eWaitResolution )
+			uDelay = eWaitResolution;
+		x_uTimeout -= uDelay / 1000;
+		oexMicroSleep( uDelay );
+
+	} // end while
+
+	return waitTimeout;
+}

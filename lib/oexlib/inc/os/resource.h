@@ -366,7 +366,7 @@ public:
 	//==============================================================
 	/// Waits for multiple resources to become signaled
 	/**
-		\param [in] x_nCount		-	Number of CResource objects in 
+		\param [in] x_nCount		-	Number of CResource objects in
 										x_pResources
 		\param [in] x_pResources	-	Array of CResource object pointers
 		\param [in] x_uTimeout 		-	Maximum time to wait for signal
@@ -377,6 +377,9 @@ public:
 										ANY of the events become signaled,
 										if x_nMin is non-zero, it will only
 										return once ALL events become signaled.
+										Note: To ensure the same result on all
+										platforms, set x_nMin to zero for ANY
+										and set to x_nCount for ALL.
 
 		This is a consolidated wait function.  It's exact characteristics
 		depend on the type of object being waited on.
@@ -413,7 +416,7 @@ public:
 	}
 
 	/// Waits for the specified events or the stop signal
-	oexINT Wait( CResource& rRes1, CResource& rRes2, CResource& rRes3, CResource& rRes4, 
+	oexINT Wait( CResource& rRes1, CResource& rRes2, CResource& rRes3, CResource& rRes4,
 				 CResource& rRes5,
 					oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
 	{	CResource* p[] = { this, &rRes1, &rRes2, &rRes3, &rRes4, &rRes5 };
@@ -421,7 +424,7 @@ public:
 	}
 
 	/// Waits for the specified events or the stop signal
-	oexINT Wait( CResource& rRes1, CResource& rRes2, CResource& rRes3, CResource& rRes4, 
+	oexINT Wait( CResource& rRes1, CResource& rRes2, CResource& rRes3, CResource& rRes4,
 				 CResource& rRes5, CResource &rRes6,
 					oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
 	{	CResource* p[] = { this, &rRes1, &rRes2, &rRes3, &rRes4, &rRes5, &rRes6 };
@@ -429,7 +432,7 @@ public:
 	}
 
 	/// Waits for the specified events or the stop signal
-	oexINT Wait( CResource& rRes1, CResource& rRes2, CResource& rRes3, CResource& rRes4, 
+	oexINT Wait( CResource& rRes1, CResource& rRes2, CResource& rRes3, CResource& rRes4,
 				 CResource& rRes5, CResource &rRes6, CResource& rRes7,
 					oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
 	{	CResource* p[] = { this, &rRes1, &rRes2, &rRes3, &rRes4, &rRes5, &rRes6, &rRes7 };
@@ -437,7 +440,7 @@ public:
 	}
 
 	/// Waits for the specified events or the stop signal
-	oexINT Wait( CResource& rRes1, CResource& rRes2, CResource& rRes3, CResource& rRes4, 
+	oexINT Wait( CResource& rRes1, CResource& rRes2, CResource& rRes3, CResource& rRes4,
 				 CResource& rRes5, CResource &rRes6, CResource& rRes7, CResource& rRes8,
 					oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
 	{	CResource* p[] = { this, &rRes1, &rRes2, &rRes3, &rRes4, &rRes5, &rRes6, &rRes7, &rRes8 };

@@ -84,7 +84,7 @@ public:
 			while ( !session.GetTransactions()
 					&& port.WaitEvent( oex::os::CIpSocket::eReadEvent ) )
 				session.OnRead( 0 );
-				  
+
 			// Drop the connection
 			port.Destroy();
 
@@ -97,6 +97,9 @@ public:
 		/// Session port
 		T_PORT			port;
 	};
+
+	/// Session list type
+	typedef TList< CSessionThread > t_LstSession;
 
 public:
 
@@ -123,7 +126,7 @@ public:
 
 		return 0 == CThread::Start();
 	}
-	
+
 	virtual oexBOOL InitThread( oex::oexPVOID x_pData )
 	{
 	oexLM();
@@ -156,14 +159,14 @@ public:
 		if ( m_server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, 1000 ) )
 		{
 			// Add a new session
-			TList< CSessionThread >::iterator it = m_lstSessions.Append();
+			typename THttpServer::t_LstSession::iterator it = m_lstSessions.Append();
 
 			// Attempt to connect session
-			if ( !m_server.Accept( it->port ) 
+			if ( !m_server.Accept( it->port )
 				 || !it->port.WaitEvent( oex::os::CIpSocket::eConnectEvent ) )
 			{
 				m_lstSessions.Erase( it );
-				
+
 				if ( m_fnOnServerEvent )
 					m_fnOnServerEvent( m_pData, eSeAccept, -1, this );
 
@@ -183,12 +186,13 @@ public:
 
 			} // end else
 
-		} // end if		
+		} // end if
 
 		// Check for expired connections
-		for ( TList< CSessionThread >::iterator it; m_lstSessions.Next( it ); )
+		for ( typename t_LstSession::iterator it; m_lstSessions.Next( it ); )
 			if ( !it->IsRunning() /* || !it->port.IsConnected() */ )
 				it = m_lstSessions.Erase( it );
+
 
 		return oexTRUE;
 	}
@@ -209,7 +213,7 @@ public:
 	}
 
 private:
-	
+
 	/// The TCP port to listen
 	oexINT						m_nPort;
 
@@ -217,7 +221,7 @@ private:
 	T_PORT						m_server;
 
 	/// List of session objects
-	TList< CSessionThread >		m_lstSessions;
+	t_LstSession				m_lstSessions;
 
 	/// Data passed to m_fnOnServerEvent
 	oexPVOID					m_pData;

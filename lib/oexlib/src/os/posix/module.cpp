@@ -89,12 +89,8 @@ oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 	// Load the module
 	_oexTRY
 	{
-		oexLM();
-
 		// Attempt to open the dynamic library
 		m_hModule = dlopen( x_pFile, x_nFlags );
-
-		oexLM();
 
 	} // end try
 	_oexCATCH( ... )

@@ -1630,7 +1630,7 @@ public:
 	}
 
 	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
-	{	
+	{
 		if ( 0 >= GetStopEvent().Wait( m_sigInc ) )
 			return oex::oexFALSE;
 
