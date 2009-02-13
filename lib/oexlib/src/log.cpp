@@ -75,6 +75,7 @@ oexBOOL CLog::Open( oexCSTR x_pPath )
 
 	// Show log file location
 	oexPrintf( oexStrToMbPtr( x_pPath ) );
+	oexPrintf( oexNL );
 
 #endif
 
@@ -108,6 +109,7 @@ oexBOOL CLog::Resume( oexCSTR x_pPath )
 
 	// Show log file location
 	oexPrintf( oexStrToMbPtr( x_pPath ) );
+	oexPrintf( oexNL );
 
 #endif
 

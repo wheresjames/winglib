@@ -260,7 +260,7 @@ public:
 		\see
 	*/
 	oexBOOL AdvanceReadPtr( oexLONG x_lStep )
-	{   CTlLocalLock ll( &m_lock );
+	{   oexAutoLock ll( &m_lock );
 		if ( !ll.IsLocked() )
             return oexFALSE;
         if ( !m_pBi )
@@ -284,7 +284,7 @@ public:
 		\see
 	*/
 	oexBOOL AdvanceWritePtr( oexLONG x_lStep )
-	{	CTlLocalLock ll( &m_lock );
+	{	oexAutoLock ll( &m_lock );
 		if ( !ll.IsLocked() )
             return oexFALSE;
         if ( !m_pBi )
@@ -547,7 +547,7 @@ public:
 			return oexFALSE;
 
 	    // Lock the buffer
-	    CTlLocalLock ll( &m_lock );
+	    oexAutoLock ll( &m_lock );
 	    if ( !ll.IsLocked() )
             return oexFALSE;
 
@@ -827,7 +827,7 @@ public:
     }
 
 	/// Returns a pointer for the buffers thread locking class
-	operator CTlLock&()
+	operator oexLock&()
     {   return m_lock; }
 
 	//==============================================================
@@ -908,25 +908,23 @@ public:
 	/// Call this function to signal that data is ready to be read.
 	void DataReady()
 	{	m_bEmpty = oexFALSE;
-		if ( m_hDataReady.IsValid() )
-            os::CEvent::SetEvent( m_hDataReady );
-		if ( m_hEmpty.IsValid() )
-            os::CEvent::ResetEvent( m_hEmpty );
+        m_evDataReady.Signal();
+        m_evEmpty.Reset();
 	}
 
 	//==============================================================
 	// GetDataReadyHandle()
 	//==============================================================
 	/// Returns the data ready event handle
-    os::CResource& GetDataReadyHandle()
-    {   return m_hDataReady; }
+    os::CEvent& GetDataReadyHandle()
+    {   return m_evDataReady; }
 
 	//==============================================================
 	// GetEmptyHandle()
 	//==============================================================
 	/// Returns the buffer empty event handle
-    os::CResource& GetEmptyHandle()
-    {   return m_hEmpty; }
+    os::CEvent& GetEmptyHandle()
+    {   return m_evEmpty; }
 
 	//==============================================================
 	// Empty()
@@ -936,7 +934,7 @@ public:
 		\return Non-zero if success.
 	*/
 	oexBOOL Empty()
-	{	CTlLocalLock ll( &m_lock );
+	{	oexAutoLock ll( &m_lock );
 		if ( !ll.IsLocked() )
             return oexFALSE;
 
@@ -946,11 +944,8 @@ public:
 		m_bEmpty = oexTRUE;
 		m_pBi->uWritePtr = m_pBi->uReadPtr = 0;
 
-        if ( m_hDataReady.IsValid() )
-            os::CEvent::ResetEvent( m_hDataReady );
-
-		if ( m_hEmpty.IsValid() )
-            os::CEvent::SetEvent( m_hEmpty );
+        m_evDataReady.Reset();
+        m_evEmpty.Signal();
 
 		return oexTRUE;
 	}
@@ -1036,13 +1031,13 @@ public:
 private:
 
 	/// Thread lock
-	CTlLock					m_lock;
+	oexLock					m_lock;
 
 	/// Data ready event
-    os::CResource			m_hDataReady;
+	os::CEvent				m_evDataReady;
 
 	/// Data ready event
-    os::CResource			m_hEmpty;
+    os::CEvent				m_evEmpty;
 
 	/// Non-zero if buffer is empty
 	oexBOOL					m_bEmpty;

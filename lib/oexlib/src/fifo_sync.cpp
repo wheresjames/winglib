@@ -52,7 +52,7 @@ CFifoSync::~CFifoSync()
 void CFifoSync::Destroy2()
 {
 	// Lock the buffer
-	CTlLocalLock ll( *this );
+	oexAutoLock ll( *this );
 	if ( !ll.IsLocked() ) 
         return;
 
@@ -72,7 +72,7 @@ void CFifoSync::Destroy()
 oexBOOL CFifoSync::Write( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT x_uEncode )
 {
 	// Lock the buffer
-	CTlLocalLock ll( *this );
+	oexAutoLock ll( *this );
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 
@@ -91,7 +91,7 @@ oexBOOL CFifoSync::Write( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT x_uEncode )
 oexBOOL CFifoSync::AllocateBuffers()
 {
 	// Lock the buffer
-	CTlLocalLock ll( *this );
+	oexAutoLock ll( *this );
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 
@@ -124,7 +124,7 @@ oexBOOL CFifoSync::AllocateBuffers()
 oexBOOL CFifoSync::AddFifo( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT x_uEncode )
 {
 	// Lock the buffer
-	CTlLocalLock ll( *this );
+	oexAutoLock ll( *this );
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 
@@ -144,7 +144,7 @@ oexBOOL CFifoSync::AddFifo( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT x_uEncode
 oexBOOL CFifoSync::InitFifoWrite( oexUINT x_uSize )
 {
 	// Lock the buffer
-	CTlLocalLock ll( *this );
+	oexAutoLock ll( *this );
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 
@@ -181,7 +181,7 @@ oexBOOL CFifoSync::InitFifoWrite( oexUINT x_uSize )
 oexBOOL CFifoSync::EndFifoWrite()
 {
 	// Lock the buffer
-	CTlLocalLock ll( *this );
+	oexAutoLock ll( *this );
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 
@@ -197,7 +197,7 @@ oexBOOL CFifoSync::EndFifoWrite()
 oexBOOL CFifoSync::Read( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oexUINT x_uEncode )
 {
 	// Lock the buffer
-	CTlLocalLock ll( *this );
+	oexAutoLock ll( *this );
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 
@@ -217,7 +217,7 @@ oexBOOL CFifoSync::Read( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oe
 oexBOOL CFifoSync::Read( CStr8 &x_sStr, oexUINT x_uMax )
 {
 	// Lock the buffer
-	CTlLocalLock ll( *this );
+	oexAutoLock ll( *this );
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 
@@ -256,7 +256,7 @@ oexBOOL CFifoSync::Read( CStr8 &x_sStr, oexUINT x_uMax )
 oexBOOL CFifoSync::Peek( CStr8 &x_sStr, oexUINT x_uMax )
 {
 	// Lock the buffer
-	CTlLocalLock ll( *this );
+	oexAutoLock ll( *this );
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 
@@ -294,7 +294,7 @@ oexBOOL CFifoSync::Peek( CStr8 &x_sStr, oexUINT x_uMax )
 oexBOOL CFifoSync::SkipBlock()
 {
 	// Lock the buffer
-	CTlLocalLock ll( *this );
+	oexAutoLock ll( *this );
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 
@@ -321,7 +321,7 @@ oexBOOL CFifoSync::SkipBlock()
 oexBOOL CFifoSync::Peek( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oexLONG x_lOffset, oexUINT x_uEncode )
 {
 	// Lock the buffer
-	CTlLocalLock ll( *this );
+	oexAutoLock ll( *this );
 	if ( !ll.IsLocked() ) 
         return oexFALSE;
 

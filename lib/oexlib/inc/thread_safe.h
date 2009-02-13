@@ -54,7 +54,7 @@ public:
     {
         m_bLocked = oexFALSE;
         m_uRef = 0;
-        m_hMutex.CreateMutex();
+        m_hMutex.NewMutex();
     }
 
 	//==============================================================
@@ -67,7 +67,7 @@ public:
 	CTlLock( oexCSTR x_pName )
     {   m_bLocked = oexFALSE;
         m_uRef = 0;
-        m_hMutex.CreateMutex( x_pName );
+        m_hMutex.NewMutex( x_pName );
     }
 
 	/// Destructor

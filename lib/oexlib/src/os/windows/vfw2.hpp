@@ -32,25 +32,6 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-// Just to make things a little easier
-#include <AtlBase.h>
-#include <string>
-#include <comutil.h>
-
-// VFW
-#include <Vfw.h>
-
-// DirectShow
-#include <DShow.h>
-#include <streams.h>
-
-#ifdef oexDEBUG
-#pragma comment( lib, "strmbasd.lib" )
-#else
-#pragma comment( lib, "strmbase.lib" )
-#endif
-
-#pragma comment( lib, "winmm.lib" )
 
 // {4B2C1FAD-F5E6-4f4c-9D2B-941F85239BC6}
 static const GUID IID_DsRenderer = 

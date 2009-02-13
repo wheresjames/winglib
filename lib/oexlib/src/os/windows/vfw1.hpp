@@ -32,12 +32,6 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-// Video For Windows
-#include <Vfw.h>
-#pragma comment( lib, "Vfw32.lib" )
-
-#include "stdio.h"
-
 //==================================================================
 // CVfwCap
 //

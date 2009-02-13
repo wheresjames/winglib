@@ -58,7 +58,7 @@ public:
 	virtual ~CSqMsgQueue()
 	{
 		// Acquire lock
-		oex::CTlLocalLock ll( m_cLock );
+		oexAutoLock ll( m_cLock );
 		if ( !ll.IsLocked() )
 			return;
 
@@ -69,7 +69,7 @@ public:
 	virtual void Destroy()
 	{
 		// Acquire lock
-		oex::CTlLocalLock ll( m_cLock );
+		oexAutoLock ll( m_cLock );
 		if ( !ll.IsLocked() )
 			return;
 
@@ -77,7 +77,7 @@ public:
 		m_lstMsgQueue.clear();
 
 		// Reset event
-		m_evtMsgWaiting.Reset();
+		m_evMsgWaiting.Reset();
 	}
 
 	/// Sends a command to the thread
@@ -91,7 +91,7 @@ public:
 	*/
 	oex::oexBOOL Msg( std::tstring sMsg, t_Params *pmapParams = oexNULL, t_Params *pmapReply = oexNULL, oex::oexUINT uTimeout = eLockTimeout )
 	{
-		oex::os::CResource hReply;
+		oexEvent evReply;
 
 		// If it's our own thread calling
 		if ( m_uCurrentThreadId && oex::os::CSys::GetCurrentThreadId() == m_uCurrentThreadId )
@@ -110,30 +110,19 @@ public:
 		{ // Stuff message into buffer
 
 			// Acquire lock
-			oex::CTlLocalLock ll( m_cLock );
+			oexAutoLock ll( m_cLock );
 			if ( !ll.IsLocked() )
 				return FALSE;
 
 			// Reply event handle needed?
-			if ( pmapReply )
-			{
-//				hReply = CreateEvent( NULL, TRUE, FALSE, NULL );
-				hReply.CreateEvent();
-	//            ASSERT( hReply );
-
-				if ( hReply.IsValid() )
-					hReply.Reset();
-				else
-					pmapReply = NULL;
-
-			} // end if
+			if ( !pmapReply )
+				evReply.Destroy();
 
 			// Add a message
-			m_lstMsgQueue.push_back( SMsg( sMsg, pmapParams, hReply, pmapReply ) );
+			m_lstMsgQueue.push_back( SMsg( sMsg, pmapParams, evReply, pmapReply ) );
 
 			// Signal that a message is waiting
-//			SetEvent( m_hMsgWaiting );
-			m_evtMsgWaiting.Set();
+			m_evMsgWaiting.Signal();
 
 		} // end message stuffing
 
@@ -141,18 +130,14 @@ public:
 		if ( pmapReply )
 		{
 			// Wait for reply
-//			BOOL bSuccess = ::WaitForSingleObject( hReply, uTimeout ) == WAIT_OBJECT_0;
-			oex::oexBOOL bSuccess = hReply.Wait( uTimeout );
-
-			// Lose reply event
-//			CMsgQueue_ReleaseHandle( hReply );
+			oex::oexBOOL bSuccess = evReply.Wait( uTimeout );
 
 			// Punt if we got the reply
 			if ( bSuccess )
 				return TRUE;
 
 			// Acquire lock
-			oex::CTlLocalLock ll( &m_cLock );
+			oexAutoLock ll( &m_cLock );
 			if ( !ll.IsLocked() )
 			{
 				// You're screwed here because pmapReply is dangling
@@ -220,7 +205,7 @@ protected:
 	oex::oexBOOL ProcessMsgs()
 	{
 		// Acquire lock
-		oex::CTlLocalLock ll( &m_cLock );
+		oexAutoLock ll( &m_cLock );
 		if ( !ll.IsLocked() )
 			return FALSE;
 
@@ -245,8 +230,7 @@ protected:
 
 				// Reset signal if queue is empty
 				if ( !m_lstMsgQueue.size() )
-					m_evtMsgWaiting.Reset();
-					//::ResetEvent( m_hMsgWaiting );
+					m_evMsgWaiting.Reset();
 
 				return TRUE;
 
@@ -258,8 +242,7 @@ protected:
 		} // end while
 
 		// Reset signal
-//		::ResetEvent( m_hMsgWaiting );
-		m_evtMsgWaiting.Reset();
+		m_evMsgWaiting.Reset();
 
 		return TRUE;
 	}
@@ -284,10 +267,10 @@ private:
 	oex::oexUINT								m_uCurrentThreadId;
 
 	/// Set when a message is waiting in the queue
-	oex::CTlEvent								m_evtMsgWaiting;
+	oexEvent									m_evMsgWaiting;
 
 	/// Message queue lock
-	oex::CTlLock                                m_cLock;
+	oexLock		                                m_cLock;
 
 	/// Message list type
 	typedef std::list< SMsg >                   t_MsgQueue;

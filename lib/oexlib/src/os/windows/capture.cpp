@@ -35,6 +35,28 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
+// *** Video For Windows
+#include <Vfw.h>
+#pragma comment( lib, "Vfw32.lib" )
+#include "stdio.h"
+
+// Just to make things a little easier
+#include <AtlBase.h>
+#include <string>
+#include <comutil.h>
+
+// *** DirectShow
+#include <DShow.h>
+#include <streams.h>
+
+#ifdef oexDEBUG
+#pragma comment( lib, "strmbasd.lib" )
+#else
+#pragma comment( lib, "strmbase.lib" )
+#endif
+
+#pragma comment( lib, "winmm.lib" )
+
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 using namespace OEX_NAMESPACE::vid;

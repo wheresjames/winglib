@@ -2,7 +2,6 @@
 
 class CTestClass
 {
-
 public:
 
 	// Do something simple

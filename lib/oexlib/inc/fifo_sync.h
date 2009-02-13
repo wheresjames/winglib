@@ -318,7 +318,7 @@ public:
 	/// Returns the number of buffer slots in the fifo that are in use
 	oexUINT GetUsedBuffers()
 	{
-        CTlLocalLock ll( *this );
+        oexAutoLock ll( *this );
 	    if ( !ll.IsLocked() )
             return oexFALSE;
 

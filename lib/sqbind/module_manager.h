@@ -57,7 +57,7 @@ public:
     void Destroy()
 	{
 		// Thread lock
-		oex::CTlLocalLock ll( m_lock );
+		oexAutoLock ll( m_lock );
 		if ( !ll.IsLocked() )
 			return;
 
@@ -99,7 +99,7 @@ public:
 			return oexNULL;
 
 		// Thread lock
-		oex::CTlLocalLock ll( m_lock );
+		oexAutoLock ll( m_lock );
 		if ( !ll.IsLocked() )
 			return oexNULL;
 
@@ -136,7 +136,7 @@ public:
 	oex::oexBOOL Unload( oex::oexCSTR x_pFile )
 	{
 		// Thread lock
-		oex::CTlLocalLock ll( m_lock );
+		oexAutoLock ll( m_lock );
 		if ( !ll.IsLocked() )
 			return oex::oexFALSE;
 
@@ -166,6 +166,6 @@ private:
     t_ModuleList					m_lstModules;
 
     /// Thread access lock
-	oex::CTlLock					m_lock;
+	oexLock							m_lock;
 
 };

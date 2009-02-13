@@ -188,7 +188,7 @@ public:
 										should take ownership before
 										the function returns.
 	*/
-	oexRESULT CreateMutex( oexCSTR x_sName = oexNULL, oexBOOL x_bInitialOwner = oexFALSE );
+	oexRESULT NewMutex( oexCSTR x_sName = oexNULL, oexBOOL x_bInitialOwner = oexFALSE );
 
 	/// Creates an event object
 	/**
@@ -198,7 +198,7 @@ public:
 		\param [in] x_bInitialState	-	The initial state of the event,
 										non-zero for signaled.
 	*/
-	oexRESULT CreateEvent( oexCSTR x_sName = oexNULL, oexBOOL x_bManualReset = oexTRUE, oexBOOL x_bInitialState = oexFALSE );
+	oexRESULT NewEvent( oexCSTR x_sName = oexNULL, oexBOOL x_bManualReset = oexTRUE, oexBOOL x_bInitialState = oexFALSE );
 
 	/// Creates a thread
 	/**
@@ -206,7 +206,7 @@ public:
 		\param [in] x_pData			-	User data passed to thread
 										callback function
 	*/
-	oexRESULT CreateThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData );
+	oexRESULT NewThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData );
 
 	/// Creates a thread lock
 	/**
@@ -215,7 +215,7 @@ public:
 										should take ownership before
 										the function returns.
 	*/
-	oexRESULT CreateLock( oexCSTR x_sName = oexNULL, oexBOOL x_bInitialOwner = oexFALSE );
+	oexRESULT NewLock( oexCSTR x_sName = oexNULL, oexBOOL x_bInitialOwner = oexFALSE );
 
 
 private:
@@ -391,7 +391,14 @@ public:
 
 	/// Default constructor
 	CLock( oexCSTR x_pName = oexNULL )
-	{	m_lock.CreateLock( x_pName ); }
+	{	m_lock.NewLock( x_pName ); }
+
+	/// Create lock
+	oexRESULT Create( oexCSTR x_pName = oexNULL )
+	{	return m_lock.NewLock( x_pName ); }
+
+	/// Destroys the event
+	void Destroy() { m_lock.Destroy(); }
 
 	/// Casts to CResource object
 	operator CResource&() { return m_lock; }
@@ -410,32 +417,32 @@ private:
 
 
 //==================================================================
-// CAutoLock
+// CScopeLock
 //
 /// Use this to lock and automatically unlock CResource objects
 /**
 	Use this to lock and automatically unlock CResource objects
 */
 //==================================================================
-class CAutoLock
+class CScopeLock
 {
 
 public:
 
 	/// Default constructor
-	CAutoLock()
+	CScopeLock()
     {
         m_ptr = oexNULL;
     }
 
 	/// Destructor - Unlocks the underlying CResource object
-	virtual ~CAutoLock()
+	virtual ~CScopeLock()
     {
         Unlock();
     }
 
 	//==============================================================
-	// CAutoLock()
+	// CScopeLock()
 	//==============================================================
 	/// Constructor - Takes a CResource pointer
 	/**
@@ -443,7 +450,7 @@ public:
 		\param [in] x_uTimeout	-	Maximum time in milli-seconds to
 									wait for lock.
 	*/
-	CAutoLock( CResource *x_ptr, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	CScopeLock( CResource *x_ptr, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
 	{   m_ptr = oexNULL;
 		if ( oexCHECK_PTR( x_ptr ) )
             if ( 0 == x_ptr->Wait( x_uTimeout ) )
@@ -451,7 +458,7 @@ public:
     }
 
 	//==============================================================
-	// CAutoLock()
+	// CScopeLock()
 	//==============================================================
 	/// Constructor - Takes a CResource reference
 	/**
@@ -459,14 +466,14 @@ public:
 		\param [in] x_uTimeout	-	Maximum time in milli-seconds to
 									wait for lock.
 	*/
-	CAutoLock( CResource &x_lock, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	CScopeLock( CResource &x_lock, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
 	{   m_ptr = oexNULL;
         if ( 0 == x_lock.Wait( x_uTimeout ) )
             m_ptr = &x_lock;
     }
 
 	//==============================================================
-	// CAutoLock()
+	// CScopeLock()
 	//==============================================================
 	/// Constructor - Takes a CResource reference
 	/**
@@ -474,11 +481,26 @@ public:
 		\param [in] x_uTimeout	-	Maximum time in milli-seconds to
 									wait for lock.
 	*/
-	CAutoLock( CLock *x_ptr, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	CScopeLock( CLock *x_ptr, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
 	{   m_ptr = oexNULL;
 		if ( oexCHECK_PTR( x_ptr ) )
             if ( 0 == x_ptr->Obj().Wait( x_uTimeout ) )
                 m_ptr = x_ptr->Ptr();
+    }
+
+	//==============================================================
+	// CScopeLock()
+	//==============================================================
+	/// Constructor - Takes a CResource reference
+	/**
+		\param [in] x_lock		-	Reference to CLock object
+		\param [in] x_uTimeout	-	Maximum time in milli-seconds to
+									wait for lock.
+	*/
+	CScopeLock( CLock &x_lock, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	{   m_ptr = oexNULL;
+        if ( 0 == x_lock.Obj().Wait( x_uTimeout ) )
+            m_ptr = x_lock.Ptr();
     }
 
 	//==============================================================
@@ -572,5 +594,49 @@ private:
 	/// Pointer to CResource object
 	CResource		*m_ptr;
 
+};
+
+//==================================================================
+// CEvent
+//
+/// Thread event
+//==================================================================
+class CEvent
+{
+public:
+
+	/// Default constructor
+	CEvent( oexCSTR x_pName = oexNULL )
+	{	m_event.NewEvent( x_pName ); }
+
+	/// Create lock
+	oexRESULT Create( oexCSTR x_pName = oexNULL )
+	{	return m_event.NewEvent( x_pName ); }
+
+	/// Destroys the event
+	void Destroy() { m_event.Destroy(); }
+
+	/// Casts to CResource object
+	operator CResource&() { return m_event; }
+
+	/// Returns a reference to the CResource object
+	CResource& Obj() { return m_event; }
+
+	/// Returns a pointer to the CResource object
+	CResource* Ptr() { return &m_event; }
+
+	/// Signals the event
+	oexBOOL Signal() { return 0 == m_event.Signal(); }
+
+	/// Resets the event
+	oexBOOL Reset() { return 0 == m_event.Reset(); }
+
+	/// Waits for the event to become signaled
+	oexBOOL Wait( oexUINT x_uTimeout ) { return 0 == m_event.Wait( x_uTimeout ); }
+
+private:
+
+	/// The actual lock
+	CResource	m_event;
 };
 

@@ -66,7 +66,7 @@ void CDataPacket::Destroy()
 oexBOOL CDataPacket::WritePacket(oexUINT x_uPacketType, oexUINT x_uDataType, oexCPVOID x_pData, oexUINT x_uData)
 {
 	// Lock the buffer
-	CTlLocalLock ll( *this );
+	oexAutoLock ll( *this );
 	if ( !ll.IsLocked() ) return oexFALSE;
 
 	// Initialize packet
@@ -84,7 +84,7 @@ oexBOOL CDataPacket::WritePacket(oexUINT x_uPacketType, oexUINT x_uDataType, oex
 oexBOOL CDataPacket::vWriteMultiPacket( oexUINT x_uPacketType, oexUINT x_uBuffers, oexPVOID *x_pArgs )
 {
 	// Lock the buffer
-	CTlLocalLock ll( *this );
+	oexAutoLock ll( *this );
 	if ( !ll.IsLocked() ) return oexFALSE;
 
 	// Variable params

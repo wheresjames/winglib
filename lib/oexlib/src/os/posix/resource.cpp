@@ -219,7 +219,7 @@ oexUINT CResource::GetOwner()
 	return pRi->uOwner;
 }
 
-oexRESULT CResource::CreateEvent( oexCSTR x_sName, oexBOOL x_bManualReset, oexBOOL x_bInitialState )
+oexRESULT CResource::NewEvent( oexCSTR x_sName, oexBOOL x_bManualReset, oexBOOL x_bInitialState )
 {
 	// Out with the old
 	Destroy();
@@ -240,13 +240,13 @@ oexRESULT CResource::CreateEvent( oexCSTR x_sName, oexBOOL x_bManualReset, oexBO
 #ifdef OEX_COND_EVENTS
 
 	// Create the mutex object
-	if ( oexINT nErr = pRi->cSync.CreateMutex() )
+	if ( oexINT nErr = pRi->cSync.NewMutex() )
 	{	Destroy(); return oexERROR( nErr, oexT( "Create mutex failed" ) ); }
 
 #else
 
 	// Create the mutex object
-	if ( oexINT nErr = pRi->cSync.CreateLock() )
+	if ( oexINT nErr = pRi->cSync.NewLock() )
 	{	Destroy(); return oexERROR( nErr, oexT( "Create mutex failed" ) ); }
 
 #endif
@@ -258,7 +258,7 @@ oexRESULT CResource::CreateEvent( oexCSTR x_sName, oexBOOL x_bManualReset, oexBO
 	return 0;
 }
 
-oexRESULT CResource::CreateMutex( oexCSTR x_sName, oexBOOL x_bInitialOwner )
+oexRESULT CResource::NewMutex( oexCSTR x_sName, oexBOOL x_bInitialOwner )
 {
 	// Out with the old
 	Destroy();
@@ -282,7 +282,7 @@ oexRESULT CResource::CreateMutex( oexCSTR x_sName, oexBOOL x_bInitialOwner )
 	return 0;
 }
 
-oexRESULT CResource::CreateThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData )
+oexRESULT CResource::NewThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData )
 {
 	// Out with the old
 	Destroy();
@@ -301,7 +301,7 @@ oexRESULT CResource::CreateThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData
 	pRi->uOwner = oexGetCurrentThreadId();
 
 	// Create event object to indicate when thread has shut down properly
-	if ( oexINT nErr = pRi->cSync.CreateEvent() )
+	if ( oexINT nErr = pRi->cSync.NewEvent() )
 	{	Destroy(); return oexERROR( nErr, oexT( "Create event failed" ) ); }
 
 	// Make thread joinable
@@ -349,7 +349,7 @@ oexPVOID CResource::ThreadProc( oexPVOID x_pData )
 	return pRet;
 }
 
-oexRESULT CResource::CreateLock( oexCSTR x_sName, oexBOOL x_bInitialOwner )
+oexRESULT CResource::NewLock( oexCSTR x_sName, oexBOOL x_bInitialOwner )
 {
 	// Out with the old
 	Destroy();
@@ -368,7 +368,7 @@ oexRESULT CResource::CreateLock( oexCSTR x_sName, oexBOOL x_bInitialOwner )
 	pRi->uOwner = 0;
 
 	// Create the mutex object
-	if ( oexINT nErr = pRi->cSync.CreateMutex() )
+	if ( oexINT nErr = pRi->cSync.NewMutex() )
 	{	Destroy(); return oexERROR( nErr, oexT( "Create mutex failed" ) ); }
 
 	return 0;

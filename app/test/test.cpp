@@ -1585,14 +1585,14 @@ oex::oexRESULT Test_CDataPacket()
     return oex::oexRES_OK;
 }
 
-class CMyThread : public oex::os::CThread
+class CMyThread : public oex::CThread
 {
 public:
 
 	CMyThread()
 	{
 		m_val = 0;
-		m_evDone.CreateEvent();
+		m_evDone.NewEvent();
 	}
 
 	virtual oex::oexBOOL InitThread( oex::oexPVOID x_pData )
@@ -1621,15 +1621,15 @@ public:
 	oex::oexINT 		m_val;
 };
 
-class CMyThread2 : public oex::os::CThread
+class CMyThread2 : public oex::CThread
 {
 public:
 
 	CMyThread2()
 	{
 		m_val = 0;
-		m_evInc.CreateEvent();
-		m_evDone.CreateEvent();
+		m_evInc.NewEvent();
+		m_evDone.NewEvent();
 	}
 
 	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
@@ -1654,7 +1654,7 @@ public:
 	oex::os::CResource	m_evDone;
 };
 
-class CMyThread3 : public oex::os::CThread
+class CMyThread3 : public oex::CThread
 {
 public:
 

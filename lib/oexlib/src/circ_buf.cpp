@@ -54,8 +54,8 @@ CCircBuf::CCircBuf( oexBOOL x_bSync, oexUINT x_uSize, oexBOOL x_bAutoGrow )
     m_uPokePtr = 0;
 
 	if ( x_bSync )
-    {   os::CEvent::Create( m_hDataReady, oexNULL, oexTRUE );
-        os::CEvent::Create( m_hEmpty, oexNULL, oexTRUE );
+    {   m_evDataReady.Create( oexNULL );
+        m_evEmpty.Create( oexNULL );
     } // end if
 
 	if ( x_uSize )
@@ -68,7 +68,7 @@ CCircBuf::~CCircBuf()
 	Destroy();
 
 	// Lose the sync
-	m_hDataReady.Destroy();
+	m_evDataReady.Destroy();
 }
 
 oexBOOL CCircBuf::NameEvents( oexCSTR x_pBaseName )
@@ -77,8 +77,8 @@ oexBOOL CCircBuf::NameEvents( oexCSTR x_pBaseName )
     if ( !x_pBaseName || !*x_pBaseName )
     {
         m_lock.Create();
-    	m_hDataReady.Destroy();
-        os::CEvent::Create( m_hDataReady, oexNULL, oexTRUE );
+    	m_evDataReady.Destroy();
+        m_evDataReady.Create( oexNULL );
 
     } // end else
 
@@ -86,8 +86,8 @@ oexBOOL CCircBuf::NameEvents( oexCSTR x_pBaseName )
     {
         m_lock.Create( CStr( x_pBaseName ).Append( oexT( "_lock" ) ).Ptr() );
 
-    	m_hDataReady.Destroy();
-        os::CEvent::Create( m_hDataReady, CStr( x_pBaseName ).Append( oexT( "_data" ) ).Ptr(), oexTRUE );
+    	m_evDataReady.Destroy();
+        m_evDataReady.Create( CStr( x_pBaseName ).Append( oexT( "_data" ) ).Ptr() );
 
     } // end else
 
@@ -97,7 +97,7 @@ oexBOOL CCircBuf::NameEvents( oexCSTR x_pBaseName )
 oexBOOL CCircBuf::Allocate( oexUINT x_uSize )
 {
 	// Lock the buffer
-	CTlLocalLock ll( &m_lock );
+	oexAutoLock ll( &m_lock );
 	if ( !ll.IsLocked() )
         return oexFALSE;
 
@@ -127,7 +127,7 @@ oexBOOL CCircBuf::Allocate( oexUINT x_uSize )
 oexUINT CCircBuf::Resize(oexUINT x_uNewSize)
 {
 	// Lock the buffer
-	CTlLocalLock ll( &m_lock );
+	oexAutoLock ll( &m_lock );
 	if ( !ll.IsLocked() )
         return oexFALSE;
 
@@ -228,7 +228,7 @@ oexUINT CCircBuf::EnsureWriteSpace( oexUINT x_uSize, oexUINT x_uReadPtr, oexUINT
 void CCircBuf::Destroy()
 {
 	// Lock the buffer
-	CTlLocalLock ll( &m_lock );
+	oexAutoLock ll( &m_lock );
 	if ( !ll.IsLocked() )
         return;
 
@@ -248,7 +248,7 @@ void CCircBuf::Destroy()
 oexBOOL CCircBuf::Read( CStr8 &x_sStr, oexUINT x_uMax )
 {
 	// Lock the buffer
-	CTlLocalLock ll( &m_lock );
+	oexAutoLock ll( &m_lock );
 	if ( !ll.IsLocked() )
         return oexFALSE;
 
@@ -287,7 +287,7 @@ oexBOOL CCircBuf::Read( CStr8 &x_sStr, oexUINT x_uMax )
 oexBOOL CCircBuf::Read( oexPVOID x_pvBuf, oexUINT x_uMax, oexUINT *x_puRead, oexUINT *x_puPtr, oexUINT x_uEncode )
 {
 	// Lock the buffer
-	CTlLocalLock ll( &m_lock );
+	oexAutoLock ll( &m_lock );
 	if ( !ll.IsLocked() )
         return oexFALSE;
 
@@ -363,7 +363,7 @@ oexBOOL CCircBuf::Read( oexPVOID x_pvBuf, oexUINT x_uMax, oexUINT *x_puRead, oex
 oexBOOL CCircBuf::Write( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT *x_puPtr, oexUINT x_uEncode )
 {
 	// Lock the buffer
-	CTlLocalLock ll( &m_lock );
+	oexAutoLock ll( &m_lock );
 	if ( !ll.IsLocked() )
         return oexFALSE;
 
@@ -515,7 +515,7 @@ oexBOOL CCircBuf::Peek( oexPVOID x_pvBuf, oexUINT x_uMax, oexUINT *x_puRead, oex
 oexBOOL CCircBuf::Peek( CStr8 &x_sStr, oexUINT x_uMax )
 {
 	// Lock the buffer
-	CTlLocalLock ll( &m_lock );
+	oexAutoLock ll( &m_lock );
 	if ( !ll.IsLocked() )
         return oexFALSE;
 
@@ -548,7 +548,7 @@ oexBOOL CCircBuf::Peek( CStr8 &x_sStr, oexUINT x_uMax )
 void CCircBuf::Defrag()
 {
 	// Lock the buffer
-	CTlLocalLock ll( &m_lock );
+	oexAutoLock ll( &m_lock );
 	if ( !ll.IsLocked() )
         return;
 
@@ -634,7 +634,7 @@ oexBOOL CCircBuf::WaitData(oexUINT x_uTimeout)
         return oexFALSE;
 
 	// Wait for data
-	if ( !m_hDataReady.Wait( x_uTimeout ) )
+	if ( !m_evDataReady.Wait( x_uTimeout ) )
 		return oexFALSE;
 
 	return oexTRUE;
@@ -647,7 +647,7 @@ oexBOOL CCircBuf::WaitEmpty(oexUINT x_uTimeout)
         return oexTRUE;
 
 	// Wait for data
-	if ( !m_hEmpty.Wait( x_uTimeout ) )
+	if ( !m_evEmpty.Wait( x_uTimeout ) )
 		return oexFALSE;
 
 	return oexTRUE;

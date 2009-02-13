@@ -450,7 +450,6 @@ namespace os
 #   include "inc/os/fmap.h"
 #   include "inc/os/mem.h"
 #   include "inc/os/tls.h"
-#   include "inc/os/event.h"
 #   include "inc/os/hq_timer.h"
 };
 
@@ -467,7 +466,8 @@ namespace os
 #include "inc/alloc.h"
 #include "inc/file_mapping.h"
 #include "inc/memory.h"
-#include "inc/thread_safe.h"
+#include "inc/thread.h"
+//#include "inc/thread_safe.h"
 #include "inc/str.h"
 #include "inc/auto_str.h"
 #include "inc/dib.h"
@@ -490,7 +490,6 @@ namespace os
 #   include "inc/os/base_file.h"
 #   include "inc/os/ip_address.h"
 #   include "inc/os/ip_socket.h"
-#   include "inc/os/thread.h"
 #	include "inc/os/module.h"
 #   include "inc/os/service.h"
 };

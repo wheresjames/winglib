@@ -35,7 +35,7 @@
 #pragma once
 
 class CScriptThread :
-		public oex::os::CThread,
+		public oex::CThread,
 		public CSqMsgQueue
 {
 public:
