@@ -41,21 +41,21 @@ public:
 		{	delete m_pServer;
 			m_pServer = oexNULL;
 		} // end if
-	}					
+	}
 
 	void Init()
 	{	if ( !m_pServer )
 			m_pServer = new CHttpServerImpl();
 	}
 
-	virtual int Start( int nPort ) 
+	virtual int Start( int nPort )
 	{
 		Init();
 
 		return m_pServer->Start( nPort );
 	}
 
-private:	
+private:
 
 	/// Pointer to server object
 	CHttpServerImpl		*m_pServer;

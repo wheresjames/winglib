@@ -7,6 +7,12 @@ int main(int argc, char* argv[])
     // Initialize the oex library
 	oexINIT();
 
+	// Initialize sockets
+    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
+    {	oexERROR( 0, "Unable to initialize sockets" );
+        return -1;
+	} // end if
+
 	// Start a log file
 	oexNOTICE( 0, "Application startup" );
 
@@ -53,7 +59,10 @@ int main(int argc, char* argv[])
 		oex::os::CSys::Printf( "Return from child...\n" );
 	} // end else
 
-	// Initialize the oex library
+	// Uninitialize sockets
+    oex::os::CIpSocket::UninitSockets();
+
+	// Uninitialize the oex library
     oexUNINIT();
 
 	return 0;

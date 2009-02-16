@@ -128,7 +128,7 @@ public:
 	};
 
 	/// Server callback
-	typedef oexINT (*PFN_OnProcessRequest)( THttpSession< T_PORT > *x_pSesion );
+	typedef oexINT (*PFN_Callback)( oexPVOID x_pData, THttpSession< T_PORT > *x_pSesion );
 
 public:
 
@@ -172,6 +172,11 @@ public:
     */
     virtual oexBOOL OnProcessRequest()
     {
+    	// Call the callback function if provided
+		if ( m_fnCallback )
+			if ( !m_fnCallback( m_pData, this ) )
+				return oexTRUE;
+
     	return oexFALSE;
     }
 
@@ -526,39 +531,55 @@ public:
 	CPropertyBag8& Post()
 	{	return m_pbPost; }
 
+	// Sets a callback function
+	void SetCallback( PFN_Callback x_fnCallback, oexPVOID x_pData )
+	{	m_fnCallback = x_fnCallback; m_pData = x_pData; }
+
+
+	// +++ Added this one to get things compiling, please change to above function
+	void SetCallback( oexPVOID x_pCallback, oexPVOID x_pData )
+	{	m_fnCallback = (PFN_Callback)x_pCallback; m_pData = x_pData; }
+
+
 private:
 
 	/// Our port
-	T_PORT				*m_pPort;
+	T_PORT						*m_pPort;
 
     /// Incomming HTTP headers
-    CPropertyBag8       m_pbRxHeaders;
+    CPropertyBag8     		  m_pbRxHeaders;
 
     /// Outgoing HTTP headers
-    CPropertyBag8       m_pbTxHeaders;
+    CPropertyBag8     		  	m_pbTxHeaders;
 
     /// Request information
-    CPropertyBag8       m_pbRequest;
+    CPropertyBag8    		  	m_pbRequest;
 
     /// Get variables
-    CPropertyBag8       m_pbGet;
+    CPropertyBag8    		   	m_pbGet;
 
     /// Post variables
-    CPropertyBag8       m_pbPost;
+    CPropertyBag8     		  	m_pbPost;
 
     /// Non-zero if the complete HTTP headers have been received.
-    oexBOOL             m_bHeaderReceived;
+    oexBOOL        		    	m_bHeaderReceived;
 
 	/// Number of transactions processed
-    oexINT				m_nTransactions;
+    oexINT						m_nTransactions;
 
     /// Content to return to client
-    CStr8               m_sContent;
+    CStr8           		    m_sContent;
 
     /// Error code
-    oexINT              m_nErrorCode;
+    oexINT           		   	m_nErrorCode;
 
 	/// Receive buffer
-    CCircBuf			m_rx;
+    CCircBuf					m_rx;
+
+	/// Pointer to callback function
+	PFN_Callback		    	m_fnCallback;
+
+	/// Data passed to callback function
+	oexPVOID					m_pData;
 
 };

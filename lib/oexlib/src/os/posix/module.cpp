@@ -100,7 +100,8 @@ oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 	} // end catch
 
 	// The module we loaded could possible screw up our logging
-	CLog::GlobalLog().Resume( sLogFile.Ptr() );
+	if ( !CLog::GlobalLog().IsOpen() )
+		CLog::GlobalLog().Resume( sLogFile.Ptr() );
 
 	if ( oexNULL == m_hModule )
 	{	oexERROR( errno, CStr().Fmt( "dlopen( '%s' )\r\n: %s", oexStrToMbPtr( x_pFile ), dlerror() ) );

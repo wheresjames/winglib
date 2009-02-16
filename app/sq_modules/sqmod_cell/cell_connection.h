@@ -26,7 +26,7 @@ public:
 	{	m_sLastError = sErr; }
 
 	/// Returns information about the last error
-	std::string& GetLastError()
+	std::string GetLastError()
 	{	return m_sLastError; }
 
 private:

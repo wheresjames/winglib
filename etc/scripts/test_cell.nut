@@ -1,17 +1,12 @@
 
 function _init()
 {
-	_self.load_module( "sqmod_cell_d.dll", 0 );
+	_self.load_module( "cell", "" );
 
 	local tc = CCellConnection();
 
-	if ( !tc.Connect( "127.0.0.1" ) )
-		_self.alert( "Unable to connect" );
-
-
-//	local tc = CTestClass();
-//	_self.alert( tc.Add( 2, 2 ).tostring() );
-
+	if ( !tc.Connect( "172.17.2.20" ) )
+		_self.alert( "Failed to connect to device" );
 
 
 }

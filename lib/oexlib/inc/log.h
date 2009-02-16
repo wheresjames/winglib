@@ -197,6 +197,10 @@ public:
 	CStr GetPath()
 	{	return m_sPath; }
 
+	/// Returns non-zero if a log file is open
+	oexBOOL IsOpen()
+	{	return m_file.IsOpen(); }
+
 private:
 
 	/// Log file

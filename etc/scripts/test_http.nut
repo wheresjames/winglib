@@ -1,7 +1,7 @@
 
 function _init()
 {
-	_self.load_module( "sqmod_http_d.dll", 0 );
+	_self.load_module( _self.path( "libsqmod_http.so" ), 0 );
 
 	local server = CHttpServer();
 	if ( !server.Start( 1234 ) )

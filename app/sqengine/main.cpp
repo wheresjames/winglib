@@ -84,27 +84,6 @@ extern "C" oex::oexRESULT SRV_Start( oex::oexCSTR x_pPath, oex::oexCSTR x_pComma
 			else
 				return 0;
 
-/*
-			// Set pointer to the module manager
-			g_sqEngine.SetModuleManager( &g_sqModuleManager );
-
-			// Set pointer to the module message queue
-			g_sqEngine.SetMessageQueue( &g_sqMsgQueue );
-
-			// Initialize the script engine
-			if ( !g_sqEngine.Init() )
-				oexERROR( 0, oexT( "Unable to initialize Squirrel-Script engine" ) );
-
-			// Attempt to load the script
-			else if ( !g_sqEngine.Load( sFile.Ptr(), oex::oexTRUE ) )
-			{	oexERROR( 0, oexMks( oexT( "Squirrel-Script : " ), g_sqEngine.GetLastError().c_str() ) );
-				oexERROR( 0, oexMks( oexT( "Error executing : " ), sFile ) );
-			} // end else if
-
-			// Success
-			else
-				return 0;
-*/
 		} // end else
 
 	} // end else

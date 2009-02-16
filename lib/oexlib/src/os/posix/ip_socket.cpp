@@ -523,8 +523,7 @@ oexBOOL CIpSocket::CreateEventHandle()
 	// Create event object
 	m_pEventObject = new epoll_event[ eMaxEvents ];
 
-    // How did it turn out?
-    return c_InvalidEvent != m_hSocketEvent;
+    return oexTRUE;
 }
 
 void CIpSocket::CloseEventHandle()
@@ -580,10 +579,7 @@ oexBOOL CIpSocket::EventSelect( oexLONG x_lEvents )
 		return oexFALSE;
 	} // end if
 
-	// Save last error
-	m_uLastError = nRes ? errno : 0;
-
-	return !nRes;
+	return oexTRUE;
 }
 
 oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
@@ -594,8 +590,17 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 
     // Must have event handle
     if ( !IsEventHandle() || !m_pEventObject )
-    {   if ( !CreateEventHandle() || !EventSelect() )
+    {
+    	if ( !CreateEventHandle() )
+    	{	oexERROR( m_uLastError, "Failed to create socket event" );
+    		return 0;
+		} // end if
+
+    	if ( !EventSelect() )
+    	{	oexERROR( m_uLastError, "Failed to enable socket events" );
             return 0;
+		} // end if
+
     } // end if
 
 	// +++ Ensure our event is being waited on?
@@ -603,13 +608,18 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 	// Grab pointer to event object
 	epoll_event *pev = (epoll_event*)m_pEventObject;
 
+
+    oexSHOWL( (int)m_hSocketEvent );
+
 	// Save start time
 	oexUINT uEnd = CHqTimer::GetBootCount() + x_uTimeout;
-	for( ; ; )
+	for( ; ; ) // forever
 	{
         // What's the event state
         if ( 0 == ( m_uEventState & x_lEventId ) )
         {
+		    oexSHOWL( (int)m_hSocketEvent );
+
 			// Wait for events
 			oexINT nRes = epoll_wait( (int)m_hSocketEvent, pev, eMaxEvents, x_uTimeout );
 
@@ -617,7 +627,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 			{
 				// Log error
 				m_uLastError = errno;
-				oexERROR( errno, oexT( "epoll_ctl() failed" ) );
+				oexERROR( errno, oexMks( oexT( "epoll_ctl() failed : m_hSocketEvent = " ), (int)m_hSocketEvent ) );
 
 				// Just ditch if they aren't waiting for the close event
 				m_uEventState |= eCloseEvent;

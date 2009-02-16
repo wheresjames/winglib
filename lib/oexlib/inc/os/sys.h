@@ -63,7 +63,6 @@ public:
 	/// Flushes the standard output buffer
 	static oexINT Flush_stdout();
 
-
 	// String conversion
 public:
 

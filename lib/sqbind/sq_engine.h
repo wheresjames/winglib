@@ -59,8 +59,8 @@ public:
 	int import( const std::tstring &sClass )
 	{   return OnImport( sClass ); }
 
-	int load_module( const std::tstring &sModule, int bRelative )
-	{   return OnLoadModule( sModule, bRelative ); }
+	int load_module( const std::tstring &sModule, const std::tstring &sPath )
+	{   return OnLoadModule( sModule, sPath ); }
 
 	void quit( int nExitCode )
 	{   oex::os::CSys::Quit( nExitCode );
@@ -95,7 +95,7 @@ protected:
 
 	virtual int OnImport( const std::tstring &sClass ) { return 0; }
 
-	virtual int OnLoadModule( const std::tstring &sModule, BOOL bRelative  ) { return 0; }
+	virtual int OnLoadModule( const std::tstring &sModule, const std::tstring &sPath ) { return 0; }
 
 	virtual std::tstring OnPath( std::tstring sPath ) { return std::tstring( oexGetModulePath( sPath.c_str() ).Ptr() ); }
 
@@ -668,7 +668,7 @@ namespace sqbind
 		}
 
 		/// Loads the specified module
-		virtual int OnLoadModule( const std::tstring &sModule, BOOL bRelative )
+		virtual int OnLoadModule( const std::tstring &sModule, const std::tstring &sPath )
 		{
 			if ( !sModule.length() )
 				return -1;
@@ -676,8 +676,17 @@ namespace sqbind
 			if ( !m_pModuleManager )
 				return -2;
 
+			oex::CStr sFull;
+			if ( sPath.length() )
+				sFull = sPath.c_str();
+			else
+				sFull = oexGetModulePath();
+
+			// Create full path
+			sFull.BuildPath( ( oex::CStr() << oexT( "sqmod_" ) <<  sModule.c_str() ).DecorateName( oex::oexTRUE, oex::oexTRUE ) );
+
 			// Attempt to load the module
-			CModuleInstance *pMi = m_pModuleManager->Load( sModule.c_str() );
+			CModuleInstance *pMi = m_pModuleManager->Load( sFull.Ptr() );
 			if ( !pMi )
 				return -3;
 

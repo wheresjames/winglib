@@ -2166,6 +2166,61 @@ public:
 		return sFilename.LTrim( nOffset + 1 );
     }
 
+	TStr& DecorateName( oexBOOL bExe, oexBOOL bLib )
+	{
+		return DecorateName( *this, bExe, bLib );
+	}
+
+	TStr& DecorateName( TStr &sFile, oexBOOL bExe, oexBOOL bLib )
+	{
+#if defined( OEX_WIN32 )
+#	if defined( oexDEBUG )
+		return DecorateName( sFile, bExe, bLib, oexTRUE, oexTRUE );
+#	else
+		return DecorateName( sFile, bExe, bLib, oexFALSE, oexTRUE );
+#	endif
+#else
+#	if defined( oexDEBUG )
+		return DecorateName( sFile, bExe, bLib, oexTRUE, oexFALSE );
+#	else
+		return DecorateName( sFile, bExe, bLib, oexFALSE, oexFALSE );
+#	endif
+#endif
+
+	}
+
+	TStr& DecorateName( TStr sFile, oexBOOL bExe, oexBOOL bLib, oexBOOL bDebug, oexBOOL bWindows )
+	{
+		Destroy();
+
+		if ( bDebug )
+			sFile << oexTT( T, "_d" );
+
+		if ( bWindows )
+		{
+			if ( bExe && !bLib )
+				*this << sFile << oexTT( T, ".exe" );
+			else if ( bExe && bLib )
+				*this << sFile << oexTT( T, ".dll" );
+			else
+				*this << sFile << oexTT( T, ".lib" );
+
+		} // end if
+
+		else
+		{
+			if ( bExe && !bLib )
+				*this << sFile << oexTT( T, "" );
+			else if ( bExe && bLib )
+				*this << oexTT( T, "lib" ) << sFile << oexTT( T, ".so" );
+			else
+				*this << oexTT( T, "lib" ) << sFile << oexTT( T, ".a" );
+
+		} // end if
+
+		return *this;
+	}
+
 private:
 
     /// The string memory

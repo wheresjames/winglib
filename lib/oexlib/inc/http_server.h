@@ -108,12 +108,17 @@ public:
 	{
 		m_pData = oexNULL;
 		m_fnOnServerEvent = oexNULL;
+		m_nTransactions = 0;
+		m_pSessionData = oexNULL;
+		m_pSessionCallback = oexNULL;
 	}
 
 	~THttpServer()
 	{
 		m_pData = oexNULL;
 		m_fnOnServerEvent = oexNULL;
+		m_pSessionData = oexNULL;
+		m_pSessionCallback = oexNULL;
 	}
 
 	oexBOOL StartServer( oexINT x_nPort, PFN_OnServerEvent fnOnServerEvent = oexNULL, oexPVOID x_pData = oexNULL )
@@ -129,7 +134,6 @@ public:
 
 	virtual oexBOOL InitThread( oex::oexPVOID x_pData )
 	{
-	oexLM();
 		// Bind to port
 		if ( !m_server.Bind( m_nPort ) )
 		{	if ( m_fnOnServerEvent )
@@ -137,7 +141,6 @@ public:
 			return oexFALSE;
 		} // end if
 
-	oexLM();
 		// Listen
 		if ( !m_server.Listen( 1 ) )
 		{	if ( m_fnOnServerEvent )
@@ -145,7 +148,6 @@ public:
 			return oexFALSE;
 		} // end if
 
-	oexLM();
 		// Notify that server is running
 		if ( m_fnOnServerEvent )
 			m_fnOnServerEvent( m_pData, eSeConnect, 0, this );
@@ -158,6 +160,8 @@ public:
 		// Wait for connect event
 		if ( m_server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, 1000 ) )
 		{
+			oexLM();
+
 			// Add a new session
 			typename THttpServer::t_LstSession::iterator it = m_lstSessions.Append();
 
@@ -174,6 +178,12 @@ public:
 
 			else
 			{
+				// Count a transaction
+				m_nTransactions++;
+
+				// Set the callback function for the data
+				it->session.SetCallback( m_pSessionCallback, m_pSessionData );
+
 				// Connect the port
 				it->session.SetPort( &it->port );
 
@@ -212,6 +222,14 @@ public:
 		return oexTRUE;
 	}
 
+	/// Returns the number of client transactions serviced
+	oexINT GetNumTransactions()
+	{	return m_nTransactions; }
+
+	/// Sets the session callback function
+	void SetSessionCallback( oexPVOID x_pCallback, oexPVOID x_pData )
+	{	m_pSessionCallback = x_pCallback; m_pSessionData = x_pData; }
+
 private:
 
 	/// The TCP port to listen
@@ -219,6 +237,9 @@ private:
 
 	/// Server port
 	T_PORT						m_server;
+
+	/// Transactions
+	oexINT						m_nTransactions;
 
 	/// List of session objects
 	t_LstSession				m_lstSessions;
@@ -228,5 +249,11 @@ private:
 
 	/// Function to call on server event
 	PFN_OnServerEvent			m_fnOnServerEvent;
+
+	/// Data passed to session callback
+	oexPVOID					m_pSessionData;
+
+	/// Pointer to session callback function
+	oexPVOID					m_pSessionCallback;
 
 };

@@ -1787,6 +1787,37 @@ public:
 
 };
 
+oex::oexINT OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
+						   oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
+{
+	if ( (int)x_pData != 5678 )
+		return 0;
+
+	return 0;
+}
+
+oex::oexRESULT Test_CHttpSession()
+{
+    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
+        return -1;
+
+	oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > m_server;
+
+	if ( !oexVERIFY( m_server.StartServer( 1234, OnServerEvent, (void*)5678 ) ) )
+		return -1;
+
+	while ( !m_server.GetNumTransactions() )
+		oexSleep( 15 );
+
+	oexSleep( 1000 );
+
+    oex::os::CIpSocket::UninitSockets();
+
+	return oex::oexRES_OK;
+}
+
+
+
 oex::oexRESULT Test_MsgParams()
 {
 //	oex::CMsgParams mp( 1, 2 );
@@ -2369,6 +2400,8 @@ int main(int argc, char* argv[])
     Test_CIpSocket();
 
 	Test_Threads();
+
+	Test_CHttpSession();
 
 //	Test_MsgParams();
 
