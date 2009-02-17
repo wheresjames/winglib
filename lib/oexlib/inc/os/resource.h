@@ -117,7 +117,7 @@ public:
 	}
 
 	/// Destructor
-	~CResource()
+	virtual ~CResource()
 	{
 		if ( m_bRelease )
 			Destroy();

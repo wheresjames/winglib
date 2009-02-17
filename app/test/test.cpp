@@ -1796,20 +1796,51 @@ oex::oexINT OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oex
 	return 0;
 }
 
+oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
+{
+	if ( (int)x_pData != 9876 )
+		return 0;
+
+	x_pSession->Content() << oexT( "Hello World!" );
+
+	return 0;
+}
+
 oex::oexRESULT Test_CHttpSession()
 {
     if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
         return -1;
 
-	oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > m_server;
+	oex::os::CIpSocket client;
+	oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > server;
 
-	if ( !oexVERIFY( m_server.StartServer( 1234, OnServerEvent, (void*)5678 ) ) )
-		return -1;
+	server.SetSessionCallback( OnSessionCallback, (void*)9876 );
 
-	while ( !m_server.GetNumTransactions() )
+	if ( !oexVERIFY( server.StartServer( 1234, OnServerEvent, (void*)5678 ) ) )
+		return -2;
+
+    if ( !oexVERIFY( client.Connect( oexT( "127.0.0.1" ), 1234 ) ) )
+        return -3;
+
+    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, SOCKET_TIMEOUT ) ) )
+        return -4;
+
+	if ( !oexVERIFY( client.Send( oexT( "GET / HTTP/1.0\r\n\r\n" ) ) ) )
+        return -5;
+
+	while ( !server.GetNumTransactions() )
 		oexSleep( 15 );
 
-	oexSleep( 1000 );
+	while ( server.GetNumActiveClients() )
+		oexSleep( 15 );
+
+	oex::CStr sData = client.Read();
+
+	if ( !oexVERIFY( 0 <= sData.Match( oexT( "Hello World!" ) ) ) )
+		return -6;
+
+	client.Destroy();
+	server.Stop();
 
     oex::os::CIpSocket::UninitSockets();
 

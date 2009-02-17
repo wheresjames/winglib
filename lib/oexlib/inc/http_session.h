@@ -128,7 +128,7 @@ public:
 	};
 
 	/// Server callback
-	typedef oexINT (*PFN_Callback)( oexPVOID x_pData, THttpSession< T_PORT > *x_pSesion );
+	typedef oexINT (*PFN_Callback)( oexPVOID x_pData, THttpSession< T_PORT > *x_pSession );
 
 public:
 

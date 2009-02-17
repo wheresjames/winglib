@@ -68,7 +68,7 @@ ifeq ($(OS),win32)
 	CFG_LD := link /NOLOGO
 	CFG_CC := cl /nologo /DWIN32 /wd4996
 	CFG_AR := lib /nologo
-	CFG_DP := cl /nologo
+	CFG_DP := makedepend
 	CFG_MD := md
 	CFG_RM := rmdir /s /q
 	CFG_DEL:= del /f /q
@@ -88,6 +88,7 @@ ifeq ($(OS),win32)
 	endif
 
 	CFG_OBJ_EXT := obj
+	CFG_DEP_EXT := d
 	CFG_CUR_ROOT := $(shell cd)
 
 	CFG_LIB_PRE	 :=
@@ -249,6 +250,7 @@ else
 	CFG_LD_OUT := -o $(nullstring)
 
 	CFG_OBJ_EXT := o
+	CFG_DEP_EXT := d
 	CFG_CUR_ROOT := $(shell pwd)
 	
 	CFG_CC_INC := -I

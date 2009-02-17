@@ -134,6 +134,8 @@ public:
 
 	virtual oexBOOL InitThread( oex::oexPVOID x_pData )
 	{
+		oexLM();
+
 		// Bind to port
 		if ( !m_server.Bind( m_nPort ) )
 		{	if ( m_fnOnServerEvent )
@@ -141,12 +143,16 @@ public:
 			return oexFALSE;
 		} // end if
 
+		oexLM();
+
 		// Listen
 		if ( !m_server.Listen( 1 ) )
 		{	if ( m_fnOnServerEvent )
 				m_fnOnServerEvent( m_pData, eSeConnect, -2, this );
 			return oexFALSE;
 		} // end if
+
+		oexLM();
 
 		// Notify that server is running
 		if ( m_fnOnServerEvent )
@@ -160,8 +166,6 @@ public:
 		// Wait for connect event
 		if ( m_server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, 1000 ) )
 		{
-			oexLM();
-
 			// Add a new session
 			typename THttpServer::t_LstSession::iterator it = m_lstSessions.Append();
 
@@ -203,7 +207,6 @@ public:
 			if ( !it->IsRunning() /* || !it->port.IsConnected() */ )
 				it = m_lstSessions.Erase( it );
 
-
 		return oexTRUE;
 	}
 
@@ -229,6 +232,10 @@ public:
 	/// Sets the session callback function
 	void SetSessionCallback( oexPVOID x_pCallback, oexPVOID x_pData )
 	{	m_pSessionCallback = x_pCallback; m_pSessionData = x_pData; }
+
+	/// Returns the number of active sessions
+	oexINT GetNumActiveClients()
+	{	return m_lstSessions.Size(); }
 
 private:
 

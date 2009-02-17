@@ -24,7 +24,7 @@ endif
 
 ifeq ($(PRJ_TYPE),lib)
 ifeq ($(OS),win32)	  
-$(BLD_PATH_EXE): $(BLD_OBJECTS_TOTAL)
+$(BLD_PATH_EXE): $(BLD_OBJECTS_TOTAL) $(BLD_DEPENDS_TOTAL)
 	- $(CFG_DEL) $(subst /,\,$@)
 	$(CFG_AR) $(CFG_AFLAGS) $(CFG_AR_OUT)$@ $(BLD_OBJECTS_TOTAL)
 else
@@ -38,7 +38,7 @@ ifeq ($(PRJ_TYPE),dll)
 GO_DEPENDS 	:= $(foreach lib,$(PRJ_LIBS),$(CFG_BINROOT)/$(CFG_LIB_PRE)$(lib)$(CFG_DPOSTFIX)$(CFG_LIB_POST))
 
 ifeq ($(OS),win32)	  
-$(BLD_PATH_EXE): $(BLD_OBJECTS_TOTAL) $(GO_DEPENDS)	
+$(BLD_PATH_EXE): $(BLD_OBJECTS_TOTAL) $(GO_DEPENDS) $(BLD_DEPENDS_TOTAL)	
 	- $(CFG_DEL) $(subst /,\,$@)
 	$(CFG_LD) $(CFG_LFLAGS) $(GO_EXPORTS) $(BLD_OBJECTS_TOTAL) $(CFG_LD_OUT)$@ $(GO_LIBPATHS) $(GO_LIBS)
 else
@@ -55,7 +55,7 @@ GO_DEPENDS 	:= $(foreach lib,$(PRJ_LIBS),$(CFG_BINROOT)/$(CFG_LIB_PRE)$(lib)$(CF
 #	$(MAKE) -C $(PRJ_LIBROOT)
 	
 ifeq ($(OS),win32)	  
-$(BLD_PATH_EXE): $(BLD_OBJECTS_TOTAL) $(GO_DEPENDS)	
+$(BLD_PATH_EXE): $(BLD_OBJECTS_TOTAL) $(GO_DEPENDS)	$(BLD_DEPENDS_TOTAL)
 	- $(CFG_DEL) $(subst /,\,$@)
 	$(CFG_LD) $(CFG_LFLAGS) $(GO_EXPORTS) $(BLD_OBJECTS_TOTAL) $(CFG_LD_OUT)$@ $(GO_LIBPATHS) $(GO_LIBS)
 else

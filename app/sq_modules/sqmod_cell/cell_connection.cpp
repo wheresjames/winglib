@@ -63,11 +63,11 @@ std::string CCellConnection::GetBackplaneData()
 	ret << oexT( "RX_Bad_CRC : " ) 						<< m_cBackplane.Obj().rx_bad_crc 		<< oexNL;
 	ret << oexT( "RX_Bus_Timeout : " ) 					<< m_cBackplane.Obj().rx_bus_timeout 	<< oexNL;
 	ret << oexT( "TX_Retry : " ) 						<< m_cBackplane.Obj().tx_retry 			<< oexNL;
-	ret << oexT( "Status : " ) 							<< m_cBackplane.Obj().status 			<< oexNL;
+	ret << oexFmt( oexT( "Status : %X" ), 				   m_cBackplane.Obj().status )	 		<< oexNL;
 	ret << oexFmt( oexT( "Address : %04X" ), 			   m_cBackplane.Obj().address ) 		<< oexNL;
 	ret << oexT( "Major Rev : " ) 						<< m_cBackplane.Obj().rev_major 		<< oexNL;
 	ret << oexT( "Minor Rev : " ) 						<< m_cBackplane.Obj().rev_minor 		<< oexNL;
-	ret << oexFmt( oexT( "Serial # : %08lX" ), 	   m_cBackplane.Obj().serial_number )	<< oexNL;
+	ret << oexFmt( oexT( "Serial # : %08lX" ), 			   m_cBackplane.Obj().serial_number )	<< oexNL;
 	ret << oexT( "Backplane size : " ) 					<< m_cBackplane.Obj().rack_size 		<< oexNL;
 	ret << oexNL;
 
@@ -84,23 +84,11 @@ std::string CCellConnection::GetBackplaneData()
 													     : oexMks( m_cRack.Obj().identity[ i ]->type ) ) << oexNL;
 		ret << oexT( "ProductCode : " )				<< m_cRack.Obj().identity[ i ]->product_code << oexNL;
 		ret << oexT( "Revision : " )				<< m_cRack.Obj().identity[ i ]->rev_lo << oexNL;
-		ret << oexT( "Status : " )					<< m_cRack.Obj().identity[ i ]->status << oexNL;
+		ret << oexFmt( oexT( "Status : %X" ), 	       m_cRack.Obj().identity[ i ]->status )	<< oexNL;
 		ret << oexFmt( oexT( "Serial # : %08lX" ), 	   m_cRack.Obj().identity[ i ]->serial )	<< oexNL;
 
 	} // end for
 
-
-/*
-*/
-
 	return ret.Ptr();
-
-/*
-    dprint(DEBUG_VALUES, "Major Rev :%02X  ", backplane.rev_major);
-    dprint(DEBUG_VALUES, "Minor Rev :%02X  ", backplane.rev_minor);
-    dprint(DEBUG_VALUES, "Serial Number :%08lX  ", backplane.serial_number);
-    dprint(DEBUG_VALUES, "Backplane size :%d\n", backplane.rack_size);
-*/
-
 }
 

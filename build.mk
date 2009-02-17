@@ -78,10 +78,14 @@ endif
 BLD_OBJECTS_$(LOC_TAG) 	:= $(subst $(BLD_PATH_SRC_$(LOC_TAG))/,$(BLD_PATH_OBJ_$(LOC_TAG))/, $(BLD_SOURCES_$(LOC_TAG):.$(LOC_CXX_$(LOC_TAG))=.$(CFG_OBJ_EXT)) )
 BLD_INCS			    := $(CFG_CC_INC)$(BLD_PATH_INC_$(LOC_TAG)) $(foreach inc,$(PRJ_INCS), $(CFG_CC_INC)$(CFG_LIBROOT)/$(inc))
 
+#BLD_DEPENDS_$(LOC_TAG) 	:= $(subst $(BLD_PATH_SRC_$(LOC_TAG))/,$(BLD_PATH_OBJ_$(LOC_TAG))/, $(BLD_SOURCES_$(LOC_TAG):.$(LOC_CXX_$(LOC_TAG))=.$(CFG_DEP_EXT)) )
+#BLD_DEPENDS_INCS		:= -I$(BLD_PATH_INC_$(LOC_TAG)) $(foreach inc,$(PRJ_INCS), -I$(CFG_LIBROOT)/$(inc))
+
+BLD_DEPENDS_TOTAL := $(BLD_DEPENDS_TOTAL) $(BLD_DEPENDS_$(LOC_TAG))
 BLD_OBJECTS_TOTAL := $(BLD_OBJECTS_TOTAL) $(BLD_OBJECTS_$(LOC_TAG))
 
 ifneq ($(OS),win32)
-include $(wildcard $(BLD_PATH_OBJ_$(LOC_TAG))/*.d)
+include $(wildcard $(BLD_PATH_OBJ_$(LOC_TAG))/*.$(CFG_DEP_EXT))
 endif
 
 #-------------------------------------------------------------------
@@ -121,14 +125,19 @@ BLD_CLEAN := $(BLD_CLEAN) clean_$(LOC_TAG)
 # Build
 #-------------------------------------------------------------------
 
-$(print this is a test)
 $(print BLD_OBJECTS_$(LOC_TAG) )
 $(print $(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) )
 
-ifeq ($(OS),win32)	  
+ifeq ($(OS),win32)
+
+#$(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_DEP_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
+#	echo # makedepend -f$@ $< >> $@
+#	$(CFG_DP) $(subst /,\,$(BLD_DEPENDS_INCS)) -p$(BLD_PATH_OBJ_$(LOC_TAG)) -f$@ $<
+
 $(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
 	- $(CFG_DEL) $(subst /,\,$@)
 	$(BLD_COMPILER) $(CFG_CFLAGS) $(CFG_DEFS) $(BLD_INCS) $(BLD_MSFLAGS) $< $(CFG_CC_OUT)$@
+	
 else
 $(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
 	- $(CFG_DEL) $@

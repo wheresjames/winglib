@@ -1,10 +1,19 @@
 
-function _init()
-{
-	_self.load_module( _self.path( "libsqmod_http.so" ), 0 );
+_self.load_module( "http", "" );
 
-	local server = CHttpServer();
-	if ( !server.Start( 1234 ) )
+class CGlobal
+{
+	server = 0;
+};
+
+local _g = CGlobal();
+
+function _init() : ( _g )
+{
+
+	_g.server = CHttpServer();
+
+	if ( !_g.server.Start( 1234 ) )
 		_self.alert( "Unable to start http server" );
 
 }

@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
 	oexINIT();
 
 	// Initialize sockets
-    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
+    if ( !oex::os::CIpSocket::InitSockets() )
     {	oexERROR( 0, "Unable to initialize sockets" );
         return -1;
 	} // end if
