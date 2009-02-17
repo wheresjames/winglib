@@ -510,7 +510,7 @@ oexBOOL CIpSocket::CreateEventHandle()
         return oexTRUE;
 
 	// Create an event handle
-	m_hSocketEvent = (oexPVOID)epoll_create( 1 );
+	m_hSocketEvent = (oexPVOID)epoll_create( eMaxEvents );
 
 	if ( -1 == (int)m_hSocketEvent )
     {	m_uLastError = errno;
@@ -608,9 +608,6 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 	// Grab pointer to event object
 	epoll_event *pev = (epoll_event*)m_pEventObject;
 
-
-    oexSHOWL( (int)m_hSocketEvent );
-
 	// Save start time
 	oexUINT uEnd = CHqTimer::GetBootCount() + x_uTimeout;
 	for( ; ; ) // forever
@@ -618,8 +615,6 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
         // What's the event state
         if ( 0 == ( m_uEventState & x_lEventId ) )
         {
-		    oexSHOWL( (int)m_hSocketEvent );
-
 			// Wait for events
 			oexINT nRes = epoll_wait( (int)m_hSocketEvent, pev, eMaxEvents, x_uTimeout );
 
@@ -649,6 +644,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 
 					// Save the status of all events
 					if ( pev[ i ].data.fd == (int)m_hSocket )
+					{	pev[ i ].events = 0;
 						for ( oexUINT uMask = 1; uMask < eAllEvents; uMask <<= 1 )
 							if ( uFlags & uMask )
 							{
@@ -667,6 +663,8 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 //									m_uConnectState |= 2;
 
 							} // end if
+
+					} // end if
 
 				} // end for
 
@@ -715,34 +713,34 @@ oexUINT CIpSocket::GetEventBit( oexLONG x_lEventMask )
 {
     // !!!  Events will be returned by WaitEvent() in the order
     //      they appear below.
-/*
-	if ( 0 != ( FD_CONNECT & x_lEventMask ) )
-        return FD_CONNECT_BIT;
 
-	if ( 0 != ( FD_ACCEPT & x_lEventMask ) )
-        return FD_ACCEPT_BIT;
+	if ( 0 != ( eConnectEvent & x_lEventMask ) )
+        return eConnectBit;
 
-	if ( 0 != ( FD_WRITE & x_lEventMask ) )
-        return FD_WRITE_BIT;
+	if ( 0 != ( eAcceptEvent & x_lEventMask ) )
+        return eAcceptBit;
 
-	if ( 0 != ( FD_READ & x_lEventMask ) )
-        return FD_READ_BIT;
+	if ( 0 != ( eWriteEvent & x_lEventMask ) )
+        return eWriteBit;
 
-	if ( 0 != ( FD_OOB & x_lEventMask ) )
-        return FD_OOB_BIT;
+	if ( 0 != ( eReadEvent & x_lEventMask ) )
+        return eReadBit;
 
-	if ( 0 != ( FD_QOS & x_lEventMask ) )
-        return FD_QOS_BIT;
+	if ( 0 != ( eOobEvent & x_lEventMask ) )
+        return eOobBit;
 
-	if ( 0 != ( FD_GROUP_QOS & x_lEventMask ) )
-        return FD_GROUP_QOS_BIT;
+	if ( 0 != ( eQosEvent & x_lEventMask ) )
+        return eQosBit;
 
-	if ( 0 != ( FD_ROUTING_INTERFACE_CHANGE & x_lEventMask ) )
-        return FD_ROUTING_INTERFACE_CHANGE_BIT;
+	if ( 0 != ( eGroupQosEvent & x_lEventMask ) )
+        return eGroupQosBit;
 
-	if ( 0 != ( FD_CLOSE & x_lEventMask ) )
-        return FD_CLOSE_BIT;
-*/
+	if ( 0 != ( eRoutingInterfaceChangeEvent & x_lEventMask ) )
+        return eRoutingInterfaceChangeBit;
+
+	if ( 0 != ( eCloseEvent & x_lEventMask ) )
+        return eCloseBit;
+
 	return 0;
 }
 

@@ -1814,7 +1814,7 @@ oex::oexRESULT Test_CHttpSession()
 	oex::os::CIpSocket client;
 	oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > server;
 
-	server.SetSessionCallback( OnSessionCallback, (void*)9876 );
+	server.SetSessionCallback( (oex::oexPVOID)OnSessionCallback, (void*)9876 );
 
 	if ( !oexVERIFY( server.StartServer( 1234, OnServerEvent, (void*)5678 ) ) )
 		return -2;

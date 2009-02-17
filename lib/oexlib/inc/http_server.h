@@ -134,8 +134,6 @@ public:
 
 	virtual oexBOOL InitThread( oex::oexPVOID x_pData )
 	{
-		oexLM();
-
 		// Bind to port
 		if ( !m_server.Bind( m_nPort ) )
 		{	if ( m_fnOnServerEvent )
@@ -143,16 +141,12 @@ public:
 			return oexFALSE;
 		} // end if
 
-		oexLM();
-
 		// Listen
 		if ( !m_server.Listen( 1 ) )
 		{	if ( m_fnOnServerEvent )
 				m_fnOnServerEvent( m_pData, eSeConnect, -2, this );
 			return oexFALSE;
 		} // end if
-
-		oexLM();
 
 		// Notify that server is running
 		if ( m_fnOnServerEvent )

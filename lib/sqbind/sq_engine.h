@@ -479,7 +479,9 @@ namespace sqbind
 		}
 
 		oex::oexINT LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e )
-		{	m_sErr = oex::CStr().Fmt( oexT( "%s(%lu)\r\n   %s" ), x_e.sSource.c_str(), x_e.uLine, x_e.sDesc.c_str() ).Ptr();
+		{	oex::CStr sErr = oex::CStr().Fmt( oexT( "%s(%lu)\r\n   %s" ), x_e.sSource.c_str(), x_e.uLine, x_e.sDesc.c_str() );
+			oexERROR( 0, sErr );
+			m_sErr = sErr.Ptr();
 			return x_nReturn;
 		}
 

@@ -279,5 +279,4 @@ private:
 	t_MsgQueue                                  m_lstMsgQueue;
 };
 
-
 DECLARE_INSTANCE_TYPE( CSqMsgQueue );
