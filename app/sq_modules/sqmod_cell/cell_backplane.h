@@ -10,6 +10,7 @@ public:
 	/// Default constructor
 	CCellBackplane()
 	{
+		oexZeroMemory( &m_backplane, sizeof( m_backplane ) );
 	}
 
 	/// Destructor
@@ -19,6 +20,9 @@ public:
 
 	/// Returns _backplane_data reference
 	operator _backplane_data&() { return m_backplane; }
+
+	/// Returns _backplane_data reference
+	_backplane_data& Obj() { return m_backplane; }
 
 private:
 

@@ -10,6 +10,7 @@ public:
 	/// Default constructor
 	CCellRack()
 	{
+		oexZeroMemory( &m_rack, sizeof( m_rack ) );
 	}
 
 	/// Destructor
@@ -19,6 +20,9 @@ public:
 
 	/// Returns _rack reference
 	operator _rack&() { return m_rack; }
+
+	/// Returns _rack reference
+	_rack& Obj() { return m_rack; }
 
 private:
 

@@ -68,7 +68,12 @@
 #************************************************
 # MontaVista build
 #************************************************
-TARGET=arm-linux
+#TARGET=arm-linux
+#TARGET=arm-none-linux-gnueabi
+#TARGET=armelf-linux-gnueabi
+#TARGET=arm-linux-gnueabi
+#TARGET=armelf-linux-eabi
+TARGET=armeb-unknown-linux-gnu
 VER_BINUTILS=binutils-2.16
 #VER_BINUTILS=binutils-2.19
 VER_GCC=gcc-3.4.4
@@ -91,7 +96,7 @@ BUILD=i686-pc-linux-gnu
 HOST=i686-pc-linux-gnu
 export ARCH=arm
 PATCHES=$PWD/patches
-PREFIX=$PWD/../../tools/${ARCH}-${VER_LINUX}
+PREFIX=$PWD/../../tools/${TARGET}
 DOWNLOADS=$PWD/../../downloads
 SYSROOT=${PREFIX}/sysroot
 BUILDROOT=${PREFIX}/src

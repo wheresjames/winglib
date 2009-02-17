@@ -178,7 +178,7 @@ else
 		else
 	
 			# Custom tools
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-linux-
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/$(TOOLS)-
 			override TOOLS := custom
 
 			CFG_STDLIB := -lrt -pthread

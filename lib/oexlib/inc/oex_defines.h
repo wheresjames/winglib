@@ -164,6 +164,7 @@
 #define oexSleep					OEX_NAMESPACE::os::CSys::Sleep
 #define oexMicroSleep				OEX_NAMESPACE::os::CSys::MicroSleep
 #define oexPrintf					OEX_NAMESPACE::os::CSys::Printf
+#define oexFmt						OEX_NAMESPACE::CStr().Fmt
 #define oexAlert					OEX_NAMESPACE::os::CSys::ShowMessageBox
 
 #define oexGuidToString				OEX_NAMESPACE::CStr().GuidToString

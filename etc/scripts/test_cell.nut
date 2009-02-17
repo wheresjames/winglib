@@ -8,10 +8,9 @@ function _init()
 	if ( !tc.Connect( "172.17.2.20" ) )
 		_self.alert( "Failed to connect to device" );
 
+	_self.alert( tc.GetBackplaneData() );
 
 }
-
-
 
 function _idle()
 {

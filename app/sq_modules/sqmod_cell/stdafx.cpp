@@ -3,12 +3,12 @@
 #include "stdafx.h"
 #include "cell_services.h"
 
-
 // Export Functions
 SQBIND_REGISTER_CLASS_BEGIN( CCellConnection, "CCellConnection" )
 	SQBIND_MEMBER_FUNCTION( CCellConnection, Connect )
 	SQBIND_MEMBER_FUNCTION( CCellConnection, Destroy )
 	SQBIND_MEMBER_FUNCTION( CCellConnection, GetLastError )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, GetBackplaneData )
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CCellConnection );
 

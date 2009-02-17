@@ -10,6 +10,7 @@ public:
 	/// Default constructor
 	CCellServices()
 	{
+		oexZeroMemory( &m_services, sizeof( m_services ) );
 	}
 
 	/// Destructor
