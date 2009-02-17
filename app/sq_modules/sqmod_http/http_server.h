@@ -11,29 +11,27 @@ public:
 		m_pMsgQueue = oexNULL;
 	}
 
-	void SetQueue( CSqMsgQueue *x_pMsgQueue )
-	{
-		m_pMsgQueue = x_pMsgQueue;
-	}
+	void SetCallback( CSqMsgQueue *x_pMsgQueue, const std::tstring &sServer, const std::tstring &sSession );
 
-	virtual int Start( int nPort )
-	{
-		// Set session callback
-		m_server.SetSessionCallback( (oex::oexPVOID)CHttpServerImpl::OnSessionCallback, this );
-
-		// Start the server
-		if ( !m_server.StartServer( nPort, CHttpServerImpl::OnServerEvent, this ) )
-			return 0;
-
-		return 1;
-	}
+	virtual int Start( int nPort );
 
 	/// Server callback
-	static oex::oexINT OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
-								      oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer );
+	static oex::oexINT _OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
+								       oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer );
+	oex::oexINT OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
+						       oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
+	{
+		return 0;
+	}
 
 	/// Session callback
-	static oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession );
+	static oex::oexINT _OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession );
+	oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
+	{
+		x_pSession->Content() << oexT( "Hello World!" );
+
+		return 0;
+	}
 
 private:
 
@@ -41,7 +39,13 @@ private:
 	oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > m_server;
 
 	// Callback
-	CSqMsgQueue *m_pMsgQueue;
+	CSqMsgQueue		*m_pMsgQueue;
+
+	// Server callback function
+	std::tstring	m_sServer;
+
+	// Session callback function
+	std::tstring	m_sSession;
 };
 
 class CHttpServer
@@ -51,6 +55,7 @@ public:
 	CHttpServer()
 	{
 		m_pServer = oexNULL;
+		Init();
 	}
 
 	~CHttpServer()
@@ -66,15 +71,13 @@ public:
 			m_pServer = new CHttpServerImpl();
 	}
 
-	void SetQueue( CSqMsgQueue *x_pMsgQueue )
+	void SetCallback( CSqMsgQueue *x_pMsgQueue, const std::tstring &sServer, const std::tstring &sSession )
 	{
-		m_pServer->SetQueue( x_pMsgQueue );
+		m_pServer->SetCallback( x_pMsgQueue, sServer, sSession );
 	}
 
 	int Start( int nPort )
 	{
-		Init();
-
 		return m_pServer->Start( nPort );
 	}
 

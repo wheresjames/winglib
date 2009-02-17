@@ -11,3 +11,6 @@ makefiles   = $(wildcard *.mk)
 	$(MAKE) -f $@ $(BUILDTYPE)
 	
 
+# DO NOT DELETE
+
+v:\Code\pedge\lib2\winglib\dep/../../abel/lib/creatememory.obj: v:\Code\pedge\lib2\winglib\dep\..\..\abel\lib/libabplc5.h

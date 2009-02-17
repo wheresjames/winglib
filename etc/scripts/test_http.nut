@@ -8,6 +8,11 @@ class CGlobal
 
 local _g = CGlobal();
 
+function OnServerEvent( server, data )
+{
+
+}
+
 function OnProcessRequest( session, data )
 {
 
@@ -17,7 +22,7 @@ function _init() : ( _g )
 {
 	_g.server = CHttpServer();
 
-	_g.server.SetQueue( _self.queue() );
+	_g.server.SetCallback( _self.queue(), "OnServerEvent", "OnProcessRequest" );
 
 	if ( !_g.server.Start( 1234 ) )
 		_self.alert( "Unable to start http server" );

@@ -75,6 +75,10 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
     oexPVOID pData = pThread->GetUserData();
     oexUINT uSleep = pThread->GetSleepTime();
 
+	// Initialize sockets
+    if ( !oex::os::CIpSocket::InitSockets() )
+    	oexERROR( 0, "Unable to initialize sockets" );
+
 	// Initialize thread
 	oexBOOL bInit = pThread->InitThread( pData );
 
@@ -93,6 +97,9 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 		nRet = pThread->EndThread( pData );
 
 	} // end if
+
+	// Uninitialize sockets
+    oex::os::CIpSocket::UninitSockets();
 
     /// Decrement the running thread count
     CThread::DecRunningThreadCount();

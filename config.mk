@@ -23,6 +23,7 @@ else
 	LIBLINK := shared
 endif
 
+#CFG_CURDIR := `pwd`
 CFG_ROOT := $(PRJ_LIBROOT)/../..
 CFG_TOOLROOT := $(PRJ_LIBROOT)/../tools
 CFG_LIBROOT  := $(PRJ_LIBROOT)/..

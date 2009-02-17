@@ -7,7 +7,7 @@
 // Export Functions
 SQBIND_REGISTER_CLASS_BEGIN( CHttpServer, "CHttpServer" )
 	SQBIND_MEMBER_FUNCTION( CHttpServer, Start )
-	SQBIND_MEMBER_FUNCTION( CHttpServer, SetQueue )
+	SQBIND_MEMBER_FUNCTION( CHttpServer, SetCallback )
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CHttpServer );
 
