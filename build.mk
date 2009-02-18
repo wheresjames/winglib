@@ -72,16 +72,16 @@ BLD_PATH_LNK_$(LOC_TAG) := /usr/bin
 BLD_SOURCES_$(LOC_TAG) 	:= $(wildcard $(BLD_PATH_SRC_$(LOC_TAG))/*.$(LOC_CXX_$(LOC_TAG)))
 ifneq ($(LOC_EXC_$(LOC_TAG)),)
 BLD_EXCLUDE_$(LOC_TAG) 	:= $(foreach file,$(LOC_EXC_$(LOC_TAG)),$(BLD_PATH_SRC_$(LOC_TAG))/$(file).$(LOC_CXX_$(LOC_TAG)))
-BLD_SOURCES_$(LOC_TAG) := $(filter-out $(BLD_EXCLUDE_$(LOC_TAG)),$(BLD_SOURCES_$(LOC_TAG)))
+BLD_SOURCES_$(LOC_TAG) 	:= $(filter-out $(BLD_EXCLUDE_$(LOC_TAG)),$(BLD_SOURCES_$(LOC_TAG)))
 endif
 
 BLD_OBJECTS_$(LOC_TAG) 	:= $(subst $(BLD_PATH_SRC_$(LOC_TAG))/,$(BLD_PATH_OBJ_$(LOC_TAG))/, $(BLD_SOURCES_$(LOC_TAG):.$(LOC_CXX_$(LOC_TAG))=.$(CFG_OBJ_EXT)) )
 BLD_INCS			    := $(CFG_CC_INC)$(BLD_PATH_INC_$(LOC_TAG)) $(foreach inc,$(PRJ_INCS), $(CFG_CC_INC)$(CFG_LIBROOT)/$(inc))
-BLD_OBJECTS_TOTAL := $(BLD_OBJECTS_TOTAL) $(BLD_OBJECTS_$(LOC_TAG))
+BLD_OBJECTS_TOTAL 		:= $(BLD_OBJECTS_TOTAL) $(BLD_OBJECTS_$(LOC_TAG))
 
-#BLD_DEPENDS_$(LOC_TAG) 	:= $(subst $(BLD_PATH_SRC_$(LOC_TAG))/,$(BLD_PATH_OBJ_$(LOC_TAG))/, $(BLD_SOURCES_$(LOC_TAG):.$(LOC_CXX_$(LOC_TAG))=.$(CFG_DEP_EXT)) )
+#BLD_DEPENDS_$(LOC_TAG) := $(subst $(BLD_PATH_SRC_$(LOC_TAG))/,$(BLD_PATH_OBJ_$(LOC_TAG))/, $(BLD_SOURCES_$(LOC_TAG):.$(LOC_CXX_$(LOC_TAG))=.$(CFG_DEP_EXT)) )
 #BLD_DEPENDS_INCS		:= -I$(BLD_PATH_INC_$(LOC_TAG)) $(foreach inc,$(PRJ_INCS), -I$(CFG_LIBROOT)/$(inc))
-#BLD_DEPENDS_TOTAL := $(BLD_DEPENDS_TOTAL) $(BLD_DEPENDS_$(LOC_TAG))
+#BLD_DEPENDS_TOTAL 		:= $(BLD_DEPENDS_TOTAL) $(BLD_DEPENDS_$(LOC_TAG))
 
 
 ifneq ($(OS),win32)
@@ -116,10 +116,10 @@ clean_$(LOC_TAG):
 
 endif
 
-BLD_ALL := $(BLD_ALL) all_$(LOC_TAG)
+BLD_ALL 	:= $(BLD_ALL) all_$(LOC_TAG)
 BLD_REBUILD := $(BLD_REBUID) rebuild_$(LOC_TAG)
-BLD_SETUP := $(BLD_SETUP) setup_$(LOC_TAG)
-BLD_CLEAN := $(BLD_CLEAN) clean_$(LOC_TAG)
+BLD_SETUP 	:= $(BLD_SETUP) setup_$(LOC_TAG)
+BLD_CLEAN 	:= $(BLD_CLEAN) clean_$(LOC_TAG)
 
 #-------------------------------------------------------------------
 # Build

@@ -71,7 +71,7 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 extern "C" oex::oexRESULT SQBIND_Export_Symbols( sqbind::VM *x_vm, sqbind::SSqAllocator *x_pAllocator )
 {
 	// Set the memory allocator
-	SQBIND_SetAllocator( x_pAllocator );
+	sqbind::SQBIND_SetAllocator( x_pAllocator );
 
 	/* !!! NOTICE !!!
 

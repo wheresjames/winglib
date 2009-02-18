@@ -260,7 +260,7 @@ protected:
 		std::tstring sOnMsg( oexT( "onmsg" ) );
 
 		// Message to self
-		if ( sPath == _T( "." ) )
+		if ( !sPath.length() || sPath == _T( "." ) )
 			ProcessMsg( sOnMsg, mapParams, pmapReply );
 
 		// All the way to the top?

@@ -34,37 +34,40 @@
 
 #pragma once
 
-sqbind::SSqAllocator g_SqAllocator = { 0, 0, 0 };
-
-oex::oexRESULT SQBIND_SetAllocator( sqbind::SSqAllocator *x_pAllocator )
+namespace sqbind
 {
-	if ( x_pAllocator )
-		oexMemCpy( &g_SqAllocator, x_pAllocator, sizeof( g_SqAllocator ) );
-	else
-		oexZeroMemory( &g_SqAllocator, sizeof( g_SqAllocator ) );
+	static SSqAllocator g_SqAllocator = { 0, 0, 0 };
 
-	return 0;
-}
+	oex::oexRESULT SQBIND_SetAllocator( sqbind::SSqAllocator *x_pAllocator )
+	{
+		if ( x_pAllocator )
+			oexMemCpy( &g_SqAllocator, x_pAllocator, sizeof( g_SqAllocator ) );
+		else
+			oexZeroMemory( &g_SqAllocator, sizeof( g_SqAllocator ) );
+
+		return 0;
+	}
+}; // end namespace sqbind
 
 void *sq_vm_malloc( SQUnsignedInteger size )
 {
-	if ( oexCHECK_PTR( g_SqAllocator.fnMalloc ) )
-		return g_SqAllocator.fnMalloc( size );
+	if ( oexCHECK_PTR( sqbind::g_SqAllocator.fnMalloc ) )
+		return sqbind::g_SqAllocator.fnMalloc( size );
 	return malloc( size );
 }
 
 void *sq_vm_realloc( void *p, SQUnsignedInteger oldsize, SQUnsignedInteger size )
 {
-	if ( oexCHECK_PTR( g_SqAllocator.fnRealloc ) )
-		return g_SqAllocator.fnRealloc( p, size );
+	if ( oexCHECK_PTR( sqbind::g_SqAllocator.fnRealloc ) )
+		return sqbind::g_SqAllocator.fnRealloc( p, size );
 
 	return realloc( p, size );
 }
 
 void sq_vm_free( void *p, SQUnsignedInteger size )
 {
-	if ( oexCHECK_PTR( g_SqAllocator.fnFree ) )
-	{	g_SqAllocator.fnFree( p );
+	if ( oexCHECK_PTR( sqbind::g_SqAllocator.fnFree ) )
+	{	sqbind::g_SqAllocator.fnFree( p );
 		return;
 	} // end if
 

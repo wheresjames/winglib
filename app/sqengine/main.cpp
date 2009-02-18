@@ -38,7 +38,7 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 //sqbind::CSqEngine		g_sqEngine;
 //CSqMsgQueue				g_sqMsgQueue;
 
-CScriptThread			g_sqScriptThread;
+sqbind::CScriptThread	g_sqScriptThread;
 sqbind::CModuleManager	g_sqModuleManager;
 
 

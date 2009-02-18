@@ -13,8 +13,9 @@ function OnServerEvent( server, data )
 
 }
 
-function OnProcessRequest( session, data )
+function OnProcessRequest() // session, data )
 {
+	_self.alert( "Hello world" );
 
 }
 

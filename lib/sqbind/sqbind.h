@@ -31,6 +31,9 @@
 //   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
+// * Imporant note on GCC 4.x
+//		http://squirrel-lang.org/forums/thread/1110.aspx
+//----------------------------------------------------------------*/
 
 #pragma once
 
@@ -43,6 +46,7 @@
 //#include <list>
 //#include <map>
 //#include <vector>
+
 
 namespace std { typedef basic_string< oex::oexTCHAR > tstring; }
 
@@ -65,6 +69,9 @@ namespace std { typedef basic_string< oex::oexTCHAR > tstring; }
 #include "sq_vector.h"
 #include "sq_map.h"
 #include "sq_list.h"
+
+#define SQBIND_DECLARE_INSTANCE( c ) \
+    }; DECLARE_INSTANCE_TYPE_NAME( sqbind::c, c ); namespace sqbind {
 
 namespace sqbind
 {
@@ -108,13 +115,19 @@ namespace sqbind
         CSqList::Register( x_vm );
     };
 
+	/// Sets the allocator for squirrel engine
+	/**
+		This is a must if different heaps are used.
+	*/
+	oex::oexRESULT SQBIND_SetAllocator( SSqAllocator *x_pAllocator );
+
 	#include "module_manager.h"
+	#include "msg_queue.h"
+	#include "sq_engine.h"
+	#include "script_thread.h"
+
 };
 
-// Declare set allocator function
-oex::oexRESULT SQBIND_SetAllocator( sqbind::SSqAllocator *x_pAllocator );
 
-// The meat of the engine
-#include "msg_queue.h"
-#include "sq_engine.h"
-#include "script_thread.h"
+
+

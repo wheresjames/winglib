@@ -34,7 +34,7 @@
 
 #pragma once
 
-class CSqMsgQueue
+class CSqMsgQueue : public oexEvent
 {
 public:
 
@@ -77,7 +77,7 @@ public:
 		m_lstMsgQueue.clear();
 
 		// Reset event
-		m_evMsgWaiting.Reset();
+		Reset();
 	}
 
 	/// Sends a command to the thread
@@ -85,6 +85,8 @@ public:
 		\param [in]     sMsg        -   Command
 		\param [in]     mapParams   -   Parameters
 		\param [out]    pmapReply   -   Receives reply
+		\param [in]		uTimeout	-	Maximum amount of time to wait
+										for a reply.
 
 		If pmapReply is not NULL, the function waits for a reply
 		from the thread.
@@ -122,7 +124,7 @@ public:
 			m_lstMsgQueue.push_back( SMsg( sMsg, pmapParams, evReply, pmapReply ) );
 
 			// Signal that a message is waiting
-			m_evMsgWaiting.Signal();
+			Signal();
 
 		} // end message stuffing
 
@@ -230,7 +232,7 @@ protected:
 
 				// Reset signal if queue is empty
 				if ( !m_lstMsgQueue.size() )
-					m_evMsgWaiting.Reset();
+					Reset();
 
 				return TRUE;
 
@@ -242,7 +244,7 @@ protected:
 		} // end while
 
 		// Reset signal
-		m_evMsgWaiting.Reset();
+		Reset();
 
 		return TRUE;
 	}
@@ -261,13 +263,31 @@ protected:
 
 private:
 
+public:
+
+	virtual oex::oexBOOL execute( t_Params *pReply, const std::tstring &sName, const std::tstring &sFunction )
+	{	t_Params params;
+		params[ oexT( "name" ) ] = sName;
+		params[ oexT( "execute" ) ] = sFunction;
+		return Msg( oexT( "msg" ), &params, pReply );
+	}
+
+	virtual oex::oexBOOL execute( t_Params *pReply, const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1 )
+	{	t_Params params;
+		params[ oexT( "name" ) ] = sName;
+		params[ oexT( "execute1" ) ] = sFunction;
+		params[ oexT( "p1" ) ] = sP1;
+		return Msg( oexT( "msg" ), &params, pReply );
+	}
+
+
 private:
 
 	/// Our thread id
 	oex::oexUINT								m_uCurrentThreadId;
 
 	/// Set when a message is waiting in the queue
-	oexEvent									m_evMsgWaiting;
+//	oexEvent									m_evMsgWaiting;
 
 	/// Message queue lock
 	oexLock		                                m_cLock;
@@ -279,4 +299,38 @@ private:
 	t_MsgQueue                                  m_lstMsgQueue;
 };
 
-DECLARE_INSTANCE_TYPE( CSqMsgQueue );
+SQBIND_DECLARE_INSTANCE( CSqMsgQueue );
+
+/*
+class SQ_CSqMsgQueue
+{
+public:
+
+	SQ_CSqMsgQueue()
+	{
+		m_pMsgQueue = oexNULL;
+	}
+
+	SQ_CSqMsgQueue( const SQ_CSqMsgQueue &r )
+	{	m_pMsgQueue = r.m_pMsgQueue; }
+
+	void Set( CSqMsgQueue *x_pMsgQueue )
+	{	m_pMsgQueue = x_pMsgQueue; }
+
+	CSqMsgQueue* Get()
+	{	return m_pMsgQueue; }
+
+public:
+	static void Register( SquirrelVM &vm )
+	{
+		SqPlus::SQClassDef< SQ_CSqMsgQueue >( vm, oexT( "CSqMsgQueue" ) )
+			;
+	}
+
+private:
+
+	CSqMsgQueue		*m_pMsgQueue;
+};
+
+SQBIND_DECLARE_INSTANCE( SQ_CSqMsgQueue );
+*/

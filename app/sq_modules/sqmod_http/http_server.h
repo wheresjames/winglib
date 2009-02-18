@@ -11,7 +11,7 @@ public:
 		m_pMsgQueue = oexNULL;
 	}
 
-	void SetCallback( CSqMsgQueue *x_pMsgQueue, const std::tstring &sServer, const std::tstring &sSession );
+	void SetCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const std::tstring &sServer, const std::tstring &sSession );
 
 	virtual int Start( int nPort );
 
@@ -28,9 +28,13 @@ public:
 	static oex::oexINT _OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession );
 	oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
 	{
-		x_pSession->Content() << oexT( "Hello World!" );
+		if ( m_pMsgQueue )
+			m_pMsgQueue->execute( oexNULL, oexT( "." ), m_sSession );
 
-		return 0;
+
+//		x_pSession->Content() << oexT( "Hello World!" );
+
+		return -1;
 	}
 
 private:
@@ -39,13 +43,13 @@ private:
 	oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > m_server;
 
 	// Callback
-	CSqMsgQueue		*m_pMsgQueue;
+	sqbind::CSqMsgQueue		*m_pMsgQueue;
 
 	// Server callback function
-	std::tstring	m_sServer;
+	std::tstring			m_sServer;
 
 	// Session callback function
-	std::tstring	m_sSession;
+	std::tstring			m_sSession;
 };
 
 class CHttpServer
@@ -71,7 +75,7 @@ public:
 			m_pServer = new CHttpServerImpl();
 	}
 
-	void SetCallback( CSqMsgQueue *x_pMsgQueue, const std::tstring &sServer, const std::tstring &sSession )
+	void SetCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const std::tstring &sServer, const std::tstring &sSession )
 	{
 		m_pServer->SetCallback( x_pMsgQueue, sServer, sSession );
 	}
