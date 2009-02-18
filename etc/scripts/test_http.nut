@@ -31,8 +31,8 @@ function _init() : ( _g )
 
 function _idle()
 {
-	_self.alert( "Waiting..." );
+//	_self.alert( "Waiting..." );
 
-	return 1;
+	return 0;
 }
 

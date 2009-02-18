@@ -28,13 +28,14 @@ public:
 	static oex::oexINT _OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession );
 	oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
 	{
-		if ( m_pMsgQueue )
-			m_pMsgQueue->execute( oexNULL, oexT( "." ), m_sSession );
+		if ( !oexCHECK_PTR( m_pMsgQueue ) )
+			return -1;
 
+		m_pMsgQueue->execute( oexNULL, oexT( "." ), m_sSession );
 
 //		x_pSession->Content() << oexT( "Hello World!" );
 
-		return -1;
+		return 0;
 	}
 
 private:

@@ -211,6 +211,9 @@ protected:
 		if ( !ll.IsLocked() )
 			return FALSE;
 
+		// Remember who owns us
+		m_uCurrentThreadId = oex::os::CSys::GetCurrentThreadId();
+
 		// Any messages waiting?
 		if ( m_lstMsgQueue.begin() == m_lstMsgQueue.end() )
 			return TRUE;

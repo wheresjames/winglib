@@ -20,7 +20,6 @@ int CHttpServerImpl::Start( int nPort )
 	return 1;
 }
 
-
 oex::oexINT CHttpServerImpl::_OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
 										     oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
 {
