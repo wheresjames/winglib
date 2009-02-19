@@ -1,9 +1,10 @@
 
 # Total dependencies
-BUILDDIRS := lib/oexlib app/test app/iptest app/srvrund app/srvmod app/sqengine
+BUILDDIRS := lib/oexlib app/test app/iptest app/srvrund app/srvmod
 
 ifdef SQMOD
-	BUILDDIRS := $(BUILDDIRS) app/sq_modules/sqmod_test app/sq_modules/sqmod_cell \
+	BUILDDIRS := $(BUILDDIRS) lib/sqbind app/sqengine \
+							  app/sq_modules/sqmod_test app/sq_modules/sqmod_cell \
 	                          app/sq_modules/sqmod_http
 endif
 

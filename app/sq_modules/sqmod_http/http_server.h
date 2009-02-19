@@ -11,7 +11,7 @@ public:
 		m_pMsgQueue = oexNULL;
 	}
 
-	void SetCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const std::tstring &sServer, const std::tstring &sSession );
+	void SetCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sServer, const sqbind::stdString &sSession );
 
 	virtual int Start( int nPort );
 
@@ -19,24 +19,11 @@ public:
 	static oex::oexINT _OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
 								       oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer );
 	oex::oexINT OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
-						       oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
-	{
-		return 0;
-	}
+						       oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer );
 
 	/// Session callback
 	static oex::oexINT _OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession );
-	oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
-	{
-		if ( !oexCHECK_PTR( m_pMsgQueue ) )
-			return -1;
-
-		m_pMsgQueue->execute( oexNULL, oexT( "." ), m_sSession );
-
-//		x_pSession->Content() << oexT( "Hello World!" );
-
-		return 0;
-	}
+	oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession );
 
 private:
 
@@ -47,10 +34,10 @@ private:
 	sqbind::CSqMsgQueue		*m_pMsgQueue;
 
 	// Server callback function
-	std::tstring			m_sServer;
+	sqbind::stdString		m_sServer;
 
 	// Session callback function
-	std::tstring			m_sSession;
+	sqbind::stdString		m_sSession;
 };
 
 class CHttpServer
@@ -76,7 +63,7 @@ public:
 			m_pServer = new CHttpServerImpl();
 	}
 
-	void SetCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const std::tstring &sServer, const std::tstring &sSession )
+	void SetCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sServer, const sqbind::stdString &sSession )
 	{
 		m_pServer->SetCallback( x_pMsgQueue, sServer, sSession );
 	}

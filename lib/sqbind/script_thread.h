@@ -41,308 +41,55 @@ class CScriptThread :
 public:
 
     /// Map type for child script  thread objects
-    typedef std::map< std::tstring, CScriptThread* >     t_ScriptList;
+    typedef std::map< stdString, CScriptThread* >     t_ScriptList;
 
 public:
 
     /// Default constructor
-    CScriptThread()
-	{	m_pModuleManager = oexNULL;
-		m_bFile = oex::oexFALSE;
-		m_pParentScript = oexNULL;
-	}
+    CScriptThread();
 
     /// Destructor
-	virtual ~CScriptThread()
-	{	Destroy(); }
+	virtual ~CScriptThread();
 
     /// Releases resources
-    void Destroy()
-	{	m_pModuleManager = oexNULL;
-		m_bFile = oex::oexFALSE;
-		m_pParentScript = oexNULL;
-	}
+    void Destroy();
 
     /// Sets the module manager pointer
-	void SetModuleManager( sqbind::CModuleManager *pMm )
-    {   m_pModuleManager = pMm; }
+	void SetModuleManager( sqbind::CModuleManager *pMm );
 
     /// Sets the script information
-	void SetScript( oex::oexCSTR pScript, oex::oexBOOL bFile )
-    {   m_sScript = pScript; m_bFile = bFile; }
+	void SetScript( oex::oexCSTR pScript, oex::oexBOOL bFile );
 
     /// Sets the parent script pointer
-    void SetParentScript( CSqMsgQueue *pParent )
-    {   m_pParentScript = pParent; }
+    void SetParentScript( CSqMsgQueue *pParent );
 
 protected:
 
     /// Initialize Squirrel engine
-	virtual oex::oexBOOL InitThread( oex::oexPVOID x_pData )
-	{
-		// +++ Ensure script
-		if ( !m_sScript.length() )
-			return oex::oexFALSE;
-
-		// Set module manager
-		m_cSqEngine.SetModuleManager( m_pModuleManager );
-
-		// Pointer to our message queue
-		m_cSqEngine.SetMessageQueue( this );
-
-		// Start the script
-		if ( !m_cSqEngine.Load( m_sScript.c_str(), m_bFile, FALSE ) )
-		{
-			std::tstring sErr = oexT( "File : " );
-			sErr += m_sScript + oexT( "\r\n\r\n" );
-
-			if ( m_cSqEngine.GetLastError().length() )
-				sErr += m_cSqEngine.GetLastError();
-			else
-				sErr += oexT( "Error loading script" );
-
-			oexERROR( 0, oexMks( oexT( "Script Error" ), sErr.c_str() ) );
-
-			return oex::oexFALSE;
-
-		} // end if
-
-		return oex::oexTRUE;
-	}
+	virtual oex::oexBOOL InitThread( oex::oexPVOID x_pData );
 
     /// Run the thing
-	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
-	{
-		int nRet = 0;
-
-		// Process script messages
-		ProcessMsgs();
-
-		// Idle processing
-		if ( !m_cSqEngine.ExecuteRet( _T( "_idle" ), &nRet ) )
-			return oex::oexFALSE;
-
-		return 0 == nRet;
-	}
+	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData );
 
     /// Shutdown Squirrel engine
-	virtual oex::oexINT EndThread( oex::oexPVOID x_pData )
-	{
-		// Lose child scripts
-		DestroyChildScripts();
-
-		// Lose the squirrel engine
-		m_cSqEngine.Destroy();
-
-		return 0;
-	}
+	virtual oex::oexINT EndThread( oex::oexPVOID x_pData );
 
     /// Process a single message from the queue
-	virtual oex::oexBOOL ProcessMsg( std::tstring &sMsg, CSqMsgQueue::t_Params &mapParams, CSqMsgQueue::t_Params *pmapReply )
-	{
-		if ( sMsg == oexT( "spawn" ) )
-			OnSpawn( mapParams, pmapReply );
-
-		// Call to send message to child script
-		else if ( sMsg == oexT( "msg" ) )
-			OnMsg( mapParams, pmapReply );
-
-		// Pass this on to the script
-		else if ( sMsg == oexT( "onmsg" ) )
-			OnOnMsg( mapParams, pmapReply );
-
-		return TRUE;
-	}
+	virtual oex::oexBOOL ProcessMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply );
 
     /// Releases all child scripts
-    void DestroyChildScripts()
-	{
-		// Kill our script
-		t_ScriptList::iterator it = m_lstScript.begin();
-		while ( m_lstScript.end() != it )
-		{
-			if ( it->second )
-			{	it->second->Stop();
-				OexAllocDestruct( it->second );
-				it->second = oexNULL;
-			} // end if
-
-			t_ScriptList::iterator nx = it; nx++;
-			m_lstScript.erase( it );
-			it = nx;
-
-			// ???
-//			it = m_lstScript.erase( it );
-
-		} // end while
-	}
-
+    void DestroyChildScripts();
 
 protected:
 
     /// Spawns a new child script thread
-	void OnSpawn( CSqMsgQueue::t_Params &mapParams, CSqMsgQueue::t_Params *pmapReply )
-	{
-		// Grab the path
-		std::tstring sPath = mapParams[ oexT( "name" ) ];
-
-		// Is it bound for another computer
-		int pos = sPath.find_first_of( oexT( ":" ), -1 );
-		if ( 0 <= pos )
-		{
-			std::tstring sAddress = sPath.substr( 0, pos );
-			if ( sAddress.length() )
-			{
-				// +++ Route to remote computer
-				oexASSERT( 0 );
-
-				return;
-
-			} // end if
-
-		} // end if
-
-		// Lose current script engine at this tag if any
-		t_ScriptList::iterator it = m_lstScript.find( sPath );
-		if ( m_lstScript.end() != it )
-		{	if ( it->second )
-			{	OexAllocDestruct( it->second );
-				it->second = oexNULL;
-			} // end if
-			m_lstScript.erase( it );
-		} // end if
-
-		// Create new object
-		CScriptThread *pSt = OexAllocConstruct< CScriptThread >();
-		if ( pSt )
-		{
-			// Save away pointer for later
-			m_lstScript[ sPath ] = pSt;
-
-			// Set us as the parent
-			pSt->SetParentScript( this );
-
-			// Allow child to have access to the module manager
-			pSt->SetModuleManager( m_pModuleManager );
-
-			// Load script information
-			pSt->SetScript( mapParams[ oexT( "script" ) ].c_str(),
-							0 != oex::CStr( mapParams[ oexT( "file" ) ].c_str() ).ToULong() );
-
-			// Create the thread
-			pSt->Start();
-
-		} // end if
-	}
+	void OnSpawn( CSqMap &mapParams, stdString *pReply );
 
     /// Routes a message to the proper script
-	void OnMsg( CSqMsgQueue::t_Params &mapParams, CSqMsgQueue::t_Params *pmapReply )
-	{
-		// Grab the path
-		std::tstring sPath = mapParams[ oexT( "name" ) ];
-
-		// Is it bound for another computer
-		int pos = sPath.find_first_of( oexT( ":" ), -1 );
-		if ( 0 <= pos )
-		{
-			std::tstring sAddress = sPath.substr( 0, pos );
-			if ( sAddress.length() )
-			{
-				// +++ Route to remote computer
-				oexASSERT( 0 );
-
-				return;
-
-			} // end if
-
-		} // end if
-
-		std::tstring sOnMsg( oexT( "onmsg" ) );
-
-		// Message to self
-		if ( !sPath.length() || sPath == _T( "." ) )
-			ProcessMsg( sOnMsg, mapParams, pmapReply );
-
-		// All the way to the top?
-		else if ( sPath == oexT( "/" ) || sPath == oexT( "\\" ) )
-		{
-			// Route to parent if any
-			if ( m_pParentScript )
-				m_pParentScript->Msg( oexT( "msg" ), &mapParams, pmapReply );
-
-			// I guess it's ours
-			else
-				ProcessMsg( sOnMsg, mapParams, pmapReply );
-
-			return;
-
-		} // end if
-
-		// Find path separator
-		std::tstring sToken = sPath.substr( 0, sPath.find_first_of( oexT( '\\' ) ) );
-		if ( !sToken.length() ) sToken = sPath.substr( 0, sPath.find_first_of( oexT( '/' ) ) );
-
-		// Did we get a token
-		if ( sPath.length() > sToken.length() )
-		{
-			// Skip the token
-			sPath = sPath.substr( sToken.length() + 1 );
-
-		} // end if
-		else
-		{   sToken = sPath;
-			sPath = oexT( "" );
-		} // end if
-
-		// Is it going up to the parent?
-		if ( sToken == oexT( ".." ) )
-		{
-			if ( m_pParentScript )
-			{
-				// End of the line?
-				if ( !sPath.length() )
-					m_pParentScript->Msg( oexT( "onmsg" ), &mapParams, pmapReply );
-
-				// Keep routing
-				else
-				{   mapParams[ oexT( "name" ) ] = sPath;
-					m_pParentScript->Msg( oexT( "msg" ), &mapParams, pmapReply );
-				} // end if
-
-			} // end if
-
-		} // end if
-
-		// Route to child
-		else
-		{
-			// Lose current script engine at this tag if any
-			t_ScriptList::iterator it = m_lstScript.find( sToken );
-			if ( m_lstScript.end() != it && it->second )
-				it->second->Msg( oexT( "onmsg" ), &mapParams, pmapReply );
-
-		} // end else
-	}
+	void OnMsg( CSqMap &mapParams, stdString *pReply );
 
     /// Processes a script message
-	void OnOnMsg( CSqMsgQueue::t_Params &mapParams, CSqMsgQueue::t_Params *pmapReply )
-	{
-		// Execute function?
-		if ( mapParams[ oexT( "execute" ) ].length() )
-			m_cSqEngine.Execute( mapParams[ oexT( "execute" ) ].c_str() );
-
-		// Execute one param
-		else if ( mapParams[ oexT( "execute1" ) ].length() )
-			m_cSqEngine.Execute( mapParams[ oexT( "execute1" ) ].c_str(), mapParams[ oexT( "p1" ) ] );
-
-		// Execute 2 params
-		else if ( mapParams[ oexT( "execute2" ) ].length() )
-			m_cSqEngine.Execute( mapParams[ oexT( "execute2" ) ].c_str(), mapParams[ oexT( "p1" ) ], mapParams[ oexT( "p2" ) ] );
-
-		// Execute 3 params
-		else if ( mapParams[ oexT( "execute3" ) ].length() )
-			m_cSqEngine.Execute( mapParams[ oexT( "execute3" ) ].c_str(), mapParams[ oexT( "p1" ) ], mapParams[ oexT( "p2" ) ], mapParams[ oexT( "p3" ) ] );
-	}
+	void OnOnMsg( CSqMap &mapParams, stdString *pReply );
 
 private:
 
@@ -356,7 +103,7 @@ private:
     t_ScriptList            m_lstScript;
 
     /// Script to load
-    std::tstring            m_sScript;
+    stdString            m_sScript;
 
     /// If non-zero, m_sScript contains a file name
 	oex::oexBOOL            m_bFile;

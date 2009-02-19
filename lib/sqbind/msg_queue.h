@@ -45,40 +45,18 @@ public:
 	};
 
 	/// Parameter object type
-	typedef std::map< std::tstring, std::tstring >    t_Params;
+	typedef std::map< stdString, stdString >    t_Params;
 
 public:
 
 	/// Default constructor
-	CSqMsgQueue()
-	{
-	}
+	CSqMsgQueue();
 
 	/// Destructor
-	virtual ~CSqMsgQueue()
-	{
-		// Acquire lock
-		oexAutoLock ll( m_cLock );
-		if ( !ll.IsLocked() )
-			return;
-
-		Destroy();
-	}
+	virtual ~CSqMsgQueue();
 
 	/// Releases resources
-	virtual void Destroy()
-	{
-		// Acquire lock
-		oexAutoLock ll( m_cLock );
-		if ( !ll.IsLocked() )
-			return;
-
-		// Dump the queue
-		m_lstMsgQueue.clear();
-
-		// Reset event
-		Reset();
-	}
+	virtual void Destroy();
 
 	/// Sends a command to the thread
 	/**
@@ -91,175 +69,43 @@ public:
 		If pmapReply is not NULL, the function waits for a reply
 		from the thread.
 	*/
-	oex::oexBOOL Msg( std::tstring sMsg, t_Params *pmapParams = oexNULL, t_Params *pmapReply = oexNULL, oex::oexUINT uTimeout = eLockTimeout )
-	{
-		oexEvent evReply;
-
-		// If it's our own thread calling
-		if ( m_uCurrentThreadId && oex::os::CSys::GetCurrentThreadId() == m_uCurrentThreadId )
-		{
-			// Just process the message directly
-			if ( pmapParams )
-				return ProcessMsg( sMsg, *pmapParams, pmapReply );
-
-			else
-			{   t_Params params;
-				return ProcessMsg( sMsg, params, pmapReply );
-			} // end else
-
-		} // end if
-
-		{ // Stuff message into buffer
-
-			// Acquire lock
-			oexAutoLock ll( m_cLock );
-			if ( !ll.IsLocked() )
-				return FALSE;
-
-			// Reply event handle needed?
-			if ( !pmapReply )
-				evReply.Destroy();
-
-			// Add a message
-			m_lstMsgQueue.push_back( SMsg( sMsg, pmapParams, evReply, pmapReply ) );
-
-			// Signal that a message is waiting
-			Signal();
-
-		} // end message stuffing
-
-		// Wait for relpy if needed
-		if ( pmapReply )
-		{
-			// Wait for reply
-			oex::oexBOOL bSuccess = evReply.Wait( uTimeout );
-
-			// Punt if we got the reply
-			if ( bSuccess )
-				return TRUE;
-
-			// Acquire lock
-			oexAutoLock ll( &m_cLock );
-			if ( !ll.IsLocked() )
-			{
-				// You're screwed here because pmapReply is dangling
-				// But don't worry, this won't ever happen ;)
-	//            ASSERT( 0 );
-
-				// Only safe thing to do would be kill the thread...
-				KillThread();
-
-				return FALSE;
-
-			} // end if
-
-			// Clear the list so pmapReply is not dangling
-			m_lstMsgQueue.clear();
-
-		} // end if
-
-		return TRUE;
-	}
+	oex::oexBOOL Msg( stdString sMsg, CSqMap *pmapParams = oexNULL, stdString *pReply = oexNULL, oex::oexUINT uTimeout = eLockTimeout );
 
 public:
-
 
 	/// Thread message structure
 	struct SMsg
 	{
 		/// Default Constructor
-		SMsg() { pmapReply = NULL; }
+		SMsg();
 
 		/// Initializer
-		SMsg( const std::tstring x_sMsg, t_Params *x_pmapParams, oex::os::CResource x_hReply, t_Params *x_pmapReply )
-		{   sMsg = x_sMsg;
-			if ( x_pmapParams )
-				mapParams = *x_pmapParams;
-			hReply = x_hReply;
-			pmapReply = x_pmapReply;
-		}
+		SMsg( const stdString x_sMsg, CSqMap *x_pmapParams, oexEvent x_evReply, stdString *x_pReply );
 
 		// Copy constructor
-		SMsg( const SMsg &x_rMsg )
-		{   sMsg = x_rMsg.sMsg;
-			mapParams = x_rMsg.mapParams;
-			hReply = x_rMsg.hReply;
-			pmapReply = x_rMsg.pmapReply;
-		}
+//		SMsg( const SMsg &x_rMsg );
 
 		/// Command
-		std::tstring                                sMsg;
+		stdString									sMsg;
 
 		/// Params
-		t_Params                                    mapParams;
+		stdString									sParams;
 
 		/// Reply event
-		oex::os::CResource							hReply;
+		oex::os::CResource							evReply;
 
 		/// Reply object
-		t_Params                                    *pmapReply;
+		stdString 									*pReply;
 
 	};
 
 protected:
 
 	/// Process messages
-	oex::oexBOOL ProcessMsgs()
-	{
-		// Acquire lock
-		oexAutoLock ll( &m_cLock );
-		if ( !ll.IsLocked() )
-			return FALSE;
-
-		// Remember who owns us
-		m_uCurrentThreadId = oex::os::CSys::GetCurrentThreadId();
-
-		// Any messages waiting?
-		if ( m_lstMsgQueue.begin() == m_lstMsgQueue.end() )
-			return TRUE;
-
-		// Process messages
-		t_MsgQueue::iterator it;
-		while ( m_lstMsgQueue.end() != ( it = m_lstMsgQueue.begin() ) )
-		{
-			// Process the message
-			ProcessMsg( it->sMsg, it->mapParams, it->pmapReply );
-
-			// We must stop processing if someone is waiting for a reply
-			if ( it->pmapReply )
-			{
-				// Signal that reply is ready
-				//::SetEvent( it->hReply );
-				it->hReply.Signal();
-				m_lstMsgQueue.erase( it );
-
-				// Reset signal if queue is empty
-				if ( !m_lstMsgQueue.size() )
-					Reset();
-
-				return TRUE;
-
-			} // end if
-
-			// Ditch the message
-			m_lstMsgQueue.erase( it );
-
-		} // end while
-
-		// Reset signal
-		Reset();
-
-		return TRUE;
-	}
+	oex::oexBOOL ProcessMsgs();
 
 	/// Process a single message from the queue
-	virtual oex::oexBOOL ProcessMsg( std::tstring &sMsg, t_Params &mapParams, t_Params *pmapReply )
-	{
-		return TRUE;
-	}
-
-	/// Returns a handle to the message wait function
-//	oex::os::CResource GetMsgWaitHandle() { return m_evtMsgWaiting; }
+	virtual oex::oexBOOL ProcessMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply );
 
 	/// Over-ride for thread killing function
 	virtual void KillThread() {}
@@ -268,35 +114,20 @@ private:
 
 public:
 
-	virtual oex::oexBOOL execute( t_Params *pReply, const std::tstring &sName, const std::tstring &sFunction )
-	{	t_Params params;
-		params[ oexT( "name" ) ] = sName;
-		params[ oexT( "execute" ) ] = sFunction;
-		return Msg( oexT( "msg" ), &params, pReply );
-	}
-
-	virtual oex::oexBOOL execute( t_Params *pReply, const std::tstring &sName, const std::tstring &sFunction, const std::tstring &sP1 )
-	{	t_Params params;
-		params[ oexT( "name" ) ] = sName;
-		params[ oexT( "execute1" ) ] = sFunction;
-		params[ oexT( "p1" ) ] = sP1;
-		return Msg( oexT( "msg" ), &params, pReply );
-	}
-
+	oex::oexBOOL execute( stdString *pReply, const stdString &sName, const stdString &sFunction );
+	oex::oexBOOL execute( stdString *pReply, const stdString &sName, const stdString &sFunction, 
+						  const stdString &sP1 );
 
 private:
 
 	/// Our thread id
 	oex::oexUINT								m_uCurrentThreadId;
 
-	/// Set when a message is waiting in the queue
-//	oexEvent									m_evMsgWaiting;
-
 	/// Message queue lock
 	oexLock		                                m_cLock;
 
 	/// Message list type
-	typedef std::list< SMsg >                   t_MsgQueue;
+	typedef std::list< SMsg, CSqStdAllocator< SMsg > > t_MsgQueue;
 
 	/// The message queue
 	t_MsgQueue                                  m_lstMsgQueue;
@@ -304,36 +135,3 @@ private:
 
 SQBIND_DECLARE_INSTANCE( CSqMsgQueue );
 
-/*
-class SQ_CSqMsgQueue
-{
-public:
-
-	SQ_CSqMsgQueue()
-	{
-		m_pMsgQueue = oexNULL;
-	}
-
-	SQ_CSqMsgQueue( const SQ_CSqMsgQueue &r )
-	{	m_pMsgQueue = r.m_pMsgQueue; }
-
-	void Set( CSqMsgQueue *x_pMsgQueue )
-	{	m_pMsgQueue = x_pMsgQueue; }
-
-	CSqMsgQueue* Get()
-	{	return m_pMsgQueue; }
-
-public:
-	static void Register( SquirrelVM &vm )
-	{
-		SqPlus::SQClassDef< SQ_CSqMsgQueue >( vm, oexT( "CSqMsgQueue" ) )
-			;
-	}
-
-private:
-
-	CSqMsgQueue		*m_pMsgQueue;
-};
-
-SQBIND_DECLARE_INSTANCE( SQ_CSqMsgQueue );
-*/

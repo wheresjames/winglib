@@ -39,128 +39,30 @@ class CModuleInstance
 public:
 
     /// Initializes the module instance
-    CModuleInstance()
-	{
-		m_fGetId = oexNULL;
-		m_fExportSymbols = oexNULL;
-	}
+    CModuleInstance();
 
     /// Destructor
-    virtual ~CModuleInstance()
-	{	Destroy(); }
+    virtual ~CModuleInstance();
 
 public:
 
     /// Unloads the modules and frees all resources
-    void Destroy()
-	{
-		// Lose the function pointers
-		m_fGetId = oexNULL;
-		m_fExportSymbols = oexNULL;
-
-		// Lose the module
-		m_cModule.Destroy();
-	}
+    void Destroy();
 
     /// Loads the specified module
     /**
         \param [in] x_pFile   -   File name of module to load
     */
-	oex::oexBOOL Load( oex::oexCSTR x_pFile )
-	{
-		// Lose the old module
-		Destroy();
-
-		// Ensure file name
-		if ( !oexCHECK_PTR( x_pFile ) || !*x_pFile )
-			return oex::oexFALSE;
-
-		// Load the module
-		if ( !m_cModule.Load( x_pFile ) )
-			return oex::oexFALSE;
-
-		// Attempt to load function pointers
-		if ( !LoadFunctions() )
-		{	Destroy();
-			return oex::oexFALSE;
-		} // end if
-
-		return oex::oexTRUE;
-	}
+	oex::oexBOOL Load( oex::oexCSTR x_pFile );
 
     /// Loads exported function pointers
-    oex::oexBOOL LoadFunctions()
-	{
-		// Ensure module
-		if ( !IsLoaded() )
-			return oex::oexFALSE;
-
-		// Get id function address
-		m_fGetId =
-			(oex::os::service::PFN_SRV_GetModuleInfo)m_cModule.AddFunction( oexT( "SRV_GetModuleInfo" ) );
-		if ( !m_fGetId )
-		{	oexERROR( 0, oex::CStr().Fmt( oexT( "In module '%s', SRV_GetModuleInfo() not found" ),
-				     				      oexStrToMbPtr( m_cModule.GetPath().Ptr() ) ) );
-			return oex::oexFALSE;
-		} // end if
-
-		oex::os::service::SSrvInfo si;
-		oexZeroMemory( &si, sizeof( si ) );
-		if ( oex::oexINT ret = m_fGetId( &si ) )
-		{	oexERROR( ret, oex::CStr().Fmt( oexT( "In module '%s', SRV_GetModuleInfo() failed by returning non-zero" ),
-				     				        oexStrToMbPtr( m_cModule.GetPath().Ptr() ) ) );
-			return oex::oexFALSE;
-		} // end if
-
-		// Verify squirrel module
-		if ( !oex::guid::CmpGuid( &sqbind::SQBIND_MODULE_IID, &si.guidType ) )
-		{	oexERROR( 0, oex::CStr().Fmt( oexT( "In module '%s', Wrong id for a squirrel module, %s != %s" ),
-										  oexStrToMbPtr( m_cModule.GetPath().Ptr() ),
-										  oexStrToMbPtr( oexGuidToString( &sqbind::SQBIND_MODULE_IID ).Ptr() ),
-										  oexStrToMbPtr( oexGuidToString( &si.guidType ).Ptr() ) ) );
-			return oex::oexFALSE;
-		} // end if
-
-		// Get export function
-		m_fExportSymbols =
-			(sqbind::PFN_SQBIND_Export_Symbols)m_cModule.AddFunction( oexT( "SQBIND_Export_Symbols" ) );
-		if ( !m_fExportSymbols )
-		{	oexERROR( 0, oex::CStr().Fmt( oexT( "In module '%s', SQBIND_Export_Symbols() not found" ),
-				     			          oexStrToMbPtr( m_cModule.GetPath().Ptr() ) ) );
-			return oex::oexFALSE;
-		} // end if
-
-		return TRUE;
-	}
+    oex::oexBOOL LoadFunctions();
 
     /// Returns non-zero if non NULL module handle
-    oex::oexBOOL IsLoaded() { return m_cModule.IsLoaded(); }
+    oex::oexBOOL IsLoaded();
 
     /// Exports module functionality to the VM
-    oex::oexBOOL Export( SquirrelVM *pVm )
-	{
-		// Ensure we have an export function
-		if ( !m_fExportSymbols )
-			return oex::oexFALSE;
-
-		// Attempt to export the functionality
-		sqbind::SSqAllocator sa = { &malloc, &realloc, &free };
-		oex::oexINT nRet = m_fExportSymbols( pVm, &sa );
-
-		if ( nRet == -1 )
-		{	oexERROR( 0, oex::CStr().Fmt( oexT( "In module '%s', SQBIND_Export() failed because heaps do not match, use shared linking" ),
-				     				        oexStrToMbPtr( m_cModule.GetPath().Ptr() ) ) );
-			return oex::oexFALSE;
-		} // end if
-
-		else if ( nRet )
-		{	oexERROR( nRet, oex::CStr().Fmt( oexT( "In module '%s', SQBIND_Export() failed" ),
-				     				        oexStrToMbPtr( m_cModule.GetPath().Ptr() ) ) );
-			return oex::oexFALSE;
-		} // end if
-
-		return oex::oexTRUE;
-	}
+    oex::oexBOOL Export( SquirrelVM *pVm );
 
 private:
 

@@ -7,7 +7,7 @@ default_target: all
 PRJ_NAME := sqmod_http
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
-PRJ_LIBS := oexlib squirrel sqstdlib sqplus
+PRJ_LIBS := oexlib squirrel sqstdlib sqplus sqbind
 PRJ_OSLB :=
  
 PRJ_EXPORTS := SRV_GetModuleInfo SQBIND_Export_Symbols

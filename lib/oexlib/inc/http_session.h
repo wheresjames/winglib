@@ -547,7 +547,7 @@ private:
 	T_PORT						*m_pPort;
 
     /// Incomming HTTP headers
-    CPropertyBag8     		  m_pbRxHeaders;
+    CPropertyBag8     			m_pbRxHeaders;
 
     /// Outgoing HTTP headers
     CPropertyBag8     		  	m_pbTxHeaders;

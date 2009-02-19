@@ -58,93 +58,21 @@ namespace sqbind
     public:
         
         /// Returns a reference to the underlying vector
-        t_List& vector() 
-        {   return m_lst; }
+        t_List& vector();
 
         /// Registers the vector class for use with Squirrel
-        static void Register( SquirrelVM &vm )
-        {
-            SqPlus::SQClassDef< CSqList >( vm, _T( "CSqList" ) )
-                    . func( &CSqList::push_back,     _T( "push_back" ) )
-                    . func( &CSqList::_get,          _T( "_get" ) )
-                    . func( &CSqList::_nexti,        _T( "_nexti" ) )
-                ;
-        }
+        static void Register( SquirrelVM &vm );
 
         /// Adds an element to the vector
-        void push_back( const t_Obj &s )
-        {
-            m_lst.push_back( s );
-        }
+        void push_back( const t_Obj &s );
 
     private:
 
         /// Internal squirrel function, returns value of specified item
-        SquirrelObject _get( HSQUIRRELVM v )
-        {
-            StackHandler sa( v );
-
-            unsigned int idx = (unsigned int)sa.GetInt( 2 );
-			if ( 0 > idx || m_lst.size() <= idx )
-                return SquirrelObject( v );
-
-            t_List::iterator it = m_lst.begin();
-			while ( idx-- )
-				if ( m_lst.end() == ++it )
-					return SquirrelObject( v );
-
-            // Stuff string
-            SquirrelObject so( v );
-	        sq_pushstring( v, it->c_str(), (int)it->length() );
-	        so.AttachToStackObject( -1 );
-	        sq_pop( v, 1 );
-
-            return so;
-        }
+        SquirrelObject _get( HSQUIRRELVM v );
 
         /// Internal squirrel function used to iterate list items
-        SquirrelObject _nexti( HSQUIRRELVM v )
-        {
-            StackHandler sa( v );
-
-            SQObjectType type = (SQObjectType)sa.GetType( 2 );
-
-            switch( type )
-            {
-                case OT_NULL:
-                {
-                    if ( !m_lst.size() )
-                        return SquirrelObject( v );
-
-                    SquirrelObject so( v );
-
-                    so = 0;
-
-                    return so;
-
-                } break;
-
-                case OT_INTEGER:
-                {
-                    // Verify index
-                    unsigned int idx = (unsigned int)sa.GetInt( 2 );
-                    if ( ( idx + 1 ) >= m_lst.size() )
-                        return SquirrelObject( v );
-
-                    SquirrelObject so( v );
-
-                    so = idx + 1;
-
-                    return so;
-
-                } break;
-
-            } // end switch
-
-            // ???
-            sa.ThrowError( _T( "Invalid index type" ) );
-            return SquirrelObject( v );
-        }
+        SquirrelObject _nexti( HSQUIRRELVM v );
 
     };
 

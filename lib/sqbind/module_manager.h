@@ -46,84 +46,18 @@ public:
 public:
 
     /// Default constructor
-	CModuleManager()
-	{}
+	CModuleManager();
 
     /// Destructor
-	virtual ~CModuleManager()
-	{	Destroy(); }
+	virtual ~CModuleManager();
 
     /// Unloads all modules
-    void Destroy()
-	{
-		// Thread lock
-		oexAutoLock ll( m_lock );
-		if ( !ll.IsLocked() )
-			return;
-
-		// Iterate all existing modules
-		t_ModuleList::iterator it = m_lstModules.begin();
-		while ( m_lstModules.end() != it )
-		{
-			// If we have a valid pointer
-			if ( it->second )
-			{
-				// Lose the module
-				it->second->Destroy();
-
-				// Drop the memory
-				OexAllocDestruct( it->second );
-
-				// Just in case
-				it->second = oexNULL;
-
-			} // end if
-
-			// Drop this module
-			t_ModuleList::iterator nx = it; nx++;
-			m_lstModules.erase( it );
-			it = nx;
-
-			// ???
-//			it = m_lstModules.erase( it );
-
-		} // end for
-	}
+    void Destroy();
 
 public:
 
     /// Loads the specified module if needed and returns an instance object
-	CModuleInstance* Load( oex::oexCSTR x_pFile )
-	{
-		if ( !oexCHECK_PTR( x_pFile ) || !*x_pFile )
-			return oexNULL;
-
-		// Thread lock
-		oexAutoLock ll( m_lock );
-		if ( !ll.IsLocked() )
-			return oexNULL;
-
-		// See if it's already loaded
-		t_ModuleList::iterator it = m_lstModules.find( x_pFile );
-		if ( m_lstModules.end() != it && it->second )
-			return it->second;
-
-		// Try to create an instance
-		CModuleInstance *pMi = OexAllocConstruct< CModuleInstance >();
-		if ( !pMi )
-			return oexNULL;
-
-		// Did we load ok?
-		if ( !pMi->Load( x_pFile ) )
-		{   OexAllocDestruct( pMi );
-			return oex::oexFALSE;
-		} // end if
-
-		// Save the pointer into the list
-		m_lstModules[ x_pFile ] = pMi;
-
-		return pMi;
-	}
+	CModuleInstance* Load( oex::oexCSTR x_pFile );
 
     /// Unloads the specified module
 	/**
@@ -133,32 +67,7 @@ public:
 		    unless your *CERTAIN* that squirrel is done with it.
 			For the most part, you won't be able to use this function.
 	*/
-	oex::oexBOOL Unload( oex::oexCSTR x_pFile )
-	{
-		// Thread lock
-		oexAutoLock ll( m_lock );
-		if ( !ll.IsLocked() )
-			return oex::oexFALSE;
-
-		// See if it's already loaded
-		t_ModuleList::iterator it = m_lstModules.find( x_pFile );
-		if ( m_lstModules.end() == it || !it->second )
-			return FALSE;
-
-		// Lose the module
-		it->second->Destroy();
-
-		// Drop the memory
-		OexAllocDestruct( it->second );
-
-		// Just in case
-		it->second = NULL;
-
-		// Drop this module
-		m_lstModules.erase( it );
-
-		return TRUE;
-	}
+	oex::oexBOOL Unload( oex::oexCSTR x_pFile );
 
 private:
 

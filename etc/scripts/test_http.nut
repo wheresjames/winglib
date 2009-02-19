@@ -13,10 +13,18 @@ function OnServerEvent( server, data )
 
 }
 
-function OnProcessRequest() // session, data )
+function OnProcessRequest( get )
 {
-	_self.alert( "Hello world" );
+//	_self.alert( get[ "str" ] );
 
+//	_self.alert( "hi" );
+
+	local mGet = CSqMap();
+	mGet.deserialize( get );
+
+	local mReply = CSqMap();
+	mReply.set( "content", mGet[ "str1" ] + " " + mGet[ "str2" ] );
+	return mReply.serialize();
 }
 
 function _init() : ( _g )

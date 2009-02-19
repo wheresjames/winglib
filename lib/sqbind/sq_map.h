@@ -43,241 +43,69 @@ namespace sqbind
     public:
 
         /// List object type
-		typedef std::tstring                t_Obj;
+		typedef stdString		t_Obj;
 
         /// List type
-        typedef std::map< t_Obj, t_Obj >    t_List;
+		typedef std::map< t_Obj, t_Obj, std::less< t_Obj >, CSqStdAllocator< t_Obj > > t_List;
+//		typedef std::map< t_Obj, t_Obj >		t_List;
 
     private:
 
         /// List
-        t_List                              m_lst;
+        t_List					m_lst;
 
     public:
         
+		/// Default constructor
+		CSqMap();
+
+		/// Deserializing constructor
+		CSqMap( const t_Obj &s );
+
         /// Returns a reference to the underlying vector
-        t_List& list() 
-        {   return m_lst; }
+        t_List& list();
+
+		/// Returns a reference to the list item
+		t_Obj& operator []( t_Obj &rObj );
+
+		/// Returns a reference to the list item
+		t_Obj& operator []( const char *p );
 
         /// Registers the vector class for use with Squirrel
-        static void Register( SquirrelVM &vm )
-        {
-            SqPlus::SQClassDef< CSqMap >( vm, _T( "CSqMap" ) )
-                    . func( &CSqMap::set,           _T( "set" ) )
-                    . func( &CSqMap::get,           _T( "get" ) )
-                    . func( &CSqMap::find_sub_k,    _T( "find_sub_k" ) )
-                    . func( &CSqMap::find_sub_v,    _T( "find_sub_v" ) )
-                    . func( &CSqMap::_get,          _T( "_get" ) )
-                    . func( &CSqMap::_nexti,        _T( "_nexti" ) )
-                ;
-        }
+        static void Register( SquirrelVM &vm );
+
+		t_Obj serialize();
+
+		void deserialize( const t_Obj &s );
+
+		void merge( const t_Obj &s );
+
+		t_Obj urlencode();
+
+		void urldecode( const t_Obj &s );
 
         /// Adds an element to the vector
-        void set( const t_Obj &k, const t_Obj &v )
-        {
-            m_lst[ k ] = v;
-        }
+        void set( const t_Obj &k, const t_Obj &v );
 
         /// Adds an element to the vector
-        t_Obj get( const t_Obj &k )
-        {
-            if ( m_lst.end() == m_lst.find( k ) )
-                return _T( "" );
-
-            return m_lst[ k ];
-        }
+        t_Obj get( const t_Obj &k );
 
         /// Adds an element to the vector
-        t_Obj find_sub_k( const t_Obj &k )
-        {
-            // For each item
-            for ( t_List::iterator it = m_lst.begin();
-                  m_lst.end() != it;
-                  it++ )
-
-                // Is the sub string in the key?
-//                if ( _tcsstr( it->first.c_str(), k.c_str() ) )
-                if ( match_pattern( it->first.c_str(), k.c_str() ) )
-                    return it->first;
-
-            return _T( "" );
-        }
+        t_Obj find_sub_k( const t_Obj &k );
 
         /// Adds an element to the vector
-        t_Obj find_sub_v( const t_Obj &v )
-        {
-            // For each item
-            for ( t_List::iterator it = m_lst.begin();
-                  m_lst.end() != it;
-                  it++ )
-
-                // Is the sub string in the value
-//                if ( _tcsstr( it->second.c_str(), v.c_str() ) )
-                if ( match_pattern( it->second.c_str(), v.c_str() ) )
-                    return it->first;
-
-            return _T( "" );
-        }
+        t_Obj find_sub_v( const t_Obj &v );
 
     private:
 
         /// Internal squirrel function, returns value of specified item
-        SquirrelObject _get( HSQUIRRELVM v )
-        {
-            StackHandler sa( v );
-
-            const SQChar *pKey = sa.GetString( 2 );
-            if ( !pKey || !*pKey )
-                return SquirrelObject( v );
-
-            t_List::iterator it = m_lst.find( pKey );
-            if ( m_lst.end() == it )
-                return SquirrelObject( v );
-
-            // Stuff string
-            SquirrelObject so( v );
-	        sq_pushstring( v, it->second.c_str(), (int)it->second.length() );
-	        so.AttachToStackObject( -1 );
-	        sq_pop( v, 1 );
-
-            return so;
-        }
+        SquirrelObject _get( HSQUIRRELVM v );
 
         /// Internal squirrel function used to iterate list items
-        SquirrelObject _nexti( HSQUIRRELVM v )
-        {
-            StackHandler sa( v );
-
-            SQObjectType type = (SQObjectType)sa.GetType( 2 );
-
-            switch( type )
-            {
-                case OT_NULL:
-                {
-                    if ( !m_lst.size() )
-                        return SquirrelObject( v );
-
-                    SquirrelObject so( v );
-
-	                sq_pushstring( v, m_lst.begin()->first.c_str(), (int)m_lst.begin()->first.length() );
-	                so.AttachToStackObject( -1 );
-	                sq_pop( v, 1 );
-
-                    return so;
-
-                } break;
-
-                case OT_STRING:
-                {
-                    const SQChar *pKey = sa.GetString( 2 );
-                    if ( !pKey || !*pKey )
-                        return SquirrelObject( v );
-
-                    t_List::iterator it = m_lst.find( pKey );
-                    if ( m_lst.end() == it )
-                        return SquirrelObject( v );
-
-                    it++;
-                    if ( m_lst.end() == it )
-                        return SquirrelObject( v );
-
-                    SquirrelObject so( v );
-
-                    sq_pushstring( v, it->first.c_str(), (int)it->first.length() );
-	                so.AttachToStackObject( -1 );
-	                sq_pop( v, 1 );
-
-                    return so;
-
-                } break;
-
-            } // end switch
-
-            // ???
-            sa.ThrowError( _T( "Invalid index type" ) );
-            return SquirrelObject( v );
-        }
+        SquirrelObject _nexti( HSQUIRRELVM v );
 
         /// Returns non-zero if pPattern matches pString
-        static bool match_pattern( const oex::oexTCHAR *pString, const oex::oexTCHAR *pPattern)
-        {
-	        if ( !pString || !pPattern ) 
-                return false;
-
-	        unsigned int i = 0, p = 0;
-
-	        // Skip multiple '*'
-	        while ( _T( '*' ) == pPattern[ p ] && _T( '*' ) == pPattern[ p + 1 ] ) 
-                p++;
-
-	        // Check for the 'any' pattern
-	        if ( pPattern[ p ] == _T( '*' ) && pPattern[ p + 1 ] == 0 )
-		        return true;
-
-	        // While we're not at the end
-	        while ( pString[ i ] != 0 )
-	        {
-		        // Are we on a wildcard?
-		        if ( _T( '*' ) == pPattern[ p ] )
-		        {
-			        // Are we matching everything?
-			        if ( pPattern[ p + 1 ] == 0 ) 
-                        return true;
-
-			        // Check for pattern advance
-			        if (	pString[ i ] == pPattern[ p + 1 ] ||
-
-					        (
-						        pString[ i ] >= _T( 'a' ) && pString[ i ] <= _T( 'z' ) && 
-						        ( pString[ i ] - ( _T( 'a' ) - _T( 'A' ) ) ) == pPattern[ p + 1 ] 
-					        ) ||
-
-					        (
-						        pString[ i ] >= _T( 'A' ) && pString[ i ] <= _T( 'Z' ) && 
-						        ( pString[ i ] + ( _T( 'a' ) - _T( 'A' ) ) ) == pPattern[ p + 1 ] 
-					        ) 
-
-				        ) p += 2;
-        				
-		        } // end if
-
-		        // Just accept this character
-		        else if ( _T( '?' ) == pPattern[ p ] ) 
-                    p++;
-
-		        // Otherwise advance if equal
-		        else if ( pString[ i ] == pPattern[ p ] ) 
-                    p++;
-
-		        // Case insensitive
-		        else if (	(
-						        pString[ i ] >= _T( 'a' ) && pString[ i ] <= _T( 'z' ) && 
-						        ( pString[ i ] - ( _T( 'a' ) - _T( 'A' ) ) ) == pPattern[ p ] 
-					        ) ||
-					        (
-						        pString[ i ] >= _T( 'A' ) && pString[ i ] <= _T( 'Z' ) && 
-						        ( pString[ i ] + ( _T( 'a' ) - _T( 'A' ) ) ) == pPattern[ p ] 
-					        ) 
-				        ) p++;
-
-		        // Back up in the pattern
-		        else while ( p && pPattern[ p ] != _T( '*' ) ) p--;
-
-		        // Return true if we're at the end of the pattern
-		        if ( pPattern[ p ] == 0 ) 
-                    return true;
-
-		        // Next char
-		        i++;
-
-	        } // end while
-
-	        // Skip wild cards
-	        while ( pPattern[ p ] == _T( '*' ) ) p++;
-
-	        // Did we match?
-	        return ( pPattern[ p ] == 0 );
-        }
+        static bool match_pattern( const oex::oexTCHAR *pString, const oex::oexTCHAR *pPattern);
 
     };
 

@@ -59,6 +59,17 @@
 
 	pbis[ "Hello" ] = "World";
 
+
+	// Convert to std map of strings
+	std::map< std::tstring, std::tstring > mapCnv;
+	for ( oex::CPropertyBag::iterator it; x_pSession->Get().List().Next( it ); )
+		mapCnv[ it.Node()->key.Ptr() ] = it->ToString().Ptr(); 
+
+	// Different char size?
+	std::map< std::tstring, std::tstring > mapCnv;
+	for ( oex::CPropertyBag8::iterator it; x_pSession->Get().List().Next( it ); )
+		mapCnv[ oexMbToStrPtr( it.Node()->key.Ptr() ) ] = oexMbToStrPtr( it->ToString().Ptr() );
+
 	\endcode
 
 	For a generic string based property bag use CPropertyBag

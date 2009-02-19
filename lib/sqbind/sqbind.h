@@ -41,13 +41,6 @@
 #define _CRT_SECURE_NO_DEPRECATE 1
 #pragma warning( disable : 4996 )
 
-// You must include these files in your project before sqbind.h
-//#include <string>
-//#include <list>
-//#include <map>
-//#include <vector>
-
-
 namespace std { typedef basic_string< oex::oexTCHAR > tstring; }
 
 // Using SqPlus script binding for now,
@@ -65,6 +58,9 @@ namespace std { typedef basic_string< oex::oexTCHAR > tstring; }
 // sqbind defines
 #include "sq_defines.h"
 
+// Custom allocator
+#include "sq_allocator.h"
+
 // stl classes we will export to squirrel
 #include "sq_vector.h"
 #include "sq_map.h"
@@ -72,6 +68,10 @@ namespace std { typedef basic_string< oex::oexTCHAR > tstring; }
 
 #define SQBIND_DECLARE_INSTANCE( c ) \
     }; DECLARE_INSTANCE_TYPE_NAME( sqbind::c, c ); namespace sqbind {
+
+#define SQBIND_NOREPLY	( (int*)0 )
+#define SQBIND_NEW(__ptr,__type) {__ptr=(__type *)sq_vm_malloc(sizeof(__type));new (__ptr) __type;}
+#define SQBIND_DELETE(__ptr,__type) {__ptr->~__type();sq_vm_free(__ptr,sizeof(__type));}
 
 namespace sqbind
 {
