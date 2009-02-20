@@ -1790,7 +1790,7 @@ public:
 oex::oexINT OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
 						   oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
 {
-	if ( (int)x_pData != 5678 )
+	if ( (int)x_pData != 6789 )
 		return 0;
 
 	return 0;
@@ -1816,10 +1816,10 @@ oex::oexRESULT Test_CHttpSession()
 
 	server.SetSessionCallback( (oex::oexPVOID)OnSessionCallback, (void*)9876 );
 
-	if ( !oexVERIFY( server.StartServer( 1234, OnServerEvent, (void*)5678 ) ) )
+	if ( !oexVERIFY( server.StartServer( 12345, OnServerEvent, (void*)6789 ) ) )
 		return -2;
 
-    if ( !oexVERIFY( client.Connect( oexT( "127.0.0.1" ), 1234 ) ) )
+    if ( !oexVERIFY( client.Connect( oexT( "127.0.0.1" ), 12345 ) ) )
         return -3;
 
     if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, SOCKET_TIMEOUT ) ) )

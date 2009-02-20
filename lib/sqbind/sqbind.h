@@ -41,8 +41,6 @@
 #define _CRT_SECURE_NO_DEPRECATE 1
 #pragma warning( disable : 4996 )
 
-namespace std { typedef basic_string< oex::oexTCHAR > tstring; }
-
 // Using SqPlus script binding for now,
 // it doesn't support multiple constructors though :(
 #define SQBIND_SQPLUS
@@ -57,9 +55,6 @@ namespace std { typedef basic_string< oex::oexTCHAR > tstring; }
 
 // sqbind defines
 #include "sq_defines.h"
-
-// Custom allocator
-#include "sq_allocator.h"
 
 // stl classes we will export to squirrel
 #include "sq_vector.h"

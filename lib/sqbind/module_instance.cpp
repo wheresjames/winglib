@@ -38,7 +38,6 @@ using namespace sqbind;
 
 CModuleInstance::CModuleInstance()
 {
-	m_fGetId = oexNULL;
 	m_fExportSymbols = oexNULL;
 }
 
@@ -48,7 +47,6 @@ CModuleInstance::~CModuleInstance()
 void CModuleInstance::Destroy()
 {
 	// Lose the function pointers
-	m_fGetId = oexNULL;
 	m_fExportSymbols = oexNULL;
 
 	// Lose the module
@@ -84,9 +82,10 @@ oex::oexBOOL CModuleInstance::LoadFunctions()
 		return oex::oexFALSE;
 
 	// Get id function address
-	m_fGetId =
+    /// GetId() function pointer
+	oex::os::service::PFN_SRV_GetModuleInfo pGetId =
 		(oex::os::service::PFN_SRV_GetModuleInfo)m_cModule.AddFunction( oexT( "SRV_GetModuleInfo" ) );
-	if ( !m_fGetId )
+	if ( !pGetId )
 	{	oexERROR( 0, oex::CStr().Fmt( oexT( "In module '%s', SRV_GetModuleInfo() not found" ),
 			     				      oexStrToMbPtr( m_cModule.GetPath().Ptr() ) ) );
 		return oex::oexFALSE;
@@ -94,7 +93,7 @@ oex::oexBOOL CModuleInstance::LoadFunctions()
 
 	oex::os::service::SSrvInfo si;
 	oexZeroMemory( &si, sizeof( si ) );
-	if ( oex::oexINT ret = m_fGetId( &si ) )
+	if ( oex::oexINT ret = pGetId( &si ) )
 	{	oexERROR( ret, oex::CStr().Fmt( oexT( "In module '%s', SRV_GetModuleInfo() failed by returning non-zero" ),
 			     				        oexStrToMbPtr( m_cModule.GetPath().Ptr() ) ) );
 		return oex::oexFALSE;
@@ -109,6 +108,20 @@ oex::oexBOOL CModuleInstance::LoadFunctions()
 		return oex::oexFALSE;
 	} // end if
 
+	// Load start function
+	oex::os::service::PFN_SRV_Start pStart =
+		(oex::os::service::PFN_SRV_Start)m_cModule.AddFunction( oexT( "SRV_Start" ) );
+	if ( !oexCHECK_PTR( pStart ) )
+		oexERROR( 0, oex::CStr().Fmt( oexT( "Symbol SRV_Start() not found in module '%s', memory allocator must be set!!!" ),
+					   			   	  oexStrToMbPtr( m_cModule.GetPath().Ptr() ) ) );
+
+	// Call start function if provided
+	else if ( oex::oexINT ret = pStart( oex::os::CMem::GetRawAllocator(), oexNULL, oexNULL, 0, oexNULL ) )
+	{	oexNOTICE( ret, oex::CStr().Fmt( oexT( "Exiting because SRV_Start() returned non-zero in module %s" ),
+					   			  	     oexStrToMbPtr( m_cModule.GetPath().Ptr() ) ) );
+		return 0;
+	} // end if
+
 	// Get export function
 	m_fExportSymbols =
 		(sqbind::PFN_SQBIND_Export_Symbols)m_cModule.AddFunction( oexT( "SQBIND_Export_Symbols" ) );
@@ -118,20 +131,23 @@ oex::oexBOOL CModuleInstance::LoadFunctions()
 		return oex::oexFALSE;
 	} // end if
 
-	return TRUE;
+	return oex::oexTRUE;
 }
 
-oex::oexBOOL CModuleInstance::IsLoaded() 
+oex::oexBOOL CModuleInstance::IsLoaded()
 { return m_cModule.IsLoaded(); }
 
 oex::oexBOOL CModuleInstance::Export( SquirrelVM *pVm )
 {
 	// Ensure we have an export function
 	if ( !m_fExportSymbols )
+	{	oexERROR( 0, oexMks( oexT( "Invalid export function " ), m_cModule.GetPath() ) );
 		return oex::oexFALSE;
+	} // end if
 
 	// Attempt to export the functionality
 	sqbind::SSqAllocator sa = { &malloc, &realloc, &free };
+
 	oex::oexINT nRet = m_fExportSymbols( pVm, &sa );
 
 	if ( nRet == -1 )

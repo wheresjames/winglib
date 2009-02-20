@@ -34,7 +34,6 @@
 
 #pragma once
 
-
 /// Allocator
 /**
     Memory allocation
@@ -63,6 +62,7 @@
 */
 class CAlloc
 {
+
 public:
 
     enum
@@ -632,4 +632,57 @@ public:
     virtual ~CAlloc() {}
 
 };
+
+/// std allocator
+/**
+	Allocator for use with std templates
+*/
+template < class T > class COexStdAllocator
+{
+public:
+
+	typedef oexINT    	size_type;
+	typedef oexINT		difference_type;
+	typedef T*        	pointer;
+	typedef const T*  	const_pointer;
+	typedef T&        	reference;
+	typedef const T&  	const_reference;
+	typedef T         	value_type;
+
+public:
+
+	COexStdAllocator() {}
+
+	COexStdAllocator( const COexStdAllocator& ) {}
+
+	T* allocate( size_type n, const void * = 0 )
+	{	return (T*)os::CMem::New( n * sizeof( T ), oexLINE, oexFILE ); }
+
+	void deallocate( void* p, size_type sz )
+	{	if ( p ) os::CMem::Delete( p ); }
+
+	T* address( T& r ) const { return &r; }
+
+	T* address( const T& r ) const { return &r; }
+
+	COexStdAllocator& operator =( const COexStdAllocator& ) { return *this; }
+
+	bool operator ==( const COexStdAllocator& ) const { return true; }
+
+	void construct( T* p, const T& val ) { new ( (T*)p ) T( val ); }
+
+	void destroy( T* p ) { p->~T(); }
+
+	size_type max_size() const { return size_type( -1 ); }
+
+	template< class U >
+		struct rebind { typedef COexStdAllocator< U > other; };
+
+	template < class U >
+		COexStdAllocator( const COexStdAllocator< U >& ) {}
+
+	template < class U >
+		COexStdAllocator& operator = ( const COexStdAllocator< U >& ) { return *this; }
+};
+
 

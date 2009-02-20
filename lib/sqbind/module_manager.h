@@ -41,7 +41,7 @@ class CModuleManager
 public:
 
     /// The module list type
-    typedef std::map< std::tstring, CModuleInstance* >     t_ModuleList;
+	typedef oexStdMap( stdString, CModuleInstance* )		t_ModuleList;
 
 public:
 

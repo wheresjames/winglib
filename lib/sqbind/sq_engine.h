@@ -569,3 +569,5 @@ private:
 	CSqMsgQueue             *m_pMsgQueue;
 };
 
+
+

@@ -33,7 +33,6 @@
 //----------------------------------------------------------------*/
 
 #include "stdafx.h"
-
 using namespace sqbind;
 
 int CSqEngineExport::alert( const stdString &sMsg )
@@ -451,11 +450,18 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 	// Attempt to load the module
 	CModuleInstance *pMi = m_pModuleManager->Load( sFull.Ptr() );
 	if ( !pMi )
+	{	oexERROR( 0, oexMks( oexT( "Failed to load module " ), sFull ) );
 		return -3;
+	} // end if
 
 	// Export functionality
 	if ( !pMi->Export( &m_vm ) )
+	{	oexERROR( 0, oexMks( oexT( "Failed to export squirrel symbols from module " ), sFull ) );
 		return -4;
+	} // end if
+	
+	// Log the fact that we loaded said module
+	oexNOTICE( 0, oexMks( oexT( "Module loaded : " ), sFull ) );
 
 	return 0;
 }

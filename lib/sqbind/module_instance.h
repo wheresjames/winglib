@@ -69,9 +69,6 @@ private:
     /// Module class
 	oex::os::CModule							m_cModule;
 
-    /// GetId() function pointer
-	oex::os::service::PFN_SRV_GetModuleInfo		m_fGetId;
-
     /// Export() function pointer
     sqbind::PFN_SQBIND_Export_Symbols			m_fExportSymbols;
 

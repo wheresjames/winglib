@@ -10,7 +10,7 @@ SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CTestClass );
 
 // Export classes
-void SQBIND_Export( sqbind::VM *x_vm )
+static void SQBIND_Export( sqbind::VM *x_vm )
 {
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;

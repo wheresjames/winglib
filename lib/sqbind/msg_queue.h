@@ -45,7 +45,7 @@ public:
 	};
 
 	/// Parameter object type
-	typedef std::map< stdString, stdString >    t_Params;
+	typedef oexStdMap( stdString, stdString )	t_Params;
 
 public:
 
@@ -115,7 +115,7 @@ private:
 public:
 
 	oex::oexBOOL execute( stdString *pReply, const stdString &sName, const stdString &sFunction );
-	oex::oexBOOL execute( stdString *pReply, const stdString &sName, const stdString &sFunction, 
+	oex::oexBOOL execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
 						  const stdString &sP1 );
 
 private:
@@ -127,7 +127,7 @@ private:
 	oexLock		                                m_cLock;
 
 	/// Message list type
-	typedef std::list< SMsg, CSqStdAllocator< SMsg > > t_MsgQueue;
+	typedef oexStdList( SMsg )					t_MsgQueue;
 
 	/// The message queue
 	t_MsgQueue                                  m_lstMsgQueue;

@@ -68,6 +68,15 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 	return 0;
 }
 
+extern "C" oexDECLARE_SRV_FUNCTION( SRV_Start );
+extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
+{
+	// Set our allocator
+	oex::os::CMem::SetRawAllocator( x_sRawAllocator );
+
+	return 0;
+}
+
 extern "C" oex::oexRESULT SQBIND_Export_Symbols( sqbind::VM *x_vm, sqbind::SSqAllocator *x_pAllocator )
 {
 	// Set the memory allocator

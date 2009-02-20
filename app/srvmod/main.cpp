@@ -5,8 +5,11 @@
 #include "errno.h"
 
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Start );
-extern "C" oex::oexRESULT SRV_Start( oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
+extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
 {
+	// Set our allocator
+	oex::os::CMem::SetRawAllocator( x_sRawAllocator );
+
     // Initialize the oex library
 	oexINIT();
 

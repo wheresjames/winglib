@@ -43,10 +43,10 @@ namespace sqbind
     public:
 
         /// List object type
-		typedef std::tstring            t_Obj;
+		typedef stdString       		t_Obj;
 
         /// List type
-        typedef std::vector< t_Obj >    t_List;
+        typedef oexStdVector( t_Obj )	t_List;
 
     private:
 
@@ -54,7 +54,7 @@ namespace sqbind
         t_List                          m_lst;
 
     public:
-        
+
 		/// Default constructor
 		CSqVector();
 

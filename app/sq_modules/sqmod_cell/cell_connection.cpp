@@ -17,7 +17,7 @@ int CCellConnection::Destroy()
 	return 1;
 }
 
-int CCellConnection::Connect( const std::string &sIp )
+int CCellConnection::Connect( const sqbind::stdString &sIp )
 {
 	// Lose old connection
 	Destroy();
@@ -37,7 +37,7 @@ int CCellConnection::Connect( const std::string &sIp )
 	return 1;
 }
 
-std::string CCellConnection::GetBackplaneData()
+sqbind::stdString CCellConnection::GetBackplaneData()
 {
 	if ( m_comm.error != OK )
 		return SetLastError( oexT( "Not connected" ) );

@@ -178,6 +178,12 @@
 #define oexSignal					OEX_NAMESPACE::CSignal
 #define oexWaitMultiple				OEX_NAMESPACE::CResource::WaitMultiple
 
+// std library
+#define oexStdString( t )	std::basic_string< t, std::char_traits< t >, oex::COexStdAllocator< t > >
+#define oexStdMap( k, v )	std::map< k, v, std::less< k >, oex::COexStdAllocator< k > >
+#define oexStdList( t )		std::list< t, oex::COexStdAllocator< t > >
+#define oexStdVector( t )	std::vector< t, oex::COexStdAllocator< t > >
+
 /// oexRETRY() - Retry something up to m times
 /**
 	\param [in] m - maximum number of times to retry

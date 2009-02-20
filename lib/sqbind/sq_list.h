@@ -45,10 +45,10 @@ namespace sqbind
     public:
 
         /// List object type
-		typedef std::tstring          t_Obj;
+		typedef stdString	          	t_Obj;
 
         /// List type
-        typedef std::list< t_Obj >    t_List;
+        typedef oexStdList( t_Obj )		t_List;
 
     private:
 
@@ -56,7 +56,7 @@ namespace sqbind
         t_List                          m_lst;
 
     public:
-        
+
         /// Returns a reference to the underlying vector
         t_List& vector();
 

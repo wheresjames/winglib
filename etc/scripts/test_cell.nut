@@ -22,7 +22,10 @@ function OnProcessRequest( get )
 	local mReply = CSqMap();
 	local tc = CCellConnection();
 
-	if ( !tc.Connect( mGet[ "ip" ] ) )
+	if ( !mGet[ "ip" ] )
+		mReply.set( "content", "You didn't specify an ip address" );
+
+	else if ( !tc.Connect( mGet[ "ip" ] ) )
 		mReply.set( "content", "Failed to connect to device at " + mGet[ "ip" ] );
 
 	else

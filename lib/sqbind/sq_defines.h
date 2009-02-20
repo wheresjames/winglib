@@ -64,3 +64,15 @@ namespace sqbind { typedef SquirrelVM VM; }
 namespace sqbind { typedef script::VMCore VM; }
 #endif
 
+namespace sqbind { typedef oexStdString( oex::oexTCHAR ) stdString; }
+
+namespace SqPlus
+{
+	inline void Push(HSQUIRRELVM v,const sqbind::stdString& value)
+	{	sq_pushstring(v,value.c_str(),-1); }
+	inline bool Match(TypeWrapper<const sqbind::stdString&>, HSQUIRRELVM v, int idx)
+	{	return sq_gettype(v,idx) == OT_STRING; }
+	inline sqbind::stdString Get(TypeWrapper<const sqbind::stdString&>,HSQUIRRELVM v,int idx)
+	{	const SQChar * s; SQPLUS_CHECK_GET(sq_getstring(v,idx,&s)); return sqbind::stdString(s); }
+}
+

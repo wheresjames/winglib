@@ -19,26 +19,26 @@ public:
 	int Destroy();
 
 	/// Connect to device
-	int Connect( const std::tstring &sIp );
+	int Connect( const sqbind::stdString &sIp );
 
 	/// Returns a string describing backplane data
-	std::tstring GetBackplaneData();
+	sqbind::stdString GetBackplaneData();
 
 	/// Sets information about the last error
-	std::tstring SetLastError( const std::tstring sErr )
+	sqbind::stdString SetLastError( const sqbind::stdString sErr )
 	{	return m_sLastError = sErr; }
 
 	/// Returns information about the last error
-	std::tstring GetLastError()
+	sqbind::stdString GetLastError()
 	{	return m_sLastError; }
 
 private:
 
 	/// Holds last error information
-	std::string			m_sLastError;
+	sqbind::stdString	m_sLastError;
 
 	/// Connection address
-	std::string			m_sIp;
+	sqbind::stdString	m_sIp;
 
 	/// Connection informatino
 	_comm_header		m_comm;

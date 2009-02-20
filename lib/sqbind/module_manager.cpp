@@ -120,7 +120,7 @@ oex::oexBOOL CModuleManager::Unload( oex::oexCSTR x_pFile )
 	// See if it's already loaded
 	t_ModuleList::iterator it = m_lstModules.find( x_pFile );
 	if ( m_lstModules.end() == it || !it->second )
-		return FALSE;
+		return oex::oexFALSE;
 
 	// Lose the module
 	it->second->Destroy();
@@ -129,10 +129,10 @@ oex::oexBOOL CModuleManager::Unload( oex::oexCSTR x_pFile )
 	OexAllocDestruct( it->second );
 
 	// Just in case
-	it->second = NULL;
+	it->second = oexNULL;
 
 	// Drop this module
 	m_lstModules.erase( it );
 
-	return TRUE;
+	return oex::oexTRUE;
 }

@@ -43,11 +43,10 @@ namespace sqbind
     public:
 
         /// List object type
-		typedef stdString		t_Obj;
+		typedef stdString						t_Obj;
 
         /// List type
-		typedef std::map< t_Obj, t_Obj, std::less< t_Obj >, CSqStdAllocator< t_Obj > > t_List;
-//		typedef std::map< t_Obj, t_Obj >		t_List;
+		typedef oexStdMap( t_Obj, t_Obj )		t_List;
 
     private:
 
@@ -55,7 +54,7 @@ namespace sqbind
         t_List					m_lst;
 
     public:
-        
+
 		/// Default constructor
 		CSqMap();
 

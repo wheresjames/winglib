@@ -122,7 +122,8 @@ oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUI
         x_uSize = uBlockSize - ( sizeof( oexUINT ) + ProtectAreaSize() );
 
     // Ok, get the memory
-    oexUCHAR *pBuf = (oexUCHAR*)os::CMem::New( uBlockSize, x_uLine, x_pFile );
+	oexUCHAR *pBuf = (oexUCHAR*)os::CMem::New( uBlockSize, x_uLine, x_pFile );
+
     if ( !pBuf )
         return oexNULL;
 
@@ -151,7 +152,7 @@ oexBOOL CAlloc::Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT
     // Verify the memory
     oexPVOID pBuf = (oexUCHAR*)CAlloc::VerifyMem( x_pBuf, oexTRUE ) - sizeof( oexUINT );
 
-    // Delete the memory
+	// Delete memory
     os::CMem::Delete( pBuf );
 
     return oexTRUE;
@@ -162,7 +163,8 @@ oexPVOID CAlloc::ReAlloc( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, 
     // Do we have the space to resize?
     oexUINT uBlockSize = BlockSize( x_pBuf );
     if ( uBlockSize < ( x_uNewSize + ProtectAreaSize() + sizeof( oexUINT ) ) )
-        return oexNULL;
+    	if ( !os::CMem::Resize( x_pBuf, x_uNewSize, x_uLine, x_pFile ) )
+        	return oexNULL;
 
     // Resize the protected memory area
     return ProtectMem( VerifyMem( x_pBuf, oexTRUE ), x_uNewSize, oexTRUE, x_uLine, x_pFile, x_uInfoIndex );
