@@ -9,7 +9,7 @@ public:
 
 	/// Default constructor
 	CCellConnection()
-	{	m_comm.file_handle = 0;
+	{	oexZeroMemory( &m_comm, sizeof( m_comm ) );
 	}
 
 	/// Destructor
@@ -20,6 +20,9 @@ public:
 
 	/// Connect to device
 	int Connect( const sqbind::stdString &sIp );
+
+	/// Read the specified tag
+	sqbind::stdString ReadTag( const sqbind::stdString &sProgram, const sqbind::stdString &sTag );
 
 	/// Returns a string describing backplane data
 	sqbind::stdString GetBackplaneData();
@@ -46,6 +49,15 @@ private:
 	/// Path
 	_path 				m_path;
 
+	/// Configuration tags
+	_tag_data			m_tagsConfig;
+	
+	/// Detail tags
+	_tag_data			m_tagsDetails;
+
+	/// Program list
+	_prog_list			m_prog_list;
+
 	/// Device rack
 	CCellRack			m_cRack;
 
@@ -54,4 +66,7 @@ private:
 
 	/// Device services
 	CCellServices		m_cServices;
+
+	/// Tag map
+	sqbind::CSqMap		m_mapTags;
 };

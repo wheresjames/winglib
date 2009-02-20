@@ -83,6 +83,9 @@ namespace sqbind
 
 		void urldecode( const t_Obj &s );
 
+		/// Returns non-zero if the specified key exists
+		oex::oexBOOL isset( const CSqMap::t_Obj &k );
+
         /// Adds an element to the vector
         void set( const t_Obj &k, const t_Obj &v );
 

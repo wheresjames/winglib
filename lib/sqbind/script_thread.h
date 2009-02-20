@@ -41,7 +41,7 @@ class CScriptThread :
 public:
 
     /// Map type for child script  thread objects
-    typedef std::map< stdString, CScriptThread* >     t_ScriptList;
+	typedef oexStdMap( stdString, CScriptThread* )		t_ScriptList;
 
 public:
 
@@ -103,7 +103,7 @@ private:
     t_ScriptList            m_lstScript;
 
     /// Script to load
-    stdString            m_sScript;
+    stdString				m_sScript;
 
     /// If non-zero, m_sScript contains a file name
 	oex::oexBOOL            m_bFile;

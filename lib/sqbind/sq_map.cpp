@@ -63,6 +63,7 @@ void CSqMap::Register( SquirrelVM &vm )
             . func( &CSqMap::merge,			oexT( "merge" ) )
             . func( &CSqMap::urlencode,		oexT( "urlencode" ) )
             . func( &CSqMap::urldecode,		oexT( "urldecode" ) )
+            . func( &CSqMap::isset,         oexT( "isset" ) )
             . func( &CSqMap::set,           oexT( "set" ) )
             . func( &CSqMap::get,           oexT( "get" ) )
             . func( &CSqMap::find_sub_k,    oexT( "find_sub_k" ) )
@@ -116,6 +117,9 @@ void CSqMap::set( const t_Obj &k, const t_Obj &v )
 {
     m_lst[ k ] = v;
 }
+
+oex::oexBOOL CSqMap::isset( const CSqMap::t_Obj &k )
+{	return m_lst.end() != m_lst.find( k ); }
 
 CSqMap::t_Obj CSqMap::get( const CSqMap::t_Obj &k )
 {

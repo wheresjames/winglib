@@ -179,10 +179,11 @@
 #define oexWaitMultiple				OEX_NAMESPACE::CResource::WaitMultiple
 
 // std library
-#define oexStdString( t )	std::basic_string< t, std::char_traits< t >, oex::COexStdAllocator< t > >
-#define oexStdMap( k, v )	std::map< k, v, std::less< k >, oex::COexStdAllocator< k > >
-#define oexStdList( t )		std::list< t, oex::COexStdAllocator< t > >
-#define oexStdVector( t )	std::vector< t, oex::COexStdAllocator< t > >
+#define oexStdTString( t )	std::basic_string< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
+#define oexStdString		oexStdTString( OEX_NAMESPACE::oexTCHAR )
+#define oexStdMap( k, v )	std::map< k, v, std::less< k >, OEX_NAMESPACE::COexStdAllocator< k > >
+#define oexStdList( t )		std::list< t, OEX_NAMESPACE::COexStdAllocator< t > >
+#define oexStdVector( t )	std::vector< t, OEX_NAMESPACE::COexStdAllocator< t > >
 
 /// oexRETRY() - Retry something up to m times
 /**

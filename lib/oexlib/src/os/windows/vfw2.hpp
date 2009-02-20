@@ -527,8 +527,8 @@ public:
 								hr = cpPBag->Read( L"FriendlyName", &var, NULL );
 
 								// Add it to the list
-								(*pList)[ std::string( (_bstr_t)pMonikerName ).c_str() ] 
-									= std::string( (_bstr_t)var.bstrVal ).c_str(); 
+								(*pList)[ oexStdString( (_bstr_t)pMonikerName ).c_str() ] 
+									= oexStdString( (_bstr_t)var.bstrVal ).c_str(); 
 
 								// Free string
 								CoTaskMemFree( pMonikerName );
@@ -1098,7 +1098,7 @@ public:
 			return oexERROR( ERROR_INVALID_PARAMETER, CStr().Fmt( oexT( "Path is a directory, %s" ), pFile ) );
 
 		// Filter name
-		std::string sFilterName( "A/V File" );
+		oexStdString sFilterName( "A/V File" );
 
 		// Create source filter
 		CComPtr< IBaseFilter > cpBaseFilter;

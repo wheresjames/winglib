@@ -21,6 +21,8 @@ public:
 	/// Returns _services reference
 	operator _services&() { return m_services; }
 
+	_services& Obj() { return m_services; }
+
 private:
 
 	/// Structure describing available services

@@ -10,7 +10,7 @@ PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus c
 PRJ_LIBS := sqbind oexlib squirrel sqstdlib sqplus cell
 PRJ_OSLB :=
  
-PRJ_EXPORTS := SRV_GetModuleInfo SQBIND_Export_Symbols
+PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SQBIND_Export_Symbols
 
 PRJ_LIBROOT := ../../..
 

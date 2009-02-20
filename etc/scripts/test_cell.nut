@@ -28,8 +28,11 @@ function OnProcessRequest( get )
 	else if ( !tc.Connect( mGet[ "ip" ] ) )
 		mReply.set( "content", "Failed to connect to device at " + mGet[ "ip" ] );
 
-	else
+	else if ( !mGet[ "tag" ] )
 		mReply.set( "content", "Data : " + tc.GetBackplaneData() );
+
+	else
+		mReply.set( "content", mGet[ "tag" ] + " = " + tc.ReadTag( "CSA", mGet[ "tag" ] ) );
 
 	return mReply.serialize();
 }

@@ -64,7 +64,7 @@ namespace sqbind { typedef SquirrelVM VM; }
 namespace sqbind { typedef script::VMCore VM; }
 #endif
 
-namespace sqbind { typedef oexStdString( oex::oexTCHAR ) stdString; }
+namespace sqbind { typedef oexStdTString( oex::oexTCHAR ) stdString; }
 
 namespace SqPlus
 {

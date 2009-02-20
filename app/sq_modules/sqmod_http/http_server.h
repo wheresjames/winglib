@@ -53,14 +53,17 @@ public:
 	~CHttpServer()
 	{
 		if ( m_pServer )
-		{	delete m_pServer;
+		{	
+			OexAllocDelete( m_pServer );
+//			delete m_pServer;
 			m_pServer = oexNULL;
 		} // end if
 	}
 
 	void Init()
 	{	if ( !m_pServer )
-			m_pServer = new CHttpServerImpl();
+			m_pServer = OexAllocConstruct< CHttpServerImpl >();
+//			m_pServer = new CHttpServerImpl();
 	}
 
 	void SetCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sServer, const sqbind::stdString &sSession )

@@ -57,7 +57,6 @@ oex::oexINT CHttpServerImpl::OnSessionCallback( oex::oexPVOID x_pData, oex::THtt
 		return -1;
 
 //	sqbind::CSqMap parReply; 
-//	std::tstring parReply;
 	sqbind::stdString sReply;
 	sqbind::stdString parGet = oex::CParser::Serialize( x_pSession->Get() ).Ptr();
 	

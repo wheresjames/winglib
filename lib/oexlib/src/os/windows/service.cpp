@@ -124,7 +124,7 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 	} // end if
 
 	// Call start function if provided
-	else if ( oexINT ret = pStart( x_sModule.Ptr(), x_sCommandLine.Ptr(), x_sCommandLine.Length(), x_pData ) )
+	else if ( oexINT ret = pStart( os::CMem::GetRawAllocator(), x_sModule.Ptr(), x_sCommandLine.Ptr(), x_sCommandLine.Length(), x_pData ) )
 	{	oexNOTICE( ret, CStr().Fmt( oexT( "Exiting because SRV_Start() returned non-zero in module %s" ),
 					   			  oexStrToMbPtr( x_sModule.Ptr() ) ) );
 		return -5;

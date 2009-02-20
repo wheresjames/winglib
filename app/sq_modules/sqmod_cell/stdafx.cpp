@@ -9,6 +9,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CCellConnection, "CCellConnection" )
 	SQBIND_MEMBER_FUNCTION( CCellConnection, Destroy )
 	SQBIND_MEMBER_FUNCTION( CCellConnection, GetLastError )
 	SQBIND_MEMBER_FUNCTION( CCellConnection, GetBackplaneData )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, ReadTag )	
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CCellConnection );
 

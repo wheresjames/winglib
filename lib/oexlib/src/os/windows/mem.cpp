@@ -35,11 +35,23 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
+#include <stdlib.h>
 #include <crtdbg.h>
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
+static oexPVOID oex_malloc( oexINT x_nSize )
+{	return malloc( (size_t)x_nSize ); }
+
+static oexPVOID oex_realloc( oexPVOID x_ptr, oexINT x_nSize )
+{	return realloc( x_ptr, x_nSize ); }
+
+static void oex_free( oexPVOID x_ptr )
+{	return free( x_ptr ); }
+
+/// Raw allocator
+SRawAllocator	CMem::m_ra = { oex_malloc, oex_realloc, oex_free };
 
 oexPVOID CMem::New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
 {
@@ -47,19 +59,26 @@ oexPVOID CMem::New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
 
     try
     {
-        // +++ Figure out how to get the unicode file name into new without conversion
+		if ( m_ra.fMalloc )
+			pBuf = (oexUCHAR*)m_ra.fMalloc( x_uSize );
+
+		else
+		{
+			// +++ Figure out how to get the unicode file name into new without conversion
 
 #if defined( oexUNICODE )
 
-        // Allocate buffer
-        pBuf = oexNEW oexUCHAR[ x_uSize ];
+	        // Allocate buffer
+    	    pBuf = oexNEW oexUCHAR[ x_uSize ];
 
 #else
 
-        // Allocate buffer
-        pBuf = oexNEWAT( x_uLine, x_pFile ) oexUCHAR[ x_uSize ];
+        	// Allocate buffer
+        	pBuf = oexNEWAT( x_uLine, x_pFile ) oexUCHAR[ x_uSize ];
 
 #endif
+
+		} // end else
 
         if ( !oexVERIFY( pBuf ) )
             return oexNULL;
@@ -75,13 +94,37 @@ oexPVOID CMem::New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
     return pBuf;
 }
 
+oexPVOID CMem::Resize( oexPVOID x_pMem, oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
+{
+	return oexNULL;
+
+}
+
 void CMem::Delete( oexPVOID x_pMem )
 {
     if ( !oexVERIFY_PTR_NULL_OK( x_pMem ) )
         return;
 
     if ( x_pMem )
-        oexDELETE_ARR( x_pMem );
+    {
+
+    	_oexTRY
+	    {
+
+			if ( m_ra.fFree )
+				m_ra.fFree( x_pMem );
+			else
+				oexDELETE_ARR( (oexUCHAR*)x_pMem );
+
+		} // end try
+
+		_oexCATCH_ALL()
+		{
+			oexASSERT( 0 );
+
+		} // end catch
+
+	} // end if
 }
 
 static void __cdecl oex_DumpHook( void * pUserData, size_t nBytes )
