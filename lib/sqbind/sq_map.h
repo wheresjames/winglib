@@ -86,6 +86,9 @@ namespace sqbind
 		/// Returns non-zero if the specified key exists
 		oex::oexBOOL isset( const CSqMap::t_Obj &k );
 
+		/// returns the number of items in the list
+		int size();
+
         /// Adds an element to the vector
         void set( const t_Obj &k, const t_Obj &v );
 

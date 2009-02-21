@@ -46,7 +46,7 @@ CSqMap::CSqMap( const CSqMap::t_Obj &s )
 }
 
 
-CSqMap::t_List& CSqMap::list() 
+CSqMap::t_List& CSqMap::list()
 {   return m_lst; }
 
 CSqMap::t_Obj& CSqMap::operator []( CSqMap::t_Obj &rObj )
@@ -64,6 +64,7 @@ void CSqMap::Register( SquirrelVM &vm )
             . func( &CSqMap::urlencode,		oexT( "urlencode" ) )
             . func( &CSqMap::urldecode,		oexT( "urldecode" ) )
             . func( &CSqMap::isset,         oexT( "isset" ) )
+            . func( &CSqMap::size,          oexT( "size" ) )
             . func( &CSqMap::set,           oexT( "set" ) )
             . func( &CSqMap::get,           oexT( "get" ) )
             . func( &CSqMap::find_sub_k,    oexT( "find_sub_k" ) )
@@ -72,6 +73,9 @@ void CSqMap::Register( SquirrelVM &vm )
             . func( &CSqMap::_nexti,        oexT( "_nexti" ) )
         ;
 }
+
+int CSqMap::size()
+{	return m_lst.size(); }
 
 CSqMap::t_Obj CSqMap::serialize()
 {
@@ -86,7 +90,7 @@ void CSqMap::deserialize( const CSqMap::t_Obj &s )
 	// Deserialize data
 	oex::CPropertyBag pb = oex::CParser::Deserialize( s.c_str() );
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
-		m_lst[ it.Node()->key.Ptr() ] = it->ToString().Ptr(); 
+		m_lst[ it.Node()->key.Ptr() ] = it->ToString().Ptr();
 }
 
 void CSqMap::merge( const CSqMap::t_Obj &s )
@@ -94,7 +98,7 @@ void CSqMap::merge( const CSqMap::t_Obj &s )
 	// Deserialize data
 	oex::CPropertyBag pb = oex::CParser::Deserialize( s.c_str(), oex::oexTRUE );
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
-		m_lst[ it.Node()->key.Ptr() ] = it->ToString().Ptr(); 
+		m_lst[ it.Node()->key.Ptr() ] = it->ToString().Ptr();
 }
 
 CSqMap::t_Obj CSqMap::urlencode()
@@ -110,7 +114,7 @@ void CSqMap::urldecode( const CSqMap::t_Obj &s )
 	// Deserialize data
 	oex::CPropertyBag pb = oex::CParser::DecodeUrlParams( s.c_str() );;
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
-		m_lst[ it.Node()->key.Ptr() ] = it->ToString().Ptr(); 
+		m_lst[ it.Node()->key.Ptr() ] = it->ToString().Ptr();
 }
 
 void CSqMap::set( const t_Obj &k, const t_Obj &v )
@@ -241,13 +245,13 @@ SquirrelObject CSqMap::_nexti( HSQUIRRELVM v )
 /// Returns non-zero if pPattern matches pString
 bool CSqMap::match_pattern( const oex::oexTCHAR *pString, const oex::oexTCHAR *pPattern)
 {
-    if ( !pString || !pPattern ) 
+    if ( !pString || !pPattern )
         return false;
 
     unsigned int i = 0, p = 0;
 
     // Skip multiple '*'
-    while ( oexT( '*' ) == pPattern[ p ] && oexT( '*' ) == pPattern[ p + 1 ] ) 
+    while ( oexT( '*' ) == pPattern[ p ] && oexT( '*' ) == pPattern[ p + 1 ] )
         p++;
 
     // Check for the 'any' pattern
@@ -261,50 +265,50 @@ bool CSqMap::match_pattern( const oex::oexTCHAR *pString, const oex::oexTCHAR *p
         if ( oexT( '*' ) == pPattern[ p ] )
         {
 	        // Are we matching everything?
-	        if ( pPattern[ p + 1 ] == 0 ) 
+	        if ( pPattern[ p + 1 ] == 0 )
                 return true;
 
 	        // Check for pattern advance
 	        if (	pString[ i ] == pPattern[ p + 1 ] ||
 
 			        (
-				        pString[ i ] >= oexT( 'a' ) && pString[ i ] <= oexT( 'z' ) && 
-				        ( pString[ i ] - ( oexT( 'a' ) - oexT( 'A' ) ) ) == pPattern[ p + 1 ] 
+				        pString[ i ] >= oexT( 'a' ) && pString[ i ] <= oexT( 'z' ) &&
+				        ( pString[ i ] - ( oexT( 'a' ) - oexT( 'A' ) ) ) == pPattern[ p + 1 ]
 			        ) ||
 
 			        (
-				        pString[ i ] >= oexT( 'A' ) && pString[ i ] <= oexT( 'Z' ) && 
-				        ( pString[ i ] + ( oexT( 'a' ) - oexT( 'A' ) ) ) == pPattern[ p + 1 ] 
-			        ) 
+				        pString[ i ] >= oexT( 'A' ) && pString[ i ] <= oexT( 'Z' ) &&
+				        ( pString[ i ] + ( oexT( 'a' ) - oexT( 'A' ) ) ) == pPattern[ p + 1 ]
+			        )
 
 		        ) p += 2;
-				
+
         } // end if
 
         // Just accept this character
-        else if ( oexT( '?' ) == pPattern[ p ] ) 
+        else if ( oexT( '?' ) == pPattern[ p ] )
             p++;
 
         // Otherwise advance if equal
-        else if ( pString[ i ] == pPattern[ p ] ) 
+        else if ( pString[ i ] == pPattern[ p ] )
             p++;
 
         // Case insensitive
         else if (	(
-				        pString[ i ] >= oexT( 'a' ) && pString[ i ] <= oexT( 'z' ) && 
-				        ( pString[ i ] - ( oexT( 'a' ) - oexT( 'A' ) ) ) == pPattern[ p ] 
+				        pString[ i ] >= oexT( 'a' ) && pString[ i ] <= oexT( 'z' ) &&
+				        ( pString[ i ] - ( oexT( 'a' ) - oexT( 'A' ) ) ) == pPattern[ p ]
 			        ) ||
 			        (
-				        pString[ i ] >= oexT( 'A' ) && pString[ i ] <= oexT( 'Z' ) && 
-				        ( pString[ i ] + ( oexT( 'a' ) - oexT( 'A' ) ) ) == pPattern[ p ] 
-			        ) 
+				        pString[ i ] >= oexT( 'A' ) && pString[ i ] <= oexT( 'Z' ) &&
+				        ( pString[ i ] + ( oexT( 'a' ) - oexT( 'A' ) ) ) == pPattern[ p ]
+			        )
 		        ) p++;
 
         // Back up in the pattern
         else while ( p && pPattern[ p ] != oexT( '*' ) ) p--;
 
         // Return true if we're at the end of the pattern
-        if ( pPattern[ p ] == 0 ) 
+        if ( pPattern[ p ] == 0 )
             return true;
 
         // Next char

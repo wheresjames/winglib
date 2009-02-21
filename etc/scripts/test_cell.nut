@@ -4,7 +4,9 @@ _self.load_module( "cell", "" );
 
 class CGlobal
 {
+	quit = 0;
 	server = 0;
+	tc = CCellConnection();
 };
 
 local _g = CGlobal();
@@ -14,25 +16,46 @@ function OnServerEvent( server, data )
 
 }
 
-function OnProcessRequest( get )
+function OnProcessRequest( get ) : ( _g )
 {
 	local mGet = CSqMap();
 	mGet.deserialize( get );
 
 	local mReply = CSqMap();
-	local tc = CCellConnection();
 
-	if ( !mGet[ "ip" ] )
-		mReply.set( "content", "You didn't specify an ip address" );
+	if ( mGet[ "quit" ] )
+	{	_g.quit = 1;
+		mReply.set( "content", "Quitting" );
+		return mReply.serialize();
+	} // end if
 
-	else if ( !tc.Connect( mGet[ "ip" ] ) )
-		mReply.set( "content", "Failed to connect to device at " + mGet[ "ip" ] );
+	if ( mGet[ "close" ] )
+		_g.tc.Destroy();
 
-	else if ( !mGet[ "tag" ] )
-		mReply.set( "content", "Data : " + tc.GetBackplaneData() );
+	if ( !_g.tc.IsConnected() && !mGet[ "ip" ] )
+	{	mReply.set( "content", "Not connected and no ip specified" );
+		return mReply.serialize();
+	} // end if
+
+	if ( !_g.tc.IsConnected() || mGet[ "ip" ] )
+		if ( !_g.tc.Connect( mGet[ "ip" ], 0 ) )
+		{	mReply.set( "content", "Unable to connect to " + mGet[ "ip" ] );
+			return mReply.serialize();
+		} // end if
+
+	if ( !_g.tc.IsConnected() )
+		mReply.set( "content", "Not connected" );
 
 	else
-		mReply.set( "content", mGet[ "tag" ] + " = " + tc.ReadTag( "CSA", mGet[ "tag" ] ) );
+	{
+		if ( mGet[ "tag" ] )
+			mReply.set( "content", mGet[ "tag" ] + " = " + _g.tc.ReadTag( "", mGet[ "tag" ] ) );
+		else if ( mGet[ "all" ] )
+			mReply.set( "content", "Data : " + _g.tc.GetBackplaneData() );
+		else
+			mReply.set( "content", "Connected to " + _g.tc.GetIp() + ", so, what else do you want?" );
+
+	} // end else
 
 	return mReply.serialize();
 }
@@ -47,35 +70,8 @@ function _init() : ( _g )
 		_self.alert( "Unable to start http server" );
 }
 
-function _idle()
+function _idle() : ( _g )
 {
-//	_self.alert( "Waiting..." );
-
-	return 0;
+	return _g.quit;
 }
 
-
-/*
-
-function _init()
-{
-	_self.load_module( "cell", "" );
-
-	local tc = CCellConnection();
-
-	if ( !tc.Connect( "172.17.2.20" ) )
-		_self.alert( "Failed to connect to device" );
-
-	_self.alert( tc.GetBackplaneData() );
-
-}
-
-function _idle()
-{
-	_self.alert( "Waiting..." );
-
-	return 1;
-}
-
-
-*/

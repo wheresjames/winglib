@@ -3,6 +3,12 @@
 
 #include "stdafx.h"
 
+CCellConnection::CCellConnection()
+{	oexZeroMemory( &m_comm, sizeof( m_comm ) );
+	m_comm.error = -1;
+}
+
+
 int CCellConnection::Destroy()
 {
 	// Close the connection
@@ -12,12 +18,13 @@ int CCellConnection::Destroy()
 	} // end if
 
 	m_comm.hostname = 0;
+	m_comm.error = -1;
 	m_sIp = "";
 
 	return 1;
 }
 
-int CCellConnection::Connect( const sqbind::stdString &sIp )
+int CCellConnection::Connect( const sqbind::stdString &sIp, int nLoadTags )
 {
 	// Lose old connection
 	Destroy();
@@ -56,46 +63,46 @@ int CCellConnection::Connect( const sqbind::stdString &sIp )
 	m_path.device2 = m_cRack.Obj().cpulocation;
 	m_path.device3 = -1;
 	m_path.device4 = -1;
-/*
-	if ( get_object_config_list( &m_comm, &m_path, 0, &m_tagsConfig, debug ) )
+
+	// Do we want to load the tags?
+	if ( nLoadTags )
+		LoadTags();
+
+	return 1;
+}
+
+int CCellConnection::LoadTags()
+{
+	if ( get_object_config_list( &m_comm, &m_path, 0, &m_tagsConfig, 0 ) )
 		SetLastError( oexT( "get_object_config_list() failed" ) );
 
-	if ( get_object_details_list( &m_comm, &m_path, 0, &m_tagsDetails, debug ) )
+	if ( get_object_details_list( &m_comm, &m_path, 0, &m_tagsDetails, 0 ) )
 		SetLastError( oexT( "get_object_details_list() failed" ) );
 
-	if ( get_program_list( &m_comm, &m_path, &m_prog_list, debug ) )
+	if ( get_program_list( &m_comm, &m_path, &m_prog_list, 0 ) )
 		SetLastError( oexT( "get_program_list() failed" ) );
 
 	int nTags = m_tagsDetails.count;
 	if ( nTags < m_tagsConfig.count )
 		nTags = m_tagsConfig.count;
 	for ( int i = 0; i < nTags; i++ )
-	{
 		if ( i < m_tagsDetails.count )
-		{
-			if ( !get_object_details( &m_comm, &m_path, m_tagsDetails.tag[ i ], debug ) )
+			if ( !get_object_details( &m_comm, &m_path, m_tagsDetails.tag[ i ], 0 ) )
 				m_mapTags.set( (const char*)m_tagsDetails.tag[ i ]->name, oexMks( i ).Ptr() );
 
-		} // end if
-
-		else if ( i < m_tagsConfig.count )
-		{
-//			m_mapTags.set( m_tagsConfig.name, oexMks( i ).Ptr() );
-
-		} // end if
-
-	} // end for
-*/
 	return 1;
 }
+
+int CCellConnection::IsConnected()
+{	return OK == m_comm.error ? 1 : 0; }
 
 sqbind::stdString CCellConnection::ReadTag( const sqbind::stdString &sProgram, const sqbind::stdString &sTag )
 {
 	if ( m_comm.error != OK )
 		return SetLastError( oexT( "ERR: Not connected" ) );
 
-//	if ( !m_mapTags.isset( sTag ) )
-//		return SetLastError( oexT( "ERR: Tag not found" ) );
+	if ( m_mapTags.size() && !m_mapTags.isset( sTag ) )
+		return SetLastError( oexT( "ERR: Tag not found" ) );
 
 	_tag_detail td;
 	oexZeroMemory( &td, sizeof( td ) );
@@ -118,23 +125,14 @@ sqbind::stdString CCellConnection::ReadTag( const sqbind::stdString &sProgram, c
 
 sqbind::stdString CCellConnection::GetBackplaneData()
 {
+	int debug = 0;
+
 	if ( m_comm.error != OK )
 		return SetLastError( oexT( "Not connected" ) );
-/*
-	m_path.device1 = -1;
-	m_path.device2 = -1;
-	m_path.device3 = -1;
-	m_path.device4 = -1;
-	m_path.device5 = -1;
-	m_path.device6 = -1;
-	m_path.device7 = -1;
-	m_path.device8 = -1;
 
-	int debug = 0;
-	if ( get_backplane_data( &m_comm, &(_backplane_data&)m_cBackplane,
-						     &(_rack&)m_cRack, &m_path, debug ) )
-		return SetLastError( oexT( "Failed to read backplane data" ) );
-*/
+	// Refresh tags
+	LoadTags();
+
 	oex::CStr ret;
 
 	ret << oexNL << oexT( "--- Backplane Data ---" ) << oexNL;
@@ -150,11 +148,7 @@ sqbind::stdString CCellConnection::GetBackplaneData()
 	ret << oexFmt( oexT( "Serial #       : %08lX" ),	   m_cBackplane.Obj().serial_number )	<< oexNL;
 	ret <<         oexT( "Backplane size : " ) 			<< m_cBackplane.Obj().rack_size 		<< oexNL;
 	ret << oexNL;
-/*
-	// Find out who's active
-	if ( who( &m_comm, &(_rack&)m_cRack, NULL, debug ) )
-		return SetLastError( oexT( "WHO faild" ) );
-*/
+
 	ret << oexNL << oexT( "--- Rack Data ---" ) << oexNL;
 	for ( int i = 0; i < m_cBackplane.Obj().rack_size; i++ )
 	{
@@ -171,12 +165,7 @@ sqbind::stdString CCellConnection::GetBackplaneData()
 		ret << oexNL;
 
 	} // end for
-/*
-	m_path.device1 = 1;
-	m_path.device2 = m_cRack.Obj().cpulocation;
-	m_path.device3 = -1;
-	m_path.device4 = -1;
-*/
+
 	if ( get_object_config_list( &m_comm, &m_path, 0, &m_tagsConfig, debug ) )
 		ret << oexT( "get_object_config_list() failed" ) << oexNL;
 
@@ -244,7 +233,7 @@ sqbind::stdString CCellConnection::GetBackplaneData()
 						ret <<         oexT( "ArraySize1: " ) 		<< (oex::oexUINT)m_tagsDetails.tag[ i ]->arraysize1 << oexNL;
 						ret <<         oexT( "ArraySize2: " ) 		<< (oex::oexUINT)m_tagsDetails.tag[ i ]->arraysize2 << oexNL;
 						ret <<         oexT( "ArraySize3: " ) 		<< (oex::oexUINT)m_tagsDetails.tag[ i ]->arraysize3 << oexNL;
-						
+
 						if ( m_tagsDetails.tag[ i ]->datalen )
 							for ( int b = 0; b < m_tagsDetails.tag[ i ]->datalen; b++ )
 							{	if ( b && !( b & 0x0f ) ) ret << oexNL;

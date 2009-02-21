@@ -8,9 +8,7 @@ class CCellConnection
 public:
 
 	/// Default constructor
-	CCellConnection()
-	{	oexZeroMemory( &m_comm, sizeof( m_comm ) );
-	}
+	CCellConnection();
 
 	/// Destructor
 	~CCellConnection()
@@ -19,7 +17,13 @@ public:
 	int Destroy();
 
 	/// Connect to device
-	int Connect( const sqbind::stdString &sIp );
+	int Connect( const sqbind::stdString &sIp, int nLoadTags );
+
+	/// Returns non-zero if connected
+	int IsConnected();
+
+	/// Loads the tag database from the target
+	int LoadTags();
 
 	/// Read the specified tag
 	sqbind::stdString ReadTag( const sqbind::stdString &sProgram, const sqbind::stdString &sTag );
@@ -34,6 +38,10 @@ public:
 	/// Returns information about the last error
 	sqbind::stdString GetLastError()
 	{	return m_sLastError; }
+
+	/// Returns the ip address of the currently connected device
+	sqbind::stdString GetIp()
+	{	return m_sIp; }
 
 private:
 
@@ -51,7 +59,7 @@ private:
 
 	/// Configuration tags
 	_tag_data			m_tagsConfig;
-	
+
 	/// Detail tags
 	_tag_data			m_tagsDetails;
 
