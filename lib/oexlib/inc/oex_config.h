@@ -84,7 +84,9 @@
 #define OEX_CRT_LEAK_DETECTION
 
 // Enable zip file support
-#define OEX_ENABLE_ZIP
+#if defined( OEX_WIN32 )
+#	define OEX_ENABLE_ZIP
+#endif
 
 // Enable image support, requires CxImage
 #define OEX_ENABLE_XIMAGE

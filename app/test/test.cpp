@@ -851,24 +851,25 @@ oex::oexRESULT TestLists()
 						"val1=yup"								"\r\n"
 						"val2=noreturn"
 						;
-	
-	if ( !oexVERIFY( oex::CParser::DecodeIni( pIni )[ oexT( "val1" ) ].ToString() == oexT( "Hello" ) ) )
+
+	oex::CPropertyBag pb = oex::CParser::DecodeIni( pIni );
+	if ( !oexVERIFY(  pb[ oexT( "val1" ) ].ToString() == oexT( "Hello" ) ) )
 		return -20;
 
-	if ( !oexVERIFY( oex::CParser::DecodeIni( pIni )[ oexT( "group1" ) ][ oexT( "val1" ) ].ToString() == oexT( "yup" ) ) )
+	if ( !oexVERIFY(  pb[ oexT( "group1" ) ][ oexT( "val1" ) ].ToString() == oexT( "yup" ) ) )
 		return -21;
 
-	if ( !oexVERIFY( oex::CParser::DecodeIni( pIni )[ oexT( "group1" ) ][ oexT( "val2" ) ].ToString() == oexT( "noreturn" ) ) )
+	if ( !oexVERIFY(  pb[ oexT( "group1" ) ][ oexT( "val2" ) ].ToString() == oexT( "noreturn" ) ) )
 		return -22;
 
-	oex::CPropertyBag pb = oex::CParser::DecodeIni( oex::CParser::EncodeIni( oex::CParser::DecodeIni( pIni ) ) );
+	pb = oex::CParser::DecodeIni( oex::CParser::EncodeIni( pb ) );
 
 	if ( !oexVERIFY( pb[ oexT( "val1" ) ].ToString() == oexT( "Hello" ) ) )
 		return -23;
 
 	if ( !oexVERIFY( pb[ oexT( "group1" ) ][ oexT( "val1" ) ].ToString() == oexT( "yup" ) ) )
 		return -24;
-		
+
     return oex::oexRES_OK;
 }
 

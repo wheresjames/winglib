@@ -549,7 +549,7 @@ public:
 
 	    return str;
     }
-		
+
     /// Encode INI File
     template< typename T >
         static TStr< T > EncodeIni( TPropertyBag< TStr< T > > &x_pb, TStr< T > x_root = oexTT( T, "" ) )
@@ -564,7 +564,7 @@ public:
 				if ( it->IsArray() )
 				{
 					TStr< T > sFull;
-					if ( x_root.Length() ) 
+					if ( x_root.Length() )
 						sFull = ( x_root ).BuildPath( it.Node()->key.TrimWhiteSpace() );
 					else
 						sFull = it.Node()->key.TrimWhiteSpace();
