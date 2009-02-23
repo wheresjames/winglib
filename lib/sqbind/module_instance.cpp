@@ -46,6 +46,22 @@ CModuleInstance::~CModuleInstance()
 
 void CModuleInstance::Destroy()
 {
+	// Release module if loaded
+	if ( m_cModule.IsLoaded() )
+	{
+		// Load start function
+		oex::os::service::PFN_SRV_Stop pStop =
+			(oex::os::service::PFN_SRV_Stop)m_cModule.AddFunction( oexT( "SRV_Stop" ) );
+		if ( !oexCHECK_PTR( pStop ) )
+			oexERROR( 0, oex::CStr().Fmt( oexT( "Symbol SRV_Stop() not found in module '%s', memory allocator must be set back to default!!!" ),
+					   			   		  oexStrToMbPtr( m_cModule.GetPath().Ptr() ) ) );
+
+		// Call stop function
+		else
+			pStop();
+
+	} // end if
+
 	// Lose the function pointers
 	m_fExportSymbols = oexNULL;
 

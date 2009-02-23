@@ -4,6 +4,12 @@
 #include "string.h"
 #include "errno.h"
 
+/// Pointer to script thread
+sqbind::CScriptThread	*g_psqScriptThread = oexNULL;
+
+/// Pointer to module manager
+sqbind::CModuleManager	*g_psqModuleManager = oexNULL;
+
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_GetModuleInfo );
 extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 {
@@ -35,12 +41,6 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 	return 0;
 }
 
-//sqbind::CSqEngine		g_sqEngine;
-//CSqMsgQueue			g_sqMsgQueue;
-
-sqbind::CScriptThread	g_sqScriptThread;
-sqbind::CModuleManager	g_sqModuleManager;
-
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Start );
 extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
 {
@@ -50,6 +50,15 @@ extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex
     // Initialize the oex library
 	oexINIT();
 
+	// Create objects
+	g_psqScriptThread = OexAllocConstruct< sqbind::CScriptThread >();
+	if ( !oexCHECK_PTR( g_psqScriptThread ) )
+		return oexERROR( -1, oexT( "Out of memory!" ) );
+
+	g_psqModuleManager = OexAllocConstruct< sqbind::CModuleManager >();
+	if ( !oexCHECK_PTR( g_psqModuleManager ) )
+		return oexERROR( -1, oexT( "Out of memory!" ) );
+
 	if ( oexCHECK_PTR( x_pPath ) && *x_pPath )
 		oex::CLog::GlobalLog().OpenLogFile( oexNULL, oex::CStr( x_pPath ).GetFileName().Ptr(), oexT( ".module.debug.log" ) );
 	else
@@ -58,15 +67,29 @@ extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex
 	// Start a log file
 	oexNOTICE( 0, oexT( "Module startup" ) );
 
-	if ( !x_nCommandLine || !oexCHECK_PTR( x_pCommandLine ) )
-		oexERROR( 0, oexT( "Script not specified" ) );
+	oex::CStr sScript;
+
+	if ( oexCHECK_PTR( x_pCommandLine ) && *x_pCommandLine && oex::CFile::Exists( x_pCommandLine ) )
+		sScript = x_pCommandLine;
 
 	else
+		sScript = oexT( "main.nut" );
+
+	if ( sScript.Length() )
 	{
 		// Attempt to find the file
-		oex::CStr sFile = x_pCommandLine;
+		oex::CStr sFile = sScript;
 		if ( !oex::CFile::Exists( sFile.Ptr() ) )
-			sFile = oexGetModulePath( x_pCommandLine );
+		{
+			// Look relative to current folder
+			if ( oex::CFile::Exists( oexGetModulePath( sFile.Ptr() ).Ptr() ) )
+				sFile = oexGetModulePath( sFile.Ptr() );
+
+			// Relative to scripts folder
+			else if ( oex::CFile::Exists( oexGetModulePath( oexT( "scripts" ) ).BuildPath( sFile ).Ptr() ) )
+				sFile = oexGetModulePath( oexT( "scripts" ) ).BuildPath( sFile );
+
+		} // end if
 
 		if ( !oex::CFile::Exists( sFile.Ptr() ) )
 			oexERROR( 0, oexMks( oexT( "File not found : " ), sFile ) );
@@ -74,13 +97,13 @@ extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex
 		else
 		{
 			// Log the script name
-			oexNOTICE( 0, oexMks( "Running script : ", x_pCommandLine ) );
+			oexNOTICE( 0, oexMks( "Running script : ", sFile ) );
 
-			g_sqScriptThread.SetModuleManager( &g_sqModuleManager );
+			g_psqScriptThread->SetModuleManager( g_psqModuleManager );
 
-			g_sqScriptThread.SetScript( sFile.Ptr(), oex::oexTRUE );
+			g_psqScriptThread->SetScript( sFile.Ptr(), oex::oexTRUE );
 
-			if ( g_sqScriptThread.Start() )
+			if ( g_psqScriptThread->Start() )
 				oexERROR( 0, "Failed to start script thread" );
 
 			else
@@ -99,8 +122,12 @@ extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Idle );
 extern "C" oex::oexRESULT SRV_Idle()
 {
+	// Ensure pointer
+	if ( !oexCHECK_PTR( g_psqScriptThread ) )
+		return -1;
+
 	// Attempt to execute idle function
-	if ( !g_sqScriptThread.IsRunning() )
+	if ( !g_psqScriptThread->IsRunning() )
 	{	oexNOTICE( 0, "Script thread has terminated" );
 		return 1;
 	} // end if
@@ -111,14 +138,21 @@ extern "C" oex::oexRESULT SRV_Idle()
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Stop );
 extern "C" oex::oexRESULT SRV_Stop()
 {
-	// Attempt to execute idle function
-	g_sqScriptThread.Destroy();
+	if ( oexCHECK_PTR( g_psqScriptThread ) )
+	{	g_psqScriptThread->Destroy();
+		OexAllocDelete( g_psqScriptThread );
+	} // end if
 
-	// Lose the modules
-	g_sqModuleManager.Destroy();
+	if ( oexCHECK_PTR( g_psqModuleManager ) )
+	{	g_psqModuleManager->Destroy();
+		OexAllocDelete( g_psqModuleManager );
+	} // end if
 
 	// Uninitialize the oex library
 	oexUNINIT();
+
+	// Switch back to default allocator
+	oex::os::CMem::SetDefaultRawAllocator();
 
 	return 0;
 }

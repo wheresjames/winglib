@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include "stdio.h"
 
+// sqengine_d.dll ../../winglib/etc/scripts/test_cell.nut
+
 int main(int argc, char* argv[])
 {
     // Initialize the oex library
@@ -15,20 +17,24 @@ int main(int argc, char* argv[])
 	if ( argc > 1 && oexCHECK_PTR( argv[ 1 ] ) )
 		sModule = argv[ 1 ];
 
+	// Calculate a module name if not specified
 	if ( !sModule.Length() )
-#if defined( _DEBUG )
-#	if defined( OEX_WIN32 )
-		sModule = oexT( "srvmod_d.dll" );
-#	else
-		sModule = oexT( "libsrvmod_d.so" );
-#	endif
-#else
-#	if defined( OEX_WIN32 )
-		sModule = oexT( "srvmod.dll" );
-#	else
-		sModule = oexT( "libsrvmod.so" );
-#	endif
-#endif
+	{
+		// Look for a .cfg file
+		oex::CStr sSettings = oexGetModuleFileName() << oexT( ".cfg" );
+		if ( oex::CFile::Exists( sSettings.Ptr() ) )
+		{
+			oex::CPropertyBag pb = oex::CParser::DecodeIni( oex::CFile().OpenExisting( sSettings.Ptr() ).Read() );
+			if ( pb.IsKey( oexT( "module" ) ) )
+				sModule = pb[ oexT( "module" ) ].ToString().DecorateName( oex::oexTRUE, oex::oexTRUE );
+
+		} // end if
+
+		// Use the name of the default module
+		else if ( !sModule.Length() )
+			sModule = oexMks( oexT( "srvmod" ) ).DecorateName( oex::oexTRUE, oex::oexTRUE );
+
+	} // end if
 
 	oex::os::CSys::Printf( "Starting...\n" );
 
@@ -40,7 +46,7 @@ int main(int argc, char* argv[])
 
 	if ( 0 > nRet )
 	{	oexERROR( nRet, "Failed to start service module..." );
-		oex::os::CSys::Printf( "Failed to start service module...\n" );
+		oex::os::CSys::Printf( "Failed to start service module %s\n", oexStrToMb( sModule ).Ptr() );
 	} // end if
 
 	else if ( 0 < nRet )

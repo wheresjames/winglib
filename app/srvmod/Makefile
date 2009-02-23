@@ -10,7 +10,7 @@ PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib
 PRJ_OSLB :=
  
-PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start
+PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop
 
 PRJ_LIBROOT := ../..
 

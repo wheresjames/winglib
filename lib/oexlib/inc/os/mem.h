@@ -78,9 +78,15 @@ public:
 	static void SetRawAllocator( SRawAllocator x_ra )
 	{	m_ra = x_ra; }
 
+	/// Sets the default raw allocator function pointers
+	static void SetDefaultRawAllocator()
+	{	m_ra = m_def; }
+
 private:
 
 	/// Raw allocator used for all memory allocations
 	static SRawAllocator	m_ra;
 
+	/// The default raw allocator
+	static SRawAllocator	m_def;
 };

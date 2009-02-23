@@ -77,6 +77,15 @@ extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex
 	return 0;
 }
 
+extern "C" oexDECLARE_SRV_FUNCTION( SRV_Stop );
+extern "C" oex::oexRESULT SRV_Stop()
+{
+	// Switch back to default allocator
+	oex::os::CMem::SetDefaultRawAllocator();
+
+	return 0;
+}
+
 extern "C" oex::oexRESULT SQBIND_Export_Symbols( sqbind::VM *x_vm, sqbind::SSqAllocator *x_pAllocator )
 {
 	// Set the memory allocator

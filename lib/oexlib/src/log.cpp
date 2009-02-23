@@ -84,11 +84,13 @@ oexBOOL CLog::Open( oexCSTR x_pPath )
 		return oexFALSE;
 
 	// Create log header
+	oexUINT uThreadId = oexGetCurrentThreadId();
 	m_file.Write( oexMks(	oexT( ";====================================================================" ) oexNL
 							oexT( "; Log file    : " ), x_pPath, oexNL
 							oexT( "; Local Time  : " ), oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL
 							oexT( "; GMT Time    : " ), oexGmtTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL
-							oexT( "; Application : " ), oexGetModuleFileName(), oexNL oexNL
+							oexT( "; Application : " ), oexGetModuleFileName(), oexNL
+							oexT( "; Thread      : " ), oexFmt( "%u (0x%x)", uThreadId, uThreadId ), oexNL oexNL
 						) );
 
 	return oexTRUE;
@@ -124,11 +126,13 @@ oexBOOL CLog::Resume( oexCSTR x_pPath )
 			return oexFALSE;
 
 		// Create log header
+		oexUINT uThreadId = oexGetCurrentThreadId();
 		m_file.Write( oexMks(	oexT( ";====================================================================" ) oexNL
 								oexT( "; Log file    : " ), x_pPath, oexNL
 								oexT( "; Local Time  : " ), oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL
 								oexT( "; GMT Time    : " ), oexGmtTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL
-								oexT( "; Application : " ), oexGetModuleFileName(), oexNL oexNL
+								oexT( "; Application : " ), oexGetModuleFileName(), oexNL
+								oexT( "; Thread      : " ), oexFmt( "%u (0x%x)", uThreadId, uThreadId ), oexNL oexNL
 							) );
 
 	} // end else
@@ -176,7 +180,9 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x
 			CStr sLog;
 
 			// Add file / line number
-			sLog << x_pFile << oexT( ":(" ) << x_nLine << oexT( ")" ) oexNL;
+			oexUINT uThreadId = oexGetCurrentThreadId();
+			sLog << x_pFile << oexT( ":(" ) << x_nLine << oexT( ")" ) 
+				 << oexFmt( " : Thread %u (0x%x)", uThreadId, uThreadId ) << oexNL;
 
 			// Write out the time
 #ifdef OEX_NANOSECONDS

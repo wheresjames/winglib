@@ -827,11 +827,11 @@ oex::oexRESULT TestLists()
 	i = 0;
     for ( oex::TList< oex::CStr >::iterator itStr; szStr[ i ] && strlst.Next( itStr ); i++ )
 		if ( !oexVERIFY( itStr->Cmp( szStr[ i ] ) ) )
-			return -10;
+			return -11;
 	i = 0;
 	for ( oex::TList< oex::CStr >::iterator itStr; szStr[ i ] && strlst2.Next( itStr ); i++ )
 		if ( !oexVERIFY( itStr->Cmp( szStr[ i ] ) ) )
-			return -10;
+			return -12;
 
 	strlst.Destroy();
 
@@ -840,8 +840,35 @@ oex::oexRESULT TestLists()
     oex::oexCSTR szStr2[] = { oexT( "1" ), oexT( "3.14" ), oexT( "String" ), oexNULL };
     for ( oex::TList< oex::CStr >::iterator itStr; szStr2[ i ] && strlst.Next( itStr ); i++ )
 		if ( !oexVERIFY( itStr->Cmp( szStr2[ i ] ) ) )
-			return -10;
+			return -13;
 
+	oex::oexCSTR pIni = "; This is a test INI file"				"\r\n"
+						"# [comment]"							"\r\n"
+						"val1=Hello"							"\r\n"
+						"val2=World"							"\r\n"
+						""										"\r\n"
+						"[group1]"								"\r\n"
+						"val1=yup"								"\r\n"
+						"val2=noreturn"
+						;
+	
+	if ( !oexVERIFY( oex::CParser::DecodeIni( pIni )[ oexT( "val1" ) ].ToString() == oexT( "Hello" ) ) )
+		return -20;
+
+	if ( !oexVERIFY( oex::CParser::DecodeIni( pIni )[ oexT( "group1" ) ][ oexT( "val1" ) ].ToString() == oexT( "yup" ) ) )
+		return -21;
+
+	if ( !oexVERIFY( oex::CParser::DecodeIni( pIni )[ oexT( "group1" ) ][ oexT( "val2" ) ].ToString() == oexT( "noreturn" ) ) )
+		return -22;
+
+	oex::CPropertyBag pb = oex::CParser::DecodeIni( oex::CParser::EncodeIni( oex::CParser::DecodeIni( pIni ) ) );
+
+	if ( !oexVERIFY( pb[ oexT( "val1" ) ].ToString() == oexT( "Hello" ) ) )
+		return -23;
+
+	if ( !oexVERIFY( pb[ oexT( "group1" ) ][ oexT( "val1" ) ].ToString() == oexT( "yup" ) ) )
+		return -24;
+		
     return oex::oexRES_OK;
 }
 
@@ -1215,7 +1242,8 @@ oex::oexRESULT TestFile()
 
 oex::oexRESULT TestZip()
 {
-/*
+#ifdef OEX_ENABLE_ZIP
+
     oex::CStr sStr = oexT( "This string will be compressed.  It has to be fairly long or the 			\
                             compression library won't really be able to compress it much.   			\
                             I also had to add more text so I could get a zero in the compressed data.   \
@@ -1230,7 +1258,9 @@ oex::oexRESULT TestZip()
     // Verify raw compression
     if ( !oexVERIFY( sStr == oexBinToStr( oex::zip::CUncompress::Uncompress( sCmp ) ) ) )
         return -2;
-*/
+
+#endif
+
     return oex::oexRES_OK;
 }
 

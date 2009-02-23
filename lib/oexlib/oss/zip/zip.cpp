@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <tchar.h>
+#include "../../oexlib.h"
 #include "zip.h"
 
 #include <crtdbg.h>

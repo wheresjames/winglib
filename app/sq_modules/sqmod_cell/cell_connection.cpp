@@ -169,36 +169,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sProgram, cons
 
 	mRet.set( oexT( "value" ), 			oexMks( nVal ).Ptr() );
 
-/*
-	mRet[ oexT( "topbase" ) ] 		= td.topbase;
-	mRet[ oexT( "base" ) ] 			= td.base;
-	mRet[ oexT( "id" ) ] 			= td.id;
-	mRet[ oexT( "linkid" ) ] 		= td.linkid;
-	mRet[ oexT( "type" ) ] 			= td.type;
-	mRet[ oexT( "size" ) ] 			= td.size;
-	mRet[ oexT( "memory" ) ] 		= td.memory;
-	mRet[ oexT( "displaytype" ) ] 	= td.displaytype;
-	mRet[ oexT( "name" ) ] 			= (const char*)td.name;
-	mRet[ oexT( "arraysize1" ) ] 	= td.arraysize1;
-	mRet[ oexT( "arraysize2" ) ] 	= td.arraysize2;
-	mRet[ oexT( "arraysize3" ) ] 	= td.arraysize3;
-*/
 	return mRet;
-
-/*
-	int nVal = 0;
-	if ( 1 == td.datalen )
-		nVal = *( (char*)td.data );
-	if ( 2 == td.datalen )
-		nVal = *( (short*)td.data );
-	if ( 4 == td.datalen )
-		nVal = *( (long*)td.data );
-
-	if ( 0xC1 == ( td.type & 0xff ) )
-		return nVal ? oexT( "true" ) : oexT( "false" );
-
-	return oexFmt( oexT( "type:%04lX" ), td.type ).Ptr();
-*/
 }
 
 sqbind::stdString CCellConnection::GetBackplaneData()

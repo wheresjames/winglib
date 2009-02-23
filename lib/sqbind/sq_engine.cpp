@@ -444,20 +444,30 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 	else
 		sFull = oexGetModulePath();
 
-	// Create full path
-	sFull.BuildPath( ( oex::CStr() << oexT( "sqmod_" ) <<  sModule.c_str() ).DecorateName( oex::oexTRUE, oex::oexTRUE ) );
+	oex::CStr sFile = ( oex::CStr() << oexT( "sqmod_" ) <<  sModule.c_str() ).DecorateName( oex::oexTRUE, oex::oexTRUE );
+
+	if ( oex::CFile::Exists( oex::CStr( sFull ).BuildPath( sFile ).Ptr() ) )
+		sFull.BuildPath( sFile );
+
+	else if ( oex::CFile::Exists( oex::CStr( sFull ).BuildPath( oexT( "modules" ) ).BuildPath( sFile ).Ptr() ) )
+		sFull.BuildPath( oexT( "modules" ) ).BuildPath( sFile );
+
+	else
+	{	oexERROR( 0, oexMks( oexT( "Module not found " ), sFile ) );
+		return -3;
+	} // end if
 
 	// Attempt to load the module
 	CModuleInstance *pMi = m_pModuleManager->Load( sFull.Ptr() );
 	if ( !pMi )
 	{	oexERROR( 0, oexMks( oexT( "Failed to load module " ), sFull ) );
-		return -3;
+		return -4;
 	} // end if
 
 	// Export functionality
 	if ( !pMi->Export( &m_vm ) )
 	{	oexERROR( 0, oexMks( oexT( "Failed to export squirrel symbols from module " ), sFull ) );
-		return -4;
+		return -5;
 	} // end if
 	
 	// Log the fact that we loaded said module

@@ -57,18 +57,7 @@ private:
 
 public:
 
-/*	/// Parsers a list by breaking it at separator strings
-	static CStrList Explode( oexCSTR pStr, oexUINT uSize, oexCSTR pSep, oexUINT uSep );
-
-    static CStrList Explode( oexCSTR pStr, oexCSTR pSep )
-	{	return Explode( pStr, zstr::Length( pStr ), pSep, zstr::Length( pSep ) ); }
-
-    static CStrList Explode( CStr sStr, oexCSTR pSep )
-	{	return Explode( sStr.Ptr(), sStr.Length(), pSep, zstr::Length( pSep ) ); }
-
-    static CStrList Explode( CStr sStr, CStr sSep )
-	{	return Explode( sStr.Ptr(), sStr.Length(), sSep.Ptr(), sSep.Length() ); }
-*/
+	/// Parsers a list by breaking it at separator strings
     template < typename T >
         static TList< TStr< T > > Explode( oexCONST T * pStr, oexCONST T * pSep )
 	{	return Explode( pStr, zstr::Length( pStr ), pSep, zstr::Length( pSep ) ); }
@@ -145,7 +134,6 @@ public:
 	static CStrList GetTokens( oexCSTR pStr, oexCSTR pValid );
 
 	/// Splits a string into an array by cutting on any character in pSep
-//	static CStrList CParser::Split( oexCSTR pStr, oexUINT uSize, oexCSTR pSep );
     template < typename T >
         static TList< TStr< T > > Split( oexCONST T *x_pStr, oexUINT x_uSize, oexCONST T *x_pSep )
     {
@@ -217,14 +205,6 @@ public:
 
 
 	/// Decodes url type params such as "a=b&c=d"
-//	static CPropertyBag DecodeUrlParams( CStr str );
-
-//    static CPropertyBag8 DecodeUrlParams( CStr8 &str )
-//    {   return DecodeUrlParams< oexCHAR8 >( str ); }
-
-//    static CPropertyBagW DecodeUrlParams( CStrW &str )
-//    {   return DecodeUrlParams< oexCHARW >( str ); }
-
     template< typename T >
         static TPropertyBag< TStr< T > > DecodeUrlParams( oexCONST T *x_pStr )
         {   return DecodeUrlParams( TStr< T >( x_pStr ) ); }
@@ -262,8 +242,6 @@ public:
 
 
 	/// Encodes url type params such as "a=b&c=d"
-//	static CStr EncodeUrlParams( CPropertyBag pb );
-
     template< typename T >
         static TStr< T > EncodeUrlParams( TPropertyBag< TStr< T > > x_pb )
     {
@@ -282,8 +260,6 @@ public:
     }
 
 	/// Returns non-zero if the character is a valid url character
-//	static oexBOOL CParser::IsUrlChar( oexTCHAR ch );
-
     template< typename T >
         static oexBOOL IsUrlChar( T x_ch )
     {   return  ( oexTC( T, 'a' ) <= x_ch && oexTC( T, 'z' ) >= x_ch ) ||
@@ -293,13 +269,7 @@ public:
                 oexTC( T, '.' ) == x_ch;
     }
 
-
 	/// Encoded a url string "Hello World" -> "Hello%20World"
-//	static CStr CParser::UrlEncode( CStr str );
-
-	/// Decodes a url string "Hello%20World" -> "Hello World"
-//	static CStr CParser::UrlDecode( CStr str );
-
     template< typename T >
         static TStr< T > UrlEncode( oexCONST T *x_pStr )
         {   return UrlEncode( TStr< T >( x_pStr ) ); }
@@ -324,6 +294,7 @@ public:
 	    return ret;
     }
 
+	/// Decodes a url string "Hello%20World" -> "Hello World"
     template< typename T >
         static TStr< T > UrlDecode( oexCONST T *x_pStr )
         {   return UrlDecode( TStr< T >( x_pStr ) ); }
@@ -357,26 +328,6 @@ public:
 
 	    return ret;
     }
-
-/*
-    /// Generic property bag deserializing
-    static CPropertyBag Deserialize( oexCSTR x_pStr )
-    {   CPropertyBag pb;
-        CStr str( x_pStr );
-        Deserialize( str, pb );
-        return pb;
-    }
-
-    /// Generic property bag deserializing
-    static CPropertyBag Deserialize( oexCONST CStr &x_sStr )
-    {   CPropertyBag pb; Deserialize( x_sStr, pb ); return pb; }
-
-    /// Generic property bag deserializing
-    static oexLONG Deserialize( oexCONST CStr &x_sStr, CPropertyBag &x_pb, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL );
-
-    /// Generic property bag serializing
-    static CStr Serialize( CPropertyBag &x_pb );
-*/
 
     /// Generic property bag deserializing
     template< typename T >
@@ -536,7 +487,6 @@ public:
     static CStr GetToken( CStr &x_sStr, CStrList x_lst, oexBOOL x_bCaseSensitive );
 
     /// Returns the next token in x_sStr if it is in lst
-//    static CStr ParseToken( CStr &x_sStr, CStrList x_lst, oexBOOL x_bCaseSensitive );
     template< typename T >
         static TStr< T > ParseToken( TStr< T > &x_sStr, TList< TStr< T > > x_lst, oexBOOL x_bCaseSensitive )
     {
@@ -559,19 +509,14 @@ public:
     }
 
     /// Decode MIME
-//    static CPropertyBag DecodeMIME( CStr &x_sStr );
-
-    /// Encode MIME
-//    static CStr EncodeMime( CPropertyBag &x_pb );
-
     template< typename T >
-        static TPropertyBag< TStr< T > > DecodeMIME( TStr< T > &x_sStr )
+        static TPropertyBag< TStr< T > > DecodeMIME( TStr< T > x_sStr )
     {
         TPropertyBag< TStr< T > > pb;
 
         while ( x_sStr.Length() )
         {
-            TStr< T > sKey = x_sStr.Parse( oexTT( T, ":" ) ), sVal;
+            TStr< T > sKey = x_sStr.Parse( oexTT( T, ":\r\n" ) ), sVal;
             if ( *x_sStr == oexTC( T, ':' ) ) x_sStr++;
 
             // Read value string
@@ -582,13 +527,14 @@ public:
 
             // Ensure valid strings
             if ( sKey.Length() && sVal.Length() )
-                pb[ UrlDecode( sKey ) ] = sVal; // UrlDecode( sVal );
+                pb[ sKey ] = sVal;
 
         } // end while
 
         return pb;
     }
 
+    /// Encode MIME
     template< typename T >
         static TStr< T > EncodeMime( TPropertyBag< TStr< T > > &x_pb )
     {
@@ -600,10 +546,101 @@ public:
             if ( it.Node()->key.Length() && it->ToString().Length() )
 
                 str << it.Node()->key << oexTT( T, ": " ) << it->ToString() << oexTT( T, "\r\n" );
-//                str << UrlEncode( it.Node()->key ) << oexTT( T, ": " ) << UrlEncode( it->ToString() ) << oexTT( T, "\r\n" );
 
 	    return str;
     }
+		
+    /// Encode INI File
+    template< typename T >
+        static TStr< T > EncodeIni( TPropertyBag< TStr< T > > &x_pb, TStr< T > x_root = oexTT( T, "" ) )
+    {
+	    TStr< T > str;
+
+        // Write out each value
+	    for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+
+            if ( it.Node()->key.Length() )
+			{
+				if ( it->IsArray() )
+				{
+					TStr< T > sFull;
+					if ( x_root.Length() ) 
+						sFull = ( x_root ).BuildPath( it.Node()->key.TrimWhiteSpace() );
+					else
+						sFull = it.Node()->key.TrimWhiteSpace();
+					str << oexTT( T, "\r\n[" ) << sFull << oexTT( T, "]\r\n" );
+					str << EncodeIni( *it, sFull );
+
+				} // end if
+
+				else
+					str << it.Node()->key.TrimWhiteSpace() << oexTT( T, "=" ) << it->ToString().TrimWhiteSpace() << oexTT( T, "\r\n" );
+
+			} // end if
+
+	    return str;
+    }
+
+	/// Decodes a url string "Hello%20World" -> "Hello World"
+    template< typename T >
+        static TPropertyBag< TStr< T > > DecodeIni( oexCONST T *x_pStr )
+        {   return DecodeIni( TStr< T >( x_pStr ) ); }
+
+	/// Decode INI File
+    template< typename T >
+        static TPropertyBag< TStr< T > > DecodeIni( TStr< T > x_sStr )
+    {
+        TPropertyBag< TStr< T > > pb;
+		TStr< T > sGroup;
+
+		x_sStr << "\r\n";
+        while ( x_sStr.Length() )
+        {
+			x_sStr.SkipWhiteSpace();
+
+			// Comment
+			if ( oexTC( T, ';' ) == x_sStr[ 0 ] || oexTC( T, '#' ) == x_sStr[ 0 ] )
+				; // Ignore
+
+			// Group
+			else if ( oexTC( T, '[' ) == x_sStr[ 0 ] )
+			{
+				// Skip '['
+				x_sStr++;
+
+				// Switch groups
+				sGroup = x_sStr.Parse( oexTT( T, "]\r\n" ) ).TrimWhiteSpace();
+
+			} // end else if
+
+			// Values
+			else
+			{
+				TStr< T > sKey = x_sStr.Parse( oexTT( T, "=\r\n" ) ).TrimWhiteSpace(), sVal;
+				if ( *x_sStr == oexTC( T, '=' ) ) x_sStr++;
+
+				// Read value string
+				sVal << x_sStr.SkipWhiteSpace().Parse( oexTT( T, "\r\n" ) ).TrimWhiteSpace();
+
+				// Ensure valid strings
+				if ( sKey.Length() && sVal.Length() )
+				{
+					if ( sGroup.Length() )
+						pb[ sGroup ][ sKey ] = sVal;
+					else
+						pb[ sKey ] = sVal;
+
+				} // end if
+
+			} // end else
+
+			x_sStr.NextLine();
+
+        } // end while
+
+        return pb;
+    }
+
 
     /// Creates a list of all permutations of the specified character string
     /**

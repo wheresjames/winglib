@@ -115,9 +115,9 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 
 #if defined( oexUNICODE )
 
-	if ( 1 == _CrtDbgReport( _CRT_ASSERT, oexStrToStr8( x_pFile ).Ptr(), x_uLine,
-                             oexStrToStr8( x_pModule ).Replace( '%', '.' ).Ptr(),
-                             oexStrToStr8( x_pStr ).Ptr() ) )
+	if ( 1 == _CrtDbgReport( _CRT_ASSERT, oexStrToMb( x_pFile ).Ptr(), x_uLine,
+                             oexStrToMb( x_pModule ).Replace( '%', '.' ).Ptr(),
+                             oexStrToMb( x_pStr ).Ptr() ) )
 
 #else
 
