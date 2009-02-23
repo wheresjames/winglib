@@ -14,6 +14,7 @@ public:
 	~CCellConnection()
 	{	Destroy(); }
 
+	/// Closes the connection and releases resources
 	int Destroy();
 
 	/// Connect to device
@@ -26,7 +27,7 @@ public:
 	int LoadTags();
 
 	/// Read the specified tag
-	sqbind::stdString ReadTag( const sqbind::stdString &sProgram, const sqbind::stdString &sTag );
+	sqbind::CSqMap ReadTag( const sqbind::stdString &sProgram, const sqbind::stdString &sTag );
 
 	/// Returns a string describing backplane data
 	sqbind::stdString GetBackplaneData();

@@ -185,6 +185,14 @@
 #define oexStdList( t )		std::list< t, OEX_NAMESPACE::COexStdAllocator< t > >
 #define oexStdVector( t )	std::vector< t, OEX_NAMESPACE::COexStdAllocator< t > >
 
+// Number conversion
+#define oexStrToInt64		OEX_NAMESPACE::os::CSys::StrToInt64
+#define oexStrToUInt64		OEX_NAMESPACE::os::CSys::StrToUInt64
+#define oexStrToLong		OEX_NAMESPACE::os::CSys::StrToLong
+#define oexStrToULong		OEX_NAMESPACE::os::CSys::StrToULong
+#define oexStrToDouble		OEX_NAMESPACE::os::CSys::StrToDouble
+
+
 /// oexRETRY() - Retry something up to m times
 /**
 	\param [in] m - maximum number of times to retry

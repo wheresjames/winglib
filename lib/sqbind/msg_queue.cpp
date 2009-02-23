@@ -37,9 +37,9 @@
 using namespace sqbind;
 
 /// Default Constructor
-CSqMsgQueue::SMsg::SMsg() 
+CSqMsgQueue::SMsg::SMsg()
 {
-	pReply = NULL; 
+	pReply = NULL;
 }
 
 /// Initializer
@@ -52,15 +52,15 @@ CSqMsgQueue::SMsg::SMsg( const stdString x_sMsg, CSqMap *x_pmapParams, oexEvent 
 	pReply = x_pReply;
 }
 
-/*
+
 // Copy constructor
 CSqMsgQueue::SMsg::SMsg( const CSqMsgQueue::SMsg &x_rMsg )
 {   sMsg = x_rMsg.sMsg;
-	mapParams.list() = x_rMsg.mapParams.list();
+	sParams = x_rMsg.sParams;
 	evReply = x_rMsg.evReply;
 	pReply = x_rMsg.pReply;
 }
-*/
+
 
 /// Default constructor
 CSqMsgQueue::CSqMsgQueue()
@@ -238,7 +238,7 @@ oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sName, co
 	return Msg( oexT( "msg" ), &params, pReply );
 }
 
-oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sName, const stdString &sFunction, 
+oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
 								   const stdString &sP1 )
 {	CSqMap params;
 	params[ oexT( "name" ) ] = sName;

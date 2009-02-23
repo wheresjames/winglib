@@ -37,8 +37,8 @@ function OnProcessRequest( get ) : ( _g )
 		return mReply.serialize();
 	} // end if
 
-	if ( !_g.tc.IsConnected() || mGet[ "ip" ] )
-		if ( !_g.tc.Connect( mGet[ "ip" ], 0 ) )
+	if ( !_g.tc.IsConnected() || mGet[ "ip" ] != _g.tc.GetIp() )
+		if ( !_g.tc.Connect( mGet[ "ip" ], 1 ) )
 		{	mReply.set( "content", "Unable to connect to " + mGet[ "ip" ] );
 			return mReply.serialize();
 		} // end if
@@ -49,7 +49,7 @@ function OnProcessRequest( get ) : ( _g )
 	else
 	{
 		if ( mGet[ "tag" ] )
-			mReply.set( "content", mGet[ "tag" ] + " = " + _g.tc.ReadTag( "", mGet[ "tag" ] ) );
+			mReply.set( "content", mGet[ "tag" ] + " = \r\n" + _g.tc.ReadTag( "", mGet[ "tag" ] ).print_r( 1 ) );
 		else if ( mGet[ "all" ] )
 			mReply.set( "content", "Data : " + _g.tc.GetBackplaneData() );
 		else

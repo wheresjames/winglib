@@ -45,6 +45,11 @@ CSqMap::CSqMap( const CSqMap::t_Obj &s )
 	deserialize( s );
 }
 
+CSqMap::CSqMap( const oex::oexTCHAR *s )
+{
+	if ( s )
+		deserialize( t_Obj( s ) );
+}
 
 CSqMap::t_List& CSqMap::list()
 {   return m_lst; }
@@ -52,7 +57,7 @@ CSqMap::t_List& CSqMap::list()
 CSqMap::t_Obj& CSqMap::operator []( CSqMap::t_Obj &rObj )
 {	return m_lst[ rObj ]; }
 
-CSqMap::t_Obj& CSqMap::operator []( const char *p )
+CSqMap::t_Obj& CSqMap::operator []( const oex::oexTCHAR *p )
 {	return m_lst[ p ]; }
 
 void CSqMap::Register( SquirrelVM &vm )
@@ -71,6 +76,7 @@ void CSqMap::Register( SquirrelVM &vm )
             . func( &CSqMap::find_sub_v,    oexT( "find_sub_v" ) )
             . func( &CSqMap::_get,          oexT( "_get" ) )
             . func( &CSqMap::_nexti,        oexT( "_nexti" ) )
+            . func( &CSqMap::print_r,       oexT( "print_r" ) )
         ;
 }
 
@@ -121,6 +127,15 @@ void CSqMap::set( const t_Obj &k, const t_Obj &v )
 {
     m_lst[ k ] = v;
 }
+
+CSqMap::iterator CSqMap::begin()
+{	return m_lst.begin(); }
+
+CSqMap::iterator CSqMap::end()
+{	return m_lst.end(); }
+
+CSqMap::iterator CSqMap::find ( const t_Obj &k )
+{	return m_lst.find( k ); }
 
 oex::oexBOOL CSqMap::isset( const CSqMap::t_Obj &k )
 {	return m_lst.end() != m_lst.find( k ); }
@@ -322,4 +337,16 @@ bool CSqMap::match_pattern( const oex::oexTCHAR *pString, const oex::oexTCHAR *p
     // Did we match?
     return ( pPattern[ p ] == 0 );
 }
+
+CSqMap::t_Obj CSqMap::print_r( int nShowVals )
+{
+	t_Obj sRet;
+	for ( iterator it = m_lst.begin(); it != m_lst.end(); it++ )
+	{	sRet += it->first; sRet += oexT( " = " );
+		sRet += ( nShowVals ? it->second : oexT( "..." ) );
+		sRet += oexT( "\r\n" );
+	} // end for
+	return sRet;
+}
+
 

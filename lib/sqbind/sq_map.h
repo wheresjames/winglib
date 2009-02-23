@@ -48,6 +48,9 @@ namespace sqbind
         /// List type
 		typedef oexStdMap( t_Obj, t_Obj )		t_List;
 
+		/// List iterator type
+		typedef t_List::iterator				iterator;
+
     private:
 
         /// List
@@ -61,6 +64,9 @@ namespace sqbind
 		/// Deserializing constructor
 		CSqMap( const t_Obj &s );
 
+		/// Deserializing constructor
+		CSqMap( const oex::oexTCHAR *s );
+
         /// Returns a reference to the underlying vector
         t_List& list();
 
@@ -68,7 +74,7 @@ namespace sqbind
 		t_Obj& operator []( t_Obj &rObj );
 
 		/// Returns a reference to the list item
-		t_Obj& operator []( const char *p );
+		t_Obj& operator []( const oex::oexTCHAR *p );
 
         /// Registers the vector class for use with Squirrel
         static void Register( SquirrelVM &vm );
@@ -100,6 +106,18 @@ namespace sqbind
 
         /// Adds an element to the vector
         t_Obj find_sub_v( const t_Obj &v );
+
+		/// Returns the first item in the list
+        iterator begin();
+
+		/// Returns the last item in the list
+        iterator end();
+
+		/// Returns the specified list item
+        iterator find ( const t_Obj &k );
+
+		/// Displays the array in a human readable form
+		t_Obj print_r( int nShowVals );
 
     private:
 

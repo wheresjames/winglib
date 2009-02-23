@@ -83,7 +83,7 @@ public:
 		SMsg( const stdString x_sMsg, CSqMap *x_pmapParams, oexEvent x_evReply, stdString *x_pReply );
 
 		// Copy constructor
-//		SMsg( const SMsg &x_rMsg );
+		SMsg( const SMsg &x_rMsg );
 
 		/// Command
 		stdString									sMsg;
