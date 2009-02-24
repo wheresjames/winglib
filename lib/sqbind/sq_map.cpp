@@ -54,7 +54,7 @@ CSqMap::CSqMap( const oex::oexTCHAR *s )
 CSqMap::t_List& CSqMap::list()
 {   return m_lst; }
 
-CSqMap::t_Obj& CSqMap::operator []( CSqMap::t_Obj &rObj )
+CSqMap::t_Obj& CSqMap::operator []( const CSqMap::t_Obj &rObj )
 {	return m_lst[ rObj ]; }
 
 CSqMap::t_Obj& CSqMap::operator []( const oex::oexTCHAR *p )

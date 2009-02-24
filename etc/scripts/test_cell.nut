@@ -49,12 +49,36 @@ function OnProcessRequest( get ) : ( _g )
 	else
 	{
 		if ( mGet[ "tag" ] )
+		{
+			if ( !_g.tc.tags()[ mGet[ "tag" ] ] )
+				mReply.set( "content", "Tag not found " + mGet[ "tag" ] );
+			else
+				mReply.set( "content", _g.tc.ReadTag( mGet[ "tag" ] ).urlencode() );
+
+		} // end if
+
+		else if ( mGet[ "all" ] )
+		{
+			local s = "Tags:\r\n";
+			local tags = _g.tc.tags();
+			foreach( k,v in tags )
+			{
+				s += k + " : " + v + "\r\n";
+
+			} // end foreach
+
+			mReply.set( "content", s );
+
+		} // end if
+
+/*
+		if ( mGet[ "tag" ] )
 			mReply.set( "content", _g.tc.ReadTag( "", mGet[ "tag" ] ).urlencode() );
 		else if ( mGet[ "all" ] )
-			mReply.set( "content", "Data : " + _g.tc.GetBackplaneData() );
+			mReply.set( "content", _g.tc.GetBackplaneData() );
 		else
 			mReply.set( "content", "Connected to " + _g.tc.GetIp() + ", so, what else do you want?" );
-
+*/
 	} // end else
 
 	return mReply.serialize();

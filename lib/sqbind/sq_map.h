@@ -71,7 +71,7 @@ namespace sqbind
         t_List& list();
 
 		/// Returns a reference to the list item
-		t_Obj& operator []( t_Obj &rObj );
+		t_Obj& operator []( const t_Obj &rObj );
 
 		/// Returns a reference to the list item
 		t_Obj& operator []( const oex::oexTCHAR *p );

@@ -50,8 +50,8 @@ static void oex_free( oexPVOID x_ptr )
 {	return free( x_ptr ); }
 
 /// Raw allocator
+SRawAllocator	CMem::m_def = { oex_malloc, oex_realloc, oex_free };
 SRawAllocator	CMem::m_ra = { oex_malloc, oex_realloc, oex_free };
-//SRawAllocator	CMem::m_ra = { 0, 0, 0 };
 
 oexPVOID CMem::New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
 {
