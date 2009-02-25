@@ -74,6 +74,10 @@ public:
 	sqbind::CSqMap& tags()
 	{	return m_mapSqTags; }
 
+	/// Creates a map from tag details structure
+	sqbind::CSqMap TagToMap( _tag_detail *pTd );
+
+
 private:
 
 	/// Holds last error information

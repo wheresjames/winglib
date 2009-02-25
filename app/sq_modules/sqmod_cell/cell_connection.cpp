@@ -139,6 +139,9 @@ int CCellConnection::LoadTags()
 		if ( !m_tagsProgram.OexNew( nProgs ).Ptr() )
 		{	SetLastError( oexT( "Out of Memory!" ) ); return 0; }
 
+		// Initialize the memory
+		m_tagsProgram.Zero();
+
 		// for each program tag
 		for ( int i = 0; i < nProgs; i++ )
 		{
@@ -243,6 +246,14 @@ oex::oexBOOL CCellConnection::GetTagValue( _tag_detail &td, sqbind::stdString &s
 	if ( !td.datalen || !oexCHECK_PTR( td.data ) )
 		return oex::oexFALSE;
 
+	if ( td.type & 0x8000 )
+		sType = oexT( "STRUCT:" );
+
+	// Dimensions
+	int nD = ( td.type & 0x6000 ) >> 13;
+	if ( nD )
+		sType += oexMks( nD, oexT( ":" ) ).Ptr();
+
 	switch( td.type & 0xff )
 	{
 		case 0xc1 :
@@ -289,6 +300,33 @@ oex::oexBOOL CCellConnection::GetTagValue( _tag_detail &td, sqbind::stdString &s
 	return oex::oexTRUE;
 }
 
+sqbind::CSqMap CCellConnection::TagToMap( _tag_detail *pTd )
+{
+	if ( !oexCHECK_PTR( pTd ) )
+		return sqbind::CSqMap();
+
+	sqbind::CSqMap mRet;
+	mRet.set( oexT( "topbase" ), 		oexMks( (unsigned int)pTd->topbase ).Ptr() );
+	mRet.set( oexT( "base" ), 			oexMks( (unsigned int)pTd->base ).Ptr() );
+	mRet.set( oexT( "id" ), 			oexMks( (unsigned int)pTd->id ).Ptr() );
+	mRet.set( oexT( "linkid" ), 		oexMks( (unsigned int)pTd->linkid ).Ptr() );
+	mRet.set( oexT( "type" ), 			oexMks( (unsigned int)( pTd->type & 0x0fff ) ).Ptr() );
+	mRet.set( oexT( "dim" ),			oexMks( (unsigned int)( ( pTd->type & 0x6000 ) >> 13 ) ).Ptr() );
+	mRet.set( oexT( "struct" ),			oexMks( (unsigned int)( ( pTd->type & 0x8000 ) ? 1 : 0 ) ).Ptr() );
+	mRet.set( oexT( "items" ), 			oexMks( (unsigned int)pTd->size ).Ptr() );
+	mRet.set( oexT( "memory" ), 		oexMks( (unsigned int)pTd->memory ).Ptr() );
+	mRet.set( oexT( "displaytype" ), 	oexMks( (unsigned int)pTd->displaytype ).Ptr() );
+	mRet.set( oexT( "name" ), 			oexMbToStrPtr( (const char*)pTd->name ) );
+
+	mRet.set( oexT( "type_name" ), 		GetTagTypeName( *pTd ).c_str() );
+
+	sqbind::stdString sVal;
+	if ( GetTagValue( *pTd, sVal ) )
+		mRet.set( oexT( "value" ), 		sVal.c_str() );
+
+	return mRet;
+}
+
 sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 {
 	// Must be connected
@@ -319,73 +357,11 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 	if ( 0 > nT || nT >= pTd->count )
 		return SetLastError( oexMks( oexT( "err=Invalid tag index " ), nT ).Ptr() );
 
-	sqbind::CSqMap mRet;
+	// Get object details
+	if ( 0 > read_object_value( &m_comm, &m_path, pTd->tag[ nT ], 0 ) )
+		return SetLastError( oexT( "err=read_object_value() failed" ) );
 
-	mRet.set( oexT( "worked" ), 		oexMks( nP, ", ", nT ).Ptr() );
-
-
-	return mRet;
-
-/*
-
-	// If we have the tag database, make sure it exists before we waste our time
-//	if ( m_mapTags.size() && !m_mapTags.isset( sTag ) )
-//		return SetLastError( oexT( "err=Tag not found" ) );
-
-	_tag_detail td, *ptd = &td;
-	oexZeroMemory( &td, sizeof( td ) );
-
-	// Was a program specified?
-	const char *pProgram = sProgram.c_str();
-	if ( !oexCHECK_PTR( pProgram ) || !*pProgram )
-		pProgram = oexNULL;
-
-	_oexTRY
-	{
-		sqbind::CSqMap::iterator it = m_mapTags.find( sTag );
-		if ( it != m_mapTags.end() )
-		{
-			int i = oexStrToLong( it->second.c_str() );
-			if ( 0 > i || m_tagsDetails.count <= i )
-				return SetLastError( oexMks( oexT( "err=index out of range " ), i ).Ptr() );
-
-			if ( 0 > read_object_value( &m_comm, &m_path, m_tagsDetails.tag[ i ], 0 ) )
-				return SetLastError( oexMks( oexT( "err=read_object_value( '" ), sTag.c_str(), oexT( "' ) failed" ) ).Ptr() );
-
-			ptd = m_tagsDetails.tag[ i ];
-
-		} // end if
-
-		else
-		{
-			// Read the tag
-			if ( read_tag( &m_comm, &m_path, (char*)pProgram, (char*)sTag.c_str(), &td, 0 ) )
-				return SetLastError( oexMks( oexT( "err=read_tag( '" ), sTag.c_str(), oexT( "' ) failed" ) ).Ptr() );
-
-		} // end else
-
-	} // end try
-	_oexCATCH_ALL()
-	{	return SetLastError( oexT( "err=assert in read_tag()" ) ); }
-
-	sqbind::CSqMap mRet;
-	mRet.set( oexT( "topbase" ), 		oexMks( (unsigned int)ptd->topbase ).Ptr() );
-	mRet.set( oexT( "base" ), 			oexMks( (unsigned int)ptd->base ).Ptr() );
-	mRet.set( oexT( "id" ), 			oexMks( (unsigned int)ptd->id ).Ptr() );
-	mRet.set( oexT( "linkid" ), 		oexMks( (unsigned int)ptd->linkid ).Ptr() );
-	mRet.set( oexT( "type" ), 			oexMks( (unsigned int)ptd->type ).Ptr() );
-	mRet.set( oexT( "size" ), 			oexMks( (unsigned int)ptd->size ).Ptr() );
-	mRet.set( oexT( "memory" ), 		oexMks( (unsigned int)ptd->memory ).Ptr() );
-	mRet.set( oexT( "displaytype" ), 	oexMks( (unsigned int)ptd->displaytype ).Ptr() );
-	mRet.set( oexT( "name" ), 			oexMbToStrPtr( (const char*)ptd->name ) );
-	mRet.set( oexT( "type_name" ), 		GetTagTypeName( *ptd ).c_str() );
-
-	sqbind::stdString sVal;
-	if ( GetTagValue( *ptd, sVal ) )
-		mRet.set( oexT( "value" ), 		sVal.c_str() );
-
-	return mRet;
-*/
+	return TagToMap( pTd->tag[ nT ] );
 }
 
 sqbind::stdString CCellConnection::GetBackplaneData()

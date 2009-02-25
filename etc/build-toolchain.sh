@@ -68,27 +68,44 @@
 #************************************************
 # MontaVista build
 #************************************************
+# --enable-kernel=2.6.10
+#
+# armv5tl-montavista-linux-gnueabi - gcc-4.2.0 - glibc-2.6
+#
+#
 #TARGET=arm-linux
+#TARGET=arm-unknown-linux-gnueabi
+#TARGET=arm-montavista-linux-gnu
+TARGET=arm-none-linux-gnueabi
 #TARGET=arm-none-linux-gnueabi
-#TARGET=armelf-linux-gnueabi
 #TARGET=arm-linux-gnueabi
-#TARGET=armelf-linux-eabi
-TARGET=armeb-unknown-linux-gnu
-VER_BINUTILS=binutils-2.16
-#VER_BINUTILS=binutils-2.19
-VER_GCC=gcc-3.4.4
+
+#VER_BINUTILS=binutils-2.16
+VER_BINUTILS=binutils-2.19
+
+#VER_GCC=gcc-3.4.3
+#VER_GCC=gcc-3.4.4
+#VER_GCC=gcc-3.4.6
+VER_GCC=gcc-4.2.0
 #VER_GCC=gcc-4.2.4
-VER_GLIBC=glibc-2.3.5
+
+#VER_GLIBC=glibc-2.3.5
+#VER_GLIBC=glibc-2.3.6
+#VER_GLIBC=glibc-2.5
+VER_GLIBC=glibc-2.6
 #VER_GLIBC=glibc-2.7
-#VER_GLIBC_THREADS=glibc-linuxthreads-2.3.5
-VER_GLIBC_THREADS=glibc-linuxthreads-2.5
+
+VER_GLIBC_THREADS=glibc-linuxthreads-2.3.5
+#VER_GLIBC_THREADS=glibc-linuxthreads-2.5
 VER_LINUX=linux-davinci-2.6
 DIR_LINUX=v2.6
-CFG_LINUX=custom_davinci_all_defconfig
+CFG_LINUX=davinci_all_defconfig
 GIT_REPOS="git://source.mvista.com/git/linux-davinci-2.6.git"
+GIT_CHECKOUT=v2.6.26-davinci1
 
 #ENABLE_ADD_ONS=nptl
 ENABLE_ADD_ONS=linuxthreads
+
 
 #-------------------------------------------------------------------
 
@@ -142,7 +159,7 @@ do
     FILE=${URL##*/}
     FILE=${FILE%.*}
     FILE=${FILE%%\?*}
-    echo Getting ${FILE}...
+    echo Getting ${FILE}
     if [ ! -d ${BUILDROOT}/${FILE} ]; then        
 		[ -d ${DOWNLOADS}/${FILE} ] || git-clone ${URL} ${DOWNLOADS}/${FILE}
 		cp -r ${DOWNLOADS}/${FILE} ${BUILDROOT}/${FILE}		
@@ -170,9 +187,10 @@ make install 2>&1 | tee -a ${BUILDROOT}/logs/12.${VER_BINUTILS}.make.install.log
 cd ${BUILDROOT}
 [ -d ${VER_LINUX} ] || bunzip2 -c ${DOWNLOADS}/${VER_LINUX}.tar.bz2 | tar xvf -
 ln -s ${VER_LINUX} linux
-find ${PATCHES} -name ${VER_LINUX}-*.patch | xargs -rtI {} cat {} | patch -d ${VER_LINUX} -p1
-[ -f ${PATCHES}/linux-cfg-${CFG_LINUX} ] && cp -a ${PATCHES}/linux-cfg-${CFG_LINUX} linux/arch/${ARCH}/configs/${CFG_LINUX}
-cd linux
+cd ${BUILDROOT}/linux
+[ !"${GIT_CHECKOUT}" ] || git checkout ${GIT_CHECKOUT}
+find ${PATCHES} -name ${VER_LINUX}-*.patch | xargs -rtI {} cat {} | patch -d ${BUILDROOT}/linux -p1
+[ -f ${PATCHES}/linux-cfg-${CFG_LINUX} ] && cp -a ${PATCHES}/linux-cfg-${CFG_LINUX} ${BUILDROOT}/linux/arch/${ARCH}/configs/${CFG_LINUX}
 make ${CFG_LINUX} 2>&1 | tee -a ${BUILDROOT}/logs/20.${VER_LINUX}.make.${CFG_LINUX}.log
 make include/linux/version.h 2>&1 | tee -a ${BUILDROOT}/logs/21.${VER_LINUX}.make.version.h.log
 mkdir -p ${SYSROOT}/usr/include

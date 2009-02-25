@@ -53,19 +53,46 @@ function OnProcessRequest( get ) : ( _g )
 			if ( !_g.tc.tags()[ mGet[ "tag" ] ] )
 				mReply.set( "content", "Tag not found " + mGet[ "tag" ] );
 			else
-				mReply.set( "content", _g.tc.ReadTag( mGet[ "tag" ] ).urlencode() );
+				mReply.set( "content", _g.tc.ReadTag( mGet[ "tag" ] ).serialize() );
 
 		} // end if
 
 		else if ( mGet[ "all" ] )
 		{
-			local s = "Tags:\r\n";
+			local s = "<table border=1><tr><td><b>Tag</b></td><td><b>Items</b></td><td><b>Type</b></td><td><b>Dimensions</b></td><td><b>Struct</b></td><td><b>Value</b></td></tr>";
 			local tags = _g.tc.tags();
+
+			local i = 0;
 			foreach( k,v in tags )
 			{
-				s += k + " : " + v + "\r\n";
+				local rep = _g.tc.ReadTag( k );
+
+				if ( ++i & 1 )
+					s += "<tr>";
+				else
+					s += "<tr bgcolor=#d0e0ff>";
+				s += "<td>" + k + "</td>";
+
+				if ( rep[ "err" ] )
+					s += "<td colspan=99>" + rep[ "err" ] + "</td>";
+				else
+				{
+					s += "<td>" + rep[ "items" ] + "</td>";
+					s += "<td>" + format( "0x%04x", rep[ "type" ].tointeger() ) + "</td>";
+					s += "<td>" + rep[ "dim" ] + "</td>";
+					s += "<td>" + rep[ "struct" ] + "</td>";
+					if ( rep[ "value" ] )
+						s += "<td>" + rep[ "value" ] + "</td>";
+					else
+						s += "<td>[n/a]</td>";
+
+				} // end else
+
+				s += "</tr>";
 
 			} // end foreach
+
+			s += "</table>";
 
 			mReply.set( "content", s );
 
