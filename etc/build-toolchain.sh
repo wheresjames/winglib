@@ -52,6 +52,7 @@
 #VER_LINUX=linux-2.6.10
 #DIR_LINUX=v2.6
 #CFG_LINUX=custom_davinci_all_defconfig
+#ENABLE_ADD_ONS=linuxthreads
 
 #************************************************
 # Recent version 
@@ -60,10 +61,12 @@
 #VER_BINUTILS=binutils-2.19
 #VER_GCC=gcc-4.2.4
 #VER_GLIBC=glibc-2.7
+#VER_GLIBC_PORTS=glibc-ports-2.7
 #VER_GLIBC_THREADS=glibc-linuxthreads-2.5
 #VER_LINUX=linux-2.6.28
 #DIR_LINUX=v2.6
 #CFG_LINUX=custom_davinci_all_defconfig
+#ENABLE_ADD_ONS=nptl
 
 #************************************************
 # MontaVista build
@@ -72,39 +75,50 @@
 #
 # armv5tl-montavista-linux-gnueabi - gcc-4.2.0 - glibc-2.6
 #
-#
-#TARGET=arm-linux
-#TARGET=arm-unknown-linux-gnueabi
-#TARGET=arm-montavista-linux-gnu
-TARGET=arm-none-linux-gnueabi
-#TARGET=arm-none-linux-gnueabi
-#TARGET=arm-linux-gnueabi
 
+#TARGET=arm-none-linux-gnu
 #VER_BINUTILS=binutils-2.16
-VER_BINUTILS=binutils-2.19
-
 #VER_GCC=gcc-3.4.3
-#VER_GCC=gcc-3.4.4
-#VER_GCC=gcc-3.4.6
-VER_GCC=gcc-4.2.0
-#VER_GCC=gcc-4.2.4
-
 #VER_GLIBC=glibc-2.3.5
-#VER_GLIBC=glibc-2.3.6
-#VER_GLIBC=glibc-2.5
-VER_GLIBC=glibc-2.6
-#VER_GLIBC=glibc-2.7
+#VER_GLIBC_THREADS=glibc-linuxthreads-2.3.5
 
-VER_GLIBC_THREADS=glibc-linuxthreads-2.3.5
+#TARGET=arm-none-linux-gnueabi
+#VER_BINUTILS=binutils-2.19
+#VER_GCC=gcc-4.2.4
+#VER_GLIBC=glibc-2.7
+#VER_GLIBC_PORTS=glibc-ports-2.7
 #VER_GLIBC_THREADS=glibc-linuxthreads-2.5
+
+TARGET=arm-none-linux-gnueabi
+VER_BINUTILS=binutils-2.19
+VER_GCC=gcc-4.2.4
+VER_GLIBC=glibc-2.7
+VER_GLIBC_PORTS=glibc-ports-2.7
+VER_GLIBC_THREADS=glibc-linuxthreads-2.5
+
+#TARGET=arm-none-linux-gnueabi
+#VER_BINUTILS=binutils-2.17
+#VER_GCC=gcc-4.1.2
+#VER_GLIBC=glibc-2.5
+#VER_GLIBC_PORTS=glibc-ports-2.5
+#VER_GLIBC_THREADS=glibc-linuxthreads-2.5
+
 VER_LINUX=linux-davinci-2.6
 DIR_LINUX=v2.6
-CFG_LINUX=davinci_all_defconfig
+#CFG_LINUX=davinci_all_defconfig
+CFG_LINUX=custom_davinci_all_defconfig
+#CFG_LINUX=custom_eabi_defconfig
 GIT_REPOS="git://source.mvista.com/git/linux-davinci-2.6.git"
-GIT_CHECKOUT=v2.6.26-davinci1
+GIT_CHECKOUT=v2.6.28-davinci1
 
-#ENABLE_ADD_ONS=nptl
-ENABLE_ADD_ONS=linuxthreads
+#		--without-tls 
+# 		--without-__thread 
+#		--disable-sanity-checks
+#ENABLE_ADD_ONS=ports,linuxthreads
+
+#		 --with-tls \
+# 		 --with-__thread \
+ENABLE_ADD_ONS=ports,nptl
 
 
 #-------------------------------------------------------------------
@@ -135,6 +149,7 @@ for URL in \
 	"http://ftp.gnu.org/gnu/binutils/${VER_BINUTILS}.tar.bz2" \
 	"http://ftp.gnu.org/gnu/gcc/${VER_GCC}/${VER_GCC}.tar.bz2" \
 	"http://ftp.gnu.org/gnu/glibc/${VER_GLIBC}.tar.bz2" \
+	"http://ftp.gnu.org/gnu/glibc/${VER_GLIBC_PORTS}.tar.bz2" \
 	"http://ftp.gnu.org/gnu/glibc/${VER_GLIBC_THREADS}.tar.bz2" \
 	"http://ftp.kernel.org/pub/linux/kernel/${DIR_LINUX}/${VER_LINUX}.tar.bz2"
 do
@@ -188,7 +203,7 @@ cd ${BUILDROOT}
 [ -d ${VER_LINUX} ] || bunzip2 -c ${DOWNLOADS}/${VER_LINUX}.tar.bz2 | tar xvf -
 ln -s ${VER_LINUX} linux
 cd ${BUILDROOT}/linux
-[ !"${GIT_CHECKOUT}" ] || git checkout ${GIT_CHECKOUT}
+[ ${GIT_CHECKOUT} == "" ] || git checkout ${GIT_CHECKOUT}
 find ${PATCHES} -name ${VER_LINUX}-*.patch | xargs -rtI {} cat {} | patch -d ${BUILDROOT}/linux -p1
 [ -f ${PATCHES}/linux-cfg-${CFG_LINUX} ] && cp -a ${PATCHES}/linux-cfg-${CFG_LINUX} ${BUILDROOT}/linux/arch/${ARCH}/configs/${CFG_LINUX}
 make ${CFG_LINUX} 2>&1 | tee -a ${BUILDROOT}/logs/20.${VER_LINUX}.make.${CFG_LINUX}.log
@@ -196,12 +211,13 @@ make include/linux/version.h 2>&1 | tee -a ${BUILDROOT}/logs/21.${VER_LINUX}.mak
 mkdir -p ${SYSROOT}/usr/include
 
 cp -a ${PREFIX}/src/linux/include/linux ${SYSROOT}/usr/include/linux
+cp -a ${PREFIX}/src/linux/include/asm ${SYSROOT}/usr/include/asm
 
 cp -a ${PREFIX}/src/linux/include/asm-arm ${SYSROOT}/usr/include/asm
 cp -a ${PREFIX}/src/linux/include/asm-generic ${SYSROOT}/usr/include/asm-generic
 
-cp -af ${PREFIX}/src/linux/arch/arm/include/asm/* ${SYSROOT}/usr/include/asm
-cp -af ${PREFIX}/src/linux/arch/arm/mach-davinci/include/mach/* ${SYSROOT}/usr/include/asm
+#cp -af ${PREFIX}/src/linux/arch/arm/include/asm/* ${SYSROOT}/usr/include/asm
+#cp -af ${PREFIX}/src/linux/arch/arm/mach-davinci/include/mach/* ${SYSROOT}/usr/include/asm
 
 #-------------------------------------------------------------------
 # 3. Glibc headers
@@ -210,6 +226,10 @@ cd ${BUILDROOT}
 [ -d ${VER_GLIBC} ] || bunzip2 -c ${DOWNLOADS}/${VER_GLIBC}.tar.bz2 | tar xvf -
 find ${PATCHES} -name ${VER_GLIBC}-*.patch | xargs -rtI {} cat {} | patch -d ${VER_GLIBC} -p1
 cd ${VER_GLIBC}
+if [ ${VER_GLIBC_PORTS} != "" ]; then
+	bunzip2 -c ${DOWNLOADS}/${VER_GLIBC_PORTS}.tar.bz2 | tar xvf -
+	ln -s ${VER_GLIBC_PORTS} ports
+fi
 [ -d ${VER_GLIBC_THREADS} ] || bunzip2 -c ${DOWNLOADS}/${VER_GLIBC_THREADS}.tar.bz2 | tar xvf -
 find ${PATCHES} -name ${VER_GLIBC_THREADS}-*.patch | xargs -rtI {} cat {} | patch -p0
 cd ..
@@ -217,6 +237,9 @@ mkdir BUILD/${VER_GLIBC}-headers
 cd BUILD/${VER_GLIBC}-headers
 ../../${VER_GLIBC}/configure --prefix=/usr \
 							 --host=${TARGET} \
+							 --without-tls \
+					 		 --without-__thread \
+					 		 --disable-sanity-checks \
 							 --enable-add-ons=${ENABLE_ADD_ONS} \
 							 --with-headers=${SYSROOT}/usr/include \
 							 2>&1 | tee ${BUILDROOT}/logs/30.${VER_GLIBC}.configure.headers.log
@@ -255,7 +278,9 @@ BUILD_CC=gcc \
 	../../${VER_GLIBC}/configure --prefix=/usr \
 								 --build=${BUILD} \
 								 --host=${TARGET} \
-								 --without-__thread \
+								 --without-tls \
+						 		 --without-__thread \
+						 		 --disable-sanity-checks \
 								 --enable-add-ons=${ENABLE_ADD_ONS} \
 								 --with-headers=${SYSROOT}/usr/include \
 								 2>&1 | tee ${BUILDROOT}/logs/50.${VER_GLIBC}.configure.log

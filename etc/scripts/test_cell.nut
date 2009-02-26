@@ -59,7 +59,7 @@ function OnProcessRequest( get ) : ( _g )
 
 		else if ( mGet[ "all" ] )
 		{
-			local s = "<table border=1><tr><td><b>Tag</b></td><td><b>Items</b></td><td><b>Type</b></td><td><b>Dimensions</b></td><td><b>Struct</b></td><td><b>Value</b></td></tr>";
+			local s = "<table border=1><tr><td><b>Tag</b></td><td><b>Items</b></td><td><b>Type</b></td><td><b>Dim</b></td><td><b>Struct</b><td><b>a1_size</b></td><td><b>Value</b></td></tr>";
 			local tags = _g.tc.tags();
 
 			local i = 0;
@@ -68,23 +68,24 @@ function OnProcessRequest( get ) : ( _g )
 				local rep = _g.tc.ReadTag( k );
 
 				if ( ++i & 1 )
-					s += "<tr>";
+					s += "<tr valign=top>";
 				else
-					s += "<tr bgcolor=#d0e0ff>";
-				s += "<td>" + k + "</td>";
+					s += "<tr valign=top bgcolor=#d0e0ff>";
+				s += "<td><small>" + k + "</small></td>";
 
 				if ( rep[ "err" ] )
-					s += "<td colspan=99>" + rep[ "err" ] + "</td>";
+					s += "<td colspan=99>" + rep[ "err" ] + "</small></td>";
 				else
 				{
-					s += "<td>" + rep[ "items" ] + "</td>";
-					s += "<td>" + format( "0x%04x", rep[ "type" ].tointeger() ) + "</td>";
-					s += "<td>" + rep[ "dim" ] + "</td>";
-					s += "<td>" + rep[ "struct" ] + "</td>";
+					s += "<td><small>" + rep[ "items" ] + "</small></td>";
+					s += "<td><small>" + format( "0x%04x:", rep[ "type" ].tointeger() ) + rep[ "type_name" ] + "</small></td>";
+					s += "<td><small>" + rep[ "dim" ] + "</small></td>";
+					s += "<td><small>" + rep[ "struct" ] + "</small></td>";
+					s += "<td><small>" + rep[ "a1_size" ] + "</small></td>";
 					if ( rep[ "value" ] )
-						s += "<td>" + rep[ "value" ] + "</td>";
+						s += "<td><small>" + rep[ "value" ] + "</small></td>";
 					else
-						s += "<td>[n/a]</td>";
+						s += "<td><small>[n/a]</small></td>";
 
 				} // end else
 

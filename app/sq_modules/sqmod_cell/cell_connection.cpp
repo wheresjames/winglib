@@ -14,7 +14,6 @@ CCellConnection::CCellConnection( const CCellConnection &r )
 {	CCellConnection();
 }
 
-
 int CCellConnection::Destroy()
 {
 	// Close the connection
@@ -240,62 +239,121 @@ sqbind::stdString CCellConnection::GetTagTypeName( _tag_detail &td )
 	return sType;
 }
 
+#pragma pack( push, 1 )
+struct SStructHeaderItem
+{	unsigned short 		type;
+	unsigned short		info;
+	unsigned long		offset;
+};
+#pragma pack( pop )
+
+oex::oexBOOL CCellConnection::GetStructValue( _tag_detail &td, sqbind::stdString &sRet )
+{
+	// Make sure it is a structure
+	if ( 0 == td.type & 0x8000 )
+		return oex::oexFALSE;
+
+	// Punt if no data
+	if ( !td.datalen || !oexCHECK_PTR( td.data ) )
+		return oex::oexFALSE;
+
+	// Get number of dimensions
+	int nD = ( td.type & 0x6000 ) >> 13;
+	int szA[] = { td.arraysize1, td.arraysize2, td.arraysize3 };
+
+	for ( int b = 0; b < td.datalen; b++ )
+	{
+		if ( b && !( b & 0x0f ) ) sRet += oexT( "<br>" ), sRet += oexNL;
+
+		sRet += oexFmt( oexT( "%02lX " ), td.data[ b ] ).Ptr();
+
+	} // end for
+
+	return oex::oexTRUE;
+}
+
 oex::oexBOOL CCellConnection::GetTagValue( _tag_detail &td, sqbind::stdString &sRet )
 {
 	// Ensure valid data
 	if ( !td.datalen || !oexCHECK_PTR( td.data ) )
 		return oex::oexFALSE;
 
+	// Is it a structure?
 	if ( td.type & 0x8000 )
-		sType = oexT( "STRUCT:" );
+		return GetStructValue( td, sRet );
 
 	// Dimensions
-	int nD = ( td.type & 0x6000 ) >> 13;
-	if ( nD )
-		sType += oexMks( nD, oexT( ":" ) ).Ptr();
+//	int nD = ( td.type & 0x6000 ) >> 13;
+//	if ( nD )
+//		sType += oexMks( nD, oexT( ":" ) ).Ptr();
 
-	switch( td.type & 0xff )
+	int count = td.arraysize1;
+	int len = td.size ? td.size : td.datalen;
+	char *ptr = (char*)td.data;
+
+	// Ensure there is enough data for the specs
+	if ( count && ( count * len ) > td.datalen )
+		return oex::oexFALSE;
+
+	do
 	{
-		case 0xc1 :
-			if ( 1 > td.datalen )
-				return oex::oexFALSE;
-			sRet = oexMks( (int)( *( (char*)td.data ) ? 1 : 0 ) ).Ptr();
-			break;
+		switch( td.type & 0xff )
+		{
+			case 0xc1 :
+				if ( 1 > len )
+					return oex::oexFALSE;
+				sRet += oexMks( (int)( *( (char*)ptr ) ? 1 : 0 ) ).Ptr();
+				break;
 
-		case 0xc2 :
-			if ( 1 > td.datalen )
-				return oex::oexFALSE;
-			sRet = oexMks( (int)( *( (char*)td.data ) ) ).Ptr();
-			break;
+			case 0xc2 :
+				if ( 1 > len )
+					return oex::oexFALSE;
+				sRet += oexMks( (int)( *( (char*)ptr ) ) ).Ptr();
+				break;
 
-		case 0xc3 :
-			if ( 2 > td.datalen )
-				return oex::oexFALSE;
-			sRet = oexMks( (int)( *( (short*)td.data ) ) ).Ptr();
-			break;
+			case 0xc3 :
+				if ( 2 > len )
+					return oex::oexFALSE;
+				sRet += oexMks( (int)( *( (short*)ptr ) ) ).Ptr();
+				break;
 
-		case 0xc4 :
-			if ( 4 > td.datalen )
-				return oex::oexFALSE;
-			sRet = oexMks( (int)( *( (long*)td.data ) ) ).Ptr();
-			break;
+			case 0xc4 :
+				if ( 4 > len )
+					return oex::oexFALSE;
+				sRet += oexMks( (int)( *( (long*)ptr ) ) ).Ptr();
+				break;
 
-		case 0xca :
-			if ( 4 > td.datalen )
-				return oex::oexFALSE;
-			sRet = oexMks( (float)( *( (float*)td.data ) ) ).Ptr();
-			break;
+			case 0xca :
+				if ( 4 > len )
+					return oex::oexFALSE;
+				sRet += oexMks( (float)( *( (float*)ptr ) ) ).Ptr();
+				break;
 
-		case 0xd3 :
-			if ( 4 > td.datalen )
-				return oex::oexFALSE;
-			sRet = oexMks( (unsigned int)( *( (unsigned long*)td.data ) ) ).Ptr();
-			break;
+			case 0xd3 :
+				if ( 4 > len )
+					return oex::oexFALSE;
+				sRet += oexMks( (unsigned int)( *( (unsigned long*)ptr ) ) ).Ptr();
+				break;
 
-		default :
-			return oex::oexFALSE;
+			default :
 
-	} // end switch
+				for ( int b = 0; b < td.datalen; b++ )
+				{	if ( b && !( b & 0x0f ) ) sRet += oexT( "<br>" ), sRet += oexNL;
+					sRet += oexFmt( oexT( "%02lX " ), td.data[ b ] ).Ptr();
+				} // end for
+
+//				return oex::oexFALSE;
+				break;
+
+		} // end switch
+
+		if ( 1 < count )
+			sRet += oexT( "," );
+
+		// Next element
+		ptr += td.size;
+
+	} while ( 0 < --count );
 
 	return oex::oexTRUE;
 }
@@ -317,6 +375,9 @@ sqbind::CSqMap CCellConnection::TagToMap( _tag_detail *pTd )
 	mRet.set( oexT( "memory" ), 		oexMks( (unsigned int)pTd->memory ).Ptr() );
 	mRet.set( oexT( "displaytype" ), 	oexMks( (unsigned int)pTd->displaytype ).Ptr() );
 	mRet.set( oexT( "name" ), 			oexMbToStrPtr( (const char*)pTd->name ) );
+	mRet.set( oexT( "a1_size" ), 		oexMks( (unsigned int)pTd->arraysize1 ).Ptr() );
+	mRet.set( oexT( "a2_size" ), 		oexMks( (unsigned int)pTd->arraysize2 ).Ptr() );
+	mRet.set( oexT( "a3_size" ),	 	oexMks( (unsigned int)pTd->arraysize3 ).Ptr() );
 
 	mRet.set( oexT( "type_name" ), 		GetTagTypeName( *pTd ).c_str() );
 

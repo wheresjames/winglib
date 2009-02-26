@@ -52,6 +52,9 @@ public:
 	/// Returns a string representation of the value
 	oex::oexBOOL GetTagValue( _tag_detail &td, sqbind::stdString &sRet );
 
+	/// Returns a structure value string
+	oex::oexBOOL GetStructValue( _tag_detail &td, sqbind::stdString &sRet );
+
 	/// Read the specified tag
 	sqbind::CSqMap ReadTag( const sqbind::stdString &sTag );
 
