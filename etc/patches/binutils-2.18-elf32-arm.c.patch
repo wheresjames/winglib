@@ -1,0 +1,24 @@
+--- binutils-2.18/bfd/elf32-arm.c.orig	2007-08-06 15:59:23.000000000 -0400
++++ binutils-2.18/bfd/elf32-arm.c	2009-02-27 13:40:39.000000000 -0500
+@@ -2521,8 +2521,8 @@
+     (&(hash_table)->root, tmp_name, FALSE, FALSE, TRUE);
+ 
+   if (hash == NULL)
+-    asprintf (error_message, _("unable to find THUMB glue '%s' for '%s'"),
+-	      tmp_name, name);
++    if ( asprintf (error_message, _("unable to find THUMB glue '%s' for '%s'"),
++	      tmp_name, name) ) {}
+ 
+   free (tmp_name);
+ 
+@@ -2554,8 +2554,8 @@
+     (&(hash_table)->root, tmp_name, FALSE, FALSE, TRUE);
+ 
+   if (myh == NULL)
+-    asprintf (error_message, _("unable to find ARM glue '%s' for '%s'"),
+-	      tmp_name, name);
++    if ( asprintf (error_message, _("unable to find ARM glue '%s' for '%s'"),
++	      tmp_name, name) ) {}
+ 
+   free (tmp_name);
+ 

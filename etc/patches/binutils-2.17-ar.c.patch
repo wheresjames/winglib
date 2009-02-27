@@ -1,0 +1,22 @@
+--- binutils-2.17/binutils/ar.c.orig	2005-10-03 15:37:44.000000000 -0400
++++ binutils-2.17/binutils/ar.c	2009-02-27 11:15:45.000000000 -0500
+@@ -807,7 +807,8 @@
+ 	/* xgettext:c-format */
+ 	fatal (_("%s is not a valid archive"),
+ 	       bfd_get_filename (bfd_my_archive (abfd)));
+-      fwrite (cbuf, 1, nread, stdout);
++      if (fwrite (cbuf, 1, nread, stdout))
++      	{}      
+       ncopied += tocopy;
+     }
+   free (cbuf);
+@@ -890,7 +891,8 @@
+ 
+ 	    output_file = ostream;
+ 	  }
+-	fwrite (cbuf, 1, nread, ostream);
++	if (fwrite (cbuf, 1, nread, ostream))
++		{}
+ 	ncopied += tocopy;
+       }
+ 

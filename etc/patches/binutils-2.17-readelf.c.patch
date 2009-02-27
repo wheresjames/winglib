@@ -1,0 +1,12 @@
+--- binutils-2.17/binutils/readelf.c.orig	2006-03-10 12:20:28.000000000 -0500
++++ binutils-2.17/binutils/readelf.c	2009-02-27 11:22:08.000000000 -0500
+@@ -3436,7 +3436,8 @@
+ 	  else
+ 	    {
+ 	      program_interpreter[0] = 0;
+-	      fscanf (file, "%63s", program_interpreter);
++	      if ( fscanf (file, "%63s", program_interpreter) )
++	      	{}
+ 
+ 	      if (do_segments)
+ 		printf (_("\n      [Requesting program interpreter: %s]"),

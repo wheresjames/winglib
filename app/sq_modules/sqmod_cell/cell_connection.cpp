@@ -189,49 +189,85 @@ int CCellConnection::LoadTags()
 int CCellConnection::IsConnected()
 {	return OK == m_comm.error ? 1 : 0; }
 
+#define CIP_PROGRAM 0x69
+#define CIP_MAP 0x68
+#define CIP_COUNTER 0x82
+#define CIP_TIMER 0x83
+#define CIP_PID 0x84
+#define CIP_BOOL 0xc1
+#define CIP_SINT 0xc2
+#define CIP_INT 0xc3
+#define CIP_DINT 0xc4
+#define CIP_LINT 0xc5
+#define CIP_USINT 0xc6
+#define CIP_UINT 0xc7
+#define CIP_UDINT 0xc8
+#define CIP_ULINT 0xc9
+#define CIP_REAL 0xca
+#define CIP_LREAL 0xcb
+#define CIP_STIME 0xcc
+#define CIP_DATE 0xcd
+#define CIP_TIME_OF_DAY 0xce
+#define CIP_DATE_AND_TIME 0xcf
+#define CIP_STRING 0xd0
+#define CIP_BYTE 0xd1
+#define CIP_WORD 0xd2
+#define CIP_DWORD 0xd3
+#define CIP_LWORD 0xd4
+#define CIP_STRING2 0xd5
+#define CIP_FTIME 0xd6
+#define CIP_LTIME 0xd7
+#define CIP_ITIME 0xd8
+#define CIP_STRINGN 0xd9
+#define CIP_SHORT_STRING 0xda
+#define CIP_TIME 0xdb
+#define CIP_EPATH 0xdc
+#define CIP_ENGUNIT 0xdd
+
+
 sqbind::stdString CCellConnection::GetTagTypeName( _tag_detail &td )
 {
 	sqbind::stdString sType;
 
-	// 0 = Atomic
-	// 1 = Structure
-	if ( td.type & 0x8000 )
-		sType = oexT( "STRUCT:" );
-
-	// Dimensions
-	int nD = ( td.type & 0x6000 ) >> 13;
-	if ( nD )
-		sType += oexMks( nD, oexT( ":" ) ).Ptr();
-
 	// Type
 	switch( td.type & 0xff )
 	{
-		case 0xc1 :
-			sType += oexT( "BOOL" );
-			break;
-
-		case 0xc2 :
-			sType += oexT( "CHAR" );
-			break;
-
-		case 0xc3 :
-			sType += oexT( "SHORT" );
-			break;
-
-		case 0xc4 :
-			sType += oexT( "LONG" );
-			break;
-
-		case 0xca :
-			sType += oexT( "FLOAT" );
-			break;
-
-		case 0xd3 :
-			sType += oexT( "COLLECTION" );
-			break;
+		case CIP_PROGRAM		: sType += oexT( "PROGRAM" ); break;
+		case CIP_MAP 			: sType += oexT( "MAP" ); break;
+		case CIP_COUNTER	 	: sType += oexT( "COUNTER" ); break;
+		case CIP_TIMER 			: sType += oexT( "TIMER" ); break;
+		case CIP_BOOL 			: sType += oexT( "BOOL" ); break;
+		case CIP_SINT 			: sType += oexT( "SINT" ); break;
+		case CIP_INT 			: sType += oexT( "INT" ); break;
+		case CIP_DINT 			: sType += oexT( "DINT" ); break;
+		case CIP_LINT 			: sType += oexT( "LINT" ); break;
+		case CIP_USINT			: sType += oexT( "USINT" ); break;
+		case CIP_UINT			: sType += oexT( "UINT" ); break;
+		case CIP_UDINT			: sType += oexT( "UDINT" ); break;
+		case CIP_ULINT			: sType += oexT( "ULINT" ); break;
+		case CIP_REAL			: sType += oexT( "REAL" ); break;
+		case CIP_LREAL			: sType += oexT( "LREAL" ); break;
+		case CIP_STIME			: sType += oexT( "STIME" ); break;
+		case CIP_DATE			: sType += oexT( "DATE" ); break;
+		case CIP_TIME_OF_DAY	: sType += oexT( "TIME_OF_DAY" ); break;
+		case CIP_DATE_AND_TIME	: sType += oexT( "DATE_AND_TIME" ); break;
+		case CIP_STRING			: sType += oexT( "STRING" ); break;
+		case CIP_BYTE			: sType += oexT( "BYTE" ); break;
+		case CIP_WORD			: sType += oexT( "WORD" ); break;
+		case CIP_DWORD			: sType += oexT( "DWORD" ); break;
+		case CIP_LWORD			: sType += oexT( "LWORD" ); break;
+		case CIP_STRING2		: sType += oexT( "STRING2" ); break;
+		case CIP_FTIME			: sType += oexT( "FTIME" ); break;
+		case CIP_LTIME			: sType += oexT( "LTIME" ); break;
+		case CIP_ITIME			: sType += oexT( "ITIME" ); break;
+		case CIP_STRINGN		: sType += oexT( "STRINGN" ); break;
+		case CIP_SHORT_STRING	: sType += oexT( "SHORT_STRING" ); break;
+		case CIP_TIME			: sType += oexT( "TIME" ); break;
+		case CIP_EPATH			: sType += oexT( "EPATH" ); break;
+		case CIP_ENGUNIT		: sType += oexT( "ENGUNIT" ); break;
 
 		default :
-			sType += oexT( "UNKNOWN" );
+			sType += oexT( "" );
 			break;
 
 	} // end switch

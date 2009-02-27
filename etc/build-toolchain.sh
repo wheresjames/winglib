@@ -76,18 +76,12 @@
 # armv5tl-montavista-linux-gnueabi - gcc-4.2.0 - glibc-2.6
 #
 
+# Works
 #TARGET=arm-none-linux-gnu
 #VER_BINUTILS=binutils-2.16
 #VER_GCC=gcc-3.4.3
 #VER_GLIBC=glibc-2.3.5
 #VER_GLIBC_THREADS=glibc-linuxthreads-2.3.5
-
-#TARGET=arm-none-linux-gnueabi
-#VER_BINUTILS=binutils-2.19
-#VER_GCC=gcc-4.2.4
-#VER_GLIBC=glibc-2.7
-#VER_GLIBC_PORTS=glibc-ports-2.7
-#VER_GLIBC_THREADS=glibc-linuxthreads-2.5
 
 TARGET=arm-none-linux-gnueabi
 VER_BINUTILS=binutils-2.19
@@ -95,13 +89,16 @@ VER_GCC=gcc-4.2.4
 VER_GLIBC=glibc-2.7
 VER_GLIBC_PORTS=glibc-ports-2.7
 VER_GLIBC_THREADS=glibc-linuxthreads-2.5
+GLIBC_EXTRA= --with-tls --disable-sanity-checks
 
 #TARGET=arm-none-linux-gnueabi
 #VER_BINUTILS=binutils-2.17
-#VER_GCC=gcc-4.1.2
+#VER_GCC=gcc-4.1.0
+#VER_GCC=gcc-4.1.1
 #VER_GLIBC=glibc-2.5
 #VER_GLIBC_PORTS=glibc-ports-2.5
 #VER_GLIBC_THREADS=glibc-linuxthreads-2.5
+#GLIBC_EXTRA= --with-tls --disable-sanity-checks
 
 VER_LINUX=linux-davinci-2.6
 DIR_LINUX=v2.6
@@ -110,6 +107,7 @@ CFG_LINUX=custom_davinci_all_defconfig
 #CFG_LINUX=custom_eabi_defconfig
 GIT_REPOS="git://source.mvista.com/git/linux-davinci-2.6.git"
 GIT_CHECKOUT=v2.6.28-davinci1
+MACH=davinci
 
 #		--without-tls 
 # 		--without-__thread 
@@ -155,7 +153,7 @@ for URL in \
 do
     FILE=${URL##*/}
     FILE=${DOWNLOADS}/${FILE%%\?*}
-    echo Downloading ${FILE}...
+    echo Downloading ${FILE}
     [ -f ${FILE} ] || wget -O ${FILE} ${URL}
     [ -s ${FILE} ] || rm ${FILE}
     
@@ -185,16 +183,18 @@ done
 # 1. GNU binutils
 #-------------------------------------------------------------------
 cd ${BUILDROOT}
-[ -d ${VER_BINUTILS} ] || bunzip2 -c ${DOWNLOADS}/${VER_BINUTILS}.tar.bz2 | tar xvf -
-find ${PATCHES} -name ${VER_BINUTILS}-*.patch | xargs -rtI {} cat {} | patch -d ${VER_BINUTILS} -p1
-mkdir -p BUILD/${VER_BINUTILS}
-cd BUILD/${VER_BINUTILS}
-../../${VER_BINUTILS}/configure --prefix=${PREFIX} \
-                                --target=${TARGET} \
-                                --with-sysroot=${SYSROOT} \
-                                2>&1 | tee -a ${BUILDROOT}/logs/10.${VER_BINUTILS}.configure.log
-make 2>&1 | tee -a ${BUILDROOT}/logs/11.${VER_BINUTILS}.make.log
-make install 2>&1 | tee -a ${BUILDROOT}/logs/12.${VER_BINUTILS}.make.install.log
+if [ ! -d ${VER_BINUTILS} ]; then 
+	bunzip2 -c ${DOWNLOADS}/${VER_BINUTILS}.tar.bz2 | tar xvf -
+	find ${PATCHES} -name ${VER_BINUTILS}-*.patch | xargs -rtI {} cat {} | patch -d ${VER_BINUTILS} -p1
+	mkdir -p BUILD/${VER_BINUTILS}
+	cd BUILD/${VER_BINUTILS}
+	../../${VER_BINUTILS}/configure --prefix=${PREFIX} \
+		                            --target=${TARGET} \
+	                                --with-sysroot=${SYSROOT} \
+	                                2>&1 | tee -a ${BUILDROOT}/logs/10.${VER_BINUTILS}.configure.log
+	make 2>&1 | tee -a ${BUILDROOT}/logs/11.${VER_BINUTILS}.make.log
+	make install 2>&1 | tee -a ${BUILDROOT}/logs/12.${VER_BINUTILS}.make.install.log
+fi
 
 #-------------------------------------------------------------------
 # 2. Linux Kernel Headers
@@ -203,7 +203,7 @@ cd ${BUILDROOT}
 [ -d ${VER_LINUX} ] || bunzip2 -c ${DOWNLOADS}/${VER_LINUX}.tar.bz2 | tar xvf -
 ln -s ${VER_LINUX} linux
 cd ${BUILDROOT}/linux
-[ ${GIT_CHECKOUT} == "" ] || git checkout ${GIT_CHECKOUT}
+[ -z "${GIT_CHECKOUT}" ] || git checkout ${GIT_CHECKOUT}
 find ${PATCHES} -name ${VER_LINUX}-*.patch | xargs -rtI {} cat {} | patch -d ${BUILDROOT}/linux -p1
 [ -f ${PATCHES}/linux-cfg-${CFG_LINUX} ] && cp -a ${PATCHES}/linux-cfg-${CFG_LINUX} ${BUILDROOT}/linux/arch/${ARCH}/configs/${CFG_LINUX}
 make ${CFG_LINUX} 2>&1 | tee -a ${BUILDROOT}/logs/20.${VER_LINUX}.make.${CFG_LINUX}.log
@@ -211,13 +211,13 @@ make include/linux/version.h 2>&1 | tee -a ${BUILDROOT}/logs/21.${VER_LINUX}.mak
 mkdir -p ${SYSROOT}/usr/include
 
 cp -a ${PREFIX}/src/linux/include/linux ${SYSROOT}/usr/include/linux
-cp -a ${PREFIX}/src/linux/include/asm ${SYSROOT}/usr/include/asm
+#cp -a ${PREFIX}/src/linux/include/asm ${SYSROOT}/usr/include/asm
 
-cp -a ${PREFIX}/src/linux/include/asm-arm ${SYSROOT}/usr/include/asm
 cp -a ${PREFIX}/src/linux/include/asm-generic ${SYSROOT}/usr/include/asm-generic
+cp -a ${PREFIX}/src/linux/include/asm-${ARCH}/* ${SYSROOT}/usr/include/asm
 
-#cp -af ${PREFIX}/src/linux/arch/arm/include/asm/* ${SYSROOT}/usr/include/asm
-#cp -af ${PREFIX}/src/linux/arch/arm/mach-davinci/include/mach/* ${SYSROOT}/usr/include/asm
+cp -af ${PREFIX}/src/linux/arch/${ARCH}/include/asm ${SYSROOT}/usr/include/asm
+[ ${MACH} = "" ] || cp -af ${PREFIX}/src/linux/arch/${ARCH}/mach-${MACH}/include/mach/* ${SYSROOT}/usr/include/asm
 
 #-------------------------------------------------------------------
 # 3. Glibc headers
@@ -237,10 +237,7 @@ mkdir BUILD/${VER_GLIBC}-headers
 cd BUILD/${VER_GLIBC}-headers
 ../../${VER_GLIBC}/configure --prefix=/usr \
 							 --host=${TARGET} \
-							 --without-tls \
-					 		 --without-__thread \
-					 		 --disable-sanity-checks \
-							 --enable-add-ons=${ENABLE_ADD_ONS} \
+							 ${GLIBC_EXTRA} \
 							 --with-headers=${SYSROOT}/usr/include \
 							 2>&1 | tee ${BUILDROOT}/logs/30.${VER_GLIBC}.configure.headers.log
 make cross-compiling=yes install_root=${SYSROOT} install-headers 2>&1 | tee ${BUILDROOT}/logs/31.${VER_GLIBC}.make.headers.log
@@ -278,9 +275,7 @@ BUILD_CC=gcc \
 	../../${VER_GLIBC}/configure --prefix=/usr \
 								 --build=${BUILD} \
 								 --host=${TARGET} \
-								 --without-tls \
-						 		 --without-__thread \
-						 		 --disable-sanity-checks \
+								 ${GLIBC_EXTRA} \
 								 --enable-add-ons=${ENABLE_ADD_ONS} \
 								 --with-headers=${SYSROOT}/usr/include \
 								 2>&1 | tee ${BUILDROOT}/logs/50.${VER_GLIBC}.configure.log

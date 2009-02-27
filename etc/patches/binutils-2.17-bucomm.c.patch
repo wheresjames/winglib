@@ -1,0 +1,21 @@
+--- binutils-2.17/binutils/bucomm.c.orig	2006-03-13 17:27:22.000000000 -0500
++++ binutils-2.17/binutils/bucomm.c	2009-02-27 11:03:27.000000000 -0500
+@@ -423,14 +423,16 @@
+ #endif
+       strcat (tmpname, "/");
+       strcat (tmpname, template);
+-      mktemp (tmpname);
++      if ( mktemp (tmpname) )
++      	{}
+       *slash = c;
+     }
+   else
+     {
+       tmpname = xmalloc (sizeof (template));
+       strcpy (tmpname, template);
+-      mktemp (tmpname);
++      if ( mktemp (tmpname) )
++      	{}
+     }
+   return tmpname;
+ }
