@@ -246,3 +246,38 @@ oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sName, co
 	params[ oexT( "p1" ) ] = sP1;
 	return Msg( oexT( "msg" ), &params, pReply );
 }
+
+oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
+								   const stdString &sP1, const stdString &sP2 )
+{	CSqMap params;
+	params[ oexT( "name" ) ] = sName;
+	params[ oexT( "execute2" ) ] = sFunction;
+	params[ oexT( "p1" ) ] = sP1;
+	params[ oexT( "p2" ) ] = sP2;
+	return Msg( oexT( "msg" ), &params, pReply );
+}
+
+oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
+								   const stdString &sP1, const stdString &sP2, const stdString &sP3 )
+{	CSqMap params;
+	params[ oexT( "name" ) ] = sName;
+	params[ oexT( "execute3" ) ] = sFunction;
+	params[ oexT( "p1" ) ] = sP1;
+	params[ oexT( "p2" ) ] = sP2;
+	params[ oexT( "p3" ) ] = sP3;
+	return Msg( oexT( "msg" ), &params, pReply );
+}
+
+oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
+								   const stdString &sP1, const stdString &sP2, const stdString &sP3,
+								   const stdString &sP4 )
+{	CSqMap params;
+	params[ oexT( "name" ) ] = sName;
+	params[ oexT( "execute4" ) ] = sFunction;
+	params[ oexT( "p1" ) ] = sP1;
+	params[ oexT( "p2" ) ] = sP2;
+	params[ oexT( "p3" ) ] = sP3;
+	params[ oexT( "p4" ) ] = sP4;
+	return Msg( oexT( "msg" ), &params, pReply );
+}
+

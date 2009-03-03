@@ -67,6 +67,9 @@ SquirrelObject CSqEngineExport::execute2( const stdString &sName, const stdStrin
 SquirrelObject CSqEngineExport::execute3( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 )
 {   return OnExecute3( sName, sFunction, sP1, sP2, sP3 ); }
 
+SquirrelObject CSqEngineExport::execute4( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 )
+{   return OnExecute4( sName, sFunction, sP1, sP2, sP3, sP4 ); }
+
 void CSqEngineExport::sleep( int nMsTime )
 {   oex::os::CSys::Sleep( nMsTime ); }
 
@@ -95,6 +98,9 @@ SquirrelObject CSqEngineExport::OnExecute2( const stdString &sName, const stdStr
 {   return SquirrelObject( NULL ); }
 
 SquirrelObject CSqEngineExport::OnExecute3( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 )
+{   return SquirrelObject( NULL ); }
+
+SquirrelObject CSqEngineExport::OnExecute4( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 )
 {   return SquirrelObject( NULL ); }
 
 CSqMsgQueue* CSqEngineExport::OnGetQueue() 
@@ -259,6 +265,7 @@ oex::oexBOOL CSqEngine::Init()
 											.func( &CSqEngineExport::execute1,          oexT( "execute1" ) )
 											.func( &CSqEngineExport::execute2,          oexT( "execute2" ) )
 											.func( &CSqEngineExport::execute3,          oexT( "execute3" ) )
+											.func( &CSqEngineExport::execute4,          oexT( "execute4" ) )
 											.func( &CSqEngineExport::quit,              oexT( "quit" ) )
 											.func( &CSqEngineExport::queue,             oexT( "queue" ) )
 											.func( &CSqEngineExport::path,              oexT( "path" ) )
@@ -388,6 +395,7 @@ oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e )
 {	oex::CStr sErr = oex::CStr().Fmt( oexT( "%s(%lu)\r\n   %s" ), x_e.sSource.c_str(), x_e.uLine, x_e.sDesc.c_str() );
 	oexERROR( 0, sErr );
 	m_sErr = sErr.Ptr();
+	oexTRACE( oexT( "%s\n" ), m_sErr.c_str() );
 	return x_nReturn;
 }
 
@@ -535,5 +543,16 @@ SquirrelObject CSqEngine::OnExecute3( const stdString &sName, const stdString &s
 	params[ oexT( "p1" ) ] = sP1;
 	params[ oexT( "p2" ) ] = sP2;
 	params[ oexT( "p3" ) ] = sP3;
+	return RouteMsg( oexT( "msg" ), params );
+}
+
+SquirrelObject CSqEngine::OnExecute4( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 )
+{	CSqMap params;
+	params[ oexT( "name" ) ] = sName;
+	params[ oexT( "execute3" ) ] = sFunction;
+	params[ oexT( "p1" ) ] = sP1;
+	params[ oexT( "p2" ) ] = sP2;
+	params[ oexT( "p3" ) ] = sP3;
+	params[ oexT( "p4" ) ] = sP4;
 	return RouteMsg( oexT( "msg" ), params );
 }

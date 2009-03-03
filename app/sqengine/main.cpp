@@ -69,7 +69,7 @@ extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex
 
 	oex::CStr sScript;
 
-	if ( oexCHECK_PTR( x_pCommandLine ) && *x_pCommandLine && oex::CFile::Exists( x_pCommandLine ) )
+	if ( oexCHECK_PTR( x_pCommandLine ) && *x_pCommandLine )
 		sScript = x_pCommandLine;
 
 	else

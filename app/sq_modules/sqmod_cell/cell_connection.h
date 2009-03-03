@@ -29,7 +29,7 @@ public:
 	CCellConnection( const CCellConnection &r );
 
 	/// Copy operator
-	CCellConnection& operator = ( const CCellConnection &r ) {}
+	CCellConnection& operator = ( const CCellConnection &r ) { return *this; }
 
 	/// Closes the connection and releases resources
 	int Destroy();
@@ -79,7 +79,6 @@ public:
 
 	/// Creates a map from tag details structure
 	sqbind::CSqMap TagToMap( _tag_detail *pTd );
-
 
 private:
 

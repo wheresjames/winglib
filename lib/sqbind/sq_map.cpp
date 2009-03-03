@@ -72,6 +72,7 @@ void CSqMap::Register( SquirrelVM &vm )
             . func( &CSqMap::size,          oexT( "size" ) )
             . func( &CSqMap::set,           oexT( "set" ) )
             . func( &CSqMap::get,           oexT( "get" ) )
+            . func( &CSqMap::unset,         oexT( "unset" ) )
             . func( &CSqMap::find_sub_k,    oexT( "find_sub_k" ) )
             . func( &CSqMap::find_sub_v,    oexT( "find_sub_v" ) )
             . func( &CSqMap::_get,          oexT( "_get" ) )
@@ -123,7 +124,13 @@ void CSqMap::urldecode( const CSqMap::t_Obj &s )
 		m_lst[ it.Node()->key.Ptr() ] = it->ToString().Ptr();
 }
 
-void CSqMap::set( const t_Obj &k, const t_Obj &v )
+void CSqMap::unset( const CSqMap::t_Obj &k )
+{
+	m_lst.erase( k );
+}
+
+
+void CSqMap::set( const CSqMap::t_Obj &k, const CSqMap::t_Obj &v )
 {
     m_lst[ k ] = v;
 }
@@ -134,7 +141,7 @@ CSqMap::iterator CSqMap::begin()
 CSqMap::iterator CSqMap::end()
 {	return m_lst.end(); }
 
-CSqMap::iterator CSqMap::find ( const t_Obj &k )
+CSqMap::iterator CSqMap::find ( const CSqMap::t_Obj &k )
 {	return m_lst.find( k ); }
 
 oex::oexBOOL CSqMap::isset( const CSqMap::t_Obj &k )

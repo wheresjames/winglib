@@ -316,5 +316,8 @@ void CScriptThread::OnOnMsg( CSqMap &mapParams, stdString *pReply )
 	else if ( mapParams[ oexT( "execute3" ) ].length() )
 		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute3" ) ].c_str(), mapParams[ oexT( "p1" ) ], mapParams[ oexT( "p2" ) ], mapParams[ oexT( "p3" ) ] );
 
+	// Execute 4 params
+	else if ( mapParams[ oexT( "execute4" ) ].length() )
+		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute4" ) ].c_str(), mapParams[ oexT( "p1" ) ], mapParams[ oexT( "p2" ) ], mapParams[ oexT( "p3" ) ], mapParams[ oexT( "p4" ) ] );
 }
 

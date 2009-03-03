@@ -98,6 +98,9 @@ namespace sqbind
         /// Adds an element to the vector
         void set( const t_Obj &k, const t_Obj &v );
 
+        /// Removes the specified element
+        void unset( const t_Obj &k );
+
         /// Adds an element to the vector
         t_Obj get( const t_Obj &k );
 

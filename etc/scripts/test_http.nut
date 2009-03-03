@@ -13,7 +13,7 @@ function OnServerEvent( server, data )
 
 }
 
-function OnProcessRequest( get )
+function OnProcessRequest( request, headers, get, post )
 {
 //	_self.alert( get[ "str" ] );
 

@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
 	// Start a log file
 	oexNOTICE( 0, "Application startup" );
 
-	oex::CStr sModule;
+	oex::CStr sModule, sCmd;
 
 	if ( argc > 1 && oexCHECK_PTR( argv[ 1 ] ) )
 		sModule = argv[ 1 ];
@@ -24,9 +24,16 @@ int main(int argc, char* argv[])
 		oex::CStr sSettings = oexGetModuleFileName() << oexT( ".cfg" );
 		if ( oex::CFile::Exists( sSettings.Ptr() ) )
 		{
+			// Decode settings file
 			oex::CPropertyBag pb = oex::CParser::DecodeIni( oex::CFile().OpenExisting( sSettings.Ptr() ).Read() );
+
+			// Module specified?
 			if ( pb.IsKey( oexT( "module" ) ) )
 				sModule = pb[ oexT( "module" ) ].ToString().DecorateName( oex::oexTRUE, oex::oexTRUE );
+
+			// Command line?
+			if ( pb.IsKey( oexT( "cmd" ) ) )
+				sCmd = pb[ oexT( "cmd" ) ].ToString();
 
 		} // end if
 
@@ -38,11 +45,10 @@ int main(int argc, char* argv[])
 
 	oex::os::CSys::Printf( "Starting...\n" );
 
-	oex::CStr sCommandLine;
-	if ( argc > 2 && oexCHECK_PTR( argv[ 2 ] ) )
-		sCommandLine = argv[ 2 ];
+	if ( !sCmd.Length() && argc > 2 && oexCHECK_PTR( argv[ 2 ] ) )
+		sCmd = argv[ 2 ];
 
-	int nRet = oex::os::CService::Run( oexGetModulePath().BuildPath( sModule.Ptr() ), sCommandLine, oexNULL, oexNULL );
+	int nRet = oex::os::CService::Run( oexGetModulePath().BuildPath( sModule.Ptr() ), sCmd, oexNULL, oexNULL );
 
 	if ( 0 > nRet )
 	{	oexERROR( nRet, "Failed to start service module..." );

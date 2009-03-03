@@ -117,6 +117,13 @@ public:
 	oex::oexBOOL execute( stdString *pReply, const stdString &sName, const stdString &sFunction );
 	oex::oexBOOL execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
 						  const stdString &sP1 );
+	oex::oexBOOL execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
+						  const stdString &sP1, const stdString &sP2 );
+	oex::oexBOOL execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
+						  const stdString &sP1, const stdString &sP2, const stdString &sP3 );
+	oex::oexBOOL execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
+						  const stdString &sP1, const stdString &sP2, const stdString &sP3,
+						  const stdString &sP4 );
 
 private:
 

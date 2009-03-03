@@ -286,7 +286,7 @@ struct SStructHeaderItem
 oex::oexBOOL CCellConnection::GetStructValue( _tag_detail &td, sqbind::stdString &sRet )
 {
 	// Make sure it is a structure
-	if ( 0 == td.type & 0x8000 )
+	if ( 0 == ( td.type & 0x8000 ) )
 		return oex::oexFALSE;
 
 	// Punt if no data

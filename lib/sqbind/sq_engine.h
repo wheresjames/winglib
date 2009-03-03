@@ -72,6 +72,8 @@ public:
 
 	SquirrelObject execute3( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 );
 
+	SquirrelObject execute4( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 );
+
 	void sleep( int nMsTime );
 
 	// _self.queue()
@@ -91,6 +93,7 @@ protected:
 	virtual SquirrelObject OnExecute1( const stdString &sName, const stdString &sFunction, const stdString &sP1 );
 	virtual SquirrelObject OnExecute2( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2 );
 	virtual SquirrelObject OnExecute3( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 );
+	virtual SquirrelObject OnExecute4( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 );
 
 	virtual CSqMsgQueue* OnGetQueue();
 
@@ -353,6 +356,37 @@ template< typename T_P1, typename T_P2, typename T_P3 >
 		return oex::oexTRUE;
 	}
 
+template< typename T_P1, typename T_P2, typename T_P3, typename T_P4 >
+	oex::oexBOOL Execute( stdString *pRet, oex::oexCSTR x_pFunction, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4 )
+	{
+		if ( !IsScript() || !x_pFunction  )
+			return oex::oexFALSE;
+
+		_oexTRY
+		{
+			SqPlus::SquirrelFunction< SquirrelObject > f( m_vm, m_vm.GetRootTable(), x_pFunction );
+
+			if ( f.func.IsNull() )
+			{   m_sErr = oexT( "Function not found : " ); m_sErr += x_pFunction;
+				return oex::oexFALSE;
+			} // end if
+
+			// Call the function
+			if ( oexCHECK_PTR( pRet ) )
+				*pRet = f( p1, p2, p3, p4 ).ToString();
+			else
+				f( p1, p2, p3, p4 );
+
+		} // end try
+
+		_oexCATCH( SScriptErrorInfo &e )
+		{	return LogError( oex::oexFALSE, e ); }
+		_oexCATCH( SquirrelError &e )
+		{	m_sErr = e.desc; return oex::oexFALSE; }
+
+		return oex::oexTRUE;
+	}
+
 	/// Executes a specific function within the script
 	/**
 		\param [in] pFunction   -   Name of the function to execute
@@ -512,6 +546,37 @@ template< typename T_RET, typename T_P1, typename T_P2, typename T_P3 >
 		return oex::oexTRUE;
 	}
 
+template< typename T_RET, typename T_P1, typename T_P2, typename T_P3, typename T_P4 >
+	oex::oexBOOL Execute( T_RET *pRet, oex::oexCSTR x_pFunction, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4 )
+	{
+		if ( !IsScript() || !x_pFunction  )
+			return oex::oexFALSE;
+
+		_oexTRY
+		{
+			SqPlus::SquirrelFunction< T_RET > f( m_vm, m_vm.GetRootTable(), x_pFunction );
+
+			if ( f.func.IsNull() )
+			{   m_sErr = oexT( "Function not found : " ); m_sErr += x_pFunction;
+				return oex::oexFALSE;
+			} // end if
+
+			// Call the function
+			if ( oexCHECK_PTR( pRet ) )
+				*pRet = f( p1, p2, p3, p4 );
+			else
+				f( p1, p2, p3, p4 );
+
+		} // end try
+
+		_oexCATCH( SScriptErrorInfo &e )
+		{	return LogError( oex::oexFALSE, e ); }
+		_oexCATCH( SquirrelError &e )
+		{	m_sErr = e.desc; return oex::oexFALSE; }
+
+		return oex::oexTRUE;
+	}
+
 public:
 
 	/// Sets pointer to the module manager
@@ -540,6 +605,7 @@ public:
 	virtual SquirrelObject OnExecute1( const stdString &sName, const stdString &sFunction, const stdString &sP1 );
 	virtual SquirrelObject OnExecute2( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2 );
 	virtual SquirrelObject OnExecute3( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 );
+	virtual SquirrelObject OnExecute4( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 );
 
 
 private:

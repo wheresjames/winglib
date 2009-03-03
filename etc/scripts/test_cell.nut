@@ -7,6 +7,7 @@ class CGlobal
 	quit = 0;
 	server = 0;
 	tc = CCellConnection();
+	tmpl = {};
 };
 
 local _g = CGlobal();
@@ -16,7 +17,7 @@ function OnServerEvent( server, data )
 
 }
 
-function OnProcessRequest( get ) : ( _g )
+function pg_data( request, headers, get, post ) : ( _g )
 {
 	local mGet = CSqMap();
 	mGet.deserialize( get );
@@ -99,16 +100,253 @@ function OnProcessRequest( get ) : ( _g )
 
 		} // end if
 
-/*
-		if ( mGet[ "tag" ] )
-			mReply.set( "content", _g.tc.ReadTag( "", mGet[ "tag" ] ).urlencode() );
-		else if ( mGet[ "all" ] )
-			mReply.set( "content", _g.tc.GetBackplaneData() );
-		else
-			mReply.set( "content", "Connected to " + _g.tc.GetIp() + ", so, what else do you want?" );
-*/
 	} // end else
 
+	return mReply.serialize();
+}
+
+function show_tag( name ) : ( _g )
+{
+	if ( !_g.tc.IsConnected() )
+		return "Can't ready tag, not connected!!!";
+
+	if ( !_g.tc.tags()[ name ] )
+		return "Tag not found : " + name;
+
+	local tag = _g.tc.ReadTag( name );
+	local content = @"
+				<table>
+					<tr valign='top'>
+						<td colspan='99'>
+							<nobr><b>" + name + @"</b></nobr>
+						</td>
+					<tr>
+			";
+
+	foreach( k,v in tag )
+	{
+		content += @"
+						<tr valign='top'>
+							<td bgcolor='#f0f0f0'>
+								" + k + @"								
+							</td>
+							<td bgcolor='#ffffff'>
+								" + v + @"								
+							</td>
+						</tr>
+			";
+	} // end foreach
+
+	content += @"
+				</table>
+		";
+
+	return content;
+}
+
+function edit_template( name, request, headers, get, post ) : ( _g )
+{
+	local mPost = CSqMap();
+	mPost.deserialize( post );
+	
+	switch ( mPost[ "etmp" ] )
+	{
+		case "add" :
+//			_g.tmpl[ mPost[ "etmp_name" ] ] <- { "type"=mPost[ "etmp_type" ], "size"=mPost[ "etmp_size" ] };
+			local i = count( _g.tmpl );
+			_g.tmpl[ mPost[ "etmp_name" ] ] <- [];
+			_g.tmpl[ mPost[ "etmp_name" ] ][ "name" ] <- mPost[ "etmp_name" ];
+			_g.tmpl[ mPost[ "etmp_name" ] ][ "type" ] <- mPost[ "etmp_type" ];
+			_g.tmpl[ mPost[ "etmp_name" ] ][ "size" ] <- mPost[ "etmp_size" ];
+			break;
+
+	} // end if
+
+	local content = @"
+		<form action='admin' method='post'>
+		<input type='hidden' name='etmp' id='etmp' value='add' >
+		<input type='hidden' name='do' id='do' value='read_tag' >
+		<input type='hidden' name='tag' id='tag' value='" + name + @"' >
+		<table>
+			<tr>
+				<td colspan='99'>
+					<b>Template for " + name + @"</b>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<b><small>Name</small></b>
+				</td>
+				<td>
+					<b><small>Type</small></b>
+				</td>
+				<td>
+					<b><small>Size</small></b>
+				</td>
+				<td>
+					<b><small>Value</small></b>
+				</td>
+			</tr>
+		";
+
+	foreach( k,v in _g.tmpl )
+	{
+		content += @"
+			<tr>
+				<td bgcolor='#ffffff'>
+					" + k + @"
+				</td>
+				<td bgcolor='#ffffff'>
+					" + v[ "type" ] + @"
+				</td>
+				<td bgcolor='#ffffff'>
+					" + v[ "size" ] + @"
+				</td>
+				<td bgcolor='#ffffff'>
+				</td>
+			</tr>
+			";
+	} // end foreach
+
+	content += @"
+			<tr>
+				<td colspan='99'>
+					<hr>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<input name='etmp_name' id='etmp_name' type='text'>
+				</td>
+				<td>
+					<input name='etmp_type' id='etmp_type' type='text'>
+				</td>
+				<td>
+					<input name='etmp_size' id='etmp_size' type='text'>
+				</td>
+				<td>
+					<input type='submit' value='Add'>
+				</td>
+			</tr>
+		</form>
+		</table>
+		";
+
+	content += @"
+		</table>
+		";
+
+	return content;
+}
+
+function pg_admin( request, headers, get, post ) : ( _g )
+{
+	local mGet = CSqMap();
+	mGet.deserialize( get );
+
+	local mPost = CSqMap();
+	mPost.deserialize( post );
+
+	switch ( mPost[ "do" ] )
+	{
+		case "connect" :
+			_g.tc.Connect( mPost[ "server" ], 1 );
+
+	} // end if
+
+	local content = @"					
+<html>
+	<body bgcolor='#c0c0c0'>
+		<table>
+			<tr>
+				<td>
+					<b>Status : </b>
+				</td>
+				<td>
+					" + ( _g.tc.IsConnected() ? ( "Connected To " +  _g.tc.GetIp() ) : "Not Connected" ) + @"
+				</td>
+			</tr>
+		</table>
+
+		<form action='admin' method='post'>
+			<input type='hidden' name='do' id='do' value='connect' >
+			<table>
+				<tr>
+					<td>
+						<b>Server : </b>
+					</td>
+					<td>
+						<input name='server' id='server' type='text'>
+					</td>
+					<td>
+						<input type='submit' value='Connect'>
+					</td>
+				</tr>
+			</table>
+		</form>
+
+		<form action='admin' method='post'>
+			<input type='hidden' name='do' id='do' value='read_tag' >
+			<table>
+				<tr>
+					<td>
+						<b>Tag : </b>
+					</td>
+					<td>
+					<input name='tag' id='tag' type='text' value='" + ( mPost[ "tag" ] ? mPost[ "tag" ] : "" ) + @"'>
+					</td>
+					<td>
+						<input type='submit' value='Read Tag'>
+					</td>
+				</tr>
+			</table>
+		</form>
+	";
+
+	if ( mPost[ "do" ] && mPost[ "do" ] == "read_tag" && mPost[ "tag" ] )
+	{
+		content += @"
+			<table>
+				<tr valign='top'>
+					<td>
+						" + show_tag( mPost[ "tag" ] ) + @"
+					</td>
+					<td>
+						" + edit_template( mPost[ "tag" ], request, headers, get, post ) + @"
+					</td>
+				</tr>
+			</table>
+			";
+
+	} // end if
+
+	content += @"
+	</body>
+</html>
+		";  
+
+	local mReply = CSqMap();
+	mReply.set( "content", content );
+	return mReply.serialize();
+}
+
+function OnProcessRequest( request, headers, get, post ) : ( _g )
+{
+	local mRequest = CSqMap();
+	mRequest.deserialize( request );
+
+	switch ( mRequest[ "path" ] )
+	{
+		case "/data" :
+			return pg_data( request, headers, get, post );
+
+		case "/admin" :
+			return pg_admin( request, headers, get, post );
+
+	} // end if
+
+	local mReply = CSqMap();
+	mReply.set( "content", "Access Denied" );
 	return mReply.serialize();
 }
 

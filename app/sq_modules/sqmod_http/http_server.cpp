@@ -59,8 +59,11 @@ oex::oexINT CHttpServerImpl::OnSessionCallback( oex::oexPVOID x_pData, oex::THtt
 //	sqbind::CSqMap parReply; 
 	sqbind::stdString sReply;
 	sqbind::stdString parGet = oex::CParser::Serialize( x_pSession->Get() ).Ptr();
+	sqbind::stdString parPost = oex::CParser::Serialize( x_pSession->Post() ).Ptr();
+	sqbind::stdString parHeaders = oex::CParser::Serialize( x_pSession->RxHeaders() ).Ptr();
+	sqbind::stdString parRequest = oex::CParser::Serialize( x_pSession->Request() ).Ptr();
 	
-	m_pMsgQueue->execute( &sReply, oexT( "." ), m_sSession, parGet );
+	m_pMsgQueue->execute( &sReply, oexT( "." ), m_sSession, parRequest, parHeaders, parGet, parPost );
 
 	sqbind::CSqMap mReply;
 	mReply.deserialize( sReply );
