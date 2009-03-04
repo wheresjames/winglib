@@ -121,4 +121,7 @@ private:
 	/// Tag map for squirrel
 	sqbind::CSqMap				m_mapSqTags;
 
+	/// Tag templates
+	sqbind::CSqMap				m_mapSqTemplates;
+
 };

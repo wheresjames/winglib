@@ -51,6 +51,7 @@ template < const int T > class oex_static_assert{};
 
 #ifdef oexDEBUG
 
+#	define oexRTRACE			        OEX_NAMESPACE::os::CDebug::FmtTrace
 #	define oexTRACE				        OEX_NAMESPACE::os::CDebug::FmtTrace
 #	define oexUNUSED( s )
 #	define oexBREAK( s )		        ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexTEXT( oexFUNCTION ), s ), OEX_NAMESPACE::oexFALSE )
@@ -58,6 +59,7 @@ template < const int T > class oex_static_assert{};
 
 #else
 
+#	define oexRTRACE			        OEX_NAMESPACE::os::CDebug::FmtTrace
 #	define oexTRACE
 #	define oexUNUSED( s )
 #	define oexBREAK( s )

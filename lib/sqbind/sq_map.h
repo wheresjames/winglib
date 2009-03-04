@@ -85,6 +85,8 @@ namespace sqbind
 
 		void merge( const t_Obj &s );
 
+		void clear();
+
 		t_Obj urlencode();
 
 		void urldecode( const t_Obj &s );
@@ -105,10 +107,10 @@ namespace sqbind
         t_Obj get( const t_Obj &k );
 
         /// Adds an element to the vector
-        t_Obj find_sub_k( const t_Obj &k );
+        t_Obj find_key( const t_Obj &k );
 
         /// Adds an element to the vector
-        t_Obj find_sub_v( const t_Obj &v );
+        t_Obj find_value( const t_Obj &v );
 
 		/// Returns the first item in the list
         iterator begin();

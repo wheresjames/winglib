@@ -58,8 +58,9 @@
 
 // stl classes we will export to squirrel
 #include "sq_vector.h"
-#include "sq_map.h"
 #include "sq_list.h"
+#include "sq_map.h"
+#include "sq_multi.h"
 
 #define SQBIND_DECLARE_INSTANCE( c ) \
     }; DECLARE_INSTANCE_TYPE_NAME( sqbind::c, c ); namespace sqbind {
@@ -105,9 +106,11 @@ namespace sqbind
     /// Bind native squirrel functions
     static void SqBindAll( SquirrelVM &x_vm )
     {
+    	CSqString::Register( x_vm );
         CSqVector::Register( x_vm );
-        CSqMap::Register( x_vm );
         CSqList::Register( x_vm );
+        CSqMap::Register( x_vm );
+        CSqMulti::Register( x_vm );
     };
 
 	/// Sets the allocator for squirrel engine

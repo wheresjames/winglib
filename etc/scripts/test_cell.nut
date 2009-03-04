@@ -128,10 +128,10 @@ function show_tag( name ) : ( _g )
 		content += @"
 						<tr valign='top'>
 							<td bgcolor='#f0f0f0'>
-								" + k + @"								
+								" + k + @"
 							</td>
 							<td bgcolor='#ffffff'>
-								" + v + @"								
+								" + v + @"
 							</td>
 						</tr>
 			";
@@ -148,16 +148,17 @@ function edit_template( name, request, headers, get, post ) : ( _g )
 {
 	local mPost = CSqMap();
 	mPost.deserialize( post );
-	
+
 	switch ( mPost[ "etmp" ] )
 	{
 		case "add" :
-//			_g.tmpl[ mPost[ "etmp_name" ] ] <- { "type"=mPost[ "etmp_type" ], "size"=mPost[ "etmp_size" ] };
-			local i = count( _g.tmpl );
-			_g.tmpl[ mPost[ "etmp_name" ] ] <- [];
-			_g.tmpl[ mPost[ "etmp_name" ] ][ "name" ] <- mPost[ "etmp_name" ];
-			_g.tmpl[ mPost[ "etmp_name" ] ][ "type" ] <- mPost[ "etmp_type" ];
-			_g.tmpl[ mPost[ "etmp_name" ] ][ "size" ] <- mPost[ "etmp_size" ];
+			local i = _g.tmpl.len();
+			_g.tmpl[ i ] <-
+				{
+					[ "name" ] = mPost[ "etmp_name" ],
+					[ "type" ] = mPost[ "etmp_type" ],
+					[ "size" ] = mPost[ "etmp_size" ]
+				};
 			break;
 
 	} // end if
@@ -194,7 +195,7 @@ function edit_template( name, request, headers, get, post ) : ( _g )
 		content += @"
 			<tr>
 				<td bgcolor='#ffffff'>
-					" + k + @"
+					" + v[ "name" ] + @"
 				</td>
 				<td bgcolor='#ffffff'>
 					" + v[ "type" ] + @"
@@ -254,7 +255,7 @@ function pg_admin( request, headers, get, post ) : ( _g )
 
 	} // end if
 
-	local content = @"					
+	local content = @"
 <html>
 	<body bgcolor='#c0c0c0'>
 		<table>
@@ -323,7 +324,7 @@ function pg_admin( request, headers, get, post ) : ( _g )
 	content += @"
 	</body>
 </html>
-		";  
+		";
 
 	local mReply = CSqMap();
 	mReply.set( "content", content );
@@ -342,6 +343,23 @@ function OnProcessRequest( request, headers, get, post ) : ( _g )
 
 		case "/admin" :
 			return pg_admin( request, headers, get, post );
+
+		case "/test" :
+
+			local m = CSqMulti();
+
+//			m[ "hello" ] <- "world";
+
+			m.get( "a" ).value().set( "1" );
+
+			m.get( "b" ).get( "ba" ).value().set( "1" );
+
+			m.get( "c" ).get( "ca" ).get( "caa" ).value().set( "1" );
+
+			local mReply = CSqMap();
+			mReply.set( "content", m.print_r( 1 ) );
+			return mReply.serialize();
+			break
 
 	} // end if
 

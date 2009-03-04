@@ -43,8 +43,8 @@
 #   define SQBIND_MEMBER_FUNCTION( c, f )    				.func ( &c::f,        	  oexT( #f ) )
 #   define SQBIND_CONST( c, e )              				.enumInt ( (int)c::##e,   oexT( #e ) )
 #   define SQBIND_GLOBALCONST( e )           				.enumInt ( (int)##e,	  oexT( #e ) )
-#   define SQBIND_MEMBER_VARIABLE( c, v )    				.var ( &##c::##v,         oexT( #v ) )
-#   define SQBIND_STATIC_FUNCTION( c, f )    				.staticFunc ( &##c::##f,  oexT( #f ) )
+#   define SQBIND_MEMBER_VARIABLE( c, v )    				.var ( &c::v,         	  oexT( #v ) )
+#   define SQBIND_STATIC_FUNCTION( c, f )    				.staticFunc ( &c::f,      oexT( #f ) )
 
 #   define SQBIND_CLASS_CONSTRUCTOR( n, c )					.staticFunc( &_sq_construct_##c_##n, oexT( "constructor" ) )
 #   define SQBIND_BEGIN_CLASS_CONSTRUCTOR( n, c, ... )		static int _sq_construct_##c_##n( __VA_ARGS__, HSQUIRRELVM v ) {
@@ -64,7 +64,31 @@ namespace sqbind { typedef SquirrelVM VM; }
 namespace sqbind { typedef script::VMCore VM; }
 #endif
 
-namespace sqbind { typedef oexStdTString( oex::oexTCHAR ) stdString; }
+namespace sqbind
+{
+	typedef oexStdTString( oex::oexTCHAR ) stdString;
+
+	class CSqString
+	{
+	public:
+		stdString* get() { return &m_str; }
+		stdString* set( const stdString &x_str )
+		{	m_str = x_str; return &m_str; }
+		stdString& operator = ( const stdString &x_str ) { return m_str = x_str; }
+		stdString& operator = ( const oex::oexTCHAR *x_str ) { if ( x_str ) m_str = x_str; return m_str; }
+		static void Register( SquirrelVM &vm )
+		{	SqPlus::SQClassDef< CSqString >( vm, oexT( "CSqString" ) )
+					. func( &CSqString::get,		oexT( "value" ) )
+					. func( &CSqString::set,		oexT( "set" ) )
+				;
+		}
+	private:
+		stdString m_str;
+	};
+}
+
+// Declare type for use as squirrel parameters
+DECLARE_INSTANCE_TYPE_NAME( sqbind::CSqString, CSqString )
 
 namespace SqPlus
 {

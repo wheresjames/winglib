@@ -73,8 +73,9 @@ void CSqMap::Register( SquirrelVM &vm )
             . func( &CSqMap::set,           oexT( "set" ) )
             . func( &CSqMap::get,           oexT( "get" ) )
             . func( &CSqMap::unset,         oexT( "unset" ) )
-            . func( &CSqMap::find_sub_k,    oexT( "find_sub_k" ) )
-            . func( &CSqMap::find_sub_v,    oexT( "find_sub_v" ) )
+            . func( &CSqMap::clear,         oexT( "clear" ) )
+            . func( &CSqMap::find_key,   	oexT( "find_key" ) )
+            . func( &CSqMap::find_value, 	oexT( "find_value" ) )
             . func( &CSqMap::_get,          oexT( "_get" ) )
             . func( &CSqMap::_nexti,        oexT( "_nexti" ) )
             . func( &CSqMap::print_r,       oexT( "print_r" ) )
@@ -83,6 +84,10 @@ void CSqMap::Register( SquirrelVM &vm )
 
 int CSqMap::size()
 {	return m_lst.size(); }
+
+void CSqMap::clear()
+{	m_lst.clear(); }
+
 
 CSqMap::t_Obj CSqMap::serialize()
 {
@@ -94,6 +99,9 @@ CSqMap::t_Obj CSqMap::serialize()
 
 void CSqMap::deserialize( const CSqMap::t_Obj &s )
 {
+	// Clear the list
+	m_lst.clear();
+
 	// Deserialize data
 	oex::CPropertyBag pb = oex::CParser::Deserialize( s.c_str() );
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
@@ -118,6 +126,9 @@ CSqMap::t_Obj CSqMap::urlencode()
 
 void CSqMap::urldecode( const CSqMap::t_Obj &s )
 {
+	// Clear the list
+	m_lst.clear();
+
 	// Deserialize data
 	oex::CPropertyBag pb = oex::CParser::DecodeUrlParams( s.c_str() );;
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
@@ -156,7 +167,7 @@ CSqMap::t_Obj CSqMap::get( const CSqMap::t_Obj &k )
 }
 
 /// Adds an element to the vector
-CSqMap::t_Obj CSqMap::find_sub_k( const CSqMap::t_Obj &k )
+CSqMap::t_Obj CSqMap::find_key( const CSqMap::t_Obj &k )
 {
     // For each item
     for ( t_List::iterator it = m_lst.begin();
@@ -172,7 +183,7 @@ CSqMap::t_Obj CSqMap::find_sub_k( const CSqMap::t_Obj &k )
 }
 
 /// Adds an element to the vector
-CSqMap::t_Obj CSqMap::find_sub_v( const CSqMap::t_Obj &v )
+CSqMap::t_Obj CSqMap::find_value( const CSqMap::t_Obj &v )
 {
     // For each item
     for ( t_List::iterator it = m_lst.begin();
@@ -199,6 +210,7 @@ SquirrelObject CSqMap::_get( HSQUIRRELVM v )
     t_List::iterator it = m_lst.find( pKey );
     if ( m_lst.end() == it )
         return SquirrelObject( v );
+
 
     // Stuff string
     SquirrelObject so( v );

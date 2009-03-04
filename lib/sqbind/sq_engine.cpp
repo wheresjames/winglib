@@ -76,13 +76,13 @@ void CSqEngineExport::sleep( int nMsTime )
 CSqMsgQueue* CSqEngineExport::queue()
 {   return OnGetQueue(); }
 
-int CSqEngineExport::OnImport( const stdString &sClass ) 
+int CSqEngineExport::OnImport( const stdString &sClass )
 { return 0; }
 
-int CSqEngineExport::OnLoadModule( const stdString &sModule, const stdString &sPath ) 
+int CSqEngineExport::OnLoadModule( const stdString &sModule, const stdString &sPath )
 { return 0; }
 
-stdString CSqEngineExport::OnPath( stdString sPath ) 
+stdString CSqEngineExport::OnPath( stdString sPath )
 { return stdString( oexGetModulePath( sPath.c_str() ).Ptr() ); }
 
 SquirrelObject CSqEngineExport::OnSpawn( const stdString &sName, const stdString &sScript, int bFile )
@@ -103,29 +103,29 @@ SquirrelObject CSqEngineExport::OnExecute3( const stdString &sName, const stdStr
 SquirrelObject CSqEngineExport::OnExecute4( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 )
 {   return SquirrelObject( NULL ); }
 
-CSqMsgQueue* CSqEngineExport::OnGetQueue() 
+CSqMsgQueue* CSqEngineExport::OnGetQueue()
 { return NULL; }
 
 
-BOOL CSqEngine::IsScript() 
+BOOL CSqEngine::IsScript()
 { return m_bLoaded; }
 
-stdString& CSqEngine::GetLastError() 
+stdString& CSqEngine::GetLastError()
 { return m_sErr; }
 
-stdString& CSqEngine::GetOutput() 
+stdString& CSqEngine::GetOutput()
 { return m_sOutput; }
 
-SquirrelVM& CSqEngine::GetVM() 
+SquirrelVM& CSqEngine::GetVM()
 { return m_vm; }
 
-CSqEngine::operator SquirrelVM&() 
+CSqEngine::operator SquirrelVM&()
 { return m_vm; }
 
-SquirrelObject& CSqEngine::GetScriptObj() 
+SquirrelObject& CSqEngine::GetScriptObj()
 { return m_script; }
 
-const SquirrelObject& CSqEngine::GetRootTable() 
+const SquirrelObject& CSqEngine::GetRootTable()
 { return m_vm.GetRootTable(); }
 
 
@@ -207,7 +207,7 @@ CSqEngine::CSqEngine() :
 	m_bLoaded = oex::oexFALSE;
 }
 
-CSqEngine::~CSqEngine() 
+CSqEngine::~CSqEngine()
 { Destroy(); }
 
 void CSqEngine::Destroy()
@@ -395,7 +395,7 @@ oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e )
 {	oex::CStr sErr = oex::CStr().Fmt( oexT( "%s(%lu)\r\n   %s" ), x_e.sSource.c_str(), x_e.uLine, x_e.sDesc.c_str() );
 	oexERROR( 0, sErr );
 	m_sErr = sErr.Ptr();
-	oexTRACE( oexT( "%s\n" ), m_sErr.c_str() );
+	oexRTRACE( oexT( "%s\n" ), m_sErr.c_str() );
 	return x_nReturn;
 }
 
@@ -413,7 +413,7 @@ oex::oexBOOL CSqEngine::Execute( stdString *pRet, oex::oexCSTR x_pFunction )
 		{   m_sErr = oexT( "Function not found : " ); m_sErr += x_pFunction;
 			return oex::oexFALSE;
 		} // end if
-		
+
 		// Call the function
 		if ( oexCHECK_PTR( pRet ) )
 			*pRet = f().ToString();
@@ -477,7 +477,7 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 	{	oexERROR( 0, oexMks( oexT( "Failed to export squirrel symbols from module " ), sFull ) );
 		return -5;
 	} // end if
-	
+
 	// Log the fact that we loaded said module
 	oexNOTICE( 0, oexMks( oexT( "Module loaded : " ), sFull ) );
 

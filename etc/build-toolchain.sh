@@ -12,6 +12,8 @@
 #				http://cross-lfs.org/view/clfs-sysroot/arm/
 #			   	http://ftp.snapgear.org/pub/snapgear/tools/arm-linux/build-arm-linux-3.4.4
 #				http://gmplib.org/manual/Build-Options.html
+#				http://aakash-bapna.blogspot.com/2007/10/iphone-non-official-sdk-aka-toolchain.html
+#				http://code.google.com/p/iphone-dev/wiki/Building
 #
 #     DON'T expect this script to work perfectly for you.
 #     DO Expect to tweak things a bit to get a build on your box.
@@ -85,13 +87,14 @@
 # armv5tl-montavista-linux-gnueabi - gcc-4.2.0 - glibc-2.6
 #
 
-# Works
+# [Works] - Old mainline
 #TARGET=arm-none-linux-gnu
 #VER_BINUTILS=binutils-2.16
 #VER_GCC=gcc-3.4.3
 #VER_GLIBC=glibc-2.3.5
 #VER_GLIBC_THREADS=glibc-linuxthreads-2.3.5
 
+# Mainline
 TARGET=arm-none-linux-gnueabi
 VER_BINUTILS=binutils-2.19
 VER_GCC=gcc-4.2.4
@@ -99,8 +102,12 @@ VER_GMP=gmp-4.2.4
 VER_GLIBC=glibc-2.7
 VER_GLIBC_PORTS=glibc-ports-2.7
 VER_GLIBC_THREADS=glibc-linuxthreads-2.5
+VER_LINUX=linux-2.6.28
+DIR_LINUX=v2.6
 GLIBC_EXTRA= --with-tls --disable-sanity-checks
+CFG_LINUX=custom_davinci_all_defconfig
 
+# Montavista Open Source
 #TARGET=arm-none-linux-gnueabi
 #VER_BINUTILS=binutils-2.17
 #VER_GCC=gcc-4.1.0
@@ -110,14 +117,13 @@ GLIBC_EXTRA= --with-tls --disable-sanity-checks
 #VER_GLIBC_THREADS=glibc-linuxthreads-2.5
 #GLIBC_EXTRA= --with-tls --disable-sanity-checks
 
-VER_LINUX=linux-davinci-2.6
-DIR_LINUX=v2.6
+#VER_LINUX=linux-davinci-2.6
+#DIR_LINUX=v2.6
 #CFG_LINUX=davinci_all_defconfig
-CFG_LINUX=custom_davinci_all_defconfig
 #CFG_LINUX=custom_eabi_defconfig
-GIT_REPOS="git://source.mvista.com/git/linux-davinci-2.6.git"
-GIT_CHECKOUT=v2.6.28-davinci1
-MACH=davinci
+#GIT_REPOS="git://source.mvista.com/git/linux-davinci-2.6.git"
+#GIT_CHECKOUT=v2.6.28-davinci1
+#MACH=davinci
 
 #		--without-tls 
 # 		--without-__thread 
@@ -131,10 +137,10 @@ ENABLE_ADD_ONS=ports,nptl
 
 #-------------------------------------------------------------------
 
-#BUILD=i686-pc-linux-gnu
-#HOST=i686-pc-linux-gnu
-BUILD=i486-linux-gnu
-HOST=i486-linux-gnu
+BUILD=i686-pc-linux-gnu
+HOST=i686-pc-linux-gnu
+#BUILD=i486-linux-gnu
+#HOST=i486-linux-gnu
 export ARCH=arm
 PATCHES=$PWD/patches
 PREFIX=$PWD/../../tools/${TARGET}
@@ -250,8 +256,8 @@ mkdir BUILD/${VER_GLIBC}-headers
 cd BUILD/${VER_GLIBC}-headers
 ../../${VER_GLIBC}/configure --prefix=/usr \
 							 --host=${TARGET} \
-							 --without-tls \
-							 --without-__threads \
+							 --with-tls \
+							 --with-__threads \
 							 --with-headers=${SYSROOT}/usr/include \
 							 2>&1 | tee ${BUILDROOT}/logs/30.${VER_GLIBC}.configure.headers.log
 make cross-compiling=yes install_root=${SYSROOT} install-headers 2>&1 | tee ${BUILDROOT}/logs/31.${VER_GLIBC}.make.headers.log
