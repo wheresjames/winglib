@@ -7,7 +7,7 @@ class CGlobal
 	quit = 0;
 	server = 0;
 	tc = CCellConnection();
-	tmpl = {};
+	tmpl_cfg = "tmpl.cfg";
 };
 
 local _g = CGlobal();
@@ -108,12 +108,20 @@ function pg_data( request, headers, get, post ) : ( _g )
 function show_tag( name ) : ( _g )
 {
 	if ( !_g.tc.IsConnected() )
-		return "Can't ready tag, not connected!!!";
+		return "[ Not Connected ]";
 
-	if ( !_g.tc.tags()[ name ] )
+	local parts = split( name, "." ), base_name = name;
+	if ( parts[ 0 ] && parts[ 0 ].len() )
+		base_name = parts[ 0 ];
+
+	if ( !_g.tc.tags()[ base_name ] )
 		return "Tag not found : " + name;
 
 	local tag = _g.tc.ReadTag( name );
+	if ( tag[ "err" ] )
+		return tag[ "err" ];
+
+
 	local content = @"
 				<table>
 					<tr valign='top'>
@@ -146,19 +154,57 @@ function show_tag( name ) : ( _g )
 
 function edit_template( name, request, headers, get, post ) : ( _g )
 {
+	// Cut off template stuff
+	local parts = split( name, "." );
+	if ( parts[ 0 ] && parts[ 0 ].len() )
+		name = parts[ 0 ];
+
 	local mPost = CSqMap();
 	mPost.deserialize( post );
+
+	local mGet = CSqMap();
+	mGet.deserialize( get );
 
 	switch ( mPost[ "etmp" ] )
 	{
 		case "add" :
-			local i = _g.tmpl.len();
+
+			local i = _g.tc.tmpl().get( name ).size();
+			local tmpl = _g.tc.tmpl().get( name ).get( i.tostring() );
+			tmpl[ "name" ].set( mPost[ "etmp_name" ] );
+			tmpl[ "type" ].set( mPost[ "etmp_type" ] );
+			if ( mPost[ "etmp_type" ] == "USER" )
+				tmpl[ "bytes"].set( mPost[ "etmp_bytes" ] );
+
+			_g.tc.VerifyTemplate();
+			CSqFile().put_contents( _g.tmpl_cfg, _g.tc.tmpl().serialize() );
+/*
 			_g.tmpl[ i ] <-
 				{
 					[ "name" ] = mPost[ "etmp_name" ],
 					[ "type" ] = mPost[ "etmp_type" ],
-					[ "size" ] = mPost[ "etmp_size" ]
+					[ "bytes" ] = mPost[ "etmp_bytes" ]
 				};
+*/
+			break;
+	};
+
+	switch ( mGet[ "etmp" ] )
+	{
+		case "del" :
+			local tmpl = _g.tc.tmpl().get( name ).unset( mGet[ "etmp_idx" ] );
+			_g.tc.VerifyTemplate();
+			CSqFile().put_contents( _g.tmpl_cfg, _g.tc.tmpl().serialize() );
+			break;
+
+		case "up" :
+			_g.tc.tmpl().get( name ).move_up( mGet[ "etmp_idx" ] );
+			CSqFile().put_contents( _g.tmpl_cfg, _g.tc.tmpl().serialize() );
+			break;
+
+		case "down" :
+			_g.tc.tmpl().get( name ).move_down( mGet[ "etmp_idx" ] );
+			CSqFile().put_contents( _g.tmpl_cfg, _g.tc.tmpl().serialize() );
 			break;
 
 	} // end if
@@ -166,7 +212,6 @@ function edit_template( name, request, headers, get, post ) : ( _g )
 	local content = @"
 		<form action='admin' method='post'>
 		<input type='hidden' name='etmp' id='etmp' value='add' >
-		<input type='hidden' name='do' id='do' value='read_tag' >
 		<input type='hidden' name='tag' id='tag' value='" + name + @"' >
 		<table>
 			<tr>
@@ -176,13 +221,15 @@ function edit_template( name, request, headers, get, post ) : ( _g )
 			</tr>
 			<tr>
 				<td>
+				</td>
+				<td>
 					<b><small>Name</small></b>
 				</td>
 				<td>
 					<b><small>Type</small></b>
 				</td>
 				<td>
-					<b><small>Size</small></b>
+					<b><small>Bytes</small></b>
 				</td>
 				<td>
 					<b><small>Value</small></b>
@@ -190,24 +237,36 @@ function edit_template( name, request, headers, get, post ) : ( _g )
 			</tr>
 		";
 
-	foreach( k,v in _g.tmpl )
+
+	if ( _g.tc.tmpl().isset( name ) )
 	{
-		content += @"
-			<tr>
-				<td bgcolor='#ffffff'>
-					" + v[ "name" ] + @"
-				</td>
-				<td bgcolor='#ffffff'>
-					" + v[ "type" ] + @"
-				</td>
-				<td bgcolor='#ffffff'>
-					" + v[ "size" ] + @"
-				</td>
-				<td bgcolor='#ffffff'>
-				</td>
-			</tr>
-			";
-	} // end foreach
+		local tmpl = _g.tc.tmpl().get( name );
+		foreach( k,v in tmpl  )
+		{
+			content += @"
+				<tr>
+					<td>
+						<a href='admin?etmp=up&etmp_idx=" + k + @"&tag=" + name + @"'>[<b><small>up</small></b>]</a>
+						<a href='admin?etmp=down&etmp_idx=" + k + @"&tag=" + name + @"'>[<b><small>down</small></b>]</a>
+						<a href='admin?etmp=del&etmp_idx=" + k + @"&tag=" + name + @"'>[<b><small>delete</small></b>]</a>
+					</td>
+					<td bgcolor='#ffffff'>
+						" + v[ "name" ].str() + @"
+					</td>
+					<td bgcolor='#ffffff'>
+						" + v[ "type" ].str() + @"
+					</td>
+					<td bgcolor='#ffffff'>
+						" + v[ "bytes" ].str() + @"
+					</td>
+					<td bgcolor='#ffffff'>
+					</td>
+				</tr>
+				";
+
+		} // end foreach
+
+	} // end if
 
 	content += @"
 			<tr>
@@ -217,13 +276,28 @@ function edit_template( name, request, headers, get, post ) : ( _g )
 			</tr>
 			<tr>
 				<td>
+				</td>
+				<td>
 					<input name='etmp_name' id='etmp_name' type='text'>
 				</td>
 				<td>
-					<input name='etmp_type' id='etmp_type' type='text'>
+					<select name='etmp_type' id='etmp_type'>
+						<option >USER</option>
+						<option >BOOL</option>
+						<option >SINT</option>
+						<option >INT</option>
+						<option >DINT</option>
+						<option >LINT</option>
+						<option >USINT</option>
+						<option >UINT</option>
+						<option >UDINT</option>
+						<option >ULINT</option>
+						<option >REAL</option>
+						<option >LREAL</option>
+					</select>
 				</td>
 				<td>
-					<input name='etmp_size' id='etmp_size' type='text'>
+					<input name='etmp_bytes' id='etmp_bytes' type='text' style='width:40'>
 				</td>
 				<td>
 					<input type='submit' value='Add'>
@@ -247,6 +321,12 @@ function pg_admin( request, headers, get, post ) : ( _g )
 
 	local mPost = CSqMap();
 	mPost.deserialize( post );
+
+	local tag = "";
+	if ( mPost[ "tag" ] )
+		tag = mPost[ "tag" ];
+	else if ( mGet[ "tag" ] )
+		tag = mGet[ "tag" ];
 
 	switch ( mPost[ "do" ] )
 	{
@@ -294,7 +374,7 @@ function pg_admin( request, headers, get, post ) : ( _g )
 						<b>Tag : </b>
 					</td>
 					<td>
-					<input name='tag' id='tag' type='text' value='" + ( mPost[ "tag" ] ? mPost[ "tag" ] : "" ) + @"'>
+					<input name='tag' id='tag' type='text' value='" + tag + @"'>
 					</td>
 					<td>
 						<input type='submit' value='Read Tag'>
@@ -304,16 +384,16 @@ function pg_admin( request, headers, get, post ) : ( _g )
 		</form>
 	";
 
-	if ( mPost[ "do" ] && mPost[ "do" ] == "read_tag" && mPost[ "tag" ] )
+	if ( tag.len() )
 	{
 		content += @"
 			<table>
 				<tr valign='top'>
 					<td>
-						" + show_tag( mPost[ "tag" ] ) + @"
+						" + show_tag( tag ) + @"
 					</td>
 					<td>
-						" + edit_template( mPost[ "tag" ], request, headers, get, post ) + @"
+						" + edit_template( tag, request, headers, get, post ) + @"
 					</td>
 				</tr>
 			</table>
@@ -348,8 +428,6 @@ function OnProcessRequest( request, headers, get, post ) : ( _g )
 
 			local m = CSqMulti();
 
-//			m[ "hello" ] <- "world";
-
 			m.get( "a" ).value().set( "1" );
 
 			m.get( "b" ).get( "ba" ).value().set( "1" );
@@ -370,6 +448,10 @@ function OnProcessRequest( request, headers, get, post ) : ( _g )
 
 function _init() : ( _g )
 {
+	// Load the data templates
+	_g.tc.tmpl().deserialize( CSqFile().get_contents( _g.tmpl_cfg ) );
+	_g.tc.VerifyTemplate();
+
 	_g.server = CHttpServer();
 
 	_g.server.SetCallback( _self.queue(), "OnServerEvent", "OnProcessRequest" );

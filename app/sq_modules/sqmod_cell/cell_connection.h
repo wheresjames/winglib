@@ -55,6 +55,9 @@ public:
 	/// Returns a structure value string
 	oex::oexBOOL GetStructValue( _tag_detail &td, sqbind::stdString &sRet );
 
+	/// Parses a tag name into components
+	oex::oexBOOL ParseTag( const sqbind::stdString &sTag, sqbind::stdString &sName, int &nP, int &nT, int &nO, int &nS, int &nB );
+
 	/// Read the specified tag
 	sqbind::CSqMap ReadTag( const sqbind::stdString &sTag );
 
@@ -74,11 +77,18 @@ public:
 	{	return m_sIp; }
 
 	/// Returns a list of tags to squirrel
-	sqbind::CSqMap& tags()
-	{	return m_mapSqTags; }
+	sqbind::CSqMap* tags()
+	{	return &m_mapSqTags; }
 
 	/// Creates a map from tag details structure
 	sqbind::CSqMap TagToMap( _tag_detail *pTd );
+
+	/// Returns the tag template map
+	sqbind::CSqMulti* tmpl()
+	{	return &m_mapSqTemplates; }
+
+	/// Verifys values in the squirrel template map
+	void VerifyTemplate();
 
 private:
 
@@ -122,6 +132,6 @@ private:
 	sqbind::CSqMap				m_mapSqTags;
 
 	/// Tag templates
-	sqbind::CSqMap				m_mapSqTemplates;
+	sqbind::CSqMulti			m_mapSqTemplates;
 
 };

@@ -68,17 +68,41 @@ namespace sqbind
 {
 	typedef oexStdTString( oex::oexTCHAR ) stdString;
 
+	class CSqParam
+	{
+	public:
+
+		// String type
+		typedef stdString						t_SqStr;
+
+	public:
+
+		// Serializes the object to a string
+		virtual t_SqStr serialize() = 0;
+
+		// Deserializes the object from a string
+		virtual void deserialize( const t_SqStr &s ) = 0;
+
+		// Merges object data / does not have to be implemented
+		virtual void merge( const t_SqStr &s ) {}
+	};
+
 	class CSqString
 	{
 	public:
-		stdString* get() { return &m_str; }
+		CSqString() {}
+		CSqString( const stdString &x_str ) { m_str = x_str; }
+		stdString& str() { return m_str; }
+		const stdString* c_str() const { return &m_str; }
 		stdString* set( const stdString &x_str )
 		{	m_str = x_str; return &m_str; }
 		stdString& operator = ( const stdString &x_str ) { return m_str = x_str; }
 		stdString& operator = ( const oex::oexTCHAR *x_str ) { if ( x_str ) m_str = x_str; return m_str; }
+
 		static void Register( SquirrelVM &vm )
-		{	SqPlus::SQClassDef< CSqString >( vm, oexT( "CSqString" ) )
-					. func( &CSqString::get,		oexT( "value" ) )
+		{
+			SqPlus::SQClassDef< CSqString >( vm, oexT( "CSqString" ) )
+					. func( &CSqString::str,		oexT( "str" ) )
 					. func( &CSqString::set,		oexT( "set" ) )
 				;
 		}
@@ -98,5 +122,15 @@ namespace SqPlus
 	{	return sq_gettype(v,idx) == OT_STRING; }
 	inline sqbind::stdString Get(TypeWrapper<const sqbind::stdString&>,HSQUIRRELVM v,int idx)
 	{	const SQChar * s; SQPLUS_CHECK_GET(sq_getstring(v,idx,&s)); return sqbind::stdString(s); }
+
+/*
+	inline void Push(HSQUIRRELVM v,const sqbind::CSqString& value)
+	{	const SQChar * s = value.c_str()->c_str();
+		sq_pushstring(v,s,-1); }
+	inline bool Match(TypeWrapper<const sqbind::CSqString&>, HSQUIRRELVM v, int idx)
+	{	return sq_gettype(v,idx) == OT_STRING; }
+	inline sqbind::CSqString Get(TypeWrapper<const sqbind::CSqString&>,HSQUIRRELVM v,int idx)
+	{	const SQChar * s; SQPLUS_CHECK_GET(sq_getstring(v,idx,&s)); return sqbind::CSqString(s); }
+*/
 }
 

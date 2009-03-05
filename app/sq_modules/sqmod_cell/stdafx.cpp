@@ -14,6 +14,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CCellConnection, "CCellConnection" )
 	SQBIND_MEMBER_FUNCTION( CCellConnection, GetBackplaneData )
 	SQBIND_MEMBER_FUNCTION( CCellConnection, ReadTag )
 	SQBIND_MEMBER_FUNCTION( CCellConnection, tags )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, tmpl )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, VerifyTemplate )
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CCellConnection );
 

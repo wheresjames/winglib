@@ -189,42 +189,6 @@ int CCellConnection::LoadTags()
 int CCellConnection::IsConnected()
 {	return OK == m_comm.error ? 1 : 0; }
 
-#define CIP_PROGRAM 0x69
-#define CIP_MAP 0x68
-#define CIP_COUNTER 0x82
-#define CIP_TIMER 0x83
-#define CIP_PID 0x84
-#define CIP_BOOL 0xc1
-#define CIP_SINT 0xc2
-#define CIP_INT 0xc3
-#define CIP_DINT 0xc4
-#define CIP_LINT 0xc5
-#define CIP_USINT 0xc6
-#define CIP_UINT 0xc7
-#define CIP_UDINT 0xc8
-#define CIP_ULINT 0xc9
-#define CIP_REAL 0xca
-#define CIP_LREAL 0xcb
-#define CIP_STIME 0xcc
-#define CIP_DATE 0xcd
-#define CIP_TIME_OF_DAY 0xce
-#define CIP_DATE_AND_TIME 0xcf
-#define CIP_STRING 0xd0
-#define CIP_BYTE 0xd1
-#define CIP_WORD 0xd2
-#define CIP_DWORD 0xd3
-#define CIP_LWORD 0xd4
-#define CIP_STRING2 0xd5
-#define CIP_FTIME 0xd6
-#define CIP_LTIME 0xd7
-#define CIP_ITIME 0xd8
-#define CIP_STRINGN 0xd9
-#define CIP_SHORT_STRING 0xda
-#define CIP_TIME 0xdb
-#define CIP_EPATH 0xdc
-#define CIP_ENGUNIT 0xdd
-
-
 sqbind::stdString CCellConnection::GetTagTypeName( _tag_detail &td )
 {
 	sqbind::stdString sType;
@@ -414,14 +378,114 @@ sqbind::CSqMap CCellConnection::TagToMap( _tag_detail *pTd )
 	mRet.set( oexT( "a1_size" ), 		oexMks( (unsigned int)pTd->arraysize1 ).Ptr() );
 	mRet.set( oexT( "a2_size" ), 		oexMks( (unsigned int)pTd->arraysize2 ).Ptr() );
 	mRet.set( oexT( "a3_size" ),	 	oexMks( (unsigned int)pTd->arraysize3 ).Ptr() );
-
 	mRet.set( oexT( "type_name" ), 		GetTagTypeName( *pTd ).c_str() );
 
-	sqbind::stdString sVal;
-	if ( GetTagValue( *pTd, sVal ) )
-		mRet.set( oexT( "value" ), 		sVal.c_str() );
-
 	return mRet;
+}
+
+void CCellConnection::VerifyTemplate()
+{
+	// For each tag name
+	for( sqbind::CSqMulti::t_List::iterator it = m_mapSqTemplates.list().begin();
+		 it != m_mapSqTemplates.list().end(); it++ )
+	{
+		int i = 0;
+
+		// For each template entry
+		for( sqbind::CSqMulti::t_List::iterator itVal = it->second.list().begin();
+			 itVal != it->second.list().end(); itVal++ )
+		{
+			// Name and type must be specified
+			if ( !itVal->second.list()[ oexT( "name" ) ].str().length()
+			     || !itVal->second.list()[ oexT( "type" ) ].str().length() )
+				it->second.list().erase( itVal++ );
+
+			else
+			{
+				// Verify size field
+				if ( itVal->second.list()[ oexT( "type" ) ].str() == oexT( "USER" ) )
+				{	if ( 0 >= oexStrToLong( itVal->second.list()[ oexT( "bytes" ) ].str().c_str() ) )
+						itVal->second.list()[ oexT( "bytes" ) ].str() = oexT( "1" );
+				} // end if
+				else
+					itVal->second.list()[ oexT( "bytes" ) ].str() = oexT( "" );
+
+				// Does it need to be moved?
+				if ( oexStrToLong( itVal->first.c_str() ) != i )
+				{	it->second.list()[ oexMks( i ).Ptr() ].list() = itVal->second.list();
+					it->second.list().erase( itVal++ );
+				} // end if
+
+				i++;
+
+			} // end else
+
+		} // end for
+
+	} // end for
+}
+
+oex::oexBOOL CCellConnection::ParseTag( const sqbind::stdString &sTag, sqbind::stdString &sName, int &nP, int &nT, int &nO, int &nS, int &nB )
+{
+	// Set invalid path
+	nP = nT = nO = nS = nB = -1;
+
+	oex::CStr sParseTag = sTag.c_str(), sTemplate, sBit;
+	sName = sParseTag.Parse( oexT( "." ) ).Ptr();
+	if ( *sParseTag == oexT( '.' ) )
+	{	sParseTag++;
+
+		sTemplate = sParseTag.Parse( oexT( ":" ) );
+		if ( *sParseTag == oexT( ':' ) )
+			sParseTag++, sBit = sParseTag;
+		else
+			sTemplate = sParseTag;
+
+	} // end if
+	else
+		sName = sParseTag.Ptr();
+
+	// Ensure we have such a tag
+	if ( !m_mapSqTags.isset( sName ) )
+		return oex::oexFALSE;
+
+	oex::CStr sT = m_mapSqTags[ sName ].c_str();
+	oex::CStr sP = sT.Parse( oexT( "." ) );
+
+	if ( *sT == oexT( '.' ) )
+		sT++, nP = sP.ToLong();
+	else
+		nP = -1;
+	nT = sT.ToLong();
+
+	// Validate program index
+	if ( 0 <= nP && ( nP >= m_prog_list.count || nP >= m_tagsProgram.Size() ) )
+		return oex::oexFALSE;
+
+	// Did we get a bit length?
+	if ( sBit.Length() )
+		nB = sBit.ToLong();
+
+	// Punt if no template or bit
+	if ( !sTemplate.Length() )
+		return oex::oexTRUE;
+
+	// Find the specified template key
+	sqbind::CSqMulti::t_List::iterator it = m_mapSqTemplates.list().find( sName );
+	if ( m_mapSqTemplates.list().end() == it )
+		return oex::oexFALSE;
+
+	// Find the specified item
+	for ( sqbind::CSqMulti::t_List::iterator itTmpl = it->second.list().begin();
+		  it->second.list().end() != itTmpl; itTmpl++ )
+		if ( itTmpl->second.list()[ oexT( "name" ) ].str() == sTemplate.Ptr() )
+		{
+			nO = 0;
+			nS = 2;
+
+		} // end if
+
+	return oex::oexTRUE;
 }
 
 sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
@@ -430,11 +494,55 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 	if ( m_comm.error != OK )
 		return SetLastError( oexT( "err=Not connected" ) );
 
-	// Ensure we have such a tag
-	if ( !m_mapSqTags.isset( sTag ) )
-		return SetLastError( oexT( "err=Tag not found" ) );
+	sqbind::stdString sName;
+	int nP, nT, nO, nS, nB;
+	if ( !ParseTag( sTag, sName, nP, nT, nO, nS, nB ) )
+		return SetLastError( oexT( "err=Tag does not exist" ) );
 
-	int nT, nP;
+	_tag_data *pTd = &m_tagsDetails;
+	if ( 0 <= nP )
+		pTd = &m_tagsProgram[ nP ];
+
+	if ( 0 > nT || nT >= pTd->count )
+		return SetLastError( oexMks( oexT( "err=Invalid tag index " ), nT ).Ptr() );
+
+	// Get object details
+	if ( 0 > read_object_value( &m_comm, &m_path, pTd->tag[ nT ], 0 ) )
+		return SetLastError( oexT( "err=read_object_value() failed" ) );
+
+	sqbind::CSqMap mRet = TagToMap( pTd->tag[ nT ] );
+	if ( mRet.isset( oexT( "err" ) ) )
+		return mRet;
+
+	// Did we get an offset and size?
+	if ( 0 <= nO && 0 <= nS )
+	{
+		if ( nO + nS <= pTd->tag[ nT ]->datalen )
+		{
+			if ( 1 == nS )
+				mRet.set( oexT( "value" ), oexMks( (int)( *(char*)&pTd->tag[ nT ]->data[ nO ] ) ).Ptr() );
+
+			else if ( 2 == nS )
+				mRet.set( oexT( "value" ), oexMks( (int)( *(short*)&pTd->tag[ nT ]->data[ nO ] ) ).Ptr() );
+
+			else if ( 4 == nS )
+				mRet.set( oexT( "value" ), oexMks( (int)( *(long*)&pTd->tag[ nT ]->data[ nO ] ) ).Ptr() );
+
+		} // end if
+
+	} // end if
+
+	else
+	{
+		sqbind::stdString sVal;
+		if ( GetTagValue( *pTd->tag[ nT ], sVal ) )
+			mRet.set( oexT( "value" ), sVal.c_str() );
+
+	} // end else
+
+	return mRet;
+
+/*
 	oex::CStr sT = m_mapSqTags[ sTag ].c_str();
 	oex::CStr sP = sT.Parse( oexT( "." ) );
 	if ( *sT == oexT( '.' ) )
@@ -459,6 +567,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 		return SetLastError( oexT( "err=read_object_value() failed" ) );
 
 	return TagToMap( pTd->tag[ nT ] );
+*/
 }
 
 sqbind::stdString CCellConnection::GetBackplaneData()

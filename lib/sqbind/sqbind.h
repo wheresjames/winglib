@@ -61,6 +61,7 @@
 #include "sq_list.h"
 #include "sq_map.h"
 #include "sq_multi.h"
+#include "sq_file.h"
 
 #define SQBIND_DECLARE_INSTANCE( c ) \
     }; DECLARE_INSTANCE_TYPE_NAME( sqbind::c, c ); namespace sqbind {
@@ -111,6 +112,7 @@ namespace sqbind
         CSqList::Register( x_vm );
         CSqMap::Register( x_vm );
         CSqMulti::Register( x_vm );
+    	CSqFile::Register( x_vm );
     };
 
 	/// Sets the allocator for squirrel engine
