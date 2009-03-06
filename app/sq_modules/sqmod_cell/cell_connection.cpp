@@ -5,7 +5,6 @@
 
 CCellConnection::CCellConnection()
 {	oexZeroMemory( &m_comm, sizeof( m_comm ) );
-	oexZeroMemory( &m_tagsConfig, sizeof( m_tagsConfig ) );
 	oexZeroMemory( &m_tagsDetails, sizeof( m_tagsDetails ) );
 	m_comm.error = -1;
 }
@@ -87,12 +86,6 @@ int CCellConnection::ReleaseTags()
 {
 	// Lose the tag map
 	m_mapTags.clear();
-/*
-	for ( int i = 0; i < m_tagsConfig.count; i++ )
-		if ( oexCHECK_PTR( m_tagsConfig.tag[ i ] ) )
-			free( m_tagsConfig.tag[ i ] ),
-			m_tagsConfig.tag[ i ] = 0;
-*/
 
 	// Lose the details tags
 	for ( int i = 0; i < m_tagsDetails.count; i++ )
@@ -109,9 +102,6 @@ int CCellConnection::LoadTags()
 
 	// Lose old tags
 	ReleaseTags();
-
-//	if ( get_object_config_list( &m_comm, &m_path, 0, &m_tagsConfig, 0 ) )
-//		nStatus = 0, SetLastError( oexT( "get_object_config_list() failed" ) );
 
 	// Get device tags
 	if ( get_object_details_list( &m_comm, &m_path, 0, &m_tagsDetails, 0 ) )
@@ -189,171 +179,201 @@ int CCellConnection::LoadTags()
 int CCellConnection::IsConnected()
 {	return OK == m_comm.error ? 1 : 0; }
 
-sqbind::stdString CCellConnection::GetTagTypeName( _tag_detail &td )
+oex::oexCSTR CCellConnection::GetTypeName( int nType )
 {
-	sqbind::stdString sType;
+#	define SWITCH_TYPE( t )	case CIP_##t		: return oexT( #t );
 
 	// Type
-	switch( td.type & 0xff )
+	switch( nType & 0xff )
 	{
-		case CIP_PROGRAM		: sType += oexT( "PROGRAM" ); break;
-		case CIP_MAP 			: sType += oexT( "MAP" ); break;
-		case CIP_COUNTER	 	: sType += oexT( "COUNTER" ); break;
-		case CIP_TIMER 			: sType += oexT( "TIMER" ); break;
-		case CIP_BOOL 			: sType += oexT( "BOOL" ); break;
-		case CIP_SINT 			: sType += oexT( "SINT" ); break;
-		case CIP_INT 			: sType += oexT( "INT" ); break;
-		case CIP_DINT 			: sType += oexT( "DINT" ); break;
-		case CIP_LINT 			: sType += oexT( "LINT" ); break;
-		case CIP_USINT			: sType += oexT( "USINT" ); break;
-		case CIP_UINT			: sType += oexT( "UINT" ); break;
-		case CIP_UDINT			: sType += oexT( "UDINT" ); break;
-		case CIP_ULINT			: sType += oexT( "ULINT" ); break;
-		case CIP_REAL			: sType += oexT( "REAL" ); break;
-		case CIP_LREAL			: sType += oexT( "LREAL" ); break;
-		case CIP_STIME			: sType += oexT( "STIME" ); break;
-		case CIP_DATE			: sType += oexT( "DATE" ); break;
-		case CIP_TIME_OF_DAY	: sType += oexT( "TIME_OF_DAY" ); break;
-		case CIP_DATE_AND_TIME	: sType += oexT( "DATE_AND_TIME" ); break;
-		case CIP_STRING			: sType += oexT( "STRING" ); break;
-		case CIP_BYTE			: sType += oexT( "BYTE" ); break;
-		case CIP_WORD			: sType += oexT( "WORD" ); break;
-		case CIP_DWORD			: sType += oexT( "DWORD" ); break;
-		case CIP_LWORD			: sType += oexT( "LWORD" ); break;
-		case CIP_STRING2		: sType += oexT( "STRING2" ); break;
-		case CIP_FTIME			: sType += oexT( "FTIME" ); break;
-		case CIP_LTIME			: sType += oexT( "LTIME" ); break;
-		case CIP_ITIME			: sType += oexT( "ITIME" ); break;
-		case CIP_STRINGN		: sType += oexT( "STRINGN" ); break;
-		case CIP_SHORT_STRING	: sType += oexT( "SHORT_STRING" ); break;
-		case CIP_TIME			: sType += oexT( "TIME" ); break;
-		case CIP_EPATH			: sType += oexT( "EPATH" ); break;
-		case CIP_ENGUNIT		: sType += oexT( "ENGUNIT" ); break;
-
-		default :
-			sType += oexT( "" );
-			break;
+		SWITCH_TYPE( PROGRAM );
+		SWITCH_TYPE( MAP );
+		SWITCH_TYPE( COUNTER );
+		SWITCH_TYPE( TIMER );
+		SWITCH_TYPE( BOOL );
+		SWITCH_TYPE( SINT );
+		SWITCH_TYPE( INT );
+		SWITCH_TYPE( DINT );
+		SWITCH_TYPE( LINT );
+		SWITCH_TYPE( USINT );
+		SWITCH_TYPE( UINT );
+		SWITCH_TYPE( UDINT );
+		SWITCH_TYPE( ULINT );
+		SWITCH_TYPE( REAL );
+		SWITCH_TYPE( LREAL );
+		SWITCH_TYPE( STIME );
+		SWITCH_TYPE( DATE );
+		SWITCH_TYPE( TIME_OF_DAY );
+		SWITCH_TYPE( DATE_AND_TIME );
+		SWITCH_TYPE( STRING );
+		SWITCH_TYPE( BYTE );
+		SWITCH_TYPE( WORD );
+		SWITCH_TYPE( DWORD );
+		SWITCH_TYPE( LWORD );
+		SWITCH_TYPE( STRING2 );
+		SWITCH_TYPE( FTIME );
+		SWITCH_TYPE( LTIME );
+		SWITCH_TYPE( ITIME );
+		SWITCH_TYPE( SHORT_STRING );
+		SWITCH_TYPE( TIME );
+		SWITCH_TYPE( EPATH );
+		SWITCH_TYPE( ENGUNIT );
 
 	} // end switch
 
-	return sType;
+	return oexT( "" );
 }
 
-#pragma pack( push, 1 )
-struct SStructHeaderItem
-{	unsigned short 		type;
-	unsigned short		info;
-	unsigned long		offset;
-};
-#pragma pack( pop )
 
-oex::oexBOOL CCellConnection::GetStructValue( _tag_detail &td, sqbind::stdString &sRet )
+int CCellConnection::GetTypeFromName( const sqbind::stdString &sType )
 {
-	// Make sure it is a structure
-	if ( 0 == ( td.type & 0x8000 ) )
-		return oex::oexFALSE;
+#	define CHECK_TYPE( t )	if ( sType == oexT( #t ) ) return CIP_##t
 
-	// Punt if no data
-	if ( !td.datalen || !oexCHECK_PTR( td.data ) )
-		return oex::oexFALSE;
+	CHECK_TYPE( PROGRAM );
+	CHECK_TYPE( MAP );
+	CHECK_TYPE( COUNTER );
+	CHECK_TYPE( TIMER );
+	CHECK_TYPE( BOOL );
+	CHECK_TYPE( SINT );
+	CHECK_TYPE( INT );
+	CHECK_TYPE( DINT );
+	CHECK_TYPE( LINT );
+	CHECK_TYPE( USINT );
+	CHECK_TYPE( UINT );
+	CHECK_TYPE( UDINT );
+	CHECK_TYPE( ULINT );
+	CHECK_TYPE( REAL );
+	CHECK_TYPE( LREAL );
+	CHECK_TYPE( STIME );
+	CHECK_TYPE( DATE );
+	CHECK_TYPE( TIME_OF_DAY );
+	CHECK_TYPE( DATE_AND_TIME );
+	CHECK_TYPE( STRING );
+	CHECK_TYPE( BYTE );
+	CHECK_TYPE( WORD );
+	CHECK_TYPE( DWORD );
+	CHECK_TYPE( LWORD );
+	CHECK_TYPE( STRING2 );
+	CHECK_TYPE( FTIME );
+	CHECK_TYPE( LTIME );
+	CHECK_TYPE( ITIME );
+	CHECK_TYPE( SHORT_STRING );
+	CHECK_TYPE( TIME );
+	CHECK_TYPE( EPATH );
+	CHECK_TYPE( ENGUNIT );
 
-	// Get number of dimensions
-	int nD = ( td.type & 0x6000 ) >> 13;
-	int szA[] = { td.arraysize1, td.arraysize2, td.arraysize3 };
-
-	for ( int b = 0; b < td.datalen; b++ )
-	{
-		if ( b && !( b & 0x0f ) ) sRet += oexT( "<br>" ), sRet += oexNL;
-
-		sRet += oexFmt( oexT( "%02lX " ), td.data[ b ] ).Ptr();
-
-	} // end for
-
-	return oex::oexTRUE;
+	return 0;
 }
 
-oex::oexBOOL CCellConnection::GetTagValue( _tag_detail &td, sqbind::stdString &sRet )
+int CCellConnection::GetTypeSize( int nType )
 {
-	// Ensure valid data
-	if ( !td.datalen || !oexCHECK_PTR( td.data ) )
-		return oex::oexFALSE;
-
-	// Is it a structure?
-	if ( td.type & 0x8000 )
-		return GetStructValue( td, sRet );
-
-	// Dimensions
-//	int nD = ( td.type & 0x6000 ) >> 13;
-//	if ( nD )
-//		sType += oexMks( nD, oexT( ":" ) ).Ptr();
-
-	int count = td.arraysize1;
-	int len = td.size ? td.size : td.datalen;
-	char *ptr = (char*)td.data;
-
-	// Ensure there is enough data for the specs
-	if ( count && ( count * len ) > td.datalen )
-		return oex::oexFALSE;
-
-	do
+	// Type
+	switch( nType & 0xff )
 	{
-		switch( td.type & 0xff )
-		{
-			case 0xc1 :
-				if ( 1 > len )
-					return oex::oexFALSE;
-				sRet += oexMks( (int)( *( (char*)ptr ) ? 1 : 0 ) ).Ptr();
-				break;
+		case CIP_BOOL 			: return 1;
+		case CIP_SINT 			: return 1;
+		case CIP_INT 			: return 2;
+		case CIP_DINT 			: return 4;
+		case CIP_LINT 			: return 8;
+		case CIP_USINT			: return 1;
+		case CIP_UINT			: return 2;
+		case CIP_UDINT			: return 4;
+		case CIP_ULINT			: return 8;
+		case CIP_REAL			: return 4;
+		case CIP_LREAL			: return 8;
+		case CIP_BYTE			: return 1;
+		case CIP_WORD			: return 2;
+		case CIP_DWORD			: return 4;
+		case CIP_LWORD			: return 8;
+	} // end switch
 
-			case 0xc2 :
-				if ( 1 > len )
-					return oex::oexFALSE;
-				sRet += oexMks( (int)( *( (char*)ptr ) ) ).Ptr();
-				break;
+	return 0;
+}
 
-			case 0xc3 :
-				if ( 2 > len )
-					return oex::oexFALSE;
-				sRet += oexMks( (int)( *( (short*)ptr ) ) ).Ptr();
-				break;
+oex::oexBOOL CCellConnection::GetItemValue( int nType, unsigned char *pData, int nSize, int nBit, sqbind::stdString &sRet )
+{
+	if ( !nSize || !oexCHECK_PTR( pData ) )
+		return oex::oexFALSE;
 
-			case 0xc4 :
-				if ( 4 > len )
-					return oex::oexFALSE;
-				sRet += oexMks( (int)( *( (long*)ptr ) ) ).Ptr();
-				break;
+	switch( nType & 0xff )
+	{
+		case CIP_BOOL :
+			if ( 1 > nSize )
+				return oex::oexFALSE;
+			sRet = oexMks( (int)( *( (char*)pData ) ? 1 : 0 ) ).Ptr();
+			break;
 
-			case 0xca :
-				if ( 4 > len )
-					return oex::oexFALSE;
-				sRet += oexMks( (float)( *( (float*)ptr ) ) ).Ptr();
-				break;
+		case CIP_SINT :
+			if ( 1 > nSize )
+				return oex::oexFALSE;
+			sRet = oexMks( (int)( *( (char*)pData ) ) ).Ptr();
+			break;
 
-			case 0xd3 :
-				if ( 4 > len )
-					return oex::oexFALSE;
-				sRet += oexMks( (unsigned int)( *( (unsigned long*)ptr ) ) ).Ptr();
-				break;
+		case CIP_INT :
+			if ( 2 > nSize )
+				return oex::oexFALSE;
+			sRet = oexMks( (int)( *( (short*)pData ) ) ).Ptr();
+			break;
 
-			default :
+		case CIP_DINT :
+			if ( 4 > nSize )
+				return oex::oexFALSE;
+			sRet = oexMks( (int)( *( (long*)pData ) ) ).Ptr();
+			break;
 
-				for ( int b = 0; b < td.datalen; b++ )
-				{	if ( b && !( b & 0x0f ) ) sRet += oexT( "<br>" ), sRet += oexNL;
-					sRet += oexFmt( oexT( "%02lX " ), td.data[ b ] ).Ptr();
-				} // end for
+		case CIP_LINT :
+			if ( 8 > nSize )
+				return oex::oexFALSE;
+			sRet = oexMks( (oex::oexINT64)( *( (oex::oexINT64*)pData ) ) ).Ptr();
+			break;
 
-//				return oex::oexFALSE;
-				break;
+		case CIP_USINT :
+		case CIP_BYTE :
+			if ( 1 > nSize )
+				return oex::oexFALSE;
+			sRet = oexMks( (unsigned int)( *( (unsigned char*)pData ) ) ).Ptr();
+			break;
 
-		} // end switch
+		case CIP_UINT :
+		case CIP_WORD :
+			if ( 2 > nSize )
+				return oex::oexFALSE;
+			sRet = oexMks( (unsigned int)( *( (unsigned short*)pData ) ) ).Ptr();
+			break;
 
-		if ( 1 < count )
-			sRet += oexT( "," );
+		case CIP_UDINT :
+		case CIP_DWORD :
+			if ( 4 > nSize )
+				return oex::oexFALSE;
+			sRet = oexMks( (unsigned int)( *( (unsigned long*)pData ) ) ).Ptr();
+			break;
 
-		// Next element
-		ptr += td.size;
+		case CIP_ULINT :
+		case CIP_LWORD :
+			if ( 8 > nSize )
+				return oex::oexFALSE;
+			sRet = oexMks( (oex::oexUINT64)( *( (oex::oexUINT64*)pData ) ) ).Ptr();
+			break;
 
-	} while ( 0 < --count );
+		case CIP_REAL :
+			if ( 4 > nSize )
+				return oex::oexFALSE;
+			sRet = oexMks( (float)( *( (float*)pData ) ) ).Ptr();
+			break;
+
+		case CIP_LREAL :
+			if ( 4 > nSize )
+				return oex::oexFALSE;
+			sRet = oexMks( (double)( *( (double*)pData ) ) ).Ptr();
+			break;
+
+		default :
+			for ( int b = 0; b < nSize; b++ )
+			{	if ( b && !( b & 0x0f ) ) sRet += oexT( "<br>" ), sRet += oexNL;
+				sRet += oexFmt( oexT( "%02lX " ), (int)pData[ b ] ).Ptr();
+			} // end for
+
+	} // end switch
 
 	return oex::oexTRUE;
 }
@@ -371,14 +391,14 @@ sqbind::CSqMap CCellConnection::TagToMap( _tag_detail *pTd )
 	mRet.set( oexT( "type" ), 			oexMks( (unsigned int)( pTd->type & 0x0fff ) ).Ptr() );
 	mRet.set( oexT( "dim" ),			oexMks( (unsigned int)( ( pTd->type & 0x6000 ) >> 13 ) ).Ptr() );
 	mRet.set( oexT( "struct" ),			oexMks( (unsigned int)( ( pTd->type & 0x8000 ) ? 1 : 0 ) ).Ptr() );
-	mRet.set( oexT( "items" ), 			oexMks( (unsigned int)pTd->size ).Ptr() );
+	mRet.set( oexT( "bytes" ), 			oexMks( (unsigned int)pTd->size ).Ptr() );
 	mRet.set( oexT( "memory" ), 		oexMks( (unsigned int)pTd->memory ).Ptr() );
 	mRet.set( oexT( "displaytype" ), 	oexMks( (unsigned int)pTd->displaytype ).Ptr() );
 	mRet.set( oexT( "name" ), 			oexMbToStrPtr( (const char*)pTd->name ) );
 	mRet.set( oexT( "a1_size" ), 		oexMks( (unsigned int)pTd->arraysize1 ).Ptr() );
 	mRet.set( oexT( "a2_size" ), 		oexMks( (unsigned int)pTd->arraysize2 ).Ptr() );
 	mRet.set( oexT( "a3_size" ),	 	oexMks( (unsigned int)pTd->arraysize3 ).Ptr() );
-	mRet.set( oexT( "type_name" ), 		GetTagTypeName( *pTd ).c_str() );
+	mRet.set( oexT( "type_name" ), 		GetTypeName( pTd->type ) );
 
 	return mRet;
 }
@@ -389,52 +409,80 @@ void CCellConnection::VerifyTemplate()
 	for( sqbind::CSqMulti::t_List::iterator it = m_mapSqTemplates.list().begin();
 		 it != m_mapSqTemplates.list().end(); it++ )
 	{
-		int i = 0;
+		int i = 0, o = 0;
 
 		// For each template entry
 		for( sqbind::CSqMulti::t_List::iterator itVal = it->second.list().begin();
-			 itVal != it->second.list().end(); itVal++ )
-		{
+			 itVal != it->second.list().end(); )
+		{	oex::oexBOOL bErase = oex::oexFALSE;
+
 			// Name and type must be specified
 			if ( !itVal->second.list()[ oexT( "name" ) ].str().length()
 			     || !itVal->second.list()[ oexT( "type" ) ].str().length() )
-				it->second.list().erase( itVal++ );
+				bErase = oex::oexTRUE;
 
 			else
 			{
 				// Verify size field
-				if ( itVal->second.list()[ oexT( "type" ) ].str() == oexT( "USER" ) )
-				{	if ( 0 >= oexStrToLong( itVal->second.list()[ oexT( "bytes" ) ].str().c_str() ) )
-						itVal->second.list()[ oexT( "bytes" ) ].str() = oexT( "1" );
-				} // end if
-				else
-					itVal->second.list()[ oexT( "bytes" ) ].str() = oexT( "" );
+				int nBytes = 1;
 
-				// Does it need to be moved?
+				// User structure must be at least one byte
+				if ( itVal->second.list()[ oexT( "type" ) ].str() == oexT( "USER" ) )
+				{	nBytes = oexStrToLong( itVal->second.list()[ oexT( "bytes" ) ].str().c_str() );
+					if ( 0 > nBytes ) nBytes = 0;
+				} // end if
+
+				// Decide size based on type
+				else
+				{
+					int nType = GetTypeFromName( itVal->second.list()[ oexT( "type" ) ].str() );
+					int nSize = GetTypeSize( nType );
+					if ( 0 < nSize )
+						nBytes = nSize;
+					else
+						nBytes = oexStrToLong( itVal->second.list()[ oexT( "bytes" ) ].str().c_str() );
+					if ( 0 > nBytes ) nBytes = 0;
+
+				} // end else
+
+				// Save size of object
+				itVal->second.list()[ oexT( "bytes" ) ].str() = oexMks( nBytes ).Ptr();
+
+				// Set the offset
+				itVal->second.list()[ oexT( "offset" ) ].str() = oexMks( o ).Ptr();
+
+				// Add size to offset
+				o += nBytes;
+
+				// Does it need to be re-indexed?
 				if ( oexStrToLong( itVal->first.c_str() ) != i )
 				{	it->second.list()[ oexMks( i ).Ptr() ].list() = itVal->second.list();
-					it->second.list().erase( itVal++ );
+					bErase = oex::oexTRUE;
 				} // end if
 
 				i++;
 
 			} // end else
 
+			if ( bErase )
+				it->second.list().erase( itVal++ );
+			else
+				itVal++;
+
 		} // end for
 
 	} // end for
 }
 
-oex::oexBOOL CCellConnection::ParseTag( const sqbind::stdString &sTag, sqbind::stdString &sName, int &nP, int &nT, int &nO, int &nS, int &nB )
+oex::oexBOOL CCellConnection::ParseTag( const sqbind::stdString &sTag, sqbind::stdString &sName, int &nProgram, int &nTag, int &nOffset, int &nSize, int &nType, int &nBit )
 {
 	// Set invalid path
-	nP = nT = nO = nS = nB = -1;
+	nProgram = nTag = nOffset = nSize = nType = nBit = -1;
 
 	oex::CStr sParseTag = sTag.c_str(), sTemplate, sBit;
 	sName = sParseTag.Parse( oexT( "." ) ).Ptr();
 	if ( *sParseTag == oexT( '.' ) )
 	{	sParseTag++;
-
 		sTemplate = sParseTag.Parse( oexT( ":" ) );
 		if ( *sParseTag == oexT( ':' ) )
 			sParseTag++, sBit = sParseTag;
@@ -442,8 +490,15 @@ oex::oexBOOL CCellConnection::ParseTag( const sqbind::stdString &sTag, sqbind::s
 			sTemplate = sParseTag;
 
 	} // end if
+
 	else
-		sName = sParseTag.Ptr();
+	{	sName = sParseTag.Parse( oexT( ":" ) ).Ptr();
+		if ( *sParseTag == oexT( ':' ) )
+			sParseTag++, sBit = sParseTag;
+		else
+			sName = sParseTag.Ptr();
+
+	} // end else
 
 	// Ensure we have such a tag
 	if ( !m_mapSqTags.isset( sName ) )
@@ -453,18 +508,18 @@ oex::oexBOOL CCellConnection::ParseTag( const sqbind::stdString &sTag, sqbind::s
 	oex::CStr sP = sT.Parse( oexT( "." ) );
 
 	if ( *sT == oexT( '.' ) )
-		sT++, nP = sP.ToLong();
+		sT++, nProgram = sP.ToLong();
 	else
-		nP = -1;
-	nT = sT.ToLong();
+		nProgram = -1;
+	nTag = sT.ToLong();
 
 	// Validate program index
-	if ( 0 <= nP && ( nP >= m_prog_list.count || nP >= m_tagsProgram.Size() ) )
+	if ( 0 <= nProgram && ( nProgram >= m_prog_list.count || nProgram >= m_tagsProgram.Size() ) )
 		return oex::oexFALSE;
 
 	// Did we get a bit length?
 	if ( sBit.Length() )
-		nB = sBit.ToLong();
+		nBit = sBit.ToLong();
 
 	// Punt if no template or bit
 	if ( !sTemplate.Length() )
@@ -480,12 +535,16 @@ oex::oexBOOL CCellConnection::ParseTag( const sqbind::stdString &sTag, sqbind::s
 		  it->second.list().end() != itTmpl; itTmpl++ )
 		if ( itTmpl->second.list()[ oexT( "name" ) ].str() == sTemplate.Ptr() )
 		{
-			nO = 0;
-			nS = 2;
+			// Grab the offset and size
+			nOffset = oexStrToLong( itTmpl->second.list()[ oexT( "offset" ) ].str().c_str() );
+			nSize = oexStrToLong( itTmpl->second.list()[ oexT( "bytes" ) ].str().c_str() );
+			nType = GetTypeFromName( itTmpl->second.list()[ oexT( "type" ) ].str() );
+
+			return oex::oexTRUE;
 
 		} // end if
 
-	return oex::oexTRUE;
+	return oex::oexFALSE;
 }
 
 sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
@@ -495,79 +554,99 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 		return SetLastError( oexT( "err=Not connected" ) );
 
 	sqbind::stdString sName;
-	int nP, nT, nO, nS, nB;
-	if ( !ParseTag( sTag, sName, nP, nT, nO, nS, nB ) )
-		return SetLastError( oexT( "err=Tag does not exist" ) );
+	int nProgram, nTag, nOffset, nSize, nType, nBit;
+	if ( !ParseTag( sTag, sName, nProgram, nTag, nOffset, nSize, nType, nBit ) )
+		return SetLastError( oexMks( oexT( "err=Tag does not exist : " ), sTag.c_str() ).Ptr() );
 
 	_tag_data *pTd = &m_tagsDetails;
-	if ( 0 <= nP )
-		pTd = &m_tagsProgram[ nP ];
+	if ( 0 <= nProgram )
+		pTd = &m_tagsProgram[ nProgram ];
 
-	if ( 0 > nT || nT >= pTd->count )
-		return SetLastError( oexMks( oexT( "err=Invalid tag index " ), nT ).Ptr() );
+	if ( 0 > nTag || nTag >= pTd->count )
+		return SetLastError( oexMks( oexT( "err=Invalid tag index " ), nTag ).Ptr() );
 
 	// Get object details
-	if ( 0 > read_object_value( &m_comm, &m_path, pTd->tag[ nT ], 0 ) )
+	if ( 0 > read_object_value( &m_comm, &m_path, pTd->tag[ nTag ], 0 ) )
 		return SetLastError( oexT( "err=read_object_value() failed" ) );
 
-	sqbind::CSqMap mRet = TagToMap( pTd->tag[ nT ] );
-	if ( mRet.isset( oexT( "err" ) ) )
-		return mRet;
+	sqbind::CSqMap mRet;
 
-	// Did we get an offset and size?
-	if ( 0 <= nO && 0 <= nS )
+	// Do they want a bit offset?
+	if ( 0 <= nBit )
 	{
-		if ( nO + nS <= pTd->tag[ nT ]->datalen )
+		int nByte = nBit / 8;
+		unsigned char *ptr = oexNULL;
+
+		if ( 0 > nOffset || 0 > nSize )
 		{
-			if ( 1 == nS )
-				mRet.set( oexT( "value" ), oexMks( (int)( *(char*)&pTd->tag[ nT ]->data[ nO ] ) ).Ptr() );
+			if ( nByte >= pTd->tag[ nTag ]->datalen )
+				return SetLastError( oexT( "err=Bit address is beyond the end of the array" ) );
 
-			else if ( 2 == nS )
-				mRet.set( oexT( "value" ), oexMks( (int)( *(short*)&pTd->tag[ nT ]->data[ nO ] ) ).Ptr() );
-
-			else if ( 4 == nS )
-				mRet.set( oexT( "value" ), oexMks( (int)( *(long*)&pTd->tag[ nT ]->data[ nO ] ) ).Ptr() );
+			// Get item pointer and size
+			ptr = pTd->tag[ nTag ]->data;
 
 		} // end if
+
+		else
+		{
+			if ( nOffset + nSize > pTd->tag[ nTag ]->datalen )
+				return SetLastError( oexT( "err=Template item offset address is beyond the end of the array" ) );			
+
+			if ( nOffset + nByte > pTd->tag[ nTag ]->datalen )
+				return SetLastError( oexT( "err=Bit address is beyond the end of the array" ) );
+
+			if ( nByte >= nSize )
+				return SetLastError( oexT( "err=Bit address is beyond the end of the template item" ) );
+
+			// Get item pointer and size
+			ptr = &pTd->tag[ nTag ]->data[ nOffset + nByte ];
+
+		} // end else
+
+		int nMask = 1;
+		int i = nBit % 8;
+		while ( nMask && i )
+			nMask <<= 1, i--;
+
+		// Capture the bit value
+		mRet.set( oexT( "value" ), 0 != ( nMask & ptr[ nByte ] ) ? oexT( "1" ) : oexT( "0" ) );
+		mRet.set( oexT( "type_name" ), oexT( "BIT" ) );
+		mRet.set( oexT( "byte" ), oexMks( nByte ).Ptr() );
+		mRet.set( oexT( "bit" ), oexMks( nBit % 8 ).Ptr() );
+
+	} // end if
+
+	// Did we get an offset and size?
+	else if ( 0 > nOffset || 0 > nSize )
+	{
+		mRet = TagToMap( pTd->tag[ nTag ] );
+		if ( mRet.isset( oexT( "err" ) ) )
+			return mRet;
+
+		sqbind::stdString sVal;
+		if ( GetItemValue( pTd->tag[ nTag ]->type, pTd->tag[ nTag ]->data, pTd->tag[ nTag ]->datalen, nBit, sVal ) )
+			mRet.set( oexT( "value" ), sVal.c_str() );
 
 	} // end if
 
 	else
 	{
+		// Check array bounds
+		if ( nOffset + nSize > pTd->tag[ nTag ]->datalen )
+			return SetLastError( oexT( "err=Template item offset address is beyond the end of the array" ) );
+
 		sqbind::stdString sVal;
-		if ( GetTagValue( *pTd->tag[ nT ], sVal ) )
-			mRet.set( oexT( "value" ), sVal.c_str() );
+		if ( GetItemValue( nType, &pTd->tag[ nTag ]->data[ nOffset ], nSize, nBit, sVal ) )
+			mRet.set( oexT( "value" ), sVal );
+
+		mRet.set( oexT( "type" ), oexMks( nType ).Ptr() );
+		mRet.set( oexT( "type_name" ), GetTypeName( nType ) );
+		mRet.set( oexT( "bytes" ), oexMks( nSize ).Ptr() );
+		mRet.set( oexT( "offset" ), oexMks( nOffset ).Ptr() );
 
 	} // end else
 
 	return mRet;
-
-/*
-	oex::CStr sT = m_mapSqTags[ sTag ].c_str();
-	oex::CStr sP = sT.Parse( oexT( "." ) );
-	if ( *sT == oexT( '.' ) )
-		sT++, nP = sP.ToLong();
-	else
-		nP = -1;
-	nT = sT.ToLong();
-
-	// Validate program index
-	if ( 0 <= nP && ( nP >= m_prog_list.count || nP >= m_tagsProgram.Size() ) )
-		return SetLastError( oexMks( oexT( "err=Invalid program index " ), nP ).Ptr() );
-
-	_tag_data *pTd = &m_tagsDetails;
-	if ( 0 <= nP )
-		pTd = &m_tagsProgram[ nP ];
-
-	if ( 0 > nT || nT >= pTd->count )
-		return SetLastError( oexMks( oexT( "err=Invalid tag index " ), nT ).Ptr() );
-
-	// Get object details
-	if ( 0 > read_object_value( &m_comm, &m_path, pTd->tag[ nT ], 0 ) )
-		return SetLastError( oexT( "err=read_object_value() failed" ) );
-
-	return TagToMap( pTd->tag[ nT ] );
-*/
 }
 
 sqbind::stdString CCellConnection::GetBackplaneData()

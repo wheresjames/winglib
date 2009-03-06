@@ -36,17 +36,25 @@
 
 using namespace sqbind;
 
-CSqMulti::CSqMulti()
+CSqMulti::~CSqMulti()
 {
+	if ( m_def )
+	{	OexAllocDestruct( m_def );
+		m_def = oexNULL;
+	} // end if
+}
+
+CSqMulti::CSqMulti()
+{	m_def = oexNULL;
 }
 
 CSqMulti::CSqMulti( const CSqMulti::t_Obj &s )
-{
+{	m_def = oexNULL;
 	deserialize( s );
 }
 
 CSqMulti::CSqMulti( const oex::oexTCHAR *s )
-{
+{	m_def = oexNULL;
 	if ( s )
 		deserialize( t_Obj( s ) );
 }
@@ -54,10 +62,10 @@ CSqMulti::CSqMulti( const oex::oexTCHAR *s )
 CSqMulti::t_List& CSqMulti::list()
 {   return m_lst; }
 
-CSqMulti::CSqMulti& CSqMulti::operator []( const CSqMulti::t_Obj &rObj )
+CSqMulti& CSqMulti::operator []( const CSqMulti::t_Obj &rObj )
 {	return m_lst[ rObj ]; }
 
-CSqMulti::CSqMulti& CSqMulti::operator []( const oex::oexTCHAR *p )
+CSqMulti& CSqMulti::operator []( const oex::oexTCHAR *p )
 {	return m_lst[ p ]; }
 
 CSqString* CSqMulti::value()
@@ -167,13 +175,11 @@ void CSqMulti::urldecode( const CSqMulti::t_Obj &s )
 }
 
 void CSqMulti::unset( const CSqMulti::t_Obj &k )
-{
-	m_lst.erase( k );
-}
+{	m_lst.erase( k ); }
 
 
 void CSqMulti::set( const CSqMulti::t_Obj &v )
-{	m_val = v; }
+{	if ( v.length() ) m_val = v; }
 
 CSqMulti::iterator CSqMulti::begin()
 {	return m_lst.begin(); }
@@ -188,7 +194,12 @@ int CSqMulti::isset( const CSqMulti::t_Obj &k )
 {	return ( m_lst.end() != m_lst.find( k ) ) ? 1 : 0; }
 
 CSqMulti* CSqMulti::get( const CSqMulti::t_Obj &k )
-{	return &m_lst[ k ];
+{	if ( !k.length() ) 
+	{	if ( !m_def )
+			m_def = OexAllocConstruct< CSqMulti >();
+		return m_def;
+	} // end if
+	return &m_lst[ k ]; 
 }
 
 void CSqMulti::move_up( const t_Obj &k )
@@ -260,7 +271,7 @@ SquirrelObject CSqMulti::_get( HSQUIRRELVM v )
     StackHandler sa( v );
 
     const SQChar *pKey = sa.GetString( 2 );
-    if ( !pKey || !*pKey )
+    if ( !oexCHECK_PTR( pKey ) || !*pKey )
         return SquirrelObject( v );
 
 //    t_List::iterator it = m_lst.find( pKey );

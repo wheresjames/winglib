@@ -46,17 +46,20 @@ public:
 	/// Releases tags and resources
 	int ReleaseTags();
 
+	/// Returns the size of the type
+	int GetTypeSize( int nType );
+
 	/// Returns a string describing the tag type
-	sqbind::stdString GetTagTypeName( _tag_detail &td );
+	oex::oexCSTR GetTypeName( int nType );
 
-	/// Returns a string representation of the value
-	oex::oexBOOL GetTagValue( _tag_detail &td, sqbind::stdString &sRet );
+	/// Returns the integer type from the type name
+	int GetTypeFromName( const sqbind::stdString &sType );
 
-	/// Returns a structure value string
-	oex::oexBOOL GetStructValue( _tag_detail &td, sqbind::stdString &sRet );
+	/// Returns a string representation of the specified item
+	oex::oexBOOL GetItemValue( int nType, unsigned char *pData, int nSize, int nBit, sqbind::stdString &sRet );
 
 	/// Parses a tag name into components
-	oex::oexBOOL ParseTag( const sqbind::stdString &sTag, sqbind::stdString &sName, int &nP, int &nT, int &nO, int &nS, int &nB );
+	oex::oexBOOL ParseTag( const sqbind::stdString &sTag, sqbind::stdString &sName, int &nProgram, int &nTag, int &nOffset, int &nSize, int &nType, int &nBit );
 
 	/// Read the specified tag
 	sqbind::CSqMap ReadTag( const sqbind::stdString &sTag );
@@ -103,9 +106,6 @@ private:
 
 	/// Path
 	_path 						m_path;
-
-	/// Configuration tags
-	_tag_data					m_tagsConfig;
 
 	/// Detail tags
 	_tag_data					m_tagsDetails;

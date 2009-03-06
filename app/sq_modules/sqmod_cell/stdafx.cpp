@@ -16,6 +16,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CCellConnection, "CCellConnection" )
 	SQBIND_MEMBER_FUNCTION( CCellConnection, tags )
 	SQBIND_MEMBER_FUNCTION( CCellConnection, tmpl )
 	SQBIND_MEMBER_FUNCTION( CCellConnection, VerifyTemplate )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, GetTypeName )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, GetTypeSize )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, GetTypeFromName )	
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CCellConnection );
 

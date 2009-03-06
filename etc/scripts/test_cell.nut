@@ -17,6 +17,19 @@ function OnServerEvent( server, data )
 
 }
 
+function parse_tag( name )
+{
+	local parts = split( name, "." );
+	if ( 1 in parts && parts[ 1 ].len() )
+		return parts[ 0 ];
+
+	parts = split( name, ":" );
+	if ( 1 in parts && parts[ 1 ].len() )
+		return parts[ 0 ];
+	
+	return name;
+}
+
 function pg_data( request, headers, get, post ) : ( _g )
 {
 	local mGet = CSqMap();
@@ -51,8 +64,9 @@ function pg_data( request, headers, get, post ) : ( _g )
 	{
 		if ( mGet[ "tag" ] )
 		{
-			if ( !_g.tc.tags()[ mGet[ "tag" ] ] )
-				mReply.set( "content", "Tag not found " + mGet[ "tag" ] );
+			local tag_name = parse_tag( mGet[ "tag" ] );
+			if ( !_g.tc.tags()[ tag_name ] )
+				mReply.set( "content", "Base tag not found " + tag_name );
 			else
 				mReply.set( "content", _g.tc.ReadTag( mGet[ "tag" ] ).serialize() );
 
@@ -60,7 +74,7 @@ function pg_data( request, headers, get, post ) : ( _g )
 
 		else if ( mGet[ "all" ] )
 		{
-			local s = "<table border=1><tr><td><b>Tag</b></td><td><b>Items</b></td><td><b>Type</b></td><td><b>Dim</b></td><td><b>Struct</b><td><b>a1_size</b></td><td><b>Value</b></td></tr>";
+			local s = "<table border=1><tr><td><b>Tag</b></td><td><b>Bytes</b></td><td><b>Type</b></td><td><b>Dim</b></td><td><b>Struct</b><td><b>a1_size</b></td><td><b>Value</b></td></tr>";
 			local tags = _g.tc.tags();
 
 			local i = 0;
@@ -78,7 +92,7 @@ function pg_data( request, headers, get, post ) : ( _g )
 					s += "<td colspan=99>" + rep[ "err" ] + "</small></td>";
 				else
 				{
-					s += "<td><small>" + rep[ "items" ] + "</small></td>";
+					s += "<td><small>" + rep[ "bytes" ] + "</small></td>";
 					s += "<td><small>" + format( "0x%04x:", rep[ "type" ].tointeger() ) + rep[ "type_name" ] + "</small></td>";
 					s += "<td><small>" + rep[ "dim" ] + "</small></td>";
 					s += "<td><small>" + rep[ "struct" ] + "</small></td>";
@@ -110,12 +124,10 @@ function show_tag( name ) : ( _g )
 	if ( !_g.tc.IsConnected() )
 		return "[ Not Connected ]";
 
-	local parts = split( name, "." ), base_name = name;
-	if ( parts[ 0 ] && parts[ 0 ].len() )
-		base_name = parts[ 0 ];
+	local base_name = parse_tag( name );
 
 	if ( !_g.tc.tags()[ base_name ] )
-		return "Tag not found : " + name;
+		return "Base tag not found : " + base_name;
 
 	local tag = _g.tc.ReadTag( name );
 	if ( tag[ "err" ] )
@@ -155,9 +167,7 @@ function show_tag( name ) : ( _g )
 function edit_template( name, request, headers, get, post ) : ( _g )
 {
 	// Cut off template stuff
-	local parts = split( name, "." );
-	if ( parts[ 0 ] && parts[ 0 ].len() )
-		name = parts[ 0 ];
+	name = parse_tag( name );
 
 	local mPost = CSqMap();
 	mPost.deserialize( post );
@@ -169,15 +179,18 @@ function edit_template( name, request, headers, get, post ) : ( _g )
 	{
 		case "add" :
 
-			local i = _g.tc.tmpl().get( name ).size();
-			local tmpl = _g.tc.tmpl().get( name ).get( i.tostring() );
-			tmpl[ "name" ].set( mPost[ "etmp_name" ] );
-			tmpl[ "type" ].set( mPost[ "etmp_type" ] );
-			if ( mPost[ "etmp_type" ] == "USER" )
-				tmpl[ "bytes"].set( mPost[ "etmp_bytes" ] );
+			if ( mPost[ "etmp_name" ] )
+			{
+				local i = _g.tc.tmpl().get( name ).size();
+				local tmpl = _g.tc.tmpl().get( name ).get( i.tostring() );
+				tmpl[ "name" ].set( mPost[ "etmp_name" ] );
+				tmpl[ "type" ].set( mPost[ "etmp_type" ] );
+				if ( mPost[ "etmp_type" ] == "USER" )
+					tmpl[ "bytes"].set( mPost[ "etmp_bytes" ] );
 
-			_g.tc.VerifyTemplate();
-			CSqFile().put_contents( _g.tmpl_cfg, _g.tc.tmpl().serialize() );
+				_g.tc.VerifyTemplate();
+				CSqFile().put_contents( _g.tmpl_cfg, _g.tc.tmpl().serialize() );
+			} // end if
 /*
 			_g.tmpl[ i ] <-
 				{
@@ -199,11 +212,13 @@ function edit_template( name, request, headers, get, post ) : ( _g )
 
 		case "up" :
 			_g.tc.tmpl().get( name ).move_up( mGet[ "etmp_idx" ] );
+			_g.tc.VerifyTemplate();
 			CSqFile().put_contents( _g.tmpl_cfg, _g.tc.tmpl().serialize() );
 			break;
 
 		case "down" :
 			_g.tc.tmpl().get( name ).move_down( mGet[ "etmp_idx" ] );
+			_g.tc.VerifyTemplate();
 			CSqFile().put_contents( _g.tmpl_cfg, _g.tc.tmpl().serialize() );
 			break;
 
@@ -230,6 +245,9 @@ function edit_template( name, request, headers, get, post ) : ( _g )
 				</td>
 				<td>
 					<b><small>Bytes</small></b>
+				</td>
+				<td>
+					<b><small>Offset</small></b>
 				</td>
 				<td>
 					<b><small>Value</small></b>
@@ -260,6 +278,9 @@ function edit_template( name, request, headers, get, post ) : ( _g )
 						" + v[ "bytes" ].str() + @"
 					</td>
 					<td bgcolor='#ffffff'>
+						" + v[ "offset" ].str() + @"
+					</td>
+					<td bgcolor='#ffffff'>
 					</td>
 				</tr>
 				";
@@ -267,6 +288,8 @@ function edit_template( name, request, headers, get, post ) : ( _g )
 		} // end foreach
 
 	} // end if
+
+	local jscript_enable = "document.getElementsByName( \"etmp_bytes\" )[ 0 ].disabled = ( this.value != \"USER\" );";
 
 	content += @"
 			<tr>
@@ -281,7 +304,7 @@ function edit_template( name, request, headers, get, post ) : ( _g )
 					<input name='etmp_name' id='etmp_name' type='text'>
 				</td>
 				<td>
-					<select name='etmp_type' id='etmp_type'>
+					<select name='etmp_type' id='etmp_type' onchange='" + jscript_enable + @"'>
 						<option >USER</option>
 						<option >BOOL</option>
 						<option >SINT</option>
@@ -299,15 +322,11 @@ function edit_template( name, request, headers, get, post ) : ( _g )
 				<td>
 					<input name='etmp_bytes' id='etmp_bytes' type='text' style='width:40'>
 				</td>
-				<td>
+				<td colspan='2'>
 					<input type='submit' value='Add'>
 				</td>
 			</tr>
 		</form>
-		</table>
-		";
-
-	content += @"
 		</table>
 		";
 
@@ -390,10 +409,13 @@ function pg_admin( request, headers, get, post ) : ( _g )
 			<table>
 				<tr valign='top'>
 					<td>
-						" + show_tag( tag ) + @"
+						" + edit_template( tag, request, headers, get, post ) + @"
+					</td>
+					<td style='border-right:2px inset black'>
+						&nbsp;
 					</td>
 					<td>
-						" + edit_template( tag, request, headers, get, post ) + @"
+						" + show_tag( tag ) + @"
 					</td>
 				</tr>
 			</table>

@@ -154,6 +154,26 @@ public:
 		SetNumTrim( oexTT( T, "%f" ), oexNULL, oexTT( T, "0" ), (oexDOUBLE)dStr );
 	}
 
+	TStr( oexCONST oexINT64 llStr )
+	{	m_nLength = 0;
+        m_uOffset = 0;
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
+		SetNumTrim( oexTT( T, "%lld" ), oexNULL, oexTT( T, "0" ), (oexINT64)llStr );
+	}
+
+	TStr( oexCONST oexUINT64 llStr )
+	{	m_nLength = 0;
+        m_uOffset = 0;
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
+		SetNumTrim( oexTT( T, "%llu" ), oexNULL, oexTT( T, "0" ), (oexUINT64)llStr );
+	}
+
 	TStr( oexCONST T tVal )
 	{	m_nLength = 0;
         m_uOffset = 0;
@@ -434,6 +454,12 @@ public:
 	TStr& operator = ( oexCONST oexDOUBLE dStr )
 	{	return SetNumTrim( oexTT( T, "%f" ), oexNULL, oexTT( T, "0" ), (oexDOUBLE)dStr ); }
 
+	TStr& operator = ( oexCONST oexINT64 llStr )
+	{	return SetNumTrim( oexTT( T, "%lld" ), oexNULL, oexTT( T, "0" ), (oexINT64)llStr ); }
+
+	TStr& operator = ( oexCONST oexUINT64 llStr )
+	{	return SetNumTrim( oexTT( T, "%llu" ), oexNULL, oexTT( T, "0" ), (oexUINT64)llStr ); }
+
 	TStr& operator += ( oexCONST oexINT nVal )
 	{	return AppendNum( oexTT( T, "%i" ), (oexINT)nVal ); }
 
@@ -442,6 +468,12 @@ public:
 
 	TStr& operator += ( oexCONST oexDOUBLE dVal )
 	{	return AppendNumTrim( oexTT( T, "%f" ), oexNULL, oexTT( T, "0" ), (oexDOUBLE)dVal ); }
+
+	TStr& operator += ( oexCONST oexUINT64 llVal )
+	{	return AppendNumTrim( oexTT( T, "%llu" ), oexNULL, oexTT( T, "0" ), (oexUINT64)llVal ); }
+
+	TStr& operator += ( oexCONST oexINT64 llVal )
+	{	return AppendNumTrim( oexTT( T, "%lld" ), oexNULL, oexTT( T, "0" ), (oexINT64)llVal ); }
 
 	TStr& operator += ( oexCONST T chVal )
 	{	return Append( &chVal, 1 ); }
@@ -457,6 +489,12 @@ public:
 
 	TStr& operator << ( oexCONST oexDOUBLE dVal )
 	{	return AppendNumTrim( oexTT( T, "%f" ), oexNULL, oexTT( T, "0" ), (oexDOUBLE)dVal ); }
+
+	TStr& operator << ( oexCONST oexINT64 llVal )
+	{	return AppendNumTrim( oexTT( T, "%lld" ), oexNULL, oexTT( T, "0" ), (oexINT64)llVal ); }
+
+	TStr& operator << ( oexCONST oexUINT64 llVal )
+	{	return AppendNumTrim( oexTT( T, "%llu" ), oexNULL, oexTT( T, "0" ), (oexUINT64)llVal ); }
 
 	TStr& operator << ( oexCONST T *pStr )
 	{	return Append( pStr ); }

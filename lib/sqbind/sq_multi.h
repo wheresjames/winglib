@@ -72,7 +72,13 @@ namespace sqbind
 		/// This objects value
         CSqString				m_val;
 
+		/// Default object
+		CSqMulti				*m_def;
+
     public:
+
+		/// Destructor
+		~CSqMulti();
 
 		/// Default constructor
 		CSqMulti();
