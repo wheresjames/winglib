@@ -26,7 +26,7 @@ function parse_tag( name )
 	parts = split( name, ":" );
 	if ( 1 in parts && parts[ 1 ].len() )
 		return parts[ 0 ];
-	
+
 	return name;
 }
 
@@ -167,6 +167,7 @@ function show_tag( name ) : ( _g )
 function edit_template( name, request, headers, get, post ) : ( _g )
 {
 	// Cut off template stuff
+	local full_tag = name;
 	name = parse_tag( name );
 
 	local mPost = CSqMap();
@@ -264,9 +265,9 @@ function edit_template( name, request, headers, get, post ) : ( _g )
 			content += @"
 				<tr>
 					<td>
-						<a href='admin?etmp=up&etmp_idx=" + k + @"&tag=" + name + @"'>[<b><small>up</small></b>]</a>
-						<a href='admin?etmp=down&etmp_idx=" + k + @"&tag=" + name + @"'>[<b><small>down</small></b>]</a>
-						<a href='admin?etmp=del&etmp_idx=" + k + @"&tag=" + name + @"'>[<b><small>delete</small></b>]</a>
+						<a href='admin?etmp=up&etmp_idx=" + k + @"&tag=" + full_tag + @"'>[<b><small>up</small></b>]</a>
+						<a href='admin?etmp=down&etmp_idx=" + k + @"&tag=" + full_tag + @"'>[<b><small>down</small></b>]</a>
+						<a href='admin?etmp=del&etmp_idx=" + k + @"&tag=" + full_tag + @"'>[<b><small>delete</small></b>]</a>
 					</td>
 					<td bgcolor='#ffffff'>
 						" + v[ "name" ].str() + @"

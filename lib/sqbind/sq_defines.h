@@ -43,6 +43,7 @@
 #   define SQBIND_MEMBER_FUNCTION( c, f )    				.func ( &c::f,        	  oexT( #f ) )
 #   define SQBIND_CONST( c, e )              				.enumInt ( (int)c::##e,   oexT( #e ) )
 #   define SQBIND_GLOBALCONST( e )           				.enumInt ( (int)##e,	  oexT( #e ) )
+#   define SQBIND_ENUM( e, s )		           				.enumInt ( (int)e,	  	  oexT( s ) )
 #   define SQBIND_MEMBER_VARIABLE( c, v )    				.var ( &c::v,         	  oexT( #v ) )
 #   define SQBIND_STATIC_FUNCTION( c, f )    				.staticFunc ( &c::f,      oexT( #f ) )
 

@@ -190,6 +190,7 @@
 #define oexStrToUInt64		OEX_NAMESPACE::os::CSys::StrToUInt64
 #define oexStrToLong		OEX_NAMESPACE::os::CSys::StrToLong
 #define oexStrToULong		OEX_NAMESPACE::os::CSys::StrToULong
+#define oexStrToFloat		OEX_NAMESPACE::os::CSys::StrToFloat
 #define oexStrToDouble		OEX_NAMESPACE::os::CSys::StrToDouble
 
 

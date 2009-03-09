@@ -242,6 +242,12 @@ oexULONG CSys::StrToULong( oexCSTR8 x_pStr, oexUINT x_uRadix )
 	return strtoul( x_pStr, NULL, x_uRadix );
 }
 
+oexFLOAT CSys::StrToFloat( oexCSTR8 x_pStr )
+{	if ( !oexVERIFY_PTR( x_pStr ) )
+		return 0;
+	return strtof( x_pStr, NULL );
+}
+
 oexDOUBLE CSys::StrToDouble( oexCSTR8 x_pStr )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
@@ -332,6 +338,12 @@ oexULONG CSys::StrToULong( oexCSTRW x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 	return wcstoul( x_pStr, NULL, x_uRadix );
+}
+
+oexFLOAT CSys::StrToFloat( oexCSTRW x_pStr )
+{	if ( !oexVERIFY_PTR( x_pStr ) )
+		return 0;
+	return wcstof( x_pStr, NULL );
 }
 
 oexDOUBLE CSys::StrToDouble( oexCSTRW x_pStr )

@@ -97,6 +97,9 @@ public:
 	static oexULONG StrToULong( oexCSTR8 pStr, oexUINT uRadix = 10 );
 
 	/// Converts to double
+	static oexFLOAT StrToFloat( oexCSTR8 pStr );
+
+	/// Converts to double
 	static oexDOUBLE StrToDouble( oexCSTR8 pStr );
 
     // Unicode
@@ -121,6 +124,9 @@ public:
 
 	/// Converts to unsigned long
 	static oexULONG StrToULong( oexCSTRW pStr, oexUINT uRadix = 10 );
+
+	/// Converts to double
+	static oexFLOAT StrToFloat( oexCSTRW pStr );
 
 	/// Converts to double
 	static oexDOUBLE StrToDouble( oexCSTRW pStr );
