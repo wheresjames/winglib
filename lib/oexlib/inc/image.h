@@ -54,9 +54,12 @@ struct oexSRgbQuad
 
 typedef oexULONG oexSColorRef;
 
+#define oexRGB( r, g, b ) ( (OEX_NAMESPACE::oexSColorRef)( ( (long)(r) & 0xff << 24 ) \
+														 | ( (long)(g) & 0xff << 16 ) \
+														 | ( (long)(b) & 0xff ) ) )
 
 //==================================================================
-// CWinImg
+// CImage
 //
 /// Provides image manipulation, JPEG, PNG, BMP, WMF, EMF, etc...
 /**

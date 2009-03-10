@@ -389,6 +389,18 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str2 == oexT( "World" ) ) )
 		return -16;
 
+	str1 = oexT( "Hello World!" );
+	str1++; str1++;
+	if ( !oexVERIFY( str1 == oexT( "llo World!" ) ) )
+		return -16;
+
+	str1.Append( oexT( "123" ) );
+	if ( !oexVERIFY( str1 == oexT( "llo World!123" ) ) )
+		return -16;
+
+	if ( !oexVERIFY( ( oex::CStr( oexT( "abcdef" ) ).LTrim( 2 ) << oexT( "ghi" ) ) == oexT( "cdefghi" ) ) )
+		return -16;
+
     str2 = oexT( "  hello  " );
     str2.TrimWhiteSpace();
     if ( !oexVERIFY( str2 == oexT( "hello" ) ) )
@@ -530,6 +542,8 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( ( oex::CStr( oexT( "123" ) ) << oexT( "456" ) ) == oexT( "123456" ) ) )
 		return -51;
 
+	oexSHOW( oex::CStr( oexT( "abc/def" ) ).GetFileName() );
+	oexSHOW( ( oex::CStr( oexT( "abc/def" ) ).GetFileName() << oexT( "ghi" ) ) );
 	if ( !oexVERIFY( ( oex::CStr( oexT( "abc/def" ) ).GetFileName() << oexT( "ghi" ) ) == oexT( "defghi" ) ) )
 		return -52;
 
@@ -539,6 +553,15 @@ oex::oexRESULT TestStrings()
 
 	if ( !oexVERIFY( 0 <= oexGetModuleFileName().GetFileName().FindSubStr( oexT( "test" ) ) ) )
 		return -54;
+
+	if ( !oexVERIFY( oex::CStr( "path" ).GetPath() == oexT( "" ) ) )
+		return -55;
+
+	if ( !oexVERIFY( oex::CStr( "test.png" ).GetFileName() == oexT( "test.png" ) ) )
+		return -56;
+
+	if ( !oexVERIFY( oex::CStr( "test.png" ).GetFileExtension() == oexT( "png" ) ) )
+		return -57;
 
     return oex::oexRES_OK;
 }

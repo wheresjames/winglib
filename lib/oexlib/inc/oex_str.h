@@ -508,7 +508,7 @@ namespace str
         \param [in] ln2 -   Number of characters in s2
     */
 	template< class T >
-		oexINT FindCharacters( T *s1, oexINT ln1, T *s2, oexINT ln2 )
+		oexINT FindCharacters( oexCONST T *s1, oexINT ln1, oexCONST T *s2, oexINT ln2 )
 	    {
             oexASSERT_PTR( s1 );
             oexASSERT_PTR( s2 );
@@ -516,7 +516,7 @@ namespace str
 		    oexINT i = 0;
 		    while ( ln1 )
 		    {
-			    T *start = s2;
+			    oexCONST T *start = s2;
                 oexINT ln_start = ln2;
 			    while ( ln_start-- )
 			    {	if ( *s1 == *start )
@@ -549,8 +549,9 @@ namespace str
 
 		    while ( ln1-- )
 		    {
-			    T *start = s2;
-			    while ( ln2-- )
+			    oexCONST T *start = s2;
+                oexINT ln_start = ln2;
+			    while ( ln_start-- )
 			    {	if ( s1[ ln1 ] == *start )
 					    return ln1;
 				    start++;

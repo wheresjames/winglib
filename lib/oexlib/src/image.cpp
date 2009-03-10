@@ -158,6 +158,8 @@ oexINT CImage::GetFileType( oexCSTR x_pFile )
 
 	sExt.ToLower();
 
+	oexSHOW( sExt );
+
 	if ( 0 );
 
 	// Check for bitmap

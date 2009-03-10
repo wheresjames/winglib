@@ -43,7 +43,7 @@ mkdir -p ${INSTALL_ROOT}
 #	"http://${SF_SERVER}.dl.sourceforge.net/sourceforge/cximage/cximage599c_lite.zip" \
 #	"http://${SF_SERVER}.dl.sourceforge.net/sourceforge/irrlicht/irrlicht-1.5.zip" \
 
-for PROJECT in abel cell CxImage irrlicht j2k jpeg opencv png SqPlus tiff zlib
+for PROJECT in abel cell CxImage gdchart irrlicht j2k jpeg opencv png SqPlus tiff zlib
 do
 	echo ${INSTALL_ROOT}/${PROJECT}
 	

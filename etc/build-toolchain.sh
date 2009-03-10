@@ -93,8 +93,25 @@
 #VER_GCC=gcc-3.4.3
 #VER_GLIBC=glibc-2.3.5
 #VER_GLIBC_THREADS=glibc-linuxthreads-2.3.5
+#VER_LINUX=linux-2.6.10
+#DIR_LINUX=v2.6
+#ENABLE_ADD_ONS=linuxthreads
 
-# Mainline
+# [Works] - Montavista proprietary
+#TARGET=arm-none-linux-gnu
+#VER_BINUTILS=binutils-2.16
+#VER_GCC=gcc-3.4.3
+#VER_GLIBC=glibc-2.3.5
+#VER_GLIBC_THREADS=glibc-linuxthreads-2.3.5
+#VER_LINUX=linux-2.6.10-davinci
+#ENABLE_ADD_ONS_S1=linuxthreads
+#ENABLE_ADD_ONS_S2=linuxthreads
+#MACH=davinci
+#TOOL_ALIAS=arm_v5t_le
+
+# [] - Montavista proprietary with eabi
+#TARGET=armv5tl-montavista-linuxeabi
+#TARGET=arm-montavista-linux-gnueabi
 TARGET=arm-none-linux-gnueabi
 VER_BINUTILS=binutils-2.19
 VER_GCC=gcc-4.2.4
@@ -102,10 +119,29 @@ VER_GMP=gmp-4.2.4
 VER_GLIBC=glibc-2.7
 VER_GLIBC_PORTS=glibc-ports-2.7
 VER_GLIBC_THREADS=glibc-linuxthreads-2.5
-VER_LINUX=linux-2.6.28
-DIR_LINUX=v2.6
-GLIBC_EXTRA= --with-tls --disable-sanity-checks
-CFG_LINUX=custom_davinci_all_defconfig
+VER_LINUX=linux-2.6.26-davinci
+#GLIBC_EXTRA_S1= --disable-shared --disable-threads --disable-nls --enable-kernel=2.6.10
+GLIBC_EXTRA_S1= --disable-shared --disable-threads --disable-nls
+ENABLE_ADD_ONS_S1=ports,nptl
+#GLIBC_EXTRA_S2= --with-tls --with-__thread --enable-kernel=2.6.10
+GLIBC_EXTRA_S2= --with-tls --with-__thread
+ENABLE_ADD_ONS_S2=ports,nptl
+MACH=davinci
+TOOL_ALIAS=arm_v5t_le
+#CFG_LINUX=davinci_dm644x_defconfig
+
+# Mainline
+#TARGET=arm-none-linux-gnueabi
+#VER_BINUTILS=binutils-2.19
+#VER_GCC=gcc-4.2.4
+#VER_GMP=gmp-4.2.4
+#VER_GLIBC=glibc-2.7
+#VER_GLIBC_PORTS=glibc-ports-2.7
+#VER_GLIBC_THREADS=glibc-linuxthreads-2.5
+#VER_LINUX=linux-2.6.28
+#DIR_LINUX=v2.6
+#GLIBC_EXTRA= --with-tls --disable-sanity-checks
+#CFG_LINUX=custom_davinci_all_defconfig
 
 # Montavista Open Source
 #TARGET=arm-none-linux-gnueabi
@@ -128,11 +164,11 @@ CFG_LINUX=custom_davinci_all_defconfig
 #		--without-tls 
 # 		--without-__thread 
 #		--disable-sanity-checks
-#ENABLE_ADD_ONS=ports,linuxthreads
+#ENABLE_ADD_ONS_S2=ports,linuxthreads
 
 #		 --with-tls \
 # 		 --with-__thread \
-ENABLE_ADD_ONS=ports,nptl
+#ENABLE_ADD_ONS_S2=ports,nptl
 
 
 #-------------------------------------------------------------------
@@ -142,11 +178,13 @@ HOST=i686-pc-linux-gnu
 #BUILD=i486-linux-gnu
 #HOST=i486-linux-gnu
 export ARCH=arm
+SCRIPT_DIR=$PWD
 PATCHES=$PWD/patches
 PREFIX=$PWD/../../tools/${TARGET}
 DOWNLOADS=$PWD/../../downloads
 SYSROOT=${PREFIX}/sysroot
 BUILDROOT=${PREFIX}/src
+#export CROSS_COMPILE=arm_v5t_le-
 export CROSS_COMPILE=${PREFIX}/bin/${TARGET}-
 export PATH=$PATH:${PREFIX}/bin
 mkdir -p ${BUILDROOT}
@@ -213,21 +251,26 @@ if [ ! -d ${VER_BINUTILS} ]; then
 	                                2>&1 | tee -a ${BUILDROOT}/logs/10.${VER_BINUTILS}.configure.log
 	make 2>&1 | tee -a ${BUILDROOT}/logs/11.${VER_BINUTILS}.make.log
 	make install 2>&1 | tee -a ${BUILDROOT}/logs/12.${VER_BINUTILS}.make.install.log
+	[ -z "${TOOL_ALIAS}" ] || sh ${SCRIPT_DIR}/link-tools.sh ${PREFIX}/bin/${TARGET} ${PREFIX}/bin/${TOOL_ALIAS} 2>&1 | tee -a ${BUILDROOT}/logs/13.${VER_BINUTILS}.link-gcc.sh.log
 fi
 
 #-------------------------------------------------------------------
 # 2. Linux Kernel Headers
 #-------------------------------------------------------------------
 cd ${BUILDROOT}
+[ ! -d ${DOWNLOADS}/${VER_LINUX} ] || cp -r ${DOWNLOADS}/${VER_LINUX} ${VER_LINUX}
 [ -d ${VER_LINUX} ] || bunzip2 -c ${DOWNLOADS}/${VER_LINUX}.tar.bz2 | tar xvf -
 ln -s ${VER_LINUX} linux
 cd ${BUILDROOT}/linux
 [ -z "${GIT_CHECKOUT}" ] || git checkout ${GIT_CHECKOUT}
 find ${PATCHES} -name ${VER_LINUX}-*.patch | xargs -rtI {} cat {} | patch -d ${BUILDROOT}/linux -p1
 [ -f ${PATCHES}/linux-cfg-${CFG_LINUX} ] && cp -a ${PATCHES}/linux-cfg-${CFG_LINUX} ${BUILDROOT}/linux/arch/${ARCH}/configs/${CFG_LINUX}
-make ${CFG_LINUX} 2>&1 | tee -a ${BUILDROOT}/logs/20.${VER_LINUX}.make.${CFG_LINUX}.log
-make include/linux/version.h 2>&1 | tee -a ${BUILDROOT}/logs/21.${VER_LINUX}.make.version.h.log
+[ -z "${CFG_LINUX}" ] || make ${CFG_LINUX} 2>&1 | tee -a ${BUILDROOT}/logs/20.${VER_LINUX}.make.${CFG_LINUX}.log
+#make dep 2>&1 | tee -a ${BUILDROOT}/logs/21.${VER_LINUX}.make.dep.log
+make include/linux/version.h 2>&1 | tee -a ${BUILDROOT}/logs/22.${VER_LINUX}.make.version.h.log
+#make symlinks 2>&1 | tee -a ${BUILDROOT}/logs/23.${VER_LINUX}.make.symlinks.log
 mkdir -p ${SYSROOT}/usr/include
+mkdir -p ${SYSROOT}/usr/include/asm
 
 cp -a ${PREFIX}/src/linux/include/linux ${SYSROOT}/usr/include/linux
 #cp -a ${PREFIX}/src/linux/include/asm ${SYSROOT}/usr/include/asm
@@ -237,6 +280,8 @@ cp -a ${PREFIX}/src/linux/include/asm-${ARCH}/* ${SYSROOT}/usr/include/asm
 
 cp -af ${PREFIX}/src/linux/arch/${ARCH}/include/asm ${SYSROOT}/usr/include/asm
 [ ${MACH} = "" ] || cp -af ${PREFIX}/src/linux/arch/${ARCH}/mach-${MACH}/include/mach/* ${SYSROOT}/usr/include/asm
+
+touch ${SYSROOT}/usr/include/linux/autoconf.h
 
 #-------------------------------------------------------------------
 # 3. Glibc headers
@@ -256,8 +301,8 @@ mkdir BUILD/${VER_GLIBC}-headers
 cd BUILD/${VER_GLIBC}-headers
 ../../${VER_GLIBC}/configure --prefix=/usr \
 							 --host=${TARGET} \
-							 --with-tls \
-							 --with-__threads \
+							 ${GLIBC_EXTRA_S1} \
+							 --enable-add-ons=${ENABLE_ADD_ONS_S1} \
 							 --with-headers=${SYSROOT}/usr/include \
 							 2>&1 | tee ${BUILDROOT}/logs/30.${VER_GLIBC}.configure.headers.log
 make cross-compiling=yes install_root=${SYSROOT} install-headers 2>&1 | tee ${BUILDROOT}/logs/31.${VER_GLIBC}.make.headers.log
@@ -294,17 +339,20 @@ fi
 find ${PATCHES} -name ${VER_GCC}-*.patch | xargs -rtI {} cat {} | patch -d ${VER_GCC} -p1
 mkdir -p BUILD/${VER_GCC}-stage1
 cd BUILD/${VER_GCC}-stage1
+
+#						   --disable-shared \
+#						   --disable-threads \
+#						   --disable-nls \
+
 ../../${VER_GCC}/configure --prefix=${PREFIX} \
 						   --target=${TARGET} \
 						   --enable-languages=c \
-						   --disable-shared \
-						   --disable-threads \
-						   --disable-nls \
 						   --with-sysroot=${SYSROOT} \
 						   --with-gmp=${SYSROOT}/usr/local \
 						   2>&1 | tee ${BUILDROOT}/logs/40.${VER_GCC}.configure.stage1.log
 make 2>&1 | tee ${BUILDROOT}/logs/41.${VER_GCC}.make.stage1.log
 make install 2>&1 | tee -a ${BUILDROOT}/logs/42.${VER_GCC}.make.stage1.install.log
+[ -z "${TOOL_ALIAS}" ] || sh ${SCRIPT_DIR}/link-tools.sh ${PREFIX}/bin/${TARGET} ${PREFIX}/bin/${TOOL_ALIAS} 2>&1 | tee -a ${BUILDROOT}/logs/43.${VER_GCC}.link-gcc.sh.log
 
 #-------------------------------------------------------------------
 # 5. Build glibc
@@ -321,8 +369,8 @@ BUILD_CC=gcc \
 	../../${VER_GLIBC}/configure --prefix=/usr \
 								 --build=${BUILD} \
 								 --host=${TARGET} \
-								 ${GLIBC_EXTRA} \
-								 --enable-add-ons=${ENABLE_ADD_ONS} \
+								 ${GLIBC_EXTRA_S2} \
+								 --enable-add-ons=${ENABLE_ADD_ONS_S2} \
 								 --with-headers=${SYSROOT}/usr/include \
 								 2>&1 | tee ${BUILDROOT}/logs/50.${VER_GLIBC}.configure.log
 make 2>&1 | tee ${BUILDROOT}/logs/51.${VER_GLIBC}.make.log
@@ -341,6 +389,7 @@ cd BUILD/${VER_GCC}
 						   2>&1 | tee ${BUILDROOT}/logs/60.${VER_GCC}.configure.stage2.log
 make 2>&1 | tee ${BUILDROOT}/logs/61.${VER_GCC}.make.stage2.log
 make install 2>&1 | tee -a ${BUILDROOT}/logs/62.${VER_GCC}.make.stage2.install.log
+[ -z "${TOOL_ALIAS}" ] || sh ${SCRIPT_DIR}/link-tools.sh ${PREFIX}/bin/${TARGET} ${PREFIX}/bin/${TOOL_ALIAS} 2>&1 | tee -a ${BUILDROOT}/logs/63.${VER_GCC}.link-gcc.sh.log
 
 #-------------------------------------------------------------------
 # 7. Build Linux kernel
