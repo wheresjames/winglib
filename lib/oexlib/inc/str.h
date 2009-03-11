@@ -2205,10 +2205,10 @@ public:
 		oexINT nOffset = str.RFindChars( oexTT( T, "\\/" ) );
 		if ( 0 > nOffset )
 			return *this;
-		return str.LTrim( nOffset + 1 );
-//		TStr ret = str.LTrim( nOffset + 1 );
-//		oexPrintf( "GetFileName() - %s - %d\n", ret.Ptr(), nOffset );
-//		return ret;
+//		return str.LTrim( nOffset + 1 );
+		TStr ret = str.LTrim( nOffset + 1 );
+		oexPrintf( "GetFileName() - %s - %d\n", ret.Ptr(), nOffset );
+		return ret;
 	}
 //    {   TStr str( *this );
 //        return str.RParse( oexTT( T, "\\/" ) );
