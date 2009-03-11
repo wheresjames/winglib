@@ -41,27 +41,18 @@ function OnProcessRequest( request, headers, get, post )
 	for ( local i = 0; i < 21; i++ )
 		data[ "0" ][ "data" ][ format( "%04d", i ) ].set( ( ( i - 10 ) * ( i - 10 ) ).tostring() );
 
-
 	local gdc = CGdcChart();
-//	gdc.SaveChart( "test.gif", p, l, m1, m2 );
-//	gdc.SaveChart( "w_test.png", "width=400,height=300,type=14", data.serialize() );
-//	gdc.SaveChart( "test.gif", 800, 600, 0, l, m1, m2 );
-
-	local img = CSqMulti();
-	local ret = gdc.GetChart( img, "png", "width=400,height=300,type=14", data.serialize() );
-	if ( 0 > ret )
+	local img = gdc.GetChart( "png", "width=400,height=300,type=14", data.serialize() );
+	if ( !img.isset( "img" ) )
 	{	mReply.set( "content", "Error creating chart : " + ret );
 		return mReply.serialize();
 	} // end if
-
-//	_self.alert( img.get( "width" ).str() );
 
 	// Write the image to disk
 	CSqFile().put_contents( "w_raw_write.png", img.get( "img" ).str() );
 
 	mReply.set( "content", img.get( "img" ).str() );
 
-//	mReply.set( "content", "Making chart" );
 	return mReply.serialize();
 }
 

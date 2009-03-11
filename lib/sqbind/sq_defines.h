@@ -118,20 +118,14 @@ DECLARE_INSTANCE_TYPE_NAME( sqbind::CSqString, CSqString )
 namespace SqPlus
 {
 	inline void Push(HSQUIRRELVM v,const sqbind::stdString& value)
-	{	sq_pushstring(v,value.c_str(),-1); }
+	{	sq_pushstring(v,value.c_str(),value.length()); }
 	inline bool Match(TypeWrapper<const sqbind::stdString&>, HSQUIRRELVM v, int idx)
 	{	return sq_gettype(v,idx) == OT_STRING; }
 	inline sqbind::stdString Get(TypeWrapper<const sqbind::stdString&>,HSQUIRRELVM v,int idx)
-	{	const SQChar * s; SQPLUS_CHECK_GET(sq_getstring(v,idx,&s)); return sqbind::stdString(s); }
-
-/*
-	inline void Push(HSQUIRRELVM v,const sqbind::CSqString& value)
-	{	const SQChar * s = value.c_str()->c_str();
-		sq_pushstring(v,s,-1); }
-	inline bool Match(TypeWrapper<const sqbind::CSqString&>, HSQUIRRELVM v, int idx)
-	{	return sq_gettype(v,idx) == OT_STRING; }
-	inline sqbind::CSqString Get(TypeWrapper<const sqbind::CSqString&>,HSQUIRRELVM v,int idx)
-	{	const SQChar * s; SQPLUS_CHECK_GET(sq_getstring(v,idx,&s)); return sqbind::CSqString(s); }
-*/
+	{	const SQChar * s = 0; 
+		int sz = sq_getsize(v,idx); 
+		SQPLUS_CHECK_GET(sq_getstring(v,idx,&s)); 
+		return sqbind::stdString(s,sz); 
+	}
 }
 

@@ -108,21 +108,18 @@ CImage::CImage( const CImage &img )
 
 CImage::~CImage()
 {_STT();
+
 	Destroy();
 
-	// Delete image object
-	if ( oexCHECK_PTR( m_pimg ) )
-		OexAllocDelete< CCxCustomImg >( (CCxCustomImg*)m_pimg );
-
-	// No more object
-	m_pimg = oexNULL;
 }
 
 void CImage::Destroy()
-{
+{_STT();
+
 	// Get image object
 	if ( oexCHECK_PTR( m_pimg ) )
-		OexAllocDelete< CCxCustomImg >( (CCxCustomImg*)m_pimg );
+		OexAllocDestruct( (CCxCustomImg*)m_pimg );
+	m_pimg = oexNULL;
 
 	// Lose
 	m_filename.Destroy();

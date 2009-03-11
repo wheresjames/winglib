@@ -33,10 +33,9 @@ public:
 	virtual ~CGdcChart();
 
 	/// Generates a chart and returns it
-	int GetChart( sqbind::CSqMulti *x_pImg,
-				  const sqbind::stdString &x_sType,
-				  const sqbind::stdString &x_sParams,
-				  const sqbind::stdString &x_sData );
+	sqbind::CSqMulti GetChart( const sqbind::stdString &x_sType,
+							   const sqbind::stdString &x_sParams,
+							   const sqbind::stdString &x_sData );
 
 	/// Creates a chart and saves it to disk
 	int SaveChart(  const sqbind::stdString &x_sFile,

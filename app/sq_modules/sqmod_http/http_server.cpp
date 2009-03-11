@@ -69,7 +69,7 @@ oex::oexINT CHttpServerImpl::OnSessionCallback( oex::oexPVOID x_pData, oex::THtt
 	mReply.deserialize( sReply );
 
 	if ( mReply[ oexT( "content" ) ].length() )
-		x_pSession->Content() << mReply[ oexT( "content" ) ].c_str();
+		x_pSession->Content().Set( mReply[ oexT( "content" ) ].c_str(), mReply[ oexT( "content" ) ].length() );
 
 //	if ( oexCHECK_PTR( pReply ) )
 //		x_pSession->Content() << pReply->ToString();

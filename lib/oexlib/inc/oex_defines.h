@@ -47,6 +47,54 @@
 #define oexVERSION_MINOR( v )		        ( v & 0xffff )
 #define oexVERSION_MAJOR( v )		        ( ( v >> 16 ) & 0xffff )
 
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+
+// For tracking allocations
+#   define OexAllocNew             OEX_NAMESPACE::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).New
+#   define OexAllocDelete          OEX_NAMESPACE::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Delete
+#   define OexAllocResize          OEX_NAMESPACE::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Resize
+
+#   define OexAllocConstruct       OEX_NAMESPACE::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Construct
+#   define OexAllocConstructArray  OEX_NAMESPACE::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).ConstructArray
+#   define OexAllocDestruct        OEX_NAMESPACE::CAlloc( __LINE__, oexTEXT( __FILE__ ) ).Destruct
+
+
+// Object function macros
+#   define OexNew                  _Log( __LINE__, oexTEXT( __FILE__ ) ).New
+#   define OexDelete               _Log( __LINE__, oexTEXT( __FILE__ ) ).Delete
+#   define OexResize               _Log( __LINE__, oexTEXT( __FILE__ ) ).Resize
+
+#   define OexConstruct            _Log( __LINE__, oexTEXT( __FILE__ ) ).Construct
+#   define OexConstructArray       _Log( __LINE__, oexTEXT( __FILE__ ) ).ConstructArray
+#   define OexDestruct             _Log( __LINE__, oexTEXT( __FILE__ ) ).Destruct
+
+#   define OexAllocate             _Log( __LINE__, oexTEXT( __FILE__ ) ).Allocate
+
+#else
+
+// For tracking allocations
+#   define OexAllocNew             OEX_NAMESPACE::CAlloc().New
+#   define OexAllocDelete          OEX_NAMESPACE::CAlloc().Delete
+#   define OexAllocResize          OEX_NAMESPACE::CAlloc().Resize
+
+#   define OexAllocConstruct       OEX_NAMESPACE::CAlloc().Construct
+#   define OexAllocConstructArray  OEX_NAMESPACE::CAlloc().ConstructArray
+#   define OexAllocDestruct        OEX_NAMESPACE::CAlloc().Destruct
+
+
+// Object function macros
+#   define OexNew                  New
+#   define OexDelete               Delete
+#   define OexResize               Resize
+
+#   define OexConstruct            Construct
+#   define OexConstructArray       ConstructArray
+#   define OexDestruct             Destruct
+
+#   define OexAllocate             Allocate
+
+#endif
+
 #if defined( OEX_WIN32 )
 #	define oexVaList				        OEX_NAMESPACE::oexPVOID
 #	define oexVaStart( v, p )		        ( v = ( ( (OEX_NAMESPACE::oexPVOID*)&p ) + 1 ) )
