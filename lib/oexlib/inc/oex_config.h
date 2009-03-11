@@ -120,3 +120,11 @@
 #	define oexFUNCTION			__FUNCTION__
 #	define oexPRETTYFUNCTION	__FUNCTION__ oexT( "()" )
 #endif
+
+#ifdef size_t
+	typedef size_t					oexSIZE_T;
+#else
+	typedef long unsigned int		oexSIZE_T;
+#endif 
+
+

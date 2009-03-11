@@ -78,11 +78,11 @@ public:
 
 	static oexCSTR8 StrFmt( oexSTR8 pDst, oexUINT uMax, oexCSTR8 pFmt, ... );
 
-	static oexCSTR8 vStrFmt( oexSTR8 pDst, oexUINT uMax, oexCSTR8 pFmt, oexVaList &pArgs );
+	static oexCSTR8 vStrFmt( oexSTR8 pDst, oexUINT uMax, oexCSTR8 pFmt, oexVaList pArgs );
 
 	static oexCSTR8 StrFmt( oexRESULT *pRes, oexSTR8 pDst, oexUINT uMax, oexCSTR8 pFmt, ... );
 
-	static oexCSTR8 vStrFmt( oexRESULT *pRes, oexSTR8 pDst, oexUINT uMax, oexCSTR8 pFmt, oexVaList &pArgs );
+	static oexCSTR8 vStrFmt( oexRESULT *pRes, oexSTR8 pDst, oexUINT uMax, oexCSTR8 pFmt, oexVaList pArgs );
 
     /// Converts to int64
     static oexINT64 StrToInt64( oexCSTR8 x_pStr, oexUINT x_uRadix );
@@ -107,11 +107,11 @@ public:
 
 	static oexCSTRW StrFmt( oexSTRW pDst, oexUINT uMax, oexCSTRW pFmt, ... );
 
-	static oexCSTRW vStrFmt( oexSTRW pDst, oexUINT uMax, oexCSTRW pFmt, oexVaList &pArgs );
+	static oexCSTRW vStrFmt( oexSTRW pDst, oexUINT uMax, oexCSTRW pFmt, oexVaList pArgs );
 
 	static oexCSTRW StrFmt( oexRESULT *pRes, oexSTRW pDst, oexUINT uMax, oexCSTRW pFmt, ... );
 
-	static oexCSTRW vStrFmt( oexRESULT *pRes, oexSTRW pDst, oexUINT uMax, oexCSTRW pFmt, oexVaList &pArgs );
+	static oexCSTRW vStrFmt( oexRESULT *pRes, oexSTRW pDst, oexUINT uMax, oexCSTRW pFmt, oexVaList pArgs );
 
     /// Converts to int64
     static oexINT64 StrToInt64( oexCSTRW x_pStr, oexUINT x_uRadix );

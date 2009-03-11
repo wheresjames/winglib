@@ -34,13 +34,12 @@
 
 #pragma once
 
-
 #if !defined(_NEW)
 #	ifndef __PLACEMENT_NEW_INLINE
 #		define __PLACEMENT_NEW_INLINE
 
 		/// Placement new
-		inline void *oexCDECL operator new( unsigned int, void *p ) { return p; }
+		inline void * oexCDECL operator new( oexSIZE_T, void *p ) { return p; }
 
 		/// Placement delete
 #		if !defined( _MSC_VER ) || _MSC_VER >= 1200

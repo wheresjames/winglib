@@ -58,7 +58,7 @@ public:
 		oexUSHORT 		uMagicNumber;
 
 		/// Size of the file in bytes
-		oexULONG		uSize;
+		oexUINT			uSize;
 
 		/// Reserved
 		oexUSHORT		uReserved1;
@@ -67,7 +67,7 @@ public:
 		oexUSHORT		uReserved2;
 
 		/// Offset to start of image data
-		oexULONG		uOffset;
+		oexUINT			uOffset;
 
 	};
 
@@ -75,13 +75,13 @@ public:
 	struct SBitmapInfoHeader
 	{
 		/// Size of this structure
-		oexULONG				biSize;
+		oexUINT					biSize;
 
 		/// Image width
-		oexLONG					biWidth;
+		oexINT					biWidth;
 
 		/// Image height
-		oexLONG					biHeight;
+		oexINT					biHeight;
 
 		/// Number of bit planes in the image
 		oexUSHORT				biPlanes;
@@ -105,25 +105,25 @@ public:
 			This value can be a fourcc code or one of the above
 			enumerations. eBiRgb, etc...
 		*/
-		oexULONG				biCompression;
+		oexUINT					biCompression;
 
 		/// The total size of the image data,
 		/// can be zero for eBiRgb encoded images.
-		oexULONG				biSizeImage;
+		oexUINT					biSizeImage;
 
 		/// Horizontal resolution in pixels per meter
-		oexLONG					biXPelsPerMeter;
+		oexINT					biXPelsPerMeter;
 
 		/// Vertical resolution in pixels per meter
-		oexLONG					biYPelsPerMeter;
+		oexINT					biYPelsPerMeter;
 
 		/// Total number of colors actually used in the image,
 		/// zero for all colors used.
-		oexULONG				biClrUsed;
+		oexUINT				biClrUsed;
 
 		/// Number of colors required for displaying the image,
 		/// zero for all colors required.
-		oexULONG				biClrImportant;
+		oexUINT				biClrImportant;
 	};
 
 	/// This structure holds bitmap data
@@ -133,7 +133,7 @@ public:
 		SBitmapInfoHeader		bmiHeader;
 
 		/// Color palette
-		oexULONG				bmiColors[ 1 ];
+		oexUINT					bmiColors[ 1 ];
 	};
 
 	// This structure contains the memory image

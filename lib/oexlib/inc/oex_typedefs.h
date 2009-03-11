@@ -98,7 +98,24 @@ typedef void oexCONST *				oexCPVOID;
 typedef unsigned char				oexBYTE;
 typedef oexBYTE*					oexPBYTE;
 
-typedef oexUINT						oexTYPEOF_PTR;
+typedef void*						oexTYPEOF_PTR;
+
+class __oexCPtrCnv
+{
+public:
+	__oexCPtrCnv()	{ ptr = 0; llInt = 0; }
+	__oexCPtrCnv( oexTYPEOF_PTR x_ptr ) { ptr = x_ptr; }
+	union
+	{
+		oexTYPEOF_PTR		ptr;
+		oexINT				nInt;
+		oexUINT				uInt;
+		oexLONG				lInt;
+		oexULONG			ulInt;
+		oexINT64			llInt;
+		oexUINT64			ullInt;
+	};
+};
 
 struct oexGUID
 {

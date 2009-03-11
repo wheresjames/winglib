@@ -63,6 +63,14 @@
 #define oexTC( c, s )				        ( 1 == sizeof( c ) ? ( ( c )( s ) ) : ( ( c )( L##s ) ) )
 #define oexTTEXT( c, s )			        oexTT( c, s )
 
+// Pointer conversion
+#define oexPtrToInt( p )	OEX_NAMESPACE::__oexCPtrCnv( p ).nInt
+#define oexPtrToUInt( p ) 	OEX_NAMESPACE::__oexCPtrCnv( p ).uInt
+#define oexPtrToLong( p ) 	OEX_NAMESPACE::__oexCPtrCnv( p ).lInt
+#define oexPtrToULong( p ) 	OEX_NAMESPACE::__oexCPtrCnv( p ).ulInt
+#define oexPtrToInt64( p ) 	OEX_NAMESPACE::__oexCPtrCnv( p ).llInt
+#define oexPtrToUInt64( p ) OEX_NAMESPACE::__oexCPtrCnv( p ).ullInt
+
 #if defined( oexUNICODE )
 
 #	define oexT( s )				        ( L##s )

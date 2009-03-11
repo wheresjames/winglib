@@ -167,7 +167,7 @@ oexCSTR8 CSys::StrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, ... )
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
-oexCSTR8 CSys::vStrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, oexVaList &x_pArgs )
+oexCSTR8 CSys::vStrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, oexVaList x_pArgs )
 {
 	return vStrFmt( oexNULL, x_pDst, x_uMax, x_pFmt, x_pArgs );
 }
@@ -181,7 +181,7 @@ oexCSTR8 CSys::StrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCST
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
-oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, oexVaList &x_pArgs )
+oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, oexVaList x_pArgs )
 {
 	if ( x_pRes )
 		*x_pRes = 0;
@@ -265,7 +265,7 @@ oexCSTRW CSys::StrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, ... )
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
-oexCSTRW CSys::vStrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, oexVaList &x_pArgs )
+oexCSTRW CSys::vStrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, oexVaList x_pArgs )
 {
 	return vStrFmt( oexNULL, x_pDst, x_uMax, x_pFmt, x_pArgs );
 }
@@ -279,7 +279,7 @@ oexCSTRW CSys::StrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCST
 }
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
-oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, oexVaList &x_pArgs )
+oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, oexVaList x_pArgs )
 {
 	if ( x_pRes )
 		*x_pRes = 0;
