@@ -38,10 +38,10 @@
 
 struct oexSRect
 {
-	oexLONG		left;
-	oexLONG		top;
-	oexLONG		right;
-	oexLONG		bottom;
+	oexINT32	left;
+	oexINT32	top;
+	oexINT32	right;
+	oexINT32	bottom;
 };
 
 struct oexSRgbQuad
@@ -52,11 +52,11 @@ struct oexSRgbQuad
 	oexBYTE		rgbReserved;
 };
 
-typedef oexULONG oexSColorRef;
+typedef oexUINT oexSColorRef;
 
-#define oexRGB( r, g, b ) ( (OEX_NAMESPACE::oexSColorRef)( ( (long)(r) & 0xff << 24 ) \
-														 | ( (long)(g) & 0xff << 16 ) \
-														 | ( (long)(b) & 0xff ) ) )
+#define oexRGB( r, g, b ) ( (OEX_NAMESPACE::oexSColorRef)( ( ( (long)(r) & 0xff ) << 24 ) \
+														 | ( ( (long)(g) & 0xff ) << 16 ) \
+														 | ( ( (long)(b) & 0xff ) <<  8 ) ) )
 
 //==================================================================
 // CImage
@@ -840,6 +840,9 @@ public:
 	// Memory pointer returned by Encode() is
 	// good until object is destroyed or this
 	// function is called again
+	/**
+		\return Zero if failure, or number of bytes encoded
+	*/
 	oexINT Encode( oexPBYTE *x_buf, oexINT *x_pnSize, oexCSTR x_pType = oexNULL );
 
 	//==============================================================

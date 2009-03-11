@@ -48,6 +48,12 @@ CSqMulti::CSqMulti()
 {	m_def = oexNULL;
 }
 
+CSqMulti::CSqMulti( const CSqMulti &m )
+{	m_def = oexNULL;
+	m_lst = m.m_lst;
+	m_val = m.m_val;
+}
+
 CSqMulti::CSqMulti( const CSqMulti::t_Obj &s )
 {	m_def = oexNULL;
 	deserialize( s );
@@ -57,6 +63,13 @@ CSqMulti::CSqMulti( const oex::oexTCHAR *s )
 {	m_def = oexNULL;
 	if ( s )
 		deserialize( t_Obj( s ) );
+}
+
+CSqMulti& CSqMulti::operator = ( const CSqMulti &m )
+{	m_def = oexNULL;
+	m_lst = m.m_lst;
+	m_val = m.m_val;
+	return *this;
 }
 
 CSqMulti::t_List& CSqMulti::list()
@@ -112,7 +125,7 @@ void CSqMulti::_serialize( oex::CPropertyBag &pb, CSqMulti::t_List &lst )
 	for ( t_List::iterator it = lst.begin(); it != lst.end(); it++ )
 	{
 		if ( it->second.m_val.str().length() )
-			pb[ it->first.c_str() ] = it->second.m_val.str().c_str();
+			pb[ it->first.c_str() ].ToString().Set( it->second.m_val.str().c_str(), it->second.m_val.str().length() );
 
 		if ( it->second.size() )
 			_serialize( pb[ it->first.c_str() ], it->second.list() );
@@ -132,7 +145,7 @@ void CSqMulti::_deserialize( oex::CPropertyBag &pb, CSqMulti::t_List &lst )
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
 	{
 		if ( it->ToString().Length() )
-			lst[ it.Node()->key.Ptr() ].m_val.set( it->ToString().Ptr() );
+			lst[ it.Node()->key.Ptr() ].m_val.str().assign( it->ToString().Ptr(), it->ToString().Length() );
 
 		if ( it->Size() )
 			_deserialize( *it, lst[ it.Node()->key.Ptr() ].list() );
@@ -147,14 +160,16 @@ void CSqMulti::deserialize( const CSqParam::t_SqStr &s )
 	m_lst.clear();
 
 	// Deserialize data
-	oex::CPropertyBag pb = oex::CParser::Deserialize( s.c_str() );
+	oex::CStr sData( s.c_str(), s.length() );
+	oex::CPropertyBag pb = oex::CParser::Deserialize( sData );
 	_deserialize( pb, m_lst );
 }
 
 void CSqMulti::merge( const CSqParam::t_SqStr &s )
 {
 	// Deserialize data
-	oex::CPropertyBag pb = oex::CParser::Deserialize( s.c_str() );
+	oex::CStr sData( s.c_str(), s.length() );
+	oex::CPropertyBag pb = oex::CParser::Deserialize( sData );
 	_deserialize( pb, m_lst );
 }
 
@@ -162,7 +177,7 @@ CSqMulti::t_Obj CSqMulti::urlencode()
 {
 	oex::CPropertyBag pb;
 	for ( t_List::iterator it = m_lst.begin(); it != m_lst.end(); it++ )
-		pb[ it->first.c_str() ] = it->second.m_val.str().c_str();
+		pb[ it->first.c_str() ].ToString().Set( it->second.m_val.str().c_str(), it->second.m_val.str().length() );
 	return oex::CParser::EncodeUrlParams( pb ).Ptr();
 }
 
@@ -171,7 +186,7 @@ void CSqMulti::urldecode( const CSqMulti::t_Obj &s )
 	// Deserialize data
 	oex::CPropertyBag pb = oex::CParser::DecodeUrlParams( s.c_str() );;
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
-		m_lst[ it.Node()->key.Ptr() ].m_val.set( it->ToString().Ptr() );
+		m_lst[ it.Node()->key.Ptr() ].m_val.str().assign( it->ToString().Ptr(), it->ToString().Length() );
 }
 
 void CSqMulti::unset( const CSqMulti::t_Obj &k )
@@ -194,12 +209,12 @@ int CSqMulti::isset( const CSqMulti::t_Obj &k )
 {	return ( m_lst.end() != m_lst.find( k ) ) ? 1 : 0; }
 
 CSqMulti* CSqMulti::get( const CSqMulti::t_Obj &k )
-{	if ( !k.length() ) 
+{	if ( !k.length() )
 	{	if ( !m_def )
 			m_def = OexAllocConstruct< CSqMulti >();
 		return m_def;
 	} // end if
-	return &m_lst[ k ]; 
+	return &m_lst[ k ];
 }
 
 void CSqMulti::move_up( const t_Obj &k )

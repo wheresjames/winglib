@@ -59,7 +59,10 @@ namespace sqbind
 		{	return oexBinToStr( oex::CFile().OpenExisting( sFile.c_str() ).Read() ).Ptr(); }
 
 		static int put_contents( const stdString &sFile, const stdString &sData )
-		{	return oex::CFile().CreateAlways( sFile.c_str() ).Write( oexStrToBin( sData.c_str() ) ); }
+		{
+			oexSHOW( sData.length() );
+			return oex::CFile().CreateAlways( sFile.c_str() ).Write( sData.c_str(), sData.length() );
+		}
 
 		static void Register( SquirrelVM &vm )
 		{

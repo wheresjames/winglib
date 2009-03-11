@@ -83,6 +83,12 @@ namespace sqbind
 		/// Default constructor
 		CSqMulti();
 
+		/// Copy constructor
+		CSqMulti( const CSqMulti &m );
+
+		/// Assignment operator
+		CSqMulti& operator = ( const CSqMulti &m );
+
 		/// Deserializing constructor
 		CSqMulti( const t_Obj &s );
 

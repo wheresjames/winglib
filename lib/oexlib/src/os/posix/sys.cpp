@@ -638,7 +638,7 @@ int CSys::Printf( oexCSTR8 x_pFmt, ... )
 }
 
 /// vprintf
-int CSys::vPrintf( oexCSTR8 x_pFmt, oexVaList &pArgs )
+int CSys::vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs )
 {	return ::vprintf( x_pFmt, pArgs );
 }
 

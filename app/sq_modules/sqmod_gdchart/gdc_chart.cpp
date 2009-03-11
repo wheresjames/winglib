@@ -36,9 +36,16 @@ CGdcChart::~CGdcChart()
 
 #define MAX_DIMENSIONS		2
 
-sqbind::stdString CGdcChart::GetChart(	const sqbind::stdString &x_sParams,
-										const sqbind::stdString &x_sData )
+int CGdcChart::GetChart( sqbind::CSqMulti *x_pImg,
+						 const sqbind::stdString &x_sType,
+						 const sqbind::stdString &x_sParams,
+						 const sqbind::stdString &x_sData )
 {
+	if ( !oexCHECK_PTR( x_pImg ) )
+	{	oexERROR( 0, "Invalid image object pointer" );
+		return -1;
+	} // end if
+
 	sqbind::CSqMulti mParams( x_sParams.c_str() );
 	sqbind::CSqMulti mData( x_sData.c_str() );
 
@@ -56,12 +63,12 @@ sqbind::stdString CGdcChart::GetChart(	const sqbind::stdString &x_sParams,
 			nDataPts = it->second[ "data" ].size();
 			if ( !nDataPts )
 			{	oexERROR( 0, "No data" );
-				return oexT( "" );
+				return -2;
 			} // end if
 
 			if ( !memLabels.OexNew( nDataPts ).Ptr() )
 			{	oexERROR( 0, oexMks( "Unable to allocate memory block, size = ", nDataPts ) );
-				return oexT( "" );
+				return -3;
 			} // end if
 
 		} // end if
@@ -69,7 +76,7 @@ sqbind::stdString CGdcChart::GetChart(	const sqbind::stdString &x_sParams,
 		// Allocate space for data
 		if ( !memPts[ 0 ].OexNew( nDataPts ).Ptr() )
 		{	oexERROR( 0, oexMks( "Unable to allocate memory block, size = ", nDataPts ) );
-			return oexT( "" );
+			return -4;
 		} // end if
 		memPts[ 0 ].Zero();
 
@@ -102,26 +109,25 @@ sqbind::stdString CGdcChart::GetChart(	const sqbind::stdString &x_sParams,
 	gdImagePtr graph = (gdImagePtr)GDC_image;
 	if ( !oexCHECK_PTR( graph ) )
 	{	oexERROR( 0, "Inavlid image pointer" );
-		return oexT( "" );
+		return -5;
 	} // end if
-
 
 	oex::CImage img;
 	if ( !img.Create( graph->sx, graph->sy ) )
 	{	oexERROR( 0, "Error allocating image buffer" );
-		return oexT( "" );
+		return -6;
 	} // end if
 
-	oexSHOW( graph->sx );
-	oexSHOW( graph->sy );
+	oexSHOW( graph->interlace );
 
-	oexSHOW( img.GetWidth() );
-	oexSHOW( img.GetHeight() );
-
+	int sw = img.GetWidth();
 	unsigned char *p = (unsigned char*)graph->pixels;
 	for ( int y = 0; y < img.GetHeight(); y++ )
 		for ( int x = 0; x < img.GetWidth(); x++ )
-		{	unsigned char b = *p; p++;
+		{	unsigned char b = p[ y * sw + x ];
+
+//			oexPrintf( "%d = %d, %d, %d\n", (int)b, (int)graph->red[ b ], (int)graph->green[ b ], (int)graph->blue[ b ] );
+
 			img.SetPixel( x, y, oexRGB( graph->red[ b ],
 										graph->green[ b ],
 										graph->blue[ b ] ) );
@@ -130,43 +136,50 @@ sqbind::stdString CGdcChart::GetChart(	const sqbind::stdString &x_sParams,
 	gdImageDestroy( graph );
 	GDC_image = NULL;
 
-	oexM();
-
 	img.Save( oexT( "test_graph.png" ) );
 
-	oexM();
+	oex::oexINT nSize;
+	oex::oexPBYTE pBuf = oexNULL;
+	oex::CStr sType = oexMks( x_sType.c_str() ).GetFileExtension();
+	if ( !sType.Length() )
+		sType = x_sType.c_str();
+	if ( 0 >= img.GetFileType( sType.Ptr() ) )
+		sType = oexT( "png" );
 
-	sqbind::stdString sRet;
+	oexSHOW( sType );
 
-	return sRet;
+	// Encode image
+	if ( 0 >= img.Encode( &pBuf, &nSize, sType.Ptr() ) || !pBuf || !nSize )
+	{	oexERROR( 0, oexMks( "Failed to encode image, type = ", x_sType.c_str() ) );
+		return -7;
+	} // end if
 
-/*
-	FILE *fd = fopen( x_sFile.c_str(), "wb" );
-	if ( !fd )
-		return oexT( "" );
+	// Save image data
+	sqbind::CSqMulti mImg;
+	(*x_pImg)[ "width" ].set( oexMks( img.GetWidth() ).Ptr() );
+	(*x_pImg)[ "height" ].set( oexMks( img.GetHeight() ).Ptr() );
+	(*x_pImg)[ "type" ].set( sType.Ptr() );
+	(*x_pImg)[ "img" ].set( sqbind::stdString().assign( (char*)pBuf, nSize ) );
 
-	out_graph( oexStrToLong( mParams[ "width" ].str().c_str() ),
-	   		   oexStrToLong( mParams[ "height" ].str().c_str() ),
-			   fd,
-			   (GDC_CHART_T)oexStrToLong( mParams[ "type" ].str().c_str() ),
-			   nDataPts, (char**)memLabels.Ptr(), nDimensions,
-			   memPts[ 0 ].Ptr(), memPts[ 1 ].Ptr() );
-
-	fclose( fd );
-*/
+	return 0;
 }
 
 int CGdcChart::SaveChart(	const sqbind::stdString &x_sFile,
 							const sqbind::stdString &x_sParams,
 							const sqbind::stdString &x_sData )
 {
-
 	// Get the chart
-	sqbind::stdString sChart = GetChart( x_sParams, x_sData );
-	if ( !sChart.length() )
-		return -1;
+	sqbind::CSqMulti mChart;
+	int nRet = GetChart( &mChart, x_sFile, x_sParams, x_sData );
+	if ( 0 > nRet )
+		return nRet;
+	if ( !mChart.isset( "img" ) )
+		return -10;
 
-	oexFilePutContentsLen( x_sFile.c_str(), sChart.c_str(), sChart.length() );
+//	oexAlert( "", mChart[ "width" ].str().c_str() );
+
+	// Save image to disk
+	oexFilePutContentsLen( x_sFile.c_str(), mChart[ "img" ].str().c_str(), mChart[ "img" ].str().length() );
 
 	return 0;
 

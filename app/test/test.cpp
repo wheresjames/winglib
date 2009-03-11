@@ -2508,7 +2508,7 @@ int main(int argc, char* argv[])
 
 //    Test_CVfsSession();
 
-//    Test_CCapture();
+    Test_CCapture();
 
 	// Initialize the oex library
     oexUNINIT();

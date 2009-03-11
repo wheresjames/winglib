@@ -158,8 +158,6 @@ oexINT CImage::GetFileType( oexCSTR x_pFile )
 
 	sExt.ToLower();
 
-	oexSHOW( sExt );
-
 	if ( 0 );
 
 	// Check for bitmap
@@ -277,6 +275,7 @@ oexBOOL CImage::Decode( oexPBYTE x_buf, oexINT x_size, oexCSTR x_pType )
 
 oexINT CImage::Encode( oexPBYTE *x_buf, oexINT *x_pnSize, oexCSTR x_pType )
 {_STT();
+
 	// Lose old memory
 	ReleaseEncodeMemory();
 
@@ -1086,6 +1085,7 @@ typedef class s_tagCxMemFile : public CxMemFile
 
 oexINT CImage::Encode( oexPBYTE x_pBuf, oexINT x_nSize, oexCSTR x_pType )
 {_STT();
+
 	// Sanity checks
 	if ( oexCHECK_PTR( x_pBuf ) || !x_nSize )
 		return 0;
