@@ -542,8 +542,6 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( ( oex::CStr( oexT( "123" ) ) << oexT( "456" ) ) == oexT( "123456" ) ) )
 		return -51;
 
-	oexSHOW( oex::CStr( oexT( "abc/def" ) ).GetFileName() );
-	oexSHOW( ( oex::CStr( oexT( "abc/def" ) ).GetFileName() << oexT( "ghi" ) ) );
 	if ( !oexVERIFY( ( oex::CStr( oexT( "abc/def" ) ).GetFileName() << oexT( "ghi" ) ) == oexT( "defghi" ) ) )
 		return -52;
 
@@ -562,6 +560,12 @@ oex::oexRESULT TestStrings()
 
 	if ( !oexVERIFY( oex::CStr( "test.png" ).GetFileExtension() == oexT( "png" ) ) )
 		return -57;
+
+	if ( !oexVERIFY( oex::CStr( "somedirectory.hi/test.png" ).GetFileExtension() == oexT( "png" ) ) )
+		return -58;
+
+	if ( !oexVERIFY( oex::CStr( "somedirectory.hi/test.not.png" ).GetFileExtension() == oexT( "png" ) ) )
+		return -59;
 
     return oex::oexRES_OK;
 }

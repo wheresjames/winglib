@@ -227,33 +227,37 @@ public:
     /// Creates our own copy of a string if it's shared
 	oexBOOL Unshare()
 	{
-		// Punt if not shared
-		if ( 1 == m_mem.GetRefCount() )
+		// Punt if not shared or offset
+		if ( !m_uOffset && 1 == m_mem.GetRefCount() )
 			return oexTRUE;
 
-		// Create our own buffer if shared
-		oexUINT uOldSize = m_mem.Size() - m_uOffset;
+		// Figure out in use size of current buffer
+		oexUINT uOldSize = m_mem.Size();
 
-		if ( uOldSize )
+		// If it's one, it's just a NULL terminator
+		if ( m_uOffset >= uOldSize || 1 >= ( uOldSize - m_uOffset ) )
+			Destroy();
+
+		else
 		{
+			// Size of the new buffer
+			oexUINT uNewSize = uOldSize - m_uOffset;
+
             TMem< T > mem;
-            if ( !oexVERIFY_PTR( mem.OexNew( uOldSize ).Ptr() ) )
+            if ( !oexVERIFY_PTR( mem.OexNew( uNewSize ).Ptr() ) )
                 return oexFALSE;
 
             // Copy string data
-			os::CSys::MemCpy( mem.Ptr(), m_mem.c_Ptr( m_uOffset * sizeof( T ) ), uOldSize * sizeof( T ) );
+			os::CSys::MemCpy( mem.Ptr(), m_mem.c_Ptr( m_uOffset ), uNewSize * sizeof( T ) );
 
             // Use the new memory
 			m_mem.Assume( mem );
 
 			// Reset offset
-			m_nLength = uOldSize;
+			m_nLength = uNewSize - 1;
 			m_uOffset = 0;
 
 		} // end if
-
-		else
-            Destroy();
 
 		return oexTRUE;
 	}
@@ -1084,7 +1088,7 @@ public:
 	TStr& Append( oexCONST T* pStr, oexUINT uSize )
 	{
 		// Allocate space for new string
-		oexUINT uOldSize = m_uOffset + Length();
+		oexUINT uOldSize = Length();
 		if ( !oexVERIFY( OexAllocate( uOldSize + uSize ) ) )
 			return *this;
 
@@ -2192,9 +2196,13 @@ public:
         return *this;
     }
 
+	// +++ Make this more efficient by removing the double search for separators
     /// Returns the root path of str
     TStr GetPath()
     {   TStr str( *this );
+		oexINT nOffset = str.RFindChars( oexTT( T, "\\/" ) );
+		if ( 0 > nOffset )
+			return TStr();
         str.RParse( oexTT( T, "\\/" ) );
         return str.RTrim( oexTT( T, "\\/" ) );
     }
@@ -2205,20 +2213,13 @@ public:
 		oexINT nOffset = str.RFindChars( oexTT( T, "\\/" ) );
 		if ( 0 > nOffset )
 			return *this;
-//		return str.LTrim( nOffset + 1 );
-		TStr ret = str.LTrim( nOffset + 1 );
-		oexPrintf( "GetFileName() - %s - %d\n", ret.Ptr(), nOffset );
-		return ret;
+		return str.LTrim( nOffset + 1 );
 	}
-//    {   TStr str( *this );
-//        return str.RParse( oexTT( T, "\\/" ) );
-//    }
 
     /// Returns the file extension of the file path
     TStr GetFileExtension()
     {	TStr sFilename = GetFileName();
 		oexINT nOffset = sFilename.RFindChars( oexTT( T, "." ) );
-		oexPrintf( "GetFileExtension() - %s - %d\n", sFilename.Ptr(), nOffset );
 		if ( 0 > nOffset )
 			return TStr();
 		return sFilename.LTrim( nOffset + 1 );

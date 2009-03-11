@@ -168,6 +168,8 @@ int CGdcChart::SaveChart(	const sqbind::stdString &x_sFile,
 
 	oexFilePutContentsLen( x_sFile.c_str(), sChart.c_str(), sChart.length() );
 
+	return 0;
+
 /*
 	sqbind::CSqMulti mParams( x_sParams.c_str() );
 	sqbind::CSqMulti mData( x_sData.c_str() );
@@ -359,7 +361,7 @@ int CGdcChart::SaveChart(	const sqbind::stdString &x_sFile,
 	char	*t[12] = {	"May", "Jun", "Jul",  "Aug",       "Sep",  "Oct",
 						"Nov", "Dec", "Jan", "Feb",        "Mar",  "Apr" };
 
-//	/* set color RGB as ulong array */
+//	/* set color RGB as ulong array * /
 //	unsigned long	setcolor[3]    = { 0xC0C0FF, 0xFF4040, 0xFFFFFF };
 
 	GDC_ANNOTATION_T	anno;

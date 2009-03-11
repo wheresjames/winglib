@@ -351,7 +351,7 @@ public:
 	static int Printf( oexCSTR8 x_pFmt, ... );
 
 	/// vprintf
-	static int vPrintf( oexCSTR8 x_pFmt, oexVaList &pArgs );
+	static int vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs );
 
 };
 
