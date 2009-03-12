@@ -93,7 +93,7 @@ CSqMap::t_Obj CSqMap::serialize()
 {
 	oex::CPropertyBag pb;
 	for ( t_List::iterator it = m_lst.begin(); it != m_lst.end(); it++ )
-		pb[ it->first.c_str() ] = it->second.c_str();
+		pb[ it->first.c_str() ].ToString().Set( it->second.c_str(), it->second.length() );
 	return oex::CParser::Serialize( pb ).Ptr();
 }
 
@@ -105,7 +105,7 @@ void CSqMap::deserialize( const CSqMap::t_Obj &s )
 	// Deserialize data
 	oex::CPropertyBag pb = oex::CParser::Deserialize( s.c_str() );
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
-		m_lst[ it.Node()->key.Ptr() ] = it->ToString().Ptr();
+		m_lst[ it.Node()->key.Ptr() ].assign( it->ToString().Ptr(), it->ToString().Length() );
 }
 
 void CSqMap::merge( const CSqMap::t_Obj &s )
@@ -113,14 +113,14 @@ void CSqMap::merge( const CSqMap::t_Obj &s )
 	// Deserialize data
 	oex::CPropertyBag pb = oex::CParser::Deserialize( s.c_str(), oex::oexTRUE );
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
-		m_lst[ it.Node()->key.Ptr() ] = it->ToString().Ptr();
+		m_lst[ it.Node()->key.Ptr() ].assign( it->ToString().Ptr(), it->ToString().Length() );
 }
 
 CSqMap::t_Obj CSqMap::urlencode()
 {
 	oex::CPropertyBag pb;
 	for ( t_List::iterator it = m_lst.begin(); it != m_lst.end(); it++ )
-		pb[ it->first.c_str() ] = it->second.c_str();
+		pb[ it->first.c_str() ].ToString().Set( it->second.c_str(), it->second.length() );
 	return oex::CParser::EncodeUrlParams( pb ).Ptr();
 }
 
@@ -132,7 +132,7 @@ void CSqMap::urldecode( const CSqMap::t_Obj &s )
 	// Deserialize data
 	oex::CPropertyBag pb = oex::CParser::DecodeUrlParams( s.c_str() );;
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
-		m_lst[ it.Node()->key.Ptr() ] = it->ToString().Ptr();
+		m_lst[ it.Node()->key.Ptr() ].assign( it->ToString().Ptr(), it->ToString().Length() );
 }
 
 void CSqMap::unset( const CSqMap::t_Obj &k )

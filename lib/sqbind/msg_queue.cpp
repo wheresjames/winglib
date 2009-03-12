@@ -43,24 +43,26 @@ CSqMsgQueue::SMsg::SMsg()
 }
 
 /// Initializer
-CSqMsgQueue::SMsg::SMsg( const stdString x_sMsg, CSqMap *x_pmapParams, oexEvent x_evReply, stdString *x_pReply )
-{   sMsg = x_sMsg;
+CSqMsgQueue::SMsg::SMsg( const stdString x_sPath, const stdString x_sMsg, CSqMap *x_pmapParams, oexEvent x_evReply, stdString *x_pReply )
+{
+	sPath = x_sPath;
+	sMsg = x_sMsg;
+
 	if ( x_pmapParams )
 //		mapParams = *x_pmapParams;
-	sParams = x_pmapParams->serialize();
+		sParams = x_pmapParams->serialize();
 	evReply = x_evReply;
 	pReply = x_pReply;
 }
 
-
 // Copy constructor
 CSqMsgQueue::SMsg::SMsg( const CSqMsgQueue::SMsg &x_rMsg )
 {   sMsg = x_rMsg.sMsg;
+	sPath = x_rMsg.sPath;
 	sParams = x_rMsg.sParams;
 	evReply = x_rMsg.evReply;
 	pReply = x_rMsg.pReply;
 }
-
 
 /// Default constructor
 CSqMsgQueue::CSqMsgQueue()
@@ -104,20 +106,23 @@ void CSqMsgQueue::Destroy()
 	If pmapReply is not NULL, the function waits for a reply
 	from the thread.
 */
-oex::oexBOOL CSqMsgQueue::Msg( stdString sMsg, CSqMap *pmapParams, stdString *pReply, oex::oexUINT uTimeout )
+oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapParams, stdString *pReply, oex::oexUINT uTimeout )
 {
 	oexEvent evReply;
 
-	// If it's our own thread calling
-	if ( m_uCurrentThreadId && oex::os::CSys::GetCurrentThreadId() == m_uCurrentThreadId )
+	oexPrintf( oexT( "CSqMsgQueue::Msg() : %s -> %s, 0x%08x, 0x%08x\n" ), sPath.c_str(), sMsg.c_str(), m_uCurrentThreadId, (unsigned int)oexGetCurrentThreadId() );
+
+	// If it's our own queue and thread calling
+	if ( ( !sPath.length() || sPath == oexT( "." ) )
+	 	 && m_uCurrentThreadId && oexGetCurrentThreadId() == m_uCurrentThreadId )
 	{
 		// Just process the message directly
 		if ( pmapParams )
-			return ProcessMsg( sMsg, *pmapParams, pReply );
+			return ProcessMsg( sPath, sMsg, *pmapParams, pReply );
 
 		else
 		{   CSqMap params;
-			return ProcessMsg( sMsg, params, pReply );
+			return ProcessMsg( sPath, sMsg, params, pReply );
 		} // end else
 
 	} // end if
@@ -134,7 +139,7 @@ oex::oexBOOL CSqMsgQueue::Msg( stdString sMsg, CSqMap *pmapParams, stdString *pR
 			evReply.Destroy();
 
 		// Add a message
-		m_lstMsgQueue.push_back( SMsg( sMsg, pmapParams, evReply, pReply ) );
+		m_lstMsgQueue.push_back( SMsg( sPath, sMsg, pmapParams, evReply, pReply ) );
 
 		// Signal that a message is waiting
 		Signal();
@@ -182,9 +187,6 @@ oex::oexBOOL CSqMsgQueue::ProcessMsgs()
 	if ( !ll.IsLocked() )
 		return FALSE;
 
-	// Remember who owns us
-	m_uCurrentThreadId = oex::os::CSys::GetCurrentThreadId();
-
 	// Any messages waiting?
 	if ( m_lstMsgQueue.begin() == m_lstMsgQueue.end() )
 		return TRUE;
@@ -197,7 +199,7 @@ oex::oexBOOL CSqMsgQueue::ProcessMsgs()
 		CSqMap mapParams( it->sParams );
 
 		// Process the message
-		ProcessMsg( it->sMsg, mapParams, it->pReply );
+		ProcessMsg( it->sPath, it->sMsg, mapParams, it->pReply );
 
 		// We must stop processing if someone is waiting for a reply
 		if ( it->pReply )
@@ -222,62 +224,77 @@ oex::oexBOOL CSqMsgQueue::ProcessMsgs()
 	// Reset signal
 	Reset();
 
-	return TRUE;
+	return oex::oexTRUE;
 }
 
 /// Process a single message from the queue
-oex::oexBOOL CSqMsgQueue::ProcessMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply )
+oex::oexBOOL CSqMsgQueue::ProcessMsg( stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply )
 {
-	return TRUE;
+	return oex::oexFALSE;
 }
 
-oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sName, const stdString &sFunction )
+oex::oexBOOL CSqMsgQueue::run( stdString *pReply, const stdString &sPath, const stdString &sScript )
 {	CSqMap params;
-	params[ oexT( "name" ) ] = sName;
-	params[ oexT( "execute" ) ] = sFunction;
-	return Msg( oexT( "msg" ), &params, pReply );
+	params[ oexT( "run" ) ] = sScript;
+	return Msg( sPath, oexT( "msg" ), &params, pReply );
 }
 
-oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
+oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sPath, const stdString &sFunction )
+{	CSqMap params;
+	params[ oexT( "execute" ) ] = sFunction;
+	return Msg( sPath, oexT( "msg" ), &params, pReply );
+}
+
+oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sPath, const stdString &sFunction,
 								   const stdString &sP1 )
 {	CSqMap params;
-	params[ oexT( "name" ) ] = sName;
 	params[ oexT( "execute1" ) ] = sFunction;
 	params[ oexT( "p1" ) ] = sP1;
-	return Msg( oexT( "msg" ), &params, pReply );
+	return Msg( sPath, oexT( "msg" ), &params, pReply );
 }
 
-oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
+oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sPath, const stdString &sFunction,
 								   const stdString &sP1, const stdString &sP2 )
 {	CSqMap params;
-	params[ oexT( "name" ) ] = sName;
 	params[ oexT( "execute2" ) ] = sFunction;
 	params[ oexT( "p1" ) ] = sP1;
 	params[ oexT( "p2" ) ] = sP2;
-	return Msg( oexT( "msg" ), &params, pReply );
+	return Msg( sPath, oexT( "msg" ), &params, pReply );
 }
 
-oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
+oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sPath, const stdString &sFunction,
 								   const stdString &sP1, const stdString &sP2, const stdString &sP3 )
 {	CSqMap params;
-	params[ oexT( "name" ) ] = sName;
 	params[ oexT( "execute3" ) ] = sFunction;
 	params[ oexT( "p1" ) ] = sP1;
 	params[ oexT( "p2" ) ] = sP2;
 	params[ oexT( "p3" ) ] = sP3;
-	return Msg( oexT( "msg" ), &params, pReply );
+	return Msg( sPath, oexT( "msg" ), &params, pReply );
 }
 
-oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
+oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sPath, const stdString &sFunction,
 								   const stdString &sP1, const stdString &sP2, const stdString &sP3,
 								   const stdString &sP4 )
 {	CSqMap params;
-	params[ oexT( "name" ) ] = sName;
 	params[ oexT( "execute4" ) ] = sFunction;
 	params[ oexT( "p1" ) ] = sP1;
 	params[ oexT( "p2" ) ] = sP2;
 	params[ oexT( "p3" ) ] = sP3;
 	params[ oexT( "p4" ) ] = sP4;
-	return Msg( oexT( "msg" ), &params, pReply );
+	return Msg( sPath, oexT( "msg" ), &params, pReply );
 }
 
+oex::oexBOOL CSqMsgQueue::spawn( stdString *pReply, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile )
+{
+	CSqMap params;
+	params[ oexT( "name" ) ] = sName;
+	params[ oexT( "script" ) ] = sScript;
+	params[ oexT( "file" ) ] = bFile ? oexT( "1" ) : oexT( "0" );
+	return Msg( sPath, oexT( "spawn" ), &params, pReply );
+}
+
+oex::oexBOOL CSqMsgQueue::kill( stdString *pReply, const stdString &sPath )
+{	CSqMap params;
+	params[ oexT( "quit" ) ] = 1;
+	return Msg( sPath, oexT( "kill" ), &params, pReply );
+}

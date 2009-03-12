@@ -75,8 +75,7 @@ public:
 
 	/// Destructor
 	~CV4l2()
-	{
-		Destroy();
+	{	Destroy();
 	}
 
 	/////////////////////////////////////////////////////////////////
@@ -445,7 +444,7 @@ public:
 
 		v4l2_format fmt;
 		CStr sStr;
-		for ( oexINT i = 0; i < oexSizeofArray( l_formats ); i++ )
+		for ( oexINT i = 0; i < oexSizeOfArray( l_formats ); i++ )
 		{
 			oexZeroMemory( &fmt, sizeof( fmt ) );
 			fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;

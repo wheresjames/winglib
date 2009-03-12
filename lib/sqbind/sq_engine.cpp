@@ -39,36 +39,61 @@ int CSqEngineExport::alert( const stdString &sMsg )
 {	return oex::os::CSys::ShowMessageBox( oexT( "Notice" ), sMsg.c_str() );
 }
 
+int CSqEngineExport::echo( const stdString &sMsg )
+{	return oexPrintf( sMsg.c_str() ); }
+
 int CSqEngineExport::import( const stdString &sClass )
 {   return OnImport( sClass ); }
 
 int CSqEngineExport::load_module( const stdString &sModule, const stdString &sPath )
 {   return OnLoadModule( sModule, sPath ); }
 
-void CSqEngineExport::quit( int nExitCode )
+int CSqEngineExport::kill( const stdString &sPath )
+{	CSqMsgQueue *q = queue();
+	if ( q ) q->kill( oexNULL, sPath );
+}
+
+void CSqEngineExport::exit( int nExitCode )
 {   oex::os::CSys::Quit( nExitCode );
 }
 
 stdString CSqEngineExport::path( const stdString &sPath )
 {   return OnPath( sPath ); }
 
-SquirrelObject CSqEngineExport::spawn( const stdString &sName, const stdString &sScript, int bFile )
-{   return OnSpawn( sName, sScript, bFile ); }
+SquirrelObject CSqEngineExport::spawn( const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile )
+{	CSqMsgQueue *q = queue();
+	if ( q ) q->spawn( oexNULL, sPath, sName, sScript, bFile );
+}
 
-SquirrelObject CSqEngineExport::execute( const stdString &sName, const stdString &sFunction )
-{   return OnExecute( sName, sFunction ); }
+SquirrelObject CSqEngineExport::run( const stdString &sPath, const stdString &sScript )
+{	CSqMsgQueue *q = queue();
+	if ( q ) q->run( oexNULL, sPath, sScript );
+}
 
-SquirrelObject CSqEngineExport::execute1( const stdString &sName, const stdString &sFunction, const stdString &sP1 )
-{   return OnExecute1( sName, sFunction, sP1 ); }
+SquirrelObject CSqEngineExport::execute( const stdString &sPath, const stdString &sFunction )
+{	CSqMsgQueue *q = queue();
+	if ( q ) q->execute( oexNULL, sPath, sFunction );
+}
 
-SquirrelObject CSqEngineExport::execute2( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2 )
-{   return OnExecute2( sName, sFunction, sP1, sP2 ); }
+SquirrelObject CSqEngineExport::execute1( const stdString &sPath, const stdString &sFunction, const stdString &sP1 )
+{	CSqMsgQueue *q = queue();
+	if ( q ) q->execute( oexNULL, sPath, sFunction, sP1 );
+}
 
-SquirrelObject CSqEngineExport::execute3( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 )
-{   return OnExecute3( sName, sFunction, sP1, sP2, sP3 ); }
+SquirrelObject CSqEngineExport::execute2( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2 )
+{	CSqMsgQueue *q = queue();
+	if ( q ) q->execute( oexNULL, sPath, sFunction, sP1, sP2 );
+}
 
-SquirrelObject CSqEngineExport::execute4( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 )
-{   return OnExecute4( sName, sFunction, sP1, sP2, sP3, sP4 ); }
+SquirrelObject CSqEngineExport::execute3( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 )
+{	CSqMsgQueue *q = queue();
+	if ( q ) q->execute( oexNULL, sPath, sFunction, sP1, sP2, sP3 );
+}
+
+SquirrelObject CSqEngineExport::execute4( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 )
+{	CSqMsgQueue *q = queue();
+	if ( q ) q->execute( oexNULL, sPath, sFunction, sP1, sP2, sP3, sP4 );
+}
 
 void CSqEngineExport::sleep( int nMsTime )
 {   oex::os::CSys::Sleep( nMsTime ); }
@@ -83,29 +108,10 @@ int CSqEngineExport::OnLoadModule( const stdString &sModule, const stdString &sP
 { return 0; }
 
 stdString CSqEngineExport::OnPath( stdString sPath )
-{ return stdString( oexGetModulePath( sPath.c_str() ).Ptr() ); }
-
-SquirrelObject CSqEngineExport::OnSpawn( const stdString &sName, const stdString &sScript, int bFile )
-{   return SquirrelObject( NULL ); }
-
-SquirrelObject CSqEngineExport::OnExecute( const stdString &sName, const stdString &sFunction )
-{   return SquirrelObject( NULL ); }
-
-SquirrelObject CSqEngineExport::OnExecute1( const stdString &sName, const stdString &sFunction, const stdString &sP1 )
-{   return SquirrelObject( NULL ); }
-
-SquirrelObject CSqEngineExport::OnExecute2( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2 )
-{   return SquirrelObject( NULL ); }
-
-SquirrelObject CSqEngineExport::OnExecute3( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 )
-{   return SquirrelObject( NULL ); }
-
-SquirrelObject CSqEngineExport::OnExecute4( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 )
-{   return SquirrelObject( NULL ); }
+{ return oexBuildPath( m_sRoot.c_str(), sPath.c_str() ).Ptr(); }
 
 CSqMsgQueue* CSqEngineExport::OnGetQueue()
-{ return NULL; }
-
+{ return oexNULL; }
 
 BOOL CSqEngine::IsScript()
 { return m_bLoaded; }
@@ -257,16 +263,18 @@ oex::oexBOOL CSqEngine::Init()
 		// Define our base class
 		SqPlus::SQClassDef< CSqEngineExport > ( m_vm, oexT( "CSqEngineExport" ) )
 											.func( &CSqEngineExport::alert,             oexT( "alert" ) )
+											.func( &CSqEngineExport::echo,				oexT( "echo" ) )
 											.func( &CSqEngineExport::import,            oexT( "import" ) )
 											.func( &CSqEngineExport::load_module,       oexT( "load_module" ) )
 											.func( &CSqEngineExport::sleep,             oexT( "sleep" ) )
 											.func( &CSqEngineExport::spawn,             oexT( "spawn" ) )
+											.func( &CSqEngineExport::run,               oexT( "run" ) )
 											.func( &CSqEngineExport::execute,           oexT( "execute" ) )
 											.func( &CSqEngineExport::execute1,          oexT( "execute1" ) )
 											.func( &CSqEngineExport::execute2,          oexT( "execute2" ) )
 											.func( &CSqEngineExport::execute3,          oexT( "execute3" ) )
 											.func( &CSqEngineExport::execute4,          oexT( "execute4" ) )
-											.func( &CSqEngineExport::quit,              oexT( "quit" ) )
+											.func( &CSqEngineExport::kill,              oexT( "kill" ) )
 											.func( &CSqEngineExport::queue,             oexT( "queue" ) )
 											.func( &CSqEngineExport::path,              oexT( "path" ) )
 										  ;
@@ -289,7 +297,7 @@ oex::oexBOOL CSqEngine::Init()
 	return oex::oexTRUE;
 }
 
-BOOL CSqEngine::Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oexBOOL bRelative, oex::oexBOOL bStart )
+oex::oexBOOL CSqEngine::Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oexBOOL bRelative, oex::oexBOOL bStart )
 {
 	if ( !oexCHECK_PTR( pScript ) || !*pScript )
 		return oex::oexFALSE;
@@ -299,20 +307,53 @@ BOOL CSqEngine::Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oexBOOL bRe
 
 	_oexTRY
 	{
-		// Save away root path
-		m_sRoot = oexGetModulePath().Ptr();
+		oex::CStr sFull;
 
-		oex::CStr sFull = oexGetModulePath();
-		if ( bFile && bRelative )
+		if ( bFile )
 		{
-			// Append path
-			//_tcscat( szFull, pScript );
-			sFull.BuildPath( pScript );
+			// +++ Change this to current working director
+			//     Add oexWorkingDirectory()
 
-			// Point to new path
-			pScript = sFull.Ptr();
+			// Does it point to a valid file?
+			if ( oexExists( pScript ) )
+
+				m_sRoot = oex::CStr( pScript ).GetPath().Ptr();
+
+			else
+			{
+				// Check relative to exe path
+				sFull = oexGetModulePath();
+				sFull.BuildPath( pScript );
+				if ( oexExists( sFull.Ptr() ) )
+				{	m_sRoot = sFull.GetPath().Ptr();
+					pScript = sFull.Ptr();
+				} // end if
+
+				else
+				{
+					// Check relative to scripts path
+					sFull = oexGetModulePath();
+					sFull.BuildPath( "scripts" );
+					sFull.BuildPath( pScript );
+					if ( oexExists( sFull.Ptr() ) )
+					{	m_sRoot = sFull.GetPath().Ptr();
+						pScript = sFull.Ptr();
+					} // end if
+
+					else
+					{	oexERROR( 0, oexMks( "Script not found : ", pScript ) );
+						return oex::oexFALSE;
+					} // end else
+
+				} // end else
+
+			} // end else
 
 		} // end if
+
+		// Save away root path
+		else
+			m_sRoot = oexGetModulePath().Ptr();
 
 		// Load the script
 		m_script = bFile ? m_vm.CompileScript( pScript )
@@ -342,7 +383,7 @@ BOOL CSqEngine::Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oexBOOL bRe
 	return oex::oexTRUE;
 }
 
-BOOL CSqEngine::Start()
+oex::oexBOOL CSqEngine::Start()
 {
 	if ( !IsScript() )
 		return oex::oexFALSE;
@@ -368,7 +409,6 @@ oex::oexBOOL CSqEngine::Idle()
 {
 	return Execute( SQBIND_NOREPLY, SQEXE_FN_IDLE );
 }
-
 
 oex::oexBOOL CSqEngine::Run( oex::oexCSTR pScript )
 {
@@ -398,7 +438,6 @@ oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e )
 	oexRTRACE( oexT( "%s\n" ), m_sErr.c_str() );
 	return x_nReturn;
 }
-
 
 oex::oexBOOL CSqEngine::Execute( stdString *pRet, oex::oexCSTR x_pFunction )
 {
@@ -490,22 +529,7 @@ void CSqEngine::SetMessageQueue( CSqMsgQueue *pMq )
 CSqMsgQueue* CSqEngine::OnGetQueue()
 {	return m_pMsgQueue; }
 
-SquirrelObject CSqEngine::OnSpawn( const stdString &sName, const stdString &sScript, int bFile )
-{
-	if ( m_pMsgQueue )
-	{
-		CSqMap params;
-		params[ oexT( "name" ) ] = sName;
-		params[ oexT( "script" ) ] = sScript;
-		params[ oexT( "file" ) ] = bFile ? oexT( "1" ) : oexT( "0" );
-
-		m_pMsgQueue->Msg( oexT( "spawn" ), &params );
-
-	} // end if
-
-	return SquirrelObject( m_vm.GetVMHandle() );
-}
-
+/*
 SquirrelObject CSqEngine::RouteMsg( const stdString &sMsg, CSqMap &rParams )
 {	if ( m_pMsgQueue )
 		m_pMsgQueue->Msg( sMsg, &rParams );
@@ -556,3 +580,4 @@ SquirrelObject CSqEngine::OnExecute4( const stdString &sName, const stdString &s
 	params[ oexT( "p4" ) ] = sP4;
 	return RouteMsg( oexT( "msg" ), params );
 }
+*/

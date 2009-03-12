@@ -75,7 +75,10 @@ protected:
 	virtual oex::oexINT EndThread( oex::oexPVOID x_pData );
 
     /// Process a single message from the queue
-	virtual oex::oexBOOL ProcessMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply );
+	virtual oex::oexBOOL ProcessMsg( stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply );
+
+	/// Executes a single message
+	oex::oexBOOL ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply );
 
     /// Releases all child scripts
     void DestroyChildScripts();
@@ -89,9 +92,25 @@ protected:
 	void OnMsg( CSqMap &mapParams, stdString *pReply );
 
     /// Processes a script message
-	void OnOnMsg( CSqMap &mapParams, stdString *pReply );
+//	void OnOnMsg( CSqMap &mapParams, stdString *pReply );
+
+public:
+
+	/// Call to quit the execution
+	void Quit() { m_bQuit = oex::oexTRUE; }
+
+	/// Sets the script name
+	void SetName( stdString sName )
+	{	m_sName = sName; }
+
+	/// Returns the script name
+	stdString GetName()
+	{	return m_sName; }
 
 private:
+
+	/// Set to non-zero when the thread should exit
+	oex::oexBOOL			m_bQuit;
 
     /// Squirrel engine
 	sqbind::CSqEngine       m_cSqEngine;
@@ -101,6 +120,9 @@ private:
 
     /// List of child scripts
     t_ScriptList            m_lstScript;
+
+    /// Script to load
+    stdString				m_sName;
 
     /// Script to load
     stdString				m_sScript;

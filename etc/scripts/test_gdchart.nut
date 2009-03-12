@@ -49,7 +49,7 @@ function OnProcessRequest( request, headers, get, post )
 	} // end if
 
 	// Write the image to disk
-	CSqFile().put_contents( "w_raw_write.png", img.get( "img" ).str() );
+//	CSqFile().put_contents( "w_raw_write.png", img.get( "img" ).str() );
 
 	mReply.set( "content", img.get( "img" ).str() );
 

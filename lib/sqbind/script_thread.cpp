@@ -38,7 +38,8 @@ using namespace sqbind;
 
 
 CScriptThread::CScriptThread()
-{	m_pModuleManager = oexNULL;
+{	m_bQuit = oex::oexFALSE;
+	m_pModuleManager = oexNULL;
 	m_bFile = oex::oexFALSE;
 	m_pParentScript = oexNULL;
 }
@@ -47,7 +48,8 @@ CScriptThread::~CScriptThread()
 {	Destroy(); }
 
 void CScriptThread::Destroy()
-{	m_pModuleManager = oexNULL;
+{	m_bQuit = oex::oexTRUE;
+	m_pModuleManager = oexNULL;
 	m_bFile = oex::oexFALSE;
 	m_pParentScript = oexNULL;
 }
@@ -67,11 +69,18 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 	if ( !m_sScript.length() )
 		return oex::oexFALSE;
 
+	// Save thread id
+	SetCurrentThreadId( oexGetCurrentThreadId() );
+
 	// Set module manager
 	m_cSqEngine.SetModuleManager( m_pModuleManager );
 
 	// Pointer to our message queue
 	m_cSqEngine.SetMessageQueue( this );
+
+	// Let the user know we're starting a thread
+	oexPrintf( oexT( "Spawning script thread : 0x%08x : %s : %s\n" ),
+			   (unsigned int)oexGetCurrentThreadId(), m_sName.c_str(), m_sScript.c_str() );
 
 	// Start the script
 	if ( !m_cSqEngine.Load( m_sScript.c_str(), m_bFile, FALSE ) )
@@ -84,7 +93,7 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 		else
 			sErr += oexT( "Error loading script" );
 
-		oexERROR( 0, oexMks( oexT( "Script Error" ), sErr.c_str() ) );
+		oexERROR( 0, oexMks( oexT( "Script Error : " ), sErr.c_str() ) );
 
 		return oex::oexFALSE;
 
@@ -95,12 +104,15 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 
 oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 {
-	int nRet = 0;
+	// Have we gotten a quit flag?
+	if ( m_bQuit )
+		return oex::oexFALSE;
 
 	// Process script messages
 	ProcessMsgs();
 
 	// Idle processing
+	int nRet = 0;
 	if ( !m_cSqEngine.Execute( &nRet, _T( "_idle" ) ) )
 		return oex::oexFALSE;
 
@@ -109,6 +121,9 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 
 oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 {
+	// Let the user know we're starting a thread
+	oexPrintf( oexT( "Exiting script thread : %s : %s\n" ), m_sName.c_str(), m_sScript.c_str() );
+
 	// Lose child scripts
 	DestroyChildScripts();
 
@@ -118,7 +133,7 @@ oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 	return 0;
 }
 
-oex::oexBOOL CScriptThread::ProcessMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply )
+oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply )
 {
 	if ( sMsg == oexT( "spawn" ) )
 		OnSpawn( mapParams, pReply );
@@ -128,10 +143,87 @@ oex::oexBOOL CScriptThread::ProcessMsg( stdString &sMsg, CSqMap &mapParams, stdS
 		OnMsg( mapParams, pReply );
 
 	// Pass this on to the script
-	else if ( sMsg == oexT( "onmsg" ) )
-		OnOnMsg( mapParams, pReply );
+//	else if ( sMsg == oexT( "onmsg" ) )
+//		OnOnMsg( mapParams, pReply );
 
-	return TRUE;
+	// Quit command
+	else if ( sMsg == oexT( "kill" ) )
+		Quit();
+
+	else
+		return oex::oexFALSE;
+
+	return oex::oexTRUE;
+}
+
+oex::oexBOOL CScriptThread::ProcessMsg( stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply )
+{
+	// Is it bound for another computer
+	int pos = sPath.find_first_of( oexT( ":" ), -1 );
+	if ( 0 <= pos )
+	{
+		stdString sAddress = sPath.substr( 0, pos );
+		if ( sAddress.length() )
+		{
+			// +++ Route to remote computer
+			oexASSERT( 0 );
+
+			return oex::oexFALSE;
+
+		} // end if
+
+	} // end if
+
+	// Is it for us?
+	if ( !sPath.length() || sPath == _T( "." ) )
+		return ExecuteMsg( sMsg, mapParams, pReply );
+
+	// All the way to the top?
+	else if ( sPath[ 0 ] == oexT( '/' ) || sPath[ 0 ] == oexT( '\\' ) )
+	{
+		sPath = sPath.substr( 1 );
+
+		// Route to parent if any
+		if ( m_pParentScript )
+			return m_pParentScript->Msg( sPath, oexT( "msg" ), &mapParams, pReply );
+
+		// I guess it's ours
+		return ExecuteMsg( sMsg, mapParams, pReply );
+
+	} // end if
+
+	// Find path separator
+	stdString sToken = sPath.substr( 0, sPath.find_first_of( oexT( '\\' ) ) );
+	if ( !sToken.length() ) sToken = sPath.substr( 0, sPath.find_first_of( oexT( '/' ) ) );
+
+	// Did we get a token
+	if ( sPath.length() > sToken.length() )
+	{
+		// Skip the token
+		sPath = sPath.substr( sToken.length() + 1 );
+
+	} // end if
+	else
+	{   sToken = sPath;
+		sPath = oexT( "" );
+	} // end if
+
+	// Is it going up to the parent?
+	if ( sToken == oexT( ".." ) )
+	{
+		if ( !m_pParentScript )
+			return oex::oexFALSE;
+
+		return m_pParentScript->Msg( sPath, sMsg, &mapParams, pReply );
+
+	} // end if
+
+	// Route to child
+	t_ScriptList::iterator it = m_lstScript.find( sToken );
+	if ( m_lstScript.end() != it && it->second )
+		return it->second->Msg( sPath, sMsg, &mapParams, pReply );
+
+	return oex::oexFALSE;
 }
 
 void CScriptThread::DestroyChildScripts()
@@ -159,26 +251,12 @@ void CScriptThread::DestroyChildScripts()
 void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 {
 	// Grab the path
-	stdString sPath = mapParams[ oexT( "name" ) ];
+	stdString sName = mapParams[ oexT( "name" ) ];
 
-	// Is it bound for another computer
-	int pos = sPath.find_first_of( oexT( ":" ), -1 );
-	if ( 0 <= pos )
-	{
-		stdString sAddress = sPath.substr( 0, pos );
-		if ( sAddress.length() )
-		{
-			// +++ Route to remote computer
-			oexASSERT( 0 );
-
-			return;
-
-		} // end if
-
-	} // end if
+	oexSHOW( sName.c_str() );
 
 	// Lose current script engine at this tag if any
-	t_ScriptList::iterator it = m_lstScript.find( sPath );
+	t_ScriptList::iterator it = m_lstScript.find( sName );
 	if ( m_lstScript.end() != it )
 	{	if ( it->second )
 		{	OexAllocDestruct( it->second );
@@ -192,7 +270,10 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 	if ( pSt )
 	{
 		// Save away pointer for later
-		m_lstScript[ sPath ] = pSt;
+		m_lstScript[ sName ] = pSt;
+
+		// Let the script know it's name
+		pSt->SetName( sName );
 
 		// Set us as the parent
 		pSt->SetParentScript( this );
@@ -212,9 +293,31 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 
 void CScriptThread::OnMsg( CSqMap &mapParams, stdString *pReply )
 {
-	// Grab the path
-	stdString sPath = mapParams[ oexT( "name" ) ];
+	// Run script?
+	if ( mapParams[ oexT( "run" ) ].length() )
+		m_cSqEngine.Run( mapParams[ oexT( "run" ) ].c_str() );
 
+	// Execute function?
+	else if ( mapParams[ oexT( "execute" ) ].length() )
+		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute" ) ].c_str() );
+
+	// Execute one param
+	else if ( mapParams[ oexT( "execute1" ) ].length() )
+		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute1" ) ].c_str(), mapParams[ oexT( "p1" ) ] );
+
+	// Execute 2 params
+	else if ( mapParams[ oexT( "execute2" ) ].length() )
+		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute2" ) ].c_str(), mapParams[ oexT( "p1" ) ], mapParams[ oexT( "p2" ) ] );
+
+	// Execute 3 params
+	else if ( mapParams[ oexT( "execute3" ) ].length() )
+		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute3" ) ].c_str(), mapParams[ oexT( "p1" ) ], mapParams[ oexT( "p2" ) ], mapParams[ oexT( "p3" ) ] );
+
+	// Execute 4 params
+	else if ( mapParams[ oexT( "execute4" ) ].length() )
+		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute4" ) ].c_str(), mapParams[ oexT( "p1" ) ], mapParams[ oexT( "p2" ) ], mapParams[ oexT( "p3" ) ], mapParams[ oexT( "p4" ) ] );
+
+/*
 	// Is it bound for another computer
 	int pos = sPath.find_first_of( oexT( ":" ), -1 );
 	if ( 0 <= pos )
@@ -242,7 +345,7 @@ void CScriptThread::OnMsg( CSqMap &mapParams, stdString *pReply )
 	{
 		// Route to parent if any
 		if ( m_pParentScript )
-			m_pParentScript->Msg( oexT( "msg" ), &mapParams, pReply );
+			m_pParentScript->Msg( sPath, oexT( "msg" ), &mapParams, pReply );
 
 		// I guess it's ours
 		else
@@ -296,28 +399,6 @@ void CScriptThread::OnMsg( CSqMap &mapParams, stdString *pReply )
 			it->second->Msg( oexT( "onmsg" ), &mapParams, pReply );
 
 	} // end else
-}
-
-void CScriptThread::OnOnMsg( CSqMap &mapParams, stdString *pReply )
-{
-	// Execute function?
-	if ( mapParams[ oexT( "execute" ) ].length() )
-		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute" ) ].c_str() );
-
-	// Execute one param
-	else if ( mapParams[ oexT( "execute1" ) ].length() )
-		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute1" ) ].c_str(), mapParams[ oexT( "p1" ) ] );
-
-	// Execute 2 params
-	else if ( mapParams[ oexT( "execute2" ) ].length() )
-		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute2" ) ].c_str(), mapParams[ oexT( "p1" ) ], mapParams[ oexT( "p2" ) ] );
-
-	// Execute 3 params
-	else if ( mapParams[ oexT( "execute3" ) ].length() )
-		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute3" ) ].c_str(), mapParams[ oexT( "p1" ) ], mapParams[ oexT( "p2" ) ], mapParams[ oexT( "p3" ) ] );
-
-	// Execute 4 params
-	else if ( mapParams[ oexT( "execute4" ) ].length() )
-		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute4" ) ].c_str(), mapParams[ oexT( "p1" ) ], mapParams[ oexT( "p2" ) ], mapParams[ oexT( "p3" ) ], mapParams[ oexT( "p4" ) ] );
+*/
 }
 

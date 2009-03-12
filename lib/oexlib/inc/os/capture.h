@@ -34,16 +34,98 @@
 
 #pragma once
 
+// !!! Add new ones freely, but never *change* the oexFOURCC types below
+
 #define oexVIDSUB_AUTO		0
+#define oexVIDSUB_AUTO_STR		oexT( "Auto Select" )
+#define oexVIDSUB_AUTO_TAG		oexT( "AUTO" )
 
 // Linux
-#define oexVIDSUB_VFL1		oexFOURCC( '1', 'V', 'F', 'L' )
-#define oexVIDSUB_VFL2		oexFOURCC( '2', 'V', 'F', 'L' )
-#define oexVIDSUB_DAVINCI	oexFOURCC( '1', 'D', 'A', 'V' )
+#define oexVIDSUB_VFL1			oexFOURCC( '1', 'V', 'F', 'L' )
+#define oexVIDSUB_VFL1_STR		oexT( "Video For Linux 1" )
+#define oexVIDSUB_VFL1_TAG		oexT( "VFL1" )
+
+#define oexVIDSUB_VFL2			oexFOURCC( '2', 'V', 'F', 'L' )
+#define oexVIDSUB_VFL2_STR		oexT( "Video For Linux 2" )
+#define oexVIDSUB_VFL2_TAG		oexT( "VFL2" )
+
+#define oexVIDSUB_DAVINCI		oexFOURCC( '1', 'D', 'A', 'V' )
+#define oexVIDSUB_DAVINCI_STR	oexT( "Davinci video capture" )
+#define oexVIDSUB_DAVINCI_TAG	oexT( "DAVINCI" )
 
 // Windows
-#define oexVIDSUB_VFW		oexFOURCC( '1', 'V', 'F', 'W' )
-#define oexVIDSUB_DSHOW		oexFOURCC( '1', 'D', 'S', 'H' )
+#define oexVIDSUB_VFW			oexFOURCC( '1', 'V', 'F', 'W' )
+#define oexVIDSUB_VFW_STR		oexT( "Video For Windows" )
+#define oexVIDSUB_VFW_TAG		oexT( "VFW" )
+
+#define oexVIDSUB_DSHOW			oexFOURCC( '1', 'D', 'S', 'H' )
+#define oexVIDSUB_DSHOW_STR		oexT( "Direct Show" )
+#define oexVIDSUB_DSHOW_TAG		oexT( "DSHOW" )
+
+struct SVideoSystemInfo
+{
+	/// Unique index for this system
+	// Note that this number may change from build to build.
+	oexUINT32		nIndex;
+
+	/// Type of video system
+	// This will never change
+	oexUINT32		uType;
+
+	/// Short tag name ( compatible with a file name )
+	oexCSTR			pTag;
+
+	/// Human readable name
+	oexCSTR			pName;
+
+	/// If the interface is supported in the current build
+	oexBOOL			bSupported;
+};
+
+static oexCONST SVideoSystemInfo g_VideoSystemInfo[] =
+{
+	{ 0, oexVIDSUB_AUTO, oexVIDSUB_AUTO_TAG, oexVIDSUB_AUTO_STR, 1 },
+
+	{ 1, oexVIDSUB_VFL1, oexVIDSUB_VFL1_TAG, oexVIDSUB_VFL1_STR,
+#if defined( OEX_LINUX )
+	1,
+#else
+	0,
+#endif
+	},
+
+	{ 2, oexVIDSUB_VFL2, oexVIDSUB_VFL2_TAG, oexVIDSUB_VFL2_STR,
+#if defined( OEX_LINUX )
+	1,
+#else
+	0,
+#endif
+	},
+
+	{ 3, oexVIDSUB_DAVINCI, oexVIDSUB_DAVINCI_TAG, oexVIDSUB_DAVINCI_STR,
+#if defined( OEX_LINUX ) && defined( OEX_CPU_ARM )
+	1,
+#else
+	0,
+#endif
+	},
+
+	{ 4, oexVIDSUB_VFW, oexVIDSUB_VFW_TAG, oexVIDSUB_VFW_STR,
+#if defined( OEX_WINDOWS )
+	1,
+#else
+	0,
+#endif
+	},
+
+	{ 5, oexVIDSUB_DSHOW, oexVIDSUB_DSHOW_TAG, oexVIDSUB_DSHOW_STR,
+#if defined( OEX_WINDOWS )
+	1,
+#else
+	0,
+#endif
+	}
+};
 
 //==================================================================
 // CCaptureTmpl
@@ -105,6 +187,50 @@ public:
 	virtual oexFLOAT GetFps() = 0;
 	virtual oexINT64 GetFrame() = 0;
 	virtual CStr GetSupportedFormats() = 0;
+
+	/// Returns the number of available sub systems
+	static oexINT GetAvailableSystems()
+	{	return oexSizeOfArray( g_VideoSystemInfo ); }
+
+	/// Returns the number of supported systems
+	static oexINT GetSupportedSystems()
+	{	oexINT nSupported = 0;
+		for( oexINT i = 0; i < GetAvailableSystems(); i++ )
+			if ( g_VideoSystemInfo[ i ].bSupported )
+				nSupported++;
+		return nSupported;
+	}
+
+	static oexCONST SVideoSystemInfo* GetSystemInfo( oexINT x_idx )
+	{
+		if ( x_idx >= GetAvailableSystems() )
+			return oexNULL;
+
+		return &g_VideoSystemInfo[ x_idx ];
+	}
+
+	static oexCONST SVideoSystemInfo* GetNextAvailableSystem( oexINT x_idx )
+	{
+		if ( 0 > x_idx )
+			x_idx = 0;
+
+		else if ( ++x_idx >= GetAvailableSystems() )
+			return oexNULL;
+
+		return &g_VideoSystemInfo[ x_idx ];
+	}
+
+	static oexCONST SVideoSystemInfo* GetNextSupportedSystem( oexINT x_idx )
+	{
+		oexCONST SVideoSystemInfo *pVsi = GetNextAvailableSystem( x_idx );
+		while ( oexCHECK_PTR( pVsi ) )
+			if ( pVsi->bSupported )
+				return pVsi;
+			else
+				pVsi = GetNextAvailableSystem( pVsi->nIndex );
+
+		return oexNULL;
+	}
 };
 
 //==================================================================
@@ -224,7 +350,7 @@ public:
 
 		return m_pDevice->IsOpen();
 	}
-	
+
 	/// Starts video capture
 	virtual oexBOOL StartCapture()
 	{
@@ -350,7 +476,7 @@ public:
 	virtual CStr GetSupportedFormats()
 	{
 		if ( !oexCHECK_PTR( m_pDevice ) )
-			return oexFALSE;
+			return CStr();
 
 		return m_pDevice->GetSupportedFormats();
 	}

@@ -1626,7 +1626,7 @@ public:
 		T tBuf[ 256 ];
 
 		oexVaList ap; oexVaStart( ap, pFmt );
-		os::CSys::vStrFmt( tBuf, oexSizeofArray( tBuf ), pFmt, ap );
+		os::CSys::vStrFmt( tBuf, oexSizeOfArray( tBuf ), pFmt, ap );
 		oexVaEnd( ap );
 
 		return Cnv( tBuf );
@@ -1652,7 +1652,7 @@ public:
 	TStr& AppendNum( oexCONST T *pFmt, ... )
 	{	T tBuf[ 256 ];
 		oexVaList ap; oexVaStart( ap, pFmt );
-		os::CSys::vStrFmt( tBuf, oexSizeofArray( tBuf ), pFmt, ap );
+		os::CSys::vStrFmt( tBuf, oexSizeOfArray( tBuf ), pFmt, ap );
 		oexVaEnd( ap );
 		return Append( tBuf );
 	}

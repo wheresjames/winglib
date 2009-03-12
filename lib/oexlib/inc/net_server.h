@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -41,7 +41,7 @@
 /**
 
   \code
-  
+
     /// Example
     TNetServer< CAutoPort, CMyProtocol > server;
 
@@ -60,8 +60,8 @@
 
 */
 //==================================================================
-template < typename T_PORT, typename T_PROTOCOL > 
-    class TNetServer : 
+template < typename T_PORT, typename T_PROTOCOL >
+    class TNetServer :
         public os::CThread,
         public CMsgCom,
         public T_PORT
@@ -74,7 +74,7 @@ public:
     /// Session type
     typedef typename t_SessionList::iterator    t_Session;
 
-public:	
+public:
 
 	/// Default constructor
 	TNetServer()
@@ -105,16 +105,16 @@ public:
 public:
 
     /// Thread initialization
-	virtual oexBOOL InitThread( oexPVOID x_pData ) 
+	virtual oexBOOL InitThread( oexPVOID x_pData )
     {
-        return oexTRUE; 
+        return oexTRUE;
     }
 
     /// Thread main loop
-	virtual oexBOOL DoThread( oexPVOID x_pData ) 
+	virtual oexBOOL DoThread( oexPVOID x_pData )
     {
         // Get events
-        os::CSys::t_WAITABLE phEvents[] = 
+        os::CSys::t_WAITABLE phEvents[] =
         {
             // 0 == Quit thread
             m_evQuit.GetHandle(),
@@ -127,7 +127,7 @@ public:
         };
 
         // How many valid handles
-        oexUINT uHandles = oexSizeofArray( phEvents );
+        oexUINT uHandles = oexSizeOfArray( phEvents );
 
         // Don't look at the port handle if invalid
         if ( os::CEvent::vInvalid() == phEvents[ 2 ] )
@@ -148,11 +148,11 @@ public:
         else if ( 2 == nRet )
             T_PORT::ProcessEvents();
 
-        return oexTRUE; 
+        return oexTRUE;
     }
 
     /// Thread shutdown
-	virtual oexINT EndThread( oexPVOID x_pData ) 
+	virtual oexINT EndThread( oexPVOID x_pData )
     {
         // Lock the session list
         CTlLocalLock ll( m_lockSession );
@@ -163,7 +163,7 @@ public:
         // Lose the session list
         m_sessions.Destroy();
 
-        return 0; 
+        return 0;
     }
 
     // Accept incomming connections
@@ -306,7 +306,7 @@ public:
     {   return m_sessions; }
 
     /// Lock for th session list
-    operator CTlLock&() 
+    operator CTlLock&()
     {   return m_lockSession; }
 
     /// Returns the total number of connections since the server started

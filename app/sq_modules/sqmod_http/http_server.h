@@ -2,16 +2,26 @@
 
 #pragma once
 
-class CHttpServerImpl
+class CHttpServer
 {
 public:
 
-	CHttpServerImpl()
+	/// Default constructor
+	CHttpServer()
 	{
-		m_pMsgQueue = oexNULL;
+		m_pServerMsgQueue = oexNULL;
+		m_pSessionMsgQueue = oexNULL;
 	}
 
-	void SetCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sServer, const sqbind::stdString &sSession );
+	// Copy semantics
+	CHttpServer( const CHttpServer &r ) {}
+	CHttpServer& operator =( const CHttpServer &r ) { return *this; }
+
+	void SetServerCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sServer );
+
+	void SetSessionCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sSession );
+
+	void SetSessionCallbackScript( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sScript, int bFile, const sqbind::stdString &sSession );
 
 	virtual int Start( int nPort );
 
@@ -30,16 +40,25 @@ private:
 	// The server
 	oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > m_server;
 
-	// Callback
-	sqbind::CSqMsgQueue		*m_pMsgQueue;
+	// Server callback queue
+	sqbind::CSqMsgQueue		*m_pServerMsgQueue;
+
+	// Session callback queue
+	sqbind::CSqMsgQueue		*m_pSessionMsgQueue;
 
 	// Server callback function
 	sqbind::stdString		m_sServer;
 
 	// Session callback function
 	sqbind::stdString		m_sSession;
-};
 
+	// Callback script
+	sqbind::stdString		m_sScript;
+
+	/// Non-zero if m_sScript holds a file name
+	oex::oexBOOL			m_bFile;
+};
+/*
 class CHttpServer
 {
 public:
@@ -53,9 +72,8 @@ public:
 	~CHttpServer()
 	{
 		if ( m_pServer )
-		{	
-			OexAllocDelete( m_pServer );
-//			delete m_pServer;
+		{
+			OexAllocDestruct( m_pServer );
 			m_pServer = oexNULL;
 		} // end if
 	}
@@ -63,7 +81,6 @@ public:
 	void Init()
 	{	if ( !m_pServer )
 			m_pServer = OexAllocConstruct< CHttpServerImpl >();
-//			m_pServer = new CHttpServerImpl();
 	}
 
 	void SetCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sServer, const sqbind::stdString &sSession )
@@ -82,3 +99,4 @@ private:
 	CHttpServerImpl		*m_pServer;
 
 };
+*/

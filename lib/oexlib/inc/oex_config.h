@@ -51,8 +51,13 @@
 // Are we using windows?
 #if defined( WIN32 ) || defined( _WIN32 )
 #	define OEX_WIN32
+#	define OEX_WINDOWS
 #else
 #	define OEX_LINUX
+#endif
+
+#if defined( CPU_ARM )
+#	define OEX_CPU_ARM
 #endif
 
 // Debug build?

@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -41,14 +41,14 @@
 /**
 
     The T_PROTOCOL class MUST implement
-    
+
     - void RegisterFunctions( CDispatch *x_pDispatch );
-        
+
         Called to register protocol specific functions
 
     - t_SOCKETEVENT GetEventHandle();
 
-        Should return a waitable event handle or NULL.        
+        Should return a waitable event handle or NULL.
 
     - void ProcessEvents();
 
@@ -65,13 +65,13 @@
   \code
 
     // Example of a more or less minimal protocol.
-    class CEchoProtocol : 
+    class CEchoProtocol :
             public CProtocol,
             public TBufferedPort< CAutoSocket >
     {
     public:
 
-        virtual oexBOOL OnRead( oexINT x_nErr ) 
+        virtual oexBOOL OnRead( oexINT x_nErr )
         {
             // Process the incomming data
             if ( !T_PORT::OnRead( x_nErr ) )
@@ -79,8 +79,8 @@
 
             // Just echo the data
             Send( Recv() );
-            
-            return oexFALSE; 
+
+            return oexFALSE;
         }
 
         /// Closes the session when the socket closes
@@ -95,8 +95,8 @@
 
 */
 //==================================================================
-template < typename T_PROTOCOL > 
-    class TNetSession : 
+template < typename T_PROTOCOL >
+    class TNetSession :
         public os::CThread,
         public CMsgCom
 {
@@ -122,20 +122,20 @@ public:
 public:
 
     /// Thread initialization
-	virtual oexBOOL InitThread( oexPVOID x_pData ) 
+	virtual oexBOOL InitThread( oexPVOID x_pData )
     {
-        return oexTRUE; 
+        return oexTRUE;
     }
 
     /// Thread main loop
-	virtual oexBOOL DoThread( oexPVOID x_pData ) 
+	virtual oexBOOL DoThread( oexPVOID x_pData )
     {
         // Ensure event handle
         if ( !msgGetMsgEvent().GetHandle() )
             return oexFALSE;
 
         // Get events
-        os::CSys::t_WAITABLE phEvents[] = 
+        os::CSys::t_WAITABLE phEvents[] =
         {
             // 0 == Quit thread
             m_evQuit.GetHandle(),
@@ -148,7 +148,7 @@ public:
         };
 
         // How many valid handles
-        oexUINT uHandles = oexSizeofArray( phEvents );
+        oexUINT uHandles = oexSizeOfArray( phEvents );
 
         // Don't look at the port handle if invalid
         if ( os::CEvent::vInvalid() == phEvents[ 2 ] )
@@ -169,16 +169,16 @@ public:
         else if ( 2 == nRet )
             m_cProtocol.ProcessEvents();
 
-        return oexTRUE; 
+        return oexTRUE;
     }
 
     /// Thread shutdown
-	virtual oexINT EndThread( oexPVOID x_pData ) 
+	virtual oexINT EndThread( oexPVOID x_pData )
     {
         // Kill ther server
         m_cProtocol.Destroy();
 
-        return 0; 
+        return 0;
     }
 
 private:

@@ -51,28 +51,39 @@ public:
 
 public:
 
-	// Simple alert function
+	/// Exits the application
+	void exit( int nExitCode );
+
+	/// Displays a message box containing string
 	int alert( const stdString &sMsg );
 
+	/// Sends data to STDOUT
+	int echo( const stdString &sMsg );
+
+	/// Imports the specified class
 	int import( const stdString &sClass );
 
+	/// Loads the specified module
 	int load_module( const stdString &sModule, const stdString &sPath );
 
-	void quit( int nExitCode );
+	/// Kills the specified thread
+	int kill( const stdString &sPath );
 
+	/// Returns the file path to the current script
 	stdString path( const stdString &sPath );
 
-	SquirrelObject spawn( const stdString &sName, const stdString &sScript, int bFile );
+	/// Creates a thread
+	SquirrelObject spawn( const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
 
-	SquirrelObject execute( const stdString &sName, const stdString &sFunction );
+	/// Executes the specified script
+	SquirrelObject run( const stdString &sPath, const stdString &sScript );
 
-	SquirrelObject execute1( const stdString &sName, const stdString &sFunction, const stdString &sP1 );
-
-	SquirrelObject execute2( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2 );
-
-	SquirrelObject execute3( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 );
-
-	SquirrelObject execute4( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 );
+	/// Execute functions
+	SquirrelObject execute( const stdString &sPath, const stdString &sFunction );
+	SquirrelObject execute1( const stdString &sPath, const stdString &sFunction, const stdString &sP1 );
+	SquirrelObject execute2( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2 );
+	SquirrelObject execute3( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 );
+	SquirrelObject execute4( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 );
 
 	void sleep( int nMsTime );
 
@@ -87,14 +98,6 @@ protected:
 
 	virtual stdString OnPath( stdString sPath );
 
-	virtual SquirrelObject OnSpawn( const stdString &sName, const stdString &sScript, int bFile );
-
-	virtual SquirrelObject OnExecute( const stdString &sName, const stdString &sFunction );
-	virtual SquirrelObject OnExecute1( const stdString &sName, const stdString &sFunction, const stdString &sP1 );
-	virtual SquirrelObject OnExecute2( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2 );
-	virtual SquirrelObject OnExecute3( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 );
-	virtual SquirrelObject OnExecute4( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 );
-
 	virtual CSqMsgQueue* OnGetQueue();
 
 protected:
@@ -103,7 +106,10 @@ protected:
 	oex::oexBOOL        m_bFile;
 
 	/// Either a file name or actual script
-	stdString        m_sScript;
+	stdString        	m_sScript;
+
+	/// Root path
+	stdString           m_sRoot;
 
 };
 
@@ -209,14 +215,14 @@ public:
 		\param [in] bFile       -   If non-zero, pScript contains a file name.
 
 	*/
-	BOOL Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oexBOOL bRelative = FALSE, oex::oexBOOL bStart = TRUE );
+	oex::oexBOOL Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oexBOOL bRelative = FALSE, oex::oexBOOL bStart = TRUE );
 
 	/// Runs the script an executes the initialization function
 	/**
 		You can just set the bStart flag in Load() to TRUE to avoid
 		calling this function if you have no special registrations.
 	*/
-	BOOL Start();
+	oex::oexBOOL Start();
 
 	/// Destroys the virtual machine and prepares the class for re-use
 	oex::oexBOOL Idle();
@@ -594,20 +600,6 @@ public:
 	/// Return message queue pointer
 	virtual CSqMsgQueue* OnGetQueue();
 
-	/// Spawns a child script process
-	virtual SquirrelObject OnSpawn( const stdString &sName, const stdString &sScript, int bFile );
-
-	/// Routes a message to the proper script
-	SquirrelObject RouteMsg( const stdString &sMsg, CSqMap &rParams );
-
-	/// Call to send a message to a child script
-	virtual SquirrelObject OnExecute( const stdString &sName, const stdString &sFunction );
-	virtual SquirrelObject OnExecute1( const stdString &sName, const stdString &sFunction, const stdString &sP1 );
-	virtual SquirrelObject OnExecute2( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2 );
-	virtual SquirrelObject OnExecute3( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 );
-	virtual SquirrelObject OnExecute4( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 );
-
-
 private:
 
 	/// Non-zero if a script is loaded
@@ -623,13 +615,10 @@ private:
 	SquirrelObject          m_script;
 
 	/// Last squirrel error
-	stdString            m_sErr;
+	stdString            	m_sErr;
 
 	/// Script output
-	stdString            m_sOutput;
-
-	/// Root path
-	stdString            m_sRoot;
+	stdString            	m_sOutput;
 
 	/// Thread message queue pointer
 	CSqMsgQueue             *m_pMsgQueue;

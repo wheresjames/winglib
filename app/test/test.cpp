@@ -66,6 +66,8 @@ The closer I am to fine
 #include "stdafx.h"
 #include "stdio.h"
 
+using namespace oex;
+
     class CTestMonitor
     {   public:
         CTestMonitor() { m_uConstructed = m_uDestructed = 0; m_uValue = 0; }
@@ -645,8 +647,8 @@ oex::oexRESULT TestGuids()
     oex::oexTCHAR   szGuid1[ 1024 ] = oexT( "" );
 
     // Guid / String conversions
-    oex::guid::GuidToString( szGuid1, oexSizeofArray( szGuid1 ), &guidTest );
-    oex::guid::StringToGuid( &guid1, szGuid1, oexSizeofArray( szGuid1 ) );
+    oex::guid::GuidToString( szGuid1, oexSizeOfArray( szGuid1 ), &guidTest );
+    oex::guid::StringToGuid( &guid1, szGuid1, oexSizeOfArray( szGuid1 ) );
     if ( !oexVERIFY( oex::guid::CmpGuid( &guidTest, &guid1 ) ) )
         return -1;
 
@@ -2348,33 +2350,18 @@ oex::oexRESULT Test_CVfsSession()
 }
 */
 
-oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sName )
+oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 {
 	oex::vid::CCapture cCapture;
 
-	// Open the capture device
-//	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_AUTO, oex::CStr().Fmt( oexT( "/dev/video%d" ), 0 ).Ptr(),
-//								    1280, 1024, 24, 15 ) ) )
-//		return -1;
-
-	if ( !oexVERIFY( cCapture.Open( uApi, 0, 0, 320, 240, 24, 15 ) ) )
+	// Don't flag an error here, maybe there is no capture device
+	if ( !cCapture.Open( uApi, 0, 0, 320, 240, 24, 15 ) )
 		return -1;
-
-//	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_VFW, 0, 0, 320, 240, 24, 15 ) ) )
-//		return -1;
-
-//	if ( !oexVERIFY( cCapture.Open( oexVIDSUB_AUTO, oexGetModulePath( oexT( "test.avi" ) ).Ptr(), 320, 240, 24, 15 ) ) )
-//		return -1;
 
 	if ( !oexVERIFY( cCapture.IsOpen() ) )
 		return -2;
 
-//	if ( !oexVERIFY( cCapture.StartCapture() ) )
-//		return -3;
-
-//	printf( oexT( "Supported Formats : \n%s\n" ), oexStrToMbPtr( cCapture.GetSupportedFormats().Ptr() ) );
-
-	printf( "Starting capture\n" );
+//	oexPrintf( oexT( "Starting capture...\n" ) );
 
 	if ( !oexVERIFY( cCapture.StartCapture() ) )
 		return -3;
@@ -2385,7 +2372,7 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sName )
 
 	for ( int i = 0; i < 1; i++ )
 	{
-		printf( "Waiting for frame...\n" );
+//		oexPrintf( oexT( "Waiting for frame...\n" ) );
 
 		if ( !oexVERIFY( cCapture.WaitForFrame( 3000 ) ) )
 			return -4;
@@ -2402,14 +2389,13 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sName )
 //		img.CopySBGGR8( cCapture.GetBuffer() );
 //		img.CopyGrey( cCapture.GetBuffer() );
 
-		printf( "Writing image to disk\n" );
 
 		int nImageSize = oex::CImage::GetScanWidth( cCapture.GetWidth(), 24 )
 		       				* oex::cmn::Abs( cCapture.GetHeight() );
 
-		printf( "w=%d, h=%d, Buffer Size = %d, Image Size = %d\n", cCapture.GetWidth(), cCapture.GetHeight(), cCapture.GetBufferSize(), nImageSize );
+//		oexPrintf( oexT( "Writing image to file : %s\n" ), oexStrToMb( sFile ).Ptr() );
+//		oexPrintf( oexT( "w=%d, h=%d, Buffer Size = %d, Image Size = %d\n" ), cCapture.GetWidth(), cCapture.GetHeight(), cCapture.GetBufferSize(), nImageSize );
 
-		oex::CStr sFile = oexGetModulePath( oex::CStr().Fmt( oexT( "./img_%s_%d.bmp" ), oexStrToMbPtr( sName.Ptr() ), 0 ).Ptr() );
 		if ( !oexVERIFY( oex::CDib::SaveDibFile( sFile.Ptr(), img.GetImageHeader(), img.GetBuffer(), nImageSize ) ) )
 			return -7;
 
@@ -2429,15 +2415,29 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sName )
 
 oex::oexRESULT Test_CCapture()
 {
-	Test_CaptureApi( oexVIDSUB_AUTO, oexT( "Auto" ) );
+	oexPrintf( oexT( "Testing video capture API...\n" ) );
 
-#if defined( OEX_LINUX )
-	Test_CaptureApi( oexVIDSUB_VFL1, oexT( "Vfl1" ) );
-	Test_CaptureApi( oexVIDSUB_VFL2, oexT( "Vfl2" ) );
-#else
-	Test_CaptureApi( oexVIDSUB_DSHOW, oexT( "DirectShow" ) );
-	Test_CaptureApi( oexVIDSUB_VFW, oexT( "Vfw" ) );
-#endif
+	oexINT idx = -1;
+	while ( oexCONST vid::SVideoSystemInfo* pVsi = vid::CCapture::GetNextAvailableSystem( idx ) )
+	{
+		oexPrintf( oexT( "%s - %s - " ), pVsi->pTag, pVsi->pName );
+
+		oex::CStr sName = oex::CStr().Fmt( oexT( "./_captest_%s_%d.bmp" ), oexStrToMbPtr( pVsi->pTag ), 0 );
+		oex::CStr sFile = oexGetModulePath( sName.Ptr() );
+
+		if ( !pVsi->bSupported )
+			oexPrintf( oexT( "Unsupported\n" ) );
+
+		else if ( !Test_CaptureApi( pVsi->uType, sFile ) )
+			oexPrintf( oexT( "Succeded - %s\n" ), oexStrToMb( sName ).Ptr() );
+
+		else
+			oexPrintf( oexT( "Failed\n" ) );
+
+		// Next item
+		idx = pVsi->nIndex;
+
+	} // end while
 
     return oex::oexRES_OK;
 }

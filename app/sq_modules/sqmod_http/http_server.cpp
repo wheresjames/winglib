@@ -2,28 +2,39 @@
 
 #include "stdafx.h"
 
-void CHttpServerImpl::SetCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sServer, const sqbind::stdString &sSession )
-{	m_pMsgQueue = x_pMsgQueue;
+void CHttpServer::SetServerCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sServer )
+{	m_pServerMsgQueue = x_pMsgQueue;
 	m_sServer = sServer;
+}
+
+void CHttpServer::SetSessionCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sSession )
+{	m_pSessionMsgQueue = x_pMsgQueue;
 	m_sSession = sSession;
 }
 
-int CHttpServerImpl::Start( int nPort )
+void CHttpServer::SetSessionCallbackScript( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sScript, int bFile, const sqbind::stdString &sSession )
+{	m_pSessionMsgQueue = x_pMsgQueue;
+	m_sScript = sScript;
+	m_bFile = bFile;
+	m_sSession = sSession;
+}
+
+int CHttpServer::Start( int nPort )
 {
 	// Set session callback
-	m_server.SetSessionCallback( (oex::oexPVOID)CHttpServerImpl::_OnSessionCallback, this );
+	m_server.SetSessionCallback( (oex::oexPVOID)CHttpServer::_OnSessionCallback, this );
 
 	// Start the server
-	if ( !m_server.StartServer( nPort, CHttpServerImpl::_OnServerEvent, this ) )
+	if ( !m_server.StartServer( nPort, CHttpServer::_OnServerEvent, this ) )
 		return 0;
 
 	return 1;
 }
 
-oex::oexINT CHttpServerImpl::_OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
+oex::oexINT CHttpServer::_OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
 										     oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
 {
-	CHttpServerImpl *pServer = (CHttpServerImpl*)x_pData;
+	CHttpServer *pServer = (CHttpServer*)x_pData;
 	if ( !oexCHECK_PTR( pServer ) )
 		return -1;
 
@@ -32,16 +43,19 @@ oex::oexINT CHttpServerImpl::_OnServerEvent( oex::oexPVOID x_pData, oex::oexINT 
 
 	return pServer->OnServerEvent( x_pData, x_nEvent, x_nErr, x_pServer );
 }
-oex::oexINT CHttpServerImpl::OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
+
+oex::oexINT CHttpServer::OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
 										    oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
 {
+	if ( m_pServerMsgQueue )
+		m_pServerMsgQueue->execute( oexNULL, oexT( "." ), m_sServer );
+
 	return 0;
 }
 
-
-oex::oexINT CHttpServerImpl::_OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
+oex::oexINT CHttpServer::_OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
 {
-	CHttpServerImpl *pServer = (CHttpServerImpl*)x_pData;
+	CHttpServer *pServer = (CHttpServer*)x_pData;
 	if ( !oexCHECK_PTR( pServer ) )
 		return -1;
 
@@ -51,33 +65,36 @@ oex::oexINT CHttpServerImpl::_OnSessionCallback( oex::oexPVOID x_pData, oex::THt
 	return pServer->OnSessionCallback( x_pData, x_pSession );
 }
 
-oex::oexINT CHttpServerImpl::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
+oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
 {
-	if ( !oexCHECK_PTR( m_pMsgQueue ) || !oexCHECK_PTR( x_pSession ) )
+	if ( !oexCHECK_PTR( m_pSessionMsgQueue ) || !oexCHECK_PTR( x_pSession ) )
 		return -1;
 
-//	sqbind::CSqMap parReply; 
 	sqbind::stdString sReply;
 	sqbind::stdString parGet = oex::CParser::Serialize( x_pSession->Get() ).Ptr();
 	sqbind::stdString parPost = oex::CParser::Serialize( x_pSession->Post() ).Ptr();
 	sqbind::stdString parHeaders = oex::CParser::Serialize( x_pSession->RxHeaders() ).Ptr();
 	sqbind::stdString parRequest = oex::CParser::Serialize( x_pSession->Request() ).Ptr();
-	
-	m_pMsgQueue->execute( &sReply, oexT( "." ), m_sSession, parRequest, parHeaders, parGet, parPost );
+
+	if ( m_sScript.length() )
+	{
+		oex::CStr sChild = oexGuidToString();
+		m_pSessionMsgQueue->spawn( &sReply, oexT( "." ), sChild.Ptr(), m_sScript, m_bFile );
+		m_pSessionMsgQueue->execute( &sReply, sChild.Ptr(), m_sSession, parRequest, parHeaders, parGet, parPost );
+		m_pSessionMsgQueue->kill( oexNULL, sChild.Ptr() );
+
+	} // end if
+
+	else
+		m_pSessionMsgQueue->execute( &sReply, oexT( "." ), m_sSession, parRequest, parHeaders, parGet, parPost );
+
+	oexSHOW( sReply.c_str() );
 
 	sqbind::CSqMap mReply;
 	mReply.deserialize( sReply );
 
 	if ( mReply[ oexT( "content" ) ].length() )
 		x_pSession->Content().Set( mReply[ oexT( "content" ) ].c_str(), mReply[ oexT( "content" ) ].length() );
-
-//	if ( oexCHECK_PTR( pReply ) )
-//		x_pSession->Content() << pReply->ToString();
-
-//	if ( parReply[ oexT( "content" ) ].length() )
-//		x_pSession->Content() << parReply[ oexT( "content" ) ].c_str();
-
-//	x_pSession->Content() << oexT( "Hello World!" );
 
 	return 0;
 }

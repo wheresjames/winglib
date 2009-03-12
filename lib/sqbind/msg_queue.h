@@ -60,6 +60,7 @@ public:
 
 	/// Sends a command to the thread
 	/**
+		\param [in]		sPath		-	Destination for the message
 		\param [in]     sMsg        -   Command
 		\param [in]     mapParams   -   Parameters
 		\param [out]    pmapReply   -   Receives reply
@@ -69,7 +70,7 @@ public:
 		If pmapReply is not NULL, the function waits for a reply
 		from the thread.
 	*/
-	oex::oexBOOL Msg( stdString sMsg, CSqMap *pmapParams = oexNULL, stdString *pReply = oexNULL, oex::oexUINT uTimeout = eLockTimeout );
+	oex::oexBOOL Msg( stdString sPath, stdString sMsg, CSqMap *pmapParams = oexNULL, stdString *pReply = oexNULL, oex::oexUINT uTimeout = eLockTimeout );
 
 public:
 
@@ -80,13 +81,16 @@ public:
 		SMsg();
 
 		/// Initializer
-		SMsg( const stdString x_sMsg, CSqMap *x_pmapParams, oexEvent x_evReply, stdString *x_pReply );
+		SMsg( const stdString x_sPath, const stdString x_sMsg, CSqMap *x_pmapParams, oexEvent x_evReply, stdString *x_pReply );
 
 		// Copy constructor
 		SMsg( const SMsg &x_rMsg );
 
 		/// Command
 		stdString									sMsg;
+
+		/// Destination
+		stdString									sPath;
 
 		/// Params
 		stdString									sParams;
@@ -105,7 +109,7 @@ protected:
 	oex::oexBOOL ProcessMsgs();
 
 	/// Process a single message from the queue
-	virtual oex::oexBOOL ProcessMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply );
+	virtual oex::oexBOOL ProcessMsg( stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply );
 
 	/// Over-ride for thread killing function
 	virtual void KillThread() {}
@@ -114,16 +118,28 @@ private:
 
 public:
 
-	oex::oexBOOL execute( stdString *pReply, const stdString &sName, const stdString &sFunction );
-	oex::oexBOOL execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
+	/// Spawns a script in another thread
+	oex::oexBOOL spawn( stdString *pReply, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
+	oex::oexBOOL kill( stdString *pReply, const stdString &sPath );
+
+	/// Runs the specified script
+	oex::oexBOOL run( stdString *pReply, const stdString &sPath, const stdString &sScript );
+
+	/// Executes the specified function with params
+	oex::oexBOOL execute( stdString *pReply, const stdString &sPath, const stdString &sFunction );
+	oex::oexBOOL execute( stdString *pReply, const stdString &sPath, const stdString &sFunction,
 						  const stdString &sP1 );
-	oex::oexBOOL execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
+	oex::oexBOOL execute( stdString *pReply, const stdString &sPath, const stdString &sFunction,
 						  const stdString &sP1, const stdString &sP2 );
-	oex::oexBOOL execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
+	oex::oexBOOL execute( stdString *pReply, const stdString &sPath, const stdString &sFunction,
 						  const stdString &sP1, const stdString &sP2, const stdString &sP3 );
-	oex::oexBOOL execute( stdString *pReply, const stdString &sName, const stdString &sFunction,
+	oex::oexBOOL execute( stdString *pReply, const stdString &sPath, const stdString &sFunction,
 						  const stdString &sP1, const stdString &sP2, const stdString &sP3,
 						  const stdString &sP4 );
+
+	/// Sets the current thread id
+	void SetCurrentThreadId( oex::oexUINT x_uCurrentThreadId )
+	{	m_uCurrentThreadId = x_uCurrentThreadId; }
 
 private:
 

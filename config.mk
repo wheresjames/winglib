@@ -25,7 +25,7 @@ endif
 
 #CFG_CURDIR := `pwd`
 CFG_ROOT := $(PRJ_LIBROOT)/../..
-CFG_TOOLROOT := $(PRJ_LIBROOT)/../tools
+CFG_TOOLROOT := $(PRJ_LIBROOT)/../../tools
 CFG_LIBROOT  := $(PRJ_LIBROOT)/..
 
 ifdef UNICODE
@@ -295,7 +295,7 @@ else
 CFG_BUILD_TYPE := $(CFG_BUILD_TYPE)-shared
 endif
 
-CFG_BINROOT  := $(CFG_LIBROOT)/bin/$(CFG_BUILD_TYPE)
+CFG_BINROOT  := $(CFG_LIBROOT)/../bin/$(CFG_BUILD_TYPE)
 
 ifdef PRJ_BINROOT
 CFG_OUTROOT := $(PRJ_BINROOT)/bin/$(CFG_BUILD_TYPE)

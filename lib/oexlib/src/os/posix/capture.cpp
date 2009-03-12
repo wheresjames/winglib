@@ -69,12 +69,12 @@ oexBOOL CCapture::Destroy()
 		switch( m_uType )
 		{
 			case oexVIDSUB_VFL1 :
-				OexAllocDelete< CV4l1 >( (CV4l1*)m_pDevice );
+				OexAllocDestruct( (CV4l1*)m_pDevice );
 				break;
 
 			case oexVIDSUB_VFL2 :
 			case oexVIDSUB_DAVINCI :
-				OexAllocDelete< CV4l2 >( (CV4l2*)m_pDevice );
+				OexAllocDestruct( (CV4l2*)m_pDevice );
 				break;
 
 		} // end switch
@@ -84,13 +84,9 @@ oexBOOL CCapture::Destroy()
 	m_uType = oexVIDSUB_AUTO;
 	m_pDevice = oexNULL;
 
-	CSys::Sleep( 1000 );
-
 	return oexTRUE;
 #endif
 }
-
-//	CV4lCapture				m_v4lCap;
 
 oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
 {
@@ -121,13 +117,13 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 			m_pDevice = oexNULL;
 
 		case oexVIDSUB_VFL1 :
-			m_uType = x_uType;
+			m_uType = oexVIDSUB_VFL1;
 			m_pDevice = OexAllocConstruct< CV4l1 >();
 			break;
 
 		case oexVIDSUB_VFL2 :
 		case oexVIDSUB_DAVINCI :
-			m_uType = x_uType;
+			m_uType = oexVIDSUB_VFL2;
 			m_pDevice = OexAllocConstruct< CV4l2 >();
 			break;
 
