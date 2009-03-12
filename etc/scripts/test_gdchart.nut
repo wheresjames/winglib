@@ -60,7 +60,7 @@ function _init() : ( _g )
 {
 	_g.server = CHttpServer();
 
-	_g.server.SetCallback( _self.queue(), "OnServerEvent", "OnProcessRequest" );
+	_g.server.SetSessionCallback( _self.queue(), "OnProcessRequest" );
 
 	if ( !_g.server.Start( 1234 ) )
 		_self.alert( "Unable to start http server" );

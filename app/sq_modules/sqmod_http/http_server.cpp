@@ -88,7 +88,7 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	else
 		m_pSessionMsgQueue->execute( &sReply, oexT( "." ), m_sSession, parRequest, parHeaders, parGet, parPost );
 
-	oexSHOW( sReply.c_str() );
+//	oexSHOW( sReply.c_str() );
 
 	sqbind::CSqMap mReply;
 	mReply.deserialize( sReply );

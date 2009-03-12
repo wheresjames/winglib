@@ -73,17 +73,17 @@ public:
 	stdString path( const stdString &sPath );
 
 	/// Creates a thread
-	SquirrelObject spawn( const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
+	int spawn( const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
 
 	/// Executes the specified script
-	SquirrelObject run( const stdString &sPath, const stdString &sScript );
+	int run( const stdString &sPath, const stdString &sScript );
 
 	/// Execute functions
-	SquirrelObject execute( const stdString &sPath, const stdString &sFunction );
-	SquirrelObject execute1( const stdString &sPath, const stdString &sFunction, const stdString &sP1 );
-	SquirrelObject execute2( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2 );
-	SquirrelObject execute3( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 );
-	SquirrelObject execute4( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 );
+	int execute( const stdString &sPath, const stdString &sFunction );
+	int execute1( const stdString &sPath, const stdString &sFunction, const stdString &sP1 );
+	int execute2( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2 );
+	int execute3( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 );
+	int execute4( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 );
 
 	void sleep( int nMsTime );
 

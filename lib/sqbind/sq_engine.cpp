@@ -50,7 +50,8 @@ int CSqEngineExport::load_module( const stdString &sModule, const stdString &sPa
 
 int CSqEngineExport::kill( const stdString &sPath )
 {	CSqMsgQueue *q = queue();
-	if ( q ) q->kill( oexNULL, sPath );
+	if ( !q ) return -1;
+	return q->kill( oexNULL, sPath );
 }
 
 void CSqEngineExport::exit( int nExitCode )
@@ -60,39 +61,46 @@ void CSqEngineExport::exit( int nExitCode )
 stdString CSqEngineExport::path( const stdString &sPath )
 {   return OnPath( sPath ); }
 
-SquirrelObject CSqEngineExport::spawn( const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile )
+int CSqEngineExport::spawn( const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile )
 {	CSqMsgQueue *q = queue();
-	if ( q ) q->spawn( oexNULL, sPath, sName, sScript, bFile );
+	if ( !q ) return -1;
+	return q->spawn( oexNULL, sPath, sName, sScript, bFile );
 }
 
-SquirrelObject CSqEngineExport::run( const stdString &sPath, const stdString &sScript )
+int CSqEngineExport::run( const stdString &sPath, const stdString &sScript )
 {	CSqMsgQueue *q = queue();
-	if ( q ) q->run( oexNULL, sPath, sScript );
+	if ( !q ) return -1;
+	return q->run( oexNULL, sPath, sScript );
 }
 
-SquirrelObject CSqEngineExport::execute( const stdString &sPath, const stdString &sFunction )
+int CSqEngineExport::execute( const stdString &sPath, const stdString &sFunction )
 {	CSqMsgQueue *q = queue();
-	if ( q ) q->execute( oexNULL, sPath, sFunction );
+	if ( !q ) return -1;
+	return q->execute( oexNULL, sPath, sFunction );
 }
 
-SquirrelObject CSqEngineExport::execute1( const stdString &sPath, const stdString &sFunction, const stdString &sP1 )
+int CSqEngineExport::execute1( const stdString &sPath, const stdString &sFunction, const stdString &sP1 )
 {	CSqMsgQueue *q = queue();
-	if ( q ) q->execute( oexNULL, sPath, sFunction, sP1 );
+	if ( !q ) return -1;
+	return q->execute( oexNULL, sPath, sFunction, sP1 );
 }
 
-SquirrelObject CSqEngineExport::execute2( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2 )
+int CSqEngineExport::execute2( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2 )
 {	CSqMsgQueue *q = queue();
-	if ( q ) q->execute( oexNULL, sPath, sFunction, sP1, sP2 );
+	if ( !q ) return -1;
+	return q->execute( oexNULL, sPath, sFunction, sP1, sP2 );
 }
 
-SquirrelObject CSqEngineExport::execute3( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 )
+int CSqEngineExport::execute3( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 )
 {	CSqMsgQueue *q = queue();
-	if ( q ) q->execute( oexNULL, sPath, sFunction, sP1, sP2, sP3 );
+	if ( !q ) return -1;
+	return q->execute( oexNULL, sPath, sFunction, sP1, sP2, sP3 );
 }
 
-SquirrelObject CSqEngineExport::execute4( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 )
+int CSqEngineExport::execute4( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 )
 {	CSqMsgQueue *q = queue();
-	if ( q ) q->execute( oexNULL, sPath, sFunction, sP1, sP2, sP3, sP4 );
+	if ( !q ) return -1;
+	return q->execute( oexNULL, sPath, sFunction, sP1, sP2, sP3, sP4 );
 }
 
 void CSqEngineExport::sleep( int nMsTime )
