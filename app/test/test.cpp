@@ -358,6 +358,16 @@ oex::oexRESULT TestStrings()
 		return -9;
 
     oex::oexGUID guid;
+	oexCSTR pTest = oexT( "01234567-8901-2345-6789-012345678901" );
+	static const oexGUID guidTest =
+	{ 0x01234567, 0x8901, 0x2345, { 0x67, 0x89, 0x01, 0x23, 0x45, 0x67, 0x89, 0x01 } };
+	
+	if ( !oexVERIFY( guid::CmpGuid( guid::StringToGuid( &guid, pTest, 36 ), &guidTest ) ) )
+		return -10;
+	
+	if ( !oexVERIFY( oex::CStr( pTest ).GuidToString( &guidTest ) == pTest ) )
+		return -10;	
+
 	str1 = oexT( "850A51F0-2CF7-4412-BB83-1AEF68BAD88C" );
 	if ( !oexVERIFY( str2.GuidToString( str1.StringToGuid( &guid ) ) == str1 ) )
 		return -10;
@@ -1850,7 +1860,7 @@ public:
 oex::oexINT OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
 						   oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
 {
-	if ( (int)x_pData != 6789 )
+	if ( oexPtrToInt( x_pData ) != 6789 )
 		return 0;
 
 	return 0;
@@ -1858,7 +1868,7 @@ oex::oexINT OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oex
 
 oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
 {
-	if ( (int)x_pData != 9876 )
+	if ( oexPtrToInt( x_pData ) != 9876 )
 		return 0;
 
 	x_pSession->Content() << oexT( "Hello World!" );

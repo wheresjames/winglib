@@ -979,17 +979,17 @@ namespace guid
 
         return os::CSys::StrFmt( x_pStr, x_uMax,
                  oexTT( T_CHAR, "%0.8lX-%0.4lX-%0.4lX-%0.2lX%0.2lX-%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX" ),
-			     (oexUINT) x_pGuid->Data1,
-			     (oexUINT) x_pGuid->Data2,
-			     (oexUINT) x_pGuid->Data3,
-			     (oexUINT) x_pGuid->Data4[ 0 ],
-			     (oexUINT) x_pGuid->Data4[ 1 ],
-			     (oexUINT) x_pGuid->Data4[ 2 ],
-			     (oexUINT) x_pGuid->Data4[ 3 ],
-			     (oexUINT) x_pGuid->Data4[ 4 ],
-			     (oexUINT) x_pGuid->Data4[ 5 ],
-			     (oexUINT) x_pGuid->Data4[ 6 ],
-			     (oexUINT) x_pGuid->Data4[ 7 ] );
+			     (oexLONG) x_pGuid->Data1,
+			     (oexLONG) x_pGuid->Data2,
+			     (oexLONG) x_pGuid->Data3,
+			     (oexLONG) x_pGuid->Data4[ 0 ],
+			     (oexLONG) x_pGuid->Data4[ 1 ],
+			     (oexLONG) x_pGuid->Data4[ 2 ],
+			     (oexLONG) x_pGuid->Data4[ 3 ],
+			     (oexLONG) x_pGuid->Data4[ 4 ],
+			     (oexLONG) x_pGuid->Data4[ 5 ],
+			     (oexLONG) x_pGuid->Data4[ 6 ],
+			     (oexLONG) x_pGuid->Data4[ 7 ] );
     }
 
     template< typename T_CHAR, typename T_GUID >
@@ -1011,8 +1011,8 @@ namespace guid
 	    // Verify separators
 	    // Example : DD05F574-2D69-4463-95DD-F76C9F7C5E6D
 	    //                   ^    ^    ^    ^
-	    if (	x_pString[ 8 ] != '-' || x_pString[ 13 ] != '-' ||
-			    x_pString[ 18 ] != '-' || x_pString[ 23 ] != '-' )
+	    if (	x_pString[ 8 ] != oexT( '-' ) || x_pString[ 13 ] != oexT( '-' ) ||
+			    x_pString[ 18 ] != oexT( '-' ) || x_pString[ 23 ] != oexT( '-' ) )
 		    return oexNULL;
 
 	    // Convert each component

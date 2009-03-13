@@ -147,7 +147,7 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 		// Attempt to find function entry point
 		pf = dlsym( m_hModule, x_pFunctionName );
 		if ( !oexCHECK_PTR( pf ) )
-		{	oexERROR( errno, CStr().Fmt( "dlsym( %d, '%s' )", (int)m_hModule, oexStrToMbPtr( x_pFunctionName ) ) );
+		{	oexERROR( errno, CStr().Fmt( "dlsym( %d, '%s' )", oexPtrToInt( m_hModule ), oexStrToMbPtr( x_pFunctionName ) ) );
 			return oexNULL;
 		} // end if
 	} // end try

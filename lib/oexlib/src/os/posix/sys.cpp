@@ -198,7 +198,7 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 	oexRESULT res = 0;
 
 	// Create format string
-	if ( 0 > vsnprintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
+	if ( 0 > vsnprintf( x_pDst, x_uMax, x_pFmt, x_pArgs ) )
 	{
 		// Null terminate buffer
 		x_pDst[ x_uMax - 1 ] = 0;
@@ -296,7 +296,7 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 	oexRESULT res = 0;
 
 	// Create format string
-	if ( 0 > vswprintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
+	if ( 0 > vswprintf( x_pDst, x_uMax, x_pFmt, x_pArgs ) )
 	{
 		// Null terminate buffer
 		x_pDst[ x_uMax - 1 ] = 0;

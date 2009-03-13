@@ -126,10 +126,10 @@
 #	define oexPRETTYFUNCTION	__FUNCTION__ oexT( "()" )
 #endif
 
-#if defined( FILE_OFFSET_BITS ) && 64 == FILE_OFFSET_BITS
+//#if defined( FILE_OFFSET_BITS ) && 64 == FILE_OFFSET_BITS
 	typedef long unsigned int		oexSIZE_T;
-#else
-	typedef unsigned int			oexSIZE_T;
-#endif
+//#else
+//	typedef unsigned int			oexSIZE_T;
+//#endif
 
 

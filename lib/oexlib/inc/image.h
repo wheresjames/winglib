@@ -38,10 +38,10 @@
 
 struct oexSRect
 {
-	oexINT32	left;
-	oexINT32	top;
-	oexINT32	right;
-	oexINT32	bottom;
+	oexLONG		left;
+	oexLONG		top;
+	oexLONG		right;
+	oexLONG		bottom;
 };
 
 struct oexSRgbQuad
@@ -52,7 +52,7 @@ struct oexSRgbQuad
 	oexBYTE		rgbReserved;
 };
 
-typedef oexUINT oexSColorRef;
+typedef oexULONG oexSColorRef;
 
 #define oexRGB( r, g, b ) ( (OEX_NAMESPACE::oexSColorRef)( ( ( (long)(r) & 0xff ) << 24 ) \
 														 | ( ( (long)(g) & 0xff ) << 16 ) \

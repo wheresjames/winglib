@@ -51,7 +51,7 @@ CFMap::t_HFILEMAP CFMap::Create( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oe
         return CFMap::c_Failed;
 	} // end if
 
-	int fd = (int)x_hFile;
+	int fd = oexPtrToInt( x_hFile );
 //	int fd = dup( (int)x_hFile );
 	if ( 0 > fd )
 	{	oexERROR( -1, oexT( "dup() returned error : unable to duplicate file handle" ) );
@@ -134,11 +134,11 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_l
 
 	// Attempt to open existing file
 	int fd = shm_open( sPath.Ptr(), O_RDWR, 0777 );
-	if ( (int)c_Failed == fd )
+	if ( oexPtrToInt( c_Failed ) == fd )
 	{
 		// Create file
 		fd = shm_open( sPath.Ptr(), O_RDWR | O_CREAT, 0777 );
-		if ( (int)c_Failed == fd )
+		if ( oexPtrToInt( c_Failed ) == fd )
 		{	oexERROR( errno, CStr().Fmt( oexT( "shm_open failed : %s" ), sPath.Ptr() ) );
 			return CFMap::c_Failed;
 		} // end if
@@ -208,7 +208,7 @@ oexBOOL CFMap::Release( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexINT64 
 	if ( c_Failed != x_hFileMap )
 	{
 		// Attempt to retrieve path
-		CStr8 sPath = g_lstFileMappingInfo[ (int)x_hFileMap ];
+		CStr8 sPath = g_lstFileMappingInfo[ oexPtrToInt( x_hFileMap ) ];
 
 		// Unlink this name
 		if ( sPath.Length() )
