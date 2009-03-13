@@ -353,6 +353,11 @@ public:
 	/// vprintf
 	static int vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs );
 
+public:
+
+	/// Pumps thread messages / only applies to Windows
+	static oexBOOL PumpThreadMessages();
+
 };
 
 //==================================================================

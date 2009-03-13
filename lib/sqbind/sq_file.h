@@ -62,10 +62,10 @@ namespace sqbind
 		{	return oex::CFile().CreateAlways( sFile.c_str() ).Write( sData.c_str(), sData.length() ); }
 
 		static int mkdir( const stdString &sDir )
-		{	oexCreatePath( sDir.c_str() ); }
+		{	return oexCreatePath( sDir.c_str() ); }
 
 		static int rmdir( const stdString &sDir )
-		{	oexDeletePath( sDir.c_str() ); }
+		{	return oexDeletePath( sDir.c_str() ); }
 
 		static int exists( const stdString &sFile )
 		{	return oexExists( sFile.c_str() ); }

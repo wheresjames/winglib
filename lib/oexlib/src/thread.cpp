@@ -91,7 +91,8 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 		// Loop while we're not supposed to stop
 		if ( bInit && pThread->m_evStop.Wait( 0 ) )
 			while ( pThread->DoThread( pData ) &&
-					pThread->m_evStop.Wait( uSleep ) );
+					pThread->m_evStop.Wait( uSleep ) )
+				os::CSys::PumpThreadMessages();
 
 		// Kill the thread
 		nRet = pThread->EndThread( pData );

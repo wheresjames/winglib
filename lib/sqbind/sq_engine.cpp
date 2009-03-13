@@ -493,6 +493,7 @@ oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e )
 	oexERROR( 0, sErr );
 	m_sErr = sErr.Ptr();
 	oexRTRACE( oexT( "%s\n" ), m_sErr.c_str() );
+	oexPrintf( oexT( "%s\n" ), m_sErr.c_str() );
 	return x_nReturn;
 }
 

@@ -157,7 +157,8 @@ public:
 	/**
 		\param [in] x_pPath			- Path for the log file
 		Opens the specified path for logging
-		\return Returns non-zero if success
+
+		\return Returns non-zero if success
 
 		\see
 	*/
@@ -171,7 +172,8 @@ public:
 		\param [in] x_pPath			- Path for the log file
 
 		Opens the specified path for logging
-		\return Returns non-zero if success
+
+		\return Returns non-zero if success
 
 		\see
 	*/

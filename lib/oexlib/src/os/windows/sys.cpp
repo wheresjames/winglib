@@ -631,3 +631,33 @@ oexUINT CSys::GetCurrentThreadId()
 {	return ::GetCurrentThreadId();
 }
 
+oexBOOL CSys::PumpThreadMessages()
+{
+    MSG msg;
+
+    // See if a message is waiting
+    while ( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
+    {
+        // Get if from the queue
+        if( GetMessage( &msg, NULL, 0, 0 ) )
+        {
+            // Give the dialog box a chance at this message
+            if ( !IsDialogMessage( msg.hwnd, &msg ) )
+            {
+                // Translate the message
+                TranslateMessage ( &msg );
+
+                // Dispatch the message
+                DispatchMessage ( &msg );
+
+            } // end if
+
+        } // end else
+
+        else return oexFALSE;
+
+    } // end if
+
+    return oexTRUE;
+}
+

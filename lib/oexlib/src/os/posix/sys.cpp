@@ -665,5 +665,11 @@ oexUINT CSys::GetCurrentThreadId()
 {	return ::pthread_self();
 }
 
+oexBOOL CSys::PumpThreadMessages()
+{
+	return oex::oexFALSE;
+}
+
+
 
 

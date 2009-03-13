@@ -454,8 +454,8 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 		        UINT uRet = WaitForSingleObject( m_hSocketEvent, x_uTimeout );
 
 		        // Check for timeout or error
-		        if ( uRet != WAIT_OBJECT_0 )
-                    return 0;
+//		        if ( uRet != WAIT_OBJECT_0 )
+//                   return 0;
 
             } // end if
 
@@ -465,7 +465,9 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 		    // Get network events
             WSANETWORKEVENTS wne; os::CSys::Zero( &wne, sizeof( wne ) );
 		    if ( SOCKET_ERROR == WSAEnumNetworkEvents( (SOCKET)m_hSocket, m_hSocketEvent, &wne ) )
+			{	oexERROR( WSAGetLastError(), "WSAEnumNetworkEvents() failed" );
 			    return 0;
+			} // end if
 
             // Save the status of all events
             for ( oexUINT uMask = 1; uMask < eAllEvents; uMask <<= 1 )
