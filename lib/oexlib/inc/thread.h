@@ -489,7 +489,7 @@ protected:
 	CResource& GetStopEvent() { return m_evStop; }
 
 	/// Returns a reference to the init event
-	CResource& GetInitEvent() { return m_evStop; }
+	CResource& GetInitEvent() { return m_evInit; }
 
 private:
 

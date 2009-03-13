@@ -36,7 +36,6 @@
 
 using namespace sqbind;
 
-
 CScriptThread::CScriptThread()
 {	m_bQuit = oex::oexFALSE;
 	m_pModuleManager = oexNULL;
@@ -79,8 +78,8 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 	m_cSqEngine.SetMessageQueue( this );
 
 	// Let the user know we're starting a thread
-	oexPrintf( oexT( "Spawning script thread : 0x%08x : %s : %s\n" ),
-			   (unsigned int)oexGetCurrentThreadId(), m_sName.c_str(), m_sScript.c_str() );
+	oexPrintf( oexT( "Spawning : 0x%08x : %s : %s\n" ),
+			  (unsigned int)oexGetCurrentThreadId(), m_sName.c_str(), oexGetFileName( m_sScript.c_str() ).Ptr() );
 
 	// Start the script
 	if ( !m_cSqEngine.Load( m_sScript.c_str(), m_bFile, FALSE ) )
@@ -122,7 +121,8 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 {
 	// Let the user know we're starting a thread
-	oexPrintf( oexT( "Exiting script thread : %s : %s\n" ), m_sName.c_str(), m_sScript.c_str() );
+	oexPrintf( oexT( "Exiting : 0x%08x : %s\n" ), 
+			   (unsigned int)oexGetCurrentThreadId(), m_sName.c_str() );
 
 	// Lose child scripts
 	DestroyChildScripts();
@@ -141,10 +141,6 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 	// Call to send message to child script
 	else if ( sMsg == oexT( "msg" ) )
 		OnMsg( mapParams, pReply );
-
-	// Pass this on to the script
-//	else if ( sMsg == oexT( "onmsg" ) )
-//		OnOnMsg( mapParams, pReply );
 
 	// Quit command
 	else if ( sMsg == oexT( "kill" ) )
@@ -253,8 +249,6 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 	// Grab the path
 	stdString sName = mapParams[ oexT( "name" ) ];
 
-	oexSHOW( sName.c_str() );
-
 	// Lose current script engine at this tag if any
 	t_ScriptList::iterator it = m_lstScript.find( sName );
 	if ( m_lstScript.end() != it )
@@ -287,6 +281,11 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 
 		// Create the thread
 		pSt->Start();
+
+		// Wait for thread to start if reply buffer
+		if ( pReply )
+			if ( pSt->GetInitEvent().Wait() )
+				*pReply = "FAILED";
 
 	} // end if
 }

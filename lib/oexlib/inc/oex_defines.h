@@ -208,6 +208,9 @@
 #define oexDelete							OEX_NAMESPACE::CFile::Delete
 #define oexExists							OEX_NAMESPACE::CFile::Exists
 #define oexBuildPath						OEX_NAMESPACE::CStr::BuildPath
+#define oexGetPath( f )						OEX_NAMESPACE::CStr( f ).GetPath()
+#define oexGetFileName( f )					OEX_NAMESPACE::CStr( f ).GetFileName()
+#define oexGetFileExtension( f )			OEX_NAMESPACE::CStr( f ).GetFileExtension()
 #define oexGetModuleFileName				OEX_NAMESPACE::os::CBaseFile::GetModFileName
 #define oexGetModulePath					OEX_NAMESPACE::os::CBaseFile::GetModPath
 #define oexFileGetContents( f )				OEX_NAMESPACE::CFile().OpenExisting( f ).Read()
