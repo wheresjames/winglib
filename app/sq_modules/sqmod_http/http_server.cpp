@@ -76,15 +76,19 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	sqbind::stdString parHeaders = oex::CParser::Serialize( x_pSession->RxHeaders() ).Ptr();
 	sqbind::stdString parRequest = oex::CParser::Serialize( x_pSession->Request() ).Ptr();
 
+	// Are we executing a child script?
 	if ( m_sScript.length() )
 	{
 		oex::CStr sChild = oexGuidToString();
 		m_pSessionMsgQueue->spawn( &sReply, oexT( "." ), sChild.Ptr(), m_sScript, m_bFile );
 		m_pSessionMsgQueue->execute( &sReply, sChild.Ptr(), m_sSession, parRequest, parHeaders, parGet, parPost );
-		m_pSessionMsgQueue->kill( oexNULL, sChild.Ptr() );
+
+		// Hmmm, may let the child kill it self for more flexibility
+//		m_pSessionMsgQueue->kill( oexNULL, sChild.Ptr() );
 
 	} // end if
 
+	// Execute function in calling script
 	else
 		m_pSessionMsgQueue->execute( &sReply, oexT( "." ), m_sSession, parRequest, parHeaders, parGet, parPost );
 

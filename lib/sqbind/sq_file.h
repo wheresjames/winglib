@@ -61,6 +61,24 @@ namespace sqbind
 		static int put_contents( const stdString &sFile, const stdString &sData )
 		{	return oex::CFile().CreateAlways( sFile.c_str() ).Write( sData.c_str(), sData.length() ); }
 
+		static int mkdir( const stdString &sDir )
+		{	oexCreatePath( sDir.c_str() ); }
+
+		static int rmdir( const stdString &sDir )
+		{	oexDeletePath( sDir.c_str() ); }
+
+		static int exists( const stdString &sFile )
+		{	return oexExists( sFile.c_str() ); }
+
+		static stdString get_filename( const stdString &sFile )
+		{	return oexGetFileName( sFile.c_str() ).Ptr(); }
+
+		static stdString get_path( const stdString &sFile )
+		{	return oexGetPath( sFile.c_str() ).Ptr(); }
+
+		static stdString get_extension( const stdString &sFile )
+		{	return oexGetFileExtension( sFile.c_str() ).Ptr(); }
+
 		static void Register( SquirrelVM &vm )
 		{
 			SqPlus::SQClassDef< CSqFile >( vm, oexT( "CSqFile" ) )
@@ -70,6 +88,12 @@ namespace sqbind
 					. func( &CSqFile::Read,					oexT( "Read" ) )
 					. staticFunc( &CSqFile::get_contents,	oexT( "get_contents" ) )
 					. staticFunc( &CSqFile::put_contents,	oexT( "put_contents" ) )
+					. staticFunc( &CSqFile::mkdir,			oexT( "mkdir" ) )
+					. staticFunc( &CSqFile::rmdir,			oexT( "rmdir" ) )
+					. staticFunc( &CSqFile::exists,			oexT( "exists" ) )
+					. staticFunc( &CSqFile::get_filename,	oexT( "get_filename" ) )
+					. staticFunc( &CSqFile::get_path,		oexT( "get_path" ) )
+					. staticFunc( &CSqFile::get_extension,	oexT( "get_extension" ) )
 				;
 		}
 

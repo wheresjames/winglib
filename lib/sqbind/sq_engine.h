@@ -72,6 +72,9 @@ public:
 	/// Returns the file path to the current script
 	stdString path( const stdString &sPath );
 
+	/// Returns the file path to the current executable
+	stdString root( const stdString &sPath );
+
 	/// Creates a thread
 	int spawn( const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
 
@@ -79,11 +82,11 @@ public:
 	int run( const stdString &sPath, const stdString &sScript );
 
 	/// Execute functions
-	int execute( const stdString &sPath, const stdString &sFunction );
-	int execute1( const stdString &sPath, const stdString &sFunction, const stdString &sP1 );
-	int execute2( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2 );
-	int execute3( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 );
-	int execute4( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 );
+	stdString execute( int nRet, const stdString &sPath, const stdString &sFunction );
+	stdString execute1( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1 );
+	stdString execute2( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2 );
+	stdString execute3( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 );
+	stdString execute4( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 );
 
 	void sleep( int nMsTime );
 

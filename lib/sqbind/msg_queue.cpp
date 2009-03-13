@@ -67,6 +67,7 @@ CSqMsgQueue::SMsg::SMsg( const CSqMsgQueue::SMsg &x_rMsg )
 /// Default constructor
 CSqMsgQueue::CSqMsgQueue()
 {
+	m_uOwnerThreadId = 0;
 }
 
 /// Destructor
@@ -112,9 +113,8 @@ oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapPara
 
 //	oexPrintf( oexT( "CSqMsgQueue::Msg() : %s -> %s, 0x%08x, 0x%08x\n" ), sPath.c_str(), sMsg.c_str(), m_uCurrentThreadId, (unsigned int)oexGetCurrentThreadId() );
 
-	// If it's our own queue and thread calling
-	if ( ( !sPath.length() || sPath == oexT( "." ) )
-	 	 && m_uCurrentThreadId && oexGetCurrentThreadId() == m_uCurrentThreadId )
+	// If it's our own thread calling
+	if ( m_uOwnerThreadId && oexGetCurrentThreadId() == m_uOwnerThreadId )
 	{
 		// Just process the message directly
 		if ( pmapParams )

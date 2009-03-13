@@ -61,6 +61,9 @@ void CSqEngineExport::exit( int nExitCode )
 stdString CSqEngineExport::path( const stdString &sPath )
 {   return OnPath( sPath ); }
 
+stdString CSqEngineExport::root( const stdString &sPath )
+{   return oexGetModulePath( sPath.c_str() ).Ptr(); }
+
 int CSqEngineExport::spawn( const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile )
 {	CSqMsgQueue *q = queue();
 	if ( !q ) return -1;
@@ -73,34 +76,79 @@ int CSqEngineExport::run( const stdString &sPath, const stdString &sScript )
 	return q->run( oexNULL, sPath, sScript );
 }
 
-int CSqEngineExport::execute( const stdString &sPath, const stdString &sFunction )
+stdString CSqEngineExport::execute( int nRet, const stdString &sPath, const stdString &sFunction )
 {	CSqMsgQueue *q = queue();
-	if ( !q ) return -1;
-	return q->execute( oexNULL, sPath, sFunction );
+	if ( !q )
+		return oexT( "" );
+
+	if ( !nRet )
+	{	q->execute( oexNULL, sPath, sFunction );
+		return oexT( "" );
+	} // end if
+
+	stdString sRet;
+	q->execute( &sRet, sPath, sFunction );
+	return sRet;
 }
 
-int CSqEngineExport::execute1( const stdString &sPath, const stdString &sFunction, const stdString &sP1 )
+stdString CSqEngineExport::execute1( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1 )
 {	CSqMsgQueue *q = queue();
-	if ( !q ) return -1;
-	return q->execute( oexNULL, sPath, sFunction, sP1 );
+	if ( !q )
+		return oexT( "" );
+
+	if ( !nRet )
+	{	q->execute( oexNULL, sPath, sFunction, sP1 );
+		return oexT( "" );
+	} // end if
+
+	stdString sRet;
+	q->execute( &sRet, sPath, sFunction, sP1 );
+	return sRet;
 }
 
-int CSqEngineExport::execute2( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2 )
+stdString CSqEngineExport::execute2( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2 )
 {	CSqMsgQueue *q = queue();
-	if ( !q ) return -1;
-	return q->execute( oexNULL, sPath, sFunction, sP1, sP2 );
+	if ( !q )
+		return oexT( "" );
+
+	if ( !nRet )
+	{	q->execute( oexNULL, sPath, sFunction, sP1, sP2 );
+		return oexT( "" );
+	} // end if
+
+	stdString sRet;
+	q->execute( &sRet, sPath, sFunction, sP1, sP2 );
+	return sRet;
 }
 
-int CSqEngineExport::execute3( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 )
+stdString CSqEngineExport::execute3( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 )
 {	CSqMsgQueue *q = queue();
-	if ( !q ) return -1;
-	return q->execute( oexNULL, sPath, sFunction, sP1, sP2, sP3 );
+	if ( !q )
+		return oexT( "" );
+
+	if ( !nRet )
+	{	q->execute( oexNULL, sPath, sFunction, sP1, sP2, sP3 );
+		return oexT( "" );
+	} // end if
+
+	stdString sRet;
+	q->execute( &sRet, sPath, sFunction, sP1, sP2, sP3 );
+	return sRet;
 }
 
-int CSqEngineExport::execute4( const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 )
+stdString CSqEngineExport::execute4( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 )
 {	CSqMsgQueue *q = queue();
-	if ( !q ) return -1;
-	return q->execute( oexNULL, sPath, sFunction, sP1, sP2, sP3, sP4 );
+	if ( !q )
+		return oexT( "" );
+
+	if ( !nRet )
+	{	q->execute( oexNULL, sPath, sFunction, sP1, sP2, sP3, sP4 );
+		return oexT( "" );
+	} // end if
+
+	stdString sRet;
+	q->execute( &sRet, sPath, sFunction, sP1, sP2, sP3, sP4 );
+	return sRet;
 }
 
 void CSqEngineExport::sleep( int nMsTime )
@@ -285,6 +333,7 @@ oex::oexBOOL CSqEngine::Init()
 											.func( &CSqEngineExport::kill,              oexT( "kill" ) )
 											.func( &CSqEngineExport::queue,             oexT( "queue" ) )
 											.func( &CSqEngineExport::path,              oexT( "path" ) )
+											.func( &CSqEngineExport::root,              oexT( "root" ) )
 										  ;
 
 		// Set base class pointer

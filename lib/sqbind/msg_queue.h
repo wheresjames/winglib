@@ -103,13 +103,13 @@ public:
 
 	};
 
+	/// Process a single message from the queue
+	virtual oex::oexBOOL ProcessMsg( stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply );
+
 protected:
 
 	/// Process messages
 	oex::oexBOOL ProcessMsgs();
-
-	/// Process a single message from the queue
-	virtual oex::oexBOOL ProcessMsg( stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply );
 
 	/// Over-ride for thread killing function
 	virtual void KillThread() {}
@@ -137,14 +137,18 @@ public:
 						  const stdString &sP1, const stdString &sP2, const stdString &sP3,
 						  const stdString &sP4 );
 
-	/// Sets the current thread id
-	void SetCurrentThreadId( oex::oexUINT x_uCurrentThreadId )
-	{	m_uCurrentThreadId = x_uCurrentThreadId; }
+	/// Sets the owning thread id
+	void SetOwnerThreadId( oex::oexUINT x_uOwnerThreadId )
+	{	m_uOwnerThreadId = x_uOwnerThreadId; }
+
+	/// Returns the owning thread id
+	oex::oexUINT GetOwnerThreadId()
+	{	return m_uOwnerThreadId; }
 
 private:
 
-	/// Our thread id
-	oex::oexUINT								m_uCurrentThreadId;
+	/// Owner thread id
+	oex::oexUINT								m_uOwnerThreadId;
 
 	/// Message queue lock
 	oexLock		                                m_cLock;

@@ -69,7 +69,7 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 		return oex::oexFALSE;
 
 	// Save thread id
-	SetCurrentThreadId( oexGetCurrentThreadId() );
+	SetOwnerThreadId( oexGetCurrentThreadId() );
 
 	// Set module manager
 	m_cSqEngine.SetModuleManager( m_pModuleManager );
@@ -121,8 +121,11 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 {
 	// Let the user know we're starting a thread
-	oexPrintf( oexT( "Exiting : 0x%08x : %s\n" ), 
+	oexPrintf( oexT( "Exiting : 0x%08x : %s\n" ),
 			   (unsigned int)oexGetCurrentThreadId(), m_sName.c_str() );
+
+	// No more owner thread
+	SetOwnerThreadId( 0 );
 
 	// Lose child scripts
 	DestroyChildScripts();
@@ -135,6 +138,10 @@ oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 
 oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply )
 {
+	// Just post it to the queue if not our message
+	if ( GetOwnerThreadId() != oexGetCurrentThreadId() )
+		return Msg( stdString(), sMsg, &mapParams, pReply );
+
 	if ( sMsg == oexT( "spawn" ) )
 		OnSpawn( mapParams, pReply );
 
@@ -177,14 +184,20 @@ oex::oexBOOL CScriptThread::ProcessMsg( stdString &sPath, stdString &sMsg, CSqMa
 	// All the way to the top?
 	else if ( sPath[ 0 ] == oexT( '/' ) || sPath[ 0 ] == oexT( '\\' ) )
 	{
-		sPath = sPath.substr( 1 );
-
 		// Route to parent if any
 		if ( m_pParentScript )
-			return m_pParentScript->Msg( sPath, oexT( "msg" ), &mapParams, pReply );
+//			return m_pParentScript->Msg( sPath, sMsg, &mapParams, pReply );
+			return m_pParentScript->ProcessMsg( sPath, sMsg, mapParams, pReply );
 
-		// I guess it's ours
-		return ExecuteMsg( sMsg, mapParams, pReply );
+		// Shave off parent sep
+		while ( sPath[ 0 ] == oexT( '/' )
+				|| sPath[ 0 ] == oexT( '\\' )
+				|| sPath[ 0 ] == oexT( '.' ) )
+			sPath = sPath.substr( 1 );
+
+		// Is it ours?
+		if ( !sPath.length() )
+			return ExecuteMsg( sMsg, mapParams, pReply );
 
 	} // end if
 
@@ -210,14 +223,16 @@ oex::oexBOOL CScriptThread::ProcessMsg( stdString &sPath, stdString &sMsg, CSqMa
 		if ( !m_pParentScript )
 			return oex::oexFALSE;
 
-		return m_pParentScript->Msg( sPath, sMsg, &mapParams, pReply );
+//		return m_pParentScript->Msg( sPath, sMsg, &mapParams, pReply );
+		return m_pParentScript->ProcessMsg( sPath, sMsg, mapParams, pReply );
 
 	} // end if
 
 	// Route to child
 	t_ScriptList::iterator it = m_lstScript.find( sToken );
 	if ( m_lstScript.end() != it && it->second )
-		return it->second->Msg( sPath, sMsg, &mapParams, pReply );
+//		return it->second->Msg( sPath, sMsg, &mapParams, pReply );
+		return it->second->ProcessMsg( sPath, sMsg, mapParams, pReply );
 
 	return oex::oexFALSE;
 }

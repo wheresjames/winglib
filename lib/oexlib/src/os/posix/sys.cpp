@@ -367,20 +367,39 @@ oexPVOID CSys::MemSet( oexPVOID x_pDst, oexINT x_nCh, oexUINT x_uSize )
 	return ::memset( x_pDst, x_nCh, x_uSize );
 }
 
+static oexINT64 g_int;
+static oexGUID g_random;
+struct SRandomSeeds
+{	oexPVOID		pFunction;
+	oexPVOID		pHeap;
+	oexINT64		nCount;
+};
+
+// +++ Probably be nice to have a bit stronger randomizer here.
 oexGUID * CSys::CreateGuid( oexGUID *pGuid )
 {
-// +++ Need implementation for the ARM
-#if !defined( OEX_NOUUID )
+	if ( !oexCHECK_PTR( pGuid ) )
+		return oexNULL;
 
-//	uuid_generate( (unsigned char*)pGuid );
+	oexGUID guid;
+	oss::CMd5::Transform( &guid, &g_random, sizeof( g_random ) );
 
-#else
+	// Use time to randomize guid
+	CSysTime st( CSysTime::eGmtTime );
+	oss::CMd5::Transform( &guid, &st, sizeof( st ) );
 
-#endif
+	// Use other random sources
+	SRandomSeeds rs = { (oexPVOID)&CreateGuid, CMem::GetRawAllocator().fMalloc( 4 ), g_int++ };
+	oss::CMd5::Transform( &guid, &rs, sizeof( rs ) );
+	CMem::GetRawAllocator().fFree( rs.pHeap );
+
+	// Add existing random data
+	guid::XorGuid( pGuid, &guid );
+	guid::XorGuid( pGuid, &g_random );
+	guid::XorGuid( &g_random, &guid );
 
     return pGuid;
 }
-
 
 void CSys::Sleep( oexUINT uMilliseconds, oexUINT uSeconds )
 {

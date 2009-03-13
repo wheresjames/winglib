@@ -36,7 +36,6 @@ function OnProcessRequest( request, headers, get, post )
 	m2.deserialize( "0=10,1=10,2=20" );
 
 	local data = CSqMulti();
-
 	data[ "0" ][ "title" ].set( "Set 0" );
 	for ( local i = 0; i < 21; i++ )
 		data[ "0" ][ "data" ][ format( "%04d", i ) ].set( ( ( i - 10 ) * ( i - 10 ) ).tostring() );
