@@ -83,7 +83,7 @@ typedef wchar_t                     oexCHARW;
 typedef oexCHARW *                  oexSTRW;
 typedef const oexCHARW *            oexCSTRW;
 
-#ifdef oexUNICODE
+#if defined( oexUNICODE )
 	typedef wchar_t					oexTCHAR;
 #else
 	typedef char					oexTCHAR;

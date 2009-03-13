@@ -48,9 +48,17 @@
 //#define OEX_ENABLE_RELEASE_MODE_MEM_CHECK
 #undef OEX_ENABLE_RELEASE_MODE_MEM_CHECK
 
+// Attempt to detect 64 bit processor
+#if defined( _WIN64 ) || defined( _M_X64 ) || defined( __amd64__ ) || defined( _LP64 )
+#	define OEX_CPU_64
+#endif
+
 // Are we using windows?
 #if defined( WIN32 ) || defined( _WIN32 )
 #	define OEX_WIN32
+#	define OEX_WINDOWS
+#elif defined( WIN64 ) || defined( _WIN64 )
+#	define OEX_WIN64
 #	define OEX_WINDOWS
 #else
 #	define OEX_LINUX
@@ -126,10 +134,11 @@
 #	define oexPRETTYFUNCTION	__FUNCTION__ oexT( "()" )
 #endif
 
-//#if defined( FILE_OFFSET_BITS ) && 64 == FILE_OFFSET_BITS
+#if defined( OEX_CPU_64 )
 	typedef long unsigned int		oexSIZE_T;
-//#else
-//	typedef unsigned int			oexSIZE_T;
-//#endif
+#else
+	typedef unsigned int			oexSIZE_T;
+#endif
+
 
 
