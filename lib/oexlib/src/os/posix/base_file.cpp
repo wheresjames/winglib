@@ -42,7 +42,9 @@ OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
 oexSTATIC_ASSERT( sizeof( CBaseFile::t_HFILE ) >= sizeof( FILE* ) );
+#if !defined( OEX_NODIRENT )
 oexSTATIC_ASSERT( sizeof( CBaseFile::t_HFIND ) >= sizeof( DIR* ) );
+#endif
 oexSTATIC_ASSERT( sizeof( CBaseFile::t_HFILE ) >= sizeof( int ) );
 
 const CBaseFile::t_HFILE CBaseFile::c_Invalid = (void*)-1;
@@ -190,7 +192,11 @@ oexBOOL CBaseFile::Flush( t_HFILE x_hFile )
 oexINT64 CBaseFile::Size( t_HFILE x_hFile )
 {
 	if ( c_Invalid == x_hFile )
-		return oexFALSE;
+		return 0;
+
+#if defined( OEX_NODIRENT )
+	return 0;
+#else
 
 	struct stat64 s64;
 
@@ -199,6 +205,8 @@ oexINT64 CBaseFile::Size( t_HFILE x_hFile )
 		return 0;
 
 	return s64.st_size;
+	
+#endif
 }
 
 oexINT64 CBaseFile::SetPointer( t_HFILE x_hFile, oexINT64 llMove, oexINT nMethod )
@@ -252,9 +260,13 @@ void CBaseFile_InitFindData( CBaseFile::SFindData *x_pFd )
 
 CBaseFile::t_HFIND CBaseFile::FindFirst( oexCSTR x_pPath, oexCSTR x_pMask, CBaseFile::SFindData *x_pFd )
 {
+#if defined( OEX_NODIRENT )
+	return oexNULL;
+#else
+
     // Sanity checks
     if ( !oexVERIFY_PTR( x_pPath ) || !oexVERIFY_PTR( x_pMask ) || !oexVERIFY_PTR( x_pFd ) )
-        return oexFALSE;
+        return oexNULL;
 
 	DIR *hDir = opendir( oexStrToMbPtr( CStr::BuildPath( x_pPath, x_pMask ).Ptr() ) );
 	if ( CBaseFile::c_InvalidFindHandle == hDir )
@@ -272,10 +284,14 @@ CBaseFile::t_HFIND CBaseFile::FindFirst( oexCSTR x_pPath, oexCSTR x_pMask, CBase
 	x_pFd->sName = oexMbToStr( pD->d_name );
 
     return (CBaseFile::t_HFIND)hDir;
+#endif
 }
 
 oexBOOL CBaseFile::FindNext( t_HFIND x_hFind, CBaseFile::SFindData *x_pFd )
 {
+#if defined( OEX_NODIRENT )
+	return oexFALSE;
+#else
 	DIR *hDir = (DIR*)x_hFind;
 
 	errno = 0;
@@ -289,10 +305,16 @@ oexBOOL CBaseFile::FindNext( t_HFIND x_hFind, CBaseFile::SFindData *x_pFd )
 	x_pFd->sName = oexMbToStr( pD->d_name );
 
     return oexTRUE;
+#endif
 }
 
 oexBOOL CBaseFile::FindClose( t_HFIND x_hFind )
-{	return closedir( (DIR*)x_hFind ) ? oexFALSE : oexTRUE;
+{
+#if defined( OEX_NODIRENT )
+	return closedir( (DIR*)x_hFind ) ? oexFALSE : oexTRUE;
+#else
+	return oexFALSE;
+#endif
 }
 
 

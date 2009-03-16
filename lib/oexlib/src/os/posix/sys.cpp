@@ -389,7 +389,8 @@ oexGUID * CSys::CreateGuid( oexGUID *pGuid )
 	oss::CMd5::Transform( &guid, &st, sizeof( st ) );
 
 	// Use other random sources
-	SRandomSeeds rs = { (oexPVOID)&CreateGuid, CMem::GetRawAllocator().fMalloc( 4 ), g_int++ };
+	SRandomSeeds rs = { (oexPVOID)&CreateGuid, CMem::GetRawAllocator().fMalloc( 4 ), 
+						g_int++ };
 	oss::CMd5::Transform( &guid, &rs, sizeof( rs ) );
 	CMem::GetRawAllocator().fFree( rs.pHeap );
 

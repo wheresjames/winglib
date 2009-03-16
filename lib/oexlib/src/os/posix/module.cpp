@@ -63,6 +63,10 @@ CModule::~CModule()
 
 oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 {
+#if defined( OEX_NODL )
+	return oexFALSE;
+#else
+
 	// Do we already have this module loaded?
 	if ( oexNULL != m_hModule && x_pFile && m_sFile == x_pFile )
 		return oexTRUE;
@@ -110,10 +114,16 @@ oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 	} // end if
 
 	return oexTRUE;
+
+#endif
 }
 
 void CModule::Destroy()
 {
+#if defined( OEX_NODL )
+	return;
+#else
+
 	// Lose the pointers
 	m_ptrs.Destroy();
 	m_map.Destroy();
@@ -123,10 +133,16 @@ void CModule::Destroy()
 	{	dlclose( m_hModule );
 		m_hModule = oexNULL;
 	} // end if
+
+#endif
 }
 
 oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 {
+#if defined( OEX_NODL )
+	return oexNULL;
+#else
+
 	// Sanity check
 	if ( !oexCHECK_PTR( x_pFunctionName ) || !*x_pFunctionName )
 	{	oexERROR( EINVAL, "Invalid function argument" );
@@ -179,6 +195,8 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 	m_ptrs[ index ] = pf;
 
 	return pf;
+
+#endif
 }
 
 oexPVOID CModule::Addr( oexINT i )

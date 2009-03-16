@@ -42,7 +42,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <dirent.h>
+
+#if !defined( OEX_NODIRENT )
+#	include <dirent.h>
+#endif
+
 //#include <stdio.h>
 #include <wchar.h>
 #include <string.h>
@@ -64,9 +68,9 @@ extern int daylight;
 
 #include <locale.h>
 
-#ifndef OEX_NOUUID
-#	include <uuid/uuid.h>
-#endif
+//#ifndef OEX_NOUUID
+//#	include <uuid/uuid.h>
+//#endif
 
 #include <sys/socket.h>
 #include <sys/epoll.h>

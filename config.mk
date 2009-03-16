@@ -134,10 +134,11 @@ else
 		
 			# Snapgear
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/usr/local/bin/arm-linux-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm-linux
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA)
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOSHM
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOSHM -DOEX_NODL
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
@@ -145,11 +146,12 @@ else
 		ifeq ($(TOOLS),codesourcery)
 
 			# Google Android
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-none-linux-gnueabi-
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/arm/bin/arm-none-eabi-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm/arm-none-eabi
 
-			CFG_STDLIB := -lrt -pthread
+			CFG_STDLIB := -lc -lstdc++ -lg
 			CFG_LFLAGS := $(CFG_LEXTRA)
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_PACKBROKEN -DOEX_NODIRENT
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
@@ -158,10 +160,11 @@ else
 
 			# nihilism
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-unknown-linux-gnu-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm-unknown-linux-gnu
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA)
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOVIDEO
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOVIDEO -DOEX_NODL
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
@@ -169,11 +172,12 @@ else
 		ifeq ($(TOOLS),uclinux)
 
 			# uclinux
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-linux-
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/usr/local/bin/arm-linux-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/usr/local/arm-linux
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA)
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOVIDEO
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOVIDEO -D__GCC_FLOAT_NOT_NEEDED
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 			
@@ -182,17 +186,33 @@ else
 
 			# openmoko
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/arm/bin/arm-angstrom-linux-gnueabi-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm/arm-angstrom-linux-gnueabi
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA)
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOVIDEO
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_NOVIDEO
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
-		else
+		endif
+		ifeq ($(TOOLS),armel)
+
+			# armel
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/usr/bin/arm-linux-gnu-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/usr/
+
+			CFG_STDLIB := -lrt -pthread
+			CFG_LFLAGS := $(CFG_LEXTRA)
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_NOVIDEO
+			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
+			CFG_AFLAGS := cq
+
+		endif
+		ifeq ($(CFG_TOOLPREFIX),)
 	
 			# Custom tools
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/$(TOOLS)-
+#			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/sysroot
 			override TOOLS := custom
 
 			CFG_STDLIB := -lrt -pthread
@@ -249,12 +269,21 @@ else
 #		endif
 #	endif
 	
+	ifneq ($(CFG_SYSROOT),)
+		CFG_SYSROOT_OPTIONS := --sysroot=$(CFG_SYSROOT)
+	endif
+
+	ifneq ($(CFG_SYSROOT_HEADERS),)
+		CFG_SYSROOT_OPTIONS := $(CFG_SYSROOT_OPTIONS) --headers=$(CFG_SYSROOT_HEADERS)
+	endif
+
 	# Tools
-	CFG_PP := $(CFG_TOOLPREFIX)g++
+	CFG_PP := $(CFG_TOOLPREFIX)g++ $(CFG_SYSROOT_OPTIONS)
 	CFG_LD := $(CFG_TOOLPREFIX)g++
-	CFG_CC := $(CFG_TOOLPREFIX)gcc
+	CFG_CC := $(CFG_TOOLPREFIX)gcc $(CFG_SYSROOT_OPTIONS)
 	CFG_AR := $(CFG_TOOLPREFIX)ar
 	CFG_DP := $(CFG_TOOLPREFIX)makedepend
+	
 	CFG_MD := mkdir -p
 	CFG_RM := rm -rf
 	CFG_DEL:= rm -f

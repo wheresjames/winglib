@@ -15,6 +15,9 @@
 #				http://aakash-bapna.blogspot.com/2007/10/iphone-non-official-sdk-aka-toolchain.html
 #				http://code.google.com/p/iphone-dev/wiki/Building
 #
+#				http://armel.applieddata.net/developers/linux/eabi/
+#				http://ixp2xxx.sourceforge.net/toolchain/toolchain.html
+#
 #     DON'T expect this script to work perfectly for you.
 #     DO Expect to tweak things a bit to get a build on your box.
 #
@@ -85,6 +88,7 @@
 # --enable-kernel=2.6.10
 #
 # armv5tl-montavista-linux-gnueabi - gcc-4.2.0 - glibc-2.6
+# -mabi=aapcs-linux -mfloat-abi=soft -meabi=4
 #
 
 # [Works] - Old mainline
@@ -119,16 +123,20 @@ VER_GMP=gmp-4.2.4
 VER_GLIBC=glibc-2.7
 VER_GLIBC_PORTS=glibc-ports-2.7
 VER_GLIBC_THREADS=glibc-linuxthreads-2.5
-VER_LINUX=linux-2.6.26-davinci
-#GLIBC_EXTRA_S1= --disable-shared --disable-threads --disable-nls --enable-kernel=2.6.10
-GLIBC_EXTRA_S1= --disable-shared --disable-threads --disable-nls
+VER_LINUX=linux-davinci-2.6
+#VER_LINUX=linux-2.6.28
+#VER_LINUX=linux-2.6.26-davinci
+#GLIBC_EXTRA_S1= --disable-shared --disable-threads --disable-nls
+#GLIBC_EXTRA_S1= --disable-shared --disable-threads --without-tls --without-__thread --with-abi=aapcs-linux
+GLIBC_EXTRA_S1= --without-tls --without-__thread --disable-shared --disable-threads --disable-sanity-checks
+#GLIBC_EXTRA_S1= --with-tls --with-__thread
 ENABLE_ADD_ONS_S1=ports,nptl
 #GLIBC_EXTRA_S2= --with-tls --with-__thread --enable-kernel=2.6.10
 GLIBC_EXTRA_S2= --with-tls --with-__thread
 ENABLE_ADD_ONS_S2=ports,nptl
-MACH=davinci
-TOOL_ALIAS=arm_v5t_le
-#CFG_LINUX=davinci_dm644x_defconfig
+#MACH=davinci
+#TOOL_ALIAS=arm_v5t_le
+CFG_LINUX=davinci_evm_dm644x_defconfig
 
 # Mainline
 #TARGET=arm-none-linux-gnueabi
@@ -278,7 +286,7 @@ cp -a ${PREFIX}/src/linux/include/linux ${SYSROOT}/usr/include/linux
 cp -a ${PREFIX}/src/linux/include/asm-generic ${SYSROOT}/usr/include/asm-generic
 cp -a ${PREFIX}/src/linux/include/asm-${ARCH}/* ${SYSROOT}/usr/include/asm
 
-cp -af ${PREFIX}/src/linux/arch/${ARCH}/include/asm ${SYSROOT}/usr/include/asm
+cp -af ${PREFIX}/src/linux/arch/${ARCH}/include/asm/* ${SYSROOT}/usr/include/asm
 [ ${MACH} = "" ] || cp -af ${PREFIX}/src/linux/arch/${ARCH}/mach-${MACH}/include/mach/* ${SYSROOT}/usr/include/asm
 
 touch ${SYSROOT}/usr/include/linux/autoconf.h
@@ -301,7 +309,7 @@ mkdir BUILD/${VER_GLIBC}-headers
 cd BUILD/${VER_GLIBC}-headers
 ../../${VER_GLIBC}/configure --prefix=/usr \
 							 --host=${TARGET} \
-							 ${GLIBC_EXTRA_S1} \
+							 --with-tls --with-__thread \
 							 --enable-add-ons=${ENABLE_ADD_ONS_S1} \
 							 --with-headers=${SYSROOT}/usr/include \
 							 2>&1 | tee ${BUILDROOT}/logs/30.${VER_GLIBC}.configure.headers.log
@@ -325,8 +333,8 @@ CC=${CROSS_COMPILE}gcc \
 	AS=${CROSS_COMPILE}as \
 	LD=${CROSS_COMPILE}ld \
 	./configure	--prefix=${SYSROOT}/usr/local \
-				--host=${TARGET} \
 				--build=${BUILD} \
+				--host=${TARGET} \
 				--enable-cxx \
 				--enable-mpbsd \
 				2>&1 | tee ${BUILDROOT}/logs/40.01.${VER_GMP}.configure.stage1.log
