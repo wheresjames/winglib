@@ -17,6 +17,7 @@
 #
 #				http://armel.applieddata.net/developers/linux/eabi/
 #				http://ixp2xxx.sourceforge.net/toolchain/toolchain.html
+#				http://www.linuxfromscratch.org/clfs/view/clfs-2.0/arm/part3.html
 #
 #     DON'T expect this script to work perfectly for you.
 #     DO Expect to tweak things a bit to get a build on your box.
@@ -90,6 +91,8 @@
 # armv5tl-montavista-linux-gnueabi - gcc-4.2.0 - glibc-2.6
 # -mabi=aapcs-linux -mfloat-abi=soft -meabi=4
 #
+# linuxthreads = --with-tls --without-__thread
+#
 
 # [Works] - Old mainline
 #TARGET=arm-none-linux-gnu
@@ -118,25 +121,29 @@
 #TARGET=arm-montavista-linux-gnueabi
 TARGET=arm-none-linux-gnueabi
 VER_BINUTILS=binutils-2.19
-VER_GCC=gcc-4.2.4
-VER_GMP=gmp-4.2.4
-VER_GLIBC=glibc-2.7
-VER_GLIBC_PORTS=glibc-ports-2.7
-VER_GLIBC_THREADS=glibc-linuxthreads-2.5
-VER_LINUX=linux-davinci-2.6
-#VER_LINUX=linux-2.6.28
-#VER_LINUX=linux-2.6.26-davinci
+#VER_GCC=gcc-4.2.4
+#VER_GMP=gmp-4.2.4
+VER_GCC=gcc-4.1.1
+VER_GMP=gmp-4.1.1
+VER_GLIBC=glibc-2.5
+VER_GLIBC_PORTS=glibc-ports-2.5
+#VER_GLIBC_THREADS=glibc-linuxthreads-2.5
+#VER_LINUX=linux-davinci-2.6
+VER_LINUX=linux-2.6.28
+#VER_LINUX=linux-2.6.10-davinci
+#VER_LINUX=linux-2.6.25-davinci
 #GLIBC_EXTRA_S1= --disable-shared --disable-threads --disable-nls
 #GLIBC_EXTRA_S1= --disable-shared --disable-threads --without-tls --without-__thread --with-abi=aapcs-linux
-GLIBC_EXTRA_S1= --without-tls --without-__thread --disable-shared --disable-threads --disable-sanity-checks
-#GLIBC_EXTRA_S1= --with-tls --with-__thread
+#GLIBC_EXTRA_S1= --without-tls --without-__thread --disable-shared --disable-threads --disable-sanity-checks
+GLIBC_EXTRA_S1= --with-tls --wit-__thread --disable-sanity-checks
 ENABLE_ADD_ONS_S1=ports,nptl
 #GLIBC_EXTRA_S2= --with-tls --with-__thread --enable-kernel=2.6.10
 GLIBC_EXTRA_S2= --with-tls --with-__thread
 ENABLE_ADD_ONS_S2=ports,nptl
 #MACH=davinci
 #TOOL_ALIAS=arm_v5t_le
-CFG_LINUX=davinci_evm_dm644x_defconfig
+CFG_LINUX=custom_davinci_all_defconfig
+#CFG_LINUX=davinci_evm_dm644x_defconfig
 
 # Mainline
 #TARGET=arm-none-linux-gnueabi
@@ -198,6 +205,8 @@ export PATH=$PATH:${PREFIX}/bin
 mkdir -p ${BUILDROOT}
 mkdir -p ${BUILDROOT}/logs
 mkdir -p ${DOWNLOADS}
+mkdir -p ${SYSROOT}/usr/include
+mkdir -p ${SYSROOT}/usr/include/asm
 
 # Set to 1 to verify signatures, (you must have the public keys)
 VERIFY_SIGS=0
@@ -255,10 +264,15 @@ if [ ! -d ${VER_BINUTILS} ]; then
 	cd BUILD/${VER_BINUTILS}
 	../../${VER_BINUTILS}/configure --prefix=${PREFIX} \
 		                            --target=${TARGET} \
+		                            --disable-nls \
+		                            --enable-shared \
+		                            --disable-multilib \
 	                                --with-sysroot=${SYSROOT} \
 	                                2>&1 | tee -a ${BUILDROOT}/logs/10.${VER_BINUTILS}.configure.log
-	make 2>&1 | tee -a ${BUILDROOT}/logs/11.${VER_BINUTILS}.make.log
+	make configure-host 2>&1 | tee -a ${BUILDROOT}/logs/11.${VER_BINUTILS}.make.configure-host.log
+	make 2>&1 | tee -a ${BUILDROOT}/logs/12.${VER_BINUTILS}.make.log
 	make install 2>&1 | tee -a ${BUILDROOT}/logs/12.${VER_BINUTILS}.make.install.log
+	cp -v include/libiberty.h ${SYSROOT}/usr/include
 	[ -z "${TOOL_ALIAS}" ] || sh ${SCRIPT_DIR}/link-tools.sh ${PREFIX}/bin/${TARGET} ${PREFIX}/bin/${TOOL_ALIAS} 2>&1 | tee -a ${BUILDROOT}/logs/13.${VER_BINUTILS}.link-gcc.sh.log
 fi
 
@@ -277,8 +291,11 @@ find ${PATCHES} -name ${VER_LINUX}-*.patch | xargs -rtI {} cat {} | patch -d ${B
 #make dep 2>&1 | tee -a ${BUILDROOT}/logs/21.${VER_LINUX}.make.dep.log
 make include/linux/version.h 2>&1 | tee -a ${BUILDROOT}/logs/22.${VER_LINUX}.make.version.h.log
 #make symlinks 2>&1 | tee -a ${BUILDROOT}/logs/23.${VER_LINUX}.make.symlinks.log
-mkdir -p ${SYSROOT}/usr/include
-mkdir -p ${SYSROOT}/usr/include/asm
+install -dv ${SYSROOT}/usr/include 2>&1 | tee -a ${BUILDROOT}/logs/24.${VER_LINUX}.install.sysroot.log
+
+#cp -av include/{asm-generic,linux,mtd,scsi,sound} ${SYSROOT}/usr/include
+#cp -av include/asm-${ARCH} ${SYSROOT}/usr/include/asm
+
 
 cp -a ${PREFIX}/src/linux/include/linux ${SYSROOT}/usr/include/linux
 #cp -a ${PREFIX}/src/linux/include/asm ${SYSROOT}/usr/include/asm
@@ -295,27 +312,49 @@ touch ${SYSROOT}/usr/include/linux/autoconf.h
 # 3. Glibc headers
 #-------------------------------------------------------------------
 cd ${BUILDROOT}
+
+# Extract GLIBC
 [ -d ${VER_GLIBC} ] || bunzip2 -c ${DOWNLOADS}/${VER_GLIBC}.tar.bz2 | tar xvf -
 find ${PATCHES} -name ${VER_GLIBC}-*.patch | xargs -rtI {} cat {} | patch -d ${VER_GLIBC} -p1
 cd ${VER_GLIBC}
+
 if [ ${VER_GLIBC_PORTS} != "" ]; then
 	bunzip2 -c ${DOWNLOADS}/${VER_GLIBC_PORTS}.tar.bz2 | tar xvf -
 	ln -s ${VER_GLIBC_PORTS} ports
 fi
-[ -d ${VER_GLIBC_THREADS} ] || bunzip2 -c ${DOWNLOADS}/${VER_GLIBC_THREADS}.tar.bz2 | tar xvf -
-find ${PATCHES} -name ${VER_GLIBC_THREADS}-*.patch | xargs -rtI {} cat {} | patch -p0
+
+if [ ${VER_GLIBC_THREADS} != "" ]; then
+	if [ ! -d ${VER_GLIBC_THREADS} ]; then
+		bunzip2 -c ${DOWNLOADS}/${VER_GLIBC_THREADS}.tar.bz2 | tar xvf -
+		find ${PATCHES} -name ${VER_GLIBC_THREADS}-*.patch | xargs -rtI {} cat {} | patch -p0
+	fi
+fi
+
 cd ..
 mkdir BUILD/${VER_GLIBC}-headers
 cd BUILD/${VER_GLIBC}-headers
-../../${VER_GLIBC}/configure --prefix=/usr \
+echo "libc_cv_forced_unwind=yes" > config.cache
+echo "libc_cv_c_cleanup=yes" >> config.cache
+echo "libc_cv_arm_tls=yes" >> config.cache
+echo "install_root=${SYSROOT}" > configparms
+CC=gcc ../../${VER_GLIBC}/configure \
+							 --prefix=/usr \
 							 --host=${TARGET} \
-							 --with-tls --with-__thread \
+							 --with-tls --with-__thread --disable-sanity-checks \
 							 --enable-add-ons=${ENABLE_ADD_ONS_S1} \
 							 --with-headers=${SYSROOT}/usr/include \
+							 --cache-file=config.cache \
 							 2>&1 | tee ${BUILDROOT}/logs/30.${VER_GLIBC}.configure.headers.log
 make cross-compiling=yes install_root=${SYSROOT} install-headers 2>&1 | tee ${BUILDROOT}/logs/31.${VER_GLIBC}.make.headers.log
+
+install -dv ${SYSROOT}/usr/include/bits
+cp -v bits/stdio_lim.h ${SYSROOT}/usr/include/bits
+
 touch ${SYSROOT}/usr/include/gnu/stubs.h
-touch ${SYSROOT}/usr/include/bits/stdio_lim.h
+#touch ${SYSROOT}/usr/include/bits/stdio_lim.h
+
+cp -v ../../${VER_GLIBC}/ports/sysdeps/unix/sysv/linux/arm/nptl/bits/pthreadtypes.h \
+    ${SYSROOT}/usr/include/bits
 
 #-------------------------------------------------------------------
 # 4. Stage 1 gcc

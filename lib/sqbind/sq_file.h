@@ -61,6 +61,14 @@ namespace sqbind
 		static int put_contents( const stdString &sFile, const stdString &sData )
 		{	return oex::CFile().CreateAlways( sFile.c_str() ).Write( sData.c_str(), sData.length() ); }
 
+		static int append_contents( const stdString &sFile, const stdString &sData )
+		{	oex::CFile f;
+			if ( !f.OpenAlways( sFile.c_str() ).IsOpen() )
+				return 0;
+			f.SetPtrPosEnd( 0 );
+			return f.Write( sData.c_str(), sData.length() );
+		}
+
 		static int mkdir( const stdString &sDir )
 		{	return oexCreatePath( sDir.c_str() ); }
 
@@ -82,18 +90,19 @@ namespace sqbind
 		static void Register( SquirrelVM &vm )
 		{
 			SqPlus::SQClassDef< CSqFile >( vm, oexT( "CSqFile" ) )
-					. func( &CSqFile::OpenExisting,			oexT( "OpenExisting" ) )
-					. func( &CSqFile::OpenNew,				oexT( "OpenNew" ) )
-					. func( &CSqFile::Write,				oexT( "Write" ) )
-					. func( &CSqFile::Read,					oexT( "Read" ) )
-					. staticFunc( &CSqFile::get_contents,	oexT( "get_contents" ) )
-					. staticFunc( &CSqFile::put_contents,	oexT( "put_contents" ) )
-					. staticFunc( &CSqFile::mkdir,			oexT( "mkdir" ) )
-					. staticFunc( &CSqFile::rmdir,			oexT( "rmdir" ) )
-					. staticFunc( &CSqFile::exists,			oexT( "exists" ) )
-					. staticFunc( &CSqFile::get_filename,	oexT( "get_filename" ) )
-					. staticFunc( &CSqFile::get_path,		oexT( "get_path" ) )
-					. staticFunc( &CSqFile::get_extension,	oexT( "get_extension" ) )
+					. func( &CSqFile::OpenExisting,				oexT( "OpenExisting" ) )
+					. func( &CSqFile::OpenNew,					oexT( "OpenNew" ) )
+					. func( &CSqFile::Write,					oexT( "Write" ) )
+					. func( &CSqFile::Read,						oexT( "Read" ) )
+					. staticFunc( &CSqFile::get_contents,		oexT( "get_contents" ) )
+					. staticFunc( &CSqFile::put_contents,		oexT( "put_contents" ) )
+					. staticFunc( &CSqFile::append_contents,	oexT( "append_contents" ) )
+					. staticFunc( &CSqFile::mkdir,				oexT( "mkdir" ) )
+					. staticFunc( &CSqFile::rmdir,				oexT( "rmdir" ) )
+					. staticFunc( &CSqFile::exists,				oexT( "exists" ) )
+					. staticFunc( &CSqFile::get_filename,		oexT( "get_filename" ) )
+					. staticFunc( &CSqFile::get_path,			oexT( "get_path" ) )
+					. staticFunc( &CSqFile::get_extension,		oexT( "get_extension" ) )
 				;
 		}
 

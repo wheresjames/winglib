@@ -205,7 +205,7 @@ oexINT64 CBaseFile::Size( t_HFILE x_hFile )
 		return 0;
 
 	return s64.st_size;
-	
+
 #endif
 }
 
@@ -324,7 +324,9 @@ oexBOOL CBaseFile::DoesExist( oexCSTR x_pPath )
 }
 
 oexBOOL CBaseFile::CreateFolder( oexCSTR x_pPath )
-{   return mkdir( oexStrToMbPtr( x_pPath ), 0 ) ? oexFALSE : oexTRUE;
+{   oexBOOL bRet = !mkdir( oexStrToMbPtr( x_pPath ), 0 ) ? oexFALSE : oexTRUE;
+	chmod( oexStrToMbPtr( x_pPath ), 0755 );
+	return bRet;
 }
 
 CStr CBaseFile::GetModPath( oexCSTR x_pPath )

@@ -359,16 +359,16 @@ oex::oexRESULT TestStrings()
 
     oex::oexGUID guid;
 	oexCSTR pTest = oexT( "01234567-8901-2345-6789-012345678901" );
-	
+
 	static const oexGUID guidTest =
 //	{ 0x01234567, 0x8901, 0x2345, { 0x67, 0x89, 0x01, 0x23, 0x45, 0x67, 0x89, 0x01 } };
 	oexAUTOGUID( 0x01234567, 0x8901, 0x2345, 0x67, 0x89, 0x01, 0x23, 0x45, 0x67, 0x89, 0x01 );
-	
+
 	if ( !oexVERIFY( guid::CmpGuid( guid::StringToGuid( &guid, pTest, 36 ), &guidTest ) ) )
 		return -10;
-	
+
 	if ( !oexVERIFY( oex::CStr( pTest ).GuidToString( &guidTest ) == pTest ) )
-		return -10;	
+		return -10;
 
 	str1 = oexT( "850A51F0-2CF7-4412-BB83-1AEF68BAD88C" );
 	if ( !oexVERIFY( str2.GuidToString( str1.StringToGuid( &guid ) ) == str1 ) )
@@ -1339,7 +1339,7 @@ oex::oexRESULT Test_CSysTime()
     if ( !oexVERIFY( st2 == st ) )
         return -6;
 
-    if ( !oexVERIFY( st2.ParseTime( oexT( "%Y/%c/%d - %g:%m:%s.%l" ), oexT( "1997/12/25 - 16:15:30.500" ) ) ) )
+    if ( !oexVERIFY( st2.ParseTime( oexT( "%Y/%c/%d - %g:%m:%s" ), oexT( "1997/12/25 - 16:15:30" ) ) ) )
         return -7;
 
     if ( !oexVERIFY( st2 == st ) )
@@ -1350,6 +1350,18 @@ oex::oexRESULT Test_CSysTime()
 
     if ( !oexVERIFY( st2 == st ) )
         return -10;
+
+    st2.SetUnixTime( st2.GetUnixTime() );
+    if ( !oexVERIFY( st2.ParseTime( oexT( "%Y/%c/%d - %g:%m:%s" ), oexT( "1997/12/25 - 16:15:30" ) ) ) )
+        return -11;
+
+    st2.SetDosTime( st2.GetDosTime() );
+    if ( !oexVERIFY( st2.ParseTime( oexT( "%Y/%c/%d - %g:%m:%s" ), oexT( "1997/12/25 - 16:15:30" ) ) ) )
+        return -11;
+
+    st2.SetNetTime( st2.GetNetTime() );
+    if ( !oexVERIFY( st2.ParseTime( oexT( "%Y/%c/%d - %g:%m:%s" ), oexT( "1997/12/25 - 16:15:30" ) ) ) )
+        return -11;
 
     return oex::oexRES_OK;
 }

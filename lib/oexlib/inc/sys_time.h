@@ -104,6 +104,9 @@ public:
             os::CSys::Zero( &m_time, sizeof( m_time ) );
     }
 
+    CSysTime( oexCONST CSysTime &x_st )
+    {   os::CSys::MemCpy( &m_time, &x_st.m_time, sizeof( m_time ) ); }
+
     CSysTime( oexINT x_nTimeFormat, oexINT64 x_llTime, oexINT x_lTzBias = eInvalid )
     {
         if ( eFmtFile == x_nTimeFormat )
@@ -463,14 +466,14 @@ public:
     oexBOOL ParseTime( oexCSTR x_sTmpl, CStr x_sStr );
 
     /// Copy operator
-    CSysTime& operator = ( CSysTime &x_st )
+    CSysTime& operator = ( oexCONST CSysTime &x_st )
     {   os::CSys::MemCpy( &m_time, &x_st.m_time, sizeof( m_time ) ); return *this; }
 
     /// Compare
-    oexBOOL operator == ( CSysTime &x_st )
+    oexBOOL operator == ( oexCONST CSysTime &x_st )
     {   return !os::CSys::MemCmp( &m_time, &x_st.m_time, sizeof( m_time ) ) ? oexTRUE : oexFALSE; }
 
-    oexBOOL operator != ( CSysTime &x_st )
+    oexBOOL operator != ( oexCONST CSysTime &x_st )
     {   return os::CSys::MemCmp( &m_time, &x_st.m_time, sizeof( m_time ) ) ? oexTRUE : oexFALSE; }
 
 

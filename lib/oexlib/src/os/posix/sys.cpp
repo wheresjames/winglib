@@ -389,7 +389,7 @@ oexGUID * CSys::CreateGuid( oexGUID *pGuid )
 	oss::CMd5::Transform( &guid, &st, sizeof( st ) );
 
 	// Use other random sources
-	SRandomSeeds rs = { (oexPVOID)&CreateGuid, CMem::GetRawAllocator().fMalloc( 4 ), 
+	SRandomSeeds rs = { (oexPVOID)&CreateGuid, CMem::GetRawAllocator().fMalloc( 4 ),
 						g_int++ };
 	oss::CMd5::Transform( &guid, &rs, sizeof( rs ) );
 	CMem::GetRawAllocator().fFree( rs.pHeap );
@@ -577,13 +577,20 @@ oexBOOL CSys::GetSystemTime( STime &t )
 	struct tm tinfo;
 	gmtime_r( &current_time, &tinfo );
 
-	struct timeval tp;
-	gettimeofday( &tp, oexNULL );
-
 	CSys_SystemTimeToSTime( &tinfo, t );
 
+#ifdef OEX_NANOSECONDS
+	struct timespec	ts;
+	clock_gettime( CLOCK_REALTIME, &ts );
+	t.uMillisecond = ts.tv_nsec / 1000 / 1000;
+	t.uMicrosecond = ts.tv_nsec / 1000 % 1000;
+	t.uNanosecond = ts.tv_nsec % 1000;
+#else
+	struct timeval tp;
+	gettimeofday( &tp, oexNULL );
 	t.uMillisecond = tp.tv_usec / 1000;
 	t.uMicrosecond = tp.tv_usec % 1000;
+#endif
 
     return oexTRUE;
 }
@@ -605,13 +612,21 @@ oexINT64 CSys::SystemTimeToFileTime( STime &x_st )
 {
 	struct tm tinfo;
 	CSys_STimeToSystemTime( x_st, &tinfo );
-	return (oexINT64)mktime( &tinfo ) + FTOFF_1970;
+	return ( (oexINT64)mktime( &tinfo ) + FTOFF_1970 ) * 10000000LL
+	       + ( 10000LL * (oexINT64)x_st.uMillisecond )
+	       + ( 10LL * (oexINT64)x_st.uMicrosecond )
+	       + ( (oexINT64)x_st.uNanosecond / 100LL )
+	       ;
 }
 
 /// Converts a file time to an STime structure
 void CSys::FileTimeToSystemTime( STime &x_st, oexINT64 x_ft )
 {
-	time_t tTime = x_ft - FTOFF_1970;
+	x_st.uNanosecond = ( x_ft * 100LL ) % 1000LL;
+	x_st.uMicrosecond = ( x_ft / 10000LL ) % 1000LL;
+	x_st.uMillisecond = ( x_ft / 10000000LL ) % 1000LL;
+
+	time_t tTime = ( x_ft / 10000000LL ) - FTOFF_1970;
 	struct tm tinfo;
 	gmtime_r( &tTime, &tinfo );
 
