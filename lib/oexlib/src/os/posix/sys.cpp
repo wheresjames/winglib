@@ -255,6 +255,7 @@ oexDOUBLE CSys::StrToDouble( oexCSTR8 x_pStr )
 }
 
 // **** Unicode
+#if !defined( OEX_NOWCHAR )    
 
 oexCSTRW CSys::StrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, ... )
 {
@@ -351,6 +352,30 @@ oexDOUBLE CSys::StrToDouble( oexCSTRW x_pStr )
 		return 0;
 	return wcstod( x_pStr, NULL );
 }
+
+oexUINT CSys::WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen )
+{
+	if ( !pSrc || !uLen )
+		return 0;
+
+	// +++ Ensure source is NULL terminated
+//	pSrc[ uLen - 1 ] = 0;
+
+	return wcstombs( pDst, pSrc, uMax );
+}
+
+oexUINT CSys::MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen )
+{
+	if ( !pSrc || !uLen )
+		return 0;
+
+	// +++ Ensure source is NULL terminated
+//	pSrc[ uLen - 1 ] = 0;
+
+	return mbstowcs( pDst, pSrc, uMax );
+}
+
+#endif // OEX_NOWCHAR
 
 oexPVOID CSys::MemCpy( oexPVOID x_pDst, oexCPVOID x_pSrc, oexUINT x_uSize )
 {
@@ -633,28 +658,6 @@ void CSys::FileTimeToSystemTime( STime &x_st, oexINT64 x_ft )
 	CSys_SystemTimeToSTime( &tinfo, x_st );
 }
 
-
-oexUINT CSys::WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen )
-{
-	if ( !pSrc || !uLen )
-		return 0;
-
-	// +++ Ensure source is NULL terminated
-//	pSrc[ uLen - 1 ] = 0;
-
-	return wcstombs( pDst, pSrc, uMax );
-}
-
-oexUINT CSys::MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen )
-{
-	if ( !pSrc || !uLen )
-		return 0;
-
-	// +++ Ensure source is NULL terminated
-//	pSrc[ uLen - 1 ] = 0;
-
-	return mbstowcs( pDst, pSrc, uMax );
-}
 
 oexCSTR CSys::SetLocale( oexINT nCategory, oexCSTR pLocal )
 {

@@ -194,8 +194,14 @@ oexINT64 CBaseFile::Size( t_HFILE x_hFile )
 	if ( c_Invalid == x_hFile )
 		return 0;
 
-#if defined( OEX_NODIRENT )
-	return 0;
+#if defined( OEX_NOSTAT64 )
+
+	struct stat s;
+	if ( fstat( oexPtrToInt( x_hFile ), &s ) )
+		return 0;
+
+	return s.st_size;
+
 #else
 
 	struct stat64 s64;
@@ -311,16 +317,22 @@ oexBOOL CBaseFile::FindNext( t_HFIND x_hFind, CBaseFile::SFindData *x_pFd )
 oexBOOL CBaseFile::FindClose( t_HFIND x_hFind )
 {
 #if defined( OEX_NODIRENT )
-	return closedir( (DIR*)x_hFind ) ? oexFALSE : oexTRUE;
-#else
 	return oexFALSE;
+#else
+	return closedir( (DIR*)x_hFind ) ? oexFALSE : oexTRUE;
 #endif
 }
 
 
 oexBOOL CBaseFile::DoesExist( oexCSTR x_pPath )
-{	struct stat64 s64;
+{
+#if defined( OEX_NOSTAT64 )
+	struct stat s;
+	return stat( oexStrToMbPtr( x_pPath ), &s ) ? oexFALSE : oexTRUE;
+#else
+	struct stat64 s64;
 	return	stat64( oexStrToMbPtr( x_pPath ), &s64 ) ? oexFALSE : oexTRUE;
+#endif
 }
 
 oexBOOL CBaseFile::CreateFolder( oexCSTR x_pPath )

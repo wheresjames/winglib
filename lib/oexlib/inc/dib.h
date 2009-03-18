@@ -264,6 +264,15 @@ public:
 	/// Convert from grey scale image
 	oexBOOL CopyGrey( oexPVOID x_pData );
 
+	// YUV Conversion
+	static oexBOOL YUV_RGB_1( oexLONG lWidth, oexLONG lHeight, oexBYTE *pSrc, oexBYTE *pDst, oexBOOL bGrayscale );
+
+	// YUV Conversion
+	static oexBOOL YUV_RGB_2( oexLONG lWidth, oexLONG lHeight, oexBYTE *pSrc, oexBYTE *pDst, oexBOOL bGrayscale );
+
+	// YUYV Conversion
+	static oexBOOL YUYV_RGB( oexLONG lWidth, oexLONG lHeight, oexPVOID pSrc, oexPVOID pDst, oexBOOL bGrayscale );
+
 private:
 
 	/// Image memory

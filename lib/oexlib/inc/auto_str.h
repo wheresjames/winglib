@@ -82,12 +82,18 @@ public:
     operator oexCONST oexCSTR() { return TStr< T >::ToString(); }
     operator oexAUTOGUID() { oexGUID guid; return TStr< T >::StringToGuid( &guid ); }
 
-#if defined( oexUNICODE )
+#if !defined( OEX_NOWCHAR )
+#	if defined( oexUNICODE )
+
     operator CStr8() 
     { return oexStrToStr8( *this ); }
-#else
+    
+#	else
+
     operator CStrW() 
     { return oexStrToStrW( *this ); }
+    
+#	endif
 #endif
 
 };

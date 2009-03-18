@@ -66,12 +66,7 @@ public:
 	// String conversion
 public:
 
-	static oexUINT WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen );
-
-	static oexUINT MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen );
-
 	static oexCSTR SetLocale( oexINT nCategory, oexCSTR pLocal );
-
 
     // Multi-byte
 public:
@@ -103,6 +98,7 @@ public:
 	static oexDOUBLE StrToDouble( oexCSTR8 pStr );
 
     // Unicode
+#if !defined( OEX_NOWCHAR )    
 public:
 
 	static oexCSTRW StrFmt( oexSTRW pDst, oexUINT uMax, oexCSTRW pFmt, ... );
@@ -130,6 +126,13 @@ public:
 
 	/// Converts to double
 	static oexDOUBLE StrToDouble( oexCSTRW pStr );
+	
+	static oexUINT WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen );
+
+	static oexUINT MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen );
+	
+	
+#endif // OEX_NOWCHAR
 
 public:
 

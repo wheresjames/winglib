@@ -170,8 +170,9 @@ public:
 
 public:
 	virtual oexBOOL Destroy() = 0;
-	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps ) = 0;
-	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps ) = 0;
+	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit ) = 0;
+	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit ) = 0;
+	virtual oexBOOL Init() = 0;
 	virtual oexBOOL IsOpen() = 0;
 	virtual oexBOOL StartCapture() = 0;
 	virtual oexBOOL StopCapture() = 0;
@@ -323,10 +324,11 @@ public:
 		\param [in] x_nHeight	- Desired video height
 		\param [in] x_nBpp		- Desired bits per pixel
 		\param [in] x_fFps		- Desired capture frame rate
+		\param [in] x_bInit		- Non-zero to initialize the device for capture
 
 		\return Non-zero if success.
 	*/
-	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps );
+	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit );
 
 	/// Opens the specified file
 	/**
@@ -337,10 +339,20 @@ public:
 		\param [in] x_nHeight	- Desired video height
 		\param [in] x_nBpp		- Desired bits per pixel
 		\param [in] x_fFps		- Desired capture frame rate
+		\param [in] x_bInit		- Non-zero to initialize the device for capture
 
 		\return Non-zero if success.
 	*/
-	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps );
+	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit );
+
+	/// Initializes the device for capture
+	virtual oexBOOL Init()
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->Init();
+	}
 
 	/// Returns non-zero if a capture device is currently open
 	virtual oexBOOL IsOpen()

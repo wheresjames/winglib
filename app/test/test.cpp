@@ -525,12 +525,14 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( !oex::zstr::Compare( str2.Ptr(), oexStr8ToStrPtr( oexStrToStr8Ptr( str1.Ptr() ) ) ) ) )
 		return -45;
 
+#if !defined( OEX_NOWCHAR )
 	str2 = str1.GuidToString();
 	if ( !oexVERIFY( str2 == oexStrWToStr( oexStrToStrW( str1 ) ) ) )
 		return -46;
 
 	if ( !oexVERIFY( !oex::zstr::Compare( str2.Ptr(), oexStrWToStrPtr( oexStrToStrWPtr( str1.Ptr() ) ) ) ) )
 		return -47;
+#endif
 
 	str2 = str1.GuidToString();
 	if ( !oexVERIFY( str2 == oexBinToStr( oexStrToBin( str1 ) ) ) )

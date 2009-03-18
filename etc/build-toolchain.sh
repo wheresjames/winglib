@@ -102,7 +102,8 @@
 #VER_GLIBC_THREADS=glibc-linuxthreads-2.3.5
 #VER_LINUX=linux-2.6.10
 #DIR_LINUX=v2.6
-#ENABLE_ADD_ONS=linuxthreads
+#ENABLE_ADD_ONS_S1=linuxthreads
+#ENABLE_ADD_ONS_S2=linuxthreads
 
 # [Works] - Montavista proprietary
 #TARGET=arm-none-linux-gnu
@@ -118,34 +119,25 @@
 
 # [] - Montavista proprietary with eabi
 #TARGET=armv5tl-montavista-linuxeabi
-#TARGET=arm-montavista-linux-gnueabi
-TARGET=arm-none-linux-gnueabi
+TARGET=arm-unknown-linux-gnueabi
 VER_BINUTILS=binutils-2.19
-#VER_GCC=gcc-4.2.4
-#VER_GMP=gmp-4.2.4
-VER_GCC=gcc-4.1.1
-VER_GMP=gmp-4.1.1
-VER_GLIBC=glibc-2.5
-VER_GLIBC_PORTS=glibc-ports-2.5
+VER_GCC=gcc-4.2.4
+VER_GMP=gmp-4.2.4
+VER_GLIBC=glibc-2.7
+VER_GLIBC_PORTS=glibc-ports-2.7
 #VER_GLIBC_THREADS=glibc-linuxthreads-2.5
-#VER_LINUX=linux-davinci-2.6
-VER_LINUX=linux-2.6.28
 #VER_LINUX=linux-2.6.10-davinci
-#VER_LINUX=linux-2.6.25-davinci
-#GLIBC_EXTRA_S1= --disable-shared --disable-threads --disable-nls
-#GLIBC_EXTRA_S1= --disable-shared --disable-threads --without-tls --without-__thread --with-abi=aapcs-linux
-#GLIBC_EXTRA_S1= --without-tls --without-__thread --disable-shared --disable-threads --disable-sanity-checks
-GLIBC_EXTRA_S1= --with-tls --wit-__thread --disable-sanity-checks
+VER_LINUX=linux-2.6.25-davinci
+GLIBC_EXTRA_S1= --with-tls --with-__thread
 ENABLE_ADD_ONS_S1=ports,nptl
-#GLIBC_EXTRA_S2= --with-tls --with-__thread --enable-kernel=2.6.10
 GLIBC_EXTRA_S2= --with-tls --with-__thread
 ENABLE_ADD_ONS_S2=ports,nptl
-#MACH=davinci
-#TOOL_ALIAS=arm_v5t_le
-CFG_LINUX=custom_davinci_all_defconfig
+MACH=davinci
+TOOL_ALIAS=arm_v5t_le
+#CFG_LINUX=custom_davinci_all_defconfig
 #CFG_LINUX=davinci_evm_dm644x_defconfig
 
-# Mainline
+# [] Mainline
 #TARGET=arm-none-linux-gnueabi
 #VER_BINUTILS=binutils-2.19
 #VER_GCC=gcc-4.2.4
@@ -158,7 +150,7 @@ CFG_LINUX=custom_davinci_all_defconfig
 #GLIBC_EXTRA= --with-tls --disable-sanity-checks
 #CFG_LINUX=custom_davinci_all_defconfig
 
-# Montavista Open Source
+# [] Montavista Open Source
 #TARGET=arm-none-linux-gnueabi
 #VER_BINUTILS=binutils-2.17
 #VER_GCC=gcc-4.1.0
@@ -167,7 +159,6 @@ CFG_LINUX=custom_davinci_all_defconfig
 #VER_GLIBC_PORTS=glibc-ports-2.5
 #VER_GLIBC_THREADS=glibc-linuxthreads-2.5
 #GLIBC_EXTRA= --with-tls --disable-sanity-checks
-
 #VER_LINUX=linux-davinci-2.6
 #DIR_LINUX=v2.6
 #CFG_LINUX=davinci_all_defconfig
@@ -175,14 +166,9 @@ CFG_LINUX=custom_davinci_all_defconfig
 #GIT_REPOS="git://source.mvista.com/git/linux-davinci-2.6.git"
 #GIT_CHECKOUT=v2.6.28-davinci1
 #MACH=davinci
-
-#		--without-tls 
-# 		--without-__thread 
-#		--disable-sanity-checks
-#ENABLE_ADD_ONS_S2=ports,linuxthreads
-
-#		 --with-tls \
-# 		 --with-__thread \
+#GLIBC_EXTRA_S1= --without-tls --without-__thread --disable-sanity-checks
+#ENABLE_ADD_ONS_S1=ports,linuxthreads
+#GLIBC_EXTRA_S@= --with-tls --with-__thread
 #ENABLE_ADD_ONS_S2=ports,nptl
 
 

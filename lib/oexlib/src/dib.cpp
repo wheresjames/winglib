@@ -283,3 +283,217 @@ oexBOOL CDib::SaveDibFile( oexCSTR x_pFile, SImageData *x_pId, oexCPVOID x_pData
 	return oexTRUE;
 }
 
+// Integer conversion coefficients for Yuv2Rgb()
+const oexLONG	c_uShift = 12;
+const oexLONG	c_u2PowShift = 4096; // 2 ^ c_uShift
+const oexLONG	c_uUScale = (oexUINT)( (oexDOUBLE)1.772 * c_u2PowShift );
+const oexLONG	c_uVScale = (oexUINT)( (oexDOUBLE)1.402 * c_u2PowShift );
+const oexLONG	c_uYuScale = (oexUINT)( (oexDOUBLE)0.34414 * c_u2PowShift );
+const oexLONG	c_uYvScale = (oexUINT)( (oexDOUBLE)0.71414 * c_u2PowShift );
+
+/**
+	\param [in] lWidth			-	Width of video frame.
+	\param [in] lHeight			-	Height of video frame.
+	\param [in] pSrc			-	Pointer to YUV encoded buffer.
+	\param [in] pDst			-	Pointer to DWORD aligned RGB buffer.
+	\param [in] bGrayscale		-	Set to true for grayscale image.
+
+	<b> YUV Format: </b>
+
+	Each Y, U, and V are one byte.
+	U and V are sub-sampled.
+
+	\code
+
+	| Y[ width * height ] | U[ width * height / 4 ] | V[ width * height / 4 ] |
+
+	\endcode
+
+	\return Zero if failure, otherwise non-zero.
+*/
+oexBOOL CDib::YUV_RGB_1(oexLONG lWidth, oexLONG lHeight, oexBYTE *pSrc, oexBYTE *pDst, oexBOOL bGrayscale)
+{
+	// Image params
+	oexINT lScanWidth = GetScanWidth( lWidth, 24 );
+//	oexINT lScanWidthDif = lScanWidth - ( lWidth * 3 );
+
+	// Access image elements (image is top down)
+	oexBYTE *pPixDst = pDst + ( lScanWidth * ( lHeight - 1 ) );
+
+	// Source index offset
+	oexUINT i = 0, i1 = 0, i2 = 0;
+
+	// Grayscale
+	if ( bGrayscale )
+
+		// Just use Y
+		for ( oexINT y = 0; y < lHeight; y++, pPixDst -= lScanWidth * 2 )
+			for ( oexINT x = 0; x < lWidth; x++, pPixDst += 3, i++ )
+				pPixDst[ 0 ] = pPixDst[ 1 ] = pPixDst[ 2 ] = pSrc[ i ];
+
+	else
+	{
+		// Field params
+		oexINT lFieldWidth = lWidth * lHeight;
+		oexINT lUOffset = lFieldWidth;
+		oexINT lVOffset = lFieldWidth + ( lFieldWidth >> 2 );
+
+		oexINT lY, lT;
+		oexCHAR lU, lV;
+
+		oexBYTE *pY = pSrc;
+		oexBYTE *pU1 = &pSrc[ lUOffset ], *pU2 = &pSrc[ lUOffset ];
+		oexBYTE *pV1 = &pSrc[ lVOffset ], *pV2 = &pSrc[ lVOffset ];
+
+		// Color
+		for ( oexINT y = 0; y < lHeight; y++, pPixDst -= lScanWidth * 2 )
+		{
+			for ( oexINT x = 0; x < lWidth; x++, pPixDst += 3, i++ )
+			{
+				// Get YUV values
+				lY = pSrc[ i ];
+
+				if ( !( y & 1 ) )
+				{	lU = *pU1; lV = *pV1;
+					if ( x & 1 ) pU1++, pV1++;
+				} // end if
+				else
+				{	lU = *pU2; lV = *pV2;
+					if ( x & 1 ) pU2++, pV2++;
+				} // end if
+
+				// Prescale
+				lY <<= c_uShift; lU -= 128; lV -= 128;
+
+				// Blue
+				lT = ( lY + c_uUScale * lU ) >> c_uShift;
+				pPixDst[ 0 ] = cmn::Range( lT, 0, 255 );
+
+				// Green
+				lT = ( lY - c_uYuScale * lU - c_uYvScale * lV ) >> c_uShift;
+				pPixDst[ 1 ] = cmn::Range( lT, 0, 255 );
+
+				// Red
+				lT = ( lY + c_uVScale * lV ) >> c_uShift;
+				pPixDst[ 2 ] = cmn::Range( lT, 0, 255 );
+
+			} // end for
+
+		} // end for
+
+	} // end else
+
+	return oexTRUE;
+}
+
+/**
+	\param [in] lWidth			-	Width of video frame.
+	\param [in] lHeight			-	Height of video frame.
+	\param [in] pSrc			-	Pointer to YUV encoded buffer.
+	\param [in] pDst			-	Pointer to DWORD aligned RGB buffer.
+	\param [in] bGrayscale		-	Set to true for grayscale image.
+
+	YUV Format:
+
+	Each Y, U, and V are one byte.
+	U and V are sub-sampled.
+	For each Y[ i ] use U[ i / 2 ] and V[ i / 2 ].
+
+	\code
+
+	| Y[ width * height ] | U[ width * height / 2 ] | V[ width * height / 2 ] |
+
+	\endcode
+
+	\return Zero if failure, otherwise non-zero.
+*/
+oexBOOL CDib::YUV_RGB_2(oexLONG lWidth, oexLONG lHeight, oexBYTE *pSrc, oexBYTE *pDst, oexBOOL bGrayscale)
+{
+	// Image params
+	oexINT lScanWidth = GetScanWidth( lWidth, 24 );
+//	oexINT lScanWidthDif = lScanWidth - ( lWidth * 3 );
+
+	// Access image elements (image is top down)
+	oexBYTE *pPixDst = pDst + ( lScanWidth * ( lHeight - 1 ) );
+
+	// Source index offset
+	oexUINT i = 0;
+
+	// Grayscale
+	if ( bGrayscale )
+
+		// Just use Y
+		for ( oexINT y = 0; y < lHeight; y++, pPixDst -= lScanWidth * 2 )
+			for ( oexINT x = 0; x < lWidth; x++, pPixDst += 3, i++ )
+				pPixDst[ 0 ] = pPixDst[ 1 ] = pPixDst[ 2 ] = pSrc[ i ];
+
+	else
+	{
+		// Field params
+		oexINT lFieldWidth = lWidth * lHeight;
+		oexINT lUOffset = lFieldWidth;
+		oexINT lVOffset = lFieldWidth + ( lFieldWidth >> 1 );
+
+		register oexINT lY, lT;
+		register oexCHAR lU, lV;
+
+		// Color
+		for ( oexINT y = 0; y < lHeight; y++, pPixDst -= lScanWidth * 2 )
+			for ( oexINT x = 0; x < lWidth; x++, pPixDst += 3, i++ )
+			{
+				// Get YUV values
+				lY = pSrc[ i ];
+				lU = pSrc[ lUOffset + ( i >> 1 ) ];
+				lV = pSrc[ lVOffset + ( i >> 1 ) ];
+
+				// Prescale
+				lY <<= c_uShift; lU -= 128; lV -= 128;
+
+				// Blue
+				lT = ( lY + c_uUScale * lU ) >> c_uShift;
+				pPixDst[ 0 ] = cmn::Range( lT, 0, 255 );
+
+				// Green
+				lT = ( lY - c_uYuScale * lU - c_uYvScale * lV ) >> c_uShift;
+				pPixDst[ 1 ] = cmn::Range( lT, 0, 255 );
+
+				// Red
+				lT = ( lY + c_uVScale * lV ) >> c_uShift;
+				pPixDst[ 2 ] = cmn::Range( lT, 0, 255 );
+
+			} // end for
+
+	} // end else
+
+	return oexTRUE;
+}
+
+oexBOOL CDib::YUYV_RGB(oexLONG lWidth, oexLONG lHeight, oexPVOID pSrc, oexPVOID pDst, oexBOOL bGrayscale)
+{
+	// Image params
+	oexINT lScanWidth = GetScanWidth( lWidth, 24 );
+//	oexINT lScanWidthDif = lScanWidth - ( lWidth * 3 );
+
+	// Access image elements (image is top down)
+	oexBYTE *pPixDst = (oexBYTE*)pDst; //( (oexBYTE*)pDst ) + ( lScanWidth * ( lHeight - 1 ) );
+	oexBYTE *pPixSrc = (oexBYTE*)pSrc;
+
+	// Source index offset
+	oexUINT i = 0;
+	for ( oexINT y = 0; y < lHeight; y++ )
+		for ( oexINT x = 0; x < lWidth; x++, pPixDst += 6, i += 4 )
+			pPixDst[ 0 ] = pPixDst[ 1 ] = pPixDst[ 2 ] = pPixSrc[ i ],
+			pPixDst[ 3 ] = pPixDst[ 4 ] = pPixDst[ 5 ] = pPixSrc[ i + 2 ];
+
+	// Grayscale
+//	if ( bGrayscale )
+
+		// Just use Y
+//		for ( oexINT y = 0; y < lHeight; y++, pPixDst -= lScanWidth * 2 * 2 )
+//			for ( oexINT x = 0; x < lWidth; x += 2, pPixDst += 6, i += 4 )
+//				pPixDst[ 0 ] = pPixDst[ 1 ] = pPixDst[ 2 ] = pPixSrc[ i ],
+//				pPixDst[ 3 ] = pPixDst[ 4 ] = pPixDst[ 5 ] = pPixSrc[ i + 2 ];
+
+
+	return oexTRUE;
+}

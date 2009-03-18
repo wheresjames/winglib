@@ -40,6 +40,10 @@ using namespace OEX_NAMESPACE::os;
 
 CStr CTrace::GetBacktrace( oexUINT x_uSkip, oexUINT x_uMax )
 {
+#if defined( OEX_NOEXECINFO )
+	return CStr();
+#else
+
 	// Allocate space for pointers
 	TMem< void* > memPtrs;
 	if ( !memPtrs.OexNew( x_uMax ).Ptr() )
@@ -69,6 +73,7 @@ CStr CTrace::GetBacktrace( oexUINT x_uSkip, oexUINT x_uMax )
 		free( sStrings );
 
 	return str;
+#endif
 }
 
 

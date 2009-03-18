@@ -223,6 +223,8 @@ public:
     {   return Write( x_sStr.Ptr(), x_sStr.LengthInBytes(), x_pllWritten );
     }
 
+#if !defined( OEX_NOWCHAR )
+
 	//==============================================================
 	// Write()
 	//==============================================================
@@ -237,6 +239,8 @@ public:
     oexBOOL Write( oexCONST CStrW x_sStr, oexINT64 *x_pllWritten = oexNULL )
     {   return Write( CStr8().ToMb( x_sStr ), x_pllWritten );
     }
+
+#endif
 
 	//==============================================================
 	// Flush()

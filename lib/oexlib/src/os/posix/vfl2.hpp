@@ -85,7 +85,7 @@ public:
 		\param [in] x_pDevice	-	Video device name
 										- Example: /dev/video0
 	*/
-	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit )
 	{
 		CStr sDevice = CStr().Fmt( "/dev/video%d", x_uDevice );
 
@@ -115,16 +115,17 @@ public:
 		m_fFps = x_fFps;
 
 		// Attempt to initialize the device
-		if ( !Init() )
-		{	Destroy();
-			return oexFALSE;
-		} // end if
+		if ( x_bInit )
+			if ( !Init() )
+			{	Destroy();
+				return oexFALSE;
+			} // end if
 
 		return oexTRUE;
 	}
 
 	/// Open file
-	oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+	oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit )
 	{
 		return oexFALSE;
 	}
@@ -161,8 +162,8 @@ public:
 
 	/// Proper ioctl call
 	static int IoCtl( int fd, int request, void * arg )
-	{	int nErr; while ( -1 == ( nErr = ioctl( fd, request, arg ) ) && EINTR == errno ); return nErr; }
-//	{	int nErr; return oexDO( nErr = ioctl( fd, request, arg ), EINTR == nErr, nErr ); }
+//	{	int nErr; while ( -1 == ( nErr = ioctl( fd, request, arg ) ) && EINTR == errno ); return nErr; }
+	{	int nErr; return oexDO( nErr = ioctl( fd, request, arg ), EINTR == nErr, nErr ); }
 
 public:
 
@@ -269,7 +270,9 @@ public:
 		fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		fmt.fmt.pix.width = m_nWidth;
 		fmt.fmt.pix.height = m_nHeight;
-		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR8; //V4L2_PIX_FMT_RGB24; // V4L2_PIX_FMT_YUYV
+		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+//		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB24;
+//		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR8;
 //		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_GREY;
 //		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
 		fmt.fmt.pix.field = V4L2_FIELD_NONE;

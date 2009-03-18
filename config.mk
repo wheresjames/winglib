@@ -208,6 +208,19 @@ else
 			CFG_AFLAGS := cq
 
 		endif
+		ifeq ($(TOOLS),buildroot)
+
+			# buildroot
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/build_arm/staging_dir/usr/bin/arm-linux-uclibcgnueabi-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/build_arm/staging_dir/
+
+			CFG_STDLIB := -lrt -pthread
+			CFG_LFLAGS := $(CFG_LEXTRA)
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_NOSTAT64 -DOEX_NOWCHAR -DOEX_NOEXECINFO
+			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
+			CFG_AFLAGS := cq
+
+		endif
 		ifeq ($(CFG_TOOLPREFIX),)
 	
 			# Custom tools

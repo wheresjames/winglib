@@ -985,25 +985,9 @@ public:
 
         return *this;
     }
-/*
-	// Converts the string to wide character
-    template< typename T_CHAR>
-        TStr& ToWc( oexCONST TStr< T_CHAR > &x_sStr )
-    {
-    	OexAllocate( 0 );
-    	return *this;
-    }
+    
+#if !defined( OEX_NOWCHAR )
 
-	template<>
-		TStr& ToWc< oexCHARW >( oexCONST TStr< oexCHARW > &x_sStr )
-	{
-		*this = x_sStr;
-		return *this;
-	}
-
-	template<>
-		TStr& ToWc< oexCHAR8 >( oexCONST TStr< oexCHAR8 > &x_sStr )
-*/
 	TStr& ToWc( oexCONST TStr< oexCHAR8 > &x_sStr )
 	{
 		if ( !oexCHECK( sizeof( T ) == sizeof( oexCHARW ) ) )
@@ -1068,13 +1052,13 @@ public:
 			return *this;
 		}
 
-
         // Save length
         m_nLength = uConv;
 
         return *this;
     }
 
+#endif
 
 	// Concatenation operator
 	TStr& Append( oexCONST TStr &sStr )

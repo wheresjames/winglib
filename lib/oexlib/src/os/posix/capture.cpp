@@ -88,7 +88,7 @@ oexBOOL CCapture::Destroy()
 #endif
 }
 
-oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit )
 {
 #ifdef OEX_NOVIDEO
 	return oexFALSE;
@@ -108,7 +108,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 			} // end if
 
 			// Try VFL2
-			if ( m_pDevice->Open( x_uType, x_uDevice, x_uSource, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
+			if ( m_pDevice->Open( x_uType, x_uDevice, x_uSource, x_nWidth, x_nHeight, x_nBpp, x_fFps, x_bInit ) )
 			{	m_uType = oexVIDSUB_VFL2;
 				return oexTRUE;
 			} // end if
@@ -135,7 +135,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 	} // end if
 
 	// Attempt to open the capture device
-	if ( !m_pDevice->Open( x_uType, x_uDevice, x_uSource, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
+	if ( !m_pDevice->Open( x_uType, x_uDevice, x_uSource, x_nWidth, x_nHeight, x_nBpp, x_fFps, x_bInit ) )
 	{	Destroy();
 		return oexFALSE;
 	} // end if
@@ -144,7 +144,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 #endif
 }
 
-oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit )
 {
 	return oexFALSE;
 }

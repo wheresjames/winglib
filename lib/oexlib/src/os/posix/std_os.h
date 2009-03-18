@@ -48,7 +48,10 @@
 #endif
 
 //#include <stdio.h>
-#include <wchar.h>
+#if !defined( OEX_NOWCHAR )
+#	include <wchar.h>
+#endif
+
 #include <string.h>
 //#include <inttypes.h>
 
@@ -68,16 +71,14 @@ extern int daylight;
 
 #include <locale.h>
 
-//#ifndef OEX_NOUUID
-//#	include <uuid/uuid.h>
-//#endif
-
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#include <execinfo.h>
+#if !defined( OEX_NOEXECINFO )
+#	include <execinfo.h>
+#endif
 
 #include <sys/ioctl.h>
 #include <linux/types.h>
