@@ -330,7 +330,7 @@ public:
 //				crop.c.width = cropcap.bounds.width; crop.c.height = cropcap.bounds.height;
 			if ( -1 == IoCtl( m_nFd, VIDIOC_S_CROP, &crop ) )
 			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_S_CROP failed" ) ) );
-				return oexFALSE;
+//				return oexFALSE;
 			} // end if
 
 		} // end if

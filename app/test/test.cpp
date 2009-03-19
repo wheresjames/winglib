@@ -2385,16 +2385,21 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 	oex::vid::CCapture cCapture;
 
 	// Don't flag an error here, maybe there is no capture device
-	if ( !cCapture.Open( uApi, 0, 0, 320, 240, 24, 15, oex::oexTRUE ) )
+	if ( !cCapture.Open( uApi, 0, 0, 640, 480, 24, 15, 0 ) )
 		return -1;
 
-	if ( !oexVERIFY( cCapture.IsOpen() ) )
+	oexPrintf( cCapture.GetSupportedFormats().Ptr() );
+
+	if ( !cCapture.Init() )
 		return -2;
+
+	if ( !oexVERIFY( cCapture.IsOpen() ) )
+		return -3;
 
 //	oexPrintf( oexT( "Starting capture...\n" ) );
 
 	if ( !oexVERIFY( cCapture.StartCapture() ) )
-		return -3;
+		return -4;
 
 	// Wait a second for the image to stabilize
 	oexSleep( 1000 );
@@ -2404,14 +2409,14 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 //		oexPrintf( oexT( "Waiting for frame...\n" ) );
 
 		if ( !oexVERIFY( cCapture.WaitForFrame( 3000 ) ) )
-			return -4;
+			return -5;
 
 		if ( !oexVERIFY( cCapture.GetBuffer() && cCapture.GetBufferSize() ) )
-			return -5;
+			return -6;
 
 		oex::CDib img;
 		if ( !oexVERIFY( img.Create( oexNULL, oexNULL, cCapture.GetWidth(), cCapture.GetHeight(), 24, 1 ) ) )
-			return -6;
+			return -7;
 
 		// Convert to RGB
 		img.Copy( cCapture.GetBuffer(), cCapture.GetBufferSize() );
@@ -2425,18 +2430,18 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 //		oexPrintf( oexT( "w=%d, h=%d, Buffer Size = %d, Image Size = %d\n" ), cCapture.GetWidth(), cCapture.GetHeight(), cCapture.GetBufferSize(), nImageSize );
 
 		if ( !oexVERIFY( oex::CDib::SaveDibFile( sFile.Ptr(), img.GetImageHeader(), img.GetBuffer(), nImageSize ) ) )
-			return -7;
+			return -8;
 
 		if ( !oexVERIFY( cCapture.ReleaseFrame() ) )
-			return -8;
+			return -9;
 
 	} // end for
 
 	if ( !oexVERIFY( cCapture.StopCapture() ) )
-		return -9;
+		return -10;
 
 	if ( !oexVERIFY( cCapture.Destroy() ) )
-		return -10;
+		return -11;
 
 	return 0;
 }
