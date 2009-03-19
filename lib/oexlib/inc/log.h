@@ -96,7 +96,7 @@ public:
 
 		\see
 	*/
-    oexINT Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x_uLevel, oexCSTR x_pErr, oexINT x_nErr, oexUINT x_uSkip = 2 );
+    oexINT Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT x_uLevel, oexCSTR x_pErr, oexINT x_nErr, oexUINT x_uSkip = 2 );
 
 	//==============================================================
 	// Log()
@@ -120,7 +120,7 @@ public:
 
 		\see
 	*/
-    oexINT Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x_uLevel, CStr x_sErr, oexINT x_nErr )
+    oexINT Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT x_uLevel, CStr x_sErr, oexINT x_nErr )
     {	if ( x_uLevel < m_uLevel ) return x_nErr;
     	return Log( x_pFile, x_nLine, x_pFunction, x_uLevel, x_sErr.Ptr(), x_nErr, 3 );
     }

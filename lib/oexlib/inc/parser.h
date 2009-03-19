@@ -593,7 +593,7 @@ public:
         TPropertyBag< TStr< T > > pb;
 		TStr< T > sGroup;
 
-		x_sStr << "\r\n";
+		x_sStr << oexTT( T, "\r\n" );
         while ( x_sStr.Length() )
         {
 			x_sStr.SkipWhiteSpace();

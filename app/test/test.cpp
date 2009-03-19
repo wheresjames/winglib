@@ -568,19 +568,19 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( 0 <= oexGetModuleFileName().GetFileName().FindSubStr( oexT( "test" ) ) ) )
 		return -54;
 
-	if ( !oexVERIFY( oex::CStr( "path" ).GetPath() == oexT( "" ) ) )
+	if ( !oexVERIFY( oex::CStr( oexT( "path" ) ).GetPath() == oexT( "" ) ) )
 		return -55;
 
-	if ( !oexVERIFY( oex::CStr( "test.png" ).GetFileName() == oexT( "test.png" ) ) )
+	if ( !oexVERIFY( oex::CStr( oexT( "test.png" ) ).GetFileName() == oexT( "test.png" ) ) )
 		return -56;
 
-	if ( !oexVERIFY( oex::CStr( "test.png" ).GetFileExtension() == oexT( "png" ) ) )
+	if ( !oexVERIFY( oex::CStr( oexT( "test.png" ) ).GetFileExtension() == oexT( "png" ) ) )
 		return -57;
 
-	if ( !oexVERIFY( oex::CStr( "somedirectory.hi/test.png" ).GetFileExtension() == oexT( "png" ) ) )
+	if ( !oexVERIFY( oex::CStr( oexT( "somedirectory.hi/test.png" ) ).GetFileExtension() == oexT( "png" ) ) )
 		return -58;
 
-	if ( !oexVERIFY( oex::CStr( "somedirectory.hi/test.not.png" ).GetFileExtension() == oexT( "png" ) ) )
+	if ( !oexVERIFY( oex::CStr( oexT( "somedirectory.hi/test.not.png" ) ).GetFileExtension() == oexT( "png" ) ) )
 		return -59;
 
     return oex::oexRES_OK;
@@ -885,15 +885,15 @@ oex::oexRESULT TestLists()
 		if ( !oexVERIFY( itStr->Cmp( szStr2[ i ] ) ) )
 			return -13;
 
-	oex::oexCSTR pIni = "; This is a test INI file"				"\r\n"
-						"# [comment]"							"\r\n"
-						"val1=Hello"							"\r\n"
-						"val2=World"							"\r\n"
-						""										"\r\n"
-						"[group1]"								"\r\n"
-						"val1=yup"								"\r\n"
-						"val2=noreturn"
-						;
+	oex::oexCSTR pIni = oexT( "; This is a test INI file"			"\r\n"
+							"# [comment]"							"\r\n"
+							"val1=Hello"							"\r\n"	
+							"val2=World"							"\r\n"
+							""										"\r\n"
+							"[group1]"								"\r\n"
+							"val1=yup"								"\r\n"
+							"val2=noreturn" 
+						);
 
 	oex::CPropertyBag pb = oex::CParser::DecodeIni( pIni );
 	if ( !oexVERIFY(  pb[ oexT( "val1" ) ].ToString() == oexT( "Hello" ) ) )
@@ -1302,6 +1302,10 @@ oex::oexRESULT TestZip()
     // Verify raw compression
     if ( !oexVERIFY( sStr == oexBinToStr( oex::zip::CUncompress::Uncompress( sCmp ) ) ) )
         return -2;
+
+#else
+
+	oexPrintf( oexT( "ZIP file support disabled\n" ) );
 
 #endif
 
@@ -1887,7 +1891,7 @@ oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os
 	if ( oexPtrToInt( x_pData ) != 9876 )
 		return 0;
 
-	x_pSession->Content() << oexT( "Hello World!" );
+	x_pSession->Content() << "Hello World!";
 
 	return 0;
 }
@@ -1911,7 +1915,7 @@ oex::oexRESULT Test_CHttpSession()
     if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, SOCKET_TIMEOUT ) ) )
         return -4;
 
-	if ( !oexVERIFY( client.Send( oexT( "GET / HTTP/1.0\r\n\r\n" ) ) ) )
+	if ( !oexVERIFY( client.Send( "GET / HTTP/1.0\r\n\r\n" ) ) )
         return -5;
 
 	while ( !server.GetNumTransactions() )
@@ -1920,9 +1924,9 @@ oex::oexRESULT Test_CHttpSession()
 	while ( server.GetNumActiveClients() )
 		oexSleep( 15 );
 
-	oex::CStr sData = client.Read();
+	oex::CStr8 sData = client.Read();
 
-	if ( !oexVERIFY( 0 <= sData.Match( oexT( "Hello World!" ) ) ) )
+	if ( !oexVERIFY( 0 <= sData.Match( "Hello World!" ) ) )
 		return -6;
 
 	client.Destroy();
@@ -2381,7 +2385,7 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 	oex::vid::CCapture cCapture;
 
 	// Don't flag an error here, maybe there is no capture device
-	if ( !cCapture.Open( uApi, 0, 0, 320, 240, 24, 15 ) )
+	if ( !cCapture.Open( uApi, 0, 0, 320, 240, 24, 15, oex::oexTRUE ) )
 		return -1;
 
 	if ( !oexVERIFY( cCapture.IsOpen() ) )
@@ -2392,9 +2396,8 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 	if ( !oexVERIFY( cCapture.StartCapture() ) )
 		return -3;
 
-//	cCapture.StartCapture();
-
-	oex::os::CSys::Sleep( 1 );
+	// Wait a second for the image to stabilize
+	oexSleep( 1000 );
 
 	for ( int i = 0; i < 1; i++ )
 	{
@@ -2414,7 +2417,6 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 		img.Copy( cCapture.GetBuffer(), cCapture.GetBufferSize() );
 //		img.CopySBGGR8( cCapture.GetBuffer() );
 //		img.CopyGrey( cCapture.GetBuffer() );
-
 
 		int nImageSize = oex::CImage::GetScanWidth( cCapture.GetWidth(), 24 )
 		       				* oex::cmn::Abs( cCapture.GetHeight() );
@@ -2446,19 +2448,20 @@ oex::oexRESULT Test_CCapture()
 	oexINT idx = -1;
 	while ( oexCONST vid::SVideoSystemInfo* pVsi = vid::CCapture::GetNextAvailableSystem( idx ) )
 	{
-		oexPrintf( oexT( "%s - %s - " ), pVsi->pTag, pVsi->pName );
+		oexPrintf( oexT( "%s - %s - " ), oexStrToMbPtr( pVsi->pTag ), oexStrToMbPtr( pVsi->pName ) );
 
 		oex::CStr sName = oex::CStr().Fmt( oexT( "./_captest_%s_%d.bmp" ), oexStrToMbPtr( pVsi->pTag ), 0 );
 		oex::CStr sFile = oexGetModulePath( sName.Ptr() );
 
+		oexINT nRet = 0;
 		if ( !pVsi->bSupported )
 			oexPrintf( oexT( "Unsupported\n" ) );
 
-		else if ( !Test_CaptureApi( pVsi->uType, sFile ) )
+		else if ( !( nRet = Test_CaptureApi( pVsi->uType, sFile ) ) )
 			oexPrintf( oexT( "Succeded - %s\n" ), oexStrToMb( sName ).Ptr() );
 
 		else
-			oexPrintf( oexT( "Failed\n" ) );
+			oexPrintf( oexT( "Failed : %d\n" ), nRet );
 
 		// Next item
 		idx = pVsi->nIndex;
@@ -2476,7 +2479,7 @@ int main(int argc, char* argv[])
     // Initialize the oex library
 	oexINIT();
 
-	oexNOTICE( 0, "Tests started" );
+	oexNOTICE( 0, oexT( "Tests started" ) );
 
     TestAllocator();
 

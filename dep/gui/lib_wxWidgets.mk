@@ -11,7 +11,7 @@ PRJ_TYPE := lib
 PRJ_INCS := zlib jpeg png tiff wxWidgets/src/regex
 PRJ_LIBS := 
 
-PRJ_LIBROOT := ..
+PRJ_LIBROOT := ../..
 
 #-------------------------------------------------------------------
 # Configure build

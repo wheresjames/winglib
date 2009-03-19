@@ -656,7 +656,7 @@ public:
 	COexStdAllocator( const COexStdAllocator& ) {}
 
 	T* allocate( size_type n, const void * = 0 )
-	{	return (T*)os::CMem::New( n * sizeof( T ), oexLINE, oexFILE ); }
+	{	return (T*)os::CMem::New( n * sizeof( T ), oexLINE, oexTEXT( oexFILE ) ); }
 
 	void deallocate( void* p, size_type sz )
 	{	if ( p ) os::CMem::Delete( p ); }

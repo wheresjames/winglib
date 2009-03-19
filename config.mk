@@ -263,14 +263,14 @@ else
 			CFG_AFLAGS := cq
 
 		endif
-		
-		# you can't use dlopen() [-ldl] with static linking!
-		# http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/d/dlopen.html
-		ifeq ($(LIBLINK),shared)
-			CFG_STDLIB := $(CFG_STDLIB) -ldl
-		endif		
-		
+	
 	endif
+
+	# you can't use dlopen() [-ldl] with static linking!
+	# http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/d/dlopen.html
+	ifeq ($(LIBLINK),shared)
+		CFG_STDLIB := $(CFG_STDLIB) -ldl
+	endif		
 	
 #	ifeq ($(PRJ_TYPE),dll)
 #		CFG_LD := $(CFG_TOOLPREFIX)ld -E --export-dynamic

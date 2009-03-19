@@ -19,7 +19,7 @@ extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex
 		oex::CLog::GlobalLog().OpenLogFile( oexNULL, oexNULL, oexT( ".module.debug.log" ) );
 
 	// Start a log file
-	oexNOTICE( 0, "Module startup" );
+	oexNOTICE( 0, oexT( "Module startup" ) );
 
 	// Uninitialize the oex library
 	oexUNINIT();
@@ -41,7 +41,7 @@ extern "C" oexDECLARE_SRV_FUNCTION( SRV_GetModuleInfo );
 extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 {
 	if ( !oexCHECK_PTR( pDi ) )
-	{	oexERROR( EINVAL, "Invalid function argument" );
+	{	oexERROR( EINVAL, oexT( "Invalid function argument" ) );
 		return -1;
 	} // end if
 

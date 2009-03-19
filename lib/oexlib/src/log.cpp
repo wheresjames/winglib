@@ -85,12 +85,12 @@ oexBOOL CLog::Open( oexCSTR x_pPath )
 
 	// Create log header
 	oexUINT uThreadId = oexGetCurrentThreadId();
-	m_file.Write( oexMks(	oexT( ";====================================================================" ) oexNL
-							oexT( "; Log file    : " ), x_pPath, oexNL
-							oexT( "; Local Time  : " ), oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL
-							oexT( "; GMT Time    : " ), oexGmtTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL
-							oexT( "; Application : " ), oexGetModuleFileName(), oexNL
-							oexT( "; Thread      : " ), oexFmt( "%u (0x%x)", uThreadId, uThreadId ), oexNL oexNL
+	m_file.Write( oexMks(	oexT( ";====================================================================" ), oexNL,
+							oexT( "; Log file    : " ), x_pPath, oexNL,
+							oexT( "; Local Time  : " ), oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL,
+							oexT( "; GMT Time    : " ), oexGmtTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL,
+							oexT( "; Application : " ), oexGetModuleFileName(), oexNL,
+							oexT( "; Thread      : " ), oexFmt( oexT( "%u (0x%x)" ), uThreadId, uThreadId ), oexNL, oexNL
 						) );
 
 	return oexTRUE;
@@ -127,12 +127,12 @@ oexBOOL CLog::Resume( oexCSTR x_pPath )
 
 		// Create log header
 		oexUINT uThreadId = oexGetCurrentThreadId();
-		m_file.Write( oexMks(	oexT( ";====================================================================" ) oexNL
-								oexT( "; Log file    : " ), x_pPath, oexNL
-								oexT( "; Local Time  : " ), oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL
-								oexT( "; GMT Time    : " ), oexGmtTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL
-								oexT( "; Application : " ), oexGetModuleFileName(), oexNL
-								oexT( "; Thread      : " ), oexFmt( "%u (0x%x)", uThreadId, uThreadId ), oexNL oexNL
+		m_file.Write( oexMks(	oexT( ";====================================================================" ), oexNL,
+								oexT( "; Log file    : " ), x_pPath, oexNL,
+								oexT( "; Local Time  : " ), oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL,
+								oexT( "; GMT Time    : " ), oexGmtTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL,
+								oexT( "; Application : " ), oexGetModuleFileName(), oexNL,
+								oexT( "; Thread      : " ), oexFmt( oexT( "%u (0x%x)" ), uThreadId, uThreadId ), oexNL, oexNL
 							) );
 
 	} // end else
@@ -140,7 +140,7 @@ oexBOOL CLog::Resume( oexCSTR x_pPath )
 	return oexTRUE;
 }
 
-oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x_uLevel, oexCSTR x_pErr, oexINT x_nErr, oexUINT x_uSkip )
+oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT x_uLevel, oexCSTR x_pErr, oexINT x_nErr, oexUINT x_uSkip )
 {
 	// Ensure valid reporting level
 	if ( x_uLevel < m_uLevel )
@@ -162,7 +162,7 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x
 				x_pFile = oexT( "???" );
 
 			if ( !oexCHECK_PTR( x_pFunction ) )
-				x_pFunction = oexT( "???" );
+				x_pFunction = "???";
 
 			CStr sLevel;
 			oexCSTR pLevel = oexT( "" );
@@ -182,17 +182,17 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x
 			// Add file / line number
 			oexUINT uThreadId = oexGetCurrentThreadId();
 			sLog << x_pFile << oexT( ":(" ) << x_nLine << oexT( ")" ) 
-				 << oexFmt( " : Thread %u (0x%x)", uThreadId, uThreadId ) << oexNL;
+				 << oexFmt( oexT( " : Thread %u (0x%x)" ), uThreadId, uThreadId ) << oexNL;
 
 			// Write out the time
 #ifdef OEX_NANOSECONDS
-			sLog << oexLocalTimeStr( oexT( " -> Local Time: %Y/%c/%d - %g:%m:%s.%l.%u.%n" ) oexNL );
+			sLog << oexLocalTimeStr( oexT( " -> Local Time: %Y/%c/%d - %g:%m:%s.%l.%u.%n" oexNL8 ) );
 #else
-			sLog << oexLocalTimeStr( oexT( " -> Local Time: %Y/%c/%d - %g:%m:%s.%l.%u" ) oexNL );
+			sLog << oexLocalTimeStr( oexT( " -> Local Time: %Y/%c/%d - %g:%m:%s.%l.%u" oexNL8 ) );
 #endif
 			// Add function name if available
 			if ( x_pFunction && *x_pFunction )
-				sLog << oexT( " -> " ) << x_pFunction << oexT( "()" ) oexNL;
+				sLog << oexT( " -> " ) << oexMbToStrPtr( x_pFunction ) << oexT( "()" oexNL8 );
 
 			// Add error level
 			sLog << oexT( " -> " ) << pLevel;
@@ -200,18 +200,18 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR x_pFunction, oexINT x
 			// Add system error info
 			if ( x_nErr )
 				sLog << CStr().Print( oexT( " : 0x%X (%d) : " ), x_nErr, x_nErr )
-					 << os::CTrace::GetErrorMsg( x_nErr ).RTrim( "\r\n" );
+					 << os::CTrace::GetErrorMsg( x_nErr ).RTrim( oexT( "\r\n" ) );
 
 			sLog << oexNL;
 
 			// Write out the user error string if available
 			if ( oexCHECK_PTR( x_pErr ) )
-				sLog << oexT( " -> " ) << CStr( x_pErr ).Replace( oexNL, oexNL oexT( " -> " ) ) << oexNL;
+				sLog << oexT( " -> " ) << CStr( x_pErr ).Replace( oexNL, oexT( "" oexNL8 " -> " ) ) << oexNL;
 
 #ifdef oexBACKTRACE_IN_LOG
 			// Write out the backtrace
 			sLog << oexT( " -> " )
-				 << os::CTrace::GetBacktrace( x_uSkip ).Replace( oexNL, oexNL oexT( " -> " ) )
+				 << os::CTrace::GetBacktrace( x_uSkip ).Replace( oexNL, oexT( "" oexNL8 " -> " ) )
 				 << oexNL;
 #endif
 

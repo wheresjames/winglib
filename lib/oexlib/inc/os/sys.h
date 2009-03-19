@@ -97,8 +97,15 @@ public:
 	/// Converts to double
 	static oexDOUBLE StrToDouble( oexCSTR8 pStr );
 
+	/// printf function
+	static int Printf( oexCSTR8 x_pFmt, ... );
+
+	/// vprintf
+	static int vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs );
+
+
     // Unicode
-#if !defined( OEX_NOWCHAR )    
+#if !defined( OEX_NOWCHAR )
 public:
 
 	static oexCSTRW StrFmt( oexSTRW pDst, oexUINT uMax, oexCSTRW pFmt, ... );
@@ -126,12 +133,19 @@ public:
 
 	/// Converts to double
 	static oexDOUBLE StrToDouble( oexCSTRW pStr );
-	
+
+	// +++ Hmmm, probably shouldn't overload Printf(), could cause nasty errors
+
+	/// printf function
+	static int Printf( oexCSTRW x_pFmt, ... );
+
+	/// vprintf
+	static int vPrintf( oexCSTRW x_pFmt, oexVaList pArgs );
+
 	static oexUINT WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen );
 
 	static oexUINT MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen );
-	
-	
+
 #endif // OEX_NOWCHAR
 
 public:
@@ -350,16 +364,27 @@ public:
 
 public:
 
-	/// printf function
-	static int Printf( oexCSTR8 x_pFmt, ... );
-
-	/// vprintf
-	static int vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs );
-
 public:
 
 	/// Pumps thread messages / only applies to Windows
 	static oexBOOL PumpThreadMessages();
+
+	//==============================================================
+	// Fork()
+	//==============================================================
+	/// Fork current process
+	/**
+		\param [in] x_pWorkingDirectory	- Working directory for the
+									      newly forked process.
+		\param [in] x_pLogFile			- token used in creating the
+										  new log file.
+
+		iii Linux only
+
+		\return Less than zero if failure, zero if child, greater
+				than zero on return from parent.
+	*/
+	static oexINT Fork( oexCSTR x_pWorkingDirectory = oexNULL, oexCSTR x_pLogFile = oexNULL );
 
 };
 

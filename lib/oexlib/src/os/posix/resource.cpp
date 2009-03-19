@@ -151,7 +151,7 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 		{
 			// Usually the creator will be the destructor
 			if ( pRi->uOwner != oexGetCurrentThreadId() )
-				oexWARNING( 0, "Thread not being destroyed by owner!" );
+				oexWARNING( 0, oexT( "Thread not being destroyed by owner!" ) );
 
 			// Wait for thread to exit
 			if ( waitSuccess != Wait( x_uTimeout ) )
@@ -321,7 +321,7 @@ oexRESULT CResource::NewThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData )
 	pthread_attr_destroy( &attr );
 
 	if ( nRet )
-	{	oexERROR( nRet, "Error creating thread" );
+	{	oexERROR( nRet, oexT( "Error creating thread" ) );
 		Destroy();
 		return nRet;
 	} // end if
@@ -348,7 +348,7 @@ oexPVOID CResource::ThreadProc( oexPVOID x_pData )
 	pthread_exit( pRet );
 
 	// ???
-	oexERROR( 0, "pthread_exit() returned!" );
+	oexERROR( 0, oexT( "pthread_exit() returned!" ) );
 
 	return pRet;
 }
@@ -438,7 +438,7 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 		{
 			// Verify mutex data pointer
 			if ( !oexCHECK_PTR( pRi->cSync.GetRi() ) )
-			{	oexERROR( 0, "Invalid mutex data pointer" );
+			{	oexERROR( 0, oexT( "Invalid mutex data pointer" ) );
 				return waitFailed;
 			} // end if
 
@@ -465,7 +465,7 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 			// Calculate a timeout
 			struct timespec to;
 			if ( oexINT nErr = clock_gettime( CLOCK_REALTIME, &to ) )
-				return oexERROR( nErr, "clock_gettime() failed" );
+				return oexERROR( nErr, oexT( "clock_gettime() failed" ) );
 			to.tv_sec += x_uTimeout / 1000;
 			to.tv_nsec += ( x_uTimeout - ( x_uTimeout / 1000 * 1000 ) ) * 1000000;
 
@@ -492,7 +492,7 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 		{
 			// Verify mutex data pointer
 			if ( !oexCHECK_PTR( pRi->cSync.GetRi() ) )
-			{	oexERROR( 0, "Invalid mutex data pointer" );
+			{	oexERROR( 0, oexT( "Invalid mutex data pointer" ) );
 				return waitFailed;
 			} // end if
 
@@ -660,7 +660,7 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 		{
 			// Verify mutex data pointer
 			if ( !oexCHECK_PTR( pRi->cSync.GetRi() ) )
-			{	oexERROR( 0, "Invalid mutex data pointer" );
+			{	oexERROR( 0, oexT( "Invalid mutex data pointer" ) );
 				return waitFailed;
 			} // end if
 
@@ -678,7 +678,7 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 		{
 			// Verify mutex data pointer
 			if ( !oexCHECK_PTR( pRi->cSync.GetRi() ) )
-			{	oexERROR( 0, "Invalid mutex data pointer" );
+			{	oexERROR( 0, oexT( "Invalid mutex data pointer" ) );
 				return waitFailed;
 			} // end if
 
@@ -720,18 +720,18 @@ oexINT CResource::WaitMultiple( oexINT x_nCount, CResource **x_pResources, oexUI
 	oexZeroMemory( nSignaled, sizeof( nSignaled ) );
 
 	if ( x_nCount > MAXIMUM_WAIT_OBJECTS )
-		oexWARNING( 0, "Number of handles specified is beyond MS Windows system capabilities!!!" );
+		oexWARNING( 0, oexT( "Number of handles specified is beyond MS Windows system capabilities!!!" ) );
 
 	// Loop through the handles
 	for( oexINT i = 0; i < x_nCount && nNumHandles < MAXIMUM_WAIT_OBJECTS; i++ )
 	{
 		if ( !x_pResources[ i ]->IsValid() )
-			oexWARNING( 0, "Invalid handle specified to WaitMultiple()" );
+			oexWARNING( 0, oexT( "Invalid handle specified to WaitMultiple()" ) );
 		else
 		{
 			SResourceInfo *pRi = (SResourceInfo*)x_pResources[ i ]->GetHandle();
 			if ( !oexCHECK_PTR( pRi ) )
-				oexERROR( 0, "Invalid data pointer" );
+				oexERROR( 0, oexT( "Invalid data pointer" ) );
 
 			else
 				pRes[ nNumHandles ] = x_pResources[ i ], nRealIndex[ nNumHandles++ ] = i;

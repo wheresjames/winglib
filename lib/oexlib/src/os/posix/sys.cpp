@@ -255,7 +255,7 @@ oexDOUBLE CSys::StrToDouble( oexCSTR8 x_pStr )
 }
 
 // **** Unicode
-#if !defined( OEX_NOWCHAR )    
+#if !defined( OEX_NOWCHAR )
 
 oexCSTRW CSys::StrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, ... )
 {
@@ -373,6 +373,20 @@ oexUINT CSys::MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen 
 //	pSrc[ uLen - 1 ] = 0;
 
 	return mbstowcs( pDst, pSrc, uMax );
+}
+
+/// vprintf
+int CSys::vPrintf( oexCSTRW x_pFmt, oexVaList pArgs )
+{	return ::vwprintf( x_pFmt, pArgs );
+}
+
+/// printf function
+int CSys::Printf( oexCSTRW x_pFmt, ... )
+{
+	oexVaList ap; oexVaStart( ap, x_pFmt );
+	int ret = vwprintf( x_pFmt, ap );
+	oexVaEnd( ap );
+	return ret;
 }
 
 #endif // OEX_NOWCHAR
@@ -690,5 +704,63 @@ oexBOOL CSys::PumpThreadMessages()
 }
 
 
+oexINT CSys::Fork( oexCSTR x_pWorkingDirectory, oexCSTR x_pLogFile )
+{
+	pid_t pid, sid;
+
+	// Fork from the parent
+	pid = fork();
+	if ( 0 > pid )
+	{	oexERROR( errno, oexT( "fork() failed" ) );
+		return pid;
+	} // end if
+
+	// Exit parent process
+	if ( 0 < pid )
+	{	//CLog::GlobalLog().OpenLogFile( oexNULL, oexNULL, oexNULL );
+		oexNOTICE( 0, CStr().Fmt( oexT( "fork() = %d (0x%x)" ), (int)pid, (int)pid ) );
+		return pid;
+	} // end if
+
+	// Change file mode mask
+	umask( 0 );
+
+	// Child process needs a SID
+	sid = setsid();
+	if ( 0 > sid )
+	{	oexERROR( errno, oexT( "setsid() failed" ) );
+		return -1;
+	} // end if
+
+	// Switch to custom log file
+	if ( oexCHECK_PTR( x_pLogFile ) && *x_pLogFile )
+		CLog::GlobalLog().OpenLogFile( oexNULL, x_pLogFile, oexT( ".fork.debug.log" ) );
+	else
+		CLog::GlobalLog().OpenLogFile( oexNULL, oexNULL, oexT( ".fork.debug.log" ) );
+
+	// Log child sid
+	oexNOTICE( 0, CStr().Fmt( oexT( "Child fork() : setsid() = %d" ), (int)sid ) );
+
+	// Set the current working directory
+	CStr sWorkingDirectory;
+	if ( !oexCHECK_PTR( x_pWorkingDirectory ) )
+		x_pWorkingDirectory = ( sWorkingDirectory = oexGetModulePath() ).Ptr();
+
+	if ( 0 > chdir( oexStrToMbPtr( x_pWorkingDirectory ) ) )
+	{	oexERROR( errno, oexMks( oexT( "chdir( '" ), x_pWorkingDirectory, oexT( "' ) failed" ) ) );
+		return -1;
+	} // end if
+
+	// No more terminals
+	if ( 0 > close( STDIN_FILENO ) )
+		oexWARNING( errno, oexT( "Unable to close STDIN_FILENO" ) );
+	if ( 0 > close( STDOUT_FILENO ) )
+		oexWARNING( errno, oexT( "Unable to close STDIN_FILENO" ) );
+	if ( 0 > close( STDERR_FILENO ) )
+		oexWARNING( errno, oexT( "Unable to close STDIN_FILENO" ) );
+
+	// Return from child process
+	return 0;
+}
 
 

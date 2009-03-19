@@ -438,10 +438,10 @@ public:
 		sReply << GetErrorString( m_nErrorCode );
 
 		// Send the headers
-		sReply << CParser::EncodeMime( m_pbTxHeaders ) << "\r\n";
+		sReply << oexMbToStr( CParser::EncodeMime( m_pbTxHeaders ) ) << oexT( "\r\n" );
 
 		// Send the content
-		sReply << m_sContent;
+		sReply << oexMbToStr( m_sContent );
 
 		return sReply;
 	}

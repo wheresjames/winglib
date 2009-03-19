@@ -9,7 +9,7 @@ PRJ_TYPE := lib
 PRJ_INCS := 
 PRJ_LIBS := 
 
-PRJ_LIBROOT := ..
+PRJ_LIBROOT := ../..
 
 #-------------------------------------------------------------------
 # Configure build

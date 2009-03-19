@@ -66,9 +66,9 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 //	SetStatusText( _T( "This is a status text" ) );
 
 	// Open the capture device
-	if ( !m_cCapture.Open( oexVIDSUB_AUTO, 0, 0, 320, 240, 24, 15 ) )
-//	if ( !m_cCapture.Open( oexVIDSUB_DSHOW, 0, 0, 320, 240, 24, 15 ) )
-//	if ( !m_cCapture.Open( oexVIDSUB_VFW, 0, 0, 320, 240, 24, 15 ) )
+	if ( !m_cCapture.Open( oexVIDSUB_AUTO, 0, 0, 320, 240, 24, 15, oex::oexTRUE ) )
+//	if ( !m_cCapture.Open( oexVIDSUB_DSHOW, 0, 0, 320, 240, 24, 15, oex::oexTRUE ) )
+//	if ( !m_cCapture.Open( oexVIDSUB_VFW, 0, 0, 320, 240, 24, 15, oex::oexTRUE ) )
 		SetStatusText( _T( "Failed to open catpure device" ) );
 
 	else

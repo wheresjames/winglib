@@ -1499,6 +1499,262 @@ public:
 			return *this;
 		}
 
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
+	           typename T_P13, typename T_P14, typename T_P15, typename T_P16,
+	           typename T_P17 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9, T_P10 p10, T_P11 p11, T_P12 p12, T_P13 p13, T_P14 p14, T_P15 p15, T_P16 p16,
+		           T_P17 p17 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			*this += p10;
+			*this += p11;
+			*this += p12;
+			*this += p13;
+			*this += p14;
+			*this += p15;
+			*this += p16;
+			*this += p17;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
+	           typename T_P13, typename T_P14, typename T_P15, typename T_P16,
+	           typename T_P17, typename T_P18 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9, T_P10 p10, T_P11 p11, T_P12 p12, T_P13 p13, T_P14 p14, T_P15 p15, T_P16 p16,
+		           T_P17 p17, T_P18 p18 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			*this += p10;
+			*this += p11;
+			*this += p12;
+			*this += p13;
+			*this += p14;
+			*this += p15;
+			*this += p16;
+			*this += p17;
+			*this += p18;
+			return *this;
+		}
+
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
+	           typename T_P13, typename T_P14, typename T_P15, typename T_P16,
+	           typename T_P17, typename T_P18, typename T_P19 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9, T_P10 p10, T_P11 p11, T_P12 p12, T_P13 p13, T_P14 p14, T_P15 p15, T_P16 p16,
+		           T_P17 p17, T_P18 p18, T_P19 p19 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			*this += p10;
+			*this += p11;
+			*this += p12;
+			*this += p13;
+			*this += p14;
+			*this += p15;
+			*this += p16;
+			*this += p17;
+			*this += p18;
+			*this += p19;
+			return *this;
+		}
+		
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
+	           typename T_P13, typename T_P14, typename T_P15, typename T_P16,
+	           typename T_P17, typename T_P18, typename T_P19, typename T_P20 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9, T_P10 p10, T_P11 p11, T_P12 p12, T_P13 p13, T_P14 p14, T_P15 p15, T_P16 p16,
+		           T_P17 p17, T_P18 p18, T_P19 p19, T_P20 p20 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			*this += p10;
+			*this += p11;
+			*this += p12;
+			*this += p13;
+			*this += p14;
+			*this += p15;
+			*this += p16;
+			*this += p17;
+			*this += p18;
+			*this += p19;
+			*this += p20;
+			return *this;
+		}
+		
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
+	           typename T_P13, typename T_P14, typename T_P15, typename T_P16,
+	           typename T_P17, typename T_P18, typename T_P19, typename T_P20,
+	           typename T_P21 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9, T_P10 p10, T_P11 p11, T_P12 p12, T_P13 p13, T_P14 p14, T_P15 p15, T_P16 p16,
+		           T_P17 p17, T_P18 p18, T_P19 p19, T_P20 p20, T_P21 p21 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			*this += p10;
+			*this += p11;
+			*this += p12;
+			*this += p13;
+			*this += p14;
+			*this += p15;
+			*this += p16;
+			*this += p17;
+			*this += p18;
+			*this += p19;
+			*this += p20;
+			*this += p21;
+			return *this;
+		}
+		
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
+	           typename T_P13, typename T_P14, typename T_P15, typename T_P16,
+	           typename T_P17, typename T_P18, typename T_P19, typename T_P20,
+	           typename T_P21, typename T_P22 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9, T_P10 p10, T_P11 p11, T_P12 p12, T_P13 p13, T_P14 p14, T_P15 p15, T_P16 p16,
+		           T_P17 p17, T_P18 p18, T_P19 p19, T_P20 p20, T_P21 p21, T_P22 p22 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			*this += p10;
+			*this += p11;
+			*this += p12;
+			*this += p13;
+			*this += p14;
+			*this += p15;
+			*this += p16;
+			*this += p17;
+			*this += p18;
+			*this += p19;
+			*this += p20;
+			*this += p21;
+			*this += p22;
+			return *this;
+		}
+		
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
+	           typename T_P13, typename T_P14, typename T_P15, typename T_P16,
+	           typename T_P17, typename T_P18, typename T_P19, typename T_P20,
+	           typename T_P21, typename T_P22, typename T_P23 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9, T_P10 p10, T_P11 p11, T_P12 p12, T_P13 p13, T_P14 p14, T_P15 p15, T_P16 p16,
+		           T_P17 p17, T_P18 p18, T_P19 p19, T_P20 p20, T_P21 p21, T_P22 p22, T_P23 p23 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			*this += p10;
+			*this += p11;
+			*this += p12;
+			*this += p13;
+			*this += p14;
+			*this += p15;
+			*this += p16;
+			*this += p17;
+			*this += p18;
+			*this += p19;
+			*this += p20;
+			*this += p21;
+			*this += p22;
+			*this += p23;
+			return *this;
+		}
+		
+	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
+	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
+	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
+	           typename T_P13, typename T_P14, typename T_P15, typename T_P16,
+	           typename T_P17, typename T_P18, typename T_P19, typename T_P20,
+	           typename T_P21, typename T_P22, typename T_P23, typename T_P24 >
+		TStr& Mks( T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8,
+		           T_P9 p9, T_P10 p10, T_P11 p11, T_P12 p12, T_P13 p13, T_P14 p14, T_P15 p15, T_P16 p16,
+		           T_P17 p17, T_P18 p18, T_P19 p19, T_P20 p20, T_P21 p21, T_P22 p22, T_P23 p23, T_P24 p24 )
+		{	*this += p1;
+			*this += p2;
+			*this += p3;
+			*this += p4;
+			*this += p5;
+			*this += p6;
+			*this += p7;
+			*this += p8;
+			*this += p9;
+			*this += p10;
+			*this += p11;
+			*this += p12;
+			*this += p13;
+			*this += p14;
+			*this += p15;
+			*this += p16;
+			*this += p17;
+			*this += p18;
+			*this += p19;
+			*this += p20;
+			*this += p21;
+			*this += p22;
+			*this += p23;
+			*this += p24;
+			return *this;
+		}
+		
 	// +++ sprintf functionality, to eventually be type safe
 	TStr& vFmt( oexCONST T *x_pFmt, oexVaList x_pArgs )
 	{	return vPrint( x_pFmt, x_pArgs );

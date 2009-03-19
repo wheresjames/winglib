@@ -76,7 +76,7 @@ oexBOOL CDib::Create( oexCSTR x_pShared, os::CFMap::t_HFILEMAP x_hShared, oexINT
 
 	// Allocate memory for the shared memory
 	if ( !m_image.OexNew( sizeof( SImageData ) + lImageSize ).Ptr() )
-	{	oexERROR( 0, oexMks( oexT( "Error allocating image data : s=" ), oexStrToMbPtr( x_pShared ),
+	{	oexERROR( 0, oexMks( oexT( "Error allocating image data : s=" ), x_pShared,
 							 oexT( ", fm=" ), oexPtrToInt( x_hShared ),
 							 oexT( ", w=" ), x_lWidth,
 							 oexT( ", h=" ), x_lHeight,
@@ -89,7 +89,7 @@ oexBOOL CDib::Create( oexCSTR x_pShared, os::CFMap::t_HFILEMAP x_hShared, oexINT
 		// Get a pointer to the image data
 		SImageData *pId = Image();
 		if ( !oexCHECK_PTR( pId ) )
-	{	oexERROR( 0, oexMks( oexT( "Error allocating image data : s=" ), oexStrToMbPtr( x_pShared ),
+	{	oexERROR( 0, oexMks( oexT( "Error allocating image data : s=" ), x_pShared,
 							 oexT( ", fm=" ), oexPtrToInt( x_hShared ),
 							 oexT( ", w=" ), x_lWidth,
 							 oexT( ", h=" ), x_lHeight,
@@ -284,12 +284,12 @@ oexBOOL CDib::SaveDibFile( oexCSTR x_pFile, SImageData *x_pId, oexCPVOID x_pData
 }
 
 // Integer conversion coefficients for Yuv2Rgb()
-const oexLONG	c_uShift = 12;
-const oexLONG	c_u2PowShift = 4096; // 2 ^ c_uShift
-const oexLONG	c_uUScale = (oexUINT)( (oexDOUBLE)1.772 * c_u2PowShift );
-const oexLONG	c_uVScale = (oexUINT)( (oexDOUBLE)1.402 * c_u2PowShift );
-const oexLONG	c_uYuScale = (oexUINT)( (oexDOUBLE)0.34414 * c_u2PowShift );
-const oexLONG	c_uYvScale = (oexUINT)( (oexDOUBLE)0.71414 * c_u2PowShift );
+const oexINT	c_uShift = 12;
+const oexINT	c_u2PowShift = 4096; // 2 ^ c_uShift
+const oexINT	c_uUScale = (oexUINT)( (oexDOUBLE)1.772 * c_u2PowShift );
+const oexINT	c_uVScale = (oexUINT)( (oexDOUBLE)1.402 * c_u2PowShift );
+const oexINT	c_uYuScale = (oexUINT)( (oexDOUBLE)0.34414 * c_u2PowShift );
+const oexINT	c_uYvScale = (oexUINT)( (oexDOUBLE)0.71414 * c_u2PowShift );
 
 /**
 	\param [in] lWidth			-	Width of video frame.
@@ -472,28 +472,63 @@ oexBOOL CDib::YUYV_RGB(oexLONG lWidth, oexLONG lHeight, oexPVOID pSrc, oexPVOID 
 {
 	// Image params
 	oexINT lScanWidth = GetScanWidth( lWidth, 24 );
-//	oexINT lScanWidthDif = lScanWidth - ( lWidth * 3 );
+	oexINT lScanWidthDif = lScanWidth - ( lWidth * 3 );
 
-	// Access image elements (image is top down)
-	oexBYTE *pPixDst = (oexBYTE*)pDst; //( (oexBYTE*)pDst ) + ( lScanWidth * ( lHeight - 1 ) );
+	// Access image
+	oexBYTE *pPixDst = (oexBYTE*)pDst;
 	oexBYTE *pPixSrc = (oexBYTE*)pSrc;
 
-	// Source index offset
-	oexUINT i = 0;
-	for ( oexINT y = 0; y < lHeight; y++ )
-		for ( oexINT x = 0; x < lWidth; x++, pPixDst += 6, i += 4 )
-			pPixDst[ 0 ] = pPixDst[ 1 ] = pPixDst[ 2 ] = pPixSrc[ i ],
-			pPixDst[ 3 ] = pPixDst[ 4 ] = pPixDst[ 5 ] = pPixSrc[ i + 2 ];
-
 	// Grayscale
-//	if ( bGrayscale )
+	if ( bGrayscale )
 
-		// Just use Y
-//		for ( oexINT y = 0; y < lHeight; y++, pPixDst -= lScanWidth * 2 * 2 )
-//			for ( oexINT x = 0; x < lWidth; x += 2, pPixDst += 6, i += 4 )
-//				pPixDst[ 0 ] = pPixDst[ 1 ] = pPixDst[ 2 ] = pPixSrc[ i ],
-//				pPixDst[ 3 ] = pPixDst[ 4 ] = pPixDst[ 5 ] = pPixSrc[ i + 2 ];
+		// Gray scale copy
+		for ( oexINT y = 0; y < lHeight; y++, pPixDst += lScanWidthDif )
+			for ( oexINT x = 0; x < lWidth; x += 2, pPixDst += 6, pPixSrc += 4 )
+				pPixDst[ 0 ] = pPixDst[ 1 ] = pPixDst[ 2 ] = pPixSrc[ 0 ],
+				pPixDst[ 3 ] = pPixDst[ 4 ] = pPixDst[ 5 ] = pPixSrc[ 2 ];
 
+	else
+		for ( oexINT y = 0; y < lHeight; y++, pPixDst += lScanWidthDif )
+			for ( oexINT x = 0; x < lWidth; x += 2, pPixDst += 6, pPixSrc += 4 )
+			{
+				// Get YUV values
+				oexINT lY1 = pPixSrc[ 0 ];
+				oexINT lU = pPixSrc[ 1 ];
+				oexINT lY2 = pPixSrc[ 2 ];
+				oexINT lV = pPixSrc[ 3 ];
+
+				// Prescale
+				lY1 <<= c_uShift;
+				lY2 <<= c_uShift;
+				lU -= 128;
+				lV -= 128;
+
+				// Blue
+				oexINT lT = ( lY1 + c_uUScale * lU ) >> c_uShift;
+				pPixDst[ 0 ] = cmn::Range( lT, 0, 255 );
+
+				// Green
+				lT = ( lY1 - c_uYuScale * lU - c_uYvScale * lV ) >> c_uShift;
+				pPixDst[ 1 ] = cmn::Range( lT, 0, 255 );
+
+				// Red
+				lT = ( lY1 + c_uVScale * lV ) >> c_uShift;
+				pPixDst[ 2 ] = cmn::Range( lT, 0, 255 );
+
+
+				// Blue
+				lT = ( lY2 + c_uUScale * lU ) >> c_uShift;
+				pPixDst[ 3 ] = cmn::Range( lT, 0, 255 );
+
+				// Green
+				lT = ( lY2 - c_uYuScale * lU - c_uYvScale * lV ) >> c_uShift;
+				pPixDst[ 4 ] = cmn::Range( lT, 0, 255 );
+
+				// Red
+				lT = ( lY2 + c_uVScale * lV ) >> c_uShift;
+				pPixDst[ 5 ] = cmn::Range( lT, 0, 255 );
+
+			} // end for
 
 	return oexTRUE;
 }

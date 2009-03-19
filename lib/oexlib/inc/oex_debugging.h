@@ -42,19 +42,19 @@ template < const int T > class oex_static_assert{};
 	typedef oex_static_assert< sizeof( int[ ( s ) ? 1 : -1 ] ) >	\
 		oex_typedef_static_assert;
 
-#define oexSHOW( v )					OEX_NAMESPACE::os::CSys::Printf( oexMks( #v, oexT( " = " ), ( v ), oexNL ).Ptr() )
-#define oexSHOWL( v )					OEX_NAMESPACE::os::CSys::Printf( oexMks( #v, oexT( " = " ), ( v ), oexNL ).Ptr() ), oexNOTICE( 0, oexMks( #v oexT( " = " ), ( v ) ) )
-#define oexSHOWVAL( v, t )				OEX_NAMESPACE::os::CSys::Printf( #v " = " t, ( v ) )
-#define oexM()							OEX_NAMESPACE::os::CSys::Printf( oexT( "%s:(%d) : **** Marker ****" ) oexNL, oexFILE, oexLINE )
+#define oexSHOW( v )					oexPrintf( oexMks( oexT( #v ), oexT( " = " ), ( v ), oexNL ).Ptr() )
+#define oexSHOWL( v )					oexPrintf( oexMks( oexT( #v ), oexT( " = " ), ( v ), oexNL ).Ptr() ), oexNOTICE( 0, oexMks( #v oexT( " = " ), ( v ) ) )
+#define oexSHOWVAL( v, t )				oexPrintf( oexT( #v " = " t ), ( v ) )
+#define oexM()							oexPrintf( oexT( "%s:(%d) : **** Marker ****" oexNL8 ), oexFILE, oexLINE )
 #define oexLM()							oexM(), oexNOTICE( 0, oexT( "**** Marker ****" ) )
-#define oexS( s )						OEX_NAMESPACE::os::CSys::Printf( oexT( "%s:(%d) (%u): " oexT( #s ) ) oexNL, oexFILE, oexLINE, (oex::oexUINT)oexGetCurrentThreadId() )
+#define oexS( s )						OEX_NAMESPACE::os::CSys::Printf( oexT( "%s:(%d) (%u): " #s oexNL8 ), oexFILE, oexLINE, (oex::oexUINT)oexGetCurrentThreadId() )
 
 #ifdef oexDEBUG
 
 #	define oexRTRACE			        OEX_NAMESPACE::os::CDebug::FmtTrace
 #	define oexTRACE				        OEX_NAMESPACE::os::CDebug::FmtTrace
 #	define oexUNUSED( s )
-#	define oexBREAK( s )		        ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexTEXT( oexFUNCTION ), s ), OEX_NAMESPACE::oexFALSE )
+#	define oexBREAK( s )		        ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, s ), OEX_NAMESPACE::oexFALSE )
 #	define oexDEBUGVAL( v, t )			oexSHOWVAR( v, t )
 
 #else
@@ -73,7 +73,7 @@ template < const int T > class oex_static_assert{};
 //     evaulated first.  This ensures that in case e is a global
 //     variable like 'errno', it is not destroyed by the other
 //     arguments.
-#define oexLOG( l, e, s )			OEX_NAMESPACE::CLog::GlobalLog().Log( oexTEXT( oexFILE ), oexLINE, oexTEXT( oexFUNCTION ), l, s, e )
+#define oexLOG( l, e, s )			OEX_NAMESPACE::CLog::GlobalLog().Log( oexTEXT( oexFILE ), oexLINE, oexFUNCTION, l, s, e )
 #define oexNOTICE( e, s )			oexLOG( OEX_NAMESPACE::CLog::eNotice, e, s )
 #define oexWARNING( e, s )			oexLOG( OEX_NAMESPACE::CLog::eWarning, e, s )
 #define oexERROR( e, s )			oexLOG( OEX_NAMESPACE::CLog::eError, e, s )
@@ -101,9 +101,9 @@ template < const int T > class oex_static_assert{};
 // Verify macros show a dialog box even in release mode
 #	define oexVERIFY_PTR_NULL_OK( ptr )     oexVERIFY( oexVerifyPtrNullOk( (OEX_NAMESPACE::oexCPVOID)ptr ) )
 #	define oexVERIFY_PTR( ptr )             oexVERIFY( OEX_NAMESPACE::oexVerifyPtr( (OEX_NAMESPACE::oexCPVOID)ptr ) )
-#	define oexVERIFY( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexTEXT( oexFUNCTION ), oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
-#	define oexVERIFYPOS( s )	            ({ OEX_NAMESPACE::oexRESULT r = s; ( 0 <= r ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexTEXT( oexFUNCTION ), oexT( #s ), r ), OEX_NAMESPACE::oexFALSE ); })
-#	define oexVERIFYZERO( s )	            ({ OEX_NAMESPACE::oexRESULT r = s; ( !r ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexTEXT( oexFUNCTION ), oexT( #s ), r ), OEX_NAMESPACE::oexFALSE ); })
+#	define oexVERIFY( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
+#	define oexVERIFYPOS( s )	            ({ OEX_NAMESPACE::oexRESULT r = s; ( 0 <= r ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, oexT( #s ), r ), OEX_NAMESPACE::oexFALSE ); })
+#	define oexVERIFYZERO( s )	            ({ OEX_NAMESPACE::oexRESULT r = s; ( !r ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, oexT( #s ), r ), OEX_NAMESPACE::oexFALSE ); })
 
 #	define oexCHECK_PTR_NULL_OK( ptr )      oexCHECK( oexVerifyPtrNullOk( (OEX_NAMESPACE::oexCPVOID)ptr ) )
 #	define oexCHECK_PTR( ptr )              oexCHECK( OEX_NAMESPACE::oexVerifyPtr( (OEX_NAMESPACE::oexCPVOID)ptr ) )
@@ -113,7 +113,7 @@ template < const int T > class oex_static_assert{};
 
 #	define oexASSERT_PTR_NULL_OK( ptr )     oexVERIFY( oexVerifyPtrNullOk( (OEX_NAMESPACE::oexCPVOID)ptr ) )
 #	define oexASSERT_PTR( ptr )             oexVERIFY( oexVerifyPtr( (OEX_NAMESPACE::oexCPVOID)ptr ) )
-#	define oexASSERT( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexTEXT( oexFUNCTION ), oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
+#	define oexASSERT( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
 
 #else
 

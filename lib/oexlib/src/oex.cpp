@@ -73,7 +73,7 @@ oexINT COex::Uninit()
 
     // You should have shutdown all threads by now!
     if ( !oexVERIFY( CThread::GetRunningThreadCount() == 0 ) )
-	{	oexERROR( 0, "Shutdown attempted while threads are still running" );
+	{	oexERROR( 0, oexT( "Shutdown attempted while threads are still running" ) );
 
 		// Give threads a moment to shutdown
 		oexUINT uTimeout = oexDEFAULT_WAIT_TIMEOUT * 1000;
@@ -87,7 +87,7 @@ oexINT COex::Uninit()
 
 		// Log again to let them know it's going to blow up
 		if ( CThread::GetRunningThreadCount() )
-			oexERROR( 0, "Threads failed to exit before timeout" );
+			oexERROR( 0, oexT( "Threads failed to exit before timeout" ) );
 
         m_nShutdownCode |= -1;
 

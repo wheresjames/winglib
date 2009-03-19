@@ -592,12 +592,12 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
     if ( !IsEventHandle() || !m_pEventObject )
     {
     	if ( !CreateEventHandle() )
-    	{	oexERROR( m_uLastError, "Failed to create socket event" );
+    	{	oexERROR( m_uLastError, oexT( "Failed to create socket event" ) );
     		return 0;
 		} // end if
 
     	if ( !EventSelect() )
-    	{	oexERROR( m_uLastError, "Failed to enable socket events" );
+    	{	oexERROR( m_uLastError, oexT( "Failed to enable socket events" ) );
             return 0;
 		} // end if
 

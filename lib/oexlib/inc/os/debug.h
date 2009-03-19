@@ -102,7 +102,7 @@ public:
 									the error code.
 		\param [in] x_nErr		-	Related error code.
 	*/
-	static void Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pStr, oexINT x_nRes = 0, oexINT x_nErr = 0 );
+	static void Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x_pFunction, oexCSTR x_pStr, oexINT x_nRes = 0, oexINT x_nErr = 0 );
 
 	//==============================================================
 	// Break()
@@ -125,7 +125,7 @@ public:
 
 		\see
 	*/
-	static void Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr, oexINT x_nRes = 0, oexINT x_nErr = 0 );
+	static void Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr, oexINT x_nRes = 0, oexINT x_nErr = 0 );
 
 	//==============================================================
 	// GetInstanceHandle()

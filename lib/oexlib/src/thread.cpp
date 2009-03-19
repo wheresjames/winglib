@@ -77,7 +77,7 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 
 	// Initialize sockets
     if ( !oex::os::CIpSocket::InitSockets() )
-    	oexERROR( 0, "Unable to initialize sockets" );
+    	oexERROR( 0, oexT( "Unable to initialize sockets" ) );
 
 	// Initialize thread
 	oexBOOL bInit = pThread->InitThread( pData );
@@ -141,7 +141,7 @@ oexRESULT CThread::Stop( oexUINT x_uWait, oexBOOL x_bKill )
 
 	// Wait for thread to stop
 	if ( !WaitThreadExit( x_uWait ) )
-		oexERROR( 0, "Thread failed to shutdown gracefully" );
+		oexERROR( 0, oexT( "Thread failed to shutdown gracefully" ) );
 
 	// Kill the thread
 	oexINT nErr = CResource::Destroy( x_uWait, x_bKill );

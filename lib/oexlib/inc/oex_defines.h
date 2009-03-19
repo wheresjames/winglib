@@ -175,8 +175,10 @@
 
 #if defined( OEX_WIN32 )
 #	define oexNL							oexT( "\r\n" )
+#	define oexNL8							"\r\n"
 #else
 #	define oexNL							oexT( "\n" )
+#	define oexNL8							"\n"
 #endif
 
 #define oexMemCmp							OEX_NAMESPACE::os::CSys::MemCmp
@@ -228,6 +230,7 @@
 #define oexPrintf							OEX_NAMESPACE::os::CSys::Printf
 #define oexFmt								OEX_NAMESPACE::CStr().Fmt
 #define oexAlert							OEX_NAMESPACE::os::CSys::ShowMessageBox
+#define oexFork								OEX_NAMESPACE::os::CSys::Fork
 
 #define oexGuidToString						OEX_NAMESPACE::CStr().GuidToString
 #define oexUniqueGuid( g )					OEX_NAMESPACE::guid::StringToGuid( g, (OEX_NAMESPACE::oexCSTR)NULL, 0 )

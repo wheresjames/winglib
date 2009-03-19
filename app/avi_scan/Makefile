@@ -7,12 +7,14 @@ default_target: all
 PRJ_NAME := avi_scan
 PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib
-PRJ_LIBS := oexlib wxWidgets jpeg
+PRJ_LIBS := oexlib jpeg
 
 ifeq ($(OS),win32)
-	PRJ_OSLB := user32.lib gdi32.lib comdlg32.lib comctl32.lib \
-	            rpcrt4.lib shell32.lib ole32.lib oleaut32.lib \
-	            advapi32.lib
+	PRJ_LIBS := $(PRJ_LIBS) wxWidgets
+else
+	PRJ_LIBS := oexlib
+	PRJ_EXTC := `wx-config --cppflags`
+	PRJ_EXTL := `wx-config --libs`
 endif
 
 

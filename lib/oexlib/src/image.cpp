@@ -139,7 +139,7 @@ CStr CImage::GetLastError()
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	// Return last error string
-	return pimg->GetLastError();
+	return oexMbToStr( pimg->GetLastError() );
 }
 
 oexINT CImage::GetFileType( oexCSTR x_pFile )
@@ -217,7 +217,7 @@ oexBOOL CImage::Load( oexCSTR x_pFile, oexCSTR x_pType )
 		return oexFALSE;
 
 	// Load the file
-	oexBOOL bRet = pimg->Load( x_pFile, type );
+	oexBOOL bRet = pimg->Load( oexStrToMbPtr( x_pFile ), type );
 
 	GetRect();
 
@@ -242,7 +242,7 @@ oexBOOL CImage::Save( oexCSTR x_pFile, oexCSTR x_pType )
 		return oexFALSE;
 
 	// Load the file
-	return pimg->Save( x_pFile, type );
+	return pimg->Save( oexStrToMbPtr( x_pFile ), type );
 }
 
 oexBOOL CImage::Decode( oexPBYTE x_buf, oexINT x_size, oexCSTR x_pType )
@@ -1290,96 +1290,96 @@ oexINT CImage::EncodeJpg(oexPBYTE x_pSrc, oexINT x_nWidth, oexINT x_nHeight, oex
 
 CStr CImage::GetUserImageStr()
 {
-	return oexT( "All Images ("	)
+	return oexT( "All Images ("	""
 
 #if defined( CXIMAGE_SUPPORT_JPG )
-											oexT( "*.jpg;*.jpeg;" )
+											"*.jpg;*.jpeg;"
 #endif
 #if defined( CXIMAGE_SUPPORT_PNG )
-											oexT( "*.png;" )
+											"*.png;"
 #endif
 #if defined( CXIMAGE_SUPPORT_GIF )
-											oexT( "*.gif;" )
+											"*.gif;"
 #endif
 #if defined( CXIMAGE_SUPPORT_ICO )
-											oexT( "*.ico;" )
+											"*.ico;"
 #endif
 #if defined( CXIMAGE_SUPPORT_TIF )
-											oexT( "*.tif;" )
+											"*.tif;"
 #endif
 #if defined( CXIMAGE_SUPPORT_TGA )
-											oexT( "*.tga;" )
+											"*.tga;"
 #endif
 #if defined( CXIMAGE_SUPPORT_WMF )
-											oexT( "*.wmf;*.emf;" )
+											"*.wmf;*.emf;"
 #endif
 #if defined( CXIMAGE_SUPPORT_JP2 )
-											oexT( "*.jp2;" )
+											"*.jp2;"
 #endif
 #if defined( CXIMAGE_SUPPORT_BMP )
-											oexT( "*.bmp;*.dib" )
+											"*.bmp;*.dib"
 #endif
 
-										oexT( ")\x0" )
+											")\x0"
 
 #if defined( CXIMAGE_SUPPORT_JPG )
-											oexT( "*.jpg;*.jpeg;" )
+											"*.jpg;*.jpeg;"
 #endif
 #if defined( CXIMAGE_SUPPORT_PNG )
-											oexT( "*.png;" )
+											"*.png;"
 #endif
 #if defined( CXIMAGE_SUPPORT_GIF )
-											oexT( "*.gif;" )
+											"*.gif;"
 #endif
 #if defined( CXIMAGE_SUPPORT_ICO )
-											oexT( "*.ico;" )
+											"*.ico;"
 #endif
 #if defined( CXIMAGE_SUPPORT_TIF )
-											oexT( "*.tif;" )
+											"*.tif;"
 #endif
 #if defined( CXIMAGE_SUPPORT_TGA )
-											oexT( "*.tga;" )
+											"*.tga;"
 #endif
 #if defined( CXIMAGE_SUPPORT_WMF )
-											oexT( "*.wmf;*.emf;" )
+											"*.wmf;*.emf;"
 #endif
 #if defined( CXIMAGE_SUPPORT_JP2 )
-											oexT( "*.jp2;" )
+											"*.jp2;"
 #endif
 #if defined( CXIMAGE_SUPPORT_BMP )
-											oexT( "*.bmp;*.dib" )
+											"*.bmp;*.dib"
 #endif
 
-										oexT( "\x0" )
+											"\x0"
 
 #if defined( CXIMAGE_SUPPORT_JPG )
-											oexT( "JPEG (*.jpg;*.jpeg)\x0*.jpg;*.jpeg\x0" )
+											"JPEG (*.jpg;*.jpeg)\x0*.jpg;*.jpeg\x0"
 #endif
 #if defined( CXIMAGE_SUPPORT_PNG )
-											oexT( "Portable Network Graphic (*.png)\x0*.png\x0" )
+											"Portable Network Graphic (*.png)\x0*.png\x0"
 #endif
 #if defined( CXIMAGE_SUPPORT_GIF )
-											oexT( "Graphic Interchange Format (*.gif)\x0*.png\x0" )
+											"Graphic Interchange Format (*.gif)\x0*.png\x0"
 #endif
 #if defined( CXIMAGE_SUPPORT_ICO )
-											oexT( "Windows Icon (*.ico)\x0*.ico\x0" )
+											"Windows Icon (*.ico)\x0*.ico\x0"
 #endif
 #if defined( CXIMAGE_SUPPORT_TIF )
-											oexT( "Tagged Image File (*.tif; *.tiff)\x0*.tif;*.tiff\x0" )
+											"Tagged Image File (*.tif; *.tiff)\x0*.tif;*.tiff\x0"
 #endif
 #if defined( CXIMAGE_SUPPORT_TGA )
-											oexT( "Targa (*.tga)\x0*.tga\x0" )
+											"Targa (*.tga)\x0*.tga\x0"
 #endif
 #if defined( CXIMAGE_SUPPORT_WMF )
-											oexT( "Windows Metafile (*.wmf;*.emf)\x0*.wmf;*.emf\x0" )
+											"Windows Metafile (*.wmf;*.emf)\x0*.wmf;*.emf\x0"
 #endif
 #if defined( CXIMAGE_SUPPORT_JP2 )
-											oexT( "JPEG 2000 (*.jp2)\x0*.jp2\x0" )
+											"JPEG 2000 (*.jp2)\x0*.jp2\x0"
 #endif
 #if defined( CXIMAGE_SUPPORT_BMP )
-											oexT( "Windows Bitmap (*.bmp;*.dib)\x0*.bmp;*.dib\x0" )
+											"Windows Bitmap (*.bmp;*.dib)\x0*.bmp;*.dib\x0"
 #endif
-											;
+											);
 }
 
 #endif // OEX_ENABLE_XIMAGE

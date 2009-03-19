@@ -202,8 +202,6 @@ public:
 		if ( x_ptr->Wait( x_uTimeout ) )
 			return oexFALSE;
 
-		oexM();
-
         m_ptr = x_ptr;
 
 		return oexTRUE;

@@ -87,7 +87,7 @@ public:
 	*/
 	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit )
 	{
-		CStr sDevice = CStr().Fmt( "/dev/video%d", x_uDevice );
+		CStr sDevice = CStr().Fmt( oexT( "/dev/video%d" ), x_uDevice );
 
 		struct stat st;
 		if ( 0 > stat( oexStrToMbPtr( sDevice.Ptr() ), &st ) )

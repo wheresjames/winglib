@@ -10,43 +10,43 @@ int main(int argc, char* argv[])
 	oexINIT();
 
 	// Start a log file
-	oexNOTICE( 0, "Application startup" );
+	oexNOTICE( 0, oexT( "Application startup" ) );
 
     if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
         return -1;
 
 	if ( 3 > argc || !oexCHECK_PTR( argv[ 1 ] ) || !oexCHECK_PTR( argv[ 2 ] ) )
-	{	printf( oexNL "Usage <IP Address> <IP Port> [Attempts:1000] [Sockets:100]" oexNL oexNL );
-		oexERROR( 0, "IP Address not specified" );
+	{	oexPrintf( oexT( "" oexNL8 "Usage <IP Address> <IP Port> [Attempts:1000] [Sockets:100]" oexNL8 oexNL8 ) );
+		oexERROR( 0, oexT( "IP Address not specified" ) );
 		return -2;
 	} // end if
 
-	oexCSTR	pAddress = argv[ 1 ];
-	oexINT  nPort = os::CSys::StrToLong( argv[ 2 ] );
+	oexCSTR	pAddress = oexMbToStrPtr( argv[ 1 ] );
+	oexINT  nPort = os::CSys::StrToLong( oexMbToStrPtr( argv[ 2 ] ) );
 	oexINT	nAttempts = 1000;
 	oexINT 	nNumSockets = 100;
 //	oexCSTR pWrite = oexNULL;
-	oexCSTR pWrite = "GET /\r\n\r\n";
+	oexCSTR8 pWrite = "GET /\r\n\r\n";
 
-	if ( 3 < argc && oexCHECK_PTR( argv[ 3 ] ) )
-		nAttempts = os::CSys::StrToLong( argv[ 3 ] );
+	if ( 3 < argc && oexCHECK_PTR( oexMbToStrPtr( argv[ 3 ] ) ) )
+		nAttempts = os::CSys::StrToLong( oexMbToStrPtr( argv[ 3 ] ) );
 
-	if ( 4 < argc && oexCHECK_PTR( argv[ 4 ] ) )
-		nNumSockets = os::CSys::StrToLong( argv[ 4 ] );
+	if ( 4 < argc && oexCHECK_PTR( oexMbToStrPtr( argv[ 4 ] ) ) )
+		nNumSockets = os::CSys::StrToLong( oexMbToStrPtr( argv[ 4 ] ) );
 
-	if ( 5 < argc && oexCHECK_PTR( argv[ 5 ] ) )
+	if ( 5 < argc && oexCHECK_PTR( oexMbToStrPtr( argv[ 5 ] ) ) )
 		pWrite = argv[ 5 ];
 
-	CStr sAttempting = CStr().Fmt( "address = %s, port = %d, attempts = %d, sockets = %d",
+	CStr sAttempting = CStr().Fmt( oexT( "address = %s, port = %d, attempts = %d, sockets = %d" ),
 								   pAddress, nPort, nAttempts, nNumSockets );
 	if ( pWrite )
-		sAttempting += CStr().Fmt( " writing = '%s'", pWrite );
-	printf( "%s" oexNL oexNL, sAttempting.Ptr() );
+		sAttempting += CStr().Fmt( oexT( " writing = '%s'" ), pWrite );
+	oexPrintf( oexT( "%s" oexNL8 oexNL8 ), sAttempting.Ptr() );
 	oexNOTICE( 0, sAttempting );
 
 	os::CIpSocket *pSockets = OexAllocConstructArray< os::CIpSocket >( nNumSockets );
 	if ( !pSockets )
-	{	oexERROR( 0, "Out of memory" );
+	{	oexERROR( 0, oexT( "Out of memory" ) );
 		return -1;
 	} // end if
 
@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
 		nTotalCount++;
     	if ( !nTotalCount || 50 <= ++nFlushCount )
     	{	nFlushCount = 0;
-    		printf( oexNL "%d : ", nTotalCount );
+    		oexPrintf( oexT( "" oexNL8 "%d : " ), nTotalCount );
     		os::CSys::Flush_stdout();
 		} // end if
 
@@ -67,9 +67,9 @@ int main(int argc, char* argv[])
 			pSockets[ nCurSocket ].Destroy();
 
     	if ( !pSockets[ nCurSocket ].Connect( pAddress, nPort ) )
-    		printf( "x" );
+    		oexPrintf( oexT( "x" ) );
     	else
-    		printf( "." );
+    		oexPrintf( oexT( "." ) );
 
 		if ( pWrite )
 			pSockets[ nCurSocket ].Write( pWrite );
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 	} // end for
 
 	// End line
-	printf( oexNL oexNL );
+	oexPrintf( oexT( "" oexNL8 oexNL8 ) );
 
 	// Kill all sockets
     OexAllocDestruct( pSockets );

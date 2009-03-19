@@ -163,21 +163,6 @@ private:
 public:
 
 	//==============================================================
-	// Fork()
-	//==============================================================
-	/// Fork current process
-	/**
-		\param [in] x_sWorkingDirectory	- Working directory for the
-									      newly forked process.
-		\param [in] x_pLogFile			- token used in creating the
-										  new log file.
-
-		\return Less than zero if failure, zero if child, greater
-				than zero on return from parent.
-	*/
-	static oexINT Fork( CStr x_sWorkingDirectory, oexCSTR x_pLogFile = oexNULL );
-
-	//==============================================================
 	// Run()
 	//==============================================================
 	/// Starts the module in a seperate process.

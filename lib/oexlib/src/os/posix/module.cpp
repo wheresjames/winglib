@@ -76,7 +76,7 @@ oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 
 	// Punt if bad filename
 	if ( !oexCHECK_PTR( x_pFile ) || !*x_pFile )
-	{	oexERROR( EINVAL, "Invalid function argument" );
+	{	oexERROR( EINVAL, oexT( "Invalid function argument" ) );
 		return oexFALSE;
 	} // end if
 
@@ -94,11 +94,11 @@ oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 	_oexTRY
 	{
 		// Attempt to open the dynamic library
-		m_hModule = dlopen( x_pFile, x_nFlags );
+		m_hModule = dlopen( oexStrToMbPtr( x_pFile ), x_nFlags );
 
 	} // end try
 	_oexCATCH( ... )
-	{	oexERROR( errno, CStr().Fmt( "Exception!!! dlopen( '%s' )\r\n: %s", oexStrToMbPtr( x_pFile ), dlerror() ) );
+	{	oexERROR( errno, CStr().Fmt( oexT( "Exception!!! dlopen( '%s' )\r\n: %s" ), oexStrToMbPtr( x_pFile ), dlerror() ) );
 		Destroy();
 		return oexFALSE;
 	} // end catch
@@ -108,7 +108,7 @@ oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 		CLog::GlobalLog().Resume( sLogFile.Ptr() );
 
 	if ( oexNULL == m_hModule )
-	{	oexERROR( errno, CStr().Fmt( "dlopen( '%s' )\r\n: %s", oexStrToMbPtr( x_pFile ), dlerror() ) );
+	{	oexERROR( errno, CStr().Fmt( oexT( "dlopen( '%s' )\r\n: %s" ), oexStrToMbPtr( x_pFile ), dlerror() ) );
 		Destroy();
 		return oexFALSE;
 	} // end if
@@ -145,12 +145,12 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 
 	// Sanity check
 	if ( !oexCHECK_PTR( x_pFunctionName ) || !*x_pFunctionName )
-	{	oexERROR( EINVAL, "Invalid function argument" );
+	{	oexERROR( EINVAL, oexT( "Invalid function argument" ) );
 		return oexNULL;
 	} // end if
 
 	if ( !m_hModule )
-	{	oexERROR( EINVAL, "Module not loaded" );
+	{	oexERROR( EINVAL, oexT( "Module not loaded" ) );
 		return oexNULL;
 	} // end if
 
@@ -161,15 +161,15 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 	_oexTRY
 	{
 		// Attempt to find function entry point
-		pf = dlsym( m_hModule, x_pFunctionName );
+		pf = dlsym( m_hModule, oexStrToMbPtr( x_pFunctionName ) );
 		if ( !oexCHECK_PTR( pf ) )
-		{	oexERROR( errno, CStr().Fmt( "dlsym( %d, '%s' )", oexPtrToInt( m_hModule ), oexStrToMbPtr( x_pFunctionName ) ) );
+		{	oexERROR( errno, CStr().Fmt( oexT( "dlsym( %d, '%s' )" ), oexPtrToInt( m_hModule ), oexStrToMbPtr( x_pFunctionName ) ) );
 			return oexNULL;
 		} // end if
 	} // end try
 
 	_oexCATCH( ... )
-	{	oexERROR( errno, CStr().Fmt( "Exception!!! dlsym( '%s', %s )\r\n: %s", oexStrToMbPtr( m_sFile.Ptr() ), oexStrToMbPtr( x_pFunctionName ), dlerror() ) );
+	{	oexERROR( errno, CStr().Fmt( oexT( "Exception!!! dlsym( '%s', %s )\r\n: %s" ), oexStrToMbPtr( m_sFile.Ptr() ), oexStrToMbPtr( x_pFunctionName ), dlerror() ) );
 		return oexFALSE;
 	} // end catch
 
@@ -212,7 +212,7 @@ oexPVOID CModule::Addr( oexINT i )
 oexPVOID CModule::Addr( oexCSTR x_pFunctionName )
 {
 	if ( !oexCHECK_PTR( x_pFunctionName ) || !*x_pFunctionName )
-	{	oexERROR( EINVAL, "Invalid function name pointer" );
+	{	oexERROR( EINVAL, oexT( "Invalid function name pointer" ) );
 		return oexNULL;
 	} // end if
 

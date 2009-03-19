@@ -7,13 +7,14 @@ default_target: all
 PRJ_NAME := vidcap
 PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib
+PRJ_LIBS := oexlib jpeg
 
 ifeq ($(OS),win32)
-	PRJ_LIBS := oexlib wxWidgets jpeg
-	PRJ_OSLB := gdi32.lib comdlg32.lib comctl32.lib rpcrt4.lib
+	PRJ_LIBS := $(PRJ_LIBS) wxWidgets
 else
 	PRJ_LIBS := oexlib
-	PRJ_EXTC := -I/usr/lib/wx/include/gtk2-unicode-release-2.8 -I/usr/include/wx-2.8 -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -D__WXGTK__ -pthread	
+	PRJ_EXTC := `wx-config --cppflags`
+	PRJ_EXTL := `wx-config --libs`
 endif
 
 PRJ_LIBROOT := ../..
