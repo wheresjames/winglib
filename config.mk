@@ -221,6 +221,19 @@ else
 			CFG_AFLAGS := cq
 
 		endif
+		ifeq ($(TOOLS),crosstool)
+
+			# crosstool
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/usr/bin/arm-crosstool-linux-gnueabi-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/usr/arm-crosstool-linux-gnueabi
+
+			CFG_STDLIB := -lrt -pthread
+			CFG_LFLAGS := $(CFG_LEXTRA)
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_NOSTAT64 -DOEX_NOWCHAR -DOEX_NOEXECINFO
+			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
+			CFG_AFLAGS := cq
+
+		endif
 		ifeq ($(CFG_TOOLPREFIX),)
 	
 			# Custom tools

@@ -165,11 +165,20 @@ public:
 		    } // end if
 
 		    else
-		    {	x_uSize -= nSep;
-                lst << TStr< T >( x_pStr, 0, nSep );
+		    {
+		    	if ( nSep )
+		    	{	x_uSize -= nSep;
+                	lst << TStr< T >( x_pStr, 0, nSep );
+				} // end if
+
                 oexINT nEnd = str::SkipCharacters( &x_pStr[ nSep ], x_uSize, x_pSep, x_uSep );
-			    if ( 0 <= nEnd ) x_pStr += nSep + nEnd, x_uSize -= nEnd;
-			    else return lst;
+
+			    if ( 0 <= nEnd )
+			    	x_pStr += nSep + nEnd, x_uSize -= nEnd;
+
+			    else
+			    	return lst;
+
 		    } // end else
 
 	    } // end while

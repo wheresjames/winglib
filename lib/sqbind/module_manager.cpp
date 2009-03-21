@@ -110,6 +110,23 @@ CModuleInstance* CModuleManager::Load( oex::oexCSTR x_pFile )
 	return pMi;
 }
 
+oex::oexBOOL CModuleManager::Exists( oex::oexCSTR x_pFile )
+{
+	// Thread lock
+	oexAutoLock ll( m_lock );
+	if ( !ll.IsLocked() )
+		return oex::oexFALSE;
+
+	// Find the module in the list
+	t_ModuleList::iterator it = m_lstModules.find( x_pFile );
+	if ( m_lstModules.end() == it || !it->second )
+		return oex::oexFALSE;
+	
+	// Found
+	return oex::oexTRUE;
+}
+
+
 oex::oexBOOL CModuleManager::Unload( oex::oexCSTR x_pFile )
 {
 	// Thread lock

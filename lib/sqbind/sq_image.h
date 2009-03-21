@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// module_manager.h
+// sq_image.h
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -34,50 +34,57 @@
 
 #pragma once
 
-#include "module_instance.h"
-
-class CModuleManager
+// namespace
+namespace sqbind
 {
-public:
+    class CSqImage
+    {
+	public:
 
-    /// The module list type
-	typedef oexStdMap( stdString, CModuleInstance* )		t_ModuleList;
+		CSqImage() {}
 
-public:
+		// Copy semantics
+		CSqImage( const CSqImage &r ) { m_img = r.m_img; }
+		CSqImage& operator=( const CSqImage &r ) { m_img = r.m_img; return *this; }
 
-    /// Default constructor
-	CModuleManager();
+		int Load( const stdString &sFile, const stdString &sType )
+		{	return m_img.Load( sFile.c_str(), sType.c_str() ); }
 
-    /// Destructor
-	virtual ~CModuleManager();
+		int Save( const stdString &sFile, const stdString &sType )
+		{	return m_img.Save( sFile.c_str(), sType.c_str() ); }
 
-    /// Unloads all modules
-    void Destroy();
+		stdString Encode( const stdString &sType )
+		{
+			oex::oexPBYTE pBuf = oexNULL;
+			oex::oexINT nSize = 0;
+			if ( !m_img.Encode( &pBuf, &nSize, sType.c_str() ) 
+			     || !oexCHECK_PTR( pBuf ) || !nSize )
+				return oexT( "" );
+			
+			return stdString().assign( (oex::oexCSTR)pBuf, nSize );
+		}
+		
+		int Decode( const stdString &sType, const stdString &sData )
+		{	return m_img.Decode( (oex::oexBYTE*)sData.c_str(), sData.length(), sType.c_str() ); }		
 
-public:
+		static void Register( SquirrelVM &vm )
+		{
+			SqPlus::SQClassDef< CSqImage >( vm, oexT( "CSqImage" ) )
+					. func( &CSqImage::Load,				oexT( "Load" ) )
+					. func( &CSqImage::Save,				oexT( "Save" ) )									
+					. func( &CSqImage::Encode,				oexT( "Encode" ) )
+					. func( &CSqImage::Decode,				oexT( "Decode" ) )
+				;
+		}
 
-    /// Returns non-zero if the module is loaded
-	oex::oexBOOL Exists( oex::oexCSTR x_pFile );
+	private:
+	
+		/// Image object
+		oex::CImage		m_img;
 
-    /// Loads the specified module if needed and returns an instance object
-	CModuleInstance* Load( oex::oexCSTR x_pFile );
+    };
 
-    /// Unloads the specified module
-	/**
-		\param [in] x_pFile		-	File to unload
+}; // end namespace
 
-		!!! Be careful here, you probably can't unload a module
-		    unless your *CERTAIN* that squirrel is done with it.
-			For the most part, you won't be able to use this function.
-	*/
-	oex::oexBOOL Unload( oex::oexCSTR x_pFile );
-
-private:
-
-    /// List of module handles
-    t_ModuleList					m_lstModules;
-
-    /// Thread access lock
-	oexLock							m_lock;
-
-};
+// Declare type for use as squirrel parameters
+DECLARE_INSTANCE_TYPE_NAME( sqbind::CSqImage, CSqImage )

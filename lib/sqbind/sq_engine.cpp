@@ -492,7 +492,9 @@ oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e )
 {	oex::CStr sErr = oex::CStr().Fmt( oexT( "%s(%lu)\r\n   %s" ), x_e.sSource.c_str(), x_e.uLine, x_e.sDesc.c_str() );
 	oexERROR( 0, sErr );
 	m_sErr = sErr.Ptr();
+#if defined( OEX_WINDOWS )
 	oexRTRACE( oexT( "%s\n" ), m_sErr.c_str() );
+#endif
 	oexPrintf( oexT( "%s\n" ), m_sErr.c_str() );
 	return x_nReturn;
 }
@@ -562,6 +564,9 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 		return -3;
 	} // end if
 
+	// See if the module is already loaded
+	oex::oexBOOL bExists = m_pModuleManager->Exists( sFull.Ptr() );
+
 	// Attempt to load the module
 	CModuleInstance *pMi = m_pModuleManager->Load( sFull.Ptr() );
 	if ( !pMi )
@@ -576,7 +581,8 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 	} // end if
 
 	// Log the fact that we loaded said module
-	oexNOTICE( 0, oexMks( oexT( "Module loaded : " ), sFull ) );
+	if ( !bExists )
+		oexNOTICE( 0, oexMks( oexT( "Module loaded : " ), sFull ) );
 
 	return 0;
 }

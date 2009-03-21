@@ -103,6 +103,14 @@ oexBOOL CFile::DeletePath( oexCSTR x_pPath, oexBOOL x_bEmpty )
 
 oexBOOL CFile::CreatePath( oexCSTR x_pPath )
 {
+	// Ensure string
+	if ( !oexCHECK_PTR( x_pPath ) || !*x_pPath )
+		return oexFALSE;
+
+	// Punt if the path already exists
+	if ( os::CBaseFile::DoesExist( x_pPath ) )
+		return oexTRUE;
+
     CStrList lst = CParser::Split( x_pPath, oexT( "\\/" ) );
     if ( !lst.Size() )
         return oexFALSE;
@@ -111,8 +119,14 @@ oexBOOL CFile::CreatePath( oexCSTR x_pPath )
     for ( CStrList::iterator it; lst.Next( it ); )
     {
         // Build path up to this level
-        if ( !sPath.Length() ) sPath = *it;
-        else sPath = CStr::BuildPath( sPath, *it );
+        if ( !sPath.Length() )
+        {  	for ( oexINT i = 0; oexT( '/' ) == x_pPath[ i ] || oexT( '\\' ) == x_pPath[ i ]; i++ )
+        		sPath << x_pPath[ i ];
+        	sPath << *it;
+		} // end if
+
+        else
+        	sPath = CStr::BuildPath( sPath, *it );
 
         // Create this part of the path if it doesn't exist
         if ( !os::CBaseFile::DoesExist( sPath.Ptr() ) )

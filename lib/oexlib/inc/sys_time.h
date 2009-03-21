@@ -101,7 +101,7 @@ public:
             GetSystemTime();
 
         else
-            os::CSys::Zero( &m_time, sizeof( m_time ) );
+        	oexZeroMemory( &m_time, sizeof( m_time ) );
     }
 
     CSysTime( oexCONST CSysTime &x_st )
@@ -120,6 +120,9 @@ public:
 
         else if ( eFmtNet == x_nTimeFormat )
             SetNetTime( (oexUINT)x_llTime, x_lTzBias );
+
+        else
+            oexZeroMemory( &m_time, sizeof( m_time ) );
     }
 
     /// Destructor

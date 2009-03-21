@@ -122,6 +122,9 @@
 // Define to include backtraces for log entries
 #define oexBACKTRACE_IN_LOG
 
+// Define to include full file paths in log entries
+//#define oexFULL_FILENAME_IN_LOG
+
 // debug macros
 #define oexFILE				__FILE__
 #define oexLINE				__LINE__

@@ -66,7 +66,7 @@ public:
 		m_llFrame = 0;
 		m_nWidth = 0;
 		m_nHeight = 0;
-		m_nBpp = 24;
+		m_uFormat = 0;
 		m_fFps = 0;
 		m_nBufferSize = 0;
 		m_pFrameBuffer = 0;
@@ -85,7 +85,7 @@ public:
 		\param [in] x_pDevice	-	Video device name
 										- Example: /dev/video0
 	*/
-	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit )
+	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit )
 	{
 		CStr sDevice = CStr().Fmt( oexT( "/dev/video%d" ), x_uDevice );
 
@@ -107,11 +107,17 @@ public:
 			return oexFALSE;
 		} // end if
 
+		// V2 query device capabilities
+		if ( -1 == IoCtl( m_nFd, VIDIOC_QUERYCAP, &m_cap2 ) )
+		{	oexNOTICE( errno, CStr().Fmt( oexT( "VIDEOC_QUERYCAP : Invalid V4L2 device, %u" ), m_nFd ) );
+			return oexFALSE;
+		} // end if
+
 		// Save device name
 		m_sDeviceName = sDevice;
 		m_nWidth = x_nWidth;
 		m_nHeight = x_nHeight;
-		m_nBpp = x_nBpp;
+		m_uFormat = x_uFormat;
 		m_fFps = x_fFps;
 
 		// Attempt to initialize the device
@@ -125,7 +131,7 @@ public:
 	}
 
 	/// Open file
-	oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit )
+	oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit )
 	{
 		return oexFALSE;
 	}
@@ -151,7 +157,7 @@ public:
 		m_llFrame = 0;
 		m_nWidth = 0;
 		m_nHeight = 0;
-		m_nBpp = 24;
+		m_uFormat = 0;
 		m_fFps = 0;
 		m_nBufferSize = 0;
 		m_pFrameBuffer = 0;
@@ -182,15 +188,10 @@ public:
 	*/
 	virtual oexBOOL Init()
 	{
-		// V2 query device capabilities
-		if ( -1 == IoCtl( m_nFd, VIDIOC_QUERYCAP, &m_cap2 ) )
-		{	oexNOTICE( errno, CStr().Fmt( oexT( "VIDEOC_QUERYCAP : Invalid V4L2 device, %u" ), m_nFd ) );
-			return oexFALSE;
-		} // end if
-
 		// Ensure it's actually a capture device
 		if ( !( m_cap2.capabilities & V4L2_CAP_VIDEO_CAPTURE ) )
 		{	oexERROR( -1, CStr().Fmt( oexT( "V4L2_CAP_VIDEO_CAPTURE : Not a capture device : capabilities = %X" ), m_cap2.capabilities ) );
+			Destroy();
 			return oexFALSE;
 		} // end if
 
@@ -265,12 +266,22 @@ public:
 //			return oexFALSE;
 		} // end if
 
+		if ( !m_uFormat )
+			m_uFormat = AutoFormat();
+
+		if ( !m_uFormat )
+		{	oexERROR( 0, CStr().Fmt( oexT( "Could not find suitable video format" ), m_nFd ) );
+			Destroy();
+			return oexFALSE;
+		} // end if
+
 		v4l2_format fmt;
 		oexZeroMemory( &fmt, sizeof( fmt ) );
 		fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		fmt.fmt.pix.width = m_nWidth;
 		fmt.fmt.pix.height = m_nHeight;
-		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+		fmt.fmt.pix.pixelformat = m_uFormat;
+//		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
 //		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB24;
 //		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR8;
 //		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_GREY;
@@ -281,6 +292,7 @@ public:
 
 		if ( -1 == IoCtl( m_nFd, VIDIOC_S_FMT, &fmt ) )
 		{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_S_FMT : Failed to set format: %u : w=%d, h=%d" ), m_nFd, m_nWidth, m_nHeight ) );
+			Destroy();
 			return oexFALSE;
 		} // end if
 
@@ -305,6 +317,7 @@ public:
 		if ( 0 >= m_nBufferSize )
 		{	oexERROR( -1, CStr().Fmt( oexT( "Invalid image size %d - %d x %d" ),
 						              m_nBufferSize, m_nWidth, m_nHeight ).Ptr() );
+			Destroy();
 			return oexFALSE;
 		} // end if
 
@@ -346,6 +359,7 @@ public:
 
 		if ( -1 == IoCtl( m_nFd, VIDIOC_REQBUFS, &req ) || eMaxBuffers > req.count )
 		{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_REQBUFS : Request for mmap buffers failed.  count=%d" ), (int)req.count ) );
+			Destroy();
 			return oexFALSE;
 		} // end if
 
@@ -373,7 +387,8 @@ public:
 			m_image[ i ].SetOffset( buf.m.offset );
 			m_image[ i ].SetShareHandle( (os::CFMap::t_HFILEMAP)m_nFd );
 			if ( !m_image[ i ].OexNew( buf.length ).Ptr() )
-			{	oexERROR( errno, CStr().Fmt( oexT( "Failed to allocate shared image buffer buf.index = %d, size=%d : %d x %d x %d" ), i, m_nBufferSize, m_nWidth, m_nHeight, m_nBpp ) );
+			{	oexERROR( errno, CStr().Fmt( oexT( "Failed to allocate shared image buffer buf.index = %d, size=%d : %d x %d x %d" ), i, m_nBufferSize, m_nWidth, m_nHeight, m_uFormat ) );
+				Destroy();
 				return oexFALSE;
 			} // end if
 
@@ -391,11 +406,91 @@ public:
 		return oexTRUE;
 	}
 
+	virtual oexUINT AutoFormat()
+	{
+		struct SFormatDesc
+		{
+			oexUINT			uId;
+			oexTCHAR		sId[ 256 ];
+		};
+
+		#define FORMAT_DESC( s )	{ s, oexT( #s ) }
+
+		static SFormatDesc l_formats[] =
+		{
+			FORMAT_DESC( V4L2_PIX_FMT_RGB24 ),
+			FORMAT_DESC( V4L2_PIX_FMT_YUYV ),
+/*
+			FORMAT_DESC( V4L2_PIX_FMT_RGB332 ),
+//			FORMAT_DESC( V4L2_PIX_FMT_RGB444 ),
+			FORMAT_DESC( V4L2_PIX_FMT_RGB555 ),
+			FORMAT_DESC( V4L2_PIX_FMT_RGB565 ),
+			FORMAT_DESC( V4L2_PIX_FMT_RGB555X ),
+			FORMAT_DESC( V4L2_PIX_FMT_RGB565X ),
+			FORMAT_DESC( V4L2_PIX_FMT_BGR24 ),
+			FORMAT_DESC( V4L2_PIX_FMT_BGR32 ),
+			FORMAT_DESC( V4L2_PIX_FMT_RGB32 ),
+			FORMAT_DESC( V4L2_PIX_FMT_GREY ),
+//				FORMAT_DESC( V4L2_PIX_FMT_PAL8 ),
+			FORMAT_DESC( V4L2_PIX_FMT_YVU410 ),
+			FORMAT_DESC( V4L2_PIX_FMT_YVU420 ),
+			FORMAT_DESC( V4L2_PIX_FMT_UYVY ),
+			FORMAT_DESC( V4L2_PIX_FMT_YUV422P ),
+			FORMAT_DESC( V4L2_PIX_FMT_YUV411P ),
+			FORMAT_DESC( V4L2_PIX_FMT_Y41P ),
+//				FORMAT_DESC( V4L2_PIX_FMT_YUV444 ),
+//				FORMAT_DESC( V4L2_PIX_FMT_YUV555 ),
+//				FORMAT_DESC( V4L2_PIX_FMT_YUV565 ),
+//				FORMAT_DESC( V4L2_PIX_FMT_YUV32 ),
+			FORMAT_DESC( V4L2_PIX_FMT_NV12 ),
+			FORMAT_DESC( V4L2_PIX_FMT_NV21 ),
+			FORMAT_DESC( V4L2_PIX_FMT_YUV410 ),
+			FORMAT_DESC( V4L2_PIX_FMT_YUV420 ),
+			FORMAT_DESC( V4L2_PIX_FMT_YYUV ),
+			FORMAT_DESC( V4L2_PIX_FMT_HI240 ),
+//			FORMAT_DESC( V4L2_PIX_FMT_HM12 ),
+			FORMAT_DESC( V4L2_PIX_FMT_SBGGR8 ),
+			FORMAT_DESC( V4L2_PIX_FMT_MJPEG ),
+			FORMAT_DESC( V4L2_PIX_FMT_JPEG ),
+			FORMAT_DESC( V4L2_PIX_FMT_DV ),
+			FORMAT_DESC( V4L2_PIX_FMT_MPEG ),
+			FORMAT_DESC( V4L2_PIX_FMT_WNVA ),
+			FORMAT_DESC( V4L2_PIX_FMT_SN9C10X ),
+//			FORMAT_DESC( V4L2_PIX_FMT_PWC1 ),
+//			FORMAT_DESC( V4L2_PIX_FMT_PWC2 ),
+//			FORMAT_DESC( V4L2_PIX_FMT_ET61X251 )
+*/
+		};
+
+		v4l2_format fmt;
+		CStr sStr;
+		for ( oexINT i = 0; i < oexSizeOfArray( l_formats ); i++ )
+		{
+			oexZeroMemory( &fmt, sizeof( fmt ) );
+			fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+			fmt.fmt.pix.width = m_nWidth;
+			fmt.fmt.pix.height = m_nHeight;
+			fmt.fmt.pix.pixelformat = l_formats[ i ].uId;
+			fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
+
+			oexTRY
+			{	if ( !IoCtl( m_nFd, VIDIOC_S_FMT, &fmt ) )
+					return l_formats[ i ].uId;
+			} // end try
+			oexCATCH_ALL()
+			{
+			} // end catch
+
+		} // end for
+
+		return 0;
+	}
+
 	virtual CStr GetSupportedFormats()
 	{
 		struct SFormatDesc
 		{
-			oexINT			nId;
+			oexUINT			uId;
 			oexTCHAR		sId[ 256 ];
 		};
 
@@ -453,12 +548,12 @@ public:
 			fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 			fmt.fmt.pix.width = m_nWidth;
 			fmt.fmt.pix.height = m_nHeight;
-			fmt.fmt.pix.pixelformat = l_formats[ i ].nId;
+			fmt.fmt.pix.pixelformat = l_formats[ i ].uId;
 			fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 
 			oexTRY
 			{	if ( !IoCtl( m_nFd, VIDIOC_S_FMT, &fmt ) )
-					sStr += CStr().Fmt( oexT( "%s : (0x%X)\n" ), oexStrToMbPtr( l_formats[ i ].sId ), l_formats[ i ].nId );
+					sStr += CStr().Fmt( oexT( "%s : (0x%X)\n" ), oexStrToMbPtr( l_formats[ i ].sId ), l_formats[ i ].uId );
 			} // end try
 			oexCATCH_ALL()
 			{
@@ -589,7 +684,7 @@ public:
 
 	/// +++ Should return the size of the video buffer
 	virtual oexINT GetImageSize()
-	{	return CImage::GetScanWidth( m_nWidth, m_nBpp ) * cmn::Abs( m_nHeight ); }
+	{	return CImage::GetScanWidth( m_nWidth, 24 ) * cmn::Abs( m_nHeight ); }
 
 	oexINT GetBufferSize()
 	{
@@ -611,8 +706,8 @@ public:
 	{	return m_nHeight; }
 
 	/// Returns the bits-per-pixel of the current image format
-	virtual oexINT GetBpp()
-	{	return m_nBpp; }
+	virtual oexUINT GetFormat()
+	{	return m_uFormat; }
 
 	/// Returns the frame rate in frames per second
 	virtual oexFLOAT GetFps()
@@ -652,7 +747,7 @@ private:
 
 	oexINT				m_nHeight;
 
-	oexINT				m_nBpp;
+	oexUINT				m_uFormat;
 
 	oexFLOAT			m_fFps;
 

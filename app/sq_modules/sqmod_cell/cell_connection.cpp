@@ -483,8 +483,8 @@ oex::oexBOOL CCellConnection::ParseTag( const sqbind::stdString &sTag, sqbind::s
 	sName = sParseTag.Parse( oexT( "." ) ).Ptr();
 	if ( *sParseTag == oexT( '.' ) )
 	{	sParseTag++;
-		sTemplate = sParseTag.Parse( oexT( ":" ) );
-		if ( *sParseTag == oexT( ':' ) )
+		sTemplate = sParseTag.Parse( oexT( "|" ) );
+		if ( *sParseTag == oexT( '|' ) )
 			sParseTag++, sBit = sParseTag;
 		else
 			sTemplate = sParseTag;
@@ -492,8 +492,8 @@ oex::oexBOOL CCellConnection::ParseTag( const sqbind::stdString &sTag, sqbind::s
 	} // end if
 
 	else
-	{	sName = sParseTag.Parse( oexT( ":" ) ).Ptr();
-		if ( *sParseTag == oexT( ':' ) )
+	{	sName = sParseTag.Parse( oexT( "|" ) ).Ptr();
+		if ( *sParseTag == oexT( '|' ) )
 			sParseTag++, sBit = sParseTag;
 		else
 			sName = sParseTag.Ptr();
@@ -590,7 +590,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 		else
 		{
 			if ( nOffset + nSize > pTd->tag[ nTag ]->datalen )
-				return SetLastError( oexT( "err=Template item offset address is beyond the end of the array" ) );			
+				return SetLastError( oexT( "err=Template item offset address is beyond the end of the array" ) );
 
 			if ( nOffset + nByte > pTd->tag[ nTag ]->datalen )
 				return SetLastError( oexT( "err=Bit address is beyond the end of the array" ) );

@@ -336,7 +336,7 @@ oexBOOL CBaseFile::DoesExist( oexCSTR x_pPath )
 }
 
 oexBOOL CBaseFile::CreateFolder( oexCSTR x_pPath )
-{   oexBOOL bRet = !mkdir( oexStrToMbPtr( x_pPath ), 0 ) ? oexFALSE : oexTRUE;
+{	oexBOOL bRet = !mkdir( oexStrToMbPtr( x_pPath ), 0 ) ? oexFALSE : oexTRUE;
 	chmod( oexStrToMbPtr( x_pPath ), 0755 );
 	return bRet;
 }

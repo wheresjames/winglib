@@ -105,7 +105,7 @@ CSysTime& CSysTime::SetUnixTime(oexUINT x_uTime, oexINT x_lTzBias )
 	oexINT64 ll = x_uTime;
 
 	ll += (oexINT64)FTOFF_1970;
-	ll *= (oexINT64)10000000;
+	ll *= (oexINT64)10000000LL;
 
     os::CSys::FileTimeToSystemTime( m_time, ll );
 

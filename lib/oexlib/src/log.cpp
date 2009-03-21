@@ -181,11 +181,15 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT 
 
 			// Add file / line number
 			oexUINT uThreadId = oexGetCurrentThreadId();
+#if defined( oexFULL_FILENAME_IN_LOG )
 			sLog << x_pFile << oexT( ":(" ) << x_nLine << oexT( ")" ) 
+#else
+			sLog << oexGetFileName( x_pFile ) << oexT( ":(" ) << x_nLine << oexT( ")" ) 
+#endif
 				 << oexFmt( oexT( " : Thread %u (0x%x)" ), uThreadId, uThreadId ) << oexNL;
 
 			// Write out the time
-#ifdef OEX_NANOSECONDS
+#if defined( OEX_NANOSECONDS )
 			sLog << oexLocalTimeStr( oexT( " -> Local Time: %Y/%c/%d - %g:%m:%s.%l.%u.%n" oexNL8 ) );
 #else
 			sLog << oexLocalTimeStr( oexT( " -> Local Time: %Y/%c/%d - %g:%m:%s.%l.%u" oexNL8 ) );
@@ -208,7 +212,7 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT 
 			if ( oexCHECK_PTR( x_pErr ) )
 				sLog << oexT( " -> " ) << CStr( x_pErr ).Replace( oexNL, oexT( "" oexNL8 " -> " ) ) << oexNL;
 
-#ifdef oexBACKTRACE_IN_LOG
+#if defined( oexBACKTRACE_IN_LOG )
 			// Write out the backtrace
 			sLog << oexT( " -> " )
 				 << os::CTrace::GetBacktrace( x_uSkip ).Replace( oexNL, oexT( "" oexNL8 " -> " ) )

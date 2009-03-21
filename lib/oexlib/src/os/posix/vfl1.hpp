@@ -66,7 +66,7 @@ public:
 		m_llFrame = 0;
 		m_nWidth = 0;
 		m_nHeight = 0;
-		m_nBpp = 24;
+		m_uFormat = 0;
 		m_fFps = 0;
 		m_nBufferSize = 0;
 		m_pFrameBuffer = 0;
@@ -86,7 +86,7 @@ public:
 		\param [in] x_pDevice	-	Video device name
 										- Example: /dev/video0
 	*/
-	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit )
+	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit )
 	{
 		CStr sDevice = oexMks( oexT( "/dev/video" ), x_uDevice );
 
@@ -112,7 +112,7 @@ public:
 		m_sDeviceName = sDevice;
 		m_nWidth = x_nWidth;
 		m_nHeight = x_nHeight;
-		m_nBpp = x_nBpp;
+		m_uFormat = x_uFormat;
 		m_fFps = x_fFps;
 
 		// Attempt to initialize the device
@@ -125,7 +125,7 @@ public:
 	}
 
 	/// Open file
-	oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit )
+	oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit )
 	{
 		return oexFALSE;
 	}
@@ -153,7 +153,7 @@ public:
 		m_llFrame = 0;
 		m_nWidth = 0;
 		m_nHeight = 0;
-		m_nBpp = 24;
+		m_uFormat = 0;
 		m_fFps = 0;
 		m_nBufferSize = 0;
 		m_pFrameBuffer = 0;
@@ -215,7 +215,7 @@ public:
 		oexINT lImageSize = m_buf1.size;
 //		oexINT lImageSize = m_buf1.size;
 		if ( 0 >= lImageSize )
-		{	oexERROR( errno, CStr().Fmt( oexT( "Invalid Image size %d : %d x %d x %d" ), lImageSize, m_nWidth, m_nHeight, m_nBpp ) );
+		{	oexERROR( errno, CStr().Fmt( oexT( "Invalid Image size %d : %d x %d x %d" ), lImageSize, m_nWidth, m_nHeight, m_uFormat ) );
 			return oexFALSE;
 		} // end if
 
@@ -224,7 +224,7 @@ public:
 		m_image.SetShareHandle( (os::CFMap::t_HFILEMAP)m_nFd );
 		if ( !oexCHECK_PTR( m_image.OexNew( lImageSize ).Ptr() ) )
 		{	oexERROR( errno, CStr().Fmt( oexT( "Failed to allocate shared image buffer size=%d : %d x %d x %d" ),
-										 lImageSize, m_nWidth, m_nHeight, m_nBpp ) );
+										 lImageSize, m_nWidth, m_nHeight, m_uFormat ) );
 			return oexFALSE;
 		} // end if
 
@@ -319,7 +319,7 @@ public:
 
 	/// +++ Should return the size of the video buffer
 	virtual oexINT GetImageSize()
-	{	return CImage::GetScanWidth( m_nWidth, m_nBpp ) * cmn::Abs( m_nHeight ); }
+	{	return CImage::GetScanWidth( m_nWidth, 24 ) * cmn::Abs( m_nHeight ); }
 
 	virtual oexINT GetBufferSize()
 	{
@@ -341,8 +341,8 @@ public:
 	{	return m_nHeight; }
 
 	/// Returns the bits-per-pixel of the current image format
-	virtual oexINT GetBpp()
-	{	return m_nBpp; }
+	virtual oexUINT GetFormat()
+	{	return m_uFormat; }
 
 	/// Returns the frame rate in frames per second
 	virtual oexFLOAT GetFps()
@@ -382,7 +382,7 @@ private:
 
 	oexINT				m_nHeight;
 
-	oexINT				m_nBpp;
+	oexUINT				m_uFormat;
 
 	oexFLOAT			m_fFps;
 

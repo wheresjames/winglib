@@ -157,13 +157,3 @@ extern "C" oex::oexRESULT SRV_Stop()
 	return 0;
 }
 
-// !!! Never call this function !!!
-// This is just a dummy function to pull in these function definitions
-extern "C" void dummy_to_import_symbols()
-{	HSQUIRRELVM 	*hvm = 0;
-	SQVM 			*svm = 0;
-	sqstd_seterrorhandlers( *hvm );
-	sqstd_register_iolib( svm );
-	sqstd_register_stringlib( *hvm );
-	sqstd_register_mathlib( *hvm );
-}

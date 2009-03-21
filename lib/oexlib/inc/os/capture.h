@@ -50,7 +50,7 @@
 #define oexVIDSUB_VFL2_TAG		oexT( "VFL2" )
 
 #define oexVIDSUB_DAVINCI		oexFOURCC( '1', 'D', 'A', 'V' )
-#define oexVIDSUB_DAVINCI_STR	oexT( "Davinci video capture" )
+#define oexVIDSUB_DAVINCI_STR	oexT( "TI DaVinci video capture" )
 #define oexVIDSUB_DAVINCI_TAG	oexT( "DAVINCI" )
 
 // Windows
@@ -170,8 +170,8 @@ public:
 
 public:
 	virtual oexBOOL Destroy() = 0;
-	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit ) = 0;
-	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit ) = 0;
+	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit ) = 0;
+	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit ) = 0;
 	virtual oexBOOL Init() = 0;
 	virtual oexBOOL IsOpen() = 0;
 	virtual oexBOOL StartCapture() = 0;
@@ -184,7 +184,7 @@ public:
 	virtual CImage* GetImage() = 0;
 	virtual oexINT GetWidth() = 0;
 	virtual oexINT GetHeight() = 0;
-	virtual oexINT GetBpp() = 0;
+	virtual oexUINT GetFormat() = 0;
 	virtual oexFLOAT GetFps() = 0;
 	virtual oexINT64 GetFrame() = 0;
 	virtual CStr GetSupportedFormats() = 0;
@@ -246,6 +246,11 @@ public:
 class CCapture : public CCaptureTmpl
 {
 public:
+
+	static oexCONST oexUINT32		c_Fmt_AUTO	 	= 0;
+	static oexCONST oexUINT32		c_Fmt_RGB24 	= oexFOURCC( 'R', 'G', 'B', '3' );
+	static oexCONST oexUINT32		c_Fmt_BGR24 	= oexFOURCC( 'B', 'G', 'R', '3' );
+	static oexCONST oexUINT32		c_Fmt_YUYV		= oexFOURCC( 'Y', 'U', 'Y', 'V' );
 
 	enum
 	{
@@ -322,13 +327,13 @@ public:
 		\param [in] x_uSource	- Index of video stream to open
 		\param [in] x_nWidth	- Desired video width
 		\param [in] x_nHeight	- Desired video height
-		\param [in] x_nBpp		- Desired bits per pixel
+		\param [in] x_uFormat	- Desired image format
 		\param [in] x_fFps		- Desired capture frame rate
 		\param [in] x_bInit		- Non-zero to initialize the device for capture
 
 		\return Non-zero if success.
 	*/
-	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit );
+	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit );
 
 	/// Opens the specified file
 	/**
@@ -337,13 +342,13 @@ public:
 		\param [in] x_uSource	- Index of video stream to open
 		\param [in] x_nWidth	- Desired video width
 		\param [in] x_nHeight	- Desired video height
-		\param [in] x_nBpp		- Desired bits per pixel
+		\param [in] x_uFormat	- Desired image format
 		\param [in] x_fFps		- Desired capture frame rate
 		\param [in] x_bInit		- Non-zero to initialize the device for capture
 
 		\return Non-zero if success.
 	*/
-	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps, oexBOOL x_bInit );
+	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit );
 
 	/// Initializes the device for capture
 	virtual oexBOOL Init()
@@ -458,12 +463,12 @@ public:
 	}
 
 	/// Returns the bits-per-pixel of the current image format
-	virtual oexINT GetBpp()
+	virtual oexUINT GetFormat()
 	{
 		if ( !oexCHECK_PTR( m_pDevice ) )
 			return oexFALSE;
 
-		return m_pDevice->GetBpp();
+		return m_pDevice->GetFormat();
 	}
 
 	/// Returns the frame rate in frames per second

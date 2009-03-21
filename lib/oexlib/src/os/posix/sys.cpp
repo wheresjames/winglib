@@ -545,6 +545,7 @@ void CSys_SystemTimeToSTime( struct tm* tinfo, CSys::STime &t )
     t.uHour = tinfo->tm_hour;
     t.uMinute = tinfo->tm_min;
     t.uSecond = tinfo->tm_sec;
+    t.nTzBias = 0;
     t.uMillisecond = 0;
     t.uMicrosecond = 0;
     t.uNanosecond = 0;
@@ -651,7 +652,8 @@ oexINT64 CSys::SystemTimeToFileTime( STime &x_st )
 {
 	struct tm tinfo;
 	CSys_STimeToSystemTime( x_st, &tinfo );
-	return ( (oexINT64)mktime( &tinfo ) + FTOFF_1970 ) * 10000000LL
+//	return ( (oexINT64)mktime( &tinfo ) + FTOFF_1970 ) * 10000000LL
+	return ( (oexINT64)timegm( &tinfo ) + FTOFF_1970 ) * 10000000LL
 	       + ( 10000LL * (oexINT64)x_st.uMillisecond )
 	       + ( 10LL * (oexINT64)x_st.uMicrosecond )
 	       + ( (oexINT64)x_st.uNanosecond / 100LL )

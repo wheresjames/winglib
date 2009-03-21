@@ -117,6 +117,8 @@ using namespace oex;
 
 oex::oexRESULT TestAllocator()
 {
+	oexPrintf( oexT( "Memory allocator...\n" ) );
+
     // Veriry over-run / under-run protection
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 
@@ -305,6 +307,8 @@ oex::oexRESULT TestAllocator()
 
 oex::oexRESULT TestStrings()
 {
+	oexPrintf( oexT( "String functions...\n" ) );
+
     oex::CStr str1, str2;
     oex::oexSTR pStr;
 
@@ -588,6 +592,8 @@ oex::oexRESULT TestStrings()
 
 oex::oexRESULT TestFileMapping()
 {
+	oexPrintf( oexT( "File mapping...\n" ) );
+
     oex::TFileMapping< oex::oexTCHAR > fm;
 
     const oex::oexUINT uSize = 150;
@@ -653,6 +659,8 @@ oex::oexRESULT TestFileMapping()
 
 oex::oexRESULT TestGuids()
 {
+	oexPrintf( oexT( "GUIDS...\n" ) );
+
     // {6674C3D8-BB11-4a58-BCE0-A34DC74365AF}
     static const oex::oexGUID guidTest =
     	oex::oexAUTOGUID( 0x6674c3d8, 0xbb11, 0x4a58, 0xbc, 0xe0, 0xa3, 0x4d, 0xc7, 0x43, 0x65, 0xaf );
@@ -690,6 +698,8 @@ oex::oexRESULT TestGuids()
 
 oex::oexRESULT TestLists()
 {
+	oexPrintf( oexT( "Linked lists...\n" ) );
+
 	// List
 	oex::TList< int > lst;
 
@@ -887,12 +897,12 @@ oex::oexRESULT TestLists()
 
 	oex::oexCSTR pIni = oexT( "; This is a test INI file"			"\r\n"
 							"# [comment]"							"\r\n"
-							"val1=Hello"							"\r\n"	
+							"val1=Hello"							"\r\n"
 							"val2=World"							"\r\n"
 							""										"\r\n"
 							"[group1]"								"\r\n"
 							"val1=yup"								"\r\n"
-							"val2=noreturn" 
+							"val2=noreturn"
 						);
 
 	oex::CPropertyBag pb = oex::CParser::DecodeIni( pIni );
@@ -918,6 +928,8 @@ oex::oexRESULT TestLists()
 
 oex::oexRESULT TestAssoLists()
 {
+	oexPrintf( oexT( "Mapped lists...\n" ) );
+
     oex::TAssoList< oex::oexINT, oex::oexINT > alii;
 
 	alii[ 4 ] = 11;
@@ -1032,6 +1044,8 @@ oex::oexRESULT TestAssoLists()
 
 oex::oexRESULT TestPropertyBag()
 {
+	oexPrintf( oexT( "Property bags...\n" ) );
+
     oex::CPropertyBag pb;
 
 	pb[ oexT( "1" ) ] = oexT( "1" );
@@ -1080,6 +1094,8 @@ oex::oexRESULT TestPropertyBag()
 
 oex::oexRESULT TestParser()
 {
+	oexPrintf( oexT( "Text parsers...\n" ) );
+
 	// Test explode function
     oex::oexCSTR szStr[] = { oexT( "This" ), oexT( "is" ), oexT( "a" ), oexT( "string" ), 0 };
 
@@ -1254,6 +1270,8 @@ oex::oexRESULT TestParser()
 
 oex::oexRESULT TestFile()
 {
+	oexPrintf( oexT( "Files...\r\n" ) );
+
     oex::CFile f;
     oex::CStr sFileName, sContents = oexT( "Safe to delete this file." );
 
@@ -1287,6 +1305,7 @@ oex::oexRESULT TestFile()
 oex::oexRESULT TestZip()
 {
 #ifdef OEX_ENABLE_ZIP
+	oexPrintf( oexT( "Zip file support...\r\n" ) );
 
     oex::CStr sStr = oexT( "This string will be compressed.  It has to be fairly long or the 			\
                             compression library won't really be able to compress it much.   			\
@@ -1305,7 +1324,7 @@ oex::oexRESULT TestZip()
 
 #else
 
-	oexPrintf( oexT( "ZIP file support disabled\n" ) );
+	oexPrintf( oexT( "!!! ZIP file support disabled\r\n" ) );
 
 #endif
 
@@ -1314,6 +1333,8 @@ oex::oexRESULT TestZip()
 
 oex::oexRESULT Test_CSysTime()
 {
+	oexPrintf( oexT( "Time functions...\r\n" ) );
+
     oex::CSysTime st;
 
     st.SetTime( 1997, 12, 25, 16, 15, 30, 500, 0, 0, 4 );
@@ -1358,22 +1379,25 @@ oex::oexRESULT Test_CSysTime()
         return -10;
 
     st2.SetUnixTime( st2.GetUnixTime() );
-    if ( !oexVERIFY( st2.ParseTime( oexT( "%Y/%c/%d - %g:%m:%s" ), oexT( "1997/12/25 - 16:15:30" ) ) ) )
+    oexPrintf( st2.FormatTime( oexT( "%Y/%c/%d - %g:%m:%s" ) ).Ptr() );
+    if ( !oexVERIFY( st2.FormatTime( oexT( "%Y/%c/%d - %g:%m:%s" ) ) == oexT( "1997/12/25 - 16:15:30" ) ) )
         return -11;
 
     st2.SetDosTime( st2.GetDosTime() );
-    if ( !oexVERIFY( st2.ParseTime( oexT( "%Y/%c/%d - %g:%m:%s" ), oexT( "1997/12/25 - 16:15:30" ) ) ) )
-        return -11;
+    if ( !oexVERIFY( st2.FormatTime( oexT( "%Y/%c/%d - %g:%m:%s" ) ) == oexT( "1997/12/25 - 16:15:30" ) ) )
+        return -12;
 
     st2.SetNetTime( st2.GetNetTime() );
-    if ( !oexVERIFY( st2.ParseTime( oexT( "%Y/%c/%d - %g:%m:%s" ), oexT( "1997/12/25 - 16:15:30" ) ) ) )
-        return -11;
+    if ( !oexVERIFY( st2.FormatTime( oexT( "%Y/%c/%d - %g:%m:%s" ) ) == oexT( "1997/12/25 - 16:15:30" ) ) )
+        return -13;
 
     return oex::oexRES_OK;
 }
 
 oex::oexRESULT Test_CIpAddress()
 {
+	oexPrintf( oexT( "IP Address...\r\n" ) );
+
     if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
         return -1;
 
@@ -1420,6 +1444,8 @@ oex::oexRESULT Test_CIpAddress()
 
 oex::oexRESULT Test_CIpSocket()
 {
+	oexPrintf( oexT( "Socket support...\r\n" ) );
+
     if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
         return -1;
 
@@ -1498,6 +1524,8 @@ oex::oexRESULT Test_CIpSocket()
 
 oex::oexRESULT Test_CCircBuf()
 {
+	oexPrintf( oexT( "Circular buffers...\r\n" ) );
+
     oex::CCircBuf cb;
 
     oex::oexCSTR pStr = oexT( "Hello World" );
@@ -1551,6 +1579,8 @@ oex::oexRESULT Test_CCircBuf()
 
 oex::oexRESULT Test_CFifoSync()
 {
+	oexPrintf( oexT( "FIFO buffers...\r\n" ) );
+
     oex::CFifoSync fs;
 
     fs.SetMaxBuffers( 10000 );
@@ -1610,6 +1640,8 @@ oex::oexRESULT Test_CFifoSync()
 
 oex::oexRESULT Test_CDataPacket()
 {
+	oexPrintf( oexT( "Packets...\r\n" ) );
+
     oex::CDataPacket dp1, dp2, dp3;
 
     oex::CStr sStr1 = oexT( "This is the first data string" );
@@ -1771,6 +1803,7 @@ public:
 
 oex::oexRESULT Test_Threads()
 {
+	oexPrintf( oexT( "Threads...\r\n" ) );
 
 	CMyThread t;
 
@@ -1898,6 +1931,8 @@ oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os
 
 oex::oexRESULT Test_CHttpSession()
 {
+	oexPrintf( oexT( "HTTP...\r\n" ) );
+
     if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
         return -1;
 
@@ -2385,9 +2420,10 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 	oex::vid::CCapture cCapture;
 
 	// Don't flag an error here, maybe there is no capture device
-	if ( !cCapture.Open( uApi, 0, 0, 640, 480, 24, 15, 0 ) )
+	if ( !cCapture.Open( uApi, 0, 0, 320, 240, 0, 15, 0 ) )
 		return -1;
 
+	// Show supported formats
 	oexPrintf( cCapture.GetSupportedFormats().Ptr() );
 
 	if ( !cCapture.Init() )
@@ -2448,25 +2484,28 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 
 oex::oexRESULT Test_CCapture()
 {
-	oexPrintf( oexT( "Testing video capture API...\n" ) );
+	oexPrintf( oexT( "Video capture API...\n" ) );
 
 	oexINT idx = -1;
 	while ( oexCONST vid::SVideoSystemInfo* pVsi = vid::CCapture::GetNextAvailableSystem( idx ) )
 	{
-		oexPrintf( oexT( "%s - %s - " ), oexStrToMbPtr( pVsi->pTag ), oexStrToMbPtr( pVsi->pName ) );
+		oexPrintf( oexT( "--- %s - %s ---\r\n" ), oexStrToMbPtr( pVsi->pTag ), oexStrToMbPtr( pVsi->pName ) );
 
 		oex::CStr sName = oex::CStr().Fmt( oexT( "./_captest_%s_%d.bmp" ), oexStrToMbPtr( pVsi->pTag ), 0 );
 		oex::CStr sFile = oexGetModulePath( sName.Ptr() );
 
 		oexINT nRet = 0;
 		if ( !pVsi->bSupported )
-			oexPrintf( oexT( "Unsupported\n" ) );
+			oexPrintf( oexT( "Unsupported\r\n" ) );
 
 		else if ( !( nRet = Test_CaptureApi( pVsi->uType, sFile ) ) )
-			oexPrintf( oexT( "Succeded - %s\n" ), oexStrToMb( sName ).Ptr() );
+			oexPrintf( oexT( "Succeded - %s\r\n" ), oexStrToMb( sName ).Ptr() );
+
+		else if ( -1 == nRet )
+			oexPrintf( oexT( "No Supported Device Found\r\n" ) );
 
 		else
-			oexPrintf( oexT( "Failed : %d\n" ), nRet );
+			oexPrintf( oexT( "Failed : %d\r\n" ), nRet );
 
 		// Next item
 		idx = pVsi->nIndex;
@@ -2484,6 +2523,7 @@ int main(int argc, char* argv[])
     // Initialize the oex library
 	oexINIT();
 
+	oexPrintf( oexT( "--- Starting tests ---\r\n" ) );
 	oexNOTICE( 0, oexT( "Tests started" ) );
 
     TestAllocator();
