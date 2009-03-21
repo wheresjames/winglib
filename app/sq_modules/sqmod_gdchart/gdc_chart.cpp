@@ -5,24 +5,6 @@
 #include "gdc.h"
 #include "gdchart.h"
 #include "gd/gd.h"
-/*
-// !!! Never call this function !!!
-// This is just a dummy function to pull in these function definitions
-extern "C" void dummy_to_import_symbols()
-{
-	out_err( 0, 0, 0, 0, 0, 0 );
-}
-
-int
-out_graph( short		GIFWIDTH,		
-		   short		GIFHEIGHT,		
-		   FILE			*gif_fptr,		
-		   GDC_CHART_T	type,
-		   int			num_points,								
-		   char			*xlbl[],
-		   int			num_sets,
-						... );
-*/
 
 CGdcChart::CGdcChart()
 {
