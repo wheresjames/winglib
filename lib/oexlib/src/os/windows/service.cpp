@@ -38,22 +38,6 @@
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
-/// +++ Possibly we can somehow create another process and call this function ???
-/*
-extern "C" oex::oexRESULT OEX_SRVMODULE_20081230192357EST_Run( oex::oexCSTR x_pPath )
-{
-
-	return -1;
-}
-*/
-
-oexINT CService::Fork( CStr x_sWorkingDirectory, oexCSTR x_pLogFile )
-{
-	// Hmmmmm
-	oexERROR( 0, "Cant fork() on Windows" );
-
-	return -1;
-}
 
 oexINT CService::Run( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay, oexINT x_nFlags )
 {

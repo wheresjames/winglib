@@ -16,6 +16,38 @@ public:
 		eMaxProgs = 1024
 	};
 
+	enum
+	{
+		/// Maximum time to cache tag values in seconds
+		eTagCacheLimit = 10
+	};
+
+	/// Holds cached tag value
+	struct STagCache
+	{
+		/// Time value was acquired
+		oex::oexUINT			uTime;
+
+		/// Tag value
+		sqbind::CSqMap			mVal;
+	};
+
+	// Tag value cache
+	typedef oexStdMap( sqbind::stdString, STagCache )		t_TagCache;
+
+	/// Holds cached tag value
+	struct SDataCache
+	{
+		/// Time value was acquired
+		oex::oexUINT				uTime;
+
+		/// Tag data
+		oex::TMem< unsigned char >	data;
+	};
+
+	// Data cache
+	typedef oexStdMap( sqbind::stdString, SDataCache )		t_DataCache;
+
 public:
 
 	/// Default constructor
@@ -59,7 +91,7 @@ public:
 	oex::oexBOOL GetItemValue( int nType, unsigned char *pData, int nSize, int nBit, sqbind::stdString &sRet );
 
 	/// Parses a tag name into components
-	oex::oexBOOL ParseTag( const sqbind::stdString &sTag, sqbind::stdString &sName, int &nProgram, int &nTag, int &nOffset, int &nSize, int &nType, int &nBit );
+	oex::oexBOOL ParseTag( const sqbind::stdString &sTag, sqbind::stdString &sName, int &nProgram, int &nTag, int &nIndex, int &nOffset, int &nSize, int &nType, int &nBit );
 
 	/// Read the specified tag
 	sqbind::CSqMap ReadTag( const sqbind::stdString &sTag );
@@ -127,6 +159,12 @@ private:
 
 	/// Tag map
 	t_TagMap					m_mapTags;
+
+	/// Cached tag values
+	t_TagCache					m_mapTagCache;
+
+	/// Data cache
+	t_DataCache					m_mapDataCache;
 
 	/// Tag map for squirrel
 	sqbind::CSqMap				m_mapSqTags;

@@ -682,6 +682,12 @@ oexCSTR CSys::SetLocale( oexINT nCategory, oexCSTR pLocal )
 	return oexT( "" );
 }
 
+oexUINT CSys::GetUnixTime()
+{
+	return time( NULL );
+}
+
+
 /// printf function
 int CSys::Printf( oexCSTR8 x_pFmt, ... )
 {

@@ -224,6 +224,7 @@
 #define oexGmtTime							OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eGmtTime )
 #define oexLocalTimeStr						OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eLocalTime ).FormatTime
 #define oexGmtTimeStr						OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eGmtTime ).FormatTime
+#define oexGetUnixTime						OEX_NAMESPACE::os::CSys::GetUnixTime
 
 #define oexSleep							OEX_NAMESPACE::os::CSys::Sleep
 #define oexMicroSleep						OEX_NAMESPACE::os::CSys::MicroSleep

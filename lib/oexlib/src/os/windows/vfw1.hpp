@@ -134,7 +134,7 @@ public:
 
 		m_nWidth = 0;
 		m_nHeight = 0;
-		m_nBpp = 0;
+		m_uFormat = 0;
 		m_fFps = 0;
 
 		m_hThread = INVALID_HANDLE_VALUE;
@@ -1683,8 +1683,8 @@ private:
 	/// Image height
 	oexINT								m_nHeight;
 
-	/// Bits per pixel
-	oexINT								m_nBpp;
+	/// Image format
+	oexUINT								m_uFormat;
 
 	/// Frames per second
 	oexFLOAT							m_fFps;
@@ -1702,7 +1702,7 @@ public:
 	//==============================================================
 	/// Opens the capture device and starts the capture
 	BOOL Open( oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight,
-			   oexINT x_nBpp, oexFLOAT x_fFps, CCaptureTmpl::cbf_OnFrame x_cbfOnFrame, 
+			   oexUINT x_uFormat, oexFLOAT x_fFps, CCaptureTmpl::cbf_OnFrame x_cbfOnFrame, 
 			   oexPVOID x_pUser, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
 	{
 		Destroy();
@@ -1712,7 +1712,7 @@ public:
 		m_uSource = x_uSource;
 		m_nWidth = x_nWidth;
 		m_nHeight = x_nHeight;
-		m_nBpp = x_nBpp;
+		m_uFormat = x_uFormat;
 		m_fFps = x_fFps;
 		m_cbfOnFrame = x_cbfOnFrame;
 		m_pUser = x_pUser;
@@ -1902,7 +1902,7 @@ public:
 	{
 		m_nWidth = 0;
 		m_nHeight = 0;
-		m_nBpp = 0;
+		m_uFormat = 0;
 		m_fFps = 0;
 		m_bReady = FALSE;
 	}
@@ -1947,19 +1947,19 @@ public:
 	/**
 		\param [in] x_uDevice	-	Device index
 	*/
-	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit )
 	{
 		Destroy();
 
 		// Save information
 		m_nWidth = x_nWidth;
 		m_nHeight = x_nHeight;
-		m_nBpp = x_nBpp;
+		m_uFormat = x_uFormat;
 		m_fFps = x_fFps;
 
 		// Create capture window
 		BOOL bRes = m_cap.Open( x_uDevice, x_uSource, x_nWidth, x_nHeight, 
-			                    x_nBpp, x_fFps, CV4w1::_OnFrame, this );
+			                    x_uFormat, x_fFps, CV4w1::_OnFrame, this );
 		if ( !bRes )
 		{	oexERROR( GetLastError(), oexT( "Failed to open capture device" ) );
 			Destroy();
@@ -1975,7 +1975,7 @@ public:
 	/**
 		\param [in] x_pFile		- Video file to open
 	*/
-	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit )
 	{
 
 		return oexFALSE;
@@ -1993,7 +1993,7 @@ public:
 		m_pFi = oexNULL;
 		m_nWidth = 0;
 		m_nHeight = 0;
-		m_nBpp = 0;
+		m_uFormat = 0;
 		m_fFps = 0;
 		m_bReady = FALSE;
 
@@ -2091,7 +2091,7 @@ public:
 	/// +++ Should return the size of the video buffer
 	virtual oexINT GetImageSize()
 	{
-		return CImage::GetScanWidth( m_nWidth, m_nBpp ) * cmn::Abs( m_nHeight ); 
+		return CImage::GetScanWidth( m_nWidth, 24 ) * cmn::Abs( m_nHeight ); 
 	}
 
 	//==============================================================
@@ -2126,11 +2126,11 @@ public:
 	{	return m_nHeight; }
 
 	//==============================================================
-	// GetBpp()
+	// GetFormat()
 	//==============================================================
-	/// Returns the bits-per-pixel of the current image format
-	virtual oexINT GetBpp()
-	{	return m_nBpp; }
+	/// Returns the image format
+	virtual oexUINT GetFormat()
+	{	return m_uFormat; }
 
 	//==============================================================
 	// GetFps()
@@ -2160,8 +2160,8 @@ private:
 	/// Image height
 	oexINT							m_nHeight;
 
-	/// Bits per pixel
-	oexINT							m_nBpp;
+	/// Image format
+	oexUINT							m_uFormat;
 
 	/// Frames per second
 	oexFLOAT						m_fFps;

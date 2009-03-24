@@ -86,6 +86,9 @@ int CCellConnection::ReleaseTags()
 {
 	// Lose the tag map
 	m_mapTags.clear();
+	m_mapSqTags.clear();
+	m_mapTagCache.clear();
+	m_mapDataCache.clear();
 
 	// Lose the details tags
 	for ( int i = 0; i < m_tagsDetails.count; i++ )
@@ -295,7 +298,16 @@ oex::oexBOOL CCellConnection::GetItemValue( int nType, unsigned char *pData, int
 	if ( !nSize || !oexCHECK_PTR( pData ) )
 		return oex::oexFALSE;
 
-	switch( nType & 0xff )
+	if ( 0 != ( nType & 0x8000 ) )
+	{
+		for ( int b = 0; b < nSize; b++ )
+		{	if ( b && !( b & 0x0f ) ) sRet += oexT( "<br>" ), sRet += oexNL;
+			sRet += oexFmt( oexT( "%02lX " ), (int)pData[ b ] ).Ptr();
+		} // end for
+
+	} // end if
+
+	else switch( nType & 0xff )
 	{
 		case CIP_BOOL :
 			if ( 1 > nSize )
@@ -399,6 +411,7 @@ sqbind::CSqMap CCellConnection::TagToMap( _tag_detail *pTd )
 	mRet.set( oexT( "a2_size" ), 		oexMks( (unsigned int)pTd->arraysize2 ).Ptr() );
 	mRet.set( oexT( "a3_size" ),	 	oexMks( (unsigned int)pTd->arraysize3 ).Ptr() );
 	mRet.set( oexT( "type_name" ), 		GetTypeName( pTd->type ) );
+	mRet.set( oexT( "datalen" ),	 	oexMks( (unsigned int)pTd->datalen ).Ptr() );
 
 	return mRet;
 }
@@ -474,10 +487,10 @@ void CCellConnection::VerifyTemplate()
 	} // end for
 }
 
-oex::oexBOOL CCellConnection::ParseTag( const sqbind::stdString &sTag, sqbind::stdString &sName, int &nProgram, int &nTag, int &nOffset, int &nSize, int &nType, int &nBit )
+oex::oexBOOL CCellConnection::ParseTag( const sqbind::stdString &sTag, sqbind::stdString &sName, int &nProgram, int &nTag, int &nIndex, int &nOffset, int &nSize, int &nType, int &nBit )
 {
 	// Set invalid path
-	nProgram = nTag = nOffset = nSize = nType = nBit = -1;
+	nProgram = nTag = nIndex = nOffset = nSize = nType = nBit = -1;
 
 	oex::CStr sParseTag = sTag.c_str(), sTemplate, sBit;
 	sName = sParseTag.Parse( oexT( "." ) ).Ptr();
@@ -499,6 +512,13 @@ oex::oexBOOL CCellConnection::ParseTag( const sqbind::stdString &sTag, sqbind::s
 			sName = sParseTag.Ptr();
 
 	} // end else
+
+	// Parse off index
+	oex::CStr sPName = sName.c_str();
+	oex::CStr sNum = sPName.RParse( oexT( "[" ) );
+	sName = sPName.Ptr();
+	if ( sNum.Length() )
+		nIndex = sNum.ParseQuoted( oexT( "[" ), oexT( "]" ) ).ToLong();
 
 	// Ensure we have such a tag
 	if ( !m_mapSqTags.isset( sName ) )
@@ -554,8 +574,8 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 		return SetLastError( oexT( "err=Not connected" ) );
 
 	sqbind::stdString sName;
-	int nProgram, nTag, nOffset, nSize, nType, nBit;
-	if ( !ParseTag( sTag, sName, nProgram, nTag, nOffset, nSize, nType, nBit ) )
+	int nProgram, nTag, nIndex, nOffset, nSize, nType, nBit;
+	if ( !ParseTag( sTag, sName, nProgram, nTag, nIndex, nOffset, nSize, nType, nBit ) )
 		return SetLastError( oexMks( oexT( "err=Tag does not exist : " ), sTag.c_str() ).Ptr() );
 
 	_tag_data *pTd = &m_tagsDetails;
@@ -565,11 +585,79 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 	if ( 0 > nTag || nTag >= pTd->count )
 		return SetLastError( oexMks( oexT( "err=Invalid tag index " ), nTag ).Ptr() );
 
-	// Get object details
-	if ( 0 > read_object_value( &m_comm, &m_path, pTd->tag[ nTag ], 0 ) )
-		return SetLastError( oexT( "err=read_object_value() failed" ) );
+	// See if exact response is in the cache
+	t_TagCache::iterator itT = m_mapTagCache.find( sTag );
+	if ( itT != m_mapTagCache.end() )
+	{
+		// Pass along value if still valid
+		if ( ( itT->second.uTime + eTagCacheLimit ) > oexGetUnixTime() )
+			return itT->second.mVal;
 
-	sqbind::CSqMap mRet;
+		// Ditch the cache
+		else 
+			m_mapTagCache.erase( itT );
+
+	} // end if
+
+	sqbind::CSqMap		mRet;
+	int					nLen = 0;
+	unsigned char *		pDat = oexNULL;
+
+	// What about the raw data?
+	t_DataCache::iterator itD = m_mapDataCache.find( sName );
+	if ( itD != m_mapDataCache.end() )
+	{
+		// Save data info if valid
+		if ( ( itD->second.uTime + eTagCacheLimit ) > oexGetUnixTime() )
+			nLen = itD->second.data.Size(),
+			pDat = itD->second.data.Ptr();
+
+		// Else just ditch it
+		else
+			m_mapDataCache.erase( itD );
+
+	} // end if	 
+
+	// Did we get anything from the cache
+	if ( !nLen || !oexCHECK_PTR( pDat ) )
+	{
+		// Get object details
+		if ( 0 > read_object_value( &m_comm, &m_path, pTd->tag[ nTag ], 0 ) )
+			return SetLastError( oexT( "err=read_object_value() failed" ) );
+
+		// Did we get valid data
+		if ( !pTd->tag[ nTag ]->datalen || !oexCHECK_PTR( pTd->tag[ nTag ]->data ) )
+			return SetLastError( oexT( "err=read_object_value() returned invalid data" ) );
+
+		// Pull out the tag data
+		nLen = pTd->tag[ nTag ]->datalen;
+		pDat = pTd->tag[ nTag ]->data;
+
+		// Add data to cache
+		SDataCache &rCache = m_mapDataCache[ sName ];
+		if ( rCache.data.OexNew( nLen ).Ptr() )
+		{	rCache.uTime = oexGetUnixTime();
+			rCache.data.MemCpy( pDat, nLen );
+		} // end if
+
+	} // end if
+
+	// Was index supplied, and is it an array?
+	if ( 0 <= nIndex && pTd->tag[ nTag ]->arraysize1 )
+	{
+		// Ensure index is valid
+		if ( pTd->tag[ nTag ]->arraysize1 <= nIndex )
+			return SetLastError( oexMks( oexT( "err=Index out of range [ " ), nIndex, oexT( " ]" ) ).Ptr() );
+
+		// Ensure there is enough data
+		if ( ( pTd->tag[ nTag ]->size * nIndex ) > nLen )
+			return SetLastError( oexMks( oexT( "err=Index [ " ), nIndex, oexT( " ] beyond the end of data" ) ).Ptr() );
+
+		// Point to one element
+		nLen = pTd->tag[ nTag ]->size;
+		pDat = &pDat[ pTd->tag[ nTag ]->size * nIndex ];
+
+	} // end if
 
 	// Do they want a bit offset?
 	if ( 0 <= nBit )
@@ -579,27 +667,27 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 
 		if ( 0 > nOffset || 0 > nSize )
 		{
-			if ( nByte >= pTd->tag[ nTag ]->datalen )
+			if ( nByte >= nLen )
 				return SetLastError( oexT( "err=Bit address is beyond the end of the array" ) );
 
 			// Get item pointer and size
-			ptr = pTd->tag[ nTag ]->data;
+			ptr = pDat;
 
 		} // end if
 
 		else
 		{
-			if ( nOffset + nSize > pTd->tag[ nTag ]->datalen )
+			if ( nOffset + nSize > nLen )
 				return SetLastError( oexT( "err=Template item offset address is beyond the end of the array" ) );
 
-			if ( nOffset + nByte > pTd->tag[ nTag ]->datalen )
+			if ( nOffset + nByte > nLen )
 				return SetLastError( oexT( "err=Bit address is beyond the end of the array" ) );
 
 			if ( nByte >= nSize )
 				return SetLastError( oexT( "err=Bit address is beyond the end of the template item" ) );
 
 			// Get item pointer and size
-			ptr = &pTd->tag[ nTag ]->data[ nOffset + nByte ];
+			ptr = &pDat[ nOffset + nByte ];
 
 		} // end else
 
@@ -624,7 +712,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 			return mRet;
 
 		sqbind::stdString sVal;
-		if ( GetItemValue( pTd->tag[ nTag ]->type, pTd->tag[ nTag ]->data, pTd->tag[ nTag ]->datalen, nBit, sVal ) )
+		if ( GetItemValue( pTd->tag[ nTag ]->type, pDat, nLen, nBit, sVal ) )
 			mRet.set( oexT( "value" ), sVal.c_str() );
 
 	} // end if
@@ -632,11 +720,11 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 	else
 	{
 		// Check array bounds
-		if ( nOffset + nSize > pTd->tag[ nTag ]->datalen )
+		if ( nOffset + nSize > nLen )
 			return SetLastError( oexT( "err=Template item offset address is beyond the end of the array" ) );
 
 		sqbind::stdString sVal;
-		if ( GetItemValue( nType, &pTd->tag[ nTag ]->data[ nOffset ], nSize, nBit, sVal ) )
+		if ( GetItemValue( nType, &pDat[ nOffset ], nSize, nBit, sVal ) )
 			mRet.set( oexT( "value" ), sVal );
 
 		mRet.set( oexT( "type" ), oexMks( nType ).Ptr() );
@@ -645,6 +733,19 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 		mRet.set( oexT( "offset" ), oexMks( nOffset ).Ptr() );
 
 	} // end else
+
+	// Append raw value
+	if ( nLen && oexCHECK_PTR( pDat ) )
+	{	sqbind::stdString sVal = oexT( "" );
+		for ( int b = 0; b < nLen; b++ )
+			sVal += oexFmt( oexT( "%02lX" ), (int)pDat[ b ] ).Ptr();
+		mRet.set( oexT( "raw_value" ), sVal );
+	} // end if
+
+	// Cache the result
+	STagCache &rCache = m_mapTagCache[ sTag ];
+	rCache.uTime = oexGetUnixTime();
+	rCache.mVal = mRet;
 
 	return mRet;
 }

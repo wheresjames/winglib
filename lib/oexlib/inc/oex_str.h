@@ -659,7 +659,7 @@ namespace str
 			    return -1;
 
 		    s++;
-            oexINT i = FindTerm( s, ln - 1, close[ q ], 1, esc, ln_esc );
+            oexINT i = FindTerm( s, ln - 1, &close[ q ], 1, esc, ln_esc );
 		    if ( 0 > i )
 			    return -1;
 

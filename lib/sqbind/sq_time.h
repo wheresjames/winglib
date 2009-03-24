@@ -81,11 +81,11 @@ namespace sqbind
 		int IsPM() { return m_t.IsPM(); }
 
 		int GetUnixTime() { return m_t.GetUnixTime(); }
-		int SetUnixTime( int n ) { m_t.SetUnixTime( n ); }
+		void SetUnixTime( int n ) { m_t.SetUnixTime( n ); }
 		int GetDosTime() { return m_t.GetDosTime(); }
-		int SetDosTime( int n ) { m_t.SetDosTime( n ); }
+		void SetDosTime( int n ) { m_t.SetDosTime( n ); }
 		int GetNetTime() { return m_t.GetNetTime(); }
-		int SetNetTime( int n ) { m_t.SetNetTime( n ); }
+		void SetNetTime( int n ) { m_t.SetNetTime( n ); }
 
 		stdString FormatTime( const stdString &sTmpl )
 		{	return m_t.FormatTime( sTmpl.c_str() ).Ptr(); }

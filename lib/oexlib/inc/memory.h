@@ -110,7 +110,7 @@ public:
         *this = x_rMem;
     }
 
-    TMem( TMem &x_m )
+    TMem( oexCONST TMem &x_m )
     {
         m_pMem = oexNULL;
 
@@ -122,7 +122,7 @@ public:
         m_pFile = oexNULL;
         m_uLine = 0;
 #endif
-        // Construct a copy
+        // Just share the memory
         Share( x_m );
     }
 

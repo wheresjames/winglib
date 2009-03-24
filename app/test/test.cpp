@@ -1379,7 +1379,6 @@ oex::oexRESULT Test_CSysTime()
         return -10;
 
     st2.SetUnixTime( st2.GetUnixTime() );
-    oexPrintf( st2.FormatTime( oexT( "%Y/%c/%d - %g:%m:%s" ) ).Ptr() );
     if ( !oexVERIFY( st2.FormatTime( oexT( "%Y/%c/%d - %g:%m:%s" ) ) == oexT( "1997/12/25 - 16:15:30" ) ) )
         return -11;
 

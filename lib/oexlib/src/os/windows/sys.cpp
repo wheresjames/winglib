@@ -39,6 +39,7 @@
 
 #include <stdlib.h>
 #include <tchar.h>
+#include <time.h>
 
 #if ( _MSC_VER >= 1300 )
 #	include <strsafe.h>
@@ -584,6 +585,12 @@ void CSys::FileTimeToSystemTime( STime &x_st, oexINT64 x_ft )
     CSys_SystemTimeToSTime( st, x_st );
 }
 
+oexUINT CSys::GetUnixTime()
+{
+	return time( NULL );
+}
+
+
 oexUINT CSys::WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen )
 {
 	if ( !pSrc || !uLen )
@@ -659,5 +666,22 @@ oexBOOL CSys::PumpThreadMessages()
     } // end if
 
     return oexTRUE;
+}
+
+/// +++ Possibly we can somehow create another process and call this function ???
+/*
+extern "C" oex::oexRESULT OEX_SRVMODULE_20081230192357EST_Run( oex::oexCSTR x_pPath )
+{
+
+	return -1;
+}
+*/
+
+oexINT CSys::Fork( oexCSTR x_pWorkingDirectory, oexCSTR x_pLogFile )
+{
+	// Hmmmmm
+	oexERROR( 0, "Cant fork() on Windows" );
+
+	return -1;
 }
 

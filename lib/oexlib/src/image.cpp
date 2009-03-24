@@ -1290,6 +1290,101 @@ oexINT CImage::EncodeJpg(oexPBYTE x_pSrc, oexINT x_nWidth, oexINT x_nHeight, oex
 
 CStr CImage::GetUserImageStr()
 {
+#ifdef OEX_WINDOWS
+
+	return oexT( "All Images ("	"" )
+
+#if defined( CXIMAGE_SUPPORT_JPG )
+											oexT( "*.jpg;*.jpeg;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_PNG )
+											oexT( "*.png;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_GIF )
+											oexT( "*.gif;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_ICO )
+											oexT( "*.ico;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_TIF )
+											oexT( "*.tif;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_TGA )
+											oexT( "*.tga;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_WMF )
+											oexT( "*.wmf;*.emf;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_JP2 )
+											oexT( "*.jp2;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_BMP )
+											oexT( "*.bmp;*.dib" )
+#endif
+
+											oexT( ")\x0" )
+
+#if defined( CXIMAGE_SUPPORT_JPG )
+											oexT( "*.jpg;*.jpeg;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_PNG )
+											oexT( "*.png;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_GIF )
+											oexT( "*.gif;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_ICO )
+											oexT( "*.ico;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_TIF )
+											oexT( "*.tif;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_TGA )
+											oexT( "*.tga;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_WMF )
+											oexT( "*.wmf;*.emf;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_JP2 )
+											oexT( "*.jp2;" )
+#endif
+#if defined( CXIMAGE_SUPPORT_BMP )
+											oexT( "*.bmp;*.dib" )
+#endif
+
+											oexT( "\x0" )
+
+#if defined( CXIMAGE_SUPPORT_JPG )
+											oexT( "JPEG (*.jpg;*.jpeg)\x0*.jpg;*.jpeg\x0" )
+#endif
+#if defined( CXIMAGE_SUPPORT_PNG )
+											oexT( "Portable Network Graphic (*.png)\x0*.png\x0" )
+#endif
+#if defined( CXIMAGE_SUPPORT_GIF )
+											oexT( "Graphic Interchange Format (*.gif)\x0*.png\x0" )
+#endif
+#if defined( CXIMAGE_SUPPORT_ICO )
+											oexT( "Windows Icon (*.ico)\x0*.ico\x0" )
+#endif
+#if defined( CXIMAGE_SUPPORT_TIF )
+											oexT( "Tagged Image File (*.tif; *.tiff)\x0*.tif;*.tiff\x0" )
+#endif
+#if defined( CXIMAGE_SUPPORT_TGA )
+											oexT( "Targa (*.tga)\x0*.tga\x0" )
+#endif
+#if defined( CXIMAGE_SUPPORT_WMF )
+											oexT( "Windows Metafile (*.wmf;*.emf)\x0*.wmf;*.emf\x0" )
+#endif
+#if defined( CXIMAGE_SUPPORT_JP2 )
+											oexT( "JPEG 2000 (*.jp2)\x0*.jp2\x0" )
+#endif
+#if defined( CXIMAGE_SUPPORT_BMP )
+											oexT( "Windows Bitmap (*.bmp;*.dib)\x0*.bmp;*.dib\x0" )
+#endif
+											;
+
+#else // OEX_WINDOWS
+
 	return oexT( "All Images ("	""
 
 #if defined( CXIMAGE_SUPPORT_JPG )
@@ -1380,6 +1475,7 @@ CStr CImage::GetUserImageStr()
 											"Windows Bitmap (*.bmp;*.dib)\x0*.bmp;*.dib\x0"
 #endif
 											);
+#endif // OEX_WINDOWS
 }
 
 #endif // OEX_ENABLE_XIMAGE

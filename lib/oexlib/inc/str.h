@@ -2250,7 +2250,7 @@ public:
         oexINT i = str::RFindTerm( Ptr(), lLen, pTerm, zstr::Length( pTerm ) );
 		if ( 0 > i )
 			return TStr();
-		TStr str( Ptr( i + 1 ), lLen - i - 1 );
+		TStr str( Ptr( i ), lLen - i );
 		RTrim( lLen - i );
 		return str;
 	}

@@ -110,7 +110,7 @@ oexBOOL CCapture::Destroy()
 	return oexTRUE;
 }
 
-oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit )
 {
 	// Lose previous device
 	Destroy();
@@ -127,7 +127,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 			} // end if
 
 			// Try VFW2
-			if ( m_pDevice->Open( x_uType, x_uDevice, x_uSource, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
+			if ( m_pDevice->Open( x_uType, x_uDevice, x_uSource, x_nWidth, x_nHeight, x_uFormat, x_fFps, x_bInit ) )
 			{	m_uType = oexVIDSUB_DSHOW;
 				return oexTRUE;
 			} // end if
@@ -153,7 +153,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 	} // end if
 
 	// Attempt to open the capture device
-	if ( !m_pDevice->Open( x_uType, x_uDevice, x_uSource, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
+	if ( !m_pDevice->Open( x_uType, x_uDevice, x_uSource, x_nWidth, x_nHeight, x_uFormat, x_fFps, x_bInit ) )
 	{	Destroy();
 		return oexFALSE;
 	} // end if
@@ -161,7 +161,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 	return oexTRUE;
 }
 
-oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexINT x_nBpp, oexFLOAT x_fFps )
+oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit )
 {
 	// Lose previous device
 	Destroy();
@@ -178,7 +178,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexIN
 			} // end if
 
 			// Try VFW2
-			if ( S_OK == m_pDevice->Open( x_uType, x_pFile, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
+			if ( S_OK == m_pDevice->Open( x_uType, x_pFile, x_nWidth, x_nHeight, x_uFormat, x_fFps, x_bInit ) )
 			{	m_uType = oexVIDSUB_DSHOW;
 				return oexTRUE;
 			} // end if
@@ -204,7 +204,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexIN
 	} // end if
 
 	// Attempt to open the capture device
-	if ( !m_pDevice->Open( x_uType, x_pFile, x_nWidth, x_nHeight, x_nBpp, x_fFps ) )
+	if ( !m_pDevice->Open( x_uType, x_pFile, x_nWidth, x_nHeight, x_uFormat, x_fFps, x_bInit ) )
 	{	Destroy();
 		return oexFALSE;
 	} // end if

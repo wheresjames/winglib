@@ -347,6 +347,9 @@ public:
         oexINT          nTzBias;
     };
 
+	/// Returns the current unix time stamp in GMT time
+	static oexUINT GetUnixTime();
+
     /// Local time
     static oexBOOL GetLocalTime( STime &x_st );
 
