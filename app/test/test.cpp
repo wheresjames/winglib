@@ -587,6 +587,12 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( oex::CStr( oexT( "somedirectory.hi/test.not.png" ) ).GetFileExtension() == oexT( "png" ) ) )
 		return -59;
 
+	if ( !oexVERIFY( oex::CBase16::Decode( oex::CBase16::Encode( "Hello World!" ) ) == "Hello World!" ) )
+		return -60;
+
+	if ( !oexVERIFY( oex::CBase64::Decode( oex::CBase64::Encode( "Hello World!" ) ) == "Hello World!" ) )
+		return -60;
+
     return oex::oexRES_OK;
 }
 
@@ -2501,7 +2507,7 @@ oex::oexRESULT Test_CCapture()
 			oexPrintf( oexT( "Succeded - %s\r\n" ), oexStrToMb( sName ).Ptr() );
 
 		else if ( -1 == nRet )
-			oexPrintf( oexT( "No Supported Device Found\r\n" ) );
+			oexPrintf( oexT( "No Compatible Device Found\r\n" ) );
 
 		else
 			oexPrintf( oexT( "Failed : %d\r\n" ), nRet );

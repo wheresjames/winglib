@@ -64,6 +64,14 @@ stdString CSqEngineExport::path( const stdString &sPath )
 stdString CSqEngineExport::root( const stdString &sPath )
 {   return oexGetModulePath( sPath.c_str() ).Ptr(); }
 
+stdString CSqEngineExport::md5( const stdString &sStr )
+{	oex::oexGUID hash;
+	oex::CStr8 sMb = oexStrToMb( oex::CStr( sStr.c_str(), sStr.length() ) );
+	oex::CStr sRes = oexMbToStr( oex::CBase16::Encode( oex::oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) );
+	return stdString().assign( sRes.Ptr(), sRes.Length() );
+}
+
+
 int CSqEngineExport::spawn( const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile )
 {	CSqMsgQueue *q = queue();
 	if ( !q ) return -1;
@@ -334,6 +342,7 @@ oex::oexBOOL CSqEngine::Init()
 											.func( &CSqEngineExport::queue,             oexT( "queue" ) )
 											.func( &CSqEngineExport::path,              oexT( "path" ) )
 											.func( &CSqEngineExport::root,              oexT( "root" ) )
+											.func( &CSqEngineExport::md5,				oexT( "md5" ) )
 										  ;
 
 		// Set base class pointer
@@ -497,36 +506,6 @@ oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e )
 #endif
 	oexPrintf( oexT( "%s\n" ), m_sErr.c_str() );
 	return x_nReturn;
-}
-
-oex::oexBOOL CSqEngine::Execute( stdString *pRet, oex::oexCSTR x_pFunction )
-{
-	if ( !IsScript() || !x_pFunction  )
-		return oex::oexFALSE;
-
-	_oexTRY
-	{
-		SqPlus::SquirrelFunction< SquirrelObject > f( m_vm, m_vm.GetRootTable(), x_pFunction );
-
-		if ( f.func.IsNull() )
-		{   m_sErr = oexT( "Function not found : " ); m_sErr += x_pFunction;
-			return oex::oexFALSE;
-		} // end if
-
-		// Call the function
-		if ( oexCHECK_PTR( pRet ) )
-			*pRet = f().ToString();
-		else
-			f();
-
-	} // end try
-
-	_oexCATCH( SScriptErrorInfo &e )
-	{	return LogError( oex::oexFALSE, e ); }
-	_oexCATCH( SquirrelError &e )
-	{	m_sErr = e.desc; return oex::oexFALSE; }
-
-	return oex::oexTRUE;
 }
 
 void CSqEngine::SetModuleManager( CModuleManager *x_pMm )

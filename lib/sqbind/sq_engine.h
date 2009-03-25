@@ -75,6 +75,9 @@ public:
 	/// Returns the file path to the current executable
 	stdString root( const stdString &sPath );
 
+	/// Returns the md5 for the specified string
+	stdString md5( const stdString &sStr );
+
 	/// Creates a thread
 	int spawn( const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
 
@@ -139,10 +142,10 @@ public:
 		{   sDesc = x_sDesc; sSource = x_sSource; uLine = x_uLine; uCol = x_uCol; }
 
 		/// Description
-		stdString    sDesc;
+		stdString    	sDesc;
 
 		/// Source file
-		stdString    sSource;
+		stdString    	sSource;
 
 		/// Line number
 		oex::oexUINT    uLine;
@@ -264,7 +267,40 @@ public:
 	/**
 		\param [in] pFunction   -   Name of the function to execute
 	*/
-	oex::oexBOOL Execute( stdString *pRet, oex::oexCSTR x_pFunction );
+	oex::oexBOOL Execute( stdString *pRet, oex::oexCSTR x_pFunction )
+	{
+		if ( !IsScript() || !x_pFunction  )
+			return oex::oexFALSE;
+
+		_oexTRY
+		{
+			SqPlus::SquirrelFunction< SquirrelObject > f( m_vm, m_vm.GetRootTable(), x_pFunction );
+
+			if ( f.func.IsNull() )
+			{   m_sErr = oexT( "Function not found : " ); m_sErr += x_pFunction;
+				return oex::oexFALSE;
+			} // end if
+
+			// Call the function
+			if ( oexCHECK_PTR( pRet ) )
+			{	SquirrelObject o( m_vm.GetVMHandle() );
+				o = f();
+				const char *p = o.ToString();
+				if ( oexCHECK_PTR( p ) )
+					*pRet = p;
+			} // end if
+			else
+				f();
+
+		} // end try
+
+		_oexCATCH( SScriptErrorInfo &e )
+		{	return LogError( oex::oexFALSE, e ); }
+		_oexCATCH( SquirrelError &e )
+		{	m_sErr = e.desc; return oex::oexFALSE; }
+
+		return oex::oexTRUE;
+	}
 
 template< typename T_P1 >
 	oex::oexBOOL Execute( stdString *pRet, oex::oexCSTR x_pFunction, T_P1 p1 )

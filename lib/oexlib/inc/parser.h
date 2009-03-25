@@ -316,7 +316,10 @@ public:
 
 	    while ( 0 < nLen-- )
 	    {
-		    if ( oexTC( T, '%' ) != *x_str )
+			if ( oexTC( T, '+' ) == *x_str )
+				ret << oexTC( T, ' ' );
+
+		    else if ( oexTC( T, '%' ) != *x_str )
 			    ret << *x_str;
 
 		    else

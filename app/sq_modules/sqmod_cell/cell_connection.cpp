@@ -17,7 +17,8 @@ int CCellConnection::Destroy()
 {
 	// Close the connection
 	if ( m_comm.file_handle )
-	{	closesocket( m_comm.file_handle );
+	{
+		closesocket( m_comm.file_handle );
 		m_comm.file_handle = 0;
 	} // end if
 
@@ -91,10 +92,11 @@ int CCellConnection::ReleaseTags()
 	m_mapDataCache.clear();
 
 	// Lose the details tags
-	for ( int i = 0; i < m_tagsDetails.count; i++ )
-		if ( oexCHECK_PTR( m_tagsDetails.tag[ i ] ) )
-			free( m_tagsDetails.tag[ i ] ),
-			m_tagsDetails.tag[ i ] = 0;
+	if ( oexCHECK_PTR( m_tagsDetails.tag ) )
+		for ( int i = 0; i < m_tagsDetails.count; i++ )
+			if ( oexCHECK_PTR( m_tagsDetails.tag[ i ] ) )
+				free( m_tagsDetails.tag[ i ] ),
+				m_tagsDetails.tag[ i ] = 0;
 
 	return 1;
 }
@@ -594,7 +596,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 			return itT->second.mVal;
 
 		// Ditch the cache
-		else 
+		else
 			m_mapTagCache.erase( itT );
 
 	} // end if
@@ -616,7 +618,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 		else
 			m_mapDataCache.erase( itD );
 
-	} // end if	 
+	} // end if
 
 	// Did we get anything from the cache
 	if ( !nLen || !oexCHECK_PTR( pDat ) )

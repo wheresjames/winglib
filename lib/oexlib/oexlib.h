@@ -476,6 +476,8 @@ namespace os
 #include "inc/property_bag.h"
 #include "inc/sys_time.h"
 #include "inc/md5.h"
+#include "inc/base_16.h"
+#include "inc/base_64.h"
 
 // +++ Get stack tracing working sometime
 //#include "inc/stack_trace.h"
