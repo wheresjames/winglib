@@ -84,6 +84,12 @@ int CSqEngineExport::run( const stdString &sPath, const stdString &sScript )
 	return q->run( oexNULL, sPath, sScript );
 }
 
+int CSqEngineExport::is_thread( const stdString &sPath )
+{	CSqMsgQueue *q = queue();
+	if ( !q ) return 0;
+
+}
+
 stdString CSqEngineExport::execute( int nRet, const stdString &sPath, const stdString &sFunction )
 {	CSqMsgQueue *q = queue();
 	if ( !q )

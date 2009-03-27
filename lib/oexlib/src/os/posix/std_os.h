@@ -72,7 +72,9 @@ extern int daylight;
 #include <locale.h>
 
 #include <sys/socket.h>
-#include <sys/epoll.h>
+#if !defined( OEX_NOEPOLL )
+#	include <sys/epoll.h>
+#endif
 #include <arpa/inet.h>
 #include <netdb.h>
 
@@ -81,7 +83,10 @@ extern int daylight;
 #endif
 
 #include <sys/ioctl.h>
-#include <linux/types.h>
+
+#if !defined( OEX_IPHONE )
+#	include <linux/types.h>
+#endif
 
 #ifndef OEX_NOVIDEO
 #	include <linux/videodev.h>

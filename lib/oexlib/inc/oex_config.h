@@ -137,7 +137,7 @@
 #	define oexPRETTYFUNCTION	__FUNCTION__ oexT( "()" )
 #endif
 
-#if defined( OEX_CPU_64 )
+#if defined( OEX_CPU_64 ) || defined( OEX_IPHONE )
 	typedef long unsigned int		oexSIZE_T;
 #else
 	typedef unsigned int			oexSIZE_T;

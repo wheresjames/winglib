@@ -75,7 +75,7 @@ public:
 
 		\warning For multiple calls, size must be divisible by four
 	*/
-	static oexINT Encode( oexSTR dst, oexINT dstsize, oexCONST oexBYTE *src, oexINT srcsize );
+	static oexINT Encode( oexSTR8 dst, oexINT dstsize, oexCONST oexBYTE *src, oexINT srcsize );
 	static CStr8 Encode( oexCPVOID src, oexINT srcsize );
 	static CStr8 Encode( CStr8 src ) { return Encode( (oexCONST oexBYTE*)src.Ptr(), src.Length() ); }
 
@@ -92,8 +92,8 @@ public:
 
 		\return Returns number of bytes decoded
 	*/
-	static oexINT Decode( oexCSTR src, oexINT *srcsize, oexBYTE *dst, oexINT *dstsize, oexINT *done );
-	static CStr8 Decode( oexCSTR src, oexINT srcsize );
+	static oexINT Decode( oexCSTR8 src, oexINT *srcsize, oexBYTE *dst, oexINT *dstsize, oexINT *done );
+	static CStr8 Decode( oexCSTR8 src, oexINT srcsize );
 	static CStr8 Decode( CStr8 src ) { return Decode( src.Ptr(), src.Length() ); }
 
 

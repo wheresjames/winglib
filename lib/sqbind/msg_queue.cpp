@@ -132,7 +132,7 @@ oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapPara
 		// Acquire lock
 		oexAutoLock ll( m_cLock );
 		if ( !ll.IsLocked() )
-			return FALSE;
+			return oex::oexFALSE;
 
 		// Reply event handle needed?
 		if ( !pReply )
@@ -154,7 +154,7 @@ oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapPara
 
 		// Punt if we got the reply
 		if ( bSuccess )
-			return TRUE;
+			return oex::oexTRUE;
 
 		// Acquire lock
 		oexAutoLock ll( &m_cLock );
@@ -167,7 +167,7 @@ oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapPara
 			// Only safe thing to do would be kill the thread...
 			KillThread();
 
-			return FALSE;
+			return oex::oexFALSE;
 
 		} // end if
 
@@ -176,7 +176,7 @@ oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapPara
 
 	} // end if
 
-	return TRUE;
+	return oex::oexTRUE;
 }
 
 /// Process messages
@@ -185,11 +185,11 @@ oex::oexBOOL CSqMsgQueue::ProcessMsgs()
 	// Acquire lock
 	oexAutoLock ll( &m_cLock );
 	if ( !ll.IsLocked() )
-		return FALSE;
+		return oex::oexFALSE;
 
 	// Any messages waiting?
 	if ( m_lstMsgQueue.begin() == m_lstMsgQueue.end() )
-		return TRUE;
+		return oex::oexTRUE;
 
 	// Process messages
 	t_MsgQueue::iterator it;
@@ -212,7 +212,7 @@ oex::oexBOOL CSqMsgQueue::ProcessMsgs()
 			if ( !m_lstMsgQueue.size() )
 				Reset();
 
-			return TRUE;
+			return oex::oexTRUE;
 
 		} // end if
 

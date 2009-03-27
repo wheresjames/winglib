@@ -162,6 +162,10 @@ oexCONST CIpSocket::t_SOCKET CIpSocket::c_SocketError = (CIpSocket::t_SOCKET)-1;
 
 oexINT CIpSocket::FlagWinToNix( oexINT x_nFlag )
 {
+#if defined( OEX_NOEPOLL )
+	return 0;
+#else
+
 	oexINT nRet = 0;
 
 	if ( eReadEvent & x_nFlag )
@@ -184,10 +188,15 @@ oexINT CIpSocket::FlagWinToNix( oexINT x_nFlag )
 		nRet |= EPOLLIN | EPOLLPRI | EPOLLOUT;
 
 	return nRet;
+#endif
 }
 
 oexINT CIpSocket::FlagNixToWin( oexINT x_nFlag )
 {
+#if defined( OEX_NOEPOLL )
+	return 0;
+#else
+
 	oexINT nRet = 0;
 
 	if ( ( EPOLLIN | EPOLLPRI ) & x_nFlag )
@@ -209,7 +218,8 @@ oexINT CIpSocket::FlagNixToWin( oexINT x_nFlag )
 	if ( ( EPOLLIN | EPOLLPRI | EPOLLOUT ) & x_nFlag )
 		nRet |= eAcceptEvent;
 
-	return nRet;
+	return nRet;	
+#endif
 }
 
 CIpSocket::CIpSocket()
@@ -505,6 +515,10 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 
 oexBOOL CIpSocket::CreateEventHandle()
 {
+#if defined( OEX_NOEPOLL )
+	return oexFALSE;
+#else
+
     // Check for event handle
     if ( IsEventHandle() )
         return oexTRUE;
@@ -523,11 +537,15 @@ oexBOOL CIpSocket::CreateEventHandle()
 	// Create event object
 	m_pEventObject = new epoll_event[ eMaxEvents ];
 
-    return oexTRUE;
+    return oexTRUE;    
+#endif
 }
 
 void CIpSocket::CloseEventHandle()
 {
+#if defined( OEX_NOEPOLL )
+	return;
+#else
 	if ( c_InvalidEvent != m_hSocketEvent )
 	{
 		// Close event handle
@@ -551,10 +569,14 @@ void CIpSocket::CloseEventHandle()
 		m_pEventObject = oexNULL;
 
 	} // end if
+#endif
 }
 
 oexBOOL CIpSocket::EventSelect( oexLONG x_lEvents )
 {
+#if defined( OEX_NOEPOLL )
+	return oexFALSE;
+#else
     // Punt if no socket
 	if ( !IsSocket() )
 		return oexFALSE;
@@ -580,10 +602,14 @@ oexBOOL CIpSocket::EventSelect( oexLONG x_lEvents )
 	} // end if
 
 	return oexTRUE;
+#endif
 }
 
 oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 {
+#if defined( OEX_NOEPOLL )
+	return 0;
+#else
 	// Must have a socket handle
 	if ( !IsSocket() )
         return 0;
@@ -707,6 +733,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 
 	// Can't get here...
 	return 0;
+#endif
 }
 
 oexUINT CIpSocket::GetEventBit( oexLONG x_lEventMask )
@@ -1258,3 +1285,4 @@ oexBOOL CIpSocket::GetLocalAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
     // Format the info
     return CIpSocket_GetAddressInfo( x_pIa, &sai );
 }
+
