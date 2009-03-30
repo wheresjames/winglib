@@ -1,9 +1,9 @@
 
 # go.mk
 
-ifndef PRJ_OSLB
-PRJ_OSLB :=	$(CFG_STDLIBS)
-endif
+#ifndef PRJ_OSLB
+PRJ_OSLB :=	$(CFG_STDLIBS) $(PRJ_OSLB)
+#endif
 
 ifeq ($(OS),win32)
 GO_LIBS	 	:= $(foreach lib,$(PRJ_LIBS), $(CFG_LIB_PRE)$(lib)$(CFG_DPOSTFIX)$(CFG_LIB_POST))

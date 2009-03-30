@@ -9,7 +9,7 @@ ifdef SQMOD
 endif
 
 ifdef GUI
-	BUILDDIRS := $(BUILDDIRS) app/vidcap app/avi_scan
+	BUILDDIRS := $(BUILDDIRS) app/vidcap app/avi_scan app/irr_test
 endif
 
 ifdef BUILDDEP

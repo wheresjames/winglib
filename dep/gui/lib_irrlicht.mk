@@ -8,6 +8,7 @@ PRJ_NAME := irrlicht
 PRJ_TYPE := lib
 PRJ_INCS := irrlicht/source/Irrlicht/zlib
 PRJ_LIBS := 
+PRJ_DEFS := _IRR_STATIC_LIB_ _IRR_COMPILE_WITH_OPENGL_
 
 PRJ_LIBROOT := ../..
 

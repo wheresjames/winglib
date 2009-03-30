@@ -52,7 +52,9 @@ ifeq ($(OS),win32)
 			CFG_LEXTRA	 := /DEBUG /NODEFAULTLIB:libcmtd
 		endif
 		CFG_DPOSTFIX := _d
-		CFG_STDLIBS	 := ole32.lib user32.lib
+		ifeq ($(CFG_STDLIBS),)
+			CFG_STDLIBS	 := ole32.lib Oleaut32.lib user32.lib gdi32.lib comdlg32.lib comctl32.lib rpcrt4.lib shell32.lib Advapi32.lib
+		endif
 	else
 		ifeq ($(LIBLINK),static)	
 			CFG_CEXTRA	 := /MT /O2 $(CFG_CEXTRA)
@@ -60,7 +62,9 @@ ifeq ($(OS),win32)
 			CFG_CEXTRA	 := /MD /O2 $(CFG_CEXTRA)
 		endif
 		CFG_LEXTRA	 := 
-		CFG_STDLIBS	 := ole32.lib user32.lib
+		ifeq ($(CFG_STDLIBS),)
+			CFG_STDLIBS	 := ole32.lib Oleaut32.lib user32.lib gdi32.lib comdlg32.lib comctl32.lib rpcrt4.lib shell32.lib Advapi32.lib
+		endif
 	endif
 
 
@@ -371,5 +375,4 @@ CFG_OUTROOT := $(PRJ_BINROOT)/bin/$(CFG_BUILD_TYPE)
 else
 CFG_OUTROOT  := $(CFG_BINROOT)
 endif
-
 

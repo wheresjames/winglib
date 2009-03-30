@@ -4,10 +4,11 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := avi_scan
+PRJ_NAME := irr_test
 PRJ_TYPE := exe
-PRJ_INCS := winglib/lib/oexlib
-PRJ_LIBS := oexlib jpeg
+PRJ_INCS := winglib/lib/oexlib irrlicht/include
+PRJ_LIBS := oexlib irrlicht cximage jpeg png tiff zlib
+PRJ_DEFS := _IRR_STATIC_LIB_ _IRR_COMPILE_WITH_OPENGL_
 
 ifeq ($(OS),win32)
 	PRJ_LIBS := $(PRJ_LIBS) wxWidgets
