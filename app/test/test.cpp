@@ -1896,6 +1896,11 @@ oex::oexRESULT Test_Threads()
 	                 && 10 < count[ 3 ] ) )
 	    return -23;
 
+	else
+		oexPrintf( oexT( "Thread counts are, %d, %d, %d, %d\r\n" ),
+				   count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
+
+
 	return oex::oexRES_OK;
 }
 

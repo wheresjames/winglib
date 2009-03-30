@@ -10,7 +10,11 @@ PRJ_INCS := irrlicht/source/Irrlicht/zlib
 PRJ_LIBS := 
 PRJ_DEFS := _IRR_STATIC_LIB_ _IRR_COMPILE_WITH_OPENGL_
 
-PRJ_LIBROOT := ../..
+ifneq ($(OS),win32)
+PRJ_DEFS := $(PRJ_DEFS) _IRR_USE_LINUX_DEVICE_ _IRR_COMPILE_WITH_X11_
+endif
+
+PRJ_LIBROOT := ..
 
 #-------------------------------------------------------------------
 # Configure build

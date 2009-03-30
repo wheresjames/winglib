@@ -22,10 +22,10 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 	oexZeroMemory( pDi, sizeof( oex::os::service::SSrvInfo ) );
 
 	// Module name
-	strncpy( pDi->szName, oexT( "Squirrel Engine" ), sizeof( pDi->szName ) - 1 );
+	strncpy( pDi->szName, "Squirrel Engine", sizeof( pDi->szName ) - 1 );
 
 	// Module description
-	strncpy( pDi->szDesc, oexT( "Supplies Squirrel-Script processing capabilities" ), sizeof( pDi->szDesc ) - 1 );
+	strncpy( pDi->szDesc, "Supplies Squirrel-Script processing capabilities", sizeof( pDi->szDesc ) - 1 );
 
 	// Set the Squirrel engine type
 	pDi->guidType = sqbind::SQBIND_ENGINE_IID;
@@ -97,14 +97,14 @@ extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex
 		else
 		{
 			// Log the script name
-			oexNOTICE( 0, oexMks( "Running script : ", sFile ) );
+			oexNOTICE( 0, oexMks( oexT( "Running script : " ), sFile ) );
 
 			g_psqScriptThread->SetModuleManager( g_psqModuleManager );
 
 			g_psqScriptThread->SetScript( sFile.Ptr(), oex::oexTRUE );
 
 			if ( g_psqScriptThread->Start() )
-				oexERROR( 0, "Failed to start script thread" );
+				oexERROR( 0, oexT( "Failed to start script thread" ) );
 
 			else
 				return 0;
@@ -128,7 +128,7 @@ extern "C" oex::oexRESULT SRV_Idle()
 
 	// Attempt to execute idle function
 	if ( !g_psqScriptThread->IsRunning() )
-	{	oexNOTICE( 0, "Script thread has terminated" );
+	{	oexNOTICE( 0, oexT( "Script thread has terminated" ) );
 		return 1;
 	} // end if
 

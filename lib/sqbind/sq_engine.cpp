@@ -405,7 +405,7 @@ oex::oexBOOL CSqEngine::Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oex
 				{
 					// Check relative to scripts path
 					sFull = oexGetModulePath();
-					sFull.BuildPath( "scripts" );
+					sFull.BuildPath( oexT( "scripts" ) );
 					sFull.BuildPath( pScript );
 					if ( oexExists( sFull.Ptr() ) )
 					{	m_sRoot = sFull.GetPath().Ptr();
@@ -413,7 +413,7 @@ oex::oexBOOL CSqEngine::Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oex
 					} // end if
 
 					else
-					{	oexERROR( 0, oexMks( "Script not found : ", pScript ) );
+					{	oexERROR( 0, oexMks( oexT( "Script not found : " ), pScript ) );
 						return oex::oexFALSE;
 					} // end else
 

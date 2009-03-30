@@ -24,7 +24,7 @@ int CCellConnection::Destroy()
 
 	m_comm.hostname = 0;
 	m_comm.error = -1;
-	m_sIp = "";
+	m_sIp = oexT( "" );
 
 	// Lose the tag database
 	ReleaseTags();
@@ -114,8 +114,8 @@ int CCellConnection::LoadTags()
 	else
 		for ( int i = 0; i < m_tagsDetails.count; i++ )
 			if ( !get_object_details( &m_comm, &m_path, m_tagsDetails.tag[ i ], 0 ) )
-			{	m_mapTags[ (const char*)m_tagsDetails.tag[ i ]->name ] = m_tagsDetails.tag[ i ];
-				m_mapSqTags.set( (const char*)m_tagsDetails.tag[ i ]->name, oexMks( i ).Ptr() );
+			{	m_mapTags[ oexMbToStrPtr( (const char*)m_tagsDetails.tag[ i ]->name ) ] = m_tagsDetails.tag[ i ];
+				m_mapSqTags.set( oexMbToStrPtr( (const char*)m_tagsDetails.tag[ i ]->name ), oexMks( i ).Ptr() );
 			} // end if
 
 	// Get program tags
@@ -159,12 +159,12 @@ int CCellConnection::LoadTags()
 					{
 						if ( !get_object_details( &m_comm, &m_path, m_tagsProgram[ i ].tag[ j ], 0 ) )
 						{
-							oex::CStr sName = oexMks( (char*)m_prog_list.prog[ i ]->name,
+							oex::CStr sName = oexMks( oexMbToStrPtr( (char*)m_prog_list.prog[ i ]->name ),
 													  oexT( "/" ),
-													  (char*)m_tagsProgram[ i ].tag[ j ]->name );
+													  oexMbToStrPtr( (char*)m_tagsProgram[ i ].tag[ j ]->name ) );
 
 							m_mapTags[ sName.Ptr() ] = m_tagsProgram[ i ].tag[ j ];
-							m_mapSqTags.set( sName.Ptr(), oexMks( i, ".", j ).Ptr() );
+							m_mapSqTags.set( sName.Ptr(), oexMks( i, oexT( "." ), j ).Ptr() );
 
 						} // end if
 

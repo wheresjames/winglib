@@ -49,10 +49,10 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 	oexZeroMemory( pDi, sizeof( oex::os::service::SSrvInfo ) );
 
 	// Module name
-	strncpy( pDi->szName, oexT( "Squirrel Engine" ), sizeof( pDi->szName ) - 1 );
+	strncpy( pDi->szName, "Squirrel Engine", sizeof( pDi->szName ) - 1 );
 
 	// Module description
-	strncpy( pDi->szDesc, oexT( "Exports functionality to Squirrel-Script" ), sizeof( pDi->szDesc ) - 1 );
+	strncpy( pDi->szDesc, "Exports functionality to Squirrel-Script", sizeof( pDi->szDesc ) - 1 );
 
 	// Set the Squirrel engine type
 	pDi->guidType = sqbind::SQBIND_MODULE_IID;

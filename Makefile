@@ -5,7 +5,8 @@ BUILDDIRS := app/hello lib/oexlib app/test app/iptest app/srvrund app/srvmod app
 ifdef SQMOD
 	BUILDDIRS := $(BUILDDIRS) lib/sqbind app/sqengine \
 							  app/sq_modules/sqmod_test app/sq_modules/sqmod_cell \
-	                          app/sq_modules/sqmod_http app/sq_modules/sqmod_gdchart                         
+	                          app/sq_modules/sqmod_http app/sq_modules/sqmod_gdchart \
+	                          app/sq_modules/sqmod_irrlicht
 endif
 
 ifdef GUI

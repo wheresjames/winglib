@@ -50,7 +50,7 @@ namespace sqbind
 		void Close() { m_f.Destroy(); }
 
 		int Write( const stdString &sData )
-		{	return m_f.Write( oexStrToBin( sData.c_str() ), sData.length() ); }
+		{	return m_f.Write( oexStrToBinPtr( sData.c_str() ), sData.length() ); }
 
 		stdString Read()
 		{	return oexBinToStr( m_f.Read() ).Ptr(); }

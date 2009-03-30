@@ -288,7 +288,7 @@ public:
 			if ( oexCHECK_PTR( pRet ) )
 			{	SquirrelObject o( m_vm.GetVMHandle() );
 				o = f();
-				const char *p = o.ToString();
+				oex::oexCSTR p = o.ToString();
 				if ( oexCHECK_PTR( p ) )
 					*pRet = p;
 			} // end if
@@ -324,7 +324,7 @@ template< typename T_P1 >
 			if ( oexCHECK_PTR( pRet ) )
 			{	SquirrelObject o( m_vm.GetVMHandle() );
 				o = f( p1 );
-				const char *p = o.ToString();
+				oex::oexCSTR p = o.ToString();
 				if ( oexCHECK_PTR( p ) )
 					*pRet = p;
 			} // end if

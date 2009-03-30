@@ -300,7 +300,7 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 		// Wait for thread to start if reply buffer
 		if ( pReply )
 			if ( pSt->GetInitEvent().Wait() )
-				*pReply = "FAILED";
+				*pReply = oexT( "FAILED" );
 
 	} // end if
 }

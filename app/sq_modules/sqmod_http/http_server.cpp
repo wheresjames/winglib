@@ -71,10 +71,10 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 		return -1;
 
 	sqbind::stdString sReply;
-	sqbind::stdString parGet = oex::CParser::Serialize( x_pSession->Get() ).Ptr();
-	sqbind::stdString parPost = oex::CParser::Serialize( x_pSession->Post() ).Ptr();
-	sqbind::stdString parHeaders = oex::CParser::Serialize( x_pSession->RxHeaders() ).Ptr();
-	sqbind::stdString parRequest = oex::CParser::Serialize( x_pSession->Request() ).Ptr();
+	sqbind::stdString parGet = oexMbToStr( oex::CParser::Serialize( x_pSession->Get() ) ).Ptr();
+	sqbind::stdString parPost = oexMbToStr( oex::CParser::Serialize( x_pSession->Post() ) ).Ptr();
+	sqbind::stdString parHeaders = oexMbToStr( oex::CParser::Serialize( x_pSession->RxHeaders() ) ).Ptr();
+	sqbind::stdString parRequest = oexMbToStr( oex::CParser::Serialize( x_pSession->Request() ) ).Ptr();
 
 	// Are we executing a child script?
 	if ( m_sScript.length() )
@@ -98,7 +98,8 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	mReply.deserialize( sReply );
 
 	if ( mReply[ oexT( "content" ) ].length() )
-		x_pSession->Content().Set( mReply[ oexT( "content" ) ].c_str(), mReply[ oexT( "content" ) ].length() );
+		x_pSession->Content() =
+			oexStrToMb( oex::CStr( mReply[ oexT( "content" ) ].c_str(), mReply[ oexT( "content" ) ].length() ) );
 
 	return 0;
 }
