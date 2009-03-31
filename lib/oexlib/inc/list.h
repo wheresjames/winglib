@@ -631,7 +631,6 @@ public:
 		m_pHead = m_pTail = oexNULL;
     }
 
-	// +++ Added const for g++
 	TList( oexCONST TList &x_rList )
 	{	m_uSize = 0;
 		m_pHead = m_pTail = oexNULL;
@@ -1241,8 +1240,6 @@ public:
         return x_itMove;
     }
 
-
-
 	//==============================================================
 	// Remove()
 	//==============================================================
@@ -1273,7 +1270,6 @@ public:
 
         return x_it;
     }
-
 
 	//==============================================================
 	// Erase()

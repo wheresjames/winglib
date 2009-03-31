@@ -92,9 +92,11 @@ static SResourceInfo* CreateRi()
 	} // end if
 
 	pRi->uOwner = 0;
+	pRi->uLastOwner = 0;
 	pRi->pData = 0;
 	pRi->bManualReset = 1;
 	pRi->bSignaled = 0;
+	pRi->pData = 0;
 	pRi->fnCallback = 0;
 	pRi->nCount = 0;
 
@@ -161,8 +163,9 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 				oexWARNING( nErr, oexT( "!! Terminating thread !!" ) );
 
 				// Kill the thread
-				if ( nErr = pthread_cancel( pRi->hThread ) )
-					oexERROR( nErr, oexT( "pthread_cancel() failed" ) );
+				if ( x_bForce )
+					if ( nErr = pthread_cancel( pRi->hThread ) )
+						oexERROR( nErr, oexT( "pthread_cancel() failed" ) );
 
 			} // end if
 

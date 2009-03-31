@@ -133,6 +133,14 @@ private:
 
 public:
 
+	// Must be called before any other file functions
+	static oexBOOL InitFileSystem();
+
+	// Must be called before program closes
+	static oexBOOL FreeFileSystem();
+
+public:
+
 	/// Creates or opens the specified file
     static t_HFILE Create( oexCSTR x_pFile, oexUINT x_eDisposition, oexUINT x_eAccess, oexUINT x_eShare, oexUINT x_uFlags, oexINT *x_pnError );
 

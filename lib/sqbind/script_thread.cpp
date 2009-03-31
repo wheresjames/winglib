@@ -120,10 +120,6 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 
 oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 {
-	// Let the user know we're starting a thread
-	oexPrintf( oexT( "Exiting : 0x%08x : %s\n" ),
-			   (unsigned int)oexGetCurrentThreadId(), m_sName.c_str() );
-
 	// No more owner thread
 	SetOwnerThreadId( 0 );
 
@@ -132,6 +128,10 @@ oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 
 	// Lose the squirrel engine
 	m_cSqEngine.Destroy();
+
+	// Let the user know we're starting a thread
+	oexPrintf( oexT( "Exiting : 0x%08x : %s\n" ),
+			   (unsigned int)oexGetCurrentThreadId(), m_sName.c_str() );
 
 	return 0;
 }

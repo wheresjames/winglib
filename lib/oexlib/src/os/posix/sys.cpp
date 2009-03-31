@@ -406,8 +406,8 @@ oexPVOID CSys::MemSet( oexPVOID x_pDst, oexINT x_nCh, oexUINT x_uSize )
 	return ::memset( x_pDst, x_nCh, x_uSize );
 }
 
-static oexINT64 g_int;
-static oexGUID g_random;
+static oexINT64 g_int = 0;
+static oexGUID g_random = IID_ZEROS;
 struct SRandomSeeds
 {	oexPVOID		pFunction;
 	oexPVOID		pHeap;
@@ -428,8 +428,11 @@ oexGUID * CSys::CreateGuid( oexGUID *pGuid )
 	oss::CMd5::Transform( &guid, &st, sizeof( st ) );
 
 	// Use other random sources
-	SRandomSeeds rs = { (oexPVOID)&CreateGuid, CMem::GetRawAllocator().fMalloc( 4 ),
-						g_int++ };
+	SRandomSeeds rs =
+	{	(oexPVOID)&CreateGuid,
+		CMem::GetRawAllocator().fMalloc( 4 ),
+		g_int++
+	};
 	oss::CMd5::Transform( &guid, &rs, sizeof( rs ) );
 	CMem::GetRawAllocator().fFree( rs.pHeap );
 
@@ -522,14 +525,14 @@ oexINT CSys::WaitForMultipleObjects( oexUINT x_uObjects, CSys::t_WAITABLE *x_pHa
 	return waitFailed;
 }
 
-oexULONG CSys::InterlockedIncrement( oexLONG *x_puVal )
+oexLONG CSys::InterlockedIncrement( oexLONG *x_puVal )
 {
 	// +++ Need this functionality
 	//return ::InterlockedIncrement( x_puVal );
 	return ++(*x_puVal);
 }
 
-oexULONG CSys::InterlockedDecrement( oexLONG *x_puVal )
+oexLONG CSys::InterlockedDecrement( oexLONG *x_puVal )
 {
 	// +++ Need this functionality
 //	return ::InterlockedDecrement( x_puVal );

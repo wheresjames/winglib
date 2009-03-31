@@ -60,13 +60,17 @@ CStr CTrace::GetBacktrace( oexUINT x_uSkip, oexUINT x_uMax )
 	// Build stack
 	CStr str;
 	for ( oexUINT i = x_uSkip; i < nPtrs; i++ )
-
-		if ( sStrings && sStrings[ i ] && memPtrs.Ptr( i ) )
+	{
+		if ( sStrings && sStrings[ i ] && oexCHECK_PTR( memPtrs.Ptr( i ) ) )
 			str += CStr().Fmt( oexT( "[0x%.8X] %s" oexNL8 ), (oexUINT)*(oexUINT*)memPtrs.Ptr( i ), sStrings[ i ] );
-		else if ( memPtrs.Ptr( i ) )
+		else if ( oexCHECK_PTR( memPtrs.Ptr( i ) ) )
 			str += CStr().Fmt( oexT( "[0x%.8X] ???" oexNL8 ), (oexUINT)*(oexUINT*)memPtrs.Ptr( i ) );
 		else
 			str += oexT( "[0x????????] ???" oexNL8 );
+
+	} // end if
+
+	memPtrs.Zero();
 
 	// Release the memory
 	if ( oexCHECK_PTR( sStrings ) )

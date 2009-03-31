@@ -243,6 +243,9 @@
 #define oexEvent							OEX_NAMESPACE::CEvent
 #define oexSignal							OEX_NAMESPACE::CSignal
 #define oexWaitMultiple						OEX_NAMESPACE::CResource::WaitMultiple
+#define oexInterlockedIncrement				OEX_NAMESPACE::os::CSys::InterlockedIncrement
+#define oexInterlockedDecrement				OEX_NAMESPACE::os::CSys::InterlockedDecrement
+#define oexCloseLog							OEX_NAMESPACE::CLog::GlobalLog().Destroy
 
 // std library
 #define oexStdTString( t )	                std::basic_string< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >

@@ -11,8 +11,8 @@ local _g = CGlobal();
 function _init() : ( _g )
 {
 	_g.irr = CSqIrrlicht();
-	
-	_g.irr.Init( 640, 480 );
+
+	_g.irr.Init( 320, 240 );
 
 }
 

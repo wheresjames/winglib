@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -43,6 +43,16 @@ oexSTATIC_ASSERT( sizeof( CBaseFile::t_HFIND ) == sizeof( HANDLE ) );
 
 const CBaseFile::t_HFILE CBaseFile::c_Invalid = INVALID_HANDLE_VALUE;
 const CBaseFile::t_HFIND CBaseFile::c_InvalidFindHandle = INVALID_HANDLE_VALUE;
+
+oexBOOL CBaseFile::InitFileSystem()
+{
+	return oexTRUE;
+}
+
+oexBOOL CBaseFile::FreeFileSystem()
+{
+	return oexTRUE;
+}
 
 CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, oexUINT x_eAccess, oexUINT x_eShare, oexUINT x_uFlags, oexINT *x_pnError )
 {
@@ -72,7 +82,7 @@ CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, o
         else *x_pnError = 0;
     } // end if
 
-    return hFile;        
+    return hFile;
 }
 
 
@@ -96,7 +106,7 @@ oexBOOL CBaseFile::Write( CBaseFile::t_HFILE x_hFile, oexCPVOID x_pData, oexINT6
 {
     DWORD dwWritten = 0;
     oexBOOL bRet = ::WriteFile( x_hFile, x_pData, x_llSize, &dwWritten, NULL ) ? oexTRUE : oexFALSE;
-    
+
     if ( x_pllWritten )
         *x_pllWritten = dwWritten;
 
@@ -112,7 +122,7 @@ oexBOOL CBaseFile::Read( CBaseFile::t_HFILE x_hFile, oexPVOID x_pData, oexINT64 
 {
     DWORD dwRead = 0;
     oexBOOL bRet = ::ReadFile( x_hFile, x_pData, x_llSize, &dwRead, NULL ) ? oexTRUE : oexFALSE;
-    
+
     if ( x_pllRead )
         *x_pllRead = dwRead;
 
@@ -193,7 +203,7 @@ static oexUINT g_ConvBaseFileAttribToWinAttrib[] =
 static DWORD CBaseFile_ToFileAttributes( oexUINT uAttrib )
 {
     DWORD dwAttrib = 0;
-    for( oexUINT i = 0; -1 != g_ConvBaseFileAttribToWinAttrib[ i ] 
+    for( oexUINT i = 0; -1 != g_ConvBaseFileAttribToWinAttrib[ i ]
                         && -1 != g_ConvBaseFileAttribToWinAttrib[ i + 1 ];
                         i += 2 )
     if ( 0 != ( uAttrib & g_ConvBaseFileAttribToWinAttrib[ i ] ) )
@@ -205,7 +215,7 @@ static DWORD CBaseFile_ToFileAttributes( oexUINT uAttrib )
 static oexUINT CBaseFile_ToCBaseFileAttributes( DWORD dwAttrib )
 {
     DWORD uAttrib = 0;
-    for( oexUINT i = 0; -1 != g_ConvBaseFileAttribToWinAttrib[ i ] 
+    for( oexUINT i = 0; -1 != g_ConvBaseFileAttribToWinAttrib[ i ]
                         && -1 != g_ConvBaseFileAttribToWinAttrib[ i + 1 ];
                         i += 2 )
     if ( 0 != ( dwAttrib & g_ConvBaseFileAttribToWinAttrib[ i + 1 ] ) )
@@ -237,7 +247,7 @@ CBaseFile::t_HFIND CBaseFile::FindFirst( oexCSTR x_pPath, oexCSTR x_pMask, CBase
 
     WIN32_FIND_DATA wfd;
     ZeroMemory( &wfd, sizeof( wfd ) );
-    
+
     // Find first file
     HANDLE hFind = ::FindFirstFile( CStr::BuildPath( x_pPath, x_pMask ).Ptr(), &wfd );
     if ( INVALID_HANDLE_VALUE == hFind )

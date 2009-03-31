@@ -964,19 +964,22 @@ namespace guid
 	    if ( !oexCHECK_PTR( x_pStr ) || !oexCHECK( x_uMax ) )
 		    return oexNULL;
 
+		// NULL terminate
+		*x_pStr = 0;
+
 	    // Verify there is enough room for the string
 	    if ( 36 > x_uMax )
-	    {	*x_pStr = 0; return x_pStr; }
+	    	return x_pStr;
 
 	    // Create new guid if one is not provided
 	    T_GUID guid;
 	    if ( !x_pGuid )
 	    {	x_pGuid = &guid;
+	    	oexZeroMemory( &guid, sizeof( guid ) ); // valgrind
             os::CSys::CreateGuid( &guid );
 	    } // end if
 
 	    // Example GUID : DD05F574-2D69-4463-95DD-F76C9F7C5E6D
-
         return os::CSys::StrFmt( x_pStr, x_uMax,
                  oexTT( T_CHAR, "%0.8lX-%0.4lX-%0.4lX-%0.2lX%0.2lX-%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX" ),
 			     (oexLONG) x_pGuid->Data1,

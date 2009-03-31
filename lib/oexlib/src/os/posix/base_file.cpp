@@ -37,6 +37,8 @@
 
 // BinReloc library
 #include "opc/breloc/binreloc.h"
+#include "opc/breloc/basic.cpp"
+//#include "opc/breloc/normal.cpp"
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
@@ -49,6 +51,27 @@ oexSTATIC_ASSERT( sizeof( CBaseFile::t_HFILE ) >= sizeof( int ) );
 
 const CBaseFile::t_HFILE CBaseFile::c_Invalid = (void*)-1;
 const CBaseFile::t_HFIND CBaseFile::c_InvalidFindHandle = NULL;
+
+static oexCSTR8 g_szModulePath = oexNULL;
+
+oexBOOL CBaseFile::InitFileSystem()
+{
+	BrInitError error;
+	g_szModulePath = _br_find_exe( &error );
+
+	return oexTRUE;
+}
+
+oexBOOL CBaseFile::FreeFileSystem()
+{
+	if ( g_szModulePath )
+	{	free( (void*)g_szModulePath );
+		g_szModulePath = oexNULL;
+	} // end if
+
+	return oexTRUE;
+}
+
 
 CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, oexUINT x_eAccess, oexUINT x_eShare, oexUINT x_uFlags, oexINT *x_pnError )
 {
@@ -343,43 +366,29 @@ oexBOOL CBaseFile::CreateFolder( oexCSTR x_pPath )
 
 CStr CBaseFile::GetModPath( oexCSTR x_pPath )
 {
-	BrInitError error;
-	if ( br_init( &error ) )
+	// Ensure we have the module path
+	if ( !g_szModulePath )
 	{
-		char *pPath = br_find_exe( oexNULL );
-
-		if ( pPath )
-		{
-			if ( x_pPath && *x_pPath )
-				return oexBuildPath( oexStr8ToStr( CStr8( pPath ) ).GetPath(), x_pPath );
-
-			else
-				return oexStr8ToStr( CStr8( pPath ) ).GetPath();
-
-		} // end if
+		if ( oexCHECK_PTR( x_pPath ) )
+			return CStr( x_pPath );
+		else
+			return CStr();
 
 	} // end if
 
-	// Don't really know if this is the best thing to do or not...
-	if ( x_pPath && *x_pPath )
-		return x_pPath;
+	if ( oexCHECK_PTR( x_pPath ) && *x_pPath )
+		return oexBuildPath( oexStr8ToStr( CStr8( g_szModulePath ) ).GetPath(), x_pPath );
 
-	return CStr();
+	return oexStr8ToStr( CStr8( g_szModulePath ) ).GetPath();
+
 }
 
 CStr CBaseFile::GetModFileName()
 {
-	BrInitError error;
-	if ( br_init( &error ) )
-	{
-		char *pPath = br_find_exe( oexNULL );
+	if ( !g_szModulePath )
+		return CStr();
 
-		if ( pPath )
-			return oexStr8ToStr( pPath );
-
-	} // end if
-
-	return CStr();
+	return oexStr8ToStr( g_szModulePath );
 }
 
 

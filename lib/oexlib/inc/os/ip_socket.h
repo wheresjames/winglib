@@ -245,6 +245,12 @@ public:
 	static void UninitSockets();
 
 	//==============================================================
+	// GetInitCount()
+	//==============================================================
+	/// Returns the number of outstanding calls to InitSockets()
+	static oexLONG GetInitCount();
+
+	//==============================================================
 	// IsInitialized()
 	//==============================================================
 	/// Returns non-zero if the Socket API was successfully initialized.

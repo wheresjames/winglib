@@ -35,11 +35,6 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
-// BinReloc library
-#include "opc/breloc/binreloc.h"
-#include "opc/breloc/basic.cpp"
-#include "opc/breloc/normal.cpp"
-
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
@@ -85,18 +80,7 @@ void CDebug::Break()
 
 void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x_pFunction, oexCSTR x_pStr, oexINT x_nRes, oexINT x_nErr )
 {
-	CStr sPath;
-
-	BrInitError error;
-	if ( br_init( &error ) )
-	{
-		char *pPath = br_find_exe( oexNULL );
-
-		if ( pPath )
-			sPath = oexStr8ToStr( pPath );
-
-	} // end if
-
+	CStr sPath = oexGetModulePath();
 	Break( x_nType, x_pFile, x_uLine, x_pFunction, sPath.Ptr(), x_pStr, x_nRes, x_nErr );
 }
 

@@ -70,11 +70,8 @@ public:
     	Destroy();
     }
 
-    void Destroy()
-    {  	m_file.Flush();
-		m_file.Destroy();
-		m_sPath.Destroy();
-	}
+	/// Close log file and release all resources
+    void Destroy();
 
 	//==============================================================
 	// Log()

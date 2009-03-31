@@ -362,11 +362,12 @@ oex::oexRESULT TestStrings()
 		return -9;
 
     oex::oexGUID guid;
+    oexZeroMemory( &guid, sizeof( guid ) );
 	oexCSTR pTest = oexT( "01234567-8901-2345-6789-012345678901" );
 
 	static const oexGUID guidTest =
-//	{ 0x01234567, 0x8901, 0x2345, { 0x67, 0x89, 0x01, 0x23, 0x45, 0x67, 0x89, 0x01 } };
-	oexAUTOGUID( 0x01234567, 0x8901, 0x2345, 0x67, 0x89, 0x01, 0x23, 0x45, 0x67, 0x89, 0x01 );
+//		{ 0x01234567, 0x8901, 0x2345, { 0x67, 0x89, 0x01, 0x23, 0x45, 0x67, 0x89, 0x01 } };
+		oexAUTOGUID( 0x01234567, 0x8901, 0x2345, 0x67, 0x89, 0x01, 0x23, 0x45, 0x67, 0x89, 0x01 );
 
 	if ( !oexVERIFY( guid::CmpGuid( guid::StringToGuid( &guid, pTest, 36 ), &guidTest ) ) )
 		return -10;
@@ -1403,9 +1404,6 @@ oex::oexRESULT Test_CIpAddress()
 {
 	oexPrintf( oexT( "IP Address...\r\n" ) );
 
-    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
-        return -1;
-
     oex::oexCSTR pUrl = oexT( "http://user:password@server.com:1111/my/path/doc.php?a=b&c=d" );
     oex::CPropertyBag pbUrl = oex::os::CIpAddress::ParseUrl( pUrl );
 
@@ -1439,8 +1437,6 @@ oex::oexRESULT Test_CIpAddress()
     ia.LookupHost( oexT( "google.com" ), 80 );
     oexPrintf( oexT( "google.com = %s = %s\n" ), oexStrToMbPtr( ia.GetDotAddress().Ptr() ), oexStrToMbPtr( ia.GetId().Ptr() ) );
 
-    oex::os::CIpSocket::UninitSockets();
-
     return oex::oexRES_OK;
 }
 
@@ -1450,9 +1446,6 @@ oex::oexRESULT Test_CIpAddress()
 oex::oexRESULT Test_CIpSocket()
 {
 	oexPrintf( oexT( "Socket support...\r\n" ) );
-
-    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
-        return -1;
 
     // *** TCP
 
@@ -1521,8 +1514,6 @@ oex::oexRESULT Test_CIpSocket()
 
     client.Destroy();
     server.Destroy();
-
-    oex::os::CIpSocket::UninitSockets();
 
     return oex::oexRES_OK;
 }
@@ -1890,16 +1881,14 @@ oex::oexRESULT Test_Threads()
 	if ( !oexVERIFY( 0 == val ) )
 		return -22;
 
+	oexPrintf( oexT( "Thread counts are, %d, %d, %d, %d\r\n" ),
+			   count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
+
 	if ( !oexVERIFY( 10 < count[ 0 ]
 	                 && 10 < count[ 1 ]
 	                 && 10 < count[ 2 ]
 	                 && 10 < count[ 3 ] ) )
 	    return -23;
-
-	else
-		oexPrintf( oexT( "Thread counts are, %d, %d, %d, %d\r\n" ),
-				   count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
-
 
 	return oex::oexRES_OK;
 }
@@ -1943,9 +1932,6 @@ oex::oexRESULT Test_CHttpSession()
 {
 	oexPrintf( oexT( "HTTP...\r\n" ) );
 
-    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
-        return -1;
-
 	oex::os::CIpSocket client;
 	oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > server;
 
@@ -1977,12 +1963,8 @@ oex::oexRESULT Test_CHttpSession()
 	client.Destroy();
 	server.Stop();
 
-    oex::os::CIpSocket::UninitSockets();
-
 	return oex::oexRES_OK;
 }
-
-
 
 oex::oexRESULT Test_MsgParams()
 {
@@ -2294,9 +2276,6 @@ oex::oexRESULT Test_CThread()
 /*
 oex::oexRESULT Test_CAutoSocket()
 {
-    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
-        return -1;
-
     // Create echo server
     oex::TNetServer< oex::CAutoSocket, oex::TEchoProtocol< oex::CAutoSocket > > server;
 
@@ -2331,17 +2310,12 @@ oex::oexRESULT Test_CAutoSocket()
     client.Destroy();
     server.Destroy();
 
-    oex::os::CIpSocket::UninitSockets();
-
     return oex::oexRES_OK;
 }
 
 
 oex::oexRESULT Test_CFtpSession()
 {
-    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
-        return -1;
-
     // FTP server
     oex::TNetServer< oex::CAutoSocket, oex::CFtpDiskSession > ftp_server;
 
@@ -2361,16 +2335,11 @@ oex::oexRESULT Test_CFtpSession()
     // Just wait forever
 //    oex::os::CSys::Sleep( 60 * 60 * 1000 );
 
-    oex::os::CIpSocket::UninitSockets();
-
     return oex::oexRES_OK;
 }
 
 oex::oexRESULT Test_CHttpSession()
 {
-    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
-        return -1;
-
     // FTP server
     oex::TNetServer< oex::CAutoSocket, oex::CHttpSession > http_server;
 
@@ -2390,16 +2359,11 @@ oex::oexRESULT Test_CHttpSession()
     // Just wait forever
 //    oex::os::CSys::Sleep( 60 * 60 * 1000 );
 
-    oex::os::CIpSocket::UninitSockets();
-
     return oex::oexRES_OK;
 }
 
 oex::oexRESULT Test_CVfsSession()
 {
-    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
-        return -1;
-
     // FTP server
     oex::TNetServer< oex::CAutoSocket, oex::CVfsFtpSession > vfs_server;
 
@@ -2418,8 +2382,6 @@ oex::oexRESULT Test_CVfsSession()
 
     // Just wait forever
 //    oex::os::CSys::Sleep( 60 * 60 * 1000 );
-
-    oex::os::CIpSocket::UninitSockets();
 
     return oex::oexRES_OK;
 }
@@ -2533,6 +2495,9 @@ int main(int argc, char* argv[])
     // Initialize the oex library
 	oexINIT();
 
+    if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
+        return -1;
+
 	oexPrintf( oexT( "--- Starting tests ---\r\n" ) );
 	oexNOTICE( 0, oexT( "Tests started" ) );
 
@@ -2593,6 +2558,9 @@ int main(int argc, char* argv[])
 //    Test_CVfsSession();
 
     Test_CCapture();
+
+	// Release sockets
+    oex::os::CIpSocket::UninitSockets();
 
 	// Initialize the oex library
     oexUNINIT();

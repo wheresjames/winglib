@@ -89,6 +89,7 @@ oexBOOL CIpAddress::ValidateAddress()
     return oexTRUE;
 }
 
+// +++ Make IPv6 safe
 oexBOOL CIpAddress::SetDotAddress( oexCSTR x_pDotAddress, oexINT32 x_uPort, oexINT32 x_uType )
 {
     if ( !oexVERIFY( x_pDotAddress ) )
@@ -104,6 +105,7 @@ oexBOOL CIpAddress::SetDotAddress( oexCSTR x_pDotAddress, oexINT32 x_uPort, oexI
     return oexTRUE;
 }
 
+// +++ Make IPv6 safe
 CStr CIpAddress::GetDotAddress()
 {
     in_addr ia;
@@ -112,7 +114,7 @@ CStr CIpAddress::GetDotAddress()
     ia.s_addr = htonl( (u_long)GetIpv4() );
 
 	// Create dot address if needed
-	return oexStr8ToStr( inet_ntoa( ia ) );
+	return oexStr8ToStr( inet_ntop( AF_INET, &ia, CStr8().OexAllocate( 256 ), 256 ) );
 }
 
 oexCONST oexGUID* CIpAddress::GetId( oexGUID *x_pGuid )

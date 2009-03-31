@@ -1,9 +1,9 @@
 /*
-	Robert Umbehant <rumbehant@wheresjames.com> lifted this code from 
+	Robert Umbehant <rumbehant@wheresjames.com> lifted this code from
 	http://autopackage.org/docs/binreloc/ , slightly mutilated it to
 	compile with a c++ compiler, and thereafter, burdened the public
 	domain with his changes.
-	
+
 	Thanks Hongli!!!
 */
 
@@ -63,6 +63,7 @@ static char * _br_find_exe_for_symbol (const void *symbol, BrInitError *error);
 /* From normal.cpp */
 int br_init (BrInitError *error);
 int br_init_lib (BrInitError *error);
+void br_free_lib ();
 char * br_find_exe (const char *default_exe);
 char * br_find_prefix (const char *default_prefix);
 char * br_find_bin_dir (const char *default_bin_dir);

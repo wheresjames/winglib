@@ -47,9 +47,6 @@ extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex
 	// Set our allocator
 	oex::os::CMem::SetRawAllocator( x_sRawAllocator );
 
-    // Initialize the oex library
-	oexINIT();
-
 	// Create objects
 	g_psqScriptThread = OexAllocConstruct< sqbind::CScriptThread >();
 	if ( !oexCHECK_PTR( g_psqScriptThread ) )
@@ -113,9 +110,6 @@ extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex
 
 	} // end else
 
-	// Uninitialize the oex library
-	oexUNINIT();
-
 	return -1;
 }
 
@@ -148,10 +142,8 @@ extern "C" oex::oexRESULT SRV_Stop()
 		OexAllocDelete( g_psqModuleManager );
 	} // end if
 
-	// Uninitialize the oex library
-	oexUNINIT();
-
 	// Switch back to default allocator
+	oexCloseLog();
 	oex::os::CMem::SetDefaultRawAllocator();
 
 	return 0;

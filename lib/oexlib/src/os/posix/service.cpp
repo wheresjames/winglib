@@ -115,7 +115,7 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 	oexNOTICE( 0, CStr().Fmt( oexT( "Module '%s' started successfully" ),
 					       	  oexStrToMbPtr( x_sModule.Ptr() ) ) );
 
-	// Load start function
+	// Load idle function
 	service::PFN_SRV_Idle pIdle =
 		(service::PFN_SRV_Idle)mod.AddFunction( oexT( "SRV_Idle" ) );
 	if ( !oexCHECK_PTR( pIdle ) )
@@ -126,10 +126,6 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 	else
 		while ( !pIdle() )
 			os::CSys::Sleep( x_nIdleDelay );
-
-	// Forever
-//	else for( ; ; )
-//		os::CSys::Sleep( 60000 );
 
 	// Check for stop function
 	service::PFN_SRV_Stop pStop =

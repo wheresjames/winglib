@@ -46,6 +46,9 @@ COex::CVerifyStartup	COex::m_cVerifyStartup;
 
 oexINT COex::Init()
 {
+	// Initialize file system
+	os::CBaseFile::InitFileSystem();
+
     // Initialize system
     oexVERIFY( os::CSys::Init() );
 
@@ -106,12 +109,18 @@ oexINT COex::Uninit()
 //    if ( !oexVERIFY( oexNet.Destroy() ) )
 //       m_nShutdownCode |= -1;
 
+	// Verify sockets were released correctly
+	oexVERIFY( !os::CIpSocket::GetInitCount() );
+
 	// Close the log file
 	CLog::GlobalLog().Destroy();
 
     // Uninit the system stuff
     if ( !oexVERIFY( os::CSys::Uninit() ) )
         m_nShutdownCode |= -8;
+
+	// Free file system
+	os::CBaseFile::FreeFileSystem();
 
     // Free all the test classes
 //    oexFREE_TESTS();

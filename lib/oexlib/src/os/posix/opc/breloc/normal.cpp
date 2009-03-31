@@ -1,9 +1,9 @@
 /*
-	Robert Umbehant <rumbehant@wheresjames.com> lifted this code from 
+	Robert Umbehant <rumbehant@wheresjames.com> lifted this code from
 	http://autopackage.org/docs/binreloc/ , slightly mutilated it to
 	compile with a c++ compiler, and thereafter, burdened the public
 	domain with his changes.
-	
+
 	Thanks Hongli!!!
 */
 
@@ -44,6 +44,18 @@ br_init (BrInitError *error)
 {
 	exe = _br_find_exe (error);
 	return exe != NULL;
+}
+
+/*
+ * Frees memory allocated by library
+*/
+void
+br_free_lib ()
+{
+	if ( exe )
+	{	free( exe );
+		exe = NULL;
+	} // end if
 }
 
 

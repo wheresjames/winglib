@@ -156,6 +156,9 @@ static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, sockaddr *x_pSa )
 
 oexLONG CIpSocket::m_lInit = -1;
 
+// +++ Add a warning if library is shutdown and this value is not zero
+static oexLONG g_CIpSocket_lInitCount = 0;
+
 oexCONST CIpSocket::t_SOCKET CIpSocket::c_InvalidSocket = (CIpSocket::t_SOCKET)-1;
 oexCONST CIpSocket::t_SOCKETEVENT CIpSocket::c_InvalidEvent = (CIpSocket::t_SOCKETEVENT)-1;
 oexCONST CIpSocket::t_SOCKET CIpSocket::c_SocketError = (CIpSocket::t_SOCKET)-1;
@@ -218,7 +221,7 @@ oexINT CIpSocket::FlagNixToWin( oexINT x_nFlag )
 	if ( ( EPOLLIN | EPOLLPRI | EPOLLOUT ) & x_nFlag )
 		nRet |= eAcceptEvent;
 
-	return nRet;	
+	return nRet;
 #endif
 }
 
@@ -234,12 +237,12 @@ CIpSocket::CIpSocket()
 
     m_uEventState = 0;
     os::CSys::Zero( &m_uEventStatus, sizeof( m_uEventStatus ) );
+    m_pEventObject = oexNULL;
 
     m_uSocketFamily = 0;
     m_uSocketType = 0;
     m_uSocketProtocol = 0;
 
-    m_pEventObject = oexNULL;
 }
 
 CIpSocket::~CIpSocket()
@@ -248,20 +251,33 @@ CIpSocket::~CIpSocket()
 	Destroy();
 }
 
+oexLONG CIpSocket::GetInitCount()
+{	return g_CIpSocket_lInitCount;
+}
+
 oexBOOL CIpSocket::InitSockets()
 {
-	// Quit if already initialized
-	if ( m_lInit == 0 )
-        return oexTRUE;
+	// Add ref
+	if ( 1 == oexInterlockedIncrement( &g_CIpSocket_lInitCount ) )
+	{
+		// Quit if already initialized
+		if ( m_lInit == 0 )
+			return oexTRUE;
 
-	/// +++ Don't need init in linux?
-	m_lInit = 0;
+		/// +++ Don't need init in linux?
+		m_lInit = 0;
+
+	} // end if
 
 	return IsInitialized();
 }
 
 void CIpSocket::UninitSockets()
 {
+	// Deref
+	if ( oexInterlockedDecrement( &g_CIpSocket_lInitCount ) )
+		return;
+
 	// Punt if not initialized
 	if ( !IsInitialized() )
 		return;
@@ -272,10 +288,6 @@ void CIpSocket::UninitSockets()
 
 void CIpSocket::Destroy()
 {
-	// Punt if not initialized
-	if ( !IsInitialized() )
-		return;
-
 	// Ditch the event handle
 	CloseEventHandle();
 
@@ -302,16 +314,20 @@ void CIpSocket::Destroy()
 	if ( c_InvalidSocket == hSocket )
 		return;
 
-	// Close the socket
-	if ( -1 == shutdown( oexPtrToInt( hSocket ), SHUT_RDWR ) )
-	{	m_uLastError = errno;
-		if ( ENOTCONN != errno )
-			oexERROR( errno, oexT( "shutdown() failed" ) );
-	} // end if
+	if ( IsInitialized() )
+	{
+		// Close the socket
+		if ( -1 == shutdown( oexPtrToInt( hSocket ), SHUT_RDWR ) )
+		{	m_uLastError = errno;
+			if ( ENOTCONN != errno )
+				oexERROR( errno, oexT( "shutdown() failed" ) );
+		} // end if
 
-    if ( -1 == close( oexPtrToInt( hSocket ) ) )
-    {	m_uLastError = errno;
-		oexERROR( errno, oexT( "close() failed" ) );
+		if ( -1 == close( oexPtrToInt( hSocket ) ) )
+		{	m_uLastError = errno;
+			oexERROR( errno, oexT( "close() failed" ) );
+		} // end if
+
 	} // end if
 }
 
@@ -534,10 +550,11 @@ oexBOOL CIpSocket::CreateEventHandle()
 	else
 		m_uLastError = 0;
 
-	// Create event object
-	m_pEventObject = new epoll_event[ eMaxEvents ];
+	// Create event object array and initialize
+	m_pEventObject = OexAllocNew< epoll_event >( eMaxEvents );
+	oexZeroMemory( m_pEventObject, sizeof( epoll_event ) * eMaxEvents );
 
-    return oexTRUE;    
+    return oexTRUE;
 #endif
 }
 
@@ -546,29 +563,30 @@ void CIpSocket::CloseEventHandle()
 #if defined( OEX_NOEPOLL )
 	return;
 #else
-	if ( c_InvalidEvent != m_hSocketEvent )
-	{
-		// Close event handle
-		if ( -1 == close( oexPtrToInt( m_hSocketEvent ) ) )
-		{	m_uLastError = errno;
-			oexERROR( errno, oexT( "close() failed" ) );
+
+	if ( IsInitialized() )
+		if ( c_InvalidEvent != m_hSocketEvent )
+		{
+			// Close event handle
+			if ( -1 == close( oexPtrToInt( m_hSocketEvent ) ) )
+			{	m_uLastError = errno;
+				oexERROR( errno, oexT( "close() failed" ) );
+			} // end if
+
+			else
+				m_uLastError = 0;
+
 		} // end if
 
-		else
-			m_uLastError = 0;
-
-		m_hSocketEvent = c_InvalidEvent;
-
-	} // end if
+	// Give up on socket event handle
+	m_hSocketEvent = c_InvalidEvent;
 
 	// Release event object
-	if ( m_pEventObject )
-	{
-		// Lose the event object memory
-		delete [] (epoll_event*)m_pEventObject;
-		m_pEventObject = oexNULL;
+	if ( oexCHECK_PTR( m_pEventObject ) )
+		OexAllocDelete( (epoll_event*)m_pEventObject );
 
-	} // end if
+	m_pEventObject = oexNULL;
+
 #endif
 }
 
@@ -589,6 +607,7 @@ oexBOOL CIpSocket::EventSelect( oexLONG x_lEvents )
 	m_uEventState = 0;
 
 	epoll_event ev;
+	oexZeroMemory( &ev, sizeof( ev ) );
 	ev.data.fd = oexPtrToInt( m_hSocket );
 	ev.events = EPOLLERR | FlagWinToNix( x_lEvents );
 

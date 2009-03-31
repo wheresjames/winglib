@@ -38,6 +38,14 @@ OEX_USING_NAMESPACE
 
 CLog CLog::m_logGlobal;
 
+void CLog::Destroy()
+{
+	m_file.Flush();
+	m_file.Destroy();
+	m_sPath.Destroy();
+}
+
+
 oexBOOL CLog::OpenLogFile( oexCSTR x_pPath, oexCSTR x_pFile, oexCSTR x_pExtension )
 {
 	CStr sFile;
@@ -81,7 +89,9 @@ oexBOOL CLog::Open( oexCSTR x_pPath )
 
 	// Open new log file
 	if ( !m_file.CreateAlways( x_pPath ).IsOpen() )
+	{	oexPrintf( oexMks( oexT( "Failed to open log file : " ), x_pPath, oexNL ).Ptr() );
 		return oexFALSE;
+	} // end if
 
 	// Create log header
 	oexUINT uThreadId = oexGetCurrentThreadId();
@@ -182,9 +192,9 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT 
 			// Add file / line number
 			oexUINT uThreadId = oexGetCurrentThreadId();
 #if defined( oexFULL_FILENAME_IN_LOG )
-			sLog << x_pFile << oexT( ":(" ) << x_nLine << oexT( ")" ) 
+			sLog << x_pFile << oexT( ":(" ) << x_nLine << oexT( ")" )
 #else
-			sLog << oexGetFileName( x_pFile ) << oexT( ":(" ) << x_nLine << oexT( ")" ) 
+			sLog << oexGetFileName( x_pFile ) << oexT( ":(" ) << x_nLine << oexT( ")" )
 #endif
 				 << oexFmt( oexT( " : Thread %u (0x%x)" ), uThreadId, uThreadId ) << oexNL;
 
