@@ -156,7 +156,6 @@ static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, sockaddr *x_pSa )
 
 oexLONG CIpSocket::m_lInit = -1;
 
-// +++ Add a warning if library is shutdown and this value is not zero
 static oexLONG g_CIpSocket_lInitCount = 0;
 
 oexCONST CIpSocket::t_SOCKET CIpSocket::c_InvalidSocket = (CIpSocket::t_SOCKET)-1;

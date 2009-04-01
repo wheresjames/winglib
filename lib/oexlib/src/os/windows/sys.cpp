@@ -486,11 +486,11 @@ oexINT CSys::WaitForMultipleObjects( oexUINT x_uObjects, CSys::t_WAITABLE *x_pHa
 	return waitFailed;
 }
 
-oexULONG CSys::InterlockedIncrement( oexLONG *x_puVal )
+oexLONG CSys::InterlockedIncrement( oexLONG *x_puVal )
 {	return ::InterlockedIncrement( x_puVal );
 }
 
-oexULONG CSys::InterlockedDecrement( oexLONG *x_puVal )
+oexLONG CSys::InterlockedDecrement( oexLONG *x_puVal )
 {	return ::InterlockedDecrement( x_puVal );
 }
 

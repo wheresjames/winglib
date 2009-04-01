@@ -122,6 +122,7 @@ static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, SOCKADDR *x_pSa )
 //////////////////////////////////////////////////////////////////////
 
 oexLONG CIpSocket::m_lInit = -1;
+static oexLONG g_CIpSocket_lInitCount = 0;
 
 oexCONST CIpSocket::t_SOCKET CIpSocket::c_InvalidSocket = (CIpSocket::t_SOCKET)INVALID_SOCKET;
 oexCONST CIpSocket::t_SOCKETEVENT CIpSocket::c_InvalidEvent = (CIpSocket::t_SOCKETEVENT)WSA_INVALID_EVENT;
@@ -154,20 +155,29 @@ CIpSocket::~CIpSocket()
 
 oexBOOL CIpSocket::InitSockets()
 {
-	// Quit if already initialized
-	if ( m_lInit == 0 )
-        return oexTRUE;
+	// Add ref
+	if ( 1 == oexInterlockedIncrement( &g_CIpSocket_lInitCount ) )
+	{
+		// Quit if already initialized
+		if ( m_lInit == 0 )
+			return oexTRUE;
 
-	WSADATA wd;
+		WSADATA wd;
 
-	// Attempt to initialize the Socket library
-	m_lInit = WSAStartup( c_MinSocketVersion, &wd );
+		// Attempt to initialize the Socket library
+		m_lInit = WSAStartup( c_MinSocketVersion, &wd );
+
+	} // end if
 
 	return IsInitialized();
 }
 
 void CIpSocket::UninitSockets()
 {
+	// Deref
+	if ( oexInterlockedDecrement( &g_CIpSocket_lInitCount ) )
+		return;
+
 	// Punt if not initialized
 	if ( !IsInitialized() )
 		return;
@@ -178,6 +188,9 @@ void CIpSocket::UninitSockets()
 	// Clean up socket lib
 	WSACleanup();
 }
+
+oexLONG CIpSocket::GetInitCount()
+{	return 0; }
 
 void CIpSocket::Destroy()
 {

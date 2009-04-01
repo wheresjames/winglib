@@ -32,9 +32,7 @@ ifdef UNICODE
 CFG_CEXTRA := $(CFG_CEXTRA) -DUNICODE -D_UNICODE
 endif
 
-ifeq ($(OS),win32)
-
-	PLATFORM := windows
+ifeq ($(PLATFORM),windows)
 
 	ifdef DBG
 		ifeq ($(LIBLINK),static)	
