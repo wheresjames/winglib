@@ -119,10 +119,11 @@ oexBOOL CFMap::Release( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexINT64 
 	oexUNUSED( x_llSize );
 
 	if ( x_pMem && oexCHECK_PTR( x_pMem ) )
-		UnmapViewOfFile( (LPCVOID)x_pMem );
+		UnmapViewOfFile( (LPVOID)x_pMem );
 
 	if ( c_Failed != x_hFileMap && oexCHECK_PTR( x_hFileMap ) )
 		CloseHandle( (HANDLE)x_hFileMap );
 
 	return oexTRUE;
 }
+

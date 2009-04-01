@@ -38,7 +38,17 @@
 #include "std_os.h"
 
 #include <stdlib.h>
-#include <tchar.h>
+#if defined( OEX_WINCE )
+//#	include <wtypes.h>
+#	define VSNPRINTF	vsnprintf
+#	define STRTOLL		strtoll
+#	define VSNWPRINTF	vswprintf
+#else
+#	include <tchar.h>
+#	define VSNPRINTF	_vsnprintf
+#	define STRTOLL		_strtoi64
+#	define VSNWPRINTF	_vsnwprintf
+#endif
 #include <time.h>
 
 #if ( _MSC_VER >= 1300 )
@@ -49,10 +59,7 @@
 #	include <stdarg.h>
 #endif
 
-#include <ObjBase.h>
-
-#include <WinSock2.h>
-#pragma comment( lib, "WS2_32.lib" )
+#include <objbase.h>
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
@@ -169,7 +176,7 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 #else
 
 	// Create format string
-	if ( 0 > _vsnprintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
+	if ( 0 > VSNPRINTF( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
 	{
 		// Null terminate buffer
 		x_pDst[ x_uMax - 1 ] = 0;
@@ -194,13 +201,13 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 oexINT64 CSys::StrToInt64( oexCSTR8 x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-    return _strtoi64( x_pStr, NULL, x_uRadix ); 
+    return STRTOLL( x_pStr, NULL, x_uRadix ); 
 }
 
 oexUINT64 CSys::StrToUInt64( oexCSTR8 x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-    return _strtoui64( x_pStr, NULL, x_uRadix ); 
+    return STRTOLL( x_pStr, NULL, x_uRadix ); 
 }
 
 oexLONG CSys::StrToLong( oexCSTR8 x_pStr, oexUINT x_uRadix ) 
@@ -275,8 +282,12 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 
 #else
 
+#if defined( OEX_WINCE )
+	return oexFALSE;
+#else
+
 	// Create format string
-	if ( 0 > _vsnwprintf( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
+	if ( 0 > VSNWPRINTF( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
 	{
 		// Null terminate buffer
 		x_pDst[ x_uMax - 1 ] = 0;
@@ -286,6 +297,7 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 
 	} // end if
 
+#endif
 #endif
 
 	// What to do with the result
@@ -301,37 +313,84 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 oexINT64 CSys::StrToInt64( oexCSTRW x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
+#if defined( OEX_WINCE )
+	return oexFALSE;
+#else
 	return _wcstoi64( x_pStr, NULL, x_uRadix ); 
+#endif
 }
 
 oexUINT64 CSys::StrToUInt64( oexCSTRW x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
+#if defined( OEX_WINCE )
+	return oexFALSE;
+#else
 	return _wcstoui64( x_pStr, NULL, x_uRadix ); 
+#endif
 }
 
 oexLONG CSys::StrToLong( oexCSTRW x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
+#if defined( OEX_WINCE )
+	return oexFALSE;
+#else
 	return wcstol( x_pStr, NULL, x_uRadix ); 
+#endif
 }
 
 oexULONG CSys::StrToULong( oexCSTRW x_pStr, oexUINT x_uRadix ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
+#if defined( OEX_WINCE )
+	return oexFALSE;
+#else
 	return wcstoul( x_pStr, NULL, x_uRadix ); 
+#endif
 }
 
 oexFLOAT CSys::StrToFloat( oexCSTRW x_pStr ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
+#if defined( OEX_WINCE )
+	return oexFALSE;
+#else
 	return (oexFLOAT)wcstod( x_pStr, NULL ); 
+#endif
 }
 
 oexDOUBLE CSys::StrToDouble( oexCSTRW x_pStr ) 
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
+#if defined( OEX_WINCE )
+	return oexFALSE;
+#else
 	return wcstod( x_pStr, NULL ); 
+#endif
+}
+
+/// vprintf
+int CSys::vPrintf( oexCSTRW x_pFmt, oexVaList pArgs )
+{
+#if defined( OEX_WINCE )
+	return oexFALSE;
+#else
+	return ::vwprintf( x_pFmt, pArgs );
+#endif
+}
+
+/// printf function
+int CSys::Printf( oexCSTRW x_pFmt, ... )
+{
+#if defined( OEX_WINCE )
+	return oexFALSE;
+#else
+	oexVaList ap; oexVaStart( ap, x_pFmt );
+	int ret = ::vwprintf( x_pFmt, ap );
+	oexVaEnd( ap );
+	return ret;
+#endif
 }
 
 oexPVOID CSys::MemCpy( oexPVOID x_pDst, oexCPVOID x_pSrc, oexUINT x_uSize )
@@ -373,7 +432,10 @@ static oexBOOL CSys_ReleaseMicroSleep()
     } // end if
 
     if ( 0 <= g_microsleep_socket_init )
-    {   WSACleanup();
+    {
+#if !defined( OEX_NOSOCKET2 )
+       WSACleanup();
+#endif
         g_microsleep_socket_init = -1;
     } // end if
 
@@ -427,7 +489,7 @@ oexBOOL CSys::MicroSleep( oexUINT uMicroseconds, oexUINT uSeconds )
 
 oexBOOL CSys::Init()
 {
-	CoInitialize( NULL );
+	CoInitializeEx( NULL, COINIT_MULTITHREADED );
 
     return oexTRUE;
 }
@@ -634,8 +696,8 @@ int CSys::vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs )
 {	return ::vprintf( x_pFmt, (va_list)pArgs );
 }
 
-oexUINT CSys::GetCurrentThreadId()
-{	return ::GetCurrentThreadId();
+oexUINT CSys::GetCurThreadId()
+{	return GetCurrentThreadId();
 }
 
 oexBOOL CSys::PumpThreadMessages()
@@ -680,7 +742,7 @@ extern "C" oex::oexRESULT OEX_SRVMODULE_20081230192357EST_Run( oex::oexCSTR x_pP
 oexINT CSys::Fork( oexCSTR x_pWorkingDirectory, oexCSTR x_pLogFile )
 {
 	// Hmmmmm
-	oexERROR( 0, "Cant fork() on Windows" );
+	oexERROR( 0, oexT( "Cant fork() on Windows" ) );
 
 	return -1;
 }

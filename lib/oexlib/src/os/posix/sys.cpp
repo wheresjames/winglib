@@ -705,7 +705,7 @@ int CSys::vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs )
 {	return ::vprintf( x_pFmt, pArgs );
 }
 
-oexUINT CSys::GetCurrentThreadId()
+oexUINT CSys::GetCurThreadId()
 {	return (oexUINT)::pthread_self();
 }
 

@@ -35,15 +35,18 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
-#include <WinSock2.h>
-#pragma comment( lib, "WS2_32.lib" )
+//#include <winsock2.h>
+//#pragma comment( lib, "ws2_32.lib" )
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
 // A few verifications
 oexSTATIC_ASSERT( sizeof( CIpSocket::t_SOCKET ) == sizeof( SOCKET ) );
+
+#if !defined( OEX_NOSOCKET2 )
 oexSTATIC_ASSERT( sizeof( CIpSocket::t_SOCKETEVENT ) == sizeof( WSAEVENT ) );
+#endif
 
 // Socket version we will use
 oexCONST WORD c_MinSocketVersion = MAKEWORD( 1, 1 );
@@ -51,6 +54,8 @@ oexCONST WORD c_MinSocketVersion = MAKEWORD( 1, 1 );
 //////////////////////////////////////////////////////////////////////
 // Helper functions
 //////////////////////////////////////////////////////////////////////
+
+//#if !defined( OEX_NOSOCKET2 )
 
 //==============================================================
 // CIpSocket_GetAddressInfo()
@@ -117,6 +122,8 @@ static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, SOCKADDR_IN *x_pSai 
 static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, SOCKADDR *x_pSa )
 {   return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa ); }
 
+//#endif
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -125,7 +132,11 @@ oexLONG CIpSocket::m_lInit = -1;
 static oexLONG g_CIpSocket_lInitCount = 0;
 
 oexCONST CIpSocket::t_SOCKET CIpSocket::c_InvalidSocket = (CIpSocket::t_SOCKET)INVALID_SOCKET;
+#if !defined( OEX_NOSOCKET2 )
 oexCONST CIpSocket::t_SOCKETEVENT CIpSocket::c_InvalidEvent = (CIpSocket::t_SOCKETEVENT)WSA_INVALID_EVENT;
+#else
+oexCONST CIpSocket::t_SOCKETEVENT CIpSocket::c_InvalidEvent = (CIpSocket::t_SOCKETEVENT)SOCKET_ERROR;
+#endif
 oexCONST CIpSocket::t_SOCKET CIpSocket::c_SocketError = (CIpSocket::t_SOCKET)SOCKET_ERROR;
 
 
@@ -185,8 +196,10 @@ void CIpSocket::UninitSockets()
 	// Not initialized
 	m_lInit	= -1;
 
+#if !defined( OEX_NOSOCKET2 )
 	// Clean up socket lib
 	WSACleanup();
+#endif
 }
 
 oexLONG CIpSocket::GetInitCount()
@@ -404,6 +417,9 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 
 oexBOOL CIpSocket::CreateEventHandle()
 {
+#if defined( OEX_NOSOCKET2 )
+	return oexFALSE;
+#else
     // Check for event handle
     if ( IsEventHandle() )
         return oexTRUE;
@@ -413,10 +429,14 @@ oexBOOL CIpSocket::CreateEventHandle()
 
     // How did it turn out?
     return c_InvalidEvent != m_hSocketEvent;
+#endif
 }
 
 void CIpSocket::CloseEventHandle()
 {
+#if defined( OEX_NOSOCKET2 )
+	return;
+#else
     // Do we have a valid handle?
     if ( c_InvalidEvent != m_hSocketEvent )
     {
@@ -427,10 +447,14 @@ void CIpSocket::CloseEventHandle()
         m_hSocketEvent = c_InvalidEvent;
 
     } // end if
+#endif
 }
 
 oexBOOL CIpSocket::EventSelect( oexLONG x_lEvents )
 {
+#if defined( OEX_NOSOCKET2 )
+	return oexFALSE;
+#else
     // Punt if no socket
 	if ( !IsSocket() )
 		return FALSE;
@@ -440,10 +464,14 @@ oexBOOL CIpSocket::EventSelect( oexLONG x_lEvents )
         CreateEventHandle();
 
 	return ( WSAEventSelect( (SOCKET)m_hSocket, (WSAEVENT)m_hSocketEvent, x_lEvents ) == 0 );
+#endif
 }
 
 oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 {
+#if defined( OEX_NOSOCKET2 )
+	return 0;
+#else
 	// Must have a socket handle
 	if ( !IsSocket() )
         return 0;
@@ -478,7 +506,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 		    // Get network events
             WSANETWORKEVENTS wne; os::CSys::Zero( &wne, sizeof( wne ) );
 		    if ( SOCKET_ERROR == WSAEnumNetworkEvents( (SOCKET)m_hSocket, m_hSocketEvent, &wne ) )
-			{	oexERROR( WSAGetLastError(), "WSAEnumNetworkEvents() failed" );
+			{	oexERROR( WSAGetLastError(), oexT( "WSAEnumNetworkEvents() failed" ) );
 			    return 0;
 			} // end if
 
@@ -544,10 +572,14 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 
 	// Can't get here...
 	return 0;
+#endif
 }
 
 oexUINT CIpSocket::GetEventBit( oexLONG x_lEventMask )
 {
+#if defined( OEX_NOSOCKET2 )
+	return 0;
+#else
     // !!!  Events will be returned by WaitEvent() in the order
     //      they appear below.
 
@@ -579,6 +611,7 @@ oexUINT CIpSocket::GetEventBit( oexLONG x_lEventMask )
         return FD_CLOSE_BIT;
 
 	return 0;
+#endif
 }
 
 oexCSTR CIpSocket::GetErrorMsg( oexUINT x_uErr )
@@ -695,27 +728,7 @@ oexCSTR CIpSocket::GetErrorMsg( oexUINT x_uErr )
 		case WSAHOST_NOT_FOUND:
 			ptr =oexT( "Host not found" );
 			break;
-		case WSA_INVALID_HANDLE:
-			ptr =oexT( "Specified event object handle is invalid" );
-			break;
-		case WSA_INVALID_PARAMETER:
-			ptr =oexT( "One or mor parameters are invalid" );
-			break;
-//		case WSAINVALIDPROCTABLE;
-//			ptr =oexT( "Invalid procedure table from service provider" );
-//			break;
-//		case WSAINVALIDPROVIDER:
-//			ptr =oexT( "Invalid service provider version number" );
-//			break;
-		case WSA_IO_INCOMPLETE:
-			ptr =oexT( "Overlapped I/O event object not in signaled state" );
-			break;
-		case WSA_IO_PENDING:
-			ptr =oexT( "Overlapped I/O operations will complete later" );
-			break;
-		case WSA_NOT_ENOUGH_MEMORY:
-			ptr =oexT( "Insufficient memory available" );
-			break;
+			
 		case WSANOTINITIALISED:
 			ptr =oexT( "Successful WSAStartup not yet performed" );
 			break;
@@ -743,12 +756,33 @@ oexCSTR CIpSocket::GetErrorMsg( oexUINT x_uErr )
 		case WSAEDISCON:
 			ptr =oexT( "Graceful shutdown in progress" );
 			break;
+			
+#if !defined( OEX_NOSOCKET2 )			
+		case WSA_INVALID_HANDLE:
+			ptr =oexT( "Specified event object handle is invalid" );
+			break;
+		case WSA_INVALID_PARAMETER:
+			ptr =oexT( "One or mor parameters are invalid" );
+			break;
+//		case WSAINVALIDPROCTABLE;
+//			ptr =oexT( "Invalid procedure table from service provider" );
+//			break;
+//		case WSAINVALIDPROVIDER:
+//			ptr =oexT( "Invalid service provider version number" );
+//			break;
+		case WSA_IO_INCOMPLETE:
+			ptr =oexT( "Overlapped I/O event object not in signaled state" );
+			break;
+		case WSA_IO_PENDING:
+			ptr =oexT( "Overlapped I/O operations will complete later" );
+			break;
+		case WSA_NOT_ENOUGH_MEMORY:
+			ptr =oexT( "Insufficient memory available" );
+			break;
 		case WSA_OPERATION_ABORTED:
 			ptr =oexT( "Overlapped I/O operation has been aborted" );
 			break;
-//		case WSAE:
-//			ptr =oexT( "" );
-//			break;
+#endif
 
 	} // end switch
 

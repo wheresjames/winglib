@@ -101,12 +101,12 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 {
 	// Sanity check
 	if ( !oexCHECK_PTR( x_pFunctionName ) || !*x_pFunctionName )
-	{	oexERROR( ERROR_INVALID_PARAMETER, "Invalid function argument" );
+	{	oexERROR( ERROR_INVALID_PARAMETER, oexT( "Invalid function argument" ) );
 		return oexNULL;
 	} // end if
 
 	if ( !m_hModule )
-	{	oexERROR( ERROR_INVALID_PARAMETER, "Module not loaded" );
+	{	oexERROR( ERROR_INVALID_PARAMETER, oexT( "Module not loaded" ) );
 		return oexNULL;
 	} // end if
 
@@ -114,7 +114,7 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 	if ( oexCHECK_PTR( pf ) )
 		return pf;
 
-	pf = ::GetProcAddress( (HMODULE)m_hModule, x_pFunctionName );
+	pf = (oexPVOID)::GetProcAddress( (HMODULE)m_hModule, x_pFunctionName );
 	if ( !oexCHECK_PTR( pf ) )
 		return oexFALSE;
 
@@ -155,7 +155,7 @@ oexPVOID CModule::Addr( oexINT i )
 oexPVOID CModule::Addr( oexCSTR x_pFunctionName )
 {
 	if ( !oexCHECK_PTR( x_pFunctionName ) || !*x_pFunctionName )
-	{	oexERROR( ERROR_INVALID_PARAMETER, "Invalid function name pointer" );
+	{	oexERROR( ERROR_INVALID_PARAMETER, oexT( "Invalid function name pointer" ) );
 		return oexNULL;
 	} // end if
 

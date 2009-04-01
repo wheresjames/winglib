@@ -94,7 +94,7 @@ oexBOOL CLog::Open( oexCSTR x_pPath )
 	} // end if
 
 	// Create log header
-	oexUINT uThreadId = oexGetCurrentThreadId();
+	oexUINT uThreadId = oexGetCurThreadId();
 	m_file.Write( oexMks(	oexT( ";====================================================================" ), oexNL,
 							oexT( "; Log file    : " ), x_pPath, oexNL,
 							oexT( "; Local Time  : " ), oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL,
@@ -136,7 +136,7 @@ oexBOOL CLog::Resume( oexCSTR x_pPath )
 			return oexFALSE;
 
 		// Create log header
-		oexUINT uThreadId = oexGetCurrentThreadId();
+		oexUINT uThreadId = oexGetCurThreadId();
 		m_file.Write( oexMks(	oexT( ";====================================================================" ), oexNL,
 								oexT( "; Log file    : " ), x_pPath, oexNL,
 								oexT( "; Local Time  : " ), oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL,
@@ -190,7 +190,7 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT 
 			CStr sLog;
 
 			// Add file / line number
-			oexUINT uThreadId = oexGetCurrentThreadId();
+			oexUINT uThreadId = oexGetCurThreadId();
 #if defined( oexFULL_FILENAME_IN_LOG )
 			sLog << x_pFile << oexT( ":(" ) << x_nLine << oexT( ")" )
 #else

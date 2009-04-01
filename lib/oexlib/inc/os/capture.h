@@ -181,7 +181,9 @@ public:
 	virtual oexPVOID GetBuffer() = 0;
 	virtual oexINT GetImageSize() = 0;
 	virtual oexINT GetBufferSize() = 0;
+#if defined ( OEX_ENABLE_XIMAGE )
 	virtual CImage* GetImage() = 0;
+#endif
 	virtual oexINT GetWidth() = 0;
 	virtual oexINT GetHeight() = 0;
 	virtual oexUINT GetFormat() = 0;
@@ -435,6 +437,8 @@ public:
 		return m_pDevice->GetBufferSize();
 	}
 
+#if defined ( OEX_ENABLE_XIMAGE )
+
 	/// Returns an image object containing the video frame
 	virtual CImage* GetImage()
 	{
@@ -443,6 +447,8 @@ public:
 
 		return m_pDevice->GetImage();
 	}
+
+#endif
 
 	/// Returns the image width
 	virtual oexINT GetWidth()

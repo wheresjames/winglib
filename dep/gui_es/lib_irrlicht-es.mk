@@ -11,6 +11,8 @@ PRJ_LIBS :=
 
 PRJ_LIBROOT := ../..
 
+PRJ_DEFS := _IRR_CEGCC_
+
 #ifeq ($(TOOLS),iphone)
 #	PRJ_DEFS := _IRR_IPHONE_PLATFORM_ _IRR_USE_IPHONE_DEVICE_
 #endif

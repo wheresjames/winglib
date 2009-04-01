@@ -36,7 +36,10 @@
 #include "std_os.h"
 
 #include <stdlib.h>
-#include <crtdbg.h>
+
+#if !defined( OEX_WINCE )
+#	include <crtdbg.h>
+#endif
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
@@ -148,6 +151,10 @@ oexBOOL CMem::MemReport()
 
 oexBOOL CMem::DumpLeaks()
 {
+#if defined( OEX_WINCE )
+	return oexFALSE;
+#else
+
     // Custom dump function?
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 
@@ -164,6 +171,8 @@ oexBOOL CMem::DumpLeaks()
 #endif
 
     return bLeaks;
+    
+#endif
 }
 
 

@@ -70,7 +70,7 @@ CStr CTrace::GetBacktrace( oexUINT x_uSkip, oexUINT x_uMax )
 */	
 }
 
-static BOOL GetWSAErrorMsg(LPSTR pMsg, DWORD err)
+static BOOL GetWSAErrorMsg(oexSTR pMsg, oexUINT err)
 {
 	oexTCHAR *ptr = NULL;
 
@@ -230,7 +230,7 @@ static BOOL GetWSAErrorMsg(LPSTR pMsg, DWORD err)
 			ptr =oexT( "WINSOCK.DLL version not supported" );
 			break;
 		case WSAEDISCON:
-			ptr =oexT( "Graceful shutdown in progress" );
+			ptr = oexT( "Graceful shutdown in progress" );
 			break;
 //		case WSA_OPERATION_ABORTED:
 //			ptr =oexT( "Overlapped I/O operation has been aborted" );
@@ -239,13 +239,13 @@ static BOOL GetWSAErrorMsg(LPSTR pMsg, DWORD err)
 //			ptr =oexT( "" );
 //			break;
 		default: 
-			strcpy( pMsg,oexT( "Unspecified error" ) );
+			zstr::Copy( pMsg, oexSTRSIZE - 1, oexT( "Unspecified error" ) );
 			return FALSE;
 			break;
 
 	} // end switch
 
-	strcpy( pMsg, ptr );
+	zstr::Copy( pMsg, oexSTRSIZE - 1, ptr );
 
 	return TRUE;
 }

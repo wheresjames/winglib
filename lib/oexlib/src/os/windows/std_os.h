@@ -37,6 +37,18 @@
 #define STRICT
 #define WIN32_LEAN_AND_MEAN
 
-#include <Windows.h>
+#if defined( OEX_WINCE )
+#	define WIN32_WINNT 0x0400
+#endif
+
+// Use Winsock2
+#ifndef OEX_NOSOCKET2
+#	include <winsock2.h>
+#	pragma comment( lib, "ws2_32.lib" )
+#else
+#	include <winsock.h>
+#endif
+
+#include <windows.h>
 
 

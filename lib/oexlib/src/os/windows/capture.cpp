@@ -35,8 +35,10 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
+#ifndef OEX_NOVIDEO
+
 // *** Video For Windows
-#include <Vfw.h>
+#include <vfw.h>
 #pragma comment( lib, "Vfw32.lib" )
 #include "stdio.h"
 
@@ -46,7 +48,7 @@
 #include <comutil.h>
 
 // *** DirectShow
-#include <DShow.h>
+#include <dshow.h>
 #include <streams.h>
 
 #ifdef oexDEBUG
@@ -57,13 +59,20 @@
 
 #pragma comment( lib, "winmm.lib" )
 
+#endif
+
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 using namespace OEX_NAMESPACE::vid;
 
+#ifndef OEX_NOVIDEO
+
 // Include capture classes
 #include "vfw1.hpp"
 #include "vfw2.hpp"
+
+#endif
+
 
 CCapture::CCapture()
 {
@@ -79,6 +88,10 @@ CCapture::~CCapture()
 
 oexBOOL CCapture::Destroy()
 {
+#ifdef OEX_NOVIDEO
+	return oexFALSE;
+#else
+
 	/// Lose device if any
 	if ( oexCHECK_PTR( m_pDevice ) )
 	{
@@ -108,10 +121,14 @@ oexBOOL CCapture::Destroy()
 #endif
 
 	return oexTRUE;
+#endif
 }
 
 oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit )
 {
+#ifdef OEX_NOVIDEO
+	return oexFALSE;
+#else
 	// Lose previous device
 	Destroy();
 
@@ -159,10 +176,14 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 	} // end if
 
 	return oexTRUE;
+#endif
 }
 
 oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit )
 {
+#ifdef OEX_NOVIDEO
+	return oexFALSE;
+#else
 	// Lose previous device
 	Destroy();
 
@@ -210,5 +231,6 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexIN
 	} // end if
 
 	return oexTRUE;
+#endif
 }
 

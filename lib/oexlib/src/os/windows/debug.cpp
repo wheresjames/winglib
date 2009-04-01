@@ -35,7 +35,9 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
-#include <crtdbg.h>
+#ifndef OEX_NOCRTDEBUG
+#	include <crtdbg.h>
+#endif
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
@@ -102,14 +104,14 @@ void CDebug::Break()
 #endif
 }
 
-void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pStr, oexINT x_nRes, oexINT x_nErr )
+void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x_pFunction, oexCSTR x_pStr, oexINT x_nRes, oexINT x_nErr )
 {
 	oexTCHAR tcModule[ oexSTRSIZE ] = oexT( "" );
 	GetModuleFileName( (HMODULE)GetInstanceHandle(), tcModule, sizeof( tcModule ) );
 	Break( x_nType, x_pFile, x_uLine, x_pFunction, tcModule, x_pStr );
 }
 
-void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr, oexINT x_nRes, oexINT x_nErr )
+void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr, oexINT x_nRes, oexINT x_nErr )
 {
 #if defined( oexDEBUG )
 
@@ -133,7 +135,7 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR x_
 	str << oexT( "Module : " ) << x_pModule << oexNL;
 	str << oexT( "File : " ) << x_pFile << oexNL;
 	str << oexT( "Line : " ) << x_uLine << oexNL << oexNL;
-	str << oexT( "Function : " ) << x_pFunction << oexNL << oexNL;
+	str << oexT( "Function : " ) << oexMbToStr( x_pFunction ) << oexNL << oexNL;
 	str << oexT( "Expression : " ) << CStr( x_pStr ).Replace( oexT( "%" ), oexT( "%%" ) );
 	if ( x_nRes )
 		str << oexT( "Result     : " ) << x_nRes << oexT( " sys:\"" ) << os::CTrace::GetErrorMsg( x_nRes ).Replace( oexT( "%" ), oexT( "%%" ) ).Ptr() << oexT( "\"" ) << oexNL;

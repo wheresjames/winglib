@@ -57,6 +57,33 @@ namespace zstr
         {   return &s[ Length( s ) ];
         }
 
+    /// Copies string, returns the number of bytes copied
+    /**
+        \param [out] dst    -   Buffer that receives the string copy
+        \param [in] sz_dst  -   Size of the buffer in dst
+        \param [in] src     -   Pointer to the string to copy
+    */
+    template < typename T, typename T_SZ >
+        T_SZ Copy( T *dst, T_SZ sz_dst, oexCONST T *src )
+        {
+            oexASSERT_PTR( dst );
+            oexASSERT_PTR( src );
+            
+            if ( 0 >= sz_dst )
+                return 0;
+
+			T_SZ ln_src = zstr::Length( src );
+            if ( ( ln_src + 1 ) > sz_dst )
+                ln_src = sz_dst - 1;
+
+            os::CSys::MemCpy( dst, src, ln_src * sizeof( T ) );
+
+            dst[ ln_src ] = 0;
+
+            return ln_src;
+        }
+
+
 };
 
 

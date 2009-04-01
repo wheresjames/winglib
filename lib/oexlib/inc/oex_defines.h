@@ -237,7 +237,7 @@
 #define oexUniqueGuid( g )					OEX_NAMESPACE::guid::StringToGuid( g, (OEX_NAMESPACE::oexCSTR)NULL, 0 )
 
 // Threads
-#define oexGetCurrentThreadId				OEX_NAMESPACE::os::CSys::GetCurrentThreadId
+#define oexGetCurThreadId					OEX_NAMESPACE::os::CSys::GetCurThreadId
 #define oexLock								OEX_NAMESPACE::CLock
 #define oexAutoLock							OEX_NAMESPACE::CScopeLock
 #define oexEvent							OEX_NAMESPACE::CEvent

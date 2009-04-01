@@ -145,7 +145,7 @@ public:
 	// IsLocked()
 	//==============================================================
 	/// Returns true if the local object is locked
-	oexBOOL IsLocked( oexUINT x_uWho = oexGetCurrentThreadId() )
+	oexBOOL IsLocked( oexUINT x_uWho = oexGetCurThreadId() )
     {
 		if ( !oexCHECK_PTR( m_ptr ) )
 			return oexFALSE;

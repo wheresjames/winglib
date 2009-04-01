@@ -16,6 +16,8 @@ TOOLS	 := local
 #TOOLS	 := snapgear
 #TOOLS	 := mingw32
 
+#OS := $(shell uname -o)
+#ifeq $(OS) GNU/Linux
 
 ifeq ($(OS),win32)
 	LIBLINK	 := static
@@ -32,7 +34,9 @@ ifdef UNICODE
 CFG_CEXTRA := $(CFG_CEXTRA) -DUNICODE -D_UNICODE
 endif
 
-ifeq ($(PLATFORM),windows)
+ifeq ($(BUILD),windows)
+
+	PLATFORM := windows
 
 	ifdef DBG
 		ifeq ($(LIBLINK),static)	
@@ -250,6 +254,38 @@ else
 			CFG_AFLAGS := cq
 
 		endif
+		ifeq ($(TOOLS),cegcc)
+
+			# cegcc
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-wince-cegcc-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm-wince-cegcc/
+
+			CFG_STDLIB := -lole32 
+			CFG_LFLAGS := $(CFG_LEXTRA)
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_WINCE -DOEX_ARM -DOEX_LOWRAM -DOEX_NOVIDEO \
+											    -DOEX_NOCRTDEBUG -DOEX_NOSOCKET2
+			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
+			CFG_AFLAGS := cq
+			
+			CFG_EXE_POST := .exe			
+
+		endif
+		ifeq ($(TOOLS),mingw32ce)
+
+			# mingw32ce
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-wince-mingw32ce-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm-wince-mingw32ce/
+
+			CFG_STDLIB :=
+			CFG_LFLAGS := $(CFG_LEXTRA)
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_WINCE -DOEX_ARM -DOEX_LOWRAM -DOEX_NOVIDEO \
+											    -DOEX_NOCRTDEBUG -DOEX_NOXIMAGE
+			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
+			CFG_AFLAGS := cq
+
+			CFG_EXE_POST := .exe			
+			
+		endif
 		ifeq ($(CFG_TOOLPREFIX),)
 	
 			# Custom tools
@@ -259,7 +295,8 @@ else
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA)
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -fexceptions -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOSHM
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -fexceptions -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSTRUCTINIT \
+									                         -DOEX_PACKBROKEN -DOEX_NOSHM
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 			

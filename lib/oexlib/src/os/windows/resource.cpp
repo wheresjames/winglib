@@ -144,8 +144,8 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 
 			// Wait to see if the thread will shutdown on it's own
 			if ( WAIT_OBJECT_0 != WaitForSingleObject( pRi->hHandle, x_uTimeout ) )
-			{	oexERROR( GetLastError(), "!!! Thread failed to exit gracefully, Calling TerminateThread() !!!" );
-				TerminateThread( pRi->hHandle, FALSE );
+			{	oexERROR( GetLastError(), oexT( "!!! Thread failed to exit gracefully, Calling TerminateThread() !!!" ) );
+				TerminateThread( pRi->hHandle, oexFALSE );
 			} // end if
 
 		case eRtMutex :
@@ -239,7 +239,7 @@ oexRESULT CResource::NewThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData )
 	// Save user data
 	pRi->pData = x_pData;
 	pRi->fnCallback = x_fnCallback;
-	pRi->uOwner = oexGetCurrentThreadId();
+	pRi->uOwner = oexGetCurThreadId();
 
 	// Create a thread
 	pRi->hHandle = CreateThread(	(LPSECURITY_ATTRIBUTES)NULL,
@@ -266,7 +266,7 @@ oexPVOID CResource::ThreadProc( oexPVOID x_pData )
 	} // end if
 
 	// Initialize COM
-	CoInitialize( NULL );
+	CoInitializeEx( NULL, COINIT_MULTITHREADED );
 
 	// Call user thread
 	oexPVOID pRet = pRi->fnCallback( pRi->pData );
@@ -335,7 +335,7 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 		case eRtMutex :
 		case eRtLock :
 			if ( WAIT_OBJECT_0 == WaitForSingleObject( pRi->hHandle, x_uTimeout ) )
-			{	pRi->uOwner = oexGetCurrentThreadId();
+			{	pRi->uOwner = oexGetCurThreadId();
 				return waitSuccess;
 			} // end if
 
@@ -452,18 +452,18 @@ oexINT CResource::WaitMultiple( oexINT x_nCount, CResource **x_pResources, oexUI
 	oexINT nRealIndex[ MAXIMUM_WAIT_OBJECTS ];
 
 	if ( x_nCount > MAXIMUM_WAIT_OBJECTS )
-		oexWARNING( 0, "Number of handles specified is beyond system capabilities!!!" );
+		oexWARNING( 0, oexT( "Number of handles specified is beyond system capabilities!!!" ) );
 
 	// Loop through the handles
 	for( oexINT i = 0; i < x_nCount && nNumHandles < MAXIMUM_WAIT_OBJECTS; i++ )
 	{
 		if ( !x_pResources[ i ]->IsValid() )
-			oexWARNING( 0, "Invalid handle specified to WaitMultiple()" );
+			oexWARNING( 0, oexT( "Invalid handle specified to WaitMultiple()" ) );
 		else
 		{
 			SResourceInfo *pRi = (SResourceInfo*)x_pResources[ i ]->GetHandle();
 			if ( !oexCHECK_PTR( pRi ) )
-				oexERROR( 0, "Invalid data pointer" );
+				oexERROR( 0, oexT( "Invalid data pointer" ) );
 
 			else
 				hHandles[ nNumHandles ] = pRi->hHandle, nRealIndex[ nNumHandles++ ] = i;

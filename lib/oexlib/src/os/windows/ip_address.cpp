@@ -35,11 +35,11 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
-#include <WinSock2.h>
-#pragma comment( lib, "WS2_32.lib" )
+//#include <winsock2.h>
+//#pragma comment( lib, "ws2_32.lib" )
 
-#include <WinInet.h>
-#pragma comment( lib, "WinInet.lib" )
+//#include <wininet.h>
+//#pragma comment( lib, "WinInet.lib" )
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
@@ -97,6 +97,9 @@ oexBOOL CIpAddress::ValidateAddress()
 
 oexBOOL CIpAddress::SetDotAddress( oexCSTR x_pDotAddress, oexINT32 x_uPort, oexINT32 x_uType )
 {
+#if defined( OEX_NOSOCKET2 )
+	return oexFALSE;
+#else
     if ( !oexVERIFY( x_pDotAddress ) )
         return oexFALSE;
 
@@ -108,10 +111,14 @@ oexBOOL CIpAddress::SetDotAddress( oexCSTR x_pDotAddress, oexINT32 x_uPort, oexI
     SetRawAddress( ip, x_uPort, x_uType );
 
     return oexTRUE;
+#endif
 }
 
 CStr CIpAddress::GetDotAddress()
 {   
+#if defined( OEX_NOSOCKET2 )
+	return oexFALSE;
+#else
     in_addr ia;
 
     // Put the address in the structure
@@ -119,6 +126,7 @@ CStr CIpAddress::GetDotAddress()
 
 	// Create dot address if needed
 	return oexStr8ToStr( inet_ntoa( ia ) );
+#endif
 }
 
 oexCONST oexGUID* CIpAddress::GetId( oexGUID *x_pGuid )
@@ -132,6 +140,122 @@ CIpAddress& CIpAddress::SetId( oexCONST oexGUID *x_pGuid )
     os::CSys::MemCpy( &m_guid, x_pGuid, sizeof( m_guid ) );
     return *this;
 }
+
+CStr CIpAddress::BuildUrl( CPropertyBag &x_pbUi )
+{
+	CStr str;
+
+	// Scheme
+	if ( x_pbUi[ oexT( "scheme" ) ].ToString().Length() )
+		str << x_pbUi[ oexT( "scheme" ) ].ToString() << oexT( "://" );
+
+	// Username and password?
+	if ( x_pbUi[ oexT( "username" ) ].ToString().Length() )
+	{
+		if ( x_pbUi[ oexT( "password" ) ].ToString().Length() )
+			str << x_pbUi[ oexT( "username" ) ].ToString()
+			    << oexT( ":" )
+			    << x_pbUi[ oexT( "password" ) ].ToString()
+			    << oexT( "@" );
+		else
+			str << x_pbUi[ oexT( "username" ) ].ToString() << oexT( "@" );
+
+	} // end if
+
+	// Username and password?
+	if ( x_pbUi[ oexT( "host" ) ].ToString().Length() )
+	{
+		if ( x_pbUi[ oexT( "host" ) ].ToString().Length() )
+			str << x_pbUi[ oexT( "host" ) ].ToString()
+			    << oexT( ":" )
+			    << x_pbUi[ oexT( "port" ) ].ToString();
+		else
+			str << x_pbUi[ oexT( "host" ) ].ToString();
+
+	} // end if
+
+	// Ensure separator
+	if ( oexT( '/' ) != *x_pbUi[ oexT( "path" ) ].ToString().Ptr()
+	     && oexT( '\\' ) != *x_pbUi[ oexT( "path" ) ].ToString().Ptr() )
+		str << oexT( '/' );
+
+	// Append the path
+	str << x_pbUi[ oexT( "path" ) ].ToString();
+
+	// Adding separator
+	if ( x_pbUi[ oexT( "extra" ) ].ToString().Length() )
+		str << oexT( "?" ) << x_pbUi[ oexT( "extra" ) ].ToString();
+
+	return str;
+}
+
+
+// Assuming formating like...
+//  http://user:password@www.somesite.com/directory/somefile.php?param=1&param=2
+CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
+{
+    CPropertyBag pb;
+
+    if ( !oexVERIFY( pUrl ) )
+        return CPropertyBag();
+
+    CStr str = pUrl;
+
+	// Read in the scheme
+	pb[ oexT( "scheme" ) ].ToString() = str.Parse( oexT( ":" ) );
+
+	// Trim off leading forward slashes
+	str.LTrim( oexT( ":/" ) );
+
+	// Is there a username / password?
+	CStr tmp = str.Parse( oexT( "@" ) );
+	if ( tmp.Length() )
+	{
+		// Skip the @
+		str++;
+
+		// Divide username and password
+		CStr s = tmp.Parse( oexT( ":" ) );
+		if ( s.Length () )
+		{	pb[ oexT( "username" ) ].ToString() = s;
+			tmp++; pb[ oexT( "password" ) ].ToString() = tmp;
+		} // end if
+		else
+			pb[ oexT( "username" ) ].ToString() = tmp;
+
+	} // end if
+
+	// Is there a username / password?
+	tmp = str.Parse( oexT( "/" ) );
+	if ( tmp.Length() )
+	{
+		CStr s = tmp.Parse( oexT( ":" ) );
+		if ( s.Length () )
+		{	pb[ oexT( "host" ) ].ToString() = s;
+			tmp++; pb[ oexT( "port" ) ].ToString() = tmp;
+		} // end if
+		else
+			pb[ oexT( "host" ) ].ToString() = tmp;
+
+	} // end if
+
+	// Grab the path
+	pb[ oexT( "path" ) ].ToString() = str.Parse( oexT( "?" ) );
+
+	// Trim separator if any
+    if ( oexT( '?' ) == *str.Ptr() )
+        str.LTrim( 1 );
+
+	// Anything left over?
+	if ( str.Length() )
+		pb[ oexT( "extra" ) ].ToString() = str;
+
+	return pb;
+}
+
+/*
+
+	// Dropping this MS stuff because of problems in WINCE
 
 CStr CIpAddress::BuildUrl( CPropertyBag &x_pbUi )
 {
@@ -245,6 +369,7 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
 
     return pb;
 }
+*/
 
 oexBOOL CIpAddress::LookupUrl( oexCSTR x_pUrl, oexINT32 x_uPort, oexINT32 x_uType )
 {
@@ -276,6 +401,9 @@ oexBOOL CIpAddress::LookupUrl( oexCSTR x_pUrl, oexINT32 x_uPort, oexINT32 x_uTyp
 
 oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_uType )
 {
+#if defined( OEX_NOSOCKET2 )
+	return oexFALSE;
+#else
     // Lose old info
     Destroy();
 
@@ -304,5 +432,6 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
     SetRawAddress( ntohl( uAddr ), x_uPort, x_uType );
 
     return oexTRUE;
+#endif
 }
 

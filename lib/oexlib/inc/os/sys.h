@@ -312,13 +312,13 @@ public:
     {   return c_uMaximumWaitObjects; }
 
 	//==============================================================
-	// GetCurrentThreadId()
+	// GetCurThreadId()
 	//==============================================================
     /// Returns the Id of the current thread
 	/**
 
 	*/
-	static oexUINT GetCurrentThreadId();
+	static oexUINT GetCurThreadId();
 
 
 private:
