@@ -18,7 +18,11 @@ int CSqIrrlicht::Init( int width, int height )
 	irr::SIrrlichtCreationParameters param;	
 	param.Bits = 16;
 	param.AntiAlias = true;
+#if defined( _WIN32_WCE )
+	param.WindowSize = irr::core::dimension2d<irr::u32>( width, height );
+#else
 	param.WindowSize = irr::core::dimension2d<irr::s32>( width, height );
+#endif
 	param.DriverType = irr::video::EDT_OPENGL;
 //	param.WindowId = (void*)reinterpret_cast<irr::s32>( GetHandle() );
 	m_pDevice = irr::createDeviceEx( param );

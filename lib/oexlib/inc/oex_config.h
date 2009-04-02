@@ -54,7 +54,15 @@
 #endif
 
 // Are we using windows?
-#if defined( WIN32 ) || defined( _WIN32 )
+#if defined( _WIN32_WCE )
+#	define OEX_WINCE
+#	define OEX_WIN32
+#	define OEX_WINDOWS
+#elif defined( _WIN64_WCE )
+#	define OEX_WINCE
+#	define OEX_WIN64
+#	define OEX_WINDOWS
+#elif defined( WIN32 ) || defined( _WIN32 )
 #	define OEX_WIN32
 #	define OEX_WINDOWS
 #elif defined( WIN64 ) || defined( _WIN64 )
@@ -63,6 +71,7 @@
 #else
 #	define OEX_LINUX
 #endif
+
 
 #if defined( CPU_ARM )
 #	define OEX_CPU_ARM
@@ -97,13 +106,17 @@
 #define OEX_CRT_LEAK_DETECTION
 
 // Enable zip file support
-#if defined( OEX_WIN32 )
+#if defined( OEX_WIN32 ) && !defined( OEX_ARM )
 #	define OEX_ENABLE_ZIP
 #endif
 
 // Enable image support, requires CxImage
 #if !defined( OEX_NOXIMAGE )
 #	define OEX_ENABLE_XIMAGE
+#endif	
+
+#if !defined( OEX_NOVIDEO )
+#	define OEX_ENABLE_VIDEO
 #endif	
 
 #if defined( OEX_WIN32 )

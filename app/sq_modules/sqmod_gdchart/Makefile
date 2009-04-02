@@ -8,7 +8,7 @@ PRJ_NAME := sqmod_gdchart
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind \
 			SqPlus/include SqPlus/sqplus gdchart
-PRJ_LIBS := sqbind oexlib squirrel sqstdlib sqplus gdchart \
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel gdchart \
 			cximage jpeg png zlib tiff
 PRJ_OSLB :=
  

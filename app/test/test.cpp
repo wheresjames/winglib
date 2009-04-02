@@ -357,6 +357,22 @@ oex::oexRESULT TestStrings()
 		 || !oexVERIFY_PTR( str1.Replace( 'z', '*' ).Ptr() ) || !oexVERIFY( !str1.Compare( oexT( "*x\x0*" ), 4 ) ) )
 		return -8;
 
+    str1.Fmt( oexT( "d = %d" ), (oex::oexINT)9 );
+	if ( !oexVERIFY( str1 == oexT( "d = 9" ) ) )
+		return -9;
+
+    str1.Fmt( oexT( "lu = %lu" ), (oex::oexULONG)11 );
+	if ( !oexVERIFY( str1 == oexT( "lu = 11" ) ) )
+		return -9;
+
+    str1.Fmt( oexT( "s = %s" ), "String" );
+	if ( !oexVERIFY( str1 == oexT( "s = String" ) ) )
+		return -9;
+
+    str1.Fmt( oexT( "f = %f" ), (oex::oexDOUBLE)3.14f );
+	if ( !oexVERIFY( str1 == oexT( "f = 3.140000" ) ) )
+		return -9;
+
     str1.Fmt( oexT( "lu = %lu, s = %s, f = %f" ), (oex::oexULONG)11, "String", (oex::oexDOUBLE)3.14f );
 	if ( !oexVERIFY( str1 == oexT( "lu = 11, s = String, f = 3.140000" ) ) )
 		return -9;
@@ -2387,6 +2403,7 @@ oex::oexRESULT Test_CVfsSession()
 }
 */
 
+#if defined( OEX_ENABLE_VIDEO )
 oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 {
 	oex::vid::CCapture cCapture;
@@ -2486,6 +2503,7 @@ oex::oexRESULT Test_CCapture()
 
     return oex::oexRES_OK;
 }
+#endif
 
 //int wmain( int argc, wchar_t *argv[] )
 //int wmain( int argc, wchar_t *argv[], wchar_t *envp[] )
@@ -2557,7 +2575,9 @@ int main(int argc, char* argv[])
 
 //    Test_CVfsSession();
 
+#if defined( OEX_ENABLE_VIDEO )
     Test_CCapture();
+#endif
 
 	// Release sockets
     oex::os::CIpSocket::UninitSockets();

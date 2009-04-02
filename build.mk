@@ -1,5 +1,15 @@
 # build.mk
 
+ifneq ($(PRJ_DEFS),)
+	ifeq ($(BUILD),vs)
+		CFG_ADD_DEFS := $(foreach def,$(PRJ_DEFS),/D$(def) )
+	else
+		CFG_ADD_DEFS := $(foreach def,$(PRJ_DEFS),-D$(def) )
+	endif	
+	CFG_DEFS := $(CFG_DEFS) $(CFG_ADD_DEFS)
+	PRJ_DEFS := 
+endif
+
 ifndef BLD_FILE_EXE
 	ifdef PRJ_FILE_EXE		 
 		BLD_FILE_EXE := $(PRJ_FILE_EXE)
@@ -84,7 +94,7 @@ BLD_OBJECTS_TOTAL 		:= $(BLD_OBJECTS_TOTAL) $(BLD_OBJECTS_$(LOC_TAG))
 #BLD_DEPENDS_TOTAL 		:= $(BLD_DEPENDS_TOTAL) $(BLD_DEPENDS_$(LOC_TAG))
 
 
-ifneq ($(OS),win32)
+ifneq ($(BUILD),vs)
 include $(wildcard $(BLD_PATH_OBJ_$(LOC_TAG))/*.$(CFG_DEP_EXT))
 endif
 
@@ -98,7 +108,7 @@ rebuild_$(LOC_TAG): clean_$(LOC_TAG) all_$(LOC_TAG)
 
 setup_$(LOC_TAG): $(BLD_PATH_OBJ_$(LOC_TAG))
 
-ifeq ($(OS),win32)
+ifeq ($(BUILD),vs)
 
 $(BLD_PATH_OBJ_$(LOC_TAG)):
 	$(CFG_MD) $(subst /,\,$@)
@@ -128,7 +138,7 @@ BLD_CLEAN 	:= $(BLD_CLEAN) clean_$(LOC_TAG)
 $(print BLD_OBJECTS_$(LOC_TAG) )
 $(print $(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) )
 
-ifeq ($(OS),win32)
+ifeq ($(BUILD),vs)
 
 #$(subst $(BLD_PATH_SRC_$(LOC_TAG))/,,$<)
 #$(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_DEP_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))

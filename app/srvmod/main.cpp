@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "stdio.h"
 #include "string.h"
-#include "errno.h"
 
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Start );
 extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
@@ -35,7 +34,7 @@ extern "C" oexDECLARE_SRV_FUNCTION( SRV_GetModuleInfo );
 extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 {
 	if ( !oexCHECK_PTR( pDi ) )
-	{	oexERROR( EINVAL, oexT( "Invalid function argument" ) );
+	{	oexERROR( 0, oexT( "Invalid function argument" ) );
 		return -1;
 	} // end if
 

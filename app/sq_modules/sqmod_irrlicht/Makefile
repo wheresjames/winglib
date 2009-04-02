@@ -6,17 +6,10 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_irrlicht
 PRJ_TYPE := dll
-PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
-		    irrlicht/include
-PRJ_LIBS := sqbind oexlib squirrel sqstdlib sqplus irrlicht jpeg png tiff zlib
+PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel
+PRJ_DEFS := _IRR_COMPILE_WITH_OPENGL_
 
-ifeq ($(PLATFORM),windows)
-	PRJ_DEFS := _IRR_STATIC_LIB_ _IRR_COMPILE_WITH_OPENGL_
-else
-	PRJ_OSLB := X11 GLU Xxf86vm
-	PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OPENGL_ _IRR_USE_LINUX_DEVICE_ _IRR_COMPILE_WITH_X11_
-endif
- 
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
 PRJ_LIBROOT := ../../..
@@ -26,6 +19,23 @@ PRJ_LIBROOT := ../../..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifeq ($(PROC),arm)
+	PRJ_INCS := $(PRJ_INCS) irrlicht-es/include
+	PRJ_LIBS := $(PRJ_LIBS) irrlicht-es jpeg png tiff zlib
+else
+	PRJ_INCS := $(PRJ_INCS) irrlicht/include
+	PRJ_LIBS := $(PRJ_LIBS) irrlicht jpeg png tiff zlib
+endif
+
+ifeq ($(PLATFORM),posix)
+	PRJ_OSLB := X11 GLU Xxf86vm
+	PRJ_DEFS := $(PRJ_DEFS) _IRR_USE_LINUX_DEVICE_ _IRR_COMPILE_WITH_X11_
+else
+	ifeq ($(OS),win32)
+		PRJ_DEFS := $(PRJ_DEFS) _IRR_STATIC_LIB_
+	endif
+endif
+ 
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------

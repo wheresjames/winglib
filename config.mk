@@ -4,8 +4,12 @@ SHELL = /bin/sh
 # config.mk
 # Cross compiler config
 
-OS		 := linux
+BUILD	 := gcc
+#BUILD	 := vs
+
+#OS		 := linux
 #OS		 := win32
+#OS		 := wince
 
 PROC	 := i386
 #PROC	 := arm
@@ -19,7 +23,7 @@ TOOLS	 := local
 #OS := $(shell uname -o)
 #ifeq $(OS) GNU/Linux
 
-ifeq ($(OS),win32)
+ifeq ($(BUILD),vs)
 	LIBLINK	 := static
 else
 	LIBLINK := shared
@@ -34,8 +38,18 @@ ifdef UNICODE
 CFG_CEXTRA := $(CFG_CEXTRA) -DUNICODE -D_UNICODE
 endif
 
-ifeq ($(BUILD),windows)
+ifdef PRJ_DEFS
+	ifeq ($(BUILD),vs)
+		CFG_DEFS := $(foreach def,$(PRJ_DEFS),/D$(def) )
+	else
+		CFG_DEFS := $(foreach def,$(PRJ_DEFS),-D$(def) )
+	endif	
+	PRJ_DEFS := 
+endif
 
+ifeq ($(BUILD),vs)
+
+	OS := win32
 	PLATFORM := windows
 
 	ifdef DBG
@@ -75,6 +89,7 @@ ifeq ($(BUILD),windows)
 	CFG_LD := link /NOLOGO
 	CFG_CC := cl /nologo /DWIN32 /wd4996
 	CFG_AR := lib /nologo
+	
 	CFG_DP := makedepend
 	CFG_MD := md
 	CFG_RM := rmdir /s /q
@@ -94,25 +109,12 @@ ifeq ($(BUILD),windows)
 		CFG_LFLAGS := $(CFG_LFLAGS) /DLL
 	endif
 
-	CFG_OBJ_EXT := obj
-	CFG_DEP_EXT := d
 	CFG_CUR_ROOT := $(shell cd)
 
-	CFG_LIB_PRE	 :=
-	CFG_LIB_POST := .lib
-	CFG_EXE_POST := .exe
-	CFG_DLL_POST := .dll
-	
-	ifdef PRJ_DEFS
-		CFG_DEFS := $(foreach def,$(PRJ_DEFS),/D$(def) )
-	endif	
-	
 else
 
 	# --with-sysroot
 	# --with-headers
-
-	PLATFORM := posix
 
 	ifdef DBG
 		CFG_CEXTRA	 := -g -DDEBUG -D_DEBUG $(CFG_CEXTRA) 
@@ -138,6 +140,9 @@ else
 
 		ifeq ($(TOOLS),snapgear)
 		
+			OS := linux
+			PLATFORM := posix
+		
 			# Snapgear
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/usr/local/bin/arm-linux-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm-linux
@@ -151,6 +156,9 @@ else
 		endif
 		ifeq ($(TOOLS),codesourcery)
 
+			OS := android
+			PLATFORM := posix
+			
 			# Google Android
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/arm/bin/arm-none-eabi-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm/arm-none-eabi
@@ -164,6 +172,9 @@ else
 		endif
 		ifeq ($(TOOLS),nihilism)
 
+			OS := linux
+			PLATFORM := posix
+			
 			# nihilism
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-unknown-linux-gnu-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm-unknown-linux-gnu
@@ -177,6 +188,9 @@ else
 		endif
 		ifeq ($(TOOLS),uclinux)
 
+			OS := linux
+			PLATFORM := posix
+			
 			# uclinux
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/usr/local/bin/arm-linux-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/usr/local/arm-linux
@@ -190,6 +204,9 @@ else
 		endif
 		ifeq ($(TOOLS),openmoko)
 
+			OS := linux
+			PLATFORM := posix
+			
 			# openmoko
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/arm/bin/arm-angstrom-linux-gnueabi-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm/arm-angstrom-linux-gnueabi
@@ -203,6 +220,9 @@ else
 		endif
 		ifeq ($(TOOLS),armel)
 
+			OS := linux
+			PLATFORM := posix
+			
 			# armel
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/usr/bin/arm-linux-gnu-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/usr/
@@ -216,6 +236,9 @@ else
 		endif
 		ifeq ($(TOOLS),buildroot)
 
+			OS := linux
+			PLATFORM := posix
+			
 			# buildroot
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/build_arm/staging_dir/usr/bin/arm-linux-uclibcgnueabi-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/build_arm/staging_dir/
@@ -229,6 +252,9 @@ else
 		endif
 		ifeq ($(TOOLS),crosstool)
 
+			OS := linux
+			PLATFORM := posix
+			
 			# crosstool
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/usr/bin/arm-crosstool-linux-gnueabi-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/usr/arm-crosstool-linux-gnueabi
@@ -242,6 +268,9 @@ else
 		endif
 		ifeq ($(TOOLS),iphone)
 
+			OS := darwin9
+			PLATFORM := posix
+			
 			# iphone
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/tc/toolchain/pre/bin/arm-apple-darwin9-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/tc/toolchain/sys/
@@ -256,14 +285,17 @@ else
 		endif
 		ifeq ($(TOOLS),cegcc)
 
+			OS := wince
+			PLATFORM := windows
+			
 			# cegcc
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-wince-cegcc-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm-wince-cegcc/
 
 			CFG_STDLIB := -lole32 
 			CFG_LFLAGS := $(CFG_LEXTRA)
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_WINCE -DOEX_ARM -DOEX_LOWRAM -DOEX_NOVIDEO \
-											    -DOEX_NOCRTDEBUG -DOEX_NOSOCKET2
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -D_WIN32_WCE=0x0400 -DOEX_ARM -D__int64="long long" \
+											    -DOEX_LOWRAM -DOEX_NOVIDEO -DOEX_NOCRTDEBUG -DOEX_NOXIMAGE 
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 			
@@ -272,14 +304,17 @@ else
 		endif
 		ifeq ($(TOOLS),mingw32ce)
 
+			OS := wince
+			PLATFORM := windows
+			
 			# mingw32ce
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-wince-mingw32ce-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm-wince-mingw32ce/
 
-			CFG_STDLIB :=
+			CFG_STDLIB := -lole32 -laygshell -lwinsock -lws2
 			CFG_LFLAGS := $(CFG_LEXTRA)
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_WINCE -DOEX_ARM -DOEX_LOWRAM -DOEX_NOVIDEO \
-											    -DOEX_NOCRTDEBUG -DOEX_NOXIMAGE
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -D_WIN32_WCE=0x0400 -DOEX_ARM -D__int64="long long" \
+											    -DOEX_LOWRAM -DOEX_NOVIDEO -DOEX_NOCRTDEBUG -DOEX_NOXIMAGE 
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
@@ -288,6 +323,9 @@ else
 		endif
 		ifeq ($(CFG_TOOLPREFIX),)
 	
+			OS := linux
+			PLATFORM := posix
+			
 			# Custom tools
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/$(TOOLS)-
 #			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/sysroot
@@ -306,6 +344,9 @@ else
 	
 		ifeq ($(TOOLS),mingw32)
 
+			OS := win32
+			PLATFORM := windows
+			
 			# Cross compile for windows
 			CFG_TOOLPREFIX := i586-mingw32msvc- 
 
@@ -317,6 +358,9 @@ else
 
 		else
 		
+			OS := linux
+			PLATFORM := posix
+			
 			# Local platform
 			CFG_TOOLPREFIX := 
 
@@ -370,24 +414,35 @@ else
 	CFG_CC_OUT := -o $(nullstring)
 	CFG_LD_OUT := -o $(nullstring)
 
-	CFG_OBJ_EXT := o
-	CFG_DEP_EXT := d
 	CFG_CUR_ROOT := $(shell pwd)
 	
 	CFG_CC_INC := -I
 	
+endif
+
+ifeq ($(PLATFORM),windows)
+
+	CFG_OBJ_EXT  := obj
+	CFG_DEP_EXT  := d
+	CFG_LIB_PRE	 :=
+	CFG_LIB_POST := .lib
+	CFG_EXE_POST := .exe
+	CFG_DLL_POST := .dll
+	
+else
+
+	CFG_OBJ_EXT := o
+	CFG_DEP_EXT := d
 	CFG_LIB_PRE	 := lib
 	CFG_LIB_POST := .a
 	CFG_DLL_PRE	 := lib
 	CFG_DLL_POST := .so
 	
-	ifdef PRJ_DEFS
-		CFG_DEFS := $(foreach def,$(PRJ_DEFS),-D$(def) )
-	endif	
-
 endif
 
-CFG_BUILD_TYPE := $(PLATFORM)-$(OS)-$(PROC)-$(TOOLS)
+
+
+CFG_BUILD_TYPE := $(PLATFORM)-$(BUILD)-$(OS)-$(PROC)-$(TOOLS)
 
 ifdef UNICODE
 CFG_BUILD_TYPE := $(CFG_BUILD_TYPE)-unicode

@@ -44,17 +44,43 @@ namespace sqbind
 		CSqImage() {}
 
 		// Copy semantics
-		CSqImage( const CSqImage &r ) { m_img = r.m_img; }
-		CSqImage& operator=( const CSqImage &r ) { m_img = r.m_img; return *this; }
+		CSqImage( const CSqImage &r ) 
+		{
+#if defined( OEX_ENABLE_XIMAGE )
+			m_img = r.m_img; 
+#endif
+		}
+		CSqImage& operator=( const CSqImage &r ) 
+		{
+#if defined( OEX_ENABLE_XIMAGE )
+			m_img = r.m_img; 
+#endif
+			return *this; 
+		}
 
 		int Load( const stdString &sFile, const stdString &sType )
-		{	return m_img.Load( sFile.c_str(), sType.c_str() ); }
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Load( sFile.c_str(), sType.c_str() ); 
+#endif
+		}
 
 		int Save( const stdString &sFile, const stdString &sType )
-		{	return m_img.Save( sFile.c_str(), sType.c_str() ); }
+		{	
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Save( sFile.c_str(), sType.c_str() ); 
+#endif
+		}
 
 		stdString Encode( const stdString &sType )
 		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return stdString();
+#else
 			oex::oexPBYTE pBuf = oexNULL;
 			oex::oexINT nSize = 0;
 			if ( !m_img.Encode( &pBuf, &nSize, sType.c_str() ) 
@@ -62,10 +88,17 @@ namespace sqbind
 				return oexT( "" );
 			
 			return stdString().assign( (oex::oexCSTR)pBuf, nSize );
+#endif
 		}
 		
 		int Decode( const stdString &sType, const stdString &sData )
-		{	return m_img.Decode( (oex::oexBYTE*)sData.c_str(), sData.length(), sType.c_str() ); }		
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Decode( (oex::oexBYTE*)sData.c_str(), sData.length(), sType.c_str() ); 
+#endif
+		}		
 
 		static void Register( SquirrelVM &vm )
 		{
@@ -79,8 +112,10 @@ namespace sqbind
 
 	private:
 	
+#if defined( OEX_ENABLE_XIMAGE )
 		/// Image object
 		oex::CImage		m_img;
+#endif
 
     };
 

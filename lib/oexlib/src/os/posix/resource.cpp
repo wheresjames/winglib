@@ -152,7 +152,7 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 		case eRtThread :
 		{
 			// Usually the creator will be the destructor
-			if ( pRi->uOwner != oexGetCurrentThreadId() )
+			if ( pRi->uOwner != oexGetCurThreadId() )
 				oexWARNING( 0, oexT( "Thread not being destroyed by owner!" ) );
 
 			// Wait for thread to exit
@@ -305,7 +305,7 @@ oexRESULT CResource::NewThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData )
 	// Save user data
 	pRi->pData = x_pData;
 	pRi->fnCallback = x_fnCallback;
-	pRi->uOwner = oexGetCurrentThreadId();
+	pRi->uOwner = oexGetCurThreadId();
 
 	// Create event object to indicate when thread has shut down properly
 	if ( oexINT nErr = pRi->cSync.NewEvent() )
@@ -423,7 +423,7 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 		{
 			// Have to give other threads polling time to grab the mutex
 			// Otherwise this one could just hog it all the time
-			oexUINT uId = oexGetCurrentThreadId();
+			oexUINT uId = oexGetCurThreadId();
 //			if ( pRi->uLastOwner == uId )
 //				oexMicroSleep( eWaitResolution );
 
@@ -501,7 +501,7 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 
 			// Have to give other threads polling time to grab the mutex
 			// Otherwise this one could just hog it all the time
-			oexUINT uId = oexGetCurrentThreadId();
+			oexUINT uId = oexGetCurThreadId();
 			if ( pRi->uLastOwner == uId )
 				oexMicroSleep( eWaitResolution );
 
@@ -593,7 +593,7 @@ oexRESULT CResource::Signal( oexUINT x_uTimeout )
 
 			// Save thread id on first signal
 			if ( !pRi->bSignaled )
-				pRi->uOwner = oexGetCurrentThreadId();
+				pRi->uOwner = oexGetCurThreadId();
 
 			// Set state to signaled
 			pRi->bSignaled = oexTRUE;
@@ -690,7 +690,7 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 			if ( !al.IsLocked() )
 				return waitTimeout;
 
-			if ( pRi->uOwner && pRi->uOwner != oexGetCurrentThreadId() )
+			if ( pRi->uOwner && pRi->uOwner != oexGetCurThreadId() )
 				return waitFailed;
 
 			if ( 0 >= pRi->nCount )

@@ -8,9 +8,10 @@ PRJ_NAME := irrlicht
 PRJ_TYPE := lib
 PRJ_INCS := irrlicht/source/Irrlicht/zlib
 PRJ_LIBS := 
+PRJ_DEFS := _IRR_COMPILE_WITH_OPENGL_
 
 ifeq ($(PLATFORM),windows)
-	PRJ_DEFS := _IRR_STATIC_LIB_ _IRR_COMPILE_WITH_OPENGL_
+	PRJ_DEFS := $(PRJ_DEFS) _IRR_STATIC_LIB_
 else
 	PRJ_DEFS := $(PRJ_DEFS) _IRR_USE_LINUX_DEVICE_ _IRR_COMPILE_WITH_X11_
 endif
@@ -21,6 +22,13 @@ PRJ_LIBROOT := ..
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
+
+ifneq ($(PROC),i386)
+all:
+	@echo =======================================================
+	@echo = !!! Processor $(PROC) not supported
+	@echo =======================================================
+else
 
 #-------------------------------------------------------------------
 # File locations
@@ -40,4 +48,5 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
+endif
 

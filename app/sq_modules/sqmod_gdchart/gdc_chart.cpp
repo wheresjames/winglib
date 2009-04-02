@@ -22,6 +22,9 @@ sqbind::CSqMulti CGdcChart::GetChart( const sqbind::stdString &x_sType,
 									  const sqbind::stdString &x_sParams,
 									  const sqbind::stdString &x_sData )
 {
+#if !defined( OEX_ENABLE_XIMAGE )
+	return sqbind::CSqMulti();
+#else
 
 	sqbind::CSqMulti mParams( x_sParams.c_str() );
 	sqbind::CSqMulti mData( x_sData.c_str() );
@@ -133,6 +136,7 @@ sqbind::CSqMulti CGdcChart::GetChart( const sqbind::stdString &x_sType,
 	mImg[ oexT( "img" ) ].set( sqbind::stdString().assign( sImg.Ptr(), sImg.Length() ) );
 
 	return mImg;
+#endif
 }
 
 int CGdcChart::SaveChart(	const sqbind::stdString &x_sFile,

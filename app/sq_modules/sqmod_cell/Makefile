@@ -7,7 +7,7 @@ default_target: all
 PRJ_NAME := sqmod_cell
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus cell/lib
-PRJ_LIBS := sqbind oexlib squirrel sqstdlib sqplus cell
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cell
 PRJ_OSLB :=
  
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols

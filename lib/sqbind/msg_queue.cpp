@@ -111,10 +111,10 @@ oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapPara
 {
 	oexEvent evReply;
 
-//	oexPrintf( oexT( "CSqMsgQueue::Msg() : %s -> %s, 0x%08x, 0x%08x\n" ), sPath.c_str(), sMsg.c_str(), m_uCurrentThreadId, (unsigned int)oexGetCurrentThreadId() );
+//	oexPrintf( oexT( "CSqMsgQueue::Msg() : %s -> %s, 0x%08x, 0x%08x\n" ), sPath.c_str(), sMsg.c_str(), m_uCurrentThreadId, (unsigned int)oexGetCurThreadId() );
 
 	// If it's our own thread calling
-	if ( m_uOwnerThreadId && oexGetCurrentThreadId() == m_uOwnerThreadId )
+	if ( m_uOwnerThreadId && oexGetCurThreadId() == m_uOwnerThreadId )
 	{
 		// Just process the message directly
 		if ( pmapParams )

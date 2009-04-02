@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "stdio.h"
 #include "string.h"
-#include "errno.h"
 
 /// Pointer to script thread
 sqbind::CScriptThread	*g_psqScriptThread = oexNULL;
@@ -14,7 +13,7 @@ extern "C" oexDECLARE_SRV_FUNCTION( SRV_GetModuleInfo );
 extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 {
 	if ( !oexCHECK_PTR( pDi ) )
-	{	oexERROR( EINVAL, oexT( "Invalid function argument" ) );
+	{	oexERROR( 0, oexT( "Invalid function argument" ) );
 		return 0;
 	} // end if
 

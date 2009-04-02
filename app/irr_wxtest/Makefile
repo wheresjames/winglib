@@ -4,18 +4,22 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := irrlicht-es
-PRJ_TYPE := lib
-PRJ_INCS := irrlicht-es/source/Irrlicht/zlib
-PRJ_LIBS := 
+PRJ_NAME := irr_wxtest
+PRJ_TYPE := exe
+PRJ_INCS := winglib/lib/oexlib irrlicht/include
+PRJ_LIBS := oexlib irrlicht cximage jpeg png tiff zlib
+
+ifeq ($(OS),win32)
+	PRJ_LIBS := $(PRJ_LIBS) wxWidgets
+	PRJ_DEFS := _IRR_STATIC_LIB_ _IRR_COMPILE_WITH_OPENGL_
+else
+	PRJ_EXTC := `wx-config --cppflags`
+	PRJ_EXTL := `wx-config --libs`
+	PRJ_OSLB := X11 GLU Xxf86vm
+	PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OPENGL_ _IRR_USE_LINUX_DEVICE_ _IRR_COMPILE_WITH_X11_
+endif
 
 PRJ_LIBROOT := ../..
-
-PRJ_DEFS := _IRR_CEGCC_
-
-#ifeq ($(TOOLS),iphone)
-#	PRJ_DEFS := _IRR_IPHONE_PLATFORM_ _IRR_USE_IPHONE_DEVICE_
-#endif
 
 #-------------------------------------------------------------------
 # Configure build
@@ -25,14 +29,7 @@ include $(PRJ_LIBROOT)/config.mk
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------
-
-ifeq ($(OS),win32)
-CFG_CFLAGS := $(CFG_CFLAGS) /DIRRLICHT_EXPORTS
-endif
-
 export LOC_TAG := def
-LOC_INC_def := $(CFG_LIBROOT)/irrlicht-es/include
-LOC_SRC_def := $(CFG_LIBROOT)/irrlicht-es/source/Irrlicht
 include $(PRJ_LIBROOT)/build.mk
 
 #-------------------------------------------------------------------

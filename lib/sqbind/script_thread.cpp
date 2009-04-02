@@ -69,7 +69,7 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 		return oex::oexFALSE;
 
 	// Save thread id
-	SetOwnerThreadId( oexGetCurrentThreadId() );
+	SetOwnerThreadId( oexGetCurThreadId() );
 
 	// Set module manager
 	m_cSqEngine.SetModuleManager( m_pModuleManager );
@@ -79,7 +79,7 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 
 	// Let the user know we're starting a thread
 	oexPrintf( oexT( "Spawning : 0x%08x : %s : %s\n" ),
-			  (unsigned int)oexGetCurrentThreadId(), m_sName.c_str(), oexGetFileName( m_sScript.c_str() ).Ptr() );
+			  (unsigned int)oexGetCurThreadId(), m_sName.c_str(), oexGetFileName( m_sScript.c_str() ).Ptr() );
 
 	// Start the script
 	if ( !m_cSqEngine.Load( m_sScript.c_str(), m_bFile, FALSE ) )
@@ -131,7 +131,7 @@ oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 
 	// Let the user know we're starting a thread
 	oexPrintf( oexT( "Exiting : 0x%08x : %s\n" ),
-			   (unsigned int)oexGetCurrentThreadId(), m_sName.c_str() );
+			   (unsigned int)oexGetCurThreadId(), m_sName.c_str() );
 
 	return 0;
 }
@@ -139,7 +139,7 @@ oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply )
 {
 	// Just post it to the queue if not our message
-	if ( GetOwnerThreadId() != oexGetCurrentThreadId() )
+	if ( GetOwnerThreadId() != oexGetCurThreadId() )
 		return Msg( stdString(), sMsg, &mapParams, pReply );
 
 	if ( sMsg == oexT( "spawn" ) )
