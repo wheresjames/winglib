@@ -1,6 +1,6 @@
 
 
-#if 0 // defined( _WIN32_WCE )
+#if defined( _WIN32_WCE )
 
 #include "stdafx.h"
 #include <windows.h>
@@ -92,7 +92,7 @@ public:
 	virtual SMaterial& getMaterial(u32 i)
 	{
 		return Material;
-	}	
+	}
 };
 
 
@@ -104,13 +104,14 @@ int main()
 #endif
 {
 	//E_DRIVER_TYPE driverType = EDT_BURNINGSVIDEO;
-	E_DRIVER_TYPE driverType = EDT_OPENGL;
+//	E_DRIVER_TYPE driverType = EDT_OPENGL;
+	E_DRIVER_TYPE driverType = EDT_OGLES1;
 
 	// create device
 
 	IrrlichtDevice *device =
 		createDevice(driverType, dimension2d<u32>(240, 320), 16, true );
-		
+
 	if (device == 0)
 		return 1; // could not create selected driver.
 
@@ -134,7 +135,7 @@ int main()
 	}
 
 
-	IGUIStaticText *text = 
+	IGUIStaticText *text =
 	guienv->addStaticText(L"FPS: 25",
 		rect<s32>(60,5,200,20), false );
 
@@ -142,10 +143,10 @@ int main()
 
 	smgr->addCameraSceneNode(0, vector3df(0,-40,0), vector3df(0,0,0));
 
-	CSampleSceneNode *myNode = 
+	CSampleSceneNode *myNode =
 		new CSampleSceneNode(smgr->getRootSceneNode(), smgr, 666);
 
-	ISceneNodeAnimator* anim = 
+	ISceneNodeAnimator* anim =
 		smgr->createRotationAnimator(vector3df(0.8f, 0, 0.8f));
 
 	if(anim)
@@ -177,7 +178,7 @@ int main()
 	}
 
 	device->drop();
-	
+
 	return 0;
 }
 
@@ -207,16 +208,16 @@ int Init( int width, int height )
 
 #if defined( _WIN32_WCE )
 
-	g_pDevice = irr::createDevice( irr::video::EDT_OPENGL, 
-								   irr::core::dimension2d< irr::u32 >( 120, 160 ), 
+	g_pDevice = irr::createDevice( irr::video::EDT_OGLES1,
+								   irr::core::dimension2d< irr::u32 >( 320, 240 ),
 								   16, true );
 
-//	g_pDevice = irr::createDevice( irr::video::EDT_OGLES1, irr::core::dimension2d<irr::u32>(width, height), 
+//	g_pDevice = irr::createDevice( irr::video::EDT_OGLES1, irr::core::dimension2d<irr::u32>(width, height),
 //	     						   16, true, false, false, 0 );
 
 
 //	irr::SIrrlichtCreationParameters param;
-//	oexZeroMemory( &param, sizeof( param ) );	
+//	oexZeroMemory( &param, sizeof( param ) );
 //	param.Bits = 16;
 //	param.WindowSize = irr::core::dimension2d<irr::u32>( width, height );
 //	param.DriverType = irr::video::EDT_OGLES1;
@@ -226,13 +227,12 @@ int Init( int width, int height )
 #else
 
 	irr::SIrrlichtCreationParameters param;
-	oexZeroMemory( &param, sizeof( param ) );	
 	param.Bits = 16;
 	param.AntiAlias = true;
 	param.WindowSize = irr::core::dimension2d<irr::s32>( width, height );
 	param.DriverType = irr::video::EDT_OPENGL;
 	g_pDevice = irr::createDeviceEx( param );
-	
+
 #endif
 
 
@@ -245,8 +245,8 @@ int Init( int width, int height )
 
 	else
 	{
-//		m_pDevice->setWindowCaption( oexT( "Irrlicht Engine" ) );	
-	
+//		m_pDevice->setWindowCaption( oexT( "Irrlicht Engine" ) );
+
 		irr::scene::ISceneManager *smgr = g_pDevice->getSceneManager();
 		irr::video::IVideoDriver *driver = g_pDevice->getVideoDriver();
 
@@ -256,14 +256,14 @@ int Init( int width, int height )
 		smgr->addLightSceneNode( 0, irr::core::vector3df( 0, 100, -50 ),
 								 irr::video::SColorf( 0.5f, 0.5f, 0.5f ), 100 );
 
-		irr::scene::ICameraSceneNode *camera = 
-			smgr->addCameraSceneNode( 0, irr::core::vector3df( 0, 30, -40 ), 
+		irr::scene::ICameraSceneNode *camera =
+			smgr->addCameraSceneNode( 0, irr::core::vector3df( 0, 30, -40 ),
 									  irr::core::vector3df( 0, 5, 0 ) );
-		
+
 		irr::scene::ISceneNode *node = smgr->addCubeSceneNode( 10.f );
 		if ( node )
 		{
-			irr::scene::ISceneNodeAnimator* rotate = 
+			irr::scene::ISceneNodeAnimator* rotate =
 				smgr->createRotationAnimator( irr::core::vector3df( 0, 0.4f, 0 ) );
 
 			node->addAnimator( rotate );
@@ -301,7 +301,7 @@ int main( int argc, char* argv[] )
 	// Init irrilcht device
 	Init( 320, 240 );
 
-	// Run the scene	
+	// Run the scene
 	while ( !Draw() )
 		oexSleep( 30 );
 

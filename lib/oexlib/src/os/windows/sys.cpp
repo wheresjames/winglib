@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -110,7 +110,7 @@ oexINT CSys::ShowMessageBox( oexCSTR x_pTitle, oexCSTR x_pStr )
 		x_pTitle = oexT( "" );
  	if ( !oexCHECK_PTR( x_pStr ) )
 		x_pStr = oexT( "" );
-	return ::MessageBox( NULL, x_pStr, x_pTitle, MB_OK ); 
+	return ::MessageBox( NULL, x_pStr, x_pTitle, MB_OK );
 }
 
 oexINT CSys::Quit( oexINT x_nReturnCode )
@@ -131,7 +131,7 @@ oexINT CSys::Flush_stdout()
 
 oexCSTR8 CSys::StrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, ... )
 {
-	oexVaList ap; oexVaStart( ap, x_pFmt );	
+	oexVaList ap; oexVaStart( ap, x_pFmt );
 	oexCSTR8 pStr = vStrFmt( x_pDst, x_uMax, x_pFmt, ap );
 	oexVaEnd( ap );
 	return pStr;
@@ -145,7 +145,7 @@ oexCSTR8 CSys::vStrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, oexVaLi
 
 oexCSTR8 CSys::StrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, ... )
 {
-	oexVaList ap; oexVaStart( ap, x_pFmt );	
+	oexVaList ap; oexVaStart( ap, x_pFmt );
 	oexCSTR8 pStr = vStrFmt( x_pRes, x_pDst, x_uMax, x_pFmt, ap );
 	oexVaEnd( ap );
 	return pStr;
@@ -176,7 +176,8 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 #else
 
 	// Create format string
-	if ( 0 > VSNPRINTF( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
+	oexINT nRet = VSNPRINTF( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs );
+	if ( 0 > nRet || x_uMax < nRet )
 	{
 		// Null terminate buffer
 		x_pDst[ x_uMax - 1 ] = 0;
@@ -189,56 +190,56 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 #endif
 
 	// What to do with the result
-	if ( x_pRes ) 
+	if ( x_pRes )
 		*x_pRes = res;
 
-	else 
+	else
 		oexASSERT( 0 == res );
 
 	return x_pDst;
 }
 
-oexINT64 CSys::StrToInt64( oexCSTR8 x_pStr, oexUINT x_uRadix ) 
+oexINT64 CSys::StrToInt64( oexCSTR8 x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-    return STRTOLL( x_pStr, NULL, x_uRadix ); 
+    return STRTOLL( x_pStr, NULL, x_uRadix );
 }
 
-oexUINT64 CSys::StrToUInt64( oexCSTR8 x_pStr, oexUINT x_uRadix ) 
+oexUINT64 CSys::StrToUInt64( oexCSTR8 x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-    return STRTOLL( x_pStr, NULL, x_uRadix ); 
+    return STRTOLL( x_pStr, NULL, x_uRadix );
 }
 
-oexLONG CSys::StrToLong( oexCSTR8 x_pStr, oexUINT x_uRadix ) 
+oexLONG CSys::StrToLong( oexCSTR8 x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-	return strtol( x_pStr, NULL, x_uRadix ); 
+	return strtol( x_pStr, NULL, x_uRadix );
 }
 
-oexULONG CSys::StrToULong( oexCSTR8 x_pStr, oexUINT x_uRadix ) 
+oexULONG CSys::StrToULong( oexCSTR8 x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-	return strtoul( x_pStr, NULL, x_uRadix ); 
+	return strtoul( x_pStr, NULL, x_uRadix );
 }
 
-oexFLOAT CSys::StrToFloat( oexCSTR8 x_pStr ) 
+oexFLOAT CSys::StrToFloat( oexCSTR8 x_pStr )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-	return (oexFLOAT)strtod( x_pStr, NULL ); 
+	return (oexFLOAT)strtod( x_pStr, NULL );
 }
 
-oexDOUBLE CSys::StrToDouble( oexCSTR8 x_pStr ) 
+oexDOUBLE CSys::StrToDouble( oexCSTR8 x_pStr )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-	return strtod( x_pStr, NULL ); 
+	return strtod( x_pStr, NULL );
 }
 
 // **** Unicode
 
 oexCSTRW CSys::StrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, ... )
 {
-	oexVaList ap; oexVaStart( ap, x_pFmt );	
+	oexVaList ap; oexVaStart( ap, x_pFmt );
 	oexCSTRW pStr = vStrFmt( x_pDst, x_uMax, x_pFmt, ap );
 	oexVaEnd( ap );
 	return pStr;
@@ -252,7 +253,7 @@ oexCSTRW CSys::vStrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, oexVaLi
 
 oexCSTRW CSys::StrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, ... )
 {
-	oexVaList ap; oexVaStart( ap, x_pFmt );	
+	oexVaList ap; oexVaStart( ap, x_pFmt );
 	oexCSTRW pStr = vStrFmt( x_pRes, x_pDst, x_uMax, x_pFmt, ap );
 	oexVaEnd( ap );
 	return pStr;
@@ -283,11 +284,24 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 #else
 
 #if defined( OEX_WINCE )
-	return oexFALSE;
+
+	// Create format string
+	oexINT nRet = VSNWPRINTF( x_pDst, x_pFmt, (va_list)x_pArgs );
+	if ( 0 > nRet || x_uMax < nRet )
+	{
+		// Null terminate buffer
+		x_pDst[ x_uMax - 1 ] = 0;
+
+		// Let the user know what went wrong
+		res = c_StrErr_INSUFFICIENT_BUFFER;
+
+	} // end if
+
 #else
 
 	// Create format string
-	if ( 0 > VSNWPRINTF( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs ) )
+	oexINT nRet = VSNWPRINTF( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs );
+	if ( 0 > nRet || x_uMax < nRet )
 	{
 		// Null terminate buffer
 		x_pDst[ x_uMax - 1 ] = 0;
@@ -301,72 +315,72 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 #endif
 
 	// What to do with the result
-	if ( x_pRes ) 
+	if ( x_pRes )
 		*x_pRes = res;
 
-	else 
+	else
 		oexASSERT( 0 == res );
 
 	return x_pDst;
 }
 
-oexINT64 CSys::StrToInt64( oexCSTRW x_pStr, oexUINT x_uRadix ) 
+oexINT64 CSys::StrToInt64( oexCSTRW x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 #if defined( OEX_WINCE )
 	return oexFALSE;
 #else
-	return _wcstoi64( x_pStr, NULL, x_uRadix ); 
+	return _wcstoi64( x_pStr, NULL, x_uRadix );
 #endif
 }
 
-oexUINT64 CSys::StrToUInt64( oexCSTRW x_pStr, oexUINT x_uRadix ) 
+oexUINT64 CSys::StrToUInt64( oexCSTRW x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 #if defined( OEX_WINCE )
 	return oexFALSE;
 #else
-	return _wcstoui64( x_pStr, NULL, x_uRadix ); 
+	return _wcstoui64( x_pStr, NULL, x_uRadix );
 #endif
 }
 
-oexLONG CSys::StrToLong( oexCSTRW x_pStr, oexUINT x_uRadix ) 
+oexLONG CSys::StrToLong( oexCSTRW x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 #if defined( OEX_WINCE )
 	return oexFALSE;
 #else
-	return wcstol( x_pStr, NULL, x_uRadix ); 
+	return wcstol( x_pStr, NULL, x_uRadix );
 #endif
 }
 
-oexULONG CSys::StrToULong( oexCSTRW x_pStr, oexUINT x_uRadix ) 
+oexULONG CSys::StrToULong( oexCSTRW x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 #if defined( OEX_WINCE )
 	return oexFALSE;
 #else
-	return wcstoul( x_pStr, NULL, x_uRadix ); 
+	return wcstoul( x_pStr, NULL, x_uRadix );
 #endif
 }
 
-oexFLOAT CSys::StrToFloat( oexCSTRW x_pStr ) 
+oexFLOAT CSys::StrToFloat( oexCSTRW x_pStr )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 #if defined( OEX_WINCE )
 	return oexFALSE;
 #else
-	return (oexFLOAT)wcstod( x_pStr, NULL ); 
+	return (oexFLOAT)wcstod( x_pStr, NULL );
 #endif
 }
 
-oexDOUBLE CSys::StrToDouble( oexCSTRW x_pStr ) 
+oexDOUBLE CSys::StrToDouble( oexCSTRW x_pStr )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 #if defined( OEX_WINCE )
 	return oexFALSE;
 #else
-	return wcstod( x_pStr, NULL ); 
+	return wcstod( x_pStr, NULL );
 #endif
 }
 
@@ -445,7 +459,7 @@ static oexBOOL CSys_ReleaseMicroSleep()
 static oexBOOL CSys_InitMicroSleep()
 {
     if ( 0 <= g_microsleep_socket_init )
-        return oexTRUE;   
+        return oexTRUE;
 
 	WSADATA wd;
 	if ( 0 != WSAStartup( 0x0101, &wd ) )
@@ -456,8 +470,8 @@ static oexBOOL CSys_InitMicroSleep()
     g_microsleep_socket = socket( AF_INET, SOCK_RAW, 0 );
     if ( INVALID_SOCKET == g_microsleep_socket )
     {   oexASSERT( 0 );
-        CSys_ReleaseMicroSleep();         
-        return oexFALSE; 
+        CSys_ReleaseMicroSleep();
+        return oexFALSE;
     } // end if
 
     // Set the fd_set structure
@@ -473,8 +487,8 @@ oexBOOL CSys::MicroSleep( oexUINT uMicroseconds, oexUINT uSeconds )
     // Ensure we're initialized
     if ( 0 > g_microsleep_socket_init )
         if ( !CSys_InitMicroSleep() )
-        {   Sleep( uMicroseconds / 1000, uSeconds ); 
-            return oexFALSE; 
+        {   Sleep( uMicroseconds / 1000, uSeconds );
+            return oexFALSE;
         } // end if
 
     // Fill in wait structure
@@ -482,8 +496,8 @@ oexBOOL CSys::MicroSleep( oexUINT uMicroseconds, oexUINT uSeconds )
     g_tv_microsleep_socket.tv_usec = uMicroseconds;
 
     // Let the socket do the waiting
-    return 0 == select( 0, NULL, NULL, 
-                        &g_fd_set_microsleep_socket, 
+    return 0 == select( 0, NULL, NULL,
+                        &g_fd_set_microsleep_socket,
                         &g_tv_microsleep_socket ) ? oexTRUE : oexFALSE;
 }
 
@@ -508,7 +522,7 @@ void CSys::CloseHandle( t_WAITABLE x_pHandle )
 CSys::t_WAITABLE CSys::DuplicateHandle( t_WAITABLE x_pHandle )
 {
     HANDLE hDup = NULL;
-    if ( !::DuplicateHandle( GetCurrentProcess(), (HANDLE)x_pHandle, 
+    if ( !::DuplicateHandle( GetCurrentProcess(), (HANDLE)x_pHandle,
                              GetCurrentProcess(), &hDup,
                              0, FALSE, DUPLICATE_SAME_ACCESS ) )
         return NULL;
@@ -517,9 +531,9 @@ CSys::t_WAITABLE CSys::DuplicateHandle( t_WAITABLE x_pHandle )
 
 oexINT CSys::WaitForSingleObject( CSys::t_WAITABLE x_pHandle, oexUINT x_uTimeout )
 {	DWORD dwRet = ::WaitForSingleObject( (HANDLE)x_pHandle, (DWORD)x_uTimeout );
-	if ( WAIT_OBJECT_0 == dwRet ) 
+	if ( WAIT_OBJECT_0 == dwRet )
         return waitSuccess;
-	else if ( WAIT_TIMEOUT == dwRet ) 
+	else if ( WAIT_TIMEOUT == dwRet )
         return waitTimeout;
 	return waitFailed;
 }
@@ -536,13 +550,13 @@ oexINT CSys::WaitForMultipleObjects( oexUINT x_uObjects, CSys::t_WAITABLE *x_pHa
 	oexSTATIC_ASSERT( WAIT_OBJECT_0 == 0 );
 
 	// Use this line if WAIT_OBJECT_0 is not zero
-//	if ( WAIT_OBJECT_0 <= dwRet && ( WAIT_OBJECT_0 + x_uObjects ) > dwRet ) 
+//	if ( WAIT_OBJECT_0 <= dwRet && ( WAIT_OBJECT_0 + x_uObjects ) > dwRet )
 //        return dwRet - WAIT_OBJECT_0;
-	
-	if ( ( WAIT_OBJECT_0 + x_uObjects ) > dwRet ) 
+
+	if ( ( WAIT_OBJECT_0 + x_uObjects ) > dwRet )
         return (etWait)dwRet;
 
-	else if ( WAIT_TIMEOUT == dwRet ) 
+	else if ( WAIT_TIMEOUT == dwRet )
         return waitTimeout;
 
 	return waitFailed;
@@ -587,13 +601,13 @@ oexBOOL CSys::GetLocalTime( STime &t )
     SYSTEMTIME st;
     CSys::Zero( &st, sizeof( st ) );
 
-    ::GetLocalTime( &st ); 
+    ::GetLocalTime( &st );
     CSys_SystemTimeToSTime( st, t );
 
     TIME_ZONE_INFORMATION tz;
     CSys::Zero( &tz, sizeof( tz ) );
 
-    ::GetTimeZoneInformation( &tz ); 
+    ::GetTimeZoneInformation( &tz );
     t.nTzBias = tz.Bias;
 
     return oexTRUE;
@@ -604,7 +618,7 @@ oexINT CSys::GetLocalTzBias()
     TIME_ZONE_INFORMATION tz;
     CSys::Zero( &tz, sizeof( tz ) );
 
-    ::GetTimeZoneInformation( &tz ); 
+    ::GetTimeZoneInformation( &tz );
     return tz.Bias;
 }
 
@@ -616,7 +630,7 @@ oexBOOL CSys::GetSystemTime( STime &t )
     SYSTEMTIME st;
     CSys::Zero( &st, sizeof( st ) );
 
-    ::GetSystemTime( &st ); 
+    ::GetSystemTime( &st );
     CSys_SystemTimeToSTime( st, t );
 
     return oexTRUE;

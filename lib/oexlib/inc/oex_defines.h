@@ -95,16 +95,27 @@
 
 #endif
 
-#if defined( OEX_WIN32 )
+#if defined( OEX_GCC )
+#	define oexVaList				        __builtin_va_list
+#	define oexVaStart				        __builtin_va_start
+#	define oexVaEnd					        __builtin_va_end
+#	define oexVaArg					        __builtin_va_arg
+#elif defined( OEX_WIN32 )
 #	define oexVaList				        OEX_NAMESPACE::oexPVOID
 #	define oexVaStart( v, p )		        ( v = ( ( (OEX_NAMESPACE::oexPVOID*)&p ) + 1 ) )
 #	define oexVaEnd( v )
 #	define oexVaArg( v, t )			        ( (t)( v++ ) )
 #else
-#	define oexVaList				        __builtin_va_list
-#	define oexVaStart				        __builtin_va_start
-#	define oexVaEnd					        __builtin_va_end
-#	define oexVaArg					        __builtin_va_arg
+// +++ Please fix this, don't want windows.h in the name space
+#if defined( OEX_WINCE )
+#	define WIN32_WINNT 0x0400
+#	include <windows.h>
+#endif
+#	include <stdarg.h>
+#	define oexVaList				        va_list
+#	define oexVaStart		    		    va_start
+#	define oexVaEnd						    va_end
+#	define oexVaArg					        va_arg
 #endif
 
 #define oexTT( c, s )				        ( 1 == sizeof( c ) ? ( ( c* )( s ) ) : ( ( c* )( L##s ) ) )
@@ -123,6 +134,9 @@
 
 #	define oexT( s )				        ( L##s )
 #	define oexTEXT( s )				        oexT( s )
+
+#	define oexPT( s )				        ( L##s )
+#	define oexPTEXT( s )			        oexPT( s )
 
 #	define oexStrToMb( s )			        OEX_NAMESPACE::CStr8().ToMb( s )
 #	define oexStrToMbPtr( s )		        OEX_NAMESPACE::CStr8().ToMb( s ).Ptr()
@@ -146,6 +160,14 @@
 
 #	define oexT( s )				        s
 #	define oexTEXT( s )				        s
+
+#if defined( OEX_WINCE )
+#	define oexPT( s )				        ( L##s )
+#	define oexPTEXT( s )			        oexPT( s )
+#else
+#	define oexPT( s )				        s
+#	define oexPTEXT( s )			        s
+#endif
 
 #	define oexStrToMb( s )			        ( s )
 #	define oexStrToMbPtr( s )		        ( s )

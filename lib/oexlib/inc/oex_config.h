@@ -53,6 +53,10 @@
 #	define OEX_CPU_64
 #endif
 
+#if defined( __GNUC__ )
+#	define OEX_GCC
+#endif
+
 // Are we using windows?
 #if defined( _WIN32_WCE )
 #	define OEX_WINCE
@@ -113,11 +117,11 @@
 // Enable image support, requires CxImage
 #if !defined( OEX_NOXIMAGE )
 #	define OEX_ENABLE_XIMAGE
-#endif	
+#endif
 
 #if !defined( OEX_NOVIDEO )
 #	define OEX_ENABLE_VIDEO
-#endif	
+#endif
 
 #if defined( OEX_WIN32 )
 #	define oexCDECL	_cdecl

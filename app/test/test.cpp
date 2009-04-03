@@ -365,7 +365,7 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str1 == oexT( "lu = 11" ) ) )
 		return -9;
 
-    str1.Fmt( oexT( "s = %s" ), "String" );
+    str1.Fmt( oexT( "s = %s" ), oexPT( "String" ) );
 	if ( !oexVERIFY( str1 == oexT( "s = String" ) ) )
 		return -9;
 
@@ -373,7 +373,7 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str1 == oexT( "f = 3.140000" ) ) )
 		return -9;
 
-    str1.Fmt( oexT( "lu = %lu, s = %s, f = %f" ), (oex::oexULONG)11, "String", (oex::oexDOUBLE)3.14f );
+    str1.Fmt( oexT( "lu = %lu, s = %s, f = %f" ), (oex::oexULONG)11, oexPT( "String" ), (oex::oexDOUBLE)3.14f );
 	if ( !oexVERIFY( str1 == oexT( "lu = 11, s = String, f = 3.140000" ) ) )
 		return -9;
 
@@ -797,26 +797,26 @@ oex::oexRESULT TestLists()
     if( !oexVERIFY( lst.First().Obj() == 11 ) )
         return -7;
 
-	oex::TList< int > lst2;
+	oex::TList< int > lst_2;
 
     oex::TList< int >::iterator itMove = lst.First();
 
     lst.Remove( itMove );
-    lst2.Insert( itMove );
+    lst_2.Insert( itMove );
 
     if( !oexVERIFY( lst.First().Obj() == 4 ) )
         return -8;
 
-    if( !oexVERIFY( lst2.First().Obj() == 11 ) )
+    if( !oexVERIFY( lst_2.First().Obj() == 11 ) )
         return -9;
 
     // Append second list onto the first
-    lst.Append( lst2 );
+    lst.Append( lst_2 );
 
     if( !oexVERIFY( lst.Last().Obj() == 11 ) )
         return -10;
 
-    if( !oexVERIFY( !lst2.Size() ) )
+    if( !oexVERIFY( !lst_2.Size() ) )
         return -11;
 
     // Destroy the list
