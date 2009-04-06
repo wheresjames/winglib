@@ -3,6 +3,11 @@
 #include "stdio.h"
 #include "string.h"
 
+#if defined ( OEX_WINDOWS )
+#include <windows.h>
+BOOL WINAPI DllMain( HANDLE hinstDLL, DWORD dwReason, LPVOID lpvReserved ) { return true; }
+#endif
+
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Start );
 extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
 {

@@ -72,10 +72,15 @@ stdString CSqEngineExport::md5( const stdString &sStr )
 }
 
 
-int CSqEngineExport::spawn( const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile )
+int CSqEngineExport::spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile )
 {	CSqMsgQueue *q = queue();
 	if ( !q ) return -1;
-	return q->spawn( oexNULL, sPath, sName, sScript, bFile );
+
+	if ( !nRet )
+		return q->spawn( oexNULL, sPath, sName, sScript, bFile );
+
+	stdString sRet;
+	return q->spawn( &sRet, sPath, sName, sScript, bFile );
 }
 
 int CSqEngineExport::run( const stdString &sPath, const stdString &sScript )
@@ -84,10 +89,10 @@ int CSqEngineExport::run( const stdString &sPath, const stdString &sScript )
 	return q->run( oexNULL, sPath, sScript );
 }
 
-int CSqEngineExport::is_thread( const stdString &sPath )
+int CSqEngineExport::is_path( const stdString &sPath )
 {	CSqMsgQueue *q = queue();
 	if ( !q ) return 0;
-
+	return q->is_path( sPath );
 }
 
 stdString CSqEngineExport::execute( int nRet, const stdString &sPath, const stdString &sFunction )
@@ -339,6 +344,7 @@ oex::oexBOOL CSqEngine::Init()
 											.func( &CSqEngineExport::sleep,             oexT( "sleep" ) )
 											.func( &CSqEngineExport::spawn,             oexT( "spawn" ) )
 											.func( &CSqEngineExport::run,               oexT( "run" ) )
+											.func( &CSqEngineExport::is_path,           oexT( "is_path" ) )
 											.func( &CSqEngineExport::execute,           oexT( "execute" ) )
 											.func( &CSqEngineExport::execute1,          oexT( "execute1" ) )
 											.func( &CSqEngineExport::execute2,          oexT( "execute2" ) )

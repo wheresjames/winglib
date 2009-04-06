@@ -1299,11 +1299,7 @@ oex::oexRESULT TestFile()
     oex::CStr sFileName, sContents = oexT( "Safe to delete this file." );
 
     // Create file name
-#if defined( OEX_WIN32 )
-    sFileName << oexT( "C:/" ) << oex::CStr().GuidToString() << oexT( ".txt" );
-#else
-    sFileName << oexT( "/tmp/" ) << oex::CStr().GuidToString() << oexT( ".txt" );
-#endif
+    sFileName << oex::CStr().GuidToString() << oexT( ".txt" );
 
     if ( !oexVERIFY( f.CreateNew( sFileName.Ptr() ).IsOpen() ) )
         return -1;

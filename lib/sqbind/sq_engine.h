@@ -79,13 +79,13 @@ public:
 	stdString md5( const stdString &sStr );
 
 	/// Creates a thread
-	int spawn( const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
+	int spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
 
 	/// Executes the specified script
 	int run( const stdString &sPath, const stdString &sScript );
 
-	/// Checks for threads existence
-	int is_thread( const stdString &sPath );
+	/// Checks for path/threads existence
+	int is_path( const stdString &sPath );
 
 	/// Execute functions
 	stdString execute( int nRet, const stdString &sPath, const stdString &sFunction );

@@ -104,7 +104,7 @@ public:
 	};
 
 	/// Process a single message from the queue
-	virtual oex::oexBOOL ProcessMsg( stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply );
+	virtual oex::oexBOOL ProcessMsg( const stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply );
 
 protected:
 
@@ -121,6 +121,7 @@ public:
 	/// Spawns a script in another thread
 	oex::oexBOOL spawn( stdString *pReply, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
 	oex::oexBOOL kill( stdString *pReply, const stdString &sPath );
+	oex::oexBOOL is_path( const stdString &sPath );
 
 	/// Runs the specified script
 	oex::oexBOOL run( stdString *pReply, const stdString &sPath, const stdString &sScript );

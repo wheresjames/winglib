@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -57,12 +57,12 @@ using namespace OEX_NAMESPACE::os;
 oexBOOL CIpAddress::SetRawAddress( oexINT64 x_llIp, oexINT32 x_uPort, oexINT32 x_uType )
 {
     // Set the ip address
-    if ( x_uType == eAddrTypeIpv4 ) 
+    if ( x_uType == eAddrTypeIpv4 )
         m_uIpv4 = (oexUINT32)x_llIp, m_uIpv4Extra = 0;
     else m_llIpv6 = x_llIp;
 
     // Port number
-    m_uPort = x_uPort; 
+    m_uPort = x_uPort;
 
     // Type information
     m_uType = x_uType;
@@ -80,7 +80,7 @@ oexBOOL CIpAddress::ValidateAddress()
 {
     // Save the crc
     oexUINT uCrc = m_uCrc;
-    
+
     // Create hash
     oexUCHAR ucHash[ CCrcHash::eHashSize ];
     CCrcHash::Hash( &ucHash, &m_guid, sizeof( m_guid ) );
@@ -105,7 +105,7 @@ oexBOOL CIpAddress::SetDotAddress( oexCSTR x_pDotAddress, oexINT32 x_uPort, oexI
 
     // Convert the dot address
     u_long ip = ntohl( inet_addr( oexStrToStr8Ptr( x_pDotAddress ) ) );
-    if ( INADDR_NONE == ip ) 
+    if ( INADDR_NONE == ip )
         return oexFALSE;
 
     SetRawAddress( ip, x_uPort, x_uType );
@@ -115,7 +115,7 @@ oexBOOL CIpAddress::SetDotAddress( oexCSTR x_pDotAddress, oexINT32 x_uPort, oexI
 }
 
 CStr CIpAddress::GetDotAddress()
-{   
+{
 #if defined( OEX_NOSOCKET2 )
 	return oexFALSE;
 #else
@@ -279,7 +279,7 @@ CStr CIpAddress::BuildUrl( CPropertyBag &x_pbUi )
     uc.lpszUrlPath = x_pbUi[ oexT( "path" ) ].ToString()._Ptr();
 
     // !!! Right or wrong, I'm going to hide this detail.
-    CStr extra; 
+    CStr extra;
     if ( x_pbUi[ oexT( "extra" ) ].ToString().Length() )
     {   extra << oexT( "?" ) << x_pbUi[ oexT( "extra" ) ].ToString();
         uc.dwExtraInfoLength = extra.Length();
@@ -289,7 +289,7 @@ CStr CIpAddress::BuildUrl( CPropertyBag &x_pbUi )
     else
     {   uc.dwExtraInfoLength = x_pbUi[ oexT( "extra" ) ].ToString().Length();
         uc.lpszExtraInfo = x_pbUi[ oexT( "extra" ) ].ToString()._Ptr();
-    } // end else    
+    } // end else
 
     uc.nScheme = (INTERNET_SCHEME)x_pbUi[ oexT( "scheme_id" ) ].ToLong();
 
@@ -297,7 +297,7 @@ CStr CIpAddress::BuildUrl( CPropertyBag &x_pbUi )
 
     CStr str;
     DWORD dwLen = oexSTRSIZE;
-    if ( !str.OexAllocate( oexSTRSIZE ) )    
+    if ( !str.OexAllocate( oexSTRSIZE ) )
         return CStr();
 
     // Attempt to create url
@@ -328,7 +328,7 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
         return CPropertyBag();
 
     oexUINT uLen = zstr::Length( pUrl );
-                    
+
     // I assume the components can't be longer than the url
     if ( !uMaxBufferSize )
         uMaxBufferSize = uLen + 2;
@@ -339,7 +339,7 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
 
     uc.dwSchemeLength = uMaxBufferSize;
     uc.lpszScheme = pb[ oexT( "scheme" ) ].ToString().OexAllocate( uMaxBufferSize );
-    
+
     uc.dwHostNameLength = uMaxBufferSize;
     uc.lpszHostName = pb[ oexT( "host" ) ].ToString().OexAllocate( uMaxBufferSize );
 
@@ -384,7 +384,7 @@ oexBOOL CIpAddress::LookupUrl( oexCSTR x_pUrl, oexINT32 x_uPort, oexINT32 x_uTyp
     CPropertyBag pbUrl = ParseUrl( x_pUrl );
     if ( !pbUrl.Size() )
         return oexFALSE;
-    
+
     // Did we get a host name?
     if ( !pbUrl[ oexT( "host" ) ].ToString().Length() )
         return oexFALSE;

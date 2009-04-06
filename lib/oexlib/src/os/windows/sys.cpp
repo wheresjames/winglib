@@ -43,11 +43,13 @@
 #	define VSNPRINTF	vsnprintf
 #	define STRTOLL		strtoll
 #	define VSNWPRINTF	vswprintf
+#	define WCSTOLL		wcstoll
 #else
 #	include <tchar.h>
 #	define VSNPRINTF	_vsnprintf
 #	define STRTOLL		_strtoi64
 #	define VSNWPRINTF	_vsnwprintf
+#	define WCSTOLL		_wcstoi64
 #endif
 #include <time.h>
 
@@ -327,84 +329,52 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 oexINT64 CSys::StrToInt64( oexCSTRW x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-#if defined( OEX_WINCE )
-	return oexFALSE;
-#else
-	return _wcstoi64( x_pStr, NULL, x_uRadix );
-#endif
+	return WCSTOLL( x_pStr, NULL, x_uRadix );
 }
 
 oexUINT64 CSys::StrToUInt64( oexCSTRW x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-#if defined( OEX_WINCE )
-	return oexFALSE;
-#else
-	return _wcstoui64( x_pStr, NULL, x_uRadix );
-#endif
+	return WCSTOLL( x_pStr, NULL, x_uRadix );
 }
 
 oexLONG CSys::StrToLong( oexCSTRW x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-#if defined( OEX_WINCE )
-	return oexFALSE;
-#else
 	return wcstol( x_pStr, NULL, x_uRadix );
-#endif
 }
 
 oexULONG CSys::StrToULong( oexCSTRW x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-#if defined( OEX_WINCE )
-	return oexFALSE;
-#else
 	return wcstoul( x_pStr, NULL, x_uRadix );
-#endif
 }
 
 oexFLOAT CSys::StrToFloat( oexCSTRW x_pStr )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-#if defined( OEX_WINCE )
-	return oexFALSE;
-#else
 	return (oexFLOAT)wcstod( x_pStr, NULL );
-#endif
 }
 
 oexDOUBLE CSys::StrToDouble( oexCSTRW x_pStr )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-#if defined( OEX_WINCE )
-	return oexFALSE;
-#else
 	return wcstod( x_pStr, NULL );
-#endif
 }
 
 /// vprintf
 int CSys::vPrintf( oexCSTRW x_pFmt, oexVaList pArgs )
 {
-#if defined( OEX_WINCE )
-	return oexFALSE;
-#else
 	return ::vwprintf( x_pFmt, pArgs );
-#endif
 }
 
 /// printf function
 int CSys::Printf( oexCSTRW x_pFmt, ... )
 {
-#if defined( OEX_WINCE )
-	return oexFALSE;
-#else
 	oexVaList ap; oexVaStart( ap, x_pFmt );
 	int ret = ::vwprintf( x_pFmt, ap );
 	oexVaEnd( ap );
 	return ret;
-#endif
 }
 
 oexPVOID CSys::MemCpy( oexPVOID x_pDst, oexCPVOID x_pSrc, oexUINT x_uSize )

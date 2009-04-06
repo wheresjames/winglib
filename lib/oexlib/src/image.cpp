@@ -216,8 +216,17 @@ oexBOOL CImage::Load( oexCSTR x_pFile, oexCSTR x_pType )
 	if ( type == -1 )
 		return oexFALSE;
 
+#if defined( OEX_WINCE )
+
+	// Load the file
+	oexBOOL bRet = pimg->Load( x_pFile, type );
+
+#else
+
 	// Load the file
 	oexBOOL bRet = pimg->Load( oexStrToMbPtr( x_pFile ), type );
+
+#endif
 
 	GetRect();
 
@@ -241,8 +250,17 @@ oexBOOL CImage::Save( oexCSTR x_pFile, oexCSTR x_pType )
 	if ( type == -1 )
 		return oexFALSE;
 
+#if defined( OEX_WINCE )
+
+	// Load the file
+	return pimg->Save( x_pFile, type );
+
+#else
+
 	// Load the file
 	return pimg->Save( oexStrToMbPtr( x_pFile ), type );
+
+#endif
 }
 
 oexBOOL CImage::Decode( oexPBYTE x_buf, oexINT x_size, oexCSTR x_pType )
@@ -1290,7 +1308,7 @@ oexINT CImage::EncodeJpg(oexPBYTE x_pSrc, oexINT x_nWidth, oexINT x_nHeight, oex
 
 CStr CImage::GetUserImageStr()
 {
-#ifdef OEX_WINDOWS
+#if defined( OEX_WINDOWS ) && !defined( OEX_WINCE )
 
 	return oexT( "All Images ("	"" )
 

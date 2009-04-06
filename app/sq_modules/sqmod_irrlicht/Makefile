@@ -21,7 +21,7 @@ include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(PROC),arm)
 	PRJ_INCS := $(PRJ_INCS) irrlicht-es/include
-	PRJ_LIBS := $(PRJ_LIBS) irrlicht-es jpeg png tiff zlib libGLES_CM
+	PRJ_LIBS := $(PRJ_LIBS) irrlicht-es jpeg png tiff zlib
 else
 	PRJ_INCS := $(PRJ_INCS) irrlicht/include
 	PRJ_LIBS := $(PRJ_LIBS) irrlicht jpeg png tiff zlib

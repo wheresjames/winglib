@@ -75,7 +75,7 @@ protected:
 	virtual oex::oexINT EndThread( oex::oexPVOID x_pData );
 
     /// Process a single message from the queue
-	virtual oex::oexBOOL ProcessMsg( stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply );
+	virtual oex::oexBOOL ProcessMsg( const stdString &x_sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply );
 
 	/// Executes a single message
 	oex::oexBOOL ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply );

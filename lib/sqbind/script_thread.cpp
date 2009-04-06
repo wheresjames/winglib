@@ -138,7 +138,11 @@ oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 
 oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply )
 {
-	// Just post it to the queue if not our message
+	// Just a path check?
+	if ( sMsg == oexT( "is_path" ) )
+		return oex::oexTRUE;
+
+	// Just post it to the queue if not our thread
 	if ( GetOwnerThreadId() != oexGetCurThreadId() )
 		return Msg( stdString(), sMsg, &mapParams, pReply );
 
@@ -159,8 +163,10 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 	return oex::oexTRUE;
 }
 
-oex::oexBOOL CScriptThread::ProcessMsg( stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply )
+oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply )
 {
+	stdString sPath = x_sPath;
+
 	// Is it bound for another computer
 	int pos = sPath.find_first_of( oexT( ":" ), -1 );
 	if ( 0 <= pos )
@@ -202,15 +208,12 @@ oex::oexBOOL CScriptThread::ProcessMsg( stdString &sPath, stdString &sMsg, CSqMa
 	} // end if
 
 	// Find path separator
-	stdString sToken = sPath.substr( 0, sPath.find_first_of( oexT( '\\' ) ) );
-	if ( !sToken.length() ) sToken = sPath.substr( 0, sPath.find_first_of( oexT( '/' ) ) );
-
-	// Did we get a token
-	if ( sPath.length() > sToken.length() )
-	{
-		// Skip the token
-		sPath = sPath.substr( sToken.length() + 1 );
-
+	stdString sToken;
+	stdString::size_type nPos = sPath.find_first_of( oexT( '\\' ) );
+	if ( stdString::npos == nPos ) nPos = sPath.find_first_of( oexT( '/' ) );
+	if ( stdString::npos != nPos )
+	{	sToken = sPath.substr( 0, nPos );
+		sPath = sPath.substr( nPos + 1 );
 	} // end if
 	else
 	{   sToken = sPath;

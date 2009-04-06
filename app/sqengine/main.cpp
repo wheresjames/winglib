@@ -9,6 +9,11 @@ sqbind::CScriptThread	*g_psqScriptThread = oexNULL;
 /// Pointer to module manager
 sqbind::CModuleManager	*g_psqModuleManager = oexNULL;
 
+#if defined ( OEX_WINDOWS )
+#include <windows.h>
+BOOL WINAPI DllMain( HANDLE hinstDLL, DWORD dwReason, LPVOID lpvReserved ) { return true; }
+#endif
+
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_GetModuleInfo );
 extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 {

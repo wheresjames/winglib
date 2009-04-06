@@ -95,7 +95,6 @@ public:
 	}
 };
 
-
 #if defined(_WIN32_WCE)
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine,
                         int nCmdShow )
@@ -103,9 +102,11 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 int main()
 #endif
 {
+
 	//E_DRIVER_TYPE driverType = EDT_BURNINGSVIDEO;
 //	E_DRIVER_TYPE driverType = EDT_OPENGL;
-	E_DRIVER_TYPE driverType = EDT_OGLES1;
+//	E_DRIVER_TYPE driverType = EDT_OGLES1;
+	E_DRIVER_TYPE driverType = EDT_BURNINGSVIDEO;
 
 	// create device
 
@@ -208,7 +209,7 @@ int Init( int width, int height )
 
 #if defined( _WIN32_WCE )
 
-	g_pDevice = irr::createDevice( irr::video::EDT_OGLES1,
+	g_pDevice = irr::createDevice( irr::video::EDT_BURNINGSVIDEO,
 								   irr::core::dimension2d< irr::u32 >( 320, 240 ),
 								   16, true );
 

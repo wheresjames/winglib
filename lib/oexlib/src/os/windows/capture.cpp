@@ -37,10 +37,15 @@
 
 #ifndef OEX_NOVIDEO
 
+#if !defined( OEX_NOVFW )
 // *** Video For Windows
 #include <vfw.h>
 #pragma comment( lib, "Vfw32.lib" )
 #include "stdio.h"
+
+#endif
+
+#if !defined( OEX_NODSHOW )
 
 // Just to make things a little easier
 #include <AtlBase.h>
@@ -60,6 +65,7 @@
 #pragma comment( lib, "winmm.lib" )
 
 #endif
+#endif
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
@@ -67,9 +73,13 @@ using namespace OEX_NAMESPACE::vid;
 
 #ifndef OEX_NOVIDEO
 
-// Include capture classes
+#if !defined( OEX_NOVFW )
 #include "vfw1.hpp"
+#endif
+
+#if !defined( OEX_NODSHOW )
 #include "vfw2.hpp"
+#endif
 
 #endif
 
@@ -97,13 +107,17 @@ oexBOOL CCapture::Destroy()
 	{
 		switch( m_uType )
 		{
+#if !defined( OEX_NOVFW )
 			case oexVIDSUB_VFW :
 				OexAllocDestruct( (CV4w1*)m_pDevice );
 				break;
+#endif
 
+#if !defined( OEX_NODSHOW )
 			case oexVIDSUB_DSHOW :
 				OexAllocDestruct( (CV4w2*)m_pDevice );
 				break;
+#endif
 
 		} // end switch
 
@@ -137,6 +151,8 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 	{
 		case oexVIDSUB_AUTO :
 
+#if !defined( OEX_NODSHOW )
+
 			m_pDevice = OexAllocConstruct< CV4w2 >();
 			if ( !oexCHECK_PTR( m_pDevice ) )
 			{	Destroy();
@@ -151,15 +167,23 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 
 			OexAllocDelete< CV4w2 >( (CV4w2*)m_pDevice );
 			m_pDevice = oexNULL;
+#endif
 
+#if !defined( OEX_NOVFW )
 		case oexVIDSUB_VFW :
 			m_uType = oexVIDSUB_VFW;
 			m_pDevice = OexAllocConstruct< CV4w1 >();
 			break;
+#endif
 
+#if !defined( OEX_NODSHOW )
 		case oexVIDSUB_DSHOW :
 			m_uType = oexVIDSUB_DSHOW;
 			m_pDevice = OexAllocConstruct< CV4w2 >();
+			break;
+#endif
+
+		default :
 			break;
 
 	} // end switch
@@ -192,6 +216,8 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexIN
 	{
 		case oexVIDSUB_AUTO :
 
+#if !defined( OEX_NODSHOW )
+
 			m_pDevice = OexAllocConstruct< CV4w2 >();
 			if ( !oexCHECK_PTR( m_pDevice ) )
 			{	Destroy();
@@ -207,14 +233,23 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexIN
 			OexAllocDelete< CV4w2 >( (CV4w2*)m_pDevice );
 			m_pDevice = oexNULL;
 
+#endif
+
+#if !defined( OEX_NOVFW )
 		case oexVIDSUB_VFW :
 			m_uType = x_uType;
 			m_pDevice = OexAllocConstruct< CV4w1 >();
 			break;
+#endif
 
+#if !defined( OEX_NODSHOW )
 		case oexVIDSUB_DSHOW :
 			m_uType = x_uType;
 			m_pDevice = OexAllocConstruct< CV4w2 >();
+			break;
+#endif
+
+		default :
 			break;
 
 	} // end switch

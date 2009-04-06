@@ -49,8 +49,7 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 	// Load the module
 	CModule mod;
 	if ( !mod.Load( x_sModule.Ptr() ) )
-	{	oexERROR( 0, CStr().Fmt( oexT( "Failed to load module %s" ),
-	                     	     oexStrToMbPtr( x_sModule.Ptr() ) ) );
+	{	oexERROR( 0, oexMks( oexT( "Failed to load module " ), x_sModule ) );
 		return -1;
 	} // end if
 

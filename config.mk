@@ -127,14 +127,6 @@ else
 		endif
 	endif
 	
-	ifeq ($(PRJ_TYPE),dll)
-		CFG_LEXTRA := $(CFG_LEXTRA) -shared
-	else	
-		ifeq ($(LIBLINK),static)
-			CFG_LEXTRA := $(CFG_LEXTRA) -static
-		endif
-	endif
-	
 	# Arm compiler
 	ifeq ($(PROC),arm)
 
@@ -314,7 +306,7 @@ else
 			CFG_STDLIB := -lole32 -laygshell -lwinsock -lws2
 			CFG_LFLAGS := $(CFG_LEXTRA)
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -D_WIN32_WCE=0x0400 -DOEX_ARM -D__int64="long long" \
-											    -DOEX_LOWRAM -DOEX_NOVIDEO -DOEX_NOCRTDEBUG -DOEX_NOXIMAGE 
+											    -DOEX_LOWRAM -DOEX_NOCRTDEBUG -DOEX_NODSHOW -DOEX_NOVFW
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
@@ -375,6 +367,17 @@ else
 		endif
 	
 	endif
+
+	ifeq ($(PRJ_TYPE),dll)
+		ifneq ($(OS),wince)
+			CFG_LEXTRA := $(CFG_LEXTRA) -shared
+		endif
+	else	
+		ifeq ($(LIBLINK),static)
+			CFG_LEXTRA := $(CFG_LEXTRA) -static
+		endif
+	endif
+
 
 	# you can't use dlopen() [-ldl] with static linking!
 	# http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/d/dlopen.html

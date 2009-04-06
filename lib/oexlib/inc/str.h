@@ -2425,11 +2425,11 @@ public:
 public:
 
     /// Concatinates two strings into a path
-    static TStr BuildPath( TStr x_sRoot, TStr x_sPath, T tSep = oexTC( T, '/' ) )
+    static TStr BuildPath( TStr x_sRoot, TStr x_sPath, T tSep = oexTCPathSep( T ) )
     {   return x_sRoot.RTrim( oexTT( T, "\\/" ) ) << tSep << x_sPath.LTrim( oexTT( T, "\\/" ) ); }
 
     /// Concatinates two strings into a path
-    TStr& BuildPath( TStr x_sPath, T tSep = oexTC( T, '/' ) )
+    TStr& BuildPath( TStr x_sPath, T tSep = oexTCPathSep( T ) )
     {   RTrim( oexTT( T, "\\/" ) );
         *this << tSep << x_sPath.LTrim( oexTT( T, "\\/" ) );
         RTrim( oexTT( T, "\\/" ) );

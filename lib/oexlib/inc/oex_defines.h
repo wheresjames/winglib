@@ -122,6 +122,14 @@
 #define oexTC( c, s )				        ( 1 == sizeof( c ) ? ( ( c )( s ) ) : ( ( c )( L##s ) ) )
 #define oexTTEXT( c, s )			        oexTT( c, s )
 
+#if defined( OEX_WINDOWS )
+#	define oexPathSep			'\\'
+#	define oexTCPathSep( c )	oexTC( c, '\\' )
+#else
+#	define oexPathSep			'/'
+#	define oexTCPathSep( c )	oexTC( c, '/' )
+#endif
+
 // Pointer conversion
 #define oexPtrToInt( p )	OEX_NAMESPACE::__oexCPtrCnv( p ).nInt
 #define oexPtrToUInt( p ) 	OEX_NAMESPACE::__oexCPtrCnv( p ).uInt

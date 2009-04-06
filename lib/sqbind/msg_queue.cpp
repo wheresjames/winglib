@@ -228,9 +228,14 @@ oex::oexBOOL CSqMsgQueue::ProcessMsgs()
 }
 
 /// Process a single message from the queue
-oex::oexBOOL CSqMsgQueue::ProcessMsg( stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply )
+oex::oexBOOL CSqMsgQueue::ProcessMsg( const stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply )
 {
 	return oex::oexFALSE;
+}
+
+oex::oexBOOL CSqMsgQueue::is_path( const stdString &sPath )
+{	CSqMap params; stdString sMsg = oexT( "is_path" );
+	return ProcessMsg( sPath, sMsg, params, oexNULL );
 }
 
 oex::oexBOOL CSqMsgQueue::run( stdString *pReply, const stdString &sPath, const stdString &sScript )

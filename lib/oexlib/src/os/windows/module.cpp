@@ -77,9 +77,16 @@ oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 	m_sFile = x_pFile;
 
 	// Load the module
+#if defined( OEX_WINCE )
+//	m_hModule = ::LoadLibraryEx( x_pFile, NULL, 0 ); //DONT_RESOLVE_DLL_REFERENCES );
 	m_hModule = ::LoadLibrary( x_pFile );
+#else
+	m_hModule = ::LoadLibrary( x_pFile );
+#endif
 	if ( m_hModule == oexNULL )
+	{	oexERROR( GetLastError(), oexMks( oexT( "Failed to load module " ), x_pFile ) );
 		return oexFALSE;
+	} // end if
 
 	return oexTRUE;
 }
