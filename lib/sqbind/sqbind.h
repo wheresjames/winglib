@@ -43,8 +43,13 @@
 
 // Using SqPlus script binding for now,
 // it doesn't support multiple constructors though :(
+#define SQBIND_SQBIND
 #define SQBIND_SQPLUS
 //#define SQBIND_JKBIND
+
+#define WSQBIND_NOREPLY	( (int*)0 )
+#define WSQBIND_NEW(__ptr,__type) {__ptr=(__type *)sq_vm_malloc(sizeof(__type));new (__ptr) __type;}
+#define WSQBIND_DELETE(__ptr,__type) {__ptr->~__type();sq_vm_free(__ptr,sizeof(__type));}
 
 // Include squirrel headers
 #include <squirrel.h>
@@ -64,13 +69,6 @@
 #include "sq_file.h"
 #include "sq_time.h"
 #include "sq_image.h"
-
-#define SQBIND_DECLARE_INSTANCE( c ) \
-    }; DECLARE_INSTANCE_TYPE_NAME( sqbind::c, c ); namespace sqbind {
-
-#define SQBIND_NOREPLY	( (int*)0 )
-#define SQBIND_NEW(__ptr,__type) {__ptr=(__type *)sq_vm_malloc(sizeof(__type));new (__ptr) __type;}
-#define SQBIND_DELETE(__ptr,__type) {__ptr->~__type();sq_vm_free(__ptr,sizeof(__type));}
 
 namespace sqbind
 {
@@ -104,7 +102,7 @@ namespace sqbind
 		\param [in] x_pAllocator	- Pointer to the memory allocator to use, you *MUST* use this
 									  if the heaps will be different!!!
 	*/
-    typedef oex::oexRESULT ( *PFN_SQBIND_Export_Symbols ) ( sqbind::VM *x_vm, SSqAllocator *x_pAllocator );
+    typedef oex::oexRESULT ( *PFN_SQBIND_Export_Symbols ) ( sqbind::VM x_vm, SSqAllocator *x_pAllocator );
 
     /// Bind native squirrel functions
     static void SqBindAll( SquirrelVM &x_vm )

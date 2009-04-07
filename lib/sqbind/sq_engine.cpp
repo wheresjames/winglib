@@ -33,10 +33,11 @@
 //----------------------------------------------------------------*/
 
 #include "stdafx.h"
+
 using namespace sqbind;
 
 int CSqEngineExport::alert( const stdString &sMsg )
-{	return oex::os::CSys::ShowMessageBox( oexT( "Notice" ), sMsg.c_str() );
+{	return oex::os::CSys::ShowMessageBox( oexT( "Script Message" ), sMsg.c_str() );
 }
 
 int CSqEngineExport::echo( const stdString &sMsg )
@@ -293,7 +294,7 @@ CSqEngine::~CSqEngine()
 
 void CSqEngine::Destroy()
 {
-	Execute( SQBIND_NOREPLY, SQEXE_FN_END );
+	Execute( WSQBIND_NOREPLY, SQEXE_FN_END );
 
 	m_script.Reset();
 
@@ -305,6 +306,55 @@ void CSqEngine::Destroy()
 
 	m_bLoaded = oex::oexFALSE;
 }
+
+// Message box and logging functions / Mostly for debugging ;)
+static int _msg( const stdString &sTitle, const stdString &sMsg )
+{	return oex::os::CSys::ShowMessageBox( sTitle.c_str(), sMsg.c_str() ); }
+static int _log( int nErr, const stdString &sMsg )
+{	return oexNOTICE( nErr, sMsg.c_str() ); }
+static int _break( const stdString &sError )
+{	oexBREAK( sError.c_str() ); return 0; }
+
+class CTestClass
+{
+public:
+
+	int msg( const stdString &sTitle, const stdString &sMsg )
+	{	return oex::os::CSys::ShowMessageBox( sTitle.c_str(), sMsg.c_str() ); }
+
+	int num( int num )
+	{	return msg( oexT( "Number" ), oexMks( num ).Ptr() ); }
+};
+
+SQBIND_REGISTER_CLASS_BEGIN( CTestClass, CTestClass )
+	SQBIND_MEMBER_FUNCTION(  CTestClass, msg )
+	SQBIND_MEMBER_FUNCTION(  CTestClass, num )
+SQBIND_REGISTER_CLASS_END()
+
+SQBIND_REGISTER_CLASS_BEGIN( CSqMsgQueue, CSqMsgQueue )
+SQBIND_REGISTER_CLASS_END()
+
+SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, alert )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, echo )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, load_module )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sleep )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, spawn )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_path )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute1 )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute2 )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute3 )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute4 )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, path )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, md5 )
+SQBIND_REGISTER_CLASS_END()
+
 
 oex::oexBOOL CSqEngine::Init()
 {
@@ -332,10 +382,42 @@ oex::oexBOOL CSqEngine::Init()
 		// Bind Squirrel variables
 		sqbind::SqBindAll( m_vm );
 
-		// Squirrel must understand CMsgQueue
-		SqPlus::SQClassDef< CSqMsgQueue > ( m_vm, oexT( "CSqMsgQueue" ) )												  ;
+		// Debugging functions
+		BindRootFunction( _msg, oexT( "_msg" ) );
+		BindRootFunction( _log, oexT( "_log" ) );
+		BindRootFunction( _log, oexT( "_break" ) );
 
-		// Define our base class
+		SQBIND_EXPORT( m_vm.GetVMHandle(), CTestClass );
+		SQBIND_EXPORT( m_vm.GetVMHandle(), CSqMsgQueue );
+		SQBIND_EXPORT( m_vm.GetVMHandle(), CSqEngineExport );
+/*
+		sqbind::VM v = m_vm.GetVMHandle();
+		sq_pushobject( v, SqBind< CSqEngineExport >::get_id() ); // push class
+		sq_pushstring( v, SQEXE_SELF, -1 );
+		sqbind_push_method_userdata( v, (CSqEngineExport*)this );
+		sq_newclosure(v,_sqbind_sqmethod_1<T,P1>,1);
+		sq_newslot(v,-3,false);
+		sq_pop(v,1); // pop class
+*/
+
+//		sqbind_function( vm, "say_goodbye", &SqBind<MyClass>::get_id() );
+
+//		BindRootVariable( (CSqEngineExport*)this, SQEXE_SELF );
+
+
+//		SqBind< CTestClass >::init( m_vm.GetVMHandle(), oexT( "CTestClass" ) );
+//		sqbind_method( m_vm.GetVMHandle(), oexT( "msg" ), &CTestClass::msg );
+//		sqbind_method( m_vm.GetVMHandle(), oexT( "num" ), &CTestClass::num );
+
+		// Squirrel must understand CMsgQueue
+//		SqBind< CTestClass >::init( m_vm.GetVMHandle(), oexT( "CSqMsgQueue" ) );
+//		SqPlus::SQClassDef< CSqMsgQueue > ( m_vm, oexT( "CSqMsgQueue" ) );
+
+//		SqBind< CTestClass >::init( m_vm.GetVMHandle(), oexT( "CSqMsgQueue" ) );
+//		sqbind_method( m_vm.GetVMHandle(), oexT( "msg" ), &CTestClass::msg );
+
+
+/*		// Define our base class
 		SqPlus::SQClassDef< CSqEngineExport > ( m_vm, oexT( "CSqEngineExport" ) )
 											.func( &CSqEngineExport::alert,             oexT( "alert" ) )
 											.func( &CSqEngineExport::echo,				oexT( "echo" ) )
@@ -359,7 +441,7 @@ oex::oexBOOL CSqEngine::Init()
 
 		// Set base class pointer
 		BindRootVariable( (CSqEngineExport*)this, SQEXE_SELF );
-
+*/
 		// Allow derived class to register it's stuff
 		OnRegisterVariables();
 
@@ -389,7 +471,7 @@ oex::oexBOOL CSqEngine::Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oex
 
 		if ( bFile )
 		{
-			// +++ Change this to current working director
+			// +++ Change this to current working directory
 			//     Add oexWorkingDirectory()
 
 			// Does it point to a valid file?
@@ -443,7 +525,7 @@ oex::oexBOOL CSqEngine::Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oex
 			m_vm.RunScript( m_script );
 
 			// Execute init function
-			Execute( SQBIND_NOREPLY, SQEXE_FN_INIT );
+			Execute( WSQBIND_NOREPLY, SQEXE_FN_INIT );
 
 		} // end if
 
@@ -472,7 +554,7 @@ oex::oexBOOL CSqEngine::Start()
 		m_vm.RunScript( m_script );
 
 		// Execute init function
-		Execute( SQBIND_NOREPLY, SQEXE_FN_INIT );
+		Execute( WSQBIND_NOREPLY, SQEXE_FN_INIT );
 
 	} // end try
 	_oexCATCH( SScriptErrorInfo &e )
@@ -485,7 +567,7 @@ oex::oexBOOL CSqEngine::Start()
 
 oex::oexBOOL CSqEngine::Idle()
 {
-	return Execute( SQBIND_NOREPLY, SQEXE_FN_IDLE );
+	return Execute( WSQBIND_NOREPLY, SQEXE_FN_IDLE );
 }
 
 oex::oexBOOL CSqEngine::Run( oex::oexCSTR pScript )
@@ -566,7 +648,7 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 	} // end if
 
 	// Export functionality
-	if ( !pMi->Export( &m_vm ) )
+	if ( !pMi->Export( m_vm.GetVMHandle() ) )
 	{	oexERROR( 0, oexMks( oexT( "Failed to export squirrel symbols from module " ), sFull ) );
 		return -5;
 	} // end if
@@ -584,55 +666,3 @@ void CSqEngine::SetMessageQueue( CSqMsgQueue *pMq )
 CSqMsgQueue* CSqEngine::OnGetQueue()
 {	return m_pMsgQueue; }
 
-/*
-SquirrelObject CSqEngine::RouteMsg( const stdString &sMsg, CSqMap &rParams )
-{	if ( m_pMsgQueue )
-		m_pMsgQueue->Msg( sMsg, &rParams );
-	return SquirrelObject( m_vm.GetVMHandle() );
-}
-
-SquirrelObject CSqEngine::OnExecute( const stdString &sName, const stdString &sFunction )
-{	CSqMap params;
-	params[ oexT( "name" ) ] = sName;
-	params[ oexT( "execute" ) ] = sFunction;
-	return RouteMsg( oexT( "msg" ), params );
-}
-
-SquirrelObject CSqEngine::OnExecute1( const stdString &sName, const stdString &sFunction, const stdString &sP1 )
-{	CSqMap params;
-	params[ oexT( "name" ) ] = sName;
-	params[ oexT( "execute1" ) ] = sFunction;
-	params[ oexT( "p1" ) ] = sP1;
-	return RouteMsg( oexT( "msg" ), params );
-}
-
-SquirrelObject CSqEngine::OnExecute2( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2 )
-{	CSqMap params;
-	params[ oexT( "name" ) ] = sName;
-	params[ oexT( "execute2" ) ] = sFunction;
-	params[ oexT( "p1" ) ] = sP1;
-	params[ oexT( "p2" ) ] = sP2;
-	return RouteMsg( oexT( "msg" ), params );
-}
-
-SquirrelObject CSqEngine::OnExecute3( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 )
-{	CSqMap params;
-	params[ oexT( "name" ) ] = sName;
-	params[ oexT( "execute3" ) ] = sFunction;
-	params[ oexT( "p1" ) ] = sP1;
-	params[ oexT( "p2" ) ] = sP2;
-	params[ oexT( "p3" ) ] = sP3;
-	return RouteMsg( oexT( "msg" ), params );
-}
-
-SquirrelObject CSqEngine::OnExecute4( const stdString &sName, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 )
-{	CSqMap params;
-	params[ oexT( "name" ) ] = sName;
-	params[ oexT( "execute3" ) ] = sFunction;
-	params[ oexT( "p1" ) ] = sP1;
-	params[ oexT( "p2" ) ] = sP2;
-	params[ oexT( "p3" ) ] = sP3;
-	params[ oexT( "p4" ) ] = sP4;
-	return RouteMsg( oexT( "msg" ), params );
-}
-*/

@@ -34,26 +34,46 @@
 
 #pragma once
 
+//#	define SQBIND_NEW( m_type ) new m_type
+//#	define SQBIND_DELETE( m_instance) delete m_instance
+#include "../../sqbind/include/sqbind.h"
+#ifdef SQBIND_SQBIND
+
+#   define SQBIND_REGISTER_CLASS_BEGIN( c, s )				static void __SqReg_sqbind_##s( HSQUIRRELVM vm ) { \
+																SqBind< c >::init( vm, oexT( #s ) );
+#   define SQBIND_MEMBER_FUNCTION( c, f )    				sqbind_method( vm, oexT( #f ), &c::f );
+#   define SQBIND_REGISTER_CLASS_END()						; }
+#   define SQBIND_EXPORT( vm, c )            				__SqReg_sqbind_##c( vm )
+#	define SQBIND_DECLARE_INSTANCE( c, n )
+
+namespace sqbind { typedef HSQUIRRELVM VM; }
+
+#endif
+
 #ifdef SQBIND_SQPLUS
+
 #   include <sqplus.h>
-#   define SQBIND_REGISTER_CLASS_BEGIN( c, s ) 				void __SqReg_##c( SquirrelVM *vm ) { \
-                                           					SqPlus::SQClassDef< c >( *vm, oexT( s ) )
-#   define SQBIND_REGISTER_CLASS_END()       				; }
-#   define SQBIND_EXPORT( vm, c )            				__SqReg_##c( vm )
-#   define SQBIND_MEMBER_FUNCTION( c, f )    				.func ( &c::f,        	  oexT( #f ) )
-#   define SQBIND_CONST( c, e )              				.enumInt ( (int)c::##e,   oexT( #e ) )
-#   define SQBIND_GLOBALCONST( e )           				.enumInt ( (int)##e,	  oexT( #e ) )
-#   define SQBIND_ENUM( e, s )		           				.enumInt ( (int)e,	  	  oexT( s ) )
-#   define SQBIND_MEMBER_VARIABLE( c, v )    				.var ( &c::v,         	  oexT( #v ) )
-#   define SQBIND_STATIC_FUNCTION( c, f )    				.staticFunc ( &c::f,      oexT( #f ) )
+#   define _SQBIND_REGISTER_CLASS_BEGIN( c, s ) 				static void __SqReg_sqplus_##s( SquirrelVM &vm ) { \
+    	                                       					SqPlus::SQClassDef< c >( vm, oexT( #s ) )
+#   define _SQBIND_REGISTER_CLASS_END()       				; }
+#   define _SQBIND_EXPORT( vm, c )            				__SqReg_sqplus_##c( vm )
+#   define _SQBIND_MEMBER_FUNCTION( c, f )    				.func ( &c::f,        	  oexT( #f ) )
+#   define _SQBIND_CONST( c, e )              				.enumInt ( (int)c::##e,   oexT( #e ) )
+#   define _SQBIND_GLOBALCONST( e )           				.enumInt ( (int)##e,	  oexT( #e ) )
+#   define _SQBIND_ENUM( e, s )		           				.enumInt ( (int)e,	  	  oexT( s ) )
+#   define _SQBIND_MEMBER_VARIABLE( c, v )    				.var ( &c::v,         	  oexT( #v ) )
+#   define _SQBIND_STATIC_FUNCTION( c, f )    				.staticFunc ( &c::f,      oexT( #f ) )
 
-#   define SQBIND_CLASS_CONSTRUCTOR( n, c )					.staticFunc( &_sq_construct_##c_##n, oexT( "constructor" ) )
-#   define SQBIND_BEGIN_CLASS_CONSTRUCTOR( n, c, ... )		static int _sq_construct_##c_##n( __VA_ARGS__, HSQUIRRELVM v ) {
-#   define SQBIND_END_CLASS_CONSTRUCTOR( c, ... )			return SqPlus::PostConstruct< c >( v, new c( __VA_ARGS__ ), SqPlus::ReleaseClassPtr< c >::release ); }
+#   define _SQBIND_CLASS_CONSTRUCTOR( n, c )					.staticFunc( &_sq_construct_##c_##n, oexT( "constructor" ) )
+#   define _SQBIND_BEGIN_CLASS_CONSTRUCTOR( n, c, ... )		static int _sq_construct_##c_##n( __VA_ARGS__, HSQUIRRELVM v ) {
+#   define _SQBIND_END_CLASS_CONSTRUCTOR( c, ... )			return SqPlus::PostConstruct< c >( v, new c( __VA_ARGS__ ), SqPlus::ReleaseClassPtr< c >::release ); }
 
-namespace sqbind { typedef SquirrelVM VM; }
+#	define _SQBIND_DECLARE_INSTANCE( c, n )					DECLARE_INSTANCE_TYPE_NAME( c, n )
+
+//namespace sqbind { typedef SquirrelVM VM; }
 
 #elif SQBIND_JKBIND
+
 #   define jkUNICODE 1
 #   include <script/VMCore.h>
 #   include <script/Declarator.h>
@@ -63,6 +83,7 @@ namespace sqbind { typedef SquirrelVM VM; }
 #   define SQBIND_EXPORT( vm, c )            script::ClassTraits< c >::bind( vm )
 #   define SQBIND_MEMBER_FUNCTION( c, f )    .method< alreadyAsThis >( xSTRING( #f ), &##c::##f )
 namespace sqbind { typedef script::VMCore VM; }
+
 #endif
 
 namespace sqbind
@@ -95,37 +116,64 @@ namespace sqbind
 		CSqString( const stdString &x_str ) { m_str = x_str; }
 		stdString& str() { return m_str; }
 		const stdString* c_str() const { return &m_str; }
-		stdString* set( const stdString &x_str )
-		{	m_str = x_str; return &m_str; }
+		stdString set( const stdString &x_str )
+		{	m_str = x_str; return m_str; }
 		stdString& operator = ( const stdString &x_str ) { return m_str = x_str; }
 		stdString& operator = ( const oex::oexTCHAR *x_str ) { if ( x_str ) m_str = x_str; return m_str; }
 
-		static void Register( SquirrelVM &vm )
-		{
-			SqPlus::SQClassDef< CSqString >( vm, oexT( "CSqString" ) )
-					. func( &CSqString::str,		oexT( "str" ) )
-					. func( &CSqString::set,		oexT( "set" ) )
-				;
-		}
+		static void Register( SquirrelVM &vm );
 	private:
 		stdString m_str;
 	};
 }
 
 // Declare type for use as squirrel parameters
-DECLARE_INSTANCE_TYPE_NAME( sqbind::CSqString, CSqString )
+SQBIND_DECLARE_INSTANCE( sqbind::CSqString, CSqString )
 
+#if defined( SQBIND_SQPLUS )
 namespace SqPlus
 {
+
 	inline void Push(HSQUIRRELVM v,const sqbind::stdString& value)
 	{	sq_pushstring(v,value.c_str(),value.length()); }
 	inline bool Match(TypeWrapper<const sqbind::stdString&>, HSQUIRRELVM v, int idx)
 	{	return sq_gettype(v,idx) == OT_STRING; }
 	inline sqbind::stdString Get(TypeWrapper<const sqbind::stdString&>,HSQUIRRELVM v,int idx)
-	{	const SQChar * s = 0; 
-		int sz = sq_getsize(v,idx); 
-		SQPLUS_CHECK_GET(sq_getstring(v,idx,&s)); 
-		return sqbind::stdString(s,sz); 
+	{	const SQChar * s = 0;
+		int sz = sq_getsize(v,idx);
+		SQPLUS_CHECK_GET(sq_getstring(v,idx,&s));
+		return sqbind::stdString(s,sz);
 	}
 }
+#endif
 
+template<>
+class SqBind<sqbind::stdString> {
+public:
+	struct Getter {
+		SQBIND_INLINE sqbind::stdString get(HSQUIRRELVM v, int p_idx) {
+			return SqBind<sqbind::stdString>::get(v,p_idx);
+		}
+	};
+	struct GetterPtr {
+		sqbind::stdString temp;
+		SQBIND_INLINE sqbind::stdString* get(HSQUIRRELVM v, int p_idx) {
+			temp=SqBind<sqbind::stdString>::get(v,p_idx);
+			return &temp;
+		}
+	};
+	static sqbind::stdString get(HSQUIRRELVM v, int p_idx) {
+		if (sq_gettype(v,p_idx)!=OT_STRING) {
+			sqbind_throwerror(v,_SC("Type is not string!"));
+			return sqbind::stdString();
+		}
+		const SQChar * str;
+		int sz = sq_getsize(v,p_idx);
+		sq_getstring(v,p_idx,&str);
+		return sqbind::stdString(str,sz);
+	}
+
+	static void push(HSQUIRRELVM v, const sqbind::stdString& p_value) {
+		sq_pushstring(v,p_value.c_str(),p_value.length());
+	}
+};

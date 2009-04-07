@@ -162,13 +162,13 @@ namespace sqbind
 		/// Recursive
 		static t_Obj _print_r( int nShowVals, t_List &rLst, int nDepth = 0 );
 
-    private:
-
         /// Internal squirrel function, returns value of specified item
         SquirrelObject _get( HSQUIRRELVM v );
 
         /// Internal squirrel function used to iterate list items
         SquirrelObject _nexti( HSQUIRRELVM v );
+
+    private:
 
         /// Returns non-zero if pPattern matches pString
         static bool match_pattern( const oex::oexTCHAR *pString, const oex::oexTCHAR *pPattern);

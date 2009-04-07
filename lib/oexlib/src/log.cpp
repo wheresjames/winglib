@@ -63,7 +63,12 @@ oexBOOL CLog::OpenLogFile( oexCSTR x_pPath, oexCSTR x_pFile, oexCSTR x_pExtensio
 	if ( oexCHECK_PTR( x_pExtension ) && *x_pExtension )
 		sFile << x_pExtension;
 	else
+#if defined( OEX_WINCE )
+		sFile << oexT( ".debug.log.txt" );
+#else
 		sFile << oexT( ".debug.log" );
+#endif
+
 
 	return Open( sFile.Ptr() );
 }

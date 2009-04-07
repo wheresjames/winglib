@@ -123,7 +123,7 @@ protected:
 };
 
 // Declare class functions
-SQBIND_DECLARE_INSTANCE( CSqEngineExport );
+}; SQBIND_DECLARE_INSTANCE( sqbind::CSqEngineExport, CSqEngineExport ); namespace sqbind {
 
 /// Squirrel engine
 class CSqEngine : public CSqEngineExport

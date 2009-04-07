@@ -37,6 +37,11 @@
 // Include engine requirements
 #include "sqeng_extern.hpp"
 
+#if defined ( OEX_WINDOWS )
+#include <windows.h>
+BOOL WINAPI DllMain( HANDLE hinstDLL, DWORD dwReason, LPVOID lpvReserved ) { return true; }
+#endif
+
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_GetModuleInfo );
 extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 {
@@ -87,7 +92,7 @@ extern "C" oex::oexRESULT SRV_Stop()
 	return 0;
 }
 
-extern "C" oex::oexRESULT SQBIND_Export_Symbols( sqbind::VM *x_vm, sqbind::SSqAllocator *x_pAllocator )
+extern "C" oex::oexRESULT SQBIND_Export_Symbols( sqbind::VM x_vm, sqbind::SSqAllocator *x_pAllocator )
 {
 	// Set the memory allocator
 	sqbind::SQBIND_SetAllocator( x_pAllocator );

@@ -124,13 +124,13 @@ namespace sqbind
 		/// Displays the array in a human readable form
 		t_Obj print_r( int nShowVals );
 
-    private:
-
         /// Internal squirrel function, returns value of specified item
         SquirrelObject _get( HSQUIRRELVM v );
 
         /// Internal squirrel function used to iterate list items
         SquirrelObject _nexti( HSQUIRRELVM v );
+
+    private:
 
         /// Returns non-zero if pPattern matches pString
         static bool match_pattern( const oex::oexTCHAR *pString, const oex::oexTCHAR *pPattern);

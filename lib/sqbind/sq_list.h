@@ -66,8 +66,6 @@ namespace sqbind
         /// Adds an element to the vector
         void push_back( const t_Obj &s );
 
-    private:
-
         /// Internal squirrel function, returns value of specified item
         SquirrelObject _get( HSQUIRRELVM v );
 

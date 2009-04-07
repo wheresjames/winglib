@@ -369,12 +369,12 @@ else
 	endif
 
 	ifeq ($(PRJ_TYPE),dll)
-		ifneq ($(OS),wince)
-			CFG_LEXTRA := $(CFG_LEXTRA) -shared
-		endif
+#		ifneq ($(PLATFORM),windows)
+			CFG_LFLAGS := $(CFG_LFLAGS) -shared
+#		endif
 	else	
 		ifeq ($(LIBLINK),static)
-			CFG_LEXTRA := $(CFG_LEXTRA) -static
+			CFG_LFLAGS := $(CFG_LFLAGS) -static
 		endif
 	endif
 
@@ -408,6 +408,7 @@ else
 	CFG_LD := $(CFG_TOOLPREFIX)g++
 	CFG_CC := $(CFG_TOOLPREFIX)gcc $(CFG_SYSROOT_OPTIONS)
 	CFG_AR := $(CFG_TOOLPREFIX)ar
+	CFG_DT := $(CFG_TOOLPREFIX)dlltool
 	CFG_DP := $(CFG_TOOLPREFIX)makedepend
 	
 	CFG_MD := mkdir -p

@@ -153,7 +153,7 @@ oex::oexBOOL CModuleInstance::LoadFunctions()
 oex::oexBOOL CModuleInstance::IsLoaded()
 { return m_cModule.IsLoaded(); }
 
-oex::oexBOOL CModuleInstance::Export( SquirrelVM *pVm )
+oex::oexBOOL CModuleInstance::Export( sqbind::VM vm )
 {
 	// Ensure we have an export function
 	if ( !m_fExportSymbols )
@@ -164,7 +164,7 @@ oex::oexBOOL CModuleInstance::Export( SquirrelVM *pVm )
 	// Attempt to export the functionality
 	sqbind::SSqAllocator sa = { &malloc, &realloc, &free };
 
-	oex::oexINT nRet = m_fExportSymbols( pVm, &sa );
+	oex::oexINT nRet = m_fExportSymbols( vm, &sa );
 
 	if ( nRet == -1 )
 	{	oexERROR( 0, oex::CStr().Fmt( oexT( "In module '%s', SQBIND_Export() failed because heaps do not match, use shared linking" ),

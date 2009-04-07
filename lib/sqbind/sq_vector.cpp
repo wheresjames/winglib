@@ -35,20 +35,22 @@
 #include "stdafx.h"
 
 using namespace sqbind;
-        
-CSqVector::CSqVector() 
+
+CSqVector::CSqVector()
 {}
 
-CSqVector::t_List& CSqVector::list() 
+CSqVector::t_List& CSqVector::list()
 {   return m_lst; }
+
+_SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqVector, CSqVector )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqVector, push_back )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqVector, _get )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqVector, _nexti )
+_SQBIND_REGISTER_CLASS_END()
 
 void CSqVector::Register( SquirrelVM &vm )
 {
-    SqPlus::SQClassDef< CSqVector >( vm, oexT( "CSqVector" ) )
-            . func( &CSqVector::push_back,     oexT( "push_back" ) )
-            . func( &CSqVector::_get,          oexT( "_get" ) )
-            . func( &CSqVector::_nexti,        oexT( "_nexti" ) )
-        ;
+	_SQBIND_EXPORT( vm, CSqVector );
 }
 
 void CSqVector::push_back( const t_Obj &s )

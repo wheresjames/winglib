@@ -161,5 +161,4 @@ private:
 	t_MsgQueue                                  m_lstMsgQueue;
 };
 
-SQBIND_DECLARE_INSTANCE( CSqMsgQueue );
-
+}; SQBIND_DECLARE_INSTANCE( sqbind::CSqMsgQueue, CSqMsgQueue ); namespace sqbind {

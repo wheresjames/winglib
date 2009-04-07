@@ -62,7 +62,7 @@ public:
     oex::oexBOOL IsLoaded();
 
     /// Exports module functionality to the VM
-    oex::oexBOOL Export( SquirrelVM *pVm );
+    oex::oexBOOL Export( sqbind::VM vm );
 
 private:
 

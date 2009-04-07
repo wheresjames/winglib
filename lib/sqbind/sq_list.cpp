@@ -38,16 +38,18 @@ using namespace sqbind;
 
 // +++ Not sure this class actually works
 
-CSqList::t_List& CSqList::vector() 
+CSqList::t_List& CSqList::vector()
 {   return m_lst; }
+
+_SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqList, CSqList )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqList, push_back )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqList, _get )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqList, _nexti )
+_SQBIND_REGISTER_CLASS_END()
 
 void CSqList::Register( SquirrelVM &vm )
 {
-    SqPlus::SQClassDef< CSqList >( vm, _T( "CSqList" ) )
-            . func( &CSqList::push_back,     _T( "push_back" ) )
-            . func( &CSqList::_get,          _T( "_get" ) )
-            . func( &CSqList::_nexti,        _T( "_nexti" ) )
-        ;
+	_SQBIND_EXPORT( vm, CSqList );
 }
 
 void CSqList::push_back( const t_Obj &s )
