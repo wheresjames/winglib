@@ -110,7 +110,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, print_r )
 _SQBIND_REGISTER_CLASS_END()
 
-void CSqMulti::Register( SquirrelVM &vm )
+void CSqMulti::Register( sqbind::VM vm )
 {
 	_SQBIND_EXPORT( vm, CSqMulti );
 }

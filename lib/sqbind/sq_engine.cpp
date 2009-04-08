@@ -315,6 +315,7 @@ static int _log( int nErr, const stdString &sMsg )
 static int _break( const stdString &sError )
 {	oexBREAK( sError.c_str() ); return 0; }
 
+/*
 class CTestClass
 {
 public:
@@ -330,30 +331,31 @@ SQBIND_REGISTER_CLASS_BEGIN( CTestClass, CTestClass )
 	SQBIND_MEMBER_FUNCTION(  CTestClass, msg )
 	SQBIND_MEMBER_FUNCTION(  CTestClass, num )
 SQBIND_REGISTER_CLASS_END()
+*/
 
-SQBIND_REGISTER_CLASS_BEGIN( CSqMsgQueue, CSqMsgQueue )
-SQBIND_REGISTER_CLASS_END()
+_SQBIND_REGISTER_CLASS_BEGIN( CSqMsgQueue, CSqMsgQueue )
+_SQBIND_REGISTER_CLASS_END()
 
-SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, alert )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, echo )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, load_module )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sleep )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, spawn )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_path )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute1 )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute2 )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute3 )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute4 )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, path )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, md5 )
-SQBIND_REGISTER_CLASS_END()
+_SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, alert )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, echo )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, load_module )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sleep )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, spawn )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_path )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute1 )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute2 )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute3 )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute4 )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, path )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, md5 )
+_SQBIND_REGISTER_CLASS_END()
 
 
 oex::oexBOOL CSqEngine::Init()
@@ -380,16 +382,16 @@ oex::oexBOOL CSqEngine::Init()
 		sq_seterrorhandler( m_vm.GetVMHandle() );
 
 		// Bind Squirrel variables
-		sqbind::SqBindAll( m_vm );
+		sqbind::SqBindAll( &m_vm );
 
 		// Debugging functions
 		BindRootFunction( _msg, oexT( "_msg" ) );
 		BindRootFunction( _log, oexT( "_log" ) );
 		BindRootFunction( _log, oexT( "_break" ) );
 
-		SQBIND_EXPORT( m_vm.GetVMHandle(), CTestClass );
-		SQBIND_EXPORT( m_vm.GetVMHandle(), CSqMsgQueue );
-		SQBIND_EXPORT( m_vm.GetVMHandle(), CSqEngineExport );
+//		SQBIND_EXPORT( m_vm.GetVMHandle(), CTestClass );
+		_SQBIND_EXPORT( &m_vm, CSqMsgQueue );
+		_SQBIND_EXPORT( &m_vm, CSqEngineExport );
 /*
 		sqbind::VM v = m_vm.GetVMHandle();
 		sq_pushobject( v, SqBind< CSqEngineExport >::get_id() ); // push class
@@ -402,20 +404,7 @@ oex::oexBOOL CSqEngine::Init()
 
 //		sqbind_function( vm, "say_goodbye", &SqBind<MyClass>::get_id() );
 
-//		BindRootVariable( (CSqEngineExport*)this, SQEXE_SELF );
-
-
-//		SqBind< CTestClass >::init( m_vm.GetVMHandle(), oexT( "CTestClass" ) );
-//		sqbind_method( m_vm.GetVMHandle(), oexT( "msg" ), &CTestClass::msg );
-//		sqbind_method( m_vm.GetVMHandle(), oexT( "num" ), &CTestClass::num );
-
-		// Squirrel must understand CMsgQueue
-//		SqBind< CTestClass >::init( m_vm.GetVMHandle(), oexT( "CSqMsgQueue" ) );
-//		SqPlus::SQClassDef< CSqMsgQueue > ( m_vm, oexT( "CSqMsgQueue" ) );
-
-//		SqBind< CTestClass >::init( m_vm.GetVMHandle(), oexT( "CSqMsgQueue" ) );
-//		sqbind_method( m_vm.GetVMHandle(), oexT( "msg" ), &CTestClass::msg );
-
+		BindRootVariable( (CSqEngineExport*)this, SQEXE_SELF );
 
 /*		// Define our base class
 		SqPlus::SQClassDef< CSqEngineExport > ( m_vm, oexT( "CSqEngineExport" ) )
@@ -648,7 +637,7 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 	} // end if
 
 	// Export functionality
-	if ( !pMi->Export( m_vm.GetVMHandle() ) )
+	if ( !pMi->Export( &m_vm ) )
 	{	oexERROR( 0, oexMks( oexT( "Failed to export squirrel symbols from module " ), sFull ) );
 		return -5;
 	} // end if

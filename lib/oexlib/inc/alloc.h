@@ -655,25 +655,25 @@ public:
 
 	COexStdAllocator( const COexStdAllocator& ) {}
 
-	T* allocate( size_type n, const void * = 0 )
+	pointer allocate( size_type n, const void * = 0 )
 	{	return (T*)os::CMem::New( n * sizeof( T ), oexLINE, oexTEXT( oexFILE ) ); }
 
-	void deallocate( void* p, size_type sz )
+	void deallocate( pointer p, size_type )
 	{	if ( p ) os::CMem::Delete( p ); }
 
-	T* address( T& r ) const { return &r; }
+	pointer address( T& r ) const { return &r; }
 
-	T* address( const T& r ) const { return &r; }
+	const_pointer address( const T& r ) const { return &r; }
 
 	COexStdAllocator& operator =( const COexStdAllocator& ) { return *this; }
 
 	bool operator ==( const COexStdAllocator& ) const { return true; }
 
-	void construct( T* p, const T& val ) { new ( (T*)p ) T( val ); }
+	void construct( pointer p, const T& val ) { new ( (pointer)p ) T( val ); }
 
-	void destroy( T* p ) { p->~T(); }
+	void destroy( pointer p ) { p->~T(); }
 
-	size_type max_size() const { return size_type( -1 ); }
+	size_type max_size() const { return size_type( -1 ) / sizeof( T ); }
 
 	template< class U >
 		struct rebind { typedef COexStdAllocator< U > other; };

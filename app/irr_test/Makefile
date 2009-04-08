@@ -17,6 +17,10 @@ PRJ_LIBROOT := ../..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifeq ($(TOOLS),iphone)
+all:
+else
+
 ifeq ($(PROC),arm)
 	PRJ_INCS := $(PRJ_INCS) irrlicht-es/include
 	PRJ_LIBS := $(PRJ_LIBS) irrlicht-es jpeg png tiff zlib
@@ -27,14 +31,16 @@ endif
 
 #_IRR_USE_WINDOWS_CE_DEVICE_
 ifeq ($(PLATFORM),posix)
-	PRJ_OSLB := X11 GLU Xxf86vm
-	PRJ_DEFS := $(PRJ_DEFS) _IRR_USE_LINUX_DEVICE_ _IRR_COMPILE_WITH_X11_
+
+	ifneq ($(TOOLS),iphone)
+		PRJ_OSLB := X11 GLU Xxf86vm
+		PRJ_DEFS := $(PRJ_DEFS) _IRR_USE_LINUX_DEVICE_ _IRR_COMPILE_WITH_X11_
+	endif
 else
 	PRJ_DEFS := _IRR_STATIC_LIB_
 	ifeq ($(OS),wince)
-		PRJ_DEFS := $(PRJ_DEFS)
-		#_IRR_COMPILE_WITH_OGLES1_
-		PRJ_INCS := $(PRJ_INCS) ogles/include
+		#PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OGLES1_
+		#PRJ_INCS := $(PRJ_INCS) ogles/include
 	else
 		PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OPENGL_
 	endif	
@@ -50,5 +56,8 @@ include $(PRJ_LIBROOT)/build.mk
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
+
+endif
+
 
 

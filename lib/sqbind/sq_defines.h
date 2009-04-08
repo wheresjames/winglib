@@ -48,13 +48,23 @@
 
 namespace sqbind { typedef HSQUIRRELVM VM; }
 
+#else
+
+#   define SQBIND_REGISTER_CLASS_BEGIN						_SQBIND_REGISTER_CLASS_BEGIN
+#   define SQBIND_MEMBER_FUNCTION    						_SQBIND_MEMBER_FUNCTION
+#   define SQBIND_REGISTER_CLASS_END						_SQBIND_REGISTER_CLASS_END
+#   define SQBIND_EXPORT            						_SQBIND_EXPORT
+#	define SQBIND_DECLARE_INSTANCE							_SQBIND_DECLARE_INSTANCE
+#   define SQBIND_STATIC_FUNCTION							_SQBIND_STATIC_FUNCTION
+
 #endif
 
 #ifdef SQBIND_SQPLUS
 
 #   include <sqplus.h>
-#   define _SQBIND_REGISTER_CLASS_BEGIN( c, s ) 				static void __SqReg_sqplus_##s( SquirrelVM &vm ) { \
-    	                                       					SqPlus::SQClassDef< c >( vm, oexT( #s ) )
+#   define _SQBIND_REGISTER_CLASS_BEGIN( c, s ) 				static void __SqReg_sqplus_##s( SquirrelVM *vm ) { \
+																oexVERIFY_PTR( vm ); \
+    	                                       					SqPlus::SQClassDef< c >( *vm, oexT( #s ) )
 #   define _SQBIND_REGISTER_CLASS_END()       				; }
 #   define _SQBIND_EXPORT( vm, c )            				__SqReg_sqplus_##c( vm )
 #   define _SQBIND_MEMBER_FUNCTION( c, f )    				.func ( &c::f,        	  oexT( #f ) )
@@ -70,7 +80,9 @@ namespace sqbind { typedef HSQUIRRELVM VM; }
 
 #	define _SQBIND_DECLARE_INSTANCE( c, n )					DECLARE_INSTANCE_TYPE_NAME( c, n )
 
-//namespace sqbind { typedef SquirrelVM VM; }
+#	if !defined( SQBIND_SQBIND )
+namespace sqbind { typedef SquirrelVM *VM; }
+#endif
 
 #elif SQBIND_JKBIND
 
@@ -121,16 +133,17 @@ namespace sqbind
 		stdString& operator = ( const stdString &x_str ) { return m_str = x_str; }
 		stdString& operator = ( const oex::oexTCHAR *x_str ) { if ( x_str ) m_str = x_str; return m_str; }
 
-		static void Register( SquirrelVM &vm );
+		static void Register( sqbind::VM vm );
 	private:
 		stdString m_str;
 	};
 }
 
-// Declare type for use as squirrel parameters
-SQBIND_DECLARE_INSTANCE( sqbind::CSqString, CSqString )
-
 #if defined( SQBIND_SQPLUS )
+
+// Declare type for use as squirrel parameters
+_SQBIND_DECLARE_INSTANCE( sqbind::CSqString, CSqString )
+
 namespace SqPlus
 {
 

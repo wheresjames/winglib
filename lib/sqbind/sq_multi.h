@@ -111,7 +111,7 @@ namespace sqbind
 		stdString& str();
 
         /// Registers the vector class for use with Squirrel
-        static void Register( SquirrelVM &vm );
+        static void Register( sqbind::VM vm );
 
 		t_Obj urlencode();
 
@@ -178,4 +178,4 @@ namespace sqbind
 }; // end namespace
 
 // Declare type for use as squirrel parameters
-DECLARE_INSTANCE_TYPE_NAME( sqbind::CSqMulti, CSqMulti )
+_SQBIND_DECLARE_INSTANCE( sqbind::CSqMulti, CSqMulti )

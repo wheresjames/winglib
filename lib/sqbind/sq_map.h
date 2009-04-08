@@ -77,7 +77,7 @@ namespace sqbind
 		t_Obj& operator []( const oex::oexTCHAR *p );
 
         /// Registers the vector class for use with Squirrel
-        static void Register( SquirrelVM &vm );
+        static void Register( sqbind::VM vm );
 
 		t_Obj serialize();
 
@@ -140,4 +140,4 @@ namespace sqbind
 }; // end namespace
 
 // Declare type for use as squirrel parameters
-DECLARE_INSTANCE_TYPE_NAME( sqbind::CSqMap, CSqMap )
+_SQBIND_DECLARE_INSTANCE( sqbind::CSqMap, CSqMap )

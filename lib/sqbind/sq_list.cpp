@@ -47,7 +47,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqList, CSqList )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqList, _nexti )
 _SQBIND_REGISTER_CLASS_END()
 
-void CSqList::Register( SquirrelVM &vm )
+void CSqList::Register( sqbind::VM vm )
 {
 	_SQBIND_EXPORT( vm, CSqList );
 }

@@ -62,7 +62,7 @@ namespace sqbind
         t_List& list();
 
         /// Registers the vector class for use with Squirrel
-        static void Register( SquirrelVM &vm );
+        static void Register( sqbind::VM vm );
 
         /// Adds an element to the vector
         void push_back( const t_Obj &s );
@@ -77,4 +77,4 @@ namespace sqbind
 }; // end namespace
 
 // Declare type for use as squirrel parameters
-SQBIND_DECLARE_INSTANCE( sqbind::CSqVector, CSqVector )
+_SQBIND_DECLARE_INSTANCE( sqbind::CSqVector, CSqVector )

@@ -87,24 +87,7 @@ namespace sqbind
 		static stdString get_extension( const stdString &sFile )
 		{	return oexGetFileExtension( sFile.c_str() ).Ptr(); }
 
-		static void Register( SquirrelVM &vm )
-		{
-			SqPlus::SQClassDef< CSqFile >( vm, oexT( "CSqFile" ) )
-					. func( &CSqFile::OpenExisting,				oexT( "OpenExisting" ) )
-					. func( &CSqFile::OpenNew,					oexT( "OpenNew" ) )
-					. func( &CSqFile::Write,					oexT( "Write" ) )
-					. func( &CSqFile::Read,						oexT( "Read" ) )
-					. staticFunc( &CSqFile::get_contents,		oexT( "get_contents" ) )
-					. staticFunc( &CSqFile::put_contents,		oexT( "put_contents" ) )
-					. staticFunc( &CSqFile::append_contents,	oexT( "append_contents" ) )
-					. staticFunc( &CSqFile::mkdir,				oexT( "mkdir" ) )
-					. staticFunc( &CSqFile::rmdir,				oexT( "rmdir" ) )
-					. staticFunc( &CSqFile::exists,				oexT( "exists" ) )
-					. staticFunc( &CSqFile::get_filename,		oexT( "get_filename" ) )
-					. staticFunc( &CSqFile::get_path,			oexT( "get_path" ) )
-					. staticFunc( &CSqFile::get_extension,		oexT( "get_extension" ) )
-				;
-		}
+		static void Register( sqbind::VM vm );
 
 	private:
 

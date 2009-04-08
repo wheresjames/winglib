@@ -43,7 +43,7 @@
 
 // Using SqPlus script binding for now,
 // it doesn't support multiple constructors though :(
-#define SQBIND_SQBIND
+//#define SQBIND_SQBIND
 #define SQBIND_SQPLUS
 //#define SQBIND_JKBIND
 
@@ -105,7 +105,7 @@ namespace sqbind
     typedef oex::oexRESULT ( *PFN_SQBIND_Export_Symbols ) ( sqbind::VM x_vm, SSqAllocator *x_pAllocator );
 
     /// Bind native squirrel functions
-    static void SqBindAll( SquirrelVM &x_vm )
+    static void SqBindAll( sqbind::VM x_vm )
     {
     	CSqString::Register( x_vm );
         CSqVector::Register( x_vm );

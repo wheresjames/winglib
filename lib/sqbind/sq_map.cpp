@@ -79,7 +79,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMap, CSqMap )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMap, print_r )
 _SQBIND_REGISTER_CLASS_END()
 
-void CSqMap::Register( SquirrelVM &vm )
+void CSqMap::Register( sqbind::VM vm )
 {
 	_SQBIND_EXPORT( vm, CSqMap );
 }

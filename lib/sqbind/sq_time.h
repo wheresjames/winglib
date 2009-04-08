@@ -93,48 +93,7 @@ namespace sqbind
 		int ParseTime( const stdString &sTmpl, const stdString &sTime )
 		{	return m_t.ParseTime( sTmpl.c_str(), sTime.c_str() ); }
 
-		static void Register( SquirrelVM &vm )
-		{
-			SqPlus::SQClassDef< CSqTime >( vm, oexT( "CSqTime" ) )
-					. func( &CSqTime::GetLocalTime,				oexT( "GetLocalTime" ) )
-					. func( &CSqTime::GetSystemTime,			oexT( "GetSystemTime" ) )
-					. func( &CSqTime::SetTime,					oexT( "SetTime" ) )
-
-					. func( &CSqTime::GetYear,					oexT( "GetYear" ) )
-					. func( &CSqTime::GetMonth,					oexT( "GetMonth" ) )
-					. func( &CSqTime::GetDay,					oexT( "GetDay" ) )
-					. func( &CSqTime::GetHour,					oexT( "GetHour" ) )
-					. func( &CSqTime::Get12Hour,				oexT( "Get12Hour" ) )
-					. func( &CSqTime::GetMinute,				oexT( "GetMinute" ) )
-					. func( &CSqTime::GetSecond,				oexT( "GetSecond" ) )
-					. func( &CSqTime::GetMilliSecond,			oexT( "GetMilliSecond" ) )
-					. func( &CSqTime::GetMicroSecond,			oexT( "GetMicroSecond" ) )
-					. func( &CSqTime::GetNanoSecond,			oexT( "GetNanoSecond" ) )
-
-					. func( &CSqTime::SetYear,					oexT( "SetYear" ) )
-					. func( &CSqTime::SetMonth,					oexT( "SetMonth" ) )
-					. func( &CSqTime::SetDay,					oexT( "SetDay" ) )
-					. func( &CSqTime::SetHour,					oexT( "SetHour" ) )
-					. func( &CSqTime::Set12Hour,				oexT( "Set12Hour" ) )
-					. func( &CSqTime::SetMinute,				oexT( "SetMinute" ) )
-					. func( &CSqTime::SetSecond,				oexT( "SetSecond" ) )
-					. func( &CSqTime::SetMilliSecond,			oexT( "SetMilliSecond" ) )
-					. func( &CSqTime::SetMicroSecond,			oexT( "SetMicroSecond" ) )
-					. func( &CSqTime::SetNanoSecond,			oexT( "SetNanoSecond" ) )
-
-					. func( &CSqTime::IsPM,						oexT( "IsPM" ) )
-
-					. func( &CSqTime::GetUnixTime,				oexT( "GetUnixTime" ) )
-					. func( &CSqTime::SetUnixTime,				oexT( "SetUnixTime" ) )
-					. func( &CSqTime::GetDosTime,				oexT( "GetDosTime" ) )
-					. func( &CSqTime::SetDosTime,				oexT( "SetDosTime" ) )
-					. func( &CSqTime::GetNetTime,				oexT( "GetNetTime" ) )
-					. func( &CSqTime::SetNetTime,				oexT( "SetNetTime" ) )
-
-					. func( &CSqTime::FormatTime,				oexT( "FormatTime" ) )
-					. func( &CSqTime::ParseTime,				oexT( "ParseTime" ) )
-				;
-		}
+		static void Register( sqbind::VM vm );
 
 	private:
 

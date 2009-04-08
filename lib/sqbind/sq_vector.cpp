@@ -48,7 +48,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqVector, CSqVector )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqVector, _nexti )
 _SQBIND_REGISTER_CLASS_END()
 
-void CSqVector::Register( SquirrelVM &vm )
+void CSqVector::Register( sqbind::VM vm )
 {
 	_SQBIND_EXPORT( vm, CSqVector );
 }

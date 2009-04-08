@@ -44,18 +44,18 @@ namespace sqbind
 		CSqImage() {}
 
 		// Copy semantics
-		CSqImage( const CSqImage &r ) 
+		CSqImage( const CSqImage &r )
 		{
 #if defined( OEX_ENABLE_XIMAGE )
-			m_img = r.m_img; 
+			m_img = r.m_img;
 #endif
 		}
-		CSqImage& operator=( const CSqImage &r ) 
+		CSqImage& operator=( const CSqImage &r )
 		{
 #if defined( OEX_ENABLE_XIMAGE )
-			m_img = r.m_img; 
+			m_img = r.m_img;
 #endif
-			return *this; 
+			return *this;
 		}
 
 		int Load( const stdString &sFile, const stdString &sType )
@@ -63,16 +63,16 @@ namespace sqbind
 #if !defined( OEX_ENABLE_XIMAGE )
 			return 0;
 #else
-			return m_img.Load( sFile.c_str(), sType.c_str() ); 
+			return m_img.Load( sFile.c_str(), sType.c_str() );
 #endif
 		}
 
 		int Save( const stdString &sFile, const stdString &sType )
-		{	
+		{
 #if !defined( OEX_ENABLE_XIMAGE )
 			return 0;
 #else
-			return m_img.Save( sFile.c_str(), sType.c_str() ); 
+			return m_img.Save( sFile.c_str(), sType.c_str() );
 #endif
 		}
 
@@ -83,35 +83,27 @@ namespace sqbind
 #else
 			oex::oexPBYTE pBuf = oexNULL;
 			oex::oexINT nSize = 0;
-			if ( !m_img.Encode( &pBuf, &nSize, sType.c_str() ) 
+			if ( !m_img.Encode( &pBuf, &nSize, sType.c_str() )
 			     || !oexCHECK_PTR( pBuf ) || !nSize )
 				return oexT( "" );
-			
+
 			return stdString().assign( (oex::oexCSTR)pBuf, nSize );
 #endif
 		}
-		
+
 		int Decode( const stdString &sType, const stdString &sData )
 		{
 #if !defined( OEX_ENABLE_XIMAGE )
 			return 0;
 #else
-			return m_img.Decode( (oex::oexBYTE*)sData.c_str(), sData.length(), sType.c_str() ); 
+			return m_img.Decode( (oex::oexBYTE*)sData.c_str(), sData.length(), sType.c_str() );
 #endif
-		}		
-
-		static void Register( SquirrelVM &vm )
-		{
-			SqPlus::SQClassDef< CSqImage >( vm, oexT( "CSqImage" ) )
-					. func( &CSqImage::Load,				oexT( "Load" ) )
-					. func( &CSqImage::Save,				oexT( "Save" ) )									
-					. func( &CSqImage::Encode,				oexT( "Encode" ) )
-					. func( &CSqImage::Decode,				oexT( "Decode" ) )
-				;
 		}
 
+		static void Register( sqbind::VM vm );
+
 	private:
-	
+
 #if defined( OEX_ENABLE_XIMAGE )
 		/// Image object
 		oex::CImage		m_img;
