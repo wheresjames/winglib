@@ -15,5 +15,6 @@ sqbind
 SqPlus
 tiff
 winglib
+wxWidgets
 zlib
 
