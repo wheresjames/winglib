@@ -10,7 +10,6 @@ INSTALL_ROOT=$PWD/../..
 UPLOADS=$PWD/../../../uploads
 
 mkdir -p ${UPLOADS}
-mkdir -p ${INSTALL_ROOT}
 
 #-------------------------------------------------------------------
 # Execute

@@ -9,6 +9,13 @@ PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib jpeg
 
+PRJ_LIBROOT := ../..
+
+#-------------------------------------------------------------------
+# Configure build
+#-------------------------------------------------------------------
+include $(PRJ_LIBROOT)/config.mk
+
 ifeq ($(OS),win32)
 	PRJ_LIBS := $(PRJ_LIBS) wxWidgets
 else
@@ -16,13 +23,6 @@ else
 	PRJ_EXTC := `wx-config --cppflags`
 	PRJ_EXTL := `wx-config --libs`
 endif
-
-PRJ_LIBROOT := ../..
-
-#-------------------------------------------------------------------
-# Configure build
-#-------------------------------------------------------------------
-include $(PRJ_LIBROOT)/config.mk
 
 #-------------------------------------------------------------------
 # File locations

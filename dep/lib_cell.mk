@@ -17,11 +17,9 @@ PRJ_LIBROOT := ..
 include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(TOOLS),iphone)
-all:
-	@echo =======================================================
-	@echo = !!! $(TOOLS) not supported
-	@echo =======================================================
-else
+UNSUPPORTED := TOOLS=$(TOOLS) is not supported
+include $(PRJ_LIBROOT)/unsupported.mk
+endif
 
 #-------------------------------------------------------------------
 # File locations
@@ -39,5 +37,4 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-endif
 

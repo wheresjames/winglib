@@ -35,11 +35,9 @@ ifeq ($(PLATFORM),windows)
 endif
 
 ifeq ($(PROC),i386)
-all:
-	@echo =======================================================
-	@echo = !!! $(PROC) not supported
-	@echo =======================================================
-else
+UNSUPPORTED := PROC=$(PROC) not supported
+include $(PRJ_LIBROOT)/unsupported.mk
+endif
 
 #-------------------------------------------------------------------
 # File locations
@@ -59,6 +57,5 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-endif
 
 

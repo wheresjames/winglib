@@ -24,9 +24,9 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="make -C ../.. PLATFORM=windows OS=win32 BUILDDEP=1 SQMOD=1 DBG=1 GUI=1"
-				ReBuildCommandLine="make -C ../.. PLATFORM=windows OS=win32 BUILDDEP=1 SQMOD=1 BUILDTYPE=rebuild DBG=1"
-				CleanCommandLine="make -C ../.. PLATFORM=windows OS=win32 BUILDDEP=1 SQMOD=1 BUILDTYPE=clean DBG=1"
+				BuildCommandLine="make -C ../.. BUILD=vs BUILDDEP=1 SQMOD=1 DBG=1 GUI=1"
+				ReBuildCommandLine="make -C ../.. BUILD=vs BUILDDEP=1 SQMOD=1 BUILDTYPE=rebuild DBG=1 GUI=1"
+				CleanCommandLine="make -C ../.. BUILD=vs BUILDDEP=1 SQMOD=1 BUILDTYPE=clean DBG=1 GUI=1"
 				Output=""
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""

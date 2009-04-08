@@ -266,7 +266,11 @@ oexPVOID CResource::ThreadProc( oexPVOID x_pData )
 	} // end if
 
 	// Initialize COM
+#if defined( OEX_WINCE )
 	CoInitializeEx( NULL, COINIT_MULTITHREADED );
+#else
+	CoInitialize( NULL );
+#endif
 
 	// Call user thread
 	oexPVOID pRet = pRi->fnCallback( pRi->pData );

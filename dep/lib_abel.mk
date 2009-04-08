@@ -17,11 +17,9 @@ PRJ_LIBROOT := ..
 include $(PRJ_LIBROOT)/config.mk
 
 ifneq ($(PROC),i386)
-all:
-	@echo =======================================================
-	@echo = !!! Processor $(PROC) not supported
-	@echo =======================================================
-else
+UNSUPPORTED := PROC=$(PROC) is not supported
+include $(PRJ_LIBROOT)/unsupported.mk
+endif
 
 #-------------------------------------------------------------------
 # File locations
@@ -38,7 +36,4 @@ include $(PRJ_LIBROOT)/build.mk
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
-
-endif
-
 

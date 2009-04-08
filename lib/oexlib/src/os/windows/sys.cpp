@@ -365,14 +365,14 @@ oexDOUBLE CSys::StrToDouble( oexCSTRW x_pStr )
 /// vprintf
 int CSys::vPrintf( oexCSTRW x_pFmt, oexVaList pArgs )
 {
-	return ::vwprintf( x_pFmt, pArgs );
+	return ::vwprintf( x_pFmt, (va_list)pArgs );
 }
 
 /// printf function
 int CSys::Printf( oexCSTRW x_pFmt, ... )
 {
 	oexVaList ap; oexVaStart( ap, x_pFmt );
-	int ret = ::vwprintf( x_pFmt, ap );
+	int ret = ::vwprintf( x_pFmt, (va_list)ap );
 	oexVaEnd( ap );
 	return ret;
 }
@@ -473,7 +473,11 @@ oexBOOL CSys::MicroSleep( oexUINT uMicroseconds, oexUINT uSeconds )
 
 oexBOOL CSys::Init()
 {
+#if defined( OEX_WINCE )
 	CoInitializeEx( NULL, COINIT_MULTITHREADED );
+#else
+	CoInitialize( NULL );
+#endif
 
     return oexTRUE;
 }

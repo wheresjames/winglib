@@ -23,7 +23,6 @@ SF_SERVER=superb-east
 #SF_SERVER=voxel
 
 mkdir -p ${DOWNLOADS}
-mkdir -p ${INSTALL_ROOT}
 
 #-------------------------------------------------------------------
 # Execute
