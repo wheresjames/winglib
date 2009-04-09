@@ -37,7 +37,7 @@ endif
 ifeq ($(PROC),i386)
 UNSUPPORTED := PROC=$(PROC) not supported
 include $(PRJ_LIBROOT)/unsupported.mk
-endif
+else
 
 #-------------------------------------------------------------------
 # File locations
@@ -57,5 +57,5 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-
+endif
 

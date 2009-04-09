@@ -18,7 +18,8 @@ PRJ_LIBROOT := ../..
 include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(TOOLS),iphone)
-all:
+UNSUPPORTED := TOOLS=$(TOOLS) not supported
+include $(PRJ_LIBROOT)/unsupported.mk
 else
 
 ifeq ($(PROC),arm)

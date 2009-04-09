@@ -20,7 +20,7 @@ include $(PRJ_LIBROOT)/config.mk
 ifeq ($(BUILD_OGLES),)
 UNSUPPORTED := Set BUILD_OGLES=1 to build this project
 include $(PRJ_LIBROOT)/unsupported.mk
-endif
+else
 
 ifeq ($(OS),wince)
 	PRJ_DEFS := NO_GETENV
@@ -57,5 +57,5 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-
+endif
 
