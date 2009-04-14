@@ -176,7 +176,7 @@ int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 
 #endif
 
-#if defined( _IRR_COMPILE_WITH_DIRECT3D_9_	)
+#if defined( _IRR_COMPILE_WITH_DIRECT3D_9_	) && defined( OEX_ENABLE_DIRECTX )
 
 	else if ( pDdx9 )
 		pDdx9->SetRenderState( D3DRS_COLORWRITEENABLE,
@@ -207,7 +207,7 @@ int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 
 #endif
 
-#if defined( _IRR_COMPILE_WITH_DIRECT3D_9_	)
+#if defined( _IRR_COMPILE_WITH_DIRECT3D_9_	) && defined( OEX_ENABLE_DIRECTX )
 
 	else if ( pDdx9 )
 	{   pDdx9->Clear(0 , 0 , D3DCLEAR_ZBUFFER, 0x000000 , 1.0f , 0);
@@ -236,7 +236,7 @@ int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 
 #endif
 
-#if defined( _IRR_COMPILE_WITH_DIRECT3D_9_	)
+#if defined( _IRR_COMPILE_WITH_DIRECT3D_9_	) && defined( OEX_ENABLE_DIRECTX )
 
 	else if ( pDdx9 )
 		pDdx9->SetRenderState( D3DRS_COLORWRITEENABLE,
