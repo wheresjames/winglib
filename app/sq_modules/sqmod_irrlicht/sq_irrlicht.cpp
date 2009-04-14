@@ -81,7 +81,6 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height )
 		if ( !oexCHECK_PTR( m_pGui ) )
 			oexERROR( 0, oexT( "GUI environment is invalid" ) );
 
-
 	    m_pDriver->setAmbientLight( irr::video::SColorf( .5f, .5f, .5f ) );
 		m_pSmgr->addLightSceneNode( 0, irr::core::vector3df( 0, 100, 0 ),
 								 irr::video::SColorf( 0.5f, 0.5f, 0.5f ), 100 );
