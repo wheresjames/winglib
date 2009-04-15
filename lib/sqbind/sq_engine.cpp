@@ -174,6 +174,9 @@ stdString CSqEngineExport::execute4( int nRet, const stdString &sPath, const std
 void CSqEngineExport::sleep( int nMsTime )
 {   oex::os::CSys::Sleep( nMsTime ); }
 
+unsigned int CSqEngineExport::clock()
+{   oexGetBootCount(); }
+
 CSqMsgQueue* CSqEngineExport::queue()
 {   return OnGetQueue(); }
 
@@ -181,6 +184,12 @@ int CSqEngineExport::OnImport( const stdString &sClass )
 { return 0; }
 
 int CSqEngineExport::OnLoadModule( const stdString &sModule, const stdString &sPath )
+{ return 0; }
+
+SquirrelVM* CSqEngineExport::GetVmPtr()
+{ return 0; }
+
+CSqEngine* CSqEngineExport::GetEnginePtr()
 { return 0; }
 
 stdString CSqEngineExport::OnPath( stdString sPath )
@@ -209,6 +218,9 @@ SquirrelObject& CSqEngine::GetScriptObj()
 
 const SquirrelObject& CSqEngine::GetRootTable()
 { return m_vm.GetRootTable(); }
+
+SquirrelVM* CSqEngine::GetVmPtr()
+{ return &m_vm; }
 
 
 void CSqEngine::SqPrint( HSQUIRRELVM v, const SQChar* s, ... )
@@ -320,6 +332,9 @@ class CTestClass
 {
 public:
 
+	_SQBIND_CLASS_CTOR_BEGIN( CTestClass )
+	_SQBIND_CLASS_CTOR_END( CTestClass )
+
 	int msg( const stdString &sTitle, const stdString &sMsg )
 	{	return oex::os::CSys::ShowMessageBox( sTitle.c_str(), sMsg.c_str() ); }
 
@@ -327,10 +342,10 @@ public:
 	{	return msg( oexT( "Number" ), oexMks( num ).Ptr() ); }
 };
 
-SQBIND_REGISTER_CLASS_BEGIN( CTestClass, CTestClass )
-	SQBIND_MEMBER_FUNCTION(  CTestClass, msg )
-	SQBIND_MEMBER_FUNCTION(  CTestClass, num )
-SQBIND_REGISTER_CLASS_END()
+_SQBIND_REGISTER_CLASS_BEGIN( CTestClass, CTestClass )
+	_SQBIND_MEMBER_FUNCTION(  CTestClass, msg )
+	_SQBIND_MEMBER_FUNCTION(  CTestClass, num )
+_SQBIND_REGISTER_CLASS_END()
 */
 
 _SQBIND_REGISTER_CLASS_BEGIN( CSqMsgQueue, CSqMsgQueue )
@@ -342,6 +357,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )
 	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, load_module )
 	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sleep )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, clock )
 	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, spawn )
 	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_path )
@@ -389,10 +405,18 @@ oex::oexBOOL CSqEngine::Init()
 		BindRootFunction( _log, oexT( "_log" ) );
 		BindRootFunction( _log, oexT( "_break" ) );
 
-//		SQBIND_EXPORT( m_vm.GetVMHandle(), CTestClass );
+//		_SQBIND_EXPORT( &m_vm, CTestClass );
 		_SQBIND_EXPORT( &m_vm, CSqMsgQueue );
 		_SQBIND_EXPORT( &m_vm, CSqEngineExport );
 /*
+
+		sq_pushroottable(v);
+		sq_pushstring(v,p_constant,-1);
+		sq_pushinteger(v,p_value);
+		sq_newslot(v,-3,false);
+		sq_pop(v,1); // pop roottable
+
+
 		sqbind::VM v = m_vm.GetVMHandle();
 		sq_pushobject( v, SqBind< CSqEngineExport >::get_id() ); // push class
 		sq_pushstring( v, SQEXE_SELF, -1 );
@@ -402,35 +426,8 @@ oex::oexBOOL CSqEngine::Init()
 		sq_pop(v,1); // pop class
 */
 
-//		sqbind_function( vm, "say_goodbye", &SqBind<MyClass>::get_id() );
-
 		BindRootVariable( (CSqEngineExport*)this, SQEXE_SELF );
 
-/*		// Define our base class
-		SqPlus::SQClassDef< CSqEngineExport > ( m_vm, oexT( "CSqEngineExport" ) )
-											.func( &CSqEngineExport::alert,             oexT( "alert" ) )
-											.func( &CSqEngineExport::echo,				oexT( "echo" ) )
-											.func( &CSqEngineExport::import,            oexT( "import" ) )
-											.func( &CSqEngineExport::load_module,       oexT( "load_module" ) )
-											.func( &CSqEngineExport::sleep,             oexT( "sleep" ) )
-											.func( &CSqEngineExport::spawn,             oexT( "spawn" ) )
-											.func( &CSqEngineExport::run,               oexT( "run" ) )
-											.func( &CSqEngineExport::is_path,           oexT( "is_path" ) )
-											.func( &CSqEngineExport::execute,           oexT( "execute" ) )
-											.func( &CSqEngineExport::execute1,          oexT( "execute1" ) )
-											.func( &CSqEngineExport::execute2,          oexT( "execute2" ) )
-											.func( &CSqEngineExport::execute3,          oexT( "execute3" ) )
-											.func( &CSqEngineExport::execute4,          oexT( "execute4" ) )
-											.func( &CSqEngineExport::kill,              oexT( "kill" ) )
-											.func( &CSqEngineExport::queue,             oexT( "queue" ) )
-											.func( &CSqEngineExport::path,              oexT( "path" ) )
-											.func( &CSqEngineExport::root,              oexT( "root" ) )
-											.func( &CSqEngineExport::md5,				oexT( "md5" ) )
-										  ;
-
-		// Set base class pointer
-		BindRootVariable( (CSqEngineExport*)this, SQEXE_SELF );
-*/
 		// Allow derived class to register it's stuff
 		OnRegisterVariables();
 
@@ -582,6 +579,17 @@ oex::oexBOOL CSqEngine::Run( oex::oexCSTR pScript )
 
 oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e )
 {	oex::CStr sErr = oex::CStr().Fmt( oexT( "%s(%lu)\r\n   %s" ), x_e.sSource.c_str(), x_e.uLine, x_e.sDesc.c_str() );
+	oexERROR( 0, sErr );
+	m_sErr = sErr.Ptr();
+#if defined( OEX_WINDOWS )
+	oexRTRACE( oexT( "%s\n" ), m_sErr.c_str() );
+#endif
+	oexPrintf( oexT( "%s\n" ), m_sErr.c_str() );
+	return x_nReturn;
+}
+
+oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, oex::oexCSTR x_pErr )
+{	oex::CStr sErr = oex::CStr().Fmt( oexT( "%s\r\n" ), x_pErr );
 	oexERROR( 0, sErr );
 	m_sErr = sErr.Ptr();
 #if defined( OEX_WINDOWS )

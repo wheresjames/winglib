@@ -34,6 +34,8 @@
 
 #pragma once
 
+class CSqEngine;
+
 //==================================================================
 // CSqEngineExport
 //
@@ -50,6 +52,9 @@ public:
 	};
 
 public:
+
+	_SQBIND_CLASS_CTOR_BEGIN( CSqEngineExport )
+	_SQBIND_CLASS_CTOR_END( CSqEngineExport )
 
 	/// Exits the application
 	void exit( int nExitCode );
@@ -68,6 +73,9 @@ public:
 
 	/// Kills the specified thread
 	int kill( const stdString &sPath );
+
+	/// Returns boot count
+	unsigned int clock();
 
 	/// Returns the file path to the current script
 	stdString path( const stdString &sPath );
@@ -98,6 +106,10 @@ public:
 
 	// _self.queue()
 	CSqMsgQueue* queue();
+
+	virtual SquirrelVM* GetVmPtr();
+
+	virtual CSqEngine* GetEnginePtr();
 
 protected:
 
@@ -241,6 +253,7 @@ public:
 	oex::oexBOOL Run( oex::oexCSTR pScript );
 
 	oex::oexINT LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e );
+	oex::oexINT LogError( oex::oexINT x_nReturn, oex::oexCSTR x_pErr );
 
 public:
 
@@ -625,6 +638,82 @@ template< typename T_RET, typename T_P1, typename T_P2, typename T_P3, typename 
 		return oex::oexTRUE;
 	}
 
+    template< typename T_P1 >
+        oex::oexBOOL Execute( SquirrelObject &soFunction, const T_P1 &p1 )
+        {
+            if ( !IsScript() || oexNULL == &soFunction )
+                return oex::oexFALSE;
+
+            try
+            {
+                SqPlus::SquirrelFunction< void > f( m_vm, m_vm.GetRootTable(), soFunction );
+
+                if ( f.func.IsNull() )
+                {   m_sErr = "Invalid function object";
+                    return oex::oexFALSE;
+                } // end if
+
+                f( p1 );
+
+            } // end try
+
+			_oexCATCH( SScriptErrorInfo &e )
+			{	return LogError( oex::oexFALSE, e ); }
+			_oexCATCH( SquirrelError &e )
+			{	m_sErr = e.desc; return oex::oexFALSE; }
+		}
+
+
+    template< typename T_P1, typename T_P2 >
+        oex::oexBOOL Execute( SquirrelObject &soFunction, const T_P1 &p1, const T_P2 &p2 )
+        {
+            if ( !IsScript() || oexNULL == &soFunction )
+                return oex::oexFALSE;
+
+            try
+            {
+                SqPlus::SquirrelFunction< void > f( m_vm, m_vm.GetRootTable(), soFunction );
+
+                if ( f.func.IsNull() )
+                {   m_sErr = "Invalid function object";
+                    return oex::oexFALSE;
+                } // end if
+
+                f( p1, p2 );
+
+            } // end try
+
+			_oexCATCH( SScriptErrorInfo &e )
+			{	return LogError( oex::oexFALSE, e ); }
+			_oexCATCH( SquirrelError &e )
+			{	m_sErr = e.desc; return oex::oexFALSE; }
+		}
+
+    template< typename T_P1, typename T_P2, typename T_P3 >
+        oex::oexBOOL Execute( SquirrelObject &soFunction, const T_P1 &p1, const T_P2 &p2, const T_P3 &p3 )
+        {
+            if ( !IsScript() || oexNULL == &soFunction )
+                return oex::oexFALSE;
+
+            try
+            {
+                SqPlus::SquirrelFunction< void > f( m_vm, m_vm.GetRootTable(), soFunction );
+
+                if ( f.func.IsNull() )
+                {   m_sErr = "Invalid function object";
+                    return oex::oexFALSE;
+                } // end if
+
+                f( p1, p2, p3 );
+
+            } // end try
+
+			_oexCATCH( SScriptErrorInfo &e )
+			{	return LogError( oex::oexFALSE, e ); }
+			_oexCATCH( SquirrelError &e )
+			{	return LogError( oex::oexFALSE, e.desc ); }
+		}
+
 public:
 
 	/// Sets pointer to the module manager
@@ -641,6 +730,12 @@ public:
 
 	/// Return message queue pointer
 	virtual CSqMsgQueue* OnGetQueue();
+
+	/// Return vm pointer
+	virtual SquirrelVM* GetVmPtr();
+
+	/// Returns the engine pointer
+	virtual CSqEngine* GetEnginePtr() { return this; }
 
 private:
 

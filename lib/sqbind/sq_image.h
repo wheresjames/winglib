@@ -41,6 +41,9 @@ namespace sqbind
     {
 	public:
 
+		_SQBIND_CLASS_CTOR_BEGIN( CSqImage )
+		_SQBIND_CLASS_CTOR_END( CSqImage )
+
 		CSqImage() {}
 
 		// Copy semantics

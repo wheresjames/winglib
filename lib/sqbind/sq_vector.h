@@ -55,6 +55,9 @@ namespace sqbind
 
     public:
 
+		_SQBIND_CLASS_CTOR_BEGIN( CSqVector )
+		_SQBIND_CLASS_CTOR_END( CSqVector )
+
 		/// Default constructor
 		CSqVector();
 

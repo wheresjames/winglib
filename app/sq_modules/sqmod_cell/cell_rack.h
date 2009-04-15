@@ -7,6 +7,9 @@ class CCellRack
 {
 public:
 
+	_SQBIND_CLASS_CTOR_BEGIN( CCellRack )
+	_SQBIND_CLASS_CTOR_END( CCellRack )
+
 	/// Default constructor
 	CCellRack()
 	{

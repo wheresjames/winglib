@@ -7,6 +7,9 @@ class CCellServices
 {
 public:
 
+	_SQBIND_CLASS_CTOR_BEGIN( CCellServices )
+	_SQBIND_CLASS_CTOR_END( CCellServices )
+
 	/// Default constructor
 	CCellServices()
 	{

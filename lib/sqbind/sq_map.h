@@ -58,6 +58,9 @@ namespace sqbind
 
     public:
 
+		_SQBIND_CLASS_CTOR_BEGIN( CSqMap )
+		_SQBIND_CLASS_CTOR_END( CSqMap )
+
 		/// Default constructor
 		CSqMap();
 

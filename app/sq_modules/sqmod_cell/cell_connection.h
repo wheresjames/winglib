@@ -50,6 +50,9 @@ public:
 
 public:
 
+	_SQBIND_CLASS_CTOR_BEGIN( CCellConnection )
+	_SQBIND_CLASS_CTOR_END( CCellConnection )
+
 	/// Default constructor
 	CCellConnection();
 

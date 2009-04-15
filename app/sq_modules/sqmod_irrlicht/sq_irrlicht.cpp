@@ -2,11 +2,10 @@
 
 #include "stdafx.h"
 
-#define _IRR_COMPILE_WITH_OPENGL_
-#if defined( _IRR_COMPILE_WITH_OPENGL_ )
+#if defined( _IRR_COMPILE_WITH_OPENGL_ ) || defined( _IRR_LINUX_X11_VIDMODE_ )
 #	include <GL/gl.h>
+#	define SQ_USE_OPENGL
 #endif
-
 
 CSqIrrlicht::CSqIrrlicht()
 {
@@ -31,9 +30,15 @@ CSqIrrlicht::~CSqIrrlicht()
 	m_pSmgr = oexNULL;
 	m_pDriver = oexNULL;
 	m_pGui = oexNULL;
-	m_pCamera = oexNULL;
 	m_nDriverType = -1;
 
+	// Lose scene camera reference
+	if ( m_pCamera )
+	{	m_pCamera->drop();
+		m_pCamera = oexNULL;
+	} // end if
+
+	// Lose device
 	if ( m_pDevice )
 	{	m_pDevice->closeDevice();
 		m_pDevice->drop();
@@ -47,7 +52,7 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height )
 	param.Bits = 16;
 	param.AntiAlias = true;
 #if defined( _WIN32_WCE )
-	param.DriverType = irr::video::EDT_BURNINGVIDEO;
+	param.DriverType = irr::video::EDT_BURNINGSVIDEO;
 	param.WindowSize = irr::core::dimension2d<irr::u32>( width, height );
 #else
 	param.DriverType = irr::video::EDT_OPENGL;
@@ -81,47 +86,77 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height )
 		if ( !oexCHECK_PTR( m_pGui ) )
 			oexERROR( 0, oexT( "GUI environment is invalid" ) );
 
-	    m_pDriver->setAmbientLight( irr::video::SColorf( .5f, .5f, .5f ) );
-		m_pSmgr->addLightSceneNode( 0, irr::core::vector3df( 0, 100, 0 ),
-								 irr::video::SColorf( 0.5f, 0.5f, 0.5f ), 100 );
-		m_pSmgr->addLightSceneNode( 0, irr::core::vector3df( 0, 100, -50 ),
-								 irr::video::SColorf( 0.5f, 0.5f, 0.5f ), 100 );
-
-		m_pCamera =
-			m_pSmgr->addCameraSceneNode( 0, irr::core::vector3df( 0, 30, -40 ),
-									  irr::core::vector3df( 0, 5, 0 ) );
-
-		irr::scene::ISceneNode *node = m_pSmgr->addCubeSceneNode( 10.f );
-		if ( node )
-		{
-			irr::scene::ISceneNodeAnimator* rotate =
-				m_pSmgr->createRotationAnimator( irr::core::vector3df( 0, 0.4f, 0 ) );
-
-			node->addAnimator( rotate );
-
-			rotate->drop();
-
-		} // end if
-
-
 	} // end else
 
 	return 1;
 }
 
-int CSqIrrlicht::Draw()
+/// Sets the ambient color lighting
+int CSqIrrlicht::SetAmbientLight( CSqirrColorf &x_col )
+{
+	if ( !m_pDriver )
+		return 0;
+
+	m_pDriver->setAmbientLight( x_col.Obj() );
+
+	return 1;
+}
+
+CSqirrNode CSqIrrlicht::AddLight( CSqirrVector3d &pos, CSqirrColorf &col, float rad )
+{
+	if ( !m_pSmgr )
+		return CSqirrNode();
+
+	return m_pSmgr->addLightSceneNode( 0, pos.Obj(), col.Obj(), rad );
+}
+
+CSqirrCamera CSqIrrlicht::AddCamera( CSqirrVector3d &pos, CSqirrVector3d &look )
+{
+	if ( !m_pSmgr )
+		return CSqirrCamera();
+
+	irr::scene::ICameraSceneNode *pCamera =
+		m_pSmgr->addCameraSceneNode( 0, pos.Obj(), look.Obj() );
+
+	if ( !pCamera )
+		return CSqirrCamera();
+
+	if ( !m_pCamera )
+	{	m_pCamera = pCamera;
+		m_pCamera->grab();
+	} // end if
+
+	return pCamera;
+}
+
+CSqirrNode CSqIrrlicht::AddCube( float size )
+{
+	if ( !m_pSmgr )
+		return CSqirrNode();
+
+	return m_pSmgr->addCubeSceneNode( size );
+}
+
+CSqirrAnimator CSqIrrlicht::AddRotateAnimator( CSqirrVector3d &speed )
+{
+	CSqirrAnimator rotate( m_pSmgr->createRotationAnimator( speed.Obj() ) );
+	if ( rotate.Ptr() ) rotate.Ptr()->drop();
+	return rotate;
+}
+
+int CSqIrrlicht::Draw( CSqirrColor &bg )
 {
 	if ( !m_pDevice || !m_pDevice->run() )
 		return -1;
 
-    if ( m_bStereo )
-		DrawAnaglyph( m_pDriver, m_pSmgr, m_pCamera, m_colBackground,
+    if ( m_bStereo && m_pCamera )
+		DrawAnaglyph( m_pDriver, m_pSmgr, m_pCamera, bg.Obj(),
 		              m_fStereoWidth, m_fStereoFocus, m_nDriverType,
 					  m_ulREyeKey, m_ulLEyeKey );
 
 	else
 	{
-		m_pDriver->beginScene( true, true, m_colBackground );
+		m_pDriver->beginScene( true, true, bg.Obj() );
 		m_pSmgr->drawAll();
 		m_pGui->drawAll();
 		m_pDriver->endScene();
@@ -132,11 +167,11 @@ int CSqIrrlicht::Draw()
 }
 
 int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
-                    irr::scene::ISceneManager *pSm,
-                    irr::scene::ICameraSceneNode *pCamera,
-                    irr::video::SColor colBackground,
-                    float fWidth, float fFocus, int nDriverType,
-                    unsigned long ulREyeKey, unsigned long ulLEyeKey )
+							   irr::scene::ISceneManager *pSm,
+							   irr::scene::ICameraSceneNode *pCamera,
+							   irr::video::SColor colBackground,
+							   float fWidth, float fFocus, int nDriverType,
+							   unsigned long ulREyeKey, unsigned long ulLEyeKey )
 {
 	// Right eye
 	irr::core::vector3df reye = pCamera->getPosition();
@@ -158,11 +193,13 @@ int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 			  && pDriver->getExposedVideoData().D3D9.D3DDev9 )
 	  pDdx9 = pDriver->getExposedVideoData().D3D9.D3DDev9;
 
+	pDriver->beginScene( true, true, colBackground );
+
 	if ( 0 )
 		;
 
 	// Setup right eye
-#if defined( _IRR_COMPILE_WITH_OPENGL_ )
+#if defined( SQ_USE_OPENGL )
 
 	else if ( nDriverType == irr::video::EDT_OPENGL )
 	{   glMatrixMode( GL_MODELVIEW );
@@ -185,13 +222,12 @@ int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 							   | ( ulREyeKey & 0xff000000 ? D3DCOLORWRITEENABLE_ALPHA : 0 ) );
 #endif
 
-	pDriver->beginScene( true, true, colBackground );
 	pSm->drawAll();
 
 	if ( 0 )
 		;
 
-#if defined( _IRR_COMPILE_WITH_OPENGL_ )
+#if defined( SQ_USE_OPENGL )
 
 	// Left Eye
 	if ( nDriverType == irr::video::EDT_OPENGL )
@@ -223,12 +259,11 @@ int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 	pCamera->OnRegisterSceneNode();
 
 	pSm->drawAll();
-	pDriver->endScene();
 
 	if ( 0 )
 		;
 
-#if defined( _IRR_COMPILE_WITH_OPENGL_ )
+#if defined( SQ_USE_OPENGL )
 
 	if ( nDriverType == irr::video::EDT_OPENGL )
 		glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
@@ -244,6 +279,8 @@ int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 							   | D3DCOLORWRITEENABLE_RED
 							   | D3DCOLORWRITEENABLE_ALPHA );
 #endif
+
+	pDriver->endScene();
 
 	// Restore original position
 	pCamera->setPosition( reye );
@@ -265,3 +302,398 @@ int CSqIrrlicht::AddSkyDome( const sqbind::stdString &sFile,
 
     return 1;
 }
+
+CSqirrVector3d CSqIrrlicht::ScreenToPlane( CSqirrVector2d &ptScreen, float fDist )
+{
+    // Must have object
+    if ( !m_pCamera || !m_pSmgr )
+        return CSqirrVector3d();
+
+    // Is mouse in the window?
+    if ( 0 > ptScreen.Obj().X || 0 > ptScreen.Obj().Y )
+        return CSqirrVector3d();
+
+    // Update the camera view
+    m_pCamera->OnRegisterSceneNode();
+
+    // Get mouse line
+    irr::core::line3df ml =
+        m_pSmgr->getSceneCollisionManager()->
+                    getRayFromScreenCoordinates( irr::core::position2di( (unsigned int)ptScreen.Obj().X, (unsigned int)ptScreen.Obj().Y ),
+                                                 m_pCamera );
+
+    // Get the camera target line
+    irr::core::line3df cl( m_pCamera->getPosition(), m_pCamera->getTarget() );
+
+    // Calculate the orthogonal plane position
+    irr::core::vector3df pos = cl.start + ( cl.getVector().normalize() * fDist );
+
+    // Calculate camera line plane intersection
+	irr::core::vector3df ptWorld;
+    if ( !irr::core::plane3df( pos, cl.getVector().normalize() ).
+                    getIntersectionWithLine( ml.getMiddle(), ml.getVector(), ptWorld ) )
+        return CSqirrVector3d();
+
+    return ptWorld;
+}
+
+CSqirrNode CSqIrrlicht::NodeAtScreen( CSqirrVector2d &ptScreen, long lMask )
+{
+    if ( !m_pSmgr || !m_pCamera || 0 > ptScreen.x() || 0 > ptScreen.y() )
+        return CSqirrNode();
+
+    irr::core::position2d< irr::s32 > pos;
+    pos.X = ptScreen.x(); pos.Y = ptScreen.y();
+
+    irr::core::line3d< irr::f32 > line =
+        m_pSmgr->getSceneCollisionManager()->getRayFromScreenCoordinates( pos, m_pCamera );
+
+    // Which node was clicked
+    irr::scene::ISceneNode *pNode =
+        m_pSmgr->getSceneCollisionManager()->getSceneNodeFromRayBB( line, lMask );
+
+    if ( !pNode )
+        return CSqirrNode();
+
+    // Drop if not visible
+    if ( !pNode->isVisible() )
+        pNode = 0;
+
+    const irr::core::list< irr::scene::ISceneNode* >& children = m_pSmgr->getRootSceneNode()->getChildren();
+    for ( irr::core::list< irr::scene::ISceneNode* >::ConstIterator it = children.begin();
+          it != children.end(); ++it )
+        if ( *it && *it != pNode && (*it)->isVisible() && 0 < (*it)->getID() && 0 != ( lMask & (*it)->getID() ) )
+        {
+            irr::core::aabbox3df bb = (*it)->getTransformedBoundingBox();
+            if ( bb.intersectsWithLine( line ) )
+                if ( !pNode || bb.intersectsWithBox( pNode->getTransformedBoundingBox() ) )
+                    pNode = *it;
+
+        } // end for
+
+    // Ensure mask is correct
+    if ( 0 > pNode->getID() || !( lMask & pNode->getID() ) )
+        pNode = NULL;
+
+	return pNode;
+}
+
+int CSqIrrlicht::InsertPoints(   irr::scene::IMeshSceneNode *pNode,
+                                 irr::scene::SMeshBuffer **pMb,
+                                 unsigned int lNewVertices, unsigned int lNewIndices,
+                                 unsigned int &vi, unsigned int &ii )
+{
+    // Sanity check
+    if ( !pNode || !pMb )
+        return 0;
+
+    // New mesh buffer
+    *pMb = new irr::scene::SMeshBuffer();
+    if ( !*pMb )
+        return 0;
+
+    // Existing mesh?
+    irr::scene::IMeshBuffer *pOldMb = 0;
+    if ( pNode->getMesh() && pNode->getMesh()->getMeshBufferCount() )
+        pOldMb = pNode->getMesh()->getMeshBuffer( 0 );
+
+    // Old buffer?
+    if ( !pOldMb || 2 > pOldMb->getVertexCount() )
+    {
+        // Just add the two points
+        (*pMb)->Vertices.set_used( lNewVertices );
+        (*pMb)->Indices.set_used( lNewIndices );
+
+        vi = 0;
+        ii = 0;
+
+        return 1;
+
+    } // end else
+
+    // Get current counts
+    vi = pOldMb->getVertexCount();
+    ii = pOldMb->getIndexCount();
+
+    // Allocate new buffers
+    (*pMb)->Vertices.set_used( vi + lNewVertices );
+    (*pMb)->Indices.set_used( ii + lNewIndices );
+
+    // Copy old data
+    if ( vi )
+//        memcpy( (*pMb)->getVertices(), pOldMb->getVertices(), pOldMb->getVertexPitch() * vi );
+        memcpy( (*pMb)->getVertices(), pOldMb->getVertices(), irr::video::getVertexPitchFromType( pOldMb->getVertexType() ) * vi );
+    if ( ii )
+        memcpy( (*pMb)->getIndices(), pOldMb->getIndices(), sizeof( irr::u16 ) * ii );
+
+    return 1;
+}
+
+int CSqIrrlicht::InsertPlane( irr::scene::IMeshSceneNode *pNode,
+                               const irr::core::vector3df &tl, const irr::core::vector3df &tr,
+                               const irr::core::vector3df &bl, const irr::core::vector3df &br,
+                               irr::video::SColor &color, long lSides,
+                               float minU, float maxU, float minV, float maxV )
+{
+    // Add new points
+    unsigned int ovi = 0, oii = 0;
+    irr::scene::SMeshBuffer *pMb = NULL;
+    if ( !InsertPoints( pNode, &pMb, ( 1 < lSides ) ? 8 : 4, ( 1 < lSides ) ? 12 : 6, ovi, oii ) )
+        return FALSE;
+
+    unsigned int vi = ovi, ii = oii;
+
+    pMb->Vertices[ vi++ ] = irr::video::S3DVertex( tl, irr::core::vector3df( 0, 0, 1 ), color, irr::core::vector2df( 1.f - minU, 1.f - maxV ) );
+    pMb->Vertices[ vi++ ] = irr::video::S3DVertex( bl, irr::core::vector3df( 0, 0, 1 ), color, irr::core::vector2df( 1.f - minU, 1.f - minV ) );
+    pMb->Vertices[ vi++ ] = irr::video::S3DVertex( br, irr::core::vector3df( 0, 0, 1 ), color, irr::core::vector2df( 1.f - maxU, 1.f - minV ) );
+    pMb->Vertices[ vi++ ] = irr::video::S3DVertex( tr, irr::core::vector3df( 0, 0, 1 ), color, irr::core::vector2df( 1.f - maxU, 1.f - maxV ) );
+
+    pMb->Indices[ ii++ ] = ovi + 1;
+    pMb->Indices[ ii++ ] = ovi + 2;
+    pMb->Indices[ ii++ ] = ovi + 3;
+    pMb->Indices[ ii++ ] = ovi + 3;
+    pMb->Indices[ ii++ ] = ovi + 0;
+    pMb->Indices[ ii++ ] = ovi + 1;
+
+    // Back side?
+    if ( 1 < lSides )
+    {
+    pMb->Vertices[ vi++ ] = irr::video::S3DVertex( tl, irr::core::vector3df( 0, 0, -1 ), color, irr::core::vector2df( 1.f - minU, 1.f - maxV ) );
+    pMb->Vertices[ vi++ ] = irr::video::S3DVertex( bl, irr::core::vector3df( 0, 0, -1 ), color, irr::core::vector2df( 1.f - minU, 1.f - minV ) );
+    pMb->Vertices[ vi++ ] = irr::video::S3DVertex( br, irr::core::vector3df( 0, 0, -1 ), color, irr::core::vector2df( 1.f - maxU, 1.f - minV ) );
+    pMb->Vertices[ vi++ ] = irr::video::S3DVertex( tr, irr::core::vector3df( 0, 0, -1 ), color, irr::core::vector2df( 1.f - maxU, 1.f - maxV ) );
+
+        pMb->Indices[ ii++ ] = ovi + 4 + 1;
+        pMb->Indices[ ii++ ] = ovi + 4 + 3;
+        pMb->Indices[ ii++ ] = ovi + 4 + 2;
+        pMb->Indices[ ii++ ] = ovi + 4 + 3;
+        pMb->Indices[ ii++ ] = ovi + 4 + 1;
+        pMb->Indices[ ii++ ] = ovi + 4 + 0;
+
+    } // end if
+
+    pMb->recalculateBoundingBox();
+
+    irr::scene::SMesh *pMesh = new irr::scene::SMesh();
+    if ( !pMesh ) return 0;
+
+    pMesh->addMeshBuffer( pMb );
+    pMb->drop();
+
+    pMesh->recalculateBoundingBox();
+
+    pNode->setMesh( pMesh );
+    pMesh->drop();
+
+    return 1;
+}
+
+CSqirrNode CSqIrrlicht::AddGrid( float fWidth, float fHeight,
+                                 long lXPanels, long lYPanels,
+                                 float fSpace, long lSides,
+                                 CSqirrColor &rColor )
+{
+    if ( !m_pSmgr )
+        return CSqirrNode();
+
+    irr::scene::SMesh *pMesh = new irr::scene::SMesh();
+    if ( !pMesh )
+        return CSqirrNode();
+
+    // Add empty mesh
+    irr::scene::IMeshSceneNode *pNode =
+        m_pSmgr->addMeshSceneNode( pMesh );
+    pMesh->drop();
+
+    if ( !pNode )
+        return CSqirrNode();
+
+    // Put a bunch of planes in the mesh
+    float psize = 8;
+    long sy = lXPanels;
+    long sx = lYPanels;
+    float xp, yp;
+    float xs = fWidth - fSpace;
+    float ys = fHeight - fSpace;
+
+    for ( long y = 0; y < sy; y++ )
+    {
+        yp = ( y - ( sy / 2 ) ) * ys + ( y - ( sy / 2 ) ) * fSpace;
+
+        for ( long x = 0; x < sx; x++ )
+        {
+            xp = ( x - ( sx / 2 ) ) * xs + ( x - ( sx / 2 ) ) * fSpace;
+
+            InsertPlane( pNode, irr::core::vector3df( xp, yp + ys, 0 ),
+                                irr::core::vector3df( xp + xs, yp + ys, 0 ),
+                                irr::core::vector3df( xp, yp, 0 ),
+                                irr::core::vector3df( xp + xs, yp, 0 ),
+                                rColor.Obj(), lSides,
+                                (float)x / (float)sx, (float)( x + 1 ) / (float)sx,
+                                (float)y / (float)sy, (float)( y + 1 ) / (float)sy );
+        } // end for
+
+    } // end for
+
+	return pNode;
+}
+
+/*
+
+// Main entry point
+function _init() : ( _g )
+{
+    local node = _irr.AddGrid( 10., 10., 10, 10, 0.2, 2
+                               CSiColor( 255, 255, 255, 255 ), 2 );
+
+    _irr.AddMeshAnimator( node, OnAnimate, 0 );
+
+}
+
+function _mod_fp( _x, _y )
+{	local n = ( _x / _y ).tointeger();
+	return _x - n * _y;
+}
+
+function OnAnimate( n, o, c )
+{
+//    _self.alert( n.tostring() );
+
+    local pi = 3.141592654;
+    local pi2 = pi * 2.;
+
+    local attn = 6;
+    local m = pi2 / 100;
+
+    local clk = _irr.clock();
+
+	for ( local i = 0; i < n; i++ )
+	{
+        // Normalize space
+        local u = o.x( i ) * m;
+//        local u = _mod_fp( o.x( i ) * m + clk, pi );
+        local v = o.y( i ) * m;
+//        local v = _mod_fp( o.y( i ) * m + clk, pi );
+        local x = 0, y = 0, z = 0;
+
+		// Cylinder
+// 		x = sin( u );
+//		y = ty;
+//		z = cos( u );
+
+		// Cone
+//		x = sin( u ) * ( pi - v ) * 0.2;
+//		y = v;
+//		z = cos( u ) * ( pi - v ) * 0.2;
+
+		// Sphere
+//		x = sin( u ) * cos( v / 2 );
+//		y = sin( v / 2 );
+//		z = cos( u ) * cos( v / 2 );
+
+		// Torus
+//		x = ( 2 + cos( v ) ) * cos( u );
+//		y = sin( v );
+//		z = ( 2 + cos( v ) ) * sin( u );
+
+		// Toroid
+//		u += pi; u *= 1.5;
+//		x = cos( u ) * ( u / ( 3 * pi ) * cos( v ) + 2 );
+//		y = u * sin( v ) / ( 3 * pi );
+//		z = sin( u ) * ( u / ( 3 * pi ) * cos( v ) + 2 );
+
+		// Coil
+//		x = cos( u * 1.5 ) * ( cos( v ) + 2 );
+//		y = sin( u * 1.5 ) * ( cos( v ) + 2 );
+//		z = sin( v ) + u;
+
+		// Trefoil Knot
+		local a = 0.5;
+		u *= 2;
+		x = a * ( cos( u ) * cos( v ) + 3 * cos( u ) * ( 1.5 + sin( 1.5 * u ) / 2 ) );
+		y = a * ( sin( v ) + 2 * cos( 1.5 * u ) );
+		z = a * ( sin( u ) * cos( v ) + 3 * sin( u ) * ( 1.5 + sin( 1.5 * u ) / 2 ) );
+
+		// Nautilus
+//		u += pi;
+//		x = 0.5 * u * cos( u ) * ( cos( v ) + 1 );
+//		y = 0.5 * u * sin( v );
+//		z = 0.5 * u * sin( u ) * ( cos( v ) + 1 );
+
+		// Mobius Strip
+//		u += pi; // 0 <= u < 2pi
+//		v *= 0.2; // -t <= v < t
+//		x = cos( u ) + v * cos( u / 2 ) * cos( u );
+//		y = sin( u ) + v * cos( u / 2 ) * sin( u );
+//		z = v * sin( u / 2 );
+
+		// Klein Bottle
+//		local a = 2.0;
+//		v += pi; // 0 <= v < 2pi
+//		x = ( a + cos( u / 2 ) * sin( v ) - sin( u / 2 ) * sin( 2 * v ) ) * cos( u );
+//		y = sin( u / 2 ) * sin( v ) + cos( u / 2 ) * sin( 2 * v );
+//		z = ( a + cos( u / 2 ) * sin( v ) - sin( u / 2 ) * sin( 2 * v ) ) * sin( u );
+
+		// Dini's surface
+//		u += pi; u *= 2; // 0 <= u < 4pi
+//		x = cos( u ) * sin( v );
+//		y = -2 - ( cos( v ) + log( tan( v / 2 ) ) + 0.2 * u - 4 );
+//		z = sin( u ) * sin( v );
+
+		// Flag
+//		 x = u;
+//		 y = v;
+//		 z = 0;
+
+		// Waving
+//        z += sin( u * 2. + clk / 2 ) + sin( u + ( clk * 2.2 ) );
+//        z += sin( v * 1. + clk ) + sin( v * 1.1 + ( clk * 1.2 ) );
+//        z *= ( ( u - pi ) / pi2 ) / attn;
+
+        c.set( i, x / m, y / m, z / m );
+
+    } // end for
+
+}
+
+*/
+int CSqIrrlicht::AddMeshAnimator( sqbind::CSqEngineExport *e, CSqirrNode &n, SquirrelObject soF, long lFreq )
+{
+    if ( !m_pSmgr || !n.IsValid() || !e || !e->GetVmPtr() )
+        return 0;
+
+    if ( !lFreq )
+    {
+        CSquirrMeshAnimator ma;
+        if ( !ma.Init( (irr::scene::IMeshSceneNode*)n.Ptr(), soF, e->GetVmPtr()->GetVMHandle(), 0 ) )
+            return 0;
+
+        // Let Squirrel manipulate the mesh
+        ma.Run( m_pSmgr, oexGetBootCount(), e->GetEnginePtr() );
+
+        // Just leave the mesh as is
+        ma.Detach();
+
+    } // end if
+
+    else
+		return 0;
+/*
+    {
+        CSquirrMeshAnimator *pMa = m_lstMeshAnimators.get( &n );
+        if ( !pMa )
+            return 0;
+
+        if ( !pMa->Init( (irr::scene::IMeshSceneNode*)n.Ptr(), soF, m_sqScript.GetVM().GetVMHandle(), lFreq ) )
+        {   m_lstMeshAnimators.erase( &n );
+            return 0;
+        } // end if
+
+        // Initialize the mesh
+        pMa->Run( m_pSmgr, oexGetBootCount(), e->GetEnginePtr() );
+
+    } // end else
+*/
+    return 1;
+}
+

@@ -26,6 +26,9 @@ public:
 
 public:
 
+	_SQBIND_CLASS_CTOR_BEGIN( CGdcChart )
+	_SQBIND_CLASS_CTOR_END( CGdcChart )
+
 	/// Default constructor
 	CGdcChart();
 

@@ -57,6 +57,9 @@ namespace sqbind
 
     public:
 
+		_SQBIND_CLASS_CTOR_BEGIN( CSqList )
+		_SQBIND_CLASS_CTOR_END( CSqList )
+
         /// Returns a reference to the underlying vector
         t_List& vector();
 

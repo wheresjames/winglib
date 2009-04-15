@@ -6,6 +6,9 @@ class CHttpServer
 {
 public:
 
+	_SQBIND_CLASS_CTOR_BEGIN( CHttpServer )
+	_SQBIND_CLASS_CTOR_END( CHttpServer )
+
 	/// Default constructor
 	CHttpServer()
 	{

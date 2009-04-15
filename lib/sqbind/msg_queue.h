@@ -49,6 +49,9 @@ public:
 
 public:
 
+	_SQBIND_CLASS_CTOR_BEGIN( CSqMsgQueue )
+	_SQBIND_CLASS_CTOR_END( CSqMsgQueue )
+
 	/// Default constructor
 	CSqMsgQueue();
 

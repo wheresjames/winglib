@@ -1,5 +1,4 @@
 
-
 #if defined( _WIN32_WCE )
 
 #include "stdafx.h"
@@ -49,7 +48,7 @@ int main( int argc, char* argv[] )
 {
 
 	IrrlichtDevice *device = 0;
-	
+
 #if defined( _WIN32_WCE )
 	device = createDevice( EDT_BURNINGSVIDEO, dimension2d<u32>(240, 320), 16, true );
 #elif defined( OEX_IPHONE )
@@ -88,7 +87,8 @@ int main( int argc, char* argv[] )
 		rect<s32>(60,5,200,20), false );
 
 	guienv->addButton(core::rect<int>(10,5,50,20), 0, 2, L"Quit");
-	
+
+	irr::scene::ICameraSceneNode *camera;
 	{ // Create scene
 
 	    driver->setAmbientLight( irr::video::SColorf( .5f, .5f, .5f ) );
@@ -97,7 +97,7 @@ int main( int argc, char* argv[] )
 		smgr->addLightSceneNode( 0, irr::core::vector3df( 0, 100, -50 ),
 								 irr::video::SColorf( 0.5f, 0.5f, 0.5f ), 100 );
 
-		irr::scene::ICameraSceneNode *camera =
+		camera =
 			smgr->addCameraSceneNode( 0, irr::core::vector3df( 0, 30, -40 ),
 									  irr::core::vector3df( 0, 5, 0 ) );
 
@@ -114,7 +114,7 @@ int main( int argc, char* argv[] )
 		} // end if
 
 	} // end Create scene
-	
+
 	u32 frames=0;
 	while(device->run())
 	{
@@ -279,7 +279,7 @@ int Init( int width, int height )
 			rotate->drop();
 
 		} // end if
-		
+
 		} // end Create Scene
 
 	} // end else
@@ -300,7 +300,7 @@ int Draw()
 		g_text->setText ( str.c_str() );
 		g_frames=0;
 	}
-	
+
 	g_pDevice->getVideoDriver()->beginScene( true, true, irr::video::SColor( 255, 100, 101, 140 ) );
 	g_pDevice->getSceneManager()->drawAll();
 	g_pDevice->getGUIEnvironment()->drawAll();

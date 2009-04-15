@@ -7,6 +7,9 @@ class CCellBackplane
 {
 public:
 
+	_SQBIND_CLASS_CTOR_BEGIN( CCellBackplane )
+	_SQBIND_CLASS_CTOR_END( CCellBackplane )
+
 	/// Default constructor
 	CCellBackplane()
 	{

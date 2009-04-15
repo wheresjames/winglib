@@ -41,6 +41,9 @@ namespace sqbind
     {
 	public:
 
+		_SQBIND_CLASS_CTOR_BEGIN( CSqTime )
+		_SQBIND_CLASS_CTOR_END( CSqTime )
+
 		CSqTime() {}
 
 		// Copy semantics

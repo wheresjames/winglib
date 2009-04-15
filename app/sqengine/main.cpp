@@ -61,9 +61,9 @@ extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex
 		return oexERROR( -1, oexT( "Out of memory!" ) );
 
 	if ( oexCHECK_PTR( x_pPath ) && *x_pPath )
-		oex::CLog::GlobalLog().OpenLogFile( oexNULL, oex::CStr( x_pPath ).GetFileName().Ptr(), oexT( ".module.debug.log" ) );
+		oex::CLog::GlobalLog().OpenLogFile( oexNULL, oex::CStr( x_pPath ).GetFileName().Ptr(), oexT( ".module.debug.log.txt" ) );
 	else
-		oex::CLog::GlobalLog().OpenLogFile( oexNULL, oexNULL, oexT( ".module.debug.log" ) );
+		oex::CLog::GlobalLog().OpenLogFile( oexNULL, oexNULL, oexT( ".module.debug.log.txt" ) );
 
 	// Start a log file
 	oexNOTICE( 0, oexT( "Module startup" ) );

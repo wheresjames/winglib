@@ -57,7 +57,7 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 		(service::PFN_SRV_GetModuleInfo)mod.AddFunction( oexT( "SRV_GetModuleInfo" ) );
 	if ( !oexCHECK_PTR( pGetModuleInfo ) )
 	{	oexERROR( 0, CStr().Fmt( oexT( "Module '%s' does not contain symbol SRV_GetModuleInfo()" ),
-					     		 oexStrToMbPtr( x_sModule.Ptr() ) ) );
+					     		 x_sModule.Ptr() ) );
 		return -2;
 	} // end if
 
@@ -66,16 +66,16 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 	oexZeroMemory( &si, sizeof( si ) );
 	if ( oexINT ret = pGetModuleInfo( &si ) )
 	{	oexERROR( ret, CStr().Fmt( oexT( "In module '%s', SRV_GetModuleInfo() failed by returning non-zero" ),
-				     			 oexStrToMbPtr( x_sModule.Ptr() ) ) );
+				     			 x_sModule.Ptr() ) );
 		return -3;
 	} // end if
 
 	// Verify correct module type
 	if ( oexCHECK_PTR( x_pguidType ) && !guid::CmpGuid( x_pguidType, &si.guidType ) )
 	{	oexERROR( 0, CStr().Fmt( oexT( "In module '%s', incorrect module type, %s != %s" ),
-								 oexStrToMbPtr( x_sModule.Ptr() ),
-								 oexStrToMbPtr( CStr().GuidToString( x_pguidType ).Ptr() ),
-								 oexStrToMbPtr( CStr().GuidToString( &si.guidType ).Ptr() ) ) );
+								 x_sModule.Ptr(),
+								 CStr().GuidToString( x_pguidType ).Ptr(),
+								 CStr().GuidToString( &si.guidType ).Ptr() ) );
 		return -4;
 	} // end if
 
@@ -88,14 +88,14 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 								    "Type:           %s\r\n"
 								    "ID:             %s\r\n"
 								    "Instance:       %s\r\n" ),
-							   oexStrToMbPtr( x_sModule.Ptr() ),
-							   oexStrToMbPtr( x_sCommandLine.Ptr() ),
-							   si.szName,
+							   x_sModule.Ptr(),
+							   x_sCommandLine.Ptr(),
+							   oexMbToStrPtr( si.szName ),
 							   oexVERSION_MAJOR( si.lVer ), oexVERSION_MINOR( si.lVer ),
-							   si.szDesc,
-							   oexStrToMbPtr( CStr().GuidToString( &si.guidType ).Ptr() ),
-							   oexStrToMbPtr( CStr().GuidToString( &si.guidId ).Ptr() ),
-							   oexStrToMbPtr( CStr().GuidToString( &si.guidInstance ).Ptr() ) ) );
+							   oexMbToStrPtr( si.szDesc ),
+							   CStr().GuidToString( &si.guidType ).Ptr(),
+							   CStr().GuidToString( &si.guidId ).Ptr(),
+							   CStr().GuidToString( &si.guidInstance ).Ptr() ) );
 
 	// Load start function
 	service::PFN_SRV_Start pStart =
@@ -114,14 +114,14 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 	} // end if
 
 	oexNOTICE( 0, CStr().Fmt( oexT( "Module '%s' started successfully" ),
-					       	  oexStrToMbPtr( x_sModule.Ptr() ) ) );
+					       	  x_sModule.Ptr() ) );
 
 	// Load start function
 	service::PFN_SRV_Idle pIdle =
 		(service::PFN_SRV_Idle)mod.AddFunction( oexT( "SRV_Idle" ) );
 	if ( !oexCHECK_PTR( pIdle ) )
 		oexWARNING( 0, CStr().Fmt( oexT( "Symbol SRV_Idle() not found in module '%s'" ),
-					   			   oexStrToMbPtr( x_sModule.Ptr() ) ) );
+					   			   x_sModule.Ptr() ) );
 
 	// Run idle loop if function provided
 	else

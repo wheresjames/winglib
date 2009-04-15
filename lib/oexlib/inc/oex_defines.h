@@ -257,6 +257,7 @@
 #define oexGetUnixTime						OEX_NAMESPACE::os::CSys::GetUnixTime
 
 #define oexSleep							OEX_NAMESPACE::os::CSys::Sleep
+#define oexGetBootCount						OEX_NAMESPACE::os::CHqTimer::GetBootCount
 #define oexMicroSleep						OEX_NAMESPACE::os::CSys::MicroSleep
 #define oexPrintf							OEX_NAMESPACE::os::CSys::Printf
 #define oexFmt								OEX_NAMESPACE::CStr().Fmt

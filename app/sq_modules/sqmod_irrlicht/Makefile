@@ -34,11 +34,9 @@ ifeq ($(PLATFORM),posix)
 else
 	PRJ_DEFS := _IRR_STATIC_LIB_
 	ifeq ($(OS),wince)
-		PRJ_DEFS := $(PRJ_DEFS)
 		#_IRR_COMPILE_WITH_OGLES1_
 		PRJ_INCS := $(PRJ_INCS) ogles/include
 	else
-		PRJ_DEFS := $(PRJ_DEFS)
 #		PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OPENGL_
 	endif	
 endif

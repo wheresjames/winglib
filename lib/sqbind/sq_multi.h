@@ -77,6 +77,9 @@ namespace sqbind
 
     public:
 
+		_SQBIND_CLASS_CTOR_BEGIN( CSqMulti )
+		_SQBIND_CLASS_CTOR_END( CSqMulti )
+
 		/// Destructor
 		~CSqMulti();
 

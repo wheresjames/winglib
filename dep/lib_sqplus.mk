@@ -24,7 +24,7 @@ LOC_INC_def := $(CFG_LIBROOT)/SqPlus/sqplus
 LOC_SRC_def := $(CFG_LIBROOT)/SqPlus/sqplus
 LOC_EXC_def := SqPlus_Backup SquirrelBindingsUtilsWin32_Backup \
 			   SquirrelObject_Backup SquirrelVM_Backup
-ifneq ($(OS),win32)	  
+ifneq ($(PLATFORM),windows)	  
 	LOC_EXC_def := $(LOC_EXC_def) SquirrelBindingsUtilsWin32
 endif
 include $(PRJ_LIBROOT)/build.mk
