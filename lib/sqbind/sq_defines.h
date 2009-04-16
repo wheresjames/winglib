@@ -63,10 +63,13 @@ namespace sqbind { typedef HSQUIRRELVM VM; }
 #ifdef SQBIND_SQPLUS
 
 #   include <sqplus.h>
-#   define _SQBIND_REGISTER_CLASS_BEGIN( c, s ) 				static void __SqReg_sqplus_##s( SquirrelVM *vm ) { \
-																oexVERIFY_PTR( vm ); \
-    	                                       					SqPlus::SQClassDef< c >( *vm, oexT( #s ) ) \
-																. staticFunc( &c::sq_construct_##s, oexT( "constructor" ) )
+#   define _SQBIND_REGISTER_CLASS_BEGIN( c, s ) 			static void __SqReg_sqplus_##s( SquirrelVM *vm ) { \
+															oexVERIFY_PTR( vm ); \
+    	                                       				SqPlus::SQClassDef< c >( *vm, oexT( #s ) ) \
+															. staticFunc( &c::sq_construct_##s, oexT( "constructor" ) )
+#   define _SQBIND_REGISTER_CLASS_BEGIN_NOCTOR( c, s )		static void __SqReg_sqplus_##s( SquirrelVM *vm ) { \
+															oexVERIFY_PTR( vm ); \
+    	                                       				SqPlus::SQClassDef< c >( *vm, oexT( #s ) )
 #   define _SQBIND_REGISTER_CLASS_END()       				; }
 #   define _SQBIND_EXPORT( vm, c )            				__SqReg_sqplus_##c( vm )
 #   define _SQBIND_MEMBER_FUNCTION( c, f )    				.func ( &c::f,        	  	oexT( #f ) )
@@ -156,7 +159,9 @@ namespace sqbind
 		CSqString() {}
 		CSqString( const stdString &x_str ) { m_str = x_str; }
 		stdString& str() { return m_str; }
-		const stdString* c_str() const { return &m_str; }
+		const stdString& c_str() const { return m_str; }
+		stdString* ptr() { return &m_str; }
+		const stdString* c_ptr() const { return &m_str; }
 		stdString set( const stdString &x_str )
 		{	m_str = x_str; return m_str; }
 		stdString& operator = ( const stdString &x_str ) { return m_str = x_str; }

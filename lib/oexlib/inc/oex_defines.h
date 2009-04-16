@@ -138,6 +138,11 @@
 #define oexPtrToInt64( p ) 	OEX_NAMESPACE::__oexCPtrCnv( p ).llInt
 #define oexPtrToUInt64( p ) OEX_NAMESPACE::__oexCPtrCnv( p ).ullInt
 
+#define oexStrWToMb( s )			        OEX_NAMESPACE::CStr8().ToMb( s )
+#define oexStrWToMbPtr( s )		        	OEX_NAMESPACE::CStr8().ToMb( s ).Ptr()
+#define oexMbToStrW( s )			        OEX_NAMESPACE::CStrW().ToWc( s )
+#define oexMbToStrWPtr( s )		  		    OEX_NAMESPACE::CStrW().ToWc( s ).Ptr()
+
 #if defined( oexUNICODE )
 
 #	define oexT( s )				        ( L##s )
@@ -258,8 +263,10 @@
 
 #define oexSleep							OEX_NAMESPACE::os::CSys::Sleep
 #define oexGetBootCount						OEX_NAMESPACE::os::CHqTimer::GetBootCount
+#define oexGetBootSeconds					OEX_NAMESPACE::os::CHqTimer::GetTimerSeconds
 #define oexMicroSleep						OEX_NAMESPACE::os::CSys::MicroSleep
 #define oexPrintf							OEX_NAMESPACE::os::CSys::Printf
+#define oexEcho								OEX_NAMESPACE::os::CSys::Echo
 #define oexFmt								OEX_NAMESPACE::CStr().Fmt
 #define oexAlert							OEX_NAMESPACE::os::CSys::ShowMessageBox
 #define oexFork								OEX_NAMESPACE::os::CSys::Fork

@@ -6,6 +6,11 @@ class CSqIrrlicht
 {
 public:
 
+	/// Mesh animator list type
+    typedef oexStdMap( CSqirrNode*, CSqirrMeshAnimator ) t_MeshAnimators;
+
+public:
+
 	_SQBIND_CLASS_CTOR_BEGIN( CSqIrrlicht )
 	_SQBIND_CLASS_CTOR_END( CSqIrrlicht )
 
@@ -75,12 +80,17 @@ public:
                             irr::video::SColor &color, long lSides,
                             float minU = 0, float maxU = 1, float minV = 0, float maxV = 1 );
 
+	// Adds a grid node
 	CSqirrNode AddGrid( float fWidth, float fHeight,
 						long lXPanels, long lYPanels,
 						float fSpace, long lSides,
 						CSqirrColor &rColor );
 
+	/// Creates a mesh animator
 	int AddMeshAnimator( sqbind::CSqEngineExport *e, CSqirrNode &n, SquirrelObject soF, long lFreq );
+
+	/// Runs mesh animators
+	void AnimateMeshes();
 
 public:
 
@@ -130,6 +140,9 @@ private:
 
 	/// Stereo focal distance
 	float							m_fStereoFocus;
+
+	/// Mesh animators
+    t_MeshAnimators                 m_lstMeshAnimators;
 
 };
 

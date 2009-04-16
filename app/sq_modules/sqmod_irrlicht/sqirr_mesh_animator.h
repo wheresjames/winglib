@@ -1,14 +1,14 @@
 #pragma once
 
-class CSquirrMeshAnimator
+class CSqirrMeshAnimator
 {
 public:
 
     /// Default constructor
-    CSquirrMeshAnimator(void);
+    CSqirrMeshAnimator(void);
 
     /// Destructor
-    ~CSquirrMeshAnimator(void);
+    ~CSqirrMeshAnimator(void);
 
     /// Release resources
     void Destroy();
@@ -63,6 +63,9 @@ private:
 
     /// Squirrel callback function
     SquirrelObject                              *m_psoCallback;
+
+	/// Pointer to engine handling the callback
+	sqbind::CSqEngine 							*m_pSe;
 
     /// Speed
     long                                        m_lSpeed;

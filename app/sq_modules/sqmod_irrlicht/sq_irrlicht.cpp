@@ -32,6 +32,9 @@ CSqIrrlicht::~CSqIrrlicht()
 	m_pGui = oexNULL;
 	m_nDriverType = -1;
 
+	// Lose animators
+    m_lstMeshAnimators.clear();
+
 	// Lose scene camera reference
 	if ( m_pCamera )
 	{	m_pCamera->drop();
@@ -148,6 +151,9 @@ int CSqIrrlicht::Draw( CSqirrColor &bg )
 {
 	if ( !m_pDevice || !m_pDevice->run() )
 		return -1;
+
+	// Animate meshes
+	AnimateMeshes();
 
     if ( m_bStereo && m_pCamera )
 		DrawAnaglyph( m_pDriver, m_pSmgr, m_pCamera, bg.Obj(),
@@ -343,7 +349,7 @@ CSqirrNode CSqIrrlicht::NodeAtScreen( CSqirrVector2d &ptScreen, long lMask )
         return CSqirrNode();
 
     irr::core::position2d< irr::s32 > pos;
-    pos.X = ptScreen.x(); pos.Y = ptScreen.y();
+    pos.X = (int)ptScreen.x(); pos.Y = (int)ptScreen.y();
 
     irr::core::line3d< irr::f32 > line =
         m_pSmgr->getSceneCollisionManager()->getRayFromScreenCoordinates( pos, m_pCamera );
@@ -664,12 +670,12 @@ int CSqIrrlicht::AddMeshAnimator( sqbind::CSqEngineExport *e, CSqirrNode &n, Squ
 
     if ( !lFreq )
     {
-        CSquirrMeshAnimator ma;
+        CSqirrMeshAnimator ma;
         if ( !ma.Init( (irr::scene::IMeshSceneNode*)n.Ptr(), soF, e->GetVmPtr()->GetVMHandle(), 0 ) )
             return 0;
 
         // Let Squirrel manipulate the mesh
-        ma.Run( m_pSmgr, oexGetBootCount(), e->GetEnginePtr() );
+        ma.Run( m_pSmgr, oexGetBootSeconds(), e->GetEnginePtr() );
 
         // Just leave the mesh as is
         ma.Detach();
@@ -677,23 +683,29 @@ int CSqIrrlicht::AddMeshAnimator( sqbind::CSqEngineExport *e, CSqirrNode &n, Squ
     } // end if
 
     else
-		return 0;
-/*
     {
-        CSquirrMeshAnimator *pMa = m_lstMeshAnimators.get( &n );
-        if ( !pMa )
-            return 0;
+		CSqirrMeshAnimator &rMa = m_lstMeshAnimators[ &n ];
 
-        if ( !pMa->Init( (irr::scene::IMeshSceneNode*)n.Ptr(), soF, m_sqScript.GetVM().GetVMHandle(), lFreq ) )
+        if ( !rMa.Init( (irr::scene::IMeshSceneNode*)n.Ptr(), soF, e->GetVmPtr()->GetVMHandle(), lFreq ) )
         {   m_lstMeshAnimators.erase( &n );
             return 0;
         } // end if
 
         // Initialize the mesh
-        pMa->Run( m_pSmgr, oexGetBootCount(), e->GetEnginePtr() );
+        rMa.Run( m_pSmgr, oexGetBootSeconds(), e->GetEnginePtr() );
 
     } // end else
-*/
+
     return 1;
 }
 
+void CSqIrrlicht::AnimateMeshes()
+{
+	if ( !m_pSmgr )
+		return;
+
+	// For each mesh animator
+	for ( t_MeshAnimators::iterator it = m_lstMeshAnimators.begin();
+			m_lstMeshAnimators.end() != it; it++ )
+		it->second.Run( m_pSmgr, oexGetBootSeconds(), oexNULL );
+}

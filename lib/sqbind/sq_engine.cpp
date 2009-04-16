@@ -41,7 +41,7 @@ int CSqEngineExport::alert( const stdString &sMsg )
 }
 
 int CSqEngineExport::echo( const stdString &sMsg )
-{	return oexPrintf( sMsg.c_str() ); }
+{	return oexEcho( sMsg.c_str() ); }
 
 int CSqEngineExport::import( const stdString &sClass )
 {   return OnImport( sClass ); }
@@ -174,7 +174,10 @@ stdString CSqEngineExport::execute4( int nRet, const stdString &sPath, const std
 void CSqEngineExport::sleep( int nMsTime )
 {   oex::os::CSys::Sleep( nMsTime ); }
 
-unsigned int CSqEngineExport::clock()
+float CSqEngineExport::clock()
+{   oexGetBootSeconds(); }
+
+unsigned int CSqEngineExport::ticks()
 {   oexGetBootCount(); }
 
 CSqMsgQueue* CSqEngineExport::queue()
@@ -358,6 +361,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, load_module )
 	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sleep )
 	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, clock )
+	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ticks )
 	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, spawn )
 	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_path )
@@ -436,7 +440,7 @@ oex::oexBOOL CSqEngine::Init()
 	_oexCATCH( SScriptErrorInfo &e )
 	{	return LogError( oex::oexFALSE, e ); }
 	_oexCATCH( SquirrelError &e )
-	{	m_sErr = e.desc; return oex::oexFALSE; }
+	{	return LogErrorM( oex::oexFALSE, e.desc ); }
 
 	m_bLoaded = TRUE;
 
@@ -520,7 +524,7 @@ oex::oexBOOL CSqEngine::Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oex
 	_oexCATCH( SScriptErrorInfo &e )
 	{	return LogError( oex::oexFALSE, e ); }
 	_oexCATCH( SquirrelError &e )
-	{	m_sErr = e.desc; return oex::oexFALSE; }
+	{	return LogErrorM( oex::oexFALSE, e.desc ); }
 
 	// Save script source information
 	m_bFile = bFile;
@@ -546,7 +550,7 @@ oex::oexBOOL CSqEngine::Start()
 	_oexCATCH( SScriptErrorInfo &e )
 	{	return LogError( oex::oexFALSE, e ); }
 	_oexCATCH( SquirrelError &e )
-	{	m_sErr = e.desc; return oex::oexFALSE; }
+	{	return LogErrorM( oex::oexFALSE, e.desc ); }
 
 	return oex::oexTRUE;
 }
@@ -572,7 +576,7 @@ oex::oexBOOL CSqEngine::Run( oex::oexCSTR pScript )
 	_oexCATCH( SScriptErrorInfo &e )
 	{	return LogError( oex::oexFALSE, e ); }
 	_oexCATCH( SquirrelError &e )
-	{	m_sErr = e.desc; return oex::oexFALSE; }
+	{	return LogErrorM( oex::oexFALSE, e.desc ); }
 
 	return oex::oexTRUE;
 }
@@ -588,8 +592,15 @@ oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e )
 	return x_nReturn;
 }
 
-oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, oex::oexCSTR x_pErr )
-{	oex::CStr sErr = oex::CStr().Fmt( oexT( "%s\r\n" ), x_pErr );
+oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, oex::oexCSTR x_pErr, oex::oexCSTR x_pFile, oex::oexUINT x_uLine )
+{
+	if ( !oexCHECK_PTR( x_pFile ) )
+		x_pFile = oexT( "" );
+
+	if ( !oexCHECK_PTR( x_pErr ) )
+		x_pErr = oexT( "" );
+
+	oex::CStr sErr = oex::CStr().Fmt( oexT( "%s(%lu)\r\n   %s" ), x_pFile, x_uLine, x_pErr );
 	oexERROR( 0, sErr );
 	m_sErr = sErr.Ptr();
 #if defined( OEX_WINDOWS )

@@ -377,6 +377,10 @@ int CSys::Printf( oexCSTRW x_pFmt, ... )
 	return ret;
 }
 
+int CSys::Echo( oexCSTRW x_pFmt )
+{	return ::puts( oexStrWToMbPtr( x_pFmt ) );
+}
+
 oexPVOID CSys::MemCpy( oexPVOID x_pDst, oexCPVOID x_pSrc, oexUINT x_uSize )
 {
 	return ::memcpy( x_pDst, x_pSrc, x_uSize );
@@ -682,6 +686,10 @@ int CSys::Printf( oexCSTR8 x_pFmt, ... )
 /// vprintf
 int CSys::vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs )
 {	return ::vprintf( x_pFmt, (va_list)pArgs );
+}
+
+int CSys::Echo( oexCSTR8 x_pFmt )
+{	return ::puts( x_pFmt );
 }
 
 oexUINT CSys::GetCurThreadId()

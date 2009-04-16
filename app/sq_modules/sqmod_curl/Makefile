@@ -4,12 +4,12 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := sqmod_irrlicht
+PRJ_NAME := sqmod_curl
 PRJ_TYPE := dll
-PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel
-PRJ_DEFS := 
-
+PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus curl/include
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cell curl
+PRJ_OSLB := ssl crypto idn ldap
+ 
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
 PRJ_LIBROOT := ../../..
@@ -19,28 +19,11 @@ PRJ_LIBROOT := ../../..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-ifeq ($(PROC),arm)
-	PRJ_INCS := $(PRJ_INCS) irrlicht-es/include
-	PRJ_LIBS := $(PRJ_LIBS) irrlicht-es cximage jpeg png tiff zlib
+ifeq ($(BUILD_CURL),)
+UNSUPPORTED := Set BUILD_CURL=1 to build this project
+include $(PRJ_LIBROOT)/unsupported.mk
 else
-	PRJ_INCS := $(PRJ_INCS) irrlicht/include
-	PRJ_LIBS := $(PRJ_LIBS) irrlicht cximage jpeg png tiff zlib
-endif
 
-#_IRR_USE_WINDOWS_CE_DEVICE_
-ifeq ($(PLATFORM),posix)
-	PRJ_OSLB := X11 GLU Xxf86vm
-	PRJ_DEFS := $(PRJ_DEFS) _IRR_USE_LINUX_DEVICE_ _IRR_COMPILE_WITH_X11_
-else
-	PRJ_DEFS := _IRR_STATIC_LIB_
-	ifeq ($(OS),wince)
-		#_IRR_COMPILE_WITH_OGLES1_
-		PRJ_INCS := $(PRJ_INCS) ogles/include
-	else
-#		PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OPENGL_
-	endif	
-endif
- 
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------
@@ -52,4 +35,5 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
+endif
 

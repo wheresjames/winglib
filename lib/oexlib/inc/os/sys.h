@@ -103,6 +103,8 @@ public:
 	/// vprintf
 	static int vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs );
 
+	/// Writes data on stdout
+	static int Echo( oexCSTR8 x_pFmt );
 
     // Unicode
 #if !defined( OEX_NOWCHAR )
@@ -141,6 +143,9 @@ public:
 
 	/// vprintf
 	static int vPrintf( oexCSTRW x_pFmt, oexVaList pArgs );
+
+	/// Writes data on stdout
+	static int Echo( oexCSTRW x_pFmt );
 
 	static oexUINT WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen );
 

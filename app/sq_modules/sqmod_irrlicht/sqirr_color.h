@@ -7,8 +7,8 @@ class CSqirrColor
 public:
 
 	_SQBIND_CLASS_CTOR_BEGIN( CSqirrColor )
-		_SQBIND_CLASS_CTOR( CSqirrColor, 3 ) ( sa.GetFloat( 2 ), sa.GetFloat( 3 ), sa.GetFloat( 4 ), 255 )
-		_SQBIND_CLASS_CTOR( CSqirrColor, 4 ) ( sa.GetFloat( 2 ), sa.GetFloat( 3 ), sa.GetFloat( 4 ), sa.GetFloat( 5 ) )
+		_SQBIND_CLASS_CTOR( CSqirrColor, 3 ) ( sa.GetInt( 2 ), sa.GetInt( 3 ), sa.GetInt( 4 ), 255 )
+		_SQBIND_CLASS_CTOR( CSqirrColor, 4 ) ( sa.GetInt( 2 ), sa.GetInt( 3 ), sa.GetInt( 4 ), sa.GetInt( 5 ) )
 	_SQBIND_CLASS_CTOR_END( CSqirrColor )
 
 	/// Default constructor

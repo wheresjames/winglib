@@ -1,7 +1,6 @@
 // stdafx.cpp
 
 #include "stdafx.h"
-#include "sq_irrlicht.h"
 
 // CSqIrrlicht
 SQBIND_REGISTER_CLASS_BEGIN( CSqIrrlicht, CSqIrrlicht )
@@ -180,6 +179,7 @@ static void SQBIND_Export( sqbind::VM x_vm )
     SQBIND_EXPORT( x_vm, CSqirrColorf );
     SQBIND_EXPORT( x_vm, CSqirrVector3d );
     SQBIND_EXPORT( x_vm, CSqirrVector2d );
+    SQBIND_EXPORT( x_vm, CSqirrVertexArray );
 
     SQBIND_EXPORT( x_vm, CSqirrAnimator );
     SQBIND_EXPORT( x_vm, CSqirrTexture );

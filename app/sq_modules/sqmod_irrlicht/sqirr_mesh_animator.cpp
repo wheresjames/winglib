@@ -1,29 +1,31 @@
 
 #include "stdafx.h"
 
-CSquirrMeshAnimator::CSquirrMeshAnimator(void)
+CSqirrMeshAnimator::CSqirrMeshAnimator(void)
 {
     m_pNode = 0;
     m_psoCallback = 0;
     m_lTick = 0;
     m_lSpeed = 0;
+    m_pSe = 0;
 }
 
-CSquirrMeshAnimator::~CSquirrMeshAnimator(void)
+CSqirrMeshAnimator::~CSqirrMeshAnimator(void)
 {   Destroy();
 }
 
-void CSquirrMeshAnimator::Destroy()
+void CSqirrMeshAnimator::Destroy()
 {
     Restore();
     Detach();
 }
 
-void CSquirrMeshAnimator::Detach()
+void CSqirrMeshAnimator::Detach()
 {
     m_pNode = 0;
     m_lTick = 0;
     m_lSpeed = 0;
+    m_pSe = 0;
     m_vertOriginal.clear();
     if ( m_psoCallback )
     {   delete m_psoCallback;
@@ -31,7 +33,7 @@ void CSquirrMeshAnimator::Detach()
     } // end if
 }
 
-int CSquirrMeshAnimator::GetMetrics( irr::video::S3DVertex **pOriginal, irr::video::S3DVertex **pCurrent, unsigned int &uPoints, unsigned int *puPitch )
+int CSqirrMeshAnimator::GetMetrics( irr::video::S3DVertex **pOriginal, irr::video::S3DVertex **pCurrent, unsigned int &uPoints, unsigned int *puPitch )
 {
     // Sanity checks
     if ( !m_pNode || !m_pNode->getMesh() || !m_pNode->getMesh()->getMeshBufferCount() )
@@ -69,7 +71,7 @@ int CSquirrMeshAnimator::GetMetrics( irr::video::S3DVertex **pOriginal, irr::vid
     return 1;
 }
 
-int CSquirrMeshAnimator::Restore()
+int CSqirrMeshAnimator::Restore()
 {
     unsigned int uV = 0, uPitch = 0;
     irr::video::S3DVertex *pO = 0, *pV = 0;
@@ -82,7 +84,7 @@ int CSquirrMeshAnimator::Restore()
     return 1;
 }
 
-int CSquirrMeshAnimator::Init( irr::scene::IMeshSceneNode *pNode )
+int CSqirrMeshAnimator::Init( irr::scene::IMeshSceneNode *pNode )
 {
     // Lose the old thing
     Destroy();
@@ -111,7 +113,7 @@ int CSquirrMeshAnimator::Init( irr::scene::IMeshSceneNode *pNode )
     return 1;
 }
 
-int CSquirrMeshAnimator::Run( irr::scene::ISceneManager *pSm, float fClock )
+int CSqirrMeshAnimator::Run( irr::scene::ISceneManager *pSm, float fClock )
 {
     // Speed check
     if ( m_lSpeed && m_lTick )
@@ -137,8 +139,14 @@ int CSquirrMeshAnimator::Run( irr::scene::ISceneManager *pSm, float fClock )
     return 1;
 }
 
-int CSquirrMeshAnimator::Run( irr::scene::ISceneManager *pSm, float fClock, sqbind::CSqEngine *pSe )
+int CSqirrMeshAnimator::Run( irr::scene::ISceneManager *pSm, float fClock, sqbind::CSqEngine *pSe )
 {
+	// Engine specified?
+	if ( !pSe )
+		pSe = m_pSe;
+	else
+		m_pSe = pSe;
+
     // Sanity check
     if ( !pSe || !m_psoCallback )
         return 0;
