@@ -55,8 +55,8 @@ namespace sqbind
 
     public:
 
-		_SQBIND_CLASS_CTOR_BEGIN( CSqVector )
-		_SQBIND_CLASS_CTOR_END( CSqVector )
+		SQBIND_CLASS_CTOR_BEGIN( CSqVector )
+		SQBIND_CLASS_CTOR_END( CSqVector )
 
 		/// Default constructor
 		CSqVector();
@@ -80,4 +80,4 @@ namespace sqbind
 }; // end namespace
 
 // Declare type for use as squirrel parameters
-_SQBIND_DECLARE_INSTANCE( sqbind::CSqVector, CSqVector )
+SQBIND_DECLARE_INSTANCE( sqbind::CSqVector, CSqVector )

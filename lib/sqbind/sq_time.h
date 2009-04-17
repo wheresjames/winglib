@@ -41,8 +41,8 @@ namespace sqbind
     {
 	public:
 
-		_SQBIND_CLASS_CTOR_BEGIN( CSqTime )
-		_SQBIND_CLASS_CTOR_END( CSqTime )
+		SQBIND_CLASS_CTOR_BEGIN( CSqTime )
+		SQBIND_CLASS_CTOR_END( CSqTime )
 
 		CSqTime() {}
 
@@ -107,4 +107,4 @@ namespace sqbind
 }; // end namespace
 
 // Declare type for use as squirrel parameters
-DECLARE_INSTANCE_TYPE_NAME( sqbind::CSqTime, CSqTime )
+SQBIND_DECLARE_INSTANCE( sqbind::CSqTime, CSqTime )

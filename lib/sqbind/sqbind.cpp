@@ -36,94 +36,93 @@
 
 using namespace sqbind;
 
-_SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqString, CSqString )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqString, str )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqString, set )
-_SQBIND_REGISTER_CLASS_END()
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqString, CSqString )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqString, str )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqString, set )
+SQBIND_REGISTER_CLASS_END()
 
 void CSqString::Register( sqbind::VM vm )
 {
-	_SQBIND_EXPORT( vm, CSqString );
+	SQBIND_EXPORT( vm, CSqString );
 }
 
-_SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqFile, CSqFile )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, OpenExisting )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, OpenNew )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, Write )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, Read )
-	_SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, get_contents )
-	_SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, put_contents )
-	_SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, append_contents )
-	_SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, mkdir )
-	_SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, rmdir )
-	_SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, exists )
-	_SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, get_filename )
-	_SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, get_path )
-	_SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, get_extension )
-_SQBIND_REGISTER_CLASS_END()
-
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqFile, CSqFile )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, OpenExisting )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, OpenNew )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, Write )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, Read )
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, get_contents )
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, put_contents )
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, append_contents )
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, mkdir )
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, rmdir )
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, exists )
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, get_filename )
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, get_path )
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, get_extension )
+SQBIND_REGISTER_CLASS_END()
 
 void CSqFile::Register( sqbind::VM vm )
 {
-	_SQBIND_EXPORT( vm, CSqFile );
+	SQBIND_EXPORT( vm, CSqFile );
 }
 
-_SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqTime, CSqTime )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetLocalTime )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetSystemTime )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetTime )
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqTime, CSqTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetLocalTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetSystemTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetTime )
 
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetYear )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMonth )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetDay )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetHour )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, Get12Hour )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMinute )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetSecond )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMilliSecond )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMicroSecond )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetNanoSecond )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetYear )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMonth )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetDay )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetHour )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, Get12Hour )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMinute )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetSecond )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMilliSecond )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMicroSecond )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetNanoSecond )
 
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetYear )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMonth )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetDay )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetHour )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, Set12Hour )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMinute )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetSecond )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMilliSecond )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMicroSecond )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetNanoSecond )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetYear )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMonth )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetDay )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetHour )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, Set12Hour )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMinute )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetSecond )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMilliSecond )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMicroSecond )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetNanoSecond )
 
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, IsPM )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, IsPM )
 
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetUnixTime )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetUnixTime )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetDosTime )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetDosTime )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetNetTime )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetNetTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetUnixTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetUnixTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetDosTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetDosTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetNetTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetNetTime )
 
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, FormatTime )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, ParseTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, FormatTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, ParseTime )
 
-_SQBIND_REGISTER_CLASS_END()
+SQBIND_REGISTER_CLASS_END()
 
 
 void CSqTime::Register( sqbind::VM vm )
 {
-	_SQBIND_EXPORT( vm, CSqTime );
+	SQBIND_EXPORT( vm, CSqTime );
 }
 
-_SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqImage, CSqImage )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Load )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Save )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Encode )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Decode )
-_SQBIND_REGISTER_CLASS_END()
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqImage, CSqImage )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Load )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Save )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Encode )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Decode )
+SQBIND_REGISTER_CLASS_END()
 
 
 void CSqImage::Register( sqbind::VM vm )
 {
-	_SQBIND_EXPORT( vm, CSqImage );
+	SQBIND_EXPORT( vm, CSqImage );
 }

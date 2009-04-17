@@ -41,8 +41,8 @@ namespace sqbind
     {
 	public:
 
-		_SQBIND_CLASS_CTOR_BEGIN( CSqFile )
-		_SQBIND_CLASS_CTOR_END( CSqFile )
+		SQBIND_CLASS_CTOR_BEGIN( CSqFile )
+		SQBIND_CLASS_CTOR_END( CSqFile )
 
 		int OpenExisting( const stdString &sFile )
 		{	return m_f.OpenExisting( sFile.c_str() ).IsOpen(); }
@@ -100,4 +100,4 @@ namespace sqbind
 }; // end namespace
 
 // Declare type for use as squirrel parameters
-DECLARE_INSTANCE_TYPE_NAME( sqbind::CSqFile, CSqFile )
+SQBIND_DECLARE_INSTANCE( sqbind::CSqFile, CSqFile )

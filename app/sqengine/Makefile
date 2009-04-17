@@ -10,7 +10,7 @@ PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib
 PRJ_OSLB :=
  
-PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Idle SRV_Stop
+PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Idle SRV_Stop
 
 PRJ_LIBROOT := ../..
 

@@ -11,6 +11,45 @@ public:
 
 public:
 
+	class CEventReceiver : public irr::IEventReceiver
+	{
+	public:
+
+		CEventReceiver() { m_pDevice = oexNULL; }
+		CEventReceiver ( irr::IrrlichtDevice *device ): m_pDevice( device ) {}
+
+		void SetDevice( irr::IrrlichtDevice *device ) { m_pDevice = device; }
+
+		virtual bool OnEvent(const irr::SEvent& event)
+		{
+			if (event.EventType == irr::EET_GUI_EVENT)
+			{
+				irr::s32 id = event.GUIEvent.Caller->getID();
+
+				switch(event.GUIEvent.EventType)
+				{
+					case irr::gui::EGET_BUTTON_CLICKED:
+					if (id == 2)
+					{
+						if ( m_pDevice )
+							m_pDevice->closeDevice();
+						return true;
+					} break;
+				}
+			}
+
+			return false;
+		}
+
+	private:
+
+		/// Pointer to irrlicht device
+		irr::IrrlichtDevice *m_pDevice;
+
+	};
+
+public:
+
 	_SQBIND_CLASS_CTOR_BEGIN( CSqIrrlicht )
 	_SQBIND_CLASS_CTOR_END( CSqIrrlicht )
 
@@ -104,6 +143,9 @@ public:
 	int GetLEyeKey() { return m_ulLEyeKey; }
 
 private:
+
+	/// Default event receiver
+	CEventReceiver					m_er;
 
 	/// Irrlicht device
 	irr::IrrlichtDevice				*m_pDevice;

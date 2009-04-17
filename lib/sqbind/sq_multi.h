@@ -77,8 +77,8 @@ namespace sqbind
 
     public:
 
-		_SQBIND_CLASS_CTOR_BEGIN( CSqMulti )
-		_SQBIND_CLASS_CTOR_END( CSqMulti )
+		SQBIND_CLASS_CTOR_BEGIN( CSqMulti )
+		SQBIND_CLASS_CTOR_END( CSqMulti )
 
 		/// Destructor
 		~CSqMulti();
@@ -181,4 +181,4 @@ namespace sqbind
 }; // end namespace
 
 // Declare type for use as squirrel parameters
-_SQBIND_DECLARE_INSTANCE( sqbind::CSqMulti, CSqMulti )
+SQBIND_DECLARE_INSTANCE( sqbind::CSqMulti, CSqMulti )

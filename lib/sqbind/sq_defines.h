@@ -42,9 +42,15 @@
 #   define SQBIND_REGISTER_CLASS_BEGIN( c, s )				static void __SqReg_sqbind_##s( HSQUIRRELVM vm ) { \
 																SqBind< c >::init( vm, oexT( #s ) );
 #   define SQBIND_MEMBER_FUNCTION( c, f )    				sqbind_method( vm, oexT( #f ), &c::f );
+#	define SQBIND_STATIC_FUNCTION( c, f )					sqbind_function( vm, #f, c::f, &SqBind< c >::get_id() );
 #   define SQBIND_REGISTER_CLASS_END()						; }
 #   define SQBIND_EXPORT( vm, c )            				__SqReg_sqbind_##c( vm )
 #	define SQBIND_DECLARE_INSTANCE( c, n )
+
+#	define SQBIND_CLASS_CTOR_BEGIN( c )
+#	define SQBIND_CLASS_CTOR_END( c )
+#	define SQBIND_CLASS_CTOR( c, n )
+#	define SQBIND_CLASS_BIND_CTOR( c )
 
 namespace sqbind { typedef HSQUIRRELVM VM; }
 
@@ -58,6 +64,12 @@ namespace sqbind { typedef HSQUIRRELVM VM; }
 #   define SQBIND_STATIC_FUNCTION							_SQBIND_STATIC_FUNCTION
 
 #   define SQBIND_CONST										_SQBIND_CONST
+
+#	define SQBIND_CLASS_CTOR_BEGIN							_SQBIND_CLASS_CTOR_BEGIN
+#	define SQBIND_CLASS_CTOR_END 							_SQBIND_CLASS_CTOR_END
+#	define SQBIND_CLASS_CTOR								_SQBIND_CLASS_CTOR
+#	define SQBIND_CLASS_BIND_CTOR							_SQBIND_CLASS_BIND_CTOR
+
 #endif
 
 #ifdef SQBIND_SQPLUS

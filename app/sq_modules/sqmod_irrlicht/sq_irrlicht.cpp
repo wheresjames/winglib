@@ -57,6 +57,9 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height )
 #if defined( _WIN32_WCE )
 	param.DriverType = irr::video::EDT_BURNINGSVIDEO;
 	param.WindowSize = irr::core::dimension2d<irr::u32>( width, height );
+#elif defined( OEX_IPHONE )
+	param.DriverType = irr::video::EDT_OGLES1;
+	param.WindowSize = irr::core::dimension2d<irr::u32>( width, height );
 #else
 	param.DriverType = irr::video::EDT_OPENGL;
 	param.WindowSize = irr::core::dimension2d<irr::s32>( width, height );
@@ -71,6 +74,10 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height )
 	{
 		// Save away driver type
 		m_nDriverType = param.DriverType;
+
+		// Set default event receiver
+		m_er.SetDevice( m_pDevice );
+		m_pDevice->setEventReceiver( &m_er );
 
 		if ( sName.length() )
 			m_pDevice->setWindowCaption( oexStrToStrWPtr( sName.c_str() ) );
@@ -88,6 +95,18 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height )
 
 		if ( !oexCHECK_PTR( m_pGui ) )
 			oexERROR( 0, oexT( "GUI environment is invalid" ) );
+
+#if defined( _WIN32_WCE )
+		// set the filesystem relative to the executable
+		{
+			wchar_t buf[255];
+			GetModuleFileNameW ( 0, buf, 255 );
+
+			irr::core::stringc base = buf;
+			base = base.subString ( 0, base.findLast ( '\\' ) );
+			m_pDevice->getFileSystem()->addFolderFileArchive ( base.c_str() );
+		}
+#endif
 
 	} // end else
 

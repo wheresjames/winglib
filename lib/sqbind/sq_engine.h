@@ -53,8 +53,8 @@ public:
 
 public:
 
-	_SQBIND_CLASS_CTOR_BEGIN( CSqEngineExport )
-	_SQBIND_CLASS_CTOR_END( CSqEngineExport )
+	SQBIND_CLASS_CTOR_BEGIN( CSqEngineExport )
+	SQBIND_CLASS_CTOR_END( CSqEngineExport )
 
 	/// Exits the application
 	void exit( int nExitCode );
@@ -138,7 +138,7 @@ protected:
 };
 
 // Declare class functions
-}; _SQBIND_DECLARE_INSTANCE( sqbind::CSqEngineExport, CSqEngineExport ); namespace sqbind {
+}; SQBIND_DECLARE_INSTANCE( sqbind::CSqEngineExport, CSqEngineExport ); namespace sqbind {
 
 #define LogErrorM( r, e )	LogError( r, e, oexTEXT( __FILE__ ), __LINE__ )
 
@@ -265,9 +265,8 @@ public:
 
 	/// Binds variables to the root table
 	template< typename T >
-		void BindRootVariable( T *pVar, oex::oexCSTR pName, oex::oexCSTR pImport = NULL, SqPlus::VarAccessType access = SqPlus::VAR_ACCESS_READ_WRITE )
-		{   if ( pImport && *pImport ) import( pImport );
-			SquirrelObject root = m_vm.GetRootTable();
+		void BindRootVariable( T *pVar, oex::oexCSTR pName, SqPlus::VarAccessType access = SqPlus::VAR_ACCESS_READ_WRITE )
+		{   SquirrelObject root = m_vm.GetRootTable();
 			SqPlus::BindVariable( m_vm, root, pVar, pName, access );
 		}
 

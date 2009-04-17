@@ -58,8 +58,8 @@ namespace sqbind
 
     public:
 
-		_SQBIND_CLASS_CTOR_BEGIN( CSqMap )
-		_SQBIND_CLASS_CTOR_END( CSqMap )
+		SQBIND_CLASS_CTOR_BEGIN( CSqMap )
+		SQBIND_CLASS_CTOR_END( CSqMap )
 
 		/// Default constructor
 		CSqMap();
@@ -143,4 +143,4 @@ namespace sqbind
 }; // end namespace
 
 // Declare type for use as squirrel parameters
-_SQBIND_DECLARE_INSTANCE( sqbind::CSqMap, CSqMap )
+SQBIND_DECLARE_INSTANCE( sqbind::CSqMap, CSqMap )

@@ -49,8 +49,8 @@ public:
 
 public:
 
-	_SQBIND_CLASS_CTOR_BEGIN( CSqMsgQueue )
-	_SQBIND_CLASS_CTOR_END( CSqMsgQueue )
+	SQBIND_CLASS_CTOR_BEGIN( CSqMsgQueue )
+	SQBIND_CLASS_CTOR_END( CSqMsgQueue )
 
 	/// Default constructor
 	CSqMsgQueue();
@@ -164,4 +164,4 @@ private:
 	t_MsgQueue                                  m_lstMsgQueue;
 };
 
-}; _SQBIND_DECLARE_INSTANCE( sqbind::CSqMsgQueue, CSqMsgQueue ); namespace sqbind {
+}; SQBIND_DECLARE_INSTANCE( sqbind::CSqMsgQueue, CSqMsgQueue ); namespace sqbind {

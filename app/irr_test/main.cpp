@@ -1,5 +1,5 @@
 
-#if defined( _WIN32_WCE )
+#if 0 //defined( _WIN32_WCE )
 
 #include "stdafx.h"
 #include <windows.h>

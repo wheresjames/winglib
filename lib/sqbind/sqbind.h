@@ -41,8 +41,7 @@
 #define _CRT_SECURE_NO_DEPRECATE 1
 #pragma warning( disable : 4996 )
 
-// Using SqPlus script binding for now,
-// it doesn't support multiple constructors though :(
+// Using SqPlus script binding for now
 //#define SQBIND_SQBIND
 #define SQBIND_SQPLUS
 //#define SQBIND_JKBIND

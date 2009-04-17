@@ -41,15 +41,15 @@ using namespace sqbind;
 CSqList::t_List& CSqList::vector()
 {   return m_lst; }
 
-_SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqList, CSqList )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqList, push_back )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqList, _get )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqList, _nexti )
-_SQBIND_REGISTER_CLASS_END()
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqList, CSqList )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqList, push_back )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqList, _get )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqList, _nexti )
+SQBIND_REGISTER_CLASS_END()
 
 void CSqList::Register( sqbind::VM vm )
 {
-	_SQBIND_EXPORT( vm, CSqList );
+	SQBIND_EXPORT( vm, CSqList );
 }
 
 void CSqList::push_back( const t_Obj &s )

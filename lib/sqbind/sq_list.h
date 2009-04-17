@@ -57,8 +57,8 @@ namespace sqbind
 
     public:
 
-		_SQBIND_CLASS_CTOR_BEGIN( CSqList )
-		_SQBIND_CLASS_CTOR_END( CSqList )
+		SQBIND_CLASS_CTOR_BEGIN( CSqList )
+		SQBIND_CLASS_CTOR_END( CSqList )
 
         /// Returns a reference to the underlying vector
         t_List& vector();
@@ -80,4 +80,4 @@ namespace sqbind
 }; // end namespace
 
 // Declare type for use as squirrel parameters
-DECLARE_INSTANCE_TYPE_NAME( sqbind::CSqList, CSqList )
+SQBIND_DECLARE_INSTANCE( sqbind::CSqList, CSqList )

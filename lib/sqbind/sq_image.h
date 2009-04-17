@@ -41,8 +41,8 @@ namespace sqbind
     {
 	public:
 
-		_SQBIND_CLASS_CTOR_BEGIN( CSqImage )
-		_SQBIND_CLASS_CTOR_END( CSqImage )
+		SQBIND_CLASS_CTOR_BEGIN( CSqImage )
+		SQBIND_CLASS_CTOR_END( CSqImage )
 
 		CSqImage() {}
 
@@ -117,4 +117,4 @@ namespace sqbind
 }; // end namespace
 
 // Declare type for use as squirrel parameters
-DECLARE_INSTANCE_TYPE_NAME( sqbind::CSqImage, CSqImage )
+SQBIND_DECLARE_INSTANCE( sqbind::CSqImage, CSqImage )

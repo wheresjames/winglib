@@ -345,37 +345,37 @@ public:
 	{	return msg( oexT( "Number" ), oexMks( num ).Ptr() ); }
 };
 
-_SQBIND_REGISTER_CLASS_BEGIN( CTestClass, CTestClass )
-	_SQBIND_MEMBER_FUNCTION(  CTestClass, msg )
-	_SQBIND_MEMBER_FUNCTION(  CTestClass, num )
-_SQBIND_REGISTER_CLASS_END()
+SQBIND_REGISTER_CLASS_BEGIN( CTestClass, CTestClass )
+	SQBIND_MEMBER_FUNCTION(  CTestClass, msg )
+	SQBIND_MEMBER_FUNCTION(  CTestClass, num )
+SQBIND_REGISTER_CLASS_END()
 */
 
-_SQBIND_REGISTER_CLASS_BEGIN( CSqMsgQueue, CSqMsgQueue )
-_SQBIND_REGISTER_CLASS_END()
+SQBIND_REGISTER_CLASS_BEGIN( CSqMsgQueue, CSqMsgQueue )
+SQBIND_REGISTER_CLASS_END()
 
-_SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, alert )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, echo )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, load_module )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sleep )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, clock )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ticks )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, spawn )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_path )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute1 )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute2 )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute3 )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute4 )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, path )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )
-	_SQBIND_MEMBER_FUNCTION(  CSqEngineExport, md5 )
-_SQBIND_REGISTER_CLASS_END()
+SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, alert )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, echo )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, load_module )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sleep )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, clock )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ticks )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, spawn )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_path )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute1 )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute2 )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute3 )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute4 )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, path )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, md5 )
+SQBIND_REGISTER_CLASS_END()
 
 
 oex::oexBOOL CSqEngine::Init()
@@ -401,17 +401,22 @@ oex::oexBOOL CSqEngine::Init()
 
 		sq_seterrorhandler( m_vm.GetVMHandle() );
 
-		// Bind Squirrel variables
-		sqbind::SqBindAll( &m_vm );
-
 		// Debugging functions
 		BindRootFunction( _msg, oexT( "_msg" ) );
 		BindRootFunction( _log, oexT( "_log" ) );
 		BindRootFunction( _log, oexT( "_break" ) );
 
-//		_SQBIND_EXPORT( &m_vm, CTestClass );
-		_SQBIND_EXPORT( &m_vm, CSqMsgQueue );
-		_SQBIND_EXPORT( &m_vm, CSqEngineExport );
+		// Bind Squirrel variables
+#if defined( SQBIND_SQBIND )
+		sqbind::SqBindAll( m_vm.GetVMHandle() );
+		SQBIND_EXPORT( m_vm.GetVMHandle(), CSqMsgQueue );
+		SQBIND_EXPORT( m_vm.GetVMHandle(), CSqEngineExport );
+#else
+		sqbind::SqBindAll( &m_vm );
+		SQBIND_EXPORT( &m_vm, CSqMsgQueue );
+		SQBIND_EXPORT( &m_vm, CSqEngineExport );
+#endif
+//		SQBIND_EXPORT( &m_vm, CTestClass );
 /*
 
 		sq_pushroottable(v);
@@ -656,7 +661,11 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 	} // end if
 
 	// Export functionality
+#if defined( SQBIND_SQBIND )
+	if ( !pMi->Export( m_vm.GetVMHandle() ) )
+#else
 	if ( !pMi->Export( &m_vm ) )
+#endif
 	{	oexERROR( 0, oexMks( oexT( "Failed to export squirrel symbols from module " ), sFull ) );
 		return -5;
 	} // end if
