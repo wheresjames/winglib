@@ -60,6 +60,10 @@ namespace sqbind
 		SQBIND_CLASS_CTOR_BEGIN( CSqList )
 		SQBIND_CLASS_CTOR_END( CSqList )
 
+		CSqList() {}
+		CSqList( const CSqList &r ) {}
+		CSqList& operator =( const CSqList &r ) { return *this; }
+
         /// Returns a reference to the underlying vector
         t_List& vector();
 

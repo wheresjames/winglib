@@ -58,6 +58,10 @@ public:
 	/// Destructor
 	virtual ~CSqMsgQueue();
 
+	// Copy semantics
+	CSqMsgQueue( const CSqMsgQueue &r ) {}
+	CSqMsgQueue& operator =( const CSqMsgQueue &r ) { return *this; }
+
 	/// Releases resources
 	virtual void Destroy();
 
