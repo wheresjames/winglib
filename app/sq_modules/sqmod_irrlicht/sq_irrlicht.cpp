@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 
-#if defined( _IRR_COMPILE_WITH_OPENGL_ ) || defined( _IRR_LINUX_X11_VIDMODE_ )
+#if defined( _MSC_VER ) || defined( _IRR_COMPILE_WITH_OPENGL_ ) || defined( _IRR_LINUX_X11_VIDMODE_ )
 #	include <GL/gl.h>
 #	define SQ_USE_OPENGL
 #endif

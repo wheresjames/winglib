@@ -175,10 +175,10 @@ void CSqEngineExport::sleep( int nMsTime )
 {   oex::os::CSys::Sleep( nMsTime ); }
 
 float CSqEngineExport::clock()
-{   oexGetBootSeconds(); }
+{   return oexGetBootSeconds(); }
 
 unsigned int CSqEngineExport::ticks()
-{   oexGetBootCount(); }
+{   return oexGetBootCount(); }
 
 CSqMsgQueue* CSqEngineExport::queue()
 {   return OnGetQueue(); }
