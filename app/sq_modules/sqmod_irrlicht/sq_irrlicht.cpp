@@ -14,6 +14,9 @@ CSqIrrlicht::CSqIrrlicht()
 	m_pDriver = oexNULL;
 	m_pGui = oexNULL;
 	m_pCamera = oexNULL;
+	m_txtFps = oexNULL;
+	m_llFrames = 0;
+	m_fLastTime = 0;
 
 	m_nDriverType = -1;
 	m_colBackground = irr::video::SColor( 255, 0, 50, 100 );
@@ -31,6 +34,9 @@ CSqIrrlicht::~CSqIrrlicht()
 	m_pDriver = oexNULL;
 	m_pGui = oexNULL;
 	m_nDriverType = -1;
+	m_txtFps = oexNULL;
+	m_llFrames = 0;
+	m_fLastTime = 0;
 
 	// Lose animators
     m_lstMeshAnimators.clear();
@@ -49,18 +55,23 @@ CSqIrrlicht::~CSqIrrlicht()
 	} // end if
 }
 
-int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height )
+int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height, int fps )
 {
 	irr::SIrrlichtCreationParameters param;
-	param.Bits = 16;
-	param.AntiAlias = true;
+
 #if defined( _WIN32_WCE )
+	param.Bits = 16;
+	param.Fullscreen = true;
 	param.DriverType = irr::video::EDT_BURNINGSVIDEO;
 	param.WindowSize = irr::core::dimension2d<irr::u32>( width, height );
 #elif defined( OEX_IPHONE )
+	param.Bits = 16;
+	param.Fullscreen = true;
 	param.DriverType = irr::video::EDT_OGLES1;
 	param.WindowSize = irr::core::dimension2d<irr::u32>( width, height );
 #else
+	param.Bits = 32;
+	param.AntiAlias = true;
 	param.DriverType = irr::video::EDT_OPENGL;
 	param.WindowSize = irr::core::dimension2d<irr::s32>( width, height );
 #endif
@@ -97,16 +108,20 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height )
 			oexERROR( 0, oexT( "GUI environment is invalid" ) );
 
 #if defined( _WIN32_WCE )
-		// set the filesystem relative to the executable
-		{
-			wchar_t buf[255];
-			GetModuleFileNameW ( 0, buf, 255 );
 
-			irr::core::stringc base = buf;
-			base = base.subString ( 0, base.findLast ( '\\' ) );
-			m_pDevice->getFileSystem()->addFolderFileArchive ( base.c_str() );
-		}
+		// Set the filesystem relative to the executable
+		m_pDevice->getFileSystem()->addFolderFileArchive ( oexStrToStr8( oexGetModulePath() ).Ptr() );
+
 #endif
+
+		if ( fps )
+		{
+			m_txtFps =
+				m_pGui->addStaticText( L"FPS: xx", irr::core::rect< irr::s32 >( 60, 5, 200, 20 ), false );
+
+			m_pGui->addButton( irr::core::rect< int >( 10, 5, 50, 20 ), 0, 2, L"Quit" );
+
+		} // end if
 
 	} // end else
 
@@ -171,11 +186,22 @@ int CSqIrrlicht::Draw( CSqirrColor &bg )
 	if ( !m_pDevice || !m_pDevice->run() )
 		return -1;
 
+	// Time values
+	float fBootSeconds = oexGetBootSeconds();
+	float fElapsed = m_fLastTime ? fBootSeconds - m_fLastTime : 0;
+
+	// Update fps
+	if ( m_txtFps && !( m_llFrames % 10 ) )
+		m_txtFps->setText ( oexMksW( m_pDriver->getFPS() ).Ptr() );
+
 	// Animate meshes
 	AnimateMeshes();
 
+	// Update physics engine
+	m_cPhysics.Update( fElapsed );
+
     if ( m_bStereo && m_pCamera )
-		DrawAnaglyph( m_pDriver, m_pSmgr, m_pCamera, bg.Obj(),
+		DrawAnaglyph( m_pDriver, m_pSmgr, m_pGui, m_pCamera, bg.Obj(),
 		              m_fStereoWidth, m_fStereoFocus, m_nDriverType,
 					  m_ulREyeKey, m_ulLEyeKey );
 
@@ -188,11 +214,16 @@ int CSqIrrlicht::Draw( CSqirrColor &bg )
 
 	} // end else
 
+	// Count a frame
+	m_llFrames++;
+	m_fLastTime = fBootSeconds;
+
 	return 0;
 }
 
 int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 							   irr::scene::ISceneManager *pSm,
+							   irr::gui::IGUIEnvironment *pGui,
 							   irr::scene::ICameraSceneNode *pCamera,
 							   irr::video::SColor colBackground,
 							   float fWidth, float fFocus, int nDriverType,
@@ -237,7 +268,7 @@ int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 
 #endif
 
-#if defined( _IRR_COMPILE_WITH_DIRECT3D_9_	) && defined( OEX_ENABLE_DIRECTX )
+#if defined( _IRR_COMPILE_WITH_DIRECT3D_9_ ) && defined( OEX_ENABLE_DIRECTX )
 
 	else if ( pDdx9 )
 		pDdx9->SetRenderState( D3DRS_COLORWRITEENABLE,
@@ -267,7 +298,7 @@ int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 
 #endif
 
-#if defined( _IRR_COMPILE_WITH_DIRECT3D_9_	) && defined( OEX_ENABLE_DIRECTX )
+#if defined( _IRR_COMPILE_WITH_DIRECT3D_9_ ) && defined( OEX_ENABLE_DIRECTX )
 
 	else if ( pDdx9 )
 	{   pDdx9->Clear(0 , 0 , D3DCLEAR_ZBUFFER, 0x000000 , 1.0f , 0);
@@ -295,7 +326,7 @@ int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 
 #endif
 
-#if defined( _IRR_COMPILE_WITH_DIRECT3D_9_	) && defined( OEX_ENABLE_DIRECTX )
+#if defined( _IRR_COMPILE_WITH_DIRECT3D_9_ ) && defined( OEX_ENABLE_DIRECTX )
 
 	else if ( pDdx9 )
 		pDdx9->SetRenderState( D3DRS_COLORWRITEENABLE,
@@ -304,6 +335,9 @@ int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 							   | D3DCOLORWRITEENABLE_RED
 							   | D3DCOLORWRITEENABLE_ALPHA );
 #endif
+
+	if ( pGui )
+		pGui->drawAll();
 
 	pDriver->endScene();
 

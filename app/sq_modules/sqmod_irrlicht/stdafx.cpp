@@ -169,6 +169,10 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqirrVertexArray, CSqirrVertexArray )
 	SQBIND_MEMBER_FUNCTION( CSqirrVertexArray, inflate )
 SQBIND_REGISTER_CLASS_END()
 
+// CSqirrAnimator
+SQBIND_REGISTER_CLASS_BEGIN( CSqirrPhysics, CSqirrPhysics )
+SQBIND_REGISTER_CLASS_END()
+
 // Export classes
 static void SQBIND_Export( sqbind::VM x_vm )
 {

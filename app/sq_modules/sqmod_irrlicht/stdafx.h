@@ -19,6 +19,8 @@
 #include "sqirr_vector.h"
 #include "sqirr_texture.h"
 
+#include "sq_physics.h"
+
 #include "sqirr_animator.h"
 
 #include "sqirr_node.h"

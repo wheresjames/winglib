@@ -238,6 +238,8 @@
 
 // String functions
 #define oexMks								OEX_NAMESPACE::CStr().Mks
+#define oexMks8								OEX_NAMESPACE::CStr8().Mks
+#define oexMksW								OEX_NAMESPACE::CStrW().Mks
 
 // File functions
 #define oexDeletePath						OEX_NAMESPACE::CFile::DeletePath

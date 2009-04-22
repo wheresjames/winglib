@@ -6,7 +6,8 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_irrlicht
 PRJ_TYPE := dll
-PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
+PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind \
+			SqPlus/include SqPlus/sqplus bullet/src
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel
 PRJ_DEFS := 
 
@@ -35,6 +36,7 @@ else
 	PRJ_DEFS := _IRR_STATIC_LIB_
 	ifeq ($(OS),wince)
 		#_IRR_COMPILE_WITH_OGLES1_
+		PRJ_OSLB := libGLES_CM
 		PRJ_INCS := $(PRJ_INCS) ogles/include
 	else
 #		PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OPENGL_

@@ -76,13 +76,41 @@ oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 	// Save file name
 	m_sFile = x_pFile;
 
-	// Load the module
+
 #if defined( OEX_WINCE )
-//	m_hModule = ::LoadLibraryEx( x_pFile, NULL, 0 ); //DONT_RESOLVE_DLL_REFERENCES );
-	m_hModule = ::LoadLibrary( x_pFile );
-#else
-	m_hModule = ::LoadLibrary( x_pFile );
+
+	// On Windows CE 6.1, we have to ensure the library is loaded in slot zero
+	// by setting the following key...
+	// HKEY_LOCAL_MACHINE\System\Loader\LoadModuleLow\<xxx.dll> = dword:1
+
+	// Open the key
+	HKEY hKey = oexNULL;
+	if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, oexT( "System\\Loader\\LoadModuleLow" ),
+					   0, KEY_ALL_ACCESS, &hKey ) == ERROR_SUCCESS )
+	{
+		// Add key if it does not already exist
+		oex::CStr sKey = m_sFile.GetFileName();
+		if ( ERROR_SUCCESS != RegQueryValueEx( hKey, sKey.Ptr(), 0, 0, 0, 0 ) )
+		{
+			DWORD dwVal = 1;
+			if ( ERROR_SUCCESS != RegSetValueEx( hKey, sKey.Ptr(), 0, REG_DWORD, (LPBYTE)&dwVal, sizeof( dwVal ) ) )
+				oexWARNING( GetLastError(), oexMks( oexT( "Error applying Windows CE 6.1+ reg hack for dll " ), x_pFile ) );
+
+		} // end if
+
+		// Close the key
+		RegCloseKey( hKey );
+
+	} // end if
+
+	// If key doesn't exist, assume it's not Windows CE 6.1+
+//	else
+//		oexWARNING( GetLastError(), oexMks( oexT( "Could not apply Windows CE 6.1+ reg hack for dll " ), x_pFile ) );
+
 #endif
+
+	// Load the module
+	m_hModule = ::LoadLibrary( x_pFile );
 	if ( m_hModule == oexNULL )
 	{	oexERROR( GetLastError(), oexMks( oexT( "Failed to load module " ), x_pFile ) );
 		return oexFALSE;

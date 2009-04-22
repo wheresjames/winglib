@@ -118,20 +118,22 @@ int main( int argc, char* argv[] )
 	u32 frames=0;
 	while(device->run())
 	{
-		driver->beginScene(true, true, SColor(0,100,100,100));
+		driver->beginScene( true, true, SColor( 0, 100, 100, 100 ) );
 		smgr->drawAll();
 		guienv->drawAll();
 		driver->endScene();
 
-		if (++frames==10)
+		if ( ++frames == 10 )
 		{
 			stringw str = L"FPS: ";
 			str += (s32)driver->getFPS();
 
 			text->setText ( str.c_str() );
-			frames=0;
-		}
-	}
+			frames = 0;
+
+		} // end if
+
+	} // end while
 
 	device->drop();
 
@@ -195,9 +197,19 @@ int Init( int width, int height )
 
 #if defined( _WIN32_WCE )
 
+#if defined( _IRR_COMPILE_WITH_OGLES1_ )
+
+	g_pDevice = irr::createDevice( irr::video::EDT_OGLES1,
+								   irr::core::dimension2d< irr::u32 >( 320, 240 ),
+								   16, true );
+
+#else
+
 	g_pDevice = irr::createDevice( irr::video::EDT_BURNINGSVIDEO,
 								   irr::core::dimension2d< irr::u32 >( 320, 240 ),
 								   16, true );
+
+#endif
 
 //	g_pDevice = irr::createDevice( irr::video::EDT_OGLES1, irr::core::dimension2d<irr::u32>(width, height),
 //	     						   16, true, false, false, 0 );

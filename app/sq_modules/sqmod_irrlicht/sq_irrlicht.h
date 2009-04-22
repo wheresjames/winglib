@@ -63,7 +63,7 @@ public:
 	CSqIrrlicht& operator =( const CSqIrrlicht &r ) { return *this; }
 
 	/// Initializes irrlicht engine
-	int Init( const sqbind::stdString &sName, int width, int height );
+	int Init( const sqbind::stdString &sName, int width, int height, int fps );
 
 	/// Draws the scene
 	int Draw( CSqirrColor &bg );
@@ -71,6 +71,7 @@ public:
 	/// Draws the sceen in anaglyphic stereo
 	static int DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 							 irr::scene::ISceneManager *pSm,
+							 irr::gui::IGUIEnvironment *pGui,
 							 irr::scene::ICameraSceneNode *pCamera,
 							 irr::video::SColor colBackground,
 							 float fWidth, float fFocus, int nDriverType,
@@ -165,8 +166,17 @@ private:
 	/// Type of driver in use
 	int								m_nDriverType;
 
+	/// Number of frames that have been processed
+	oex::oexINT64					m_llFrames;
+
+	/// Time of last run
+	float							m_fLastTime;
+
 	/// Background color
 	irr::video::SColor 				m_colBackground;
+
+	/// Fps count
+	irr::gui::IGUIStaticText 		*m_txtFps;
 
 	/// Non-zero to enable anaglyphic stereo mode
 	int								m_bStereo;
@@ -185,6 +195,9 @@ private:
 
 	/// Mesh animators
     t_MeshAnimators                 m_lstMeshAnimators;
+
+	/// World physics
+    CSqirrPhysics					m_cPhysics;
 
 };
 
