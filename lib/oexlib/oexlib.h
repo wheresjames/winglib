@@ -363,7 +363,7 @@
 		It is worth the time it takes to set this up and maintain it. Complicating the build
 		cycle will result in 'stupid' mistakes and eat up enormous amounts of time trying to
 		get the build 'right' from memory. Check lists are also inadequate, mistakes will be
-		made and it is too time consuming. Shot for nothing less than complete automation. In
+		made and it is too time consuming. Shoot for nothing less than complete automation. In
 		fact, having a dedicated machine that executes completely autonomous nightly builds
 		from the code versioning system is becoming the norm. This helps greatly when trying
 		to determine exactly when a bug is introduced.
@@ -607,6 +607,8 @@ public:
 
 		virtual ~CVerifyStartup()
 		{
+#if !defined( OEX_WINDOWS )
+
 			if ( !COex::GetStartupCode() )
 			{	oexTRACE( oexT( "! oexlib - oex::COex::Init() was not called!\n" ) );
 				oexBREAK( oexT( "oex::COex::Init() was not called!" ) );
@@ -624,6 +626,7 @@ public:
 			{	oexTRACE( oexT( "! oexlib - oex::COex::Uninit() reported error code %li\n" ), COex::GetShutdownCode() );
 				oexBREAK( oexT( "oex::COex::Uninit() reported an error" ) );
 			} // end else if
+#endif
 		}
 	};
 
@@ -666,7 +669,7 @@ public:
 	static oexINT GetStartupCode()
 	{	return m_nStartupCode; }
 
-	/// Returns the startup code
+	/// Returns the shutdown code
 	static oexINT GetShutdownCode()
 	{	return m_nShutdownCode; }
 

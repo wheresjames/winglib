@@ -103,8 +103,17 @@ typedef void*						oexTYPEOF_PTR;
 class __oexCPtrCnv
 {
 public:
-	__oexCPtrCnv()	{ ptr = 0; llInt = 0; }
-	__oexCPtrCnv( oexTYPEOF_PTR x_ptr ) { ptr = x_ptr; }
+	__oexCPtrCnv()	{ Zero(); }
+	__oexCPtrCnv( oexTYPEOF_PTR x_ptr ) { Zero(); ptr = x_ptr; }
+	__oexCPtrCnv( oexINT x_val ) { Zero(); nInt = x_val; }
+	__oexCPtrCnv( oexUINT x_val ) { Zero(); uInt = x_val; }
+	__oexCPtrCnv( oexLONG x_val ) { Zero(); lInt = x_val; }
+	__oexCPtrCnv( oexULONG x_val ) { Zero(); ulInt = x_val; }
+	__oexCPtrCnv( oexINT64 x_val ) { Zero(); llInt = x_val; }
+	__oexCPtrCnv( oexUINT64 x_val ) { Zero(); ullInt = x_val; }
+
+	void Zero() { ptr = 0; ullInt = 0; }
+
 	union
 	{
 		oexTYPEOF_PTR		ptr;

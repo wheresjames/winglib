@@ -12,7 +12,7 @@ class CSqirrPhysics
 public:
 
 	/// Gravity
-	static const float c_fGravity = -9.80665f;
+	static const float c_fGravity;
 
 public:
 

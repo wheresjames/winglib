@@ -61,11 +61,16 @@ template < typename T > class TStr
 {
 public:
 
+	// Size type
+	typedef oexLONG		size_type;
+
+public:
+
     /// Default constructor
     TStr()
     {
         m_nLength = 0;
-        m_uOffset = 0;
+        m_nOffset = 0;
 
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
@@ -75,7 +80,7 @@ public:
 
 	TStr( oexCONST TStr &str )
 	{	m_nLength = 0;
-        m_uOffset = 0;
+        m_nOffset = 0;
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -86,7 +91,7 @@ public:
 
 	TStr( oexCONST T *pStr )
 	{	m_nLength = 0;
-        m_uOffset = 0;
+        m_nOffset = 0;
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -96,7 +101,7 @@ public:
 
 	TStr( oexCONST T *pStr, oexUINT uSize )
 	{	m_nLength = 0;
-        m_uOffset = 0;
+        m_nOffset = 0;
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -106,7 +111,7 @@ public:
 
 	TStr( oexCONST T *pStr, oexINT nStart, oexUINT uLen )
 	{	m_nLength = 0;
-        m_uOffset = 0;
+        m_nOffset = 0;
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -116,7 +121,7 @@ public:
 
 	TStr( oexCONST T *pStr, oexUINT uSize, oexINT nStart, oexUINT uLen )
 	{	m_nLength = 0;
-        m_uOffset = 0;
+        m_nOffset = 0;
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -126,7 +131,7 @@ public:
 
 	TStr( oexCONST oexINT nVal )
 	{	m_nLength = 0;
-        m_uOffset = 0;
+        m_nOffset = 0;
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -136,7 +141,7 @@ public:
 
 	TStr( oexCONST oexUINT uVal )
 	{	m_nLength = 0;
-        m_uOffset = 0;
+        m_nOffset = 0;
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -146,7 +151,7 @@ public:
 
 	TStr( oexCONST oexDOUBLE dStr )
 	{	m_nLength = 0;
-        m_uOffset = 0;
+        m_nOffset = 0;
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -156,7 +161,7 @@ public:
 
 	TStr( oexCONST oexINT64 llStr )
 	{	m_nLength = 0;
-        m_uOffset = 0;
+        m_nOffset = 0;
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -166,7 +171,7 @@ public:
 
 	TStr( oexCONST oexUINT64 llStr )
 	{	m_nLength = 0;
-        m_uOffset = 0;
+        m_nOffset = 0;
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -176,7 +181,7 @@ public:
 
 	TStr( oexCONST T tVal )
 	{	m_nLength = 0;
-        m_uOffset = 0;
+        m_nOffset = 0;
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -186,7 +191,7 @@ public:
 
 	TStr( oexCONST oexGUID &guid )
 	{	m_nLength = 0;
-        m_uOffset = 0;
+        m_nOffset = 0;
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
         m_pFile = oexNULL;
         m_uLine = 0;
@@ -206,7 +211,7 @@ public:
         m_nLength = 0;
 
         // Reset the offset
-        m_uOffset = 0;
+        m_nOffset = 0;
 
         // Lose the string memory
         m_mem.OexDelete();
@@ -219,7 +224,7 @@ public:
     {
         // Share the memory
         m_nLength = x_str.m_nLength;
-        m_uOffset = x_str.m_uOffset;
+        m_nOffset = x_str.m_nOffset;
         m_mem.Share( x_str.m_mem );
         return *this;
     }
@@ -228,34 +233,34 @@ public:
 	oexBOOL Unshare()
 	{
 		// Punt if not shared or offset
-		if ( !m_uOffset && 1 == m_mem.GetRefCount() )
+		if ( !m_nOffset && 1 == m_mem.GetRefCount() )
 			return oexTRUE;
 
 		// Figure out in use size of current buffer
-		oexUINT uOldSize = m_mem.Size();
+		size_type nOldSize = m_mem.Size();
 
 		// If it's one, it's just a NULL terminator
-		if ( m_uOffset >= uOldSize || 1 >= ( uOldSize - m_uOffset ) )
+		if ( m_nOffset >= nOldSize || 1 >= ( nOldSize - m_nOffset ) )
 			Destroy();
 
 		else
 		{
 			// Size of the new buffer
-			oexUINT uNewSize = uOldSize - m_uOffset;
+			size_type nNewSize = nOldSize - m_nOffset;
 
             TMem< T > mem;
-            if ( !oexVERIFY_PTR( mem.OexNew( uNewSize ).Ptr() ) )
+            if ( !oexVERIFY_PTR( mem.OexNew( nNewSize ).Ptr() ) )
                 return oexFALSE;
 
             // Copy string data
-			os::CSys::MemCpy( mem.Ptr(), m_mem.c_Ptr( m_uOffset ), uNewSize * sizeof( T ) );
+			os::CSys::MemCpy( mem.Ptr(), m_mem.c_Ptr( m_nOffset ), nNewSize * sizeof( T ) );
 
             // Use the new memory
 			m_mem.Assume( mem );
 
 			// Reset offset
-			m_nLength = uNewSize - 1;
-			m_uOffset = 0;
+			m_nLength = nNewSize - 1;
+			m_nOffset = 0;
 
 		} // end if
 
@@ -314,7 +319,7 @@ public:
 		if ( !m_mem.Size() )
 			( (TStr*)this )->OexAllocate( 0 );
 
-		return ( (TStr*)this )->m_mem.Ptr( m_uOffset );
+		return ( (TStr*)this )->m_mem.Ptr( m_nOffset );
 	}
 
 	/// Returns a const pointer to the internal string buffer
@@ -339,7 +344,7 @@ public:
 
         } // end if
 
-		return ( (TStr*)this )->m_mem.Ptr( x_uOffset + m_uOffset );
+		return ( (TStr*)this )->m_mem.Ptr( x_uOffset + m_nOffset );
 	}
 
 	/// Returns a writable pointer (use with care)
@@ -392,7 +397,7 @@ public:
 	oexINT Length() oexCONST
 	{	if ( 0 > m_nLength )
 			return ( (TStr*)this )->CalculateLength();
-		return m_nLength - m_uOffset;
+		return m_nLength - m_nOffset;
 	}
 
     /// Manually sets the length
@@ -404,7 +409,7 @@ public:
             return m_nLength;
 
         // Ensure we have that much data
-        if ( !OexAllocate( m_uOffset + x_nLength ) )
+        if ( !OexAllocate( m_nOffset + x_nLength ) )
             return 0;
 
         // Just accept the callers size
@@ -539,7 +544,7 @@ public:
 
         // See if we're sharing the same memory
         if ( rStr.m_mem.c_Ptr() == m_mem.c_Ptr()
-             && rStr.m_uOffset == m_uOffset )
+             && rStr.m_nOffset == m_nOffset )
             return oexTRUE;
 
         // I suppose we'll have to actually compare the strings
@@ -624,12 +629,12 @@ public:
         {   Destroy(); return *this; }
 
         // Shift the start of the string
-        m_uOffset += x_uStart;
+        m_nOffset += x_uStart;
 
         // Do we need to adjust the length?
         if ( x_uLen && x_uLen < ( uSize - x_uStart ) )
-        {   OexAllocate( m_uOffset + x_uLen );
-            m_nLength = m_uOffset + x_uLen;
+        {   OexAllocate( m_nOffset + x_uLen );
+            m_nLength = m_nOffset + x_uLen;
         } // end if
 
 		return *this;
@@ -831,7 +836,7 @@ public:
 		} // end if
 
         // Ditch the offset
-        m_uOffset = 0;
+        m_nOffset = 0;
 
 		// Allocate space for new string
 		if ( !oexVERIFY_PTR( OexAllocate( uSize ) ) || !uSize )
@@ -852,7 +857,7 @@ public:
 		{	OexAllocate( 0 ); return *this; }
 
         // Ditch the offset
-        m_uOffset = 0;
+        m_nOffset = 0;
 
 		// Allocate space for new string
 		T* pPtr = OexAllocate( 1 );
@@ -2526,10 +2531,10 @@ private:
     TMem< T >       m_mem;
 
     /// The length of the string
-    oexINT          m_nLength;
+    size_type       m_nLength;
 
     /// Offset into the string, this is invaluable for text parsing
-    oexINT          m_uOffset;
+    size_type       m_nOffset;
 
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 

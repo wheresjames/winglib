@@ -19,7 +19,7 @@ public:
 	enum
 	{
 		/// Maximum time to cache tag values in seconds
-		eTagCacheLimit = 10
+		eTagCacheLimit = 3
 	};
 
 	/// Holds cached tag value

@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 
-//const float CSqirrPhysics::c_fGravity = -9.80665f;
+const float CSqirrPhysics::c_fGravity = -9.80665f;
 
 CSqirrPhysics::CSqirrPhysics()
 {

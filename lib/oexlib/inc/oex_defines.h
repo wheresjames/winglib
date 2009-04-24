@@ -137,6 +137,7 @@
 #define oexPtrToULong( p ) 	OEX_NAMESPACE::__oexCPtrCnv( p ).ulInt
 #define oexPtrToInt64( p ) 	OEX_NAMESPACE::__oexCPtrCnv( p ).llInt
 #define oexPtrToUInt64( p ) OEX_NAMESPACE::__oexCPtrCnv( p ).ullInt
+#define oexPtrToPtr( p ) OEX_NAMESPACE::__oexCPtrCnv( p ).ptr
 
 #define oexStrWToMb( s )			        OEX_NAMESPACE::CStr8().ToMb( s )
 #define oexStrWToMbPtr( s )		        	OEX_NAMESPACE::CStr8().ToMb( s ).Ptr()

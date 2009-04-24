@@ -79,6 +79,10 @@ template < class T > class TFileMapping
 {
 public:
 
+	typedef oexINT64	size_type;
+
+public:
+
 	/// Defualt constructor
 	TFileMapping()
 	{	m_pPtr = oexNULL;
@@ -180,8 +184,8 @@ public:
 				// Was the object constructed?
 				if ( bDestroy && CAlloc::eF1Constructed & CAlloc::GetFlags( m_pPtr ) )
 				{
-					oexUINT uSize = Size();
-					for ( oexUINT i = 0; i < uSize; i++ )
+					size_type nSize = Size();
+					for ( size_type i = 0; i < nSize; i++ )
 						m_pPtr[ i ].~T();
 
 				} // end if
@@ -352,7 +356,7 @@ public:
 	oexBOOL Existing() { return m_bExisting; }
 
     /// Returns the size of the file mapping
-    oexUINT Size() const
+    oexINT64 Size() const
     {
         if ( !m_pPtr )
             return 0;

@@ -15,10 +15,12 @@ public:
 	{
 	public:
 
-		CEventReceiver() { m_pDevice = oexNULL; }
-		CEventReceiver ( irr::IrrlichtDevice *device ): m_pDevice( device ) {}
+		CEventReceiver() { m_pDevice = oexNULL; m_pQuit = oexNULL; }
+		CEventReceiver ( irr::IrrlichtDevice *device, int *pQuit ) 
+			: m_pDevice( device ), m_pQuit( pQuit ) {}
 
-		void SetDevice( irr::IrrlichtDevice *device ) { m_pDevice = device; }
+		void SetDevice( irr::IrrlichtDevice *device, int *pQuit ) 
+		{	m_pDevice = device; m_pQuit = pQuit; }
 
 		virtual bool OnEvent(const irr::SEvent& event)
 		{
@@ -29,8 +31,10 @@ public:
 				switch(event.GUIEvent.EventType)
 				{
 					case irr::gui::EGET_BUTTON_CLICKED:
-					if (id == 2)
+					if ( id == 2 )
 					{
+						if ( m_pQuit )
+							*m_pQuit = 1;
 						if ( m_pDevice )
 							m_pDevice->closeDevice();
 						return true;
@@ -42,6 +46,9 @@ public:
 		}
 
 	private:
+
+		/// Pointer to variable to set when engine shuts down
+		int					*m_pQuit;
 
 		/// Pointer to irrlicht device
 		irr::IrrlichtDevice *m_pDevice;
@@ -198,6 +205,9 @@ private:
 
 	/// World physics
     CSqirrPhysics					m_cPhysics;
+
+	/// Non-zero if engine should quit
+	int								m_bQuit;
 
 };
 

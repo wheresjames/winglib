@@ -106,7 +106,7 @@ public:
 	{	oexINT64 freq = osGetTimerFreq();
 		if ( !freq ) return 0;
 		oexINT64 val = osGetTimerValue();
-		return val / freq;
+		return oexDOUBLE( val / freq );
 	}
 
 	//==============================================================

@@ -17,6 +17,7 @@ CSqIrrlicht::CSqIrrlicht()
 	m_txtFps = oexNULL;
 	m_llFrames = 0;
 	m_fLastTime = 0;
+	m_bQuit = 0;
 
 	m_nDriverType = -1;
 	m_colBackground = irr::video::SColor( 255, 0, 50, 100 );
@@ -37,6 +38,7 @@ CSqIrrlicht::~CSqIrrlicht()
 	m_txtFps = oexNULL;
 	m_llFrames = 0;
 	m_fLastTime = 0;
+	m_bQuit = 0;
 
 	// Lose animators
     m_lstMeshAnimators.clear();
@@ -87,7 +89,7 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height, in
 		m_nDriverType = param.DriverType;
 
 		// Set default event receiver
-		m_er.SetDevice( m_pDevice );
+		m_er.SetDevice( m_pDevice, &m_bQuit );
 		m_pDevice->setEventReceiver( &m_er );
 
 		if ( sName.length() )
@@ -186,7 +188,7 @@ CSqirrAnimator CSqIrrlicht::AddRotateAnimator( CSqirrVector3d &speed )
 
 int CSqIrrlicht::Draw( CSqirrColor &bg )
 {
-	if ( !m_pDevice || !m_pDevice->run() )
+	if ( m_bQuit || !m_pDevice || !m_pDevice->run() )
 		return -1;
 
 	// Time values

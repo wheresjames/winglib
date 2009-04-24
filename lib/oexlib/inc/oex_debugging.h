@@ -115,14 +115,6 @@ template < const int T > class oex_static_assert{};
 #	define oexASSERT_PTR( ptr )             oexVERIFY( oexVerifyPtr( (OEX_NAMESPACE::oexCPVOID)ptr ) )
 #	define oexASSERT( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
 
-#else
-
-#	define oexASSERT_PTR( ptr )
-#	define oexASSERT_PTR_NULL_OK( ptr )
-#	define oexASSERT( s )
-
-#endif
-
 // +++ Only works for 32-bit processors
 //
 // 0xABABABAB	-	LocalAlloc()
@@ -140,23 +132,38 @@ template < const int T > class oex_static_assert{};
 // 0xFFFFFFFF	-	Invalid
 static oexBOOL oexVerifyPtrNullOk( oexCPVOID ptr )
 {	if ( !ptr ) return oexTRUE;
-    return (       ( (oexTYPEOF_PTR)ptr >  (oexTYPEOF_PTR)0x00000032 )
-                && ( (oexTYPEOF_PTR)ptr != (oexTYPEOF_PTR)0xABABABAB )
-				&& ( (oexTYPEOF_PTR)ptr != (oexTYPEOF_PTR)0xBAADF00D )
-				&& ( (oexTYPEOF_PTR)ptr != (oexTYPEOF_PTR)0xCCCCCCCC )
-				&& ( (oexTYPEOF_PTR)ptr != (oexTYPEOF_PTR)0xCDCDCDCD )
-				&& ( (oexTYPEOF_PTR)ptr != (oexTYPEOF_PTR)0xDDDDDDDD )
-				&& ( (oexTYPEOF_PTR)ptr != (oexTYPEOF_PTR)0xFDFDFDFD )
-				&& ( (oexTYPEOF_PTR)ptr != (oexTYPEOF_PTR)0xFEEEFEEE )
-				&& ( (oexTYPEOF_PTR)ptr != (oexTYPEOF_PTR)0xDEADDEAD )
-				&& ( (oexTYPEOF_PTR)ptr != (oexTYPEOF_PTR)0xDEADC0DE )
-				&& ( (oexTYPEOF_PTR)ptr != (oexTYPEOF_PTR)0xDEADBEEF )
-				&& ( (oexTYPEOF_PTR)ptr != (oexTYPEOF_PTR)0xDEADBABE )
-				&& ( (oexTYPEOF_PTR)ptr != (oexTYPEOF_PTR)0xA5A5A5A5 )
-				&& ( (oexTYPEOF_PTR)ptr != (oexTYPEOF_PTR)0xFFFFFFFF ) );
+    return (       ( (oexTYPEOF_PTR)ptr >  oexPtrToPtr( 0x00000032 ) )
+                && ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xABABABAB ) )
+				&& ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xBAADF00D ) )
+				&& ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xCCCCCCCC ) )
+				&& ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xCDCDCDCD ) )
+				&& ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xDDDDDDDD ) )
+				&& ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xFDFDFDFD ) )
+				&& ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xFEEEFEEE ) )
+				&& ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xDEADDEAD ) )
+				&& ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xDEADC0DE ) )
+				&& ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xDEADBEEF ) )
+				&& ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xDEADBABE ) )
+				&& ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xA5A5A5A5 ) )
+				&& ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xFFFFFFFF ) ) );
 }
 
 static oexBOOL oexVerifyPtr( oexCPVOID ptr )
 {	return	( (oexTYPEOF_PTR)oexNULL != (oexTYPEOF_PTR)ptr ) &&
 			oexVerifyPtrNullOk( ptr );
 }
+
+#else
+
+#	define oexASSERT_PTR( ptr )
+#	define oexASSERT_PTR_NULL_OK( ptr )
+#	define oexASSERT( s )
+
+static oexBOOL oexVerifyPtrNullOk( oexCPVOID ptr )
+{	return oexTRUE; }
+
+static oexBOOL oexVerifyPtr( oexCPVOID ptr )
+{	return	( (oexTYPEOF_PTR)oexNULL != (oexTYPEOF_PTR)ptr ); }
+
+#endif
+

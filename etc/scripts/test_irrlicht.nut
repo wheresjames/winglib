@@ -14,7 +14,7 @@ function _init() : ( _g )
 
 //	_g.irr.SetStereo( 1 );
 	_self.echo( "...Initializing...\n" );
-	_g.irr.Init( "Irr Test", 240, 320 );
+	_g.irr.Init( "Irr Test", 240, 320, 1 );
 
 	_self.echo( "...setting ambient light...\n" );
 	_g.irr.SetAmbientLight( CSqirrColorf( 0.5, 0.5, 0.5 ) );

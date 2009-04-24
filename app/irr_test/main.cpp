@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 #if defined( _WIN32_WCE )
-#include <windows.h>
+#	include <windows.h>
 #endif
 
 class MyEventReceiver : public irr::IEventReceiver
@@ -110,8 +110,6 @@ int Init( int width, int height )
 
 	else
 	{
-//		m_pDevice->setWindowCaption( oexT( "Irrlicht Engine" ) );
-
 		irr::scene::ISceneManager *smgr = g_pDevice->getSceneManager();
 		irr::video::IVideoDriver *driver = g_pDevice->getVideoDriver();
 		irr::gui::IGUIEnvironment* guienv = g_pDevice->getGUIEnvironment();
@@ -127,27 +125,27 @@ int Init( int width, int height )
 
 		{ // Create scene
 
-	    driver->setAmbientLight( irr::video::SColorf( .5f, .5f, .5f ) );
-		smgr->addLightSceneNode( 0, irr::core::vector3df( 0, 100, 0 ),
-								 irr::video::SColorf( 0.5f, 0.5f, 0.5f ), 100 );
-		smgr->addLightSceneNode( 0, irr::core::vector3df( 0, 100, -50 ),
-								 irr::video::SColorf( 0.5f, 0.5f, 0.5f ), 100 );
+			driver->setAmbientLight( irr::video::SColorf( .5f, .5f, .5f ) );
+			smgr->addLightSceneNode( 0, irr::core::vector3df( 0, 100, 0 ),
+									 irr::video::SColorf( 0.5f, 0.5f, 0.5f ), 100 );
+			smgr->addLightSceneNode( 0, irr::core::vector3df( 0, 100, -50 ),
+									 irr::video::SColorf( 0.5f, 0.5f, 0.5f ), 100 );
 
-		irr::scene::ICameraSceneNode *camera =
-			smgr->addCameraSceneNode( 0, irr::core::vector3df( 0, 30, -40 ),
-									  irr::core::vector3df( 0, 5, 0 ) );
+			irr::scene::ICameraSceneNode *camera =
+				smgr->addCameraSceneNode( 0, irr::core::vector3df( 0, 30, -40 ),
+										  irr::core::vector3df( 0, 5, 0 ) );
 
-		irr::scene::ISceneNode *node = smgr->addCubeSceneNode( 10.f );
-		if ( node )
-		{
-			irr::scene::ISceneNodeAnimator* rotate =
-				smgr->createRotationAnimator( irr::core::vector3df( 0, 0.4f, 0 ) );
+			irr::scene::ISceneNode *node = smgr->addCubeSceneNode( 10.f );
+			if ( node )
+			{
+				irr::scene::ISceneNodeAnimator* rotate =
+					smgr->createRotationAnimator( irr::core::vector3df( 0, 0.4f, 0 ) );
 
-			node->addAnimator( rotate );
+				node->addAnimator( rotate );
 
-			rotate->drop();
+				rotate->drop();
 
-		} // end if
+			} // end if
 
 		} // end Create Scene
 
@@ -174,7 +172,6 @@ int Draw()
 	g_pDevice->getSceneManager()->drawAll();
 	g_pDevice->getGUIEnvironment()->drawAll();
 	g_pDevice->getVideoDriver()->endScene();
-
 
 	return 0;
 }
