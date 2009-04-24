@@ -123,6 +123,9 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height, in
 
 		} // end if
 
+		// Initialize physics engine
+		m_cPhysics.Init();
+
 	} // end else
 
 	return 1;

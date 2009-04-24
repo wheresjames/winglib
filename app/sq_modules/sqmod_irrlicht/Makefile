@@ -8,7 +8,7 @@ PRJ_NAME := sqmod_irrlicht
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind \
 			SqPlus/include SqPlus/sqplus bullet/src
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel bullet
 PRJ_DEFS := 
 
 PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols

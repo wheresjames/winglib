@@ -9,6 +9,10 @@
 
 class CSqirrPhysics
 {
+public:
+
+	/// Gravity
+	static const float c_fGravity = -9.80665f;
 
 public:
 
@@ -24,6 +28,12 @@ public:
 	CSqirrPhysics( const CSqirrPhysics &r ) {}
 	CSqirrPhysics& operator =( const CSqirrPhysics &r ) { return *this; }
 
+	/// Initializes the physics engine
+	int Init();
+
+	/// Release physics resources
+	void Destroy();
+
 	/// Updates physics world
 	int Update( float fElapsed );
 
@@ -33,7 +43,19 @@ private:
 #if !defined( OEX_NOBULLET )
 
 	/// Bullet physics
-	btDiscreteDynamicsWorld			*m_pPhysicsWorld;
+	oex::TMem< btDiscreteDynamicsWorld >				m_memPhysicsWorld;
+
+	/// Configuration
+	oex::TMem< btDefaultCollisionConfiguration >		m_memCollisionConfig;
+
+	/// Collision dispatcher
+	oex::TMem< btCollisionDispatcher >					m_memCollisionDispatcher;
+
+	/// Axis sweep
+	oex::TMem< btAxisSweep3 >							m_memBroadphase;
+
+	/// Solver
+	oex::TMem< btSequentialImpulseConstraintSolver >	m_memSolver;
 
 #endif
 
