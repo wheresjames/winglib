@@ -82,6 +82,15 @@ LOC_INC_sb := $(CFG_LIBROOT)/bullet/src/BulletSoftBody
 LOC_SRC_sb := $(CFG_LIBROOT)/bullet/src/BulletSoftBody
 include $(PRJ_LIBROOT)/build.mk
 
+#----------------------------
+# -- LinearMath
+#----------------------------
+
+export LOC_TAG := lm
+LOC_INC_lm := $(CFG_LIBROOT)/bullet/src/LinearMath
+LOC_SRC_lm := $(CFG_LIBROOT)/bullet/src/LinearMath
+include $(PRJ_LIBROOT)/build.mk
+
 #-------------------------------------------------------------------
 # Execute the build
 #-------------------------------------------------------------------
