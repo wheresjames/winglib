@@ -16,10 +16,10 @@ public:
 	public:
 
 		CEventReceiver() { m_pDevice = oexNULL; m_pQuit = oexNULL; }
-		CEventReceiver ( irr::IrrlichtDevice *device, int *pQuit ) 
+		CEventReceiver ( irr::IrrlichtDevice *device, int *pQuit )
 			: m_pDevice( device ), m_pQuit( pQuit ) {}
 
-		void SetDevice( irr::IrrlichtDevice *device, int *pQuit ) 
+		void SetDevice( irr::IrrlichtDevice *device, int *pQuit )
 		{	m_pDevice = device; m_pQuit = pQuit; }
 
 		virtual bool OnEvent(const irr::SEvent& event)
@@ -103,6 +103,9 @@ public:
 
 	/// Creates a rotation animator
 	CSqirrAnimator AddRotateAnimator( CSqirrVector3d &speed );
+
+	/// Adds a mesh
+	CSqirrNode AddMesh( oex::oexCSTR x_pFile, float x_fScale, int x_bClearFromCache );
 
 public:
 

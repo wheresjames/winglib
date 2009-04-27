@@ -468,7 +468,7 @@ void CCellConnection::VerifyTemplate()
 
 				// Add size to offset
 				o += nBytes;
-				
+
 				int num = 1;
 				int n = oexStrToLong( itVal->first.c_str() );
 				if ( !n && itVal->first[ 0 ] > oexT( '9' ) )
@@ -480,7 +480,7 @@ void CCellConnection::VerifyTemplate()
 					if ( num )
 						it->second.list()[ oexMks( i ).Ptr() ].list() = itVal->second.list();
 					else if ( i <= 26 )
-					{	char idx[ 2 ] = { 'a', 0 };
+					{	oex::oexTCHAR idx[ 2 ] = { oexT( 'a' ), 0 };
 						idx[ 0 ] += i;
 						it->second.list()[ idx ].list() = itVal->second.list();
 					} // end else

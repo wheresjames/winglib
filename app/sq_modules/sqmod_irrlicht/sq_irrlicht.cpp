@@ -767,3 +767,43 @@ void CSqIrrlicht::AnimateMeshes()
 			m_lstMeshAnimators.end() != it; it++ )
 		it->second.Run( m_pSmgr, oexGetBootSeconds(), oexNULL );
 }
+
+CSqirrNode CSqIrrlicht::AddMesh( oex::oexCSTR x_pFile, float x_fScale, int x_bClearFromCache )
+{
+	if ( !m_pSmgr || !oexCHECK_PTR( x_pFile ) )
+		return CSqirrNode();
+
+    try
+    {
+        irr::scene::IAnimatedMesh *pMesh = m_pSmgr->getMesh( oexStrToMbPtr( x_pFile ) );
+        if ( !pMesh )
+			return CSqirrNode();
+
+        irr::scene::IAnimatedMeshSceneNode *pAniMesh = m_pSmgr->addAnimatedMeshSceneNode( pMesh );
+        if ( !pAniMesh )
+			return CSqirrNode();
+
+        // Set the scale
+        pAniMesh->setScale( irr::core::vector3df( x_fScale, x_fScale, x_fScale ) );
+
+        // Remove from cache?
+        if ( x_bClearFromCache )
+            m_pSmgr->getMeshCache()->removeMesh( pAniMesh->getMesh() );
+
+        for ( int i = 0; i < pAniMesh->getMaterialCount(); i++ )
+        {   pAniMesh->getMaterial( i ).NormalizeNormals = true;
+            pAniMesh->getMaterial( i ).Shininess = 0;
+        } // end for
+//      pAniMesh->addShadowVolumeSceneNode( 0, true, 100.f );
+        pAniMesh->setMaterialFlag( irr::video::EMF_LIGHTING, true );
+
+		return pAniMesh;
+
+    } // end try
+
+    catch( ... )
+    {
+    } // end catch
+
+	return CSqirrNode();
+}
