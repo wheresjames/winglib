@@ -17,11 +17,11 @@ void CSqirrPhysics::Destroy()
 {
 #if !defined( OEX_NOBULLET )
 
-	m_memPhysicsWorld.Delete();
-	m_memSolver.Delete();
-	m_memBroadphase.Delete();
-	m_memCollisionDispatcher.Delete();
-	m_memCollisionConfig.Delete();
+	m_memPhysicsWorld.OexDelete();
+	m_memSolver.OexDelete();
+	m_memBroadphase.OexDelete();
+	m_memCollisionDispatcher.OexDelete();
+	m_memCollisionConfig.OexDelete();
 
 #endif
 }
@@ -38,12 +38,12 @@ int CSqirrPhysics::Init()
 	const int maxOverlap = 65535;
 
 	// Create default configuration	
-	if ( !m_memCollisionConfig.Construct().Ptr() )
+	if ( !m_memCollisionConfig.OexConstruct().Ptr() )
 	{	oexERROR( 0, "Out of memory allocating btDefaultCollisionConfiguration" ); 
 		Destroy(); return 0;
 	} // end if  
 
-	if ( !m_memCollisionDispatcher.Construct( *m_memCollisionConfig ).Ptr() )
+	if ( !m_memCollisionDispatcher.OexConstruct( *m_memCollisionConfig ).Ptr() )
 	{	oexERROR( 0, "Out of memory allocating btCollisionDispatcher" ); 
 		Destroy(); return 0;
 	} // end if  
@@ -57,12 +57,12 @@ int CSqirrPhysics::Init()
 		Destroy(); return 0;
 	} // end if  
 
-	if ( !m_memSolver.Construct().Ptr() )
+	if ( !m_memSolver.OexConstruct().Ptr() )
 	{	oexERROR( 0, "Out of memory allocating btSequentialImpulseConstraintSolver" ); 
 		Destroy(); return 0;
 	} // end if  
 
-	if ( !m_memPhysicsWorld.Construct(  *m_memCollisionDispatcher, *m_memBroadphase, 
+	if ( !m_memPhysicsWorld.OexConstruct(  *m_memCollisionDispatcher, *m_memBroadphase, 
 										*m_memSolver, *m_memCollisionConfig ).Ptr() )
 	{	oexERROR( 0, "Out of memory allocating btDiscreteDynamicsWorld" ); 
 		Destroy(); return 0;

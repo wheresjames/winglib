@@ -671,6 +671,7 @@ template< typename T_RET, typename T_P1, typename T_P2, typename T_P3, typename 
 			{	return LogError( oex::oexFALSE, e ); }
 			_oexCATCH( SquirrelError &e )
 			{	return LogErrorM( oex::oexFALSE, e.desc ); }
+			return oex::oexTRUE;
 		}
 
 
@@ -697,6 +698,7 @@ template< typename T_RET, typename T_P1, typename T_P2, typename T_P3, typename 
 			{	return LogError( oex::oexFALSE, e ); }
 			_oexCATCH( SquirrelError &e )
 			{	return LogErrorM( oex::oexFALSE, e.desc ); }
+			return oex::oexTRUE;
 		}
 
     template< typename T_P1, typename T_P2, typename T_P3 >
@@ -722,6 +724,7 @@ template< typename T_RET, typename T_P1, typename T_P2, typename T_P3, typename 
 			{	return LogError( oex::oexFALSE, e ); }
 			_oexCATCH( SquirrelError &e )
 			{	return LogErrorM( oex::oexFALSE, e.desc ); }
+			return oex::oexTRUE;
 		}
 
 public:
