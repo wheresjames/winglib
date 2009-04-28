@@ -21,6 +21,10 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqIrrlicht, CSqIrrlicht )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddLight )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddCamera )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddCube )
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddMesh )
+
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, LoadTexture )
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, CreateTexture )
 
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddRotateAnimator )
 
@@ -45,6 +49,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqirrNode, CSqirrNode )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, GetScale )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetMaterialFlag )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetMaterialType )
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetTexture )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetParent )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetVisible )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, IsVisible )

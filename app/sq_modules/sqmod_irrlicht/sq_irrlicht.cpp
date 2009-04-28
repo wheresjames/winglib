@@ -807,3 +807,42 @@ CSqirrNode CSqIrrlicht::AddMesh( const sqbind::stdString &sFile, float x_fScale,
 
 	return CSqirrNode();
 }
+
+CSqirrTexture CSqIrrlicht::CreateTexture( long lWidth, long lHeight, int bMipMapping )
+{
+	if ( !m_pDriver || !m_pSmgr || 0 >= lWidth || 0 >= lHeight )
+		return CSqirrTexture();
+
+	// Set mip-mapping state
+	int bCurMipMapping = m_pDriver->getTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS );
+    m_pDriver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, bMipMapping ? true : false );
+
+	// Create texture
+	CSqirrTexture tex( m_pDriver->addTexture( irr::core::dimension2d< irr::s32 >( lWidth, lHeight ), "Texture" ) );
+
+	// Restore mip mapping state
+    m_pDriver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, bCurMipMapping ? true : false );
+
+    return tex;
+}
+
+CSqirrTexture CSqIrrlicht::LoadTexture( const sqbind::stdString &sFile, int bMipMapping )
+{
+	if ( !m_pSmgr || !sFile.length() )
+		return CSqirrTexture();
+
+    if ( !oexExists( sFile.c_str() ) )
+		return CSqirrTexture();
+
+	// Set mip-mapping state
+	int bCurMipMapping = m_pDriver->getTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS );
+    m_pDriver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, bMipMapping ? true : false );
+
+	// Load the texture
+	CSqirrTexture tex( m_pDriver->getTexture( sFile.c_str() ) );
+
+	// Restore mip mapping state
+    m_pDriver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, bCurMipMapping ? true : false );
+
+	return tex;
+}

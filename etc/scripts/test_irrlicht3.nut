@@ -26,7 +26,7 @@ function _init() : ( _g )
 	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 100, 100 ), CSqirrVector3d( 0, 0, 0 ) );
 //	cam.SetLens( 1., 2.4, 3.2 );
 
-    local node = _g.irr.AddMesh( _self.path( "../media/key.obj" ), 1., 0 );
+    local node = _g.irr.AddMesh( "../../lib/winglib/etc/media/key.obj", 0.5, 0 );
 
     local rotate = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.5, 0 ) );
     node.AddAnimator( rotate );

@@ -63,6 +63,17 @@ public:
 		return m_p->getPosition();
 	}
 
+	void SetTexture( long lMaterial, CSqirrTexture &st )
+	{
+		if ( !m_p ) return;
+
+		if ( 0 <= lMaterial )
+			m_p->setMaterialTexture( lMaterial, st.Ptr() );
+
+		else for ( int i = 0; i < m_p->getMaterialCount(); i++ )
+			m_p->setMaterialTexture( i, st.Ptr() );
+	}
+
 	void FaceTarget( CSqirrVector3d &v )
 	{   if ( !m_p ) return;
 		irr::core::vector3df rot, dif = m_p->getPosition() - v.Obj();

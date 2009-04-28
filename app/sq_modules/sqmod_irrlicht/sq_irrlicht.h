@@ -142,6 +142,13 @@ public:
 	/// Runs mesh animators
 	void AnimateMeshes();
 
+	/// Loads a texture from a disk image
+	CSqirrTexture LoadTexture( const sqbind::stdString &sFile, int bMipMapping );
+
+	/// Create texture
+	CSqirrTexture CreateTexture( long lWidth, long lHeight, int bMipMapping );
+
+
 public:
 
 	void SetStereo( int b ) { m_bStereo = b; }

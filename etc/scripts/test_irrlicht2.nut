@@ -26,7 +26,7 @@ function _init() : ( _g )
 	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 100, 100 ), CSqirrVector3d( 0, 0, 0 ) );
 //	cam.SetLens( 1., 2.4, 3.2 );
 
-    local node = _g.irr.AddGrid( 10., 10., 10, 10, 0.2, 2, CSqirrColor( 255, 255, 255 ), 2 );
+    local node = _g.irr.AddGrid( 10., 10., 10, 10, 0., 2, CSqirrColor( 255, 255, 255 ), 2 );
     _g.irr.AddMeshAnimator( _self, node, OnAnimate, 1 );
 
     local rotate = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.5, 0 ) );
