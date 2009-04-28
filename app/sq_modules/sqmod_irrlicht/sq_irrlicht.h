@@ -105,7 +105,7 @@ public:
 	CSqirrAnimator AddRotateAnimator( CSqirrVector3d &speed );
 
 	/// Adds a mesh
-	CSqirrNode AddMesh( oex::oexCSTR x_pFile, float x_fScale, int x_bClearFromCache );
+	CSqirrNode AddMesh( const sqbind::stdString &sFile, float x_fScale, int x_bClearFromCache );
 
 public:
 

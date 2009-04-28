@@ -768,14 +768,14 @@ void CSqIrrlicht::AnimateMeshes()
 		it->second.Run( m_pSmgr, oexGetBootSeconds(), oexNULL );
 }
 
-CSqirrNode CSqIrrlicht::AddMesh( oex::oexCSTR x_pFile, float x_fScale, int x_bClearFromCache )
+CSqirrNode CSqIrrlicht::AddMesh( const sqbind::stdString &sFile, float x_fScale, int x_bClearFromCache )
 {
-	if ( !m_pSmgr || !oexCHECK_PTR( x_pFile ) )
+	if ( !m_pSmgr || !sFile.length() )
 		return CSqirrNode();
 
     try
     {
-        irr::scene::IAnimatedMesh *pMesh = m_pSmgr->getMesh( oexStrToMbPtr( x_pFile ) );
+        irr::scene::IAnimatedMesh *pMesh = m_pSmgr->getMesh( oexStrToMbPtr( sFile.c_str() ) );
         if ( !pMesh )
 			return CSqirrNode();
 
