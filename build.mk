@@ -111,7 +111,7 @@ setup_$(LOC_TAG): $(BLD_PATH_OBJ_$(LOC_TAG))
 ifeq ($(BUILD),vs)
 
 $(BLD_PATH_OBJ_$(LOC_TAG)):
-	$(CFG_MD) $(subst /,\,$@)
+	$(CFG_MD) "$(subst /,\,$@)"
 	
 clean_$(LOC_TAG):
 	- $(CFG_RM) "$(subst /,\,$(BLD_PATH_OBJ_$(LOC_TAG)))"
