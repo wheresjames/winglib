@@ -3,7 +3,7 @@
 BUILDDIRS := app/hello lib/oexlib app/test app/iptest app/srvrund app/srvmod app/modrun app/irr_test
 
 ifdef SQMOD
-	BUILDDIRS := $(BUILDDIRS) lib/sqbind app/squirrel app/sqengine \
+	BUILDDIRS := $(BUILDDIRS) lib/sqbind app/sqrl app/sqengine \
 							  app/sq_modules/sqmod_test app/sq_modules/sqmod_cell \
 	                          app/sq_modules/sqmod_http app/sq_modules/sqmod_gdchart \
 	                          app/sq_modules/sqmod_irrlicht app/sq_modules/sqmod_curl

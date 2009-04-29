@@ -47,7 +47,7 @@ function _init() : ( _g )
 //	cam.SetLens( 1., 2.4, 3.2 );
 
 	// Add a flat grid
-    _g.ball = _g.irr.AddGrid( 10., 10., 10, 10, 0., 2, CSqirrColor( 255, 255, 255 ), 2 );
+    _g.ball = _g.irr.AddGrid( 1., 1., 100, 100, 0., 2, CSqirrColor( 255, 255, 255 ), 2 );
 
 	// Shape into a ball
     _g.irr.AddMeshAnimator( _self, _g.ball, make_ball, 1 );

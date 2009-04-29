@@ -130,6 +130,15 @@ public:
                             irr::video::SColor &color, long lSides,
                             float minU = 0, float maxU = 1, float minV = 0, float maxV = 1 );
 
+	/// Inserts a sphere into a mesh
+	static int InsertSphere( irr::scene::SMeshBuffer *pMb, irr::core::vector3df center,
+	       		             float fWidth, float fHeight, long lPoints, const irr::video::SColor &color );
+
+
+	/// Adds a sphere
+	CSqirrNode AddSphere( float fWidth, float fHeight, long lPoints );
+
+
 	// Adds a grid node
 	CSqirrNode AddGrid( float fWidth, float fHeight,
 						long lXPanels, long lYPanels,

@@ -22,6 +22,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqIrrlicht, CSqIrrlicht )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddCamera )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddCube )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddMesh )
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddSphere )
 
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, LoadTexture )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, CreateTexture )
