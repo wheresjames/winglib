@@ -4,7 +4,7 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := squirrel
+PRJ_NAME := sqrl
 PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
 PRJ_LIBS := oexlib sqbind sqplus sqstdlib squirrel cximage jpeg png tiff zlib
