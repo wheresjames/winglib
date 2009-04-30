@@ -23,16 +23,23 @@ TOOLS	 := local
 #OS := $(shell uname -o)
 #ifeq $(OS) GNU/Linux
 
+#CFG_CURDIR := $(shell pwd)
+
 ifeq ($(BUILD),vs)
 	LIBLINK	 := static
 else
 	LIBLINK := shared
 endif
 
-#CFG_CURDIR := `pwd`
-CFG_ROOT := $(PRJ_LIBROOT)/../..
-CFG_TOOLROOT := $(PRJ_LIBROOT)/../../tools
-CFG_LIBROOT  := $(PRJ_LIBROOT)/..
+ifdef PRJ_ROOT
+	CFG_ROOT := $(PRJ_ROOT)
+	CFG_TOOLROOT := $(PRJ_ROOT)/tools
+	CFG_LIBROOT  := $(PRJ_OSROOT)
+else
+	CFG_ROOT := $(PRJ_LIBROOT)/../..
+	CFG_TOOLROOT := $(PRJ_LIBROOT)/../../tools
+	CFG_LIBROOT  := $(PRJ_LIBROOT)/..
+endif
 
 ifdef UNICODE
 CFG_CEXTRA := $(CFG_CEXTRA) -DUNICODE -D_UNICODE
@@ -109,7 +116,8 @@ ifeq ($(BUILD),vs)
 		CFG_LFLAGS := $(CFG_LFLAGS) /DLL
 	endif
 
-	CFG_CUR_ROOT := $(shell cd)
+	#CFG_CUR_ROOT := $(shell cd)
+	CFG_CUR_ROOT := $(shell pwd)
 
 else
 
@@ -462,7 +470,7 @@ else
 CFG_BUILD_TYPE := $(CFG_BUILD_TYPE)-shared
 endif
 
-CFG_BINROOT  := $(CFG_LIBROOT)/../bin/$(CFG_BUILD_TYPE)
+CFG_BINROOT  := $(CFG_ROOT)/bin/$(CFG_BUILD_TYPE)
 
 ifdef PRJ_BINROOT
 CFG_OUTROOT := $(PRJ_BINROOT)/bin/$(CFG_BUILD_TYPE)

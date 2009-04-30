@@ -111,6 +111,7 @@ setup_$(LOC_TAG): $(BLD_PATH_OBJ_$(LOC_TAG))
 ifeq ($(BUILD),vs)
 
 $(BLD_PATH_OBJ_$(LOC_TAG)):
+	echo $(CFG_CUR_ROOT)
 	$(CFG_MD) "$(subst /,\,$@)"
 	
 clean_$(LOC_TAG):
