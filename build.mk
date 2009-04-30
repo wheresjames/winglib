@@ -66,13 +66,13 @@ else
 BLD_PATH_INC_$(LOC_TAG) := $(CFG_CUR_ROOT)
 endif
 
-ifneq ($(LOC_OUT_$(LOC_TAG)),)
-BLD_PATH_BIN_$(LOC_TAG) := $(CFG_OUTROOT)/_$(PRJ_NAME)/$(LOC_OUT_$(LOC_TAG))
-else
-BLD_PATH_BIN_$(LOC_TAG) := $(CFG_OUTROOT)/_$(PRJ_NAME)
-endif
+#ifneq ($(LOC_OUT_$(LOC_TAG)),)
+#BLD_PATH_BIN_$(LOC_TAG) := $(CFG_OUTROOT)/_$(PRJ_NAME)/$(LOC_OUT_$(LOC_TAG))
+#else
+BLD_PATH_BIN_$(LOC_TAG) := $(CFG_OUTROOT)/_$(PRJ_NAME)/$(LOC_TAG)
+#endif
 
-BLD_PATH_OBJ_$(LOC_TAG) := $(BLD_PATH_BIN_$(LOC_TAG))/obj
+BLD_PATH_OBJ_$(LOC_TAG) := $(BLD_PATH_BIN_$(LOC_TAG))
 BLD_PATH_INS_$(LOC_TAG) := /usr/share/$(PRJ_NAME)
 BLD_PATH_LNK_$(LOC_TAG) := /usr/bin
 
@@ -111,7 +111,6 @@ setup_$(LOC_TAG): $(BLD_PATH_OBJ_$(LOC_TAG))
 ifeq ($(BUILD),vs)
 
 $(BLD_PATH_OBJ_$(LOC_TAG)):
-	echo $(CFG_CUR_ROOT)
 	$(CFG_MD) "$(subst /,\,$@)"
 	
 clean_$(LOC_TAG):
