@@ -4,7 +4,8 @@
 #include "stdafx.h"
 
 CCellConnection::CCellConnection()
-{	oexZeroMemory( &m_comm, sizeof( m_comm ) );
+{	m_nTagCacheLimit = eDefaultCacheLimit;
+	oexZeroMemory( &m_comm, sizeof( m_comm ) );
 	oexZeroMemory( &m_tagsDetails, sizeof( m_tagsDetails ) );
 	m_comm.error = -1;
 }
@@ -182,7 +183,7 @@ int CCellConnection::LoadTags()
 }
 
 int CCellConnection::IsConnected()
-{	return OK == m_comm.error ? 1 : 0; }
+{	return ( OK == m_comm.error ) ? 1 : 0; }
 
 oex::oexCSTR CCellConnection::GetTypeName( int nType )
 {
@@ -471,19 +472,11 @@ void CCellConnection::VerifyTemplate()
 
 				int num = 1;
 				int n = oexStrToLong( itVal->first.c_str() );
-				if ( !n && itVal->first[ 0 ] > oexT( '9' ) )
-					n = itVal->first[ 0 ] - oexT( 'a' ), num = 0;
 
 				// Does it need to be re-indexed?
 				if ( n != i )
 				{
-					if ( num )
-						it->second.list()[ oexMks( i ).Ptr() ].list() = itVal->second.list();
-					else if ( i <= 26 )
-					{	oex::oexTCHAR idx[ 2 ] = { oexT( 'a' ), 0 };
-						idx[ 0 ] += i;
-						it->second.list()[ idx ].list() = itVal->second.list();
-					} // end else
+					it->second.list()[ oexFmt( "%.3d", i ).Ptr() ].list() = itVal->second.list();
 
 					bErase = oex::oexTRUE;
 				} // end if
@@ -605,7 +598,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 	if ( itT != m_mapTagCache.end() )
 	{
 		// Pass along value if still valid
-		if ( ( itT->second.uTime + eTagCacheLimit ) > oexGetUnixTime() )
+		if ( ( itT->second.uTime + m_nTagCacheLimit ) > oexGetUnixTime() )
 			return itT->second.mVal;
 
 		// Ditch the cache
@@ -623,7 +616,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 	if ( itD != m_mapDataCache.end() )
 	{
 		// Save data info if valid
-		if ( ( itD->second.uTime + eTagCacheLimit ) > oexGetUnixTime() )
+		if ( ( itD->second.uTime + m_nTagCacheLimit ) > oexGetUnixTime() )
 			nLen = itD->second.data.Size(),
 			pDat = itD->second.data.Ptr();
 

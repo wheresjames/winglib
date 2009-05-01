@@ -89,7 +89,7 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height, in
 		m_nDriverType = param.DriverType;
 
 		// Set default event receiver
-		m_er.SetDevice( m_pDevice, &m_bQuit );
+		m_er.SetDevice( this, &m_bQuit );
 		m_pDevice->setEventReceiver( &m_er );
 
 		if ( sName.length() )
@@ -922,11 +922,17 @@ int CSqIrrlicht::InsertSphere( irr::scene::SMeshBuffer *pMb, irr::core::vector3d
     return 1;
 }
 
-CSqirrNode CSqIrrlicht::AddSphere( float fWidth, float fHeight, long lPoints )
+CSqirrNode CSqIrrlicht::AddSphere( float fRadius, long lPolyCount )
 {
 	if ( !m_pSmgr )
 		return CSqirrNode();
 
+    irr::scene::ISceneNode *pNode =
+		m_pSmgr->addSphereSceneNode( fRadius, lPolyCount );
+
+    return pNode;
+
+/*
     if ( 2 > lPoints )
 		return CSqirrNode();
 
@@ -950,6 +956,67 @@ CSqirrNode CSqIrrlicht::AddSphere( float fWidth, float fHeight, long lPoints )
     {   pNode->getMaterial( i ).NormalizeNormals = true;
         pNode->getMaterial( i ).Shininess = 0;
     } // end for
-
+	
     return pNode;
+*/
+}
+
+int CSqIrrlicht::OnEvent( const irr::SEvent& rEvent )
+{
+	switch( rEvent.EventType )
+	{
+		case irr::EET_MOUSE_INPUT_EVENT :
+		{
+			switch( rEvent.MouseInput.Event )
+			{
+				case irr::EMIE_MOUSE_MOVED:
+					oexEcho( "EMIE_MOUSE_MOVED" );
+					break;
+
+				case irr::EMIE_LMOUSE_PRESSED_DOWN:
+					oexEcho( "EMIE_LMOUSE_PRESSED_DOWN" );
+					break;
+
+				case irr::EMIE_LMOUSE_LEFT_UP:
+					oexEcho( "EMIE_LMOUSE_LEFT_UP" );
+					break;
+
+				case irr::EMIE_MMOUSE_PRESSED_DOWN:
+					oexEcho( "EMIE_MMOUSE_PRESSED_DOWN" );
+					break;
+
+				case irr::EMIE_MMOUSE_LEFT_UP:
+					oexEcho( "EMIE_MMOUSE_LEFT_UP" );
+					break;
+
+				case irr::EMIE_RMOUSE_PRESSED_DOWN:
+					oexEcho( "EMIE_RMOUSE_PRESSED_DOWN" );
+					break;
+
+				case irr::EMIE_RMOUSE_LEFT_UP:
+					oexEcho( "EMIE_RMOUSE_LEFT_UP" );
+					break;
+
+				case irr::EMIE_MOUSE_WHEEL:
+					oexEcho( "EMIE_MOUSE_WHEEL" );
+					break;
+
+				default:
+					break;
+
+			} // end switch
+
+		}break;	
+
+		case irr::EET_GUI_EVENT :
+		{
+			// Check for close button
+			if ( irr::gui::EGET_BUTTON_CLICKED == rEvent.GUIEvent.EventType )
+				if ( rEvent.GUIEvent.Caller->getID() == 2 )
+					m_bQuit = 1;
+		} break;
+
+	} // end switch
+
+	return 0;
 }

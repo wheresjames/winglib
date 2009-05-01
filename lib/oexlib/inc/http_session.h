@@ -219,7 +219,16 @@ public:
 
 		// Are there any post variables?
 		if ( !m_pbPost.Size() && m_pbRequest[ "type" ] == "POST" )
-			m_pbPost = CParser::DecodeUrlParams( Rx().Read() );
+		{
+			// IE and Netscape append CRLF, so be sure and use 
+			// the content length if available
+			if ( uContentLength )
+				m_pbPost = CParser::DecodeUrlParams( Rx().Read( uContentLength ) );
+			
+			else
+				m_pbPost = CParser::DecodeUrlParams( Rx().Read() );
+		
+		} // end if
 
 		// Set default headers
 		DefaultHeaders();

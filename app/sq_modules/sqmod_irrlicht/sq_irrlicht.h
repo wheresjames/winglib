@@ -15,43 +15,26 @@ public:
 	{
 	public:
 
-		CEventReceiver() { m_pDevice = oexNULL; m_pQuit = oexNULL; }
-		CEventReceiver ( irr::IrrlichtDevice *device, int *pQuit )
-			: m_pDevice( device ), m_pQuit( pQuit ) {}
+		CEventReceiver() { m_pIrr = oexNULL; }
+		CEventReceiver ( CSqIrrlicht *device, int *pQuit )
+			: m_pIrr( device ) {}
 
-		void SetDevice( irr::IrrlichtDevice *device, int *pQuit )
-		{	m_pDevice = device; m_pQuit = pQuit; }
+		void SetDevice( CSqIrrlicht *device, int *pQuit )
+		{	m_pIrr = device; }
 
-		virtual bool OnEvent(const irr::SEvent& event)
+		virtual bool OnEvent( const irr::SEvent& rEvent )
 		{
-			if (event.EventType == irr::EET_GUI_EVENT)
-			{
-				irr::s32 id = event.GUIEvent.Caller->getID();
-
-				switch(event.GUIEvent.EventType)
-				{
-					case irr::gui::EGET_BUTTON_CLICKED:
-					if ( id == 2 )
-					{
-						if ( m_pQuit )
-							*m_pQuit = 1;
-						if ( m_pDevice )
-							m_pDevice->closeDevice();
-						return true;
-					} break;
-				}
-			}
+			// Let irrlicht in on it
+			if ( m_pIrr )
+				m_pIrr->OnEvent( rEvent );
 
 			return false;
 		}
 
 	private:
 
-		/// Pointer to variable to set when engine shuts down
-		int					*m_pQuit;
-
 		/// Pointer to irrlicht device
-		irr::IrrlichtDevice *m_pDevice;
+		CSqIrrlicht			*m_pIrr;
 
 	};
 
@@ -136,7 +119,7 @@ public:
 
 
 	/// Adds a sphere
-	CSqirrNode AddSphere( float fWidth, float fHeight, long lPoints );
+	CSqirrNode AddSphere( float fRadius, long lPolyCount );
 
 
 	// Adds a grid node
@@ -157,6 +140,8 @@ public:
 	/// Create texture
 	CSqirrTexture CreateTexture( long lWidth, long lHeight, int bMipMapping );
 
+	/// Called when an event occurs
+	int OnEvent( const irr::SEvent& rEvent );
 
 public:
 

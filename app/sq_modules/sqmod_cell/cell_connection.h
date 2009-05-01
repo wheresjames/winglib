@@ -19,7 +19,7 @@ public:
 	enum
 	{
 		/// Maximum time to cache tag values in seconds
-		eTagCacheLimit = 3
+		eDefaultCacheLimit = 3
 	};
 
 	/// Holds cached tag value
@@ -128,6 +128,10 @@ public:
 	/// Verifys values in the squirrel template map
 	void VerifyTemplate();
 
+	/// Get / Set the cache limit
+	void SetCacheLimit( int n ) { m_nTagCacheLimit = n; }
+	int GetCacheLimit() { return m_nTagCacheLimit; }
+
 private:
 
 	/// Holds last error information
@@ -174,5 +178,8 @@ private:
 
 	/// Tag templates
 	sqbind::CSqMulti			m_mapSqTemplates;
+
+	/// Maximum ammount of time to cache a tag value
+	int							m_nTagCacheLimit;
 
 };
