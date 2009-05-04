@@ -83,6 +83,12 @@ protected:
     /// Releases all child scripts
     void DestroyChildScripts();
 
+	/// Frees stopped child scripts
+    void CleanupChildScripts();
+
+	/// Returns non-zero when messages will no longer be processed
+	virtual oex::oexBOOL Running() { return CThread::IsRunning(); }
+
 protected:
 
     /// Spawns a new child script thread
@@ -132,5 +138,4 @@ private:
 
     /// Parent script
     CSqMsgQueue             *m_pParentScript;
-
 };

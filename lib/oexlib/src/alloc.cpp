@@ -206,6 +206,7 @@ oexPVOID CAlloc::VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSiz
 	// Ensure overrun buffers match
 	// *** If this asserts, you probably over-ran the buffer!
 	//     i.e. buffer overflow
+	//     Or maybe you're freeing a bad pointer?
 	if ( !oexVERIFY( !os::CSys::MemCmp( &pBuf[ uSize ], m_ucOverrunPadding, sizeof( m_ucOverrunPadding ) ) ) )
 		return oexNULL;
 

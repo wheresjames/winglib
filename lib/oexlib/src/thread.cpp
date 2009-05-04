@@ -158,7 +158,9 @@ oexRESULT CThread::Stop( oexUINT x_uWait, oexBOOL x_bKill )
 }
 
 oexBOOL CThread::IsRunning()
-{	return !WaitThreadExit( 0 );
+{	
+	// Has the thread exited?
+	return !WaitThreadExit( 0 );
 }
 
 oexBOOL CThread::WaitThreadExit( oexUINT x_uTimeout )

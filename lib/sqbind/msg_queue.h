@@ -145,6 +145,9 @@ public:
 						  const stdString &sP1, const stdString &sP2, const stdString &sP3,
 						  const stdString &sP4 );
 
+	/// Returns a list of child nodes
+	oex::oexBOOL get_children( stdString *pReply, const stdString &sPath );
+
 	/// Sets the owning thread id
 	void SetOwnerThreadId( oex::oexUINT x_uOwnerThreadId )
 	{	m_uOwnerThreadId = x_uOwnerThreadId; }
@@ -152,6 +155,15 @@ public:
 	/// Returns the owning thread id
 	oex::oexUINT GetOwnerThreadId()
 	{	return m_uOwnerThreadId; }
+
+	/// Call to request thread exit
+	void RequestQuit() { m_bWantQuit = oex::oexTRUE; }
+
+	/// Returns quit request status
+	oex::oexBOOL WantQuit() { return m_bWantQuit; }
+
+	/// Returns non-zero when messages will no longer be processed
+	virtual oex::oexBOOL Running() { return oex::oexFALSE; }
 
 private:
 
@@ -166,6 +178,9 @@ private:
 
 	/// The message queue
 	t_MsgQueue                                  m_lstMsgQueue;
+
+	/// Non-zero if script has requested exit
+	oex::oexBOOL								m_bWantQuit;
 };
 
 }; SQBIND_DECLARE_INSTANCE( sqbind::CSqMsgQueue, CSqMsgQueue ); namespace sqbind {

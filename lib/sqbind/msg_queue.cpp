@@ -68,6 +68,7 @@ CSqMsgQueue::SMsg::SMsg( const CSqMsgQueue::SMsg &x_rMsg )
 CSqMsgQueue::CSqMsgQueue()
 {
 	m_uOwnerThreadId = 0;
+	m_bWantQuit = oex::oexFALSE;
 }
 
 /// Destructor
@@ -94,6 +95,8 @@ void CSqMsgQueue::Destroy()
 
 	// Reset event
 	Reset();
+
+	m_bWantQuit = oex::oexFALSE;
 }
 
 /// Sends a command to the thread
@@ -111,7 +114,7 @@ oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapPara
 {
 	oexEvent evReply;
 
-//	oexPrintf( oexT( "CSqMsgQueue::Msg() : %s -> %s, 0x%08x, 0x%08x\n" ), sPath.c_str(), sMsg.c_str(), m_uCurrentThreadId, (unsigned int)oexGetCurThreadId() );
+//	oexPrintf( oexT( "MSG: %s, To: %s, Caller: 0x%08x, Owner: 0x%08x\n" ), sMsg.c_str(), sPath.c_str(), (unsigned int)oexGetCurThreadId(), m_uOwnerThreadId );
 
 	// If it's our own thread calling
 	if ( m_uOwnerThreadId && oexGetCurThreadId() == m_uOwnerThreadId )
@@ -146,9 +149,13 @@ oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapPara
 
 	} // end message stuffing
 
-	// Wait for relpy if needed
+	// Wait for reply if needed
 	if ( pReply )
 	{
+		// Don't wait if messages will not be processed
+		if ( !Running() )
+			return oex::oexFALSE;
+
 		// Wait for reply
 		oex::oexBOOL bSuccess = !evReply.Wait( uTimeout );
 
@@ -302,4 +309,9 @@ oex::oexBOOL CSqMsgQueue::kill( stdString *pReply, const stdString &sPath )
 {	CSqMap params;
 	params[ oexT( "quit" ) ] = 1;
 	return Msg( sPath, oexT( "kill" ), &params, pReply );
+}
+
+oex::oexBOOL CSqMsgQueue::get_children( stdString *pReply, const stdString &sPath )
+{	CSqMap params;
+	return Msg( sPath, oexT( "get_children" ), &params, pReply );
 }

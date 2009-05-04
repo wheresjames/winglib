@@ -8,6 +8,7 @@ CCellConnection::CCellConnection()
 	oexZeroMemory( &m_comm, sizeof( m_comm ) );
 	oexZeroMemory( &m_tagsDetails, sizeof( m_tagsDetails ) );
 	m_comm.error = -1;
+	m_bNotResponding = oex::oexFALSE;
 }
 
 CCellConnection::CCellConnection( const CCellConnection &r )
@@ -26,6 +27,7 @@ int CCellConnection::Destroy()
 	m_comm.hostname = 0;
 	m_comm.error = -1;
 	m_sIp = oexT( "" );
+	m_bNotResponding = oex::oexFALSE;
 
 	// Lose the tag database
 	ReleaseTags();
@@ -182,8 +184,18 @@ int CCellConnection::LoadTags()
 	return 1;
 }
 
+int CCellConnection::IsResponding()
+{
+	return ( m_bNotResponding ) ? 0 : 1; 
+}
+
 int CCellConnection::IsConnected()
-{	return ( OK == m_comm.error ) ? 1 : 0; }
+{
+	if ( m_bNotResponding )
+		return 0;
+
+	return ( OK == m_comm.error ) ? 1 : 0; 
+}
 
 oex::oexCSTR CCellConnection::GetTypeName( int nType )
 {
@@ -333,7 +345,7 @@ oex::oexBOOL CCellConnection::GetItemValue( int nType, unsigned char *pData, int
 		case CIP_DINT :
 			if ( 4 > nSize )
 				return oex::oexFALSE;
-			sRet = oexMks( (int)( *( (long*)pData ) ) ).Ptr();
+			sRet = oexMks( (int)( *( (int*)pData ) ) ).Ptr();
 			break;
 
 		case CIP_LINT :
@@ -360,7 +372,7 @@ oex::oexBOOL CCellConnection::GetItemValue( int nType, unsigned char *pData, int
 		case CIP_DWORD :
 			if ( 4 > nSize )
 				return oex::oexFALSE;
-			sRet = oexMks( (unsigned int)( *( (unsigned long*)pData ) ) ).Ptr();
+			sRet = oexMks( (unsigned int)( *( (unsigned int*)pData ) ) ).Ptr();
 			break;
 
 		case CIP_ULINT :
@@ -631,7 +643,9 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 	{
 		// Get object details
 		if ( 0 > read_object_value( &m_comm, &m_path, pTd->tag[ nTag ], 0 ) )
+		{	m_bNotResponding = oex::oexTRUE;
 			return SetLastError( oexT( "err=read_object_value() failed" ) );
+		} // end if
 
 		// Did we get valid data
 		if ( !pTd->tag[ nTag ]->datalen || !oexCHECK_PTR( pTd->tag[ nTag ]->data ) )

@@ -1006,7 +1006,7 @@ int CSqIrrlicht::OnEvent( const irr::SEvent& rEvent )
 
 			} // end switch
 
-		}break;	
+		} break;	
 
 		case irr::EET_GUI_EVENT :
 		{

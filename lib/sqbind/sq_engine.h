@@ -80,6 +80,9 @@ public:
 	/// Returns boot count
 	unsigned int ticks();
 
+	/// Get child scripts
+	stdString get_children( const stdString &sPath );
+
 	/// Returns the file path to the current script
 	stdString path( const stdString &sPath );
 

@@ -96,6 +96,15 @@ int CSqEngineExport::is_path( const stdString &sPath )
 	return q->is_path( sPath );
 }
 
+stdString CSqEngineExport::get_children( const stdString &sPath )
+{	CSqMsgQueue *q = queue();
+	if ( !q ) return oexT( "" );
+	stdString sRet;
+	if ( !q->get_children( &sRet, sPath ) )
+		return oexT( "" );
+	return sRet;
+}
+
 stdString CSqEngineExport::execute( int nRet, const stdString &sPath, const stdString &sFunction )
 {	CSqMsgQueue *q = queue();
 	if ( !q )
@@ -359,6 +368,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, echo )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, load_module )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_children )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sleep )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, clock )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ticks )

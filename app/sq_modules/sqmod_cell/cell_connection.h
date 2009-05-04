@@ -75,6 +75,9 @@ public:
 	/// Returns non-zero if connected
 	int IsConnected();
 
+	/// Returns non-zero if device is not responding
+	int IsResponding();
+
 	/// Loads the tag database from the target
 	int LoadTags();
 
@@ -182,4 +185,6 @@ private:
 	/// Maximum ammount of time to cache a tag value
 	int							m_nTagCacheLimit;
 
+	/// Set to non-zero if device quits responding
+	oex::oexBOOL				m_bNotResponding;
 };

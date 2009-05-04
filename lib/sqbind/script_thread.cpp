@@ -110,10 +110,17 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 	// Process script messages
 	ProcessMsgs();
 
+	// Punt if quit has been requested
+	if ( WantQuit() )
+		return oex::oexFALSE;
+
 	// Idle processing
 	int nRet = 0;
 	if ( !m_cSqEngine.Execute( &nRet, _T( "_idle" ) ) )
 		return oex::oexFALSE;
+
+	// Cleanup child scripts
+	CleanupChildScripts();
 
 	return 0 == nRet;
 }
@@ -153,9 +160,21 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 	else if ( sMsg == oexT( "msg" ) )
 		OnMsg( mapParams, pReply );
 
+	// Return comma separated list of child scripts command
+	else if ( sMsg == oexT( "get_children" ) )
+	{	if ( oexCHECK_PTR( pReply ) )
+		{	oex::TList< oex::CStr > strlst;
+			for (	t_ScriptList::iterator it = m_lstScript.begin();
+					m_lstScript.end() != it; it++ )
+				if ( oexCHECK_PTR( it->second ) && it->second->IsRunning() && !it->second->WantQuit() )
+					strlst << oex::CParser::UrlEncode( it->second->GetName().c_str() );
+			*pReply = oex::CParser::Implode( strlst, oexT( "," ) ).Ptr();
+		} // end if
+	} // end else if
+
 	// Quit command
 	else if ( sMsg == oexT( "kill" ) )
-		Quit();
+		RequestQuit();
 
 	else
 		return oex::oexFALSE;
@@ -238,6 +257,36 @@ oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMs
 		return it->second->ProcessMsg( sPath, sMsg, mapParams, pReply );
 
 	return oex::oexFALSE;
+}
+
+void CScriptThread::CleanupChildScripts()
+{
+
+	// Kill our script
+	t_ScriptList::iterator it = m_lstScript.begin();
+	while ( m_lstScript.end() != it )
+	{
+		// Delete node if child has stopped
+		if ( it->second && !it->second->GetInitEvent().Wait( 0 ) && !it->second->IsRunning() )
+		{	it->second->Stop();
+			OexAllocDestruct( it->second );
+			it->second = oexNULL;
+		} // end if
+
+		if ( !it->second )
+		{	t_ScriptList::iterator nx = it; nx++;
+			m_lstScript.erase( it );
+			it = nx;
+		} // end if
+
+		else
+			it++;
+
+		// ???
+//			it = m_lstScript.erase( it );
+
+	} // end while
+
 }
 
 void CScriptThread::DestroyChildScripts()
@@ -333,89 +382,5 @@ void CScriptThread::OnMsg( CSqMap &mapParams, stdString *pReply )
 	// Execute 4 params
 	else if ( mapParams[ oexT( "execute4" ) ].length() )
 		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute4" ) ].c_str(), mapParams[ oexT( "p1" ) ], mapParams[ oexT( "p2" ) ], mapParams[ oexT( "p3" ) ], mapParams[ oexT( "p4" ) ] );
-
-/*
-	// Is it bound for another computer
-	int pos = sPath.find_first_of( oexT( ":" ), -1 );
-	if ( 0 <= pos )
-	{
-		stdString sAddress = sPath.substr( 0, pos );
-		if ( sAddress.length() )
-		{
-			// +++ Route to remote computer
-			oexASSERT( 0 );
-
-			return;
-
-		} // end if
-
-	} // end if
-
-	stdString sOnMsg( oexT( "onmsg" ) );
-
-	// Message to self
-	if ( !sPath.length() || sPath == _T( "." ) )
-		ProcessMsg( sOnMsg, mapParams, pReply );
-
-	// All the way to the top?
-	else if ( sPath == oexT( "/" ) || sPath == oexT( "\\" ) )
-	{
-		// Route to parent if any
-		if ( m_pParentScript )
-			m_pParentScript->Msg( sPath, oexT( "msg" ), &mapParams, pReply );
-
-		// I guess it's ours
-		else
-			ProcessMsg( sOnMsg, mapParams, pReply );
-
-		return;
-
-	} // end if
-
-	// Find path separator
-	stdString sToken = sPath.substr( 0, sPath.find_first_of( oexT( '\\' ) ) );
-	if ( !sToken.length() ) sToken = sPath.substr( 0, sPath.find_first_of( oexT( '/' ) ) );
-
-	// Did we get a token
-	if ( sPath.length() > sToken.length() )
-	{
-		// Skip the token
-		sPath = sPath.substr( sToken.length() + 1 );
-
-	} // end if
-	else
-	{   sToken = sPath;
-		sPath = oexT( "" );
-	} // end if
-
-	// Is it going up to the parent?
-	if ( sToken == oexT( ".." ) )
-	{
-		if ( m_pParentScript )
-		{
-			// End of the line?
-			if ( !sPath.length() )
-				m_pParentScript->Msg( oexT( "onmsg" ), &mapParams, pReply );
-
-			// Keep routing
-			else
-			{   mapParams[ oexT( "name" ) ] = sPath;
-				m_pParentScript->Msg( oexT( "msg" ), &mapParams, pReply );
-			} // end if
-
-		} // end if
-
-	} // end if
-
-	// Route to child
-	else
-	{
-		// Lose current script engine at this tag if any
-		t_ScriptList::iterator it = m_lstScript.find( sToken );
-		if ( m_lstScript.end() != it && it->second )
-			it->second->Msg( oexT( "onmsg" ), &mapParams, pReply );
-
-	} // end else
-*/
 }
 
