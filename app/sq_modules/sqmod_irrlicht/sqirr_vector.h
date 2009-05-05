@@ -30,9 +30,9 @@ public:
 		m_v.Z = z;
 	}
 
-	float x() { return m_v.X; }
-	float y() { return m_v.Y; }
-	float z() { return m_v.Z; }
+	float& x() { return m_v.X; }
+	float& y() { return m_v.Y; }
+	float& z() { return m_v.Z; }
 
 	void inflate( float v ) { m_v.X *= v; m_v.Y *= v; m_v.Z *= v; }
 
@@ -71,8 +71,8 @@ public:
 		m_v.Y = y;
 	}
 
-	float x() { return m_v.X; }
-	float y() { return m_v.Y; }
+	float& x() { return m_v.X; }
+	float& y() { return m_v.Y; }
 
 	void inflate( float v ) { m_v.X *= v; m_v.Y *= v; }
 

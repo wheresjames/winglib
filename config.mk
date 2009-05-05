@@ -1,5 +1,6 @@
 
-SHELL = /bin/sh
+SHELL=/bin/sh
+#SHELL=cmd.exe
 
 # config.mk
 # Cross compiler config
@@ -18,7 +19,16 @@ TOOLS	 := local
 #TOOLS	 := debian
 #TOOLS	 := codesourcery
 #TOOLS	 := snapgear
+#TOOLS	 := buildroot
+#TOOLS	 := crosstool
+#TOOLS	 := nihilism
+#TOOLS	 := openmoko
+#TOOLS	 := uclinux
+#TOOLS	 := armel
+#TOOLS	 := cegcc
 #TOOLS	 := mingw32
+#TOOLS	 := ming232ce
+#TOOLS	 := iphone
 
 #OS := $(shell uname -o)
 #ifeq $(OS) GNU/Linux
@@ -98,9 +108,16 @@ ifeq ($(BUILD),vs)
 	CFG_AR := lib /nologo
 	
 	CFG_DP := makedepend
-	CFG_MD := md
 	CFG_RM := rmdir /s /q
 	CFG_DEL:= del /f /q
+#	CFG_MD := md
+	CFG_MD := $(PRJ_LIBROOT)/make_directory.bat
+
+# +++ As to the line above, I have no clue why, but *sometimes*
+#     make complains that the 'md' command cannot be found on 
+#     Windows.  Moving it to a batch file seems to fix the problem.
+#     BTW, it's *not* the embedded relative ellipsis, I suspected 
+#     that too.
 
 	CFG_CC_OUT := /Fo
 	CFG_LD_OUT := /OUT:

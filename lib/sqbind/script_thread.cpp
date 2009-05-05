@@ -159,7 +159,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 	// Call to send message to child script
 	else if ( sMsg == oexT( "msg" ) )
 		OnMsg( mapParams, pReply );
-
+	
 	// Return comma separated list of child scripts command
 	else if ( sMsg == oexT( "get_children" ) )
 	{	if ( oexCHECK_PTR( pReply ) )

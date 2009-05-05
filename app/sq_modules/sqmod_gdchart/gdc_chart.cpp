@@ -79,6 +79,12 @@ sqbind::CSqMulti CGdcChart::GetChart( const sqbind::stdString &x_sType,
 
 	} // end for
 
+	GDC_BGColor = 0xffffff;
+	GDC_GridColor = 0x000000;
+	GDC_LineColor = 0x000000;
+	GDC_PlotColor = 0x00ff00;
+	GDC_ylabel_fmt = oexT( "%.2f" );
+
 	// Write out the graph to the pipe
 	out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
 	   		   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),

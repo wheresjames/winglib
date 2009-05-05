@@ -21,9 +21,22 @@ class CGlobal
 
 local _g = CGlobal();
 
+function _irr_event( e, x, y, w ) : ( _g )
+{
+//	_self.echo( e + ", " + x + ", " + y + ", " + w );
+
+	if ( e.tointeger() == _g.irr.EMIE_LMOUSE_PRESSED_DOWN )
+	{	local pos = _g.irr.ScreenToPlane( CSqirrVector2d( x, y ), 50. );
+		_g.xpos = pos.x();
+		_g.ypos = pos.y();
+//		_g.ball.SetPosition( pos );
+	} // end if
+}
+
 function _init() : ( _g )
 {
 	_g.irr = CSqIrrlicht();
+	_g.irr.SetCallback( _self.queue(), "_irr_event" );
 
 	// Stereo mode / if you have the colored 3d glasses
 //	_g.irr.SetStereo( 1 );

@@ -145,6 +145,32 @@ public:
 
 public:
 
+	/// Gets the intersect between a line and a plane
+	int getLineIntersect( CSqirrLine &line, CSqirrVector3d &pt, CSqirrVector3d &axis, CSqirrVector3d *intersect );
+
+	/// Get screen intersect point
+	int getIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSqirrVector3d &axis, CSqirrVector3d *intersect );
+
+	/// Returns the intersection between the mouse and the specified plane
+	int getMouseIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSqirrVector3d &axis, CSqirrVector3d *intersect );
+
+	/// Returns the specified pick point
+	int getPickPoint( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSqirrVector3d *intersect );
+
+	/// Gets a nodes screen position
+	CSqirrVector2d getNodeScreenPos( CSqirrNode &rNode );
+
+	/// Gets a screen position
+	CSqirrVector2d getScreenPos( CSqirrVector3d &v );
+
+	/// Converts a 2d screen point into a world position 
+	int screenToWorld( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorld, float fDist );
+
+	/// Converts a 2d screen point into a plane orthogonal to the camera
+	int screenToPlane( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorld, float fDist );
+
+public:
+
 	void SetStereo( int b ) { m_bStereo = b; }
 	int GetStereo() { return m_bStereo; }
 
@@ -153,6 +179,10 @@ public:
 
 	void SetLEyeKey( unsigned long ul ) { m_ulLEyeKey = ul; }
 	int GetLEyeKey() { return m_ulLEyeKey; }
+
+	// Sets the callback queue
+	void SetCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &x_sFunction )
+	{	m_pCallbackQueue = x_pMsgQueue; m_sCallbackFunction = x_sFunction; }
 
 private:
 
@@ -212,6 +242,12 @@ private:
 
 	/// Non-zero if engine should quit
 	int								m_bQuit;
+
+	/// Callback queue
+	sqbind::CSqMsgQueue				*m_pCallbackQueue;
+
+	/// Callback path
+	sqbind::stdString				m_sCallbackFunction;
 
 };
 

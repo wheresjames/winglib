@@ -9,6 +9,8 @@
 
 CSqIrrlicht::CSqIrrlicht()
 {
+	m_pCallbackQueue = oexNULL;
+
 	m_pDevice = oexNULL;
 	m_pSmgr = oexNULL;
 	m_pDriver = oexNULL;
@@ -31,6 +33,8 @@ CSqIrrlicht::CSqIrrlicht()
 
 CSqIrrlicht::~CSqIrrlicht()
 {
+	m_pCallbackQueue = oexNULL;
+
 	m_pSmgr = oexNULL;
 	m_pDriver = oexNULL;
 	m_pGui = oexNULL;
@@ -367,6 +371,7 @@ int CSqIrrlicht::AddSkyDome( const sqbind::stdString &sFile,
     return 1;
 }
 
+// local pos = ScreenToPlane( SquirrVector2d( x, y ), 50 );
 CSqirrVector3d CSqIrrlicht::ScreenToPlane( CSqirrVector2d &ptScreen, float fDist )
 {
     // Must have object
@@ -967,6 +972,19 @@ int CSqIrrlicht::OnEvent( const irr::SEvent& rEvent )
 	{
 		case irr::EET_MOUSE_INPUT_EVENT :
 		{
+			// If we have a queue
+			if ( m_pCallbackQueue ) 
+			{
+				// Mouse callback
+				m_pCallbackQueue->execute( oexNULL, "", m_sCallbackFunction, 
+										   oexMks( rEvent.MouseInput.Event ).Ptr(),
+										   oexMks( rEvent.MouseInput.X ).Ptr(),
+										   oexMks( rEvent.MouseInput.Y ).Ptr(),
+										   oexMks( rEvent.MouseInput.Wheel ).Ptr() );
+
+			} // end if
+
+/*
 			switch( rEvent.MouseInput.Event )
 			{
 				case irr::EMIE_MOUSE_MOVED:
@@ -1005,7 +1023,7 @@ int CSqIrrlicht::OnEvent( const irr::SEvent& rEvent )
 					break;
 
 			} // end switch
-
+*/
 		} break;	
 
 		case irr::EET_GUI_EVENT :
@@ -1020,3 +1038,223 @@ int CSqIrrlicht::OnEvent( const irr::SEvent& rEvent )
 
 	return 0;
 }
+
+int CSqIrrlicht::getLineIntersect( CSqirrLine &line, CSqirrVector3d &pt, CSqirrVector3d &axis, CSqirrVector3d *intersect )
+{
+    // Get line
+    irr::core::line3df l(  line.start().x(), line.start().y(), line.start().z(),
+							line.end().x(), line.end().y(), line.end().z() );
+
+    // Pick an axis we don't need as the normal for the plane
+    irr::core::vector3df normal;
+    if ( !axis.x() ) normal.X = 1;
+    else if ( !axis.y() ) normal.Y = 1;
+    else if ( !axis.z() ) normal.Z = 1;
+    else normal = l.getVector();
+
+    // Get mouse line / plane intersection
+    if ( !irr::core::plane3df( pt.Obj(), normal ).
+			getIntersectionWithLine( l.getMiddle(), l.getVector(), intersect->Obj() ) )
+        return 0;
+
+    // Revert the axis we don't want to change
+    if ( !axis.x() ) intersect->x() = pt.x();
+    if ( !axis.y() ) intersect->y() = pt.y();
+    if ( !axis.z() ) intersect->z() = pt.z();
+
+    return 1;
+}
+
+int CSqIrrlicht::getIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSqirrVector3d &axis, CSqirrVector3d *intersect )
+{
+    // Must have object
+    if ( !m_pCamera || !m_pSmgr ) 
+		return 0;
+
+    // Is mouse in the window?    
+    if ( 0 > ptScreen.Obj().X || 0 > ptScreen.Obj().Y )
+        return 0;
+
+    m_pCamera->OnRegisterSceneNode();
+
+    // Get mouse line
+    irr::core::line3df ml = 
+        m_pSmgr->getSceneCollisionManager()->
+                    getRayFromScreenCoordinates( irr::core::position2di( (unsigned int)ptScreen.Obj().X, (unsigned int)ptScreen.Obj().Y ), 
+                                                 m_pCamera );
+
+    // Pick an axis we don't need as the normal for the plane
+    irr::core::vector3df normal;
+    if ( !axis.x() ) 
+		normal.X = 1;
+    else if ( !axis.y() ) 
+		normal.Y = 1;
+    else if ( !axis.z() ) 
+		normal.Z = 1;
+    else normal = 
+		ml.getVector();
+
+    // Get mouse line / plane intersection
+    if ( !irr::core::plane3df( pt.Obj(), normal ).
+                    getIntersectionWithLine( ml.getMiddle(), ml.getVector(), intersect->Obj() ) )
+        return 0;
+
+    // Revert the axis we don't want to change
+    if ( !axis.x() ) intersect->x() = pt.x();
+    if ( !axis.y() ) intersect->y() = pt.y();
+    if ( !axis.z() ) intersect->z() = pt.z();
+
+    return 1;
+}
+
+int CSqIrrlicht::getMouseIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSqirrVector3d &axis, CSqirrVector3d *intersect )
+{
+    // Must have object
+    if ( !m_pCamera || !m_pSmgr ) 
+		return 0;
+
+    // Is mouse in the window?
+    if ( 0 > ptScreen.x() || 0 > ptScreen.y() )
+        return 0;
+
+    m_pCamera->OnRegisterSceneNode();
+
+    // Get mouse line
+    irr::core::line3df ml = 
+        m_pSmgr->getSceneCollisionManager()->
+                    getRayFromScreenCoordinates( irr::core::position2di( ptScreen.x(), ptScreen.y() ), 
+                                                 m_pCamera );
+
+    // Pick an axis we don't need as the normal for the plane
+    irr::core::vector3df normal;
+    if ( !axis.x() ) normal.X = 1;
+    else if ( !axis.y() ) normal.Y = 1;
+    else if ( !axis.z() ) normal.Z = 1;
+    else normal = ml.getVector();
+
+    // Get mouse line / plane intersection
+    if ( !irr::core::plane3df( pt.Obj(), normal ).
+                    getIntersectionWithLine( ml.getMiddle(), ml.getVector(), intersect->Obj() ) )
+        return 0;
+
+    // Revert the axis we don't want to change
+    if ( !axis.x() ) intersect->x() = pt.x();
+    if ( !axis.y() ) intersect->y() = pt.y();
+    if ( !axis.z() ) intersect->z() = pt.z();
+
+    return 1;
+}
+
+int CSqIrrlicht::getPickPoint( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSqirrVector3d *intersect )
+{
+    // Must have object
+    if ( !m_pCamera || !m_pSmgr ) 
+		return 0;
+
+    // Is mouse in the window?
+    if ( 0 > ptScreen.x() || 0 > ptScreen.y() )
+        return 0;
+
+    m_pCamera->OnRegisterSceneNode();
+
+    // Get mouse line
+    irr::core::line3df ml = 
+        m_pSmgr->getSceneCollisionManager()->
+                    getRayFromScreenCoordinates( irr::core::position2di( ptScreen.x(), ptScreen.y() ), 
+                                                 m_pCamera );
+
+    // New position
+    *intersect = ml.start + ml.getVector().normalize() * 
+                    (float)m_pCamera->getPosition().getDistanceFrom( pt.Obj() );
+    
+    return 1;
+}
+
+CSqirrVector2d CSqIrrlicht::getNodeScreenPos( CSqirrNode &rNode )
+{
+    // Must have object
+    if ( !m_pCamera || !m_pSmgr ) 
+        return CSqirrVector2d( -1, -1 );
+
+    irr::core::vector3df pos3d( rNode.GetPosition().Obj() );
+
+    m_pCamera->OnRegisterSceneNode();
+
+    irr::core::position2di pos2d = 
+        m_pSmgr->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition( pos3d, m_pCamera );
+
+    return CSqirrVector2d( (float)pos2d.X, (float)pos2d.Y );
+}
+
+CSqirrVector2d CSqIrrlicht::getScreenPos( CSqirrVector3d &v )
+{
+    // Must have object
+    if ( !m_pCamera || !m_pSmgr ) 
+        return CSqirrVector2d( -1, -1 );
+
+    m_pCamera->OnRegisterSceneNode();
+
+    irr::core::position2di pos2d = 
+        m_pSmgr->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition( v.Obj(), m_pCamera );
+
+    return CSqirrVector2d( (float)pos2d.X, (float)pos2d.Y );
+}
+
+int CSqIrrlicht::screenToWorld( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorld, float fDist )
+{
+    // Must have object
+    if ( !m_pCamera || !m_pSmgr ) 
+        return 0;
+
+    // Is mouse in the window?    
+    if ( 0 > ptScreen.Obj().X || 0 > ptScreen.Obj().Y )
+        return 0;
+
+    m_pCamera->OnRegisterSceneNode();
+
+    // Get mouse line
+    irr::core::line3df ml = 
+        m_pSmgr->getSceneCollisionManager()->
+                    getRayFromScreenCoordinates( irr::core::position2di( (UINT)ptScreen.Obj().X, (UINT)ptScreen.Obj().Y ), 
+                                                 m_pCamera );
+
+    // Calculate position
+    *ptWorld = ml.start + ( ml.getVector().normalize() * fDist );
+
+    return 1;
+}
+
+int CSqIrrlicht::screenToPlane( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorld, float fDist )
+{
+    // Must have object
+    if ( !m_pCamera || !m_pSmgr ) 
+        return 0;
+
+    // Is mouse in the window?    
+    if ( 0 > ptScreen.Obj().X || 0 > ptScreen.Obj().Y )
+        return 0;
+
+    // Update the camera view
+    m_pCamera->OnRegisterSceneNode();
+
+    // Get mouse line
+    irr::core::line3df ml = 
+        m_pSmgr->getSceneCollisionManager()->
+                    getRayFromScreenCoordinates( irr::core::position2di( (UINT)ptScreen.Obj().X, (UINT)ptScreen.Obj().Y ), 
+                                                 m_pCamera );
+
+    // Get the camera target line
+    irr::core::line3df cl( m_pCamera->getPosition(),
+                           m_pCamera->getTarget() ); 
+
+    // Calculate the orthogonal plane position
+    irr::core::vector3df pos = cl.start + ( cl.getVector().normalize() * fDist );
+
+    // Calculate camera line plane intersection
+    if ( !irr::core::plane3df( pos, cl.getVector().normalize() ).
+                    getIntersectionWithLine( ml.getMiddle(), ml.getVector(), ptWorld->Obj() ) )
+        return 0;
+
+    return 1;
+}
+ 

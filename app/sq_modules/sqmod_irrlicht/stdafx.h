@@ -17,6 +17,7 @@
 
 #include "sqirr_color.h"
 #include "sqirr_vector.h"
+#include "sqirr_line.h"
 #include "sqirr_texture.h"
 
 #include "sq_physics.h"
