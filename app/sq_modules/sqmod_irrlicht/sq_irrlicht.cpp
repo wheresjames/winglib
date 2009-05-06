@@ -1215,7 +1215,7 @@ int CSqIrrlicht::screenToWorld( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorl
     // Get mouse line
     irr::core::line3df ml = 
         m_pSmgr->getSceneCollisionManager()->
-                    getRayFromScreenCoordinates( irr::core::position2di( (UINT)ptScreen.Obj().X, (UINT)ptScreen.Obj().Y ), 
+                    getRayFromScreenCoordinates( irr::core::position2di( (unsigned int)ptScreen.Obj().X, (unsigned int)ptScreen.Obj().Y ), 
                                                  m_pCamera );
 
     // Calculate position
@@ -1240,7 +1240,7 @@ int CSqIrrlicht::screenToPlane( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorl
     // Get mouse line
     irr::core::line3df ml = 
         m_pSmgr->getSceneCollisionManager()->
-                    getRayFromScreenCoordinates( irr::core::position2di( (UINT)ptScreen.Obj().X, (UINT)ptScreen.Obj().Y ), 
+                    getRayFromScreenCoordinates( irr::core::position2di( (unsigned int)ptScreen.Obj().X, (unsigned int)ptScreen.Obj().Y ), 
                                                  m_pCamera );
 
     // Get the camera target line

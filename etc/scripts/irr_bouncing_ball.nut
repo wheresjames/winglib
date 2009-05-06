@@ -11,12 +11,15 @@ class CGlobal
 
 	// x position / velocity
 	xpos = 0;
-	xvel = 1;
+	xvel = 2;
+	xfrc = 0.005;
 
 	// y position / velocity / friction
 	ypos = 0;
 	yvel = 0;
-	yfrc = 0.005
+	yfrc = 0.01;
+
+	zpos = 0;
 };
 
 local _g = CGlobal();
@@ -26,10 +29,16 @@ function _irr_event( e, x, y, w ) : ( _g )
 //	_self.echo( e + ", " + x + ", " + y + ", " + w );
 
 	if ( e.tointeger() == _g.irr.EMIE_LMOUSE_PRESSED_DOWN )
-	{	local pos = _g.irr.ScreenToPlane( CSqirrVector2d( x, y ), 50. );
+	{
+		local pos = CSqirrVector3d();
+		_g.irr.screenToWorld( CSqirrVector2d( x.tofloat(), y.tofloat() ), pos, 100. );
 		_g.xpos = pos.x();
 		_g.ypos = pos.y();
+		_g.zpos = pos.z();
+		_g.yvel = 0;
+		_g.xvel = 2;
 //		_g.ball.SetPosition( pos );
+
 	} // end if
 }
 
@@ -63,7 +72,7 @@ function _init() : ( _g )
 	_g.ball = _g.irr.AddSphere( 10., 16 );
 
 	// Set texture
-    _g.ball.SetTexture( 0, _g.irr.LoadTexture( "../../lib2/winglib/etc/media/tennis.jpg", 1 ) );
+    _g.ball.SetTexture( 0, _g.irr.LoadTexture( "../../lib/winglib/etc/media/tennis.jpg", 1 ) );
 
 	// Add a rotator
 	local ani = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.4, 0 ) );
@@ -76,50 +85,28 @@ function _idle() : ( _g )
 	if ( -50 > _g.xpos || 50 < _g.xpos )
 		_g.xvel = -_g.xvel;
 	
-	// Gravity
-	_g.yvel -= 0.5
-
 	// Friction
 	_g.yvel -= ( _g.yvel * _g.yfrc );
+	_g.xvel -= ( _g.xvel * _g.xfrc );
 
 	// Bounce off ground
 	if ( -100 > _g.ypos )
-		_g.yvel = -_g.yvel;
+	{	if ( 0  > _g.yvel )
+			_g.yvel = -_g.yvel;
+	} // end if
+
+	// Gravity
+	else if ( -98 < _g.ypos )
+		_g.yvel -= 0.5
 
 	// Update ball position
 	_g.xpos += _g.xvel;
 	_g.ypos += _g.yvel;
 
 	// Set the balls new position
-	_g.ball.SetPosition( CSqirrVector3d( _g.xpos, _g.ypos, 0 ) );
+	_g.ball.SetPosition( CSqirrVector3d( _g.xpos, _g.ypos, _g.zpos ) );
 
 	return _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
 }
-
-// Complex math crap that bends a grid into a ball
-function make_ball( n, o, c )
-{
-    local pi = 3.141592654;
-    local pi2 = pi * 2.;
-
-    local m = pi2 / 100;
-
-	for ( local i = 0; i < n; i++ )
-	{
-        // Normalize space
-        local u = o.x( i ) * m;
-        local v = o.y( i ) * m;
-        local x = 0, y = 0, z = 0;
-
-		x = sin( u ) * cos( v / 2 );
-		y = sin( v / 2 );
-		z = cos( u ) * cos( v / 2 );
-
-        c.set( i, x / m, y / m, z / m );
-
-    } // end for
-
-}
-
 
 
