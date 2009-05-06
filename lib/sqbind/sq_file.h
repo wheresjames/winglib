@@ -90,6 +90,28 @@ namespace sqbind
 		static stdString get_extension( const stdString &sFile )
 		{	return oexGetFileExtension( sFile.c_str() ).Ptr(); }
 
+		static CSqMap get_dirlist( const stdString &sDir, const stdString &sMask, int bFiles, int bDirs )
+		{	
+			oex::CFindFiles ff;
+			CSqMap mRet;
+			if ( ff.FindFirst( sDir.c_str(), sMask.c_str() ) )
+				do
+				{
+					// Directory
+					if ( ff.IsDirectory() ) 
+					{	if ( bDirs )
+							mRet[ ff.GetFileName().Ptr() ] = oexT( "d" );
+					} // end if
+
+					// File
+					else if ( bFiles )
+						mRet[ ff.GetFileName().Ptr() ] = oexT( "f" );
+
+				} while ( ff.FindNext() );
+
+			return mRet;
+		}
+
 		static void Register( sqbind::VM vm );
 
 	private:

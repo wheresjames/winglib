@@ -591,19 +591,19 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 {
 	// Must be connected
 	if ( m_comm.error != OK )
-		return SetLastError( oexT( "err=Not connected" ) );
+		return SetLastError( oexT( "#err=Not connected" ) );
 
 	sqbind::stdString sName;
 	int nProgram, nTag, nIndex, nOffset, nSize, nType, nBit;
 	if ( !ParseTag( sTag, sName, nProgram, nTag, nIndex, nOffset, nSize, nType, nBit ) )
-		return SetLastError( oexMks( oexT( "err=Tag does not exist : " ), sTag.c_str() ).Ptr() );
+		return SetLastError( oexMks( oexT( "#err=Tag does not exist : " ), sTag.c_str() ).Ptr() );
 
 	_tag_data *pTd = &m_tagsDetails;
 	if ( 0 <= nProgram )
 		pTd = &m_tagsProgram[ nProgram ];
 
 	if ( 0 > nTag || nTag >= pTd->count )
-		return SetLastError( oexMks( oexT( "err=Invalid tag index " ), nTag ).Ptr() );
+		return SetLastError( oexMks( oexT( "#err=Invalid tag index " ), nTag ).Ptr() );
 
 	// See if exact response is in the cache
 	t_TagCache::iterator itT = m_mapTagCache.find( sTag );
@@ -644,12 +644,12 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 		// Get object details
 		if ( 0 > read_object_value( &m_comm, &m_path, pTd->tag[ nTag ], 0 ) )
 		{	m_bNotResponding = oex::oexTRUE;
-			return SetLastError( oexT( "err=read_object_value() failed" ) );
+			return SetLastError( oexT( "#err=read_object_value() failed" ) );
 		} // end if
 
 		// Did we get valid data
 		if ( !pTd->tag[ nTag ]->datalen || !oexCHECK_PTR( pTd->tag[ nTag ]->data ) )
-			return SetLastError( oexT( "err=read_object_value() returned invalid data" ) );
+			return SetLastError( oexT( "#err=read_object_value() returned invalid data" ) );
 
 		// Pull out the tag data
 		nLen = pTd->tag[ nTag ]->datalen;
@@ -669,11 +669,11 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 	{
 		// Ensure index is valid
 		if ( pTd->tag[ nTag ]->arraysize1 <= nIndex )
-			return SetLastError( oexMks( oexT( "err=Index out of range [ " ), nIndex, oexT( " ]" ) ).Ptr() );
+			return SetLastError( oexMks( oexT( "#err=Index out of range [ " ), nIndex, oexT( " ]" ) ).Ptr() );
 
 		// Ensure there is enough data
 		if ( ( pTd->tag[ nTag ]->size * nIndex ) > nLen )
-			return SetLastError( oexMks( oexT( "err=Index [ " ), nIndex, oexT( " ] beyond the end of data" ) ).Ptr() );
+			return SetLastError( oexMks( oexT( "#err=Index [ " ), nIndex, oexT( " ] beyond the end of data" ) ).Ptr() );
 
 		// Point to one element
 		nLen = pTd->tag[ nTag ]->size;
@@ -690,7 +690,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 		if ( 0 > nOffset || 0 > nSize )
 		{
 			if ( nByte >= nLen )
-				return SetLastError( oexT( "err=Bit address is beyond the end of the array" ) );
+				return SetLastError( oexT( "#err=Bit address is beyond the end of the array" ) );
 
 			// Get item pointer and size
 			ptr = pDat;
@@ -700,13 +700,13 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 		else
 		{
 			if ( nOffset + nSize > nLen )
-				return SetLastError( oexT( "err=Template item offset address is beyond the end of the array" ) );
+				return SetLastError( oexT( "#err=Template item offset address is beyond the end of the array" ) );
 
 			if ( nOffset + nByte > nLen )
-				return SetLastError( oexT( "err=Bit address is beyond the end of the array" ) );
+				return SetLastError( oexT( "#err=Bit address is beyond the end of the array" ) );
 
 			if ( nByte >= nSize )
-				return SetLastError( oexT( "err=Bit address is beyond the end of the template item" ) );
+				return SetLastError( oexT( "#err=Bit address is beyond the end of the template item" ) );
 
 			// Get item pointer and size
 			ptr = &pDat[ nOffset + nByte ];
@@ -743,7 +743,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 	{
 		// Check array bounds
 		if ( nOffset + nSize > nLen )
-			return SetLastError( oexT( "err=Template item offset address is beyond the end of the array" ) );
+			return SetLastError( oexT( "#err=Template item offset address is beyond the end of the array" ) );
 
 		sqbind::stdString sVal;
 		if ( GetItemValue( nType, &pDat[ nOffset ], nSize, nBit, sVal ) )

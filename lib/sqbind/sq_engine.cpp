@@ -72,6 +72,12 @@ stdString CSqEngineExport::md5( const stdString &sStr )
 	return stdString().assign( sRes.Ptr(), sRes.Length() );
 }
 
+stdString CSqEngineExport::unique()
+{	oex::oexGUID hash;
+	oex::CStr sRes = oexMbToStr( oex::CBase16::Encode( oexUniqueGuid( &hash ), sizeof( hash ) ) );
+	return stdString().assign( sRes.Ptr(), sRes.Length() );	
+}
+
 
 int CSqEngineExport::spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile )
 {	CSqMsgQueue *q = queue();
@@ -385,6 +391,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, md5 )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, unique )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tolong )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tofloat )
 SQBIND_REGISTER_CLASS_END()
 
 

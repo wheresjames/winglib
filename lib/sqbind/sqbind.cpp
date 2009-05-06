@@ -60,6 +60,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqFile, CSqFile )
 	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, get_filename )
 	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, get_path )
 	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, get_extension )
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, get_dirlist )	
 SQBIND_REGISTER_CLASS_END()
 
 void CSqFile::Register( sqbind::VM vm )

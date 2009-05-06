@@ -92,6 +92,9 @@ public:
 	/// Returns the md5 for the specified string
 	stdString md5( const stdString &sStr );
 
+	/// Returns a unique md5 hash
+	stdString CSqEngineExport::unique();
+
 	/// Creates a thread
 	int spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
 
@@ -116,6 +119,15 @@ public:
 	virtual SquirrelVM* GetVmPtr();
 
 	virtual CSqEngine* GetEnginePtr();
+
+	int tolong( const stdString &s )
+	{	return oexStrToLong( s.c_str() ); }
+
+	int toulong( const stdString &s )
+	{	return oexStrToULong( s.c_str() ); }
+
+	int tofloat( const stdString &s )
+	{	return oexStrToFloat( s.c_str() ); }
 
 protected:
 
