@@ -90,6 +90,62 @@ namespace sqbind
 		int GetNetTime() { return m_t.GetNetTime(); }
 		void SetNetTime( int n ) { m_t.SetNetTime( n ); }
 
+		/**
+			\param [in] x_sTmpl	    -	Template string
+
+			Formats a time string based on the specified template.
+
+			-	\%h = hour 12 hour fixed 2 digits
+			-	\%H = hour 12 hour
+			-	\%g = hour 24 hour fixed 2 digits
+			-	\%G = hour 24 hour
+			-	\%m = minute fixed 2 digits
+			-	\%M = minute
+			-	\%s = second fixed 2 digits
+			-	\%S = second
+			-	\%l = milli seconds fixed 3 digits
+			-	\%L = milli seconds
+			-	\%u = micro seconds fixed 3 digits
+			-	\%U = micro seconds
+			-	\%n = nano seconds fixed 3 digits
+			-	\%N = nano seconds
+			-	\%a = am/pm
+			-	\%A = AM/PM
+			-	\%c = Month [01-12] fixed 2 digits
+			-	\%C = Month [1-12]
+			-	\%d = Day [01-31] fixed 2 digits
+			-	\%D = Day [1-31]
+			-	\%i = Day of the week [0-6]
+			-	\%I = Day of the week [1-7]
+			-	\%y = 2 digit year
+			-	\%Y = 4 digit year
+			-	\%a = am/pm
+			-	\%A = AM/PM
+			-	\%w = Abbreviated day of week [Sun,Mon,Tue,Wed,Thu,Fri,Sat]
+			-	\%W = Day of week [Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday]
+			-	\%b = Abbreviated Month [Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec]
+			-	\%B = Month [January,February,March,April,May,June,July,August,September,October,November,December]
+			-	\%Za = Lower case time zone abbreviation [est,gmt,pst...]
+			-	\%ZA = Upper case time zone abbreviation [EST,GMT,PST...]
+			-	\%Zs = Time zone sign +/-
+			-	\%Zh = Hours of offset in time zone fixed two digits
+			-	\%ZH = Hours of offset in time zone
+			-	\%Zh = Minutes of offset in time zone fixed two digits
+			-	\%ZH = Minutes of offset in time zone
+			-	\%Zz = Time zone offset in minutes with leading +/-
+			-	\%ZZ = Time zone offset in seconds with leading +/-
+
+			Some examples:
+
+			-   "%W, %B %D, %Y - %h:%m:%s %A"  = Thursday, December 25, 1997 - 04:15:30 PM
+			-   "%Y/%c/%d - %g:%m:%s.%l"    = 1997/12/25 - 16:15:30.500
+			-   "%w, %d %b %Y %g:%m:%s GMT" = Thu, 25 Dec 1997 16:15:30 GMT
+			-	"%Y-%c-%d %g:%m:%s" = 2009-05-06 00:00:00
+
+			\return Formated string
+
+			\see ParseString()
+		*/
 		stdString FormatTime( const stdString &sTmpl )
 		{	return m_t.FormatTime( sTmpl.c_str() ).Ptr(); }
 
