@@ -37,6 +37,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqIrrlicht, CSqIrrlicht )
 
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, ScreenToPlane )
 
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, NodeAtScreen )
+
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, getLineIntersect )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, getIntersect )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, getMouseIntersect )
@@ -79,6 +81,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqirrNode, CSqirrNode )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetVisible )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, IsVisible )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetDebugDataVisible )
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetID )
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, GetID )
+
 
 	// Material flags
 	SQBIND_CONST( irr::video, EMF_WIREFRAME )

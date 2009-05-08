@@ -27,19 +27,20 @@ public:
 	/// Default constructor
 	CSqirrNode() { m_p = 0; m_type = 0; }
 
-	CSqirrNode( irr::scene::ISceneNode *p ) { SetPtr( p, eTypeNone ); }
+	CSqirrNode( irr::scene::ISceneNode *p ) : m_p( 0 ), m_type( 0 ) { SetPtr( p, eTypeNone ); }
 	CSqirrNode& operator = ( irr::scene::ISceneNode *p ) { SetPtr( p, eTypeNone ); }
 
-	CSqirrNode( irr::scene::ICameraSceneNode *p ) { SetPtr( p, eTypeCamera ); }
+	CSqirrNode( irr::scene::ICameraSceneNode *p ) : m_p( 0 ), m_type( 0 ) { SetPtr( p, eTypeCamera ); }
 	CSqirrNode& operator = ( irr::scene::ICameraSceneNode *p ) { SetPtr( p, eTypeCamera ); }
 
-	void SetPtr( irr::scene::ISceneNode *p, int t ) { if ( p ) { m_p = p; p->grab(); } m_type = t; }
+	void SetPtr( irr::scene::ISceneNode *p, int t ) { Destroy(); if ( p ) { m_p = p; p->grab(); m_type = t; } }
 	~CSqirrNode() { Destroy(); }
 	void Destroy() { if ( m_p ) { m_p->drop(); m_p = 0; } }
 
 	// Copy semantics
-	CSqirrNode( const CSqirrNode &r ) { m_type = r.m_type; m_p = r.m_p; if ( m_p ) m_p->grab(); }
-	CSqirrNode& operator = ( const CSqirrNode &r ) { Destroy(); m_type = r.m_type; m_p = r.m_p; if ( m_p ) m_p->grab(); return *this; }
+	CSqirrNode( const CSqirrNode &r ) : m_p( 0 ), m_type( 0 ) { SetPtr( r.m_p, r.m_type ); }
+	CSqirrNode& operator = ( const CSqirrNode &r ) { SetPtr( r.m_p, r.m_type ); return *this; }
+
 	irr::scene::ISceneNode* Ptr() { return m_p; }
 	int GetNodeType() { return m_type; }
 
@@ -161,6 +162,16 @@ public:
 	void SetDebugDataVisible( int lEds )
 	{   if ( !m_p ) return;
 		m_p->setDebugDataVisible( (irr::scene::E_DEBUG_SCENE_TYPE)lEds );
+	}
+
+	void SetID( int id )
+	{   if ( !m_p ) return;
+		m_p->setID( id );
+	}
+
+	int GetID()
+	{   if ( !m_p ) return 0;
+		return m_p->getID();
 	}
 
 	int IsValid()

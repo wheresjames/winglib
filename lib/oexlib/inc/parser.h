@@ -738,6 +738,90 @@ public:
         return t;
     }
 
+public:
+
+    template < typename T >
+		static oexUINT ahtodw( oexCONST T* pBuffer, oexUINT uBytes )
+		{
+			oexUINT num = 0;
+		                                              
+			// For Each ASCII Digit
+			for ( oexUINT i = 0; i < uBytes; i++ )
+			{
+				// Convert ASCII Digit Between 0 And 9
+				if ( pBuffer[ i ] >= oexTC( T, '0' ) && pBuffer[ i ] <= oexTC( T, '9' ) )
+					num = ( num << 4 ) + ( pBuffer[ i ] - oexTC( T, '0' ) );
+				
+				// Convert ASCII Digit Between A And F
+				else if ( pBuffer[ i ] >= oexTC( T, 'A' ) && pBuffer[ i ] <= oexTC( T, 'F' ) )
+					num = ( num << 4 ) + ( pBuffer[ i ] - 'A' ) + 10;
+
+				// Convert ASCII Digit Between a And f
+				else if ( pBuffer[ i ] >= oexTC( T, 'a' ) && pBuffer[ i ] <= oexTC( T, 'f' ) )
+					num = ( num << 4 ) + ( pBuffer[ i ] - oexTC( T, 'a' ) ) + 10;
+
+			} // end for
+		    
+			return num;	
+		}
+
+    template < typename T >
+		static oexUINT HtmlToRgb( oexCONST T* pHtml )
+		{
+			if ( !oexCHECK_PTR( pHtml ) || *pHtml != oexTC( T, '#' ) )
+				return 0;
+
+			// Convert to RGB value
+			return ahtodw( &pHtml[ 1 ], 2 )
+				   | ( ahtodw( &pHtml[ 3 ], 2 ) << 8 )
+				   | ( ahtodw( &pHtml[ 5 ], 2 ) << 16 );
+		}
+
+    template < typename T >
+		oexUINT dwtohstr( oexUINT num, T *buf, oexUINT index, oexUINT pad = 2, oexUINT max = 2 )
+		{
+			oexUINT i = 0;
+			oexUINT	c = 8;
+
+			// Correct pointer
+			buf = &buf[ index ];
+			
+			while ( c )
+			{
+				buf[ i ] = (T)( oexTC( T, '0' ) + ( ( num & 0xf0000000 ) >> 28 ) );
+				if ( buf[ i ] > oexTC( T, '9' ) ) buf[ i ] += oexTC( T, 'A' ) - oexTC( T, '9' ) - 1;
+				if ( pad >= c || i || buf[ i ] != oexTC( T, '0' ) ) if ( i < max ) i++;
+				num <<= 4;
+ 				c--;
+
+			} // end while
+			
+			if ( !i ) buf[ i++ ] = oexTC( T, '0' );
+
+			buf[ i ] = 0;
+
+			return i;
+		}
+
+    template < typename T >
+		TStr< T > RgbToHtml( oexUINT rgb )
+		{
+			oexUINT i = 0;
+
+			TStr< T > sHtml;
+			T *pHtml = sHtml.OexAlloc( 7 );
+			if ( !oexCHECK_PTR( pHtml ) )
+				return oexTT( T, "" );
+
+			// Convert to HTML format
+			pHtml[ i++ ] = oexTC( T, '#' );
+			i += dwtohstr( rgb & 0x0000ff, pHtml, i );
+			i += dwtohstr( ( rgb & 0x00ff00 ) >> 8, pHtml, i );
+			i += dwtohstr( ( rgb & 0x00ff00 ) >> 16, pHtml, i );
+
+			return sHtml;
+		}
+
 protected:
 
 };

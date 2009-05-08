@@ -79,11 +79,22 @@ sqbind::CSqMulti CGdcChart::GetChart( const sqbind::stdString &x_sType,
 
 	} // end for
 
+	// Defaults
 	GDC_BGColor = 0xffffff;
 	GDC_GridColor = 0x000000;
 	GDC_LineColor = 0x000000;
 	GDC_PlotColor = 0x00ff00;
 	GDC_ylabel_fmt = oexT( "%.2f" );
+
+	// User settings
+	if ( mParams.isset( oexT( "col_bg" ) ) )
+		GDC_BGColor = oexHtmlToRgb( mParams[ oexT( "col_bg" ) ].str().c_str() );
+	if ( mParams.isset( oexT( "col_grid" ) ) )
+		GDC_GridColor = oexHtmlToRgb( mParams[ oexT( "col_grid" ) ].str().c_str() );
+	if ( mParams.isset( oexT( "col_labels" ) ) )
+		GDC_LineColor = oexHtmlToRgb( mParams[ oexT( "col_labels" ) ].str().c_str() );
+	if ( mParams.isset( oexT( "col_plot" ) ) )
+		GDC_PlotColor = oexHtmlToRgb( mParams[ oexT( "col_plot" ) ].str().c_str() );
 
 	// Write out the graph to the pipe
 	out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),

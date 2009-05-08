@@ -303,6 +303,9 @@
 #define oexStrToFloat		                OEX_NAMESPACE::os::CSys::StrToFloat
 #define oexStrToDouble		                OEX_NAMESPACE::os::CSys::StrToDouble
 
+#define oexHtmlToRgb						OEX_NAMESPACE::CParser::HtmlToRgb
+#define oexRgbToHtml						OEX_NAMESPACE::CParser::oexRgbToHtml
+
 
 /// oexRETRY() - Retry something up to m times
 /**
