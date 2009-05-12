@@ -216,7 +216,9 @@ public:
 	/// Decodes url type params such as "a=b&c=d"
     template< typename T >
         static TPropertyBag< TStr< T > > DecodeUrlParams( oexCONST T *x_pStr )
-        {   return DecodeUrlParams( TStr< T >( x_pStr ) ); }
+        {   oexASSERT_PTR( x_pStr );
+			return DecodeUrlParams( TStr< T >( x_pStr ) ); 
+		}
 
     template< typename T >
         static TPropertyBag< TStr< T > > DecodeUrlParams( TStr< T > x_str )
@@ -281,7 +283,9 @@ public:
 	/// Encoded a url string "Hello World" -> "Hello%20World"
     template< typename T >
         static TStr< T > UrlEncode( oexCONST T *x_pStr )
-        {   return UrlEncode( TStr< T >( x_pStr ) ); }
+        {	oexASSERT_PTR( x_pStr );
+			return UrlEncode( TStr< T >( x_pStr ) ); 
+		}
 
     template< typename T >
         static TStr< T > UrlEncode( TStr< T > x_str )
@@ -306,7 +310,9 @@ public:
 	/// Decodes a url string "Hello%20World" -> "Hello World"
     template< typename T >
         static TStr< T > UrlDecode( oexCONST T *x_pStr )
-        {   return UrlDecode( TStr< T >( x_pStr ) ); }
+        {   oexASSERT_PTR( x_pStr );
+			return UrlDecode( TStr< T >( x_pStr ) ); 
+		}
 
     template< typename T >
         static TStr< T > UrlDecode( TStr< T > x_str )
@@ -339,6 +345,189 @@ public:
 	    } // end while
 
 	    return ret;
+    }
+
+	/// Returns non-zero if the character is a valid html character
+    template< typename T >
+        static oexBOOL IsHtmlChar( T x_ch )
+    {   if (	   ( oexTC( T, 'a' ) <= x_ch && oexTC( T, 'z' ) >= x_ch )
+				|| ( oexTC( T, 'A' ) <= x_ch && oexTC( T, 'Z' ) >= x_ch )
+				|| ( oexTC( T, '0' ) <= x_ch && oexTC( T, '9' ) >= x_ch	)
+			) return oexTRUE;
+
+		switch( x_ch )
+		{
+			// case oexTC( T, ' ' ) : 
+			case oexTC( T, '!' ) : 
+			case oexTC( T, '#' ) : case oexTC( T, '$' ) : 
+			case oexTC( T, '%' ) : case oexTC( T, '\'' ) : 
+			case oexTC( T, '(' ) : case oexTC( T, ')' ) : 
+			case oexTC( T, '*' ) : case oexTC( T, '+' ) : 
+			case oexTC( T, ',' ) : case oexTC( T, '-' ) : 
+			case oexTC( T, '.' ) : case oexTC( T, '/' ) : 
+			case oexTC( T, '\\' ) : case oexTC( T, ':' ) : 
+			case oexTC( T, ';' ) : case oexTC( T, '=' ) : 
+			case oexTC( T, '@' ) : case oexTC( T, '?' ) :
+			case oexTC( T, '[' ) : case oexTC( T, ']' ) :
+			case oexTC( T, '^' ) : case oexTC( T, '_' ) :
+			case oexTC( T, '`' ) : case oexTC( T, '|' ) :
+			case oexTC( T, '{' ) : case oexTC( T, '}' ) :
+			case oexTC( T, '~' ) : case oexTC( T, ' ' ) :
+				return oexTRUE;
+		} // end switch
+
+		// Invalid
+		return oexFALSE;
+    }
+
+    template< typename T >
+		static TStr< T > HtmlEncodeChar( T x_ch )
+		{
+			switch( x_ch )
+			{
+				case oexTC( T, ' ' ) :
+					return oexTT( T, "&nbsp;" );
+
+				case oexTC( T, '"' ) :
+					return oexTT( T, "&quot;" );
+
+				case oexTC( T, '&' ) :
+					return oexTT( T, "&amp;" );
+
+				case oexTC( T, '<' ) :
+					return oexTT( T, "&lt;" );
+
+				case oexTC( T, '>' ) :
+					return oexTT( T, "&gt;" );
+
+				case oexTC( T, '€' ) :
+					return oexTT( T, "&euro;" );
+
+			} // end switch
+
+			// Generic encode
+			return oexFmt( oexTT( T, "&#" ), (oexUCHAR)x_ch, oexTT( T, ";" ) );
+		}
+
+	/// Encoded a string "<b>Hello World</b>" -> "&lt;b&gt;Hello&nbsp;World&lt;/b&gt;"
+    template< typename T >
+        static TStr< T > HtmlEncode( oexCONST T *x_pStr )
+        {	oexASSERT_PTR( x_pStr );
+			return HtmlEncode( TStr< T >( x_pStr ) ); 
+		}
+
+    template< typename T >
+        static TStr< T > HtmlEncode( TStr< T > x_str )
+    {
+	    TStr< T > ret, num;
+	    oexINT nLen = x_str.Length();
+
+	    while ( 0 < nLen-- )
+	    {
+		    if ( IsHtmlChar( *x_str ) )
+			    ret << *x_str;
+		    else
+			    ret << HtmlEncodeChar( *x_str );
+
+		    x_str++;
+
+	    } // end while
+
+	    return ret;
+    }
+
+    template< typename T >
+		static TStr< T > HtmlDecodeChar( oexCONST T *x_pStr )
+        {	oexASSERT_PTR( x_pStr );
+			return HtmlDecodeChar( TStr< T >( x_pStr ) ); 
+		}
+
+
+    template< typename T >
+		struct SHtmlItem
+		{
+			oexCONST T		ch;
+			oexCONST T		*s;
+			oexINT			l;
+		};
+
+
+    template< typename T >
+		static T HtmlDecodeChar( TStr< T > &x_str )
+		{
+			static const SHtmlItem< T > c_cnv[] = 
+			{
+				{ oexTC( T, ' ' ), "&nbsp;", 6 },
+				{ oexTC( T, '"' ), "&quot;", 6 },
+				{ oexTC( T, '&' ), "&amp;", 5 },
+				{ oexTC( T, '<' ), "&lt;", 4 },
+				{ oexTC( T, '>' ), "&gt;", 4 },
+				{ 0, oexNULL }
+			};
+
+			// Ensure it starts off looking like an escape sequence
+			if ( oexTC( T, '&' ) != *x_str )
+				return *( x_str.Slice( 1 ) );
+
+			// Search for ;
+			// We'll only consider up to 12 characters
+			oexINT i;
+			for ( i = 0; i < x_str.Length() && i < 12 && oexTC( T, ';' ) != x_str[ i ]; i++ )
+				;
+
+			// Quit if not found
+			if ( oexTC( T, ';' ) != x_str[ i ] )
+				return *( x_str.Slice( 1 ) );
+
+			// Trim the ; too
+			i++;
+
+			// Check for number encode
+			if ( oexTC( T, '#' ) == x_str[ 1 ] )
+				return (T)x_str.Slice( i ).LTrim( 2 ).ToLong();
+
+			// Scan for known sequence
+			TStr< T > sub = x_str.SubStr( 0, i );
+			for ( oexUINT c = 0; c < oexSizeOfArray( c_cnv ) && c_cnv[ c ].s; c++ )
+				if ( sub == c_cnv[ c ].s )
+				{	x_str.LTrim( i );
+					return c_cnv[ c ].ch;
+				} // end if
+
+			// Eh, what can you do?
+			return *( x_str.Slice( 1 ) );
+		}
+
+
+	/// Decodes an html string "&lt;b&gt;Hello&nbsp;World&lt;/b&gt;" -> "<b>Hello World</b>"
+    template< typename T >
+        static TStr< T > HtmlDecode( oexCONST T *x_pStr )
+        {   return HtmlDecode( TStr< T >( x_pStr ) ); }
+
+    template< typename T >
+        static TStr< T > HtmlDecode( TStr< T > x_str )
+    {
+	    TStr< T > ret;
+
+		do
+		{
+			// Find escape sequence
+			oexINT o = x_str.FindChars( oexTT( T, "&" ) );
+
+			// Found &
+			if ( 0 <= o )
+			{	if ( o ) 
+					ret << x_str.Slice( o );
+				ret << HtmlDecodeChar( x_str );
+			} // end if
+
+			// Just append the rest of the string
+			else
+				ret << x_str, x_str.Destroy();
+
+		} while ( x_str.Length() );
+
+		return ret;
     }
 
     /// Generic property bag deserializing

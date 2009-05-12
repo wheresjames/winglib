@@ -92,8 +92,32 @@ public:
 	/// Returns the md5 for the specified string
 	stdString md5( const stdString &sStr );
 
+	/// Trims the specified characters from the beginning of the string
+	stdString ltrim( const stdString &sS, const stdString &sChs );
+
+	/// Trims the specified characters from the end of the string
+	stdString rtrim( const stdString &sS, const stdString &sChs );
+
+	/// Trims the specified characters from the beginning and end of the string
+	stdString trim( const stdString &sS, const stdString &sChs );
+
+	/// Trims the white space from the beginning and end of the string
+	stdString trimws( const stdString &sS );
+
+	/// URL encodes the string
+	stdString urlencode( const stdString &sS );
+
+	/// URL decodes the string
+	stdString urldecode( const stdString &sS );
+
+	/// HTML encodes the string
+	stdString htmlencode( const stdString &sS );
+
+	/// HTML decodes the string
+	stdString htmldecode( const stdString &sS );
+
 	/// Returns a unique md5 hash
-	stdString CSqEngineExport::unique();
+	stdString unique();
 
 	/// Creates a thread
 	int spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );

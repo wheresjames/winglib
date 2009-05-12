@@ -3,6 +3,7 @@ bullet
 cell
 curl
 CxImage
+freetype
 gdchart
 irrlicht
 irrlicht-es

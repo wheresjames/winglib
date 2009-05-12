@@ -610,6 +610,15 @@ public:
 
 public:
 
+    /// Slices chars and returns the sliced string
+	TStr Slice( oexUINT x_uLen = 0 )
+	{
+		// Grab the slice
+		TStr ret( Ptr(), Length(), 0, x_uLen );
+		LTrim( x_uLen );
+		return ret;
+	}
+
     /// Compare to const string
     oexINT Compare( oexCONST T *x_pPtr, oexUINT x_uLen )
     {   return str::Compare( Ptr(), Length(), x_pPtr, x_uLen ); }
@@ -1146,6 +1155,9 @@ public:
 		LTrim( i );
 		return *this;
 	}
+
+	TStr& Trim( oexCONST T* pChars )
+	{	return RTrim( pChars ).LTrim( pChars ); }
 
 	TStr& operator >>= ( oexUINT uChars )
 	{	return LTrim( uChars ); }

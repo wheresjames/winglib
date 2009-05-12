@@ -305,7 +305,12 @@
 
 #define oexHtmlToRgb						OEX_NAMESPACE::CParser::HtmlToRgb
 #define oexRgbToHtml						OEX_NAMESPACE::CParser::oexRgbToHtml
-
+#define oexUrlEncode						OEX_NAMESPACE::CParser::UrlEncode
+#define oexUrlDecode						OEX_NAMESPACE::CParser::UrlDecode
+#define oexSerialize						OEX_NAMESPACE::CParser::Serialize
+#define oexDeserialize						OEX_NAMESPACE::CParser::Deserialize
+#define oexHtmlEncode						OEX_NAMESPACE::CParser::HtmlEncode
+#define oexHtmlDecode						OEX_NAMESPACE::CParser::HtmlDecode
 
 /// oexRETRY() - Retry something up to m times
 /**

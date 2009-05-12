@@ -78,6 +78,33 @@ stdString CSqEngineExport::unique()
 	return stdString().assign( sRes.Ptr(), sRes.Length() );	
 }
 
+stdString CSqEngineExport::ltrim( const stdString &sS, const stdString &sChs )
+{	return oex::CStr( sS.c_str() ).LTrim( sChs.c_str() ).Ptr();
+}
+
+stdString CSqEngineExport::rtrim( const stdString &sS, const stdString &sChs )
+{	return oex::CStr( sS.c_str() ).RTrim( sChs.c_str() ).Ptr();
+}
+
+stdString CSqEngineExport::trim( const stdString &sS, const stdString &sChs )
+{	return oex::CStr( sS.c_str() ).Trim( sChs.c_str() ).Ptr();
+}
+
+stdString CSqEngineExport::trimws( const stdString &sS )
+{	return oex::CStr( sS.c_str() ).TrimWhiteSpace().Ptr();
+}
+
+stdString CSqEngineExport::urlencode( const stdString &sS )
+{	return oexUrlEncode( sS.c_str() ).Ptr(); }
+
+stdString CSqEngineExport::urldecode( const stdString &sS )
+{	return oexUrlDecode( sS.c_str() ).Ptr(); }
+
+stdString CSqEngineExport::htmlencode( const stdString &sS )
+{	return oexHtmlEncode( sS.c_str() ).Ptr(); }
+
+stdString CSqEngineExport::htmldecode( const stdString &sS )
+{	return oexHtmlDecode( sS.c_str() ).Ptr(); }
 
 int CSqEngineExport::spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile )
 {	CSqMsgQueue *q = queue();
@@ -394,8 +421,15 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, unique )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tolong )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tofloat )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, trim )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ltrim )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, rtrim )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, trimws )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, urlencode )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, urldecode )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, htmlencode )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, htmldecode )
 SQBIND_REGISTER_CLASS_END()
-
 
 oex::oexBOOL CSqEngine::Init()
 {
