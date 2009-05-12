@@ -4,6 +4,7 @@ cell
 curl
 CxImage
 freetype
+ftgl
 gdchart
 irrlicht
 irrlicht-es

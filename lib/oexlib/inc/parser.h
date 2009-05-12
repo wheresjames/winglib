@@ -400,9 +400,6 @@ public:
 				case oexTC( T, '>' ) :
 					return oexTT( T, "&gt;" );
 
-				case oexTC( T, '€' ) :
-					return oexTT( T, "&euro;" );
-
 			} // end switch
 
 			// Generic encode
