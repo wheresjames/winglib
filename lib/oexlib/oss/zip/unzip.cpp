@@ -2606,7 +2606,7 @@ int inflate(z_streamp z, int f)
 }
 
 
-
+#if defined( OEX_WIN32 )
 
 
 // unzip.c -- IO on .zip files using zlib
@@ -4193,6 +4193,7 @@ bool IsZipHandleU(HZIP hz)
   return (han->flag==1);
 }
 
+#endif
 
 CZipLibUncompress::~CZipLibUncompress()
 { if ( pstream ) { delete (z_stream*)pstream; pstream = NULL; } }
@@ -4202,7 +4203,7 @@ oex::oexCSTR8 CZipLibUncompress::Uncompress()
 {
     if ( !pstream ) pstream = new z_stream;
     z_stream *stream = (z_stream*)pstream;
-    ZeroMemory( stream, sizeof( z_stream ) );
+    oexZeroMemory( stream, sizeof( z_stream ) );
 
     inflateInit2( stream );
 

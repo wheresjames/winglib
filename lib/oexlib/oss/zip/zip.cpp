@@ -1,4 +1,55 @@
 
+#ifdef WIN32
+#	include <Windows.h>
+#else
+#	include <stdarg.h>
+#endif
+
+
+#ifdef __INTEL_COMPILER
+#   pragma warning( disable : 1786 )
+#else
+#   pragma warning ( disable : 4996 )
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#ifdef WIN32
+#	include <tchar.h>
+#	include <crtdbg.h>
+#else
+#	define far
+#	define __cdecl
+#	define MAX_PATH		( 1024 * 4 )
+	typedef unsigned long DWORD;
+	typedef long long __int64;
+	typedef unsigned long long __uint64;
+#	ifdef _UNICODE
+#	define _T( s )	        ( L##s )
+		typedef wchar_t TCHAR;
+#	else
+#	define _T( s )	        ( s )
+		typedef char TCHAR;
+#	endif
+	typedef struct _FILETIME {
+	  DWORD dwLowDateTime;
+	  DWORD dwHighDateTime;
+	} FILETIME,
+	 *PFILETIME;
+#	define HANDLE	void*
+#	define DECLARE_HANDLE(name) typedef void * name
+#endif
+#include "../../oexlib.h"
+#include "zip.h"
+
+#ifdef oexDEBUG
+#   define new oexNEW
+#endif
+
+
+
+/*
 #include <Windows.h>
 
 #ifdef __INTEL_COMPILER
@@ -16,6 +67,7 @@
 #ifdef oexDEBUG
 #   define new oexNEW
 #endif
+*/
 
 // THIS FILE is almost entirely based upon code by info-zip.
 // It has been modified by Lucian Wischik. The modifications
@@ -2141,7 +2193,7 @@ char zencode(unsigned long *keys, char c)
 
 
 
-
+#if defined( OEX_WIN32 )
 
 
 bool HasZipSuffix(const TCHAR *fn)
@@ -2162,7 +2214,8 @@ bool HasZipSuffix(const TCHAR *fn)
 
 lutime_t filetime2timet(const FILETIME ft)
 { __int64 i = *(__int64*)&ft;
-  return (lutime_t)((i-116444736000000000)/10000000);
+//  return (lutime_t)((i-116444736000000000)/10000000);
+  return (lutime_t)(i/10000000)-11644473600ll;
 }
 
 void filetime2dosdatetime(const FILETIME ft, WORD *dosdate,WORD *dostime)
@@ -2841,7 +2894,7 @@ bool IsZipHandleZ(HZIP hz)
   return (han->flag==2);
 }
 
-
+#endif
 
 CZipLibCompress::~CZipLibCompress()
 { if ( state ) { delete state; state = 0; }
@@ -2873,7 +2926,7 @@ const char* CZipLibCompress::Compress()
   state->ds.window_size=0;
   //  I think that covers everything that needs to be initted.
   //
-  bi_init(*state,(char*)buf, sizeof(buf), TRUE); // it used to be just 1024-size, not 16384 as here
+  bi_init(*state,(char*)buf, sizeof(buf), true); // it used to be just 1024-size, not 16384 as here
   ush att = BINARY;
   ct_init(*state,&att);
   ush flg = 0;
