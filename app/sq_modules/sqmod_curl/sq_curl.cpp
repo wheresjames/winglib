@@ -76,3 +76,49 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqStrin
 	return 1;
 }
 
+int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::stdString &sPost, sqbind::CSqString *sData )
+{
+	if ( !sUrl.length() )
+		return 0;
+
+	// Lose old thing
+	Destroy();
+
+	// Initialize Curl
+	m_curl = curl_easy_init();
+	if ( !m_curl )
+		return 0;
+
+	curl_easy_setopt( m_curl, CURLOPT_POST, 1 );
+
+	curl_easy_setopt( m_curl, CURLOPT_POSTFIELDS, sPost.c_str() );
+	curl_easy_setopt( m_curl, CURLOPT_POSTFIELDSIZE, sPost.length() );
+
+	curl_easy_setopt( m_curl, CURLOPT_HEADER, 0 );
+	curl_easy_setopt( m_curl, CURLOPT_FOLLOWLOCATION, 1 );
+	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYPEER, 0 );
+	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYHOST, 0 );
+
+	char sErr[ CURL_ERROR_SIZE ] = { 0 };
+	curl_easy_setopt( m_curl, CURLOPT_ERRORBUFFER, &sErr[ 0 ] );
+
+	// The URL we want
+	curl_easy_setopt( m_curl, CURLOPT_URL, sUrl.c_str() );
+	if ( lPort )
+		curl_easy_setopt( m_curl, CURLOPT_PORT, lPort );
+
+	sqbind::stdString sOut;
+	curl_easy_setopt( m_curl, CURLOPT_WRITEDATA, sData->ptr() );
+	curl_easy_setopt( m_curl, CURLOPT_WRITEFUNCTION, StdWriter );
+
+	// Do the thing
+	CURLcode res = curl_easy_perform( m_curl );
+
+	if ( CURLE_OK != res )
+	{	m_sErr = sErr;
+		return 0;
+	} // end if
+
+	return 1;
+}
+

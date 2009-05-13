@@ -22,6 +22,9 @@ public:
 	/// Grab url
 	int GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqString *sData );
 
+	/// HTTP Post
+	int PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::stdString &sPost, sqbind::CSqString *sData );
+
 	/// Returns the last error
 	sqbind::stdString GetLastError() { return m_sErr; }
 
