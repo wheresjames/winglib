@@ -79,7 +79,12 @@ BLD_PATH_LNK_$(LOC_TAG) := /usr/bin
 #-------------------------------------------------------------------
 # Sources
 #-------------------------------------------------------------------
-BLD_SOURCES_$(LOC_TAG) 	:= $(wildcard $(BLD_PATH_SRC_$(LOC_TAG))/*.$(LOC_CXX_$(LOC_TAG)))
+ifneq ($(LOC_LST_$(LOC_TAG)),)
+	BLD_SOURCES_$(LOC_TAG) 	:= $(foreach file,$(LOC_LST_$(LOC_TAG)),$(BLD_PATH_SRC_$(LOC_TAG))/$(file).$(LOC_CXX_$(LOC_TAG)))
+else
+	BLD_SOURCES_$(LOC_TAG) 	:= $(wildcard $(BLD_PATH_SRC_$(LOC_TAG))/*.$(LOC_CXX_$(LOC_TAG)))
+endif
+
 ifneq ($(LOC_EXC_$(LOC_TAG)),)
 BLD_EXCLUDE_$(LOC_TAG) 	:= $(foreach file,$(LOC_EXC_$(LOC_TAG)),$(BLD_PATH_SRC_$(LOC_TAG))/$(file).$(LOC_CXX_$(LOC_TAG)))
 BLD_SOURCES_$(LOC_TAG) 	:= $(filter-out $(BLD_EXCLUDE_$(LOC_TAG)),$(BLD_SOURCES_$(LOC_TAG)))

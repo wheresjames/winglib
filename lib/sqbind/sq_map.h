@@ -133,6 +133,9 @@ namespace sqbind
         /// Internal squirrel function used to iterate list items
         SquirrelObject _nexti( HSQUIRRELVM v );
 
+        /// Internal squirrel function used to add a new item
+        SquirrelObject _newslot( HSQUIRRELVM v );
+
     private:
 
         /// Returns non-zero if pPattern matches pString

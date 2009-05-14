@@ -76,6 +76,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMap, CSqMap )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMap, find_value )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMap, _get )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMap, _nexti )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMap, _newslot )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMap, print_r )
 _SQBIND_REGISTER_CLASS_END()
 
@@ -199,6 +200,40 @@ CSqMap::t_Obj CSqMap::find_value( const CSqMap::t_Obj &v )
 
     return oexT( "" );
 }
+
+SquirrelObject CSqMap::_newslot( HSQUIRRELVM v )
+{
+    StackHandler sa( v );
+
+	// Get key
+    const SQChar *pKey = sa.GetString( 2 );
+    if ( !pKey || !*pKey )
+        return SquirrelObject( v );
+
+	// Get value
+    const SQChar *pVal = sa.GetString( 3 );
+    if ( !pVal )
+        return SquirrelObject( v );
+
+	// Add to list
+	m_lst[ pKey ] = pVal;
+
+	// Find the new value
+    t_List::iterator it = m_lst.find( pKey );
+    if ( m_lst.end() == it )
+        return SquirrelObject( v );
+
+
+    // Stuff string
+    SquirrelObject so( v );
+    sq_pushstring( v, it->second.c_str(), (int)it->second.length() );
+    so.AttachToStackObject( -1 );
+    sq_pop( v, 1 );
+
+    return so;
+
+}
+
 
 /// Internal squirrel function, returns value of specified item
 SquirrelObject CSqMap::_get( HSQUIRRELVM v )

@@ -7,8 +7,10 @@ default_target: all
 PRJ_NAME := sqmod_irrlicht
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind \
-			SqPlus/include SqPlus/sqplus bullet/src
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel bullet
+			SqPlus/include SqPlus/sqplus bullet/src \
+			freetype/include ftgl/src
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel \
+			bullet freetype ftgl
 PRJ_DEFS := 
 
 PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
@@ -19,6 +21,10 @@ PRJ_LIBROOT := ../../..
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
+
+ifeq ($(PLATFORM),windows)
+	PRJ_DEFS := $(PRJ_DEFS) FTGL_LIBRARY_STATIC
+endif
 
 ifeq ($(PROC),arm)
 	PRJ_INCS := $(PRJ_INCS) irrlicht-es/include
@@ -33,12 +39,12 @@ ifeq ($(PLATFORM),posix)
 	PRJ_OSLB := X11 GLU Xxf86vm
 	PRJ_DEFS := $(PRJ_DEFS) _IRR_USE_LINUX_DEVICE_ _IRR_COMPILE_WITH_X11_
 else
-	PRJ_DEFS := _IRR_STATIC_LIB_
+	PRJ_DEFS := $(PRJ_DEFS) _IRR_STATIC_LIB_
 	ifeq ($(OS),wince)
 		#_IRR_COMPILE_WITH_OGLES1_
 #		PRJ_OSLB := libGLES_CM
 #		PRJ_INCS := $(PRJ_INCS) ogles/include
-		PRJ_DEFS := OEX_NOBULLET
+		PRJ_DEFS := $(PRJ_DEFS) OEX_NOBULLET
 	else
 #		PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OPENGL_
 	endif	
