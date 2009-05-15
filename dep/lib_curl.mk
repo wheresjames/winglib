@@ -8,7 +8,7 @@ PRJ_NAME := curl
 PRJ_TYPE := lib
 PRJ_INCS := curl/src openldap/include
 PRJ_LIBS := 
-PRJ_DEFS := HAVE_CONFIG_H CURL_STATICLIB CURL_DISABLE_LDAP
+PRJ_DEFS := HAVE_CONFIG_H CURL_STATICLIB CURL_DISABLE_LDAP HAVE_SELECT
 PRJ_LIBROOT := ..
 
 #-------------------------------------------------------------------
