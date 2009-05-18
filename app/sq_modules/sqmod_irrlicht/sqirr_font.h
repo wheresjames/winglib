@@ -23,8 +23,11 @@ public:
 	CSqirrFont( const CSqirrFont &r ) {}
 	CSqirrFont& operator =( const CSqirrFont &r ) { return *this; }
 
-	// Sets the specified font
+	/// Sets the specified font
 	int set( int size, const sqbind::stdString &sFont );
+
+	/// Renders the specified text
+	int Render( const sqbind::stdString &sText );
 
 private:
 

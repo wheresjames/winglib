@@ -165,6 +165,7 @@ SQBIND_REGISTER_CLASS_END()
 // CSqirrFont
 SQBIND_REGISTER_CLASS_BEGIN( CSqirrFont, CSqirrFont )
 	SQBIND_MEMBER_FUNCTION( CSqirrFont, set )
+	SQBIND_MEMBER_FUNCTION( CSqirrFont, Render )
 SQBIND_REGISTER_CLASS_END()
 
 // CSqirrColor
@@ -239,6 +240,7 @@ static void SQBIND_Export( sqbind::VM x_vm )
 
     SQBIND_EXPORT( x_vm, CSqirrAnimator );
     SQBIND_EXPORT( x_vm, CSqirrTexture );
+    SQBIND_EXPORT( x_vm, CSqirrFont );
 
     SQBIND_EXPORT( x_vm, CSqirrNode );
     SQBIND_EXPORT( x_vm, CSqirrCamera );
