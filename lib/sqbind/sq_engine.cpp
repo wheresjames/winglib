@@ -75,7 +75,7 @@ stdString CSqEngineExport::md5( const stdString &sStr )
 stdString CSqEngineExport::unique()
 {	oex::oexGUID hash;
 	oex::CStr sRes = oexMbToStr( oex::CBase16::Encode( oexUniqueGuid( &hash ), sizeof( hash ) ) );
-	return stdString().assign( sRes.Ptr(), sRes.Length() );	
+	return stdString().assign( sRes.Ptr(), sRes.Length() );
 }
 
 stdString CSqEngineExport::ltrim( const stdString &sS, const stdString &sChs )
@@ -128,6 +128,16 @@ int CSqEngineExport::is_path( const stdString &sPath )
 	if ( !q ) return 0;
 	return q->is_path( sPath );
 }
+
+void CSqEngineExport::error( int e, const stdString &sStr )
+{	oexERROR( 0, sStr.c_str() ); }
+
+void CSqEngineExport::warning( int e, const stdString &sStr )
+{	oexWARNING( 0, sStr.c_str() ); }
+
+void CSqEngineExport::notice( int e, const stdString &sStr )
+{	oexNOTICE( 0, sStr.c_str() ); }
+
 
 stdString CSqEngineExport::get_children( const stdString &sPath )
 {	CSqMsgQueue *q = queue();

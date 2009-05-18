@@ -92,6 +92,15 @@ public:
 	/// Returns the md5 for the specified string
 	stdString md5( const stdString &sStr );
 
+	/// Logs an error
+	void error( int e, const stdString &sStr );
+
+	/// Logs a warning
+	void warning( int e, const stdString &sStr );
+
+	/// Logs a message
+	void notice( int e, const stdString &sStr );
+
 	/// Trims the specified characters from the beginning of the string
 	stdString ltrim( const stdString &sS, const stdString &sChs );
 
