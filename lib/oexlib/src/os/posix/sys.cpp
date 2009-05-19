@@ -782,4 +782,14 @@ oexINT CSys::Fork( oexCSTR x_pWorkingDirectory, oexCSTR x_pLogFile )
 	return 0;
 }
 
+oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams )
+{
+	if ( !oexCHECK_PTR( x_pFile ) )
+		return oexFALSE;
 
+	if ( oexCHECK_PTR( x_pParams ) )
+		return system( x_pFile ) : oexTRUE : oexFALSE;
+
+	return system( oexStrToMb( oexMks( x_pFile, oexT( " " ), x_pParams ) ).Ptr() )
+			? oexTRUE : oexFALSE;
+}

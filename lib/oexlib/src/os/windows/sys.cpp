@@ -743,3 +743,14 @@ oexINT CSys::Fork( oexCSTR x_pWorkingDirectory, oexCSTR x_pLogFile )
 	return -1;
 }
 
+oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
+{
+	if ( !oexCHECK_PTR( x_pFile ) )
+		return oexFALSE;
+
+	return ( 32 < (unsigned int)ShellExecute( NULL, oexT( "open" ), 
+											  x_pFile, x_pParams, 
+											  x_pDirectory, SW_SHOWNORMAL ) )
+		   ? oexTRUE : oexFALSE;
+}
+

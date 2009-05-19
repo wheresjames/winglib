@@ -59,6 +59,10 @@ void CSqEngineExport::exit( int nExitCode )
 {   oex::os::CSys::Quit( nExitCode );
 }
 
+void CSqEngineExport::terminate( int nExitCode )
+{   oex::os::CSys::Exit( nExitCode );
+}
+
 stdString CSqEngineExport::path( const stdString &sPath )
 {   return OnPath( sPath ); }
 
@@ -122,6 +126,10 @@ int CSqEngineExport::run( const stdString &sPath, const stdString &sScript )
 	if ( !q ) return -1;
 	return q->run( oexNULL, sPath, sScript );
 }
+
+int CSqEngineExport::shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory )
+{	return oexShell( sFile.c_str(), sParams.c_str(), sDirectory.c_str() ); }
+
 
 int CSqEngineExport::is_path( const stdString &sPath )
 {	CSqMsgQueue *q = queue();
@@ -417,6 +425,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ticks )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, spawn )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, error )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, warning )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, notice )
@@ -426,6 +435,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute2 )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute3 )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, execute4 )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, exit )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, terminate )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, path )

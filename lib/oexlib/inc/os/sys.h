@@ -394,6 +394,20 @@ public:
 	*/
 	static oexINT Fork( oexCSTR x_pWorkingDirectory = oexNULL, oexCSTR x_pLogFile = oexNULL );
 
+
+	//==============================================================
+	// Shell()
+	//==============================================================
+	/// Executes the instruction on the shell
+	/**
+		\param [in] x_pFile			- File to execute
+		\param [in] x_pParams		- Parmeters to pass to file
+		\param [in] x_pDirectory	- Directory to start in
+
+		\return Non-zero if success
+	*/
+	static oexBOOL Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory );
+
 };
 
 //==================================================================

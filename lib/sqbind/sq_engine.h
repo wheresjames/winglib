@@ -56,8 +56,11 @@ public:
 	SQBIND_CLASS_CTOR_BEGIN( CSqEngineExport )
 	SQBIND_CLASS_CTOR_END( CSqEngineExport )
 
-	/// Exits the application
+	/// Requests the appliation exit
 	void exit( int nExitCode );
+
+	/// Immediatly stops the application
+	void terminate( int nExitCode );
 
 	/// Displays a message box containing string
 	int alert( const stdString &sMsg );
@@ -136,6 +139,9 @@ public:
 
 	/// Checks for path/threads existence
 	int is_path( const stdString &sPath );
+
+	/// Executes shell command
+	int shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
 
 	/// Execute functions
 	stdString execute( int nRet, const stdString &sPath, const stdString &sFunction );

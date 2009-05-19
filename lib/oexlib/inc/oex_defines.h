@@ -273,6 +273,7 @@
 #define oexFmt								OEX_NAMESPACE::CStr().Fmt
 #define oexAlert							OEX_NAMESPACE::os::CSys::ShowMessageBox
 #define oexFork								OEX_NAMESPACE::os::CSys::Fork
+#define oexShell							OEX_NAMESPACE::os::CSys::Shell
 
 #define oexGuidToString						OEX_NAMESPACE::CStr().GuidToString
 #define oexUniqueGuid( g )					OEX_NAMESPACE::guid::StringToGuid( g, (OEX_NAMESPACE::oexCSTR)NULL, 0 )
