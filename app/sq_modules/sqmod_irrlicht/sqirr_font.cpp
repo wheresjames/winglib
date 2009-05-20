@@ -13,7 +13,7 @@
 void CSqirrFont::Destroy()
 {
 	if ( m_font )
-	{	OexAllocDelete( m_font );
+	{//	OexAllocDelete( m_font );
 		m_font = oexNULL;
 	} // end if
 }
@@ -24,7 +24,7 @@ int CSqirrFont::set( int size, const sqbind::stdString &sFont )
 	Destroy();
 
 	// Create new font
-	m_font = OexAllocConstruct< FTExtrudeFont >( sFont.c_str() );
+//	m_font = OexAllocConstruct< FTExtrudeFont >( sFont.c_str() );
 	if ( !m_font || m_font->Error() )
 	{	oexERROR( 0, oexMks( oexT( "Unable to create font " ), sFont.c_str() ) );
 		Destroy();
@@ -38,10 +38,10 @@ int CSqirrFont::set( int size, const sqbind::stdString &sFont )
 //		return 0;
 //	} // end if
 
-	m_font->FaceSize(80);
-	m_font->Depth(10);
-	m_font->Outset(0, 3);
-	m_font->CharMap(ft_encoding_unicode);
+//	m_font->FaceSize(80);
+//	m_font->Depth(10);
+//	m_font->Outset(0, 3);
+//	m_font->CharMap(ft_encoding_unicode);
 
 
 	return 1;

@@ -83,7 +83,7 @@ function _init() : ( _g )
 	_g.ball.SetID( 1 );
 
 	// Set texture
-    _g.ball.SetTexture( 0, _g.irr.LoadTexture( _self.path( "../media/tennis.jpg" ), 1 ) );
+    _g.ball.SetTexture( 0, _g.irr.LoadTexture( _self.path( "../media/beach_ball.jpg" ), 1 ) );
 
 	// Add a rotator
 	local ani = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.4, 0 ) );
