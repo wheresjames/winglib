@@ -133,7 +133,7 @@ public:
                             oexUINT x_eShare = os::CBaseFile::eShareRead | os::CBaseFile::eShareWrite )
     {   return Create( x_pFile, os::CBaseFile::eDisOpenExisting, x_eAccess, x_eShare ); }
 
-    /// Opens an existing file, creats if file doesn't exist
+    /// Opens an existing file, creates if file doesn't exist
     CFile& OpenAlways(     oexCSTR x_pFile,
                             oexUINT x_eAccess = os::CBaseFile::eAccessRead | os::CBaseFile::eAccessWrite,
                             oexUINT x_eShare = os::CBaseFile::eShareRead | os::CBaseFile::eShareWrite )

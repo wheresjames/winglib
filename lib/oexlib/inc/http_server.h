@@ -179,6 +179,9 @@ public:
 				// Count a transaction
 				m_nTransactions++;
 
+				// Set the log file name
+				it->session.SetLogFile( m_sLog.Ptr() );
+
 				// Set the callback function for the data
 				it->session.SetCallback( m_pSessionCallback, m_pSessionData );
 
@@ -231,6 +234,12 @@ public:
 	oexINT GetNumActiveClients()
 	{	return m_lstSessions.Size(); }
 
+	/// Sets the log file name
+	oexBOOL SetLogFile( oexCSTR x_pLog )
+	{	m_sLog = x_pLog;
+		return oexTRUE;
+	}
+
 private:
 
 	/// The TCP port to listen
@@ -256,5 +265,8 @@ private:
 
 	/// Pointer to session callback function
 	oexPVOID					m_pSessionCallback;
+
+	/// Log file name
+	CStr						m_sLog;
 
 };

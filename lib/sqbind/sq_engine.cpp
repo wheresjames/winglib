@@ -82,6 +82,18 @@ stdString CSqEngineExport::unique()
 	return stdString().assign( sRes.Ptr(), sRes.Length() );
 }
 
+int CSqEngineExport::local_time()
+{	return oexLocalTime().GetUnixTime(); }
+
+int CSqEngineExport::gmt_time()
+{	return oexGmtTime().GetUnixTime(); }
+
+stdString CSqEngineExport::local_timestr( const stdString &fmt )
+{	return oexLocalTimeStr( fmt.c_str() ).Ptr(); }
+
+stdString CSqEngineExport::gmt_timestr( const stdString &fmt )
+{	return oexGmtTimeStr( fmt.c_str() ).Ptr(); }
+
 stdString CSqEngineExport::ltrim( const stdString &sS, const stdString &sChs )
 {	return oex::CStr( sS.c_str() ).LTrim( sChs.c_str() ).Ptr();
 }
@@ -98,6 +110,10 @@ stdString CSqEngineExport::trimws( const stdString &sS )
 {	return oex::CStr( sS.c_str() ).TrimWhiteSpace().Ptr();
 }
 
+int CSqEngineExport::find( const stdString &sS, const stdString &sSub )
+{	return oex::CStr( sS.c_str() ).Match( sSub.c_str() );
+}
+
 stdString CSqEngineExport::urlencode( const stdString &sS )
 {	return oexUrlEncode( sS.c_str() ).Ptr(); }
 
@@ -109,6 +125,16 @@ stdString CSqEngineExport::htmlencode( const stdString &sS )
 
 stdString CSqEngineExport::htmldecode( const stdString &sS )
 {	return oexHtmlDecode( sS.c_str() ).Ptr(); }
+
+stdString CSqEngineExport::compress( const stdString &sS )
+{	oex::CStr c = oexCompress( oex::CStr( sS.c_str(), sS.length() ) );
+	return stdString( c.Ptr(), c.Length() );
+}
+
+stdString CSqEngineExport::uncompress( const stdString &sS )
+{	oex::CStr c = oexUncompress( oex::CStr( sS.c_str(), sS.length() ) );
+	return stdString( c.Ptr(), c.Length() );
+}
 
 int CSqEngineExport::spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile )
 {	CSqMsgQueue *q = queue();
@@ -443,16 +469,23 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, md5 )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, unique )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, local_time )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, gmt_time )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, local_timestr )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, gmt_timestr )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tolong )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tofloat )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, trim )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ltrim )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, rtrim )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, trimws )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, find )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, urlencode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, urldecode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, htmlencode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, htmldecode )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, compress )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, uncompress )
 SQBIND_REGISTER_CLASS_END()
 
 oex::oexBOOL CSqEngine::Init()

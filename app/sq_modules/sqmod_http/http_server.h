@@ -38,6 +38,9 @@ public:
 	static oex::oexINT _OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession );
 	oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession );
 
+	/// Starts web logging
+	int SetLogFile( const sqbind::stdString &sFile );
+
 private:
 
 	// The server

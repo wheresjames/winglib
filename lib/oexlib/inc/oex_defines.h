@@ -258,8 +258,8 @@
 #define oexFilePutContentsLen( f, c, l )	OEX_NAMESPACE::CFile().CreateAlways( f ).Write( c, l )
 
 // Time functions
-#define oexLocalTime						OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eLocalTime )
-#define oexGmtTime							OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eGmtTime )
+#define oexLocalTime()						OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eLocalTime )
+#define oexGmtTime()						OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eGmtTime )
 #define oexLocalTimeStr						OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eLocalTime ).FormatTime
 #define oexGmtTimeStr						OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eGmtTime ).FormatTime
 #define oexGetUnixTime						OEX_NAMESPACE::os::CSys::GetUnixTime
@@ -295,6 +295,9 @@
 #define oexStdMap( k, v )	                std::map< k, v, std::less< k >, OEX_NAMESPACE::COexStdAllocator< k > >
 #define oexStdList( t )		                std::list< t, OEX_NAMESPACE::COexStdAllocator< t > >
 #define oexStdVector( t )	                std::vector< t, OEX_NAMESPACE::COexStdAllocator< t > >
+
+#define oexCompress							OEX_NAMESPACE::zip::CCompress::Compress
+#define oexUncompress						OEX_NAMESPACE::zip::CUncompress::Uncompress
 
 // Number conversion
 #define oexStrToInt64		                OEX_NAMESPACE::os::CSys::StrToInt64

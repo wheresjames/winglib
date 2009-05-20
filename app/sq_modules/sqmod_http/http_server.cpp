@@ -104,3 +104,7 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	return 0;
 }
 
+int CHttpServer::SetLogFile( const sqbind::stdString &sFile )
+{	return m_server.SetLogFile( sFile.c_str() );
+}
+

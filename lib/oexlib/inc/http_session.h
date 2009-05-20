@@ -139,6 +139,11 @@ public:
         m_nErrorCode = HTTP_OK;
         m_nTransactions = 0;
         m_bHeaderReceived = oexFALSE;
+#ifdef OEX_ENABLE_ZIP
+		m_bEnableCompression = oexTRUE; 
+#else
+		m_bEnableCompression = oexFALSE; 
+#endif
     }
 
     THttpSession( T_PORT *x_pPort )
@@ -147,6 +152,11 @@ public:
         m_nErrorCode = HTTP_OK;
         m_nTransactions = 0;
         m_bHeaderReceived = oexFALSE;
+#ifdef OEX_ENABLE_ZIP
+		m_bEnableCompression = oexTRUE; 
+#else
+		m_bEnableCompression = oexFALSE; 
+#endif
     }
 
     /// Destructor
@@ -268,6 +278,21 @@ public:
         return oexTRUE;
     }
 
+	void GrabConnectionInfo()
+	{
+		m_pbRequest[ "REQUEST_TIME" ] = oexGetUnixTime();
+
+		// Punt if no port
+		if ( !m_pPort )
+			return;
+
+		m_pbRequest[ "SERVER_ADDR" ] = m_pPort->LocalAddress().GetDotAddress();
+		m_pbRequest[ "SERVER_PORT" ] = m_pPort->LocalAddress().GetPort();
+		m_pbRequest[ "REMOTE_ADDR" ] = m_pPort->PeerAddress().GetDotAddress();
+		m_pbRequest[ "REMOTE_PORT" ] = m_pPort->PeerAddress().GetPort();
+
+	}
+
     /// Reads in the http headers
     oexINT ReadHeaders()
 	{
@@ -295,12 +320,16 @@ public:
 		if ( !m_pbRequest[ "type" ].ToString().Length() )
 			return HTTP_BAD_REQUEST;
 
+		// For now
+		m_pbRequest[ "REQUEST_METHOD" ].ToString() = m_pbRequest[ "type" ].ToString();
+		
 		// Grab the url
 		CStr8 sPath = sRx.ParseNextToken();
 		m_pbRequest[ "path" ] = sPath.Parse( "?" );
 		if ( m_pbRequest[ "path" ].ToString().Length() )
 		{   if ( *sPath == '?' )
 				sPath++;
+			m_pbRequest[ "params" ] = sPath;
 			m_pbGet = CParser::DecodeUrlParams( sPath );
 		} // end if
 		else m_pbRequest[ "path" ].ToString() = sPath;
@@ -322,6 +351,24 @@ public:
 		// Read in the headers
 		m_pbRxHeaders = CParser::DecodeMIME( sRx );
 
+		// Reconstruct the request
+		m_pbRequest[ "REQUEST_STRING" ].ToString() 
+			<< m_pbRequest[ "type" ].ToString()
+			<< " " << m_pbRequest[ "path" ].ToString();
+
+		// Add params
+		if ( m_pbRequest[ "params" ].ToString().Length() )
+			m_pbRequest[ "REQUEST_STRING" ].ToString() 
+				<< "?" << m_pbRequest[ "params" ].ToString();
+
+		// Protocol and version
+		m_pbRequest[ "REQUEST_STRING" ].ToString() 
+			<< " " << m_pbRequest[ "proto" ].ToString()
+			<< "/" << m_pbRequest[ "ver" ].ToString();
+
+		// Add connection information
+		GrabConnectionInfo();		
+		
 		// Headers received
 		m_bHeaderReceived = oexTRUE;
 
@@ -461,8 +508,32 @@ public:
 		if ( !oexCHECK_PTR( m_pPort ) )
 			return oexFALSE;
 
+		// For compression support
+		CStr *pSend = &m_sContent;
+
+#ifdef OEX_ENABLE_ZIP
+
+		CStr sCompressed;
+
+		// Is compression enabled, and does the client support it?
+		if ( m_bEnableCompression )
+		{
+			// Currently only supporting zlib/deflate
+			if ( 0 <= m_pbRxHeaders[ "Accept-Encoding" ].ToString().Match( "deflate" ) )
+			{	m_pbTxHeaders[ "Content-Encoding" ] = "deflate";
+				sCompressed = oexCompress( m_sContent );
+				pSend = &sCompressed;
+			} // end if
+
+		} // end if
+
+#endif
+
+		// Log the request
+		Log();
+
 		// How big is the data?
-		m_pbTxHeaders[ "Content-length" ] = m_sContent.Length();
+		m_pbTxHeaders[ "Content-length" ] = pSend->Length();
 
 		// Send the header
 		m_pPort->Write( GetErrorString( m_nErrorCode ) );
@@ -471,7 +542,7 @@ public:
 		m_pPort->Write( CParser::EncodeMime( m_pbTxHeaders ) << "\r\n" );
 
 		// Send the content
-		m_pPort->Write( m_sContent );
+		m_pPort->Write( *pSend );
 
 		return oexTRUE;
 
@@ -549,6 +620,71 @@ public:
 	void SetCallback( oexPVOID x_pCallback, oexPVOID x_pData )
 	{	m_fnCallback = (PFN_Callback)x_pCallback; m_pData = x_pData; }
 
+	// Sets the log file name
+	oexBOOL SetLogFile( oexCSTR x_pLog )
+	{	m_sLog = x_pLog;
+		return oexTRUE;
+	}
+
+	/// Enables / disables compression
+	void EnableCompression( oexBOOL b )
+	{
+#ifdef OEX_ENABLE_ZIP
+		m_bEnableCompression = b; 
+#else
+		m_bEnableCompression = oexFALSE; 
+#endif
+	}
+
+	/// Returns non-zero if compression is enabled
+	oexBOOL IsCompressionEnabled()
+	{	return m_bEnableCompression; }
+
+	CStr CommonLog()
+	{
+		CStr s;
+
+		s	<< m_pbRequest[ "REMOTE_ADDR" ].ToString()
+			<< " -" // rfc931 
+			<< " -" // username
+			<< " " << oexLocalTimeStr( "[%c/%b/%Y:%g:%m:%s %Zs%Zh%Zm]" )
+			<< " \"" << m_pbRequest[ "REQUEST_STRING" ].ToString() << "\""
+			<< " " << m_nErrorCode
+			<< " " << m_sContent.Length();
+
+		// Add referer if specified
+		if ( m_pbRxHeaders[ "referer" ].ToString().Length() )
+			s << " \"" << m_pbRxHeaders[ "referer" ].ToString() << "\"";
+		else
+			s << " -";
+		
+		// Add user agent if specified
+		if ( m_pbRxHeaders[ "User-Agent" ].ToString().Length() )
+			s << " \"" << m_pbRxHeaders[ "User-Agent" ].ToString() << "\"";
+		else
+			s << " -";
+
+		s << "\r\n";
+
+		return s;
+	}
+
+	// Writes the transaction log to a file
+	oexBOOL Log()
+	{
+		if ( !m_sLog.Length() )
+			return oexFALSE;
+
+		CFile fLog;
+		if ( !fLog.OpenAlways( m_sLog.Ptr() ).IsOpen() )
+			return oexFALSE;
+
+		// Skip to the end of the file
+		fLog.SetPtrPosEnd( 0 );
+
+		// Add to the log
+		return fLog.Write( CommonLog() );
+	}
 
 private:
 
@@ -591,4 +727,9 @@ private:
 	/// Data passed to callback function
 	oexPVOID					m_pData;
 
+	/// Log file
+	CStr						m_sLog;
+
+	/// Non-zero to enable compression
+	oexBOOL						m_bEnableCompression;
 };

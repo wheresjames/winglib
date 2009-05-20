@@ -116,6 +116,9 @@ public:
 	/// Trims the white space from the beginning and end of the string
 	stdString trimws( const stdString &sS );
 
+	/// Finds sub string sSub in sS, returns offset or less than zero if not found
+	int find( const stdString &sS, const stdString &sSub );
+
 	/// URL encodes the string
 	stdString urlencode( const stdString &sS );
 
@@ -128,8 +131,26 @@ public:
 	/// HTML decodes the string
 	stdString htmldecode( const stdString &sS );
 
+	/// Compresses string using zlib/deflate
+	stdString compress( const stdString &sS );
+
+	/// Uncompresses string using zlib/inflate
+	stdString uncompress( const stdString &sS );
+
 	/// Returns a unique md5 hash
 	stdString unique();
+
+	/// Returns local time stamp
+	int local_time();
+
+	/// Returns gmt time stamp
+	int gmt_time();
+
+	/// Returns a formated time string
+	stdString local_timestr( const stdString &fmt );
+
+	/// Returns a formated time string
+	stdString gmt_timestr( const stdString &fmt );
 
 	/// Creates a thread
 	int spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );

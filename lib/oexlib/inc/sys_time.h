@@ -392,16 +392,17 @@ public:
 		-	\%Zs = Time zone sign +/-
 		-	\%Zh = Hours of offset in time zone fixed two digits
 		-	\%ZH = Hours of offset in time zone
-		-	\%Zh = Minutes of offset in time zone fixed two digits
-		-	\%ZH = Minutes of offset in time zone
+		-	\%Zm = Minutes of offset in time zone fixed two digits
+		-	\%ZM = Minutes of offset in time zone
 		-	\%Zz = Time zone offset in minutes with leading +/-
 		-	\%ZZ = Time zone offset in seconds with leading +/-
 
         Some examples:
 
-        -   "%W, %B %D, %Y - %h:%m:%s %A"  = Thursday, December 25, 1997 - 04:15:30 PM
-        -   "%Y/%c/%d - %g:%m:%s.%l"    = 1997/12/25 - 16:15:30.500
-        -   "%w, %d %b %Y %g:%m:%s GMT" = Thu, 25 Dec 1997 16:15:30 GMT
+        -   "%W, %B %D, %Y - %h:%m:%s %A"	= Thursday, December 25, 1997 - 04:15:30 PM
+        -   "%Y/%c/%d - %g:%m:%s.%l"		= 1997/12/25 - 16:15:30.500
+        -   "%w, %d %b %Y %g:%m:%s GMT"		= Thu, 25 Dec 1997 16:15:30 GMT
+		-	"%c/%b/%Y:%g:%m:%s %Zs%Zh%Zm"	= 25/Dec/1997:16:15:30 -0500
 
 		\return Formated string
 
@@ -455,8 +456,8 @@ public:
 		-	\%Zs = Time zone sign +/-
 		-	\%Zh = Hours of offset in time zone fixed two digits
 		-	\%ZH = Hours of offset in time zone
-		-	\%Zh = Minutes of offset in time zone fixed two digits
-		-	\%ZH = Minutes of offset in time zone
+		-	\%Zm = Minutes of offset in time zone fixed two digits
+		-	\%ZM = Minutes of offset in time zone
 		-	\%Zz = Time zone offset in minutes with leading +/-
 		-	\%ZZ = Time zone offset in seconds with leading +/-
 
