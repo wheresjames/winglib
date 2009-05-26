@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -63,7 +63,7 @@
 
 */
 //==================================================================
-class CFindFiles  
+class CFindFiles
 {
 public:
 
@@ -77,23 +77,17 @@ public:
 	// BuildPaths()
 	//==============================================================
 	/// Builds paths to current file
-	/**		
+	/**
 		\return Non-zero if success
 	*/
-	oexBOOL BuildPaths()
-    {
-	    // Ensure valid filename
-	    return ( m_fd.sName.Length() &&
-             !m_fd.sName.CmpLen( oexT( "." ), 1 ) &&
-             !m_fd.sName.CmpLen( oexT( ".." ), 2 ) );
-    }
+	oexBOOL BuildPaths();
 
 
 	//==============================================================
 	// FindNext()
 	//==============================================================
 	/// Finds the next matching file
-	/**		
+	/**
 		\return Non-zero if another file is found
 	*/
 	oexBOOL FindNext();
@@ -107,8 +101,8 @@ public:
 		\param [in] x_pMask		-	File search mask
 
 		\return Non-zero if a matching file was found
-	
-		\see 
+
+		\see
 	*/
 	oexBOOL FindFirst( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*.*" ) );
 
@@ -122,10 +116,10 @@ public:
 	/**
 		\param [in] pDir		-	Directory to start search
 		\param [in] pMask		-	File search mask
-		
+
 		\return Non-zero if a matching file was found
-	
-		\see 
+
+		\see
 	*/
 	CFindFiles( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*.*" ) );
 
@@ -136,37 +130,37 @@ public:
 	// GetPath()
 	//==============================================================
 	/// Returns the path to the found file
-	CStr GetPath() 
+	CStr GetPath()
     {   if ( !IsValid() ) return oexT( "" ); return m_sPath; }
 
 	//==============================================================
 	// GetFullPath()
 	//==============================================================
 	/// Returns the complete filename for the found file
-    CStr GetFullPath() 
+    CStr GetFullPath()
     {   if ( !IsValid() ) return oexT( "" ); return CStr::BuildPath( m_sPath.Ptr(), m_fd.sName ); }
 
 	//==============================================================
 	// GetFileName()
 	//==============================================================
 	/// Returns the filename for the current matching file
-	CStr GetFileName() 
+	CStr GetFileName()
     {   if ( !IsValid() ) return oexT( "" ); return m_fd.sName; }
 
 	//==============================================================
 	// GetFileAttributes()
 	//==============================================================
 	/// Returns the file attributes of the current matching file
-	oexUINT GetFileAttributes() 
+	oexUINT GetFileAttributes()
     {   if ( !IsValid() ) return 0; return m_fd.uFileAttributes; }
 
 	//==============================================================
 	// IsDirectory()
 	//==============================================================
 	/// Returns non-zero if the current match is a directory
-	oexBOOL IsDirectory() 
-    {	if ( !IsValid() ) return oexFALSE; 
-        return ( 0 != ( os::CBaseFile::eFileAttribDirectory & m_fd.uFileAttributes ) ); 
+	oexBOOL IsDirectory()
+    {	if ( !IsValid() ) return oexFALSE;
+        return ( 0 != ( os::CBaseFile::eFileAttribDirectory & m_fd.uFileAttributes ) );
     }
 
     /// Returns non-zero if a find is in progress
@@ -179,6 +173,9 @@ public:
     /// Returns a list of all matching files
     static CStrList GetFileList( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*.*" ) );
 
+	/// File pattern
+    CStr GetPattern() { return m_sPattern; }
+
 private:
 
 	/// Currently open find handle
@@ -186,6 +183,9 @@ private:
 
 	/// Buffer containing path to file
 	CStr				                m_sPath;
+
+	/// Patern that the files must match
+	CStr								m_sPattern;
 
     /// Find data
     os::CBaseFile::SFindData            m_fd;
@@ -202,18 +202,18 @@ private:
 	The functions in this class, by design, exactly match CFindFiles
 	so it is a drop in replacement.
 
-	This is a template class because I didn't want to use dynamic 
-	memory allocation since this could slow down the searches.  I 
-	also don't know the maximum folder depth you may want to parse.  
+	This is a template class because I didn't want to use dynamic
+	memory allocation since this could slow down the searches.  I
+	also don't know the maximum folder depth you may want to parse.
 	Using a 'large enough' number like 32 or 64 would result
 	in a pretty large amount of memory.  So I allow (force) you to
 	decide for yourself.
 
 	I also failed to supply a default to avoid causing any pain
-	to those that may not otherwise realize that the depth is 
+	to those that may not otherwise realize that the depth is
 	limited.
 
-	At the time I am writing this, each depth will cost you 
+	At the time I am writing this, each depth will cost you
 	112 bytes.  sizeof( CFindFiles )
 
 	Typical example:
@@ -236,13 +236,13 @@ private:
 
 */
 //==================================================================
-template < oexCONST oexLONG c_lMaxDepth > class TRecursiveFindFiles  
+template < oexCONST oexLONG c_lMaxDepth > class TRecursiveFindFiles
 {
 public:
 
 	/// Default constructor
 	TRecursiveFindFiles()  { m_uDepth = 0; }
-	
+
 	/// Destructor
 	virtual ~TRecursiveFindFiles() {}
 
@@ -253,10 +253,10 @@ public:
 	/**
 		\param [in] x_pDir		-	Directory to start search
 		\param [in] x_pMask		-	File search mask
-		
+
 		\return Non-zero if a matching file was found
-	
-		\see 
+
+		\see
 	*/
 	TRecursiveFindFiles( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*.*" ) )
 	{	m_uDepth = 0; FindFirst( x_pDir, x_pMask ); }
@@ -271,8 +271,8 @@ public:
 		if ( c_lMaxDepth <= m_uDepth )
 			m_uDepth = c_lMaxDepth;
 
-		do 
-		{				
+		do
+		{
 			// Destroy this depth
 			m_ff[ m_uDepth ].Destroy();
 
@@ -286,7 +286,7 @@ public:
 	// BuildPaths()
 	//==============================================================
 	/// Builds paths to current file
-	/**		
+	/**
 		\return Non-zero if success
 	*/
 	oexBOOL BuildPaths() { return m_ff[ m_uDepth ].BuildPath(); }
@@ -295,13 +295,13 @@ public:
 	// FindNext()
 	//==============================================================
 	/// Finds the next matching file
-	/**		
+	/**
 		\return Non-zero if another file is found
 	*/
 	oexBOOL FindNext()
 	{
 		// Ensure valid depth
-		if ( c_lMaxDepth <= m_uDepth ) 
+		if ( c_lMaxDepth <= m_uDepth )
 			m_uDepth = c_lMaxDepth - 1;
 
 		// Recurse into directory if this is one
@@ -333,7 +333,7 @@ public:
 				return oexTRUE;
 
 			// Any higher ground?
-			if ( !m_uDepth ) 
+			if ( !m_uDepth )
                 return oexFALSE;
 
 			// Next depth
@@ -352,10 +352,10 @@ public:
 	/**
 		\param [in] x_pDir		-	Directory to start search
 		\param [in] x_pMask		-	File search mask
-		
+
 		\return Non-zero if a matching file was found
-	
-		\see 
+
+		\see
 	*/
 	oexBOOL FindFirst( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*.*" ) )
 	{
@@ -366,7 +366,7 @@ public:
 		m_sSearchMask = x_pMask;
 
 		// Pass it on
-		return m_ff[ m_uDepth ].FindFirst( x_pDir, x_pMask ); 
+		return m_ff[ m_uDepth ].FindFirst( x_pDir, x_pMask );
 	}
 
 

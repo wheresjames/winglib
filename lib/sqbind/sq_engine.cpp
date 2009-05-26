@@ -66,6 +66,9 @@ void CSqEngineExport::terminate( int nExitCode )
 stdString CSqEngineExport::path( const stdString &sPath )
 {   return OnPath( sPath ); }
 
+stdString CSqEngineExport::build_path( const stdString &sS1,  const stdString &sS2 )
+{	return oexBuildPath( sS1.c_str(), sS2.c_str() ).Ptr(); }
+
 stdString CSqEngineExport::root( const stdString &sPath )
 {   return oexGetModulePath( sPath.c_str() ).Ptr(); }
 
@@ -127,12 +130,12 @@ stdString CSqEngineExport::htmldecode( const stdString &sS )
 {	return oexHtmlDecode( sS.c_str() ).Ptr(); }
 
 stdString CSqEngineExport::compress( const stdString &sS )
-{	oex::CStr c = oexCompress( oex::CStr( sS.c_str(), sS.length() ) );
+{	oex::CStr c = oexCompressStr( oex::CStr( sS.c_str(), sS.length() ) );
 	return stdString( c.Ptr(), c.Length() );
 }
 
 stdString CSqEngineExport::uncompress( const stdString &sS )
-{	oex::CStr c = oexUncompress( oex::CStr( sS.c_str(), sS.length() ) );
+{	oex::CStr c = oexUncompressStr( oex::CStr( sS.c_str(), sS.length() ) );
 	return stdString( c.Ptr(), c.Length() );
 }
 
@@ -466,6 +469,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, path )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, build_path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, md5 )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, unique )

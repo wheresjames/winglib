@@ -161,7 +161,6 @@ oexBOOL CBaseFile::Write( CBaseFile::t_HFILE x_hFile, oexCPVOID x_pData, oexINT6
 	if ( c_Invalid == x_hFile )
 		return oexFALSE;
 
-//    oexUINT uWritten = write( x_pData, 1, x_uSize, (FILE*)hFile );
 	oexINT64 llWritten = write( oexPtrToInt( x_hFile ), x_pData, x_llSize );
 
     if ( x_pllWritten )
@@ -184,7 +183,6 @@ oexBOOL CBaseFile::Read( CBaseFile::t_HFILE x_hFile, oexPVOID x_pData, oexINT64 
 	if ( c_Invalid == x_hFile )
 		return oexFALSE;
 
-//	oexUINT uRead = fread( x_pData, 1, x_uSize, (FILE*)hFile );
 	oexINT64 llRead = read( oexPtrToInt( x_hFile ), x_pData, x_llSize );
 
 	if ( 0 > llRead )
@@ -287,17 +285,33 @@ void CBaseFile_InitFindData( CBaseFile::SFindData *x_pFd )
     x_pFd->ftLastModified = 0;
 }
 
+void CBaseFile_SetFindData( CBaseFile::SFindData *x_pFd, const dirent *x_pD )
+{
+	if ( !oexCHECK_PTR( x_pFd ) || !oexCHECK_PTR( x_pD ) )
+		return;
+
+	// Init structure
+	CBaseFile_InitFindData( x_pFd );
+
+	// Save file name
+	x_pFd->sName = oexMbToStr( x_pD->d_name );
+
+	// Is it a directory?
+	if ( DT_DIR & x_pD->d_type )
+		x_pFd->uFileAttributes |= CBaseFile::eFileAttribDirectory;
+}
+
 CBaseFile::t_HFIND CBaseFile::FindFirst( oexCSTR x_pPath, oexCSTR x_pMask, CBaseFile::SFindData *x_pFd )
 {
 #if defined( OEX_NODIRENT )
-	return oexNULL;
+	return CBaseFile::c_InvalidFindHandle;
 #else
 
     // Sanity checks
     if ( !oexVERIFY_PTR( x_pPath ) || !oexVERIFY_PTR( x_pMask ) || !oexVERIFY_PTR( x_pFd ) )
-        return oexNULL;
+        return CBaseFile::c_InvalidFindHandle;
 
-	DIR *hDir = opendir( oexStrToMbPtr( CStr::BuildPath( x_pPath, x_pMask ).Ptr() ) );
+	DIR *hDir = opendir( oexStrToMbPtr( x_pPath ) );
 	if ( CBaseFile::c_InvalidFindHandle == hDir )
 		return CBaseFile::c_InvalidFindHandle;
 
@@ -308,9 +322,8 @@ CBaseFile::t_HFIND CBaseFile::FindFirst( oexCSTR x_pPath, oexCSTR x_pMask, CBase
 		return CBaseFile::c_InvalidFindHandle;
 	} // end if
 
-	CBaseFile_InitFindData( x_pFd );
-
-	x_pFd->sName = oexMbToStr( pD->d_name );
+	// Set file data
+	CBaseFile_SetFindData( x_pFd, pD );
 
     return (CBaseFile::t_HFIND)hDir;
 #endif
@@ -326,12 +339,9 @@ oexBOOL CBaseFile::FindNext( t_HFIND x_hFind, CBaseFile::SFindData *x_pFd )
 	errno = 0;
 	struct dirent *pD = readdir( hDir );
 	if ( !pD || errno )
-	{	closedir( hDir );
 		return oexFALSE;
-	} // end if
 
-	CBaseFile_InitFindData( x_pFd );
-	x_pFd->sName = oexMbToStr( pD->d_name );
+	CBaseFile_SetFindData( x_pFd, pD );
 
     return oexTRUE;
 #endif

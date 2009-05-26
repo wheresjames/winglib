@@ -84,7 +84,7 @@ sqbind::CSqMulti CGdcChart::GetChart( const sqbind::stdString &x_sType,
 	GDC_GridColor = 0x000000;
 	GDC_LineColor = 0x000000;
 	GDC_PlotColor = 0x00ff00;
-	GDC_ylabel_fmt = oexT( "%.2f" );
+	GDC_ylabel_fmt = (char*)"%.2f";
 
 	// User settings
 	if ( mParams.isset( oexT( "col_bg" ) ) )

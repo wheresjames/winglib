@@ -95,6 +95,9 @@ public:
 	/// Returns the md5 for the specified string
 	stdString md5( const stdString &sStr );
 
+	/// Returns the file path to the current script
+	stdString build_path( const stdString &sS1,  const stdString &sS2 );
+
 	/// Logs an error
 	void error( int e, const stdString &sStr );
 

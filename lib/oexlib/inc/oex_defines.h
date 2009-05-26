@@ -299,6 +299,11 @@
 #define oexCompress							OEX_NAMESPACE::zip::CCompress::Compress
 #define oexUncompress						OEX_NAMESPACE::zip::CUncompress::Uncompress
 
+// +++ This sux with unicode.  Be nice to find a more
+//     efficient way to do this, it's just so damn handy.
+#define oexCompressStr( s )					oexMbToStr( oexCompress( oexStrToMb( ( s ) ) ) )
+#define oexUncompressStr( s )				oexMbToStr( oexUncompress( oexStrToMb( ( s ) ) ) )
+
 // Number conversion
 #define oexStrToInt64		                OEX_NAMESPACE::os::CSys::StrToInt64
 #define oexStrToUInt64		                OEX_NAMESPACE::os::CSys::StrToUInt64

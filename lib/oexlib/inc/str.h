@@ -999,7 +999,7 @@ public:
 
         return *this;
     }
-    
+
 #if !defined( OEX_NOWCHAR )
 
 	TStr& ToWc( oexCONST TStr< oexCHAR8 > &x_sStr )
@@ -1602,7 +1602,7 @@ public:
 			*this += p19;
 			return *this;
 		}
-		
+
 	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
 	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
 	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
@@ -1633,7 +1633,7 @@ public:
 			*this += p20;
 			return *this;
 		}
-		
+
 	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
 	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
 	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
@@ -1666,7 +1666,7 @@ public:
 			*this += p21;
 			return *this;
 		}
-		
+
 	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
 	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
 	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
@@ -1700,7 +1700,7 @@ public:
 			*this += p22;
 			return *this;
 		}
-		
+
 	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
 	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
 	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
@@ -1735,7 +1735,7 @@ public:
 			*this += p23;
 			return *this;
 		}
-		
+
 	template < typename T_P1, typename T_P2, typename T_P3, typename T_P4,
 	           typename T_P5, typename T_P6, typename T_P7, typename T_P8,
 	           typename T_P9, typename T_P10, typename T_P11, typename T_P12,
@@ -1771,7 +1771,7 @@ public:
 			*this += p24;
 			return *this;
 		}
-		
+
 	// +++ sprintf functionality, to eventually be type safe
 	TStr& vFmt( oexCONST T *x_pFmt, oexVaList x_pArgs )
 	{	return vPrint( x_pFmt, x_pArgs );
@@ -2535,6 +2535,11 @@ public:
 		} // end if
 
 		return *this;
+	}
+
+	// Match against file pattern
+	oexBOOL MatchPattern( oexCONST TStr x_sPattern, oexBOOL x_bIgnoreCase )
+	{	return 0 <= str::MatchPattern( Ptr(), Length(), x_sPattern.Ptr(), x_sPattern.Length(), x_bIgnoreCase );
 	}
 
 private:

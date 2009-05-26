@@ -187,3 +187,4 @@ oexINT64 CFile::FindInFile( oexPVOID x_pStr, oexINT64 x_llLen, oexINT64 x_llMax 
 	return -1;
 
 }
+

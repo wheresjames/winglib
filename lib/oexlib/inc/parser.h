@@ -217,7 +217,7 @@ public:
     template< typename T >
         static TPropertyBag< TStr< T > > DecodeUrlParams( oexCONST T *x_pStr )
         {   oexASSERT_PTR( x_pStr );
-			return DecodeUrlParams( TStr< T >( x_pStr ) ); 
+			return DecodeUrlParams( TStr< T >( x_pStr ) );
 		}
 
     template< typename T >
@@ -284,7 +284,7 @@ public:
     template< typename T >
         static TStr< T > UrlEncode( oexCONST T *x_pStr )
         {	oexASSERT_PTR( x_pStr );
-			return UrlEncode( TStr< T >( x_pStr ) ); 
+			return UrlEncode( TStr< T >( x_pStr ) );
 		}
 
     template< typename T >
@@ -311,7 +311,7 @@ public:
     template< typename T >
         static TStr< T > UrlDecode( oexCONST T *x_pStr )
         {   oexASSERT_PTR( x_pStr );
-			return UrlDecode( TStr< T >( x_pStr ) ); 
+			return UrlDecode( TStr< T >( x_pStr ) );
 		}
 
     template< typename T >
@@ -357,16 +357,16 @@ public:
 
 		switch( x_ch )
 		{
-			// case oexTC( T, ' ' ) : 
-			case oexTC( T, '!' ) : 
-			case oexTC( T, '#' ) : case oexTC( T, '$' ) : 
-			case oexTC( T, '%' ) : case oexTC( T, '\'' ) : 
-			case oexTC( T, '(' ) : case oexTC( T, ')' ) : 
-			case oexTC( T, '*' ) : case oexTC( T, '+' ) : 
-			case oexTC( T, ',' ) : case oexTC( T, '-' ) : 
-			case oexTC( T, '.' ) : case oexTC( T, '/' ) : 
-			case oexTC( T, '\\' ) : case oexTC( T, ':' ) : 
-			case oexTC( T, ';' ) : case oexTC( T, '=' ) : 
+			// case oexTC( T, ' ' ) :
+			case oexTC( T, '!' ) :
+			case oexTC( T, '#' ) : case oexTC( T, '$' ) :
+			case oexTC( T, '%' ) : case oexTC( T, '\'' ) :
+			case oexTC( T, '(' ) : case oexTC( T, ')' ) :
+			case oexTC( T, '*' ) : case oexTC( T, '+' ) :
+			case oexTC( T, ',' ) : case oexTC( T, '-' ) :
+			case oexTC( T, '.' ) : case oexTC( T, '/' ) :
+			case oexTC( T, '\\' ) : case oexTC( T, ':' ) :
+			case oexTC( T, ';' ) : case oexTC( T, '=' ) :
 			case oexTC( T, '@' ) : case oexTC( T, '?' ) :
 			case oexTC( T, '[' ) : case oexTC( T, ']' ) :
 			case oexTC( T, '^' ) : case oexTC( T, '_' ) :
@@ -410,7 +410,7 @@ public:
     template< typename T >
         static TStr< T > HtmlEncode( oexCONST T *x_pStr )
         {	oexASSERT_PTR( x_pStr );
-			return HtmlEncode( TStr< T >( x_pStr ) ); 
+			return HtmlEncode( TStr< T >( x_pStr ) );
 		}
 
     template< typename T >
@@ -436,7 +436,7 @@ public:
     template< typename T >
 		static TStr< T > HtmlDecodeChar( oexCONST T *x_pStr )
         {	oexASSERT_PTR( x_pStr );
-			return HtmlDecodeChar( TStr< T >( x_pStr ) ); 
+			return HtmlDecodeChar( TStr< T >( x_pStr ) );
 		}
 
 
@@ -452,7 +452,7 @@ public:
     template< typename T >
 		static T HtmlDecodeChar( TStr< T > &x_str )
 		{
-			static const SHtmlItem< T > c_cnv[] = 
+			static const SHtmlItem< T > c_cnv[] =
 			{
 				{ oexTC( T, ' ' ), "&nbsp;", 6 },
 				{ oexTC( T, '"' ), "&quot;", 6 },
@@ -513,7 +513,7 @@ public:
 
 			// Found &
 			if ( 0 <= o )
-			{	if ( o ) 
+			{	if ( o )
 					ret << x_str.Slice( o );
 				ret << HtmlDecodeChar( x_str );
 			} // end if
@@ -930,14 +930,14 @@ public:
 		static oexUINT ahtodw( oexCONST T* pBuffer, oexUINT uBytes )
 		{
 			oexUINT num = 0;
-		                                              
+
 			// For Each ASCII Digit
 			for ( oexUINT i = 0; i < uBytes; i++ )
 			{
 				// Convert ASCII Digit Between 0 And 9
 				if ( pBuffer[ i ] >= oexTC( T, '0' ) && pBuffer[ i ] <= oexTC( T, '9' ) )
 					num = ( num << 4 ) + ( pBuffer[ i ] - oexTC( T, '0' ) );
-				
+
 				// Convert ASCII Digit Between A And F
 				else if ( pBuffer[ i ] >= oexTC( T, 'A' ) && pBuffer[ i ] <= oexTC( T, 'F' ) )
 					num = ( num << 4 ) + ( pBuffer[ i ] - 'A' ) + 10;
@@ -947,8 +947,8 @@ public:
 					num = ( num << 4 ) + ( pBuffer[ i ] - oexTC( T, 'a' ) ) + 10;
 
 			} // end for
-		    
-			return num;	
+
+			return num;
 		}
 
     template < typename T >
@@ -971,7 +971,7 @@ public:
 
 			// Correct pointer
 			buf = &buf[ index ];
-			
+
 			while ( c )
 			{
 				buf[ i ] = (T)( oexTC( T, '0' ) + ( ( num & 0xf0000000 ) >> 28 ) );
@@ -981,7 +981,7 @@ public:
  				c--;
 
 			} // end while
-			
+
 			if ( !i ) buf[ i++ ] = oexTC( T, '0' );
 
 			buf[ i ] = 0;
@@ -1007,6 +1007,17 @@ public:
 
 			return sHtml;
 		}
+
+	// Match against list of file patterns
+    template < typename T >
+		oexBOOL MatchPatterns( TStr< T > x_s, TList< TStr< T > > x_lstPatterns, oexBOOL x_bIgnoreCase )
+		{	for ( typename TList< TStr< T > >::iterator it; x_lstPatterns.Next( it ); )
+				if ( x_s.MatchPattern( it.Obj(), x_bIgnoreCase ) )
+					return oexTRUE;
+			return oexFALSE;
+		}
+
+
 
 protected:
 

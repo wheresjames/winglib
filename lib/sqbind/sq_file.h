@@ -59,7 +59,9 @@ namespace sqbind
 		{	return oexBinToStr( m_f.Read() ).Ptr(); }
 
 		static stdString get_contents( const stdString &sFile )
-		{	return oexBinToStr( oex::CFile().OpenExisting( sFile.c_str() ).Read() ).Ptr(); }
+		{	oex::CStr data = oexBinToStr( oex::CFile().OpenExisting( sFile.c_str() ).Read() );
+			return stdString( data.Ptr(), data.Length() );
+		}
 
 		static int put_contents( const stdString &sFile, const stdString &sData )
 		{	return oex::CFile().CreateAlways( sFile.c_str() ).Write( sData.c_str(), sData.length() ); }
@@ -91,14 +93,14 @@ namespace sqbind
 		{	return oexGetFileExtension( sFile.c_str() ).Ptr(); }
 
 		static CSqMap get_dirlist( const stdString &sDir, const stdString &sMask, int bFiles, int bDirs )
-		{	
+		{
 			oex::CFindFiles ff;
 			CSqMap mRet;
 			if ( ff.FindFirst( sDir.c_str(), sMask.c_str() ) )
 				do
 				{
 					// Directory
-					if ( ff.IsDirectory() ) 
+					if ( ff.IsDirectory() )
 					{	if ( bDirs )
 							mRet[ ff.GetFileName().Ptr() ] = oexT( "d" );
 					} // end if

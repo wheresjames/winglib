@@ -1593,8 +1593,10 @@ int inflate_blocks_free(inflate_blocks_statef *s, z_streamp z)
 //
 
 
-
-extern const char inflate_copyright[] =
+// Changed from extern because of 'multiple defined' errors, not trying
+// to be an ass ;)
+//
+static const char inflate_copyright[] =
    " inflate 1.1.3 Copyright 1995-1998 Mark Adler ";
 // If you use the zlib library in a product, an acknowledgment is welcome
 // in the documentation of your product. If for some reason you cannot
@@ -2624,7 +2626,9 @@ int inflate(z_streamp z, int f)
 
 
 
-const char unz_copyright[] = " unzip 0.15 Copyright 1998 Gilles Vollant ";
+static const char unz_copyright[] = " unzip 0.15 Copyright 1998 Gilles Vollant ";
+
+
 
 // unz_file_info_interntal contain internal info about a file in zipfile
 typedef struct unz_file_info_internal_s

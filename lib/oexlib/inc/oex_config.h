@@ -162,5 +162,9 @@
 	typedef unsigned int			oexSIZE_T;
 #endif
 
-
+#if defined( OEX_WINDOWS )
+#	undef OEX_CASE_SENSITIVE_FILES
+#else
+#	define OEX_CASE_SENSITIVE_FILES
+#endif
 

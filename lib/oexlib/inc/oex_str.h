@@ -68,7 +68,7 @@ namespace zstr
         {
             oexASSERT_PTR( dst );
             oexASSERT_PTR( src );
-            
+
             if ( 0 >= sz_dst )
                 return 0;
 
@@ -895,6 +895,115 @@ namespace str
 
         return llNum;
     }
+
+	template< class T >
+		oexINT MatchPattern( oexCONST T *s, oexINT ln_s, oexCONST T* pat, oexINT ln_pat, oexBOOL ignore_case )
+	{
+		oexASSERT_PTR( s );
+		oexASSERT_PTR( pat );
+
+		// Match empty pattern
+		if ( !ln_pat )
+			return 0;
+
+		oexINT i = 0, p = 0;
+
+		// Skip multiple '*'
+		while ( p < ( ln_pat + 1 ) && pat[ p ] == oexTC( T, '*' ) && pat[ p + 1 ] == oexTC( T, '*' ) )
+			p++;
+
+		// Check for the 'any' pattern
+		if ( pat[ p ] == oexTC( T, '*' ) && p + 1 >= ln_pat )
+			return 0;
+
+		// While we're not at the end
+		while ( i < ln_s )
+		{
+			// Are we on a wildcard?
+			if ( pat[ p ] == oexTC( T, '*' ) )
+			{
+				// Are we matching everything?
+				if ( p + 1 >= ln_pat )
+					return 0;
+
+				// Check for pattern advance
+				if ( s[ i ] == pat[ p + 1 ] ||
+						( ignore_case &&
+							(
+								s[ i ] >= oexTC( T, 'a' ) && s[ i ] <= oexTC( T, 'z' ) &&
+								( s[ i ] - ( oexTC( T, 'a' ) - oexTC( T, 'A' ) ) ) == pat[ p + 1 ]
+							) ||
+
+							(
+								s[ i ] >= oexTC( T, 'A' ) && s[ i ] <= oexTC( T, 'Z' ) &&
+								( s[ i ] + ( oexTC( T, 'a' ) - oexTC( T, 'A' ) ) ) == pat[ p + 1 ]
+							)
+						)
+					) p += 2;
+
+			} // end if
+
+			// Just accept this character
+			else if ( pat[ p ] == oexTC( T, '?' ) )
+				p++;
+
+			// Otherwise advance if equal
+			else if ( s[ i ] == pat[ p ] )
+				p++;
+
+			// Case insensitive
+			else if ( ignore_case &&
+						(
+							s[ i ] >= oexTC( T, 'a' ) && s[ i ] <= oexTC( T, 'z' ) &&
+							( s[ i ] - ( oexTC( T, 'a' ) - oexTC( T, 'A' ) ) ) == pat[ p ]
+						) ||
+						(
+							s[ i ] >= oexTC( T, 'A' ) && s[ i ] <= oexTC( T, 'Z' ) &&
+							( s[ i ] + ( oexTC( T, 'a' ) - oexTC( T, 'A' ) ) ) == pat[ p ]
+						)
+					) p++;
+
+			else
+			{
+				// Attempt to back up in the pattern
+				while ( p && pat[ p ] != oexTC( T, '*' ) )
+					p--;
+
+				// Did we find the 'any' pattern?
+				if ( pat[ p ] != oexTC( T, '*' ) )
+					return -1;
+
+			} // end else
+
+			// Next char
+			i++;
+
+			// Are we at the end of the pattern?
+			if ( p >= ln_pat  )
+			{
+				// Quit if at the end of the string too
+				if ( i >= ln_s )
+					return 0;
+
+				// Attempt to back up in the pattern
+				while ( p && pat[ p ] != oexTC( T, '*' ) )
+					p--;
+
+				// Did we find the 'any' pattern?
+				if ( pat[ p ] != oexTC( T, '*' ) )
+					return -1;
+
+			} // end if
+
+		} // end while
+
+		// Skip wild cards
+		while ( p < ln_pat && pat[ p ] == oexTC( T, '*' ) )
+			p++;
+
+		// Did we match?
+		return ( p >= ln_pat ) ? 0 : -1;
+	}
 
 };
 
