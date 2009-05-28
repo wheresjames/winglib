@@ -298,7 +298,7 @@ public:
 		    if ( IsUrlChar( *x_str ) )
 			    ret << *x_str;
 		    else
-			    ret << num.Fmt( oexTT( T, "%%%02lX" ), (oexUCHAR)*x_str );
+			    ret << num.Fmt( oexTT( T, "%%%02X" ), (oexUCHAR)*x_str );
 
 		    x_str++;
 

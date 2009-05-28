@@ -48,7 +48,7 @@
 #if !defined( OEX_NODSHOW )
 
 // Just to make things a little easier
-#include <AtlBase.h>
+#include <atlbase.h>
 #include <string>
 #include <comutil.h>
 

@@ -25,11 +25,19 @@
 # Setup
 #-------------------------------------------------------------------
 
-VER_BINUTILS=binutils-2.19
-VER_GCC=gcc-4.2.4
-VER_GMP=gmp-4.2.4
-VER_MINGW32=mingwrt-3.15.2-mingw32-src
-VER_MINGWAPI=w32api-3.13-mingw32-src
+VER_BINUTILS=binutils-2.19.1
+FILE_BINUTILS=binutils-2.19.1-src.tar.gz
+
+VER_GCC=gcc-3.4.5-20060117-2
+FILE_GCC=gcc-core-3.4.5-20060117-2-src.tar.gz
+FILE_GPP=gcc-g++-3.4.5-20060117-2-src.tar.gz
+
+VER_MINGW32=mingwrt-3.15.2-mingw32
+FILE_MINGW32=mingwrt-3.15.2-mingw32-src.tar.gz
+
+VER_MINGWAPI=w32api-3.13-mingw32
+FILE_MINGWAPI=w32api-3.13-mingw32-src.tar.gz
+
 
 #-------------------------------------------------------------------
 
@@ -47,23 +55,29 @@ export PATH=$PATH:${PREFIX}/bin
 mkdir -p ${BUILDROOT}
 mkdir -p ${BUILDROOT}/logs
 mkdir -p ${DOWNLOADS}
-mkdir -p ${SYSROOT}/usr/include
-mkdir -p ${SYSROOT}/usr/include/asm
+mkdir -p ${PREFIX}/${TARGET}
+mkdir -p ${SYSROOT}
 
 # Set to 1 to verify signatures, (you must have the public keys)
 VERIFY_SIGS=0
+ARCHIVE_TYPE=tar.gz
 
 #-------------------------------------------------------------------
 # Get the sources
 #-------------------------------------------------------------------
 #	"http://hivelocity.dl.sourceforge.net/sourceforge/mingw/binutils-2.19.1-src.tar.gz" \
+#	"http://ftp.gnu.org/gnu/binutils/${VER_BINUTILS}.tar.bz2" \
+#	"http://ftp.gnu.org/gnu/gcc/${VER_GCC}/${VER_GCC}.tar.bz2" \
+
+REPO_SERVER="http://hivelocity.dl.sourceforge.net/sourceforge/mingw/"
 
 cd ${BUILDROOT}
 for URL in \
-	"http://ftp.gnu.org/gnu/binutils/${VER_BINUTILS}.tar.bz2" \
-	"http://ftp.gnu.org/gnu/gcc/${VER_GCC}/${VER_GCC}.tar.bz2" \
-	"http://hivelocity.dl.sourceforge.net/sourceforge/mingw/${VER_MINGW32}.tar.gz" \
-	"http://hivelocity.dl.sourceforge.net/sourceforge/mingw/${VER_MINGWAPI}.tar.gz"
+	"${REPO_SERVER}${FILE_BINUTILS}" \
+	"${REPO_SERVER}${FILE_GCC}" \
+	"${REPO_SERVER}${FILE_GPP}" \
+	"${REPO_SERVER}${FILE_MINGW32}" \
+	"${REPO_SERVER}${FILE_MINGWAPI}"
 do
     FILE=${URL##*/}
     FILE=${DOWNLOADS}/${FILE%%\?*}
@@ -81,18 +95,27 @@ do
 	fi
 done
 
+# Extract windows headers
+cd ${PREFIX}/${TARGET}
+gunzip -c ${DOWNLOADS}/${FILE_MINGW32} | tar xvf -
+cp -rf ${VER_MINGW32}/* ./
+rm -Rf ${VER_MINGW32}
+
+gunzip -c ${DOWNLOADS}/${FILE_MINGWAPI} | tar xvf -
+cp -rf ${VER_MINGWAPI}/* ./
+rm -Rf ${VER_MINGWAPI}
+
 #-------------------------------------------------------------------
 # 1. GNU binutils
 #-------------------------------------------------------------------
 cd ${BUILDROOT}
 if [ ! -d ${VER_BINUTILS} ]; then 
-	bunzip2 -c ${DOWNLOADS}/${VER_BINUTILS}.tar.bz2 | tar xvf -
+	gunzip -c ${DOWNLOADS}/${FILE_BINUTILS} | tar xvf -
 	find ${PATCHES} -name ${VER_BINUTILS}-*.patch | xargs -rtI {} cat {} | patch -d ${VER_BINUTILS} -p1
 	mkdir -p BUILD/${VER_BINUTILS}
 	cd BUILD/${VER_BINUTILS}
 	../../${VER_BINUTILS}/configure --prefix=${PREFIX} \
 		                            --target=${TARGET} \
-	                                --with-sysroot=${SYSROOT} \
 	                                2>&1 | tee -a ${BUILDROOT}/logs/10.${VER_BINUTILS}.configure.log
 	make 2>&1 | tee -a ${BUILDROOT}/logs/11.${VER_BINUTILS}.make.log
 	make install 2>&1 | tee -a ${BUILDROOT}/logs/12.${VER_BINUTILS}.make.install.log
@@ -105,33 +128,14 @@ fi
 #-------------------------------------------------------------------
 cd ${BUILDROOT}
 
-#GMP
-if [ ${VER_GMP} != "" ]; then
-	bunzip2 -c ${DOWNLOADS}/${VER_GMP}.tar.bz2 | tar xvf -
-	find ${PATCHES} -name ${VER_GMP}-*.patch | xargs -rtI {} cat {} | patch -d ${VER_GMP} -p1	
-	cd ${VER_GMP}
-CC=${CROSS_COMPILE}gcc \
-	AR=${CROSS_COMPILE}ar \
-	RANLIB=${CROSS_COMPILE}ranlib \
-	AS=${CROSS_COMPILE}as \
-	LD=${CROSS_COMPILE}ld \
-	./configure	--prefix=${SYSROOT}/usr/local \
-				--build=${BUILD} \
-				--host=${TARGET} \
-				2>&1 | tee ${BUILDROOT}/logs/20.01.${VER_GMP}.configure.stage1.log
-	make 2>&1 | tee ${BUILDROOT}/logs/20.02.${VER_GMP}.make.stage1.log
-	make install 2>&1 | tee -a ${BUILDROOT}/logs/20.03.${VER_GMP}.make.stage1.install.log
-	cd ${BUILDROOT}
-fi
-
-[ -d ${VER_GCC} ] || bunzip2 -c ${DOWNLOADS}/${VER_GCC}.tar.bz2 | tar xvf -
+[ -d ${VER_GCC} ] || gunzip -c ${DOWNLOADS}/${FILE_GCC} | tar xvf -
+[ -d ${VER_GPP} ] || gunzip -c ${DOWNLOADS}/${FILE_GPP} | tar xvf -
 find ${PATCHES} -name ${VER_GCC}-*.patch | xargs -rtI {} cat {} | patch -d ${VER_GCC} -p1
 mkdir -p BUILD/${VER_GCC}
 cd BUILD/${VER_GCC}
 
 ../../${VER_GCC}/configure --prefix=${PREFIX} \
                            --target=${TARGET} \
-                           --with-sysroot=${SYSROOT} \
 						   2>&1 | tee ${BUILDROOT}/logs/21.${VER_GCC}.configure.stage1.log
 make 2>&1 | tee ${BUILDROOT}/logs/22.${VER_GCC}.make.stage1.log
 make install 2>&1 | tee -a ${BUILDROOT}/logs/23.${VER_GCC}.make.stage1.install.log

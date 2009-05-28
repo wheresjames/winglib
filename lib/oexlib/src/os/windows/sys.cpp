@@ -38,7 +38,7 @@
 #include "std_os.h"
 
 #include <stdlib.h>
-#if defined( OEX_WINCE )
+#if defined( OEX_WINCE ) || defined( __MINGW32__ )
 //#	include <wtypes.h>
 #	define VSNPRINTF	vsnprintf
 #	define STRTOLL		strtoll
@@ -83,6 +83,8 @@ const oexUINT		CSys::c_StrErr_OK = S_OK;
 #endif
 
 //#if ( _MSC_VER >= 1300 )
+// !!! Don't use StringCchVPrintfW()
+//     it contains a very crazy buffer overrun
 #if 0
 #	define AWESOMENEWFULLOFBUGSWINDOWSSTRINGFUNCTION
 #else
@@ -285,7 +287,7 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 
 #else
 
-#if defined( OEX_WINCE )
+#if defined( OEX_WINCE ) || defined( __MINGW32__ )
 
 	// Create format string
 	oexINT nRet = VSNWPRINTF( x_pDst, x_pFmt, (va_list)x_pArgs );

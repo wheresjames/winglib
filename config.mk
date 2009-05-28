@@ -365,11 +365,12 @@ else
 			PLATFORM := windows
 			
 			# Cross compile for windows
-			CFG_TOOLPREFIX := i586-mingw32msvc- 
+			CFG_TOOLPREFIX := i586-mingw32msvc-
 
-			CFG_STDLIB := -lrt -pthread
+			CFG_STDLIB := -lole32 -lgdi32 -lwsock32 -lws2_32
 			CFG_LFLAGS := $(CFG_LEXTRA)
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_NOVFW -DOEX_NOCRTDEBUG \
+												-D__int64="long long"
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
@@ -406,9 +407,11 @@ else
 
 	# you can't use dlopen() [-ldl] with static linking!
 	# http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/d/dlopen.html
-	ifeq ($(LIBLINK),shared)
-		CFG_STDLIB := $(CFG_STDLIB) -ldl
-	endif		
+	ifeq ($(PLATFORM),posix)
+		ifeq ($(LIBLINK),shared)
+			CFG_STDLIB := $(CFG_STDLIB) -ldl
+		endif		
+	endif
 	
 #	ifeq ($(PRJ_TYPE),dll)
 #		CFG_LD := $(CFG_TOOLPREFIX)ld -E --export-dynamic

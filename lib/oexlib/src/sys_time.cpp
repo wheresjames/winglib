@@ -223,49 +223,49 @@ CStr CSysTime::FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors )
 		// Replace escape sequence
 		else switch( x_sTmpl[ ++x ] )
 		{
-			case oexT( 'h' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)Get12Hour() ); break;
+			case oexT( 'h' ) : str.AppendNum( oexT( "%0.2u" ), (oexUINT)Get12Hour() ); break;
 
-			case oexT( 'H' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)Get12Hour() ); break;
+			case oexT( 'H' ) : str.AppendNum( oexT( "%u" ), (oexUINT)Get12Hour() ); break;
 
-			case oexT( 'g' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uHour ); break;
+			case oexT( 'g' ) : str.AppendNum( oexT( "%0.2u" ), (oexUINT)m_time.uHour ); break;
 
-			case oexT( 'G' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uHour ); break;
+			case oexT( 'G' ) : str.AppendNum( oexT( "%u" ), (oexUINT)m_time.uHour ); break;
 
-			case oexT( 'm' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uMinute ); break;
+			case oexT( 'm' ) : str.AppendNum( oexT( "%0.2u" ), (oexUINT)m_time.uMinute ); break;
 
-			case oexT( 'M' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMinute ); break;
+			case oexT( 'M' ) : str.AppendNum( oexT( "%u" ), (oexUINT)m_time.uMinute ); break;
 
-			case oexT( 's' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uSecond ); break;
+			case oexT( 's' ) : str.AppendNum( oexT( "%0.2u" ), (oexUINT)m_time.uSecond ); break;
 
-			case oexT( 'S' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uSecond ); break;
+			case oexT( 'S' ) : str.AppendNum( oexT( "%u" ), (oexUINT)m_time.uSecond ); break;
 
-			case oexT( 'l' ) : str.AppendNum( oexT( "%0.3lu" ), (oexUINT)m_time.uMillisecond ); break;
+			case oexT( 'l' ) : str.AppendNum( oexT( "%0.3u" ), (oexUINT)m_time.uMillisecond ); break;
 
-			case oexT( 'L' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMillisecond ); break;
+			case oexT( 'L' ) : str.AppendNum( oexT( "%u" ), (oexUINT)m_time.uMillisecond ); break;
 
-			case oexT( 'u' ) : str.AppendNum( oexT( "%0.3lu" ), (oexUINT)m_time.uMicrosecond ); break;
+			case oexT( 'u' ) : str.AppendNum( oexT( "%0.3u" ), (oexUINT)m_time.uMicrosecond ); break;
 
-			case oexT( 'U' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMicrosecond ); break;
+			case oexT( 'U' ) : str.AppendNum( oexT( "%u" ), (oexUINT)m_time.uMicrosecond ); break;
 
-			case oexT( 'n' ) : str.AppendNum( oexT( "%0.3lu" ), (oexUINT)m_time.uNanosecond ); break;
+			case oexT( 'n' ) : str.AppendNum( oexT( "%0.3u" ), (oexUINT)m_time.uNanosecond ); break;
 
-			case oexT( 'N' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uNanosecond ); break;
+			case oexT( 'N' ) : str.AppendNum( oexT( "%u" ), (oexUINT)m_time.uNanosecond ); break;
 
-			case oexT( 'c' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uMonth ); break;
+			case oexT( 'c' ) : str.AppendNum( oexT( "%0.2u" ), (oexUINT)m_time.uMonth ); break;
 
-			case oexT( 'C' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uMonth ); break;
+			case oexT( 'C' ) : str.AppendNum( oexT( "%u" ), (oexUINT)m_time.uMonth ); break;
 
-			case oexT( 'd' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uDay ); break;
+			case oexT( 'd' ) : str.AppendNum( oexT( "%0.2u" ), (oexUINT)m_time.uDay ); break;
 
-			case oexT( 'D' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uDay ); break;
+			case oexT( 'D' ) : str.AppendNum( oexT( "%u" ), (oexUINT)m_time.uDay ); break;
 
-			case oexT( 'i' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uDayOfWeek ); break;
+			case oexT( 'i' ) : str.AppendNum( oexT( "%u" ), (oexUINT)m_time.uDayOfWeek ); break;
 
-			case oexT( 'I' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uDayOfWeek + 1 ); break;
+			case oexT( 'I' ) : str.AppendNum( oexT( "%u" ), (oexUINT)m_time.uDayOfWeek + 1 ); break;
 
-			case oexT( 'y' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT)m_time.uYear ); break;
+			case oexT( 'y' ) : str.AppendNum( oexT( "%0.2u" ), (oexUINT)m_time.uYear ); break;
 
-			case oexT( 'Y' ) : str.AppendNum( oexT( "%lu" ), (oexUINT)m_time.uYear ); break;
+			case oexT( 'Y' ) : str.AppendNum( oexT( "%u" ), (oexUINT)m_time.uYear ); break;
 
             case oexT( 'a' ) : str << ( IsPM() ? oexT( "pm" ) : oexT( "am" ) ); break;
 
@@ -286,13 +286,13 @@ CStr CSysTime::FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors )
 					case oexT( 's' ) :
 					case oexT( 'S' ) : str << ( ( 0 > m_time.nTzBias ) ? oexT( '-' ) : oexT( '+' ) ); break;
 
-                    case oexT( 'h' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) / 60 ); break;
+                    case oexT( 'h' ) : str.AppendNum( oexT( "%0.2u" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) / 60 ); break;
 
-					case oexT( 'H' ) : str.AppendNum( oexT( "%lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) / 60 ); break;
+					case oexT( 'H' ) : str.AppendNum( oexT( "%u" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) / 60 ); break;
 
-					case oexT( 'm' ) : str.AppendNum( oexT( "%0.2lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) % 60 ); break;
+					case oexT( 'm' ) : str.AppendNum( oexT( "%0.2u" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) % 60 ); break;
 
-					case oexT( 'M' ) : str.AppendNum( oexT( "%lu" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) % 60 ); break;
+					case oexT( 'M' ) : str.AppendNum( oexT( "%u" ), (oexUINT) ( 0 > m_time.nTzBias ? -m_time.nTzBias : m_time.nTzBias ) % 60 ); break;
 
 					// Unknown escape sequence
 					default :

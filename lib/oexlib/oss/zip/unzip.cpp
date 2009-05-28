@@ -1,6 +1,6 @@
 
 #ifdef WIN32
-#	include <Windows.h>
+#	include <windows.h>
 #endif
 
 
@@ -15,7 +15,9 @@
 #include <string.h>
 #ifdef WIN32
 #	include <tchar.h>
-#	include <crtdbg.h>
+#	if !defined( OEX_NOCRTDEBUG )
+#		include <crtdbg.h>
+#	endif
 #else
 #	define MAX_PATH		( 1024 * 4 )
 	typedef unsigned long DWORD;

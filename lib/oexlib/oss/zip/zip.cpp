@@ -1,6 +1,6 @@
 
 #ifdef WIN32
-#	include <Windows.h>
+#	include <windows.h>
 #else
 #	include <stdarg.h>
 #endif
@@ -17,7 +17,9 @@
 #include <string.h>
 #ifdef WIN32
 #	include <tchar.h>
-#	include <crtdbg.h>
+#	if !defined( OEX_NOCRTDEBUG )
+#		include <crtdbg.h>
+#	endif
 #else
 #	define far
 #	define __cdecl

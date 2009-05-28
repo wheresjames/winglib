@@ -10,6 +10,7 @@ irrlicht
 irrlicht-es
 j2k
 jpeg
+mysql
 ogles
 ogles-src
 opencv

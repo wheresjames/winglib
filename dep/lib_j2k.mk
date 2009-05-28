@@ -20,7 +20,7 @@ include $(PRJ_LIBROOT)/config.mk
 # File locations
 #-------------------------------------------------------------------
 ifeq ($(OS),win32)
-CFG_CFLAGS := $(CFG_CFLAGS) /DLIBJ2K_EXPORTS
+	PRJ_DEFS := $(PRJ_DEFS) LIBJ2K_EXPORTS
 endif
 
 export LOC_TAG := def

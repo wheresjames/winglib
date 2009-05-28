@@ -33,7 +33,7 @@ else
 #-------------------------------------------------------------------
 
 ifeq ($(OS),win32)
-CFG_CFLAGS := $(CFG_CFLAGS) /DIRRLICHT_EXPORTS
+	PRJ_DEFS := $(PRJ_DEFS) IRRLICHT_EXPORTS
 endif
 
 export LOC_TAG := def

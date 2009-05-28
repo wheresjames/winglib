@@ -361,8 +361,8 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str1 == oexT( "d = 9" ) ) )
 		return -9;
 
-    str1.Fmt( oexT( "lu = %lu" ), (oex::oexULONG)11 );
-	if ( !oexVERIFY( str1 == oexT( "lu = 11" ) ) )
+    str1.Fmt( oexT( "u = %u" ), (oex::oexULONG)11 );
+	if ( !oexVERIFY( str1 == oexT( "u = 11" ) ) )
 		return -9;
 
     str1.Fmt( oexT( "s = %s" ), oexPT( "String" ) );
@@ -373,8 +373,8 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str1 == oexT( "f = 3.140000" ) ) )
 		return -9;
 
-    str1.Fmt( oexT( "lu = %lu, s = %s, f = %f" ), (oex::oexULONG)11, oexPT( "String" ), (oex::oexDOUBLE)3.14f );
-	if ( !oexVERIFY( str1 == oexT( "lu = 11, s = String, f = 3.140000" ) ) )
+    str1.Fmt( oexT( "u = %u, s = %s, f = %f" ), (oex::oexULONG)11, oexPT( "String" ), (oex::oexDOUBLE)3.14f );
+	if ( !oexVERIFY( str1 == oexT( "u = 11, s = String, f = 3.140000" ) ) )
 		return -9;
 
     oex::oexGUID guid;

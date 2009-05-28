@@ -37,7 +37,7 @@
 
 #include <stdlib.h>
 
-#if !defined( OEX_WINCE )
+#if !defined( OEX_NOCRTDEBUG )
 #	include <crtdbg.h>
 #endif
 
@@ -151,7 +151,7 @@ oexBOOL CMem::MemReport()
 
 oexBOOL CMem::DumpLeaks()
 {
-#if defined( OEX_WINCE )
+#if defined( OEX_NOCRTDEBUG )
 	return oexFALSE;
 #else
 

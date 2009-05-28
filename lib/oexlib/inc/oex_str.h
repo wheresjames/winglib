@@ -1117,18 +1117,18 @@ namespace guid
 
 	    // Example GUID : DD05F574-2D69-4463-95DD-F76C9F7C5E6D
         return os::CSys::StrFmt( x_pStr, x_uMax,
-                 oexTT( T_CHAR, "%0.8lX-%0.4lX-%0.4lX-%0.2lX%0.2lX-%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX%0.2lX" ),
-			     (oexLONG) x_pGuid->Data1,
-			     (oexLONG) x_pGuid->Data2,
-			     (oexLONG) x_pGuid->Data3,
-			     (oexLONG) x_pGuid->Data4[ 0 ],
-			     (oexLONG) x_pGuid->Data4[ 1 ],
-			     (oexLONG) x_pGuid->Data4[ 2 ],
-			     (oexLONG) x_pGuid->Data4[ 3 ],
-			     (oexLONG) x_pGuid->Data4[ 4 ],
-			     (oexLONG) x_pGuid->Data4[ 5 ],
-			     (oexLONG) x_pGuid->Data4[ 6 ],
-			     (oexLONG) x_pGuid->Data4[ 7 ] );
+                 oexTT( T_CHAR, "%0.8X-%0.4X-%0.4X-%0.2X%0.2X-%0.2X%0.2X%0.2X%0.2X%0.2X%0.2X" ),
+			     (oexINT) x_pGuid->Data1,
+			     (oexINT) x_pGuid->Data2,
+			     (oexINT) x_pGuid->Data3,
+			     (oexINT) x_pGuid->Data4[ 0 ],
+			     (oexINT) x_pGuid->Data4[ 1 ],
+			     (oexINT) x_pGuid->Data4[ 2 ],
+			     (oexINT) x_pGuid->Data4[ 3 ],
+			     (oexINT) x_pGuid->Data4[ 4 ],
+			     (oexINT) x_pGuid->Data4[ 5 ],
+			     (oexINT) x_pGuid->Data4[ 6 ],
+			     (oexINT) x_pGuid->Data4[ 7 ] );
     }
 
     template< typename T_CHAR, typename T_GUID >

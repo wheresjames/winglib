@@ -72,7 +72,7 @@ CStr CTrace::GetBacktrace( oexUINT x_uSkip, oexUINT x_uMax )
 
 static BOOL GetWSAErrorMsg(oexSTR pMsg, oexUINT err)
 {
-	oexTCHAR *ptr = NULL;
+	oexCSTR ptr = NULL;
 
 	switch( err )
 	{
