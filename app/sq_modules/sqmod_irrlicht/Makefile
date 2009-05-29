@@ -6,7 +6,7 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_irrlicht
 PRJ_TYPE := dll
-PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind \
+PRJ_INCS := winglib/lib/sqbind winglib/lib/oexlib \
 			SqPlus/include SqPlus/sqplus bullet/src \
 			freetype/include ftgl/src
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel \

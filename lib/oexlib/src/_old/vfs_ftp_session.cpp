@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -36,13 +36,13 @@
 
 OEX_USING_NAMESPACE
 
-/* 
+/*
 Code                Description
 
 110                 Restart marker reply
 120                 Service ready in nnn minutes
 125                 Data connection already open; transfer starting
-150                 File status ok; about to open data connection  
+150                 File status ok; about to open data connection
 200                 Command ok
 202                 Command not implemented; superfluous at this site
 211                 System status or system help reply
@@ -92,7 +92,7 @@ CVfsFtpSession::CVfsFtpSession()
     m_sRoot = "_root_";
 }
 
-oexBOOL CVfsFtpSession::OnConnect( oexINT x_nErr ) 
+oexBOOL CVfsFtpSession::OnConnect( oexINT x_nErr )
 {
     // Send greetings
     Write( "220 Nebula Server Ready.\n" );
@@ -137,7 +137,7 @@ oexBOOL CVfsFtpSession::OnRead( oexINT x_nErr )
 
     // CWD
     else if ( sCmd == "CWD" )
-    {   sData = sData.TrimWhiteSpace();        
+    {   sData = sData.TrimWhiteSpace();
         if ( *sData != '/' && *sData != '\\' )
             sData = CStr8::BuildPath( m_sCurrent, sData );
         m_sCurrent = sData;
@@ -146,19 +146,19 @@ oexBOOL CVfsFtpSession::OnRead( oexINT x_nErr )
 
     // MKD
     else if ( sCmd == "MKD" )
-    {   sData = sData.TrimWhiteSpace();        
+    {   sData = sData.TrimWhiteSpace();
         if ( *sData != '/' && *sData != '\\' )
             sData = CStr8::BuildPath( m_sCurrent, sData );
-        m_vfs.MakeFolder( CStr8::BuildPath( m_sRoot, sData ).Ptr() ); 
+        m_vfs.MakeFolder( CStr8::BuildPath( m_sRoot, sData ).Ptr() );
         Write( "250 MKD command successful.\n" );
     } // end else if
 
     // RMD
     else if ( sCmd == "RMD" )
-    {   sData = sData.TrimWhiteSpace();        
+    {   sData = sData.TrimWhiteSpace();
         if ( *sData != '/' && *sData != '\\' )
             sData = CStr8::BuildPath( m_sCurrent, sData );
-        m_vfs.Delete( CStr8::BuildPath( m_sRoot, sData ).Ptr() ); 
+        m_vfs.Delete( CStr8::BuildPath( m_sRoot, sData ).Ptr() );
         Write( "250 RMD command successful.\n" );
     } // end else if
 
@@ -202,16 +202,16 @@ oexBOOL CVfsFtpSession::OnRead( oexINT x_nErr )
 
     // DELE
     else if ( sCmd == "DELE" )
-    {   sData = sData.TrimWhiteSpace();        
+    {   sData = sData.TrimWhiteSpace();
         if ( *sData != '/' && *sData != '\\' )
             sData = CStr8::BuildPath( m_sCurrent, sData );
-        m_vfs.Delete( CStr8::BuildPath( m_sRoot, sData ).Ptr() ); 
+        m_vfs.Delete( CStr8::BuildPath( m_sRoot, sData ).Ptr() );
         Write( "250 DELE command successful.\n" );
     } // end if
 
     // QUIT
     else if ( sCmd == "QUIT" )
-    {   Write( "221 Goodbye.\n" );        
+    {   Write( "221 Goodbye.\n" );
         CloseSession();
     }
 
@@ -223,7 +223,7 @@ oexBOOL CVfsFtpSession::OnRead( oexINT x_nErr )
 }
 
 oexBOOL CVfsFtpSession::CmdPasv()
-{   
+{
     oexBOOL bStarted = oexFALSE;
 
     // Loop through port numbers
@@ -244,7 +244,7 @@ oexBOOL CVfsFtpSession::CmdPasv()
 
         // Bind to port
         if ( m_nsData.Queue( 0, oexCall( oexT( "Bind" ), m_uPasvPort ) )
-                .Wait( oexDEFAULT_TIMEOUT ).GetReply().ToInt() 
+                .Wait( oexDEFAULT_TIMEOUT ).GetReply().ToInt()
 
              && m_nsData.Queue( 0, oexCall( oexT( "Listen" ), 0 ) )
                 .Wait( oexDEFAULT_TIMEOUT ).GetReply().ToInt() )
@@ -252,16 +252,16 @@ oexBOOL CVfsFtpSession::CmdPasv()
             bStarted = oexTRUE;
 
     } // end while
-        
+
     // Did we get a server?
     if ( bStarted )
     {
         // Tell the client where the server is
         CStr8 sAddress = oexStrToStr8( LocalAddress().GetDotAddress().Replace( '.', ',' ) );
-        Write( CStr8().Fmt( "227 Entering Passive Mode (%s,%lu,%lu).\n", 
+        Write( CStr8().Fmt( "227 Entering Passive Mode (%s,%u,%u).\n",
                             sAddress.Ptr(), m_uPasvPort >> 8 & 0xff, m_uPasvPort & 0xff ) );
     } // end if
-        
+
     else
         Write( "425 Error creating server.\n" );
 
@@ -290,14 +290,14 @@ CDispatch CVfsFtpSession::GetPassiveConnection()
 
     } // end if
 
-    else 
+    else
         Write( "125 Data connection already open; Transfer starting.\n" );
 
     return session;
 }
 
 oexBOOL CVfsFtpSession::CmdList()
-{       
+{
     // Get connection
     CDispatch session = GetPassiveConnection();
 
@@ -313,10 +313,10 @@ oexBOOL CVfsFtpSession::CmdList()
     for ( CPropertyBag8::iterator itPb; pb.List().Next( itPb ); )
     {
         // Format file information
-        sStr << CStr8().Fmt( "%crwxrwxrwx    1 user     group %lu %s %s\n",
+        sStr << CStr8().Fmt( "%crwxrwxrwx    1 user     group %u %s %s\n",
                               ( itPb.Obj()[ "type" ].ToLong() == 2 ) ? 'd' : '-',
                               (oexUINT)itPb.Obj()[ "size" ].ToLong(),
-                              oexStrToStr8Ptr( 
+                              oexStrToStr8Ptr(
                                 CSysTime( CSysTime::eFmtFile, 0 )
                                     .FormatTime( oexT( "%b %d %Y" ) ) ),
                               itPb.Node()->key.Ptr() );
@@ -332,13 +332,13 @@ oexBOOL CVfsFtpSession::CmdList()
     oexCONST oexUINT uTimeout = 8;
     os::CHqTimer to( oexTRUE );
     double dTime = 0;
-    
+
     // Attempt to write data
     while ( !nWritten && uTimeout > ( dTime = to.ElapsedSeconds() ) && session.IsConnected() )
     {
         nWritten = session.Queue( 0, oexCall( oexT( "WaitTxEmpty" ), 0 ) )
                             .Wait( uTimeout * 1000 ).GetReply().ToInt();
-        
+
         if ( !nWritten )
             os::CSys::Sleep( 15 );
 
@@ -348,7 +348,7 @@ oexBOOL CVfsFtpSession::CmdList()
     m_nsData.Queue( 0, oexCall( oexT( "Reset" ) ) ).Wait( oexDEFAULT_TIMEOUT );
 
     // All done
-    if ( nWritten ) 
+    if ( nWritten )
         Write( "226 Transfer complete.\n" );
 
     // Timeout?
@@ -363,7 +363,7 @@ oexBOOL CVfsFtpSession::CmdList()
 }
 
 oexBOOL CVfsFtpSession::CmdRetr( oexCSTR8 x_pFile )
-{       
+{
     CStr8 sContent = m_vfs.LoadFile( CStr8::BuildPath( CurrentPath(), x_pFile ).Ptr() );
     if ( !sContent.Length() )
     {   Write( "451 Requested file action aborted; local error in processing.\n" );
@@ -389,7 +389,7 @@ oexBOOL CVfsFtpSession::CmdRetr( oexCSTR8 x_pFile )
 }
 
 oexBOOL CVfsFtpSession::CmdStor( oexCSTR8 x_pFile )
-{       
+{
     // Get connection
     CDispatch session = GetPassiveConnection();
 

@@ -701,7 +701,7 @@ oex::oexBOOL CSqEngine::Run( oex::oexCSTR pScript )
 }
 
 oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e )
-{	oex::CStr sErr = oex::CStr().Fmt( oexT( "%s(%lu)\r\n   %s" ), x_e.sSource.c_str(), x_e.uLine, x_e.sDesc.c_str() );
+{	oex::CStr sErr = oex::CStr().Fmt( oexT( "%s(%u)\r\n   %s" ), x_e.sSource.c_str(), x_e.uLine, x_e.sDesc.c_str() );
 	oexERROR( 0, sErr );
 	m_sErr = sErr.Ptr();
 #if defined( OEX_WINDOWS )
@@ -719,7 +719,7 @@ oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, oex::oexCSTR x_pErr, oex
 	if ( !oexCHECK_PTR( x_pErr ) )
 		x_pErr = oexT( "" );
 
-	oex::CStr sErr = oex::CStr().Fmt( oexT( "%s(%lu)\r\n   %s" ), x_pFile, x_uLine, x_pErr );
+	oex::CStr sErr = oex::CStr().Fmt( oexT( "%s(%u)\r\n   %s" ), x_pFile, x_uLine, x_pErr );
 	oexERROR( 0, sErr );
 	m_sErr = sErr.Ptr();
 #if defined( OEX_WINDOWS )

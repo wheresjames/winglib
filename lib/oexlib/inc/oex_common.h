@@ -58,9 +58,10 @@ namespace cmn
 
 		required_bytes = FitTo( 42, 8 );
 	*/
-	oexINT static FitTo( oexINT val, oexINT unit )
+    template < typename T >
+		T FitTo( T val, T unit )
 	{	if ( !unit ) return 0;
-		oexINT i = val / unit;
+		oexINT i = (oexINT)( val / unit );
 		return ( ( i * unit ) >= val ) ? i : i + 1;
 	}
 

@@ -1252,7 +1252,7 @@ ulg flush_block(TState &state,char *buf, ulg stored_len, int eof)
     static_lenb = (state.ts.static_len+3+7)>>3;
     state.ts.input_len += stored_len; /* for debugging only */
 
-    Trace("\nopt %lu(%lu) stat %lu(%lu) stored %lu lit %u dist %u ",
+    Trace("\nopt %u(%u) stat %u(%u) stored %u lit %u dist %u ",
             opt_lenb, state.ts.opt_len, static_lenb, state.ts.static_len, stored_len,
             state.ts.last_lit, state.ts.last_dist);
 

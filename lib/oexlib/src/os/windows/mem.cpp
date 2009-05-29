@@ -138,7 +138,7 @@ static void __cdecl oex_DumpHook( void * pUserData, size_t nBytes )
 
 oexBOOL CMem::MemReport()
 {
-#if defined( oexDEBUG )
+#if defined( oexDEBUG ) && !defined( OEX_NOCRTDEBUG )
 
     _CrtMemState checkPt1;
     _CrtMemCheckpoint( &checkPt1 );
@@ -171,7 +171,7 @@ oexBOOL CMem::DumpLeaks()
 #endif
 
     return bLeaks;
-    
+
 #endif
 }
 

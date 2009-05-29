@@ -186,7 +186,7 @@ int CCellConnection::LoadTags()
 
 int CCellConnection::IsResponding()
 {
-	return ( m_bNotResponding ) ? 0 : 1; 
+	return ( m_bNotResponding ) ? 0 : 1;
 }
 
 int CCellConnection::IsConnected()
@@ -194,7 +194,7 @@ int CCellConnection::IsConnected()
 	if ( m_bNotResponding )
 		return 0;
 
-	return ( OK == m_comm.error ) ? 1 : 0; 
+	return ( OK == m_comm.error ) ? 1 : 0;
 }
 
 oex::oexCSTR CCellConnection::GetTypeName( int nType )
@@ -317,7 +317,7 @@ oex::oexBOOL CCellConnection::GetItemValue( int nType, unsigned char *pData, int
 	{
 		for ( int b = 0; b < nSize; b++ )
 		{	if ( b && !( b & 0x0f ) ) sRet += oexT( "<br>" ), sRet += oexNL;
-			sRet += oexFmt( oexT( "%02lX " ), (int)pData[ b ] ).Ptr();
+			sRet += oexFmt( oexT( "%02X " ), (int)pData[ b ] ).Ptr();
 		} // end for
 
 	} // end if
@@ -397,7 +397,7 @@ oex::oexBOOL CCellConnection::GetItemValue( int nType, unsigned char *pData, int
 		default :
 			for ( int b = 0; b < nSize; b++ )
 			{	if ( b && !( b & 0x0f ) ) sRet += oexT( "<br>" ), sRet += oexNL;
-				sRet += oexFmt( oexT( "%02lX " ), (int)pData[ b ] ).Ptr();
+				sRet += oexFmt( oexT( "%02X " ), (int)pData[ b ] ).Ptr();
 			} // end for
 
 	} // end switch
@@ -760,7 +760,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 	if ( nLen && oexCHECK_PTR( pDat ) )
 	{	sqbind::stdString sVal = oexT( "" );
 		for ( int b = 0; b < nLen; b++ )
-			sVal += oexFmt( oexT( "%02lX" ), (int)pDat[ b ] ).Ptr();
+			sVal += oexFmt( oexT( "%02X" ), (int)pDat[ b ] ).Ptr();
 		mRet.set( oexT( "raw_value" ), sVal );
 	} // end if
 
@@ -802,7 +802,7 @@ sqbind::stdString CCellConnection::GetBackplaneData()
 	ret << oexFmt( oexT( "Address        : %04X" ), 	   m_cBackplane.Obj().address ) 		<< oexNL;
 	ret <<         oexT( "Major Rev      : " ) 			<< m_cBackplane.Obj().rev_major 		<< oexNL;
 	ret <<         oexT( "Minor Rev      : " ) 			<< m_cBackplane.Obj().rev_minor 		<< oexNL;
-	ret << oexFmt( oexT( "Serial #       : %08lX" ),	   m_cBackplane.Obj().serial_number )	<< oexNL;
+	ret << oexFmt( oexT( "Serial #       : %08X" ),	   m_cBackplane.Obj().serial_number )	<< oexNL;
 	ret <<         oexT( "Backplane size : " ) 			<< m_cBackplane.Obj().rack_size 		<< oexNL;
 	ret << oexNL;
 
@@ -818,7 +818,7 @@ sqbind::stdString CCellConnection::GetBackplaneData()
 		ret <<		   oexT( "ProductCode : " )			<< m_cRack.Obj().identity[ i ]->product_code << oexNL;
 		ret <<		   oexT( "Revision    : " )			<< m_cRack.Obj().identity[ i ]->rev_lo << oexNL;
 		ret << oexFmt( oexT( "Status      : %X" ), 	       m_cRack.Obj().identity[ i ]->status )	<< oexNL;
-		ret << oexFmt( oexT( "Serial #    : %08lX" ), 	   m_cRack.Obj().identity[ i ]->serial )	<< oexNL;
+		ret << oexFmt( oexT( "Serial #    : %08X" ), 	   m_cRack.Obj().identity[ i ]->serial )	<< oexNL;
 		ret << oexNL;
 
 	} // end for
@@ -862,24 +862,24 @@ sqbind::stdString CCellConnection::GetBackplaneData()
 					if ( i < m_tagsConfig.count && oexCHECK_PTR( m_tagsConfig.tag ) )
 					{
 						ret << oexT( "--- Config ---" ) << oexNL;
-						ret << oexFmt( oexT( "Top Base     : %08lX" ),	m_tagsDetails.tag[ i ]->topbase ) << oexNL;
-						ret << oexFmt( oexT( "Base         : %08lX" ),	m_tagsDetails.tag[ i ]->base ) << oexNL;
-						ret << oexFmt( oexT( "Link ID      : %08lX" ),	m_tagsDetails.tag[ i ]->linkid ) << oexNL;
-						ret << oexFmt( oexT( "Type         : %04lX" ),	m_tagsDetails.tag[ i ]->type ) << oexNL;
+						ret << oexFmt( oexT( "Top Base     : %08X" ),	m_tagsDetails.tag[ i ]->topbase ) << oexNL;
+						ret << oexFmt( oexT( "Base         : %08X" ),	m_tagsDetails.tag[ i ]->base ) << oexNL;
+						ret << oexFmt( oexT( "Link ID      : %08X" ),	m_tagsDetails.tag[ i ]->linkid ) << oexNL;
+						ret << oexFmt( oexT( "Type         : %04X" ),	m_tagsDetails.tag[ i ]->type ) << oexNL;
 					} // end if
 
 					if ( i < m_tagsDetails.count && oexCHECK_PTR( m_tagsDetails.tag ) )
 					{
 						ret << oexNL << oexT( "--- Details ---" ) << oexNL;
-						ret << oexFmt( oexT( "Top Base     : %08lX" ),	m_tagsDetails.tag[ i ]->topbase ) << oexNL;
-						ret << oexFmt( oexT( "Base         : %08lX" ),	m_tagsDetails.tag[ i ]->base ) << oexNL;
-						ret << oexFmt( oexT( "ID           : %08lX" ),	m_tagsDetails.tag[ i ]->id ) << oexNL;
-						ret << oexFmt( oexT( "Link ID      : %08lX" ),	m_tagsDetails.tag[ i ]->linkid ) << oexNL;
-						ret << oexFmt( oexT( "Type         : %04lX" ),	m_tagsDetails.tag[ i ]->type ) << oexNL;
-						ret << oexFmt( oexT( "Size         : %04lX" ),	m_tagsDetails.tag[ i ]->size ) << oexNL;
+						ret << oexFmt( oexT( "Top Base     : %08X" ),	m_tagsDetails.tag[ i ]->topbase ) << oexNL;
+						ret << oexFmt( oexT( "Base         : %08X" ),	m_tagsDetails.tag[ i ]->base ) << oexNL;
+						ret << oexFmt( oexT( "ID           : %08X" ),	m_tagsDetails.tag[ i ]->id ) << oexNL;
+						ret << oexFmt( oexT( "Link ID      : %08X" ),	m_tagsDetails.tag[ i ]->linkid ) << oexNL;
+						ret << oexFmt( oexT( "Type         : %04X" ),	m_tagsDetails.tag[ i ]->type ) << oexNL;
+						ret << oexFmt( oexT( "Size         : %04X" ),	m_tagsDetails.tag[ i ]->size ) << oexNL;
 						ret << 	       oexT( "Data Length  : " ) 		<< m_tagsDetails.tag[ i ]->datalen << oexNL;
-						ret << oexFmt( oexT( "Memory       : %08lX" ),	m_tagsDetails.tag[ i ]->memory ) << oexNL;
-						ret << oexFmt( oexT( "Display      : %04lX" ),	m_tagsDetails.tag[ i ]->displaytype ) << oexNL;
+						ret << oexFmt( oexT( "Memory       : %08X" ),	m_tagsDetails.tag[ i ]->memory ) << oexNL;
+						ret << oexFmt( oexT( "Display      : %04X" ),	m_tagsDetails.tag[ i ]->displaytype ) << oexNL;
 						ret <<         oexT( "Name         : " ) 		<< (const char*)m_tagsDetails.tag[ i ]->name << oexNL;
 						ret <<         oexT( "Type Name    : " ) 		<< GetTagTypeName( *m_tagsDetails.tag[ i ] ).c_str() << oexNL;
 						sqbind::stdString sVal;
@@ -914,11 +914,11 @@ sqbind::stdString CCellConnection::GetBackplaneData()
 	{
 		ret << oexNL;
 		ret << oexT( "--- Program " ) << i << oexT( " ---" ) << oexNL;
-		ret << oexFmt( 				oexT( "Base      : %08lX" ),	m_prog_list.prog[ i ]->base ) << oexNL;
+		ret << oexFmt( 				oexT( "Base      : %08X" ),	m_prog_list.prog[ i ]->base ) << oexNL;
 
 		if ( !get_program_details( &m_comm, &m_path, m_prog_list.prog[ i ], debug ) )
 		{
-			ret << oexFmt( 			oexT( "Link ID   : %08lX" ),	m_prog_list.prog[ i ]->linkid ) << oexNL;
+			ret << oexFmt( 			oexT( "Link ID   : %08X" ),	m_prog_list.prog[ i ]->linkid ) << oexNL;
 			for ( int j = 0; j < m_tagsDetails.count; j++ )
 				if ( m_tagsDetails.tag[ j ]->linkid == m_prog_list.prog[ i ]->linkid )
 				{
@@ -940,8 +940,8 @@ sqbind::stdString CCellConnection::GetBackplaneData()
 					for ( int j = 0; j < td.count; j++ )
 					{
 						ret << oexT( "Program Tag " ) << j << oexNL;
-						ret << 		oexFmt( oexT( "Base         : %08lX" ),	   td.tag[ j ]->base ) << oexNL;
-						ret << 		oexFmt( oexT( "ID           : %08lX" ),	   td.tag[ j ]->id ) << oexNL;
+						ret << 		oexFmt( oexT( "Base         : %08X" ),	   td.tag[ j ]->base ) << oexNL;
+						ret << 		oexFmt( oexT( "ID           : %08X" ),	   td.tag[ j ]->id ) << oexNL;
 
 						if ( !get_object_details( &m_comm, &m_path, td.tag[ j ], debug ) )
 						{
@@ -949,7 +949,7 @@ sqbind::stdString CCellConnection::GetBackplaneData()
 								ret << oexT( "read_object_value() failed for tag " ) << j << oexNL;
 
 							ret << 	        oexT( "Name         : " ) 		<< (const char*)td.tag[ j ]->name << oexNL;
-							ret << oexFmt(  oexT( "Type         : %04lX" ),	   td.tag[ j ]->type ) << oexNL;
+							ret << oexFmt(  oexT( "Type         : %04X" ),	   td.tag[ j ]->type ) << oexNL;
 							ret << 	        oexT( "Size         : " ) 		<< td.tag[ j ]->size << oexNL;
 							ret << 	        oexT( "Data Length  : " ) 		<< td.tag[ j ]->datalen << oexNL;
 							ret <<          oexT( "Type Name    : " ) 		<< GetTagTypeName( *td.tag[ j ] ).c_str() << oexNL;
@@ -963,7 +963,7 @@ sqbind::stdString CCellConnection::GetBackplaneData()
 							if ( td.tag[ j ]->datalen && oexCHECK_PTR( td.tag[ j ]->data ) )
 							{	for ( int b = 0; b < td.tag[ j ]->datalen; b++ )
 								{	if ( b && !( b & 0x0f ) ) ret << oexNL;
-									ret << oexFmt( oexT( "%02lX " ), td.tag[ j ]->data[ b ] );
+									ret << oexFmt( oexT( "%02X " ), td.tag[ j ]->data[ b ] );
 								} // end for
 								ret << oexNL;
 							} // end if

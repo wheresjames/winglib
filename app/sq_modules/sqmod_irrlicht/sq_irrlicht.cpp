@@ -78,8 +78,8 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height, in
 #else
 	param.Bits = 32;
 	param.AntiAlias = true;
-//	param.DriverType = irr::video::EDT_OPENGL;
-	param.DriverType = irr::video::EDT_BURNINGSVIDEO;
+	param.DriverType = irr::video::EDT_OPENGL;
+//	param.DriverType = irr::video::EDT_BURNINGSVIDEO;
 	param.WindowSize = irr::core::dimension2d<irr::s32>( width, height );
 #endif
 
@@ -962,7 +962,7 @@ CSqirrNode CSqIrrlicht::AddSphere( float fRadius, long lPolyCount )
     {   pNode->getMaterial( i ).NormalizeNormals = true;
         pNode->getMaterial( i ).Shininess = 0;
     } // end for
-	
+
     return pNode;
 */
 }
@@ -974,10 +974,10 @@ int CSqIrrlicht::OnEvent( const irr::SEvent& rEvent )
 		case irr::EET_MOUSE_INPUT_EVENT :
 		{
 			// If we have a queue
-			if ( m_pCallbackQueue ) 
+			if ( m_pCallbackQueue )
 			{
 				// Mouse callback
-				m_pCallbackQueue->execute( oexNULL, "", m_sCallbackFunction, 
+				m_pCallbackQueue->execute( oexNULL, "", m_sCallbackFunction,
 										   oexMks( rEvent.MouseInput.Event ).Ptr(),
 										   oexMks( rEvent.MouseInput.X ).Ptr(),
 										   oexMks( rEvent.MouseInput.Y ).Ptr(),
@@ -1025,7 +1025,7 @@ int CSqIrrlicht::OnEvent( const irr::SEvent& rEvent )
 
 			} // end switch
 */
-		} break;	
+		} break;
 
 		case irr::EET_GUI_EVENT :
 		{
@@ -1069,30 +1069,30 @@ int CSqIrrlicht::getLineIntersect( CSqirrLine &line, CSqirrVector3d &pt, CSqirrV
 int CSqIrrlicht::getIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSqirrVector3d &axis, CSqirrVector3d *intersect )
 {
     // Must have object
-    if ( !m_pCamera || !m_pSmgr ) 
+    if ( !m_pCamera || !m_pSmgr )
 		return 0;
 
-    // Is mouse in the window?    
+    // Is mouse in the window?
     if ( 0 > ptScreen.Obj().X || 0 > ptScreen.Obj().Y )
         return 0;
 
     m_pCamera->OnRegisterSceneNode();
 
     // Get mouse line
-    irr::core::line3df ml = 
+    irr::core::line3df ml =
         m_pSmgr->getSceneCollisionManager()->
-                    getRayFromScreenCoordinates( irr::core::position2di( (unsigned int)ptScreen.Obj().X, (unsigned int)ptScreen.Obj().Y ), 
+                    getRayFromScreenCoordinates( irr::core::position2di( (unsigned int)ptScreen.Obj().X, (unsigned int)ptScreen.Obj().Y ),
                                                  m_pCamera );
 
     // Pick an axis we don't need as the normal for the plane
     irr::core::vector3df normal;
-    if ( !axis.x() ) 
+    if ( !axis.x() )
 		normal.X = 1;
-    else if ( !axis.y() ) 
+    else if ( !axis.y() )
 		normal.Y = 1;
-    else if ( !axis.z() ) 
+    else if ( !axis.z() )
 		normal.Z = 1;
-    else normal = 
+    else normal =
 		ml.getVector();
 
     // Get mouse line / plane intersection
@@ -1111,7 +1111,7 @@ int CSqIrrlicht::getIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSq
 int CSqIrrlicht::getMouseIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSqirrVector3d &axis, CSqirrVector3d *intersect )
 {
     // Must have object
-    if ( !m_pCamera || !m_pSmgr ) 
+    if ( !m_pCamera || !m_pSmgr )
 		return 0;
 
     // Is mouse in the window?
@@ -1121,9 +1121,9 @@ int CSqIrrlicht::getMouseIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt
     m_pCamera->OnRegisterSceneNode();
 
     // Get mouse line
-    irr::core::line3df ml = 
+    irr::core::line3df ml =
         m_pSmgr->getSceneCollisionManager()->
-                    getRayFromScreenCoordinates( irr::core::position2di( ptScreen.x(), ptScreen.y() ), 
+                    getRayFromScreenCoordinates( irr::core::position2di( ptScreen.x(), ptScreen.y() ),
                                                  m_pCamera );
 
     // Pick an axis we don't need as the normal for the plane
@@ -1149,7 +1149,7 @@ int CSqIrrlicht::getMouseIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt
 int CSqIrrlicht::getPickPoint( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSqirrVector3d *intersect )
 {
     // Must have object
-    if ( !m_pCamera || !m_pSmgr ) 
+    if ( !m_pCamera || !m_pSmgr )
 		return 0;
 
     // Is mouse in the window?
@@ -1159,29 +1159,29 @@ int CSqIrrlicht::getPickPoint( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSq
     m_pCamera->OnRegisterSceneNode();
 
     // Get mouse line
-    irr::core::line3df ml = 
+    irr::core::line3df ml =
         m_pSmgr->getSceneCollisionManager()->
-                    getRayFromScreenCoordinates( irr::core::position2di( ptScreen.x(), ptScreen.y() ), 
+                    getRayFromScreenCoordinates( irr::core::position2di( ptScreen.x(), ptScreen.y() ),
                                                  m_pCamera );
 
     // New position
-    *intersect = ml.start + ml.getVector().normalize() * 
+    *intersect = ml.start + ml.getVector().normalize() *
                     (float)m_pCamera->getPosition().getDistanceFrom( pt.Obj() );
-    
+
     return 1;
 }
 
 CSqirrVector2d CSqIrrlicht::getNodeScreenPos( CSqirrNode &rNode )
 {
     // Must have object
-    if ( !m_pCamera || !m_pSmgr ) 
+    if ( !m_pCamera || !m_pSmgr )
         return CSqirrVector2d( -1, -1 );
 
     irr::core::vector3df pos3d( rNode.GetPosition().Obj() );
 
     m_pCamera->OnRegisterSceneNode();
 
-    irr::core::position2di pos2d = 
+    irr::core::position2di pos2d =
         m_pSmgr->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition( pos3d, m_pCamera );
 
     return CSqirrVector2d( (float)pos2d.X, (float)pos2d.Y );
@@ -1190,12 +1190,12 @@ CSqirrVector2d CSqIrrlicht::getNodeScreenPos( CSqirrNode &rNode )
 CSqirrVector2d CSqIrrlicht::getScreenPos( CSqirrVector3d &v )
 {
     // Must have object
-    if ( !m_pCamera || !m_pSmgr ) 
+    if ( !m_pCamera || !m_pSmgr )
         return CSqirrVector2d( -1, -1 );
 
     m_pCamera->OnRegisterSceneNode();
 
-    irr::core::position2di pos2d = 
+    irr::core::position2di pos2d =
         m_pSmgr->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition( v.Obj(), m_pCamera );
 
     return CSqirrVector2d( (float)pos2d.X, (float)pos2d.Y );
@@ -1204,19 +1204,19 @@ CSqirrVector2d CSqIrrlicht::getScreenPos( CSqirrVector3d &v )
 int CSqIrrlicht::screenToWorld( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorld, float fDist )
 {
     // Must have object
-    if ( !m_pCamera || !m_pSmgr ) 
+    if ( !m_pCamera || !m_pSmgr )
         return 0;
 
-    // Is mouse in the window?    
+    // Is mouse in the window?
     if ( 0 > ptScreen.Obj().X || 0 > ptScreen.Obj().Y )
         return 0;
 
     m_pCamera->OnRegisterSceneNode();
 
     // Get mouse line
-    irr::core::line3df ml = 
+    irr::core::line3df ml =
         m_pSmgr->getSceneCollisionManager()->
-                    getRayFromScreenCoordinates( irr::core::position2di( (unsigned int)ptScreen.Obj().X, (unsigned int)ptScreen.Obj().Y ), 
+                    getRayFromScreenCoordinates( irr::core::position2di( (unsigned int)ptScreen.Obj().X, (unsigned int)ptScreen.Obj().Y ),
                                                  m_pCamera );
 
     // Calculate position
@@ -1228,10 +1228,10 @@ int CSqIrrlicht::screenToWorld( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorl
 int CSqIrrlicht::screenToPlane( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorld, float fDist )
 {
     // Must have object
-    if ( !m_pCamera || !m_pSmgr ) 
+    if ( !m_pCamera || !m_pSmgr )
         return 0;
 
-    // Is mouse in the window?    
+    // Is mouse in the window?
     if ( 0 > ptScreen.Obj().X || 0 > ptScreen.Obj().Y )
         return 0;
 
@@ -1239,14 +1239,14 @@ int CSqIrrlicht::screenToPlane( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorl
     m_pCamera->OnRegisterSceneNode();
 
     // Get mouse line
-    irr::core::line3df ml = 
+    irr::core::line3df ml =
         m_pSmgr->getSceneCollisionManager()->
-                    getRayFromScreenCoordinates( irr::core::position2di( (unsigned int)ptScreen.Obj().X, (unsigned int)ptScreen.Obj().Y ), 
+                    getRayFromScreenCoordinates( irr::core::position2di( (unsigned int)ptScreen.Obj().X, (unsigned int)ptScreen.Obj().Y ),
                                                  m_pCamera );
 
     // Get the camera target line
     irr::core::line3df cl( m_pCamera->getPosition(),
-                           m_pCamera->getTarget() ); 
+                           m_pCamera->getTarget() );
 
     // Calculate the orthogonal plane position
     irr::core::vector3df pos = cl.start + ( cl.getVector().normalize() * fDist );
@@ -1258,4 +1258,4 @@ int CSqIrrlicht::screenToPlane( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorl
 
     return 1;
 }
- 
+

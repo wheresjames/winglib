@@ -6,7 +6,7 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := irrlicht
 PRJ_TYPE := lib
-PRJ_INCS := irrlicht/source/Irrlicht/zlib
+PRJ_INCS := jpeg png tiff zlib
 PRJ_LIBS := 
 PRJ_DEFS := _IRR_COMPILE_WITH_OPENGL_
 
@@ -18,7 +18,7 @@ PRJ_LIBROOT := ..
 include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(PLATFORM),windows)
-	PRJ_DEFS := $(PRJ_DEFS) _IRR_STATIC_LIB_
+	PRJ_DEFS := $(PRJ_DEFS) _IRR_STATIC_LIB_ _IRR_MULTI_ZLIB_
 else
 	PRJ_DEFS := $(PRJ_DEFS) _IRR_USE_LINUX_DEVICE_ _IRR_COMPILE_WITH_X11_
 endif

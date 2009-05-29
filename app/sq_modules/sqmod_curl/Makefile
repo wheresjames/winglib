@@ -7,7 +7,7 @@ default_target: all
 PRJ_NAME := sqmod_curl
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus curl/include
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cell curl
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cell curl cximage jpeg png tiff zlib
 PRJ_DEFS := HAVE_CONFIG_H CURL_STATICLIB CURL_DISABLE_LDAP
  
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols

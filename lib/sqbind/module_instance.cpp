@@ -80,7 +80,10 @@ oex::oexBOOL CModuleInstance::Load( oex::oexCSTR x_pFile )
 
 	// Load the module
 	if ( !m_cModule.Load( x_pFile ) )
+	{	oexERROR( 0, oex::CStr().Fmt( oexT( "Failed to load module '%s'" ),
+			     				      oexStrToMbPtr( m_cModule.GetPath().Ptr() ) ) );
 		return oex::oexFALSE;
+	} // end if
 
 	// Attempt to load function pointers
 	if ( !LoadFunctions() )

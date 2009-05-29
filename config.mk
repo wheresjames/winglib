@@ -368,8 +368,8 @@ else
 			CFG_TOOLPREFIX := i586-mingw32msvc-
 
 			CFG_STDLIB := -lole32 -lgdi32 -lwsock32 -lws2_32
-			CFG_LFLAGS := $(CFG_LEXTRA)
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_NOVFW -DOEX_NOCRTDEBUG \
+			CFG_LFLAGS := $(CFG_LEXTRA) -export-all-symbols
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_NODSHOW -DOEX_NOVFW -DOEX_NOCRTDEBUG \
 												-D__int64="long long"
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq

@@ -130,7 +130,7 @@ template < const int T > class oex_static_assert{};
 // 0xDEADBABE	-	Linux / Unix
 // 0xA5A5A5A5	-	Embedded
 // 0xFFFFFFFF	-	Invalid
-static oexBOOL oexVerifyPtrNullOk( oexCPVOID ptr )
+static inline oexBOOL oexVerifyPtrNullOk( oexCPVOID ptr )
 {	if ( !ptr ) return oexTRUE;
     return (       ( (oexTYPEOF_PTR)ptr >  oexPtrToPtr( 0x00000032 ) )
                 && ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xABABABAB ) )
@@ -148,7 +148,7 @@ static oexBOOL oexVerifyPtrNullOk( oexCPVOID ptr )
 				&& ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xFFFFFFFF ) ) );
 }
 
-static oexBOOL oexVerifyPtr( oexCPVOID ptr )
+static inline oexBOOL oexVerifyPtr( oexCPVOID ptr )
 {	return	( (oexTYPEOF_PTR)oexNULL != (oexTYPEOF_PTR)ptr ) &&
 			oexVerifyPtrNullOk( ptr );
 }
@@ -159,10 +159,10 @@ static oexBOOL oexVerifyPtr( oexCPVOID ptr )
 #	define oexASSERT_PTR_NULL_OK( ptr )
 #	define oexASSERT( s )
 
-static oexBOOL oexVerifyPtrNullOk( oexCPVOID ptr )
+static inline oexBOOL oexVerifyPtrNullOk( oexCPVOID ptr )
 {	return oexTRUE; }
 
-static oexBOOL oexVerifyPtr( oexCPVOID ptr )
+static inline oexBOOL oexVerifyPtr( oexCPVOID ptr )
 {	return	( (oexTYPEOF_PTR)oexNULL != (oexTYPEOF_PTR)ptr ); }
 
 #endif

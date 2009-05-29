@@ -8,7 +8,6 @@ PRJ_NAME := curl
 PRJ_TYPE := lib
 PRJ_INCS := curl/src openldap/include
 PRJ_LIBS := 
-PRJ_DEFS := HAVE_CONFIG_H CURL_STATICLIB CURL_DISABLE_LDAP HAVE_SELECT
 PRJ_LIBROOT := ..
 
 #-------------------------------------------------------------------
@@ -20,6 +19,11 @@ ifeq ($(BUILD_CURL),)
 UNSUPPORTED := Set BUILD_CURL=1 to build this project
 include $(PRJ_LIBROOT)/unsupported.mk
 else
+
+ifeq ($(PLATFORM),windows)
+# HAVE_CONFIG_H 
+	PRJ_DEFS := $(PRJ_DEFS) CURL_STATICLIB CURL_DISABLE_LDAP HAVE_SELECT
+endif
 
 #-------------------------------------------------------------------
 # File locations

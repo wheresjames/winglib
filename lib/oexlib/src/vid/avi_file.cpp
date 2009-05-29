@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -112,7 +112,7 @@ oexBOOL CAviFile::Create( oexCSTR pFile )
 
 	// Open new file
 	if ( !m_file.CreateAlways( pFile ).IsOpen() )
-	{	oexTRACE( oexT( " : %lu" ), (unsigned long)m_file.GetLastError() );
+	{	oexTRACE( oexT( " : %u" ), (unsigned long)m_file.GetLastError() );
 		return oexFALSE;
 	} // end if
 
@@ -131,12 +131,12 @@ oexBOOL CAviFile::Open( oexCSTR pFile, oexBOOL bAllowAppend )
 
 	// Attempt to open existing file
 	if ( !m_file.OpenExisting( pFile ).IsOpen() )
-	{	oexTRACE( oexT( "%s : %lu" ), __FUNCTION__, (unsigned long)m_file.GetLastError() );
+	{	oexTRACE( oexT( "%s : %u" ), __FUNCTION__, (unsigned long)m_file.GetLastError() );
 		return oexFALSE;
 	} // end if
 
 	if ( !m_file.Read( &m_rfh, sizeof( m_rfh ) ) )
-	{	oexTRACE( oexT( "%s : %lu" ), __FUNCTION__, (unsigned long)m_file.GetLastError() );
+	{	oexTRACE( oexT( "%s : %u" ), __FUNCTION__, (unsigned long)m_file.GetLastError() );
 		Destroy();
 		return oexFALSE;
 	} // end if
@@ -192,7 +192,7 @@ oexBOOL CAviFile::ReadChunkHeader( SRiffChunk *pRc )
 }
 
 oexBOOL CAviFile::SkipChunk()
-{																								
+{
 	SRiffChunk rc;
 
 	// Read the chunk header
@@ -213,7 +213,7 @@ oexBOOL CAviFile::FindChunk( unsigned long fccType, SRiffChunk *pRc )
 
 	// Read the chunk header
 	while ( ReadChunkHeader( pRc ) )
-	{	
+	{
 		// Is this our guy?
 		if ( oexLittleEndian( pRc->fccType ) == fccType )
 			return oexTRUE;
@@ -222,7 +222,7 @@ oexBOOL CAviFile::FindChunk( unsigned long fccType, SRiffChunk *pRc )
 		if ( !SkipChunk() )
 			return oexFALSE;
 
-	} // end while	
+	} // end while
 
 	return oexFALSE;
 }
@@ -464,7 +464,7 @@ oexBOOL CAviFile::WriteAviHeaders()
 
 	// Fill in info
 	m_ash->fcc = oexLittleEndian( eAviStreamHeader );
-	m_ash->cb = oexLittleEndian( m_ash.Size() - 8 );	
+	m_ash->cb = oexLittleEndian( m_ash.Size() - 8 );
 	m_ash->fccType = SAviStreamHeader::eAshStreamTypeVideo;
 
 	// Write to file
@@ -547,7 +547,7 @@ oexBOOL CAviFile::WriteIndex()
 	m_file.SetPtrPosBegin( m_llStreamOffset - sizeof( rcStream ) );
 	if ( !m_file.Write( &rcStream, sizeof( rcStream ) ) )
 		return oexFALSE;
-	
+
 	// Allocate memory for index data
 	if ( m_memAviIndex.Size() != eIndexCacheSize )
 		if ( !m_memAviIndex.OexNew( eIndexCacheSize ).Ptr() )
@@ -621,7 +621,7 @@ oexBOOL CAviFile::WriteIndex()
 	// Update header values
 	Amh()->dwTotalFrames = uTotalFrames;
 	Amh()->dwFlags |= SAviMainHeader::eAmhHasIndex;
-	Amh()->dwSuggestedBufferSize = oexLittleEndian( (oexUINT)llMaxSize );	
+	Amh()->dwSuggestedBufferSize = oexLittleEndian( (oexUINT)llMaxSize );
 
 	Ash()->dwLength = uTotalFrames;
 	Ash()->dwSuggestedBufferSize = oexLittleEndian( (oexUINT)llMaxSize );
@@ -650,7 +650,7 @@ oexBOOL CAviFile::AddFrame( oexUINT x_uType, oexUINT x_uStream, oexCPVOID x_pDat
 	rc.lDataSize = x_uSize;
 
 	if ( x_uStream )
-	{	oex::CStr sStream( oex::CStr().Fmt( oexT( "%lu" ), x_uStream ) );
+	{	oex::CStr sStream( oex::CStr().Fmt( oexT( "%u" ), x_uStream ) );
 		rc.chFccType[ 0 ] = sStream[ 0 ];
 		rc.chFccType[ 1 ] = sStream[ 1 ];
 	} // end if
@@ -703,8 +703,8 @@ oexBOOL CAviFile::StartStream( oexUINT uStream, oexBOOL bAllowAppend )
 			// Is this the start of a stream
 			SRiffChunk rc;
 			if ( m_file.Read( &rc, sizeof( rc ) ) && eFccList == oexLittleEndian( rc.fccType ) )
-				if ( m_file.Read( &rc, sizeof( rc ) ) && eAviStream == oexLittleEndian( rc.fccType ) )	
-				{	m_llStreamOffset = m_file.GetPtrPos();					
+				if ( m_file.Read( &rc, sizeof( rc ) ) && eAviStream == oexLittleEndian( rc.fccType ) )
+				{	m_llStreamOffset = m_file.GetPtrPos();
 					if ( bAllowAppend )
 						m_llNextFrame = m_llStreamOffset + rc.lDataSize;
 					rfp.Cancel();
@@ -732,7 +732,7 @@ oexBOOL CAviFile::FindIndex()
 
 	// Start at the beginning of the file
 	m_file.SetPtrPosBegin( sizeof( m_rfh ) );
-	
+
 	// Iterate chunks
 	SRiffChunk rc;
 	while ( ReadChunkHeader( &rc ) )
@@ -795,7 +795,7 @@ oexBOOL CAviFile::CacheFrame( oexINT64 x_llFrame, oexBOOL bForward )
 
 	// Is the frame in memory?
 	if ( m_memAviIndex.Size() == eIndexCacheSize
-		 && x_llFrame >= m_llIndexBase 
+		 && x_llFrame >= m_llIndexBase
 		 && x_llFrame < ( m_llIndexBase + eIndexCacheSize ) )
 		return oexTRUE;
 
@@ -818,7 +818,7 @@ oexBOOL CAviFile::CacheFrame( oexINT64 x_llFrame, oexBOOL bForward )
 			return oexFALSE;
 
 	// File offset
-	oexINT64 ll = ( m_llIndex + ( m_llIndexFrameOffset * sizeof( SAviIndexEntry ) ) ) 
+	oexINT64 ll = ( m_llIndex + ( m_llIndexFrameOffset * sizeof( SAviIndexEntry ) ) )
 		          + ( x_llFrame * sizeof( SAviIndexEntry ) );
 
 	// Offset into index

@@ -93,7 +93,7 @@ void CDebug::vFmtTrace( oexCSTR x_pFmt, oexVaList &x_pArgs )
 
 void CDebug::Break()
 {
-#ifdef oexDEBUG
+#if defined( oexDEBUG ) && !defined( OEX_NOCRTDEBUG )
 
 	_CrtDbgBreak();
 
@@ -113,7 +113,7 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x
 
 void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr, oexINT x_nRes, oexINT x_nErr )
 {
-#if defined( oexDEBUG )
+#if defined( oexDEBUG ) && !defined( OEX_NOCRTDEBUG )
 
 #if defined( oexUNICODE )
 

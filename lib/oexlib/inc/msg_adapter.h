@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -48,13 +48,13 @@ public:
 
     /// Constructor
     CMsgTypeAdapter( CMsg *x_pMsg, oexPVOID x_pMem, oexUINT x_uSize, oexUINT x_uType )
-    {   m_pMem = x_pMem;        
+    {   m_pMem = x_pMem;
         m_uSize = x_uSize;
         m_uType = x_uType;
         m_pMsg = oexNULL;
     }
 
-    /// Copy 
+    /// Copy
     CMsgTypeAdapter& Copy( oexCONST CMsgTypeAdapter &x_rMa )
     {   m_pMem = x_rMa.m_pMem;
         m_uSize = x_rMa.m_uSize;
@@ -119,7 +119,7 @@ public:
     template< typename T >
         static oexUINT GetType()
         {   oexASSERT( 0 );
-            return eTypeInvalid; 
+            return eTypeInvalid;
         }
 
     template<> oexITS oexUINT GetType< oexCHAR >()
@@ -136,25 +136,25 @@ public:
 
     template<> oexITS oexUINT GetType< oexINT >()
     {   if ( 4 == sizeof( oexINT ) )
-            return eTypeInt32; 
+            return eTypeInt32;
         else if ( 8 == sizeof( oexINT ) )
-            return eTypeInt64; 
+            return eTypeInt64;
         else if ( 2 == sizeof( oexINT ) )
-            return eTypeInt16; 
+            return eTypeInt16;
         else if ( 1 == sizeof( oexINT ) )
-            return eTypeInt8; 
+            return eTypeInt8;
 		return eTypeInvalid;
     }
 
     template<> oexITS oexUINT GetType< oexUINT >()
     {   if ( 4 == sizeof( oexUINT ) )
-            return eTypeInt32; 
+            return eTypeInt32;
         else if ( 8 == sizeof( oexUINT ) )
-            return eTypeInt64; 
+            return eTypeInt64;
         else if ( 2 == sizeof( oexUINT ) )
-            return eTypeInt16; 
+            return eTypeInt16;
         else if ( 1 == sizeof( oexUINT ) )
-            return eTypeInt8; 
+            return eTypeInt8;
 		return eTypeInvalid;
     }
 
@@ -195,71 +195,71 @@ public:
 
             if ( eTypeInt8 == m_uType )
             {   if ( !oexCHECK( sizeof( oexCHAR ) == m_uSize ) )
-                    return oexFALSE;            
+                    return oexFALSE;
                 *p = (T)*(oexCHAR*)m_pMem;
             } // end if
 
             else if ( eTypeUInt8 == m_uType )
             {   if ( oexCHECK( sizeof( oexUCHAR ) == m_uSize ) )
-                    return oexFALSE;            
+                    return oexFALSE;
                 *p = (T)*(oexUCHAR*)m_pMem;
             } // end if
 
             else if ( eTypeInt16 == m_uType )
             {   if ( !oexCHECK( sizeof( oexSHORT ) == m_uSize ) )
-                    return oexFALSE;            
+                    return oexFALSE;
                 *p = (T)*(oexSHORT*)m_pMem;
             } // end if
 
             else if ( eTypeUInt16 == m_uType )
             {   if ( oexCHECK( sizeof( oexUSHORT ) == m_uSize ) )
-                    return oexFALSE;            
+                    return oexFALSE;
                 *p = (T)*(oexUSHORT*)m_pMem;
             } // end if
 
             else if ( eTypeInt32 == m_uType )
             {   if ( !oexCHECK( sizeof( oexLONG ) == m_uSize ) )
-                    return oexFALSE;            
+                    return oexFALSE;
                 *p = (T)*(oexLONG*)m_pMem;
             } // end if
 
             else if ( eTypeUInt32 == m_uType )
             {   if ( oexCHECK( sizeof( oexULONG ) == m_uSize ) )
-                    return oexFALSE;            
+                    return oexFALSE;
                 *p = (T)*(oexULONG*)m_pMem;
             } // end if
 
             else if ( eTypeInt64 == m_uType )
             {   if ( !oexCHECK( sizeof( oexLONG ) == m_uSize ) )
-                    return oexFALSE;            
+                    return oexFALSE;
                 *p = (T)*(oexLONG*)m_pMem;
             } // end if
 
             else if ( eTypeUInt64 == m_uType )
             {   if ( oexCHECK( sizeof( oexULONG ) == m_uSize ) )
-                    return oexFALSE;            
+                    return oexFALSE;
                 *p = (T)*(oexULONG*)m_pMem;
             } // end if
 
             else if ( eTypeFloat == m_uType )
             {   if ( oexCHECK( sizeof( oexFLOAT ) == m_uSize ) )
-                    return oexFALSE;            
+                    return oexFALSE;
                 *p = (T)*(oexFLOAT*)m_pMem;
             } // end if
 
             else if ( eTypeDouble == m_uType )
             {   if ( oexCHECK( sizeof( oexDOUBLE ) == m_uSize ) )
-                    return oexFALSE;            
+                    return oexFALSE;
                 *p = (T)*(oexDOUBLE*)m_pMem;
             } // end if
 
             else if ( eTypeDouble == m_uType )
             {   if ( oexCHECK( sizeof( oexDOUBLE ) == m_uSize ) )
-                    return oexFALSE;            
+                    return oexFALSE;
                 *p = (T)*(oexDOUBLE*)m_pMem;
             } // end if
 
-            else 
+            else
                 return oexFALSE;
 
             return oexTRUE;
@@ -277,7 +277,7 @@ public:
             else if ( eTypeStr8 == m_uType )
                 *p = (T)CStr8( (oexSTR8)m_pMem, m_uSize / sizeof( oexCSTR8 ) ).ToNum();
 
-            else 
+            else
                 return oexFALSE;
 
             return oexTRUE;
@@ -296,7 +296,7 @@ public:
             else if ( eTypeStr8 == m_uType )
                 *p = (T)CStr8( (oexSTR8)m_pMem, m_uSize / sizeof( oexCSTR8 ) ).ToDouble();
 
-            else 
+            else
                 return oexFALSE;
 
             return oexTRUE;
@@ -419,37 +419,37 @@ public:
             if ( eTypeInt8 == m_uType )
             {   if ( !oexCHECK( sizeof( oexCHAR ) == m_uSize ) )
                     return oexFALSE;
-                os::CSys::StrFmt( p, sz, oexTT( T, "%li" ), (oexLONG)*(oexCHAR*)m_pMem );
+                os::CSys::StrFmt( p, sz, oexTT( T, "%d" ), (oexLONG)*(oexCHAR*)m_pMem );
             } // end if
 
             else if ( eTypeUInt8 == m_uType )
             {   if ( !oexCHECK( sizeof( oexUCHAR ) == m_uSize ) )
                     return oexFALSE;
-                os::CSys::StrFmt( p, sz, oexTT( T, "%lu" ), (oexULONG)*(oexUCHAR*)m_pMem );
+                os::CSys::StrFmt( p, sz, oexTT( T, "%u" ), (oexULONG)*(oexUCHAR*)m_pMem );
             } // end if
 
             else if ( eTypeInt16 == m_uType )
             {   if ( !oexCHECK( sizeof( oexSHORT ) == m_uSize ) )
                     return oexFALSE;
-                os::CSys::StrFmt( p, sz, oexTT( T, "%li" ), (oexLONG)*(oexSHORT*)m_pMem );
+                os::CSys::StrFmt( p, sz, oexTT( T, "%d" ), (oexLONG)*(oexSHORT*)m_pMem );
             } // end if
 
             else if ( eTypeUInt16 == m_uType )
             {   if ( !oexCHECK( sizeof( oexUSHORT ) == m_uSize ) )
                     return oexFALSE;
-                os::CSys::StrFmt( p, sz, oexTT( T, "%lu" ), (oexULONG)*(oexUSHORT*)m_pMem );
+                os::CSys::StrFmt( p, sz, oexTT( T, "%u" ), (oexULONG)*(oexUSHORT*)m_pMem );
             } // end if
 
             else if ( eTypeInt32 == m_uType )
             {   if ( !oexCHECK( sizeof( oexLONG ) == m_uSize ) )
                     return oexFALSE;
-                os::CSys::StrFmt( p, sz, oexTT( T, "%li" ), (oexLONG)*(oexLONG*)m_pMem );
+                os::CSys::StrFmt( p, sz, oexTT( T, "%i" ), (oexLONG)*(oexLONG*)m_pMem );
             } // end if
 
             else if ( eTypeUInt32 == m_uType )
             {   if ( !oexCHECK( sizeof( oexULONG ) == m_uSize ) )
                     return oexFALSE;
-                os::CSys::StrFmt( p, sz, oexTT( T, "%lu" ), (oexULONG)*(oexULONG*)m_pMem );
+                os::CSys::StrFmt( p, sz, oexTT( T, "%u" ), (oexULONG)*(oexULONG*)m_pMem );
             } // end if
 
             else if ( eTypeFloat == m_uType )
@@ -477,7 +477,7 @@ public:
     {
         // Types must match here
         if ( GetType< oexCSTR8 >() == m_uType )
-            return (oexCSTR8)m_pMem;        
+            return (oexCSTR8)m_pMem;
 
         // Pointer to buffer
         oexSTR8 pStr = m_ucNumBuf;
@@ -527,11 +527,11 @@ public:
         return CMsgAddress( (oexCSTRW)*this );
 #else
         return CMsgAddress( (oexCSTR8)*this );
-#endif        
+#endif
     }
 
 private:
-    
+
     /// Pointer to memory
     oexPVOID        m_pMem;
 

@@ -50,7 +50,7 @@
 #endif
 
 // For detecting memory leaks
-#if defined( OEX_CRT_LEAK_DETECTION ) && defined( oexDEBUG ) && defined( OEX_WIN32 )
+#if defined( OEX_CRT_LEAK_DETECTION ) && defined( oexDEBUG ) && defined( OEX_WIN32 ) && !defined( __MINGW32__ )
 #   define oexNEW                   new( _NORMAL_BLOCK, __FILE__, __LINE__ )
 #   define oexNEWAT( l, f )         new( _NORMAL_BLOCK, f, l )
 #else
