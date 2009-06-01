@@ -97,6 +97,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, size )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, set )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, get )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, copy )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_up )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_down )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, value )
@@ -196,6 +197,16 @@ void CSqMulti::unset( const CSqMulti::t_Obj &k )
 
 void CSqMulti::set( const CSqMulti::t_Obj &v )
 {	if ( v.length() ) m_val = v; }
+
+void CSqMulti::copy( CSqMulti &m )
+{
+	// Copy string
+	m_val = m.m_val;
+
+	// Copy array
+	for ( iterator it = m.begin(); it != m.end(); it++ )
+		get( it->first )->copy( it->second );
+}
 
 CSqMulti::iterator CSqMulti::begin()
 {	return m_lst.begin(); }

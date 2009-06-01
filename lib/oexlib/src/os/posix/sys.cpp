@@ -787,9 +787,20 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 	if ( !oexCHECK_PTR( x_pFile ) )
 		return oexFALSE;
 
-	if ( oexCHECK_PTR( x_pParams ) )
-		return system( x_pFile ) ? oexTRUE : oexFALSE;
+	CStr sCmd;
 
-	return system( oexStrToMb( oexMks( x_pFile, oexT( " " ), x_pParams ) ).Ptr() )
-			? oexTRUE : oexFALSE;
+	// Changing direcories?
+	if ( oexCHECK_PTR( x_pDirectory ) && *x_pDirectory )
+		sCmd = oexMks( oexT( "cd \"" ), x_pDirectory, oexT( "\"; " ) );
+
+	// File name
+	sCmd += x_pFile;
+
+	// Params?
+	if ( oexCHECK_PTR( x_pParams ) && *x_pParams )
+		sCmd += oexMks( oexT( " " ), x_pParams );
+
+	oexEcho( oexMks( oexT( "system() : " ), sCmd ).Ptr() );
+
+	return system( oexStrToMb( sCmd ).Ptr() ) ? oexTRUE : oexFALSE;
 }

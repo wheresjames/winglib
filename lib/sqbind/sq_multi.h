@@ -129,19 +129,22 @@ namespace sqbind
 		/// Clears the list
 		void clear();
 
-        /// Adds an element to the vector
+		/// Copys a key
+        void copy( CSqMulti &m );
+
+        /// Adds an element
         void set( const t_Obj &v );
 
         /// Removes the specified element
         void unset( const t_Obj &k );
 
-        /// Adds an element to the vector
+        /// Gets an element
         CSqMulti* get( const t_Obj &k );
 
-        /// Adds an element to the vector
+        /// Finds an element
         t_Obj find_key( const t_Obj &k );
 
-        /// Adds an element to the vector
+        /// Finds an element by value
         t_Obj find_value( const t_Obj &v );
 
 		/// Returns the first item in the list

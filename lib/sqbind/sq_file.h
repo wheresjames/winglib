@@ -80,6 +80,12 @@ namespace sqbind
 		static int rmdir( const stdString &sDir )
 		{	return oexDeletePath( sDir.c_str() ); }
 
+		static int delete_file( const stdString &sPath )
+		{	return oexDelete( sPath.c_str() ); }
+
+		static int delete_path( const stdString &sPath )
+		{	return oexDeletePath( sPath.c_str() ); }
+
 		static int exists( const stdString &sFile )
 		{	return oexExists( sFile.c_str() ); }
 
