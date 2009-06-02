@@ -41,6 +41,11 @@ function OnProcessRequest( request, headers, get, post ) : ( _g, _cfg )
 			page = pg_run( mRequest, mHeaders, mGet, mPost );
 			break;
 
+		case "/cron" :
+			dofile( _self.path( "pg_cron.nut" ) );
+			page = pg_run( mRequest, mHeaders, mGet, mPost );
+			break;
+
 	} // end if
 
 	if ( !page.len() )
@@ -78,7 +83,8 @@ function show_menu( sel )
 	local menu_items =
 	[
 		[ "home", "Home" ],
-		[ "build", "Build" ]
+		[ "build", "Build" ],
+		[ "cron", "Cron" ]
 	];
 
 // style='border-left:solid 1px;border-top:solid 1px;border-right:solid 1px;border-bottom:solid 1px'

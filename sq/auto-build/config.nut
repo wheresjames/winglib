@@ -18,7 +18,8 @@ class CConfig
 	// Directory that holds the build scritps
 	build_scripts_dir = _self.root( "build_scripts" );
 
-
+	// Cron jobs config file
+	cron_cfg = _self.root( "cron.cfg" );
 
 };
 

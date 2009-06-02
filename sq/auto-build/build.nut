@@ -13,6 +13,11 @@ class CGlobal
 };
 local _g = CGlobal();
 
+function Done() : ( _g )
+{
+	_g.done = 1;
+}
+
 function Build( id, dir ) : ( _g, _cfg )
 {
 	_self.echo( "Starting build : " + id );
@@ -35,10 +40,37 @@ function Build( id, dir ) : ( _g, _cfg )
 	CSqFile().delete_path( _g.wd );
 	CSqFile().mkdir( _g.wd );
 
-	_g.done = build( cfg );
+	execute_build( cfg );
 }
 
-function build( cfg ) : ( _g, _cfg )
+function Cron( id, dir ) : ( _g, _cfg )
+{
+	local cfg = CSqMulti();
+	cfg.deserialize( CSqFile().get_contents( _cfg.cron_cfg ) );
+
+	if ( !cfg.isset( id ) )
+		return;
+
+	// Map names to files
+	local fmap = {};
+	local scripts = CSqFile().get_dirlist( _cfg.build_scripts_dir, "*", 1, 0 );
+	foreach( k,v in scripts )
+	{	local file = _self.build_path( _cfg.build_scripts_dir, k );
+		if ( CSqFile().exists( file ) )
+		{	local scfg = CSqMulti();
+			scfg.deserialize( CSqFile().get_contents( file ) );
+			fmap[ scfg[ "name" ].str() ] <- k;
+		} // end if
+	} // end foreach
+
+	// Build each job
+	local jobs = split( cfg[ id ][ "jobs" ].str(), "," );
+	foreach( j in jobs )
+		if ( j in fmap )
+			Build( fmap[ j ], cfg[ id ][ "name" ].str() );
+}
+
+function execute_build( cfg ) : ( _g, _cfg )
 {
 	_self.echo ( "Building : " + cfg.get( "name" ).str() );
 
@@ -88,7 +120,6 @@ function _init() : ( _g, _cfg )
 
 function _idle(): ( _g, _cfg )
 {
-
 	return _g.done;
 }
 
