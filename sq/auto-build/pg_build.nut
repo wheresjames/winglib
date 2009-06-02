@@ -136,6 +136,12 @@ function show_step( inf )
 		case "goto" :
 			return "Goto Step : " + _self.tolong( inf[ "goto" ].str() );
 
+		case "cd" :
+			return "Change Directory : " + inf[ "dir" ].str();
+
+		case "md" :
+			return "Make Directory : " + inf[ "dir" ].str();
+
 	} // end switch
 
 	return "Unknown step type : " + inf[ "type" ].str();
@@ -154,6 +160,8 @@ function show_add_step( cfg, mRequest, mHeaders, mGet, mPost ) : ( _cfg )
 				<option value='cmd'>Execute Command</option>
 				<option value='co'>Checkout</option>
 				<option value='dl'>Download</option>
+				<option value='cd'>Change Directory</option>
+				<option value='md'>Make Directory</option>
 				<option value='goto'>Goto</option>
 			</select>
 		";
@@ -214,7 +222,7 @@ function show_add_step( cfg, mRequest, mHeaders, mGet, mPost ) : ( _cfg )
 										</td>
 									</tr>
 								</table>
-							</div
+							</div>
 							<div id='co' name='co' style='display:none'>
 								<table width='100%'>
 									<tr>
@@ -239,7 +247,7 @@ function show_add_step( cfg, mRequest, mHeaders, mGet, mPost ) : ( _cfg )
 										</td>
 									</tr>
 								</table>
-							</div
+							</div>
 							<div id='dl' name='dl' style='display:none'>
 								<table width='100%'>
 									<tr>
@@ -251,7 +259,7 @@ function show_add_step( cfg, mRequest, mHeaders, mGet, mPost ) : ( _cfg )
 										</td>
 									</tr>
 								</table>
-							</div
+							</div>
 							<div id='goto' name='goto' style='display:none'>
 								<table width='100%'>
 									<tr>
@@ -262,7 +270,32 @@ function show_add_step( cfg, mRequest, mHeaders, mGet, mPost ) : ( _cfg )
 											<input type='text' id='goto' name='goto' value='' style='width:150'>
 										</td>
 									</tr>
-							</div
+								</table>
+							</div>
+							<div id='cd' name='cd' style='display:none'>
+								<table width='100%'>
+									<tr>
+										<td>
+											Directory
+										</td>
+										<td width='100%'>
+											<input type='text' id='cd_dir' name='cd_dir' value='' style='width:100%'>
+										</td>
+									</tr>
+								</table>
+							</div>
+							<div id='md' name='md' style='display:none'>
+								<table width='100%'>
+									<tr>
+										<td>
+											Directory
+										</td>
+										<td width='100%'>
+											<input type='text' id='md_dir' name='md_dir' value='' style='width:100%'>
+										</td>
+									</tr>
+								</table>
+							</div>
 						</td>
 					</tr>
 				</table>
@@ -305,6 +338,14 @@ function edit_builds( mRequest, mHeaders, mGet, mPost ) : ( _cfg )
 
 			case "dl" :
 				cfg[ "s" ][ id ][ "link" ].set( mPost[ "dl_link" ] );
+				break;
+
+			case "cd" :
+				cfg[ "s" ][ id ][ "dir" ].set( mPost[ "cd_dir" ] );
+				break;
+
+			case "md" :
+				cfg[ "s" ][ id ][ "dir" ].set( mPost[ "md_dir" ] );
 				break;
 
 			case "goto" :

@@ -7,6 +7,7 @@ class CGlobal
 	queue = [];
 	done = 0;
 
+	rt = "";
 	wd = _self.root( "" );
 
 };
@@ -25,7 +26,10 @@ function Build( id ) : ( _g, _cfg )
 	local cfg = CSqMulti();
 	cfg.deserialize( CSqFile().get_contents( file ) );
 
-	_g.wd = _self.root( id );
+	_g.rt = _self.root( id );
+	_g.wd = _g.rt;
+
+	CSqFile().delete_path( _g.wd );
 	CSqFile().mkdir( _g.wd );
 
 	_g.done = build( cfg );
@@ -47,6 +51,24 @@ function build( cfg ) : ( _g, _cfg )
 
 				// Checkout
 				_self.shell( "svn", par, _g.wd );
+
+				break;
+
+			case "cd" :
+
+				_g.wd = _self.build_path( _g.rt, v[ "dir" ].str() );
+
+				break;
+
+			case "md" :
+
+				CSqFile().mkdir( _self.build_path( _g.rt, v[ "dir" ].str() ) );
+
+				break;
+
+			case "cmd" :
+
+				_self.shell( v[ "cmd" ].str(), "", _g.wd );
 
 				break;
 
