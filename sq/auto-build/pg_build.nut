@@ -390,7 +390,7 @@ function edit_builds( mRequest, mHeaders, mGet, mPost ) : ( _cfg )
 
 	else if ( mGet[ "build_now" ] )
 	{
-		_self.execute1( 0, "/build_mgr", "Build", mGet[ "edit" ] );
+		_self.execute2( 0, "/build_mgr", "Build", mGet[ "edit" ], "" );
 
 	} // end else if
 

@@ -11,6 +11,7 @@ set INSTALL_ROOT=%CD%\..\..
 set DOWNLOADS=%CD%\..\..\..\downloads
 set REPO=http://www.wetcoin.com/src
 
+md %INSTALL_ROOT%
 md %DOWNLOADS%
 
 set /p PROJECTS=<dependencies.txt

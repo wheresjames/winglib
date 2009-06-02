@@ -237,6 +237,13 @@ void CIpSocket::Destroy()
 	if ( INVALID_SOCKET == hSocket )
 		return;
 
+	// Shutdown the socket
+    shutdown( (SOCKET)m_hSocket, SD_SEND );
+
+	// Read out all data
+	char buf[ 1024 ];
+	while( recv( (SOCKET)m_hSocket, buf, sizeof( buf ), 0 ) );
+
 	// Close the socket
 	closesocket( hSocket );
 
@@ -728,7 +735,7 @@ oexCSTR CIpSocket::GetErrorMsg( oexUINT x_uErr )
 		case WSAHOST_NOT_FOUND:
 			ptr =oexT( "Host not found" );
 			break;
-			
+
 		case WSANOTINITIALISED:
 			ptr =oexT( "Successful WSAStartup not yet performed" );
 			break;
@@ -756,8 +763,8 @@ oexCSTR CIpSocket::GetErrorMsg( oexUINT x_uErr )
 		case WSAEDISCON:
 			ptr =oexT( "Graceful shutdown in progress" );
 			break;
-			
-#if !defined( OEX_NOSOCKET2 )			
+
+#if !defined( OEX_NOSOCKET2 )
 		case WSA_INVALID_HANDLE:
 			ptr =oexT( "Specified event object handle is invalid" );
 			break;

@@ -315,13 +315,22 @@ void CIpSocket::Destroy()
 
 	if ( IsInitialized() )
 	{
-		// Close the socket
-		if ( -1 == shutdown( oexPtrToInt( hSocket ), SHUT_RDWR ) )
+		// Shutdown the socket
+		if ( -1 == shutdown( oexPtrToInt( hSocket ), SHUT_WR ) )
 		{	m_uLastError = errno;
 			if ( ENOTCONN != errno )
 				oexERROR( errno, oexT( "shutdown() failed" ) );
 		} // end if
 
+		// Read out all remaining data
+		char buf[ 1024 ]; int err;
+		while( err = recv( oexPtrToInt( hSocket ), buf, sizeof( buf ), 0 ) );
+		if ( -1 == err )
+		{	m_uLastError = errno;
+			oexERROR( errno, oexT( "recv() failed" ) );
+		} // end if
+
+		// Close the socket
 		if ( -1 == close( oexPtrToInt( hSocket ) ) )
 		{	m_uLastError = errno;
 			oexERROR( errno, oexT( "close() failed" ) );

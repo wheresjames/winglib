@@ -22,6 +22,7 @@ SF_SERVER=superb-east
 #SF_SERVER=internap
 #SF_SERVER=voxel
 
+mkdir -p ${INSTALL_ROOT}
 mkdir -p ${DOWNLOADS}
 
 #-------------------------------------------------------------------

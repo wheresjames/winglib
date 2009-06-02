@@ -13,7 +13,7 @@ class CGlobal
 };
 local _g = CGlobal();
 
-function Build( id ) : ( _g, _cfg )
+function Build( id, dir ) : ( _g, _cfg )
 {
 	_self.echo( "Starting build : " + id );
 
@@ -26,7 +26,10 @@ function Build( id ) : ( _g, _cfg )
 	local cfg = CSqMulti();
 	cfg.deserialize( CSqFile().get_contents( file ) );
 
-	_g.rt = _self.root( id );
+	if ( dir.len() )
+		_g.rt = _self.root( _self.build_path( "BUILD", dir ) );
+	else
+		_g.rt = _self.root( "BUILD/code" );
 	_g.wd = _g.rt;
 
 	CSqFile().delete_path( _g.wd );
