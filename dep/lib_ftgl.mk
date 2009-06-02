@@ -16,6 +16,11 @@ PRJ_LIBROOT := ..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifeq ($(3D),)
+UNSUPPORTED := Set make option 3D=1 to build
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 PRJ_DEFS := M_PI=3.14159265358979323846 
 
 ifeq ($(PLATFORM),windows)
@@ -51,4 +56,5 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
+endif
 

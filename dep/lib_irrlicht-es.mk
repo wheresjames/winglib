@@ -19,6 +19,16 @@ PRJ_LIBROOT := ..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifeq ($(3D),)
+UNSUPPORTED := Set make option 3D=1 to build
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
+ifeq ($(PROC),i386)
+UNSUPPORTED := PROC=$(PROC) not supported
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 ifeq ($(TOOLS),iphone)
 	PRJ_INCS := $(PRJ_INCS) ogles/include
 #	PRJ_DEFS := _IRR_IPHONE_PLATFORM_ _IRR_USE_IPHONE_DEVICE_
@@ -33,11 +43,6 @@ ifeq ($(PLATFORM),windows)
 		PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OPENGL_
 	endif	
 endif
-
-ifeq ($(PROC),i386)
-UNSUPPORTED := PROC=$(PROC) not supported
-include $(PRJ_LIBROOT)/unsupported.mk
-else
 
 #-------------------------------------------------------------------
 # File locations
@@ -56,6 +61,8 @@ include $(PRJ_LIBROOT)/build.mk
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
+
+endif
 
 endif
 
