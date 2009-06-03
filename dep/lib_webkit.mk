@@ -6,7 +6,7 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := WebKit
 PRJ_TYPE := lib
-PRJ_INCS := WebKit
+PRJ_INCS := WebKit WebKit/JavaScriptCore/API
 PRJ_LIBS := 
 
 PRJ_LIBROOT := ..

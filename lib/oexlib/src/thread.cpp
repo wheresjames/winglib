@@ -51,6 +51,7 @@ CThread::CThread()
 {
     m_pData = 0;
     m_uSleep = 0;
+	m_bInitStatus = oexFALSE;
 }
 
 CThread::~CThread()
@@ -80,16 +81,16 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
     	oexERROR( 0, oexT( "Unable to initialize sockets" ) );
 
 	// Initialize thread
-	oexBOOL bInit = pThread->InitThread( pData );
+	pThread->m_bInitStatus = pThread->InitThread( pData );
 
 	// Signal that we're initialized
 	pThread->m_evInit.Signal();
 
 	// Was initialization a success?
-	if ( bInit )
+	if ( pThread->m_bInitStatus )
 	{
 		// Loop while we're not supposed to stop
-		if ( bInit && pThread->m_evStop.Wait( 0 ) )
+		if ( pThread->m_evStop.Wait( 0 ) )
 			while ( pThread->DoThread( pData ) &&
 					pThread->m_evStop.Wait( uSleep ) )
 				os::CSys::PumpThreadMessages();
@@ -98,6 +99,9 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 		nRet = pThread->EndThread( pData );
 
 	} // end if
+
+//	else
+//		oexWARNING( 0, oexMks( oexT( "Thread failed to initialize : " ), oexGetCurThreadId() ) );
 
 	// Uninitialize sockets
     oex::os::CIpSocket::UninitSockets();
@@ -153,12 +157,13 @@ oexRESULT CThread::Stop( oexUINT x_uWait, oexBOOL x_bKill )
     // Clear thread data
     m_pData = 0;
     m_uSleep = 0;
+	m_bInitStatus = oexFALSE;
 
     return nErr;
 }
 
 oexBOOL CThread::IsRunning()
-{	
+{
 	// Has the thread exited?
 	return !WaitThreadExit( 0 );
 }

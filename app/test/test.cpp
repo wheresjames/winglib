@@ -1463,13 +1463,13 @@ oex::oexRESULT Test_CIpSocket()
 
     oex::os::CIpSocket server, session, client;
 
-    if ( !oexVERIFY( server.Bind( 23456 ) ) )
+    if ( !oexVERIFY( server.Bind( 21212 ) ) )
         return -2;
 
     if ( !oexVERIFY( server.Listen() ) )
         return -3;
 
-    if ( !oexVERIFY( client.Connect( oexT( "127.0.0.1" ), 23456 ) ) )
+    if ( !oexVERIFY( client.Connect( oexT( "127.0.0.1" ), 21212 ) ) )
         return -4;
 
     if ( !oexVERIFY( server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, SOCKET_TIMEOUT ) ) )
@@ -1506,13 +1506,13 @@ oex::oexRESULT Test_CIpSocket()
     // *** UDP
 
     if ( !oexVERIFY( server.Create( oex::os::CIpSocket::eAfInet, oex::os::CIpSocket::eTypeDgram, oex::os::CIpSocket::eProtoUdp ) )
-         || !oexVERIFY( server.Bind( 12345 ) ) )
+         || !oexVERIFY( server.Bind( 21212 ) ) )
         return -13;
 
     if ( !oexVERIFY( client.Create( oex::os::CIpSocket::eAfInet, oex::os::CIpSocket::eTypeDgram, oex::os::CIpSocket::eProtoUdp ) ) )
         return -14;
 
-    if ( !oexVERIFY( client.PeerAddress().LookupHost( oexT( "127.0.0.1" ), 12345 ) ) )
+    if ( !oexVERIFY( client.PeerAddress().LookupHost( oexT( "127.0.0.1" ), 21212 ) ) )
         return -15;
 
     if ( !oexVERIFY( client.SendTo( oexStrToBin( pStr ) ) ) )
@@ -1949,17 +1949,23 @@ oex::oexRESULT Test_CHttpSession()
 
 	server.SetSessionCallback( (oex::oexPVOID)OnSessionCallback, (void*)9876 );
 
-	if ( !oexVERIFY( server.StartServer( 12345, OnServerEvent, (void*)6789 ) ) )
+	if ( !oexVERIFY( server.StartServer( 21212, OnServerEvent, (void*)6789 ) ) )
 		return -2;
 
-    if ( !oexVERIFY( client.Connect( oexT( "127.0.0.1" ), 12345 ) ) )
-        return -3;
+	if ( !oexVERIFY( !server.GetInitEvent().Wait() ) )
+		return -3;
+
+	if ( !oexVERIFY( server.GetInitStatus() ) )
+		return -4;
+
+    if ( !oexVERIFY( client.Connect( oexT( "127.0.0.1" ), 21212 ) ) )
+        return -5;
 
     if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, SOCKET_TIMEOUT ) ) )
-        return -4;
+        return -6;
 
 	if ( !oexVERIFY( client.Send( "GET / HTTP/1.0\r\n\r\n" ) ) )
-        return -5;
+        return -7;
 
 	while ( !server.GetNumTransactions() )
 		oexSleep( 15 );
@@ -1970,7 +1976,7 @@ oex::oexRESULT Test_CHttpSession()
 	oex::CStr8 sData = client.Read();
 
 	if ( !oexVERIFY( 0 <= sData.Match( "Hello World!" ) ) )
-		return -6;
+		return -8;
 
 	client.Destroy();
 	server.Stop();

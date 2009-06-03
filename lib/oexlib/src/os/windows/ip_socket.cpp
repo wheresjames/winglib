@@ -238,11 +238,7 @@ void CIpSocket::Destroy()
 		return;
 
 	// Shutdown the socket
-    shutdown( (SOCKET)m_hSocket, SD_SEND );
-
-	// Read out all data
-	char buf[ 1024 ];
-	while( recv( (SOCKET)m_hSocket, buf, sizeof( buf ), 0 ) );
+    shutdown( (SOCKET)m_hSocket, SD_BOTH );
 
 	// Close the socket
 	closesocket( hSocket );

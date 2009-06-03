@@ -240,6 +240,9 @@ public:
 		return oexTRUE;
 	}
 
+	/// Returns reference to port object
+	T_PORT& Port() { return m_server; }
+
 private:
 
 	/// The TCP port to listen

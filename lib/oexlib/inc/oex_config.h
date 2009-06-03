@@ -101,9 +101,16 @@
 //#define oexDEFAULT_WAIT_TIMEOUT       3000
 
 #if defined( OEX_WIN32 )
+
+// Just informative under Windows.
+// This is windows default resolution
 #	define oexWAIT_RESOLUTION			15000
+
 #else
+
+// iii This value is very touchy
 #	define oexWAIT_RESOLUTION			4000
+
 #endif
 
 // Enable CRT leak detection

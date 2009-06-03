@@ -271,7 +271,7 @@ public:
 	virtual void Destroy() { os::CResource::Destroy(); m_nosig.Destroy(); }
 
 	/// Signals the event
-	virtual oexRESULT Signal( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT ) 
+	virtual oexRESULT Signal( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
 	{	return m_nosig.Reset() | os::CResource::Signal(); }
 
 	/// Resets the event
@@ -455,6 +455,16 @@ public:
     /// Waits for thread to initialize
     oexBOOL WaitThreadExit( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT );
 
+	/// Returns a reference to the stop event
+	CResource& GetStopEvent() { return m_evStop; }
+
+	/// Returns a reference to the init event
+	CResource& GetInitEvent() { return m_evInit; }
+
+	/// Return value of InitThread()
+	/// call GetInitEvent().Wait() to ensure it's valid
+	oexBOOL GetInitStatus() { return m_bInitStatus; }
+
 private:
 
 	//==============================================================
@@ -483,12 +493,6 @@ protected:
 	/// Decrements the running thread count
 	static void DecRunningThreadCount();
 
-	/// Returns a reference to the stop event
-	CResource& GetStopEvent() { return m_evStop; }
-
-	/// Returns a reference to the init event
-	CResource& GetInitEvent() { return m_evInit; }
-
 private:
 
     /// Users data
@@ -496,6 +500,9 @@ private:
 
     /// Inject sleep
     oexUINT                                 m_uSleep;
+
+	/// Return value of InitThread()
+	oexBOOL									m_bInitStatus;
 
     /// Count of all threads that were created
     static oexLONG                          m_lThreadCount;

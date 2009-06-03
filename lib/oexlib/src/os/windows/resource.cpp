@@ -94,9 +94,7 @@ static SResourceInfo* CreateRi()
 {
 	SResourceInfo *pRi = OexAllocConstruct< SResourceInfo >();
 	if ( !pRi )
-	{	oexERROR( ERROR_OUTOFMEMORY, oexT( "Out of memory" ) );
 		return oexNULL;
-	} // end if
 
 	pRi->uOwner = 0;
 	pRi->hHandle = INVALID_HANDLE_VALUE;
@@ -144,8 +142,14 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 
 			// Wait to see if the thread will shutdown on it's own
 			if ( WAIT_OBJECT_0 != WaitForSingleObject( pRi->hHandle, x_uTimeout ) )
-			{	oexERROR( GetLastError(), oexT( "!!! Thread failed to exit gracefully, Calling TerminateThread() !!!" ) );
-				TerminateThread( pRi->hHandle, oexFALSE );
+			{
+				if ( x_bForce )
+				{	oexERROR( GetLastError(), oexT( "!!! Thread failed to exit gracefully, Calling TerminateThread() !!!" ) );
+					TerminateThread( pRi->hHandle, oexFALSE );
+				} // end if
+				else
+					oexERROR( GetLastError(), oexT( "!!! Thread failed to exit gracefully, it is being abandonded !!!" ) );
+
 			} // end if
 
 		case eRtMutex :
@@ -245,8 +249,8 @@ oexRESULT CResource::NewThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData )
 	pRi->hHandle = CreateThread(	(LPSECURITY_ATTRIBUTES)NULL,
 									0,
 						            CThreadProcImpl::ThreadProc,
-									(LPVOID)pRi,	
-									0, 
+									(LPVOID)pRi,
+									0,
 									(LPDWORD)&pRi->uThreadId );
 
 	// Seems to be confusion about what this function returns on error
@@ -466,6 +470,8 @@ oexINT CResource::WaitMultiple( oexINT x_nCount, CResource **x_pResources, oexUI
 		else
 		{
 			SResourceInfo *pRi = (SResourceInfo*)x_pResources[ i ]->GetHandle();
+
+			// +++ Should this be INVALID_HANDLE_VALUE?
 			if ( !oexCHECK_PTR( pRi ) )
 				oexERROR( 0, oexT( "Invalid data pointer" ) );
 
