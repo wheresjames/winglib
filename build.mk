@@ -56,14 +56,19 @@ endif
 # Using full paths helps IDE editors to locate the file when there's an error ;)
 ifneq ($(LOC_SRC_$(LOC_TAG)),)
 BLD_PATH_SRC_$(LOC_TAG) := $(CFG_CUR_ROOT)/$(LOC_SRC_$(LOC_TAG))
+ifneq ($(LOC_SRC_$(LOC_TAG)),$(LOC_INC_$(LOC_TAG)))
+	BLD_PATH_INC_$(LOC_TAG) := $(CFG_CUR_ROOT)/$(LOC_SRC_$(LOC_TAG))
+endif
 else
 BLD_PATH_SRC_$(LOC_TAG) := $(CFG_CUR_ROOT)
 endif
 
 ifneq ($(LOC_INC_$(LOC_TAG)),)
-BLD_PATH_INC_$(LOC_TAG) := $(CFG_CUR_ROOT)/$(LOC_INC_$(LOC_TAG))
+BLD_PATH_INC_$(LOC_TAG) := $(BLD_PATH_INC_$(LOC_TAG)) $(CFG_CUR_ROOT)/$(LOC_INC_$(LOC_TAG))
 else
-BLD_PATH_INC_$(LOC_TAG) := $(CFG_CUR_ROOT)
+ifeq ($(LOC_SRC_$(LOC_TAG)),)
+	BLD_PATH_INC_$(LOC_TAG) := $(BLD_PATH_INC_$(LOC_TAG)) $(CFG_CUR_ROOT)
+endif
 endif
 
 #ifneq ($(LOC_OUT_$(LOC_TAG)),)
@@ -92,8 +97,11 @@ endif
 
 BLD_OBJECTS_$(LOC_TAG) 	:= $(subst $(BLD_PATH_SRC_$(LOC_TAG))/,$(BLD_PATH_OBJ_$(LOC_TAG))/, $(BLD_SOURCES_$(LOC_TAG):.$(LOC_CXX_$(LOC_TAG))=.$(CFG_OBJ_EXT)) )
 BLD_INCS			    := $(CFG_CC_INC)$(BLD_PATH_INC_$(LOC_TAG)) $(foreach inc,$(PRJ_INCS), $(CFG_CC_INC)$(CFG_LIBROOT)/$(inc))
-BLD_OBJECTS_TOTAL 		:= $(BLD_OBJECTS_TOTAL) $(BLD_OBJECTS_$(LOC_TAG))
+ifneq ($(PRJ_SYSI),)
+	BLD_INCS			:= $(BLD_INCS) $(foreach inc,$(PRJ_SYSI), $(CFG_CC_INC)$(inc))
+endif
 
+BLD_OBJECTS_TOTAL 		:= $(BLD_OBJECTS_TOTAL) $(BLD_OBJECTS_$(LOC_TAG))
 #BLD_DEPENDS_$(LOC_TAG) := $(subst $(BLD_PATH_SRC_$(LOC_TAG))/,$(BLD_PATH_OBJ_$(LOC_TAG))/, $(BLD_SOURCES_$(LOC_TAG):.$(LOC_CXX_$(LOC_TAG))=.$(CFG_DEP_EXT)) )
 #BLD_DEPENDS_INCS		:= -I$(BLD_PATH_INC_$(LOC_TAG)) $(foreach inc,$(PRJ_INCS), -I$(CFG_LIBROOT)/$(inc))
 #BLD_DEPENDS_TOTAL 		:= $(BLD_DEPENDS_TOTAL) $(BLD_DEPENDS_$(LOC_TAG))
