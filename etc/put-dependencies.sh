@@ -6,6 +6,7 @@
 
 FILE_EXT=tar.bz2
 #FILE_EXT=zip
+DEPENDS=${PWD}/dependencies.txt
 INSTALL_ROOT=$PWD/../..
 UPLOADS=$PWD/../../../uploads
 
@@ -15,7 +16,9 @@ mkdir -p ${UPLOADS}
 # Execute
 #-------------------------------------------------------------------
 
-for PROJECT in `cat dependencies.txt`
+cd ${INSTALL_ROOT}
+
+for PROJECT in `cat ${DEPENDS}`
 do
 	echo ${INSTALL_ROOT}/${PROJECT}
 
@@ -26,9 +29,9 @@ do
 		
 	    echo Creating ${FILE}...
 
-		tar -c ${INSTALL_ROOT}/${PROJECT} | bzip2 > "${FILE}.tar.bz2"
+		tar -c ${PROJECT} | bzip2 > "${FILE}.tar.bz2"
 		
-		zip -r "${FILE}.zip" ${INSTALL_ROOT}/${PROJECT}
+		zip -r "${FILE}.zip" ${PROJECT}
 
 	fi	
 done
