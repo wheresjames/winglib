@@ -1,5 +1,6 @@
 abel
 bullet
+cairo
 cell
 curl
 CxImage
@@ -14,11 +15,14 @@ mysql
 ogles
 ogles-src
 opencv
+pixman
 png
+pthreads
 scintilla
 sqbind
 SqPlus
 tiff
+WebKit
 winglib
 wxWidgets
 zlib

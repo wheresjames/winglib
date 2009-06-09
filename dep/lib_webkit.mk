@@ -6,7 +6,7 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := WebKit
 PRJ_TYPE := lib
-PRJ_INCS := wxWidgets/include freetype/include \
+PRJ_INCS := wxWidgets/include freetype/include pthreads cairo/src \
 			WebKit WebKit/DerivedSources \
 			WebKit/WebCore WebKit/WebCore/accessibility WebKit/WebCore/bindings/js \
 			WebKit/WebCore/bridge WebKit/WebCore/bridge/c WebKit/WebCore/css WebKit/WebCore/dom \
@@ -23,7 +23,9 @@ PRJ_INCS := wxWidgets/include freetype/include \
 			WebKit/JavaScriptCore/bytecode WebKit/JavaScriptCore/bytecompiler WebKit/JavaScriptCore/debugger WebKit/JavaScriptCore/jit \
 			WebKit/JavaScriptCore/pcre WebKit/JavaScriptCore/profiler WebKit/JavaScriptCore/runtime WebKit/JavaScriptCore/wrec \
 			WebKit/JavaScriptCore/assembler WebKit/JavaScriptCore/wtf/unicode WebKit/JavaScriptCore/yarr WebKit/JavaScriptCore/pcre \
-			WebKit/JavaScriptCore/parser WebKit/JavaScriptCore/runtime WebKit/JavaScriptCore/wtf
+			WebKit/JavaScriptCore/parser WebKit/JavaScriptCore/runtime WebKit/JavaScriptCore/wtf WebKit/JavaScriptCore/icu \
+			\
+			WebKit/WebCore/icu \
 
 PRJ_SYSI := 
 PRJ_LIBS := 
@@ -45,14 +47,19 @@ ifeq ($(PLATFORM),windows)
 	PRJ_LIBS := $(PRJ_LIBS) wxWidgets
 	PRJ_DEFS := 
 	
-	PRJ_INCS := winglib/dep/etc/WebKit/inc/windows $(PRJ_INCS)
+	PRJ_INCS := winglib/dep/etc/WebKit/inc/windows winglib/dep/etc/cairo/inc/windows $(PRJ_INCS) \
+				WebKit/WebKit/win WebKit/WebKit/win/WebCoreSupport WebKit/WebKit/win/webkit \
+				WebKit/WebCore/platform/win WebKit/WebCore/platform/graphics/win \
+				WebKit/WebCore/accessibility/win WebKit/WebCore/loader/win WebKit/WebCore/page/win \
+				WebKit/WebCore/platform/graphics/cairo WebKit/WebCore/platform/network/curl
+#				WebKit/WebCore/platform/network/soup
 
 else
 	PRJ_EXTC := `wx-config --cppflags`
 	PRJ_EXTL := `wx-config --libs`
 #	PRJ_OSLB := X11 GLU Xxf86vm
 
-	PRJ_INCS := winglib/dep/etc/WebKit/inc/posix $(PRJ_INCS) \
+	PRJ_INCS := winglib/dep/etc/WebKit/inc/posix winglib/dep/etc/cairo/inc/posix $(PRJ_INCS) \
 				WebKit/WebKit/gtk WebKit/WebKit/gtk/WebCoreSupport WebKit/WebKit/gtk/webkit \
 				WebKit/WebCore/platform/gtk WebKit/WebCore/platform/graphics/gtk \
 				WebKit/WebCore/accessibility/gtk WebKit/WebCore/loader/gtk WebKit/WebCore/page/gtk \
@@ -68,10 +75,17 @@ endif
 # -- JavaScriptCore
 #----------------------------
 
-#export LOC_TAG := wc_ac
-#LOC_SRC_wc_ac := $(CFG_LIBROOT)/WebKit/WebCore/accessibility
-#LOC_LST_wc_ac := AllInOneFile
+export LOC_TAG := wc_ac
+LOC_SRC_wc_ac := $(CFG_LIBROOT)/WebKit/WebCore/accessibility
+include $(PRJ_LIBROOT)/build.mk
+
+#export LOC_TAG := wc_dom
+#LOC_SRC_wc_dom := $(CFG_LIBROOT)/WebKit/WebCore/dom
 #include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wc_pf
+LOC_SRC_wc_pf := $(CFG_LIBROOT)/WebKit/WebCore/platform
+include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := jsc_api
 LOC_SRC_jsc_api := $(CFG_LIBROOT)/WebKit/JavaScriptCore

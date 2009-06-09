@@ -374,7 +374,23 @@ else
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
-		else
+		endif
+		ifeq ($(TOOLS),mac)
+
+			OS := mac
+			PLATFORM := posix
+			
+			# Cross compile for mac
+			CFG_TOOLPREFIX := g++
+
+			CFG_STDLIB := 
+			CFG_LFLAGS := $(CFG_LEXTRA) 
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_NOSTRUCTINIT
+			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
+			CFG_AFLAGS := cq
+
+		endif
+		ifeq ($(TOOLS),)
 		
 			OS := linux
 			PLATFORM := posix

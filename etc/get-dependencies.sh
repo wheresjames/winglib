@@ -51,7 +51,7 @@ do
 			bunzip2 -c ${FILE} | tar xvf -
 	    fi
 	    echo Patching ${PROJECT}...
-		find ${PATCHES} -name ${PROJECT}-*.patch | xargs -rtI {} cat {} | patch -d ${PROJECT} -p1
+		find ${PATCHES} -name ${PROJECT}-*.patch | xargs -rtI{} cat {} | patch -d ${PROJECT} -p1
 	fi
 done
 

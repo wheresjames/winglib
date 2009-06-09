@@ -22,11 +22,13 @@ do
 	# If the directory exists
 	if [ -d ${INSTALL_ROOT}/${PROJECT} ]; then
 
-		FILE="${UPLOADS}/${PROJECT}.${FILE_EXT}"
+		FILE="${UPLOADS}/${PROJECT}"
 		
 	    echo Creating ${FILE}...
 
-		tar -c ${INSTALL_ROOT}/${PROJECT} | bzip2 > ${FILE}
+		tar -c ${INSTALL_ROOT}/${PROJECT} | bzip2 > "${FILE}.tar.bz2"
+		
+		zip -r "${FILE}.zip" ${INSTALL_ROOT}/${PROJECT}
 
 	fi	
 done
