@@ -6,7 +6,7 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := WebKit
 PRJ_TYPE := lib
-PRJ_INCS := wxWidgets/include freetype/include pthreads cairo/src \
+PRJ_INCS := wxWidgets/include freetype/include cairo/src \
 			WebKit WebKit/DerivedSources \
 			WebKit/WebCore WebKit/WebCore/accessibility WebKit/WebCore/bindings/js \
 			WebKit/WebCore/bridge WebKit/WebCore/bridge/c WebKit/WebCore/css WebKit/WebCore/dom \
@@ -25,11 +25,11 @@ PRJ_INCS := wxWidgets/include freetype/include pthreads cairo/src \
 			WebKit/JavaScriptCore/assembler WebKit/JavaScriptCore/wtf/unicode WebKit/JavaScriptCore/yarr WebKit/JavaScriptCore/pcre \
 			WebKit/JavaScriptCore/parser WebKit/JavaScriptCore/runtime WebKit/JavaScriptCore/wtf WebKit/JavaScriptCore/icu \
 			\
-			WebKit/WebCore/icu \
+			WebKit/WebCore/icu
 
 PRJ_SYSI := 
 PRJ_LIBS := 
-PRJ_DEFS := USE_FREETYPE
+PRJ_DEFS := USE_FREETYPE PTW32_STATIC_LIB
 
 PRJ_LIBROOT := ..
 
@@ -47,7 +47,8 @@ ifeq ($(PLATFORM),windows)
 	PRJ_LIBS := $(PRJ_LIBS) wxWidgets
 	PRJ_DEFS := 
 	
-	PRJ_INCS := winglib/dep/etc/WebKit/inc/windows winglib/dep/etc/cairo/inc/windows $(PRJ_INCS) \
+	PRJ_INCS := winglib/dep/etc/WebKit/inc/windows winglib/dep/etc/cairo/inc/windows \
+				$(PRJ_INCS) pthreads \
 				WebKit/WebKit/win WebKit/WebKit/win/WebCoreSupport WebKit/WebKit/win/webkit \
 				WebKit/WebCore/platform/win WebKit/WebCore/platform/graphics/win \
 				WebKit/WebCore/accessibility/win WebKit/WebCore/loader/win WebKit/WebCore/page/win \
