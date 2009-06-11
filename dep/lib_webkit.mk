@@ -45,14 +45,24 @@ else
 
 ifeq ($(PLATFORM),windows)
 	PRJ_LIBS := $(PRJ_LIBS) wxWidgets
-	PRJ_DEFS := 
-	
+	PRJ_DEFS := $(PRJ_DEFS) NEED_ERRNO NDEBUG=1 wxUSE_GRAPHICS_CONTEXT=1
+
 	PRJ_INCS := winglib/dep/etc/WebKit/inc/windows winglib/dep/etc/cairo/inc/windows \
+				winglib/dep/etc/wxWidgets/inc/windows \
 				$(PRJ_INCS) pthreads \
-				WebKit/WebKit/win WebKit/WebKit/win/WebCoreSupport WebKit/WebKit/win/webkit \
-				WebKit/WebCore/platform/win WebKit/WebCore/platform/graphics/win \
-				WebKit/WebCore/accessibility/win WebKit/WebCore/loader/win WebKit/WebCore/page/win \
+				WebKit/WebKit/wx/WebKitSupport \
+				WebKit/WebCore/platform/win WebKit/WebCore/page/win \
+				WebKit/WebKit/wx WebKit/WebKit/wx/WebCoreSupport WebKit/WebKit/wx/webkit \
+				WebKit/WebCore/platform/wx WebKit/WebCore/platform/graphics/wx \
+				WebKit/WebCore/accessibility/win WebKit/WebCore/loader/wx WebKit/WebCore/page/wx \
 				WebKit/WebCore/platform/graphics/cairo WebKit/WebCore/platform/network/curl
+	
+#	PRJ_INCS := winglib/dep/etc/WebKit/inc/windows winglib/dep/etc/cairo/inc/windows \
+#				$(PRJ_INCS) pthreads \
+#				WebKit/WebKit/win WebKit/WebKit/win/WebCoreSupport WebKit/WebKit/win/webkit \
+#				WebKit/WebCore/platform/win WebKit/WebCore/platform/graphics/win \
+#				WebKit/WebCore/accessibility/win WebKit/WebCore/loader/win WebKit/WebCore/page/win \
+#				WebKit/WebCore/platform/graphics/cairo WebKit/WebCore/platform/network/curl
 #				WebKit/WebCore/platform/network/soup
 
 else
@@ -60,6 +70,9 @@ else
 	PRJ_EXTL := `wx-config --libs`
 #	PRJ_OSLB := X11 GLU Xxf86vm
 
+	PRJ_DEFS := $(PRJ_DEFS) CAIRO_HAS_FT_FONT CAIRO_HAS_FC_FONT
+
+	PRJ_SYSI := /usr/include/libsoup-2.4
 	PRJ_INCS := winglib/dep/etc/WebKit/inc/posix winglib/dep/etc/cairo/inc/posix $(PRJ_INCS) \
 				WebKit/WebKit/gtk WebKit/WebKit/gtk/WebCoreSupport WebKit/WebKit/gtk/webkit \
 				WebKit/WebCore/platform/gtk WebKit/WebCore/platform/graphics/gtk \
@@ -91,6 +104,10 @@ include $(PRJ_LIBROOT)/build.mk
 export LOC_TAG := jsc_api
 LOC_SRC_jsc_api := $(CFG_LIBROOT)/WebKit/JavaScriptCore
 LOC_LST_jsc_api := AllInOneFile
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wx
+LOC_SRC_wx := $(CFG_LIBROOT)/WebKit/WebKit/wx
 include $(PRJ_LIBROOT)/build.mk
 
 #-------------------------------------------------------------------

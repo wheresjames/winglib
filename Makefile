@@ -30,6 +30,9 @@ ifdef GUI
 	ifdef 3D
 		BUILDDIRS := $(BUILDDIRS) app/irr_wxtest
 	endif
+	ifdef BUILD_WEBKIT
+		BUILDDIRS := $(BUILDDIRS) app/wx_webkit
+	endif
 endif
 
 ifdef BUILDDEP

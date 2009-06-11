@@ -66,7 +66,7 @@
 #define LT_OBJDIR ".libs/"
 
 /* Define to disable debugging features */
-#define NDEBUG 1
+//#define NDEBUG 1
 
 /* Define to 1 if your C compiler doesn't accept -c and -o together. */
 /* #undef NO_MINUS_C_MINUS_O */
@@ -100,6 +100,11 @@
 
 /* Define if target is X11 */
 //#define WTF_PLATFORM_X11 1
+
+#define __WXMSW__ 1
+#define BUILDING_WX__ 1
+
+#define WTF_USE_WXGC 1
 
 /* Use alternate JSImmediate */
 /* #undef WTF_USE_ALTERNATE_JSIMMEDIATE */
