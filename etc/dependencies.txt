@@ -11,6 +11,8 @@ irrlicht
 irrlicht-es
 j2k
 jpeg
+libsoup
+libxml
 mysql
 ogles
 ogles-src

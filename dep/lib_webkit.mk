@@ -6,7 +6,7 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := WebKit
 PRJ_TYPE := lib
-PRJ_INCS := wxWidgets/include freetype/include cairo/src \
+PRJ_INCS := wxWidgets/include freetype/include cairo/src libxml/include \
 			WebKit WebKit/DerivedSources \
 			WebKit/WebCore WebKit/WebCore/accessibility WebKit/WebCore/bindings/js \
 			WebKit/WebCore/bridge WebKit/WebCore/bridge/c WebKit/WebCore/css WebKit/WebCore/dom \
@@ -45,10 +45,12 @@ else
 
 ifeq ($(PLATFORM),windows)
 	PRJ_LIBS := $(PRJ_LIBS) wxWidgets
-	PRJ_DEFS := $(PRJ_DEFS) NEED_ERRNO NDEBUG=1 wxUSE_GRAPHICS_CONTEXT=1
+	PRJ_DEFS := $(PRJ_DEFS) NDEBUG=1 wxUSE_GRAPHICS_CONTEXT=1
+#NEED_ERRNO 
+
 
 	PRJ_INCS := winglib/dep/etc/WebKit/inc/windows winglib/dep/etc/cairo/inc/windows \
-				winglib/dep/etc/wxWidgets/inc/windows \
+				winglib/dep/etc/wxWidgets/inc/windows winglib/dep/etc/libxml/inc/windows \
 				$(PRJ_INCS) pthreads \
 				WebKit/WebKit/wx/WebKitSupport \
 				WebKit/WebCore/platform/win WebKit/WebCore/page/win \
@@ -86,28 +88,104 @@ endif
 #-------------------------------------------------------------------
 
 #----------------------------
-# -- JavaScriptCore
+# -- WebCore
 #----------------------------
+
+export LOC_TAG := wc
+LOC_SRC_wc := $(CFG_LIBROOT)/WebKit/WebCore
+include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := wc_ac
 LOC_SRC_wc_ac := $(CFG_LIBROOT)/WebKit/WebCore/accessibility
 include $(PRJ_LIBROOT)/build.mk
 
-#export LOC_TAG := wc_dom
-#LOC_SRC_wc_dom := $(CFG_LIBROOT)/WebKit/WebCore/dom
-#include $(PRJ_LIBROOT)/build.mk
+export LOC_TAG := wc_css
+LOC_SRC_wc_css := $(CFG_LIBROOT)/WebKit/WebCore/css
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wc_dom
+LOC_SRC_wc_dom := $(CFG_LIBROOT)/WebKit/WebCore/dom
+LOC_EXC_wc_dom := XMLTokenizerQt
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wc_ed
+LOC_SRC_wc_ed := $(CFG_LIBROOT)/WebKit/WebCore/editing
+LOC_EXC_wc_ed := SmartReplaceCF
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wc_html
+LOC_SRC_wc_html := $(CFG_LIBROOT)/WebKit/WebCore/html
+LOC_EXC_wc_html := HTMLBodyElement HTMLElementsAllInOne
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wc_ld
+LOC_SRC_wc_ld := $(CFG_LIBROOT)/WebKit/WebCore/loader
+LOC_EXC_wc_ld := UserStyleSheetLoader
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wc_pg
+LOC_SRC_wc_pg := $(CFG_LIBROOT)/WebKit/WebCore/page
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wc_pg_a
+LOC_SRC_wc_pg_a := $(CFG_LIBROOT)/WebKit/WebCore/page/animation
+include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := wc_pf
 LOC_SRC_wc_pf := $(CFG_LIBROOT)/WebKit/WebCore/platform
 include $(PRJ_LIBROOT)/build.mk
 
-export LOC_TAG := jsc_api
-LOC_SRC_jsc_api := $(CFG_LIBROOT)/WebKit/JavaScriptCore
-LOC_LST_jsc_api := AllInOneFile
+export LOC_TAG := wc_pf_net
+LOC_SRC_wc_pt_net := $(CFG_LIBROOT)/WebKit/WebCore/platform/network
 include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wc_pf_txt
+LOC_SRC_wc_pf_txt := $(CFG_LIBROOT)/WebKit/WebCore/platform/text
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wc_svg_g
+LOC_SRC_wc_svg_g := $(CFG_LIBROOT)/WebKit/WebCore/svg/graphics
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wc_rd
+LOC_SRC_wc_rd := $(CFG_LIBROOT)/WebKit/WebCore/rendering
+LOC_EXC_wc_rd := RenderMediaControls RenderThemeChromiumLinux RenderThemeChromiumWin \
+				 RenderThemeWin
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wc_rd_s
+LOC_SRC_wc_rd_s := $(CFG_LIBROOT)/WebKit/WebCore/rendering/style
+include $(PRJ_LIBROOT)/build.mk
+
+#----------------------------
+# -- JavaScriptCore
+#----------------------------
+
+export LOC_TAG := jsc_wtf
+LOC_SRC_jsc_wtf := $(CFG_LIBROOT)/WebKit/JavaScriptCore/wtf
+LOC_EXC_jsc_wtf := GOwnPtr ThreadingWin ThreadSpecificWin
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := jsc_jit
+LOC_SRC_jsc_jit := $(CFG_LIBROOT)/WebKit/JavaScriptCore/jit
+LOC_EXC_jsc_jit := ExecutableAllocatorPosix
+include $(PRJ_LIBROOT)/build.mk
+
+
+#----------------------------
+# -- wx
+#----------------------------
 
 export LOC_TAG := wx
 LOC_SRC_wx := $(CFG_LIBROOT)/WebKit/WebKit/wx
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wx_p_g
+LOC_SRC_wx_p_g := $(CFG_LIBROOT)/WebCore/platform/graphics/wx
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wx_p
+LOC_SRC_wx_p := $(CFG_LIBROOT)/WebCore/platform/wx
 include $(PRJ_LIBROOT)/build.mk
 
 #-------------------------------------------------------------------

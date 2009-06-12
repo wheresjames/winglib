@@ -1,6 +1,14 @@
 /* autotoolsconfig.h.  Generated from autotoolsconfig.h.in by configure.  */
 /* autotoolsconfig.h.in.  Generated from configure.ac by autoheader.  */
 
+#define ENABLE_XPATH 1
+
+#define ENABLE_OFFLINE_WEB_APPLICATIONS 1
+
+#define ENABLE_DOM_STORAGE 1
+
+#define ENABLE_SVG 1
+
 /* Define to enable JIT */
 #define ENABLE_JIT 1
 
@@ -105,6 +113,8 @@
 #define BUILDING_WX__ 1
 
 #define WTF_USE_WXGC 1
+
+#define WTF_USE_JSC 1
 
 /* Use alternate JSImmediate */
 /* #undef WTF_USE_ALTERNATE_JSIMMEDIATE */
