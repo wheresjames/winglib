@@ -22,6 +22,7 @@ png
 pthreads
 scintilla
 sqbind
+sqlite
 SqPlus
 tiff
 WebKit
