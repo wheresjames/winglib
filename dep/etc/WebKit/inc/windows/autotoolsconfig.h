@@ -9,6 +9,12 @@
 
 #define ENABLE_SVG 1
 
+#define ENABLE_XSLT 1
+
+//#define ENABLE_CHANNEL_MESSAGING 1
+
+#define ENABLE_WORKERS 1
+
 /* Define to enable JIT */
 #define ENABLE_JIT 1
 
@@ -110,11 +116,16 @@
 //#define WTF_PLATFORM_X11 1
 
 #define __WXMSW__ 1
-#define BUILDING_WX__ 1
+//#define BUILDING_WX__ 1
 
-#define WTF_USE_WXGC 1
+//#define WTF_USE_WXGC 1
+
+#define BUILDING_CHROMIUM__ 1
+#define WTF_USE_SKIA 1
 
 #define WTF_USE_JSC 1
+
+#define WTF_USE_CURL 1
 
 /* Use alternate JSImmediate */
 /* #undef WTF_USE_ALTERNATE_JSIMMEDIATE */

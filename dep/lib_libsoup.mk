@@ -4,13 +4,12 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := wx_webkit
-PRJ_TYPE := exe
-PRJ_LIBS := oexlib
-PRJ_INCS := winglib/lib/oexlib curl/include WebKit/WebKit/wx
-PRJ_DEFS := NDEBUG=1 USE_FREETYPE PTW32_STATIC_LIB
-
-PRJ_LIBROOT := ../..
+PRJ_NAME := soup
+PRJ_TYPE := lib
+PRJ_INCS := libsoup libgio
+PRJ_LIBS := 
+PRJ_DEFS :=
+PRJ_LIBROOT := ..
 
 #-------------------------------------------------------------------
 # Configure build
@@ -18,23 +17,17 @@ PRJ_LIBROOT := ../..
 include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(PLATFORM),windows)
-	PRJ_OSLB := comctl32 comdlg32 uuid oleaut32
-	PRJ_LIBS := $(PRJ_LIBS) jpeg WebKit wxWidgets sqlite xml zlib jpeg curl
-	PRJ_DEFS := $(PRJ_DEFS) 
-		# NEED_ERRNO
-	PRJ_INCS := $(PRJ_INCS) winglib/dep/etc/wxWidgets/inc/windows wxWidgets/include
-
+UNSUPPORTED := PLATFORM=$(PLATFORM) is not supported
+include $(PRJ_LIBROOT)/unsupported.mk
 else
-	PRJ_LIBS := $(PRJ_LIBS) jpeg
-	PRJ_EXTC := `wx-config --cppflags`
-	PRJ_EXTL := `wx-config --libs`
-	PRJ_OSLB := X11 GLU Xxf86vm
-endif
 
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------
 export LOC_TAG := def
+LOC_CXX_def := c
+LOC_SRC_def := $(CFG_LIBROOT)/libsoup/libsoup
+LOC_EXC_def := 			   
 include $(PRJ_LIBROOT)/build.mk
 
 #-------------------------------------------------------------------
@@ -42,4 +35,5 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
+endif
 

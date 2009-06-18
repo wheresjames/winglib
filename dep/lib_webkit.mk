@@ -1,12 +1,15 @@
 
 default_target: all
 
+#			wxWidgets/include freetype/include cairo/src libxml/include curl/include sqlite libxslt \
+
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := WebKit
 PRJ_TYPE := lib
-PRJ_INCS := wxWidgets/include freetype/include cairo/src libxml/include curl/include sqlite \
+PRJ_INCS := \
+			freetype/include libxml/include curl/include sqlite libxslt \
 			WebKit WebKit/DerivedSources \
 			WebKit/WebCore WebKit/WebCore/accessibility WebKit/WebCore/bindings/js \
 			WebKit/WebCore/bridge WebKit/WebCore/bridge/c WebKit/WebCore/css WebKit/WebCore/dom \
@@ -47,20 +50,34 @@ include $(PRJ_LIBROOT)/unsupported.mk
 else
 
 ifeq ($(PLATFORM),windows)
-	PRJ_LIBS := $(PRJ_LIBS) wxWidgets
-	PRJ_DEFS := $(PRJ_DEFS) NDEBUG=1 wxUSE_GRAPHICS_CONTEXT=1
-#NEED_ERRNO 
+	PRJ_DEFS := $(PRJ_DEFS) NDEBUG=1
 
-
-	PRJ_INCS := winglib/dep/etc/WebKit/inc/windows winglib/dep/etc/cairo/inc/windows \
-				winglib/dep/etc/wxWidgets/inc/windows winglib/dep/etc/libxml/inc/windows \
+	PRJ_INCS := winglib/dep/etc/WebKit/inc/windows winglib/dep/etc/libxml/inc/windows \
 				$(PRJ_INCS) pthreads \
-				WebKit/WebKit/wx/WebKitSupport WebKit/WebCore/platform/wx/wxcode \
-				WebKit/WebCore/platform/win WebKit/WebCore/page/win \
-				WebKit/WebKit/wx WebKit/WebKit/wx/WebCoreSupport WebKit/WebKit/wx/webkit \
-				WebKit/WebCore/platform/wx WebKit/WebCore/platform/graphics/wx \
-				WebKit/WebCore/accessibility/win WebKit/WebCore/loader/wx WebKit/WebCore/page/wx \
-				WebKit/WebCore/platform/graphics/cairo WebKit/WebCore/platform/network/curl
+				WebKit/WebCore/platform/network/curl
+
+	ifdef BUILD_WEBKIT_WX
+
+		PRJ_DEFS := $(PRJ_DEFS) wxUSE_GRAPHICS_CONTEXT=1
+		PRJ_INCS := $(PRJ_INCS) \
+					WebKit/WebKit/wx/WebKitSupport WebKit/WebCore/platform/wx/wxcode \
+					WebKit/WebCore/platform/win WebKit/WebCore/page/win \
+					WebKit/WebKit/wx WebKit/WebKit/wx/WebCoreSupport WebKit/WebKit/wx/webkit \
+					WebKit/WebCore/platform/wx WebKit/WebCore/platform/graphics/wx \
+					WebKit/WebCore/accessibility/win WebKit/WebCore/loader/wx WebKit/WebCore/page/wx
+
+	else
+
+		PRJ_INCS := $(PRJ_INCS) \
+					WebKit/WebCore/platform/chromium WebKit/WebCore/platform/graphics/chromium \
+					WebKit/WebCore/accessibility/chromium WebKit/WebCore/platform/network/chromium \
+					\
+					chromium WebKit/WebCore/platform/graphics/skia \
+					skia/include/config skia/include/core skia/include/effects
+					
+
+	endif
+
 	
 #	PRJ_INCS := winglib/dep/etc/WebKit/inc/windows winglib/dep/etc/cairo/inc/windows \
 #				$(PRJ_INCS) pthreads \
@@ -72,7 +89,7 @@ ifeq ($(PLATFORM),windows)
 
 else
 	PRJ_EXTC := `wx-config --cppflags`
-	PRJ_EXTL := `wx-config --libs`
+#	PRJ_EXTL := `wx-config --libs`
 #	PRJ_OSLB := X11 GLU Xxf86vm
 
 	PRJ_DEFS := $(PRJ_DEFS) CAIRO_HAS_FT_FONT CAIRO_HAS_FC_FONT
@@ -140,7 +157,7 @@ include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := wc_hist
 LOC_SRC_wc_hist := $(CFG_LIBROOT)/WebKit/WebCore/history
-LOC_EXC_wc_hist := BackForwardListChromium
+LOC_EXC_wc_hist := BackForwardList
 include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := wc_html
@@ -176,12 +193,9 @@ export LOC_TAG := wc_pg_a
 LOC_SRC_wc_pg_a := $(CFG_LIBROOT)/WebKit/WebCore/page/animation
 include $(PRJ_LIBROOT)/build.mk
 
-export LOC_TAG := wc_pg_wx
-LOC_SRC_wc_pg_wx := $(CFG_LIBROOT)/WebKit/WebCore/page/wx
-include $(PRJ_LIBROOT)/build.mk
-
 export LOC_TAG := wc_pf
 LOC_SRC_wc_pf := $(CFG_LIBROOT)/WebKit/WebCore/platform
+LOC_EXC_wc_pf := DragData
 include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := wc_pf_ani
@@ -192,11 +206,11 @@ export LOC_TAG := wc_pf_g
 LOC_SRC_wc_pf_g := $(CFG_LIBROOT)/WebKit/WebCore/platform/graphics
 include $(PRJ_LIBROOT)/build.mk
 
-export LOC_TAG := wc_pf_g_c
-LOC_SRC_wc_pf_g_c := $(CFG_LIBROOT)/WebKit/WebCore/platform/graphics/cairo
-LOC_EXC_wc_pf_g_c := FontCairo GradientCairo ImageBufferCairo PathCairo PatternCairo \
-					 TransformationMatrixCairo
-include $(PRJ_LIBROOT)/build.mk
+#export LOC_TAG := wc_pf_g_c
+#LOC_SRC_wc_pf_g_c := $(CFG_LIBROOT)/WebKit/WebCore/platform/graphics/cairo
+#LOC_EXC_wc_pf_g_c := FontCairo GradientCairo ImageBufferCairo PathCairo PatternCairo \
+#					 TransformationMatrixCairo
+#include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := wc_pf_g_t
 LOC_SRC_wc_pf_g_t := $(CFG_LIBROOT)/WebKit/WebCore/platform/graphics/transforms
@@ -220,6 +234,7 @@ include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := wc_plugins
 LOC_SRC_wc_plugins := $(CFG_LIBROOT)/WebKit/WebCore/plugins
+LOC_EXC_wc_plugins := PluginView PluginViewNone
 include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := wc_st
@@ -236,12 +251,15 @@ include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := wc_rd
 LOC_SRC_wc_rd := $(CFG_LIBROOT)/WebKit/WebCore/rendering
-LOC_EXC_wc_rd := RenderMediaControls RenderThemeChromiumLinux RenderThemeChromiumWin \
-				 RenderThemeWin
+LOC_EXC_wc_rd := 
 include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := wc_rd_s
 LOC_SRC_wc_rd_s := $(CFG_LIBROOT)/WebKit/WebCore/rendering/style
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wc_wk
+LOC_SRC_wc_wk := $(CFG_LIBROOT)/WebKit/WebCore/workers
 include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := wc_xml
@@ -297,8 +315,13 @@ LOC_SRC_jsc_wtf := $(CFG_LIBROOT)/WebKit/JavaScriptCore/wtf
 LOC_EXC_jsc_wtf := GOwnPtr ThreadingWin ThreadSpecificWin
 include $(PRJ_LIBROOT)/build.mk
 
-export LOC_TAG := jsc_yar
-LOC_SRC_jsc_yar := $(CFG_LIBROOT)/WebKit/JavaScriptCore/yar
+#export LOC_TAG := jsc_wtf_u
+#LOC_SRC_jsc_wtf_u := $(CFG_LIBROOT)/WebKit/JavaScriptCore/wtf/unicode/glib
+#LOC_EXC_jsc_wtf_u :=
+#include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := jsc_uni
+LOC_SRC_jsc_uni := $(CFG_LIBROOT)/WebKit/JavaScriptCore/wtf/unicode/icu
 include $(PRJ_LIBROOT)/build.mk
 
 
@@ -306,33 +329,47 @@ include $(PRJ_LIBROOT)/build.mk
 # -- wx
 #----------------------------
 
-export LOC_TAG := wx
-LOC_SRC_wx := $(CFG_LIBROOT)/WebKit/WebKit/wx
-include $(PRJ_LIBROOT)/build.mk
+ifdef BUILD_WEBKIT_WX
 
-export LOC_TAG := wx_p_ed
-LOC_SRC_wx_p_ed := $(CFG_LIBROOT)/WebKit/WebCore/editing/wx
-LOC_EXC_wx_p_ed := 
-include $(PRJ_LIBROOT)/build.mk
+	export LOC_TAG := wx
+	LOC_SRC_wx := $(CFG_LIBROOT)/WebKit/WebKit/wx
+	include $(PRJ_LIBROOT)/build.mk
 
-export LOC_TAG := wx_p_g
-LOC_SRC_wx_p_g := $(CFG_LIBROOT)/WebKit/WebCore/platform/graphics/wx
-LOC_EXC_wx_p_g := 
-include $(PRJ_LIBROOT)/build.mk
+	export LOC_TAG := wx_p_ed
+	LOC_SRC_wx_p_ed := $(CFG_LIBROOT)/WebKit/WebCore/editing/wx
+	LOC_EXC_wx_p_ed := 
+	include $(PRJ_LIBROOT)/build.mk
 
-export LOC_TAG := wx_p_txt
-LOC_SRC_wx_p_txt := $(CFG_LIBROOT)/WebKit/WebCore/platform/text/wx
-LOC_EXC_wx_p_txt := 
-include $(PRJ_LIBROOT)/build.mk
+	export LOC_TAG := wx_pg
+	LOC_SRC_wx_pg := $(CFG_LIBROOT)/WebKit/WebCore/page/wx
+	include $(PRJ_LIBROOT)/build.mk
 
-export LOC_TAG := wx_p
-LOC_SRC_wx_p := $(CFG_LIBROOT)/WebKit/WebCore/platform/wx
-LOC_EXC_wx_p := KeyEventWin 
-include $(PRJ_LIBROOT)/build.mk
+	export LOC_TAG := wx_p_g
+	LOC_SRC_wx_p_g := $(CFG_LIBROOT)/WebKit/WebCore/platform/graphics/wx
+	LOC_EXC_wx_p_g := 
+	include $(PRJ_LIBROOT)/build.mk
 
-export LOC_TAG := wx_wk_sup
-LOC_SRC_wx_wk_sup := $(CFG_LIBROOT)/WebKit/WebKit/wx/WebKitSupport
-include $(PRJ_LIBROOT)/build.mk
+	export LOC_TAG := wx_p_txt
+	LOC_SRC_wx_p_txt := $(CFG_LIBROOT)/WebKit/WebCore/platform/text/wx
+	LOC_EXC_wx_p_txt := 
+	include $(PRJ_LIBROOT)/build.mk
+
+	export LOC_TAG := wx_p
+	LOC_SRC_wx_p := $(CFG_LIBROOT)/WebKit/WebCore/platform/wx
+	LOC_EXC_wx_p := KeyEventWin 
+	include $(PRJ_LIBROOT)/build.mk
+
+	export LOC_TAG := wx_wk_sup
+	LOC_SRC_wx_wk_sup := $(CFG_LIBROOT)/WebKit/WebKit/wx/WebKitSupport
+	include $(PRJ_LIBROOT)/build.mk
+
+else
+
+#----------------------------
+# -- chromium / skia
+#----------------------------
+
+endif
 
 #-------------------------------------------------------------------
 # Execute the build
