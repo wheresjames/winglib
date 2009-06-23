@@ -16,6 +16,11 @@ PRJ_LIBROOT := ..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifeq ($(BUILD_WEBKIT),)
+UNSUPPORTED := Set make option BUILD_WEBKIT=1 to build
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 ifeq ($(PLATFORM),windows)
 UNSUPPORTED := PLATFORM=$(PLATFORM) is not supported
 include $(PRJ_LIBROOT)/unsupported.mk
@@ -34,6 +39,8 @@ include $(PRJ_LIBROOT)/build.mk
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
+
+endif
 
 endif
 

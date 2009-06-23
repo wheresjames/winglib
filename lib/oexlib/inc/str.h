@@ -1931,6 +1931,10 @@ public:
 	oexGUID * StringToGuid( oexGUID *x_pGuid )
     {	return guid::StringToGuid( x_pGuid, Ptr(), Length() ); }
 
+	/// Converts the string to a GUID, returns oexNULL if this string does not contain a GUID
+	oexGUID& StringToGuid( oexGUID &x_rGuid )
+    {	guid::StringToGuid( &x_rGuid, Ptr(), Length() ); return x_rGuid; }
+
 	/// Converts a GUID to a string, if pGuid is NULL, a unique GUID is created
 	TStr& GuidToString( oexCONST oexGUID *x_pGuid = oexNULL )
 	{	guid::GuidToString( OexAllocate( 36 /* + 1 is implicit*/ ), 37, x_pGuid );
@@ -1938,6 +1942,13 @@ public:
 		return *this;
 	}
 
+	/// Converts a GUID to a string
+	TStr& GuidToString( oexCONST oexGUID &x_rGuid )
+	{	guid::GuidToString( OexAllocate( 36 /* + 1 is implicit*/ ), 37, &x_rGuid );
+		oexVERIFY( Length() == 36 );
+		return *this;
+	}
+	
 public:
 
     /// Converts to a number

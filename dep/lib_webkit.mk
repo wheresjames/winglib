@@ -237,6 +237,17 @@ LOC_SRC_wc_plugins := $(CFG_LIBROOT)/WebKit/WebCore/plugins
 LOC_EXC_wc_plugins := PluginView PluginViewNone
 include $(PRJ_LIBROOT)/build.mk
 
+export LOC_TAG := wc_rd
+LOC_SRC_wc_rd := $(CFG_LIBROOT)/WebKit/WebCore/rendering
+LOC_EXC_wc_rd := RenderMediaControls RenderThemeChromiumMac RenderThemeChromiumLinux \
+				 RenderThemeChromiumSkia RenderThemeChromiumWin RenderThemeMac RenderThemeWin \
+				 RenderThemeSafari
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := wc_rd_s
+LOC_SRC_wc_rd_s := $(CFG_LIBROOT)/WebKit/WebCore/rendering/style
+include $(PRJ_LIBROOT)/build.mk
+
 export LOC_TAG := wc_st
 LOC_SRC_wc_st := $(CFG_LIBROOT)/WebKit/WebCore/storage
 include $(PRJ_LIBROOT)/build.mk
@@ -247,15 +258,6 @@ include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := wc_svg_g
 LOC_SRC_wc_svg_g := $(CFG_LIBROOT)/WebKit/WebCore/svg/graphics
-include $(PRJ_LIBROOT)/build.mk
-
-export LOC_TAG := wc_rd
-LOC_SRC_wc_rd := $(CFG_LIBROOT)/WebKit/WebCore/rendering
-LOC_EXC_wc_rd := 
-include $(PRJ_LIBROOT)/build.mk
-
-export LOC_TAG := wc_rd_s
-LOC_SRC_wc_rd_s := $(CFG_LIBROOT)/WebKit/WebCore/rendering/style
 include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := wc_wk

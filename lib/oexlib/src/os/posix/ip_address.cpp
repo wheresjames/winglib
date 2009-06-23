@@ -276,34 +276,93 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
     // Ensure we have a valid pointer
     if ( !oexCHECK_PTR( x_pServer ) )
         return oexFALSE;
+   
+// +++ Get this working eventually
+// #if !defined( OEX_USE_GETHOSTBYNAME )
+#if 0		
+
+	in_addr ip4;
+	if ( inet_pton( PF_INET, oexStrToMbPtr( x_pServer ), &ip4 ) )
+	{	SetRawAddress( ntohl( *(oexULONG*)&ip4.s_addr ), x_uPort, x_uType );
+		return oexTRUE;	
+	} // end if
+
+	struct addrinfo hints, *addr = 0;
+	oexZeroMemory( &hints, sizeof( hints ) );
+	hints.ai_family = PF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_CANONNAME;
+	
+	int rval = 0;
+    if ( rval = getaddrinfo( x_pServer, 0, &hints, &addr ) )
+    {  	oexERROR( rval, CStr().Fmt( oexT( "getaddrinfo( '%s' ) failed" ), oexStrToMbPtr( x_pServer ) ).Ptr() );
+	} // end if
+
+	int max = 128;
+	while ( !oexCHECK_PTR( addr ) && max-- )
+	{
+		switch( addr->ai_family )
+		{
+			case AF_INET :
+			{
+				sockaddr_in *psai = (sockaddr_in*)addr->ai_addr;
+				in_addr *pia = &psai->sin_addr;
+			    SetRawAddress( ntohl( *(oexULONG*)&pia->s_addr ), x_uPort, x_uType );
+			    return oexTRUE;
+			    
+			} break;
+				
+			case AF_INET6 :
+			{
+				// +++ Add v6 support
+				sockaddr_in6 *psai = (sockaddr_in6*)addr->ai_addr;
+				sin6_addr *pia6 = &psai->sin6_addr;
+				
+			} break;			
+		
+		} // end switch
+		
+		if ( addr == addr->ai_next )
+			addr = 0;
+		else
+			addr = addr->ai_next;
+	
+	} // end while
+	
+	oexWARNING( 0, oexMks( oexT( "getaddrinfo( '" ), x_pServer, oexT( "' ) : lookup failed, max = " ), max ) );
+	
+	return oexFALSE;
+	
+#else
 
 	// First try to interpret as dot address
-	oexULONG uAddr = inet_addr( oexStrToStr8Ptr( x_pServer ) );
-	if ( INADDR_NONE == uAddr )
-    {
-        struct hostent *pHe;
+	oexUINT uAddr = inet_addr( oexStrToStr8Ptr( x_pServer ) );
+	if ( INADDR_NONE != uAddr )
+	{   SetRawAddress( uAddr, x_uPort, x_uType );
+		return oexTRUE;
+	} // end if
 
-		// Get host address
-		oexDO( pHe = gethostbyname( oexStrToStr8Ptr( x_pServer ) ), !pHe && EINTR == h_errno, pHe );
+    struct hostent *pHe;
 
-        if ( !pHe || !pHe->h_addr_list )
-        {  	oexERROR( h_errno, CStr().Fmt( oexT( "gethostbyname( '%s' ) failed" ), oexStrToMbPtr( x_pServer ) ).Ptr() );
-            return oexFALSE;
-		} // end if
+	// Get host address
+	oexDO( pHe = gethostbyname( oexStrToStr8Ptr( x_pServer ) ), !pHe && EINTR == h_errno, pHe );
 
-        in_addr *pia = (in_addr*)*pHe->h_addr_list;
-        if ( !oexCHECK_PTR( pia ) )
-        {  	oexERROR( h_errno, CStr().Fmt( oexT( "gethostbyname( '%s' ) failed, h_addr_list is NULL" ), oexStrToMbPtr( x_pServer ) ).Ptr() );
-            return oexFALSE;
-		} // end if
+    if ( !pHe || !pHe->h_addr_list )
+    {  	oexERROR( h_errno, CStr().Fmt( oexT( "gethostbyname( '%s' ) failed" ), oexStrToMbPtr( x_pServer ) ).Ptr() );
+        return oexFALSE;
+	} // end if
 
-        // Grab the address
-        uAddr = *(oexULONG*)&pia->s_addr;
+    in_addr *pia = (in_addr*)*pHe->h_addr_list;
+    if ( !oexCHECK_PTR( pia ) )
+    {  	oexERROR( h_errno, CStr().Fmt( oexT( "gethostbyname( '%s' ) failed, h_addr_list is NULL" ), oexStrToMbPtr( x_pServer ) ).Ptr() );
+        return oexFALSE;
+	} // end if
 
-    } // end if
-
-    SetRawAddress( ntohl( uAddr ), x_uPort, x_uType );
+    SetRawAddress( ntohl( *(oexUINT*)&pia->s_addr ), x_uPort, x_uType );
 
     return oexTRUE;
+    
+#endif
+
 }
 

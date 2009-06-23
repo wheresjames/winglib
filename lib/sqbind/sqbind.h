@@ -73,13 +73,11 @@ namespace sqbind
 {
 	/// Squirrel Engine ID {DBD585B7-9B61-475e-9DB5-0CC25C698814}
 	static oex::oexCSTR SQBIND_ENGINE_TYPEID = oexT( "DBD585B7-9B61-475e-9DB5-0CC25C698814" );
-	static const oex::oexGUID SQBIND_ENGINE_IID =
-		{ 0xdbd585b7, 0x9b61, 0x475e, { 0x9d, 0xb5, 0xc, 0xc2, 0x5c, 0x69, 0x88, 0x14 } };
+	static const oex::oexGUID SQBIND_ENGINE_IID = oexINITGUID( 0xdbd585b7, 0x9b61, 0x475e, 0x9d, 0xb5, 0xc, 0xc2, 0x5c, 0x69, 0x88, 0x14 );
 
 	/// Squirrel Module ID {20856ECF-F93E-4f49-AA02-C5784A4146F5}
 	static oex::oexCSTR SQBIND_MODULE_TYPEID = oexT( "20856ECF-F93E-4f49-AA02-C5784A4146F5" );
-	static const oex::oexGUID SQBIND_MODULE_IID =
-		{ 0x20856ecf, 0xf93e, 0x4f49, { 0xaa, 0x2, 0xc5, 0x78, 0x4a, 0x41, 0x46, 0xf5 } };
+	static const oex::oexGUID SQBIND_MODULE_IID = oexINITGUID( 0x20856ecf, 0xf93e, 0x4f49, 0xaa, 0x2, 0xc5, 0x78, 0x4a, 0x41, 0x46, 0xf5 );
 
 	/// Allocator
 	struct SSqAllocator

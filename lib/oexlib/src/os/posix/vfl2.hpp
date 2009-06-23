@@ -322,6 +322,7 @@ public:
 		} // end if
 
 		v4l2_cropcap cropcap;
+		oexZeroMemory( &cropcap, sizeof( cropcap ) );
 		cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if ( 0 == IoCtl( m_nFd, VIDIOC_CROPCAP, &cropcap ) )
 		{
@@ -336,6 +337,7 @@ public:
 			oexSHOWVAL( cropcap.bounds.height, "%d\n" );
 
 			v4l2_crop crop;
+			oexZeroMemory( &crop, sizeof( crop ) );
 			crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 			crop.c = cropcap.defrect;
 //				crop.c = cropcap.bounds;

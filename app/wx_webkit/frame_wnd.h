@@ -50,6 +50,6 @@ public:
 
 private:
 
-	wxWebView 		*m_pWebView;
+//	wxWebView 		*m_pWebView;
 
 };

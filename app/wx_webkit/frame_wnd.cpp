@@ -39,7 +39,7 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 		pcMenuBar->Append( pcMenuFile, _T( "&File" ) ),
 		SetMenuBar( pcMenuBar );
 
-	m_pWebView = new wxWebView( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 ); //wxHW_SCROLLBAR_AUTO );
+//	m_pWebView = new wxWebView( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 ); //wxHW_SCROLLBAR_AUTO );
 
 
 	CreateStatusBar();

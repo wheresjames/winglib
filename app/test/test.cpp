@@ -686,10 +686,12 @@ oex::oexRESULT TestGuids()
 
     // {6674C3D8-BB11-4a58-BCE0-A34DC74365AF}
     static const oex::oexGUID guidTest =
-    	oex::oexAUTOGUID( 0x6674c3d8, 0xbb11, 0x4a58, 0xbc, 0xe0, 0xa3, 0x4d, 0xc7, 0x43, 0x65, 0xaf );
+    	oexINITGUID( 0x6674c3d8, 0xbb11, 0x4a58, 0xbc, 0xe0, 0xa3, 0x4d, 0xc7, 0x43, 0x65, 0xaf );
 
     oex::oexGUID    guid1, guid2;
     oex::oexTCHAR   szGuid1[ 1024 ] = oexT( "" );
+
+	oexSHOW( guidTest );
 
     // Guid / String conversions
     oex::guid::GuidToString( szGuid1, oexSizeOfArray( szGuid1 ), &guidTest );
@@ -712,7 +714,7 @@ oex::oexRESULT TestGuids()
         return -4;
 
     oex::guid::XorGuid( &guid1, &guid2 );
-    oex::guid::SetGuid( &guid2, 0, 0, sizeof( guid1 ) );
+    oex::guid::SetGuid( &guid2, 0, 0, sizeof( guid2 ) );
     if ( !oexVERIFY( oex::guid::CmpGuid( &guid1, &guid2 ) ) )
         return -5;
 

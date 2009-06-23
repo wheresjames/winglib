@@ -256,7 +256,8 @@ else
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA)
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_NOSTAT64 -DOEX_NOWCHAR -DOEX_NOEXECINFO
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_NOSTAT64 \
+											    -DOEX_NOWCHAR -DOEX_NOEXECINFO
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
@@ -270,9 +271,29 @@ else
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/usr/arm-crosstool-linux-gnueabi
 
 			CFG_STDLIB := -lrt -pthread
-			CFG_LFLAGS := $(CFG_LEXTRA)
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_NOSTAT64 -DOEX_NOWCHAR -DOEX_NOEXECINFO
+			CFG_LFLAGS := $(CFG_LEXTRA)  
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_NOSTAT64 
+										   -DOEX_NOWCHAR -DOEX_NOEXECINFO
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
+			CFG_AFLAGS := cq
+
+		else ifeq ($(TOOLS),scratchbox)
+
+			OS := linux
+			PLATFORM := posix
+			
+			# scratchbox/compilers/arm-linux-gcc3.4.cs-glibc2.3/bin/arm-linux-g++
+			# scratchbox/compilers/arm-linux-gcc3.4.cs-glibc2.3/bin
+			
+			# martin's crosstool build
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/arm-gcc3.4-uclibc0.9.28/bin/arm-linux-
+			#CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm-gcc3.4-uclibc0.9.28
+
+			CFG_STDLIB := -lrt -pthread
+			CFG_LFLAGS := $(CFG_LEXTRA) 
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT \
+												-DOEX_NOSTAT64 -DOEX_NOWCHAR -DOEX_NOEXECINFO -DOEX_PACKBROKEN
+			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD 
 			CFG_AFLAGS := cq
 
 		else ifeq ($(TOOLS),iphone)
@@ -287,7 +308,7 @@ else
 			CFG_STDLIB := 
 			CFG_LFLAGS := $(CFG_LEXTRA)
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_IPHONE -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM \
-										-DOEX_NOSTRUCTINIT -DOEX_NOSTAT64 -DOEX_NOVIDEO -DOEX_NOEPOLL
+											    -DOEX_NOSTRUCTINIT -DOEX_NOSTAT64 -DOEX_NOVIDEO -DOEX_NOEPOLL
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
@@ -398,12 +419,12 @@ else
 	endif
 
 	ifeq ($(PRJ_TYPE),dll)
-#		ifneq ($(PLATFORM),windows)
+		ifneq ($(PLATFORM),windows)
 			CFG_LFLAGS := $(CFG_LFLAGS) -shared
-#		endif
+		endif
 	else	
 		ifeq ($(LIBLINK),static)
-			CFG_LFLAGS := $(CFG_LFLAGS) -static
+			CFG_LFLAGS := $(CFG_LFLAGS) -static -static-libgcc
 		endif
 	endif
 
@@ -411,9 +432,9 @@ else
 	# you can't use dlopen() [-ldl] with static linking!
 	# http://www.qnx.com/developers/docs/6.3.2/neutrino/lib_ref/d/dlopen.html
 	ifeq ($(PLATFORM),posix)
-		ifeq ($(LIBLINK),shared)
+#		ifeq ($(LIBLINK),shared)
 			CFG_STDLIB := $(CFG_STDLIB) -ldl
-		endif		
+#		endif		
 	endif
 	
 #	ifeq ($(PRJ_TYPE),dll)

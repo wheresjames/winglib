@@ -7,7 +7,7 @@ default_target: all
 PRJ_NAME := wx_webkit
 PRJ_TYPE := exe
 PRJ_LIBS := oexlib
-PRJ_INCS := winglib/lib/oexlib curl/include WebKit/WebKit/wx
+PRJ_INCS := winglib/lib/oexlib curl/include WebKit/WebKit/win
 PRJ_DEFS := NDEBUG=1 USE_FREETYPE PTW32_STATIC_LIB
 
 PRJ_LIBROOT := ../..
