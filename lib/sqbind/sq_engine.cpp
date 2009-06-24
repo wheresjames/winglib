@@ -391,6 +391,8 @@ CSqEngine::CSqEngine() :
 	m_script( m_vm.GetVMHandle() )
 {
 	m_bLoaded = oex::oexFALSE;
+	m_fExportSymbols = oexNULL;
+	m_pSqAllocator = oexNULL;
 }
 
 CSqEngine::~CSqEngine()
@@ -409,6 +411,7 @@ void CSqEngine::Destroy()
 	m_sRoot = oexT( "" );
 
 	m_bLoaded = oex::oexFALSE;
+
 }
 
 // Message box and logging functions / Mostly for debugging ;)
@@ -492,6 +495,11 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, uncompress )
 SQBIND_REGISTER_CLASS_END()
 
+void CSqEngine::SetExportFunction( PFN_SQBIND_Export_Symbols fn, sqbind::SSqAllocator *pa )
+{	m_fExportSymbols = fn;
+	m_pSqAllocator = pa;
+}
+
 oex::oexBOOL CSqEngine::Init()
 {
 	Destroy();
@@ -553,6 +561,14 @@ oex::oexBOOL CSqEngine::Init()
 
 		// Allow derived class to register it's stuff
 		OnRegisterVariables();
+
+		// Custom registrations
+		if ( m_fExportSymbols )
+#if defined( SQBIND_SQBIND )
+			oex::oexINT nRet = m_fExportSymbols( m_vm.GetVMHandle(), m_pSqAllocator );
+#else
+			oex::oexINT nRet = m_fExportSymbols( &m_vm, m_pSqAllocator );
+#endif
 
 	} // end try
 

@@ -62,6 +62,9 @@ void CScriptThread::SetScript( oex::oexCSTR pScript, oex::oexBOOL bFile )
 void CScriptThread::SetParentScript( CSqMsgQueue *pParent )
 {   m_pParentScript = pParent; }
 
+void CScriptThread::SetExportFunction( PFN_SQBIND_Export_Symbols fn, sqbind::SSqAllocator *pa )
+{	m_cSqEngine.SetExportFunction( fn, pa ); }
+
 oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 {
 	// +++ Ensure script
@@ -159,7 +162,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 	// Call to send message to child script
 	else if ( sMsg == oexT( "msg" ) )
 		OnMsg( mapParams, pReply );
-	
+
 	// Return comma separated list of child scripts command
 	else if ( sMsg == oexT( "get_children" ) )
 	{	if ( oexCHECK_PTR( pReply ) )

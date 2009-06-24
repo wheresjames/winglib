@@ -2,6 +2,26 @@
 #include "stdafx.h"
 #include "stdio.h"
 
+// Statically linking modules?
+#if defined( SQBIND_STATIC )
+
+#	include "../sq_modules/sqmod_cell/stdafx.cpp"
+//#	include "../sq_modules/sqmod_curl/stdafx.cpp"
+#	include "../sq_modules/sqmod_gdchart/stdafx.cpp"
+#	include "../sq_modules/sqmod_http/stdafx.cpp"
+
+    static oex::oexRESULT SQBIND_Export_Symbols( sqbind::VM x_vm, sqbind::SSqAllocator *x_pAllocator )
+	{
+		SQBIND_Export_cell( x_vm );
+//		SQBIND_Export_curl( x_vm );
+		SQBIND_Export_gdchart( x_vm );
+		SQBIND_Export_http( x_vm );
+
+		return 0;
+	}
+
+#endif
+
 /// Pointer to script thread
 sqbind::CScriptThread	*g_psqScriptThread = oexNULL;
 
@@ -73,6 +93,8 @@ int main(int argc, char* argv[])
 	g_psqScriptThread->SetModuleManager( g_psqModuleManager );
 
 	g_psqScriptThread->SetScript( sCmd.Ptr(), oex::oexTRUE );
+
+	g_psqScriptThread->SetExportFunction( SQBIND_Export_Symbols, oexNULL );
 
 	if ( g_psqScriptThread->Start() )
 		return oexERROR( -5, oexT( "Failed to start script thread" ) );

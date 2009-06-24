@@ -1,7 +1,6 @@
 // stdafx.cpp
 
 #include "stdafx.h"
-#include "cell_services.h"
 
 // Export Functions
 SQBIND_REGISTER_CLASS_BEGIN( CCellConnection, CCellConnection )
@@ -26,7 +25,7 @@ SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CCellConnection );
 
 // Export classes
-static void SQBIND_Export( sqbind::VM x_vm )
+static void SQBIND_Export_cell( sqbind::VM x_vm )
 {
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
@@ -34,5 +33,17 @@ static void SQBIND_Export( sqbind::VM x_vm )
     SQBIND_EXPORT( x_vm, CCellConnection );
 }
 
-// Include squirrel module exported symbols
-#include <sqmod_extern.hpp>
+#if defined( SQBIND_STATIC )
+	#include "cell_backplane.cpp"
+	#include "cell_connection.cpp"
+	#include "cell_rack.cpp"
+	#include "cell_services.cpp"
+#else
+
+	static void SQBIND_Export( sqbind::VM x_vm )
+	{	SQBIND_Export_cell( x_vm ); }
+
+	// Include squirrel module exported symbols
+	#include <sqmod_extern.hpp>
+
+#endif

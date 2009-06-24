@@ -843,28 +843,39 @@ public:
 	/// Returns the engine pointer
 	virtual CSqEngine* GetEnginePtr() { return this; }
 
+	/// Call to set a function that is called when thread starts
+	/// to export custom symbols
+	void SetExportFunction( PFN_SQBIND_Export_Symbols fn, sqbind::SSqAllocator *pa );
+
 private:
 
 	/// Non-zero if a script is loaded
-	oex::oexBOOL			m_bLoaded;
+	oex::oexBOOL				m_bLoaded;
 
 	/// Squirrel virtual machine
-	SquirrelVM              m_vm;
+	SquirrelVM              	m_vm;
 
 	/// Pointer to module manager object
-	CModuleManager          *m_pModuleManager;
+	CModuleManager          	*m_pModuleManager;
 
 	/// Squirrel script
-	SquirrelObject          m_script;
+	SquirrelObject          	m_script;
 
 	/// Last squirrel error
-	stdString            	m_sErr;
+	stdString            		m_sErr;
 
 	/// Script output
-	stdString            	m_sOutput;
+	stdString            		m_sOutput;
 
 	/// Thread message queue pointer
-	CSqMsgQueue             *m_pMsgQueue;
+	CSqMsgQueue             	*m_pMsgQueue;
+
+	/// Function that is called by thread to export symbols
+	PFN_SQBIND_Export_Symbols	m_fExportSymbols;
+
+	/// Custom memory allocator
+	sqbind::SSqAllocator		*m_pSqAllocator;
+
 };
 
 

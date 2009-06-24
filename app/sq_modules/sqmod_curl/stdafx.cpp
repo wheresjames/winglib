@@ -11,7 +11,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqCurl, CSqCurl )
 SQBIND_REGISTER_CLASS_END()
 
 // Export classes
-static void SQBIND_Export( sqbind::VM x_vm )
+static void SQBIND_Export_curl( sqbind::VM x_vm )
 {
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
@@ -19,5 +19,14 @@ static void SQBIND_Export( sqbind::VM x_vm )
     SQBIND_EXPORT( x_vm, CSqCurl );
 }
 
-// Include squirrel module exported symbols
-#include <sqmod_extern.hpp>
+#if defined( SQBIND_STATIC )
+	#include "sq_curl.cpp"
+#else
+
+	static void SQBIND_Export( sqbind::VM x_vm )
+	{	SQBIND_Export_curl( x_vm ); }
+
+	// Include squirrel module exported symbols
+	#include <sqmod_extern.hpp>
+
+#endif
