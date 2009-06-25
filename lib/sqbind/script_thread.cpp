@@ -345,6 +345,9 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 		// Allow child to have access to the module manager
 		pSt->SetModuleManager( m_pModuleManager );
 
+		// Import environment
+		pSt->SetExportFunction( m_cSqEngine.GetExportFunction(), m_cSqEngine.GetAllocator() );
+
 		// Load script information
 		pSt->SetScript( mapParams[ oexT( "script" ) ].c_str(),
 						0 != oex::CStr( mapParams[ oexT( "file" ) ].c_str() ).ToULong() );

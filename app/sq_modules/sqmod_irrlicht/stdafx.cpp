@@ -227,7 +227,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqirrPhysics, CSqirrPhysics )
 SQBIND_REGISTER_CLASS_END()
 
 // Export classes
-static void SQBIND_Export( sqbind::VM x_vm )
+static void SQBIND_Export_irrlicht( sqbind::VM x_vm )
 {
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
@@ -248,5 +248,17 @@ static void SQBIND_Export( sqbind::VM x_vm )
     SQBIND_EXPORT( x_vm, CSqIrrlicht );
 }
 
-// Include squirrel module exported symbols
-#include <sqmod_extern.hpp>
+#if defined( SQBIND_STATIC )
+	#include "sqirr_font.cpp"
+	#include "sq_irrlicht.cpp"
+	#include "sqirr_mesh_animator.cpp"
+	#include "sq_physics.cpp"
+#else
+
+	static void SQBIND_Export( sqbind::VM x_vm )
+	{	SQBIND_Export_irrlicht( x_vm ); }
+
+	// Include squirrel module exported symbols
+	#include <sqmod_extern.hpp>
+
+#endif

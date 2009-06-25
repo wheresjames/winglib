@@ -847,6 +847,12 @@ public:
 	/// to export custom symbols
 	void SetExportFunction( PFN_SQBIND_Export_Symbols fn, sqbind::SSqAllocator *pa );
 
+	/// Returns pointer to symbol export function
+	PFN_SQBIND_Export_Symbols GetExportFunction() { return m_fExportSymbols; }
+
+	/// Returns pointer to memory allocator
+	sqbind::SSqAllocator* GetAllocator() { return m_pSqAllocator; }
+
 private:
 
 	/// Non-zero if a script is loaded

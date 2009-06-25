@@ -2,25 +2,8 @@
 #include "stdafx.h"
 #include "stdio.h"
 
-// Statically linking modules?
-#if defined( SQBIND_STATIC )
-
-#	include "../sq_modules/sqmod_cell/stdafx.cpp"
-//#	include "../sq_modules/sqmod_curl/stdafx.cpp"
-#	include "../sq_modules/sqmod_gdchart/stdafx.cpp"
-#	include "../sq_modules/sqmod_http/stdafx.cpp"
-
-    static oex::oexRESULT SQBIND_Export_Symbols( sqbind::VM x_vm, sqbind::SSqAllocator *x_pAllocator )
-	{
-		SQBIND_Export_cell( x_vm );
-//		SQBIND_Export_curl( x_vm );
-		SQBIND_Export_gdchart( x_vm );
-		SQBIND_Export_http( x_vm );
-
-		return 0;
-	}
-
-#endif
+// Include statically linked modules
+#include "../sq_modules/static_build.hpp"
 
 /// Pointer to script thread
 sqbind::CScriptThread	*g_psqScriptThread = oexNULL;

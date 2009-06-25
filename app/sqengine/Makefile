@@ -14,6 +14,12 @@ PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Idle SRV_Stop
 
 PRJ_LIBROOT := ../..
 
+ifdef SQMOD_STATIC
+	PRJ_DEFS := $(PRJ_DEFS) SQBIND_STATIC $(foreach mod,$(SQMOD_STATIC),SQBIND_STATIC_$(mod) )
+	PRJ_INCS := $(PRJ_INCS) gdchart cell/lib
+	PRJ_LIBS := $(PRJ_LIBS) gdchart cell
+endif
+
 #-------------------------------------------------------------------
 # Configure build
 #-------------------------------------------------------------------
