@@ -419,9 +419,7 @@ else
 	endif
 
 	ifeq ($(PRJ_TYPE),dll)
-		ifneq ($(PLATFORM),windows)
-			CFG_LFLAGS := $(CFG_LFLAGS) -shared
-		endif
+		CFG_LFLAGS := $(CFG_LFLAGS) -shared
 	else	
 		ifeq ($(LIBLINK),static)
 			CFG_LFLAGS := $(CFG_LFLAGS) -static -static-libgcc

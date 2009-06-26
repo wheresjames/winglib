@@ -58,5 +58,8 @@
 		return 0;
 	}
 
-#endif
+#else
 
+#	define SQBIND_Export_Symbols oexNULL
+
+#endif
