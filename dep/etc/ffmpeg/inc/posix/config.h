@@ -784,7 +784,7 @@
 #define CONFIG_ALSA_MUXER 1
 #define CONFIG_AUDIO_BEOS_MUXER 0
 #define CONFIG_OSS_MUXER 1
-#define restrict restrict
+#define restrict __restrict__
 #define ASMALIGN(ZEROBITS) ".align 1 << " #ZEROBITS "\n\t"
 #define EXTERN_PREFIX ""
 

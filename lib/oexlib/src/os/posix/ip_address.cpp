@@ -338,7 +338,7 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
 	// First try to interpret as dot address
 	oexUINT uAddr = inet_addr( oexStrToStr8Ptr( x_pServer ) );
 	if ( INADDR_NONE != uAddr )
-	{   SetRawAddress( uAddr, x_uPort, x_uType );
+	{   SetRawAddress( ntohl( uAddr ), x_uPort, x_uType );
 		return oexTRUE;
 	} // end if
 

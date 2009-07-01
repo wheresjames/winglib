@@ -4,6 +4,7 @@ cairo
 cell
 curl
 CxImage
+ffmpeg
 freetype
 ftgl
 gdchart
