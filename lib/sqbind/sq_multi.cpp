@@ -370,6 +370,9 @@ SquirrelObject CSqMulti::_nexti( HSQUIRRELVM v )
 
         } break;
 
+        default:
+        	break;
+
     } // end switch
 
     // ???

@@ -55,7 +55,7 @@ public:
 		/// Constructor
 		CRestoreFilePos( CFile *x_pF )
 		{	m_pf = x_pF;
-			if ( m_pf ) m_llPos = x_pF->GetPtrPos();
+			m_llPos = ( m_pf ) ? x_pF->GetPtrPos() : 0;
 		}
 
 		/// Destructor

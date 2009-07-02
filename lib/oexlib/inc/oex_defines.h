@@ -279,7 +279,7 @@
 #define oexUniqueGuid( g )					OEX_NAMESPACE::guid::StringToGuid( g, (OEX_NAMESPACE::oexCSTR)NULL, 0 )
 #ifndef OEX_NOSTRUCTINIT
 #	define oexINITGUID( n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11 ) \
-		{ n1, n2, n3, { n4, n5, n6, n7, n8, n9, n10, n11 } }
+		{ { { n1, n2, n3, { n4, n5, n6, n7, n8, n9, n10, n11 } } } }
 #else
 #	define oexINITGUID( n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11 ) \
 		OEX_NAMESPACE::oexAUTOGUID( n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11 )

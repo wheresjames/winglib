@@ -80,7 +80,7 @@ oexBOOL CIpAddress::ValidateAddress()
     CCrcHash::Hash( &ucHash, &m_guid, sizeof( m_guid ) );
 
     // Verify the hash value
-    if ( uCrc != *(oexINT16*)&ucHash )
+    if ( uCrc != (oexUINT)*(oexINT16*)&ucHash )
     {   oexASSERT( 0 ); Destroy(); return oexFALSE; }
 
     // Restore the crc

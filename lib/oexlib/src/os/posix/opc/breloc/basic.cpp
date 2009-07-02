@@ -168,6 +168,7 @@ _br_find_exe (BrInitError *error)
  * Find the canonical filename of the executable which owns symbol.
  * Returns a filename which must be freed, or NULL on error.
  */
+/*
 static char *
 _br_find_exe_for_symbol (const void *symbol, BrInitError *error)
 {
@@ -200,16 +201,16 @@ _br_find_exe_for_symbol (const void *symbol, BrInitError *error)
 		if (fgets (line, SIZE, f) == NULL)
 			break;
 
-		/* Sanity check. */
+		/ * Sanity check. * /
 		if (strstr (line, " r-xp ") == NULL || strchr (line, '/') == NULL)
 			continue;
 
-		/* Parse line. */
+		/ * Parse line. * /
 		start_addr = line;
 		end_addr = strchr (line, '-');
 		file = strchr (line, '/');
 
-		/* More sanity check. */
+		/ * More sanity check. * /
 		if (!(file > end_addr && end_addr != NULL && end_addr[0] == '-'))
 			continue;
 
@@ -226,19 +227,19 @@ _br_find_exe_for_symbol (const void *symbol, BrInitError *error)
 		if (file[len - 1] == '\n')
 			file[len - 1] = '\0';
 
-		/* Get rid of "(deleted)" from the filename. */
+		/ * Get rid of "(deleted)" from the filename. * /
 		len = strlen (file);
 		if (len > 10 && strcmp (file + len - 10, " (deleted)") == 0)
 			file[len - 10] = '\0';
 
-		/* I don't know whether this can happen but better safe than sorry. */
+		/ * I don't know whether this can happen but better safe than sorry. * /
 		len = strlen (start_addr);
 		if (len != strlen (end_addr))
 			continue;
 
 
-		/* Transform the addresses into a string in the form of 0xdeadbeef,
-		 * then transform that into a pointer. */
+		/ * Transform the addresses into a string in the form of 0xdeadbeef,
+		 * then transform that into a pointer. * /
 		if (address_string_len < len + 3) {
 			address_string_len = len + 3;
 			address_string = (char *) realloc (address_string, address_string_len);
@@ -268,6 +269,7 @@ _br_find_exe_for_symbol (const void *symbol, BrInitError *error)
 		return (char *) NULL;
 	else
 		return strdup (found);
-#endif /* ENABLE_BINRELOC */
+#endif / * ENABLE_BINRELOC * /
 }
+*/
 /*** FUNCTION END */

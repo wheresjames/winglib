@@ -57,7 +57,7 @@ typedef enum {
 
 /* From basic.cpp */
 static char * _br_find_exe (BrInitError *error);
-static char * _br_find_exe_for_symbol (const void *symbol, BrInitError *error);
+//static char * _br_find_exe_for_symbol (const void *symbol, BrInitError *error);
 
 
 /* From normal.cpp */
@@ -75,7 +75,7 @@ char * br_find_libexec_dir (const char *default_libexec_dir);
 char * br_find_etc_dir (const char *default_etc_dir);
 char * br_strcat (const char *str1, const char *str2);
 char * br_build_path (const char *dir, const char *file);
-static char * br_strndup (const char *str, size_t size);
+//static char * br_strndup (const char *str, size_t size);
 char * br_dirname (const char *path);
 
 #endif /* _binreloc_2008_02_08 */

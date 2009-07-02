@@ -642,7 +642,6 @@ namespace str
 	    {
             oexASSERT_PTR( s );
 
-		    oexINT i = 0;
 		    while ( ln-- )
 		    {
                 if ( 0 <= FindCharacter( term, ln_term, s[ ln ] ) )
@@ -930,13 +929,15 @@ namespace str
 				if ( s[ i ] == pat[ p + 1 ] ||
 						( ignore_case &&
 							(
-								s[ i ] >= oexTC( T, 'a' ) && s[ i ] <= oexTC( T, 'z' ) &&
-								( s[ i ] - ( oexTC( T, 'a' ) - oexTC( T, 'A' ) ) ) == pat[ p + 1 ]
-							) ||
+								(
+									s[ i ] >= oexTC( T, 'a' ) && s[ i ] <= oexTC( T, 'z' ) &&
+									( s[ i ] - ( oexTC( T, 'a' ) - oexTC( T, 'A' ) ) ) == pat[ p + 1 ]
+								) ||
 
-							(
-								s[ i ] >= oexTC( T, 'A' ) && s[ i ] <= oexTC( T, 'Z' ) &&
-								( s[ i ] + ( oexTC( T, 'a' ) - oexTC( T, 'A' ) ) ) == pat[ p + 1 ]
+								(
+									s[ i ] >= oexTC( T, 'A' ) && s[ i ] <= oexTC( T, 'Z' ) &&
+									( s[ i ] + ( oexTC( T, 'a' ) - oexTC( T, 'A' ) ) ) == pat[ p + 1 ]
+								)
 							)
 						)
 					) p += 2;
@@ -954,12 +955,14 @@ namespace str
 			// Case insensitive
 			else if ( ignore_case &&
 						(
-							s[ i ] >= oexTC( T, 'a' ) && s[ i ] <= oexTC( T, 'z' ) &&
-							( s[ i ] - ( oexTC( T, 'a' ) - oexTC( T, 'A' ) ) ) == pat[ p ]
-						) ||
-						(
-							s[ i ] >= oexTC( T, 'A' ) && s[ i ] <= oexTC( T, 'Z' ) &&
-							( s[ i ] + ( oexTC( T, 'a' ) - oexTC( T, 'A' ) ) ) == pat[ p ]
+							(
+								s[ i ] >= oexTC( T, 'a' ) && s[ i ] <= oexTC( T, 'z' ) &&
+								( s[ i ] - ( oexTC( T, 'a' ) - oexTC( T, 'A' ) ) ) == pat[ p ]
+							) ||
+							(
+								s[ i ] >= oexTC( T, 'A' ) && s[ i ] <= oexTC( T, 'Z' ) &&
+								( s[ i ] + ( oexTC( T, 'a' ) - oexTC( T, 'A' ) ) ) == pat[ p ]
+							)
 						)
 					) p++;
 

@@ -118,7 +118,7 @@ sqbind::CSqMulti CGdcChart::GetChart( const sqbind::stdString &x_sType,
 
 	int sw = img.GetWidth();
 	int sh = img.GetHeight();
-	int sz = ( img.GetWidth() * img.GetHeight() ) / 4;
+//	int sz = ( img.GetWidth() * img.GetHeight() ) / 4;
 	unsigned char **p = graph->pixels;
 
 	for ( int y = 0, u = sh - 1; y < sh; y++, u-- )

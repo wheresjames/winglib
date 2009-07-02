@@ -59,7 +59,7 @@ CStr CTrace::GetBacktrace( oexUINT x_uSkip, oexUINT x_uMax )
 
 	// Build stack
 	CStr str;
-	for ( oexUINT i = x_uSkip; i < nPtrs; i++ )
+	for ( oexUINT i = x_uSkip; (oexINT)i < nPtrs; i++ )
 	{
 		if ( sStrings && sStrings[ i ] && oexCHECK_PTR( memPtrs.Ptr( i ) ) )
 			str += CStr().Fmt( oexT( "[0x%.8X] %s" oexNL8 ), (oexUINT)*(oexUINT*)memPtrs.Ptr( i ), sStrings[ i ] );

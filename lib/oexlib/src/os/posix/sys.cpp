@@ -464,6 +464,8 @@ oexBOOL CSys::MicroSleep( oexUINT uMicroseconds, oexUINT uSeconds )
 
 	if ( uMicroseconds )
 		::usleep( uMicroseconds );
+		
+	return oexTRUE;
 }
 
 oexBOOL CSys::Init()
@@ -491,6 +493,8 @@ CSys::t_WAITABLE CSys::DuplicateHandle( t_WAITABLE x_pHandle )
         return oexNULL;
     return (t_WAITABLE)hDup;
 */
+
+	return 0;
 }
 
 oexINT CSys::WaitForSingleObject( CSys::t_WAITABLE x_pHandle, oexUINT x_uTimeout )

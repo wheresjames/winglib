@@ -397,40 +397,44 @@ public:
 	/// Returns a pointer to the AVI main header
 	SAviMainHeader* Amh()
 	{	if ( !m_amh.Ptr() )
-			if ( !oexVERIFY( m_amh.OexNew( sizeof( SAviMainHeader ) ).Ptr() ) )
+		{	if ( !oexVERIFY( m_amh.OexNew( sizeof( SAviMainHeader ) ).Ptr() ) )
 				return oexNULL;
 			else
 				oexZeroMemory( m_amh.Ptr(), m_amh.Size() );
+		} // end if
 		return m_amh.Ptr();
 	}
 
 	/// Returns a pointer to the AVI stream header
 	SAviStreamHeader* Ash()
 	{	if ( !m_ash.Ptr() )
-			if ( !oexVERIFY( m_ash.OexNew( sizeof( SAviStreamHeader ) ).Ptr() ) )
+		{	if ( !oexVERIFY( m_ash.OexNew( sizeof( SAviStreamHeader ) ).Ptr() ) )
 				return oexNULL;
 			else
 				oexZeroMemory( m_ash.Ptr(), m_ash.Size() );
+		} // end if
 		return m_ash.Ptr();
 	}
 
 	/// Returns a pointer to the AVI bitmap info structure
 	SBitmapInfo* Bi()
 	{	if ( !m_bi.Ptr() )
-			if ( !oexVERIFY( m_bi.OexNew( sizeof( SBitmapInfo::SBitmapInfoHeader ) ).Ptr() ) )
+		{	if ( !oexVERIFY( m_bi.OexNew( sizeof( SBitmapInfo::SBitmapInfoHeader ) ).Ptr() ) )
 				return oexNULL;
 			else
 				oexZeroMemory( m_bi.Ptr(), m_bi.Size() );
+		} // end if
 		return m_bi.Ptr();
 	}
 
 	/// Returns a pointer to the AVI stream header
 	SWaveFormatEx* Wfe()
 	{	if ( !m_wfe.Ptr() )
-			if ( !oexVERIFY( m_wfe.OexNew( sizeof( SWaveFormatEx ) ).Ptr() ) )
+		{	if ( !oexVERIFY( m_wfe.OexNew( sizeof( SWaveFormatEx ) ).Ptr() ) )
 				return oexNULL;
 			else
 				oexZeroMemory( m_wfe.Ptr(), m_wfe.Size() );
+		} // end if
 		return m_wfe.Ptr();
 	}
 

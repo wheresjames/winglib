@@ -526,7 +526,7 @@ oex::oexBOOL CSqEngine::Init()
 		// Debugging functions
 		BindRootFunction( _msg, oexT( "_msg" ) );
 		BindRootFunction( _log, oexT( "_log" ) );
-		BindRootFunction( _log, oexT( "_break" ) );
+		BindRootFunction( _break, oexT( "_break" ) );
 
 		// Bind Squirrel variables
 #if defined( SQBIND_SQBIND )
@@ -565,9 +565,9 @@ oex::oexBOOL CSqEngine::Init()
 		// Custom registrations
 		if ( m_fExportSymbols )
 #if defined( SQBIND_SQBIND )
-			oex::oexINT nRet = m_fExportSymbols( m_vm.GetVMHandle(), m_pSqAllocator );
+			m_fExportSymbols( m_vm.GetVMHandle(), m_pSqAllocator );
 #else
-			oex::oexINT nRet = m_fExportSymbols( &m_vm, m_pSqAllocator );
+			m_fExportSymbols( &m_vm, m_pSqAllocator );
 #endif
 
 	} // end try

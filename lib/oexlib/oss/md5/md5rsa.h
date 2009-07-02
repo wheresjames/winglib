@@ -1,7 +1,7 @@
 /*******************************************************************
 // From RFC 1321 (RFC1321)
 
-/* MD5C.C - RSA Data Security, Inc., MD5 message-digest algorithm
+/ * MD5C.C - RSA Data Security, Inc., MD5 message-digest algorithm
  */
 
 /* Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All

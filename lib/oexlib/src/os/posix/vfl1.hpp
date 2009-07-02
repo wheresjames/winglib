@@ -158,13 +158,15 @@ public:
 		m_nBufferSize = 0;
 		m_pFrameBuffer = 0;
 		m_nActiveBuf = 0;
+		
+		return oexTRUE;
 	}
 
 public:
 
 	/// Proper ioctl call
 	static int IoCtl( int fd, int request, void * arg )
-	{	int nErr; while ( -1 == ( nErr = ioctl( fd, request, arg ) ) && EINTR == errno ); }
+	{	int nErr; while ( -1 == ( nErr = ioctl( fd, request, arg ) ) && EINTR == errno ); return nErr; }
 //	{	int nErr; return oexDO( nErr = ioctl( fd, request, arg ), EINTR == nErr, nErr ); }
 
 public:

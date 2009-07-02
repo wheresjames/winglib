@@ -115,6 +115,9 @@ SquirrelObject CSqList::_nexti( HSQUIRRELVM v )
 
         } break;
 
+        default:
+        	break;
+        	
     } // end switch
 
     // ???

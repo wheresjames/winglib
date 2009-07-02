@@ -146,7 +146,7 @@ else
 		CFG_LEXTRA	 := -g
 		CFG_DPOSTFIX := _d
 	else
-		CFG_CEXTRA	 := -O2 -s $(CFG_CEXTRA) 
+		CFG_CEXTRA	 := -O3 -s $(CFG_CEXTRA) 
 		ifneq ($(PRJ_TYPE),dll)
 			CFG_LEXTRA	 := -s
 		endif
@@ -410,7 +410,7 @@ else
 			
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA) -rdynamic -Wl,-E -Wl,--export-dynamic
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -Wall 
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 

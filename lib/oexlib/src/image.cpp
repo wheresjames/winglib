@@ -213,7 +213,7 @@ oexBOOL CImage::Load( oexCSTR x_pFile, oexCSTR x_pType )
 	// Get the file type
 	DWORD type = GetFileType( ( oexCHECK_PTR( x_pType ) && *x_pType ) ? x_pType : x_pFile );
 
-	if ( type == -1 )
+	if ( (DWORD)-1 == type )
 		return oexFALSE;
 
 #if defined( OEX_WINCE )
@@ -247,7 +247,7 @@ oexBOOL CImage::Save( oexCSTR x_pFile, oexCSTR x_pType )
 	// Get the file type
 	DWORD type = GetFileType( ( oexCHECK_PTR( x_pType ) && *x_pType ) ? x_pType : x_pFile );
 
-	if ( type == -1 )
+	if ( (DWORD)-1 == type )
 		return oexFALSE;
 
 #if defined( OEX_WINCE )
@@ -276,7 +276,7 @@ oexBOOL CImage::Decode( oexPBYTE x_buf, oexINT x_size, oexCSTR x_pType )
 
 	// Get the file type
 	DWORD type = ( oexCHECK_PTR( x_pType ) && *x_pType ) ? GetFileType( x_pType ) : -1;
-	if ( -1 == type )
+	if ( (DWORD)-1 == type )
 		return oexFALSE;
 
 	// Encode the image
@@ -305,7 +305,7 @@ oexINT CImage::Encode( oexPBYTE *x_buf, oexINT *x_pnSize, oexCSTR x_pType )
 
 	// Get the file type
 	DWORD type = ( oexCHECK_PTR( x_pType ) && *x_pType ) ? GetFileType( x_pType ) : -1;
-	if ( -1 == type )
+	if ( (DWORD)-1 == type )
 		return 0;
 
 	// Encode the image
@@ -784,8 +784,8 @@ oexBOOL CImage::Create(oexINT x_w, oexINT x_h, oexINT x_bpp)
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	// Just just return if we already have the image they want
-	if ( pimg->GetWidth() == x_w
-	     && pimg->GetHeight() == x_h
+	if ( (oexINT)pimg->GetWidth() == x_w
+	     && (oexINT)pimg->GetHeight() == x_h
 	     && pimg->GetBpp() == x_bpp )
 		return TRUE;
 
@@ -1116,7 +1116,7 @@ oexINT CImage::Encode( oexPBYTE x_pBuf, oexINT x_nSize, oexCSTR x_pType )
 
 	// Get the file type
 	DWORD type = GetFileType( x_pType );
-	if ( -1 == type )
+	if ( (DWORD)-1 == type )
 		return 0;
 
 	// Wrap the memory pointer

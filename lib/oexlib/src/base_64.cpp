@@ -98,12 +98,12 @@ CBase64::~CBase64()
 oexINT CBase64::Decode( oexCSTR8 src, oexINT *srcsize, oexBYTE *dst, oexINT *dstsize, oexINT *done )
 {
 	oexINT x = 0, y = 0;
-	oexINT b = 0, last = 0;
+	oexINT b = 0;
 	oexINT max = *srcsize;
 
 	while( x < max )
 	{
-		oexBYTE ch = m_b64decode[ src[ x++ ] ];
+		oexBYTE ch = m_b64decode[ (oexINT)src[ x++ ] ];
 
 		if ( !( ch & 0x80 ) )
 		{
@@ -175,7 +175,7 @@ CStr8 CBase64::Decode( oexCSTR8 src, oexINT srcsize )
 oexINT CBase64::Encode( oexSTR8 dst, oexINT dstsize, oexCONST oexBYTE *src, oexINT srcsize )
 {
 	oexINT x = 0, y = 0;
-	oexINT b = 0, last = 0;
+	oexINT b = 0;
 	oexINT line = 0;
 
 	oexINT val = 0;

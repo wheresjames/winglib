@@ -164,13 +164,13 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 
 				// Kill the thread
 				if ( x_bForce )
-					if ( nErr = pthread_cancel( pRi->hThread ) )
+					if ( ( nErr = pthread_cancel( pRi->hThread ) ) )
 						oexERROR( nErr, oexT( "pthread_cancel() failed" ) );
 
 			} // end if
 
 			// Attempt to join the thread
-			else if ( oexINT nErr = pthread_join( pRi->hThread, oexNULL ) )
+			else if ( ( nErr = pthread_join( pRi->hThread, oexNULL ) ) )
 				oexERROR( nErr, oexT( "pthread_join() failed" ) );
 
 		} break;
@@ -178,7 +178,7 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 		case eRtMutex :
 
 			// Initiailze mutex object
-			if ( nErr = pthread_mutex_destroy( &pRi->hMutex ) )
+			if ( ( nErr = pthread_mutex_destroy( &pRi->hMutex ) ) )
 				oexERROR( nErr, oexT( "pthread_mutex_destroy() failed : Error releasing mutex object" ) );
 
 			break;
@@ -189,7 +189,7 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 			pRi->cSync.Destroy();
 
 			// Release condition object
-			if ( nErr = pthread_cond_destroy( &pRi->hCond ) )
+			if ( ( nErr = pthread_cond_destroy( &pRi->hCond ) ) )
 				oexERROR( nErr, oexT( "pthread_cond_destroy() failed : Error releasing pthread_cond object" ) );
 
 		} break;
@@ -602,12 +602,12 @@ oexRESULT CResource::Signal( oexUINT x_uTimeout )
 
 			// Unblock everyone if manual reset
 			if ( pRi->bManualReset )
-			{	if ( nErr = pthread_cond_broadcast( &pRi->hCond ) )
+			{	if ( ( nErr = pthread_cond_broadcast( &pRi->hCond ) ) )
 					return oexERROR( nErr, oexT( "pthread_cond_broadcast() failed" ) );
 			} // end if
 
 			// Unblock single waiting thread if auto
-			else if ( nErr = pthread_cond_signal( &pRi->hCond ) )
+			else if ( ( nErr = pthread_cond_signal( &pRi->hCond ) ) )
 				return oexERROR( nErr, oexT( "pthread_cond_signal() failed" ) );
 #endif
 

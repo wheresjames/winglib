@@ -859,11 +859,13 @@ public:
             oexASSERT( x_sStr.Length() <= 8 );
 
             TList< TStr< T > > lst;
+
+#if defined( oexDEBUG )
+
             oexUINT u = StringPermutations( lst, (T*)x_sStr.Ptr(), (T*)0 );
 
             oexASSERT( u == lst.Size() );
-
-#if defined( oexDEBUG )
+            
             // Verify known lengths
             switch( x_sStr.Length() )
             {
@@ -879,6 +881,9 @@ public:
                 case 9 : oexASSERT( 362880 == u ); break;
                 case 10 : oexASSERT( 3628800 == u ); break;
             };
+#else
+            StringPermutations( lst, (T*)x_sStr.Ptr(), (T*)0 );
+
 #endif
             return lst;
         }

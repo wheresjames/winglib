@@ -96,7 +96,7 @@ static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, sockaddr_in *x_pSai 
         return oexFALSE;
 
     // Sets the raw address value
-    x_pIa->SetRawAddress( ntohl( *(oexULONG*)&x_pSai->sin_addr.s_addr ), ntohs( x_pSai->sin_port ) );
+    x_pIa->SetRawAddress( ntohl( (oexULONG)x_pSai->sin_addr.s_addr ), ntohs( x_pSai->sin_port ) );
 
     return oexTRUE;
 }
@@ -129,7 +129,7 @@ static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, sockaddr_in *x_pSai 
         return oexFALSE;
 
     // Set the ip address
-    *(oexULONG*)&x_pSai->sin_addr.s_addr = htonl( (oexULONG)x_pIa->GetIpv4() );
+    x_pSai->sin_addr.s_addr = htonl( (oexULONG)x_pIa->GetIpv4() );
 
     // Set the port
     x_pSai->sin_port = htons( (short)x_pIa->GetPort() );
@@ -145,10 +145,12 @@ static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, sockaddr_in *x_pSai 
 	\param [in] x_pIa	-	Address information
 	\param [in] x_pSai 	-	Structure to be filled in
 */
+/*
 static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, sockaddr *x_pSa )
 {
    return CIpSocket_GetAddressInfo( x_pIa, (sockaddr_in*)x_pSa );
 }
+*/
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -1031,7 +1033,7 @@ CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
     {
         // Allocate buffer
         CStr8 sBuf;
-        oexCHAR *pBuf = sBuf.Allocate( x_uMax );
+        sBuf.Allocate( x_uMax );
 
         // Attempt to read data
         oexUINT uRead = RecvFrom( sBuf._Ptr(), x_uMax, oexNULL, x_uFlags );
@@ -1053,7 +1055,7 @@ CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
 
     // Read all available data
     while ( 0 < ( uRead = RecvFrom( sBuf._Ptr( uOffset ), oexSTRSIZE, oexNULL, x_uFlags ) )
-            && uRead >= oexSTRSIZE )
+            && (oexINT)uRead >= oexSTRSIZE )
     {
         // Allocate more space
         uOffset += uRead;
@@ -1124,7 +1126,7 @@ CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
     {
         // Allocate buffer
         CStr8 sBuf;
-        oexCHAR *pBuf = sBuf.Allocate( x_uMax );
+        sBuf.Allocate( x_uMax );
 
         // Attempt to read data
         oexUINT uRead = Recv( sBuf._Ptr(), x_uMax, oexNULL, x_uFlags );
@@ -1146,9 +1148,9 @@ CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
 
     // Read all available data
     while ( 0 < ( uRead = Recv( sBuf._Ptr( uOffset ), oexSTRSIZE, oexNULL, x_uFlags ) )
-            && uRead >= oexSTRSIZE )
+            && (oexINT)uRead >= oexSTRSIZE )
     {
-		if ( uRead > oexSTRSIZE )
+		if ( (oexINT)uRead > oexSTRSIZE )
 			uRead = oexSTRSIZE;
 
         // Allocate more space

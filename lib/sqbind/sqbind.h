@@ -39,7 +39,10 @@
 
 // Kill Microsoft ads
 #define _CRT_SECURE_NO_DEPRECATE 1
-#pragma warning( disable : 4996 )
+
+#ifdef OEX_WINDOWS
+#	pragma warning( disable : 4996 )
+#endif
 
 // Using SqPlus script binding for now
 //#define SQBIND_SQBIND
@@ -72,11 +75,11 @@
 namespace sqbind
 {
 	/// Squirrel Engine ID {DBD585B7-9B61-475e-9DB5-0CC25C698814}
-	static oex::oexCSTR SQBIND_ENGINE_TYPEID = oexT( "DBD585B7-9B61-475e-9DB5-0CC25C698814" );
+	static const oex::oexCSTR SQBIND_ENGINE_TYPEID = oexT( "DBD585B7-9B61-475e-9DB5-0CC25C698814" );
 	static const oex::oexGUID SQBIND_ENGINE_IID = oexINITGUID( 0xdbd585b7, 0x9b61, 0x475e, 0x9d, 0xb5, 0xc, 0xc2, 0x5c, 0x69, 0x88, 0x14 );
 
 	/// Squirrel Module ID {20856ECF-F93E-4f49-AA02-C5784A4146F5}
-	static oex::oexCSTR SQBIND_MODULE_TYPEID = oexT( "20856ECF-F93E-4f49-AA02-C5784A4146F5" );
+	static const oex::oexCSTR SQBIND_MODULE_TYPEID = oexT( "20856ECF-F93E-4f49-AA02-C5784A4146F5" );
 	static const oex::oexGUID SQBIND_MODULE_IID = oexINITGUID( 0x20856ecf, 0xf93e, 0x4f49, 0xaa, 0x2, 0xc5, 0x78, 0x4a, 0x41, 0x46, 0xf5 );
 
 	/// Allocator
@@ -102,17 +105,7 @@ namespace sqbind
     typedef oex::oexRESULT ( *PFN_SQBIND_Export_Symbols ) ( sqbind::VM x_vm, SSqAllocator *x_pAllocator );
 
     /// Bind native squirrel functions
-    static void SqBindAll( sqbind::VM x_vm )
-    {
-    	CSqString::Register( x_vm );
-        CSqVector::Register( x_vm );
-        CSqList::Register( x_vm );
-        CSqMap::Register( x_vm );
-        CSqMulti::Register( x_vm );
-    	CSqFile::Register( x_vm );
-    	CSqTime::Register( x_vm );
-    	CSqImage::Register( x_vm );
-    };
+    void SqBindAll( sqbind::VM x_vm );
 
 	/// Sets the allocator for squirrel engine
 	/**

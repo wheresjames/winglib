@@ -482,7 +482,6 @@ void CCellConnection::VerifyTemplate()
 				// Add size to offset
 				o += nBytes;
 
-				int num = 1;
 				int n = oexStrToLong( itVal->first.c_str() );
 
 				// Does it need to be re-indexed?
@@ -554,7 +553,7 @@ oex::oexBOOL CCellConnection::ParseTag( const sqbind::stdString &sTag, sqbind::s
 	nTag = sT.ToLong();
 
 	// Validate program index
-	if ( 0 <= nProgram && ( nProgram >= m_prog_list.count || nProgram >= m_tagsProgram.Size() ) )
+	if ( 0 <= nProgram && ( nProgram >= (oex::oexINT)m_prog_list.count || nProgram >= (oex::oexINT)m_tagsProgram.Size() ) )
 		return oex::oexFALSE;
 
 	// Did we get a bit length?
@@ -668,7 +667,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 	if ( 0 <= nIndex && pTd->tag[ nTag ]->arraysize1 )
 	{
 		// Ensure index is valid
-		if ( pTd->tag[ nTag ]->arraysize1 <= nIndex )
+		if ( (oex::oexINT)pTd->tag[ nTag ]->arraysize1 <= nIndex )
 			return SetLastError( oexMks( oexT( "#err=Index out of range [ " ), nIndex, oexT( " ]" ) ).Ptr() );
 
 		// Ensure there is enough data

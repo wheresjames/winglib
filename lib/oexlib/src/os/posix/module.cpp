@@ -174,7 +174,7 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 	} // end catch
 
 	// Save index
-	oexINT index = m_map.Size();
+	oexUINT index = m_map.Size();
 
 	// Re allocate space for pointers
 	oexUINT uSize = m_ptrs.Size();

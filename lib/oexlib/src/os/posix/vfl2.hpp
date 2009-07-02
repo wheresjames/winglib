@@ -162,6 +162,8 @@ public:
 		m_nBufferSize = 0;
 		m_pFrameBuffer = 0;
 		m_nActiveBuf = 0;
+		
+		return oexTRUE;
 	}
 
 public:
@@ -302,7 +304,7 @@ public:
 //			} // end if
 
 		// Did we get a new width / height
-		if ( m_nWidth != fmt.fmt.pix.width || m_nHeight != fmt.fmt.pix.height )
+		if ( m_nWidth != (oexINT)fmt.fmt.pix.width || m_nHeight != (oexINT)fmt.fmt.pix.height )
 		{
 			oexWARNING( 0, CStr().Fmt( oexT( "VIDIOC_S_FMT : Changed video size: %u : %d -> %d x %d -> %d" ),
 										   m_nFd, m_nWidth, fmt.fmt.pix.width, m_nHeight, fmt.fmt.pix.height ) );
@@ -466,7 +468,7 @@ public:
 
 		v4l2_format fmt;
 		CStr sStr;
-		for ( oexINT i = 0; i < oexSizeOfArray( l_formats ); i++ )
+		for ( oexINT i = 0; i < (oexINT)oexSizeOfArray( l_formats ); i++ )
 		{
 			oexZeroMemory( &fmt, sizeof( fmt ) );
 			fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -544,7 +546,7 @@ public:
 
 		v4l2_format fmt;
 		CStr sStr;
-		for ( oexINT i = 0; i < oexSizeOfArray( l_formats ); i++ )
+		for ( oexINT i = 0; i < (oexINT)oexSizeOfArray( l_formats ); i++ )
 		{
 			oexZeroMemory( &fmt, sizeof( fmt ) );
 			fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;

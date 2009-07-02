@@ -12,7 +12,7 @@
 extern "C" 
 {
 	#include "libavcodec/avcodec.h"
-//	#include "libavformat/avformat.h"
+	#include "libavformat/avformat.h"
 }
 
-#include "ff_decoder.h"
+#include "ff_decoder.h"#include "ff_encoder.h"

@@ -658,9 +658,11 @@ public:
 
 	TStr& Sub( oexCONST T* pStr, oexUINT uSize, oexINT nStart, oexUINT uLen )
 	{
-		oexUINT uStart;
-		if ( 0 <= nStart ) uStart = (oexUINT)nStart;
-		else nStart = (oexUINT)( (oexINT)uSize - nStart );
+		oexUINT uStart = 0;
+		if ( 0 <= nStart ) 
+			uStart = (oexUINT)nStart;
+		else 
+			uStart = (oexUINT)( (oexINT)uSize - nStart );
 
 		// Sanity checks
 		if ( !oexVERIFY_PTR( pStr ) || !uSize || uStart >= uSize )
@@ -1203,7 +1205,7 @@ public:
 			// Shift up size
 			uSize <<= 1;
 
-		} while ( uSize && os::CSys::c_StrErr_INSUFFICIENT_BUFFER == res );
+		} while ( uSize && os::CSys::c_StrErr_INSUFFICIENT_BUFFER == (oexUINT)res );
 
 		// Verfiy that the string was copied correctly
 		oexASSERT( os::CSys::c_StrErr_OK == res );
@@ -1938,7 +1940,7 @@ public:
 	/// Converts a GUID to a string, if pGuid is NULL, a unique GUID is created
 	TStr& GuidToString( oexCONST oexGUID *x_pGuid = oexNULL )
 	{	guid::GuidToString( OexAllocate( 36 /* + 1 is implicit*/ ), 37, x_pGuid );
-		oexVERIFY( Length() == 36 );
+		oexIGNORE oexVERIFY( Length() == 36 );
 		return *this;
 	}
 
@@ -1995,7 +1997,7 @@ public:
 
 	oexBOOL Cmp( oexCONST T* pStr, oexUINT uSize )
 	{
-        if ( uSize != Length() )
+        if ( (oexINT)uSize != Length() )
             return oexFALSE;
 		if ( !uSize )
             return oexTRUE;
@@ -2222,7 +2224,7 @@ public:
 
 	/// Splits off a token and returns it
 	TStr ParseQuoted( oexCONST T *pOpen, oexCONST T *pClose, oexCONST T *pEscape = oexNULL )
-    {	oexVERIFY_PTR_NULL_OK( pEscape );
+    {	oexIGNORE oexVERIFY_PTR_NULL_OK( pEscape );
         oexINT i = str::ParseQuoted(    Ptr(), Length(),
                                         pOpen, zstr::Length( pOpen ),
                                         pClose, zstr::Length( pOpen ),

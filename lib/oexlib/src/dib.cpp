@@ -321,7 +321,7 @@ oexBOOL CDib::YUV_RGB_1(oexLONG lWidth, oexLONG lHeight, oexBYTE *pSrc, oexBYTE 
 	oexBYTE *pPixDst = pDst + ( lScanWidth * ( lHeight - 1 ) );
 
 	// Source index offset
-	oexUINT i = 0, i1 = 0, i2 = 0;
+	oexUINT i = 0;
 
 	// Grayscale
 	if ( bGrayscale )
@@ -341,7 +341,6 @@ oexBOOL CDib::YUV_RGB_1(oexLONG lWidth, oexLONG lHeight, oexBYTE *pSrc, oexBYTE 
 		oexINT lY, lT;
 		oexCHAR lU, lV;
 
-		oexBYTE *pY = pSrc;
 		oexBYTE *pU1 = &pSrc[ lUOffset ], *pU2 = &pSrc[ lUOffset ];
 		oexBYTE *pV1 = &pSrc[ lVOffset ], *pV2 = &pSrc[ lVOffset ];
 

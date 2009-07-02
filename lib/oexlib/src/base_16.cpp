@@ -92,12 +92,12 @@ CBase16::~CBase16()
 oexINT CBase16::Decode( oexCSTR8 src, oexINT *srcsize, oexBYTE *dst, oexINT *dstsize, oexINT *done )
 {
 	oexINT x = 0, y = 0;
-	oexINT b = 0, last = 0;
+	oexINT b = 0;
 	oexINT max = *srcsize;
 
 	while ( x < max )
 	{
-		oexBYTE ch = m_b16decode[ src[ x++ ] ];
+		oexBYTE ch = m_b16decode[ (oexINT)src[ x++ ] ];
 
 		if ( !( ch & 0x80 ) )
 		{

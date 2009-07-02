@@ -111,6 +111,9 @@ SquirrelObject CSqVector::_nexti( HSQUIRRELVM v )
             return so;
 
         } break;
+        
+        default:
+        	break;
 
     } // end switch
 
