@@ -90,9 +90,9 @@ ifeq ($(BUILD),vs)
 		endif
 	else
 		ifeq ($(LIBLINK),static)	
-			CFG_CEXTRA	 := /MT /O2 $(CFG_CEXTRA)
+			CFG_CEXTRA	 := /MT /O2 /DNDEBUG=1 $(CFG_CEXTRA)
 		else
-			CFG_CEXTRA	 := /MD /O2 $(CFG_CEXTRA)
+			CFG_CEXTRA	 := /MD /O2 /DNDEBUG=1 $(CFG_CEXTRA)
 		endif
 		CFG_LEXTRA	 := 
 		ifeq ($(CFG_STDLIBS),)
@@ -146,7 +146,7 @@ else
 		CFG_LEXTRA	 := -g
 		CFG_DPOSTFIX := _d
 	else
-		CFG_CEXTRA	 := -O3 -s $(CFG_CEXTRA) 
+		CFG_CEXTRA	 := -O3 -s -DNDEBUG=1 $(CFG_CEXTRA) 
 		ifneq ($(PRJ_TYPE),dll)
 			CFG_LEXTRA	 := -s
 		endif
@@ -378,9 +378,9 @@ else
 			CFG_TOOLPREFIX := i586-mingw32msvc-
 
 			CFG_STDLIB := -lole32 -lgdi32 -lwsock32 -lws2_32
-			CFG_LFLAGS := $(CFG_LEXTRA) -export-all-symbols
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_NODSHOW -DOEX_NOVFW -DOEX_NOCRTDEBUG \
-												-D__int64="long long"
+			CFG_LFLAGS := $(CFG_LEXTRA) -export-all-symbols 
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -Wall -fno-strict-aliasing \
+										-DOEX_NODSHOW -DOEX_NOVFW -DOEX_NOCRTDEBUG -D__int64="long long"
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
@@ -394,7 +394,8 @@ else
 
 			CFG_STDLIB := 
 			CFG_LFLAGS := $(CFG_LEXTRA) 
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_NOSTRUCTINIT
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -Wall -fno-strict-aliasing \
+									    -DOEX_NOSTRUCTINIT
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
@@ -410,7 +411,7 @@ else
 			
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA) -rdynamic -Wl,-E -Wl,--export-dynamic
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -Wall 
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -Wall -fno-strict-aliasing
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 

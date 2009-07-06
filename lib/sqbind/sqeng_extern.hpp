@@ -53,7 +53,7 @@ void *sq_vm_malloc( SQUnsignedInteger size )
 {
 	if ( oexCHECK_PTR( sqbind::g_SqAllocator.fnMalloc ) )
 		return sqbind::g_SqAllocator.fnMalloc( size );
-	return malloc( size );
+	return oex::os::CMem::New( size, oexLINE, oexFILE );
 }
 
 void *sq_vm_realloc( void *p, SQUnsignedInteger oldsize, SQUnsignedInteger size )
@@ -61,7 +61,7 @@ void *sq_vm_realloc( void *p, SQUnsignedInteger oldsize, SQUnsignedInteger size 
 	if ( oexCHECK_PTR( sqbind::g_SqAllocator.fnRealloc ) )
 		return sqbind::g_SqAllocator.fnRealloc( p, size );
 
-	return realloc( p, size );
+	return oex::os::CMem::Resize( p, size, oexLINE, oexFILE );
 }
 
 void sq_vm_free( void *p, SQUnsignedInteger size )
@@ -71,7 +71,7 @@ void sq_vm_free( void *p, SQUnsignedInteger size )
 		return;
 	} // end if
 
-	free( p );
+	return oex::os::CMem::Delete( p );
 }
 
 

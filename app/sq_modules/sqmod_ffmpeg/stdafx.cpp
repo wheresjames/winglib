@@ -2,10 +2,19 @@
 
 #include "stdafx.h"
 
-extern "C" void assert(int expression)
+#ifndef assert
+extern "C"  void assert(int expression)
 {
 }
+#endif
 
+extern "C"
+{
+//const uint64_t ff_pw_20 = 0x0014001400140014ULL;
+//const uint64_t ff_pw_20 __attribute__ ((aligned (8))) = 0x0014001400140014ULL;
+//const unsigned long long ff_pw_20 = 0x0014001400140014ULL;
+//DECLARE_ALIGNED_8 (const uint64_t, ff_pw_20 ) = 0x0014001400140014ULL;
+}
 
 // Export Functions
 SQBIND_REGISTER_CLASS_BEGIN( CFfDecoder, CFfDecoder )
