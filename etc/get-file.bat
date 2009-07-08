@@ -3,7 +3,7 @@
 echo %1 %2 %3
 
 IF EXIST %2 GOTO EXTRACT
-wget %1 -O %2 %1
+wget -O %2 %1
 
 :EXTRACT
 
