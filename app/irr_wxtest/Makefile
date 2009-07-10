@@ -17,7 +17,9 @@ PRJ_LIBROOT := ../..
 include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(OS),win32)
-	PRJ_OSLB := comctl32 comdlg32 uuid oleaut32 opengl32
+	ifeq ($(BUILD),gcc)
+		PRJ_OSLB := comctl32 comdlg32 uuid oleaut32 opengl32
+	endif
 	PRJ_LIBS := $(PRJ_LIBS) wxWidgets jpeg
 	PRJ_INCS := $(PRJ_INCS) winglib/dep/etc/wxWidgets/inc/windows wxWidgets/include
 	PRJ_DEFS := _IRR_STATIC_LIB_ _IRR_COMPILE_WITH_OPENGL_

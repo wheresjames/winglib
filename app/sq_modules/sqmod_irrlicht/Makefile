@@ -46,7 +46,9 @@ else
 #		PRJ_INCS := $(PRJ_INCS) ogles/include
 		PRJ_DEFS := $(PRJ_DEFS) OEX_NOBULLET
 	else
-		PRJ_OSLB := opengl32
+		ifeq ($(BUILD),gcc)
+			PRJ_OSLB := opengl32
+		endif
 #		PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OPENGL_
 	endif	
 endif

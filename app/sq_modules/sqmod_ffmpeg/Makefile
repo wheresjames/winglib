@@ -21,6 +21,11 @@ PRJ_LIBROOT := ../../..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifndef BUILD_FFMPEG
+UNSUPPORTED := Set make option BUILD_FFMPEG=1 to build
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 ifeq ($(PLATFORM),windows)
 	PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows $(PRJ_INCS)
 else
@@ -39,4 +44,4 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-
+endif

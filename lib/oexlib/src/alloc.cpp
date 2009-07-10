@@ -163,7 +163,7 @@ oexPVOID CAlloc::ReAlloc( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, 
     // Do we have the space to resize?
     oexUINT uBlockSize = BlockSize( x_pBuf );
     if ( uBlockSize < ( x_uNewSize + ProtectAreaSize() + sizeof( oexUINT ) ) )
-    	if ( !os::CMem::Resize( x_pBuf, x_uNewSize, x_uLine, x_pFile ) )
+//    	if ( !os::CMem::Resize( x_pBuf, x_uNewSize, x_uLine, x_pFile ) )
         	return oexNULL;
 
     // Resize the protected memory area

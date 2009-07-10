@@ -7,7 +7,7 @@
 
 #if !defined( INFINITY ) && defined( HUGE_VAL )
 #	define INFINITY HUGE_VAL
-#endif 
+#endif
 
 #if !defined( RTLD_NOW )
 #	define RTLD_NOW 0x00002
@@ -98,7 +98,7 @@
 #define HAVE_MEMALIGN 0
 #define HAVE_MKSTEMP 0
 #define HAVE_PLD 0
-#define HAVE_POSIX_MEMALIGN 1
+#define HAVE_POSIX_MEMALIGN 0
 #define HAVE_ROUND 1
 #define HAVE_ROUNDF 1
 #define HAVE_SDL 1
@@ -168,7 +168,7 @@
 #define CONFIG_LIBX264 0
 #define CONFIG_LIBXVID 0
 #define CONFIG_MDCT 1
-#define CONFIG_MEMALIGN_HACK 0
+#define CONFIG_MEMALIGN_HACK 1
 #define CONFIG_MLIB 0
 #define CONFIG_MPEGAUDIO_HP 1
 #define CONFIG_NETWORK 1

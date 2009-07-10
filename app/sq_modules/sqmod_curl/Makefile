@@ -19,14 +19,18 @@ PRJ_LIBROOT := ../../..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-ifeq ($(PLATFORM),posix)
-	PRJ_OSLB := ssl crypto idn ldap
-endif
-
 ifeq ($(BUILD_CURL),)
 	UNSUPPORTED := Set BUILD_CURL=1 to build this project
 	include $(PRJ_LIBROOT)/unsupported.mk
 else
+
+ifeq ($(PLATFORM),posix)
+	PRJ_OSLB := ssl crypto idn ldap
+else
+	ifeq ($(BUILD),vs)
+		PRJ_INCS := $(PRJ_INCS) winglib/dep/etc/vs/inc/c99
+	endif
+endif
 
 #-------------------------------------------------------------------
 # Source files

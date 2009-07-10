@@ -170,7 +170,8 @@ else
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
-		else ifeq ($(TOOLS),codesourcery)
+		endif
+		ifeq ($(TOOLS),codesourcery)
 
 			OS := android
 			PLATFORM := posix
@@ -185,7 +186,8 @@ else
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
-		else ifeq ($(TOOLS),nihilism)
+		endif
+		ifeq ($(TOOLS),nihilism)
 
 			OS := linux
 			PLATFORM := posix
@@ -200,7 +202,8 @@ else
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
-		else ifeq ($(TOOLS),uclinux)
+		endif
+		ifeq ($(TOOLS),uclinux)
 
 			OS := linux
 			PLATFORM := posix
@@ -215,7 +218,8 @@ else
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 			
-		else ifeq ($(TOOLS),openmoko)
+		endif
+		ifeq ($(TOOLS),openmoko)
 
 			OS := linux
 			PLATFORM := posix
@@ -230,7 +234,8 @@ else
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
-		else ifeq ($(TOOLS),armel)
+		endif
+		ifeq ($(TOOLS),armel)
 
 			OS := linux
 			PLATFORM := posix
@@ -245,7 +250,8 @@ else
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
-		else ifeq ($(TOOLS),buildroot)
+		endif
+		ifeq ($(TOOLS),buildroot)
 
 			OS := linux
 			PLATFORM := posix
@@ -261,7 +267,8 @@ else
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
-		else ifeq ($(TOOLS),crosstool)
+		endif
+		ifeq ($(TOOLS),crosstool)
 
 			OS := linux
 			PLATFORM := posix
@@ -277,7 +284,8 @@ else
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
-		else ifeq ($(TOOLS),scratchbox)
+		endif
+		ifeq ($(TOOLS),scratchbox)
 
 			OS := linux
 			PLATFORM := posix
@@ -296,7 +304,8 @@ else
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD 
 			CFG_AFLAGS := cq
 
-		else ifeq ($(TOOLS),iphone)
+		endif
+		ifeq ($(TOOLS),iphone)
 
 			OS := darwin9
 			PLATFORM := posix
@@ -312,7 +321,8 @@ else
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
-		else ifeq ($(TOOLS),cegcc)
+		endif
+		ifeq ($(TOOLS),cegcc)
 
 			OS := wince
 			PLATFORM := windows
@@ -330,7 +340,8 @@ else
 			
 			CFG_EXE_POST := .exe			
 
-		else ifeq ($(TOOLS),mingw32ce)
+		endif
+		ifeq ($(TOOLS),mingw32ce)
 
 			OS := wince
 			PLATFORM := windows
@@ -348,7 +359,9 @@ else
 
 			CFG_EXE_POST := .exe			
 			
-		else
+		endif
+		ifeq ($(TOOLS),)
+
 	
 			OS := linux
 			PLATFORM := posix
@@ -384,7 +397,8 @@ else
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
-		else ifeq ($(TOOLS),mac)
+		endif
+		ifeq ($(TOOLS),mac)
 
 			OS := apple
 			PLATFORM := posix
@@ -399,7 +413,8 @@ else
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
-		else
+		endif
+		ifeq ($(TOOLS),)
 		
 			OS := linux
 			PLATFORM := posix

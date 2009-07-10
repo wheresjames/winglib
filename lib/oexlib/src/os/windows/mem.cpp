@@ -61,7 +61,7 @@ oexPVOID CMem::New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
 {
     oexUCHAR *pBuf;
 
-    try
+    _oexTRY
     {
 		if ( m_ra.fMalloc )
 			pBuf = (oexUCHAR*)m_ra.fMalloc( x_uSize );
@@ -89,7 +89,7 @@ oexPVOID CMem::New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
 
     } // end try
 
-    catch( ... )
+    _oexCATCH_ALL()
     {
         return oexNULL;
 
@@ -100,8 +100,23 @@ oexPVOID CMem::New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
 
 oexPVOID CMem::Resize( oexPVOID x_pMem, oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
 {
-	return oexNULL;
+	if ( !x_pMem )
+		return New( x_uSize, x_uLine, x_pFile );
 
+    _oexTRY
+    {
+		if ( m_ra.fRealloc )
+			return m_ra.fRealloc( x_pMem, x_uSize );
+
+	} // end try
+
+	_oexCATCH_ALL()
+	{
+		oexASSERT( 0 );
+
+	} // end catch
+
+	return oexNULL;
 }
 
 void CMem::Delete( oexPVOID x_pMem )

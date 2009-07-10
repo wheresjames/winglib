@@ -32,8 +32,11 @@ else
 	PRJ_INCS := winglib/dep/etc/ffmpeg/inc/posix $(PRJ_INCS)
 endif
 
-CFG_CFLAGS := $(CFG_CFLAGS) -ffast-math -fomit-frame-pointer 
-# -fno-stack-check
+CFG_CFLAGS := $(CFG_CFLAGS) -ffast-math -fomit-frame-pointer
+
+ifdef DBG
+	CFG_CFLAGS := $(CFG_CFLAGS) -fno-stack-check -O3
+endif
 
 #-------------------------------------------------------------------
 # File locations
