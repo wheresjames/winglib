@@ -610,20 +610,20 @@ public:
 #if !defined( OEX_WINDOWS )
 
 			if ( !COex::GetStartupCode() )
-			{	oexTRACE( oexT( "! oexlib - oex::COex::Init() was not called!\n" ) );
+			{//	oexTRACE( oexT( "! oexlib - oex::COex::Init() was not called!\n" ) );
 				oexBREAK( oexT( "oex::COex::Init() was not called!" ) );
 			} // end if
 			else if ( 0 > COex::GetStartupCode() )
-			{	oexTRACE( oexFmt( oexT( "! oexlib - oex::COex::Init() reported error code %d\n" ), COex::GetStartupCode() ) );
+			{//	oexTRACE( oexFmt( oexT( "! oexlib - oex::COex::Init() reported error code %d\n" ), COex::GetStartupCode() ) );
 				oexBREAK( oexT( "oex::COex::Init() reported an error" ) );
 			} // end else if
 
 			if ( !COex::GetShutdownCode() )
-			{	oexTRACE( oexT( "! oexlib - oex::COex::Uninit() was not called!\n" ) );
+			{//	oexTRACE( oexT( "! oexlib - oex::COex::Uninit() was not called!\n" ) );
 				oexBREAK( oexT( "oex::COex::Uninit() was not called!" ) );
 			} // end if
 			else if ( 0 > COex::GetShutdownCode() )
-			{	oexTRACE( oexFmt( oexT( "! oexlib - oex::COex::Uninit() reported error code %d\n" ), COex::GetShutdownCode() ) );
+			{//	oexTRACE( oexFmt( oexT( "! oexlib - oex::COex::Uninit() reported error code %d\n" ), COex::GetShutdownCode() ) );
 				oexBREAK( oexT( "oex::COex::Uninit() reported an error" ) );
 			} // end else if
 #endif

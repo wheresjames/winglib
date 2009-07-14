@@ -659,9 +659,9 @@ public:
 	TStr& Sub( oexCONST T* pStr, oexUINT uSize, oexINT nStart, oexUINT uLen )
 	{
 		oexUINT uStart = 0;
-		if ( 0 <= nStart ) 
+		if ( 0 <= nStart )
 			uStart = (oexUINT)nStart;
-		else 
+		else
 			uStart = (oexUINT)( (oexINT)uSize - nStart );
 
 		// Sanity checks
@@ -1208,7 +1208,7 @@ public:
 		} while ( uSize && os::CSys::c_StrErr_INSUFFICIENT_BUFFER == (oexUINT)res );
 
 		// Verfiy that the string was copied correctly
-		oexASSERT( os::CSys::c_StrErr_OK == res );
+		oexASSERT( (oexRESULT)os::CSys::c_StrErr_OK == res );
 
 		// Set the length of the string
 		Length();
@@ -1947,10 +1947,10 @@ public:
 	/// Converts a GUID to a string
 	TStr& GuidToString( oexCONST oexGUID &x_rGuid )
 	{	guid::GuidToString( OexAllocate( 36 /* + 1 is implicit*/ ), 37, &x_rGuid );
-		oexVERIFY( Length() == 36 );
+		oexIGNORE oexVERIFY( Length() == 36 );
 		return *this;
 	}
-	
+
 public:
 
     /// Converts to a number
@@ -2236,6 +2236,34 @@ public:
 	}
 
 	/// Splits off a token and returns it
+	TStr& Unquote( oexCONST T *pOpen, oexCONST T *pClose, oexCONST T *pEscape = oexNULL )
+    {	oexIGNORE oexVERIFY_PTR_NULL_OK( pEscape );
+        oexINT i = str::ParseQuoted(    Ptr(), Length(),
+                                        pOpen, zstr::Length( pOpen ),
+                                        pClose, zstr::Length( pOpen ),
+                                        pEscape, pEscape ? zstr::Length( pEscape ) : 0 );
+		if ( 0 >= i )
+			return *this;
+
+		Sub( 1, i - 1 );
+		return *this;
+	}
+
+	/// Splits off a token and returns it
+	TStr ParseWithQuoted( oexCONST T *pOpen, oexCONST T *pTerm, oexCONST T *pClose, oexCONST T *pEscape = oexNULL )
+    {	oexIGNORE oexVERIFY_PTR_NULL_OK( pEscape );
+        oexINT i = str::ParseQuoted(    Ptr(), Length(),
+                                        pTerm, zstr::Length( pTerm ),
+                                        pOpen, zstr::Length( pOpen ),
+                                        pClose, zstr::Length( pOpen ),
+                                        pEscape, pEscape ? zstr::Length( pEscape ) : 0 );
+		if ( 0 >= i ) return TStr();
+		TStr str = SubStr( 1, i - 1 );
+		LTrim( i + 1 );
+		return str;
+	}
+
+	/// Splits off a token and returns it
 	TStr ParseToken( oexCONST T* pValid )
 	{	oexVALIDATE_PTR( pValid );
 		oexINT i = 0;
@@ -2275,7 +2303,7 @@ public:
 
 	/// Splits off a string up to any of the terminator characters
 	TStr RParse( oexCONST T* pTerm )
-	{	oexASSERT_PTR( pTerm );
+	{	oexIGNORE oexASSERT_PTR( pTerm );
         oexINT lLen = Length();
         oexINT i = str::RFindTerm( Ptr(), lLen, pTerm, zstr::Length( pTerm ) );
 		if ( 0 > i )

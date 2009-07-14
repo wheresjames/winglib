@@ -865,7 +865,7 @@ public:
             oexUINT u = StringPermutations( lst, (T*)x_sStr.Ptr(), (T*)0 );
 
             oexASSERT( u == lst.Size() );
-            
+
             // Verify known lengths
             switch( x_sStr.Length() )
             {
@@ -1023,6 +1023,170 @@ public:
 		}
 
 
+	/// Splits a string into an array by cutting on any character in m_pSep, while respecting quotes
+	template < typename T >
+		static TList< TStr< T > > SplitQuoted( oexCONST T *x_pStr, oexUINT x_uSize,
+											   oexCONST T *x_pSep, oexCONST T *x_pOpen,
+											   oexCONST T *x_pClose, oexCONST T *x_pEsc )
+	{
+		TList< TStr< T > > lst;
+		if ( !oexVERIFY_PTR( x_pStr ) )
+			return lst;
+
+		oexUINT x_uSep = 0;
+		if ( !x_pSep ) x_uSep = 0;
+		else if ( !oexVERIFY_PTR( x_pSep ) )
+			return lst;
+		else x_uSep = zstr::Length( x_pSep );
+
+		// Breaking down to chars?
+		if ( !x_uSep )
+			return lst;
+
+		while ( x_uSize )
+		{
+			// Skip any separators
+			oexINT nSkip = str::SkipCharacters( x_pStr, x_uSize, x_pSep, x_uSep );
+			if ( 0 <= nSkip )
+				x_pStr += nSkip, x_uSize -= nSkip;
+
+			// Are we done?
+			if ( !x_uSize )
+				return lst;
+
+			// Find a closing separator
+			oexINT nSep = str::ParseWithQuoted( x_pStr, x_uSize, x_pSep, x_uSep,
+												x_pOpen, zstr::Length( x_pOpen ),
+												x_pClose, zstr::Length( x_pClose ),
+												x_pEsc, x_pEsc ? zstr::Length( x_pEsc ) : 0 );
+
+			if ( 0 > nSep )
+			{	lst << x_pStr;
+				return lst;
+			} // end if
+
+			else
+			{
+				if ( nSep )
+				{	x_uSize -= nSep;
+					lst << TStr< T >( x_pStr, 0, nSep );
+					x_pStr += nSep;
+				} // end if
+
+			} // end else
+
+		} // end while
+
+		// Add last item
+		if ( *x_pStr )
+			lst << x_pStr;
+
+		return lst;
+	}
+
+	/// Parses command line variables in a typical format
+	/*
+	 	example :
+
+		-a -simple:param -file:'C:/Program Files/myfile.txt' -two:'hi and\\'hi' -empty: hello world
+
+		parses to...
+
+		Array( Size() == 7 )
+		{
+		  'a' = ''
+		  'simple' = 'param'
+		  'file' = 'C:/Program Files/myfile.txt'
+		  'two' = 'hi and\'hi'
+		  'empty' = ''
+		  '0' = 'hello'
+		  '1' = 'world'
+		}
+
+	*/
+
+	typedef oexTCHAR T_tc;
+
+	static TPropertyBag< TStr< T_tc > > ParseCommandLine( oexINT x_nNum, T_tc **x_pStr );
+
+	static TPropertyBag< TStr< T_tc > > ParseCommandLine( oexCONST TStr< T_tc > &x_sStr );
+
+	static oexLONG ParseCommandLine( oexCONST TStr< T_tc > &x_sStr, TPropertyBag< TStr< T_tc > > &x_pb, oexBOOL x_bMerge = oexFALSE );
+
+/*	+++ The following code should work, but gcc is choking on it
+
+	template< typename T >
+		static TPropertyBag< TStr< T > > ParseCommandLine( oexINT x_nNum, oexCONST T *x_pStr )
+	{
+		if ( 2 > x_nNum || !oexCHECK_PTR( x_pStr ) )
+			return TPropertyBag< TStr< T > >();
+
+		// Build string
+		oex::TStr< T > sCmdLine;
+		for ( int i = 1; i < x_nNum; i++ )
+			sCmdLine << x_pStr[ i ] << oexT( " " );
+
+		// Parse the command line
+		return ParseCommandLine( sCmdLine );
+	}
+
+	template< typename T >
+		static TPropertyBag< TStr< T > > ParseCommandLine( oexCONST TStr< T > &x_sStr )
+	{
+		TPropertyBag< TStr< T > > pb;
+		ParseCommandLine( x_sStr, pb );
+		return pb;
+	}
+
+	template< typename T >
+		static oexLONG ParseCommandLine( oexCONST TStr< T > &x_sStr, TPropertyBag< TStr< T > > &x_pb, oexBOOL x_bMerge = oexFALSE )
+	{
+		//typedef oex::CStr strType;
+
+		// +++ This is the correct one, not the one above.
+		//     Why doesn't it work on gcc ???!!!!??!
+		typedef oex::TStr< T > strType;
+
+		// Lose previous contents
+		if ( !x_bMerge )
+			x_pb.Destroy();
+
+		// Punt if null string
+		if ( !x_sStr.Length() )
+			return 0;
+
+		// Parse the command line items
+		oex::TList< strType > strlst;
+		strlst = CParser::SplitQuoted( x_sStr.Ptr(), x_sStr.Length(), " ", "\"'", "\"'", "\\" );
+
+		// We get anything?
+		if ( !strlst.Size() )
+			return 0;
+
+		oexINT i = 0;
+		for ( oex::TList< strType >::iterator it; strlst.Next( it ); )
+		{
+			// Is it a switch?
+			if ( oexTC( T, '-' ) == it.Obj()[ 0 ] )
+			{
+				it.Obj()++;
+				TStr< T > sKey = it.Obj().Parse( oexTT( T, ":" ) );
+				if ( *it.Obj() == oexTC( T, ':' ) )
+					it.Obj()++, x_pb[ sKey ] = it.Obj().Unquote( oexTT( T, "\"'" ), oexTT( T, "\"'" ), oexTT( T, "\\" ) );
+				else
+					x_pb[ it.Obj() ] = oexTT( T, "" );
+
+			} // end if
+
+			// Add as number
+			else
+				x_pb[ ( TStr< T >() << i++ ) ] = it.Obj();
+
+		} // end if
+
+		return x_pb.Size();
+	}
+*/
 
 protected:
 

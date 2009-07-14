@@ -111,9 +111,9 @@ template < const int T > class oex_static_assert{};
 
 #ifdef oexDEBUG
 
-#	define oexASSERT_PTR_NULL_OK( ptr )     oexVERIFY( oexVerifyPtrNullOk( (OEX_NAMESPACE::oexCPVOID)ptr ) )
-#	define oexASSERT_PTR( ptr )             oexVERIFY( oexVerifyPtr( (OEX_NAMESPACE::oexCPVOID)ptr ) )
-#	define oexASSERT( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
+#	define oexASSERT_PTR_NULL_OK( ptr )     oexIGNORE oexVERIFY( oexVerifyPtrNullOk( (OEX_NAMESPACE::oexCPVOID)ptr ) )
+#	define oexASSERT_PTR( ptr )             oexIGNORE oexVERIFY( oexVerifyPtr( (OEX_NAMESPACE::oexCPVOID)ptr ) )
+#	define oexASSERT( s )		            oexIGNORE ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
 
 // +++ Only works for 32-bit processors
 //

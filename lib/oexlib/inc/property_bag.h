@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -63,7 +63,7 @@
 	// Convert to std map of strings
 	std::map< std::tstring, std::tstring > mapCnv;
 	for ( oex::CPropertyBag::iterator it; x_pSession->Get().List().Next( it ); )
-		mapCnv[ it.Node()->key.Ptr() ] = it->ToString().Ptr(); 
+		mapCnv[ it.Node()->key.Ptr() ] = it->ToString().Ptr();
 
 	// Different char size?
 	std::map< std::tstring, std::tstring > mapCnv;
@@ -122,10 +122,10 @@ public:
 	/// Indexes into sub array
 	/**
 		\param [in] x_key	-	Index key
-		
+
 		\return Reference to sub class.
-	
-		\see 
+
+		\see
 	*/
 	TPropertyBag& operator []( T_L x_key ) { return m_lstPb[ x_key ]; }
 
@@ -135,41 +135,41 @@ public:
 	/// Assignment operator
 	/**
 		\param [in] x_t	-	object
-		
+
 		\return Reference to sub class.
-	
-		\see 
+
+		\see
 	*/
-	TPropertyBag& operator = ( T_R x_t ) 
+	TPropertyBag& operator = ( T_R x_t )
     {
         if ( !m_t.Ptr() )
             m_t.OexConstruct().Ptr();
 
         if ( m_t.Ptr() )
-            *m_t.Ptr() = x_t; 
+            *m_t.Ptr() = x_t;
 
-        return *this; 
+        return *this;
     }
 /*
 #if defined( oexUNICODE )
 
-	TPropertyBag& operator = ( CStr8 &v ) 
+	TPropertyBag& operator = ( CStr8 &v )
     {
         if ( !m_t.Ptr() )
             m_t.OexConstruct().Ptr();
 
-        m_t = oexStr8ToStr( v ); 
+        m_t = oexStr8ToStr( v );
         return *this;
     }
 
 #else
 
-	TPropertyBag& operator = ( CStrW &v ) 
-    {   
+	TPropertyBag& operator = ( CStrW &v )
+    {
         if ( !m_t.Ptr() )
             m_t.OexConstruct().Ptr();
 
-        m_t = oexStrWToStr( v ); 
+        m_t = oexStrWToStr( v );
         return *this;
     }
 
@@ -188,7 +188,7 @@ public:
 	//==============================================================
 	/// Returns our encapsulated object
     /**
-        It was a nice feature, but I had to disable this so that we 
+        It was a nice feature, but I had to disable this so that we
         could efficiently assign and move property bags through
         function parameters and return values.  Also a nice way
         to move a property bag inside of another.
@@ -197,15 +197,15 @@ public:
 
 	/// Returns our encapsulated thing-a-ma-jig reference
 	T_R& Value() { return m_t; }
-    
+
 	//==============================================================
 	// operator ->
 	//==============================================================
 	/// Pointer difference operator
 	/**
 		\return Pointer to object
-	
-		\see 
+
+		\see
 	*/
 //	T_R* operator -> () { return &m_t.Obj(); }
 
@@ -213,24 +213,24 @@ public:
 	// operator ==
 	//==============================================================
 	/// Equality operator
-	oexBOOL operator == ( T_R x_t ) 
-    { 
+	oexBOOL operator == ( T_R x_t )
+    {
         if ( !m_t.Ptr() )
             return oexFALSE;
-        return *m_t.Ptr() == x_t; 
+        return *m_t.Ptr() == x_t;
     }
 
 	//==============================================================
 	// operator !=
 	//==============================================================
 	/// NEQ operator
-	oexBOOL operator != ( T_R x_t ) 
-    { 
+	oexBOOL operator != ( T_R x_t )
+    {
         if ( !m_t.Ptr() )
             return oexTRUE;
-        return *m_t.Ptr() != x_t; 
+        return *m_t.Ptr() != x_t;
     }
-	
+
 	//==============================================================
 	// IsArray()
 	//==============================================================
@@ -247,7 +247,7 @@ public:
 	// IsDefaultValue()
 	//==============================================================
 	// Returns non zero if there is a default value
-	oexBOOL IsDefaultValue() 
+	oexBOOL IsDefaultValue()
     { return ( m_t.Ptr() && m_t.Ptr()->Length() ) ? oexTRUE : oexFALSE; }
 
 	//==============================================================
@@ -255,57 +255,48 @@ public:
 	//==============================================================
 	/// Returns non-zero if the specified key exists
 	/**
-		\param [in] x_key 
-		
-		\return 
-	
-		\see 
+		\param [in] x_key
+
+		\return
+
+		\see
 	*/
 	oexBOOL IsKey( T_L x_key ) { return m_lstPb.IsKey( x_key ); }
 
 	/// Converts to long
-	oexLONG ToLong() 
-    { 
+	oexLONG ToLong()
+    {
         if ( !m_t.Ptr() )
             return 0;
 
-        return m_t.Ptr()->ToLong(); 
+        return m_t.Ptr()->ToLong();
     }
 
 	/// Converts to unsigned long
-	oexULONG ToULong() 
+	oexULONG ToULong()
     {
         if ( !m_t.Ptr() )
             return 0;
-        return m_t.Ptr()->ToULong(); 
+        return m_t.Ptr()->ToULong();
     }
 
 	/// Converts to double
-	oexDOUBLE ToDouble() 
+	oexDOUBLE ToDouble()
     {
         if ( !m_t.Ptr() )
             return 0;
-        return m_t.Ptr()->ToDouble(); 
+        return m_t.Ptr()->ToDouble();
     }
 
 	/// Converts to a string
-	T_L& ToString() 
-    { 
+	T_L& ToString()
+    {
         // Create an object if we don't have one
         if ( !m_t.Ptr() )
             m_t.OexConstruct();
 
-        return *m_t.Ptr(); 
+        return *m_t.Ptr();
     }
-
-	//==============================================================
-	// PrintR()
-	//==============================================================
-	/// Writes the contents of the property bag into a human readable string
-	/**
-		\return Human readable representation of the contents
-	*/
-	T_L PrintR() { return PrintR( *this, T_L() ); }
 
     TPropertyBag& Assume( oexCONST TPropertyBag &x_pb )
     {
@@ -324,7 +315,18 @@ public:
         return pb;
     }
 
-#if defined( WIN32 ) && !defined( OEX_ARM )
+//#if defined( WIN32 ) && !defined( OEX_ARM )
+//#if defined( OEX_DEBUG )
+
+	//==============================================================
+	// PrintR()
+	//==============================================================
+	/// Writes the contents of the property bag into a human readable string
+	/**
+		\return Human readable representation of the contents
+	*/
+	T_L PrintR() { return PrintR( *this, T_L() ); }
+
 	//==============================================================
 	// PrintR()
 	//==============================================================
@@ -333,49 +335,49 @@ public:
 		\param [in] pb			-	Property bag reference
 		\param [in] key			-	Key of interest
 		\param [in] uDepth		-	Current depth, to track recursion
-		
+
 		\return Human readable representation of the contents
-	
-		\see 
+
+		\see
 	*/
-	T_L PrintR( TPropertyBag &pb, T_L &key, oexUINT uDepth = 0 )
+	T_L PrintR( TPropertyBag< T_L, T_R > &pb, oexCONST T_L &key, oexUINT uDepth = 0 )
 	{
-		T_L tabs; 
+		T_L tabs;
 		for ( oexUINT t = 0; t < uDepth; t++ )
-			tabs << "  ";
+			tabs << oexT( "  " );
 		uDepth++;
 
 		T_L str;
 		if ( pb.IsArray() )
 		{
-			if ( key.Length() ) 
+			if ( key.Length() )
 			{
-				str << tabs << "\'" << key << "\'" << " = ";
+				str << tabs << oexT( "\'" ) << key << oexT( "\'" ) << oexT( " = " );
 
 				if ( pb.IsDefaultValue() )
-					str << "\'" << pb.ToString() << "\'";
+					str << oexT( "\'" ) << pb.ToString() << oexT( "\'" );
 
-				str << oexNL; 
+				str << oexNL;
 
-				tabs << "  "; uDepth++;
+				tabs << oexT( "  " ); uDepth++;
 
 			} // end if
 
-			str << tabs << "Array()" oexNL << tabs << "{" oexNL;
+			str << tabs << oexT( "Array()" ) oexNL << tabs << oexT( "{" ) oexNL;
 
 			for ( iterator it; pb.List().Next( it ); )
-				str << PrintR( it, it.Node()->key, uDepth );
+				str << PrintR( it.Obj(), it.Node()->key, uDepth );
 
-			str << tabs << "}" oexNL;
+			str << tabs << oexT( "}" ) oexNL;
 
 		} // end if
 
 		else
-			str << tabs << "\'" << key << "\'" << " = " << "\'" << pb.ToString() << "\'" << oexNL;
+			str << tabs << oexT( "\'" ) << key << oexT( "\'" ) << oexT( " = " ) << oexT( "\'" ) << pb.ToString() << oexT( "\'" ) << oexNL;
 
 		return str;
 	}
-#endif
+//#endif
 
     /// Erases the specified key
     iterator Unset( T_L key )
@@ -387,7 +389,7 @@ private:
 	TMem< T_R >					    m_t;
 
 	/// Array of strings
-	t_PbArray						m_lstPb; 
+	t_PbArray						m_lstPb;
 
 };
 
@@ -409,7 +411,7 @@ private:
 	arr1[ "A" ][ "AA" ] = "Hello World!";
 	arr1[ "A" ][ "AB" ] = (long)1;
 	arr1[ "B" ][ "BA" ] = (double)3.14159f;
-	
+
 	for ( long i = 0; i < 4; i++ )
 		arr1[ "list" ][ i ] = i * 2;
 

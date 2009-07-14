@@ -1255,6 +1255,32 @@ oex::oexRESULT TestParser()
     if ( !oexVERIFY( pb[ oexT( "x" ) ][ oexT( "a" ) ].ToString() == oexT( "b" ) ) )
         return -31;
 
+	oex::CStr sCmdLine = oexT( "-a -simple:param -file:'C:/Program Files/myfile.txt' -two:'hi and\\'hi' -empty: hello world" );
+	oexINT nParams = CParser::ParseCommandLine( sCmdLine, pb );
+
+    if ( !oexVERIFY( 7 == nParams ) )
+        return -32;
+
+    if ( !oexVERIFY( pb[ oexT( "a" ) ].ToString() == oexT( "" ) ) )
+        return -33;
+
+    if ( !oexVERIFY( pb[ oexT( "simple" ) ].ToString() == oexT( "param" ) ) )
+        return -34;
+
+    if ( !oexVERIFY( pb[ oexT( "file" ) ].ToString() == oexT( "C:/Program Files/myfile.txt" ) ) )
+        return -35;
+
+    if ( !oexVERIFY( pb[ oexT( "two" ) ].ToString() == oexT( "hi and\\'hi" ) ) )
+        return -36;
+
+    if ( !oexVERIFY( pb[ oexT( "empty" ) ].ToString() == oexT( "" ) ) )
+        return -37;
+
+    if ( !oexVERIFY( pb[ oexT( "0" ) ].ToString() == oexT( "hello" ) ) )
+        return -38;
+
+    if ( !oexVERIFY( pb[ oexT( "1" ) ].ToString() == oexT( "world" ) ) )
+        return -39;
 /*
     oex::CPropertyBag url = oex::CParser::DecodeUrlParams( oexT( "a=b&c=d&e=&f" );
 

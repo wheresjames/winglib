@@ -605,8 +605,8 @@ namespace str
             oexASSERT_PTR( term );
             oexASSERT_PTR_NULL_OK( esc );
 
-		    oexINT i = 0;
-		    while ( ln )
+		    oexINT i = 0, o = 0;
+		    while ( 0 < ln )
 		    {
 			    // Finda terminator
 			    i = FindCharacters( s, ln, term, ln_term );
@@ -615,12 +615,13 @@ namespace str
 
 			    // Is it escaped?
 			    if ( !i || !esc || 0 > FindCharacter( esc, ln_esc, s[ i - 1 ] ) )
-				    return i;
+				    return o + i;
 
 			    // Next
 			    s += i + 1;
+				o += i + 1;
 
-                ln--;
+                ln -= i;
 
 		    } // end while
 
@@ -691,6 +692,81 @@ namespace str
 
 		    return i + 1;
 
+	    }
+
+    /// Finds the end of a quoted sub string
+    /**
+        \param [in] s       -   String of characters in which to search
+        \param [in] ln      -   Length of the string in s
+        \param [in] open    -   List of opening quotes
+        \param [in] ln_open -   Length of string in term
+        \param [in] close   -   List of closing quotes
+        \param [in] ln_close-   Length of string in term
+        \param [in] esc     -   Escape characters
+        \param [in] ln_esc  -   Length of string in esc
+
+        The opening and closing quote characters must correspond within the string.
+
+        open    = "<{[(";
+        close   = ">}])";
+
+    */
+	template< class T >
+		oexINT ParseWithQuoted( oexCONST T* s, oexINT ln, oexCONST T *term, oexINT ln_term, oexCONST T* open, oexINT ln_open, oexCONST T *close, oexINT ln_close, oexCONST T *esc = oexNULL, oexINT ln_esc = 0 )
+	    {
+            oexASSERT_PTR( s );
+            oexASSERT_PTR( term );
+            oexASSERT_PTR_NULL_OK( esc );
+
+			oexINT q = -1;
+		    oexINT i = 0;
+		    while ( ln )
+		    {
+				// Is this the terminator?
+				if ( 0 <= FindCharacter( term, ln_term, *s ) )
+					return i;
+
+				// Is it an escape character?
+				if ( esc && 0 <= FindCharacter( esc, ln_esc, *s ) )
+				{
+				    i++; s++; ln--;
+
+					if ( !ln )
+						return -1;
+
+				} // end if
+
+				else
+				{
+					// Is it a 'start quote' character?
+					q = FindCharacter( open, ln_open, *s );
+					if ( 0 <= q )
+					{
+						// Skip open quote
+						s++, i++, ln--;
+						if ( !ln )
+							return -1;
+
+						// Find end quote
+						oexINT e = FindTerm( s, ln, &close[ q ], 1, esc, ln_esc );
+
+						// Adjust if found
+						if ( 0 <= e )
+							i += e, s += e, ln -= e;
+
+						// iii I'm choosing to ignore an unterminated quote,
+						// 	   could also have just grabed the rest of the string
+
+					} // end if
+
+				} // end if
+
+				// Next character
+			    i++; s++; ln--;
+
+		    } // end while
+
+		    return -1;
 	    }
 
     /// Finds the first character in s within the specified range
