@@ -29,6 +29,8 @@ TOOLS	 := local
 #TOOLS	 := mingw32
 #TOOLS	 := ming232ce
 #TOOLS	 := iphone
+#TOOLS	 := openmoko
+#TOOLS	 := mac
 
 #OS := $(shell uname -o)
 #ifeq $(OS) GNU/Linux
@@ -414,8 +416,8 @@ else
 			CFG_AFLAGS := cq
 
 		endif
-		ifeq ($(TOOLS),)
-		
+		ifeq ($(TOOLS),local)
+
 			OS := linux
 			PLATFORM := posix
 			
