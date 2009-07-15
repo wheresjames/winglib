@@ -149,6 +149,26 @@ public:
 		SetNum( oexTT( T, "%u" ), (oexUINT)uVal );
 	}
 
+	TStr( oexCONST oexLONG lVal )
+	{	m_nLength = 0;
+        m_nOffset = 0;
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
+		SetNum( oexTT( T, "%i" ), (oexINT64)lVal );
+	}
+
+	TStr( oexCONST oexULONG ulVal )
+	{	m_nLength = 0;
+        m_nOffset = 0;
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
+		SetNum( oexTT( T, "%u" ), (oexUINT64)ulVal );
+	}
+
 	TStr( oexCONST oexDOUBLE dStr )
 	{	m_nLength = 0;
         m_nOffset = 0;
@@ -464,6 +484,12 @@ public:
 	TStr& operator = ( oexCONST oexUINT uVal )
 	{	return SetNum( oexTT( T, "%u" ), (oexUINT)uVal ); }
 
+	TStr& operator = ( oexCONST oexLONG lVal )
+	{	return SetNum( oexTT( T, "%lld" ), (oexINT64)lVal ); }
+
+	TStr& operator = ( oexCONST oexULONG ulVal )
+	{	return SetNum( oexTT( T, "%llu" ), (oexUINT64)ulVal ); }
+
 	TStr& operator = ( oexCONST oexDOUBLE dStr )
 	{	return SetNumTrim( oexTT( T, "%f" ), oexNULL, oexTT( T, "0" ), (oexDOUBLE)dStr ); }
 
@@ -478,6 +504,12 @@ public:
 
 	TStr& operator += ( oexCONST oexUINT uVal )
 	{	return AppendNum( oexTT( T, "%u" ), (oexUINT)uVal ); }
+
+	TStr& operator += ( oexCONST oexLONG lVal )
+	{	return AppendNum( oexTT( T, "%lld" ), (oexINT64)lVal ); }
+
+	TStr& operator += ( oexCONST oexULONG ulVal )
+	{	return AppendNum( oexTT( T, "%llu" ), (oexUINT64)ulVal ); }
 
 	TStr& operator += ( oexCONST oexDOUBLE dVal )
 	{	return AppendNumTrim( oexTT( T, "%f" ), oexNULL, oexTT( T, "0" ), (oexDOUBLE)dVal ); }
@@ -499,6 +531,12 @@ public:
 
 	TStr& operator << ( oexCONST oexUINT uVal )
 	{	return AppendNum( oexTT( T, "%u" ), (oexUINT)uVal ); }
+
+	TStr& operator << ( oexCONST oexLONG lVal )
+	{	return AppendNum( oexTT( T, "%lld" ), (oexINT64)lVal ); }
+
+	TStr& operator << ( oexCONST oexULONG ulVal )
+	{	return AppendNum( oexTT( T, "%llu" ), (oexUINT64)ulVal ); }
 
 	TStr& operator << ( oexCONST oexDOUBLE dVal )
 	{	return AppendNumTrim( oexTT( T, "%f" ), oexNULL, oexTT( T, "0" ), (oexDOUBLE)dVal ); }
@@ -2303,7 +2341,7 @@ public:
 
 	/// Splits off a string up to any of the terminator characters
 	TStr RParse( oexCONST T* pTerm )
-	{	oexIGNORE oexASSERT_PTR( pTerm );
+	{	oexASSERT_PTR( pTerm );
         oexINT lLen = Length();
         oexINT i = str::RFindTerm( Ptr(), lLen, pTerm, zstr::Length( pTerm ) );
 		if ( 0 > i )
@@ -2484,7 +2522,10 @@ public:
 
     /// Concatinates two strings into a path
     static TStr BuildPath( TStr x_sRoot, TStr x_sPath, T tSep = oexTCPathSep( T ) )
-    {   return x_sRoot.RTrim( oexTT( T, "\\/" ) ) << tSep << x_sPath.LTrim( oexTT( T, "\\/" ) ); }
+    {	if ( !x_sRoot.Length() ) return x_sPath;
+		if ( !x_sPath.Length() ) return x_sRoot;
+		return x_sRoot.RTrim( oexTT( T, "\\/" ) ) << tSep << x_sPath.LTrim( oexTT( T, "\\/" ) );
+	}
 
     /// Concatinates two strings into a path
     TStr& BuildPath( TStr x_sPath, T tSep = oexTCPathSep( T ) )
@@ -2521,6 +2562,18 @@ public:
 		if ( 0 > nOffset )
 			return TStr();
 		return sFilename.LTrim( nOffset + 1 );
+    }
+
+    /// Returns the file without the extension
+    TStr RemoveFileExtension()
+    {	TStr sFilename = GetFileName();
+		oexINT nOffset = sFilename.RFindChars( oexTT( T, "." ) );
+		if ( 0 > nOffset )
+			return *this;
+		TStr sPath = GetPath();
+		if ( !sPath.Length() )
+			return sFilename.RTrim( sFilename.Length() - nOffset );
+		return TStr().BuildPath( sPath, sFilename.RTrim( sFilename.Length() - nOffset ) );
     }
 
 	TStr& DecorateName( oexBOOL bExe, oexBOOL bLib )

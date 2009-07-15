@@ -275,6 +275,11 @@
 #define oexFork								OEX_NAMESPACE::os::CSys::Fork
 #define oexShell							OEX_NAMESPACE::os::CSys::Shell
 
+#define oexMd5( s )							( { OEX_NAMESPACE::oexGUID hash; \
+											  	OEX_NAMESPACE::TStr< oexCHAR8 > sMb = oexStrToMb( s ); \
+											  	OEX_NAMESPACE::CStr _s = oexMbToStr( OEX_NAMESPACE::CBase16::Encode( OEX_NAMESPACE::oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) ); \
+											  	_s; \
+										    } )
 #define oexGuidToString						OEX_NAMESPACE::CStr().GuidToString
 #define oexUniqueGuid( g )					OEX_NAMESPACE::guid::StringToGuid( g, (OEX_NAMESPACE::oexCSTR)NULL, 0 )
 #ifndef OEX_NOSTRUCTINIT
