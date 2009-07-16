@@ -48,9 +48,9 @@ else
 endif
 
 ifeq ($(LOC_BLD_$(LOC_TAG)),c)
-BLD_COMPILER := $(CFG_CC)
+	BLD_COMPILER := $(CFG_CC)
 else
-BLD_COMPILER := $(CFG_PP)
+	BLD_COMPILER := $(CFG_PP)
 endif
 
 # Using full paths helps IDE editors to locate the file when there's an error ;)
@@ -60,11 +60,11 @@ ifneq ($(LOC_SRC_$(LOC_TAG)),$(LOC_INC_$(LOC_TAG)))
 	BLD_PATH_INC_$(LOC_TAG) := $(CFG_CC_INC)$(CFG_CUR_ROOT)/$(LOC_SRC_$(LOC_TAG))
 endif
 else
-BLD_PATH_SRC_$(LOC_TAG) := $(CFG_CUR_ROOT)
+	BLD_PATH_SRC_$(LOC_TAG) := $(CFG_CUR_ROOT)
 endif
 
 ifneq ($(LOC_INC_$(LOC_TAG)),)
-BLD_PATH_INC_$(LOC_TAG) := $(BLD_PATH_INC_$(LOC_TAG)) $(CFG_CC_INC)$(CFG_CUR_ROOT)/$(LOC_INC_$(LOC_TAG))
+	BLD_PATH_INC_$(LOC_TAG) := $(BLD_PATH_INC_$(LOC_TAG)) $(CFG_CC_INC)$(CFG_CUR_ROOT)/$(LOC_INC_$(LOC_TAG))
 else
 ifeq ($(LOC_SRC_$(LOC_TAG)),)
 	BLD_PATH_INC_$(LOC_TAG) := $(BLD_PATH_INC_$(LOC_TAG)) $(CFG_CC_INC)$(CFG_CUR_ROOT)
@@ -91,8 +91,8 @@ else
 endif
 
 ifneq ($(LOC_EXC_$(LOC_TAG)),)
-BLD_EXCLUDE_$(LOC_TAG) 	:= $(foreach file,$(LOC_EXC_$(LOC_TAG)),$(BLD_PATH_SRC_$(LOC_TAG))/$(file).$(LOC_CXX_$(LOC_TAG)))
-BLD_SOURCES_$(LOC_TAG) 	:= $(filter-out $(BLD_EXCLUDE_$(LOC_TAG)),$(BLD_SOURCES_$(LOC_TAG)))
+	BLD_EXCLUDE_$(LOC_TAG) 	:= $(foreach file,$(LOC_EXC_$(LOC_TAG)),$(BLD_PATH_SRC_$(LOC_TAG))/$(file).$(LOC_CXX_$(LOC_TAG)))
+	BLD_SOURCES_$(LOC_TAG) 	:= $(filter-out $(BLD_EXCLUDE_$(LOC_TAG)),$(BLD_SOURCES_$(LOC_TAG)))
 endif
 
 BLD_OBJECTS_$(LOC_TAG) 	:= $(subst $(BLD_PATH_SRC_$(LOC_TAG))/,$(BLD_PATH_OBJ_$(LOC_TAG))/, $(BLD_SOURCES_$(LOC_TAG):.$(LOC_CXX_$(LOC_TAG))=.$(CFG_OBJ_EXT)) )
@@ -108,7 +108,7 @@ BLD_OBJECTS_TOTAL 		:= $(BLD_OBJECTS_TOTAL) $(BLD_OBJECTS_$(LOC_TAG))
 
 
 ifneq ($(BUILD),vs)
-include $(wildcard $(BLD_PATH_OBJ_$(LOC_TAG))/*.$(CFG_DEP_EXT))
+	include $(wildcard $(BLD_PATH_OBJ_$(LOC_TAG))/*.$(CFG_DEP_EXT))
 endif
 
 #-------------------------------------------------------------------

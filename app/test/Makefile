@@ -7,8 +7,9 @@ default_target: all
 PRJ_NAME := test
 PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib
-PRJ_LIBS := oexlib
+PRJ_LIBS := oexlib 
 PRJ_OSLB := 
+PRJ_RESD := winglib/app/test/res
 
 PRJ_LIBROOT := ../..
 

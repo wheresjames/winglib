@@ -38,7 +38,7 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 	oexEcho( sOut.Ptr() );
 
 	// Read in and compress the file
-    oex::CStr8 sData = oex::zip::CCompress::Compress( CFile().OpenExisting( sIln.Ptr() ).Read() );
+    oex::CStr8 sData = oex::zip::CCompress::Compress( CFile().OpenExisting( sIn.Ptr() ).Read() );
 
 	// Create a variable name based on the md5 hash
 	if ( !sVar.Length() )
