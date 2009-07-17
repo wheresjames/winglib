@@ -9,6 +9,7 @@ PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib
 PRJ_OSLB := 
+PRJ_TOOL := 1
 
 PRJ_LIBROOT := ../..
 
