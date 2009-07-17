@@ -12,38 +12,13 @@ ifdef PRJ_EXSY
 	GO_ADD := $(GO_ADD) -Wl,--exclude-symbols$(foreach s,$(PRJ_EXSY),,$(s))
 endif
 
-ifdef PRJ_RESD
-	
-GO_RES := $(wildcard $(CFG_LIBROOT)/$(PRJ_RESD)/*)
-GO_RES := $(subst $(CFG_LIBROOT)/$(PRJ_RESD)/,$(CFG_OUTROOT)/_$(PRJ_NAME)/_res/,$(GO_RES))
-GO_RES := $(foreach res,$(GO_RES), $(res).$(CFG_OBJ_EXT))
-
-endif
-
 ifeq ($(BUILD),vs)
 
-$(CFG_OUTROOT)/_$(PRJ_NAME)/_res:
-	$(CFG_MD) "$(subst /,\,$@)"
-	
-else
-
-$(CFG_OUTROOT)/_$(PRJ_NAME)/_res:
-	$(CFG_MD) $@
-	
-endif
-
-$(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.cpp: $(CFG_LIBROOT)/$(PRJ_RESD)/% $(CFG_OUTROOT)/_$(PRJ_NAME)/_res
-	$(CFG_RESCMP) $< $@
-
-$(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.$(CFG_OBJ_EXT): $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.cpp
-	$(CFG_CC) $< $(CFG_CC_OUT)$@
-
-ifeq ($(BUILD),vs)
-GO_LIBS := $(foreach lib,$(PRJ_LIBS), $(CFG_LIB_PRE)$(lib)$(CFG_DPOSTFIX)$(CFG_LIB_POST))
+GO_LIBS := $(GO_LIBS) $(foreach lib,$(PRJ_LIBS), $(CFG_LIB_PRE)$(lib)$(CFG_DPOSTFIX)$(CFG_LIB_POST))
 GO_LIBS := $(GO_LIBS) $(PRJ_OSLB)
 	
 	ifneq ($(PRJ_LIBP),)
-		GO_LIBPATHS	:= $(GO_LIBS) /LIBPATH:$(CFG_LIBROOT)
+		GO_LIBPATHS	:= $(GO_LIBPATHS) /LIBPATH:$(CFG_LIBROOT)
 		GO_LIBS	 	:= $(GO_LIBS) $(foreach lib,$(PRJ_LIBP),-l$(lib))
 	endif
 	GO_LIBPATHS := /LIBPATH:$(CFG_BINROOT)
@@ -52,10 +27,10 @@ GO_LIBS := $(GO_LIBS) $(PRJ_OSLB)
 	endif
 	GO_EXPORTS 	:= $(foreach exp,$(PRJ_EXPORTS), $(CFG_FLAG_EXPORT)$(exp))
 else
-	GO_LIBS	 	:= $(foreach lib,$(PRJ_LIBS),-l$(lib)$(CFG_DPOSTFIX))
+	GO_LIBS	 	:= $(GO_LIBS) $(foreach lib,$(PRJ_LIBS),-l$(lib)$(CFG_DPOSTFIX))
 	GO_LIBS	 	:= $(GO_LIBS) $(foreach lib,$(PRJ_OSLB), -l$(lib))
 	ifneq ($(PRJ_LIBP),)
-		GO_LIBPATHS	:= $(GO_LIBS) -L$(CFG_LIBROOT)
+		GO_LIBPATHS	:= $(GO_LIBPATHS) -L$(CFG_LIBROOT)
 		GO_LIBS	 	:= $(GO_LIBS) $(foreach lib,$(PRJ_LIBP),-l$(lib))
 	endif
 	GO_LIBPATHS := $(GO_LIBPATHS) -L$(CFG_BINROOT)
@@ -102,21 +77,25 @@ GO_DEPENDS 	:= $(foreach lib,$(PRJ_LIBS),$(CFG_BINROOT)/$(CFG_LIB_PRE)$(lib)$(CF
 #$(GO_DEPENDS):
 #	$(MAKE) -C $(PRJ_LIBROOT)
 	
-ifeq ($(BUILD),vs)	  
-$(BLD_PATH_EXE): $(BLD_OBJECTS_TOTAL) $(GO_DEPENDS)	$(BLD_DEPENDS_TOTAL) $(GO_RES)
+ifeq ($(BUILD),vs)	
+  
+$(BLD_PATH_EXE): $(CFG_RES_HEADER) $(BLD_OBJECTS_TOTAL) $(GO_DEPENDS) $(BLD_DEPENDS_TOTAL)
 	- $(CFG_DEL) $(subst /,\,$@)
-	$(CFG_LD) $(CFG_LFLAGS) $(GO_EXPORTS) $(BLD_OBJECTS_TOTAL) $(CFG_LD_OUT)$@ $(GO_LIBPATHS) $(GO_LIBS) $(GO_ADD)
+	$(CFG_LD) $(CFG_LFLAGS) $(GO_EXPORTS) $(BLD_OBJECTS_TOTAL) $(CFG_RES_O) $(CFG_LD_OUT)$@ $(GO_LIBPATHS) $(GO_LIBS) $(GO_ADD)
+	
 else
-$(BLD_PATH_EXE): $(BLD_OBJECTS_TOTAL) $(GO_DEPENDS)
+
+$(BLD_PATH_EXE): $(CFG_RES_HEADER) $(BLD_OBJECTS_TOTAL) $(GO_DEPENDS)
 	- $(CFG_DEL) $@
-	$(CFG_LD) $(CFG_LFLAGS) $(PRJ_EXTL) $(BLD_OBJECTS_TOTAL) $(CFG_LD_OUT)$@ $(GO_LIBPATHS) $(GO_LIBS) $(CFG_STDLIB) $(GO_ADD)
+	$(CFG_LD) $(CFG_LFLAGS) $(PRJ_EXTL) $(BLD_OBJECTS_TOTAL) $(CFG_RES_O) $(CFG_LD_OUT)$@ $(GO_LIBPATHS) $(GO_LIBS) $(CFG_STDLIB) $(GO_ADD)
+	
 endif	
+
 endif
+
 endif
 
 all: $(BLD_ALL) $(BLD_PATH_EXE) 
 rebuild: $(BLD_REBUILD) $(BLD_PATH_EXE)
 setup: $(BLD_SETUP)
 clean: $(BLD_CLEAN)
-
-

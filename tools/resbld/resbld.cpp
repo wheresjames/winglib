@@ -20,7 +20,7 @@ void chtoa( oexUCHAR *b, oexUCHAR ch )
 		b[ 0 ] = 'a' + ( c - 10 );
 }
 
-int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, oex::CStr sSuf )
+int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, oex::CStr sSuf, oex::CStr sInc )
 {
 //	oexCHAR8 *_p = ;
 //	oexINT _l = ;
@@ -35,7 +35,7 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 	if ( !sOut.Length() )
 		sOut << sIn.RemoveFileExtension() << oexT( ".cpp" );
 
-	oexEcho( sOut.Ptr() );
+	oexEcho( sOut.GetFileName().Ptr() );
 
 	// Read in and compress the file
     oex::CStr8 sData = oex::zip::CCompress::Compress( CFile().OpenExisting( sIn.Ptr() ).Read() );
@@ -45,22 +45,38 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 		sVar << oexT( "g_oexres_" ) << oexMd5( sIn );
 
 	if ( !sPre.Length() )
-		sPre << oexT( "extern \"C\" char " ) << sVar << oexT( "[] = \r\n{\r\n\t" );
+		sPre << oexT( "char " ) << sVar << oexT( "[] = \r\n{\r\n\t" );
 
 	if ( !sSuf.Length() )
 		sSuf = oexT( "\r\n\t0\r\n};\r\n" );
 
+	if ( sInc.Length() )
+	{
+		oex::CFile i;
+		if ( !i.OpenAlways( sInc.Ptr() ).IsOpen() )
+		{	oexEcho( oexMks( oexT( "Unable to open include file for writing : " ), sInc ).Ptr() );
+			return -2;
+		} // end if
+
+		i.SetPtrPosEnd( 0 );
+
+		// Add to include
+		i.Write( CStr8() << "\r\nextern unsigned long " << oexStrToMb( sVar ) << "_len;"
+				 	     << "\r\nextern char " << sVar << "[];\r\n" );
+
+	} // end if
+
 	oex::CFile f;
 	if ( !f.CreateAlways( sOut.Ptr() ).IsOpen() )
 	{	oexEcho( oexMks( oexT( "Unable to create output file : " ), sOut ).Ptr() );
-		return -2;
+		return -3;
 	} // end if
 
 	oexCONST oexUCHAR *p = (oexCONST oexUCHAR*)sData.Ptr();
 	oexULONG u = sData.Length();
 
 	// Write out the data length
-	f.Write( ( CStr8() << "\r\nextern \"C\" unsigned long " << oexStrToMb( sVar ) << "_len = " << u << ";\r\n" ) );
+	f.Write( ( CStr8() << "\r\nunsigned long " << oexStrToMb( sVar ) << "_len = " << u << ";\r\n" ) );
 
 	// Write out the data
 	f.Write( sPre );
@@ -109,7 +125,8 @@ int process(int argc, char* argv[])
 						  pb[ oexT( "1" ) ].ToString(),
 						  pb[ oexT( "v" ) ].ToString(),
 						  pb[ oexT( "p" ) ].ToString(),
-						  pb[ oexT( "s" ) ].ToString() );
+						  pb[ oexT( "s" ) ].ToString(),
+						  pb[ oexT( "i" ) ].ToString() );
 
 	return ret;
 }

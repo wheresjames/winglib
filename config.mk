@@ -537,8 +537,45 @@ else
 endif
 
 ifdef PRJ_RESCMP
-	CFG_RESCMP := $(CFG_OUTROOT)/$(CFG_EXE_PRE)$(PRJ_RESCMP)$(CFG_DPOSTFIX)$(CFG_EXE_POST)
+	CFG_TOOL_RESCMP := $(CFG_OUTROOT)/$(CFG_EXE_PRE)$(PRJ_RESCMP)$(CFG_DPOSTFIX)$(CFG_EXE_POST)
 else
-	CFG_RESCMP  := $(CFG_OUTROOT)/$(CFG_EXE_PRE)resbld$(CFG_DPOSTFIX)$(CFG_EXE_POST)
+	CFG_TOOL_RESCMP  := $(CFG_OUTROOT)/$(CFG_EXE_PRE)resbld$(CFG_DPOSTFIX)$(CFG_EXE_POST)
+endif
+
+CFG_TOOL_JOIN  := $(CFG_OUTROOT)/$(CFG_EXE_PRE)join$(CFG_DPOSTFIX)$(CFG_EXE_POST)
+
+ifdef PRJ_RESD
+
+CFG_RES_HEADER := $(CFG_OUTROOT)/_$(PRJ_NAME)/oexres.h
+CFG_RES_I := $(wildcard $(CFG_LIBROOT)/$(PRJ_RESD)/*)
+CFG_RES := $(subst $(CFG_LIBROOT)/$(PRJ_RESD)/,$(CFG_OUTROOT)/_$(PRJ_NAME)/_res/,$(CFG_RES_I))
+CFG_RES_O := $(foreach res,$(CFG_RES), $(res).$(CFG_OBJ_EXT))
+CFG_RES_H := $(foreach res,$(CFG_RES), $(res).h)
+CFG_RES_C := $(foreach res,$(CFG_RES), $(res).c)
+
+ifeq ($(BUILD),vs)
+
+$(CFG_OUTROOT)/_$(PRJ_NAME)/_res:
+	$(CFG_MD) "$(subst /,\,$@)"	
+else
+$(CFG_OUTROOT)/_$(PRJ_NAME)/_res:
+	$(CFG_MD) $@	
+endif
+
+.PRECIOUS: $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.c
+$(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.c: $(CFG_LIBROOT)/$(PRJ_RESD)/% 
+	- $(CFG_DEL) $(subst /,\,$@)
+	- $(CFG_DEL) $(subst /,\,$(subst $(CFG_LIBROOT)/$(PRJ_RESD)/,$(CFG_OUTROOT)/_$(PRJ_NAME)/_res/,$<).h)
+	$(CFG_TOOL_RESCMP) $< $@ -i:$(subst $(CFG_LIBROOT)/$(PRJ_RESD)/,$(CFG_OUTROOT)/_$(PRJ_NAME)/_res/,$<).h
+
+.PRECIOUS: $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.$(CFG_OBJ_EXT)
+$(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.$(CFG_OBJ_EXT): $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.c
+	- $(CFG_DEL) $(subst /,\,$@)
+	$(CFG_CC) $(CFG_CFLAGS) $< $(CFG_CC_OUT)$@
+	
+$(CFG_RES_HEADER): $(CFG_OUTROOT)/_$(PRJ_NAME)/_res $(CFG_RES_O)
+	- $(CFG_DEL) $(subst /,\,$@)
+	$(CFG_TOOL_JOIN) $@ $(CFG_RES_H)
+	
 endif
 

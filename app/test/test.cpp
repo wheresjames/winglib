@@ -1378,6 +1378,22 @@ oex::oexRESULT TestZip()
     return oex::oexRES_OK;
 }
 
+oex::oexRESULT TestResources()
+{
+	oexPrintf( oexT( "Resources...\r\n" ) );
+
+	// oex::CStr8 res = oexGetResource( "hello.txt" );
+	// oexCHAR8 *_p = oexGetResourcePtr( "hello.txt" );
+	// oexINT _l = oexGetResourceLen( "hello.txt" );
+
+	oexCHAR8 *_p = g_oexres_d6f2ff759e1a69bfffab20fea977739a;
+	oexINT _l = g_oexres_d6f2ff759e1a69bfffab20fea977739a_len;
+	if ( !oexVERIFY( oexMbToStr( oex::zip::CUncompress::Uncompress( oex::CStr8( _p, _l ) ) ) == oexT( "Hello World!" ) ) )
+		return -1;
+
+    return oex::oexRES_OK;
+}
+
 oex::oexRESULT Test_CSysTime()
 {
 	oexPrintf( oexT( "Time functions...\r\n" ) );
@@ -2568,6 +2584,8 @@ int main(int argc, char* argv[])
     TestFile();
 
     TestZip();
+
+	TestResources();
 
     Test_CSysTime();
 

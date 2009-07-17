@@ -1,6 +1,8 @@
 
 # regular apps
-BUILDDIRS := app/hello lib/oexlib tools/resbld app/test app/iptest app/srvrund app/srvmod app/modrun
+BUILDDIRS := app/hello lib/oexlib \
+			 tools/resbld tools/join \
+			 app/test app/iptest app/srvrund app/srvmod app/modrun
 
 #-------------------------------------------------------------------
 # BUILDDEP	= Build dependent libraries
