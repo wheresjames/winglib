@@ -536,6 +536,8 @@ else
 	CFG_OUTROOT  := $(CFG_BINROOT)
 endif
 
+CFG_INCS := $(foreach inc,$(PRJ_INCS), $(CFG_CC_INC)$(CFG_LIBROOT)/$(inc))
+
 ifdef PRJ_RESCMP
 	CFG_TOOL_RESCMP := $(CFG_OUTROOT)/$(CFG_EXE_PRE)$(PRJ_RESCMP)$(CFG_DPOSTFIX)$(CFG_EXE_POST)
 else
@@ -546,36 +548,29 @@ CFG_TOOL_JOIN  := $(CFG_OUTROOT)/$(CFG_EXE_PRE)join$(CFG_DPOSTFIX)$(CFG_EXE_POST
 
 ifdef PRJ_RESD
 
-CFG_RES_HEADER := $(CFG_OUTROOT)/_$(PRJ_NAME)/oexres.h
-CFG_RES_I := $(wildcard $(CFG_LIBROOT)/$(PRJ_RESD)/*)
-CFG_RES := $(subst $(CFG_LIBROOT)/$(PRJ_RESD)/,$(CFG_OUTROOT)/_$(PRJ_NAME)/_res/,$(CFG_RES_I))
-CFG_RES_O := $(foreach res,$(CFG_RES), $(res).$(CFG_OBJ_EXT))
-CFG_RES_H := $(foreach res,$(CFG_RES), $(res).h)
-CFG_RES_C := $(foreach res,$(CFG_RES), $(res).c)
+CFG_RES_INP := $(foreach res,$(PRJ_RESD),$(CFG_LIBROOT)/$(res))
+CFG_RES_OUT := $(CFG_OUTROOT)/_$(PRJ_NAME)/_res
+CFG_RES_DEP := $(CFG_RES_OUT)/oexres.d
+CFG_RES_INC := $(CFG_RES_OUT)/oexres.h
+CFG_RES_MAK := $(CFG_RES_OUT)/oexres.mk
 
-ifeq ($(BUILD),vs)
+.PRECIOUS: $(CFG_RES_MAK)
+$(CFG_RES_MAK):
+	$(CFG_TOOL_RESCMP) -d:'$(CFG_RES_INP)' -o:'$(CFG_RES_OUT)'
+	
+include $(CFG_RES_MAK)
+CFG_RES_OBJ := $(subst .cpp,.$(CFG_OBJ_EXT),$(RES_CPP))
 
-$(CFG_OUTROOT)/_$(PRJ_NAME)/_res:
-	$(CFG_MD) "$(subst /,\,$@)"	
-else
-$(CFG_OUTROOT)/_$(PRJ_NAME)/_res:
-	$(CFG_MD) $@	
-endif
-
-.PRECIOUS: $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.c
-$(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.c: $(CFG_LIBROOT)/$(PRJ_RESD)/% 
-	- $(CFG_DEL) $(subst /,\,$@)
-	- $(CFG_DEL) $(subst /,\,$(subst $(CFG_LIBROOT)/$(PRJ_RESD)/,$(CFG_OUTROOT)/_$(PRJ_NAME)/_res/,$<).h)
-	$(CFG_TOOL_RESCMP) $< $@ -i:$(subst $(CFG_LIBROOT)/$(PRJ_RESD)/,$(CFG_OUTROOT)/_$(PRJ_NAME)/_res/,$<).h
+.PRECIOUS: $(CFG_RES_DEP)
+$(CFG_RES_DEP):
+	$(CFG_TOOL_RESCMP) -d:'$(CFG_RES_INP)' -o:'$(CFG_RES_OUT)'
+	
+include $(CFG_RES_DEP)
 
 .PRECIOUS: $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.$(CFG_OBJ_EXT)
-$(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.$(CFG_OBJ_EXT): $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.c
+$(CFG_RES_OUT)/%.$(CFG_OBJ_EXT): $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.cpp
 	- $(CFG_DEL) $(subst /,\,$@)
-	$(CFG_CC) $(CFG_CFLAGS) $< $(CFG_CC_OUT)$@
-	
-$(CFG_RES_HEADER): $(CFG_OUTROOT)/_$(PRJ_NAME)/_res $(CFG_RES_O)
-	- $(CFG_DEL) $(subst /,\,$@)
-	$(CFG_TOOL_JOIN) $@ $(CFG_RES_H)
+	$(CFG_PP) $(CFG_CFLAGS) $(CFG_INCS) $< $(CFG_CC_OUT)$@
 	
 endif
 

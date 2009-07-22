@@ -28,14 +28,14 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 
 	if ( !oexExists( sIn.Ptr() ) )
 	{	oexEcho( oexMks( oexT( "No such file : " ), sIn ).Ptr() );
-		return -2;
+		return -20;
 	} // end if
 
 	// Do we need to create a name?
 	if ( !sOut.Length() )
 		sOut << sIn.RemoveFileExtension() << oexT( ".cpp" );
 
-	oexEcho( sOut.GetFileName().Ptr() );
+	oexEcho( ( oex::CStr() << sIn.GetFileName() << " -> " << sOut.GetFileName() ).Ptr() );
 
 	// Read in and compress the file
     oex::CStr8 sData = oex::zip::CCompress::Compress( CFile().OpenExisting( sIn.Ptr() ).Read() );
@@ -45,45 +45,45 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 		sVar << oexT( "g_oexres_" ) << oexMd5( sIn );
 
 	if ( !sPre.Length() )
-		sPre << oexT( "char " ) << sVar << oexT( "[] = \r\n{\r\n\t" );
+		sPre << oexT( "char " ) << sVar << oexT( "[] = " oexNL "{" oexNL "\t" );
 
 	if ( !sSuf.Length() )
-		sSuf = oexT( "\r\n\t0\r\n};\r\n" );
+		sSuf = oexT( oexNL "\t0" oexNL "};" oexNL );
 
 	if ( sInc.Length() )
 	{
 		oex::CFile i;
 		if ( !i.OpenAlways( sInc.Ptr() ).IsOpen() )
 		{	oexEcho( oexMks( oexT( "Unable to open include file for writing : " ), sInc ).Ptr() );
-			return -2;
+			return -21;
 		} // end if
 
 		i.SetPtrPosEnd( 0 );
 
 		// Add to include
-		i.Write( CStr8() << "\r\nextern unsigned long " << oexStrToMb( sVar ) << "_len;"
-				 	     << "\r\nextern char " << sVar << "[];\r\n" );
+		i.Write( CStr8() << oexNL "extern unsigned long " << oexStrToMb( sVar ) << "_len;"
+				 	     << oexNL "extern char " << oexStrToMb( sVar ) << "[];" oexNL );
 
 	} // end if
 
 	oex::CFile f;
 	if ( !f.CreateAlways( sOut.Ptr() ).IsOpen() )
 	{	oexEcho( oexMks( oexT( "Unable to create output file : " ), sOut ).Ptr() );
-		return -3;
+		return -22;
 	} // end if
 
 	oexCONST oexUCHAR *p = (oexCONST oexUCHAR*)sData.Ptr();
 	oexULONG u = sData.Length();
 
 	// Write out the data length
-	f.Write( ( CStr8() << "\r\nunsigned long " << oexStrToMb( sVar ) << "_len = " << u << ";\r\n" ) );
+	f.Write( ( CStr8() << oexNL "unsigned long " << oexStrToMb( sVar ) << "_len = " << u << ";" oexNL ) );
 
 	// Write out the data
 	f.Write( sPre );
 
 	CStr8 buf;
 	oexUCHAR *t = (oexUCHAR*)"0x.., ";
-	oexUCHAR *r = (oexUCHAR*)"0x..,\r\n\t";
+	oexUCHAR *r = (oexUCHAR*)"0x..," oexNL "\t";
 	oexUCHAR *b = (oexUCHAR*)buf.OexAllocate( 1024 ), *s;
 	oexINT bl = 0;
 	for ( oexULONG i = 0; i < u; i++ )
@@ -110,6 +110,65 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 	return 0;
 }
 
+int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb, 
+			  oex::CStr sPath, oex::CFile *pInc, oex::CFile *pCmp, oex::CFile *pRes, oex::CFile *pDep )
+{
+	// Ensure directory exists
+	if ( !oexExists( dir.Ptr() ) )
+		return -10;
+
+	oex::CFindFiles ff;
+	if ( ff.FindFirst( dir.Ptr(), "*" ) )
+		do
+		{
+			// Build relative path
+			oex::CStr sRel = oexBuildPath( sPath, ff.GetFileName() );
+//			oexSHOW( sRel );
+
+			// Recurse into directory
+			if ( ff.IsDirectory() ) 
+				from_dir( ff.GetFullPath(), sOutDir, pb, sRel, pInc, pCmp, pRes, pDep );
+
+			else 
+			{
+				// Create variable name
+				oex::CStr sHash = oexMd5( sRel );
+				oex::CStr sVar; sVar << oexT( "g_oexres_" ) << sHash;
+				oex::CStr sOut = oexBuildPath( sOutDir, sHash << oexT( ".cpp" ) );
+
+//				oexSHOW( ff.GetFullPath() );
+//				oexSHOW( sVar );
+//				oexSHOW( sOut );
+
+				// Create file
+				if ( 0 == create_res( ff.GetFullPath(), sOut, sVar, 
+									  oexT( "" ), oexT( "" ), oexT( "" ) ) )
+				{
+					if ( pInc )
+						pInc->Write( CStr8() << oexNL "extern unsigned long " << oexStrToMb( sVar ) << "_len;"
+				 							 << oexNL "extern char " << oexStrToMb( sVar ) << "[];" oexNL );
+
+					if ( pCmp )
+						pCmp->Write( CStr8() << oexNL "\telse if ( !strncmp( sName, \"" << sRel << "\", max ) )" oexNL
+												"\t\t*p = " << oexStrToMb( sVar ) << "," oexNL
+												"\t\t*l = " << oexStrToMb( sVar ) << "_len;" oexNL );
+
+					if ( pRes )
+						pRes->Write( CStr8() << "\t" << sOut << " \\" oexNL );
+
+					if ( pDep )
+						pDep->Write( CStr8() << sOut << ": " << ff.GetFullPath() << oexNL oexNL );
+
+				} // end if
+
+			} // end else
+
+		} while ( ff.FindNext() );
+
+	return 0;
+}
+
+
 int process(int argc, char* argv[])
 {
 	if ( 2 > argc )
@@ -121,14 +180,73 @@ int process(int argc, char* argv[])
 	oex::CPropertyBag pb = oex::CParser::ParseCommandLine( argc, argv );
 //	oexEcho( oexMks( oexT( "Command Line = " ), pb.PrintR() ).Ptr() );
 
-	int ret = create_res( pb[ oexT( "0" ) ].ToString(),
-						  pb[ oexT( "1" ) ].ToString(),
-						  pb[ oexT( "v" ) ].ToString(),
-						  pb[ oexT( "p" ) ].ToString(),
-						  pb[ oexT( "s" ) ].ToString(),
-						  pb[ oexT( "i" ) ].ToString() );
+	// Was an entire directory specified?
+	if ( pb.IsKey( oexT( "d" ) ) )
+	{
+		// Output directory
+		oex::CStr sOutDir = pb[ oexT( "o" ) ].ToString();
 
-	return ret;
+		// Output same as input if not specified
+		if ( !sOutDir.Length() )
+			sOutDir = pb[ oexT( "d" ) ].ToString();
+		
+		// Ensure output directory exists
+		if ( !oexExists( sOutDir.Ptr() ) )
+			oexCreatePath( sOutDir.Ptr() );
+
+		// Include file?
+		oex::CFile fInc;
+		if ( fInc.CreateAlways( oexBuildPath( sOutDir, oexT( "oexres.h" ) ).Ptr() ).IsOpen() )
+			fInc.Write( CStr8() << oexNL
+				"int OexGetResourceInfo( char *sName, void **p, long *l );" oexNL
+				"int OexGetResourceInfo( char *sName, long max, void **p, long *l );" oexNL 
+				);
+
+		oex::CFile fCmp;
+		if ( fCmp.CreateAlways( oexBuildPath( sOutDir, oexT( "oexres.cpp" ) ).Ptr() ).IsOpen() )
+			fCmp.Write( CStr8() << oexNL
+				"#include \"string.h\"" oexNL "#include \"oexres.h\"" oexNL oexNL
+				"int OexGetResourceInfo( char *sName, void **p, long *l )" oexNL
+				"{	return OexGetResourceInfo( sName, strlen( sName ), p, l ); }" oexNL
+				"int OexGetResourceInfo( char *sName, long max, void **p, long *l )" oexNL
+				"{" oexNL
+				"\tif ( 0 );" oexNL
+				);
+
+		oex::CFile fRes;
+		if ( fRes.CreateAlways( oexBuildPath( sOutDir, oexT( "oexres.mk" ) ).Ptr() ).IsOpen() )
+			fRes.Write( CStr8() << oexNL
+				"RES_CPP := \\" oexNL
+				"\t" << oexBuildPath( sOutDir, "oexres.cpp" ) << " \\" oexNL
+				);
+
+		oex::CFile fDep;
+		if ( fDep.CreateAlways( oexBuildPath( sOutDir, oexT( "oexres.d" ) ).Ptr() ).IsOpen() )
+			fDep.Write( CStr8() << oexNL
+				);
+
+		// Create resources from directory
+		int ret = from_dir( pb[ oexT( "d" ) ].ToString(), sOutDir, pb, oexT( "" ), &fInc, &fCmp, &fRes, &fDep );
+
+		if ( fCmp.IsOpen() )
+			fCmp.Write( CStr8() << 
+				oexNL "\telse return -1;" oexNL 
+				oexNL
+				"\treturn 0;" oexNL
+				"}" oexNL
+			);
+
+		return ret;
+
+	} // end if
+
+	// Compile single file
+	return create_res( pb[ oexT( "0" ) ].ToString(),
+					   pb[ oexT( "1" ) ].ToString(),
+					   pb[ oexT( "v" ) ].ToString(),
+					   pb[ oexT( "p" ) ].ToString(),
+					   pb[ oexT( "s" ) ].ToString(),
+					   pb[ oexT( "i" ) ].ToString() );
 }
 
 

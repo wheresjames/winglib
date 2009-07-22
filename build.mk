@@ -100,8 +100,8 @@ BLD_INCS			    := $(BLD_PATH_INC_$(LOC_TAG)) $(foreach inc,$(PRJ_INCS), $(CFG_CC
 ifneq ($(PRJ_SYSI),)
 	BLD_INCS			:= $(BLD_INCS) $(foreach inc,$(PRJ_SYSI), $(CFG_CC_INC)$(inc))
 endif
-ifdef PRJ_RESD
-	BLD_INCS			:= $(CFG_CC_INC)$(CFG_OUTROOT)/_$(PRJ_NAME) $(BLD_INCS)
+ifdef CFG_RES_OUT
+	BLD_INCS			:= $(CFG_CC_INC)$(CFG_RES_OUT) $(BLD_INCS)
 endif
 
 BLD_OBJECTS_TOTAL 		:= $(BLD_OBJECTS_TOTAL) $(BLD_OBJECTS_$(LOC_TAG))
@@ -161,12 +161,12 @@ ifeq ($(BUILD),vs)
 #	echo # makedepend -o.obj $(subst /,\,$(BLD_DEPENDS_INCS)) -p$(BLD_PATH_OBJ_$(LOC_TAG))/ -f$@ $< >> $@
 #	$(CFG_DP) -o.obj $(subst /,\,$(BLD_DEPENDS_INCS)) -f$@ $<
 
-$(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG)) $(CFG_RES_HEADER)
+$(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
 	- $(CFG_DEL) $(subst /,\,$@)
 	$(BLD_COMPILER) $(CFG_CFLAGS) $(CFG_DEFS) $(BLD_INCS) $(BLD_MSFLAGS) $< $(CFG_CC_OUT)$@
 	
 else
-$(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG)) $(CFG_RES_HEADER)
+$(BLD_PATH_OBJ_$(LOC_TAG))/%.$(CFG_OBJ_EXT) : $(BLD_PATH_SRC_$(LOC_TAG))/%.$(LOC_CXX_$(LOC_TAG))
 	- $(CFG_DEL) $@
 	$(BLD_COMPILER) $(CFG_CFLAGS) $(CFG_DEFS) $(PRJ_EXTC) $(BLD_INCS) $< $(CFG_CC_OUT)$@
 endif

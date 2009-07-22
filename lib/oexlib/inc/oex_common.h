@@ -128,7 +128,7 @@ namespace cmn
 	/// Returns the modulus
 	template < typename T >
 		static T Mod( T x, T y )
-		{	return ( ( x ) - ( (oexINT)( ( x ) / ( y ) ) ) * ( y ) ); }
+		{	return ( ( x ) - ( (oexLONG)( ( x ) / ( y ) ) ) * ( y ) ); }
 	template <>
 		inline oexINT Mod< oexINT >( oexINT x, oexINT y )
 		{	return x % y; }

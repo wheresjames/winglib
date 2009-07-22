@@ -117,7 +117,7 @@ using namespace oex;
 
 oex::oexRESULT TestAllocator()
 {
-	oexPrintf( oexT( "Memory allocator...\n" ) );
+	oexEcho( oexT( "Memory allocator..." ) );
 
     // Veriry over-run / under-run protection
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
@@ -307,7 +307,7 @@ oex::oexRESULT TestAllocator()
 
 oex::oexRESULT TestStrings()
 {
-	oexPrintf( oexT( "String functions...\n" ) );
+	oexEcho( oexT( "String functions..." ) );
 
     oex::CStr str1, str2;
     oex::oexSTR pStr;
@@ -383,7 +383,7 @@ oex::oexRESULT TestStrings()
 
 	static const oexGUID guidTest =
 //		{ 0x01234567, 0x8901, 0x2345, { 0x67, 0x89, 0x01, 0x23, 0x45, 0x67, 0x89, 0x01 } };
-		oexAUTOGUID( 0x01234567, 0x8901, 0x2345, 0x67, 0x89, 0x01, 0x23, 0x45, 0x67, 0x89, 0x01 );
+		oexINITGUID( 0x01234567, 0x8901, 0x2345, 0x67, 0x89, 0x01, 0x23, 0x45, 0x67, 0x89, 0x01 );
 
 	if ( !oexVERIFY( guid::CmpGuid( guid::StringToGuid( &guid, pTest, 36 ), &guidTest ) ) )
 		return -10;
@@ -615,7 +615,7 @@ oex::oexRESULT TestStrings()
 
 oex::oexRESULT TestFileMapping()
 {
-	oexPrintf( oexT( "File mapping...\n" ) );
+	oexEcho( oexT( "File mapping..." ) );
 
     oex::TFileMapping< oex::oexTCHAR > fm;
 
@@ -682,7 +682,7 @@ oex::oexRESULT TestFileMapping()
 
 oex::oexRESULT TestGuids()
 {
-	oexPrintf( oexT( "GUIDS...\n" ) );
+	oexEcho( oexT( "GUIDS..." ) );
 
     // {6674C3D8-BB11-4a58-BCE0-A34DC74365AF}
     static const oex::oexGUID guidTest =
@@ -691,7 +691,7 @@ oex::oexRESULT TestGuids()
     oex::oexGUID    guid1, guid2;
     oex::oexTCHAR   szGuid1[ 1024 ] = oexT( "" );
 
-	oexSHOW( guidTest );
+//	oexSHOW( guidTest );
 
     // Guid / String conversions
     oex::guid::GuidToString( szGuid1, oexSizeOfArray( szGuid1 ), &guidTest );
@@ -723,7 +723,7 @@ oex::oexRESULT TestGuids()
 
 oex::oexRESULT TestLists()
 {
-	oexPrintf( oexT( "Linked lists...\n" ) );
+	oexEcho( oexT( "Linked lists..." ) );
 
 	// List
 	oex::TList< int > lst;
@@ -953,7 +953,7 @@ oex::oexRESULT TestLists()
 
 oex::oexRESULT TestAssoLists()
 {
-	oexPrintf( oexT( "Mapped lists...\n" ) );
+	oexEcho( oexT( "Mapped lists..." ) );
 
     oex::TAssoList< oex::oexINT, oex::oexINT > alii;
 
@@ -1069,7 +1069,7 @@ oex::oexRESULT TestAssoLists()
 
 oex::oexRESULT TestPropertyBag()
 {
-	oexPrintf( oexT( "Property bags...\n" ) );
+	oexEcho( oexT( "Property bags..." ) );
 
     oex::CPropertyBag pb;
 
@@ -1119,7 +1119,7 @@ oex::oexRESULT TestPropertyBag()
 
 oex::oexRESULT TestParser()
 {
-	oexPrintf( oexT( "Text parsers...\n" ) );
+	oexEcho( oexT( "Text parsers..." ) );
 
 	// Test explode function
     oex::oexCSTR szStr[] = { oexT( "This" ), oexT( "is" ), oexT( "a" ), oexT( "string" ), 0 };
@@ -1321,7 +1321,7 @@ oex::oexRESULT TestParser()
 
 oex::oexRESULT TestFile()
 {
-	oexPrintf( oexT( "Files...\r\n" ) );
+	oexEcho( oexT( "Files..." ) );
 
     oex::CFile f;
     oex::CStr sFileName, sContents = oexT( "Safe to delete this file." );
@@ -1352,7 +1352,7 @@ oex::oexRESULT TestFile()
 oex::oexRESULT TestZip()
 {
 #ifdef OEX_ENABLE_ZIP
-	oexPrintf( oexT( "Zip file support...\r\n" ) );
+	oexEcho( oexT( "Zip file support..." ) );
 
     oex::CStr sStr = oexT( "This string will be compressed.  It has to be fairly long or the 			\
                             compression library won't really be able to compress it much.   			\
@@ -1371,32 +1371,102 @@ oex::oexRESULT TestZip()
 
 #else
 
-	oexPrintf( oexT( "!!! ZIP file support disabled\r\n" ) );
+	oexEcho( oexT( "!!! ZIP file support disabled" ) );
 
 #endif
 
     return oex::oexRES_OK;
 }
 
+template< typename T >
+	long bsearch( T *a, long n, T s, long inv = -1 )
+	{
+		if ( !n )
+			return -1;
+
+		if ( *a == s )
+			return 0;
+
+		n >>= 1;
+		T *b = a + n;
+
+		while( n )
+		{
+			n >>= 1;
+
+			if ( *b == s )
+				return b - a;
+
+			b += ( *b < s ) ? n : -n;
+
+		} // end while
+
+		return inv;
+	}
+
+
 oex::oexRESULT TestResources()
 {
-	oexPrintf( oexT( "Resources...\r\n" ) );
+	int a[] = { 1, 6, 9, 11, 50, 100, 102, 233 };
+	int sz = sizeof( a ) / sizeof( int );
+
+	if ( !oexVERIFY( 0 == bsearch( a, sz, 1 ) )
+		 || !oexVERIFY( 1 == bsearch( a, sz, 6 ) )
+		 || !oexVERIFY( 2 == bsearch( a, sz, 9 ) )
+		 || !oexVERIFY( 3 == bsearch( a, sz, 11 ) )
+		 || !oexVERIFY( 4 == bsearch( a, sz, 50 ) )
+		 || !oexVERIFY( 5 == bsearch( a, sz, 100 ) )
+		 || !oexVERIFY( 6 == bsearch( a, sz, 102 ) )
+		 || !oexVERIFY( 7 == bsearch( a, sz, 233 ) )
+		 || !oexVERIFY( -1 == bsearch( a, sz, 0 ) )
+		 || !oexVERIFY( -1 == bsearch( a, sz, 22 ) )
+		 || !oexVERIFY( -1 == bsearch( a, sz, 500 ) ) )
+		return -1;
+
+	sz--;
+	if ( !oexVERIFY( 0 == bsearch( a, sz, 1 ) )
+		 || !oexVERIFY( 1 == bsearch( a, sz, 6 ) )
+		 || !oexVERIFY( 2 == bsearch( a, sz, 9 ) )
+		 || !oexVERIFY( 3 == bsearch( a, sz, 11 ) )
+		 || !oexVERIFY( 4 == bsearch( a, sz, 50 ) )
+		 || !oexVERIFY( 5 == bsearch( a, sz, 100 ) )
+		 || !oexVERIFY( 6 == bsearch( a, sz, 102 ) )
+		 || !oexVERIFY( -1 == bsearch( a, sz, 233 ) )
+		 || !oexVERIFY( -1 == bsearch( a, sz, 0 ) )
+		 || !oexVERIFY( -1 == bsearch( a, sz, 22 ) )
+		 || !oexVERIFY( -1 == bsearch( a, sz, 500 ) ) )
+		return -1;
+
+	oexEcho( oexT( "Resources..." ) );
 
 	// oex::CStr8 res = oexGetResource( "hello.txt" );
 	// oexCHAR8 *_p = oexGetResourcePtr( "hello.txt" );
 	// oexINT _l = oexGetResourceLen( "hello.txt" );
 
-	oexCHAR8 *_p = g_oexres_d6f2ff759e1a69bfffab20fea977739a;
-	oexINT _l = g_oexres_d6f2ff759e1a69bfffab20fea977739a_len;
-	if ( !oexVERIFY( oexMbToStr( oex::zip::CUncompress::Uncompress( oex::CStr8( _p, _l ) ) ) == oexT( "Hello World!" ) ) )
+	void *_p; long _l;
+	if ( !oexVERIFY( !OexGetResourceInfo( oexT( "hello.txt" ), &_p, &_l ) ) )
 		return -1;
+
+	if ( !oexVERIFY( oexMbToStr( oex::zip::CUncompress::Uncompress( oex::CStr8( (oexCHAR8*)_p, _l ) ) ) == oexT( "Hello World!" ) ) )
+		return -2;
+
+	if ( !oexVERIFY( !OexGetResourceInfo( oexT( "imgs/saturn.jpg" ), &_p, &_l ) ) )
+		return -3;
+
+	oex::CStr8 sImg = oex::zip::CUncompress::Uncompress( oex::CStr8( (oexCHAR8*)_p, _l ) );
+
+	if ( !oexVERIFY( 4437 == sImg.Length() ) )
+		return -4;
 
     return oex::oexRES_OK;
 }
 
+
 oex::oexRESULT Test_CSysTime()
 {
-	oexPrintf( oexT( "Time functions...\r\n" ) );
+	oexEcho( oexT( "Time functions..." ) );
+
+	oexEcho( oex::CSysTime().GetLocalTime().FormatTime( oexT( "Current Time: %W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() );
 
     oex::CSysTime st;
 
@@ -1458,7 +1528,7 @@ oex::oexRESULT Test_CSysTime()
 
 oex::oexRESULT Test_CIpAddress()
 {
-	oexPrintf( oexT( "IP Address...\r\n" ) );
+	oexEcho( oexT( "IP Address..." ) );
 
     oex::oexCSTR pUrl = oexT( "http://user:password@server.com:1111/my/path/doc.php?a=b&c=d" );
     oex::CPropertyBag pbUrl = oex::os::CIpAddress::ParseUrl( pUrl );
@@ -1501,7 +1571,7 @@ oex::oexRESULT Test_CIpAddress()
 
 oex::oexRESULT Test_CIpSocket()
 {
-	oexPrintf( oexT( "Socket support...\r\n" ) );
+	oexEcho( oexT( "Socket support..." ) );
 
     // *** TCP
 
@@ -1576,7 +1646,7 @@ oex::oexRESULT Test_CIpSocket()
 
 oex::oexRESULT Test_CCircBuf()
 {
-	oexPrintf( oexT( "Circular buffers...\r\n" ) );
+	oexEcho( oexT( "Circular buffers..." ) );
 
     oex::CCircBuf cb;
 
@@ -1631,7 +1701,7 @@ oex::oexRESULT Test_CCircBuf()
 
 oex::oexRESULT Test_CFifoSync()
 {
-	oexPrintf( oexT( "FIFO buffers...\r\n" ) );
+	oexEcho( oexT( "FIFO buffers..." ) );
 
     oex::CFifoSync fs;
 
@@ -1692,7 +1762,7 @@ oex::oexRESULT Test_CFifoSync()
 
 oex::oexRESULT Test_CDataPacket()
 {
-	oexPrintf( oexT( "Packets...\r\n" ) );
+	oexEcho( oexT( "Packets..." ) );
 
     oex::CDataPacket dp1, dp2, dp3;
 
@@ -1855,7 +1925,7 @@ public:
 
 oex::oexRESULT Test_Threads()
 {
-	oexPrintf( oexT( "Threads...\r\n" ) );
+	oexEcho( oexT( "Threads..." ) );
 
 	CMyThread t;
 
@@ -1901,7 +1971,7 @@ oex::oexRESULT Test_Threads()
 		oexSleep( 100 );
 
 	} // end while
-
+	
 	if ( !oexVERIFY( 0 == t2.Stop( 10000 ) ) )
 		return -15;
 
@@ -1986,7 +2056,7 @@ oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os
 
 oex::oexRESULT Test_CHttpSession()
 {
-	oexPrintf( oexT( "HTTP...\r\n" ) );
+	oexEcho( oexT( "HTTP..." ) );
 
 	oex::os::CIpSocket client;
 	oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > server;
@@ -2459,7 +2529,7 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 		return -1;
 
 	// Show supported formats
-	oexPrintf( cCapture.GetSupportedFormats().Ptr() );
+	oexEcho( cCapture.GetSupportedFormats().Ptr() );
 
 	if ( !cCapture.Init() )
 		return -2;
@@ -2467,7 +2537,7 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 	if ( !oexVERIFY( cCapture.IsOpen() ) )
 		return -3;
 
-//	oexPrintf( oexT( "Starting capture...\n" ) );
+//	oexEcho( oexT( "Starting capture...\n" ) );
 
 	if ( !oexVERIFY( cCapture.StartCapture() ) )
 		return -4;
@@ -2477,7 +2547,7 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 
 	for ( int i = 0; i < 1; i++ )
 	{
-//		oexPrintf( oexT( "Waiting for frame...\n" ) );
+//		oexEcho( oexT( "Waiting for frame...\n" ) );
 
 		if ( !oexVERIFY( cCapture.WaitForFrame( 3000 ) ) )
 			return -5;
@@ -2519,7 +2589,7 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 
 oex::oexRESULT Test_CCapture()
 {
-	oexPrintf( oexT( "Video capture API...\n" ) );
+	oexEcho( oexT( "Video capture API..." ) );
 
 	oexINT idx = -1;
 	while ( oexCONST vid::SVideoSystemInfo* pVsi = vid::CCapture::GetNextAvailableSystem( idx ) )
@@ -2562,7 +2632,7 @@ int main(int argc, char* argv[])
     if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
         return -1;
 
-	oexPrintf( oexT( "--- Starting tests ---\r\n" ) );
+	oexEcho( oexT( "--- Starting tests ---" ) );
 	oexNOTICE( 0, oexT( "Tests started" ) );
 
     TestAllocator();
