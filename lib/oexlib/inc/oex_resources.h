@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// util.cpp
+// oex_resources.h
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -32,18 +32,50 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#include "../oexlib.h"
+#pragma once
 
-OEX_USING_NAMESPACE
+// Resources
+#if defined( OEX_RESOURCES )
 
-CStr8 CUtil::md5( CStr8 s )
-{	oexGUID hash;
-	return CBase16::Encode( oss::CMd5::Transform( &hash, s.Ptr(), s.Length() ), sizeof( hash ) );
-}
+	// Resource macros
+#	define oexGetResource		OEX_NAMESPACE::COexResourceHelper().GetResource
 
-CStrW CUtil::md5( CStrW s )
-{	oexGUID hash;
-	CStr8 sMb = oexStrWToMb( s );
-	CStrW _s = oexMbToStrW( CBase16::Encode( OEX_NAMESPACE::oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) );
-  	return _s;
-}
+	class COexResourceHelper
+	{
+	public:
+
+		COexResourceHelper()
+		{
+			m_p = oexNULL;
+			m_l = 0;
+		}
+
+		COexResourceHelper( CStr sName )
+		{
+			if ( OexGetResourceInfo( sName.Ptr(), &m_p, &m_l ) )
+				m_p = oexNULL, m_l = 0;
+		}
+
+		CStr8 GetResource( CStr sName )
+		{
+			if ( OexGetResourceInfo( sName.Ptr(), &m_p, &m_l ) )
+				return CStr8();
+
+			return oex::zip::CUncompress::Uncompress( (oexCHAR8*)m_p, m_l );
+		}
+
+	private:
+
+		/// Pointer to resource
+		const void 		*m_p;
+
+		/// Length of resource
+		long 			m_l;
+
+	};
+
+#else
+
+#	define OEX_NO_RESOURCES		1
+
+#endif

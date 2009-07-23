@@ -115,6 +115,45 @@ using namespace oex;
     template < typename T >
     	static T ReturnTest( const T t ) { return (T)t; }
 
+
+
+
+oex::oexRESULT TestCommon()
+{
+	oexEcho( oexT( "Common..." ) );
+
+	int a[ 100 ]; // = { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, ... };
+	int sz = sizeof( a ) / sizeof( int );
+
+	for ( int i = 0; i < sz; i++ )
+		a[ i ] = i << 1;
+
+	// For every possible sub set of a and value of t in a
+	for ( int x = 0; x < sz; x++ )
+		for ( int y = x; y < sz; y++ )
+			for ( int t = 0; t < ( sz << 1 ); t++ )
+			{
+				// Try to find t
+				int res = oex::cmn::bsearch( &a[ x ], y - x, t );
+
+				// actual index of t in a
+				int i = ( t >> 1 ) - x;
+
+				// Would the index be valid?
+				if ( x >= y || t & 1 || i < 0 || i >= ( y - x ) )
+					i = -1;
+
+				// Did bsearch() get the right answer?
+				if ( !oexVERIFY( res == i ) )
+				{	oexSHOW( res ); oexSHOW( t ); oexSHOW( i ); oexSHOW( x ); oexSHOW( y );
+					return -1;
+				} // endi f
+
+			} // end for
+
+    return oex::oexRES_OK;
+}
+
 oex::oexRESULT TestAllocator()
 {
 	oexEcho( oexT( "Memory allocator..." ) );
@@ -1378,85 +1417,29 @@ oex::oexRESULT TestZip()
     return oex::oexRES_OK;
 }
 
-template< typename T >
-	long bsearch( T *a, long n, T s, long inv = -1 )
-	{
-		if ( !n )
-			return -1;
-
-		if ( *a == s )
-			return 0;
-
-		n >>= 1;
-		T *b = a + n;
-
-		while( n )
-		{
-			n >>= 1;
-
-			if ( *b == s )
-				return b - a;
-
-			b += ( *b < s ) ? n : -n;
-
-		} // end while
-
-		return inv;
-	}
-
-
 oex::oexRESULT TestResources()
 {
-	int a[] = { 1, 6, 9, 11, 50, 100, 102, 233 };
-	int sz = sizeof( a ) / sizeof( int );
-
-	if ( !oexVERIFY( 0 == bsearch( a, sz, 1 ) )
-		 || !oexVERIFY( 1 == bsearch( a, sz, 6 ) )
-		 || !oexVERIFY( 2 == bsearch( a, sz, 9 ) )
-		 || !oexVERIFY( 3 == bsearch( a, sz, 11 ) )
-		 || !oexVERIFY( 4 == bsearch( a, sz, 50 ) )
-		 || !oexVERIFY( 5 == bsearch( a, sz, 100 ) )
-		 || !oexVERIFY( 6 == bsearch( a, sz, 102 ) )
-		 || !oexVERIFY( 7 == bsearch( a, sz, 233 ) )
-		 || !oexVERIFY( -1 == bsearch( a, sz, 0 ) )
-		 || !oexVERIFY( -1 == bsearch( a, sz, 22 ) )
-		 || !oexVERIFY( -1 == bsearch( a, sz, 500 ) ) )
-		return -1;
-
-	sz--;
-	if ( !oexVERIFY( 0 == bsearch( a, sz, 1 ) )
-		 || !oexVERIFY( 1 == bsearch( a, sz, 6 ) )
-		 || !oexVERIFY( 2 == bsearch( a, sz, 9 ) )
-		 || !oexVERIFY( 3 == bsearch( a, sz, 11 ) )
-		 || !oexVERIFY( 4 == bsearch( a, sz, 50 ) )
-		 || !oexVERIFY( 5 == bsearch( a, sz, 100 ) )
-		 || !oexVERIFY( 6 == bsearch( a, sz, 102 ) )
-		 || !oexVERIFY( -1 == bsearch( a, sz, 233 ) )
-		 || !oexVERIFY( -1 == bsearch( a, sz, 0 ) )
-		 || !oexVERIFY( -1 == bsearch( a, sz, 22 ) )
-		 || !oexVERIFY( -1 == bsearch( a, sz, 500 ) ) )
-		return -1;
-
 	oexEcho( oexT( "Resources..." ) );
 
 	// oex::CStr8 res = oexGetResource( "hello.txt" );
 	// oexCHAR8 *_p = oexGetResourcePtr( "hello.txt" );
 	// oexINT _l = oexGetResourceLen( "hello.txt" );
 
-	void *_p; long _l;
+	const void *_p; long _l;
 	if ( !oexVERIFY( !OexGetResourceInfo( oexT( "hello.txt" ), &_p, &_l ) ) )
 		return -1;
 
-	if ( !oexVERIFY( oexMbToStr( oex::zip::CUncompress::Uncompress( oex::CStr8( (oexCHAR8*)_p, _l ) ) ) == oexT( "Hello World!" ) ) )
+	if ( !oexVERIFY( oexMbToStr( oex::zip::CUncompress::Uncompress( (oexCHAR8*)_p, _l ) ) == oexT( "Hello World!" ) ) )
 		return -2;
 
-	if ( !oexVERIFY( !OexGetResourceInfo( oexT( "imgs/saturn.jpg" ), &_p, &_l ) ) )
-		return -3;
 
-	oex::CStr8 sImg = oex::zip::CUncompress::Uncompress( oex::CStr8( (oexCHAR8*)_p, _l ) );
+	// Get image resource
+	oex::CStr8 sImg = oexGetResource( oexT( "imgs/saturn.jpg" ) );
 
 	if ( !oexVERIFY( 4437 == sImg.Length() ) )
+	{	oexSHOW( sImg.Length() );
 		return -4;
+	} // end if
 
     return oex::oexRES_OK;
 }
@@ -1971,7 +1954,7 @@ oex::oexRESULT Test_Threads()
 		oexSleep( 100 );
 
 	} // end while
-	
+
 	if ( !oexVERIFY( 0 == t2.Stop( 10000 ) ) )
 		return -15;
 
@@ -2265,7 +2248,7 @@ oex::oexRESULT Test_CMsg()
     if ( !oexVERIFY( reply[ 0 ] == 3 ) )
         return -7;
 
-/*
+/ *
     CMsgTest mt;
 
     oex::CMsg reply = mt.msgSend( msgCreate( 0, msgTo( "Add" ), 1, 2 ) );
@@ -2281,7 +2264,7 @@ oex::oexRESULT Test_CMsg()
 //    CMsgProxy mp = msgCreateObject( "CMsgTest" );
 
 //  CMsgProxy mp = msgCreateObject( "npp://server/CMsgTest" );
-/*
+/ *
     if ( !oexVERIFY( mp.IsConnected() ) )
         return -1
 
@@ -2301,7 +2284,7 @@ oex::oexRESULT Test_CMsg()
 }
 
 
-/*
+/ *
 oex::oexRESULT Test_CMsg()
 {
     oex::oexUINT len = oex::obj::Size( oexT( "This is a test string." ) );
@@ -2405,7 +2388,7 @@ oex::oexRESULT Test_CThread()
     return oex::oexRES_OK;
 }
 
-/*
+/ *
 oex::oexRESULT Test_CAutoSocket()
 {
     // Create echo server
@@ -2634,6 +2617,8 @@ int main(int argc, char* argv[])
 
 	oexEcho( oexT( "--- Starting tests ---" ) );
 	oexNOTICE( 0, oexT( "Tests started" ) );
+
+    TestCommon();
 
     TestAllocator();
 

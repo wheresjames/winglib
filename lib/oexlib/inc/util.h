@@ -49,6 +49,7 @@ public:
 
 	/// Creaets md5 of wchar string
 	static CStrW md5( CStrW s );
+
 };
 
 

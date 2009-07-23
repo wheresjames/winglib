@@ -62,7 +62,7 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 
 		// Add to include
 		i.Write( CStr8() << oexNL "extern unsigned long " << oexStrToMb( sVar ) << "_len;"
-				 	     << oexNL "extern char " << oexStrToMb( sVar ) << "[];" oexNL );
+				 	     << oexNL "extern const char " << oexStrToMb( sVar ) << "[];" oexNL );
 
 	} // end if
 
@@ -83,7 +83,7 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 
 	CStr8 buf;
 	oexUCHAR *t = (oexUCHAR*)"0x.., ";
-	oexUCHAR *r = (oexUCHAR*)"0x..," oexNL "\t";
+	oexUCHAR *r = (oexUCHAR*)"0x..," oexNL "\t ";
 	oexUCHAR *b = (oexUCHAR*)buf.OexAllocate( 1024 ), *s;
 	oexINT bl = 0;
 	for ( oexULONG i = 0; i < u; i++ )
@@ -110,7 +110,7 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 	return 0;
 }
 
-int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb, 
+int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 			  oex::CStr sPath, oex::CFile *pInc, oex::CFile *pCmp, oex::CFile *pRes, oex::CFile *pDep )
 {
 	// Ensure directory exists
@@ -126,10 +126,10 @@ int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 //			oexSHOW( sRel );
 
 			// Recurse into directory
-			if ( ff.IsDirectory() ) 
+			if ( ff.IsDirectory() )
 				from_dir( ff.GetFullPath(), sOutDir, pb, sRel, pInc, pCmp, pRes, pDep );
 
-			else 
+			else
 			{
 				// Create variable name
 				oex::CStr sHash = oexMd5( sRel );
@@ -141,12 +141,12 @@ int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 //				oexSHOW( sOut );
 
 				// Create file
-				if ( 0 == create_res( ff.GetFullPath(), sOut, sVar, 
+				if ( 0 == create_res( ff.GetFullPath(), sOut, sVar,
 									  oexT( "" ), oexT( "" ), oexT( "" ) ) )
 				{
 					if ( pInc )
 						pInc->Write( CStr8() << oexNL "extern unsigned long " << oexStrToMb( sVar ) << "_len;"
-				 							 << oexNL "extern char " << oexStrToMb( sVar ) << "[];" oexNL );
+				 							 << oexNL "extern const char " << oexStrToMb( sVar ) << "[];" oexNL );
 
 					if ( pCmp )
 						pCmp->Write( CStr8() << oexNL "\telse if ( !strncmp( sName, \"" << sRel << "\", max ) )" oexNL
@@ -189,7 +189,7 @@ int process(int argc, char* argv[])
 		// Output same as input if not specified
 		if ( !sOutDir.Length() )
 			sOutDir = pb[ oexT( "d" ) ].ToString();
-		
+
 		// Ensure output directory exists
 		if ( !oexExists( sOutDir.Ptr() ) )
 			oexCreatePath( sOutDir.Ptr() );
@@ -198,17 +198,21 @@ int process(int argc, char* argv[])
 		oex::CFile fInc;
 		if ( fInc.CreateAlways( oexBuildPath( sOutDir, oexT( "oexres.h" ) ).Ptr() ).IsOpen() )
 			fInc.Write( CStr8() << oexNL
-				"int OexGetResourceInfo( char *sName, void **p, long *l );" oexNL
-				"int OexGetResourceInfo( char *sName, long max, void **p, long *l );" oexNL 
+				"#define OEX_RESOURCES 1" oexNL
+				"#if defined( OEX_NO_RESOURCES )" oexNL
+				"#\terror 'oexres.h' MUST be included BEFORE 'oexlib.h'" oexNL
+				"#endif" oexNL oexNL
+				"int OexGetResourceInfo( const char *sName, const void **p, long *l );" oexNL
+				"int OexGetResourceInfo( const char *sName, long max, const void **p, long *l );" oexNL
 				);
 
 		oex::CFile fCmp;
 		if ( fCmp.CreateAlways( oexBuildPath( sOutDir, oexT( "oexres.cpp" ) ).Ptr() ).IsOpen() )
 			fCmp.Write( CStr8() << oexNL
 				"#include \"string.h\"" oexNL "#include \"oexres.h\"" oexNL oexNL
-				"int OexGetResourceInfo( char *sName, void **p, long *l )" oexNL
+				"int OexGetResourceInfo( const char *sName, const void **p, long *l )" oexNL
 				"{	return OexGetResourceInfo( sName, strlen( sName ), p, l ); }" oexNL
-				"int OexGetResourceInfo( char *sName, long max, void **p, long *l )" oexNL
+				"int OexGetResourceInfo( const char *sName, long max, const void **p, long *l )" oexNL
 				"{" oexNL
 				"\tif ( 0 );" oexNL
 				);
@@ -221,7 +225,7 @@ int process(int argc, char* argv[])
 				);
 
 		oex::CFile fDep;
-		if ( fDep.CreateAlways( oexBuildPath( sOutDir, oexT( "oexres.d" ) ).Ptr() ).IsOpen() )
+		if ( fDep.CreateAlways( oexBuildPath( sOutDir, oexT( "oexres.dpp" ) ).Ptr() ).IsOpen() )
 			fDep.Write( CStr8() << oexNL
 				);
 
@@ -229,8 +233,8 @@ int process(int argc, char* argv[])
 		int ret = from_dir( pb[ oexT( "d" ) ].ToString(), sOutDir, pb, oexT( "" ), &fInc, &fCmp, &fRes, &fDep );
 
 		if ( fCmp.IsOpen() )
-			fCmp.Write( CStr8() << 
-				oexNL "\telse return -1;" oexNL 
+			fCmp.Write( CStr8() <<
+				oexNL "\telse return -1;" oexNL
 				oexNL
 				"\treturn 0;" oexNL
 				"}" oexNL

@@ -318,6 +318,31 @@ namespace cmn
 	template < typename T >
 		oexINT RH( T pRect )
 	{	return pRect.bottom - pRect.top; }
+
+	template< typename T >
+		oexLONG bsearch( T *a, oexLONG n, T s, oexLONG inv = -1 )
+		{
+			if ( !a || !n )
+				return inv;
+
+			// Save begining and ending pointers
+			T *o = a, *b = a, *e = a + n - 1;
+
+			while ( b <= e )
+			{
+				if ( *a < s )
+					b = ++a, a += ( e - b ) >> 1;
+
+				else if ( *a > s )
+					e = --a, a -= ( e - b ) >> 1;
+
+				else
+					return a - o;
+			};
+
+			return -1;
+		}
+
 };
 
 

@@ -550,7 +550,7 @@ ifdef PRJ_RESD
 
 CFG_RES_INP := $(foreach res,$(PRJ_RESD),$(CFG_LIBROOT)/$(res))
 CFG_RES_OUT := $(CFG_OUTROOT)/_$(PRJ_NAME)/_res
-CFG_RES_DEP := $(CFG_RES_OUT)/oexres.d
+CFG_RES_DEP := $(CFG_RES_OUT)/oexres.dpp
 CFG_RES_INC := $(CFG_RES_OUT)/oexres.h
 CFG_RES_MAK := $(CFG_RES_OUT)/oexres.mk
 
@@ -566,6 +566,14 @@ $(CFG_RES_DEP):
 	$(CFG_TOOL_RESCMP) -d:'$(CFG_RES_INP)' -o:'$(CFG_RES_OUT)'
 	
 include $(CFG_RES_DEP)
+
+ifneq ($(BUILD),vs)
+	include $(wildcard $(CFG_RES_OUT)/*.$(CFG_DEP_EXT))
+endif
+
+.PRECIOUS: $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.cpp: $(RES_CPP)
+$(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.cpp: 
+	$(CFG_TOOL_RESCMP) -d:'$(CFG_RES_INP)' -o:'$(CFG_RES_OUT)'
 
 .PRECIOUS: $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.$(CFG_OBJ_EXT)
 $(CFG_RES_OUT)/%.$(CFG_OBJ_EXT): $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.cpp

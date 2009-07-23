@@ -69,6 +69,7 @@ public:
     CStr8 Uncompress();
 
     // Set input method
+    oexBOOL SetPtrInput( const oexCHAR8 *p, oexLONG l ) { m_pInput = p; m_lInput = l, m_lInputPos = 0; return 0 < m_sInput.Length(); }
     oexBOOL SetStrInput( const CStr8 &x_sStr ) { m_sInput = x_sStr; return 0 < m_sInput.Length(); }
     oexBOOL SetFileInput( oexCSTR x_pFile ) { return m_fInput.OpenExisting( x_pFile ).IsOpen(); }
 
@@ -85,15 +86,21 @@ public:
     static CStr8 Uncompress( const CStr8 &x_sStr )
     {   CUncompress cmp; cmp.SetStrInput( x_sStr ); cmp.Uncompress(); return cmp.m_sOutput; }
 
+    static CStr8 Uncompress( const oexCHAR8 *p, oexLONG l )
+    {   CUncompress cmp; cmp.SetPtrInput( p, l ); cmp.Uncompress(); return cmp.m_sOutput; }
+
 private:
 
-    oexPVOID    m_pCompress;
+    oexPVOID    		m_pCompress;
 
-    CStr8        m_sInput;
-    CFile       m_fInput;
+    CStr8        		m_sInput;
+    CFile       		m_fInput;
+	const oexCHAR8		*m_pInput;
+	oexLONG				m_lInput;
+	oexLONG				m_lInputPos;
 
-    CStr8        m_sOutput;
-    CFile       m_fOutput;
+    CStr8        		m_sOutput;
+    CFile       		m_fOutput;
 };
 
 };
