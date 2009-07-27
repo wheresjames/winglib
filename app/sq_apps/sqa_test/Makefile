@@ -4,14 +4,10 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := test
-PRJ_TYPE := exe
-PRJ_INCS := winglib/lib/oexlib
-PRJ_LIBS := oexlib 
-PRJ_OSLB := 
-PRJ_RESD := res
+PRJ_SQRL := yes
+PRJ_NAME := sqa_test
 
-PRJ_LIBROOT := ../..
+PRJ_LIBROOT := ../../..
 
 #-------------------------------------------------------------------
 # Configure build
@@ -19,12 +15,7 @@ PRJ_LIBROOT := ../..
 include $(PRJ_LIBROOT)/config.mk
 
 #-------------------------------------------------------------------
-# File locations
-#-------------------------------------------------------------------
-export LOC_TAG := def
-include $(PRJ_LIBROOT)/build.mk
-
-#-------------------------------------------------------------------
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
+

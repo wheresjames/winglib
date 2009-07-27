@@ -49,7 +49,6 @@ CScriptThread::~CScriptThread()
 void CScriptThread::Destroy()
 {	m_bQuit = oex::oexTRUE;
 	m_pModuleManager = oexNULL;
-	m_bFile = oex::oexFALSE;
 	m_pParentScript = oexNULL;
 }
 
@@ -81,14 +80,18 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 	m_cSqEngine.SetMessageQueue( this );
 
 	// Let the user know we're starting a thread
-	oexPrintf( oexT( "Spawning : 0x%08x : %s : %s\n" ),
-			  (unsigned int)oexGetCurThreadId(), m_sName.c_str(), oexGetFileName( m_sScript.c_str() ).Ptr() );
+//	oexPrintf( oexT( "Spawning : 0x%08x : %s : %s\n" ),
+//			  (unsigned int)oexGetCurThreadId(), m_sName.c_str(), oexGetFileName( m_sScript.c_str() ).Ptr() );
 
 	// Start the script
 	if ( !m_cSqEngine.Load( m_sScript.c_str(), m_bFile, FALSE ) )
 	{
 		stdString sErr = oexT( "File : " );
-		sErr += m_sScript + oexT( "\r\n\r\n" );
+
+		if ( m_bFile )
+			sErr += m_sScript + oexT( "\r\n\r\n" );
+		else
+			sErr += oexT( "(buffer)\r\n\r\n" );
 
 		if ( m_cSqEngine.GetLastError().length() )
 			sErr += m_cSqEngine.GetLastError();
@@ -140,8 +143,8 @@ oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 	m_cSqEngine.Destroy();
 
 	// Let the user know we're starting a thread
-	oexPrintf( oexT( "Exiting : 0x%08x : %s\n" ),
-			   (unsigned int)oexGetCurThreadId(), m_sName.c_str() );
+//	oexPrintf( oexT( "Exiting : 0x%08x : %s\n" ),
+//			   (unsigned int)oexGetCurThreadId(), m_sName.c_str() );
 
 	return 0;
 }
@@ -336,6 +339,9 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 		// Save away pointer for later
 		m_lstScript[ sName ] = pSt;
 
+		// Set include function
+		pSt->SetIncludeScriptFunction( m_cSqEngine.GetIncludeScriptFunction() );
+
 		// Let the script know it's name
 		pSt->SetName( sName );
 
@@ -348,9 +354,26 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 		// Import environment
 		pSt->SetExportFunction( m_cSqEngine.GetExportFunction(), m_cSqEngine.GetAllocator() );
 
-		// Load script information
-		pSt->SetScript( mapParams[ oexT( "script" ) ].c_str(),
-						0 != oex::CStr( mapParams[ oexT( "file" ) ].c_str() ).ToULong() );
+		// Is it a file?
+		if ( 0 != oex::CStr( mapParams[ oexT( "file" ) ].c_str() ).ToULong() )
+		{
+			if ( m_cSqEngine.GetIncludeScriptFunction() )
+			{
+				stdString sData;
+				if ( m_cSqEngine.GetIncludeScriptFunction()( mapParams[ oexT( "script" ) ], sData ) )
+					*pReply = oexT( "FAILED" );
+				else
+					pSt->SetScript( sData.c_str(), 0 );
+
+			} // end if
+
+			else
+				pSt->SetScript( mapParams[ oexT( "script" ) ].c_str(), 1 );
+		} // end if
+
+		else
+			// Load script information
+			pSt->SetScript( mapParams[ oexT( "script" ) ].c_str(), 0 );
 
 		// Create the thread
 		pSt->Start();

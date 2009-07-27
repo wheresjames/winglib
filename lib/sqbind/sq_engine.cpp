@@ -46,6 +46,9 @@ int CSqEngineExport::echo( const stdString &sMsg )
 int CSqEngineExport::import( const stdString &sClass )
 {   return OnImport( sClass ); }
 
+int CSqEngineExport::include( const stdString &sScript )
+{   return OnInclude( sScript ); }
+
 int CSqEngineExport::load_module( const stdString &sModule, const stdString &sPath )
 {   return OnLoadModule( sModule, sPath ); }
 
@@ -275,6 +278,9 @@ CSqMsgQueue* CSqEngineExport::queue()
 int CSqEngineExport::OnImport( const stdString &sClass )
 { return 0; }
 
+int CSqEngineExport::OnInclude( const stdString &sClass )
+{ return 0; }
+
 int CSqEngineExport::OnLoadModule( const stdString &sModule, const stdString &sPath )
 { return 0; }
 
@@ -393,6 +399,7 @@ CSqEngine::CSqEngine() :
 	m_bLoaded = oex::oexFALSE;
 	m_fExportSymbols = oexNULL;
 	m_pSqAllocator = oexNULL;
+	m_fIncludeScript = oexNULL;
 }
 
 CSqEngine::~CSqEngine()
@@ -450,6 +457,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, alert )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, echo )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, load_module )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_children )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sleep )
@@ -666,6 +674,91 @@ oex::oexBOOL CSqEngine::Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oex
 	m_sScript = pScript;
 
 	return oex::oexTRUE;
+}
+
+int CSqEngine::OnInclude( const stdString &sScript )
+{
+	oex::oexBOOL bFile = oex::oexTRUE;
+	oex::oexCSTR pScript = sScript.c_str();
+
+	stdString sData;
+	if ( m_fIncludeScript )
+	{
+		if ( m_fIncludeScript( sScript, sData ) || !sData.length() )
+			return -1;
+
+		pScript = sData.c_str();
+		bFile = oex::oexFALSE;
+
+	} // end if
+
+	stdString sRoot;
+
+	_oexTRY
+	{
+		oex::CStr sFull;
+
+		if ( bFile )
+		{
+			// +++ Change this to current working directory
+			//     Add oexWorkingDirectory()
+
+			// Does it point to a valid file?
+			if ( oexExists( pScript ) )
+
+				sRoot = oex::CStr( pScript ).GetPath().Ptr();
+
+			else
+			{
+				// Check relative to exe path
+				sFull = oexGetModulePath();
+				sFull.BuildPath( pScript );
+				if ( oexExists( sFull.Ptr() ) )
+				{	sRoot = sFull.GetPath().Ptr();
+					pScript = sFull.Ptr();
+				} // end if
+
+				else
+				{
+					// Check relative to scripts path
+					sFull = oexGetModulePath();
+					sFull.BuildPath( oexT( "scripts" ) );
+					sFull.BuildPath( pScript );
+					if ( oexExists( sFull.Ptr() ) )
+					{	sRoot = sFull.GetPath().Ptr();
+						pScript = sFull.Ptr();
+					} // end if
+
+					else
+					{	oexERROR( 0, oexMks( oexT( "Script not found : " ), pScript ) );
+						return oex::oexFALSE;
+					} // end else
+
+				} // end else
+
+			} // end else
+
+		} // end if
+
+		// Save away root path
+		else
+			sRoot = oexGetModulePath().Ptr();
+
+		// Load the script
+		m_script = bFile ? m_vm.CompileScript( pScript )
+						 : m_vm.CompileBuffer( pScript );
+
+		// Run the script
+		m_vm.RunScript( m_script );
+
+	} // end try
+
+	_oexCATCH( SScriptErrorInfo &e )
+	{	return LogError( oex::oexFALSE, e ); }
+	_oexCATCH( SquirrelError &e )
+	{	return LogErrorM( oex::oexFALSE, e.desc ); }
+
+	return 0;
 }
 
 oex::oexBOOL CSqEngine::Start()

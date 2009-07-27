@@ -1,6 +1,12 @@
 
 # go.mk
 
+ifdef PRJ_SQRL
+export LOC_TAG := sq
+LOC_SRC_sq := $(CFG_LIBROOT)/winglib/tools/sqembed
+include $(PRJ_LIBROOT)/build.mk	
+endif
+
 #ifndef PRJ_OSLB
 PRJ_OSLB :=	$(CFG_STDLIBS) $(PRJ_OSLB)
 #endif

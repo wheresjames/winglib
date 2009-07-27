@@ -4,7 +4,7 @@
 #include "string.h"
 
 // Include statically linked modules
-#include "../sq_modules/static_build.hpp"
+#include "sqbind_static_build.hpp"
 
 /// Pointer to script thread
 sqbind::CScriptThread	*g_psqScriptThread = oexNULL;

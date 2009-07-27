@@ -5,27 +5,27 @@
 #if defined( SQBIND_STATIC )
 
 #	if defined( SQBIND_STATIC_cell )
-#		include "../sq_modules/sqmod_cell/stdafx.cpp"
+#		include "../../app/sq_modules/sqmod_cell/stdafx.cpp"
 #	endif
 
 #	if defined( SQBIND_STATIC_curl )
-#		include "../sq_modules/sqmod_curl/stdafx.cpp"
+#		include "../../app/sq_modules/sqmod_curl/stdafx.cpp"
 #endif
 
 #	if defined( SQBIND_STATIC_gdchart )
-#	include "../sq_modules/sqmod_gdchart/stdafx.cpp"
+#	include "../../app/sq_modules/sqmod_gdchart/stdafx.cpp"
 #endif
 
 #	if defined( SQBIND_STATIC_http )
-#	include "../sq_modules/sqmod_http/stdafx.cpp"
+#	include "../../app/sq_modules/sqmod_http/stdafx.cpp"
 #endif
 
 #	if defined( SQBIND_STATIC_irrlicht )
-#	include "../sq_modules/sqmod_irrlicht/stdafx.cpp"
+#	include "../../app/sq_modules/sqmod_irrlicht/stdafx.cpp"
 #endif
 
 #	if defined( SQBIND_STATIC_webkit )
-#	include "../sq_modules/sqmod_webkit/stdafx.cpp"
+#	include "../../app/sq_modules/sqmod_webkit/stdafx.cpp"
 #endif
 
     static oex::oexRESULT SQBIND_Export_Symbols( sqbind::VM x_vm, sqbind::SSqAllocator *x_pAllocator )

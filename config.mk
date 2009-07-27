@@ -43,6 +43,10 @@ else
 	LIBLINK := shared
 endif
 
+ifndef PRJ_TYPE
+	PRJ_TYPE := exe
+endif
+
 ifdef PRJ_ROOT
 	CFG_ROOT := $(PRJ_ROOT)
 	CFG_TOOLROOT := $(PRJ_ROOT)/tools
@@ -53,8 +57,20 @@ else
 	CFG_LIBROOT  := $(PRJ_LIBROOT)/..
 endif
 
+ifdef PRJ_SQRL
+	PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus $(PRJ_INCS)
+	PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib $(PRJ_LIBS)
+	PRJ_RESD := sq
+	PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Idle SRV_Stop $(PRJ_EXPORTS)
+endif
+
+ifdef SQMOD_STATIC
+	PRJ_DEFS := $(PRJ_DEFS) SQBIND_STATIC $(foreach mod,$(SQMOD_STATIC),SQBIND_STATIC_$(mod) )
+endif
+
+
 ifdef UNICODE
-CFG_CEXTRA := $(CFG_CEXTRA) -DUNICODE -D_UNICODE
+	CFG_CEXTRA := $(CFG_CEXTRA) -DUNICODE -D_UNICODE
 endif
 
 ifdef PRJ_DEFS
@@ -548,7 +564,12 @@ CFG_TOOL_JOIN  := $(CFG_OUTROOT)/$(CFG_EXE_PRE)join$(CFG_DPOSTFIX)$(CFG_EXE_POST
 
 ifdef PRJ_RESD
 
-CFG_RES_INP := $(foreach res,$(PRJ_RESD),$(CFG_LIBROOT)/$(res))
+ifdef PRJ_RESP
+	CFG_RES_INP := $(foreach res,$(PRJ_RESD),$(PRJ_RESP)/$(res))
+else
+	CFG_RES_INP := $(foreach res,$(PRJ_RESD),$(res))
+endif
+
 CFG_RES_OUT := $(CFG_OUTROOT)/_$(PRJ_NAME)/_res
 CFG_RES_DEP := $(CFG_RES_OUT)/oexres.dpp
 CFG_RES_INC := $(CFG_RES_OUT)/oexres.h
@@ -571,7 +592,7 @@ ifneq ($(BUILD),vs)
 	include $(wildcard $(CFG_RES_OUT)/*.$(CFG_DEP_EXT))
 endif
 
-.PRECIOUS: $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.cpp: $(RES_CPP)
+#.PRECIOUS: $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.cpp: $(RES_CPP)
 $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.cpp: 
 	$(CFG_TOOL_RESCMP) -d:'$(CFG_RES_INP)' -o:'$(CFG_RES_OUT)'
 
@@ -581,4 +602,5 @@ $(CFG_RES_OUT)/%.$(CFG_OBJ_EXT): $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.cpp
 	$(CFG_PP) $(CFG_CFLAGS) $(CFG_INCS) $< $(CFG_CC_OUT)$@
 	
 endif
+
 

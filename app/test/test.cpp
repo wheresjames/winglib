@@ -128,7 +128,7 @@ oex::oexRESULT TestCommon()
 	for ( int i = 0; i < sz; i++ )
 		a[ i ] = i << 1;
 
-	// For every possible sub set of a and value of t in a
+	// For every possible sub set of a and value of t in limits of a
 	for ( int x = 0; x < sz; x++ )
 		for ( int y = x; y < sz; y++ )
 			for ( int t = 0; t < ( sz << 1 ); t++ )
@@ -136,7 +136,7 @@ oex::oexRESULT TestCommon()
 				// Try to find t
 				int res = oex::cmn::bsearch( &a[ x ], y - x, t );
 
-				// actual index of t in a
+				// actual index of t in &a[ x ]
 				int i = ( t >> 1 ) - x;
 
 				// Would the index be valid?
@@ -1431,7 +1431,6 @@ oex::oexRESULT TestResources()
 
 	if ( !oexVERIFY( oexMbToStr( oex::zip::CUncompress::Uncompress( (oexCHAR8*)_p, _l ) ) == oexT( "Hello World!" ) ) )
 		return -2;
-
 
 	// Get image resource
 	oex::CStr8 sImg = oexGetResource( oexT( "imgs/saturn.jpg" ) );

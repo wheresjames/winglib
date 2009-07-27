@@ -117,6 +117,10 @@ public:
 	/// to export custom symbols
 	void SetExportFunction( PFN_SQBIND_Export_Symbols fn, sqbind::SSqAllocator *pa );
 
+	/// Set custom include function
+	void SetIncludeScriptFunction( sqbind::CSqEngine::t_IncludeScript f )
+	{	m_cSqEngine.SetIncludeScriptFunction( f ); }
+
 private:
 
 	/// Set to non-zero when the thread should exit

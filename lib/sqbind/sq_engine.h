@@ -71,6 +71,9 @@ public:
 	/// Imports the specified class
 	int import( const stdString &sClass );
 
+	/// Includes the specified script
+	int include( const stdString &sScript );
+
 	/// Loads the specified module
 	int load_module( const stdString &sModule, const stdString &sPath );
 
@@ -196,6 +199,8 @@ protected:
 
 	virtual int OnImport( const stdString &sClass );
 
+	virtual int OnInclude( const stdString &sScript );
+
 	virtual int OnLoadModule( const stdString &sModule, const stdString &sPath );
 
 	virtual stdString OnPath( stdString sPath );
@@ -251,6 +256,9 @@ public:
 		/// Column number
 		oex::oexUINT    uCol;
 	};
+
+	// Callback function for custom script source
+	typedef int (*t_IncludeScript)( const stdString &sScript, stdString &sData );
 
 public:
 
@@ -828,6 +836,9 @@ public:
 	/// Registers library classes
 	virtual int OnImport( const stdString &sClass );
 
+	/// Includes the specified script
+	virtual int OnInclude( const stdString &sScript );
+
 	/// Loads the specified module
 	virtual int OnLoadModule( const stdString &sModule, const stdString &sPath );
 
@@ -852,6 +863,14 @@ public:
 
 	/// Returns pointer to memory allocator
 	sqbind::SSqAllocator* GetAllocator() { return m_pSqAllocator; }
+
+	/// Custom include function
+	void SetIncludeScriptFunction( t_IncludeScript f )
+	{	m_fIncludeScript = f; }
+
+	/// Returns custom include function
+	t_IncludeScript GetIncludeScriptFunction()
+	{	return m_fIncludeScript; }
 
 private:
 
@@ -881,6 +900,9 @@ private:
 
 	/// Custom memory allocator
 	sqbind::SSqAllocator		*m_pSqAllocator;
+
+	/// Custom script include function
+	t_IncludeScript				m_fIncludeScript;
 
 };
 
