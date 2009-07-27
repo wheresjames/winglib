@@ -52,16 +52,30 @@
 
 		COexResourceHelper( CStr sName )
 		{
-			if ( OexGetResourceInfo( sName.Ptr(), &m_p, &m_l ) )
+			if ( GetResource( sName, &m_p, &m_l ) )
 				m_p = oexNULL, m_l = 0;
 		}
 
 		CStr8 GetResource( CStr sName )
 		{
-			if ( OexGetResourceInfo( sName.Ptr(), &m_p, &m_l ) )
+			if ( GetResource( sName, &m_p, &m_l ) )
 				return CStr8();
 
 			return oex::zip::CUncompress::Uncompress( (oexCHAR8*)m_p, m_l );
+		}
+
+		int GetResource( CStr sName, const void ** p, long *l )
+		{
+			// Search for the item
+			CStr8 sName8 = oexStrToMb( sName );
+			for ( int i = 0; _g_oexlib_resources[ i ].name; i++ )
+				if ( sName8 == _g_oexlib_resources[ i ].name )
+				{	*p = _g_oexlib_resources[ i ].data;
+					*l = _g_oexlib_resources[ i ].size;
+					return 0;
+				} // end if
+
+			return -1;
 		}
 
 	private:

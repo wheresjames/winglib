@@ -1426,7 +1426,7 @@ oex::oexRESULT TestResources()
 	// oexINT _l = oexGetResourceLen( "hello.txt" );
 
 	const void *_p; long _l;
-	if ( !oexVERIFY( !OexGetResourceInfo( oexT( "hello.txt" ), &_p, &_l ) ) )
+	if ( !oexVERIFY( !oexGetResource( oexT( "hello.txt" ), &_p, &_l ) ) )
 		return -1;
 
 	if ( !oexVERIFY( oexMbToStr( oex::zip::CUncompress::Uncompress( (oexCHAR8*)_p, _l ) ) == oexT( "Hello World!" ) ) )

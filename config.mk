@@ -61,7 +61,9 @@ ifdef PRJ_SQRL
 	PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus $(PRJ_INCS)
 	PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib $(PRJ_LIBS)
 	PRJ_RESD := sq
-	PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Idle SRV_Stop $(PRJ_EXPORTS)
+	ifeq ($(PRJ_TYPE),dll)
+		PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Idle SRV_Stop $(PRJ_EXPORTS)
+	endif
 endif
 
 ifdef SQMOD_STATIC

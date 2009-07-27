@@ -11,8 +11,11 @@ public:
 	_SQBIND_CLASS_CTOR_END( CSqirrFont )
 
 	/// Default constructor
-	CSqirrFont() : m_font( 0 ) {}
-	CSqirrFont( int size, const sqbind::stdString &sFont ) : m_font( 0 )
+	CSqirrFont() 
+//		: m_font( 0 ) 
+	{}
+	CSqirrFont( int size, const sqbind::stdString &sFont ) 
+//		: m_font( 0 )
 	{	set( size, sFont ); }
 	~CSqirrFont() {}
 
@@ -32,7 +35,7 @@ public:
 private:
 
 	// Pointer to font
-	FTFont			*m_font;
+//	FTFont			*m_font;
 
 };
 

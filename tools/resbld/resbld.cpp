@@ -62,7 +62,7 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 
 		// Add to include
 		i.Write( CStr8() << oexNL "extern unsigned long " << oexStrToMb( sVar ) << "_len;"
-				 	     << oexNL "extern const char " << oexStrToMb( sVar ) << "[];" oexNL );
+				 	     << oexNL "extern char " << oexStrToMb( sVar ) << "[];" oexNL );
 
 	} // end if
 
@@ -111,7 +111,8 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 }
 
 int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
-			  oex::CStr sPath, oex::CFile *pInc, oex::CFile *pCmp, oex::CFile *pRes, oex::CFile *pDep )
+			  oex::CStr sPath, oex::CFile *pInc, oex::CFile *pCmp, 
+			  oex::CFile *pRes, oex::CFile *pDep, oex::CFile *pSym )
 {
 	// Ensure directory exists
 	if ( !oexExists( dir.Ptr() ) )
@@ -127,7 +128,7 @@ int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 
 			// Recurse into directory
 			if ( ff.IsDirectory() )
-				from_dir( ff.GetFullPath(), sOutDir, pb, sRel, pInc, pCmp, pRes, pDep );
+				from_dir( ff.GetFullPath(), sOutDir, pb, sRel, pInc, pCmp, pRes, pDep, pSym );
 
 			else
 			{
@@ -144,14 +145,17 @@ int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 				if ( 0 == create_res( ff.GetFullPath(), sOut, sVar,
 									  oexT( "" ), oexT( "" ), oexT( "" ) ) )
 				{
-					if ( pInc )
-						pInc->Write( CStr8() << oexNL "extern unsigned long " << oexStrToMb( sVar ) << "_len;"
-				 							 << oexNL "extern const char " << oexStrToMb( sVar ) << "[];" oexNL );
+					if ( pSym )
+						pSym->Write( CStr8() << oexNL "extern unsigned long " << oexStrToMb( sVar ) << "_len;"
+				 							 << oexNL "extern char " << oexStrToMb( sVar ) << "[];" oexNL );
 
 					if ( pCmp )
-						pCmp->Write( CStr8() << oexNL "\telse if ( !strncmp( sName, \"" << sRel << "\", max ) )" oexNL
-												"\t\t*p = " << oexStrToMb( sVar ) << "," oexNL
-												"\t\t*l = " << oexStrToMb( sVar ) << "_len;" oexNL );
+						pCmp->Write( CStr8() << oexNL 
+												"\t{" oexNL
+												"\t\t\"" << sRel << "\"," oexNL
+												"\t\t" << oexStrToMb( sVar ) << "," oexNL
+												"\t\t" << oexStrToMb( sVar ) << "_len" oexNL
+												"\t}," oexNL );
 
 					if ( pRes )
 						pRes->Write( CStr8() << "\t" << sOut << " \\" oexNL );
@@ -201,20 +205,26 @@ int process(int argc, char* argv[])
 				"#define OEX_RESOURCES 1" oexNL
 				"#if defined( OEX_NO_RESOURCES )" oexNL
 				"#\terror 'oexres.h' MUST be included BEFORE 'oexlib.h'" oexNL
-				"#endif" oexNL oexNL
-				"int OexGetResourceInfo( const char *sName, const void **p, long *l );" oexNL
-				"int OexGetResourceInfo( const char *sName, long max, const void **p, long *l );" oexNL
+				"#endif" oexNL 
+				oexNL
+				"struct SOexResourceInfo" oexNL
+				"{" oexNL
+				"\tconst char         *name;" oexNL
+				"\tconst char*        data;" oexNL
+				"\tunsigned long      size;" oexNL
+				"};" oexNL 
+				oexNL
+				"extern const SOexResourceInfo _g_oexlib_resources[];" oexNL
 				);
 
 		oex::CFile fCmp;
 		if ( fCmp.CreateAlways( oexBuildPath( sOutDir, oexT( "oexres.cpp" ) ).Ptr() ).IsOpen() )
 			fCmp.Write( CStr8() << oexNL
-				"#include \"string.h\"" oexNL "#include \"oexres.h\"" oexNL oexNL
-				"int OexGetResourceInfo( const char *sName, const void **p, long *l )" oexNL
-				"{	return OexGetResourceInfo( sName, strlen( sName ), p, l ); }" oexNL
-				"int OexGetResourceInfo( const char *sName, long max, const void **p, long *l )" oexNL
+				"#include \"oexres.h\"" oexNL 
+				"#include \"oexsym.h\"" oexNL 
+				oexNL
+				"const SOexResourceInfo _g_oexlib_resources[] = " oexNL
 				"{" oexNL
-				"\tif ( 0 );" oexNL
 				);
 
 		oex::CFile fRes;
@@ -229,15 +239,20 @@ int process(int argc, char* argv[])
 			fDep.Write( CStr8() << oexNL
 				);
 
+		oex::CFile fSym;
+		if ( fSym.CreateAlways( oexBuildPath( sOutDir, oexT( "oexsym.h" ) ).Ptr() ).IsOpen() )
+			fSym.Write( CStr8() << oexNL
+				);
+
 		// Create resources from directory
-		int ret = from_dir( pb[ oexT( "d" ) ].ToString(), sOutDir, pb, oexT( "" ), &fInc, &fCmp, &fRes, &fDep );
+		int ret = from_dir( pb[ oexT( "d" ) ].ToString(), sOutDir, pb, oexT( "" ), &fInc, &fCmp, &fRes, &fDep, &fSym );
 
 		if ( fCmp.IsOpen() )
 			fCmp.Write( CStr8() <<
-				oexNL "\telse return -1;" oexNL
+				oexNL 
+				"\t{ 0, 0, 0 }" oexNL
 				oexNL
-				"\treturn 0;" oexNL
-				"}" oexNL
+				"};" oexNL
 			);
 
 		return ret;
