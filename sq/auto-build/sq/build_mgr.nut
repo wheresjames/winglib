@@ -1,5 +1,5 @@
 
-dofile( _self.path( "config.nut" ) );
+_self.include( "config.nut" );
 local _cfg = CConfig();
 
 class CGlobal
@@ -40,7 +40,7 @@ function _idle(): ( _g, _cfg )
 			{
 				// Start build if not already in progress
 				if ( !_self.is_path( "./" + i[ 1 ] ) )
-				{	_self.spawn( 1, ".", i[ 1 ], _self.path( "build.nut" ), 1 );
+				{	_self.spawn( 1, ".", i[ 1 ], "build.nut", 1 );
 					_self.execute2( 0, i[ 1 ], "Build", i[ 1 ], i[ 2 ] );
 					_self.execute( 0, i[ 1 ], "Done" );
 				} // end if
@@ -54,7 +54,7 @@ function _idle(): ( _g, _cfg )
 			{
 				// Start build if not already in progress
 				if ( !_self.is_path( "./" + i[ 1 ] ) )
-				{	_self.spawn( 1, ".", i[ 1 ], _self.path( "build.nut" ), 1 );
+				{	_self.spawn( 1, ".", i[ 1 ], "build.nut", 1 );
 					_self.execute2( 0, i[ 1 ], "Cron", i[ 1 ], i[ 2 ] );
 					_self.execute( 0, i[ 1 ], "Done" );
 				} // end if

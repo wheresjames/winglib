@@ -558,6 +558,33 @@ int CSqIrrlicht::InsertPlane( irr::scene::IMeshSceneNode *pNode,
     return 1;
 }
 
+CSqirrNode CSqIrrlicht::AddPlane( float fWidth, float fHeight, long lSides, CSqirrColor &rColor )
+{
+    if ( !m_pSmgr )
+        return CSqirrNode();
+
+    irr::scene::SMesh *pMesh = new irr::scene::SMesh();
+    if ( !pMesh )
+        return CSqirrNode();
+
+    // Add empty mesh
+    irr::scene::IMeshSceneNode *pNode =
+        m_pSmgr->addMeshSceneNode( pMesh );
+    pMesh->drop();
+
+    if ( !pNode )
+        return CSqirrNode();
+
+	// Add a plane
+	InsertPlane( pNode, irr::core::vector3df( 0, fHeight, 0 ),
+                        irr::core::vector3df( fWidth, fHeight, 0 ),
+                        irr::core::vector3df( 0, 0, 0 ),
+                        irr::core::vector3df( fWidth, 0, 0 ),
+                        rColor.Obj(), lSides, 0, 1, 0, 1 );
+
+	return pNode;
+}
+
 CSqirrNode CSqIrrlicht::AddGrid( float fWidth, float fHeight,
                                  long lXPanels, long lYPanels,
                                  float fSpace, long lSides,

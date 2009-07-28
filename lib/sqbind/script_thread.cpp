@@ -368,7 +368,7 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 			} // end if
 
 			else
-				pSt->SetScript( mapParams[ oexT( "script" ) ].c_str(), 1 );
+				pSt->SetScript( m_cSqEngine.path( mapParams[ oexT( "script" ) ] ).c_str(), 1 );
 		} // end if
 
 		else

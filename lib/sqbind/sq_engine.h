@@ -195,6 +195,8 @@ public:
 	int tofloat( const stdString &s )
 	{	return oexStrToFloat( s.c_str() ); }
 
+	stdString& GetRoot() { return m_sRoot; }
+
 protected:
 
 	virtual int OnImport( const stdString &sClass );

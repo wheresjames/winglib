@@ -1,5 +1,5 @@
 
-dofile( _self.path( "config.nut" ) );
+_self.include( "config.nut" );
 local _cfg = CConfig();
 
 function pg_run( mRequest, mHeaders, mGet, mPost ) : ( _cfg )

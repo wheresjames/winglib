@@ -32,7 +32,7 @@ function _init() : ( _g )
     local rotate = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.1, 0 ) );
     node.AddAnimator( rotate );
 
-	local tex = _g.irr.LoadTexture( "../../lib/winglib/etc/media/wheresjames_logo.png", 1 );
+	local tex = _g.irr.LoadTexture( _self.path( "../media/wheresjames_logo.png" ), 1 );
     node.SetTexture( 0, tex );
 }
 

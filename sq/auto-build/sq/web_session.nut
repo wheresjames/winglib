@@ -1,5 +1,5 @@
 
-dofile( _self.path( "config.nut" ) );
+_self.include( "config.nut" );
 local _cfg = CConfig();
 
 class CGlobal
@@ -32,17 +32,17 @@ function OnProcessRequest( request, headers, get, post ) : ( _g, _cfg )
 		case "" :
 		case "/" :
 		case "/home" :
-			dofile( _self.path( "pg_home.nut" ) );
+			_self.include( "pg_home.nut" );
 			page = pg_run( mRequest, mHeaders, mGet, mPost );
 			break;
 
 		case "/build" :
-			dofile( _self.path( "pg_build.nut" ) );
+			_self.include( "pg_build.nut" );
 			page = pg_run( mRequest, mHeaders, mGet, mPost );
 			break;
 
 		case "/cron" :
-			dofile( _self.path( "pg_cron.nut" ) );
+			_self.include( "pg_cron.nut" );
 			page = pg_run( mRequest, mHeaders, mGet, mPost );
 			break;
 

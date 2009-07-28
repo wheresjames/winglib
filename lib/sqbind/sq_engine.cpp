@@ -678,74 +678,25 @@ oex::oexBOOL CSqEngine::Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oex
 
 int CSqEngine::OnInclude( const stdString &sScript )
 {
-	oex::oexBOOL bFile = oex::oexTRUE;
-	oex::oexCSTR pScript = sScript.c_str();
-
-	stdString sData;
-	if ( m_fIncludeScript )
-	{
-		if ( m_fIncludeScript( sScript, sData ) || !sData.length() )
-			return -1;
-
-		pScript = sData.c_str();
-		bFile = oex::oexFALSE;
-
-	} // end if
-
-	stdString sRoot;
-
 	_oexTRY
 	{
-		oex::CStr sFull;
+		oex::oexBOOL bFile = oex::oexTRUE;
+		oex::oexCSTR pScript = sScript.c_str();
 
-		if ( bFile )
+		// See if there is an embedded include handler
+		stdString sData;
+		if ( m_fIncludeScript )
 		{
-			// +++ Change this to current working directory
-			//     Add oexWorkingDirectory()
+			if ( m_fIncludeScript( sScript, sData ) || !sData.length() )
+				return -1;
 
-			// Does it point to a valid file?
-			if ( oexExists( pScript ) )
-
-				sRoot = oex::CStr( pScript ).GetPath().Ptr();
-
-			else
-			{
-				// Check relative to exe path
-				sFull = oexGetModulePath();
-				sFull.BuildPath( pScript );
-				if ( oexExists( sFull.Ptr() ) )
-				{	sRoot = sFull.GetPath().Ptr();
-					pScript = sFull.Ptr();
-				} // end if
-
-				else
-				{
-					// Check relative to scripts path
-					sFull = oexGetModulePath();
-					sFull.BuildPath( oexT( "scripts" ) );
-					sFull.BuildPath( pScript );
-					if ( oexExists( sFull.Ptr() ) )
-					{	sRoot = sFull.GetPath().Ptr();
-						pScript = sFull.Ptr();
-					} // end if
-
-					else
-					{	oexERROR( 0, oexMks( oexT( "Script not found : " ), pScript ) );
-						return oex::oexFALSE;
-					} // end else
-
-				} // end else
-
-			} // end else
+			pScript = sData.c_str();
+			bFile = oex::oexFALSE;
 
 		} // end if
 
-		// Save away root path
-		else
-			sRoot = oexGetModulePath().Ptr();
-
 		// Load the script
-		m_script = bFile ? m_vm.CompileScript( pScript )
+		m_script = bFile ? m_vm.CompileScript( oexBuildPath( m_sRoot.c_str(), sScript.c_str() ).Ptr() )
 						 : m_vm.CompileBuffer( pScript );
 
 		// Run the script
@@ -754,9 +705,9 @@ int CSqEngine::OnInclude( const stdString &sScript )
 	} // end try
 
 	_oexCATCH( SScriptErrorInfo &e )
-	{	return LogError( oex::oexFALSE, e ); }
+	{	return LogError( -2, e ); }
 	_oexCATCH( SquirrelError &e )
-	{	return LogErrorM( oex::oexFALSE, e.desc ); }
+	{	return LogErrorM( -3, e.desc ); }
 
 	return 0;
 }

@@ -122,11 +122,14 @@ public:
 	CSqirrNode AddSphere( float fRadius, long lPolyCount );
 
 
-	// Adds a grid node
+	/// Adds a grid node
 	CSqirrNode AddGrid( float fWidth, float fHeight,
 						long lXPanels, long lYPanels,
 						float fSpace, long lSides,
 						CSqirrColor &rColor );
+
+	/// Adds a plane
+	CSqirrNode AddPlane( float fWidth, float fHeight, long lSides, CSqirrColor &rColor );
 
 	/// Creates a mesh animator
 	int AddMeshAnimator( sqbind::CSqEngineExport *e, CSqirrNode &n, SquirrelObject soF, long lFreq );

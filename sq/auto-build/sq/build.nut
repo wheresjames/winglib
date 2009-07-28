@@ -1,5 +1,5 @@
 
-dofile( _self.path( "config.nut" ) );
+_self.include( "config.nut" );
 local _cfg = CConfig();
 
 class CGlobal

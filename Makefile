@@ -23,7 +23,9 @@ ifdef SQMOD
 	                          app/sq_modules/sqmod_http app/sq_modules/sqmod_gdchart \
 	                          app/sq_modules/sqmod_curl app/sq_modules/sqmod_webkit \
 	                          \
-	                          app/sq_apps/sqa_test
+	                          app/sq_apps/sqa_test \
+	                          \
+	                          sq/auto-build
 	ifdef 3D
 		BUILDDIRS := $(BUILDDIRS) app/sq_modules/sqmod_irrlicht \
 								  \

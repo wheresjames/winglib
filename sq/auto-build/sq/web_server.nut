@@ -24,7 +24,7 @@ function OnProcessRequest( request, headers, get, post ) : ( _g )
 function _init() : ( _g )
 {
 	// Set callback script
-	_g.server.SetSessionCallbackScript( _self.queue(), _self.path( "web_session.nut" ), 1, "OnProcessRequest" );
+	_g.server.SetSessionCallbackScript( _self.queue(), "web_session.nut", 1, "OnProcessRequest" );
 
 	// Create logs folder
 	CSqFile().mkdir( _self.root( "weblogs" ) );
