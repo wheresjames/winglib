@@ -4,39 +4,35 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := xml
-PRJ_TYPE := lib
-PRJ_INCS := libxml/include winglib/dep/etc/libxml/inc/posix zlib
-PRJ_LIBS := 
-PRJ_DEFS :=
-PRJ_LIBROOT := ..
+PRJ_NAME := sqmod_gstreamer
+PRJ_TYPE := dll
+PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
+			gstreamer glib glib/glib glib/gmodule glib/gobject \
+			libxml/include winglib/dep/etc/libxml/inc/posix
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib \
+			gstreamer glib xml
+PRJ_DEFS := 
+PRJ_LIBP :=
+PRJ_OSLB :=
+ 
+PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
+
+PRJ_LIBROOT := ../../..
 
 #-------------------------------------------------------------------
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-#ifeq ($(BUILD_WEBKIT),)
-#UNSUPPORTED := Set make option BUILD_WEBKIT=1 to build
-#include $(PRJ_LIBROOT)/unsupported.mk
-#else
+ifndef BUILD_GSTREAMER
+UNSUPPORTED := Set make option BUILD_GSTREAMER=1 to build
+include $(PRJ_LIBROOT)/unsupported.mk
+else
 
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------
 export LOC_TAG := def
-LOC_CXX_def := c
-LOC_SRC_def := $(CFG_LIBROOT)/libxml
-LOC_EXC_def := rngparser schematron testapi testchar testdict \
-			   testC14N testdso testHTML testModule testOOM testOOMlib testReader \
-			   testrecurse testRegexp testRelax testSAX testSchemas \
-			   testThreads testThreadsWin32 testURI testXPath trionan \
-			   xmlcatalog xmlreader xmllint
-			   
-ifeq ($(PLATFORM),posix)
-	LOC_EXC_def := $(LOC_EXC_def) threads trio
-endif
-			   
 include $(PRJ_LIBROOT)/build.mk
 
 #-------------------------------------------------------------------
@@ -44,5 +40,4 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-#endif
-
+endif

@@ -19,7 +19,7 @@ endif
 ifdef SQMOD
 	BUILDDIRS := $(BUILDDIRS) lib/sqbind app/sqrl app/sqengine \
 							  app/sq_modules/sqmod_test app/sq_modules/sqmod_cell \
-							  app/sq_modules/sqmod_ffmpeg \
+							  app/sq_modules/sqmod_ffmpeg app/sq_modules/sqmod_gstreamer\
 	                          app/sq_modules/sqmod_http app/sq_modules/sqmod_gdchart \
 	                          app/sq_modules/sqmod_curl app/sq_modules/sqmod_webkit \
 	                          \
