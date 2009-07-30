@@ -17,6 +17,9 @@ public:
 	/// Releases all resources
 	void Destroy();
 
+	/// Initializes capture stream
+	int Init();
+
 private:
 
 };

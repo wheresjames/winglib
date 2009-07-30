@@ -8,7 +8,7 @@ PRJ_NAME := xml
 PRJ_TYPE := lib
 PRJ_INCS := libxml/include winglib/dep/etc/libxml/inc/posix zlib
 PRJ_LIBS := 
-PRJ_DEFS :=
+PRJ_DEFS := LIBXML_THREAD_ENABLED=1
 PRJ_LIBROOT := ..
 
 #-------------------------------------------------------------------
@@ -31,10 +31,10 @@ LOC_EXC_def := rngparser schematron testapi testchar testdict \
 			   testC14N testdso testHTML testModule testOOM testOOMlib testReader \
 			   testrecurse testRegexp testRelax testSAX testSchemas \
 			   testThreads testThreadsWin32 testURI testXPath trionan \
-			   xmlcatalog xmlreader xmllint
+			   xmlcatalog xmllint
 			   
 ifeq ($(PLATFORM),posix)
-	LOC_EXC_def := $(LOC_EXC_def) threads trio
+	LOC_EXC_def := $(LOC_EXC_def) trio
 endif
 			   
 include $(PRJ_LIBROOT)/build.mk

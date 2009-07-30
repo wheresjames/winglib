@@ -290,9 +290,11 @@ public:
 	/// Waits for a new frame of video
 	virtual oexBOOL WaitForFrame( oexUINT x_uTimeout = 0 )
 	{
-		if ( eMaxBuffers <= ++m_nActiveBuf )
-			m_nActiveBuf = 0;
+//		if ( eMaxBuffers <= ++m_nActiveBuf )
+//			m_nActiveBuf = 0;
 
+		oexSHOW( m_nFd );
+		oexSHOW( m_nActiveBuf );
 		oexINT nFrame = m_nActiveBuf;
 		if ( -1 == IoCtl( m_nFd, VIDIOCSYNC, &nFrame ) && EAGAIN != errno )
 		{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOCSYNC : Failed to wait for frame sync, %u" ), m_nFd ) );

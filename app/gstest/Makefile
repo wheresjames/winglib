@@ -4,21 +4,16 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := sqmod_gstreamer
-PRJ_TYPE := dll
-PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
-			gstreamer glib glib/glib glib/gmodule glib/gobject \
+PRJ_NAME := gstest
+PRJ_TYPE := exe
+PRJ_INCS := gstreamer glib glib/glib glib/gmodule glib/gobject \
 			libxml/include winglib/dep/etc/libxml/inc/posix
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel \
-			gstreamer glib xml \
-			cximage jpeg png tiff zlib
+PRJ_LIBS := gstreamer glib xml zlib
 PRJ_DEFS := 
 PRJ_LIBP :=
 PRJ_OSLB :=
  
-PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
-
-PRJ_LIBROOT := ../../..
+PRJ_LIBROOT := ../..
 
 #-------------------------------------------------------------------
 # Configure build

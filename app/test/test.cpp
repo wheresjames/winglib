@@ -817,9 +817,11 @@ oex::oexRESULT TestLists()
 	it = lst.Last();
 	do
 	{
-		if ( !oexVERIFY( it.Obj() == vals[ i-- ] ) ||
-             !oexVERIFY( -1 <= i ) )
+		if ( !oexVERIFY( 0 <= i )
+			 || !oexVERIFY( it.Obj() == vals[ i ] ) )
 			return -5;
+
+		i--;
 
 	} while ( it.Prev() );
 
@@ -827,9 +829,11 @@ oex::oexRESULT TestLists()
 	i = 4;
 	for ( oex::TList< int >::iterator it3; lst.Prev( it3 ); )
 	{
-		if ( !oexVERIFY( it3.Obj() == vals[ i-- ] ) ||
-             !oexVERIFY( -1 <= i ) )
+		if ( !oexVERIFY( 0 <= i )
+			 || !oexVERIFY( it3.Obj() == vals[ i ] ) )
 			return -6;
+
+		i--;
 
 	} // end if
 
@@ -1425,7 +1429,7 @@ oex::oexRESULT TestResources()
 	// oexCHAR8 *_p = oexGetResourcePtr( "hello.txt" );
 	// oexINT _l = oexGetResourceLen( "hello.txt" );
 
-	const void *_p; long _l;
+	const void *_p = 0; long _l = 0;
 	if ( !oexVERIFY( !oexGetResource( oexT( "hello.txt" ), &_p, &_l ) ) )
 		return -1;
 
@@ -2511,7 +2515,7 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 		return -1;
 
 	// Show supported formats
-	oexEcho( cCapture.GetSupportedFormats().Ptr() );
+//	oexEcho( cCapture.GetSupportedFormats().Ptr() );
 
 	if ( !cCapture.Init() )
 		return -2;

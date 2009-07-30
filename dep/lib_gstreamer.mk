@@ -30,8 +30,12 @@ export LOC_TAG := gst
 LOC_CXX_gst := c
 LOC_SRC_gst := $(CFG_LIBROOT)/gstreamer/gst
 LOC_EXC_gst := gstregistryxml
-#LOC_EXC_gst := gstelement gsterror gstpipeline gstpreset \
-#			   gstregistryxml gsttaglist gstutils
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := gst_parse
+LOC_CXX_gst_parse := c
+LOC_SRC_gst_parse := $(CFG_LIBROOT)/gstreamer/gst/parse
+#LOC_EXC_gst_parse := 
 include $(PRJ_LIBROOT)/build.mk
 
 

@@ -6,9 +6,11 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := glib
 PRJ_TYPE := lib
-PRJ_INCS := glib glib/glib
+PRJ_INCS := glib glib/glib \
+			winglib/dep/etc/glib/inc/posix
 PRJ_LIBS := 
-PRJ_DEFS := GOBJECT_COMPILATION
+PRJ_DEFS := GOBJECT_COMPILATION LINK_SIZE=2 MAX_NAME_COUNT=10000 MAX_NAME_SIZE=32 NEWLINE=-1 \
+			POSIX_MALLOC_THRESHOLD=10 MATCH_LIMIT=10000000 MATCH_LIMIT_RECURSION=10000000
 PRJ_LIBROOT := ..
 
 #-------------------------------------------------------------------
@@ -49,6 +51,16 @@ LOC_CXX_gmodule := c
 LOC_SRC_gmodule := $(CFG_LIBROOT)/glib/gmodule
 LOC_EXC_gmodule := gmodule-ar gmodule-beos gmodule-dl gmodule-dld \
 				   gmodule-dyld	gmodule-os2 gmodule-win32
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := libcharset
+LOC_CXX_libcharset := c
+LOC_SRC_libcharset := $(CFG_LIBROOT)/glib/glib/libcharset
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := pcre
+LOC_CXX_pcre := c
+LOC_SRC_pcre := $(CFG_LIBROOT)/glib/glib/pcre
 include $(PRJ_LIBROOT)/build.mk
 
 

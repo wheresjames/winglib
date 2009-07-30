@@ -2,6 +2,13 @@
 #include "stdafx.h"
 #include "stdio.h"
 
+/*
+	you put your eyes in your pocket,
+	and your nose on the ground,
+	there ought to be a law,
+	against you coming around
+*/
+
 // Include statically linked modules
 #include "sqbind_static_build.hpp"
 
@@ -57,7 +64,9 @@ int main(int argc, char* argv[])
 			sCmd = oexGetModulePath( oexT( "scripts" ) ).BuildPath( sCmd );
 
 		else
+		{	oexEcho( oexMks( oexT( "Script not found : " ), sCmd ).Ptr() );
 			return oexERROR( -2, oexMks( oexT( "Script not found : " ), sCmd ) );
+		} // end else
 
 	} // end if
 

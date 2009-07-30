@@ -352,8 +352,8 @@ public:
 
 		} // end if
 
-		else
-			oexNOTICE( errno, oexT( "VIDIOC_CROPCAP is not supported" ) );
+//		else
+//			oexNOTICE( errno, oexT( "VIDIOC_CROPCAP is not supported" ) );
 
 		v4l2_requestbuffers req;
 		oexZeroMemory( &req, sizeof( req ) );
