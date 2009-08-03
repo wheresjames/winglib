@@ -124,8 +124,7 @@ oexINT COex::Uninit()
 
     // Free all the test classes
 //    oexFREE_TESTS();
-
-#if defined( OEX_CRT_LEAK_DETECTION ) && defined( oexDEBUG )
+#if defined( OEX_CRT_LEAK_DETECTION ) && defined( oexDEBUG ) && defined( OEX_WIN32 )
 
     oexTRACE( oexT( "\n-------------------------------- oexlib is dumping memory leaks ---\n" ) );
 

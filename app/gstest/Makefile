@@ -8,7 +8,7 @@ PRJ_NAME := gstest
 PRJ_TYPE := exe
 PRJ_INCS := gstreamer glib glib/glib glib/gmodule glib/gobject \
 			libxml/include winglib/dep/etc/libxml/inc/posix
-PRJ_LIBS := gstreamer glib xml zlib
+PRJ_LIBS := gstreamer gst-plugins-good glib xml zlib
 PRJ_DEFS := 
 PRJ_LIBP :=
 PRJ_OSLB :=

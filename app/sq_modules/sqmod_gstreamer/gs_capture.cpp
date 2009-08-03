@@ -71,11 +71,11 @@ static void bus_callback(GstBus *bus, GstMessage *message, void *appdata)
 
 // gst_registry_find_feature
 
-//#define VIDEO_SRC "v4l2src"
-//#define VIDEO_SINK "xvimagesink"
+#define VIDEO_SRC "v4l2src"
+#define VIDEO_SINK "xvimagesink"
 
-#define VIDEO_SRC "v4lsrc"
-#define VIDEO_SINK "ximagesink"
+//#define VIDEO_SRC "v4lsrc"
+//#define VIDEO_SINK "ximagesink"
 
 //#define VIDEO_SRC "gnomevfssrc"
 
@@ -106,9 +106,9 @@ int CGsCapture::Init()
 	 * message bus */
 	pipeline = gst_pipeline_new("test-camera");
 
-	bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
-	gst_bus_add_watch(bus, (GstBusFunc)bus_callback, loop);
-	gst_object_unref(GST_OBJECT(bus));
+	bus = gst_pipeline_get_bus( GST_PIPELINE( pipeline ) );
+	gst_bus_add_watch( bus, (GstBusFunc)bus_callback, loop );
+	gst_object_unref( GST_OBJECT( bus ) );
 
 /*
 	GstElement *filesrc  = gst_element_factory_make ("filesrc", "my_filesource");
@@ -121,7 +121,7 @@ int CGsCapture::Init()
 
 	/* Create elements */
 	/* Camera video stream comes from a Video4Linux driver */
-	camera_src = gst_element_factory_make(VIDEO_SRC, "camera_src");
+	camera_src = gst_element_factory_make("v4l2src", "camera_src");
 
 //	gst_play_error_plugin (VIDEO_SRC, &err);
 
@@ -143,6 +143,7 @@ int CGsCapture::Init()
 	/* Filter to convert stream to use format that the gdkpixbuf library
 	 * can use */
 	image_filter = gst_element_factory_make("ffmpegcolorspace", "image_filter");
+
 	/* A dummy sink for the image stream. Goes to bitheaven */
 	image_sink = gst_element_factory_make("fakesink", "image_sink");
 
@@ -228,6 +229,32 @@ int CGsCapture::Init()
 //			 screen_sink);
 
 	gst_element_set_state(pipeline, GST_STATE_PLAYING);
+
+	{ // Take snap shot
+
+		GstElement *image_sink;
+
+		/* Get the image sink element from the pipeline */
+		image_sink = gst_bin_get_by_name(GST_BIN(pipeline),
+				"image_sink");
+				
+		if ( !image_sink )				
+		{	oexEcho( "image_sink is null" );
+			return -1;
+		}
+				
+
+		/* Display a note to the user */
+//		hildon_banner_show_information(GTK_WIDGET(appdata->window),
+	//		NULL, "Taking Photo");
+
+		/* Connect the "handoff"-signal of the image sink to the
+		 * callback. This gets called whenever the sink gets a
+		 * buffer it's ready to pass forward on the pipeline */
+//		appdata->buffer_cb_id = g_signal_connect(
+//				G_OBJECT(image_sink), "handoff",
+//				G_CALLBACK(buffer_probe_callback), appdata);
+	}
 
 	return 0;
 }

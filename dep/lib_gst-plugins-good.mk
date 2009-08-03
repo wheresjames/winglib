@@ -4,12 +4,15 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := gstreamer
+PRJ_NAME := gst-plugins-good
 PRJ_TYPE := lib
-PRJ_INCS := gstreamer glib glib/glib glib/gmodule glib/gobject \
+PRJ_INCS := gstreamer gstreamer/libs \
+			gst-plugins-base/gst-libs \
+			gst-plugins-good/gst-libs \
+			glib glib/glib glib/gmodule glib/gobject \
 			libxml/include winglib/dep/etc/libxml/inc/posix
 PRJ_LIBS := 
-PRJ_DEFS := HAVE_CONFIG_H=1 
+PRJ_DEFS := HAVE_CONFIG_H=1
 PRJ_LIBROOT := ..
 
 #-------------------------------------------------------------------
@@ -26,16 +29,10 @@ else
 # File locations
 #-------------------------------------------------------------------
 
-export LOC_TAG := gst
-LOC_CXX_gst := c
-LOC_SRC_gst := $(CFG_LIBROOT)/gstreamer/gst
-LOC_EXC_gst := gstregistryxml
-include $(PRJ_LIBROOT)/build.mk
-
-export LOC_TAG := gst_parse
-LOC_CXX_gst_parse := c
-LOC_SRC_gst_parse := $(CFG_LIBROOT)/gstreamer/gst/parse
-#LOC_EXC_gst_parse := 
+export LOC_TAG := gp_v4l2
+LOC_CXX_gp_v4l2 := c
+LOC_SRC_gp_v4l2 := $(CFG_LIBROOT)/gst-plugins-good/sys/v4l2
+LOC_EXC_gp_v4l2 := gstv4l2xoverlay
 include $(PRJ_LIBROOT)/build.mk
 
 

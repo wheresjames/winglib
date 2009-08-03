@@ -64,7 +64,16 @@ main (gint   argc,
   gst_object_unref (bus);
 
   filesrc  = gst_element_factory_make ("filesrc", "my_filesource");
+  if ( !filesrc ) {
+    g_print ("filesrc is null\n");
+    return -1;
+  }
+
   decoder  = gst_element_factory_make ("mad", "my_decoder");
+  if ( !decoder ) {
+    g_print ("decoder is null\n");
+    return -1;
+  }
 
   /* putting an audioconvert element here to convert the output of the
    * decoder into a format that my_filter can handle (we are assuming it
@@ -72,7 +81,7 @@ main (gint   argc,
   convert1 = gst_element_factory_make ("audioconvert", "audioconvert1");
 
   /* use "identity" here for a filter that does nothing */
-  filter   = gst_element_factory_make ("my_filter", "my_filter");
+  filter   = gst_element_factory_make ("identity", "identity");
 
   /* there should always be audioconvert and audioresample elements before
    * the audio sink, since the capabilities of the audio sink usually vary
