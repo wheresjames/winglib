@@ -4,9 +4,11 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := gstreamer
+PRJ_NAME := gst-plugins-base
 PRJ_TYPE := lib
-PRJ_INCS := gstreamer \
+PRJ_INCS := gstreamer gstreamer/libs \
+			winglib/dep/etc/gstreamer/inc/posix \
+			gst-plugins-base/gst-libs \
 			glib glib/glib glib/gmodule glib/gobject \
 			libxml/include winglib/dep/etc/libxml/inc/posix
 PRJ_LIBS := 
@@ -27,25 +29,11 @@ else
 # File locations
 #-------------------------------------------------------------------
 
-export LOC_TAG := gst
-LOC_CXX_gst := c
-LOC_SRC_gst := $(CFG_LIBROOT)/gstreamer/gst
-LOC_EXC_gst := gstregistryxml
+export LOC_TAG := gpb_interfaces
+LOC_CXX_gpb_interfaces := c
+LOC_SRC_gpb_interfaces := $(CFG_LIBROOT)/gst-plugins-base/gst-libs/gst/interfaces
+LOC_EXC_gpb_interfaces := navigation
 include $(PRJ_LIBROOT)/build.mk
-
-export LOC_TAG := gst_parse
-LOC_CXX_gst_parse := c
-LOC_SRC_gst_parse := $(CFG_LIBROOT)/gstreamer/gst/parse
-#LOC_EXC_gst_parse := 
-include $(PRJ_LIBROOT)/build.mk
-
-export LOC_TAG := gst_libs_base
-LOC_CXX_gst_libs_base := c
-LOC_INC_gst_libs_base := $(CFG_LIBROOT)/gstreamer/libs
-LOC_SRC_gst_libs_base := $(CFG_LIBROOT)/gstreamer/libs/gst/base
-#LOC_EXC_gst_libs_base := 
-include $(PRJ_LIBROOT)/build.mk
-
 
 #-------------------------------------------------------------------
 # Execute the build

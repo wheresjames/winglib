@@ -1,45 +1,12 @@
 
-default_target: all
-
-#-------------------------------------------------------------------
-# Project
-#-------------------------------------------------------------------
-PRJ_NAME := gst-plugins-good
-PRJ_TYPE := lib
-PRJ_INCS := gstreamer gstreamer/libs \
-			gst-plugins-base/gst-libs \
-			gst-plugins-good/gst-libs \
-			glib glib/glib glib/gmodule glib/gobject \
-			libxml/include winglib/dep/etc/libxml/inc/posix
-PRJ_LIBS := 
-PRJ_DEFS := HAVE_CONFIG_H=1
-PRJ_LIBROOT := ..
-
-#-------------------------------------------------------------------
-# Configure build
-#-------------------------------------------------------------------
-include $(PRJ_LIBROOT)/config.mk
-
-ifndef BUILD_GSTREAMER
-UNSUPPORTED := Set make option BUILD_GSTREAMER=1 to build
-include $(PRJ_LIBROOT)/unsupported.mk
-else
-
-#-------------------------------------------------------------------
-# File locations
-#-------------------------------------------------------------------
-
-export LOC_TAG := gp_v4l2
-LOC_CXX_gp_v4l2 := c
-LOC_SRC_gp_v4l2 := $(CFG_LIBROOT)/gst-plugins-good/sys/v4l2
-LOC_EXC_gp_v4l2 := gstv4l2xoverlay
-include $(PRJ_LIBROOT)/build.mk
-
-
-#-------------------------------------------------------------------
-# Execute the build
-#-------------------------------------------------------------------
-include $(PRJ_LIBROOT)/go.mk
-
-endif
+.PHONY all: 
+	$(MAKE) -f lib_gst-plugins-good.i \
+			MK_MODULE=v4l2src \
+			MK_PATH=gst-plugins-good/sys/v4l2 \
+			MK_EXCLUDE=gstv4l2xoverlay			
+	$(MAKE) -f lib_gst-plugins-good.i \
+			MK_MODULE=xvimage \
+			MK_PATH=gst-plugins-base/sys/xvimage \
+			MK_EXCLUDE= \
+			MK_OSLB="X11 Xxf86vm Xv"
 
