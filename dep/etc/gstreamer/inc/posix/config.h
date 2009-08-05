@@ -18,7 +18,7 @@
 /* #undef GST_DISABLE_OPTION_PARSING */
 
 /* Define if pipeline parsing code is disabled */
-/* #undef GST_DISABLE_PARSE */
+#define GST_DISABLE_PARSE
 
 /* Extra platform specific plugin suffix */
 /* #undef GST_EXTRA_MODULE_SUFFIX */
@@ -37,7 +37,7 @@
 #define GST_ORIGIN ""
 
 /* Home directory to use */
-#define GST_HOME_DIR "."
+#define GST_ROOT_PATH "."
 
 /* package name in plugins */
 #define GST_PACKAGE "GStreamer"

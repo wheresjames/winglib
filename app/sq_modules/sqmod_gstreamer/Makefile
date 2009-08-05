@@ -7,7 +7,8 @@ default_target: all
 PRJ_NAME := sqmod_gstreamer
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
-			gstreamer glib glib/glib glib/gmodule glib/gobject \
+			gstreamer/gstreamer winglib/dep/etc/gstreamer/inc/posix \
+			glib glib/glib glib/gmodule glib/gobject \
 			libxml/include winglib/dep/etc/libxml/inc/posix
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel \
 			gstreamer glib xml \

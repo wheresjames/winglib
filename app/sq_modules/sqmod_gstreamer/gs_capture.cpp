@@ -91,6 +91,7 @@ int CGsCapture::Init()
 	/* Initialize Gstreamer */
 //	gst_init( 0, 0 );
 
+oexM();
 	GError *err = 0;
 	if ( !gst_init_check( 0, 0, &err ) )
 	{	oexSHOW( err->message );
@@ -98,6 +99,7 @@ int CGsCapture::Init()
 		oexEcho( "gst_init_check() failed" );
 		return -1;
 	}
+oexM();
 
 	loop = g_main_loop_new (NULL, FALSE);
 	oexSHOW( (int)loop );
@@ -125,14 +127,22 @@ int CGsCapture::Init()
 
 //	gst_play_error_plugin (VIDEO_SRC, &err);
 
+oexM();
 
 	/* Colorspace filter is needed to make sure that sinks understands
 	 * the stream coming from the camera */
 	csp_filter = gst_element_factory_make("ffmpegcolorspace", "csp_filter");
+
+oexM();
+
 	/* Tee that copies the stream to multiple outputs */
 	tee = gst_element_factory_make("tee", "tee");
+
+
 	/* Queue creates new thread for the stream */
 	screen_queue = gst_element_factory_make("queue", "screen_queue");
+
+
 	/* Sink that shows the image on screen. Xephyr doesn't support XVideo
 	 * extension, so it needs to use ximagesink, but the device uses
 	 * xvimagesink */
@@ -146,6 +156,8 @@ int CGsCapture::Init()
 
 	/* A dummy sink for the image stream. Goes to bitheaven */
 	image_sink = gst_element_factory_make("fakesink", "image_sink");
+
+oexM();
 
 	/* Check that elements are correctly initialized */
 	if(!(pipeline && bus && camera_src && screen_sink && csp_filter && screen_queue
@@ -183,6 +195,8 @@ int CGsCapture::Init()
 			NULL);
 
 
+oexM();
+
 	/* Link the camera source and colorspace filter using capabilities
 	 * specified */
 	if(!gst_element_link_filtered(camera_src, csp_filter, caps))
@@ -210,6 +224,8 @@ int CGsCapture::Init()
 			"framerate", GST_TYPE_FRACTION, 15, 1,
 			NULL);
 
+oexM();
+
 	/* Link the image-branch of the pipeline. The pipeline is
 	 * ready after this */
 	if(!gst_element_link_many(tee, image_queue, image_filter, NULL))
@@ -228,7 +244,11 @@ int CGsCapture::Init()
 //	g_signal_connect(appdata->screen, "expose-event", G_CALLBACK(expose_cb),
 //			 screen_sink);
 
+oexM();
+
 	gst_element_set_state(pipeline, GST_STATE_PLAYING);
+
+oexM();
 
 	{ // Take snap shot
 
@@ -237,12 +257,12 @@ int CGsCapture::Init()
 		/* Get the image sink element from the pipeline */
 		image_sink = gst_bin_get_by_name(GST_BIN(pipeline),
 				"image_sink");
-				
-		if ( !image_sink )				
+
+		if ( !image_sink )
 		{	oexEcho( "image_sink is null" );
 			return -1;
 		}
-				
+
 
 		/* Display a note to the user */
 //		hildon_banner_show_information(GTK_WIDGET(appdata->window),

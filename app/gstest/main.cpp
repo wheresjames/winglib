@@ -79,9 +79,17 @@ main (gint   argc,
    * decoder into a format that my_filter can handle (we are assuming it
    * will handle any sample rate here though) */
   convert1 = gst_element_factory_make ("audioconvert", "audioconvert1");
+  if ( !convert1 ) {
+    g_print ("convert1 is null\n");
+    return -1;
+  }
 
   /* use "identity" here for a filter that does nothing */
   filter   = gst_element_factory_make ("identity", "identity");
+  if ( !filter ) {
+    g_print ("filter is null\n");
+    return -1;
+  }
 
   /* there should always be audioconvert and audioresample elements before
    * the audio sink, since the capabilities of the audio sink usually vary

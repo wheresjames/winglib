@@ -4,17 +4,15 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := gst$(MK_MODULE)
-PRJ_TYPE := dll
-PRJ_INCS := gstreamer gstreamer/libs \
+PRJ_NAME := gst-plugins-base
+PRJ_TYPE := lib
+PRJ_INCS := gstreamer/gstreamer gstreamer/gstreamer/libs \
 			winglib/dep/etc/gstreamer/inc/posix \
-			gst-plugins-base/gst-libs \
-			gst-plugins-good/gst-libs \
+			/gstreamer/gst-plugins-base/gst-libs \
 			glib glib/glib glib/gmodule glib/gobject \
 			libxml/include winglib/dep/etc/libxml/inc/posix
-PRJ_LIBS := gstreamer gst-plugins-base
-PRJ_DEFS := HAVE_CONFIG_H=1
-PRJ_OSLB := $(MK_OSLB)
+PRJ_LIBS := 
+PRJ_DEFS := HAVE_CONFIG_H=1 
 PRJ_LIBROOT := ..
 
 #-------------------------------------------------------------------
@@ -31,12 +29,17 @@ else
 # File locations
 #-------------------------------------------------------------------
 
-export LOC_TAG := gstm_$(MK_MODULE)
-LOC_CXX_gstm_$(MK_MODULE) := c
-LOC_SRC_gstm_$(MK_MODULE) := $(CFG_LIBROOT)/$(MK_PATH)
-LOC_EXC_gstm_$(MK_MODULE) := $(MK_EXCLUDE)
+export LOC_TAG := gpb_interfaces
+LOC_CXX_gpb_interfaces := c
+LOC_SRC_gpb_interfaces := $(CFG_LIBROOT)/gstreamer/gst-plugins-base/gst-libs/gst/interfaces
+LOC_EXC_gpb_interfaces := 
 include $(PRJ_LIBROOT)/build.mk
 
+export LOC_TAG := gpb_video
+LOC_CXX_gpb_video := c
+LOC_SRC_gpb_video := $(CFG_LIBROOT)/gstreamer/gst-plugins-base/gst-libs/gst/video
+LOC_EXC_gpb_video := 
+include $(PRJ_LIBROOT)/build.mk
 
 #-------------------------------------------------------------------
 # Execute the build
