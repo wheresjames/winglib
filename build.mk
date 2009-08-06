@@ -10,23 +10,6 @@ ifneq ($(PRJ_DEFS),)
 	PRJ_DEFS := 
 endif
 
-ifndef BLD_FILE_EXE
-	ifdef PRJ_FILE_EXE		 
-		BLD_FILE_EXE := $(PRJ_FILE_EXE)
-	else
-		ifeq ($(PRJ_TYPE),lib)
-			BLD_FILE_EXE := $(CFG_LIB_PRE)$(PRJ_NAME)$(CFG_DPOSTFIX)$(CFG_LIB_POST)
-		else
-			ifeq ($(PRJ_TYPE),dll)
-				BLD_FILE_EXE := $(CFG_DLL_PRE)$(PRJ_NAME)$(CFG_DPOSTFIX)$(CFG_DLL_POST)
-			else
-				BLD_FILE_EXE := $(CFG_EXE_PRE)$(PRJ_NAME)$(CFG_DPOSTFIX)$(CFG_EXE_POST)
-			endif
-		endif
-	endif
-	BLD_PATH_EXE := $(CFG_OUTROOT)/$(BLD_FILE_EXE)	
-endif
-
 ifeq ($(LOC_CXX_$(LOC_TAG)),)
 	LOC_CXX_$(LOC_TAG) := cpp
 endif
@@ -72,9 +55,9 @@ endif
 endif
 
 #ifneq ($(LOC_OUT_$(LOC_TAG)),)
-#BLD_PATH_BIN_$(LOC_TAG) := $(CFG_OUTROOT)/_$(PRJ_NAME)/$(LOC_OUT_$(LOC_TAG))
+#BLD_PATH_BIN_$(LOC_TAG) := $(CFG_OUTROOT)/_0_obj/$(PRJ_NAME)/$(LOC_OUT_$(LOC_TAG))
 #else
-BLD_PATH_BIN_$(LOC_TAG) := $(CFG_OUTROOT)/_$(PRJ_NAME)/$(LOC_TAG)
+BLD_PATH_BIN_$(LOC_TAG) := $(CFG_OUTROOT)/_0_obj/$(PRJ_NAME)/$(LOC_TAG)
 #endif
 
 BLD_PATH_OBJ_$(LOC_TAG) := $(BLD_PATH_BIN_$(LOC_TAG))

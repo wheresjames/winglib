@@ -1,5 +1,21 @@
 
 # go.mk
+ifndef BLD_FILE_EXE
+	ifdef PRJ_FILE_EXE		 
+		BLD_FILE_EXE := $(PRJ_FILE_EXE)
+	else
+		ifeq ($(PRJ_TYPE),lib)
+			BLD_FILE_EXE := $(CFG_LIB_PRE)$(PRJ_NAME)$(CFG_DPOSTFIX)$(CFG_LIB_POST)
+		else
+			ifeq ($(PRJ_TYPE),dll)
+				BLD_FILE_EXE := $(CFG_DLL_PRE)$(PRJ_NAME)$(CFG_DPOSTFIX)$(CFG_DLL_POST)
+			else
+				BLD_FILE_EXE := $(CFG_EXE_PRE)$(PRJ_NAME)$(CFG_DPOSTFIX)$(CFG_EXE_POST)
+			endif
+		endif
+	endif
+	BLD_PATH_EXE := $(CFG_OUTROOT)/$(BLD_FILE_EXE)	
+endif
 
 ifdef PRJ_SQRL
 export LOC_TAG := sq
@@ -105,3 +121,5 @@ all: $(BLD_ALL) $(BLD_PATH_EXE)
 rebuild: $(BLD_REBUILD) $(BLD_PATH_EXE)
 setup: $(BLD_SETUP)
 clean: $(BLD_CLEAN)
+
+

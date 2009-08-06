@@ -554,6 +554,10 @@ else
 	CFG_OUTROOT  := $(CFG_BINROOT)
 endif
 
+ifdef PRJ_SUBROOT
+	CFG_OUTROOT := $(CFG_OUTROOT)/$(PRJ_SUBROOT)
+endif
+
 CFG_INCS := $(foreach inc,$(PRJ_INCS), $(CFG_CC_INC)$(CFG_LIBROOT)/$(inc))
 
 ifdef PRJ_RESCMP
@@ -572,7 +576,7 @@ else
 	CFG_RES_INP := $(foreach res,$(PRJ_RESD),$(res))
 endif
 
-CFG_RES_OUT := $(CFG_OUTROOT)/_$(PRJ_NAME)/_res
+CFG_RES_OUT := $(CFG_OUTROOT)/_0_res/$(PRJ_NAME)
 CFG_RES_DEP := $(CFG_RES_OUT)/oexres.dpp
 CFG_RES_INC := $(CFG_RES_OUT)/oexres.h
 CFG_RES_MAK := $(CFG_RES_OUT)/oexres.mk
@@ -594,12 +598,12 @@ ifneq ($(BUILD),vs)
 	include $(wildcard $(CFG_RES_OUT)/*.$(CFG_DEP_EXT))
 endif
 
-#.PRECIOUS: $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.cpp: $(RES_CPP)
-$(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.cpp: 
+#.PRECIOUS: $(CFG_RES_OUT)/%.cpp: $(RES_CPP)
+$(CFG_RES_OUT)/%.cpp: 
 	$(CFG_TOOL_RESCMP) -d:'$(CFG_RES_INP)' -o:'$(CFG_RES_OUT)'
 
-.PRECIOUS: $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.$(CFG_OBJ_EXT)
-$(CFG_RES_OUT)/%.$(CFG_OBJ_EXT): $(CFG_OUTROOT)/_$(PRJ_NAME)/_res/%.cpp
+.PRECIOUS: $(CFG_RES_OUT)/%.$(CFG_OBJ_EXT)
+$(CFG_RES_OUT)/%.$(CFG_OBJ_EXT): $(CFG_RES_OUT)/%.cpp
 	- $(CFG_DEL) $(subst /,\,$@)
 	$(CFG_PP) $(CFG_CFLAGS) $(CFG_INCS) $< $(CFG_CC_OUT)$@
 	

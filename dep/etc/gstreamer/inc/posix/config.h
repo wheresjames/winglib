@@ -124,7 +124,9 @@
 #define HAVE_FGETPOS 1
 
 /* Define to 1 if you have the `fork' function. */
-#define HAVE_FORK 1
+#ifndef _DEBUG
+#	define HAVE_FORK 1
+#endif
 
 /* Define to 1 if fseeko (and presumably ftello) exists and is declared. */
 #define HAVE_FSEEKO 1

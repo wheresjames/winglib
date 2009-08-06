@@ -4,7 +4,8 @@ MK_INC := lib_gst-c-gst-plugins-good.i
 .PHONY all: 
 	$(MAKE) -f $(MK_INC) \
 			MK_MODULE=coreelements \
-			MK_PATH=gstreamer/plugins/elements
+			MK_PATH=gstreamer/plugins/elements \
+			MK_EXCLUDE=
 	$(MAKE) -f $(MK_INC) \
 			MK_MODULE=video4linux \
 			MK_PATH=gst-plugins-good/sys/v4l2 \

@@ -50,8 +50,8 @@ export LOC_TAG := gst_libs_base
 LOC_CXX_gst_libs_base := c
 LOC_INC_gst_libs_base := $(CFG_LIBROOT)/gstreamer/gstreamer/libs
 LOC_SRC_gst_libs_base := $(CFG_LIBROOT)/gstreamer/gstreamer/libs/gst/base
+LOC_EXC_gst_libs_base := 
 include $(PRJ_LIBROOT)/build.mk
-
 
 #-------------------------------------------------------------------
 # Execute the build
