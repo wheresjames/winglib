@@ -17,6 +17,8 @@ PRJ_DEFS :=
 PRJ_LIBP :=
 PRJ_OSLB :=
  
+PRJ_SUBROOT := sqmod
+
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
 PRJ_LIBROOT := ../../..

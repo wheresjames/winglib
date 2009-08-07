@@ -111,7 +111,7 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 }
 
 int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
-			  oex::CStr sPath, oex::CFile *pInc, oex::CFile *pCmp, 
+			  oex::CStr sPath, oex::CFile *pInc, oex::CFile *pCmp,
 			  oex::CFile *pRes, oex::CFile *pDep, oex::CFile *pSym )
 {
 	// Ensure directory exists
@@ -150,7 +150,7 @@ int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 				 							 << oexNL "extern char " << oexStrToMb( sVar ) << "[];" oexNL );
 
 					if ( pCmp )
-						pCmp->Write( CStr8() << oexNL 
+						pCmp->Write( CStr8() << oexNL
 												"\t{" oexNL
 												"\t\t\"" << sRel << "\"," oexNL
 												"\t\t" << oexStrToMb( sVar ) << "," oexNL
@@ -205,14 +205,14 @@ int process(int argc, char* argv[])
 				"#define OEX_RESOURCES 1" oexNL
 				"#if defined( OEX_NO_RESOURCES )" oexNL
 				"#\terror 'oexres.h' MUST be included BEFORE 'oexlib.h'" oexNL
-				"#endif" oexNL 
+				"#endif" oexNL
 				oexNL
 				"struct SOexResourceInfo" oexNL
 				"{" oexNL
-				"\tconst char         *name;" oexNL
-				"\tconst char*        data;" oexNL
-				"\tunsigned long      size;" oexNL
-				"};" oexNL 
+				"\tconst char *   name;" oexNL
+				"\tconst char *   data;" oexNL
+				"\tunsigned long  size;" oexNL
+				"};" oexNL
 				oexNL
 				"extern const SOexResourceInfo _g_oexlib_resources[];" oexNL
 				);
@@ -220,8 +220,8 @@ int process(int argc, char* argv[])
 		oex::CFile fCmp;
 		if ( fCmp.CreateAlways( oexBuildPath( sOutDir, oexT( "oexres.cpp" ) ).Ptr() ).IsOpen() )
 			fCmp.Write( CStr8() << oexNL
-				"#include \"oexres.h\"" oexNL 
-				"#include \"oexsym.h\"" oexNL 
+				"#include \"oexres.h\"" oexNL
+				"#include \"oexsym.h\"" oexNL
 				oexNL
 				"const SOexResourceInfo _g_oexlib_resources[] = " oexNL
 				"{" oexNL
@@ -249,7 +249,7 @@ int process(int argc, char* argv[])
 
 		if ( fCmp.IsOpen() )
 			fCmp.Write( CStr8() <<
-				oexNL 
+				oexNL
 				"\t{ 0, 0, 0 }" oexNL
 				oexNL
 				"};" oexNL

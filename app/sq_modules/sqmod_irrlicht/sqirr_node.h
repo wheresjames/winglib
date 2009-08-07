@@ -27,21 +27,22 @@ public:
 	/// Default constructor
 	CSqirrNode() { m_p = 0; m_type = 0; }
 
-	CSqirrNode( irr::scene::ISceneNode *p ) : m_p( 0 ), m_type( 0 ) { SetPtr( p, eTypeNone ); }
-	CSqirrNode& operator = ( irr::scene::ISceneNode *p ) { SetPtr( p, eTypeNone ); }
+	CSqirrNode( irr::scene::ISceneNode *p ) : m_type( 0 ), m_p( 0 ) { SetPtr( p, eTypeNone ); }
+	CSqirrNode& operator = ( irr::scene::ISceneNode *p ) { SetPtr( p, eTypeNone ); return *this; }
 
-	CSqirrNode( irr::scene::ICameraSceneNode *p ) : m_p( 0 ), m_type( 0 ) { SetPtr( p, eTypeCamera ); }
-	CSqirrNode& operator = ( irr::scene::ICameraSceneNode *p ) { SetPtr( p, eTypeCamera ); }
+	CSqirrNode( irr::scene::ICameraSceneNode *p ) : m_type( 0 ), m_p( 0 ) { SetPtr( p, eTypeCamera ); }
+	CSqirrNode& operator = ( irr::scene::ICameraSceneNode *p ) { SetPtr( p, eTypeCamera ); return *this; }
 
 	void SetPtr( irr::scene::ISceneNode *p, int t ) { Destroy(); if ( p ) { m_p = p; p->grab(); m_type = t; } }
 	~CSqirrNode() { Destroy(); }
 	void Destroy() { if ( m_p ) { m_p->drop(); m_p = 0; } }
 
 	// Copy semantics
-	CSqirrNode( const CSqirrNode &r ) : m_p( 0 ), m_type( 0 ) { SetPtr( r.m_p, r.m_type ); }
+	CSqirrNode( const CSqirrNode &r ) : m_type( 0 ), m_p( 0 ) { SetPtr( r.m_p, r.m_type ); }
 	CSqirrNode& operator = ( const CSqirrNode &r ) { SetPtr( r.m_p, r.m_type ); return *this; }
 
 	irr::scene::ISceneNode* Ptr() { return m_p; }
+	irr::scene::ISceneNode& Obj() { return *m_p; }
 	int GetNodeType() { return m_type; }
 
 	CSqirrNode* Node() { return this; }
@@ -71,7 +72,7 @@ public:
 		if ( 0 <= lMaterial )
 			m_p->setMaterialTexture( lMaterial, st.Ptr() );
 
-		else for ( int i = 0; i < m_p->getMaterialCount(); i++ )
+		else for ( unsigned int i = 0; i < m_p->getMaterialCount(); i++ )
 			m_p->setMaterialTexture( i, st.Ptr() );
 	}
 

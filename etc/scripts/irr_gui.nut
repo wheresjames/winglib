@@ -66,11 +66,11 @@ function _init() : ( _g )
 	_g.irr.SetAmbientLight( CSqirrColorf( 0.5, 0.5, 0.5 ) );
 
 	// Add point lights
-	_g.irr.AddLight( CSqirrVector3d( 0., 200., 100. ), CSqirrColorf( 1., 1., 1. ), 800. );
-	_g.irr.AddLight( CSqirrVector3d( 50., 200., 100. ), CSqirrColorf( 1., 1., 1. ), 800. );
+	_g.irr.AddLight( CSqirrVector3d( 0., 200., -100. ), CSqirrColorf( 1., 1., 1. ), 800. );
+	_g.irr.AddLight( CSqirrVector3d( 50., 200., -100. ), CSqirrColorf( 1., 1., 1. ), 800. );
 
 	// Add default camera
-	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 0, 200 ), CSqirrVector3d( 0, 0, 0 ) );
+	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 0, -200 ), CSqirrVector3d( 0, 0, 0 ) );
 //	cam.SetLens( 1., 2.4, 3.2 );
 
 //	_g.window = _g.irr.AddGrid( 100., 100., 1, 1, 0., 2, CSqirrColor( 255, 255, 255 ) );
@@ -80,6 +80,13 @@ function _init() : ( _g )
 
 	local tex = _g.irr.LoadTexture( _self.path( "../media/car.png" ), 1 );
     _g.window.SetTexture( 0, tex );
+
+
+	local posScreen = CSqirrBoundingBox3d();
+//	local posScreen = CSqirrBoundingBox3d( 0, 0, 0, 50, 50, 50 )
+
+	_g.irr.screenToWorldBox( CSqirrRect2d( 20., 50., 220., 100. ), posScreen, 200. );
+	_g.irr.FillVolume( _g.window, posScreen );
 
 	// Add a rotator
 //	local ani = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.4, 0 ) );

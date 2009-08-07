@@ -12,6 +12,8 @@ PRJ_DEFS := HAVE_AV_CONFIG_H=1
 PRJ_LIBP :=
 PRJ_OSLB :=
  
+PRJ_SUBROOT := sqmod
+
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
 PRJ_LIBROOT := ../../..

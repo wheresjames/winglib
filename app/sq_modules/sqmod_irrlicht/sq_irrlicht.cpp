@@ -358,18 +358,16 @@ int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 	return 1;
 }
 
-int CSqIrrlicht::AddSkyDome( const sqbind::stdString &sFile,
-							 long lHorzRes, long lVertRes,
-							 float fTxtPercent, float fSpherePercent )
+CSqirrNode CSqIrrlicht::AddSkyDome( const sqbind::stdString &sFile,
+									long lHorzRes, long lVertRes,
+							 		float fTxtPercent, float fSpherePercent )
 {
 	if ( !sFile.length() )
-		return 0;
+		return CSqirrNode();
 
-    irr::scene::ISceneNode *pNode =
+	return
         m_pSmgr->addSkyDomeSceneNode( m_pDriver->getTexture( sFile.c_str() ),
                                       lHorzRes, lVertRes, fTxtPercent, fSpherePercent );
-
-    return 1;
 }
 
 // local pos = ScreenToPlane( SquirrVector2d( x, y ), 50 );
@@ -606,7 +604,6 @@ CSqirrNode CSqIrrlicht::AddGrid( float fWidth, float fHeight,
         return CSqirrNode();
 
     // Put a bunch of planes in the mesh
-    float psize = 8;
     long sy = lXPanels;
     long sx = lYPanels;
     float xp, yp;
@@ -823,7 +820,7 @@ CSqirrNode CSqIrrlicht::AddMesh( const sqbind::stdString &sFile, float x_fScale,
         if ( x_bClearFromCache )
             m_pSmgr->getMeshCache()->removeMesh( pAniMesh->getMesh() );
 
-        for ( int i = 0; i < pAniMesh->getMaterialCount(); i++ )
+        for ( unsigned int i = 0; i < pAniMesh->getMaterialCount(); i++ )
         {   pAniMesh->getMaterial( i ).NormalizeNormals = true;
             pAniMesh->getMaterial( i ).Shininess = 0;
         } // end for
@@ -1062,6 +1059,9 @@ int CSqIrrlicht::OnEvent( const irr::SEvent& rEvent )
 					m_bQuit = 1;
 		} break;
 
+		default :
+			break;
+
 	} // end switch
 
 	return 0;
@@ -1252,6 +1252,37 @@ int CSqIrrlicht::screenToWorld( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorl
     return 1;
 }
 
+int CSqIrrlicht::screenToWorldBox( CSqirrRect2d &rcScreen, CSqirrBoundingBox3d *bbWorld, float fDist )
+{
+    // Must have object
+    if ( !m_pCamera || !m_pSmgr )
+        return 0;
+
+    // Is mouse in the window?
+    if ( 0 > rcScreen.ltObj().X || 0 > rcScreen.ltObj().Y
+	     || 0 > rcScreen.rbObj().X || 0 > rcScreen.rbObj().Y )
+        return 0;
+
+    m_pCamera->OnRegisterSceneNode();
+
+    // Left / Top
+    irr::core::line3df lt =
+        m_pSmgr->getSceneCollisionManager()->
+                    getRayFromScreenCoordinates( irr::core::position2di( (unsigned int)rcScreen.ltObj().X, (unsigned int)rcScreen.ltObj().Y ),
+                                                 m_pCamera );
+    bbWorld->Obj().MinEdge = lt.start + ( lt.getVector().normalize() * fDist );
+
+	// Right / Bottom
+    irr::core::line3df rb =
+        m_pSmgr->getSceneCollisionManager()->
+                    getRayFromScreenCoordinates( irr::core::position2di( (unsigned int)rcScreen.rbObj().X, (unsigned int)rcScreen.rbObj().Y ),
+                                                 m_pCamera );
+    bbWorld->Obj().MaxEdge = rb.start + ( rb.getVector().normalize() * fDist );
+
+    return 1;
+}
+
+
 int CSqIrrlicht::screenToPlane( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorld, float fDist )
 {
     // Must have object
@@ -1286,3 +1317,43 @@ int CSqIrrlicht::screenToPlane( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorl
     return 1;
 }
 
+int CSqIrrlicht::FillVolume( CSqirrNode &rNode, CSqirrBoundingBox3d &rBb )
+{
+	if ( !rNode.IsValid() )
+		return 0;
+
+	irr::core::aabbox3df bb = rNode.Obj().getTransformedBoundingBox();
+
+	oexSHOW( bb.MinEdge.X );
+	oexSHOW( bb.MinEdge.Y );
+	oexSHOW( bb.MinEdge.Z );
+
+	float xn = bb.MaxEdge.X - bb.MinEdge.X;
+	float yn = bb.MaxEdge.Y - bb.MinEdge.Y;
+	float zn = bb.MaxEdge.Z - bb.MinEdge.Z;
+
+	float xd = rBb.Obj().MaxEdge.X - rBb.Obj().MinEdge.X;
+	float yd = rBb.Obj().MaxEdge.Y - rBb.Obj().MinEdge.Y;
+	float zd = rBb.Obj().MaxEdge.Z - rBb.Obj().MinEdge.Z;
+
+	oexSHOW( xn );
+	oexSHOW( yn );
+	oexSHOW( zn );
+	oexSHOW( xd );
+	oexSHOW( yd );
+	oexSHOW( zd );
+
+	irr::core::vector3df s( xn ? xd / xn : 1,
+							yn ? yd / yn : 1,
+							1 );
+//							zn ? zd / zn : 1 );
+
+	oexSHOW( rBb.Obj().MinEdge.X );
+	oexSHOW( rBb.Obj().MinEdge.Y );
+	oexSHOW( rBb.Obj().MinEdge.Z );
+
+	rNode.Obj().setPosition( rBb.Obj().MinEdge );
+	rNode.Obj().setScale( s );
+
+	return 1;
+}

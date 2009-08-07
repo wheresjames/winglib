@@ -11,9 +11,9 @@ public:
 
 	CSqirrCamera() {}
 	CSqirrCamera( irr::scene::ISceneNode *p ) { SetPtr( p, eTypeNone ); }
-	CSqirrCamera& operator = ( irr::scene::ISceneNode *p ) { SetPtr( p, eTypeNone ); }
+	CSqirrCamera& operator = ( irr::scene::ISceneNode *p ) { SetPtr( p, eTypeNone ); return *this; }
 	CSqirrCamera( irr::scene::ICameraSceneNode *p ) { SetPtr( p, eTypeCamera ); }
-	CSqirrCamera& operator = ( irr::scene::ICameraSceneNode *p ) { SetPtr( p, eTypeCamera ); }
+	CSqirrCamera& operator = ( irr::scene::ICameraSceneNode *p ) { SetPtr( p, eTypeCamera ); return *this; }
 
 	void UpdateCamera()
 	{

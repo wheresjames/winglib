@@ -35,41 +35,41 @@ int CSqirrPhysics::Init()
 	Destroy();
 
 	const int maxProxies = 32766;
-	const int maxOverlap = 65535;
+//	const int maxOverlap = 65535;
 
-	// Create default configuration	
+	// Create default configuration
 	if ( !m_memCollisionConfig.OexConstruct().Ptr() )
-	{	oexERROR( 0, "Out of memory allocating btDefaultCollisionConfiguration" ); 
+	{	oexERROR( 0, "Out of memory allocating btDefaultCollisionConfiguration" );
 		Destroy(); return 0;
-	} // end if  
+	} // end if
 
 	if ( !m_memCollisionDispatcher.OexConstruct( *m_memCollisionConfig ).Ptr() )
-	{	oexERROR( 0, "Out of memory allocating btCollisionDispatcher" ); 
+	{	oexERROR( 0, "Out of memory allocating btCollisionDispatcher" );
 		Destroy(); return 0;
-	} // end if  
+	} // end if
 
 	btVector3 worldAabbMin( -10000, -10000, -10000 );
 	btVector3 worldAabbMax( 10000, 10000, 10000 );
 	if ( !m_memBroadphase.Construct( btVector3( -10000, -10000, -10000 ),
 									 btVector3( 10000, 10000, 10000 ),
 									 maxProxies ).Ptr() )
-	{	oexERROR( 0, "Out of memory allocating btAxisSweep3" ); 
+	{	oexERROR( 0, "Out of memory allocating btAxisSweep3" );
 		Destroy(); return 0;
-	} // end if  
+	} // end if
 
 	if ( !m_memSolver.OexConstruct().Ptr() )
-	{	oexERROR( 0, "Out of memory allocating btSequentialImpulseConstraintSolver" ); 
+	{	oexERROR( 0, "Out of memory allocating btSequentialImpulseConstraintSolver" );
 		Destroy(); return 0;
-	} // end if  
+	} // end if
 
-	if ( !m_memPhysicsWorld.OexConstruct(  *m_memCollisionDispatcher, *m_memBroadphase, 
+	if ( !m_memPhysicsWorld.OexConstruct(  *m_memCollisionDispatcher, *m_memBroadphase,
 										*m_memSolver, *m_memCollisionConfig ).Ptr() )
-	{	oexERROR( 0, "Out of memory allocating btDiscreteDynamicsWorld" ); 
+	{	oexERROR( 0, "Out of memory allocating btDiscreteDynamicsWorld" );
 		Destroy(); return 0;
-	} // end if  
+	} // end if
 
 	// Set gravity
-	m_memPhysicsWorld->setGravity( btVector3( 0, c_fGravity, 0 ) ); 
+	m_memPhysicsWorld->setGravity( btVector3( 0, c_fGravity, 0 ) );
 
 	return 1;
 #endif

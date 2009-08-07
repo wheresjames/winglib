@@ -47,8 +47,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqIrrlicht, CSqIrrlicht )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, getNodeScreenPos )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, getScreenPos )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, screenToWorld )
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, screenToWorldBox )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, screenToPlane )
-
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, FillVolume )
 
 	SQBIND_CONST( irr, EMIE_LMOUSE_PRESSED_DOWN )
 	SQBIND_CONST( irr, EMIE_LMOUSE_LEFT_UP )
@@ -202,6 +203,31 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqirrVector2d, CSqirrVector2d )
 	SQBIND_MEMBER_FUNCTION( CSqirrVector2d, inflate )
 SQBIND_REGISTER_CLASS_END()
 
+// CSqirrBoundingBox3d
+SQBIND_REGISTER_CLASS_BEGIN( CSqirrBoundingBox3d, CSqirrBoundingBox3d )
+	SQBIND_MEMBER_FUNCTION( CSqirrBoundingBox3d, top )
+	SQBIND_MEMBER_FUNCTION( CSqirrBoundingBox3d, left )
+	SQBIND_MEMBER_FUNCTION( CSqirrBoundingBox3d, front )
+	SQBIND_MEMBER_FUNCTION( CSqirrBoundingBox3d, right )
+	SQBIND_MEMBER_FUNCTION( CSqirrBoundingBox3d, bottom )
+	SQBIND_MEMBER_FUNCTION( CSqirrBoundingBox3d, back )
+	SQBIND_MEMBER_FUNCTION( CSqirrBoundingBox3d, set )
+	SQBIND_MEMBER_FUNCTION( CSqirrBoundingBox3d, inflate )
+SQBIND_REGISTER_CLASS_END()
+
+// CSqirrRect2d
+SQBIND_REGISTER_CLASS_BEGIN( CSqirrRect2d, CSqirrRect2d )
+	SQBIND_MEMBER_FUNCTION( CSqirrRect2d, top )
+	SQBIND_MEMBER_FUNCTION( CSqirrRect2d, left )
+	SQBIND_MEMBER_FUNCTION( CSqirrRect2d, right )
+	SQBIND_MEMBER_FUNCTION( CSqirrRect2d, bottom )
+	SQBIND_MEMBER_FUNCTION( CSqirrRect2d, lt )
+	SQBIND_MEMBER_FUNCTION( CSqirrRect2d, rb )
+	SQBIND_MEMBER_FUNCTION( CSqirrRect2d, set )
+	SQBIND_MEMBER_FUNCTION( CSqirrRect2d, inflate )
+SQBIND_REGISTER_CLASS_END()
+
+
 // CSqirrLine
 SQBIND_REGISTER_CLASS_BEGIN( CSqirrLine, CSqirrLine )
 	SQBIND_MEMBER_FUNCTION( CSqirrLine, start )
@@ -238,6 +264,8 @@ static void SQBIND_Export_irrlicht( sqbind::VM x_vm )
     SQBIND_EXPORT( x_vm, CSqirrVector3d );
     SQBIND_EXPORT( x_vm, CSqirrVector2d );
     SQBIND_EXPORT( x_vm, CSqirrVertexArray );
+    SQBIND_EXPORT( x_vm, CSqirrBoundingBox3d );
+    SQBIND_EXPORT( x_vm, CSqirrRect2d );
 
     SQBIND_EXPORT( x_vm, CSqirrAnimator );
     SQBIND_EXPORT( x_vm, CSqirrTexture );

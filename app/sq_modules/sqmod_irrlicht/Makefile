@@ -15,6 +15,8 @@ PRJ_DEFS :=
 
 PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
+PRJ_SUBROOT := sqmod
+
 PRJ_LIBROOT := ../../..
 
 #-------------------------------------------------------------------

@@ -68,9 +68,9 @@ public:
 							 unsigned long ulREyeKey, unsigned long ulLEyeKey );
 
 	/// Adds a sky dome to the scene
-	int AddSkyDome( const sqbind::stdString &sFile,
-					long lHorzRes, long lVertRes,
-					float fTxtPercent, float fSpherePercent );
+	CSqirrNode AddSkyDome( const sqbind::stdString &sFile,
+						   long lHorzRes, long lVertRes,
+						   float fTxtPercent, float fSpherePercent );
 
 	/// Sets the ambient color lighting
 	int SetAmbientLight( CSqirrColorf &x_col );
@@ -166,11 +166,17 @@ public:
 	/// Gets a screen position
 	CSqirrVector2d getScreenPos( CSqirrVector3d &v );
 
-	/// Converts a 2d screen point into a world position 
+	/// Converts a 2d screen point into a world position
 	int screenToWorld( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorld, float fDist );
+
+	/// Converts a 2d rectangle into a world position
+	int screenToWorldBox( CSqirrRect2d &rcScreen, CSqirrBoundingBox3d *bbWorld, float fDist );
 
 	/// Converts a 2d screen point into a plane orthogonal to the camera
 	int screenToPlane( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorld, float fDist );
+
+	/// Scales the node to fill the specified volume
+	int FillVolume( CSqirrNode &rNode, CSqirrBoundingBox3d &rBb );
 
 public:
 

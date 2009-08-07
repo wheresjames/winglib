@@ -37,6 +37,8 @@ PRJ_DEFS := HAVE_CONFIG_H CURL_STATICLIB CURL_DISABLE_LDAP NDEBUG=1
  
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
+PRJ_SUBROOT := sqmod
+
 PRJ_LIBROOT := ../../..
 
 #-------------------------------------------------------------------

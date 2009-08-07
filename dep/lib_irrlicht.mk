@@ -33,13 +33,13 @@ else
 	PRJ_DEFS := $(PRJ_DEFS) _IRR_USE_LINUX_DEVICE_ _IRR_COMPILE_WITH_X11_
 endif
 
-#-------------------------------------------------------------------
-# File locations
-#-------------------------------------------------------------------
-
 ifeq ($(OS),win32)
 	PRJ_DEFS := $(PRJ_DEFS) IRRLICHT_EXPORTS
 endif
+
+#-------------------------------------------------------------------
+# File locations
+#-------------------------------------------------------------------
 
 export LOC_TAG := def
 LOC_INC_def := $(CFG_LIBROOT)/irrlicht/include

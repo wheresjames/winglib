@@ -12,6 +12,8 @@ PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel gdchart \
 			cximage jpeg png zlib tiff
 PRJ_OSLB :=
  
+PRJ_SUBROOT := sqmod
+
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
 PRJ_LIBROOT := ../../..
