@@ -63,14 +63,8 @@
 // sqbind defines
 #include "sq_defines.h"
 
-// stl classes we will export to squirrel
-#include "sq_vector.h"
-#include "sq_list.h"
-#include "sq_map.h"
-#include "sq_multi.h"
-#include "sq_file.h"
-#include "sq_time.h"
-#include "sq_image.h"
+// stl classes we will import to squirrel
+#include "import.h"
 
 namespace sqbind
 {

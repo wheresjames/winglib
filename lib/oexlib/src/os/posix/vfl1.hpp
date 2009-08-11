@@ -158,7 +158,7 @@ public:
 		m_nBufferSize = 0;
 		m_pFrameBuffer = 0;
 		m_nActiveBuf = 0;
-		
+
 		return oexTRUE;
 	}
 
@@ -234,6 +234,11 @@ public:
 	}
 
 	virtual CStr GetSupportedFormats()
+	{
+		return CStr();
+	}
+
+	virtual CStr GetFormatDescription( oexUINT x_uFormat )
 	{
 		return CStr();
 	}

@@ -179,8 +179,8 @@ public:
 	virtual oexBOOL WaitForFrame( oexUINT x_uTimeout ) = 0;
 	virtual oexBOOL ReleaseFrame() = 0;
 	virtual oexPVOID GetBuffer() = 0;
-	virtual oexINT GetImageSize() = 0;
 	virtual oexINT GetBufferSize() = 0;
+	virtual oexINT GetImageSize() = 0;
 #if defined ( OEX_ENABLE_XIMAGE )
 	virtual CImage* GetImage() = 0;
 #endif
@@ -190,6 +190,7 @@ public:
 	virtual oexFLOAT GetFps() = 0;
 	virtual oexINT64 GetFrame() = 0;
 	virtual CStr GetSupportedFormats() = 0;
+	virtual CStr GetFormatDescription( oexUINT x_uFormat ) = 0;
 
 	/// Returns the number of available sub systems
 	static oexINT GetAvailableSystems()
@@ -503,6 +504,15 @@ public:
 
 		return m_pDevice->GetSupportedFormats();
 	}
+
+	virtual CStr GetFormatDescription( oexUINT x_uFormat )
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return CStr();
+
+		return m_pDevice->GetFormatDescription( x_uFormat );
+	}
+
 
 private:
 

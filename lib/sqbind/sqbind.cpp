@@ -48,8 +48,10 @@ namespace sqbind
 		CSqFile::Register( x_vm );
 		CSqTime::Register( x_vm );
 		CSqImage::Register( x_vm );
+		CSqCapture::Register( x_vm );
+		CSqCapture::Register( x_vm );
 	};
-	
+
 };
 
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqString, CSqString )

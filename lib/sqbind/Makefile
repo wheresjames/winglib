@@ -22,6 +22,10 @@ include $(PRJ_LIBROOT)/config.mk
 export LOC_TAG := def
 include $(PRJ_LIBROOT)/build.mk
 
+export LOC_TAG := import
+LOC_SRC_import := $(CFG_LIBROOT)/winglib/lib/sqbind/import
+include $(PRJ_LIBROOT)/build.mk
+
 #-------------------------------------------------------------------
 # Execute the build
 #-------------------------------------------------------------------

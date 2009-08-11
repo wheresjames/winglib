@@ -445,10 +445,10 @@ else
 			# -lregex -lpng -ljpeg -lzlib -ltiff -lstdc++ -lgcc -lodbc32 -lwsock32 -lwinspool -lwinmm -lshell32 -lcomctl32 -lctl3d32 -lodbc32 -ladvapi32 -lodbc32 -lwsock32 -lopengl32 -lglu32 -lole32 -loleaut32
 			
 			CFG_STDLIB := -lrt -pthread
-#			CFG_LFLAGS := $(CFG_LEXTRA) -rdynamic -Wl,-E -Wl,--export-dynamic
-			CFG_LFLAGS := $(CFG_LEXTRA) 
-#			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -Wall -fno-strict-aliasing
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -Wall
+			CFG_LFLAGS := $(CFG_LEXTRA) -rdynamic -Wl,-E -Wl,--export-dynamic
+#			CFG_LFLAGS := $(CFG_LEXTRA) 
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -Wall -fno-strict-aliasing
+#			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -Wall
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 

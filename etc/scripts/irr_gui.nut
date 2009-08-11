@@ -74,13 +74,14 @@ function _init() : ( _g )
 //	cam.SetLens( 1., 2.4, 3.2 );
 
 //	_g.window = _g.irr.AddGrid( 100., 100., 1, 1, 0., 2, CSqirrColor( 255, 255, 255 ) );
-//    _g.window = _g.irr.AddGrid( 10., 10., 10, 20, 0., 2, CSqirrColor( 255, 255, 255 ) );
-	_g.window = _g.irr.AddPlane( 160., 120., 2, CSqirrColor( 255, 255, 255 ) );
-	_g.window.SetPosition( CSqirrVector3d( -80., -60., 0. ) );
+//  _g.window = _g.irr.AddGrid( 10., 10., 10, 20, 0., 2, CSqirrColor( 255, 255, 255 ) );
+
+	_g.window = _g.irr.AddSphere( 10., 16 );
+//	_g.window = _g.irr.AddPlane( 160., 120., 2, CSqirrColor( 255, 255, 255 ) );
+//	_g.window.SetPosition( CSqirrVector3d( -80., -60., 0. ) );
 
 	local tex = _g.irr.LoadTexture( _self.path( "../media/car.png" ), 1 );
     _g.window.SetTexture( 0, tex );
-
 
 	local posScreen = CSqirrBoundingBox3d();
 //	local posScreen = CSqirrBoundingBox3d( 0, 0, 0, 50, 50, 50 )
@@ -89,8 +90,8 @@ function _init() : ( _g )
 	_g.irr.FillVolume( _g.window, posScreen );
 
 	// Add a rotator
-//	local ani = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.4, 0 ) );
-//	_g.window.AddAnimator( ani );
+	local ani = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.4, 0 ) );
+	_g.window.AddAnimator( ani );
 }
 
 function _idle() : ( _g )

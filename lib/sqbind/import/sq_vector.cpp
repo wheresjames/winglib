@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// sq_list.cpp
+// sq_vector.cpp
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -32,54 +32,51 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#include "stdafx.h"
+#include "../stdafx.h"
 
 using namespace sqbind;
 
-// +++ Not sure this class actually works
+CSqVector::CSqVector()
+{}
 
-CSqList::t_List& CSqList::vector()
+CSqVector::t_List& CSqVector::list()
 {   return m_lst; }
 
-SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqList, CSqList )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqList, push_back )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqList, _get )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqList, _nexti )
-SQBIND_REGISTER_CLASS_END()
+_SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqVector, CSqVector )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqVector, push_back )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqVector, _get )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqVector, _nexti )
+_SQBIND_REGISTER_CLASS_END()
 
-void CSqList::Register( sqbind::VM vm )
+void CSqVector::Register( sqbind::VM vm )
 {
-	SQBIND_EXPORT( vm, CSqList );
+	_SQBIND_EXPORT( vm, CSqVector );
 }
 
-void CSqList::push_back( const t_Obj &s )
+void CSqVector::push_back( const t_Obj &s )
 {
     m_lst.push_back( s );
 }
 
-SquirrelObject CSqList::_get( HSQUIRRELVM v )
+SquirrelObject CSqVector::_get( HSQUIRRELVM v )
 {
     StackHandler sa( v );
 
-    unsigned int idx = (unsigned int)sa.GetInt( 2 );
-	if ( 0 > idx || m_lst.size() <= idx )
+    // Ensure valid index
+    int nIndex = sa.GetInt( 2 );
+    if ( 0 > nIndex || m_lst.size() <= (unsigned int)nIndex )
         return SquirrelObject( v );
-
-    t_List::iterator it = m_lst.begin();
-	while ( idx-- )
-		if ( m_lst.end() == ++it )
-			return SquirrelObject( v );
 
     // Stuff string
     SquirrelObject so( v );
-    sq_pushstring( v, it->c_str(), (int)it->length() );
+    sq_pushstring( v, m_lst[ nIndex ].c_str(), (int)m_lst[ nIndex ].length() );
     so.AttachToStackObject( -1 );
     sq_pop( v, 1 );
 
     return so;
 }
 
-SquirrelObject CSqList::_nexti( HSQUIRRELVM v )
+SquirrelObject CSqVector::_nexti( HSQUIRRELVM v )
 {
     StackHandler sa( v );
 
@@ -114,13 +111,14 @@ SquirrelObject CSqList::_nexti( HSQUIRRELVM v )
             return so;
 
         } break;
-
+        
         default:
         	break;
-        	
+
     } // end switch
 
     // ???
     sa.ThrowError( _T( "Invalid index type" ) );
     return SquirrelObject( v );
 }
+

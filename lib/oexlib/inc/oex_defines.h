@@ -355,11 +355,13 @@
 
 /// Creates a four character code
 #define oexFOURCC( a, b, c, d )  ( (OEX_NAMESPACE::oexULONG)(						\
-								  	  ( ( (OEX_NAMESPACE::oexULONG)a ) << 24 ) 	\
-									| ( ( (OEX_NAMESPACE::oexULONG)b ) <<  8 ) 	\
-									| ( ( (OEX_NAMESPACE::oexULONG)c ) >>  8 ) 	\
-									| ( ( (OEX_NAMESPACE::oexULONG)d ) >> 24 ) 	\
+								  	  ( ( (OEX_NAMESPACE::oexULONG)a & 0xff ) << 24 ) 	\
+									| ( ( (OEX_NAMESPACE::oexULONG)b & 0xff ) << 16 ) 	\
+									| ( ( (OEX_NAMESPACE::oexULONG)c & 0xff ) <<  8 ) 	\
+									| ( ( (OEX_NAMESPACE::oexULONG)d & 0xff )       ) 	\
 								 ) )
+
+#define oexFOURCC_STR( cc ) oexMbToStr( OEX_NAMESPACE::CStr8( (char*)&( cc ), 4 ) )
 
 #if defined( oexUSE_EXCEPTIONS ) && !defined( OEX_NOEXCEPTIONS )
 #	define oexTRY				try

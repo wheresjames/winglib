@@ -32,7 +32,7 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#include "stdafx.h"
+#include "../stdafx.h"
 
 using namespace sqbind;
 

@@ -58,6 +58,18 @@ include $(PRJ_LIBROOT)/build.mk
 #						 gstdataqueue gsttypefindhelper
 #include $(PRJ_LIBROOT)/build.mk
 
+export LOC_TAG := gst
+LOC_CXX_gst := c
+LOC_SRC_gst := $(CFG_LIBROOT)/gstreamer/gstreamer/gst
+LOC_EXC_gst := gstregistryxml
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := gst_libs_base
+LOC_CXX_gst_libs_base := c
+LOC_INC_gst_libs_base := $(CFG_LIBROOT)/gstreamer/gstreamer/libs
+LOC_SRC_gst_libs_base := $(CFG_LIBROOT)/gstreamer/gstreamer/libs/gst/base
+LOC_EXC_gst_libs_base := 
+include $(PRJ_LIBROOT)/build.mk
 
 #-------------------------------------------------------------------
 # Execute the build

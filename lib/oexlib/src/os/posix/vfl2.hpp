@@ -32,6 +32,58 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
+struct SFormatDesc
+{
+	oexUINT			uId;
+	oexTCHAR		sId[ 256 ];
+};
+
+#define FORMAT_DESC( s )	{ s, oexT( #s ) }
+
+static SFormatDesc _g_oexvid_formats[] =
+{
+	FORMAT_DESC( V4L2_PIX_FMT_RGB332 ),
+//	FORMAT_DESC( V4L2_PIX_FMT_RGB444 ),
+	FORMAT_DESC( V4L2_PIX_FMT_RGB555 ),
+	FORMAT_DESC( V4L2_PIX_FMT_RGB565 ),
+	FORMAT_DESC( V4L2_PIX_FMT_RGB555X ),
+	FORMAT_DESC( V4L2_PIX_FMT_RGB565X ),
+	FORMAT_DESC( V4L2_PIX_FMT_BGR24 ),
+	FORMAT_DESC( V4L2_PIX_FMT_RGB24 ),
+	FORMAT_DESC( V4L2_PIX_FMT_BGR32 ),
+	FORMAT_DESC( V4L2_PIX_FMT_RGB32 ),
+	FORMAT_DESC( V4L2_PIX_FMT_GREY ),
+//	FORMAT_DESC( V4L2_PIX_FMT_PAL8 ),
+	FORMAT_DESC( V4L2_PIX_FMT_YVU410 ),
+	FORMAT_DESC( V4L2_PIX_FMT_YVU420 ),
+	FORMAT_DESC( V4L2_PIX_FMT_YUYV ),
+	FORMAT_DESC( V4L2_PIX_FMT_UYVY ),
+	FORMAT_DESC( V4L2_PIX_FMT_YUV422P ),
+	FORMAT_DESC( V4L2_PIX_FMT_YUV411P ),
+	FORMAT_DESC( V4L2_PIX_FMT_Y41P ),
+//	FORMAT_DESC( V4L2_PIX_FMT_YUV444 ),
+//	FORMAT_DESC( V4L2_PIX_FMT_YUV555 ),
+//	FORMAT_DESC( V4L2_PIX_FMT_YUV565 ),
+//	FORMAT_DESC( V4L2_PIX_FMT_YUV32 ),
+	FORMAT_DESC( V4L2_PIX_FMT_NV12 ),
+	FORMAT_DESC( V4L2_PIX_FMT_NV21 ),
+	FORMAT_DESC( V4L2_PIX_FMT_YUV410 ),
+	FORMAT_DESC( V4L2_PIX_FMT_YUV420 ),
+	FORMAT_DESC( V4L2_PIX_FMT_YYUV ),
+	FORMAT_DESC( V4L2_PIX_FMT_HI240 ),
+//	FORMAT_DESC( V4L2_PIX_FMT_HM12 ),
+	FORMAT_DESC( V4L2_PIX_FMT_SBGGR8 ),
+	FORMAT_DESC( V4L2_PIX_FMT_MJPEG ),
+	FORMAT_DESC( V4L2_PIX_FMT_JPEG ),
+	FORMAT_DESC( V4L2_PIX_FMT_DV ),
+	FORMAT_DESC( V4L2_PIX_FMT_MPEG ),
+	FORMAT_DESC( V4L2_PIX_FMT_WNVA ),
+	FORMAT_DESC( V4L2_PIX_FMT_SN9C10X ),
+//	FORMAT_DESC( V4L2_PIX_FMT_PWC1 ),
+//	FORMAT_DESC( V4L2_PIX_FMT_PWC2 ),
+//	FORMAT_DESC( V4L2_PIX_FMT_ET61X251 )
+};
+
 class CV4l2 : public CCaptureTmpl
 {
 public:
@@ -71,6 +123,7 @@ public:
 		m_nBufferSize = 0;
 		m_pFrameBuffer = 0;
 		m_nActiveBuf = 0;
+		m_uFormat = 0;
 	}
 
 	/// Destructor
@@ -162,7 +215,8 @@ public:
 		m_nBufferSize = 0;
 		m_pFrameBuffer = 0;
 		m_nActiveBuf = 0;
-		
+		m_uFormat = 0;
+
 		return oexTRUE;
 	}
 
@@ -171,7 +225,7 @@ public:
 	/// Proper ioctl call
 	static int IoCtl( int fd, int request, void * arg )
 //	{	int nErr; while ( -1 == ( nErr = ioctl( fd, request, arg ) ) && EINTR == errno ); return nErr; }
-	{	int nErr; return oexDO( nErr = ioctl( fd, request, arg ), EINTR == nErr, nErr ); }
+	{	int nErr; return oexDO( nErr = ioctl( fd, request, arg ), EINTR == nErr, nErr ); return nErr; }
 
 public:
 
@@ -272,7 +326,7 @@ public:
 			m_uFormat = AutoFormat();
 
 		if ( !m_uFormat )
-		{	oexERROR( 0, CStr().Fmt( oexT( "Could not find suitable video format" ), m_nFd ) );
+		{	oexERROR( 0, CStr().Fmt( oexT( "Could not find suitable video format : m_nFd = %u" ), m_nFd ) );
 			Destroy();
 			return oexFALSE;
 		} // end if
@@ -298,10 +352,12 @@ public:
 			return oexFALSE;
 		} // end if
 
-//			if ( V4L2_PIX_FMT_RGB24 != fmt.fmt.pix.pixelformat )
-//			{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_S_FMT : Unsupporeted format type: %d" ), (int)fmt.fmt.pix.pixelformat ) );
-//				return oexFALSE;
-//			} // end if
+		if ( m_uFormat != fmt.fmt.pix.pixelformat )
+		{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_S_FMT : Unsupported format: %x - suggested type: %x" ),
+											(unsigned int)m_uFormat,
+											(unsigned int)fmt.fmt.pix.pixelformat ) );
+			return oexFALSE;
+		} // end if
 
 		// Did we get a new width / height
 		if ( m_nWidth != (oexINT)fmt.fmt.pix.width || m_nHeight != (oexINT)fmt.fmt.pix.height )
@@ -412,74 +468,21 @@ public:
 
 	virtual oexUINT AutoFormat()
 	{
-		struct SFormatDesc
-		{
-			oexUINT			uId;
-			oexTCHAR		sId[ 256 ];
-		};
-
-		#define FORMAT_DESC( s )	{ s, oexT( #s ) }
-
-		static SFormatDesc l_formats[] =
-		{
-			FORMAT_DESC( V4L2_PIX_FMT_RGB24 ),
-			FORMAT_DESC( V4L2_PIX_FMT_YUYV ),
-/*
-			FORMAT_DESC( V4L2_PIX_FMT_RGB332 ),
-//			FORMAT_DESC( V4L2_PIX_FMT_RGB444 ),
-			FORMAT_DESC( V4L2_PIX_FMT_RGB555 ),
-			FORMAT_DESC( V4L2_PIX_FMT_RGB565 ),
-			FORMAT_DESC( V4L2_PIX_FMT_RGB555X ),
-			FORMAT_DESC( V4L2_PIX_FMT_RGB565X ),
-			FORMAT_DESC( V4L2_PIX_FMT_BGR24 ),
-			FORMAT_DESC( V4L2_PIX_FMT_BGR32 ),
-			FORMAT_DESC( V4L2_PIX_FMT_RGB32 ),
-			FORMAT_DESC( V4L2_PIX_FMT_GREY ),
-//				FORMAT_DESC( V4L2_PIX_FMT_PAL8 ),
-			FORMAT_DESC( V4L2_PIX_FMT_YVU410 ),
-			FORMAT_DESC( V4L2_PIX_FMT_YVU420 ),
-			FORMAT_DESC( V4L2_PIX_FMT_UYVY ),
-			FORMAT_DESC( V4L2_PIX_FMT_YUV422P ),
-			FORMAT_DESC( V4L2_PIX_FMT_YUV411P ),
-			FORMAT_DESC( V4L2_PIX_FMT_Y41P ),
-//				FORMAT_DESC( V4L2_PIX_FMT_YUV444 ),
-//				FORMAT_DESC( V4L2_PIX_FMT_YUV555 ),
-//				FORMAT_DESC( V4L2_PIX_FMT_YUV565 ),
-//				FORMAT_DESC( V4L2_PIX_FMT_YUV32 ),
-			FORMAT_DESC( V4L2_PIX_FMT_NV12 ),
-			FORMAT_DESC( V4L2_PIX_FMT_NV21 ),
-			FORMAT_DESC( V4L2_PIX_FMT_YUV410 ),
-			FORMAT_DESC( V4L2_PIX_FMT_YUV420 ),
-			FORMAT_DESC( V4L2_PIX_FMT_YYUV ),
-			FORMAT_DESC( V4L2_PIX_FMT_HI240 ),
-//			FORMAT_DESC( V4L2_PIX_FMT_HM12 ),
-			FORMAT_DESC( V4L2_PIX_FMT_SBGGR8 ),
-			FORMAT_DESC( V4L2_PIX_FMT_MJPEG ),
-			FORMAT_DESC( V4L2_PIX_FMT_JPEG ),
-			FORMAT_DESC( V4L2_PIX_FMT_DV ),
-			FORMAT_DESC( V4L2_PIX_FMT_MPEG ),
-			FORMAT_DESC( V4L2_PIX_FMT_WNVA ),
-			FORMAT_DESC( V4L2_PIX_FMT_SN9C10X ),
-//			FORMAT_DESC( V4L2_PIX_FMT_PWC1 ),
-//			FORMAT_DESC( V4L2_PIX_FMT_PWC2 ),
-//			FORMAT_DESC( V4L2_PIX_FMT_ET61X251 )
-*/
-		};
-
 		v4l2_format fmt;
 		CStr sStr;
-		for ( oexINT i = 0; i < (oexINT)oexSizeOfArray( l_formats ); i++ )
+		for ( oexINT i = 0; i < (oexINT)oexSizeOfArray( _g_oexvid_formats ); i++ )
 		{
 			oexZeroMemory( &fmt, sizeof( fmt ) );
 			fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 			fmt.fmt.pix.width = m_nWidth;
 			fmt.fmt.pix.height = m_nHeight;
-			fmt.fmt.pix.pixelformat = l_formats[ i ].uId;
+			fmt.fmt.pix.pixelformat = _g_oexvid_formats[ i ].uId;
 			fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 
 			oexTRY
 			{	if ( !IoCtl( m_nFd, VIDIOC_S_FMT, &fmt ) )
-					return l_formats[ i ].uId;
+//					if ( _g_oexvid_formats[ i ].uId == fmt.fmt.pix.pixelformat )
+						return fmt.fmt.pix.pixelformat;
 			} // end try
 			oexCATCH_ALL()
 			{
@@ -492,72 +495,21 @@ public:
 
 	virtual CStr GetSupportedFormats()
 	{
-		struct SFormatDesc
-		{
-			oexUINT			uId;
-			oexTCHAR		sId[ 256 ];
-		};
-
-		#define FORMAT_DESC( s )	{ s, oexT( #s ) }
-
-		static SFormatDesc l_formats[] =
-		{
-			FORMAT_DESC( V4L2_PIX_FMT_RGB332 ),
-//			FORMAT_DESC( V4L2_PIX_FMT_RGB444 ),
-			FORMAT_DESC( V4L2_PIX_FMT_RGB555 ),
-			FORMAT_DESC( V4L2_PIX_FMT_RGB565 ),
-			FORMAT_DESC( V4L2_PIX_FMT_RGB555X ),
-			FORMAT_DESC( V4L2_PIX_FMT_RGB565X ),
-			FORMAT_DESC( V4L2_PIX_FMT_BGR24 ),
-			FORMAT_DESC( V4L2_PIX_FMT_RGB24 ),
-			FORMAT_DESC( V4L2_PIX_FMT_BGR32 ),
-			FORMAT_DESC( V4L2_PIX_FMT_RGB32 ),
-			FORMAT_DESC( V4L2_PIX_FMT_GREY ),
-//				FORMAT_DESC( V4L2_PIX_FMT_PAL8 ),
-			FORMAT_DESC( V4L2_PIX_FMT_YVU410 ),
-			FORMAT_DESC( V4L2_PIX_FMT_YVU420 ),
-			FORMAT_DESC( V4L2_PIX_FMT_YUYV ),
-			FORMAT_DESC( V4L2_PIX_FMT_UYVY ),
-			FORMAT_DESC( V4L2_PIX_FMT_YUV422P ),
-			FORMAT_DESC( V4L2_PIX_FMT_YUV411P ),
-			FORMAT_DESC( V4L2_PIX_FMT_Y41P ),
-//				FORMAT_DESC( V4L2_PIX_FMT_YUV444 ),
-//				FORMAT_DESC( V4L2_PIX_FMT_YUV555 ),
-//				FORMAT_DESC( V4L2_PIX_FMT_YUV565 ),
-//				FORMAT_DESC( V4L2_PIX_FMT_YUV32 ),
-			FORMAT_DESC( V4L2_PIX_FMT_NV12 ),
-			FORMAT_DESC( V4L2_PIX_FMT_NV21 ),
-			FORMAT_DESC( V4L2_PIX_FMT_YUV410 ),
-			FORMAT_DESC( V4L2_PIX_FMT_YUV420 ),
-			FORMAT_DESC( V4L2_PIX_FMT_YYUV ),
-			FORMAT_DESC( V4L2_PIX_FMT_HI240 ),
-//			FORMAT_DESC( V4L2_PIX_FMT_HM12 ),
-			FORMAT_DESC( V4L2_PIX_FMT_SBGGR8 ),
-			FORMAT_DESC( V4L2_PIX_FMT_MJPEG ),
-			FORMAT_DESC( V4L2_PIX_FMT_JPEG ),
-			FORMAT_DESC( V4L2_PIX_FMT_DV ),
-			FORMAT_DESC( V4L2_PIX_FMT_MPEG ),
-			FORMAT_DESC( V4L2_PIX_FMT_WNVA ),
-			FORMAT_DESC( V4L2_PIX_FMT_SN9C10X ),
-//			FORMAT_DESC( V4L2_PIX_FMT_PWC1 ),
-//			FORMAT_DESC( V4L2_PIX_FMT_PWC2 ),
-//			FORMAT_DESC( V4L2_PIX_FMT_ET61X251 )
-		};
-
 		v4l2_format fmt;
 		CStr sStr;
-		for ( oexINT i = 0; i < (oexINT)oexSizeOfArray( l_formats ); i++ )
+		for ( oexINT i = 0; i < (oexINT)oexSizeOfArray( _g_oexvid_formats ); i++ )
 		{
 			oexZeroMemory( &fmt, sizeof( fmt ) );
 			fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 			fmt.fmt.pix.width = m_nWidth;
 			fmt.fmt.pix.height = m_nHeight;
-			fmt.fmt.pix.pixelformat = l_formats[ i ].uId;
+			fmt.fmt.pix.pixelformat = _g_oexvid_formats[ i ].uId;
 			fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 
 			oexTRY
 			{	if ( !IoCtl( m_nFd, VIDIOC_S_FMT, &fmt ) )
-					sStr += CStr().Fmt( oexT( "%s : (0x%X)\n" ), oexStrToMbPtr( l_formats[ i ].sId ), l_formats[ i ].uId );
+					if ( _g_oexvid_formats[ i ].uId == fmt.fmt.pix.pixelformat )
+						sStr << oexFOURCC_STR( _g_oexvid_formats[ i ].uId ) << oexT( "," );
 			} // end try
 			oexCATCH_ALL()
 			{
@@ -566,6 +518,15 @@ public:
 		} // end for
 
 		return sStr;
+	}
+
+	virtual CStr GetFormatDescription( oexUINT x_uFormat )
+	{
+		for ( oexINT i = 0; i < (oexINT)oexSizeOfArray( _g_oexvid_formats ); i++ )
+				if ( _g_oexvid_formats[ i ].uId == x_uFormat )
+						return _g_oexvid_formats[ i ].sId;
+
+		return oexT( "" );
 	}
 
 	virtual oexBOOL StartCapture()
@@ -626,6 +587,7 @@ public:
 //		os::CSys::printf( "Active Buffer is %d\n", buf.index );
 
 		m_nActiveBuf = buf.index;
+		m_nBufferSize = buf.bytesused;
 
 /*			if ( eIoReadWrite == m_nIoMode )
 		{
@@ -692,7 +654,7 @@ public:
 
 	oexINT GetBufferSize()
 	{
-		if ( m_pFrameBuffer )
+		if ( m_nBufferSize )
 			return m_nBufferSize;
 		return GetImageSize();
 	}

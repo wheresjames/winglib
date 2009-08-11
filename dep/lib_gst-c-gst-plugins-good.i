@@ -12,7 +12,7 @@ PRJ_INCS := gstreamer/gstreamer gstreamer/gstreamer/libs \
 			gstreamer/gst-plugins-good/gst-libs \
 			glib glib/glib glib/gmodule glib/gobject \
 			libxml/include winglib/dep/etc/libxml/inc/posix
-PRJ_LIBS := gst-plugins-base gstreamer
+PRJ_LIBS := gst-plugins-base
 PRJ_DEFS := HAVE_CONFIG_H=1
 PRJ_OSLB := $(MK_OSLB)
 PRJ_LIBROOT := ..

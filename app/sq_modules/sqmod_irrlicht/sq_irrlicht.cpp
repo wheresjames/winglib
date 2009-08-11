@@ -1279,6 +1279,15 @@ int CSqIrrlicht::screenToWorldBox( CSqirrRect2d &rcScreen, CSqirrBoundingBox3d *
                                                  m_pCamera );
     bbWorld->Obj().MaxEdge = rb.start + ( rb.getVector().normalize() * fDist );
 
+
+	// Ensure correct ordering
+	if ( bbWorld->Obj().MinEdge.X > bbWorld->Obj().MaxEdge.X )
+		oex::cmn::Swap( bbWorld->Obj().MinEdge.X, bbWorld->Obj().MaxEdge.X );
+	if ( bbWorld->Obj().MinEdge.Y > bbWorld->Obj().MaxEdge.Y )
+		oex::cmn::Swap( bbWorld->Obj().MinEdge.Y, bbWorld->Obj().MaxEdge.Y );
+	if ( bbWorld->Obj().MinEdge.Z > bbWorld->Obj().MaxEdge.Z )
+		oex::cmn::Swap( bbWorld->Obj().MinEdge.Z, bbWorld->Obj().MaxEdge.Z );
+
     return 1;
 }
 
@@ -1322,38 +1331,32 @@ int CSqIrrlicht::FillVolume( CSqirrNode &rNode, CSqirrBoundingBox3d &rBb )
 	if ( !rNode.IsValid() )
 		return 0;
 
+	rNode.Obj().setScale( irr::core::vector3df( 1, 1, 1 ) );
+	irr::core::vector3df pos = rNode.Obj().getPosition();
 	irr::core::aabbox3df bb = rNode.Obj().getTransformedBoundingBox();
 
-	oexSHOW( bb.MinEdge.X );
-	oexSHOW( bb.MinEdge.Y );
-	oexSHOW( bb.MinEdge.Z );
-
+	// Calculate existing node widths
 	float xn = bb.MaxEdge.X - bb.MinEdge.X;
 	float yn = bb.MaxEdge.Y - bb.MinEdge.Y;
 	float zn = bb.MaxEdge.Z - bb.MinEdge.Z;
 
+	// Calculate desired widths
 	float xd = rBb.Obj().MaxEdge.X - rBb.Obj().MinEdge.X;
 	float yd = rBb.Obj().MaxEdge.Y - rBb.Obj().MinEdge.Y;
 	float zd = rBb.Obj().MaxEdge.Z - rBb.Obj().MinEdge.Z;
 
-	oexSHOW( xn );
-	oexSHOW( yn );
-	oexSHOW( zn );
-	oexSHOW( xd );
-	oexSHOW( yd );
-	oexSHOW( zd );
+	// Calculate conversion scales
+	float x_scale = xn ? xd / xn : 1;
+	float y_scale = yn ? yd / yn : 1;
+	float z_scale = zn ? zd / zn : 1;
 
-	irr::core::vector3df s( xn ? xd / xn : 1,
-							yn ? yd / yn : 1,
-							1 );
-//							zn ? zd / zn : 1 );
+	// Set new sale
+	rNode.Obj().setScale( irr::core::vector3df( x_scale, y_scale, z_scale ) );
 
-	oexSHOW( rBb.Obj().MinEdge.X );
-	oexSHOW( rBb.Obj().MinEdge.Y );
-	oexSHOW( rBb.Obj().MinEdge.Z );
-
-	rNode.Obj().setPosition( rBb.Obj().MinEdge );
-	rNode.Obj().setScale( s );
+	// Set new position
+	rNode.Obj().setPosition( irr::core::vector3df( 	rBb.Obj().MinEdge.X + ( x_scale * ( pos.X - bb.MinEdge.X ) ),
+													rBb.Obj().MinEdge.Y + ( y_scale * ( pos.Y - bb.MinEdge.Y ) ),
+													rBb.Obj().MinEdge.Z + ( z_scale * ( pos.Z - bb.MinEdge.Z ) ) ) );
 
 	return 1;
 }
