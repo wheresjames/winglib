@@ -57,7 +57,7 @@ int CSqCapture::Destroy()
 	return 1;
 }
 
-int CSqCapture::Init( int nDevice, int nChannel, int nWidth, int nHeight, int nFps, const stdString &sFormat )
+int CSqCapture::Init( int nDevice, int nChannel, int nWidth, int nHeight, int nFps, const stdString &sFormat, int nInit )
 {
 	oex::CStr sFmt = sFormat.c_str();
 
@@ -66,18 +66,20 @@ int CSqCapture::Init( int nDevice, int nChannel, int nWidth, int nHeight, int nF
 
 	// Open the capture device
 	if ( !m_cap.Open( 0, nDevice, nChannel, nWidth, nHeight, *(const oex::oexUINT*)sFmt.Ptr(), nFps, 0 ) )
-//	if ( !m_cap.Open( 0, nDevice, nChannel, nWidth, nHeight, oexFOURCC( 'Y', 'U', 'Y', 'V' ), nFps, 0 ) )
 		return -1;
 
+//	if ( !m_cap.Open( 0, nDevice, nChannel, nWidth, nHeight, oexFOURCC( 'Y', 'U', 'Y', 'V' ), nFps, 0 ) )
 //	CStr().Fmt( oexT( "VIDIOC_S_FMT : Unsupported format: %x - suggested type: %x" ),
 //												(unsigned int)m_uFormat
+
+	if ( !nInit )
+		return 1;
 
 	if ( !m_cap.Init() )
 		return -2;
 
 	if ( !m_cap.StartCapture() )
 		return -3;
-
 
 	return 1;
 }

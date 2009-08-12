@@ -58,7 +58,7 @@ namespace sqbind
 		int Destroy();
 
 		/// Initializes the capture device
-		int Init( int nDevice, int nChannel, int nWidth, int nHeight, int nFps, const stdString &sFormat );
+		int Init( int nDevice, int nChannel, int nWidth, int nHeight, int nFps, const stdString &sFormat, int nInit );
 
 		/// Returns encoded image
 		stdString Capture( const stdString &sEncode );

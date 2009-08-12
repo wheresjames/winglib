@@ -16,10 +16,10 @@ PRJ_LIBROOT := ..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-#ifeq ($(BUILD_WEBKIT),)
-#UNSUPPORTED := Set make option BUILD_WEBKIT=1 to build
-#include $(PRJ_LIBROOT)/unsupported.mk
-#else
+ifneq ($(PROC),i386)
+UNSUPPORTED := PROC=$(PROC) Not supported
+include $(PRJ_LIBROOT)/unsupported.mk
+else
 
 #-------------------------------------------------------------------
 # File locations
@@ -44,5 +44,5 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-#endif
+endif
 

@@ -105,7 +105,11 @@ public:
 
 	enum
 	{
+#ifdef OEX_ARM
+		eMaxBuffers = 1
+#else
 		eMaxBuffers = 2
+#endif
 	};
 
 public:
@@ -347,7 +351,12 @@ public:
 //		fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 
 		if ( -1 == IoCtl( m_nFd, VIDIOC_S_FMT, &fmt ) )
-		{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_S_FMT : Failed to set format: %u : w=%d, h=%d" ), m_nFd, m_nWidth, m_nHeight ) );
+		{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_S_FMT : Failed to set format: %u : f=%x w=%d, h=%d" ),
+											 m_nFd, (unsigned int)m_uFormat, m_nWidth, m_nHeight ) );
+			if ( m_uFormat != fmt.fmt.pix.pixelformat )
+				oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_S_FMT : Unsupported format: %x - suggested type: %x" ),
+											 (unsigned int)m_uFormat,
+											 (unsigned int)fmt.fmt.pix.pixelformat ) );
 			Destroy();
 			return oexFALSE;
 		} // end if
@@ -378,7 +387,7 @@ public:
 			Destroy();
 			return oexFALSE;
 		} // end if
-
+/*
 		v4l2_cropcap cropcap;
 		oexZeroMemory( &cropcap, sizeof( cropcap ) );
 		cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -410,7 +419,7 @@ public:
 
 //		else
 //			oexNOTICE( errno, oexT( "VIDIOC_CROPCAP is not supported" ) );
-
+*/
 		v4l2_requestbuffers req;
 		oexZeroMemory( &req, sizeof( req ) );
 		req.count	= eMaxBuffers;
@@ -474,14 +483,14 @@ public:
 		{
 			oexZeroMemory( &fmt, sizeof( fmt ) );
 			fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			fmt.fmt.pix.width = m_nWidth;
-			fmt.fmt.pix.height = m_nHeight;
+			fmt.fmt.pix.width = 320;
+			fmt.fmt.pix.height = 240;
 			fmt.fmt.pix.pixelformat = _g_oexvid_formats[ i ].uId;
-			fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
+//			fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 
 			oexTRY
-			{	if ( !IoCtl( m_nFd, VIDIOC_S_FMT, &fmt ) )
-//					if ( _g_oexvid_formats[ i ].uId == fmt.fmt.pix.pixelformat )
+			{	if ( -1 != IoCtl( m_nFd, VIDIOC_TRY_FMT, &fmt ) )
+					if ( _g_oexvid_formats[ i ].uId == fmt.fmt.pix.pixelformat )
 						return fmt.fmt.pix.pixelformat;
 			} // end try
 			oexCATCH_ALL()
@@ -501,13 +510,13 @@ public:
 		{
 			oexZeroMemory( &fmt, sizeof( fmt ) );
 			fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			fmt.fmt.pix.width = m_nWidth;
-			fmt.fmt.pix.height = m_nHeight;
+			fmt.fmt.pix.width = 320;
+			fmt.fmt.pix.height = 240;
 			fmt.fmt.pix.pixelformat = _g_oexvid_formats[ i ].uId;
-			fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
+//			fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 
 			oexTRY
-			{	if ( !IoCtl( m_nFd, VIDIOC_S_FMT, &fmt ) )
+			{	if ( -1 != IoCtl( m_nFd, VIDIOC_TRY_FMT, &fmt ) )
 					if ( _g_oexvid_formats[ i ].uId == fmt.fmt.pix.pixelformat )
 						sStr << oexFOURCC_STR( _g_oexvid_formats[ i ].uId ) << oexT( "," );
 			} // end try

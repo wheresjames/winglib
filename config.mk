@@ -37,6 +37,14 @@ TOOLS	 := local
 
 #CFG_CURDIR := $(shell pwd)
 
+ifdef PRJ_LOCAL
+	CFG_PROC	 := $(CFG_LOCAL_PROC)
+	CFG_TOOLS	 := $(CFG_LOCAL_TOOLS)
+else
+	CFG_PROC	 := $(PROC)
+	CFG_TOOLS	 := $(TOOLS)
+endif
+
 ifeq ($(BUILD),vs)
 	LIBLINK	 := static
 else
@@ -88,6 +96,10 @@ ifeq ($(BUILD),vs)
 
 	OS := win32
 	PLATFORM := windows
+	
+	CFG_LOCAL_BUILD_TYPE 	:= $(CFG_ROOT)/bin/windows-vs-win32-i386-local-static
+	CFG_LOCAL_TOOL_RESCMP  	:= $(CFG_LOCAL_BUILD_TYPE)/resbld.exe
+	CFG_LOCAL_TOOL_JOIN  	:= $(CFG_LOCAL_BUILD_TYPE)/join.exe
 
 	ifdef DBG
 		ifeq ($(LIBLINK),static)	
@@ -160,6 +172,10 @@ else
 
 	# --with-sysroot
 	# --with-headers
+	
+	CFG_LOCAL_BUILD_TYPE 	:= $(CFG_ROOT)/bin/posix-gcc-linux-i386-local-shared
+	CFG_LOCAL_TOOL_RESCMP 	:= $(CFG_LOCAL_BUILD_TYPE)/resbld
+	CFG_LOCAL_TOOL_JOIN  	:= $(CFG_LOCAL_BUILD_TYPE)/join	
 
 	ifdef DBG
 		CFG_CEXTRA	 := -g -DDEBUG -D_DEBUG $(CFG_CEXTRA) 
@@ -173,16 +189,16 @@ else
 	endif
 	
 	# Arm compiler
-	ifeq ($(PROC),arm)
+	ifeq ($(CFG_PROC),arm)
 
-		ifeq ($(TOOLS),snapgear)
+		ifeq ($(CFG_TOOLS),snapgear)
 		
 			OS := linux
 			PLATFORM := posix
 		
 			# Snapgear
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/usr/local/bin/arm-linux-
-			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm-linux
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/usr/local/bin/arm-linux-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm-linux
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA)
@@ -191,14 +207,14 @@ else
 			CFG_AFLAGS := cq
 
 		endif
-		ifeq ($(TOOLS),codesourcery)
+		ifeq ($(CFG_TOOLS),codesourcery)
 
 			OS := android
 			PLATFORM := posix
 			
 			# Google Android
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/arm/bin/arm-none-eabi-
-			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm/arm-none-eabi
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm/bin/arm-none-eabi-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm/arm-none-eabi
 
 			CFG_STDLIB := -lc -lstdc++ -lg
 			CFG_LFLAGS := $(CFG_LEXTRA)
@@ -207,14 +223,14 @@ else
 			CFG_AFLAGS := cq
 
 		endif
-		ifeq ($(TOOLS),nihilism)
+		ifeq ($(CFG_TOOLS),nihilism)
 
 			OS := linux
 			PLATFORM := posix
 			
 			# nihilism
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-unknown-linux-gnu-
-			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm-unknown-linux-gnu
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/bin/arm-unknown-linux-gnu-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm-unknown-linux-gnu
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA)
@@ -223,14 +239,14 @@ else
 			CFG_AFLAGS := cq
 
 		endif
-		ifeq ($(TOOLS),uclinux)
+		ifeq ($(CFG_TOOLS),uclinux)
 
 			OS := linux
 			PLATFORM := posix
 			
 			# uclinux
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/usr/local/bin/arm-linux-
-			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/usr/local/arm-linux
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/usr/local/bin/arm-linux-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/usr/local/arm-linux
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA)
@@ -239,14 +255,14 @@ else
 			CFG_AFLAGS := cq
 			
 		endif
-		ifeq ($(TOOLS),openmoko)
+		ifeq ($(CFG_TOOLS),openmoko)
 
 			OS := linux
 			PLATFORM := posix
 			
 			# openmoko
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/arm/bin/arm-angstrom-linux-gnueabi-
-			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm/arm-angstrom-linux-gnueabi
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm/bin/arm-angstrom-linux-gnueabi-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm/arm-angstrom-linux-gnueabi
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA)
@@ -255,14 +271,14 @@ else
 			CFG_AFLAGS := cq
 
 		endif
-		ifeq ($(TOOLS),armel)
+		ifeq ($(CFG_TOOLS),armel)
 
 			OS := linux
 			PLATFORM := posix
 			
 			# armel
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/usr/bin/arm-linux-gnu-
-			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/usr/
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/usr/bin/arm-linux-gnu-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/usr/
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA)
@@ -271,14 +287,14 @@ else
 			CFG_AFLAGS := cq
 
 		endif
-		ifeq ($(TOOLS),buildroot)
+		ifeq ($(CFG_TOOLS),buildroot)
 
 			OS := linux
 			PLATFORM := posix
 			
 			# buildroot
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/build_arm/staging_dir/usr/bin/arm-linux-uclibcgnueabi-
-			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/build_arm/staging_dir/
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/build_arm/staging_dir/usr/bin/arm-linux-uclibcgnueabi-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/build_arm/staging_dir/
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA)
@@ -288,24 +304,24 @@ else
 			CFG_AFLAGS := cq
 
 		endif
-		ifeq ($(TOOLS),crosstool)
+		ifeq ($(CFG_TOOLS),crosstool)
 
 			OS := linux
 			PLATFORM := posix
 			
 			# crosstool
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/usr/bin/arm-crosstool-linux-gnueabi-
-			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/usr/arm-crosstool-linux-gnueabi
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/usr/bin/arm-crosstool-linux-gnueabi-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/usr/arm-crosstool-linux-gnueabi
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA)  
-			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_NOSTAT64 
+			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_NOSTAT64 \
 										   -DOEX_NOWCHAR -DOEX_NOEXECINFO
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
 		endif
-		ifeq ($(TOOLS),scratchbox)
+		ifeq ($(CFG_TOOLS),scratchbox)
 
 			OS := linux
 			PLATFORM := posix
@@ -314,8 +330,8 @@ else
 			# scratchbox/compilers/arm-linux-gcc3.4.cs-glibc2.3/bin
 			
 			# martin's crosstool build
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/arm-gcc3.4-uclibc0.9.28/bin/arm-linux-
-			#CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm-gcc3.4-uclibc0.9.28
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm-gcc3.4-uclibc0.9.28/bin/arm-linux-
+			#CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm-gcc3.4-uclibc0.9.28
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA) 
@@ -325,14 +341,14 @@ else
 			CFG_AFLAGS := cq
 
 		endif
-		ifeq ($(TOOLS),iphone)
+		ifeq ($(CFG_TOOLS),iphone)
 
 			OS := darwin9
 			PLATFORM := posix
 			
 			# iphone
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/tc/toolchain/pre/bin/arm-apple-darwin9-
-			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/tc/toolchain/sys/
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/tc/toolchain/pre/bin/arm-apple-darwin9-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/tc/toolchain/sys/
 
 			CFG_STDLIB := 
 			CFG_LFLAGS := $(CFG_LEXTRA)
@@ -342,14 +358,14 @@ else
 			CFG_AFLAGS := cq
 
 		endif
-		ifeq ($(TOOLS),cegcc)
+		ifeq ($(CFG_TOOLS),cegcc)
 
 			OS := wince
 			PLATFORM := windows
 			
 			# cegcc
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-wince-cegcc-
-			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm-wince-cegcc/
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/bin/arm-wince-cegcc-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm-wince-cegcc/
 
 			CFG_STDLIB := -lole32 
 			CFG_LFLAGS := $(CFG_LEXTRA)
@@ -361,14 +377,14 @@ else
 			CFG_EXE_POST := .exe			
 
 		endif
-		ifeq ($(TOOLS),mingw32ce)
+		ifeq ($(CFG_TOOLS),mingw32ce)
 
 			OS := wince
 			PLATFORM := windows
 			
 			# mingw32ce
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/arm-wince-mingw32ce-
-			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/arm-wince-mingw32ce/
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/bin/arm-wince-mingw32ce-
+			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm-wince-mingw32ce/
 
 			CFG_STDLIB := -lole32 -laygshell -lwinsock -lws2
 			CFG_LFLAGS := $(CFG_LEXTRA)
@@ -380,16 +396,16 @@ else
 			CFG_EXE_POST := .exe			
 			
 		endif
-		ifeq ($(TOOLS),)
+		ifeq ($(CFG_TOOLS),)
 
 	
 			OS := linux
 			PLATFORM := posix
 			
 			# Custom tools
-			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(TOOLS)/bin/$(TOOLS)-
-#			CFG_SYSROOT := $(CFG_TOOLROOT)/$(TOOLS)/sysroot
-			override TOOLS := custom
+			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/bin/$(CFG_TOOLS)-
+#			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/sysroot
+			override CFG_TOOLS := custom
 
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA)
@@ -402,7 +418,7 @@ else
 
 	else
 	
-		ifeq ($(TOOLS),mingw32)
+		ifeq ($(CFG_TOOLS),mingw32)
 
 			OS := win32
 			PLATFORM := windows
@@ -418,7 +434,7 @@ else
 			CFG_AFLAGS := cq
 
 		endif
-		ifeq ($(TOOLS),mac)
+		ifeq ($(CFG_TOOLS),mac)
 
 			OS := apple
 			PLATFORM := posix
@@ -434,7 +450,7 @@ else
 			CFG_AFLAGS := cq
 
 		endif
-		ifeq ($(TOOLS),local)
+		ifeq ($(CFG_TOOLS),local)
 
 			OS := linux
 			PLATFORM := posix
@@ -549,6 +565,7 @@ else
 endif
 
 CFG_BINROOT  := $(CFG_ROOT)/bin/$(CFG_BUILD_TYPE)
+CFG_LOCAL_BINROOT  := $(CFG_ROOT)/bin/$(CFG_LOCAL_BUILD_TYPE)
 
 ifdef PRJ_BINROOT
 	CFG_OUTROOT := $(PRJ_BINROOT)/bin/$(CFG_BUILD_TYPE)
@@ -562,13 +579,13 @@ endif
 
 CFG_INCS := $(foreach inc,$(PRJ_INCS), $(CFG_CC_INC)$(CFG_LIBROOT)/$(inc))
 
-ifdef PRJ_RESCMP
-	CFG_TOOL_RESCMP := $(CFG_OUTROOT)/$(CFG_EXE_PRE)$(PRJ_RESCMP)$(CFG_DPOSTFIX)$(CFG_EXE_POST)
+ifneq ($(PROC),i386)
+	CFG_TOOL_RESCMP  := $(CFG_LOCAL_TOOL_RESCMP)
+	CFG_TOOL_JOIN  := $(CFG_LOCAL_TOOL_JOIN)
 else
 	CFG_TOOL_RESCMP  := $(CFG_OUTROOT)/$(CFG_EXE_PRE)resbld$(CFG_DPOSTFIX)$(CFG_EXE_POST)
+	CFG_TOOL_JOIN  := $(CFG_OUTROOT)/$(CFG_EXE_PRE)join$(CFG_DPOSTFIX)$(CFG_EXE_POST)
 endif
-
-CFG_TOOL_JOIN  := $(CFG_OUTROOT)/$(CFG_EXE_PRE)join$(CFG_DPOSTFIX)$(CFG_EXE_POST)
 
 ifdef PRJ_RESD
 

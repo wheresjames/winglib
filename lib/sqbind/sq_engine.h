@@ -392,11 +392,15 @@ public:
 
 			// Call the function
 			if ( oexCHECK_PTR( pRet ) )
-			{	SquirrelObject o( m_vm.GetVMHandle() );
+			{
+				SquirrelObject o( m_vm.GetVMHandle() );
 				o = f();
+
+				oex::oexLONG l = o.Len();
 				oex::oexCSTR p = o.ToString();
-				if ( oexCHECK_PTR( p ) )
-					*pRet = p;
+				if ( oexCHECK_PTR( p ) && l )
+					pRet->assign( p, l );
+
 			} // end if
 			else
 				f();
@@ -428,11 +432,15 @@ template< typename T_P1 >
 
 			// Call the function
 			if ( oexCHECK_PTR( pRet ) )
-			{	SquirrelObject o( m_vm.GetVMHandle() );
+			{
+				SquirrelObject o( m_vm.GetVMHandle() );
 				o = f( p1 );
+
+				oex::oexLONG l = o.Len();
 				oex::oexCSTR p = o.ToString();
-				if ( oexCHECK_PTR( p ) )
-					*pRet = p;
+				if ( oexCHECK_PTR( p ) && l )
+					pRet->assign( p, l );
+
 			} // end if
 			else
 				f( p1 );
@@ -465,11 +473,15 @@ template< typename T_P1, typename T_P2 >
 
 			// Call the function
 			if ( oexCHECK_PTR( pRet ) )
-			{	SquirrelObject o( m_vm.GetVMHandle() );
+			{
+				SquirrelObject o( m_vm.GetVMHandle() );
 				o = f( p1, p2 );
+
+				oex::oexLONG l = o.Len();
 				oex::oexCSTR p = o.ToString();
-				if ( oexCHECK_PTR( p ) )
-					*pRet = p;
+				if ( oexCHECK_PTR( p ) && l )
+					pRet->assign( p, l );
+
 			} // end if
 			else
 				f( p1, p2 );
@@ -501,11 +513,15 @@ template< typename T_P1, typename T_P2, typename T_P3 >
 
 			// Call the function
 			if ( oexCHECK_PTR( pRet ) )
-			{	SquirrelObject o( m_vm.GetVMHandle() );
+			{
+				SquirrelObject o( m_vm.GetVMHandle() );
 				o = f( p1, p2, p3 );
+
+				oex::oexLONG l = o.Len();
 				oex::oexCSTR p = o.ToString();
-				if ( oexCHECK_PTR( p ) )
-					*pRet = p;
+				if ( oexCHECK_PTR( p ) && l )
+					pRet->assign( p, l );
+
 			} // end if
 			else
 				f( p1, p2, p3 );
@@ -537,11 +553,15 @@ template< typename T_P1, typename T_P2, typename T_P3, typename T_P4 >
 
 			// Call the function
 			if ( oexCHECK_PTR( pRet ) )
-			{	SquirrelObject o( m_vm.GetVMHandle() );
+			{
+				SquirrelObject o( m_vm.GetVMHandle() );
 				o = f( p1, p2, p3, p4 );
+
+				oex::oexLONG l = o.Len();
 				oex::oexCSTR p = o.ToString();
-				if ( oexCHECK_PTR( p ) )
-					*pRet = p;
+				if ( oexCHECK_PTR( p ) && l )
+					pRet->assign( p, l );
+
 			} // end if
 			else
 				f( p1, p2, p3, p4 );

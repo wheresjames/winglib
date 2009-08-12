@@ -37,13 +37,18 @@
 OEX_USING_NAMESPACE
 
 CStr8 CUtil::md5( CStr8 s )
-{	oexGUID hash;
+{
+	oexGUID hash;
 	return CBase16::Encode( oss::CMd5::Transform( &hash, s.Ptr(), s.Length() ), sizeof( hash ) );
+
 }
 
 CStrW CUtil::md5( CStrW s )
-{	oexGUID hash;
+{
+#if !defined( OEX_NOWCHAR )
+	oexGUID hash;
 	CStr8 sMb = oexStrWToMb( s );
 	CStrW _s = oexMbToStrW( CBase16::Encode( OEX_NAMESPACE::oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) );
   	return _s;
+#endif
 }
