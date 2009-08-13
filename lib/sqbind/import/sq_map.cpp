@@ -158,8 +158,8 @@ CSqMap::iterator CSqMap::end()
 CSqMap::iterator CSqMap::find ( const CSqMap::t_Obj &k )
 {	return m_lst.find( k ); }
 
-oex::oexBOOL CSqMap::isset( const CSqMap::t_Obj &k )
-{	return m_lst.end() != m_lst.find( k ); }
+int CSqMap::isset( const CSqMap::t_Obj &k )
+{	return ( m_lst.end() != m_lst.find( k ) ) ? 1 : 0; }
 
 CSqMap::t_Obj CSqMap::get( const CSqMap::t_Obj &k )
 {
@@ -305,7 +305,7 @@ SquirrelObject CSqMap::_nexti( HSQUIRRELVM v )
             return so;
 
         } break;
-        
+
         default:
         	break;
 

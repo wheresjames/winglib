@@ -159,6 +159,18 @@ int CSqEngineExport::run( const stdString &sPath, const stdString &sScript )
 	return q->run( oexNULL, sPath, sScript );
 }
 
+void CSqEngineExport::set( const stdString &sPath, const stdString &sKey, const stdString &sVal )
+{	CSqMsgQueue *q = queue();
+	if ( q )
+		q->set( sPath, sKey, sVal );
+}
+
+stdString CSqEngineExport::get( const stdString &sPath, const stdString &sKey )
+{	CSqMsgQueue *q = queue();
+	if ( !q ) return stdString();
+	return q->get( sPath, sKey );
+}
+
 int CSqEngineExport::shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory )
 {	return oexShell( sFile.c_str(), sParams.c_str(), sDirectory.c_str() ); }
 
@@ -464,6 +476,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, clock )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ticks )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, spawn )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, error )

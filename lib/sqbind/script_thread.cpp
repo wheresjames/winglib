@@ -151,15 +151,23 @@ oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 
 oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply )
 {
+	// Property bag set
+	if ( sMsg == oexT( "pb_set" ) )
+		m_pb[ mapParams[ oexT( "key" ) ] ] = mapParams[ oexT( "val" ) ];
+
+	// Property bag get
+	else if ( sMsg == oexT( "pb_get" ) )
+		*pReply = m_pb[ mapParams[ oexT( "key" ) ] ];
+
 	// Just a path check?
-	if ( sMsg == oexT( "is_path" ) )
+	else if ( sMsg == oexT( "is_path" ) )
 		return oex::oexTRUE;
 
 	// Just post it to the queue if not our thread
-	if ( GetOwnerThreadId() != oexGetCurThreadId() )
+	else if ( GetOwnerThreadId() != oexGetCurThreadId() )
 		return Msg( stdString(), sMsg, &mapParams, pReply );
 
-	if ( sMsg == oexT( "spawn" ) )
+	else if ( sMsg == oexT( "spawn" ) )
 		OnSpawn( mapParams, pReply );
 
 	// Call to send message to child script

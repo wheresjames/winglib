@@ -719,8 +719,28 @@ public:
 
             // Read value string
             do
-            {   sVal << x_sStr.SkipWhiteSpace().Parse( oexTT( T, "\r\n" ) );
-                x_sStr.NextLine();
+            {
+				// Skip to data
+				if ( !x_sStr.IsMatchAt( 0, oexTT( T, "\r\n" ) ) )
+				{
+					// Skip any white space
+					x_sStr.SkipWhiteSpace();
+
+					// Just use the rest of the string if there is no more data
+					if ( 0 > x_sStr.FindChars( oexTT( T, "\r\n" ) ) )
+						sVal << x_sStr,
+						x_sStr.Destroy();
+
+					// Parse off our value
+					else
+						sVal << x_sStr.Parse( oexTT( T, "\r\n" ) ),
+						x_sStr.NextLine();
+
+				} // end if
+
+				else
+					x_sStr.NextLine();
+
             } while ( x_sStr.Length() && x_sStr.IsWhiteSpaceAt( 0 ) );
 
             // Ensure valid strings

@@ -95,7 +95,7 @@ namespace sqbind
 		void urldecode( const t_Obj &s );
 
 		/// Returns non-zero if the specified key exists
-		oex::oexBOOL isset( const CSqMap::t_Obj &k );
+		int isset( const CSqMap::t_Obj &k );
 
 		/// returns the number of items in the list
 		int size();

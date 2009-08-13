@@ -140,6 +140,7 @@ namespace sqbind
 			-   "%W, %B %D, %Y - %h:%m:%s %A"  = Thursday, December 25, 1997 - 04:15:30 PM
 			-   "%Y/%c/%d - %g:%m:%s.%l"    = 1997/12/25 - 16:15:30.500
 			-   "%w, %d %b %Y %g:%m:%s GMT" = Thu, 25 Dec 1997 16:15:30 GMT
+			-   "%w, %d-%b-%Y %g:%m:%s GMT" = Thu, 25-Dec-1997 16:15:30 GMT
 			-	"%Y-%c-%d %g:%m:%s" = 2009-05-06 00:00:00
 
 			\return Formated string

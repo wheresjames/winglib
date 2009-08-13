@@ -26,7 +26,7 @@ ifdef SQMOD
 	                          \
 	                          app/sq_apps/sqa_test \
 	                          \
-	                          sq/auto-build
+	                          sq/auto-build sq/task-list
 	ifdef 3D
 		BUILDDIRS := $(BUILDDIRS) app/sq_modules/sqmod_irrlicht \
 								  \

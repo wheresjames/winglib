@@ -56,6 +56,12 @@ public:
 	SQBIND_CLASS_CTOR_BEGIN( CSqEngineExport )
 	SQBIND_CLASS_CTOR_END( CSqEngineExport )
 
+	/// Sets the specified property
+	void set( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
+	/// Gets the specified property
+	stdString get( const stdString &sPath, const stdString &sKey );
+
 	/// Requests the appliation exit
 	void exit( int nExitCode );
 

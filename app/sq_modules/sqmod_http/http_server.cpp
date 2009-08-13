@@ -94,12 +94,21 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 
 //	oexSHOW( sReply.c_str() );
 
+	// Decode the reply
 	sqbind::CSqMap mReply;
 	mReply.deserialize( sReply );
 
+	// Set the content
 	if ( mReply[ oexT( "content" ) ].length() )
 		x_pSession->Content() =
 			oexStrToMb( oex::CStr( mReply[ oexT( "content" ) ].c_str(), mReply[ oexT( "content" ) ].length() ) );
+
+	// Set any headers that were returned
+	sqbind::CSqMap mHeaders;
+	mHeaders.deserialize( mReply[ oexT( "headers" ) ] );
+	for ( sqbind::CSqMap::t_List::iterator it = mHeaders.list().begin();
+			mHeaders.list().end() != it; it++ )
+		x_pSession->TxHeaders()[ oexStrToMb( it->first.c_str() ) ] = oexStrToMb( it->second.c_str() );
 
 	return 0;
 }

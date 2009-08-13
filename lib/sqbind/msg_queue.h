@@ -165,6 +165,12 @@ public:
 	/// Returns non-zero when messages will no longer be processed
 	virtual oex::oexBOOL Running() { return oex::oexFALSE; }
 
+	/// Sets the specified property
+	void set( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
+	/// Gets the specified property
+	stdString get( const stdString &sPath, const stdString &sKey );
+
 private:
 
 	/// Owner thread id

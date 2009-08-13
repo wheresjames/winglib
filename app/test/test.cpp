@@ -1324,6 +1324,52 @@ oex::oexRESULT TestParser()
 
     if ( !oexVERIFY( pb[ oexT( "1" ) ].ToString() == oexT( "world" ) ) )
         return -39;
+
+	oex::CStr sMime = oexT( "a: b\r\n" )
+					  oexT( "c: d\r\n" )
+					  oexT( "e: f\r\n" )
+					  oexT( "\r\n" );
+
+	pb = oex::CParser::DecodeMIME( sMime );
+
+    if ( !oexVERIFY( pb[ oexT( "a" ) ].ToString() == oexT( "b" ) ) )
+        return -40;
+
+    if ( !oexVERIFY( pb[ oexT( "c" ) ].ToString() == oexT( "d" ) ) )
+        return -41;
+
+    if ( !oexVERIFY( pb[ oexT( "e" ) ].ToString() == oexT( "f" ) ) )
+        return -42;
+
+	sMime = oexT( "a: b\r\n" )
+			oexT( "c: d\r\n" )
+			oexT( "e: f" );
+
+	pb = oex::CParser::DecodeMIME( sMime );
+
+    if ( !oexVERIFY( pb[ oexT( "a" ) ].ToString() == oexT( "b" ) ) )
+        return -43;
+
+    if ( !oexVERIFY( pb[ oexT( "c" ) ].ToString() == oexT( "d" ) ) )
+        return -44;
+
+    if ( !oexVERIFY( pb[ oexT( "e" ) ].ToString() == oexT( "f" ) ) )
+        return -45;
+
+	sMime = oexT( "a: b\r\n" )
+			oexT( "c:\r\n" )
+			oexT( "e: f" );
+
+	pb = oex::CParser::DecodeMIME( sMime );
+
+    if ( !oexVERIFY( pb[ oexT( "a" ) ].ToString() == oexT( "b" ) ) )
+        return -46;
+
+    if ( !oexVERIFY( pb[ oexT( "c" ) ].ToString() == oexT( "" ) ) )
+        return -47;
+
+    if ( !oexVERIFY( pb[ oexT( "e" ) ].ToString() == oexT( "f" ) ) )
+        return -48;
 /*
     oex::CPropertyBag url = oex::CParser::DecodeUrlParams( oexT( "a=b&c=d&e=&f" );
 

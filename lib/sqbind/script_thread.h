@@ -43,6 +43,9 @@ public:
     /// Map type for child script  thread objects
 	typedef oexStdMap( stdString, CScriptThread* )		t_ScriptList;
 
+	/// Property bag type
+	typedef oexStdMap( stdString, stdString )			t_PropertyBag;
+
 public:
 
     /// Default constructor
@@ -146,4 +149,8 @@ private:
 
     /// Parent script
     CSqMsgQueue             	*m_pParentScript;
+
+	/// Generic property bag
+	t_PropertyBag				m_pb;
+
 };

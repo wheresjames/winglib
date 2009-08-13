@@ -140,9 +140,9 @@ public:
         m_nTransactions = 0;
         m_bHeaderReceived = oexFALSE;
 #ifdef OEX_ENABLE_ZIP
-		m_bEnableCompression = oexTRUE; 
+		m_bEnableCompression = oexTRUE;
 #else
-		m_bEnableCompression = oexFALSE; 
+		m_bEnableCompression = oexFALSE;
 #endif
     }
 
@@ -153,9 +153,9 @@ public:
         m_nTransactions = 0;
         m_bHeaderReceived = oexFALSE;
 #ifdef OEX_ENABLE_ZIP
-		m_bEnableCompression = oexTRUE; 
+		m_bEnableCompression = oexTRUE;
 #else
-		m_bEnableCompression = oexFALSE; 
+		m_bEnableCompression = oexFALSE;
 #endif
     }
 
@@ -230,14 +230,14 @@ public:
 		// Are there any post variables?
 		if ( !m_pbPost.Size() && m_pbRequest[ "type" ] == "POST" )
 		{
-			// IE and Netscape append CRLF, so be sure and use 
+			// IE and Netscape append CRLF, so be sure and use
 			// the content length if available
 			if ( uContentLength )
 				m_pbPost = CParser::DecodeUrlParams( Rx().Read( uContentLength ) );
-			
+
 			else
 				m_pbPost = CParser::DecodeUrlParams( Rx().Read() );
-		
+
 		} // end if
 
 		// Set default headers
@@ -322,7 +322,7 @@ public:
 
 		// For now
 		m_pbRequest[ "REQUEST_METHOD" ].ToString() = m_pbRequest[ "type" ].ToString();
-		
+
 		// Grab the url
 		CStr8 sPath = sRx.ParseNextToken();
 		m_pbRequest[ "path" ] = sPath.Parse( "?" );
@@ -352,23 +352,23 @@ public:
 		m_pbRxHeaders = CParser::DecodeMIME( sRx );
 
 		// Reconstruct the request
-		m_pbRequest[ "REQUEST_STRING" ].ToString() 
+		m_pbRequest[ "REQUEST_STRING" ].ToString()
 			<< m_pbRequest[ "type" ].ToString()
 			<< " " << m_pbRequest[ "path" ].ToString();
 
 		// Add params
 		if ( m_pbRequest[ "params" ].ToString().Length() )
-			m_pbRequest[ "REQUEST_STRING" ].ToString() 
+			m_pbRequest[ "REQUEST_STRING" ].ToString()
 				<< "?" << m_pbRequest[ "params" ].ToString();
 
 		// Protocol and version
-		m_pbRequest[ "REQUEST_STRING" ].ToString() 
+		m_pbRequest[ "REQUEST_STRING" ].ToString()
 			<< " " << m_pbRequest[ "proto" ].ToString()
 			<< "/" << m_pbRequest[ "ver" ].ToString();
 
 		// Add connection information
-		GrabConnectionInfo();		
-		
+		GrabConnectionInfo();
+
 		// Headers received
 		m_bHeaderReceived = oexTRUE;
 
@@ -630,9 +630,9 @@ public:
 	void EnableCompression( oexBOOL b )
 	{
 #ifdef OEX_ENABLE_ZIP
-		m_bEnableCompression = b; 
+		m_bEnableCompression = b;
 #else
-		m_bEnableCompression = oexFALSE; 
+		m_bEnableCompression = oexFALSE;
 #endif
 	}
 
@@ -645,7 +645,7 @@ public:
 		CStr s;
 
 		s	<< m_pbRequest[ "REMOTE_ADDR" ].ToString()
-			<< " -" // rfc931 
+			<< " -" // rfc931
 			<< " -" // username
 			<< " " << oexLocalTimeStr( "[%c/%b/%Y:%g:%m:%s %Zs%Zh%Zm]" )
 			<< " \"" << m_pbRequest[ "REQUEST_STRING" ].ToString() << "\""
@@ -657,7 +657,7 @@ public:
 			s << " \"" << m_pbRxHeaders[ "referer" ].ToString() << "\"";
 		else
 			s << " -";
-		
+
 		// Add user agent if specified
 		if ( m_pbRxHeaders[ "User-Agent" ].ToString().Length() )
 			s << " \"" << m_pbRxHeaders[ "User-Agent" ].ToString() << "\"";
