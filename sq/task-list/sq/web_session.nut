@@ -51,6 +51,23 @@ function RestoreSession( mHeaders, mReply )
 	return mSession;
 }
 
+function DoLogin( mGet, mPost, mSession, login_menu )
+{
+	if ( mGet.isset( "login" ) )
+		mSession[ "user" ] <- "1";
+	else if ( mGet.isset( "logout" ) )
+		mSession.clear();
+
+	local loggedin = mSession.isset( "user" );
+	local login_menu = "";
+	if ( loggedin )
+		login_menu = "<a href='?logout=1'>Logout</a>";
+	else
+		login_menu = "<a href='?login=1'>Login</a>";
+
+	return loggedin;
+}
+
 function OnProcessRequest( request, headers, get, post )
 {
 	_self.kill( "." );
@@ -70,19 +87,11 @@ function OnProcessRequest( request, headers, get, post )
 	local mReply = CSqMap();
 	local page = "Access Denied";
 
+	// Restore session
 	local mSession = RestoreSession( mHeaders, mReply );
 
-	if ( mGet.isset( "login" ) )
-		mSession[ "user" ] <- "1";
-	else if ( mGet.isset( "logout" ) )
-		mSession.unset( "user" );
-
-	local loggedin = mSession.isset( "user" );
 	local login_menu = "";
-	if ( loggedin )
-		login_menu = "<a href='?logout=1'>Logout</a>";
-	else
-		login_menu = "<a href='?login=1'>Login</a>";
+	local loggedin = DoLogin( mGet, mPost, mSession, login_menu.weakref() );
 
 	local menu_items =
 	[
@@ -128,7 +137,8 @@ function OnProcessRequest( request, headers, get, post )
 </html>";
 
 	// Save session data
-	_self.set( "/web_server", mSession[ "id" ], mSession.serialize() );
+	if ( mSession.isset( "id" ) )
+		_self.set( "/web_server", mSession[ "id" ], mSession.serialize() );
 
 	mReply.set( "content", content );
 	return mReply.serialize();
