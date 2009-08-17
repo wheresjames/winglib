@@ -2027,8 +2027,28 @@ public:
 	//==============================================================
 	virtual CStr GetSupportedFormats()
 	{
-		CStr sStr;
-		return sStr;
+//		return oexT( "YUYV,RGB3" );
+		return oexT( "RGB3" );
+	}
+
+	//==============================================================
+	// GetFormatDescription()
+	//==============================================================
+	virtual CStr GetFormatDescription( oexUINT x_uFormat )
+	{
+		switch( x_uFormat )
+		{
+//			case oexFOURCC( 'Y', 'U', 'Y', 'V' ) :
+//				return "YUYV - Y, U (Cb) and V (Cr)";
+
+			case oexFOURCC( 'R', 'G', 'B', '3' ) :
+				return "RGB3 - 24-bit / Red(8), Green(8), Blue(8)";
+
+			default:
+				break;
+		};
+
+		return CStr();
 	}
 
 	//==============================================================

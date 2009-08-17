@@ -354,12 +354,21 @@
 #define oexDO( s, w, r )			oexRETRY( 1000, s, w, r )
 
 /// Creates a four character code
-#define oexFOURCC( a, b, c, d )  ( (OEX_NAMESPACE::oexULONG)(						\
+#if defined( OEX_WINDOWS )
+#	define oexFOURCC( a, b, c, d )  ( (OEX_NAMESPACE::oexULONG)(						\
+								  	  ( ( (OEX_NAMESPACE::oexULONG)a & 0xff )       ) 	\
+									| ( ( (OEX_NAMESPACE::oexULONG)b & 0xff ) <<  8 ) 	\
+									| ( ( (OEX_NAMESPACE::oexULONG)c & 0xff ) << 16 ) 	\
+									| ( ( (OEX_NAMESPACE::oexULONG)d & 0xff ) << 24 ) 	\
+								 ) )
+#else
+#	define oexFOURCC( a, b, c, d )  ( (OEX_NAMESPACE::oexULONG)(						\
 								  	  ( ( (OEX_NAMESPACE::oexULONG)a & 0xff ) << 24 ) 	\
 									| ( ( (OEX_NAMESPACE::oexULONG)b & 0xff ) << 16 ) 	\
 									| ( ( (OEX_NAMESPACE::oexULONG)c & 0xff ) <<  8 ) 	\
 									| ( ( (OEX_NAMESPACE::oexULONG)d & 0xff )       ) 	\
 								 ) )
+#endif
 
 #define oexFOURCC_STR( cc ) oexMbToStr( OEX_NAMESPACE::CStr8( (char*)&( cc ), 4 ) )
 

@@ -1,4 +1,10 @@
 
+ifndef BUILD_GSTREAMER
+
+all:
+
+else
+
 MK_INC := lib_gst-c-gst-plugins-good.i
 
 .PHONY all: 
@@ -18,3 +24,4 @@ MK_INC := lib_gst-c-gst-plugins-good.i
 			MK_MODULE=ffmpegcolorspace \
 			MK_PATH=gst-plugins-base/gst/ffmpegcolorspace
 
+endif

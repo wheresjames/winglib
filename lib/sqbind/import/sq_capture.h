@@ -74,6 +74,12 @@ namespace sqbind
 		/// Capture device
 		oex::vid::CCapture			m_cap;
 
+		/// Image buffer
+		oex::CImage					m_img;
+
+		/// General purpose buffer
+		oex::TMem< oex::oexBYTE >	m_buf;
+
     };
 
 }; // end namespace

@@ -6,7 +6,7 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := xml
 PRJ_TYPE := lib
-PRJ_INCS := libxml/include winglib/dep/etc/libxml/inc/posix zlib
+PRJ_INCS := libxml/include zlib
 PRJ_LIBS := 
 PRJ_DEFS := LIBXML_THREAD_ENABLED=1
 PRJ_LIBROOT := ..
@@ -20,6 +20,12 @@ ifneq ($(PROC),i386)
 UNSUPPORTED := PROC=$(PROC) Not supported
 include $(PRJ_LIBROOT)/unsupported.mk
 else
+
+ifeq ($(PLATFORM),windows)
+	PRJ_INCS := winglib/dep/etc/libxml/inc/windows $(PRJ_INCS)
+else
+	PRJ_INCS := winglib/dep/etc/libxml/inc/posix $(PRJ_INCS)
+endif
 
 #-------------------------------------------------------------------
 # File locations

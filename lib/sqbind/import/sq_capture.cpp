@@ -54,6 +54,12 @@ int CSqCapture::Destroy()
 	// Close the capture device
 	m_cap.Destroy();
 
+	// Lose any image buffer we may have
+	m_img.Destroy();
+
+	// Lose temporary buffer
+	m_buf.Destroy();
+
 	return 1;
 }
 
@@ -128,9 +134,80 @@ stdString CSqCapture::Capture( const stdString &sEncode )
 	if ( !m_cap.WaitForFrame( 3000 ) )
 		return stdString();
 
+	// Convert to multi-byte
+	oex::CStr8 fmt = oexStrToMb( sEncode.c_str() );
+	if ( fmt.Length() < 4 )
+		return oexT( "" );
+
+	// What format does the user want?
+	oex::oexUINT uReq = 0;
+	if ( 4 <= sEncode.length() )
+		uReq = *(oex::oexUINT*)fmt.Ptr();			
+
+	// What format do we have
+	oex::oexUINT uFormat = m_cap.GetFormat();
+
+	// Is the video already in the required format?
 	stdString ret;
-	if ( m_cap.GetBuffer() && m_cap.GetBufferSize() )
-		ret.assign( (char*)m_cap.GetBuffer(), m_cap.GetBufferSize() );
+	if ( !uReq || uReq == uFormat )
+	{
+		if ( m_cap.GetBuffer() && m_cap.GetBufferSize() )
+			ret.assign( (char*)m_cap.GetBuffer(), m_cap.GetBufferSize() );
+
+	} // end if
+
+	else
+	{
+		switch( uReq )
+		{
+			// JPEG
+			case oexFOURCC( 'J', 'P', 'E', 'G' ) :
+
+				switch( uFormat )
+				{
+					// RGB3 -> JPEG
+					case oexFOURCC( 'R', 'G', 'B', '3' ) :
+					{
+						if ( m_img.Create( m_cap.GetWidth(), m_cap.GetHeight(), 24 ) )
+						{
+							memcpy( m_img.GetBits(), m_cap.GetBuffer(), m_cap.GetBufferSize() );
+
+							oex::oexPBYTE pEnc;
+							oex::oexINT nEnc;
+							if ( 0 < m_img.Encode( &pEnc, &nEnc, oexT( "JPG" ) ) )
+								ret.assign( (char*)pEnc, nEnc );								 
+
+						} // end if
+
+					} // end case
+					break;
+
+					// UYVY -> JPEG
+					case oexFOURCC( 'U', 'Y', 'V', 'Y' ) :
+					{
+						if ( m_img.Create( m_cap.GetWidth(), m_cap.GetHeight(), 24 ) )
+						{
+							// YUYV conversion
+							oex::CDib::YUYV_RGB( m_cap.GetWidth(), m_cap.GetHeight(), m_cap.GetBits(),
+												 m_img.GetBits(), 0 );
+
+							oex::oexPBYTE pEnc;
+							oex::oexINT nEnc;
+							if ( 0 < m_img.Encode( &pEnc, &nEnc, oexT( "JPG" ) ) )
+								ret.assign( (char*)pEnc, nEnc );								 
+
+						} // end if
+
+					} // end case
+					break;
+
+				} // end switch
+
+				break;
+				
+		} // end switch
+
+	} // end else
 
 	// Release video buffer
 	m_cap.ReleaseFrame();

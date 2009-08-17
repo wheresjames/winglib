@@ -10,9 +10,6 @@
 #undef HAVE_LIBPTHREAD
 #undef HAVE_PTHREAD_H
 
-/* Define if IPV6 support is there */
-#undef SUPPORT_IP6
-
 /* Define if getaddrinfo is there */
 #undef HAVE_GETADDRINFO
 
@@ -169,9 +166,6 @@
 /* Define to 1 if you have the <stdarg.h> header file. */
 #define HAVE_STDARG_H 1
 
-/* Define to 1 if you have the <stdint.h> header file. */
-#define HAVE_STDINT_H 1
-
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
 
@@ -224,9 +218,6 @@
 
 /* Define to 1 if you have the <time.h> header file. */
 #define HAVE_TIME_H 1
-
-/* Define to 1 if you have the <unistd.h> header file. */
-#undef HAVE_UNISTD_H
 
 /* Whether va_copy() is available */
 #undef HAVE_VA_COPY

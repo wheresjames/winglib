@@ -1345,6 +1345,10 @@ public:
 	{
 		Destroy();
 
+		// If width and height are zero, just wanting a query object
+		if ( !x_nWidth && !x_nHeight )
+			return oexTRUE;
+
 		HRESULT hr = m_cap.Capture( x_uDevice, x_uSource, x_nWidth, x_nHeight, CV4w2::_OnFrame, this );
 		if ( S_OK != hr )
 		{	oexERROR( hr, "Failed to open capture device" );
@@ -1436,9 +1440,27 @@ public:
 	//==============================================================
 	virtual CStr GetSupportedFormats()
 	{
-		CStr sStr;
+		return oexT( "RGB3,YUYV" );
+	}
 
-		return sStr;
+	//==============================================================
+	// GetFormatDescription()
+	//==============================================================
+	virtual CStr GetFormatDescription( oexUINT x_uFormat )
+	{
+		switch( x_uFormat )
+		{
+			case oexFOURCC( 'Y', 'U', 'Y', 'V' ) :
+				return "YUYV - Y, U (Cb) and V (Cr)";
+
+			case oexFOURCC( 'R', 'G', 'B', '3' ) :
+				return "RGB3 - 24-bit / Red(8), Green(8), Blue(8)";
+
+			default:
+				break;
+		};
+
+		return CStr();
 	}
 
 	//==============================================================
