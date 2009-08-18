@@ -188,8 +188,8 @@ stdString CSqCapture::Capture( const stdString &sEncode )
 						if ( m_img.Create( m_cap.GetWidth(), m_cap.GetHeight(), 24 ) )
 						{
 							// YUYV conversion
-							oex::CDib::YUYV_RGB( m_cap.GetWidth(), m_cap.GetHeight(), m_cap.GetBits(),
-												 m_img.GetBits(), 0 );
+							oex::CDib::YUYV_RGB( m_cap.GetWidth(), m_cap.GetHeight(), 
+												 m_cap.GetBuffer(), m_img.GetBits(), 0 );
 
 							oex::oexPBYTE pEnc;
 							oex::oexINT nEnc;

@@ -493,6 +493,7 @@ namespace os
 #   include "inc/os/ip_socket.h"
 #	include "inc/os/module.h"
 #   include "inc/os/service.h"
+#	include "inc/os/service_impl.h"
 };
 
 //------------------------------------------------------------------

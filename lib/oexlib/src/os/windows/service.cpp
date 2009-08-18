@@ -144,3 +144,5 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 	// Call stop function
 	return pStop();
 }
+
+

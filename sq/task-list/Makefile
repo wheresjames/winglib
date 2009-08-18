@@ -4,8 +4,9 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_SQRL := yes
+PRJ_SQRL := service
 PRJ_NAME := task-list
+PRJ_DESC := Task list manager
 
 SQMOD_STATIC := http
 

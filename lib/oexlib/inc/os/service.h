@@ -220,3 +220,4 @@ public:
 	*/
 	static oexINT RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay = 10, oexINT x_nFlags = -1 );
 };
+

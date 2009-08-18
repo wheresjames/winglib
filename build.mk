@@ -7,7 +7,7 @@ ifneq ($(PRJ_DEFS),)
 		CFG_ADD_DEFS := $(foreach def,$(PRJ_DEFS),-D$(def) )
 	endif	
 	CFG_DEFS := $(CFG_DEFS) $(CFG_ADD_DEFS)
-	PRJ_DEFS := 
+	PRJ_DEFS :=
 endif
 
 ifeq ($(LOC_CXX_$(LOC_TAG)),)
