@@ -95,6 +95,9 @@ public:
 	/// Get child scripts
 	stdString get_children( const stdString &sPath );
 
+	/// Decorates the file with appropriate compile time options
+	stdString decorate( const stdString &sPath, int bExe, int bLib );
+
 	/// Returns the file path to the current script
 	stdString path( const stdString &sPath );
 

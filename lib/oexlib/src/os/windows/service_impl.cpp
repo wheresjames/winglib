@@ -85,7 +85,9 @@ CServiceImpl::CServiceImpl()
 	// Set service handle to null
 	m_hService = oexNULL;
 
-	m_bRun = oexFALSE;
+	// I assume we want to start off running
+	// ( this is needed to ensure things work when running 'as exe')
+	m_bRun = oexTRUE;
 
 	// Auto restart service by default
 	m_bAutoRestart = oexTRUE;
@@ -118,32 +120,33 @@ int CServiceImpl::RunService( int argc, char** argv, oexCSTR pName, oexCSTR pDes
 	pInstance->SetCommandLine( argc, argv );
 
 	// Run as plain old executable?
-	if ( pInstance->CommandLine().IsKey( oexT( "exe" ) ) )
+	if ( pInstance->CommandLine().IsKey( oexT( "run" ) ) )
 		return pInstance->OnRun();
 
-	if ( pInstance->CommandLine().IsKey( oexT( "RegService" ) ) )
+	if ( pInstance->CommandLine().IsKey( oexT( "install" ) ) )
 	{
 		int nErr = InstallService( pName, pDesc, pInstance->getAutoRestart() );
 		if ( 0 > nErr )
-		{	oexEcho( oexT( "Error registering service" ) );
+		{	oexEcho( oexT( "Error installing service" ) );
 			return nErr;
 		} // end if
 
-		oexEcho( oexT( "Registered service" ) );
+		oexEcho( oexT( "Installed service" ) );
 
 		return 0;
 
 	} // end if
 
-	if ( pInstance->CommandLine().IsKey( oexT( "UnregService" ) ) )
+	if ( pInstance->CommandLine().IsKey( oexT( "remove" ) ) 
+		 || pInstance->CommandLine().IsKey( oexT( "uninstall" ) ) )
 	{		
 		int nErr = RemoveService( pName );
 		if ( 0 > nErr )
-		{	oexEcho( oexT( "Error unregistering service" ) );
+		{	oexEcho( oexT( "Error removing service" ) );
 			return nErr;
 		} // end if
 
-		oexEcho( oexT( "Unregistered service" ) );
+		oexEcho( oexT( "Removed service" ) );
 
 		return 0;
 
@@ -163,8 +166,18 @@ int CServiceImpl::RunService( int argc, char** argv, oexCSTR pName, oexCSTR pDes
 
 	// Start the control dispatcher thread for our service
 	if ( !StartServiceCtrlDispatcher( ServiceTable ) )
-	{	oexERROR( GetLastError(), oexT( "StartServiceCtrlDispatcher() failed" ) );
+	{
+		// +++ This probably means we're running as exe
+		//     Need to do more testing on this
+		if ( ERROR_FAILED_SERVICE_CONTROLLER_CONNECT == GetLastError() )
+			if ( !pInstance->CommandLine().IsKey( oexT( "service" ) ) )
+				return pInstance->OnRun();
+		
+		// Log the error
+		oexERROR( GetLastError(), oexT( "StartServiceCtrlDispatcher() failed" ) );
+
 		return -2;
+
 	} // end if
 
 	return g_ss.dwWin32ExitCode;

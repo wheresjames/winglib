@@ -69,6 +69,9 @@ void CSqEngineExport::terminate( int nExitCode )
 stdString CSqEngineExport::path( const stdString &sPath )
 {   return OnPath( sPath ); }
 
+stdString CSqEngineExport::decorate( const stdString &sPath, int bExe, int bLib )
+{   return oex::CStr( sPath.c_str() ).DecorateName( bExe, bLib ).Ptr(); }
+
 stdString CSqEngineExport::build_path( const stdString &sS1,  const stdString &sS2 )
 {	return oexBuildPath( sS1.c_str(), sS2.c_str() ).Ptr(); }
 
@@ -495,6 +498,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, build_path )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, decorate )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, md5 )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, unique )
@@ -524,7 +528,7 @@ void CSqEngine::SetExportFunction( PFN_SQBIND_Export_Symbols fn, sqbind::SSqAllo
 
 oex::oexBOOL CSqEngine::Init()
 {
-	Destroy();
+//	Destroy();
 
 	_oexTRY
 	{

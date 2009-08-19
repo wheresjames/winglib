@@ -27,45 +27,39 @@ function DecodeCookie( cookie )
 
 function RestoreSession( mHeaders, mReply )
 {
+	local id = "";
 	local mSession = CSqMap();
 	if ( mHeaders.isset( "Cookie" ) )
 	{
-		local id = DecodeCookie( mHeaders[ "Cookie" ] );
+		id = DecodeCookie( mHeaders[ "Cookie" ] );
 
 		if ( id.len() )
 			mSession.deserialize( _self.get( "/web_server", id ) );
 
-		// Validate the entry
-		if ( !id.len() || !mSession.isset( "id" ) || mSession[ "id" ] != id )
-		{
-			id = _self.unique();
-			mSession[ "id" ] <- id;
-			local mRHeaders = CSqMap();
-			mRHeaders.set( "Set-Cookie", CreateCookie( mSession[ "id" ] ) );
-			mReply.set( "headers", mRHeaders.serialize() );
+	} // end if
 
-		} // end if
+	// Validate the entry
+	if ( !id.len() || !mSession.isset( "id" ) || mSession[ "id" ] != id )
+	{
+		id = _self.unique();
+		mSession[ "id" ] <- id;
+		local mRHeaders = CSqMap();
+		mRHeaders.set( "Set-Cookie", CreateCookie( mSession[ "id" ] ) );
+		mReply.set( "headers", mRHeaders.serialize() );
 
 	} // end if
 
 	return mSession;
 }
 
-function DoLogin( mGet, mPost, mSession, login_menu )
+function DoLogin( mGet, mPost, mSession )
 {
 	if ( mGet.isset( "login" ) )
 		mSession[ "user" ] <- "1";
 	else if ( mGet.isset( "logout" ) )
 		mSession.clear();
 
-	local loggedin = mSession.isset( "user" );
-	local login_menu = "";
-	if ( loggedin )
-		login_menu = "<a href='?logout=1'>Logout</a>";
-	else
-		login_menu = "<a href='?login=1'>Login</a>";
-
-	return loggedin;
+	return mSession.isset( "user" );
 }
 
 function OnProcessRequest( request, headers, get, post )
@@ -91,7 +85,8 @@ function OnProcessRequest( request, headers, get, post )
 	local mSession = RestoreSession( mHeaders, mReply );
 
 	local login_menu = "";
-	local loggedin = DoLogin( mGet, mPost, mSession, login_menu.weakref() );
+	local loggedin = DoLogin( mGet, mPost, mSession );
+	local login_menu = loggedin ? "<a href='?logout=1'>Logout</a>" : "<a href='?login=1'>Login</a>";
 
 	local menu_items =
 	[
@@ -101,6 +96,7 @@ function OnProcessRequest( request, headers, get, post )
 	if ( loggedin )
 		menu_items.append( [ "tasks", "Tasks" ] );
 
+	
 	switch ( mRequest[ "path" ] )
 	{
 		case "" :
@@ -159,7 +155,7 @@ function show_menu( sel, menu_items, right )
 
 	local ret = @"
 		<table width='100%' style='" + _cfg( "obj_border" ) + @"' bgcolor='" + _cfg( "col_shade" ) + @"'>
-			<tr><td colspan='0'><nobr><b>Auto&nbsp;Build&nbsp;&nbsp;&nbsp;</b></nobr></td>
+			<tr><td colspan='0'><nobr><b>Task&nbsp;List&nbsp;&nbsp;&nbsp;</b></nobr></td>
 			<td width='100%'><table><tr>
 		";
 

@@ -127,30 +127,30 @@ public:
 private:
 
 	/// Set to non-zero when the thread should exit
-	oex::oexBOOL				m_bQuit;
+	oex::oexBOOL						m_bQuit;
 
     /// Squirrel engine
-	sqbind::CSqEngine       	m_cSqEngine;
+	sqbind::CSqEngine					m_cSqEngine;
 
     /// Pointer to the module manager
-    sqbind::CModuleManager  	*m_pModuleManager;
+    sqbind::CModuleManager  			*m_pModuleManager;
 
     /// List of child scripts
-    t_ScriptList            	m_lstScript;
+    t_ScriptList					 	m_lstScript;
 
     /// Script to load
-    stdString					m_sName;
+    stdString							m_sName;
 
     /// Script to load
-    stdString					m_sScript;
+    stdString							m_sScript;
 
     /// If non-zero, m_sScript contains a file name
-	oex::oexBOOL            	m_bFile;
+	oex::oexBOOL						m_bFile;
 
     /// Parent script
-    CSqMsgQueue             	*m_pParentScript;
+    CSqMsgQueue							*m_pParentScript;
 
 	/// Generic property bag
-	t_PropertyBag				m_pb;
+	t_PropertyBag						m_pb;
 
 };

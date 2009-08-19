@@ -47,7 +47,8 @@ CScriptThread::~CScriptThread()
 {	Destroy(); }
 
 void CScriptThread::Destroy()
-{	m_bQuit = oex::oexTRUE;
+{	Stop();
+	m_bQuit = oex::oexTRUE;
 	m_pModuleManager = oexNULL;
 	m_pParentScript = oexNULL;
 }
@@ -139,7 +140,7 @@ oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 	// Lose child scripts
 	DestroyChildScripts();
 
-	// Lose the squirrel engine
+	// Lose the engine
 	m_cSqEngine.Destroy();
 
 	// Let the user know we're starting a thread

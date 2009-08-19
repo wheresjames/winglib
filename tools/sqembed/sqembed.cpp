@@ -19,8 +19,21 @@ int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData )
 	if ( !sScript.length() )
 		return -1;
 
+	// Data container
+	oex::CStr s;
+
+	// Check for override
+	if ( oexExists( oexBuildPath( oexT( "scripts" ), sScript.c_str() ).Ptr() ) )
+		s = oexMbToStr( oexFileGetContents( oexBuildPath( oexT( "scripts" ), sScript.c_str() ).Ptr() ) );
+
+	else if ( oexExists( oexBuildPath( oexT( "sq" ), sScript.c_str() ).Ptr() ) )
+		s = oexMbToStr( oexFileGetContents( oexBuildPath( oexT( "sq" ), sScript.c_str() ).Ptr() ) );
+
 	// Attempt to get the embedded script
-	oex::CStr s = oexMbToStr( oexGetResource( sScript.c_str() ) );
+	else
+		s = oexMbToStr( oexGetResource( sScript.c_str() ) );
+
+	// Assign data
 	sData.assign( s.Ptr(), s.Length() );
 
 	return 0;

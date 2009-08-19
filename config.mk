@@ -78,21 +78,12 @@ else
 	CFG_DEFS := -DOEX_PROJECT_NAME="$(CFG_NAME)" -DOEX_PROJECT_DESC="$(CFG_DESC)"
 endif	
 
-ifdef PRJ_DEFS
-	ifeq ($(BUILD),vs)
-		CFG_DEFS := $(CFG_DEFS) $(foreach def,$(PRJ_DEFS),/D$(def) )
-	else
-		CFG_DEFS := $(CFG_DEFS) $(foreach def,$(PRJ_DEFS),-D$(def) )
-	endif	
-	PRJ_DEFS :=
-endif
-
 ifdef PRJ_SQRL
 	PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus $(PRJ_INCS)
 	PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib $(PRJ_LIBS)
 	PRJ_RESD := sq
 	ifeq ($(PRJ_SQRL),service)
-		CFG_DEFS := $(CFG_DEFS) OEX_SERVICE
+		PRJ_DEFS := $(PRJ_DEFS) OEX_SERVICE
 	endif
 	ifeq ($(PRJ_TYPE),dll)
 		PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Idle SRV_Stop $(PRJ_EXPORTS)
@@ -100,7 +91,16 @@ ifdef PRJ_SQRL
 endif
 
 ifdef SQMOD_STATIC
-	CFG_DEFS := $(CFG_DEFS) SQBIND_STATIC $(foreach mod,$(SQMOD_STATIC),SQBIND_STATIC_$(mod) )
+	PRJ_DEFS := $(PRJ_DEFS) SQBIND_STATIC $(foreach mod,$(SQMOD_STATIC),SQBIND_STATIC_$(mod) )
+endif
+
+ifdef PRJ_DEFS
+	ifeq ($(BUILD),vs)
+		CFG_DEFS := $(CFG_DEFS) $(foreach def,$(PRJ_DEFS),/D$(def) )
+	else
+		CFG_DEFS := $(CFG_DEFS) $(foreach def,$(PRJ_DEFS),-D$(def) )
+	endif	
+	PRJ_DEFS :=
 endif
 
 ifdef UNICODE
@@ -181,7 +181,7 @@ ifeq ($(BUILD),vs)
 	endif
 
 	#CFG_CUR_ROOT := $(shell cd)
-	CFG_CUR_ROOT := $(shell pwd)
+	CFG_CUR_ROOT := $(subst \,/,$(shell pwd))
 
 else
 
