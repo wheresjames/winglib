@@ -82,6 +82,9 @@ public:
 
 public:
 
+	/// Call from main() to make this thing go
+	virtual int OnRunService( int argc, char** argv, oexCSTR pName, oexCSTR pDesc );
+
 	/// Main loop, this is the one you probably want to override
 	virtual int OnRun() { return -1; }
 

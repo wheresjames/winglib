@@ -50,9 +50,6 @@ public:
 
 	virtual int OnRun() 
 	{
-		// Initialize the oex library
-		oexINIT();
-
 		// Initialize sockets
 		if ( !oex::os::CIpSocket::InitSockets() )
     		oexERROR( 0, oexT( "Unable to initialize sockets" ) );
@@ -116,9 +113,6 @@ public:
 
 		// Uninitialize sockets
 		oex::os::CIpSocket::UninitSockets();
-
-		// Uninitialize the oex library
-		oexUNINIT();
 
 		return 0; 
 	}

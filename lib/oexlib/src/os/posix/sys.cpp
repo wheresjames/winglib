@@ -734,13 +734,15 @@ oexINT CSys::Fork( oexCSTR x_pWorkingDirectory, oexCSTR x_pLogFile )
 	// Fork from the parent
 	pid = fork();
 	if ( 0 > pid )
-	{	oexERROR( errno, oexT( "fork() failed" ) );
+	{	oexPrintf( "fork() failed : %d\n", errno );
+		oexERROR( errno, oexT( "fork() failed" ) );
 		return pid;
 	} // end if
 
 	// Exit parent process
 	if ( 0 < pid )
-	{	//CLog::GlobalLog().OpenLogFile( oexNULL, oexNULL, oexNULL );
+	{	//CLog::GlobalLog().OpenLogFile( oexNULL, oexNULL, oexNULL );		
+		//oexPrintf( "Exit parent : %d\n", (int)pid );
 		oexNOTICE( 0, CStr().Fmt( oexT( "fork() = %d (0x%x)" ), (int)pid, (int)pid ) );
 		return pid;
 	} // end if
@@ -751,7 +753,8 @@ oexINT CSys::Fork( oexCSTR x_pWorkingDirectory, oexCSTR x_pLogFile )
 	// Child process needs a SID
 	sid = setsid();
 	if ( 0 > sid )
-	{	oexERROR( errno, oexT( "setsid() failed" ) );
+	{	oexPrintf( "setsid() failed : %d\n", (int)sid );
+		oexERROR( errno, oexT( "setsid() failed" ) );
 		return -1;
 	} // end if
 
@@ -766,13 +769,15 @@ oexINT CSys::Fork( oexCSTR x_pWorkingDirectory, oexCSTR x_pLogFile )
 
 	// Set the current working directory
 	CStr sWorkingDirectory;
-	if ( !oexCHECK_PTR( x_pWorkingDirectory ) )
+	if ( !oexCHECK_PTR( x_pWorkingDirectory ) || !*x_pWorkingDirectory )
 		x_pWorkingDirectory = ( sWorkingDirectory = oexGetModulePath() ).Ptr();
 
-	if ( 0 > chdir( oexStrToMbPtr( x_pWorkingDirectory ) ) )
-	{	oexERROR( errno, oexMks( oexT( "chdir( '" ), x_pWorkingDirectory, oexT( "' ) failed" ) ) );
-		return -1;
-	} // end if
+	if ( oexCHECK_PTR( x_pWorkingDirectory ) && *x_pWorkingDirectory )
+		if ( 0 > chdir( oexStrToMbPtr( x_pWorkingDirectory ) ) )
+		{	oexPrintf( "Failed to set working directory : %d : %s\n", errno, x_pWorkingDirectory );
+			oexERROR( errno, oexMks( oexT( "chdir( '" ), x_pWorkingDirectory, oexT( "' ) failed" ) ) );		
+			return -1;
+		} // end if
 
 	// No more terminals
 	if ( 0 > close( STDIN_FILENO ) )

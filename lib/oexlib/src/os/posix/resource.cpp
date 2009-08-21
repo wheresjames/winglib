@@ -35,6 +35,13 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
+// +++ Need to get timedlocks working one day
+//     and do lots of clean up on the locks / mutex
+//#if defined(_POSIX_TIMEOUTS) && (_POSIX_TIMEOUTS - 200112L) >= 0L
+//#	define OEX_USE_TIMEDLOCK 1
+//#else
+#	undef OEX_USE_TIMEDLOCK
+//#endif
 
 // +++ Not sure what to do here, it would seem that
 //     pthread_cond_timedwait() is subjet to malfunctioning if the
@@ -79,6 +86,9 @@ namespace OEX_NAMESPACE
 
 			// Lock info
 			oexINT								nCount;
+
+			// Threads waiting for lock
+			oexINT								nWaiting;
 		};
 	};
 };
@@ -99,6 +109,7 @@ static SResourceInfo* CreateRi()
 	pRi->pData = 0;
 	pRi->fnCallback = 0;
 	pRi->nCount = 0;
+	pRi->nWaiting = 0;
 
 	return pRi;
 }
@@ -427,11 +438,50 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 //			if ( pRi->uLastOwner == uId )
 //				oexMicroSleep( eWaitResolution );
 
+#if defined( OEX_USE_TIMEDLOCK )
+
+			// Do we already own the mutex?
+			if ( pRi->uOwner == oexGetCurThreadId() )
+			{	pRi->nCount++;
+				return waitSuccess;
+			} // end if
+
+			if ( pRi->nWaiting && pRi->uLastOwner == uId )
+				oexMicroSleep( eWaitResolution );
+
+			struct timespec to;
+			clock_gettime( CLOCK_REALTIME, &to );
+			to.tv_sec += x_uTimeout / 1000;
+			to.tv_nsec += ( x_uTimeout % 1000 ) * 1000000;
+
+			// Attempt to acquire lock
+			if ( !pthread_mutex_trylock( &pRi->hMutex ) )
+			{	pRi->nCount = 1;
+				pRi->uOwner = uId;
+				pRi->nWaiting = 0;
+				return waitSuccess;
+			} // end if
+
+			else
+			{
+				pRi->nWaiting++;
+
+				if ( !pthread_mutex_timedlock( &pRi->hMutex, &to ) )
+				{	pRi->nCount = 1;
+					pRi->uOwner = uId;
+					pRi->nWaiting = 0;
+					return waitSuccess;
+				} // end if
+
+			} // end else
+
+#else
 			oexINT nErr = 0;
 			if ( oexWAIT_UNTIL( x_uTimeout, !( nErr = pthread_mutex_trylock( &pRi->hMutex ) ) || EDEADLK == nErr ) )
 			{	pRi->uOwner = uId;
 				return waitSuccess;
 			} // end if
+#endif
 
 			return waitTimeout;
 
@@ -453,7 +503,7 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 			return waitTimeout;
 
 #else
-			CAutoLock al( pRi->cSync, x_uTimeout );
+			oexAutoLock al( pRi->cSync, x_uTimeout );
 			if ( !al.IsLocked() )
 				return waitTimeout;
 
@@ -499,10 +549,28 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 				return waitFailed;
 			} // end if
 
+			oexUINT uId = oexGetCurThreadId();
+
+#if defined( OEX_USE_TIMEDLOCK )
+
+			if ( waitSuccess == pRi->cSync.Wait( x_uTimeout ) )
+			{
+				// Is it owned?
+				if ( !pRi->uOwner || pRi->uOwner == uId )
+				{	pRi->nCount++;
+					pRi->uOwner = uId;
+					return waitSuccess;
+				} // end if
+				else
+					oexEcho( "Thread locks are trashed!!!" );
+
+			} // end if
+
+#else
+
 			// Have to give other threads polling time to grab the mutex
 			// Otherwise this one could just hog it all the time
-			oexUINT uId = oexGetCurThreadId();
-			if ( pRi->uLastOwner == uId )
+			if ( pRi->nWaiting && pRi->uLastOwner == uId )
 				oexMicroSleep( eWaitResolution );
 
 			while ( x_uTimeout > eWaitResolution )
@@ -517,8 +585,13 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 						if ( !pRi->uOwner || pRi->uOwner == uId )
 						{	pRi->nCount++;
 							pRi->uOwner = uId;
+							pRi->nWaiting = 0;
 							return waitSuccess;
 						} // end if
+
+						// Someone is waiting
+						else
+							pRi->nWaiting++;
 
 					} // end if
 
@@ -532,6 +605,8 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 				oexMicroSleep( uDelay );
 
 			} // end if
+
+#endif
 
 			return waitTimeout;
 
@@ -655,8 +730,22 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 			break;
 
 		case eRtMutex :
+
+			if ( pRi->uOwner != oexGetCurThreadId() )
+				return waitFailed;
+
+			if ( 0 >= pRi->nCount )
+				return waitFailed;
+
+			if ( --pRi->nCount )
+				return waitSuccess;
+
 			if ( !( nErr = pthread_mutex_unlock( &pRi->hMutex ) ) )
+			{	pRi->uLastOwner = pRi->uOwner;
 				pRi->uOwner = 0;
+				nErr = waitSuccess;
+			} // end if
+
 			break;
 
 		case eRtEvent :
@@ -685,6 +774,21 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 				return waitFailed;
 			} // end if
 
+#if defined( OEX_USE_TIMEDLOCK )
+
+			if ( !pRi->uOwner || pRi->uOwner != oexGetCurThreadId() )
+				return waitFailed;
+
+			if ( 0 >= pRi->nCount )
+				return waitFailed;
+
+			if ( 0 == --pRi->nCount )
+			{	pRi->uLastOwner = pRi->uOwner;
+				pRi->uOwner = 0;
+				pRi->cSync.Reset( x_uTimeout );
+			} // end if
+
+#else
 			// Lock the mutex
 			oexAutoLock al( pRi->cSync, x_uTimeout );
 			if ( !al.IsLocked() )
@@ -700,7 +804,7 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 			{	pRi->uLastOwner = pRi->uOwner;
 				pRi->uOwner = 0;
 			} // end if
-
+#endif
 			return waitSuccess;
 
 		} break;

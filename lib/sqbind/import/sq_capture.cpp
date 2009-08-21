@@ -142,7 +142,7 @@ stdString CSqCapture::Capture( const stdString &sEncode )
 	// What format does the user want?
 	oex::oexUINT uReq = 0;
 	if ( 4 <= sEncode.length() )
-		uReq = *(oex::oexUINT*)fmt.Ptr();			
+		uReq = *(oex::oexUINT*)fmt.Ptr();
 
 	// What format do we have
 	oex::oexUINT uFormat = m_cap.GetFormat();
@@ -175,7 +175,7 @@ stdString CSqCapture::Capture( const stdString &sEncode )
 							oex::oexPBYTE pEnc;
 							oex::oexINT nEnc;
 							if ( 0 < m_img.Encode( &pEnc, &nEnc, oexT( "JPG" ) ) )
-								ret.assign( (char*)pEnc, nEnc );								 
+								ret.assign( (char*)pEnc, nEnc );
 
 						} // end if
 
@@ -185,18 +185,30 @@ stdString CSqCapture::Capture( const stdString &sEncode )
 					// UYVY -> JPEG
 					case oexFOURCC( 'U', 'Y', 'V', 'Y' ) :
 					{
+
+oexEcho( "Creating image" );
+
 						if ( m_img.Create( m_cap.GetWidth(), m_cap.GetHeight(), 24 ) )
 						{
+oexEcho( "Starting conversion" );
+
 							// YUYV conversion
-							oex::CDib::YUYV_RGB( m_cap.GetWidth(), m_cap.GetHeight(), 
+							oex::CDib::YUYV_RGB( m_cap.GetWidth(), m_cap.GetHeight(),
 												 m_cap.GetBuffer(), m_img.GetBits(), 0 );
 
 							oex::oexPBYTE pEnc;
 							oex::oexINT nEnc;
+
+oexEcho( "Starting image encoding" );
 							if ( 0 < m_img.Encode( &pEnc, &nEnc, oexT( "JPG" ) ) )
-								ret.assign( (char*)pEnc, nEnc );								 
+								ret.assign( (char*)pEnc, nEnc );
+							else
+								oexERROR( 0, oexT( "Error encoding image" ) );
 
 						} // end if
+
+						else
+							oexERROR( 0, oexT( "Unable to create image buffer" ) );
 
 					} // end case
 					break;
@@ -204,7 +216,7 @@ stdString CSqCapture::Capture( const stdString &sEncode )
 				} // end switch
 
 				break;
-				
+
 		} // end switch
 
 	} // end else

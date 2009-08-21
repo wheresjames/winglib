@@ -390,7 +390,7 @@ oexBOOL CCircBuf::Write( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT *x_puPtr, o
         return oexFALSE;
 
 	oexUCHAR *pView;
-	oexUINT i = 0, uWritten = 0, uView;
+	oexUINT i = 0, uWritten = 0, uView = 0;
 
 	// Read all the blocks into the buffer
 	while ( GetView( i, uPtr, x_uSize, m_pBuf, m_uSize, &pView, &uView ) )

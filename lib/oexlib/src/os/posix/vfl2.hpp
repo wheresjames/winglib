@@ -170,6 +170,13 @@ public:
 			return oexFALSE;
 		} // end if
 
+		// Ensure it's actually a capture device
+		if ( !( m_cap2.capabilities & V4L2_CAP_VIDEO_CAPTURE ) )
+		{	oexERROR( -1, CStr().Fmt( oexT( "V4L2_CAP_VIDEO_CAPTURE : Not a capture device : capabilities = %X" ), m_cap2.capabilities ) );
+			Destroy();
+			return oexFALSE;
+		} // end if
+
 		// Save device name
 		m_sDeviceName = sDevice;
 		m_nWidth = x_nWidth;
@@ -229,7 +236,7 @@ public:
 	/// Proper ioctl call
 	static int IoCtl( int fd, int request, void * arg )
 //	{	int nErr; while ( -1 == ( nErr = ioctl( fd, request, arg ) ) && EINTR == errno ); return nErr; }
-	{	int nErr; return oexDO( nErr = ioctl( fd, request, arg ), EINTR == nErr, nErr ); return nErr; }
+	{	int nErr; return oexDO( nErr = ioctl( fd, request, arg ), EINTR == nErr, nErr ); }
 
 public:
 
@@ -248,13 +255,6 @@ public:
 	*/
 	virtual oexBOOL Init()
 	{
-		// Ensure it's actually a capture device
-		if ( !( m_cap2.capabilities & V4L2_CAP_VIDEO_CAPTURE ) )
-		{	oexERROR( -1, CStr().Fmt( oexT( "V4L2_CAP_VIDEO_CAPTURE : Not a capture device : capabilities = %X" ), m_cap2.capabilities ) );
-			Destroy();
-			return oexFALSE;
-		} // end if
-
 		// +++ Detect io mode if eIoAuto / not sure what the prefered order should be.
 		//     Should probably do some performance testing...
 		if ( eIoAuto == m_nIoMode )
@@ -341,6 +341,7 @@ public:
 		fmt.fmt.pix.width = m_nWidth;
 		fmt.fmt.pix.height = m_nHeight;
 		fmt.fmt.pix.pixelformat = m_uFormat;
+//		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_UYVY;
 //		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
 //		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB24;
 //		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR8;
@@ -349,14 +350,37 @@ public:
 		fmt.fmt.pix.field = V4L2_FIELD_NONE;
 //		fmt.fmt.pix.field = V4L2_FIELD_ANY;
 //		fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
+//		fmt.fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
 
 		if ( -1 == IoCtl( m_nFd, VIDIOC_S_FMT, &fmt ) )
-		{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_S_FMT : Failed to set format: %u : f=%x w=%d, h=%d" ),
+		{
+			oexINT nErr = errno;
+
+			oexSHOW( fmt.fmt.pix.width );
+			oexSHOW( fmt.fmt.pix.height );
+			oexPrintf( "%x\n", fmt.fmt.pix.pixelformat );
+			oexSHOW( (int)fmt.fmt.pix.field );
+			oexSHOW( fmt.fmt.pix.bytesperline );
+			oexSHOW( fmt.fmt.pix.sizeimage );
+			oexSHOW( fmt.fmt.pix.colorspace );
+			oexSHOW( fmt.fmt.pix.priv );
+
+			// Log failure
+			oexERROR( nErr, CStr().Fmt( oexT( "VIDIOC_S_FMT : Failed to set format: %u : f=%x w=%d, h=%d" ),
 											 m_nFd, (unsigned int)m_uFormat, m_nWidth, m_nHeight ) );
+
 			if ( m_uFormat != fmt.fmt.pix.pixelformat )
-				oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_S_FMT : Unsupported format: %x - suggested type: %x" ),
+				oexERROR( nErr, CStr().Fmt( oexT( "VIDIOC_S_FMT : Unsupported format: %x - suggested type: %x" ),
 											 (unsigned int)m_uFormat,
 											 (unsigned int)fmt.fmt.pix.pixelformat ) );
+
+			if ( m_nWidth != (oexINT)fmt.fmt.pix.width || m_nHeight != (oexINT)fmt.fmt.pix.height )
+				oexERROR( nErr, CStr().Fmt( oexT( "VIDIOC_S_FMT : Unsupported size: %d x %d - suggested size: %d x %d" ),
+											 (int)m_nWidth,
+											 (int)m_nHeight,
+											 (int)fmt.fmt.pix.width,
+											 (int)fmt.fmt.pix.height ) );
+
 			Destroy();
 			return oexFALSE;
 		} // end if
@@ -533,7 +557,7 @@ public:
 	{
 		for ( oexINT i = 0; i < (oexINT)oexSizeOfArray( _g_oexvid_formats ); i++ )
 				if ( _g_oexvid_formats[ i ].uId == x_uFormat )
-						return _g_oexvid_formats[ i ].sId;
+						return CStr().Fmt( "0x%x - ", x_uFormat ) << _g_oexvid_formats[ i ].sId;
 
 		return oexT( "" );
 	}

@@ -2035,12 +2035,13 @@ oex::oexRESULT Test_Threads()
 	                 && 0 == tl4.Stop() ) )
 	    return -21;
 
-
-	if ( !oexVERIFY( 0 == val ) )
-		return -22;
-
 	oexPrintf( oexT( "Thread counts are, %d, %d, %d, %d\r\n" ),
 			   count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
+
+	if ( !oexVERIFY( 0 == val ) )
+	{	oexSHOW( val );
+		return -22;
+	} // end if
 
 	if ( !oexVERIFY( 10 < count[ 0 ]
 	                 && 10 < count[ 1 ]
@@ -2695,11 +2696,11 @@ int main(int argc, char* argv[])
 
 #ifndef OEX_LOWRAM
 
-//    Test_CCircBuf();
+    Test_CCircBuf();
 
-//    Test_CFifoSync();
+    Test_CFifoSync();
 
-//    Test_CDataPacket();
+    Test_CDataPacket();
 
 #endif
 
