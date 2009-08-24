@@ -29,12 +29,14 @@ include $(PRJ_LIBROOT)/build.mk
 export LOC_TAG := os
 LOC_INC_os := inc/os
 LOC_SRC_os := src/os/$(PLATFORM)
-LOC_OUT_os := os
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := sqlite
+LOC_CXX_sqlite := c
+LOC_SRC_sqlite := oss/sqlite
 include $(PRJ_LIBROOT)/build.mk
 
 #-------------------------------------------------------------------
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
-
-

@@ -34,6 +34,9 @@
 
 #pragma once
 
+// 3rd party stuff
+#define OEX_ENABLE_SQLITE
+
 // Compile messages
 #define OEX_VERBOSE_COMPILE
 

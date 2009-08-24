@@ -2654,6 +2654,48 @@ oex::oexRESULT Test_CCapture()
 }
 #endif
 
+#if defined( OEX_ENABLE_SQLITE )
+oex::oexRESULT Test_CSQLite()
+{
+	oexEcho( oexT( "CSQLite..." ) );
+
+	oex::CSQLite sq;
+
+	// Delete any existing test database
+	if ( oexExists( oexT( "OexTestDb" ) ) )
+		oexDelete( oexT( "OexTestDb" ) );
+
+	if ( !oexVERIFY( sq.Open( oexT( "OexTestDb" ) ) ) )
+		return -1;
+
+	if ( !oexVERIFY( sq.Exec( oexT( "CREATE TABLE test ( name char(64), title char(64) )" ) ) ) )
+		return -2;
+
+	if ( !oexVERIFY( sq.Exec( oexT( "INSERT INTO test VALUES('Bob','Engineer')" ) ) ) )
+		return -3;
+
+	if ( !oexVERIFY( sq.Exec( oexT( "INSERT INTO test (name,title) VALUES('Kim','Artist')" ) ) ) )
+		return -4;
+
+	if ( !oexVERIFY( sq.Exec( oexT( "SELECT * FROM test" ) ) ) )
+		return -5;
+
+	if ( !oexVERIFY( sq.NumRows() == 2 ) )
+		return -6;
+
+	if ( !oexVERIFY( sq.Row( 0 )[ oexT( "name" ) ].ToString() == oexT( "Bob" ) 
+					 || !( sq.Row( 0 )[ oexT( "title" ) ].ToString() == oexT( "Engineer" ) ) ) )
+		return -7;
+
+	if ( !oexVERIFY( sq.Row( 0 )[ oexT( "name" ) ].ToString() == oexT( "Kim" ) 
+					 || !( sq.Row( 0 )[ oexT( "title" ) ].ToString() == oexT( "Artist" ) ) ) )
+		return -8;
+
+	return oex::oexRES_OK;
+}
+#endif
+
+
 //int wmain( int argc, wchar_t *argv[] )
 //int wmain( int argc, wchar_t *argv[], wchar_t *envp[] )
 
@@ -2727,6 +2769,10 @@ int main(int argc, char* argv[])
 //    Test_CHttpSession();
 
 //    Test_CVfsSession();
+
+#if defined( OEX_ENABLE_SQLITE )
+	Test_CSQLite();
+#endif
 
 #if defined( OEX_ENABLE_VIDEO )
     Test_CCapture();

@@ -73,7 +73,7 @@ else
 endif
 
 ifeq ($(BUILD),vs)
-	CFG_DEFS := /DOEX_PROJECT_NAME='\"$(CFG_NAME)\"' /DOEX_PROJECT_DESC='\"$(CFG_DESC)\"'
+	CFG_DEFS := /DOEX_PROJECT_NAME="\"$(CFG_NAME)\"" /DOEX_PROJECT_DESC="\"$(CFG_DESC)\""
 else
 	CFG_DEFS := -DOEX_PROJECT_NAME="\"$(CFG_NAME)\"" -DOEX_PROJECT_DESC="\"$(CFG_DESC)\""
 endif	

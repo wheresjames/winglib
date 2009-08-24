@@ -6,8 +6,6 @@ function CreateCookie( params )
 	local c = CSqMap();
 	c[ "SID" ] <- params;
 
-	local t = CSqTime();
-	t.SetTime( 2010, 1, 1, 1, 1, 1 );
 	local cookie = c.serialize() + "; path=/";
 	return cookie;
 }
@@ -96,13 +94,17 @@ function OnProcessRequest( request, headers, get, post )
 	if ( loggedin )
 		menu_items.append( [ "tasks", "Tasks" ] );
 
-	
 	switch ( mRequest[ "path" ] )
 	{
 		case "" :
 		case "/" :
 		case "/home" :
 			_self.include( "pg/home.nut" );
+			page = pg_run( mRequest, mHeaders, mGet, mPost, mSession );
+			break;
+
+		case "/signup" :
+			_self.include( "pg/signup.nut" );
 			page = pg_run( mRequest, mHeaders, mGet, mPost, mSession );
 			break;
 
@@ -188,7 +190,7 @@ function show_menu( sel, menu_items, right )
 				<td>&nbsp;<nobr>" + right + @"</nobr>&nbsp;</td>
 			</tr>
 		</table>
-	" + _cfg( "obj_divider" );
+	";
 
 	return ret;
 }

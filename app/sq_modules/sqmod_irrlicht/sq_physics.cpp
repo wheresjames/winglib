@@ -2,6 +2,22 @@
 
 #include "stdafx.h"
 
+/*
+
+	http://irrlicht.sourceforge.net/phpBB2/viewtopic.php?t=30994
+
+
+btCompoundShape* cShape = new btCompoundShape();
+
+for(u32 i = 0;i < meshBufferCount;++i)
+{
+      IMeshBuffer* mb = mesh->getMeshBuffer(i);
+      cShape->addChildShape(btTransform::getIdentity(),
+         new btConvexHullShape(&((S3DVertex*)mb->getVertices())->Pos.X,
+         mb->getVertexCount(), getVertexPitchFromType(mb->getVertexType())));   
+} 
+*/
+
 const float CSqirrPhysics::c_fGravity = -9.80665f;
 
 CSqirrPhysics::CSqirrPhysics()

@@ -514,6 +514,7 @@ namespace os
 #include "inc/fifo_sync.h"
 #include "inc/data_packet.h"
 #include "inc/image.h"
+#include "inc/sqlite.h"
 
 #include "inc/http_session.h"
 #include "inc/http_server.h"
