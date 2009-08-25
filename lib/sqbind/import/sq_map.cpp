@@ -91,12 +91,22 @@ int CSqMap::size()
 void CSqMap::clear()
 {	m_lst.clear(); }
 
+void CSqMap::_serialize( oex::CPropertyBag &pb, CSqMap::t_List &lst )
+{
+	for ( t_List::iterator it = lst.begin(); it != lst.end(); it++ )
+		pb[ it->first.c_str() ].ToString().Set( it->second.c_str(), it->second.length() );
+}
+
+void CSqMap::_deserialize( oex::CPropertyBag &pb, CSqMap::t_List &lst )
+{
+	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
+		lst[ it.Node()->key.Ptr() ].assign( it->ToString().Ptr(), it->ToString().Length() );
+}
 
 CSqMap::t_Obj CSqMap::serialize()
 {
 	oex::CPropertyBag pb;
-	for ( t_List::iterator it = m_lst.begin(); it != m_lst.end(); it++ )
-		pb[ it->first.c_str() ].ToString().Set( it->second.c_str(), it->second.length() );
+	_serialize( pb, m_lst );
 	return oex::CParser::Serialize( pb ).Ptr();
 }
 
@@ -107,8 +117,8 @@ void CSqMap::deserialize( const CSqMap::t_Obj &s )
 
 	// Deserialize data
 	oex::CPropertyBag pb = oex::CParser::Deserialize( s.c_str() );
-	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
-		m_lst[ it.Node()->key.Ptr() ].assign( it->ToString().Ptr(), it->ToString().Length() );
+	_deserialize( pb, m_lst );
+
 }
 
 void CSqMap::merge( const CSqMap::t_Obj &s )

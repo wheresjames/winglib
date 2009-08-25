@@ -79,8 +79,14 @@ public:
 	/// Returns the number of rows returned by the last query
 	oexINT NumRows() { return m_nRows; }
 
+	/// Returns table information
+	oexBOOL QueryTableInfo( oexCSTR x_pTable );
+
 	/// Queries column info / since this is db specific
 	oexBOOL QueryColumnInfo();
+
+	/// Returns non zero if the specified table exists
+	oexBOOL IsTable( oexCSTR x_pTable );
 
 public:
 
@@ -94,6 +100,9 @@ protected:
 
 	/// Query callback
 	virtual int OnCallback( int argc, char **argv, char **azColName );
+
+	/// Called to clear result data
+	virtual void OnClear() {}
 
 private:
 

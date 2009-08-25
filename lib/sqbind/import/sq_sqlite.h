@@ -65,14 +65,20 @@ namespace sqbind
 		/// Opens the specified database
 		int Open( const stdString &sDbName );
 
+		/// Returns non-zero if the specified table exists
+		int IsTable( const stdString &sTable );
+
 		/// Executes a query on the database
 		int Exec( const stdString &sQuery );
 
 		/// Inserts the specified data
-		int Insert( const stdString &sTable, CSqMulti &mData );
+		int Insert( const stdString &sTable, CSqMap &mData );
 
 		/// Updates the specified row
-		int Update( const stdString &sTable, const stdString &sWhere, CSqMulti &mData );
+		int Update( const stdString &sTable, const stdString &sWhere, CSqMap &mData );
+
+		/// Queries for table information
+		int QueryTableInfo( const stdString &sTable );
 
 		/// Queries for column information
 		int QueryColumnInfo();
@@ -81,7 +87,7 @@ namespace sqbind
 		stdString Escape( const stdString &sStr );
 
 		/// Clears the last result
-		void Clear();
+		virtual void OnClear();
 
 		/// Returns a description of the last error
 		stdString GetLastError();
@@ -89,11 +95,11 @@ namespace sqbind
 		/// Returns the last query
 		stdString GetLastQuery();
 
-		/// Returns the number of rows in the last query
-		int NumRows() { return m_nRows; }
-
 		/// Returns the result of the last query
 		CSqMulti& Result() { return m_mResult; }
+
+		/// The number of rows returned by the last query
+		int NumRows() { return CSQLite::NumRows(); }
 
 	protected:
 
@@ -101,9 +107,6 @@ namespace sqbind
 		virtual int OnCallback( int argc, char **argv, char **azColName );
 
 	private:
-
-		/// Number of rows in the last query
-		int							m_nRows;
 
 		/// Result of the last query
 		sqbind::CSqMulti			m_mResult;

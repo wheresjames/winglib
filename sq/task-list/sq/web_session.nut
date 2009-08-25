@@ -88,7 +88,8 @@ function OnProcessRequest( request, headers, get, post )
 
 	local menu_items =
 	[
-		[ "home", "Home" ]
+		[ "home", "Home" ],
+		[ "signup", "Sign Up" ]
 	];
 
 	if ( loggedin )

@@ -59,10 +59,7 @@ namespace sqbind
 		virtual void merge( const t_SqStr &s );
 
 		static void _serialize( oex::CPropertyBag &pb, CSqMulti::t_List &lst );
-
-
 		static void _deserialize( oex::CPropertyBag &pb, CSqMulti::t_List &lst );
-
 
     private:
 

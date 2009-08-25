@@ -41,12 +41,14 @@ using namespace sqbind;
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSQLite, CSqSQLite )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, Open )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, Destroy )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, IsTable )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, Exec )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, Insert )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, Update )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, NumRows )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, Result )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, Escape )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, QueryTableInfo )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, QueryColumnInfo )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, GetLastQuery )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, GetLastError )
@@ -59,7 +61,6 @@ void CSqSQLite::Register( sqbind::VM vm )
 
 CSqSQLite::CSqSQLite()
 {
-	m_nRows = 0;
 }
 
 int CSqSQLite::Destroy()
@@ -73,12 +74,9 @@ int CSqSQLite::Destroy()
 	return 1;
 }
 
-void CSqSQLite::Clear()
+void CSqSQLite::OnClear()
 {
-	CSQLite::Clear();
-
 	// Lose last result
-	m_nRows = 0;
 	m_mResult.clear();
 }
 
@@ -88,6 +86,11 @@ int CSqSQLite::Open( const stdString &sDbName )
 	return CSQLite::Open( sDbName.c_str() ) ? 1 : 0;
 }
 
+int CSqSQLite::IsTable( const stdString &sTable )
+{
+	return CSQLite::IsTable( sTable.c_str() ) ? 1 : 0;
+}
+
 int CSqSQLite::Exec( const stdString &sQuery )
 {
 	Clear();
@@ -95,18 +98,23 @@ int CSqSQLite::Exec( const stdString &sQuery )
 	return CSQLite::Exec( sQuery.c_str() ) ? 1 : 0;
 }
 
-int CSqSQLite::Insert( const stdString &sTable, CSqMulti &mData )
+int CSqSQLite::Insert( const stdString &sTable, CSqMap &mData )
 {	oex::CPropertyBag pb;
-	CSqMulti::_serialize( pb, mData.list() );
+	CSqMap::_serialize( pb, mData.list() );
 	return CSQLite::Insert( sTable.c_str(), pb ); 
 }
 
-int CSqSQLite::Update( const stdString &sTable, const stdString &sWhere, CSqMulti &mData )
+int CSqSQLite::Update( const stdString &sTable, const stdString &sWhere, CSqMap &mData )
 {	oex::CPropertyBag pb;
-	CSqMulti::_serialize( pb, mData.list() );
+	CSqMap::_serialize( pb, mData.list() );
 	return CSQLite::Update( sTable.c_str(), sWhere.c_str(), pb ); 
 }
 
+int CSqSQLite::QueryTableInfo( const stdString &sTable )
+{
+	Clear();
+	return CSQLite::QueryTableInfo( sTable.c_str() );
+}
 
 int CSqSQLite::QueryColumnInfo()
 {
@@ -133,7 +141,7 @@ stdString CSqSQLite::GetLastQuery()
 int CSqSQLite::OnCallback( int argc, char **argv, char **azColName )
 {
 	// Allocate row object
-	CSqMulti &row = m_mResult[ oexMks( m_nRows++ ).Ptr() ];
+	CSqMulti &row = m_mResult[ oexMks( NumRows() ).Ptr() ];
 	
 	// Add rows
 	for ( int i = 0; i < argc; i++ )

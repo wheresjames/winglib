@@ -2660,11 +2660,17 @@ oex::oexRESULT Test_CSQLite()
 	oexEcho( oexT( "CSQLite..." ) );
 
 	oex::CSQLite sq;
-
+	
 	if ( !oexVERIFY( sq.Open( oexT( ":memory:" ) ) ) )
 		return -1;
 
+	if ( !oexVERIFY( !sq.IsTable( oexT( "test" ) ) ) )
+		return -2;
+
 	if ( !oexVERIFY( sq.Exec( oexT( "CREATE TABLE test ( id INTEGER NOT NULL, name CHAR(64), title CHAR(64), PRIMARY KEY(id) )" ) ) ) )
+		return -2;
+
+	if ( !oexVERIFY( sq.IsTable( oexT( "test" ) ) ) )
 		return -2;
 
 	if ( !oexVERIFY( sq.Exec( oexT( "INSERT INTO test VALUES(0,'Bob','Engineer')" ) ) ) )

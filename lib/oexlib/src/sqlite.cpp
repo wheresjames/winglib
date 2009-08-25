@@ -63,13 +63,19 @@ int CSQLite::_Callback( void *pThis, int argc, char **argv, char **azColName )
 	if ( !oexCHECK_PTR( argv ) || !oexCHECK_PTR( azColName ) )
 		return 0;
 
-	return ((CSQLite*)pThis )->OnCallback( argc, argv, azColName );
+	// Do the data callback
+	int nRet = ((CSQLite*)pThis )->OnCallback( argc, argv, azColName );
+
+	// Count a row
+	((CSQLite*)pThis )->m_nRows++;
+
+	return nRet;
 }
 
 int CSQLite::OnCallback( int argc, char **argv, char **azColName )
 {
 	// What row are we on
-	CPropertyBag &row = m_pbResult[ m_nRows++ ];
+	CPropertyBag &row = m_pbResult[ m_nRows ];
 	
 	for ( int i = 0; i < argc; i++ )
 		if ( oexCHECK_PTR( azColName[ i ] ) )
@@ -97,9 +103,12 @@ void CSQLite::Destroy()
 }
 
 void CSQLite::Clear()
-{	m_nRows = 0;
+{	
+	m_nRows = 0;
 	m_sQuery.Destroy();
 	m_pbResult.Destroy();
+	
+	OnClear();
 }
 
 oexBOOL CSQLite::Open( oexCSTR x_pDb )
@@ -119,6 +128,11 @@ oexBOOL CSQLite::Open( oexCSTR x_pDb )
 	} // end if
 
 	return oexTRUE;
+}
+
+oexBOOL CSQLite::IsTable( oexCSTR x_pTable )
+{
+	return QueryTableInfo( x_pTable ) && NumRows();
 }
 
 oexBOOL CSQLite::Exec( CStr x_sQuery )
@@ -148,6 +162,12 @@ oexBOOL CSQLite::Exec( CStr x_sQuery )
 	} // end if
 
 	return oexTRUE;
+}
+
+oexBOOL CSQLite::QueryTableInfo( oexCSTR x_pTable )
+{
+	return Exec( CStr() << oexT( "SELECT * FROM SQLite_Master WHERE `name`='" ) 
+					   << Escape( x_pTable ) << oexT( "'" ) );
 }
 
 oexBOOL CSQLite::QueryColumnInfo()

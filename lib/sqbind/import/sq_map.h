@@ -88,6 +88,9 @@ namespace sqbind
 
 		void merge( const t_Obj &s );
 
+		static void _serialize( oex::CPropertyBag &pb, CSqMap::t_List &lst );
+		static void _deserialize( oex::CPropertyBag &pb, CSqMap::t_List &lst );
+
 		void clear();
 
 		t_Obj urlencode();

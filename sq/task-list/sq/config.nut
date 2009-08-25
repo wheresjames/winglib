@@ -4,6 +4,14 @@ local _g_cfg =
 	// Server TCP port
 	tcp_port	= 4405,
 
+	// Databases
+	db_name		= "task-list.db",
+	db_tables	= {
+					users = 
+					[	"CREATE TABLE users ( uid INTEGER NOT NULL, user CHAR(64), display CHAR(64), title CHAR(64), PRIMARY KEY(uid) )",
+					]
+				  },
+
 	// Scheme colors
 	col_bg		= "#000000",
 	col_fg 		= "#008000",
