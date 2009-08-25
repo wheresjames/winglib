@@ -108,6 +108,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_value )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, _get )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, _nexti )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, _newslot )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, print_r )
 _SQBIND_REGISTER_CLASS_END()
 
@@ -290,6 +291,39 @@ CSqMulti::t_Obj CSqMulti::find_value( const CSqMulti::t_Obj &v )
             return it->first;
 
     return oexT( "" );
+}
+
+SquirrelObject CSqMulti::_newslot( HSQUIRRELVM v )
+{
+    StackHandler sa( v );
+
+	// Get key
+    const SQChar *pKey = sa.GetString( 2 );
+    if ( !pKey || !*pKey )
+        return SquirrelObject( v );
+
+	// Get value
+    const SQChar *pVal = sa.GetString( 3 );
+    if ( !pVal )
+        return SquirrelObject( v );
+
+	// Add to list
+	m_lst[ pKey ].set( pVal );
+
+	// Find the new value
+    t_List::iterator it = m_lst.find( pKey );
+    if ( m_lst.end() == it )
+        return SquirrelObject( v );
+
+    // Stuff string
+    SquirrelObject so( v );
+    sq_pushstring( v, it->first.c_str(), (int)it->first.length() );
+//    sq_pushstring( v, it->second.c_str(), (int)it->second.length() );
+    so.AttachToStackObject( -1 );
+    sq_pop( v, 1 );
+
+    return so;
+
 }
 
 /// Internal squirrel function, returns value of specified item

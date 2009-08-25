@@ -60,6 +60,9 @@ int CSQLite::_Callback( void *pThis, int argc, char **argv, char **azColName )
 	if ( !oexCHECK_PTR( pThis ) )
 		return 0;
 
+	if ( !oexCHECK_PTR( argv ) || !oexCHECK_PTR( azColName ) )
+		return 0;
+
 	return ((CSQLite*)pThis )->OnCallback( argc, argv, azColName );
 }
 
@@ -67,10 +70,16 @@ int CSQLite::OnCallback( int argc, char **argv, char **azColName )
 {
 	// What row are we on
 	CPropertyBag &row = m_pbResult[ m_nRows++ ];
-
-	// Add rows
+	
 	for ( int i = 0; i < argc; i++ )
-		row[ azColName[ i ] ] = argv[ i ];
+		if ( oexCHECK_PTR( azColName[ i ] ) )
+			row[ oexMbToStr( azColName[ i ] ) ] = oexCHECK_PTR( argv[ i ] ) 
+													? oexMbToStr( argv[ i ] )
+													: oexT( "" );
+		else
+			row[ oexT( "*" ) ] = oexCHECK_PTR( argv[ i ] ) 
+												? oexMbToStr( argv[ i ] )
+												: oexT( "" );
 
 	return 0;
 }
@@ -89,6 +98,7 @@ void CSQLite::Destroy()
 
 void CSQLite::Clear()
 {	m_nRows = 0;
+	m_sQuery.Destroy();
 	m_pbResult.Destroy();
 }
 
@@ -111,28 +121,83 @@ oexBOOL CSQLite::Open( oexCSTR x_pDb )
 	return oexTRUE;
 }
 
-oexBOOL CSQLite::Exec( oexCSTR x_pQuery )
+oexBOOL CSQLite::Exec( CStr x_sQuery )
 {
 	// Lose previous results
 	Clear();
 
 	// Sanity check params
-	if ( !oexCHECK_PTR( m_sqobj ) || !oexCHECK_PTR( x_pQuery ) )
+	if ( !oexCHECK_PTR( m_sqobj ) || !x_sQuery.Length() )
 		return oexFALSE;
+
+	// Save the last query
+	m_sQuery = x_sQuery;
 
 	// Execute the query
 	char *pErr = oexNULL;
-	oexINT res = sqlite3_exec( (sqlite3*)m_sqobj, x_pQuery, CSQLite::_Callback, this, &pErr );
+	oexINT res = sqlite3_exec( (sqlite3*)m_sqobj, m_sQuery.Ptr(), CSQLite::_Callback, this, &pErr );
 	if ( SQLITE_OK != res )
-	{ 	if ( oexCHECK_PTR( pErr ) )
-			m_sErr = oexMbToStr( pErr );
+	{ 	m_sErr = oexT( "Query Failed : " );
+		m_sErr << m_sQuery << oexNL;
+		if ( oexCHECK_PTR( pErr ) )
+			m_sErr << oexMbToStr( pErr );
 		else
-			m_sErr = oexT( "Invalid pointer returned from sqlite3_exec()" );
+			m_sErr << oexT( "Invalid pointer returned from sqlite3_exec()" );
 		oexERROR( res, m_sErr );
 		return oexFALSE;
 	} // end if
 
 	return oexTRUE;
+}
+
+oexBOOL CSQLite::QueryColumnInfo()
+{
+	return Exec( oexT( "PRAGMA table_info(test)" ) );
+}
+
+CStr CSQLite::Escape( CStr sStr )
+{
+	char *s = sqlite3_mprintf( "%q", oexStrToMb( sStr ).Ptr() );
+	CStr sRet = oexMbToStr( s );
+	sqlite3_free( s );
+	return sRet;
+}
+
+oexBOOL CSQLite::Insert( oexCSTR pTable, CPropertyBag &pb )
+{
+	if ( !oexCHECK_PTR( pTable ) || !*pTable )
+		return oexFALSE;
+
+	// Create field / value strings
+	CStr sF, sV;
+	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
+	{	if ( sF.Length() ) sF << oexT( "," ), sV << oexT( "," );		
+		sF << oexT( "'" ) << Escape( it.Node()->key ) << oexT( "'" );
+		sV << oexT( "'" ) << Escape( it->ToString() ) << oexT( "'" );
+	} // end for
+
+	// Create insert command
+	return Exec( CStr() << oexT( "INSERT INTO `" ) << pTable << oexT( "` (" )
+		                << sF << oexT( ") VALUES(" ) << sV << oexT( ")" ) );
+}
+
+oexBOOL CSQLite::Update( oexCSTR pTable, oexCSTR pWhere, CPropertyBag &pb )
+{
+	if ( !oexCHECK_PTR( pTable ) || !*pTable
+		 || !oexCHECK_PTR( pWhere ) || !*pWhere )
+		return oexFALSE;
+
+	// Create field=value strings
+	CStr sV;
+	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
+	{	if ( sV.Length() ) sV << oexT( ", " );		
+		sV << oexT( "'" ) << Escape( it.Node()->key ) << oexT( "'='" )
+						  << Escape( it->ToString() ) << oexT( "'" );
+	} // end for
+
+	// Create insert command
+	return Exec( CStr() << oexT( "UPDATE `" ) << pTable 
+						<< oexT( "` SET " ) << sV << oexT( " WHERE " ) << pWhere );
 }
 
 #endif // OEX_ENABLE_SQLITE

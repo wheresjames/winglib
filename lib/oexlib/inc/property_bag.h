@@ -62,12 +62,12 @@
 
 	// Convert to std map of strings
 	std::map< std::tstring, std::tstring > mapCnv;
-	for ( oex::CPropertyBag::iterator it; x_pSession->Get().List().Next( it ); )
+	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
 		mapCnv[ it.Node()->key.Ptr() ] = it->ToString().Ptr();
 
 	// Different char size?
 	std::map< std::tstring, std::tstring > mapCnv;
-	for ( oex::CPropertyBag8::iterator it; x_pSession->Get().List().Next( it ); )
+	for ( oex::CPropertyBag8::iterator it; pb.List().Next( it ); )
 		mapCnv[ oexMbToStrPtr( it.Node()->key.Ptr() ) ] = oexMbToStrPtr( it->ToString().Ptr() );
 
 	\endcode

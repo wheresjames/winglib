@@ -234,7 +234,6 @@ SquirrelObject CSqMap::_newslot( HSQUIRRELVM v )
 
 }
 
-
 /// Internal squirrel function, returns value of specified item
 SquirrelObject CSqMap::_get( HSQUIRRELVM v )
 {

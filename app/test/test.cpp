@@ -1144,7 +1144,7 @@ oex::oexRESULT TestPropertyBag()
 
     if ( !oexVERIFY( oex::CParser::Implode( pb[ oexT( "1" ) ].List(), oexT( "," )) == oexT( "1a,1b,1c" ) ) )
 		return -4;
-
+	
 	oex::TPropertyBag< oex::oexINT, oex::oexINT > pbii;
 
 	pbii[ 2 ] = 2;
@@ -2661,35 +2661,70 @@ oex::oexRESULT Test_CSQLite()
 
 	oex::CSQLite sq;
 
-	// Delete any existing test database
-	if ( oexExists( oexT( "OexTestDb" ) ) )
-		oexDelete( oexT( "OexTestDb" ) );
-
-	if ( !oexVERIFY( sq.Open( oexT( "OexTestDb" ) ) ) )
+	if ( !oexVERIFY( sq.Open( oexT( ":memory:" ) ) ) )
 		return -1;
 
-	if ( !oexVERIFY( sq.Exec( oexT( "CREATE TABLE test ( name char(64), title char(64) )" ) ) ) )
+	if ( !oexVERIFY( sq.Exec( oexT( "CREATE TABLE test ( id INTEGER NOT NULL, name CHAR(64), title CHAR(64), PRIMARY KEY(id) )" ) ) ) )
 		return -2;
 
-	if ( !oexVERIFY( sq.Exec( oexT( "INSERT INTO test VALUES('Bob','Engineer')" ) ) ) )
+	if ( !oexVERIFY( sq.Exec( oexT( "INSERT INTO test VALUES(0,'Bob','Engineer')" ) ) ) )
 		return -3;
 
 	if ( !oexVERIFY( sq.Exec( oexT( "INSERT INTO test (name,title) VALUES('Kim','Artist')" ) ) ) )
 		return -4;
 
-	if ( !oexVERIFY( sq.Exec( oexT( "SELECT * FROM test" ) ) ) )
+	CPropertyBag pb;
+	pb[ oexT( "name" ) ] = oexT( "Amy" );
+	pb[ oexT( "title" ) ] = oexT( "\"Director\" of 'Sales' and `Marketing`" );
+	if ( !oexVERIFY( sq.Insert( oexT( "test" ), pb ) ) )
 		return -5;
 
-	if ( !oexVERIFY( sq.NumRows() == 2 ) )
+	if ( !oexVERIFY( sq.Exec( oexT( "SELECT * FROM test" ) ) ) )
 		return -6;
 
-	if ( !oexVERIFY( sq.Row( 0 )[ oexT( "name" ) ].ToString() == oexT( "Bob" ) 
-					 || !( sq.Row( 0 )[ oexT( "title" ) ].ToString() == oexT( "Engineer" ) ) ) )
+	if ( !oexVERIFY( sq.NumRows() == 3 ) )
 		return -7;
 
-	if ( !oexVERIFY( sq.Row( 0 )[ oexT( "name" ) ].ToString() == oexT( "Kim" ) 
-					 || !( sq.Row( 0 )[ oexT( "title" ) ].ToString() == oexT( "Artist" ) ) ) )
+	if ( !oexVERIFY( sq.Row( 0 )[ oexT( "name" ) ].ToString() == oexT( "Bob" ) 
+					 && sq.Row( 0 )[ oexT( "title" ) ].ToString() == oexT( "Engineer" ) ) )
 		return -8;
+
+	if ( !oexVERIFY( sq.Row( 1 )[ oexT( "name" ) ].ToString() == oexT( "Kim" ) 
+					 && sq.Row( 1 )[ oexT( "title" ) ].ToString() == oexT( "Artist" ) ) )
+		return -9;
+
+	if ( !oexVERIFY( sq.Row( 2 )[ oexT( "name" ) ].ToString() == oexT( "Amy" ) 
+					 && sq.Row( 2 )[ oexT( "title" ) ].ToString() == oexT( "\"Director\" of 'Sales' and `Marketing`" ) ) )
+		return -10;
+
+	pb[ oexT( "title" ) ] = oexT( "Sales" );
+	if ( !oexVERIFY( sq.Update( oexT( "test" ), oexT( "`name`='Amy'" ), pb ) ) )
+		return -11;
+
+	if ( !oexVERIFY( sq.Exec( oexT( "SELECT * FROM test WHERE `name`='Amy'" ) ) ) )
+		return -12;
+
+	if ( !oexVERIFY( sq.NumRows() == 1 ) )
+		return -13;
+
+	if ( !oexVERIFY( sq.Row( 0 )[ oexT( "name" ) ].ToString() == oexT( "Amy" ) 
+					 && sq.Row( 0 )[ oexT( "title" ) ].ToString() == oexT( "Sales" ) ) )
+		return -14;
+
+	if ( !oexVERIFY( sq.QueryColumnInfo() ) )
+		return -15;
+
+	if ( !oexVERIFY( sq.NumRows() == 3 ) )
+		return -16;
+
+	if ( !oexVERIFY( sq.Row( 0 )[ oexT( "name" ) ].ToString() == oexT( "id" ) ) )
+		return -17;
+
+	if ( !oexVERIFY( sq.Row( 1 )[ oexT( "name" ) ].ToString() == oexT( "name" ) ) )
+		return -18;
+
+	if ( !oexVERIFY( sq.Row( 2 )[ oexT( "name" ) ].ToString() == oexT( "title" ) ) )
+		return -19;
 
 	return oex::oexRES_OK;
 }

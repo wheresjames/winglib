@@ -56,10 +56,19 @@ public:
 	oexBOOL Open( oexCSTR x_pDb );
 
 	/// Executes a query on the database
-	oexBOOL Exec( oexCSTR x_pQuery );
+	oexBOOL Exec( CStr x_sQuery );
+
+	/// Inserts property bag values into the database
+	oexBOOL Insert( oexCSTR pTable, CPropertyBag &pb );
+
+	/// Updates a row in the table
+	oexBOOL Update( oexCSTR pTable, oexCSTR pWhere, CPropertyBag &pb );
 
 	/// Returns the last error string
 	CStr& GetLastError() { return m_sErr; }
+
+	/// Returns the last error string
+	CStr& GetLastQuery() { return m_sQuery; }
 
 	/// Returns the result of the last query
 	CPropertyBag& Result() { return m_pbResult; }
@@ -70,13 +79,21 @@ public:
 	/// Returns the number of rows returned by the last query
 	oexINT NumRows() { return m_nRows; }
 
+	/// Queries column info / since this is db specific
+	oexBOOL QueryColumnInfo();
+
+public:
+
+	/// Escapes a string so that it is safe to insert in the database
+	static CStr Escape( CStr sStr );
+
 protected:
 
 	/// Dispatch function for OnCallback()
 	static int _Callback( void *pThis, int argc, char **argv, char **azColName );
 
 	/// Query callback
-	int OnCallback( int argc, char **argv, char **azColName );
+	virtual int OnCallback( int argc, char **argv, char **azColName );
 
 private:
 
@@ -85,6 +102,9 @@ private:
 
 	/// Last error message
 	CStr			m_sErr;
+
+	/// The last query
+	CStr			m_sQuery;
 
 	/// Number of rows returned by the last query
 	oexINT			m_nRows;

@@ -50,6 +50,11 @@ namespace sqbind
 		CSqImage::Register( x_vm );
 		CSqCapture::Register( x_vm );
 		CSqCapture::Register( x_vm );
+
+#if defined( OEX_ENABLE_SQLITE )
+		CSqSQLite::Register( x_vm );
+#endif
+
 	};
 
 };
