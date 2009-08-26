@@ -74,6 +74,9 @@ namespace sqbind
 			return f.Write( sData.c_str(), sData.length() );
 		}
 
+		static CSqMulti deserialize( const stdString &sFile )
+		{	return CSqMulti( get_contents( sFile ) ); }
+
 		static int mkdir( const stdString &sDir )
 		{	return oexCreatePath( sDir.c_str() ); }
 
