@@ -80,13 +80,17 @@ public:
 
 		virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
 		{
-			// Process the request
-			while ( !session.GetTransactions()
-					&& port.WaitEvent( oex::os::CIpSocket::eReadEvent ) )
-				session.OnRead( 0 );
+			// While thread is running and no transactions
+			while ( GetStopEvent().Wait( 0 ) && !session.GetTransactions() )
+			{
+				// Process data if any
+				if ( port.WaitEvent( oex::os::CIpSocket::eReadEvent, 100 ) )
+					session.OnRead( 0 );
+
+			} // end while
 
 			// Drop the connection
-			port.Destroy();
+//			port.Destroy();
 
 			return oex::oexFALSE;
 		}

@@ -513,10 +513,10 @@ private:
 protected:
 
     /// Quit signal
-	CResource								m_evStop;
+	CEvent									m_evStop;
 
     /// Signals when the thread has initialized
-	CResource								m_evInit;
+	CEvent									m_evInit;
 
 };
 

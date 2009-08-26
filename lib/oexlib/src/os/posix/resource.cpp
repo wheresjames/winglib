@@ -481,6 +481,7 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 			{	pRi->uOwner = uId;
 				return waitSuccess;
 			} // end if
+
 #endif
 
 			return waitTimeout;
@@ -497,10 +498,21 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 
 #ifndef OEX_COND_EVENTS
 
+#	if defined( OEX_USE_TIMEDLOCK )
+
+			oexAutoLock al( pRi->cSync, x_uTimeout );
+			if ( !al.IsLocked() )
+				return waitTimeout;
+			return waitSuccess;
+
+#	else
+
 			// Just poll the signal
 			if ( oexWAIT_UNTIL( x_uTimeout, pRi->bSignaled ) )
 				return waitSuccess;
 			return waitTimeout;
+
+#	endif
 
 #else
 			oexAutoLock al( pRi->cSync, x_uTimeout );
@@ -662,6 +674,18 @@ oexRESULT CResource::Signal( oexUINT x_uTimeout )
 
 		case eRtEvent :
 		{
+#if defined( OEX_USE_TIMEDLOCK )
+
+			// Signal
+			if ( waitSuccess != pRi->cSync.Wait( 0 ) )
+				return waitFailed;
+
+			pRi->bSignaled = oexTRUE;
+			pRi->uOwner = oexGetCurThreadId();
+
+			return waitSuccess;
+
+#else
 			oexAutoLock al( pRi->cSync, x_uTimeout );
 			if ( !al.IsLocked() )
 				return oexERROR( nErr, oexT( "Unable to acquire lock to signal event object" ) );
@@ -673,7 +697,7 @@ oexRESULT CResource::Signal( oexUINT x_uTimeout )
 			// Set state to signaled
 			pRi->bSignaled = oexTRUE;
 
-#ifndef OEX_COND_EVENTS
+#	ifndef OEX_COND_EVENTS
 
 			// Unblock everyone if manual reset
 			if ( pRi->bManualReset )
@@ -684,6 +708,8 @@ oexRESULT CResource::Signal( oexUINT x_uTimeout )
 			// Unblock single waiting thread if auto
 			else if ( ( nErr = pthread_cond_signal( &pRi->hCond ) ) )
 				return oexERROR( nErr, oexT( "pthread_cond_signal() failed" ) );
+#	endif
+
 #endif
 
 		} break;
@@ -731,6 +757,11 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 
 		case eRtMutex :
 
+#if defined( OEX_USE_TIMEDLOCK )
+
+			if ( !pRi->uOwner )
+				return waitSuccess;
+
 			if ( pRi->uOwner != oexGetCurThreadId() )
 				return waitFailed;
 
@@ -738,18 +769,36 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 				return waitFailed;
 
 			if ( --pRi->nCount )
-				return waitSuccess;
+				return waitFailed;
 
 			if ( !( nErr = pthread_mutex_unlock( &pRi->hMutex ) ) )
 			{	pRi->uLastOwner = pRi->uOwner;
 				pRi->uOwner = 0;
-				nErr = waitSuccess;
 			} // end if
-
+#else
+			if ( !( nErr = pthread_mutex_unlock( &pRi->hMutex ) ) )
+			{	pRi->uLastOwner - pRi->uOwner;
+				pRi->uOwner = 0;
+			} // end if
+#endif
 			break;
 
 		case eRtEvent :
 		{
+
+#if defined( OEX_USE_TIMEDLOCK )
+
+			// Signal
+			if ( waitSuccess != pRi->cSync.Reset( x_uTimeout ) )
+				return waitFailed;
+
+			pRi->bSignaled = oexFALSE;
+			pRi->uOwner = 0;
+
+			return waitSuccess;
+
+#else
+
 			// Verify mutex data pointer
 			if ( !oexCHECK_PTR( pRi->cSync.GetRi() ) )
 			{	oexERROR( 0, oexT( "Invalid mutex data pointer" ) );
@@ -764,6 +813,7 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 			pRi->bSignaled = oexFALSE;
 			pRi->uOwner = 0;
 
+#endif
 		} break;
 
 		case eRtLock :

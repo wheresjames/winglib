@@ -124,8 +124,8 @@ oexRESULT CThread::Start( oexPVOID x_pData, oexUINT x_uSleep )
     m_uSleep = x_uSleep;
 
     // Give the thread a fighting chance
-    m_evStop.NewEvent();
-    m_evInit.NewEvent();
+    m_evStop.Reset();
+    m_evInit.Reset();
 
 	// Attempt to create the thread
 	if ( CResource::NewThread( CThread::ThreadProc, this ) )
@@ -136,12 +136,12 @@ oexRESULT CThread::Start( oexPVOID x_pData, oexUINT x_uSleep )
 
 oexRESULT CThread::Stop( oexUINT x_uWait, oexBOOL x_bKill )
 {
+	// Signal that the thread should exit
+	m_evStop.Signal();
+
 	// Ensure thread resource is valid
 	if ( !CResource::IsValid() )
 		return 0;
-
-	// Signal that the thread should exit
-	m_evStop.Signal();
 
 	// Wait for thread to stop
 	if ( !WaitThreadExit( x_uWait ) )
@@ -149,10 +149,6 @@ oexRESULT CThread::Stop( oexUINT x_uWait, oexBOOL x_bKill )
 
 	// Kill the thread
 	oexINT nErr = CResource::Destroy( x_uWait, x_bKill );
-
-	// Lose the events
-    m_evStop.Destroy();
-    m_evInit.Destroy();
 
     // Clear thread data
     m_pData = 0;
@@ -180,7 +176,6 @@ oexBOOL CThread::WaitThreadExit( oexUINT x_uTimeout )
 
 	return oexTRUE;
 }
-
 
 // The number of threads running
 oexLONG CThread::m_lThreadCount = 0;

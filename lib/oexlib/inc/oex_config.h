@@ -111,6 +111,7 @@
 
 #else
 
+// Wait resolution in uSeconds
 // iii This value is very touchy
 #	define oexWAIT_RESOLUTION			4000
 

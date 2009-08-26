@@ -63,6 +63,8 @@ The closer I am to fine
 
 */
 
+#define TEST_TCP_PORT	21216
+
 #include "stdafx.h"
 #include "stdio.h"
 
@@ -120,7 +122,7 @@ using namespace oex;
 
 oex::oexRESULT TestCommon()
 {
-	oexEcho( oexT( "Common..." ) );
+	oexEcho( oexT( "======== Common..." ) );
 
 	int a[ 100 ]; // = { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, ... };
 	int sz = sizeof( a ) / sizeof( int );
@@ -156,7 +158,7 @@ oex::oexRESULT TestCommon()
 
 oex::oexRESULT TestAllocator()
 {
-	oexEcho( oexT( "Memory allocator..." ) );
+	oexEcho( oexT( "======== Memory allocator..." ) );
 
     // Veriry over-run / under-run protection
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
@@ -346,7 +348,7 @@ oex::oexRESULT TestAllocator()
 
 oex::oexRESULT TestStrings()
 {
-	oexEcho( oexT( "String functions..." ) );
+	oexEcho( oexT( "======== String functions..." ) );
 
     oex::CStr str1, str2;
     oex::oexSTR pStr;
@@ -654,7 +656,7 @@ oex::oexRESULT TestStrings()
 
 oex::oexRESULT TestFileMapping()
 {
-	oexEcho( oexT( "File mapping..." ) );
+	oexEcho( oexT( "======== File mapping..." ) );
 
     oex::TFileMapping< oex::oexTCHAR > fm;
 
@@ -721,7 +723,7 @@ oex::oexRESULT TestFileMapping()
 
 oex::oexRESULT TestGuids()
 {
-	oexEcho( oexT( "GUIDS..." ) );
+	oexEcho( oexT( "======== GUIDS..." ) );
 
     // {6674C3D8-BB11-4a58-BCE0-A34DC74365AF}
     static const oex::oexGUID guidTest =
@@ -762,7 +764,7 @@ oex::oexRESULT TestGuids()
 
 oex::oexRESULT TestLists()
 {
-	oexEcho( oexT( "Linked lists..." ) );
+	oexEcho( oexT( "======== Linked lists..." ) );
 
 	// List
 	oex::TList< int > lst;
@@ -996,7 +998,7 @@ oex::oexRESULT TestLists()
 
 oex::oexRESULT TestAssoLists()
 {
-	oexEcho( oexT( "Mapped lists..." ) );
+	oexEcho( oexT( "======== Mapped lists..." ) );
 
     oex::TAssoList< oex::oexINT, oex::oexINT > alii;
 
@@ -1112,7 +1114,7 @@ oex::oexRESULT TestAssoLists()
 
 oex::oexRESULT TestPropertyBag()
 {
-	oexEcho( oexT( "Property bags..." ) );
+	oexEcho( oexT( "======== Property bags..." ) );
 
     oex::CPropertyBag pb;
 
@@ -1144,7 +1146,7 @@ oex::oexRESULT TestPropertyBag()
 
     if ( !oexVERIFY( oex::CParser::Implode( pb[ oexT( "1" ) ].List(), oexT( "," )) == oexT( "1a,1b,1c" ) ) )
 		return -4;
-	
+
 	oex::TPropertyBag< oex::oexINT, oex::oexINT > pbii;
 
 	pbii[ 2 ] = 2;
@@ -1162,7 +1164,7 @@ oex::oexRESULT TestPropertyBag()
 
 oex::oexRESULT TestParser()
 {
-	oexEcho( oexT( "Text parsers..." ) );
+	oexEcho( oexT( "======== Text parsers..." ) );
 
 	// Test explode function
     oex::oexCSTR szStr[] = { oexT( "This" ), oexT( "is" ), oexT( "a" ), oexT( "string" ), 0 };
@@ -1410,7 +1412,7 @@ oex::oexRESULT TestParser()
 
 oex::oexRESULT TestFile()
 {
-	oexEcho( oexT( "Files..." ) );
+	oexEcho( oexT( "======== Files..." ) );
 
     oex::CFile f;
     oex::CStr sFileName, sContents = oexT( "Safe to delete this file." );
@@ -1441,7 +1443,7 @@ oex::oexRESULT TestFile()
 oex::oexRESULT TestZip()
 {
 #ifdef OEX_ENABLE_ZIP
-	oexEcho( oexT( "Zip file support..." ) );
+	oexEcho( oexT( "======== Zip file support..." ) );
 
     oex::CStr sStr = oexT( "This string will be compressed.  It has to be fairly long or the 			\
                             compression library won't really be able to compress it much.   			\
@@ -1469,7 +1471,7 @@ oex::oexRESULT TestZip()
 
 oex::oexRESULT TestResources()
 {
-	oexEcho( oexT( "Resources..." ) );
+	oexEcho( oexT( "======== Resources..." ) );
 
 	// oex::CStr8 res = oexGetResource( "hello.txt" );
 	// oexCHAR8 *_p = oexGetResourcePtr( "hello.txt" );
@@ -1496,7 +1498,7 @@ oex::oexRESULT TestResources()
 
 oex::oexRESULT Test_CSysTime()
 {
-	oexEcho( oexT( "Time functions..." ) );
+	oexEcho( oexT( "======== Time functions..." ) );
 
 	oexEcho( oex::CSysTime().GetLocalTime().FormatTime( oexT( "Current Time: %W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() );
 
@@ -1560,7 +1562,7 @@ oex::oexRESULT Test_CSysTime()
 
 oex::oexRESULT Test_CIpAddress()
 {
-	oexEcho( oexT( "IP Address..." ) );
+	oexEcho( oexT( "======== IP Address..." ) );
 
     oex::oexCSTR pUrl = oexT( "http://user:password@server.com:1111/my/path/doc.php?a=b&c=d" );
     oex::CPropertyBag pbUrl = oex::os::CIpAddress::ParseUrl( pUrl );
@@ -1603,19 +1605,19 @@ oex::oexRESULT Test_CIpAddress()
 
 oex::oexRESULT Test_CIpSocket()
 {
-	oexEcho( oexT( "Socket support..." ) );
+	oexEcho( oexT( "======== Socket support..." ) );
 
     // *** TCP
 
     oex::os::CIpSocket server, session, client;
 
-    if ( !oexVERIFY( server.Bind( 21212 ) ) )
+    if ( !oexVERIFY( server.Bind( TEST_TCP_PORT ) ) )
         return -2;
 
     if ( !oexVERIFY( server.Listen() ) )
         return -3;
 
-    if ( !oexVERIFY( client.Connect( oexT( "127.0.0.1" ), 21212 ) ) )
+    if ( !oexVERIFY( client.Connect( oexT( "127.0.0.1" ), TEST_TCP_PORT ) ) )
         return -4;
 
     if ( !oexVERIFY( server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, SOCKET_TIMEOUT ) ) )
@@ -1652,13 +1654,13 @@ oex::oexRESULT Test_CIpSocket()
     // *** UDP
 
     if ( !oexVERIFY( server.Create( oex::os::CIpSocket::eAfInet, oex::os::CIpSocket::eTypeDgram, oex::os::CIpSocket::eProtoUdp ) )
-         || !oexVERIFY( server.Bind( 21212 ) ) )
+         || !oexVERIFY( server.Bind( TEST_TCP_PORT ) ) )
         return -13;
 
     if ( !oexVERIFY( client.Create( oex::os::CIpSocket::eAfInet, oex::os::CIpSocket::eTypeDgram, oex::os::CIpSocket::eProtoUdp ) ) )
         return -14;
 
-    if ( !oexVERIFY( client.PeerAddress().LookupHost( oexT( "127.0.0.1" ), 21212 ) ) )
+    if ( !oexVERIFY( client.PeerAddress().LookupHost( oexT( "127.0.0.1" ), TEST_TCP_PORT ) ) )
         return -15;
 
     if ( !oexVERIFY( client.SendTo( oexStrToBin( pStr ) ) ) )
@@ -1678,7 +1680,7 @@ oex::oexRESULT Test_CIpSocket()
 
 oex::oexRESULT Test_CCircBuf()
 {
-	oexEcho( oexT( "Circular buffers..." ) );
+	oexEcho( oexT( "======== Circular buffers..." ) );
 
     oex::CCircBuf cb;
 
@@ -1733,7 +1735,7 @@ oex::oexRESULT Test_CCircBuf()
 
 oex::oexRESULT Test_CFifoSync()
 {
-	oexEcho( oexT( "FIFO buffers..." ) );
+	oexEcho( oexT( "======== FIFO buffers..." ) );
 
     oex::CFifoSync fs;
 
@@ -1794,7 +1796,7 @@ oex::oexRESULT Test_CFifoSync()
 
 oex::oexRESULT Test_CDataPacket()
 {
-	oexEcho( oexT( "Packets..." ) );
+	oexEcho( oexT( "======== Packets..." ) );
 
     oex::CDataPacket dp1, dp2, dp3;
 
@@ -1957,7 +1959,7 @@ public:
 
 oex::oexRESULT Test_Threads()
 {
-	oexEcho( oexT( "Threads..." ) );
+	oexEcho( oexT( "======== Threads..." ) );
 
 	CMyThread t;
 
@@ -2089,14 +2091,14 @@ oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os
 
 oex::oexRESULT Test_CHttpSession()
 {
-	oexEcho( oexT( "HTTP..." ) );
+	oexEcho( oexT( "======== HTTP..." ) );
 
 	oex::os::CIpSocket client;
 	oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > server;
 
 	server.SetSessionCallback( (oex::oexPVOID)OnSessionCallback, (void*)9876 );
 
-	if ( !oexVERIFY( server.StartServer( 21212, OnServerEvent, (void*)6789 ) ) )
+	if ( !oexVERIFY( server.StartServer( TEST_TCP_PORT, OnServerEvent, (void*)6789 ) ) )
 		return -2;
 
 	if ( !oexVERIFY( !server.GetInitEvent().Wait() ) )
@@ -2105,7 +2107,7 @@ oex::oexRESULT Test_CHttpSession()
 	if ( !oexVERIFY( server.GetInitStatus() ) )
 		return -4;
 
-    if ( !oexVERIFY( client.Connect( oexT( "127.0.0.1" ), 21212 ) ) )
+    if ( !oexVERIFY( client.Connect( oexT( "127.0.0.1" ), TEST_TCP_PORT ) ) )
         return -5;
 
     if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, SOCKET_TIMEOUT ) ) )
@@ -2126,6 +2128,7 @@ oex::oexRESULT Test_CHttpSession()
 		return -8;
 
 	client.Destroy();
+
 	server.Stop();
 
 	return oex::oexRES_OK;
@@ -2622,7 +2625,7 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 
 oex::oexRESULT Test_CCapture()
 {
-	oexEcho( oexT( "Video capture API..." ) );
+	oexEcho( oexT( "======== Video capture API..." ) );
 
 	oexINT idx = -1;
 	while ( oexCONST vid::SVideoSystemInfo* pVsi = vid::CCapture::GetNextAvailableSystem( idx ) )
@@ -2657,10 +2660,10 @@ oex::oexRESULT Test_CCapture()
 #if defined( OEX_ENABLE_SQLITE )
 oex::oexRESULT Test_CSQLite()
 {
-	oexEcho( oexT( "CSQLite..." ) );
+	oexEcho( oexT( "======== CSQLite..." ) );
 
 	oex::CSQLite sq;
-	
+
 	if ( !oexVERIFY( sq.Open( oexT( ":memory:" ) ) ) )
 		return -1;
 
@@ -2691,15 +2694,15 @@ oex::oexRESULT Test_CSQLite()
 	if ( !oexVERIFY( sq.NumRows() == 3 ) )
 		return -7;
 
-	if ( !oexVERIFY( sq.Row( 0 )[ oexT( "name" ) ].ToString() == oexT( "Bob" ) 
+	if ( !oexVERIFY( sq.Row( 0 )[ oexT( "name" ) ].ToString() == oexT( "Bob" )
 					 && sq.Row( 0 )[ oexT( "title" ) ].ToString() == oexT( "Engineer" ) ) )
 		return -8;
 
-	if ( !oexVERIFY( sq.Row( 1 )[ oexT( "name" ) ].ToString() == oexT( "Kim" ) 
+	if ( !oexVERIFY( sq.Row( 1 )[ oexT( "name" ) ].ToString() == oexT( "Kim" )
 					 && sq.Row( 1 )[ oexT( "title" ) ].ToString() == oexT( "Artist" ) ) )
 		return -9;
 
-	if ( !oexVERIFY( sq.Row( 2 )[ oexT( "name" ) ].ToString() == oexT( "Amy" ) 
+	if ( !oexVERIFY( sq.Row( 2 )[ oexT( "name" ) ].ToString() == oexT( "Amy" )
 					 && sq.Row( 2 )[ oexT( "title" ) ].ToString() == oexT( "\"Director\" of 'Sales' and `Marketing`" ) ) )
 		return -10;
 
@@ -2713,7 +2716,7 @@ oex::oexRESULT Test_CSQLite()
 	if ( !oexVERIFY( sq.NumRows() == 1 ) )
 		return -13;
 
-	if ( !oexVERIFY( sq.Row( 0 )[ oexT( "name" ) ].ToString() == oexT( "Amy" ) 
+	if ( !oexVERIFY( sq.Row( 0 )[ oexT( "name" ) ].ToString() == oexT( "Amy" )
 					 && sq.Row( 0 )[ oexT( "title" ) ].ToString() == oexT( "Sales" ) ) )
 		return -14;
 
@@ -2748,7 +2751,7 @@ int main(int argc, char* argv[])
     if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
         return -1;
 
-	oexEcho( oexT( "--- Starting tests ---" ) );
+	oexEcho( oexT( "-------- Starting tests --------" ) );
 	oexNOTICE( 0, oexT( "Tests started" ) );
 
     TestCommon();
@@ -2777,6 +2780,8 @@ int main(int argc, char* argv[])
 
     Test_CSysTime();
 
+	Test_Threads();
+
 #ifndef OEX_LOWRAM
 
     Test_CCircBuf();
@@ -2790,8 +2795,6 @@ int main(int argc, char* argv[])
     Test_CIpAddress();
 
     Test_CIpSocket();
-
-	Test_Threads();
 
 	Test_CHttpSession();
 
