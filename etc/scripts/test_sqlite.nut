@@ -36,7 +36,7 @@ function _init()
 
 	_self.echo( "========== Change Amy to a Dutchess ==========" );
 
-	local pb = CSqMulti();
+	local pb = CSqMap();
 	pb[ "title" ] <- "Dutchess";
 
 	if ( !sq.Update( "test", "`name`='Amy'", pb ) )
