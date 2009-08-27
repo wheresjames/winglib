@@ -75,6 +75,7 @@ namespace sqbind
     public:
 
 		SQBIND_CLASS_CTOR_BEGIN( CSqMulti )
+			_SQBIND_CLASS_CTOR( CSqMulti, 1 ) ( sa.GetString( 2 ) )
 		SQBIND_CLASS_CTOR_END( CSqMulti )
 
 		/// Destructor
@@ -116,6 +117,9 @@ namespace sqbind
 		t_Obj urlencode();
 
 		void urldecode( const t_Obj &s );
+
+		/// Merges in the specified array
+		CSqMulti& add( CSqMulti &m );
 
 		/// Returns non-zero if the specified key exists
 		int isset( const t_Obj &k );

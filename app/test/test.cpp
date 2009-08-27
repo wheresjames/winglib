@@ -1288,8 +1288,8 @@ oex::oexRESULT TestParser()
 
     if ( !oexVERIFY( oex::CParser::Serialize( pb2 ) == sStr ) )
         return -28;
-
-    pb = oex::CParser::Deserialize( oexT( "x{a=b}" ) );
+	
+    pb = oex::CParser::Deserialize( oexT( "x{a=b,c}" ) );
 
     if ( !oexVERIFY( pb.IsKey( oexT( "x" ) ) ) )
         return -29;
@@ -1299,6 +1299,54 @@ oex::oexRESULT TestParser()
 
     if ( !oexVERIFY( pb[ oexT( "x" ) ][ oexT( "a" ) ].ToString() == oexT( "b" ) ) )
         return -31;
+
+    if ( !oexVERIFY( pb[ oexT( "x" ) ].IsKey( oexT( "c" ) ) ) )
+        return -32;
+	
+    pb = oex::CParser::Deserialize( oexT( "z" ) );
+
+    if ( !oexVERIFY( pb.IsKey( oexT( "z" ) ) ) )
+        return -33;
+
+	pb = oex::CParser::Deserialize( oexT( "a = b,\r\n d =\r\n\t{ \r\nx = e, y,\n z, h\re\nl\tl\t o, a%20b }" ) );
+
+    if ( !oexVERIFY( pb.IsKey( oexT( "a" ) ) ) )
+        return -34;
+
+    if ( !oexVERIFY( pb[ oexT( "a" ) ].ToString() == oexT( "b" ) ) )
+        return -35;
+
+    if ( !oexVERIFY( pb.IsKey( oexT( "d" ) ) ) )
+        return -36;
+
+    if ( !oexVERIFY( pb[ oexT( "d" ) ][ oexT( "x" ) ].ToString() == oexT( "e" ) ) )
+        return -37;
+
+    if ( !oexVERIFY( pb[ oexT( "d" ) ].IsKey( oexT( "y" ) ) ) )
+        return -38;
+
+    if ( !oexVERIFY( pb[ oexT( "d" ) ].IsKey( oexT( "z" ) ) ) )
+        return -39;
+
+    if ( !oexVERIFY( pb[ oexT( "d" ) ].IsKey( oexT( "hello" ) ) ) )
+        return -40;
+
+    if ( !oexVERIFY( pb[ oexT( "d" ) ].IsKey( oexT( "a b" ) ) ) )
+        return -41;
+
+	pb = oex::CParser::Deserialize( oexT( "{a,b,c}" ) );
+
+    if ( !oexVERIFY( pb.IsKey( oexT( "" ) ) ) )
+        return -42;
+
+    if ( !oexVERIFY( pb[ oexT( "" ) ].IsKey( oexT( "a" ) ) ) )
+        return -43;
+
+    if ( !oexVERIFY( pb[ oexT( "" ) ].IsKey( oexT( "b" ) ) ) )
+        return -44;
+
+	if ( !oexVERIFY( pb[ oexT( "" ) ].IsKey( oexT( "c" ) ) ) )
+        return -45;
 
 	oex::CStr sCmdLine = oexT( "-a -simple:param -file:'C:/Program Files/myfile.txt' -two:'hi and\\'hi' -empty: hello world" );
 	oexINT nParams = CParser::ParseCommandLine( sCmdLine, pb );

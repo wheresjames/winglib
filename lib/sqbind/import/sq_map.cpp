@@ -47,7 +47,7 @@ CSqMap::CSqMap( const CSqMap::t_Obj &s )
 
 CSqMap::CSqMap( const oex::oexTCHAR *s )
 {
-	if ( s )
+	if ( oexCHECK_PTR( s ) )
 		deserialize( t_Obj( s ) );
 }
 
@@ -68,6 +68,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMap, CSqMap )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMap, urldecode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMap, isset )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMap, size )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMap, add )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMap, set )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMap, get )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMap, unset )
@@ -94,13 +95,15 @@ void CSqMap::clear()
 void CSqMap::_serialize( oex::CPropertyBag &pb, CSqMap::t_List &lst )
 {
 	for ( t_List::iterator it = lst.begin(); it != lst.end(); it++ )
-		pb[ it->first.c_str() ].ToString().Set( it->second.c_str(), it->second.length() );
+		if ( it->first.length() )
+			pb[ it->first.c_str() ].ToString().Set( it->second.c_str(), it->second.length() );
 }
 
 void CSqMap::_deserialize( oex::CPropertyBag &pb, CSqMap::t_List &lst )
 {
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
-		lst[ it.Node()->key.Ptr() ].assign( it->ToString().Ptr(), it->ToString().Length() );
+		if ( it.Node()->key.Length() )
+			lst[ it.Node()->key.Ptr() ].assign( it->ToString().Ptr(), it->ToString().Length() );
 }
 
 CSqMap::t_Obj CSqMap::serialize()
@@ -119,6 +122,13 @@ void CSqMap::deserialize( const CSqMap::t_Obj &s )
 	oex::CPropertyBag pb = oex::CParser::Deserialize( s.c_str() );
 	_deserialize( pb, m_lst );
 
+}
+
+CSqMap& CSqMap::add( CSqMap &m )
+{	
+	for ( t_List::iterator it = m.m_lst.begin(); it != m.m_lst.end(); it++ )
+		m_lst[ it->first ] = it->second;
+	return *this;
 }
 
 void CSqMap::merge( const CSqMap::t_Obj &s )
@@ -165,7 +175,7 @@ CSqMap::iterator CSqMap::begin()
 CSqMap::iterator CSqMap::end()
 {	return m_lst.end(); }
 
-CSqMap::iterator CSqMap::find ( const CSqMap::t_Obj &k )
+CSqMap::iterator CSqMap::find( const CSqMap::t_Obj &k )
 {	return m_lst.find( k ); }
 
 int CSqMap::isset( const CSqMap::t_Obj &k )

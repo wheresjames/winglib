@@ -95,6 +95,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, urldecode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, isset )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, size )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, add )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, set )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, get )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, copy )
@@ -127,11 +128,15 @@ void CSqMulti::_serialize( oex::CPropertyBag &pb, CSqMulti::t_List &lst )
 {
 	for ( t_List::iterator it = lst.begin(); it != lst.end(); it++ )
 	{
-		if ( it->second.m_val.str().length() )
-			pb[ it->first.c_str() ].ToString().Set( it->second.m_val.str().c_str(), it->second.m_val.str().length() );
+		t_Obj sKey = it->first;
+		if ( !sKey.length() )
+			sKey = oexT( "*" );
 
-		if ( it->second.size() )
-			_serialize( pb[ it->first.c_str() ], it->second.list() );
+		if ( !it->second.size() )
+			pb[ sKey.c_str() ].ToString().Set( it->second.m_val.str().c_str(), it->second.m_val.str().length() );
+
+		else
+			_serialize( pb[ sKey.c_str() ], it->second.list() );
 
 	} // end for
 }
@@ -147,11 +152,15 @@ void CSqMulti::_deserialize( oex::CPropertyBag &pb, CSqMulti::t_List &lst )
 {
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
 	{
-		if ( it->ToString().Length() )
-			lst[ it.Node()->key.Ptr() ].m_val.str().assign( it->ToString().Ptr(), it->ToString().Length() );
+		t_Obj sKey = it.Node()->key.Ptr();
+		if ( !sKey.length() )
+			sKey = oexT( "*" );
 
-		if ( it->Size() )
-			_deserialize( *it, lst[ it.Node()->key.Ptr() ].list() );
+		if ( !it->Size() )
+			lst[ sKey ].m_val.str().assign( it->ToString().Ptr(), it->ToString().Length() );
+
+		else
+			_deserialize( *it, lst[ sKey ].list() );
 
 	} // end for
 
@@ -166,6 +175,21 @@ void CSqMulti::deserialize( const CSqParam::t_SqStr &s )
 	oex::CStr sData( s.c_str(), s.length() );
 	oex::CPropertyBag pb = oex::CParser::Deserialize( sData );
 	_deserialize( pb, m_lst );
+}
+
+CSqMulti& CSqMulti::add( CSqMulti &m )
+{	
+	for ( t_List::iterator it = m.m_lst.begin(); it != m.m_lst.end(); it++ )
+	{
+		if ( !it->second.size() )
+			m_lst[ it->first ] = it->second.m_val.str();
+
+		else
+			m_lst[ it->first ].add( it->second );
+
+	} // end for
+
+	return *this;
 }
 
 void CSqMulti::merge( const CSqParam::t_SqStr &s )

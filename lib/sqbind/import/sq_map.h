@@ -58,7 +58,9 @@ namespace sqbind
 
     public:
 
+		// Squirrel constructor map
 		SQBIND_CLASS_CTOR_BEGIN( CSqMap )
+			_SQBIND_CLASS_CTOR( CSqMap, 1 ) ( sa.GetString( 2 ) )
 		SQBIND_CLASS_CTOR_END( CSqMap )
 
 		/// Default constructor
@@ -85,6 +87,8 @@ namespace sqbind
 		t_Obj serialize();
 
 		void deserialize( const t_Obj &s );
+
+		CSqMap& add( CSqMap &m );
 
 		void merge( const t_Obj &s );
 

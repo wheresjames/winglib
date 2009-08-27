@@ -561,26 +561,32 @@ public:
             {
                 case oexTC( T, ',' ) : case oexTC( T, '}' ) : case 0 :
                 {
-                    if ( 1 < e - s )
+                    if ( 0 < e - s )
                     {
                         // Find '='
                         oexLONG a = s;
-                        while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] ) a++;
+                        while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] ) 
+							a++;
 
                         TStr< T > sKey, sVal;
 
-                        // First character is separator
-                        if ( a == s )
-                            sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ) );
+						// NULL key?
+						if ( e <= s )
+							; // sKey = oexTT( T, "" );
 
-                        else sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ) );
+                        // First character is separator
+                        else if ( a == s )
+                            sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
+
+                        else sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
 
                         // Single token
                         if ( 1 >= e - a )
                             x_pb[ sKey ] = oexTT( T, "" );
 
                         // Both tokens present
-                        else x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ) );
+                        else 
+							x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).DropWhiteSpace() );
 
                         // Count one item
                         lItems++;
@@ -603,24 +609,28 @@ public:
 
                     // Find '='
                     oexLONG a = s;
-                    while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] ) a++;
+                    while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] ) 
+						a++;
 
-                    // First character is separator
-                    if ( a == s )
-                        sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ) );
+                    // NULL key?
+					if ( e <= s )
+						; // sKey = oexTT( T, "" );
+
+                    else if ( a == s )
+                        sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
 
                     // No default value
                     else if ( a >= e )
-                        sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), e - s ) );
+                        sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), e - s ).DropWhiteSpace() );
 
                     else if ( a < e )
-                    {   sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ) );
-                        x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ) );
+                    {   sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
+                        x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).DropWhiteSpace() );
                         lItems++;
                     } // end if
 
                     // Do we have a key?
-                    if ( sKey.Length() )
+//                    if ( sKey.Length() )
                     {
                         // This will point to the end of the array we're about to decode
                         oexLONG lEnd = 0;

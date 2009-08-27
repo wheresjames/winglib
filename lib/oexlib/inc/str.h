@@ -309,10 +309,11 @@ public:
 #else
             pMem = m_mem.Resize( x_uSize + 1 ).Ptr();
 #endif
-            if ( !oexVERIFY_PTR( pMem ) )
-			    return oexNULL;
-
         } // end if
+
+		// Verify we got valid memory
+        if ( !oexVERIFY_PTR( pMem ) )
+		    return oexNULL;
 
         // Set empty string if new buffer
         if ( !bExisting )
