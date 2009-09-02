@@ -330,3 +330,18 @@ stdString CSqMsgQueue::get( const stdString &sPath, const stdString &sKey )
 	Msg( sPath, oexT( "pb_get" ), &params, &sRet );
 	return sRet;
 }
+
+stdString CSqMsgQueue::isset( const stdString &sPath, const stdString &sKey )
+{	stdString sRet;
+	CSqMap params;
+	params[ oexT( "key" ) ] = sKey;
+	Msg( sPath, oexT( "pb_isset" ), &params, &sRet );
+	return sRet;
+}
+
+stdString CSqMsgQueue::pb( const stdString &sPath )
+{	stdString sRet;
+	CSqMap params;
+	Msg( sPath, oexT( "pb_all" ), &params, &sRet );
+	return sRet;
+}

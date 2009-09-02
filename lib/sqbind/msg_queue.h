@@ -171,6 +171,12 @@ public:
 	/// Gets the specified property
 	stdString get( const stdString &sPath, const stdString &sKey );
 
+	/// Returns non-zero if the specified value exists
+	stdString isset( const stdString &sPath, const stdString &sKey );
+
+	/// Gets the property bag
+	stdString pb( const stdString &sPath );
+
 private:
 
 	/// Owner thread id

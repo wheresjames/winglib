@@ -62,6 +62,12 @@ public:
 	/// Gets the specified property
 	stdString get( const stdString &sPath, const stdString &sKey );
 
+	/// Returns non-zero if the specified value exists
+	int isset( const stdString &sPath, const stdString &sKey );
+
+	/// Returns a copy of the entire property bag
+	CSqMap pb( const stdString &sPath );
+
 	/// Requests the appliation exit
 	void exit( int nExitCode );
 

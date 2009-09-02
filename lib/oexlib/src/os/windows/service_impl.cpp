@@ -274,9 +274,9 @@ int CServiceImpl::OnRunService( int argc, char** argv, oexCSTR pName, oexCSTR pD
 
 	} // end if
 
-	if ( CommandLine().IsKey( oexT( "remove" ) ) 
+	if ( CommandLine().IsKey( oexT( "remove" ) )
 		 || CommandLine().IsKey( oexT( "uninstall" ) ) )
-	{		
+	{
 		int nErr = RemoveService( pName );
 		if ( 0 > nErr )
 		{	oexEcho( oexT( "Error removing service" ) );
@@ -309,7 +309,7 @@ int CServiceImpl::OnRunService( int argc, char** argv, oexCSTR pName, oexCSTR pD
 		if ( ERROR_FAILED_SERVICE_CONTROLLER_CONNECT == GetLastError() )
 			if ( !CommandLine().IsKey( oexT( "service" ) ) )
 				return OnRun();
-		
+
 		// Log the error
 		oexERROR( GetLastError(), oexT( "StartServiceCtrlDispatcher() failed" ) );
 
@@ -336,7 +336,7 @@ void CServiceImpl::SetCommandLine( int argc, char **argv )
 void CServiceImpl::OnServiceMain( int argc, char** argv )
 {
 	// Register our service control handler
-	m_hService = ::RegisterServiceCtrlHandler( GetName().Ptr(), _ServiceHandler );
+	m_hService = (oexPVOID)::RegisterServiceCtrlHandler( GetName().Ptr(), _ServiceHandler );
 
 	// Initialize service
 	int nErr = OnInitService();
@@ -353,30 +353,30 @@ void CServiceImpl::OnServiceMain( int argc, char** argv )
 	SetServiceStatus ( (SERVICE_STATUS_HANDLE)m_hService, &g_ss );
 
 	// Run the service
-	g_ss.dwWin32ExitCode = OnRun(); 
+	g_ss.dwWin32ExitCode = OnRun();
 
 	// Call exit service
 	OnExitService();
 
 	// Notify that we're stopping
 	m_bRun = oexFALSE;
-	g_ss.dwCurrentState = SERVICE_STOPPED;	
+	g_ss.dwCurrentState = SERVICE_STOPPED;
 	SetServiceStatus ( (SERVICE_STATUS_HANDLE)m_hService, &g_ss );
 }
 
 void CServiceImpl::OnServiceHandler( unsigned int fdwControl )
 {
 	switch( fdwControl )
-	{ 
-		case SERVICE_CONTROL_STOP: 
+	{
+		case SERVICE_CONTROL_STOP:
 			m_bRun = oexFALSE;
-			g_ss.dwCurrentState = SERVICE_STOPPED; 
-			break; 
+			g_ss.dwCurrentState = SERVICE_STOPPED;
+			break;
 
-		case SERVICE_CONTROL_SHUTDOWN: 
+		case SERVICE_CONTROL_SHUTDOWN:
 			m_bRun = oexFALSE;
-			g_ss.dwCurrentState = SERVICE_STOPPED; 
-			break; 
+			g_ss.dwCurrentState = SERVICE_STOPPED;
+			break;
 
 		default:
 			break;
@@ -386,7 +386,7 @@ void CServiceImpl::OnServiceHandler( unsigned int fdwControl )
 	// Report current status
 	SetServiceStatus ( (SERVICE_STATUS_HANDLE)m_hService, &g_ss );
 
-	return; 
+	return;
 }
 
 int CServiceImpl::InstallService( oexCSTR pName, oexCSTR pDesc, oexBOOL bAutoRestart )
@@ -417,7 +417,7 @@ int CServiceImpl::InstallService( oexCSTR pName, oexCSTR pDesc, oexBOOL bAutoRes
 	{	oexERROR( GetLastError(), oexMks( oexT( "CreateService() failed : " ), pName ) );
 		return -3;
 	} // end if
-								
+
 	// Close handles
 	CloseServiceHandle ( hService );
 	CloseServiceHandle ( hSCManager );
@@ -477,7 +477,7 @@ int CServiceImpl::RemoveService( oexCSTR pName )
 	{	oexERROR( GetLastError(), oexT( "Could not delete service : DeleteService() failed" ) );
 		return -4;
 	} // end if
-							   
+
 	// Close handles
 	CloseServiceHandle ( hService );
 	CloseServiceHandle ( hSCManager );
@@ -518,7 +518,7 @@ int CServiceImpl::RemoveService( oexCSTR pName )
 	} // end delete sub keys
 
 	HKEY hKey = NULL;
-	LONG lRes = RegCreateKeyEx( HKEY_LOCAL_MACHINE, oexT( "SYSTEM\\CurrentControlSet\\Services\\" ),								
+	LONG lRes = RegCreateKeyEx( HKEY_LOCAL_MACHINE, oexT( "SYSTEM\\CurrentControlSet\\Services\\" ),
 								0, NULL, 0, KEY_WRITE | KEY_SET_VALUE, NULL, &hKey, NULL );
 	if ( ERROR_SUCCESS != lRes )
 		oexERROR( GetLastError(), oexT( "Failed to delete registry key : RegCreateKeyEx() failed" ) );

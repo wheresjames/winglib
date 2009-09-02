@@ -154,11 +154,34 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 {
 	// Property bag set
 	if ( sMsg == oexT( "pb_set" ) )
-		m_pb[ mapParams[ oexT( "key" ) ] ] = mapParams[ oexT( "val" ) ];
+	{
+		if ( mapParams[ oexT( "val" ) ].length() )
+			m_pb[ mapParams[ oexT( "key" ) ] ] = mapParams[ oexT( "val" ) ];
+		else
+		{	t_PropertyBag::iterator it = m_pb.find( mapParams[ oexT( "key" ) ] );
+			if ( m_pb.end() != it )
+				m_pb.erase( it );
+		} // end else
+	} // end if
 
 	// Property bag get
 	else if ( sMsg == oexT( "pb_get" ) )
 		*pReply = m_pb[ mapParams[ oexT( "key" ) ] ];
+
+	// Does property value exist?
+	else if ( sMsg == oexT( "pb_isset" ) )
+		*pReply = ( m_pb.end() != m_pb.find( mapParams[ oexT( "key" ) ] ) ) ? "1" : "";
+
+	// Return serialized property bag
+	else if ( sMsg == oexT( "pb_all" ) )
+	{
+		// +++ Can we write a native serialize method for std::map one day?
+		oex::CPropertyBag pb;
+		CSqMap::_serialize( pb, m_pb );
+		oex::CStr s = oex::CParser::Serialize( pb );
+		pReply->assign( s.Ptr(), s.Length() );
+
+	} // end else if
 
 	// Just a path check?
 	else if ( sMsg == oexT( "is_path" ) )
