@@ -12,7 +12,7 @@ int process(int argc, char* argv[])
 	} // end if
 
 	// Parse the command line params
-	oex::CPropertyBag pb = oex::CParser::ParseCommandLine( argc, argv );
+	oex::CPropertyBag pb = oex::CParser::ParseCommandLine( argc, (const char**)argv );
 //	oexEcho( oexMks( oexT( "Command Line = " ), pb.PrintR() ).Ptr() );
 
 	oex::CStr sOut = pb[ oexT( "0" ) ].ToString();

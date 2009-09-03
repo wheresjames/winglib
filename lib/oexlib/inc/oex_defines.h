@@ -401,4 +401,4 @@
 #define oexRUN_SERVICE( cType ) \
 	cType theApp; \
 	int main( int argc, char* argv[] ) \
-	{	return OEX_NAMESPACE::os::CServiceImpl::RunService( argc, argv, OEX_PROJECT_NAME, OEX_PROJECT_DESC ); }
+	{	return OEX_NAMESPACE::os::CServiceImpl::RunService( argc, (const char**)argv, OEX_PROJECT_NAME, OEX_PROJECT_DESC ); }

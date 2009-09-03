@@ -1137,7 +1137,9 @@ public:
 
 	typedef oexTCHAR T_tc;
 
-	static TPropertyBag< TStr< T_tc > > ParseCommandLine( oexINT x_nNum, T_tc **x_pStr );
+	static oexLONG ParseCommandLineItem( oexINT i, TStr< CParser::T_tc > x_sStr, TPropertyBag< TStr< CParser::T_tc > > &x_pb );
+
+	static TPropertyBag< TStr< T_tc > > ParseCommandLine( oexINT x_nNum, oexCONST T_tc **x_pStr );
 
 	static TPropertyBag< TStr< T_tc > > ParseCommandLine( oexCONST TStr< T_tc > &x_sStr );
 

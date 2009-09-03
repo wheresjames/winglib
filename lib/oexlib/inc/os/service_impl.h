@@ -45,7 +45,7 @@ public:
 	~CServiceImpl();
 
 	/// Sets the command line
-	void SetCommandLine( int argc, char **argv );
+	void SetCommandLine( int argc, const char **argv );
 
 	/// Returns a reference to the parsed command line parameters
 	CPropertyBag& CommandLine()
@@ -72,7 +72,7 @@ public:
 	{	return m_bRun; }
 
 	/// Call from main() to make this thing go
-	static int RunService( int argc, char** argv, oexCSTR pName, oexCSTR pDesc );
+	static int RunService( int argc, const char** argv, oexCSTR pName, oexCSTR pDesc );
 
 	/// Installs the service
 	static int InstallService( oexCSTR pName, oexCSTR pDesc, oexBOOL bAutoRestart );
@@ -83,7 +83,7 @@ public:
 public:
 
 	/// Call from main() to make this thing go
-	virtual int OnRunService( int argc, char** argv, oexCSTR pName, oexCSTR pDesc );
+	virtual int OnRunService( int argc, const char** argv, oexCSTR pName, oexCSTR pDesc );
 
 	/// Main loop, this is the one you probably want to override
 	virtual int OnRun() { return -1; }
@@ -95,7 +95,7 @@ public:
 	virtual int OnExitService() { return 0; }
 
 	/// Main service loop
-	virtual void OnServiceMain( int argc, char** argv );
+	virtual void OnServiceMain( int argc, const char** argv );
 
 	/// Service control handler
 	virtual void OnServiceHandler( unsigned int fdwControl );
@@ -111,7 +111,7 @@ private:
 	int						m_argc;
 
 	/// Command line arguments
-	char**					m_argv;
+	const char**			m_argv;
 
 	/// Service name, you must set this in the constructor to have any effect
 	CStr					m_sName;

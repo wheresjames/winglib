@@ -119,3 +119,4 @@ namespace sqbind
 SQBIND_DECLARE_INSTANCE( sqbind::CSqSQLite, CSqSQLite )
 
 #endif // defined( OEX_ENABLE_SQLITE )
+

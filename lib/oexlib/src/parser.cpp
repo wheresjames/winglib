@@ -276,12 +276,42 @@ CStr CParser::Encode( CPropertyBag &enc, CPropertyBag &fmt, CStr root )
 //{	Parse( str, "[url] = {url} /& .;" );
 */
 
-TPropertyBag< TStr< CParser::T_tc > > CParser::ParseCommandLine( oexINT x_nNum, CParser::T_tc **x_pStr )
+oexLONG CParser::ParseCommandLineItem( oexINT i, TStr< CParser::T_tc > x_sStr, TPropertyBag< TStr< CParser::T_tc > > &x_pb )
+{
+	typedef T_tc T;
+	
+	// Is it a switch?
+	if ( oexTC( T, '-' ) == x_sStr[ 0 ] )
+	{
+		x_sStr++;
+		TStr< T > sKey = x_sStr.Parse( oexTT( T, ":" ) );
+		if ( x_sStr[ 0 ] == oexTC( T, ':' ) )
+			x_sStr++, x_pb[ sKey ] = x_sStr.Unquote( oexTT( T, "\"'" ), oexTT( T, "\"'" ), oexTT( T, "\\" ) );
+		else
+			x_pb[ x_sStr ] = oexTT( T, "" );
+
+	} // end if
+
+	// Add as number
+	else
+		x_pb[ ( TStr< T >() << i++ ) ] = x_sStr;
+		
+	return i;
+}
+
+TPropertyBag< TStr< CParser::T_tc > > CParser::ParseCommandLine( oexINT x_nNum, oexCONST CParser::T_tc **x_pStr )
 {
 	typedef T_tc T;
 	if ( 2 > x_nNum || !oexCHECK_PTR( x_pStr ) )
 		return TPropertyBag< TStr< T > >();
 
+	TPropertyBag< TStr< T > > pb;
+	for ( int i = 1, x = 0; i < x_nNum; i++ )
+		x = ParseCommandLineItem( x, x_pStr[ i ], pb );
+		
+	return pb;
+
+/*
 	// Build string
 	oex::TStr< T > sCmdLine;
 	for ( int i = 1; i < x_nNum; i++ )
@@ -289,6 +319,7 @@ TPropertyBag< TStr< CParser::T_tc > > CParser::ParseCommandLine( oexINT x_nNum, 
 
 	// Parse the command line
 	return ParseCommandLine( sCmdLine );
+*/
 }
 
 TPropertyBag< TStr< CParser::T_tc > > CParser::ParseCommandLine( oexCONST TStr< CParser::T_tc > &x_sStr )
@@ -320,7 +351,10 @@ oexLONG CParser::ParseCommandLine( oexCONST TStr< CParser::T_tc > &x_sStr, TProp
 
 	oexINT i = 0;
 	for ( oex::TList< TStr< T > >::iterator it; strlst.Next( it ); )
-	{
+	{	
+		i = ParseCommandLineItem( i, *it, x_pb );
+	
+/*	
 		// Is it a switch?
 		if ( oexTC( T, '-' ) == it.Obj()[ 0 ] )
 		{
@@ -336,10 +370,11 @@ oexLONG CParser::ParseCommandLine( oexCONST TStr< CParser::T_tc > &x_sStr, TProp
 		// Add as number
 		else
 			x_pb[ ( TStr< T >() << i++ ) ] = it.Obj();
-
+*/
 	} // end if
 
 	return x_pb.Size();
 }
+
 
 

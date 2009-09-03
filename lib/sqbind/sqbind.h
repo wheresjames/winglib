@@ -40,7 +40,7 @@
 // Kill Microsoft ads
 #define _CRT_SECURE_NO_DEPRECATE 1
 
-#ifdef OEX_WINDOWS
+#if defined( OEX_WINDOWS ) && !defined( OEX_GCC )
 #	pragma warning( disable : 4996 )
 #endif
 

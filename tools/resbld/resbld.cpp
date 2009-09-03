@@ -158,7 +158,7 @@ int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 												"\t}," oexNL );
 
 					if ( pRes )
-						pRes->Write( CStr8() << "\t" << sOut << " \\" oexNL );
+						pRes->Write( CStr8() << " \\" oexNL "\t" << sOut );
 
 					if ( pDep )
 						pDep->Write( CStr8() << sOut << ": " << ff.GetFullPath() << oexNL oexNL );
@@ -172,6 +172,19 @@ int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 	return 0;
 }
 
+int from_dirs( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
+			   oex::CStr sPath, oex::CFile *pInc, oex::CFile *pCmp,
+			   oex::CFile *pRes, oex::CFile *pDep, oex::CFile *pSym )
+{
+	int ret = -1;
+	oexSHOW( dir );
+	oex::CStrList lst = oex::CParser::Split( dir.Ptr(), oexT( " \r\n\t" ) );
+	for ( oex::CStrList::iterator it; lst.Next( it ); )
+		oexEcho( it->Ptr() ),
+		ret = from_dir( *it, sOutDir, pb, sPath, pInc, pCmp, pRes, pDep, pSym );
+	return ret;
+}
+
 
 int process(int argc, char* argv[])
 {
@@ -181,22 +194,21 @@ int process(int argc, char* argv[])
 	} // end if
 
 	// Parse the command line params
-	oex::CPropertyBag pb = oex::CParser::ParseCommandLine( argc, argv );
+	oex::CPropertyBag pb = oex::CParser::ParseCommandLine( argc, (const char**)argv );
 //	oexEcho( oexMks( oexT( "Command Line = " ), pb.PrintR() ).Ptr() );
 
 	// Was an entire directory specified?
 	if ( pb.IsKey( oexT( "d" ) ) )
 	{
+		oexSHOW( pb[ oexT( "d" ) ].ToString() );
+	
 		// Output directory
 		oex::CStr sOutDir = pb[ oexT( "o" ) ].ToString();
 
-		// Output same as input if not specified
-		if ( !sOutDir.Length() )
-			sOutDir = pb[ oexT( "d" ) ].ToString();
-
-		// Ensure output directory exists
-		if ( !oexExists( sOutDir.Ptr() ) )
-			oexCreatePath( sOutDir.Ptr() );
+		// Ensure output directory exists if specified
+		if ( sOutDir.Length() )
+			if ( !oexExists( sOutDir.Ptr() ) )
+				oexCreatePath( sOutDir.Ptr() );
 
 		// Include file?
 		oex::CFile fInc;
@@ -231,7 +243,7 @@ int process(int argc, char* argv[])
 		if ( fRes.CreateAlways( oexBuildPath( sOutDir, oexT( "oexres.mk" ) ).Ptr() ).IsOpen() )
 			fRes.Write( CStr8() << oexNL
 				"RES_CPP := \\" oexNL
-				"\t" << oexBuildPath( sOutDir, "oexres.cpp" ) << " \\" oexNL
+				"\t" << oexBuildPath( sOutDir, "oexres.cpp" ) //<< " \\" oexNL
 				);
 
 		oex::CFile fDep;
@@ -245,7 +257,10 @@ int process(int argc, char* argv[])
 				);
 
 		// Create resources from directory
-		int ret = from_dir( pb[ oexT( "d" ) ].ToString(), sOutDir, pb, oexT( "" ), &fInc, &fCmp, &fRes, &fDep, &fSym );
+		int ret = from_dirs( pb[ oexT( "d" ) ].ToString(), sOutDir, pb, oexT( "" ), &fInc, &fCmp, &fRes, &fDep, &fSym );
+
+		if ( fRes.IsOpen() )
+			fRes.Write( oexNL );
 
 		if ( fCmp.IsOpen() )
 			fCmp.Write( CStr8() <<

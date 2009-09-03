@@ -594,13 +594,13 @@ endif
 
 CFG_INCS := $(foreach inc,$(PRJ_INCS), $(CFG_CC_INC)$(CFG_LIBROOT)/$(inc))
 
-ifneq ($(PROC),i386)
+#ifneq ($(PROC),i386)
 	CFG_TOOL_RESCMP  := $(CFG_LOCAL_TOOL_RESCMP)
 	CFG_TOOL_JOIN  := $(CFG_LOCAL_TOOL_JOIN)
-else
-	CFG_TOOL_RESCMP  := $(CFG_OUTROOT)/$(CFG_EXE_PRE)resbld$(CFG_DPOSTFIX)$(CFG_EXE_POST)
-	CFG_TOOL_JOIN  := $(CFG_OUTROOT)/$(CFG_EXE_PRE)join$(CFG_DPOSTFIX)$(CFG_EXE_POST)
-endif
+#else
+#	CFG_TOOL_RESCMP  := $(CFG_OUTROOT)/$(CFG_EXE_PRE)resbld$(CFG_DPOSTFIX)$(CFG_EXE_POST)
+#	CFG_TOOL_JOIN  := $(CFG_OUTROOT)/$(CFG_EXE_PRE)join$(CFG_DPOSTFIX)$(CFG_EXE_POST)
+#endif
 
 ifdef PRJ_RESD
 
@@ -617,14 +617,14 @@ CFG_RES_MAK := $(CFG_RES_OUT)/oexres.mk
 
 .PRECIOUS: $(CFG_RES_MAK)
 $(CFG_RES_MAK):
-	$(CFG_TOOL_RESCMP) -d:'$(CFG_RES_INP)' -o:'$(CFG_RES_OUT)'
+	$(CFG_TOOL_RESCMP) -d:"$(CFG_RES_INP)" -o:"$(CFG_RES_OUT)"
 	
 include $(CFG_RES_MAK)
 CFG_RES_OBJ := $(subst .cpp,.$(CFG_OBJ_EXT),$(RES_CPP))
 
 .PRECIOUS: $(CFG_RES_DEP)
 $(CFG_RES_DEP):
-	$(CFG_TOOL_RESCMP) -d:'$(CFG_RES_INP)' -o:'$(CFG_RES_OUT)'
+	$(CFG_TOOL_RESCMP) -d:"$(CFG_RES_INP)" -o:"$(CFG_RES_OUT)"
 	
 include $(CFG_RES_DEP)
 
@@ -634,7 +634,7 @@ endif
 
 #.PRECIOUS: $(CFG_RES_OUT)/%.cpp: $(RES_CPP)
 $(CFG_RES_OUT)/%.cpp: 
-	$(CFG_TOOL_RESCMP) -d:'$(CFG_RES_INP)' -o:'$(CFG_RES_OUT)'
+	$(CFG_TOOL_RESCMP) -d:"$(CFG_RES_INP)" -o:"$(CFG_RES_OUT)"
 
 .PRECIOUS: $(CFG_RES_OUT)/%.$(CFG_OBJ_EXT)
 $(CFG_RES_OUT)/%.$(CFG_OBJ_EXT): $(CFG_RES_OUT)/%.cpp

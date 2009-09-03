@@ -75,7 +75,7 @@ CServiceImpl* CServiceImpl::GetInstance()
 	return m_pInstance;
 }
 
-int CServiceImpl::RunService( int argc, char** argv, oexCSTR pName, oexCSTR pDesc  )
+int CServiceImpl::RunService( int argc, const char** argv, oexCSTR pName, oexCSTR pDesc  )
 {
 	// Initialize the oex library
 	oexINIT();
@@ -96,7 +96,7 @@ int CServiceImpl::RunService( int argc, char** argv, oexCSTR pName, oexCSTR pDes
 	return nRet;
 }
 
-int CServiceImpl::OnRunService( int argc, char** argv, oexCSTR pName, oexCSTR pDesc )
+int CServiceImpl::OnRunService( int argc, const char** argv, oexCSTR pName, oexCSTR pDesc )
 {
 	// Set the command line
 	SetCommandLine( argc, argv );
@@ -151,7 +151,7 @@ int CServiceImpl::OnRunService( int argc, char** argv, oexCSTR pName, oexCSTR pD
 	return OnRun();
 }
 
-void CServiceImpl::SetCommandLine( int argc, char **argv )
+void CServiceImpl::SetCommandLine( int argc, const char **argv )
 {
 	// Save command line pointers
 	m_argc = argc;
@@ -164,7 +164,7 @@ void CServiceImpl::SetCommandLine( int argc, char **argv )
 		m_pbCommandLine.Destroy();
 }
 
-void CServiceImpl::OnServiceMain( int argc, char** argv )
+void CServiceImpl::OnServiceMain( int argc, const char** argv )
 {
 	return;
 }

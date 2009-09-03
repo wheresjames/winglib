@@ -118,8 +118,6 @@ using namespace oex;
     	static T ReturnTest( const T t ) { return (T)t; }
 
 
-
-
 oex::oexRESULT TestCommon()
 {
 	oexEcho( oexT( "======== Common..." ) );
@@ -1375,6 +1373,18 @@ oex::oexRESULT TestParser()
     if ( !oexVERIFY( pb[ oexT( "1" ) ].ToString() == oexT( "world" ) ) )
         return -39;
 
+	oexCSTR pCmdLine[] = { oexT( "test.exe" ), oexT( "-d:res res2" ),  oexT( "-o:mydir" ) };
+	pb = CParser::ParseCommandLine( 3, pCmdLine );
+
+    if ( !oexVERIFY( pb.Size() == 2 ) )
+        return -32;
+
+    if ( !oexVERIFY( pb[ oexT( "d" ) ].ToString() == oexT( "res res2" ) ) )
+        return -33;
+
+    if ( !oexVERIFY( pb[ oexT( "o" ) ].ToString() == oexT( "mydir" ) ) )
+        return -34;
+
 	oex::CStr sMime = oexT( "a: b\r\n" )
 					  oexT( "c: d\r\n" )
 					  oexT( "e: f\r\n" )
@@ -1531,6 +1541,12 @@ oex::oexRESULT TestResources()
 
 	if ( !oexVERIFY( oexMbToStr( oex::zip::CUncompress::Uncompress( (oexCHAR8*)_p, _l ) ) == oexT( "Hello World!" ) ) )
 		return -2;
+
+	if ( !oexVERIFY( !oexGetResource( oexT( "hello2.txt" ), &_p, &_l ) ) )
+		return -3;
+
+	if ( !oexVERIFY( oexMbToStr( oex::zip::CUncompress::Uncompress( (oexCHAR8*)_p, _l ) ) == oexT( "Hello World!" ) ) )
+		return -4;
 
 	// Get image resource
 	oex::CStr8 sImg = oexGetResource( oexT( "imgs/saturn.jpg" ) );
