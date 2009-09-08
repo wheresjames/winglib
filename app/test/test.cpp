@@ -649,6 +649,9 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( oex::CBase64::Decode( oex::CBase64::Encode( "Hello World!" ) ) == "Hello World!" ) )
 		return -60;
 
+	// +++ This caused crash somehow, note sSub passed as parameter
+	// oex::CStr sSub = oexBuildPath( sRoot, oexBuildPath( sSub, sScript.c_str() ) );
+
     return oex::oexRES_OK;
 }
 

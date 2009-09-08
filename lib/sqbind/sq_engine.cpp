@@ -78,6 +78,12 @@ stdString CSqEngineExport::build_path( const stdString &sS1,  const stdString &s
 stdString CSqEngineExport::root( const stdString &sPath )
 {   return oexGetModulePath( sPath.c_str() ).Ptr(); }
 
+stdString CSqEngineExport::module_name()
+{   return oexGetModuleFileName().Ptr(); }
+
+stdString CSqEngineExport::module_path()
+{   return oexGetModulePath().Ptr(); }
+
 stdString CSqEngineExport::md5( const stdString &sStr )
 {	oex::oexGUID hash;
 	oex::CStr8 sMb = oexStrToMb( oex::CStr( sStr.c_str(), sStr.length() ) );
@@ -512,6 +518,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, path )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, module_name )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, module_path )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, build_path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, decorate )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )

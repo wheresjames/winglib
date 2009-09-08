@@ -110,6 +110,12 @@ public:
 	/// Returns the file path to the current executable
 	stdString root( const stdString &sPath );
 
+	/// Returns the file path of the current executable
+	stdString module_path();
+
+	/// Returns the file name of the current executable
+	stdString module_name();
+
 	/// Returns the md5 for the specified string
 	stdString md5( const stdString &sStr );
 

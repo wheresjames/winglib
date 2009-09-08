@@ -21,20 +21,25 @@ int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData )
 
 	// Data container
 	oex::CStr s;
+	
+	// Possible script override folders
+	const char *szSub[] = { oexT( "config" ), oexT( "scripts" ), oexT( "sq" ), 0 };
 
-	// Check for override
-	if ( oexExists( oexBuildPath( oexT( "scripts" ), sScript.c_str() ).Ptr() ) )
-		s = oexMbToStr( oexFileGetContents( oexBuildPath( oexT( "scripts" ), sScript.c_str() ).Ptr() ) );
+	// Is there an override script?
+	oex::CStr sRoot = oexGetModulePath();
+	for ( int i = 0; !s.Length() && szSub[ i ]; i++ )
+	{	oex::CStr sSub = oexBuildPath( sRoot, oexBuildPath( szSub[ i ], sScript.c_str() ) );
+		if ( oexExists( sSub.Ptr() ) )
+			s = oexMbToStr( oexFileGetContents( sSub.Ptr() ) );
+	} // end for
 
-	else if ( oexExists( oexBuildPath( oexT( "sq" ), sScript.c_str() ).Ptr() ) )
-		s = oexMbToStr( oexFileGetContents( oexBuildPath( oexT( "sq" ), sScript.c_str() ).Ptr() ) );
-
-	// Attempt to get the embedded script
-	else
+	// Embedded version?
+	if ( !s.Length() )
 		s = oexMbToStr( oexGetResource( sScript.c_str() ) );
 
-	// Assign data
-	sData.assign( s.Ptr(), s.Length() );
+	// Assign data if any
+	if ( s.Length() )
+		sData.assign( s.Ptr(), s.Length() );
 
 	return 0;
 }
