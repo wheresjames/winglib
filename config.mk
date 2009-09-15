@@ -79,8 +79,8 @@ else
 endif	
 
 ifdef PRJ_SQRL
-	PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus $(PRJ_INCS)
-	PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib $(PRJ_LIBS)
+	PRJ_INCS := $(PRJ_INCS) winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
+	PRJ_LIBS := $(PRJ_LIBS) sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib
 	PRJ_RESD := sq
 	ifeq ($(PRJ_SQRL),service)
 		PRJ_DEFS := $(PRJ_DEFS) OEX_SERVICE

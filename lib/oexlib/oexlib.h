@@ -402,6 +402,13 @@
 
 */
 
+/*
+	+++ TODO
+
+	+ Add timeout classes / clock based and manual
+
+*/
+
 #pragma once
 
 //------------------------------------------------------------------

@@ -84,6 +84,42 @@ stdString CSqEngineExport::module_name()
 stdString CSqEngineExport::module_path()
 {   return oexGetModulePath().Ptr(); }
 
+stdString CSqEngineExport::get_resource( const stdString &sRes, int bFileOverrideOk )
+{
+	// Data container
+	oex::CStr s;
+
+	if ( bFileOverrideOk )
+	{
+		// Look in script path
+		stdString sSub = path( sRes );
+		if ( oexExists( sSub.c_str() ) )
+			s = oexMbToStr( oexFileGetContents( sSub.c_str() ) );
+
+		// Look in binary path
+		else
+		{	stdString sSub = root( sRes );
+			if ( oexExists( sSub.c_str() ) )
+				s = oexMbToStr( oexFileGetContents( sSub.c_str() ) );
+		} // end else
+
+	} // end if
+
+#if defined( OEX_RESOURCES )
+
+	// Check for resource
+	if ( !s.Length() )
+		s = oexGetResource( sRes.c_str() );
+
+#endif
+
+	// Punt if no data
+	if ( !s.Length() )
+		return stdString();
+
+	return stdString( s.Ptr(), s.Length() );
+}
+
 stdString CSqEngineExport::md5( const stdString &sStr )
 {	oex::oexGUID hash;
 	oex::CStr8 sMb = oexStrToMb( oex::CStr( sStr.c_str(), sStr.length() ) );
@@ -542,6 +578,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, htmldecode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, compress )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, uncompress )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_resource )	
 SQBIND_REGISTER_CLASS_END()
 
 void CSqEngine::SetExportFunction( PFN_SQBIND_Export_Symbols fn, sqbind::SSqAllocator *pa )

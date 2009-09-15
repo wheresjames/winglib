@@ -191,6 +191,9 @@ public:
 	/// Executes shell command
 	int shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
 
+	/// Returns a linked in resource
+	stdString get_resource( const stdString &sRes, int bFileOverrideOk );
+
 	/// Execute functions
 	stdString execute( int nRet, const stdString &sPath, const stdString &sFunction );
 	stdString execute1( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1 );
