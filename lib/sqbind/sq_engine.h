@@ -146,6 +146,9 @@ public:
 	/// Finds sub string sSub in sS, returns offset or less than zero if not found
 	int find( const stdString &sS, const stdString &sSub );
 
+	/// Replaces the occurences of the specified string
+	stdString replace( const stdString &sS, const stdString &sFind, const stdString &sReplace );
+
 	/// URL encodes the string
 	stdString urlencode( const stdString &sS );
 

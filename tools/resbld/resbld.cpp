@@ -177,11 +177,9 @@ int from_dirs( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 			   oex::CFile *pRes, oex::CFile *pDep, oex::CFile *pSym )
 {
 	int ret = -1;
-	oexSHOW( dir );
 	oex::CStrList lst = oex::CParser::Split( dir.Ptr(), oexT( " \r\n\t" ) );
 	for ( oex::CStrList::iterator it; lst.Next( it ); )
-		oexEcho( it->Ptr() ),
-		ret = from_dir( *it, sOutDir, pb, sPath, pInc, pCmp, pRes, pDep, pSym );
+		ret = from_dir( *it, sOutDir, pb, *it, pInc, pCmp, pRes, pDep, pSym );
 	return ret;
 }
 
@@ -200,8 +198,6 @@ int process(int argc, char* argv[])
 	// Was an entire directory specified?
 	if ( pb.IsKey( oexT( "d" ) ) )
 	{
-		oexSHOW( pb[ oexT( "d" ) ].ToString() );
-	
 		// Output directory
 		oex::CStr sOutDir = pb[ oexT( "o" ) ].ToString();
 

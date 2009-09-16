@@ -1538,25 +1538,40 @@ oex::oexRESULT TestResources()
 	// oexCHAR8 *_p = oexGetResourcePtr( "hello.txt" );
 	// oexINT _l = oexGetResourceLen( "hello.txt" );
 
-	const void *_p = 0; long _l = 0;
-	if ( !oexVERIFY( !oexGetResource( oexT( "hello.txt" ), &_p, &_l ) ) )
+	if ( !oexVERIFY( oexGetResourceCount() == 4 ) )
 		return -1;
 
-	if ( !oexVERIFY( oexMbToStr( oex::zip::CUncompress::Uncompress( (oexCHAR8*)_p, _l ) ) == oexT( "Hello World!" ) ) )
+	if ( !oexVERIFY( oexGetResourceName( 0 ) == oexT( "res/hello.txt" ) ) )
 		return -2;
 
-	if ( !oexVERIFY( !oexGetResource( oexT( "hello2.txt" ), &_p, &_l ) ) )
+	if ( !oexVERIFY( oexGetResourceSize( 0 ) == 14 ) )
 		return -3;
 
-	if ( !oexVERIFY( oexMbToStr( oex::zip::CUncompress::Uncompress( (oexCHAR8*)_p, _l ) ) == oexT( "Hello World!" ) ) )
+	if ( !oexVERIFY_PTR( oexGetResourcePtr( 0 ) ) )
 		return -4;
 
+	if ( !oexVERIFY( !oexGetResourcePtr( 4 ) ) )
+		return -5;
+
+	const void *_p = 0; long _l = 0;
+	if ( !oexVERIFY( !oexGetResource( 0, &_p, &_l ) ) )
+		return -6;
+
+	if ( !oexVERIFY( oexMbToStr( oex::zip::CUncompress::Uncompress( (oexCHAR8*)_p, _l ) ) == oexT( "Hello World!" ) ) )
+		return -7;
+
+	if ( !oexVERIFY( !oexGetResource( oexT( "res2/hello2.txt" ), &_p, &_l ) ) )
+		return -8;
+
+	if ( !oexVERIFY( oexMbToStr( oex::zip::CUncompress::Uncompress( (oexCHAR8*)_p, _l ) ) == oexT( "Hello World!" ) ) )
+		return -9;
+
 	// Get image resource
-	oex::CStr8 sImg = oexGetResource( oexT( "imgs/saturn.jpg" ) );
+	oex::CStr8 sImg = oexGetResource( oexT( "res/imgs/saturn.jpg" ) );
 
 	if ( !oexVERIFY( 4437 == sImg.Length() ) )
 	{	oexSHOW( sImg.Length() );
-		return -4;
+		return -10;
 	} // end if
 
     return oex::oexRES_OK;

@@ -688,6 +688,15 @@ public:
 	static oexINT GetShutdownCode()
 	{	return m_nShutdownCode; }
 
+	/// Returns data for the specified session id
+	static CPropertyBag GetSessionData( CStr sId );
+
+	/// Sets the data for the specified session id
+	static oexBOOL SetSessionData( CStr sId, CPropertyBag &x_pbSession );
+
+	/// Releases data for the specified session id
+	static oexBOOL ReleaseSessionData( CStr sId );
+
 private:
 
 	/// oexlib startup result

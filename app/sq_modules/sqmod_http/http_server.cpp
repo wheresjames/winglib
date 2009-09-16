@@ -24,6 +24,9 @@ int CHttpServer::Start( int nPort )
 	// Set session callback
 	m_server.SetSessionCallback( (oex::oexPVOID)CHttpServer::_OnSessionCallback, this );
 
+	// Enable session data
+	m_server.EnableSessions( oex::oexTRUE );
+
 	// Start the server
 	if ( !m_server.StartServer( nPort, CHttpServer::_OnServerEvent, this ) )
 		return 0;
@@ -58,7 +61,7 @@ oex::oexINT CHttpServer::_OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSe
 	CHttpServer *pServer = (CHttpServer*)x_pData;
 	if ( !oexCHECK_PTR( pServer ) )
 		return -1;
-
+	
 	if ( !oexCHECK_PTR( x_pSession ) )
 		return -2;
 
@@ -69,7 +72,7 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 {
 	if ( !oexCHECK_PTR( m_pSessionMsgQueue ) || !oexCHECK_PTR( x_pSession ) )
 		return -1;
-
+	
 	sqbind::stdString sReply;
 	sqbind::stdString parGet = oexMbToStr( oex::CParser::Serialize( x_pSession->Get() ) ).Ptr();
 	sqbind::stdString parPost = oexMbToStr( oex::CParser::Serialize( x_pSession->Post() ) ).Ptr();
@@ -103,13 +106,17 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 		x_pSession->Content() =
 			oexStrToMb( oex::CStr( mReply[ oexT( "content" ) ].c_str(), mReply[ oexT( "content" ) ].length() ) );
 
+	// File as reply?
+	else if ( mReply[ oexT( "file" ) ].length() )
+		x_pSession->SetFileName( mReply[ oexT( "file" ) ].c_str(), mReply[ oexT( "filetype" ) ].c_str() );
+	
 	// Set any headers that were returned
 	sqbind::CSqMap mHeaders;
 	mHeaders.deserialize( mReply[ oexT( "headers" ) ] );
 	for ( sqbind::CSqMap::t_List::iterator it = mHeaders.list().begin();
 			mHeaders.list().end() != it; it++ )
 		x_pSession->TxHeaders()[ oexStrToMb( it->first.c_str() ) ] = oexStrToMb( it->second.c_str() );
-
+	
 	return 0;
 }
 

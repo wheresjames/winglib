@@ -44,6 +44,7 @@ oexINT					COex::m_nStartupCode = 0;
 oexINT					COex::m_nShutdownCode = 0;
 COex::CVerifyStartup	COex::m_cVerifyStartup;
 
+
 oexINT COex::Init()
 {
 	// Initialize file system

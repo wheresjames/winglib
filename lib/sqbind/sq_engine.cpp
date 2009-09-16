@@ -146,36 +146,60 @@ stdString CSqEngineExport::gmt_timestr( const stdString &fmt )
 {	return oexGmtTimeStr( fmt.c_str() ).Ptr(); }
 
 stdString CSqEngineExport::ltrim( const stdString &sS, const stdString &sChs )
-{	return oex::CStr( sS.c_str() ).LTrim( sChs.c_str() ).Ptr();
+{	oex::CStr s( sS.c_str(), sS.length() );
+	s.LTrim( sChs.c_str() );
+	return stdString( s.Ptr(), s.Length() );
 }
 
 stdString CSqEngineExport::rtrim( const stdString &sS, const stdString &sChs )
-{	return oex::CStr( sS.c_str() ).RTrim( sChs.c_str() ).Ptr();
+{	oex::CStr s( sS.c_str(), sS.length() );
+	s.RTrim( sChs.c_str() );
+	return stdString( s.Ptr(), s.Length() );
+
 }
 
 stdString CSqEngineExport::trim( const stdString &sS, const stdString &sChs )
-{	return oex::CStr( sS.c_str() ).Trim( sChs.c_str() ).Ptr();
+{	oex::CStr s( sS.c_str(), sS.length() );
+	s.Trim( sChs.c_str() );
+	return stdString( s.Ptr(), s.Length() );
 }
 
 stdString CSqEngineExport::trimws( const stdString &sS )
-{	return oex::CStr( sS.c_str() ).TrimWhiteSpace().Ptr();
+{	oex::CStr s( sS.c_str(), sS.length() );
+	s.TrimWhiteSpace();
+	return stdString( s.Ptr(), s.Length() );
 }
 
 int CSqEngineExport::find( const stdString &sS, const stdString &sSub )
-{	return oex::CStr( sS.c_str() ).Match( sSub.c_str() );
+{	oex::CStr s( sS.c_str(), sS.length() );
+	return s.Match( sSub.c_str() );
+}
+
+stdString CSqEngineExport::replace( const stdString &sS, const stdString &sFind, const stdString &sReplace )
+{	oex::CStr s( sS.c_str(), sS.length() );
+	s.Replace( sFind.c_str(), sReplace.c_str() );
+	return stdString( s.Ptr(), s.Length() );
 }
 
 stdString CSqEngineExport::urlencode( const stdString &sS )
-{	return oexUrlEncode( sS.c_str() ).Ptr(); }
+{	oex::CStr s = oexUrlEncode( oex::CStr( sS.c_str(), sS.length() ) );
+	return stdString( s.Ptr(), s.Length() );
+}
 
 stdString CSqEngineExport::urldecode( const stdString &sS )
-{	return oexUrlDecode( sS.c_str() ).Ptr(); }
+{	oex::CStr s = oexUrlDecode( oex::CStr( sS.c_str(), sS.length() ) ); 
+	return stdString( s.Ptr(), s.Length() );
+}
 
 stdString CSqEngineExport::htmlencode( const stdString &sS )
-{	return oexHtmlEncode( sS.c_str() ).Ptr(); }
+{	oex::CStr s = oexHtmlEncode( oex::CStr( sS.c_str(), sS.length() ) );
+	return stdString( s.Ptr(), s.Length() );
+}
 
 stdString CSqEngineExport::htmldecode( const stdString &sS )
-{	return oexHtmlDecode( sS.c_str() ).Ptr(); }
+{	oex::CStr s = oexHtmlDecode( oex::CStr( sS.c_str(), sS.length() ) );
+	return stdString( s.Ptr(), s.Length() );
+}
 
 stdString CSqEngineExport::compress( const stdString &sS )
 {	oex::CStr c = oexCompressStr( oex::CStr( sS.c_str(), sS.length() ) );
@@ -572,6 +596,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, rtrim )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, trimws )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, find )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, replace )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, urlencode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, urldecode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, htmlencode )

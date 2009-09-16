@@ -35,7 +35,7 @@ int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData )
 
 	// Embedded version?
 	if ( !s.Length() )
-		s = oexMbToStr( oexGetResource( sScript.c_str() ) );
+		s = oexMbToStr( oexGetResource( oexBuildPath( oexT( "sq" ), sScript.c_str() ) ) );
 
 	// Assign data if any
 	if ( s.Length() )
@@ -63,7 +63,7 @@ public:
 		oexNOTICE( 0, oexT( "Application startup" ) );
 
 		// Get main script file
-		oex::CStr sScript = oexMbToStr( oexGetResource( oexT( "main.nut" ) ) );
+		oex::CStr sScript = oexMbToStr( oexGetResource( oexT( "sq/main.nut" ) ) );
 		if ( !sScript.Length() )
 			return oexERROR( -2, oexT( "embedded:main.nut not found" ) );
 

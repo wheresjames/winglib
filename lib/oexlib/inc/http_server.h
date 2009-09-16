@@ -115,6 +115,7 @@ public:
 		m_nTransactions = 0;
 		m_pSessionData = oexNULL;
 		m_pSessionCallback = oexNULL;
+		m_bEnableSessions = oexFALSE;
 	}
 
 	~THttpServer()
@@ -123,6 +124,7 @@ public:
 		m_fnOnServerEvent = oexNULL;
 		m_pSessionData = oexNULL;
 		m_pSessionCallback = oexNULL;
+		m_bEnableSessions = oexFALSE;
 	}
 
 	oexBOOL StartServer( oexINT x_nPort, PFN_OnServerEvent fnOnServerEvent = oexNULL, oexPVOID x_pData = oexNULL )
@@ -192,6 +194,10 @@ public:
 				// Connect the port
 				it->session.SetPort( &it->port );
 
+				// Enable sessions?
+				if ( m_bEnableSessions )
+					it->session.SetSessionObject( &m_pbSession, &m_lockSession );
+
 				// Notify of new connection
 				if ( m_fnOnServerEvent )
 					m_fnOnServerEvent( m_pData, eSeAccept, 0, this );
@@ -247,6 +253,9 @@ public:
 	/// Returns reference to port object
 	T_PORT& Port() { return m_server; }
 
+	/// Enable / disable sessions
+	void EnableSessions( oexBOOL b ) { m_bEnableSessions = b; }
+
 private:
 
 	/// The TCP port to listen
@@ -275,5 +284,14 @@ private:
 
 	/// Log file name
 	CStr						m_sLog;
+
+	/// Enable sessions
+	oexBOOL						m_bEnableSessions;
+
+	/// Stores session data
+	CPropertyBag				m_pbSession;
+
+	/// Lock for session data access
+	CLock						m_lockSession;
 
 };

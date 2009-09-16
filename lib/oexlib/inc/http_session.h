@@ -144,6 +144,8 @@ public:
 #else
 		m_bEnableCompression = oexFALSE;
 #endif
+		m_fnCallback = oexNULL;
+		m_pData = oexNULL;
     }
 
     THttpSession( T_PORT *x_pPort )
@@ -157,6 +159,8 @@ public:
 #else
 		m_bEnableCompression = oexFALSE;
 #endif
+		m_fnCallback = oexNULL;
+		m_pData = oexNULL;
     }
 
     /// Destructor
@@ -278,6 +282,76 @@ public:
         return oexTRUE;
     }
 
+	CStr8 CreateCookie( CStr8 params )
+	{	CPropertyBag8 pb;
+		pb[ "OEXSID" ] = params;
+		return CParser::Serialize( pb ) += "; path=/";
+	}
+
+	CStr8 DecodeCookie( CStr8 cookie )
+	{	CStrList8 items = CParser::Split( m_pbRxHeaders[ "Cookie" ].ToString(), "; " );
+		for ( CStrList8::iterator it; items.Next( it ); )
+		{	CPropertyBag8 data = CParser::Deserialize( it.Obj() );
+			if ( data.IsKey( "OEXSID" ) && data[ "OEXSID" ].ToString().Length() )
+				return data[ "OEXSID" ].ToString();
+		} // end for
+		return CStr8();
+	}
+
+	void RestoreSession()
+	{
+		// Do we have session objects?
+		if ( !m_ppbSession || !m_plockSession )
+			return;
+
+		oexAutoLock ll( m_plockSession );
+		if ( !ll.IsLocked() )
+			return;
+
+		CStr8 id;
+
+		// Is there a cookie?
+		if ( m_pbRxHeaders.IsKey( "Cookie" ) )
+		{
+			// Get our session id
+			id = DecodeCookie( m_pbRxHeaders[ "Cookie" ].ToString() );
+
+			// Attempt to recover our data
+			if ( id.Length() )
+			{
+				oexSHOW( id );
+				m_pbSession = (*m_ppbSession)[ id ].Copy();
+				oexSHOW( m_pbSession.PrintR() );
+			} // end if
+
+		} // end if
+
+		// Do we need to create a new session
+		if ( !id.Length() || !m_pbSession.IsKey( "id" ) || m_pbSession[ "id" ].ToString() != id )
+			m_pbSession[ "id" ] = oexGuidToString();
+	}
+
+	void SaveSession()
+	{
+		// Do we have session objects?
+		if ( !m_ppbSession || !m_plockSession )
+			return;
+
+		oexAutoLock ll( m_plockSession );
+		if ( !ll.IsLocked() )
+			return;
+
+		// Ensure session id
+		if ( !m_pbSession.IsKey( "id" ) || m_pbTxHeaders.IsKey( "Set-Cookie" ) )
+			return;
+		
+		// Save the session data
+		(*m_ppbSession)[ m_pbSession[ "id" ].ToString() ] = m_pbSession.Copy();
+
+		// Add id to headers		
+		m_pbTxHeaders[ "Set-Cookie" ] = CreateCookie( m_pbSession[ "id" ].ToString() );
+	}
+
 	void GrabConnectionInfo()
 	{
 		m_pbRequest[ "REQUEST_TIME" ] = oexGetUnixTime();
@@ -368,6 +442,9 @@ public:
 
 		// Add connection information
 		GrabConnectionInfo();
+
+		// Attempt to restore session information
+		RestoreSession();
 
 		// Headers received
 		m_bHeaderReceived = oexTRUE;
@@ -508,6 +585,13 @@ public:
 		if ( !oexCHECK_PTR( m_pPort ) )
 			return oexFALSE;
 
+		// Save session data
+		SaveSession();
+
+		// Do we need to send a file?
+		if ( !m_sContent.Length() && m_sFile.Length() )
+			return SendFile( m_sFile.Ptr(), m_sFileType.Ptr() );
+
 		// For compression support
 		CStr *pSend = &m_sContent;
 
@@ -516,7 +600,7 @@ public:
 		CStr sCompressed;
 
 		// Is compression enabled, and does the client support it?
-		if ( m_bEnableCompression )
+		if (m_bEnableCompression )
 		{
 			// Currently only supporting zlib/deflate
 			if ( 0 <= m_pbRxHeaders[ "Accept-Encoding" ].ToString().Match( "deflate" ) )
@@ -576,11 +660,26 @@ public:
 
 		// Write out the file
 		// Do this in chunks in case the file is huge
-		CStr8 sData;
-		do
-		{	sData = f.Read( oexSTRSIZE );
-			m_pPort->Write( sData );
-		} while ( oexSTRSIZE == sData.Length() );
+		oexINT64 read = 0;
+		unsigned char buf[ oexSTRSIZE ];
+		while ( f.Read( buf, sizeof( buf ), &read ) && read )
+		{
+			// Send what we can
+			oexUINT uTotal = 0, uSent = 0;
+			
+			while ( uSent < read )
+			{
+				// Send what we can
+				uSent += m_pPort->Send( &buf[ uSent ], read - uSent );
+
+				// Wait if buffer is full
+				if ( uSent < read )
+				    if ( !m_pPort->WaitEvent( os::CIpSocket::eWriteEvent ) )
+						return oexFALSE;
+
+			} // end while
+
+		} // end while
 
 		return oexTRUE;
 	}
@@ -611,20 +710,39 @@ public:
 	CPropertyBag8& Post()
 	{	return m_pbPost; }
 
-	// Sets a callback function
+	/// Sets a callback function
 	void SetCallback( PFN_Callback x_fnCallback, oexPVOID x_pData )
 	{	m_fnCallback = x_fnCallback; m_pData = x_pData; }
 
-
-	// +++ Added this one to get things compiling, please change to above function
+	/// +++ Added this one to get things compiling, please change to above function
 	void SetCallback( oexPVOID x_pCallback, oexPVOID x_pData )
 	{	m_fnCallback = (PFN_Callback)x_pCallback; m_pData = x_pData; }
 
-	// Sets the log file name
+	/// Sets the log file name
 	oexBOOL SetLogFile( oexCSTR x_pLog )
 	{	m_sLog = x_pLog;
 		return oexTRUE;
 	}
+
+	/// Sets the path to a file to send as a reply
+	void SetFileName( oexCSTR pFile, oexCSTR pType = oexNULL )
+	{
+		if ( !oexCHECK_PTR( pFile ) )
+			m_sFile.Destroy();
+		else
+			m_sFile = pFile;
+
+		if ( !oexCHECK_PTR( pType ) )
+			m_sFileType.Destroy();
+		else
+			m_sFile = pFile;
+	}
+
+	/// Returns the name of the file to be sent as a reply
+	CStr GetFileName() { return m_sFile; }
+
+	/// Reply file type
+	CStr GetFileType() { return m_sFileType; }
 
 	/// Enables / disables compression
 	void EnableCompression( oexBOOL b )
@@ -686,6 +804,10 @@ public:
 		return fLog.Write( CommonLog() );
 	}
 
+	/// Set sessino object
+	void SetSessionObject( CPropertyBag *pPb, CLock *pLock )
+	{	m_ppbSession = pPb; m_plockSession = pLock; }
+
 private:
 
 	/// Our port
@@ -706,6 +828,9 @@ private:
     /// Post variables
     CPropertyBag8     		  	m_pbPost;
 
+    /// Post variables
+    CPropertyBag8     		  	m_pbSession;
+
     /// Non-zero if the complete HTTP headers have been received.
     oexBOOL        		    	m_bHeaderReceived;
 
@@ -721,15 +846,28 @@ private:
 	/// Receive buffer
     CCircBuf					m_rx;
 
+	/// Log file
+	CStr						m_sLog;
+
+	/// Name of a file to send if m_sContent is empty
+	CStr						m_sFile;
+
+	/// File type
+	CStr						m_sFileType;
+
 	/// Pointer to callback function
 	PFN_Callback		    	m_fnCallback;
 
 	/// Data passed to callback function
 	oexPVOID					m_pData;
 
-	/// Log file
-	CStr						m_sLog;
-
 	/// Non-zero to enable compression
 	oexBOOL						m_bEnableCompression;
+
+	/// Stores session data
+	CPropertyBag				*m_ppbSession;
+
+	/// Lock for session data access
+	CLock						*m_plockSession;
+
 };

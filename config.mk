@@ -113,8 +113,8 @@ ifeq ($(BUILD),vs)
 	PLATFORM := windows
 	
 	CFG_LOCAL_BUILD_TYPE 	:= $(CFG_ROOT)/bin/windows-vs-win32-i386-local-static
-	CFG_LOCAL_TOOL_RESCMP  	:= $(CFG_LOCAL_BUILD_TYPE)/resbld.exe
-	CFG_LOCAL_TOOL_JOIN  	:= $(CFG_LOCAL_BUILD_TYPE)/join.exe
+	CFG_LOCAL_TOOL_RESCMP  	:= "$(CFG_LOCAL_BUILD_TYPE)/resbld.exe"
+	CFG_LOCAL_TOOL_JOIN  	:= "$(CFG_LOCAL_BUILD_TYPE)/join.exe"
 
 	ifdef DBG
 		ifeq ($(LIBLINK),static)	

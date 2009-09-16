@@ -39,6 +39,10 @@
 
 	// Resource macros
 #	define oexGetResource		OEX_NAMESPACE::COexResourceHelper().GetResource
+#	define oexGetResourceCount	OEX_NAMESPACE::COexResourceHelper().GetResourceCount
+#	define oexGetResourceName	OEX_NAMESPACE::COexResourceHelper().GetResourceName
+#	define oexGetResourceSize	OEX_NAMESPACE::COexResourceHelper().GetResourceSize
+#	define oexGetResourcePtr	OEX_NAMESPACE::COexResourceHelper().GetResourcePtr
 
 	class COexResourceHelper
 	{
@@ -64,7 +68,15 @@
 			return oex::zip::CUncompress::Uncompress( (oexCHAR8*)m_p, m_l );
 		}
 
-		int GetResource( CStr sName, const void ** p, long *l )
+		CStr8 GetResource( oexLONG i )
+		{
+			if ( GetResource( i, &m_p, &m_l ) )
+				return CStr8();
+
+			return oex::zip::CUncompress::Uncompress( (oexCHAR8*)m_p, m_l );
+		}
+
+		oexLONG GetResource( CStr sName, const void ** p, oexLONG *l )
 		{
 			// Search for the item
 			CStr8 sName8 = oexStrToMb( sName );
@@ -76,6 +88,51 @@
 				} // end if
 
 			return -1;
+		}
+
+		oexLONG GetResource( oexLONG i, const void ** p, oexLONG *l )
+		{
+			if ( 0 > i || GetResourceCount() <= i )
+				return -1;
+
+			// Save resource info
+			*p = _g_oexlib_resources[ i ].data;
+			*l = _g_oexlib_resources[ i ].size;
+
+			return 0;
+		}
+
+		oexLONG GetResourceSize( oexLONG i )
+		{
+			if ( 0 > i || GetResourceCount() <= i )
+				return -1;
+				
+			return oexMbToStrPtr( _g_oexlib_resources[ i ].size );
+		}
+
+		oexCPVOID GetResourcePtr( oexLONG i )
+		{
+			if ( 0 > i || GetResourceCount() <= i )
+				return 0;
+				
+			return oexMbToStrPtr( _g_oexlib_resources[ i ].data );
+		}
+
+		CStr GetResourceName( oexLONG i )
+		{
+			if ( 0 > i || GetResourceCount() <= i )
+				return CStr();
+				
+			return oexMbToStrPtr( _g_oexlib_resources[ i ].name );
+		}
+
+		oexLONG GetResourceCount()
+		{
+			oexLONG i = 0;
+			while ( _g_oexlib_resources[ i ].name )
+				i++;
+
+			return i;
 		}
 
 	private:
