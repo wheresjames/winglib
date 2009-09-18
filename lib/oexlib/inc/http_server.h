@@ -116,6 +116,7 @@ public:
 		m_pSessionData = oexNULL;
 		m_pSessionCallback = oexNULL;
 		m_bEnableSessions = oexFALSE;
+		m_bLocalOnly = oexFALSE;
 	}
 
 	~THttpServer()
@@ -125,6 +126,7 @@ public:
 		m_pSessionData = oexNULL;
 		m_pSessionCallback = oexNULL;
 		m_bEnableSessions = oexFALSE;
+		m_bLocalOnly = oexFALSE;
 	}
 
 	oexBOOL StartServer( oexINT x_nPort, PFN_OnServerEvent fnOnServerEvent = oexNULL, oexPVOID x_pData = oexNULL )
@@ -182,28 +184,56 @@ public:
 
 			else
 			{
-				// Count a transaction
-				m_nTransactions++;
+				oexBOOL bAccept = oexTRUE;
 
-				// Set the log file name
-				it->session.SetLogFile( m_sLog.Ptr() );
+				// Only accepting local connections?
+				if ( m_bLocalOnly )
+				{
+					// Get local and remote address
+					CStr8 sLocal = it->port.LocalAddress().GetDotAddress();
+					CStr8 sRemote = it->port.PeerAddress().GetDotAddress();
 
-				// Set the callback function for the data
-				it->session.SetCallback( m_pSessionCallback, m_pSessionData );
+					// Verify it is a local address
+					if ( sLocal != sRemote && sRemote != "127.0.0.1" )
+						bAccept = oexFALSE;
 
-				// Connect the port
-				it->session.SetPort( &it->port );
+				} // end if
 
-				// Enable sessions?
-				if ( m_bEnableSessions )
-					it->session.SetSessionObject( &m_pbSession, &m_lockSession );
+				if ( !bAccept )
+				{
+					m_lstSessions.Erase( it );
 
-				// Notify of new connection
-				if ( m_fnOnServerEvent )
-					m_fnOnServerEvent( m_pData, eSeAccept, 0, this );
+					if ( m_fnOnServerEvent )
+						m_fnOnServerEvent( m_pData, eSeAccept, -1, this );
 
-				// Start the thread
-				it->Start();
+				} // end if
+
+				else
+				{
+					// Count a transaction
+					m_nTransactions++;
+
+					// Set the log file name
+					it->session.SetLogFile( m_sLog.Ptr() );
+
+					// Set the callback function for the data
+					it->session.SetCallback( m_pSessionCallback, m_pSessionData );
+
+					// Connect the port
+					it->session.SetPort( &it->port );
+
+					// Enable sessions?
+					if ( m_bEnableSessions )
+						it->session.SetSessionObject( &m_pbSession, &m_lockSession );
+
+					// Notify of new connection
+					if ( m_fnOnServerEvent )
+						m_fnOnServerEvent( m_pData, eSeAccept, 0, this );
+
+					// Start the thread
+					it->Start();
+
+				} // end if
 
 			} // end else
 
@@ -256,6 +286,9 @@ public:
 	/// Enable / disable sessions
 	void EnableSessions( oexBOOL b ) { m_bEnableSessions = b; }
 
+	/// Enable / disable remote connections
+	void EnableRemoteConnections( oexBOOL b ) { m_bLocalOnly = !b; }
+
 private:
 
 	/// The TCP port to listen
@@ -293,5 +326,8 @@ private:
 
 	/// Lock for session data access
 	CLock						m_lockSession;
+
+	/// Non-zero to accept local connections only
+	oexBOOL						m_bLocalOnly;
 
 };

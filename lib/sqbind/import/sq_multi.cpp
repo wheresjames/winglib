@@ -126,19 +126,7 @@ void CSqMulti::clear()
 
 void CSqMulti::_serialize( oex::CPropertyBag &pb, CSqMulti::t_List &lst )
 {
-	for ( t_List::iterator it = lst.begin(); it != lst.end(); it++ )
-	{
-		t_Obj sKey = it->first;
-		if ( !sKey.length() )
-			sKey = oexT( "*" );
-
-		if ( !it->second.size() )
-			pb[ sKey.c_str() ].ToString().Set( it->second.m_val.str().c_str(), it->second.m_val.str().length() );
-
-		else
-			_serialize( pb[ sKey.c_str() ], it->second.list() );
-
-	} // end for
+	SQBIND_MultiToPropertyBag( lst, pb );
 }
 
 CSqParam::t_SqStr CSqMulti::serialize()
@@ -150,20 +138,7 @@ CSqParam::t_SqStr CSqMulti::serialize()
 
 void CSqMulti::_deserialize( oex::CPropertyBag &pb, CSqMulti::t_List &lst )
 {
-	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
-	{
-		t_Obj sKey = it.Node()->key.Ptr();
-		if ( !sKey.length() )
-			sKey = oexT( "*" );
-
-		if ( !it->Size() )
-			lst[ sKey ].m_val.str().assign( it->ToString().Ptr(), it->ToString().Length() );
-
-		else
-			_deserialize( *it, lst[ sKey ].list() );
-
-	} // end for
-
+	SQBIND_PropertyBagToMulti( pb, lst );
 }
 
 void CSqMulti::deserialize( const CSqParam::t_SqStr &s )

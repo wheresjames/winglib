@@ -24,7 +24,7 @@ int CHttpServer::Start( int nPort )
 	// Set session callback
 	m_server.SetSessionCallback( (oex::oexPVOID)CHttpServer::_OnSessionCallback, this );
 
-	// Enable session data
+	// Enable sessions by default
 	m_server.EnableSessions( oex::oexTRUE );
 
 	// Start the server
@@ -73,18 +73,22 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	if ( !oexCHECK_PTR( m_pSessionMsgQueue ) || !oexCHECK_PTR( x_pSession ) )
 		return -1;
 	
-	sqbind::stdString sReply;
-	sqbind::stdString parGet = oexMbToStr( oex::CParser::Serialize( x_pSession->Get() ) ).Ptr();
-	sqbind::stdString parPost = oexMbToStr( oex::CParser::Serialize( x_pSession->Post() ) ).Ptr();
-	sqbind::stdString parHeaders = oexMbToStr( oex::CParser::Serialize( x_pSession->RxHeaders() ) ).Ptr();
-	sqbind::stdString parRequest = oexMbToStr( oex::CParser::Serialize( x_pSession->Request() ) ).Ptr();
+	sqbind::stdString	sReply;
+
+	// Save information
+	sqbind::CSqMulti	mParams, mR;
+	SQBIND_PropertyBag8ToMulti( x_pSession->Get(), mParams[ oexT( "GET" ) ] );
+	SQBIND_PropertyBag8ToMulti( x_pSession->Post(), mParams[ oexT( "POST" ) ] );
+	SQBIND_PropertyBag8ToMulti( x_pSession->RxHeaders(), mParams[ oexT( "HEADERS" ) ] );
+	SQBIND_PropertyBag8ToMulti( x_pSession->Request(), mParams[ oexT( "REQUEST" ) ] );
+	SQBIND_PropertyBag8ToMulti( x_pSession->Session(), mParams[ oexT( "SESSION" ) ] );
 
 	// Are we executing a child script?
 	if ( m_sScript.length() )
 	{
 		oex::CStr sChild = oexGuidToString();
 		m_pSessionMsgQueue->spawn( &sReply, oexT( "." ), sChild.Ptr(), m_sScript, m_bFile );
-		m_pSessionMsgQueue->execute( &sReply, sChild.Ptr(), m_sSession, parRequest, parHeaders, parGet, parPost );
+		m_pSessionMsgQueue->execute( &sReply, sChild.Ptr(), m_sSession, mParams.serialize() );
 
 		// Hmmm, may let the child kill it self for more flexibility
 //		m_pSessionMsgQueue->kill( oexNULL, sChild.Ptr() );
@@ -93,7 +97,7 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 
 	// Execute function in calling script
 	else
-		m_pSessionMsgQueue->execute( &sReply, oexT( "." ), m_sSession, parRequest, parHeaders, parGet, parPost );
+		m_pSessionMsgQueue->execute( &sReply, oexT( "." ), m_sSession, mParams.serialize() );
 
 //	oexSHOW( sReply.c_str() );
 
@@ -109,13 +113,17 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	// File as reply?
 	else if ( mReply[ oexT( "file" ) ].length() )
 		x_pSession->SetFileName( mReply[ oexT( "file" ) ].c_str(), mReply[ oexT( "filetype" ) ].c_str() );
-	
+
+	// Update new session data
+	if ( mReply.isset( oexT( "session" ) ) )
+		if ( mReply[ "session" ].length() )
+			x_pSession->Session() = oex::CParser::Deserialize( mReply[ oexT( "session" ) ].c_str() );
+		else
+			x_pSession->Session().Destroy();
+
 	// Set any headers that were returned
-	sqbind::CSqMap mHeaders;
-	mHeaders.deserialize( mReply[ oexT( "headers" ) ] );
-	for ( sqbind::CSqMap::t_List::iterator it = mHeaders.list().begin();
-			mHeaders.list().end() != it; it++ )
-		x_pSession->TxHeaders()[ oexStrToMb( it->first.c_str() ) ] = oexStrToMb( it->second.c_str() );
+	if ( mReply[ oexT( "headers" ) ].length() )
+		SQBIND_StdToPropertyBag8( sqbind::CSqMap( mReply[ oexT( "headers" ) ] ), x_pSession->TxHeaders() );
 	
 	return 0;
 }
@@ -123,4 +131,19 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 int CHttpServer::SetLogFile( const sqbind::stdString &sFile )
 {	return m_server.SetLogFile( sFile.c_str() );
 }
+
+void CHttpServer::EnableRemoteConnections( int bEnable )
+{
+	// Enable/disable remote connections
+	m_server.EnableRemoteConnections( bEnable ? oex::oexTRUE : oex::oexFALSE );
+
+}
+
+void CHttpServer::EnableSessions( int bEnable )
+{
+	// Enable/disable remote connections
+	m_server.EnableSessions( bEnable ? oex::oexTRUE : oex::oexFALSE );
+
+}
+
 

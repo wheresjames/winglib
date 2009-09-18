@@ -41,6 +41,12 @@ public:
 	/// Starts web logging
 	int SetLogFile( const sqbind::stdString &sFile );
 
+	/// Enable / Disable remote connections
+	void EnableRemoteConnections( int bEnable );
+
+	/// Enable / Disable session data
+	void EnableSessions( int bEnable );
+
 private:
 
 	// The server

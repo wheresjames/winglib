@@ -146,6 +146,7 @@ public:
 #endif
 		m_fnCallback = oexNULL;
 		m_pData = oexNULL;
+		m_bNewSession = oexTRUE;
     }
 
     THttpSession( T_PORT *x_pPort )
@@ -318,17 +319,30 @@ public:
 
 			// Attempt to recover our data
 			if ( id.Length() )
-			{
-				oexSHOW( id );
 				m_pbSession = (*m_ppbSession)[ id ].Copy();
-				oexSHOW( m_pbSession.PrintR() );
-			} // end if
+
+		} // end if
+		
+		CStr ip = m_pPort->PeerAddress().GetDotAddress();
+
+		// Do we need to create a new session
+		// Ensure session ip and port match current connection
+		// This helps stop cookie spoofing
+		if ( !id.Length() 
+			 || !m_pbSession.IsKey( "id" ) || m_pbSession[ "id" ].ToString() != id 
+			 || !m_pbSession.IsKey( "ip" ) || m_pbSession[ "ip" ].ToString() != ip 
+			 )
+		{
+			// Save connection information
+			m_pbSession[ "id" ] = oexGuidToString();
+			m_pbSession[ "ip" ] = ip;
 
 		} // end if
 
-		// Do we need to create a new session
-		if ( !id.Length() || !m_pbSession.IsKey( "id" ) || m_pbSession[ "id" ].ToString() != id )
-			m_pbSession[ "id" ] = oexGuidToString();
+		// Existing session restored
+		else
+			m_bNewSession = oexFALSE;
+
 	}
 
 	void SaveSession()
@@ -348,8 +362,9 @@ public:
 		// Save the session data
 		(*m_ppbSession)[ m_pbSession[ "id" ].ToString() ] = m_pbSession.Copy();
 
-		// Add id to headers		
-		m_pbTxHeaders[ "Set-Cookie" ] = CreateCookie( m_pbSession[ "id" ].ToString() );
+		// Add id to headers if new session
+		if ( m_bNewSession )
+			m_pbTxHeaders[ "Set-Cookie" ] = CreateCookie( m_pbSession[ "id" ].ToString() );
 	}
 
 	void GrabConnectionInfo()
@@ -710,6 +725,9 @@ public:
 	CPropertyBag8& Post()
 	{	return m_pbPost; }
 
+	CPropertyBag8& Session()
+	{	return m_pbSession; }
+
 	/// Sets a callback function
 	void SetCallback( PFN_Callback x_fnCallback, oexPVOID x_pData )
 	{	m_fnCallback = x_fnCallback; m_pData = x_pData; }
@@ -808,6 +826,10 @@ public:
 	void SetSessionObject( CPropertyBag *pPb, CLock *pLock )
 	{	m_ppbSession = pPb; m_plockSession = pLock; }
 
+	/// Returns non-zero if this is a new session
+	oexBOOL IsNewSession()
+	{	return m_bNewSession; }
+
 private:
 
 	/// Our port
@@ -869,5 +891,8 @@ private:
 
 	/// Lock for session data access
 	CLock						*m_plockSession;
+											  
+	/// Non-zero if a new session was just created
+	oexBOOL						m_bNewSession;
 
 };
