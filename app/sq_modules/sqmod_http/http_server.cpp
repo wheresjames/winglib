@@ -145,5 +145,15 @@ void CHttpServer::EnableSessions( int bEnable )
 	m_server.EnableSessions( bEnable ? oex::oexTRUE : oex::oexFALSE );
 
 }
+void CHttpServer::SetSessionTimeout( int nTimeout )
+{
+	if ( 0 > nTimeout )
+		nTimeout = 0;
+
+	// Enable/disable remote connections
+	m_server.SetSessionTimeout( (oex::oexUINT)nTimeout );
+
+}
+
 
 

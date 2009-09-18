@@ -147,6 +147,7 @@ public:
 		m_fnCallback = oexNULL;
 		m_pData = oexNULL;
 		m_bNewSession = oexTRUE;
+		m_uSessionTimeout = 60 * 60;
     }
 
     THttpSession( T_PORT *x_pPort )
@@ -305,6 +306,7 @@ public:
 		if ( !m_ppbSession || !m_plockSession )
 			return;
 
+		// Lock the session data object
 		oexAutoLock ll( m_plockSession );
 		if ( !ll.IsLocked() )
 			return;
@@ -318,30 +320,38 @@ public:
 			id = DecodeCookie( m_pbRxHeaders[ "Cookie" ].ToString() );
 
 			// Attempt to recover our data
-			if ( id.Length() )
+			if ( id.Length() && m_ppbSession->IsKey( id ) )
 				m_pbSession = (*m_ppbSession)[ id ].Copy();
 
 		} // end if
 		
+		// Get remote ip address
 		CStr ip = m_pPort->PeerAddress().GetDotAddress();
+		oexUINT ts = (oexUINT)oexGetUnixTime();
 
 		// Do we need to create a new session
 		// Ensure session ip and port match current connection
 		// This helps stop cookie spoofing
 		if ( !id.Length() 
-			 || !m_pbSession.IsKey( "id" ) || m_pbSession[ "id" ].ToString() != id 
-			 || !m_pbSession.IsKey( "ip" ) || m_pbSession[ "ip" ].ToString() != ip 
+			 || !m_pbSession.IsKey( "_id" ) || m_pbSession[ "_id" ].ToString() != id 
+			 || !m_pbSession.IsKey( "_ip" ) || m_pbSession[ "_ip" ].ToString() != ip 
+			 || !m_pbSession.IsKey( "_ts" ) 
+			 || ( m_pbSession[ "_ts" ].ToULong() + m_uSessionTimeout ) < ts
 			 )
 		{
-			// Save connection information
-			m_pbSession[ "id" ] = oexGuidToString();
-			m_pbSession[ "ip" ] = ip;
+			// Save new connection information
+			m_pbSession.Destroy();
+			m_pbSession[ "_id" ] = oexGuidToString();
+			m_pbSession[ "_ip" ] = ip;
 
 		} // end if
 
 		// Existing session restored
 		else
 			m_bNewSession = oexFALSE;
+
+		// Update timestamp
+		m_pbSession[ "_ts" ] = ts;
 
 	}
 
@@ -351,20 +361,29 @@ public:
 		if ( !m_ppbSession || !m_plockSession )
 			return;
 
+		// Lock the session data object
 		oexAutoLock ll( m_plockSession );
 		if ( !ll.IsLocked() )
 			return;
 
 		// Ensure session id
-		if ( !m_pbSession.IsKey( "id" ) || m_pbTxHeaders.IsKey( "Set-Cookie" ) )
+		if ( !m_pbSession.IsKey( "_id" ) || m_pbTxHeaders.IsKey( "Set-Cookie" ) )
 			return;
+
+		// Grab session id
+		CStr id = m_pbSession[ "_id" ].ToString();
+
+		// Erase data if session has been marked invalid
+		if ( !m_pbSession[ "_ts" ].ToULong() )
+			m_ppbSession->Unset( id );
 		
-		// Save the session data
-		(*m_ppbSession)[ m_pbSession[ "id" ].ToString() ] = m_pbSession.Copy();
+		// Save the new session data
+		else
+			(*m_ppbSession)[ id ] = m_pbSession.Copy();
 
 		// Add id to headers if new session
 		if ( m_bNewSession )
-			m_pbTxHeaders[ "Set-Cookie" ] = CreateCookie( m_pbSession[ "id" ].ToString() );
+			m_pbTxHeaders[ "Set-Cookie" ] = CreateCookie( id );
 	}
 
 	void GrabConnectionInfo()
@@ -830,6 +849,10 @@ public:
 	oexBOOL IsNewSession()
 	{	return m_bNewSession; }
 
+	/// Sets the length of time that session data is to be valid
+	void SetSessionTimeout( oexUINT uTo )
+	{	m_uSessionTimeout = uTo; }
+
 private:
 
 	/// Our port
@@ -894,5 +917,8 @@ private:
 											  
 	/// Non-zero if a new session was just created
 	oexBOOL						m_bNewSession;
+
+	/// Length of time in seconds that session data is to be valid
+	oexUINT						m_uSessionTimeout;
 
 };

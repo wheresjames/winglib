@@ -47,6 +47,9 @@ public:
 	/// Enable / Disable session data
 	void EnableSessions( int bEnable );
 
+	/// Length of time in seconds that session data is valid
+	void SetSessionTimeout( int nTimeout );
+
 private:
 
 	// The server
