@@ -87,6 +87,10 @@ CSqString* CSqMulti::value()
 sqbind::stdString& CSqMulti::str()
 {	return m_val.str(); }
 
+int CSqMulti::len()
+{	return m_val.str().length(); }
+
+
 _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, serialize )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, deserialize )
@@ -103,6 +107,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_down )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, value )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, len )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, unset )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, clear )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_key )

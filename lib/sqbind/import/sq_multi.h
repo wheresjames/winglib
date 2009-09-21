@@ -111,6 +111,9 @@ namespace sqbind
 		/// Returns a string representation of the value
 		stdString& str();
 
+		/// Returns the length of the string value
+		int len();
+
         /// Registers the vector class for use with Squirrel
         static void Register( sqbind::VM vm );
 

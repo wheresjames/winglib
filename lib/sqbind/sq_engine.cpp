@@ -34,6 +34,15 @@
 
 #include "stdafx.h"
 
+/*
+	got the house, but not the deed,
+	got the horn, but not the reed.
+
+	got the cards, but not the luck,
+	got the wheel, but not the truck.
+
+*/
+
 using namespace sqbind;
 
 int CSqEngineExport::alert( const stdString &sMsg )
@@ -818,7 +827,8 @@ int CSqEngine::OnInclude( const stdString &sScript )
 	{	nRet = LogErrorM( -3, e.desc ); 
 	}
 
-	m_sScriptName = sScriptName;
+	if ( sScriptName.length() )
+		m_sScriptName = sScriptName;
 
 	return nRet;
 }
