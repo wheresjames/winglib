@@ -227,8 +227,8 @@ private:
 
     void                *pstream;
     
-    oex::oexCHAR8       buf_in[ 16384 ];
-    oex::oexCHAR8       buf_out[ 16384 ];
+    oex::oexCHAR8       buf_in[ 1 * 1024 ];
+    oex::oexCHAR8       buf_out[ 16 * 1024 ];
 };
 
 

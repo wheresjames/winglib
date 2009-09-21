@@ -115,7 +115,7 @@
 			if ( 0 > i || GetResourceCount() <= i )
 				return 0;
 				
-			return oexMbToStrPtr( _g_oexlib_resources[ i ].data );
+			return _g_oexlib_resources[ i ].data;
 		}
 
 		CStr GetResourceName( oexLONG i )

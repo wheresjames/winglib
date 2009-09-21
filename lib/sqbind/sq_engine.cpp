@@ -781,6 +781,10 @@ oex::oexBOOL CSqEngine::Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oex
 
 int CSqEngine::OnInclude( const stdString &sScript )
 {
+	// Push script name
+	int nRet = 0;
+	stdString sScriptName = m_sScriptName;
+
 	_oexTRY
 	{
 		oex::oexBOOL bFile = oex::oexTRUE;
@@ -790,7 +794,7 @@ int CSqEngine::OnInclude( const stdString &sScript )
 		stdString sData;
 		if ( m_fIncludeScript )
 		{
-			if ( m_fIncludeScript( sScript, sData ) || !sData.length() )
+			if ( m_fIncludeScript( sScript, sData, m_sScriptName ) || !sData.length() )
 				return -1;
 
 			pScript = sData.c_str();
@@ -808,11 +812,15 @@ int CSqEngine::OnInclude( const stdString &sScript )
 	} // end try
 
 	_oexCATCH( SScriptErrorInfo &e )
-	{	return LogError( -2, e ); }
+	{	nRet = LogError( -2, e ); 
+	}
 	_oexCATCH( SquirrelError &e )
-	{	return LogErrorM( -3, e.desc ); }
+	{	nRet = LogErrorM( -3, e.desc ); 
+	}
 
-	return 0;
+	m_sScriptName = sScriptName;
+
+	return nRet;
 }
 
 oex::oexBOOL CSqEngine::Start()
@@ -863,14 +871,31 @@ oex::oexBOOL CSqEngine::Run( oex::oexCSTR pScript )
 	return oex::oexTRUE;
 }
 
+void CSqEngine::SetScriptName( oex::oexCSTR pScriptName )
+{
+	if ( oexCHECK_PTR( pScriptName ) )
+		m_sScriptName = pScriptName;
+	else
+		m_sScriptName = oexT( "" );
+}
+
 oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e )
-{	oex::CStr sErr = oex::CStr().Fmt( oexT( "%s(%u)\r\n   %s" ), x_e.sSource.c_str(), x_e.uLine, x_e.sDesc.c_str() );
+{	
+	oex::CStr sErr;	
+	if ( x_e.sSource == oexT( "console_buffer" ) )
+		sErr = oex::CStr().Fmt( oexT( "%s(%u)\r\n   %s" ), m_sScriptName.c_str(), x_e.uLine, x_e.sDesc.c_str() );
+	else
+		sErr = oex::CStr().Fmt( oexT( "%s(%u)\r\n   %s" ), x_e.sSource.c_str(), x_e.uLine, x_e.sDesc.c_str() );
+
 	oexERROR( 0, sErr );
+
 	m_sErr = sErr.Ptr();
+
 #if defined( OEX_WINDOWS )
 	oexRTRACE( oexT( "%s\n" ), m_sErr.c_str() );
 #endif
 	oexPrintf( oexT( "%s\n" ), m_sErr.c_str() );
+
 	return x_nReturn;
 }
 
@@ -882,13 +907,21 @@ oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, oex::oexCSTR x_pErr, oex
 	if ( !oexCHECK_PTR( x_pErr ) )
 		x_pErr = oexT( "" );
 
-	oex::CStr sErr = oex::CStr().Fmt( oexT( "%s(%u)\r\n   %s" ), x_pFile, x_uLine, x_pErr );
+	oex::CStr sErr;
+	if ( !x_pFile || oex::CStr( x_pFile ) == oexT( "console_buffer" ) )
+		sErr = oex::CStr().Fmt( oexT( "%s(%u)\r\n   %s" ), m_sScriptName.c_str(), x_uLine, x_pErr );
+	else
+		sErr = oex::CStr().Fmt( oexT( "%s(%u)\r\n   %s" ), x_pFile, x_uLine, x_pErr );
+
 	oexERROR( 0, sErr );
+
 	m_sErr = sErr.Ptr();
+
 #if defined( OEX_WINDOWS )
 	oexRTRACE( oexT( "%s\n" ), m_sErr.c_str() );
 #endif
 	oexPrintf( oexT( "%s\n" ), m_sErr.c_str() );
+
 	return x_nReturn;
 }
 

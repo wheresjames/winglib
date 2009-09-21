@@ -13,7 +13,7 @@ sqbind::CScriptThread	*g_psqScriptThread = oexNULL;
 sqbind::CModuleManager	*g_psqModuleManager = oexNULL;
 
 // Custom include script
-int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData )
+int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData, sqbind::stdString &sName )
 {
 	// Sanity checks
 	if ( !sScript.length() )
@@ -30,12 +30,16 @@ int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData )
 	for ( int i = 0; !s.Length() && szSub[ i ]; i++ )
 	{	oex::CStr sSub = oexBuildPath( sRoot, oexBuildPath( szSub[ i ], sScript.c_str() ) );
 		if ( oexExists( sSub.Ptr() ) )
-			s = oexMbToStr( oexFileGetContents( sSub.Ptr() ) );
+		{	s = oexMbToStr( oexFileGetContents( sSub.Ptr() ) );
+			sName.assign( sSub.Ptr(), sSub.Length() ); 
+		} // end if
 	} // end for
 
 	// Embedded version?
 	if ( !s.Length() )
-		s = oexMbToStr( oexGetResource( oexBuildPath( oexT( "sq" ), sScript.c_str() ) ) );
+	{	s = oexMbToStr( oexGetResource( oexBuildPath( oexT( "sq" ), sScript.c_str() ) ) );
+		sName = ( oexGetModuleFileName() << oexT( ":" ) << sScript.c_str() ).Ptr();
+	} // end if
 
 	// Assign data if any
 	if ( s.Length() )

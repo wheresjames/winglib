@@ -124,6 +124,10 @@ public:
 	void SetIncludeScriptFunction( sqbind::CSqEngine::t_IncludeScript f )
 	{	m_cSqEngine.SetIncludeScriptFunction( f ); }
 
+	/// Sets the script name
+	void SetScriptName( sqbind::stdString sName )
+	{	m_cSqEngine.SetScriptName( sName.c_str() ); }
+
 private:
 
 	/// Set to non-zero when the thread should exit

@@ -391,16 +391,20 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 		{
 			if ( m_cSqEngine.GetIncludeScriptFunction() )
 			{
-				stdString sData;
-				if ( m_cSqEngine.GetIncludeScriptFunction()( mapParams[ oexT( "script" ) ], sData ) )
+				stdString sData, sName;
+				if ( m_cSqEngine.GetIncludeScriptFunction()( mapParams[ oexT( "script" ) ], sData, sName ) )
 					*pReply = oexT( "FAILED" );
 				else
 					pSt->SetScript( sData.c_str(), 0 );
+
+				// Set the script name
+				pSt->SetScriptName( sName );
 
 			} // end if
 
 			else
 				pSt->SetScript( m_cSqEngine.path( mapParams[ oexT( "script" ) ] ).c_str(), 1 );
+
 		} // end if
 
 		else

@@ -287,7 +287,7 @@ public:
 	};
 
 	// Callback function for custom script source
-	typedef int (*t_IncludeScript)( const stdString &sScript, stdString &sData );
+	typedef int (*t_IncludeScript)( const stdString &sScript, stdString &sData, stdString &sName );
 
 public:
 
@@ -349,6 +349,13 @@ public:
 		You don't need to call this directly, it is called by Load().
 	*/
 	oex::oexBOOL Init();
+
+	/// Sets the name of the script used for debugging
+	/**
+		\param [in] pScript     -   The script or a file name.
+
+	*/
+	void SetScriptName( oex::oexCSTR pScriptName );
 
 	/// Loads a script and prepares it for execution
 	/**
@@ -952,6 +959,9 @@ private:
 
 	/// Custom script include function
 	t_IncludeScript				m_fIncludeScript;
+
+	/// Name of the script
+	stdString					m_sScriptName;
 
 };
 

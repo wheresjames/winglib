@@ -1501,6 +1501,7 @@ oex::oexRESULT TestFile()
     return oex::oexRES_OK;
 }
 
+
 oex::oexRESULT TestZip()
 {
 #ifdef OEX_ENABLE_ZIP
@@ -1526,6 +1527,28 @@ oex::oexRESULT TestZip()
 	oexEcho( oexT( "!!! ZIP file support disabled" ) );
 
 #endif
+
+	// Check high compression text that is larger than internal buffer
+	// defined at oss/unzip.h(230)
+	char buf[ 1024 * 64 ];
+	for ( int i = 0; i < sizeof( buf ); i++ )
+		buf[ i ] = (char)( i % 64 ) + ' ';
+
+	sStr.Set( buf, sizeof( buf ) );
+
+	sCmp = oex::zip::CCompress::Compress( oexStrToBin( sStr ) );
+
+    if ( !oexVERIFY( sCmp.Length() ) || !oexVERIFY( sCmp.LengthInBytes() < sStr.LengthInBytes() ) )
+        return -3;
+
+	oex::CStr sUn = oexBinToStr( oex::zip::CUncompress::Uncompress( sCmp ) );
+
+	if ( !oexVERIFY( sUn.Length() == sStr.Length() ) )
+		return -4;
+
+    // Verify raw compression
+    if ( !oexVERIFY( sStr == sUn ) )
+        return -5;
 
     return oex::oexRES_OK;
 }
@@ -1573,7 +1596,7 @@ oex::oexRESULT TestResources()
 	{	oexSHOW( sImg.Length() );
 		return -10;
 	} // end if
-
+	
     return oex::oexRES_OK;
 }
 

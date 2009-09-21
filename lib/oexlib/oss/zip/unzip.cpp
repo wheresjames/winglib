@@ -4213,37 +4213,37 @@ oex::oexCSTR8 CZipLibUncompress::Uncompress()
 
     inflateInit2( stream );
 
-    // Stream type
-    stream->data_type = Z_BINARY;
-
-    // Start output buffer
-    stream->next_out = (Byte*)buf_out;
-    stream->avail_out = sizeof( buf_out );
-
-    int err = Z_OK;
+	bool bOutFull = false;
+    int err = Z_OK, last_in;
     while ( Z_OK == err )
     {
+	    // Start output buffer
+	    stream->data_type = Z_BINARY;
+		stream->next_out = (Byte*)buf_out;
+	    stream->avail_out = sizeof( buf_out );
+
         // Get more data if we're out
         if ( !stream->avail_in )
-        {   stream->avail_in = OnRead( buf_in, sizeof( buf_in ) ) * sizeof( buf_in[ 0 ] );
+        {   last_in = stream->avail_in = OnRead( buf_in, sizeof( buf_in ) ) * sizeof( buf_in[ 0 ] );
             stream->next_in = (Byte*)buf_in;
         } // end if
 
         // Are we done?
-        if ( !stream->avail_in )
+        if ( !bOutFull && !stream->avail_in )
             err = -1;
 
         else
         {
             // Inflate
-            err = inflate( stream, Z_SYNC_FLUSH );
+			err = inflate( stream, Z_NO_FLUSH );
+
+			// Is the output buffer full?
+			bOutFull = !stream->avail_out;
 
             // Write out data we've received so far
             if ( sizeof( buf_out ) > stream->avail_out )
             {   unsigned avail = sizeof( buf_out ) - stream->avail_out;
                 OnWrite( buf_out, &avail );
-                stream->next_out = (Byte*)buf_out;
-                stream->avail_out = sizeof( buf_out );
             } // end if
 
         } // end else
