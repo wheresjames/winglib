@@ -11,16 +11,6 @@ class CGlobal
 
 local _g = CGlobal();
 
-function OnProcessRequest( request, headers, get, post ) : ( _g )
-{
-	local mRequest = CSqMap();
-	mRequest.deserialize( request );
-
-	local mReply = CSqMap();
-	mReply.set( "content", "Access Denied" );
-	return mReply.serialize();
-}
-
 function _init() : ( _g )
 {
 	// Set callback script

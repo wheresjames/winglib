@@ -48,6 +48,7 @@ CSQLite::CSQLite()
 {
 	m_sqobj = oexNULL;
 	m_nRows = 0;
+	m_bDebugMode = oexFALSE;
 }
 
 CSQLite::~CSQLite()
@@ -147,6 +148,12 @@ oexBOOL CSQLite::Exec( CStr x_sQuery )
 	// Save the last query
 	m_sQuery = x_sQuery;
 
+	// Debug mode?
+	if ( m_bDebugMode )
+	{	oexNOTICE( 0, x_sQuery );
+		oexEcho( x_sQuery.Ptr() );
+	} // end if
+
 	// Execute the query
 	char *pErr = oexNULL;
 	oexINT res = sqlite3_exec( (sqlite3*)m_sqobj, m_sQuery.Ptr(), CSQLite::_Callback, this, &pErr );
@@ -218,6 +225,27 @@ oexBOOL CSQLite::Update( oexCSTR pTable, oexCSTR pWhere, CPropertyBag &pb )
 	// Create insert command
 	return Exec( CStr() << oexT( "UPDATE `" ) << pTable 
 						<< oexT( "` SET " ) << sV << oexT( " WHERE " ) << pWhere );
+}
+
+oexBOOL CSQLite::Delete( oexCSTR pTable, CPropertyBag &pb, oexCSTR pCond )
+{
+	if ( !oexCHECK_PTR( pTable ) || !*pTable || !pb.Size() )
+		return oexFALSE;
+
+	if ( !oexCHECK_PTR( pCond ) || !*pCond )
+		pCond = oexT( "AND" );
+
+	// Create field=value strings
+	CStr sV;
+	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
+	{	if ( sV.Length() ) sV << oexT( " " ) << pCond << oexT( " " );
+		sV << oexT( "`" ) << Escape( it.Node()->key ) << oexT( "`='" )
+						  << Escape( it->ToString() ) << oexT( "'" );
+	} // end for
+
+	// Create insert command
+	return Exec( CStr() << oexT( "DELETE FROM " ) << pTable 
+						<< oexT( " WHERE " ) << sV );
 }
 
 #endif // OEX_ENABLE_SQLITE

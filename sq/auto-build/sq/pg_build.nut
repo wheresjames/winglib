@@ -2,36 +2,36 @@
 _self.include( "config.nut" );
 local _cfg = CConfig();
 
-function pg_run( mRequest, mHeaders, mGet, mPost ) : ( _cfg )
+function pg_run( mParams ) : ( _cfg )
 {
 	// Ensure build scripts directory
 	if ( !CSqFile().exists( _cfg.build_scripts_dir ) )
 		CSqFile().mkdir( _cfg.build_scripts_dir );
 
 	// Adding a build?
-	if ( mPost[ "name" ] && mPost[ "desc" ] )
+	if ( mParams[ "POST" ][ "name" ].len() && mParams[ "POST" ][ "desc" ].len() )
 	{	local id = _self.unique();
 		local cfg = CSqMulti();
-		cfg[ "name" ].set( _self.trimws( mPost[ "name" ] ) );
-		cfg[ "desc" ].set( _self.trimws( mPost[ "desc" ] ) );
+		cfg[ "name" ].set( _self.trimws( mParams[ "POST" ][ "name" ].str() ) );
+		cfg[ "desc" ].set( _self.trimws( mParams[ "POST" ][ "desc" ].str() ) );
 		CSqFile().put_contents( _self.build_path( _cfg.build_scripts_dir, id ), cfg.serialize() );
 	} // end if
 
 	// Delete build?
-	else if ( mGet[ "del" ] )
-	{	local file = _self.build_path( _cfg.build_scripts_dir, mGet[ "del" ] );
+	else if ( mParams[ "GET" ][ "del" ].len() )
+	{	local file = _self.build_path( _cfg.build_scripts_dir, mParams[ "GET" ][ "del" ].str() );
 		if ( CSqFile().exists( file ) )
 			CSqFile().delete_file( file );
 	} // end if
 
 	// Execute now?
-	else if ( mGet[ "edit" ] )
-		return edit_builds( mRequest, mHeaders, mGet, mPost );
+	else if ( mParams[ "GET" ].isset( "edit" ) )
+		return edit_builds( mParams );
 
-	return show_builds( mRequest, mHeaders, mGet, mPost );
+	return show_builds( mParams );
 }
 
-function show_builds( mRequest, mHeaders, mGet, mPost ) : ( _cfg )
+function show_builds( mParams ) : ( _cfg )
 {
 	local content = @"
 		<table width='95%'>
@@ -78,7 +78,7 @@ function show_builds( mRequest, mHeaders, mGet, mPost ) : ( _cfg )
 		local cfg = CSqMulti();
 		cfg.deserialize( CSqFile().get_contents( _self.build_path( _cfg.build_scripts_dir, k ) ) );
 
-		local dlink = ( mGet[ "rdel" ] && mGet[ "rdel" ] == k )
+		local dlink = ( mParams[ "GET" ][ "rdel" ].str() == k )
 					  ? "[<a title='Delete' href='/build?del=" + k + "'><b>SURE?</b></a>]"
 					  : "[<a title='Delete' href='/build?rdel=" + k + "'><b>x</b></a>]";
 
@@ -147,9 +147,9 @@ function show_step( inf )
 	return "Unknown step type : " + inf[ "type" ].str();
 }
 
-function show_add_step( cfg, mRequest, mHeaders, mGet, mPost ) : ( _cfg )
+function show_add_step( cfg, mParams ) : ( _cfg )
 {
-	local next = _self.tolong( mPost.get( "step" ) );
+	local next = _self.tolong( mParams[ "POST" ][ "step" ].str() );
 	if ( !next )
 	{	next = _self.tolong( cfg[ "next" ].str() );
 		if ( !next ) next = 10;
@@ -183,7 +183,7 @@ function show_add_step( cfg, mRequest, mHeaders, mGet, mPost ) : ( _cfg )
 
 			</script>
 
-			<form action='/build?edit=" + mGet[ "edit" ] + @"&add_step=1' method='post'>
+			<form action='/build?edit=" + mParams[ "GET" ][ "edit" ].str() + @"&add_step=1' method='post'>
 				<table
 					width='100%'
 					style='border-left:solid 1px;border-top:solid 1px;border-right:solid 1px;border-bottom:solid 1px'
@@ -309,71 +309,72 @@ function show_add_step( cfg, mRequest, mHeaders, mGet, mPost ) : ( _cfg )
 	return content;
 }
 
-function edit_builds( mRequest, mHeaders, mGet, mPost ) : ( _cfg )
+function edit_builds( mParams ) : ( _cfg )
 {
 	local cfg = CSqMulti();
-	cfg.deserialize( CSqFile().get_contents( _self.build_path( _cfg.build_scripts_dir, mGet[ "edit" ] ) ) );
+	cfg.deserialize( CSqFile().get_contents( _self.build_path( _cfg.build_scripts_dir, mParams[ "GET" ][ "edit" ].str() ) ) );
 
 	if ( !cfg.size() )
 		return "Invalid Build";
 
 	// Are we adding a step?
-	if ( mGet[ "add_step" ] && mPost[ "type" ] && mPost[ "type" ].len() )
+	if ( mParams[ "POST" ].isset( "add_step" ) 
+		 && mParams[ "POST" ][ "type" ].len() )
 	{
-		local next = _self.tolong( mPost.get( "next" ) );
+		local next = _self.tolong( mParams[ "POST" ][ "next" ].str() );
 		if ( !next )
 		{	next = _self.tolong( cfg[ "next" ].str() );
 			if ( !next ) next = 10;
 		} // end if
 		local id = format( "%.6d", next );
 
-		cfg[ "s" ][ id ][ "type" ].set( mPost[ "type" ] );
-		switch( mPost[ "type" ] )
+		cfg[ "s" ][ id ][ "type" ].set( mParams[ "POST" ][ "type" ].str() );
+		switch( mParams[ "POST" ][ "type" ].str() )
 		{
 			case "co" :
-				cfg[ "s" ][ id ][ "repo" ].set( mPost[ "co_repo" ] );
-				cfg[ "s" ][ id ][ "link" ].set( mPost[ "co_link" ] );
-				cfg[ "s" ][ id ][ "to" ].set( mPost[ "co_to" ] );
+				cfg[ "s" ][ id ][ "repo" ].set( mParams[ "POST" ][ "co_repo" ].str() );
+				cfg[ "s" ][ id ][ "link" ].set( mParams[ "POST" ][ "co_link" ].str() );
+				cfg[ "s" ][ id ][ "to" ].set( mParams[ "POST" ][ "co_to" ].str() );
 				break;
 
 			case "dl" :
-				cfg[ "s" ][ id ][ "link" ].set( mPost[ "dl_link" ] );
+				cfg[ "s" ][ id ][ "link" ].set( mParams[ "POST" ][ "dl_link" ].str() );
 				break;
 
 			case "cd" :
-				cfg[ "s" ][ id ][ "dir" ].set( mPost[ "cd_dir" ] );
+				cfg[ "s" ][ id ][ "dir" ].set( mParams[ "POST" ][ "cd_dir" ].str() );
 				break;
 
 			case "md" :
-				cfg[ "s" ][ id ][ "dir" ].set( mPost[ "md_dir" ] );
+				cfg[ "s" ][ id ][ "dir" ].set( mParams[ "POST" ][ "md_dir" ].str() );
 				break;
 
 			case "goto" :
-				cfg[ "s" ][ id ][ "goto" ].set( mPost[ "goto" ] );
+				cfg[ "s" ][ id ][ "goto" ].set( mParams[ "POST" ][ "goto" ].str() );
 				break;
 
 			case "cmd" :
-				cfg[ "s" ][ id ][ "cmd" ].set( mPost[ "cmd" ] );
+				cfg[ "s" ][ id ][ "cmd" ].set( mParams[ "POST" ][ "cmd" ].str() );
 				break;
 
 		} // end switch
 
 		cfg[ "next" ].set( format( "%.6d", ( next + 10 ) ) );
-		CSqFile().put_contents( _self.build_path( _cfg.build_scripts_dir, mGet[ "edit" ] ), cfg.serialize() );
+		CSqFile().put_contents( _self.build_path( _cfg.build_scripts_dir, mParams[ "GET" ][ "edit" ].str() ), cfg.serialize() );
 
 	} // end if
 
 	// Remove step
-	else if ( mGet[ "del_step" ] )
+	else if ( mParams[ "GET" ].isset( "del_step" ) )
 	{
-		local id = format( "%.6d", _self.tolong( mGet[ "del_step" ] ) );
+		local id = format( "%.6d", _self.tolong( mParams[ "GET" ][ "del_step" ].str() ) );
 		cfg[ "s" ].unset( id );
-		CSqFile().put_contents( _self.build_path( _cfg.build_scripts_dir, mGet[ "edit" ] ), cfg.serialize() );
+		CSqFile().put_contents( _self.build_path( _cfg.build_scripts_dir, mParams[ "GET" ][ "edit" ].str() ), cfg.serialize() );
 
 	} // end if
 
 	// Renumber steps?
-	else if ( mGet[ "renum" ] && cfg[ "s" ].size() )
+	else if ( mParams[ "GET" ].isset( "renum" ) && cfg[ "s" ].size() )
 	{
 		local num = 0;
 		local cp = CSqMulti();
@@ -384,13 +385,13 @@ function edit_builds( mRequest, mHeaders, mGet, mPost ) : ( _cfg )
 		cfg[ "s" ].copy( cp );
 
 		cfg[ "next" ].set( format( "%.6d", ( num + 10 ) ) );
-		CSqFile().put_contents( _self.build_path( _cfg.build_scripts_dir, mGet[ "edit" ] ), cfg.serialize() );
+		CSqFile().put_contents( _self.build_path( _cfg.build_scripts_dir, mParams[ "GET" ][ "edit" ].str() ), cfg.serialize() );
 
 	} // end if
 
-	else if ( mGet[ "build_now" ] )
+	else if ( mParams[ "GET" ].isset( "build_now" ) )
 	{
-		_self.execute2( 0, "/build_mgr", "Build", mGet[ "edit" ], "" );
+		_self.execute2( 0, "/build_mgr", "Build", mParams[ "GET" ][ "edit" ].str(), "" );
 
 	} // end else if
 
@@ -406,7 +407,7 @@ function edit_builds( mRequest, mHeaders, mGet, mPost ) : ( _cfg )
 					<nobr><b>" + cfg[ "desc" ].str() + @"</b></nobr>
 				</td>
 				<td width='100%' align='right'>
-					[<a title='Renumber' href='/build?edit=" + mGet[ "edit" ] + @"&build_now=1'><b>BUILD</b></a>]
+					[<a title='Renumber' href='/build?edit=" + mParams[ "GET" ][ "edit" ].str() + @"&build_now=1'><b>BUILD</b></a>]
 				</td>
 			</tr>
 			</table>
@@ -416,13 +417,13 @@ function edit_builds( mRequest, mHeaders, mGet, mPost ) : ( _cfg )
 
 	content += @"
 			</table>
-		" + show_add_step( cfg, mRequest, mHeaders, mGet, mPost );
+		" + show_add_step( cfg, mParams );
 
 	content += @"
 			<table width='100%' cellspacing='0'>
 				<tr>
 					<td style='border-bottom:solid 1px'>
-						[<a title='Renumber' href='/build?edit=" + mGet[ "edit" ] + @"&renum=1'><b>*</b></a>]
+						[<a title='Renumber' href='/build?edit=" + mParams[ "GET" ][ "edit" ].str() + @"&renum=1'><b>*</b></a>]
 					</td>
 					<td style='border-bottom:solid 1px'>
 						&nbsp;
@@ -442,7 +443,7 @@ function edit_builds( mRequest, mHeaders, mGet, mPost ) : ( _cfg )
 		content += @"
 				<tr" + rowcolor + @">
 					<td>
-						[<a title='Delete' href='/build?edit=" + mGet[ "edit" ] + @"&del_step=" + n + @"'><b>x</b></a>]
+						[<a title='Delete' href='/build?edit=" + mParams[ "GET" ][ "edit" ].str() + @"&del_step=" + n + @"'><b>x</b></a>]
 					</td>
 					<td style='border-right:solid 1px " + _cfg.col_dkline + @"'>
 						" + n + @"&nbsp;

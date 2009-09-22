@@ -72,10 +72,13 @@ namespace sqbind
 		int Exec( const stdString &sQuery );
 
 		/// Inserts the specified data
-		int Insert( const stdString &sTable, CSqMap &mData );
+		int Insert( const stdString &sTable, CSqMulti &mData );
+
+		/// Deletes rows from table
+		int Delete( const stdString &sTable, CSqMulti &mData, const stdString &sCond );
 
 		/// Updates the specified row
-		int Update( const stdString &sTable, const stdString &sWhere, CSqMap &mData );
+		int Update( const stdString &sTable, const stdString &sWhere, CSqMulti &mData );
 
 		/// Queries for table information
 		int QueryTableInfo( const stdString &sTable );
@@ -100,6 +103,9 @@ namespace sqbind
 
 		/// The number of rows returned by the last query
 		int NumRows() { return CSQLite::NumRows(); }
+
+		/// Non-zero to enable debug mode
+		void DebugMode( int bEnable );
 
 	protected:
 

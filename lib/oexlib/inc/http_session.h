@@ -394,11 +394,14 @@ public:
 		if ( !m_pPort )
 			return;
 
-		m_pbRequest[ "SERVER_ADDR" ] = m_pPort->LocalAddress().GetDotAddress();
+		CStr8 sLocal = m_pPort->LocalAddress().GetDotAddress();
+		CStr8 sRemote = m_pPort->PeerAddress().GetDotAddress();
+		m_pbRequest[ "SERVER_ADDR" ] = sLocal;
 		m_pbRequest[ "SERVER_PORT" ] = m_pPort->LocalAddress().GetPort();
-		m_pbRequest[ "REMOTE_ADDR" ] = m_pPort->PeerAddress().GetDotAddress();
+		m_pbRequest[ "REMOTE_ADDR" ] = sRemote;
 		m_pbRequest[ "REMOTE_PORT" ] = m_pPort->PeerAddress().GetPort();
-
+		m_pbRequest[ "IS_REMOTE" ] = ( sLocal != sRemote && sRemote != "127.0.0.1" )
+										? oexT( "1" ) : oexT( "" );
 	}
 
     /// Reads in the http headers

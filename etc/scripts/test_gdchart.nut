@@ -14,16 +14,13 @@ function OnServerEvent( server, data )
 
 }
 
-function OnProcessRequest( request, headers, get, post )
+function OnProcessRequest( params )
 {
+	local mParams = CSqMulti();
+	mParams.deserialize( params );
+	_self.echo( mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str() + " : " + mParams[ "REQUEST" ][ "REQUEST_STRING" ].str() );
+
 	local mReply = CSqMap();
-
-//	_self.alert( get[ "str" ] );
-
-//	_self.alert( "hi" );
-
-	local mGet = CSqMap();
-	mGet.deserialize( get );
 
 	local l = CSqMulti();
 	l.deserialize( "0=1,1=1,2=2" );

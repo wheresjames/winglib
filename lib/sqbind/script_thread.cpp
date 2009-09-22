@@ -156,29 +156,42 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 	if ( sMsg == oexT( "pb_set" ) )
 	{
 		if ( mapParams[ oexT( "val" ) ].length() )
-			m_pb[ mapParams[ oexT( "key" ) ] ] = mapParams[ oexT( "val" ) ];
+			m_pb.at( mapParams[ oexT( "key" ) ].c_str() ) = mapParams[ oexT( "val" ) ].c_str();
+//			m_pb[ mapParams[ oexT( "key" ) ] ] = mapParams[ oexT( "val" ) ];
+
 		else
-		{	t_PropertyBag::iterator it = m_pb.find( mapParams[ oexT( "key" ) ] );
-			if ( m_pb.end() != it )
-				m_pb.erase( it );
+		{
+			m_pb.erase_at( mapParams[ oexT( "key" ) ].c_str() );
+//			t_PropertyBag::iterator it = m_pb.find_at( mapParams[ oexT( "key" ) ].c_str() );
+//			if ( it.IsValid() )
+//				m_pb.List().Erase( it );
+
+//			t_PropertyBag::iterator it = m_pb.find( mapParams[ oexT( "key" ) ] );
+//			if ( m_pb.end() != it )
+//				m_pb.erase( it );
+
 		} // end else
+
 	} // end if
 
 	// Property bag get
 	else if ( sMsg == oexT( "pb_get" ) )
-		*pReply = m_pb[ mapParams[ oexT( "key" ) ] ];
+		*pReply = m_pb.at( mapParams[ oexT( "key" ) ].c_str() ).ToString().Ptr();
+//		*pReply = m_pb[ mapParams[ oexT( "key" ) ] ];
 
 	// Does property value exist?
 	else if ( sMsg == oexT( "pb_isset" ) )
-		*pReply = ( m_pb.end() != m_pb.find( mapParams[ oexT( "key" ) ] ) ) ? "1" : "";
-
+		*pReply = ( m_pb.find_at( mapParams[ oexT( "key" ) ].c_str() ).IsValid() ) ? "1" : "";
+//		*pReply = ( m_pb.end() != m_pb.find_at( mapParams[ oexT( "key" ) ] ) ) ? "1" : "";
+	
 	// Return serialized property bag
 	else if ( sMsg == oexT( "pb_all" ) )
 	{
 		// +++ Can we write a native serialize method for std::map one day?
-		oex::CPropertyBag pb;
-		CSqMap::_serialize( pb, m_pb );
-		oex::CStr s = oex::CParser::Serialize( pb );
+//		oex::CPropertyBag pb;
+//		CSqMap::_serialize( pb, m_pb );
+//		oex::CStr s = oex::CParser::Serialize( pb );
+		oex::CStr s = oex::CParser::Serialize( m_pb );
 		pReply->assign( s.Ptr(), s.Length() );
 
 	} // end else if

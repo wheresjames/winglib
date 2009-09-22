@@ -30,30 +30,28 @@ function parse_tag( name )
 	return name;
 }
 
-function pg_data( request, headers, get, post ) : ( _g )
+function pg_data( mParams ) : ( _g )
 {
-	local mGet = CSqMap();
-	mGet.deserialize( get );
-
 	local mReply = CSqMap();
 
-	if ( mGet[ "quit" ] )
+	if ( mParams[ "GET" ].isset( "quit" ) )
 	{	_g.quit = 1;
 		mReply.set( "content", "Quitting" );
 		return mReply.serialize();
 	} // end if
 
-	if ( mGet[ "close" ] )
+	if ( mParams[ "GET" ].isset( "close" ) )
 		_g.tc.Destroy();
 
-	if ( !_g.tc.IsConnected() && !mGet[ "ip" ] )
+	if ( !_g.tc.IsConnected() && !mParams[ "GET" ][ "ip" ].len() )
 	{	mReply.set( "content", "Not connected and no ip specified" );
 		return mReply.serialize();
 	} // end if
 
-	if ( !_g.tc.IsConnected() || ( mGet[ "ip" ] && mGet[ "ip" ] != _g.tc.GetIp() ) )
-		if ( !_g.tc.Connect( mGet[ "ip" ], 1 ) )
-		{	mReply.set( "content", "Unable to connect to " + mGet[ "ip" ] );
+	if ( !_g.tc.IsConnected() || 
+		 ( mParams[ "GET" ][ "ip" ].len() && mParams[ "GET" ][ "ip" ].str() != _g.tc.GetIp() ) )
+		if ( !_g.tc.Connect( mParams[ "GET" ][ "ip" ].str(), 1 ) )
+		{	mReply.set( "content", "Unable to connect to " + mParams[ "GET" ][ "ip" ].str() );
 			return mReply.serialize();
 		} // end if
 
@@ -62,17 +60,17 @@ function pg_data( request, headers, get, post ) : ( _g )
 
 	else
 	{
-		if ( mGet[ "tag" ] )
+		if ( mParams[ "GET" ][ "tag" ].len() )
 		{
-			local tag_name = parse_tag( mGet[ "tag" ] );
+			local tag_name = parse_tag( mParams[ "GET" ][ "tag" ].str() );
 			if ( !_g.tc.tags()[ tag_name ] )
 				mReply.set( "content", "Base tag not found " + tag_name );
 			else
-				mReply.set( "content", _g.tc.ReadTag( mGet[ "tag" ] ).serialize() );
+				mReply.set( "content", _g.tc.ReadTag( mParams[ "GET" ][ "tag" ].str() ).serialize() );
 
 		} // end if
 
-		else if ( mGet[ "all" ] )
+		else if ( mParams[ "GET" ].isset( "all" ) )
 		{
 			local s = "<table border=1><tr><td><b>Tag</b></td><td><b>Bytes</b></td><td><b>Type</b></td><td><b>Dim</b></td><td><b>Struct</b><td><b>a1_size</b></td><td><b>Value</b></td></tr>";
 			local tags = _g.tc.tags();
@@ -164,61 +162,49 @@ function show_tag( name ) : ( _g )
 	return content;
 }
 
-function edit_template( name, request, headers, get, post ) : ( _g )
+function edit_template( mParams ) : ( _g )
 {
 	// Cut off template stuff
 	local full_tag = name;
 	name = parse_tag( name );
 
-	local mPost = CSqMap();
-	mPost.deserialize( post );
-
-	local mGet = CSqMap();
-	mGet.deserialize( get );
-
-	switch ( mPost[ "etmp" ] )
+	switch ( mParams[ "POST" ][ "etmp" ].str() )
 	{
 		case "add" :
 
-			if ( mPost[ "etmp_name" ] )
+			if ( mParams[ "POST" ][ "etmp_name" ].len() )
 			{
 				local i = _g.tc.tmpl().get( name ).size();
 				local tmpl = _g.tc.tmpl().get( name ).get( i.tostring() );
-				tmpl[ "name" ].set( mPost[ "etmp_name" ] );
-				tmpl[ "type" ].set( mPost[ "etmp_type" ] );
-				if ( mPost[ "etmp_type" ] == "USER" )
-					tmpl[ "bytes"].set( mPost[ "etmp_bytes" ] );
+				tmpl[ "name" ].set( mParams[ "POST" ][ "etmp_name" ].str() );
+				tmpl[ "type" ].set( mParams[ "POST" ][ "etmp_type" ].str() );
+				if ( mParams[ "POST" ][ "etmp_type" ].str() == "USER" )
+					tmpl[ "bytes"].set( mParams[ "POST" ][ "etmp_bytes" ].str() );
 
 				_g.tc.VerifyTemplate();
 				CSqFile().put_contents( _g.tmpl_cfg, _g.tc.tmpl().serialize() );
+
 			} // end if
-/*
-			_g.tmpl[ i ] <-
-				{
-					[ "name" ] = mPost[ "etmp_name" ],
-					[ "type" ] = mPost[ "etmp_type" ],
-					[ "bytes" ] = mPost[ "etmp_bytes" ]
-				};
-*/
+
 			break;
 	};
 
-	switch ( mGet[ "etmp" ] )
+	switch ( mParams[ "GET" ][ "etmp" ].str() )
 	{
 		case "del" :
-			local tmpl = _g.tc.tmpl().get( name ).unset( mGet[ "etmp_idx" ] );
+			local tmpl = _g.tc.tmpl().get( name ).unset( mParams[ "GET" ][ "etmp_idx" ].str() );
 			_g.tc.VerifyTemplate();
 			CSqFile().put_contents( _g.tmpl_cfg, _g.tc.tmpl().serialize() );
 			break;
 
 		case "up" :
-			_g.tc.tmpl().get( name ).move_up( mGet[ "etmp_idx" ] );
+			_g.tc.tmpl().get( name ).move_up( mParams[ "GET" ][ "etmp_idx" ].str() );
 			_g.tc.VerifyTemplate();
 			CSqFile().put_contents( _g.tmpl_cfg, _g.tc.tmpl().serialize() );
 			break;
 
 		case "down" :
-			_g.tc.tmpl().get( name ).move_down( mGet[ "etmp_idx" ] );
+			_g.tc.tmpl().get( name ).move_down( mParams[ "GET" ][ "etmp_idx" ].str() );
 			_g.tc.VerifyTemplate();
 			CSqFile().put_contents( _g.tmpl_cfg, _g.tc.tmpl().serialize() );
 			break;
@@ -334,24 +320,18 @@ function edit_template( name, request, headers, get, post ) : ( _g )
 	return content;
 }
 
-function pg_admin( request, headers, get, post ) : ( _g )
+function pg_admin( mParams ) : ( _g )
 {
-	local mGet = CSqMap();
-	mGet.deserialize( get );
-
-	local mPost = CSqMap();
-	mPost.deserialize( post );
-
 	local tag = "";
-	if ( mPost[ "tag" ] )
-		tag = mPost[ "tag" ];
-	else if ( mGet[ "tag" ] )
-		tag = mGet[ "tag" ];
+	if ( mParams[ "POST" ][ "tag" ].len() )
+		tag = mParams[ "POST" ][ "tag" ].str();
+	else if ( mParams[ "GET" ][ "tag" ].len() )
+		tag = mParams[ "GET" ][ "tag" ].str();
 
-	switch ( mPost[ "do" ] )
+	switch ( mParams[ "POST" ][ "do" ].str() )
 	{
 		case "connect" :
-			_g.tc.Connect( mPost[ "server" ], 1 );
+			_g.tc.Connect( mParams[ "POST" ][ "server" ].str(), 1 );
 
 	} // end if
 
@@ -434,33 +414,19 @@ function pg_admin( request, headers, get, post ) : ( _g )
 	return mReply.serialize();
 }
 
-function OnProcessRequest( request, headers, get, post ) : ( _g )
+function OnProcessRequest( params ) : ( _g )
 {
-	local mRequest = CSqMap();
-	mRequest.deserialize( request );
+	local mParams = CSqMulti();
+	mParams.deserialize( params );
+	_self.echo( mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str() + " : " + mParams[ "REQUEST" ][ "REQUEST_STRING" ].str() );
 
-	switch ( mRequest[ "path" ] )
+	switch ( mParams[ "REQUEST" ][ "path" ].str() )
 	{
 		case "/data" :
-			return pg_data( request, headers, get, post );
+			return pg_data( mParams );
 
 		case "/admin" :
-			return pg_admin( request, headers, get, post );
-
-		case "/test" :
-
-			local m = CSqMulti();
-
-			m.get( "a" ).value().set( "1" );
-
-			m.get( "b" ).get( "ba" ).value().set( "1" );
-
-			m.get( "c" ).get( "ca" ).get( "caa" ).value().set( "1" );
-
-			local mReply = CSqMap();
-			mReply.set( "content", m.print_r( 1 ) );
-			return mReply.serialize();
-			break
+			return pg_admin( mParams );
 
 	} // end if
 
@@ -477,7 +443,7 @@ function _init() : ( _g )
 
 	_g.server = CHttpServer();
 
-	_g.server.SetCallback( _self.queue(), "OnServerEvent", "OnProcessRequest" );
+	_g.server.SetSessionCallback( _self.queue(), "OnProcessRequest" );
 
 	if ( !_g.server.Start( 1234 ) )
 		_self.alert( "Unable to start http server" );

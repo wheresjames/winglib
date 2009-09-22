@@ -64,6 +64,9 @@ public:
 	/// Updates a row in the table
 	oexBOOL Update( oexCSTR pTable, oexCSTR pWhere, CPropertyBag &pb );
 
+	/// Deletes based on specified conditions
+	oexBOOL Delete( oexCSTR pTable, CPropertyBag &pb, oexCSTR pCond );
+
 	/// Returns the last error string
 	CStr& GetLastError() { return m_sErr; }
 
@@ -87,6 +90,9 @@ public:
 
 	/// Returns non zero if the specified table exists
 	oexBOOL IsTable( oexCSTR x_pTable );
+
+	/// If enabled, echo's all querys to stdout
+	void DebugMode( oexBOOL x_b ) { m_bDebugMode = x_b; }
 
 public:
 
@@ -120,6 +126,9 @@ private:
 
 	/// The result
 	CPropertyBag	m_pbResult;
+
+	/// Non-zero to enable debug mode
+	oexBOOL			m_bDebugMode;
 
 };
 

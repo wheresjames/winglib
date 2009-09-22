@@ -649,6 +649,25 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( oex::CBase64::Decode( oex::CBase64::Encode( "Hello World!" ) ) == "Hello World!" ) )
 		return -60;
 
+	str1 = oexT( "1.2.3" );
+
+	if ( !oexVERIFY( str1.Parse( oexT( "." ) ) == oexT( "1" ) ) )
+		return -61;
+
+	if ( !oexVERIFY( str1 == oexT( ".2.3" ) ) )
+		return -62;
+
+	if ( !oexVERIFY( str1.Length() == 4 ) )
+		return -63;
+	
+	str1.Skip( oexT( "." ) );
+
+	if ( !oexVERIFY( str1 == oexT( "2.3" ) ) )
+		return -64;
+
+	if ( !oexVERIFY( str1.Length() == 3 ) )
+		return -65;
+
 	// +++ This caused crash somehow, note sSub passed as parameter
 	// oex::CStr sSub = oexBuildPath( sRoot, oexBuildPath( sSub, sScript.c_str() ) );
 
@@ -1125,6 +1144,7 @@ oex::oexRESULT TestPropertyBag()
 	pb[ oexT( "1" ) ][ oexT( "c" ) ] = oexT( "1c" );
 	pb[ oexT( "2" ) ][ oexT( "a" ) ] = oexT( "2a" );
 	pb[ oexT( "2" ) ][ oexT( "b" ) ] = oexT( "2b" );
+	pb[ oexT( "3" ) ][ oexT( "a" ) ][ oexT( "1" ) ] = oexT( "3a1" );
 
 	pb[ oexT( "n" ) ][ 1 ] = 11;
 	pb[ oexT( "n" ) ][ 2 ] = 22;
@@ -1147,7 +1167,20 @@ oex::oexRESULT TestPropertyBag()
 
     if ( !oexVERIFY( oex::CParser::Implode( pb[ oexT( "1" ) ].List(), oexT( "," )) == oexT( "1a,1b,1c" ) ) )
 		return -4;
+	
+	CStr s = pb.at( "1.a" ).ToString();
+	if ( !oexVERIFY( pb.at( "1.a" ).ToString() == oexT( "1a" ) ) )
+		return -5;
 
+	if ( !oexVERIFY( pb.at( oex::CStr( "1/b" ), oex::CStr( "/" ) ) == oexT( "1b" ) ) )
+		return -6;
+	
+	if ( !oexVERIFY( pb.at( "3.a.1" ) == oexT( "3a1" ) ) )
+		return -7;
+
+	if ( !oexVERIFY( pb.at( oex::CStr( "3/a/1" ), oex::CStr( "/" ) ) == oexT( "3a1" ) ) )
+		return -8;
+	
 	oex::TPropertyBag< oex::oexINT, oex::oexINT > pbii;
 
 	pbii[ 2 ] = 2;

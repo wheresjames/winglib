@@ -2,7 +2,7 @@
 _self.include( "config.nut" );
 local _cfg = CConfig();
 
-function pg_run( mRequest, mHeaders, mGet, mPost ) : ( _cfg )
+function pg_run( mParams ) : ( _cfg )
 {
 	// Get list of running build scripts
 	local running_scripts = "<table>";

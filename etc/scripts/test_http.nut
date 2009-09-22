@@ -13,17 +13,16 @@ function OnServerEvent( server, data )
 
 }
 
-function OnProcessRequest( request, headers, get, post )
+function OnProcessRequest( params )
 {
-//	_self.alert( get[ "str" ] );
+	local mParams = CSqMulti();
+	mParams.deserialize( params );
+	_self.echo( mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str() + " : " + mParams[ "REQUEST" ][ "REQUEST_STRING" ].str() );
 
-//	_self.alert( "hi" );
-
-	local mGet = CSqMap();
-	mGet.deserialize( get );
+	local page = "<pre>" + mParams.print_r( 1 ) + "</pre>";
 
 	local mReply = CSqMap();
-	mReply.set( "content", mGet[ "str1" ] + " " + mGet[ "str2" ] );
+	mReply.set( "content", page );
 	return mReply.serialize();
 }
 
@@ -31,7 +30,7 @@ function _init() : ( _g )
 {
 	_g.server = CHttpServer();
 
-	_g.server.SetCallback( _self.queue(), "OnServerEvent", "OnProcessRequest" );
+	_g.server.SetSessionCallback( _self.queue(), "OnProcessRequest" );
 
 	if ( !_g.server.Start( 1234 ) )
 		_self.alert( "Unable to start http server" );

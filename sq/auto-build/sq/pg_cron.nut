@@ -2,32 +2,34 @@
 _self.include( "config.nut" );
 local _cfg = CConfig();
 
-function pg_run( mRequest, mHeaders, mGet, mPost ) : ( _cfg )
+function pg_run( mParams ) : ( _cfg )
 {
 	// Ensure build scripts directory
 	local cfg = CSqMulti();
 	cfg.deserialize( CSqFile().get_contents( _cfg.cron_cfg ) );
 
 	// Adding a build?
-	if ( mPost[ "name" ] && mPost[ "times" ] && mPost[ "jobs" ] )
+	if ( mParams[ "POST" ].isset( "name" ) 
+		 && mParams[ "POST" ].isset( "times" )
+		 && mParams[ "POST" ].isset( "jobs" ) )
 	{	local id = _self.unique();
-		cfg[ id ][ "name" ].set( _self.trimws( mPost[ "name" ] ) );
-		cfg[ id ][ "times" ].set( _self.trimws( mPost[ "times" ] ) );
-		cfg[ id ][ "jobs" ].set( _self.trimws( mPost[ "jobs" ] ) );
+		cfg[ id ][ "name" ].set( _self.trimws( mParams[ "POST" ][ "name" ].str() ) );
+		cfg[ id ][ "times" ].set( _self.trimws( mParams[ "POST" ][ "times" ].str() ) );
+		cfg[ id ][ "jobs" ].set( _self.trimws( mParams[ "POST" ][ "jobs" ].str() ) );
 		CSqFile().put_contents( _cfg.cron_cfg, cfg.serialize() );
 		_self.echo( _cfg.cron_cfg );
 	} // end if
 
 	// Delete build?
-	else if ( mGet[ "del" ] )
-	{	cfg.unset( mGet[ "del" ] );
+	else if ( mParams[ "GET" ].isset( "del" ) )
+	{	cfg.unset( mParams[ "GET" ][ "del" ].str() );
 		CSqFile().put_contents( _cfg.cron_cfg, cfg.serialize() );
 	} // end if
 
-	else if ( mGet[ "run" ] )
+	else if ( mParams[ "GET" ].isset( "run" ) )
 	{
-		if ( cfg.isset( mGet[ "run" ] ) )
-			_self.execute2( 0, "/build_mgr", "Cron", mGet[ "run" ], "" );
+		if ( cfg.isset( mParams[ "GET" ][ "run" ].str() ) )
+			_self.execute2( 0, "/build_mgr", "Cron", mParams[ "GET" ][ "run" ].str(), "" );
 
 	} // end if
 

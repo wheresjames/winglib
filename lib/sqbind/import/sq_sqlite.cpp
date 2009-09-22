@@ -45,6 +45,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSQLite, CSqSQLite )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, Exec )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, Insert )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, Update )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, Delete )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, NumRows )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, Result )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, Escape )
@@ -52,6 +53,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSQLite, CSqSQLite )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, QueryColumnInfo )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, GetLastQuery )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, GetLastError )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSQLite, DebugMode )
 SQBIND_REGISTER_CLASS_END()
 
 void CSqSQLite::Register( sqbind::VM vm )
@@ -91,6 +93,10 @@ int CSqSQLite::IsTable( const stdString &sTable )
 	return CSQLite::IsTable( sTable.c_str() ) ? 1 : 0;
 }
 
+void CSqSQLite::DebugMode( int bEnable )
+{	CSQLite::DebugMode( bEnable ? oex::oexTRUE : oex::oexFALSE ); }
+
+
 int CSqSQLite::Exec( const stdString &sQuery )
 {
 	Clear();
@@ -98,15 +104,21 @@ int CSqSQLite::Exec( const stdString &sQuery )
 	return CSQLite::Exec( sQuery.c_str() ) ? 1 : 0;
 }
 
-int CSqSQLite::Insert( const stdString &sTable, CSqMap &mData )
+int CSqSQLite::Insert( const stdString &sTable, CSqMulti &mData )
 {	oex::CPropertyBag pb;
-	CSqMap::_serialize( pb, mData.list() );
+	CSqMulti::_serialize( pb, mData.list() );
 	return CSQLite::Insert( sTable.c_str(), pb ); 
 }
 
-int CSqSQLite::Update( const stdString &sTable, const stdString &sWhere, CSqMap &mData )
+int CSqSQLite::Delete( const stdString &sTable, CSqMulti &mData, const stdString &sCond )
 {	oex::CPropertyBag pb;
-	CSqMap::_serialize( pb, mData.list() );
+	CSqMulti::_serialize( pb, mData.list() );
+	return CSQLite::Delete( sTable.c_str(), pb, sCond.c_str() ); 
+}
+
+int CSqSQLite::Update( const stdString &sTable, const stdString &sWhere, CSqMulti &mData )
+{	oex::CPropertyBag pb;
+	CSqMulti::_serialize( pb, mData.list() );
 	return CSQLite::Update( sTable.c_str(), sWhere.c_str(), pb ); 
 }
 

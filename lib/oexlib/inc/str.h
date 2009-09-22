@@ -587,7 +587,7 @@ public:
             return oexTRUE;
 
         // I suppose we'll have to actually compare the strings
-        return !Compare( rStr.m_mem.c_Ptr(), rStr.Length() );
+        return !Compare( rStr.Ptr(), rStr.Length() );
     }
 
     /// Compare to other object

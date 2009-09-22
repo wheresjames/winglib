@@ -14,14 +14,13 @@ function OnServerEvent( server, data )
 
 }
 
-function OnProcessRequest( request, headers, get, post ) : ( _g )
+function OnProcessRequest( params ) : ( _g )
 {
 	local mReply = CSqMap();
 
-//	_self.echo( request );
-
-	local mGet = CSqMap();
-	mGet.deserialize( get );
+	local mParams = CSqMulti();
+	mParams.deserialize( params );
+	_self.echo( mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str() + " : " + mParams[ "REQUEST" ][ "REQUEST_STRING" ].str() );
 
 //	local img = CSqImage();
 //	img.Load( _self.path( "../media/car.png" ), "" );
@@ -43,7 +42,7 @@ function _init() : ( _g )
 		_self.echo( "Unable to start http server" );
 
 	_g.cap = CSqCapture();
-	if ( 0 > _g.cap.Init( 0, 0, 320, 240, 15, "JPEG" ) )
+	if ( 0 > _g.cap.Init( 0, 0, 320, 240, 15, "JPEG", 1 ) )
 		_self.echo( "Unable to start capture device" );
 
 	local disp = "";

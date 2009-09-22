@@ -1,13 +1,13 @@
 
 _self.include( "config.nut" );
 
-function pg_run( mRequest, mHeaders, mGet, mPost, mSession )
+function pg_run( mParams )
 {
 	// User wants to exit?
-	if ( mGet.isset( "exit" ) && mGet[ "exit" ].len() )
+	if ( mParams[ "GET" ].isset( "exit" ) && mParams[ "GET" ][ "exit" ].len() )
 	{
 		// Ensure proper shutdown code
-		if ( mGet[ "exit" ] == _self.get( "/", "exit_code" ) )
+		if ( mParams[ "GET" ][ "exit" ].str() == _self.get( "/", "exit_code" ) )
 			_self.terminate( -1 );
 
 		// Set new code

@@ -177,6 +177,184 @@ public:
 */
 
 	//==============================================================
+	// at
+	//==============================================================
+	/// Parses string path
+	/**
+		\param [in] x_key	-	Index key
+
+		pb.at( "k1.k2.k3" ).ToString()
+
+		is equiv to
+
+		pb[ "k1" ][ "k2" ][ "k3" ].ToString()
+
+		\return Reference to sub class.
+
+		\see
+	*/
+	template < typename T_CHAR > 
+		TPropertyBag& at( TStr< T_CHAR > x_key, TStr< T_CHAR > x_sep = oexTT( T_CHAR, "." ) )
+		{
+			T_L p = x_key.Parse( x_sep.Ptr() );
+			x_key.Skip( x_sep.Ptr() );
+
+			if ( p.Length() && x_key.Length() )		
+				return m_lstPb[ p ].at( x_key, x_sep );
+
+			else if ( p.Length() )
+				return m_lstPb[ p ];
+
+			else if ( x_key.Length() )
+				return m_lstPb[ x_key ];
+
+			return *this;
+		}
+
+	template < typename T_CHAR > 
+		TPropertyBag& at( const T_CHAR *x_key, const T_CHAR *x_sep = oexTT( T_CHAR, "." ) )
+		{
+			// If valid data
+			if ( oexCHECK_PTR( x_key ) && oexCHECK_PTR( x_sep ) )
+			{
+				T_L key = x_key;
+				T_L p = key.Parse( x_sep );
+				key.Skip( x_sep );
+
+				if ( p.Length() && key.Length() )		
+					return m_lstPb[ p ].at( key, T_L( x_sep ) ); 
+
+				else if ( p.Length() )
+					return m_lstPb[ p ];
+
+				else if ( key.Length() )
+					return m_lstPb[ key ];
+
+			} // end if
+
+			return *this;
+		}
+
+	//==============================================================
+	// find_at
+	//==============================================================
+	/// Parses string path
+	/**
+		\param [in] x_key	-	Index key
+
+		pb.at( "k1.k2.k3" ).ToString()
+
+		is equiv to
+
+		pb[ "k1" ][ "k2" ][ "k3" ].ToString()
+
+		\return Reference to sub class.
+
+		\see
+	*/
+	template < typename T_CHAR > 
+		iterator find_at( TStr< T_CHAR > x_key, TStr< T_CHAR > x_sep = oexTT( T_CHAR, "." ) )
+		{
+			T_L p = x_key.Parse( x_sep.Ptr() );
+			x_key.Skip( x_sep.Ptr() );
+
+			if ( p.Length() && x_key.Length() )		
+				return m_lstPb[ p ].find_at( x_key, x_sep );
+
+			else if ( p.Length() )
+				return m_lstPb.Find( p );
+
+			else if ( x_key.Length() )
+				return m_lstPb.Find( x_key );
+
+			return iterator();
+		}
+
+	template < typename T_CHAR > 
+		iterator find_at( const T_CHAR *x_key, const T_CHAR *x_sep = oexTT( T_CHAR, "." ) )
+		{
+			// If valid data
+			if ( oexCHECK_PTR( x_key ) && oexCHECK_PTR( x_sep ) )
+			{
+				T_L key = x_key;
+				T_L p = key.Parse( x_sep );
+				key.Skip( x_sep );
+
+				if ( p.Length() && key.Length() )		
+					return m_lstPb[ p ].find_at( key, T_L( x_sep ) ); 
+
+				else if ( p.Length() )
+					return m_lstPb.Find( p );
+
+				else if ( key.Length() )
+					return m_lstPb.Find( key );
+
+			} // end if
+
+			return iterator();
+		}
+
+	//==============================================================
+	// erase_at
+	//==============================================================
+	/// Parses string path
+	/**
+		\param [in] x_key	-	Index key
+
+		pb.at( "k1.k2.k3" ).ToString()
+
+		is equiv to
+
+		pb[ "k1" ][ "k2" ][ "k3" ].ToString()
+
+		\return Reference to sub class.
+
+		\see
+	*/
+	template < typename T_CHAR > 
+		iterator erase_at( TStr< T_CHAR > x_key, TStr< T_CHAR > x_sep = oexTT( T_CHAR, "." ) )
+		{
+			T_L p = x_key.Parse( x_sep.Ptr() );
+			x_key.Skip( x_sep.Ptr() );
+
+			if ( p.Length() && x_key.Length() )		
+				return m_lstPb[ p ].erase_at( x_key, x_sep );
+
+			else if ( p.Length() )
+				return m_lstPb.Unset( p );
+
+			else if ( x_key.Length() )
+				return m_lstPb.Unset( x_key );
+
+			return iterator();
+		}
+
+	template < typename T_CHAR > 
+		iterator erase_at( const T_CHAR *x_key, const T_CHAR *x_sep = oexTT( T_CHAR, "." ) )
+		{
+			// If valid data
+			if ( oexCHECK_PTR( x_key ) && oexCHECK_PTR( x_sep ) )
+			{
+				T_L key = x_key;
+				T_L p = key.Parse( x_sep );
+				key.Skip( x_sep );
+
+				if ( p.Length() && key.Length() )		
+					return m_lstPb[ p ].erase_at( key, T_L( x_sep ) ); 
+
+				else if ( p.Length() )
+					return m_lstPb.Unset( p );
+
+				else if ( key.Length() )
+					return m_lstPb.Unset( key );
+
+			} // end if
+
+			return iterator();
+		}
+
+
+	//==============================================================
 	// operator =
 	//==============================================================
     /// Assumes control of the contents of another property bag
@@ -305,7 +483,7 @@ public:
         m_lstPb = ( (TPropertyBag&)x_pb ).m_lstPb;
         return *this;
     }
-
+	
     // Returns a copy of the property bag
     TPropertyBag Copy()
     {   TPropertyBag pb;

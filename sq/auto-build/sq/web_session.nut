@@ -8,42 +8,42 @@ class CGlobal
 
 local _g = CGlobal();
 
-function OnProcessRequest( request, headers, get, post ) : ( _g, _cfg )
+function OnProcessRequest( params ) : ( _g, _cfg )
 {
 	_self.kill( "." );
 
-	local mRequest = CSqMap();
-	mRequest.deserialize( request );
-
-	local mHeaders = CSqMap();
-	mHeaders.deserialize( headers );
-
-	local mGet = CSqMap();
-	mGet.deserialize( get );
-
-	local mPost = CSqMap();
-	mPost.deserialize( post );
+	local mParams = CSqMulti();
+	mParams.deserialize( params );
+	_self.echo( mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str() 
+				+ " : " + mParams[ "REQUEST" ][ "REQUEST_STRING" ].str() );
 
 	local mReply = CSqMap();
 	local page = "Access Denied";
 
-	switch ( mRequest[ "path" ] )
+	switch ( mParams[ "REQUEST" ][ "path" ].str() )
 	{
 		case "" :
 		case "/" :
 		case "/home" :
 			_self.include( "pg_home.nut" );
-			page = pg_run( mRequest, mHeaders, mGet, mPost );
+			page = pg_run( mParams );
 			break;
 
 		case "/build" :
 			_self.include( "pg_build.nut" );
-			page = pg_run( mRequest, mHeaders, mGet, mPost );
+			page = pg_run( mParams );
 			break;
 
 		case "/cron" :
 			_self.include( "pg_cron.nut" );
-			page = pg_run( mRequest, mHeaders, mGet, mPost );
+			page = pg_run( mParams );
+			break;
+
+		case "/test" :
+			page = "<font color='" + _cfg( "col_text" ) + "'><pre>"
+				    + mParams.print_r( 1 )
+					+ "</pre></font>";
+			CSqFile().put_contents( _self.root( "test.htm" ), page );
 			break;
 
 	} // end if
@@ -53,12 +53,12 @@ function OnProcessRequest( request, headers, get, post ) : ( _g, _cfg )
 		return mReply.serialize();
 	} // end if
 	local content = "<html>\r\n"
-		+ "<!--Remote:" + mRequest[ "REMOTE_ADDR" ] + "-->\r\n"
-		+ "<!--Local:" + mRequest[ "SERVER_ADDR" ] + "-->\r\n"
+		+ "<!--Remote:" + mParams[ "REQUEST" ][ "REMOTE_ADDR" ] + "-->\r\n"
+		+ "<!--Local:" + mParams[ "REQUEST" ][ "SERVER_ADDR" ] + "-->\r\n"
 		+ @"
 			<body bgcolor='#000000' text='" + _cfg.col_text + "' link='" + _cfg.col_link + "' vlink='" + _cfg.col_link + @"'>
 		"
-		+ show_menu( mRequest[ "path" ] )
+		+ show_menu( mParams[ "REQUEST" ][ "path" ].str() )
 		+ page
 		+ @"
 	</body>

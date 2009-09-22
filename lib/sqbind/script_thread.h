@@ -44,7 +44,8 @@ public:
 	typedef oexStdMap( stdString, CScriptThread* )		t_ScriptList;
 
 	/// Property bag type
-	typedef oexStdMap( stdString, stdString )			t_PropertyBag;
+//	typedef oexStdMap( stdString, stdString )			t_PropertyBag;
+	typedef oex::CPropertyBag							t_PropertyBag;
 
 public:
 
