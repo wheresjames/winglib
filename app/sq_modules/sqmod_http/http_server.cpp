@@ -61,7 +61,7 @@ oex::oexINT CHttpServer::_OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSe
 	CHttpServer *pServer = (CHttpServer*)x_pData;
 	if ( !oexCHECK_PTR( pServer ) )
 		return -1;
-	
+
 	if ( !oexCHECK_PTR( x_pSession ) )
 		return -2;
 
@@ -72,7 +72,7 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 {
 	if ( !oexCHECK_PTR( m_pSessionMsgQueue ) || !oexCHECK_PTR( x_pSession ) )
 		return -1;
-	
+
 	sqbind::stdString	sReply;
 
 	// Save information
@@ -116,15 +116,20 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 
 	// Update new session data
 	if ( mReply.isset( oexT( "session" ) ) )
+	{
 		if ( mReply[ "session" ].length() )
 			x_pSession->Session() = oex::CParser::Deserialize( mReply[ oexT( "session" ) ].c_str() );
 		else
 			x_pSession->Session().Destroy();
 
+	} // end if
+
 	// Set any headers that were returned
 	if ( mReply[ oexT( "headers" ) ].length() )
-		SQBIND_StdToPropertyBag8( sqbind::CSqMap( mReply[ oexT( "headers" ) ] ), x_pSession->TxHeaders() );
-	
+	{	sqbind::CSqMulti t( mReply[ oexT( "headers" ) ] );
+		SQBIND_StdToPropertyBag8( t, x_pSession->TxHeaders() );
+	} // end if
+
 	return 0;
 }
 

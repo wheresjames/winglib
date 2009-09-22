@@ -111,7 +111,7 @@ namespace sqbind
 	#include "msg_queue.h"
 	#include "sq_engine.h"
 	#include "script_thread.h"
-
+	#include "sq_tools.h"
 };
 
 

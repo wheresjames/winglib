@@ -324,7 +324,7 @@ public:
 				m_pbSession = (*m_ppbSession)[ id ].Copy();
 
 		} // end if
-		
+
 		// Get remote ip address
 		CStr ip = m_pPort->PeerAddress().GetDotAddress();
 		oexUINT ts = (oexUINT)oexGetUnixTime();
@@ -332,10 +332,10 @@ public:
 		// Do we need to create a new session
 		// Ensure session ip and port match current connection
 		// This helps stop cookie spoofing
-		if ( !id.Length() 
-			 || !m_pbSession.IsKey( "_id" ) || m_pbSession[ "_id" ].ToString() != id 
-			 || !m_pbSession.IsKey( "_ip" ) || m_pbSession[ "_ip" ].ToString() != ip 
-			 || !m_pbSession.IsKey( "_ts" ) 
+		if ( !id.Length()
+			 || !m_pbSession.IsKey( "_id" ) || m_pbSession[ "_id" ].ToString() != id
+			 || !m_pbSession.IsKey( "_ip" ) || m_pbSession[ "_ip" ].ToString() != ip
+			 || !m_pbSession.IsKey( "_ts" )
 			 || ( m_pbSession[ "_ts" ].ToULong() + m_uSessionTimeout ) < ts
 			 )
 		{
@@ -376,7 +376,7 @@ public:
 		// Erase data if session has been marked invalid
 		if ( !m_pbSession[ "_ts" ].ToULong() )
 			m_ppbSession->Unset( id );
-		
+
 		// Save the new session data
 		else
 			(*m_ppbSession)[ id ] = m_pbSession.Copy();
@@ -699,8 +699,8 @@ public:
 		while ( f.Read( buf, sizeof( buf ), &read ) && read )
 		{
 			// Send what we can
-			oexUINT uTotal = 0, uSent = 0;
-			
+			oexUINT uSent = 0;
+
 			while ( uSent < read )
 			{
 				// Send what we can
@@ -914,7 +914,7 @@ private:
 
 	/// Lock for session data access
 	CLock						*m_plockSession;
-											  
+
 	/// Non-zero if a new session was just created
 	oexBOOL						m_bNewSession;
 

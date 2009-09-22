@@ -1289,7 +1289,7 @@ oex::oexRESULT TestParser()
 
     if ( !oexVERIFY( oex::CParser::Serialize( pb2 ) == sStr ) )
         return -28;
-	
+
     pb = oex::CParser::Deserialize( oexT( "x{a=b,c}" ) );
 
     if ( !oexVERIFY( pb.IsKey( oexT( "x" ) ) ) )
@@ -1303,7 +1303,7 @@ oex::oexRESULT TestParser()
 
     if ( !oexVERIFY( pb[ oexT( "x" ) ].IsKey( oexT( "c" ) ) ) )
         return -32;
-	
+
     pb = oex::CParser::Deserialize( oexT( "z" ) );
 
     if ( !oexVERIFY( pb.IsKey( oexT( "z" ) ) ) )
@@ -1531,7 +1531,7 @@ oex::oexRESULT TestZip()
 	// Check high compression text that is larger than internal buffer
 	// defined at oss/unzip.h(230)
 	char buf[ 1024 * 64 ];
-	for ( int i = 0; i < sizeof( buf ); i++ )
+	for ( unsigned int i = 0; i < sizeof( buf ); i++ )
 		buf[ i ] = (char)( i % 64 ) + ' ';
 
 	sStr.Set( buf, sizeof( buf ) );
@@ -1564,20 +1564,24 @@ oex::oexRESULT TestResources()
 	if ( !oexVERIFY( oexGetResourceCount() == 4 ) )
 		return -1;
 
-	if ( !oexVERIFY( oexGetResourceName( 0 ) == oexT( "res/hello.txt" ) ) )
+	int i = 0;
+	while ( oexGetResourcePtr( i ) && oexGetResourceName( i ) != oexT( "res/hello.txt" ) )
+		i++;
+
+	if ( !oexVERIFY( oexGetResourceName( i ) == oexT( "res/hello.txt" ) ) )
 		return -2;
 
-	if ( !oexVERIFY( oexGetResourceSize( 0 ) == 14 ) )
+	if ( !oexVERIFY( oexGetResourceSize( i ) == 14 ) )
 		return -3;
 
-	if ( !oexVERIFY_PTR( oexGetResourcePtr( 0 ) ) )
+	if ( !oexVERIFY_PTR( oexGetResourcePtr( i ) ) )
 		return -4;
 
 	if ( !oexVERIFY( !oexGetResourcePtr( 4 ) ) )
 		return -5;
 
 	const void *_p = 0; long _l = 0;
-	if ( !oexVERIFY( !oexGetResource( 0, &_p, &_l ) ) )
+	if ( !oexVERIFY( !oexGetResource( i, &_p, &_l ) ) )
 		return -6;
 
 	if ( !oexVERIFY( oexMbToStr( oex::zip::CUncompress::Uncompress( (oexCHAR8*)_p, _l ) ) == oexT( "Hello World!" ) ) )
@@ -1596,7 +1600,7 @@ oex::oexRESULT TestResources()
 	{	oexSHOW( sImg.Length() );
 		return -10;
 	} // end if
-	
+
     return oex::oexRES_OK;
 }
 
