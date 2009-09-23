@@ -542,6 +542,9 @@ CSqMulti::t_Obj CSqMulti::_print_r( int nShowVals, t_List &rLst, int nDepth )
 
 CSqMulti::t_Obj CSqMulti::print_r( int nShowVals )
 {
+	if ( !size() )
+		return m_val.str();
+
 	return _print_r( nShowVals, m_lst );
 }
 

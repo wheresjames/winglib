@@ -255,11 +255,11 @@ int CSqEngineExport::isset( const stdString &sPath, const stdString &sKey )
 	return q->isset( sPath, sKey ).length();
 }
 
-CSqMap CSqEngineExport::pb( const stdString &sPath )
+CSqMulti CSqEngineExport::pb( const stdString &sPath )
 {	CSqMsgQueue *q = queue();
 	if ( !q )
-		return CSqMap();
-	return CSqMap( q->pb( sPath ) );
+		return CSqMulti();
+	return CSqMulti( q->pb( sPath ) );
 }
 
 int CSqEngineExport::shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory )

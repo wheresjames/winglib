@@ -66,7 +66,7 @@ public:
 	int isset( const stdString &sPath, const stdString &sKey );
 
 	/// Returns a copy of the entire property bag
-	CSqMap pb( const stdString &sPath );
+	CSqMulti pb( const stdString &sPath );
 
 	/// Requests the appliation exit
 	void exit( int nExitCode );

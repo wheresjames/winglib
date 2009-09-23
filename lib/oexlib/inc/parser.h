@@ -400,10 +400,19 @@ public:
 				case oexTC( T, '>' ) :
 					return oexTT( T, "&gt;" );
 
+				case oexTC( T, '\t' ) :
+					return oexTT( T, "&nbsp;&nbsp;&nbsp;&nbsp;" );
+
+				case oexTC( T, '\r' ) :
+					return oexTT( T, "" );
+
+				case oexTC( T, '\n' ) :
+					return oexTT( T, "<br>" );
+
 			} // end switch
 
 			// Generic encode
-			return oexFmt( oexTT( T, "&#" ), (oexUCHAR)x_ch, oexTT( T, ";" ) );
+			return oexMks( oexTT( T, "&#" ), (oexULONG)x_ch, oexTT( T, ";" ) );
 		}
 
 	/// Encoded a string "<b>Hello World</b>" -> "&lt;b&gt;Hello&nbsp;World&lt;/b&gt;"
@@ -459,6 +468,7 @@ public:
 				{ oexTC( T, '&' ), "&amp;", 5 },
 				{ oexTC( T, '<' ), "&lt;", 4 },
 				{ oexTC( T, '>' ), "&gt;", 4 },
+				{ oexTC( T, '\n' ), "<br>", 4 },
 				{ 0, oexNULL }
 			};
 
