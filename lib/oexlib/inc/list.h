@@ -96,10 +96,41 @@ public:
 
 		\see
 	*/
+	TListNode( oexCONST T_OBJ &x_pObj, oexCONST TListNode *x_pIt, oexCONST oexINT x_nOpt ) :
+		m_obj( x_pObj )
+
+	{
+		m_pPrev = oexNULL; (TListNode*)
+        m_pNext = oexNULL;
+
+		if ( x_pIt )
+        {
+            if ( eAppend == x_nOpt )
+                Append( (TListNode*)x_pIt );
+            else
+                Insert( (TListNode*)x_pIt );
+        } // end if
+	}
+
+	//==============================================================
+	// TListNode()
+	//==============================================================
+	/// Constructs a list node object
+	/**
+		\param [in] x_pObj	-	Pointer to object to contain in this
+								node.
+		\param [in] x_pIt	-	Pointer to list node object
+		\param [in] x_nOpt	-	How to insert
+
+		Inserts this node into the list by inserting or appending to
+		the object in x_pIt.
+
+		\see
+	*/
 	TListNode( oexCONST T_OBJ *x_pObj, oexCONST TListNode *x_pIt, oexCONST oexINT x_nOpt )
 	{
-        if ( x_pObj )
-            m_obj = *x_pObj;
+		if ( oexCHECK_PTR( x_pObj ) )
+			m_obj = *((T_OBJ*)x_pObj);
 
 		m_pPrev = oexNULL; (TListNode*)
         m_pNext = oexNULL;
@@ -681,12 +712,7 @@ public:
 		\return iterator containing object
 	*/
 	TList& operator << ( oexCONST T_OBJ &x_rObj )
-	{
-        iterator itNew( Append() );
-
-		if ( itNew.Ptr() )
-            itNew.Obj() = x_rObj;
-
+	{   Append( x_rObj );
 		return *this;
 	}
 
@@ -781,7 +807,7 @@ public:
 
 		\return iterator containing object
 	*/
-	iterator Append( T_NODE &x_rNode )
+	iterator Append( oexCONST T_NODE &x_rNode )
     {
         x_rNode.Append( m_pTail );
 
@@ -807,7 +833,7 @@ public:
 
 		\return iterator containing object
 	*/
-	iterator Append( T_OBJ *x_pObj = oexNULL )
+	iterator Append( oexCONST T_OBJ *x_pObj = oexNULL )
 	{
         T_NODE *pNode = oexNULL;
 
@@ -815,14 +841,14 @@ public:
 // +++ Doesn't work with g++ ???
 //========================================
 
-//        pNode = OexAllocConstruct< T_NODE >( x_pObj, m_pTail, T_NODE::eAppend );
-//        if ( !pNode )
-//            return (T_NODE*)oexNULL;
+        pNode = OexAllocConstruct< T_NODE >( x_pObj, m_pTail, T_NODE::eAppend );
+        if ( !pNode )
+            return (T_NODE*)oexNULL;
 
 //========================================
 // --- So using this instead
 //========================================
-
+/*
 		pNode = OexAllocConstruct< T_NODE >();
 	    if ( !pNode )
 	        return (T_NODE*)oexNULL;
@@ -834,7 +860,7 @@ public:
 		// Append to list
 		if ( m_pTail )
 			pNode->Append( m_pTail );
-
+*/
 //========================================
 // --- End doesn't work with g++
 //========================================
@@ -864,12 +890,23 @@ public:
 	*/
 	iterator Append( oexCONST T_OBJ &x_rObj )
 	{
-        iterator itNew = Append();
+        T_NODE *pNode = oexNULL;
 
-		if ( itNew.Ptr() )
-            itNew.Obj() = x_rObj;
+        pNode = OexAllocConstruct< T_NODE >( &x_rObj, m_pTail, T_NODE::eAppend );
+        if ( !pNode )
+            return (T_NODE*)oexNULL;
 
-		return itNew;
+		// One node bigger now
+		m_uSize++;
+
+		// New tail pointer
+		m_pTail = pNode;
+
+		// Assign head pointer if list is empty
+		if ( !m_pHead )
+			m_pHead = pNode;
+
+		return m_pTail;
 	}
 
 	//==============================================================

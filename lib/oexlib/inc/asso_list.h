@@ -126,8 +126,13 @@ public:
 	{}
 
 	/// Ditto on the wish list above
-	TAssoListNode( T_OBJ *x_pObj, TAssoListNode *x_pIt, oexINT x_nOpt )
+	TAssoListNode( oexCONST T_OBJ *x_pObj, TAssoListNode *x_pIt, oexINT x_nOpt )
 		: TListNode< T_OBJ >( x_pObj, x_pIt, x_nOpt )
+	{}
+
+	/// Ditto on the wish list above
+	TAssoListNode( oexCONST T_OBJ &x_rObj, TAssoListNode *x_pIt, oexINT x_nOpt )
+		: TListNode< T_OBJ >( x_rObj, x_pIt, x_nOpt )
 	{}
 
 	/// Key value for this list node

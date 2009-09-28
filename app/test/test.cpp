@@ -782,9 +782,47 @@ oex::oexRESULT TestGuids()
     return oex::oexRES_OK;
 }
 
+
+/*
+struct A
+{
+	A() { oexEcho( "A()" ); }
+	A( const A &a ) { oexEcho( "A( copy )" ); }
+	~A() { oexEcho( "~A()" ); }
+	A& operator = ( const A &a ) { oexEcho( "A assignment" ); return *this; }
+};
+
+struct B
+{
+	B() { oexEcho( "B()" ); }
+//	B( const B &b ) { oexEcho( "B( copy )" ); }
+	~B() { oexEcho( "~B()" ); }
+//	B& operator = ( const B &b ) { oexEcho( "B assignment" ); return *this; }
+
+	A a;
+};
+*/
+
 oex::oexRESULT TestLists()
 {
 	oexEcho( oexT( "======== Linked lists..." ) );
+
+/*
+	ECHO( "----------- TMem -----------" );
+
+	TList< B > l;
+	
+	l << B();
+
+	ECHO( "---" );
+	l << B();
+
+	ECHO( "---" );
+	l << B();
+	
+	ECHO( "---" );
+	l.Erase( l[ 1 ] );
+*/
 
 	// List
 	oex::TList< int > lst;
@@ -2179,7 +2217,7 @@ oex::oexRESULT Test_Threads()
 	                 && 0 == tl4.Stop() ) )
 	    return -21;
 
-	oexPrintf( oexT( "Thread counts are, %d, %d, %d, %d\r\n" ),
+	oexPrintf( oexT( "Thread counts are, %d, %d, %d, %d" ),
 			   count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
 
 	if ( !oexVERIFY( 0 == val ) )
@@ -2232,7 +2270,7 @@ oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os
 }
 
 oex::oexRESULT Test_CHttpSession()
-{
+{	
 	oexEcho( oexT( "======== HTTP..." ) );
 
 	oex::os::CIpSocket client;
@@ -2257,10 +2295,10 @@ oex::oexRESULT Test_CHttpSession()
 
 	if ( !oexVERIFY( client.Send( "GET / HTTP/1.0\r\n\r\n" ) ) )
         return -7;
-
+	
 	while ( !server.GetNumTransactions() )
 		oexSleep( 15 );
-
+	
 	while ( server.GetNumActiveClients() )
 		oexSleep( 15 );
 
@@ -2880,7 +2918,6 @@ oex::oexRESULT Test_CSQLite()
 	return oex::oexRES_OK;
 }
 #endif
-
 
 //int wmain( int argc, wchar_t *argv[] )
 //int wmain( int argc, wchar_t *argv[], wchar_t *envp[] )

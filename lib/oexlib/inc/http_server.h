@@ -199,7 +199,7 @@ public:
 					CStr8 sRemote = it->port.PeerAddress().GetDotAddress();
 
 					// Verify it is a local address
-					if ( sLocal != sRemote && sRemote != "127.0.0.1" )
+					if ( sLocal != sRemote && sRemote != oexT( "127.0.0.1" ) )
 						bAccept = oexFALSE;
 
 				} // end if
@@ -247,16 +247,19 @@ public:
 
 		} // end if
 
+		// Check for expired connections
+		for ( typename t_LstSession::iterator it; m_lstSessions.Next( it ); )
+			if ( !it->IsRunning() /* || !it->port.IsConnected() */ )
+				it = m_lstSessions.Erase( it );
+
 		// Is it time to cleanup?
-		if ( !m_uCleanup )
+		if ( m_uCleanup )
+			m_uCleanup--;
+
+		else
 		{
 //			oexEcho( "Cleaning up..." );
 			m_uCleanup = eCleanupInterval;
-
-			// Check for expired connections
-			for ( typename t_LstSession::iterator it; m_lstSessions.Next( it ); )
-				if ( !it->IsRunning() /* || !it->port.IsConnected() */ )
-					it = m_lstSessions.Erase( it );
 
 			// Attempt to cleanup session data
 			oexAutoLock ll( m_lockSession );
@@ -265,16 +268,13 @@ public:
 				// Remove timed out sessions
 				oexUINT ts = (oexUINT)oexGetUnixTime();
 				for ( CPropertyBag::iterator it; m_pbSession.List().Next( it ); )
-					if ( !it->IsKey( "_ts" ) 
-						 || ( it.Obj()[ "_ts" ].ToULong() + m_uSessionTimeout ) < ts )
+					if ( !it->IsKey( oexT( "_ts" ) )
+						 || ( it.Obj()[ oexT( "_ts" ) ].ToULong() + m_uSessionTimeout ) < ts )
 						it = m_pbSession.List().Erase( it );
 
 			} // end if
 
 		} // end if
-
-		else
-			m_uCleanup--;
 
 		return oexTRUE;
 	}
