@@ -231,6 +231,10 @@ int CSqEngineExport::spawn( int nRet, const stdString &sPath, const stdString &s
 	return q->spawn( &sRet, sPath, sName, sScript, bFile );
 }
 
+double CSqEngineExport::get_cpu_load()
+{	return oexGetCpuLoad();
+}
+
 int CSqEngineExport::run( const stdString &sPath, const stdString &sScript )
 {	CSqMsgQueue *q = queue();
 	if ( !q ) return -1;
@@ -573,6 +577,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, pb )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_cpu_load )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, error )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, warning )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, notice )
@@ -600,6 +605,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, gmt_timestr )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tolong )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tofloat )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, todouble )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, trim )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ltrim )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, rtrim )

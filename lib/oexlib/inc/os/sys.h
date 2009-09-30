@@ -408,6 +408,24 @@ public:
 	*/
 	static oexBOOL Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory );
 
+	//==============================================================
+	// GetCpuLoad()
+	//==============================================================
+	/// Returns a value between 0 and 100 representing the current
+	/// cpu load.
+	static oexDOUBLE GetCpuLoad();
+
+	//==============================================================
+	// GetCpuLoad()
+	//==============================================================
+	/// Returns a value between 0 and 100 representing the current
+	/// cpu load of the specified process
+	/**
+		\param [in] x_pProcessName	- Process for which the cpu
+									  load is relevant
+	*/
+	oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName );
+
 };
 
 //==================================================================

@@ -34,7 +34,6 @@
 
 #include "../../../oexlib.h"
 
-
 #include "std_os.h"
 
 #include <stdlib.h>
@@ -62,6 +61,9 @@
 #endif
 
 #include <objbase.h>
+
+// Linked in
+#include "../../../oss/cpu/cpu_usage.hpp"
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
@@ -756,3 +758,11 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 		   ? oexTRUE : oexFALSE;
 }
 
+static CCpuUsage g_cpu;
+oexDOUBLE CSys::GetCpuLoad()
+{	return g_cpu.GetCpuUsage();
+}
+
+oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName )
+{	return g_cpu.GetCpuUsage( x_pProcessName );
+}

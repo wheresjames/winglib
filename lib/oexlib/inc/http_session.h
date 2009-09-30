@@ -523,6 +523,7 @@ public:
 		else if ( sExt == "gif" ) return "image/gif";
 		else if ( sExt == "htm" ) return "text/html";
 		else if ( sExt == "html" ) return "text/html";
+		else if ( sExt == "css" ) return "text/css";
 		else if ( sExt == "txt" ) return "text/plain";
 		else return "application/octet-stream";
 	}

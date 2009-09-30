@@ -274,6 +274,7 @@
 #define oexAlert							OEX_NAMESPACE::os::CSys::ShowMessageBox
 #define oexFork								OEX_NAMESPACE::os::CSys::Fork
 #define oexShell							OEX_NAMESPACE::os::CSys::Shell
+#define oexGetCpuLoad						OEX_NAMESPACE::os::CSys::GetCpuLoad
 
 #define oexMd5								OEX_NAMESPACE::CUtil::md5
 #define oexGuidToString						OEX_NAMESPACE::CStr().GuidToString

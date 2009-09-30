@@ -194,6 +194,9 @@ public:
 	/// Executes shell command
 	int shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
 
+	/// Returns the current cpu load
+	double get_cpu_load();
+
 	/// Returns a linked in resource
 	stdString get_resource( const stdString &sRes, int bFileOverrideOk );
 
@@ -219,8 +222,11 @@ public:
 	int toulong( const stdString &s )
 	{	return oexStrToULong( s.c_str() ); }
 
-	int tofloat( const stdString &s )
+	float tofloat( const stdString &s )
 	{	return oexStrToFloat( s.c_str() ); }
+
+	double todouble( const stdString &s )
+	{	return oexStrToDouble( s.c_str() ); }
 
 	stdString& GetRoot() { return m_sRoot; }
 

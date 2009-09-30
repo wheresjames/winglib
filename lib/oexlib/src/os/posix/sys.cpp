@@ -813,3 +813,9 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 
 	return system( oexStrToMb( sCmd ).Ptr() ) ? oexTRUE : oexFALSE;
 }
+
+oexDOUBLE CSys::GetCpuLoad()
+{
+	// +++ Get cpu load from linux?
+	return 0;
+}

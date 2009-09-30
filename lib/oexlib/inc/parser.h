@@ -403,11 +403,11 @@ public:
 				case oexTC( T, '\t' ) :
 					return oexTT( T, "&nbsp;&nbsp;&nbsp;&nbsp;" );
 
-				case oexTC( T, '\r' ) :
-					return oexTT( T, "" );
+//				case oexTC( T, '\r' ) :
+//					return oexTT( T, "" );
 
-				case oexTC( T, '\n' ) :
-					return oexTT( T, "<br>" );
+//				case oexTC( T, '\n' ) :
+//					return oexTT( T, "<br>" );
 
 			} // end switch
 
