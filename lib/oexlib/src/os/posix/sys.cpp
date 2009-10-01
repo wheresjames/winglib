@@ -464,17 +464,7 @@ oexBOOL CSys::MicroSleep( oexUINT uMicroseconds, oexUINT uSeconds )
 
 	if ( uMicroseconds )
 		::usleep( uMicroseconds );
-		
-	return oexTRUE;
-}
 
-oexBOOL CSys::Init()
-{
-    return oexTRUE;
-}
-
-oexBOOL CSys::Uninit()
-{
 	return oexTRUE;
 }
 
@@ -741,7 +731,7 @@ oexINT CSys::Fork( oexCSTR x_pWorkingDirectory, oexCSTR x_pLogFile )
 
 	// Exit parent process
 	if ( 0 < pid )
-	{	//CLog::GlobalLog().OpenLogFile( oexNULL, oexNULL, oexNULL );		
+	{	//CLog::GlobalLog().OpenLogFile( oexNULL, oexNULL, oexNULL );
 		//oexPrintf( "Exit parent : %d\n", (int)pid );
 		oexNOTICE( 0, CStr().Fmt( oexT( "fork() = %d (0x%x)" ), (int)pid, (int)pid ) );
 		return pid;
@@ -775,7 +765,7 @@ oexINT CSys::Fork( oexCSTR x_pWorkingDirectory, oexCSTR x_pLogFile )
 	if ( oexCHECK_PTR( x_pWorkingDirectory ) && *x_pWorkingDirectory )
 		if ( 0 > chdir( oexStrToMbPtr( x_pWorkingDirectory ) ) )
 		{	oexPrintf( "Failed to set working directory : %d : %s\n", errno, x_pWorkingDirectory );
-			oexERROR( errno, oexMks( oexT( "chdir( '" ), x_pWorkingDirectory, oexT( "' ) failed" ) ) );		
+			oexERROR( errno, oexMks( oexT( "chdir( '" ), x_pWorkingDirectory, oexT( "' ) failed" ) ) );
 			return -1;
 		} // end if
 
@@ -809,13 +799,141 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 	if ( oexCHECK_PTR( x_pParams ) && *x_pParams )
 		sCmd += oexMks( oexT( " " ), x_pParams );
 
-	oexEcho( oexMks( oexT( "system() : " ), sCmd ).Ptr() );
+//	oexEcho( oexMks( oexT( "system() : " ), sCmd ).Ptr() );
 
 	return system( oexStrToMb( sCmd ).Ptr() ) ? oexTRUE : oexFALSE;
 }
 
+struct SProcStatInfo
+{
+	// Proc stat file
+	CFile 			fProcStat;
+
+	// Values
+	CPropertyBag	pb;
+};
+
+static oexBOOL UpdateProcStat( SProcStatInfo *pPsi )
+{
+	// Verify processor pointer
+	if ( !oexCHECK_PTR( pPsi ) )
+		return oexFALSE;
+
+	// Lose old values
+	pPsi->pb.Destroy();
+
+	// Open processor status file if needed
+	if ( !pPsi->fProcStat.IsOpen() )
+	{	if ( !pPsi->fProcStat.OpenExisting( oexT( "/proc/stat" ), os::CBaseFile::eAccessRead ).IsOpen() )
+			return oexFALSE;
+	} // end if
+
+	// Start at the start
+	pPsi->fProcStat.SetPtrPosBegin( 0 );
+
+	// Read in info
+	CStr sInfo = pPsi->fProcStat.Read( 64 * 1024 );
+	if ( !sInfo.Length() )
+		return oexFALSE;
+
+	// Parse the data
+	CStrList lst = CParser::Split( sInfo, oexT( "\r\n" ) );
+	for ( CStrList::iterator it; lst.Next( it ); )
+	{
+		CStrList lstParams = CParser::Split( it.Obj(), oexT( " \t" ) );
+
+		// Iterate through the values
+		CStrList::iterator itK = lstParams.First();
+		CStrList::iterator itV = itK;
+
+		// Read in values
+		oexLONG i = 0;
+		if ( itK.Obj() != oexT( "intr" ) )
+		{	CPropertyBag &r = pPsi->pb[ itK.Obj() ];
+			while ( itV.Next() )
+				r[ i++ ] = itV.Obj();
+		} // end if
+	}
+
+	return oexTRUE;
+}
+
+static oexBOOL ReleaseProcStat( SProcStatInfo *pPsi )
+{
+	// Verify processor pointer
+	if ( !oexCHECK_PTR( pPsi ) )
+		return oexFALSE;
+
+	// Close the file
+	if ( pPsi->fProcStat.IsOpen() )
+		pPsi->fProcStat.Close();
+
+	return oexTRUE;
+}
+
+struct SCpuLoadInfo
+{
+	// Non zero if cpu values are valid
+	oexBOOL			bValid;
+
+	// Last cpu values
+	oexINT64		cpu[ 16 ];
+
+};
+
+static SProcStatInfo 	g_psi;
+static SCpuLoadInfo		g_cli = { oexFALSE };
 oexDOUBLE CSys::GetCpuLoad()
+{
+	// Get proc status
+	if ( !UpdateProcStat( &g_psi ) )
+		return 0;
+
+	oexDOUBLE dCpu = 0;
+	CPropertyBag &cpu = g_psi.pb[ oexT( "cpu" ) ];
+
+	if ( !g_cli.bValid )
+	{
+		g_cli.bValid = oexTRUE;
+		for( oexUINT i = 0; i < oexSizeOfArray( g_cli.cpu ); i++ )
+			g_cli.cpu[ i ] = 0;
+
+	} // end if
+
+	else
+	{
+		oexINT64 v[ oexSizeOfArray( g_cli.cpu ) ], total = 0;
+		for( oexUINT i = 0; i < oexSizeOfArray( v ) && i < cpu.Size(); i++ )
+			v[ i ] = cpu[ i ].ToInt64() - g_cli.cpu[ i ], total += v[ i ];
+
+		if ( total )
+			dCpu = ( (oexDOUBLE)total - (oexDOUBLE)v[ 3 ] ) * 100. / (oexDOUBLE)total;
+
+	} // end else
+
+	// Save values
+	for( oexUINT i = 0; i < oexSizeOfArray( g_cli.cpu ) && i < cpu.Size(); i++ )
+		g_cli.cpu[ i ] = cpu[ i ].ToInt64();
+
+	return dCpu;
+}
+
+oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName )
 {
 	// +++ Get cpu load from linux?
 	return 0;
 }
+
+oexBOOL CSys::Init()
+{
+    return oexTRUE;
+}
+
+oexBOOL CSys::Uninit()
+{
+	// Release proc stat info
+	ReleaseProcStat( &g_psi );
+
+	return oexTRUE;
+}
+

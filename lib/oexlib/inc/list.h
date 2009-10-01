@@ -840,27 +840,27 @@ public:
 //========================================
 // +++ Doesn't work with g++ ???
 //========================================
-
+/*
         pNode = OexAllocConstruct< T_NODE >( x_pObj, m_pTail, T_NODE::eAppend );
         if ( !pNode )
             return (T_NODE*)oexNULL;
-
+*/
 //========================================
 // --- So using this instead
 //========================================
-/*
+
 		pNode = OexAllocConstruct< T_NODE >();
 	    if ( !pNode )
 	        return (T_NODE*)oexNULL;
 
 		// Assign object
 		if ( x_pObj )
-			pNode->Obj() = *x_pObj;
+			pNode->Obj() = *( (T_OBJ*)x_pObj );
 
 		// Append to list
 		if ( m_pTail )
 			pNode->Append( m_pTail );
-*/
+
 //========================================
 // --- End doesn't work with g++
 //========================================
@@ -892,9 +892,33 @@ public:
 	{
         T_NODE *pNode = oexNULL;
 
+//========================================
+// +++ Doesn't work with g++ ???
+//========================================
+/*
         pNode = OexAllocConstruct< T_NODE >( &x_rObj, m_pTail, T_NODE::eAppend );
         if ( !pNode )
             return (T_NODE*)oexNULL;
+
+*/
+//========================================
+// --- So using this instead
+//========================================
+
+		pNode = OexAllocConstruct< T_NODE >();
+	    if ( !pNode )
+	        return (T_NODE*)oexNULL;
+
+		// Assign object
+		pNode->Obj() = x_rObj;
+
+		// Append to list
+		if ( m_pTail )
+			pNode->Append( m_pTail );
+
+//========================================
+// --- End doesn't work with g++
+//========================================
 
 		// One node bigger now
 		m_uSize++;

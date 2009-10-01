@@ -88,8 +88,19 @@ CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, o
 	if ( !oexCHECK_PTR( x_pFile ) )
 		return CBaseFile::c_InvalidFindHandle;
 
-	// +++ Fix this stuff
-	oexINT nMode = O_RDWR; // O_WRONLY O_RDONLY
+	// +++ Fix sharing flags
+	// O_SHARE_RDONLY O_SHARE_WRONLY O_SHARE_RDWR O_SHARE_NONE
+
+	// Decide mode
+	oexINT nMode = 0;
+	oexUINT uWhat = ( os::CBaseFile::eAccessRead | os::CBaseFile::eAccessWrite );
+	if ( ( uWhat & x_eAccess ) == uWhat )
+		nMode = O_RDWR;
+	else if ( 0 != ( os::CBaseFile::eAccessRead & x_eAccess ) )
+		nMode = O_RDONLY;
+	else if ( 0 != ( os::CBaseFile::eAccessWrite & x_eAccess ) )
+		nMode = O_WRONLY;
+
 	switch( x_eDisposition )
     {
     	case eDisCreateNew :
@@ -97,7 +108,7 @@ CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, o
     		break;
 
         case eDisCreateAlways :
-        	nMode |= O_CREAT;
+        	nMode |= O_CREAT; // | O_TRUNC;
         	break;
 
         case eDisOpenExisting :

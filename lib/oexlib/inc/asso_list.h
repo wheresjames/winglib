@@ -685,7 +685,7 @@ public:
 
 		\see Get(), Find()
 	*/
-	T_OBJ& operator []( T_KEY x_key )
+	T_OBJ& operator []( oexCONST T_KEY x_key )
 	{	return *Get( x_key ); }
 
 	//==============================================================

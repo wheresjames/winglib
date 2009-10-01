@@ -55,7 +55,19 @@ oexBOOL CFile::Destroy()
 CStr8 CFile::Read( oexINT64 x_llSize )
 {
     oexINT64 llSize = Size();
-    if ( x_llSize == 0 || x_llSize > llSize )
+    if ( x_llSize == 0 )
+	{
+		if ( llSize )
+        	x_llSize = (oexUINT)llSize;
+
+		// +++ Hmmmm ...  This may mean we can't get the size
+		else
+			return CStr8(); // x_llSize = 16 * 1024;
+
+	} // end if
+
+	// Trim down if too much was asked
+	else if ( llSize && x_llSize > llSize )
         x_llSize = (oexUINT)llSize;
 
 	// Punt if no

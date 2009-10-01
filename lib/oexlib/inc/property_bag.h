@@ -193,13 +193,13 @@ public:
 
 		\see
 	*/
-	template < typename T_CHAR > 
+	template < typename T_CHAR >
 		TPropertyBag& at( TStr< T_CHAR > x_key, TStr< T_CHAR > x_sep = oexTT( T_CHAR, "." ) )
 		{
 			T_L p = x_key.Parse( x_sep.Ptr() );
 			x_key.Skip( x_sep.Ptr() );
 
-			if ( p.Length() && x_key.Length() )		
+			if ( p.Length() && x_key.Length() )
 				return m_lstPb[ p ].at( x_key, x_sep );
 
 			else if ( p.Length() )
@@ -211,7 +211,7 @@ public:
 			return *this;
 		}
 
-	template < typename T_CHAR > 
+	template < typename T_CHAR >
 		TPropertyBag& at( const T_CHAR *x_key, const T_CHAR *x_sep = oexTT( T_CHAR, "." ) )
 		{
 			// If valid data
@@ -221,8 +221,8 @@ public:
 				T_L p = key.Parse( x_sep );
 				key.Skip( x_sep );
 
-				if ( p.Length() && key.Length() )		
-					return m_lstPb[ p ].at( key, T_L( x_sep ) ); 
+				if ( p.Length() && key.Length() )
+					return m_lstPb[ p ].at( key, T_L( x_sep ) );
 
 				else if ( p.Length() )
 					return m_lstPb[ p ];
@@ -252,13 +252,13 @@ public:
 
 		\see
 	*/
-	template < typename T_CHAR > 
+	template < typename T_CHAR >
 		iterator find_at( TStr< T_CHAR > x_key, TStr< T_CHAR > x_sep = oexTT( T_CHAR, "." ) )
 		{
 			T_L p = x_key.Parse( x_sep.Ptr() );
 			x_key.Skip( x_sep.Ptr() );
 
-			if ( p.Length() && x_key.Length() )		
+			if ( p.Length() && x_key.Length() )
 				return m_lstPb[ p ].find_at( x_key, x_sep );
 
 			else if ( p.Length() )
@@ -270,7 +270,7 @@ public:
 			return iterator();
 		}
 
-	template < typename T_CHAR > 
+	template < typename T_CHAR >
 		iterator find_at( const T_CHAR *x_key, const T_CHAR *x_sep = oexTT( T_CHAR, "." ) )
 		{
 			// If valid data
@@ -280,8 +280,8 @@ public:
 				T_L p = key.Parse( x_sep );
 				key.Skip( x_sep );
 
-				if ( p.Length() && key.Length() )		
-					return m_lstPb[ p ].find_at( key, T_L( x_sep ) ); 
+				if ( p.Length() && key.Length() )
+					return m_lstPb[ p ].find_at( key, T_L( x_sep ) );
 
 				else if ( p.Length() )
 					return m_lstPb.Find( p );
@@ -311,13 +311,13 @@ public:
 
 		\see
 	*/
-	template < typename T_CHAR > 
+	template < typename T_CHAR >
 		iterator erase_at( TStr< T_CHAR > x_key, TStr< T_CHAR > x_sep = oexTT( T_CHAR, "." ) )
 		{
 			T_L p = x_key.Parse( x_sep.Ptr() );
 			x_key.Skip( x_sep.Ptr() );
 
-			if ( p.Length() && x_key.Length() )		
+			if ( p.Length() && x_key.Length() )
 				return m_lstPb[ p ].erase_at( x_key, x_sep );
 
 			else if ( p.Length() )
@@ -329,7 +329,7 @@ public:
 			return iterator();
 		}
 
-	template < typename T_CHAR > 
+	template < typename T_CHAR >
 		iterator erase_at( const T_CHAR *x_key, const T_CHAR *x_sep = oexTT( T_CHAR, "." ) )
 		{
 			// If valid data
@@ -339,8 +339,8 @@ public:
 				T_L p = key.Parse( x_sep );
 				key.Skip( x_sep );
 
-				if ( p.Length() && key.Length() )		
-					return m_lstPb[ p ].erase_at( key, T_L( x_sep ) ); 
+				if ( p.Length() && key.Length() )
+					return m_lstPb[ p ].erase_at( key, T_L( x_sep ) );
 
 				else if ( p.Length() )
 					return m_lstPb.Unset( p );
@@ -458,6 +458,40 @@ public:
         return m_t.Ptr()->ToULong();
     }
 
+	/// Converts to int
+	oexINT ToInt()
+    {
+        if ( !m_t.Ptr() )
+            return 0;
+
+        return m_t.Ptr()->ToInt();
+    }
+
+	/// Converts to unsigned int
+	oexUINT ToUInt()
+    {
+        if ( !m_t.Ptr() )
+            return 0;
+        return m_t.Ptr()->ToUInt();
+    }
+
+	/// Converts to int64
+	oexINT64 ToInt64()
+    {
+        if ( !m_t.Ptr() )
+            return 0;
+
+        return m_t.Ptr()->ToInt64();
+    }
+
+	/// Converts to unsigned int64
+	oexUINT64 ToUInt64()
+    {
+        if ( !m_t.Ptr() )
+            return 0;
+        return m_t.Ptr()->ToUInt64();
+    }
+
 	/// Converts to double
 	oexDOUBLE ToDouble()
     {
@@ -483,7 +517,7 @@ public:
         m_lstPb = ( (TPropertyBag&)x_pb ).m_lstPb;
         return *this;
     }
-	
+
     // Returns a copy of the property bag
     TPropertyBag Copy()
     {   TPropertyBag pb;

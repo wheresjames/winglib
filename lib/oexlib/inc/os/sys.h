@@ -424,7 +424,7 @@ public:
 		\param [in] x_pProcessName	- Process for which the cpu
 									  load is relevant
 	*/
-	oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName );
+	static oexDOUBLE GetCpuLoad( oexCSTR x_pProcessName );
 
 };
 
