@@ -102,6 +102,7 @@ public:
 		HTTP_TEMPORARY_REDIRECT = 307,
 
 		HTTP_BAD_REQUEST = 400,
+		HTTP_AUTHORIZATION_REQUIRED = 401,
 		HTTP_PAYMENT_REQUIRED = 402,
 		HTTP_FORBIDDEN = 403,
 		HTTP_NOT_FOUND = 404,
@@ -559,40 +560,34 @@ public:
 		{
 			case HTTP_OK :
 				return "HTTP/1.0 200 OK\r\n";
-				break;
 
 			case HTTP_NO_CONTENT :
 				return "HTTP/1.0 204 No Content\r\n";
-				break;
 
 			case HTTP_PARTIAL_CONTENT :
 				return "HTTP/1.0 206 Partial Content\r\n";
-				break;
 
 			case HTTP_BAD_REQUEST :
 				return "HTTP/1.0 400 Bad Request\r\n";
-				break;
+
+			case HTTP_AUTHORIZATION_REQUIRED :
+				return "HTTP/1.0 401 Authorization Required\r\n";
 
 			case HTTP_FORBIDDEN :
 				return "HTTP/1.0 403 Forbidden\r\n";
-				break;
 
 			case HTTP_NOT_FOUND :
 				return "HTTP/1.0 404 Document Not Found\r\n";
-				break;
 
 			case HTTP_REQUEST_TIMEOUT :
 				return "HTTP/1.0 408 Request timed out\r\n";
-				break;
 
 			case HTTP_NOT_IMPLEMENTED :
 				return "HTTP/1.0 501 Not Implemented\r\n";
-				break;
 
 			case HTTP_SERVER_ERROR :
 			default :
 				return "HTTP/1.0 500 Server Error\r\n";
-				break;
 		}
 
 		return "HTTP/1.0 500 Server Error\r\n";

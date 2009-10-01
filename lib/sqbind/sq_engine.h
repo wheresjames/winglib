@@ -119,6 +119,18 @@ public:
 	/// Returns the md5 for the specified string
 	stdString md5( const stdString &sStr );
 
+	/// Base64 encodes a string
+	stdString base64_encode( const stdString &sStr );
+
+	/// Base64 decodes a string
+	stdString base64_decode( const stdString &sStr );
+
+	/// Base16 encodes a string
+	stdString base16_encode( const stdString &sStr );
+
+	/// Base16 decodes a string
+	stdString base16_decode( const stdString &sStr );
+
 	/// Returns the file path to the current script
 	stdString build_path( const stdString &sS1,  const stdString &sS2 );
 

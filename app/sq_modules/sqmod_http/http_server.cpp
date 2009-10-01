@@ -130,6 +130,12 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 		SQBIND_StdToPropertyBag8( t, x_pSession->TxHeaders() );
 	} // end if
 
+	if ( mReply[ oexT( "reply-code" ) ].length() )
+	{	oex::oexLONG code = oexStrToLong( mReply[ oexT( "reply-code" ) ].c_str() );
+		if ( code )
+			x_pSession->SetHTTPReplyCode( code );
+	} // end if
+
 	return 0;
 }
 
@@ -159,6 +165,8 @@ void CHttpServer::SetSessionTimeout( int nTimeout )
 	m_server.SetSessionTimeout( (oex::oexUINT)nTimeout );
 
 }
+
+
 
 
 

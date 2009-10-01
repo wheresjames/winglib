@@ -129,6 +129,30 @@ stdString CSqEngineExport::get_resource( const stdString &sRes, int bFileOverrid
 	return stdString( s.Ptr(), s.Length() );
 }
 
+stdString CSqEngineExport::base64_encode( const stdString &sStr )
+{	oex::CStr8 sMb = oexStrToMb( oex::CStr( sStr.c_str(), sStr.length() ) );
+	oex::CStr sRes = oexMbToStr( oex::CBase64::Encode( sMb ) );
+	return stdString().assign( sRes.Ptr(), sRes.Length() );
+}
+
+stdString CSqEngineExport::base64_decode( const stdString &sStr )
+{	oex::CStr8 sMb = oexStrToMb( oex::CStr( sStr.c_str(), sStr.length() ) );
+	oex::CStr sRes = oexMbToStr( oex::CBase64::Decode( sMb ) );
+	return stdString().assign( sRes.Ptr(), sRes.Length() );
+}
+
+stdString CSqEngineExport::base16_encode( const stdString &sStr )
+{	oex::CStr8 sMb = oexStrToMb( oex::CStr( sStr.c_str(), sStr.length() ) );
+	oex::CStr sRes = oexMbToStr( oex::CBase16::Encode( sMb ) );
+	return stdString().assign( sRes.Ptr(), sRes.Length() );
+}
+
+stdString CSqEngineExport::base16_decode( const stdString &sStr )
+{	oex::CStr8 sMb = oexStrToMb( oex::CStr( sStr.c_str(), sStr.length() ) );
+	oex::CStr sRes = oexMbToStr( oex::CBase16::Decode( sMb ) );
+	return stdString().assign( sRes.Ptr(), sRes.Length() );
+}
+
 stdString CSqEngineExport::md5( const stdString &sStr )
 {	oex::oexGUID hash;
 	oex::CStr8 sMb = oexStrToMb( oex::CStr( sStr.c_str(), sStr.length() ) );
@@ -196,7 +220,7 @@ stdString CSqEngineExport::urlencode( const stdString &sS )
 }
 
 stdString CSqEngineExport::urldecode( const stdString &sS )
-{	oex::CStr s = oexUrlDecode( oex::CStr( sS.c_str(), sS.length() ) ); 
+{	oex::CStr s = oexUrlDecode( oex::CStr( sS.c_str(), sS.length() ) );
 	return stdString( s.Ptr(), s.Length() );
 }
 
@@ -577,7 +601,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, pb )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_cpu_load )	
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_cpu_load )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, error )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, warning )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, notice )
@@ -593,11 +617,15 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, module_name )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, module_path )	
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, module_path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, build_path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, decorate )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, md5 )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base64_decode )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base64_encode )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base16_decode )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base16_encode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, unique )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, local_time )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, gmt_time )
@@ -605,7 +633,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, gmt_timestr )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tolong )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tofloat )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, todouble )	
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, todouble )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, trim )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ltrim )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, rtrim )
@@ -618,7 +646,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, htmldecode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, compress )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, uncompress )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_resource )	
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_resource )
 SQBIND_REGISTER_CLASS_END()
 
 void CSqEngine::SetExportFunction( PFN_SQBIND_Export_Symbols fn, sqbind::SSqAllocator *pa )
@@ -827,10 +855,10 @@ int CSqEngine::OnInclude( const stdString &sScript )
 	} // end try
 
 	_oexCATCH( SScriptErrorInfo &e )
-	{	nRet = LogError( -2, e ); 
+	{	nRet = LogError( -2, e );
 	}
 	_oexCATCH( SquirrelError &e )
-	{	nRet = LogErrorM( -3, e.desc ); 
+	{	nRet = LogErrorM( -3, e.desc );
 	}
 
 	if ( sScriptName.length() )
@@ -896,8 +924,8 @@ void CSqEngine::SetScriptName( oex::oexCSTR pScriptName )
 }
 
 oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e )
-{	
-	oex::CStr sErr;	
+{
+	oex::CStr sErr;
 	if ( x_e.sSource == oexT( "console_buffer" ) )
 		sErr = oex::CStr().Fmt( oexT( "%s(%u)\r\n   %s" ), m_sScriptName.c_str(), x_e.uLine, x_e.sDesc.c_str() );
 	else
