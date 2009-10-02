@@ -2123,7 +2123,7 @@ public:
 			} // end if
 
 			// Append non-matching stuff
-			if ( s != m )
+			if ( m )
 				str += SubStr( s, m );
 
 			// Replace with other string if needed

@@ -89,8 +89,11 @@ public:
 	/// Loads the specified module
 	int load_module( const stdString &sModule, const stdString &sPath );
 
-	/// Kills the specified thread
+	/// Sends the kills message to the specified thread
 	int kill( const stdString &sPath );
+
+	/// Sends the kills message to the specified thread and doesn't return until it exits
+	int kill_wait( const stdString &sPath );
 
 	/// Returns boot time in seconds
 	float clock();
@@ -160,6 +163,12 @@ public:
 
 	/// Replaces the occurences of the specified string
 	stdString replace( const stdString &sS, const stdString &sFind, const stdString &sReplace );
+
+	/// Drop specified characters from a string or all but
+	stdString drop( const stdString &sS, const stdString &sDrop, int bInclusive );
+
+	/// Drop the specified range of characters from a string or all but
+	stdString drop_range( const stdString &sS, const stdString &sBegin, const stdString &sEnd, int bInclusive );
 
 	/// URL encodes the string
 	stdString urlencode( const stdString &sS );
@@ -279,7 +288,7 @@ public:
 
 	#define     SQEXE_FN_INIT       oexT( "_init" )
 	#define     SQEXE_FN_IDLE       oexT( "_idle" )
-	#define     SQEXE_FN_END        oexT( "_end" )
+	#define     SQEXE_FN_EXIT       oexT( "_exit" )
 	#define     SQEXE_SELF          oexT( "_self" )
 
 public:
@@ -359,6 +368,10 @@ public:
 
 	/// Destroys the virtual machine and prepares the class for re-use
 	void Destroy();
+
+	/// Calls script exit function if it hasn't already been called
+	/// This only works once
+	void Exit();
 
 	/// Initializes the virtual machine
 	/**
@@ -980,6 +993,9 @@ private:
 
 	/// Name of the script
 	stdString					m_sScriptName;
+
+	/// Non-zero if exit function needs calling
+	BOOL						m_bCallExit;
 
 };
 

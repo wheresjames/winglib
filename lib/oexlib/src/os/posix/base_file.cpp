@@ -135,7 +135,8 @@ CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, o
 	} // end if
 
 	if ( CBaseFile::c_Invalid == hFile )
-	{	oexERROR( errno, oexMks( oexT( "open( '" ), x_pFile, oexT( "', " ), nMode , oexT( " ) failed" ) ) );
+	{	if ( 2 != errno ) // Don't log non-existant files
+			oexERROR( errno, oexMks( oexT( "open( '" ), x_pFile, oexT( "', " ), nMode , oexT( " ) failed" ) ) );
 		return hFile;
 	} // end if
 

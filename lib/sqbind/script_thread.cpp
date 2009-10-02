@@ -47,8 +47,8 @@ CScriptThread::~CScriptThread()
 {	Destroy(); }
 
 void CScriptThread::Destroy()
-{	Stop();
-	m_bQuit = oex::oexTRUE;
+{	m_bQuit = oex::oexTRUE;
+	Stop();
 	m_pModuleManager = oexNULL;
 	m_pParentScript = oexNULL;
 }
@@ -123,7 +123,7 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 
 	// Idle processing
 	int nRet = 0;
-	if ( !m_cSqEngine.Execute( &nRet, _T( "_idle" ) ) )
+	if ( !m_cSqEngine.Execute( &nRet, SQEXE_FN_IDLE ) )
 		return oex::oexFALSE;
 
 	// Cleanup child scripts
@@ -134,6 +134,9 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 
 oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 {
+	// Let script cleanup
+	m_cSqEngine.Exit();
+
 	// No more owner thread
 	SetOwnerThreadId( 0 );
 
@@ -162,7 +165,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 			m_pb.erase_at( mapParams[ oexT( "key" ) ].c_str() );
 
 	} // end if
-	
+
 	// Property bag get
 	else if ( sMsg == oexT( "pb_get" ) )
 	{
@@ -173,11 +176,11 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 			*pReply = pb.ToString().Ptr();
 
 	} // end else if
-	
+
 	// Does property value exist?
 	else if ( sMsg == oexT( "pb_isset" ) )
 		*pReply = ( m_pb.find_at( mapParams[ oexT( "key" ) ].c_str() ).IsValid() ) ? "1" : "";
-	
+
 	// Return serialized property bag
 	else if ( sMsg == oexT( "pb_all" ) )
 	{	oex::CStr s = oex::CParser::Serialize( m_pb );
@@ -225,10 +228,15 @@ oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMs
 {
 	stdString sPath = x_sPath;
 
+//	if ( sMsg == oexT( "kill" ) )
+//		oexPrintf( oexT( "ProcessMsg(): %s, To: %s, Caller: 0x%08x, Owner: 0x%08x\n" ), sMsg.c_str(), x_sPath.c_str(), (unsigned int)oexGetCurThreadId(), GetOwnerThreadId() );
+
 	// Is it bound for another computer
 	int pos = sPath.find_first_of( oexT( ":" ), -1 );
 	if ( 0 <= pos )
 	{
+		oexPrintf( "Remote routing not supported\n" );
+
 		stdString sAddress = sPath.substr( 0, pos );
 		if ( sAddress.length() )
 		{
@@ -242,7 +250,7 @@ oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMs
 	} // end if
 
 	// Is it for us?
-	if ( !sPath.length() || sPath == _T( "." ) )
+	if ( !sPath.length() || sPath == _T( "." ) || sPath == m_sName )
 		return ExecuteMsg( sMsg, mapParams, pReply );
 
 	// All the way to the top?
@@ -390,7 +398,12 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 		// Is it a file?
 		if ( 0 != oex::CStr( mapParams[ oexT( "file" ) ].c_str() ).ToULong() )
 		{
-			if ( m_cSqEngine.GetIncludeScriptFunction() )
+			// Does the path specified exist?
+			if ( oexExists( mapParams[ oexT( "script" ) ].c_str() ) )
+				pSt->SetScript( mapParams[ oexT( "script" ) ].c_str(), 1 );
+
+			// Custom include engine?
+			else if ( m_cSqEngine.GetIncludeScriptFunction() )
 			{
 				stdString sData, sName;
 				if ( m_cSqEngine.GetIncludeScriptFunction()( mapParams[ oexT( "script" ) ], sData, sName ) )

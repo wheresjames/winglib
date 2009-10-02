@@ -606,7 +606,9 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str1.Replace( oexT( "ABC" ), oexT( "123" ) ) == oexT( "123DEFGHIJKLMNOPQRSTUVWXYZ" ) )
 	     || !oexVERIFY( str1.Replace( oexT( "LMNO" ), oexT( "1234" ) ) == oexT( "ABCDEFGHIJK1234PQRSTUVWXYZ" ) )
 	     || !oexVERIFY( str1.Replace( oexT( "XYZ" ), oexT( "123" ) ) == oexT( "ABCDEFGHIJKLMNOPQRSTUVW123" ) )
-	     || !oexVERIFY( str1.Replace( oexT( "ABCDEFGHIJKLMNOPQRSTUVWXYZ" ), oexT( "123" ) ) == oexT( "123" ) ) )
+	     || !oexVERIFY( str1.Replace( oexT( "ABCDEFGHIJKLMNOPQRSTUVWXYZ" ), oexT( "123" ) ) == oexT( "123" ) )
+	     || !oexVERIFY( oex::CStr( "my new script" ).Replace( oexT( " " ), oexT( "_" ) ) == oexT( "my_new_script" ) )
+		 )
 		return -49;
 
 	if ( !oexVERIFY( !oex::CStr( oexT( "/" ) ).LTrim( oexT( "/" ) ).Length() )
@@ -659,7 +661,7 @@ oex::oexRESULT TestStrings()
 
 	if ( !oexVERIFY( str1.Length() == 4 ) )
 		return -63;
-	
+
 	str1.Skip( oexT( "." ) );
 
 	if ( !oexVERIFY( str1 == oexT( "2.3" ) ) )
@@ -811,7 +813,7 @@ oex::oexRESULT TestLists()
 	ECHO( "----------- TMem -----------" );
 
 	TList< B > l;
-	
+
 	l << B();
 
 	ECHO( "---" );
@@ -819,7 +821,7 @@ oex::oexRESULT TestLists()
 
 	ECHO( "---" );
 	l << B();
-	
+
 	ECHO( "---" );
 	l.Erase( l[ 1 ] );
 */
@@ -1205,20 +1207,20 @@ oex::oexRESULT TestPropertyBag()
 
     if ( !oexVERIFY( oex::CParser::Implode( pb[ oexT( "1" ) ].List(), oexT( "," )) == oexT( "1a,1b,1c" ) ) )
 		return -4;
-	
+
 	CStr s = pb.at( "1.a" ).ToString();
 	if ( !oexVERIFY( pb.at( "1.a" ).ToString() == oexT( "1a" ) ) )
 		return -5;
 
 	if ( !oexVERIFY( pb.at( oex::CStr( "1/b" ), oex::CStr( "/" ) ) == oexT( "1b" ) ) )
 		return -6;
-	
+
 	if ( !oexVERIFY( pb.at( "3.a.1" ) == oexT( "3a1" ) ) )
 		return -7;
 
 	if ( !oexVERIFY( pb.at( oex::CStr( "3/a/1" ), oex::CStr( "/" ) ) == oexT( "3a1" ) ) )
 		return -8;
-	
+
 	oex::TPropertyBag< oex::oexINT, oex::oexINT > pbii;
 
 	pbii[ 2 ] = 2;
@@ -2270,7 +2272,7 @@ oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os
 }
 
 oex::oexRESULT Test_CHttpSession()
-{	
+{
 	oexEcho( oexT( "======== HTTP..." ) );
 
 	oex::os::CIpSocket client;
@@ -2295,10 +2297,10 @@ oex::oexRESULT Test_CHttpSession()
 
 	if ( !oexVERIFY( client.Send( "GET / HTTP/1.0\r\n\r\n" ) ) )
         return -7;
-	
+
 	while ( !server.GetNumTransactions() )
 		oexSleep( 15 );
-	
+
 	while ( server.GetNumActiveClients() )
 		oexSleep( 15 );
 

@@ -66,6 +66,12 @@ int CSqEngineExport::kill( const stdString &sPath )
 	if ( !q ) return -1;
 	return q->kill( oexNULL, sPath );
 }
+int CSqEngineExport::kill_wait( const stdString &sPath )
+{	CSqMsgQueue *q = queue();
+	if ( !q ) return -1;
+	stdString sRet;
+	return q->kill( &sRet, sPath );
+}
 
 void CSqEngineExport::exit( int nExitCode )
 {   oex::os::CSys::Quit( nExitCode );
@@ -209,8 +215,20 @@ int CSqEngineExport::find( const stdString &sS, const stdString &sSub )
 }
 
 stdString CSqEngineExport::replace( const stdString &sS, const stdString &sFind, const stdString &sReplace )
-{	oex::CStr s( sS.c_str(), sS.length() );
-	s.Replace( sFind.c_str(), sReplace.c_str() );
+{	oex::CStr s = oex::CStr( sS.c_str(), sS.length() )
+					.Replace( sFind.c_str(), sReplace.c_str() );
+	return stdString( s.Ptr(), s.Length() );
+}
+
+stdString CSqEngineExport::drop( const stdString &sS, const stdString &sDrop, int bInclusive )
+{	oex::CStr s = oex::CStr( sS.c_str(), sS.length() )
+					.Drop( sDrop.c_str(), bInclusive );
+	return stdString( s.Ptr(), s.Length() );
+}
+
+stdString CSqEngineExport::drop_range( const stdString &sS, const stdString &sBegin, const stdString &sEnd, int bInclusive )
+{	oex::CStr s = oex::CStr( sS.c_str(), sS.length() )
+					.DropRange( sBegin.c_str()[ 0 ], sEnd.c_str()[ 0 ], bInclusive );
 	return stdString( s.Ptr(), s.Length() );
 }
 
@@ -531,14 +549,26 @@ CSqEngine::CSqEngine() :
 	m_fExportSymbols = oexNULL;
 	m_pSqAllocator = oexNULL;
 	m_fIncludeScript = oexNULL;
+	m_bCallExit = oex::oexFALSE;
 }
 
 CSqEngine::~CSqEngine()
 { Destroy(); }
 
+void CSqEngine::Exit()
+{
+	if ( !m_bCallExit )
+		return;
+
+	m_bCallExit = oex::oexFALSE;
+
+	int nRet = 0;
+	Execute( &nRet, SQEXE_FN_EXIT );
+}
+
 void CSqEngine::Destroy()
 {
-	Execute( WSQBIND_NOREPLY, SQEXE_FN_END );
+	Exit();
 
 	m_script.Reset();
 
@@ -614,6 +644,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, exit )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, terminate )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill_wait )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, module_name )
@@ -640,6 +671,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, trimws )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, find )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, replace )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, drop )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, drop_range )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, urlencode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, urldecode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, htmlencode )
@@ -723,6 +756,9 @@ oex::oexBOOL CSqEngine::Init()
 #else
 			m_fExportSymbols( &m_vm, m_pSqAllocator );
 #endif
+
+		// Want the exit function called
+		m_bCallExit = oex::oexTRUE;
 
 	} // end try
 

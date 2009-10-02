@@ -114,7 +114,8 @@ oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapPara
 {
 	oexEvent evReply;
 
-//	oexPrintf( oexT( "MSG: %s, To: %s, Caller: 0x%08x, Owner: 0x%08x\n" ), sMsg.c_str(), sPath.c_str(), (unsigned int)oexGetCurThreadId(), m_uOwnerThreadId );
+//	if ( sMsg == oexT( "kill" ) )
+//		oexPrintf( oexT( "Msg(): %s, To: %s, Caller: 0x%08x, Owner: 0x%08x\n" ), sMsg.c_str(), sPath.c_str(), (unsigned int)oexGetCurThreadId(), m_uOwnerThreadId );
 
 	// If it's our own thread calling
 	if ( m_uOwnerThreadId && oexGetCurThreadId() == m_uOwnerThreadId )
@@ -307,7 +308,6 @@ oex::oexBOOL CSqMsgQueue::spawn( stdString *pReply, const stdString &sPath, cons
 
 oex::oexBOOL CSqMsgQueue::kill( stdString *pReply, const stdString &sPath )
 {	CSqMap params;
-	params[ oexT( "quit" ) ] = 1;
 	return Msg( sPath, oexT( "kill" ), &params, pReply );
 }
 
