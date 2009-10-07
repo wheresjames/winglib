@@ -63,6 +63,8 @@
 #include <objbase.h>
 
 // Linked in
+#define _wautostr oex::CStrW
+#define _wautostr_tomb( s ) (oexStrWToMb( s ).Ptr())
 #include "../../../oss/cpu/cpu_usage.hpp"
 
 OEX_USING_NAMESPACE
@@ -78,9 +80,9 @@ const oexUINT		CSys::c_StrErr_OK = S_OK;
 
 // Disable microsoft security warnings
 // Wouldn't have to do this but StringCchVPrintfW() has issues.
-#pragma warning( disable : 4995 4996 )
-
-#ifdef __INTEL_COMPILER
+#if defined( _MSC_VER )
+#	pragma warning( disable : 4995 4996 )
+#elif defined( __INTEL_COMPILER )
 #	pragma warning( disable : 1786 )
 #endif
 
@@ -183,7 +185,7 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 
 	// Create format string
 	oexINT nRet = VSNPRINTF( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs );
-	if ( 0 > nRet || x_uMax < nRet )
+	if ( 0 > nRet || x_uMax < (oexUINT)nRet )
 	{
 		// Null terminate buffer
 		x_pDst[ x_uMax - 1 ] = 0;
@@ -293,7 +295,7 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 
 	// Create format string
 	oexINT nRet = VSNWPRINTF( x_pDst, x_pFmt, (va_list)x_pArgs );
-	if ( 0 > nRet || x_uMax < nRet )
+	if ( 0 > nRet || x_uMax < (oexUINT)nRet )
 	{
 		// Null terminate buffer
 		x_pDst[ x_uMax - 1 ] = 0;
@@ -752,8 +754,8 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 	if ( !oexCHECK_PTR( x_pFile ) )
 		return oexFALSE;
 
-	return ( 32 < (unsigned int)ShellExecute( NULL, oexT( "open" ), 
-											  x_pFile, x_pParams, 
+	return ( 32 < (unsigned int)ShellExecute( NULL, oexT( "open" ),
+											  x_pFile, x_pParams,
 											  x_pDirectory, SW_SHOWNORMAL ) )
 		   ? oexTRUE : oexFALSE;
 }

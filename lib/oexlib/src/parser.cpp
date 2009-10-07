@@ -279,7 +279,7 @@ CStr CParser::Encode( CPropertyBag &enc, CPropertyBag &fmt, CStr root )
 oexLONG CParser::ParseCommandLineItem( oexINT i, TStr< CParser::T_tc > x_sStr, TPropertyBag< TStr< CParser::T_tc > > &x_pb )
 {
 	typedef T_tc T;
-	
+
 	// Is it a switch?
 	if ( oexTC( T, '-' ) == x_sStr[ 0 ] )
 	{
@@ -295,31 +295,33 @@ oexLONG CParser::ParseCommandLineItem( oexINT i, TStr< CParser::T_tc > x_sStr, T
 	// Add as number
 	else
 		x_pb[ ( TStr< T >() << i++ ) ] = x_sStr;
-		
+
 	return i;
 }
 
-TPropertyBag< TStr< CParser::T_tc > > CParser::ParseCommandLine( oexINT x_nNum, oexCONST CParser::T_tc **x_pStr )
+TPropertyBag< TStr< CParser::T_tc > > CParser::ParseCommandLine( oexINT x_nNum, oexCONST oexCHARW **x_pStr )
 {
-	typedef T_tc T;
+	typedef T_tc oexCHARW;
 	if ( 2 > x_nNum || !oexCHECK_PTR( x_pStr ) )
-		return TPropertyBag< TStr< T > >();
+		return TPropertyBag< TStr< T_tc > >();
 
-	TPropertyBag< TStr< T > > pb;
+	TPropertyBag< TStr< T_tc > > pb;
 	for ( int i = 1, x = 0; i < x_nNum; i++ )
-		x = ParseCommandLineItem( x, x_pStr[ i ], pb );
-		
+		x = ParseCommandLineItem( x, oexStrWToStr( x_pStr[ i ] ), pb );
+
 	return pb;
+}
 
-/*
-	// Build string
-	oex::TStr< T > sCmdLine;
-	for ( int i = 1; i < x_nNum; i++ )
-		sCmdLine << x_pStr[ i ] << oexT( " " );
+TPropertyBag< TStr< CParser::T_tc > > CParser::ParseCommandLine( oexINT x_nNum, oexCONST oexCHAR **x_pStr )
+{
+	if ( 2 > x_nNum || !oexCHECK_PTR( x_pStr ) )
+		return TPropertyBag< TStr< T_tc > >();
 
-	// Parse the command line
-	return ParseCommandLine( sCmdLine );
-*/
+	TPropertyBag< TStr< T_tc > > pb;
+	for ( int i = 1, x = 0; i < x_nNum; i++ )
+		x = ParseCommandLineItem( x, oexMbToStr( x_pStr[ i ] ), pb );
+
+	return pb;
 }
 
 TPropertyBag< TStr< CParser::T_tc > > CParser::ParseCommandLine( oexCONST TStr< CParser::T_tc > &x_sStr )
@@ -343,7 +345,7 @@ oexLONG CParser::ParseCommandLine( oexCONST TStr< CParser::T_tc > &x_sStr, TProp
 		return 0;
 
 	// Parse the command line items
-	oex::TList< TStr< T > > strlst = SplitQuoted( x_sStr.Ptr(), x_sStr.Length(), " ", "\"'", "\"'", "\\" );
+	oex::TList< TStr< T > > strlst = SplitQuoted( x_sStr.Ptr(), x_sStr.Length(), oexT( " " ), oexT( "\"'" ), oexT( "\"'" ), oexT( "\\" ) );
 
 	// We get anything?
 	if ( !strlst.Size() )
@@ -351,27 +353,7 @@ oexLONG CParser::ParseCommandLine( oexCONST TStr< CParser::T_tc > &x_sStr, TProp
 
 	oexINT i = 0;
 	for ( oex::TList< TStr< T > >::iterator it; strlst.Next( it ); )
-	{	
 		i = ParseCommandLineItem( i, *it, x_pb );
-	
-/*	
-		// Is it a switch?
-		if ( oexTC( T, '-' ) == it.Obj()[ 0 ] )
-		{
-			it.Obj()++;
-			TStr< T > sKey = it.Obj().Parse( oexTT( T, ":" ) );
-			if ( *it.Obj() == oexTC( T, ':' ) )
-				it.Obj()++, x_pb[ sKey ] = it.Obj().Unquote( oexTT( T, "\"'" ), oexTT( T, "\"'" ), oexTT( T, "\\" ) );
-			else
-				x_pb[ it.Obj() ] = oexTT( T, "" );
-
-		} // end if
-
-		// Add as number
-		else
-			x_pb[ ( TStr< T >() << i++ ) ] = it.Obj();
-*/
-	} // end if
 
 	return x_pb.Size();
 }

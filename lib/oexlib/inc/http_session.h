@@ -327,7 +327,7 @@ public:
 		} // end if
 
 		// Get remote ip address
-		CStr ip = m_pPort->PeerAddress().GetDotAddress();
+		CStr8 ip = oexStrToMb( m_pPort->PeerAddress().GetDotAddress() );
 		oexUINT ts = (oexUINT)oexGetUnixTime();
 
 		// Do we need to create a new session
@@ -372,7 +372,7 @@ public:
 			return;
 
 		// Grab session id
-		CStr id = m_pbSession[ "_id" ].ToString();
+		CStr8 id = m_pbSession[ "_id" ].ToString();
 
 		// Erase data if session has been marked invalid
 		if ( !m_pbSession[ "_ts" ].ToULong() )
@@ -796,12 +796,12 @@ public:
 
 	CStr CommonLog()
 	{
-		CStr s;
+		CStr8 s;
 
 		s	<< m_pbRequest[ "REMOTE_ADDR" ].ToString()
 			<< " -" // rfc931
 			<< " -" // username
-			<< " " << oexLocalTimeStr( "[%c/%b/%Y:%g:%m:%s %Zs%Zh%Zm]" )
+			<< " " << oexStrToMb( oexLocalTimeStr( oexT( "[%c/%b/%Y:%g:%m:%s %Zs%Zh%Zm]" ) ) )
 			<< " \"" << m_pbRequest[ "REQUEST_STRING" ].ToString() << "\""
 			<< " " << m_nErrorCode
 			<< " " << m_sContent.Length();
@@ -820,7 +820,7 @@ public:
 
 		s << "\r\n";
 
-		return s;
+		return oexMbToStr( s );
 	}
 
 	// Writes the transaction log to a file
@@ -841,7 +841,7 @@ public:
 	}
 
 	/// Set sessino object
-	void SetSessionObject( CPropertyBag *pPb, CLock *pLock )
+	void SetSessionObject( CPropertyBag8 *pPb, CLock *pLock )
 	{	m_ppbSession = pPb; m_plockSession = pLock; }
 
 	/// Returns non-zero if this is a new session
@@ -909,7 +909,7 @@ private:
 	oexBOOL						m_bEnableCompression;
 
 	/// Stores session data
-	CPropertyBag				*m_ppbSession;
+	CPropertyBag8				*m_ppbSession;
 
 	/// Lock for session data access
 	CLock						*m_plockSession;

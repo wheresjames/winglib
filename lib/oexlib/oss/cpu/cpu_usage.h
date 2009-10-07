@@ -6,7 +6,7 @@
 //
 /// Monitors the CPU usage
 /**
-	
+
 */
 //==================================================================
 class CCpuUsage
@@ -31,10 +31,10 @@ public:
 	/// Returns the current CPU usage by the named process
 	/**
 		\param [in] pProcessName	-	Process name
-		
+
 		\return CPU usage
-	
-		\see 
+
+		\see
 	*/
 	int GetCpuUsage(LPCTSTR pProcessName);
 
@@ -44,10 +44,10 @@ public:
 	/// Enable performance counters
 	/**
 		\param [in] bEnable		-	Non-zero to enable
-		
+
 		\return Returns the value in bEnable.
-	
-		\see 
+
+		\see
 	*/
 	BOOL EnablePerformaceCounters(BOOL bEnable = TRUE);
 
@@ -66,6 +66,5 @@ private:
 	/// Average cpu time
 	LONG			m_lAvg;
 };
-
 
 #endif

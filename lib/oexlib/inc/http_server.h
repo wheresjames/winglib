@@ -199,7 +199,7 @@ public:
 					CStr8 sRemote = it->port.PeerAddress().GetDotAddress();
 
 					// Verify it is a local address
-					if ( sLocal != sRemote && sRemote != oexT( "127.0.0.1" ) )
+					if ( sLocal != sRemote && sRemote != "127.0.0.1" )
 						bAccept = oexFALSE;
 
 				} // end if

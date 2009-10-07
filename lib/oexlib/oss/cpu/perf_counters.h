@@ -1,7 +1,12 @@
 
 #include <winperf.h>
 #include <stdio.h>
-#include <comdef.h>	// for using bstr_t class
+
+#if !defined( _wautostr )
+#	include <comdef.h>	// for using bstr_t class
+#	define _wautostr _bstr_t
+#	define _wautostr_tomb( s ) ((LPCTSTR)s)
+#endif
 
 #define TOTALBYTES    (100*1024)
 #define BYTEINCREMENT (10*1024)
@@ -84,12 +89,12 @@ protected:
 	};
 
 	//
-	//	The performance data is accessed through the registry key 
+	//	The performance data is accessed through the registry key
 	//	HKEY_PEFORMANCE_DATA.
-	//	However, although we use the registry to collect performance data, 
+	//	However, although we use the registry to collect performance data,
 	//	the data is not stored in the registry database.
-	//	Instead, calling the registry functions with the HKEY_PEFORMANCE_DATA key 
-	//	causes the system to collect the data from the appropriate system 
+	//	Instead, calling the registry functions with the HKEY_PEFORMANCE_DATA key
+	//	causes the system to collect the data from the appropriate system
 	//	object managers.
 	//
 	//	QueryPerformanceData allocates memory block for getting the
@@ -109,7 +114,7 @@ protected:
 		LONG lRes;
 
 		char keyName[32];
-		sprintf(keyName,"%d %d",dwObjectIndex, dwCounterIndex);
+		sprintf(keyName,"%u %u",(unsigned int)dwObjectIndex, (unsigned int)dwCounterIndex);
 
 		Buffer.Reset();
 		while( (lRes = RegQueryValueEx( HKEY_PERFORMANCE_DATA,
@@ -158,26 +163,26 @@ protected:
 			pPerfCntr = NextCounter( pPerfCntr );
 		}
 
-		if( pPerfObj->NumInstances == PERF_NO_INSTANCES )		
+		if( pPerfObj->NumInstances == PERF_NO_INSTANCES )
 		{
 			pCounterBlock = (PPERF_COUNTER_BLOCK) ((LPBYTE) pPerfObj + pPerfObj->DefinitionLength);
 		}
 		else
 		{
 			pPerfInst = FirstInstance( pPerfObj );
-		
+
 			// Look for instance pInstanceName
-			_bstr_t bstrInstance;
-			_bstr_t bstrInputInstance = pInstanceName;
+			_wautostr bstrInstance;
+			_wautostr bstrInputInstance = (wchar_t*)pInstanceName;
 			for( int k=0; k < pPerfObj->NumInstances; k++ )
 			{
-				bstrInstance = (wchar_t *)((PBYTE)pPerfInst + pPerfInst->NameOffset);
-				if (!stricmp((LPCTSTR)bstrInstance, (LPCTSTR)bstrInputInstance))
+				bstrInstance = (wchar_t*)((PBYTE)pPerfInst + pPerfInst->NameOffset);
+				if (!stricmp(_wautostr_tomb( bstrInstance ), _wautostr_tomb( bstrInputInstance )))
 				{
 					pCounterBlock = (PPERF_COUNTER_BLOCK) ((LPBYTE) pPerfInst + pPerfInst->ByteLength);
 					break;
 				}
-				
+
 				// Get the next instance.
 
 				pPerfInst = NextInstance( pPerfInst );

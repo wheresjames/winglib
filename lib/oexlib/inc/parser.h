@@ -575,7 +575,7 @@ public:
                     {
                         // Find '='
                         oexLONG a = s;
-                        while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] ) 
+                        while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] )
 							a++;
 
                         TStr< T > sKey, sVal;
@@ -595,7 +595,7 @@ public:
                             x_pb[ sKey ] = oexTT( T, "" );
 
                         // Both tokens present
-                        else 
+                        else
 							x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).DropWhiteSpace() );
 
                         // Count one item
@@ -619,7 +619,7 @@ public:
 
                     // Find '='
                     oexLONG a = s;
-                    while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] ) 
+                    while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] )
 						a++;
 
                     // NULL key?
@@ -1149,7 +1149,9 @@ public:
 
 	static oexLONG ParseCommandLineItem( oexINT i, TStr< CParser::T_tc > x_sStr, TPropertyBag< TStr< CParser::T_tc > > &x_pb );
 
-	static TPropertyBag< TStr< T_tc > > ParseCommandLine( oexINT x_nNum, oexCONST T_tc **x_pStr );
+	static TPropertyBag< TStr< T_tc > > ParseCommandLine( oexINT x_nNum, oexCONST oexCHARW **x_pStr );
+
+	static TPropertyBag< TStr< T_tc > > ParseCommandLine( oexINT x_nNum, oexCONST oexCHAR **x_pStr );
 
 	static TPropertyBag< TStr< T_tc > > ParseCommandLine( oexCONST TStr< T_tc > &x_sStr );
 

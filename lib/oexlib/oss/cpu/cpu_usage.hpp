@@ -21,16 +21,16 @@
 //		The cpu usage counter is of type PERF_100NSEC_TIMER_INV
 //		which as the following calculation:
 //
-//		Element		Value 
+//		Element		Value
 //		=======		===========
-//		X			CounterData 
-//		Y			100NsTime 
+//		X			CounterData
+//		Y			100NsTime
 //		Data Size	8 Bytes
 //		Time base	100Ns
-//		Calculation 100*(1-(X1-X0)/(Y1-Y0)) 
+//		Calculation 100*(1-(X1-X0)/(Y1-Y0))
 //
-//      where the denominator (Y) represents the total elapsed time of the 
-//      sample interval and the numerator (X) represents the time during 
+//      where the denominator (Y) represents the total elapsed time of the
+//      sample interval and the numerator (X) represents the time during
 //      the interval when the monitored components were inactive.
 //
 //
@@ -47,7 +47,7 @@
 
 typedef enum
 {
-	WINNT,	WIN2K_XP, WIN9X, UNKNOWN
+	PF_WINNT, PF_WIN2K_XP, PF_WIN9X, PF_UNKNOWN
 }PLATFORM;
 
 PLATFORM GetPlatform()
@@ -55,18 +55,18 @@ PLATFORM GetPlatform()
 	OSVERSIONINFO osvi;
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	if (!GetVersionEx(&osvi))
-		return UNKNOWN;
+		return PF_UNKNOWN;
 	switch (osvi.dwPlatformId)
 	{
 	case VER_PLATFORM_WIN32_WINDOWS:
-		return WIN9X;
+		return PF_WIN9X;
 	case VER_PLATFORM_WIN32_NT:
 		if (osvi.dwMajorVersion == 4)
-			return WINNT;
+			return PF_WINNT;
 		else
-			return WIN2K_XP;
+			return PF_WIN2K_XP;
 	}
-	return UNKNOWN;
+	return PF_UNKNOWN;
 }
 
 CCpuUsage::CCpuUsage()
@@ -86,7 +86,7 @@ CCpuUsage::~CCpuUsage()
 
 BOOL CCpuUsage::EnablePerformaceCounters(BOOL bEnable)
 {
-	if (GetPlatform() != WIN2K_XP)
+	if (GetPlatform() != PF_WIN2K_XP)
 		return TRUE;
 
 	HKEY hKey = NULL;
@@ -123,7 +123,7 @@ int CCpuUsage::GetCpuUsage()
 
 	if (m_bFirstTime)
 		EnablePerformaceCounters();
-	
+
 	// Cpu usage counter is 8 byte length.
 	CPerfCounters<LONGLONG> PerfCounters;
 	char szInstance[256] = {0};
@@ -141,11 +141,11 @@ int CCpuUsage::GetCpuUsage()
 	DWORD dwCpuUsageIndex;
 	switch (Platform)
 	{
-	case WINNT:
+	case PF_WINNT:
 		dwObjectIndex = SYSTEM_OBJECT_INDEX;
 		dwCpuUsageIndex = TOTAL_PROCESSOR_TIME_COUNTER_INDEX;
 		break;
-	case WIN2K_XP:
+	case PF_WIN2K_XP:
 		dwObjectIndex = PROCESSOR_OBJECT_INDEX;
 		dwCpuUsageIndex = PROCESSOR_TIME_COUNTER_INDEX;
 		strcpy(szInstance,"_Total");
@@ -157,7 +157,8 @@ int CCpuUsage::GetCpuUsage()
 	int				CpuUsage = 0;
 	LONGLONG		lnNewValue = 0;
 	PPERF_DATA_BLOCK pPerfData = NULL;
-	LARGE_INTEGER	NewPerfTime100nSec = {0};
+	LARGE_INTEGER	NewPerfTime100nSec;
+	NewPerfTime100nSec.QuadPart = 0;
 
 	lnNewValue = PerfCounters.GetCounterValue(&pPerfData, dwObjectIndex, dwCpuUsageIndex, szInstance);
 	NewPerfTime100nSec = pPerfData->PerfTime100nSec;
@@ -192,8 +193,8 @@ int CCpuUsage::GetCpuUsage()
 
 int CCpuUsage::GetCpuUsage(LPCTSTR pProcessName)
 {
-	static PLATFORM Platform = GetPlatform();
-	
+//	static PLATFORM Platform = GetPlatform();
+
 	if (m_bFirstTime)
 		EnablePerformaceCounters();
 
@@ -208,7 +209,8 @@ int CCpuUsage::GetCpuUsage(LPCTSTR pProcessName)
 	int				CpuUsage = 0;
 	LONGLONG		lnNewValue = 0;
 	PPERF_DATA_BLOCK pPerfData = NULL;
-	LARGE_INTEGER	NewPerfTime100nSec = {0};
+	LARGE_INTEGER	NewPerfTime100nSec;
+	NewPerfTime100nSec.QuadPart = 0;
 
 	lnNewValue = PerfCounters.GetCounterValue(&pPerfData, dwObjectIndex, dwCpuUsageIndex, szInstance);
 	NewPerfTime100nSec = pPerfData->PerfTime100nSec;
@@ -236,9 +238,9 @@ int CCpuUsage::GetCpuUsage(LPCTSTR pProcessName)
 #if ( 0 < CPU_WEIGHT )
 
 	// Calculate average
-	if ( m_lAvg == 0 ) 
+	if ( m_lAvg == 0 )
 		m_lAvg = CpuUsage;
-	else 
+	else
 		m_lAvg = ( ( m_lAvg * CPU_WEIGHT ) + CpuUsage ) / ( CPU_WEIGHT + 1 );
 
 #else

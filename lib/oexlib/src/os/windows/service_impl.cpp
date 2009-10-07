@@ -293,7 +293,7 @@ int CServiceImpl::OnRunService( int argc, const char** argv, oexCSTR pName, oexC
 	SERVICE_TABLE_ENTRY ServiceTable[ 2 ];
 
 	// Set service name
-	ServiceTable[ 0 ].lpServiceName = (LPSTR)GetName().Ptr();
+	ServiceTable[ 0 ].lpServiceName = (oexSTR)GetName().Ptr();
 
 	// Set pointer to main service function
 	ServiceTable[ 0 ].lpServiceProc = (LPSERVICE_MAIN_FUNCTION)_ServiceMain;
@@ -430,7 +430,7 @@ int CServiceImpl::InstallService( oexCSTR pName, oexCSTR pDesc, oexBOOL bAutoRes
 		LONG lRes = RegCreateKeyEx( HKEY_LOCAL_MACHINE, sKey.Ptr(),
 									0, NULL, 0, KEY_WRITE | KEY_SET_VALUE, NULL, &hKey, NULL );
 		if ( ERROR_SUCCESS != lRes )
-			oexERROR( GetLastError(), "Could not set service restart options, RegCreateKeyEx() failed" );
+			oexERROR( GetLastError(), oexT( "Could not set service restart options, RegCreateKeyEx() failed" ) );
 		else
 		{
 			// Set failure mode

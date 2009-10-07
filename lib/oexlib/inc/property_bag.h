@@ -556,7 +556,7 @@ public:
 	{
 		T_L tabs;
 		for ( oexUINT t = 0; t < uDepth; t++ )
-			tabs << oexT( "  " );
+			tabs << oexTT( T_L, "  " );
 		uDepth++;
 
 		T_L str;
@@ -564,28 +564,28 @@ public:
 		{
 			if ( key.Length() )
 			{
-				str << tabs << oexT( "\'" ) << key << oexT( "\'" ) << oexT( " = " );
+				str << tabs << oexTT( T_L, "\'" ) << key << oexTT( T_L, "\'" ) << oexTT( T_L, " = " );
 
 				if ( pb.IsDefaultValue() )
-					str << oexT( "\'" ) << pb.ToString() << oexT( "\'" );
+					str << oexTT( T_L, "\'" ) << pb.ToString() << oexTT( T_L, "\'" );
 
 				str << oexNL;
 
-				tabs << oexT( "  " ); uDepth++;
+				tabs << oexTT( T_L, "  " ); uDepth++;
 
 			} // end if
 
-			str << tabs << oexT( "Array()" ) oexNL << tabs << oexT( "{" ) oexNL;
+			str << tabs << oexTT( T_L, "Array()" ) oexNL << tabs << oexTT( T_L, "{" ) oexNL;
 
 			for ( iterator it; pb.List().Next( it ); )
 				str << PrintR( it.Obj(), it.Node()->key, uDepth );
 
-			str << tabs << oexT( "}" ) oexNL;
+			str << tabs << oexTT( T_L, "}" ) oexNL;
 
 		} // end if
 
 		else
-			str << tabs << oexT( "\'" ) << key << oexT( "\'" ) << oexT( " = " ) << oexT( "\'" ) << pb.ToString() << oexT( "\'" ) << oexNL;
+			str << tabs << oexTT( T_L, "\'" ) << key << oexTT( T_L, "\'" ) << oexTT( T_L, " = " ) << oexTT( T_L, "\'" ) << pb.ToString() << oexTT( T_L, "\'" ) << oexNL;
 
 		return str;
 	}
