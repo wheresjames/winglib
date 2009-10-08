@@ -195,8 +195,8 @@ public:
 				if ( m_bLocalOnly )
 				{
 					// Get local and remote address
-					CStr8 sLocal = it->port.LocalAddress().GetDotAddress();
-					CStr8 sRemote = it->port.PeerAddress().GetDotAddress();
+					CStr8 sLocal = oexStrToMb( it->port.LocalAddress().GetDotAddress() );
+					CStr8 sRemote = oexStrToMb( it->port.PeerAddress().GetDotAddress() );
 
 					// Verify it is a local address
 					if ( sLocal != sRemote && sRemote != "127.0.0.1" )
@@ -267,9 +267,9 @@ public:
 			{
 				// Remove timed out sessions
 				oexUINT ts = (oexUINT)oexGetUnixTime();
-				for ( CPropertyBag::iterator it; m_pbSession.List().Next( it ); )
-					if ( !it->IsKey( oexT( "_ts" ) )
-						 || ( it.Obj()[ oexT( "_ts" ) ].ToULong() + m_uSessionTimeout ) < ts )
+				for ( CPropertyBag8::iterator it; m_pbSession.List().Next( it ); )
+					if ( !it->IsKey( "_ts" )
+						 || ( it.Obj()[ "_ts" ].ToULong() + m_uSessionTimeout ) < ts )
 						it = m_pbSession.List().Erase( it );
 
 			} // end if
@@ -358,7 +358,7 @@ private:
 	oexBOOL						m_bEnableSessions;
 
 	/// Stores session data
-	CPropertyBag				m_pbSession;
+	CPropertyBag8				m_pbSession;
 
 	/// Lock for session data access
 	CLock						m_lockSession;

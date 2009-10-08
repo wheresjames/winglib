@@ -106,15 +106,15 @@
 		{
 			if ( 0 > i || GetResourceCount() <= i )
 				return -1;
-				
-			return oexMbToStrPtr( _g_oexlib_resources[ i ].size );
+
+			return _g_oexlib_resources[ i ].size;
 		}
 
 		oexCPVOID GetResourcePtr( oexLONG i )
 		{
 			if ( 0 > i || GetResourceCount() <= i )
 				return 0;
-				
+
 			return _g_oexlib_resources[ i ].data;
 		}
 
@@ -122,7 +122,7 @@
 		{
 			if ( 0 > i || GetResourceCount() <= i )
 				return CStr();
-				
+
 			return oexMbToStrPtr( _g_oexlib_resources[ i ].name );
 		}
 

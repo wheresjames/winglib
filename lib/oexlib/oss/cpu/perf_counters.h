@@ -71,7 +71,7 @@ protected:
 
 		void Reset()
 		{
-			memset(m_pBuffer,NULL,m_Size);
+			memset(m_pBuffer,0,m_Size);
 		}
 		operator LPBYTE ()
 		{
@@ -113,12 +113,9 @@ protected:
 		DWORD BufferSize = Buffer.GetSize();
 		LONG lRes;
 
-		char keyName[32];
-		sprintf(keyName,"%u %u",(unsigned int)dwObjectIndex, (unsigned int)dwCounterIndex);
-
 		Buffer.Reset();
 		while( (lRes = RegQueryValueEx( HKEY_PERFORMANCE_DATA,
-								   keyName,
+								   oexMks( dwObjectIndex, dwCounterIndex ).Ptr(),
 								   NULL,
 								   NULL,
 								   Buffer,

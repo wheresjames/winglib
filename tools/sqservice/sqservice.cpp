@@ -21,9 +21,9 @@ int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData, s
 
 	// Data container
 	oex::CStr s;
-	
+
 	// Possible script override folders
-	const char *szSub[] = { oexT( "config" ), oexT( "scripts" ), oexT( "sq" ), 0 };
+	oex::oexCSTR szSub[] = { oexT( "config" ), oexT( "scripts" ), oexT( "sq" ), 0 };
 
 	// Is there an override script?
 	oex::CStr sRoot = oexGetModulePath();
@@ -31,7 +31,7 @@ int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData, s
 	{	oex::CStr sSub = oexBuildPath( sRoot, oexBuildPath( szSub[ i ], sScript.c_str() ) );
 		if ( oexExists( sSub.Ptr() ) )
 		{	s = oexMbToStr( oexFileGetContents( sSub.Ptr() ) );
-			sName.assign( sSub.Ptr(), sSub.Length() ); 
+			sName.assign( sSub.Ptr(), sSub.Length() );
 		} // end if
 	} // end for
 
@@ -54,10 +54,10 @@ public:
 
 	CSqService()
 	{
-		SetName( oexT( OEX_PROJECT_NAME ) );
+		SetName( oexTEXT( OEX_PROJECT_NAME ) );
 	}
 
-	virtual int OnRun() 
+	virtual int OnRun()
 	{
 		// Initialize sockets
 		if ( !oex::os::CIpSocket::InitSockets() )
@@ -100,7 +100,7 @@ public:
 			return oexERROR( -5, oexT( "Failed to start script thread" ) );
 
 		// Wait on service to shutdown or thread to exit
-		while ( IsRunning() && g_psqScriptThread->IsRunning() )			    
+		while ( IsRunning() && g_psqScriptThread->IsRunning() )
 			oexSleep( 100 );
 
 		if ( IsRunning() )
@@ -123,7 +123,7 @@ public:
 		// Uninitialize sockets
 		oex::os::CIpSocket::UninitSockets();
 
-		return 0; 
+		return 0;
 	}
 
 };

@@ -487,7 +487,7 @@ void CCellConnection::VerifyTemplate()
 				// Does it need to be re-indexed?
 				if ( n != i )
 				{
-					it->second.list()[ oexFmt( "%.3d", i ).Ptr() ].list() = itVal->second.list();
+					it->second.list()[ oexFmt( oexT( "%.3d" ), i ).Ptr() ].list() = itVal->second.list();
 
 					bErase = oex::oexTRUE;
 				} // end if

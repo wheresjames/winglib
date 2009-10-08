@@ -575,12 +575,12 @@ public:
 
 			} // end if
 
-			str << tabs << oexTT( T_L, "Array()" ) oexNL << tabs << oexTT( T_L, "{" ) oexNL;
+			str << tabs << oexTT( T_L, "Array()" ) << oexNL << tabs << oexTT( T_L, "{" ) << oexNL;
 
 			for ( iterator it; pb.List().Next( it ); )
 				str << PrintR( it.Obj(), it.Node()->key, uDepth );
 
-			str << tabs << oexTT( T_L, "}" ) oexNL;
+			str << tabs << oexTT( T_L, "}" ) << oexNL;
 
 		} // end if
 

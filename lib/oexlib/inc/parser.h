@@ -463,12 +463,12 @@ public:
 		{
 			static const SHtmlItem< T > c_cnv[] =
 			{
-				{ oexTC( T, ' ' ), "&nbsp;", 6 },
-				{ oexTC( T, '"' ), "&quot;", 6 },
-				{ oexTC( T, '&' ), "&amp;", 5 },
-				{ oexTC( T, '<' ), "&lt;", 4 },
-				{ oexTC( T, '>' ), "&gt;", 4 },
-				{ oexTC( T, '\n' ), "<br>", 4 },
+				{ oexTC( T, ' ' ), oexTT( T, "&nbsp;" ), 6 },
+				{ oexTC( T, '"' ), oexTT( T, "&quot;" ), 6 },
+				{ oexTC( T, '&' ), oexTT( T, "&amp;" ), 5 },
+				{ oexTC( T, '<' ), oexTT( T, "&lt;" ), 4 },
+				{ oexTC( T, '>' ), oexTT( T, "&gt;" ), 4 },
+				{ oexTC( T, '\n' ), oexTT( T, "<br>" ), 4 },
 				{ 0, oexNULL }
 			};
 

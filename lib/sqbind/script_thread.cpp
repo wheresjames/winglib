@@ -179,7 +179,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 	// Does property value exist?
 	else if ( sMsg == oexT( "pb_isset" ) )
-		*pReply = ( m_pb.find_at( mapParams[ oexT( "key" ) ].c_str() ).IsValid() ) ? "1" : "";
+		*pReply = ( m_pb.find_at( mapParams[ oexT( "key" ) ].c_str() ).IsValid() ) ? oexT( "1" ) : oexT( "" );
 
 	// Return serialized property bag
 	else if ( sMsg == oexT( "pb_all" ) )

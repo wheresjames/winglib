@@ -3811,7 +3811,7 @@ class TUnzip
 ZRESULT TUnzip::Open(void *z,unsigned int len,DWORD flags)
 { if (uf!=0 || currentfile!=-1) return ZR_NOTINITED;
   //
-#ifdef GetCurrentDirectory
+#if !defined( OEX_WINCE ) && defined( GetCurrentDirectory )
   GetCurrentDirectory(MAX_PATH,rootdir);
 #else
   _tcscpy(rootdir,_T("\\"));

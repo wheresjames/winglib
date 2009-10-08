@@ -205,7 +205,8 @@
 
 #define oexSizeOfArray( a )         		( sizeof( a ) / sizeof( a[ 0 ] ) )
 
-#define oexZeroMemory( p, sz )				OEX_NAMESPACE::os::CSys::Zero( p, sz );
+#define oexZeroMemory						OEX_NAMESPACE::os::CSys::Zero
+#define oexZero( o )						oexZeroMemory( &o, sizeof( o ) )
 
 #define oexEMPTY_STRING             		oexT( "" )
 
@@ -402,4 +403,4 @@
 #define oexRUN_SERVICE( cType ) \
 	cType theApp; \
 	int main( int argc, char* argv[] ) \
-	{	return OEX_NAMESPACE::os::CServiceImpl::RunService( argc, (const char**)argv, OEX_PROJECT_NAME, OEX_PROJECT_DESC ); }
+	{	return OEX_NAMESPACE::os::CServiceImpl::RunService( argc, (const char**)argv, oexTEXT( OEX_PROJECT_NAME ), oexTEXT( OEX_PROJECT_DESC ) ); }

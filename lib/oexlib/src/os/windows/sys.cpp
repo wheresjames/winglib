@@ -754,10 +754,30 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 	if ( !oexCHECK_PTR( x_pFile ) )
 		return oexFALSE;
 
+#if !defined( OEX_WINCE )
+
 	return ( 32 < (unsigned int)ShellExecute( NULL, oexT( "open" ),
 											  x_pFile, x_pParams,
 											  x_pDirectory, SW_SHOWNORMAL ) )
 		   ? oexTRUE : oexFALSE;
+#else
+
+	SHELLEXECUTEINFO sei;
+	oexZero( sei );
+	sei.cbSize = sizeof( sei );
+	sei.fMask = SEE_MASK_FLAG_NO_UI | SEE_MASK_NOCLOSEPROCESS;
+	sei.lpVerb = oexT( "open" );
+	sei.lpFile = x_pFile;
+	sei.lpParameters = x_pParams;
+	sei.lpDirectory = x_pDirectory;
+	sei.nShow = SW_SHOWNORMAL;
+
+	if ( !ShellExecuteEx( &sei ) )
+		return oexFALSE;
+
+	return ( 32 < (oexUINT)sei.hInstApp ) ? oexTRUE : oexFALSE;
+
+#endif
 }
 
 static CCpuUsage g_cpu;

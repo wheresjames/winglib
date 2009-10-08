@@ -607,7 +607,7 @@ oex::oexRESULT TestStrings()
 	     || !oexVERIFY( str1.Replace( oexT( "LMNO" ), oexT( "1234" ) ) == oexT( "ABCDEFGHIJK1234PQRSTUVWXYZ" ) )
 	     || !oexVERIFY( str1.Replace( oexT( "XYZ" ), oexT( "123" ) ) == oexT( "ABCDEFGHIJKLMNOPQRSTUVW123" ) )
 	     || !oexVERIFY( str1.Replace( oexT( "ABCDEFGHIJKLMNOPQRSTUVWXYZ" ), oexT( "123" ) ) == oexT( "123" ) )
-	     || !oexVERIFY( oex::CStr( "my new script" ).Replace( oexT( " " ), oexT( "_" ) ) == oexT( "my_new_script" ) )
+	     || !oexVERIFY( oex::CStr( oexT( "my new script" ) ).Replace( oexT( " " ), oexT( "_" ) ) == oexT( "my_new_script" ) )
 		 )
 		return -49;
 
@@ -1208,17 +1208,17 @@ oex::oexRESULT TestPropertyBag()
     if ( !oexVERIFY( oex::CParser::Implode( pb[ oexT( "1" ) ].List(), oexT( "," )) == oexT( "1a,1b,1c" ) ) )
 		return -4;
 
-	CStr s = pb.at( "1.a" ).ToString();
-	if ( !oexVERIFY( pb.at( "1.a" ).ToString() == oexT( "1a" ) ) )
+	CStr s = pb.at( oexT( "1.a" ) ).ToString();
+	if ( !oexVERIFY( pb.at( oexT( "1.a" ) ).ToString() == oexT( "1a" ) ) )
 		return -5;
 
-	if ( !oexVERIFY( pb.at( oex::CStr( "1/b" ), oex::CStr( "/" ) ) == oexT( "1b" ) ) )
+	if ( !oexVERIFY( pb.at( oex::CStr( oexT( "1/b" ) ), oex::CStr( oexT( "/" ) ) ) == oexT( "1b" ) ) )
 		return -6;
 
-	if ( !oexVERIFY( pb.at( "3.a.1" ) == oexT( "3a1" ) ) )
+	if ( !oexVERIFY( pb.at( oexT( "3.a.1" ) ) == oexT( "3a1" ) ) )
 		return -7;
 
-	if ( !oexVERIFY( pb.at( oex::CStr( "3/a/1" ), oex::CStr( "/" ) ) == oexT( "3a1" ) ) )
+	if ( !oexVERIFY( pb.at( oex::CStr( oexT( "3/a/1" ) ), oex::CStr( oexT( "/" ) ) ) == oexT( "3a1" ) ) )
 		return -8;
 
 	oex::TPropertyBag< oex::oexINT, oex::oexINT > pbii;
@@ -1461,10 +1461,10 @@ oex::oexRESULT TestParser()
     if ( !oexVERIFY( pb[ oexT( "o" ) ].ToString() == oexT( "mydir" ) ) )
         return -34;
 
-	oex::CStr sMime = oexT( "a: b\r\n" )
-					  oexT( "c: d\r\n" )
-					  oexT( "e: f\r\n" )
-					  oexT( "\r\n" );
+	oex::CStr sMime = oex::CStr() << oexT( "a: b\r\n" )
+								  << oexT( "c: d\r\n" )
+								  << oexT( "e: f\r\n" )
+								  << oexT( "\r\n" );
 
 	pb = oex::CParser::DecodeMIME( sMime );
 
@@ -1477,9 +1477,10 @@ oex::oexRESULT TestParser()
     if ( !oexVERIFY( pb[ oexT( "e" ) ].ToString() == oexT( "f" ) ) )
         return -42;
 
-	sMime = oexT( "a: b\r\n" )
-			oexT( "c: d\r\n" )
-			oexT( "e: f" );
+	sMime.Destroy();
+	sMime << oexT( "a: b\r\n" )
+		  << oexT( "c: d\r\n" )
+		  << oexT( "e: f" );
 
 	pb = oex::CParser::DecodeMIME( sMime );
 
@@ -1492,9 +1493,10 @@ oex::oexRESULT TestParser()
     if ( !oexVERIFY( pb[ oexT( "e" ) ].ToString() == oexT( "f" ) ) )
         return -45;
 
-	sMime = oexT( "a: b\r\n" )
-			oexT( "c:\r\n" )
-			oexT( "e: f" );
+	sMime.Destroy();
+	sMime << oexT( "a: b\r\n" )
+		  << oexT( "c:\r\n" )
+		  << oexT( "e: f" );
 
 	pb = oex::CParser::DecodeMIME( sMime );
 
@@ -1603,9 +1605,9 @@ oex::oexRESULT TestZip()
 
 	// Check high compression text that is larger than internal buffer
 	// defined at oss/unzip.h(230)
-	char buf[ 1024 * 64 ];
+	oexTCHAR buf[ 1024 * 64 ];
 	for ( unsigned int i = 0; i < sizeof( buf ); i++ )
-		buf[ i ] = (char)( i % 64 ) + ' ';
+		buf[ i ] = (oexTCHAR)( i % 64 ) + oexT( ' ' );
 
 	sStr.Set( buf, sizeof( buf ) );
 

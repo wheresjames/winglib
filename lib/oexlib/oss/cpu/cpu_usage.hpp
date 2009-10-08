@@ -126,7 +126,7 @@ int CCpuUsage::GetCpuUsage()
 
 	// Cpu usage counter is 8 byte length.
 	CPerfCounters<LONGLONG> PerfCounters;
-	char szInstance[256] = {0};
+	oex::CStr sInstance;
 
 //		Note:
 //		====
@@ -148,7 +148,7 @@ int CCpuUsage::GetCpuUsage()
 	case PF_WIN2K_XP:
 		dwObjectIndex = PROCESSOR_OBJECT_INDEX;
 		dwCpuUsageIndex = PROCESSOR_TIME_COUNTER_INDEX;
-		strcpy(szInstance,"_Total");
+		sInstance = oexT( "_Total" );
 		break;
 	default:
 		return -1;
@@ -160,7 +160,7 @@ int CCpuUsage::GetCpuUsage()
 	LARGE_INTEGER	NewPerfTime100nSec;
 	NewPerfTime100nSec.QuadPart = 0;
 
-	lnNewValue = PerfCounters.GetCounterValue(&pPerfData, dwObjectIndex, dwCpuUsageIndex, szInstance);
+	lnNewValue = PerfCounters.GetCounterValue(&pPerfData, dwObjectIndex, dwCpuUsageIndex, sInstance.Ptr());
 	NewPerfTime100nSec = pPerfData->PerfTime100nSec;
 
 	if (m_bFirstTime)
@@ -193,18 +193,16 @@ int CCpuUsage::GetCpuUsage()
 
 int CCpuUsage::GetCpuUsage(LPCTSTR pProcessName)
 {
-//	static PLATFORM Platform = GetPlatform();
-
 	if (m_bFirstTime)
 		EnablePerformaceCounters();
 
 	// Cpu usage counter is 8 byte length.
 	CPerfCounters<LONGLONG> PerfCounters;
-	char szInstance[256] = {0};
+	oex::CStr sInstance;
 
 	DWORD dwObjectIndex = PROCESS_OBJECT_INDEX;
 	DWORD dwCpuUsageIndex = PROCESSOR_TIME_COUNTER_INDEX;
-	strcpy(szInstance,pProcessName);
+	sInstance = pProcessName;
 
 	int				CpuUsage = 0;
 	LONGLONG		lnNewValue = 0;
@@ -212,7 +210,7 @@ int CCpuUsage::GetCpuUsage(LPCTSTR pProcessName)
 	LARGE_INTEGER	NewPerfTime100nSec;
 	NewPerfTime100nSec.QuadPart = 0;
 
-	lnNewValue = PerfCounters.GetCounterValue(&pPerfData, dwObjectIndex, dwCpuUsageIndex, szInstance);
+	lnNewValue = PerfCounters.GetCounterValue(&pPerfData, dwObjectIndex, dwCpuUsageIndex, sInstance.Ptr());
 	NewPerfTime100nSec = pPerfData->PerfTime100nSec;
 
 	if (m_bFirstTime)

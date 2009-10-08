@@ -117,8 +117,8 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	// Update new session data
 	if ( mReply.isset( oexT( "session" ) ) )
 	{
-		if ( mReply[ "session" ].length() )
-			x_pSession->Session() = oex::CParser::Deserialize( mReply[ oexT( "session" ) ].c_str() );
+		if ( mReply[ oexT( "session" ) ].length() )
+			x_pSession->Session() = oex::CParser::Deserialize( oexStrToMb( mReply[ oexT( "session" ) ].c_str() ) );
 		else
 			x_pSession->Session().Destroy();
 

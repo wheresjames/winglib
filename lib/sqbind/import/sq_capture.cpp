@@ -103,13 +103,12 @@ stdString SaveImage( void *pBuf, long lSize, long lWidth, long lHeight )
 
 	unsigned char *pEnc = 0;
 	int lEnc = 0;
-	if ( !img.Encode( &pEnc, &lEnc, "jpg" ) || !pEnc || !lEnc )
+	if ( !img.Encode( &pEnc, &lEnc, oexT( "jpg" ) ) || !pEnc || !lEnc )
 		return stdString();
 
-	stdString ret;
-	ret.assign( (char*)pEnc, lEnc );
+	oex::CStr s = oexMbToStr( oex::CStr8( (char*)pEnc, lEnc ) );
 
-	return ret;
+	return stdString().assign( s.Ptr(), s.Length() );
 }
 
 stdString CSqCapture::GetSupportedFormats()
@@ -152,7 +151,9 @@ stdString CSqCapture::Capture( const stdString &sEncode )
 	if ( !uReq || uReq == uFormat )
 	{
 		if ( m_cap.GetBuffer() && m_cap.GetBufferSize() )
-			ret.assign( (char*)m_cap.GetBuffer(), m_cap.GetBufferSize() );
+		{	oex::CStr s = oexMbToStr( oex::CStr8( (char*)m_cap.GetBuffer(), m_cap.GetBufferSize() ) );
+			ret.assign( s.Ptr(), s.Length() );
+		} // end if
 
 	} // end if
 
@@ -175,7 +176,9 @@ stdString CSqCapture::Capture( const stdString &sEncode )
 							oex::oexPBYTE pEnc;
 							oex::oexINT nEnc;
 							if ( 0 < m_img.Encode( &pEnc, &nEnc, oexT( "JPG" ) ) )
-								ret.assign( (char*)pEnc, nEnc );
+							{	oex::CStr s = oexMbToStr( oex::CStr8( (char*)pEnc, nEnc ) );
+								ret.assign( s.Ptr(), s.Length() );
+							} // end if
 
 						} // end if
 
@@ -201,7 +204,9 @@ oexEcho( "Starting conversion" );
 
 oexEcho( "Starting image encoding" );
 							if ( 0 < m_img.Encode( &pEnc, &nEnc, oexT( "JPG" ) ) )
-								ret.assign( (char*)pEnc, nEnc );
+							{	oex::CStr s = oexMbToStr( oex::CStr8( (char*)pEnc, nEnc ) );
+								ret.assign( s.Ptr(), s.Length() );
+							} // end if
 							else
 								oexERROR( 0, oexT( "Error encoding image" ) );
 

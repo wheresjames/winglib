@@ -342,7 +342,7 @@ public:
 		{
 			// Save new connection information
 			m_pbSession.Destroy();
-			m_pbSession[ "_id" ] = oexGuidToString();
+			m_pbSession[ "_id" ] = oexStrToMb( oexGuidToString() );
 			m_pbSession[ "_ip" ] = ip;
 
 		} // end if
@@ -395,14 +395,13 @@ public:
 		if ( !m_pPort )
 			return;
 
-		CStr8 sLocal = m_pPort->LocalAddress().GetDotAddress();
-		CStr8 sRemote = m_pPort->PeerAddress().GetDotAddress();
+		CStr8 sLocal = oexStrToMb( m_pPort->LocalAddress().GetDotAddress() );
+		CStr8 sRemote = oexStrToMb( m_pPort->PeerAddress().GetDotAddress() );
 		m_pbRequest[ "SERVER_ADDR" ] = sLocal;
 		m_pbRequest[ "SERVER_PORT" ] = m_pPort->LocalAddress().GetPort();
 		m_pbRequest[ "REMOTE_ADDR" ] = sRemote;
 		m_pbRequest[ "REMOTE_PORT" ] = m_pPort->PeerAddress().GetPort();
-		m_pbRequest[ "IS_REMOTE" ] = ( sLocal != sRemote && sRemote != "127.0.0.1" )
-										? oexT( "1" ) : oexT( "" );
+		m_pbRequest[ "IS_REMOTE" ] = ( sLocal != sRemote && sRemote != "127.0.0.1" ) ? "1" : "";
 	}
 
     /// Reads in the http headers
@@ -626,11 +625,11 @@ public:
 			return SendFile( m_sFile.Ptr(), m_sFileType.Ptr() );
 
 		// For compression support
-		CStr *pSend = &m_sContent;
+		CStr8 *pSend = &m_sContent;
 
 #ifdef OEX_ENABLE_ZIP
 
-		CStr sCompressed;
+		CStr8 sCompressed;
 
 		// Is compression enabled, and does the client support it?
 		if (m_bEnableCompression )
@@ -671,9 +670,9 @@ public:
 			return oexFALSE;
 
 		if ( oexCHECK_PTR( x_pType ) && *x_pType )
-			SetContentType( x_pType );
+			SetContentType( oexStrToMbPtr( x_pType ) );
 		else
-			SetContentType( x_pFile );
+			SetContentType( oexStrToMbPtr( x_pFile ) );
 
 		CFile f;
 		if ( !f.OpenExisting( x_pFile ).IsOpen() )

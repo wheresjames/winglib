@@ -94,7 +94,7 @@ template < typename T_PB, typename T_STD  >
 			} // end if
 
 			else
-				SQBIND_PropertyBagToMulti( *it, m[ sKey ].list() );
+				SQBIND_PropertyBag8ToMulti( *it, m[ sKey ].list() );
 
 		} // end for
 	}
@@ -132,7 +132,7 @@ template < typename T_STD, typename T_PB  >
 			} // end if
 
 			else
-				SQBIND_MultiToPropertyBag( it->second.list(), pb[ oexStrToMbPtr( sKey.c_str() ) ] );
+				SQBIND_MultiToPropertyBag8( it->second.list(), pb[ oexStrToMbPtr( sKey.c_str() ) ] );
 
 		} // end for
 	}
