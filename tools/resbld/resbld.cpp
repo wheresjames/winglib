@@ -48,7 +48,7 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 		sPre << oexT( "char " ) << sVar << oexT( "[] = " ) << oexNL << oexT( "{" ) << oexNL << oexT( "\t" );
 
 	if ( !sSuf.Length() )
-//		sSuf << oexNL << oexT( "\t0" ) << oexNL << oexT( "};" ) << oexNL;
+		sSuf << oexNL << oexT( "\t0" ) << oexNL << oexT( "};" ) << oexNL;
 
 	if ( sInc.Length() )
 	{
