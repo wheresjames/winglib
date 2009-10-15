@@ -3,16 +3,15 @@
 #include "stdafx.h"
 
 
+// av_open_input_file av_find_stream_info
+
 CFfDecoder::CFfDecoder()
 {
 	m_pCodec = oexNULL;
 	m_pCodecContext = oexNULL;
 
-	// Initialize ffmpeg
-    avcodec_init();
-
-	// Register all available codecs
-    avcodec_register_all();
+	// Register codecs
+	av_register_all();
 
 }
 
@@ -29,7 +28,6 @@ int CFfDecoder::Create( int x_nCodec )
 	m_pCodec = avcodec_find_decoder( (CodecID)x_nCodec );
 	if ( !m_pCodec )
 		return 0;
-
 
 	return 1;
 }

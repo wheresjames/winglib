@@ -103,7 +103,29 @@ namespace sqbind
 #endif
 		}
 
+		int getWidth()
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.GetWidth();
+#endif
+		}
+
+		int getHeight()
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.GetHeight();
+#endif
+		}
+
+
 		static void Register( sqbind::VM vm );
+
+		/// Returns reference to the wrapped image object
+		oex::CImage& Obj() { return m_img; }
 
 	private:
 

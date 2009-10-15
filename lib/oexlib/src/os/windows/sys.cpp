@@ -780,6 +780,8 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 #endif
 }
 
+#if !defined( OEX_GCC )
+
 static CCpuUsage g_cpu;
 oexDOUBLE CSys::GetCpuLoad()
 {	return g_cpu.GetCpuUsage();
@@ -788,3 +790,19 @@ oexDOUBLE CSys::GetCpuLoad()
 oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName )
 {	return g_cpu.GetCpuUsage( x_pProcessName );
 }
+
+#else
+
+// +++ At the moment, the cpu code above is crashing in gcc,
+//     and isn't working anyway
+
+static CCpuUsage g_cpu;
+oexDOUBLE CSys::GetCpuLoad()
+{	return 0;
+}
+
+oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName )
+{	return 0;
+}
+
+#endif

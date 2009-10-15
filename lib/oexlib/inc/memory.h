@@ -201,6 +201,7 @@ public:
     oexBOOL IsMapped() const
     {   return 0 < m_fm.Size(); }
 
+	/// Allocate a new block of memory
     TMem& New( oexUINT x_uSize, oexBOOL x_bConstructed = oexFALSE, oexBOOL x_bUseFullBlock = oexFALSE )
     {
         // Lose old memory
@@ -221,7 +222,6 @@ public:
 #else
             m_pMem = CAlloc().New< T >( x_uSize, x_bConstructed, x_bUseFullBlock );
 #endif
-
 
 #if defined ( oexDEBUG )
         if ( !Ptr() )
@@ -283,7 +283,7 @@ public:
         Delete();
     }
 
-	/// Generic resize
+	/// Zero memory
     TMem& Zero()
     {
         oexUINT uSize = Size();
@@ -312,6 +312,9 @@ public:
         // Shared memory cannot be resized
         if ( !oexVERIFY( !m_fm.Ptr() ) )
             return *this;
+
+		// Unshare the memory
+		Unshare();
 
         // Do we have what we need?
         oexUINT uSize = Size();
@@ -531,16 +534,38 @@ public:
     TMem& MemCpy( oexCONST T *x_pBuf, oexUINT x_uSize )
     {
         // Verify pointer
-        if ( !oexVERIFY_PTR( x_pBuf ) )
+        if ( !oexVERIFY_PTR( x_pBuf ) || !x_uSize )
             return *this;
 
         // Do we need more space?
         if ( Size() < x_uSize )
-            if ( !New( x_uSize ).Ptr() )
+            if ( !OexNew( x_uSize ).Ptr() )
                 return *this;
 
         // Copy data if all the stars align
         os::CSys::MemCpy( Ptr(), x_pBuf, x_uSize * sizeof( T ) );
+
+        return *this;
+    }
+
+    /// Append data from a raw buffer
+    TMem& MemAppend( oexCONST T *x_pBuf, oexUINT x_uSize )
+    {
+        // Verify pointer
+        if ( !oexVERIFY_PTR( x_pBuf ) || !x_uSize )
+            return *this;
+
+		// How much space do we need?
+		oexUINT uSize = Size();
+		oexUINT uNewSize = uSize + x_uSize;
+
+        // Do we need more space?
+        if ( uSize < uNewSize )
+            if ( !Resize( uNewSize ).Ptr() )
+                return *this;
+
+        // Copy data if all the stars align
+        os::CSys::MemCpy( Ptr( uSize ), x_pBuf, x_uSize * sizeof( T ) );
 
         return *this;
     }
@@ -602,6 +627,27 @@ public:
             mem.Copy( *this, x_pNewName, x_uNameLen );
         return mem;
     }
+
+    /// Creates our own copy of a string if it's shared
+	oexBOOL Unshare()
+	{
+		// Punt if not shared or offset
+		if ( 1 == GetRefCount() )
+			return oexTRUE;
+
+		// Create a new buffer
+		TMem< T > mem;
+		if ( !oexVERIFY_PTR( mem.OexNew( Size() ).Ptr() ) )
+			return oexFALSE;
+
+		// Copy our buffer
+		mem.Copy( *this );
+
+        // Use the new memory
+		Assume( mem );
+
+		return oexTRUE;
+	}
 
     /// Causes this object to share memory with another
     TMem& Share( oexCONST TMem &x_m )

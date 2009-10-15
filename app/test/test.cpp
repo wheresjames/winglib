@@ -2221,7 +2221,7 @@ oex::oexRESULT Test_Threads()
 	                 && 0 == tl4.Stop() ) )
 	    return -21;
 
-	oexPrintf( oexT( "Thread counts are, %d, %d, %d, %d" ),
+	oexPrintf( oexT( "Thread counts are, %d, %d, %d, %d\n" ),
 			   count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
 
 	if ( !oexVERIFY( 0 == val ) )

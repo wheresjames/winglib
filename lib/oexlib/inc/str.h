@@ -61,8 +61,11 @@ template < typename T > class TStr
 {
 public:
 
-	// Size type
+	/// Size type
 	typedef oexLONG		size_type;
+
+	/// Char type
+	typedef T			char_type;
 
 public:
 

@@ -43,6 +43,7 @@ public:
 				break;
 			}
 
+
 			pPerfObj = NextObject( pPerfObj );
 		}
 		return lnValue;

@@ -40,6 +40,7 @@ namespace sqbind
 {
 	void SqBindAll( sqbind::VM x_vm )
 	{
+		CSqBinary::Register( x_vm );
 		CSqString::Register( x_vm );
 		CSqVector::Register( x_vm );
 		CSqList::Register( x_vm );
@@ -48,7 +49,6 @@ namespace sqbind
 		CSqFile::Register( x_vm );
 		CSqTime::Register( x_vm );
 		CSqImage::Register( x_vm );
-		CSqCapture::Register( x_vm );
 		CSqCapture::Register( x_vm );
 
 #if defined( OEX_ENABLE_SQLITE )
@@ -145,10 +145,34 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqImage, CSqImage )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Save )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Encode )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Decode )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, getWidth )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, getHeight )
 SQBIND_REGISTER_CLASS_END()
 
 
 void CSqImage::Register( sqbind::VM vm )
 {
 	SQBIND_EXPORT( vm, CSqImage );
+}
+
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Allocate )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Free )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Resize )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Copy )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Share )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Size )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, get )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, set )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, SetName )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, GetName )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setUsed )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getUsed )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setString )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getString )
+SQBIND_REGISTER_CLASS_END()
+
+void CSqBinary::Register( sqbind::VM vm )
+{
+	SQBIND_EXPORT( vm, CSqBinary );
 }

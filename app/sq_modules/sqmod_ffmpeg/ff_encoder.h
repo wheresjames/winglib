@@ -18,7 +18,13 @@ public:
 	void Destroy();
 
 	/// Creates a decoder
-	int Create( int x_nCodec );
+	int Create( int x_nCodec, int width, int height );
+
+	/// Encode image
+	int Encode( int fmt, int width, int height, sqbind::CSqBinary *in, sqbind::CSqBinary *out );
+
+	/// Encode image
+	int EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *buf );
 
 private:
 

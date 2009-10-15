@@ -9,10 +9,12 @@
 #include "oexlib.h"
 #include "sqbind.h"
 
-extern "C" 
+extern "C"
 {
 	#include "libavcodec/avcodec.h"
 	#include "libavformat/avformat.h"
+	#include "libswscale/swscale.h"
 }
 
 #include "ff_decoder.h"#include "ff_encoder.h"
+#include "ff_convert.h"

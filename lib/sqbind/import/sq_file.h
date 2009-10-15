@@ -55,8 +55,38 @@ namespace sqbind
 		int Write( const stdString &sData )
 		{	return m_f.Write( oexStrToBinPtr( sData.c_str() ), sData.length() ); }
 
+		int WriteBin( CSqBinary *sData )
+		{	if ( !sData ) return 0;
+			return m_f.Write( sData->Ptr(), sData->getUsed() );
+		}
+
 		stdString Read()
 		{	return oexBinToStr( m_f.Read() ).Ptr(); }
+
+		CSqBinary ReadBin( int nBytes )
+		{	if ( !nBytes )
+				return CSqBinary();
+
+			// Don't read more than is available
+			oex::oexINT64 nSize = m_f.Size();
+			if ( nSize < nBytes )
+				nBytes = (int)nSize;
+
+			// Allocate buffer
+			CSqBinary buf;
+			if ( !buf.Allocate( nBytes ) )
+				return buf;
+
+			// Attempt read
+			oex::oexINT64 nRead = 0;
+			if ( !m_f.Read( buf._Ptr(), nBytes, &nRead ) )
+				return CSqBinary();
+
+			// How'd it go?
+			buf.setUsed( (int)nRead );
+
+			return buf;
+		}
 
 		static stdString get_contents( const stdString &sFile )
 		{	oex::CStr data = oexBinToStr( oex::CFile().OpenExisting( sFile.c_str() ).Read() );
