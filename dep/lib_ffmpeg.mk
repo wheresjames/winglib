@@ -58,14 +58,25 @@ include $(PRJ_LIBROOT)/build.mk
 export LOC_TAG := libavcodec
 LOC_CXX_libavcodec := c
 LOC_SRC_libavcodec := $(CFG_LIBROOT)/ffmpeg/libavcodec
-
-LOC_EXC_libavcodec := libamr libdiracdec libdiracenc \
+LOC_EXC_libavcodec := acelp_filters h264enc \
+					  \
+					  vaapi vaapi_mpeg2 vaapi_mpeg4 vaapi_vc1 \
+					  \
+					  libamr libdiracdec libdiracenc \
 					  libfaac libfaad libgsm libmp3lame libopenjpeg libschroedinger \
 					  libschroedingerdec libschroedingerenc libspeexdec libtheoraenc \
 					  libvorbis libx264 libxvidff libxvid_rc \
 					  \
 					  aacenc aacpsy beosthread g729dec imgconvert_template motion_est_template \
-					  mpegvideo_xvmc os2thread svq3 vdpau 
+					  mpegvideo_xvmc os2thread pthread svq3 vdpau 
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := libswscale
+LOC_CXX_libswscale := c
+LOC_SRC_libswscale := $(CFG_LIBROOT)/ffmpeg/libswscale
+LOC_EXC_libswscale := rgb2rgb_template swscale_template
+include $(PRJ_LIBROOT)/build.mk
+
 
 ifeq ($(PLATFORM),windows)
 	LOC_EXC_libavcodec := $(LOC_EXC_libavcodec) pthread

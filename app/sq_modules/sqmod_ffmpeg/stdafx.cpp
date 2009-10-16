@@ -33,6 +33,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfEncoder, CFfEncoder )
 
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, Destroy )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, Create )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, IsLoaded )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, Encode )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, EncodeImage )
 

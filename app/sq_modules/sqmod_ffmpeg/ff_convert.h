@@ -14,6 +14,9 @@ public:
 	/// Fills in frame data for specified format
 	static int FillAVFrame( AVFrame *pAv, int fmt, int width, int height, void *buf );
 
+	/// Fills in the picture structure for the specified format
+	static int FillAVPicture( AVPicture *pPic, int fmt, int width, int height, void *buf );
+
 	/// Calculate image buffer size for specified format
 	static int CalcImageSize( int fmt, int width, int height );
 

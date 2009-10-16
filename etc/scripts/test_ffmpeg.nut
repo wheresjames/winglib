@@ -19,11 +19,11 @@ function test_encode()
 		return;
 	} // end if
 
-	local w = pic.getWidth();
-	local h = pic.getHeight();
+//	local w = pic.getWidth();
+//	local h = pic.getHeight();
 
 	// Convert to YUV420 color space
-	local buf = CSqBinary();
+//	local buf = CSqBinary();
 //	if ( !CFfConvert().ConvertColorIB( pic, buf, CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_BICUBIC ) )
 //	{	_self.echo( "ConvertColorIB() failed" );
 //		return;
@@ -34,18 +34,18 @@ function test_encode()
 	// Create encoder
 	local enc = CFfEncoder();
 
-	_self.echo( "return" );
-
-//	if ( !enc.Create( CFfEncoder().CODEC_ID_MPEG4, w, h ) )
+	if ( !enc.Create( CFfEncoder().CODEC_ID_MPEG4,
+					  CFfConvert().PIX_FMT_YUV420P,
+					  pic.getWidth(), pic.getHeight() ) )
 //	if ( !enc.Create( 0, w, h ) )
-//	{	_self.echo( "failed to create encoder" );
-//		return;
-//	} // end if
+	{	_self.echo( "failed to create encoder" );
+		return;
+	} // end if
 
 	// Encode the frame
 	local frame = CSqBinary();
 //	local nEnc = enc.Encode( buf, frame );
-	local nEnc = enc.EncodeImage( pic, frame );
+	local nEnc = enc.EncodeImage( pic, frame, CFfConvert().SWS_FAST_BILINEAR );
 	if ( !nEnc )
 	{	_self.echo( "Encode() failed" );
 		return;

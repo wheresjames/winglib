@@ -4,18 +4,15 @@
 
 CFfEncoder::CFfEncoder()
 {
+	m_nFmt = 0;
 	m_pCodec = oexNULL;
 	m_pCodecContext = oexNULL;
 	m_pStream = oexNULL;
 	m_pOutput = oexNULL;
 	m_pFormatContext = oexNULL;
 
-oexM();
-
 	// Register codecs
 	av_register_all();
-
-oexM();
 }
 
 void CFfEncoder::Destroy()
@@ -40,18 +37,17 @@ void CFfEncoder::Destroy()
 		m_pOutput = oexNULL;
 	} // end if
 
+	m_nFmt = 0;
 	m_pCodecContext = oexNULL;
 
+	m_tmp.Free();
 }
 
 // http://lists.mplayerhq.hu/pipermail/libav-user/2009-June/003257.html
-int CFfEncoder::Create( int x_nCodec, int width, int height )
+int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height )
 {
-oexM();
-oexSHOW( width );
-oexSHOW( height );
-
-	x_nCodec = CODEC_ID_MPEG4;
+//	x_nCodec = CODEC_ID_MPEG4;
+	m_nFmt = fmt;
 
 	if ( 0 >= width || 0 >= height )
 		return 0;
@@ -91,8 +87,7 @@ oexSHOW( height );
     params.height = height;
     params.time_base.num = 1;
     params.time_base.den = 30;
-//	params.pix_fmt = PIX_FMT_RGB24;
-	params.pix_fmt = PIX_FMT_YUV420P;
+	params.pix_fmt = (PixelFormat)m_nFmt;
 
     if ( 0 > ( res = av_set_parameters( m_pFormatContext, &params ) ) )
 	{	oexERROR( res, oexT( "av_set_parameters() failed " ) );
@@ -134,8 +129,7 @@ oexSHOW( height );
     m_pCodecContext->time_base.num = 1;
     m_pCodecContext->me_method = 1;
     m_pCodecContext->strict_std_compliance = 1;
-//	m_pCodecContext->pix_fmt = PIX_FMT_RGB24;
-	m_pCodecContext->pix_fmt = PIX_FMT_YUV420P;
+	m_pCodecContext->pix_fmt = (PixelFormat)m_nFmt;
 
 	if ( 0 > ( res = avcodec_open( m_pCodecContext, m_pCodec ) ) )
 	{	oexERROR( res, oexT( "avcodec_open() failed" ) );
@@ -146,30 +140,52 @@ oexSHOW( height );
 	return 1;
 }
 
-int CFfEncoder::Encode( int fmt, int width, int height, sqbind::CSqBinary *in, sqbind::CSqBinary *out )
+int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int sz_in, sqbind::CSqBinary *out )
 {
-	if ( !in || !out )
+oexM();
+
+	// Ensure codec
+	if ( !m_pCodecContext )
 		return 0;
 
-oexSHOW( width );
-oexSHOW( height );
+oexM();
+
+	// Validate parmeters
+	if ( !in || !sz_in || !out || !width || !height )
+		return 0;
+
+oexM();
+
+oexSHOW( sz_in );
+oexSHOW( CFfConvert::CalcImageSize( fmt, width, height ) );
+
+	// Validate buffer size
+	if ( CFfConvert::CalcImageSize( fmt, width, height ) > sz_in )
+		return 0;
+
+oexM();
 
 	// How much room could we possibly need
-	int nSize = CFfConvert::CalcImageSize( PIX_FMT_RGB24, width, height ) * 2;
+	int nSize = CFfConvert::CalcImageSize( fmt, width, height ) * 2;
 	if ( out->Size() < nSize && !out->Obj().OexNew( nSize ).Ptr() )
 		return 0;
+
+oexM();
 
 	AVFrame *paf = avcodec_alloc_frame();
 	if ( !paf )
 		return 0;
 
-	if ( !CFfConvert::FillAVFrame( paf, fmt, width, height, in->_Ptr() ) )
+oexM();
+
+	if ( !CFfConvert::FillAVFrame( paf, fmt, width, height, (void*)in ) )
 		return 0;
 
-//	paf->key_frame = 1;
+	paf->key_frame = 1;
 //	paf->pts = AV_NOPTS_VALUE;
 //	paf->motion_val = { 0, 0 };
 
+oexM();
 	int nBytes = avcodec_encode_video( m_pCodecContext, out->Obj().Ptr(), nSize, paf );
 	if ( 0 > nBytes )
 	{	oexERROR( nBytes, oexT( "avcodec_encode_video() failed" ) );
@@ -178,6 +194,7 @@ oexSHOW( height );
 		return 0;
 	} // end if
 
+oexM();
 	av_free( paf );
 
 	out->setUsed( nBytes );
@@ -185,42 +202,37 @@ oexSHOW( height );
 	return nBytes;
 }
 
-int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *buf )
+int CFfEncoder::Encode( int fmt, int width, int height, sqbind::CSqBinary *in, sqbind::CSqBinary *out )
 {
-	if ( !img || !buf )
+	// Sanity checks
+	if ( !in || !in->getUsed() )
+		return 0;
+
+	return EncodeRaw( fmt, width, height, in->Ptr(), in->getUsed(), out );
+}
+
+int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, int alg )
+{
+	// Ensure codec
+	if ( !m_pCodecContext )
+		return 0;
+
+	// Validate params
+	if ( !img || !out )
+		return 0;
+
+	// Do we need to convert the colorspace?
+	if ( PIX_FMT_RGB24 == m_nFmt )
+		return EncodeRaw( PIX_FMT_RGB24, img->getWidth(), img->getHeight(), img->Obj().GetBits(), img->Obj().GetImageSize(), out );
+
+	// Must convert to input format
+	if ( !CFfConvert::ConvertColorIB( img, &m_tmp, m_nFmt, alg ) )
 		return 0;
 
 oexM();
+oexSHOW( m_tmp.getUsed() );
 
-	// How much room could we possibly need
-	int nSize = CFfConvert::CalcImageSize( PIX_FMT_RGB24, img->getWidth(), img->getHeight() ) * 2;
-	if ( buf->Size() < nSize && !buf->Obj().OexNew( nSize ).Ptr() )
-		return 0;
-
-oexM();
-	AVFrame *paf = avcodec_alloc_frame();
-	if ( !paf )
-		return 0;
-
-oexM();
-	if ( !CFfConvert::FillAVFrame( paf, PIX_FMT_RGB24, img->getWidth(), img->getHeight(), img->Obj().GetBits() ) )
-		return 0;
-
-oexM();
-	int nBytes = avcodec_encode_video( m_pCodecContext, buf->Obj().Ptr(), nSize, paf );
-	if ( 0 > nBytes )
-	{	oexERROR( nBytes, oexT( "avcodec_encode_video() failed" ) );
-		buf->setUsed( 0 );
-		av_free( paf );
-		return 0;
-	} // end if
-
-oexM();
-
-	av_free( paf );
-
-	buf->setUsed( nBytes );
-
-	return nBytes;
+	// Do the conversion
+	return EncodeRaw( m_nFmt, img->getWidth(), img->getHeight(), m_tmp.Ptr(), m_tmp.getUsed(), out );
 }
 

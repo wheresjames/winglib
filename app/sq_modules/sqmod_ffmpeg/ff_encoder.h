@@ -18,15 +18,24 @@ public:
 	void Destroy();
 
 	/// Creates a decoder
-	int Create( int x_nCodec, int width, int height );
+	int Create( int x_nCodec, int fmt, int width, int height );
 
-	/// Encode image
+	/// Encode raw buffer
+	int EncodeRaw( int fmt, int width, int height, const void *in, int sz_in, sqbind::CSqBinary *out );
+
+	/// Encode binary buffer
 	int Encode( int fmt, int width, int height, sqbind::CSqBinary *in, sqbind::CSqBinary *out );
 
 	/// Encode image
-	int EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *buf );
+	int EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, int alg );
+
+	/// Returns non-zero if valid codec
+	int IsLoaded() { return 0 != m_pCodecContext; }
 
 private:
+
+	/// Format type
+	int						m_nFmt;
 
 	/// Pointer to codec object
     AVCodec 				*m_pCodec;
@@ -42,5 +51,8 @@ private:
 
 	/// Output container context
 	AVFormatContext			*m_pFormatContext;
+
+	/// Temp buffer
+	sqbind::CSqBinary		m_tmp;
 
 };
