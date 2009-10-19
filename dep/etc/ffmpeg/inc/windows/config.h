@@ -33,8 +33,8 @@
 #define ARCH_SH4 0
 #define ARCH_SPARC 0
 #define ARCH_SPARC64 0
-#define ARCH_X86 1
-#define ARCH_X86_32 1
+#define ARCH_X86 0
+#define ARCH_X86_32 0
 #define ARCH_X86_64 0
 #define HAVE_ALTIVEC 0
 #define HAVE_AMD3DNOW 1

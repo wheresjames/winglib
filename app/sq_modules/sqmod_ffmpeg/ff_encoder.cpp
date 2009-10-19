@@ -184,8 +184,10 @@ oexM();
 	paf->key_frame = 1;
 //	paf->pts = AV_NOPTS_VALUE;
 //	paf->motion_val = { 0, 0 };
-
+	
 oexM();
+//  /Zp16
+	__declspec(align(32)) int _align_stack_32 = 0;
 	int nBytes = avcodec_encode_video( m_pCodecContext, out->Obj().Ptr(), nSize, paf );
 	if ( 0 > nBytes )
 	{	oexERROR( nBytes, oexT( "avcodec_encode_video() failed" ) );
