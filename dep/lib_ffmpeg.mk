@@ -8,7 +8,7 @@ PRJ_NAME := ffmpeg
 PRJ_TYPE := lib
 PRJ_INCS := ffmpeg
 PRJ_LIBS := 
-PRJ_DEFS := attribute_align_arg= HAVE_AV_CONFIG_H=1
+PRJ_DEFS := HAVE_AV_CONFIG_H=1
 PRJ_LIBROOT := ..
 
 #-------------------------------------------------------------------
@@ -16,13 +16,13 @@ PRJ_LIBROOT := ..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-ifneq ($(BUILD),gcc)
-UNSUPPORTED := BUILD=$(BUILD) is invalid, ffmpeg can only be built with 'gcc'
+ifndef BUILD_FFMPEG
+UNSUPPORTED := Set make option BUILD_FFMPEG=1 to build
 include $(PRJ_LIBROOT)/unsupported.mk
 else
 
-ifndef BUILD_FFMPEG
-UNSUPPORTED := Set make option BUILD_FFMPEG=1 to build
+ifneq ($(BUILD),gcc)
+UNSUPPORTED := BUILD=$(BUILD) is invalid, ffmpeg can only be built with 'gcc'
 include $(PRJ_LIBROOT)/unsupported.mk
 else
 

@@ -33,8 +33,8 @@
 #define ARCH_SH4 0
 #define ARCH_SPARC 0
 #define ARCH_SPARC64 0
-#define ARCH_X86 0
-#define ARCH_X86_32 0
+#define ARCH_X86 1
+#define ARCH_X86_32 1
 #define ARCH_X86_64 0
 #define HAVE_ALTIVEC 0
 #define HAVE_AMD3DNOW 1
@@ -814,6 +814,10 @@
 #define restrict __restrict__
 #define ASMALIGN(ZEROBITS) ".align 1 << " #ZEROBITS "\n\t"
 #define EXTERN_PREFIX "_"
+
+// attribute_align_arg
+//#define attribute_align_arg __attribute__((force_align_arg_pointer))
+#undef attribute_align_arg
 
 // You can uncomment this or modify os_support.c to include this first
 // #include <winsock2.h>

@@ -87,7 +87,9 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	if ( !psc )
 		return 0;
 
-	int nRet = 0;	
+oexM();
+
+	int nRet = 0;
 	oex::AlignCall16( nRet, sws_scale,
 							psc, apSrc.data, apSrc.linesize, 0, height,
 							apDst.data, apDst.linesize
@@ -151,7 +153,9 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 
 	// http://gnunet.org/libextractor/doxygen/html/swscale-example_8c.html
 
-	int nRet = 0;	
+oexM();
+
+	int nRet = 0;
 	oex::AlignCall16( nRet, sws_scale,
 								psc, apSrc.data, apSrc.linesize, 0, height,
 			   					apDst.data, apDst.linesize

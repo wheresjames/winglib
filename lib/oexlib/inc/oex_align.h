@@ -72,8 +72,29 @@
 #define oexIsAligned32( v )					OEX_NAMESPACE::cmn::IsAligned32( (oexLONG)( v ) )
 #define oexIsAligned64( v )					OEX_NAMESPACE::cmn::IsAligned64( (oexLONG)( v ) )
 
-#if defined( OEX_GCC )
-#else
+#if defined( __OEX_GCC )
+
+#	define oexNaked
+#	define oexAlignStack( n )					\
+		__asm__ volatile (						\
+			"mov	%ebx, %esp			\n\t"	\
+			"and	%esp, ~( n - 1 )	\n\t"	\
+			"sub	%esp, 12			\n\t"	\
+			"push	%ebx				\n\t"	\
+		);
+
+#	define oexRestoreStack()					\
+		__asm__ volatile (						\
+			"pop	%ebx				\n\t"	\
+			"mov	%esp, %ebx			\n\t"	\
+		);
+#	define oexAlignStackNaked( n )	oexAlignStack( n )
+#	define oexRestoreStackNaked()	oexRestoreStack()
+
+#	define oexAsmRet()
+
+#elif defined( OEX_MSC )
+
 #	define oexNaked							__declspec( naked )
 
 #	define oexAlignStack( n )					\
@@ -98,9 +119,18 @@
 
 #	define oexAsmRet() __asm { ret }
 
-#	define oexAlignCall( n, f ) oexAlignStack( n ); f; oexRestoreStack();
+#else
+
+#	define oexNaked							// __attribute__ ((naked))
+#	define oexAlignStack( n )
+#	define oexRestoreStack()
+#	define oexAlignStackNaked( n )
+#	define oexRestoreStackNaked()
+#	define oexAsmRet()
 
 #endif
+
+#	define oexAlignCall( n, f ) oexAlignStack( n ); f; oexRestoreStack();
 
 // Disable warning about modifying ebp
 #if defined( OEX_MSC )
@@ -110,7 +140,7 @@
 
 #define oex_align_tmpl_P0		typename T_F
 #define oex_align_decl_P0		T_F f
-#define oex_align_call_P0		
+#define oex_align_call_P0
 
 #define oex_align_tmpl_P1		typename T_F, typename T_P1
 #define oex_align_decl_P1		T_F f, T_P1 p1

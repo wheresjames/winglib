@@ -30,7 +30,10 @@ else
 
 ifeq ($(PLATFORM),windows)
 	PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows $(PRJ_INCS)
-	PRJ_OSLB := $(PRJ_OSLB) libgcc.a libmingwex.a
+	ifeq ($(BUILD),vs)
+		PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows/vs $(PRJ_INCS)
+		PRJ_OSLB := $(PRJ_OSLB) libgcc.a libmingwex.a
+	endif
 else
 	PRJ_INCS := winglib/dep/etc/ffmpeg/inc/posix $(PRJ_INCS)
 endif
