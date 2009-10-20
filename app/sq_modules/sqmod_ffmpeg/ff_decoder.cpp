@@ -29,6 +29,7 @@ int CFfDecoder::Create( int x_nCodec )
 	if ( !m_pCodec )
 		return 0;
 
+
 	return 1;
 }
 

@@ -38,7 +38,6 @@ void CFfEncoder::Destroy()
 // http://lists.mplayerhq.hu/pipermail/libav-user/2009-June/003257.html
 int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height )
 {
-//	x_nCodec = CODEC_ID_MPEG4;
 	m_nFmt = fmt;
 
 	if ( 0 >= width || 0 >= height )
@@ -50,17 +49,14 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height )
 	// Lose previous codec
 	Destroy();
 
-//	m_pOutput = guess_format( oexT( "avi" ), 0, 0 );
-
-	oexAlignCall( 16, m_pOutput = guess_format( oexT( "avi" ), 0, 0 ) );
-
+	m_pOutput = guess_format( x_sContainer.c_str(), 0, 0 );
 	if ( !m_pOutput )
 	{	oexERROR( 0, oexMks( oexT( "guess_format( " ), x_sContainer.c_str(), oexT( " ) failed " ) ) );
 		Destroy();
 		return 0;
 	} // end if
 
-	oexAlignCall( 16, m_pFormatContext = avformat_alloc_context() );
+	m_pFormatContext = avformat_alloc_context();
 	if ( !m_pFormatContext )
 	{	oexERROR( 0, oexT( "av_alloc_format_context() failed " ) );
 		Destroy();
@@ -83,14 +79,14 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height )
     params.time_base.den = 30;
 	params.pix_fmt = (PixelFormat)m_nFmt;
 
-	oexAlignCall( 16, res = av_set_parameters( m_pFormatContext, &params ) );
+	res = av_set_parameters( m_pFormatContext, &params );
 	if ( 0 > res )
 	{	oexERROR( res, oexT( "av_set_parameters() failed " ) );
 		Destroy();
 		return 0;
 	} // end if
 
-	oexAlignCall( 16, m_pStream = av_new_stream( m_pFormatContext, 0 ) );
+	m_pStream = av_new_stream( m_pFormatContext, 0 );
 	if ( !m_pStream )
 	{	oexERROR( 0, oexT( "av_new_stream() failed " ) );
 		Destroy();
@@ -100,7 +96,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height )
 	m_pFormatContext->streams[ 0 ] = m_pStream;
 	m_pFormatContext->nb_streams = 1;
 
-	oexAlignCall( 16, m_pCodec = avcodec_find_encoder( (CodecID)x_nCodec ) );
+	m_pCodec = avcodec_find_encoder( (CodecID)x_nCodec );
 	if ( !m_pCodec )
 	{	oexERROR( 0, oexMks( oexT( "avcodec_find_encoder() failed to find codec for id : " ), (int)x_nCodec ) );
 		Destroy();
@@ -126,18 +122,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height )
     m_pCodecContext->strict_std_compliance = 1;
 	m_pCodecContext->pix_fmt = (PixelFormat)m_nFmt;
 
-//	oex::AlignCall16( res, avcodec_open, m_pCodecContext, m_pCodec );
-
-//	VHALIGNCALL16( res = avcodec_open( m_pCodecContext, m_pCodec ) );
-
-//	oexAlignStack( 16 );
-//	res = avcodec_open( m_pCodecContext, m_pCodec );
-//	oexRestoreStack();
-
-oexM();
-
-	oexAlignCall( 16, res = avcodec_open( m_pCodecContext, m_pCodec ) );
-
+	res = avcodec_open( m_pCodecContext, m_pCodec );
 	if ( 0 > res )
 	{	oexERROR( res, oexT( "avcodec_open() failed" ) );
 		Destroy();
@@ -149,8 +134,6 @@ oexM();
 
 int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int sz_in, sqbind::CSqBinary *out )
 {
-oexM();
-
 	// Ensure codec
 	if ( !m_pCodecContext )
 		return 0;
@@ -179,11 +162,7 @@ oexM();
 //	paf->pts = AV_NOPTS_VALUE;
 //	paf->motion_val = { 0, 0 };
 
-oexM();
-
-	int nBytes = 0;
-	oexAlignCall( 16, nBytes = avcodec_encode_video( m_pCodecContext, out->Obj().Ptr(), nSize, paf ) );
-
+	int nBytes = avcodec_encode_video( m_pCodecContext, out->Obj().Ptr(), nSize, paf );
 	if ( 0 > nBytes )
 	{	oexERROR( nBytes, oexT( "avcodec_encode_video() failed" ) );
 		out->setUsed( 0 );
@@ -224,8 +203,6 @@ int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, int 
 	// Must convert to input format
 	if ( !CFfConvert::ConvertColorIB( img, &m_tmp, m_nFmt, alg ) )
 		return 0;
-
-oexM();
 
 	// Do the conversion
 	return EncodeRaw( m_nFmt, img->getWidth(), img->getHeight(), m_tmp.Ptr(), m_tmp.getUsed(), out );

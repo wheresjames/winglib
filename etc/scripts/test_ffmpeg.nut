@@ -3,11 +3,15 @@ _self.load_module( "ffmpeg", "" );
 
 function _init()
 {
-	test_encode();
-	test_decode();
+	local frame = CSqBinary();
+
+	test_encode( frame );
+
+	if ( frame.getUsed() )
+		test_decode( frame );
 }
 
-function test_encode()
+function test_encode( frame )
 {
 	_self.echo( "----------------------------------------" );
 	_self.echo( "Testing encoder..." );
@@ -43,7 +47,7 @@ function test_encode()
 	} // end if
 
 	// Encode the frame
-	local frame = CSqBinary();
+//	local frame = CSqBinary();
 //	local nEnc = enc.Encode( buf, frame );
 	local nEnc = enc.EncodeImage( pic, frame, CFfConvert().SWS_FAST_BILINEAR );
 	if ( !nEnc )
@@ -54,7 +58,7 @@ function test_encode()
 	_self.echo( "success : Encoded " + nEnc + " bytes" );
 }
 
-function test_decode()
+function test_decode( frame )
 {
 	_self.echo( "----------------------------------------" );
 	_self.echo( "Testing decoder..." );
@@ -65,6 +69,7 @@ function test_decode()
 	{	_self.echo( "failed to create decoder" );
 		return;
 	} // end if
+	
 
 
 	_self.echo( "success" );

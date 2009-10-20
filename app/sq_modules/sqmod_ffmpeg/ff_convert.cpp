@@ -8,9 +8,7 @@ CFfConvert::CFfConvert()
 
 int CFfConvert::CalcImageSize( int fmt, int width, int height )
 {
-	int nRet = 0;
-	oex::AlignCall16( nRet, avpicture_get_size, (PixelFormat)fmt, width, height );
-	return nRet;
+	return avpicture_get_size( (PixelFormat)fmt, width, height );
 }
 
 int CFfConvert::FillAVPicture( AVPicture *pPic, int fmt, int width, int height, void *buf )
@@ -22,8 +20,7 @@ int CFfConvert::FillAVPicture( AVPicture *pPic, int fmt, int width, int height, 
 	oexZeroMemory( pPic, sizeof( AVPicture ) );
 
 	// Fill in the picture data
-	int nSize = 0;
-	oex::AlignCall16( nSize, avpicture_fill, pPic, (uint8_t*)buf, (PixelFormat)fmt, width, height );
+	int nSize = avpicture_fill( pPic, (uint8_t*)buf, (PixelFormat)fmt, width, height );
 	if ( 0 >= nSize )
 		return 0;
 
@@ -38,8 +35,7 @@ int CFfConvert::FillAVFrame( AVFrame *pAv, int fmt, int width, int height, void 
 	AVPicture avPic;
 	oexZero( avPic );
 
-	int nSize = 0;
-	oex::AlignCall16( nSize, avpicture_fill, &avPic, (uint8_t*)buf, (PixelFormat)fmt, width, height );
+	int nSize = avpicture_fill( &avPic, (uint8_t*)buf, (PixelFormat)fmt, width, height );
 	if ( 0 >= nSize )
 		return 0;
 
@@ -76,24 +72,24 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 
 	// Fill in picture data
 	AVPicture apSrc, apDst;
-	if ( !FillAVPicture( &apSrc, src_fmt, width, height, src )
-	     || !FillAVPicture( &apDst, dst_fmt, width, height, dst ) )
+	if ( !FillAVPicture( &apSrc, src_fmt, width, height, src->_Ptr() )
+	     || !FillAVPicture( &apDst, dst_fmt, width, height, dst->_Ptr() ) )
 		return 0;
 
 	// Create conversion
 	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
 										width, height, (PixelFormat)dst_fmt,
-										alg, (SwsFilter*)NULL, (SwsFilter*)NULL, (const double*)NULL );
+										alg, NULL, NULL, NULL );
 	if ( !psc )
 		return 0;
 
-oexM();
+	int nRet = sws_scale(	psc, apSrc.data, apSrc.linesize, 0, height,
+							apDst.data, apDst.linesize );
 
-	int nRet = 0;
-	oex::AlignCall16( nRet, sws_scale,
-							psc, apSrc.data, apSrc.linesize, 0, height,
-							apDst.data, apDst.linesize
-	);
+	sws_freeContext( psc );
+
+	if ( 0 >= nRet )
+		return 0;
 
 	dst->setUsed( nSize );
 
@@ -112,6 +108,7 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 	if ( !img )
 		return 0;
 
+	PixelFormat src_fmt = PIX_FMT_RGB24;
 	int width = img->getWidth();
 	int height = img->getHeight();
 	if ( !img->Obj().GetBits() || 0 >= width || 0 >= height )
@@ -128,14 +125,14 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 
 	// Fill in picture data
 	AVPicture apSrc, apDst;
-	if ( !FillAVPicture( &apSrc, PIX_FMT_RGB24, width, height, img->Obj().GetBits() )
-	     || !FillAVPicture( &apDst, dst_fmt, width, height, dst ) )
+	if ( !FillAVPicture( &apSrc, src_fmt, width, height, img->Obj().GetBits() )
+	     || !FillAVPicture( &apDst, dst_fmt, width, height, dst->_Ptr() ) )
 		return 0;
 
 /*	More overhead has been added to colorspace conversion
 
 	// Convert the image
-	if ( img_convert( &apDst, dst_fmt, &apSrc, PIX_FMT_RGB24, width, height ) )
+	if ( img_convert( &apDst, dst_fmt, &apSrc, src_fmt, width, height ) )
 		return 0;
 
 	// Save the number of bytes used in the output buffer
@@ -143,37 +140,24 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 
 	return 1;
 */
+
 	// Create conversion
-	SwsContext *psc = sws_getContext(	width, height, PIX_FMT_RGB24,
+	SwsContext *psc = sws_getContext(	width, height, src_fmt,
 										width, height, (PixelFormat)dst_fmt,
-										alg, (SwsFilter*)NULL, (SwsFilter*)NULL, (const double*)NULL );
+										alg, NULL, NULL, NULL );
 
 	if ( !psc )
 		return 0;
 
-	// http://gnunet.org/libextractor/doxygen/html/swscale-example_8c.html
+	// Do the conversion
+	int nRet = sws_scale( psc, apSrc.data, apSrc.linesize, 0, height,
+			   			  apDst.data, apDst.linesize );
 
-oexM();
-
-	int nRet = 0;
-	oex::AlignCall16( nRet, sws_scale,
-								psc, apSrc.data, apSrc.linesize, 0, height,
-			   					apDst.data, apDst.linesize
-	);
-	nRet = height;
-
-oexM();
-
-oexSHOW( nRet );
-
-//	sws_freeContext( psc );
+	sws_freeContext( psc );
 
 	if ( 0 >= nRet )
 		return 0;
 
-oexM();
-
-oexSHOW( nSize );
 	dst->setUsed( nSize );
 
 	return 1;
