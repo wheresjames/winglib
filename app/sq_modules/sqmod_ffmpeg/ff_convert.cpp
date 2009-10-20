@@ -8,7 +8,9 @@ CFfConvert::CFfConvert()
 
 int CFfConvert::CalcImageSize( int fmt, int width, int height )
 {
-	return avpicture_get_size( (PixelFormat)fmt, width, height );
+	int nRet = 0;
+	oex::AlignCall16( nRet, avpicture_get_size, (PixelFormat)fmt, width, height );
+	return nRet;
 }
 
 int CFfConvert::FillAVPicture( AVPicture *pPic, int fmt, int width, int height, void *buf )
@@ -20,7 +22,8 @@ int CFfConvert::FillAVPicture( AVPicture *pPic, int fmt, int width, int height, 
 	oexZeroMemory( pPic, sizeof( AVPicture ) );
 
 	// Fill in the picture data
-	int nSize = avpicture_fill( pPic, (uint8_t*)buf, (PixelFormat)fmt, width, height );
+	int nSize = 0;
+	oex::AlignCall16( nSize, avpicture_fill, pPic, (uint8_t*)buf, (PixelFormat)fmt, width, height );
 	if ( 0 >= nSize )
 		return 0;
 
@@ -35,7 +38,8 @@ int CFfConvert::FillAVFrame( AVFrame *pAv, int fmt, int width, int height, void 
 	AVPicture avPic;
 	oexZero( avPic );
 
-	int nSize = avpicture_fill( &avPic, (uint8_t*)buf, (PixelFormat)fmt, width, height );
+	int nSize = 0;
+	oex::AlignCall16( nSize, avpicture_fill, &avPic, (uint8_t*)buf, (PixelFormat)fmt, width, height );
 	if ( 0 >= nSize )
 		return 0;
 
@@ -77,14 +81,17 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 		return 0;
 
 	// Create conversion
-	SwsContext *psc = sws_getContext( width, height, (PixelFormat)src_fmt,
-									  width, height, (PixelFormat)dst_fmt,
-									  alg, NULL, NULL, NULL);
+	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
+										width, height, (PixelFormat)dst_fmt,
+										alg, (SwsFilter*)NULL, (SwsFilter*)NULL, (const double*)NULL );
 	if ( !psc )
 		return 0;
 
-	sws_scale( psc, apSrc.data, apSrc.linesize, 0, height,
-			   apDst.data, apDst.linesize );
+	int nRet = 0;	
+	oex::AlignCall16( nRet, sws_scale,
+							psc, apSrc.data, apSrc.linesize, 0, height,
+							apDst.data, apDst.linesize
+	);
 
 	dst->setUsed( nSize );
 
@@ -108,22 +115,14 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 	if ( !img->Obj().GetBits() || 0 >= width || 0 >= height )
 		return 0;
 
-oexSHOW( width );
-oexSHOW( height );
-
 	// How big is the destination image?
 	int nSize = CalcImageSize( dst_fmt, width, height );
 	if ( !nSize )
 		return 0;
 
-oexSHOW( nSize );
-
 	// Allocate memory for destination image
 	if ( dst->Size() < nSize && !dst->Obj().OexNew( nSize * 2 ).Ptr() )
 		return 0;
-
-oexSHOW( dst->Obj().Size() );
-oexSHOW( (int)dst->Obj().Ptr() );
 
 	// Fill in picture data
 	AVPicture apSrc, apDst;
@@ -142,32 +141,22 @@ oexSHOW( (int)dst->Obj().Ptr() );
 
 	return 1;
 */
-
-
-oexM();
-
 	// Create conversion
-	SwsContext *psc = sws_getContext( width, height, PIX_FMT_RGB24,
-									  width, height, (PixelFormat)dst_fmt,
-									  alg, NULL, NULL, NULL);
+	SwsContext *psc = sws_getContext(	width, height, PIX_FMT_RGB24,
+										width, height, (PixelFormat)dst_fmt,
+										alg, (SwsFilter*)NULL, (SwsFilter*)NULL, (const double*)NULL );
+
 	if ( !psc )
 		return 0;
 
-oexM();
-
-	for ( int i = 0; i < 4; i++ )
-		oexSHOW( i ),
-		oexSHOW( (int)apSrc.data[ i ] ),
-		oexSHOW( (int)apSrc.linesize[ i ] ),
-		oexSHOW( (int)apDst.data[ i ] ),
-		oexSHOW( (int)apDst.linesize[ i ] );
-
-
 	// http://gnunet.org/libextractor/doxygen/html/swscale-example_8c.html
 
-//	int nRet = sws_scale( psc, apSrc.data, apSrc.linesize, 0, height,
-//			   				   apDst.data, apDst.linesize );
-	int nRet = height;
+	int nRet = 0;	
+	oex::AlignCall16( nRet, sws_scale,
+								psc, apSrc.data, apSrc.linesize, 0, height,
+			   					apDst.data, apDst.linesize
+	);
+	nRet = height;
 
 oexM();
 
@@ -180,6 +169,7 @@ oexSHOW( nRet );
 
 oexM();
 
+oexSHOW( nSize );
 	dst->setUsed( nSize );
 
 	return 1;

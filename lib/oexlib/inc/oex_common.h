@@ -239,20 +239,60 @@ namespace cmn
         T Align2( T val )
     {   return ( val + 1 ) & ( ~1 ); }
 
+    /// Returns non-zero if aligned on 16 bit boundry
+    template < typename T >
+        oexBOOL IsAligned2( T val )
+    {   return Align2( val ) == val; }
+
     /// Aligns value on 32 bit boundry
     template < typename T >
         T Align4( T val )
     {   return ( val + 3 ) & ( ~3 ); }
+
+    /// Returns non-zero if aligned on 32 bit boundry
+    template < typename T >
+        oexBOOL IsAligned4( T val )
+    {   return Align4( val ) == val; }
 
     /// Aligns value on 64 bit boundry
     template < typename T >
         T Align8( T val )
     {   return ( val + 7 ) & ( ~7 ); }
 
+    /// Returns non-zero if aligned on 64 bit boundry
+    template < typename T >
+        oexBOOL IsAligned8( T val )
+    {   return Align8( val ) == val; }
+
     /// Aligns value on 128 bit boundry
     template < typename T >
         T Align16( T val )
     {   return ( val + 15 ) & ( ~0x0f ); }
+
+    /// Returns non-zero if aligned on 128 bit boundry
+    template < typename T >
+        oexBOOL IsAligned16( T val )
+    {   return Align16( val ) == val; }
+
+    /// Aligns value on 256 bit boundry
+    template < typename T >
+        T Align32( T val )
+    {   return ( val + 31 ) & ( ~0x1f ); }
+
+    /// Returns non-zero if aligned on 256 bit boundry
+    template < typename T >
+        oexBOOL IsAligned32( T val )
+    {   return Align32( val ) == val; }
+
+    /// Aligns value on 512 bit boundry
+    template < typename T >
+        T Align64( T val )
+    {   return ( val + 63 ) & ( ~0x3f ); }
+
+    /// Returns non-zero if aligned on 512 bit boundry
+    template < typename T >
+        oexBOOL IsAligned64( T val )
+    {   return Align64( val ) == val; }
 
     /// Aligns value on processor dependent boundry
 #if oexSIZEOFINT == 2
@@ -267,7 +307,18 @@ namespace cmn
 #elif oexSIZEOFINT == 16
     template < typename T >
         T Align( T val ) { return Align16( val ); }
+#elif oexSIZEOFINT == 32
+    template < typename T >
+        T Align( T val ) { return Align32( val ); }
+#elif oexSIZEOFINT == 64
+    template < typename T >
+        T Align( T val ) { return Align64( val ); }
 #endif
+
+	/// Returns non-zero if aligned on processor dependent boundry
+    template < typename T >
+        oexBOOL IsAligned( T val )
+    {   return Align( val ) == val; }
 
     /// Returns the next power of two equal to or greater than v, or v if there isn't one
     template< typename T >

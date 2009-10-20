@@ -34,9 +34,6 @@
 
 #pragma once
 
-// Native processor integer size in bits
-#define oexSIZEOFINT 4
-
 typedef long						oexRESULT;
 
 #if defined( _MSC_VER )

@@ -118,12 +118,12 @@ ifeq ($(BUILD),vs)
 
 	ifdef DBG
 		ifeq ($(LIBLINK),static)	
-			CFG_CEXTRA	 := /DDEBUG /D_DEBUG /D_MT /MTd /Z7 /Zp16 $(CFG_CEXTRA)
+			CFG_CEXTRA	 := /DDEBUG /D_DEBUG /D_MT /MTd /Z7 $(CFG_CEXTRA)
 		else
 			ifeq ($(PRJ_TYPE),dll)
-				CFG_CEXTRA	 := /DDEBUG /D_DEBUG /D_MT /MDd /Z7 /Zp16 $(CFG_CEXTRA)
+				CFG_CEXTRA	 := /DDEBUG /D_DEBUG /D_MT /MDd /Z7 $(CFG_CEXTRA)
 			else
-				CFG_CEXTRA	 := /DDEBUG /D_DEBUG /D_MT /MDd /Z7 /Zp16 $(CFG_CEXTRA)
+				CFG_CEXTRA	 := /DDEBUG /D_DEBUG /D_MT /MDd /Z7 $(CFG_CEXTRA)
 			endif
 		endif
 		ifeq ($(LIBLINK),static)	

@@ -60,6 +60,10 @@
 #	define OEX_GCC
 #endif
 
+#if defined( _MSC_VER )
+#	define OEX_MSC
+#endif
+
 // Are we using windows?
 #if defined( _WIN32_WCE )
 #	define OEX_WINCE
@@ -90,7 +94,7 @@
 #endif
 
 // Unicode build?
-#if defined( UNICODE )
+#if defined( UNICODE ) || defined( OEX_WINCE )
 #   define oexUNICODE
 #endif
 
@@ -178,4 +182,7 @@
 #else
 #	define OEX_CASE_SENSITIVE_FILES
 #endif
+
+// Native processor integer size in bits
+#define oexSIZEOFINT 4
 

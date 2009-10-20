@@ -118,6 +118,10 @@
 #	define oexVaArg					        va_arg
 #endif
 
+struct oex_no_ret_type_struct{};
+typedef oex_no_ret_type_struct* oexNoRetType;
+#define oexNoRet ((OEX_NAMESPACE::oexNoRetType)0)
+
 #define oexTT( c, s )				        ( 1 == sizeof( c ) ? ( ( c* )( s ) ) : ( ( c* )( L##s ) ) )
 #define oexTC( c, s )				        ( 1 == sizeof( c ) ? ( ( c )( s ) ) : ( ( c )( L##s ) ) )
 #define oexTTEXT( c, s )			        oexTT( c, s )
@@ -149,9 +153,6 @@
 #	define oexT( s )				        ( L##s )
 #	define oexTEXT( s )				        oexT( s )
 
-#	define oexPT( s )				        ( L##s )
-#	define oexPTEXT( s )			        oexPT( s )
-
 #	define oexStrToMb( s )			        OEX_NAMESPACE::CStr8().ToMb( s )
 #	define oexStrToMbPtr( s )		        OEX_NAMESPACE::CStr8().ToMb( s ).Ptr()
 #   define oexStrToStr8( s )                OEX_NAMESPACE::CStr8().Cnv( s )
@@ -174,14 +175,6 @@
 
 #	define oexT( s )				        s
 #	define oexTEXT( s )				        s
-
-#if defined( OEX_WINCE )
-#	define oexPT( s )				        ( L##s )
-#	define oexPTEXT( s )			        oexPT( s )
-#else
-#	define oexPT( s )				        s
-#	define oexPTEXT( s )			        s
-#endif
 
 #	define oexStrToMb( s )			        ( s )
 #	define oexStrToMbPtr( s )		        ( s )

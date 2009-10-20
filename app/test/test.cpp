@@ -341,6 +341,42 @@ oex::oexRESULT TestAllocator()
 
     } // end scope
 
+	// Test alignment functions
+	for ( int i = 0; i < 100; i++ )
+		if ( !oexVERIFY( 0 == ( oex::cmn::Align2( i ) & 1 ) )
+			 || !oexVERIFY( 0 == ( oex::cmn::Align4( i ) & 3 ) )
+			 || !oexVERIFY( 0 == ( oex::cmn::Align8( i ) & 7 ) )
+			 || !oexVERIFY( 0 == ( oex::cmn::Align16( i ) & 15 ) ) )
+			return -22;
+
+	// Test alignment functions
+	for ( int i = 0; i < 100; i++ )
+		if ( !oexVERIFY( oex::cmn::IsAligned2( oex::cmn::Align2( i ) ) )
+			 || !oexVERIFY( oex::cmn::IsAligned4( oex::cmn::Align4( i ) ) )
+			 || !oexVERIFY( oex::cmn::IsAligned8( oex::cmn::Align8( i ) ) )
+			 || !oexVERIFY( oex::cmn::IsAligned16( oex::cmn::Align16( i ) ) ) )
+			return -22;
+
+	// Declare aligned buffers
+	oexAligned( oexCHAR, bufp[ 2 ] ) = { 0 };
+	oexAligned2( oexCHAR, buf2[ 2 ] ) = { 0 };
+	oexAligned4( oexCHAR, buf4[ 2 ] ) = { 0 };
+	oexAligned8( oexCHAR, buf8[ 2 ] ) = { 0 };
+	oexAligned16( oexCHAR, buf16[ 2 ] ) = { 0 };
+	oexAligned32( oexCHAR, buf32[ 2 ] ) = { 0 };
+	oexAligned64( oexCHAR, buf64[ 2 ] ) = { 0 };
+
+	// Verify buffer alignments
+	if ( !oexVERIFY( oexIsAligned( (oexLONG)bufp ) ) 
+		 || !oexVERIFY( oexIsAligned2( (oexLONG)buf2 ) ) 
+		 || !oexVERIFY( oexIsAligned4( (oexLONG)buf4 ) ) 
+		 || !oexVERIFY( oexIsAligned8( (oexLONG)buf8 ) ) 
+		 || !oexVERIFY( oexIsAligned16( (oexLONG)buf16 ) ) 
+		 || !oexVERIFY( oexIsAligned32( (oexLONG)buf32 ) ) 
+		 || !oexVERIFY( oexIsAligned64( (oexLONG)buf64 ) ) 
+	   )
+		return -23;
+
     return oex::oexRES_OK;
 }
 
@@ -385,7 +421,7 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str1 == oexT( "Hello World! - Goodbye Bugs!" ) ) )
 		return -6;
 
-    pStr = str1.Allocate( 4 );
+    pStr = str1.OexAllocate( 4 );
     oex::zstr::Copy( pStr, oexT( "wxyz" ) );
 	if ( !oexVERIFY( str1.Length() == 4 ) )
 		return -7;
@@ -404,7 +440,7 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str1 == oexT( "u = 11" ) ) )
 		return -9;
 
-    str1.Fmt( oexT( "s = %s" ), oexPT( "String" ) );
+    str1.Fmt( oexT( "s = %s" ), oexT( "String" ) );
 	if ( !oexVERIFY( str1 == oexT( "s = String" ) ) )
 		return -9;
 
@@ -412,10 +448,10 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str1 == oexT( "f = 3.140000" ) ) )
 		return -9;
 
-    str1.Fmt( oexT( "u = %u, s = %s, f = %f" ), (oex::oexULONG)11, oexPT( "String" ), (oex::oexDOUBLE)3.14f );
+    str1.Fmt( oexT( "u = %u, s = %s, f = %f" ), (oex::oexULONG)11, oexT( "String" ), (oex::oexDOUBLE)3.14f );
 	if ( !oexVERIFY( str1 == oexT( "u = 11, s = String, f = 3.140000" ) ) )
 		return -9;
-
+	
     oex::oexGUID guid;
     oexZeroMemory( &guid, sizeof( guid ) );
 	oexCSTR pTest = oexT( "01234567-8901-2345-6789-012345678901" );

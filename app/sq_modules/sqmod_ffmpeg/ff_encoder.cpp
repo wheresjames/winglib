@@ -2,6 +2,17 @@
 
 #include "stdafx.h"
 
+#define VHALIGNCALL16(x) \
+   {\
+      _asm { mov ebx, esp }\
+      _asm { and esp, 0xfffffff0 }\
+      _asm { push ebx }\
+      x;\
+      _asm { pop ebx }\
+      _asm { mov esp, ebx }\
+   }
+
+
 CFfEncoder::CFfEncoder()
 {
 	m_nFmt = 0;
@@ -10,18 +21,13 @@ CFfEncoder::CFfEncoder()
 	m_pStream = oexNULL;
 	m_pOutput = oexNULL;
 	m_pFormatContext = oexNULL;
-
+		
 	// Register codecs
-	av_register_all();
+	oexAlignCall( 16, av_register_all() );
 }
 
 void CFfEncoder::Destroy()
 {
-	if ( m_pCodec )
-	{	av_free( m_pCodec );
-		m_pCodec = oexNULL;
-	} // end if
-
 	if ( m_pStream )
 	{	av_free( m_pStream );
 		m_pStream = oexNULL;
@@ -32,12 +38,9 @@ void CFfEncoder::Destroy()
 		m_pFormatContext = oexNULL;
 	} // end if
 
-	if ( m_pOutput )
-	{	av_free( m_pOutput );
-		m_pOutput = oexNULL;
-	} // end if
-
 	m_nFmt = 0;
+	m_pCodec = oexNULL;
+	m_pOutput = oexNULL;
 	m_pCodecContext = oexNULL;
 
 	m_tmp.Free();
@@ -57,16 +60,18 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height )
 
 	// Lose previous codec
 	Destroy();
+	
+//	m_pOutput = guess_format( oexT( "avi" ), 0, 0 );
 
-	m_pOutput = guess_format( x_sContainer.c_str(), 0, 0 );
+	oexAlignCall( 16, m_pOutput = guess_format( oexT( "avi" ), 0, 0 ) );
+
 	if ( !m_pOutput )
 	{	oexERROR( 0, oexMks( oexT( "guess_format( " ), x_sContainer.c_str(), oexT( " ) failed " ) ) );
 		Destroy();
 		return 0;
 	} // end if
 
-//	m_pFormatContext = av_alloc_format_context();
-	m_pFormatContext = avformat_alloc_context();
+	oexAlignCall( 16, m_pFormatContext = avformat_alloc_context() );
 	if ( !m_pFormatContext )
 	{	oexERROR( 0, oexT( "av_alloc_format_context() failed " ) );
 		Destroy();
@@ -89,13 +94,14 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height )
     params.time_base.den = 30;
 	params.pix_fmt = (PixelFormat)m_nFmt;
 
-    if ( 0 > ( res = av_set_parameters( m_pFormatContext, &params ) ) )
+	oexAlignCall( 16, res = av_set_parameters( m_pFormatContext, &params ) );
+	if ( 0 > res )
 	{	oexERROR( res, oexT( "av_set_parameters() failed " ) );
 		Destroy();
 		return 0;
 	} // end if
 
-	m_pStream = av_new_stream( m_pFormatContext, 0 );
+	oexAlignCall( 16, m_pStream = av_new_stream( m_pFormatContext, 0 ) );
 	if ( !m_pStream )
 	{	oexERROR( 0, oexT( "av_new_stream() failed " ) );
 		Destroy();
@@ -105,7 +111,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height )
 	m_pFormatContext->streams[ 0 ] = m_pStream;
 	m_pFormatContext->nb_streams = 1;
 
-	m_pCodec = avcodec_find_encoder( (CodecID)x_nCodec );
+	oexAlignCall( 16, m_pCodec = avcodec_find_encoder( (CodecID)x_nCodec ) );
 	if ( !m_pCodec )
 	{	oexERROR( 0, oexMks( oexT( "avcodec_find_encoder() failed to find codec for id : " ), (int)x_nCodec ) );
 		Destroy();
@@ -130,8 +136,18 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height )
     m_pCodecContext->me_method = 1;
     m_pCodecContext->strict_std_compliance = 1;
 	m_pCodecContext->pix_fmt = (PixelFormat)m_nFmt;
+	
+//	oex::AlignCall16( res, avcodec_open, m_pCodecContext, m_pCodec );
+	
+//	VHALIGNCALL16( res = avcodec_open( m_pCodecContext, m_pCodec ) );
+	
+//	oexAlignStack( 16 );
+//	res = avcodec_open( m_pCodecContext, m_pCodec );
+//	oexRestoreStack();
+	
+	oexAlignCall( 16, res = avcodec_open( m_pCodecContext, m_pCodec ) );
 
-	if ( 0 > ( res = avcodec_open( m_pCodecContext, m_pCodec ) ) )
+	if ( 0 > res )
 	{	oexERROR( res, oexT( "avcodec_open() failed" ) );
 		Destroy();
 		return 0;
@@ -142,53 +158,38 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height )
 
 int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int sz_in, sqbind::CSqBinary *out )
 {
-oexM();
-
 	// Ensure codec
 	if ( !m_pCodecContext )
 		return 0;
-
-oexM();
 
 	// Validate parmeters
 	if ( !in || !sz_in || !out || !width || !height )
 		return 0;
 
-oexM();
-
-oexSHOW( sz_in );
-oexSHOW( CFfConvert::CalcImageSize( fmt, width, height ) );
-
 	// Validate buffer size
 	if ( CFfConvert::CalcImageSize( fmt, width, height ) > sz_in )
 		return 0;
-
-oexM();
 
 	// How much room could we possibly need
 	int nSize = CFfConvert::CalcImageSize( fmt, width, height ) * 2;
 	if ( out->Size() < nSize && !out->Obj().OexNew( nSize ).Ptr() )
 		return 0;
 
-oexM();
-
 	AVFrame *paf = avcodec_alloc_frame();
 	if ( !paf )
 		return 0;
 
-oexM();
-
 	if ( !CFfConvert::FillAVFrame( paf, fmt, width, height, (void*)in ) )
 		return 0;
-
+	
 	paf->key_frame = 1;
 //	paf->pts = AV_NOPTS_VALUE;
 //	paf->motion_val = { 0, 0 };
 	
-oexM();
-//  /Zp16
-	__declspec(align(32)) int _align_stack_32 = 0;
-	int nBytes = avcodec_encode_video( m_pCodecContext, out->Obj().Ptr(), nSize, paf );
+	int nBytes = 0;
+//	oex::AlignCall16( nBytes, avcodec_encode_video, m_pCodecContext, out->Obj().Ptr(), nSize, paf );
+
+	VHALIGNCALL16( nBytes = avcodec_encode_video( m_pCodecContext, out->Obj().Ptr(), nSize, paf ) );
 	if ( 0 > nBytes )
 	{	oexERROR( nBytes, oexT( "avcodec_encode_video() failed" ) );
 		out->setUsed( 0 );
@@ -196,7 +197,6 @@ oexM();
 		return 0;
 	} // end if
 
-oexM();
 	av_free( paf );
 
 	out->setUsed( nBytes );
@@ -230,9 +230,6 @@ int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, int 
 	// Must convert to input format
 	if ( !CFfConvert::ConvertColorIB( img, &m_tmp, m_nFmt, alg ) )
 		return 0;
-
-oexM();
-oexSHOW( m_tmp.getUsed() );
 
 	// Do the conversion
 	return EncodeRaw( m_nFmt, img->getWidth(), img->getHeight(), m_tmp.Ptr(), m_tmp.getUsed(), out );

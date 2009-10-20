@@ -435,6 +435,7 @@ OEX_START_NAMESPACE
 #include "inc/oex_typedefs.h"
 #include "inc/oex_const.h"
 #include "inc/oex_exceptions.h"
+#include "inc/oex_align.h"
 #include "inc/oex_common.h"
 
 //------------------------------------------------------------------
