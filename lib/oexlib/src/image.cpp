@@ -73,8 +73,38 @@ public:
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
+static void* _cximage_malloc( size_t size ) 
+{
+	return oex::os::CMem::New( size, oexLINE, oexTEXT( oexFILE ) );
+}
+
+static void* _cximage_calloc( size_t num, size_t size ) 
+{
+	void *ptr = oex::os::CMem::New( num * size, oexLINE, oexTEXT( oexFILE ) );
+	oexZeroMemory( ptr, num * size );
+	return ptr;
+}
+
+static void* _cximage_realloc( void *ptr, size_t size ) 
+{
+	return oex::os::CMem::Resize( ptr, size, oexLINE, oexTEXT( oexFILE ) );
+}
+
+static void _cximage_free( void *ptr ) 
+{
+	return oex::os::CMem::Delete( ptr );
+}
+
+extern "C"
+{	t_cx_malloc cximage_malloc = _cximage_malloc;
+	t_cx_calloc cximage_calloc = _cximage_calloc;
+	t_cx_realloc cximage_realloc = _cximage_realloc;
+	t_cx_free cximage_free = _cximage_free;
+};
+
 CImage::CImage()
 {_STT();
+	
 	m_pimg = OexAllocConstruct< CCxCustomImg >();
 
 	m_nMem = 0;

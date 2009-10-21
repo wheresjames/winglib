@@ -8,6 +8,7 @@ PRJ_NAME := cximage
 PRJ_TYPE := lib
 PRJ_INCS := zlib
 PRJ_LIBS := 
+PRJ_DEFS := CXIMAGE_CUSTOM_ALLOCATOR=1
 
 PRJ_LIBROOT := ..
 

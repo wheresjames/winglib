@@ -21,6 +21,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfDecoder, CFfDecoder )
 
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, Destroy )
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, Create )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, FindStreamInfo )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, DecodeImage )
 
 	// Codec types
 	SQBIND_GLOBALCONST( CODEC_ID_H264 )
@@ -48,6 +50,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfConvert, CFfConvert )
 	SQBIND_STATIC_FUNCTION( CFfConvert, CalcImageSize )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorBB )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorIB )
+	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorBI )
 
 	// Format tyeps
 	SQBIND_GLOBALCONST( PIX_FMT_RGB24 )

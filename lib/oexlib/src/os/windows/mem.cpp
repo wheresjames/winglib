@@ -159,9 +159,13 @@ oexBOOL CMem::MemReport()
     _CrtMemCheckpoint( &checkPt1 );
     _CrtMemDumpStatistics( &checkPt1 );
     _CrtCheckMemory( );
+    return oexTRUE;
+
+#else
+
+	return oexFALSE;
 
 #endif
-    return oexTRUE;
 }
 
 oexBOOL CMem::DumpLeaks()

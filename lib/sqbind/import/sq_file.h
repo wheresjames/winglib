@@ -44,13 +44,25 @@ namespace sqbind
 		SQBIND_CLASS_CTOR_BEGIN( CSqFile )
 		SQBIND_CLASS_CTOR_END( CSqFile )
 
+		int CreateAlways( const stdString &sFile )
+		{	return m_f.CreateAlways( sFile.c_str() ).IsOpen(); }
+
 		int OpenExisting( const stdString &sFile )
 		{	return m_f.OpenExisting( sFile.c_str() ).IsOpen(); }
+
+		int OpenAlways( const stdString &sFile )
+		{	return m_f.OpenAlways( sFile.c_str() ).IsOpen(); }
 
 		int OpenNew( const stdString &sFile )
 		{	return m_f.CreateAlways( sFile.c_str() ).IsOpen(); }
 
 		void Close() { m_f.Destroy(); }
+
+		int SetPtrPosBegin( int n ) { return m_f.SetPtrPosBegin( n ); }
+
+		int SetPtrPosEnd( int n ) { return m_f.SetPtrPosEnd( n ); }
+
+		int Size() { return m_f.Size(); }
 
 		int Write( const stdString &sData )
 		{	return m_f.Write( oexStrToBinPtr( sData.c_str() ), sData.length() ); }
@@ -93,8 +105,17 @@ namespace sqbind
 			return stdString( data.Ptr(), data.Length() );
 		}
 
+		static CSqBinary get_contents_bin( const stdString &sFile, int nBytes )
+		{	CSqFile f; if ( !f.OpenExisting( sFile ) ) return CSqBinary(); return f.ReadBin( nBytes ); }
+
 		static int put_contents( const stdString &sFile, const stdString &sData )
 		{	return oex::CFile().CreateAlways( sFile.c_str() ).Write( sData.c_str(), sData.length() ); }
+
+		static int put_contents_bin( const stdString &sFile, CSqBinary *sData )
+		{	if ( !sData ) return 0;
+			CSqFile f; if ( !f.CreateAlways( sFile.c_str() ) ) return 0;
+			return f.WriteBin( sData ); 
+		}
 
 		static int append_contents( const stdString &sFile, const stdString &sData )
 		{	oex::CFile f;
@@ -102,6 +123,15 @@ namespace sqbind
 				return 0;
 			f.SetPtrPosEnd( 0 );
 			return f.Write( sData.c_str(), sData.length() );
+		}
+
+		static int append_contents_bin( const stdString &sFile, CSqBinary *sData )
+		{	if ( !sData ) return 0;
+			CSqFile f;
+			if ( !f.OpenAlways( sFile.c_str() ) )
+				return 0;
+			f.SetPtrPosEnd( 0 );
+			return f.WriteBin( sData );
 		}
 
 		static int mkdir( const stdString &sDir )

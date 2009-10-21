@@ -61,6 +61,15 @@ namespace sqbind
 			return *this;
 		}
 
+		int Create( int width, int height )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Create( width, height );
+#endif
+		}
+
 		int Load( const stdString &sFile, const stdString &sType )
 		{
 #if !defined( OEX_ENABLE_XIMAGE )

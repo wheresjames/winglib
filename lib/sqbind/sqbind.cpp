@@ -70,13 +70,28 @@ void CSqString::Register( sqbind::VM vm )
 }
 
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqFile, CSqFile )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, CreateAlways )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, OpenAlways )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, OpenExisting )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, OpenNew )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, Close )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, SetPtrPosBegin )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, SetPtrPosEnd )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, Size )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, WriteBin )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, ReadBin )
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, get_contents_bin )
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, put_contents_bin )
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, append_contents_bin )
+
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, Write )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFile, Read )
 	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, get_contents )
 	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, put_contents )
 	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, append_contents )
+
 	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, mkdir )
 	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, rmdir )
 	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, exists )
@@ -141,6 +156,7 @@ void CSqTime::Register( sqbind::VM vm )
 }
 
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqImage, CSqImage )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Create )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Load )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Save )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Encode )

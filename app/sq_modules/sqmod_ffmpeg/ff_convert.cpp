@@ -96,8 +96,6 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	return 1;
 }
 
-int img_convert ( AVPicture *, int, const AVPicture *, int, int, int );
-
 int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, int dst_fmt, int alg )
 {
 	if ( !dst )
@@ -120,7 +118,7 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 		return 0;
 
 	// Allocate memory for destination image
-	if ( dst->Size() < nSize && !dst->Obj().OexNew( nSize * 2 ).Ptr() )
+	if ( dst->Size() < nSize && !dst->Obj().OexNew( nSize ).Ptr() )
 		return 0;
 
 	// Fill in picture data
@@ -159,6 +157,44 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 		return 0;
 
 	dst->setUsed( nSize );
+
+	return 1;
+}
+
+int CFfConvert::ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg )
+{
+	// Sanity checks
+	if ( !img || 0 >= width || 0 >= height || !src || !src->getUsed() )
+		return 0;
+
+	// Do we need to allocate destination image?
+	if ( img->getWidth() != width || img->getHeight() != height )
+		if ( !img->Create( width, height ) )
+			return 0;
+
+	PixelFormat dst_fmt = PIX_FMT_RGB24;
+
+	// Fill in picture data
+	AVPicture apSrc, apDst;
+	if ( !FillAVPicture( &apSrc, src_fmt, width, height, src->_Ptr() )
+	     || !FillAVPicture( &apDst, dst_fmt, width, height, img->Obj().GetBits() ) )
+		return 0;
+
+	// Create conversion
+	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
+										width, height, dst_fmt,
+										alg, NULL, NULL, NULL );
+	if ( !psc )
+		return 0;
+
+	// Do the conversion
+	int nRet = sws_scale( psc, apSrc.data, apSrc.linesize, 0, height,
+			   			  apDst.data, apDst.linesize );
+
+	sws_freeContext( psc );
+
+	if ( 0 >= nRet )
+		return 0;
 
 	return 1;
 }

@@ -12,7 +12,7 @@ CFfEncoder::CFfEncoder()
 	m_pFormatContext = oexNULL;
 
 	// Register codecs
-	oexAlignCall( 16, av_register_all() );
+	av_register_all();
 }
 
 void CFfEncoder::Destroy()
@@ -25,6 +25,11 @@ void CFfEncoder::Destroy()
 	if ( m_pFormatContext )
 	{	av_free( m_pFormatContext );
 		m_pFormatContext = oexNULL;
+	} // end if
+
+	if ( m_pCodecContext )
+	{	avcodec_close( m_pCodecContext );
+		m_pCodecContext = oexNULL;
 	} // end if
 
 	m_nFmt = 0;

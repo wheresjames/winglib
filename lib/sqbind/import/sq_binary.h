@@ -118,6 +118,8 @@ namespace sqbind
 				return 0;
 
 			m_buf.Share( p->m_buf );
+
+			return 1;
 		}
 
 		/// Returns the size of the current buffer
