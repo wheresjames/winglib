@@ -41,6 +41,7 @@ OEX_USING_NAMESPACE
 // Ensure alignement
 #	if defined( OEX_ALIGNEDMEM ) && 0 != OEX_ALIGNEDMEM
 		oexSTATIC_ASSERT( 0 == ( OEX_MEMBLOCKPADDING & ( OEX_ALIGNEDMEM - 1 ) ) );
+		oexSTATIC_ASSERT( OEX_MEMBLOCKPADDING >= sizeof( oexUINT ) );
 #	endif
 
 /// Underrun padding
@@ -74,7 +75,7 @@ void CAlloc::ReportBlock( oexPVOID x_pMem, oexUINT uSize )
         oexUCHAR *pBuf = (oexUCHAR*)x_pMem;
 
         oexUINT uBlockSize = *(oexUINT*)pBuf;
-        pBuf += sizeof( oexUINT );
+        pBuf += OEX_SIZE_VAR;
 
         SBlockHeader *pBh = (SBlockHeader*)pBuf;
         pBuf += sizeof( SBlockHeader );
@@ -118,13 +119,13 @@ oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUI
     oexASSERT( x_pFile );
 
     // Allocate memory in powers of two
-    oexUINT uBlockSize = cmn::NextPower2( sizeof( oexUINT ) + x_uSize + ProtectAreaSize() );
+    oexUINT uBlockSize = cmn::NextPower2( OEX_SIZE_VAR + x_uSize + ProtectAreaSize() );
 
     // Does user want all allocated space?
     if ( x_bUseFullBlock )
 
         // Maximum useable space for the block size
-        x_uSize = uBlockSize - ( sizeof( oexUINT ) + ProtectAreaSize() );
+        x_uSize = uBlockSize - ( OEX_SIZE_VAR + ProtectAreaSize() );
 
     // Ok, get the memory
 	oexUCHAR *pBuf = (oexUCHAR*)os::CMem::New( uBlockSize, x_uLine, x_pFile );
@@ -134,7 +135,7 @@ oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUI
 
     // Save block size
     *(oexUINT*)pBuf = uBlockSize;
-    pBuf += sizeof( oexUINT );
+    pBuf += OEX_SIZE_VAR;
 
     // Initialize block header
     os::CSys::Zero( pBuf, sizeof( SBlockHeader ) );
@@ -155,7 +156,7 @@ oexBOOL CAlloc::Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT
         return oexFALSE;
 
     // Verify the memory
-    oexPVOID pBuf = (oexUCHAR*)CAlloc::VerifyMem( x_pBuf, oexTRUE ) - sizeof( oexUINT );
+    oexPVOID pBuf = (oexUCHAR*)CAlloc::VerifyMem( x_pBuf, oexTRUE ) - OEX_SIZE_VAR;
 
 	// Delete memory
     os::CMem::Delete( pBuf );
@@ -167,7 +168,7 @@ oexPVOID CAlloc::ReAlloc( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, 
 {
     // Do we have the space to resize?
     oexUINT uBlockSize = BlockSize( x_pBuf );
-    if ( uBlockSize < ( x_uNewSize + ProtectAreaSize() + sizeof( oexUINT ) ) )
+    if ( uBlockSize < ( x_uNewSize + ProtectAreaSize() + OEX_SIZE_VAR ) )
 //    	if ( !os::CMem::Resize( x_pBuf, x_uNewSize, x_uLine, x_pFile ) )
         	return oexNULL;
 

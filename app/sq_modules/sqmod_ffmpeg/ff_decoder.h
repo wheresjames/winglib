@@ -15,13 +15,13 @@ public:
 	void Destroy();
 
 	/// Creates a decoder
-	int Create( int x_nCodec );
+	int Create( int x_nCodec, int fmt, int width, int height, int cmp );
 
 	/// Reads info from a stream
 	int FindStreamInfo( sqbind::CSqBinary *in );
 
 	/// Encodes the specified image
-	int DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img );
+	int DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, int alg );
 
 private:
 
@@ -36,5 +36,8 @@ private:
 
 	/// Temp buffer
 	sqbind::CSqBinary		m_tmp;
+
+	/// Image format
+	int						m_nFmt;
 
 };

@@ -75,8 +75,7 @@ namespace sqbind
 		/// Copy constructor
 		CSqBinary( const t_buffer &r, t_size nUsed = 0 ) :
 			m_buf( r )
-		{
-			m_nUsed = nUsed;
+		{	m_nUsed = nUsed;
 		}
 
 		/// Registers the class

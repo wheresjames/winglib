@@ -106,7 +106,7 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 	if ( !img )
 		return 0;
 
-	PixelFormat src_fmt = PIX_FMT_RGB24;
+	PixelFormat src_fmt = PIX_FMT_BGR24;
 	int width = img->getWidth();
 	int height = img->getHeight();
 	if ( !img->Obj().GetBits() || 0 >= width || 0 >= height )
@@ -126,6 +126,10 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 	if ( !FillAVPicture( &apSrc, src_fmt, width, height, img->Obj().GetBits() )
 	     || !FillAVPicture( &apDst, dst_fmt, width, height, dst->_Ptr() ) )
 		return 0;
+
+	// Flip
+	apSrc.data[ 0 ] = apSrc.data[ 0 ] + ( height - 1 ) * apSrc.linesize[ 0 ];
+	apSrc.linesize[ 0 ] = -apSrc.linesize[ 0 ];
 
 /*	More overhead has been added to colorspace conversion
 
@@ -172,13 +176,17 @@ int CFfConvert::ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, 
 		if ( !img->Create( width, height ) )
 			return 0;
 
-	PixelFormat dst_fmt = PIX_FMT_RGB24;
+	PixelFormat dst_fmt = PIX_FMT_BGR24;
 
 	// Fill in picture data
 	AVPicture apSrc, apDst;
 	if ( !FillAVPicture( &apSrc, src_fmt, width, height, src->_Ptr() )
 	     || !FillAVPicture( &apDst, dst_fmt, width, height, img->Obj().GetBits() ) )
 		return 0;
+
+	// Flip
+	apDst.data[ 0 ] = apDst.data[ 0 ] + ( height - 1 ) * apDst.linesize[ 0 ];
+	apDst.linesize[ 0 ] = -apDst.linesize[ 0 ];
 
 	// Create conversion
 	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,

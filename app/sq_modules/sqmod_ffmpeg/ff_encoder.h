@@ -18,7 +18,7 @@ public:
 	void Destroy();
 
 	/// Creates a decoder
-	int Create( int x_nCodec, int fmt, int width, int height );
+	int Create( int x_nCodec, int fmt, int width, int height, int cmp );
 
 	/// Encode raw buffer
 	int EncodeRaw( int fmt, int width, int height, const void *in, int sz_in, sqbind::CSqBinary *out );

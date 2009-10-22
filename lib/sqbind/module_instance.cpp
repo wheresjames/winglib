@@ -165,7 +165,9 @@ oex::oexBOOL CModuleInstance::Export( sqbind::VM vm )
 	} // end if
 
 	// Attempt to export the functionality
-	sqbind::SSqAllocator sa = { &malloc, &realloc, &free };
+	sqbind::SSqAllocator sa = { oex::os::CMem::GetRawAllocator().fMalloc,
+								oex::os::CMem::GetRawAllocator().fRealloc,
+								oex::os::CMem::GetRawAllocator().fFree };
 
 	oex::oexINT nRet = m_fExportSymbols( vm, &sa );
 

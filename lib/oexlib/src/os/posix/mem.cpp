@@ -42,12 +42,12 @@ using namespace OEX_NAMESPACE::os;
 
 #if !defined( OEX_ALIGNEDMEM ) || 0 == OEX_ALIGNEDMEM
 
-static oexPVOID oex_malloc( oexINT x_nSize )
+static oexPVOID oex_malloc( size_t x_nSize )
 {
 	return malloc( (size_t)x_nSize );
 }
 
-static oexPVOID oex_realloc( oexPVOID x_ptr, oexINT x_nSize )
+static oexPVOID oex_realloc( oexPVOID x_ptr, size_t x_nSize )
 {	return realloc( x_ptr, x_nSize );
 }
 
@@ -60,7 +60,7 @@ static void oex_free( oexPVOID x_ptr )
 // Ensure OEX_ALIGNEDMEM is a power of 2
 oexSTATIC_ASSERT( 0 == ( OEX_ALIGNEDMEM & ( OEX_ALIGNEDMEM - 1 ) ) );
 
-static oexPVOID oex_malloc( oexINT x_nSize )
+static oexPVOID oex_malloc( size_t x_nSize )
 {
 	// Allocate memory
 	void *ptr = malloc( (size_t)x_nSize + OEX_ALIGNEDMEM + sizeof( void* ) );
@@ -77,7 +77,7 @@ static oexPVOID oex_malloc( oexINT x_nSize )
 	return ptr2;
 }
 
-static oexPVOID oex_realloc( oexPVOID x_ptr, oexINT x_nSize )
+static oexPVOID oex_realloc( oexPVOID x_ptr, size_t x_nSize )
 {
 	if ( !x_ptr )
 		return oex_malloc( x_nSize );

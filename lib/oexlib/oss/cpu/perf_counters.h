@@ -57,16 +57,16 @@ protected:
 		CBuffer(UINT Size)
 		{
 			m_Size = Size;
-			m_pBuffer = (LPBYTE) malloc( Size*sizeof(BYTE) );
+			m_pBuffer = (LPBYTE) OexAllocNew<BYTE>( Size*sizeof(BYTE) );
 		}
 		~CBuffer()
 		{
-			free(m_pBuffer);
+			OexAllocDelete<BYTE>(m_pBuffer);
 		}
 		void *Realloc(UINT Size)
 		{
 			m_Size = Size;
-			m_pBuffer = (LPBYTE) realloc( m_pBuffer, Size );
+			m_pBuffer = (LPBYTE) OexAllocResize<BYTE>( m_pBuffer, Size );
 			return m_pBuffer;
 		}
 

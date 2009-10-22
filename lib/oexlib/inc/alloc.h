@@ -110,6 +110,32 @@ public:
         oexUINT         uFlags;
     };
 
+// Alignment params
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#	if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#		define OEX_MEMBLOCKPADDING 	( sizeof( OEX_NAMESPACE::CAlloc::SBlockHeader ) + sizeof( OEX_NAMESPACE::CAlloc::m_ucUnderrunPadding ) )
+#	else
+#		define OEX_MEMBLOCKPADDING 	( sizeof( OEX_NAMESPACE::CAlloc::SBlockHeader ) )
+#	endif
+#	define OEX_MEMBLOCKOVERHEAD 	( OEX_MEMBLOCKPADDING + sizeof( OEX_NAMESPACE::CAlloc::m_ucOverrunPadding ) )
+#else
+#	define OEX_MEMBLOCKPADDING 		0
+#	define OEX_MEMBLOCKOVERHEAD 	0
+#endif
+
+// Alignment params
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#	if defined( OEX_ALIGNEDMEM ) && 0 != OEX_ALIGNEDMEM
+#		define OEX_SIZE_VAR	OEX_MEMBLOCKPADDING
+#	else
+#		define OEX_SIZE_VAR sizeof( oexUINT )
+#	endif
+#else
+#	define OEX_SIZE_VAR sizeof( oexUINT )
+#endif
+
+public:
+
 	//==============================================================
 	// ProtectMem()
 	//==============================================================
@@ -158,7 +184,7 @@ public:
     static inline oexUINT BlockSize( oexCPVOID x_pBuf )
     {
         // Grab the size of the allocated buffer
-        return *(oexUINT*)( ( (oexUCHAR*)x_pBuf ) - sizeof( oexUINT )
+        return *(oexUINT*)( ( (oexUCHAR*)x_pBuf ) - OEX_SIZE_VAR
                                                   - sizeof( SBlockHeader )
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
                                                   - sizeof( m_ucUnderrunPadding )
@@ -686,16 +712,5 @@ public:
 		COexStdAllocator& operator = ( const COexStdAllocator< U >& ) { return *this; }
 };
 
-#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-#	if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-#		define OEX_MEMBLOCKPADDING 	( sizeof( OEX_NAMESPACE::CAlloc::SBlockHeader ) + sizeof( OEX_NAMESPACE::CAlloc::m_ucUnderrunPadding ) )
-#	else
-#		define OEX_MEMBLOCKPADDING 	( sizeof( OEX_NAMESPACE::CAlloc::SBlockHeader ) )
-#	endif
-#	define OEX_MEMBLOCKOVERHEAD 	( OEX_MEMBLOCKPADDING + sizeof( OEX_NAMESPACE::CAlloc::m_ucOverrunPadding ) )
-#else
-#	define OEX_MEMBLOCKPADDING 		0
-#	define OEX_MEMBLOCKOVERHEAD 	0
-#endif
 
 

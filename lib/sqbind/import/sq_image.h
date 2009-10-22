@@ -130,6 +130,21 @@ namespace sqbind
 #endif
 		}
 
+		// Copy image
+		int CopyImage( CSqImage *p )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			if ( !p )
+				return 0;
+
+			m_img.Copy( &p->m_img );
+
+			return 1;
+#endif
+		}
+
 
 		static void Register( sqbind::VM vm );
 
