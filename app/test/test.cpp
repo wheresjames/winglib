@@ -363,17 +363,13 @@ oex::oexRESULT TestAllocator()
 	oexAligned4( oexCHAR, buf4[ 2 ] ) = { 0 };
 	oexAligned8( oexCHAR, buf8[ 2 ] ) = { 0 };
 	oexAligned16( oexCHAR, buf16[ 2 ] ) = { 0 };
-	oexAligned32( oexCHAR, buf32[ 2 ] ) = { 0 };
-	oexAligned64( oexCHAR, buf64[ 2 ] ) = { 0 };
 
 	// Verify buffer alignments
-	if ( !oexVERIFY( oexIsAligned( (oexLONG)bufp ) ) 
-		 || !oexVERIFY( oexIsAligned2( (oexLONG)buf2 ) ) 
-		 || !oexVERIFY( oexIsAligned4( (oexLONG)buf4 ) ) 
-		 || !oexVERIFY( oexIsAligned8( (oexLONG)buf8 ) ) 
-		 || !oexVERIFY( oexIsAligned16( (oexLONG)buf16 ) ) 
-		 || !oexVERIFY( oexIsAligned32( (oexLONG)buf32 ) ) 
-		 || !oexVERIFY( oexIsAligned64( (oexLONG)buf64 ) ) 
+	if ( !oexVERIFY( oexIsAligned( (oexLONG)bufp ) )
+		 || !oexVERIFY( oexIsAligned2( (oexLONG)buf2 ) )
+		 || !oexVERIFY( oexIsAligned4( (oexLONG)buf4 ) )
+		 || !oexVERIFY( oexIsAligned8( (oexLONG)buf8 ) )
+		 || !oexVERIFY( oexIsAligned16( (oexLONG)buf16 ) )
 	   )
 		return -23;
 
@@ -451,7 +447,7 @@ oex::oexRESULT TestStrings()
     str1.Fmt( oexT( "u = %u, s = %s, f = %f" ), (oex::oexULONG)11, oexT( "String" ), (oex::oexDOUBLE)3.14f );
 	if ( !oexVERIFY( str1 == oexT( "u = 11, s = String, f = 3.140000" ) ) )
 		return -9;
-	
+
     oex::oexGUID guid;
     oexZeroMemory( &guid, sizeof( guid ) );
 	oexCSTR pTest = oexT( "01234567-8901-2345-6789-012345678901" );

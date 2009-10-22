@@ -167,6 +167,12 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 //	paf->pts = AV_NOPTS_VALUE;
 //	paf->motion_val = { 0, 0 };
 
+	if ( !oex::cmn::IsAligned16( (oex::oexULONG)out->Obj().Ptr() ) )
+		oexEcho( "!!! Pointer not aligned" );
+
+oexSHOW( OEX_MEMBLOCKPADDING );
+oexM();
+
 	int nBytes = avcodec_encode_video( m_pCodecContext, out->Obj().Ptr(), nSize, paf );
 	if ( 0 > nBytes )
 	{	oexERROR( nBytes, oexT( "avcodec_encode_video() failed" ) );
@@ -174,6 +180,8 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 		av_free( paf );
 		return 0;
 	} // end if
+
+oexM();
 
 	av_free( paf );
 
@@ -205,9 +213,13 @@ int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, int 
 	if ( PIX_FMT_RGB24 == m_nFmt )
 		return EncodeRaw( PIX_FMT_RGB24, img->getWidth(), img->getHeight(), img->Obj().GetBits(), img->Obj().GetImageSize(), out );
 
+oexM();
+
 	// Must convert to input format
 	if ( !CFfConvert::ConvertColorIB( img, &m_tmp, m_nFmt, alg ) )
 		return 0;
+
+oexM();
 
 	// Do the conversion
 	return EncodeRaw( m_nFmt, img->getWidth(), img->getHeight(), m_tmp.Ptr(), m_tmp.getUsed(), out );

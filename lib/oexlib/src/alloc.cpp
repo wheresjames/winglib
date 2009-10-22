@@ -38,6 +38,11 @@ OEX_USING_NAMESPACE
 
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 
+// Ensure alignement
+#	if defined( OEX_ALIGNEDMEM ) && 0 != OEX_ALIGNEDMEM
+		oexSTATIC_ASSERT( 0 == ( OEX_MEMBLOCKPADDING & ( OEX_ALIGNEDMEM - 1 ) ) );
+#	endif
+
 /// Underrun padding
 oexUCHAR CAlloc::m_ucUnderrunPadding[ 4 ] =
 {

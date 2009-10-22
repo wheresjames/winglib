@@ -98,6 +98,12 @@
 #   define oexUNICODE
 #endif
 
+// Align memory on 16 byte boundry
+// OEX_ALIGNEDMEM must be set to a power of 2
+#if defined( OEX_WINDOWS )
+#	define OEX_ALIGNEDMEM 16
+#endif
+
 // By default, the thread locks time out and usually the function
 // will give up and treat it as an error, sixty seconds should be
 // plenty, but you may have some reason, like a reeeeaaaallllyyy

@@ -27,7 +27,11 @@ include $(PRJ_LIBROOT)/unsupported.mk
 else
 
 ifeq ($(PLATFORM),windows)
-	PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows $(PRJ_INCS) zlib
+	ifeq ($(BUILD),vs)
+		PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows/vs $(PRJ_INCS)
+	else
+		PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows/gcc $(PRJ_INCS) zlib
+	endif
 else
 	PRJ_INCS := winglib/dep/etc/ffmpeg/inc/posix $(PRJ_INCS)
 endif

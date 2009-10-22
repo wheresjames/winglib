@@ -44,14 +44,96 @@
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
+#if !defined( OEX_ALIGNEDMEM ) || 0 == OEX_ALIGNEDMEM
+
 static oexPVOID oex_malloc( oexINT x_nSize )
-{	return malloc( (size_t)x_nSize ); }
+{
+	return malloc( (size_t)x_nSize );
+}
 
 static oexPVOID oex_realloc( oexPVOID x_ptr, oexINT x_nSize )
-{	return realloc( x_ptr, x_nSize ); }
+{	return realloc( x_ptr, x_nSize );
+}
 
 static void oex_free( oexPVOID x_ptr )
-{	return free( x_ptr ); }
+{	return free( x_ptr );
+}
+
+#else
+
+// Ensure OEX_ALIGNEDMEM is a power of 2
+oexSTATIC_ASSERT( 0 == ( OEX_ALIGNEDMEM & ( OEX_ALIGNEDMEM - 1 ) ) );
+
+static oexPVOID oex_malloc( oexINT x_nSize )
+{
+	// Allocate memory
+	void *ptr = malloc( (size_t)x_nSize + OEX_ALIGNEDMEM + sizeof( void* ) );
+	if ( !ptr )
+		return oexNULL;
+
+	// Align pointer
+	oexBYTE *ptr2 = (oexBYTE*)ptr + sizeof( void* );
+	ptr2 += OEX_ALIGNEDMEM - ( (oexLONG)ptr2 & ( OEX_ALIGNEDMEM - 1 ) );
+
+	// Save original pointer
+	*( (void**)ptr2 - 1 ) = ptr;
+
+	return ptr2;
+}
+
+static oexPVOID oex_realloc( oexPVOID x_ptr, oexINT x_nSize )
+{
+	if ( !x_ptr )
+		return oex_malloc( x_nSize );
+
+	// Get original pointer
+	void *ptr = *( (void**)x_ptr - 1 );
+
+	// Ensure it's sane
+	oexASSERT( cmn::Dif( (oexULONG)ptr, (oexULONG)x_ptr ) <= OEX_ALIGNEDMEM + sizeof( void* ) );
+
+	// Attempt realloc
+	void *ptr2 = realloc( ptr, x_nSize + OEX_ALIGNEDMEM + sizeof( void* ) );
+	if ( ptr2 == ptr )
+		return x_ptr;
+
+	// Great, the os moved the block
+	void *ptr3 = (oexBYTE*)ptr2 + ( (oexLONG)x_ptr - (oexLONG)ptr );
+	*( (void**)ptr3 - 1 ) = ptr2;
+
+	// Is it still aligned?
+	if ( 0 == ( (oexLONG)ptr3 & ( OEX_ALIGNEDMEM - 1 ) ) )
+		return ptr3;
+
+//	oexEcho( "+++ inefficient realloc()" );
+
+	// Well, now life sux
+	// I don't know what to do except allocate another aligned block and copy
+	void *ptr4 = oex_malloc( x_nSize );
+	oexMemCpy( ptr4, ptr3, x_nSize );
+
+	// Free the realloc() pointer
+	free( ptr2 );
+
+	// Did you get all that?
+	return ptr4;
+}
+
+static void oex_free( oexPVOID x_ptr )
+{
+	if ( !x_ptr )
+		return;
+
+	// Get original pointer
+	void *ptr = *( (void**)x_ptr - 1 );
+
+	// Ensure it's sane
+	oexASSERT( cmn::Dif( (oexULONG)ptr, (oexULONG)x_ptr ) <= OEX_ALIGNEDMEM + sizeof( void* ) );
+
+	return free( ptr );
+}
+
+#endif
 
 /// Raw allocator
 SRawAllocator	CMem::m_def = { oex_malloc, oex_realloc, oex_free };
@@ -146,10 +228,12 @@ void CMem::Delete( oexPVOID x_pMem )
 	} // end if
 }
 
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 static void __cdecl oex_DumpHook( void * pUserData, size_t nBytes )
 {
     CAlloc::ReportBlock( pUserData, nBytes );
 }
+#endif
 
 oexBOOL CMem::MemReport()
 {

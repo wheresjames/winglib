@@ -72,8 +72,9 @@ public:
            index 0 = the allocation
            index 1 = resize
            index 2 = delete
+		   index 3 = reserved
         */
-        eMaxAllocTrail = 3
+        eMaxAllocTrail = 4
     };
 
     // Allocation flags
@@ -684,5 +685,17 @@ public:
 	template < class U >
 		COexStdAllocator& operator = ( const COexStdAllocator< U >& ) { return *this; }
 };
+
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#	if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+#		define OEX_MEMBLOCKPADDING 	( sizeof( OEX_NAMESPACE::CAlloc::SBlockHeader ) + sizeof( OEX_NAMESPACE::CAlloc::m_ucUnderrunPadding ) )
+#	else
+#		define OEX_MEMBLOCKPADDING 	( sizeof( OEX_NAMESPACE::CAlloc::SBlockHeader ) )
+#	endif
+#	define OEX_MEMBLOCKOVERHEAD 	( OEX_MEMBLOCKPADDING + sizeof( OEX_NAMESPACE::CAlloc::m_ucOverrunPadding ) )
+#else
+#	define OEX_MEMBLOCKPADDING 		0
+#	define OEX_MEMBLOCKOVERHEAD 	0
+#endif
 
 
