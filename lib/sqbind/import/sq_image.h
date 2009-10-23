@@ -145,6 +145,15 @@ namespace sqbind
 #endif
 		}
 
+		// Copy image
+		int Resample( int x, int y, int fast )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Resample( x, y, fast ) ? 1 : 0;
+#endif
+		}
 
 		static void Register( sqbind::VM vm );
 

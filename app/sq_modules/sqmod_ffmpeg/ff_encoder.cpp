@@ -49,7 +49,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
 		return 0;
 
 	int res = 0;
-	sqbind::stdString x_sContainer = oexT( "avi" );
+//	sqbind::stdString x_sContainer = oexT( "avi" );
 
 	// Lose previous codec
 	Destroy();
@@ -59,7 +59,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
 	{	oexERROR( 0, oexMks( oexT( "avcodec_find_encoder() failed to find codec for id : " ), (int)x_nCodec ) );
 		return 0;
 	} // end if
-
+/*
 	m_pOutput = guess_format( x_sContainer.c_str(), 0, 0 );
 	if ( !m_pOutput )
 	{	oexERROR( 0, oexMks( oexT( "guess_format( " ), x_sContainer.c_str(), oexT( " ) failed " ) ) );
@@ -106,13 +106,22 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
 
 	m_pFormatContext->streams[ 0 ] = m_pStream;
 	m_pFormatContext->nb_streams = 1;
-
 	m_pCodecContext = m_pStream->codec;
 	if ( !m_pCodecContext )
 	{	oexERROR( 0, oexT( "codec field is NULL" ) );
 		Destroy();
 		return 0;
 	} // end if
+*/
+
+	m_pCodecContext = avcodec_alloc_context();
+	if ( !m_pCodecContext )
+	{	oexERROR( 0, oexT( "avcodec_alloc_context() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+
+	avcodec_get_context_defaults( m_pCodecContext );
 
     m_pCodecContext->codec_id = (CodecID)x_nCodec;
     m_pCodecContext->codec_type = CODEC_TYPE_VIDEO;
@@ -122,6 +131,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
     m_pCodecContext->gop_size = 12;
     m_pCodecContext->time_base.den = 30;
     m_pCodecContext->time_base.num = 1;
+//	m_pCodecContext->time_base  = (AVRational) { 1, 30 };
     m_pCodecContext->me_method = 1;
     m_pCodecContext->strict_std_compliance = cmp;
 	m_pCodecContext->pix_fmt = (PixelFormat)m_nFmt;
@@ -204,13 +214,13 @@ int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, int 
 	// Validate params
 	if ( !img || !out )
 		return 0;
-
+	
 	// Do we need to convert the colorspace?
 	if ( PIX_FMT_BGR24 == m_nFmt )
 		return EncodeRaw( PIX_FMT_BGR24, img->getWidth(), img->getHeight(), img->Obj().GetBits(), img->Obj().GetImageSize(), out );
 
 	// Must convert to input format
-	if ( !CFfConvert::ConvertColorIB( img, &m_tmp, m_nFmt, alg ) )
+	if ( !CFfConvert::ConvertColorIB( img, &m_tmp, m_nFmt, alg, 1 ) )
 		return 0;
 
 	// Do the conversion

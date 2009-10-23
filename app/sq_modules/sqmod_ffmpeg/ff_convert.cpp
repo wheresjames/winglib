@@ -96,7 +96,7 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	return 1;
 }
 
-int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, int dst_fmt, int alg )
+int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, int dst_fmt, int alg, int flip )
 {
 	if ( !dst )
 		return 0;
@@ -127,9 +127,11 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 	     || !FillAVPicture( &apDst, dst_fmt, width, height, dst->_Ptr() ) )
 		return 0;
 
-	// Flip
-	apSrc.data[ 0 ] = apSrc.data[ 0 ] + ( height - 1 ) * apSrc.linesize[ 0 ];
-	apSrc.linesize[ 0 ] = -apSrc.linesize[ 0 ];
+	// Flip?
+	if ( flip )
+	{	apSrc.data[ 0 ] = apSrc.data[ 0 ] + ( height - 1 ) * apSrc.linesize[ 0 ];
+		apSrc.linesize[ 0 ] = -apSrc.linesize[ 0 ];
+	} // end if
 
 /*	More overhead has been added to colorspace conversion
 
@@ -165,28 +167,126 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 	return 1;
 }
 
-int CFfConvert::ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg )
+int CFfConvert::ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip )
 {
 	// Sanity checks
 	if ( !img || 0 >= width || 0 >= height || !src || !src->getUsed() )
 		return 0;
 
+	// Image format
+	PixelFormat dst_fmt = PIX_FMT_BGR24;
+
 	// Do we need to allocate destination image?
 	if ( img->getWidth() != width || img->getHeight() != height )
 		if ( !img->Create( width, height ) )
 			return 0;
-
-	PixelFormat dst_fmt = PIX_FMT_BGR24;
-
+	
 	// Fill in picture data
 	AVPicture apSrc, apDst;
 	if ( !FillAVPicture( &apSrc, src_fmt, width, height, src->_Ptr() )
 	     || !FillAVPicture( &apDst, dst_fmt, width, height, img->Obj().GetBits() ) )
 		return 0;
 
-	// Flip
-	apDst.data[ 0 ] = apDst.data[ 0 ] + ( height - 1 ) * apDst.linesize[ 0 ];
-	apDst.linesize[ 0 ] = -apDst.linesize[ 0 ];
+	// Flip?
+	if ( flip )
+	{	apDst.data[ 0 ] = apDst.data[ 0 ] + ( height - 1 ) * apDst.linesize[ 0 ];
+		apDst.linesize[ 0 ] = -apDst.linesize[ 0 ];
+	} // end if
+
+	// Create conversion
+	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
+										width, height, dst_fmt,
+										alg, NULL, NULL, NULL );
+	if ( !psc )
+		return 0;
+
+	// Do the conversion
+	int nRet = sws_scale( psc, apSrc.data, apSrc.linesize, 0, height,
+			   			  apDst.data, apDst.linesize );
+
+	sws_freeContext( psc );
+
+	if ( 0 >= nRet )
+		return 0;
+
+	return 1;
+}
+
+int CFfConvert::ConvertColorRI( void *buf, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip )
+{
+	// Sanity checks
+	if ( !img || 0 >= width || 0 >= height || !buf )
+		return 0;
+
+	// Image format
+	PixelFormat dst_fmt = PIX_FMT_BGR24;
+
+	// Do we need to allocate destination image?
+	if ( img->getWidth() != width || img->getHeight() != height )
+		if ( !img->Create( width, height ) )
+			return 0;
+	
+	// Fill in picture data
+	AVPicture apSrc, apDst;
+	if ( !FillAVPicture( &apSrc, src_fmt, width, height, buf )
+	     || !FillAVPicture( &apDst, dst_fmt, width, height, img->Obj().GetBits() ) )
+		return 0;
+
+	// Flip?
+	if ( flip )
+	{	apDst.data[ 0 ] = apDst.data[ 0 ] + ( height - 1 ) * apDst.linesize[ 0 ];
+		apDst.linesize[ 0 ] = -apDst.linesize[ 0 ];
+	} // end if
+
+	// Create conversion
+	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
+										width, height, dst_fmt,
+										alg, NULL, NULL, NULL );
+	if ( !psc )
+		return 0;
+
+	// Do the conversion
+	int nRet = sws_scale( psc, apSrc.data, apSrc.linesize, 0, height,
+			   			  apDst.data, apDst.linesize );
+
+	sws_freeContext( psc );
+
+	if ( 0 >= nRet )
+		return 0;
+
+	return 1;
+}
+
+int CFfConvert::ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip )
+{
+	// Sanity checks
+	if ( !img || 0 >= width || 0 >= height || !pAf )
+		return 0;
+
+	// Image format
+	PixelFormat dst_fmt = PIX_FMT_BGR24;
+
+	// Do we need to allocate destination image?
+	if ( img->getWidth() != width || img->getHeight() != height )
+		if ( !img->Create( width, height ) )
+			return 0;
+	
+	// Fill in picture data
+	AVPicture apSrc, apDst;
+
+	// Copy source information
+	for ( int i = 0; i < 4; i++ )
+		apSrc.data[ i ] = pAf->data[ 0 ],
+		apSrc.linesize[ i ] = pAf->linesize[ 0 ];
+
+	if ( !FillAVPicture( &apDst, dst_fmt, width, height, img->Obj().GetBits() ) )
+		return 0;
+
+	// Flip?
+	if ( flip )
+	{	apDst.data[ 0 ] = apDst.data[ 0 ] + ( height - 1 ) * apDst.linesize[ 0 ];
+		apDst.linesize[ 0 ] = -apDst.linesize[ 0 ];
+	} // end if
 
 	// Create conversion
 	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,

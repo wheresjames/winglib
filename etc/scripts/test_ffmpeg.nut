@@ -3,7 +3,9 @@ _self.load_module( "ffmpeg", "" );
 
 function _init()
 {
-	local test_image = "../media/car.png";
+//	local test_image = "../media/car.png";
+	local test_image = "../media/wall_street.jpg";
+//	local test_image = "../media/mars.jpg";
 
 	// Load a picture
 	local img = CSqImage();
@@ -15,10 +17,10 @@ function _init()
 	_self.echo( "Loaded picture " + img.getWidth() + "x" + img.getHeight() );
 
 	run_test( "MJPEG", img, CFfEncoder().CODEC_ID_MJPEG, -1,
-			  CFfConvert().PIX_FMT_YUVJ420P, CFfConvert().SWS_FAST_BILINEAR );
+			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_BILINEAR );
 
-	run_test( "WMV1", img, CFfEncoder().CODEC_ID_WMV1, 0,
-			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
+//	run_test( "WMV1", img, CFfEncoder().CODEC_ID_WMV1, 0,
+//			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
 
 //	run_test( "WMV2", img, CFfEncoder().CODEC_ID_WMV2, 0,
 //			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
@@ -29,7 +31,8 @@ function _init()
 	run_test( "MPEG4", img, CFfEncoder().CODEC_ID_MPEG4, 0, 
 			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
 
-	run_test( "H264", img, CFfEncoder().CODEC_ID_H264, 0, 
+	img.Resample( 352, 288, 1 );
+	run_test( "H263", img, CFfEncoder().CODEC_ID_H263, 0, 
 			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
 }
 
@@ -52,7 +55,7 @@ function run_test( name, img, fmt, cmp, cs, alg )
 
 	test_decode( frame, cimg, fmt, cmp, cs, alg );
 
-	CSqFile().put_contents_bin( _self.root( "_ffmpeg_" + name + ".raw" ), frame );
+//	CSqFile().put_contents_bin( _self.root( "_ffmpeg_" + name + ".raw" ), frame );
 
 	cimg.Save( _self.root( "_ffmpeg_" + name + ".png" ), "" );
 }
