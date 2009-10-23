@@ -7,7 +7,7 @@
 
 #if !defined( INFINITY ) && defined( HUGE_VAL )
 #	define INFINITY HUGE_VAL
-#endif 
+#endif
 
 #define FFMPEG_CONFIGURATION ""
 #define FFMPEG_DATADIR "/usr/local/share/ffmpeg"
@@ -80,6 +80,7 @@
 #define HAVE_LIBDC1394_1 0
 #define HAVE_LIBDC1394_2 0
 #define HAVE_LLRINT 1
+#define HAVE_LOG2 1
 #define HAVE_LOONGSON 0
 #define HAVE_LRINT 1
 #define HAVE_LRINTF 1
@@ -113,6 +114,18 @@
 #define HAVE_XFORM_ASM 0
 #define HAVE_YASM 0
 #define CONFIG_BSFS 1
+#define CONFIG_AEA_DEMUXER 0 			// allcodecs.c
+#define CONFIG_CAF_DEMUXER 0			//
+#define CONFIG_SPDIF_MUXER 0			//
+#define CONFIG_W64_DEMUXER 0			//
+#define CONFIG_RTMP_PROTOCOL 1			//
+#define CONFIG_AAC_ENCODER 0			// allcodecs.c
+#define CONFIG_ATRAC1_DECODER 0			//
+#define CONFIG_TWINVQ_DECODER 0			//
+#define CONFIG_WMAPRO_DECODER 0			//
+#define CONFIG_PCM_BLURAY_DECODER 0		//
+#define CONFIG_PGSSUB_DECODER 0			//
+#define CONFIG_FRWU_DECODER 0			//
 #define CONFIG_DECODERS 1
 #define CONFIG_DEMUXERS 1
 #define CONFIG_ENCODERS 1
@@ -794,7 +807,7 @@
 #define ASMALIGN(ZEROBITS) ".align 1 << " #ZEROBITS "\n\t"
 #define EXTERN_PREFIX ""
 
-#include "internal.h"
+//#include "internal.h"
 
 #endif /* FFMPEG_CONFIG_H */
 

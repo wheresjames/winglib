@@ -39,7 +39,8 @@ endif
 CFG_CFLAGS := $(CFG_CFLAGS) -ffast-math -fomit-frame-pointer
 
 ifdef DBG
-	CFG_CFLAGS := $(CFG_CFLAGS) -fno-stack-check -O3
+#  -O3
+	CFG_CFLAGS := $(CFG_CFLAGS) -fno-stack-check -O1
 endif
 
 #-------------------------------------------------------------------
@@ -62,7 +63,7 @@ include $(PRJ_LIBROOT)/build.mk
 export LOC_TAG := libavcodec
 LOC_CXX_libavcodec := c
 LOC_SRC_libavcodec := $(CFG_LIBROOT)/ffmpeg/libavcodec
-LOC_EXC_libavcodec := acelp_filters h264enc \
+LOC_EXC_libavcodec := acelp_filters \
 					  \
 					  vaapi vaapi_mpeg2 vaapi_mpeg4 vaapi_vc1 \
 					  \
@@ -72,7 +73,13 @@ LOC_EXC_libavcodec := acelp_filters h264enc \
 					  libvorbis libx264 libxvidff libxvid_rc \
 					  \
 					  aacenc aacpsy beosthread g729dec imgconvert_template motion_est_template \
-					  mpegvideo_xvmc os2thread pthread svq3 vdpau 
+					  mpegvideo_xvmc os2thread svq3 vdpau
+ifeq ($(PLATFORM),windows)
+LOC_EXC_libavcodec := $(LOC_EXC_libavcodec) pthread
+else
+LOC_EXC_libavcodec := $(LOC_EXC_libavcodec) w32thread
+endif
+
 include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := libswscale

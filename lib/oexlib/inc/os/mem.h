@@ -34,8 +34,8 @@
 
 #pragma once
 
-typedef void* (*PFN_malloc)( size_t size );
-typedef void* (*PFN_realloc)( oexPVOID ptr, size_t size );
+typedef void* (*PFN_malloc)( oexSIZE_T size );
+typedef void* (*PFN_realloc)( oexPVOID ptr, oexSIZE_T size );
 typedef void (*PFN_free)( oexPVOID free );
 
 struct SRawAllocator

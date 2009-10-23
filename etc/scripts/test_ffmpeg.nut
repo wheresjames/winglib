@@ -25,15 +25,19 @@ function _init()
 //	run_test( "WMV2", img, CFfEncoder().CODEC_ID_WMV2, 0,
 //			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
 
-	run_test( "MSMPEG4V2", img, CFfEncoder().CODEC_ID_MSMPEG4V2, 0, 
+	run_test( "MSMPEG4V2", img, CFfEncoder().CODEC_ID_MSMPEG4V2, 0,
 			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
 
-	run_test( "MPEG4", img, CFfEncoder().CODEC_ID_MPEG4, 0, 
+	run_test( "MPEG4", img, CFfEncoder().CODEC_ID_MPEG4, 0,
+			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
+
+	run_test( "FLV1", img, CFfEncoder().CODEC_ID_FLV1, 0,
 			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
 
 	img.Resample( 352, 288, 1 );
-	run_test( "H263", img, CFfEncoder().CODEC_ID_H263, 0, 
+	run_test( "H263", img, CFfEncoder().CODEC_ID_H263, 0,
 			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
+
 }
 
 function run_test( name, img, fmt, cmp, cs, alg )
@@ -55,7 +59,7 @@ function run_test( name, img, fmt, cmp, cs, alg )
 
 	test_decode( frame, cimg, fmt, cmp, cs, alg );
 
-//	CSqFile().put_contents_bin( _self.root( "_ffmpeg_" + name + ".raw" ), frame );
+	CSqFile().put_contents_bin( _self.root( "_ffmpeg_" + name + ".jpg" ), frame );
 
 	cimg.Save( _self.root( "_ffmpeg_" + name + ".png" ), "" );
 }
@@ -89,7 +93,7 @@ function test_decode( frame, img, fmt, cmp, cs, alg )
 	{	_self.echo( "failed to create decoder" );
 		return;
 	} // end if
-	
+
 	if ( !dec.DecodeImage( frame, img, alg ) )
 	{	_self.echo( "failed to decode image" );
 		return;

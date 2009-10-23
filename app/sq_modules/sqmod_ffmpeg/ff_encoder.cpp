@@ -66,7 +66,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
 		Destroy();
 		return 0;
 	} // end if
-	
+
 	m_pFormatContext = avformat_alloc_context();
 	if ( !m_pFormatContext )
 	{	oexERROR( 0, oexT( "av_alloc_format_context() failed " ) );
@@ -131,7 +131,6 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
     m_pCodecContext->gop_size = 12;
     m_pCodecContext->time_base.den = 30;
     m_pCodecContext->time_base.num = 1;
-//	m_pCodecContext->time_base  = (AVRational) { 1, 30 };
     m_pCodecContext->me_method = 1;
     m_pCodecContext->strict_std_compliance = cmp;
 	m_pCodecContext->pix_fmt = (PixelFormat)m_nFmt;
@@ -166,7 +165,7 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 	int nSize = CFfConvert::CalcImageSize( fmt, width, height ) * 2;
 	if ( out->Size() < nSize && !out->Obj().OexNew( nSize ).Ptr() )
 		return 0;
-	
+
 	AVFrame *paf = avcodec_alloc_frame();
 	if ( !paf )
 		return 0;
@@ -175,11 +174,6 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 		return 0;
 
 	paf->key_frame = 1;
-//	paf->pts = AV_NOPTS_VALUE;
-//	paf->motion_val = { 0, 0 };
-
-//	if ( !oex::cmn::IsAligned16( (oex::oexULONG)out->Obj().Ptr() ) )
-//		oexEcho( "!!! Pointer not aligned" );
 
 	int nBytes = avcodec_encode_video( m_pCodecContext, out->Obj().Ptr(), nSize, paf );
 	if ( 0 > nBytes )
@@ -214,7 +208,7 @@ int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, int 
 	// Validate params
 	if ( !img || !out )
 		return 0;
-	
+
 	// Do we need to convert the colorspace?
 	if ( PIX_FMT_BGR24 == m_nFmt )
 		return EncodeRaw( PIX_FMT_BGR24, img->getWidth(), img->getHeight(), img->Obj().GetBits(), img->Obj().GetImageSize(), out );

@@ -3,17 +3,17 @@
 #include "stdafx.h"
 
 /*
-	.oo.ooo.oooooooo.  
-	 oU U U U U U Uo                                     
-	 |             |                                     
-	 |             |====\                                
-	 | F F M P E G |    ||                               
-	 |             |    ||                               
-	 |   B E E R   |    ||                               
-	 |             |    ||                               
-	 |             |====/                                
+	.oo.ooo.oooooooo.
+	 oU U U U U U Uo
 	 |             |
-	 ===============                                     
+	 |             |====\
+	 | F F M P E G |    ||
+	 |             |    ||
+	 |   B E E R   |    ||
+	 |             |    ||
+	 |             |====/
+	 |             |
+	 ===============
 */
 
 // av_open_input_file av_find_stream_info av_log_set_callback
@@ -68,18 +68,14 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
 		return 0;
 	} // end if
 
-	avcodec_get_context_defaults( m_pCodecContext );
-//	avcodec_get_context_defaults2( m_pCodecContext, CODEC_TYPE_VIDEO );
+//	avcodec_get_context_defaults( m_pCodecContext );
+	avcodec_get_context_defaults2( m_pCodecContext, CODEC_TYPE_VIDEO );
 
     m_pCodecContext->codec_id = (CodecID)x_nCodec;
     m_pCodecContext->codec_type = CODEC_TYPE_VIDEO;
     m_pCodecContext->bit_rate = 400000;
     m_pCodecContext->width = width;
     m_pCodecContext->height = height;
-//	m_pCodecContext->gop_size = 12;
-//	m_pCodecContext->time_base.den = 30;
-//	m_pCodecContext->time_base.num = 1;
-//	m_pCodecContext->me_method = 1;
 //	m_pCodecContext->strict_std_compliance = cmp;
 	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
 
@@ -125,11 +121,7 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, int a
 	if ( !m_pCodecContext )
 		return 0;
 
-//	int width = m_pCodecContext->width;
-//	int height = m_pCodecContext->height;
-
 	// Validate params
-//	if ( !in || !in->getUsed() || !img || 0 >= width || 0 >= height )
 	if ( !in || !in->getUsed() || !img )
 		return 0;
 
@@ -140,74 +132,24 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, int a
 	// Set end to zero to ensure no overreading on damaged blocks
 	oexZeroMemory( &in->_Ptr()[ in->getUsed() ], FF_INPUT_BUFFER_PADDING_SIZE * 2 );
 
-	// Get stream info if needed
-//	if ( !m_pFormatContext )
-//		FindStreamInfo( in );
-/*
-	// Temp buffer
-	int nSize = CFfConvert::CalcImageSize( m_nFmt, width, height );
-	if ( !nSize )
-		return 0;
-
-	if ( !m_tmp.Allocate( nSize ) )
-		return 0;
-
-	if ( !oex::cmn::IsAligned16( (long)in->_Ptr() ) )
-		return 0;
-
-	if ( !oex::cmn::IsAligned16( (long)m_tmp._Ptr() ) )
-		return 0;
-*/	
 	AVFrame *paf = avcodec_alloc_frame();
 	if ( !paf )
 		return 0;
 
-//	if ( !CFfConvert::FillAVFrame( paf, m_nFmt, width, height, (void*)m_tmp._Ptr() ) )
-//	{	av_free( paf );
-//		return 0;
-//	} // end if
-
-/*	int gpp = 0;
-	int used = 0;
-	uint8_t *buf = in->_Ptr();
-	int size = in->Size();
-	while( ( used = avcodec_decode_video( m_pCodecContext, paf, &gpp, buf, size ) ) && !gpp )
-	{
-		if ( used <= size )
-			buf += used, size -= used;
-		else
-			buf = 0, size = 0;
-
-	} // end while
-*/
-
 	int gpp = 0;
 	int used = avcodec_decode_video( m_pCodecContext, paf, &gpp, in->_Ptr(), in->Size() );
-
-//	AVPacket pkt;
-//	av_init_packet( &pkt );
-//	pkt.data = in->_Ptr();
-//	pkt.size = in->Size();
-//	int used = avcodec_decode_video2( m_pCodecContext, paf, &gpp, &pkt );
 
 	if ( 0 >= gpp )
 	{	av_free( paf );
 		return 0;
 	} // end if
 
-	// Read out 
+	// Read out
 	int width = m_pCodecContext->width;
 	int height = m_pCodecContext->height;
-//	m_nFmt = m_pCodecContext->pix_fmt;
-
-//	int nSize = CFfConvert::CalcImageSize( m_nFmt, width, height );
-//	m_tmp.setUsed( nSize );
-
-	// Must convert to input format
-//	int res = CFfConvert::ConvertColorBI( &m_tmp, m_nFmt, width, height, img, alg, 1 );
-//	int res = CFfConvert::ConvertColorRI( paf->data[ 0 ], m_nFmt, width, height, img, alg, 0 );
 	int res = CFfConvert::ConvertColorFI( paf, m_nFmt, width, height, img, alg, 1 );
 
+	// +++ Not sure if this is right or not?
 //	av_free( paf );
 
 	return res ? 1 : 0;

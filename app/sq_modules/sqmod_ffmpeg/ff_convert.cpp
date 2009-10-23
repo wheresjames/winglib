@@ -180,7 +180,7 @@ int CFfConvert::ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, 
 	if ( img->getWidth() != width || img->getHeight() != height )
 		if ( !img->Create( width, height ) )
 			return 0;
-	
+
 	// Fill in picture data
 	AVPicture apSrc, apDst;
 	if ( !FillAVPicture( &apSrc, src_fmt, width, height, src->_Ptr() )
@@ -225,7 +225,7 @@ int CFfConvert::ConvertColorRI( void *buf, int src_fmt, int width, int height, s
 	if ( img->getWidth() != width || img->getHeight() != height )
 		if ( !img->Create( width, height ) )
 			return 0;
-	
+
 	// Fill in picture data
 	AVPicture apSrc, apDst;
 	if ( !FillAVPicture( &apSrc, src_fmt, width, height, buf )
@@ -265,19 +265,36 @@ int CFfConvert::ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height
 
 	// Image format
 	PixelFormat dst_fmt = PIX_FMT_BGR24;
+//	src_fmt = PIX_FMT_YUV444P;
+//	src_fmt = PIX_FMT_YUVA420P;
+/*
+	SQBIND_GLOBALCONST( PIX_FMT_YUV411P )
+	SQBIND_GLOBALCONST( PIX_FMT_YUV420P )
+	SQBIND_GLOBALCONST( PIX_FMT_YUV422P )
+	SQBIND_GLOBALCONST( PIX_FMT_YUV440P )
+	SQBIND_GLOBALCONST( PIX_FMT_YUV444P )
+
+	SQBIND_GLOBALCONST( PIX_FMT_YUYV422 )
+
+	SQBIND_GLOBALCONST( PIX_FMT_YUVJ420P )
+	SQBIND_GLOBALCONST( PIX_FMT_YUVJ422P )
+	SQBIND_GLOBALCONST( PIX_FMT_YUVJ444P )
+	SQBIND_GLOBALCONST( PIX_FMT_YUVJ440P )
+	SQBIND_GLOBALCONST( PIX_FMT_YUVA420P )
+*/
 
 	// Do we need to allocate destination image?
 	if ( img->getWidth() != width || img->getHeight() != height )
 		if ( !img->Create( width, height ) )
 			return 0;
-	
+
 	// Fill in picture data
 	AVPicture apSrc, apDst;
 
 	// Copy source information
 	for ( int i = 0; i < 4; i++ )
-		apSrc.data[ i ] = pAf->data[ 0 ],
-		apSrc.linesize[ i ] = pAf->linesize[ 0 ];
+		apSrc.data[ i ] = pAf->data[ i ],
+		apSrc.linesize[ i ] = pAf->linesize[ i ];
 
 	if ( !FillAVPicture( &apDst, dst_fmt, width, height, img->Obj().GetBits() ) )
 		return 0;

@@ -147,7 +147,6 @@ ifeq ($(BUILD),vs)
 		endif
 	endif
 
-
 	# Tools
 	CFG_PP := cl /nologo /DWIN32 /wd4996
 	CFG_LD := link /NOLOGO
