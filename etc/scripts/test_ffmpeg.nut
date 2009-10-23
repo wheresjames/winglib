@@ -3,6 +3,46 @@ _self.load_module( "ffmpeg", "" );
 
 function _init()
 {
+//	local test_avi = "~/bag_test.avi";
+	local test_avi = "/home/landshark/bag_test.avi";
+
+	local vid = CFfContainer();
+	if ( !vid.Open( test_avi ) )
+	{	_self.echo( "failed to open file" );
+		return;
+	} // end if
+
+	_self.echo( "Video File : " + vid.getWidth() + "x" + vid.getHeight() );
+
+	local dec = CFfDecoder();
+	if ( !dec.Create( vid.getVideoCodecId(), vid.getVideoFormat(),
+					  vid.getWidth(), vid.getHeight(), 0 ) )
+	{	_self.echo( "failed to create decoder" );
+		return;
+	} // end if
+
+	local stream = -1;
+	local frame = CSqBinary();
+	do { stream = vid.ReadFrame( frame );
+	} while ( 0 <= stream && stream != vid.getVideoStream() )
+
+	if ( 0 > stream )
+	{	_self.echo( "failed to read any video data frame from file" );
+		return;
+	} // end if
+
+	_self.echo( "Read " + frame.getUsed() + " bytes" );
+
+//	local img = CSqImage();
+//	if ( !dec.DecodeImage( frame, img, CFfConvert().SWS_FAST_BILINEAR ) )
+//	{	_self.echo( "failed to decode image" );
+//		return;
+//	} // end if
+
+	_self.echo( "success" );
+
+	return;
+
 //	local test_image = "../media/car.png";
 	local test_image = "../media/wall_street.jpg";
 //	local test_image = "../media/mars.jpg";
@@ -37,7 +77,6 @@ function _init()
 	img.Resample( 352, 288, 1 );
 	run_test( "H263", img, CFfEncoder().CODEC_ID_H263, 0,
 			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
-
 }
 
 function run_test( name, img, fmt, cmp, cs, alg )

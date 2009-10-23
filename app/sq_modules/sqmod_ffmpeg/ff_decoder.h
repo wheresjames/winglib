@@ -11,6 +11,9 @@ public:
 	/// Default constructor
 	CFfDecoder();
 
+	/// Destructor
+	virtual ~CFfDecoder() { Destroy(); }
+
 	/// Releases all resources
 	void Destroy();
 
@@ -27,7 +30,7 @@ private:
 
 	/// Pointer to codec object
     AVCodec 				*m_pCodec;
-    
+
     /// Pointer to codec context
     AVCodecContext 			*m_pCodecContext;
 

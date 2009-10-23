@@ -12,7 +12,7 @@ public:
 	CFfEncoder();
 
 	/// Destructor
-	~CFfEncoder() { Destroy(); }
+	virtual ~CFfEncoder() { Destroy(); }
 
 	/// Releases all resources
 	void Destroy();

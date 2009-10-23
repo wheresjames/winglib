@@ -12,7 +12,7 @@ CFfEncoder::CFfEncoder()
 	m_pFormatContext = oexNULL;
 
 	// Register codecs
-	av_register_all();
+//	av_register_all();
 }
 
 void CFfEncoder::Destroy()

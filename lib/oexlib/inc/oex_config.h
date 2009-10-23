@@ -160,7 +160,12 @@
 #undef oexUSE_EXCEPTIONS
 
 // Define to include backtraces for log entries
-#define oexBACKTRACE_IN_LOG
+//#define oexBACKTRACE_IN_LOG
+
+// Define to have log entries printed to the command line
+#if defined( oexDEBUG )
+#	define oexPRINT_LOGS 2
+#endif
 
 // Define to include full file paths in log entries
 //#define oexFULL_FILENAME_IN_LOG

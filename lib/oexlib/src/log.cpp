@@ -87,8 +87,8 @@ oexBOOL CLog::Open( oexCSTR x_pPath )
 #if defined( oexDEBUG )
 
 	// Show log file location
-	oexPrintf( oexStrToMbPtr( x_pPath ) );
-	oexPrintf( oexNL );
+//	oexPrintf( oexStrToMbPtr( x_pPath ) );
+//	oexPrintf( oexNL );
 
 #endif
 
@@ -125,8 +125,8 @@ oexBOOL CLog::Resume( oexCSTR x_pPath )
 #if defined( oexDEBUG )
 
 	// Show log file location
-	oexPrintf( oexStrToMbPtr( x_pPath ) );
-	oexPrintf( oexNL );
+//	oexPrintf( oexStrToMbPtr( x_pPath ) );
+//	oexPrintf( oexNL );
 
 #endif
 
@@ -239,6 +239,14 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT 
 
 			// Write out the string to the file
 			m_file.Write( oexStrToMb( sLog ) );
+			
+#if defined( oexPRINT_LOGS )
+
+		// Print if user wants to see this level
+		if ( oexPRINT_LOGS <= x_uLevel )
+			oexEcho( sLog.Ptr() );
+#endif
+			
 		}
 		_oexCATCH( ... )
 		{

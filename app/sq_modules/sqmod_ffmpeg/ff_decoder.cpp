@@ -27,7 +27,7 @@ CFfDecoder::CFfDecoder()
 	m_nFmt = 0;
 
 	// Register codecs
-	av_register_all();
+//	av_register_all();
 }
 
 void CFfDecoder::Destroy()

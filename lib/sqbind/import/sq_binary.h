@@ -63,12 +63,14 @@ namespace sqbind
 			m_buf( r.m_buf )
 		{
 			m_nUsed = r.m_nUsed;
+			m_ptr = 0;
 		}
 
 		/// Assignment operator
 		CSqBinary& operator=( const CSqBinary &r )
 		{	m_nUsed = r.m_nUsed;
 			m_buf.Share( r.m_buf );
+			m_ptr = r.m_ptr;
 			return *this;
 		}
 
@@ -76,6 +78,7 @@ namespace sqbind
 		CSqBinary( const t_buffer &r, t_size nUsed = 0 ) :
 			m_buf( r )
 		{	m_nUsed = nUsed;
+			m_ptr = 0;
 		}
 
 		/// Registers the class
@@ -84,18 +87,21 @@ namespace sqbind
 		/// Frees the buffer
 		void Free()
 		{	m_nUsed = 0;
+			m_ptr = 0;
 			m_buf.Destroy();
 		}
 
 		/// Allocate specified number of bytes
 		int Allocate( t_size nSize )
-		{	m_buf.OexNew( nSize );
+		{	m_ptr = 0;
+			m_buf.OexNew( nSize );
 			return m_buf.Size() == (unsigned int)nSize ? 1 : 0;
 		}
 
 		/// Resize buffer to specified size
 		int Resize( t_size nNewSize )
-		{	m_buf.Resize( nNewSize );
+		{	m_ptr = 0;
+			m_buf.Resize( nNewSize );
 			return m_buf.Size() == (unsigned int)nNewSize ? 1 : 0;
 		}
 
@@ -105,8 +111,19 @@ namespace sqbind
 			if ( !p )
 				return 0;
 
+			m_ptr = 0;
 			m_nUsed = p->m_nUsed;
-			m_buf.Copy( p->m_buf );
+			if ( !m_nUsed )
+				Free();
+			else
+			{
+				if ( !p->m_ptr )
+					m_buf.Copy( p->m_buf );
+
+				else
+					m_buf.MemCpy( p->m_ptr, m_nUsed );
+
+			} // end else
 			return m_buf.Size();
 		}
 
@@ -116,6 +133,8 @@ namespace sqbind
 			if ( !p )
 				return 0;
 
+			m_nUsed = p->m_nUsed;
+			m_ptr = p->m_ptr;
 			m_buf.Share( p->m_buf );
 
 			return 1;
@@ -146,14 +165,14 @@ namespace sqbind
 		/// Returns the number of bytes in the buffer being used
 		t_size getUsed()
 		{	if ( 0 > m_nUsed ) m_nUsed = 0;
+			if ( m_ptr ) return m_nUsed;
 			else if ( Size() < m_nUsed ) m_nUsed = Size();
 			return m_nUsed;
 		}
 
 		/// Sets the share name
 		void SetName( const stdString &s )
-		{
-			m_buf.SetName( s.c_str() );
+		{	m_buf.SetName( s.c_str() );
 		}
 
 		/// Returns the share name
@@ -163,34 +182,41 @@ namespace sqbind
 
 		/// Returns a string representation of the buffer
 		stdString getString()
-		{	oex::CStr s = oexMbToStr( oex::CStr8( (const oex::CStr8::char_type*)m_buf.Ptr(), m_buf.Size() ) );
+		{	oex::CStr s = oexMbToStr( oex::CStr8( (const oex::CStr8::char_type*)Ptr(), getUsed() ) );
 			return stdString( s.Ptr(), s.Length() );
 		}
 
 		/// Converts a string to a binary buffer
 		// Returns the number of bytes in the buffer
 		t_size setString( const stdString &s )
-		{	oex::CStr8 mb = oexStrToMb( oex::CStr( s.c_str(), s.length() ) );
+		{	m_ptr = 0;
+			oex::CStr8 mb = oexStrToMb( oex::CStr( s.c_str(), s.length() ) );
 			m_buf.MemCpy( (const t_byte*)mb.Ptr(), mb.Length() );
 			return (t_size)m_buf.Size();
 		}
 
 		/// Converts a string to a binary buffer
 		// Returns the number of bytes in the buffer
+		// +++ This isn't quite right, should use getUsed()
 		t_size appendString( const stdString &s )
-		{	oex::CStr8 mb = oexStrToMb( oex::CStr( s.c_str(), s.length() ) );
+		{	if ( m_ptr ) { m_buf.MemCpy( m_ptr, getUsed() ); m_ptr = 0; }
+			oex::CStr8 mb = oexStrToMb( oex::CStr( s.c_str(), s.length() ) );
 			m_buf.MemAppend( (const t_byte*)mb.Ptr(), mb.Length() );
 			return (t_size)m_buf.Size();
 		}
 
 		/// Returns a pointer to the buffer
-		const t_byte* Ptr() { return m_buf.Ptr(); }
+		const t_byte* Ptr() { if ( m_ptr ) return m_ptr; return m_buf.Ptr(); }
 
 		/// Returns a pointer to the buffer
-		t_byte* _Ptr() { return m_buf.Ptr(); }
+		t_byte* _Ptr() { if ( m_ptr ) return m_ptr; return m_buf.Ptr(); }
 
 		/// Returns reference to buffer
 		t_buffer& Obj() { return m_buf; }
+
+		/// Sets a custom buffer pointer ( make sure it doesn't go away before this class! )
+		void setBuffer( t_byte *ptr, t_size size )
+		{	Free(); m_ptr = ptr; m_nUsed = size; }
 
 	private:
 
@@ -199,6 +225,9 @@ namespace sqbind
 
 		/// Buffer object
 		t_buffer					m_buf;
+
+		/// User buffer ( a bit more dangerous to use )
+		t_byte						*m_ptr;
 
 	};
 

@@ -177,21 +177,42 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfConvert, CFfConvert )
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CFfConvert );
 
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
+
+	SQBIND_MEMBER_FUNCTION( CFfContainer, Open )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, Destroy )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, ReadFrame )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getWidth )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getHeight )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoFormat )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoCodecId )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoStream )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioStream )
+
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CFfContainer );
+
 // Export classes
 static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 {
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
 
+	// Register codecs
+	av_register_all();
+
     SQBIND_EXPORT( x_vm, CFfDecoder );
     SQBIND_EXPORT( x_vm, CFfEncoder );
     SQBIND_EXPORT( x_vm, CFfConvert );
+    SQBIND_EXPORT( x_vm, CFfContainer );
 }
 
 #if defined( SQBIND_STATIC )
 	#include "ff_decoder.cpp"
 	#include "ff_encoder.cpp"
 	#include "ff_convert.cpp"
+	#include "ff_container.cpp"
 #else
 
 	static void SQBIND_Export( sqbind::VM x_vm )
