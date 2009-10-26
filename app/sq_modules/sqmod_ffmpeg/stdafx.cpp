@@ -17,6 +17,15 @@ extern "C"
 }
 
 // Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CFfFrameInfo, CFfFrameInfo )
+
+	SQBIND_MEMBER_FUNCTION( CFfFrameInfo, setKeyFrame )
+	SQBIND_MEMBER_FUNCTION( CFfFrameInfo, getKeyFrame )
+
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CFfFrameInfo );
+
+// Export Functions
 SQBIND_REGISTER_CLASS_BEGIN( CFfDecoder, CFfDecoder )
 
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, Destroy )
@@ -219,6 +228,7 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
     SQBIND_EXPORT( x_vm, CFfDecoder );
     SQBIND_EXPORT( x_vm, CFfEncoder );
     SQBIND_EXPORT( x_vm, CFfConvert );
+    SQBIND_EXPORT( x_vm, CFfFrameInfo );
     SQBIND_EXPORT( x_vm, CFfContainer );
 }
 

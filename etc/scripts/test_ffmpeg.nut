@@ -9,7 +9,6 @@ function _init()
 	local test_img = "../media/wall_street.jpg";
 	local test_avi = "/home/landshark/bag_test.avi"
 
-
 	// **************************************************
 	// Encode / Decode tests
 
@@ -52,6 +51,70 @@ function _init()
 
 	test_avi_write( ffmpeg_root, _self.build_path( ffmpeg_root, "_a_ffmpeg_write_test.avi" ) );
 
+	// **************************************************
+	// RTSP test
+
+	test_rtsp( ffmpeg_root, "rtsp://prug.rtsp-youtube.l.google.com/ChoLENy73wIaEQmJv18x7xfevhMYESARFEgGDA==/0/0/0/1/video.3gp", 15 );
+
+	_self.echo( "" );
+}
+
+function test_rtsp( root, url, fps )
+{
+	local vid_in = CFfContainer();
+	if ( !vid_in.Open( url ) )
+	{	_self.echo( "failed to open file" );
+		return;
+	} // end if
+
+	_self.echo( "Video File : " + vid_in.getWidth() + "x" + vid_in.getHeight() );
+
+	local dec = CFfDecoder();
+	if ( !dec.Create( vid_in.getVideoCodecId(), vid_in.getVideoFormat(),
+					  vid_in.getWidth(), vid_in.getHeight(), 0 ) )
+	{	_self.echo( "failed to create decoder" );
+		return;
+	} // end if
+
+	local vid_out = CFfContainer();
+	if ( !vid_out.Create( _self.build_path( root, "_ffmpeg_rtsp.avi" ), "" ) )
+	{	_self.echo( "failed to create file" );
+		return;
+	} // end if
+
+	if ( 0 > vid_out.AddVideoStream( vid_in.getVideoCodecId(), vid_in.getWidth(), vid_in.getHeight(), fps ) )
+	{	_self.echo( "failed to add video stream" );
+		return;
+	} // end if
+
+	if ( !vid_out.InitWrite() )
+	{	_self.echo( "failed to initialize file" );
+		return;
+	} // end if
+
+	local i = 0;
+	local stream = -1;
+	local frame = CSqBinary();
+	local frame_info = CFfFrameInfo();
+	while ( i < ( fps * 10 ) && 0 <= ( stream = vid_in.ReadFrame( frame, frame_info ) ) )
+	{
+//		if ( frame_info.getKeyFrame() )
+//			_self.print( "key" );
+
+		if ( vid_in.getVideoStream() == stream )
+		{
+			_self.sleep( 1000 / fps );
+
+			vid_out.WriteFrame( frame, frame_info );
+
+			_self.print( "\r" + i++ );
+			_self.flush();
+
+		} // end if
+
+	} // end while
+
+	_self.echo( "\rsuccess : Frames written = " + i );
 }
 
 function test_avi_write( root, file )
@@ -92,6 +155,7 @@ function test_avi_write( root, file )
 
 	local i = 0;
 	local frame = CSqBinary();
+	local frame_info = CFfFrameInfo();
 	do
 	{
 		local nEnc = enc.EncodeImage( img, frame, CFfConvert().SWS_FAST_BILINEAR );
@@ -100,7 +164,7 @@ function test_avi_write( root, file )
 			return;
 		} // end if
 
-		if ( !vid.WriteFrame( frame ) )
+		if ( !vid.WriteFrame( frame, frame_info ) )
 		{	_self.echo( "failed to write frame to avi" );
 			return;
 		} // end if
@@ -138,7 +202,8 @@ function test_avi_read( root, file )
 	local i = 0;
 	local stream = -1;
 	local frame = CSqBinary();
-	while ( 0 <= ( stream = vid.ReadFrame( frame ) ) )
+	local frame_info = CFfFrameInfo();
+	while ( 0 <= ( stream = vid.ReadFrame( frame, frame_info ) ) )
 	{
 		if ( vid.getVideoStream() == stream )
 		{

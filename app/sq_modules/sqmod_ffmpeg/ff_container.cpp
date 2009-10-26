@@ -98,7 +98,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl )
 	return 1;
 }
 
-int CFfContainer::ReadFrame( sqbind::CSqBinary *dat )
+int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, CFfFrameInfo *fi )
 {
 	if ( !m_pFormatContext )
 		return -1;
@@ -111,6 +111,12 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat )
 	int res = av_read_frame( m_pFormatContext, &pkt );
 	if ( res )
 		return -1;
+
+	if ( fi )
+	{
+		fi->setKeyFrame( 0 != ( pkt.flags & PKT_FLAG_KEY ) );
+
+	} // end if
 
 	dat->setBuffer( pkt.data, pkt.size );
 
@@ -224,7 +230,7 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	return m_nVideoStream;
 }
 
-int CFfContainer::WriteFrame( sqbind::CSqBinary *dat )
+int CFfContainer::WriteFrame( sqbind::CSqBinary *dat, CFfFrameInfo *fi )
 {
 	if ( !m_pFormatContext )
 		return 0;
@@ -248,7 +254,11 @@ int CFfContainer::WriteFrame( sqbind::CSqBinary *dat )
 
 	if ( pCodec->coded_frame )
 		pkt.pts = pCodec->coded_frame->pts;
-	pkt.flags |= PKT_FLAG_KEY;
+//	pkt.flags |= PKT_FLAG_KEY;
+
+	if ( fi && fi->getKeyFrame() )
+		pkt.flags |= PKT_FLAG_KEY;
+
 	pkt.stream_index = pStream->index;
 	pkt.data = dat->_Ptr();
 	pkt.size = dat->getUsed();
