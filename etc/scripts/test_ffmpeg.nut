@@ -3,11 +3,125 @@ _self.load_module( "ffmpeg", "" );
 
 function _init()
 {
-//	local test_avi = "~/bag_test.avi";
-	local test_avi = "/home/landshark/bag_test.avi";
+	local ffmpeg_root = _self.root( "_ffmpeg_" )
+	CSqFile().mkdir( ffmpeg_root );
+
+	local test_img = "../media/wall_street.jpg";
+	local test_avi = "/home/landshark/bag_test.avi"
+
+
+	// **************************************************
+	// Encode / Decode tests
+
+	// Load a picture
+	local img = CSqImage();
+	if ( !img.Load( _self.path( test_img ), "" ) )
+	{	_self.echo( "failed to load image" );
+		return;
+	} // end if
+
+	_self.echo( "Loaded picture " + img.getWidth() + "x" + img.getHeight() );
+
+	run_test( ffmpeg_root, "MJPEG", img, CFfEncoder().CODEC_ID_MJPEG, -1,
+			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_BILINEAR );
+
+//	run_test( ffmpeg_root, "WMV1", img, CFfEncoder().CODEC_ID_WMV1, 0,
+//			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
+
+//	run_test( ffmpeg_root, "WMV2", img, CFfEncoder().CODEC_ID_WMV2, 0,
+//			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
+
+	run_test( ffmpeg_root, "MSMPEG4V2", img, CFfEncoder().CODEC_ID_MSMPEG4V2, 0,
+			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
+
+	run_test( ffmpeg_root, "MPEG4", img, CFfEncoder().CODEC_ID_MPEG4, 0,
+			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
+
+	run_test( ffmpeg_root, "FLV1", img, CFfEncoder().CODEC_ID_FLV1, 0,
+			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
+
+	img.Resample( 352, 288, 0 );
+	run_test( ffmpeg_root, "H263", img, CFfEncoder().CODEC_ID_H263, 0,
+			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
+
+
+	// **************************************************
+	// AVI test
+
+	test_avi_read( ffmpeg_root, test_avi );
+
+	test_avi_write( ffmpeg_root, _self.build_path( ffmpeg_root, "_a_ffmpeg_write_test.avi" ) );
+
+}
+
+function test_avi_write( root, file )
+{
+	_self.echo( "" );
+	_self.echo( "----------------------------------------------" );
+	_self.echo( "-      AVI Write Test" );
+	_self.echo( "----------------------------------------------" );
+
+	local img = CSqImage();
+	if ( !img.Load( _self.build_path( root, "avi_0.jpg" ), "" ) )
+	{	_self.echo( "failed to find avi input image" );
+		return;
+	} // end if
 
 	local vid = CFfContainer();
-	if ( !vid.Open( test_avi ) )
+	if ( !vid.Create( file, "" ) )
+	{	_self.echo( "failed to create file" );
+		return;
+	} // end if
+
+	if ( 0 > vid.AddVideoStream( CFfEncoder().CODEC_ID_MPEG4, img.getWidth(), img.getHeight(), 30 ) )
+	{	_self.echo( "failed to add video stream" );
+		return;
+	} // end if
+
+	if ( !vid.InitWrite() )
+	{	_self.echo( "failed to initialize file" );
+		return;
+	} // end if
+
+	local enc = CFfEncoder();
+	if ( !enc.Create( vid.getVideoCodecId(), CFfConvert().PIX_FMT_YUV420P,
+					  img.getWidth(), img.getHeight(), 0 ) )
+	{	_self.echo( "failed to create encoder" );
+		return;
+	} // end if
+
+	local i = 0;
+	local frame = CSqBinary();
+	do
+	{
+		local nEnc = enc.EncodeImage( img, frame, CFfConvert().SWS_FAST_BILINEAR );
+		if ( !nEnc )
+		{	_self.echo( "Encode() failed" );
+			return;
+		} // end if
+
+		if ( !vid.WriteFrame( frame ) )
+		{	_self.echo( "failed to write frame to avi" );
+			return;
+		} // end if
+
+		_self.print( "\r" + i );
+		_self.flush();
+
+	} while ( img.Load( _self.build_path( root, "avi_" + ++i + ".jpg" ), "" ) );
+
+	_self.echo( "\rsuccess : Frames written = " + i );
+}
+
+function test_avi_read( root, file )
+{
+	_self.echo( "" );
+	_self.echo( "----------------------------------------------" );
+	_self.echo( "-      AVI Read Test" );
+	_self.echo( "----------------------------------------------" );
+
+	local vid = CFfContainer();
+	if ( !vid.Open( file ) )
 	{	_self.echo( "failed to open file" );
 		return;
 	} // end if
@@ -21,65 +135,35 @@ function _init()
 		return;
 	} // end if
 
+	local i = 0;
 	local stream = -1;
 	local frame = CSqBinary();
-	do { stream = vid.ReadFrame( frame );
-	} while ( 0 <= stream && stream != vid.getVideoStream() )
+	while ( 0 <= ( stream = vid.ReadFrame( frame ) ) )
+	{
+		if ( vid.getVideoStream() == stream )
+		{
+			local img = CSqImage();
+			if ( !dec.DecodeImage( frame, img, CFfConvert().SWS_FAST_BILINEAR ) )
+			{	_self.echo( "failed to decode image" );
+				return;
+			} // end if
 
-	if ( 0 > stream )
-	{	_self.echo( "failed to read any video data frame from file" );
-		return;
-	} // end if
+			// Save this frame
+			img.Save( _self.build_path( root, "avi_" + i++ + ".jpg" ), "" );
 
-	_self.echo( "Read " + frame.getUsed() + " bytes" );
+			_self.print( "\r" + i );
+			_self.flush();
 
-//	local img = CSqImage();
-//	if ( !dec.DecodeImage( frame, img, CFfConvert().SWS_FAST_BILINEAR ) )
-//	{	_self.echo( "failed to decode image" );
-//		return;
-//	} // end if
+		} // end if
 
-	_self.echo( "success" );
+	} // end while
+
+	_self.echo( "\rsuccess : Frames read " + i );
 
 	return;
-
-//	local test_image = "../media/car.png";
-	local test_image = "../media/wall_street.jpg";
-//	local test_image = "../media/mars.jpg";
-
-	// Load a picture
-	local img = CSqImage();
-	if ( !img.Load( _self.path( test_image ), "" ) )
-	{	_self.echo( "failed to load image" );
-		return;
-	} // end if
-
-	_self.echo( "Loaded picture " + img.getWidth() + "x" + img.getHeight() );
-
-	run_test( "MJPEG", img, CFfEncoder().CODEC_ID_MJPEG, -1,
-			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_BILINEAR );
-
-//	run_test( "WMV1", img, CFfEncoder().CODEC_ID_WMV1, 0,
-//			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
-
-//	run_test( "WMV2", img, CFfEncoder().CODEC_ID_WMV2, 0,
-//			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
-
-	run_test( "MSMPEG4V2", img, CFfEncoder().CODEC_ID_MSMPEG4V2, 0,
-			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
-
-	run_test( "MPEG4", img, CFfEncoder().CODEC_ID_MPEG4, 0,
-			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
-
-	run_test( "FLV1", img, CFfEncoder().CODEC_ID_FLV1, 0,
-			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
-
-	img.Resample( 352, 288, 1 );
-	run_test( "H263", img, CFfEncoder().CODEC_ID_H263, 0,
-			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
 }
 
-function run_test( name, img, fmt, cmp, cs, alg )
+function run_test( root, name, img, fmt, cmp, cs, alg )
 {
 	_self.echo( "" );
 	_self.echo( "----------------------------------------------" );
@@ -98,9 +182,9 @@ function run_test( name, img, fmt, cmp, cs, alg )
 
 	test_decode( frame, cimg, fmt, cmp, cs, alg );
 
-	CSqFile().put_contents_bin( _self.root( "_ffmpeg_" + name + ".jpg" ), frame );
+	CSqFile().put_contents_bin( _self.build_path( root, "_ffmpeg_" + name + ".raw" ), frame );
 
-	cimg.Save( _self.root( "_ffmpeg_" + name + ".png" ), "" );
+	cimg.Save( _self.build_path( root, "_ffmpeg_" + name + ".png" ), "" );
 }
 
 
@@ -139,5 +223,4 @@ function test_decode( frame, img, fmt, cmp, cs, alg )
 	} // end if
 
 	_self.echo( "success: Decoded Image " + img.getWidth() + "x" + img.getHeight() );
-
 }

@@ -26,7 +26,6 @@ sqbind
 sqlite
 SqPlus
 tiff
-WebKit
 winglib
 wxWidgets
 zlib

@@ -213,6 +213,8 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexMemCmp							OEX_NAMESPACE::os::CSys::MemCmp
 #define oexMemCpy							OEX_NAMESPACE::os::CSys::MemCpy
 #define oexMemSet							OEX_NAMESPACE::os::CSys::MemSet
+#define oexStrCpy							OEX_NAMESPACE::zstr::Copy
+#define oexStrCpySz( d, s )					OEX_NAMESPACE::zstr::Copy( d, sizeof( d ), s )
 
 #define oexINIT()                   		OEX_NAMESPACE::COex::Init()
 #define oexUNINIT()                 		OEX_NAMESPACE::COex::Uninit()

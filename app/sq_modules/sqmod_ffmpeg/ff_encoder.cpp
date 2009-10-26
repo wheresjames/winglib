@@ -43,76 +43,17 @@ void CFfEncoder::Destroy()
 // http://lists.mplayerhq.hu/pipermail/libav-user/2009-June/003257.html
 int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
 {
-	m_nFmt = fmt;
+	// Lose previous codec
+	Destroy();
 
 	if ( 0 >= width || 0 >= height )
 		return 0;
-
-	int res = 0;
-//	sqbind::stdString x_sContainer = oexT( "avi" );
-
-	// Lose previous codec
-	Destroy();
 
 	m_pCodec = avcodec_find_encoder( (CodecID)x_nCodec );
 	if ( !m_pCodec )
 	{	oexERROR( 0, oexMks( oexT( "avcodec_find_encoder() failed to find codec for id : " ), (int)x_nCodec ) );
 		return 0;
 	} // end if
-/*
-	m_pOutput = guess_format( x_sContainer.c_str(), 0, 0 );
-	if ( !m_pOutput )
-	{	oexERROR( 0, oexMks( oexT( "guess_format( " ), x_sContainer.c_str(), oexT( " ) failed " ) ) );
-		Destroy();
-		return 0;
-	} // end if
-
-	m_pFormatContext = avformat_alloc_context();
-	if ( !m_pFormatContext )
-	{	oexERROR( 0, oexT( "av_alloc_format_context() failed " ) );
-		Destroy();
-		return 0;
-	} // end if
-
-	m_pFormatContext->oformat = m_pOutput;
-	strcpy( m_pFormatContext->filename, "test.avi" );
-	m_pFormatContext->max_delay = (int)( 0.5 * AV_TIME_BASE );
-	m_pFormatContext->loop_output = AVFMT_NOOUTPUTLOOP;
-	m_pFormatContext->flags |= AVFMT_FLAG_NONBLOCK;
-
-	AVFormatParameters params;
-    params.prealloced_context = 1;
-    params.video_codec_id = (CodecID)x_nCodec;
-    params.audio_codec_id = CODEC_ID_NONE;
-    params.width = width;
-    params.height = height;
-    params.time_base.num = 1;
-    params.time_base.den = 30;
-	params.pix_fmt = (PixelFormat)m_nFmt;
-
-	res = av_set_parameters( m_pFormatContext, &params );
-	if ( 0 > res )
-	{	oexERROR( res, oexT( "av_set_parameters() failed " ) );
-		Destroy();
-		return 0;
-	} // end if
-
-	m_pStream = av_new_stream( m_pFormatContext, 0 );
-	if ( !m_pStream )
-	{	oexERROR( 0, oexT( "av_new_stream() failed " ) );
-		Destroy();
-		return 0;
-	} // end if
-
-	m_pFormatContext->streams[ 0 ] = m_pStream;
-	m_pFormatContext->nb_streams = 1;
-	m_pCodecContext = m_pStream->codec;
-	if ( !m_pCodecContext )
-	{	oexERROR( 0, oexT( "codec field is NULL" ) );
-		Destroy();
-		return 0;
-	} // end if
-*/
 
 	m_pCodecContext = avcodec_alloc_context();
 	if ( !m_pCodecContext )
@@ -133,16 +74,18 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
     m_pCodecContext->time_base.num = 1;
     m_pCodecContext->me_method = 1;
     m_pCodecContext->strict_std_compliance = cmp;
-	m_pCodecContext->pix_fmt = (PixelFormat)m_nFmt;
+	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
 //	m_pCodecContext->qmin = m_pCodecContext->qmax = 100;
 
-	res = avcodec_open( m_pCodecContext, m_pCodec );
+	int res = avcodec_open( m_pCodecContext, m_pCodec );
 	if ( 0 > res )
 	{	oexERROR( res, oexT( "avcodec_open() failed" ) );
 		m_pCodecContext = oexNULL;
 		Destroy();
 		return 0;
 	} // end if
+
+	m_nFmt = fmt;
 
 	return 1;
 }

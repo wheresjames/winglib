@@ -28,6 +28,9 @@ public:
 
 private:
 
+	/// Image format
+	int						m_nFmt;
+
 	/// Pointer to codec object
     AVCodec 				*m_pCodec;
 
@@ -39,8 +42,5 @@ private:
 
 	/// Temp buffer
 	sqbind::CSqBinary		m_tmp;
-
-	/// Image format
-	int						m_nFmt;
 
 };

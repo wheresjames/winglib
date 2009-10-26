@@ -22,6 +22,18 @@ public:
 	/// Reads frame data
 	int ReadFrame( sqbind::CSqBinary *dat );
 
+	/// Creates a container
+	int Create( const sqbind::stdString &sUrl, const sqbind::stdString &sType );
+
+	/// Initializes file writing
+	int InitWrite();
+
+	/// Adds a video stream to the file
+	int AddVideoStream( int fmt, int width, int height, int fps );
+
+	/// Writes the specified image to the file
+	int WriteFrame( sqbind::CSqBinary *dat );
+
 	/// Returns video width
 	int getWidth()
 	{	if ( !m_pFormatContext || 0 > m_nVideoStream
@@ -66,6 +78,12 @@ public:
 
 private:
 
+	/// Write ability?
+	int 					m_nWrite;
+
+	/// Write ability?
+	int 					m_nRead;
+
 	/// Output container context
 	AVFormatContext			*m_pFormatContext;
 
@@ -74,4 +92,5 @@ private:
 
 	/// Audio stream index
 	int						m_nAudioStream;
+
 };

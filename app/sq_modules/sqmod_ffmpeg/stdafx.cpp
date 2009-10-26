@@ -181,8 +181,14 @@ DECLARE_INSTANCE_TYPE( CFfConvert );
 SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 
 	SQBIND_MEMBER_FUNCTION( CFfContainer, Open )
-	SQBIND_MEMBER_FUNCTION( CFfContainer, Destroy )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, ReadFrame )
+
+	SQBIND_MEMBER_FUNCTION( CFfContainer, Create )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, InitWrite )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, AddVideoStream )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, WriteFrame )
+
+	SQBIND_MEMBER_FUNCTION( CFfContainer, Destroy )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getWidth )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getHeight )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoFormat )
@@ -198,6 +204,14 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 {
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
+
+#if defined( OEX_DEBUG )
+	av_log_set_level( AV_LOG_INFO );
+#else
+//	av_log_set_level( AV_LOG_WARNING );
+	av_log_set_level( AV_LOG_ERROR );
+//	av_log_set_level( AV_LOG_FATAL );
+#endif
 
 	// Register codecs
 	av_register_all();

@@ -49,8 +49,14 @@ int CSqEngineExport::alert( const stdString &sMsg )
 {	return oex::os::CSys::ShowMessageBox( oexT( "Script Message" ), sMsg.c_str() );
 }
 
+int CSqEngineExport::print( const stdString &sMsg )
+{	return oexPrintf( sMsg.c_str() ); }
+
 int CSqEngineExport::echo( const stdString &sMsg )
 {	return oexEcho( sMsg.c_str() ); }
+
+int CSqEngineExport::flush()
+{	return oex::os::CSys::Flush_stdout(); }
 
 int CSqEngineExport::import( const stdString &sClass )
 {   return OnImport( sClass ); }
@@ -616,7 +622,9 @@ SQBIND_REGISTER_CLASS_END()
 
 SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, alert )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, print )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, echo )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, flush )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, load_module )

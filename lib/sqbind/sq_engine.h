@@ -78,7 +78,14 @@ public:
 	int alert( const stdString &sMsg );
 
 	/// Sends data to STDOUT
+	int print( const stdString &sMsg );
+
+	/// Sends data to STDOUT
+	//  Same as print, but appends new line
 	int echo( const stdString &sMsg );
+
+	/// Flushes STDOUT
+	int flush();
 
 	/// Imports the specified class
 	int import( const stdString &sClass );

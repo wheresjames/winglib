@@ -125,19 +125,26 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, int a
 	if ( !in || !in->getUsed() || !img )
 		return 0;
 
-	// Ensure padding
-	if ( in->getUsed() + ( FF_INPUT_BUFFER_PADDING_SIZE * 2 ) > in->Size() )
-		in->Resize( in->getUsed() + FF_INPUT_BUFFER_PADDING_SIZE );
+	// How much padding is there in the buffer
+	// If not enough, we assume the caller took care of it
+	int nPadding = in->Size() - in->getUsed();
+	if ( 0 < nPadding )
+	{
+		// Don't zero mor than twice the padding size
+		if ( nPadding > ( FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
+			nPadding = FF_INPUT_BUFFER_PADDING_SIZE * 2;
 
-	// Set end to zero to ensure no overreading on damaged blocks
-	oexZeroMemory( &in->_Ptr()[ in->getUsed() ], FF_INPUT_BUFFER_PADDING_SIZE * 2 );
+		// Set end to zero to ensure no overreading on damaged blocks
+		oexZeroMemory( &in->_Ptr()[ in->getUsed() ], nPadding );
+
+	} // end if
 
 	AVFrame *paf = avcodec_alloc_frame();
 	if ( !paf )
 		return 0;
 
 	int gpp = 0;
-	int used = avcodec_decode_video( m_pCodecContext, paf, &gpp, in->_Ptr(), in->Size() );
+	int used = avcodec_decode_video( m_pCodecContext, paf, &gpp, in->_Ptr(), in->getUsed() );
 
 	if ( 0 >= gpp )
 	{	av_free( paf );

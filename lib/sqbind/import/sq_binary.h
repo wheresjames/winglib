@@ -56,7 +56,7 @@ namespace sqbind
 		SQBIND_CLASS_CTOR_END( CSqBinary )
 
 		/// Default constructor
-		CSqBinary() { m_nUsed = 0; }
+		CSqBinary() { m_nUsed = 0; m_ptr = 0; }
 
 		/// Copy constructor
 		CSqBinary( const CSqBinary &r ) :
@@ -100,8 +100,24 @@ namespace sqbind
 
 		/// Resize buffer to specified size
 		int Resize( t_size nNewSize )
-		{	m_ptr = 0;
-			m_buf.Resize( nNewSize );
+		{
+			if ( m_ptr )
+			{
+				// Is the buffer getting smaller?
+				if ( m_nUsed > nNewSize )
+					m_nUsed = nNewSize;
+
+				// Make a new buffer and copy data
+				m_buf.OexNew( nNewSize );
+				oexMemCpy( m_buf.Ptr(), m_ptr, m_nUsed );
+				m_ptr = 0;
+
+			} // end if
+
+			// Simple resize
+			else
+				m_buf.Resize( nNewSize );
+
 			return m_buf.Size() == (unsigned int)nNewSize ? 1 : 0;
 		}
 
