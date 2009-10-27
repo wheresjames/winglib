@@ -31,7 +31,7 @@ else
 ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),vs)
 		PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows/vs $(PRJ_INCS)
-		PRJ_OSLB := $(PRJ_OSLB) libgcc.a libmingwex.a
+		PRJ_PLIB := libgcc.a libmingwex.a
 	else
 		PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows/gcc $(PRJ_INCS) zlib
 	endif

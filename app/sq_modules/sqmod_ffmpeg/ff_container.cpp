@@ -64,14 +64,14 @@ int CFfContainer::Open( const sqbind::stdString &sUrl )
 	int res = av_open_input_file( &m_pFormatContext, oexStrToMbPtr( sUrl.c_str() ),
 								  oexNULL, 0, oexNULL );
 	if ( res )
-	{	oexERROR( 0, oexT( "av_open_input_file() failed" ) );
+	{	oexERROR( res, oexT( "av_open_input_file() failed" ) );
 		Destroy();
 		return 0;
 	} // end if
 
 	res = av_find_stream_info( m_pFormatContext );
 	if ( 0 > res )
-	{	oexERROR( 0, oexT( "av_find_stream_info() failed" ) );
+	{	oexERROR( res, oexT( "av_find_stream_info() failed" ) );
 		Destroy();
 		return 0;
 	} // end if
@@ -170,21 +170,24 @@ int CFfContainer::InitWrite()
 	if ( !m_nWrite )
 		return 0;
 
-	if ( 0 > av_set_parameters( m_pFormatContext, oexNULL ) )
-	{	oexERROR( 0, oexT( "av_set_parameters() failed" ) );
+	int res = 0;
+	if ( 0 > ( res = av_set_parameters( m_pFormatContext, oexNULL ) ) )
+	{	oexERROR( res, oexT( "av_set_parameters() failed" ) );
+		m_nWrite = 0;
 		Destroy();
 		return 0;
 	} // end if
 
 	if ( !( m_pFormatContext->oformat->flags & AVFMT_NOFILE ) )
-		if ( 0 > url_fopen( &m_pFormatContext->pb, m_pFormatContext->filename, URL_WRONLY ) )
-		{	oexERROR( 0, oexT( "url_fopen() failed" ) );
+		if ( 0 > ( res = url_fopen( &m_pFormatContext->pb, m_pFormatContext->filename, URL_WRONLY ) ) )
+		{	oexERROR( res, oexT( "url_fopen() failed" ) );
+			m_nWrite = 0;
 			Destroy();
 			return 0;
 		} // end if
 
-    if ( av_write_header( m_pFormatContext ) )
-	{	oexERROR( 0, oexT( "av_write_header() failed" ) );
+    if ( 0 > ( res = av_write_header( m_pFormatContext ) ) )
+	{	oexERROR( res, oexT( "av_write_header() failed" ) );
 		Destroy();
 		return 0;
 	} // end if

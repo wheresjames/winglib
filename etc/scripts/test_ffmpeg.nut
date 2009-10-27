@@ -7,7 +7,8 @@ function _init()
 	CSqFile().mkdir( ffmpeg_root );
 
 	local test_img = "../media/wall_street.jpg";
-	local test_avi = "/home/landshark/bag_test.avi"
+//	local test_avi = "/home/landshark/bag_test.avi";
+	local test_avi = _self.root( "TestClip.avi" );
 
 	// **************************************************
 	// Encode / Decode tests
@@ -54,13 +55,19 @@ function _init()
 	// **************************************************
 	// RTSP test
 
-	test_rtsp( ffmpeg_root, "rtsp://prug.rtsp-youtube.l.google.com/ChoLENy73wIaEQmJv18x7xfevhMYESARFEgGDA==/0/0/0/1/video.3gp", 15 );
+	test_rtsp( ffmpeg_root, "rtsp://192.168.2.130/Mediainput/mpeg4", 30 );
+//	test_rtsp( ffmpeg_root, "rtsp://prug.rtsp-youtube.l.google.com/ChoLENy73wIaEQmJv18x7xfevhMYESARFEgGDA==/0/0/0/1/video.3gp", 15 );
 
 	_self.echo( "" );
 }
 
 function test_rtsp( root, url, fps )
 {
+	_self.echo( "" );
+	_self.echo( "----------------------------------------------" );
+	_self.echo( "-     RTSP Test : " + url );
+	_self.echo( "----------------------------------------------" );
+
 	local vid_in = CFfContainer();
 	if ( !vid_in.Open( url ) )
 	{	_self.echo( "failed to open file" );

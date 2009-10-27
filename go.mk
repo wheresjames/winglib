@@ -43,7 +43,7 @@ endif
 ifeq ($(BUILD),vs)
 
 GO_LIBS := $(GO_LIBS) $(foreach lib,$(PRJ_LIBS), $(CFG_LIB_PRE)$(lib)$(CFG_DPOSTFIX)$(CFG_LIB_POST))
-GO_LIBS := $(GO_LIBS) $(PRJ_OSLB)
+GO_LIBS := $(PRJ_PLIB) $(GO_LIBS) $(PRJ_OSLB)
 	
 	ifneq ($(PRJ_LIBP),)
 		GO_LIBPATHS	:= $(GO_LIBPATHS) /LIBPATH:$(CFG_LIBROOT)
