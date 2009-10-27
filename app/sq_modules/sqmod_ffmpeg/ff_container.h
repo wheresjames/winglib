@@ -1,25 +1,5 @@
 // ff_container.h
 
-class CFfFrameInfo
-{
-public:
-
-	// Declare constructors
-	_SQBIND_CLASS_CTOR_BEGIN( CFfFrameInfo )
-	_SQBIND_CLASS_CTOR_END( CFfFrameInfo )
-
-	CFfFrameInfo() { m_nKeyFrame = 0; }
-
-	void setKeyFrame( int f ) { m_nKeyFrame = f; }
-	int getKeyFrame() { return m_nKeyFrame; }
-
-
-private:
-
-	int			m_nKeyFrame;
-
-};
-
 class CFfContainer
 {
 public:
@@ -37,13 +17,13 @@ public:
 	void Destroy();
 
 	/// Open link
-	int Open( const sqbind::stdString &sUrl );
+	int Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m );
 
 	/// Reads frame data
-	int ReadFrame( sqbind::CSqBinary *dat, CFfFrameInfo *fi );
+	int ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
 
 	/// Creates a container
-	int Create( const sqbind::stdString &sUrl, const sqbind::stdString &sType );
+	int Create( const sqbind::stdString &sUrl, const sqbind::stdString &sType, sqbind::CSqMulti *m );
 
 	/// Initializes file writing
 	int InitWrite();
@@ -52,7 +32,7 @@ public:
 	int AddVideoStream( int fmt, int width, int height, int fps );
 
 	/// Writes the specified image to the file
-	int WriteFrame( sqbind::CSqBinary *dat, CFfFrameInfo *fi );
+	int WriteFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
 
 	/// Returns video width
 	int getWidth()

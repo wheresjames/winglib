@@ -87,6 +87,12 @@ CSqString* CSqMulti::value()
 sqbind::stdString& CSqMulti::str()
 {	return m_val.str(); }
 
+int CSqMulti::toint()
+{	return oexStrToLong( m_val.str().c_str() ); }
+
+float CSqMulti::tofloat()
+{	return oexStrToFloat( m_val.str().c_str() ); }
+
 int CSqMulti::len()
 {	return m_val.str().length(); }
 
@@ -107,6 +113,8 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_down )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, value )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, toint )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, tofloat )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, len )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, unset )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, clear )
@@ -158,7 +166,7 @@ void CSqMulti::deserialize( const CSqParam::t_SqStr &s )
 }
 
 CSqMulti& CSqMulti::add( CSqMulti &m )
-{	
+{
 	for ( t_List::iterator it = m.m_lst.begin(); it != m.m_lst.end(); it++ )
 	{
 		if ( !it->second.size() )

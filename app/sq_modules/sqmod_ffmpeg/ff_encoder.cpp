@@ -90,7 +90,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
 	return 1;
 }
 
-int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int sz_in, sqbind::CSqBinary *out )
+int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int sz_in, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
 {
 	// Ensure codec
 	if ( !m_pCodecContext )
@@ -116,7 +116,12 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 	if ( !CFfConvert::FillAVFrame( paf, fmt, width, height, (void*)in ) )
 		return 0;
 
-	paf->key_frame = 1;
+	if ( m )
+	{
+		if ( m->isset( oexT( "flags" ) ) && ( (*m)[ oexT( "flags" ) ].toint() & 0x01 ) )
+			paf->key_frame = 1;
+
+	} // end if
 
 	int nBytes = avcodec_encode_video( m_pCodecContext, out->Obj().Ptr(), nSize, paf );
 	if ( 0 > nBytes )
@@ -133,16 +138,16 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 	return nBytes;
 }
 
-int CFfEncoder::Encode( int fmt, int width, int height, sqbind::CSqBinary *in, sqbind::CSqBinary *out )
+int CFfEncoder::Encode( int fmt, int width, int height, sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
 {
 	// Sanity checks
 	if ( !in || !in->getUsed() )
 		return 0;
 
-	return EncodeRaw( fmt, width, height, in->Ptr(), in->getUsed(), out );
+	return EncodeRaw( fmt, width, height, in->Ptr(), in->getUsed(), out, m );
 }
 
-int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, int alg )
+int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
 {
 	// Ensure codec
 	if ( !m_pCodecContext )
@@ -154,13 +159,13 @@ int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, int 
 
 	// Do we need to convert the colorspace?
 	if ( PIX_FMT_BGR24 == m_nFmt )
-		return EncodeRaw( PIX_FMT_BGR24, img->getWidth(), img->getHeight(), img->Obj().GetBits(), img->Obj().GetImageSize(), out );
+		return EncodeRaw( PIX_FMT_BGR24, img->getWidth(), img->getHeight(), img->Obj().GetBits(), img->Obj().GetImageSize(), out, m );
 
 	// Must convert to input format
-	if ( !CFfConvert::ConvertColorIB( img, &m_tmp, m_nFmt, alg, 1 ) )
+	if ( !CFfConvert::ConvertColorIB( img, &m_tmp, m_nFmt, SWS_FAST_BILINEAR, 1 ) )
 		return 0;
 
 	// Do the conversion
-	return EncodeRaw( m_nFmt, img->getWidth(), img->getHeight(), m_tmp.Ptr(), m_tmp.getUsed(), out );
+	return EncodeRaw( m_nFmt, img->getWidth(), img->getHeight(), m_tmp.Ptr(), m_tmp.getUsed(), out, m );
 }
 

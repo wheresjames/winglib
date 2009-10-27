@@ -19,7 +19,7 @@ void CFfContainer::Destroy()
 			av_close_input_file( m_pFormatContext );
 	} // end if
 
-	else if ( m_nWrite )
+	else if ( 1 < m_nWrite )
 	{
 		if ( m_pFormatContext )
 		{
@@ -51,7 +51,7 @@ void CFfContainer::Destroy()
 	m_nRead = 0;
 }
 
-int CFfContainer::Open( const sqbind::stdString &sUrl )
+int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 {
 	// Lose old container
 	Destroy();
@@ -76,6 +76,36 @@ int CFfContainer::Open( const sqbind::stdString &sUrl )
 		return 0;
 	} // end if
 
+	if ( m )
+	{
+		(*m)[ oexT( "filename" ) ].set( m_pFormatContext->filename );
+		(*m)[ oexT( "timestamp" ) ].set( oexMks( m_pFormatContext->timestamp ).Ptr() );
+		(*m)[ oexT( "title" ) ].set( m_pFormatContext->title );
+		(*m)[ oexT( "author" ) ].set( m_pFormatContext->author );
+		(*m)[ oexT( "copyright" ) ].set( m_pFormatContext->copyright );
+		(*m)[ oexT( "comment" ) ].set( m_pFormatContext->comment );
+		(*m)[ oexT( "album" ) ].set( m_pFormatContext->album );
+		(*m)[ oexT( "year" ) ].set( oexMks( m_pFormatContext->year ).Ptr() );
+		(*m)[ oexT( "track" ) ].set( oexMks( m_pFormatContext->track ).Ptr() );
+		(*m)[ oexT( "genre" ) ].set( m_pFormatContext->genre );
+		(*m)[ oexT( "ctx_flags" ) ].set( oexMks( m_pFormatContext->ctx_flags ).Ptr() );
+		(*m)[ oexT( "start_time" ) ].set( oexMks( m_pFormatContext->start_time ).Ptr() );
+		(*m)[ oexT( "duration" ) ].set( oexMks( m_pFormatContext->duration ).Ptr() );
+		(*m)[ oexT( "file_size" ) ].set( oexMks( m_pFormatContext->file_size ).Ptr() );
+		(*m)[ oexT( "bit_rate" ) ].set( oexMks( m_pFormatContext->bit_rate ).Ptr() );
+		(*m)[ oexT( "index_built" ) ].set( oexMks( m_pFormatContext->index_built ).Ptr() );
+		(*m)[ oexT( "mux_rate" ) ].set( oexMks( m_pFormatContext->mux_rate ).Ptr() );
+		(*m)[ oexT( "packet_size" ) ].set( oexMks( m_pFormatContext->packet_size ).Ptr() );
+		(*m)[ oexT( "preload" ) ].set( oexMks( m_pFormatContext->preload ).Ptr() );
+		(*m)[ oexT( "max_delay" ) ].set( oexMks( m_pFormatContext->max_delay ).Ptr() );
+		(*m)[ oexT( "loop_output" ) ].set( oexMks( m_pFormatContext->loop_output ).Ptr() );
+		(*m)[ oexT( "loop_input" ) ].set( oexMks( m_pFormatContext->loop_input ).Ptr() );
+		(*m)[ oexT( "probesize" ) ].set( oexMks( m_pFormatContext->probesize ).Ptr() );
+		(*m)[ oexT( "max_analyze_duration" ) ].set( oexMks( m_pFormatContext->max_analyze_duration ).Ptr() );
+		(*m)[ oexT( "keylen" ) ].set( oexMks( m_pFormatContext->keylen ).Ptr() );
+
+	} // end if
+
 	// Find audio and video stream indices
 	for ( unsigned int i = 0; i < m_pFormatContext->nb_streams; i++ )
 		if ( CODEC_TYPE_VIDEO == m_pFormatContext->streams[i]->codec->codec_type )
@@ -98,7 +128,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl )
 	return 1;
 }
 
-int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, CFfFrameInfo *fi )
+int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 {
 	if ( !m_pFormatContext )
 		return -1;
@@ -107,28 +137,34 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, CFfFrameInfo *fi )
 		return -1;
 
 	AVPacket pkt;
+	oexZero( pkt );
 
 	int res = av_read_frame( m_pFormatContext, &pkt );
 	if ( res )
 		return -1;
 
-	if ( fi )
+	if ( m )
 	{
-		fi->setKeyFrame( 0 != ( pkt.flags & PKT_FLAG_KEY ) );
+		(*m)[ oexT( "flags" ) ].set( oexMks( pkt.flags ).Ptr() );
+		(*m)[ oexT( "size" ) ].set( oexMks( pkt.size ).Ptr() );
+		(*m)[ oexT( "stream_index" ) ].set( oexMks( pkt.stream_index ).Ptr() );
+		(*m)[ oexT( "pos" ) ].set( oexMks( pkt.pos ).Ptr() );
+		(*m)[ oexT( "dts" ) ].set( oexMks( pkt.dts ).Ptr() );
+		(*m)[ oexT( "pts" ) ].set( oexMks( pkt.pts ).Ptr() );
+		(*m)[ oexT( "duration" ) ].set( oexMks( pkt.duration ).Ptr() );
+//		(*m)[ oexT( "convergence_duration" ) ].set( oexMks( pkt.convergence_duration ).Ptr() );
 
 	} // end if
+
 
 	dat->setBuffer( pkt.data, pkt.size );
 
 	return pkt.stream_index;
 }
 
-int CFfContainer::Create( const sqbind::stdString &sUrl, const sqbind::stdString &sType )
+int CFfContainer::Create( const sqbind::stdString &sUrl, const sqbind::stdString &sType, sqbind::CSqMulti *m )
 {
 	Destroy();
-
-	// Writing
-	m_nWrite = 1;
 
 	if ( !sUrl.length() )
 		return 0;
@@ -159,6 +195,39 @@ int CFfContainer::Create( const sqbind::stdString &sUrl, const sqbind::stdString
 	m_pFormatContext->oformat = pOut;
 	oexStrCpySz( m_pFormatContext->filename, sUrl.c_str() );
 
+	if ( m )
+	{
+		if ( m->isset( oexT( "flags" ) ) )
+			m_pFormatContext->flags = (*m)[ oexT( "flags" ) ].toint();
+
+		if ( m->isset( oexT( "max_analyze_duration" ) ) )
+			m_pFormatContext->max_analyze_duration = (*m)[ oexT( "max_analyze_duration" ) ].toint();
+
+		if ( m->isset( oexT( "probesize" ) ) )
+			m_pFormatContext->probesize = (*m)[ oexT( "probesize" ) ].toint();
+
+		if ( m->isset( oexT( "bit_rate" ) ) )
+			m_pFormatContext->bit_rate = (*m)[ oexT( "bit_rate" ) ].toint();
+
+		if ( m->isset( oexT( "loop_input" ) ) )
+			m_pFormatContext->loop_input = (*m)[ oexT( "loop_input" ) ].toint();
+
+		if ( m->isset( oexT( "loop_output" ) ) )
+			m_pFormatContext->loop_output = (*m)[ oexT( "loop_output" ) ].toint();
+
+	} // end if
+
+	m_nWrite = 1;
+
+/*
+	int res = 0;
+	if ( 0 > ( res = av_set_parameters( m_pFormatContext, oexNULL ) ) )
+	{	oexERROR( res, oexT( "av_set_parameters() failed" ) );
+		m_nWrite = 0;
+		Destroy();
+		return 0;
+	} // end if
+*/
 	return 1;
 }
 
@@ -173,7 +242,6 @@ int CFfContainer::InitWrite()
 	int res = 0;
 	if ( 0 > ( res = av_set_parameters( m_pFormatContext, oexNULL ) ) )
 	{	oexERROR( res, oexT( "av_set_parameters() failed" ) );
-		m_nWrite = 0;
 		Destroy();
 		return 0;
 	} // end if
@@ -181,7 +249,6 @@ int CFfContainer::InitWrite()
 	if ( !( m_pFormatContext->oformat->flags & AVFMT_NOFILE ) )
 		if ( 0 > ( res = url_fopen( &m_pFormatContext->pb, m_pFormatContext->filename, URL_WRONLY ) ) )
 		{	oexERROR( res, oexT( "url_fopen() failed" ) );
-			m_nWrite = 0;
 			Destroy();
 			return 0;
 		} // end if
@@ -191,6 +258,9 @@ int CFfContainer::InitWrite()
 		Destroy();
 		return 0;
 	} // end if
+
+	// Writing
+	m_nWrite = 2;
 
 	return 1;
 }
@@ -226,14 +296,14 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
     pcc->time_base.den = fps;
 	pcc->gop_size = 12;
 
-	oex::CStr sFName( m_pFormatContext->oformat->name );
-	if (  sFName == oexT( "3gp" ) || sFName == oexT( "mov" ) || sFName == oexT( "mp4" ) )
-		pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
+//	oex::CStr sFName( m_pFormatContext->oformat->name );
+//	if (  sFName == oexT( "3gp" ) || sFName == oexT( "mov" ) || sFName == oexT( "mp4" ) )
+//		pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
 
 	return m_nVideoStream;
 }
 
-int CFfContainer::WriteFrame( sqbind::CSqBinary *dat, CFfFrameInfo *fi )
+int CFfContainer::WriteFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 {
 	if ( !m_pFormatContext )
 		return 0;
@@ -253,14 +323,36 @@ int CFfContainer::WriteFrame( sqbind::CSqBinary *dat, CFfFrameInfo *fi )
 		return 0;
 
 	AVPacket pkt;
+	oexZero( pkt );
 	av_init_packet( &pkt );
 
 	if ( pCodec->coded_frame )
 		pkt.pts = pCodec->coded_frame->pts;
 //	pkt.flags |= PKT_FLAG_KEY;
 
-	if ( fi && fi->getKeyFrame() )
-		pkt.flags |= PKT_FLAG_KEY;
+	if ( m )
+	{
+		if ( m->isset( oexT( "flags" ) ) )
+			pkt.flags = (*m)[ oexT( "flags" ) ].toint();
+
+/*
+		if ( m->isset( oexT( "dts" ) ) )
+			pkt.dts = (*m)[ oexT( "dts" ) ].toint();
+
+		if ( m->isset( oexT( "pts" ) ) )
+			pkt.dts = (*m)[ oexT( "pts" ) ].toint();
+
+		if ( m->isset( oexT( "duration" ) ) )
+			pkt.flags = (*m)[ oexT( "duration" ) ].toint();
+*/
+//		pkt.pts = 0; //AV_NOPTS_VALUE;
+//		pkt.dts = 0; //AV_NOPTS_VALUE;
+		pkt.duration = 0;
+		pkt.pos = -1;
+//		pkt.convergence_duration = 0; //AV_NOPTS_VALUE;
+
+
+	} // end if
 
 	pkt.stream_index = pStream->index;
 	pkt.data = dat->_Ptr();

@@ -111,6 +111,12 @@ namespace sqbind
 		/// Returns a string representation of the value
 		stdString& str();
 
+		/// Returns a string representation of the value
+		int toint();
+
+		/// Returns a string representation of the value
+		float tofloat();
+
 		/// Returns the length of the string value
 		int len();
 

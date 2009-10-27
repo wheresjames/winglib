@@ -21,13 +21,13 @@ public:
 	int Create( int x_nCodec, int fmt, int width, int height, int cmp );
 
 	/// Encode raw buffer
-	int EncodeRaw( int fmt, int width, int height, const void *in, int sz_in, sqbind::CSqBinary *out );
+	int EncodeRaw( int fmt, int width, int height, const void *in, int sz_in, sqbind::CSqBinary *out, sqbind::CSqMulti *m);
 
 	/// Encode binary buffer
-	int Encode( int fmt, int width, int height, sqbind::CSqBinary *in, sqbind::CSqBinary *out );
+	int Encode( int fmt, int width, int height, sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m );
 
 	/// Encode image
-	int EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, int alg );
+	int EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, sqbind::CSqMulti *m );
 
 	/// Returns non-zero if valid codec
 	int IsLoaded() { return 0 != m_pCodecContext; }
