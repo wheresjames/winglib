@@ -347,8 +347,8 @@ int CFfContainer::WriteFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 */
 //		pkt.pts = 0; //AV_NOPTS_VALUE;
 //		pkt.dts = 0; //AV_NOPTS_VALUE;
-		pkt.duration = 0;
-		pkt.pos = -1;
+//		pkt.duration = 0;
+//		pkt.pos = -1;
 //		pkt.convergence_duration = 0; //AV_NOPTS_VALUE;
 
 

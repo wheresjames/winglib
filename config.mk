@@ -103,6 +103,10 @@ ifdef PRJ_DEFS
 	PRJ_DEFS :=
 endif
 
+ifndef PRJ_OPTS
+	PRJ_OPTS := -O3
+endif
+
 ifdef UNICODE
 	CFG_CEXTRA := $(CFG_CEXTRA) -DUNICODE -D_UNICODE
 endif
@@ -196,7 +200,7 @@ else
 		CFG_LEXTRA	 := -g
 		CFG_DPOSTFIX := _d
 	else
-		CFG_CEXTRA	 := -O3 -s -DNDEBUG=1 $(CFG_CEXTRA) 
+		CFG_CEXTRA	 := $(PRJ_OPTS) -s -DNDEBUG=1 $(CFG_CEXTRA) 
 		ifneq ($(PRJ_TYPE),dll)
 			CFG_LEXTRA	 := -s
 		endif

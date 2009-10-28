@@ -39,7 +39,6 @@ endif
 CFG_CFLAGS := $(CFG_CFLAGS) -ffast-math -fomit-frame-pointer
 
 ifdef DBG
-#  -O3
 	CFG_CFLAGS := $(CFG_CFLAGS) -fno-stack-check -O1
 endif
 

@@ -8,8 +8,6 @@ function _init()
 
 	local test_img = _self.path( "../media/wall_street.jpg" );
 	local test_avi = _self.path( "../media/nurse_shark.avi" );
-//	local test_avi = "/home/landshark/bag_test.avi";
-//	local test_avi = _self.root( "TestClip.avi" );
 
 	// **************************************************
 	// Encode / Decode tests
@@ -59,7 +57,7 @@ function _init()
 //	test_rtsp( ffmpeg_root, "rtsp://192.168.2.130/Mediainput/mpeg4", 30 );
 //	test_rtsp( ffmpeg_root, "rtsp://prug.rtsp-youtube.l.google.com/ChoLENy73wIaEQmJv18x7xfevhMYESARFEgGDA==/0/0/0/1/video.3gp", 15 );
 //	test_rtsp( ffmpeg_root, "rtsp://video2.multicasttech.com/AFTVSciFi3GPP296.sdp", 15 );
-//	test_rtsp( ffmpeg_root, "rtsp://a1352.l1857053128.c18570.g.lq.akamaistream.net/D/1352/18570/v0001/reflector:53128", 15 );
+	test_rtsp( ffmpeg_root, "rtsp://a1352.l1857053128.c18570.g.lq.akamaistream.net/D/1352/18570/v0001/reflector:53128", 15 );
 
 	_self.echo( "" );
 }
@@ -108,7 +106,7 @@ function test_rtsp( root, url, fps )
 	local stream = -1;
 	local frame = CSqBinary();
 	local frame_info = CSqMulti();
-	while ( i < ( fps * 10 ) && 0 <= ( stream = vid_in.ReadFrame( frame, frame_info ) ) )
+	while ( i < ( fps * 30 ) && 0 <= ( stream = vid_in.ReadFrame( frame, frame_info ) ) )
 	{
 		if ( vid_in.getVideoStream() == stream )
 		{
@@ -147,7 +145,7 @@ function test_avi_write( root, file )
 		return;
 	} // end if
 
-	if ( 0 > vid.AddVideoStream( CFfEncoder().CODEC_ID_MPEG4, img.getWidth(), img.getHeight(), 30 ) )
+	if ( 0 > vid.AddVideoStream( CFfEncoder().CODEC_ID_MPEG4, img.getWidth(), img.getHeight(), 15 ) )
 	{	_self.echo( "failed to add video stream" );
 		return;
 	} // end if
@@ -174,7 +172,7 @@ function test_avi_write( root, file )
 			return;
 		} // end if
 
-		if ( !vid.WriteFrame( frame, CSqMulti() ) )
+		if ( !vid.WriteFrame( frame, CSqMulti( "flags=1" ) ) )
 		{	_self.echo( "failed to write frame to avi" );
 			return;
 		} // end if
