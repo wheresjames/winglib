@@ -6,9 +6,9 @@ function _init()
 	local ffmpeg_root = _self.root( "_ffmpeg_" )
 	CSqFile().mkdir( ffmpeg_root );
 
-
-	local test_img = "../media/wall_street.jpg";
-	local test_avi = "/home/landshark/bag_test.avi";
+	local test_img = _self.path( "../media/wall_street.jpg" );
+	local test_avi = _self.path( "../media/nurse_shark.avi" );
+//	local test_avi = "/home/landshark/bag_test.avi";
 //	local test_avi = _self.root( "TestClip.avi" );
 
 	// **************************************************
@@ -16,7 +16,7 @@ function _init()
 
 	// Load a picture
 	local img = CSqImage();
-	if ( !img.Load( _self.path( test_img ), "" ) )
+	if ( !img.Load( test_img, "" ) )
 	{	_self.echo( "failed to load image" );
 		return;
 	} // end if
@@ -57,7 +57,9 @@ function _init()
 	// RTSP test
 
 //	test_rtsp( ffmpeg_root, "rtsp://192.168.2.130/Mediainput/mpeg4", 30 );
-	test_rtsp( ffmpeg_root, "rtsp://prug.rtsp-youtube.l.google.com/ChoLENy73wIaEQmJv18x7xfevhMYESARFEgGDA==/0/0/0/1/video.3gp", 15 );
+//	test_rtsp( ffmpeg_root, "rtsp://prug.rtsp-youtube.l.google.com/ChoLENy73wIaEQmJv18x7xfevhMYESARFEgGDA==/0/0/0/1/video.3gp", 15 );
+//	test_rtsp( ffmpeg_root, "rtsp://video2.multicasttech.com/AFTVSciFi3GPP296.sdp", 15 );
+//	test_rtsp( ffmpeg_root, "rtsp://a1352.l1857053128.c18570.g.lq.akamaistream.net/D/1352/18570/v0001/reflector:53128", 15 );
 
 	_self.echo( "" );
 }
@@ -140,8 +142,7 @@ function test_avi_write( root, file )
 	} // end if
 
 	local vid = CFfContainer();
-	local file_info = CSqMulti();
-	if ( !vid.Create( file, "", file_info ) )
+	if ( !vid.Create( file, "", CSqMulti() ) )
 	{	_self.echo( "failed to create file" );
 		return;
 	} // end if

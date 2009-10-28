@@ -33,7 +33,7 @@ ifeq ($(PLATFORM),windows)
 		PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows/gcc $(PRJ_INCS) zlib
 	endif
 else
-	PRJ_INCS := winglib/dep/etc/ffmpeg/inc/posix $(PRJ_INCS)
+	PRJ_INCS := winglib/dep/etc/ffmpeg/inc/posix $(PRJ_INCS) zlib
 endif
 
 CFG_CFLAGS := $(CFG_CFLAGS) -ffast-math -fomit-frame-pointer
@@ -57,7 +57,7 @@ include $(PRJ_LIBROOT)/build.mk
 export LOC_TAG := libavformat
 LOC_CXX_libavformat := c
 LOC_SRC_libavformat := $(CFG_LIBROOT)/ffmpeg/libavformat
-LOC_EXC_libavformat := avisynth libnut
+LOC_EXC_libavformat := avisynth libnut matroskadec mov
 include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := libavcodec
