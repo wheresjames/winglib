@@ -115,6 +115,53 @@ int CFfDecoder::FindStreamInfo( sqbind::CSqBinary *in )
 	return 1;
 }
 
+int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, int alg )
+{
+	// Ensure codec
+	if ( !m_pCodecContext )
+		return 0;
+
+	// Validate params
+	if ( !in || !in->getUsed() || !out )
+		return 0;
+
+	// How much padding is there in the buffer
+	// If not enough, we assume the caller took care of it
+	int nPadding = in->Size() - in->getUsed();
+	if ( 0 < nPadding )
+	{
+		// Don't zero mor than twice the padding size
+		if ( nPadding > ( FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
+			nPadding = FF_INPUT_BUFFER_PADDING_SIZE * 2;
+
+		// Set end to zero to ensure no overreading on damaged blocks
+		oexZeroMemory( &in->_Ptr()[ in->getUsed() ], nPadding );
+
+	} // end if
+
+	AVFrame *paf = avcodec_alloc_frame();
+	if ( !paf )
+		return 0;
+
+	int gpp = 0;
+	int used = avcodec_decode_video( m_pCodecContext, paf, &gpp, in->_Ptr(), in->getUsed() );
+
+	if ( 0 >= gpp )
+	{//	av_free( paf );
+		return 0;
+	} // end if
+
+	// Read out
+	int width = m_pCodecContext->width;
+	int height = m_pCodecContext->height;
+	int res = CFfConvert::ConvertColorFB( paf, m_nFmt, width, height, fmt, out, alg );
+
+	// +++ Not sure if this is right or not?
+//	av_free( paf );
+
+	return res ? 1 : 0;
+}
+
 int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, int alg )
 {
 	// Ensure codec

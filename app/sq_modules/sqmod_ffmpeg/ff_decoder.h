@@ -24,6 +24,9 @@ public:
 	int FindStreamInfo( sqbind::CSqBinary *in );
 
 	/// Encodes the specified image
+	int Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, int alg );
+
+	/// Encodes the specified image
 	int DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, int alg );
 
 private:

@@ -265,23 +265,6 @@ int CFfConvert::ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height
 
 	// Image format
 	PixelFormat dst_fmt = PIX_FMT_BGR24;
-//	src_fmt = PIX_FMT_YUV444P;
-//	src_fmt = PIX_FMT_YUVA420P;
-/*
-	SQBIND_GLOBALCONST( PIX_FMT_YUV411P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUV420P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUV422P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUV440P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUV444P )
-
-	SQBIND_GLOBALCONST( PIX_FMT_YUYV422 )
-
-	SQBIND_GLOBALCONST( PIX_FMT_YUVJ420P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUVJ422P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUVJ444P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUVJ440P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUVA420P )
-*/
 
 	// Do we need to allocate destination image?
 	if ( img->getWidth() != width || img->getHeight() != height )
@@ -320,6 +303,49 @@ int CFfConvert::ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height
 
 	if ( 0 >= nRet )
 		return 0;
+
+	return 1;
+}
+
+int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height, int dst_fmt, sqbind::CSqBinary *dst, int alg )
+{
+	// Sanity checks
+	if ( !dst || 0 >= width || 0 >= height || !pAf )
+		return 0;
+
+	// Output size
+	int nSize = CFfConvert::CalcImageSize( dst_fmt, width, height );
+	if ( dst->Size() < nSize && !dst->Obj().OexNew( nSize ).Ptr() )
+		return 0;
+
+	// Fill in picture data
+	AVPicture apSrc, apDst;
+
+	// Copy source information
+	for ( int i = 0; i < 4; i++ )
+		apSrc.data[ i ] = pAf->data[ i ],
+		apSrc.linesize[ i ] = pAf->linesize[ i ];
+
+	if ( !FillAVPicture( &apDst, dst_fmt, width, height, dst->_Ptr() ) )
+		return 0;
+
+	// Create conversion
+	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
+										width, height, (PixelFormat)dst_fmt,
+										alg, NULL, NULL, NULL );
+	if ( !psc )
+		return 0;
+
+	// Do the conversion
+	int nRet = sws_scale( psc, apSrc.data, apSrc.linesize, 0, height,
+			   			  apDst.data, apDst.linesize );
+
+	sws_freeContext( psc );
+
+	if ( 0 >= nRet )
+		return 0;
+
+	dst->setUsed( nSize );
 
 	return 1;
 }

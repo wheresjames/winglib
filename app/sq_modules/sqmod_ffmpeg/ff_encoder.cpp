@@ -120,6 +120,8 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 	{
 		if ( m->isset( oexT( "flags" ) ) && ( (*m)[ oexT( "flags" ) ].toint() & 0x01 ) )
 			paf->key_frame = 1;
+		else
+			paf->key_frame = 0;
 
 	} // end if
 

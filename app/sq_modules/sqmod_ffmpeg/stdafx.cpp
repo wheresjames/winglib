@@ -120,7 +120,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfConvert, CFfConvert )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorBB )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorIB )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorBI )
-
+	
 	// Format tyeps
 	SQBIND_GLOBALCONST( PIX_FMT_RGB24 )
 	SQBIND_GLOBALCONST( PIX_FMT_BGR24 )
@@ -203,6 +203,22 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CFfContainer );
 
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CFfTranscode, CFfTranscode )
+
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, Init )
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, Destroy )
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, Transcode )
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, GetRaw )	
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, GetImage )	
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, getDecoderCodecId )	
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, getEncoderCodecId )	
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, getWidth )	
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, getHeight )	
+
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CFfTranscode );
+
 // Export classes
 static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 {
@@ -224,6 +240,7 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
     SQBIND_EXPORT( x_vm, CFfEncoder );
     SQBIND_EXPORT( x_vm, CFfConvert );
     SQBIND_EXPORT( x_vm, CFfContainer );
+    SQBIND_EXPORT( x_vm, CFfTranscode );
 }
 
 #if defined( SQBIND_STATIC )
@@ -231,6 +248,7 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 	#include "ff_encoder.cpp"
 	#include "ff_convert.cpp"
 	#include "ff_container.cpp"
+	#include "ff_transcode.cpp"
 #else
 
 	static void SQBIND_Export( sqbind::VM x_vm )

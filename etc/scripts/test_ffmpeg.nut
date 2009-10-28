@@ -54,10 +54,10 @@ function _init()
 	// **************************************************
 	// RTSP test
 
-//	test_rtsp( ffmpeg_root, "rtsp://192.168.2.130/Mediainput/mpeg4", 30 );
+//	test_rtsp( ffmpeg_root, "rtsp://a1352.l1857053128.c18570.g.lq.akamaistream.net/D/1352/18570/v0001/reflector:53128", 30 );
 //	test_rtsp( ffmpeg_root, "rtsp://prug.rtsp-youtube.l.google.com/ChoLENy73wIaEQmJv18x7xfevhMYESARFEgGDA==/0/0/0/1/video.3gp", 15 );
 //	test_rtsp( ffmpeg_root, "rtsp://video2.multicasttech.com/AFTVSciFi3GPP296.sdp", 15 );
-	test_rtsp( ffmpeg_root, "rtsp://a1352.l1857053128.c18570.g.lq.akamaistream.net/D/1352/18570/v0001/reflector:53128", 15 );
+	test_rtsp( ffmpeg_root, "rtsp://192.168.2.130/Mediainput/mpeg4", 30 );
 
 	_self.echo( "" );
 }
@@ -92,7 +92,11 @@ function test_rtsp( root, url, fps )
 		return;
 	} // end if
 
-	if ( 0 > vid_out.AddVideoStream( vid_in.getVideoCodecId(), vid_in.getWidth(), vid_in.getHeight(), fps ) )
+	local codec_id = vid_in.getVideoCodecId();
+//	local codec_id = CFfEncoder().CODEC_ID_MSMPEG4V2;
+	local transcode = codec_id != vid_in.getVideoCodecId();
+
+	if ( 0 > vid_out.AddVideoStream( codec_id, vid_in.getWidth(), vid_in.getHeight(), fps ) )
 	{	_self.echo( "failed to add video stream" );
 		return;
 	} // end if
@@ -106,13 +110,25 @@ function test_rtsp( root, url, fps )
 	local stream = -1;
 	local frame = CSqBinary();
 	local frame_info = CSqMulti();
+	local tframe = CSqBinary();
+	local tc = CFfTranscode();
+
+	if ( transcode )
+		if ( !tc.Init( vid_in.getWidth(), vid_in.getHeight(), 
+					   vid_in.getVideoCodecId(), codec_id ) )
+		{	_self.echo( "failed to create transcoder" );
+			return;
+		} // end if
+
 	while ( i < ( fps * 30 ) && 0 <= ( stream = vid_in.ReadFrame( frame, frame_info ) ) )
 	{
 		if ( vid_in.getVideoStream() == stream )
 		{
-//			_self.sleep( 1000 / fps );
+			if ( !transcode )
+				vid_out.WriteFrame( frame, frame_info );
 
-			vid_out.WriteFrame( frame, frame_info );
+			else if ( tc.Transcode( frame, tframe, frame_info ) )
+				vid_out.WriteFrame( tframe, frame_info );
 
 			_self.print( "\r" + i++ );
 			_self.flush();
@@ -145,7 +161,7 @@ function test_avi_write( root, file )
 		return;
 	} // end if
 
-	if ( 0 > vid.AddVideoStream( CFfEncoder().CODEC_ID_MPEG4, img.getWidth(), img.getHeight(), 15 ) )
+	if ( 0 > vid.AddVideoStream( CFfEncoder().CODEC_ID_MSMPEG4V2, img.getWidth(), img.getHeight(), 15 ) )
 	{	_self.echo( "failed to add video stream" );
 		return;
 	} // end if

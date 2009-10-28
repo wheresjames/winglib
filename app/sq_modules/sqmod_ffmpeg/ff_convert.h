@@ -35,6 +35,8 @@ public:
 	/// Convert AVFrame to image
 	static int ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip );
 
+	/// Convert AVFrame
+	static int ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height, int dst_fmt, sqbind::CSqBinary *dst, int alg );
 
 private:
 
