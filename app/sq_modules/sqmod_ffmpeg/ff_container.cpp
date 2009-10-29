@@ -9,14 +9,19 @@ CFfContainer::CFfContainer()
 	m_nAudioStream = -1;
 	m_nWrite = 0;
 	m_nRead = 0;
+	oexZero( m_pkt );
 }
 
 void CFfContainer::Destroy()
 {
 	if ( m_nRead )
 	{
+		if ( m_pkt.data )
+			av_free_packet( &m_pkt );
+
 		if ( m_pFormatContext )
 			av_close_input_file( m_pFormatContext );
+
 	} // end if
 
 	else if ( 1 < m_nWrite )
@@ -49,6 +54,7 @@ void CFfContainer::Destroy()
 	m_nAudioStream = -1;
 	m_nWrite = 0;
 	m_nRead = 0;
+	oexZero( m_pkt );
 }
 
 int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
@@ -136,30 +142,26 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 	if ( !m_nRead )
 		return -1;
 
-	AVPacket pkt;
-	oexZero( pkt );
-
-	int res = av_read_frame( m_pFormatContext, &pkt );
+	int res = av_read_frame( m_pFormatContext, &m_pkt );
 	if ( res )
 		return -1;
 
 	if ( m )
 	{
-		(*m)[ oexT( "flags" ) ].set( oexMks( pkt.flags ).Ptr() );
-		(*m)[ oexT( "size" ) ].set( oexMks( pkt.size ).Ptr() );
-		(*m)[ oexT( "stream_index" ) ].set( oexMks( pkt.stream_index ).Ptr() );
-		(*m)[ oexT( "pos" ) ].set( oexMks( pkt.pos ).Ptr() );
-		(*m)[ oexT( "dts" ) ].set( oexMks( pkt.dts ).Ptr() );
-		(*m)[ oexT( "pts" ) ].set( oexMks( pkt.pts ).Ptr() );
-		(*m)[ oexT( "duration" ) ].set( oexMks( pkt.duration ).Ptr() );
+		(*m)[ oexT( "flags" ) ].set( oexMks( m_pkt.flags ).Ptr() );
+		(*m)[ oexT( "size" ) ].set( oexMks( m_pkt.size ).Ptr() );
+		(*m)[ oexT( "stream_index" ) ].set( oexMks( m_pkt.stream_index ).Ptr() );
+		(*m)[ oexT( "pos" ) ].set( oexMks( m_pkt.pos ).Ptr() );
+		(*m)[ oexT( "dts" ) ].set( oexMks( m_pkt.dts ).Ptr() );
+		(*m)[ oexT( "pts" ) ].set( oexMks( m_pkt.pts ).Ptr() );
+		(*m)[ oexT( "duration" ) ].set( oexMks( m_pkt.duration ).Ptr() );
 //		(*m)[ oexT( "convergence_duration" ) ].set( oexMks( pkt.convergence_duration ).Ptr() );
 
 	} // end if
 
+	dat->setBuffer( m_pkt.data, m_pkt.size );
 
-	dat->setBuffer( pkt.data, pkt.size );
-
-	return pkt.stream_index;
+	return m_pkt.stream_index;
 }
 
 int CFfContainer::Create( const sqbind::stdString &sUrl, const sqbind::stdString &sType, sqbind::CSqMulti *m )

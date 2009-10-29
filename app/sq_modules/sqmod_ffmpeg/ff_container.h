@@ -87,6 +87,8 @@ private:
 	/// Output container context
 	AVFormatContext			*m_pFormatContext;
 
+	AVPacket				m_pkt;
+
 	/// Video stream index
 	int						m_nVideoStream;
 

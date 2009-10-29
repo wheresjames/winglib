@@ -204,7 +204,7 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, int a
 	int res = CFfConvert::ConvertColorFI( paf, m_nFmt, width, height, img, alg, 1 );
 
 	// +++ Not sure if this is right or not?
-//	av_free( paf );
+	av_free( paf );
 
 	return res ? 1 : 0;
 }
