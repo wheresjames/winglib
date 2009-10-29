@@ -24,14 +24,19 @@ CFfDecoder::CFfDecoder()
 	m_pCodec = oexNULL;
 	m_pCodecContext = oexNULL;
 	m_pFormatContext = oexNULL;
+	m_pFrame = oexNULL;
 	m_nFmt = 0;
+	oexZero( m_pkt );
 
-	// Register codecs
-//	av_register_all();
 }
 
 void CFfDecoder::Destroy()
 {
+	if ( m_pFrame )
+	{	av_free( m_pFrame );
+		m_pFrame = oexNULL;
+	} // end if
+
 	if ( m_pCodecContext )
 	{	avcodec_close( m_pCodecContext );
 		m_pCodecContext = oexNULL;
@@ -44,6 +49,7 @@ void CFfDecoder::Destroy()
 
 	m_nFmt = 0;
 	m_pCodec = oexNULL;
+	oexZero( m_pkt );
 }
 
 int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
@@ -115,7 +121,7 @@ int CFfDecoder::FindStreamInfo( sqbind::CSqBinary *in )
 	return 1;
 }
 
-int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, int alg )
+int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
 {
 	// Ensure codec
 	if ( !m_pCodecContext )
@@ -139,30 +145,60 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 
 	} // end if
 
-	AVFrame *paf = avcodec_alloc_frame();
-	if ( !paf )
-		return 0;
-
-	int gpp = 0;
-	int used = avcodec_decode_video( m_pCodecContext, paf, &gpp, in->_Ptr(), in->getUsed() );
-
-	if ( 0 >= gpp )
-	{//	av_free( paf );
-		return 0;
+	if ( m_pFrame )
+	{	av_free( m_pFrame );
+		m_pFrame = oexNULL;
 	} // end if
 
-	// Read out
-	int width = m_pCodecContext->width;
-	int height = m_pCodecContext->height;
-	int res = CFfConvert::ConvertColorFB( paf, m_nFmt, width, height, fmt, out, alg );
+	m_pFrame = avcodec_alloc_frame();
+	if ( !m_pFrame )
+		return 0;
 
-	// +++ Not sure if this is right or not?
-//	av_free( paf );
+	// Init packet
+	oexZero( m_pkt );
+	av_init_packet( &m_pkt );
+
+	if ( m )
+	{
+		if ( m->isset( oexT( "flags" ) ) )
+			m_pkt.flags = (*m)[ oexT( "flags" ) ].toint();
+		if ( m->isset( oexT( "size" ) ) )
+			m_pkt.size = (*m)[ oexT( "size" ) ].toint();
+		if ( m->isset( oexT( "stream_index" ) ) )
+			m_pkt.stream_index = (*m)[ oexT( "stream_index" ) ].toint();
+		if ( m->isset( oexT( "pos" ) ) )
+			m_pkt.pos = (*m)[ oexT( "pos" ) ].toint();
+		if ( m->isset( oexT( "dts" ) ) )
+			m_pkt.dts = (*m)[ oexT( "dts" ) ].toint();
+		if ( m->isset( oexT( "pts" ) ) )
+			m_pkt.pts = (*m)[ oexT( "pts" ) ].toint();
+		if ( m->isset( oexT( "duration" ) ) )
+			m_pkt.duration = (*m)[ oexT( "duration" ) ].toint();
+
+	} // end if
+
+	m_pkt.data = in->_Ptr();
+	m_pkt.size = in->getUsed();
+
+	int gpp = 0;
+	int used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
+
+	if ( used != m_pkt.size )
+		oexEcho( "Unsed data!!!" );
+
+//	int gpp = 0;
+//	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, in->_Ptr(), in->getUsed() );
+
+	if ( 0 >= gpp )
+		return 0;
+
+	// Convert
+	int res = CFfConvert::ConvertColorFB( m_pFrame, m_nFmt, m_pCodecContext->width, m_pCodecContext->height, fmt, out, SWS_FAST_BILINEAR );
 
 	return res ? 1 : 0;
 }
 
-int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, int alg )
+int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbind::CSqMulti *m )
 {
 	// Ensure codec
 	if ( !m_pCodecContext )
@@ -186,27 +222,23 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, int a
 
 	} // end if
 
-	AVFrame *paf = avcodec_alloc_frame();
-	if ( !paf )
+	if ( m_pFrame )
+	{	av_free( m_pFrame );
+		m_pFrame = oexNULL;
+	} // end if
+
+	m_pFrame = avcodec_alloc_frame();
+	if ( !m_pFrame )
 		return 0;
 
 	int gpp = 0;
-	int used = avcodec_decode_video( m_pCodecContext, paf, &gpp, in->_Ptr(), in->getUsed() );
+	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, in->_Ptr(), in->getUsed() );
 
 	if ( 0 >= gpp )
-	{	av_free( paf );
 		return 0;
-	} // end if
 
-	// Read out
-	int width = m_pCodecContext->width;
-	int height = m_pCodecContext->height;
-	int res = CFfConvert::ConvertColorFI( paf, m_nFmt, width, height, img, alg, 1 );
-
-	// +++ Not sure if this is right or not?
-	av_free( paf );
+	// Convert
+	int res = CFfConvert::ConvertColorFI( m_pFrame, m_nFmt, m_pCodecContext->width, m_pCodecContext->height, img, SWS_FAST_BILINEAR, 1 );
 
 	return res ? 1 : 0;
 }
-
-

@@ -33,6 +33,35 @@ public:
 		return m_p->getSize().Height;
 	}
 
+	sqbind::CSqBinary Lock()
+	{
+		if ( !m_p )
+			return sqbind::CSqBinary();
+
+		oex::oexBYTE *pBuf = (oex::oexBYTE*)m_p->lock();
+		if ( !pBuf )
+			return sqbind::CSqBinary();
+
+		int nSize = m_p->getSize().Width * m_p->getSize().Height * 4;
+		if ( !nSize )
+			return sqbind::CSqBinary();
+
+		sqbind::CSqBinary buf;
+		buf.setBuffer( pBuf, nSize );
+		return buf;
+
+	} // end if
+
+	int Unlock()
+	{
+		if ( !m_p )
+			return 0;
+
+		m_p->unlock();
+
+		return 1;
+	}
+
 protected:
 
 	irr::video::ITexture    	*m_p;

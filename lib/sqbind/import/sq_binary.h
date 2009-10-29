@@ -63,7 +63,7 @@ namespace sqbind
 			m_buf( r.m_buf )
 		{
 			m_nUsed = r.m_nUsed;
-			m_ptr = 0;
+			m_ptr = r.m_ptr;
 		}
 
 		/// Assignment operator
@@ -159,6 +159,9 @@ namespace sqbind
 		/// Returns the size of the current buffer
 		t_size Size()
 		{
+			if ( m_ptr )
+				return m_nUsed;
+
 			return (t_size)m_buf.Size();
 		}
 

@@ -22,6 +22,9 @@ public:
 	/// Reads frame data
 	int ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
 
+	/// Reads and decodes a frame
+	int DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
+
 	/// Creates a container
 	int Create( const sqbind::stdString &sUrl, const sqbind::stdString &sType, sqbind::CSqMulti *m );
 
@@ -87,7 +90,14 @@ private:
 	/// Output container context
 	AVFormatContext			*m_pFormatContext;
 
+	/// Codec context
+	AVCodecContext			*m_pCodecContext;
+
+	/// AV Packet
 	AVPacket				m_pkt;
+
+	/// Decode frame
+	AVFrame					*m_pFrame;
 
 	/// Video stream index
 	int						m_nVideoStream;

@@ -67,7 +67,7 @@ int CFfTranscode::Transcode( sqbind::CSqBinary *src, sqbind::CSqBinary *dst, sqb
 	} // end if
 
 	// Decode in comming
-	if ( !m_dec.Decode( src, PIX_FMT_YUV420P, &m_tmp, SWS_FAST_BILINEAR ) )
+	if ( !m_dec.Decode( src, PIX_FMT_YUV420P, &m_tmp, fi ) )
 		return 0;
 
 	// Encode in new format

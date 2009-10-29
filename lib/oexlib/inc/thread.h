@@ -298,6 +298,13 @@ private:
 class CThread : public os::CResource
 {
 
+	enum
+	{
+		/// Default amount of time thread sleeps between calls to DoThread()
+		eDefaultSleepTime = 15
+	};
+
+
 public:
 
 	/// Default Constructor
@@ -321,7 +328,7 @@ public:
 
 		\see
 	*/
-	virtual oexRESULT Start( oexPVOID x_pData = oexNULL, oexUINT x_uSleep = 30 );
+	virtual oexRESULT Start( oexPVOID x_pData = oexNULL, oexUINT x_uSleep = eDefaultSleepTime );
 
 	//==============================================================
 	// Stop()

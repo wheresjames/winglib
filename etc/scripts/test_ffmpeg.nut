@@ -22,26 +22,26 @@ function _init()
 	_self.echo( "Loaded picture " + img.getWidth() + "x" + img.getHeight() );
 
 	run_test( ffmpeg_root, "MJPEG", img, CFfEncoder().CODEC_ID_MJPEG, -1,
-			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_BILINEAR );
+			  CFfConvert().PIX_FMT_YUV420P );
 
 //	run_test( ffmpeg_root, "WMV1", img, CFfEncoder().CODEC_ID_WMV1, 0,
-//			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
+//			  CFfConvert().PIX_FMT_YUV420P );
 
 //	run_test( ffmpeg_root, "WMV2", img, CFfEncoder().CODEC_ID_WMV2, 0,
-//			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
+//			  CFfConvert().PIX_FMT_YUV420P );
 
 	run_test( ffmpeg_root, "MSMPEG4V2", img, CFfEncoder().CODEC_ID_MSMPEG4V2, 0,
-			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
+			  CFfConvert().PIX_FMT_YUV420P );
 
 	run_test( ffmpeg_root, "MPEG4", img, CFfEncoder().CODEC_ID_MPEG4, 0,
-			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
+			  CFfConvert().PIX_FMT_YUV420P );
 
 	run_test( ffmpeg_root, "FLV1", img, CFfEncoder().CODEC_ID_FLV1, 0,
-			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
+			  CFfConvert().PIX_FMT_YUV420P );
 
 	img.Resample( 352, 288, 0 );
 	run_test( ffmpeg_root, "H263", img, CFfEncoder().CODEC_ID_H263, 0,
-			  CFfConvert().PIX_FMT_YUV420P, CFfConvert().SWS_FAST_BILINEAR );
+			  CFfConvert().PIX_FMT_YUV420P );
 
 
 	// **************************************************
@@ -78,14 +78,14 @@ function test_rtsp( root, url, fps )
 
 	_self.echo( "Video File : " + vid_in.getWidth() + "x" + vid_in.getHeight() );
 	_self.echo( " -> " + file_info.serialize() );
-
+/*
 	local dec = CFfDecoder();
 	if ( !dec.Create( vid_in.getVideoCodecId(), vid_in.getVideoFormat(),
 					  vid_in.getWidth(), vid_in.getHeight(), 0 ) )
 	{	_self.echo( "failed to create decoder" );
 		return;
 	} // end if
-
+*/
 	local vid_out = CFfContainer();
 	if ( !vid_out.Create( _self.build_path( root, "_ffmpeg_rtsp.avi" ), "", file_info ) )
 	{	_self.echo( "failed to create file" );
@@ -114,7 +114,7 @@ function test_rtsp( root, url, fps )
 	local tc = CFfTranscode();
 
 	if ( transcode )
-		if ( !tc.Init( vid_in.getWidth(), vid_in.getHeight(), 
+		if ( !tc.Init( vid_in.getWidth(), vid_in.getHeight(),
 					   vid_in.getVideoCodecId(), codec_id ) )
 		{	_self.echo( "failed to create transcoder" );
 			return;
@@ -130,7 +130,7 @@ function test_rtsp( root, url, fps )
 			else if ( tc.Transcode( frame, tframe, frame_info ) )
 				vid_out.WriteFrame( tframe, frame_info );
 
-			_self.print( "\r" + i++ );
+			_self.print( "\r" + i++ + " " );
 			_self.flush();
 
 		} // end if
@@ -193,7 +193,7 @@ function test_avi_write( root, file )
 			return;
 		} // end if
 
-		_self.print( "\r" + i );
+		_self.print( "\r" + i + " " );
 		_self.flush();
 
 	} while ( img.Load( _self.build_path( root, "_z_avi_" + ++i + ".jpg" ), "" ) );
@@ -226,12 +226,13 @@ function test_avi_read( root, file )
 	local i = 0;
 	local stream = -1;
 	local frame = CSqBinary();
-	while ( 0 <= ( stream = vid.ReadFrame( frame, CSqMulti() ) ) )
+	local frame_info = CSqMulti();
+	while ( 0 <= ( stream = vid.ReadFrame( frame, frame_info ) ) )
 	{
 		if ( vid.getVideoStream() == stream )
 		{
 			local img = CSqImage();
-			if ( !dec.DecodeImage( frame, img, CFfConvert().SWS_FAST_BILINEAR ) )
+			if ( !dec.DecodeImage( frame, img, frame_info ) )
 			{	_self.echo( "failed to decode image" );
 				return;
 			} // end if
@@ -239,7 +240,7 @@ function test_avi_read( root, file )
 			// Save this frame
 			img.Save( _self.build_path( root, "_z_avi_" + i++ + ".jpg" ), "" );
 
-			_self.print( "\r" + i );
+			_self.print( "\r" + i + " " );
 			_self.flush();
 
 		} // end if
@@ -251,7 +252,7 @@ function test_avi_read( root, file )
 	return;
 }
 
-function run_test( root, name, img, fmt, cmp, cs, alg )
+function run_test( root, name, img, fmt, cmp, cs )
 {
 	_self.echo( "" );
 	_self.echo( "----------------------------------------------" );
@@ -263,12 +264,12 @@ function run_test( root, name, img, fmt, cmp, cs, alg )
 
 	cimg.CopyImage( img );
 
-	test_encode( frame, cimg, fmt, cmp, cs, alg );
+	test_encode( frame, cimg, fmt, cmp, cs );
 
 	if ( !frame.getUsed() )
 		return;
 
-	test_decode( frame, cimg, fmt, cmp, cs, alg );
+	test_decode( frame, cimg, fmt, cmp, cs );
 
 	CSqFile().put_contents_bin( _self.build_path( root, "_ffmpeg_" + name + ".raw" ), frame );
 
@@ -276,7 +277,7 @@ function run_test( root, name, img, fmt, cmp, cs, alg )
 }
 
 
-function test_encode( frame, img, fmt, cmp, cs, alg )
+function test_encode( frame, img, fmt, cmp, cs )
 {
 	_self.echo( "\nTesting encoder..." );
 
@@ -295,7 +296,7 @@ function test_encode( frame, img, fmt, cmp, cs, alg )
 	_self.echo( "success : Encoded " + nEnc + " bytes" );
 }
 
-function test_decode( frame, img, fmt, cmp, cs, alg )
+function test_decode( frame, img, fmt, cmp, cs )
 {
 	_self.echo( "\nTesting decoder..." );
 
@@ -305,7 +306,7 @@ function test_decode( frame, img, fmt, cmp, cs, alg )
 		return;
 	} // end if
 
-	if ( !dec.DecodeImage( frame, img, alg ) )
+	if ( !dec.DecodeImage( frame, img, CSqMulti() ) )
 	{	_self.echo( "failed to decode image" );
 		return;
 	} // end if

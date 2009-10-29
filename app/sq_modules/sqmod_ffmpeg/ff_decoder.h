@@ -24,10 +24,10 @@ public:
 	int FindStreamInfo( sqbind::CSqBinary *in );
 
 	/// Encodes the specified image
-	int Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, int alg );
+	int Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m );
 
 	/// Encodes the specified image
-	int DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, int alg );
+	int DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbind::CSqMulti *m );
 
 private:
 
@@ -42,6 +42,12 @@ private:
 
 	/// Output container context
 	AVFormatContext			*m_pFormatContext;
+
+	/// Decode frame buffer
+	AVFrame 				*m_pFrame;
+
+	/// Frame packet
+	AVPacket				m_pkt;
 
 	/// Temp buffer
 	sqbind::CSqBinary		m_tmp;

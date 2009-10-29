@@ -5,6 +5,8 @@
 CFfContainer::CFfContainer()
 {
 	m_pFormatContext = oexNULL;
+	m_pCodecContext = oexNULL;
+	m_pFrame = oexNULL;
 	m_nVideoStream = -1;
 	m_nAudioStream = -1;
 	m_nWrite = 0;
@@ -18,6 +20,9 @@ void CFfContainer::Destroy()
 	{
 		if ( m_pkt.data )
 			av_free_packet( &m_pkt );
+
+		if ( m_pCodecContext )
+			avcodec_close( m_pCodecContext );
 
 		if ( m_pFormatContext )
 			av_close_input_file( m_pFormatContext );
@@ -50,6 +55,8 @@ void CFfContainer::Destroy()
 	} // end else if
 
 	m_pFormatContext = oexNULL;
+	m_pCodecContext = oexNULL;
+	m_pFrame = oexNULL;
 	m_nVideoStream = -1;
 	m_nAudioStream = -1;
 	m_nWrite = 0;
@@ -114,9 +121,9 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 
 	// Find audio and video stream indices
 	for ( unsigned int i = 0; i < m_pFormatContext->nb_streams; i++ )
-		if ( CODEC_TYPE_VIDEO == m_pFormatContext->streams[i]->codec->codec_type )
+		if ( CODEC_TYPE_VIDEO == m_pFormatContext->streams[ i ]->codec->codec_type )
 			m_nVideoStream = i;
-		else if ( CODEC_TYPE_AUDIO == m_pFormatContext->streams[i]->codec->codec_type )
+		else if ( CODEC_TYPE_AUDIO == m_pFormatContext->streams[ i ]->codec->codec_type )
 			m_nAudioStream = i;
 
 	// Did we find a stream?
@@ -124,6 +131,21 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 	{	oexERROR( 0, oexT( "file contains no video or audio streams" ) );
 		Destroy();
 		return 0;
+	} // end if
+
+	// Video stream
+	if ( 0 <= m_nVideoStream
+	     && m_pFormatContext->streams[ m_nVideoStream ]
+		 &&  m_pFormatContext->streams[ m_nVideoStream ]->codec )
+	{
+		m_pCodecContext = m_pFormatContext->streams[ m_nVideoStream ]->codec;
+		AVCodec *pCodec = avcodec_find_decoder( m_pCodecContext->codec_id );
+		if ( !pCodec )
+			m_pCodecContext = oexNULL;
+
+		else if ( 0 > avcodec_open( m_pCodecContext, pCodec ) )
+				m_pCodecContext = oexNULL;
+
 	} // end if
 
 	// Reading
@@ -159,7 +181,56 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 
 	} // end if
 
-	dat->setBuffer( m_pkt.data, m_pkt.size );
+	if ( dat )
+		dat->setBuffer( m_pkt.data, m_pkt.size );
+
+	return m_pkt.stream_index;
+}
+
+int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
+{
+	// Read a frame from the packet
+	int res = -1;
+
+	do
+	{
+		// Read frames from input stream
+		res = ReadFrame( oexNULL, m );
+		if ( 0 > res )
+			return res;
+
+	} while ( res != stream );
+
+	// Video only atm
+	if ( !dat || stream != m_nVideoStream || !m_pCodecContext )
+		return -1;
+
+	if ( !m_pFrame )
+		m_pFrame = avcodec_alloc_frame();
+	if ( !m_pFrame )
+		return -1;
+
+	int gpp = 0;
+	int used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
+	if ( 0 > used )
+		return -1;
+
+	if ( !gpp )
+		return -1;
+
+	int nSize = CFfConvert::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
+
+	// Is it already the right format?
+	if ( fmt == (int)m_pCodecContext->pix_fmt )
+	{	dat->setBuffer( m_pFrame->data[ 0 ], nSize );
+		return m_pkt.stream_index;
+	} // end if
+
+	// Do colorspace conversion
+	if ( !CFfConvert::ConvertColorFB( m_pFrame, m_pCodecContext->pix_fmt,
+									  m_pCodecContext->width, m_pCodecContext->height,
+									  fmt, dat, SWS_FAST_BILINEAR ) )
+		return -1;
 
 	return m_pkt.stream_index;
 }
