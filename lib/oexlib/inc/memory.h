@@ -561,11 +561,61 @@ public:
 
         // Do we need more space?
         if ( uSize < uNewSize )
-            if ( !Resize( uNewSize ).Ptr() )
+            if ( !OexResize( uNewSize ).Ptr() )
                 return *this;
 
         // Copy data if all the stars align
         os::CSys::MemCpy( Ptr( uSize ), x_pBuf, x_uSize * sizeof( T ) );
+
+        return *this;
+    }
+
+    /// Append data from a raw buffer
+    TMem& MemCpyAt( oexCONST T *x_pBuf, oexUINT x_uPos, oexUINT x_uSize )
+    {
+        // Verify pointer
+        if ( !oexVERIFY_PTR( x_pBuf ) || !x_uSize )
+            return *this;
+
+		// How much space do we need?
+		oexUINT uSize = Size();
+		oexUINT uNewSize = x_uPos + x_uSize;
+
+        // Do we need more space?
+        if ( uSize < uNewSize )
+            if ( !OexResize( uNewSize ).Ptr() )
+                return *this;
+
+        // Copy data if all the stars align
+        os::CSys::MemCpy( Ptr( x_uPos ), x_pBuf, x_uSize * sizeof( T ) );
+
+        return *this;
+    }
+
+	/// Removes data from the beginning of the buffer
+	//  Not efficient
+    TMem& LShift( oexUINT x_uPos, oexUINT x_uSize )
+    {
+        // Verify pointer
+        if ( !x_uSize )
+            return *this;
+
+		oexUINT uSize = Size();
+
+		// Valid?
+		if ( x_uPos >= uSize )
+			return *this;
+
+		// Whole buffer?
+		if ( !x_uSize )
+			x_uSize = uSize - x_uPos;
+
+		// Ensure reasonable size
+		if ( ( x_uPos + x_uSize ) > uSize )
+			x_uSize = uSize - x_uPos;
+
+		// Move the data
+        os::CSys::MemCpy( Ptr(), Ptr( x_uPos ), x_uSize );
 
         return *this;
     }

@@ -192,6 +192,7 @@ DECLARE_INSTANCE_TYPE( CFfConvert );
 SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 
 	SQBIND_MEMBER_FUNCTION( CFfContainer, Open )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, isOpen )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, ReadFrame )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, DecodeFrame )
 
@@ -207,6 +208,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoCodecId )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoStream )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioStream )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getFrameCount )
 
 	SQBIND_GLOBALCONST( FFF_KEY_FRAME )
 

@@ -211,17 +211,17 @@ namespace sqbind
 		{	m_ptr = 0;
 			oex::CStr8 mb = oexStrToMb( oex::CStr( s.c_str(), s.length() ) );
 			m_buf.MemCpy( (const t_byte*)mb.Ptr(), mb.Length() );
-			return (t_size)m_buf.Size();
+			m_nUsed = mb.Length();
+			return getUsed();
 		}
 
 		/// Converts a string to a binary buffer
 		// Returns the number of bytes in the buffer
 		// +++ This isn't quite right, should use getUsed()
 		t_size appendString( const stdString &s )
-		{	if ( m_ptr ) { m_buf.MemCpy( m_ptr, getUsed() ); m_ptr = 0; }
-			oex::CStr8 mb = oexStrToMb( oex::CStr( s.c_str(), s.length() ) );
-			m_buf.MemAppend( (const t_byte*)mb.Ptr(), mb.Length() );
-			return (t_size)m_buf.Size();
+		{	oex::CStr8 mb = oexStrToMb( oex::CStr( s.c_str(), s.length() ) );
+			AppendBuffer( (const t_byte*)mb.Ptr(), mb.Length() );
+			return getUsed();
 		}
 
 		/// Returns a pointer to the buffer
@@ -236,6 +236,60 @@ namespace sqbind
 		/// Sets a custom buffer pointer ( make sure it doesn't go away before this class! )
 		void setBuffer( t_byte *ptr, t_size size )
 		{	Free(); m_ptr = ptr; m_nUsed = size; }
+
+		/// Append buffer
+		int Append( CSqBinary *p )
+		{
+			if ( !p )
+				return m_nUsed;
+
+			return AppendBuffer( p->Ptr(), p->getUsed() );
+		}
+
+		/// Append data to buffer
+		int AppendBuffer( oex::oexCPVOID pBuf, t_size nBytes )
+		{
+			// Custom pointer?
+			if ( m_ptr )
+			{
+				// Copy custom buffer
+				if ( m_nUsed )
+					m_buf.MemCpy( m_ptr, m_nUsed );
+
+				// Append new data
+				m_buf.MemCpyAt( (t_byte*)pBuf, m_nUsed, nBytes );
+
+				// Not custom buffer anymore
+				m_ptr = 0;
+				m_nUsed = m_nUsed + nBytes;
+
+				return m_nUsed;
+			}
+
+			// Verify m_nUsed
+			if ( (unsigned int)m_nUsed > m_buf.Size() )
+				m_nUsed = m_buf.Size();
+
+			// Append new data
+			m_buf.MemCpyAt( (t_byte*)pBuf, m_nUsed, nBytes );
+			m_nUsed += nBytes;
+
+			return m_nUsed;
+		}
+
+		/// Shift the data in the buffer to the left
+		int LShift( int nBytes )
+		{
+			// All of it?
+			if ( nBytes >= m_nUsed )
+				m_nUsed = 0;
+
+			else
+				m_buf.LShift( nBytes, m_nUsed - nBytes ),
+				m_nUsed -= nBytes;
+
+			return m_nUsed;
+		}
 
 	private:
 

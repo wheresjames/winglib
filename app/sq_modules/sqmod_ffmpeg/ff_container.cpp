@@ -11,6 +11,8 @@ CFfContainer::CFfContainer()
 	m_nAudioStream = -1;
 	m_nWrite = 0;
 	m_nRead = 0;
+	m_bKeyRxd = 0;
+	m_nFrames = 0;
 	oexZero( m_pkt );
 }
 
@@ -61,6 +63,9 @@ void CFfContainer::Destroy()
 	m_nAudioStream = -1;
 	m_nWrite = 0;
 	m_nRead = 0;
+	m_bKeyRxd = 0;
+	m_nFrames = 0;
+	m_buf.Free();
 	oexZero( m_pkt );
 }
 
@@ -181,6 +186,13 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 
 	} // end if
 
+	// Waiting key frame?
+	if ( !m_bKeyRxd )
+	{	if ( 0 == ( m_pkt.flags & PKT_FLAG_KEY ) )
+			return -1;
+		m_bKeyRxd = 1;
+	} // end if
+
 	if ( dat )
 		dat->setBuffer( m_pkt.data, m_pkt.size );
 
@@ -192,6 +204,8 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 	// Read a frame from the packet
 	int res = -1;
 
+	oexPrintf( oexMks( "\r",  m_nFrames, " : " ).Ptr() );
+
 	do
 	{
 		// Read frames from input stream
@@ -200,6 +214,16 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 			return res;
 
 	} while ( res != stream );
+
+	oexPrintf( oexMks( m_pkt.flags, " : ", m_pkt.size, " : ", m_buf.getUsed(), "    " ).Ptr() );
+	oex::os::CSys::Flush_stdout();
+
+	// Data left over from last time?
+	if ( m_buf.getUsed() )
+	{	m_buf.AppendBuffer( m_pkt.data, m_pkt.size );
+		m_pkt.data = m_buf._Ptr();
+		m_pkt.size = m_buf.getUsed();
+	} // end if
 
 	// Video only atm
 	if ( !dat || stream != m_nVideoStream || !m_pCodecContext )
@@ -212,11 +236,28 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 
 	int gpp = 0;
 	int used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
-	if ( 0 > used )
+	if ( 0 >= used )
+	{	oexEcho( "!used" );
 		return -1;
+	} // end if
+/*
+	// Left over data?
+	if ( used < m_pkt.size )
+	{
+		if ( m_buf.getUsed() )
+			m_buf.LShift( used );
+		else
+			m_buf.AppendBuffer( &m_pkt.data[ used ], m_pkt.size - used );
+
+	} // end if
+	else
+		m_buf.setUsed( 0 );
+*/
 
 	if ( !gpp )
+	{	oexEcho( "!gpp" );
 		return -1;
+	} // end if
 
 	int nSize = CFfConvert::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
 
@@ -231,6 +272,9 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 									  m_pCodecContext->width, m_pCodecContext->height,
 									  fmt, dat, SWS_FAST_BILINEAR ) )
 		return -1;
+
+	// Frame
+	m_nFrames++;
 
 	return m_pkt.stream_index;
 }

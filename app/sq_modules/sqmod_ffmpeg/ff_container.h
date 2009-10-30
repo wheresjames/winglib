@@ -79,6 +79,16 @@ public:
 	{	return m_nVideoStream;
 	}
 
+	/// Returns non-zero if a container is open
+	int isOpen()
+	{	return m_pFormatContext ? 1 : 0;
+	}
+
+	/// Return the frame count
+	int getFrameCount()
+	{	return m_nFrames;
+	}
+
 private:
 
 	/// Write ability?
@@ -99,10 +109,19 @@ private:
 	/// Decode frame
 	AVFrame					*m_pFrame;
 
+	/// Non-zero if key frame has been received
+	int						m_bKeyRxd;
+
 	/// Video stream index
 	int						m_nVideoStream;
 
 	/// Audio stream index
 	int						m_nAudioStream;
+
+	/// Left over packet data
+	sqbind::CSqBinary		m_buf;
+
+	/// Number of frames that have been processed
+	int						m_nFrames;
 
 };

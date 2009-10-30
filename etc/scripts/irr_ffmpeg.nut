@@ -38,17 +38,36 @@ function _init() : ( _g )
 //    local rotate = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.5, 0 ) );
 //    _g.video.AddAnimator( rotate );
 
-//	StartStream( "rtsp://a1352.l1857053128.c18570.g.lq.akamaistream.net/D/1352/18570/v0001/reflector:53128", 30 );
-	StartStream( "rtsp://192.168.2.130/Mediainput/mpeg4", 30 );
-//	StartStream( "rtsp://10.10.211.26/Mediainput/mpeg4", 30 );
+	local rtsp_video =
+		{
+			nasa 		= [ "NASA", 		"rtsp://a1352.l1857053128.c18570.g.lq.akamaistream.net/D/1352/18570/v0001/reflector:53128" ],
+			adventure 	= [ "Adventure", 	"rtsp://video3.multicasttech.com/AFTVAdventure3GPP296.sdp" ],
+			cartoons 	= [ "Cartoons", 	"rtsp://video2.multicasttech.com/AFTVCartoons3GPP296.sdp" ],
+			classic 	= [ "Classic", 		"rtsp://video3.multicasttech.com/AFTVClassics3GPP296.sdp" ],
+			comedy 		= [ "Comedy", 		"rtsp://video3.multicasttech.com/AFTVComedy3GPP296.sdp" ],
+			crime 		= [ "Crime", 		"rtsp://video2.multicasttech.com/AFTVCrime3GPP296.sdp" ],
+			halloween	= [ "Halloween", 	"rtsp://video3.multicasttech.com/AFTVHalloween3GPP296.sdp" ],
+			horror		= [ "Horror", 		"rtsp://video2.multicasttech.com/AFTVHorror3GPP296.sdp" ],
+			indy		= [ "Indy Movies", 	"rtsp://video2.multicasttech.com/AFTVIndyMovies3GPP296.sdp" ],
+			mystery		= [ "Mystery", 		"rtsp://video2.multicasttech.com/AFTVMystery3GPP296.sdp" ],
+			scifi		= [ "SciFi", 		"rtsp://video2.multicasttech.com/AFTVSciFi3GPP296.sdp" ],
+			western		= [ "Westerns", 	"rtsp://video2.multicasttech.com/AFTVWesterns3GPP296.sdp" ],
+			espana		= [ "Espana", 		"rtsp://video3.multicasttech.com/EspanaFree3GPP296.sdp" ],
 
+			local1		= [ "Local 1", 		"rtsp://192.168.2.130/Mediainput/mpeg4" ],
+			local2		= [ "Local 2", 		"rtsp://192.168.2.87/Mediainput/mpeg4" ],
+			local3		= [ "Local 3", 		"rtsp://10.10.211.26/Mediainput/mpeg4" ]
+		};
+
+//	StartStream( rtsp_video[ "local2" ] );
+	StartStream( rtsp_video[ "nasa" ] );
 
 }
 
-function StartStream( url, fps ) : ( _g )
+function StartStream( inf ) : ( _g )
 {
 	_g.rtsp = CFfContainer();
-	if ( !_g.rtsp.Open( url, CSqMulti() ) )
+	if ( !_g.rtsp.Open( inf[ 1 ], CSqMulti() ) )
 		return 0;
 
 	_self.echo( "Video File : " + _g.rtsp.getWidth() + "x" + _g.rtsp.getHeight() );
@@ -61,6 +80,9 @@ function StartStream( url, fps ) : ( _g )
 
 function UpdateVideo() : ( _g )
 {
+	if ( !_g.rtsp.isOpen() )
+		return;
+
 	local buf = _g.tex.Lock();
 	if ( buf.getUsed() )
 		_g.rtsp.DecodeFrame( _g.rtsp.getVideoStream(), CFfConvert().PIX_FMT_RGB32, buf, CSqMulti() ),
