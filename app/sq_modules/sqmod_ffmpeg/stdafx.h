@@ -16,6 +16,9 @@ extern "C"
 	#include "libswscale/swscale.h"
 };
 
+#define FFSQ_VIDEO2
+#undef printf
+
 #include "ff_decoder.h"
 #include "ff_encoder.h"
 #include "ff_convert.h"

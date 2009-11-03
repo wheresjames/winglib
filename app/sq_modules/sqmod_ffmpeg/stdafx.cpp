@@ -239,6 +239,7 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 
 #if defined( OEX_DEBUG )
 	av_log_set_level( AV_LOG_INFO );
+//	av_log_set_level( AV_LOG_DEBUG );
 #else
 //	av_log_set_level( AV_LOG_WARNING );
 	av_log_set_level( AV_LOG_ERROR );

@@ -54,13 +54,14 @@ function _init() : ( _g )
 			western		= [ "Westerns", 	"rtsp://video2.multicasttech.com/AFTVWesterns3GPP296.sdp" ],
 			espana		= [ "Espana", 		"rtsp://video3.multicasttech.com/EspanaFree3GPP296.sdp" ],
 
-			local1		= [ "Local 1", 		"rtsp://192.168.2.130/Mediainput/mpeg4" ],
-			local2		= [ "Local 2", 		"rtsp://192.168.2.87/Mediainput/mpeg4" ],
-			local3		= [ "Local 3", 		"rtsp://10.10.211.26/Mediainput/mpeg4" ]
+			local1		= [ "Local 1", 		"rtsp://192.168.2.130/mediainput/mpeg4" ],
+			local2		= [ "Local 2", 		"rtsp://192.168.2.87/mediainput/mpeg4" ],
+			local3		= [ "Local 3", 		"rtsp://192.168.2.87/nphMpeg4" ],
+			local4		= [ "Local 4", 		"rtsp://10.10.211.26/Mediainput/mpeg4" ]
 		};
 
-//	StartStream( rtsp_video[ "local2" ] );
-	StartStream( rtsp_video[ "nasa" ] );
+	StartStream( rtsp_video[ "local1" ] );
+//	StartStream( rtsp_video[ "nasa" ] );
 
 }
 

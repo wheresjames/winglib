@@ -49,7 +49,6 @@ endif
 export LOC_TAG := libavutil
 LOC_CXX_libavutil := c
 LOC_SRC_libavutil := $(CFG_LIBROOT)/ffmpeg/libavutil
-#LOC_LST_libavutil := log rational
 LOC_EXC_libavutil := integer softfloat
 include $(PRJ_LIBROOT)/build.mk
 
@@ -59,6 +58,13 @@ LOC_SRC_libavformat := $(CFG_LIBROOT)/ffmpeg/libavformat
 LOC_EXC_libavformat := avisynth libnut matroskadec mov
 include $(PRJ_LIBROOT)/build.mk
 
+export LOC_TAG := libswscale
+LOC_CXX_libswscale := c
+LOC_SRC_libswscale := $(CFG_LIBROOT)/ffmpeg/libswscale
+LOC_EXC_libswscale := rgb2rgb_template swscale_template \
+					  swscale-example colorspace-test
+include $(PRJ_LIBROOT)/build.mk
+					  				  
 export LOC_TAG := libavcodec
 LOC_CXX_libavcodec := c
 LOC_SRC_libavcodec := $(CFG_LIBROOT)/ffmpeg/libavcodec
@@ -73,20 +79,6 @@ LOC_EXC_libavcodec := acelp_filters \
 					  \
 					  aacenc aacpsy beosthread g729dec imgconvert_template motion_est_template \
 					  mpegvideo_xvmc os2thread svq3 vdpau
-ifeq ($(PLATFORM),windows)
-LOC_EXC_libavcodec := $(LOC_EXC_libavcodec) pthread
-else
-LOC_EXC_libavcodec := $(LOC_EXC_libavcodec) w32thread
-endif
-
-include $(PRJ_LIBROOT)/build.mk
-
-export LOC_TAG := libswscale
-LOC_CXX_libswscale := c
-LOC_SRC_libswscale := $(CFG_LIBROOT)/ffmpeg/libswscale
-LOC_EXC_libswscale := rgb2rgb_template swscale_template
-include $(PRJ_LIBROOT)/build.mk
-
 
 ifeq ($(PLATFORM),windows)
 	LOC_EXC_libavcodec := $(LOC_EXC_libavcodec) pthread
@@ -95,17 +87,32 @@ else
 endif
 
 include $(PRJ_LIBROOT)/build.mk
-					  				  
+
 ifeq ($(PROC),i386)
-	export LOC_TAG := x86
-	LOC_CXX_x86 := c
-	LOC_SRC_x86 := $(CFG_LIBROOT)/ffmpeg/libavcodec/x86
-	LOC_EXC_x86 := dsputil_h264_template_mmx dsputil_h264_template_ssse3 dsputil_mmx_avg_template \
-				   dsputil_mmx_qns_template dsputil_mmx_rnd_template h264dsp_mmx \
-				   mpegvideo_mmx_template
+
+	export LOC_TAG := libavcodecx86
+	LOC_CXX_libavcodecx86 := c
+	LOC_SRC_libavcodecx86 := $(CFG_LIBROOT)/ffmpeg/libavcodec/x86
+	LOC_EXC_libavcodecx86 := dsputil_h264_template_mmx dsputil_h264_template_ssse3 dsputil_mmx_avg_template \
+				   			 dsputil_mmx_qns_template dsputil_mmx_rnd_template h264dsp_mmx \
+				   			 mpegvideo_mmx_template
 	include $(PRJ_LIBROOT)/build.mk
+
+	export LOC_TAG := libswscalex86
+	LOC_CXX_libswscalex86 := c
+	LOC_SRC_libswscalex86 := $(CFG_LIBROOT)/ffmpeg/libswscale/x86
+	LOC_EXC_libswscalex86 := yuv2rgb_template
+	include $(PRJ_LIBROOT)/build.mk
+	
 endif
 
+ifeq ($(PROC),arm)
+	export LOC_TAG := arm
+	LOC_CXX_arm := c
+	LOC_SRC_arm := $(CFG_LIBROOT)/ffmpeg/libavcodec/arm
+	LOC_EXC_arm := 
+	include $(PRJ_LIBROOT)/build.mk
+endif
 
 #-------------------------------------------------------------------
 # Execute the build

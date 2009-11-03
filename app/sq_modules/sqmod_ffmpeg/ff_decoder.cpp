@@ -180,8 +180,21 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 	m_pkt.data = in->_Ptr();
 	m_pkt.size = in->getUsed();
 
+#if defined( FFSQ_VIDEO2 )
+
 	int gpp = 0;
 	int used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
+
+#else
+
+	int gpp = 0;
+	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, in->_Ptr(), in->getUsed() );
+	if ( 0 >= used )
+	{	oexEcho( "!used" );
+		return -1;
+	} // end if
+
+#endif
 
 	if ( used != m_pkt.size )
 		oexEcho( "Unsed data!!!" );

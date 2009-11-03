@@ -42,13 +42,13 @@ void CFfContainer::Destroy()
 			for ( unsigned int i = 0; i < m_pFormatContext->nb_streams; i++ )
 				if (  m_pFormatContext->streams[ i ] )
 					av_freep( m_pFormatContext->streams[ i ] );
-
+/*
 			// Close file / socket resources
 			if ( m_pFormatContext->oformat
 				 && !( m_pFormatContext->oformat->flags & AVFMT_NOFILE )
 				 && m_pFormatContext->pb )
 				url_fclose( m_pFormatContext->pb );
-
+*/
 			// Free the stream
 			av_free( m_pFormatContext );
 
@@ -77,6 +77,10 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 	// Did we get a valid string?
 	if ( !sUrl.length() )
 		return 0;
+
+//	AVFormatParameters	fp;
+//	oexZero( fp );
+//	fp.initial_pause = 1;
 
 	// Attempt to open it
 	int res = av_open_input_file( &m_pFormatContext, oexStrToMbPtr( sUrl.c_str() ),
@@ -144,12 +148,17 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 		 &&  m_pFormatContext->streams[ m_nVideoStream ]->codec )
 	{
 		m_pCodecContext = m_pFormatContext->streams[ m_nVideoStream ]->codec;
+//		m_pCodecContext->workaround_bugs |= FF_BUG_AUTODETECT;
+//		m_pCodecContext->error_concealment = FF_EC_GUESS_MVS;
+//		m_pCodecContext->error_recognition = FF_ER_CAREFUL;
 		AVCodec *pCodec = avcodec_find_decoder( m_pCodecContext->codec_id );
 		if ( !pCodec )
 			m_pCodecContext = oexNULL;
 
 		else if ( 0 > avcodec_open( m_pCodecContext, pCodec ) )
 				m_pCodecContext = oexNULL;
+
+		oexSHOW( (int)m_pCodecContext->codec_id );
 
 	} // end if
 
@@ -218,6 +227,11 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 	oexPrintf( oexMks( m_pkt.flags, " : ", m_pkt.size, " : ", m_buf.getUsed(), "    " ).Ptr() );
 	oex::os::CSys::Flush_stdout();
 
+	if ( 0 != ( m_pkt.flags & PKT_FLAG_KEY ) )
+		oexEcho( " key frame" );
+//	else if ( m_pkt.size > 2000 )
+//		oexEcho( " large" );
+
 	// Data left over from last time?
 	if ( m_buf.getUsed() )
 	{	m_buf.AppendBuffer( m_pkt.data, m_pkt.size );
@@ -234,12 +248,27 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 	if ( !m_pFrame )
 		return -1;
 
+#if defined( FFSQ_VIDEO2 )
+
 	int gpp = 0;
 	int used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
 	if ( 0 >= used )
 	{	oexEcho( "!used" );
 		return -1;
 	} // end if
+
+#else
+
+	int gpp = 0;
+	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, m_pkt.data, m_pkt.size );
+	if ( 0 >= used )
+	{	oexEcho( "!used" );
+		return -1;
+	} // end if
+
+#endif
+
+
 /*
 	// Left over data?
 	if ( used < m_pkt.size )
@@ -259,11 +288,11 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 		return -1;
 	} // end if
 
-	int nSize = CFfConvert::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
-
 	// Is it already the right format?
 	if ( fmt == (int)m_pCodecContext->pix_fmt )
-	{	dat->setBuffer( m_pFrame->data[ 0 ], nSize );
+	{	int nSize = CFfConvert::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
+		dat->setBuffer( m_pFrame->data[ 0 ], nSize );
+		m_nFrames++;
 		return m_pkt.stream_index;
 	} // end if
 
@@ -362,14 +391,14 @@ int CFfContainer::InitWrite()
 		Destroy();
 		return 0;
 	} // end if
-
+/*
 	if ( !( m_pFormatContext->oformat->flags & AVFMT_NOFILE ) )
 		if ( 0 > ( res = url_fopen( &m_pFormatContext->pb, m_pFormatContext->filename, URL_WRONLY ) ) )
 		{	oexERROR( res, oexT( "url_fopen() failed" ) );
 			Destroy();
 			return 0;
 		} // end if
-
+*/
     if ( 0 > ( res = av_write_header( m_pFormatContext ) ) )
 	{	oexERROR( res, oexT( "av_write_header() failed" ) );
 		Destroy();
@@ -406,7 +435,7 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	// Fill in codec info
 	pcc->codec_id = (CodecID)codec_id;
 	pcc->codec_type = CODEC_TYPE_VIDEO;
-	pcc->bit_rate = 400000;
+	pcc->bit_rate = 800000;
 	pcc->width = width;
 	pcc->height = height;
     pcc->time_base.num = 1;

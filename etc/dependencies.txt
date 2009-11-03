@@ -14,6 +14,7 @@ j2k
 jpeg
 libsoup
 libxml
+live555
 mysql
 ogles
 ogles-src
