@@ -8,8 +8,8 @@ PRJ_NAME := live555
 PRJ_TYPE := lib
 PRJ_INCS := live555/liveMedia/include live555/groupsock/include \
 			live555/UsageEnvironment/include live555/BasicUsageEnvironment/include 
-PRJ_LIBS := 
 PRJ_DEFS := SOCKLEN_T=socklen_t
+PRJ_LIBS := 
 
 PRJ_LIBROOT := ..
 
@@ -28,6 +28,9 @@ else
 #include $(PRJ_LIBROOT)/unsupported.mk
 #else
 
+ifeq ($(BUILD),vs)
+	PRJ_DEFS := $(PRJ_DEFS) socklen_t=int
+endif
 
 #-------------------------------------------------------------------
 # File locations
