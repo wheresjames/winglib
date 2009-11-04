@@ -1,5 +1,6 @@
 
 _self.load_module( "irrlicht", "" );
+_self.load_module( "live555", "" );
 _self.load_module( "ffmpeg", "" );
 
 class CGlobal
@@ -9,6 +10,7 @@ class CGlobal
 	tex = 0;
 
 	rtsp = 0;
+	dec = 0;
 };
 
 local _g = CGlobal();
@@ -60,21 +62,30 @@ function _init() : ( _g )
 			local4		= [ "Local 4", 		"rtsp://10.10.211.26/Mediainput/mpeg4" ]
 		};
 
-	StartStream( rtsp_video[ "local2" ] );
+	StartStream( rtsp_video[ "local4" ] );
 //	StartStream( rtsp_video[ "nasa" ] );
 
 }
 
 function StartStream( inf ) : ( _g )
 {
-	_g.rtsp = CFfContainer();
+	_g.rtsp = CLvRtspClient();
 	if ( !_g.rtsp.Open( inf[ 1 ], CSqMulti() ) )
+	{	_self.echo( "Failed to open rtsp stream " + inf[ 1 ] );
 		return 0;
+	} // end if
 
 	_self.echo( "Video File : " + _g.rtsp.getWidth() + "x" + _g.rtsp.getHeight() );
 
-	_g.tex = _g.irr.CreateTexture( _g.rtsp.getWidth(), _g.rtsp.getHeight(), 0 );
+	_g.tex = _g.irr.CreateTexture( 640, 480, 0 );
     _g.video.SetTexture( 0, _g.tex );
+
+	_g.dec = CFfDecoder();
+	if ( !_g.dec.Create( CFfDecoder().CODEC_ID_MPEG4, CFfConvert().PIX_FMT_YUV420P,
+						 640, 480, 0 ) )
+	{	_self.echo( "failed to create decoder" );
+		return 0;
+	} // end if
 
 	return 1;
 }
@@ -84,10 +95,22 @@ function UpdateVideo() : ( _g )
 	if ( !_g.rtsp.isOpen() )
 		return;
 
-	local buf = _g.tex.Lock();
-	if ( buf.getUsed() )
-		_g.rtsp.DecodeFrame( _g.rtsp.getVideoStream(), CFfConvert().PIX_FMT_RGB32, buf, CSqMulti() ),
-		_g.tex.Unlock();
+	local frame = CSqBinary();
+	if ( _g.rtsp.LockFrame( frame, CSqMulti() ) )
+	{
+		local tex = _g.tex.Lock();
+		if ( tex.getUsed() )
+			_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti() ),
+			_g.tex.Unlock();
+
+		_g.rtsp.UnlockFrame();
+
+	} // end if
+
+//	local buf = _g.tex.Lock();
+//	if ( buf.getUsed() )
+//		_g.rtsp.DecodeFrame( _g.rtsp.getVideoStream(), CFfConvert().PIX_FMT_RGB32, buf, CSqMulti() ),
+//		_g.tex.Unlock();
 }
 
 function _idle() : ( _g )
