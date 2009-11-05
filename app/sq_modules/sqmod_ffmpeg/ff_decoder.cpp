@@ -255,3 +255,156 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 
 	return res ? 1 : 0;
 }
+
+
+struct SCodecMap
+{
+	enum 
+	{
+		// Video is flipped
+		eFlipped = 1
+	};
+
+	int			id;
+	char		name[ 16 ];
+	int			flags;
+};
+
+static SCodecMap g_ff_codec_map[] = 
+{
+	{ CODEC_ID_MPEG4,		"mpg4",		0 },
+	{ CODEC_ID_MPEG4,		"fmp4",		0 },
+	{ CODEC_ID_MPEG4,		"divx",		0 },
+	{ CODEC_ID_MPEG4,		"dx50",		0 },
+	{ CODEC_ID_MPEG4,		"xvid",		0 },
+	{ CODEC_ID_MPEG4,		"mp4s",		0 },
+	{ CODEC_ID_MPEG4,		"m4s2",		0 },
+	{ CODEC_ID_MPEG4,		"div1",		0 },
+	{ CODEC_ID_MPEG4,		"blz0",		0 },
+	{ CODEC_ID_MPEG4,		"mp4v",		0 },
+	{ CODEC_ID_MPEG4,		"ump4",		0 },
+	{ CODEC_ID_MPEG4,		"wv1f",		0 },
+	{ CODEC_ID_MPEG4,		"sedg",		0 },
+	{ CODEC_ID_MPEG4,		"rmp4",		0 },
+	{ CODEC_ID_MPEG4,		"3iv2",		0 },
+	{ CODEC_ID_MPEG4,		"ffds",		0 },
+	{ CODEC_ID_MPEG4,		"fvfw",		0 },
+	{ CODEC_ID_MPEG4,		"dcod",		0 },
+	{ CODEC_ID_MPEG4,		"mvxm",		0 },
+	{ CODEC_ID_MPEG4,		"pm4v",		0 },
+	{ CODEC_ID_MPEG4,		"smp4",		0 },
+	{ CODEC_ID_MPEG4,		"dxgm",		0 },
+	{ CODEC_ID_MPEG4,		"vidm",		0 },
+	{ CODEC_ID_MPEG4,		"m4t3",		0 },
+	{ CODEC_ID_MPEG4,		"geox",		0 },
+	{ CODEC_ID_MPEG4,		"hdx4",		SCodecMap::eFlipped },
+	{ CODEC_ID_MPEG4,		"dmk2",		0 },
+	{ CODEC_ID_MPEG4,		"digi",		0 },
+	{ CODEC_ID_MPEG4,		"inmc",		0 },
+	{ CODEC_ID_MPEG4,		"ephv",		0 },
+	{ CODEC_ID_MPEG4,		"em4a",		0 },
+	{ CODEC_ID_MPEG4,		"m4cc",		0 },
+
+	{ CODEC_ID_H264,		"h264",		0 },
+	{ CODEC_ID_H264,		"x264",		0 },
+	{ CODEC_ID_H264,		"avc1",		0 },
+	{ CODEC_ID_H264,		"vssh",		0 },
+
+	{ CODEC_ID_H263,		"h263",		0 },
+	{ CODEC_ID_H263,		"x263",		0 },
+	{ CODEC_ID_H263,		"t263",		0 },
+	{ CODEC_ID_H263,		"l263",		0 },
+	{ CODEC_ID_H263,		"vx1k",		0 },
+
+	{ CODEC_ID_H263P,		"p263",		0 },
+	{ CODEC_ID_H263I,		"i263",		0 },
+
+	{ CODEC_ID_MSMPEG4V3,	"div3",		0 },
+	{ CODEC_ID_MSMPEG4V3,	"mp43",		0 },
+	{ CODEC_ID_MSMPEG4V3,	"mpg3",		0 },
+	{ CODEC_ID_MSMPEG4V3,	"div6",		0 },
+	{ CODEC_ID_MSMPEG4V3,	"div5",		0 },
+	{ CODEC_ID_MSMPEG4V3,	"div4",		0 },
+	{ CODEC_ID_MSMPEG4V3,	"dvx3",		0 },
+	{ CODEC_ID_MSMPEG4V3,	"ap41",		0 },
+	{ CODEC_ID_MSMPEG4V3,	"col1",		0 },
+	{ CODEC_ID_MSMPEG4V3,	"col2",		0 },
+
+	{ CODEC_ID_MSMPEG4V2,	"mp42",		0 },
+	{ CODEC_ID_MSMPEG4V2,	"div2",		0 },
+
+	{ CODEC_ID_MSMPEG4V1,	"mpg4",		0 },
+	{ CODEC_ID_MSMPEG4V1,	"mp41",		0 },
+
+	{ CODEC_ID_WMV1,		"wmv1",		0 },
+	{ CODEC_ID_WMV2,		"wmv2",		0 },
+	{ CODEC_ID_WMV3,		"wmv3",		0 },
+
+	{ CODEC_ID_DVVIDEO,		"dvsd",		0 },
+	{ CODEC_ID_DVVIDEO,		"dvhd",		0 },
+	{ CODEC_ID_DVVIDEO,		"dvs1",		0 },
+	{ CODEC_ID_DVVIDEO,		"dv25",		0 },
+	{ CODEC_ID_DVVIDEO,		"dv50",		0 },
+	{ CODEC_ID_DVVIDEO,		"cdvc",		0 },
+	{ CODEC_ID_DVVIDEO,		"dvc ",		0 },
+
+	{ CODEC_ID_MPEG1VIDEO,	"mpg1",		0 },
+	{ CODEC_ID_MPEG2VIDEO,	"mpg2",		0 },
+
+	{ CODEC_ID_MJPEG,		"mjpg",		0 },
+	{ CODEC_ID_MJPEG,		"ljpg",		0 },
+	{ CODEC_ID_MJPEG,		"dmb1",		0 },
+	{ CODEC_ID_MJPEG,		"jpgl",		0 },
+	{ CODEC_ID_MJPEG,		"mjls",		0 },
+	{ CODEC_ID_MJPEG,		"jpeg",		0 },
+	{ CODEC_ID_MJPEG,		"ijpg",		0 },
+	{ CODEC_ID_MJPEG,		"avrn",		0 },
+	{ CODEC_ID_MJPEG,		"acdv",		0 },
+	{ CODEC_ID_MJPEG,		"qivg",		0 },
+	{ CODEC_ID_MJPEG,		"slmj",		0 },
+	{ CODEC_ID_MJPEG,		"cjpg",		0 },
+
+	{ CODEC_ID_INDEO3,		"rt21",		0 },
+	{ CODEC_ID_INDEO3,		"iv31",		0 },
+	{ CODEC_ID_INDEO3,		"iv32",		0 },
+	{ CODEC_ID_INDEO4,		"iv41",		0 },
+	{ CODEC_ID_INDEO5,		"iv50",		0 },
+
+	{ CODEC_ID_MSVIDEO1,	"msvc",		0 },
+	{ CODEC_ID_MSVIDEO1,	"cram",		0 },
+	{ CODEC_ID_MSVIDEO1,	"wham",		0 },
+
+	{ CODEC_ID_CINEPAK,		"cvid",		0 },
+	{ CODEC_ID_ZLIB,		"zlib",		0 },
+	{ CODEC_ID_SNOW,		"snow",		0 },
+	{ CODEC_ID_FLV1,		"flv1",		0 },
+	{ CODEC_ID_FLASHSV,		"fsv1",		0 },
+	{ CODEC_ID_THEORA,		"theo",		0 },
+	{ CODEC_ID_JPEG2000,	"mj2c",		0 },
+	{ CODEC_ID_PNG,			"mpng",		0 },
+
+	{ 0, 0, 0 }
+};
+
+int CFfDecoder::LookupCodecId( const sqbind::stdString &sCodec )
+{
+	if ( 4 > sCodec.length() )
+		return 0;
+
+	// Find a codec with that name
+	for ( int i = 0; g_ff_codec_map[ i ].name; i++ )
+		if ( !strnicmp( sCodec.c_str(), g_ff_codec_map[ i ].name, 4 ) )
+			return g_ff_codec_map[ i ].id;
+
+	return 0;
+}
+
+sqbind::stdString CFfDecoder::LookupCodecName( int nId )
+{
+	// Find a codec with that id
+	for ( int i = 0; g_ff_codec_map[ i ].name; i++ )
+		if ( nId == g_ff_codec_map[ i ].id )
+			return g_ff_codec_map[ i ].name;
+
+	return oexT( "" );
+}

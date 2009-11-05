@@ -56,14 +56,10 @@ function _init() : ( _g )
 			western		= [ "Westerns", 	"rtsp://video2.multicasttech.com/AFTVWesterns3GPP296.sdp" ],
 			espana		= [ "Espana", 		"rtsp://video3.multicasttech.com/EspanaFree3GPP296.sdp" ],
 
-			local1		= [ "Local 1", 		"rtsp://192.168.2.130/mediainput/mpeg4" ],
-			local2		= [ "Local 2", 		"rtsp://192.168.2.87/mediainput/mpeg4" ],
-			local3		= [ "Local 3", 		"rtsp://192.168.2.87/nphMpeg4" ],
-			local4		= [ "Local 4", 		"rtsp://10.10.211.26/Mediainput/mpeg4" ]
+			utube1		= [ "utube1",		"rtsp://v2.cache1.c.youtube.com/CkgLENy73wIaPwlnoDu0pt7zDRMYDSANFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNaDkNsaWNrVGh1bWJuYWlsYOmkotHXgfvJRgw=/0/0/0/video.3gp" ],
 		};
 
-	StartStream( rtsp_video[ "local4" ] );
-//	StartStream( rtsp_video[ "nasa" ] );
+	StartStream( rtsp_video[ "utube1" ] );
 
 }
 
@@ -71,19 +67,27 @@ function StartStream( inf ) : ( _g )
 {
 	_g.rtsp = CLvRtspClient();
 	if ( !_g.rtsp.Open( inf[ 1 ], CSqMulti() ) )
-	{	_self.echo( "Failed to open rtsp stream " + inf[ 1 ] );
+	{	_self.echo( "Failed to open RTSP stream " + inf[ 1 ] );
 		return 0;
 	} // end if
 
-	_self.echo( "Video File : " + _g.rtsp.getWidth() + "x" + _g.rtsp.getHeight() );
+	if ( !_g.rtsp.waitInit( 8000 ) || !_g.rtsp.isOpen() )
+	{	_g.rtsp.Destroy();
+		_self.echo( "Failed to initialize RTSP stream " + inf[ 1 ] );
+		return 0;
+	} // end if
 
-	_g.tex = _g.irr.CreateTexture( 640, 480, 0 );
-    _g.video.SetTexture( 0, _g.tex );
+//	_self.echo( "Video File : " + _g.rtsp.getWidth() + "x" + _g.rtsp.getHeight() );
+
+//	_g.tex = _g.irr.CreateTexture( 320, 240, 0 );
+//	_g.video.SetTexture( 0, _g.tex );
 
 	_g.dec = CFfDecoder();
-	if ( !_g.dec.Create( CFfDecoder().CODEC_ID_MPEG4, CFfConvert().PIX_FMT_YUV420P,
-						 640, 480, 0 ) )
-	{	_self.echo( "failed to create decoder" );
+//	if ( !_g.dec.Create( CFfDecoder().CODEC_ID_MPEG4, CFfConvert().PIX_FMT_YUV420P,
+	if ( !_g.dec.Create( CFfDecoder().LookupCodecId( _g.rtsp.getCodecName() ), CFfConvert().PIX_FMT_YUV420P,
+						 0, 0, 0 ) )
+	{	_g.rtsp.Destroy();
+		_self.echo( "failed to create decoder for " + _g.rtsp.getCodecName() );
 		return 0;
 	} // end if
 
@@ -98,10 +102,28 @@ function UpdateVideo() : ( _g )
 	local frame = CSqBinary();
 	if ( _g.rtsp.LockFrame( frame, CSqMulti() ) )
 	{
-		local tex = _g.tex.Lock();
-		if ( tex.getUsed() )
-			_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti() ),
-			_g.tex.Unlock();
+
+		if ( !_g.tex )
+		{
+			// Decode a frame to get the width / height
+			_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, CSqBinary(), CSqMulti() );
+			if ( 0 < _g.dec.getWidth() && 0 < _g.dec.getHeight() )
+			{	_g.tex = _g.irr.CreateTexture( _g.dec.getWidth(), _g.dec.getHeight(), 0 );
+				_g.video.SetTexture( 0, _g.tex );
+			} // end if
+
+			_self.echo( _g.dec.getWidth() + " x " + _g.dec.getHeight() );
+
+		} // end if
+
+		else
+		{
+			local tex = _g.tex.Lock();
+			if ( tex.getUsed() )
+				_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti() ),
+				_g.tex.Unlock();
+
+		} // end else
 
 		_g.rtsp.UnlockFrame();
 

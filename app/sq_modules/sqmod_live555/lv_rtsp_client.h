@@ -16,7 +16,7 @@ public:
 	public:
 
 		/// Constructor
-		CVideoSink( UsageEnvironment &pEnv );
+		CVideoSink( UsageEnvironment &rEnv );
 
 		/// Destructor
 		virtual ~CVideoSink();
@@ -99,6 +99,14 @@ public:
 	{	return m_nFrames;
 	}
 
+	/// Returns the codec name
+	sqbind::stdString getCodecName()
+	{	return m_sVideoCodec; }
+
+	/// waits for the application to initialize
+	int waitInit( int nMax )
+	{	return !GetInitEvent().Wait( nMax ); }
+
 protected:
 
 	/// Initializes thread
@@ -120,6 +128,9 @@ private:
 
 	/// Url to open
 	sqbind::stdString		m_sUrl;
+
+	/// The name of the video codec
+	sqbind::stdString		m_sVideoCodec;
 
 	/// Parameters
 	sqbind::CSqMulti		m_mParams;

@@ -7,12 +7,14 @@ SQBIND_REGISTER_CLASS_BEGIN( CLvRtspClient, CLvRtspClient )
 
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, Destroy )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, Open )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, waitInit )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, LockFrame )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, UnlockFrame )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, isOpen )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getWidth )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getHeight )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getFrameCount )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getCodecName )	
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CLvRtspClient );

@@ -29,6 +29,26 @@ public:
 	/// Encodes the specified image
 	int DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbind::CSqMulti *m );
 
+	/// Returns the width of the decoded video
+	int getWidth()
+	{	if ( !m_pCodecContext )
+			return 0;
+		return m_pCodecContext->width; 
+	}
+
+	/// Returns the width of the decoded video
+	int getHeight()
+	{	if ( !m_pCodecContext )
+			return 0;
+		return m_pCodecContext->height; 
+	}
+
+	/// Lookup a codec based on name
+	static int LookupCodecId( const sqbind::stdString &sCodec );
+
+	/// Lookup a codec based on id
+	static sqbind::stdString LookupCodecName( int nId );
+
 private:
 
 	/// Image format

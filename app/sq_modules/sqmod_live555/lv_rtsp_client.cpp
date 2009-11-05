@@ -108,11 +108,18 @@ void CLvRtspClient::ThreadDestroy()
 	if ( m_pRtspClient && m_pSession )
 		m_pRtspClient->teardownMediaSession( *m_pSession );
 
+	if ( m_pRtspClient )
+		m_pRtspClient->close( m_pSession );
+
+	if ( m_pEnv )
+		m_pEnv->reclaim();
+
 	m_nFrames = 0;
 	m_pEnv = oexNULL;
 	m_pRtspClient = oexNULL;
 	m_pSession = oexNULL;
 	m_pVs = oexNULL;
+	m_sVideoCodec = oexT( "" );
 }
 
 int CLvRtspClient::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
@@ -177,8 +184,11 @@ int nVerbosity = 0;
 	delete [] pOptions;
 	pOptions = oexNULL;
 
-//	char *pSdp = m_pRtspClient->sendOptions( sUrl.c_str(), username, password );
-	char *pSdp = m_pRtspClient->describeURL( sUrl.c_str() );
+	char *pSdp = oexNULL;
+	if ( m && m->isset( "username" ) )
+		pSdp = m_pRtspClient->describeWithPassword( sUrl.c_str(), (*m)[ "username" ].str().c_str(), (*m)[ "password" ].str().c_str() );
+	else
+		pSdp = m_pRtspClient->describeURL( sUrl.c_str() );
 	if ( !pSdp )
 	{	oexERROR( 0, oexT( "describeURL() failed" ) );
 		ThreadDestroy();
@@ -228,6 +238,9 @@ int nVerbosity = 0;
 
 	int sn = pss->rtpSource()->RTPgs()->socketNum();
 	setReceiveBufferTo( *m_pEnv, sn, 1000000 );
+
+	if ( pss->codecName() )
+		m_sVideoCodec = pss->codecName();
 
 	if ( !m_pRtspClient->setupMediaSubsession( *pss, False, False ) )
 	{	oexERROR( 0, oexT( "setupMediaSubsession() failed" ) );
@@ -306,7 +319,7 @@ oex::oexBOOL CLvRtspClient::DoThread( oex::oexPVOID x_pData )
 
 	m_pEnv->taskScheduler().doEventLoop( &m_nEnd );
 
-	return oex::oexTRUE;
+	return oex::oexFALSE;
 }
 
 oex::oexINT CLvRtspClient::EndThread( oex::oexPVOID x_pData )
