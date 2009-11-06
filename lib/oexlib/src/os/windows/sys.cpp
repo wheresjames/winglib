@@ -78,6 +78,8 @@ oexSTATIC_ASSERT( sizeof( CSys::t_WAITABLE ) == sizeof( HANDLE ) );
 
 const oexUINT		CSys::c_StrErr_OK = S_OK;
 
+static CCpuUsage	*g_cpu = oexNULL;
+
 // Disable microsoft security warnings
 // Wouldn't have to do this but StringCchVPrintfW() has issues.
 #if defined( _MSC_VER )
@@ -496,6 +498,11 @@ oexBOOL CSys::Uninit()
 {
 	CoUninitialize();
 
+	if ( g_cpu )
+	{	OexAllocDelete< CCpuUsage >( g_cpu );
+		g_cpu = 0;
+	} // end if
+
     return CSys_ReleaseMicroSleep();
 }
 
@@ -782,13 +789,16 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 
 #if !defined( OEX_GCC )
 
-static CCpuUsage g_cpu;
 oexDOUBLE CSys::GetCpuLoad()
-{	return g_cpu.GetCpuUsage();
+{	if ( !g_cpu ) g_cpu = OexAllocConstruct< CCpuUsage >();
+	if ( !g_cpu ) return 0;
+	return g_cpu->GetCpuUsage();
 }
 
 oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName )
-{	return g_cpu.GetCpuUsage( x_pProcessName );
+{	if ( !g_cpu ) g_cpu = OexAllocConstruct< CCpuUsage >();
+	if ( !g_cpu ) return 0;
+	return g_cpu->GetCpuUsage( x_pProcessName );
 }
 
 #else
@@ -796,7 +806,6 @@ oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName )
 // +++ At the moment, the cpu code above is crashing in gcc,
 //     and isn't working anyway
 
-static CCpuUsage g_cpu;
 oexDOUBLE CSys::GetCpuLoad()
 {	return 0;
 }

@@ -80,6 +80,81 @@ int CLvRtspClient::CVideoSink::UnlockFrame()
 }
 
 
+CLvRtspClient::CAudioSink::CAudioSink( UsageEnvironment& rEnv ) :
+	MediaSink( rEnv )
+{
+}
+
+CLvRtspClient::CAudioSink::~CAudioSink()
+{
+	m_buf.Free();
+}
+
+Boolean CLvRtspClient::CAudioSink::continuePlaying()
+{
+	if ( !fSource )
+		return False;
+
+	if ( !m_buf.Size() )
+		m_buf.Obj().OexNew( eDefaultBufferSize );
+
+	fSource->getNextFrame( m_buf._Ptr(), m_buf.Size(), _afterGettingFrame, this, onSourceClosure, this );
+
+	return True;
+}
+
+void CLvRtspClient::CAudioSink::_afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
+				  									struct timeval presentationTime, unsigned durationInMicroseconds )
+{
+//	oexEcho( oexMks( "Rx: ", frameSize, ", ", numTruncatedBytes, ", ", durationInMicroseconds ).Ptr() );
+
+	CAudioSink* pAudioSink = (CAudioSink*)clientData;
+	if ( pAudioSink )
+		pAudioSink->afterGettingFrame( clientData, frameSize, numTruncatedBytes,
+									   presentationTime, durationInMicroseconds );
+}
+
+void CLvRtspClient::CAudioSink::afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
+				  								   struct timeval presentationTime, unsigned durationInMicroseconds )
+{
+	if ( !fSource )
+		return;
+
+	// How much data was used this time
+	m_buf.setUsed( frameSize );
+
+	// Signal that a new frame is ready
+	m_sigFrame.Signal();
+
+	// Wait for frame to get used
+	m_sigFrame.GetResetEvent().Wait( 8000 );
+
+//    onSourceClosure( this );
+
+	continuePlaying();
+}
+
+int CLvRtspClient::CAudioSink::LockFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
+{
+	// Check to see if a new frame is ready
+	if ( m_sigFrame.Wait( 0 ) )
+		return 0;
+
+	if ( dat )
+		*dat = m_buf;
+
+	return 1;
+}
+
+int CLvRtspClient::CAudioSink::UnlockFrame()
+{
+	// Unlock the buffer
+	m_sigFrame.Reset();
+
+	return 1;
+}
+
+
 
 CLvRtspClient::CLvRtspClient()
 {
@@ -88,7 +163,10 @@ CLvRtspClient::CLvRtspClient()
 	m_pRtspClient = oexNULL;
 	m_pSession = oexNULL;
 	m_pVs = oexNULL;
+	m_pAs = oexNULL;
 	m_nEnd = 0;
+	m_bVideo = 1;
+	m_bAudio = 1;
 }
 
 void CLvRtspClient::Destroy()
@@ -119,10 +197,11 @@ void CLvRtspClient::ThreadDestroy()
 	m_pRtspClient = oexNULL;
 	m_pSession = oexNULL;
 	m_pVs = oexNULL;
+	m_pAs = oexNULL;
 	m_sVideoCodec = oexT( "" );
 }
 
-int CLvRtspClient::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
+int CLvRtspClient::Open( const sqbind::stdString &sUrl, int bVideo, int bAudio, sqbind::CSqMulti *m )
 {
 	Destroy();
 
@@ -130,12 +209,15 @@ int CLvRtspClient::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 	if ( m )
 		m_mParams = *m;
 
+	m_bVideo = bVideo;
+	m_bAudio = bAudio;
+
 	Start();
 
 	return 1;
 }
 
-int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
+int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bAudio, sqbind::CSqMulti *m )
 {
 	// Lose old container
 	ThreadDestroy();
@@ -211,55 +293,23 @@ int nVerbosity = 0;
 	// Find a video stream
 	MediaSubsessionIterator iter( *m_pSession );
 	MediaSubsession *pss;
-	while ( 0 != ( pss = iter.next() ) && strncmp( "video", pss->mediumName(), 5 ) )
+	int bFoundVideo = 0, bFoundAudio = 0;
+	oex::CStr sVTag = oexT( "video" ), sATag = oexT( "audio" );
+	while ( 0 != ( pss = iter.next() ) 
+			&& ( ( bVideo && !bFoundVideo ) || ( bAudio && !bFoundAudio ) ) )
+	{
 //		oexEcho( oexMks( pss->mediumName(), " - ", pss->codecName() ).Ptr() )
-		;
 
-	if ( !pss )
-	{	oexERROR( 0, oexT( "video not found in stream" ) );
-		ThreadDestroy();
-		return 0;
-	} // end if
+		if ( bVideo && !bFoundVideo && sVTag == pss->mediumName() )
+			InitVideo( pss ), bFoundVideo = 1;
 
-	// Create receiver for stream
-	if ( !pss->initiate( -1 ) )
-	{	oexERROR( 0, oexT( "initiate() video stream failed" ) );
-		ThreadDestroy();
-		return 0;
-	} // end if
+		else if ( bAudio && !bFoundAudio && sATag == pss->mediumName() )
+			InitAudio( pss ), bFoundAudio = 1;
 
-	if ( !pss->rtpSource() )
-	{	oexERROR( 0, oexT( "RTP source is null" ) );
-		ThreadDestroy();
-		return 0;
-	} // end if
+	} // end while
 
-	pss->rtpSource()->setPacketReorderingThresholdTime( 2000000 );
-
-	int sn = pss->rtpSource()->RTPgs()->socketNum();
-	setReceiveBufferTo( *m_pEnv, sn, 1000000 );
-
-	if ( pss->codecName() )
-		m_sVideoCodec = pss->codecName();
-
-	if ( !m_pRtspClient->setupMediaSubsession( *pss, False, False ) )
-	{	oexERROR( 0, oexT( "setupMediaSubsession() failed" ) );
-		ThreadDestroy();
-		return 0;
-	} // end if
-
-	m_pVs = new CVideoSink( *m_pEnv );
-	if ( !m_pVs )
-	{	oexERROR( 0, oexT( "CVideoSink::createNew() failed" ) );
-		ThreadDestroy();
-		return 0;
-	} // end if
-
-	if ( !m_pVs->startPlaying( *pss->rtpSource(), 0, 0 ) )
-	{	oexERROR( 0, oexT( "CVideoSink::startPlaying() failed" ) );
-		ThreadDestroy();
-		return 0;
-	} // end if
+	m_bVideo = bFoundVideo;
+	m_bAudio = bFoundAudio;
 
 	m_pRtspClient->playMediaSession( *m_pSession, 0, 0, 1.f );
 
@@ -287,15 +337,105 @@ int nVerbosity = 0;
 	return 1;
 }
 
-int CLvRtspClient::LockFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
+int CLvRtspClient::InitVideo( MediaSubsession *pss )
 {
+	if ( !pss )
+	{	oexERROR( 0, oexT( "Invalid video object" ) );
+		return 0;
+	} // end if
+
+	// Create receiver for stream
+	if ( !pss->initiate( -1 ) )
+	{	oexERROR( 0, oexT( "initiate() video stream failed" ) );
+		return 0;
+	} // end if
+
+	if ( !pss->rtpSource() )
+	{	oexERROR( 0, oexT( "RTP source is null" ) );
+		return 0;
+	} // end if
+
+	pss->rtpSource()->setPacketReorderingThresholdTime( 2000000 );
+
+	int sn = pss->rtpSource()->RTPgs()->socketNum();
+	setReceiveBufferTo( *m_pEnv, sn, 1000000 );
+
+	if ( pss->codecName() )
+		m_sVideoCodec = pss->codecName();
+
+	if ( !m_pRtspClient->setupMediaSubsession( *pss, False, False ) )
+	{	oexERROR( 0, oexMks( oexT( "setupMediaSubsession() failed, Codec : " ), m_sVideoCodec.c_str() ).Ptr()  );
+		return 0;
+	} // end if
+
+	m_pVs = new CVideoSink( *m_pEnv );
 	if ( !m_pVs )
+	{	oexERROR( 0, oexT( "CVideoSink::createNew() failed" ) );
+		return 0;
+	} // end if
+
+	if ( !m_pVs->startPlaying( *pss->rtpSource(), 0, 0 ) )
+	{	oexERROR( 0, oexT( "CVideoSink::startPlaying() failed" ) );
+		return 0;
+	} // end if
+
+	return 1;
+}
+
+int CLvRtspClient::InitAudio( MediaSubsession *pss )
+{
+	if ( !pss )
+	{	oexERROR( 0, oexT( "Invalid video object" ) );
+		return 0;
+	} // end if
+
+	// Create receiver for stream
+	if ( !pss->initiate( -1 ) )
+	{	oexERROR( 0, oexT( "initiate() video stream failed" ) );
+		return 0;
+	} // end if
+
+	if ( !pss->rtpSource() )
+	{	oexERROR( 0, oexT( "RTP source is null" ) );
+		return 0;
+	} // end if
+
+	pss->rtpSource()->setPacketReorderingThresholdTime( 2000000 );
+
+	int sn = pss->rtpSource()->RTPgs()->socketNum();
+	setReceiveBufferTo( *m_pEnv, sn, 1000000 );
+
+	if ( pss->codecName() )
+		m_sAudioCodec = pss->codecName();
+
+	if ( !m_pRtspClient->setupMediaSubsession( *pss, False, False ) )
+	{	oexERROR( 0, oexT( "setupMediaSubsession() failed" ) );
+		return 0;
+	} // end if
+
+	m_pAs = new CAudioSink( *m_pEnv );
+	if ( !m_pAs )
+	{	oexERROR( 0, oexT( "CAudioSink::createNew() failed" ) );
+		return 0;
+	} // end if
+
+	if ( !m_pAs->startPlaying( *pss->rtpSource(), 0, 0 ) )
+	{	oexERROR( 0, oexT( "CAudioSink::startPlaying() failed" ) );
+		return 0;
+	} // end if
+
+	return 1;
+}
+
+int CLvRtspClient::LockVideo( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
+{
+	if ( !m_bVideo || !m_pVs )
 		return 0;
 
 	return m_pVs->LockFrame( dat, m );
 }
 
-int CLvRtspClient::UnlockFrame()
+int CLvRtspClient::UnlockVideo()
 {
 	if ( !m_pVs )
 		return 0;
@@ -303,9 +443,25 @@ int CLvRtspClient::UnlockFrame()
 	return m_pVs->UnlockFrame();
 }
 
+int CLvRtspClient::LockAudio( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
+{
+	if ( !m_bAudio || !m_pAs )
+		return 0;
+
+	return m_pAs->LockFrame( dat, m );
+}
+
+int CLvRtspClient::UnlockAudio()
+{
+	if ( !m_pAs )
+		return 0;
+
+	return m_pAs->UnlockFrame();
+}
+
 oex::oexBOOL CLvRtspClient::InitThread( oex::oexPVOID x_pData )
 {
-	if ( !ThreadOpen( m_sUrl, &m_mParams ) )
+	if ( !ThreadOpen( m_sUrl, m_bVideo, m_bAudio, &m_mParams ) )
 		return oex::oexFALSE;
 
 	return oex::oexTRUE;

@@ -18,8 +18,52 @@ public:
 		/// Constructor
 		CVideoSink( UsageEnvironment &rEnv );
 
+		/// Reads frame info
+		int LockFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
+
+		/// Releases the frame buffer
+		int UnlockFrame();
+
+	private:
+
 		/// Destructor
 		virtual ~CVideoSink();
+
+		/// Grabs next frame
+		virtual Boolean continuePlaying();
+
+	private:
+
+		static void _afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
+										struct timeval presentationTime, unsigned durationInMicroseconds );
+
+		/// Processes new frames
+		void afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
+								struct timeval presentationTime, unsigned durationInMicroseconds );
+
+	private:
+
+		/// Data buffer
+		sqbind::CSqBinary		m_buf;
+
+		/// Signals when a new frame is ready
+		oex::CSignal			m_sigFrame;
+
+	};
+
+	class CAudioSink : public MediaSink
+	{
+	public:
+
+		enum
+		{
+			eDefaultBufferSize = 200000
+		};
+
+	public:
+
+		/// Constructor
+		CAudioSink( UsageEnvironment &rEnv );
 
 		/// Reads frame info
 		int LockFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
@@ -28,6 +72,9 @@ public:
 		int UnlockFrame();
 
 	private:
+
+		/// Destructor
+		virtual ~CAudioSink();
 
 		/// Grabs next frame
 		virtual Boolean continuePlaying();
@@ -68,16 +115,22 @@ public:
 	void Destroy();
 
 	/// Open link
-	int Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m );
+	int Open( const sqbind::stdString &sUrl, int bVideo, int bAudio, sqbind::CSqMulti *m );
 
 	/// Thread open
-	int ThreadOpen( const sqbind::stdString &sUrl, sqbind::CSqMulti *m );
+	int ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bAudio, sqbind::CSqMulti *m );
 
 	/// Reads frame data, good until UnlockFrame() is called
-	int LockFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
+	int LockVideo( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
 
 	/// Releases the frame buffer
-	int UnlockFrame();
+	int UnlockVideo();
+
+	/// Reads frame data, good until UnlockFrame() is called
+	int LockAudio( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
+
+	/// Releases the frame buffer
+	int UnlockAudio();
 
 	/// Returns video width
 	int getWidth()
@@ -99,13 +152,25 @@ public:
 	{	return m_nFrames;
 	}
 
-	/// Returns the codec name
-	sqbind::stdString getCodecName()
+	/// Returns the video codec name
+	sqbind::stdString getVideoCodecName()
 	{	return m_sVideoCodec; }
+
+	/// Returns the audio codec name
+	sqbind::stdString getAudioCodecName()
+	{	return m_sAudioCodec; }
 
 	/// waits for the application to initialize
 	int waitInit( int nMax )
 	{	return !GetInitEvent().Wait( nMax ); }
+
+	/// Returns non-zero if video was enabled and the open stream contains video
+	int isVideo() 
+	{	return m_bVideo; }
+
+	/// Returns non-zero if audio was enabled and the open stream contains audio
+	int isAudio()
+	{	return m_bAudio; }
 
 protected:
 
@@ -121,6 +186,12 @@ protected:
 	/// Thread cleanup
 	void ThreadDestroy();
 
+	/// Initializes video stream
+	int InitVideo( MediaSubsession *pss );
+
+	/// Initializes video stream
+	int InitAudio( MediaSubsession *pss );
+
 private:
 
 	/// Flag to end loop
@@ -129,8 +200,17 @@ private:
 	/// Url to open
 	sqbind::stdString		m_sUrl;
 
+	/// Non-zero if video should be processed
+	int						m_bVideo;
+
+	/// Non-zero if audio should be processed
+	int						m_bAudio;
+
 	/// The name of the video codec
 	sqbind::stdString		m_sVideoCodec;
+
+	/// The name of the video codec
+	sqbind::stdString		m_sAudioCodec;
 
 	/// Parameters
 	sqbind::CSqMulti		m_mParams;
@@ -146,6 +226,9 @@ private:
 
 	/// Video sink
 	CVideoSink				*m_pVs;
+
+	/// Audio sink
+	CAudioSink				*m_pAs;
 
 	/// Left over packet data
 	sqbind::CSqBinary		m_buf;

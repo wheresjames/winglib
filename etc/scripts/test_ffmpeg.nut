@@ -21,7 +21,7 @@ function _init()
 
 	_self.echo( "Loaded picture " + img.getWidth() + "x" + img.getHeight() );
 
-	run_test( ffmpeg_root, "MJPEG", img, CFfEncoder().CODEC_ID_MJPEG, -1,
+	run_test( ffmpeg_root, "MJPEG", img, CFfDecoder().LookupCodecId( "MJPG" ), -1,
 			  CFfConvert().PIX_FMT_YUV420P );
 
 //	run_test( ffmpeg_root, "WMV1", img, CFfEncoder().CODEC_ID_WMV1, 0,
@@ -30,17 +30,17 @@ function _init()
 //	run_test( ffmpeg_root, "WMV2", img, CFfEncoder().CODEC_ID_WMV2, 0,
 //			  CFfConvert().PIX_FMT_YUV420P );
 
-	run_test( ffmpeg_root, "MSMPEG4V2", img, CFfEncoder().CODEC_ID_MSMPEG4V2, 0,
+	run_test( ffmpeg_root, "MSMPEG4V2", img, CFfDecoder().LookupCodecId( "MP42" ), 0,
 			  CFfConvert().PIX_FMT_YUV420P );
 
-	run_test( ffmpeg_root, "MPEG4", img, CFfEncoder().CODEC_ID_MPEG4, 0,
-			  CFfConvert().PIX_FMT_YUV420P );
+//	run_test( ffmpeg_root, "MPEG4", img, CFfDecoder().LookupCodecId( "MPG4" ), 0,
+//			  CFfConvert().PIX_FMT_YUV420P );
 
-	run_test( ffmpeg_root, "FLV1", img, CFfEncoder().CODEC_ID_FLV1, 0,
+	run_test( ffmpeg_root, "FLV1", img, CFfDecoder().LookupCodecId( "FLV1" ), 0,
 			  CFfConvert().PIX_FMT_YUV420P );
 
 	img.Resample( 352, 288, 0 );
-	run_test( ffmpeg_root, "H263", img, CFfEncoder().CODEC_ID_H263, 0,
+	run_test( ffmpeg_root, "H263", img, CFfDecoder().LookupCodecId( "H263" ), 0,
 			  CFfConvert().PIX_FMT_YUV420P );
 
 
@@ -54,8 +54,8 @@ function _init()
 	// **************************************************
 	// RTSP test
 
-	test_rtsp( ffmpeg_root, "rtsp://a1352.l1857053128.c18570.g.lq.akamaistream.net/D/1352/18570/v0001/reflector:53128", 30 );
-//	test_rtsp( ffmpeg_root, "rtsp://prug.rtsp-youtube.l.google.com/ChoLENy73wIaEQmJv18x7xfevhMYESARFEgGDA==/0/0/0/1/video.3gp", 15 );
+//	test_rtsp( ffmpeg_root, "rtsp://a1352.l1857053128.c18570.g.lq.akamaistream.net/D/1352/18570/v0001/reflector:53128", 30 );
+	test_rtsp( ffmpeg_root, "rtsp://v2.cache1.c.youtube.com/CkgLENy73wIaPwlnoDu0pt7zDRMYDSANFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNaDkNsaWNrVGh1bWJuYWlsYOmkotHXgfvJRgw=/0/0/0/video.3gp", 15 );
 //	test_rtsp( ffmpeg_root, "rtsp://video2.multicasttech.com/AFTVSciFi3GPP296.sdp", 15 );
 //	test_rtsp( ffmpeg_root, "rtsp://192.168.2.130/Mediainput/mpeg4", 30 );
 
@@ -161,7 +161,7 @@ function test_avi_write( root, file )
 		return;
 	} // end if
 
-	if ( 0 > vid.AddVideoStream( CFfEncoder().CODEC_ID_MSMPEG4V2, img.getWidth(), img.getHeight(), 15 ) )
+	if ( 0 > vid.AddVideoStream( CFfDecoder().LookupCodecId( "MP42" ), img.getWidth(), img.getHeight(), 15 ) )
 	{	_self.echo( "failed to add video stream" );
 		return;
 	} // end if
@@ -258,6 +258,11 @@ function run_test( root, name, img, fmt, cmp, cs )
 	_self.echo( "----------------------------------------------" );
 	_self.echo( "-      Codec : " + name );
 	_self.echo( "----------------------------------------------" );
+
+	if ( !fmt )
+	{	_self.echo( "invalid codec id" );
+		return;
+	} // endi f
 
 	local frame = CSqBinary();
 	local cimg = CSqImage();

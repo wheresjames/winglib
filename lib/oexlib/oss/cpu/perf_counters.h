@@ -15,7 +15,7 @@ template <class T>
 class CPerfCounters
 {
 public:
-	CPerfCounters()
+	CPerfCounters() : m_Buffer(TOTALBYTES)
 	{
 	}
 	~CPerfCounters()
@@ -89,6 +89,8 @@ protected:
 		UINT m_Size;
 	};
 
+	CBuffer		m_Buffer;
+
 	//
 	//	The performance data is accessed through the registry key
 	//	HKEY_PEFORMANCE_DATA.
@@ -102,32 +104,32 @@ protected:
 	//	performance data.
 	//
 	//
-	void QueryPerformanceData(PERF_DATA_BLOCK **pPerfData, DWORD dwObjectIndex, DWORD dwCounterIndex)
+	void QueryPerformanceData( PERF_DATA_BLOCK **pPerfData, DWORD dwObjectIndex, DWORD dwCounterIndex)
 	{
 		//
 		// Since i want to use the same allocated area for each query,
 		// i declare CBuffer as static.
 		// The allocated is changed only when RegQueryValueEx return ERROR_MORE_DATA
 		//
-		static CBuffer Buffer(TOTALBYTES);
+//		static CBuffer Buffer(TOTALBYTES);
 
-		DWORD BufferSize = Buffer.GetSize();
+		DWORD BufferSize = m_Buffer.GetSize();
 		LONG lRes;
 
-		Buffer.Reset();
+		m_Buffer.Reset();
 		while( (lRes = RegQueryValueEx( HKEY_PERFORMANCE_DATA,
 								   oexMks( dwObjectIndex, dwCounterIndex ).Ptr(),
 								   NULL,
 								   NULL,
-								   Buffer,
+								   m_Buffer,
 								   &BufferSize )) == ERROR_MORE_DATA )
 		{
 			// Get a buffer that is big enough.
 
 			BufferSize += BYTEINCREMENT;
-			Buffer.Realloc(BufferSize);
+			m_Buffer.Realloc(BufferSize);
 		}
-		*pPerfData = (PPERF_DATA_BLOCK) Buffer.m_pBuffer;
+		*pPerfData = (PPERF_DATA_BLOCK) m_Buffer.m_pBuffer;
 	}
 
 	//

@@ -1,30 +1,13 @@
-// ff_decoder.cpp
+// ff_audio_decoder.cpp
 
 #include "stdafx.h"
-
-/*
-	.oo.ooo.oooooooo.
-	 oU U U U U U Uo
-	 |             |
-	 |             |====\
-	 | F F M P E G |    ||
-	 |             |    ||
-	 |   B E E R   |    ||
-	 |             |    ||
-	 |             |====/
-	 |             |
-	 ===============
-*/
-
-// av_open_input_file av_find_stream_info av_log_set_callback
-// void av_log_default_callback(void* ptr, int level, const char* fmt, va_list vl)
 
 extern "C" 
 {
 #	include "libavformat/riff.h"
 };
 
-CFfDecoder::CFfDecoder()
+CFfAudioDecoder::CFfAudioDecoder()
 {
 	m_pCodec = oexNULL;
 	m_pCodecContext = oexNULL;
@@ -35,7 +18,7 @@ CFfDecoder::CFfDecoder()
 
 }
 
-void CFfDecoder::Destroy()
+void CFfAudioDecoder::Destroy()
 {
 	if ( m_pFrame )
 	{	av_free( m_pFrame );
@@ -57,19 +40,17 @@ void CFfDecoder::Destroy()
 	oexZero( m_pkt );
 }
 
-int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
+int CFfAudioDecoder::Create( int x_nCodec, int fmt )
 {
 	// Lose previous codec
 	Destroy();
 
 	m_pCodec = avcodec_find_decoder( (CodecID)x_nCodec );
 	if ( !m_pCodec )
-	{	oexERROR( 0, oexT( "avcodec_find_decoder() failed" ) );
+	{	oexERROR( 0, oexMks( oexT( "avcodec_find_decoder() failed : " ), 
+					 (int)x_nCodec, oexT( " - " ), LookupCodecName( x_nCodec ).c_str() ) );
 		return 0;
 	} // end if
-
-//	CODEC_CAP_PARSE_ONLY CODEC_CAP_TRUNCATED
-//	avcodec_parse_frame
 
 	// Allocate context
 	m_pCodecContext = avcodec_alloc_context();
@@ -83,12 +64,9 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
 	avcodec_get_context_defaults2( m_pCodecContext, CODEC_TYPE_VIDEO );
 
     m_pCodecContext->codec_id = (CodecID)x_nCodec;
-    m_pCodecContext->codec_type = CODEC_TYPE_VIDEO;
-    m_pCodecContext->bit_rate = 400000;
-    m_pCodecContext->width = width;
-    m_pCodecContext->height = height;
+    m_pCodecContext->codec_type = CODEC_TYPE_AUDIO;
 //	m_pCodecContext->strict_std_compliance = cmp;
-	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
+//	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
 
 	int res = avcodec_open( m_pCodecContext, m_pCodec );
 	if ( 0 > res )
@@ -103,7 +81,7 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
 	return 1;
 }
 
-int CFfDecoder::FindStreamInfo( sqbind::CSqBinary *in )
+int CFfAudioDecoder::FindStreamInfo( sqbind::CSqBinary *in )
 {
 	if ( !in )
 		return 0;
@@ -126,7 +104,7 @@ int CFfDecoder::FindStreamInfo( sqbind::CSqBinary *in )
 	return 1;
 }
 
-int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
+int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
 {
 	// Ensure codec
 	if ( !m_pCodecContext )
@@ -141,7 +119,7 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 	int nPadding = in->Size() - in->getUsed();
 	if ( 0 < nPadding )
 	{
-		// Don't zero mor than twice the padding size
+		// Don't zero more than twice the padding size
 		if ( nPadding > ( FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
 			nPadding = FF_INPUT_BUFFER_PADDING_SIZE * 2;
 
@@ -216,94 +194,41 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 	return res ? 1 : 0;
 }
 
-int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbind::CSqMulti *m )
+static AVCodecTag g_ff_audio_codec_map[] = 
 {
-	// Ensure codec
-	if ( !m_pCodecContext )
-		return 0;
-
-	// Validate params
-	if ( !in || !in->getUsed() || !img )
-		return 0;
-
-	// How much padding is there in the buffer
-	// If not enough, we assume the caller took care of it
-	int nPadding = in->Size() - in->getUsed();
-	if ( 0 < nPadding )
-	{
-		// Don't zero mor than twice the padding size
-		if ( nPadding > ( FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
-			nPadding = FF_INPUT_BUFFER_PADDING_SIZE * 2;
-
-		// Set end to zero to ensure no overreading on damaged blocks
-		oexZeroMemory( &in->_Ptr()[ in->getUsed() ], nPadding );
-
-	} // end if
-
-	if ( m_pFrame )
-	{	av_free( m_pFrame );
-		m_pFrame = oexNULL;
-	} // end if
-
-	m_pFrame = avcodec_alloc_frame();
-	if ( !m_pFrame )
-		return 0;
-
-	int gpp = 0;
-	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, in->_Ptr(), in->getUsed() );
-
-	if ( 0 >= gpp )
-		return 0;
-
-	// Convert
-	int res = CFfConvert::ConvertColorFI( m_pFrame, m_nFmt, m_pCodecContext->width, m_pCodecContext->height, img, SWS_FAST_BILINEAR, 1 );
-
-	return res ? 1 : 0;
-}
-
-
-static AVCodecTag g_ff_codec_map[] = 
-{
-    { CODEC_ID_MPEG4,			MKTAG('M', 'P', '4', 'V') },
+    { CODEC_ID_AAC,				MKTAG('A', 'M', 'R', ' ') },
+    { CODEC_ID_AMR_NB,			MKTAG('A', 'M', 'R', ' ') },
+    { CODEC_ID_AMR_WB,			MKTAG('A', 'M', 'R', ' ') },
 
 	{ CODEC_ID_NONE,			0 }
 };
 
-
-int CFfDecoder::LookupCodecId( const sqbind::stdString &sCodec )
+int CFfAudioDecoder::LookupCodecId( const sqbind::stdString &sCodec )
 {
 	char c[ 5 ] = { ' ', ' ', ' ', ' ', 0 };
 	for ( int i = 0; i < 4 && i < sCodec.length(); i++ )
 		c[ i ] = (char)sCodec[ i ];
 
 	// Find a codec with that name
-	for ( int i = 0; CODEC_ID_NONE != ff_codec_bmp_tags[ i ].id; i++ )
-		if ( *(oex::oexUINT32*)c == ff_codec_bmp_tags[ i ].tag )
-			return ff_codec_bmp_tags[ i ].id;
+	for ( int i = 0; CODEC_ID_NONE != ff_codec_wav_tags[ i ].id; i++ )
+		if ( *(oex::oexUINT32*)c == ff_codec_wav_tags[ i ].tag )
+			return ff_codec_wav_tags[ i ].id;
 
 	// Extras
-	for ( int i = 0; CODEC_ID_NONE != g_ff_codec_map[ i ].id; i++ )
-		if ( *(oex::oexUINT32*)c == g_ff_codec_map[ i ].tag )
-			return g_ff_codec_map[ i ].id;
+	for ( int i = 0; CODEC_ID_NONE != g_ff_audio_codec_map[ i ].id; i++ )
+		if ( *(oex::oexUINT32*)c == g_ff_audio_codec_map[ i ].tag )
+			return g_ff_audio_codec_map[ i ].id;
 
 	return 0;
 }
 
-sqbind::stdString CFfDecoder::LookupCodecName( int nId )
+sqbind::stdString CFfAudioDecoder::LookupCodecName( int nId )
 {
 	// Find a codec with that id
-	for ( int i = 0; CODEC_ID_NONE != ff_codec_bmp_tags[ i ].id; i++ )
-		if ( ff_codec_bmp_tags[ i ].id == (CodecID)nId )
+	for ( int i = 0; CODEC_ID_NONE != ff_codec_wav_tags[ i ].id; i++ )
+		if ( ff_codec_wav_tags[ i ].id == (CodecID)nId )
 		{	char b[ 5 ] = { 0, 0, 0, 0, 0 };
-			*(oex::oexUINT32*)b = ff_codec_bmp_tags[ i ].tag;
-			return oexMbToStrPtr( b );
-		} // end if
-
-	// Find a codec with that id
-	for ( int i = 0; CODEC_ID_NONE != g_ff_codec_map[ i ].id; i++ )
-		if ( g_ff_codec_map[ i ].id == (CodecID)nId )
-		{	char b[ 5 ] = { 0, 0, 0, 0, 0 };
-			*(oex::oexUINT32*)b = g_ff_codec_map[ i ].tag;
+			*(oex::oexUINT32*)b = ff_codec_wav_tags[ i ].tag;
 			return oexMbToStrPtr( b );
 		} // end if
 

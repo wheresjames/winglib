@@ -11,6 +11,7 @@ class CGlobal
 
 	rtsp = 0;
 	dec = 0;
+	adec = 0;
 };
 
 local _g = CGlobal();
@@ -66,28 +67,8 @@ function _init() : ( _g )
 function StartStream( inf ) : ( _g )
 {
 	_g.rtsp = CLvRtspClient();
-	if ( !_g.rtsp.Open( inf[ 1 ], CSqMulti() ) )
+	if ( !_g.rtsp.Open( inf[ 1 ], 1, 1, CSqMulti() ) )
 	{	_self.echo( "Failed to open RTSP stream " + inf[ 1 ] );
-		return 0;
-	} // end if
-
-	if ( !_g.rtsp.waitInit( 8000 ) || !_g.rtsp.isOpen() )
-	{	_g.rtsp.Destroy();
-		_self.echo( "Failed to initialize RTSP stream " + inf[ 1 ] );
-		return 0;
-	} // end if
-
-//	_self.echo( "Video File : " + _g.rtsp.getWidth() + "x" + _g.rtsp.getHeight() );
-
-//	_g.tex = _g.irr.CreateTexture( 320, 240, 0 );
-//	_g.video.SetTexture( 0, _g.tex );
-
-	_g.dec = CFfDecoder();
-//	if ( !_g.dec.Create( CFfDecoder().CODEC_ID_MPEG4, CFfConvert().PIX_FMT_YUV420P,
-	if ( !_g.dec.Create( CFfDecoder().LookupCodecId( _g.rtsp.getCodecName() ), CFfConvert().PIX_FMT_YUV420P,
-						 0, 0, 0 ) )
-	{	_g.rtsp.Destroy();
-		_self.echo( "failed to create decoder for " + _g.rtsp.getCodecName() );
 		return 0;
 	} // end if
 
@@ -96,12 +77,49 @@ function StartStream( inf ) : ( _g )
 
 function UpdateVideo() : ( _g )
 {
+	// Has it connected?
+	if ( !_g.rtsp.waitInit( 0 ) )
+	{	_self.print( "." ); _self.flush();
+		return;
+	} // end if
+
 	if ( !_g.rtsp.isOpen() )
 		return;
 
-	local frame = CSqBinary();
-	if ( _g.rtsp.LockFrame( frame, CSqMulti() ) )
+	// Do we need to create the video decoder?
+	if ( !_g.dec && _g.rtsp.isVideo() )
 	{
+		_self.echo( "Creating video decoder for " + _g.rtsp.getVideoCodecName() );
+		_g.dec = CFfDecoder();
+		if ( !_g.dec.Create( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ), CFfConvert().PIX_FMT_YUV420P,
+							 0, 0, 0 ) )
+			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getVideoCodecName() );
+
+	} // end if
+
+	if ( !_g.adec && _g.rtsp.isAudio() )
+	{
+		_self.echo( "Creating audio decoder for " + _g.rtsp.getAudioCodecName() );
+
+		_g.adec = CFfAudioDecoder();
+		if ( !_g.adec.Create( CFfAudioDecoder().LookupCodecId( _g.rtsp.getAudioCodecName() ), CFfConvert().PIX_FMT_YUV420P,
+							 0, 0, 0 ) )
+			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getAudioCodecName() );
+
+	} // end if
+
+	if ( !_g.dec && !_g.adec )
+	{	_self.echo( "Closing stream because there are no decoders" );
+		_g.rtsp.Destroy();
+		return 0;
+	} // end if
+
+	local frame = CSqBinary();
+
+	// Are we doing video?
+	if ( _g.dec && _g.rtsp.LockVideo( frame, CSqMulti() ) )
+	{
+//		_self.echo( "Video data : " + frame.getUsed() );
 
 		if ( !_g.tex )
 		{
@@ -125,14 +143,19 @@ function UpdateVideo() : ( _g )
 
 		} // end else
 
-		_g.rtsp.UnlockFrame();
+		_g.rtsp.UnlockVideo();
 
 	} // end if
 
-//	local buf = _g.tex.Lock();
-//	if ( buf.getUsed() )
-//		_g.rtsp.DecodeFrame( _g.rtsp.getVideoStream(), CFfConvert().PIX_FMT_RGB32, buf, CSqMulti() ),
-//		_g.tex.Unlock();
+	// Is there audio?
+	if ( _g.adec && _g.rtsp.LockAudio( frame, CSqMulti() ) )
+	{
+//		_self.echo( "Audio data : " + frame.getUsed() );
+
+		_g.rtsp.UnlockAudio();
+
+	} // end if
+
 }
 
 function _idle() : ( _g )

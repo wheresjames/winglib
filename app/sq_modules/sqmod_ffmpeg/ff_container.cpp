@@ -158,8 +158,6 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 		else if ( 0 > avcodec_open( m_pCodecContext, pCodec ) )
 				m_pCodecContext = oexNULL;
 
-		oexSHOW( (int)m_pCodecContext->codec_id );
-
 	} // end if
 
 	// Reading
@@ -391,14 +389,14 @@ int CFfContainer::InitWrite()
 		Destroy();
 		return 0;
 	} // end if
-/*
+
 	if ( !( m_pFormatContext->oformat->flags & AVFMT_NOFILE ) )
 		if ( 0 > ( res = url_fopen( &m_pFormatContext->pb, m_pFormatContext->filename, URL_WRONLY ) ) )
 		{	oexERROR( res, oexT( "url_fopen() failed" ) );
 			Destroy();
 			return 0;
 		} // end if
-*/
+
     if ( 0 > ( res = av_write_header( m_pFormatContext ) ) )
 	{	oexERROR( res, oexT( "av_write_header() failed" ) );
 		Destroy();
