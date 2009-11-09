@@ -43,7 +43,7 @@ CSqMsgQueue::SMsg::SMsg()
 }
 
 /// Initializer
-CSqMsgQueue::SMsg::SMsg( const stdString x_sPath, const stdString x_sMsg, CSqMap *x_pmapParams, oexEvent x_evReply, stdString *x_pReply )
+CSqMsgQueue::SMsg::SMsg( const stdString x_sPath, const stdString x_sMsg, CSqMap *x_pmapParams, oexEvent *x_evReply, stdString *x_pReply )
 {
 	sPath = x_sPath;
 	sMsg = x_sMsg;
@@ -51,7 +51,8 @@ CSqMsgQueue::SMsg::SMsg( const stdString x_sPath, const stdString x_sMsg, CSqMap
 	if ( x_pmapParams )
 //		mapParams = *x_pmapParams;
 		sParams = x_pmapParams->serialize();
-	evReply = x_evReply;
+	if ( x_evReply )
+		evReply = *x_evReply;
 	pReply = x_pReply;
 }
 
@@ -110,9 +111,19 @@ void CSqMsgQueue::Destroy()
 	If pmapReply is not NULL, the function waits for a reply
 	from the thread.
 */
-oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapParams, stdString *pReply, oex::oexUINT uTimeout )
+oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapParams, stdString *pReply, oexEvent *pReplyEvent, oex::oexUINT uTimeout )
 {
-	oexEvent evReply;
+	oex::TMem< oexEvent > mevReply;
+	oex::oexBOOL bRet = oex::oexFALSE;
+
+	// Do we want replies?
+	if ( !pReply )
+		pReplyEvent = oexNULL;
+
+	// Ensure event if replies are needed
+	else if ( !pReplyEvent )
+		if ( !( pReplyEvent = mevReply.OexConstruct().Ptr() ) )
+			return oex::oexFALSE;
 
 //	if ( sMsg == oexT( "kill" ) )
 //		oexPrintf( oexT( "Msg(): %s, To: %s, Caller: 0x%08x, Owner: 0x%08x\n" ), sMsg.c_str(), sPath.c_str(), (unsigned int)oexGetCurThreadId(), m_uOwnerThreadId );
@@ -122,15 +133,20 @@ oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapPara
 	{
 		// Just process the message directly
 		if ( pmapParams )
-			return ProcessMsg( sPath, sMsg, *pmapParams, pReply );
+			bRet = ProcessMsg( sPath, sMsg, *pmapParams, pReply, pReplyEvent );
 
 		else
 		{   CSqMap params;
-			return ProcessMsg( sPath, sMsg, params, pReply );
+			bRet = ProcessMsg( sPath, sMsg, params, pReply, pReplyEvent );
 		} // end else
+
+		// How'd it go?
+		if ( !bRet )
+			return oex::oexFALSE;
 
 	} // end if
 
+	else
 	{ // Stuff message into buffer
 
 		// Acquire lock
@@ -138,53 +154,25 @@ oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapPara
 		if ( !ll.IsLocked() )
 			return oex::oexFALSE;
 
-		// Reply event handle needed?
-		if ( !pReply )
-			evReply.Destroy();
-
 		// Add a message
-		m_lstMsgQueue.push_back( SMsg( sPath, sMsg, pmapParams, evReply, pReply ) );
+		m_lstMsgQueue.push_back( SMsg( sPath, sMsg, pmapParams, pReplyEvent, pReply ) );
 
 		// Signal that a message is waiting
 		Signal();
 
+		bRet = oex::oexTRUE;
+
 	} // end message stuffing
 
 	// Wait for reply if needed
-	if ( pReply )
+	if ( mevReply.Size() )
 	{
-		// Don't wait if messages will not be processed
-		if ( !Running() )
-			return oex::oexFALSE;
-
 		// Wait for reply
-		oex::oexBOOL bSuccess = !evReply.Wait( uTimeout );
-
-		// Punt if we got the reply
-		if ( bSuccess )
-			return oex::oexTRUE;
-
-		// Acquire lock
-		oexAutoLock ll( &m_cLock );
-		if ( !ll.IsLocked() )
-		{
-			// You're screwed here because pmapReply is dangling
-			// But don't worry, this won't ever happen ;)
-            oexASSERT( 0 );
-
-			// Only safe thing to do would be kill the thread...
-			KillThread();
-
-			return oex::oexFALSE;
-
-		} // end if
-
-		// Clear the list so pmapReply is not dangling
-		m_lstMsgQueue.clear();
+		bRet = !mevReply->Wait( uTimeout );
 
 	} // end if
 
-	return oex::oexTRUE;
+	return bRet;
 }
 
 /// Process messages
@@ -207,13 +195,13 @@ oex::oexBOOL CSqMsgQueue::ProcessMsgs()
 		CSqMap mapParams( it->sParams );
 
 		// Process the message
-		ProcessMsg( it->sPath, it->sMsg, mapParams, it->pReply );
+		ProcessMsg( it->sPath, it->sMsg, mapParams, it->pReply, &it->evReply );
 
 		// We must stop processing if someone is waiting for a reply
 		if ( it->pReply )
 		{
 			// Signal that reply is ready
-			it->evReply.Signal();
+//			it->evReply.Signal();
 			m_lstMsgQueue.erase( it );
 
 			// Reset signal if queue is empty
@@ -236,14 +224,14 @@ oex::oexBOOL CSqMsgQueue::ProcessMsgs()
 }
 
 /// Process a single message from the queue
-oex::oexBOOL CSqMsgQueue::ProcessMsg( const stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply )
+oex::oexBOOL CSqMsgQueue::ProcessMsg( const stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent )
 {
 	return oex::oexFALSE;
 }
 
 oex::oexBOOL CSqMsgQueue::is_path( const stdString &sPath )
 {	CSqMap params; stdString sMsg = oexT( "is_path" );
-	return ProcessMsg( sPath, sMsg, params, oexNULL );
+	return ProcessMsg( sPath, sMsg, params, oexNULL, oexNULL );
 }
 
 oex::oexBOOL CSqMsgQueue::run( stdString *pReply, const stdString &sPath, const stdString &sScript )

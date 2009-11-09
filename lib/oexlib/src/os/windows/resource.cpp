@@ -96,6 +96,10 @@ static SResourceInfo* CreateRi()
 	if ( !pRi )
 		return oexNULL;
 
+	// Add a reference count for deletion
+	if ( 2 != CAlloc::AddRef( pRi ) )
+		return oexNULL;
+
 	pRi->uOwner = 0;
 	pRi->hHandle = INVALID_HANDLE_VALUE;
 	pRi->uThreadId = 0;
@@ -106,56 +110,55 @@ static SResourceInfo* CreateRi()
 	return pRi;
 }
 
-
-oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
+static oexINT FreeRi( SResourceInfo* x_pRi, oexINT x_eType, oexUINT x_uTimeout, oexBOOL x_bForce )
 {
 	// Any resources to release?
-	if ( cInvalid() == m_hHandle || eRtInvalid == m_eType )
-		return 0;
+	if ( CResource::cInvalid() == x_pRi || CResource::eRtInvalid == x_eType )
+		return -1;
 
 	// Get pointer to resource information
-	SResourceInfo *pRi = (SResourceInfo*)m_hHandle;
-	if ( !oexCHECK_PTR( pRi ) )
-	{	m_hHandle = c_Invalid;
-		m_eType = eRtInvalid;
-		oexERROR( 0, oexT( "Invalid resource info object pointer" ) );
+	if ( !oexCHECK_PTR( x_pRi ) )
 		return -1;
-	} // end if
+
+	// Check for other references
+	oexINT nRef;
+	if ( 1 != ( nRef = OexAllocDelete( x_pRi ) ) )
+		return nRef;
 
 	// Error code
 	oexINT nErr = 0;
 
 	// Execute proper release function if valid handle
-	switch( m_eType )
+	switch( x_eType )
 	{
-		case eRtInvalid :
+		case CResource::eRtInvalid :
 			break;
 
-		case eRtFile :
-			os::CBaseFile::Close( pRi->hHandle, &nErr );
+		case CResource::eRtFile :
+			os::CBaseFile::Close( x_pRi->hHandle, &nErr );
 			break;
 
-		case eRtSocket :
+		case CResource::eRtSocket :
 			break;
 
-		case eRtThread :
+		case CResource::eRtThread :
 
 			// Wait to see if the thread will shutdown on it's own
-			if ( WAIT_OBJECT_0 != WaitForSingleObject( pRi->hHandle, x_uTimeout ) )
+			if ( WAIT_OBJECT_0 != WaitForSingleObject( x_pRi->hHandle, x_uTimeout ) )
 			{
 				if ( x_bForce )
 				{	oexERROR( GetLastError(), oexT( "!!! Thread failed to exit gracefully, Calling TerminateThread() !!!" ) );
-					TerminateThread( pRi->hHandle, oexFALSE );
+					TerminateThread( x_pRi->hHandle, oexFALSE );
 				} // end if
 				else
 					oexERROR( GetLastError(), oexT( "!!! Thread failed to exit gracefully, it is being abandonded !!!" ) );
 
 			} // end if
 
-		case eRtMutex :
-		case eRtEvent :
-		case eRtLock :
-			CloseHandle( pRi->hHandle );
+		case CResource::eRtMutex :
+		case CResource::eRtEvent :
+		case CResource::eRtLock :
+			CloseHandle( x_pRi->hHandle );
 			break;
 
 		default :
@@ -164,14 +167,44 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 
 	} // end switch
 
-	// Clear handle info
+	// Drop the memory for real
+	OexAllocDelete( x_pRi );
+
+	return 0;
+}
+
+oexINT CResource::AddRef() const
+{
+	if ( m_hHandle )
+		return CAlloc::AddRef( m_hHandle ) - 1;
+	return -1;
+}
+
+
+oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
+{
+	// Ensure reasonable values
+	if ( CResource::cInvalid() == m_hHandle || CResource::eRtInvalid == m_eType )
+	{	m_hHandle = c_Invalid;
+		m_eType = eRtInvalid; 
+		return -1;
+	} // end if
+
+	// Get destroy info
+	SResourceInfo* pRi = (SResourceInfo*)m_hHandle;
+	E_RESOURCE_TYPE eType = m_eType;
+
+	// Good practice and all...
 	m_hHandle = c_Invalid;
-	m_eType = eRtInvalid;
+	m_eType = eRtInvalid; 
 
-	// Drop the memory
-	OexAllocDelete( pRi );
+	// Free the resource
+	if ( 0 > FreeRi( pRi, eType, x_uTimeout, x_bForce ) )
+	{	oexERROR( 0, oexT( "Invalid resource info object pointer" ) );
+		return -1;
+	} // end if
 
-	return nErr;
+	return 0;
 }
 
 oexUINT CResource::GetOwner()
@@ -195,7 +228,6 @@ oexRESULT CResource::NewEvent( oexCSTR x_sName, oexBOOL x_bManualReset, oexBOOL 
 	// Initialize member variables
 	m_eType = eRtEvent;
 	m_hHandle = (CResource::t_HANDLE)pRi;
-	EnableAutoRelease();
 
 	// Create the event
 	pRi->hHandle = CreateEvent( NULL, x_bManualReset, x_bInitialState, x_sName );
@@ -217,7 +249,6 @@ oexRESULT CResource::NewMutex( oexCSTR x_sName, oexBOOL x_bInitialOwner )
 	// Save information
 	m_eType = eRtMutex;
 	m_hHandle = (CResource::t_HANDLE)pRi;
-	EnableAutoRelease();
 
 	// Create the mutex
 	pRi->hHandle = CreateMutex( NULL, x_bInitialOwner, x_sName );
@@ -238,7 +269,6 @@ oexRESULT CResource::NewThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData )
 
 	m_eType = eRtThread;
 	m_hHandle = (CResource::t_HANDLE)pRi;
-	EnableAutoRelease();
 
 	// Save user data
 	pRi->pData = x_pData;
@@ -297,7 +327,6 @@ oexRESULT CResource::NewLock( oexCSTR x_sName, oexBOOL x_bInitialOwner )
 	// Initialize member variables
 	m_eType = eRtLock;
 	m_hHandle = (CResource::t_HANDLE)pRi;
-	EnableAutoRelease();
 
 	// Initialize structure
 	pRi->nCount = 0;

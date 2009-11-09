@@ -149,11 +149,12 @@ oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUI
     return pBuf;
 }
 
-oexBOOL CAlloc::Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex )
+oexINT CAlloc::Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex )
 {
     // Decrement the reference count
-    if ( 0 != DecRef( x_pBuf ) )
-        return oexFALSE;
+	oexINT nRef;
+    if ( 0 != ( nRef = DecRef( x_pBuf ) ) )
+        return nRef;
 
     // Verify the memory
     oexPVOID pBuf = (oexUCHAR*)CAlloc::VerifyMem( x_pBuf, oexTRUE ) - OEX_SIZE_VAR;
@@ -161,7 +162,7 @@ oexBOOL CAlloc::Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT
 	// Delete memory
     os::CMem::Delete( pBuf );
 
-    return oexTRUE;
+    return 0;
 }
 
 oexPVOID CAlloc::ReAlloc( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex )

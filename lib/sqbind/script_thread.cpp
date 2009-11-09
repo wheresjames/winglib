@@ -153,8 +153,10 @@ oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 	return 0;
 }
 
-oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply )
+oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent )
 {
+	oex::oexBOOL bRet = oex::oexTRUE;
+
 	// Property bag set
 	if ( sMsg == oexT( "pb_set" ) )
 	{
@@ -189,11 +191,11 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 	// Just a path check?
 	else if ( sMsg == oexT( "is_path" ) )
-		return oex::oexTRUE;
+		bRet = oex::oexTRUE;
 
 	// Just post it to the queue if not our thread
 	else if ( GetOwnerThreadId() != oexGetCurThreadId() )
-		return Msg( stdString(), sMsg, &mapParams, pReply );
+		return Msg( stdString(), sMsg, &mapParams, pReply, pReplyEvent );
 
 	else if ( sMsg == oexT( "spawn" ) )
 		OnSpawn( mapParams, pReply );
@@ -219,12 +221,16 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 		RequestQuit();
 
 	else
-		return oex::oexFALSE;
+		bRet = oex::oexFALSE;
 
-	return oex::oexTRUE;
+	// Signal message has been processed
+	if ( pReplyEvent )
+		pReplyEvent->Signal();
+
+	return bRet;
 }
 
-oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply )
+oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent )
 {
 	stdString sPath = x_sPath;
 
@@ -251,7 +257,7 @@ oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMs
 
 	// Is it for us?
 	if ( !sPath.length() || sPath == _T( "." ) || sPath == m_sName )
-		return ExecuteMsg( sMsg, mapParams, pReply );
+		return ExecuteMsg( sMsg, mapParams, pReply, pReplyEvent );
 
 	// All the way to the top?
 	else if ( sPath[ 0 ] == oexT( '/' ) || sPath[ 0 ] == oexT( '\\' ) )
@@ -259,7 +265,7 @@ oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMs
 		// Route to parent if any
 		if ( m_pParentScript )
 //			return m_pParentScript->Msg( sPath, sMsg, &mapParams, pReply );
-			return m_pParentScript->ProcessMsg( sPath, sMsg, mapParams, pReply );
+			return m_pParentScript->ProcessMsg( sPath, sMsg, mapParams, pReply, pReplyEvent );
 
 		// Shave off parent sep
 		while ( sPath[ 0 ] == oexT( '/' )
@@ -269,7 +275,7 @@ oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMs
 
 		// Is it ours?
 		if ( !sPath.length() )
-			return ExecuteMsg( sMsg, mapParams, pReply );
+			return ExecuteMsg( sMsg, mapParams, pReply, pReplyEvent );
 
 	} // end if
 
@@ -293,7 +299,7 @@ oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMs
 			return oex::oexFALSE;
 
 //		return m_pParentScript->Msg( sPath, sMsg, &mapParams, pReply );
-		return m_pParentScript->ProcessMsg( sPath, sMsg, mapParams, pReply );
+		return m_pParentScript->ProcessMsg( sPath, sMsg, mapParams, pReply, pReplyEvent );
 
 	} // end if
 
@@ -301,7 +307,7 @@ oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMs
 	t_ScriptList::iterator it = m_lstScript.find( sToken );
 	if ( m_lstScript.end() != it && it->second )
 //		return it->second->Msg( sPath, sMsg, &mapParams, pReply );
-		return it->second->ProcessMsg( sPath, sMsg, mapParams, pReply );
+		return it->second->ProcessMsg( sPath, sMsg, mapParams, pReply, pReplyEvent );
 
 	return oex::oexFALSE;
 }
@@ -385,6 +391,7 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 
 		// Let the script know it's name
 		pSt->SetName( sName );
+		pSt->SetScriptName( sName );
 
 		// Set us as the parent
 		pSt->SetParentScript( this );

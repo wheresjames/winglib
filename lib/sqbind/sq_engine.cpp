@@ -87,6 +87,9 @@ void CSqEngineExport::terminate( int nExitCode )
 {   oex::os::CSys::Exit( nExitCode );
 }
 
+stdString CSqEngineExport::get_name()
+{	return m_sScriptName; }
+
 stdString CSqEngineExport::path( const stdString &sPath )
 {   return OnPath( sPath ); }
 
@@ -688,6 +691,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, compress )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, uncompress )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_resource )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_name )
 SQBIND_REGISTER_CLASS_END()
 
 void CSqEngine::SetExportFunction( PFN_SQBIND_Export_Symbols fn, sqbind::SSqAllocator *pa )

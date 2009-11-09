@@ -71,13 +71,14 @@ public:
 		\param [in]     sMsg        -   Command
 		\param [in]     mapParams   -   Parameters
 		\param [out]    pmapReply   -   Receives reply
+		\param [out]	pReplyEvent	-	Signaled when reply is processed
 		\param [in]		uTimeout	-	Maximum amount of time to wait
 										for a reply.
 
 		If pmapReply is not NULL, the function waits for a reply
 		from the thread.
 	*/
-	oex::oexBOOL Msg( stdString sPath, stdString sMsg, CSqMap *pmapParams = oexNULL, stdString *pReply = oexNULL, oex::oexUINT uTimeout = eLockTimeout );
+	oex::oexBOOL Msg( stdString sPath, stdString sMsg, CSqMap *pmapParams = oexNULL, stdString *pReply = oexNULL, oexEvent *pReplyEvent = oexNULL, oex::oexUINT uTimeout = eLockTimeout );
 
 public:
 
@@ -88,7 +89,7 @@ public:
 		SMsg();
 
 		/// Initializer
-		SMsg( const stdString x_sPath, const stdString x_sMsg, CSqMap *x_pmapParams, oexEvent x_evReply, stdString *x_pReply );
+		SMsg( const stdString x_sPath, const stdString x_sMsg, CSqMap *x_pmapParams, oexEvent *x_evReply, stdString *x_pReply );
 
 		// Copy constructor
 		SMsg( const SMsg &x_rMsg );
@@ -103,7 +104,7 @@ public:
 		stdString									sParams;
 
 		/// Reply event
-		oex::os::CResource							evReply;
+		oexEvent									evReply;
 
 		/// Reply object
 		stdString 									*pReply;
@@ -111,7 +112,7 @@ public:
 	};
 
 	/// Process a single message from the queue
-	virtual oex::oexBOOL ProcessMsg( const stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply );
+	virtual oex::oexBOOL ProcessMsg( const stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent );
 
 protected:
 

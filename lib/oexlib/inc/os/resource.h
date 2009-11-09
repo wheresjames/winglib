@@ -110,40 +110,40 @@ public:
 public:
 
 	/// Constructor
-	CResource( oexBOOL x_bRelease = oexFALSE )
-	{	m_bRelease = x_bRelease;
-		m_hHandle = cInvalid();
+	CResource()
+	{	m_hHandle = cInvalid();
 		m_eType = eRtInvalid;
 	}
 
 	/// Destructor
 	virtual ~CResource()
 	{
-		if ( m_bRelease )
-			Destroy();
+		Destroy();
 	}
 
 	/// Copy constructor
 	CResource( oexCONST CResource &x_r )
-	{	m_bRelease = oexFALSE;
-		m_hHandle = x_r.m_hHandle;
-		m_eType = x_r.m_eType;
+	{	if ( 1 < x_r.AddRef() )
+		{	x_r.AddRef();
+			m_hHandle = x_r.m_hHandle;
+			m_eType = x_r.m_eType;
+		} // end if
 	}
+	
 
-	// Assignment operator
+	/// Assignment operator
 	CResource& operator =( oexCONST CResource &x_r )
-	{	m_bRelease = oexFALSE;
-		m_hHandle = x_r.m_hHandle;
-		m_eType = x_r.m_eType;
+	{	if ( 1 < x_r.AddRef() )
+		{	m_hHandle = x_r.m_hHandle;
+			m_eType = x_r.m_eType;
+		} // end if
 		return *this;
 	}
 
-	/// Enables auto release
-	CResource& EnableAutoRelease()
-	{	m_bRelease = oexTRUE;
-		return *this;
-	}
+	/// Adds a reference count to the objcet
+	oexINT AddRef() const;
 
+/*
 	// Disables auto release
 	CResource* Detach( CResource *pRes = oexNULL )
 	{
@@ -161,6 +161,7 @@ public:
 
 		return pRes;
 	}
+*/
 
 	//==============================================================
 	// Destroy()
@@ -462,9 +463,6 @@ private:
 
 	/// Resource type
 	E_RESOURCE_TYPE				m_eType;
-
-	/// Auto Release
-	oexBOOL						m_bRelease;
 };
 
 

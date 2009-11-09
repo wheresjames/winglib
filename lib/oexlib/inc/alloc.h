@@ -335,7 +335,7 @@ public:
     static oexPVOID Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex, oexBOOL x_bUseFullBlock = oexFALSE );
 
     /// Generic block free
-    static oexBOOL Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex );
+    static oexINT Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex );
 
     /// Resizes the buffer without reallocating if possible
     static oexPVOID ReAlloc( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex );
@@ -365,7 +365,7 @@ public:
 
     /// Generic delete
     template< typename T >
-        oexBOOL Delete( T* x_pPtr )
+        oexINT Delete( T* x_pPtr )
     {
         // Destruct object if needed
         if ( x_pPtr )
@@ -383,14 +383,14 @@ public:
         } // end if
 
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-        oexBOOL bRet = Free( x_pPtr, m_uLine, m_pFile, 2 );
+        oexINT nRef = Free( x_pPtr, m_uLine, m_pFile, 2 );
         m_pFile = oexNULL;
         m_uLine = 0;
 #else
-        oexBOOL bRet = Free( x_pPtr, 0, 0, 2 );
+        oexINT nRef = Free( x_pPtr, 0, 0, 2 );
 #endif
 
-        return bRet;
+        return nRef;
     }
 
     /// Generic resize

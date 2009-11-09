@@ -108,6 +108,9 @@ public:
 	/// Returns boot count
 	unsigned int ticks();
 
+	/// Returns the script name
+	stdString get_name();
+
 	/// Get child scripts
 	stdString get_children( const stdString &sPath );
 
@@ -280,6 +283,9 @@ protected:
 
 	/// Root path
 	stdString           m_sRoot;
+
+	/// Name of the script
+	stdString					m_sScriptName;
 
 };
 
@@ -997,9 +1003,6 @@ private:
 
 	/// Custom script include function
 	t_IncludeScript				m_fIncludeScript;
-
-	/// Name of the script
-	stdString					m_sScriptName;
 
 	/// Non-zero if exit function needs calling
 	BOOL						m_bCallExit;

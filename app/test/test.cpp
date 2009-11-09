@@ -2177,6 +2177,13 @@ oex::oexRESULT Test_Threads()
 {
 	oexEcho( oexT( "======== Threads..." ) );
 
+	{ // Test resource reference counting
+		oexEvent e1;
+		oexEvent e2( e1 );
+		oexEvent e3;
+		e3 = e2;
+	} // end scope
+
 	CMyThread t;
 
 	if ( !oexVERIFY( 0 == t.Start() ) )

@@ -43,6 +43,10 @@ class CLock : public os::CResource
 {
 public:
 
+	/// Copy constructor
+	CLock( const CLock &r ) : os::CResource( r ) { }
+	CLock& operator = ( const CLock &r ) { *(os::CResource*)this = r;  return *this; }
+
 	/// Default constructor
 	CLock( oexCSTR x_pName = oexNULL )
 	{	NewLock( x_pName ); }
@@ -241,6 +245,10 @@ class CEvent : public os::CResource
 {
 public:
 
+	/// Copy constructor
+	CEvent( const CEvent &r ) : CResource( r ) { }
+	CEvent& operator = ( const CEvent &r ) { *(os::CResource*)this = r; return *this; }
+
 	/// Default constructor
 	CEvent( oexCSTR x_pName = oexNULL )
 	{	NewEvent( x_pName ); }
@@ -259,6 +267,10 @@ public:
 class CSignal : public os::CResource
 {
 public:
+
+	/// Copy constructor
+	CSignal( const CSignal &r ) : os::CResource( r ), m_nosig( r.m_nosig ) { }
+	CSignal& operator = ( const CSignal &r ) { *(os::CResource*)this = r;  m_nosig = r.m_nosig; return *this; }
 
 	/// Default constructor
 	CSignal( oexCSTR x_pName = oexNULL )
