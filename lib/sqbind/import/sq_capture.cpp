@@ -189,11 +189,11 @@ stdString CSqCapture::Capture( const stdString &sEncode )
 					case oexFOURCC( 'U', 'Y', 'V', 'Y' ) :
 					{
 
-oexEcho( "Creating image" );
+//oexEcho( "Creating image" );
 
 						if ( m_img.Create( m_cap.GetWidth(), m_cap.GetHeight(), 24 ) )
 						{
-oexEcho( "Starting conversion" );
+//oexEcho( "Starting conversion" );
 
 							// YUYV conversion
 							oex::CDib::YUYV_RGB( m_cap.GetWidth(), m_cap.GetHeight(),
@@ -202,7 +202,7 @@ oexEcho( "Starting conversion" );
 							oex::oexPBYTE pEnc;
 							oex::oexINT nEnc;
 
-oexEcho( "Starting image encoding" );
+//oexEcho( "Starting image encoding" );
 							if ( 0 < m_img.Encode( &pEnc, &nEnc, oexT( "JPG" ) ) )
 							{	oex::CStr s = oexMbToStr( oex::CStr8( (char*)pEnc, nEnc ) );
 								ret.assign( s.Ptr(), s.Length() );

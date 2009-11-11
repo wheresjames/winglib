@@ -236,7 +236,7 @@ public:
 	/// Proper ioctl call
 	static int IoCtl( int fd, int request, void * arg )
 //	{	int nErr; while ( -1 == ( nErr = ioctl( fd, request, arg ) ) && EINTR == errno ); return nErr; }
-	{	int nErr; return oexDO( nErr = ioctl( fd, request, arg ), EINTR == nErr, nErr ); }
+	{	int nErr; return oexDO( nErr = ioctl( fd, request, arg ), EINTR == nErr, nErr ); return nErr; }
 
 public:
 
@@ -475,6 +475,8 @@ public:
 //			if ( !i )
 //				m_nBufferSize = buf.length;
 
+oexSHOW( buf.length );
+
 			// Allocate shared memory
 			m_image[ i ].PlainShare( oexTRUE );
 			m_image[ i ].SetOffset( buf.m.offset );
@@ -564,6 +566,9 @@ public:
 
 	virtual oexBOOL StartCapture()
 	{
+		if ( 0 > m_nFd )
+			return oexFALSE;
+
 		for( oexINT i = 0; i < eMaxBuffers; i++ )
 		{
 			v4l2_buffer buf;
@@ -590,6 +595,9 @@ public:
 	/// Stops video capture
 	virtual oexBOOL StopCapture()
 	{
+		if ( 0 > m_nFd )
+			return oexFALSE;
+
 		int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if ( -1 == IoCtl ( m_nFd, VIDIOC_STREAMOFF, &type ) )
 		{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_STREAMOFF : Failed : m_nFd = %u" ), m_nFd ) );
@@ -602,12 +610,16 @@ public:
 	/// Waits for a new frame of video
 	oexBOOL WaitForFrame( oexUINT x_uTimeout = 0 )
 	{
-//		os::CSys::printf( "calling VIDIOC_DQBUF...\n" );
+		if ( 0 > m_nFd )
+			return oexFALSE;
+
+//		oexEcho( "calling VIDIOC_DQBUF..." );
 
 		v4l2_buffer buf;
 		oexZeroMemory( &buf, sizeof( buf ) );
 		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory = V4L2_MEMORY_MMAP;
+		buf.index = 0;
 
 		errno = 0;
 		if ( -1 == IoCtl( m_nFd, VIDIOC_DQBUF, &buf ) || 0 > buf.index || eMaxBuffers <= buf.index )
@@ -617,7 +629,7 @@ public:
 
 //		os::CSys::Sleep( 3000 );
 
-//		os::CSys::printf( "Active Buffer is %d\n", buf.index );
+//		oexPrintf( "Active Buffer is %d\n", buf.index );
 
 		m_nActiveBuf = buf.index;
 		m_nBufferSize = buf.bytesused;

@@ -33,7 +33,11 @@ ifeq ($(PLATFORM),windows)
 		PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows/gcc $(PRJ_INCS) zlib
 	endif
 else
-	PRJ_INCS := winglib/dep/etc/ffmpeg/inc/posix $(PRJ_INCS) zlib
+	ifeq ($(PROC),arm)
+		PRJ_INCS := winglib/dep/etc/ffmpeg/inc/arm $(PRJ_INCS) zlib
+	else
+		PRJ_INCS := winglib/dep/etc/ffmpeg/inc/posix $(PRJ_INCS) zlib
+	endif
 endif
 
 CFG_CFLAGS := $(CFG_CFLAGS) -ffast-math -fomit-frame-pointer
@@ -56,6 +60,9 @@ export LOC_TAG := libavformat
 LOC_CXX_libavformat := c
 LOC_SRC_libavformat := $(CFG_LIBROOT)/ffmpeg/libavformat
 LOC_EXC_libavformat := avisynth libnut matroskadec mov
+#ifeq ($(PROC),arm)
+#	LOC_EXC_libavformat := $(LOC_EXC_libavformat) ipmovie mpegts sierravmd
+#endif
 include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := libswscale
@@ -80,6 +87,9 @@ LOC_EXC_libavcodec := acelp_filters \
 					  aacenc aacpsy beosthread g729dec imgconvert_template motion_est_template \
 					  mpegvideo_xvmc os2thread svq3 vdpau
 
+#ifeq ($(PROC),arm)
+#	LOC_EXC_libavcodec := $(LOC_EXC_libavcodec) dnxhdenc dsputil gif sp5xdec
+#endif
 ifeq ($(PLATFORM),windows)
 	LOC_EXC_libavcodec := $(LOC_EXC_libavcodec) pthread
 else
@@ -110,7 +120,9 @@ ifeq ($(PROC),arm)
 	export LOC_TAG := arm
 	LOC_CXX_arm := c
 	LOC_SRC_arm := $(CFG_LIBROOT)/ffmpeg/libavcodec/arm
-	LOC_EXC_arm := 
+	LOC_EXC_arm := dsputil_iwmmxt_rnd_template \
+				   \
+				   dsputil_iwmmxt mpegvideo_iwmmxt
 	include $(PRJ_LIBROOT)/build.mk
 endif
 

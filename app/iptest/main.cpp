@@ -67,9 +67,9 @@ int main(int argc, char* argv[])
 			pSockets[ nCurSocket ].Destroy();
 
     	if ( !pSockets[ nCurSocket ].Connect( pAddress, nPort ) )
-    		oexPrintf( oexT( "x" ) );
+    		oexPrintf( oexT( "x" ) ), os::CSys::Flush_stdout();
     	else
-    		oexPrintf( oexT( "." ) );
+    		oexPrintf( oexT( "." ) ), os::CSys::Flush_stdout();
 
 		if ( pWrite )
 			pSockets[ nCurSocket ].Write( pWrite );

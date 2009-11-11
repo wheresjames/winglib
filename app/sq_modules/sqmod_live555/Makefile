@@ -9,7 +9,7 @@ PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus ffmpeg \
 			live555/liveMedia/include live555/UsageEnvironment/include \
 			live555/BasicUsageEnvironment/include live555/groupsock/include
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage ffmpeg jpeg png tiff zlib live555
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib live555
 PRJ_DEFS := 
 PRJ_LIBP :=
 PRJ_OSLB :=

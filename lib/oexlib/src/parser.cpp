@@ -306,8 +306,12 @@ TPropertyBag< TStr< CParser::T_tc > > CParser::ParseCommandLine( oexINT x_nNum, 
 		return TPropertyBag< TStr< T_tc > >();
 
 	TPropertyBag< TStr< T_tc > > pb;
+	
+// +++ ???
+#if !defined( OEX_ARM )
 	for ( int i = 1, x = 0; i < x_nNum; i++ )
 		x = ParseCommandLineItem( x, oexStrWToStr( x_pStr[ i ] ), pb );
+#endif
 
 	return pb;
 }
