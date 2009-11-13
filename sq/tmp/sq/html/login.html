@@ -1,0 +1,62 @@
+
+
+<script type="text/javascript" src="jscript/spinTheWheel/jQuery.spinTheWheel.js"></script>
+
+<style>
+
+	.aSpinner
+	{
+		background-image:url('jscript/spinTheWheel/overlay_vertical.png');
+		width:125px;
+		height:227px;
+	}
+
+	.aSpinner div
+	{
+		font-family:arial,verdana,sans-serif;
+		color:#666666;
+		font-size:20px;
+		font-weight:bold;
+		width:125px;
+		text-align:center;
+	}
+
+</style>
+
+<script type="text/javascript">
+
+	$(document).ready(function() {
+		var alist = [ "Bob", "Cindy", "Ethan", "George", "Helen", "Jack", "Karen", "Luke", "Paula", "Tina", "Zack" ];
+		$('.aSpinner').spinTheWheel({list:alist, cursor:'ns-resize', horizontal:false });
+	});
+
+</script>
+
+<table align='center' valign='middle'>
+	<tr>
+		<td valign='middle'>
+			<div class="aSpinner"></div><br/>
+		</td>
+		<td valign='middle'>
+			<span id="inlineKeypad"></span>
+		</td>
+	</tr>
+</table>
+
+<link href="jscript/jquery.keypad/jquery.keypad.css" type="text/css" rel="stylesheet" />
+<script type="text/javascript" src="jscript/jquery.keypad/jquery.keypad.min.js"></script>
+
+<script type="text/javascript">
+
+	$('#inlineKeypad').keypad({onClose: useValue, prompt: '',
+		closeText: 'Done', closeStatus: 'Use this value'});
+
+	function useValue(value) {
+		alert('The entered value is ' + value);
+	}
+
+</script>
+
+<br>
+
+
