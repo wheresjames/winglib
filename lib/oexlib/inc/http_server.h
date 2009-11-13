@@ -141,6 +141,7 @@ public:
 		m_nPort = x_nPort;
 		m_pData = x_pData;
 		m_fnOnServerEvent = fnOnServerEvent;
+		m_sServerId = oexStrToMb( oexGuidToString() );
 
 		return 0 == CThread::Start();
 	}
@@ -230,6 +231,9 @@ public:
 					// Set default session timeout
 					it->session.SetSessionTimeout( m_uSessionTimeout );
 
+					// Let the session know the server id
+					it->session.SetServerId( m_sServerId );
+
 					// Enable sessions?
 					if ( m_bEnableSessions )
 						it->session.SetSessionObject( &m_pbSession, &m_lockSession );
@@ -270,7 +274,14 @@ public:
 				for ( CPropertyBag8::iterator it; m_pbSession.List().Next( it ); )
 					if ( !it->IsKey( "_ts" )
 						 || ( it.Obj()[ "_ts" ].ToULong() + m_uSessionTimeout ) < ts )
+					{
+//						oexEcho( oexMks( oexT( "Erasing session : " ),
+//										 ts, oexT( " : " ),
+//										 m_uSessionTimeout, oexNL,
+//										 it->PrintR() ).Ptr() );
 						it = m_pbSession.List().Erase( it );
+
+					} // end if
 
 			} // end if
 
@@ -356,6 +367,9 @@ private:
 
 	/// Enable sessions
 	oexBOOL						m_bEnableSessions;
+
+	/// Unique server id
+	CStr8						m_sServerId;
 
 	/// Stores session data
 	CPropertyBag8				m_pbSession;

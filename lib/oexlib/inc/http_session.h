@@ -164,6 +164,8 @@ public:
 #endif
 		m_fnCallback = oexNULL;
 		m_pData = oexNULL;
+		m_bNewSession = oexTRUE;
+		m_uSessionTimeout = 60 * 60;
     }
 
     /// Destructor
@@ -287,7 +289,7 @@ public:
 
 	CStr8 CreateCookie( CStr8 params )
 	{	CPropertyBag8 pb;
-		pb[ "OEXSID" ] = params;
+		pb[ m_sCookieId ] = params;
 		return CParser::Serialize( pb ) += "; path=/";
 	}
 
@@ -295,8 +297,8 @@ public:
 	{	CStrList8 items = CParser::Split( m_pbRxHeaders[ "Cookie" ].ToString(), "; " );
 		for ( CStrList8::iterator it; items.Next( it ); )
 		{	CPropertyBag8 data = CParser::Deserialize( it.Obj() );
-			if ( data.IsKey( "OEXSID" ) && data[ "OEXSID" ].ToString().Length() )
-				return data[ "OEXSID" ].ToString();
+			if ( data.IsKey( m_sCookieId ) && data[ m_sCookieId ].ToString().Length() )
+				return data[ m_sCookieId ].ToString();
 		} // end for
 		return CStr8();
 	}
@@ -839,9 +841,13 @@ public:
 		return fLog.Write( CommonLog() );
 	}
 
-	/// Set sessino object
+	/// Set session object
+	void SetServerId( CStr8 sSid )
+	{	m_sServerId = sSid; }
+
+	/// Set session object
 	void SetSessionObject( CPropertyBag8 *pPb, CLock *pLock )
-	{	m_ppbSession = pPb; m_plockSession = pLock; }
+	{	m_sCookieId = oexT( "OEXSID_" ); m_sCookieId << m_sServerId; m_ppbSession = pPb; m_plockSession = pLock; }
 
 	/// Returns non-zero if this is a new session
 	oexBOOL IsNewSession()
@@ -906,6 +912,12 @@ private:
 
 	/// Non-zero to enable compression
 	oexBOOL						m_bEnableCompression;
+
+	/// Unique server id
+	CStr8						m_sServerId;
+
+	/// Session cookie id
+	CStr8						m_sCookieId;
 
 	/// Stores session data
 	CPropertyBag8				*m_ppbSession;

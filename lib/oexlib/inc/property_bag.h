@@ -552,11 +552,14 @@ public:
 
 		\see
 	*/
-	T_L PrintR( TPropertyBag< T_L, T_R > &pb, oexCONST T_L &key, oexUINT uDepth = 0 )
+	template < typename T_CH >
+		T_L PrintR( TPropertyBag< TStr< T_CH >, T_R > &pb, oexCONST TStr< T_CH > &key, oexUINT uDepth = 0 )
 	{
+		typedef TStr< T_CH > T_L;
+
 		T_L tabs;
 		for ( oexUINT t = 0; t < uDepth; t++ )
-			tabs << oexTT( T_L, "  " );
+			tabs << oexTT( T_CH, "  " );
 		uDepth++;
 
 		T_L str;
@@ -564,28 +567,28 @@ public:
 		{
 			if ( key.Length() )
 			{
-				str << tabs << oexTT( T_L, "\'" ) << key << oexTT( T_L, "\'" ) << oexTT( T_L, " = " );
+				str << tabs << oexTT( T_CH, "\'" ) << key << oexTT( T_CH, "\'" ) << oexTT( T_CH, " = " );
 
 				if ( pb.IsDefaultValue() )
-					str << oexTT( T_L, "\'" ) << pb.ToString() << oexTT( T_L, "\'" );
+					str << oexTT( T_CH, "\'" ) << pb.ToString() << oexTT( T_CH, "\'" );
 
 				str << oexNL;
 
-				tabs << oexTT( T_L, "  " ); uDepth++;
+				tabs << oexTT( T_CH, "  " ); uDepth++;
 
 			} // end if
 
-			str << tabs << oexTT( T_L, "Array()" ) << oexNL << tabs << oexTT( T_L, "{" ) << oexNL;
+			str << tabs << oexTT( T_CH, "Array()" ) << oexNL << tabs << oexTT( T_CH, "{" ) << oexNL;
 
 			for ( iterator it; pb.List().Next( it ); )
 				str << PrintR( it.Obj(), it.Node()->key, uDepth );
 
-			str << tabs << oexTT( T_L, "}" ) << oexNL;
+			str << tabs << oexTT( T_CH, "}" ) << oexNL;
 
 		} // end if
 
 		else
-			str << tabs << oexTT( T_L, "\'" ) << key << oexTT( T_L, "\'" ) << oexTT( T_L, " = " ) << oexTT( T_L, "\'" ) << pb.ToString() << oexTT( T_L, "\'" ) << oexNL;
+			str << tabs << oexTT( T_CH, "\'" ) << key << oexTT( T_CH, "\'" ) << oexTT( T_CH, " = " ) << oexTT( T_CH, "\'" ) << pb.ToString() << oexTT( T_CH, "\'" ) << oexNL;
 
 		return str;
 	}

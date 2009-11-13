@@ -19,7 +19,7 @@ function OnProcessRequest( params )
 
 	local mParams = CSqMulti();
 	mParams.deserialize( params );
-	_self.echo( mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str() 
+	_self.echo( mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str()
 				+ " : " + mParams[ "REQUEST" ][ "REQUEST_STRING" ].str() );
 
 	local mReply = CSqMap();
@@ -66,8 +66,8 @@ function OnProcessRequest( params )
 		return mReply.serialize();
 	} // end if
 	local content = "<html>\r\n"
-		+ "<!--Remote:" + mParams[ "REQUEST" ][ "REMOTE_ADDR" ] + "-->\r\n"
-		+ "<!--Local:" + mParams[ "REQUEST" ][ "SERVER_ADDR" ] + "-->\r\n"
+		+ "<!--Remote:" + mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str() + "-->\r\n"
+		+ "<!--Local:" + mParams[ "REQUEST" ][ "SERVER_ADDR" ].str() + "-->\r\n"
 		+ @"
 			<body bgcolor='" + _cfg( "col_bg" ) + "' text='" + _cfg( "col_fg" ) + "' link='" + _cfg( "col_link" ) + "' vlink='" + _cfg( "col_link" ) + @"'>
 		"
