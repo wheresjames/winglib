@@ -87,11 +87,29 @@ namespace OEX_NAMESPACE
 			// Lock info
 			oexINT								nCount;
 
+			// File info
+			CBaseFile::t_HFILE					hFile;
+
 			// Threads waiting for lock
 			oexINT								nWaiting;
 		};
 	};
 };
+
+#define oexWAIT_UNTIL( to, st )									\
+( { oexBOOL bRet = oexFALSE;										\
+	if ( to )														\
+	{	oexUINT uTimeout = (oexUINT)to * 1000;						\
+		while ( uTimeout && !( bRet = ( st ) ) )					\
+		{	oexUINT uWait = uTimeout;								\
+			if ( uWait > CResource::eWaitResolution )				\
+				uWait = CResource::eWaitResolution;					\
+			uTimeout -= uWait;										\
+			oexMicroSleep( uWait );									\
+		}															\
+	} else bRet = ( st );											\
+	bRet;															\
+} )
 
 static SResourceInfo* CreateRi()
 {
@@ -100,6 +118,10 @@ static SResourceInfo* CreateRi()
 	{	oexERROR( ENOMEM, oexT( "Out of memory" ) );
 		return oexNULL;
 	} // end if
+
+	// Add a reference count for deletion
+	if ( 2 != CAlloc::AddRef( pRi ) )
+		return oexNULL;
 
 	pRi->uOwner = 0;
 	pRi->uLastOwner = 0;
@@ -114,21 +136,135 @@ static SResourceInfo* CreateRi()
 	return pRi;
 }
 
-#define oexWAIT_UNTIL( to, st )									\
-( { oexBOOL bRet = oexFALSE;										\
-	if ( to )														\
-	{	oexUINT uTimeout = (oexUINT)to * 1000;						\
-		while ( uTimeout && !( bRet = ( st ) ) )					\
-		{	oexUINT uWait = uTimeout;								\
-			if ( uWait > eWaitResolution )							\
-				uWait = eWaitResolution;							\
-			uTimeout -= uWait;										\
-			oexMicroSleep( uWait );									\
-		}															\
-	} else bRet = ( st );											\
-	bRet;															\
-} )
+static oexINT FreeRi( SResourceInfo* x_pRi, oexINT x_eType, oexUINT x_uTimeout, oexBOOL x_bForce )
+{
+	// Any resources to release?
+	if ( CResource::cInvalid() == x_pRi || CResource::eRtInvalid == x_eType )
+		return -1;
 
+	// Get pointer to resource information
+	if ( !oexCHECK_PTR( x_pRi ) )
+		return -1;
+
+	// Check for other references
+	oexINT nRef;
+	if ( 1 != ( nRef = OexAllocDelete( x_pRi ) ) )
+		return nRef;
+
+	// Error code
+	oexINT nErr = 0;
+
+	// Execute proper release function if valid handle
+	switch( x_eType )
+	{
+		case CResource::eRtInvalid :
+			break;
+
+		case CResource::eRtFile :
+			os::CBaseFile::Close( x_pRi->hFile, &nErr );
+			break;
+
+		case CResource::eRtSocket :
+			break;
+
+		case CResource::eRtThread :
+		{
+			// Usually the creator will be the destructor
+			if ( x_pRi->uOwner != oexGetCurThreadId() )
+				oexWARNING( 0, oexT( "Thread not being destroyed by owner!" ) );
+
+			// Wait for thread to exit
+			if ( x_pRi->cSync.Wait( x_uTimeout ) && !oexWAIT_UNTIL( x_uTimeout, pthread_kill( x_pRi->hThread, 0 ) ))
+			{
+				// iii  This should not happen, don't ignore the problem,
+				//      figure out how to shut this thread down properly!
+				oexWARNING( nErr, oexT( "!! Terminating thread !!" ) );
+
+				// Kill the thread
+				if ( x_bForce )
+					if ( ( nErr = pthread_cancel( x_pRi->hThread ) ) )
+						oexERROR( nErr, oexT( "pthread_cancel() failed" ) );
+
+			} // end if
+
+			// Attempt to join the thread
+			else if ( ( nErr = pthread_join( x_pRi->hThread, oexNULL ) ) )
+				oexERROR( nErr, oexT( "pthread_join() failed" ) );
+
+		} break;
+
+		case CResource::eRtMutex :
+
+			// Initiailze mutex object
+			if ( ( nErr = pthread_mutex_destroy( &x_pRi->hMutex ) ) )
+				oexERROR( nErr, oexT( "pthread_mutex_destroy() failed : Error releasing mutex object" ) );
+
+			break;
+
+		case CResource::eRtEvent :
+		{
+			// Release Lock
+			x_pRi->cSync.Destroy();
+
+			// Release condition object
+			if ( ( nErr = pthread_cond_destroy( &x_pRi->hCond ) ) )
+				oexERROR( nErr, oexT( "pthread_cond_destroy() failed : Error releasing pthread_cond object" ) );
+
+		} break;
+
+		case CResource::eRtLock :
+		{
+			// Release mutex object
+			x_pRi->cSync.Destroy();
+
+		} break;
+
+		default :
+			oexERROR( EINVAL, oexT( "Attempt to release unknown resource type" ) );
+			break;
+
+	} // end switch
+
+	// Drop the memory for real
+	OexAllocDelete( x_pRi );
+
+	return 0;
+}
+
+oexINT CResource::AddRef() const
+{
+	if ( CResource::cInvalid() == m_hHandle || !oexCHECK_PTR( m_hHandle ) )
+		return -1;
+	return CAlloc::AddRef( m_hHandle ) - 1;
+}
+
+oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
+{
+	// Ensure reasonable values
+	if ( CResource::cInvalid() == m_hHandle || CResource::eRtInvalid == m_eType )
+	{	m_hHandle = c_Invalid;
+		m_eType = eRtInvalid;
+		return -1;
+	} // end if
+
+	// Get destroy info
+	SResourceInfo* pRi = (SResourceInfo*)m_hHandle;
+	E_RESOURCE_TYPE eType = m_eType;
+
+	// Good practice and all...
+	m_hHandle = CResource::cInvalid();
+	m_eType = CResource::eRtInvalid;
+
+	// Free the resource
+	if ( 0 > FreeRi( pRi, eType, x_uTimeout, x_bForce ) )
+	{	oexERROR( 0, oexT( "Invalid resource info object pointer" ) );
+		return -1;
+	} // end if
+
+	return 0;
+}
+
+/*
 oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 {
 	// Any resources to release?
@@ -227,6 +363,7 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 
 	return nErr;
 }
+*/
 
 oexUINT CResource::GetOwner()
 {
@@ -249,7 +386,6 @@ oexRESULT CResource::NewEvent( oexCSTR x_sName, oexBOOL x_bManualReset, oexBOOL 
 	// Initialize member variables
 	m_eType = eRtEvent;
 	m_hHandle = (CResource::t_HANDLE)pRi;
-	EnableAutoRelease();
 
 	// Initialize structure
 	pRi->bManualReset = x_bManualReset;
@@ -288,7 +424,6 @@ oexRESULT CResource::NewMutex( oexCSTR x_sName, oexBOOL x_bInitialOwner )
 	// Save information
 	m_eType = eRtMutex;
 	m_hHandle = (CResource::t_HANDLE)pRi;
-	EnableAutoRelease();
 
 	// Initiailze mutex object
 	if ( oexINT nErr = pthread_mutex_init( &pRi->hMutex, 0 ) )
@@ -311,7 +446,6 @@ oexRESULT CResource::NewThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData )
 
 	m_eType = eRtThread;
 	m_hHandle = (CResource::t_HANDLE)pRi;
-	EnableAutoRelease();
 
 	// Save user data
 	pRi->pData = x_pData;
@@ -379,7 +513,6 @@ oexRESULT CResource::NewLock( oexCSTR x_sName, oexBOOL x_bInitialOwner )
 	// Initialize member variables
 	m_eType = eRtLock;
 	m_hHandle = (CResource::t_HANDLE)pRi;
-	EnableAutoRelease();
 
 	// Initialize structure
 	pRi->nCount = 0;
@@ -777,7 +910,7 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 			} // end if
 #else
 			if ( !( nErr = pthread_mutex_unlock( &pRi->hMutex ) ) )
-			{	pRi->uLastOwner - pRi->uOwner;
+			{	pRi->uLastOwner = pRi->uOwner;
 				pRi->uOwner = 0;
 			} // end if
 #endif

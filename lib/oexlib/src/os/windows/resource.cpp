@@ -175,9 +175,9 @@ static oexINT FreeRi( SResourceInfo* x_pRi, oexINT x_eType, oexUINT x_uTimeout, 
 
 oexINT CResource::AddRef() const
 {
-	if ( m_hHandle )
-		return CAlloc::AddRef( m_hHandle ) - 1;
-	return -1;
+	if ( CResource::cInvalid() == m_hHandle || !oexCHECK_PTR( m_hHandle ) )
+		return -1;
+	return CAlloc::AddRef( m_hHandle ) - 1;
 }
 
 
@@ -186,7 +186,7 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 	// Ensure reasonable values
 	if ( CResource::cInvalid() == m_hHandle || CResource::eRtInvalid == m_eType )
 	{	m_hHandle = c_Invalid;
-		m_eType = eRtInvalid; 
+		m_eType = eRtInvalid;
 		return -1;
 	} // end if
 
@@ -196,7 +196,7 @@ oexRESULT CResource::Destroy( oexUINT x_uTimeout, oexBOOL x_bForce )
 
 	// Good practice and all...
 	m_hHandle = c_Invalid;
-	m_eType = eRtInvalid; 
+	m_eType = eRtInvalid;
 
 	// Free the resource
 	if ( 0 > FreeRi( pRi, eType, x_uTimeout, x_bForce ) )

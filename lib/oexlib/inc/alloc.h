@@ -293,7 +293,7 @@ public:
     */
     static inline oexUINT AddRef( oexPVOID x_pBuf )
     {
-        // Return size of usable memory
+        // Add a count to the reference
         return ++( (SBlockHeader*)( (oexUCHAR*)x_pBuf
                                     - sizeof( SBlockHeader )
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
@@ -308,7 +308,7 @@ public:
     */
     static inline oexUINT DecRef( oexPVOID x_pBuf )
     {
-        // Return size of usable memory
+        // Decrease the reference count
         return --( (SBlockHeader*)( (oexUCHAR*)x_pBuf
                                     - sizeof( SBlockHeader )
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )

@@ -212,12 +212,26 @@ oex::oexRESULT TestAllocator()
     if ( !buf )
         return -1;
 
-    // Add a reference
-    oex::CAlloc::AddRef( buf );
+	if ( !oexVERIFY( 1 == oex::CAlloc::GetRefCount( buf ) ) )
+		return -2;
 
-    // Delete twice
-    OexAllocDelete( buf );
-    OexAllocDelete( buf );
+    // Add a reference
+    if ( !oexVERIFY( 2 == oex::CAlloc::AddRef( buf ) ) )
+    	return -3;
+
+	if ( !oexVERIFY( 2 == oex::CAlloc::GetRefCount( buf ) ) )
+		return -4;
+
+    // Delete once
+    if ( !oexVERIFY( 1 == OexAllocDelete( buf ) ) )
+    	return -5;
+
+	if ( !oexVERIFY( 1 == oex::CAlloc::GetRefCount( buf ) ) )
+		return -6;
+
+	// Delete twice
+    if ( !oexVERIFY( 0 == OexAllocDelete( buf ) ) )
+    	return -7;
 
     // Allocate single object
     CTestMonitor tm;

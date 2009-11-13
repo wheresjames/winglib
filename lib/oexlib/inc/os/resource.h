@@ -124,19 +124,27 @@ public:
 	/// Copy constructor
 	CResource( oexCONST CResource &x_r )
 	{	if ( 1 < x_r.AddRef() )
-		{	x_r.AddRef();
-			m_hHandle = x_r.m_hHandle;
-			m_eType = x_r.m_eType;
-		} // end if
-	}
-	
-
-	/// Assignment operator
-	CResource& operator =( oexCONST CResource &x_r )
-	{	if ( 1 < x_r.AddRef() )
 		{	m_hHandle = x_r.m_hHandle;
 			m_eType = x_r.m_eType;
 		} // end if
+		else
+		{	m_hHandle = cInvalid();
+			m_eType = eRtInvalid;
+		} // end else
+	}
+
+
+	/// Assignment operator
+	CResource& operator = ( oexCONST CResource &x_r )
+	{	Destroy();
+		if ( 1 < x_r.AddRef() )
+		{	m_hHandle = x_r.m_hHandle;
+			m_eType = x_r.m_eType;
+		} // end if
+		else
+		{	m_hHandle = cInvalid();
+			m_eType = eRtInvalid;
+		} // end else
 		return *this;
 	}
 
