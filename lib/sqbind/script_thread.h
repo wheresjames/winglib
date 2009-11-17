@@ -129,6 +129,12 @@ public:
 	void SetScriptName( sqbind::stdString sName )
 	{	m_cSqEngine.SetScriptName( sName.c_str() ); }
 
+	/// Return a pointer to the engine
+	virtual CSqEngine* GetEngine() { return &m_cSqEngine; }
+
+	/// Returns the queue for the specified path
+	virtual CSqMsgQueue* GetQueue( const stdString &x_sPath );
+
 private:
 
 	/// Set to non-zero when the thread should exit

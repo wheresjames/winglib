@@ -6,10 +6,12 @@
 #include "gdchart.h"
 #include "gd/gd.h"
 
+
+/// Unfortunately, the gdchart library is not thread safe
+oexLock CGdcChart::m_lock;
+
 CGdcChart::CGdcChart()
 {
-	GDC_generate_gif = FALSE;
-	GDC_hold_img = GDC_EXPOSE_IMAGE;
 }
 
 CGdcChart::~CGdcChart()
@@ -18,14 +20,10 @@ CGdcChart::~CGdcChart()
 
 #define MAX_DIMENSIONS		2
 
-sqbind::CSqMulti CGdcChart::GetChart( const sqbind::stdString &x_sType,
-									  const sqbind::stdString &x_sParams,
-									  const sqbind::stdString &x_sData )
+sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
+									  	 const sqbind::stdString &x_sParams,
+									  	 const sqbind::stdString &x_sData )
 {
-#if !defined( OEX_ENABLE_XIMAGE )
-	return sqbind::CSqMulti();
-#else
-
 	sqbind::CSqMulti mParams( x_sParams.c_str() );
 	sqbind::CSqMulti mData( x_sData.c_str() );
 
@@ -79,6 +77,15 @@ sqbind::CSqMulti CGdcChart::GetChart( const sqbind::stdString &x_sType,
 
 	} // end for
 
+	// Lock the gdchart library
+	oexAutoLock ll( m_lock );
+	if ( !ll.IsLocked() )
+		return oexT( "" );
+
+	// Settings
+	GDC_generate_gif = FALSE;
+	GDC_hold_img = GDC_EXPOSE_IMAGE;
+
 	// Defaults
 	GDC_BGColor = 0xffffff;
 	GDC_GridColor = 0x000000;
@@ -103,12 +110,37 @@ sqbind::CSqMulti CGdcChart::GetChart( const sqbind::stdString &x_sType,
 			   nDataPts, (char**)memLabels.Ptr(), nDimensions,
 			   memPts[ 0 ].Ptr(), memPts[ 1 ].Ptr() );
 
+	// Get the image buffer info
 	gdImagePtr graph = (gdImagePtr)GDC_image;
-	if ( !oexCHECK_PTR( graph ) )
+	if ( !oexCHECK_PTR( graph ) || !oexCHECK_PTR( graph->pixels ) )
 	{	oexERROR( 0, oexT( "Inavlid image pointer" ) );
 		return oexT( "" );
 	} // end if
 
+	// Image size
+	long lSize = graph->sx * graph->sy * 3;
+	if ( 0 >= lSize )
+	{	oexERROR( 0, oexMks( oexT( "Inavlid image size : " ), lSize ).Ptr() );
+		return oexT( "" );
+	} // end if
+
+	// Copy image data
+	m_img.MemCpy( (sqbind::CSqBinary::t_byte*)graph->pixels, lSize );
+
+	// Save image information
+	sqbind::CSqMulti mImg;
+	mImg[ oexT( "type" ) ].set( x_sType.c_str() );
+	mImg[ oexT( "width" ) ].set( oexMks( graph->sx ).Ptr() );
+	mImg[ oexT( "height" ) ].set( oexMks( graph->sy ).Ptr() );
+	mImg[ oexT( "size" ) ].set( oexMks( lSize ).Ptr() );
+
+	// Lose the image buffer
+	gdImageDestroy( graph );
+	GDC_image = NULL;
+
+	return mImg;
+
+/*
 	oex::CImage img;
 
 	if ( !img.Create( graph->sx, graph->sy ) )
@@ -153,20 +185,20 @@ sqbind::CSqMulti CGdcChart::GetChart( const sqbind::stdString &x_sType,
 	mImg[ oexT( "img" ) ].set( sqbind::stdString().assign( sImg.Ptr(), sImg.Length() ) );
 
 	return mImg;
-#endif
+*/
 }
 
 int CGdcChart::SaveChart(	const sqbind::stdString &x_sFile,
 							const sqbind::stdString &x_sParams,
 							const sqbind::stdString &x_sData )
 {
-	// Get the chart
-	sqbind::CSqMulti mChart = GetChart( x_sFile, x_sParams, x_sData );
-	if ( !mChart.isset( oexT( "img" ) ) )
+	// Create the chart
+	sqbind::CSqMulti mChart = CreateChart( x_sFile, x_sParams, x_sData );
+	if ( !m_img.getUsed() )
 		return -10;
 
 	// Save image to disk
-	oexFilePutContentsLen( x_sFile.c_str(), mChart[ oexT( "img" ) ].str().c_str(), mChart[ oexT( "img" ) ].str().length() );
+	oexFilePutContentsLen( x_sFile.c_str(), m_img.Ptr(), m_img.getUsed() );
 
 	return 0;
 }

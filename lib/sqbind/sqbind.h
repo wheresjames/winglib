@@ -107,6 +107,9 @@ namespace sqbind
 	*/
 	oex::oexRESULT SQBIND_SetAllocator( SSqAllocator *x_pAllocator );
 
+	// Lot's of objects need pointers to this class
+	class CSqEngine;
+
 	#include "module_manager.h"
 	#include "msg_queue.h"
 	#include "sq_engine.h"

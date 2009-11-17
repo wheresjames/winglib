@@ -470,3 +470,66 @@ void CScriptThread::OnMsg( CSqMap &mapParams, stdString *pReply )
 		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute4" ) ].c_str(), mapParams[ oexT( "p1" ) ], mapParams[ oexT( "p2" ) ], mapParams[ oexT( "p3" ) ], mapParams[ oexT( "p4" ) ] );
 }
 
+CSqMsgQueue* CScriptThread::GetQueue( const stdString &x_sPath )
+{
+	stdString sPath = x_sPath.c_str();
+
+	// Us?
+	if ( !sPath.length() || sPath == oexT( "." ) || sPath == m_sName )
+		return this;
+
+	// Can't get remote objects
+	int pos = sPath.find_first_of( oexT( ":" ), -1 );
+	if ( 0 <= pos )
+		return oexNULL;
+
+	// All the way to the top?
+	else if ( sPath[ 0 ] == oexT( '/' ) || sPath[ 0 ] == oexT( '\\' ) )
+	{
+		// Route to parent if any
+		if ( m_pParentScript )
+			return m_pParentScript->GetQueue( sPath );
+
+		// Shave off parent sep
+		while ( sPath[ 0 ] == oexT( '/' )
+				|| sPath[ 0 ] == oexT( '\\' )
+				|| sPath[ 0 ] == oexT( '.' ) )
+			sPath = sPath.substr( 1 );
+
+		// Is it ours?
+		if ( !sPath.length() )
+			return this;
+
+	} // end if
+
+	// Find path separator
+	stdString sToken;
+	stdString::size_type nPos = sPath.find_first_of( oexT( '\\' ) );
+	if ( stdString::npos == nPos ) nPos = sPath.find_first_of( oexT( '/' ) );
+	if ( stdString::npos != nPos )
+	{	sToken = sPath.substr( 0, nPos );
+		sPath = sPath.substr( nPos + 1 );
+	} // end if
+	else
+	{   sToken = sPath;
+		sPath = oexT( "" );
+	} // end if
+
+	// Is it going up to the parent?
+	if ( sToken == oexT( ".." ) )
+	{
+		if ( !m_pParentScript )
+			return oex::oexFALSE;
+
+		return m_pParentScript->GetQueue( sPath );
+
+	} // end if
+
+	// Route to child
+	t_ScriptList::iterator it = m_lstScript.find( sToken );
+	if ( m_lstScript.end() != it && it->second )
+		return it->second->GetQueue( sPath );
+
+	return oexNULL;
+}
+

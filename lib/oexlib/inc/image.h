@@ -989,6 +989,17 @@ public:
 	*/
 	oexINT GetEncBufferSize() { return m_nMem; }
 
+	// Copies raw data into image
+	/**
+		\return Zero if failure, or number of bytes copied
+	*/
+	oexINT CopyBits( oexPVOID x_buf, oexINT x_nSize );
+
+	// Copies raw data from image
+	/**
+		\return Zero if failure, or number of bytes copied
+	*/
+	oexINT GetBits( oexPVOID x_buf, oexINT x_nSize );
 
 	//==============================================================
 	// CreateHBITMAP()

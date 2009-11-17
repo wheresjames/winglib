@@ -131,6 +131,13 @@ public:
 	/// Server callback
 	typedef oexINT (*PFN_Callback)( oexPVOID x_pData, THttpSession< T_PORT > *x_pSession );
 
+	/// Byte type
+	typedef oex::oexBYTE t_byte;
+
+	/// Buffer type
+	typedef oex::TMem< t_byte > t_buffer;
+
+
 public:
 
     /// Default constructor
@@ -149,6 +156,7 @@ public:
 		m_pData = oexNULL;
 		m_bNewSession = oexTRUE;
 		m_uSessionTimeout = 60 * 60;
+		m_uBufSize = 0;
     }
 
     THttpSession( T_PORT *x_pPort )
@@ -166,6 +174,7 @@ public:
 		m_pData = oexNULL;
 		m_bNewSession = oexTRUE;
 		m_uSessionTimeout = 60 * 60;
+		m_uBufSize = 0;
     }
 
     /// Destructor
@@ -626,6 +635,10 @@ public:
 		if ( !m_sContent.Length() && m_sFile.Length() )
 			return SendFile( m_sFile.Ptr(), m_sFileType.Ptr() );
 
+		// Do we have a binary buffer?
+		else if ( !m_sContent.Length() && m_buf.Size() && m_uBufSize )
+			return SendBinary( &m_buf, m_uBufSize, m_sBufType.Ptr() );
+
 		// For compression support
 		CStr8 *pSend = &m_sContent;
 
@@ -666,6 +679,51 @@ public:
 
 	}
 
+    oexBOOL SendBinary( t_buffer *x_pBuffer, oexUINT x_uSize, oexCSTR x_pType = oexNULL )
+    {
+		if ( !x_pBuffer || 0 >= x_uSize )
+			return oexFALSE;
+
+		if ( oexCHECK_PTR( x_pType ) && *x_pType )
+			SetContentType( oexStrToMbPtr( x_pType ) );
+		else
+			SetContentType( "" );
+
+		// Ensure we don't read past the end of the buffer
+		if ( x_uSize < x_pBuffer->Size() )
+			x_uSize = x_pBuffer->Size();
+
+		// How big is the data
+		m_pbTxHeaders[ "Content-length" ] = x_uSize;
+
+		// Send the header
+		m_pPort->Write( GetErrorString( m_nErrorCode ) );
+
+		// Send the headers
+		m_pPort->Write( CParser::EncodeMime( m_pbTxHeaders ) << "\r\n" );
+
+		// Send the data
+		oexUINT uSent = 0;
+		while ( uSent < x_uSize )
+		{
+			// Send out as much data as we can
+			oexUINT uRet = m_pPort->Send( x_pBuffer->Ptr( uSent ), x_uSize - uSent );
+			if ( !uRet )
+				return oexFALSE;
+
+			// Track bytes sent
+			uSent += uRet;
+
+			// Wait if buffer is full
+			if ( uSent < x_uSize )
+				if ( !m_pPort->WaitEvent( os::CIpSocket::eWriteEvent ) )
+					return oexFALSE;
+
+		} // end while
+
+		return oexTRUE;
+	}
+
     oexBOOL SendFile( oexCSTR x_pFile, oexCSTR x_pType = oexNULL )
 	{
 		if ( !oexCHECK_PTR( x_pFile ) || !*x_pFile || !CFile::Exists( x_pFile ) )
@@ -674,7 +732,7 @@ public:
 		if ( oexCHECK_PTR( x_pType ) && *x_pType )
 			SetContentType( oexStrToMbPtr( x_pType ) );
 		else
-			SetContentType( oexStrToMbPtr( x_pFile ) );
+			SetContentType( "" );
 
 		CFile f;
 		if ( !f.OpenExisting( x_pFile ).IsOpen() )
@@ -704,7 +762,12 @@ public:
 			while ( uSent < read )
 			{
 				// Send what we can
-				uSent += m_pPort->Send( &buf[ uSent ], read - uSent );
+				oexUINT uRet = m_pPort->Send( &buf[ uSent ], read - uSent );
+				if ( !uRet )
+					return 0;
+
+				// Add bytes sent
+				uSent += uRet;
 
 				// Wait if buffer is full
 				if ( uSent < read )
@@ -764,15 +827,53 @@ public:
 	/// Sets the path to a file to send as a reply
 	void SetFileName( oexCSTR pFile, oexCSTR pType = oexNULL )
 	{
-		if ( !oexCHECK_PTR( pFile ) )
+		if ( !oexCHECK_PTR( pFile ) || !*pFile )
 			m_sFile.Destroy();
 		else
 			m_sFile = pFile;
 
-		if ( !oexCHECK_PTR( pType ) )
+		if ( !oexCHECK_PTR( pType ) || !*pType )
 			m_sFileType.Destroy();
 		else
-			m_sFile = pFile;
+			m_sFileType = pType;
+	}
+
+	/// Set buffer
+	void SetBuffer( oexPVOID pBuf, oexUINT uSize, oexCSTR pType = oexNULL )
+	{
+		if ( !pBuf || !uSize )
+		{	m_buf.Destroy();
+			m_uBufSize = 0;
+			return;
+		} // end if
+
+		if ( !oexCHECK_PTR( pType ) || !*pType )
+			m_sBufType.Destroy();
+		else
+			m_sBufType = pType;
+
+		// Copy the data
+		m_buf.MemCpy( pBuf, uSize );
+		m_uBufSize = uSize;
+	}
+
+	/// Set buffer
+	void SetBuffer( t_buffer *pBuf, oexUINT uSize, oexCSTR pType = oexNULL )
+	{
+		if ( !pBuf || !uSize )
+		{	m_buf.Destroy();
+			m_uBufSize = 0;
+			return;
+		} // end if
+
+		if ( !oexCHECK_PTR( pType ) || !*pType )
+			m_sBufType.Destroy();
+		else
+			m_sBufType = pType;
+
+		// Copy the data
+		m_buf.Share( *pBuf );
+		m_uBufSize = uSize;
 	}
 
 	/// Returns the name of the file to be sent as a reply
@@ -931,4 +1032,12 @@ private:
 	/// Length of time in seconds that session data is to be valid
 	oexUINT						m_uSessionTimeout;
 
+	/// Number of bytes in m_buf to send
+	oexUINT 					m_uBufSize;
+
+	/// Binary data to send back to client
+	t_buffer					m_buf;
+
+	/// File type
+	CStr						m_sBufType;
 };

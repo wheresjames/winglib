@@ -83,23 +83,41 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	SQBIND_PropertyBag8ToMulti( x_pSession->Request(), mParams[ oexT( "REQUEST" ) ] );
 	SQBIND_PropertyBag8ToMulti( x_pSession->Session(), mParams[ oexT( "SESSION" ) ] );
 
+	sqbind::CSqMsgQueue *q = m_pSessionMsgQueue;
+	sqbind::CSqBinary binReturn;
+
 	// Are we executing a child script?
 	if ( m_sScript.length() )
 	{
+		// Create a child process to handle this transaction
 		oex::CStr sChild = oexGuidToString();
-		m_pSessionMsgQueue->spawn( &sReply, oexT( "." ), sChild.Ptr(), m_sScript, m_bFile );
-		m_pSessionMsgQueue->execute( &sReply, sChild.Ptr(), m_sSession, mParams.serialize() );
-
-		// Hmmm, may let the child kill it self for more flexibility
-//		m_pSessionMsgQueue->kill( oexNULL, sChild.Ptr() );
+		q->spawn( &sReply, oexT( "." ), sChild.Ptr(), m_sScript, m_bFile );
+		q = m_pSessionMsgQueue->GetQueue( sChild.Ptr() );
+		if ( !q )
+		{	m_pSessionMsgQueue->kill( oexNULL, sChild.Ptr() );
+			oexERROR( 0, oexMks( oexT( "Failed to spawn " ), sChild ) );
+			return 0;
+		} // end if
 
 	} // end if
 
-	// Execute function in calling script
-	else
-		m_pSessionMsgQueue->execute( &sReply, oexT( "." ), m_sSession, mParams.serialize() );
+	{ // Scope
 
-//	oexSHOW( sReply.c_str() );
+		// Call into child
+		oexAutoLock ll( q->GetLock() );
+		if ( !ll.IsLocked() )
+			return 0;
+
+		// Get a pointer to the engine
+		sqbind::CSqEngine *pEngine = q->GetEngine();
+		if ( !pEngine )
+			return 0;
+
+		// Make the call
+		if ( !pEngine->Execute( &sReply, m_sSession.c_str(), mParams.serialize(), &binReturn ) )
+			return 0;
+
+	} // end scope
 
 	// Decode the reply
 	sqbind::CSqMap mReply;
@@ -113,6 +131,10 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	// File as reply?
 	else if ( mReply[ oexT( "file" ) ].length() )
 		x_pSession->SetFileName( mReply[ oexT( "file" ) ].c_str(), mReply[ oexT( "filetype" ) ].c_str() );
+
+	// Do we have binary data?
+	else if ( binReturn.getUsed() )
+		x_pSession->SetBuffer( &binReturn.Obj(), binReturn.getUsed(), mReply[ oexT( "bin_type" ) ].c_str() );
 
 	// Update new session data
 	if ( mReply.isset( oexT( "session" ) ) )
@@ -165,8 +187,3 @@ void CHttpServer::SetSessionTimeout( int nTimeout )
 	m_server.SetSessionTimeout( (oex::oexUINT)nTimeout );
 
 }
-
-
-
-
-

@@ -569,7 +569,7 @@ template< typename T_P1, typename T_P2 >
 		_oexCATCH( SScriptErrorInfo &e )
 		{	return LogError( oex::oexFALSE, e ); }
 		_oexCATCH( SquirrelError &e )
-		{	return LogErrorM( oex::oexFALSE, e.desc ); }
+		{	return LogErrorM( oex::oexFALSE, oexMks( x_pFunction, oexT( " : " ), e.desc ).Ptr() ); }
 
 		return oex::oexTRUE;
 	}

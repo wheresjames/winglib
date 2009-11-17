@@ -73,24 +73,24 @@ public:
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-static void* _cximage_malloc( size_t size ) 
+static void* _cximage_malloc( size_t size )
 {
 	return oex::os::CMem::New( size, oexLINE, oexTEXT( oexFILE ) );
 }
 
-static void* _cximage_calloc( size_t num, size_t size ) 
+static void* _cximage_calloc( size_t num, size_t size )
 {
 	void *ptr = oex::os::CMem::New( num * size, oexLINE, oexTEXT( oexFILE ) );
 	oexZeroMemory( ptr, num * size );
 	return ptr;
 }
 
-static void* _cximage_realloc( void *ptr, size_t size ) 
+static void* _cximage_realloc( void *ptr, size_t size )
 {
 	return oex::os::CMem::Resize( ptr, size, oexLINE, oexTEXT( oexFILE ) );
 }
 
-static void _cximage_free( void *ptr ) 
+static void _cximage_free( void *ptr )
 {
 	return oex::os::CMem::Delete( ptr );
 }
@@ -104,7 +104,7 @@ extern "C"
 
 CImage::CImage()
 {_STT();
-	
+
 	m_pimg = OexAllocConstruct< CCxCustomImg >();
 
 	m_nMem = 0;
@@ -1174,6 +1174,51 @@ oexINT CImage::GetImageSize()
 
 	return ( pimg->GetEffWidth() * pimg->GetHeight() );
 }
+
+oexINT CImage::CopyBits( oexPVOID x_buf, oexINT x_nSize )
+{
+	// Sanity checks
+	if ( !x_buf || !x_nSize )
+		return 0;
+
+	// Get image size
+	oexINT nSize = GetImageSize();
+	if ( nSize > x_nSize )
+		nSize = x_nSize;
+
+	// Get destination buffer
+	oexPVOID pBits = GetBits();
+	if ( !pBits )
+		return 0;
+
+	// Copy the data
+	memcpy( pBits, x_buf, nSize );
+
+	return nSize;
+}
+
+oexINT CImage::GetBits( oexPVOID x_buf, oexINT x_nSize )
+{
+	// Sanity checks
+	if ( !x_buf || !x_nSize )
+		return 0;
+
+	// Get image size
+	oexINT nSize = GetImageSize();
+	if ( nSize > x_nSize )
+		nSize = x_nSize;
+
+	// Get destination buffer
+	oexPVOID pBits = GetBits();
+	if ( !pBits )
+		return 0;
+
+	// Copy the data
+	memcpy( x_buf, pBits, nSize );
+
+	return nSize;
+}
+
 
 class CJpegErr : public jpeg_error_mgr
 {

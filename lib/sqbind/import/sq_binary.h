@@ -237,6 +237,26 @@ namespace sqbind
 		void setBuffer( t_byte *ptr, t_size size )
 		{	Free(); m_ptr = ptr; m_nUsed = size; }
 
+		/// Sets a custom buffer pointer ( make sure it doesn't go away before this class! )
+		int MemCpy( t_byte *ptr, t_size size )
+		{
+			// Ensure it's not a custom buffer
+ 			if ( m_ptr )
+ 				Free();
+
+
+			// Copy data
+			if ( !m_buf.MemCpy( ptr, size ).Size() < size )
+			{	m_nUsed = 0;
+				return 0;
+			} // end if
+
+			// Update used count
+			m_nUsed = size;
+
+			return 1;
+		}
+
 		/// Append buffer
 		int Append( CSqBinary *p )
 		{
@@ -247,7 +267,7 @@ namespace sqbind
 		}
 
 		/// Append data to buffer
-		int AppendBuffer( oex::oexCPVOID pBuf, t_size nBytes )
+		int AppendBuffer( const t_byte *pBuf, t_size nBytes )
 		{
 			// Custom pointer?
 			if ( m_ptr )

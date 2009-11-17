@@ -155,6 +155,39 @@ namespace sqbind
 #endif
 		}
 
+		int setPixels( CSqBinary *dat )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			if ( !dat )
+				return 0;
+
+			return m_img.CopyBits( dat->_Ptr(), dat->getUsed() );
+#endif
+		}
+
+		int getPixels( CSqBinary *dat )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			if ( !dat )
+				return 0;
+
+			// How large is the image?
+			int nSize = m_img.GetImageSize();
+			if ( 0 >= nSize )
+				return 0;
+
+			// Copy the image data
+			dat->MemCpy( (CSqBinary::t_byte*)m_img.GetBits(), nSize );
+
+			// Return image size
+			return nSize;
+#endif
+		}
+
 		static void Register( sqbind::VM vm );
 
 		/// Returns reference to the wrapped image object

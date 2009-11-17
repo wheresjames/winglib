@@ -178,6 +178,15 @@ public:
 	/// Gets the property bag
 	stdString pb( const stdString &sPath );
 
+	/// Return a reference to the message queue lock
+	oexLock& GetLock() { return m_cLock; }
+
+	/// Returns a pointer to the engine
+	virtual CSqEngine* GetEngine() { return oexNULL; }
+
+	/// Returns the queue for the specified path
+	virtual CSqMsgQueue* GetQueue( const stdString &x_sPath ) { return oexNULL; }
+
 private:
 
 	/// Owner thread id

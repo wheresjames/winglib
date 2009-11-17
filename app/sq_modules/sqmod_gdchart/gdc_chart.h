@@ -36,13 +36,24 @@ public:
 	virtual ~CGdcChart();
 
 	/// Generates a chart and returns it
-	sqbind::CSqMulti GetChart( const sqbind::stdString &x_sType,
-							   const sqbind::stdString &x_sParams,
-							   const sqbind::stdString &x_sData );
+	sqbind::CSqMulti CreateChart( const sqbind::stdString &x_sType,
+							      const sqbind::stdString &x_sParams,
+							      const sqbind::stdString &x_sData );
 
 	/// Creates a chart and saves it to disk
 	int SaveChart(  const sqbind::stdString &x_sFile,
 					const sqbind::stdString &x_sParams,
 					const sqbind::stdString &x_sData );
+
+	/// Returns the image data
+	sqbind::CSqBinary getImage() { return m_img; }
+
+private:
+
+	/// Thread lock
+	static oexLock				m_lock;
+
+	/// Last image buffer
+	sqbind::CSqBinary			m_img;
 
 };

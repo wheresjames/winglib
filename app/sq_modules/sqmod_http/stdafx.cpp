@@ -10,9 +10,10 @@ SQBIND_REGISTER_CLASS_BEGIN( CHttpServer, CHttpServer )
 	SQBIND_MEMBER_FUNCTION( CHttpServer, SetSessionCallbackScript )
 	SQBIND_MEMBER_FUNCTION( CHttpServer, SetServerCallback )
 	SQBIND_MEMBER_FUNCTION( CHttpServer, SetLogFile )
-	SQBIND_MEMBER_FUNCTION( CHttpServer, EnableRemoteConnections )	
-	SQBIND_MEMBER_FUNCTION( CHttpServer, EnableSessions )	
-	SQBIND_MEMBER_FUNCTION( CHttpServer, SetSessionTimeout )	
+	SQBIND_MEMBER_FUNCTION( CHttpServer, EnableRemoteConnections )
+	SQBIND_MEMBER_FUNCTION( CHttpServer, EnableSessions )
+	SQBIND_MEMBER_FUNCTION( CHttpServer, SetSessionTimeout )
+
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CHttpServer );
 
