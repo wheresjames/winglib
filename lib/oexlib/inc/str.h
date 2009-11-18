@@ -62,10 +62,13 @@ template < typename T > class TStr
 public:
 
 	/// Size type
-	typedef oexLONG		size_type;
+	typedef oexLONG				t_size;
 
 	/// Char type
-	typedef T			char_type;
+	typedef T					t_char;
+
+	/// Buffer type
+	typedef TMem< t_char >		t_buffer;
 
 public:
 
@@ -260,7 +263,7 @@ public:
 			return oexTRUE;
 
 		// Figure out in use size of current buffer
-		size_type nOldSize = m_mem.Size();
+		t_size nOldSize = m_mem.Size();
 
 		// If it's one, it's just a NULL terminator
 		if ( m_nOffset >= nOldSize || 1 >= ( nOldSize - m_nOffset ) )
@@ -269,9 +272,9 @@ public:
 		else
 		{
 			// Size of the new buffer
-			size_type nNewSize = nOldSize - m_nOffset;
+			t_size nNewSize = nOldSize - m_nOffset;
 
-            TMem< T > mem;
+            t_buffer mem;
             if ( !oexVERIFY_PTR( mem.OexNew( nNewSize ).Ptr() ) )
                 return oexFALSE;
 
@@ -388,8 +391,14 @@ public:
     {   return *Ptr(); }
 
 	/// TMem object
-	operator TMem< T >&() const
+	operator t_buffer&() const
 	{	return m_mem; }
+
+	/// Returns memory object reference
+	t_buffer& Mem() { return m_mem; }
+
+	/// Returns const memory object reference
+	oexCONST t_buffer& c_Mem() oexCONST { return m_mem; }
 
 	/// Calculates the length of the string by finding the NULL terminator
 	oexINT CalculateLength()
@@ -435,6 +444,21 @@ public:
         // Ensure we have that much data
         if ( !OexAllocate( m_nOffset + x_nLength ) )
             return 0;
+
+        // Just accept the callers size
+        m_nLength = x_nLength;
+
+        return m_nLength;
+    }
+
+    /// Manually sets the length
+    /// This function is for buffer sharing
+	/// !!! This function may cause a non null terminated string
+    oexINT _SetLength( oexINT x_nLength )
+    {
+		// Ensure it's within reason
+		if ( x_nLength > m_mem.Size() )
+			x_nLength = m_mem.Size();
 
         // Just accept the callers size
         m_nLength = x_nLength;
@@ -892,7 +916,7 @@ public:
         m_nOffset = 0;
 
 		// Allocate space for new string
-		if ( !oexVERIFY_PTR( OexAllocate( uSize ) ) || !uSize )
+		if ( !oexVERIFY_PTR( OexAllocate( uSize ) ) )
 			return *this;
 
 		// Copy the string data
@@ -2643,13 +2667,13 @@ public:
 private:
 
     /// The string memory
-    TMem< T >       m_mem;
+    t_buffer       m_mem;
 
     /// The length of the string
-    size_type       m_nLength;
+    t_size       m_nLength;
 
     /// Offset into the string, this is invaluable for text parsing
-    size_type       m_nOffset;
+    t_size       m_nOffset;
 
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 

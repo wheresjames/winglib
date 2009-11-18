@@ -101,7 +101,14 @@ public:
 
 		// Wait on service to shutdown or thread to exit
 		while ( IsRunning() && g_psqScriptThread->IsRunning() )
+		{
+			// Clean up binary shares
+			oexCleanupBin();
+
+			// Wait
 			oexSleep( 100 );
+
+		} // end while
 
 		if ( IsRunning() )
 			oexNOTICE( 0, oexT( "Script thread has terminated" ) );

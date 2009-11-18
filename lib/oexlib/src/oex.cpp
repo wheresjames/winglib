@@ -44,9 +44,24 @@ oexINT					COex::m_nStartupCode = 0;
 oexINT					COex::m_nShutdownCode = 0;
 COex::CVerifyStartup	COex::m_cVerifyStartup;
 
+#if defined( oexDEBUG )
+CMemLeak				COex::m_cMemLeak;
+CMemLeak& COex::GetMemLeak() { return m_cMemLeak; }
+#endif
+
+CBinShare				COex::m_cBinShare;
+CBinShare& COex::GetBinShare() { return m_cBinShare; }
+
 
 oexINT COex::Init()
 {
+#if defined( oexDEBUG )
+
+	// Create memory leak detector
+	m_cMemLeak.Create();
+
+#endif
+
 	// Initialize file system
 	os::CBaseFile::InitFileSystem();
 
@@ -123,8 +138,30 @@ oexINT COex::Uninit()
 	// Free file system
 	os::CBaseFile::FreeFileSystem();
 
+	// Free any binary shares
+	m_cBinShare.Destroy();
+
     // Free all the test classes
 //	oexFREE_TESTS();
+
+#if defined( oexDEBUG )
+
+	// Freeze memory statistics
+	m_cMemLeak.Freeze();
+
+	CStr sReport = m_cMemLeak.Report();
+
+//	oexEcho( sReport.Ptr() );
+
+	oexTRACE( sReport.Ptr() );
+
+	// Create memory leak detector
+	m_cMemLeak.Destroy();
+
+#endif
+
+
+/*
 #if !defined( OEX_NOCRTDEBUG ) && defined( OEX_CRT_LEAK_DETECTION ) && defined( oexDEBUG ) && defined( OEX_WIN32 )
 
     oexTRACE( oexT( "\n-------------------------------- oexlib is dumping memory leaks ---\n" ) );
@@ -137,6 +174,7 @@ oexINT COex::Uninit()
 
       oexTRACE( oexT( "-------------------------------- End oexlib memory report ---------\n\n" ) );
 #endif
+*/
 
 	return m_nShutdownCode;
 }

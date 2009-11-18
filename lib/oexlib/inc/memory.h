@@ -652,7 +652,7 @@ public:
                 else
                 {
                     // Allocate raw array
-                    New( uSize );
+                    OexNew( uSize );
 
                     // Just copy the memory
                     os::CSys::MemCpy( Ptr(), x_m.c_Ptr(), uSize * sizeof( T ) );

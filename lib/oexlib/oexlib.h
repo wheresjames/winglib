@@ -486,6 +486,7 @@ namespace os
 #include "inc/md5.h"
 #include "inc/base_16.h"
 #include "inc/base_64.h"
+#include "inc/bin_share.h"
 
 // +++ Get stack tracing working sometime
 //#include "inc/stack_trace.h"
@@ -573,6 +574,7 @@ namespace vid
 //------------------------------------------------------------------
 // These are always last
 //------------------------------------------------------------------
+#include "inc/mem_leak.h"
 #include "inc/util.h"
 #include "inc/oex_resources.h"
 
@@ -698,6 +700,12 @@ public:
 	/// Releases data for the specified session id
 	static oexBOOL ReleaseSessionData( CStr sId );
 
+	/// Returns a reference to the memory leak detector
+	static CMemLeak& GetMemLeak();
+
+	/// Returns a pointer to the binary buffer share
+	static CBinShare& GetBinShare();
+
 private:
 
 	/// oexlib startup result
@@ -708,6 +716,18 @@ private:
 
 	/// This is just to warn of improper initialization or shutdown
 	static CVerifyStartup		m_cVerifyStartup;
+
+#if defined( oexDEBUG )
+
+	/// Memory leak tracker
+	static CMemLeak				m_cMemLeak;
+
+#endif
+
+	/// Memory buffer share
+	static CBinShare			m_cBinShare;
+
+
 };
 
 OEX_END_NAMESPACE

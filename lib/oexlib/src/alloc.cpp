@@ -63,7 +63,7 @@ oexUCHAR CAlloc::m_ucOverrunPadding[ 24 ] =
 
 #endif
 
-void CAlloc::ReportBlock( oexPVOID x_pMem, oexUINT uSize )
+void CAlloc::ReportBlock( oexCPVOID x_pMem, oexUINT uSize )
 {
     // Could get an exception if it's not our memory block
     // But we can't force people to use our allocation routines ;)
@@ -106,6 +106,98 @@ void CAlloc::ReportBlock( oexPVOID x_pMem, oexUINT uSize )
 
     } // end catch
 
+}
+
+oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oexUINT uBuf )
+{
+	if ( !pMsg )
+		return oexFALSE;
+
+	*pMsg = 0;
+
+    // Could get an exception if it's not our memory block
+    // But we can't force people to use our allocation routines ;)
+    oexTRY
+    {
+        if ( !oexVERIFY_PTR( x_pMem ) )
+            return oexFALSE;
+
+        oexUCHAR *pBuf = (oexUCHAR*)x_pMem;
+
+        oexUINT uBlockSize = *(oexUINT*)pBuf;
+        pBuf += OEX_SIZE_VAR;
+
+        SBlockHeader *pBh = (SBlockHeader*)pBuf;
+        pBuf += sizeof( SBlockHeader );
+
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        pBuf += sizeof( m_ucUnderrunPadding );
+#endif
+
+		if( uSize )
+			os::CSys::StrFmt( pMsg, uBuf, oexT( "Total: %u, Block: %u, Protected: %u, Refs: %u, Flags: %u\n" ),
+		                                              uSize, uBlockSize, pBh->uSize, pBh->uRef, pBh->uFlags );
+		else
+			os::CSys::StrFmt( pMsg, uBuf, oexT( "Block: %u, Protected: %u, Refs: %u, Flags: %u\n" ),
+													  uBlockSize, pBh->uSize, pBh->uRef, pBh->uFlags );
+
+        if ( pBh->ai[ 0 ].pFile )
+            os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
+                              oexT( "%s(%u) : Allocated\n" ), pBh->ai[ 0 ].pFile, pBh->ai[ 0 ].uLine );
+
+        if ( pBh->ai[ 1 ].pFile )
+            os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
+                              oexT( "%s(%u) : Resized\n" ), pBh->ai[ 1 ].pFile, pBh->ai[ 1 ].uLine );
+
+        if ( pBh->ai[ 2 ].pFile )
+            os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
+                              oexT( "%s(%u) : Freed\n" ), pBh->ai[ 2 ].pFile, pBh->ai[ 2 ].uLine );
+
+#if defined( OEX_MAX_LINES_IN_MEMDUMP )
+
+		oexINT i = 0;
+		oexINT b, sz = uBuf - zstr::Length( pMsg );
+		oexSTR p = zstr::eos( pMsg );
+		for ( oexINT l = 0; 0 < sz && i < pBh->uSize && l < OEX_MAX_LINES_IN_MEMDUMP; l++, i += 16 )
+		{
+			for ( b = 0; 0 < sz && ( i + b ) < pBh->uSize && b < 16; b++ )
+				os::CSys::StrFmt( p, sz,oexT( "%0.2X " ), (oexUINT)pBuf[ i + b ] ),
+				p += 3, sz -= 3;
+
+			while ( 0 < sz && b < 16 )
+				zstr::Copy( p, sz, oexT( "   " ) ),
+				p += 3, sz -= 3, b++;
+
+			// Append space
+			zstr::Copy( p, sz, oexT( "  " ) ),
+			p += 2, sz -= 2;
+
+			for ( b = 0; 0 < sz && ( i + b ) < pBh->uSize && b < 16; b++ )
+				if ( pBuf[ i + b ] >= oexT( ' ' ) && pBuf[ i + b ] <= oexT( '~' ) )
+					*( p++ ) = pBuf[ i + b ], sz--;
+				else
+					*( p++ ) = oexT( '.' ), sz--;
+
+			// Append new line
+			zstr::Copy( p, sz, oexT( "\r\n" ) ),
+			p += 2, sz -= 2;
+
+		} // end for
+
+#endif
+
+		return oexTRUE;
+
+    } // end try
+
+    oexCATCH_ALL()
+    {
+
+    } // end catch
+
+	zstr::Copy( pMsg, oexT( " Assert while trying to interpret memory block.  Perhaps it's someone else's memory block?\n" ) );
+
+	return oexFALSE;
 }
 
 oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex, oexBOOL x_bUseFullBlock )

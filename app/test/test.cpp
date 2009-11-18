@@ -390,6 +390,104 @@ oex::oexRESULT TestAllocator()
     return oex::oexRES_OK;
 }
 
+oex::oexRESULT TestBinary()
+{
+	oexEcho( oexT( "======== Binary buffers..." ) );
+
+	oex::CBin b1;
+
+	if ( !oexVERIFY( b1.Allocate( 128 ) ) )
+		return -1;
+
+	if ( !oexVERIFY( 128 == b1.Size() ) )
+		return -2;
+
+	if ( !oexVERIFY( 0 == b1.getUsed() ) )
+		return -3;
+
+	if ( !oexVERIFY( b1.MemCpy( "Hello", 5 ) ) )
+		return -4;
+
+	if ( !oexVERIFY( 5 == b1.getUsed() ) )
+		return -5;
+
+	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "Hello", b1.getUsed() ) ) )
+		return -6;
+
+	// !!! Careful, this string may *not* null terminated
+	//     It's ok here, operator == is binary compatible
+	//     but if you use TStr::Ptr(), you may have issues
+	if ( !oexVERIFY( b1.getString() == "Hello" ) )
+		return -7;
+
+	if ( !oexVERIFY( b1.getSafeString() == "Hello" ) )
+		return -7;
+
+	if ( !oexVERIFY( 5 == b1.setString( "olleH" ) ) )
+		return -8;
+	
+	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "olleH", b1.getUsed() ) ) )
+		return -9;
+
+	if ( !oexVERIFY( 10 == b1.AppendBuffer( "Hello", 5 ) ) )
+		return 10;
+
+	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "olleHHello", b1.getUsed() ) ) )
+		return -11;
+
+	if ( !oexVERIFY( 1 == oexGetRefCount( b1.Ptr() ) ) )
+		return -12;
+
+	oex::CBin b2( b1 );
+
+	if ( !oexVERIFY( b1.Ptr() == b2.Ptr() ) )
+		return -13;
+
+	if ( !oexVERIFY( 2 == oexGetRefCount( b1.Ptr() ) ) )
+		return -14;
+
+	b2.Destroy();
+
+	if ( !oexVERIFY( 1 == oexGetRefCount( b1.Ptr() ) ) )
+		return -15;
+
+	b2 = b1;
+
+	if ( !oexVERIFY( b1.Ptr() == b2.Ptr() ) )
+		return -16;
+
+	if ( !oexVERIFY( 2 == oexGetRefCount( b1.Ptr() ) ) )
+		return -17;
+	
+	b2.Copy();
+
+	if ( !oexVERIFY( 1 == oexGetRefCount( b1.Ptr() ) ) )
+		return -18;
+
+	oex::CBin::t_byte* pChar = OexAllocNew< oex::CBin::t_byte >( 100 );
+
+	if ( !oexVERIFY( 1 == oexGetRefCount( pChar ) ) )
+		return -19;
+	
+	b2.setBuffer( pChar, 100 );
+
+	if ( !oexVERIFY( pChar == b2.Ptr() ) )
+		return -20;
+
+	if ( !oexVERIFY( 100 == b2.getUsed() ) )
+		return -21;
+
+	if ( !oexVERIFY( 2 == oexGetRefCount( pChar ) ) )
+		return -22;
+
+	OexAllocDelete< oex::CBin::t_byte >( pChar );
+
+	if ( !oexVERIFY( 1 == oexGetRefCount( pChar ) ) )
+		return -23;
+
+	return oex::oexRES_OK;
+}
+	
 oex::oexRESULT TestStrings()
 {
 	oexEcho( oexT( "======== String functions..." ) );
@@ -2994,6 +3092,8 @@ int main(int argc, char* argv[])
 
     TestAllocator();
 
+	TestBinary();
+
     TestStrings();
 
     TestFileMapping();
@@ -3055,7 +3155,7 @@ int main(int argc, char* argv[])
 #endif
 
 #if defined( OEX_ENABLE_VIDEO )
-    Test_CCapture();
+//    Test_CCapture();
 #endif
 
 	// Release sockets

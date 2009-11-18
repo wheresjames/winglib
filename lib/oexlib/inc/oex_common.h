@@ -329,6 +329,59 @@ namespace cmn
 		return n;
 	}
 
+	/// Returns non-zero if the specified value is a power of 2
+	template< typename T >
+		oexBOOL IsPowerOf2( T v )
+		{	return v == ( v & ( v - 1 ) ); }
+
+	template< typename T >
+		T BitsToValue( T bits )
+		{
+			if ( !bits )
+				return 0;
+
+			return 1 << bits;
+		}
+
+	template< typename T >
+		T ValueToBits( T v )
+		{
+			if ( v < 2 )
+				return 1;
+
+			v = NextPower2( v );
+			T bits = 1;
+			while ( v )
+				v >>= 1,
+				bits++;
+
+			return bits;
+		}
+
+	template< typename T >
+		T BitsToMask( T bits )
+		{
+			T mask = 0;
+
+			while ( bits-- )
+				mask <<= 1, mask |= 1;
+
+			return mask;
+		}
+
+	template< typename T >
+		T CountBits( T v )
+		{
+			T bits = 0;
+			while ( v )
+			{	if ( v & 1 ) 
+					bits++;
+				v >>= 1;
+			} // end while
+
+			return bits;
+		}
+
     /// Returns the state of the specified bit in buf
     template < typename T >
         oexBOOL GetBit( T *buf, oexUINT bit )

@@ -44,15 +44,33 @@ using namespace OEX_NAMESPACE::os;
 
 static oexPVOID oex_malloc( oexSIZE_T x_nSize )
 {
+#if defined( oexDEBUG )
+	oexPVOID p = malloc( (size_t)x_nSize );
+	COex::GetMemLeak().Add( p );
+	return p;
+#else
 	return malloc( (size_t)x_nSize );
+#endif
 }
 
 static oexPVOID oex_realloc( oexPVOID x_ptr, oexSIZE_T x_nSize )
-{	return realloc( x_ptr, x_nSize );
+{
+#if defined( oexDEBUG )
+	oexPVOID p = realloc( x_ptr, x_nSize );
+	COex::GetMemLeak().Remove( x_ptr );
+	COex::GetMemLeak().Add( p );
+	return p;
+#else
+	return realloc( x_ptr, x_nSize );
+#endif
 }
 
 static void oex_free( oexPVOID x_ptr )
-{	return free( x_ptr );
+{	
+#if defined( oexDEBUG )
+	COex::GetMemLeak().Remove( x_ptr );
+#endif
+	return free( x_ptr );
 }
 
 #else
@@ -73,6 +91,10 @@ static oexPVOID oex_malloc( oexSIZE_T x_nSize )
 
 	// Save original pointer
 	*( (void**)ptr2 - 1 ) = ptr;
+
+#if defined( oexDEBUG )
+	COex::GetMemLeak().Add( ptr2 );
+#endif
 
 	return ptr2;
 }
@@ -111,6 +133,11 @@ static oexPVOID oex_realloc( oexPVOID x_ptr, oexSIZE_T x_nSize )
 	// Free the realloc() pointer
 	free( ptr2 );
 
+#if defined( oexDEBUG )
+	COex::GetMemLeak().Remove( ptr2 );
+	COex::GetMemLeak().Add( ptr4 );
+#endif
+
 	// Did you get all that?
 	return ptr4;
 }
@@ -125,6 +152,10 @@ static void oex_free( oexPVOID x_ptr )
 
 	// Ensure it's sane
 	oexASSERT( cmn::Dif( (oexULONG)ptr, (oexULONG)x_ptr ) <= OEX_ALIGNEDMEM + sizeof( void* ) );
+
+#if defined( oexDEBUG )
+	COex::GetMemLeak().Remove( ptr );
+#endif
 
 	return free( ptr );
 }

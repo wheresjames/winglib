@@ -170,6 +170,9 @@
 // Define to include full file paths in log entries
 //#define oexFULL_FILENAME_IN_LOG
 
+// Maximum number of data dump lines to show in CAlloc::GetBlockReport()
+#define OEX_MAX_LINES_IN_MEMDUMP	8
+
 // debug macros
 #define oexFILE				__FILE__
 #define oexLINE				__LINE__

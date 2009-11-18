@@ -71,6 +71,10 @@ public:
     static void Delete( oexPVOID x_pMem );
 
 	/// Returns a copy of the raw allocator function pointers
+	static SRawAllocator GetDefaultAllocator()
+	{	return m_def; }
+
+	/// Returns a copy of the raw allocator function pointers
 	static SRawAllocator GetRawAllocator()
 	{	return m_ra; }
 

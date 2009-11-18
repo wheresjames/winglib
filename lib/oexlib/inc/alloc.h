@@ -164,7 +164,10 @@ public:
 	static oexPVOID VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSize = oexNULL, oexUINT x_uLine = 0, oexCSTR x_pFile = oexNULL, oexUINT x_uInfoIndex = eMaxAllocTrail );
 
     /// Dumps information on memory block
-    static void ReportBlock( oexPVOID x_pMem, oexUINT uSize );
+    static void ReportBlock( oexCPVOID x_pMem, oexUINT uSize );
+
+	/// Returns a string describing the memory block
+	static oexBOOL GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pBuf, oexUINT uBuf );
 
     /// Returns the size of the memory protection overhead
     static inline oexUINT ProtectAreaSize()

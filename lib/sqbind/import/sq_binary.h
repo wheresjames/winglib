@@ -201,7 +201,7 @@ namespace sqbind
 
 		/// Returns a string representation of the buffer
 		stdString getString()
-		{	oex::CStr s = oexMbToStr( oex::CStr8( (const oex::CStr8::char_type*)Ptr(), getUsed() ) );
+		{	oex::CStr s = oexMbToStr( oex::CStr8( (const oex::CStr8::t_char*)Ptr(), getUsed() ) );
 			return stdString( s.Ptr(), s.Length() );
 		}
 
@@ -246,7 +246,7 @@ namespace sqbind
 
 
 			// Copy data
-			if ( !m_buf.MemCpy( ptr, size ).Size() < size )
+			if ( m_buf.MemCpy( ptr, size ).Size() < size )
 			{	m_nUsed = 0;
 				return 0;
 			} // end if

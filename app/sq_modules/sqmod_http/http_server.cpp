@@ -101,6 +101,10 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 
 	} // end if
 
+	// Execute the thing
+	q->execute( &sReply, oexT( "." ), m_sSession.c_str(), mParams.serialize() );
+
+/*
 	{ // Scope
 
 		// Call into child
@@ -118,7 +122,7 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 			return 0;
 
 	} // end scope
-
+*/
 	// Decode the reply
 	sqbind::CSqMap mReply;
 	mReply.deserialize( sReply );

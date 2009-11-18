@@ -94,6 +94,13 @@
 
 #endif
 
+#define oexAddRef					OEX_NAMESPACE::CAlloc::AddRef
+#define oexDecRef					OEX_NAMESPACE::CAlloc::DecRef
+#define oexGetRefCount				OEX_NAMESPACE::CAlloc::GetRefCount
+
+#define oexGetBin					OEX_NAMESPACE::COex::GetBinShare().GetBuffer
+#define oexCleanupBin				OEX_NAMESPACE::COex::GetBinShare().Cleanup
+
 #if defined( OEX_GCC )
 #	define oexVaList				        __builtin_va_list
 #	define oexVaStart				        __builtin_va_start
@@ -265,6 +272,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexMicroSleep						OEX_NAMESPACE::os::CSys::MicroSleep
 #define oexPrintf							OEX_NAMESPACE::os::CSys::Printf
 #define oexEcho								OEX_NAMESPACE::os::CSys::Echo
+#define oexFlush_stdout						OEX_NAMESPACE::os::CSys::Flush_stdout
 #define oexFmt								OEX_NAMESPACE::CStr().Fmt
 #define oexAlert							OEX_NAMESPACE::os::CSys::ShowMessageBox
 #define oexFork								OEX_NAMESPACE::os::CSys::Fork

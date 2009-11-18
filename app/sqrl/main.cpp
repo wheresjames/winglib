@@ -94,7 +94,14 @@ int main(int argc, char* argv[])
 
 	// Attempt to execute idle function
 	while ( g_psqScriptThread->IsRunning() )
+	{
+		// Clean up binary shares
+		oexCleanupBin();
+
+		// Wait
 		oexSleep( 100 );
+
+	} // end while
 
 	oexNOTICE( 0, oexT( "Script thread has terminated" ) );
 
