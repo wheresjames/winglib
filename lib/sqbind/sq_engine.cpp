@@ -46,8 +46,7 @@
 using namespace sqbind;
 
 int CSqEngineExport::alert( const stdString &sMsg )
-{	return oex::os::CSys::ShowMessageBox( oexT( "Script Message" ), sMsg.c_str() );
-}
+{	return oex::os::CSys::ShowMessageBox( oexT( "Script Message" ), sMsg.c_str() ); }
 
 int CSqEngineExport::print( const stdString &sMsg )
 {	return oexPrintf( sMsg.c_str() ); }
@@ -143,6 +142,24 @@ stdString CSqEngineExport::get_resource( const stdString &sRes, int bFileOverrid
 
 	return stdString( s.Ptr(), s.Length() );
 }
+
+/// Returns the buffer for a binary share
+CSqBinary CSqEngineExport::get_binshare( const stdString &sName )
+{	return oexGetBin( sName.c_str() ); }
+
+/// Returns the buffer for a binary share
+int CSqEngineExport::set_binshare( const stdString &sName, CSqBinary *pBin )
+{	if ( !pBin ) return 0;
+	return oexSetBin( sName.c_str(), &pBin->Mem() );
+}
+
+/// Returns the buffer for a binary share
+int CSqEngineExport::is_binshare( const stdString &sName )
+{	return oexIsBin( sName.c_str() ); }
+
+/// Runs garbage collection on binary shares
+int CSqEngineExport::cleanup_binshare()
+{	return oexCleanupBin(); }
 
 stdString CSqEngineExport::base64_encode( const stdString &sStr )
 {	oex::CStr8 sMb = oexStrToMb( oex::CStr( sStr.c_str(), sStr.length() ) );
@@ -692,6 +709,11 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, uncompress )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_resource )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_name )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_binshare )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_binshare )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_binshare )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, cleanup_binshare )
+
 SQBIND_REGISTER_CLASS_END()
 
 void CSqEngine::SetExportFunction( PFN_SQBIND_Export_Symbols fn, sqbind::SSqAllocator *pa )

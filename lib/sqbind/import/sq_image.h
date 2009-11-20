@@ -88,27 +88,24 @@ namespace sqbind
 #endif
 		}
 
-		stdString Encode( const stdString &sType )
+		CSqBinary Encode( const stdString &sType )
 		{
 #if !defined( OEX_ENABLE_XIMAGE )
-			return stdString();
+			return CSqBinary();
 #else
-			oex::oexPBYTE pBuf = oexNULL;
-			oex::oexINT nSize = 0;
-			if ( !m_img.Encode( &pBuf, &nSize, sType.c_str() )
-			     || !oexCHECK_PTR( pBuf ) || !nSize )
-				return oexT( "" );
-
-			return stdString().assign( (oex::oexCSTR)pBuf, nSize );
+			return m_img.Encode( sType.c_str() );
 #endif
 		}
 
-		int Decode( const stdString &sType, const stdString &sData )
+		int Decode( const stdString &sType, CSqBinary *pData )
 		{
 #if !defined( OEX_ENABLE_XIMAGE )
 			return 0;
 #else
-			return m_img.Decode( (oex::oexBYTE*)sData.c_str(), sData.length(), sType.c_str() );
+			if ( !pData )
+				return 0;
+
+			return m_img.Decode( (oex::oexBYTE*)pData->Ptr(), pData->getUsed(), sType.c_str() );
 #endif
 		}
 
@@ -187,6 +184,13 @@ namespace sqbind
 			return nSize;
 #endif
 		}
+
+		/// Returns non-zero if there is a valid image buffer
+		int isValid()
+		{
+			return m_img.IsValid() ? 1 : 0;
+		}
+
 
 		static void Register( sqbind::VM vm );
 

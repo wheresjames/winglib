@@ -41,14 +41,14 @@ namespace sqbind
     {
 	public:
 
+		/// Size type
+		typedef oex::CBin::t_size		t_size;
+
 		/// Byte type
-		typedef oex::oexBYTE t_byte;
+		typedef oex::CBin::t_byte		t_byte;
 
 		/// Buffer type
-		typedef oex::TMem< t_byte > t_buffer;
-
-		/// Size type
-		typedef int t_size;
+		typedef oex::CBin				t_buffer;
 
 	public:
 
@@ -56,271 +56,113 @@ namespace sqbind
 		SQBIND_CLASS_CTOR_END( CSqBinary )
 
 		/// Default constructor
-		CSqBinary() { m_nUsed = 0; m_ptr = 0; }
+		CSqBinary() {}
 
 		/// Copy constructor
-		CSqBinary( const CSqBinary &r ) :
-			m_buf( r.m_buf )
-		{
-			m_nUsed = r.m_nUsed;
-			m_ptr = r.m_ptr;
-		}
+		CSqBinary( const CSqBinary &r ) : m_bin( r.m_bin ) { }
 
 		/// Assignment operator
-		CSqBinary& operator=( const CSqBinary &r )
-		{	m_nUsed = r.m_nUsed;
-			m_buf.Share( r.m_buf );
-			m_ptr = r.m_ptr;
-			return *this;
-		}
+		CSqBinary& operator = ( const CSqBinary &r )
+		{	m_bin = r.m_bin; return *this; }
 
 		/// Copy constructor
-		CSqBinary( const t_buffer &r, t_size nUsed = 0 ) :
-			m_buf( r )
-		{	m_nUsed = nUsed;
-			m_ptr = 0;
-		}
+		CSqBinary( const t_buffer &r ) : m_bin( r ) { }
+
+		/// Assignment operator
+		CSqBinary& operator = ( const t_buffer &r )
+		{	m_bin = r; return *this; }
 
 		/// Registers the class
 		static void Register( sqbind::VM vm );
 
-		/// Frees the buffer
-		void Free()
-		{	m_nUsed = 0;
-			m_ptr = 0;
-			m_buf.Destroy();
-		}
+		/// Frees the memory
+		void Free() { m_bin.Destroy(); }
 
-		/// Allocate specified number of bytes
-		int Allocate( t_size nSize )
-		{	m_ptr = 0;
-			m_buf.OexNew( nSize );
-			return m_buf.Size() == (unsigned int)nSize ? 1 : 0;
-		}
+		/// Allocate specified amount of memory
+		t_size Allocate( t_size x_nSize ) { m_bin.Allocate( x_nSize ); return m_bin.Size(); }
 
-		/// Resize buffer to specified size
-		int Resize( t_size nNewSize )
-		{
-			if ( m_ptr )
-			{
-				// Is the buffer getting smaller?
-				if ( m_nUsed > nNewSize )
-					m_nUsed = nNewSize;
+		/// Resizes memory block
+		t_size Resize( t_size x_nNewSize ) { m_bin.Resize( x_nNewSize ); return m_bin.Size(); }
 
-				// Make a new buffer and copy data
-				m_buf.OexNew( nNewSize );
-				oexMemCpy( m_buf.Ptr(), m_ptr, m_nUsed );
-				m_ptr = 0;
+		/// Copies memory object
+		t_size Copy( CSqBinary *x_p ) { if ( !x_p ) return 0; return m_bin.Copy( &x_p->m_bin ); }
 
-			} // end if
+		/// Shares memory object
+		t_size Share( CSqBinary *x_p ) { if ( !x_p ) return 0; return m_bin.Share( &x_p->m_bin ); }
 
-			// Simple resize
-			else
-				m_buf.Resize( nNewSize );
+		/// Returns the raw size of the buffer
+		t_size Size() { return m_bin.Size(); }
 
-			return m_buf.Size() == (unsigned int)nNewSize ? 1 : 0;
-		}
+		/// Returns the value of the byte at i
+		int get( t_size x_i ) { return (int)m_bin.get( x_i ); }
 
-		/// Copy another buffer
-		int Copy( CSqBinary *p )
-		{
-			if ( !p )
-				return 0;
-
-			m_ptr = 0;
-			m_nUsed = p->m_nUsed;
-			if ( !m_nUsed )
-				Free();
-			else
-			{
-				if ( !p->m_ptr )
-					m_buf.Copy( p->m_buf );
-
-				else
-					m_buf.MemCpy( p->m_ptr, m_nUsed );
-
-			} // end else
-			return m_buf.Size();
-		}
-
-		/// Shares another buffer
-		int Share( CSqBinary *p )
-		{
-			if ( !p )
-				return 0;
-
-			m_nUsed = p->m_nUsed;
-			m_ptr = p->m_ptr;
-			m_buf.Share( p->m_buf );
-
-			return 1;
-		}
-
-		/// Returns the size of the current buffer
-		t_size Size()
-		{
-			if ( m_ptr )
-				return m_nUsed;
-
-			return (t_size)m_buf.Size();
-		}
-
-		/// Returns character value at i
-		int get( int i )
-		{	if ( i >= Size() ) return -1;
-			return (int)m_buf.Ptr( i );
-		}
-
-		/// Sets character value at i
-		void set( int i, int v )
-		{	if ( i >= Size() ) return;
-			*m_buf.Ptr( i ) = (t_byte)v;
-		}
+		/// Sets the value of the byte at i
+		void set( t_size x_i, int x_v ) { m_bin.set( x_i, (t_byte)x_v ); }
 
 		/// Sets the number of bytes in the buffer being used
-		void setUsed( t_size n )
-		{	m_nUsed = n; }
+		void setUsed( t_size x_n ) { m_bin.setUsed( x_n ); }
 
 		/// Returns the number of bytes in the buffer being used
-		t_size getUsed()
-		{	if ( 0 > m_nUsed ) m_nUsed = 0;
-			if ( m_ptr ) return m_nUsed;
-			else if ( Size() < m_nUsed ) m_nUsed = Size();
-			return m_nUsed;
-		}
+		t_size getUsed() { return m_bin.getUsed(); }
 
 		/// Sets the share name
-		void SetName( const stdString &s )
-		{	m_buf.SetName( s.c_str() );
-		}
+		void SetName( const stdString &s ) { m_bin.SetName( s.c_str() ); }
 
 		/// Returns the share name
-		stdString GetName()
-		{	return m_buf.GetName();
-		}
+		stdString GetName() { return m_bin.GetName(); }
 
-		/// Returns a string representation of the buffer
+		/// Sets plain share flag
+		void PlainShare( int x_bPlain ) { m_bin.PlainShare( x_bPlain ? oex::oexTRUE : oex::oexFALSE ); }
+
+		/// Returns non-zero if plain share
+		int IsPlainShare() { return m_bin.IsPlainShare() ? 1 : 0; }
+
+		/// Returns a string representation of the data
 		stdString getString()
-		{	oex::CStr s = oexMbToStr( oex::CStr8( (const oex::CStr8::t_char*)Ptr(), getUsed() ) );
+		{	oex::CStr s = oexMbToStr( m_bin.getString() );
 			return stdString( s.Ptr(), s.Length() );
 		}
 
-		/// Converts a string to a binary buffer
-		// Returns the number of bytes in the buffer
+		/// Initializes the binary buffer from a string
 		t_size setString( const stdString &s )
-		{	m_ptr = 0;
-			oex::CStr8 mb = oexStrToMb( oex::CStr( s.c_str(), s.length() ) );
-			m_buf.MemCpy( (const t_byte*)mb.Ptr(), mb.Length() );
-			m_nUsed = mb.Length();
-			return getUsed();
-		}
+		{	return m_bin.setString( oexStrToMb( oex::CStr( s.c_str(), s.length() ) ) ); }
 
-		/// Converts a string to a binary buffer
-		// Returns the number of bytes in the buffer
-		// +++ This isn't quite right, should use getUsed()
+		/// Appends the string data to the buffer
 		t_size appendString( const stdString &s )
-		{	oex::CStr8 mb = oexStrToMb( oex::CStr( s.c_str(), s.length() ) );
-			AppendBuffer( (const t_byte*)mb.Ptr(), mb.Length() );
-			return getUsed();
-		}
+		{	return m_bin.appendString( oexStrToMb( oex::CStr( s.c_str(), s.length() ) ) ); }
 
-		/// Returns a pointer to the buffer
-		const t_byte* Ptr() { if ( m_ptr ) return m_ptr; return m_buf.Ptr(); }
+		/// Return const pointer to raw buffer
+		const t_byte* Ptr( t_size o = 0 ) { return m_bin.Ptr( o ); }
 
-		/// Returns a pointer to the buffer
-		t_byte* _Ptr() { if ( m_ptr ) return m_ptr; return m_buf.Ptr(); }
+		/// Return writable pointer to raw buffer
+		t_byte* _Ptr( t_size o = 0 ) { return m_bin._Ptr( o ); }
 
-		/// Returns reference to buffer
-		t_buffer& Obj() { return m_buf; }
+		/// Sets a raw buffer
+		void setBuffer( t_byte *x_ptr, t_size x_size, int x_bFree = 1 )
+		{	m_bin.setBuffer( x_ptr, x_size, x_bFree ? oex::oexTRUE : oex::oexFALSE ); }
 
-		/// Sets a custom buffer pointer ( make sure it doesn't go away before this class! )
-		void setBuffer( t_byte *ptr, t_size size )
-		{	Free(); m_ptr = ptr; m_nUsed = size; }
+		/// Copies data from a raw buffer
+		t_size MemCpy( oexCONST t_byte *x_ptr, t_size x_size )
+		{	return m_bin.MemCpy( x_ptr, x_size ); }
 
-		/// Sets a custom buffer pointer ( make sure it doesn't go away before this class! )
-		int MemCpy( t_byte *ptr, t_size size )
-		{
-			// Ensure it's not a custom buffer
- 			if ( m_ptr )
- 				Free();
+		/// Appends the specified buffer
+		t_size Append( CSqBinary *x_p )
+		{	if ( !x_p ) return 0; return m_bin.Append( &x_p->m_bin ); }
 
+		/// Appends the specified raw buffer
+		t_size AppendBuffer( const t_byte *x_pBuf, t_size x_nBytes )
+		{	return m_bin.AppendBuffer( x_pBuf, x_nBytes ); }
 
-			// Copy data
-			if ( m_buf.MemCpy( ptr, size ).Size() < size )
-			{	m_nUsed = 0;
-				return 0;
-			} // end if
+		/// Shift data in buffer to the left
+		t_size LShift( t_size x_nBytes )
+		{	return m_bin.LShift( x_nBytes ); }
 
-			// Update used count
-			m_nUsed = size;
-
-			return 1;
-		}
-
-		/// Append buffer
-		int Append( CSqBinary *p )
-		{
-			if ( !p )
-				return m_nUsed;
-
-			return AppendBuffer( p->Ptr(), p->getUsed() );
-		}
-
-		/// Append data to buffer
-		int AppendBuffer( const t_byte *pBuf, t_size nBytes )
-		{
-			// Custom pointer?
-			if ( m_ptr )
-			{
-				// Copy custom buffer
-				if ( m_nUsed )
-					m_buf.MemCpy( m_ptr, m_nUsed );
-
-				// Append new data
-				m_buf.MemCpyAt( (t_byte*)pBuf, m_nUsed, nBytes );
-
-				// Not custom buffer anymore
-				m_ptr = 0;
-				m_nUsed = m_nUsed + nBytes;
-
-				return m_nUsed;
-			}
-
-			// Verify m_nUsed
-			if ( (unsigned int)m_nUsed > m_buf.Size() )
-				m_nUsed = m_buf.Size();
-
-			// Append new data
-			m_buf.MemCpyAt( (t_byte*)pBuf, m_nUsed, nBytes );
-			m_nUsed += nBytes;
-
-			return m_nUsed;
-		}
-
-		/// Shift the data in the buffer to the left
-		int LShift( int nBytes )
-		{
-			// All of it?
-			if ( nBytes >= m_nUsed )
-				m_nUsed = 0;
-
-			else
-				m_buf.LShift( nBytes, m_nUsed - nBytes ),
-				m_nUsed -= nBytes;
-
-			return m_nUsed;
-		}
+		/// Returns reference to buffer object
+		t_buffer& Mem() { return m_bin; }
 
 	private:
 
-		/// The number of bytes in the buffer actually being used
-		t_size						m_nUsed;
-
-		/// Buffer object
-		t_buffer					m_buf;
-
-		/// User buffer ( a bit more dangerous to use )
-		t_byte						*m_ptr;
+		t_buffer		m_bin;
 
 	};
 

@@ -338,8 +338,8 @@ oex::oexRESULT TestAllocator()
         oex::TMem< char > mem;
 
         // Work out the resize function
-        const oex::oexUINT uTestSize = 1000;
-        for ( oex::oexUINT i = 0; i < uTestSize; i++ )
+        const oexSIZE_T uTestSize = 1000;
+        for ( oexSIZE_T i = 0; i < uTestSize; i++ )
         {
             if ( !oexVERIFY_PTR( mem.OexResize( i + 1 ).c_Ptr() ) )
                 return -20;
@@ -349,14 +349,14 @@ oex::oexRESULT TestAllocator()
         } // end for
 
         // Verify the memory data
-        for ( oex::oexUINT i = 0; i < uTestSize; i++ )
+        for ( oexSIZE_T i = 0; i < uTestSize; i++ )
             if ( !oexVERIFY( *mem.Ptr( i ) == (char)i ) )
                 return -21;
 
     } // end scope
 
 	// Test alignment functions
-	for ( int i = 0; i < 100; i++ )
+	for ( oexSIZE_T i = 0; i < 100; i++ )
 		if ( !oexVERIFY( 0 == ( oex::cmn::Align2( i ) & 1 ) )
 			 || !oexVERIFY( 0 == ( oex::cmn::Align4( i ) & 3 ) )
 			 || !oexVERIFY( 0 == ( oex::cmn::Align8( i ) & 7 ) )
@@ -364,7 +364,7 @@ oex::oexRESULT TestAllocator()
 			return -22;
 
 	// Test alignment functions
-	for ( int i = 0; i < 100; i++ )
+	for ( oexSIZE_T i = 0; i < 100; i++ )
 		if ( !oexVERIFY( oex::cmn::IsAligned2( oex::cmn::Align2( i ) ) )
 			 || !oexVERIFY( oex::cmn::IsAligned4( oex::cmn::Align4( i ) ) )
 			 || !oexVERIFY( oex::cmn::IsAligned8( oex::cmn::Align8( i ) ) )
@@ -425,7 +425,7 @@ oex::oexRESULT TestBinary()
 
 	if ( !oexVERIFY( 5 == b1.setString( "olleH" ) ) )
 		return -8;
-	
+
 	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "olleH", b1.getUsed() ) ) )
 		return -9;
 
@@ -458,17 +458,19 @@ oex::oexRESULT TestBinary()
 
 	if ( !oexVERIFY( 2 == oexGetRefCount( b1.Ptr() ) ) )
 		return -17;
-	
+
 	b2.Copy();
 
 	if ( !oexVERIFY( 1 == oexGetRefCount( b1.Ptr() ) ) )
 		return -18;
 
+	b1.Destroy();
+
 	oex::CBin::t_byte* pChar = OexAllocNew< oex::CBin::t_byte >( 100 );
 
 	if ( !oexVERIFY( 1 == oexGetRefCount( pChar ) ) )
 		return -19;
-	
+
 	b2.setBuffer( pChar, 100 );
 
 	if ( !oexVERIFY( pChar == b2.Ptr() ) )
@@ -485,9 +487,67 @@ oex::oexRESULT TestBinary()
 	if ( !oexVERIFY( 1 == oexGetRefCount( pChar ) ) )
 		return -23;
 
+	b2.Destroy();
+
+
+	if ( !oexVERIFY( 5 == b1.setString( "Hello" ) ) )
+		return -24;
+
+	if ( !oexVERIFY( oexSetBin( oexT( "TestBuffer" ), &b1 ) ) )
+		return -25;
+
+	if ( !oexVERIFY( oexIsBin( oexT( "TestBuffer" ) ) ) )
+		return -26;
+
+	if ( !oexVERIFY( !oexIsBin( oexT( "WrongBuffer" ) ) ) )
+		return -27;
+
+	b2 = oexGetBin( oexT( "WrongBuffer" ) );
+
+	if ( !oexVERIFY( !b2.Ptr() && !b2.getUsed() ) )
+		return -28;
+
+	b2 = oexGetBin( oexT( "TestBuffer" ) );
+
+	if ( !oexVERIFY( b1.Ptr() == b2.Ptr() ) )
+		return -29;
+
+	if ( !oexVERIFY( 5 == b2.getUsed() ) )
+		return -30;
+
+	CStr8 s = b2.getString();
+
+	if ( !oexVERIFY( s.Ptr() == b2.Ptr() ) )
+		return -31;
+
+	if ( !oexVERIFY( s == "Hello" ) )
+		return -32;
+
+	oexCPVOID ptr = b1.Ptr();
+
+	if ( !oexVERIFY( 4 == oexGetRefCount( ptr ) ) )
+		return -33;
+
+	s.Destroy();
+
+	if ( !oexVERIFY( 3 == oexGetRefCount( ptr ) ) )
+		return -34;
+
+	b2.Destroy();
+
+	if ( !oexVERIFY( 2 == oexGetRefCount( ptr ) ) )
+		return -35;
+
+	oexSetBin( oexT( "TestBuffer" ), 0 );
+
+	if ( !oexVERIFY( 1 == oexGetRefCount( ptr ) ) )
+		return -36;
+
+	b1.Destroy();
+
 	return oex::oexRES_OK;
 }
-	
+
 oex::oexRESULT TestStrings()
 {
 	oexEcho( oexT( "======== String functions..." ) );
@@ -674,7 +734,7 @@ oex::oexRESULT TestStrings()
         return -31;
 
     str1 = oexT( "1234abc" );
-    oex::oexINT nEnd = 0;
+    oexSIZE_T nEnd = 0;
     if ( !oexVERIFY( 1234 == str1.ToNum( 0, 10, &nEnd, oex::oexTRUE ) ) )
         return -32;
 
@@ -814,7 +874,22 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str1.Length() == 3 ) )
 		return -65;
 
-	// +++ This caused crash somehow, note sSub passed as parameter
+
+	str1 = oexT( "HTTP/1.1" );
+
+	if ( !oexVERIFY( CParser::ParseToken( str1.SkipWhiteSpace(), CStrList8() << oexT( "HTTP" ), oexFALSE ) == oexT( "HTTP" ) ) )
+		return -66;
+
+	if ( !oexVERIFY( *str1 == oexT( '/' ) ) )
+		return 67;
+
+	str1++;
+
+	if ( !oexVERIFY( str1.ParseNextToken() == oexT( "1.1" ) ) )
+		return 68;
+
+
+	// +++ This caused a crash somehow, note sSub passed as parameter
 	// oex::CStr sSub = oexBuildPath( sRoot, oexBuildPath( sSub, sScript.c_str() ) );
 
     return oex::oexRES_OK;
@@ -826,7 +901,7 @@ oex::oexRESULT TestFileMapping()
 
     oex::TFileMapping< oex::oexTCHAR > fm;
 
-    const oex::oexUINT uSize = 150;
+    const oexSIZE_T uSize = 150;
     if ( !oexVERIFY( fm.Create( 0, 0, 0, oexT( "Test" ), uSize ) ) )
         return -1;
 
@@ -1389,7 +1464,7 @@ oex::oexRESULT TestParser()
 
     oex::TList< oex::CStr > lst = oex::CParser::Explode( oexT( "This---is---a---string" ), oexT( "---" ) );
 
-	oex::oexUINT i = 0;
+	oexSIZE_T i = 0;
 	for ( oex::TList< oex::CStr >::iterator it; szStr[ i ] && lst.Next( it ); i++ )
 		if ( !oexVERIFY( it->Cmp( szStr[ i ] ) ) )
 			return -1;
@@ -2013,12 +2088,12 @@ oex::oexRESULT Test_CCircBuf()
     oex::CCircBuf cb;
 
     oex::oexCSTR pStr = oexT( "Hello World" );
-    oex::oexUINT uStr = oex::zstr::Length( pStr );
-    oex::oexUINT uBufferedData = 0;
+    oexSIZE_T uStr = oex::zstr::Length( pStr );
+    oexSIZE_T uBufferedData = 0;
 
-    for ( oex::oexUINT i = 0; i < 1000; i++ )
+    for ( oexSIZE_T i = 0; i < 1000; i++ )
     {
-        for ( oex::oexUINT x = 0; x < 8; x++ )
+        for ( oexSIZE_T x = 0; x < 8; x++ )
             cb.Write( oexStrToStr8Ptr( pStr ) ),
 			uBufferedData += uStr;
 
@@ -2042,9 +2117,9 @@ oex::oexRESULT Test_CCircBuf()
     sb2.Allocate( 100000 );
 
     uBufferedData = 0;
-    for ( oex::oexUINT i = 0; i < 1000; i++ )
+    for ( oexSIZE_T i = 0; i < 1000; i++ )
     {
-        for ( oex::oexUINT x = 0; x < 8; x++ )
+        for ( oexSIZE_T x = 0; x < 8; x++ )
             sb1.Write( oexStrToStr8( pStr ) ),
 			uBufferedData += uStr;
 
@@ -2070,11 +2145,11 @@ oex::oexRESULT Test_CFifoSync()
     fs.SetMaxBuffers( 10000 );
 
     oex::oexCSTR pStr = oexT( "Hello World" );
-    oex::oexUINT uBufferedData = 0;
+    oexSIZE_T uBufferedData = 0;
 
-    for ( oex::oexUINT i = 0; i < 10; i++ )
+    for ( oexSIZE_T i = 0; i < 10; i++ )
     {
-        for ( oex::oexUINT x = 0; x < 8; x++ )
+        for ( oexSIZE_T x = 0; x < 8; x++ )
         {
             uBufferedData++;
             fs.Write( oexStrToBin( pStr ) );
@@ -2088,7 +2163,7 @@ oex::oexRESULT Test_CFifoSync()
 
     } // end for
 
-    oex::oexUINT uUsed = fs.GetUsedBuffers();
+    oexSIZE_T uUsed = fs.GetUsedBuffers();
   	if ( !oexVERIFY( fs.GetUsedBuffers() == uBufferedData ) )
         return -2;
 
@@ -2102,9 +2177,9 @@ oex::oexRESULT Test_CFifoSync()
     fs2.Allocate( 400000, 20000 );
 
     uBufferedData = 0;
-    for ( oex::oexUINT i = 0; i < 1000; i++ )
+    for ( oexSIZE_T i = 0; i < 1000; i++ )
     {
-        for ( oex::oexUINT x = 0; x < 8; x++ )
+        for ( oexSIZE_T x = 0; x < 8; x++ )
             fs1.Write( oexStrToBin( pStr ) ),
 			uBufferedData++;
 
@@ -2575,7 +2650,7 @@ public:
     {   return str;
     }
 
-    oex::CStr ReturnPtr( oex::oexCSTR ptr, oex::oexUINT uSize )
+    oex::CStr ReturnPtr( oex::oexCSTR ptr, oexSIZE_T uSize )
     {   return ptr;
     }
 };
@@ -2591,7 +2666,7 @@ oex::oexRESULT Test_CMsgParam()
 /*
 oex::oexRESULT Test_CMsg()
 {
-    oex::oexUINT len = oex::obj::Size( oexT( "This is a test string." ) );
+    oexSIZE_T len = oex::obj::Size( oexT( "This is a test string." ) );
 
     CMsgTest mt;
     oex::CMsgTarget target;
@@ -2675,7 +2750,7 @@ oex::oexRESULT Test_CMsg()
 / *
 oex::oexRESULT Test_CMsg()
 {
-    oex::oexUINT len = oex::obj::Size( oexT( "This is a test string." ) );
+    oexSIZE_T len = oex::obj::Size( oexT( "This is a test string." ) );
 
     CMsgTest mt;
     oex::CMsgTarget target;

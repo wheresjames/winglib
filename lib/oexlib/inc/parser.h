@@ -478,7 +478,7 @@ public:
 
 			// Search for ;
 			// We'll only consider up to 12 characters
-			oexINT i;
+			oexSIZE_T i;
 			for ( i = 0; i < x_str.Length() && i < 12 && oexTC( T, ';' ) != x_str[ i ]; i++ )
 				;
 

@@ -625,7 +625,7 @@ public:
 
 		\see
 	*/
-	oexUINT Send( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 );
+	oexUINT Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 );
 
 	//==============================================================
 	// Send()

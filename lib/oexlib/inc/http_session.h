@@ -132,10 +132,10 @@ public:
 	typedef oexINT (*PFN_Callback)( oexPVOID x_pData, THttpSession< T_PORT > *x_pSession );
 
 	/// Byte type
-	typedef oex::oexBYTE t_byte;
+	typedef CBin::t_byte	t_byte;
 
 	/// Buffer type
-	typedef oex::TMem< t_byte > t_buffer;
+	typedef CBin			t_buffer;
 
 
 public:
@@ -156,7 +156,6 @@ public:
 		m_pData = oexNULL;
 		m_bNewSession = oexTRUE;
 		m_uSessionTimeout = 60 * 60;
-		m_uBufSize = 0;
     }
 
     THttpSession( T_PORT *x_pPort )
@@ -174,7 +173,6 @@ public:
 		m_pData = oexNULL;
 		m_bNewSession = oexTRUE;
 		m_uSessionTimeout = 60 * 60;
-		m_uBufSize = 0;
     }
 
     /// Destructor
@@ -470,8 +468,11 @@ public:
 		// Go to the next line
 		sRx.NextLine();
 
-		// Read in the headers
-		m_pbRxHeaders = CParser::DecodeMIME( sRx );
+		// Any headers?
+		if ( sRx.Length() )
+
+			// Read in the headers
+			m_pbRxHeaders = CParser::DecodeMIME( sRx );
 
 		// Reconstruct the request
 		m_pbRequest[ "REQUEST_STRING" ].ToString()
@@ -636,8 +637,8 @@ public:
 			return SendFile( m_sFile.Ptr(), m_sFileType.Ptr() );
 
 		// Do we have a binary buffer?
-		else if ( !m_sContent.Length() && m_buf.Size() && m_uBufSize )
-			return SendBinary( &m_buf, m_uBufSize, m_sBufType.Ptr() );
+		else if ( !m_sContent.Length() && m_buf.getUsed() )
+			return SendBinary( &m_buf, m_sBufType.Ptr() );
 
 		// For compression support
 		CStr8 *pSend = &m_sContent;
@@ -679,9 +680,9 @@ public:
 
 	}
 
-    oexBOOL SendBinary( t_buffer *x_pBuffer, oexUINT x_uSize, oexCSTR x_pType = oexNULL )
+    oexBOOL SendBinary( t_buffer *x_pBuffer, oexCSTR x_pType = oexNULL )
     {
-		if ( !x_pBuffer || 0 >= x_uSize )
+		if ( !x_pBuffer )
 			return oexFALSE;
 
 		if ( oexCHECK_PTR( x_pType ) && *x_pType )
@@ -689,12 +690,8 @@ public:
 		else
 			SetContentType( "" );
 
-		// Ensure we don't read past the end of the buffer
-		if ( x_uSize < x_pBuffer->Size() )
-			x_uSize = x_pBuffer->Size();
-
 		// How big is the data
-		m_pbTxHeaders[ "Content-length" ] = x_uSize;
+		m_pbTxHeaders[ "Content-length" ] = x_pBuffer->getUsed();
 
 		// Send the header
 		m_pPort->Write( GetErrorString( m_nErrorCode ) );
@@ -703,11 +700,12 @@ public:
 		m_pPort->Write( CParser::EncodeMime( m_pbTxHeaders ) << "\r\n" );
 
 		// Send the data
-		oexUINT uSent = 0;
-		while ( uSent < x_uSize )
+		oexSIZE_T uSent = 0;
+		oexSIZE_T uSize = x_pBuffer->getUsed();
+		while ( uSent < uSize )
 		{
 			// Send out as much data as we can
-			oexUINT uRet = m_pPort->Send( x_pBuffer->Ptr( uSent ), x_uSize - uSent );
+			oexUINT uRet = m_pPort->Send( x_pBuffer->Ptr( uSent ), uSize - uSent );
 			if ( !uRet )
 				return oexFALSE;
 
@@ -715,7 +713,7 @@ public:
 			uSent += uRet;
 
 			// Wait if buffer is full
-			if ( uSent < x_uSize )
+			if ( uSent < uSize )
 				if ( !m_pPort->WaitEvent( os::CIpSocket::eWriteEvent ) )
 					return oexFALSE;
 
@@ -839,11 +837,10 @@ public:
 	}
 
 	/// Set buffer
-	void SetBuffer( oexPVOID pBuf, oexUINT uSize, oexCSTR pType = oexNULL )
+	void SetBuffer( oexCPVOID pBuf, oexUINT uSize, oexCSTR pType = oexNULL )
 	{
 		if ( !pBuf || !uSize )
 		{	m_buf.Destroy();
-			m_uBufSize = 0;
 			return;
 		} // end if
 
@@ -853,16 +850,14 @@ public:
 			m_sBufType = pType;
 
 		// Copy the data
-		m_buf.MemCpy( pBuf, uSize );
-		m_uBufSize = uSize;
+		m_buf.MemCpy( (t_byte*)pBuf, uSize );
 	}
 
 	/// Set buffer
-	void SetBuffer( t_buffer *pBuf, oexUINT uSize, oexCSTR pType = oexNULL )
+	void SetBuffer( TMem< t_byte > *pBuf, oexUINT uSize, oexCSTR pType = oexNULL )
 	{
 		if ( !pBuf || !uSize )
 		{	m_buf.Destroy();
-			m_uBufSize = 0;
 			return;
 		} // end if
 
@@ -872,8 +867,42 @@ public:
 			m_sBufType = pType;
 
 		// Copy the data
-		m_buf.Share( *pBuf );
-		m_uBufSize = uSize;
+		m_buf.Mem().Share( *pBuf );
+		m_buf.setUsed( uSize );
+	}
+
+	/// Set buffer
+	void SetBuffer( CBin &rBuf, oexCSTR pType = oexNULL )
+	{
+		if ( !rBuf.getUsed() )
+		{	m_buf.Destroy();
+			return;
+		} // end if
+
+		if ( !oexCHECK_PTR( pType ) || !*pType )
+			m_sBufType.Destroy();
+		else
+			m_sBufType = pType;
+
+		// Reference the data
+		m_buf.Share( rBuf );
+	}
+
+	void SetBuffer( CStr8 &str, oexCSTR pType = oexNULL )
+	{
+		if ( !str.Length() )
+		{	m_buf.Destroy();
+			return;
+		} // end if
+
+		if ( !oexCHECK_PTR( pType ) || !*pType )
+			m_sBufType.Destroy();
+		else
+			m_sBufType = pType;
+
+		// Copy the data
+		m_buf.Mem().Share( *str.Mem() );
+		m_buf.setUsed( str.Length() );
 	}
 
 	/// Returns the name of the file to be sent as a reply
@@ -1031,9 +1060,6 @@ private:
 
 	/// Length of time in seconds that session data is to be valid
 	oexUINT						m_uSessionTimeout;
-
-	/// Number of bytes in m_buf to send
-	oexUINT 					m_uBufSize;
 
 	/// Binary data to send back to client
 	t_buffer					m_buf;

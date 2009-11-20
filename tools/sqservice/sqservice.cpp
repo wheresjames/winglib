@@ -100,10 +100,11 @@ public:
 			return oexERROR( -5, oexT( "Failed to start script thread" ) );
 
 		// Wait on service to shutdown or thread to exit
+		oex::oexINT gc = 0;
 		while ( IsRunning() && g_psqScriptThread->IsRunning() )
 		{
 			// Clean up binary shares
-			oexCleanupBin();
+			if ( gc ) gc--; else { gc = 10; oexCleanupBin(); }
 
 			// Wait
 			oexSleep( 100 );

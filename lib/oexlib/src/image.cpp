@@ -107,23 +107,20 @@ CImage::CImage()
 
 	m_pimg = OexAllocConstruct< CCxCustomImg >();
 
-	m_nMem = 0;
-	m_pMem = oexNULL;
-
 	m_pEncoderState = oexNULL;
 
 	m_bTransparent = oexFALSE;
 	m_rgbTransparent = 0; //RGB( 0, 0, 0 );
 
 	oexZeroMemory( &m_rect, sizeof( m_rect ) );
+
+	m_pMem = oexNULL;
+	m_uMemSize = 0;
 }
 
 CImage::CImage( const CImage &img )
 {
 	m_pimg = OexAllocConstruct< CCxCustomImg >();
-
-	m_nMem = 0;
-	m_pMem = oexNULL;
 
 	m_pEncoderState = oexNULL;
 
@@ -133,6 +130,9 @@ CImage::CImage( const CImage &img )
 	oexZeroMemory( &m_rect, sizeof( m_rect ) );
 
     Copy( (CImage*)&img );
+
+	m_pMem = oexNULL;
+	m_uMemSize = 0;
 }
 
 
@@ -309,13 +309,30 @@ oexBOOL CImage::Decode( oexPBYTE x_buf, oexINT x_size, oexCSTR x_pType )
 	if ( (DWORD)-1 == type )
 		return oexFALSE;
 
-	// Encode the image
+	// Decode the image
 	if ( !pimg->Decode( x_buf, x_size, type ) )
 		return oexFALSE;
 
 	GetRect();
 
 	return TRUE;
+}
+
+CBin& CImage::Encode( oexCSTR x_pType )
+{_STT();
+
+	// Encode the image
+	oexPBYTE pBuf; oexINT nSize;
+	if ( !Encode( &pBuf, &nSize, x_pType ) || !pBuf || 0 >= nSize )
+		return m_mem;
+
+	// +++ Be nice to replace this copy with the CBin::setBuffer()
+	//     mentioned a few lines down.
+
+	// Copy the image
+	m_mem.MemCpy( (CBin::t_byte*)pBuf, nSize );
+
+	return m_mem;
 }
 
 oexINT CImage::Encode( oexPBYTE *x_buf, oexINT *x_pnSize, oexCSTR x_pType )
@@ -339,31 +356,40 @@ oexINT CImage::Encode( oexPBYTE *x_buf, oexINT *x_pnSize, oexCSTR x_pType )
 		return 0;
 
 	// Encode the image
-	long lSize = m_nMem = 0;
-	if ( !pimg->Encode( m_pMem, lSize, type ) )
+	BYTE *pMem = 0;
+	long lSize = 0;
+	if ( !pimg->Encode( pMem, lSize, type ) || !oexCHECK_PTR( pMem ) || 0 >= lSize )
 		return 0;
 
-	// Save the size
-	m_nMem = lSize;
+	// Save pointers
+	m_pMem = pMem;
+	m_uMemSize = (oexUINT)lSize;
+
+	// +++ This would be nice, it would save a copy, but to make it work
+	//     we must ensure that xImage uses oex_malloc() to allocate
+	//     the memory.
+//	m_mem.setBuffer( (CBin::t_byte*)pMem, lSize );
 
 	// Save data
 	if ( oexCHECK_PTR( x_buf ) )
-		 *x_buf = m_pMem;
+		 *x_buf = (oexPBYTE)m_pMem;
 	if ( oexCHECK_PTR( x_pnSize ) )
-		*x_pnSize = m_nMem;
+		*x_pnSize = m_uMemSize;
 
-	// Verify memory
-	if ( !oexCHECK_PTR( m_pMem ) || m_nMem == 0 )
-		return 0;
-
-	return m_nMem;
+	return lSize;
 }
 
 void CImage::ReleaseEncodeMemory()
 {_STT();
-	m_nMem = 0;
+
+	// Hmmm.... not releasing this means we won't have to realloc
+	// it all the time
+//	m_mem.Destroy();
+
+	// Release the memory
+	m_uMemSize = 0;
 	if ( oexCHECK_PTR( m_pMem ) )
-		free( m_pMem );
+		free( (void*)m_pMem );
 	m_pMem = oexNULL;
 }
 

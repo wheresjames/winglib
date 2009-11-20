@@ -345,7 +345,7 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 	oexINT  nMBias = eInvalid;
 
     oexBOOL bErrors = oexFALSE;
-    oexINT nEnd = 0;
+    CStr::t_size nEnd = 0;
 
 	// Process the template
 	while ( x_sTmpl[ x ] != 0 )

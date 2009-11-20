@@ -55,7 +55,9 @@ template < const int T > class oex_static_assert{};
 #	define oexTRACE( s )		        oexEcho( s )
 #	define oexUNUSED( s )
 #	define oexBREAK( s )		        ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, s ), OEX_NAMESPACE::oexFALSE )
-#	define oexDEBUGVAL( v, t )			oexSHOWVAR( v, t )
+#	define oexDSHOWVAL( v, t )			oexSHOWVAL( v, t )
+#	define oexDSHOW( v )				oexSHOW( v )
+#	define oexDSHOWL( v )				oexSHOWL( v )
 
 #else
 
@@ -63,8 +65,9 @@ template < const int T > class oex_static_assert{};
 #	define oexTRACE( s )
 #	define oexUNUSED( s )
 #	define oexBREAK( s )
-#	define oexDEBUGVAL( v, t )
-
+#	define oexDSHOWVAL( v, t )
+#	define oexDSHOW( v )
+#	define oexDSHOWL( v )
 #endif
 
 // \note __FILE__ seems to always be type char*

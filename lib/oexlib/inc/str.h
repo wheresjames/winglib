@@ -62,7 +62,7 @@ template < typename T > class TStr
 public:
 
 	/// Size type
-	typedef oexLONG				t_size;
+	typedef oexSIZE_T			t_size;
 
 	/// Char type
 	typedef T					t_char;
@@ -105,7 +105,7 @@ public:
 		Set( pStr );
 	}
 
-	TStr( oexCONST T *pStr, oexUINT uSize )
+	TStr( oexCONST T *pStr, t_size uSize )
 	{	m_nLength = 0;
         m_nOffset = 0;
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
@@ -115,7 +115,7 @@ public:
 		Set( pStr, uSize );
 	}
 
-	TStr( oexCONST T *pStr, oexINT nStart, oexUINT uLen )
+	TStr( oexCONST T *pStr, t_size nStart, t_size uLen )
 	{	m_nLength = 0;
         m_nOffset = 0;
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
@@ -125,7 +125,7 @@ public:
 		Sub( pStr, nStart, uLen );
 	}
 
-	TStr( oexCONST T *pStr, oexUINT uSize, oexINT nStart, oexUINT uLen )
+	TStr( oexCONST T *pStr, t_size uSize, t_size nStart, t_size uLen )
 	{	m_nLength = 0;
         m_nOffset = 0;
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
@@ -294,7 +294,7 @@ public:
 	}
 
 	/// Allocates at least the number of bytes specified
-	T* Allocate( oexUINT x_uSize )
+	T* Allocate( t_size x_uSize )
 	{
 //		oexTRACE( "TStr::Allocate( %u )\n", (oexUINT)uSize );
 
@@ -319,7 +319,10 @@ public:
 
 		// Verify we got valid memory
         if ( !oexVERIFY_PTR( pMem ) )
+        {	oexDSHOWVAL( (oexUINT)x_uSize, "%u : " );
+        	oexDSHOWVAL( (oexUINT)pMem, "0x%x\n" );
 		    return oexNULL;
+		} // endi f
 
         // Set empty string if new buffer
         if ( !bExisting )
@@ -334,7 +337,7 @@ public:
 
 		// We'll scan for the length of the buffer later
 		else
-            m_nLength = -1;
+            m_nLength = oexMAXSIZE;
 
 		return pMem;
     }
@@ -401,10 +404,10 @@ public:
 	oexCONST t_buffer& c_Mem() oexCONST { return m_mem; }
 
 	/// Calculates the length of the string by finding the NULL terminator
-	oexINT CalculateLength()
+	t_size CalculateLength()
 	{
 		m_nLength = 0;
-		oexINT lMax = m_mem.Size();
+		t_size lMax = m_mem.Size();
 
 		// Do we have a buffer?
 		if ( 0 >= lMax )
@@ -427,15 +430,15 @@ public:
 	}
 
 	/// Returns the length of the string, calculates if needed.
-	oexINT Length() oexCONST
-	{	if ( 0 > m_nLength )
+	t_size Length() oexCONST
+	{	if ( oexMAXSIZE == m_nLength )
 			return ( (TStr*)this )->CalculateLength();
 		return m_nLength - m_nOffset;
 	}
 
     /// Manually sets the length
     /// !!! This allows NULL characters to be in the string.
-    oexINT SetLength( oexINT x_nLength )
+    t_size SetLength( t_size x_nLength )
     {
         // Do we already have the correct length?
         if ( x_nLength == m_nLength )
@@ -454,7 +457,7 @@ public:
     /// Manually sets the length
     /// This function is for buffer sharing
 	/// !!! This function may cause a non null terminated string
-    oexINT _SetLength( oexINT x_nLength )
+    t_size _SetLength( t_size x_nLength )
     {
 		// Ensure it's within reason
 		if ( x_nLength > m_mem.Size() )
@@ -467,7 +470,7 @@ public:
     }
 
     /// Returns the size in bytes, of a single character
-    oexINT SizeOfChar() oexCONST
+    t_size SizeOfChar() oexCONST
     {   return sizeof( T ); }
 
     /// Returns the length of the string in bytes
@@ -475,7 +478,7 @@ public:
         \param x_uAdd   -   Number of *characters* to
                             add to the returned length
     */
-    oexINT LengthInBytes( oexUINT x_uAdd = 0 ) oexCONST
+    t_size LengthInBytes( t_size x_uAdd = 0 ) oexCONST
     {
         return ( Length() + x_uAdd ) * SizeOfChar();
     }
@@ -686,14 +689,14 @@ public:
 	}
 
     /// Compare to const string
-    oexINT Compare( oexCONST T *x_pPtr, oexUINT x_uLen )
+    t_size Compare( oexCONST T *x_pPtr, t_size x_uLen )
     {   return str::Compare( Ptr(), Length(), x_pPtr, x_uLen ); }
 
     /// Extracts a sub string
-	TStr& Sub( oexUINT x_uStart, oexUINT x_uLen = 0 )
+	TStr& Sub( t_size x_uStart, t_size x_uLen = 0 )
 	{
         // Current string length
-		oexUINT uSize = Length();
+		t_size uSize = Length();
 
 		// Can't shorten the string if we don't own the memory
 		if ( x_uLen && x_uLen < ( uSize - x_uStart ) && 1 != m_mem.GetRefCount() )
@@ -716,15 +719,15 @@ public:
 
 	}
 
-	TStr& Sub( TStr &str, oexINT nStart, oexUINT uLen )
+	TStr& Sub( TStr &str, t_size nStart, t_size uLen )
 	{	return Sub( str.Ptr(), str.Length(), nStart, uLen ); }
 
-	TStr& Sub( oexCONST T* pStr, oexINT nStart, oexUINT uLen )
+	TStr& Sub( oexCONST T* pStr, t_size nStart, t_size uLen )
 	{	return Sub( pStr, zstr::Length( pStr ), nStart, uLen ); }
 
-	TStr& Sub( oexCONST T* pStr, oexUINT uSize, oexINT nStart, oexUINT uLen )
+	TStr& Sub( oexCONST T* pStr, t_size uSize, t_size nStart, t_size uLen )
 	{
-		oexUINT uStart = 0;
+		t_size uStart = 0;
 		if ( 0 <= nStart )
 			uStart = (oexUINT)nStart;
 		else
@@ -752,7 +755,7 @@ public:
 	}
 
 	/// Returns a sub string
-	TStr SubStr( oexINT nStart, oexUINT uLen ) oexCONST
+	TStr SubStr( t_size nStart, t_size uLen ) oexCONST
 	{	return TStr( Ptr(), Length(), nStart, uLen );
     }
 
@@ -766,9 +769,9 @@ public:
 
 	/// Moves part of the string from one place to another
 	/// May destroy the string if there is overlap
-	TStr& Move( oexUINT uFrom, oexUINT uTo, oexUINT uSize )
+	TStr& Move( t_size uFrom, t_size uTo, t_size uSize )
 	{	Move( _Ptr(), Length(), uFrom, uTo, uSize ); return *this; }
-	oexINT Move( T* pPtr, oexUINT uLen, oexUINT uFrom, oexUINT uTo, oexUINT uSize )
+	t_size Move( T* pPtr, t_size uLen, t_size uFrom, t_size uTo, t_size uSize )
 	{
 		// Sanity check
 		if ( uFrom >= uLen || uTo >= uLen )
@@ -898,7 +901,7 @@ public:
         return *this;
     }
 
-	TStr& Set( oexCONST T* x_pStr, oexUINT uSize )
+	TStr& Set( oexCONST T* x_pStr, t_size uSize )
 	{
 		// Verify pointer
         if ( !x_pStr || !oexVERIFY_PTR( x_pStr ) || !uSize )
@@ -949,7 +952,7 @@ public:
 	}
 
     template< typename T_CHAR >
-        TStr& Cnv( oexCONST T_CHAR *x_pStr, oexUINT x_uLen = 0 )
+        TStr& Cnv( oexCONST T_CHAR *x_pStr, t_size x_uLen = 0 )
     {
 		if ( !x_pStr || !x_pStr )
 		{	OexAllocate( 0 );
@@ -1003,7 +1006,7 @@ public:
     }
 
     template< typename T_STR >
-        TStr& Bin( oexCONST T_STR *x_pStr, oexUINT x_uLen = 0 )
+        TStr& Bin( oexCONST T_STR *x_pStr, t_size x_uLen = 0 )
     {
 		if ( !x_pStr || !x_pStr )
 		{	OexAllocate( 0 );
@@ -1022,8 +1025,8 @@ public:
         oexUINT uBytes = x_uLen * sizeof( T_STR );
 
         // Calculate whole bytes and remainder
-        oexUINT uT = uBytes / sizeof( T );
-        oexUINT uR = uBytes - ( uT * sizeof( T ) );
+        t_size uT = uBytes / sizeof( T );
+        t_size uR = uBytes - ( uT * sizeof( T ) );
 
         // Allocate enough space
         if ( !OexAllocate( uT + uR ) )
@@ -1041,7 +1044,7 @@ public:
     template< typename T_CHAR>
         TStr& Bin( oexCONST TStr< T_CHAR > &x_sStr )
     {
-        oexUINT uLen = x_sStr.Length();
+        t_size uLen = x_sStr.Length();
 
 		if ( !uLen )
 		{	OexAllocate( 0 );
@@ -1049,11 +1052,11 @@ public:
         } // end if
 
         // Get length of in comming string in bytes
-        oexUINT uBytes = uLen * sizeof( T_CHAR );
+        t_size uBytes = uLen * sizeof( T_CHAR );
 
         // Calculate whole bytes and remainder
-        oexUINT uT = uBytes / sizeof( T );
-        oexUINT uR = uBytes - ( uT * sizeof( T ) );
+        t_size uT = uBytes / sizeof( T );
+        t_size uR = uBytes - ( uT * sizeof( T ) );
 
         // Allocate enough space
         if ( !OexAllocate( uT + uR ) )
@@ -1075,7 +1078,7 @@ public:
 		if ( !oexCHECK( sizeof( T ) == sizeof( oexCHARW ) ) )
 			return *this;
 
-        oexUINT uLen = x_sStr.Length();
+        t_size uLen = x_sStr.Length();
 
 		if ( !uLen )
 		{	OexAllocate( 0 );
@@ -1083,7 +1086,7 @@ public:
         } // end if
 
         // Get length of in comming string in bytes
-        oexUINT uConv = os::CSys::MbsToWcs( oexNULL, 0, x_sStr.Ptr(), uLen );
+        t_size uConv = os::CSys::MbsToWcs( oexNULL, 0, x_sStr.Ptr(), uLen );
 
         // Allocate enough space
         if ( !OexAllocate( uConv ) )
@@ -1110,7 +1113,7 @@ public:
 		if ( !oexCHECK( sizeof( T ) == sizeof( oexCHAR8 ) ) )
 			return *this;
 
-        oexUINT uLen = x_sStr.Length();
+        t_size uLen = x_sStr.Length();
 
 		if ( !uLen )
 		{	OexAllocate( 0 );
@@ -1151,10 +1154,10 @@ public:
 	{	return Append( pStr, zstr::Length( pStr ) ); }
 
 	// Concatenation operator
-	TStr& Append( oexCONST T* pStr, oexUINT uSize )
+	TStr& Append( oexCONST T* pStr, t_size uSize )
 	{
 		// Allocate space for new string
-		oexUINT uOldSize = Length();
+		t_size uOldSize = Length();
 		if ( !oexVERIFY( OexAllocate( uOldSize + uSize ) ) )
 			return *this;
 
@@ -1227,10 +1230,10 @@ public:
 	TStr& Trim( oexCONST T* pChars )
 	{	return RTrim( pChars ).LTrim( pChars ); }
 
-	TStr& operator >>= ( oexUINT uChars )
+	TStr& operator >>= ( t_size uChars )
 	{	return LTrim( uChars ); }
 
-	TStr& operator <<= ( oexUINT uChars )
+	TStr& operator <<= ( t_size uChars )
 	{	return RTrim( uChars ); }
 
 	TStr& operator ++( int ) { return LTrim( 1 ); }
@@ -1256,7 +1259,7 @@ public:
 		{	OexAllocate( 0 ); return *this; }
 
 		oexRESULT res;
-		oexUINT uSize = oexSTRSIZE;
+		t_size uSize = oexSTRSIZE;
 		do
 		{
 			// Allocate buffer
@@ -1271,7 +1274,7 @@ public:
 			// Shift up size
 			uSize <<= 1;
 
-		} while ( uSize && os::CSys::c_StrErr_INSUFFICIENT_BUFFER == (oexUINT)res );
+		} while ( uSize && os::CSys::c_StrErr_INSUFFICIENT_BUFFER == (t_size)res );
 
 		// Verfiy that the string was copied correctly
 		oexASSERT( (oexRESULT)os::CSys::c_StrErr_OK == res );
@@ -1299,8 +1302,8 @@ public:
 			return *this;
 
 		oexRESULT res;
-		oexUINT uSize = oexSTRSIZE;
-		oexUINT uLen = Length();
+		t_size uSize = oexSTRSIZE;
+		t_size uLen = Length();
 		do
 		{
 			// Allocate buffer
@@ -2020,9 +2023,9 @@ public:
 public:
 
     /// Converts to a number
-    oexINT64 ToNum( oexINT x_nMax = 0, oexUINT x_uRadix = 10, oexINT *x_pnEnd = oexNULL, oexBOOL x_bTrim = oexFALSE )
+    oexINT64 ToNum( t_size x_nMax = 0, oexUINT x_uRadix = 10, t_size *x_pnEnd = oexNULL, oexBOOL x_bTrim = oexFALSE )
     {   if ( !x_nMax || x_nMax > Length() ) x_nMax = Length();
-        oexINT nEnd = 0; oexINT64 llNum = str::StrToNum( Ptr(), x_nMax, x_uRadix, &nEnd );
+        t_size nEnd = 0; oexINT64 llNum = str::StrToNum( Ptr(), x_nMax, x_uRadix, &nEnd );
         if ( x_bTrim ) LTrim( nEnd );
         if ( x_pnEnd ) *x_pnEnd = nEnd;
         return llNum;
@@ -2061,9 +2064,9 @@ public:
 	oexBOOL Cmp( oexCONST T* pStr )
 	{	return Cmp( pStr, zstr::Length( pStr ) ); }
 
-	oexBOOL Cmp( oexCONST T* pStr, oexUINT uSize )
+	oexBOOL Cmp( oexCONST T* pStr, t_size uSize )
 	{
-        if ( (oexINT)uSize != Length() )
+        if ( (t_size)uSize != Length() )
             return oexFALSE;
 		if ( !uSize )
             return oexTRUE;
@@ -2076,7 +2079,7 @@ public:
 	oexBOOL ICmp( oexCONST T* pStr )
 	{	return ICmp( pStr, zstr::Length( pStr ) ); }
 
-	oexBOOL ICmp( oexCONST T* pStr, oexUINT uSize )
+	oexBOOL ICmp( oexCONST T* pStr, t_size uSize )
     {   return !str::ICompare( Ptr(), Length(), pStr, uSize ); }
 
 	oexBOOL CmpLen( TStr &str, oexINT x_lLen = -1 )
@@ -2090,7 +2093,7 @@ public:
 		return CmpLen( pStr, lLen, x_lLen );
     }
 
-	oexBOOL CmpLen( oexCONST T* pStr, oexUINT uSize, oexINT x_lLen = -1 )
+	oexBOOL CmpLen( oexCONST T* pStr, t_size uSize, oexINT x_lLen = -1 )
     {   if ( 0 > x_lLen ) x_lLen = uSize;
         return !str::CompareLen( Ptr(), Length(), pStr, uSize, x_lLen );
     }
@@ -2106,7 +2109,7 @@ public:
 		return ICmpLen( pStr, lLen, x_lLen );
     }
 
-	oexBOOL ICmpLen( oexCONST T* pStr, oexUINT uSize, oexINT x_lLen = -1 )
+	oexBOOL ICmpLen( oexCONST T* pStr, t_size uSize, oexINT x_lLen = -1 )
     {   if ( 0 > x_lLen ) x_lLen = uSize;
         return !str::ICompareLen( Ptr(), Length(), pStr, uSize, x_lLen );
     }
@@ -2233,7 +2236,7 @@ public:
 	/// Skips any character 'c' where ( tMin <= c <= tMax )
 	/// In range characters are removed from the string
 	TStr& SkipInRange( T tMin, T tMax )
-	{	oexUINT uLen = Length();
+	{	t_size uLen = Length();
 		oexINT p = str::SkipInRange( Ptr(), Length(), tMin, tMax );
 		if ( 0 < p ) LTrim( p ); else if ( 0 > p ) Destroy();
 		return *this;
@@ -2379,17 +2382,17 @@ public:
 		return str;
 	}
 
-	oexBOOL IsMatchAt( oexUINT i, oexCONST T* pChars )
+	oexBOOL IsMatchAt( t_size i, oexCONST T* pChars )
 	{	oexASSERT_PTR( pChars );
         return 0 <= str::FindCharacter( pChars, zstr::Length( pChars ), *Ptr( i ) );
 	}
 
-    oexBOOL IsInRangeAt( oexUINT i, T tMin, T tMax )
+    oexBOOL IsInRangeAt( t_size i, T tMin, T tMax )
 	{   T ch = *Ptr( i );
         return tMin <= ch && tMax >= ch;
 	}
 
-    oexBOOL IsWhiteSpaceAt( oexUINT i )
+    oexBOOL IsWhiteSpaceAt( t_size i )
     {   return !IsInRangeAt( i, oexT( '!' ), oexT( '~' ) ); }
 
 	/// Finds the first token in a string and returns it
@@ -2402,13 +2405,13 @@ public:
 	static TStr NextToken( TStr str, T tMin, T tMax, oexINT *puI = oexNULL )
 	{	return NextToken( str.Ptr(), str.Length(), tMin, tMax, puI ); }
 
-	static TStr NextToken( oexCONST T* pStr, oexUINT uSize, T tMin, T tMax, oexINT *puI  = oexNULL )
+	static TStr NextToken( oexCONST T* pStr, t_size uSize, T tMin, T tMax, oexINT *puI  = oexNULL )
 	{
 		// Sanity check
 		if ( !oexVERIFY_PTR( pStr ) )
 			return TStr();
 
-		oexUINT i = 0;
+		t_size i = 0;
 
 		// Ensure valid index pointer
 		if ( !oexVERIFY_PTR_NULL_OK( puI ) )
@@ -2434,7 +2437,7 @@ public:
 		// Find the end of the token
 		oexINT nEnd = str::SkipInRange( &pStr[ nStart ], uSize - nStart, tMin, tMax );
 		if ( 0 >= nEnd )
-			return TStr();
+			nEnd = uSize;
 
 		// Add offset
 		if ( puI )
@@ -2454,7 +2457,7 @@ public:
 	static TStr NextToken( TStr str, oexCONST T* pValid, oexINT *puI = oexNULL )
 	{	return NextToken( str.Ptr(), str.Length(), pValid, puI ); }
 
-	static TStr NextToken( oexCONST T* pStr, oexUINT uSize, oexCONST T *pValid, oexINT *puI  = oexNULL )
+	static TStr NextToken( oexCONST T* pStr, t_size uSize, oexCONST T *pValid, oexINT *puI  = oexNULL )
 	{
 		// Sanity check
 		if ( !oexCHECK_PTR( pStr ) || !oexCHECK_PTR_NULL_OK( pValid ) )
@@ -2463,8 +2466,8 @@ public:
 		if ( !pValid )
 			return TStr( pStr, uSize );
 
-		oexUINT i = 0;
-		oexUINT uValid = zstr::Length( pValid );
+		t_size i = 0;
+		t_size uValid = zstr::Length( pValid );
 
 		// Ensure valid index pointer
 		if ( !oexVERIFY_PTR_NULL_OK( puI ) )
@@ -2490,7 +2493,7 @@ public:
 		// Find the end of the token
 		oexINT nEnd = str::SkipCharacters( &pStr[ nStart ], uSize - nStart, pValid, uValid );
 		if ( 0 >= nEnd )
-			return TStr();
+			nEnd = uSize;
 
 		// Add offset
 		if ( puI )
@@ -2506,7 +2509,7 @@ public:
 	{	return Token( pStr, zstr::Length( pStr ), pValid, puI ); }
 	static TStr Token( TStr str, oexCONST T* pValid, oexINT *puI = oexNULL )
 	{	return Token( str.Ptr(), str.Length(), pValid, puI ); }
-	static TStr Token( oexCONST T* pStr, oexUINT uSize, oexCONST T *pValid, oexINT *puI  = oexNULL )
+	static TStr Token( oexCONST T* pStr, t_size uSize, oexCONST T *pValid, oexINT *puI  = oexNULL )
 	{
 		// Sanity check
 		if ( !oexCHECK_PTR( pStr ) || !oexCHECK_PTR_NULL_OK( pValid ) )
@@ -2515,8 +2518,8 @@ public:
 		if ( !pValid )
 			return TStr( pStr, uSize );
 
-		oexUINT i = 0;
-		oexUINT uValid = zstr::Length( pValid );
+		t_size i = 0;
+		t_size uValid = zstr::Length( pValid );
 
 		// Ensure valid index pointer
 		if ( !oexVERIFY_PTR_NULL_OK( puI ) )
@@ -2537,7 +2540,7 @@ public:
 		// Find the end of the token
 		oexINT nEnd = str::SkipCharacters( pStr, uSize, pValid, uValid );
 		if ( 0 >= nEnd )
-			return TStr();
+			nEnd = uSize;
 
 		// Add offset
 		if ( puI )
@@ -2737,16 +2740,16 @@ namespace obj
 		+++ I don't like having the reference to CStr here, so I really
 		should figure out another way.  Any suggestions?
 	*/
-	template <> oexITS oexUINT Size< CStrW >( oexCONST CStrW *x_obj )
+	template <> oexITS oexSIZE_T Size< CStrW >( oexCONST CStrW *x_obj )
     {   return ( (CStrW*)x_obj )->LengthInBytes(); }
 
-	template <> oexITS oexUINT Size< CStr8 >( oexCONST CStr8 *x_obj )
+	template <> oexITS oexSIZE_T Size< CStr8 >( oexCONST CStr8 *x_obj )
     {   return ( (CStr8*)x_obj )->LengthInBytes(); }
 
-	template <> oexITS oexUINT Size< CStr16 >( oexCONST CStr16 *x_obj )
+	template <> oexITS oexSIZE_T Size< CStr16 >( oexCONST CStr16 *x_obj )
     {   return ( (CStr16*)x_obj )->LengthInBytes(); }
 
-//	template <> oexITS oexUINT Size< CStr32 >( oexCONST CStr32 *x_obj )
+//	template <> oexITS oexSIZE_T Size< CStr32 >( oexCONST CStr32 *x_obj )
 //    {   return ( (CStr32&)x_obj ).LengthInBytes(); }
 
 	//==============================================================

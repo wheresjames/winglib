@@ -52,19 +52,19 @@ public:
 public:
 
 	/// Default constructor
-	CBin() 
+	CBin()
 	{
-		m_nUsed = 0; 
-		m_ptr = oexNULL; 
+		m_nUsed = 0;
+		m_ptr = oexNULL;
 		m_bFree = oexFALSE;
 	}
 
 	/// Copy constructor
 	CBin( const CBin &r ) :
 		m_buf( r.m_buf )
-	{			
-		m_nUsed = 0; 
-		m_ptr = oexNULL; 
+	{
+		m_nUsed = 0;
+		m_ptr = oexNULL;
 		m_bFree = oexFALSE;
 
 		if ( r.m_ptr )
@@ -136,8 +136,14 @@ public:
 	/// Copy another buffer
 	t_size Copy( CBin *x_p = oexNULL );
 
+	/// Copy another buffer
+	t_size Copy( CBin &x_r ) { return Copy( &x_r ); }
+
 	/// Shares another buffer
 	t_size Share( CBin *x_p = oexNULL );
+
+	/// Shares another buffer
+	t_size Share( CBin &x_r ) { return Share( &x_r ); }
 
 	/// Returns the size of the current buffer
 	t_size Size()
@@ -152,7 +158,7 @@ public:
 
 	/// Returns character value at i
 	t_byte get( t_size i )
-	{	
+	{
 		if ( i >= m_nUsed )
 			return 0;
 
@@ -167,7 +173,7 @@ public:
 	{
 		if ( i >= m_nUsed )
 			return;
-		
+
 		if ( m_ptr )
 			m_ptr[ i ] = v;
 
@@ -178,7 +184,7 @@ public:
 	void setUsed( t_size n )
 	{
 		// Set new used size
-		m_nUsed = n; 
+		m_nUsed = n;
 
 		// Ensure valid
 		if ( 0 > m_nUsed )
@@ -192,24 +198,24 @@ public:
 	/// Returns the number of bytes in the buffer being used
 	t_size getUsed()
 	{
-		if ( 0 > m_nUsed ) 
+		if ( 0 > m_nUsed )
 			m_nUsed = 0;
 
-		if ( m_ptr ) 
+		if ( m_ptr )
 			return m_nUsed;
 
-		else if ( Size() < m_nUsed ) 
+		else if ( Size() < m_nUsed )
 			m_nUsed = Size();
 
 		return m_nUsed;
 	}
 
 	/// Sets the share name
-	void SetName( const CStr &s )
-	{	m_buf.SetName( s.Ptr() ); }
+	void SetName( oexCSTR s )
+	{	m_buf.SetName( s ); }
 
 	/// Returns the share name
-	CStr GetName()
+	oexCSTR GetName()
 	{	return m_buf.GetName(); }
 
 	/// Sets plain share flag
@@ -237,16 +243,16 @@ public:
 		s._SetLength( getUsed() );
 		return s;
 	}
-	
+
 	/// Returns a string representation of the buffer, it will be null terminated
 	/**
 		At the cost of copying the buffer, this string will always be null terminated
-		
+
 	*/
 	CStr8 getSafeString()
 	{	return CStr8( Ptr(), getUsed() );
 	}
-	
+
 	/// Converts a string to a binary buffer
 	// Returns the number of bytes in the buffer
 	t_size setString( const CStr8 &s )
@@ -264,10 +270,10 @@ public:
 	}
 
 	/// Returns a pointer to the buffer
-	const t_byte* Ptr() { if ( m_ptr ) return m_ptr; return m_buf.Ptr(); }
+	const t_byte* Ptr( t_size o = 0 ) { if ( m_ptr ) return m_ptr + o; return m_buf.Ptr( o ); }
 
 	/// Returns a writable pointer to the buffer
-	t_byte* _Ptr() { if ( m_ptr ) return m_ptr; return m_buf.Ptr(); }
+	t_byte* _Ptr( t_size o = 0 ) { if ( m_ptr ) return m_ptr + o; return m_buf.Ptr( o ); }
 
 	/// Sets a Ptr buffer pointer ( make sure it doesn't go away before this class! )
 	void setBuffer( t_byte *x_ptr, t_size x_size, oexBOOL x_bFree = oexTRUE )
@@ -286,7 +292,7 @@ public:
 	}
 
 	/// Sets a Ptr buffer pointer ( make sure it doesn't go away before this class! )
-	t_size MemCpy( t_byte *ptr, t_size size )
+	t_size MemCpy( oexCONST t_byte *ptr, t_size size )
 	{
 		// Free any Ptr buffer
 		FreePtr();
@@ -304,19 +310,19 @@ public:
 	}
 
 	/// Append buffer
-	t_size Append( CBin *p )
+	t_size Append( CBin *x_p )
 	{
-		if ( !p )
+		if ( !x_p )
 			return m_nUsed;
 
-		return AppendBuffer( p->Ptr(), p->getUsed() );
+		return AppendBuffer( x_p->Ptr(), x_p->getUsed() );
 	}
 
 	/// Append data to buffer
-	t_size AppendBuffer( const t_byte *pBuf, t_size nBytes );
+	t_size AppendBuffer( const t_byte *x_pBuf, t_size x_nBytes );
 
 	/// Shift the data in the buffer to the left
-	t_size LShift( t_size nBytes );
+	t_size LShift( t_size x_nBytes );
 
 	/// Returns buffer object reference
 	t_buffer& Mem() { return m_buf; }
@@ -349,10 +355,39 @@ private:
 */
 class CBinShare
 {
+	enum
+	{
+		/// Amount of time in seconds to retain unaccessed buffers
+		eBufferTimeout = 60
+	};
+
+	class CBinHolder
+	{
+	public:
+
+		/// Default constructor
+		CBinHolder() {}
+
+		/// Copy constructor
+		CBinHolder( const CBinHolder &c )
+			: bin( c.bin ), to( to ) {}
+
+		/// Assignment operator
+		CBinHolder& operator = ( const CBinHolder &c )
+		{	bin = c.bin; to = to; return *this; }
+
+		/// Buffer
+		CBin			bin;
+
+		/// Expires
+		oexUINT			to;
+	};
+
+
 public:
 
 	/// Buffer list type
-    typedef TAssoList< CStr, CBin >			t_buffers;
+    typedef TAssoList< CStr, CBinHolder >	t_buffers;
 
 	/// Size type
 	typedef CBin::t_size					t_size;
@@ -369,7 +404,7 @@ public:
     }
 
     /// Destructor
-    virtual ~CBinShare() 
+    virtual ~CBinShare()
 	{
 		Destroy();
 	}
@@ -378,7 +413,13 @@ public:
 	void Destroy();
 
 	/// Returns the specified buffer
-	CBin GetBuffer( CStr sName, CBinShare::t_size uSize );
+	CBin GetBuffer( CStr sName, CBinShare::t_size uSize = 0 );
+
+	/// Returns the specified buffer
+	oexBOOL SetBuffer( CStr sName, CBin *pBin );
+
+	/// Returns non-zero if the specified binary buffer exists
+	oexBOOL IsBuffer( CStr sName );
 
 	/// Releases unused buffers
 	oexINT Cleanup();

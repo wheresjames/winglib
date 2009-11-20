@@ -172,7 +172,7 @@ public:
 	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
 	{
 		// Wait for connect event
-		if ( m_server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, 1000 ) )
+		if ( m_server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, 100 ) )
 		{
 			// Add a new session
 			typename THttpServer::t_LstSession::iterator it = m_lstSessions.Append();
@@ -263,7 +263,7 @@ public:
 		else
 		{
 //			oexEcho( "Cleaning up..." );
-			m_uCleanup = eCleanupInterval;
+			m_uCleanup = eCleanupInterval * 10;
 
 			// Attempt to cleanup session data
 			oexAutoLock ll( m_lockSession );

@@ -845,6 +845,14 @@ public:
 	*/
 	oexINT Encode( oexPBYTE *x_buf, oexINT *x_pnSize, oexCSTR x_pType = oexNULL );
 
+	// Memory pointer returned by Encode() is
+	// good until object is destroyed or this
+	// function is called again
+	/**
+		\return Zero if failure, or number of bytes encoded
+	*/
+	CBin& Encode( oexCSTR x_pType = oexNULL );
+
 	//==============================================================
 	// Save()
 	//==============================================================
@@ -974,7 +982,20 @@ public:
 
 		\see
 	*/
-	oexPBYTE GetEncBuffer() { return m_pMem; }
+	CBin& GetEncBuffer() { return m_mem; }
+
+	//==============================================================
+	// GetEncBufferPtr()
+	//==============================================================
+	/// Returns a pointer to the internal encoded image buffer
+	/**
+		This buffer is only valid after a call to Encode()
+
+		\return Pointer to the internal encoded image buffer
+
+		\see
+	*/
+	oexCPVOID GetEncBufferPtr() { return m_mem.Ptr(); }
 
 	//==============================================================
 	// GetEncBufferSize()
@@ -987,7 +1008,7 @@ public:
 
 		\see
 	*/
-	oexINT GetEncBufferSize() { return m_nMem; }
+	oexINT GetEncBufferSize() { return m_mem.getUsed(); }
 
 	// Copies raw data into image
 	/**
@@ -1086,11 +1107,14 @@ private:
 	/// Pointer to JPEG encoder state structure
 	void			*m_pEncoderState;
 
-	/// Pointer to encoder memory created by CxImage
-	oexPBYTE		m_pMem;
+	/// Encoder memory
+	CBin			m_mem;
 
-	/// Size of the buffer in m_pMem
-	oexINT			m_nMem;
+	/// xImage buffer
+	oexCPVOID		m_pMem;
+
+	/// m_pMem buffer size
+	oexUINT			m_uMemSize;
 
 	/// The filename of the current image if available
 	CStr			m_filename;

@@ -22,8 +22,12 @@ CGdcChart::~CGdcChart()
 
 sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 									  	 const sqbind::stdString &x_sParams,
-									  	 const sqbind::stdString &x_sData )
+									  	 const sqbind::stdString &x_sData,
+									  	 sqbind::CSqImage *x_pImg )
 {
+	if ( !x_pImg )
+		return oexT( "" );
+
 	sqbind::CSqMulti mParams( x_sParams.c_str() );
 	sqbind::CSqMulti mData( x_sData.c_str() );
 
@@ -117,15 +121,34 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 		return oexT( "" );
 	} // end if
 
+	// Create image to hold the data
+	if ( !x_pImg->isValid()
+		 || x_pImg->getWidth() != graph->sx
+		 || x_pImg->getHeight() != graph->sy )
+		if ( !x_pImg->Create( graph->sx, graph->sy ) )
+			return oexT( "" );
+
 	// Image size
-	long lSize = graph->sx * graph->sy * 3;
+	long lSize = x_pImg->Obj().GetImageSize();
 	if ( 0 >= lSize )
 	{	oexERROR( 0, oexMks( oexT( "Inavlid image size : " ), lSize ).Ptr() );
 		return oexT( "" );
 	} // end if
 
-	// Copy image data
-	m_img.MemCpy( (sqbind::CSqBinary::t_byte*)graph->pixels, lSize );
+	int sw = graph->sx;
+	int sh = graph->sy;
+	unsigned char **s = graph->pixels;
+	unsigned char *d = (unsigned char*)x_pImg->Obj().GetBits();
+
+	for ( int y = 0, u = sh - 1; y < sh; y++, u-- )
+		for ( int x = 0; x < sw; x++, d += 3 )
+		{
+			unsigned char b = s[ u ][ x ];
+			d[ 0 ] = graph->red[ b & 0x03 ];
+			d[ 1 ] = graph->green[ b & 0x03 ];
+			d[ 2 ] = graph->blue[ b & 0x03 ];
+
+		} // end for
 
 	// Save image information
 	sqbind::CSqMulti mImg;
@@ -193,12 +216,10 @@ int CGdcChart::SaveChart(	const sqbind::stdString &x_sFile,
 							const sqbind::stdString &x_sData )
 {
 	// Create the chart
-	sqbind::CSqMulti mChart = CreateChart( x_sFile, x_sParams, x_sData );
-	if ( !m_img.getUsed() )
+	sqbind::CSqImage img;
+	sqbind::CSqMulti mChart = CreateChart( x_sFile, x_sParams, x_sData, &img );
+	if ( !img.isValid() )
 		return -10;
 
-	// Save image to disk
-	oexFilePutContentsLen( x_sFile.c_str(), m_img.Ptr(), m_img.getUsed() );
-
-	return 0;
+	return img.Save( x_sFile, oexNULL );
 }

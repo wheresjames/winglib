@@ -99,6 +99,8 @@
 #define oexGetRefCount				OEX_NAMESPACE::CAlloc::GetRefCount
 
 #define oexGetBin					OEX_NAMESPACE::COex::GetBinShare().GetBuffer
+#define oexSetBin					OEX_NAMESPACE::COex::GetBinShare().SetBuffer
+#define oexIsBin					OEX_NAMESPACE::COex::GetBinShare().IsBuffer
 #define oexCleanupBin				OEX_NAMESPACE::COex::GetBinShare().Cleanup
 
 #if defined( OEX_GCC )

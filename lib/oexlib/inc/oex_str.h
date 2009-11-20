@@ -43,8 +43,8 @@
 namespace zstr
 {
     template < typename T >
-        oexUINT Length( oexCONST T *s )
-        {   oexUINT l = 0;
+        oexSIZE_T Length( oexCONST T *s )
+        {   oexSIZE_T l = 0;
             oexASSERT_PTR( s );
             while ( *s )
             	s++, l++;
@@ -98,8 +98,8 @@ namespace str
         \param [in] sz      -   Length of the buffer in s
     */
     template < typename T >
-        oexUINT Length( oexCONST T *s, oexINT sz )
-        {   oexUINT l = 0;
+        oexSIZE_T Length( oexCONST T *s, oexINT sz )
+        {   oexSIZE_T l = 0;
             oexASSERT_PTR( s );
             while ( sz-- && *s )
             	s++, l++;
@@ -120,7 +120,7 @@ namespace str
         \param [in] ln_src  -   Length of the string in src
     */
     template < typename T >
-        oexUINT Copy( T *dst, oexINT sz_dst, oexCONST T *src, oexINT ln_src )
+        oexSIZE_T Copy( T *dst, oexINT sz_dst, oexCONST T *src, oexINT ln_src )
         {
             if ( 0 >= sz_dst )
                 return 0;
@@ -144,7 +144,7 @@ namespace str
         \param [in] ln_src  -   Length of the string in src
     */
     template< typename T >
-        oexUINT Append( T *dst, oexINT ln_dst, oexINT sz_dst, oexCONST T* src, oexINT sz_src )
+        oexSIZE_T Append( T *dst, oexINT ln_dst, oexINT sz_dst, oexCONST T* src, oexINT sz_src )
         {
             if ( ln_dst >= sz_dst )
                 return ln_dst;
@@ -272,7 +272,7 @@ namespace str
         \param [in] ln2 -   Number of characters in s2
     */
 	template< class T >
-		oexINT RSkipCharacters( oexCONST T *s1, oexUINT ln1, oexCONST T *s2, oexUINT ln2 )
+		oexINT RSkipCharacters( oexCONST T *s1, oexSIZE_T ln1, oexCONST T *s2, oexSIZE_T ln2 )
 	    {
             oexASSERT_PTR( s1 );
             oexASSERT_PTR( s2 );
@@ -305,7 +305,7 @@ namespace str
         \param [in] ch  -   Character to search for
     */
 	template< class T >
-		oexINT FindCharacter( oexCONST T *s, oexUINT ln, T ch )
+		oexINT FindCharacter( oexCONST T *s, oexSIZE_T ln, T ch )
 		{
             oexASSERT_PTR( s );
 
@@ -566,7 +566,7 @@ namespace str
         \param [in] ln2 -   Number of characters in s2
     */
 	template< class T >
-		oexINT RFindCharacters( oexCONST T *s1, oexUINT ln1, oexCONST T *s2, oexUINT ln2 )
+		oexINT RFindCharacters( oexCONST T *s1, oexSIZE_T ln1, oexCONST T *s2, oexSIZE_T ln2 )
 	    {
             oexASSERT_PTR( s1 );
             oexASSERT_PTR( s2 );
@@ -887,7 +887,7 @@ namespace str
 
     /// Converts a string to a number
 	template< class T >
-        oexINT64 StrToNum( oexCONST T *x_pStr, oexUINT x_uSize = 0, oexUINT x_uRadix = 10, oexINT *x_pnEnd = oexNULL )
+        oexINT64 StrToNum( oexCONST T *x_pStr, oexSIZE_T x_uSize = 0, oexUINT x_uRadix = 10, oexSIZE_T *x_pnEnd = oexNULL )
     {
         oexASSERT( x_uRadix < 36 );
         if ( 0 >= x_uRadix || 36 < x_uRadix )
@@ -922,7 +922,7 @@ namespace str
                 i += 2;
 
         // Decode the number
-        while ( !bErr && (oexUINT)i < x_uSize )
+        while ( !bErr && (oexSIZE_T)i < x_uSize )
         {
             oexINT ch = (oexINT)x_pStr[ i ];
 
@@ -1095,25 +1095,25 @@ namespace str
 namespace zstr
 {
     template < typename T >
-        oexUINT Copy( T *dst, oexCONST T *src )
-        {   oexUINT uLen = Length( src );
+        oexSIZE_T Copy( T *dst, oexCONST T *src )
+        {   oexSIZE_T uLen = Length( src );
             return str::Copy( dst, uLen + 1, src, uLen );
         }
 
     template < typename T >
-        oexUINT Copy( T *dst, oexUINT sz_dst, oexCONST T *src )
+        oexSIZE_T Copy( T *dst, oexSIZE_T sz_dst, oexCONST T *src )
         {   return str::Copy( dst, sz_dst, src, Length( src ) );
         }
 
     template< typename T >
-        oexUINT Append( T *dst, oexCONST T* src )
-        {   oexUINT uLenSrc = Length( src );
-        	oexUINT uLenDst = Length( dst );
+        oexSIZE_T Append( T *dst, oexCONST T* src )
+        {   oexSIZE_T uLenSrc = Length( src );
+        	oexSIZE_T uLenDst = Length( dst );
             return str::Append( dst, uLenDst, uLenDst + uLenSrc + 1, src, uLenSrc );
         }
 
     template< typename T >
-        oexUINT Append( T *dst, oexINT sz_dst, oexCONST T* src )
+        oexSIZE_T Append( T *dst, oexINT sz_dst, oexCONST T* src )
         {   return str::Append( dst, Length( dst ), sz_dst, src, Length( src ) );
         }
 
@@ -1138,12 +1138,12 @@ namespace guid
     oexSTATIC_ASSERT(  sizeof( oexGUID ) == 16 );
 
     template< typename T_STR >
-        oexBOOL ahtoui( oexUINT *x_puNum, oexCONST T_STR *x_pBuffer, oexUINT x_uBytes, oexBOOL x_bSkipInvalid = oexFALSE )
+        oexBOOL ahtoui( oexSIZE_T *x_puNum, oexCONST T_STR *x_pBuffer, oexSIZE_T x_uBytes, oexBOOL x_bSkipInvalid = oexFALSE )
     {
-	    oexUINT num = 0;
+	    oexSIZE_T num = 0;
 
 	    // For Each ASCII Digit
-	    for ( oexUINT i = 0; x_uBytes && x_pBuffer[ i ]; i++ )
+	    for ( oexSIZE_T i = 0; x_uBytes && x_pBuffer[ i ]; i++ )
 	    {
 		    // Convert ASCII Digit Between 0 And 9
 		    if ( x_pBuffer[ i ] >= '0' && x_pBuffer[ i ] <= '9' )
@@ -1173,7 +1173,7 @@ namespace guid
     }
 
     template< typename T_CHAR, typename T_GUID >
-        oexCONST T_CHAR* GuidToString( T_CHAR *x_pStr, oexUINT x_uMax, oexCONST T_GUID *x_pGuid )
+        oexCONST T_CHAR* GuidToString( T_CHAR *x_pStr, oexSIZE_T x_uMax, oexCONST T_GUID *x_pGuid )
     {
 	    // Sanity checks
 	    if ( !oexCHECK_PTR( x_pStr ) || !oexCHECK( x_uMax ) )
@@ -1211,7 +1211,7 @@ namespace guid
     }
 
     template< typename T_CHAR, typename T_GUID >
-        T_GUID * StringToGuid( T_GUID *x_pGuid, oexCONST T_CHAR *x_pString, oexUINT x_uMax )
+        T_GUID * StringToGuid( T_GUID *x_pGuid, oexCONST T_CHAR *x_pString, oexSIZE_T x_uMax )
     {
 	    if ( !oexCHECK_PTR( x_pGuid ) )
 		    return oexNULL;
@@ -1234,7 +1234,7 @@ namespace guid
 		    return oexNULL;
 
 	    // Convert each component
-	    oexUINT ul = 0;
+	    oexSIZE_T ul = 0;
 	    if ( !ahtoui( &ul, x_pString, 8 ) )
             return oexNULL;
 	    x_pGuid->Data1 = ul;
@@ -1247,7 +1247,7 @@ namespace guid
             return oexNULL;
 	    x_pGuid->Data3 = (oexUINT16)ul;
 
-	    oexUINT i;
+	    oexSIZE_T i;
 	    for ( i = 0; i < 2; i++ )
 	    {	if ( !ahtoui( &ul, &x_pString[ 19 + ( i << 1 ) ], 2 ) )
                 return oexNULL;
@@ -1311,7 +1311,7 @@ namespace guid
         oexUCHAR *p2 = (oexUCHAR*)pGuid2;
         oexUCHAR *m = (oexUCHAR*)pMask;
 
-        for ( oexUINT i = 0; bMatch && i < sizeof( T_GUID1 ) / sizeof( oexUCHAR ); i++ )
+        for ( oexSIZE_T i = 0; bMatch && i < sizeof( T_GUID1 ) / sizeof( oexUCHAR ); i++ )
             if ( p1[ i ] ^ p2[ i ] & m[ i ] )
                 bMatch = oexFALSE;
 
@@ -1355,13 +1355,13 @@ namespace guid
     }
 
     template< typename T_GUID, typename T >
-        T_GUID * SetGuid( T_GUID *pGuid1, oexCONST T pVal, oexUINT uOffset, oexUINT uCount )
+        T_GUID * SetGuid( T_GUID *pGuid1, oexCONST T pVal, oexSIZE_T uOffset, oexSIZE_T uCount )
     {
         oexASSERT_PTR( pGuid1 );
 
         // Set GUID values
         T *p = &( (T*)pGuid1 )[ uOffset ];
-        for ( oexUINT i = 0; ( sizeof( T ) * ( uOffset + i + 1 ) ) <= sizeof( T_GUID ); i++ )
+        for ( oexSIZE_T i = 0; ( sizeof( T ) * ( uOffset + i + 1 ) ) <= sizeof( T_GUID ); i++ )
             p[ i ] = pVal;
 
         return pGuid1;

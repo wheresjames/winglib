@@ -160,7 +160,9 @@
 #undef oexUSE_EXCEPTIONS
 
 // Define to include backtraces for log entries
-//#define oexBACKTRACE_IN_LOG
+#if defined( oexDEBUG )
+#	define oexBACKTRACE_IN_LOG
+#endif
 
 // Define to have log entries printed to the command line
 #if defined( oexDEBUG )
@@ -190,6 +192,8 @@
 #else
 	typedef unsigned int			oexSIZE_T;
 #endif
+
+#define oexMAXSIZE	( (oexSIZE_T) -1 )
 
 #if defined( OEX_WINDOWS )
 #	undef OEX_CASE_SENSITIVE_FILES

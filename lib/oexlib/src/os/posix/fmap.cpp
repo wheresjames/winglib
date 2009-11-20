@@ -75,7 +75,7 @@ CFMap::t_HFILEMAP CFMap::Create( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oe
 }
 
 // +++ Total hack, and currently not thread safe, replace soon please!!!
-static TAssoList< oexINT, CStr8 > g_lstFileMappingInfo;
+TAssoList< oexINT, CStr8 > g_lstFileMappingInfo;
 
 CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, oexCSTR x_pName, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists, oexINT64 x_llOffset )
 {
@@ -186,7 +186,7 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_l
 	return (t_HFILEMAP)fd;
 #else
 
-	oexERROR( -1, oexT( "Not yet supported on the arm" ) );
+	oexERROR( 0, oexT( "Not implemented" ) );
 
 	return CFMap::c_Failed;
 

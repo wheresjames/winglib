@@ -89,10 +89,11 @@ int main(int argc, char* argv[])
 		return oexERROR( -5, oexT( "Failed to start script thread" ) );
 
 	// Attempt to execute idle function
+	oex::oexINT gc = 0;
 	while ( g_psqScriptThread->IsRunning() )
 	{
 		// Clean up binary shares
-		oexCleanupBin();
+		if ( gc ) gc--; else { gc = 10; oexCleanupBin(); }
 
 		// Wait
 		oexSleep( 100 );

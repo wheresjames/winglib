@@ -66,7 +66,7 @@ static oexPVOID oex_realloc( oexPVOID x_ptr, oexSIZE_T x_nSize )
 }
 
 static void oex_free( oexPVOID x_ptr )
-{	
+{
 #if defined( oexDEBUG )
 	COex::GetMemLeak().Remove( x_ptr );
 #endif
@@ -257,10 +257,14 @@ void CMem::Delete( oexPVOID x_pMem )
 	} // end if
 }
 
+#if defined( OEX_WIN32 )
+#	if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 static void /*_cdecl*/ oex_DumpHook( void * pUserData, size_t nBytes )
 {
     CAlloc::ReportBlock( pUserData, nBytes );
 }
+#	endif
+#endif
 
 oexBOOL CMem::MemReport()
 {

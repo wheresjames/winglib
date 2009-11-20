@@ -56,6 +56,9 @@ class CMemLeak
 		eDefaultSlotMask = 0x0f
 	};
 
+	// Size type
+	typedef oexSIZE_T		t_size;
+
 public:
 
 	/// Constructor
@@ -68,7 +71,7 @@ public:
 	void Destroy();
 
 	/// Creates the leak detection pool
-	oexBOOL Create( oexINT x_nPoolBits = eDefaultPoolBits, oexINT x_nSlotMask = eDefaultSlotMask );
+	oexBOOL Create( t_size x_nPoolBits = eDefaultPoolBits, t_size x_nSlotMask = eDefaultSlotMask );
 
 	/// Adds a pointer to the tracking pool
 	oexINT Add( oexCPVOID p );
@@ -97,36 +100,36 @@ private:
 	oexCPVOID				*m_pPool;
 
 	/// Pool size
-	oexINT					m_nPoolSize;
+	t_size					m_nPoolSize;
 
 	/// Pool bits
-	oexINT					m_nPoolBits;
+	t_size					m_nPoolBits;
 
 	/// Pool mask
-	oexINT					m_nPoolMask;
+	t_size					m_nPoolMask;
 
 	/// Slot mask
-	oexINT					m_nSlotMask;
+	t_size					m_nSlotMask;
 
 	/// Slot size
-	oexINT					m_nSlotSize;
+	t_size					m_nSlotSize;
 
 	/// Total number of allocations
-	oexINT					m_nAllocations;
+	t_size					m_nAllocations;
 
 #if defined( OEX_MEMLEAK_DEBUG )
 
 	/// Tracks the number of slot overflows
-	oexINT					m_nSlotOverflows;
+	t_size					m_nSlotOverflows;
 
 #endif
 
 	/// Tracks the number of pool overflows
-	oexINT					m_nPoolOverflows;
+	t_size					m_nPoolOverflows;
 
 	/// Total number of allocations
-	oexUINT					m_uTotalAllocations;
+	t_size					m_uTotalAllocations;
 
 	/// Current number of allocations
-	oexUINT					m_uCurrentAllocations;
+	t_size					m_uCurrentAllocations;
 };

@@ -128,7 +128,7 @@ CBin::t_size CBin::Share( CBin *x_p )
 	return m_nUsed;
 }
 
-CBin::t_size CBin::AppendBuffer( const CBin::t_byte *pBuf, CBin::t_size nBytes )
+CBin::t_size CBin::AppendBuffer( const CBin::t_byte *x_pBuf, CBin::t_size x_nBytes )
 {
 	// Ptr pointer?
 	if ( m_ptr )
@@ -138,11 +138,11 @@ CBin::t_size CBin::AppendBuffer( const CBin::t_byte *pBuf, CBin::t_size nBytes )
 			m_buf.MemCpy( m_ptr, m_nUsed );
 
 		// Append new data
-		m_buf.MemCpyAt( (t_byte*)pBuf, m_nUsed, nBytes );
+		m_buf.MemCpyAt( (t_byte*)x_pBuf, m_nUsed, x_nBytes );
 
 		// Not Ptr buffer anymore
 		FreePtr();
-		m_nUsed = m_nUsed + nBytes;
+		m_nUsed = m_nUsed + x_nBytes;
 
 		return m_nUsed;
 	}
@@ -152,16 +152,16 @@ CBin::t_size CBin::AppendBuffer( const CBin::t_byte *pBuf, CBin::t_size nBytes )
 		m_nUsed = m_buf.Size();
 
 	// Append new data
-	m_buf.MemCpyAt( (t_byte*)pBuf, m_nUsed, nBytes );
-	m_nUsed += nBytes;
+	m_buf.MemCpyAt( (t_byte*)x_pBuf, m_nUsed, x_nBytes );
+	m_nUsed += x_nBytes;
 
 	return m_nUsed;
 }
 
-CBin::t_size CBin::LShift( CBin::t_size nBytes )
+CBin::t_size CBin::LShift( CBin::t_size x_nBytes )
 {
 	// All of it?
-	if ( nBytes >= m_nUsed )
+	if ( x_nBytes >= m_nUsed )
 	{	FreePtr();
 		m_nUsed = 0;
 		return 0;
@@ -171,19 +171,19 @@ CBin::t_size CBin::LShift( CBin::t_size nBytes )
 	if ( m_ptr )
 	{
 		// What's the new size?
-		m_nUsed -= nBytes;
+		m_nUsed -= x_nBytes;
 		if ( !m_buf.OexNew( m_nUsed ).Ptr() )
 			return 0;
 
 		// Copy to private buffer
-		m_buf.MemCpy( &m_ptr[ nBytes ], m_nUsed );
-		
+		m_buf.MemCpy( &m_ptr[ x_nBytes ], m_nUsed );
+
 	} // end if
 	else
 	{
 		// Just shift the buffer
-		m_buf.LShift( nBytes, m_nUsed - nBytes ),
-		m_nUsed -= nBytes;
+		m_buf.LShift( x_nBytes, m_nUsed - x_nBytes ),
+		m_nUsed -= x_nBytes;
 
 	} // end else
 
@@ -200,7 +200,7 @@ void CBinShare::Destroy()
 
 	// Warn user if they are not running garbage collection
 	if ( m_buffers.Size() && ( m_uTime + 3 ) < oexGetUnixTime() )
-	{	oexERROR( 0, "You are using oexGetBin(), but not calling oexCleanupBin()" );
+	{	oexERROR( 0, "You are using oexGetBin() / oexSetBin(), but not calling oexCleanupBin()" );
 	} // edn if
 
 #endif
@@ -209,25 +209,60 @@ void CBinShare::Destroy()
 	m_buffers.Destroy();
 }
 
-CBin CBinShare::GetBuffer( CStr sName, CBinShare::t_size uSize )
+CBin CBinShare::GetBuffer( CStr x_sName, CBinShare::t_size x_uSize )
 {
 	oexAutoLock ll( m_lock );
 	if ( !ll.IsLocked() )
 		return CBin();
 
 	// Existing?
-	if ( m_buffers.IsKey( sName ) )
-		return m_buffers[ sName ];
+	if ( m_buffers.IsKey( x_sName ) )
+	{	CBinHolder &r = m_buffers[ x_sName ];
+		r.to = oexGetUnixTime();
+		return r.bin;
+	} // end if
 
 	// User only wants existing?
-	else if ( !uSize )
+	else if ( !x_uSize )
 		return CBin();
 
 	// Get / Create share
-	CBin &r = m_buffers[ sName ];
-	r.Mem().OexNew( uSize );
-	return r;
+	CBinHolder &r = m_buffers[ x_sName ];
+	r.bin.Mem().OexNew( x_uSize );
+	r.to = oexGetUnixTime();
+
+	return r.bin;
 }
+
+oexBOOL CBinShare::SetBuffer( CStr x_sName, CBin *x_pBin )
+{
+	oexAutoLock ll( m_lock );
+	if ( !ll.IsLocked() )
+		return oexFALSE;
+
+	// Are we dropping the buffer?
+	if ( !x_pBin || !x_pBin->Size() )
+	{	m_buffers.Unset( x_sName );
+		return oexTRUE;
+	} // end if
+
+	// Create share
+	CBinHolder &r = m_buffers[ x_sName ];
+	r.bin = *x_pBin;
+	r.to = oexGetUnixTime();
+
+	return oexTRUE;
+}
+
+oexBOOL CBinShare::IsBuffer( CStr x_sName )
+{
+	oexAutoLock ll( m_lock );
+	if ( !ll.IsLocked() )
+		return oexFALSE;
+
+	return m_buffers.IsKey( x_sName );
+}
+
 
 oexINT CBinShare::Cleanup()
 {
@@ -242,12 +277,23 @@ oexINT CBinShare::Cleanup()
 
 //	oexPrintf( "." ); oexFlush_stdout();
 
+	oexUINT tm = oexGetUnixTime();
+	oexUINT to = tm - eBufferTimeout;
+
 	// Collect the garbage...
     for ( t_buffers::iterator it; m_buffers.Next( it ); )
 	{
-		// Remove unused buffers
-		if ( !it->Ptr() || 1 == oexGetRefCount( it->Ptr() ) )
-			it = m_buffers.Erase( it );		
+		// Remove invalid buffers
+		if ( !it->bin.Ptr() )
+			it = m_buffers.Erase( it );
+
+		// Reset timeout if it's being used
+		else if ( 1 < oexGetRefCount( it->bin.Ptr() ) )
+			it->to = tm;
+
+		// Erase once it times out
+		else if ( to > it->to )
+			it = m_buffers.Erase( it );
 
 	} // end for
 

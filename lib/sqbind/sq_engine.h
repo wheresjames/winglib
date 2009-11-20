@@ -56,6 +56,18 @@ public:
 	SQBIND_CLASS_CTOR_BEGIN( CSqEngineExport )
 	SQBIND_CLASS_CTOR_END( CSqEngineExport )
 
+	/// Returns the buffer for a binary share
+	CSqBinary get_binshare( const stdString &sName );
+
+	/// Returns the buffer for a binary share
+	int set_binshare( const stdString &sName, CSqBinary *pBin );
+
+	/// Returns the buffer for a binary share
+	int is_binshare( const stdString &sName );
+
+	/// Runs garbage collection on binary shares
+	int cleanup_binshare();
+
 	/// Sets the specified property
 	void set( const stdString &sPath, const stdString &sKey, const stdString &sVal );
 

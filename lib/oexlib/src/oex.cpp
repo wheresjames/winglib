@@ -80,6 +80,11 @@ oexINT COex::Init()
 	return m_nStartupCode;
 }
 
+#if defined( OEX_GCC )
+
+	extern TAssoList< oexINT, CStr8 > g_lstFileMappingInfo;
+
+#endif
 
 oexINT COex::Uninit()
 {
@@ -143,6 +148,13 @@ oexINT COex::Uninit()
 
     // Free all the test classes
 //	oexFREE_TESTS();
+
+#if defined( OEX_GCC )
+
+	// Lose file mappings
+	g_lstFileMappingInfo.Destroy();
+
+#endif
 
 #if defined( oexDEBUG )
 

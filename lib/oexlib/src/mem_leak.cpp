@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -42,7 +42,7 @@ CMemLeak::CMemLeak()
 
 	m_nSlotOverflows = 0;
 	m_nPoolOverflows = 0;
-	
+
 #endif
 
 	m_uTotalAllocations = 0;
@@ -81,7 +81,7 @@ void CMemLeak::Destroy()
 
 	m_nSlotOverflows = 0;
 	m_nPoolOverflows = 0;
-	
+
 #endif
 
 	m_uTotalAllocations = 0;
@@ -91,7 +91,7 @@ void CMemLeak::Destroy()
 
 }
 
-oexBOOL CMemLeak::Create( oexINT x_nPoolBits, oexINT x_nSlotMask )
+oexBOOL CMemLeak::Create( t_size x_nPoolBits, t_size x_nSlotMask )
 {
 	Destroy();
 
@@ -114,7 +114,7 @@ oexBOOL CMemLeak::Create( oexINT x_nPoolBits, oexINT x_nSlotMask )
 
 	// Get the pool mask
 	m_nPoolMask = cmn::BitsToMask( m_nPoolBits );
-	
+
 	// What's the pool size?
 	m_nPoolSize = cmn::BitsToValue( m_nPoolBits );
 
@@ -144,9 +144,9 @@ oexINT CMemLeak::Add( oexCPVOID p )
 		return -1;
 
 	// Calculate starting offset
-	oexUINT uOffset = ( (oexUINT)p >> 4 ) & m_nPoolMask;
+	t_size uOffset = ( (oexUINT)p >> 4 ) & m_nPoolMask;
 
-	oexUINT uStart = uOffset;
+	t_size uStart = uOffset;
 	do
 	{
 		// Can we save it here?
@@ -166,10 +166,10 @@ oexINT CMemLeak::Add( oexCPVOID p )
 #if defined( OEX_MEMLEAK_DEBUG )
 
 		// This isn't so bad, just less efficient
-		oexUINT u = ( uStart <= uOffset ) ? uOffset - uStart : m_nPoolSize - uOffset;
+		t_size u = ( uStart <= uOffset ) ? uOffset - uStart : m_nPoolSize - uOffset;
 		if ( u > m_nSlotSize )
 			m_nSlotOverflows++,
-			oexEcho( "CMemLeak : Slot overflow" );		
+			oexEcho( "CMemLeak : Slot overflow" );
 
 #endif
 
@@ -197,9 +197,9 @@ oexINT CMemLeak::Check( oexCPVOID p )
 		return -1;
 
 	// Calculate starting offset
-	oexUINT uOffset = ( (oexUINT)p >> 4 ) & m_nPoolMask;
+	t_size uOffset = ( (oexUINT)p >> 4 ) & m_nPoolMask;
 
-	oexUINT uStart = uOffset;
+	t_size uStart = uOffset;
 	do
 	{
 		// Is this the one we're looking for?
@@ -221,9 +221,9 @@ oexINT CMemLeak::Remove( oexCPVOID p )
 		return -1;
 
 	// Calculate starting offset
-	oexUINT uOffset = ( (oexUINT)p >> 4 ) & m_nPoolMask;
+	t_size uOffset = ( (oexUINT)p >> 4 ) & m_nPoolMask;
 
-	oexUINT uStart = uOffset;
+	t_size uStart = uOffset;
 	do
 	{
 		// Is this the one we're looking for?
@@ -250,7 +250,7 @@ oexINT CMemLeak::Remove( oexCPVOID p )
 	} while ( uStart != uOffset );
 
 #if defined( OEX_MEMLEAK_DEBUG )
-	oexEcho( oexT( "CMemLeak : Block not found" ) ); 
+	oexEcho( oexT( "CMemLeak : Block not found" ) );
 //	oexASSERT( 0 );
 #endif
 
@@ -273,7 +273,7 @@ CStr CMemLeak::Report()
 					 );
 
 
-	oexUINT uOffset = 0;
+	t_size uOffset = 0;
     oexTCHAR szMsg[ 1024 * 16 ] = oexEMPTY_STRING;
 	do
 	{

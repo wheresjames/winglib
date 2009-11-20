@@ -155,10 +155,10 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
 
 #if defined( OEX_MAX_LINES_IN_MEMDUMP )
 
-		oexINT i = 0;
-		oexINT b, sz = uBuf - zstr::Length( pMsg );
+		oexSIZE_T i = 0;
+		oexSIZE_T b, sz = uBuf - zstr::Length( pMsg );
 		oexSTR p = zstr::eos( pMsg );
-		for ( oexINT l = 0; 0 < sz && i < pBh->uSize && l < OEX_MAX_LINES_IN_MEMDUMP; l++, i += 16 )
+		for ( oexSIZE_T l = 0; 0 < sz && i < pBh->uSize && l < OEX_MAX_LINES_IN_MEMDUMP; l++, i += 16 )
 		{
 			for ( b = 0; 0 < sz && ( i + b ) < pBh->uSize && b < 16; b++ )
 				os::CSys::StrFmt( p, sz,oexT( "%0.2X " ), (oexUINT)pBuf[ i + b ] ),
@@ -306,8 +306,16 @@ oexPVOID CAlloc::VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSiz
 	// *** If this asserts, you probably over-ran the buffer!
 	//     i.e. buffer overflow
 	//     Or maybe you're freeing a bad pointer?
-	if ( !oexVERIFY( !os::CSys::MemCmp( &pBuf[ uSize ], m_ucOverrunPadding, sizeof( m_ucOverrunPadding ) ) ) )
+	if ( os::CSys::MemCmp( &pBuf[ uSize ], m_ucOverrunPadding, sizeof( m_ucOverrunPadding ) ) )
+	{
+#if defined( oexDEBUG )
+		oexTCHAR szMsg[ 1024 * 16 ] = { 0 };
+		if ( GetBlockReport( x_pBuf, 0, szMsg, sizeof( szMsg ) ) )
+			oexEcho( szMsg );
+		oexASSERT( 0 != "Overrun padding has been currupted" );
+#endif
 		return oexNULL;
+	} // end if
 
 	// Clear so it can't haunt us later
     if ( x_bUpdate )

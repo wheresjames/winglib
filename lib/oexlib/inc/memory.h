@@ -63,6 +63,11 @@ template < typename T, typename T_AS = T > class TMem
 {
 public:
 
+	typedef oexSIZE_T		t_size;
+
+
+public:
+
     TMem()
     {
         m_pMem = oexNULL;
@@ -168,7 +173,7 @@ public:
                                 NULL terminated.
 
     */
-    TMem& SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
+    TMem& SetName( oexCSTR x_pName, t_size x_uLen = 0 )
     {   m_fm.SetName( x_pName, x_uLen );
         return *this;
     }
@@ -202,7 +207,7 @@ public:
     {   return 0 < m_fm.Size(); }
 
 	/// Allocate a new block of memory
-    TMem& New( oexUINT x_uSize, oexBOOL x_bConstructed = oexFALSE, oexBOOL x_bUseFullBlock = oexFALSE )
+    TMem& New( t_size x_uSize, oexBOOL x_bConstructed = oexFALSE, oexBOOL x_bUseFullBlock = oexFALSE )
     {
         // Lose old memory
         Delete();
@@ -232,9 +237,9 @@ public:
         return *this;
     }
 
-    oexUINT Size() const
+    t_size Size() const
     {
-        oexCONST T *pPtr = c_Ptr();
+        oexCONST T *pPtr = nc_Ptr();
 
         if ( !pPtr )
             return 0;
@@ -245,7 +250,7 @@ public:
             return 0;
     }
 
-	oexUINT SizeInBytes() const
+	t_size SizeInBytes() const
 	{
 		return Size() * sizeof( T );
 	}
@@ -286,7 +291,7 @@ public:
 	/// Zero memory
     TMem& Zero()
     {
-        oexUINT uSize = Size();
+        t_size uSize = Size();
         if ( !m_pMem || !uSize )
 			return *this;
 
@@ -294,7 +299,7 @@ public:
         if ( CAlloc::eF1Constructed & CAlloc::GetFlags( m_pMem ) )
 
 			// For each element
-            for ( oexUINT i = 0; i < uSize; i++ )
+            for ( t_size i = 0; i < uSize; i++ )
 
 	            // Set to new object
 				*Ptr( i ) = T_AS();
@@ -307,7 +312,7 @@ public:
 	}
 
     /// Generic resize
-    TMem& Resize(oexUINT x_uNewSize )
+    TMem& Resize( t_size x_uNewSize )
     {
         // Shared memory cannot be resized
         if ( !oexVERIFY( !m_fm.Ptr() ) )
@@ -317,7 +322,7 @@ public:
 		Unshare();
 
         // Do we have what we need?
-        oexUINT uSize = Size();
+        t_size uSize = Size();
         if ( uSize == x_uNewSize )
             return *this;
 
@@ -330,7 +335,7 @@ public:
         {
             // Was the object constructed?
             if ( CAlloc::eF1Constructed & CAlloc::GetFlags( m_pMem ) )
-                for ( oexUINT i = x_uNewSize; i < uSize; i++ )
+                for ( t_size i = x_uNewSize; i < uSize; i++ )
                     m_pMem[ i ].~T();
 
             // We can make things smaller
@@ -366,7 +371,7 @@ public:
                 if ( CAlloc::eF1Constructed & CAlloc::GetFlags( m_pMem ) )
                 {
                     // Initialize new array
-                    for ( oexUINT i = 0; i < x_uNewSize; i++ )
+                    for ( t_size i = 0; i < x_uNewSize; i++ )
 
                         if ( i < uSize )
                             *mem.Ptr() = *Ptr();
@@ -386,7 +391,7 @@ public:
 
             // Construct new objects if needed
             else if ( CAlloc::eF1Constructed & CAlloc::GetFlags( m_pMem ) )
-                for ( oexUINT i = uSize; i < x_uNewSize; i++ )
+                for ( t_size i = uSize; i < x_uNewSize; i++ )
                     oexPLACEMENT_NEW ( &pMem[ i ] ) T();
 
         } // end else
@@ -408,6 +413,71 @@ public:
     {   return Ptr(); }
 
 	//==============================================================
+	// n_Ptr()
+	//==============================================================
+	/// Returns a pointer to the memory
+    T* n_Ptr()
+    {
+        if ( m_pMem )
+            return m_pMem;
+
+        return m_fm.Ptr();
+    }
+
+	//==============================================================
+	// n_Ptr()
+	//==============================================================
+	/// Returns a pointer to the memory
+    /**
+        \param [in] x_uOffset   -   Offset into the memory
+    */
+    T* n_Ptr( t_size x_uOffset )
+    {
+        T* pPtr = n_Ptr();
+
+        if ( !pPtr )
+            return oexNULL;
+
+        // Out of bounds
+        oexASSERT( Size() > x_uOffset );
+
+        return &pPtr[ x_uOffset ];
+    }
+
+	//==============================================================
+	// nc_Ptr()
+	//==============================================================
+	/// Returns a pointer to the memory
+    oexCONST T* nc_Ptr() const
+    {
+        if ( m_pMem )
+            return m_pMem;
+
+        return m_fm.c_Ptr();
+    }
+
+	//==============================================================
+	// nc_Ptr()
+	//==============================================================
+	/// Returns a pointer to the memory
+    /**
+        \param [in] x_uOffset   -   Offset into the memory
+    */
+    oexCONST T* nc_Ptr( t_size x_uOffset ) const
+    {
+        oexCONST T* pPtr = nc_Ptr();
+
+        if ( !pPtr )
+            return oexNULL;
+
+        // Out of bounds
+        oexASSERT( Size() > x_uOffset );
+
+        return &pPtr[ x_uOffset ];
+    }
+
+
+	//==============================================================
 	// Ptr()
 	//==============================================================
 	/// Returns a pointer to the memory
@@ -426,15 +496,15 @@ public:
     /**
         \param [in] x_uOffset   -   Offset into the memory
     */
-    T_AS* Ptr( oexUINT x_uOffset )
+    T_AS* Ptr( t_size x_uOffset )
     {
         T_AS* pPtr = Ptr();
 
-        // Out of bounds
-        oexASSERT( pPtr && ( Size() * sizeof( T_AS ) / sizeof( T ) ) > x_uOffset );
-
         if ( !pPtr )
             return oexNULL;
+
+        // Out of bounds
+        oexASSERT( ( Size() * sizeof( T_AS ) / sizeof( T ) ) > x_uOffset );
 
         return &pPtr[ x_uOffset ];
     }
@@ -443,12 +513,12 @@ public:
 	// c_Ptr()
 	//==============================================================
 	/// Returns a pointer to the memory
-	oexCONST T* c_Ptr() const
+	oexCONST T_AS* c_Ptr() const
     {
         if ( m_pMem )
-            return m_pMem;
+            return (T_AS*)m_pMem;
 
-        return m_fm.c_Ptr();
+        return (T_AS*)m_fm.c_Ptr();
     }
 
 	//==============================================================
@@ -458,15 +528,15 @@ public:
     /**
         \param [in] x_uOffset   -   Offset into the memory
     */
-    oexCONST T* c_Ptr( oexUINT x_uOffset ) const
+    oexCONST T_AS* c_Ptr( t_size x_uOffset ) const
     {
-        oexCONST T* pPtr = c_Ptr();
-
-        // Out of bounds
-        oexASSERT( pPtr && Size() > x_uOffset );
+        oexCONST T_AS* pPtr = c_Ptr();
 
         if ( !pPtr )
             return oexNULL;
+
+        // Out of bounds
+        oexASSERT( ( Size() * sizeof( T_AS ) / sizeof( T ) ) > x_uOffset );
 
         return &pPtr[ x_uOffset ];
     }
@@ -480,7 +550,7 @@ public:
         to abuse.  You should really make sure the index exists
         before you call this function.
     */
-    T_AS& operator [] ( oexUINT x_uOffset )
+    T_AS& operator [] ( t_size x_uOffset )
     {
         // Ensure index
         if ( ( Size() * sizeof( T_AS ) / sizeof( T ) ) <= x_uOffset )
@@ -498,13 +568,13 @@ public:
 public:
 
     /// Adds a reference to the memory block
-    oexUINT AddRef()
+    t_size AddRef()
     {   if ( !Ptr() ) return 0;
         return CAlloc().AddRef( Ptr() );
     }
 
     /// Returns the memory blocks reference count
-    oexUINT GetRefCount()
+    t_size GetRefCount()
     {   if ( !Ptr() ) return 0;
         return CAlloc().GetRefCount( Ptr() );
     }
@@ -531,7 +601,7 @@ public:
     }
 
     /// Copy data from a raw buffer
-    TMem& MemCpy( oexCONST T *x_pBuf, oexUINT x_uSize )
+    TMem& MemCpy( oexCONST T *x_pBuf, t_size x_uSize )
     {
         // Verify pointer
         if ( !oexVERIFY_PTR( x_pBuf ) || !x_uSize )
@@ -549,15 +619,15 @@ public:
     }
 
     /// Append data from a raw buffer
-    TMem& MemAppend( oexCONST T *x_pBuf, oexUINT x_uSize )
+    TMem& MemAppend( oexCONST T *x_pBuf, t_size x_uSize )
     {
         // Verify pointer
         if ( !oexVERIFY_PTR( x_pBuf ) || !x_uSize )
             return *this;
 
 		// How much space do we need?
-		oexUINT uSize = Size();
-		oexUINT uNewSize = uSize + x_uSize;
+		t_size uSize = Size();
+		t_size uNewSize = uSize + x_uSize;
 
         // Do we need more space?
         if ( uSize < uNewSize )
@@ -571,15 +641,15 @@ public:
     }
 
     /// Append data from a raw buffer
-    TMem& MemCpyAt( oexCONST T *x_pBuf, oexUINT x_uPos, oexUINT x_uSize )
+    TMem& MemCpyAt( oexCONST T *x_pBuf, t_size x_uPos, t_size x_uSize )
     {
         // Verify pointer
         if ( !oexVERIFY_PTR( x_pBuf ) || !x_uSize )
             return *this;
 
 		// How much space do we need?
-		oexUINT uSize = Size();
-		oexUINT uNewSize = x_uPos + x_uSize;
+		t_size uSize = Size();
+		t_size uNewSize = x_uPos + x_uSize;
 
         // Do we need more space?
         if ( uSize < uNewSize )
@@ -594,13 +664,13 @@ public:
 
 	/// Removes data from the beginning of the buffer
 	//  Not efficient
-    TMem& LShift( oexUINT x_uPos, oexUINT x_uSize )
+    TMem& LShift( t_size x_uPos, t_size x_uSize )
     {
         // Verify pointer
         if ( !x_uSize )
             return *this;
 
-		oexUINT uSize = Size();
+		t_size uSize = Size();
 
 		// Valid?
 		if ( x_uPos >= uSize )
@@ -621,7 +691,7 @@ public:
     }
 
     /// Copies another objects data
-    TMem& Copy( oexCONST TMem &x_m, oexCSTR x_pNewName = oexNULL, oexUINT x_uNameLen = 0 )
+    TMem& Copy( oexCONST TMem &x_m, oexCSTR x_pNewName = oexNULL, t_size x_uNameLen = 0 )
     {
         // Drop current
         Delete();
@@ -629,7 +699,7 @@ public:
         // Raw memory?
         if ( x_m.m_pMem || ( x_pNewName && *x_pNewName ) )
         {
-            oexUINT uSize = x_m.Size();
+            t_size uSize = x_m.Size();
             if ( uSize )
             {
                 // Shared memory?
@@ -644,7 +714,7 @@ public:
 
                     // Copy objects
                     // +++ Casting away const
-                    for ( oexUINT i = 0; i < uSize; i++ )
+                    for ( t_size i = 0; i < uSize; i++ )
                         *Ptr( i ) = *(T*)( x_m.c_Ptr( i ) );
 
                 } // end if
@@ -671,7 +741,7 @@ public:
     }
 
     /// Returns a copy of this object
-    TMem Copy( oexCSTR x_pNewName = oexNULL, oexUINT x_uNameLen = 0 )
+    TMem Copy( oexCSTR x_pNewName = oexNULL, t_size x_uNameLen = 0 )
     {   TMem mem;
         if ( Ptr() )
             mem.Copy( *this, x_pNewName, x_uNameLen );
@@ -843,11 +913,11 @@ public:
 public:
 
     /// Construct object array
-    TMem& ConstructArray( oexUINT x_uSize )
+    TMem& ConstructArray( t_size x_uSize )
     {
         T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-            for ( oexUINT i = 0; i < x_uSize; i++ )
+            for ( t_size i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T();
 
         return *this;
@@ -855,11 +925,11 @@ public:
 
     /// Construct object array, 1 param
     template< typename T_P1 >
-        TMem& ConstructArray( oexUINT x_uSize, T_P1 p1 )
+        TMem& ConstructArray( t_size x_uSize, T_P1 p1 )
     {
         T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-            for ( oexUINT i = 0; i < x_uSize; i++ )
+            for ( t_size i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1 );
 
         return *this;
@@ -867,11 +937,11 @@ public:
 
     /// Construct object array, 2 param
     template< typename T_P1, typename T_P2 >
-        TMem& ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2 )
+        TMem& ConstructArray( t_size x_uSize, T_P1 p1, T_P2 p2 )
     {
         T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-            for ( oexUINT i = 0; i < x_uSize; i++ )
+            for ( t_size i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1, p2 );
 
         return *this;
@@ -879,11 +949,11 @@ public:
 
     /// Construct object array, 3 param
     template< typename T_P1, typename T_P2, typename T_P3 >
-        TMem& ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3 )
+        TMem& ConstructArray( t_size x_uSize, T_P1 p1, T_P2 p2, T_P3 p3 )
     {
         T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-            for ( oexUINT i = 0; i < x_uSize; i++ )
+            for ( t_size i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1, p2, p3 );
 
         return *this;
@@ -891,11 +961,11 @@ public:
 
     /// Construct object array, 4 param
     template< typename T_P1, typename T_P2, typename T_P3, typename T_P4 >
-        TMem& ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4 )
+        TMem& ConstructArray( t_size x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4 )
     {
         T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-            for ( oexUINT i = 0; i < x_uSize; i++ )
+            for ( t_size i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1, p2, p3, p4 );
 
         return *this;
@@ -903,11 +973,11 @@ public:
 
     /// Construct object array, 5 param
     template< typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5 >
-        TMem& ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5 )
+        TMem& ConstructArray( t_size x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5 )
     {
         T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-            for ( oexUINT i = 0; i < x_uSize; i++ )
+            for ( t_size i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1, p2, p3, p4, p5 );
 
         return *this;
@@ -915,11 +985,11 @@ public:
 
     /// Construct object array, 6 param
     template< typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6 >
-        TMem& ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6 )
+        TMem& ConstructArray( t_size x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6 )
     {
         T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-            for ( oexUINT i = 0; i < x_uSize; i++ )
+            for ( t_size i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1, p2, p3, p4, p5, p6 );
 
         return *this;
@@ -927,11 +997,11 @@ public:
 
     /// Construct object array, 7 param
     template< typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6, typename T_P7 >
-        TMem& ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7 )
+        TMem& ConstructArray( t_size x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7 )
     {
         T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-            for ( oexUINT i = 0; i < x_uSize; i++ )
+            for ( t_size i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1, p2, p3, p4, p5, p6, p7 );
 
         return *this;
@@ -939,11 +1009,11 @@ public:
 
     /// Construct object array, 8 param
     template< typename T_P1, typename T_P2, typename T_P3, typename T_P4, typename T_P5, typename T_P6, typename T_P7, typename T_P8 >
-        TMem& ConstructArray( oexUINT x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8 )
+        TMem& ConstructArray( t_size x_uSize, T_P1 p1, T_P2 p2, T_P3 p3, T_P4 p4, T_P5 p5, T_P6 p6, T_P7 p7, T_P8 p8 )
     {
         T *p = New( x_uSize, oexTRUE ).Ptr();
         if ( oexVERIFY( p ) && ( m_pMem || !m_fm.Existing() ) )
-            for ( oexUINT i = 0; i < x_uSize; i++ )
+            for ( t_size i = 0; i < x_uSize; i++ )
                 oexPLACEMENT_NEW ( &p[ i ] ) T( p1, p2, p3, p4, p5, p6, p7, p8 );
 
         return *this;

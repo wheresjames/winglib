@@ -84,7 +84,6 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	SQBIND_PropertyBag8ToMulti( x_pSession->Session(), mParams[ oexT( "SESSION" ) ] );
 
 	sqbind::CSqMsgQueue *q = m_pSessionMsgQueue;
-	sqbind::CSqBinary binReturn;
 
 	// Are we executing a child script?
 	if ( m_sScript.length() )
@@ -137,8 +136,15 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 		x_pSession->SetFileName( mReply[ oexT( "file" ) ].c_str(), mReply[ oexT( "filetype" ) ].c_str() );
 
 	// Do we have binary data?
-	else if ( binReturn.getUsed() )
-		x_pSession->SetBuffer( &binReturn.Obj(), binReturn.getUsed(), mReply[ oexT( "bin_type" ) ].c_str() );
+	else if ( mReply[ oexT( "binary" ) ].length() )
+	{
+		oex::CBin bin = oexGetBin( mReply[ oexT( "binary" ) ].c_str() );
+		if ( bin.getUsed() )
+		{	oexSetBin( mReply[ oexT( "binary" ) ].c_str(), 0 );
+			x_pSession->SetBuffer( bin, mReply[ oexT( "binary_type" ) ].c_str() );
+		} // end if
+
+	} // end else if
 
 	// Update new session data
 	if ( mReply.isset( oexT( "session" ) ) )
