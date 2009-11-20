@@ -35,7 +35,7 @@
 #pragma once
 
 /// This scheme just helps to ensure that a service function is defined correctly
-#define oexDECLARE_SRV_Start( f ) OEX_NAMESPACE::oexRESULT f( OEX_NAMESPACE::os::SRawAllocator x_sAllocator, OEX_NAMESPACE::oexCSTR x_pPath, OEX_NAMESPACE::oexCSTR x_pCommandLine, OEX_NAMESPACE::oexINT x_nCommandLine, OEX_NAMESPACE::oexCPVOID x_pData )
+#define oexDECLARE_SRV_Start( f ) OEX_NAMESPACE::oexRESULT f( OEX_NAMESPACE::SRawAllocator x_sAllocator, OEX_NAMESPACE::oexCSTR x_pPath, OEX_NAMESPACE::oexCSTR x_pCommandLine, OEX_NAMESPACE::oexINT x_nCommandLine, OEX_NAMESPACE::oexCPVOID x_pData )
 #define oexDECLARE_SRV_Stop( f ) OEX_NAMESPACE::oexRESULT f()
 #define oexDECLARE_SRV_Idle( f ) OEX_NAMESPACE::oexRESULT f()
 #define oexDECLARE_SRV_GetModuleInfo( f ) OEX_NAMESPACE::oexRESULT f( OEX_NAMESPACE::os::service::SSrvInfo *pDi )

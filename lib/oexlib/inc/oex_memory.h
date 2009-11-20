@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// mem.h
+// oex_memory.h
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -48,6 +48,9 @@ struct SRawAllocator
 
 	/// Frees a memory block
 	PFN_free		fFree;
+
+	/// Binary shares
+	oexPVOID		pBinShare;
 };
 
 class CMem

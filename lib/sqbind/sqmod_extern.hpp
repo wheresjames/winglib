@@ -74,10 +74,10 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 }
 
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Start );
-extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
+extern "C" oex::oexRESULT SRV_Start( oex::SRawAllocator x_sRawAllocator, oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
 {
 	// Set our allocator
-	oex::os::CMem::SetRawAllocator( x_sRawAllocator );
+	oex::CMem::SetRawAllocator( x_sRawAllocator );
 
 	return 0;
 }
@@ -87,7 +87,7 @@ extern "C" oex::oexRESULT SRV_Stop()
 {
 	// Switch back to default allocator
 	oexCloseLog();
-	oex::os::CMem::SetDefaultRawAllocator();
+	oex::CMem::SetDefaultRawAllocator();
 
 	return 0;
 }
@@ -104,7 +104,7 @@ extern "C" oex::oexRESULT SQBIND_Export_Symbols( sqbind::VM x_vm, sqbind::SSqAll
 		your application before including this file.
 
 		In the project examples this is done in stdafx.cpp.
-		Your project may be different.
+		I don't care how you do it in your project.
 
 	*/
 

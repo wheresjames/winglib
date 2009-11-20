@@ -67,7 +67,7 @@ function _init() : ( _g )
 function StartStream( inf ) : ( _g )
 {
 	_g.rtsp = CLvRtspClient();
-	if ( !_g.rtsp.Open( inf[ 1 ], 1, 1, CSqMulti() ) )
+	if ( !_g.rtsp.Open( inf[ 1 ], 1, 0, CSqMulti() ) )
 	{	_self.echo( "Failed to open RTSP stream " + inf[ 1 ] );
 		return 0;
 	} // end if

@@ -686,10 +686,10 @@ public:
 	COexStdAllocator( const COexStdAllocator& ) {}
 
 	pointer allocate( size_type n, const void * = 0 )
-	{	return (T*)os::CMem::New( n * sizeof( T ), oexLINE, oexTEXT( oexFILE ) ); }
+	{	return (T*)CMem::New( n * sizeof( T ), oexLINE, oexTEXT( oexFILE ) ); }
 
 	void deallocate( pointer p, size_type )
-	{	if ( p ) os::CMem::Delete( p ); }
+	{	if ( p ) CMem::Delete( p ); }
 
 	pointer address( T& r ) const { return &r; }
 

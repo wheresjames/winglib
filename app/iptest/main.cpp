@@ -94,7 +94,7 @@ int iptest(int argc, char* argv[])
 		if ( pSockets[ i ].IsSocket() )
 		{
 			if ( pSockets[ i ].WaitEvent( oex::os::CIpSocket::eReadEvent, 2000 ) )
-			{		if ( pSockets[ nCurSocket ].Read().Length() )
+			{	if ( pSockets[ nCurSocket ].Read().Length() )
 					oexPrintf( oexT( "." ) ), os::CSys::Flush_stdout();
 				else
 					oexPrintf( oexT( "0" ) ), os::CSys::Flush_stdout();

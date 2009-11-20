@@ -437,6 +437,8 @@ OEX_START_NAMESPACE
 #include "inc/oex_exceptions.h"
 #include "inc/oex_align.h"
 #include "inc/oex_common.h"
+#include "inc/oex_memory.h"
+
 
 //------------------------------------------------------------------
 // Platform independent debugging functions
@@ -456,7 +458,6 @@ namespace os
 #   include "inc/os/sys.h"
 #	include "inc/os/resource.h"
 #   include "inc/os/fmap.h"
-#   include "inc/os/mem.h"
 #   include "inc/os/tls.h"
 #   include "inc/os/hq_timer.h"
 };
@@ -723,10 +724,6 @@ private:
 	static CMemLeak				m_cMemLeak;
 
 #endif
-
-	/// Memory buffer share
-	static CBinShare			m_cBinShare;
-
 
 };
 

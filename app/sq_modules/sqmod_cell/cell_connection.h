@@ -135,6 +135,9 @@ public:
 	void SetCacheLimit( int n ) { m_nTagCacheLimit = n; }
 	int GetCacheLimit() { return m_nTagCacheLimit; }
 
+	/// Dump the cache to a string
+	sqbind::stdString DumpCache();
+
 private:
 
 	/// Holds last error information

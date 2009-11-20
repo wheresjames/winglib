@@ -220,7 +220,7 @@ oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUI
         x_uSize = uBlockSize - ( OEX_SIZE_VAR + ProtectAreaSize() );
 
     // Ok, get the memory
-	oexUCHAR *pBuf = (oexUCHAR*)os::CMem::New( uBlockSize, x_uLine, x_pFile );
+	oexUCHAR *pBuf = (oexUCHAR*)CMem::New( uBlockSize, x_uLine, x_pFile );
 
     if ( !pBuf )
         return oexNULL;
@@ -252,7 +252,7 @@ oexINT CAlloc::Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT 
     oexPVOID pBuf = (oexUCHAR*)CAlloc::VerifyMem( x_pBuf, oexTRUE ) - OEX_SIZE_VAR;
 
 	// Delete memory
-    os::CMem::Delete( pBuf );
+    CMem::Delete( pBuf );
 
     return 0;
 }

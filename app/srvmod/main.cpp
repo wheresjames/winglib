@@ -9,10 +9,10 @@ BOOL WINAPI DllMain( HANDLE hinstDLL, DWORD dwReason, LPVOID lpvReserved ) { ret
 #endif
 
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Start );
-extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
+extern "C" oex::oexRESULT SRV_Start( oex::SRawAllocator x_sRawAllocator, oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
 {
 	// Set our allocator
-	oex::os::CMem::SetRawAllocator( x_sRawAllocator );
+	oex::CMem::SetRawAllocator( x_sRawAllocator );
 
 	if ( oexCHECK_PTR( x_pPath ) && *x_pPath )
 		oex::CLog::GlobalLog().OpenLogFile( oexNULL, oex::CStr( x_pPath ).GetFileName().Ptr(), oexT( ".module.debug.log" ) );
@@ -29,7 +29,7 @@ extern "C" oexDECLARE_SRV_FUNCTION( SRV_Stop );
 extern "C" oex::oexRESULT SRV_Stop()
 {
 	// Switch back to default allocator
-	oex::os::CMem::SetDefaultRawAllocator();
+	oex::CMem::SetDefaultRawAllocator();
 
 	return 0;
 }

@@ -106,7 +106,7 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 
 	// How much room could we possibly need
 	int nSize = CFfConvert::CalcImageSize( fmt, width, height ) * 2;
-	if ( out->Size() < nSize && !out->Obj().OexNew( nSize ).Ptr() )
+	if ( out->Size() < nSize && !out->Mem().Mem().OexNew( nSize ).Ptr() )
 		return 0;
 
 	AVFrame *paf = avcodec_alloc_frame();
@@ -125,7 +125,7 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 
 	} // end if
 
-	int nBytes = avcodec_encode_video( m_pCodecContext, out->Obj().Ptr(), nSize, paf );
+	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->Ptr(), nSize, paf );
 	if ( 0 > nBytes )
 	{	oexERROR( nBytes, oexT( "avcodec_encode_video() failed" ) );
 		out->setUsed( 0 );

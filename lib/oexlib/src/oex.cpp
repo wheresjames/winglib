@@ -49,8 +49,14 @@ CMemLeak				COex::m_cMemLeak;
 CMemLeak& COex::GetMemLeak() { return m_cMemLeak; }
 #endif
 
-CBinShare				COex::m_cBinShare;
-CBinShare& COex::GetBinShare() { return m_cBinShare; }
+CBinShare& COex::GetBinShare() 
+{	
+	CBinShare *p = (CBinShare*)CMem::GetRawAllocator().pBinShare;
+	if ( !oexVERIFY_PTR( p ) )
+		return CBinShare();
+
+	return *p;
+}
 
 
 oexINT COex::Init()
@@ -144,7 +150,7 @@ oexINT COex::Uninit()
 	os::CBaseFile::FreeFileSystem();
 
 	// Free any binary shares
-	m_cBinShare.Destroy();
+	GetBinShare().Destroy();
 
     // Free all the test classes
 //	oexFREE_TESTS();

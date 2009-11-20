@@ -78,6 +78,7 @@ oexSTATIC_ASSERT( sizeof( CSys::t_WAITABLE ) == sizeof( HANDLE ) );
 
 const oexUINT		CSys::c_StrErr_OK = S_OK;
 
+static oexLock		*g_lockCpu = oexNULL;
 static CCpuUsage	*g_cpu = oexNULL;
 
 // Disable microsoft security warnings
@@ -498,11 +499,27 @@ oexBOOL CSys::Uninit()
 {
 	CoUninitialize();
 
-	if ( g_cpu )
-	{	OexAllocDelete< CCpuUsage >( g_cpu );
-		g_cpu = 0;
-	} // end if
+	if ( g_lockCpu )
+	{
+		oexAutoLock ll( g_lockCpu );
+		if ( ll.IsLocked() )
+		{
+			// Kill cpu class
+			if ( g_cpu )
+			{	OexAllocDelete< CCpuUsage >( g_cpu );
+				g_cpu = 0;
+			} // end if
 
+			oexLock *p = g_lockCpu;
+			g_lockCpu = oexNULL;
+
+			ll.Unlock();
+			OexAllocDelete< oexLock >( p );
+
+		} // end if
+
+	} // end if
+	
     return CSys_ReleaseMicroSleep();
 }
 
@@ -790,14 +807,40 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 #if !defined( OEX_GCC )
 
 oexDOUBLE CSys::GetCpuLoad()
-{	if ( !g_cpu ) g_cpu = OexAllocConstruct< CCpuUsage >();
-	if ( !g_cpu ) return 0;
+{	
+	if ( !g_lockCpu )
+		g_lockCpu = OexAllocConstruct< oexLock >();
+	if ( !g_lockCpu ) 
+		return 0;
+
+	oexAutoLock ll( g_lockCpu );
+	if ( !ll.IsLocked() )
+		return 0;	
+	
+	if ( !g_cpu ) 
+		g_cpu = OexAllocConstruct< CCpuUsage >();
+	if ( !g_cpu ) 
+		return 0;
+
 	return g_cpu->GetCpuUsage();
 }
 
 oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName )
-{	if ( !g_cpu ) g_cpu = OexAllocConstruct< CCpuUsage >();
-	if ( !g_cpu ) return 0;
+{	
+	if ( !g_lockCpu )
+		g_lockCpu = OexAllocConstruct< oexLock >();
+	if ( !g_lockCpu ) 
+		return 0;
+
+	oexAutoLock ll( g_lockCpu );
+	if ( !ll.IsLocked() )
+		return 0;	
+	
+	if ( !g_cpu ) 
+		g_cpu = OexAllocConstruct< CCpuUsage >();
+	if ( !g_cpu ) 
+		return 0;
+
 	return g_cpu->GetCpuUsage( x_pProcessName );
 }
 

@@ -75,24 +75,24 @@ public:
 
 static void* _cximage_malloc( size_t size )
 {
-	return oex::os::CMem::New( size, oexLINE, oexTEXT( oexFILE ) );
+	return oex::CMem::New( size, oexLINE, oexTEXT( oexFILE ) );
 }
 
 static void* _cximage_calloc( size_t num, size_t size )
 {
-	void *ptr = oex::os::CMem::New( num * size, oexLINE, oexTEXT( oexFILE ) );
+	void *ptr = oex::CMem::New( num * size, oexLINE, oexTEXT( oexFILE ) );
 	oexZeroMemory( ptr, num * size );
 	return ptr;
 }
 
 static void* _cximage_realloc( void *ptr, size_t size )
 {
-	return oex::os::CMem::Resize( ptr, size, oexLINE, oexTEXT( oexFILE ) );
+	return oex::CMem::Resize( ptr, size, oexLINE, oexTEXT( oexFILE ) );
 }
 
 static void _cximage_free( void *ptr )
 {
-	return oex::os::CMem::Delete( ptr );
+	return oex::CMem::Delete( ptr );
 }
 
 extern "C"

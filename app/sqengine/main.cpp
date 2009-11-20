@@ -49,10 +49,10 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 }
 
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Start );
-extern "C" oex::oexRESULT SRV_Start( oex::os::SRawAllocator x_sRawAllocator, oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
+extern "C" oex::oexRESULT SRV_Start( oex::SRawAllocator x_sRawAllocator, oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
 {
 	// Set our allocator
-	oex::os::CMem::SetRawAllocator( x_sRawAllocator );
+	oex::CMem::SetRawAllocator( x_sRawAllocator );
 
 	// Create objects
 	g_psqScriptThread = OexAllocConstruct< sqbind::CScriptThread >();
@@ -151,7 +151,7 @@ extern "C" oex::oexRESULT SRV_Stop()
 
 	// Switch back to default allocator
 	oexCloseLog();
-	oex::os::CMem::SetDefaultRawAllocator();
+	oex::CMem::SetDefaultRawAllocator();
 
 	return 0;
 }

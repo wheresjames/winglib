@@ -21,6 +21,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CCellConnection, CCellConnection )
 	SQBIND_MEMBER_FUNCTION( CCellConnection, GetTypeFromName )
 	SQBIND_MEMBER_FUNCTION( CCellConnection, SetCacheLimit )
 	SQBIND_MEMBER_FUNCTION( CCellConnection, GetCacheLimit )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, DumpCache )
+
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CCellConnection );
 

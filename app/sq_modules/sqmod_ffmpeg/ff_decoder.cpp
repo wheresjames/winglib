@@ -182,7 +182,7 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 
 	} // end if
 
-	m_pkt.data = in->_Ptr();
+	m_pkt.data = (uint8_t*)in->_Ptr();
 	m_pkt.size = in->getUsed();
 
 #if defined( FFSQ_VIDEO2 )
@@ -250,7 +250,7 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 		return 0;
 
 	int gpp = 0;
-	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, in->_Ptr(), in->getUsed() );
+	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (uint8_t*)in->_Ptr(), in->getUsed() );
 
 	if ( 0 >= gpp )
 		return 0;

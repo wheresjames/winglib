@@ -135,7 +135,7 @@ oex::oexBOOL CModuleInstance::LoadFunctions()
 					   			   	  oexStrToMbPtr( m_cModule.GetPath().Ptr() ) ) );
 
 	// Call start function if provided
-	else if ( oex::oexINT ret = pStart( oex::os::CMem::GetRawAllocator(), oexNULL, oexNULL, 0, oexNULL ) )
+	else if ( oex::oexINT ret = pStart( oex::CMem::GetRawAllocator(), oexNULL, oexNULL, 0, oexNULL ) )
 	{	oexNOTICE( ret, oex::CStr().Fmt( oexT( "Exiting because SRV_Start() returned non-zero in module %s" ),
 					   			  	     oexStrToMbPtr( m_cModule.GetPath().Ptr() ) ) );
 		return 0;
@@ -165,9 +165,9 @@ oex::oexBOOL CModuleInstance::Export( sqbind::VM vm )
 	} // end if
 
 	// Attempt to export the functionality
-	sqbind::SSqAllocator sa = { oex::os::CMem::GetRawAllocator().fMalloc,
-								oex::os::CMem::GetRawAllocator().fRealloc,
-								oex::os::CMem::GetRawAllocator().fFree };
+	sqbind::SSqAllocator sa = { oex::CMem::GetRawAllocator().fMalloc,
+								oex::CMem::GetRawAllocator().fRealloc,
+								oex::CMem::GetRawAllocator().fFree };
 
 	oex::oexINT nRet = m_fExportSymbols( vm, &sa );
 

@@ -160,7 +160,7 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *
 
 	} // end if
 
-	m_pkt.data = in->_Ptr();
+	m_pkt.data = (uint8_t*)in->_Ptr();
 	m_pkt.size = in->getUsed();
 
 #if defined( FFSQ_VIDEO2 )

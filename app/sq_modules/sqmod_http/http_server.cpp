@@ -122,6 +122,7 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 
 	} // end scope
 */
+
 	// Decode the reply
 	sqbind::CSqMap mReply;
 	mReply.deserialize( sReply );
@@ -134,7 +135,7 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	// File as reply?
 	else if ( mReply[ oexT( "file" ) ].length() )
 		x_pSession->SetFileName( mReply[ oexT( "file" ) ].c_str(), mReply[ oexT( "filetype" ) ].c_str() );
-
+	
 	// Do we have binary data?
 	else if ( mReply[ oexT( "binary" ) ].length() )
 	{

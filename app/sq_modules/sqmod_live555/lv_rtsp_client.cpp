@@ -21,9 +21,9 @@ Boolean CLvRtspClient::CVideoSink::continuePlaying()
 		return False;
 
 	if ( !m_buf.Size() )
-		m_buf.Obj().OexNew( eDefaultBufferSize );
+		m_buf.Mem().Mem().OexNew( eDefaultBufferSize );
 
-	fSource->getNextFrame( m_buf._Ptr(), m_buf.Size(), _afterGettingFrame, this, onSourceClosure, this );
+	fSource->getNextFrame( (unsigned char*)m_buf._Ptr(), m_buf.Size(), _afterGettingFrame, this, onSourceClosure, this );
 
 	return True;
 }
@@ -96,9 +96,9 @@ Boolean CLvRtspClient::CAudioSink::continuePlaying()
 		return False;
 
 	if ( !m_buf.Size() )
-		m_buf.Obj().OexNew( eDefaultBufferSize );
+		m_buf.Mem().Mem().OexNew( eDefaultBufferSize );
 
-	fSource->getNextFrame( m_buf._Ptr(), m_buf.Size(), _afterGettingFrame, this, onSourceClosure, this );
+	fSource->getNextFrame( (unsigned char*)m_buf._Ptr(), m_buf.Size(), _afterGettingFrame, this, onSourceClosure, this );
 
 	return True;
 }

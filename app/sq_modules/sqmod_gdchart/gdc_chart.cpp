@@ -162,53 +162,6 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 	GDC_image = NULL;
 
 	return mImg;
-
-/*
-	oex::CImage img;
-
-	if ( !img.Create( graph->sx, graph->sy ) )
-	{	oexERROR( 0, oexT( "Error allocating image buffer" ) );
-		return oexT( "" );
-	} // end if
-
-	int sw = img.GetWidth();
-	int sh = img.GetHeight();
-//	int sz = ( img.GetWidth() * img.GetHeight() ) / 4;
-	unsigned char **p = graph->pixels;
-
-	for ( int y = 0, u = sh - 1; y < sh; y++, u-- )
-		for ( int x = 0; x < sw; x++ )
-		{	unsigned char b = p[ u ][ x ];
-			img.SetPixel( x, y, oexRGB( graph->red[ b  & 0x03 ], graph->green[ b & 0x03 ], graph->blue[ b & 0x03 ] ) );
-		} // end for
-
-	gdImageDestroy( graph );
-	GDC_image = NULL;
-
-	oex::oexINT nSize;
-	oex::oexPBYTE pBuf = oexNULL;
-	oex::CStr sType = oexMks( x_sType.c_str() ).GetFileExtension();
-	if ( !sType.Length() )
-		sType = x_sType.c_str();
-	if ( 0 >= img.GetFileType( sType.Ptr() ) )
-		sType = oexT( "png" );
-
-	// Encode image
-	if ( 0 >= img.Encode( &pBuf, &nSize, sType.Ptr() ) || !pBuf || !nSize )
-	{	oexERROR( 0, oexMks( oexT( "Failed to encode image, type = " ), x_sType.c_str() ) );
-		return oexT( "" );
-	} // end if
-
-	sqbind::CSqMulti mImg;
-	mImg[ oexT( "type" ) ].set( sType.Ptr() );
-	mImg[ oexT( "width" ) ].set( oexMks( img.GetWidth() ).Ptr() );
-	mImg[ oexT( "height" ) ].set( oexMks( img.GetHeight() ).Ptr() );
-
-	oex::CStr sImg = oexBinToStr( oex::CStr8( (char*)pBuf, nSize ) );
-	mImg[ oexT( "img" ) ].set( sqbind::stdString().assign( sImg.Ptr(), sImg.Length() ) );
-
-	return mImg;
-*/
 }
 
 int CGdcChart::SaveChart(	const sqbind::stdString &x_sFile,

@@ -86,6 +86,65 @@ int CCellConnection::Connect( const sqbind::stdString &sIp, int nLoadTags )
 	return 1;
 }
 
+sqbind::stdString CCellConnection::DumpCache()
+{
+	sqbind::stdString sRet;
+
+	// Create a string describing the cache
+	sqbind::stdString::value_type *ptr, szHex[ 1024 ] = { 0 };
+	for ( t_DataCache::iterator it = m_mapDataCache.begin(); it != m_mapDataCache.end(); it++ )
+		if ( it->first.length() )
+		{
+			// Save the data name
+			sRet += oexT( "---- " );
+			sRet += it->first;
+			sRet += oexT( " ----" );
+			sRet += oexNL;
+
+			int b, i = 0, bytes = it->second.data.Size();
+			unsigned char *buf = it->second.data.Ptr();
+			while ( i < bytes )
+			{
+				// Start the line
+				*szHex = 0;
+				ptr = szHex;
+
+				// Print hex
+				for ( b = 0; ( i + b ) < bytes && b < 16; b++ )
+					oex::os::CSys::StrFmt( ptr, 4, oexT( "%0.2X " ), (unsigned int)buf[ i + b ] ), ptr += 3;
+
+				// Pad to 16
+				while ( b < 16 )
+					oex::zstr::Copy( ptr, oexT( "   " ) ), ptr += 3, b++;
+
+				// Space
+				oex::zstr::Copy( ptr, oexT( "   " ) ), ptr += 3;
+
+				// Show ascii characters
+				for ( b = 0; ( i + b ) < bytes && b < 16; b++ )
+					if ( buf[ i + b ] >= oexT( ' ' ) && buf[ i + b ] <= oexT( '~' ) )
+						*( ptr++ ) = buf[ i + b ];
+					else
+						*( ptr++ ) = oexT( '.' );
+
+				// New line character
+				oex::zstr::Copy( ptr, oexNL );
+
+				// Save the line
+				sRet += szHex;
+
+				// Next 16 bytes
+				i += 16;
+				
+			} // end while			
+
+			sRet += oexNL;
+
+		} // end if
+
+	return sRet;
+}
+
 int CCellConnection::ReleaseTags()
 {
 	// Lose the tag map

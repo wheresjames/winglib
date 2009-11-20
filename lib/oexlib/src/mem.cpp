@@ -32,13 +32,11 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#include "../../../oexlib.h"
-#include "std_os.h"
+#include "../oexlib.h"
 
-//#include <crtdbg.h>
+#include <stdlib.h>
 
 OEX_USING_NAMESPACE
-using namespace OEX_NAMESPACE::os;
 
 #if !defined( OEX_ALIGNEDMEM ) || 0 == OEX_ALIGNEDMEM
 
@@ -130,13 +128,13 @@ static oexPVOID oex_realloc( oexPVOID x_ptr, oexSIZE_T x_nSize )
 	void *ptr4 = oex_malloc( x_nSize );
 	oexMemCpy( ptr4, ptr3, x_nSize );
 
-	// Free the realloc() pointer
-	free( ptr2 );
-
 #if defined( oexDEBUG )
 	COex::GetMemLeak().Remove( ptr2 );
 	COex::GetMemLeak().Add( ptr4 );
 #endif
+
+	// Free the realloc() pointer
+	free( ptr2 );
 
 	// Did you get all that?
 	return ptr4;
@@ -162,15 +160,18 @@ static void oex_free( oexPVOID x_ptr )
 
 #endif
 
+/// Binary share object
+static CBinShare		m_cBinShare;
+
 /// Raw allocator
-SRawAllocator	CMem::m_def = { oex_malloc, oex_realloc, oex_free };
-SRawAllocator	CMem::m_ra = { oex_malloc, oex_realloc, oex_free };
+SRawAllocator		CMem::m_def = { oex_malloc, oex_realloc, oex_free, &m_cBinShare };
+SRawAllocator		CMem::m_ra = { oex_malloc, oex_realloc, oex_free, &m_cBinShare };
 
 oexPVOID CMem::New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
 {
     oexUCHAR *pBuf;
 
-	_oexTRY
+    _oexTRY
     {
 		if ( m_ra.fMalloc )
 			pBuf = (oexUCHAR*)m_ra.fMalloc( x_uSize );
@@ -198,7 +199,7 @@ oexPVOID CMem::New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
 
     } // end try
 
-	_oexCATCH_ALL()
+    _oexCATCH_ALL()
     {
 		oexASSERT( 0 );
 
@@ -256,51 +257,4 @@ void CMem::Delete( oexPVOID x_pMem )
 
 	} // end if
 }
-
-#if defined( OEX_WIN32 )
-#	if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-static void /*_cdecl*/ oex_DumpHook( void * pUserData, size_t nBytes )
-{
-    CAlloc::ReportBlock( pUserData, nBytes );
-}
-#	endif
-#endif
-
-oexBOOL CMem::MemReport()
-{
-#if defined( oexDEBUG ) && defined( OEX_WIN32 )
-
-    _CrtMemState checkPt1;
-    _CrtMemCheckpoint( &checkPt1 );
-    _CrtMemDumpStatistics( &checkPt1 );
-    _CrtCheckMemory( );
-
-#endif
-    return oexTRUE;
-}
-
-oexBOOL CMem::DumpLeaks()
-{
-    // Custom dump function?
-#if defined( OEX_WIN32 )
-#	if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-
-    _CRT_DUMP_CLIENT pPdc = _CrtSetDumpClient( oex_DumpHook );
-
-#	endif
-#endif
-
-    oexBOOL bLeaks = oexFALSE; //_CrtDumpMemoryLeaks() ? oexTRUE : oexFALSE;
-
-#if defined( OEX_WIN32 )
-#	if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-
-    _CrtSetDumpClient( pPdc );
-
-#	endif
-#endif
-
-    return bLeaks;
-}
-
 

@@ -201,7 +201,7 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 	} // end if
 
 	if ( dat )
-		dat->setBuffer( m_pkt.data, m_pkt.size );
+		dat->setBuffer( (sqbind::CSqBinary::t_byte*)m_pkt.data, m_pkt.size, 0 );
 
 	return m_pkt.stream_index;
 }
@@ -232,8 +232,8 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 
 	// Data left over from last time?
 	if ( m_buf.getUsed() )
-	{	m_buf.AppendBuffer( m_pkt.data, m_pkt.size );
-		m_pkt.data = m_buf._Ptr();
+	{	m_buf.AppendBuffer( (sqbind::CSqBinary::t_byte*)m_pkt.data, m_pkt.size );
+		m_pkt.data = (uint8_t*)m_buf._Ptr();
 		m_pkt.size = m_buf.getUsed();
 	} // end if
 
@@ -289,7 +289,7 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 	// Is it already the right format?
 	if ( fmt == (int)m_pCodecContext->pix_fmt )
 	{	int nSize = CFfConvert::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
-		dat->setBuffer( m_pFrame->data[ 0 ], nSize );
+		dat->setBuffer( (sqbind::CSqBinary::t_byte*)m_pFrame->data[ 0 ], nSize, 0 );
 		m_nFrames++;
 		return m_pkt.stream_index;
 	} // end if
@@ -499,7 +499,7 @@ int CFfContainer::WriteFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 	} // end if
 
 	pkt.stream_index = pStream->index;
-	pkt.data = dat->_Ptr();
+	pkt.data = (uint8_t*)dat->_Ptr();
 	pkt.size = dat->getUsed();
 
 	if ( av_write_frame( m_pFormatContext, &pkt ) )

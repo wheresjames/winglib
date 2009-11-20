@@ -71,7 +71,7 @@ void CMemLeak::Destroy()
 
 	if ( m_pPool )
 	{
-		os::SRawAllocator sa = os::CMem::GetDefaultAllocator();
+		SRawAllocator sa = CMem::GetDefaultAllocator();
 		if ( sa.fFree )
 			sa.fFree( m_pPool );
 		m_pPool = oexNULL;
@@ -119,7 +119,7 @@ oexBOOL CMemLeak::Create( t_size x_nPoolBits, t_size x_nSlotMask )
 	m_nPoolSize = cmn::BitsToValue( m_nPoolBits );
 
 	// Get the default allocator
-	os::SRawAllocator sa = os::CMem::GetDefaultAllocator();
+	SRawAllocator sa = CMem::GetDefaultAllocator();
 	if ( !sa.fMalloc )
 	{	Destroy();
 		return oexFALSE;
