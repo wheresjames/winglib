@@ -65,6 +65,7 @@
 // Linked in
 #define _wautostr oex::CStrW
 #define _wautostr_tomb( s ) (oexStrWToMb( s ).Ptr())
+#define _wautostr_towc( s ) (oexMbToStrW( s ).Ptr())
 #include "../../../oss/cpu/cpu_usage.hpp"
 
 OEX_USING_NAMESPACE

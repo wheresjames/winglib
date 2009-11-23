@@ -132,4 +132,7 @@ private:
 
 	/// Current number of allocations
 	t_size					m_uCurrentAllocations;
+
+	/// Maximum number of allocations
+	t_size					m_uPeakAllocations;
 };

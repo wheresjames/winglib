@@ -118,7 +118,7 @@ protected:
 
 		m_Buffer.Reset();
 		while( (lRes = RegQueryValueEx( HKEY_PERFORMANCE_DATA,
-								   oexMks( dwObjectIndex, dwCounterIndex ).Ptr(),
+								   oexMks( dwObjectIndex, oexT( " " ), dwCounterIndex ).Ptr(),
 								   NULL,
 								   NULL,
 								   m_Buffer,
@@ -173,7 +173,7 @@ protected:
 
 			// Look for instance pInstanceName
 			_wautostr bstrInstance;
-			_wautostr bstrInputInstance = (wchar_t*)pInstanceName;
+			_wautostr bstrInputInstance = _wautostr_towc( pInstanceName );
 			for( int k=0; k < pPerfObj->NumInstances; k++ )
 			{
 				bstrInstance = (wchar_t*)((PBYTE)pPerfInst + pPerfInst->NameOffset);

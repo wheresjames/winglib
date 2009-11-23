@@ -41,12 +41,13 @@ CMemLeak::CMemLeak()
 #if defined( OEX_MEMLEAK_DEBUG )
 
 	m_nSlotOverflows = 0;
-	m_nPoolOverflows = 0;
 
 #endif
 
+	m_nPoolOverflows = 0;
 	m_uTotalAllocations = 0;
 	m_uCurrentAllocations = 0;
+	m_uPeakAllocations = 0;
 	m_nPoolBits = 0;
 	m_nSlotMask = 0;
 	m_nSlotSize = 0;
@@ -80,10 +81,11 @@ void CMemLeak::Destroy()
 #if defined( OEX_MEMLEAK_DEBUG )
 
 	m_nSlotOverflows = 0;
-	m_nPoolOverflows = 0;
 
 #endif
 
+	m_nPoolOverflows = 0;
+	m_uPeakAllocations = 0;
 	m_uTotalAllocations = 0;
 	m_uCurrentAllocations = 0;
 
@@ -158,6 +160,8 @@ oexINT CMemLeak::Add( oexCPVOID p )
 			// Track numbers
 			m_uTotalAllocations++;
 			m_uCurrentAllocations++;
+			if ( m_uCurrentAllocations > m_uPeakAllocations )
+				m_uPeakAllocations = m_uCurrentAllocations;
 
 			return 0;
 
@@ -264,6 +268,7 @@ CStr CMemLeak::Report()
 
 	CStr s = oexMks( oexNL, oexT( "------------------ Memory Report --------------------" ), oexNL, oexNL,
 					 oexT( "Total Allocations : " ), m_uTotalAllocations, oexNL,
+					 oexT( "Peak Allocations : " ), m_uPeakAllocations, oexNL,
 					 oexT( "Current Allocations : " ), m_uCurrentAllocations, oexNL,
 					 oexT( "Pool Overflows : " ), m_nPoolOverflows, oexNL,
 #if defined( OEX_MEMLEAK_DEBUG )
