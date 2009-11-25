@@ -35,10 +35,9 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
-
 #define OEX_THREAD_TIMEOUTS
 #define OEX_THREAD_FORCEFAIRNESS
-//#define OEX_THREAD_USE_GETTIME
+//#define OEX_THREAD_USE_GETTIMEOFDAY
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
@@ -416,13 +415,19 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 		case eRtLock :
 		case eRtMutex :
 		{
+
 #if defined( OEX_THREAD_FORCEFAIRNESS )
 
 			// +++ This is to force fairness among threads
 			//     There HAS to be a way to force this natively ????
 			if ( pRi->uWaiting && pRi->uLastOwner == oexGetCurThreadId() )
-			{	pRi->uWaiting = 0;
-				oexMicroSleep( 0 );
+			{
+				// Don't have to wait now
+				pRi->uWaiting = 0;
+
+				// iii Zero doesn't work ;)
+				oexMicroSleep( oexWAIT_RESOLUTION );
+
 			} // end if
 
 			// Attempt lock
@@ -444,22 +449,23 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 #if defined( OEX_THREAD_TIMEOUTS )
 
 			struct timespec to;
-#	if !defined( OEX_THREAD_USE_GETTIME )
+
+			// Get time
+
+#	if !defined( OEX_THREAD_USE_GETTIMEOFDAY )
 			clock_gettime( CLOCK_REALTIME, &to );
+#	else
+			struct timeval tp;
+			gettimeofday( &tp, 0 );
+			to.tv_sec = tp.tv_sec; to.tv_nsec = tp.tv_sec
+#	endif
+
+			// Add our time
 			to.tv_sec += x_uTimeout / 1000;
 			to.tv_nsec += ( x_uTimeout % 1000 ) * 1000000;
 			if ( to.tv_nsec > 1000000000 )
 				to.tv_sec += to.tv_nsec / 1000000000,
 				to.tv_nsec %= 1000000000;
-#	else
-			struct timeval    tp;
-			gettimeofday( &tp, 0 );
-			to.tv_sec  = tp.tv_sec + x_uTimeout / 1000;
-    		to.tv_nsec = tp.tv_usec * 1000 + ( ( x_uTimeout % 1000 ) * 1000000 );
-			if ( to.tv_nsec > 1000000000 )
-				to.tv_sec += to.tv_nsec / 1000000000,
-				to.tv_nsec %= 1000000000;
-#	endif
 
 			// Wait for the lock
 			if ( !pthread_mutex_timedlock( &pRi->hMutex, &to ) )
@@ -491,12 +497,12 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 
 			// Does user want to wait?
 			if ( !x_uTimeout && pRi->bManualReset )
-				return waitTimeout;
+				return waitFailed;
 
 			// Lock the mutex
 			oexAutoLock al( pRi->cSync, x_uTimeout );
 			if ( !al.IsLocked() )
-				return waitTimeout;
+				return waitFailed;
 
 			// Ensure it wasn't signaled while we were waiting
 			if ( pRi->bSignaled )
@@ -505,22 +511,23 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 #if defined( OEX_THREAD_TIMEOUTS )
 
 			struct timespec to;
-#	if !defined( OEX_THREAD_USE_GETTIME )
+
+			// Get time
+
+#	if !defined( OEX_THREAD_USE_GETTIMEOFDAY )
 			clock_gettime( CLOCK_REALTIME, &to );
+#	else
+			struct timeval tp;
+			gettimeofday( &tp, 0 );
+			to.tv_sec = tp.tv_sec; to.tv_nsec = tp.tv_sec
+#	endif
+
+			// Add our time
 			to.tv_sec += x_uTimeout / 1000;
 			to.tv_nsec += ( x_uTimeout % 1000 ) * 1000000;
 			if ( to.tv_nsec > 1000000000 )
 				to.tv_sec += to.tv_nsec / 1000000000,
 				to.tv_nsec %= 1000000000;
-#	else
-			struct timeval    tp;
-			gettimeofday( &tp, 0 );
-			to.tv_sec  = tp.tv_sec + x_uTimeout / 1000;
-    		to.tv_nsec = tp.tv_usec * 1000 + ( ( x_uTimeout % 1000 ) * 1000000 );
-			if ( to.tv_nsec > 1000000000 )
-				to.tv_sec += to.tv_nsec / 1000000000,
-				to.tv_nsec %= 1000000000;
-#	endif
 
 			// Get mutex handle
 			SResourceInfo *pRiMutex = (SResourceInfo*)pRi->cSync.m_hHandle;
@@ -664,20 +671,27 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 		case eRtLock :
 		case eRtMutex :
 		{
-			// Unlock the mutex
-			if ( oexINT nErr = pthread_mutex_unlock( &pRi->hMutex ) )
-			{	oexERROR( nErr, oexT( "pthread_mutex_unlock() failed" ) );
+			// Attempt lock
+			if ( pthread_mutex_trylock( &pRi->hMutex ) )
 				return waitFailed;
-			} // end if
 
-			// Remember we released the mutex
-			pRi->uLastOwner = oexGetCurThreadId();
-
+			// Update lock count
 			if ( pRi->nCount )
 				pRi->nCount--;
 
+			// Cleanup if count is zero
 			if ( !pRi->nCount )
+			{	pRi->uLastOwner = pRi->uOwner;
 				pRi->uOwner = 0;
+			} // end if
+
+			// Unlock the mutex twice
+			oexINT nErr;
+			if ( ( nErr = pthread_mutex_unlock( &pRi->hMutex ) )
+			     || ( nErr = pthread_mutex_unlock( &pRi->hMutex ) ) )
+			{	oexERROR( nErr, oexT( "pthread_mutex_unlock() failed" ) );
+				return waitFailed;
+			} // end if
 
 			return waitSuccess;
 
