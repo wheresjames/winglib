@@ -134,6 +134,10 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 
 oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 {
+	// Lock the queue
+	while ( CSqMsgQueue::GetLock().Wait( 100 ) )
+		ProcessMsgs();
+
 	// Let script cleanup
 	m_cSqEngine.Exit();
 

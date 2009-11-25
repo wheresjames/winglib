@@ -156,6 +156,8 @@ public:
 		m_pData = oexNULL;
 		m_bNewSession = oexTRUE;
 		m_uSessionTimeout = 60 * 60;
+		m_ppbSession = oexNULL;
+		m_plockSession = oexNULL;
     }
 
     THttpSession( T_PORT *x_pPort )
@@ -173,6 +175,8 @@ public:
 		m_pData = oexNULL;
 		m_bNewSession = oexTRUE;
 		m_uSessionTimeout = 60 * 60;
+		m_ppbSession = oexNULL;
+		m_plockSession = oexNULL;
     }
 
     /// Destructor

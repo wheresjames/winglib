@@ -56,6 +56,10 @@
 #	define OEX_CPU_64
 #endif
 
+#if defined( OEX_CPU_64 )
+#	define OEX_NOCASTPTR
+#endif
+
 #if defined( __GNUC__ )
 #	define OEX_GCC
 #endif

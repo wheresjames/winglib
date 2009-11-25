@@ -73,7 +73,7 @@ CStr CTrace::GetBacktrace( oexUINT x_uSkip, oexUINT x_uMax )
 	memPtrs.Zero();
 
 	// Release the memory
-	if ( oexCHECK_PTR( sStrings ) )
+	if ( sStrings )
 		free( sStrings );
 
 	return str;

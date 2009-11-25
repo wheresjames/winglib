@@ -450,22 +450,54 @@ oexGUID * CSys::CreateGuid( oexGUID *pGuid )
 
 void CSys::Sleep( oexUINT uMilliseconds, oexUINT uSeconds )
 {
+/*
+	if ( uMilliseconds > 1000 )
+	{	uSeconds += uMilliseconds / 1000;
+		uMilliseconds %= 1000;
+	} // end if
+
 	if ( uSeconds )
 		::sleep( uSeconds );
 
-	if ( uMilliseconds )
+	struct timespec ts;
+	ts.tv_sec = 0;
+	ts.tv_nsec = uMilliseconds * 1000000;
+	nanosleep( &ts, 0 );
+*/
+
+	if ( uSeconds )
+		::sleep( uSeconds );
+
+	if ( !uSeconds || uMilliseconds )
 		::usleep( uMilliseconds * 1000 );
+
 }
 
 oexBOOL CSys::MicroSleep( oexUINT uMicroseconds, oexUINT uSeconds )
 {
-	if ( uSeconds )
-		CSys::Sleep( 0, uSeconds );
+/*
+	if ( uMicroseconds > 1000000 )
+	{	uSeconds += uMicroseconds / 1000000;
+		uMicroseconds %= 1000000;
+	} // end if
 
-	if ( uMicroseconds )
+	if ( uSeconds )
+		::sleep( uSeconds );
+
+	struct timespec ts;
+	ts.tv_sec = 0;
+	ts.tv_nsec = uMicroseconds * 1000;
+	return nanosleep( &ts, 0 );
+*/
+
+	if ( uSeconds )
+		::sleep( uSeconds );
+
+	if ( !uSeconds || uMicroseconds )
 		::usleep( uMicroseconds );
 
 	return oexTRUE;
+
 }
 
 void CSys::CloseHandle( t_WAITABLE x_pHandle )

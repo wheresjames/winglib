@@ -151,10 +151,13 @@ public:
 	/// Returns true if the local object is locked
 	oexBOOL IsLocked( oexUINT x_uWho = oexGetCurThreadId() )
     {
-		if ( !oexCHECK_PTR( m_ptr ) )
+//		return m_ptr ? oexTRUE : oexFALSE;
+
+		if ( !m_ptr )
 			return oexFALSE;
 
 		return m_ptr->GetOwner() == x_uWho;
+
     }
 
 	//==============================================================
@@ -220,7 +223,7 @@ public:
 	*/
 	oexBOOL Unlock()
 	{
-		if ( !oexCHECK_PTR( m_ptr ) )
+		if ( !m_ptr )
             return oexTRUE;
 
 		m_ptr->Reset();

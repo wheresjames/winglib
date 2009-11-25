@@ -2333,7 +2333,7 @@ class CMyThread3 : public oex::CThread
 public:
 
 	CMyThread3( oexLock *x_lock, oex::oexINT *x_val, oex::oexINT *x_count, oex::oexINT x_id )
-	{	m_lock = x_lock; m_val = x_val; m_count = x_count; m_id = x_id; }
+	{	m_lock = x_lock; m_val = x_val; m_count = x_count; m_id = x_id; m_bThrottle = 0; }
 
 	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
 	{
@@ -2345,7 +2345,8 @@ public:
 		if ( !al.IsLocked() )
 			return oex::oexFALSE;
 
-		oexSleep( 15 );
+		if ( m_bThrottle )
+			oexSleep( 15 );
 
 		if ( 1 != *m_val )
 			return oex::oexFALSE;
@@ -2358,6 +2359,37 @@ public:
 	oex::oexINT 	*m_val;
 	oex::oexINT		*m_count;
 	oex::oexINT		m_id;
+	oex::oexBOOL	m_bThrottle;
+};
+
+class CMyThread4 : public oex::CThread
+{
+public:
+
+	CMyThread4()
+	{
+		m_uElapsed = 0;
+	}
+
+	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
+	{
+		// Save the time stamp
+		oex::oexINT uTime = oexGetUnixTime();
+
+		// Should time out
+		oexAutoLock al( m_lock, 3000 );
+
+		// We should not get the lock
+		if ( !al.IsLocked() )
+
+			// How much time went by?
+			m_uElapsed = oexGetUnixTime() - uTime;
+
+		return oex::oexFALSE;
+	}
+
+	oexLock				m_lock;
+	oex::oexUINT		m_uElapsed;
 };
 
 oex::oexRESULT Test_Threads()
@@ -2422,6 +2454,24 @@ oex::oexRESULT Test_Threads()
 	if ( !oexVERIFY( str == oexT( "1,2,3,4,5,6,7,8,9,10," ) ) )
 		return -16;
 
+	// *** Timeout test
+
+	CMyThread4 t4;
+
+	if ( !oexVERIFY( !t4.m_lock.Wait( 0 ) ) )
+		return 23;
+
+	if ( !oexVERIFY( 0 == t4.Start() ) )
+		return -24;
+
+	if ( !oexVERIFY( t4.WaitThreadExit() ) )
+		return -25;
+
+	t4.m_lock.Reset();
+
+	if ( 3 != t4.m_uElapsed )
+		oexEcho( oexMks( oexT( "Lock timeout set to 3 seconds, actual delay =  " ), t4.m_uElapsed ).Ptr() );
+
 	// *** Lock test
 
 	oexLock lock;
@@ -2447,7 +2497,7 @@ oex::oexRESULT Test_Threads()
 	                 && 0 == tl4.Stop() ) )
 	    return -21;
 
-	oexPrintf( oexT( "Thread counts are, %d, %d, %d, %d\n" ),
+	oexPrintf( oexT( "Unthrottled Thread counts are : %d, %d, %d, %d\n" ),
 			   count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
 
 	if ( !oexVERIFY( 0 == val ) )
@@ -2455,11 +2505,52 @@ oex::oexRESULT Test_Threads()
 		return -22;
 	} // end if
 
-	if ( !oexVERIFY( 10 < count[ 0 ]
-	                 && 10 < count[ 1 ]
-	                 && 10 < count[ 2 ]
-	                 && 10 < count[ 3 ] ) )
-	    return -23;
+	oex::oexINT min = oex::cmn::Min( count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
+	oex::oexINT max = oex::cmn::Max( count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
+	if ( max > ( min * 4 ) )
+		oexEcho( oexT( " Hmmmm.... Unthrottled thread counts are not fair" ) );
+
+	if ( !oexVERIFY( 0 == val ) )
+	{	oexSHOW( val );
+		return -22;
+	} // end if
+
+	oexZero( count );
+	tl1.m_bThrottle = 1;
+	tl2.m_bThrottle = 1;
+	tl3.m_bThrottle = 1;
+	tl4.m_bThrottle = 1;
+
+	if ( !oexVERIFY( 0 == tl1.Start( 0, 0 )
+	                 && 0 == tl2.Start( 0, 0 )
+	                 && 0 == tl3.Start( 0, 0 )
+	                 && 0 == tl4.Start( 0, 0 ) ) )
+		return -20;
+
+	oexSleep( 1000 );
+
+	if ( !oexVERIFY( 0 == tl1.Stop()
+	                 && 0 == tl2.Stop()
+	                 && 0 == tl3.Stop()
+	                 && 0 == tl4.Stop() ) )
+	    return -21;
+
+	oexPrintf( oexT( "Throttled Thread counts are : %d, %d, %d, %d\n" ),
+			   count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
+
+	if ( !oexVERIFY( 0 == val ) )
+	{	oexSHOW( val );
+		return -22;
+	} // end if
+
+	min = oex::cmn::Min( count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
+	max = oex::cmn::Max( count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
+	if ( max > ( min * 4 ) )
+		oexEcho( oexT( " Hmmmm.... Throttled thread counts are not fair" ) );
+
+	oex::oexINT nTotal = count[ 0 ] + count[ 1 ] + count[ 2 ] + count[ 3 ];
+	if ( nTotal < 50 || nTotal > 80 )
+		oexEcho( oexMks( oexT( " There should be about 66 counts total, but there are " ), nTotal ).Ptr() );
 
 	return oex::oexRES_OK;
 }
@@ -3167,8 +3258,6 @@ int main(int argc, char* argv[])
 
     TestAllocator();
 
-	TestBinary();
-
     TestStrings();
 
     TestFileMapping();
@@ -3192,6 +3281,8 @@ int main(int argc, char* argv[])
     Test_CSysTime();
 
 	Test_Threads();
+
+	TestBinary();
 
 #ifndef OEX_LOWRAM
 

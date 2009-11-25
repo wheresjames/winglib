@@ -49,12 +49,10 @@ CMemLeak				COex::m_cMemLeak;
 CMemLeak& COex::GetMemLeak() { return m_cMemLeak; }
 #endif
 
-CBinShare& COex::GetBinShare() 
-{	
+CBinShare& COex::GetBinShare()
+{
 	CBinShare *p = (CBinShare*)CMem::GetRawAllocator().pBinShare;
-	if ( !oexVERIFY_PTR( p ) )
-		return CBinShare();
-
+	oexASSERT_PTR( p );
 	return *p;
 }
 

@@ -75,6 +75,11 @@ namespace cmn
         T Max( T a, T b, T c )
     {   return a > b ? ( a > c ? a : c ) : ( b > c ? b : c ); }
 
+    /// Returns the largest of a, b, c, or d
+    template< typename T >
+    	T Max( T a, T b, T c, T d )
+    {	return Max( a, Max( b, Max( c, d ) ) ); }
+
     /// Returns the smallest of a or b
     template < typename T >
         T Min( T a, T b )
@@ -84,6 +89,11 @@ namespace cmn
     template < typename T >
         T Min( T a, T b, T c )
     {   return a < b ? ( a < c ? a : c ) : ( b < c ? b : c ); }
+
+    /// Returns the smallest of a, b, c, or d
+    template< typename T >
+    	T Min( T a, T b, T c, T d )
+    {	return Min( a, Min( b, Min( c, d ) ) ); }
 
     /// Returns val limited to the range of min and max
     template < typename T >
@@ -374,7 +384,7 @@ namespace cmn
 		{
 			T bits = 0;
 			while ( v )
-			{	if ( v & 1 ) 
+			{	if ( v & 1 )
 					bits++;
 				v >>= 1;
 			} // end while
