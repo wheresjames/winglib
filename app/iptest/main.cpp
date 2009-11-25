@@ -60,7 +60,7 @@ int iptest(int argc, char* argv[])
 		if ( bLooped )
 		{
 			// Give it a second to return data
-			if ( pSockets[ nCurSocket ].WaitEvent( oex::os::CIpSocket::eReadEvent, 2000 ) )
+			if ( pSockets[ nCurSocket ].WaitEvent( oex::os::CIpSocket::eReadEvent, 1000 ) )
 			{		if ( pSockets[ nCurSocket ].Read().Length() )
 					oexPrintf( oexT( "." ) ), os::CSys::Flush_stdout();
 				else
@@ -93,14 +93,14 @@ int iptest(int argc, char* argv[])
 		// Give it a second to return data
 		if ( pSockets[ i ].IsSocket() )
 		{
-			if ( pSockets[ i ].WaitEvent( oex::os::CIpSocket::eReadEvent, 2000 ) )
+			if ( pSockets[ i ].WaitEvent( oex::os::CIpSocket::eReadEvent, 1000 ) )
 			{	if ( pSockets[ nCurSocket ].Read().Length() )
-					oexPrintf( oexT( "." ) ), os::CSys::Flush_stdout();
+					oexPrintf( oexT( "|." ) ), os::CSys::Flush_stdout();
 				else
-					oexPrintf( oexT( "0" ) ), os::CSys::Flush_stdout();
+					oexPrintf( oexT( "|0" ) ), os::CSys::Flush_stdout();
 			} // end if
 			else
-				oexPrintf( oexT( "x" ) ), os::CSys::Flush_stdout();
+				oexPrintf( oexT( "|x" ) ), os::CSys::Flush_stdout();
 
 		} // end if
 

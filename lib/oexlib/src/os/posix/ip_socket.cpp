@@ -311,6 +311,8 @@ void CIpSocket::Destroy()
     m_uSocketType = 0;
     m_uSocketProtocol = 0;
 
+    m_uConnectState = 0;
+
 	// Ensure valid socket handle
 	if ( c_InvalidSocket == hSocket )
 		return;
@@ -331,6 +333,7 @@ void CIpSocket::Destroy()
 		} // end if
 
 	} // end if
+
 }
 
 oexBOOL CIpSocket::Shutdown()
@@ -663,13 +666,18 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
         if ( 0 == ( m_uEventState & x_lEventId ) )
         {
 			// Wait for events
-			oexINT nRes = epoll_wait( oexPtrToInt( m_hSocketEvent ), pev, eMaxEvents, x_uTimeout );
+			oexINT nRes;
+			do { nRes = epoll_wait( oexPtrToInt( m_hSocketEvent ), pev, eMaxEvents, x_uTimeout );
+			} while ( -1 == nRes && EINTR == errno );
 
 			if ( -1 == nRes )
 			{
 				// Log error
 				m_uLastError = errno;
-				oexERROR( errno, oexMks( oexT( "epoll_ctl() failed : m_hSocketEvent = " ), oexPtrToInt( m_hSocketEvent ) ) );
+				oexERROR( errno, oexMks( oexT( "epoll_wait() failed : m_hSocketEvent = " ), oexPtrToInt( m_hSocketEvent ) ) );
+
+				// Disconnected?
+				m_uConnectState |= eCsError;
 
 				// Just ditch if they aren't waiting for the close event
 				m_uEventState |= eCloseEvent;
@@ -703,7 +711,10 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 								m_uEventStatus[ uOffset ] = 0;
 
 								// Signal activity
-								m_uConnectState |= 1;
+								m_uConnectState |= eCsActivity;
+
+								// Turn off error flag
+								m_uConnectState &= ~eCsError;
 
 								// +++ Signal when we get a connect message
 //								if ( 0 != ( ( EPOLLIN | EPOLLOUT ) & uMask ) )
@@ -716,8 +727,9 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 				} // end for
 
             // !!!  Kludge around missing connect message
-            if ( !( m_uConnectState & 2 ) && ( m_uConnectState & 1 ) )
-            {   m_uConnectState |= 2;
+            if ( !( m_uConnectState & eCsConnected ) && ( m_uConnectState & eCsActivity ) )
+            {   m_uConnectState |= eCsConnected;
+				m_uConnectState &= ~eCsError;
                 m_uEventState |= eConnectEvent;
                 m_uEventStatus[ eConnectBit ] = 0;
             } // end if

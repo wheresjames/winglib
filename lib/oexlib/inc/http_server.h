@@ -146,7 +146,9 @@ public:
 		return 0 == CThread::Start();
 	}
 
-	virtual oexBOOL InitThread( oex::oexPVOID x_pData )
+protected:
+
+	oexBOOL ThreadStartServer()
 	{
 		// Bind to port
 		if ( !m_server.Bind( m_nPort ) )
@@ -165,6 +167,15 @@ public:
 		// Notify that server is running
 		if ( m_fnOnServerEvent )
 			m_fnOnServerEvent( m_pData, eSeConnect, 0, this );
+
+		return oexTRUE;
+	}
+
+	virtual oexBOOL InitThread( oex::oexPVOID x_pData )
+	{
+		// Attempt to start the server
+		if ( !ThreadStartServer() )
+			return oexFALSE;
 
 		return oexTRUE;
 	}
@@ -251,6 +262,20 @@ public:
 
 		} // end if
 
+		// Did we lose the connection?
+		else if ( m_server.IsError() )
+		{
+			// Drop old socket
+			m_server.Destroy();
+
+			// Wait a bit
+			oexSleep( 3000 );
+
+			// Restart the server
+			ThreadStartServer();
+
+		} // end else
+
 		// Check for expired connections
 		for ( typename t_LstSession::iterator it; m_lstSessions.Next( it ); )
 			if ( !it->IsRunning() /* || !it->port.IsConnected() */ )
@@ -304,6 +329,8 @@ public:
 
 		return oexTRUE;
 	}
+
+public:
 
 	/// Returns the number of client transactions serviced
 	oexINT GetNumTransactions()

@@ -42,6 +42,7 @@ OEX_USING_NAMESPACE
 #	if defined( OEX_ALIGNEDMEM ) && 0 != OEX_ALIGNEDMEM
 		oexSTATIC_ASSERT( 0 == ( OEX_MEMBLOCKPADDING & ( OEX_ALIGNEDMEM - 1 ) ) );
 		oexSTATIC_ASSERT( OEX_MEMBLOCKPADDING >= sizeof( oexUINT ) );
+		oexSTATIC_ASSERT( OEX_SIZE_VAR >= sizeof( oexUINT ) );
 #	endif
 
 /// Underrun padding
@@ -230,7 +231,7 @@ oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUI
     pBuf += OEX_SIZE_VAR;
 
     // Initialize block header
-    os::CSys::Zero( pBuf, sizeof( SBlockHeader ) );
+    oexZeroMemory( pBuf, sizeof( SBlockHeader ) );
 
     // Return protected memory area
     pBuf = (oexUCHAR*)CAlloc::ProtectMem( pBuf, x_uSize, oexTRUE, x_uLine, x_pFile, x_uInfoIndex );
@@ -257,16 +258,33 @@ oexINT CAlloc::Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT 
     return 0;
 }
 
-oexPVOID CAlloc::ReAlloc( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex )
+oexPVOID CAlloc::ReAlloc( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex, oexBOOL x_bAllowMove, oexBOOL x_bUseFullBlock )
 {
-    // Do we have the space to resize?
+    // Do we have the space in the current block?
     oexUINT uBlockSize = BlockSize( x_pBuf );
-    if ( uBlockSize < ( x_uNewSize + ProtectAreaSize() + OEX_SIZE_VAR ) )
-//    	if ( !os::CMem::Resize( x_pBuf, x_uNewSize, x_uLine, x_pFile ) )
-        	return oexNULL;
+    if ( uBlockSize >= ( x_uNewSize + ProtectAreaSize() + OEX_SIZE_VAR ) )
+	    return ProtectMem( VerifyMem( x_pBuf, oexTRUE ), x_uNewSize, oexTRUE, x_uLine, x_pFile, x_uInfoIndex );
 
-    // Resize the protected memory area
-    return ProtectMem( VerifyMem( x_pBuf, oexTRUE ), x_uNewSize, oexTRUE, x_uLine, x_pFile, x_uInfoIndex );
+	// Will the caller allow the block to be moved?
+   	if ( !x_bAllowMove )
+   		return oexNULL;
+
+	// New block size
+	uBlockSize = cmn::NextPower2( OEX_SIZE_VAR + x_uNewSize + ProtectAreaSize() );
+
+	// Attempt resize
+	oexUCHAR *pBuf = (oexUCHAR*)CMem::Resize( (oexUCHAR*)VerifyMem( x_pBuf, oexTRUE ) - OEX_SIZE_VAR, uBlockSize, x_uLine, x_pFile );
+
+	// Ensure the resize worked
+	if( !pBuf )
+		return oexNULL;
+
+	// Save new block size
+	*(oexUINT*)pBuf = uBlockSize;
+	pBuf += OEX_SIZE_VAR;
+
+	// Return new memory block
+	return (oexUCHAR*)ProtectMem( pBuf, x_uNewSize, oexTRUE, x_uLine, x_pFile, x_uInfoIndex );
 }
 
 oexPVOID CAlloc::VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex )

@@ -424,7 +424,7 @@ oexGUID * CSys::CreateGuid( oexGUID *pGuid )
 	if ( !oexCHECK_PTR( pGuid ) )
 		return oexNULL;
 
-	oexGUID guid;
+	oexGUID guid = IID_ZEROS;
 	oss::CMd5::Transform( &guid, &g_random, sizeof( g_random ) );
 
 	// Use time to randomize guid
@@ -441,7 +441,7 @@ oexGUID * CSys::CreateGuid( oexGUID *pGuid )
 	CMem::GetRawAllocator().fFree( rs.pHeap );
 
 	// Add existing random data
-	guid::XorGuid( pGuid, &guid );
+	guid::CopyGuid( pGuid, &guid );
 	guid::XorGuid( pGuid, &g_random );
 	guid::XorGuid( &g_random, &guid );
 

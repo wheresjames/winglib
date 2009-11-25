@@ -341,7 +341,7 @@ public:
     static oexINT Free( oexPVOID x_pBuf, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex );
 
     /// Resizes the buffer without reallocating if possible
-    static oexPVOID ReAlloc( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex );
+    static oexPVOID ReAlloc( oexPVOID x_pBuf, oexUINT x_uNewSize, oexUINT x_uLine, oexCSTR x_pFile, oexUINT x_uInfoIndex, oexBOOL x_bAllowMove = oexFALSE, oexBOOL x_bUseFullBlock = oexFALSE );
 
 public:
 
@@ -398,14 +398,14 @@ public:
 
     /// Generic resize
     template< typename T >
-        T* Resize( T* x_pPtr, oexUINT x_uNewSize )
+        T* Resize( T* x_pPtr, oexUINT x_uNewSize, oexBOOL x_bAllowMove = oexFALSE, oexBOOL x_bUseFullBlock = oexFALSE )
     {
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-        T* pPtr = (T*)ReAlloc( x_pPtr, x_uNewSize * sizeof( T ), m_uLine, m_pFile, 1 );
+        T* pPtr = (T*)ReAlloc( x_pPtr, x_uNewSize * sizeof( T ), m_uLine, m_pFile, 1, x_bAllowMove, x_bUseFullBlock );
         m_pFile = oexNULL;
         m_uLine = 0;
 #else
-        T* pPtr = (T*)ReAlloc( x_pPtr, x_uNewSize * sizeof( T ), 0, 0, 1 );
+        T* pPtr = (T*)ReAlloc( x_pPtr, x_uNewSize * sizeof( T ), 0, 0, 1, x_bAllowMove, x_bUseFullBlock );
 #endif
         return pPtr;
     }

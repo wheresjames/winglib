@@ -193,6 +193,21 @@ public:
 		eMaxEvents						= 1000
 	};
 
+	enum
+	{
+		// Activity
+		eCsActivity						= 0x00000001,
+
+		// Socket has received connected signal
+		eCsConnected					= 0x00000002,
+
+		// Socket is connecting
+		eCsConnecting					= 0x00000004,
+
+		// Error on socket
+		eCsError						= 0x00010000
+	};
+
     /// Socket handle type
     typedef oexPVOID t_SOCKET;
 
@@ -283,6 +298,45 @@ public:
 	/// Returns non-zero if the class contains a valid socket handle
 	oexBOOL IsSocket()
     {   return ( m_hSocket != c_InvalidSocket ); }
+
+	//==============================================================
+	// GetConnectState()
+	//==============================================================
+	/// Returns value representing connect status
+	/**
+			bit 1	-	non zero if activity
+			bit 2	-	non zero if connected
+			bit 3	-	non zero if connecting
+	*/
+    oexINT GetConnectState()
+    {	return m_uConnectState; }
+
+	//==============================================================
+	// IsConnected()
+	//==============================================================
+	/// Returns
+	oexBOOL IsConnected()
+	{	return ( m_uConnectState & ( eCsActivity | eCsConnected ) )
+				? oexTRUE : oexFALSE;
+	}
+
+	//==============================================================
+	// IsConnecting()
+	//==============================================================
+	/// Returns
+	oexBOOL IsConnecting()
+	{	return ( m_uConnectState & eCsConnecting )
+				? oexTRUE : oexFALSE;
+	}
+
+	//==============================================================
+	// IsError()
+	//==============================================================
+	/// Returns
+	oexBOOL IsError()
+	{	return ( m_uConnectState & eCsError )
+				? oexTRUE : oexFALSE;
+	}
 
 	//==============================================================
 	// GetSocketHandle()

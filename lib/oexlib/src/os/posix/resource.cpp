@@ -420,13 +420,21 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 
 			// +++ This is to force fairness among threads
 			//     There HAS to be a way to force this natively ????
-			if ( pRi->uWaiting && pRi->uLastOwner == oexGetCurThreadId() )
+			if ( pRi->uWaiting )
 			{
-				// Don't have to wait now
-				pRi->uWaiting = 0;
+				// If we don't own the lock,
+				// but we were the last to have it,
+				// give someone else a chance.
+				oexUINT uId = oexGetCurThreadId();
+				if ( pRi->uOwner != uId && pRi->uLastOwner == uId )
+				{
+					// Don't have to wait now
+					pRi->uWaiting = 0;
 
-				// iii Zero doesn't work ;)
-				oexMicroSleep( oexWAIT_RESOLUTION );
+					// iii Zero doesn't work ;)
+					oexMicroSleep( oexWAIT_RESOLUTION );
+
+				} // end if
 
 			} // end if
 

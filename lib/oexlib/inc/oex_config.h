@@ -117,7 +117,7 @@
 #define oexDEFAULT_WAIT_TIMEOUT         60000
 //#define oexDEFAULT_WAIT_TIMEOUT       3000
 
-#if defined( OEX_WIN32 )
+#if defined( OEX_WINDOWS )
 
 // Just informative under Windows.
 // This is windows default resolution
@@ -126,8 +126,8 @@
 #else
 
 // Wait resolution in uSeconds
-// iii This value is very touchy
-#	define oexWAIT_RESOLUTION			4000
+// iii Make it the same as Windows
+#	define oexWAIT_RESOLUTION			15000
 
 #endif
 

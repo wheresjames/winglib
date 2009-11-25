@@ -330,6 +330,11 @@ public:
         if ( !m_pMem )
             return New( x_uNewSize );
 
+		// Can only do an inplace resize on simple types
+		// because if it moves, all the contained pointers will
+		// be screwed up.
+		oexBOOL bAllowMove = ( 0 == ( CAlloc::eF1Constructed & CAlloc::GetFlags( m_pMem ) ) );
+
         // If we're shrinking
         if ( x_uNewSize < uSize )
         {
@@ -340,9 +345,9 @@ public:
 
             // We can make things smaller
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-            m_pMem = CAlloc( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize );
+            m_pMem = CAlloc( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize, bAllowMove );
 #else
-            m_pMem = CAlloc().Resize( m_pMem, x_uNewSize );
+            m_pMem = CAlloc().Resize( m_pMem, x_uNewSize, bAllowMove );
 #endif
 
         } // end if
@@ -350,13 +355,15 @@ public:
         // We must be making it larger
         else
         {
-            // Will a simple resize work?
+			T* pMem = oexNULL;
+
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-            T* pMem = CAlloc( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize );
+	        pMem = CAlloc( m_uLine, m_pFile ).Resize( m_pMem, x_uNewSize, bAllowMove );
 #else
-            T* pMem = CAlloc().Resize( m_pMem, x_uNewSize );
+    	    pMem = CAlloc().Resize( m_pMem, x_uNewSize, bAllowMove );
 #endif
 
+			// Do we have new memory?
             if ( !pMem )
             {
                 TMem< T > mem;
@@ -389,10 +396,18 @@ public:
 
             } // end if
 
-            // Construct new objects if needed
-            else if ( CAlloc::eF1Constructed & CAlloc::GetFlags( m_pMem ) )
-                for ( t_size i = uSize; i < x_uNewSize; i++ )
-                    oexPLACEMENT_NEW ( &pMem[ i ] ) T();
+            // If the memory moved
+            else
+            {
+				// Save new memory location
+				m_pMem = pMem;
+
+				// Initialize the new objects
+				if ( CAlloc::eF1Constructed & CAlloc::GetFlags( m_pMem ) )
+					for ( t_size i = uSize; i < x_uNewSize; i++ )
+						oexPLACEMENT_NEW ( &pMem[ i ] ) T();
+
+			} // end else
 
         } // end else
 
