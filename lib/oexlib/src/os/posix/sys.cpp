@@ -915,10 +915,19 @@ struct SCpuLoadInfo
 
 static SProcStatInfo 	g_psi;
 static SCpuLoadInfo		g_cli = { oexFALSE };
+static oexLock			g_cpu_lock;
 oexDOUBLE CSys::GetCpuLoad()
 {
+	oexAutoLock ll( g_cpu_lock );
+	if ( !ll.IsLocked() )
+		return 0;
+
 	// Get proc status
 	if ( !UpdateProcStat( &g_psi ) )
+		return 0;
+
+	// Ensure cpu key
+	if ( !g_psi.pb.IsKey( oexT( "cpu" ) ) )
 		return 0;
 
 	oexDOUBLE dCpu = 0;
@@ -952,7 +961,7 @@ oexDOUBLE CSys::GetCpuLoad()
 
 oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName )
 {
-	// +++ Get cpu load from linux?
+	// +++ Get process cpu load from linux?
 	return 0;
 }
 
@@ -963,6 +972,10 @@ oexBOOL CSys::Init()
 
 oexBOOL CSys::Uninit()
 {
+	oexAutoLock ll( g_cpu_lock );
+	if ( !ll.IsLocked() )
+		return 0;
+
 	// Release proc stat info
 	ReleaseProcStat( &g_psi );
 

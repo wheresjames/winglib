@@ -47,7 +47,7 @@ const CResource::t_HANDLE CResource::c_Invalid = (oexPVOID)0;
 const oexUINT CResource::c_Infinite = 0xffffffff;
 
 // This is currently the limit in Windows.   Tho there is no real
-// limit in Posix, We want things to be cross platform right? ;)
+// limit in Posix, but we want things to be cross platform right? ;)
 #define MAXIMUM_WAIT_OBJECTS	64
 
 namespace OEX_NAMESPACE
@@ -505,7 +505,7 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 
 			// Does user want to wait?
 			if ( !x_uTimeout && pRi->bManualReset )
-				return waitFailed;
+				return waitTimeout;
 
 			// Lock the mutex
 			oexAutoLock al( pRi->cSync, x_uTimeout );
@@ -723,53 +723,107 @@ oexRESULT CResource::Reset( oexUINT x_uTimeout )
 oexINT CResource::WaitMultiple( oexINT x_nCount, CResource **x_pResources, oexUINT x_uTimeout, oexBOOL x_nMin )
 {
 	oexINT nNumHandles = 0;
-	CResource *pRes[ MAXIMUM_WAIT_OBJECTS ];
+	oexINT nNumSignaled = 0;
 	oexINT nRealIndex[ MAXIMUM_WAIT_OBJECTS ];
 	oexINT nSignaled[ MAXIMUM_WAIT_OBJECTS ];
-	oexZeroMemory( nSignaled, sizeof( nSignaled ) );
+	oexINT nFailed[ MAXIMUM_WAIT_OBJECTS ];
 
+	// Warn user if we surpass ms windows caps
 	if ( x_nCount > MAXIMUM_WAIT_OBJECTS )
 		oexWARNING( 0, oexT( "Number of handles specified is beyond MS Windows system capabilities!!!" ) );
 
-	// Loop through the handles
+	// Organize the wait handles
 	for( oexINT i = 0; i < x_nCount && nNumHandles < MAXIMUM_WAIT_OBJECTS; i++ )
 	{
-		if ( !x_pResources[ i ]->IsValid() )
+		// Valid?
+		if ( !oexCHECK_PTR( x_pResources[ i ] ) || !x_pResources[ i ]->IsValid() )
 			oexWARNING( 0, oexT( "Invalid handle specified to WaitMultiple()" ) );
+
+		// Add to wait chain
 		else
 		{
-			SResourceInfo *pRi = (SResourceInfo*)x_pResources[ i ]->GetHandle();
-			if ( !pRi )
-				oexERROR( 0, oexT( "Invalid data pointer" ) );
+			// Integrity check
+			oexRESULT res = x_pResources[ i ]->Wait( 0 );
 
-			else
-				pRes[ nNumHandles ] = x_pResources[ i ],
+			// Is it signaled?
+			if ( waitSuccess == res )
+			{
+				// Enough to ditch?
+				if ( ++nNumSignaled >= x_nMin )
+					return i;
+
+			} // end if
+
+			// We'll have to wait on this one
+			else if ( waitTimeout == res )
+			{
+				// Save info
+				nFailed[ nNumHandles ] = 0;
+				nSignaled[ nNumHandles ] = 0;
 				nRealIndex[ nNumHandles++ ] = i;
+
+			} // end if
+
+			// ??? Must be in an unwaitable state?
+			else
+				oexWARNING( 0, oexT( "Unwaitable handle specified to WaitMultiple()" ) );
 
 		} // end else
 
 	} // end for
 
-	oexINT nNumSignaled = 0;
-	while ( x_uTimeout > eWaitResolution )
+	oexUINT uDelay = 0;
+
+	// Forever
+	for( ; ; )
 	{
 		// See who's signaled
 		for ( oexINT i = 0; i < nNumHandles; i++ )
-			if ( !nSignaled[ i ] )
-				if ( waitSuccess == pRes[ i ]->Wait( 0 ) )
-				{	nSignaled[ i ]++;
+		{
+			// Has this one already been signaled?
+			if ( !nSignaled[ i ] && !nFailed[ i ] )
+			{
+				// Wait on this item
+				oexRESULT res = x_pResources[ nRealIndex[ i ] ]->Wait( uDelay );
+
+				// Did it succeed?
+				if ( waitSuccess == res )
+				{
+					// Do we have the required number of signals
 					if ( ++nNumSignaled >= x_nMin )
 						return nRealIndex[ i ];
+
+					// Another one bites the dust
+					nSignaled[ i ]++;
+
 				} // end if
 
-		// Wait a bit
-		oexUINT uDelay = x_uTimeout * 1000;
-		if ( uDelay > eWaitResolution )
-			uDelay = eWaitResolution;
-		x_uTimeout -= uDelay / 1000;
-		oexMicroSleep( uDelay );
+				// Failed?
+				else if ( waitTimeout != res )
+					nFailed[ i ] = 1;
 
-	} // end while
+				// Clear delay
+				uDelay = 0;
+
+			} // end for
+
+		} // end for
+
+		// ???
+		if ( uDelay )
+			return waitFailed;
+
+		// Timed out?
+		if ( x_uTimeout < eWaitResolution )
+			return waitTimeout;
+
+		// How long to wait
+		uDelay = eWaitResolution / 1000;
+
+		// Subtract from total
+		x_uTimeout -= uDelay;
+
+	} // end forever
 
 	return waitTimeout;
 }

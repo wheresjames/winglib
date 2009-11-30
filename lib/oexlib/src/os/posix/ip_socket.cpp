@@ -270,6 +270,9 @@ oexBOOL CIpSocket::InitSockets()
 
 	} // end if
 
+	// Don't cause SIGPIPE
+	signal( SIGPIPE, SIG_IGN );
+
 	return IsInitialized();
 }
 
@@ -376,8 +379,8 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
     m_uSocketType = x_type;
     m_uSocketProtocol = x_protocol;
 
-	int on = 1;
-	if ( -1 == setsockopt( oexPtrToInt( m_hSocket ), SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on) ) )
+	int set = 1;
+	if ( -1 == setsockopt( oexPtrToInt( m_hSocket ), SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set) ) )
 		oexWARNING( errno, oexT( "socket interface does not support SO_REUSEADDR" ) );
 
 	// Capture all events
@@ -714,7 +717,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 								m_uConnectState |= eCsActivity;
 
 								// Turn off error flag
-								m_uConnectState &= ~eCsError;
+//								m_uConnectState &= ~eCsError;
 
 								// +++ Signal when we get a connect message
 //								if ( 0 != ( ( EPOLLIN | EPOLLOUT ) & uMask ) )
@@ -729,7 +732,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
             // !!!  Kludge around missing connect message
             if ( !( m_uConnectState & eCsConnected ) && ( m_uConnectState & eCsActivity ) )
             {   m_uConnectState |= eCsConnected;
-				m_uConnectState &= ~eCsError;
+//				m_uConnectState &= ~eCsError;
                 m_uEventState |= eConnectEvent;
                 m_uEventStatus[ eConnectBit ] = 0;
             } // end if
@@ -999,13 +1002,15 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
     si.sin_family = m_uSocketFamily;
 
 	// Receive data from socket
+	x_uFlags |= MSG_NOSIGNAL;
 	int nRes = recvfrom( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize,
                          (int)x_uFlags, (sockaddr*)&si, &nSize );
 
 	if ( -1 == nRes )
     {	m_uLastError = errno;
 		m_uEventState |= eCloseEvent;
-		oexERROR( errno, oexT( "recvfrom() failed" ) );
+		m_uConnectState |= eCsError;
+		oexWARNING( errno, oexT( "recvfrom() failed" ) );
 		if ( x_puRead )
             *x_puRead = 0;
 		return oexFALSE;
@@ -1094,12 +1099,14 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
         return oexFALSE;
 
 	// Receive data from socket
+	x_uFlags |= MSG_NOSIGNAL;
 	int nRes = recv( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
 
 	if ( -1 == nRes )
     {	m_uLastError = errno;
 		m_uEventState |= eCloseEvent;
-		oexERROR( errno, oexT( "recv() failed" ) );
+		m_uConnectState |= eCsError;
+		oexWARNING( errno, oexT( "recv() failed" ) );
 		if ( x_puRead )
             *x_puRead = 0;
 		return oexFALSE;
@@ -1195,6 +1202,7 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
     CIpSocket_SetAddressInfo( &m_addrPeer, &si );
 
     // Send the data
+	x_uFlags |= MSG_NOSIGNAL;
     int nRes = sendto( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize,
                        (int)x_uFlags, (sockaddr*)&si, sizeof( si ) );
 
@@ -1206,7 +1214,9 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
 
 		m_uEventState |= eCloseEvent;
 
-		oexERROR( errno, oexT( "sendto() failed" ) );
+		m_uConnectState |= eCsError;
+
+		oexWARNING( errno, oexT( "sendto() failed" ) );
 
 		// Number of bytes sent
 		if ( x_puSent )
@@ -1237,6 +1247,7 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
         return 0;
 
 	// Attempt to send the data
+	x_uFlags |= MSG_NOSIGNAL;
 	int nRes = send( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
 
 	// Check for error
@@ -1247,7 +1258,9 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 
 		m_uEventState |= eCloseEvent;
 
-		oexERROR( errno, oexT( "send() failed" ) );
+		m_uConnectState |= eCsError;
+
+		oexWARNING( errno, oexT( "send() failed" ) );
 
 		// Number of bytes sent
 		if ( x_puSent )

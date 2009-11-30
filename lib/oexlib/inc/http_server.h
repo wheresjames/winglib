@@ -84,7 +84,7 @@ public:
 		virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
 		{
 			// While thread is running and no transactions
-			while ( GetStopEvent().Wait( 0 ) && !session.GetTransactions() )
+			while ( GetStopEvent().Wait( 0 ) && !session.GetTransactions() && !port.IsError() )
 			{
 				// Process data if any
 				if ( port.WaitEvent( oex::os::CIpSocket::eReadEvent, 100 ) )
@@ -278,7 +278,7 @@ protected:
 
 		// Check for expired connections
 		for ( typename t_LstSession::iterator it; m_lstSessions.Next( it ); )
-			if ( !it->IsRunning() /* || !it->port.IsConnected() */ )
+			if ( !it->IsRunning() /* || !it->port.IsError() */ )
 				it = m_lstSessions.Erase( it );
 
 		// Is it time to cleanup?

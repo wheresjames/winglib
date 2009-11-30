@@ -44,11 +44,11 @@ namespace zstr
 {
     template < typename T >
         oexSIZE_T Length( oexCONST T *s )
-        {   oexSIZE_T l = 0;
-            oexASSERT_PTR( s );
-            while ( *s )
-            	s++, l++;
-            return l;
+        {   oexASSERT_PTR( s );
+            oexCONST T *p = s;
+            while ( *p )
+            	p++;
+            return (oexSIZE_T)( p - s );
         }
 
 	/// Returns end of string
