@@ -303,8 +303,10 @@ oexPVOID CAlloc::VerifyMem( oexPVOID x_pBuf, oexBOOL x_bUpdate, oexUINT *x_puSiz
 #endif
                                          );
 
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
     // Grab the size of the allocated buffer
     oexUINT uSize = pBh->uSize;
+#endif
 
     if ( x_puSize )
 	    *x_puSize = *( (oexUINT*)pBuf );

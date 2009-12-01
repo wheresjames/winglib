@@ -161,11 +161,17 @@ static void oex_free( oexPVOID x_ptr )
 #endif
 
 /// Binary share object
-static CBinShare		m_cBinShare;
+static CBinShare		g_cBinShare;
+
+/// Memory leak tracker
+static CMemLeak			g_cMemLeak;
+
+/// Logging
+static CLog				g_cLog;
 
 /// Raw allocator
-SRawAllocator		CMem::m_def = { oex_malloc, oex_realloc, oex_free, &m_cBinShare };
-SRawAllocator		CMem::m_ra = { oex_malloc, oex_realloc, oex_free, &m_cBinShare };
+SRawAllocator		CMem::m_def = { oex_malloc, oex_realloc, oex_free, &g_cBinShare, &g_cMemLeak, &g_cLog };
+SRawAllocator		CMem::m_ra = { oex_malloc, oex_realloc, oex_free, &g_cBinShare, &g_cMemLeak, &g_cLog };
 
 oexPVOID CMem::New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
 {

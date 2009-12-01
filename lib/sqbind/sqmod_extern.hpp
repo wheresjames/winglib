@@ -86,7 +86,6 @@ extern "C" oexDECLARE_SRV_FUNCTION( SRV_Stop );
 extern "C" oex::oexRESULT SRV_Stop()
 {
 	// Switch back to default allocator
-	oexCloseLog();
 	oex::CMem::SetDefaultRawAllocator();
 
 	return 0;

@@ -18,18 +18,8 @@ sqbind::CScriptThread	*g_psqScriptThread = oexNULL;
 /// Pointer to module manager
 sqbind::CModuleManager	*g_psqModuleManager = oexNULL;
 
-int main(int argc, char* argv[])
+int run(int argc, char* argv[])
 {
-    // Initialize the oex library
-	oexINIT();
-
-	// Initialize sockets
-    if ( !oex::os::CIpSocket::InitSockets() )
-    	oexERROR( 0, oexT( "Unable to initialize sockets" ) );
-
-	// Start a log file
-	oexNOTICE( 0, oexT( "Application startup" ) );
-
 	oex::CStr sCmd;
 
 	if ( argc > 1 && oexCHECK_PTR( argv[ 1 ] ) )
@@ -116,6 +106,24 @@ int main(int argc, char* argv[])
 		OexAllocDelete( g_psqModuleManager );
 	} // end if
 
+	return 0;
+}
+
+int main(int argc, char* argv[])
+{
+    // Initialize the oex library
+	oexINIT();
+
+	// Initialize sockets
+    if ( !oex::os::CIpSocket::InitSockets() )
+    	oexERROR( 0, oexT( "Unable to initialize sockets" ) );
+
+	// Start a log file
+	oexNOTICE( 0, oexT( "Application startup" ) );
+
+	// Run the app
+	int nRet = run( argc, argv );
+
 	oexNOTICE( 0, oexT( "Shutting down..." ) );
 
 	// Uninitialize sockets
@@ -124,6 +132,6 @@ int main(int argc, char* argv[])
 	// Uninitialize the oex library
     oexUNINIT();
 
-	return 0;
+	return nRet;
 }
 

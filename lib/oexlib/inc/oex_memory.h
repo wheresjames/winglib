@@ -38,6 +38,9 @@ typedef void* (*PFN_malloc)( oexSIZE_T size );
 typedef void* (*PFN_realloc)( oexPVOID ptr, oexSIZE_T size );
 typedef void (*PFN_free)( oexPVOID free );
 
+class CMemLeak;
+class CBinShare;
+class CLog;
 struct SRawAllocator
 {
 	/// Allocates memory
@@ -50,7 +53,13 @@ struct SRawAllocator
 	PFN_free		fFree;
 
 	/// Binary shares
-	oexPVOID		pBinShare;
+	CBinShare		*pBinShare;
+
+	/// Memory leak tracker
+	CMemLeak		*pMemLeak;
+
+	/// Logging class
+	CLog			*pLog;
 };
 
 class CMem

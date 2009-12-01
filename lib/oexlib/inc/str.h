@@ -386,8 +386,8 @@ public:
 	{	( (TStr*)this )->Unshare(); return (T*)Ptr( x_uOffset ); }
 
 	/// Returns the specified character
-	T& operator []( oexUINT x_uOffset ) const
-	{	( (TStr*)this )->Unshare(); return *_Ptr( x_uOffset ); }
+	oexCONST T operator []( oexUINT x_uOffset ) const
+	{	return *Ptr( x_uOffset ); }
 
 	/// Returns the first character in the buffer
 	oexCONST T& operator *() const
@@ -2259,6 +2259,12 @@ public:
 
 	/// Returns the offset of the first character in pChars found in the string
 	/// Returns -1 if no characters found
+	oexINT FindChars( oexCONST T* pChars, t_size lnChars )
+	{	return str::FindCharacters( Ptr(), Length(), pChars, lnChars );
+	}
+
+	/// Returns the offset of the first character in pChars found in the string
+	/// Returns -1 if no characters found
 	oexINT RFindChars( oexCONST T* pChars )
 	{	return str::RFindCharacters( Ptr(), Length(), pChars, zstr::Length( pChars ) );
 	}
@@ -2267,6 +2273,14 @@ public:
 	/// them from the string
 	TStr& Find( oexCONST T* pChars )
 	{	oexINT p = str::FindCharacters( Ptr(), Length(), pChars, zstr::Length( pChars ) );
+		if ( 0 < p ) LTrim( p ); else if ( 0 > p ) Destroy();
+		return *this;
+	}
+
+	/// Skips any characters not in pChars and removes
+	/// them from the string
+	TStr& Find( oexCONST T* pChars, t_size lnChars )
+	{	oexINT p = str::FindCharacters( Ptr(), Length(), pChars, lnChars );
 		if ( 0 < p ) LTrim( p ); else if ( 0 > p ) Destroy();
 		return *this;
 	}
@@ -2368,6 +2382,18 @@ public:
 		TStr str( Ptr(), 0, i );
 		LTrim( i );
 		return str;
+	}
+
+	/// Splits off a string up to and including any of the terminator characters,
+	TStr& SkipPast( oexCONST T* pTerm )
+	{	oexASSERT_PTR( pTerm );
+		oexUINT nTerm = zstr::Length( pTerm );
+		oexINT i = str::FindCharacters( Ptr(), Length(), pTerm, nTerm );
+		if ( 0 > i ) { Destroy(); return *this; }
+		oexINT nEnd = str::SkipCharacters( Ptr( i ), Length() - i, pTerm, nTerm );
+		if ( 0 > nEnd ) { Destroy(); return *this; }
+		LTrim( i + nEnd );
+		return *this;
 	}
 
 	/// Splits off a string up to any of the terminator characters

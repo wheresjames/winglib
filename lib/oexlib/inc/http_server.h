@@ -126,6 +126,9 @@ public:
 
 	~THttpServer()
 	{
+		// Stop the server
+		Stop();
+
 		m_pData = oexNULL;
 		m_fnOnServerEvent = oexNULL;
 		m_pSessionData = oexNULL;

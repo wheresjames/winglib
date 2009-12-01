@@ -44,25 +44,69 @@ oexINT					COex::m_nStartupCode = 0;
 oexINT					COex::m_nShutdownCode = 0;
 COex::CVerifyStartup	COex::m_cVerifyStartup;
 
+COex::CVerifyStartup::CVerifyStartup()
+{
+}
+
+COex::CVerifyStartup::~CVerifyStartup()
+{
+/* +++ Fix this check one day
+
 #if defined( oexDEBUG )
-CMemLeak				COex::m_cMemLeak;
-CMemLeak& COex::GetMemLeak() { return m_cMemLeak; }
+
+	if ( !COex::GetStartupCode() )
+	{//	oexTRACE( oexT( "! oexlib - oex::COex::Init() was not called!\n" ) );
+		oexBREAK( oexT( "oex::COex::Init() was not called!" ) );
+	} // end if
+	else if ( 0 > COex::GetStartupCode() )
+	{//	oexTRACE( oexFmt( oexT( "! oexlib - oex::COex::Init() reported error code %d\n" ), COex::GetStartupCode() ) );
+		oexBREAK( oexT( "oex::COex::Init() reported an error" ) );
+	} // end else if
+
+	if ( !COex::GetShutdownCode() )
+	{//	oexTRACE( oexT( "! oexlib - oex::COex::Uninit() was not called!\n" ) );
+		oexBREAK( oexT( "oex::COex::Uninit() was not called!" ) );
+	} // end if
+	else if ( 0 > COex::GetShutdownCode() )
+	{//	oexTRACE( oexFmt( oexT( "! oexlib - oex::COex::Uninit() reported error code %d\n" ), COex::GetShutdownCode() ) );
+		oexBREAK( oexT( "oex::COex::Uninit() reported an error" ) );
+	} // end else if
+
 #endif
+
+*/
+}
+
+oexINT COex::GetStartupCode()
+{	return m_nStartupCode; }
+
+oexINT COex::GetShutdownCode()
+{	return m_nShutdownCode; }
 
 CBinShare& COex::GetBinShare()
 {
-	CBinShare *p = (CBinShare*)CMem::GetRawAllocator().pBinShare;
+	CBinShare *p = CMem::GetRawAllocator().pBinShare;
 	oexASSERT_PTR( p );
 	return *p;
 }
 
+#if defined( oexDEBUG )
+
+CMemLeak& COex::GetMemLeak()
+{
+	CMemLeak *p = CMem::GetRawAllocator().pMemLeak;
+	oexASSERT_PTR( p );
+	return *p;
+}
+
+#endif
 
 oexINT COex::Init()
 {
 #if defined( oexDEBUG )
 
 	// Create memory leak detector
-	m_cMemLeak.Create();
+	GetMemLeak().Create();
 
 #endif
 
@@ -135,10 +179,10 @@ oexINT COex::Uninit()
 //       m_nShutdownCode |= -1;
 
 	// Verify sockets were released correctly
-	oexVERIFY( !os::CIpSocket::GetInitCount() );
+//	oexVERIFY( !os::CIpSocket::GetInitCount() );
 
 	// Close the log file
-	CLog::GlobalLog().Destroy();
+	oexCloseLog();
 
     // Uninit the system stuff
     if ( !oexVERIFY( os::CSys::Uninit() ) )
@@ -163,16 +207,16 @@ oexINT COex::Uninit()
 #if defined( oexDEBUG )
 
 	// Freeze memory statistics
-	m_cMemLeak.Freeze();
+	GetMemLeak().Freeze();
 
-	CStr sReport = m_cMemLeak.Report();
+	CStr sReport = GetMemLeak().Report();
 
 //	oexEcho( sReport.Ptr() );
 
 	oexTRACE( sReport.Ptr() );
 
 	// Create memory leak detector
-	m_cMemLeak.Destroy();
+	GetMemLeak().Destroy();
 
 #endif
 

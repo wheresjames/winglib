@@ -214,9 +214,7 @@ public:
 	// GlobalLog()
 	//==============================================================
 	/// Returns a pointer to the global log object
-	static CLog& GlobalLog()
-	{	return m_logGlobal;
-	}
+	static CLog& GlobalLog();
 
 private:
 
@@ -226,7 +224,5 @@ private:
 	/// Error reporting level
 	oexINT								m_uLevel;
 
-	/// Global log file
-	static CLog							m_logGlobal;
 };
 

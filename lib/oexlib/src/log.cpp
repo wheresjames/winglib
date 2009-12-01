@@ -36,7 +36,11 @@
 
 OEX_USING_NAMESPACE
 
-CLog CLog::m_logGlobal;
+CLog& CLog::GlobalLog()
+{	CLog *p = CMem::GetRawAllocator().pLog;
+	oexASSERT_PTR( p );
+	return *p;
+}
 
 void CLog::Destroy()
 {
@@ -44,7 +48,6 @@ void CLog::Destroy()
 	m_file.Destroy();
 	m_sPath.Destroy();
 }
-
 
 oexBOOL CLog::OpenLogFile( oexCSTR x_pPath, oexCSTR x_pFile, oexCSTR x_pExtension )
 {
@@ -239,14 +242,14 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT 
 
 			// Write out the string to the file
 			m_file.Write( oexStrToMb( sLog ) );
-			
+
 #if defined( oexPRINT_LOGS )
 
 		// Print if user wants to see this level
 		if ( oexPRINT_LOGS <= x_uLevel )
 			oexEcho( sLog.Ptr() );
 #endif
-			
+
 		}
 		_oexCATCH( ... )
 		{

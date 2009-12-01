@@ -48,8 +48,8 @@
 //#undef OEX_ENABLE_TESTS
 
 // Enables buffer over-run/under-run checking in release mode
-#define OEX_ENABLE_RELEASE_MODE_MEM_CHECK
-//#undef OEX_ENABLE_RELEASE_MODE_MEM_CHECK
+//#define OEX_ENABLE_RELEASE_MODE_MEM_CHECK
+#undef OEX_ENABLE_RELEASE_MODE_MEM_CHECK
 
 // Attempt to detect 64 bit processor
 #if defined( _WIN64 ) || defined( _M_X64 ) || defined( __amd64__ ) || defined( _LP64 )

@@ -890,6 +890,71 @@ static oexBOOL UpdateProcStat( SProcStatInfo *pPsi )
 	return oexTRUE;
 }
 
+static oexBOOL UpdateProcStatItem( SProcStatInfo *pPsi, oexCSTR pItem )
+{
+	// Verify processor pointer
+	if ( !oexCHECK_PTR( pPsi ) || !oexCHECK_PTR( pItem ) )
+		return oexFALSE;
+
+	// Lose old values
+	pPsi->pb.Destroy();
+
+	// Open processor status file if needed
+	if ( !pPsi->fProcStat.IsOpen() )
+	{	if ( !pPsi->fProcStat.OpenExisting( oexT( "/proc/stat" ), os::CBaseFile::eAccessRead ).IsOpen() )
+			return oexFALSE;
+	} // end if
+
+	// Start at the start
+	pPsi->fProcStat.SetPtrPosBegin( 0 );
+
+	// Read in info
+	CStr sInfo = pPsi->fProcStat.Read( 64 * 1024 );
+	if ( !sInfo.Length() )
+		return oexFALSE;
+
+	oexINT nItem = zstr::Length( pItem );
+	while ( sInfo.Length() )
+	{
+		// Is this the one we're looking for?
+		if ( sInfo.CmpLen( pItem, nItem ) )
+		{
+			// Skip tag name
+			sInfo.LTrim( nItem );
+			sInfo.Skip( oexT( "\t " ) );
+
+			// Create a key for data
+			CPropertyBag &r = pPsi->pb[ pItem ];
+
+			// Read in values
+			oexINT nSep, i = 0, nDone = 0;
+			while ( !nDone && 0 < ( nSep = sInfo.FindChars( oexT( "\r\n\t " ) ) ) )
+			{
+				// Add item
+				r[ i++ ] = CStr( sInfo.Ptr(), nSep );
+
+				// Are we done?
+				if ( oexT( ' ' ) != sInfo[ nSep ] && oexT( '\t' ) != sInfo[ nSep ] )
+					nDone = 1;
+
+				// Skip
+				sInfo.LTrim( nSep );
+				sInfo.Skip( oexT( "\t " ) );
+
+			} // end while
+
+			return oexTRUE;
+
+		} // end if
+
+		else
+			sInfo.SkipPast( oexT( "\r\n" ) );
+
+	} // end while
+
+	return oexFALSE;
+}
+
 static oexBOOL ReleaseProcStat( SProcStatInfo *pPsi )
 {
 	// Verify processor pointer
@@ -899,6 +964,9 @@ static oexBOOL ReleaseProcStat( SProcStatInfo *pPsi )
 	// Close the file
 	if ( pPsi->fProcStat.IsOpen() )
 		pPsi->fProcStat.Close();
+
+	// Release propertys
+	pPsi->pb.Destroy();
 
 	return oexTRUE;
 }
@@ -923,7 +991,7 @@ oexDOUBLE CSys::GetCpuLoad()
 		return 0;
 
 	// Get proc status
-	if ( !UpdateProcStat( &g_psi ) )
+	if ( !UpdateProcStatItem( &g_psi, oexT( "cpu" ) ) )
 		return 0;
 
 	// Ensure cpu key
@@ -933,31 +1001,40 @@ oexDOUBLE CSys::GetCpuLoad()
 	oexDOUBLE dCpu = 0;
 	CPropertyBag &cpu = g_psi.pb[ oexT( "cpu" ) ];
 
+	// Must have values
+	if ( !cpu.Size() )
+		return 0;
+
 	if ( !g_cli.bValid )
 	{
 		g_cli.bValid = oexTRUE;
 		for( oexUINT i = 0; i < oexSizeOfArray( g_cli.cpu ); i++ )
-			g_cli.cpu[ i ] = 0;
+			g_cli.cpu[ i ] = cpu[ i ].ToInt64();
 
 	} // end if
 
 	else
 	{
-		oexINT64 v[ oexSizeOfArray( g_cli.cpu ) ], total = 0;
-		for( oexUINT i = 0; i < oexSizeOfArray( v ) && i < cpu.Size(); i++ )
-			v[ i ] = cpu[ i ].ToInt64() - g_cli.cpu[ i ], total += v[ i ];
+		oexINT64 total = 0;
+		oexINT64 vals[ oexSizeOfArray( g_cli.cpu ) ];
+		for( oexUINT i = 0; i < oexSizeOfArray( g_cli.cpu ) && i < cpu.Size(); i++ )
+		{
+			oexINT64 v = cpu[ i ].ToInt64();
+			vals[ i ] = v - g_cli.cpu[ i ];
+			g_cli.cpu[ i ] = v;
+
+			total += vals[ i ];
+
+		} // end for
 
 		if ( total )
-			dCpu = ( (oexDOUBLE)total - (oexDOUBLE)v[ 3 ] ) * 100. / (oexDOUBLE)total;
+			dCpu = (oexDOUBLE)( total - vals[ 3 ] ) * 100. / (oexDOUBLE)total;
 
 	} // end else
 
-	// Save values
-	for( oexUINT i = 0; i < oexSizeOfArray( g_cli.cpu ) && i < cpu.Size(); i++ )
-		g_cli.cpu[ i ] = cpu[ i ].ToInt64();
-
 	return dCpu;
 }
+
 
 oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName )
 {

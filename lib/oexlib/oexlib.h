@@ -621,32 +621,8 @@ public:
 	class CVerifyStartup
 	{
 	public:
-
-		CVerifyStartup(){}
-
-		virtual ~CVerifyStartup()
-		{
-#if !defined( OEX_WINDOWS )
-
-			if ( !COex::GetStartupCode() )
-			{//	oexTRACE( oexT( "! oexlib - oex::COex::Init() was not called!\n" ) );
-				oexBREAK( oexT( "oex::COex::Init() was not called!" ) );
-			} // end if
-			else if ( 0 > COex::GetStartupCode() )
-			{//	oexTRACE( oexFmt( oexT( "! oexlib - oex::COex::Init() reported error code %d\n" ), COex::GetStartupCode() ) );
-				oexBREAK( oexT( "oex::COex::Init() reported an error" ) );
-			} // end else if
-
-			if ( !COex::GetShutdownCode() )
-			{//	oexTRACE( oexT( "! oexlib - oex::COex::Uninit() was not called!\n" ) );
-				oexBREAK( oexT( "oex::COex::Uninit() was not called!" ) );
-			} // end if
-			else if ( 0 > COex::GetShutdownCode() )
-			{//	oexTRACE( oexFmt( oexT( "! oexlib - oex::COex::Uninit() reported error code %d\n" ), COex::GetShutdownCode() ) );
-				oexBREAK( oexT( "oex::COex::Uninit() reported an error" ) );
-			} // end else if
-#endif
-		}
+		CVerifyStartup();
+		virtual ~CVerifyStartup();
 	};
 
 private:
@@ -685,12 +661,10 @@ public:
 	static oexINT Uninit();
 
 	/// Returns the startup code
-	static oexINT GetStartupCode()
-	{	return m_nStartupCode; }
+	static oexINT GetStartupCode();
 
 	/// Returns the shutdown code
-	static oexINT GetShutdownCode()
-	{	return m_nShutdownCode; }
+	static oexINT GetShutdownCode();
 
 	/// Returns data for the specified session id
 	static CPropertyBag GetSessionData( CStr sId );
@@ -701,8 +675,12 @@ public:
 	/// Releases data for the specified session id
 	static oexBOOL ReleaseSessionData( CStr sId );
 
+#if defined( oexDEBUG )
+
 	/// Returns a reference to the memory leak detector
 	static CMemLeak& GetMemLeak();
+
+#endif
 
 	/// Returns a pointer to the binary buffer share
 	static CBinShare& GetBinShare();
@@ -717,13 +695,6 @@ private:
 
 	/// This is just to warn of improper initialization or shutdown
 	static CVerifyStartup		m_cVerifyStartup;
-
-#if defined( oexDEBUG )
-
-	/// Memory leak tracker
-	static CMemLeak				m_cMemLeak;
-
-#endif
 
 };
 
