@@ -195,6 +195,12 @@ public:
 
 	enum
 	{
+		/// Activity timeout
+		eActivityTimeout				= 30 * 1000
+	};
+
+	enum
+	{
 		// Activity
 		eCsActivity						= 0x00000001,
 
@@ -338,6 +344,14 @@ public:
 	{	return ( m_uConnectState & eCsError )
 				? oexTRUE : oexFALSE;
 	}
+
+	//==============================================================
+	// IsActivity()
+	//==============================================================
+	/// Returns
+	oexBOOL IsActivity()
+	{	return m_toActivity.IsValid();
+	}	
 
 	//==============================================================
 	// GetSocketHandle()
@@ -842,6 +856,8 @@ private:
 	/// Number of accepts
 	oexULONG				m_uAccepts;
 
+	/// Activity timeout
+	CTimeout				m_toActivity;
 };
 
 

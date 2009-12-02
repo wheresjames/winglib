@@ -241,6 +241,9 @@ void CIpSocket::Destroy()
 	m_uWrites = 0;
 	m_uAccepts = 0;
 
+	// Reset activity timeout
+	m_toActivity.Clear();
+
 	// Ensure valid socket handle
 	if ( INVALID_SOCKET == hSocket )
 		return;
@@ -364,6 +367,7 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 
 	// We're trying to connect
 	m_uConnectState |= eCsConnecting;
+	m_toActivity.SetMs( eActivityTimeout );
 
     // Return the result
 	return oexTRUE;
@@ -417,6 +421,7 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
 
 	// We're trying to connect
 	m_uConnectState |= eCsConnecting;
+	m_toActivity.SetMs( eActivityTimeout );
 
     // Return the result
 	return oexTRUE;
@@ -460,8 +465,10 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 
 	// Child is connecting
 	x_is.m_uConnectState |= eCsConnecting;
+	x_is.m_toActivity.SetMs( eActivityTimeout );
 
 	m_uAccepts++;
+	m_toActivity.SetMs( eActivityTimeout );
 
     return oexTRUE;
 }
@@ -605,6 +612,9 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 
 			// Save the error code
 			m_uLastError = m_uEventStatus[ uBit ];
+
+			// Something is going on
+			m_toActivity.SetMs( eActivityTimeout );
 
 			// We received the event
 			return uMask;
@@ -862,6 +872,7 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
                          (int)x_uFlags, (LPSOCKADDR)&si, &nSize );
 
 	m_uReads++;
+	m_toActivity.SetMs( eActivityTimeout );
 
     // Grab the last error code
     m_uLastError = WSAGetLastError();
@@ -958,6 +969,7 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 	int nRet = recv( (SOCKET)m_hSocket, (LPSTR)x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uReads++;
+	m_toActivity.SetMs( eActivityTimeout );
 
     // Grab the last error code
     m_uLastError = WSAGetLastError();
@@ -1075,6 +1087,7 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
                        (int)x_uFlags, (LPSOCKADDR)&si, sizeof( si ) );
 
 	m_uWrites++;
+	m_toActivity.SetMs( eActivityTimeout );
 
 	// Get the last error code
 	m_uLastError = WSAGetLastError();
@@ -1119,6 +1132,7 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 	int nRet = send( (SOCKET)m_hSocket, (LPCSTR)x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uWrites++;
+	m_toActivity.SetMs( eActivityTimeout );
 
 	// Get the last error code
 	m_uLastError = WSAGetLastError();

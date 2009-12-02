@@ -91,16 +91,14 @@ public:
 			while ( GetStopEvent().Wait( 0 ) 
 				    && !session.GetTransactions() 
 					&& !port.IsError() 
-					&& ( port.IsConnected() || port.IsConnecting() ) )
+					&& ( port.IsConnected() || port.IsConnecting() ) 
+					&& port.IsActivity() )
 			{
 				// Process data if any
 				if ( port.WaitEvent( oex::os::CIpSocket::eReadEvent, 100 ) )
 					session.OnRead( 0 );
 
 			} // end while
-
-			// Drop the connection
-//			port.Destroy();
 
 			return oex::oexFALSE;
 		}
@@ -382,6 +380,10 @@ public:
 	void SetSessionTimeout( oexUINT uTo )
 	{	m_uSessionTimeout = uTo; }
 
+	/// Enable / disable multi threading
+	void EnableMultiThreading( oexBOOL b )
+	{	m_bMultiThreaded = b; }
+
 private:
 
 	/// The TCP port to listen
@@ -431,5 +433,8 @@ private:
 
 	/// Time to cleanup sessions;
 	oexUINT						m_uCleanup;
+
+	/// Non-zero to enable multi-threading
+	oexBOOL						m_bMultiThreaded;
 
 };
