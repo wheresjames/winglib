@@ -9,7 +9,9 @@ PRJ_TYPE := lib
 PRJ_INCS := libxml/include zlib
 PRJ_LIBS := 
 PRJ_DEFS := LIBXML_THREAD_ENABLED=1
+
 PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build

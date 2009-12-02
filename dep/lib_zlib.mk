@@ -8,6 +8,7 @@ PRJ_NAME := zlib
 PRJ_TYPE := lib
 PRJ_INCS := 
 PRJ_LIBS := 
+PRJ_OBJROOT := _0_dep
 
 PRJ_LIBROOT := ..
 

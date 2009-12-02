@@ -9,7 +9,9 @@ PRJ_TYPE := lib
 PRJ_INCS := ffmpeg
 PRJ_LIBS := 
 PRJ_DEFS := HAVE_AV_CONFIG_H=1
+
 PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build

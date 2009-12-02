@@ -10,6 +10,7 @@ PRJ_INCS := opencv/cxcore/include
 PRJ_LIBS := 
 
 PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build

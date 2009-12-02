@@ -10,6 +10,7 @@ PRJ_INCS := bullet/src
 PRJ_LIBS := 
 
 PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build

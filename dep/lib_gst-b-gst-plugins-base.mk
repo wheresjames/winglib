@@ -17,6 +17,7 @@ PRJ_INCS := gstreamer/gstreamer gstreamer/gstreamer/libs \
 PRJ_LIBS := 
 PRJ_DEFS := HAVE_CONFIG_H=1 
 PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build

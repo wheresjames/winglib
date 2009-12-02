@@ -9,7 +9,9 @@ PRJ_TYPE := lib
 PRJ_INCS := freetype/include
 PRJ_LIBS := 
 PRJ_DEFS := FT2_BUILD_LIBRARY NO_ERRNO_H
+
 PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build

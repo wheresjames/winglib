@@ -11,6 +11,7 @@ PRJ_LIBS :=
 PRJ_DEFS := CXIMAGE_CUSTOM_ALLOCATOR=1
 
 PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build

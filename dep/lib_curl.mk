@@ -8,7 +8,9 @@ PRJ_NAME := curl
 PRJ_TYPE := lib
 PRJ_INCS := curl/src openldap/include
 PRJ_LIBS := 
+
 PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build

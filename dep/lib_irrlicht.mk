@@ -11,6 +11,7 @@ PRJ_LIBS :=
 PRJ_DEFS := _IRR_COMPILE_WITH_OPENGL_
 
 PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build

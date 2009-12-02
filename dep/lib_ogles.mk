@@ -11,6 +11,7 @@ PRJ_INCS := ogles/src ogles/src/WinCE ogles/include ogles/include/EVC3Inc/ARM \
 PRJ_LIBS := 
 
 PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build

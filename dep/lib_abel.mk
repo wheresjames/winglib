@@ -10,6 +10,7 @@ PRJ_INCS :=
 PRJ_LIBS := 
 PRJ_DEFS :=
 PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build

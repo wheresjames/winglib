@@ -38,6 +38,7 @@ PRJ_LIBS :=
 PRJ_DEFS := USE_FREETYPE PTW32_STATIC_LIB
 
 PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build

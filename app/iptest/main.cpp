@@ -171,6 +171,9 @@ int iptest(int argc, char* argv[])
 	// Finish off the block
 	show_progress( oexNULL, uShow, lBlockSize );
 
+	// new line
+	oexEcho( oexNL );
+
 	return 0;
 }
 

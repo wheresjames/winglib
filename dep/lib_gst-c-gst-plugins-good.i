@@ -16,6 +16,7 @@ PRJ_LIBS := gst-plugins-base
 PRJ_DEFS := HAVE_CONFIG_H=1
 PRJ_OSLB := $(MK_OSLB)
 PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 PRJ_SUBROOT := gst/plugins
 
 #-------------------------------------------------------------------

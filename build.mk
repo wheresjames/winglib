@@ -54,11 +54,11 @@ ifeq ($(LOC_SRC_$(LOC_TAG)),)
 endif
 endif
 
-#ifneq ($(LOC_OUT_$(LOC_TAG)),)
-#BLD_PATH_BIN_$(LOC_TAG) := $(CFG_OUTROOT)/_0_obj/$(PRJ_NAME)/$(LOC_OUT_$(LOC_TAG))
-#else
+ifdef PRJ_OBJROOT
+BLD_PATH_BIN_$(LOC_TAG) := $(CFG_OUTROOT)/$(PRJ_OBJROOT)/$(PRJ_NAME)/$(LOC_TAG)
+else
 BLD_PATH_BIN_$(LOC_TAG) := $(CFG_OUTROOT)/_0_obj/$(PRJ_NAME)/$(LOC_TAG)
-#endif
+endif
 
 BLD_PATH_OBJ_$(LOC_TAG) := $(BLD_PATH_BIN_$(LOC_TAG))
 BLD_PATH_INS_$(LOC_TAG) := /usr/share/$(PRJ_NAME)

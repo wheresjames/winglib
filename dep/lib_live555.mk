@@ -12,6 +12,7 @@ PRJ_DEFS := SOCKLEN_T=socklen_t
 PRJ_LIBS := 
 
 PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build

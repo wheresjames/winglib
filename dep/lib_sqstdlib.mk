@@ -10,6 +10,7 @@ PRJ_INCS := SqPlus/include
 PRJ_LIBS :=
 
 PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build

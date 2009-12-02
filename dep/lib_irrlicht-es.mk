@@ -12,7 +12,7 @@ PRJ_DEFS := GL_APIENTRY= glTexEnvi=glTexEnvx \
 		    EGL_RENDERABLE_TYPE=0x3040 EGL_OPENGL_ES_BIT=0x0001 EGL_CLIENT_APIS=0x308D
 
 PRJ_LIBROOT := ..
-
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build
