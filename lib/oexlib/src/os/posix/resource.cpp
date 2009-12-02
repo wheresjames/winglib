@@ -546,6 +546,9 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 
 #else
 
+			// Get mutex handle
+			SResourceInfo *pRiMutex = (SResourceInfo*)pRi->cSync.m_hHandle;
+
 			// Wait for the lock
 			if ( !pthread_cond_wait( &pRi->hCond, &pRiMutex->hMutex ) )
 				return pRi->bSignaled ? waitSuccess : waitTimeout;
@@ -613,17 +616,13 @@ oexRESULT CResource::Signal( oexUINT x_uTimeout )
 			// Manual reset releases all threads
 			else
 			{
-//				{ // Scope lock
+				// Lock the mutex
+				oexAutoLock al( pRi->cSync, x_uTimeout );
+				if ( !al.IsLocked() )
+					return waitTimeout;
 
-					// Lock the mutex
-					oexAutoLock al( pRi->cSync, x_uTimeout );
-					if ( !al.IsLocked() )
-						return waitTimeout;
-
-					// Set signal
-					pRi->bSignaled = 1;
-
-//				} // end scope
+				// Set signal
+				pRi->bSignaled = 1;
 
 				// Wake up waiting threads
 				if ( !pthread_cond_broadcast( &pRi->hCond ) )
