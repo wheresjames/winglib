@@ -89,8 +89,12 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	if ( m_sScript.length() )
 	{
 		// Create a child process to handle this transaction
-		oex::CStr sChild = oexGuidToString();
+//		oex::CStr sChild = oexGuidToString();
+
+		oex::CStr sChild = x_pSession->GetTransactionId();
+
 		q->spawn( &sReply, oexT( "." ), sChild.Ptr(), m_sScript, m_bFile );
+
 		q = m_pSessionMsgQueue->GetQueue( sChild.Ptr() );
 		if ( !q )
 		{	m_pSessionMsgQueue->kill( oexNULL, sChild.Ptr() );

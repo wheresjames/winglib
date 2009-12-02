@@ -44,6 +44,8 @@
 /// Memory leak tracking
 class CMemLeak
 {
+public:
+
 	enum
 	{
 		// Pool size in bits ( 16 = 65536)
@@ -83,7 +85,7 @@ public:
 	oexINT Remove( oexCPVOID p );
 
 	/// Creates a report of the memory situation
-	CStr Report();
+	CStr Report( t_size *pLeaks = oexNULL );
 
 	/// Freezes memory allocation statistics
 	void Freeze() { m_bFreeze = oexTRUE; }

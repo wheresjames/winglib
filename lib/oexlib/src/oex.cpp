@@ -209,13 +209,18 @@ oexINT COex::Uninit()
 	// Freeze memory statistics
 	GetMemLeak().Freeze();
 
-	CStr sReport = GetMemLeak().Report();
-
-//	oexEcho( sReport.Ptr() );
+	CMemLeak::t_size nLeaks = 0;
+	CStr sReport = GetMemLeak().Report( &nLeaks );
 
 	oexTRACE( sReport.Ptr() );
+//	oexEcho( sReport.Ptr() );
 
-	// Create memory leak detector
+	// Save leak report to file, hopefully that will bug the developer into fixing them
+	if ( nLeaks )
+		CFile().CreateAlways( ( oexGetModuleFileName() << oexT( ".leaks.txt" ) ).Ptr() )
+			.Write( sReport );
+
+	// Drop the memory leak detector
 	GetMemLeak().Destroy();
 
 #endif

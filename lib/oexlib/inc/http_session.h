@@ -979,6 +979,10 @@ public:
 	void SetServerId( CStr8 sSid )
 	{	m_sServerId = sSid; }
 
+	/// Returns the server id
+	CStr GetServerId()
+	{	return m_sServerId; }
+
 	/// Set session object
 	void SetSessionObject( CPropertyBag8 *pPb, CLock *pLock )
 	{	m_sCookieId = oexT( "OEXSID_" ); m_sCookieId << m_sServerId; m_ppbSession = pPb; m_plockSession = pLock; }
@@ -990,6 +994,14 @@ public:
 	/// Sets the length of time that session data is to be valid
 	void SetSessionTimeout( oexUINT uTo )
 	{	m_uSessionTimeout = uTo; }
+
+	/// Sets our unique transaction id
+	void SetTransactionId( oexLONG nTid )
+	{	m_nTransactionId = nTid; }
+
+	/// Returns this sessions unique transaction id
+	oexLONG GetTransactionId()
+	{	return m_nTransactionId; }
 
 private:
 
@@ -1070,4 +1082,8 @@ private:
 
 	/// File type
 	CStr						m_sBufType;
+
+	/// Sets our transaction id
+	oexLONG						m_nTransactionId;
+
 };

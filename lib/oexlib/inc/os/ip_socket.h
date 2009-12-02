@@ -316,8 +316,9 @@ public:
 	//==============================================================
 	/// Returns
 	oexBOOL IsConnected()
-	{	return ( m_uConnectState & ( eCsActivity | eCsConnected ) )
-				? oexTRUE : oexFALSE;
+	{	if ( m_uConnectState & ( eCsActivity | eCsConnected ) )
+			return oexTRUE;
+		return WaitEvent( eConnectEvent, 0 );
 	}
 
 	//==============================================================
@@ -779,6 +780,15 @@ public:
 	/// Converts unix event flags to windows event flags
 	static oexINT FlagNixToWin( oexINT x_nFlag );
 
+	/// Returns the number of reads on the socket
+	oexULONG getNumReads() { return m_uReads; }
+
+	/// Returns the number of writes on the socket
+	oexULONG getNumWrites() { return m_uWrites; }
+
+	/// Returns the number of accepts on the socket
+	oexULONG getNumAccepts() { return m_uAccepts; }
+
 private:
 
 	/// Socket API initialization return code
@@ -822,6 +832,15 @@ private:
 
     /// Socket protocol
     oexUINT                 m_uSocketProtocol;
+
+	/// Number of reads on the socket
+	oexULONG				m_uReads;
+
+	/// Number of writes on the socket
+	oexULONG				m_uWrites;
+
+	/// Number of accepts
+	oexULONG				m_uAccepts;
 
 };
 

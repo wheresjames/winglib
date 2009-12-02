@@ -156,6 +156,10 @@ CIpSocket::CIpSocket()
     m_uSocketFamily = 0;
     m_uSocketType = 0;
     m_uSocketProtocol = 0;
+
+	m_uReads = 0;
+	m_uWrites = 0;
+	m_uAccepts = 0;
 }
 
 CIpSocket::~CIpSocket()
@@ -233,6 +237,10 @@ void CIpSocket::Destroy()
     m_uSocketType = 0;
     m_uSocketProtocol = 0;
 
+	m_uReads = 0;
+	m_uWrites = 0;
+	m_uAccepts = 0;
+
 	// Ensure valid socket handle
 	if ( INVALID_SOCKET == hSocket )
 		return;
@@ -276,7 +284,9 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 
     // Was there an error?
     if ( c_InvalidSocket == m_hSocket )
+	{	m_uConnectState |= eCsError;
         return oexFALSE;
+	} // end if
 
     // Save socket connect params
     m_uSocketFamily = x_af;
@@ -297,7 +307,10 @@ oexBOOL CIpSocket::Bind( oexUINT x_uPort )
 
 	// Create socket if there is none
 	if ( !IsSocket() && !Create() )
-	{	Destroy(); return FALSE; }
+	{	Destroy(); 
+		m_uConnectState |= eCsError;
+        return oexFALSE;
+	} // end if
 
 	sockaddr_in sai;
 	ZeroMemory( &sai, sizeof( sai ) );
@@ -313,7 +326,12 @@ oexBOOL CIpSocket::Bind( oexUINT x_uPort )
 	// Save the last error code
 	m_uLastError = WSAGetLastError();
 
-	return !nRet;
+	if ( nRet )
+	{	m_uConnectState |= eCsError;
+        return oexFALSE;
+	} // end if
+
+	return oexTRUE;
 }
 
 oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
@@ -324,7 +342,9 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 
 	// Must have socket
 	if ( !IsSocket() )
-        return FALSE;
+	{	m_uConnectState |= eCsError;
+        return oexFALSE;
+	} // end if
 
 	// Valid number of connections?
 	if ( x_uMaxConnections == 0 )
@@ -336,8 +356,17 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 	// Save the last error code
 	m_uLastError = WSAGetLastError();
 
+	// Error?
+	if ( c_SocketError == (t_SOCKET)nRet )
+	{	m_uConnectState |= eCsError;
+        return oexFALSE;
+	} // end if
+
+	// We're trying to connect
+	m_uConnectState |= eCsConnecting;
+
     // Return the result
-	return c_SocketError != (t_SOCKET)nRet;
+	return oexTRUE;
 }
 
 
@@ -352,15 +381,22 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
 
 	// Create socket if there is none
 	if ( !IsSocket() && !Create() )
-	{	Destroy(); return FALSE; }
+	{	Destroy(); 
+		m_uConnectState |= eCsError;
+        return oexFALSE;
+	} // end if
 
     // Were we passed a URL?
     if ( !x_uPort && !m_addrPeer.LookupUrl( x_pAddress ) )
+	{	m_uConnectState |= eCsError;
         return oexFALSE;
+	} // end if
 
     // Lookup the host address
     else if ( !m_addrPeer.LookupHost( x_pAddress, x_uPort ) )
+	{	m_uConnectState |= eCsError;
         return oexFALSE;
+	} // end if
 
     SOCKADDR_IN si;
     os::CSys::Zero( &si, sizeof( si ) );
@@ -373,9 +409,16 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
 	// Save the last error code
 	m_uLastError = WSAGetLastError();
 
+	// Check for error
     if ( nRet && WSAEWOULDBLOCK != m_uLastError )
+	{	m_uConnectState |= eCsError;
         return oexFALSE;
+	} // end if
 
+	// We're trying to connect
+	m_uConnectState |= eCsConnecting;
+
+    // Return the result
 	return oexTRUE;
 }
 
@@ -414,6 +457,11 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 
 	// Capture all events
 	x_is.EventSelect();
+
+	// Child is connecting
+	x_is.m_uConnectState |= eCsConnecting;
+
+	m_uAccepts++;
 
     return oexTRUE;
 }
@@ -525,11 +573,11 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
                     m_uEventStatus[ uOffset ] = wne.iErrorCode[ uOffset ];
 
                     // Signal activity
-                    m_uConnectState |= 1;
+                    m_uConnectState |= eCsActivity;
 
                     // Signal when we get a connect message
                     if ( 0 != ( FD_CONNECT & wne.lNetworkEvents ) )
-                        m_uConnectState |= 2;
+                        m_uConnectState |= eCsConnected;
 
                 } // end if
 
@@ -537,7 +585,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
             //      If we're accepting a connection, we don't
             //      get a connect message.  ( At least on Windows )
             if ( !( m_uConnectState & 2 ) && ( m_uConnectState & 1 ) )
-            {   m_uConnectState |= 2;
+            {   m_uConnectState |= eCsConnected;
                 wne.lNetworkEvents |= FD_CONNECT;
                 m_uEventState |= FD_CONNECT;
                 m_uEventStatus[ FD_CONNECT_BIT ] = 0;
@@ -813,6 +861,8 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 	int nRet = recvfrom( (SOCKET)m_hSocket, (LPSTR)x_pData, (int)x_uSize,
                          (int)x_uFlags, (LPSOCKADDR)&si, &nSize );
 
+	m_uReads++;
+
     // Grab the last error code
     m_uLastError = WSAGetLastError();
 
@@ -821,14 +871,18 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 
 	// Check for closed socket
 	if ( !nRet )
+	{	m_uConnectState |= eCsError;
         return 0;
+	} // end if
 
 	// Check for socket error
 	if ( SOCKET_ERROR == nRet || x_uSize < (oexUINT)nRet  || 0 > nRet )
 	{
 		// Is the socket blocking?
 		if ( WSAEWOULDBLOCK != m_uLastError )
+		{	m_uConnectState |= eCsError;
 			return 0;
+		} // end if
 
 		// Nothing read
 		if ( x_puRead )
@@ -837,7 +891,7 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 		return 0;
 
 	} // end if
-
+	
 	// Save the number of bytes read
 	if ( x_puRead )
         *x_puRead = nRet;
@@ -903,19 +957,25 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 	// Receive data from socket
 	int nRet = recv( (SOCKET)m_hSocket, (LPSTR)x_pData, (int)x_uSize, (int)x_uFlags );
 
+	m_uReads++;
+
     // Grab the last error code
     m_uLastError = WSAGetLastError();
 
 	// Check for closed socket
 	if ( !nRet )
+	{	m_uConnectState |= eCsError;
         return 0;
+	} // end if
 
 	// Check for socket error
 	if ( SOCKET_ERROR == nRet || x_uSize < (oexUINT)nRet  || 0 > nRet )
 	{
 		// Is the socket blocking?
 		if ( WSAEWOULDBLOCK != m_uLastError )
+		{	m_uConnectState |= eCsError;
 			return 0;
+		} // end if
 
 		// Nothing read
 		if ( x_puRead )
@@ -1014,6 +1074,8 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
     int nRet = sendto( (SOCKET)m_hSocket, (LPCSTR)x_pData, (int)x_uSize,
                        (int)x_uFlags, (LPSOCKADDR)&si, sizeof( si ) );
 
+	m_uWrites++;
+
 	// Get the last error code
 	m_uLastError = WSAGetLastError();
 
@@ -1022,7 +1084,9 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
 	{
 		// Is the socket blocking?
 		if ( WSAEWOULDBLOCK != m_uLastError )
+		{	m_uConnectState |= eCsError;
 			return 0;
+		} // end if
 
 		// Number of bytes sent
 		if ( x_puSent )
@@ -1054,6 +1118,8 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 	// Attempt to send the data
 	int nRet = send( (SOCKET)m_hSocket, (LPCSTR)x_pData, (int)x_uSize, (int)x_uFlags );
 
+	m_uWrites++;
+
 	// Get the last error code
 	m_uLastError = WSAGetLastError();
 
@@ -1062,7 +1128,9 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 	{
 		// Is the socket blocking?
 		if ( WSAEWOULDBLOCK != m_uLastError )
+		{	m_uConnectState |= eCsError;
 			return 0;
+		} // end if
 
 		// Number of bytes sent
 		if ( x_puSent )

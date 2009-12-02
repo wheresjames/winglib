@@ -261,7 +261,7 @@ oexINT CMemLeak::Remove( oexCPVOID p )
 	return -1;
 }
 
-CStr CMemLeak::Report()
+CStr CMemLeak::Report( t_size *pLeaks )
 {
 	if ( !m_pPool )
 		return oexT( "No Pool" );
@@ -278,6 +278,7 @@ CStr CMemLeak::Report()
 					 );
 
 
+	oexULONG uLeaks = 0;
 	t_size uOffset = 0;
     oexTCHAR szMsg[ 1024 * 16 ] = oexEMPTY_STRING;
 	do
@@ -291,6 +292,8 @@ CStr CMemLeak::Report()
 			// Append to string
 			s << oexFmt( oexT( "0x%x : " ), (oexUINT)m_pPool[ uOffset ] ) << szMsg << oexNL;
 
+			uLeaks++;
+
 		} // end if
 
 		// Calculate next offset
@@ -300,6 +303,10 @@ CStr CMemLeak::Report()
 	} while ( uOffset );
 
 	s << oexNL << oexT( "---------------- End Memory Report ------------------" ) << oexNL;
+
+	// Let use know how many leaks there were
+	if ( pLeaks )
+		*pLeaks = uLeaks;
 
 	return s;
 }

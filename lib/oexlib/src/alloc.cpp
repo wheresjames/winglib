@@ -136,29 +136,30 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
 #endif
 
 		if( uSize )
-			os::CSys::StrFmt( pMsg, uBuf, oexT( "Total: %u, Block: %u, Protected: %u, Refs: %u, Flags: %u\n" ),
+			os::CSys::StrFmt( pMsg, uBuf, oexT( "Total: %u, Block: %u, Protected: %u, Refs: %u, Flags: %u" oexNL8 ),
 		                                              uSize, uBlockSize, pBh->uSize, pBh->uRef, pBh->uFlags );
 		else
-			os::CSys::StrFmt( pMsg, uBuf, oexT( "Block: %u, Protected: %u, Refs: %u, Flags: %u\n" ),
+			os::CSys::StrFmt( pMsg, uBuf, oexT( "Block: %u, Protected: %u, Refs: %u, Flags: %u" oexNL8 ),
 													  uBlockSize, pBh->uSize, pBh->uRef, pBh->uFlags );
 
         if ( pBh->ai[ 0 ].pFile )
             os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
-                              oexT( "%s(%u) : Allocated\n" ), pBh->ai[ 0 ].pFile, pBh->ai[ 0 ].uLine );
+                              oexT( "%s(%u) : Allocated" oexNL8 ), pBh->ai[ 0 ].pFile, pBh->ai[ 0 ].uLine );
 
         if ( pBh->ai[ 1 ].pFile )
             os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
-                              oexT( "%s(%u) : Resized\n" ), pBh->ai[ 1 ].pFile, pBh->ai[ 1 ].uLine );
+                              oexT( "%s(%u) : Resized" oexNL8 ), pBh->ai[ 1 ].pFile, pBh->ai[ 1 ].uLine );
 
         if ( pBh->ai[ 2 ].pFile )
             os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
-                              oexT( "%s(%u) : Freed\n" ), pBh->ai[ 2 ].pFile, pBh->ai[ 2 ].uLine );
+                              oexT( "%s(%u) : Freed" oexNL8 ), pBh->ai[ 2 ].pFile, pBh->ai[ 2 ].uLine );
 
 #if defined( OEX_MAX_LINES_IN_MEMDUMP )
 
 		oexSIZE_T i = 0;
 		oexSIZE_T b, sz = uBuf - zstr::Length( pMsg );
 		oexSTR p = zstr::eos( pMsg );
+		oexSIZE_T szNL = zstr::Length( oexNL8 );
 		for ( oexSIZE_T l = 0; 0 < sz && i < pBh->uSize && l < OEX_MAX_LINES_IN_MEMDUMP; l++, i += 16 )
 		{
 			for ( b = 0; 0 < sz && ( i + b ) < pBh->uSize && b < 16; b++ )
@@ -180,8 +181,8 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
 					*( p++ ) = oexT( '.' ), sz--;
 
 			// Append new line
-			zstr::Copy( p, sz, oexT( "\r\n" ) ),
-			p += 2, sz -= 2;
+			zstr::Copy( p, sz, oexNL8 ),
+			p += szNL, sz -= szNL;
 
 		} // end for
 
@@ -196,7 +197,7 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
 
     } // end catch
 
-	zstr::Copy( pMsg, oexT( " Assert while trying to interpret memory block.  Perhaps it's someone else's memory block?\n" ) );
+	zstr::Copy( pMsg, oexT( " Assert while trying to interpret memory block.  Perhaps it's someone else's memory block?" oexNL8 ) );
 
 	return oexFALSE;
 }

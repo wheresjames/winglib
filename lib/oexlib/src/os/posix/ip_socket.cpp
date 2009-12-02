@@ -244,6 +244,10 @@ CIpSocket::CIpSocket()
     m_uSocketType = 0;
     m_uSocketProtocol = 0;
 
+	m_uReads = 0;
+	m_uWrites = 0;
+	m_uAccepts = 0;
+
 }
 
 CIpSocket::~CIpSocket()
@@ -315,6 +319,10 @@ void CIpSocket::Destroy()
     m_uSocketProtocol = 0;
 
     m_uConnectState = 0;
+
+	m_uReads = 0;
+	m_uWrites = 0;
+	m_uAccepts = 0;
 
 	// Ensure valid socket handle
 	if ( c_InvalidSocket == hSocket )
@@ -448,6 +456,9 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 
 	m_uLastError = 0;
 
+	// We're trying to connect
+	m_uConnectState |= eCsConnecting;
+
     // Return the result
 	return !nRet;
 }
@@ -487,7 +498,13 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
 	} // end if
 
 	else
+	{
 		m_uLastError = 0;
+		
+		// We're trying to connect
+		m_uConnectState |= eCsConnecting;
+
+	} // end else if
 
     if ( nRet && EINPROGRESS != m_uLastError )
         return oexFALSE;
@@ -534,6 +551,12 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 	// Capture all events
 	x_is.EventSelect();
 
+	// Child is connecting
+	x_is.m_uConnectState |= eCsConnecting;
+
+	// Accepted
+	m_uAccept++;
+	
     return oexTRUE;
 }
 
@@ -1006,6 +1029,8 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 	int nRes = recvfrom( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize,
                          (int)x_uFlags, (sockaddr*)&si, &nSize );
 
+	m_uReads++;
+
 	if ( -1 == nRes )
     {	m_uLastError = errno;
 		m_uEventState |= eCloseEvent;
@@ -1102,6 +1127,8 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 	x_uFlags |= MSG_NOSIGNAL;
 	int nRes = recv( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
 
+	m_uReads++;
+
 	if ( -1 == nRes )
     {	m_uLastError = errno;
 		m_uEventState |= eCloseEvent;
@@ -1112,7 +1139,7 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 		return oexFALSE;
 	} // end if
 
-    m_uLastError = 0;
+	m_uLastError = 0;
 
 	// Check for closed socket
 	if ( !nRes )
@@ -1206,6 +1233,8 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
     int nRes = sendto( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize,
                        (int)x_uFlags, (sockaddr*)&si, sizeof( si ) );
 
+	m_uWrites++;
+
 	// Check for error
 	if ( -1 == nRes )
 	{
@@ -1249,6 +1278,8 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 	// Attempt to send the data
 	x_uFlags |= MSG_NOSIGNAL;
 	int nRes = send( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
+
+	m_uWrites++;
 
 	// Check for error
 	if ( -1 == nRes )

@@ -67,7 +67,11 @@ public:
 		eSeAccept = 3,
 
 		/// Cleanup interval in seconds
-		eCleanupInterval = 60
+		eCleanupInterval = 10,
+
+		/// Maximum number of sessions to keep
+		//  After this amount is reached, oldest sessions will be dropped
+		eMaxSessions = 32
 
 	};
 
@@ -84,7 +88,10 @@ public:
 		virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
 		{
 			// While thread is running and no transactions
-			while ( GetStopEvent().Wait( 0 ) && !session.GetTransactions() && !port.IsError() )
+			while ( GetStopEvent().Wait( 0 ) 
+				    && !session.GetTransactions() 
+					&& !port.IsError() 
+					&& ( port.IsConnected() || port.IsConnecting() ) )
 			{
 				// Process data if any
 				if ( port.WaitEvent( oex::os::CIpSocket::eReadEvent, 100 ) )
@@ -193,7 +200,7 @@ protected:
 
 			// Attempt to connect session
 			if ( !m_server.Accept( it->port )
-				 || !it->port.WaitEvent( oex::os::CIpSocket::eConnectEvent ) )
+				 /*|| !it->port.WaitEvent( oex::os::CIpSocket::eConnectEvent ) */)
 			{
 				m_lstSessions.Erase( it );
 
@@ -231,7 +238,7 @@ protected:
 				else
 				{
 					// Count a transaction
-					m_nTransactions++;
+					it->session.SetTransactionId( m_nTransactions++ );
 
 					// Set the log file name
 					it->session.SetLogFile( m_sLog.Ptr() );
@@ -281,7 +288,7 @@ protected:
 
 		// Check for expired connections
 		for ( typename t_LstSession::iterator it; m_lstSessions.Next( it ); )
-			if ( !it->IsRunning() /* || !it->port.IsError() */ )
+			if ( !it->IsRunning() )
 				it = m_lstSessions.Erase( it );
 
 		// Is it time to cleanup?
@@ -297,11 +304,20 @@ protected:
 			oexAutoLock ll( m_lockSession );
 			if ( ll.IsLocked() )
 			{
+				// +++ This gets us by, but it would be nice to drop the oldest
+				//     connections based on _ts.  Currently just dropping anything 
+				//     that hasn't communicated in 30 seconds when we're over the limit.
+
+				// Do we need to drop sessions?
+				oexBOOL bDrop = eMaxSessions < m_pbSession.Size();
+
 				// Remove timed out sessions
 				oexUINT ts = (oexUINT)oexGetUnixTime();
 				for ( CPropertyBag8::iterator it; m_pbSession.List().Next( it ); )
 					if ( !it->IsKey( "_ts" )
-						 || ( it.Obj()[ "_ts" ].ToULong() + m_uSessionTimeout ) < ts )
+						 || ( it.Obj()[ "_ts" ].ToULong() + m_uSessionTimeout ) < ts 
+						 || ( bDrop && ( it.Obj()[ "_ts" ].ToULong() + 30 ) < ts ) 
+					   )
 					{
 //						oexEcho( oexMks( oexT( "Erasing session : " ),
 //										 ts, oexT( " : " ),
@@ -375,7 +391,7 @@ private:
 	T_PORT						m_server;
 
 	/// Transactions
-	oexINT						m_nTransactions;
+	oexLONG						m_nTransactions;
 
 	/// List of session objects
 	t_LstSession				m_lstSessions;
