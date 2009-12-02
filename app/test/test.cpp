@@ -2597,6 +2597,9 @@ oex::oexRESULT Test_CHttpSession()
 	oex::os::CIpSocket client;
 	oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > server;
 
+	// *** Multi-threaded
+	server.EnableMultiThreading( oexTRUE );
+
 	server.SetSessionCallback( (oex::oexPVOID)OnSessionCallback, (void*)9876 );
 
 	if ( !oexVERIFY( server.StartServer( TEST_TCP_PORT, OnServerEvent, (void*)6789 ) ) )
@@ -2627,6 +2630,45 @@ oex::oexRESULT Test_CHttpSession()
 
 	if ( !oexVERIFY( 0 <= sData.Match( "Hello World!" ) ) )
 		return -8;
+
+	client.Destroy();
+
+	server.Stop();
+
+
+	// *** Single-threaded
+	server.EnableMultiThreading( oexFALSE );
+
+	server.SetSessionCallback( (oex::oexPVOID)OnSessionCallback, (void*)9876 );
+
+	if ( !oexVERIFY( server.StartServer( TEST_TCP_PORT, OnServerEvent, (void*)6789 ) ) )
+		return -9;
+
+	if ( !oexVERIFY( !server.GetInitEvent().Wait() ) )
+		return -10;
+
+	if ( !oexVERIFY( server.GetInitStatus() ) )
+		return -11;
+
+    if ( !oexVERIFY( client.Connect( oexT( "127.0.0.1" ), TEST_TCP_PORT ) ) )
+        return -12;
+
+    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eConnectEvent, SOCKET_TIMEOUT ) ) )
+        return -13;
+
+	if ( !oexVERIFY( client.Send( "GET / HTTP/1.0\r\n\r\n" ) ) )
+        return -14;
+
+	while ( !server.GetNumTransactions() )
+		oexSleep( 15 );
+
+	while ( server.GetNumActiveClients() )
+		oexSleep( 15 );
+
+	sData = client.Read();
+
+	if ( !oexVERIFY( 0 <= sData.Match( "Hello World!" ) ) )
+		return -15;
 
 	client.Destroy();
 

@@ -50,6 +50,9 @@ public:
 	/// Length of time in seconds that session data is valid
 	void SetSessionTimeout( int nTimeout );
 
+	/// Enable / Disable multi-threaded sessions
+	void EnableMultiThreading( int bEnable );
+
 private:
 
 	// The server

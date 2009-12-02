@@ -3,8 +3,8 @@ _self.load_module( "ffmpeg", "" );
 
 function _init()
 {
-	local in_file = "in.avi";
-	local out_file = "out.avi";
+	local in_file = "/home/landshark/Desktop/R-033000-034500-13500.avi";
+	local out_file = "/home/landshark/Desktop/out.avi";
 
 	local inp = CFfContainer();
 	if ( !inp.Open( in_file, CSqMulti() ) )
@@ -27,7 +27,7 @@ function _init()
 		return;
 	} // end if
 
-	if ( 0 > out.AddVideoStream( inp.getVideoCodecId(), inp.getWidth(), inp.getHeight(), 1 ) )
+	if ( 0 > out.AddVideoStream( inp.getVideoCodecId(), inp.getWidth(), inp.getHeight(), 10 ) )
 	{	_self.echo( "failed to add video stream to output file" );
 		return;
 	} // end if
@@ -37,7 +37,7 @@ function _init()
 		return;
 	} // end if
 
-	local i = 0, w = 0;
+	local i = 0, w = 0, e = 0;
 	local stream = -1;
 	local frame = CSqBinary();
 	local frame_info = CSqMulti();
@@ -48,13 +48,17 @@ function _init()
 		{
 			// Is it a key frame?
 			if ( frame_info[ "flags" ].toint() )
+				e = 10;
+
+			if ( e )
 			{
+				e--;
+				w++;
+
 				if ( !out.WriteFrame( frame, frame_info ) )
 				{	_self.echo( "failed to write frame to avi" );
 					return;
 				} // end if
-
-				w++;
 
 			} // end if
 

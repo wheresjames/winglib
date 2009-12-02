@@ -17,10 +17,10 @@ int show_use( int nRet, oexCSTR pErr, int bShowUse = 0 )
 						 " -b:<num> = Block size, default is 50" oexNL8
 						 " -u:<string> = URL address for HTTP" oexNL8
 						 " -d:<string> = data to send" oexNL8
-						 oexNL8 
+						 oexNL8
 						 "Example: iptest google.com -u:/index.html" oexNL8
 						 "Example: iptest 127.0.0.1 -p:8080 -a:100 -s:2 -u:/big_image.jpg" oexNL8
-						 oexNL8 
+						 oexNL8
 						 ) );
 	else
 		oexERROR( 0, pErr );
@@ -96,13 +96,13 @@ int iptest(int argc, char* argv[])
 
 	TMem< os::CIpSocket > mSockets;
 
-	if ( mSockets.OexConstructArray( lSockets ).Size() != lSockets )
+	if ( mSockets.OexConstructArray( lSockets ).Size() != (oexSIZE_T)lSockets )
 		return show_use( -6, oexT( "Unable to create socket array" ) );
 
 	oexEcho( oexMks( oexT( "Connecting to : " ), sAddress, oexT( ":" ), lPort,
-					 oexT( " - attempts = " ), lAttempts, 
-					 oexT( ", sockets = " ), lSockets, 
-					 oexT( ", url = " ), sUrl, 
+					 oexT( " - attempts = " ), lAttempts,
+					 oexT( ", sockets = " ), lSockets,
+					 oexT( ", url = " ), sUrl,
 					 oexNL ).Ptr() );
 
 	oexULONG uShow = 0, uConnected = 0;
@@ -112,7 +112,7 @@ int iptest(int argc, char* argv[])
 		uConnected = 0;
 
 		// Start all the sockets we have
-		for ( oexLONG i = 0; i < mSockets.Size(); i++ )
+		for ( oexULONG i = 0; i < mSockets.Size(); i++ )
 		{
 			// Ditch err'd sockets
 			if ( mSockets[ i ].IsError() )
@@ -122,9 +122,9 @@ int iptest(int argc, char* argv[])
 
 			// Connect if it's not doing anything
 			if ( 0 < lAttempts && !mSockets[ i ].IsConnected() && !mSockets[ i ].IsConnecting() )
-			{	
+			{
 				lAttempts--;
-				
+
 				if ( !mSockets[ i ].Connect( sAddress.Ptr(), lPort ) )
 					show_progress( oexT( "x" ), uShow, lBlockSize );
 //				else

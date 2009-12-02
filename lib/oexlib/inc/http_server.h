@@ -81,26 +81,34 @@ public:
 public:
 
 	/// Holds information about a session
-	class CSessionThread : public CThread
+	class CSessionInfo
 	{
 	public:
 
-		virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
+		/// Constructor
+		CSessionInfo() { delete_me = oexFALSE; }
+
+		/// Returns non-zero if we need to keep the connection running
+		oex::oexBOOL IsValid()
 		{
-			// While thread is running and no transactions
-			while ( GetStopEvent().Wait( 0 ) 
-				    && !session.GetTransactions() 
-					&& !port.IsError() 
-					&& ( port.IsConnected() || port.IsConnecting() ) 
-					&& port.IsActivity() )
-			{
-				// Process data if any
-				if ( port.WaitEvent( oex::os::CIpSocket::eReadEvent, 100 ) )
-					session.OnRead( 0 );
+			// Does it need updating?
+			if ( session.GetTransactions()
+			     || port.IsError()
+			     || ( !port.IsConnected() && !port.IsConnecting() )
+			     || !port.IsActivity() )
+				return oexFALSE;
 
-			} // end while
+			return oexTRUE;
+		}
 
-			return oex::oexFALSE;
+		// Updates the connection
+		oex::oexBOOL Update( oexUINT x_uTimeout )
+		{
+			// Process data if any
+			if ( port.WaitEvent( oex::os::CIpSocket::eReadEvent, x_uTimeout ) )
+				session.OnRead( 0 );
+
+			return oex::oexTRUE;
 		}
 
 		/// Session object
@@ -108,10 +116,75 @@ public:
 
 		/// Session port
 		T_PORT			port;
+
+		/// Non-zero if this item is done
+		oexBOOL			delete_me;
+	};
+
+	/// Holds information about a session
+	class CSessionThread :
+		public CSessionInfo,
+		public CThread
+	{
+	public:
+
+		virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
+		{
+			// While thread is running and no transactions
+			while ( GetStopEvent().Wait( 0 ) && CSessionInfo::IsValid() )
+				CSessionInfo::Update( 100 );
+
+			return oex::oexFALSE;
+		}
+
 	};
 
 	/// Session list type
-	typedef TList< CSessionThread > t_LstSession;
+	typedef TList< CSessionThread > t_LstSessionThread;
+
+	/// Session list type
+	typedef TList< CSessionInfo > t_LstSessionInfo;
+
+	/// Holds information about a session
+	class CSingleSessionThread : public CThread
+	{
+	public:
+
+		/// Constructor
+		CSingleSessionThread()
+		{
+			m_pSessionInfo = oexNULL;
+			m_pSessionLock = oexNULL;
+		}
+
+		/// Do the work
+		virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
+		{
+			if ( !m_pSessionInfo || !m_pSessionLock )
+				return oexFALSE;
+
+			// Lock the session list
+			oexAutoLock ll( m_pSessionLock );
+			if ( !ll.IsLocked() )
+				return oexFALSE;
+
+			// Update the sessions
+			for ( typename t_LstSessionInfo::iterator it; m_pSessionInfo->Next( it ); )
+				if ( it->IsValid() )
+					it->Update( 0 );
+				else
+					it->delete_me = oexTRUE;
+
+			return oex::oexTRUE;
+		}
+
+		/// Session information
+		t_LstSessionInfo 	*m_pSessionInfo;
+
+		/// Session information lock
+		oexLock				*m_pSessionLock;
+
+	};
 
 public:
 
@@ -127,6 +200,7 @@ public:
 		m_bLocalOnly = oexFALSE;
 		m_uSessionTimeout = 60 * 60;
 		m_uCleanup = 0;
+		m_bMultiThreaded = oexTRUE;
 	}
 
 	~THttpServer()
@@ -188,19 +262,75 @@ protected:
 		return oexTRUE;
 	}
 
-	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
+	/// Authenticate the connection
+	virtual oexBOOL OnAuthenticate( T_PORT &port )
 	{
-		// Wait for connect event
-		if ( m_server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, 100 ) )
-		{
-			// Add a new session
-			typename THttpServer::t_LstSession::iterator it = m_lstSessions.Append();
+		// Accepting anyone?
+		if ( !m_bLocalOnly )
+			return oexTRUE;
 
-			// Attempt to connect session
-			if ( !m_server.Accept( it->port )
-				 /*|| !it->port.WaitEvent( oex::os::CIpSocket::eConnectEvent ) */)
+		// Get local and remote address
+		CStr8 sLocal = oexStrToMb( port.LocalAddress().GetDotAddress() );
+		CStr8 sRemote = oexStrToMb( port.PeerAddress().GetDotAddress() );
+
+		// Verify it is a local address
+		if ( sLocal != sRemote && sRemote != "127.0.0.1" )
+			return oexFALSE;
+
+		return oexTRUE;
+	}
+
+	oexBOOL InformSession( T_SESSION &session, T_PORT &port )
+	{
+		// Count a transaction
+		session.SetTransactionId( m_nTransactions++ );
+
+		// Set the log file name
+		session.SetLogFile( m_sLog.Ptr() );
+
+		// Set the callback function for the data
+		session.SetCallback( m_pSessionCallback, m_pSessionData );
+
+		// Connect the port
+		session.SetPort( &port );
+
+		// Set default session timeout
+		session.SetSessionTimeout( m_uSessionTimeout );
+
+		// Let the session know the server id
+		session.SetServerId( m_sServerId );
+
+		// Enable sessions?
+		if ( m_bEnableSessions )
+			session.SetSessionObject( &m_pbSession, &m_lockSession );
+
+		return oexTRUE;
+	}
+
+	/// Accepts multi-threaded connection
+	oexBOOL MultiAccept()
+	{
+		// Add a new session
+		typename THttpServer::t_LstSessionThread::iterator it = m_lstSessionThread.Append();
+
+		// Attempt to connect session
+		if ( !m_server.Accept( it->port ) )
+		{
+			// Erase session
+			m_lstSessionThread.Erase( it );
+
+			// Let user in on the error
+			if ( m_fnOnServerEvent )
+				m_fnOnServerEvent( m_pData, eSeAccept, -1, this );
+
+		} // end if
+
+		else
+		{
+			// Authenticate the connection
+			if ( !OnAuthenticate( it->port ) )
 			{
-				m_lstSessions.Erase( it );
+				m_lstSessionThread.Erase( it );
 
 				if ( m_fnOnServerEvent )
 					m_fnOnServerEvent( m_pData, eSeAccept, -1, this );
@@ -209,64 +339,95 @@ protected:
 
 			else
 			{
-				oexBOOL bAccept = oexTRUE;
+				// Fill in session information
+				InformSession( it->session, it->port );
 
-				// Only accepting local connections?
-				if ( m_bLocalOnly )
-				{
-					// Get local and remote address
-					CStr8 sLocal = oexStrToMb( it->port.LocalAddress().GetDotAddress() );
-					CStr8 sRemote = oexStrToMb( it->port.PeerAddress().GetDotAddress() );
+				// Notify of new connection
+				if ( m_fnOnServerEvent )
+					m_fnOnServerEvent( m_pData, eSeAccept, 0, this );
 
-					// Verify it is a local address
-					if ( sLocal != sRemote && sRemote != "127.0.0.1" )
-						bAccept = oexFALSE;
+				// Start the thread
+				it->Start();
 
-				} // end if
+			} // end if
 
-				if ( !bAccept )
-				{
-					m_lstSessions.Erase( it );
+		} // end else
 
-					if ( m_fnOnServerEvent )
-						m_fnOnServerEvent( m_pData, eSeAccept, -1, this );
+		return oexTRUE;
+	}
 
-				} // end if
+	/// Accepts single-threaded connection
+	oexBOOL SingleAccept()
+	{
+		// Must lock to make changes
+		oexAutoLock ll( m_lockSessionInfo );
+		if ( !ll.IsLocked() )
+			return oexFALSE;
 
-				else
-				{
-					// Count a transaction
-					it->session.SetTransactionId( m_nTransactions++ );
+		// Add a new session
+		typename THttpServer::t_LstSessionInfo::iterator it = m_lstSessionInfo.Append();
 
-					// Set the log file name
-					it->session.SetLogFile( m_sLog.Ptr() );
+		// Attempt to connect session
+		if ( !m_server.Accept( it->port ) )
+		{
+			// Erase session
+			m_lstSessionInfo.Erase( it );
 
-					// Set the callback function for the data
-					it->session.SetCallback( m_pSessionCallback, m_pSessionData );
+			// Let user in on the error
+			if ( m_fnOnServerEvent )
+				m_fnOnServerEvent( m_pData, eSeAccept, -1, this );
 
-					// Connect the port
-					it->session.SetPort( &it->port );
+		} // end if
 
-					// Set default session timeout
-					it->session.SetSessionTimeout( m_uSessionTimeout );
+		else
+		{
+			// Authenticate the connection
+			if ( !OnAuthenticate( it->port ) )
+			{
+				m_lstSessionInfo.Erase( it );
 
-					// Let the session know the server id
-					it->session.SetServerId( m_sServerId );
+				if ( m_fnOnServerEvent )
+					m_fnOnServerEvent( m_pData, eSeAccept, -1, this );
 
-					// Enable sessions?
-					if ( m_bEnableSessions )
-						it->session.SetSessionObject( &m_pbSession, &m_lockSession );
+			} // end if
 
-					// Notify of new connection
-					if ( m_fnOnServerEvent )
-						m_fnOnServerEvent( m_pData, eSeAccept, 0, this );
+			else
+			{
+				// Fill in session information
+				InformSession( it->session, it->port );
 
-					// Start the thread
-					it->Start();
+				// Notify of new connection
+				if ( m_fnOnServerEvent )
+					m_fnOnServerEvent( m_pData, eSeAccept, 0, this );
 
-				} // end if
+			} // end if
 
-			} // end else
+		} // end else
+
+		// Start the processing thread if needed
+		if ( !m_cSingleSessionThread.IsRunning() )
+		{
+			// Some info the thread will need
+			m_cSingleSessionThread.m_pSessionInfo = &m_lstSessionInfo;
+			m_cSingleSessionThread.m_pSessionLock = &m_lockSessionInfo;
+
+			// Start the thread
+			m_cSingleSessionThread.Start();
+
+		} // end if
+
+		return oexTRUE;
+	}
+
+	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
+	{
+		// Wait for connect event
+		if ( m_server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, 100 ) )
+		{
+			if ( m_bMultiThreaded )
+				MultiAccept();
+			else
+				SingleAccept();
 
 		} // end if
 
@@ -284,48 +445,73 @@ protected:
 
 		} // end else
 
-		// Check for expired connections
-		for ( typename t_LstSession::iterator it; m_lstSessions.Next( it ); )
-			if ( !it->IsRunning() )
-				it = m_lstSessions.Erase( it );
+		// Clean up expired connections
+		CleanupConnections();
 
-		// Is it time to cleanup?
+		// Is it time to cleanup sessions?
 		if ( m_uCleanup )
 			m_uCleanup--;
-
 		else
-		{
-//			oexEcho( "Cleaning up..." );
-			m_uCleanup = eCleanupInterval * 10;
+			CleanupSessions();
 
-			// Attempt to cleanup session data
-			oexAutoLock ll( m_lockSession );
-			if ( ll.IsLocked() )
+		return oexTRUE;
+	}
+
+	oexBOOL CleanupConnections()
+	{
+		// Check for expired connections
+		for ( typename t_LstSessionThread::iterator it; m_lstSessionThread.Next( it ); )
+			if ( !it->IsRunning() )
+				it = m_lstSessionThread.Erase( it );
+
+		// Check for expired connections
+		for ( typename t_LstSessionInfo::iterator it; m_lstSessionInfo.Next( it ); )
+			if ( it->delete_me )
 			{
-				// +++ This gets us by, but it would be nice to drop the oldest
-				//     connections based on _ts.  Currently just dropping anything 
-				//     that hasn't communicated in 30 seconds when we're over the limit.
+				// Must lock to make changes
+				oexAutoLock ll( m_lockSessionInfo );
+				if ( !ll.IsLocked() )
+					return oexFALSE;
 
-				// Do we need to drop sessions?
-				oexBOOL bDrop = eMaxSessions < m_pbSession.Size();
-
-				// Remove timed out sessions
-				oexUINT ts = (oexUINT)oexGetUnixTime();
-				for ( CPropertyBag8::iterator it; m_pbSession.List().Next( it ); )
-					if ( !it->IsKey( "_ts" )
-						 || ( it.Obj()[ "_ts" ].ToULong() + m_uSessionTimeout ) < ts 
-						 || ( bDrop && ( it.Obj()[ "_ts" ].ToULong() + 30 ) < ts ) 
-					   )
-					{
-//						oexEcho( oexMks( oexT( "Erasing session : " ),
-//										 ts, oexT( " : " ),
-//										 m_uSessionTimeout, oexNL,
-//										 it->PrintR() ).Ptr() );
-						it = m_pbSession.List().Erase( it );
-
-					} // end if
+				// Erase item
+				it = m_lstSessionInfo.Erase( it );
 
 			} // end if
+
+		return oexTRUE;
+	}
+
+	oexBOOL CleanupSessions()
+	{
+//		oexEcho( "Cleaning up..." );
+		m_uCleanup = eCleanupInterval * 10;
+
+		// Attempt to cleanup session data
+		oexAutoLock ll( m_lockSession );
+		if ( ll.IsLocked() )
+		{
+			// +++ This gets us by, but it would be nice to drop the oldest
+			//     connections based on _ts.  Currently just dropping anything
+			//     that hasn't communicated in 30 seconds when we're over the limit.
+
+			// Do we need to drop sessions?
+			oexBOOL bDrop = eMaxSessions < m_pbSession.Size();
+
+			// Remove timed out sessions
+			oexUINT ts = (oexUINT)oexGetUnixTime();
+			for ( CPropertyBag8::iterator it; m_pbSession.List().Next( it ); )
+				if ( !it->IsKey( "_ts" )
+					 || ( it.Obj()[ "_ts" ].ToULong() + m_uSessionTimeout ) < ts
+					 || ( bDrop && ( it.Obj()[ "_ts" ].ToULong() + 30 ) < ts )
+				   )
+				{
+//					oexEcho( oexMks( oexT( "Erasing session : " ),
+//									 ts, oexT( " : " ),
+//									 m_uSessionTimeout, oexNL,
+//									 it->PrintR() ).Ptr() );
+					it = m_pbSession.List().Erase( it );
+
+				} // end if
 
 		} // end if
 
@@ -334,11 +520,17 @@ protected:
 
 	virtual oexINT EndThread( oex::oexPVOID x_pData )
 	{
+		// Ensure the session thread has stopped
+		m_cSingleSessionThread.Stop();
+
 		// Stop the server
 		m_server.Destroy();
 
 		// Lose all sessions
-		m_lstSessions.Destroy();
+		m_lstSessionThread.Destroy();
+
+		// Lose session info objects
+		m_lstSessionInfo.Destroy();
 
 		// Notify that server is running
 		if ( m_fnOnServerEvent )
@@ -359,7 +551,7 @@ public:
 
 	/// Returns the number of active sessions
 	oexINT GetNumActiveClients()
-	{	return m_lstSessions.Size(); }
+	{	return m_lstSessionThread.Size() + m_lstSessionInfo.Size(); }
 
 	/// Sets the log file name
 	oexBOOL SetLogFile( oexCSTR x_pLog )
@@ -381,6 +573,8 @@ public:
 	{	m_uSessionTimeout = uTo; }
 
 	/// Enable / disable multi threading
+	//  For some reason, I enable doing this
+	//  while the server is running ;)
 	void EnableMultiThreading( oexBOOL b )
 	{	m_bMultiThreaded = b; }
 
@@ -395,8 +589,14 @@ private:
 	/// Transactions
 	oexLONG						m_nTransactions;
 
-	/// List of session objects
-	t_LstSession				m_lstSessions;
+	/// List of session thread objects (multi-threaded)
+	t_LstSessionThread			m_lstSessionThread;
+
+	/// List of session info objects (single-threaded)
+	t_LstSessionInfo			m_lstSessionInfo;
+
+	/// Runs single threaded sessions
+	CSingleSessionThread		m_cSingleSessionThread;
 
 	/// Data passed to m_fnOnServerEvent
 	oexPVOID					m_pData;
@@ -436,5 +636,8 @@ private:
 
 	/// Non-zero to enable multi-threading
 	oexBOOL						m_bMultiThreaded;
+
+	/// Session info lock
+	oexLock						m_lockSessionInfo;
 
 };

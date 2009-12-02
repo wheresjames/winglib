@@ -27,6 +27,9 @@ int CHttpServer::Start( int nPort )
 	// Enable sessions by default
 	m_server.EnableSessions( oex::oexTRUE );
 
+	// Multi-threaded server
+	m_server.EnableMultiThreading( oex::oexFALSE );
+
 	// Start the server
 	if ( !m_server.StartServer( nPort, CHttpServer::_OnServerEvent, this ) )
 		return 0;
@@ -139,7 +142,7 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	// File as reply?
 	else if ( mReply[ oexT( "file" ) ].length() )
 		x_pSession->SetFileName( mReply[ oexT( "file" ) ].c_str(), mReply[ oexT( "filetype" ) ].c_str() );
-	
+
 	// Do we have binary data?
 	else if ( mReply[ oexT( "binary" ) ].length() )
 	{
@@ -201,4 +204,9 @@ void CHttpServer::SetSessionTimeout( int nTimeout )
 	// Enable/disable remote connections
 	m_server.SetSessionTimeout( (oex::oexUINT)nTimeout );
 
+}
+
+void CHttpServer::EnableMultiThreading( int bEnable )
+{
+	m_server.EnableMultiThreading( bEnable );
 }
