@@ -145,6 +145,12 @@ oexINT CMemLeak::Add( oexCPVOID p )
 	if ( !m_pPool || !p || m_bFreeze )
 		return -1;
 
+	// Track numbers
+	m_uTotalAllocations++;
+	m_uCurrentAllocations++;
+	if ( m_uCurrentAllocations > m_uPeakAllocations )
+		m_uPeakAllocations = m_uCurrentAllocations;
+
 	// Calculate starting offset
 	t_size uOffset = ( (oexUINT)p >> 4 ) & m_nPoolMask;
 
@@ -156,12 +162,6 @@ oexINT CMemLeak::Add( oexCPVOID p )
 		{
 			// Save pointer
 			m_pPool[ uOffset ] = p;
-
-			// Track numbers
-			m_uTotalAllocations++;
-			m_uCurrentAllocations++;
-			if ( m_uCurrentAllocations > m_uPeakAllocations )
-				m_uPeakAllocations = m_uCurrentAllocations;
 
 			return 0;
 
@@ -224,6 +224,14 @@ oexINT CMemLeak::Remove( oexCPVOID p )
 	if ( !m_pPool || !p || m_bFreeze )
 		return -1;
 
+	// Track allocations
+	if ( m_uCurrentAllocations )
+		m_uCurrentAllocations--;
+#if defined( OEX_MEMLEAK_DEBUG )
+	else
+		oexEcho( oexT( "CMemLeak : m_uCurrentAllocations wants to go negative?" ) );
+#endif
+
 	// Calculate starting offset
 	t_size uOffset = ( (oexUINT)p >> 4 ) & m_nPoolMask;
 
@@ -235,14 +243,6 @@ oexINT CMemLeak::Remove( oexCPVOID p )
 		{
 			// Remove from pool
 			m_pPool[ uOffset ] = 0;
-
-			// Track allocations
-			if ( m_uCurrentAllocations )
-				m_uCurrentAllocations--;
-#if defined( OEX_MEMLEAK_DEBUG )
-			else
-				oexEcho( oexT( "CMemLeak : m_uCurrentAllocations wants to go negative?" ) );
-#endif
 
 			return (oexINT)uOffset;
 

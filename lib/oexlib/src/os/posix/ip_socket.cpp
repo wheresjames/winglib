@@ -500,7 +500,7 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
 	else
 	{
 		m_uLastError = 0;
-		
+
 		// We're trying to connect
 		m_uConnectState |= eCsConnecting;
 
@@ -555,8 +555,8 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 	x_is.m_uConnectState |= eCsConnecting;
 
 	// Accepted
-	m_uAccept++;
-	
+	m_uAccepts++;
+
     return oexTRUE;
 }
 
