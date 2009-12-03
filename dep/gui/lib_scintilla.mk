@@ -10,6 +10,7 @@ PRJ_INCS :=
 PRJ_LIBS := 
 
 PRJ_LIBROOT := ../..
+PRJ_OBJROOT := _0_dep_gui
 
 #-------------------------------------------------------------------
 # Configure build

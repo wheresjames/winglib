@@ -10,6 +10,7 @@ PRJ_INCS := zlib jpeg png tiff wxWidgets/include wxWidgets/src/regex
 PRJ_LIBS := 
 
 PRJ_LIBROOT := ../..
+PRJ_OBJROOT := _0_dep_gui
 
 #-------------------------------------------------------------------
 # Configure build

@@ -409,7 +409,7 @@ protected:
 		{
 			// Some info the thread will need
 			m_cSingleSessionThread.m_pSessionInfo = &m_lstSessionInfo;
-			m_cSingleSessionThread.m_pSessionLock = &m_lockSessionInfo;
+			m_cSingleSessionThread.m_pSessionLock = &m_lockSession;
 
 			// Start the thread
 			m_cSingleSessionThread.Start();
