@@ -71,7 +71,7 @@ oexBOOL CIpAddress::SetRawAddress( oexINT64 x_llIp, oexINT32 x_uPort, oexINT32 x
     m_uCrc = 0;
     oexUCHAR ucHash[ CCrcHash::eHashSize ];
     CCrcHash::Hash( &ucHash, &m_guid, sizeof( m_guid ) );
-    m_uCrc = *(oexINT16*)&ucHash;
+    m_uCrc = *(oexUINT16*)&ucHash;
 
     return oexTRUE;
 }
@@ -79,15 +79,21 @@ oexBOOL CIpAddress::SetRawAddress( oexINT64 x_llIp, oexINT32 x_uPort, oexINT32 x
 oexBOOL CIpAddress::ValidateAddress()
 {
     // Save the crc
-    oexUINT uCrc = m_uCrc;
+    oexUINT16 uCrc = m_uCrc;
+
+	// Clear the crc while we hash
+	m_uCrc = 0;
 
     // Create hash
     oexUCHAR ucHash[ CCrcHash::eHashSize ];
     CCrcHash::Hash( &ucHash, &m_guid, sizeof( m_guid ) );
 
     // Verify the hash value
-    if ( uCrc != *(oexINT16*)&ucHash )
-    {   oexASSERT( 0 ); Destroy(); return oexFALSE; }
+    if ( uCrc != *(oexUINT16*)&ucHash )
+    {   oexASSERT( 0 ); 
+		Destroy(); 
+		return oexFALSE; 
+	}
 
     // Restore the crc
     m_uCrc = uCrc;

@@ -29,6 +29,23 @@ int show_use( int nRet, oexCSTR pErr, int bShowUse = 0 )
 						 "Example: iptest google.com -u:/index.html" oexNL8
 						 "Example: iptest 127.0.0.1 -p:8080 -a:100 -s:2 -u:/big_image.jpg" oexNL8
 						 oexNL8
+						 "--- What the output symbols mean ---" oexNL8
+						 "  . = Successful read" oexNL8
+						 "  ! = Socket error" oexNL8
+						 "  x = Port closed without reading data" oexNL8
+						 "  < = Read error" oexNL8
+						 "  > = Write error" oexNL8 
+						 oexNL8
+						 "--- Following apply to the -e option ---"	oexNL8
+						 "  * = Data block read, continuing to wait for data" oexNL8
+						 "  _ = Socket is idle, waiting for data" oexNL8
+						 "  ( = Operation is starting" oexNL8
+						 " (c = Conecting" oexNL8
+						 " (w = Writing" oexNL8
+						 " (r = Reading" oexNL8
+						 " (! = Socket error" oexNL8
+						 "  ) = Operation completed" oexNL8
+						 oexNL8
 						 ) );
 	else
 		oexERROR( 0, pErr );
@@ -152,7 +169,7 @@ int iptest(int argc, char* argv[])
 	if ( mSockets.OexConstructArray( lSockets ).Size() != (oexSIZE_T)lSockets )
 		return show_use( -6, oexT( "Unable to create socket array" ) );
 
-	oexEcho( oexMks( oexT( "Connecting to : " ), addr.GetDotAddress(), oexT( ":" ), lPort,
+	oexEcho( oexMks( oexT( oexNL8 "Connecting to : " ), addr.GetDotAddress(), oexT( ":" ), lPort,
 					 oexT( " - attempts = " ), lAttempts,
 					 oexT( ", sockets = " ), lSockets,
 					 oexT( ", url = " ), sUrl,
@@ -174,12 +191,10 @@ int iptest(int argc, char* argv[])
 			{
 				DBG_PRINT( "(" );
 
-				if ( !mSockets[ i ].getNumWrites() )
-					show_progress( oexT( "!" ), uShow );
-				else
-					show_progress( oexT( "-" ), uShow );
+				show_progress( oexT( "!" ), uShow );
 
-				DBG_PRINT( oexFmt( oexT( " flags=%x to=%f " ),
+				DBG_PRINT( oexFmt( oexT( " writes= flags=%x to=%f " ),
+								   mSockets[ i ].getNumWrites(),
 								   mSockets[ i ].GetConnectState(),
 								   mSockets[ i ].GetActivityTimeout()
 								 ).Ptr() );
@@ -286,6 +301,22 @@ int iptest(int argc, char* argv[])
 					} // end else
 
 					DBG_PRINT( ")" );
+
+				} // end else if
+
+				// Wait for data
+				else if ( mSockets[ i ].WaitEvent( oex::os::CIpSocket::eCloseEvent, 0 ) )
+				{
+					// Did we read anything
+					if ( lReadAll && mSockets[ i ].getNumReads() )
+						show_progress( oexT( "." ), uShow );
+
+					// No data
+					else
+						show_progress( oexT( "x" ), uShow );	
+
+					// Close the socket
+					mSockets[ i ].Destroy();
 
 				} // end else if
 

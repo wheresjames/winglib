@@ -490,7 +490,10 @@ oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
 
 	// Create socket if there is none
 	if ( !IsSocket() && !Create() )
-	{	Destroy(); return oexFALSE; }
+	{	m_uConnectState |= eCsError;
+		Destroy(); 
+		return oexFALSE; 
+	} // end if
 
 	// Save the address
 	m_addrPeer = x_rIpAddress;
@@ -507,7 +510,8 @@ oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
 
 	// Check result
 	if ( -1 == nRet && EINPROGRESS != m_uLastError )
-    {	m_uLastError = errno;
+	{	m_uConnectState |= eCsError;
+    	m_uLastError = errno;
 		oexERROR( errno, oexT( "connect() failed" ) );
 		return oexFALSE;
 	} // end if
@@ -526,6 +530,10 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
 {
 	if ( !oexVERIFY_PTR( x_pAddress ) )
         return oexFALSE;
+
+	// Punt if not initialized
+	if ( !IsInitialized() )
+		return oexFALSE;
 
 	CIpAddress addr;
 

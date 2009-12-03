@@ -373,34 +373,25 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 	return oexTRUE;
 }
 
-
-oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
+oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
 {
-	if ( !oexVERIFY_PTR( x_pAddress ) )
-        return oexFALSE;
-
 	// Punt if not initialized
 	if ( !IsInitialized() )
 		return oexFALSE;
 
+	// Ensure we were passed a valid address
+	if ( !x_rIpAddress.ValidateAddress() )
+	{	Destroy(); return oexFALSE; }
+
 	// Create socket if there is none
 	if ( !IsSocket() && !Create() )
-	{	Destroy(); 
-		m_uConnectState |= eCsError;
-        return oexFALSE;
+	{	m_uConnectState |= eCsError;
+		Destroy(); 
+		return oexFALSE; 
 	} // end if
 
-    // Were we passed a URL?
-    if ( !x_uPort && !m_addrPeer.LookupUrl( x_pAddress ) )
-	{	m_uConnectState |= eCsError;
-        return oexFALSE;
-	} // end if
-
-    // Lookup the host address
-    else if ( !m_addrPeer.LookupHost( x_pAddress, x_uPort ) )
-	{	m_uConnectState |= eCsError;
-        return oexFALSE;
-	} // end if
+	// Save the address
+	m_addrPeer = x_rIpAddress;
 
     SOCKADDR_IN si;
     os::CSys::Zero( &si, sizeof( si ) );
@@ -425,6 +416,28 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
 
     // Return the result
 	return oexTRUE;
+}
+
+oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
+{
+	if ( !oexVERIFY_PTR( x_pAddress ) )
+        return oexFALSE;
+
+	// Punt if not initialized
+	if ( !IsInitialized() )
+		return oexFALSE;
+
+	CIpAddress addr;
+
+    // Were we passed a URL?
+    if ( !x_uPort && !addr.LookupUrl( x_pAddress ) )
+        return oexFALSE;
+
+    // Lookup the host address
+    else if ( !addr.LookupHost( x_pAddress, x_uPort ) )
+        return oexFALSE;
+
+    return Connect( addr );
 }
 
 oexBOOL CIpSocket::Attach( t_SOCKET x_hSocket )
