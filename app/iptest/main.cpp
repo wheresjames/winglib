@@ -2,6 +2,12 @@
 #include "stdafx.h"
 #include "stdio.h"
 
+#define NUM_TEMPLATE	"%6u "
+
+#	define DBG_PRINT( s )	( lDbg ? oexPrintf( oexT( s ) ), os::CSys::Flush_stdout() : 0 )
+#	define DBGBLOCKSIZE	1
+#	define BLOCKSIZE		50
+
 using namespace oex;
 
 int show_use( int nRet, oexCSTR pErr, int bShowUse = 0 )
@@ -17,6 +23,8 @@ int show_use( int nRet, oexCSTR pErr, int bShowUse = 0 )
 						 " -b:<num> = Block size, default is 50" oexNL8
 						 " -u:<string> = URL address for HTTP" oexNL8
 						 " -d:<string> = data to send" oexNL8
+						 " -e = Extended information" oexNL8
+						 " -r = Read until socket closes" oexNL8
 						 oexNL8
 						 "Example: iptest google.com -u:/index.html" oexNL8
 						 "Example: iptest 127.0.0.1 -p:8080 -a:100 -s:2 -u:/big_image.jpg" oexNL8
@@ -27,39 +35,79 @@ int show_use( int nRet, oexCSTR pErr, int bShowUse = 0 )
 	return nRet;
 }
 
-void show_progress( oexCSTR pShow, oexULONG &uShow, oexLONG lBlockSize )
-{
-	static oexUINT uOk = 0, uBad = 0;
+static oexUINT g_uStartTime = oexGetUnixTime();
+static oexUINT g_uCounts = 0, g_uOk = 0, g_uBad = 0, g_uLastShow = 0;
+static oexUINT g_uCountsTotal = 0, g_uOkTotal = 0, g_uBadTotal = 0;
 
-	if ( !pShow || !( uShow % lBlockSize ) )
+void show_position( oexBOOL bEnd, oexULONG &uShow, oexLONG lBlockSize )
+{
+	// Time to show?
+	if ( !bEnd && ( uShow == g_uLastShow || ( uShow % lBlockSize ) ) )
+		return;
+
+	g_uLastShow = uShow;
+
+	// Do we have enough to show statistics?
+	if ( 10 <= g_uCounts && ( g_uOk || g_uBad ) )
 	{
-		// Show progress
-		if ( uOk || uBad )
-			oexPrintf( oexFmt( oexT( " %3u %%%%" ), uOk * 100 / ( uOk + uBad ) ).Ptr() );
+		oexPrintf( oexFmt( oexT( " %3u %%%%" ), g_uOk * 100 / ( g_uOk + g_uBad ) ).Ptr() );
+
+		// Collect totals
+		g_uCountsTotal += g_uCounts;
+		g_uOkTotal += g_uOk;
+		g_uBadTotal += g_uBad;
 
 		// Reset counters
-		uOk = 0, uBad = 0;
-
-		if ( pShow )
-
-			// Show new line
-			oexPrintf( oexFmt( oexT( "\r\n%6u " ), uShow ).Ptr() );
+		g_uCounts = 0, g_uOk = 0, g_uBad = 0;
 
 	} // end if
 
+	if ( !bEnd )
+
+		// Show new line
+		oexPrintf( oexFmt( oexT( oexNL8 NUM_TEMPLATE ), uShow ).Ptr() );
+
+	else
+	{
+		oexUINT uSecs = oexGetUnixTime() - g_uStartTime;
+		if ( 0 == uSecs ) uSecs++;
+
+		// Show summary
+		oexEcho( oexMks( oexT( oexNL8 "================================================" oexNL8 ),
+						 oexT( "Total   : " ), g_uCountsTotal, oexNL,
+						 oexT( "Success : " ), g_uOkTotal, oexNL,
+						 oexT( "Failed  : " ), g_uBadTotal, oexNL,
+						 oexT( "Time    : " ), uSecs, oexT( " seconds" oexNL8 ),
+						 oexT( "Speed   : " ), g_uOkTotal / uSecs, oexT( " / second" oexNL8 ),
+						 oexT( "Quality : " ),
+						 	oexFmt( oexT( "%3u %%" ), ( ( g_uOkTotal + g_uBadTotal )
+						 								  ? ( g_uOkTotal * 100 / ( g_uOkTotal + g_uBadTotal ) )
+						 								  : 0
+						 								)
+						 		  ),
+						 oexT( oexNL8 "================================================" oexNL8 )
+					   ).Ptr() );
+
+	} // end if
+
+}
+
+void show_progress( oexCSTR pShow, oexULONG &uShow )
+{
 	if ( !pShow )
 		return;
 
 	if ( oexT( '.' ) == *pShow )
-		uOk++;
+		g_uOk++;
 	else
-		uBad++;
+		g_uBad++;
 
 	oexPrintf( pShow );
 
 	os::CSys::Flush_stdout();
 
 	uShow++;
+	g_uCounts++;
 }
 
 int iptest(int argc, char* argv[])
@@ -75,15 +123,20 @@ int iptest(int argc, char* argv[])
 	oexLONG lPort		= pbCmdLine.IsKey( oexT( "p" ) ) ? pbCmdLine[ oexT( "p" ) ].ToLong() : 80;
 	oexLONG lAttempts	= pbCmdLine.IsKey( oexT( "a" ) ) ? pbCmdLine[ oexT( "a" ) ].ToLong() : 1000;
 	oexLONG lSockets	= pbCmdLine.IsKey( oexT( "s" ) ) ? pbCmdLine[ oexT( "s" ) ].ToLong() : 10;
-	oexLONG lBlockSize	= pbCmdLine.IsKey( oexT( "b" ) ) ? pbCmdLine[ oexT( "b" ) ].ToLong() : 50;
+	oexLONG lDbg		= pbCmdLine.IsKey( oexT( "e" ) ) ? 1 : 0;
+	oexLONG lReadAll	= pbCmdLine.IsKey( oexT( "r" ) ) ? 1 : 0;
+	oexLONG lBlockSize	= pbCmdLine.IsKey( oexT( "b" ) ) ? pbCmdLine[ oexT( "b" ) ].ToLong() : ( lDbg ? DBGBLOCKSIZE : BLOCKSIZE );
 	CStr8 sUrl			= pbCmdLine.IsKey( oexT( "u" ) ) ? pbCmdLine[ oexT( "u" ) ].ToString() : oexT( "/" );
 	CStr8 sData			= pbCmdLine.IsKey( oexT( "d" ) ) ? pbCmdLine[ oexT( "d" ) ].ToString() : oexT( "" );
 
 	if ( !sAddress.Length() )
 		return show_use( -3, oexT( "IP Address not specified" ), 1 );
 
-	if ( 0 >= lPort )
-		return show_use( -3, oexT( "Invalid TCP port 0" ), 1 );
+	os::CIpAddress addr;
+    if ( !lPort && !addr.LookupUrl( sAddress.Ptr() ) )
+		return show_use( -3, oexT( "Network address lookup failed" ), 1 );
+    else if ( !addr.LookupHost( sAddress.Ptr(), lPort ) )
+		return show_use( -3, oexT( "Network address lookup failed" ), 1 );
 
 	if ( 0 >= lAttempts )
 		return show_use( -4, oexT( "Invalid number of attempts 0" ), 1 );
@@ -99,11 +152,13 @@ int iptest(int argc, char* argv[])
 	if ( mSockets.OexConstructArray( lSockets ).Size() != (oexSIZE_T)lSockets )
 		return show_use( -6, oexT( "Unable to create socket array" ) );
 
-	oexEcho( oexMks( oexT( "Connecting to : " ), sAddress, oexT( ":" ), lPort,
+	oexEcho( oexMks( oexT( "Connecting to : " ), addr.GetDotAddress(), oexT( ":" ), lPort,
 					 oexT( " - attempts = " ), lAttempts,
 					 oexT( ", sockets = " ), lSockets,
 					 oexT( ", url = " ), sUrl,
 					 oexNL ).Ptr() );
+
+	oexPrintf( oexFmt( oexT( oexNL8 NUM_TEMPLATE ) , 0 ).Ptr() );
 
 	oexULONG uShow = 0, uConnected = 0;
 	while( 0 < lAttempts || uConnected )
@@ -114,10 +169,28 @@ int iptest(int argc, char* argv[])
 		// Start all the sockets we have
 		for ( oexULONG i = 0; i < mSockets.Size(); i++ )
 		{
-			// Ditch err'd sockets
-			if ( mSockets[ i ].IsError() )
-			{	mSockets[ i ].Destroy();
-				show_progress( oexT( "e" ), uShow, lBlockSize );
+			// Ditch stalled sockets
+			if ( mSockets[ i ].IsSocket() && !mSockets[ i ].IsRunning( 1 ) )
+			{
+				DBG_PRINT( "(" );
+
+				if ( !mSockets[ i ].getNumWrites() )
+					show_progress( oexT( "!" ), uShow );
+				else
+					show_progress( oexT( "-" ), uShow );
+
+				DBG_PRINT( oexFmt( oexT( " flags=%x to=%f " ),
+								   mSockets[ i ].GetConnectState(),
+								   mSockets[ i ].GetActivityTimeout()
+								 ).Ptr() );
+
+				if ( mSockets[ i ].GetLastError() )
+					DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
+
+				mSockets[ i ].Destroy();
+
+				DBG_PRINT( ")" );
+
 			} // end if
 
 			// Connect if it's not doing anything
@@ -125,10 +198,20 @@ int iptest(int argc, char* argv[])
 			{
 				lAttempts--;
 
-				if ( !mSockets[ i ].Connect( sAddress.Ptr(), lPort ) )
-					show_progress( oexT( "x" ), uShow, lBlockSize );
-//				else
-//					show_progress( oexT( "c" ), uShow, lBlockSize );
+				DBG_PRINT( "(c" );
+
+				if ( !mSockets[ i ].Connect( addr ) )
+				{
+					show_progress( oexT( "x" ), uShow );
+
+					if ( mSockets[ i ].GetLastError() )
+						DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
+
+					mSockets[ i ].Destroy();
+
+				} // end if
+
+				DBG_PRINT( ")" );
 
 			} // end if
 
@@ -137,28 +220,87 @@ int iptest(int argc, char* argv[])
 			{
 				// Do we need to write the data?
 				if ( !mSockets[ i ].getNumWrites() )
-				{	mSockets[ i ].Write( sData );
-//					show_progress( oexT( "w" ), uShow, lBlockSize );
+				{
+					DBG_PRINT( "(w" );
+
+					if ( !mSockets[ i ].Write( sData ) )
+					{
+						show_progress( oexT( ">" ), uShow );
+
+						if ( mSockets[ i ].GetLastError() )
+							DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
+
+						mSockets[ i ].Destroy();
+
+					} // end if
+
+					DBG_PRINT( ")" );
+
 				} // end else if
 
 				// Wait for data
 				else if ( mSockets[ i ].WaitEvent( oex::os::CIpSocket::eReadEvent, 0 ) )
 				{
-					if ( mSockets[ i ].Read().Length() )
-						show_progress( oexT( "." ), uShow, lBlockSize );
-					else
-						show_progress( oexT( "0" ), uShow, lBlockSize );
+					DBG_PRINT( "(r" );
 
-					// Close the socket
-					mSockets[ i ].Destroy();
+					if ( !lReadAll )
+					{
+						if ( mSockets[ i ].Read().Length() )
+							show_progress( oexT( "." ), uShow );
+						else
+						{
+							show_progress( oexT( "<" ), uShow );
+
+							if ( mSockets[ i ].GetLastError() )
+								DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
+
+						} // end else
+
+						// Close the socket
+						mSockets[ i ].Destroy();
+
+					} // end if
+
+					else
+					{
+						oexINT nRes = mSockets[ i ].Read().Length();
+
+						if ( 0 < nRes )
+							DBG_PRINT( "*" );
+
+						else
+						{
+							if ( mSockets[ i ].GetLastError() )
+							{	show_progress( oexT( "<" ), uShow );
+								DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
+							} // end if
+
+							else
+								show_progress( oexT( "." ), uShow );
+
+							// Close the socket
+							mSockets[ i ].Destroy();
+
+						} // end if
+
+					} // end else
+
+					DBG_PRINT( ")" );
 
 				} // end else if
+
+				// Waiting...
+				else
+					DBG_PRINT( "_" );
 
 			} // end if
 
 			// Track the number of sockets still working
 			if ( mSockets[ i ].IsConnected() || mSockets[ i ].IsConnecting() )
 				uConnected++;
+
+			// Show our position
+			show_position( 0, uShow, lBlockSize );
 
 		} // end for
 
@@ -168,11 +310,8 @@ int iptest(int argc, char* argv[])
 
 	} // end for
 
-	// Finish off the block
-	show_progress( oexNULL, uShow, lBlockSize );
-
-	// new line
-	oexEcho( oexNL );
+	// Show totals
+	show_position( 1, uShow, lBlockSize );
 
 	return 0;
 }

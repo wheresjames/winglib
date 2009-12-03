@@ -63,21 +63,7 @@ oexINT64 CHqTimer::osGetTimerValue()
 
 	gettimeofday( &tv, &tz );
 
-	return ( tv.tv_sec * 1000000 ) + tv.tv_usec;
-
-/*
-	if ( m_llFreq != 1000 )
-	{
-		oexINT64 ll;
-
-		QueryPerformanceCounter( (LARGE_INTEGER*)&ll );
-
-		return ll;
-
-	} // end if
-
-	return (oexINT64)GetTickCount();
-*/
+	return ( (oexINT64)tv.tv_sec * (oexINT64)1000000 ) + (oexINT64)tv.tv_usec;
 }
 
 oexINT64 CHqTimer::Elapsed( oexINT64 llStart, oexINT64 llStop )

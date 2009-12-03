@@ -65,7 +65,7 @@ oexBOOL CIpAddress::SetRawAddress( oexINT64 x_llIp, oexINT32 x_uPort, oexINT32 x
     m_uCrc = 0;
     oexUCHAR ucHash[ CCrcHash::eHashSize ];
     CCrcHash::Hash( &ucHash, &m_guid, sizeof( m_guid ) );
-    m_uCrc = *(oexINT16*)&ucHash;
+    m_uCrc = *(oexUINT16*)&ucHash;
 
     return oexTRUE;
 }
@@ -73,15 +73,21 @@ oexBOOL CIpAddress::SetRawAddress( oexINT64 x_llIp, oexINT32 x_uPort, oexINT32 x
 oexBOOL CIpAddress::ValidateAddress()
 {
     // Save the crc
-    oexUINT uCrc = m_uCrc;
+    oexUINT16 uCrc = m_uCrc;
+
+	// Zero crc for the check
+    m_uCrc = 0;
 
     // Create hash
     oexUCHAR ucHash[ CCrcHash::eHashSize ];
     CCrcHash::Hash( &ucHash, &m_guid, sizeof( m_guid ) );
 
     // Verify the hash value
-    if ( uCrc != (oexUINT)*(oexINT16*)&ucHash )
-    {   oexASSERT( 0 ); Destroy(); return oexFALSE; }
+    if ( uCrc != *(oexUINT16*)&ucHash )
+    {	oexASSERT( 0 );
+    	Destroy();
+    	return oexFALSE;
+    }
 
     // Restore the crc
     m_uCrc = uCrc;
@@ -276,15 +282,15 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
     // Ensure we have a valid pointer
     if ( !oexCHECK_PTR( x_pServer ) )
         return oexFALSE;
-   
+
 // +++ Get this working eventually
 // #if !defined( OEX_USE_GETHOSTBYNAME )
-#if 0		
+#if 0
 
 	in_addr ip4;
 	if ( inet_pton( PF_INET, oexStrToMbPtr( x_pServer ), &ip4 ) )
 	{	SetRawAddress( ntohl( *(oexULONG*)&ip4.s_addr ), x_uPort, x_uType );
-		return oexTRUE;	
+		return oexTRUE;
 	} // end if
 
 	struct addrinfo hints, *addr = 0;
@@ -292,7 +298,7 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
 	hints.ai_family = PF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_CANONNAME;
-	
+
 	int rval = 0;
     if ( rval = getaddrinfo( x_pServer, 0, &hints, &addr ) )
     {  	oexERROR( rval, CStr().Fmt( oexT( "getaddrinfo( '%s' ) failed" ), oexStrToMbPtr( x_pServer ) ).Ptr() );
@@ -309,30 +315,30 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
 				in_addr *pia = &psai->sin_addr;
 			    SetRawAddress( ntohl( *(oexULONG*)&pia->s_addr ), x_uPort, x_uType );
 			    return oexTRUE;
-			    
+
 			} break;
-				
+
 			case AF_INET6 :
 			{
 				// +++ Add v6 support
 				sockaddr_in6 *psai = (sockaddr_in6*)addr->ai_addr;
 				sin6_addr *pia6 = &psai->sin6_addr;
-				
-			} break;			
-		
+
+			} break;
+
 		} // end switch
-		
+
 		if ( addr == addr->ai_next )
 			addr = 0;
 		else
 			addr = addr->ai_next;
-	
+
 	} // end while
-	
+
 	oexWARNING( 0, oexMks( oexT( "getaddrinfo( '" ), x_pServer, oexT( "' ) : lookup failed, max = " ), max ) );
-	
+
 	return oexFALSE;
-	
+
 #else
 
 	// First try to interpret as dot address
@@ -361,7 +367,7 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
     SetRawAddress( ntohl( *(oexUINT*)&pia->s_addr ), x_uPort, x_uType );
 
     return oexTRUE;
-    
+
 #endif
 
 }

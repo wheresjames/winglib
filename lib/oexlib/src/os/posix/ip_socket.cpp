@@ -331,6 +331,19 @@ void CIpSocket::Destroy()
 
 	if ( IsInitialized() )
 	{
+		// Turn off non-blocking
+//		int flags = fcntl( oexPtrToInt( hSocket ), F_GETFL, 0 );
+//		fcntl( oexPtrToInt( m_hSocket ), F_SETFL, flags & ~O_NONBLOCK );
+
+		struct linger lopt;
+		lopt.l_onoff = 1;
+		lopt.l_linger = 60;
+
+		if ( -1 == setsockopt( oexPtrToInt( hSocket ), SOL_SOCKET, SO_LINGER, &lopt, sizeof( lopt ) ) )
+		{	m_uLastError = errno;
+			oexERROR( errno, oexT( "setsockopt() failed" ) );
+		} // end if
+
 		// Shutdown the socket
 		if ( -1 == shutdown( oexPtrToInt( hSocket ), SHUT_RDWR ) )
 		{	m_uLastError = errno;
@@ -465,26 +478,22 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 	return !nRet;
 }
 
-oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
+oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
 {
-	if ( !oexVERIFY_PTR( x_pAddress ) )
-        return oexFALSE;
-
 	// Punt if not initialized
 	if ( !IsInitialized() )
 		return oexFALSE;
+
+	// Ensure we were passed a valid address
+	if ( !x_rIpAddress.ValidateAddress() )
+	{	Destroy(); return oexFALSE; }
 
 	// Create socket if there is none
 	if ( !IsSocket() && !Create() )
 	{	Destroy(); return oexFALSE; }
 
-    // Were we passed a URL?
-    if ( !x_uPort && !m_addrPeer.LookupUrl( x_pAddress ) )
-        return oexFALSE;
-
-    // Lookup the host address
-    else if ( !m_addrPeer.LookupHost( x_pAddress, x_uPort ) )
-        return oexFALSE;
+	// Save the address
+	m_addrPeer = x_rIpAddress;
 
     sockaddr_in si;
     oexZeroMemory( &si, sizeof( si ) );
@@ -494,25 +503,41 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
     // Attempt to connect
     int nRet = connect( oexPtrToInt( m_hSocket ), (sockaddr*)&si, sizeof( si ) );
 
-	if ( -1 == nRet )
+	m_uLastError = errno;
+
+	// Check result
+	if ( -1 == nRet && EINPROGRESS != m_uLastError )
     {	m_uLastError = errno;
 		oexERROR( errno, oexT( "connect() failed" ) );
+		return oexFALSE;
 	} // end if
 
-	else
-	{
-		m_uLastError = 0;
+	m_uLastError = 0;
 
-		// We're trying to connect
-		m_uConnectState |= eCsConnecting;
-		m_toActivity.SetMs( eActivityTimeout );
-
-	} // end else if
-
-    if ( nRet && EINPROGRESS != m_uLastError )
-        return oexFALSE;
+	// We're trying to connect
+	m_uConnectState |= eCsConnecting;
+	m_toActivity.SetMs( eActivityTimeout );
 
 	return oexTRUE;
+}
+
+
+oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
+{
+	if ( !oexVERIFY_PTR( x_pAddress ) )
+        return oexFALSE;
+
+	CIpAddress addr;
+
+    // Were we passed a URL?
+    if ( !x_uPort && !addr.LookupUrl( x_pAddress ) )
+        return oexFALSE;
+
+    // Lookup the host address
+    else if ( !addr.LookupHost( x_pAddress, x_uPort ) )
+        return oexFALSE;
+
+    return Connect( addr );
 }
 
 oexBOOL CIpSocket::Attach( t_SOCKET x_hSocket )
@@ -635,6 +660,10 @@ oexBOOL CIpSocket::EventSelect( oexLONG x_lEvents )
 	if ( !IsSocket() )
 		return oexFALSE;
 
+	// Enable non-blocking mode
+	int flags = fcntl( oexPtrToInt( m_hSocket ), F_GETFL, 0 );
+	fcntl( oexPtrToInt( m_hSocket ), F_SETFL, flags | O_NONBLOCK );
+
     // Must have event handle
     if ( !IsEventHandle() || !m_pEventObject )
         CreateEventHandle();
@@ -705,7 +734,8 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 			{
 				// Log error
 				m_uLastError = errno;
-				oexERROR( errno, oexMks( oexT( "epoll_wait() failed : m_hSocketEvent = " ), oexPtrToInt( m_hSocketEvent ) ) );
+
+				oexERROR( m_uLastError, oexMks( oexT( "epoll_wait() failed : m_hSocketEvent = " ), oexPtrToInt( m_hSocketEvent ) ) );
 
 				// Disconnected?
 				m_uConnectState |= eCsError;
@@ -716,10 +746,6 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 					return 0;
 
 			} // end if
-
-			// Check for closed socket
-//			if ( !nRes )
-//				m_uEventState |= eCloseEvent;
 
 			// Process all events
 			if ( 0 < nRes )
@@ -741,11 +767,34 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 								m_uEventState |= uMask;
 								m_uEventStatus[ uOffset ] = 0;
 
-								// Signal activity
-								m_uConnectState |= eCsActivity;
+								// Attempt to detect connect error
+								if ( 0 != ( uMask & eConnectEvent ) )
+								{
+/* +++ Nope, doesn't always work
+									// use getpeername() to check for errors
+									sockaddr_in sai; oexZero( sai );
+									socklen_t len = sizeof( sai );
+									if ( -1 == getpeername( oexPtrToInt( m_hSocket ), (sockaddr*)&sai, &len ) )
+									{	m_uLastError = errno;
+										m_uEventStatus[ uOffset ] = errno;
+										m_uConnectState |= eCsError;
+									} // end if
+*/
+/* +++ gives error : Resource temporarily unavailable
+									char buf[ 1 ];
+									if ( -1 == recv( oexPtrToInt( m_hSocket ), buf, 0, 0 ) )
+									{	m_uLastError = errno;
+										m_uEventStatus[ uOffset ] = errno;
+										m_uConnectState |= eCsError;
+									} // end if
+*/
+								}
 
-								// Turn off error flag
-//								m_uConnectState &= ~eCsError;
+								// Handle close event
+								if ( 0 != ( uMask & eCloseEvent ) )
+									m_uConnectState &= ~eCsConnected;
+								else
+									m_uConnectState |= eCsActivity;
 
 								// +++ Signal when we get a connect message
 //								if ( 0 != ( ( EPOLLIN | EPOLLOUT ) & uMask ) )
@@ -778,7 +827,8 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
             m_uEventState &= ~uMask;
 
 			// Save the error code
-			m_uLastError = m_uEventStatus[ uBit ];
+			if ( m_uEventStatus[ uBit ] )
+				m_uLastError = m_uEventStatus[ uBit ];
 
 			// Something is going on
 			m_toActivity.SetMs( eActivityTimeout );
@@ -840,180 +890,54 @@ oexUINT CIpSocket::GetEventBit( oexLONG x_lEventMask )
 
 oexCSTR CIpSocket::GetErrorMsg( oexUINT x_uErr )
 {
-	return oexT( "Unknown" );
+	m_sError.Destroy();
+	m_sError << CStr().Print( oexT( "0x%X (%d) : " ), x_uErr, x_uErr )
+			 << os::CTrace::GetErrorMsg( x_uErr ).RTrim( oexT( "\r\n" ) );
 
-/*	oexCSTR ptr = oexT( "Unknown Winsock error" );
-
+	return m_sError.Ptr();
+}
+/*
 	switch( x_uErr )
 	{
-		case WSAEACCES:
-			ptr = oexT( "Access Denied" );
+		case EPERM:
+			ptr = oexT( "Operation not permitted" );
 			break;
-		case WSAEADDRINUSE:
-			ptr = oexT( "Address already in use" );
+		case ENOENT:
+			ptr = oexT( "No such file or directory" );
 			break;
-		case WSAEADDRNOTAVAIL:
-			ptr = oexT( "Cannot assign requested address" );
+		case ESRCH:
+			ptr = oexT( "No such process" );
 			break;
-		case WSAEAFNOSUPPORT:
-			ptr = oexT( "Address family not supported by protocol family" );
+		case EINTR:
+			ptr = oexT( "Interrupted system call" );
 			break;
-		case WSAEALREADY:
-			ptr = oexT( "Operation already in progress" );
+		case EIO:
+			ptr = oexT( "I/O error" );
 			break;
-		case WSAECONNABORTED:
-			ptr = oexT( "Software caused connection abort" );
+		case ENXIO:
+			ptr = oexT( "No such device or address" );
 			break;
-		case WSAECONNREFUSED:
-			ptr = oexT( "Connection refused" );
+		case E2BIG:
+			ptr = oexT( "Arg list too long" );
 			break;
-		case WSAECONNRESET:
-			ptr =oexT( "Connection reset by peer" );
+		case ENOEXEC:
+			ptr =oexT( "Exec format error" );
 			break;
-		case WSAEDESTADDRREQ:
-			ptr =oexT( "Destination addres required" );
+		case EBADF:
+			ptr =oexT( "Bad file number" );
 			break;
-		case WSAEFAULT:
-			ptr =oexT( "Bad Address" );
+		case ECHILD:
+			ptr =oexT( "No child processes" );
 			break;
-		case WSAEHOSTDOWN:
-			ptr =oexT( "Host is down" );
+		case EAGAIN:
+			ptr =oexT( "Try again" );
 			break;
-		case WSAEHOSTUNREACH:
-			ptr =oexT( "Host is unreachable" );
+		case ENOMEM:
+			ptr =oexT( "Out of memory" );
 			break;
-		case WSAEINPROGRESS:
-			ptr =oexT( "Operation is now in progress" );
-			break;
-		case WSAEINTR:
-			ptr =oexT( "Interrupted function call" );
-			break;
-		case WSAEINVAL:
-			ptr =oexT( "Invalid argument" );
-			break;
-		case WSAEISCONN:
-			ptr =oexT( "Socket is already connected" );
-			break;
-		case WSAEMFILE:
-			ptr =oexT( "Too many open files" );
-			break;
-		case WSAEMSGSIZE:
-			ptr =oexT( "Message is too long" );
-			break;
-		case WSAENETDOWN:
-			ptr =oexT( "Network is down" );
-			break;
-		case WSAENETRESET:
-			ptr =oexT( "Network dropped connection on reset" );
-			break;
-		case WSAENETUNREACH:
-			ptr =oexT( "Network is unreachable" );
-			break;
-		case WSAENOBUFS:
-			ptr =oexT( "Insufficient buffer space is available" );
-			break;
-		case WSAENOPROTOOPT:
-			ptr =oexT( "Bad protocol option" );
-			break;
-		case WSAENOTCONN:
-			ptr =oexT( "Socket is not connected" );
-			break;
-		case WSAENOTSOCK:
-			ptr =oexT( "Socket operation on non-socket" );
-			break;
-		case WSAEOPNOTSUPP:
-			ptr =oexT( "Operation not supported" );
-			break;
-		case WSAEPFNOSUPPORT:
-			ptr =oexT( "Protocol family not supported" );
-			break;
-		case WSAEPROCLIM:
-			ptr =oexT( "Too many processes" );
-			break;
-		case WSAEPROTONOSUPPORT:
-			ptr =oexT( "Protocol not supported" );
-			break;
-		case WSAEPROTOTYPE:
-			ptr =oexT( "Protocol wrong type for socket" );
-			break;
-		case WSAESHUTDOWN:
-			ptr =oexT( "Cannot send after socket shutdown" );
-			break;
-		case WSAESOCKTNOSUPPORT:
-			ptr =oexT( "Socket type not supported" );
-			break;
-		case WSAETIMEDOUT:
-			ptr =oexT( "Connection timed out" );
-			break;
-		case WSATYPE_NOT_FOUND:
-			ptr =oexT( "Class type not found" );
-			break;
-		case WSAEWOULDBLOCK:
-			ptr =oexT( "Resource temporarily unavailable (Would block)" );
-			break;
-		case WSAHOST_NOT_FOUND:
-			ptr =oexT( "Host not found" );
-			break;
-		case WSA_INVALID_HANDLE:
-			ptr =oexT( "Specified event object handle is invalid" );
-			break;
-		case WSA_INVALID_PARAMETER:
-			ptr =oexT( "One or mor parameters are invalid" );
-			break;
-//		case WSAINVALIDPROCTABLE;
-//			ptr =oexT( "Invalid procedure table from service provider" );
-//			break;
-//		case WSAINVALIDPROVIDER:
-//			ptr =oexT( "Invalid service provider version number" );
-//			break;
-		case WSA_IO_INCOMPLETE:
-			ptr =oexT( "Overlapped I/O event object not in signaled state" );
-			break;
-		case WSA_IO_PENDING:
-			ptr =oexT( "Overlapped I/O operations will complete later" );
-			break;
-		case WSA_NOT_ENOUGH_MEMORY:
-			ptr =oexT( "Insufficient memory available" );
-			break;
-		case WSANOTINITIALISED:
-			ptr =oexT( "Successful WSAStartup not yet performed" );
-			break;
-		case WSANO_DATA:
-			ptr =oexT( "Valid name, no data record of requested type" );
-			break;
-		case WSANO_RECOVERY:
-			ptr =oexT( "Non-recoverable error has occured" );
-			break;
-//		case WSAPROVIDERFAILEDINIT:
-//			ptr =oexT( "Unable to initialize a service provider" );
-//			break;
-		case WSASYSCALLFAILURE:
-			ptr =oexT( "System call failure" );
-			break;
-		case WSASYSNOTREADY:
-			ptr =oexT( "Network subsystem is unavailable" );
-			break;
-		case WSATRY_AGAIN:
-			ptr =oexT( "Non-authoritative host not found" );
-			break;
-		case WSAVERNOTSUPPORTED:
-			ptr =oexT( "WINSOCK.DLL version not supported" );
-			break;
-		case WSAEDISCON:
-			ptr =oexT( "Graceful shutdown in progress" );
-			break;
-		case WSA_OPERATION_ABORTED:
-			ptr =oexT( "Overlapped I/O operation has been aborted" );
-			break;
-//		case WSAE:
-//			ptr =oexT( "" );
-//			break;
 
 	} // end switch
-
-	return ptr;
 */
-}
 
 //oexUINT CIpSocket::CheckReturn() {}
 
@@ -1037,14 +961,15 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 	int nRes = recvfrom( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize,
                          (int)x_uFlags, (sockaddr*)&si, &nSize );
 
+	m_uLastError = errno;
+
 	m_uReads++;
 	m_toActivity.SetMs( eActivityTimeout );
 
-	if ( -1 == nRes )
-    {	m_uLastError = errno;
-		m_uEventState |= eCloseEvent;
+	if ( -1 == nRes && m_uLastError != EAGAIN )
+    {	m_uEventState |= eCloseEvent;
 		m_uConnectState |= eCsError;
-		oexWARNING( errno, oexT( "recvfrom() failed" ) );
+//		oexWARNING( m_uLastError, oexT( "recvfrom() failed" ) );
 		if ( x_puRead )
             *x_puRead = 0;
 		return oexFALSE;
@@ -1136,14 +1061,15 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 	x_uFlags |= MSG_NOSIGNAL;
 	int nRes = recv( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
 
+	m_uLastError = errno;
+
 	m_uReads++;
 	m_toActivity.SetMs( eActivityTimeout );
 
-	if ( -1 == nRes )
-    {	m_uLastError = errno;
-		m_uEventState |= eCloseEvent;
+	if ( -1 == nRes && m_uLastError != EAGAIN )
+    {	m_uEventState |= eCloseEvent;
 		m_uConnectState |= eCsError;
-		oexWARNING( errno, oexT( "recv() failed" ) );
+//		oexWARNING( m_uLastError, oexT( "recv() failed" ) );
 		if ( x_puRead )
             *x_puRead = 0;
 		return oexFALSE;
@@ -1243,20 +1169,19 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
     int nRes = sendto( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize,
                        (int)x_uFlags, (sockaddr*)&si, sizeof( si ) );
 
+	m_uLastError = errno;
+
 	m_uWrites++;
 	m_toActivity.SetMs( eActivityTimeout );
 
 	// Check for error
 	if ( -1 == nRes )
 	{
-		// Get the last error code
-		m_uLastError = errno;
-
 		m_uEventState |= eCloseEvent;
 
 		m_uConnectState |= eCsError;
 
-		oexWARNING( errno, oexT( "sendto() failed" ) );
+//		oexWARNING( m_uLastError, oexT( "sendto() failed" ) );
 
 		// Number of bytes sent
 		if ( x_puSent )
@@ -1290,20 +1215,19 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 	x_uFlags |= MSG_NOSIGNAL;
 	int nRes = send( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
 
+	m_uLastError = errno;
+
 	m_uWrites++;
 	m_toActivity.SetMs( eActivityTimeout );
 
 	// Check for error
 	if ( -1 == nRes )
 	{
-		// Get the last error code
-		m_uLastError = errno;
-
 		m_uEventState |= eCloseEvent;
 
 		m_uConnectState |= eCsError;
 
-		oexWARNING( errno, oexT( "send() failed" ) );
+//		oexWARNING( m_uLastError, oexT( "send() failed" ) );
 
 		// Number of bytes sent
 		if ( x_puSent )

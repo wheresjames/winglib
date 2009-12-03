@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -59,13 +59,18 @@ public:
 public:
 
     /// Default constructor
-    CIpAddress() 
-    {   m_uType = 0; m_uCrc = 0; m_uPort = 0; m_llIpv6 = 0; 
+    CIpAddress()
+    {   m_uType = 0; m_uCrc = 0; m_uPort = 0; m_llIpv6 = 0;
+    }
+
+    /// Copy constructor
+    CIpAddress( oexCONST CIpAddress &r )
+    {   Copy( r );
     }
 
     /// Resets address information
-    void Destroy() 
-    {   m_uType = 0; m_uCrc = 0; m_uPort = 0; m_llIpv6 = 0; 
+    void Destroy()
+    {   m_uType = 0; m_uCrc = 0; m_uPort = 0; m_llIpv6 = 0;
     }
 
     //==============================================================
@@ -87,7 +92,7 @@ public:
     /// Generates a guid describing the connection.
     CStr GetId()
     {   oexGUID guid;
-        return CStr().GuidToString( GetId( &guid ) ); 
+        return CStr().GuidToString( GetId( &guid ) );
     }
 
     /// Sets the address from an ID
@@ -96,7 +101,7 @@ public:
     /// Sets the address from an ID
     CIpAddress& SetId( CStr &sId )
     {   oexGUID guid;
-        return SetId( sId.StringToGuid( &guid ) ); 
+        return SetId( sId.StringToGuid( &guid ) );
     }
 
     /// Builds a url from the given information
@@ -142,41 +147,41 @@ public:
     oexBOOL LookupHost( oexCSTR x_pServer, oexINT32 uPort, oexINT32 uType = eAddrTypeIpv4 );
 
     /// Returns the binary ip address value
-    oexINT64 GetIpv6() 
+    oexINT64 GetIpv6()
     {   return m_llIpv6; }
 
     /// Returns the lo part of the ip address
-    oexINT32 GetIpv4() 
+    oexINT32 GetIpv4()
     {   return m_uIpv4; }
 
     /// Returns the port number
-    oexINT32 GetPort() 
+    oexINT32 GetPort()
     {   return m_uPort; }
 
     /// Returns the port number
-    oexINT32 GetType() 
+    oexINT32 GetType()
     {   return m_uType; }
 
     /// Returns the address check sum
-    oexINT32 GetCrc() 
+    oexINT32 GetCrc()
     {   return m_uCrc; }
 
     /// Returns the GUID
-    oexGUID& GetGuid() 
+    oexGUID& GetGuid()
     {   return m_guid; }
 
     /// Guid structure
-    operator oexGUID*() 
+    operator oexGUID*()
     {   return &m_guid; }
 
     /// Copy another address
-    CIpAddress& Copy( CIpAddress &rIa )
-    {   guid::CopyGuid( &m_guid, &rIa.m_guid ); 
-        ValidateAddress(); return *this; 
+    CIpAddress& Copy( oexCONST CIpAddress &rIa )
+    {   guid::CopyGuid( &m_guid, &rIa.m_guid );
+        ValidateAddress(); return *this;
     }
 
     /// Copy operator
-    CIpAddress& operator = ( CIpAddress &rIa )
+    CIpAddress& operator = ( oexCONST CIpAddress &rIa )
     {   return Copy( rIa ); }
 
     /// Compare addresses
@@ -192,6 +197,9 @@ public:
     {   return !Cmp( rIa ); }
 
 private:
+
+// No padding
+#pragma pack( push, 1 )
 
     union
     {
@@ -226,6 +234,8 @@ private:
         /// Unique id
         oexGUID                 m_guid;
     };
+
+#pragma pack( pop )
 
 };
 

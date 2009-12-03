@@ -320,7 +320,7 @@ public:
 	//==============================================================
 	// IsConnected()
 	//==============================================================
-	/// Returns
+	/// Returns non-zero if th socket is connected
 	oexBOOL IsConnected()
 	{	if ( m_uConnectState & ( eCsActivity | eCsConnected ) )
 			return oexTRUE;
@@ -330,7 +330,7 @@ public:
 	//==============================================================
 	// IsConnecting()
 	//==============================================================
-	/// Returns
+	/// Returns non-zero if the socket is in the process of connecting
 	oexBOOL IsConnecting()
 	{	return ( m_uConnectState & eCsConnecting )
 				? oexTRUE : oexFALSE;
@@ -351,7 +351,41 @@ public:
 	/// Returns
 	oexBOOL IsActivity()
 	{	return m_toActivity.IsValid();
-	}	
+	}
+
+	//==============================================================
+	// GetActivityTimeout()
+	//==============================================================
+	/// Returns
+	oexBOOL GetActivityTimeout()
+	{	return m_toActivity.Remaining();
+	}
+
+	//==============================================================
+	// IsRunning()
+	//==============================================================
+	/// Returns non-zero if the socket is working
+	oexBOOL IsRunning( oexBOOL bCheckActivity )
+	{
+		// Is there a socket?
+		if ( !IsSocket() )
+			return oexFALSE;
+
+		// Has it erred out?
+		if ( IsError() )
+			return oexFALSE;
+
+		// Ensure it's connected or connecting
+		if ( !IsConnected() && !IsConnecting() )
+			return oexFALSE;
+
+		// Does the caller want an activity check?
+		if ( !bCheckActivity )
+			return oexTRUE;
+
+		// Is the connection active?
+		return IsActivity();
+	}
 
 	//==============================================================
 	// GetSocketHandle()
@@ -478,6 +512,17 @@ public:
 		\return Returns non-zero if success.
 	*/
 	oexBOOL Connect( oexCSTR x_pAddress, oexUINT x_uPort );
+
+	//==============================================================
+	// Connect()
+	//==============================================================
+	/// Address of remote peer.
+	/**
+		\param [in] x_rIpAddress -	Address of remote peer
+
+		\return Returns non-zero if success.
+	*/
+	oexBOOL Connect( CIpAddress &x_rIpAddress );
 
 public:
 
@@ -813,6 +858,9 @@ private:
 
 	/// Last error code
 	oexUINT					m_uLastError;
+
+	/// Temporarily holds error value for GetErrorMsg()
+    CStr					m_sError;
 
     /// String used to connect
     CStr                    m_sConnect;

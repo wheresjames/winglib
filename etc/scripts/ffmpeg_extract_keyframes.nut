@@ -48,17 +48,17 @@ function _init()
 		{
 			// Is it a key frame?
 			if ( frame_info[ "flags" ].toint() )
-				e = 10;
+				e = 5;
 
 			if ( e )
 			{
-				e--;
-				w++;
-
-				if ( !out.WriteFrame( frame, frame_info ) )
+				if ( !out.WriteFrame( frame, CSqMulti( ( e == 5 ) ? "flags=1" : "" ) ) )
 				{	_self.echo( "failed to write frame to avi" );
 					return;
 				} // end if
+
+				e--;
+				w++;
 
 			} // end if
 

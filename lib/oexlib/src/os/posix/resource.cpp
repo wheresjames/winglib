@@ -82,7 +82,7 @@ namespace OEX_NAMESPACE
 
 			// Lock info
 			oexINT								nCount;
-			oexINT								uWaiting;
+			oexINT								nWaiting;
 
 		};
 	};
@@ -106,7 +106,7 @@ static SResourceInfo* CreateRi()
 	pRi->nCount = 0;
 	pRi->bSignaled = 0;
 	pRi->bManualReset = 0;
-	pRi->uWaiting = 0;
+	pRi->nWaiting = 0;
 
 	return pRi;
 }
@@ -420,7 +420,8 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 
 			// +++ This is to force fairness among threads
 			//     There HAS to be a way to force this natively ????
-			if ( pRi->uWaiting )
+			oexINT nWaiting = pRi->nWaiting;
+			if ( 0 < nWaiting )
 			{
 				// If we don't own the lock,
 				// but we were the last to have it,
@@ -428,11 +429,16 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 				oexUINT uId = oexGetCurThreadId();
 				if ( pRi->uOwner != uId && pRi->uLastOwner == uId )
 				{
-					// Don't have to wait now
-					pRi->uWaiting = 0;
+					oexUINT uMax = 10;
+					while ( uMax && nWaiting == pRi->nWaiting )
 
-					// iii Zero doesn't work ;)
-					oexMicroSleep( oexWAIT_RESOLUTION );
+						// iii Zero doesn't work ;)
+						oexMicroSleep( oexWAIT_RESOLUTION ),
+						uMax--;
+
+					// Did something go wrong with the waiting count?
+					if ( !uMax )
+						pRi->nWaiting = 0;
 
 				} // end if
 
@@ -450,7 +456,7 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 				return waitTimeout;
 
 			// Someone is waiting
-			pRi->uWaiting++;
+			pRi->nWaiting++;
 
 #endif
 
@@ -478,6 +484,7 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 			// Wait for the lock
 			if ( !pthread_mutex_timedlock( &pRi->hMutex, &to ) )
 			{	pRi->nCount++;
+				if ( pRi->nWaiting ) pRi->nWaiting--;
 				pRi->uOwner = oexGetCurThreadId();
 				return waitSuccess;
 			} // end if
@@ -487,11 +494,13 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 			// Wait for the lock
 			if ( !pthread_mutex_lock( &pRi->hMutex ) )
 			{	pRi->nCount++;
+				if ( pRi->nWaiting ) pRi->nWaiting--;
 				pRi->uOwner = oexGetCurThreadId();
 				return waitSuccess;
 			} // end if
 
 #endif
+			if ( pRi->nWaiting ) pRi->nWaiting--;
 
 			return waitTimeout;
 

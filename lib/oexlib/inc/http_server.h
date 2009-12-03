@@ -92,10 +92,7 @@ public:
 		oex::oexBOOL IsValid()
 		{
 			// Does it need updating?
-			if ( session.GetTransactions()
-			     || port.IsError()
-			     || ( !port.IsConnected() && !port.IsConnecting() )
-			     || !port.IsActivity() )
+			if ( session.GetTransactions() || !port.IsRunning( 1 ) )
 				return oexFALSE;
 
 			return oexTRUE;
@@ -104,9 +101,12 @@ public:
 		// Updates the connection
 		oex::oexBOOL Update( oexUINT x_uTimeout )
 		{
-			// Process data if any
-			if ( port.WaitEvent( oex::os::CIpSocket::eReadEvent, x_uTimeout ) )
-				session.OnRead( 0 );
+			// Any data waiting?
+			if ( !port.WaitEvent( oex::os::CIpSocket::eReadEvent, x_uTimeout ) )
+				return oexFALSE;
+
+			// Go process it
+			session.OnRead( 0 );
 
 			return oex::oexTRUE;
 		}
@@ -145,7 +145,7 @@ public:
 	/// Session list type
 	typedef TList< CSessionInfo > t_LstSessionInfo;
 
-	/// Holds information about a session
+	/// Processes multiple sessions
 	class CSingleSessionThread : public CThread
 	{
 	public:
@@ -163,19 +163,64 @@ public:
 			if ( !m_pSessionInfo || !m_pSessionLock )
 				return oexFALSE;
 
-			// Lock the session list
-			oexAutoLock ll( m_pSessionLock );
-			if ( !ll.IsLocked() )
-				return oexFALSE;
+			oexUINT uWait = 0;
+			while ( GetStopEvent().Wait( 0 ) )
+			{
+				oexBOOL bUpdate = oexFALSE;
 
-			// Update the sessions
-			for ( typename t_LstSessionInfo::iterator it; m_pSessionInfo->Next( it ); )
-				if ( it->IsValid() )
-					it->Update( 0 );
+				// +++ Make this a little safer / faster
+				/*
+					!!! WARNING : Be very careful with this code.
+
+					Since we're in charge of deleting items, and
+					the server thread always appends to the end,
+					we can safely read up to Size() items without
+					locking.  Important to keep things straight here.
+				*/
+
+				// Get current size of the list
+				oexUINT uSize = m_pSessionInfo->Size();
+
+				// Anything to do?
+				if ( !uSize )
+					oexSleep( 15 );
+
 				else
-					it->delete_me = oexTRUE;
+					for ( typename t_LstSessionInfo::iterator it; uSize-- && m_pSessionInfo->Next( it ); )
+						if ( it->IsValid() )
+						{	if ( it->Update( uWait ) )
+								bUpdate = oexTRUE;
+							uWait = 0;
+						} // end if
+						else
+						{
+							if ( 2 > uSize )
+							{
+								// Must lock if we're close to the end
+								oexAutoLock ll( m_pSessionLock );
+								if ( !ll.IsLocked() )
+									return oexFALSE;
 
-			return oex::oexTRUE;
+								// Erase item
+								it = m_pSessionInfo->Erase( it );
+
+							} // end if
+
+							else
+								// Ok to modify this one without locking
+								it = m_pSessionInfo->Erase( it );
+
+						} // end if
+
+				// Don't hog the processor
+				if ( !bUpdate )
+					uWait = 15;
+				else
+					uWait = 0;
+
+			} // end while
+
+			return oex::oexFALSE;
 		}
 
 		/// Session information
@@ -463,20 +508,6 @@ protected:
 		for ( typename t_LstSessionThread::iterator it; m_lstSessionThread.Next( it ); )
 			if ( !it->IsRunning() )
 				it = m_lstSessionThread.Erase( it );
-
-		// Check for expired connections
-		for ( typename t_LstSessionInfo::iterator it; m_lstSessionInfo.Next( it ); )
-			if ( it->delete_me )
-			{
-				// Must lock to make changes
-				oexAutoLock ll( m_lockSessionInfo );
-				if ( !ll.IsLocked() )
-					return oexFALSE;
-
-				// Erase item
-				it = m_lstSessionInfo.Erase( it );
-
-			} // end if
 
 		return oexTRUE;
 	}

@@ -2626,10 +2626,25 @@ oex::oexRESULT Test_CHttpSession()
 	while ( server.GetNumActiveClients() )
 		oexSleep( 15 );
 
+    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eReadEvent, SOCKET_TIMEOUT ) ) )
+        return -8;
+
 	oex::CStr8 sData = client.Read();
 
-	if ( !oexVERIFY( 0 <= sData.Match( "Hello World!" ) ) )
-		return -8;
+	if ( !oexVERIFY( 0 <= sData.Match( "HTTP/1.0" ) ) )
+		return -9;
+
+	if ( 0 > sData.Match( "Hello World!" ) )
+	{
+		// We're not a proper client, so just wait for data
+		oexSleep( 100 );
+
+		sData = client.Read();
+
+		if ( !oexVERIFY( 0 <= sData.Match( "Hello World!" ) ) )
+			return -11;
+
+	} // end if
 
 	client.Destroy();
 
@@ -2665,10 +2680,25 @@ oex::oexRESULT Test_CHttpSession()
 	while ( server.GetNumActiveClients() )
 		oexSleep( 15 );
 
+    if ( !oexVERIFY( client.WaitEvent( oex::os::CIpSocket::eReadEvent, SOCKET_TIMEOUT ) ) )
+        return -15;
+
 	sData = client.Read();
 
-	if ( !oexVERIFY( 0 <= sData.Match( "Hello World!" ) ) )
-		return -15;
+	if ( !oexVERIFY( 0 <= sData.Match( "HTTP/1.0" ) ) )
+		return -16;
+
+	if ( 0 > sData.Match( "Hello World!" ) )
+	{
+		// We're not a proper client, so just wait for data
+		oexSleep( 100 );
+
+		sData = client.Read();
+
+		if ( !oexVERIFY( 0 <= sData.Match( "Hello World!" ) ) )
+			return -18;
+
+	} // end if
 
 	client.Destroy();
 

@@ -27,9 +27,6 @@ int CHttpServer::Start( int nPort )
 	// Enable sessions by default
 	m_server.EnableSessions( oex::oexTRUE );
 
-	// Multi-threaded server
-	m_server.EnableMultiThreading( oex::oexFALSE );
-
 	// Start the server
 	if ( !m_server.StartServer( nPort, CHttpServer::_OnServerEvent, this ) )
 		return 0;
@@ -92,8 +89,6 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	if ( m_sScript.length() )
 	{
 		// Create a child process to handle this transaction
-//		oex::CStr sChild = oexGuidToString();
-
 		oex::CStr sChild = x_pSession->GetTransactionId();
 
 		q->spawn( &sReply, oexT( "." ), sChild.Ptr(), m_sScript, m_bFile );

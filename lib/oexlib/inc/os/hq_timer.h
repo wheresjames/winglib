@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -42,8 +42,8 @@
 	This class attempts to use the high accuracy hardware timer
 	via the Windows API QueryPerformanceCounter() function if
 	available.  If this counter is not available, it falls back
-	on the less reliable GetTickCount() value.	
-  
+	on the less reliable GetTickCount() value.
+
   \code
 
 	CHqTimer htTimer1;
@@ -60,10 +60,10 @@
 
 */
 //==================================================================
-class CHqTimer  
+class CHqTimer
 {
 public:
-	
+
 	/// Default Constructor
 	CHqTimer( oexBOOL x_bStart = oexFALSE )
 	{
@@ -71,10 +71,10 @@ public:
 		m_llStart = m_llStop = 0;
 
         // Do we want to start the timer?
-        if ( x_bStart ) 
+        if ( x_bStart )
             Start();
 	}
-	
+
 	/// Returns the timer frequency
 	static oexINT64 osGetTimerFreq();
 
@@ -88,21 +88,21 @@ public:
 	// GetTimerFrequency()
 	//==============================================================
 	/// Returns the frequency of the active timer
-	static oexINT64 GetTimerFrequency() 
+	static oexINT64 GetTimerFrequency()
 	{	return m_llFreq; }
 
 	//==============================================================
 	// GetTimer()
 	//==============================================================
 	/// Return the current timer value
-	static oexINT64 GetTimer() 
+	static oexINT64 GetTimer()
 	{	return osGetTimerValue(); }
 
 	//==============================================================
 	// GetTimer()
 	//==============================================================
 	/// Return the current timer value
-	static oexDOUBLE GetTimerSeconds() 
+	static oexDOUBLE GetTimerSeconds()
 	{	oexINT64 freq = osGetTimerFreq();
 		if ( !freq ) return 0;
 		oexINT64 val = osGetTimerValue();
@@ -113,35 +113,35 @@ public:
 	// IsReset()
 	//==============================================================
 	/// Returns non-zero if timer is reset
-	oexBOOL IsReset() 
+	oexBOOL IsReset()
     {   return ( !m_llStart && !m_llStop ); }
 
 	//==============================================================
 	// IsRunning()
 	//==============================================================
 	/// Returns non-zero if timer is running
-	oexBOOL IsRunning() 
+	oexBOOL IsRunning()
     {   return ( m_llStart && !m_llStop ); }
 
 	//==============================================================
 	// IsStopped()
 	//==============================================================
 	/// Returns non-zero if timer is stopped
-	oexBOOL IsStopped() 
+	oexBOOL IsStopped()
     {   return ( m_llStart && m_llStop ); }
 
 	//==============================================================
 	// Reset()
 	//==============================================================
 	/// Resets internal values
-	void Reset() 
+	void Reset()
     {   m_llStart = m_llStop = 0; }
 
 	//==============================================================
 	// Start()
 	//==============================================================
 	/// Saves the current time as start time
-	oexINT64 Start() 
+	oexINT64 Start()
     {   return m_llStart = GetTimer(); }
 
 	//==============================================================
@@ -151,14 +151,14 @@ public:
 	/**
 		\param [in] x_ll	-	Start time
 	*/
-	oexINT64 Start( oexINT64 x_ll ) 
+	oexINT64 Start( oexINT64 x_ll )
     {   return m_llStart = x_ll; }
 
 	//==============================================================
 	// Stop()
 	//==============================================================
 	/// Saves the current time as stop time
-	oexINT64 Stop() 
+	oexINT64 Stop()
     {   return m_llStop = GetTimer(); }
 
 	//==============================================================
@@ -168,9 +168,9 @@ public:
 	/**
 		\param [in] ll	-	Stop time
 	*/
-	oexINT64 Stop( oexINT64 x_ll ) 
+	oexINT64 Stop( oexINT64 x_ll )
     {   return m_llStop = x_ll; }
-	
+
 	//==============================================================
 	// Ellapsed()
 	//==============================================================
@@ -181,16 +181,16 @@ public:
 	// Ellapsed()
 	//==============================================================
 	/// Returns amount of time captured or ellapsed since
-	oexINT64 Elapsed()	
-    {   if ( m_llStop ) return Elapsed( m_llStart, m_llStop ); 
-        return Elapsed( m_llStart, GetTimer() ); 
+	oexINT64 Elapsed()
+    {   if ( m_llStop ) return Elapsed( m_llStart, m_llStop );
+        return Elapsed( m_llStart, GetTimer() );
     }
 
 	//==============================================================
 	// EllapsedSeconds()
 	//==============================================================
 	/// Returns ellapsed time in seconds
-	oexDOUBLE ElapsedSeconds() 
+	oexDOUBLE ElapsedSeconds()
     {   return ( (oexDOUBLE)Elapsed() / (oexDOUBLE)GetTimerFrequency() ); }
 
 	//==============================================================
@@ -221,12 +221,12 @@ private:
 
 */
 //==================================================================
-class CTimeout  
+class CTimeout
 {
 public:
 
 	/// Default constructor
-	CTimeout() 
+	CTimeout()
 	{	m_timeout = 0; }
 
 	/// Sets the timeout value in seconds
@@ -259,6 +259,14 @@ public:
 	/// Returns non-zero if the timer is set and has expired
 	oexBOOL IsExpired()
 	{	return ( 1 < m_timeout && CHqTimer::GetTimerSeconds() > m_timeout ); }
+
+	/// Returns the time in seconds remaining
+	oexDOUBLE Remaining()
+	{	double t = CHqTimer::GetTimerSeconds();
+		if ( 1 < m_timeout && t < m_timeout )
+			return m_timeout - t;
+		return 0;
+	}
 
 private:
 
