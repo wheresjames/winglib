@@ -505,9 +505,10 @@ protected:
 	oexBOOL CleanupConnections()
 	{
 		// Check for expired connections
-		for ( typename t_LstSessionThread::iterator it; m_lstSessionThread.Next( it ); )
-			if ( !it->IsRunning() )
-				it = m_lstSessionThread.Erase( it );
+		if ( m_lstSessionThread.Size() )
+			for ( typename t_LstSessionThread::iterator it; m_lstSessionThread.Next( it ); )
+				if ( !it->IsRunning() )
+					it = m_lstSessionThread.Erase( it );
 
 		return oexTRUE;
 	}

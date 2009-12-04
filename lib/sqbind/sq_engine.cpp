@@ -63,6 +63,9 @@ int CSqEngineExport::import( const stdString &sClass )
 int CSqEngineExport::include( const stdString &sScript )
 {   return OnInclude( sScript ); }
 
+int CSqEngineExport::include_once( const stdString &sScript )
+{   return OnIncludeOnce( sScript ); }
+
 int CSqEngineExport::load_module( const stdString &sModule, const stdString &sPath )
 {   return OnLoadModule( sModule, sPath ); }
 
@@ -456,6 +459,9 @@ int CSqEngineExport::OnImport( const stdString &sClass )
 int CSqEngineExport::OnInclude( const stdString &sClass )
 { return 0; }
 
+int CSqEngineExport::OnIncludeOnce( const stdString &sClass )
+{ return 0; }
+
 int CSqEngineExport::OnLoadModule( const stdString &sModule, const stdString &sPath )
 { return 0; }
 
@@ -600,6 +606,8 @@ void CSqEngine::Destroy()
 
 	m_vm.Shutdown();
 
+	m_mapIncludeScriptCache.clear();
+
 	m_sErr = oexT( "" );
 	m_sOutput = oexT( "" );
 	m_sRoot = oexT( "" );
@@ -647,6 +655,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, flush )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include_once )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, load_module )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_children )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sleep )
@@ -890,6 +899,19 @@ oex::oexBOOL CSqEngine::Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oex
 	m_sScript = pScript;
 
 	return oex::oexTRUE;
+}
+
+int CSqEngine::OnIncludeOnce( const stdString &sScript )
+{
+	// Has it already been included
+	if ( m_mapIncludeScriptCache.end() != m_mapIncludeScriptCache.find( sScript ) )
+		return 0;
+
+	// Save the time we included it
+	m_mapIncludeScriptCache[ sScript ] = oexGetUnixTime();
+
+	// Include the thing
+	return OnInclude( sScript );
 }
 
 int CSqEngine::OnInclude( const stdString &sScript )

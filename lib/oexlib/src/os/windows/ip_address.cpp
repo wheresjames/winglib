@@ -93,7 +93,7 @@ oexBOOL CIpAddress::ValidateAddress()
     {   oexASSERT( 0 ); 
 		Destroy(); 
 		return oexFALSE; 
-	}
+	} // end if
 
     // Restore the crc
     m_uCrc = uCrc;

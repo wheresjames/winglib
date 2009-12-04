@@ -105,6 +105,10 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	// Execute the thing
 	q->execute( &sReply, oexT( "." ), m_sSession.c_str(), mParams.serialize() );
 
+	// Kill thread if we created it
+	if ( !m_bScriptsLinger && m_sScript.length() )
+		q->kill( oexNULL, "." );
+
 /*
 	{ // Scope
 
@@ -205,3 +209,9 @@ void CHttpServer::EnableMultiThreading( int bEnable )
 {
 	m_server.EnableMultiThreading( bEnable );
 }
+
+void CHttpServer::EnableScriptLinger( int bEnable )
+{
+	m_bScriptsLinger = bEnable;
+}
+

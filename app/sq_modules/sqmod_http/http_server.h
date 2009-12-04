@@ -14,6 +14,8 @@ public:
 	{
 		m_pServerMsgQueue = oexNULL;
 		m_pSessionMsgQueue = oexNULL;
+		m_bScriptsLinger = 0;
+		m_bFile = 0;
 	}
 
 	// Copy semantics
@@ -53,6 +55,9 @@ public:
 	/// Enable / Disable multi-threaded sessions
 	void EnableMultiThreading( int bEnable );
 
+	/// Non-zero to enable scripts to linger
+	void EnableScriptLinger( int bEnable );
+
 private:
 
 	// The server
@@ -75,46 +80,7 @@ private:
 
 	/// Non-zero if m_sScript holds a file name
 	oex::oexBOOL			m_bFile;
+
+	/// Non-zero if scripts should not be killed after 
+	oex::oexBOOL			m_bScriptsLinger;
 };
-/*
-class CHttpServer
-{
-public:
-
-	CHttpServer()
-	{
-		m_pServer = oexNULL;
-		Init();
-	}
-
-	~CHttpServer()
-	{
-		if ( m_pServer )
-		{
-			OexAllocDestruct( m_pServer );
-			m_pServer = oexNULL;
-		} // end if
-	}
-
-	void Init()
-	{	if ( !m_pServer )
-			m_pServer = OexAllocConstruct< CHttpServerImpl >();
-	}
-
-	void SetCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sServer, const sqbind::stdString &sSession )
-	{
-		m_pServer->SetCallback( x_pMsgQueue, sServer, sSession );
-	}
-
-	int Start( int nPort )
-	{
-		return m_pServer->Start( nPort );
-	}
-
-private:
-
-	/// Pointer to server object
-	CHttpServerImpl		*m_pServer;
-
-};
-*/

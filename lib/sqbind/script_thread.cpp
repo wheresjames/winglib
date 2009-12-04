@@ -110,26 +110,48 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 
 oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 {
-	// Have we gotten a quit flag?
-	if ( m_bQuit )
-		return oex::oexFALSE;
+	oex::os::CTimeout toIdle;
 
-	// Process script messages
-	ProcessMsgs();
+	// Until we're told to stop
+	while ( GetStopEvent().Wait( 0 ) )
+	{
+		// Wait for a message
+		CSqMsgQueue::Wait( 100 );
 
-	// Punt if quit has been requested
-	if ( WantQuit() )
-		return oex::oexFALSE;
+		// Have we gotten a quit flag?
+		if ( m_bQuit )
+			return oex::oexFALSE;
 
-	// Idle processing
-	int nRet = 0;
-	if ( !m_cSqEngine.Execute( &nRet, SQEXE_FN_IDLE ) )
-		return oex::oexFALSE;
+		// Process script messages
+		ProcessMsgs();
 
-	// Cleanup child scripts
-	CleanupChildScripts();
+		// Punt if quit has been requested
+		if ( WantQuit() )
+			return oex::oexFALSE;
 
-	return 0 == nRet;
+		// Time for idle processing?
+		if ( !toIdle.IsValid() )
+		{
+			// About every 100 milli-seconds
+			toIdle.SetMs( 100 );
+
+			// Idle processing
+			int nRet = 0;
+			if ( !m_cSqEngine.Execute( &nRet, SQEXE_FN_IDLE ) )
+				return oex::oexFALSE;
+
+			// Cleanup child scripts
+			CleanupChildScripts();
+
+			// Did idle function indicate exit?
+			if ( nRet )
+				return oex::oexFALSE;
+
+		} // end if
+
+	} // end if
+
+	return oex::oexFALSE;
 }
 
 oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )

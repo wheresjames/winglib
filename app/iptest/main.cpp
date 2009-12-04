@@ -52,7 +52,7 @@ int show_use( int nRet, oexCSTR pErr, int bShowUse = 0 )
 	return nRet;
 }
 
-static oexUINT g_uStartTime = oexGetUnixTime();
+static oexDOUBLE g_dStartTime = os::CHqTimer::GetTimerSeconds();
 static oexUINT g_uCounts = 0, g_uOk = 0, g_uBad = 0, g_uLastShow = 0;
 static oexUINT g_uCountsTotal = 0, g_uOkTotal = 0, g_uBadTotal = 0;
 
@@ -85,24 +85,23 @@ void show_position( oexBOOL bEnd, oexULONG &uShow, oexLONG lBlockSize )
 		oexPrintf( oexFmt( oexT( oexNL8 NUM_TEMPLATE ), uShow ).Ptr() );
 
 	else
-	{
-		oexUINT uSecs = oexGetUnixTime() - g_uStartTime;
-		if ( 0 == uSecs ) uSecs++;
+	{	
+		oexDOUBLE dSecs = os::CHqTimer::GetTimerSeconds() - g_dStartTime;
+		if ( 0 == dSecs ) dSecs = 1;
 
 		// Show summary
-		oexEcho( oexMks( oexT( oexNL8 "================================================" oexNL8 ),
+		oexEcho( oexMks( oexT( oexNL8 
+							   "================================================" oexNL8 ),
 						 oexT( "Total   : " ), g_uCountsTotal, oexNL,
 						 oexT( "Success : " ), g_uOkTotal, oexNL,
 						 oexT( "Failed  : " ), g_uBadTotal, oexNL,
-						 oexT( "Time    : " ), uSecs, oexT( " seconds" oexNL8 ),
-						 oexT( "Speed   : " ), g_uOkTotal / uSecs, oexT( " / second" oexNL8 ),
-						 oexT( "Quality : " ),
-						 	oexFmt( oexT( "%3u %%" ), ( ( g_uOkTotal + g_uBadTotal )
-						 								  ? ( g_uOkTotal * 100 / ( g_uOkTotal + g_uBadTotal ) )
-						 								  : 0
-						 								)
-						 		  ),
-						 oexT( oexNL8 "================================================" oexNL8 )
+				 oexFmt( oexT( "Time    : %.2f seconds" oexNL8 ), dSecs ),
+				 oexFmt( oexT( "Speed   : %.2f / second" oexNL8 ), (oexDOUBLE)g_uOkTotal / dSecs ),
+				 oexFmt( oexT( "Quality : %3u %%" oexNL8 ),
+								( ( g_uOkTotal + g_uBadTotal )
+						 		? ( g_uOkTotal * 100 / ( g_uOkTotal + g_uBadTotal ) )
+						 		: 0 ) ),
+						 oexT( "================================================" oexNL8 )
 					   ).Ptr() );
 
 	} // end if
@@ -240,7 +239,10 @@ int iptest(int argc, char* argv[])
 
 					if ( !mSockets[ i ].Write( sData ) )
 					{
-						show_progress( oexT( ">" ), uShow );
+						if ( !lDbg )
+							show_progress( oexT( ">" ), uShow );
+						else
+							show_progress( oexT( ":" ), uShow );
 
 						if ( mSockets[ i ].GetLastError() )
 							DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
@@ -286,7 +288,11 @@ int iptest(int argc, char* argv[])
 						else
 						{
 							if ( mSockets[ i ].GetLastError() )
-							{	show_progress( oexT( "<" ), uShow );
+							{
+								if ( !lDbg )
+									show_progress( oexT( "<" ), uShow );
+								else
+									show_progress( oexT( ":" ), uShow );
 								DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
 							} // end if
 

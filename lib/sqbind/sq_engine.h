@@ -105,6 +105,10 @@ public:
 	/// Includes the specified script
 	int include( const stdString &sScript );
 
+	/// Includes the specified script the first time, 
+	/// ignores further calls to include the same script
+	int include_once( const stdString &sScript );
+
 	/// Loads the specified module
 	int load_module( const stdString &sModule, const stdString &sPath );
 
@@ -279,6 +283,8 @@ protected:
 
 	virtual int OnInclude( const stdString &sScript );
 
+	virtual int OnIncludeOnce( const stdString &sScript );
+
 	virtual int OnLoadModule( const stdString &sModule, const stdString &sPath );
 
 	virtual stdString OnPath( stdString sPath );
@@ -338,8 +344,11 @@ public:
 		oex::oexUINT    uCol;
 	};
 
-	// Callback function for custom script source
+	/// Callback function for custom script source
 	typedef int (*t_IncludeScript)( const stdString &sScript, stdString &sData, stdString &sName );
+
+	/// Include script cache type
+	typedef oexStdMap( sqbind::stdString, oex::oexUINT ) t_IncludeScriptCache;
 
 public:
 
@@ -951,6 +960,9 @@ public:
 	/// Includes the specified script
 	virtual int OnInclude( const stdString &sScript );
 
+	/// Includes the specified script
+	virtual int OnIncludeOnce( const stdString &sScript );
+
 	/// Loads the specified module
 	virtual int OnLoadModule( const stdString &sModule, const stdString &sPath );
 
@@ -1015,6 +1027,9 @@ private:
 
 	/// Custom script include function
 	t_IncludeScript				m_fIncludeScript;
+
+	/// List of scripts that have already been included
+	t_IncludeScriptCache		m_mapIncludeScriptCache;
 
 	/// Non-zero if exit function needs calling
 	BOOL						m_bCallExit;
