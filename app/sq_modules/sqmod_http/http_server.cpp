@@ -215,3 +215,7 @@ void CHttpServer::EnableScriptLinger( int bEnable )
 	m_bScriptsLinger = bEnable;
 }
 
+int CHttpServer::GetNumActiveClients()
+{
+	return m_server.GetNumActiveClients();
+}

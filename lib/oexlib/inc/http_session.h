@@ -217,15 +217,22 @@ public:
 	/**
 		\param [in] x_nErr	-	Error code
 
-		\return Non-zero if success
+		\return Less than zero on failure
 
 		\see
 	*/
-    oexBOOL OnRead( oexINT x_nErr )
+    oexRESULT OnRead( oexINT x_nErr )
 	{
+		if ( !oexCHECK_PTR( m_pPort ) )
+			return -1;
+
 		// Read in data if port is available
-		if ( oexCHECK_PTR( m_pPort ) )
-			Rx().Write( m_pPort->Read() );
+		CStr8 sData = m_pPort->Read();
+		if ( !sData.Length() )
+			return -1;
+
+		// Add the data to the queue
+		Rx().Write( sData );
 
 		// Grab headers if needed
 		if ( !m_bHeaderReceived )
@@ -234,18 +241,18 @@ public:
 
 			// Waiting for data?
 			if ( !nErr )
-				return oexFALSE;
+				return 0;
 
 			// Error?
 			if ( HTTP_OK != nErr )
-				return SendErrorMsg( nErr, "Bad HTTP request headers." );
+				return SendErrorMsg( nErr, "Bad HTTP request headers." ) ? 1 : -1;
 
 		} // end if
 
 		// Do we have all the data?
 		oexUINT uContentLength = m_pbRxHeaders[ "Content-Length" ].ToLong();
 		if ( uContentLength && uContentLength > Rx().GetMaxRead() )
-			return oexFALSE;
+			return 0;
 
 		// Are there any post variables?
 		if ( !m_pbPost.Size() && m_pbRequest[ "type" ] == "POST" )
@@ -269,7 +276,7 @@ public:
 
 		// No hablo
 		else
-			return SendErrorMsg( HTTP_NOT_IMPLEMENTED, "Not implemented." );
+			return SendErrorMsg( HTTP_NOT_IMPLEMENTED, "Not implemented." ) ? 1 : -1;
 
 		// Count a transaction
         m_nTransactions++;
@@ -277,7 +284,7 @@ public:
 		// Get ready for more requests
 		m_bHeaderReceived = oexFALSE;
 
-		return oexTRUE;
+		return 1;
 	}
 
 

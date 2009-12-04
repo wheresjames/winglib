@@ -14,6 +14,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CHttpServer, CHttpServer )
 	SQBIND_MEMBER_FUNCTION( CHttpServer, EnableSessions )
 	SQBIND_MEMBER_FUNCTION( CHttpServer, EnableMultiThreading )
 	SQBIND_MEMBER_FUNCTION( CHttpServer, SetSessionTimeout )
+	SQBIND_MEMBER_FUNCTION( CHttpServer, GetNumActiveClients )
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CHttpServer );

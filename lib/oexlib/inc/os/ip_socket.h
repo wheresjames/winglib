@@ -906,6 +906,9 @@ private:
 
 	/// Activity timeout
 	CTimeout				m_toActivity;
+
+	/// Non-zero if events have been hooked
+	oexBOOL					m_bEventsHooked;
 };
 
 

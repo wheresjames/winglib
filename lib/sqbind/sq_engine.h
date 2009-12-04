@@ -105,7 +105,7 @@ public:
 	/// Includes the specified script
 	int include( const stdString &sScript );
 
-	/// Includes the specified script the first time, 
+	/// Includes the specified script the first time,
 	/// ignores further calls to include the same script
 	int include_once( const stdString &sScript );
 
@@ -243,6 +243,15 @@ public:
 
 	/// Returns the current cpu load
 	double get_cpu_load();
+
+	/// Amount of time in seconds, since the computer started
+	double boot_time();
+
+	/// Tick count seconds
+	unsigned int get_timer_seconds();
+
+	/// Tick count micro seconds
+	unsigned int get_timer_useconds();
 
 	/// Returns a linked in resource
 	stdString get_resource( const stdString &sRes, int bFileOverrideOk );

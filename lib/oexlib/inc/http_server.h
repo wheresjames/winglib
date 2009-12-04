@@ -86,7 +86,7 @@ public:
 	public:
 
 		/// Constructor
-		CSessionInfo() { delete_me = oexFALSE; }
+		CSessionInfo() { }
 
 		/// Returns non-zero if we need to keep the connection running
 		oex::oexBOOL IsValid()
@@ -99,16 +99,17 @@ public:
 		}
 
 		// Updates the connection
-		oex::oexBOOL Update( oexUINT x_uTimeout )
+		oex::oexRESULT Update( oexUINT x_uTimeout )
 		{
 			// Any data waiting?
 			if ( !port.WaitEvent( oex::os::CIpSocket::eReadEvent, x_uTimeout ) )
-				return oexFALSE;
+				return 0;
 
 			// Go process it
-			session.OnRead( 0 );
+			if ( 0 > session.OnRead( 0 ) )
+				return -1;
 
-			return oex::oexTRUE;
+			return 1;
 		}
 
 		/// Session object
@@ -116,9 +117,6 @@ public:
 
 		/// Session port
 		T_PORT			port;
-
-		/// Non-zero if this item is done
-		oexBOOL			delete_me;
 	};
 
 	/// Holds information about a session
@@ -132,7 +130,8 @@ public:
 		{
 			// While thread is running and no transactions
 			while ( GetStopEvent().Wait( 0 ) && CSessionInfo::IsValid() )
-				CSessionInfo::Update( 100 );
+				if ( 0 > CSessionInfo::Update( 100 ) )
+					return oex::oexFALSE;
 
 			return oex::oexFALSE;
 		}
@@ -188,9 +187,16 @@ public:
 				else
 					for ( typename t_LstSessionInfo::iterator it; uSize-- && m_pSessionInfo->Next( it ); )
 						if ( it->IsValid() )
-						{	if ( it->Update( uWait ) )
+						{
+							oexRESULT r = it->Update( uWait );
+
+							if ( 0 > r )
+								it->port.Destroy();
+							else if ( r )
 								bUpdate = oexTRUE;
+
 							uWait = 0;
+
 						} // end if
 						else
 						{
@@ -466,40 +472,45 @@ protected:
 
 	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
 	{
-		// Wait for connect event
-		if ( m_server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, 100 ) )
+		// Wait for stop event
+		while ( GetStopEvent().Wait( 0 ) )
 		{
-			if ( m_bMultiThreaded )
-				MultiAccept();
+			// Wait for connect event
+			if ( m_server.WaitEvent( oex::os::CIpSocket::eAcceptEvent, 100 ) )
+			{
+				if ( m_bMultiThreaded )
+					MultiAccept();
+				else
+					SingleAccept();
+
+			} // end if
+
+			// Did we lose the connection?
+			else if ( m_server.IsError() )
+			{
+				// Drop old socket
+				m_server.Destroy();
+
+				// Wait a bit
+				oexSleep( 3000 );
+
+				// Restart the server
+				ThreadStartServer();
+
+			} // end else
+
+			// Clean up expired connections
+			CleanupConnections();
+
+			// Is it time to cleanup sessions?
+			if ( m_uCleanup )
+				m_uCleanup--;
 			else
-				SingleAccept();
+				CleanupSessions();
 
-		} // end if
+		} // end while
 
-		// Did we lose the connection?
-		else if ( m_server.IsError() )
-		{
-			// Drop old socket
-			m_server.Destroy();
-
-			// Wait a bit
-			oexSleep( 3000 );
-
-			// Restart the server
-			ThreadStartServer();
-
-		} // end else
-
-		// Clean up expired connections
-		CleanupConnections();
-
-		// Is it time to cleanup sessions?
-		if ( m_uCleanup )
-			m_uCleanup--;
-		else
-			CleanupSessions();
-
-		return oexTRUE;
+		return oexFALSE;
 	}
 
 	oexBOOL CleanupConnections()

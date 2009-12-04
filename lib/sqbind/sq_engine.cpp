@@ -303,7 +303,28 @@ int CSqEngineExport::spawn( int nRet, const stdString &sPath, const stdString &s
 }
 
 double CSqEngineExport::get_cpu_load()
-{	return oexGetCpuLoad();
+{	return oexGetCpuLoad(); }
+
+double CSqEngineExport::boot_time()
+{
+	oexSHOW( oex::os::CHqTimer::GetTimerSeconds() );
+	return oex::os::CHqTimer::GetTimerSeconds();
+}
+
+unsigned int CSqEngineExport::get_timer_seconds()
+{
+	oex::oexINT64 nVal = 0;
+	if ( !oex::os::CHqTimer::osGetCounts( &nVal, oexNULL ) )
+		return 0;
+	return (unsigned int)nVal;
+}
+
+unsigned int CSqEngineExport::get_timer_useconds()
+{
+	oex::oexINT64 nVal = 0;
+	if ( !oex::os::CHqTimer::osGetCounts( oexNULL, &nVal ) )
+		return 0;
+	return (unsigned int)nVal;
 }
 
 int CSqEngineExport::run( const stdString &sPath, const stdString &sScript )
@@ -669,6 +690,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_cpu_load )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, boot_time )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, error )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, warning )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, notice )
@@ -697,6 +719,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, unique )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, local_time )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, gmt_time )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_timer_seconds )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_timer_useconds )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, local_timestr )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, gmt_timestr )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tolong )

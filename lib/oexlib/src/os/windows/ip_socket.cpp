@@ -247,15 +247,47 @@ void CIpSocket::Destroy()
 	// Ensure valid socket handle
 	if ( INVALID_SOCKET == hSocket )
 		return;
+/*
+	if ( IsInitialized() )
+	{
+		// Turn off non-blocking
+//		int flags = fcntl( oexPtrToInt( hSocket ), F_GETFL, 0 );
+//		fcntl( oexPtrToInt( m_hSocket ), F_SETFL, flags & ~O_NONBLOCK );
+
+		struct linger lopt;
+		lopt.l_onoff = 0;
+		lopt.l_linger = 60;
+
+		if ( -1 == setsockopt( oexPtrToInt( hSocket ), SOL_SOCKET, SO_LINGER, &lopt, sizeof( lopt ) ) )
+		{	m_uLastError = errno;
+			oexERROR( errno, oexT( "setsockopt() failed" ) );
+		} // end if
+
+		// Shutdown the socket
+		if ( -1 == shutdown( oexPtrToInt( hSocket ), SHUT_RDWR ) )
+		{	m_uLastError = errno;
+			if ( ENOTCONN != errno )
+				oexERROR( errno, oexT( "shutdown() failed" ) );
+		} // end if
+
+		// Close the socket
+		if ( -1 == closesocket( hSocket ) )
+		{	m_uLastError = errno;
+			oexERROR( errno, oexT( "close() failed" ) );
+		} // end if
+
+	} // end if
+*/
 
 	// Shutdown the socket
-    shutdown( (SOCKET)m_hSocket, SD_BOTH );
+    shutdown( hSocket, SD_BOTH );
 
 	// Close the socket
 	closesocket( hSocket );
 
 	// Save the last error code
 	m_uLastError = WSAGetLastError();
+
 }
 
 oexBOOL CIpSocket::Shutdown()
@@ -310,7 +342,7 @@ oexBOOL CIpSocket::Bind( oexUINT x_uPort )
 
 	// Create socket if there is none
 	if ( !IsSocket() && !Create() )
-	{	Destroy(); 
+	{	Destroy();
 		m_uConnectState |= eCsError;
         return oexFALSE;
 	} // end if
@@ -386,8 +418,8 @@ oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
 	// Create socket if there is none
 	if ( !IsSocket() && !Create() )
 	{	m_uConnectState |= eCsError;
-		Destroy(); 
-		return oexFALSE; 
+		Destroy();
+		return oexFALSE;
 	} // end if
 
 	// Save the address
@@ -915,7 +947,7 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 		return 0;
 
 	} // end if
-	
+
 	// Save the number of bytes read
 	if ( x_puRead )
         *x_puRead = nRet;

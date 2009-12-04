@@ -25,6 +25,8 @@ int show_use( int nRet, oexCSTR pErr, int bShowUse = 0 )
 						 " -d:<string> = data to send" oexNL8
 						 " -e = Extended information" oexNL8
 						 " -r = Read until socket closes" oexNL8
+						 " -c = Strictly limit number of connections to -a:" oexNL8
+						 " -l = Log socket errors" oexNL8
 						 oexNL8
 						 "Example: iptest google.com -u:/index.html" oexNL8
 						 "Example: iptest 127.0.0.1 -p:8080 -a:100 -s:2 -u:/big_image.jpg" oexNL8
@@ -34,7 +36,7 @@ int show_use( int nRet, oexCSTR pErr, int bShowUse = 0 )
 						 "  ! = Socket error" oexNL8
 						 "  x = Port closed without reading data" oexNL8
 						 "  < = Read error" oexNL8
-						 "  > = Write error" oexNL8 
+						 "  > = Write error" oexNL8
 						 oexNL8
 						 "--- Following apply to the -e option ---"	oexNL8
 						 "  * = Data block read, continuing to wait for data" oexNL8
@@ -45,6 +47,7 @@ int show_use( int nRet, oexCSTR pErr, int bShowUse = 0 )
 						 " (r = Reading" oexNL8
 						 " (! = Socket error" oexNL8
 						 "  ) = Operation completed" oexNL8
+						 "  ~ = Closing lingering socket, if -c is not specified" oexNL8
 						 oexNL8
 						 ) );
 	else
@@ -53,16 +56,17 @@ int show_use( int nRet, oexCSTR pErr, int bShowUse = 0 )
 }
 
 static oexDOUBLE g_dStartTime = os::CHqTimer::GetTimerSeconds();
-static oexUINT g_uCounts = 0, g_uOk = 0, g_uBad = 0, g_uLastShow = 0;
+static oexUINT g_uCounts = 0, g_uOk = 0, g_uBad = 0;
+static oexLONG g_lLastShow = 0;
 static oexUINT g_uCountsTotal = 0, g_uOkTotal = 0, g_uBadTotal = 0;
 
-void show_position( oexBOOL bEnd, oexULONG &uShow, oexLONG lBlockSize )
+void show_position( oexBOOL bEnd, oexLONG &lShow, oexLONG lBlockSize )
 {
 	// Time to show?
-	if ( !bEnd && ( uShow == g_uLastShow || ( uShow % lBlockSize ) ) )
+	if ( !bEnd && ( lShow == g_lLastShow || ( lShow % lBlockSize ) ) )
 		return;
 
-	g_uLastShow = uShow;
+	g_lLastShow = lShow;
 
 	// Do we have enough to show statistics?
 	if ( 10 <= g_uCounts && ( g_uOk || g_uBad ) )
@@ -82,15 +86,15 @@ void show_position( oexBOOL bEnd, oexULONG &uShow, oexLONG lBlockSize )
 	if ( !bEnd )
 
 		// Show new line
-		oexPrintf( oexFmt( oexT( oexNL8 NUM_TEMPLATE ), uShow ).Ptr() );
+		oexPrintf( oexFmt( oexT( oexNL8 NUM_TEMPLATE ), lShow ).Ptr() );
 
 	else
-	{	
+	{
 		oexDOUBLE dSecs = os::CHqTimer::GetTimerSeconds() - g_dStartTime;
 		if ( 0 == dSecs ) dSecs = 1;
 
 		// Show summary
-		oexEcho( oexMks( oexT( oexNL8 
+		oexEcho( oexMks( oexT( oexNL8
 							   "================================================" oexNL8 ),
 						 oexT( "Total   : " ), g_uCountsTotal, oexNL,
 						 oexT( "Success : " ), g_uOkTotal, oexNL,
@@ -108,7 +112,7 @@ void show_position( oexBOOL bEnd, oexULONG &uShow, oexLONG lBlockSize )
 
 }
 
-void show_progress( oexCSTR pShow, oexULONG &uShow )
+void show_progress( oexCSTR pShow, oexLONG &lShow )
 {
 	if ( !pShow )
 		return;
@@ -122,7 +126,7 @@ void show_progress( oexCSTR pShow, oexULONG &uShow )
 
 	os::CSys::Flush_stdout();
 
-	uShow++;
+	lShow++;
 	g_uCounts++;
 }
 
@@ -141,6 +145,8 @@ int iptest(int argc, char* argv[])
 	oexLONG lSockets	= pbCmdLine.IsKey( oexT( "s" ) ) ? pbCmdLine[ oexT( "s" ) ].ToLong() : 10;
 	oexLONG lDbg		= pbCmdLine.IsKey( oexT( "e" ) ) ? 1 : 0;
 	oexLONG lReadAll	= pbCmdLine.IsKey( oexT( "r" ) ) ? 1 : 0;
+	oexLONG lLog		= pbCmdLine.IsKey( oexT( "l" ) ) ? 1 : 0;
+	oexLONG lLimit		= pbCmdLine.IsKey( oexT( "c" ) ) ? 1 : 0;
 	oexLONG lBlockSize	= pbCmdLine.IsKey( oexT( "b" ) ) ? pbCmdLine[ oexT( "b" ) ].ToLong() : ( lDbg ? DBGBLOCKSIZE : BLOCKSIZE );
 	CStr8 sUrl			= pbCmdLine.IsKey( oexT( "u" ) ) ? pbCmdLine[ oexT( "u" ) ].ToString() : oexT( "/" );
 	CStr8 sData			= pbCmdLine.IsKey( oexT( "d" ) ) ? pbCmdLine[ oexT( "d" ) ].ToString() : oexT( "" );
@@ -176,8 +182,9 @@ int iptest(int argc, char* argv[])
 
 	oexPrintf( oexFmt( oexT( oexNL8 NUM_TEMPLATE ) , 0 ).Ptr() );
 
-	oexULONG uShow = 0, uConnected = 0;
-	while( 0 < lAttempts || uConnected )
+	oexLONG lShow = 0, lConnects = 0;
+	oexUINT uConnected = 0;
+	while( lShow < lAttempts )
 	{
 		// Reset connected count
 		uConnected = 0;
@@ -190,7 +197,7 @@ int iptest(int argc, char* argv[])
 			{
 				DBG_PRINT( "(" );
 
-				show_progress( oexT( "!" ), uShow );
+				show_progress( oexT( "!" ), lShow );
 
 				DBG_PRINT( oexFmt( oexT( " writes= flags=%x to=%f " ),
 								   mSockets[ i ].getNumWrites(),
@@ -199,7 +206,9 @@ int iptest(int argc, char* argv[])
 								 ).Ptr() );
 
 				if ( mSockets[ i ].GetLastError() )
+				{	if ( lLog ) oexERROR( mSockets[ i ].GetLastError(), mSockets[ i ].GetLastErrorMsg() );
 					DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
+				} // end if
 
 				mSockets[ i ].Destroy();
 
@@ -208,18 +217,19 @@ int iptest(int argc, char* argv[])
 			} // end if
 
 			// Connect if it's not doing anything
-			if ( 0 < lAttempts && !mSockets[ i ].IsConnected() && !mSockets[ i ].IsConnecting() )
+			if ( ( lConnects < lAttempts || ( !lLimit && lShow < lAttempts ) ) && !mSockets[ i ].IsSocket() )
 			{
-				lAttempts--;
-
 				DBG_PRINT( "(c" );
 
+				lConnects++;
 				if ( !mSockets[ i ].Connect( addr ) )
 				{
-					show_progress( oexT( "x" ), uShow );
+					show_progress( oexT( "x" ), lShow );
 
 					if ( mSockets[ i ].GetLastError() )
+					{	if ( lLog ) oexERROR( mSockets[ i ].GetLastError(), mSockets[ i ].GetLastErrorMsg() );
 						DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
+					} // end if
 
 					mSockets[ i ].Destroy();
 
@@ -240,12 +250,14 @@ int iptest(int argc, char* argv[])
 					if ( !mSockets[ i ].Write( sData ) )
 					{
 						if ( !lDbg )
-							show_progress( oexT( ">" ), uShow );
+							show_progress( oexT( ">" ), lShow );
 						else
-							show_progress( oexT( ":" ), uShow );
+							show_progress( oexT( ":" ), lShow );
 
 						if ( mSockets[ i ].GetLastError() )
+						{	if ( lLog ) oexERROR( mSockets[ i ].GetLastError(), mSockets[ i ].GetLastErrorMsg() );
 							DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
+						} // end if
 
 						mSockets[ i ].Destroy();
 
@@ -263,13 +275,15 @@ int iptest(int argc, char* argv[])
 					if ( !lReadAll )
 					{
 						if ( mSockets[ i ].Read().Length() )
-							show_progress( oexT( "." ), uShow );
+							show_progress( oexT( "." ), lShow );
 						else
 						{
-							show_progress( oexT( "<" ), uShow );
+							show_progress( oexT( "<" ), lShow );
 
 							if ( mSockets[ i ].GetLastError() )
+							{	if ( lLog ) oexERROR( mSockets[ i ].GetLastError(), mSockets[ i ].GetLastErrorMsg() );
 								DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
+							} // end if
 
 						} // end else
 
@@ -290,14 +304,17 @@ int iptest(int argc, char* argv[])
 							if ( mSockets[ i ].GetLastError() )
 							{
 								if ( !lDbg )
-									show_progress( oexT( "<" ), uShow );
+									show_progress( oexT( "<" ), lShow );
 								else
-									show_progress( oexT( ":" ), uShow );
+									show_progress( oexT( ":" ), lShow );
+
+								if ( lLog ) oexERROR( mSockets[ i ].GetLastError(), mSockets[ i ].GetLastErrorMsg() );
 								DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
+
 							} // end if
 
 							else
-								show_progress( oexT( "." ), uShow );
+								show_progress( oexT( "." ), lShow );
 
 							// Close the socket
 							mSockets[ i ].Destroy();
@@ -315,11 +332,11 @@ int iptest(int argc, char* argv[])
 				{
 					// Did we read anything
 					if ( lReadAll && mSockets[ i ].getNumReads() )
-						show_progress( oexT( "." ), uShow );
+						show_progress( oexT( "." ), lShow );
 
 					// No data
 					else
-						show_progress( oexT( "x" ), uShow );	
+						show_progress( oexT( "x" ), lShow );
 
 					// Close the socket
 					mSockets[ i ].Destroy();
@@ -337,7 +354,7 @@ int iptest(int argc, char* argv[])
 				uConnected++;
 
 			// Show our position
-			show_position( 0, uShow, lBlockSize );
+			show_position( 0, lShow, lBlockSize );
 
 		} // end for
 
@@ -348,7 +365,19 @@ int iptest(int argc, char* argv[])
 	} // end for
 
 	// Show totals
-	show_position( 1, uShow, lBlockSize );
+	show_position( 1, lShow, lBlockSize );
+
+	if ( lDbg )
+	{
+		// Show the closing of lingering sockets
+		for ( oexULONG i = 0; i < mSockets.Size(); i++ )
+			if ( mSockets[ i ].IsSocket() )
+				oexPrintf( oexT( "~" ) ), os::CSys::Flush_stdout(),
+				mSockets[ i ].Destroy();
+
+		oexEcho( oexNL oexNL );
+
+	} // end if
 
 	return 0;
 }

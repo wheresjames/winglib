@@ -81,6 +81,9 @@ public:
 	/// Returns the timer value
 	static oexINT64 osGetTimerValue();
 
+	/// Get timer counts from the system clock
+	static oexBOOL osGetCounts( oexINT64 *pSeconds, oexINT64 *pUSeconds );
+
 	/// Destructor
 	virtual ~CHqTimer() {}
 
@@ -102,12 +105,7 @@ public:
 	// GetTimer()
 	//==============================================================
 	/// Return the current timer value
-	static oexDOUBLE GetTimerSeconds()
-	{	oexINT64 freq = osGetTimerFreq();
-		if ( !freq ) return 0;
-		oexINT64 val = osGetTimerValue();
-		return oexDOUBLE( val ) / oexDOUBLE( freq );
-	}
+	static oexDOUBLE GetTimerSeconds();
 
 	//==============================================================
 	// IsReset()

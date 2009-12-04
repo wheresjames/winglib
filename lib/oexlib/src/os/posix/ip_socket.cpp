@@ -248,6 +248,7 @@ CIpSocket::CIpSocket()
 	m_uWrites = 0;
 	m_uAccepts = 0;
 
+	m_bEventsHooked = oexFALSE;
 }
 
 CIpSocket::~CIpSocket()
@@ -336,7 +337,7 @@ void CIpSocket::Destroy()
 //		fcntl( oexPtrToInt( m_hSocket ), F_SETFL, flags & ~O_NONBLOCK );
 
 		struct linger lopt;
-		lopt.l_onoff = 1;
+		lopt.l_onoff = 0;
 		lopt.l_linger = 60;
 
 		if ( -1 == setsockopt( oexPtrToInt( hSocket ), SOL_SOCKET, SO_LINGER, &lopt, sizeof( lopt ) ) )
@@ -491,8 +492,8 @@ oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
 	// Create socket if there is none
 	if ( !IsSocket() && !Create() )
 	{	m_uConnectState |= eCsError;
-		Destroy(); 
-		return oexFALSE; 
+		Destroy();
+		return oexFALSE;
 	} // end if
 
 	// Save the address
@@ -573,7 +574,7 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 	// Accept and encapsulate the socket
 	oexBOOL bSuccess = x_is.Attach( (t_SOCKET)accept( oexPtrToInt( m_hSocket ), &saAddr, &iAddr ) );
 
-	if ( !bSuccess )
+	if ( !bSuccess && EAGAIN != errno )
     {	m_uLastError = errno;
 		oexERROR( errno, oexT( "accept() failed" ) );
 	} // end if
@@ -636,6 +637,25 @@ void CIpSocket::CloseEventHandle()
 	if ( IsInitialized() )
 		if ( c_InvalidEvent != m_hSocketEvent )
 		{
+			// Unhook events
+			if ( m_bEventsHooked )
+			{
+				m_bEventsHooked = oexFALSE;
+
+				epoll_event ev; oexZero( ev );
+				ev.data.fd = oexPtrToInt( m_hSocket );
+				ev.events = 0;
+
+				// Set the event masks
+				int nRes = epoll_ctl( oexPtrToInt( m_hSocketEvent ), EPOLL_CTL_DEL, oexPtrToInt( m_hSocket ), &ev );
+
+				if ( -1 == nRes )
+				{	m_uLastError = errno;
+					oexERROR( errno, oexT( "epoll_ctl() failed" ) );
+				} // end if
+
+			} // end if
+
 			// Close event handle
 			if ( -1 == close( oexPtrToInt( m_hSocketEvent ) ) )
 			{	m_uLastError = errno;
@@ -655,6 +675,7 @@ void CIpSocket::CloseEventHandle()
 		OexAllocDelete( (epoll_event*)m_pEventObject );
 
 	m_pEventObject = oexNULL;
+	m_bEventsHooked = oexFALSE;
 
 #endif
 }
@@ -685,13 +706,17 @@ oexBOOL CIpSocket::EventSelect( oexLONG x_lEvents )
 	ev.events = EPOLLERR | FlagWinToNix( x_lEvents );
 
 	// Set the event masks
-	int nRes = epoll_ctl( oexPtrToInt( m_hSocketEvent ), EPOLL_CTL_ADD, oexPtrToInt( m_hSocket ), &ev );
+	int nRes = epoll_ctl( oexPtrToInt( m_hSocketEvent ),
+						  m_bEventsHooked ? EPOLL_CTL_MOD : EPOLL_CTL_ADD,
+						  oexPtrToInt( m_hSocket ), &ev );
 
 	if ( -1 == nRes )
     {	m_uLastError = errno;
 		oexERROR( errno, oexT( "epoll_ctl() failed" ) );
 		return oexFALSE;
 	} // end if
+
+	m_bEventsHooked = oexTRUE;
 
 	return oexTRUE;
 #endif

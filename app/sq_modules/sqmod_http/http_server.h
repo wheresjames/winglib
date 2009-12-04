@@ -58,6 +58,9 @@ public:
 	/// Non-zero to enable scripts to linger
 	void EnableScriptLinger( int bEnable );
 
+	/// Returns the number of active client connections
+	int GetNumActiveClients();
+
 private:
 
 	// The server
@@ -81,6 +84,6 @@ private:
 	/// Non-zero if m_sScript holds a file name
 	oex::oexBOOL			m_bFile;
 
-	/// Non-zero if scripts should not be killed after 
+	/// Non-zero if scripts should not be killed after
 	oex::oexBOOL			m_bScriptsLinger;
 };
