@@ -19,17 +19,24 @@ endif
 
 ifdef SQMOD
 	BUILDDIRS := $(BUILDDIRS) lib/sqbind app/sqrl app/sqengine \
-							  app/sq_modules/sqmod_test app/sq_modules/sqmod_cell \
-							  app/sq_modules/sqmod_ffmpeg app/sq_modules/sqmod_gstreamer\
-	                          app/sq_modules/sqmod_http app/sq_modules/sqmod_gdchart \
-	                          app/sq_modules/sqmod_curl app/sq_modules/sqmod_webkit \
-	                          app/sq_modules/sqmod_live555 \
+							  \
+							  sqmod/sqmod_cell \
+	                          sqmod/sqmod_curl \
+							  sqmod/sqmod_ffmpeg \
+	                          sqmod/sqmod_gdchart \
+							  sqmod/sqmod_gstreamer \
+	                          sqmod/sqmod_http \
+	                          sqmod/sqmod_live555 \
+							  sqmod/sqmod_test \
+							  sqmod/sqmod_tinyxml \
+	                          sqmod/sqmod_webkit \
 	                          \
 	                          app/sq_apps/sqa_test \
 	                          \
 	                          sq/auto-build sq/task-list
+	                          
 	ifdef 3D
-		BUILDDIRS := $(BUILDDIRS) app/sq_modules/sqmod_irrlicht \
+		BUILDDIRS := $(BUILDDIRS) sqmod/sqmod_irrlicht \
 								  \
 								  app/sq_apps/sqa_irrtest
 	endif

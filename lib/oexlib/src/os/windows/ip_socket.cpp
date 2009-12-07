@@ -247,7 +247,7 @@ void CIpSocket::Destroy()
 	// Ensure valid socket handle
 	if ( INVALID_SOCKET == hSocket )
 		return;
-/*
+
 	if ( IsInitialized() )
 	{
 		// Turn off non-blocking
@@ -258,27 +258,26 @@ void CIpSocket::Destroy()
 		lopt.l_onoff = 0;
 		lopt.l_linger = 60;
 
-		if ( -1 == setsockopt( oexPtrToInt( hSocket ), SOL_SOCKET, SO_LINGER, &lopt, sizeof( lopt ) ) )
-		{	m_uLastError = errno;
-			oexERROR( errno, oexT( "setsockopt() failed" ) );
+		if ( SOCKET_ERROR == setsockopt( hSocket, SOL_SOCKET, SO_LINGER, (const char*)&lopt, sizeof( lopt ) ) )
+		{	m_uLastError = WSAGetLastError();
+			oexERROR( m_uLastError, oexT( "setsockopt() failed" ) );
 		} // end if
 
 		// Shutdown the socket
-		if ( -1 == shutdown( oexPtrToInt( hSocket ), SHUT_RDWR ) )
-		{	m_uLastError = errno;
-			if ( ENOTCONN != errno )
-				oexERROR( errno, oexT( "shutdown() failed" ) );
+		if ( SOCKET_ERROR == shutdown( hSocket, SD_BOTH ) )
+		{	m_uLastError = WSAGetLastError();
+			oexERROR( m_uLastError, oexT( "shutdown() failed" ) );
 		} // end if
 
 		// Close the socket
-		if ( -1 == closesocket( hSocket ) )
-		{	m_uLastError = errno;
-			oexERROR( errno, oexT( "close() failed" ) );
+		if ( SOCKET_ERROR == closesocket( hSocket ) )
+		{	m_uLastError = WSAGetLastError();
+			oexERROR( m_uLastError, oexT( "close() failed" ) );
 		} // end if
 
 	} // end if
-*/
 
+/*
 	// Shutdown the socket
     shutdown( hSocket, SD_BOTH );
 
@@ -287,7 +286,7 @@ void CIpSocket::Destroy()
 
 	// Save the last error code
 	m_uLastError = WSAGetLastError();
-
+*/
 }
 
 oexBOOL CIpSocket::Shutdown()

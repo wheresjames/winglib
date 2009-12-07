@@ -1115,11 +1115,11 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 	else if ( oex::CFile::Exists( oex::CStr( sFull ).BuildPath( oexT( "sqmod" ) ).BuildPath( sFile ).Ptr() ) )
 		sFull.BuildPath( oexT( "sqmod" ) ).BuildPath( sFile );
 
+	else if ( oex::CFile::Exists( oex::CStr( sFull ).BuildPath( oexT( "_sqmod" ) ).BuildPath( sFile ).Ptr() ) )
+		sFull.BuildPath( oexT( "_sqmod" ) ).BuildPath( sFile );
+
 	else if ( oex::CFile::Exists( oex::CStr( sFull ).BuildPath( oexT( "modules" ) ).BuildPath( sFile ).Ptr() ) )
 		sFull.BuildPath( oexT( "modules" ) ).BuildPath( sFile );
-
-	else if ( oex::CFile::Exists( oex::CStr( sFull ).BuildPath( oexT( "mod" ) ).BuildPath( sFile ).Ptr() ) )
-		sFull.BuildPath( oexT( "mod" ) ).BuildPath( sFile );
 
 	else
 	{	oexERROR( 0, oexMks( oexT( "Module not found " ), sFile ) );

@@ -524,9 +524,9 @@ CSqMulti::t_Obj CSqMulti::_print_r( int nShowVals, t_List &rLst, int nDepth )
 		{
 			// Is default value present?
 			if ( it->second.m_val.str().length() )
-				sRet += oexT( "[ " ),
-				sRet += ( nShowVals ? it->second.m_val.str() : oexT( "..." ) ),
-				sRet += oexT( "] " );
+//				sRet += oexT( "[ " ),
+				sRet += ( nShowVals ? it->second.m_val.str() : oexT( "..." ) );
+//				sRet += oexT( " ]" );
 			sRet += oexNL;
 			if ( nDepth ) sRet += tab( nDepth );
 			sRet += oexT( " [ " );
