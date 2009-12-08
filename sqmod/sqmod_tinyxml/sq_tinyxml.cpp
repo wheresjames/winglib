@@ -40,7 +40,7 @@ static int _Decode( sqbind::CSqMulti *out, TiXmlElement *in, int bIndexed, int n
 		sqbind::stdString sName;
 		if ( pName && *pName )
 			sName = oexMbToStrPtr( pName );
-		
+
 		sqbind::CSqMulti *r = oexNULL;
 		if ( bIndexed )
 		{
@@ -70,7 +70,7 @@ static int _Decode( sqbind::CSqMulti *out, TiXmlElement *in, int bIndexed, int n
 		// First add the attributes
 		TiXmlAttribute *pAttrib = in->FirstAttribute();
 		while ( nMax-- && pAttrib )
-		{	
+		{
 			// Get name and value
 			const char *pAtt = pAttrib->Name();
 			const char *pValue = pAttrib->Value();
@@ -96,11 +96,11 @@ static int _Decode( sqbind::CSqMulti *out, TiXmlElement *in, int bIndexed, int n
 		if ( in->FirstChildElement() )
 			nDecoded += _Decode( r, in->FirstChildElement(), bIndexed, nDepth + 1 );
 
-	} while ( in = in->NextSiblingElement() );
+	} while ( ( in = in->NextSiblingElement() ) );
 
 	return nDecoded;
 }
-				  
+
 int CSqXml::Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int bIndexed )
 {
 	if ( !sData.length() || !pOut )

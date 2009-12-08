@@ -9,7 +9,7 @@
 #include "oexlib.h"
 #include "sqbind.h"
 
-#include "tinyxml/tinyxml.h"
+#include "tinyxml.h"
 
 #include "sq_tinyxml.h"
 
