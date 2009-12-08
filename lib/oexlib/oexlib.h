@@ -499,6 +499,7 @@ namespace os
 {
 #	include "inc/os/trace.h"
 #   include "inc/os/base_file.h"
+#   include "inc/os/serial_port.h"
 #   include "inc/os/ip_address.h"
 #   include "inc/os/ip_socket.h"
 #	include "inc/os/module.h"
