@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 
-// Export Functions
+// CLvRtspClient
 SQBIND_REGISTER_CLASS_BEGIN( CLvRtspClient, CLvRtspClient )
 
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, Destroy )
@@ -16,31 +16,41 @@ SQBIND_REGISTER_CLASS_BEGIN( CLvRtspClient, CLvRtspClient )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getWidth )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getHeight )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getFrameCount )
-	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getVideoCodecName )	
-	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getAudioCodecName )	
-	SQBIND_MEMBER_FUNCTION( CLvRtspClient, isVideo )	
-	SQBIND_MEMBER_FUNCTION( CLvRtspClient, isAudio )		
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getVideoCodecName )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getAudioCodecName )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, isVideo )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, isAudio )
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CLvRtspClient );
 
+// CLvRtspServer
+SQBIND_REGISTER_CLASS_BEGIN( CLvRtspServer, CLvRtspServer )
+
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, Destroy )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, StartServer )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, isThread )
+
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CLvRtspServer );
 
 // Export classes
-static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
+static void SQBIND_Export_live555( sqbind::VM x_vm )
 {
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
 
-
     SQBIND_EXPORT( x_vm, CLvRtspClient );
+    SQBIND_EXPORT( x_vm, CLvRtspServer );
 }
 
 #if defined( SQBIND_STATIC )
 	#include "lv_rtsp_client.cpp"
+	#include "lv_rtsp_server.cpp"
 #else
 
 	static void SQBIND_Export( sqbind::VM x_vm )
-	{	SQBIND_Export_ffmpeg( x_vm ); }
+	{	SQBIND_Export_live555( x_vm ); }
 
 	// Include squirrel module exported symbols
 	#include <sqmod_extern.hpp>
