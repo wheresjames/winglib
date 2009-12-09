@@ -135,9 +135,7 @@
 #define OEX_CRT_LEAK_DETECTION
 
 // Enable zip file support
-//#if defined( OEX_WIN32 ) && !defined( OEX_ARM )
 #define OEX_ENABLE_ZIP
-//#endif
 
 // Enable image support, requires CxImage
 #if !defined( OEX_NOXIMAGE )
@@ -175,6 +173,9 @@
 
 // Define to include full file paths in log entries
 //#define oexFULL_FILENAME_IN_LOG
+
+// Define to have full path in markers
+//#define oexDEBUG_FULLFILENAMES
 
 // Maximum number of data dump lines to show in CAlloc::GetBlockReport()
 #define OEX_MAX_LINES_IN_MEMDUMP	8

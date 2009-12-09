@@ -5,61 +5,96 @@
 #include "GroupsockHelper.hh"
 
 
-CLvRtspServer::CLiveMediaSubsession* CLvRtspServer::CLiveMediaSubsession::createNew( UsageEnvironment& env, Boolean reuseFirstSource )
+// CLiveMediaSubsession::createNew
+CLvRtspServer::CLiveMediaSubsession* CLvRtspServer::CLiveMediaSubsession::createNew( UsageEnvironment& env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer )
 {
-	return new CLvRtspServer::CLiveMediaSubsession( env, reuseFirstSource );
+oexM();
+
+	if ( !pRtspServer )
+		return oexNULL;
+
+	return new CLvRtspServer::CLiveMediaSubsession( env, reuseFirstSource, pRtspServer );
 }
 
+// CLiveMediaSubsession::createNewStreamSource
 FramedSource* CLvRtspServer::CLiveMediaSubsession::createNewStreamSource( unsigned clientSessionId, unsigned& estBitrate )
 {
+oexM();
+
+	if ( !m_pRtspServer )
+		return oexNULL;
+
+	CLvRtspServer::CLiveMediaSource *pSource
+		= CLvRtspServer::CLiveMediaSource::createNew( envir(), m_pRtspServer );
+
 	estBitrate = 500;
 
-oexEcho( oexMks( " === ", __FUNCTION__ ).Ptr() );
-
-	return CLvRtspServer::CLiveMediaSource::createNew( envir() );
+	// Create a framer for the video stream
+//	return MPEG4VideoStreamFramer::createNew( envir(), pSource );
+	return MPEG4VideoStreamDiscreteFramer::createNew( envir(), pSource );
 }
 
-RTPSink* CLvRtspServer::CLiveMediaSubsession::createNewRTPSink( Groupsock* rtpGroupsock,
-															  	unsigned char rtpPayloadTypeIfDynamic,
-															  	FramedSource* inputSource )
+// CLiveMediaSubsession::createNewRTPSink
+RTPSink* CLvRtspServer::CLiveMediaSubsession::createNewRTPSink( Groupsock* rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic, FramedSource* inputSource )
 {
-oexEcho( oexMks( " === ", __FUNCTION__ ).Ptr() );
+oexM();
+	return MPEG4ESVideoRTPSink::createNew( envir(), rtpGroupsock, rtpPayloadTypeIfDynamic, 1000 );
 
-	return MPEG4ESVideoRTPSink::createNew( envir(), rtpGroupsock, rtpPayloadTypeIfDynamic );
 }
 
-CLvRtspServer::CLiveMediaSource*
-	CLvRtspServer::CLiveMediaSource::createNew( UsageEnvironment& env )
+// CLiveMediaSource::createNew()
+CLvRtspServer::CLiveMediaSource* CLvRtspServer::CLiveMediaSource::createNew( UsageEnvironment& env, CLvRtspServer *pRtspServer )
 {
-	return new CLvRtspServer::CLiveMediaSource( env );
+oexM();
+
+	if ( !pRtspServer )
+		return oexNULL;
+
+	return new CLvRtspServer::CLiveMediaSource( env, pRtspServer );
 }
 
-CLvRtspServer::CLiveMediaSource::CLiveMediaSource( UsageEnvironment& env )
-	: FramedSource( env )
-{
-}
-
-CLvRtspServer::CLiveMediaSource::~CLiveMediaSource()
-{
-}
-
+// CLiveMediaSource::doGetNextFrame()
 void CLvRtspServer::CLiveMediaSource::doGetNextFrame()
 {
-oexEcho( oexMks( " === ", __FUNCTION__ ).Ptr() );
+oexM();
 
-	if ( 0 )
+	// Call into the script to get the next frame
+	if ( !m_pRtspServer || 0 > m_pRtspServer->CallDoGetNextFrame( &CLvRtspServer::CLiveMediaSource::_deliverFrame, this ) )
 	{	handleClosure(this);
 		return;
 	} // end if
 }
 
-void CLvRtspServer::CLiveMediaSource::deliverFrame()
+void CLvRtspServer::CLiveMediaSource::_deliverFrame( oex::oexPVOID pUserData, sqbind::CSqBinary *pFrame )
 {
-oexEcho( oexMks( " === ", __FUNCTION__ ).Ptr() );
+	CLvRtspServer::CLiveMediaSource *p = (CLvRtspServer::CLiveMediaSource*)pUserData;
+	if ( p )
+		p->deliverFrame( pFrame );
+}
+
+// CLiveMediaSource::deliverFrame()
+void CLvRtspServer::CLiveMediaSource::deliverFrame( sqbind::CSqBinary *pFrame )
+{
+oexM();
 
 	// Are we waiting for data?
-	if ( !isCurrentlyAwaitingData() )
-		return;
+//	if ( !isCurrentlyAwaitingData() )
+//		return;
+
+	if ( !pFrame )
+	{	fFrameSize = 0;
+		fTo = 0;
+	} // end if
+
+	else
+	{
+		fFrameSize = pFrame->getUsed();
+		if ( fFrameSize > fMaxSize )
+			fFrameSize = fMaxSize;
+
+		fTo = (unsigned char*)pFrame->_Ptr();
+
+	} // end else
 
 	// Deliver the data here:
 
@@ -73,6 +108,9 @@ CLvRtspServer::CLvRtspServer()
 	m_nFrames = 0;
 	m_pEnv = oexNULL;
 	m_pRtspServer = oexNULL;
+	m_pMsgQueue = oexNULL;
+	m_fDeliverFrame = oexNULL;
+	m_pUserData = oexNULL;
 }
 
 void CLvRtspServer::Destroy()
@@ -192,7 +230,7 @@ int CLvRtspServer::ThreadOpen( sqbind::CSqMulti *m )
 	} // end if
 
 	// Add subsession
-    if ( !pSms->addSubsession( CLiveMediaSubsession::createNew( *m_pEnv, True ) ) )
+    if ( !pSms->addSubsession( CLiveMediaSubsession::createNew( *m_pEnv, True, this ) ) )
 	{	oexERROR( 0, oexMks( oexT( "ServerMediaSession::addSubsession() failed : " ), m_pEnv->getResultMsg() ) );
 		ThreadDestroy();
 		return 0;
@@ -205,12 +243,28 @@ int CLvRtspServer::ThreadOpen( sqbind::CSqMulti *m )
 
 	return 1;
 }
+
 void CLvRtspServer::AnnounceStream( RTSPServer* pRtspServer, ServerMediaSession* pSms, char const* pStreamName )
 {
-  char* url = pRtspServer->rtspURL( pSms );
+	char* url = pRtspServer->rtspURL( pSms );
 
-  pRtspServer->envir() 	<< "\n\"" << pStreamName << "\" stream\n"
-  	  					<< "Play this stream using the URL \"" << url << "\"\n";
+	pRtspServer->envir() 	<< "\n\"" << pStreamName << "\" stream\n"
+							<< "Play this stream using the URL \"" << url << "\"\n";
 
-  delete[] url;
+	delete[] url;
 }
+
+int CLvRtspServer::CallDoGetNextFrame( f_deliverFrame fDeliverFrame, oex::oexPVOID pUserData )
+{
+	m_fDeliverFrame = fDeliverFrame;
+	m_pUserData = pUserData;
+
+	if ( !m_pMsgQueue || !m_sDoGetNextFrame.length() )
+		return -1;
+	sqbind::stdString sReply;
+	if ( !m_pMsgQueue->execute( &sReply, oexT( "." ), m_sDoGetNextFrame.c_str() ) )
+		return -2;
+
+	return oexStrToLong( sReply.c_str() );
+}
+

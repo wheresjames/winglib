@@ -30,6 +30,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CLvRtspServer, CLvRtspServer )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, Destroy )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, StartServer )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, isThread )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, setServerCallback )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, setNextFrame )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, deliverFrame )
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CLvRtspServer );

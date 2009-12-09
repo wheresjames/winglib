@@ -4,12 +4,17 @@ class CLvRtspServer : oex::CThread
 {
 public:
 
+	/// Deliver frame function prototype
+	typedef void (*f_deliverFrame)( oex::oexPVOID pUserData, sqbind::CSqBinary *pFrame );
+
+public:
+
 	class CLiveMediaSubsession : public OnDemandServerMediaSubsession
 	{
 	public:
 
 		/// Creates an instance of this class
-		static CLiveMediaSubsession* createNew( UsageEnvironment& env, Boolean reuseFirstSource );
+		static CLiveMediaSubsession* createNew( UsageEnvironment& env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer );
 
 	private:
 
@@ -19,40 +24,65 @@ public:
 		/// Creates a new sink instance
 		virtual RTPSink* createNewRTPSink( Groupsock* rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic, FramedSource* inputSource );
 
+		virtual char const* getAuxSDPLine(RTPSink* rtpSink, FramedSource* inputSource)
+		{
+oexM();
+			return oexNULL;
+		}
+
+
 	protected:
 
 		/// Constructor
-		CLiveMediaSubsession( UsageEnvironment &env, Boolean reuseFirstSource )
-			: OnDemandServerMediaSubsession( env, reuseFirstSource )
-		{}
+		CLiveMediaSubsession( UsageEnvironment &env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer )
+			: OnDemandServerMediaSubsession( env, reuseFirstSource ),
+			  m_pRtspServer( pRtspServer )
+		{
+		}
 
 		/// Destructor
-		virtual ~CLiveMediaSubsession() {}
+		virtual ~CLiveMediaSubsession()
+		{
+			m_pRtspServer = oexNULL;
+		}
+
+
+	private:
+
+		/// Pointer to the video server
+		CLvRtspServer 				*m_pRtspServer;
 	};
 
 	class CLiveMediaSource: public FramedSource
 	{
 	public:
-		static CLiveMediaSource* createNew( UsageEnvironment& env );
+		static CLiveMediaSource* createNew( UsageEnvironment& env, CLvRtspServer *pRtspServer );
 
 	protected:
 
-		CLiveMediaSource( UsageEnvironment& env );
+		CLiveMediaSource( UsageEnvironment& env, CLvRtspServer *pRtspServer )
+			: FramedSource( env ), m_pRtspServer( pRtspServer )
+		{
+		}
 
-		virtual ~CLiveMediaSource();
+
+		virtual ~CLiveMediaSource()
+		{
+			m_pRtspServer = oexNULL;
+		}
 
 	private:
 
 		virtual void doGetNextFrame();
 
-		void deliverFrame();
+		static void _deliverFrame( oex::oexPVOID pUserData, sqbind::CSqBinary *pFrame );
 
-	};
+		void deliverFrame( sqbind::CSqBinary *pFrame );
 
-	class CLiveMediaSink: public VideoRTPSink
-	{
-		public:
+	private:
 
+		/// Pointer to the video server
+		CLvRtspServer 				*m_pRtspServer;
 	};
 
 
@@ -100,7 +130,44 @@ protected:
 	/// Announces stream
 	static void AnnounceStream( RTSPServer* pRtspServer, ServerMediaSession* pSms, char const* pStreamName );
 
+public:
+
+	/// Sets the callback function for initiating more data
+	void setServerCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &x_sDoGetNextFrame )
+	{	m_pMsgQueue = x_pMsgQueue; m_sDoGetNextFrame = x_sDoGetNextFrame; }
+
+	/// Sets the next frame that will be sent
+	void setNextFrame( sqbind::CSqBinary *bin, sqbind::CSqBinary *pFrame )
+	{
+		if ( bin )
+			m_binFrame = *bin;
+	}
+
+	/// Call deliver frame function
+	void deliverFrame( sqbind::CSqBinary *pFrame )
+	{	if ( m_fDeliverFrame )
+			m_fDeliverFrame( m_pUserData, pFrame );
+	}
+
+	/// Calls into script to get the next frame
+	int CallDoGetNextFrame( f_deliverFrame pDeliverFrame, oex::oexPVOID pUserData );
+
 private:
+
+	/// Session callback queue
+	sqbind::CSqMsgQueue		*m_pMsgQueue;
+
+	/// Server callback function
+	sqbind::stdString		m_sDoGetNextFrame;
+
+	/// Next frame to be sent
+	sqbind::CSqBinary		m_binFrame;
+
+	/// Deliver frame callback function
+	f_deliverFrame			m_fDeliverFrame;
+
+	/// User data passed to m_fDeliverFrame
+	oex::oexPVOID			m_pUserData;
 
 	/// Usage environment
 	UsageEnvironment		*m_pEnv;
