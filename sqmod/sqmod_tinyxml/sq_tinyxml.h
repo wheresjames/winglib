@@ -98,7 +98,9 @@ public:
 	void Destroy();
 
 	/// Encodes XML data
-	static sqbind::stdString Encode( sqbind::CSqMulti *pData, int bIndexed );
+	static sqbind::stdString Encode( sqbind::CSqMulti *pData, 
+									 const sqbind::stdString &sLineBreak, 
+									 const sqbind::stdString &sTab, int bIndexed );
 
 	/// Decodes XML data
 	static int Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int bIndexed );

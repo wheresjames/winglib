@@ -116,7 +116,7 @@ int CSqXml::Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int 
 #else
 		if ( !xmlDoc.Parse( oexStrToMb( CStr( sData.c_str(), sData.length() ) ).Ptr() ) )
 #endif
-			return 0;
+			; // return 0;
 
 		// Decode into array
 		return _Decode( pOut, xmlDoc.FirstChildElement(), bIndexed );
@@ -187,7 +187,9 @@ static int _Encode( TiXmlNode *pNode, sqbind::CSqMulti *pData, int bIndexed, int
 	return 1;
 }
 
-sqbind::stdString CSqXml::Encode( sqbind::CSqMulti *pData, int bIndexed )
+sqbind::stdString CSqXml::Encode( sqbind::CSqMulti *pData, 
+								  const sqbind::stdString &sLineBreak, 
+								  const sqbind::stdString &sTab, int bIndexed )
 {
 	if ( !pData )
 		return oexT( "" );
@@ -201,7 +203,8 @@ sqbind::stdString CSqXml::Encode( sqbind::CSqMulti *pData, int bIndexed )
 
 	// Setup a printer
 	TiXmlPrinter printer;
-	printer.SetIndent( "  " );
+	printer.SetIndent( sTab.c_str() );
+	printer.SetLineBreak( sLineBreak.c_str() );
 	xmlDoc.Accept( &printer );
 
 	// Return the encoded xml

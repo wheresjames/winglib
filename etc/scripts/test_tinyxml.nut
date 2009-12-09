@@ -41,9 +41,9 @@ function _init()
 
 	_self.echo( "\r\n========= Encode XML ==========\r\n" );
 
-	_self.echo( "\r\n === Keyed\r\n\r\n" + xml.Encode( keyed, 0 ) );
+	_self.echo( "\r\n === Keyed\r\n\r\n" + xml.Encode( keyed, "\r\n", "  ", 0 ) );
 
-	_self.echo( "\r\n === Indexed\r\n\r\n" + xml.Encode( indexed, 1 ) );
+	_self.echo( "\r\n === Indexed\r\n\r\n" + xml.Encode( indexed, "\r\n", "  ", 1 ) );
 
 	_self.echo( "\r\n === Data check \r\n" );
 

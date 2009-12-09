@@ -49,7 +49,7 @@ public:
 
 	};
 
-	class CLiveMediaSource: public VideoRTPSink
+	class CLiveMediaSink: public VideoRTPSink
 	{
 		public:
 
