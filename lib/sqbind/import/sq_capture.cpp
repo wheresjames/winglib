@@ -42,6 +42,8 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqCapture, CSqCapture )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, Capture )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, GetSupportedFormats )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, GetFormatDescription )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, getWidth )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, getHeight )
 SQBIND_REGISTER_CLASS_END()
 
 void CSqCapture::Register( sqbind::VM vm )
@@ -128,11 +130,36 @@ stdString CSqCapture::GetFormatDescription( const stdString &sFormat )
 }
 
 
-stdString CSqCapture::Capture( const stdString &sEncode )
+int CSqCapture::Capture( sqbind::CSqBinary *pBuf, int nMaxWait )
 {
-	if ( !m_cap.WaitForFrame( 3000 ) )
-		return stdString();
+	if ( !pBuf )
+		return -1;
 
+	// No data yet
+	pBuf->setUsed( 0 );
+
+	// Wait for a frame
+	if ( !m_cap.WaitForFrame( nMaxWait ) )
+		return -1;
+
+	// Did we get valid info?
+	if ( m_cap.GetBuffer() && m_cap.GetBufferSize() )
+
+		// Ensure we have space, really just an optimization to allocate
+		// twice the needed space since MemCpy() does this anyway.
+		if ( (oexSIZE_T)pBuf->Size() >= (oexSIZE_T)m_cap.GetBufferSize()
+			 || pBuf->Allocate( m_cap.GetBufferSize() * 2 ) )
+
+			// Copy the buffer
+			pBuf->MemCpy( (CSqBinary::t_byte*)m_cap.GetBuffer(), (CSqBinary::t_size)m_cap.GetBufferSize() );
+
+
+	// Release the memory
+	m_cap.ReleaseFrame();
+
+	return pBuf->getUsed();
+
+/*
 	// Convert to multi-byte
 	oex::CStr8 fmt = oexStrToMb( sEncode.c_str() );
 	if ( fmt.Length() < 4 )
@@ -230,31 +257,5 @@ stdString CSqCapture::Capture( const stdString &sEncode )
 	m_cap.ReleaseFrame();
 
 	return ret;
-
-/*
-	oex::CDib img;
-	if ( !oexVERIFY( img.Create( oexNULL, oexNULL, cCapture.GetWidth(), cCapture.GetHeight(), 24, 1 ) ) )
-		return -7;
-
-
-
-
-	// Convert to RGB
-	img.Copy( cCapture.GetBuffer(), cCapture.GetBufferSize() );
-//		img.CopySBGGR8( cCapture.GetBuffer() );
-//		img.CopyGrey( cCapture.GetBuffer() );
-
-	int nImageSize = oex::CImage::GetScanWidth( cCapture.GetWidth(), 24 )
-						* oex::cmn::Abs( cCapture.GetHeight() );
-
-//		oexPrintf( oexT( "Writing image to file : %s\n" ), oexStrToMb( sFile ).Ptr() );
-//		oexPrintf( oexT( "w=%d, h=%d, Buffer Size = %d, Image Size = %d\n" ), cCapture.GetWidth(), cCapture.GetHeight(), cCapture.GetBufferSize(), nImageSize );
-
-	if ( !oexVERIFY( oex::CDib::SaveDibFile( sFile.Ptr(), img.GetImageHeader(), img.GetBuffer(), nImageSize ) ) )
-		return -8;
-
-	if ( !oexVERIFY( cCapture.ReleaseFrame() ) )
-		return -9;
-
 */
 }

@@ -14,6 +14,9 @@ extern "C"
 //const uint64_t ff_pw_20 __attribute__ ((aligned (8))) = 0x0014001400140014ULL;
 //const unsigned long long ff_pw_20 = 0x0014001400140014ULL;
 //DECLARE_ALIGNED_8 (const uint64_t, ff_pw_20 ) = 0x0014001400140014ULL;
+
+int snd_strerror( const char *p )
+{ return 0; }
 }
 
 // Export Functions
@@ -28,8 +31,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfDecoder, CFfDecoder )
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, getHeight )
 
 	SQBIND_STATIC_FUNCTION( CFfDecoder, LookupCodecId )
-	SQBIND_STATIC_FUNCTION( CFfDecoder, LookupCodecName )	
-	
+	SQBIND_STATIC_FUNCTION( CFfDecoder, LookupCodecName )
+
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CFfDecoder );
@@ -127,7 +130,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfAudioDecoder, CFfAudioDecoder )
 	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, Decode )
 
 	SQBIND_STATIC_FUNCTION( CFfAudioDecoder, LookupCodecId )
-	SQBIND_STATIC_FUNCTION( CFfAudioDecoder, LookupCodecName )	
+	SQBIND_STATIC_FUNCTION( CFfAudioDecoder, LookupCodecName )
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CFfAudioDecoder );
@@ -175,6 +178,24 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfTranscode, CFfTranscode )
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CFfTranscode );
 
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CFfCapture, CFfCapture )
+
+	SQBIND_MEMBER_FUNCTION( CFfCapture, Open )
+	SQBIND_MEMBER_FUNCTION( CFfCapture, isOpen )
+	SQBIND_MEMBER_FUNCTION( CFfCapture, ReadFrame )
+
+	SQBIND_MEMBER_FUNCTION( CFfCapture, Destroy )
+	SQBIND_MEMBER_FUNCTION( CFfCapture, getWidth )
+	SQBIND_MEMBER_FUNCTION( CFfCapture, getHeight )
+	SQBIND_MEMBER_FUNCTION( CFfCapture, getVideoFormat )
+	SQBIND_MEMBER_FUNCTION( CFfCapture, getVideoCodecId )
+	SQBIND_MEMBER_FUNCTION( CFfCapture, getFrameCount )
+
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CFfCapture );
+
+
 // Export classes
 static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 {
@@ -192,6 +213,7 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 
 	// Register codecs
 	av_register_all();
+	avdevice_register_all();
 
     SQBIND_EXPORT( x_vm, CFfDecoder );
     SQBIND_EXPORT( x_vm, CFfEncoder );
@@ -199,6 +221,7 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
     SQBIND_EXPORT( x_vm, CFfConvert );
     SQBIND_EXPORT( x_vm, CFfContainer );
     SQBIND_EXPORT( x_vm, CFfTranscode );
+    SQBIND_EXPORT( x_vm, CFfCapture );
 }
 
 #if defined( SQBIND_STATIC )
@@ -208,6 +231,7 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 	#include "ff_convert.cpp"
 	#include "ff_container.cpp"
 	#include "ff_transcode.cpp"
+	#include "ff_captuer.cpp"
 #else
 
 	static void SQBIND_Export( sqbind::VM x_vm )

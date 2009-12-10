@@ -10,6 +10,9 @@ class CGlobal
 
 	vid = CFfContainer();
 
+	tc = CFfTranscode();
+	frame = CSqBinary();
+	tframe = CSqBinary();
 };
 
 local _g = CGlobal();
@@ -27,6 +30,7 @@ function _init() : ( _g )
 function StartServer() : ( _g )
 {
 	local file = _self.path( "../media/nurse_shark.avi" );
+//	local file = "test.avi";
 
 	if ( !_g.vid.Open( file, CSqMulti() ) )
 	{	_self.echo( "failed to open file" );
@@ -35,12 +39,11 @@ function StartServer() : ( _g )
 
 	_self.echo( "Video File : " + _g.vid.getWidth() + "x" + _g.vid.getHeight() );
 
-//	local dec = CFfDecoder();
-//	if ( !dec.Create( vid.getVideoCodecId(), vid.getVideoFormat(),
-//					  vid.getWidth(), vid.getHeight(), 0 ) )
-//	{	_self.echo( "failed to create decoder" );
-//		return;
-//	} // end if
+	if ( !_g.tc.Init( _g.vid.getWidth(), _g.vid.getHeight(),
+				      _g.vid.getVideoCodecId(), CFfDecoder().LookupCodecId( "FMP4" ) ) )
+	{	_self.echo( "failed to create transcoder" );
+		return;
+	} // end if
 
 	_g.l555.setServerCallback( _self.queue(), "doGetNextFrame" );
 
@@ -55,21 +58,29 @@ function StartServer() : ( _g )
 function doGetNextFrame() : ( _g )
 {
 	local stream = -1;
-	local frame = CSqBinary();
 	local frame_info = CSqMulti();
-	while ( 0 <= ( stream = _g.vid.ReadFrame( frame, frame_info ) ) )
+	while ( 0 <= ( stream = _g.vid.ReadFrame( _g.frame, frame_info ) ) )
 	{
 		if ( _g.vid.getVideoStream() == stream )
 		{
-			_self.echo( "delivering frame" );
-//			_g.l555.setNextFrame( frame );
-			_g.l555.deliverFrame( frame );
+//			_self.echo( "input image = " + _g.frame.getUsed() );
+			if ( !_g.tc.Transcode( _g.frame, _g.tframe, frame_info ) )
+			{	_self.echo( "Transcode() failed" );
+				return;
+			} // end if
+
+
+//			_self.echo( "delivering frame - " + _g.tframe.getUsed() );
+			_g.l555.deliverFrame( _g.tframe );
 
 			return;
 
 		} // end if
 
 	} // end while
+
+	// We're done
+	_g.l555.deliverFrame( CSqBinary() );
 
 }
 

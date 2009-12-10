@@ -127,9 +127,6 @@ protected:
 	/// Initializes the threaded environment
 	int ThreadOpen( sqbind::CSqMulti *m );
 
-	/// Announces stream
-	static void AnnounceStream( RTSPServer* pRtspServer, ServerMediaSession* pSms, char const* pStreamName );
-
 public:
 
 	/// Sets the callback function for initiating more data
@@ -145,14 +142,28 @@ public:
 
 	/// Call deliver frame function
 	void deliverFrame( sqbind::CSqBinary *pFrame )
-	{	if ( m_fDeliverFrame )
-			m_fDeliverFrame( m_pUserData, pFrame );
+	{
+		// Get reference to frame data
+		if ( pFrame && pFrame->getUsed() )
+			m_binFrame = *pFrame;
+		else
+			m_binFrame.Free();
+
+		// Do we have a deliver function
+		if ( m_fDeliverFrame )
+			m_fDeliverFrame( m_pUserData, &m_binFrame );
 	}
 
 	/// Calls into script to get the next frame
 	int CallDoGetNextFrame( f_deliverFrame pDeliverFrame, oex::oexPVOID pUserData );
 
+	/// Returns the url that can be used to access the string
+	sqbind::stdString getUrl() { return m_sUrl; }
+
 private:
+
+	/// The url that can be used to access the stream
+	sqbind::stdString		m_sUrl;
 
 	/// Session callback queue
 	sqbind::CSqMsgQueue		*m_pMsgQueue;

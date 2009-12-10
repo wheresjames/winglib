@@ -8,7 +8,7 @@ PRJ_NAME := ffmpeg
 PRJ_TYPE := lib
 PRJ_INCS := ffmpeg
 PRJ_LIBS := 
-PRJ_DEFS := HAVE_AV_CONFIG_H=1
+PRJ_DEFS := HAVE_AV_CONFIG_H=1 FFMPEG_LICENSE=""
 
 PRJ_LIBROOT := ..
 PRJ_OBJROOT := _0_dep
@@ -65,6 +65,13 @@ LOC_EXC_libavformat := avisynth libnut matroskadec mov
 #ifeq ($(PROC),arm)
 #	LOC_EXC_libavformat := $(LOC_EXC_libavformat) ipmovie mpegts sierravmd
 #endif
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := libavdevice
+LOC_CXX_libavdevice := c
+LOC_SRC_libavdevice := $(CFG_LIBROOT)/ffmpeg/libavdevice
+LOC_EXC_libavdevice := alsa-audio-common alsa-audio-dec alsa-audio-enc bktr \
+					   jack_audio libdc1394 vfwcap
 include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := libswscale

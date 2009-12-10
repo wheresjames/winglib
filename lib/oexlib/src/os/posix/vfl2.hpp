@@ -108,7 +108,7 @@ public:
 #ifdef OEX_ARM
 		eMaxBuffers = 1
 #else
-		eMaxBuffers = 2
+		eMaxBuffers = 4
 #endif
 	};
 
@@ -158,7 +158,7 @@ public:
 		} // end if
 
 		// Attempt to open the device
-		m_nFd = open( oexStrToMbPtr( sDevice.Ptr() ), O_RDWR | O_NONBLOCK, 0 );
+		m_nFd = open( oexStrToMbPtr( sDevice.Ptr() ), O_RDWR, 0 );
 		if ( 0 > m_nFd )
 		{	oexERROR( errno, CStr().Fmt( oexT( "Unable to open device : %s" ), oexStrToMbPtr( sDevice.Ptr() ) ) );
 			return oexFALSE;
@@ -475,7 +475,7 @@ public:
 //			if ( !i )
 //				m_nBufferSize = buf.length;
 
-oexSHOW( buf.length );
+//oexSHOW( buf.length );
 
 			// Allocate shared memory
 			m_image[ i ].PlainShare( oexTRUE );
@@ -619,7 +619,7 @@ oexSHOW( buf.length );
 		oexZeroMemory( &buf, sizeof( buf ) );
 		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory = V4L2_MEMORY_MMAP;
-		buf.index = 0;
+		buf.index = m_nActiveBuf;
 
 		errno = 0;
 		if ( -1 == IoCtl( m_nFd, VIDIOC_DQBUF, &buf ) || 0 > buf.index || eMaxBuffers <= buf.index )
@@ -680,6 +680,9 @@ oexSHOW( buf.length );
 		{	oexERROR( errno, CStr().Fmt( oexT( "VIDIOC_QBUF : Failed : m_nFd = %u" ), m_nFd ) );
 			return oexFALSE;
 		} // end if
+
+		if ( eMaxBuffers <= ++m_nActiveBuf )
+			m_nActiveBuf = 0;
 
 		return oexTRUE;
 	}

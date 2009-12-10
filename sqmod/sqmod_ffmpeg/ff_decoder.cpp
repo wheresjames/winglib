@@ -19,7 +19,7 @@
 // av_open_input_file av_find_stream_info av_log_set_callback
 // void av_log_default_callback(void* ptr, int level, const char* fmt, va_list vl)
 
-extern "C" 
+extern "C"
 {
 #	include "libavformat/riff.h"
 };
@@ -195,14 +195,14 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 	int gpp = 0;
 	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, in->_Ptr(), in->getUsed() );
 	if ( 0 >= used )
-	{	oexEcho( "!used" );
+	{	oexSHOW( "!used" );
 		return -1;
 	} // end if
 
 #endif
 
-	if ( used != m_pkt.size )
-		oexEcho( "Unsed data!!!" );
+//	if ( used != m_pkt.size )
+//		oexSHOW( "Unsed data!!!" );
 
 //	int gpp = 0;
 //	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, in->_Ptr(), in->getUsed() );
@@ -262,7 +262,7 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 }
 
 
-static AVCodecTag g_ff_codec_map[] = 
+static AVCodecTag g_ff_codec_map[] =
 {
     { CODEC_ID_MPEG4,			MKTAG('M', 'P', '4', 'V') },
 

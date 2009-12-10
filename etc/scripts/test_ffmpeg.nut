@@ -33,8 +33,8 @@ function _init()
 	run_test( ffmpeg_root, "MSMPEG4V2", img, CFfDecoder().LookupCodecId( "MP42" ), 0,
 			  CFfConvert().PIX_FMT_YUV420P );
 
-//	run_test( ffmpeg_root, "MPEG4", img, CFfDecoder().LookupCodecId( "MPG4" ), 0,
-//			  CFfConvert().PIX_FMT_YUV420P );
+	run_test( ffmpeg_root, "MPEG4", img, CFfDecoder().LookupCodecId( "MP4V" ), 0,
+			  CFfConvert().PIX_FMT_YUV420P );
 
 	run_test( ffmpeg_root, "FLV1", img, CFfDecoder().LookupCodecId( "FLV1" ), 0,
 			  CFfConvert().PIX_FMT_YUV420P );
@@ -43,6 +43,8 @@ function _init()
 	run_test( ffmpeg_root, "H263", img, CFfDecoder().LookupCodecId( "H263" ), 0,
 			  CFfConvert().PIX_FMT_YUV420P );
 
+//	run_test( ffmpeg_root, "H264", img, CFfDecoder().LookupCodecId( "H264" ), 0,
+//			  CFfConvert().PIX_FMT_YUV420P );
 
 	// **************************************************
 	// AVI test
@@ -55,9 +57,8 @@ function _init()
 	// RTSP test
 
 //	test_rtsp( ffmpeg_root, "rtsp://a1352.l1857053128.c18570.g.lq.akamaistream.net/D/1352/18570/v0001/reflector:53128", 30 );
-	test_rtsp( ffmpeg_root, "rtsp://v2.cache1.c.youtube.com/CkgLENy73wIaPwlnoDu0pt7zDRMYDSANFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNaDkNsaWNrVGh1bWJuYWlsYOmkotHXgfvJRgw=/0/0/0/video.3gp", 15 );
-//	test_rtsp( ffmpeg_root, "rtsp://video2.multicasttech.com/AFTVSciFi3GPP296.sdp", 15 );
-//	test_rtsp( ffmpeg_root, "rtsp://192.168.2.130/Mediainput/mpeg4", 30 );
+//	test_rtsp( ffmpeg_root, "rtsp://v2.cache1.c.youtube.com/CkgLENy73wIaPwlnoDu0pt7zDRMYDSANFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNaDkNsaWNrVGh1bWJuYWlsYOmkotHXgfvJRgw=/0/0/0/video.3gp", 15 );
+	test_rtsp( ffmpeg_root, "rtsp://video2.multicasttech.com/AFTVSciFi3GPP296.sdp", 15 );
 
 	_self.echo( "" );
 }

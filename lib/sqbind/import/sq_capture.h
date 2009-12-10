@@ -60,14 +60,20 @@ namespace sqbind
 		/// Initializes the capture device
 		int Init( int nDevice, int nChannel, int nWidth, int nHeight, int nFps, const stdString &sFormat, int nInit );
 
-		/// Returns encoded image
-		stdString Capture( const stdString &sEncode );
+		/// Returns the image data
+		int Capture( sqbind::CSqBinary *pBuf, int nMaxWait );
 
 		/// Returns a string describing the supported formats
 		stdString GetSupportedFormats();
 
 		/// Return the description string for the specified format
 		stdString GetFormatDescription( const stdString &sFormat );
+
+		/// Returns the capture image width
+		int getWidth() { return m_cap.GetWidth(); }
+
+		/// Returns the capture image height
+		int getHeight() { return m_cap.GetHeight(); }
 
 	private:
 

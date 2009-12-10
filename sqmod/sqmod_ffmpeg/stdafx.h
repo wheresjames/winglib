@@ -13,6 +13,7 @@ extern "C"
 {
 	#include "libavcodec/avcodec.h"
 	#include "libavformat/avformat.h"
+	#include "libavdevice/avdevice.h"
 	#include "libswscale/swscale.h"
 };
 
@@ -25,3 +26,4 @@ extern "C"
 #include "ff_convert.h"
 #include "ff_container.h"
 #include "ff_transcode.h"
+#include "ff_capture.h"

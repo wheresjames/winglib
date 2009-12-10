@@ -3393,7 +3393,7 @@ int main(int argc, char* argv[])
 #endif
 
 #if defined( OEX_ENABLE_VIDEO )
-//    Test_CCapture();
+    Test_CCapture();
 #endif
 
 	// Release sockets
