@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 
-extern "C" 
+extern "C"
 {
 #	include "libavformat/riff.h"
 };
@@ -47,7 +47,7 @@ int CFfAudioDecoder::Create( int x_nCodec, int fmt )
 
 	m_pCodec = avcodec_find_decoder( (CodecID)x_nCodec );
 	if ( !m_pCodec )
-	{	oexERROR( 0, oexMks( oexT( "avcodec_find_decoder() failed : " ), 
+	{	oexERROR( 0, oexMks( oexT( "avcodec_find_decoder() failed : " ),
 					 (int)x_nCodec, oexT( " - " ), LookupCodecName( x_nCodec ).c_str() ) );
 		return 0;
 	} // end if
@@ -194,7 +194,7 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *
 	return res ? 1 : 0;
 }
 
-static AVCodecTag g_ff_audio_codec_map[] = 
+static AVCodecTag g_ff_audio_codec_map[] =
 {
     { CODEC_ID_AAC,				MKTAG('A', 'M', 'R', ' ') },
     { CODEC_ID_AMR_NB,			MKTAG('A', 'M', 'R', ' ') },
@@ -206,7 +206,7 @@ static AVCodecTag g_ff_audio_codec_map[] =
 int CFfAudioDecoder::LookupCodecId( const sqbind::stdString &sCodec )
 {
 	char c[ 5 ] = { ' ', ' ', ' ', ' ', 0 };
-	for ( int i = 0; i < 4 && i < sCodec.length(); i++ )
+	for ( unsigned int i = 0; i < 4 && i < sCodec.length(); i++ )
 		c[ i ] = (char)sCodec[ i ];
 
 	// Find a codec with that name

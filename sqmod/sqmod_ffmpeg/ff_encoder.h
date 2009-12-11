@@ -18,7 +18,7 @@ public:
 	void Destroy();
 
 	/// Creates a decoder
-	int Create( int x_nCodec, int fmt, int width, int height, int cmp );
+	int Create( int x_nCodec, int fmt, int width, int height, int fps, int brate, sqbind::CSqMulti *m );
 
 	/// Encode raw buffer
 	int EncodeRaw( int fmt, int width, int height, const void *in, int sz_in, sqbind::CSqBinary *out, sqbind::CSqMulti *m);
@@ -30,7 +30,37 @@ public:
 	int EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, sqbind::CSqMulti *m );
 
 	/// Returns non-zero if valid codec
-	int IsLoaded() { return 0 != m_pCodecContext; }
+	int isValid() { return 0 != m_pCodecContext; }
+
+	/// Returns the width of the decoded video
+	int getWidth()
+	{	if ( !m_pCodecContext )
+			return 0;
+		return m_pCodecContext->width;
+	}
+
+	/// Returns the width of the decoded video
+	int getHeight()
+	{	if ( !m_pCodecContext )
+			return 0;
+		return m_pCodecContext->height;
+	}
+
+	/// Returns the frame rate
+	int getFps()
+	{	if ( !m_pCodecContext )
+			return 0;
+		if ( m_pCodecContext->time_base.num )
+			return m_pCodecContext->time_base.den / m_pCodecContext->time_base.num;
+		return m_pCodecContext->time_base.den;
+	}
+
+	/// Returns the bit rate
+	int getBitRate()
+	{	if ( !m_pCodecContext )
+			return 0;
+		return m_pCodecContext->bit_rate;
+	}
 
 private:
 

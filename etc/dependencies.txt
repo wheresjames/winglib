@@ -29,6 +29,5 @@ SqPlus
 tiff
 tinyxml
 winglib
-wxWidgets
 zlib
 

@@ -41,7 +41,7 @@ void CFfEncoder::Destroy()
 }
 
 // http://lists.mplayerhq.hu/pipermail/libav-user/2009-June/003257.html
-int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
+int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, int brate, sqbind::CSqMulti *m )
 {
 	// Lose previous codec
 	Destroy();
@@ -66,14 +66,14 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
 
     m_pCodecContext->codec_id = (CodecID)x_nCodec;
     m_pCodecContext->codec_type = CODEC_TYPE_VIDEO;
-    m_pCodecContext->bit_rate = 400000;
+    m_pCodecContext->bit_rate = brate;
     m_pCodecContext->width = width;
     m_pCodecContext->height = height;
     m_pCodecContext->gop_size = 12;
-    m_pCodecContext->time_base.den = 30;
+    m_pCodecContext->time_base.den = fps;
     m_pCodecContext->time_base.num = 1;
     m_pCodecContext->me_method = 1;
-    m_pCodecContext->strict_std_compliance = cmp;
+    m_pCodecContext->strict_std_compliance = ( ( m && m->isset( "cmp" ) ) ? (*m)[ "cmp" ].toint() : 0 );
 	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
 //	m_pCodecContext->qmin = m_pCodecContext->qmax = 100;
 

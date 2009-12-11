@@ -58,9 +58,12 @@ function _init() : ( _g )
 			espana		= [ "Espana", 		"rtsp://video3.multicasttech.com/EspanaFree3GPP296.sdp" ],
 
 			utube1		= [ "utube1",		"rtsp://v2.cache1.c.youtube.com/CkgLENy73wIaPwlnoDu0pt7zDRMYDSANFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNaDkNsaWNrVGh1bWJuYWlsYOmkotHXgfvJRgw=/0/0/0/video.3gp" ],
+
+			live555		= [ "live555", 		"rtsp://192.168.2.200:8554/vid1" ]
+
 		};
 
-	StartStream( rtsp_video[ "utube1" ] );
+	StartStream( rtsp_video[ "live555" ] );
 
 }
 
@@ -92,7 +95,7 @@ function UpdateVideo() : ( _g )
 		_self.echo( "Creating video decoder for " + _g.rtsp.getVideoCodecName() );
 		_g.dec = CFfDecoder();
 		if ( !_g.dec.Create( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ), CFfConvert().PIX_FMT_YUV420P,
-							 0, 0, 0 ) )
+							 0, 0, 0, 0, CSqMulti() ) )
 			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getVideoCodecName() );
 
 	} // end if

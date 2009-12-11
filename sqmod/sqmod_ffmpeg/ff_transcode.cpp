@@ -6,21 +6,17 @@ CFfTranscode::CFfTranscode()
 {
 	m_dec_id = 0;
 	m_enc_id = 0;
-	m_width = 0;
-	m_height = 0;
 }
 
 void CFfTranscode::Destroy()
 {
 	m_dec_id = 0;
 	m_enc_id = 0;
-	m_width = 0;
-	m_height = 0;
 	m_enc.Destroy();
 	m_dec.Destroy();
 }
 
-int CFfTranscode::Init( int width, int height, int src_codec, int dst_codec )
+int CFfTranscode::Init( int width, int height, int fps, int brate, int src_codec, int dst_codec )
 {
 	Destroy();
 
@@ -35,26 +31,23 @@ int CFfTranscode::Init( int width, int height, int src_codec, int dst_codec )
 		return 1;
 
 	// Attempt to create a decoder
-	if ( !m_dec.Create( m_dec_id, PIX_FMT_YUV420P, width, height, 0 ) )
+	if ( !m_dec.Create( m_dec_id, PIX_FMT_YUV420P, width, height, fps, brate, 0 ) )
 	{	Destroy();
 		return 0;
 	} // end if
 
 	// Create encoder
-	if ( !m_enc.Create( m_enc_id, PIX_FMT_YUV420P, width, height, 0 ) )
+	if ( !m_enc.Create( m_enc_id, PIX_FMT_YUV420P, width, height, fps, brate, 0 ) )
 	{	Destroy();
 		return 0;
 	} // end if
-
-	m_width = width;
-	m_height = height;
 
 	return 1;
 }
 
 int CFfTranscode::Transcode( sqbind::CSqBinary *src, sqbind::CSqBinary *dst, sqbind::CSqMulti *fi )
 {
-	if ( 0 >= m_width || 0 >= m_height )
+	if ( !isValid() )
 		return 0;
 
 	if ( !src || !dst )
@@ -71,7 +64,7 @@ int CFfTranscode::Transcode( sqbind::CSqBinary *src, sqbind::CSqBinary *dst, sqb
 		return 0;
 
 	// Encode in new format
-	if ( !m_enc.Encode( PIX_FMT_YUV420P, m_width, m_height, &m_tmp, dst, fi ) )
+	if ( !m_enc.Encode( PIX_FMT_YUV420P, m_dec.getWidth(), m_dec.getHeight(), &m_tmp, dst, fi ) )
 		return 0;
 
 	return 1;
@@ -89,10 +82,10 @@ int CFfTranscode::GetRaw( sqbind::CSqBinary *buf )
 
 int CFfTranscode::GetImage( sqbind::CSqImage *img )
 {
-	if ( !img || !m_tmp.getUsed() || 0 >= m_width || 0 >= m_height )
+	if ( !img || !m_tmp.getUsed() || !isValid() )
 		return 0;
 
 	// Convert to image format
-	return CFfConvert::ConvertColorBI( &m_tmp, PIX_FMT_YUV420P, m_width, m_height, img, SWS_FAST_BILINEAR, 1 );
+	return CFfConvert::ConvertColorBI( &m_tmp, PIX_FMT_YUV420P, m_dec.getWidth(), m_dec.getHeight(), img, SWS_FAST_BILINEAR, 1 );
 }
 

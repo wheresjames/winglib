@@ -102,7 +102,7 @@ void CLvRtspServer::CLiveMediaSource::deliverFrame( sqbind::CSqBinary *pFrame )
 	{	fPresentationTime.tv_usec += fDurationInMicroseconds;
 		fPresentationTime.tv_sec += fPresentationTime.tv_usec / 1000000;
 		fPresentationTime.tv_usec %= 1000000;
-	}
+	} // end else
 
 	// Inform the reader that data is now available:
 	envir().taskScheduler().scheduleDelayedTask( 0, (TaskFunc*)FramedSource::afterGetting, this );
@@ -140,13 +140,20 @@ int CLvRtspServer::StartServer( sqbind::CSqMulti *m )
 {
 	Destroy();
 
+	// Save off params
 	if ( m )
 		m_mParams = *m;
 
+	// Start the thread
 	if ( Start() )
 		return 0;
 
-	return !GetInitEvent().Wait( 3000 );
+	// Wait for the thing to init
+	if ( GetInitEvent().Wait( 3000 ) )
+		return 0;
+
+	// Did we get a server?
+	return oexNULL != m_pRtspServer;
 }
 
 oex::oexBOOL CLvRtspServer::InitThread( oex::oexPVOID x_pData )
@@ -263,12 +270,12 @@ int CLvRtspServer::CallDoGetNextFrame( f_deliverFrame fDeliverFrame, oex::oexPVO
 	if ( !m_pMsgQueue || !m_sDoGetNextFrame.length() )
 		return -1;
 /*
+	// +++ Hmmm... I think it should work async, but it stalls
 	if ( !m_pMsgQueue->execute( oexNULL, oexT( "." ), m_sDoGetNextFrame.c_str() ) )
 		return -2;
 
 	return 0;
 */
-
 	sqbind::stdString sReply;
 	if ( !m_pMsgQueue->execute( &sReply, oexT( "." ), m_sDoGetNextFrame.c_str() ) )
 		return -2;

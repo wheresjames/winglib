@@ -57,7 +57,7 @@ void CFfDecoder::Destroy()
 	oexZero( m_pkt );
 }
 
-int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
+int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, int brate, sqbind::CSqMulti *m )
 {
 	// Lose previous codec
 	Destroy();
@@ -84,10 +84,12 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int cmp )
 
     m_pCodecContext->codec_id = (CodecID)x_nCodec;
     m_pCodecContext->codec_type = CODEC_TYPE_VIDEO;
-    m_pCodecContext->bit_rate = 400000;
+    m_pCodecContext->bit_rate = brate;
     m_pCodecContext->width = width;
     m_pCodecContext->height = height;
-//	m_pCodecContext->strict_std_compliance = cmp;
+    m_pCodecContext->time_base.den = fps;
+    m_pCodecContext->time_base.num = 1;
+    m_pCodecContext->strict_std_compliance = ( ( m && m->isset( "cmp" ) ) ? (*m)[ "cmp" ].toint() : 0 );
 	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
 
 	int res = avcodec_open( m_pCodecContext, m_pCodec );
@@ -185,27 +187,13 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 	m_pkt.data = (uint8_t*)in->_Ptr();
 	m_pkt.size = in->getUsed();
 
+	int gpp = 0;
+//	int used =
 #if defined( FFSQ_VIDEO2 )
-
-	int gpp = 0;
-	int used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
-
+		avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
 #else
-
-	int gpp = 0;
-	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, in->_Ptr(), in->getUsed() );
-	if ( 0 >= used )
-	{	oexSHOW( "!used" );
-		return -1;
-	} // end if
-
+		avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (uint8_t*)in->_Ptr(), in->getUsed() );
 #endif
-
-//	if ( used != m_pkt.size )
-//		oexSHOW( "Unsed data!!!" );
-
-//	int gpp = 0;
-//	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, in->_Ptr(), in->getUsed() );
 
 	if ( 0 >= gpp )
 		return 0;
@@ -249,8 +237,16 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 	if ( !m_pFrame )
 		return 0;
 
+	m_pkt.data = (uint8_t*)in->_Ptr();
+	m_pkt.size = in->getUsed();
+
 	int gpp = 0;
-	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (uint8_t*)in->_Ptr(), in->getUsed() );
+//	int used =
+#if defined( FFSQ_VIDEO2 )
+		avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
+#else
+		avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (uint8_t*)in->_Ptr(), in->getUsed() );
+#endif
 
 	if ( 0 >= gpp )
 		return 0;
@@ -273,7 +269,7 @@ static AVCodecTag g_ff_codec_map[] =
 int CFfDecoder::LookupCodecId( const sqbind::stdString &sCodec )
 {
 	char c[ 5 ] = { ' ', ' ', ' ', ' ', 0 };
-	for ( int i = 0; i < 4 && i < sCodec.length(); i++ )
+	for ( oexSIZE_T i = 0; i < 4 && i < sCodec.length(); i++ )
 		c[ i ] = (char)sCodec[ i ];
 
 	// Find a codec with that name

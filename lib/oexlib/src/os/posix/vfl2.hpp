@@ -108,7 +108,7 @@ public:
 #ifdef OEX_ARM
 		eMaxBuffers = 1
 #else
-		eMaxBuffers = 4
+		eMaxBuffers = 8
 #endif
 	};
 
@@ -341,6 +341,8 @@ public:
 		fmt.fmt.pix.width = m_nWidth;
 		fmt.fmt.pix.height = m_nHeight;
 		fmt.fmt.pix.pixelformat = m_uFormat;
+//		fmt.fmt.pix.bytesperline = 0;
+//		fmt.fmt.pix.sizeimage = 0;
 //		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_UYVY;
 //		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
 //		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB24;

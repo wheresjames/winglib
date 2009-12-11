@@ -433,7 +433,7 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	// Fill in codec info
 	pcc->codec_id = (CodecID)codec_id;
 	pcc->codec_type = CODEC_TYPE_VIDEO;
-	pcc->bit_rate = 800000;
+	pcc->bit_rate = 2000000;
 	pcc->width = width;
 	pcc->height = height;
     pcc->time_base.num = 1;

@@ -62,7 +62,7 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 		return 0;
 
 	// How big is the destination image?
-	int nSize = CalcImageSize( dst_fmt, width, height );
+	oexSIZE_T nSize = CalcImageSize( dst_fmt, width, height );
 	if ( !nSize )
 		return 0;
 
@@ -113,7 +113,7 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 		return 0;
 
 	// How big is the destination image?
-	int nSize = CalcImageSize( dst_fmt, width, height );
+	oexSIZE_T nSize = CalcImageSize( dst_fmt, width, height );
 	if ( !nSize )
 		return 0;
 
@@ -314,7 +314,7 @@ int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height
 		return 0;
 
 	// Output size
-	int nSize = CFfConvert::CalcImageSize( dst_fmt, width, height );
+	oexSIZE_T nSize = CFfConvert::CalcImageSize( dst_fmt, width, height );
 	if ( dst->Size() < nSize && !dst->Mem().Mem().OexNew( nSize ).Ptr() )
 		return 0;
 

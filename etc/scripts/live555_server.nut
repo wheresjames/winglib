@@ -4,6 +4,9 @@ _self.load_module( "ffmpeg", "" );
 
 class CGlobal
 {
+	fps = 15;
+	brate = 2000000;
+
 	running = 0;
 
 	l555 = CLvRtspServer();
@@ -22,7 +25,7 @@ function _init() : ( _g )
 	if ( !StartServer() )
 		return 0;
 
-	_self.echo( "RTSP Server running..." );
+	_self.echo( "RTSP Server running : " + _g.l555.getUrl() );
 
 	return 1;
 }
@@ -39,7 +42,7 @@ function StartServer() : ( _g )
 
 	_self.echo( "Video File : " + _g.vid.getWidth() + "x" + _g.vid.getHeight() );
 
-	if ( !_g.tc.Init( _g.vid.getWidth(), _g.vid.getHeight(),
+	if ( !_g.tc.Init( _g.vid.getWidth(), _g.vid.getHeight(), _g.fps, _g.brate,
 				      _g.vid.getVideoCodecId(), CFfDecoder().LookupCodecId( "FMP4" ) ) )
 	{	_self.echo( "failed to create transcoder" );
 		return;
@@ -68,7 +71,6 @@ function doGetNextFrame() : ( _g )
 			{	_self.echo( "Transcode() failed" );
 				return;
 			} // end if
-
 
 //			_self.echo( "delivering frame - " + _g.tframe.getUsed() );
 			_g.l555.deliverFrame( _g.tframe );

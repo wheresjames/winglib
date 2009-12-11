@@ -18,7 +18,7 @@ public:
 	void Destroy();
 
 	/// Initializes the transcoder
-	int Init( int width, int height, int src_codec, int dst_codec );
+	int Init( int width, int height, int fps, int brate, int src_codec, int dst_codec );
 
 	/// Encode binary buffer
 	int Transcode( sqbind::CSqBinary *src, sqbind::CSqBinary *dst, sqbind::CSqMulti *fi );
@@ -35,11 +35,20 @@ public:
 	/// Returns the encoder id
 	int getEncoderCodecId() { return m_enc_id; }
 
+	/// Returns non-zero if valid encoder / decoder
+	int isValid() { return m_dec.isValid() && m_enc.isValid(); }
+
 	/// Returns the image width
-	int getWidth() { return m_width; }
+	int getWidth() { return m_enc.getWidth(); }
 
 	/// Returns the image height
-	int getHeight() { return m_height; }
+	int getHeight() { return m_enc.getWidth(); }
+
+	/// Returns the frame rate
+	int getFps() { return m_enc.getFps(); }
+
+	/// Returns the bit rate
+	int getBitRate() { return m_enc.getBitRate(); }
 
 private:
 
@@ -48,12 +57,6 @@ private:
 
 	/// Encoder codec
 	int					m_enc_id;
-
-	/// Image width
-	int					m_width;
-
-	/// Image height
-	int					m_height;
 
 	/// The video decoder
 	CFfDecoder			m_dec;
