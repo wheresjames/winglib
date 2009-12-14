@@ -86,7 +86,7 @@ public:
 
 		\see
 	*/
-	static t_HFILEMAP Create( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists, oexINT64 x_llOffset = 0 );
+	static t_HFILEMAP Create( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oexFILESIZE_T x_llSize, oexFILESIZE_T *x_pllSize, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists, oexFILESIZE_T x_llOffset = 0 );
 
 	//==============================================================
 	// Create()
@@ -117,7 +117,7 @@ public:
 
 		\see
 	*/
-	static t_HFILEMAP Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, oexCSTR x_pName, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists, oexINT64 x_llOffset = 0 );
+	static t_HFILEMAP Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexFILESIZE_T x_llSize, oexFILESIZE_T *x_pllSize, oexCSTR x_pName, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists, oexFILESIZE_T x_llOffset = 0 );
 
 	//==============================================================
 	// osReleaseFileMapping()
@@ -134,7 +134,7 @@ public:
 
 		\see
 	*/
-	static oexBOOL Release( t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexINT64 x_llSize );
+	static oexBOOL Release( t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexFILESIZE_T x_llSize );
 
 	//==============================================================
 	// vFailed()

@@ -47,6 +47,11 @@ class CFile
 {
 public:
 
+	/// Size type
+	typedef oexFILESIZE_T t_size;
+
+public:
+
 	/// Restores the file position when the class is destroyed
 	class CRestoreFilePos
 	{
@@ -157,7 +162,7 @@ public:
     oexBOOL Destroy();
 
     /// Returns the file size
-    oexINT64 Size() { return os::CBaseFile::Size( m_hFile ); }
+    t_size Size() { return os::CBaseFile::Size( m_hFile ); }
 
 	//==============================================================
 	// Read()
@@ -172,7 +177,7 @@ public:
 
 		\see
 	*/
-    oexBOOL Read( oexPVOID x_pBuf, oexINT64 x_llSize, oexINT64 *x_pllRead = oexNULL )
+    oexBOOL Read( oexPVOID x_pBuf, t_size x_llSize, t_size *x_pllRead = oexNULL )
     {   if ( os::CBaseFile::vInvalid() == m_hFile ) return oexFALSE;
         return os::CBaseFile::Read( m_hFile, x_pBuf, x_llSize, x_pllRead, &m_nLastError );
     }
@@ -188,7 +193,7 @@ public:
 
 		\see
 	*/
-    CStr8 Read( oexINT64 x_llSize = 0 );
+    CStr8 Read( t_size x_llSize = 0 );
 
 	//==============================================================
 	// Write()
@@ -203,7 +208,7 @@ public:
 
 		\see
 	*/
-    oexBOOL Write( oexCPVOID x_pBuf, oexINT64 x_llSize, oexINT64 *x_pllWritten = oexNULL )
+    oexBOOL Write( oexCPVOID x_pBuf, t_size x_llSize, t_size *x_pllWritten = oexNULL )
     {   if ( os::CBaseFile::vInvalid() == m_hFile ) return oexFALSE;
         return os::CBaseFile::Write( m_hFile, x_pBuf, x_llSize, x_pllWritten, &m_nLastError );
     }
@@ -219,7 +224,7 @@ public:
 
 		\see
 	*/
-    oexBOOL Write( oexCONST CStr8 x_sStr, oexINT64 *x_pllWritten = oexNULL )
+    oexBOOL Write( oexCONST CStr8 x_sStr, t_size *x_pllWritten = oexNULL )
     {   return Write( x_sStr.Ptr(), x_sStr.LengthInBytes(), x_pllWritten );
     }
 
@@ -236,7 +241,7 @@ public:
 
 		\see
 	*/
-    oexBOOL Write( oexCONST CStrW x_sStr, oexINT64 *x_pllWritten = oexNULL )
+    oexBOOL Write( oexCONST CStrW x_sStr, t_size *x_pllWritten = oexNULL )
     {   return Write( CStr8().ToMb( x_sStr ), x_pllWritten );
     }
 
@@ -270,7 +275,7 @@ public:
 
 		\see
 	*/
-	oexINT64 GetPtrPos()
+	t_size GetPtrPos()
     {   if ( os::CBaseFile::vInvalid() == m_hFile ) return -1;
         return os::CBaseFile::SetPointer( m_hFile, 0, os::CBaseFile::eFileOffsetCurrent );
     }
@@ -287,7 +292,7 @@ public:
 
 		\see
 	*/
-    oexINT64 SetPtrPos( oexINT64 x_llPos, oexINT x_nMethod )
+    t_size SetPtrPos( t_size x_llPos, oexINT x_nMethod )
     {   if ( os::CBaseFile::vInvalid() == m_hFile ) return -1;
         return os::CBaseFile::SetPointer( m_hFile, x_llPos, x_nMethod );
     }
@@ -303,7 +308,7 @@ public:
 
 		\see
 	*/
-    oexINT64 SetPtrPosBegin( oexINT64 x_llPos )
+    t_size SetPtrPosBegin( t_size x_llPos )
     {   return SetPtrPos( x_llPos, os::CBaseFile::eFileOffsetBegin ); }
 
 	//==============================================================
@@ -317,7 +322,7 @@ public:
 
 		\see
 	*/
-    oexINT64 SetPtrPosEnd( oexINT64 x_llPos )
+    t_size SetPtrPosEnd( t_size x_llPos )
     {   return SetPtrPos( x_llPos, os::CBaseFile::eFileOffsetEnd ); }
 
 	//==============================================================
@@ -331,7 +336,7 @@ public:
 
 		\see
 	*/
-    oexINT64 SetPtrPosCur( oexINT64 x_llPos )
+    t_size SetPtrPosCur( t_size x_llPos )
     {   return SetPtrPos( x_llPos, os::CBaseFile::eFileOffsetCurrent ); }
 
     /// Returns non-zero if the specified file is open
@@ -364,7 +369,7 @@ public:
 				pointer to the start of the string.  If the string is not found
 				the function returns -1 and the file pointer is not changed.
 	*/
-	oexINT64 FindInFile( oexPVOID x_pStr, oexINT64 x_llLen, oexINT64 x_llMax = 0 );
+	t_size FindInFile( oexPVOID x_pStr, t_size x_llLen, t_size x_llMax = 0 );
 
 public:
 

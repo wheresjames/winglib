@@ -152,7 +152,7 @@ oexINT CMemLeak::Add( oexCPVOID p )
 		m_uPeakAllocations = m_uCurrentAllocations;
 
 	// Calculate starting offset
-	t_size uOffset = ( (oexUINT)p >> 4 ) & m_nPoolMask;
+	t_size uOffset = ( oexPtrToInt( p ) >> 4 ) & m_nPoolMask;
 
 	t_size uStart = uOffset;
 	do
@@ -201,7 +201,7 @@ oexINT CMemLeak::Check( oexCPVOID p )
 		return -1;
 
 	// Calculate starting offset
-	t_size uOffset = ( (oexUINT)p >> 4 ) & m_nPoolMask;
+	t_size uOffset = ( oexPtrToInt( p ) >> 4 ) & m_nPoolMask;
 
 	t_size uStart = uOffset;
 	do
@@ -233,7 +233,7 @@ oexINT CMemLeak::Remove( oexCPVOID p )
 #endif
 
 	// Calculate starting offset
-	t_size uOffset = ( (oexUINT)p >> 4 ) & m_nPoolMask;
+	t_size uOffset = ( oexPtrToInt( p ) >> 4 ) & m_nPoolMask;
 
 	t_size uStart = uOffset;
 	do
@@ -290,7 +290,7 @@ CStr CMemLeak::Report( t_size *pLeaks )
 			CAlloc::GetBlockReport( m_pPool[ uOffset ], 0, szMsg, sizeof( szMsg ) );
 
 			// Append to string
-			s << oexFmt( oexT( "0x%x : " ), (oexUINT)m_pPool[ uOffset ] ) << szMsg << oexNL;
+			s << oexFmt( oexT( "0x%x : " ), oexPtrToInt( m_pPool[ uOffset ] ) ) << szMsg << oexNL;
 
 			uLeaks++;
 

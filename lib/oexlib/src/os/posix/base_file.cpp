@@ -168,12 +168,12 @@ oexBOOL CBaseFile::Close( CBaseFile::t_HFILE x_hFile, oexINT *x_pnErr )
     return bRet;
 }
 
-oexBOOL CBaseFile::Write( CBaseFile::t_HFILE x_hFile, oexCPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllWritten, oexINT *x_pnErr )
+oexBOOL CBaseFile::Write( CBaseFile::t_HFILE x_hFile, oexCPVOID x_pData, CBaseFile::t_size x_llSize, CBaseFile::t_size *x_pllWritten, oexINT *x_pnErr )
 {
 	if ( c_Invalid == x_hFile )
 		return oexFALSE;
 
-	oexINT64 llWritten = write( oexPtrToInt( x_hFile ), x_pData, x_llSize );
+	CBaseFile::t_size llWritten = write( oexPtrToInt( x_hFile ), x_pData, x_llSize );
 
     if ( x_pllWritten )
         *x_pllWritten = llWritten;
@@ -190,12 +190,12 @@ oexBOOL CBaseFile::Write( CBaseFile::t_HFILE x_hFile, oexCPVOID x_pData, oexINT6
     return ( x_llSize == llWritten );
 }
 
-oexBOOL CBaseFile::Read( CBaseFile::t_HFILE x_hFile, oexPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllRead, oexINT *x_pnErr )
+oexBOOL CBaseFile::Read( CBaseFile::t_HFILE x_hFile, oexPVOID x_pData, CBaseFile::t_size x_llSize, CBaseFile::t_size *x_pllRead, oexINT *x_pnErr )
 {
 	if ( c_Invalid == x_hFile )
 		return oexFALSE;
 
-	oexINT64 llRead = read( oexPtrToInt( x_hFile ), x_pData, x_llSize );
+	CBaseFile::t_size llRead = read( oexPtrToInt( x_hFile ), x_pData, x_llSize );
 
 	if ( 0 > llRead )
 	{
@@ -208,7 +208,7 @@ oexBOOL CBaseFile::Read( CBaseFile::t_HFILE x_hFile, oexPVOID x_pData, oexINT64 
 	} // end if
 
     else if ( x_pllRead )
-        *x_pllRead = (oexUINT)llRead;
+        *x_pllRead = llRead;
 
     return ( 0 <= llRead );
 }
@@ -222,7 +222,7 @@ oexBOOL CBaseFile::Flush( t_HFILE x_hFile )
 }
 
 
-oexINT64 CBaseFile::Size( t_HFILE x_hFile )
+CBaseFile::t_size CBaseFile::Size( t_HFILE x_hFile )
 {
 	if ( c_Invalid == x_hFile )
 		return 0;
@@ -248,7 +248,7 @@ oexINT64 CBaseFile::Size( t_HFILE x_hFile )
 #endif
 }
 
-oexINT64 CBaseFile::SetPointer( t_HFILE x_hFile, oexINT64 llMove, oexINT nMethod )
+CBaseFile::t_size CBaseFile::SetPointer( t_HFILE x_hFile, CBaseFile::t_size llMove, oexINT nMethod )
 {
 	if ( c_Invalid == x_hFile )
 		return oexFALSE;
@@ -261,7 +261,7 @@ oexINT64 CBaseFile::SetPointer( t_HFILE x_hFile, oexINT64 llMove, oexINT nMethod
     else return -1;
 
     // Set new file position
-	oexINT64 llPos = lseek( oexPtrToInt( x_hFile ), llMove, nOrigin );
+	CBaseFile::t_size llPos = lseek( oexPtrToInt( x_hFile ), llMove, nOrigin );
 
 	if ( 0 > llPos )
 		return 0;

@@ -901,7 +901,7 @@ oex::oexRESULT TestFileMapping()
 
     oex::TFileMapping< oex::oexTCHAR > fm;
 
-    const oexSIZE_T uSize = 150;
+    const oexFILESIZE_T uSize = 150;
     if ( !oexVERIFY( fm.Create( 0, 0, 0, oexT( "Test" ), uSize ) ) )
         return -1;
 
@@ -2549,8 +2549,8 @@ oex::oexRESULT Test_Threads()
 		oexEcho( oexT( " Hmmmm.... Throttled thread counts are not fair" ) );
 
 	oex::oexINT nTotal = count[ 0 ] + count[ 1 ] + count[ 2 ] + count[ 3 ];
-	if ( nTotal < 50 || nTotal > 80 )
-		oexEcho( oexMks( oexT( " There should be about 66 counts total, but there are " ), nTotal ).Ptr() );
+	if ( nTotal < 55 || nTotal > 65 )
+		oexEcho( oexMks( oexT( " There should be about 60 counts total, but there are " ), nTotal ).Ptr() );
 
 	return oex::oexRES_OK;
 }

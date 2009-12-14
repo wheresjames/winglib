@@ -38,6 +38,9 @@ class CBaseFile
 {
 public:
 
+	/// Size type
+	typedef oexFILESIZE_T	t_size;
+
     /// File handle type
     typedef oexPVOID t_HFILE;
 
@@ -152,16 +155,16 @@ public:
     {   return c_Invalid; }
 
 	/// Writes data to a file handle
-    static oexBOOL Write( t_HFILE x_hFile, oexCPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllWritten, oexINT *x_pnErr );
+    static oexBOOL Write( t_HFILE x_hFile, oexCPVOID x_pData, t_size x_llSize, t_size *x_pllWritten, oexINT *x_pnErr );
 
 	/// Reads data from a file handle
-    static oexBOOL Read( t_HFILE x_hFile, oexPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllRead, oexINT *x_pnErr );
+    static oexBOOL Read( t_HFILE x_hFile, oexPVOID x_pData, t_size x_llSize, t_size *x_pllRead, oexINT *x_pnErr );
 
 	/// Returns the size of the specified file
-    static oexINT64 Size( t_HFILE hFile );
+    static t_size Size( t_HFILE hFile );
 
 	/// Sets the file pointer
-    static oexINT64 SetPointer( t_HFILE x_hFile, oexINT64 llMove, oexINT nMethod );
+    static t_size SetPointer( t_HFILE x_hFile, t_size llMove, oexINT nMethod );
 
 	/// Removes the specified folder
     static oexBOOL RemoveFolder( oexCSTR x_pDir );

@@ -52,9 +52,9 @@ oexBOOL CFile::Destroy()
     return bRet;
 }
 
-CStr8 CFile::Read( oexINT64 x_llSize )
+CStr8 CFile::Read( CFile::t_size x_llSize )
 {
-    oexINT64 llSize = Size();
+    t_size llSize = Size();
     if ( x_llSize == 0 )
 	{
 		if ( llSize )
@@ -78,7 +78,7 @@ CStr8 CFile::Read( oexINT64 x_llSize )
     if ( !str.OexAllocate( x_llSize ) )
         return CStr8();
 
-    oexINT64 llRead = 0;
+    t_size llRead = 0;
     oexBOOL bRet = Read( str._Ptr(), x_llSize, &llRead );
 
     if ( !bRet ) str.Destroy();
@@ -150,7 +150,7 @@ oexBOOL CFile::CreatePath( oexCSTR x_pPath )
     return oexTRUE;
 }
 
-oexINT64 CFile::FindInFile( oexPVOID x_pStr, oexINT64 x_llLen, oexINT64 x_llMax )
+CFile::t_size CFile::FindInFile( oexPVOID x_pStr, CFile::t_size x_llLen, CFile::t_size x_llMax )
 {
 	if ( !x_pStr || !x_llLen || ( x_llMax > 0 && x_llMax < x_llLen ) )
 		return -1;
@@ -163,7 +163,7 @@ oexINT64 CFile::FindInFile( oexPVOID x_pStr, oexINT64 x_llLen, oexINT64 x_llMax 
 	CFile::CRestoreFilePos rfp( this );
 
 	// First just check to see if we're there already
-	oexINT64 llRead = 0;
+	t_size llRead = 0;
 	if ( !Read( buf.Ptr(), x_llLen, &llRead ) || llRead != x_llLen )
 		return -1;
 
@@ -171,16 +171,16 @@ oexINT64 CFile::FindInFile( oexPVOID x_pStr, oexINT64 x_llLen, oexINT64 x_llMax 
 	if ( !oexMemCmp( x_pStr, buf.Ptr(), x_llLen ) )
 		return rfp.Get();
 
-	oexINT64 llSize = buf.Size();
+	t_size llSize = buf.Size();
 	if ( !Read( buf.Ptr( x_llLen ), llSize - x_llLen, &llRead ) || !llRead )
 		return -1;
 
 	llSize = llRead + x_llLen;
-	oexINT64 llFile = 0;
+	t_size llFile = 0;
 	while ( llSize >= x_llLen )
 	{
 		// Check for string
-		oexINT64 i;
+		t_size i;
 		for ( i = 0; ( llSize - i ) >= x_llLen; i++ )
 			if ( !oexMemCmp( x_pStr, buf.Ptr( i ), x_llLen ) )
 				return rfp.Set( llFile + i );

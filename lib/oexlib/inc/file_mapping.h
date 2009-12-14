@@ -53,8 +53,8 @@
             if ( CAlloc::eF1Constructed & CAlloc::GetFlags( pPtr )
                  && 1 == CAlloc::GetRefCount( pPtr ) )
             {
-                oexUINT uSize = Size();
-                for ( oexUINT i = 0; i < uSize; i++ )
+                t_size uSize = Size();
+                for ( t_size i = 0; i < uSize; i++ )
                     pPtr[ i ].~T();
 
             } // end if
@@ -79,7 +79,7 @@ template < class T > class TFileMapping
 {
 public:
 
-	typedef oexINT64	size_type;
+	typedef oexFILESIZE_T	t_size;
 
 public:
 
@@ -114,7 +114,7 @@ public:
                                 NULL terminated.
 
     */
-    TFileMapping& SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
+    TFileMapping& SetName( oexCSTR x_pName, t_size x_uLen = 0 )
     {
         // Lose the previous name
         if ( m_pName )
@@ -184,14 +184,14 @@ public:
 				// Was the object constructed?
 				if ( bDestroy && CAlloc::eF1Constructed & CAlloc::GetFlags( m_pPtr ) )
 				{
-					size_type nSize = Size();
-					for ( size_type i = 0; i < nSize; i++ )
+					t_size nSize = Size();
+					for ( t_size i = 0; i < nSize; i++ )
 						m_pPtr[ i ].~T();
 
 				} // end if
 
 				m_pPtr = (T*)CAlloc::VerifyMem( m_pPtr, bDestroy );
-				m_pPtr -= sizeof( oexUINT );
+				m_pPtr -= sizeof( t_size );
 
 			} // end if
 
@@ -226,7 +226,7 @@ public:
 
 		\see
 	*/
-    T* Create( oexBOOL x_bConstructed, oexCSTR x_pFile, os::CFMap::t_HFILEMAP x_hFile, oexCSTR x_pName, oexINT64 x_llSize, os::CFMap::etAccess x_uAccess = os::CFMap::eAccessAll )
+    T* Create( oexBOOL x_bConstructed, oexCSTR x_pFile, os::CFMap::t_HFILEMAP x_hFile, oexCSTR x_pName, t_size x_llSize, os::CFMap::etAccess x_uAccess = os::CFMap::eAccessAll )
 	{
 		// Lose old file mapping
 		Destroy();
@@ -238,12 +238,12 @@ public:
         if ( x_hFile )
         	m_hShareHandle = x_hFile;
 
-		oexINT64 llSize = x_llSize;
+		t_size llSize = x_llSize;
 
 		if ( !m_bPlain )
 		{
 			// Calculate the actual size we'll need
-			llSize += sizeof( oexUINT ) + CAlloc::ProtectAreaSize();
+			llSize += sizeof( t_size ) + CAlloc::ProtectAreaSize();
 			llSize = cmn::NextPower2( llSize );
 
 		} // end if
@@ -271,18 +271,18 @@ public:
 		m_llOpenSize = llSize;
 
         // Save block size
-        *(oexUINT*)m_pPtr = (oexUINT)llSize;
+        *(t_size*)m_pPtr = (t_size)llSize;
 
 		if ( !m_bPlain )
 		{
-			m_pPtr += sizeof( oexUINT );
+			m_pPtr += sizeof( t_size );
 
 			// Look for abandoned blocks ( this mostly for Linux )
 			if ( m_bExisting && !CAlloc::GetRefCount( CAlloc::RawToPtr( m_pPtr ) ) )
 				m_bExisting = oexFALSE;
 
 			// Protect memory area
-			m_pPtr = (T*)CAlloc::ProtectMem( m_pPtr, (oexUINT)x_llSize, !m_bExisting );
+			m_pPtr = (T*)CAlloc::ProtectMem( m_pPtr, (t_size)x_llSize, !m_bExisting );
 
 			// Verify existing block
 			if ( m_bExisting )
@@ -319,7 +319,7 @@ public:
     /**
         \param [in] x_uOffset   -   Offset into the memory
     */
-    T* Ptr( oexUINT x_uOffset )
+    T* Ptr( t_size x_uOffset )
     {
         // Out of bounds
         oexASSERT( m_pPtr && Size() > x_uOffset );
@@ -341,7 +341,7 @@ public:
     /**
         \param [in] x_uOffset   -   Offset into the memory
     */
-    oexCONST T* c_Ptr( oexUINT x_uOffset ) const
+    oexCONST T* c_Ptr( t_size x_uOffset ) const
     {
         // Out of bounds
         oexASSERT( m_pPtr && Size() > x_uOffset );
@@ -356,7 +356,7 @@ public:
 	oexBOOL Existing() { return m_bExisting; }
 
     /// Returns the size of the file mapping
-    oexINT64 Size() const
+    t_size Size() const
     {
         if ( !m_pPtr )
             return 0;
@@ -368,7 +368,7 @@ public:
     }
 
     /// Returns the size of the file mapping
-    oexUINT BlockSize()
+    t_size BlockSize()
     {
         if ( !m_pPtr )
             return 0;
@@ -447,11 +447,11 @@ public:
     {	return m_bPlain; }
 
 	/// Sets the nmap offset
-    void SetOffset( oexINT64 x_llOffset )
+    void SetOffset( t_size x_llOffset )
     {	m_llOffset = x_llOffset; }
 
 	/// Gets the nmap offset
-    oexINT64 GetOffset()
+    t_size GetOffset()
     {	return m_llOffset; }
 
 private:
@@ -470,13 +470,13 @@ private:
     oexTCHAR                    *m_pName;
 
 	/// Size that was passed to CreateFileMapping()
-	oexINT64					m_llOpenSize;
+	t_size						m_llOpenSize;
 
 	/// External file handle for share
 	os::CFMap::t_HFILEMAP		m_hShareHandle;
 
 	/// Share offset
-	oexINT64					m_llOffset;
+	t_size						m_llOffset;
 
 	/// Set to non-zero for a plain file mapping (without any memory protection)
 	oexBOOL						m_bPlain;

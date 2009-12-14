@@ -43,7 +43,7 @@ oexSTATIC_ASSERT( sizeof( CFMap::t_HFILEMAP ) == sizeof( FILE* ) );
 
 oexCONST CFMap::t_HFILEMAP CFMap::c_Failed = (oexCONST CFMap::t_HFILEMAP)-1;
 
-CFMap::t_HFILEMAP CFMap::Create( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists, oexINT64 x_llOffset )
+CFMap::t_HFILEMAP CFMap::Create( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oexFILESIZE_T x_llSize, oexFILESIZE_T *x_pllSize, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists, oexFILESIZE_T x_llOffset )
 {
     // Sanity checks
     if ( !oexCHECK_PTR( x_pMem ) || CFMap::c_Failed == x_hFile )
@@ -74,10 +74,11 @@ CFMap::t_HFILEMAP CFMap::Create( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oe
 	return (t_HFILEMAP)fd;
 }
 
-// +++ Total hack, and currently not thread safe, replace soon please!!!
-TAssoList< oexINT, CStr8 > g_lstFileMappingInfo;
+// +++ Total hack, replace soon please!!!
+oexLock						g_lstFileMappingInfoLock;
+TAssoList< oexINT, CStr8 > 	g_lstFileMappingInfo;
 
-CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_llSize, oexINT64 *x_pllSize, oexCSTR x_pName, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists, oexINT64 x_llOffset )
+CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexFILESIZE_T x_llSize, oexFILESIZE_T *x_pllSize, oexCSTR x_pName, etAccess x_eAccess, oexBOOL *x_pbAlreadyExists, oexFILESIZE_T x_llOffset )
 {
 
 // +++ Need to get some equivalent on the arm
@@ -171,7 +172,9 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_l
 //	shm_unlink( sPath.Ptr() );
 
 	// Add file mapping name to list
-	g_lstFileMappingInfo[ fd ] = sPath;
+	oexAutoLock ll( g_lstFileMappingInfoLock );
+	if ( ll.IsLocked() )
+		g_lstFileMappingInfo[ fd ] = sPath;
 
 	if ( x_pMem )
 		*x_pMem = pMem;
@@ -193,7 +196,7 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_l
 #endif
 }
 
-oexBOOL CFMap::Release( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexINT64 x_llSize )
+oexBOOL CFMap::Release( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexFILESIZE_T x_llSize )
 {
 	// Do we have a valid memory pointer
 	if ( x_pMem && oexCHECK_PTR( x_pMem ) )
@@ -203,6 +206,11 @@ oexBOOL CFMap::Release( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexINT64 
 
 // +++ Need to get some equivalent on the arm
 #ifndef OEX_NOSHM
+
+	// Lock the list
+	oexAutoLock ll( g_lstFileMappingInfoLock );
+	if ( !ll.IsLocked() )
+		return oexFALSE;
 
 	// Unlink
 	if ( c_Failed != x_hFileMap )

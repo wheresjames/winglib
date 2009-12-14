@@ -144,13 +144,20 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 
 // Pointer conversion
 #if defined( OEX_NOCASTPTR )
-#	define oexPtrToInt( p )					OEX_NAMESPACE::__oexCPtrCnv( p ).nInt
-#	define oexPtrToUInt( p ) 				OEX_NAMESPACE::__oexCPtrCnv( p ).uInt
-#	define oexPtrToLong( p ) 				OEX_NAMESPACE::__oexCPtrCnv( p ).lInt
-#	define oexPtrToULong( p ) 				OEX_NAMESPACE::__oexCPtrCnv( p ).ulInt
-#	define oexPtrToInt64( p ) 				OEX_NAMESPACE::__oexCPtrCnv( p ).llInt
-#	define oexPtrToUInt64( p ) 				OEX_NAMESPACE::__oexCPtrCnv( p ).ullInt
-#	define oexPtrToPtr( p ) 				OEX_NAMESPACE::__oexCPtrCnv( p ).ptr
+#	define oexPtrToInt( p )					( (OEX_NAMESPACE::oexINT)(OEX_NAMESPACE::oexULONG)p )
+#	define oexPtrToUInt( p ) 				( (OEX_NAMESPACE::oexUINT)(OEX_NAMESPACE::oexULONG)p )
+#	define oexPtrToLong( p ) 				( (OEX_NAMESPACE::oexLONG)(OEX_NAMESPACE::oexULONG)p )
+#	define oexPtrToULong( p ) 				( (OEX_NAMESPACE::oexULONG)(OEX_NAMESPACE::oexULONG)p )
+#	define oexPtrToInt64( p ) 				( (OEX_NAMESPACE::oexINT64)(OEX_NAMESPACE::oexULONG)p )
+#	define oexPtrToUInt64( p ) 				( (OEX_NAMESPACE::oexUINT64)(OEX_NAMESPACE::oexULONG)p )
+#	define oexPtrToPtr( p ) 				( (OEX_NAMESPACE::oexPVOID)(OEX_NAMESPACE::oexULONG)p )
+//#	define oexPtrToInt( p )					OEX_NAMESPACE::__oexCPtrCnv( p ).nInt
+//#	define oexPtrToUInt( p ) 				OEX_NAMESPACE::__oexCPtrCnv( p ).uInt
+//#	define oexPtrToLong( p ) 				OEX_NAMESPACE::__oexCPtrCnv( p ).lInt
+//#	define oexPtrToULong( p ) 				OEX_NAMESPACE::__oexCPtrCnv( p ).ulInt
+//#	define oexPtrToInt64( p ) 				OEX_NAMESPACE::__oexCPtrCnv( p ).llInt
+//#	define oexPtrToUInt64( p ) 				OEX_NAMESPACE::__oexCPtrCnv( p ).ullInt
+//#	define oexPtrToPtr( p ) 				OEX_NAMESPACE::__oexCPtrCnv( p ).ptr
 #else
 #	define oexPtrToInt( p )					( (OEX_NAMESPACE::oexINT)p )
 #	define oexPtrToUInt( p ) 				( (OEX_NAMESPACE::oexUINT)p )

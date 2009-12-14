@@ -76,7 +76,7 @@ ifeq ($(BUILD),vs)
 	CFG_DEFS := /DOEX_PROJECT_NAME="\"$(CFG_NAME)\"" /DOEX_PROJECT_DESC="\"$(CFG_DESC)\""
 else
 	CFG_DEFS := -DOEX_PROJECT_NAME="\"$(CFG_NAME)\"" -DOEX_PROJECT_DESC="\"$(CFG_DESC)\""
-endif	
+endif
 
 ifdef PRJ_SQRL
 	PRJ_INCS := $(PRJ_INCS) winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
@@ -99,7 +99,7 @@ ifdef PRJ_DEFS
 		CFG_DEFS := $(CFG_DEFS) $(foreach def,$(PRJ_DEFS),/D$(def) )
 	else
 		CFG_DEFS := $(CFG_DEFS) $(foreach def,$(PRJ_DEFS),-D$(def) )
-	endif	
+	endif
 	PRJ_DEFS :=
 endif
 
@@ -115,13 +115,13 @@ ifeq ($(BUILD),vs)
 
 	OS := win32
 	PLATFORM := windows
-	
+
 	CFG_LOCAL_BUILD_TYPE 	:= $(CFG_ROOT)/bin/windows-vs-win32-i386-local-static
 	CFG_LOCAL_TOOL_RESCMP  	:= "$(CFG_LOCAL_BUILD_TYPE)/resbld.exe"
 	CFG_LOCAL_TOOL_JOIN  	:= "$(CFG_LOCAL_BUILD_TYPE)/join.exe"
 
 	ifdef DBG
-		ifeq ($(LIBLINK),static)	
+		ifeq ($(LIBLINK),static)
 			CFG_CEXTRA	 := /DDEBUG /D_DEBUG /D_MT /MTd /Z7 $(CFG_CEXTRA)
 		else
 			ifeq ($(PRJ_TYPE),dll)
@@ -130,7 +130,7 @@ ifeq ($(BUILD),vs)
 				CFG_CEXTRA	 := /DDEBUG /D_DEBUG /D_MT /MDd /Z7 $(CFG_CEXTRA)
 			endif
 		endif
-		ifeq ($(LIBLINK),static)	
+		ifeq ($(LIBLINK),static)
 			CFG_LEXTRA	 := /DEBUG
 		else
 			CFG_LEXTRA	 := /DEBUG /NODEFAULTLIB:libcmtd
@@ -140,12 +140,12 @@ ifeq ($(BUILD),vs)
 			CFG_STDLIBS	 := ole32.lib Oleaut32.lib user32.lib gdi32.lib comdlg32.lib comctl32.lib rpcrt4.lib shell32.lib Advapi32.lib
 		endif
 	else
-		ifeq ($(LIBLINK),static)	
+		ifeq ($(LIBLINK),static)
 			CFG_CEXTRA	 := /MT /O2 /Zp16 /DNDEBUG=1 $(CFG_CEXTRA)
 		else
 			CFG_CEXTRA	 := /MD /O2 /Zp16 /DNDEBUG=1 $(CFG_CEXTRA)
 		endif
-		CFG_LEXTRA	 := 
+		CFG_LEXTRA	 :=
 		ifeq ($(CFG_STDLIBS),)
 			CFG_STDLIBS	 := ole32.lib Oleaut32.lib user32.lib gdi32.lib comdlg32.lib comctl32.lib rpcrt4.lib shell32.lib Advapi32.lib
 		endif
@@ -156,7 +156,7 @@ ifeq ($(BUILD),vs)
 	CFG_LD := link /NOLOGO
 	CFG_CC := cl /nologo /DWIN32 /wd4996
 	CFG_AR := lib /nologo
-	
+
 	CFG_DP := makedepend
 	CFG_RM := rmdir /s /q
 	CFG_DEL:= del /f /q
@@ -164,21 +164,21 @@ ifeq ($(BUILD),vs)
 	CFG_MD := $(PRJ_LIBROOT)/make_directory.bat
 
 # +++ As to the line above, I have no clue why, but *sometimes*
-#     make complains that the 'md' command cannot be found on 
+#     make complains that the 'md' command cannot be found on
 #     Windows.  Moving it to a batch file seems to fix the problem.
-#     BTW, it's *not* the embedded relative ellipsis, I suspected 
+#     BTW, it's *not* the embedded relative ellipsis, I suspected
 #     that too.
 
 	CFG_CC_OUT := /Fo
 	CFG_LD_OUT := /OUT:
 	CFG_AR_OUT := /OUT:
 	CFG_CC_INC := /I
-	
+
 	CFG_FLAG_EXPORT := /EXPORT:
 
 	CFG_CFLAGS := /EHsc /c $(CFG_CEXTRA)
 	CFG_LFLAGS := $(CFG_LEXTRA)
-	
+
 	ifeq ($(PRJ_TYPE),dll)
 		CFG_LFLAGS := $(CFG_LFLAGS) /DLL
 	endif
@@ -190,30 +190,30 @@ else
 
 	# --with-sysroot
 	# --with-headers
-	
+
 	CFG_LOCAL_BUILD_TYPE 	:= $(CFG_ROOT)/bin/posix-gcc-linux-i386-local-shared
 	CFG_LOCAL_TOOL_RESCMP 	:= $(CFG_LOCAL_BUILD_TYPE)/resbld
-	CFG_LOCAL_TOOL_JOIN  	:= $(CFG_LOCAL_BUILD_TYPE)/join	
+	CFG_LOCAL_TOOL_JOIN  	:= $(CFG_LOCAL_BUILD_TYPE)/join
 
 	ifdef DBG
-		CFG_CEXTRA	 := -g -DDEBUG -D_DEBUG $(CFG_CEXTRA) 
+		CFG_CEXTRA	 := -g -DDEBUG -D_DEBUG $(CFG_CEXTRA)
 		CFG_LEXTRA	 := -g
 		CFG_DPOSTFIX := _d
 	else
-		CFG_CEXTRA	 := $(PRJ_OPTS) -s -DNDEBUG=1 $(CFG_CEXTRA) 
+		CFG_CEXTRA	 := $(PRJ_OPTS) -s -DNDEBUG=1 $(CFG_CEXTRA)
 		ifneq ($(PRJ_TYPE),dll)
 			CFG_LEXTRA	 := -s
 		endif
 	endif
-	
+
 	# Arm compiler
 	ifeq ($(CFG_PROC),arm)
 
 		ifeq ($(CFG_TOOLS),snapgear)
-		
+
 			OS := linux
 			PLATFORM := posix
-		
+
 			# Snapgear
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/usr/local/bin/arm-linux-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm-linux
@@ -229,7 +229,7 @@ else
 
 			OS := android
 			PLATFORM := posix
-			
+
 			# Google Android
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm/bin/arm-none-eabi-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm/arm-none-eabi
@@ -245,7 +245,7 @@ else
 
 			OS := linux
 			PLATFORM := posix
-			
+
 			# nihilism
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/bin/arm-unknown-linux-gnu-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm-unknown-linux-gnu
@@ -261,7 +261,7 @@ else
 
 			OS := linux
 			PLATFORM := posix
-			
+
 			# uclinux
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/usr/local/bin/arm-linux-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/usr/local/arm-linux
@@ -271,13 +271,13 @@ else
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_PACKBROKEN -DOEX_NOVIDEO -D__GCC_FLOAT_NOT_NEEDED
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
-			
+
 		endif
 		ifeq ($(CFG_TOOLS),openmoko)
 
 			OS := linux
 			PLATFORM := posix
-			
+
 			# openmoko
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm/bin/arm-angstrom-linux-gnueabi-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm/arm-angstrom-linux-gnueabi
@@ -293,7 +293,7 @@ else
 
 			OS := linux
 			PLATFORM := posix
-			
+
 			# armel
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/usr/bin/arm-linux-gnu-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/usr/
@@ -309,7 +309,7 @@ else
 
 			OS := linux
 			PLATFORM := posix
-			
+
 			# buildroot
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/build_arm/staging_dir/usr/bin/arm-linux-uclibcgnueabi-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/build_arm/staging_dir/
@@ -326,13 +326,13 @@ else
 
 			OS := linux
 			PLATFORM := posix
-			
+
 			# crosstool
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/usr/bin/arm-crosstool-linux-gnueabi-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/usr/arm-crosstool-linux-gnueabi
 
 			CFG_STDLIB := -lrt -pthread
-			CFG_LFLAGS := $(CFG_LEXTRA)  
+			CFG_LFLAGS := $(CFG_LEXTRA)
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT -DOEX_NOSTAT64 \
 										   -DOEX_NOWCHAR -DOEX_NOEXECINFO
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
@@ -343,19 +343,19 @@ else
 
 			OS := linux
 			PLATFORM := posix
-			
+
 			# scratchbox/compilers/arm-linux-gcc3.4.cs-glibc2.3/bin/arm-linux-g++
 			# scratchbox/compilers/arm-linux-gcc3.4.cs-glibc2.3/bin
-			
+
 			# martin's crosstool build
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm-gcc3.4-uclibc0.9.28/bin/arm-linux-
 			#CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm-gcc3.4-uclibc0.9.28
 
 			CFG_STDLIB := -lrt -pthread
-			CFG_LFLAGS := $(CFG_LEXTRA) 
+			CFG_LFLAGS := $(CFG_LEXTRA)
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM -DOEX_NOSTRUCTINIT \
 												-DOEX_NOSTAT64 -DOEX_NOWCHAR -DOEX_NOEXECINFO -DOEX_PACKBROKEN
-			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD 
+			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
 		endif
@@ -363,12 +363,12 @@ else
 
 			OS := darwin9
 			PLATFORM := posix
-			
+
 			# iphone
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/tc/toolchain/pre/bin/arm-apple-darwin9-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/tc/toolchain/sys/
 
-			CFG_STDLIB := 
+			CFG_STDLIB :=
 			CFG_LFLAGS := $(CFG_LEXTRA)
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -DOEX_IPHONE -DOEX_ARM -DOEX_LOWRAM -DOEX_NOSHM \
 											    -DOEX_NOSTRUCTINIT -DOEX_NOSTAT64 -DOEX_NOVIDEO -DOEX_NOEPOLL
@@ -380,26 +380,26 @@ else
 
 			OS := wince
 			PLATFORM := windows
-			
+
 			# cegcc
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/bin/arm-wince-cegcc-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm-wince-cegcc/
 
-			CFG_STDLIB := -lole32 
+			CFG_STDLIB := -lole32
 			CFG_LFLAGS := $(CFG_LEXTRA)
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -D_WIN32_WCE=0x0400 -DOEX_ARM -D__int64="long long" \
-											    -DOEX_LOWRAM -DOEX_NOVIDEO -DOEX_NOCRTDEBUG -DOEX_NOXIMAGE 
+											    -DOEX_LOWRAM -DOEX_NOVIDEO -DOEX_NOCRTDEBUG -DOEX_NOXIMAGE
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
-			
-			CFG_EXE_POST := .exe			
+
+			CFG_EXE_POST := .exe
 
 		endif
 		ifeq ($(CFG_TOOLS),mingw32ce)
 
 			OS := wince
 			PLATFORM := windows
-			
+
 			# mingw32ce
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/bin/arm-wince-mingw32ce-
 			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/arm-wince-mingw32ce/
@@ -411,15 +411,15 @@ else
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
-			CFG_EXE_POST := .exe			
-			
+			CFG_EXE_POST := .exe
+
 		endif
 		ifeq ($(CFG_TOOLS),)
 
-	
+
 			OS := linux
 			PLATFORM := posix
-			
+
 			# Custom tools
 			CFG_TOOLPREFIX := $(CFG_TOOLROOT)/$(CFG_TOOLS)/bin/$(CFG_TOOLS)-
 #			CFG_SYSROOT := $(CFG_TOOLROOT)/$(CFG_TOOLS)/sysroot
@@ -431,21 +431,21 @@ else
 									                         -DOEX_PACKBROKEN -DOEX_NOSHM
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
-			
+
 		endif
 
 	else
-	
+
 		ifeq ($(CFG_TOOLS),mingw32)
 
 			OS := win32
 			PLATFORM := windows
-			
+
 			# Cross compile for windows
 			CFG_TOOLPREFIX := i586-mingw32msvc-
 
 			CFG_STDLIB := -lole32 -lgdi32 -lwsock32 -lws2_32
-			CFG_LFLAGS := $(CFG_LEXTRA) -export-all-symbols 
+			CFG_LFLAGS := $(CFG_LEXTRA) -export-all-symbols
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -Wall -fno-strict-aliasing \
 										-DOEX_NODSHOW -DOEX_NOVFW -DOEX_NOCRTDEBUG -D__int64="long long"
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
@@ -456,12 +456,12 @@ else
 
 			OS := apple
 			PLATFORM := posix
-			
-			# Cross compile for mac
-			CFG_TOOLPREFIX := 
 
-			CFG_STDLIB := 
-			CFG_LFLAGS := $(CFG_LEXTRA) 
+			# Cross compile for mac
+			CFG_TOOLPREFIX :=
+
+			CFG_STDLIB :=
+			CFG_LFLAGS := $(CFG_LEXTRA)
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -Wall -fno-strict-aliasing \
 									    -DOEX_NOSTRUCTINIT
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
@@ -472,27 +472,32 @@ else
 
 			OS := linux
 			PLATFORM := posix
-			
+
 			# Local platform
-			CFG_TOOLPREFIX := 
+			CFG_TOOLPREFIX :=
 
 			# -lregex -lpng -ljpeg -lzlib -ltiff -lstdc++ -lgcc -lodbc32 -lwsock32 -lwinspool -lwinmm -lshell32 -lcomctl32 -lctl3d32 -lodbc32 -ladvapi32 -lodbc32 -lwsock32 -lopengl32 -lglu32 -lole32 -loleaut32
-			
+
 			CFG_STDLIB := -lrt -pthread
 			CFG_LFLAGS := $(CFG_LEXTRA) -rdynamic -Wl,-E -Wl,--export-dynamic
-#			CFG_LFLAGS := $(CFG_LEXTRA) 
+#			CFG_LFLAGS := $(CFG_LEXTRA)
 			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -Wall -fno-strict-aliasing
 #			CFG_CFLAGS := $(CFG_CEXTRA) -c -MMD -Wall
 			CFG_SFLAGS := $(CFG_CFLAGS) -S -MMD
 			CFG_AFLAGS := cq
 
 		endif
-	
+
+	endif
+
+	ifeq ($(LIBLINK),shared)
+		CFG_LFLAGS := $(CFG_LFLAGS) -fPIC
+		CFG_CFLAGS := $(CFG_CFLAGS) -fPIC
 	endif
 
 	ifeq ($(PRJ_TYPE),dll)
 		CFG_LFLAGS := $(CFG_LFLAGS) -shared
-	else	
+	else
 		ifeq ($(LIBLINK),static)
 			CFG_LFLAGS := $(CFG_LFLAGS) -static -static-libgcc
 		endif
@@ -504,9 +509,9 @@ else
 	ifeq ($(PLATFORM),posix)
 #		ifeq ($(LIBLINK),shared)
 			CFG_STDLIB := $(CFG_STDLIB) -ldl
-#		endif		
+#		endif
 	endif
-	
+
 #	ifeq ($(PRJ_TYPE),dll)
 #		CFG_LD := $(CFG_TOOLPREFIX)ld -E --export-dynamic
 #	else
@@ -516,7 +521,7 @@ else
 #			CFG_LD := $(CFG_TOOLPREFIX)g++ -rdynamic -Wl,-E -Wl,--export-dynamic
 #		endif
 #	endif
-	
+
 	ifneq ($(CFG_SYSROOT),)
 		CFG_SYSROOT_OPTIONS := --sysroot=$(CFG_SYSROOT)
 	endif
@@ -532,18 +537,18 @@ else
 	CFG_AR := $(CFG_TOOLPREFIX)ar
 	CFG_DT := $(CFG_TOOLPREFIX)dlltool
 	CFG_DP := $(CFG_TOOLPREFIX)makedepend
-	
+
 	CFG_MD := mkdir -p
 	CFG_RM := rm -rf
 	CFG_DEL:= rm -f
-	
+
 	CFG_CC_OUT := -o $(nullstring)
 	CFG_LD_OUT := -o $(nullstring)
 
 	CFG_CUR_ROOT := $(shell pwd)
-	
+
 	CFG_CC_INC := -I
-	
+
 endif
 
 ifeq ($(PLATFORM),windows)
@@ -554,7 +559,7 @@ ifeq ($(PLATFORM),windows)
 	CFG_LIB_POST := .lib
 	CFG_EXE_POST := .exe
 	CFG_DLL_POST := .dll
-	
+
 else
 
 	CFG_OBJ_EXT := o
@@ -563,7 +568,7 @@ else
 	CFG_LIB_POST := .a
 	CFG_DLL_PRE	 := lib
 	CFG_DLL_POST := .so
-	
+
 endif
 
 CFG_BUILD_TYPE := $(PLATFORM)-$(BUILD)-$(OS)-$(PROC)-$(TOOLS)
@@ -621,14 +626,14 @@ CFG_RES_MAK := $(CFG_RES_OUT)/oexres.mk
 .PRECIOUS: $(CFG_RES_MAK)
 $(CFG_RES_MAK):
 	$(CFG_TOOL_RESCMP) -d:"$(CFG_RES_INP)" -o:"$(CFG_RES_OUT)"
-	
+
 include $(CFG_RES_MAK)
 CFG_RES_OBJ := $(subst .cpp,.$(CFG_OBJ_EXT),$(RES_CPP))
 
 .PRECIOUS: $(CFG_RES_DEP)
 $(CFG_RES_DEP):
 	$(CFG_TOOL_RESCMP) -d:"$(CFG_RES_INP)" -o:"$(CFG_RES_OUT)"
-	
+
 include $(CFG_RES_DEP)
 
 ifneq ($(BUILD),vs)
@@ -636,14 +641,14 @@ ifneq ($(BUILD),vs)
 endif
 
 #.PRECIOUS: $(CFG_RES_OUT)/%.cpp: $(RES_CPP)
-$(CFG_RES_OUT)/%.cpp: 
+$(CFG_RES_OUT)/%.cpp:
 	$(CFG_TOOL_RESCMP) -d:"$(CFG_RES_INP)" -o:"$(CFG_RES_OUT)"
 
 .PRECIOUS: $(CFG_RES_OUT)/%.$(CFG_OBJ_EXT)
 $(CFG_RES_OUT)/%.$(CFG_OBJ_EXT): $(CFG_RES_OUT)/%.cpp
 	- $(CFG_DEL) $(subst /,\,$@)
 	$(CFG_PP) $(CFG_CFLAGS) $(CFG_INCS) $< $(CFG_CC_OUT)$@
-	
+
 endif
 
 

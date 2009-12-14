@@ -192,14 +192,6 @@
 #	define oexPRETTYFUNCTION	__FUNCTION__ oexT( "()" )
 #endif
 
-#if defined( OEX_CPU_64 ) || defined( OEX_IPHONE )
-	typedef long unsigned int		oexSIZE_T;
-#else
-	typedef unsigned int			oexSIZE_T;
-#endif
-
-#define oexMAXSIZE	( (oexSIZE_T) -1 )
-
 #if defined( OEX_WINDOWS )
 #	undef OEX_CASE_SENSITIVE_FILES
 #else
@@ -209,4 +201,17 @@
 // Native processor integer size in bits
 #define oexSIZEOFINT 4
 
+#if defined( OEX_CPU_64 ) || defined( OEX_IPHONE )
+	typedef long unsigned int		oexSIZE_T;
+#else
+	typedef unsigned int			oexSIZE_T;
+#endif
 
+#if defined( _MSC_VER )
+	typedef __int64					oexFILESIZE_T;
+#else
+	typedef long long				oexFILESIZE_T;
+#endif
+
+#define oexMAX_SIZE					( (oexSIZE_T)-1 )
+#define oexMAX_FILESIZE				( (oexFILESIZE_T)-1 )

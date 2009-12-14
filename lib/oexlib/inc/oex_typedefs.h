@@ -66,6 +66,8 @@ typedef bool						oexBOOL;
 typedef char						oexCHAR;
 typedef unsigned char				oexUCHAR;
 
+#define oexMAXSIZE	( (oexSIZE_T) -1 )
+
 // String types
 typedef char                        oexCHAR8;
 typedef oexCHAR8 *                  oexSTR8;
@@ -96,7 +98,7 @@ typedef unsigned char				oexBYTE;
 typedef oexBYTE*					oexPBYTE;
 
 typedef void*						oexTYPEOF_PTR;
-
+/*
 class __oexCPtrCnv
 {
 public:
@@ -122,7 +124,7 @@ public:
 		oexUINT64			ullInt;
 	};
 };
-
+*/
 struct oexGUID
 {
     union

@@ -119,25 +119,25 @@ namespace obj
 								    returned.
 	*/
 	template < typename T >
-		static oexUINT Size( oexCONST T *x_obj )
+		static oexSIZE_T Size( oexCONST T *x_obj )
         {   return sizeof( T ); }
 
     // +++ These next two are dangerous since they could be invoked by actual
 	//     pointers to chars as opposed to strings.  Please fix!
-    template<> oexITS oexUINT Size< oexCHAR8 >( oexCONST oexCHAR8 *x_obj )
+    template<> oexITS oexSIZE_T Size< oexCHAR8 >( oexCONST oexCHAR8 *x_obj )
     {   return zstr::Length( x_obj ); }
 
-    template<> oexITS oexUINT Size< oexCHARW >( oexCONST oexCHARW *x_obj )
+    template<> oexITS oexSIZE_T Size< oexCHARW >( oexCONST oexCHARW *x_obj )
     {   return zstr::Length( x_obj ) * sizeof( oexCHARW ); }
 
 	template < typename T >
-		static oexUINT Size( oexCONST T **x_obj )
+		static oexSIZE_T Size( oexCONST T **x_obj )
         {   return sizeof( T ); }
 
-    template<> oexITS oexUINT Size< oexCHAR8 >( oexCONST oexCHAR8 **x_obj )
+    template<> oexITS oexSIZE_T Size< oexCHAR8 >( oexCONST oexCHAR8 **x_obj )
     {   return zstr::Length( *x_obj ); }
 
-    template<> oexITS oexUINT Size< oexCHARW >( oexCONST oexCHARW **x_obj )
+    template<> oexITS oexSIZE_T Size< oexCHARW >( oexCONST oexCHARW **x_obj )
     {   return zstr::Length( *x_obj ) * sizeof( oexCHARW ); }
 
 	//==============================================================
@@ -150,13 +150,13 @@ namespace obj
                                     for other objects.
 	*/
 	template < typename T >
-		static oexUINT Terminator( oexCONST T *x_obj )
+		static oexSIZE_T Terminator( oexCONST T *x_obj )
         {   return 0; }
 
-    template<> oexITS oexUINT Terminator< oexCSTR8 >( oexCONST oexCSTR8 *x_obj )
+    template<> oexITS oexSIZE_T Terminator< oexCSTR8 >( oexCONST oexCSTR8 *x_obj )
     {   return 1; }
 
-    template<> oexITS oexUINT Terminator< oexCSTRW >( oexCONST oexCSTRW *x_obj )
+    template<> oexITS oexSIZE_T Terminator< oexCSTRW >( oexCONST oexCSTRW *x_obj )
     {   return 2; }
 
 	//==============================================================
