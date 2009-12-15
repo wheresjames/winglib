@@ -64,8 +64,8 @@
 
 // Linked in
 #define _wautostr oex::CStrW
-#define _wautostr_tomb( s ) (oexStrWToMb( s ).Ptr())
-#define _wautostr_towc( s ) (oexMbToStrW( s ).Ptr())
+#define _wautostr_tomb( s ) (oexStrWToMbPtr( s ))
+#define _wautostr_towc( s ) (oexStrToStrWPtr( s ))
 #include "../../../oss/cpu/cpu_usage.hpp"
 
 OEX_USING_NAMESPACE
@@ -520,7 +520,7 @@ oexBOOL CSys::Uninit()
 		} // end if
 
 	} // end if
-	
+
     return CSys_ReleaseMicroSleep();
 }
 
@@ -808,38 +808,38 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 #if !defined( OEX_GCC )
 
 oexDOUBLE CSys::GetCpuLoad()
-{	
+{
 	if ( !g_lockCpu )
 		g_lockCpu = OexAllocConstruct< oexLock >();
-	if ( !g_lockCpu ) 
+	if ( !g_lockCpu )
 		return 0;
 
 	oexAutoLock ll( g_lockCpu );
 	if ( !ll.IsLocked() )
-		return 0;	
-	
-	if ( !g_cpu ) 
+		return 0;
+
+	if ( !g_cpu )
 		g_cpu = OexAllocConstruct< CCpuUsage >();
-	if ( !g_cpu ) 
+	if ( !g_cpu )
 		return 0;
 
 	return g_cpu->GetCpuUsage();
 }
 
 oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName )
-{	
+{
 	if ( !g_lockCpu )
 		g_lockCpu = OexAllocConstruct< oexLock >();
-	if ( !g_lockCpu ) 
+	if ( !g_lockCpu )
 		return 0;
 
 	oexAutoLock ll( g_lockCpu );
 	if ( !ll.IsLocked() )
-		return 0;	
-	
-	if ( !g_cpu ) 
+		return 0;
+
+	if ( !g_cpu )
 		g_cpu = OexAllocConstruct< CCpuUsage >();
-	if ( !g_cpu ) 
+	if ( !g_cpu )
 		return 0;
 
 	return g_cpu->GetCpuUsage( x_pProcessName );

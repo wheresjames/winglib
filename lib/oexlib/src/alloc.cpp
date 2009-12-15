@@ -181,7 +181,7 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
 					*( p++ ) = oexT( '.' ), sz--;
 
 			// Append new line
-			zstr::Copy( p, sz, oexNL8 ),
+			zstr::Copy( p, sz, oexNL ),
 			p += szNL, sz -= szNL;
 
 		} // end for

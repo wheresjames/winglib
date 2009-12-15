@@ -107,7 +107,7 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 
 	// Kill thread if we created it
 	if ( !m_bScriptsLinger && m_sScript.length() )
-		q->kill( oexNULL, "." );
+		q->kill( oexNULL, oexT( "." ) );
 
 /*
 	{ // Scope

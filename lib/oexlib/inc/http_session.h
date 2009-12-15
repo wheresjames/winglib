@@ -992,7 +992,7 @@ public:
 
 	/// Set session object
 	void SetSessionObject( CPropertyBag8 *pPb, CLock *pLock )
-	{	m_sCookieId = oexT( "OEXSID_" ); m_sCookieId << m_sServerId; m_ppbSession = pPb; m_plockSession = pLock; }
+	{	m_sCookieId = "OEXSID_"; m_sCookieId << m_sServerId; m_ppbSession = pPb; m_plockSession = pLock; }
 
 	/// Returns non-zero if this is a new session
 	oexBOOL IsNewSession()

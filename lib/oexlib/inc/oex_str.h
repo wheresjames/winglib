@@ -1129,6 +1129,18 @@ namespace zstr
         {	return str::Compare( s1, Length( s1 ), s2, Length( s2 ) );
 		}
 
+    /// Compares two strings, case insensitive
+    /**
+        \param [in] s1  -   First string
+        \param [in] s2  -   Second string
+
+        Returns zero if the two strings match
+    */
+    template< class T >
+        oexINT ICompare( T *s1, T *s2 )
+        {	return str::ICompare( s1, Length( s1 ), s2, Length( s2 ) );
+		}
+
 };
 
 

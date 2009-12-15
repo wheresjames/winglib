@@ -247,7 +247,7 @@ void CIpSocket::Destroy()
 	// Ensure valid socket handle
 	if ( INVALID_SOCKET == hSocket )
 		return;
-
+/*
 	if ( IsInitialized() )
 	{
 		// Turn off non-blocking
@@ -276,8 +276,8 @@ void CIpSocket::Destroy()
 		} // end if
 
 	} // end if
+*/
 
-/*
 	// Shutdown the socket
     shutdown( hSocket, SD_BOTH );
 
@@ -286,7 +286,7 @@ void CIpSocket::Destroy()
 
 	// Save the last error code
 	m_uLastError = WSAGetLastError();
-*/
+
 }
 
 oexBOOL CIpSocket::Shutdown()

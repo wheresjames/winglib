@@ -4,7 +4,7 @@
 
 #define NUM_TEMPLATE	"%6u "
 
-#	define DBG_PRINT( s )	( lDbg ? oexPrintf( oexT( s ) ), os::CSys::Flush_stdout() : 0 )
+#	define DBG_PRINT( s )	( lDbg ? oexPrintf( s ), os::CSys::Flush_stdout() : 0 )
 #	define DBGBLOCKSIZE	1
 #	define BLOCKSIZE		50
 
@@ -86,7 +86,7 @@ void show_position( oexBOOL bEnd, oexLONG &lShow, oexLONG lBlockSize )
 	if ( !bEnd )
 
 		// Show new line
-		oexPrintf( oexFmt( oexT( oexNL8 NUM_TEMPLATE ), lShow ).Ptr() );
+		oexPrintf( oexFmt( oexTEXT( oexNL8 NUM_TEMPLATE ), lShow ).Ptr() );
 
 	else
 	{
@@ -94,18 +94,18 @@ void show_position( oexBOOL bEnd, oexLONG &lShow, oexLONG lBlockSize )
 		if ( 0 == dSecs ) dSecs = 1;
 
 		// Show summary
-		oexEcho( oexMks( oexT( oexNL8
-							   "================================================" oexNL8 ),
-						 oexT( "Total   : " ), g_uCountsTotal, oexNL,
-						 oexT( "Success : " ), g_uOkTotal, oexNL,
-						 oexT( "Failed  : " ), g_uBadTotal, oexNL,
-				 oexFmt( oexT( "Time    : %.2f seconds" oexNL8 ), dSecs ),
-				 oexFmt( oexT( "Speed   : %.2f / second" oexNL8 ), (oexDOUBLE)g_uOkTotal / dSecs ),
-				 oexFmt( oexT( "Quality : %3u %%" oexNL8 ),
+		oexEcho( oexMks( oexTEXT( oexNL8
+							      "================================================" oexNL8 ),
+						    oexT( "Total   : " ), g_uCountsTotal, oexNL,
+						    oexT( "Success : " ), g_uOkTotal, oexNL,
+						    oexT( "Failed  : " ), g_uBadTotal, oexNL,
+				 oexFmt( oexTEXT( "Time    : %.2f seconds" oexNL8 ), dSecs ),
+				 oexFmt( oexTEXT( "Speed   : %.2f / second" oexNL8 ), (oexDOUBLE)g_uOkTotal / dSecs ),
+				 oexFmt( oexTEXT( "Quality : %3u %%" oexNL8 ),
 								( ( g_uOkTotal + g_uBadTotal )
 						 		? ( g_uOkTotal * 100 / ( g_uOkTotal + g_uBadTotal ) )
 						 		: 0 ) ),
-						 oexT( "================================================" oexNL8 )
+						 oexTEXT( "================================================" oexNL8 )
 					   ).Ptr() );
 
 	} // end if
@@ -136,10 +136,10 @@ int iptest(int argc, char* argv[])
 		return show_use( -2, oexT( "Command line variables are invalid" ), 1 );
 
 	// Parse the command line info
-	CPropertyBag8 pbCmdLine = oex::CParser::ParseCommandLine( argc, (const char**)argv );
+	CPropertyBag pbCmdLine = oex::CParser::ParseCommandLine( argc, (const char**)argv );
 
 	// Get params
-	CStr8 sAddress		= pbCmdLine.IsKey( oexT( "0" ) ) ? pbCmdLine[ oexT( "0" ) ].ToString() : oexT( "" );
+	CStr sAddress		= pbCmdLine.IsKey( oexT( "0" ) ) ? pbCmdLine[ oexT( "0" ) ].ToString() : oexT( "" );
 	oexLONG lPort		= pbCmdLine.IsKey( oexT( "p" ) ) ? pbCmdLine[ oexT( "p" ) ].ToLong() : 80;
 	oexLONG lAttempts	= pbCmdLine.IsKey( oexT( "a" ) ) ? pbCmdLine[ oexT( "a" ) ].ToLong() : 1000;
 	oexLONG lSockets	= pbCmdLine.IsKey( oexT( "s" ) ) ? pbCmdLine[ oexT( "s" ) ].ToLong() : 10;
@@ -148,8 +148,8 @@ int iptest(int argc, char* argv[])
 	oexLONG lLog		= pbCmdLine.IsKey( oexT( "l" ) ) ? 1 : 0;
 	oexLONG lLimit		= pbCmdLine.IsKey( oexT( "c" ) ) ? 1 : 0;
 	oexLONG lBlockSize	= pbCmdLine.IsKey( oexT( "b" ) ) ? pbCmdLine[ oexT( "b" ) ].ToLong() : ( lDbg ? DBGBLOCKSIZE : BLOCKSIZE );
-	CStr8 sUrl			= pbCmdLine.IsKey( oexT( "u" ) ) ? pbCmdLine[ oexT( "u" ) ].ToString() : oexT( "/" );
-	CStr8 sData			= pbCmdLine.IsKey( oexT( "d" ) ) ? pbCmdLine[ oexT( "d" ) ].ToString() : oexT( "" );
+	CStr sUrl			= pbCmdLine.IsKey( oexT( "u" ) ) ? pbCmdLine[ oexT( "u" ) ].ToString() : oexT( "/" );
+	CStr8 sData			= oexStrToStr8( pbCmdLine.IsKey( oexT( "d" ) ) ? pbCmdLine[ oexT( "d" ) ].ToString() : oexT( "" ) );
 
 	if ( !sAddress.Length() )
 		return show_use( -3, oexT( "IP Address not specified" ), 1 );
@@ -167,20 +167,20 @@ int iptest(int argc, char* argv[])
 		return show_use( -5, oexT( "Invalid number of sockets 0" ), 1 );
 
 	if ( !sData.Length() )
-		sData = CStr8() << "GET " << sUrl << " HTTP/1.1\r\n\r\n";
+		sData = CStr8() << "GET " << oexStrToStr8( sUrl ) << " HTTP/1.1\r\n\r\n";
 
 	TMem< os::CIpSocket > mSockets;
 
 	if ( mSockets.OexConstructArray( lSockets ).Size() != (oexSIZE_T)lSockets )
 		return show_use( -6, oexT( "Unable to create socket array" ) );
 
-	oexEcho( oexMks( oexT( oexNL8 "Connecting to : " ), addr.GetDotAddress(), oexT( ":" ), lPort,
+	oexEcho( oexMks( oexTEXT( oexNL8 "Connecting to : " ), addr.GetDotAddress(), oexT( ":" ), lPort,
 					 oexT( " - attempts = " ), lAttempts,
 					 oexT( ", sockets = " ), lSockets,
 					 oexT( ", url = " ), sUrl,
 					 oexNL ).Ptr() );
 
-	oexPrintf( oexFmt( oexT( oexNL8 NUM_TEMPLATE ) , 0 ).Ptr() );
+	oexPrintf( oexFmt( oexTEXT( oexNL8 NUM_TEMPLATE ) , 0 ).Ptr() );
 
 	oexLONG lShow = 0, lConnects = 0;
 	oexUINT uConnected = 0;
@@ -375,7 +375,7 @@ int iptest(int argc, char* argv[])
 				oexPrintf( oexT( "~" ) ), os::CSys::Flush_stdout(),
 				mSockets[ i ].Destroy();
 
-		oexEcho( oexNL oexNL );
+		oexEcho( oexTEXT( oexNL8 oexNL8 ) );
 
 	} // end if
 

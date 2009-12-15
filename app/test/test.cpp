@@ -877,7 +877,7 @@ oex::oexRESULT TestStrings()
 
 	str1 = oexT( "HTTP/1.1" );
 
-	if ( !oexVERIFY( CParser::ParseToken( str1.SkipWhiteSpace(), CStrList8() << oexT( "HTTP" ), oexFALSE ) == oexT( "HTTP" ) ) )
+	if ( !oexVERIFY( CParser::ParseToken( str1.SkipWhiteSpace(), CStrList() << oexT( "HTTP" ), oexFALSE ) == oexT( "HTTP" ) ) )
 		return -66;
 
 	if ( !oexVERIFY( *str1 == oexT( '/' ) ) )
@@ -2549,8 +2549,8 @@ oex::oexRESULT Test_Threads()
 		oexEcho( oexT( " Hmmmm.... Throttled thread counts are not fair" ) );
 
 	oex::oexINT nTotal = count[ 0 ] + count[ 1 ] + count[ 2 ] + count[ 3 ];
-	if ( nTotal < 55 || nTotal > 65 )
-		oexEcho( oexMks( oexT( " There should be about 60 counts total, but there are " ), nTotal ).Ptr() );
+	if ( nTotal < 65 || nTotal > 75 )
+		oexEcho( oexMks( oexT( " There should be about 70 counts total, but there are " ), nTotal ).Ptr() );
 
 	return oex::oexRES_OK;
 }

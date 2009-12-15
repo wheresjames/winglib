@@ -20,7 +20,17 @@
 #define FFMPEG_CONFIGURATION ""
 #define FFMPEG_DATADIR "/usr/local/share/ffmpeg"
 #define ARCH_ALPHA 0
-#define ARCH_ARM 0
+#if defined( OEX_ARM )
+#	define ARCH_ARM 1
+#	define ARCH_X86 0
+#	define ARCH_X86_32 0
+#	define ARCH_X86_64 0
+#else
+#	define ARCH_ARM 0
+#	define ARCH_X86 1
+#	define ARCH_X86_32 1
+#	define ARCH_X86_64 0
+#endif
 #define ARCH_BFIN 0
 #define ARCH_IA64 0
 #define ARCH_M68K 0
@@ -33,9 +43,6 @@
 #define ARCH_SH4 0
 #define ARCH_SPARC 0
 #define ARCH_SPARC64 0
-#define ARCH_X86 1
-#define ARCH_X86_32 1
-#define ARCH_X86_64 0
 #define HAVE_ALTIVEC 0
 #define HAVE_AMD3DNOW 1
 #define HAVE_AMD3DNOWEXT 1
@@ -800,17 +807,17 @@
 #define CONFIG_ALSA_DEMUXER 1
 #define CONFIG_AUDIO_BEOS_DEMUXER 0
 #define CONFIG_BKTR_DEMUXER 0
-#define CONFIG_DV1394_DEMUXER 1
+#define CONFIG_DV1394_DEMUXER 0
 #define CONFIG_JACK_DEMUXER 0
-#define CONFIG_OSS_DEMUXER 1
-#define CONFIG_V4L2_DEMUXER 1
-#define CONFIG_V4L_DEMUXER 1
+#define CONFIG_OSS_DEMUXER 0
+#define CONFIG_V4L2_DEMUXER 0
+#define CONFIG_V4L_DEMUXER 0
 #define CONFIG_VFWCAP_DEMUXER 0
 #define CONFIG_X11_GRAB_DEVICE_DEMUXER 0
 #define CONFIG_LIBDC1394_DEMUXER 0
-#define CONFIG_ALSA_MUXER 1
+#define CONFIG_ALSA_MUXER 0
 #define CONFIG_AUDIO_BEOS_MUXER 0
-#define CONFIG_OSS_MUXER 1
+#define CONFIG_OSS_MUXER 0
 
 #define CONFIG_ALSA_OUTDEV 0
 #define CONFIG_ALSA_INDEV 0
@@ -824,6 +831,12 @@
 #define CONFIG_V4L2_INDEV 0
 #define CONFIG_V4L_INDEV 0
 #define CONFIG_VFWCAP_INDEV 1
+#define CONFIG_IV8_DEMUXER 0
+#define CONFIG_LIBDC1394_INDEV 0
+#define CONFIG_X11_GRAB_DEVICE_INDEV 0
+#define CONFIG_MPEG4_VDPAU_DECODER 0
+#define CONFIG_ALS_DECODER 0
+
 #define restrict __restrict__
 #define ASMALIGN(ZEROBITS) ".align 1 << " #ZEROBITS "\n\t"
 #define EXTERN_PREFIX "_"

@@ -71,7 +71,16 @@ export LOC_TAG := libavdevice
 LOC_CXX_libavdevice := c
 LOC_SRC_libavdevice := $(CFG_LIBROOT)/ffmpeg/libavdevice
 LOC_EXC_libavdevice := alsa-audio-common alsa-audio-dec alsa-audio-enc bktr \
-					   jack_audio libdc1394 vfwcap
+					   jack_audio libdc1394
+ifeq ($(PLATFORM),windows)					   
+	LOC_EXC_libavdevice := $(LOC_EXC_libavdevice) dv1394 oss_audio v4l v4l2 x11grab
+	ifeq ($(PROC),arm)
+		LOC_EXC_libavdevice := $(LOC_EXC_libavdevice) vfwcap
+	endif
+else
+LOC_EXC_libavdevice := $(LOC_EXC_libavdevice) vfwcap					   
+endif
+					   
 include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := libswscale

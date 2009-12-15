@@ -43,15 +43,15 @@ template < const int T > class oex_static_assert{};
 		oex_typedef_static_assert;
 
 #if defined( oexDEBUG_FULLFILENAMES )
-#	define oexSHOW( v )					oexPrintf( oexMks( oexFILE, oexT( "(" ), oexLINE, oexT( ") : " ), oexT( #v ), oexT( " = " ), ( v ), oexNL ).Ptr() )
-#	define oexSHOWL( v )				oexPrintf( oexMks( oexFILE, oexT( "(" ), oexLINE, oexT( ") : " ), oexT( #v ), oexT( " = " ), ( v ), oexNL ).Ptr() ), oexNOTICE( 0, oexMks( #v oexT( " = " ), ( v ) ) )
-#	define oexM()						oexPrintf( oexT( "%s:(%d) : %s() : **** MARKER ****" oexNL8 ), oexFILE, oexLINE, oexFUNCTION )
-#	define oexS( s )					OEX_NAMESPACE::os::CSys::Printf( oexT( "%s:(%d) : %s() : (%u) : %s" oexNL8 ), oexFILE, oexLINE, oexFUNCTION, (oex::oexUINT)oexGetCurThreadId(), s ? s : oexT( "" ) )
+#	define oexSHOW( v )					oexPrintf( oexMks( oexTEXT( oexFILE ), oexT( "(" ), oexLINE, oexT( ") : " ), oexT( #v ), oexT( " = " ), ( v ), oexNL ).Ptr() )
+#	define oexSHOWL( v )				oexPrintf( oexMks( oexTEXT( oexFILE ), oexT( "(" ), oexLINE, oexT( ") : " ), oexT( #v ), oexT( " = " ), ( v ), oexNL ).Ptr() ), oexNOTICE( 0, oexMks( #v oexT( " = " ), ( v ) ) )
+#	define oexM()						oexPrintf( oexT( "%s:(%d) : %s() : **** MARKER ****" oexNL8 ), oexTEXT( oexFILE ), oexLINE, oexFUNCTION )
+#	define oexS( s )					OEX_NAMESPACE::os::CSys::Printf( oexT( "%s:(%d) : %s() : (%u) : %s" oexNL8 ), oexTEXT( oexFILE ), oexLINE, oexFUNCTION, (oex::oexUINT)oexGetCurThreadId(), s ? s : oexT( "" ) )
 #else
-#	define oexSHOW( v )					oexPrintf( oexMks( oexGetFileName( oexFILE ).Ptr(), oexT( "(" ), oexLINE, oexT( ") : " ), oexT( #v ), oexT( " = " ), ( v ), oexNL ).Ptr() )
-#	define oexSHOWL( v )				oexPrintf( oexMks( oexGetFileName( oexFILE ).Ptr(), oexT( "(" ), oexLINE, oexT( ") : " ), oexT( #v ), oexT( " = " ), ( v ), oexNL ).Ptr() ), oexNOTICE( 0, oexMks( #v oexT( " = " ), ( v ) ) )
-#	define oexM()						oexPrintf( oexT( "%s:(%d) : %s() : **** MARKER ****" oexNL8 ), oexGetFileName( oexFILE ).Ptr(), oexLINE, oexFUNCTION )
-#	define oexS( s )					OEX_NAMESPACE::os::CSys::Printf( oexT( "%s:(%d): %s() : (%u) : %s" oexNL8 ), oexGetFileName( oexFILE ).Ptr(), oexLINE, oexFUNCTION, (oex::oexUINT)oexGetCurThreadId(), s ? s : oexT( "" ) )
+#	define oexSHOW( v )					oexPrintf( oexMks( oexGetFileName( oexTEXT( oexFILE ) ).Ptr(), oexT( "(" ), oexLINE, oexT( ") : " ), oexT( #v ), oexT( " = " ), ( v ), oexNL ).Ptr() )
+#	define oexSHOWL( v )				oexPrintf( oexMks( oexGetFileName( oexTEXT( oexFILE ) ).Ptr(), oexT( "(" ), oexLINE, oexT( ") : " ), oexT( #v ), oexT( " = " ), ( v ), oexNL ).Ptr() ), oexNOTICE( 0, oexMks( #v oexT( " = " ), ( v ) ) )
+#	define oexM()						oexPrintf( oexT( "%s:(%d) : %s() : **** MARKER ****" oexNL8 ), oexGetFileName( oexTEXT( oexFILE ) ).Ptr(), oexLINE, oexFUNCTION )
+#	define oexS( s )					OEX_NAMESPACE::os::CSys::Printf( oexT( "%s:(%d): %s() : (%u) : %s" oexNL8 ), oexGetFileName( oexTEXT( oexFILE ) ).Ptr(), oexLINE, oexFUNCTION, (oex::oexUINT)oexGetCurThreadId(), s ? s : oexT( "" ) )
 #endif
 #define oexLM()							oexM(), oexNOTICE( 0, oexT( "**** MARKER ****" ) )
 #define oexSHOWVAL( v, t )				oexPrintf( oexT( #v " = " t ), ( v ) )

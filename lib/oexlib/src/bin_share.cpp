@@ -200,7 +200,7 @@ void CBinShare::Destroy()
 
 	// Warn user if they are not running garbage collection
 	if ( m_buffers.Size() && ( m_uTime + 3 ) < oexGetUnixTime() )
-	{	oexERROR( 0, "You are using oexGetBin() / oexSetBin(), but not calling oexCleanupBin()" );
+	{	oexERROR( 0, oexT( "You are using oexGetBin() / oexSetBin(), but not calling oexCleanupBin()" ) );
 	} // edn if
 
 #endif

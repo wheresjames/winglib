@@ -197,7 +197,7 @@ oexINT COex::Uninit()
     // Free all the test classes
 //	oexFREE_TESTS();
 
-#if defined( OEX_GCC )
+#if !defined( OEX_WINDOWS )
 
 	// Lose file mappings
 	g_lstFileMappingInfo.Destroy();

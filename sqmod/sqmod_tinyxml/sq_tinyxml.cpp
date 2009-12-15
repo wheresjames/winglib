@@ -111,10 +111,10 @@ int CSqXml::Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int 
 		// Parse XML
 		TiXmlDocument	xmlDoc;
 
-#if !defined( OEX_UNICODE )
+#if !defined( oexUNICODE )
 		if ( !xmlDoc.Parse( sData.c_str() ) )
 #else
-		if ( !xmlDoc.Parse( oexStrToMb( CStr( sData.c_str(), sData.length() ) ).Ptr() ) )
+		if ( !xmlDoc.Parse( oexStrToMb( oex::CStr( sData.c_str(), sData.length() ) ).Ptr() ) )
 #endif
 			; // return 0;
 
@@ -149,7 +149,7 @@ static int _Encode( TiXmlNode *pNode, sqbind::CSqMulti *pData, int bIndexed, int
 			// Is it just an attribute
 			if ( nDepth && !it->second.size() )
 			{
-				((TiXmlElement*)pNode)->SetAttribute( it->first.c_str(), it->second.str().c_str() );
+				((TiXmlElement*)pNode)->SetAttribute( oexStrToMbPtr( it->first.c_str() ), oexStrToMbPtr( it->second.str().c_str() ) );
 
 			} // end else if
 
@@ -160,18 +160,18 @@ static int _Encode( TiXmlNode *pNode, sqbind::CSqMulti *pData, int bIndexed, int
 
 				if ( !bIndexed )
 				{	if ( it->first.length() )
-						pItem = pNode->InsertEndChild( TiXmlElement( it->first.c_str() ) );
+						pItem = pNode->InsertEndChild( TiXmlElement( oexStrToMbPtr( it->first.c_str() ) ) );
 				} // end if
 
 				else if ( it->second.isset( oexT( "$" ) ) && it->second[ oexT( "$" ) ].str().length() )
-					pItem = pNode->InsertEndChild( TiXmlElement( it->second[ oexT( "$" ) ].str().c_str() ) );
+					pItem = pNode->InsertEndChild( TiXmlElement( oexStrToMbPtr( it->second[ oexT( "$" ) ].str().c_str() ) ) );
 
 				// Did we get an item?
 				if ( pItem )
 				{
 					// Default value?
 					if ( it->second.str().length() )
-						pItem->InsertEndChild( TiXmlText( it->second.str().c_str() ) );
+						pItem->InsertEndChild( TiXmlText( oexStrToMbPtr( it->second.str().c_str() ) ) );
 
 					// Encode sub items
 					_Encode( pItem, &it->second, bIndexed, nDepth + 1 );
@@ -187,8 +187,8 @@ static int _Encode( TiXmlNode *pNode, sqbind::CSqMulti *pData, int bIndexed, int
 	return 1;
 }
 
-sqbind::stdString CSqXml::Encode( sqbind::CSqMulti *pData, 
-								  const sqbind::stdString &sLineBreak, 
+sqbind::stdString CSqXml::Encode( sqbind::CSqMulti *pData,
+								  const sqbind::stdString &sLineBreak,
 								  const sqbind::stdString &sTab, int bIndexed )
 {
 	if ( !pData )
@@ -203,11 +203,11 @@ sqbind::stdString CSqXml::Encode( sqbind::CSqMulti *pData,
 
 	// Setup a printer
 	TiXmlPrinter printer;
-	printer.SetIndent( sTab.c_str() );
-	printer.SetLineBreak( sLineBreak.c_str() );
+	printer.SetIndent( oexStrToMbPtr( sTab.c_str() ) );
+	printer.SetLineBreak( oexStrToMbPtr( sLineBreak.c_str() ) );
 	xmlDoc.Accept( &printer );
 
 	// Return the encoded xml
-	return printer.CStr();
+	return oexMbToStrPtr( printer.CStr() );
 }
 

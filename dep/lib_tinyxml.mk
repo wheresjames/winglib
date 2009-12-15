@@ -23,6 +23,7 @@ include $(PRJ_LIBROOT)/config.mk
 export LOC_TAG := def
 LOC_INC_def := $(CFG_LIBROOT)/tinyxml
 LOC_SRC_def := $(CFG_LIBROOT)/tinyxml
+LOC_EXC_def := echo xmltest
 include $(PRJ_LIBROOT)/build.mk
 
 #-------------------------------------------------------------------
