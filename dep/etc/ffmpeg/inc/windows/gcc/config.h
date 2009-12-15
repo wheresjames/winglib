@@ -20,17 +20,10 @@
 #define FFMPEG_CONFIGURATION ""
 #define FFMPEG_DATADIR "/usr/local/share/ffmpeg"
 #define ARCH_ALPHA 0
-#if defined( OEX_ARM )
-#	define ARCH_ARM 1
-#	define ARCH_X86 0
-#	define ARCH_X86_32 0
-#	define ARCH_X86_64 0
-#else
-#	define ARCH_ARM 0
-#	define ARCH_X86 1
-#	define ARCH_X86_32 1
-#	define ARCH_X86_64 0
-#endif
+#define ARCH_ARM 0
+#define ARCH_X86 1
+#define ARCH_X86_32 1
+#define ARCH_X86_64 0
 #define ARCH_BFIN 0
 #define ARCH_IA64 0
 #define ARCH_M68K 0

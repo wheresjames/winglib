@@ -100,16 +100,16 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 
 	if ( m )
 	{
-		(*m)[ oexT( "filename" ) ].set( m_pFormatContext->filename );
+		(*m)[ oexT( "filename" ) ].set( oexMbToStrPtr( m_pFormatContext->filename ) );
 		(*m)[ oexT( "timestamp" ) ].set( oexMks( m_pFormatContext->timestamp ).Ptr() );
-		(*m)[ oexT( "title" ) ].set( m_pFormatContext->title );
-		(*m)[ oexT( "author" ) ].set( m_pFormatContext->author );
-		(*m)[ oexT( "copyright" ) ].set( m_pFormatContext->copyright );
-		(*m)[ oexT( "comment" ) ].set( m_pFormatContext->comment );
-		(*m)[ oexT( "album" ) ].set( m_pFormatContext->album );
+		(*m)[ oexT( "title" ) ].set( oexMbToStrPtr( m_pFormatContext->title ) );
+		(*m)[ oexT( "author" ) ].set( oexMbToStrPtr( m_pFormatContext->author ) );
+		(*m)[ oexT( "copyright" ) ].set( oexMbToStrPtr( m_pFormatContext->copyright ) );
+		(*m)[ oexT( "comment" ) ].set( oexMbToStrPtr( m_pFormatContext->comment ) );
+		(*m)[ oexT( "album" ) ].set( oexMbToStrPtr( m_pFormatContext->album ) );
 		(*m)[ oexT( "year" ) ].set( oexMks( m_pFormatContext->year ).Ptr() );
 		(*m)[ oexT( "track" ) ].set( oexMks( m_pFormatContext->track ).Ptr() );
-		(*m)[ oexT( "genre" ) ].set( m_pFormatContext->genre );
+		(*m)[ oexT( "genre" ) ].set( oexMbToStrPtr( m_pFormatContext->genre ) );
 		(*m)[ oexT( "ctx_flags" ) ].set( oexMks( m_pFormatContext->ctx_flags ).Ptr() );
 		(*m)[ oexT( "start_time" ) ].set( oexMks( m_pFormatContext->start_time ).Ptr() );
 		(*m)[ oexT( "duration" ) ].set( oexMks( m_pFormatContext->duration ).Ptr() );
@@ -211,7 +211,7 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 	// Read a frame from the packet
 	int res = -1;
 
-	oexPrintf( oexMks( "\r",  m_nFrames, " : " ).Ptr() );
+//	oexPrintf( oexMks( oexT( "\r" ),  m_nFrames, oexT( " : " ) ).Ptr() );
 
 	do
 	{
@@ -222,8 +222,8 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 
 	} while ( res != stream );
 
-	oexPrintf( oexMks( m_pkt.flags, " : ", m_pkt.size, " : ", m_buf.getUsed(), "    " ).Ptr() );
-	oex::os::CSys::Flush_stdout();
+//	oexPrintf( oexMks( m_pkt.flags, " : ", m_pkt.size, " : ", m_buf.getUsed(), "    " ).Ptr() );
+//	oex::os::CSys::Flush_stdout();
 
 	if ( 0 != ( m_pkt.flags & PKT_FLAG_KEY ) )
 		oexEcho( " key frame" );
@@ -317,9 +317,9 @@ int CFfContainer::Create( const sqbind::stdString &sUrl, const sqbind::stdString
 	AVOutputFormat *pOut = 0;
 
 	if ( sType.length() )
-		pOut = guess_format( sType.c_str(), 0, 0 );
+		pOut = guess_format( oexStrToMbPtr( sType.c_str() ), 0, 0 );
 	else
-		pOut = guess_format( 0, sUrl.c_str(), 0 );
+		pOut = guess_format( 0, oexStrToMbPtr( sUrl.c_str() ), 0 );
 
 	if ( !pOut )
 	{	oexERROR( 0, oexT( "guess_format() failed" ) );
@@ -337,7 +337,7 @@ int CFfContainer::Create( const sqbind::stdString &sUrl, const sqbind::stdString
 
 	// Save format and file name
 	m_pFormatContext->oformat = pOut;
-	oexStrCpySz( m_pFormatContext->filename, sUrl.c_str() );
+	oexStrCpySz( m_pFormatContext->filename, oexStrToMbPtr( sUrl.c_str() ) );
 
 	if ( m )
 	{

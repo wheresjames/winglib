@@ -21,10 +21,10 @@ UNSUPPORTED := TOOLS=$(TOOLS) not supported
 include $(PRJ_LIBROOT)/unsupported.mk
 else
 
-ifdef SQMOD_STATIC
-PRJ_INCS := $(PRJ_INCS) bullet/src freetype/include ftgl/src
-PRJ_LIBS := $(PRJ_LIBS) bullet freetype ftgl
-endif
+#ifdef SQMOD_STATIC
+#PRJ_INCS := $(PRJ_INCS) bullet/src freetype/include ftgl/src
+#PRJ_LIBS := $(PRJ_LIBS) bullet freetype ftgl
+#endif
 
 ifeq ($(PROC),arm)
 	PRJ_INCS := $(PRJ_INCS) irrlicht-es/include
@@ -44,7 +44,7 @@ ifeq ($(PLATFORM),posix)
 else
 	PRJ_DEFS := _IRR_STATIC_LIB_
 	ifeq ($(OS),wince)
-		PRJ_OSLB := libGLES_CM
+		#PRJ_OSLB := libGLES_CM
 		#PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OGLES1_
 		#PRJ_INCS := $(PRJ_INCS) ogles/include
 	else

@@ -33,6 +33,12 @@ ifeq ($(BUILD),vs)
 	PRJ_DEFS := $(PRJ_DEFS) socklen_t=int
 endif
 
+ifeq ($(PLATFORM),windows)
+	ifeq ($(PROC),arm)
+		PRJ_DEFS := $(PRJ_DEFS) LOCALE_NOT_USED
+	endif
+endif
+
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------

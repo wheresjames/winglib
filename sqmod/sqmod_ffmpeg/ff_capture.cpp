@@ -56,7 +56,7 @@ int CFfCapture::Open( const sqbind::stdString &sFormat, const sqbind::stdString 
 //	fp.device = sDevice.c_str();
 	fp.channels = 0;
 
-	AVInputFormat *pFormat = av_find_input_format( sFormat.c_str() );
+	AVInputFormat *pFormat = av_find_input_format( oexStrToMbPtr( sFormat.c_str() ) );
 	if ( !pFormat )
 	{	oexERROR( 0, oexMks( oexT( "av_find_input_format() failed : " ), sFormat.c_str() ) );
 		Destroy();
@@ -81,16 +81,16 @@ int CFfCapture::Open( const sqbind::stdString &sFormat, const sqbind::stdString 
 
 	if ( m )
 	{
-		(*m)[ oexT( "filename" ) ].set( m_pFormatContext->filename );
+		(*m)[ oexT( "filename" ) ].set( oexMbToStrPtr( m_pFormatContext->filename ) );
 		(*m)[ oexT( "timestamp" ) ].set( oexMks( m_pFormatContext->timestamp ).Ptr() );
-		(*m)[ oexT( "title" ) ].set( m_pFormatContext->title );
-		(*m)[ oexT( "author" ) ].set( m_pFormatContext->author );
-		(*m)[ oexT( "copyright" ) ].set( m_pFormatContext->copyright );
-		(*m)[ oexT( "comment" ) ].set( m_pFormatContext->comment );
-		(*m)[ oexT( "album" ) ].set( m_pFormatContext->album );
+		(*m)[ oexT( "title" ) ].set( oexMbToStrPtr( m_pFormatContext->title ) );
+		(*m)[ oexT( "author" ) ].set( oexMbToStrPtr( m_pFormatContext->author ) );
+		(*m)[ oexT( "copyright" ) ].set( oexMbToStrPtr( m_pFormatContext->copyright ) );
+		(*m)[ oexT( "comment" ) ].set( oexMbToStrPtr( m_pFormatContext->comment ) );
+		(*m)[ oexT( "album" ) ].set( oexMbToStrPtr( m_pFormatContext->album ) );
 		(*m)[ oexT( "year" ) ].set( oexMks( m_pFormatContext->year ).Ptr() );
 		(*m)[ oexT( "track" ) ].set( oexMks( m_pFormatContext->track ).Ptr() );
-		(*m)[ oexT( "genre" ) ].set( m_pFormatContext->genre );
+		(*m)[ oexT( "genre" ) ].set( oexMbToStrPtr( m_pFormatContext->genre ) );
 		(*m)[ oexT( "ctx_flags" ) ].set( oexMks( m_pFormatContext->ctx_flags ).Ptr() );
 		(*m)[ oexT( "start_time" ) ].set( oexMks( m_pFormatContext->start_time ).Ptr() );
 		(*m)[ oexT( "duration" ) ].set( oexMks( m_pFormatContext->duration ).Ptr() );

@@ -371,6 +371,9 @@ oex::oexRESULT TestAllocator()
 			 || !oexVERIFY( oex::cmn::IsAligned16( oex::cmn::Align16( i ) ) ) )
 			return -22;
 
+// +++ Get this working in WinCE
+#if !defined( OEX_WINCE )
+
 	// Declare aligned buffers
 	oexAligned( oexCHAR, bufp[ 2 ] ) = { 0 };
 	oexAligned2( oexCHAR, buf2[ 2 ] ) = { 0 };
@@ -386,6 +389,7 @@ oex::oexRESULT TestAllocator()
 		 || !oexVERIFY( oexIsAligned16( (oexLONG)buf16 ) )
 	   )
 		return -23;
+#endif
 
     return oex::oexRES_OK;
 }

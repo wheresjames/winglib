@@ -91,7 +91,7 @@ void CLvRtspServer::CLiveMediaSource::deliverFrame( sqbind::CSqBinary *pFrame )
 	oexMemCpy( fTo, pFrame->Ptr(), fFrameSize );
 
 	double dFps = 15;
-	fDurationInMicroseconds = double( 1000000 ) / dFps;
+	fDurationInMicroseconds = (unsigned int)( double( 1000000 ) / dFps );
 
 	// Use current time on first frame
 	if ( fPresentationTime.tv_sec == 0 && fPresentationTime.tv_usec == 0 )
@@ -227,7 +227,7 @@ int CLvRtspServer::ThreadOpen( sqbind::CSqMulti *m )
 	// Create the RTSP server:
 	m_pRtspServer = RTSPServer::createNew( *m_pEnv, 8554, pUad );
 	if ( !m_pRtspServer )
-	{	oexERROR( 0, oexMks( oexT( "RTSPServer::createNew() failed : " ), m_pEnv->getResultMsg() ) );
+	{	oexERROR( 0, oexMks( oexT( "RTSPServer::createNew() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) );
 		ThreadDestroy();
 		return 0;
 	} // end if
@@ -238,14 +238,14 @@ int CLvRtspServer::ThreadOpen( sqbind::CSqMulti *m )
 	// Create media session
     ServerMediaSession* pSms = ServerMediaSession::createNew( *m_pEnv, pStreamName, pStreamName, pStreamDesc );
 	if ( !pSms )
-	{	oexERROR( 0, oexMks( oexT( "ServerMediaSession::createNew() failed : " ), m_pEnv->getResultMsg() ) );
+	{	oexERROR( 0, oexMks( oexT( "ServerMediaSession::createNew() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) );
 		ThreadDestroy();
 		return 0;
 	} // end if
 
 	// Add subsession
     if ( !pSms->addSubsession( CLiveMediaSubsession::createNew( *m_pEnv, True, this ) ) )
-	{	oexERROR( 0, oexMks( oexT( "ServerMediaSession::addSubsession() failed : " ), m_pEnv->getResultMsg() ) );
+	{	oexERROR( 0, oexMks( oexT( "ServerMediaSession::addSubsession() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) );
 		ThreadDestroy();
 		return 0;
 	} // end if
@@ -255,7 +255,7 @@ int CLvRtspServer::ThreadOpen( sqbind::CSqMulti *m )
 
 	char* pUrl = m_pRtspServer->rtspURL( pSms );
 	if ( pUrl )
-	{	m_sUrl = oexMbToStr( pUrl );
+	{	m_sUrl = oexMbToStrPtr( pUrl );
 		delete [] pUrl;
 	} // end if
 

@@ -248,14 +248,14 @@ int nVerbosity = 0;
 #endif
 
 	// Create rtsp client
-	m_pRtspClient = RTSPClient::createNew( *m_pEnv, nVerbosity, oexT( "CLvRtspClient" ), 0 );
+	m_pRtspClient = RTSPClient::createNew( *m_pEnv, nVerbosity, "CLvRtspClient", 0 );
 	if ( !m_pRtspClient )
 	{	oexERROR( 0, oexT( "RTSPClient::createNew() failed" ) );
 		ThreadDestroy();
 		return 0;
 	} // end if
 
-	char *pOptions = m_pRtspClient->sendOptionsCmd( sUrl.c_str(), 0, 0 );
+	char *pOptions = m_pRtspClient->sendOptionsCmd( oexStrToMbPtr( sUrl.c_str() ), 0, 0 );
 	if ( !pOptions )
 	{	oexERROR( 0, oexT( "sendOptionsCmd() failed" ) );
 		ThreadDestroy();
@@ -267,10 +267,12 @@ int nVerbosity = 0;
 	pOptions = oexNULL;
 
 	char *pSdp = oexNULL;
-	if ( m && m->isset( "username" ) )
-		pSdp = m_pRtspClient->describeWithPassword( sUrl.c_str(), (*m)[ "username" ].str().c_str(), (*m)[ "password" ].str().c_str() );
+	if ( m && m->isset( oexT( "username" ) ) )
+		pSdp = m_pRtspClient->describeWithPassword( oexStrToMbPtr( sUrl.c_str() ), 
+													oexStrToMbPtr( (*m)[ oexT( "username" ) ].str().c_str() ), 
+													oexStrToMbPtr( (*m)[ oexT( "password" ) ].str().c_str() ) );
 	else
-		pSdp = m_pRtspClient->describeURL( sUrl.c_str() );
+		pSdp = m_pRtspClient->describeURL( oexStrToMbPtr( sUrl.c_str() ) );
 	if ( !pSdp )
 	{	oexERROR( 0, oexT( "describeURL() failed" ) );
 		ThreadDestroy();
@@ -294,7 +296,7 @@ int nVerbosity = 0;
 	MediaSubsessionIterator iter( *m_pSession );
 	MediaSubsession *pss;
 	int bFoundVideo = 0, bFoundAudio = 0;
-	oex::CStr sVTag = oexT( "video" ), sATag = oexT( "audio" );
+	oex::CStr8 sVTag = "video", sATag = "audio";
 	while ( 0 != ( pss = iter.next() ) 
 			&& ( ( bVideo && !bFoundVideo ) || ( bAudio && !bFoundAudio ) ) )
 	{
@@ -361,7 +363,7 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 	setReceiveBufferTo( *m_pEnv, sn, 1000000 );
 
 	if ( pss->codecName() )
-		m_sVideoCodec = pss->codecName();
+		m_sVideoCodec = oexMbToStrPtr( pss->codecName() );
 
 	if ( !m_pRtspClient->setupMediaSubsession( *pss, False, False ) )
 	{	oexERROR( 0, oexMks( oexT( "setupMediaSubsession() failed, Codec : " ), m_sVideoCodec.c_str() ).Ptr()  );
@@ -406,7 +408,7 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 	setReceiveBufferTo( *m_pEnv, sn, 1000000 );
 
 	if ( pss->codecName() )
-		m_sAudioCodec = pss->codecName();
+		m_sAudioCodec = oexMbToStrPtr( pss->codecName() );
 
 	if ( !m_pRtspClient->setupMediaSubsession( *pss, False, False ) )
 	{	oexERROR( 0, oexT( "setupMediaSubsession() failed" ) );

@@ -34,7 +34,9 @@ ifeq ($(PLATFORM),windows)
 		PRJ_PLIB := libgcc.a libmingwex.a
 	else
 		PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows/gcc $(PRJ_INCS) zlib
-		PRJ_OSLB := $(PRJ_OSLB) vfw32
+		ifneq ($(PROC),arm)
+			PRJ_OSLB := $(PRJ_OSLB) vfw32
+		endif
 	endif
 else
 	PRJ_INCS := winglib/dep/etc/ffmpeg/inc/posix $(PRJ_INCS)

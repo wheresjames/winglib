@@ -10,7 +10,7 @@ BUILDDIRS := app/hello lib/oexlib \
 # SQMOD 	= Squirrel
 # 3D 		= Irrlicht
 # GUI 		= OpenGL / wxWidgets
-# GUI_ES	= Embedded OpenGL / wxWidgets 
+# GUI_ES	= Embedded OpenGL / wxWidgets
 #-------------------------------------------------------------------
 
 ifdef 3D
@@ -29,18 +29,12 @@ ifdef SQMOD
 	                          sqmod/sqmod_live555 \
 							  sqmod/sqmod_test \
 							  sqmod/sqmod_tinyxml \
-	                          sqmod/sqmod_webkit \
-	                          \
-	                          app/sq_apps/sqa_test \
-	                          \
-	                          sq/auto-build sq/task-list
-	                          
+	                          sqmod/sqmod_webkit
+
 	ifdef 3D
-		BUILDDIRS := $(BUILDDIRS) sqmod/sqmod_irrlicht \
-								  \
-								  app/sq_apps/sqa_irrtest
+		BUILDDIRS := $(BUILDDIRS) sqmod/sqmod_irrlicht
 	endif
-	                          
+
 endif
 
 ifdef GUI
@@ -56,10 +50,10 @@ endif
 ifdef BUILDDEP
 	ifdef GUI
 		BUILDDIRS := dep/gui $(BUILDDIRS)
-	endif	
+	endif
 	ifdef GUI_ES
 		BUILDDIRS := dep/gui_es $(BUILDDIRS)
-	endif	
+	endif
 	BUILDDIRS := dep $(BUILDDIRS)
 endif
 

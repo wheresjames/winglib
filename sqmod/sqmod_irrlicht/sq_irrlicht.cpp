@@ -7,6 +7,12 @@
 #	define SQ_USE_OPENGL
 #endif
 
+#if defined( _WIN32_WCE ) || defined( OEX_IPHONE )
+#	define D2D_TYPE	irr::u32
+#else
+#	define D2D_TYPE	irr::s32
+#endif
+
 CSqIrrlicht::CSqIrrlicht()
 {
 	m_pCallbackQueue = oexNULL;
@@ -69,18 +75,18 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height, in
 	param.Bits = 16;
 	param.Fullscreen = true;
 	param.DriverType = irr::video::EDT_BURNINGSVIDEO;
-	param.WindowSize = irr::core::dimension2d<irr::u32>( width, height );
+	param.WindowSize = irr::core::dimension2d<D2D_TYPE>( width, height );
 #elif defined( OEX_IPHONE )
 	param.Bits = 16;
 	param.Fullscreen = true;
 	param.DriverType = irr::video::EDT_OGLES1;
-	param.WindowSize = irr::core::dimension2d<irr::u32>( width, height );
+	param.WindowSize = irr::core::dimension2d<D2D_TYPE>( width, height );
 #else
 	param.Bits = 32;
 	param.AntiAlias = true;
 	param.DriverType = irr::video::EDT_OPENGL;
 //	param.DriverType = irr::video::EDT_BURNINGSVIDEO;
-	param.WindowSize = irr::core::dimension2d<irr::s32>( width, height );
+	param.WindowSize = irr::core::dimension2d<D2D_TYPE>( width, height );
 #endif
 
 	m_pDevice = irr::createDeviceEx( param );
@@ -848,7 +854,7 @@ CSqirrTexture CSqIrrlicht::CreateTexture( long lWidth, long lHeight, int bMipMap
     m_pDriver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, bMipMapping ? true : false );
 
 	// Create texture
-	CSqirrTexture tex( m_pDriver->addTexture( irr::core::dimension2d< irr::s32 >( lWidth, lHeight ), "Texture" ) );
+	CSqirrTexture tex( m_pDriver->addTexture( irr::core::dimension2d< D2D_TYPE >( lWidth, lHeight ), "Texture" /*, ECF_A8R8G8B8 */ ) );
 
 	// Restore mip mapping state
     m_pDriver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, bCurMipMapping ? true : false );
@@ -1001,7 +1007,7 @@ int CSqIrrlicht::OnEvent( const irr::SEvent& rEvent )
 			if ( m_pCallbackQueue )
 			{
 				// Mouse callback
-				m_pCallbackQueue->execute( oexNULL, "", m_sCallbackFunction,
+				m_pCallbackQueue->execute( oexNULL, oexT( "" ), m_sCallbackFunction,
 										   oexMks( rEvent.MouseInput.Event ).Ptr(),
 										   oexMks( rEvent.MouseInput.X ).Ptr(),
 										   oexMks( rEvent.MouseInput.Y ).Ptr(),

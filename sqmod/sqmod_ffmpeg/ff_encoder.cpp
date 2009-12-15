@@ -73,7 +73,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
     m_pCodecContext->time_base.den = fps;
     m_pCodecContext->time_base.num = 1;
     m_pCodecContext->me_method = 1;
-    m_pCodecContext->strict_std_compliance = ( ( m && m->isset( "cmp" ) ) ? (*m)[ "cmp" ].toint() : 0 );
+    m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
 	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
 //	m_pCodecContext->qmin = m_pCodecContext->qmax = 100;
 

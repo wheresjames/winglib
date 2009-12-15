@@ -31,8 +31,12 @@ else
 ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),vs)
 		PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows/vs $(PRJ_INCS)
-	else
-		PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows/gcc $(PRJ_INCS) zlib
+	else 
+		ifeq ($(PROC),arm)
+			PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows/arm $(PRJ_INCS) zlib
+		else
+			PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows/gcc $(PRJ_INCS) zlib
+		endif
 	endif
 else
 	ifeq ($(PROC),arm)
@@ -105,9 +109,14 @@ LOC_EXC_libavcodec := acelp_filters \
 					  aacenc aacpsy beosthread g729dec imgconvert_template motion_est_template \
 					  mpegvideo_xvmc os2thread svq3 vdpau
 
-#ifeq ($(PROC),arm)
-#	LOC_EXC_libavcodec := $(LOC_EXC_libavcodec) dnxhdenc dsputil gif sp5xdec
-#endif
+ifeq ($(PROC),arm)
+	ifeq ($(PLATFORM),windows)
+#		LOC_EXC_libavcodec := $(LOC_EXC_libavcodec)
+#							  4xm apedec asv1 cljr dct-test dv faandct \
+#							  faanidct ffv1 huffyuv imgconvert
+	endif
+#	dnxhdenc dsputil gif sp5xdec
+endif
 ifeq ($(PLATFORM),windows)
 	LOC_EXC_libavcodec := $(LOC_EXC_libavcodec) pthread
 else
@@ -135,13 +144,22 @@ ifeq ($(PROC),i386)
 endif
 
 ifeq ($(PROC),arm)
+
 	export LOC_TAG := arm
+	LOC_CXX_arm := c
 	LOC_CXX_arm := c
 	LOC_SRC_arm := $(CFG_LIBROOT)/ffmpeg/libavcodec/arm
 	LOC_EXC_arm := dsputil_iwmmxt_rnd_template \
-				   \
 				   dsputil_iwmmxt mpegvideo_iwmmxt
 	include $(PRJ_LIBROOT)/build.mk
+	
+#	export LOC_TAG := arm_asm
+#	LOC_CXX_arm_asm := S
+#	LOC_BLD_arm_asm := c
+#	LOC_SRC_arm_asm := $(CFG_LIBROOT)/ffmpeg/libavcodec/arm
+#	LOC_LST_arm_asm := 
+#	include $(PRJ_LIBROOT)/build.mk
+	
 endif
 
 #-------------------------------------------------------------------
