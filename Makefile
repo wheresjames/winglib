@@ -27,6 +27,7 @@ ifdef SQMOD
 							  sqmod/sqmod_gstreamer \
 	                          sqmod/sqmod_http \
 	                          sqmod/sqmod_live555 \
+	                          sqmod/sqmod_mimetic \
 							  sqmod/sqmod_test \
 							  sqmod/sqmod_tinyxml \
 	                          sqmod/sqmod_webkit
