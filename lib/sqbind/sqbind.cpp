@@ -166,6 +166,8 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqImage, CSqImage )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, CopyImage )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Resample )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, isValid )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, setPixels )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, getPixels )
 SQBIND_REGISTER_CLASS_END()
 
 

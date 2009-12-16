@@ -52,7 +52,8 @@ int CFfCapture::Open( const sqbind::stdString &sFormat, const sqbind::stdString 
 	fp.width = 320;
 	fp.height = 240;
 	fp.pix_fmt = PIX_FMT_NONE; //PIX_FMT_YUV420P;
-	fp.time_base = (AVRational){ 1, 15 };
+	fp.time_base.num = 15;
+	fp.time_base.den = 1;
 //	fp.device = sDevice.c_str();
 	fp.channels = 0;
 

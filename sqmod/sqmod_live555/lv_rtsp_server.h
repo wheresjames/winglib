@@ -160,6 +160,9 @@ public:
 	/// Returns the url that can be used to access the string
 	sqbind::stdString getUrl() { return m_sUrl; }
 
+	/// Signals that message loop should exit
+	void Quit() { m_nEnd = 1; }
+
 private:
 
 	/// The url that can be used to access the stream

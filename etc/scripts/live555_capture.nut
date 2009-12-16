@@ -10,7 +10,7 @@ class CGlobal
 	brate = 2000000;
 
 	use_ffmpeg_decode = 0;
-	save_avi = "capture_test.avi";
+	save_avi = ""; //capture_test.avi";
 
 	l555 = CLvRtspServer();
 
@@ -44,6 +44,10 @@ function StartServer() : ( _g )
 {
 	if ( 0 > _g.cap.Init( 0, 0, 320, 240, 15, "JPEG", 1 ) )
 	{	_self.echo( "Unable to start capture device" ); return 0; }
+
+	// Create empty image
+	if ( !_g.img.Create( _g.cap.getWidth(), _g.cap.getHeight() ) )
+	{	_self.echo( "Unable to create image buffer" ); return 0; }
 
 /*
 	local disp = "";
@@ -121,7 +125,8 @@ function doGetNextFrame() : ( _g )
 
 	else
 	{
-		if ( !_g.img.Decode( "jpg", _g.frame )
+//		if ( !_g.img.Decode( "jpg", _g.frame )
+		if ( !_g.img.setPixels( _g.frame )
 			 || ! _g.enc.EncodeImage( _g.img, _g.tframe, frame_info ) )
 		{	_self.echo( "Transcode() failed" );
 			_g.l555.deliverFrame( CSqBinary() );

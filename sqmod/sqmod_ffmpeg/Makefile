@@ -32,6 +32,9 @@ ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),vs)
 		PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows/vs $(PRJ_INCS)
 		PRJ_PLIB := libgcc.a libmingwex.a
+		ifneq ($(PROC),arm)
+			PRJ_OSLB := $(PRJ_OSLB) vfw32.lib
+		endif
 	else
 		PRJ_INCS := winglib/dep/etc/ffmpeg/inc/windows/gcc $(PRJ_INCS) zlib
 		ifneq ($(PROC),arm)

@@ -54,7 +54,11 @@ void CLvRtspServer::CLiveMediaSource::doGetNextFrame()
 {
 	// Call into the script to get the next frame
 	if ( !m_pRtspServer || 0 > m_pRtspServer->CallDoGetNextFrame( &CLvRtspServer::CLiveMediaSource::_deliverFrame, this ) )
-	{	handleClosure(this);
+	{	//handleClosure(this);
+		if ( m_pRtspServer )
+			m_pRtspServer->Quit();
+//		else
+//			handleClosure(this);
 		return;
 	} // end if
 }
@@ -72,7 +76,10 @@ void CLvRtspServer::CLiveMediaSource::deliverFrame( sqbind::CSqBinary *pFrame )
 	// End of stream?
 	if ( !pFrame || !pFrame->getUsed() )
 	{	fFrameSize = 0; fTo = 0;
-		handleClosure(this);
+		if ( m_pRtspServer )
+			m_pRtspServer->Quit();
+//		else
+//			handleClosure(this);
 		return;
 	} // end if
 
@@ -105,7 +112,11 @@ void CLvRtspServer::CLiveMediaSource::deliverFrame( sqbind::CSqBinary *pFrame )
 	} // end else
 
 	// Inform the reader that data is now available:
-	envir().taskScheduler().scheduleDelayedTask( 0, (TaskFunc*)FramedSource::afterGetting, this );
+
+	// This one crashes, I don't quite get the threading issues here...
+//	envir().taskScheduler().scheduleDelayedTask( 0, (TaskFunc*)FramedSource::afterGetting, this );
+
+	afterGetting( this );
 }
 
 CLvRtspServer::CLvRtspServer()
@@ -171,8 +182,15 @@ oex::oexBOOL CLvRtspServer::DoThread( oex::oexPVOID x_pData )
 	if ( !m_pEnv )
 		return oex::oexFALSE;
 
-	// Do the stuff
-	m_pEnv->taskScheduler().doEventLoop( &m_nEnd );
+	try
+	{
+		// Do the stuff
+		m_pEnv->taskScheduler().doEventLoop( &m_nEnd );
+
+	} // end try
+	catch( ... )
+	{
+	} // end catch
 
 	oexEcho( "doEventLoop() exited" );
 
@@ -189,11 +207,11 @@ oex::oexINT CLvRtspServer::EndThread( oex::oexPVOID x_pData )
 
 void CLvRtspServer::ThreadDestroy()
 {
+	if ( m_pRtspServer )
+		m_pRtspServer->close( m_pRtspServer );
+
 	if ( m_pEnv )
 		m_pEnv->reclaim();
-
-//	if ( m_pRtspServer )
-//		m_pRtspServer->close();
 
 	m_nFrames = 0;
 	m_pEnv = oexNULL;
