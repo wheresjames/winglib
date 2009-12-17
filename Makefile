@@ -30,6 +30,7 @@ ifdef SQMOD
 	                          sqmod/sqmod_mimetic \
 							  sqmod/sqmod_test \
 							  sqmod/sqmod_tinyxml \
+	                          sqmod/sqmod_vmime \
 	                          sqmod/sqmod_webkit
 
 	ifdef 3D
