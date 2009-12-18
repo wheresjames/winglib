@@ -11,5 +11,6 @@
 
 #include "vmime/vmime.hpp"
 
+#include "sq_msg.h"
 #include "sq_vmime.h"
 

@@ -9,7 +9,10 @@ PRJ_TYPE := lib
 PRJ_INCS := libvmime
 PRJ_LIBS := 
 PRJ_DEFS := VMIME_PACKAGE=\"\" VMIME_VERSION=\"\" VMIME_API=\"\" \
-			VMIME_HAVE_MESSAGING_FEATURES VMIME_HAVE_FILESYSTEM_FEATURES
+			VMIME_HAVE_MESSAGING_FEATURES VMIME_HAVE_FILESYSTEM_FEATURES \
+			VMIME_BUILTIN_MESSAGING_PROTO_IMAP VMIME_BUILTIN_MESSAGING_PROTO_POP3 \
+			VMIME_BUILTIN_MESSAGING_PROTO_SMTP VMIME_BUILTIN_MESSAGING_PROTO_MAILDIR \
+			VMIME_BUILTIN_MESSAGING_PROTO_SENDMAIL
 
 PRJ_LIBROOT := ..
 PRJ_OBJROOT := _0_dep
@@ -64,29 +67,29 @@ export LOC_TAG := net_maildir_format
 LOC_SRC_net_maildir_format := $(CFG_LIBROOT)/libvmime/src/net/maildir/format
 include $(PRJ_LIBROOT)/build.mk
 
-export LOC_TAG := pop3
-LOC_SRC_pop3 := $(CFG_LIBROOT)/libvmime/src/pop3
+export LOC_TAG := net_pop3
+LOC_SRC_net_pop3 := $(CFG_LIBROOT)/libvmime/src/net/pop3
 include $(PRJ_LIBROOT)/build.mk
 
-export LOC_TAG := sendmail
-LOC_SRC_sendmail := $(CFG_LIBROOT)/libvmime/src/sendmail
+export LOC_TAG := net_sendmail
+LOC_SRC_net_sendmail := $(CFG_LIBROOT)/libvmime/src/net/sendmail
 include $(PRJ_LIBROOT)/build.mk
 
-export LOC_TAG := smtp
-LOC_SRC_smtp := $(CFG_LIBROOT)/libvmime/src/smtp
+export LOC_TAG := net_smtp
+LOC_SRC_net_smtp := $(CFG_LIBROOT)/libvmime/src/net/smtp
 include $(PRJ_LIBROOT)/build.mk
 
-export LOC_TAG := tls
-LOC_SRC_tls := $(CFG_LIBROOT)/libvmime/src/tls
-include $(PRJ_LIBROOT)/build.mk
+#export LOC_TAG := tls
+#LOC_SRC_tls := $(CFG_LIBROOT)/libvmime/src/net/tls
+#include $(PRJ_LIBROOT)/build.mk
 
 ifeq ($(PLATFORM),windows)
 	export LOC_TAG := platform_windows
-	LOC_SRC_platform_windows := $(CFG_LIBROOT)/libvmime/src/platform/windows
+	LOC_SRC_platform_windows := $(CFG_LIBROOT)/libvmime/src/platforms/windows
 	include $(PRJ_LIBROOT)/build.mk
 else
 	export LOC_TAG := platform_posix
-	LOC_SRC_platform_posix := $(CFG_LIBROOT)/libvmime/src/platform_posix
+	LOC_SRC_platform_posix := $(CFG_LIBROOT)/libvmime/src/platforms/posix
 	include $(PRJ_LIBROOT)/build.mk
 endif
 
