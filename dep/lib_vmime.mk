@@ -6,13 +6,13 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := vmime
 PRJ_TYPE := lib
-PRJ_INCS := libvmime
+PRJ_INCS := libvmime gnutls
 PRJ_LIBS := 
 PRJ_DEFS := VMIME_PACKAGE=\"\" VMIME_VERSION=\"\" VMIME_API=\"\" \
 			VMIME_HAVE_MESSAGING_FEATURES VMIME_HAVE_FILESYSTEM_FEATURES \
 			VMIME_BUILTIN_MESSAGING_PROTO_IMAP VMIME_BUILTIN_MESSAGING_PROTO_POP3 \
 			VMIME_BUILTIN_MESSAGING_PROTO_SMTP VMIME_BUILTIN_MESSAGING_PROTO_MAILDIR \
-			VMIME_BUILTIN_MESSAGING_PROTO_SENDMAIL
+			VMIME_HAVE_TLS_SUPPORT
 
 PRJ_LIBROOT := ..
 PRJ_OBJROOT := _0_dep
@@ -79,9 +79,9 @@ export LOC_TAG := net_smtp
 LOC_SRC_net_smtp := $(CFG_LIBROOT)/libvmime/src/net/smtp
 include $(PRJ_LIBROOT)/build.mk
 
-#export LOC_TAG := tls
-#LOC_SRC_tls := $(CFG_LIBROOT)/libvmime/src/net/tls
-#include $(PRJ_LIBROOT)/build.mk
+export LOC_TAG := tls
+LOC_SRC_tls := $(CFG_LIBROOT)/libvmime/src/net/tls
+include $(PRJ_LIBROOT)/build.mk
 
 ifeq ($(PLATFORM),windows)
 	export LOC_TAG := platform_windows
@@ -109,11 +109,11 @@ export LOC_TAG := security_digest_sha1
 LOC_SRC_security_digest_sha1 := $(CFG_LIBROOT)/libvmime/src/security/digest/sha1
 include $(PRJ_LIBROOT)/build.mk
 
-ifneq ($(PLATFORM),windows)
-	export LOC_TAG := security_sasl
-	LOC_SRC_security_sasl := $(CFG_LIBROOT)/libvmime/src/security/sasl
-	include $(PRJ_LIBROOT)/build.mk
-endif
+#ifneq ($(PLATFORM),windows)
+#	export LOC_TAG := security_sasl
+#	LOC_SRC_security_sasl := $(CFG_LIBROOT)/libvmime/src/security/sasl
+#	include $(PRJ_LIBROOT)/build.mk
+#endif
 
 export LOC_TAG := utility
 LOC_SRC_utility := $(CFG_LIBROOT)/libvmime/src/utility

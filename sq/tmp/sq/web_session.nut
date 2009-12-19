@@ -34,13 +34,13 @@ function OnProcessRequest( params )
 	if ( 0 <= _self.find( mParams[ "REQUEST" ][ "path" ].str(), share_name ) )
 	{	//local file = _self.build_path( cc[ "media_root" ], CSqFile().get_filename( mParams[ "REQUEST" ][ "path" ].str() ) );
 		local file = mParams[ "REQUEST" ][ "path" ].str();
-		file = _self.replace( file, share_name, "/var/www/_php/atest/jscript" );
+		file = _self.replace( file, share_name, _self.root( "tmp/jscript" ) );
 		mReply.set( "file", file );
 		return mReply.serialize();
 	} // end if
 
 	if ( !loggedin )
-		page = CSqFile().get_contents( _self.path( "html/login.html" ) );
+		page = CSqFile().get_contents( _self.root( "tmp/html/login.html" ) );
 
 	else
 	{

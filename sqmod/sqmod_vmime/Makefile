@@ -9,7 +9,7 @@ PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 			libvmime
 
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cell curl cximage jpeg png tiff zlib \
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cell cximage jpeg png tiff zlib \
 		    vmime
 PRJ_DEFS := VMIME_HAVE_MESSAGING_FEATURES VMIME_HAVE_FILESYSTEM_FEATURES
  

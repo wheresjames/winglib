@@ -13,11 +13,11 @@ function _init() : ( _g )
 	_g.irr = CSqIrrlicht();
 
 	_g.irr.SetStereo( 1 );
-//	_g.irr.SetREyeKey( 0x000000ff );
-//	_g.irr.SetLEyeKey( 0x00ffff00 );
+	_g.irr.SetREyeKey( 0x000000ff );
+	_g.irr.SetLEyeKey( 0x00ffff00 );
 //	_g.irr.Init( "Irr Test", 240, 320, 1 );
-//	_g.irr.Init( "Irr Test", 640, 480, 1 );
-	_g.irr.Init( "Irr Test", 1024, 768, 1 );
+	_g.irr.Init( "Irr Test", 640, 480, 1 );
+//	_g.irr.Init( "Irr Test", 1024, 768, 1 );
 
 	_g.irr.SetAmbientLight( CSqirrColorf( 0.5, 0.5, 0.5 ) );
 

@@ -11,6 +11,9 @@ function _init() : ( _g )
 {
 	local vmime = CSqVMime();
 
+	vmime.setUsername( "" );
+	vmime.setPassword( "" );
+
 	_self.echo( "\n------ Starting ------\n" );
 /*
 	local m = CVmMsg();

@@ -26,22 +26,24 @@
 <script type="text/javascript">
 
 	$(document).ready(function() {
-		var alist = [ "Bob", "Cindy", "Ethan", "George", "Helen", "Jack", "Karen", "Luke", "Paula", "Tina", "Zack" ];
+		var alist = [ "Bob", "Cindy", "Ethan", "George", "Helen", "Jack", "Karen", "Luke", "Matt", "Nesanne", "Paula", "Prem", "Tina", "Vincent", "Willie", "Zack" ];
 		$('.aSpinner').spinTheWheel({list:alist, cursor:'ns-resize', horizontal:false });
 	});
 
 </script>
 
-<table align='center' valign='middle'>
+<table width='100%' height='100%'><tr><td>
+<table align='center' valign='middle' cellpadding=0 cellspacing=0>
 	<tr>
-		<td valign='middle'>
-			<div class="aSpinner"></div><br/>
+		<td valign='top'>
+			<div class="aSpinner" style='margin-top:2px;margin-right:2px;border-left:solid 1px;border-top:solid 1px;border-right:solid 1px;border-bottom:solid 1px;'></div><br/>
 		</td>
-		<td valign='middle'>
+		<td valign='top'>
 			<span id="inlineKeypad"></span>
 		</td>
 	</tr>
 </table>
+</td></tr></table>
 
 <link href="jscript/jquery.keypad/jquery.keypad.css" type="text/css" rel="stylesheet" />
 <script type="text/javascript" src="jscript/jquery.keypad/jquery.keypad.min.js"></script>

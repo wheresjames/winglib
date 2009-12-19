@@ -1,12 +1,17 @@
 /* config.h.in.  Generated from configure.in by autoheader.  */
 
+#ifndef VMIME_TYPES
+#	define VMIME_TYPES
+	typedef unsigned char vmime_uint8;
+	typedef unsigned int vmime_uint32;
+#endif
 
 /* hack for BROKEN autoheader, since it will not predicitably order
    macros by any obvious means. */
 
-#undef HAVE_UNISTD_H
-#undef HAVE_FEATURES_H
-#undef HAVE_SYS_TYPES_H
+#define HAVE_UNISTD_H
+#define HAVE_FEATURES_H
+#define HAVE_SYS_TYPES_H
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

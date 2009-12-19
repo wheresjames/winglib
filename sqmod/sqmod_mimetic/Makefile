@@ -9,7 +9,7 @@ PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 			mimetic
 
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cell curl cximage jpeg png tiff zlib \
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cell cximage jpeg png tiff zlib \
 		    mimetic
 PRJ_DEFS := uint32_t=unsigned
  
@@ -24,6 +24,11 @@ PRJ_LIBROOT := ../..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifndef BUILD_MIMETIC
+UNSUPPORTED := Set make option BUILD_MIMETIC=1 to build
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 #-------------------------------------------------------------------
 # Source files
 #-------------------------------------------------------------------
@@ -35,3 +40,6 @@ include $(PRJ_LIBROOT)/build.mk
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
+
+endif
+

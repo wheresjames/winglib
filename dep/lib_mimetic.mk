@@ -8,7 +8,11 @@ PRJ_NAME := mimetic
 PRJ_TYPE := lib
 PRJ_INCS := mimetic
 PRJ_LIBS := 
-PRJ_DEFS := uint32_t=unsigned
+ifeq ($(PLATFORM),windows)
+	PRJ_DEFS := uint32_t=unsigned
+else
+	PRJ_DEFS :=
+endif
 
 PRJ_LIBROOT := ..
 PRJ_OBJROOT := _0_dep
@@ -17,6 +21,11 @@ PRJ_OBJROOT := _0_dep
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
+
+ifndef BUILD_MIMETIC
+UNSUPPORTED := Set make option BUILD_MIMETIC=1 to build
+include $(PRJ_LIBROOT)/unsupported.mk
+else
 
 ifeq ($(PLATFORM),windows)
 	PRJ_INCS := winglib/dep/etc/mimetic/inc/windows $(PRJ_INCS)
@@ -55,4 +64,5 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
+endif
 
