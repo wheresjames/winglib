@@ -9,7 +9,7 @@ PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 			mimetic
 
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cell cximage jpeg png tiff zlib \
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib \
 		    mimetic
 PRJ_DEFS := uint32_t=unsigned
  

@@ -4,22 +4,14 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := sqmod_vmime
-PRJ_TYPE := dll
-PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
-			libvmime
+PRJ_NAME := gsasl
+PRJ_TYPE := lib
+PRJ_INCS := libgsasl libgsasl/gl
+PRJ_LIBS := 
+PRJ_DEFS := GSASL_API= HAVE_CONFIG_H LOCALEDIR=\"\"
 
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib \
-		    vmime gnutls gsasl
-PRJ_DEFS := VMIME_HAVE_MESSAGING_FEATURES VMIME_HAVE_FILESYSTEM_FEATURES
-#			GSASL_API= ASN1_API= \
-#			VMIME_HAVE_TLS_SUPPORT VMIME_HAVE_SASL_SUPPORT
- 
-PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
-
-PRJ_SUBROOT := _sqmod
-
-PRJ_LIBROOT := ../..
+PRJ_LIBROOT := ..
+PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build
@@ -27,19 +19,29 @@ PRJ_LIBROOT := ../..
 include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(PLATFORM),windows)
-	PRJ_INCS := winglib/dep/etc/vmime/inc/windows $(PRJ_INCS)
+	PRJ_INCS := winglib/dep/etc/gsasl/inc/windows libgsasl/win32/include $(PRJ_INCS)
 else
-	PRJ_INCS := winglib/dep/etc/vmime/inc/posix $(PRJ_INCS)
+	PRJ_INCS := winglib/dep/etc/gsasl/inc/posix $(PRJ_INCS)
+endif
+
+ifeq ($(BUILD),vs)
+	PRJ_DEFS := $(PRJ_DEFS) RESTRICT=__restrict 
+else
+	PRJ_DEFS := $(PRJ_DEFS) RESTRICT=restrict 
 endif
 
 #-------------------------------------------------------------------
-# Source files
+# File locations
 #-------------------------------------------------------------------
-
 export LOC_TAG := def
+LOC_CXX_def := c
+LOC_SRC_def := $(CFG_LIBROOT)/libgsasl/src
+LOC_EXC_def := 
 include $(PRJ_LIBROOT)/build.mk
 
 #-------------------------------------------------------------------
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
+
+

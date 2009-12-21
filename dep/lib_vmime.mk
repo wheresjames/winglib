@@ -6,13 +6,15 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := vmime
 PRJ_TYPE := lib
-PRJ_INCS := libvmime gnutls
+PRJ_INCS := libvmime gnutls/lib/includes gnutls/libextra/includes \
+			libgsasl/src
 PRJ_LIBS := 
 PRJ_DEFS := VMIME_PACKAGE=\"\" VMIME_VERSION=\"\" VMIME_API=\"\" \
 			VMIME_HAVE_MESSAGING_FEATURES VMIME_HAVE_FILESYSTEM_FEATURES \
 			VMIME_BUILTIN_MESSAGING_PROTO_IMAP VMIME_BUILTIN_MESSAGING_PROTO_POP3 \
-			VMIME_BUILTIN_MESSAGING_PROTO_SMTP VMIME_BUILTIN_MESSAGING_PROTO_MAILDIR \
-			VMIME_HAVE_TLS_SUPPORT
+			VMIME_BUILTIN_MESSAGING_PROTO_SMTP VMIME_BUILTIN_MESSAGING_PROTO_MAILDIR
+#			GSASL_API= ASN1_API= \			
+#			VMIME_HAVE_TLS_SUPPORT VMIME_HAVE_SASL_SUPPORT 
 
 PRJ_LIBROOT := ..
 PRJ_OBJROOT := _0_dep
@@ -23,9 +25,9 @@ PRJ_OBJROOT := _0_dep
 include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(PLATFORM),windows)
-	PRJ_INCS := winglib/dep/etc/vmime/inc/windows $(PRJ_INCS)
+	PRJ_INCS := winglib/dep/etc/vmime/inc/windows winglib/dep/etc/gnutls/inc/windows $(PRJ_INCS)
 else
-	PRJ_INCS := winglib/dep/etc/vmime/inc/posix $(PRJ_INCS)
+	PRJ_INCS := winglib/dep/etc/vmime/inc/posix winglib/dep/etc/gnutls/inc/posix $(PRJ_INCS)
 endif
 
 #-------------------------------------------------------------------
@@ -79,9 +81,9 @@ export LOC_TAG := net_smtp
 LOC_SRC_net_smtp := $(CFG_LIBROOT)/libvmime/src/net/smtp
 include $(PRJ_LIBROOT)/build.mk
 
-export LOC_TAG := tls
-LOC_SRC_tls := $(CFG_LIBROOT)/libvmime/src/net/tls
-include $(PRJ_LIBROOT)/build.mk
+#export LOC_TAG := tls
+#LOC_SRC_tls := $(CFG_LIBROOT)/libvmime/src/net/tls
+#include $(PRJ_LIBROOT)/build.mk
 
 ifeq ($(PLATFORM),windows)
 	export LOC_TAG := platform_windows
@@ -109,11 +111,9 @@ export LOC_TAG := security_digest_sha1
 LOC_SRC_security_digest_sha1 := $(CFG_LIBROOT)/libvmime/src/security/digest/sha1
 include $(PRJ_LIBROOT)/build.mk
 
-#ifneq ($(PLATFORM),windows)
-#	export LOC_TAG := security_sasl
-#	LOC_SRC_security_sasl := $(CFG_LIBROOT)/libvmime/src/security/sasl
-#	include $(PRJ_LIBROOT)/build.mk
-#endif
+#export LOC_TAG := security_sasl
+#LOC_SRC_security_sasl := $(CFG_LIBROOT)/libvmime/src/security/sasl
+#include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := utility
 LOC_SRC_utility := $(CFG_LIBROOT)/libvmime/src/utility

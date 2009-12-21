@@ -1,0 +1,32 @@
+// stdafx.cpp
+
+#include "stdafx.h"
+
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CPoSmtp, CPoSmtp )
+	SQBIND_MEMBER_FUNCTION( CPoSmtp, Destroy )
+//	SQBIND_MEMBER_FUNCTION( CPoSmtp, Open )
+
+SQBIND_REGISTER_CLASS_END()
+
+
+// Export classes
+static void SQBIND_Export_poco( sqbind::VM x_vm )
+{
+	if ( !oexCHECK_PTR( x_vm ) )
+		return;
+
+    SQBIND_EXPORT( x_vm, CPoSmtp );
+}
+
+#if defined( SQBIND_STATIC )
+	#include "sq_smtp.cpp"
+#else
+
+	static void SQBIND_Export( sqbind::VM x_vm )
+	{	SQBIND_Export_poco( x_vm ); }
+
+	// Include squirrel module exported symbols
+	#include <sqmod_extern.hpp>
+
+#endif
