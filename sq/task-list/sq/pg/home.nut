@@ -1,7 +1,7 @@
 
 _self.include( "config.nut" );
 
-function pg_run( mParams )
+function pg_home( mParams )
 {
 	// User wants to exit?
 	if ( mParams[ "GET" ].isset( "exit" ) && mParams[ "GET" ][ "exit" ].len() )
@@ -11,9 +11,9 @@ function pg_run( mParams )
 			_self.terminate( -1 );
 
 		// Set new code
-		local id = _self.unique();		
+		local id = _self.unique();
 		_self.set( "/", "exit_code", id );
-		
+
 		return @"
 				<br>
 				<b><big>

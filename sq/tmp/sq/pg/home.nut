@@ -1,7 +1,7 @@
 
 _self.include( "config.nut" );
 
-function pg_run( mParams )
+function pg_home( mParams )
 {
 	// User wants to exit?
 	if ( mParams[ "GET" ].isset( "exit" ) && mParams[ "GET" ][ "exit" ].len() )

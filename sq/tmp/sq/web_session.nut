@@ -15,8 +15,6 @@ function DoLogin( mParams )
 
 function OnProcessRequest( params )
 {
-	_self.kill( "." );
-
 	local mParams = CSqMulti();
 	mParams.deserialize( params );
 	_self.echo( mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str()
@@ -28,7 +26,7 @@ function OnProcessRequest( params )
 	local login_menu = "";
 	local loggedin = DoLogin( mParams );
 	local login_menu = loggedin ? "<a href='?logout=1'>Logout</a>" : "<a href='?login=1'>Login</a>";
-
+/*
 	// Is it a file request?
 	local share_name = "/jscript";
 	if ( 0 <= _self.find( mParams[ "REQUEST" ][ "path" ].str(), share_name ) )
@@ -38,7 +36,7 @@ function OnProcessRequest( params )
 		mReply.set( "file", file );
 		return mReply.serialize();
 	} // end if
-
+*/
 	if ( !loggedin )
 		page = CSqFile().get_contents( _self.root( "tmp/html/login.html" ) );
 
@@ -59,12 +57,12 @@ function OnProcessRequest( params )
 			case "/" :
 			case "/home" :
 				_self.include( "pg/home.nut" );
-				page = pg_run( mParams );
+				page = pg_home( mParams );
 				break;
 
 			case "/signup" :
 				_self.include( "pg/signup.nut" );
-				page = pg_run( mParams );
+				page = pg_signup( mParams );
 				break;
 
 			case "/test" :

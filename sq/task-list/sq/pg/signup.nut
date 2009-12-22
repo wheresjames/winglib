@@ -1,7 +1,7 @@
 
 _self.include( "config.nut" );
 
-function pg_run( mParams )
+function pg_signup( mParams )
 {
 	local db = CSqSQLite();
 //	db.DebugMode( 1 );

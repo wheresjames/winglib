@@ -128,8 +128,16 @@ public:
 		HTTP_VERSION_NOT_SUPPORTED = 505,
 	};
 
+	enum
+	{
+		eAuthMappedFolder = 1
+	};
+
 	/// Server callback
 	typedef oexINT (*PFN_Callback)( oexPVOID x_pData, THttpSession< T_PORT > *x_pSession );
+
+	/// Authentication callback
+	typedef oexINT (*PFN_Authenticate)( oexPVOID x_pData, THttpSession< T_PORT > *x_pSession, oexLONG lType, oexCSTR pData );
 
 	/// Byte type
 	typedef CBin::t_byte	t_byte;
@@ -153,11 +161,14 @@ public:
 		m_bEnableCompression = oexFALSE;
 #endif
 		m_fnCallback = oexNULL;
+		m_fnAuthenticate = oexNULL;
 		m_pData = oexNULL;
 		m_bNewSession = oexTRUE;
 		m_uSessionTimeout = 60 * 60;
 		m_ppbSession = oexNULL;
 		m_plockSession = oexNULL;
+		m_pMappedFolders = oexNULL;
+		m_pMappedFoldersLock = oexNULL;
     }
 
     THttpSession( T_PORT *x_pPort )
@@ -172,11 +183,14 @@ public:
 		m_bEnableCompression = oexFALSE;
 #endif
 		m_fnCallback = oexNULL;
+		m_fnAuthenticate = oexNULL;
 		m_pData = oexNULL;
 		m_bNewSession = oexTRUE;
 		m_uSessionTimeout = 60 * 60;
 		m_ppbSession = oexNULL;
 		m_plockSession = oexNULL;
+		m_pMappedFolders = oexNULL;
+		m_pMappedFoldersLock = oexNULL;
     }
 
     /// Destructor
@@ -254,29 +268,34 @@ public:
 		if ( uContentLength && uContentLength > Rx().GetMaxRead() )
 			return 0;
 
-		// Are there any post variables?
-		if ( !m_pbPost.Size() && m_pbRequest[ "type" ] == "POST" )
-		{
-			// IE and Netscape append CRLF, so be sure and use
-			// the content length if available
-			if ( uContentLength )
-				m_pbPost = CParser::DecodeUrlParams( Rx().Read( uContentLength ) );
-
-			else
-				m_pbPost = CParser::DecodeUrlParams( Rx().Read() );
-
-		} // end if
-
 		// Set default headers
 		DefaultHeaders();
 
-		// Do the processing
-		if ( OnProcessRequest() )
-			SendReply();
+		// Check for mapped foders first
+		if ( !ProcessMappedFolders() )
+		{
+			// Are there any post variables?
+			if ( !m_pbPost.Size() && m_pbRequest[ "type" ] == "POST" )
+			{
+				// IE and Netscape append CRLF, so be sure and use
+				// the content length if available
+				if ( uContentLength )
+					m_pbPost = CParser::DecodeUrlParams( Rx().Read( uContentLength ) );
 
-		// No hablo
-		else
-			return SendErrorMsg( HTTP_NOT_IMPLEMENTED, "Not implemented." ) ? 1 : -1;
+				else
+					m_pbPost = CParser::DecodeUrlParams( Rx().Read() );
+
+			} // end if
+
+			// Do the processing
+			if ( OnProcessRequest() )
+				SendReply();
+
+			// No hablo
+			else
+				return SendErrorMsg( HTTP_NOT_IMPLEMENTED, "Not implemented." ) ? 1 : -1;
+
+		} // end if
 
 		// Count a transaction
         m_nTransactions++;
@@ -285,6 +304,41 @@ public:
 		m_bHeaderReceived = oexFALSE;
 
 		return 1;
+	}
+
+	oexBOOL ProcessMappedFolders()
+	{
+		// Mapped folders?
+		if ( !m_pMappedFolders || !m_pMappedFoldersLock )
+			return oexFALSE;
+
+		oexAutoLock ll( m_pMappedFoldersLock );
+		if ( !ll.IsLocked() )
+			return oexFALSE;
+
+		CStr8 sPath = m_pbRequest[ "path" ].ToString();
+		sPath.LTrim( "\\/" );
+		CStr8 sName = sPath.Parse( "\\/" );
+		if ( !sName.Length() || !m_pMappedFolders->IsKey( sName ) )
+			return oexFALSE;
+
+		if ( m_fnAuthenticate )
+			if ( 0 > m_fnAuthenticate( m_pData, this, eAuthMappedFolder, sName.Ptr() ) )
+			{	SendErrorMsg( HTTP_FORBIDDEN, "Access denied" );
+				return oexTRUE;
+			} // end if
+
+		CStr8 sFile = oexStrToMb( oexGetModulePath() );
+		sFile.BuildPath( (*m_pMappedFolders)[ sName ].ToString() );
+		sFile.BuildPath( sPath );
+
+		if ( !oexExists( oexMbToStr( sFile ).Ptr() ) )
+		{	SendErrorMsg( HTTP_NOT_FOUND, "File not found" );
+			return oexTRUE;
+		} // end if
+
+		return SendFile( sFile.Ptr() );
+
 	}
 
 
@@ -827,6 +881,14 @@ public:
 	void SetCallback( oexPVOID x_pCallback, oexPVOID x_pData )
 	{	m_fnCallback = (PFN_Callback)x_pCallback; m_pData = x_pData; }
 
+	/// Sets a authentication function
+	void SetAuthentication( PFN_Authenticate x_fnAuthenticate, oexPVOID x_pData )
+	{	m_fnAuthenticate = x_fnAuthenticate; m_pData = x_pData; }
+
+	/// Sets a authentication function
+	void SetAuthentication( oexPVOID x_fnAuthenticate, oexPVOID x_pData )
+	{	m_fnAuthenticate = x_fnAuthenticate; m_pData = x_pData; }
+
 	/// Sets the log file name
 	oexBOOL SetLogFile( oexCSTR x_pLog )
 	{	m_sLog = x_pLog;
@@ -1010,6 +1072,10 @@ public:
 	oexLONG GetTransactionId()
 	{	return m_nTransactionId; }
 
+	/// Sets the mapped folders list
+	void SetMappedFoldersList( CStrAssoList *pList, oexLock *pLock )
+	{	m_pMappedFolders = pList; m_pMappedFoldersLock = pLock; }
+
 private:
 
 	/// Our port
@@ -1060,6 +1126,9 @@ private:
 	/// Pointer to callback function
 	PFN_Callback		    	m_fnCallback;
 
+	/// Pointer to authentication function
+	PFN_Authenticate			m_fnAuthenticate;
+
 	/// Data passed to callback function
 	oexPVOID					m_pData;
 
@@ -1093,4 +1162,9 @@ private:
 	/// Sets our transaction id
 	oexLONG						m_nTransactionId;
 
+	/// Pointer to list of mapped folders
+	CStrAssoList				*m_pMappedFolders;
+
+	/// Pointer to mapped folders lock
+	oexLock						*m_pMappedFoldersLock;
 };

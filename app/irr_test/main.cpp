@@ -26,6 +26,9 @@ public:
 					Device->closeDevice();
 					return true;
 				} break;
+
+				default :
+					break;
 			}
 		}
 

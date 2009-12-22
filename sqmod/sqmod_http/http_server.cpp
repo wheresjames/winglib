@@ -12,6 +12,11 @@ void CHttpServer::SetSessionCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sq
 	m_sSession = sSession;
 }
 
+void CHttpServer::SetAuthenticationCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sAuthenticate )
+{	m_pAuthenticateMsgQueue = x_pMsgQueue;
+	m_sAuthenticate = sAuthenticate;
+}
+
 void CHttpServer::SetSessionCallbackScript( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sScript, int bFile, const sqbind::stdString &sSession )
 {	m_pSessionMsgQueue = x_pMsgQueue;
 	m_sScript = sScript;
@@ -218,4 +223,37 @@ void CHttpServer::EnableScriptLinger( int bEnable )
 int CHttpServer::GetNumActiveClients()
 {
 	return m_server.GetNumActiveClients();
+}
+
+int CHttpServer::MapFolder( const sqbind::stdString &sName, const sqbind::stdString &sFolder )
+{
+	return m_server.MapFolder( sName.c_str(), sFolder.c_str() );
+}
+
+oex::oexINT CHttpServer::_OnAuthenticate( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession, oex::oexLONG lType, oex::oexCSTR pData )
+{
+	CHttpServer *pServer = (CHttpServer*)x_pData;
+	if ( !oexCHECK_PTR( pServer ) )
+		return -1;
+
+	if ( !oexCHECK_PTR( x_pSession ) )
+		return -2;
+
+	return pServer->OnAuthenticate( x_pData, x_pSession, lType, pData );
+}
+
+oex::oexINT CHttpServer::OnAuthenticate( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession, oex::oexLONG lType, oex::oexCSTR pData )
+{
+	if ( !m_pAuthenticateMsgQueue )
+		return 0;
+
+	if ( !pData )
+		pData = oexT( "" );
+
+	sqbind::stdString sType = oexMks( lType ).Ptr();
+	sqbind::stdString sData = ( pData ? pData : oexT( "" ) );
+
+	sqbind::stdString sReply;
+	m_pAuthenticateMsgQueue->execute( &sReply, oexT( "." ), m_sAuthenticate, sType, sData );
+	return (oex::oexINT)oexStrToLong( sReply.c_str() );
 }

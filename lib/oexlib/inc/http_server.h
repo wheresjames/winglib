@@ -351,6 +351,9 @@ protected:
 		// Let the session know the server id
 		session.SetServerId( m_sServerId );
 
+		// Mapped folders
+		session.SetMappedFoldersList( &m_lstMappedFolders, &m_lockMappedFolders );
+
 		// Enable sessions?
 		if ( m_bEnableSessions )
 			session.SetSessionObject( &m_pbSession, &m_lockSession );
@@ -621,6 +624,20 @@ public:
 	void EnableMultiThreading( oexBOOL b )
 	{	m_bMultiThreaded = b; }
 
+	/// Maps / unmaps a folder
+	oexBOOL MapFolder( oexCSTR pName, oexCSTR pFolder )
+	{
+		if ( !pName || !*pName )
+			return oexFALSE;
+
+		if ( pFolder && *pFolder )
+			m_lstMappedFolders[ pName ] = pFolder;
+		else
+			m_lstMappedFolders.Unset( pName );
+
+		return oexTRUE;
+	}
+
 private:
 
 	/// The TCP port to listen
@@ -682,5 +699,11 @@ private:
 
 	/// Session info lock
 	oexLock						m_lockSessionInfo;
+
+	/// Lock for the mapped folders list
+	oexLock						m_lockMappedFolders;
+
+	/// List of mapped folders
+	CStrAssoList				m_lstMappedFolders;
 
 };

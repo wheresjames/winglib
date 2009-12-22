@@ -13,16 +13,31 @@ class CGlobal
 
 local _g = CGlobal();
 
+function OnAuthenticate( type, data )
+{
+	_self.echo( "Authenticate : " + type + ", " + data );
+
+	return 1;
+}
+
 function _init() : ( _g )
 {
-	// Set callback script
-	_g.server.SetSessionCallbackScript( _self.queue(), "web_session.nut", 1, "OnProcessRequest" );
-
 	// Create logs folder
 	CSqFile().mkdir( _self.root( "weblogs" ) );
 
 	SetWebLog();
 
+	// Multi-threaded
+//	_g.server.SetSessionCallbackScript( _self.queue(), "session.nut", 1, "OnProcessRequest" );
+
+	// Single-threaded
+	_self.include( "web_session.nut" );
+	_g.server.SetSessionCallback( _self.queue(), "OnProcessRequest" );
+	_g.server.SetAuthenticationCallback( _self.queue(), "OnAuthenticate" );
+
+	_g.server.MapFolder( "config", "cfg" );
+
+	_g.server.EnableMultiThreading( 0 );
 	if ( !_g.server.Start( _cfg( "tcp_port" ) ) )
 		_self.alert( "Unable to start http server" );
 
