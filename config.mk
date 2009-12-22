@@ -491,8 +491,9 @@ else
 	endif
 
 	ifeq ($(LIBLINK),shared)
-		CFG_LFLAGS := $(CFG_LFLAGS) -fPIC
-		CFG_CFLAGS := $(CFG_CFLAGS) -fPIC
+		CFG_LFLAGS := $(CFG_LFLAGS)
+		CFG_CFLAGS := $(CFG_CFLAGS)
+#		CFG_CFLAGS := $(CFG_CFLAGS) -fPIC
 	endif
 
 	ifeq ($(PRJ_TYPE),dll)

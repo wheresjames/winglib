@@ -13,6 +13,7 @@ irrlicht-es
 j2k
 jpeg
 libsoup
+libvmime
 libxml
 live555
 mysql
@@ -20,6 +21,7 @@ ogles
 ogles-src
 opencv
 pixman
+poco
 png
 pthreads
 scintilla

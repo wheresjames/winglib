@@ -56,13 +56,13 @@
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
-#undef HAVE_DIRENT_H
+#define HAVE_DIRENT_H
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
-#undef HAVE_DLFCN_H
+#define HAVE_DLFCN_H
 
 /* Define to 1 if you have the <features.h> header file. */
-#undef HAVE_FEATURES_H
+#define HAVE_FEATURES_H
 
 /* has gcc atomic functions */
 #undef HAVE_GCC_BITS_ATOMIC
@@ -74,109 +74,109 @@
 #undef HAVE_HIRES_TIMER
 
 /* Define if you have the iconv() function. */
-#undef HAVE_ICONV
+#define HAVE_ICONV
 
 /* Define to 1 if you have the <inttypes.h> header file. */
-#undef HAVE_INTTYPES_H
+#define HAVE_INTTYPES_H
 
 /* Define to 1 if you have the `malloc' library (-lmalloc). */
-#undef HAVE_LIBMALLOC
+#define HAVE_LIBMALLOC
 
 /* Define to 1 if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
+#define HAVE_MEMORY_H
 
 /* Define to 1 if you have the `mlock' function. */
-#undef HAVE_MLOCK
+#define HAVE_MLOCK
 
 /* Define to 1 if you have the `mlockall' function. */
-#undef HAVE_MLOCKALL
+#define HAVE_MLOCKALL
 
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
-#undef HAVE_NDIR_H
+#define HAVE_NDIR_H
 
 /* Define to 1 if you have the <netdb.h> header file. */
-#undef HAVE_NETDB_H
+#define HAVE_NETDB_H
 
 /* has pwrite */
-#undef HAVE_PREAD_PWRITE
+#define HAVE_PREAD_PWRITE
 
 /* Define if you have POSIX threads libraries and header files. */
-#undef HAVE_PTHREAD
+#define HAVE_PTHREAD
 
 /* has stack size */
-#undef HAVE_PTHREAD_ATTR_SETSTACKSIZE
+#define HAVE_PTHREAD_ATTR_SETSTACKSIZE
 
 /* has cancel */
-#undef HAVE_PTHREAD_CANCEL
+#define HAVE_PTHREAD_CANCEL
 
 /* has non portable delay */
 #undef HAVE_PTHREAD_DELAY_NP
 
 /* posix thread header */
-#undef HAVE_PTHREAD_H
+#define HAVE_PTHREAD_H
 
 /* has mach link */
 #undef HAVE_PTHREAD_MACH_THREAD_NP
 
 /* has non portable setkind */
-#undef HAVE_PTHREAD_MUTEXATTR_SETKIND_NP
+#define HAVE_PTHREAD_MUTEXATTR_SETKIND_NP
 
 /* has setttype */
-#undef HAVE_PTHREAD_MUTEXATTR_SETTYPE
+#define HAVE_PTHREAD_MUTEXATTR_SETTYPE
 
 /* has non portable settype */
 #undef HAVE_PTHREAD_MUTEXATTR_SETTYPE_NP
 
 /* has nanosleep */
-#undef HAVE_PTHREAD_NANOSLEEP
+#define HAVE_PTHREAD_NANOSLEEP
 
 /* Define to 1 if you have the <pthread_np.h> header file. */
-#undef HAVE_PTHREAD_NP_H
+#define HAVE_PTHREAD_NP_H
 
 /* has rwlock support */
-#undef HAVE_PTHREAD_RWLOCK
+#define HAVE_PTHREAD_RWLOCK
 
 /* has sched yield */
-#undef HAVE_PTHREAD_SCHED_YIELD
+#define HAVE_PTHREAD_SCHED_YIELD
 
 /* has setcancel */
-#undef HAVE_PTHREAD_SETCANCEL
+#define HAVE_PTHREAD_SETCANCEL
 
 /* has setcanceltype */
-#undef HAVE_PTHREAD_SETCANCELTYPE
+#define HAVE_PTHREAD_SETCANCELTYPE
 
 /* has suspend */
 #undef HAVE_PTHREAD_SUSPEND
 
 /* has yield */
-#undef HAVE_PTHREAD_YIELD
+#define HAVE_PTHREAD_YIELD
 
 /* has np yield */
 #undef HAVE_PTHREAD_YIELD_NP
 
 /* Define to 1 if you have the `sched_getscheduler' function. */
-#undef HAVE_SCHED_GETSCHEDULER
+#define HAVE_SCHED_GETSCHEDULER
 
 /* Define to 1 if you have the <sched.h> header file. */
-#undef HAVE_SCHED_H
+#define HAVE_SCHED_H
 
 /* Define to 1 if you have the <semaphore.h> header file. */
-#undef HAVE_SEMAPHORE_H
+#define HAVE_SEMAPHORE_H
 
 /* Define to 1 if stdbool.h conforms to C99. */
-#undef HAVE_STDBOOL_H
+#define HAVE_STDBOOL_H
 
 /* Define to 1 if you have the <stdint.h> header file. */
-#undef HAVE_STDINT_H
+#define HAVE_STDINT_H
 
 /* Define to 1 if you have the <stdlib.h> header file. */
-#undef HAVE_STDLIB_H
+#define HAVE_STDLIB_H
 
 /* Define to 1 if you have the <strings.h> header file. */
-#undef HAVE_STRINGS_H
+#define HAVE_STRINGS_H
 
 /* Define to 1 if you have the <string.h> header file. */
-#undef HAVE_STRING_H
+#define HAVE_STRING_H
 
 /* Define to 1 if you have the <sys/atomic.h> header file. */
 #undef HAVE_SYS_ATOMIC_H
@@ -186,47 +186,47 @@
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
-#undef HAVE_SYS_DIR_H
+#define HAVE_SYS_DIR_H
 
 /* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
    */
-#undef HAVE_SYS_NDIR_H
+#define HAVE_SYS_NDIR_H
 
 /* Define to 1 if you have the <sys/sched.h> header file. */
-#undef HAVE_SYS_SCHED_H
+#define HAVE_SYS_SCHED_H
 
 /* Define to 1 if you have the <sys/socket.h> header file. */
-#undef HAVE_SYS_SOCKET_H
+#define HAVE_SYS_SOCKET_H
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
-#undef HAVE_SYS_STAT_H
+#define HAVE_SYS_STAT_H
 
 /* Define to 1 if you have the <sys/time.h> header file. */
-#undef HAVE_SYS_TIME_H
+#define HAVE_SYS_TIME_H
 
 /* Define to 1 if you have the <sys/types.h> header file. */
-#undef HAVE_SYS_TYPES_H
+#define HAVE_SYS_TYPES_H
 
 /* Define to 1 if you have the <thread.h> header file. */
 #undef HAVE_THREAD_H
 
 /* have unix header */
-#undef HAVE_UNISTD_H
+#define HAVE_UNISTD_H
 
 /* has usable atomic functions */
 #undef HAVE_WORKING_SYS_ATOMIC_H
 
 /* Define to 1 if the system has the type `_Bool'. */
-#undef HAVE__BOOL
+#define HAVE__BOOL
 
 /* Define as const if the declaration of iconv() needs const. */
-#undef ICONV_CONST
+#define ICONV_CONST
 
 /* Define to 1 if your C compiler doesn't accept -c and -o together. */
 #undef NO_MINUS_C_MINUS_O
 
 /* Name of package */
-#undef PACKAGE
+#define PACKAGE "vmime"
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT

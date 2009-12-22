@@ -40,6 +40,22 @@ int run(int argc, char* argv[])
 				sCmd = pb[ oexT( "cmd" ) ].ToString();
 
 		} // end if
+		
+		else
+		{
+			sSettings = oexGetModuleFileName() << oexT( ".cfg.txt" );
+			if ( oex::CFile::Exists( sSettings.Ptr() ) )
+			{
+				// Decode settings file
+				oex::CPropertyBag pb = oex::CParser::DecodeIni( oexMbToStr( oex::CFile().OpenExisting( sSettings.Ptr() ).Read() ) );
+
+				// Command line?
+				if ( pb.IsKey( oexT( "cmd" ) ) )
+					sCmd = pb[ oexT( "cmd" ) ].ToString();
+
+			} // end if
+			
+		} // end else
 
 	} // end if
 

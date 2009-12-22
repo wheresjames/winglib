@@ -48,6 +48,9 @@ LOC_EXC_def := DirectoryIterator_UNIX DirectoryIterator_VMS DirectoryIterator_WI
 			   SharedMemory_DUMMY SharedMemory_POSIX SharedMemory_WIN32 SharedMemory_WIN32U \
 			   Thread_POSIX Thread_WIN32 Thread_WIN32U Timezone_UNIX Timezone_WIN32 \
 			   OpcomChannel	SyslogChannel
+ifneq ($(PLATFORM),windows)
+	LOC_EXC_def := $(LOC_EXC_def) EventLogChannel WindowsConsoleChannel
+endif
 include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := net
