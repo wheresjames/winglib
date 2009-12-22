@@ -10,6 +10,9 @@ PRJ_INCS := ffmpeg
 PRJ_LIBS := 
 PRJ_DEFS := HAVE_AV_CONFIG_H=1 FFMPEG_LICENSE=""
 
+# sux, but can't define -fPIC for ffmpeg, at least atm
+PRJ_NPIC := 1
+
 PRJ_LIBROOT := ..
 PRJ_OBJROOT := _0_dep
 
