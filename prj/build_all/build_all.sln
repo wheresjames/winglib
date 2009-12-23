@@ -1,24 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "build_all", "build_all.vcproj", "{DC2772E5-4496-4053-920C-B52FBB27A409}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug (Shared)|Win32 = Debug (Shared)|Win32
 		Debug|Win32 = Debug|Win32
 		Release (Shared)|Win32 = Release (Shared)|Win32
 		Release|Win32 = Release|Win32
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DC2772E5-4496-4053-920C-B52FBB27A409}.Debug (Shared)|Win32.ActiveCfg = Debug|Win32
-		{DC2772E5-4496-4053-920C-B52FBB27A409}.Debug (Shared)|Win32.Build.0 = Debug|Win32
-		{DC2772E5-4496-4053-920C-B52FBB27A409}.Debug|Win32.ActiveCfg = Debug|Win32
-		{DC2772E5-4496-4053-920C-B52FBB27A409}.Debug|Win32.Build.0 = Debug|Win32
-		{DC2772E5-4496-4053-920C-B52FBB27A409}.Release (Shared)|Win32.ActiveCfg = Release|Win32
-		{DC2772E5-4496-4053-920C-B52FBB27A409}.Release (Shared)|Win32.Build.0 = Release|Win32
-		{DC2772E5-4496-4053-920C-B52FBB27A409}.Release|Win32.ActiveCfg = Release|Win32
-		{DC2772E5-4496-4053-920C-B52FBB27A409}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

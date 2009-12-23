@@ -10,7 +10,8 @@ PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 			libvmime
 
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib \
-		    vmime gnutls gsasl
+		    vmime 
+#		    gnutls gsasl
 PRJ_DEFS := VMIME_HAVE_MESSAGING_FEATURES VMIME_HAVE_FILESYSTEM_FEATURES
 #			GSASL_API= ASN1_API= \
 #			VMIME_HAVE_TLS_SUPPORT VMIME_HAVE_SASL_SUPPORT

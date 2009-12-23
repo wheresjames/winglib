@@ -6,8 +6,8 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := vmime
 PRJ_TYPE := lib
-PRJ_INCS := libvmime gnutls/lib/includes gnutls/libextra/includes \
-			libgsasl/src
+PRJ_INCS := libvmime
+#			gnutls/lib/includes gnutls/libextra/includes libgsasl/src
 PRJ_LIBS := 
 PRJ_DEFS := VMIME_PACKAGE=\"\" VMIME_VERSION=\"\" VMIME_API=\"\" \
 			VMIME_HAVE_MESSAGING_FEATURES VMIME_HAVE_FILESYSTEM_FEATURES \
