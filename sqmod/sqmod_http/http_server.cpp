@@ -29,6 +29,9 @@ int CHttpServer::Start( int nPort )
 	// Set session callback
 	m_server.SetSessionCallback( (oex::oexPVOID)CHttpServer::_OnSessionCallback, this );
 
+	// Set session callback
+	m_server.SetAuthCallback( (oex::oexPVOID)CHttpServer::_OnAuthenticate, this );
+
 	// Enable sessions by default
 	m_server.EnableSessions( oex::oexTRUE );
 
@@ -247,13 +250,15 @@ oex::oexINT CHttpServer::OnAuthenticate( oex::oexPVOID x_pData, oex::THttpSessio
 	if ( !m_pAuthenticateMsgQueue )
 		return 0;
 
-	if ( !pData )
-		pData = oexT( "" );
-
 	sqbind::stdString sType = oexMks( lType ).Ptr();
 	sqbind::stdString sData = ( pData ? pData : oexT( "" ) );
 
+	sqbind::CSqMulti mParams;
+	SQBIND_PropertyBag8ToMulti( x_pSession->RxHeaders(), mParams[ oexT( "HEADERS" ) ] );
+	SQBIND_PropertyBag8ToMulti( x_pSession->Request(), mParams[ oexT( "REQUEST" ) ] );
+	SQBIND_PropertyBag8ToMulti( x_pSession->Session(), mParams[ oexT( "SESSION" ) ] );
+
 	sqbind::stdString sReply;
-	m_pAuthenticateMsgQueue->execute( &sReply, oexT( "." ), m_sAuthenticate, sType, sData );
+	m_pAuthenticateMsgQueue->execute( &sReply, oexT( "." ), m_sAuthenticate, sType, sData, mParams.serialize() );
 	return (oex::oexINT)oexStrToLong( sReply.c_str() );
 }

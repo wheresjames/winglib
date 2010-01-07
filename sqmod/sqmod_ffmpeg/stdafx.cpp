@@ -223,7 +223,9 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 
 	// Register codecs
 	av_register_all();
+#if !defined( OEX_WINDOWS )
 	avdevice_register_all();
+#endif
 
     SQBIND_EXPORT( x_vm, CFfDecoder );
     SQBIND_EXPORT( x_vm, CFfEncoder );

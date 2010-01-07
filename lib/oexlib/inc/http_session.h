@@ -130,6 +130,8 @@ public:
 
 	enum
 	{
+		eAuthRequest = 0,
+
 		eAuthMappedFolder = 1
 	};
 
@@ -161,8 +163,9 @@ public:
 		m_bEnableCompression = oexFALSE;
 #endif
 		m_fnCallback = oexNULL;
-		m_fnAuthenticate = oexNULL;
 		m_pData = oexNULL;
+		m_fnAuthenticate = oexNULL;
+		m_pAuthData = oexNULL;
 		m_bNewSession = oexTRUE;
 		m_uSessionTimeout = 60 * 60;
 		m_ppbSession = oexNULL;
@@ -274,6 +277,11 @@ public:
 		// Check for mapped foders first
 		if ( !ProcessMappedFolders() )
 		{
+			// Call authentication function if any
+			if ( m_fnAuthenticate )
+				if ( 0 > m_fnAuthenticate( m_pAuthData, this, eAuthRequest, oexMbToStr( m_pbRequest[ "path" ].ToString() ).Ptr() ) )
+					return SendErrorMsg( HTTP_FORBIDDEN, "Access denied" );
+
 			// Are there any post variables?
 			if ( !m_pbPost.Size() && m_pbRequest[ "type" ] == "POST" )
 			{
@@ -323,13 +331,46 @@ public:
 			return oexFALSE;
 
 		if ( m_fnAuthenticate )
-			if ( 0 > m_fnAuthenticate( m_pData, this, eAuthMappedFolder, sName.Ptr() ) )
+			if ( 0 > m_fnAuthenticate( m_pAuthData, this, eAuthMappedFolder, oexMbToStr( sName ).Ptr() ) )
 			{	SendErrorMsg( HTTP_FORBIDDEN, "Access denied" );
 				return oexTRUE;
 			} // end if
 
+		CStr sMapped = (*m_pMappedFolders)[ sName ].ToString();
+
+oexSHOW( sMapped );
+
+		// Is it a resource?
+		if ( oexIsResources() )
+		{
+			oexM();
+
+			if( oexT( '#' ) == *sMapped.Ptr() )
+		{
+			// Drop the '#'
+			sMapped++;
+
+			// Build full path
+			sMapped.BuildPath( sPath );
+
+oexSHOW( sMapped );
+
+			// Get the resource
+			if ( !oexGetResource( sMapped, &m_sContent ) )
+			{	SendErrorMsg( HTTP_NOT_FOUND, "File not found" );
+				return oexTRUE;
+			} // end if
+
+			// Send the reply
+			SendReply();
+
+			return oexTRUE;
+
+		} // end if
+		} // end if
+
 		CStr8 sFile = oexStrToMb( oexGetModulePath() );
-		sFile.BuildPath( (*m_pMappedFolders)[ sName ].ToString() );
+		sFile.BuildPath( sMapped );
 		sFile.BuildPath( sPath );
 
 		if ( !oexExists( oexMbToStr( sFile ).Ptr() ) )
@@ -337,8 +378,10 @@ public:
 			return oexTRUE;
 		} // end if
 
-		return SendFile( sFile.Ptr() );
+		if ( !SendFile( sFile.Ptr() ) )
+			SendErrorMsg( HTTP_SERVER_ERROR, "File error" );
 
+		return oexTRUE;
 	}
 
 
@@ -795,7 +838,7 @@ public:
 		if ( oexCHECK_PTR( x_pType ) && *x_pType )
 			SetContentType( oexStrToMbPtr( x_pType ) );
 		else
-			SetContentType( "" );
+			SetContentType( x_pFile );
 
 		CFile f;
 		if ( !f.OpenExisting( x_pFile ).IsOpen() )
@@ -882,12 +925,12 @@ public:
 	{	m_fnCallback = (PFN_Callback)x_pCallback; m_pData = x_pData; }
 
 	/// Sets a authentication function
-	void SetAuthentication( PFN_Authenticate x_fnAuthenticate, oexPVOID x_pData )
-	{	m_fnAuthenticate = x_fnAuthenticate; m_pData = x_pData; }
+	void SetAuthCallback( PFN_Authenticate x_fnAuthenticate, oexPVOID x_pData )
+	{	m_fnAuthenticate = x_fnAuthenticate; m_pAuthData = x_pData; }
 
 	/// Sets a authentication function
-	void SetAuthentication( oexPVOID x_fnAuthenticate, oexPVOID x_pData )
-	{	m_fnAuthenticate = x_fnAuthenticate; m_pData = x_pData; }
+	void SetAuthCallback( oexPVOID x_fnAuthenticate, oexPVOID x_pData )
+	{	m_fnAuthenticate = (PFN_Authenticate)x_fnAuthenticate; m_pAuthData = x_pData; }
 
 	/// Sets the log file name
 	oexBOOL SetLogFile( oexCSTR x_pLog )
@@ -1126,11 +1169,14 @@ private:
 	/// Pointer to callback function
 	PFN_Callback		    	m_fnCallback;
 
+	/// Data passed to callback function
+	oexPVOID					m_pData;
+
 	/// Pointer to authentication function
 	PFN_Authenticate			m_fnAuthenticate;
 
 	/// Data passed to callback function
-	oexPVOID					m_pData;
+	oexPVOID					m_pAuthData;
 
 	/// Non-zero to enable compression
 	oexBOOL						m_bEnableCompression;

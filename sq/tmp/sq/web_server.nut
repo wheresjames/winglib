@@ -13,11 +13,22 @@ class CGlobal
 
 local _g = CGlobal();
 
-function OnAuthenticate( type, data )
+function OnAuthenticate( type, data, params )
 {
-	_self.echo( "Authenticate : " + type + ", " + data );
+	local mParams = CSqMulti();
+	mParams.deserialize( params );
+//	_self.echo( mParams.print_r( 1 ) );
+	_self.echo( type + ":" + data + " - " + mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str() + " - " + mParams[ "REQUEST" ][ "REQUEST_STRING" ].str() );
 
-	return 1;
+	if ( !type )
+		return 1;
+
+	if ( mParams[ "SESSION" ].isset( "user" ) )
+		return 1;
+
+	_self.echo( "denied" );
+
+	return -1;
 }
 
 function _init() : ( _g )

@@ -342,6 +342,9 @@ protected:
 		// Set the callback function for the data
 		session.SetCallback( m_pSessionCallback, m_pSessionData );
 
+		// Set the authentication callback
+		session.SetAuthCallback( m_pAuthCallback, m_pAuthData );
+
 		// Connect the port
 		session.SetPort( &port );
 
@@ -595,6 +598,10 @@ public:
 	void SetSessionCallback( oexPVOID x_pCallback, oexPVOID x_pData )
 	{	m_pSessionCallback = x_pCallback; m_pSessionData = x_pData; }
 
+	/// Sets the session callback function
+	void SetAuthCallback( oexPVOID x_pCallback, oexPVOID x_pData )
+	{	m_pAuthCallback = x_pCallback; m_pAuthData = x_pData; }
+
 	/// Returns the number of active sessions
 	oexINT GetNumActiveClients()
 	{	return m_lstSessionThread.Size() + m_lstSessionInfo.Size(); }
@@ -669,6 +676,12 @@ private:
 
 	/// Pointer to session callback function
 	oexPVOID					m_pSessionCallback;
+
+	/// Data passed to session callback
+	oexPVOID					m_pAuthData;
+
+	/// Pointer to session callback function
+	oexPVOID					m_pAuthCallback;
 
 	/// Log file name
 	CStr						m_sLog;

@@ -524,9 +524,10 @@ namespace os
 #include "inc/circ_buf.h"
 #include "inc/fifo_sync.h"
 #include "inc/data_packet.h"
+#include "inc/resources.h"
+
 #include "inc/image.h"
 #include "inc/sqlite.h"
-
 #include "inc/http_session.h"
 #include "inc/http_server.h"
 
@@ -578,7 +579,6 @@ namespace vid
 //------------------------------------------------------------------
 #include "inc/mem_leak.h"
 #include "inc/util.h"
-#include "inc/oex_resources.h"
 
 //------------------------------------------------------------------
 // Init / Uninit
@@ -686,6 +686,9 @@ public:
 	/// Returns a pointer to the binary buffer share
 	static CBinShare& GetBinShare();
 
+	/// Returns a pointer to the binary buffer share
+	static COexResourceHelper& GetResourceHelper();
+
 private:
 
 	/// oexlib startup result
@@ -696,6 +699,9 @@ private:
 
 	/// This is just to warn of improper initialization or shutdown
 	static CVerifyStartup		m_cVerifyStartup;
+
+	/// Resource helper for this module
+	static COexResourceHelper	m_cResourceHelper;
 
 };
 

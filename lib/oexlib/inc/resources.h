@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// oex_memory.h
+// resources.h
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -34,79 +34,71 @@
 
 #pragma once
 
-typedef void* (*PFN_malloc)( oexSIZE_T size );
-typedef void* (*PFN_realloc)( oexPVOID ptr, oexSIZE_T size );
-typedef void (*PFN_free)( oexPVOID free );
+#if !defined( OEX_RESOURCES )
+#	define OEX_NO_RESOURCES 1
+#endif
 
-class CMemLeak;
-class CBinShare;
-class CLog;
-class COexResourceHelper;
-struct SRawAllocator
+struct _SOexResourceInfo
 {
-	/// Allocates memory
-	PFN_malloc			fMalloc;
-
-	/// Resizes a memory block
-	PFN_realloc			fRealloc;
-
-	/// Frees a memory block
-	PFN_free			fFree;
-
-	/// Binary shares
-	CBinShare			*pBinShare;
-
-	/// Memory leak tracker
-	CMemLeak			*pMemLeak;
-
-	/// Logging class
-	CLog				*pLog;
-
-	/// Resource helper
-	COexResourceHelper	*pResourceHelper;
+	const char *   name;
+	const char *   data;
+	unsigned long  size;
 };
 
-class CMem
+class COexResourceHelper
 {
-private:
-	CMem()
-    {}
-	virtual ~CMem()
-    {}
+public:
+
+	/// Initializes resource engine
+	static oexBOOL InitResources();
 
 public:
 
-    static oexBOOL DumpLeaks();
+	/// Constructor
+	COexResourceHelper();
 
-    static oexBOOL MemReport();
+	/// Constructor
+	COexResourceHelper( const _SOexResourceInfo *pRes );
 
-    static oexPVOID New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile  );
+	/// Constructs class from resource name
+	COexResourceHelper( CStr sName );
 
-    static oexPVOID Resize( oexPVOID x_pMem, oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile  );
+	/// Returns non-zero if there is a resource list
+	oexBOOL IsResources();
 
-    static void Delete( oexPVOID x_pMem );
+	/// Sets the pointer to the resource array
+	void SetResourcePtr( const _SOexResourceInfo *pRes );
 
-	/// Returns a copy of the raw allocator function pointers
-	static SRawAllocator GetDefaultAllocator()
-	{	return m_def; }
+	/// Returns resource data
+	CStr8 GetResource( CStr sName );
 
-	/// Returns a copy of the raw allocator function pointers
-	static SRawAllocator GetRawAllocator()
-	{	return m_ra; }
+	/// Returns resource data
+	oexBOOL GetResource( CStr sName, CStr8 *pRes );
 
-	/// Sets the raw allocator function pointers
-	static void SetRawAllocator( SRawAllocator x_ra )
-	{	m_ra = x_ra; }
+	/// Gets resource data for specified index
+	CStr8 GetResource( oexLONG i );
 
-	/// Sets the default raw allocator function pointers
-	static void SetDefaultRawAllocator()
-	{	m_ra = m_def; }
+	/// Returns resource pointer for specified name
+	oexLONG GetResource( CStr sName, const void ** p, oexLONG *l );
+
+	/// Returns resource pointer for specified index
+	oexLONG GetResource( oexLONG i, const void ** p, oexLONG *l );
+
+	/// Returns specified resource size
+	oexLONG GetResourceSize( oexLONG i );
+
+	/// Returns specified resource pointer
+	oexCPVOID GetResourcePtr( oexLONG i );
+
+	/// Returns the resource name for the specified index
+	CStr GetResourceName( oexLONG i );
+
+	/// Gets total resource count
+	oexLONG GetResourceCount();
 
 private:
 
-	/// Raw allocator used for all memory allocations
-	static SRawAllocator	m_ra;
-
-	/// The default raw allocator
-	static SRawAllocator	m_def;
+	/// Pointer to resources
+	const _SOexResourceInfo		*m_oexlib_resources_ptr; 
 };
+

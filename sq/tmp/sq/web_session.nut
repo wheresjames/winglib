@@ -17,8 +17,8 @@ function OnProcessRequest( params )
 {
 	local mParams = CSqMulti();
 	mParams.deserialize( params );
-	_self.echo( mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str()
-				+ " : " + mParams[ "REQUEST" ][ "REQUEST_STRING" ].str() );
+//	_self.echo( mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str()
+//				+ " : " + mParams[ "REQUEST" ][ "REQUEST_STRING" ].str() );
 
 	local mReply = CSqMap();
 	local page = "Access Denied";

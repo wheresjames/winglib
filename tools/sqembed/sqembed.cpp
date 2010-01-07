@@ -53,6 +53,9 @@ int main(int argc, char* argv[])
     // Initialize the oex library
 	oexINIT();
 
+	// Initialize resources
+	oexInitResources();
+
 	// Initialize sockets
     if ( !oex::os::CIpSocket::InitSockets() )
     	oexERROR( 0, oexT( "Unable to initialize sockets" ) );

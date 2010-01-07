@@ -236,6 +236,15 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #	define oexNL8							"\n"
 #endif
 
+// Resource macros
+#define oexInitResources()					OEX_NAMESPACE::COex::GetResourceHelper().SetResourcePtr( (const OEX_NAMESPACE::_SOexResourceInfo*)_g_oexlib_resources )
+#define oexIsResources						OEX_NAMESPACE::COex::GetResourceHelper().IsResources
+#define oexGetResource						OEX_NAMESPACE::COex::GetResourceHelper().GetResource
+#define oexGetResourceCount					OEX_NAMESPACE::COex::GetResourceHelper().GetResourceCount
+#define oexGetResourceName					OEX_NAMESPACE::COex::GetResourceHelper().GetResourceName
+#define oexGetResourceSize					OEX_NAMESPACE::COex::GetResourceHelper().GetResourceSize
+#define oexGetResourcePtr					OEX_NAMESPACE::COex::GetResourceHelper().GetResourcePtr
+
 #define oexMemCmp							OEX_NAMESPACE::os::CSys::MemCmp
 #define oexMemCpy							OEX_NAMESPACE::os::CSys::MemCpy
 #define oexMemSet							OEX_NAMESPACE::os::CSys::MemSet

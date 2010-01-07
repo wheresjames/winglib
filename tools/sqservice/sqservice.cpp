@@ -59,6 +59,9 @@ public:
 
 	virtual int OnRun()
 	{
+		// Initialize resources
+		oexInitResources();
+
 		// Initialize sockets
 		if ( !oex::os::CIpSocket::InitSockets() )
     		oexERROR( 0, oexT( "Unable to initialize sockets" ) );

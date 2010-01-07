@@ -83,6 +83,13 @@ oexINT COex::GetStartupCode()
 oexINT COex::GetShutdownCode()
 {	return m_nShutdownCode; }
 
+COexResourceHelper& COex::GetResourceHelper()
+{
+	COexResourceHelper *p = CMem::GetRawAllocator().pResourceHelper;
+	oexASSERT_PTR( p );
+	return *p;
+}
+
 CBinShare& COex::GetBinShare()
 {
 	CBinShare *p = CMem::GetRawAllocator().pBinShare;

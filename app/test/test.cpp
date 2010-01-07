@@ -2638,17 +2638,22 @@ oex::oexRESULT Test_CHttpSession()
 	if ( !oexVERIFY( 0 <= sData.Match( "HTTP/1.0" ) ) )
 		return -9;
 
-	if ( 0 > sData.Match( "Hello World!" ) )
+	int max = 10;
+	while ( 0 > sData.Match( "Hello World!" ) && max )
 	{
+		max--;
+
 		// We're not a proper client, so just wait for data
 		oexSleep( 100 );
 
-		sData = client.Read();
-
-		if ( !oexVERIFY( 0 <= sData.Match( "Hello World!" ) ) )
-			return -11;
+		sData += client.Read();
 
 	} // end if
+
+	if ( !oexVERIFY( max ) )
+	{	oexSHOW( oexMbToStr( sData ) );
+		return -11;
+	} // end if	
 
 	client.Destroy();
 
@@ -3323,6 +3328,9 @@ int main(int argc, char* argv[])
 {
     // Initialize the oex library
 	oexINIT();
+
+	// Initialize resources
+	oexInitResources();
 
     if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
         return -1;
