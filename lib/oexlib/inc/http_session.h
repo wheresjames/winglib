@@ -338,22 +338,14 @@ public:
 
 		CStr sMapped = (*m_pMappedFolders)[ sName ].ToString();
 
-oexSHOW( sMapped );
-
 		// Is it a resource?
-		if ( oexIsResources() )
-		{
-			oexM();
-
-			if( oexT( '#' ) == *sMapped.Ptr() )
+		if ( oexIsResources() && oexT( '#' ) == *sMapped.Ptr() )
 		{
 			// Drop the '#'
 			sMapped++;
 
 			// Build full path
 			sMapped.BuildPath( sPath );
-
-oexSHOW( sMapped );
 
 			// Get the resource
 			if ( !oexGetResource( sMapped, &m_sContent ) )
@@ -366,7 +358,6 @@ oexSHOW( sMapped );
 
 			return oexTRUE;
 
-		} // end if
 		} // end if
 
 		CStr8 sFile = oexStrToMb( oexGetModulePath() );
