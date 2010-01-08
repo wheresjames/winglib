@@ -94,7 +94,8 @@ extern "C" oex::oexRESULT SRV_Stop()
 extern "C" oex::oexRESULT SQBIND_Export_Symbols( sqbind::VM x_vm, sqbind::SSqAllocator *x_pAllocator )
 {
 	// Set the memory allocator
-	sqbind::SQBIND_SetAllocator( x_pAllocator );
+	// iii kinda obsolete, SRV_Start() does this now
+//	sqbind::SQBIND_SetAllocator( x_pAllocator );
 
 	/* !!! NOTICE !!!
 

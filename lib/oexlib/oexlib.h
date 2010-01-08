@@ -526,6 +526,14 @@ namespace os
 #include "inc/data_packet.h"
 #include "inc/resources.h"
 
+//------------------------------------------------------------------
+// Static features
+//------------------------------------------------------------------
+#include "inc/oex.h"
+
+//------------------------------------------------------------------
+// Higher level features
+//------------------------------------------------------------------
 #include "inc/image.h"
 #include "inc/sqlite.h"
 #include "inc/http_session.h"
@@ -580,129 +588,5 @@ namespace vid
 #include "inc/mem_leak.h"
 #include "inc/util.h"
 
-//------------------------------------------------------------------
-// Init / Uninit
-//------------------------------------------------------------------
-
-//==================================================================
-// COexlib
-//
-/// This class is just for containing the startup / shutdown code
-/**
-
-	Before using any functions in this library, be sure and call
-	oex::COex::Init().  Before your program shuts down,
-	call oex::COex::Uninit().  You may also want to run the self
-	test functions after initialization, at least in the debug
-	version.
-
-	\code
-
-	// Initialize oexlib
-	oex::COexlib::Init();
-
-	// Run self tests
-	oex::CTestManager::Run();
-
-
-	// ... Use oexlib ...
-
-
-	// Cleanup oexlib
-	oex::COexlib::Uninit();
-
-	\endcode
-
-*/
-//==================================================================
-class COex
-{
-public:
-
-	class CVerifyStartup
-	{
-	public:
-		CVerifyStartup();
-		virtual ~CVerifyStartup();
-	};
-
-private:
-	COex() {}
-	virtual ~COex() {}
-
-public:
-
-	//==============================================================
-	// Init()
-	//==============================================================
-	/// Call this function before using the oex library
-	/**
-
-		Call before using any oexlib functionality.
-
-		\return Positive non-zero value on success.  If this function
-				fails, the return value is negative.
-
-		\see Uninit()
-	*/
-	static oexINT Init();
-
-	//==============================================================
-	// Uninit()
-	//==============================================================
-	/// Call this function to clean up the oex library
-	/**
-		Call this function before your program shuts down.
-
-		\return Positive non-zero value on success.  If this function
-				fails, the return value is negative.
-
-		\see Init()
-	*/
-	static oexINT Uninit();
-
-	/// Returns the startup code
-	static oexINT GetStartupCode();
-
-	/// Returns the shutdown code
-	static oexINT GetShutdownCode();
-
-	/// Returns data for the specified session id
-	static CPropertyBag GetSessionData( CStr sId );
-
-	/// Sets the data for the specified session id
-	static oexBOOL SetSessionData( CStr sId, CPropertyBag &x_pbSession );
-
-	/// Releases data for the specified session id
-	static oexBOOL ReleaseSessionData( CStr sId );
-
-#if defined( oexDEBUG )
-
-	/// Returns a reference to the memory leak detector
-	static CMemLeak& GetMemLeak();
-
-#endif
-
-	/// Returns a pointer to the binary buffer share
-	static CBinShare& GetBinShare();
-
-	/// Returns a pointer to the binary buffer share
-	static COexResourceHelper& GetResourceHelper();
-
-private:
-
-	/// oexlib startup result
-	static oexINT				m_nStartupCode;
-
-	/// oexlib shutdown result
-	static oexINT				m_nShutdownCode;
-
-	/// This is just to warn of improper initialization or shutdown
-	static CVerifyStartup		m_cVerifyStartup;
-
-	/// Resource helper for this module
-	static COexResourceHelper	m_cResourceHelper;
-
-};
 
 OEX_END_NAMESPACE

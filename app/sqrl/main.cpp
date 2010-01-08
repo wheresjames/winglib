@@ -40,7 +40,7 @@ int run(int argc, char* argv[])
 				sCmd = pb[ oexT( "cmd" ) ].ToString();
 
 		} // end if
-		
+
 		else
 		{
 			sSettings = oexGetModuleFileName() << oexT( ".cfg.txt" );
@@ -54,7 +54,7 @@ int run(int argc, char* argv[])
 					sCmd = pb[ oexT( "cmd" ) ].ToString();
 
 			} // end if
-			
+
 		} // end else
 
 	} // end if

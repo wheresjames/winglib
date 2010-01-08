@@ -186,8 +186,9 @@ public:
 		m_bEnableCompression = oexFALSE;
 #endif
 		m_fnCallback = oexNULL;
-		m_fnAuthenticate = oexNULL;
 		m_pData = oexNULL;
+		m_fnAuthenticate = oexNULL;
+		m_pAuthData = oexNULL;
 		m_bNewSession = oexTRUE;
 		m_uSessionTimeout = 60 * 60;
 		m_ppbSession = oexNULL;
@@ -327,20 +328,27 @@ public:
 		CStr8 sPath = m_pbRequest[ "path" ].ToString();
 		sPath.LTrim( "\\/" );
 		CStr8 sName = sPath.Parse( "\\/" );
-		if ( !sName.Length() || !m_pMappedFolders->IsKey( sName ) )
+		CStr sStrName = oexMbToStr( sName );
+		if ( !sName.Length() || !m_pMappedFolders->IsKey( sStrName ) )
 			return oexFALSE;
 
 		if ( m_fnAuthenticate )
-			if ( 0 > m_fnAuthenticate( m_pAuthData, this, eAuthMappedFolder, oexMbToStr( sName ).Ptr() ) )
+			if ( 0 > m_fnAuthenticate( m_pAuthData, this, eAuthMappedFolder, sStrName.Ptr() ) )
 			{	SendErrorMsg( HTTP_FORBIDDEN, "Access denied" );
 				return oexTRUE;
 			} // end if
 
-		CStr sMapped = (*m_pMappedFolders)[ sName ].ToString();
+		CStr sMapped = (*m_pMappedFolders)[ sStrName ].ToString();
 
 		// Is it a resource?
-		if ( oexIsResources() && oexT( '#' ) == *sMapped.Ptr() )
+		if ( oexT( '#' ) == *sMapped.Ptr() )
 		{
+			// Are there any resources?
+			if ( !oexIsResources() )
+			{	SendErrorMsg( HTTP_NOT_FOUND, "File not found" );
+				return oexTRUE;
+			} // end if
+
 			// Drop the '#'
 			sMapped++;
 
@@ -829,7 +837,7 @@ public:
 		if ( oexCHECK_PTR( x_pType ) && *x_pType )
 			SetContentType( oexStrToMbPtr( x_pType ) );
 		else
-			SetContentType( x_pFile );
+			SetContentType( oexStrToMbPtr( x_pFile ) );
 
 		CFile f;
 		if ( !f.OpenExisting( x_pFile ).IsOpen() )

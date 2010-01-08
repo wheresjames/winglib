@@ -26,21 +26,10 @@ function OnProcessRequest( params )
 	local login_menu = "";
 	local loggedin = DoLogin( mParams );
 	local login_menu = loggedin ? "<a href='?logout=1'>Logout</a>" : "<a href='?login=1'>Login</a>";
-/*
-	// Is it a file request?
-	local share_name = "/jscript";
-	if ( 0 <= _self.find( mParams[ "REQUEST" ][ "path" ].str(), share_name ) )
-	{	//local file = _self.build_path( cc[ "media_root" ], CSqFile().get_filename( mParams[ "REQUEST" ][ "path" ].str() ) );
-		local file = mParams[ "REQUEST" ][ "path" ].str();
-		file = _self.replace( file, share_name, _self.root( "tmp/jscript" ) );
-		mReply.set( "file", file );
-		return mReply.serialize();
-	} // end if
-*/
-	if ( !loggedin )
-		page = CSqFile().get_contents( _self.root( "tmp/html/login.html" ) );
-
-	else
+	
+//	if ( !loggedin )
+//		page = CSqFile().get_contents( _self.root( "tmp/html/login.html" ) );
+//	else
 	{
 		local menu_items =
 		[
@@ -56,13 +45,14 @@ function OnProcessRequest( params )
 			case "" :
 			case "/" :
 			case "/home" :
-				_self.include( "pg/home.nut" );
+				_self.include_once( "pg/home.nut" );
 				page = pg_home( mParams );
 				break;
 
-			case "/signup" :
-				_self.include( "pg/signup.nut" );
-				page = pg_signup( mParams );
+			case "/data" :
+				_self.include_once( "pg/data.nut" );
+				mReply.set( "content", pg_data( mParams ) );
+				return mReply.serialize();
 				break;
 
 			case "/test" :

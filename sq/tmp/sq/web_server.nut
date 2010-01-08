@@ -46,7 +46,7 @@ function _init() : ( _g )
 	_g.server.SetSessionCallback( _self.queue(), "OnProcessRequest" );
 	_g.server.SetAuthenticationCallback( _self.queue(), "OnAuthenticate" );
 
-	_g.server.MapFolder( "config", "cfg" );
+	_g.server.MapFolder( "tt", _self.root( "tt" ) );
 
 	_g.server.EnableMultiThreading( 0 );
 	if ( !_g.server.Start( _cfg( "tcp_port" ) ) )

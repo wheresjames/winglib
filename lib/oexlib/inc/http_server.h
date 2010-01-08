@@ -247,6 +247,8 @@ public:
 		m_nTransactions = 0;
 		m_pSessionData = oexNULL;
 		m_pSessionCallback = oexNULL;
+		m_pAuthData = oexNULL;
+		m_pAuthCallback = oexNULL;
 		m_bEnableSessions = oexFALSE;
 		m_bLocalOnly = oexFALSE;
 		m_uSessionTimeout = 60 * 60;
@@ -263,6 +265,8 @@ public:
 		m_fnOnServerEvent = oexNULL;
 		m_pSessionData = oexNULL;
 		m_pSessionCallback = oexNULL;
+		m_pAuthData = oexNULL;
+		m_pAuthCallback = oexNULL;
 		m_bEnableSessions = oexFALSE;
 		m_bLocalOnly = oexFALSE;
 	}
