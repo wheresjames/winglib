@@ -95,7 +95,8 @@ extern "C" oex::oexRESULT SQBIND_Export_Symbols( sqbind::VM x_vm, sqbind::SSqAll
 {
 	// Set the memory allocator
 	// iii kinda obsolete, SRV_Start() does this now
-//	sqbind::SQBIND_SetAllocator( x_pAllocator );
+	// +++ Commenting this out seems to cause memory leaks on posix systems???
+	sqbind::SQBIND_SetAllocator( x_pAllocator );
 
 	/* !!! NOTICE !!!
 
