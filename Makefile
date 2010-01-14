@@ -28,6 +28,7 @@ ifdef SQMOD
 	                          sqmod/sqmod_http \
 	                          sqmod/sqmod_live555 \
 	                          sqmod/sqmod_mimetic \
+	                          sqmod/sqmod_mysql \
 	                          sqmod/sqmod_poco \
 							  sqmod/sqmod_test \
 							  sqmod/sqmod_tinyxml \
