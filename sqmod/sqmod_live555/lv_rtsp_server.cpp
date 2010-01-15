@@ -80,6 +80,8 @@ void CLvRtspServer::CLiveMediaSource::deliverFrame( sqbind::CSqBinary *pFrame )
 			m_pRtspServer->Quit();
 //		else
 //			handleClosure(this);
+		fPresentationTime.tv_sec == 0;
+		fPresentationTime.tv_usec == 0; 
 		return;
 	} // end if
 

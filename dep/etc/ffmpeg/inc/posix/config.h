@@ -2,7 +2,11 @@
 #ifndef FFMPEG_CONFIG_H
 #define FFMPEG_CONFIG_H
 
-#define INT_BIT 32
+#if defined( _WIN64 ) || defined( _M_X64 ) || defined( __amd64__ ) || defined( _LP64 )
+#	define INT_BIT 64
+#else
+#	define INT_BIT 32
+#endif
 //#define BROKEN_RELOCATIONS 1
 
 #if !defined( INFINITY ) && defined( HUGE_VAL )
@@ -26,8 +30,13 @@
 #define ARCH_SPARC 0
 #define ARCH_SPARC64 0
 #define ARCH_X86 1
-#define ARCH_X86_32 1
-#define ARCH_X86_64 0
+#if ( INT_BIT == 32 )
+#	define ARCH_X86_32 1
+#	define ARCH_X86_64 0
+#else
+#	define ARCH_X86_32 0
+#	define ARCH_X86_64 1
+#endif
 #define HAVE_ALTIVEC 0
 #define HAVE_AMD3DNOW 1
 #define HAVE_AMD3DNOWEXT 1

@@ -2347,13 +2347,17 @@ public:
 		(*m_val)++;
 
 		if ( !al.IsLocked() )
+		{	oexEcho( "no lock" );
 			return oex::oexFALSE;
+		}
 
 		if ( m_bThrottle )
 			oexSleep( 15 );
 
 		if ( 1 != *m_val )
+		{	oexEcho( "???" );
 			return oex::oexFALSE;
+		}
 
 		(*m_val)--;
 		return oex::oexTRUE;

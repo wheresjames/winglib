@@ -11,8 +11,9 @@
 
 #ifdef OEX_WINDOWS
 #	include "winsock2.h"
+#	include "mysql.h"
+#else
+#	include "mysql/mysql.h"
 #endif
-
-#include "mysql.h"
 
 #include "sq_mysql.h"

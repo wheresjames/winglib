@@ -3,6 +3,7 @@ _self.include( "config.nut" );
 
 function pg_home( mParams )
 {
+/*
 	// User wants to exit?
 	if ( mParams[ "GET" ].isset( "exit" ) && mParams[ "GET" ][ "exit" ].len() )
 	{
@@ -21,11 +22,13 @@ function pg_home( mParams )
 					&nbsp;&nbsp;&nbsp;
 					<a href='?exit=" + id + @"'>YES</a>
 					&nbsp;&nbsp;&nbsp;
-					<a href='home'>NO</a>
+					<a href='/home'>NO</a>
 				</big></b>
 			";
 
 	} // end if
+	
+*/
 
 	// Get list of running build scripts
 	local content = @"
@@ -39,8 +42,16 @@ function pg_home( mParams )
 					<td>
 						" + _cfg( "obj_divider" ) + @"
 					</td>
-				<td>
+				</tr>
 			</table>
+		";
+		
+	content += @"	
+			<script src='/js/jquery-1.3.2.min.js' type='text/javascript'></script>			
+			<div id='dlist'><em>...loading...</em></div>
+			<script type='text/javascript'>
+				setTimeout( '$(\'#dlist\').load( \'/test\' );', 1000 );
+			</script>
 		";
 
 	return content;

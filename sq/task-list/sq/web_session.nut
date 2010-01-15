@@ -15,7 +15,7 @@ function DoLogin( mParams )
 
 function OnProcessRequest( params )
 {
-	_self.kill( "." );
+//	_self.kill( "." );
 
 	local mParams = CSqMulti();
 	mParams.deserialize( params );

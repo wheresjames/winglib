@@ -47,8 +47,6 @@ GO_LIBS := $(PRJ_PLIB) $(GO_LIBS) $(PRJ_OSLB)
 	
 	ifneq ($(PRJ_LIBP),)
 		GO_LIBPATHS	:= $(GO_LIBPATHS) $(foreach lib,$(PRJ_LIBP),/LIBPATH:$(lib))
-#		GO_LIBPATHS	:= $(GO_LIBPATHS) /LIBPATH:$(CFG_LIBROOT)
-#		GO_LIBS	 	:= $(GO_LIBS) $(foreach lib,$(PRJ_LIBP),-l$(lib))
 	endif
 	GO_LIBPATHS := $(GO_LIBPATHS) /LIBPATH:$(CFG_BINROOT)
 	ifneq ($(CFG_BINROOT),$(CFG_OUTROOT))
@@ -59,8 +57,9 @@ else
 	GO_LIBS	 	:= $(GO_LIBS) $(foreach lib,$(PRJ_LIBS),-l$(lib)$(CFG_DPOSTFIX))
 	GO_LIBS	 	:= $(GO_LIBS) $(foreach lib,$(PRJ_OSLB), -l$(lib))
 	ifneq ($(PRJ_LIBP),)
-		GO_LIBPATHS	:= $(GO_LIBPATHS) -L$(CFG_LIBROOT)
-		GO_LIBS	 	:= $(GO_LIBS) $(foreach lib,$(PRJ_LIBP),-l$(lib))
+#		GO_LIBPATHS	:= $(GO_LIBPATHS) -L$(CFG_LIBROOT)
+		GO_LIBPATHS	:= $(GO_LIBPATHS) $(foreach lib,$(PRJ_LIBP),-L$(lib))
+#		GO_LIBS	 	:= $(GO_LIBS) $(foreach lib,$(PRJ_LIBP),-l$(lib))
 	endif
 	GO_LIBPATHS := $(GO_LIBPATHS) -L$(CFG_BINROOT)
 	ifneq ($(CFG_BINROOT),$(CFG_OUTROOT))

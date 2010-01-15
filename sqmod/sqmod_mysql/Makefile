@@ -6,8 +6,7 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_mysql
 PRJ_TYPE := dll
-PRJ_INCS := winglib/lib/oexlib mysql/include \
-			winglib/lib/sqbind SqPlus/include SqPlus/sqplus
+PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib
 
 PRJ_SUBROOT := _sqmod
@@ -22,8 +21,12 @@ PRJ_LIBROOT := ../..
 include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(PLATFORM),windows)
+	PRJ_INCS := $(PRJ_INCS) mysql/include
 	PRJ_LIBP := mysql/lib/opt
 	PRJ_OSLB := libmysql.lib
+else
+	PRJ_LIBP := /usr/lib/mysql
+	PRJ_OSLB := mysqlclient
 endif
 
 ifeq ($(TOOLS),mingw32)

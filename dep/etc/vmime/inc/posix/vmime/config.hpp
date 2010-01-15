@@ -52,7 +52,7 @@
 #undef HAVE_BITS_ATOMICITY_H
 
 /* Define to 1 if you have the `clock_gettime' function. */
-#undef HAVE_CLOCK_GETTIME
+#define HAVE_CLOCK_GETTIME
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */

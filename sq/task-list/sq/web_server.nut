@@ -16,13 +16,17 @@ local _g = CGlobal();
 function _init() : ( _g )
 {
 	// Set callback script
-	_g.server.SetSessionCallbackScript( _self.queue(), "web_session.nut", 1, "OnProcessRequest" );
+//	_g.server.SetSessionCallbackScript( _self.queue(), "web_session.nut", 1, "OnProcessRequest" );
+
+	_self.include( "web_session.nut" );
+	_g.server.SetSessionCallback( _self.queue(), "OnProcessRequest" );
 
 	// Create logs folder
 	CSqFile().mkdir( _self.root( "weblogs" ) );
 
 	SetWebLog();
-
+	
+	_g.server.EnableMultiThreading( 0 );
 	if ( !_g.server.Start( _cfg( "tcp_port" ) ) )
 		_self.alert( "Unable to start http server" );
 

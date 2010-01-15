@@ -736,6 +736,9 @@ public:
 		if ( !oexCHECK_PTR( m_pPort ) )
 			return oexFALSE;
 
+		// Log the request
+		Log();
+
 		// Save session data
 		SaveSession();
 
@@ -767,9 +770,6 @@ public:
 		} // end if
 
 #endif
-
-		// Log the request
-		Log();
 
 		// How big is the data?
 		m_pbTxHeaders[ "Content-length" ] = pSend->Length();
