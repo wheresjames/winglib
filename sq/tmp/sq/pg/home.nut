@@ -31,6 +31,7 @@ function pg_home( mParams )
 */
 
 	// Get list of running build scripts
+/*
 	local content = @"
 			<table width='95%'>
 				<tr>
@@ -45,12 +46,35 @@ function pg_home( mParams )
 				</tr>
 			</table>
 		";
-		
+*/
+	local content = "";
+
+//  setTimeout( '$(\'#dlist\').load( \'/data\' );', 1000 );
+
 	content += @"	
-			<script src='/js/jquery-1.3.2.min.js' type='text/javascript'></script>			
 			<div id='dlist'><em>...loading...</em></div>
 			<script type='text/javascript'>
-				setTimeout( '$(\'#dlist\').load( \'/test\' );', 1000 );
+
+			function DataCallback( data )
+			{
+//				alert( data );
+				$('#dlist').value = data;
+			}			
+
+			function StartPolling()
+			{
+				$.ajax({
+					type: 'GET',
+					url: '/data',
+					cache:false,
+					global:false,
+					data: '',
+					success: function( data ) { DataCallback( data ); }
+				});
+			}
+
+			setTimeout( 'StartPolling();', 1000 );
+
 			</script>
 		";
 

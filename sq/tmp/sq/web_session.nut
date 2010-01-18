@@ -27,18 +27,21 @@ function OnProcessRequest( params )
 	local loggedin = DoLogin( mParams );
 	local login_menu = loggedin ? "<a href='?logout=1'>Logout</a>" : "<a href='?login=1'>Login</a>";
 	
-//	if ( !loggedin )
-//		page = CSqFile().get_contents( _self.root( "tmp/html/login.html" ) );
-//	else
+	if ( "/data" == mParams[ "REQUEST" ][ "path" ].str() )
+	{	_self.include_once( "pg/data.nut" );
+		mReply.set( "content", pg_data( mParams, loggedin ) );
+		return mReply.serialize();
+	} // end if
+
+	if ( !loggedin )
+		page = CSqFile().get_contents( _self.path( "html/login.html" ) );
+	else
 	{
 		local menu_items =
 		[
-			[ "home", "Home" ],
-			[ "signup", "Sign Up" ]
+//			[ "home", "Home" ],
+//			[ "signup", "Sign Up" ]
 		];
-
-		if ( loggedin )
-			menu_items.append( [ "tasks", "Tasks" ] );
 
 		switch ( mParams[ "REQUEST" ][ "path" ].str() )
 		{
@@ -75,13 +78,13 @@ function OnProcessRequest( params )
 
 	local content = "<html>\r\n"
 		+ "<head>\r\n"
-	    + " <script type='text/javascript' src='jscript/jquery-1.3.2.min.js'></script>\r\n"
 		+ " <!--Remote:" + mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str() + "-->\r\n"
 		+ " <!--Local:" + mParams[ "REQUEST" ][ "SERVER_ADDR" ].str() + "-->\r\n"
 		+ "</head>\r\n"
 		+ @"
 			<body bgcolor='" + _cfg( "col_bg" ) + "' text='" + _cfg( "col_fg" ) + "' link='" + _cfg( "col_link" ) + "' vlink='" + _cfg( "col_link" ) + @"'>
 		"
+	    + " <script type='text/javascript' src='/js/jquery-1.3.2.min.js'></script>\r\n"
 		+ page
 		+ @"
 	</body>
@@ -107,7 +110,7 @@ function show_menu( sel, menu_items, right )
 
 	local ret = @"
 		<table width='100%' style='" + _cfg( "obj_border" ) + @"' bgcolor='" + _cfg( "col_shade" ) + @"'>
-			<tr><td colspan='0'><nobr><b>Task&nbsp;List&nbsp;&nbsp;&nbsp;</b></nobr></td>
+			<tr><td colspan='0'><nobr><b></b></nobr></td>
 			<td width='100%'><table><tr>
 		";
 

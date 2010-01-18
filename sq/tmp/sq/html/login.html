@@ -1,64 +1,65 @@
+<script type='text/javascript'>
+	
+	function Press( b )
+	{	document.getElementById( 'user_input' ).value += b; }
 
+	function Clear()
+	{	document.getElementById( 'user_input' ).value = ''; }
 
-<script type="text/javascript" src="jscript/spinTheWheel/jQuery.spinTheWheel.js"></script>
-
-<style>
-
-	.aSpinner
-	{
-		background-image:url('jscript/spinTheWheel/overlay_vertical.png');
-		width:125px;
-		height:227px;
-	}
-
-	.aSpinner div
-	{
-		font-family:arial,verdana,sans-serif;
-		color:#666666;
-		font-size:20px;
-		font-weight:bold;
-		width:125px;
-		text-align:center;
-	}
-
-</style>
-
-<script type="text/javascript">
-
-	$(document).ready(function() {
-		var alist = [ "Bob", "Cindy", "Ethan", "George", "Helen", "Jack", "Karen", "Luke", "Matt", "Nesanne", "Paula", "Prem", "Tina", "Vincent", "Willie", "Zack" ];
-		$('.aSpinner').spinTheWheel({list:alist, cursor:'ns-resize', horizontal:false });
-	});
-
+	function Enter()
+	{	document.location.href = "?login="+document.getElementById( 'user_input' ).value; }
+	
 </script>
 
-<table width='100%' height='100%'><tr><td>
-<table align='center' valign='middle' cellpadding=0 cellspacing=0>
+<table>
 	<tr>
-		<td valign='top'>
-			<div class="aSpinner" style='margin-top:2px;margin-right:2px;border-left:solid 1px;border-top:solid 1px;border-right:solid 1px;border-bottom:solid 1px;'></div><br/>
+		<td colspan='99'>
+			<input id='user_input' type='text' value=''/>
 		</td>
-		<td valign='top'>
-			<span id="inlineKeypad"></span>
+	</tr>
+	<tr>
+		<td width='25'>
+			<button onclick="Press('1');" style='width:50'>1</button>
+		</td>
+		<td width='25'>
+			<button onclick="Press('2');" style='width:50'>2</button>
+		</td>
+		<td width='25'>
+			<button onclick="Press('3');" style='width:50'>3</button>
+		</td>
+	</tr>
+	<tr>
+		<td width='25'>
+			<button onclick="Press('4');" style='width:50'>4</button>
+		</td>
+		<td width='25'>
+			<button onclick="Press('5');" style='width:50'>5</button>
+		</td>
+		<td width='25'>
+			<button onclick="Press('6');" style='width:50'>6</button>
+		</td>
+	</tr>
+	<tr>
+		<td width='25'>
+			<button onclick="Press('7');" style='width:50'>7</button>
+		</td>
+		<td width='25'>
+			<button onclick="Press('8');" style='width:50'>8</button>
+		</td>
+		<td width='25'>
+			<button onclick="Press('9');" style='width:50'>9</button>
+		</td>
+	</tr>
+	<tr>
+		<td width='25'>
+			<button onclick="Clear();" style='width:50'>CLR</button>
+		</td>
+		<td width='25'>
+			<button onclick="Press('0');" style='width:50'>0</button>
+		</td>
+		<td width='25'>
+			<button onclick="Enter()" style='width:50'>OK</button>
 		</td>
 	</tr>
 </table>
-</td></tr></table>
-
-<link href="jscript/jquery.keypad/jquery.keypad.css" type="text/css" rel="stylesheet" />
-<script type="text/javascript" src="jscript/jquery.keypad/jquery.keypad.min.js"></script>
-
-<script type="text/javascript">
-
-	$('#inlineKeypad').keypad({onClose: useValue, prompt: '',
-		closeText: 'Done', closeStatus: 'Use this value'});
-
-	function useValue(value) {
-		alert('The entered value is ' + value);
-	}
-
-</script>
-
-<br>
-
 
