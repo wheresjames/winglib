@@ -57,8 +57,19 @@ function pg_home( mParams )
 
 			function DataCallback( data )
 			{
-//				alert( data );
-				$('#dlist').value = data;
+				arr = {};
+				ScsDeserialize( data, arr );
+				
+				str = '<table>';				
+				for ( var key in arr )
+				{
+					str += '<tr><td>' + arr[ key ] + '</td></td>';			
+					
+				} // end for
+				str += '</table>';
+			
+				document.getElementById( 'dlist' ).innerHTML = str;
+				setTimeout( 'StartPolling();', 1000 );
 			}			
 
 			function StartPolling()

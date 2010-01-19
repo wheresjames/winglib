@@ -84,6 +84,7 @@ function OnProcessRequest( params )
 		+ @"
 			<body bgcolor='" + _cfg( "col_bg" ) + "' text='" + _cfg( "col_fg" ) + "' link='" + _cfg( "col_link" ) + "' vlink='" + _cfg( "col_link" ) + @"'>
 		"
+	    + " <script type='text/javascript' src='/js/strings.js'></script>\r\n"
 	    + " <script type='text/javascript' src='/js/jquery-1.3.2.min.js'></script>\r\n"
 		+ page
 		+ @"
