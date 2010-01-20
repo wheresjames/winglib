@@ -106,7 +106,9 @@ sqbind::stdString CVmMsg::getField( const sqbind::stdString &sName )
 	try
 	{	vmime::ref <vmime::headerField> f = m_msg->getHeader()->findField( sName.c_str() );
 		if ( !f ) return oexT( "" );
-		std::string s = f->generate();
+		vmime::ref <vmime::headerFieldValue> v = f->getValue();
+		if ( !v ) return oexT( "" );
+		std::string s = v->generate();
 		return sqbind::stdString( s.c_str(), s.length() );
 	} catch( vmime::exception e ) { m_sLastError = e.what(); }
 	return oexT( "" );

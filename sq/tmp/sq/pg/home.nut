@@ -60,13 +60,16 @@ function pg_home( mParams )
 
 				function addItem( id, str ) 
 				{
+					g_current_items[ id ] = 1;
 					$('#items').prepend( '<li style=\'display:none\' id=\'item' + id + '\'>' + str + '</li>' );
      				$('#item' + id).fadeIn();
-					$('#item' + id).click( function() { $(this).fadeOut(); } );
-				}			
-				function removeItem( id) 
+					$('#item' + id).click( function() { removeItem( id ); $(this).fadeOut(); } );
+				}
+							
+				function removeItem( id ) 
 				{
-					$('#item' + id).hide();
+					g_current_items[ id ] = 0;
+					$('#item' + id).fadeOut();
 				}		
 
 				var g_items = {};
@@ -75,24 +78,25 @@ function pg_home( mParams )
 				{
 					for ( var key in g_items )
 						if ( !g_current_items[ key ] )
-						{	g_current_items[ key ] = 1;
-							addItem( g_counter++, key );
+						{	addItem( key, g_items[ key ] );
+							return;
+						} // end if
+						
+					for ( var key in g_current_items )
+						if ( !g_items[ key ] )
+						{	removeItem( key );
 							return;
 						} // end if
 				}
 
-				setInterval( 'updateList();', 1000 );
+				setInterval( 'updateList();', 3000 );
 
-				var g_counter = 0;
 				function DataCallback( data )
 				{
-					arr = {};
-					ScsDeserialize( data, arr );
-					
-					for ( var key in arr )
-						g_items[ key ] = arr[ key ];
-			
-//					setTimeout( 'StartPolling();', 1000 );
+					g_items = {};
+					ScsDeserialize( data, g_items );
+	
+					setTimeout( 'StartPolling();', 3000 );
 				}			
 
 				function StartPolling()
