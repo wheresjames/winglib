@@ -42,6 +42,7 @@
 #include "import/sq_multi.h"
 #include "import/sq_file.h"
 #include "import/sq_time.h"
+#include "import/sq_socket.h"
 #include "import/sq_image.h"
 #include "import/sq_capture.h"
 

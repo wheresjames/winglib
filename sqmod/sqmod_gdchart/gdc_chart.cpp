@@ -6,7 +6,6 @@
 #include "gdchart.h"
 #include "gd/gd.h"
 
-
 /// Unfortunately, the gdchart library is not thread safe
 oexLock CGdcChart::m_lock;
 
@@ -106,7 +105,7 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 		GDC_LineColor = oexHtmlToRgb( mParams[ oexT( "col_labels" ) ].str().c_str() );
 	if ( mParams.isset( oexT( "col_plot" ) ) )
 		GDC_PlotColor = oexHtmlToRgb( mParams[ oexT( "col_plot" ) ].str().c_str() );
-
+	
 	// Write out the graph to the pipe
 	out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
 	   		   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),

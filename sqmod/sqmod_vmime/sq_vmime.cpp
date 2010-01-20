@@ -85,6 +85,24 @@ int CSqVMime::Open( const sqbind::stdString &sUrl )
 	return 1;
 }
 
+int CSqVMime::Close( int expunge )
+{
+	if ( !m_f )
+		return 0;
+
+	try
+	{
+		m_f->close( expunge );
+
+		return 1;
+
+	} // end try
+	catch ( vmime::exception e ) { m_sLastError = e.what(); }
+
+	return 0;
+}
+
+
 int CSqVMime::getMessageCount()
 {
 	if ( !m_f )
@@ -99,6 +117,41 @@ int CSqVMime::getMessageCount()
 
 	return 0;
 }
+
+int CSqVMime::deleteMessage( int n )
+{
+	if ( !m_f )
+		return 0;
+
+	try
+	{
+		m_f->deleteMessage( n );
+
+		return 1;
+
+	} // end try
+	catch ( vmime::exception e ) { m_sLastError = e.what(); }
+
+	return 0;
+}
+
+int CSqVMime::deleteMessages( int from, int to )
+{
+	if ( !m_f )
+		return 0;
+
+	try
+	{
+		m_f->deleteMessages( from, to );
+
+		return 1;
+
+	} // end try
+	catch ( vmime::exception e ) { m_sLastError = e.what(); }
+
+	return 0;
+}
+
 
 CVmMsg CSqVMime::getMessage( int n )
 {

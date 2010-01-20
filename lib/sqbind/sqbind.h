@@ -62,7 +62,11 @@
 
 // sqbind defines
 #include "sq_defines.h"
-
+namespace sqbind
+{
+	// There will be a class called CSqMsgQueue
+	class CSqMsgQueue;
+}
 // stl classes we will import to squirrel
 #include "import.h"
 

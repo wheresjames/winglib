@@ -132,7 +132,7 @@ public:
     }
 
     /// Copy operator
-    TMem& operator = ( TMem &x_m )
+    TMem& operator = ( oexCONST TMem &x_m )
     {
         return Share( x_m );
     }

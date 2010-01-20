@@ -368,8 +368,7 @@ public:
 
 		} // end if
 
-		CStr8 sFile = oexStrToMb( oexGetModulePath() );
-		sFile.BuildPath( sMapped );
+		CStr8 sFile = sMapped;
 		sFile.BuildPath( sPath );
 
 		if ( !oexExists( oexMbToStr( sFile ).Ptr() ) )
@@ -868,8 +867,8 @@ public:
 			{
 				// Send what we can
 				oexUINT uRet = m_pPort->Send( &buf[ uSent ], read - uSent );
-				if ( !uRet )
-					return 0;
+//				if ( !uRet )
+//					return oexFALSE;
 
 				// Add bytes sent
 				uSent += uRet;

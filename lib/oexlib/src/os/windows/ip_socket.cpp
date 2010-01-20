@@ -278,8 +278,13 @@ void CIpSocket::Destroy()
 	} // end if
 */
 
-	// Shutdown the socket
-    shutdown( hSocket, SD_BOTH );
+	// Start socket shutdown
+	shutdown( hSocket, SD_SEND );
+
+	// Wait on graceful shutdown
+	int ret; char buf[ 1024 ];
+	do { ret = recv( hSocket, buf, sizeof( buf ), 0 );
+	} while ( 0 < ret );
 
 	// Close the socket
 	closesocket( hSocket );

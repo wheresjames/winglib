@@ -50,41 +50,64 @@ function pg_home( mParams )
 	local content = "";
 
 //  setTimeout( '$(\'#dlist\').load( \'/data\' );', 1000 );
+//	<div id='dlist'><em>...loading...</em></div>
 
-	content += @"	
-			<div id='dlist'><em>...loading...</em></div>
+	content += @"
+
+			<ul id='items'></ul>
+
 			<script type='text/javascript'>
 
-			function DataCallback( data )
-			{
-				arr = {};
-				ScsDeserialize( data, arr );
-				
-				str = '<table>';				
-				for ( var key in arr )
+				function addItem( id, str ) 
 				{
-					str += '<tr><td>' + arr[ key ] + '</td></td>';			
+					$('#items').prepend( '<li style=\'display:none\' id=\'item' + id + '\'>' + str + '</li>' );
+     				$('#item' + id).fadeIn();
+					$('#item' + id).click( function() { $(this).fadeOut(); } );
+				}			
+				function removeItem( id) 
+				{
+					$('#item' + id).hide();
+				}		
+
+				var g_items = {};
+				var g_current_items = {};
+				function updateList()
+				{
+					for ( var key in g_items )
+						if ( !g_current_items[ key ] )
+						{	g_current_items[ key ] = 1;
+							addItem( g_counter++, key );
+							return;
+						} // end if
+				}
+
+				setInterval( 'updateList();', 1000 );
+
+				var g_counter = 0;
+				function DataCallback( data )
+				{
+					arr = {};
+					ScsDeserialize( data, arr );
 					
-				} // end for
-				str += '</table>';
+					for ( var key in arr )
+						g_items[ key ] = arr[ key ];
 			
-				document.getElementById( 'dlist' ).innerHTML = str;
+//					setTimeout( 'StartPolling();', 1000 );
+				}			
+
+				function StartPolling()
+				{
+					$.ajax({
+						type: 'GET',
+						url: '/data',
+						cache:false,
+						global:false,
+						data: '',
+						success: function( data ) { DataCallback( data ); }
+					});
+				}
+
 				setTimeout( 'StartPolling();', 1000 );
-			}			
-
-			function StartPolling()
-			{
-				$.ajax({
-					type: 'GET',
-					url: '/data',
-					cache:false,
-					global:false,
-					data: '',
-					success: function( data ) { DataCallback( data ); }
-				});
-			}
-
-			setTimeout( 'StartPolling();', 1000 );
 
 			</script>
 		";

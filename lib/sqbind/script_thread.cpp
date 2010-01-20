@@ -183,21 +183,75 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 {
 	oex::oexBOOL bRet = oex::oexTRUE;
 
-	// Property bag set
-	if ( sMsg == oexT( "pb_set" ) )
+		// Is it a script map?
+	if ( ( sMsg == oexT( "pb_get" ) || sMsg == oexT( "pb_set" ) ) 
+		 && *mapParams[ oexT( "key" ) ].c_str() == oexT( '@' ) )
 	{
+		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
+		oex::CStr sKey( key.c_str(), key.length() );
+
+		// Skip '@'
+		sKey++;
+
+		// Where to map
+		sqbind::stdString sFunction  = sKey.Parse( oexT( ":" ) ).Ptr();
+		if ( !sFunction.length() ) sFunction = sKey.Ptr(), sKey.Destroy();
+		else sKey++;
+
+		// Did we get a function?
+		if ( sFunction.length() )
+		{
+			CSqEngine *pEngine = GetEngine();
+			if ( pEngine )
+			{
+				// Get params
+				sqbind::stdString sP[ 4 ]; int i = 0;
+
+				// Use val as first parameter if set command
+				if ( sMsg == oexT( "pb_set" ) )
+					sP[ i++ ] = mapParams[ oexT( "val" ) ];
+
+				while( i < 4 && sKey.Length() )
+				{	sP[ i ] = sKey.Parse( oexT( ":" ) ).Ptr();
+					if ( !sP[ i ].length() ) 
+						sP[ i ] = sKey.Ptr(), sKey.Destroy();
+					else 
+						sKey++;
+					i++;
+				} // end if
+
+				switch( i )
+				{	case 0 : pEngine->Execute( pReply, sFunction.c_str() ); break;
+					case 1 : pEngine->Execute( pReply, sFunction.c_str(), sP[ 0 ] ); break;
+					case 2 : pEngine->Execute( pReply, sFunction.c_str(), sP[ 0 ], sP[ 1 ] ); break;
+					case 3 : pEngine->Execute( pReply, sFunction.c_str(), sP[ 0 ], sP[ 1 ], sP[ 2 ] ); break;
+					default : pEngine->Execute( pReply, sFunction.c_str(), sP[ 0 ], sP[ 1 ], sP[ 2 ], sP[ 3 ] ); break;
+				} // end switch
+
+			} // end if					
+
+		} // end if
+
+	} // end if
+
+	// Property bag set
+	else if ( sMsg == oexT( "pb_set" ) )
+	{
+		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
 		if ( mapParams[ oexT( "val" ) ].length() )
-			m_pb.at( mapParams[ oexT( "key" ) ].c_str() ) = mapParams[ oexT( "val" ) ].c_str();
+			m_pb.at( key.c_str() ) = mapParams[ oexT( "val" ) ].c_str();
 
 		else
-			m_pb.erase_at( mapParams[ oexT( "key" ) ].c_str() );
+			m_pb.erase_at( key.c_str() );
 
 	} // end if
 
 	// Property bag get
 	else if ( sMsg == oexT( "pb_get" ) )
 	{
-		oex::CPropertyBag &pb = m_pb.at( mapParams[ oexT( "key" ) ].c_str() );
+		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
+
+		oex::CPropertyBag &pb = m_pb.at( key.c_str() );
 		if ( pb.Size() )
 			*pReply = oex::CParser::Serialize( pb ).Ptr();
 		else

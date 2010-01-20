@@ -47,6 +47,9 @@ public:
 	/// Opens the specified mail service
 	int Open( const sqbind::stdString &sUrl );
 
+	/// Deletes the specified message
+	int Close( int expunge );
+
 	/// Sets the username
 	void setUsername( const sqbind::stdString &s )
 	{	m_sUsername = s; }
@@ -72,6 +75,12 @@ public:
 
 	/// Returns the specified message
 	CVmMsg getMessage( int n );
+
+	/// Deletes the specified message
+	int deleteMessage( int n );
+
+	/// Deletes the specified messages
+	int deleteMessages( int from, int to );
 
 	/// Adds a message to the current folder
 	int addMessage( CVmMsg *pMsg );

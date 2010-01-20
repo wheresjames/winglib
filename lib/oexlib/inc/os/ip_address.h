@@ -99,9 +99,9 @@ public:
     CIpAddress& SetId( oexCONST oexGUID *x_pGuid );
 
     /// Sets the address from an ID
-    CIpAddress& SetId( CStr &sId )
+    CIpAddress& SetId( oexCONST CStr &sId )
     {   oexGUID guid;
-        return SetId( sId.StringToGuid( &guid ) );
+        return SetId( CStr( sId ).StringToGuid( &guid ) );
     }
 
     /// Builds a url from the given information

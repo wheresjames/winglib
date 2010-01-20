@@ -357,7 +357,7 @@ public:
 	// GetActivityTimeout()
 	//==============================================================
 	/// Returns
-	oexBOOL GetActivityTimeout()
+	oexINT GetActivityTimeout()
 	{	return m_toActivity.Remaining();
 	}
 
@@ -675,6 +675,21 @@ public:
     CStr8 Read( oexUINT x_uMax = 0, oexUINT x_uFlags = 0 )
 	{	return Recv( x_uMax, x_uFlags ); }
 
+	//==============================================================
+	// Read()
+	//==============================================================
+	/// Reads data from the socket and returns a CStr object
+	/**
+		\param [in] x_uMax		-   Maximum amount of data to return
+		\param [in] x_uFlags	-	Socket receive flags
+
+		\return CStr containing data
+
+		\see
+	*/
+    CBin ReadBin( oexUINT x_uMax = 0, oexUINT x_uFlags = 0 )
+	{	return Recv( x_uMax, x_uFlags ).Mem(); }
+
 
 	//==============================================================
 	// SendTo()
@@ -789,6 +804,25 @@ public:
 	oexUINT Write( oexCONST CStr8 &x_sStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
     {	return Send( (oexPVOID)x_sStr.Ptr(), x_sStr.Length(), x_puSent, x_uFlags ); }
 
+	//==============================================================
+	// Write()
+	//==============================================================
+	/// Writes binary data to the socket
+	/**
+		\param [in] x_sBin		-	String to be sent
+		\param [in] x_uMax		-	Maximum number of bytes to send
+		\param [in] x_puSent	-	Number of bytes sent
+		\param [in] x_uFlags	-	Socket write flags
+
+		\return Number of bytes sent or c_InvalidSocket if failure.
+
+		\see
+	*/
+	oexUINT WriteBin( oexCONST CBin &x_sBin, oexUINT x_uMax = 0, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
+    {	CBin &sBin = (CBin&)x_sBin;
+		if ( !x_uMax || x_uMax > sBin.getUsed() ) x_uMax = sBin.getUsed();
+		return Send( (oexPVOID)sBin.Ptr(), x_uMax, x_puSent, x_uFlags ); 
+	}
 
 public:
 
