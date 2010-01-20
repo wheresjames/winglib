@@ -61,9 +61,11 @@ function _init() : ( _g )
 
 			live555		= [ "live555", 		"rtsp://192.168.2.200:8554/vid1" ]
 
+			ser			= [ "ser", 			"rtsp://204.232.210.57" ]
+
 		};
 
-	StartStream( rtsp_video[ "live555" ] );
+	StartStream( rtsp_video[ "ser" ] );
 
 }
 

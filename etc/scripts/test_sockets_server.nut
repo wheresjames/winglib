@@ -49,7 +49,7 @@ function _init() : ( _g )
 	}
 	}
 */
-
+/*
 	while ( 1 )
 	{
 
@@ -81,12 +81,36 @@ function _init() : ( _g )
 	}
 
 	}
-
 	_self.echo( "\n...done...\n" );
+*/
 }
 
 function _idle() : ( _g )
 {
-	return -1;
+	// Wait for connect request
+	while ( _g.server.WaitEvent( CSqSocket().EVT_ACCEPT, 1000 ) )
+	{
+		// Create a new socket to handle this session
+		local session = CSqSocket();
+
+		// Accept the session
+		if ( !_g.server.Accept( session ) )
+		{	_self.echo( "Accept() : " + _g.server.getLastError() );
+			return 0;
+		} // end if
+
+		// Show connection info
+		local addr = CSqSockAddress();
+		_g.server.PeerAddress( addr );
+		_self.echo( "Connection from : " + addr.getDotAddress() );
+
+		// Set the script that will handle the session
+		session.setScript( _self.queue(), "session", "test_sockets_session.nut", "SetSocket" );
+
+		// Script will take ownership of the session now...
+
+	} // end while
+
+	return 0;
 }
 

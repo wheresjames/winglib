@@ -17,7 +17,7 @@ CGdcChart::~CGdcChart()
 {
 }
 
-#define MAX_DIMENSIONS		2
+#define MAX_DIMENSIONS		9
 
 sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 									  	 const sqbind::stdString &x_sParams,
@@ -32,7 +32,7 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 
 	int nDataPts = 0;
 	oex::TMem< oex::oexCSTR > memLabels;
-	oex::TMem< float > memPts[ MAX_DIMENSIONS ];
+	oex::TMem< float > memPts[ MAX_DIMENSIONS + 1 ];
 
 	int nDimensions = 0;
 	for ( sqbind::CSqMulti::iterator it = mData.begin();
@@ -55,11 +55,11 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 		} // end if
 
 		// Allocate space for data
-		if ( !memPts[ 0 ].OexNew( nDataPts ).Ptr() )
+		if ( !memPts[ nDimensions ].OexNew( nDataPts ).Ptr() )
 		{	oexERROR( 0, oexMks( oexT( "Unable to allocate memory block, size = " ), nDataPts ) );
 			return oexT( "" );
 		} // end if
-		memPts[ 0 ].Zero();
+		memPts[ nDimensions ].Zero();
 
 		// Get data points
 		int i = 0;
@@ -80,6 +80,13 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 
 	} // end for
 
+	// GDChart sometimes tries to read from an extra dimension???
+	if ( !memPts[ nDimensions ].OexNew( nDataPts ).Ptr() )
+	{	oexERROR( 0, oexMks( oexT( "Unable to allocate memory block, size = " ), nDataPts ) );
+		return oexT( "" );
+	} // end if
+	memPts[ nDimensions ].Zero();
+
 	// Lock the gdchart library
 	oexAutoLock ll( m_lock );
 	if ( !ll.IsLocked() )
@@ -96,6 +103,11 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 	GDC_PlotColor = 0x00ff00;
 	GDC_ylabel_fmt = (char*)"%.3f";
 
+	unsigned long _SetColor[ MAX_DIMENSIONS + 9 ] = { 0xff0000, 0x00ff00, 0x00ffff,
+													  0xffff00, 0x0000ff, 0xff00ff,
+													  0xffffff, 0xa0a0a0, 0x808080 };
+	GDC_SetColor = _SetColor;
+
 	// User settings
 	if ( mParams.isset( oexT( "col_bg" ) ) )
 		GDC_BGColor = oexHtmlToRgb( mParams[ oexT( "col_bg" ) ].str().c_str() );
@@ -104,19 +116,69 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 	if ( mParams.isset( oexT( "col_labels" ) ) )
 		GDC_LineColor = oexHtmlToRgb( mParams[ oexT( "col_labels" ) ].str().c_str() );
 	if ( mParams.isset( oexT( "col_plot" ) ) )
-		GDC_PlotColor = oexHtmlToRgb( mParams[ oexT( "col_plot" ) ].str().c_str() );
+		GDC_PlotColor = GDC_SetColor[ 0 ] = GDC_SetColor[ 1 ] = GDC_SetColor[ 2 ] = GDC_SetColor[ 3 ]
+			= oexHtmlToRgb( mParams[ oexT( "col_plot" ) ].str().c_str() );
+	if ( mParams.isset( oexT( "col_plot2" ) ) )
+		GDC_SetColor[ 1 ] = GDC_SetColor[ 2 ] = GDC_SetColor[ 3 ]
+			= oexHtmlToRgb( mParams[ oexT( "col_plot2" ) ].str().c_str() );
+	if ( mParams.isset( oexT( "col_plot3" ) ) )
+		GDC_SetColor[ 2 ] = GDC_SetColor[ 3 ]
+			= oexHtmlToRgb( mParams[ oexT( "col_plot3" ) ].str().c_str() );
+	if ( mParams.isset( oexT( "col_plot4" ) ) )
+		GDC_SetColor[ 3 ]
+			= oexHtmlToRgb( mParams[ oexT( "col_plot4" ) ].str().c_str() );
 	
 	// Write out the graph to the pipe
-	out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
-	   		   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
-			   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
-			   nDataPts, (char**)memLabels.Ptr(), nDimensions,
-			   memPts[ 0 ].Ptr(), memPts[ 1 ].Ptr() );
+	switch ( nDimensions )
+	{
+	case 1:
+		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
+	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
+				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
+				   memPts[ 0 ].Ptr(), memPts[ 1 ].Ptr() );
+		break;
+
+	case 2:
+		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
+	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
+				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
+				   memPts[ 0 ].Ptr(), memPts[ 1 ].Ptr(), memPts[ 2 ].Ptr() );
+		break;
+
+	case 3:
+		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
+	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
+				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
+				   memPts[ 0 ].Ptr(), memPts[ 1 ].Ptr(), memPts[ 2 ].Ptr(), memPts[ 3 ].Ptr() );
+		break;
+
+	case 4:
+		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
+	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
+				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
+				   memPts[ 0 ].Ptr(), memPts[ 1 ].Ptr(), memPts[ 2 ].Ptr(), memPts[ 3 ].Ptr(),
+				   memPts[ 4 ].Ptr() );
+		break;
+
+	default :
+		oexERROR( 0, oexMks( oexT( "Invalid graph dimensions : " ), nDimensions ) );
+		GDC_image = NULL;
+		GDC_SetColor = NULL;
+		return oexT( "" );
+		break;
+
+	} // end switch
 
 	// Get the image buffer info
 	gdImagePtr graph = (gdImagePtr)GDC_image;
 	if ( !oexCHECK_PTR( graph ) || !oexCHECK_PTR( graph->pixels ) )
 	{	oexERROR( 0, oexT( "Inavlid image pointer" ) );
+		GDC_image = NULL;
+		GDC_SetColor = NULL;
 		return oexT( "" );
 	} // end if
 
@@ -131,6 +193,8 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 	long lSize = x_pImg->Obj().GetImageSize();
 	if ( 0 >= lSize )
 	{	oexERROR( 0, oexMks( oexT( "Inavlid image size : " ), lSize ).Ptr() );
+		GDC_image = NULL;
+		GDC_SetColor = NULL;
 		return oexT( "" );
 	} // end if
 
@@ -143,9 +207,9 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 		for ( int x = 0; x < sw; x++, d += 3 )
 		{
 			unsigned char b = s[ u ][ x ];
-			d[ 0 ] = graph->red[ b & 0x03 ];
-			d[ 1 ] = graph->green[ b & 0x03 ];
-			d[ 2 ] = graph->blue[ b & 0x03 ];
+			d[ 0 ] = graph->red[ b & 0xff ];
+			d[ 1 ] = graph->green[ b & 0xff ];
+			d[ 2 ] = graph->blue[ b & 0xff ];
 
 		} // end for
 
@@ -159,6 +223,7 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 	// Lose the image buffer
 	gdImageDestroy( graph );
 	GDC_image = NULL;
+	GDC_SetColor = NULL;
 
 	return mImg;
 }
