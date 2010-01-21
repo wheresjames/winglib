@@ -216,9 +216,6 @@ int CSqSocket::setScript( sqbind::CSqMsgQueue *pMsgQueue, const sqbind::stdStrin
 
 	} // end scope
 
-	// Set the socket object in the script
-//	q->execute( &sReply, oexT( "." ), sFunction, this );
-
 	return 1;
 }
 
