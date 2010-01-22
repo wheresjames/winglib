@@ -15,6 +15,11 @@ public:
 	CSqirrCamera( irr::scene::ICameraSceneNode *p ) { SetPtr( p, eTypeCamera ); }
 	CSqirrCamera& operator = ( irr::scene::ICameraSceneNode *p ) { SetPtr( p, eTypeCamera ); return *this; }
 
+	CSqirrNode* node()
+	{
+		return (CSqirrNode*)this;
+	}
+
 	void UpdateCamera()
 	{
 		if ( !m_p || GetNodeType() != eTypeCamera )

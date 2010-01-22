@@ -143,6 +143,7 @@ SQBIND_REGISTER_CLASS_END()
 
 // CSqirrCamera
 SQBIND_REGISTER_CLASS_BEGIN( CSqirrCamera, CSqirrCamera )
+	SQBIND_MEMBER_FUNCTION( CSqirrCamera, node )
 	SQBIND_MEMBER_FUNCTION( CSqirrCamera, UpdateCamera )
 	SQBIND_MEMBER_FUNCTION( CSqirrCamera, SetTarget )
 	SQBIND_MEMBER_FUNCTION( CSqirrCamera, GetTarget )

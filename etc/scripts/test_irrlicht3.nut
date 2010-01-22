@@ -18,7 +18,7 @@ function _init() : ( _g )
 	_g.irr.Init( "Irr Test", 240, 320, 1 );
 //	_g.irr.Init( "Irr Test", 640, 480, 1 );
 
-	_g.irr.SetAmbientLight( CSqirrColorf( 0.5, 0.5, 0.5 ) );
+//	_g.irr.SetAmbientLight( CSqirrColorf( 1.0, 1.0, 1.0, 1.0 ) );
 
 	_g.irr.AddLight( CSqirrVector3d( 0., 200., 0. ), CSqirrColorf( 0.5, 0.5, 0.5 ), 100. );
 	_g.irr.AddLight( CSqirrVector3d( 50., 200., 100. ), CSqirrColorf( 0.5, 0.5, 0.5 ), 100. );

@@ -85,6 +85,7 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height, in
 	param.Bits = 32;
 	param.AntiAlias = true;
 	param.DriverType = irr::video::EDT_OPENGL;
+//	param.DriverType = irr::video::EDT_DIRECT3D9;
 //	param.DriverType = irr::video::EDT_BURNINGSVIDEO;
 	param.WindowSize = irr::core::dimension2d<D2D_TYPE>( width, height );
 #endif
@@ -1001,6 +1002,26 @@ int CSqIrrlicht::OnEvent( const irr::SEvent& rEvent )
 {
 	switch( rEvent.EventType )
 	{
+		case irr::EET_KEY_INPUT_EVENT :
+		{
+			// If we have a queue
+			if ( m_pCallbackQueue )
+			{
+				// Mouse callback
+				m_pCallbackQueue->execute( oexNULL, oexT( "" ), m_sCallbackFunction,
+										   oexT( "99" ),
+										   oexMks( rEvent.KeyInput.Key ).Ptr(),
+										   oexMks( rEvent.KeyInput.Char ).Ptr(),
+										   oexMks( ( rEvent.KeyInput.PressedDown ? 1 : 0 ) 
+												 | ( rEvent.KeyInput.Shift ? 2 : 0 )
+												 | ( rEvent.KeyInput.Control ? 4 : 0 )				   
+												 ).Ptr() );
+
+			} // end if
+
+		} break;
+		
+
 		case irr::EET_MOUSE_INPUT_EVENT :
 		{
 			// If we have a queue
