@@ -14,7 +14,7 @@ public:
 	/// Default constructor
 	CSqirrColor() {}
 	CSqirrColor( int r, int g, int b, int a ) : m_col( a, r, g, b ) {}
-	CSqirrColor( irr::video::SColor c ) : m_col( c ) {}
+	CSqirrColor( const irr::video::SColor &c ) : m_col( c ) {}
 	~CSqirrColor() {}
 
 	// Copy semantics

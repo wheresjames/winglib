@@ -845,6 +845,27 @@ CSqirrNode CSqIrrlicht::AddMesh( const sqbind::stdString &sFile, float x_fScale,
 	return CSqirrNode();
 }
 
+int CSqIrrlicht::SetVertexColors( CSqirrNode &x_node, CSqirrColor &x_col )
+{
+	if ( !m_pSmgr || !x_node.IsValid() )
+		return 0;
+
+	// Set vertex colors
+	if ( CSqirrNode::eTypeMesh == x_node.GetNodeType() )
+		m_pSmgr->getMeshManipulator()->setVertexColors( ( (irr::scene::IMeshSceneNode*)x_node.Ptr() )->getMesh(),
+													  x_col.Obj() );
+
+	else if ( CSqirrNode::eTypeAnimatedMesh == x_node.GetNodeType() )
+		m_pSmgr->getMeshManipulator()->setVertexColors( ( (irr::scene::IAnimatedMeshSceneNode*)x_node.Ptr() )->getMesh()->getMesh( 0 ),
+													  x_col.Obj() );
+
+	else 
+		return 0;
+
+	return 1;
+}
+
+
 CSqirrTexture CSqIrrlicht::CreateTexture( long lWidth, long lHeight, int bMipMapping )
 {
 	if ( !m_pDriver || !m_pSmgr || 0 >= lWidth || 0 >= lHeight )
@@ -964,12 +985,14 @@ CSqirrNode CSqIrrlicht::AddSphere( float fRadius, long lPolyCount )
 	if ( !m_pSmgr )
 		return CSqirrNode();
 
-    irr::scene::ISceneNode *pNode =
-		m_pSmgr->addSphereSceneNode( fRadius, lPolyCount );
+	return m_pSmgr->addSphereSceneNode( fRadius, lPolyCount );
+}
 
-    return pNode;
+CSqirrNode CSqIrrlicht::AddSphereMesh( float fWidth, float fHeight, long lPoints )
+{
+	if ( !m_pSmgr )
+		return CSqirrNode();
 
-/*
     if ( 2 > lPoints )
 		return CSqirrNode();
 
@@ -995,8 +1018,121 @@ CSqirrNode CSqIrrlicht::AddSphere( float fRadius, long lPolyCount )
     } // end for
 
     return pNode;
-*/
 }
+
+int CSqIrrlicht::InsertCylinder( irr::scene::SMeshBuffer *pMb, irr::core::vector3df center,
+                                 float fWidth, float fHeight, long lPoints, irr::video::SColor &color )
+{
+	if ( !pMb )
+		return 0;
+
+    float fHWidth = fWidth / 2;
+    float fHHeight = fHeight / 2;
+
+    USHORT uPoints = (USHORT)lPoints;
+
+    USHORT vi = pMb->Vertices.size();
+    if ( vi ) pMb->Vertices.reallocate( vi + ( uPoints * 4 ) );
+    pMb->Vertices.set_used( vi + ( lPoints * 4 ) );
+
+    USHORT ii = pMb->Indices.size();
+    if ( ii ) pMb->Indices.reallocate( ii + ( uPoints * 12 - 12 ) );
+    pMb->Indices.set_used( ii + ( lPoints * 12 - 12 ) );
+
+    USHORT tr = 0, str = uPoints, sbr = uPoints * 2, br = uPoints * 3;
+    for ( USHORT i = 0; i < lPoints; i++ )
+    {
+        // Index points
+        USHORT ti = tr + i, sti = str + i, sbi = sbr + i, bi = br + i;
+
+        // Create vertex
+        irr::core::vector3df v( center.X + cos( irr::core::PI * 2 * i / uPoints ) * fHWidth,  
+                                center.Y + fHHeight,  
+                                center.Z + sin( irr::core::PI * 2 * i / uPoints ) * fHWidth );
+
+        // Texture coords
+        irr::core::vector2df t( cos( irr::core::PI * 2 * i / uPoints ), 
+                                sin( irr::core::PI * 2 * i / uPoints ) );
+
+        // Top
+        pMb->Vertices[ vi + ti ] = irr::video::S3DVertex( v, irr::core::vector3df( v ).normalize(), color, t );
+
+        // Side / Top
+        pMb->Vertices[ vi + sti ] = irr::video::S3DVertex( v, irr::core::vector3df( v ).normalize(), color, 
+                                                           irr::core::vector2df( (float)i / (float)( uPoints - 1 ), 0.f ) );
+
+        // Side / Bottom
+        v.Y = center.Y - fHHeight;
+        pMb->Vertices[ vi + sbi ] = irr::video::S3DVertex( v, irr::core::vector3df( v ).normalize(), color, 
+                                                           irr::core::vector2df( (float)i / (float)( uPoints - 1 ), 1.f ) );
+
+        // Bottom
+        pMb->Vertices[ vi + bi ] = irr::video::S3DVertex( v, irr::core::vector3df( v ).normalize(), color, t );
+
+        // Side / top
+        pMb->Indices[ ii++ ] = vi + sbi;
+        pMb->Indices[ ii++ ] = vi + sti;
+        pMb->Indices[ ii++ ] = vi + ( ( ( i + 1 ) < uPoints ) ? sti + 1 : str );
+
+        // Side / bottom
+        pMb->Indices[ ii++ ] = vi + sbi;
+        pMb->Indices[ ii++ ] = vi + ( ( ( i + 1 ) < uPoints ) ? sti + 1 : str );
+        pMb->Indices[ ii++ ] = vi + ( ( ( i + 1 ) < uPoints ) ? sbi + 1 : sbr );
+
+        if ( 2 <= i )
+        {
+            // Top
+            pMb->Indices[ ii++ ] = vi + tr;
+            pMb->Indices[ ii++ ] = vi + ti;
+            pMb->Indices[ ii++ ] = vi + ( ti - 1 );
+
+            // Bottom
+            pMb->Indices[ ii++ ] = vi + br;
+            pMb->Indices[ ii++ ] = vi + ( bi - 1 );
+            pMb->Indices[ ii++ ] = vi + bi;
+
+        } // end if
+
+    } // end for
+
+    return 1;
+}
+
+CSqirrNode CSqIrrlicht::AddCylinderMesh( float fWidth, float fHeight, long lPoints )
+{
+	if ( !m_pSmgr )
+		return CSqirrNode();
+
+    if ( 2 > lPoints )
+		return CSqirrNode();
+
+    if ( 2 > lPoints )
+        return CSqirrNode();
+         
+    irr::scene::SMeshBuffer *pMb = new irr::scene::SMeshBuffer();
+
+    InsertCylinder( pMb, irr::core::vector3df(), fWidth, fHeight, lPoints, irr::video::SColor( 255, 255, 255, 255 ) );
+
+    pMb->recalculateBoundingBox();    
+
+    irr::scene::SMesh *pMesh = new irr::scene::SMesh();
+    pMesh->addMeshBuffer( pMb );
+    pMb->drop();
+
+    pMesh->recalculateBoundingBox();
+
+    irr::scene::IMeshSceneNode *pNode = 
+        m_pSmgr->addMeshSceneNode( pMesh );
+    pMesh->drop();
+
+    for ( UINT i = 0; i < pNode->getMaterialCount(); i++ )
+    {   pNode->getMaterial( i ).NormalizeNormals = true;
+        pNode->getMaterial( i ).Shininess = 0;
+    } // end for
+
+    return pNode;
+}
+
 
 int CSqIrrlicht::OnEvent( const irr::SEvent& rEvent )
 {

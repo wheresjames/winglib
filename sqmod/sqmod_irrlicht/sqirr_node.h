@@ -14,8 +14,13 @@ public:
 		/// Camera type
 		eTypeCamera,
 
+		/// Mesh
+		eTypeMesh,
 
-		// Number of types
+		/// Animated mesh
+		eTypeAnimatedMesh,
+
+		/// Number of types
 		eNumTypes
 	};
 
@@ -32,6 +37,12 @@ public:
 
 	CSqirrNode( irr::scene::ICameraSceneNode *p ) : m_type( 0 ), m_p( 0 ) { SetPtr( p, eTypeCamera ); }
 	CSqirrNode& operator = ( irr::scene::ICameraSceneNode *p ) { SetPtr( p, eTypeCamera ); return *this; }
+
+	CSqirrNode( irr::scene::IAnimatedMeshSceneNode *p ) : m_type( 0 ), m_p( 0 ) { SetPtr( p, eTypeAnimatedMesh ); }
+	CSqirrNode& operator = ( irr::scene::IAnimatedMeshSceneNode *p ) { SetPtr( p, eTypeAnimatedMesh ); return *this; }
+
+	CSqirrNode( irr::scene::IMeshSceneNode *p ) : m_type( 0 ), m_p( 0 ) { SetPtr( p, eTypeMesh ); }
+	CSqirrNode& operator = ( irr::scene::IMeshSceneNode *p ) { SetPtr( p, eTypeMesh ); return *this; }
 
 	void SetPtr( irr::scene::ISceneNode *p, int t ) { Destroy(); if ( p ) { m_p = p; p->grab(); m_type = t; } }
 	~CSqirrNode() { Destroy(); }
@@ -115,6 +126,28 @@ public:
 		m_p->updateAbsolutePosition();
 	}
 
+	void Point( CSqirrVector3d &a, CSqirrVector3d &b, float scale )
+	{
+		if ( !m_p )
+			return;
+
+		// Get mid point
+		a.Obj().X += ( b.Obj().X - a.Obj().X ) / 2;
+		a.Obj().Y += ( b.Obj().Y - a.Obj().Y ) / 2;
+		a.Obj().Z += ( b.Obj().Z - a.Obj().Z ) / 2;
+
+		// Position
+		Move( a );
+		FaceTarget( b );
+
+		// Need scale to be set?
+		if ( scale )
+		{	CSqirrVector3d s  = GetScale();
+			s.Obj().Y = a.Distance( b ) * scale;
+			SetScale( s );
+		} // end if
+	}
+
 	CSqirrVector3d GetExtent()
 	{   if ( !m_p ) return CSqirrVector3d();
 		return m_p->getBoundingBox().getExtent();
@@ -181,6 +214,7 @@ public:
 protected:
 
 	int							m_type;
+
 	irr::scene::ISceneNode    	*m_p;
 
 };

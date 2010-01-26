@@ -27,10 +27,13 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqIrrlicht, CSqIrrlicht )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddMesh )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddSphere )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddPlane )
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddSphereMesh )
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddCylinderMesh )	
 
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, LoadTexture )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, CreateTexture )
-
+	
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, SetVertexColors )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddRotateAnimator )
 
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddGrid )
@@ -85,8 +88,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqirrNode, CSqirrNode )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetDebugDataVisible )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetID )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, GetID )
-
-
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, Point )
+	
 	// Material flags
 	SQBIND_CONST( irr::video, EMF_WIREFRAME )
 	SQBIND_CONST( irr::video, EMF_POINTCLOUD )
@@ -196,6 +199,10 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqirrVector3d, CSqirrVector3d )
 	SQBIND_MEMBER_FUNCTION( CSqirrVector3d, z )
 	SQBIND_MEMBER_FUNCTION( CSqirrVector3d, set )
 	SQBIND_MEMBER_FUNCTION( CSqirrVector3d, inflate )
+	SQBIND_MEMBER_FUNCTION( CSqirrVector3d, Distance )	
+	SQBIND_MEMBER_FUNCTION( CSqirrVector3d, Transition )
+	SQBIND_MEMBER_FUNCTION( CSqirrVector3d, ExpTransition )
+	SQBIND_MEMBER_FUNCTION( CSqirrVector3d, CalcTransitionSpeed )	
 SQBIND_REGISTER_CLASS_END()
 
 // CSqirrVector2d

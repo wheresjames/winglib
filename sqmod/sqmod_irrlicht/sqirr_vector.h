@@ -36,6 +36,85 @@ public:
 
 	void inflate( float v ) { m_v.X *= v; m_v.Y *= v; m_v.Z *= v; }
 
+	float Distance( CSqirrVector3d &pt )
+	{	float dx = pt.Obj().X - Obj().X;
+		float dy = pt.Obj().Y - Obj().Y;
+		float dz = pt.Obj().Z - Obj().Z;
+		float dxy = sqrt( dx * dx + dy * dy );
+		return sqrt( dxy * dxy + dz * dz );
+	}
+
+	int CalcTransitionSpeed( CSqirrVector3d &pt, CSqirrVector3d *speed, int steps, float pps )
+	{
+		if ( !speed )
+			return 0;
+
+		// points per step?
+		if ( pps )
+		{	steps = Distance( pt ) / pps;
+			if ( steps < 1 ) 
+				steps = 1;
+		} // end if
+
+		// Calculate appropriate speed per axis
+		speed->Obj().X = ( pt.Obj().X - Obj().X ) / (float)steps;
+		speed->Obj().Y = ( pt.Obj().Y - Obj().Y ) / (float)steps;
+		speed->Obj().Z = ( pt.Obj().Z - Obj().Z ) / (float)steps;
+
+		return 1;
+	}
+
+	int Transition( CSqirrVector3d &pt, CSqirrVector3d &speed, float min )
+	{
+		float dx = pt.Obj().X - Obj().X;
+		float dy = pt.Obj().Y - Obj().Y;
+		float dz = pt.Obj().Z - Obj().Z;
+
+		if ( !dx && !dy && !dz ) 
+			return 0;
+
+		if ( dx < min && dx > -min ) 
+			Obj().X = pt.Obj().X;
+		else
+			Obj().X += speed.Obj().X;
+
+		if ( dy < min && dy > -min ) 
+			Obj().Y = pt.Obj().Y;
+		else
+			Obj().Y += speed.Obj().Y;
+
+		if ( dz < min && dz > -min ) 
+			Obj().Z = pt.Obj().Z;
+		else
+			Obj().Z += speed.Obj().Z;
+
+		return 1;
+	}
+
+	int ExpTransition( CSqirrVector3d &b, float div, float min )
+	{
+		float dx = b.Obj().X - Obj().X;
+		float dy = b.Obj().Y - Obj().Y;
+		float dz = b.Obj().Z - Obj().Z;
+
+		if ( !dx && !dy && !dz ) 
+			return 0;
+
+		if ( div < 1 ) div = 1;
+
+		if ( dx < min && dx > -min ) Obj().X = b.Obj().X;
+		else Obj().X += dx / div;
+
+		if ( dy < min && dy > -min ) Obj().Y = b.Obj().Y;
+		else Obj().Y += dy / div;
+
+		if ( dz < min && dz > -min ) Obj().Z = b.Obj().Z;
+		else Obj().Z += dz / div;
+
+		return 1;
+	}
+
+
 private:
 
 	irr::core::vector3df    m_v;

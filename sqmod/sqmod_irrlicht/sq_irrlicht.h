@@ -90,6 +90,16 @@ public:
 	/// Adds a mesh
 	CSqirrNode AddMesh( const sqbind::stdString &sFile, float x_fScale, int x_bClearFromCache );
 
+	/// Sets the vertex colors on a mesh
+	int SetVertexColors( CSqirrNode &x_node, CSqirrColor &x_col );
+
+	/// Inserts a sphere mesh
+	CSqirrNode AddSphereMesh( float fWidth, float fHeight, long lPoints );
+
+	/// Inserts a cylinder mesh
+	CSqirrNode AddCylinderMesh( float fWidth, float fHeight, long lPoints );
+
+
 public:
 
 	/// Convert screen coords into world coords
@@ -112,6 +122,11 @@ public:
                             const irr::core::vector3df &bl, const irr::core::vector3df &br,
                             irr::video::SColor &color, long lSides,
                             float minU = 0, float maxU = 1, float minV = 0, float maxV = 1 );
+
+	/// Inserts a cylinder intot the mesh
+	static int InsertCylinder( irr::scene::SMeshBuffer *pMb, irr::core::vector3df center,
+							   float fWidth, float fHeight, long lPoints, irr::video::SColor &color );
+
 
 	/// Inserts a sphere into a mesh
 	static int InsertSphere( irr::scene::SMeshBuffer *pMb, irr::core::vector3df center,
