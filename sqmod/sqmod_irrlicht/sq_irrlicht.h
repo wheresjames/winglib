@@ -58,6 +58,12 @@ public:
 	/// Draws the scene
 	int Draw( CSqirrColor &bg );
 
+	/// Draws the scene to a texture
+	int RenderToTexture( CSqirrTexture *txt, CSqirrNode *pCamera );
+
+	/// Captures the current frame buffer data
+	int Capture( sqbind::CSqBinary *pBin );
+
 	/// Draws the sceen in anaglyphic stereo
 	static int DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 							 irr::scene::ISceneManager *pSm,
@@ -158,6 +164,9 @@ public:
 	/// Create texture
 	CSqirrTexture CreateTexture( long lWidth, long lHeight, int bMipMapping );
 
+	/// Creates a texture suitable for rendering
+	CSqirrTexture CreateRenderTexture( long lWidth, long lHeight, int bMipMapping );
+
 	/// Called when an event occurs
 	int OnEvent( const irr::SEvent& rEvent );
 
@@ -208,6 +217,9 @@ public:
 	void SetCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &x_sFunction )
 	{	m_pCallbackQueue = x_pMsgQueue; m_sCallbackFunction = x_sFunction; }
 
+	int getWidth() { return m_nWidth; }
+	int getHeight() { return m_nHeight; }
+
 private:
 
 	/// Default event receiver
@@ -227,6 +239,12 @@ private:
 
 	/// Main scene camera
 	irr::scene::ICameraSceneNode	*m_pCamera;
+
+	/// Display width
+	int								m_nWidth;
+
+	/// Display height
+	int								m_nHeight;
 
 	/// Type of driver in use
 	int								m_nDriverType;

@@ -9,6 +9,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqIrrlicht, CSqIrrlicht )
 
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, Init )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, Draw )
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, RenderToTexture )	
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, Capture )		
 
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddSkyDome )
 
@@ -32,7 +34,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqIrrlicht, CSqIrrlicht )
 
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, LoadTexture )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, CreateTexture )
-	
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, CreateRenderTexture )	
+
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, SetVertexColors )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddRotateAnimator )
 
@@ -53,6 +56,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqIrrlicht, CSqIrrlicht )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, screenToWorldBox )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, screenToPlane )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, FillVolume )
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, getWidth )
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, getHeight )	
 
 	SQBIND_CONST( irr, EMIE_LMOUSE_PRESSED_DOWN )
 	SQBIND_CONST( irr, EMIE_LMOUSE_LEFT_UP )
@@ -71,6 +76,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqirrNode, CSqirrNode )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, AddAnimator )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetPosition )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, GetPosition )
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetRotation )
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, GetRotation )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, FaceTarget )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, FaceTargetY )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, FaceTargetX )

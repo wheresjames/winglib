@@ -65,7 +65,6 @@ public:
 protected:
 
 	irr::video::ITexture    	*m_p;
-
 };
 
 _SQBIND_DECLARE_INSTANCE( CSqirrTexture, CSqirrTexture );

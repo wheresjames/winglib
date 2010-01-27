@@ -160,6 +160,30 @@ namespace sqbind
 		/// Returns reference to buffer object
 		t_buffer& Mem() { return m_bin; }
 
+		int getCHAR( t_size x_nOffset ) { return m_bin.getCHAR( x_nOffset ); }
+		void setCHAR( t_size x_nOffset, int val ) { m_bin.setCHAR( x_nOffset, val ); }
+
+		unsigned int getUCHAR( t_size x_nOffset ) { return m_bin.getUCHAR( x_nOffset ); }
+		void setUCHAR( t_size x_nOffset, unsigned int val ) { m_bin.setUCHAR( x_nOffset, val ); }
+
+		int getINT( t_size x_nOffset ) { return m_bin.getINT( x_nOffset ); }
+		void setINT( t_size x_nOffset, int val ) { m_bin.setINT( x_nOffset, val ); }
+
+		unsigned int getUINT( t_size x_nOffset ) { return m_bin.getUINT( x_nOffset ); }
+		void setUINT( t_size x_nOffset, unsigned int val ) { m_bin.setUINT( x_nOffset, val ); }
+
+		long getLONG( t_size x_nOffset ) { return m_bin.getLONG( x_nOffset ); }
+		void setLONG( t_size x_nOffset, long val ) { m_bin.setLONG( x_nOffset, val ); }
+
+		unsigned long getULONG( t_size x_nOffset ) { return m_bin.getULONG( x_nOffset ); }
+		void setULONG( t_size x_nOffset, unsigned long val ) { m_bin.setULONG( x_nOffset, val ); }
+
+		float getFLOAT( t_size x_nOffset ) { return m_bin.getFLOAT( x_nOffset ); }
+		void setFLOAT( t_size x_nOffset, float val ) { m_bin.setFLOAT( x_nOffset, val ); }
+
+		double getDOUBLE( t_size x_nOffset ) { return m_bin.getDOUBLE( x_nOffset ); }
+		void setDOUBLE( t_size x_nOffset, double val ) { m_bin.setDOUBLE( x_nOffset, val ); }
+
 	private:
 
 		t_buffer		m_bin;

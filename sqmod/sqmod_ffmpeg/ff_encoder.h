@@ -17,7 +17,7 @@ public:
 	/// Releases all resources
 	void Destroy();
 
-	/// Creates a decoder
+	/// Creates an encoder
 	int Create( int x_nCodec, int fmt, int width, int height, int fps, int brate, sqbind::CSqMulti *m );
 
 	/// Encode raw buffer

@@ -22,6 +22,7 @@ ifdef SQMOD
 							  \
 							  sqmod/sqmod_cell \
 	                          sqmod/sqmod_curl \
+							  sqmod/sqmod_fftw \
 							  sqmod/sqmod_ffmpeg \
 	                          sqmod/sqmod_gdchart \
 							  sqmod/sqmod_gstreamer \

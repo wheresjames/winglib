@@ -26,6 +26,8 @@ CSqIrrlicht::CSqIrrlicht()
 	m_llFrames = 0;
 	m_fLastTime = 0;
 	m_bQuit = 0;
+	m_nWidth = 0;
+	m_nHeight = 0;
 
 	m_nDriverType = -1;
 	m_colBackground = irr::video::SColor( 255, 0, 50, 100 );
@@ -49,6 +51,8 @@ CSqIrrlicht::~CSqIrrlicht()
 	m_llFrames = 0;
 	m_fLastTime = 0;
 	m_bQuit = 0;
+	m_nWidth = 0;
+	m_nHeight = 0;
 
 	// Lose animators
     m_lstMeshAnimators.clear();
@@ -97,6 +101,10 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height, in
 
 	else
 	{
+		// Save size
+		m_nWidth = width;
+		m_nHeight = height;
+
 		// Save away driver type
 		m_nDriverType = param.DriverType;
 
@@ -364,6 +372,69 @@ int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 
 	return 1;
 }
+
+int CSqIrrlicht::RenderToTexture( CSqirrTexture *txt, CSqirrNode *pCamera )
+{
+	// Sanity checks
+	if ( !txt || !txt->Ptr() || !m_pSmgr || !m_pDriver )
+		return 0;
+
+	// User defined camera?
+	int bUserCamera = 0;
+	if ( pCamera && pCamera->IsValid() 
+		 && CSqirrNode::eTypeCamera == pCamera->GetNodeType() )
+		m_pSmgr->setActiveCamera( (irr::scene::ICameraSceneNode*)pCamera->Ptr() ), bUserCamera = 1;
+
+	// Setup to render to texture
+	m_pDriver->setRenderTarget( txt->Ptr() );
+
+	// Draw the scene
+	m_pSmgr->drawAll();
+
+	// Clear render target
+	m_pDriver->setRenderTarget( 0, true, true, 0 );
+
+	// Update mip maps if needed
+	if ( txt->Ptr()->hasMipMaps() )
+		txt->Ptr()->regenerateMipMapLevels();
+
+	// Restore camera if needed
+	if ( bUserCamera && m_pCamera )
+		m_pSmgr->setActiveCamera( m_pCamera );
+
+	return 1;
+}
+
+int CSqIrrlicht::Capture( sqbind::CSqBinary *pBin )
+{
+	if ( !pBin || !m_pDevice || 0 >= getWidth() || 0 >= getHeight() )
+		return 0;
+
+#ifdef SQ_USE_OPENGL
+
+	if ( irr::video::EDT_OPENGL == m_nDriverType )
+	{
+		oex::oexULONG uSize = getWidth() * getHeight() * 4;
+		if ( !pBin->Allocate( uSize ) )
+			return 0;
+
+		// Read pixels from open gl
+		glReadPixels( 0, 0, getWidth(), getHeight(),
+//					  GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, 
+					  GL_RGBA, GL_UNSIGNED_BYTE,
+					  (GLvoid*)pBin->Ptr() );
+
+		pBin->setUsed( uSize );
+
+		return 1;
+
+	} // end if
+
+#endif
+
+	return 0;	
+}
+
 
 CSqirrNode CSqIrrlicht::AddSkyDome( const sqbind::stdString &sFile,
 									long lHorzRes, long lVertRes,
@@ -884,6 +955,25 @@ CSqirrTexture CSqIrrlicht::CreateTexture( long lWidth, long lHeight, int bMipMap
     return tex;
 }
 
+CSqirrTexture CSqIrrlicht::CreateRenderTexture( long lWidth, long lHeight, int bMipMapping )
+{
+	if ( !m_pDriver || !m_pSmgr || 0 >= lWidth || 0 >= lHeight )
+		return CSqirrTexture();
+
+	// Set mip-mapping state
+	int bCurMipMapping = m_pDriver->getTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS );
+    m_pDriver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, bMipMapping ? true : false );
+
+	// Create texture
+	CSqirrTexture tex( m_pDriver->createRenderTargetTexture( irr::core::dimension2d< irr::s32 >( lWidth, lHeight ) ) );
+
+	// Restore mip mapping state
+    m_pDriver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, bCurMipMapping ? true : false );
+
+    return tex;
+}
+
+
 CSqirrTexture CSqIrrlicht::LoadTexture( const sqbind::stdString &sFile, int bMipMapping )
 {
 	if ( !m_pSmgr || !sFile.length() )
@@ -1015,6 +1105,8 @@ CSqirrNode CSqIrrlicht::AddSphereMesh( float fWidth, float fHeight, long lPoints
     for ( int i = 0; i < pNode->getMaterialCount(); i++ )
     {   pNode->getMaterial( i ).NormalizeNormals = true;
         pNode->getMaterial( i ).Shininess = 0;
+//        pNode->getMaterial( i ).Shininess = 20;	// 0.5 - 128
+//        pNode->getMaterial( i ).SpecularColor.set( 255, 255, 255, 255 );
     } // end for
 
     return pNode;

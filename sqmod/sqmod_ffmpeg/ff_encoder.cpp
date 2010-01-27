@@ -100,6 +100,10 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 	if ( !in || !sz_in || !out || !width || !height )
 		return 0;
 
+	// Check for inverted image
+	if ( 0 > height )
+		height = -height;
+
 	// Validate buffer size
 	if ( CFfConvert::CalcImageSize( fmt, width, height ) > sz_in )
 		return 0;
@@ -146,7 +150,20 @@ int CFfEncoder::Encode( int fmt, int width, int height, sqbind::CSqBinary *in, s
 	if ( !in || !in->getUsed() )
 		return 0;
 
-	return EncodeRaw( fmt, width, height, in->Ptr(), in->getUsed(), out, m );
+	int flip = 0;
+	if ( 0 > height )
+		flip = 1;
+
+	// Do we need to convert the colorspace?
+	if ( !flip && fmt == m_nFmt )
+		return EncodeRaw( fmt, width, height, in->Ptr(), in->getUsed(), out, m );
+
+	// Must convert to input format
+	if ( !CFfConvert::ConvertColorBB( width, height, in, fmt, &m_tmp, m_nFmt, SWS_FAST_BILINEAR ) )
+		return 0;
+
+	// Do the conversion
+	return EncodeRaw( m_nFmt, width, height, m_tmp.Ptr(), m_tmp.getUsed(), out, m );
 }
 
 int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, sqbind::CSqMulti *m )

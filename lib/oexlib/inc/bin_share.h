@@ -34,6 +34,17 @@
 
 #pragma once
 
+#define OEX_CBIN_DECLARE_TYPE_ACCESS( t )							\
+	oex##t get##t( t_size x_nOffset )								\
+	{	x_nOffset = x_nOffset * sizeof( oex##t );					\
+		if ( x_nOffset + sizeof( oex##t ) >= Size() ) return 0;		\
+		return *( (oex##t*)Ptr( x_nOffset ) );						\
+	}																\
+	void set##t( t_size x_nOffset, oex##t val )						\
+	{	x_nOffset = x_nOffset * sizeof( oex##t );					\
+		if ( x_nOffset + sizeof( oex##t ) >= Size() ) return;		\
+		*( (oex##t*)Ptr( x_nOffset ) ) = val;						\
+	}
 
 /// Shared memory block
 class CBin
@@ -228,7 +239,7 @@ public:
 
 	/// Returns a string representation of the buffer
 	/**
-		\warning Careful, this string may *not* null terminated
+		\warning Careful, this string may *not* be null terminated
 				 If you use TStr::Ptr(), you may have issues
 	*/
 	CStr8 getString()
@@ -323,6 +334,18 @@ public:
 
 	/// Shift the data in the buffer to the left
 	t_size LShift( t_size x_nBytes );
+
+	/// Declare access types
+	OEX_CBIN_DECLARE_TYPE_ACCESS( CHAR );
+	OEX_CBIN_DECLARE_TYPE_ACCESS( UCHAR );
+	OEX_CBIN_DECLARE_TYPE_ACCESS( INT );
+	OEX_CBIN_DECLARE_TYPE_ACCESS( UINT );
+	OEX_CBIN_DECLARE_TYPE_ACCESS( LONG );
+	OEX_CBIN_DECLARE_TYPE_ACCESS( ULONG );
+	OEX_CBIN_DECLARE_TYPE_ACCESS( INT64 );
+	OEX_CBIN_DECLARE_TYPE_ACCESS( UINT64 );
+	OEX_CBIN_DECLARE_TYPE_ACCESS( FLOAT );
+	OEX_CBIN_DECLARE_TYPE_ACCESS( DOUBLE );
 
 	/// Returns buffer object reference
 	t_buffer& Mem() { return m_buf; }

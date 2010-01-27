@@ -5,6 +5,7 @@ cell
 curl
 CxImage
 ffmpeg
+fftw
 freetype
 ftgl
 gdchart

@@ -55,6 +55,12 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 
 	dst->setUsed( 0 );
 
+	int flip = 0;
+	if ( 0 > height )
+	{	flip = 1;
+		height = -height;
+	} // end if
+
 	if ( 0 >= width || 0 >= height )
 		return 0;
 
@@ -75,6 +81,12 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	if ( !FillAVPicture( &apSrc, src_fmt, width, height, src->_Ptr() )
 	     || !FillAVPicture( &apDst, dst_fmt, width, height, dst->_Ptr() ) )
 		return 0;
+
+	// Flip?
+	if ( flip )
+	{	apSrc.data[ 0 ] = apSrc.data[ 0 ] + ( height - 1 ) * apSrc.linesize[ 0 ];
+		apSrc.linesize[ 0 ] = -apSrc.linesize[ 0 ];
+	} // end if
 
 	// Create conversion
 	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,

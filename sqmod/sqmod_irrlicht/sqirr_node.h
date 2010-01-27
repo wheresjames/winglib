@@ -76,6 +76,16 @@ public:
 		return m_p->getPosition();
 	}
 
+	void SetRotation( CSqirrVector3d &v )
+	{   if ( !m_p ) return;
+		m_p->setRotation( v.Obj() );
+	}
+
+	CSqirrVector3d GetRotation()
+	{   if ( !m_p ) return CSqirrVector3d();
+		return m_p->getRotation();
+	}
+
 	void SetTexture( long lMaterial, CSqirrTexture &st )
 	{
 		if ( !m_p ) return;
