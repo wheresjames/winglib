@@ -330,13 +330,22 @@ namespace cmn
         oexBOOL IsAligned( T val )
     {   return Align( val ) == val; }
 
-    /// Returns the next power of two equal to or greater than v, or v if there isn't one
+    /// Returns the power of two equal to or greater than v, or v if there isn't one
     template< typename T >
 	    T NextPower2( T v )
 	{	T n = 2;
 		while ( n && n < v ) n <<= 1;
 		if ( !n ) return v;
 		return n;
+	}
+
+    /// Returns the power of two equal to or less than v, or v if there isn't one
+    template< typename T >
+	    T PrevPower2( T v )
+	{	T n = 2;
+		while ( n && n <= v ) n <<= 1;
+		if ( !n ) return v;
+		return n >> 1;
 	}
 
 	/// Returns non-zero if the specified value is a power of 2

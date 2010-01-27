@@ -44,6 +44,14 @@
 	{	x_nOffset = x_nOffset * sizeof( oex##t );					\
 		if ( x_nOffset + sizeof( oex##t ) >= Size() ) return;		\
 		*( (oex##t*)Ptr( x_nOffset ) ) = val;						\
+	}																\
+	oex##t getAbs##t( t_size x_nOffset )							\
+	{	if ( x_nOffset + sizeof( oex##t ) >= Size() ) return 0;		\
+		return *( (oex##t*)Ptr( x_nOffset ) );						\
+	}																\
+	void setAbs##t( t_size x_nOffset, oex##t val )					\
+	{	if ( x_nOffset + sizeof( oex##t ) >= Size() ) return;		\
+		*( (oex##t*)Ptr( x_nOffset ) ) = val;						\
 	}
 
 /// Shared memory block
@@ -112,6 +120,15 @@ public:
 		m_ptr = oexNULL;
 		m_bFree = oexFALSE;
 	}
+
+	/// Creates a buffer from raw pointer and size
+	CBin( t_byte *x_ptr, t_size x_size, oexBOOL x_bFree = oexTRUE )
+	{	m_nUsed = 0;
+		m_ptr = oexNULL;
+		m_bFree = oexFALSE;
+		setBuffer( x_ptr, x_size, x_bFree );
+	}
+
 
 	/// Destructor
 	~CBin() { Destroy(); }

@@ -6,6 +6,10 @@
 CSqFftw::CSqFftw()
 {
 	m_plan_valid = 0;
+	m_in = oexNULL;
+	m_out = oexNULL;
+	m_size = 0;
+	m_samples = 0;
 }
 
 CSqFftw::~CSqFftw()
@@ -17,30 +21,67 @@ void CSqFftw::Destroy()
 {
 	// Lose plan
 	if ( m_plan_valid )
-	{	m_plan_valid = 0;
 		fftw_destroy_plan( m_plan );
-	} // end if
+
+	if ( m_in )
+		fftw_free( m_in );
+
+	if ( m_out )
+		fftw_free( m_out );
+
+	m_plan_valid = 0;
+	m_in = oexNULL;
+	m_out = oexNULL;
+	m_size = 0;
+	m_samples = 0;
 }
 
-int CSqFftw::Plan( sqbind::CSqBinary *in, sqbind::CSqBinary *out, int reverse, int measure )
+int CSqFftw::Allocate( int samples )
 {
-	// Verify buffer integrity
-	if ( !in || !in->getUsed() || !out || !out->getUsed() )
+	Destroy();
+
+	// Must be a power of 2
+	samples = oex::cmn::PrevPower2( samples );
+	if ( !samples )
 		return 0;
 
-	// How many samples
-	long nSamples = in->getUsed() / sizeof( fftw_complex );
-	if ( !nSamples )
+	// What will the size of the array be?
+	int size = sizeof( fftw_complex ) * samples; 
+	if ( !size )
 		return 0;
 
-	// Reference the buffers
-	m_in.Share( in );
-	m_out.Share( out );
+	// Allocate input buffer
+	m_in = (fftw_complex*) fftw_malloc( size );
+	if ( !m_in )
+	{	Destroy();
+		return 0;
+	} // end if
+
+	// Allocate output buffer
+	m_out = (fftw_complex*) fftw_malloc( size );
+	if ( !m_out )
+	{	Destroy();
+		return 0;
+	} // end if
+
+	// Save buffer info
+	m_size = size;
+	m_samples = samples;
+
+	return 1;
+}
+
+int CSqFftw::Plan( int samples, int reverse, int measure )
+{
+	// Allocate space
+	if ( !Allocate( samples ) )
+		return 0;
 
 	// Get the plan
 	m_plan = 
-		fftw_plan_dft_1d( nSamples, (fftw_complex*)m_in.Ptr(), (fftw_complex*)m_out.Ptr(), 
-						  reverse ? FFTW_BACKWARD : FFTW_FORWARD, measure ? FFTW_ESTIMATE : FFTW_MEASURE );
+		fftw_plan_dft_1d( m_samples, m_in, m_out, 
+						  reverse ? FFTW_BACKWARD : FFTW_FORWARD, 
+						  measure ? FFTW_ESTIMATE : FFTW_MEASURE );
 
 	m_plan_valid = 1;
 
@@ -56,5 +97,4 @@ int CSqFftw::Execute()
 
 	return 1;
 }
-
 

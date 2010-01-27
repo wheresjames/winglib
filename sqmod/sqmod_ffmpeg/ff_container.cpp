@@ -282,9 +282,7 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 */
 
 	if ( !gpp )
-	{	oexEcho( "!gpp" );
 		return -1;
-	} // end if
 
 	// Is it already the right format?
 	if ( fmt == (int)m_pCodecContext->pix_fmt )

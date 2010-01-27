@@ -219,7 +219,7 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 	int nPadding = in->Size() - in->getUsed();
 	if ( 0 < nPadding )
 	{
-		// Don't zero mor than twice the padding size
+		// Don't zero more than twice the padding size
 		if ( nPadding > ( FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
 			nPadding = FF_INPUT_BUFFER_PADDING_SIZE * 2;
 

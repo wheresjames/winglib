@@ -164,16 +164,16 @@
 #undef HAVE_MACH_MACH_TIME_H
 
 /* Define to 1 if you have the <malloc.h> header file. */
-#undef HAVE_MALLOC_H
+#define HAVE_MALLOC_H 1
 
 /* Define to 1 if you have the `memalign' function. */
-#undef HAVE_MEMALIGN
+#define HAVE_MEMALIGN 1
 
 /* Define to 1 if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
+#define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the `memset' function. */
-#undef HAVE_MEMSET
+#define HAVE_MEMSET 1
 
 /* Define to enable MIPS paired-single optimizations. */
 #undef HAVE_MIPS_PS
@@ -203,7 +203,7 @@
 #undef HAVE_SNPRINTF
 
 /* Define to 1 if you have the `sqrt' function. */
-#undef HAVE_SQRT
+#define HAVE_SQRT 1
 
 /* Define to enable SSE optimizations. */
 #undef HAVE_SSE
@@ -298,22 +298,22 @@
 #undef PTHREAD_CREATE_JOINABLE
 
 /* The size of `double', as computed by sizeof. */
-#undef SIZEOF_DOUBLE
+#define SIZEOF_DOUBLE 8
 
 /* The size of `float', as computed by sizeof. */
-#undef SIZEOF_FLOAT
+#define SIZEOF_FLOAT 4
 
 /* The size of `int', as computed by sizeof. */
-#undef SIZEOF_INT
+#define SIZEOF_INT 4
 
 /* The size of `long', as computed by sizeof. */
-#undef SIZEOF_LONG
+#define SIZEOF_LONG 4
 
 /* The size of `long long', as computed by sizeof. */
-#undef SIZEOF_LONG_LONG
+#define SIZEOF_LONG_LONG 8
 
 /* The size of `ptrdiff_t', as computed by sizeof. */
-#undef SIZEOF_PTRDIFF_T
+#define SIZEOF_PTRDIFF_T	4
 
 /* The size of `size_t', as computed by sizeof. */
 #define SIZEOF_SIZE_T 4
@@ -339,7 +339,7 @@
 #undef STACK_DIRECTION
 
 /* Define to 1 if you have the ANSI C header files. */
-#undef STDC_HEADERS
+#define STDC_HEADERS 1
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
