@@ -381,7 +381,7 @@ int CSqIrrlicht::RenderToTexture( CSqirrTexture *txt, CSqirrNode *pCamera )
 
 	// User defined camera?
 	int bUserCamera = 0;
-	if ( pCamera && pCamera->IsValid() 
+	if ( pCamera && pCamera->IsValid()
 		 && CSqirrNode::eTypeCamera == pCamera->GetNodeType() )
 		m_pSmgr->setActiveCamera( (irr::scene::ICameraSceneNode*)pCamera->Ptr() ), bUserCamera = 1;
 
@@ -420,7 +420,7 @@ int CSqIrrlicht::Capture( sqbind::CSqBinary *pBin )
 
 		// Read pixels from open gl
 		glReadPixels( 0, 0, getWidth(), getHeight(),
-//					  GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, 
+//					  GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV,
 					  GL_RGBA, GL_UNSIGNED_BYTE,
 					  (GLvoid*)pBin->Ptr() );
 
@@ -432,7 +432,7 @@ int CSqIrrlicht::Capture( sqbind::CSqBinary *pBin )
 
 #endif
 
-	return 0;	
+	return 0;
 }
 
 
@@ -930,7 +930,7 @@ int CSqIrrlicht::SetVertexColors( CSqirrNode &x_node, CSqirrColor &x_col )
 		m_pSmgr->getMeshManipulator()->setVertexColors( ( (irr::scene::IAnimatedMeshSceneNode*)x_node.Ptr() )->getMesh()->getMesh( 0 ),
 													  x_col.Obj() );
 
-	else 
+	else
 		return 0;
 
 	return 1;
@@ -995,7 +995,7 @@ CSqirrTexture CSqIrrlicht::LoadTexture( const sqbind::stdString &sFile, int bMip
 	return tex;
 }
 
-int CSqIrrlicht::InsertSphere( irr::scene::SMeshBuffer *pMb, irr::core::vector3df center,
+int CSqIrrlicht::InsertSphere( irr::scene::SMeshBuffer *pMb, const irr::core::vector3df &center,
                                  float fWidth, float fHeight, long lPoints, const irr::video::SColor &color )
 {
     float fHWidth = fWidth / 2;
@@ -1102,7 +1102,7 @@ CSqirrNode CSqIrrlicht::AddSphereMesh( float fWidth, float fHeight, long lPoints
         m_pSmgr->addMeshSceneNode( pMesh );
     pMesh->drop();
 
-    for ( int i = 0; i < pNode->getMaterialCount(); i++ )
+    for ( unsigned int i = 0; i < pNode->getMaterialCount(); i++ )
     {   pNode->getMaterial( i ).NormalizeNormals = true;
         pNode->getMaterial( i ).Shininess = 0;
 //        pNode->getMaterial( i ).Shininess = 20;	// 0.5 - 128
@@ -1112,8 +1112,8 @@ CSqirrNode CSqIrrlicht::AddSphereMesh( float fWidth, float fHeight, long lPoints
     return pNode;
 }
 
-int CSqIrrlicht::InsertCylinder( irr::scene::SMeshBuffer *pMb, irr::core::vector3df center,
-                                 float fWidth, float fHeight, long lPoints, irr::video::SColor &color )
+int CSqIrrlicht::InsertCylinder( irr::scene::SMeshBuffer *pMb, const irr::core::vector3df &center,
+                                 float fWidth, float fHeight, long lPoints, const irr::video::SColor &color )
 {
 	if ( !pMb )
 		return 0;
@@ -1121,41 +1121,41 @@ int CSqIrrlicht::InsertCylinder( irr::scene::SMeshBuffer *pMb, irr::core::vector
     float fHWidth = fWidth / 2;
     float fHHeight = fHeight / 2;
 
-    USHORT uPoints = (USHORT)lPoints;
+    unsigned short uPoints = (unsigned short)lPoints;
 
-    USHORT vi = pMb->Vertices.size();
+    unsigned short vi = pMb->Vertices.size();
     if ( vi ) pMb->Vertices.reallocate( vi + ( uPoints * 4 ) );
     pMb->Vertices.set_used( vi + ( lPoints * 4 ) );
 
-    USHORT ii = pMb->Indices.size();
+    unsigned short ii = pMb->Indices.size();
     if ( ii ) pMb->Indices.reallocate( ii + ( uPoints * 12 - 12 ) );
     pMb->Indices.set_used( ii + ( lPoints * 12 - 12 ) );
 
-    USHORT tr = 0, str = uPoints, sbr = uPoints * 2, br = uPoints * 3;
-    for ( USHORT i = 0; i < lPoints; i++ )
+    unsigned short tr = 0, str = uPoints, sbr = uPoints * 2, br = uPoints * 3;
+    for ( unsigned short i = 0; i < lPoints; i++ )
     {
         // Index points
-        USHORT ti = tr + i, sti = str + i, sbi = sbr + i, bi = br + i;
+        unsigned short ti = tr + i, sti = str + i, sbi = sbr + i, bi = br + i;
 
         // Create vertex
-        irr::core::vector3df v( center.X + cos( irr::core::PI * 2 * i / uPoints ) * fHWidth,  
-                                center.Y + fHHeight,  
+        irr::core::vector3df v( center.X + cos( irr::core::PI * 2 * i / uPoints ) * fHWidth,
+                                center.Y + fHHeight,
                                 center.Z + sin( irr::core::PI * 2 * i / uPoints ) * fHWidth );
 
         // Texture coords
-        irr::core::vector2df t( cos( irr::core::PI * 2 * i / uPoints ), 
+        irr::core::vector2df t( cos( irr::core::PI * 2 * i / uPoints ),
                                 sin( irr::core::PI * 2 * i / uPoints ) );
 
         // Top
         pMb->Vertices[ vi + ti ] = irr::video::S3DVertex( v, irr::core::vector3df( v ).normalize(), color, t );
 
         // Side / Top
-        pMb->Vertices[ vi + sti ] = irr::video::S3DVertex( v, irr::core::vector3df( v ).normalize(), color, 
+        pMb->Vertices[ vi + sti ] = irr::video::S3DVertex( v, irr::core::vector3df( v ).normalize(), color,
                                                            irr::core::vector2df( (float)i / (float)( uPoints - 1 ), 0.f ) );
 
         // Side / Bottom
         v.Y = center.Y - fHHeight;
-        pMb->Vertices[ vi + sbi ] = irr::video::S3DVertex( v, irr::core::vector3df( v ).normalize(), color, 
+        pMb->Vertices[ vi + sbi ] = irr::video::S3DVertex( v, irr::core::vector3df( v ).normalize(), color,
                                                            irr::core::vector2df( (float)i / (float)( uPoints - 1 ), 1.f ) );
 
         // Bottom
@@ -1200,12 +1200,12 @@ CSqirrNode CSqIrrlicht::AddCylinderMesh( float fWidth, float fHeight, long lPoin
 
     if ( 2 > lPoints )
         return CSqirrNode();
-         
+
     irr::scene::SMeshBuffer *pMb = new irr::scene::SMeshBuffer();
 
     InsertCylinder( pMb, irr::core::vector3df(), fWidth, fHeight, lPoints, irr::video::SColor( 255, 255, 255, 255 ) );
 
-    pMb->recalculateBoundingBox();    
+    pMb->recalculateBoundingBox();
 
     irr::scene::SMesh *pMesh = new irr::scene::SMesh();
     pMesh->addMeshBuffer( pMb );
@@ -1213,11 +1213,11 @@ CSqirrNode CSqIrrlicht::AddCylinderMesh( float fWidth, float fHeight, long lPoin
 
     pMesh->recalculateBoundingBox();
 
-    irr::scene::IMeshSceneNode *pNode = 
+    irr::scene::IMeshSceneNode *pNode =
         m_pSmgr->addMeshSceneNode( pMesh );
     pMesh->drop();
 
-    for ( UINT i = 0; i < pNode->getMaterialCount(); i++ )
+    for ( unsigned int i = 0; i < pNode->getMaterialCount(); i++ )
     {   pNode->getMaterial( i ).NormalizeNormals = true;
         pNode->getMaterial( i ).Shininess = 0;
     } // end for
@@ -1240,15 +1240,15 @@ int CSqIrrlicht::OnEvent( const irr::SEvent& rEvent )
 										   oexT( "99" ),
 										   oexMks( rEvent.KeyInput.Key ).Ptr(),
 										   oexMks( rEvent.KeyInput.Char ).Ptr(),
-										   oexMks( ( rEvent.KeyInput.PressedDown ? 1 : 0 ) 
+										   oexMks( ( rEvent.KeyInput.PressedDown ? 1 : 0 )
 												 | ( rEvent.KeyInput.Shift ? 2 : 0 )
-												 | ( rEvent.KeyInput.Control ? 4 : 0 )				   
+												 | ( rEvent.KeyInput.Control ? 4 : 0 )
 												 ).Ptr() );
 
 			} // end if
 
 		} break;
-		
+
 
 		case irr::EET_MOUSE_INPUT_EVENT :
 		{

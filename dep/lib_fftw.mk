@@ -6,7 +6,7 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := fftw
 PRJ_TYPE := lib
-PRJ_INCS := fftw/kernel fftw/dft fftw/dft/scalar
+PRJ_INCS := fftw/kernel fftw/dft fftw/dft/scalar fftw/rdft fftw/reodft
 PRJ_LIBS := 
 
 PRJ_LIBROOT := ..
@@ -19,6 +19,8 @@ include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(PLATFORM),windows)
 	PRJ_INCS := winglib/dep/etc/fftw/inc/windows $(PRJ_INCS)
+else
+	PRJ_INCS := winglib/dep/etc/fftw/inc/posix $(PRJ_INCS)
 endif
 
 #-------------------------------------------------------------------

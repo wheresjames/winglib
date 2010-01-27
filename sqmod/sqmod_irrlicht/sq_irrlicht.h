@@ -130,12 +130,12 @@ public:
                             float minU = 0, float maxU = 1, float minV = 0, float maxV = 1 );
 
 	/// Inserts a cylinder intot the mesh
-	static int InsertCylinder( irr::scene::SMeshBuffer *pMb, irr::core::vector3df center,
-							   float fWidth, float fHeight, long lPoints, irr::video::SColor &color );
+	static int InsertCylinder( irr::scene::SMeshBuffer *pMb, const irr::core::vector3df &center,
+							   float fWidth, float fHeight, long lPoints, const irr::video::SColor &color );
 
 
 	/// Inserts a sphere into a mesh
-	static int InsertSphere( irr::scene::SMeshBuffer *pMb, irr::core::vector3df center,
+	static int InsertSphere( irr::scene::SMeshBuffer *pMb, const irr::core::vector3df &center,
 	       		             float fWidth, float fHeight, long lPoints, const irr::video::SColor &color );
 
 
