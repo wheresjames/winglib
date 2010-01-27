@@ -1,9 +1,14 @@
 
 _self.load_module( "irrlicht", "" );
+_self.load_module( "ffmpeg", "" );
 
 class CGlobal
 {
 	irr = 0;
+
+	rec_avi = 0;
+	rec_enc = 0;
+	rec_frame = 0;
 };
 
 local _g = CGlobal();
@@ -13,8 +18,8 @@ function _init() : ( _g )
 	_g.irr = CSqIrrlicht();
 
 	_g.irr.SetStereo( 1 );
-	_g.irr.SetREyeKey( 0x000000ff );
-	_g.irr.SetLEyeKey( 0x00ffff00 );
+//	_g.irr.SetREyeKey( 0x000000ff );
+//	_g.irr.SetLEyeKey( 0x00ffff00 );
 //	_g.irr.Init( "Irr Test", 240, 320, 1 );
 	_g.irr.Init( "Irr Test", 640, 480, 1 );
 //	_g.irr.Init( "Irr Test", 1024, 768, 1 );
@@ -32,10 +37,14 @@ function _init() : ( _g )
 
     local rotate = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.5, 0 ) );
     node.AddAnimator( rotate );
+
+	// Save to file
+	RecordToFile( _self.root( "math-stuff.avi" ) );
 }
 
 function _idle() : ( _g )
 {
+	RenderFile();
 	return _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
 }
 
@@ -53,7 +62,7 @@ function OnAnimate( n, o, c )
     local attn = 6;
     local m = pi2 / 100;
 
-	local clk = _mod_fp( _self.ticks() / 5000., 11. );
+	local clk = _mod_fp( _self.ticks() / 20000., 11. );
 
 	for ( local i = 0; i < n; i++ )
 	{
@@ -245,4 +254,50 @@ function OnAnimate( n, o, c )
 
     } // end for
 
+}
+
+function RecordToFile( file ) : ( _g )
+{
+	_g.rec_avi = CFfContainer();
+	_g.rec_enc = CFfEncoder();
+	_g.rec_frame = CSqBinary();
+
+	local width = _g.irr.getWidth(), height = _g.irr.getHeight();
+
+	if ( !_g.rec_avi.Create( file, "", CSqMulti() ) )
+		_self.echo( "Failed to create avi" );
+	else if ( 0 > _g.rec_avi.AddVideoStream( CFfDecoder().LookupCodecId( "MP42" ), width, height, 30 ) )
+		_self.echo( "Failed to add video stream" );
+	else if ( !_g.rec_avi.InitWrite() )
+		_self.echo( "Failed to initiailze avi" );
+
+	else if ( !_g.rec_enc.Create( _g.rec_avi.getVideoCodecId(), CFfConvert().PIX_FMT_YUV420P, 
+								  width, height, 30, 2000000, CSqMulti() ) )
+		_self.echo( "Failed to create encoder" );
+
+}
+
+function RenderFile() : ( _g )
+{
+	// Render to file if needed
+	if ( !_g.rec_enc || !_g.rec_avi )
+		return;
+
+	local img = CSqBinary();
+	if ( _g.irr.Capture( img ) )
+	{
+		local inf = CSqMulti();
+		
+		if ( !_g.rec_enc.Encode( CFfConvert().PIX_FMT_BGR32, 
+								 _g.irr.getWidth(), -_g.irr.getHeight(),
+								 img, _g.rec_frame, inf ) )
+			_self.echo( "Failed to encode frame" );
+
+		else if ( !_g.rec_avi.WriteFrame( _g.rec_frame, inf ) )
+			_self.echo( "Failed to write to avi file" );
+
+	} // end if
+
+	else
+		_self.echo( "Failed to capture image buffer" );
 }

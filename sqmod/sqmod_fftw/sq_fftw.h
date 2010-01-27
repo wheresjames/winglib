@@ -68,7 +68,8 @@ public:
 		if ( !real ) return 0;
 		double imag = getInput().getDOUBLE( i * 2 + 1 );
 		if ( !imag ) return 0;
-		return atan( imag / real );
+//		return atan( imag / real );
+		return atan2( imag, real );
 	}
 
 	/// Sets an input value
@@ -97,7 +98,8 @@ public:
 		if ( !real ) return 0;
 		double imag = getOutput().getDOUBLE( i * 2 + 1 );
 		if ( !imag ) return 0;
-		return atan( imag / real );
+//		return atan( imag / real );
+		return atan2( imag, real );
 	}
 
 private:
