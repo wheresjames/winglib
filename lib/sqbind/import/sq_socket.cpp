@@ -104,6 +104,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSocket, CSqSocket )
 	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Destroy )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Connect )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, CreateUDP )	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Bind )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Listen )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Accept )
@@ -111,10 +112,16 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSocket, CSqSocket )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, WaitEvent )	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Read )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Write )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, ReadFrom )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, SendTo )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, ReadBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, WriteBin )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, PeerAddress )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, LocalAddress )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, ReadFromBin )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, SendToBin )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, getPeerAddress )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, setPeerAddress )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, getLocalAddress )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, setLocalAddress )
 
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, getLastError )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, getNumReads )
@@ -126,6 +133,11 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSocket, CSqSocket )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, isConnecting )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, isActivity )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, setScript )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, htonl )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, ntohl )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, htons )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, ntohs )
 
 	SQBIND_ENUM( oex::os::CIpSocket::eReadEvent,		"EVT_READ" )
 	SQBIND_ENUM( oex::os::CIpSocket::eWriteEvent,		"EVT_WRITE" )
@@ -144,6 +156,14 @@ void CSqSocket::Destroy()
 {
 	m_socket->Destroy();
 }
+
+int CSqSocket::CreateUDP()
+{
+	return m_socket->Create( oex::os::CIpSocket::eAfInet, 
+							 oex::os::CIpSocket::eTypeDgram, 
+							 oex::os::CIpSocket::eProtoUdp );
+}
+
 
 int CSqSocket::Connect( const sqbind::stdString &sUrl, int nPort )
 {
@@ -245,7 +265,7 @@ int CSqSocket::isActivity()
 	return m_socket->IsActivity();
 }
 
-int CSqSocket::PeerAddress( CSqSockAddress *pAddr )
+int CSqSocket::getPeerAddress( CSqSockAddress *pAddr )
 {
 	if ( !pAddr )
 		return 0;
@@ -255,12 +275,32 @@ int CSqSocket::PeerAddress( CSqSockAddress *pAddr )
 	return 1;
 }
 
-int CSqSocket::LocalAddress( CSqSockAddress *pAddr )
+int CSqSocket::getLocalAddress( CSqSockAddress *pAddr )
 {
 	if ( !pAddr )
 		return 0;
 
 	pAddr->Obj() = m_socket->LocalAddress();
+
+	return 1;
+}
+
+int CSqSocket::setPeerAddress( CSqSockAddress *pAddr )
+{
+	if ( !pAddr )
+		return 0;
+
+	m_socket->PeerAddress() = pAddr->Obj();
+
+	return 1;
+}
+
+int CSqSocket::setLocalAddress( CSqSockAddress *pAddr )
+{
+	if ( !pAddr )
+		return 0;
+
+	m_socket->LocalAddress() = pAddr->Obj();
 
 	return 1;
 }
@@ -285,6 +325,16 @@ int CSqSocket::Write( const sqbind::stdString &s, int nMax )
 	return m_socket->Send( oexStrToMb( oex::CStr( s.c_str(), s.length() ) ) );
 }
 
+sqbind::stdString CSqSocket::ReadFrom( int nMax )
+{	oex::CStr s = oexMbToStr( m_socket->RecvFrom( nMax ) );
+	return sqbind::stdString( s.Ptr(), s.Length() );
+}
+
+int CSqSocket::SendTo( const sqbind::stdString &s, int nMax )
+{
+	return m_socket->SendTo( oexStrToMb( oex::CStr( s.c_str(), s.length() ) ) );
+}
+
 int CSqSocket::ReadBin( sqbind::CSqBinary *pBin, int nMax )
 {	if ( !pBin )
 		return 0;
@@ -296,5 +346,18 @@ int CSqSocket::WriteBin( sqbind::CSqBinary *pBin, int nMax )
 {	if ( !pBin )
 		return 0;
 	return m_socket->WriteBin( pBin->Mem(), nMax );
+}
+
+int CSqSocket::ReadFromBin( sqbind::CSqBinary *pBin, int nMax )
+{	if ( !pBin )
+		return 0;
+	*pBin = m_socket->ReadFromBin( nMax );
+	return pBin->getUsed();
+}
+
+int CSqSocket::SendToBin( sqbind::CSqBinary *pBin, int nMax )
+{	if ( !pBin )
+		return 0;
+	return m_socket->SendToBin( pBin->Mem(), nMax );
 }
 

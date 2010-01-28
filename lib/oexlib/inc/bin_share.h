@@ -161,6 +161,10 @@ public:
 	t_size Unshare()
 	{	return Copy(); }
 
+	/// Initializes all byetes in the memory block to zero
+	void Zero()
+	{	if ( _Ptr() && Size() ) oexZeroMemory( _Ptr(), Size() ); }
+
 	/// Copy another buffer
 	t_size Copy( CBin *x_p = oexNULL );
 

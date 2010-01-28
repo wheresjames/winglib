@@ -909,7 +909,7 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 
 	// Must have a socket handle
 	if ( !IsSocket() )
-        return oexFALSE;
+        return 0;
 
     SOCKADDR_IN si;
     int nSize = sizeof( si );
@@ -1260,3 +1260,8 @@ oexBOOL CIpSocket::GetLocalAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
     // Format the info
     return CIpSocket_GetAddressInfo( x_pIa, &sai );
 }
+
+oexUINT32 CIpSocket::htonl( oexUINT32 v ) { return ::htonl( v ); }
+oexUINT32 CIpSocket::ntohl( oexUINT32 v ) { return ::ntohl( v ); }
+oexUINT16 CIpSocket::htons( oexUINT16 v ) { return ::htons( v ); }
+oexUINT16 CIpSocket::ntohs( oexUINT16 v ) { return ::ntohs( v ); }

@@ -100,6 +100,9 @@ namespace sqbind
 		/// Resizes memory block
 		t_size Resize( t_size x_nNewSize ) { m_bin.Resize( x_nNewSize ); return m_bin.Size(); }
 
+		/// Initializes all byetes in the memory block to zero
+		void Zero() { m_bin.Zero(); }
+
 		/// Copies memory object
 		t_size Copy( CSqBinary *x_p ) { if ( !x_p ) return 0; return m_bin.Copy( &x_p->m_bin ); }
 

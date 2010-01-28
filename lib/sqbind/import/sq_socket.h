@@ -111,6 +111,9 @@ namespace sqbind
 		/// Close previous device
 		void Destroy();
 
+		/// Create a UDP socket
+		int CreateUDP();
+
 		/// Connects to the specified address
 		int Connect( const sqbind::stdString &sUrl, int nPort );
 
@@ -126,20 +129,32 @@ namespace sqbind
 		/// Share the socket with another class
 		int Share( CSqSocket *pSocket );
 
-		/// Reads from the port
-		sqbind::stdString Read( int nMax );
-
 		/// Waits for the specified event(s)
 		int WaitEvent( int nEvent, int nMax );
 
+		/// Reads from the port
+		sqbind::stdString Read( int nMax );
+
 		/// Writes to the port
 		int Write( const sqbind::stdString &s, int nMax );
+
+		/// Reads from the port
+		sqbind::stdString ReadFrom( int nMax );
+
+		/// Writes to the port
+		int SendTo( const sqbind::stdString &s, int nMax );
 
 		/// Reads from the port
 		int ReadBin( sqbind::CSqBinary *pBin, int nMax );
 
 		/// Writes to the port
 		int WriteBin( sqbind::CSqBinary *pBin, int nMax );
+
+		/// Reads from the port
+		int ReadFromBin( sqbind::CSqBinary *pBin, int nMax );
+
+		/// Writes to the port
+		int SendToBin( sqbind::CSqBinary *pBin, int nMax );
 
 		/// Returns a string describing the last error
 		sqbind::stdString getLastError();
@@ -172,16 +187,31 @@ namespace sqbind
 		int getConnectState();
 
 		/// Gets the peer address
-		int PeerAddress( CSqSockAddress *pAddr );
+		int getPeerAddress( CSqSockAddress *pAddr );
 
 		/// Gets the local address
-		int LocalAddress( CSqSockAddress *pAddr );
+		int getLocalAddress( CSqSockAddress *pAddr );
+
+		/// Gets the peer address
+		int setPeerAddress( CSqSockAddress *pAddr );
+
+		/// Gets the local address
+		int setLocalAddress( CSqSockAddress *pAddr );
 
 		/// Callback script
 		int setScript( sqbind::CSqMsgQueue *pMsgQueue, const sqbind::stdString &sId, const sqbind::stdString &sScript, const sqbind::stdString &sFunction );
 
-	private:
+		oex::oexUINT32 htonl( oex::oexUINT32 v )
+		{	return m_socket->htonl( v ); }
+		oex::oexUINT32 ntohl( oex::oexUINT32 v )
+		{	return m_socket->ntohl( v ); }
+		oex::oexUINT16 htons( oex::oexUINT16 v )
+		{	return m_socket->htons( v ); }
+		oex::oexUINT16 ntohs( oex::oexUINT16 v )
+		{	return m_socket->ntohs( v ); }
 
+	private:
+		
 		/// Socket class
 		oex::TMem< oex::os::CIpSocket >	m_socket;
 

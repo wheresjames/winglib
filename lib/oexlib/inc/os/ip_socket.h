@@ -628,6 +628,22 @@ public:
 	*/
     CStr8 RecvFrom( oexUINT x_uMax = 0, oexUINT x_uFlags = 0 );
 
+	//==============================================================
+	// ReadFromBin()
+	//==============================================================
+	/// Reads data from the socket and returns a CStr object
+	/**
+		\param [in] x_uMax		-   Maximum amount of data to return
+		\param [in] x_uFlags	-	Socket receive flags
+
+		\return CStr containing data
+
+		\see
+	*/
+    CBin ReadFromBin( oexUINT x_uMax = 0, oexUINT x_uFlags = 0 )
+	{	CStr8 s = RecvFrom( x_uMax, x_uFlags );
+		return CBin( s.Mem(), s.Length() ); 
+	}
 
 	//==============================================================
 	// Recv()
@@ -676,7 +692,7 @@ public:
 	{	return Recv( x_uMax, x_uFlags ); }
 
 	//==============================================================
-	// Read()
+	// ReadBin()
 	//==============================================================
 	/// Reads data from the socket and returns a CStr object
 	/**
@@ -688,8 +704,9 @@ public:
 		\see
 	*/
     CBin ReadBin( oexUINT x_uMax = 0, oexUINT x_uFlags = 0 )
-	{	return Recv( x_uMax, x_uFlags ).Mem(); }
-
+	{	CStr8 s = Recv( x_uMax, x_uFlags );
+		return CBin( s.Mem(), s.Length() ); 
+	}
 
 	//==============================================================
 	// SendTo()
@@ -739,6 +756,25 @@ public:
 	oexUINT SendTo( CStr8 &x_sStr, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
     {	return SendTo( (oexPVOID)x_sStr.Ptr(), x_sStr.Length(), x_puSent, x_uFlags ); }
 
+	//==============================================================
+	// SendToBin()
+	//==============================================================
+	/// Writes binary data to the socket
+	/**
+		\param [in] x_sBin		-	String to be sent
+		\param [in] x_uMax		-	Maximum number of bytes to send
+		\param [in] x_puSent	-	Number of bytes sent
+		\param [in] x_uFlags	-	Socket write flags
+
+		\return Number of bytes sent or c_InvalidSocket if failure.
+
+		\see
+	*/
+	oexUINT SendToBin( oexCONST CBin &x_sBin, oexUINT x_uMax = 0, oexUINT *x_puSent = oexNULL, oexUINT x_uFlags = 0 )
+    {	CBin &sBin = (CBin&)x_sBin;
+		if ( !x_uMax || x_uMax > sBin.getUsed() ) x_uMax = sBin.getUsed();
+		return SendTo( (oexPVOID)sBin.Ptr(), x_uMax, x_puSent, x_uFlags ); 
+	}
 
 	//==============================================================
 	// Send()
@@ -852,6 +888,12 @@ public:
 
     /// Shuts down the socket
     oexBOOL Shutdown();
+
+	/// Byte conversions
+	static oexUINT32 htonl( oexUINT32 v );
+	static oexUINT32 ntohl( oexUINT32 v );
+	static oexUINT16 htons( oexUINT16 v );
+	static oexUINT16 ntohs( oexUINT16 v );
 
 public:
 
