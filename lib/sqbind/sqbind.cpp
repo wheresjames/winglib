@@ -112,7 +112,9 @@ void CSqFile::Register( sqbind::VM vm )
 
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqTime, CSqTime )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetLocalTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetLocalTime )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetSystemTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetSystemTime )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetTime )
 
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetYear )

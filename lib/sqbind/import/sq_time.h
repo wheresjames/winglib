@@ -53,8 +53,14 @@ namespace sqbind
 		void GetLocalTime()
 		{	m_t.GetLocalTime(); }
 
+		void SetLocalTime()
+		{	m_t.SetLocalTime(); }
+
 		void GetSystemTime()
 		{	m_t.GetSystemTime(); }
+
+		void SetSystemTime()
+		{	m_t.SetSystemTime(); }
 
 		void SetTime( int year, int month, int day, int hour, int minute, int second )
 		{	m_t.SetTime( year, month, day, hour, minute, second ); }

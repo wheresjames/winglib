@@ -86,12 +86,16 @@ function _init() : ( _g )
 	local ts_client = _self.gmt_time();
 
 	local tm = CSqTime();
-	tm.SetUnixTime( ts_server );
-	_self.echo( "Server Time : " + tm.FormatTime( "%W, %B %D, %Y - %h:%m:%s %A" ) );
 	tm.SetUnixTime( ts_client );
 	_self.echo( "Local  Time : " + tm.FormatTime( "%W, %B %D, %Y - %h:%m:%s %A" ) );
+	tm.SetUnixTime( ts_server );
+	_self.echo( "Server Time : " + tm.FormatTime( "%W, %B %D, %Y - %h:%m:%s %A" ) );
 
 	_self.echo( "\nLocal time is off by " + ( ts_client - ts_server ) + " seconds" );
+
+	// Correct time
+//	if ( ts_client != ts_server )
+//		tm.SetSystemTime();
 
 	_self.echo( "\n...done...\n" );
 }

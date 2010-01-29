@@ -133,8 +133,14 @@ public:
     CSysTime& GetLocalTime()
     {   os::CSys::GetLocalTime( m_time ); return *this; }
 
-    CSysTime& GetSystemTime()
+    CSysTime& SetLocalTime()
+    {   os::CSys::SetLocalTime( m_time ); return *this; }
+
+	CSysTime& GetSystemTime()
     {   os::CSys::GetSystemTime( m_time ); return *this; }
+
+    CSysTime& SetSystemTime()
+    {   os::CSys::SetSystemTime( m_time ); return *this; }
 
 	//==============================================================
 	// SetTime()

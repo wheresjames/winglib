@@ -358,8 +358,14 @@ public:
     /// Local time
     static oexBOOL GetLocalTime( STime &x_st );
 
+    /// Local time
+    static oexBOOL SetLocalTime( STime &x_st );
+
     /// System time
     static oexBOOL GetSystemTime( STime &x_st );
+
+    /// System time
+    static oexBOOL SetSystemTime( STime &x_st );
 
     /// Converts an STime structure to file time
     static oexINT64 SystemTimeToFileTime( STime &x_st );

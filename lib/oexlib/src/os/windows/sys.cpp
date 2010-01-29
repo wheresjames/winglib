@@ -622,6 +622,22 @@ oexBOOL CSys::GetLocalTime( STime &t )
     return oexTRUE;
 }
 
+oexBOOL CSys::SetLocalTime( STime &t )
+{
+    SYSTEMTIME st;
+    CSys::Zero( &st, sizeof( st ) );
+
+	CSys_STimeToSystemTime( t, st );
+
+	// Set local time must be called twice to ensure
+	// daylight saving is updated correctly.  Why the
+	// function couldn't do this on it's own is beyond me.
+    ::SetLocalTime( &st );
+    ::SetLocalTime( &st );
+
+    return oexTRUE;
+}
+
 oexINT CSys::GetLocalTzBias()
 {
     TIME_ZONE_INFORMATION tz;
@@ -641,6 +657,18 @@ oexBOOL CSys::GetSystemTime( STime &t )
 
     ::GetSystemTime( &st );
     CSys_SystemTimeToSTime( st, t );
+
+    return oexTRUE;
+}
+
+oexBOOL CSys::SetSystemTime( STime &t )
+{
+    SYSTEMTIME st;
+    CSys::Zero( &st, sizeof( st ) );
+
+	CSys_STimeToSystemTime( t, st );
+
+    ::SetSystemTime( &st );
 
     return oexTRUE;
 }

@@ -31,7 +31,7 @@ function _idle() : ( _g )
 		local pkt_size = 12 * 4;
 		local pkt = CSqBinary();
 
-		if ( !socket.ReadFromBin( pkt, 0 ) )
+		if ( !_g.socket.ReadFromBin( pkt, 0 ) )
 		{	_self.echo( "ReadFromBin() : " + socket.getLastError() );
 			continue;
 		} // end if
@@ -42,7 +42,7 @@ function _idle() : ( _g )
 		} // end if
 
 		// What is the clients time
-		local ts_client = socket.ntohl( pkt.getUINT( 10 ) ) - NTP_EPOCH;
+		local ts_client = _g.socket.ntohl( pkt.getUINT( 6 ) ) - NTP_EPOCH;
 		local ts_server = _self.gmt_time();
 
 		local tm = CSqTime();
@@ -50,7 +50,7 @@ function _idle() : ( _g )
 		_self.echo( "Server Time : " + tm.FormatTime( "%W, %B %D, %Y - %h:%m:%s %A" ) );
 		tm.SetUnixTime( ts_client );
 		_self.echo( "Local  Time : " + tm.FormatTime( "%W, %B %D, %Y - %h:%m:%s %A" ) );
-		_self.echo( "\Client time is off by " + ( ts_client - ts_server ) + " seconds" );
+		_self.echo( "\nClient time is off by " + ( ts_client - ts_server ) + " seconds" );
 
 		pkt.Zero();
 		pkt.setUsed( pkt_size );
