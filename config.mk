@@ -137,7 +137,7 @@ ifeq ($(BUILD),vs)
 		endif
 		CFG_DPOSTFIX := _d
 		ifeq ($(CFG_STDLIBS),)
-			CFG_STDLIBS	 := ole32.lib Oleaut32.lib user32.lib gdi32.lib comdlg32.lib comctl32.lib rpcrt4.lib shell32.lib Advapi32.lib
+			CFG_STDLIBS	 := ole32.lib Oleaut32.lib user32.lib gdi32.lib comdlg32.lib comctl32.lib rpcrt4.lib shell32.lib advapi32.lib
 		endif
 	else
 		ifeq ($(LIBLINK),static)

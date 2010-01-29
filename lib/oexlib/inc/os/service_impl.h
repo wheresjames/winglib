@@ -80,6 +80,18 @@ public:
 	/// Uninstalls the service
 	static int RemoveService( oexCSTR pName );
 
+	/// Starts the service
+	static int Start( oexCSTR pName );
+
+	/// Stops the service
+	static int Stop( oexCSTR pName );
+
+	/// Shutsdown the service
+	static int Shutdown( oexCSTR pName );
+
+	/// Restarts the service
+	static int Restart( oexCSTR pName );
+
 public:
 
 	/// Call from main() to make this thing go

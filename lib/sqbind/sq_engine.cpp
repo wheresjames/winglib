@@ -1093,6 +1093,19 @@ int CSqEngine::OnImport( const stdString &sClass )
 	return -1;
 }
 
+static oex::CStr FindFile( const stdString &sRoot, oex::CStrList &lstSubs, oex::CStr &sFile )
+{
+	// Check all possible sub folders
+	for ( oex::CStrList::iterator it; lstSubs.Next( it ); )
+	{	oex::CStr sFull = oexBuildPath( sRoot.c_str(), *it );
+		sFull.BuildPath( sFile );
+		if ( oexExists( sFull.Ptr() ) )
+			return sFull;
+	} // end for
+
+	return oex::CStr();
+}
+
 int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 {
 	if ( !sModule.length() )
@@ -1101,30 +1114,36 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 	if ( !m_pModuleManager )
 		return -2;
 
-	oex::CStr sFull;
-	if ( sPath.length() )
-		sFull = sPath.c_str();
-	else
-		sFull = oexGetModulePath();
+	oex::CStrList lstSubs;
+	lstSubs << oexT( "sqmod" ) << oexT( "_sqmod" ) << oexT( "modules" );
 
+	// Build module file name
 	oex::CStr sFile = ( oex::CStr() << oexT( "sqmod_" ) <<  sModule.c_str() ).DecorateName( oex::oexTRUE, oex::oexTRUE );
+	oex::CStr sFull;
 
-	if ( oex::CFile::Exists( oex::CStr( sFull ).BuildPath( sFile ).Ptr() ) )
-		sFull.BuildPath( sFile );
-
-	else if ( oex::CFile::Exists( oex::CStr( sFull ).BuildPath( oexT( "sqmod" ) ).BuildPath( sFile ).Ptr() ) )
-		sFull.BuildPath( oexT( "sqmod" ) ).BuildPath( sFile );
-
-	else if ( oex::CFile::Exists( oex::CStr( sFull ).BuildPath( oexT( "_sqmod" ) ).BuildPath( sFile ).Ptr() ) )
-		sFull.BuildPath( oexT( "_sqmod" ) ).BuildPath( sFile );
-
-	else if ( oex::CFile::Exists( oex::CStr( sFull ).BuildPath( oexT( "modules" ) ).BuildPath( sFile ).Ptr() ) )
-		sFull.BuildPath( oexT( "modules" ) ).BuildPath( sFile );
+	// User path?
+	if ( sPath.length() )
+		sFull = FindFile( sPath, lstSubs, sFile );
 
 	else
-	{	oexERROR( 0, oexMks( oexT( "Module not found " ), sFile ) );
+	{
+#if !defined( oexDEBUG )
+
+		// Check install folder
+		oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\SquirrelScript" ), oexT( "Install_Dir" ) );
+		if ( sInstallRoot.Length() )
+			sFull = FindFile( sInstallRoot.Ptr(), lstSubs, sFile );
+
+#endif
+
+		// Check exe folder
+		if ( !sFull.Length() )
+			sFull = FindFile( oexGetModulePath().Ptr(), lstSubs, sFile );
+
+	} // end else
+
+	if ( !sFull.Length() )
 		return -3;
-	} // end if
 
 	// See if the module is already loaded
 	oex::oexBOOL bExists = m_pModuleManager->Exists( sFull.Ptr() );

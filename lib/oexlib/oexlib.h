@@ -505,6 +505,7 @@ namespace os
 #	include "inc/os/module.h"
 #   include "inc/os/service.h"
 #	include "inc/os/service_impl.h"
+#   include "inc/os/sys_util.h"
 };
 
 //------------------------------------------------------------------

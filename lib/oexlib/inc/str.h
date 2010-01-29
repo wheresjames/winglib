@@ -2073,13 +2073,13 @@ public:
 		return !os::CSys::MemCmp( m_mem.Ptr(), pStr, uSize );
 	}
 
-	oexBOOL ICmp( TStr &str )
+	oexBOOL ICmp( TStr &str ) const
 	{	return ICmp( str.Ptr(), str.Length() ); }
 
-	oexBOOL ICmp( oexCONST T* pStr )
+	oexBOOL ICmp( oexCONST T* pStr ) const
 	{	return ICmp( pStr, zstr::Length( pStr ) ); }
 
-	oexBOOL ICmp( oexCONST T* pStr, t_size uSize )
+	oexBOOL ICmp( oexCONST T* pStr, t_size uSize ) const
     {   return !str::ICompare( Ptr(), Length(), pStr, uSize ); }
 
 	oexBOOL CmpLen( TStr &str, oexINT x_lLen = -1 )

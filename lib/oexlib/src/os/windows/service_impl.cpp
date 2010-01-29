@@ -260,6 +260,9 @@ int CServiceImpl::OnRunService( int argc, const char** argv, oexCSTR pName, oexC
 	if ( CommandLine().IsKey( oexT( "run" ) ) )
 		return OnRun();
 
+	// Flag set if we execute a command
+	oexBOOL bExit = oexFALSE;
+
 	if ( CommandLine().IsKey( oexT( "install" ) ) )
 	{
 		int nErr = InstallService( pName, pDesc, getAutoRestart() );
@@ -270,7 +273,63 @@ int CServiceImpl::OnRunService( int argc, const char** argv, oexCSTR pName, oexC
 
 		oexEcho( oexT( "Installed service" ) );
 
-		return 0;
+		bExit = oexTRUE;
+
+	} // end if
+
+	if ( CommandLine().IsKey( oexT( "start" ) ) )
+	{
+		int nErr = Start( pName );
+		if ( 0 > nErr )
+		{	oexEcho( oexT( "Error starting service" ) );
+			return nErr;
+		} // end if
+
+		oexEcho( oexT( "Service started" ) );
+
+		bExit = oexTRUE;
+
+	} // end if
+
+	if ( CommandLine().IsKey( oexT( "restart" ) ) )
+	{
+		int nErr = Restart( pName );
+		if ( 0 > nErr )
+		{	oexEcho( oexT( "Error restarting down service" ) );
+			return nErr;
+		} // end if
+
+		oexEcho( oexT( "Service restarted" ) );
+
+		bExit = oexTRUE;
+
+	} // end if
+
+	if ( CommandLine().IsKey( oexT( "stop" ) ) )
+	{
+		int nErr = Stop( pName );
+		if ( 0 > nErr )
+		{	oexEcho( oexT( "Error stopping service" ) );
+			return nErr;
+		} // end if
+
+		oexEcho( oexT( "Service stopped" ) );
+
+		bExit = oexTRUE;
+
+	} // end if
+
+	if ( CommandLine().IsKey( oexT( "shutdown" ) ) )
+	{
+		int nErr = Shutdown( pName );
+		if ( 0 > nErr )
+		{	oexEcho( oexT( "Error shutting down service" ) );
+			return nErr;
+		} // end if
+
+		oexEcho( oexT( "Service shutdown" ) );
+
+		bExit = oexTRUE;
 
 	} // end if
 
@@ -285,9 +344,13 @@ int CServiceImpl::OnRunService( int argc, const char** argv, oexCSTR pName, oexC
 
 		oexEcho( oexT( "Removed service" ) );
 
-		return 0;
+		bExit = oexTRUE;
 
 	} // end if
+
+	// Quit if we executed a service command
+	if ( bExit )
+		return 0;
 
 	// Service data
 	SERVICE_TABLE_ENTRY ServiceTable[ 2 ];
@@ -387,6 +450,108 @@ void CServiceImpl::OnServiceHandler( unsigned int fdwControl )
 	SetServiceStatus ( (SERVICE_STATUS_HANDLE)m_hService, &g_ss );
 
 	return;
+}
+
+int CServiceImpl::Start( oexCSTR pName )
+{
+	// Open service control manager
+	SC_HANDLE hManager = ::OpenSCManager( NULL, NULL, SC_MANAGER_ALL_ACCESS );
+	if ( !hManager )
+		return -1;
+
+	// Open service
+	SC_HANDLE hService = ::OpenService( hManager, pName, SERVICE_ALL_ACCESS );
+	if ( !hService )
+	{	CloseServiceHandle( hManager );
+		return -2;
+	} // end if
+
+	// Start the service
+	::StartService( hService, 0, NULL );
+
+	// Close handles
+	::CloseServiceHandle( hService );
+	::CloseServiceHandle( hManager );
+
+	return 1;
+}
+
+int CServiceImpl::Stop( oexCSTR pName )
+{
+	// Open service control manager
+	SC_HANDLE hManager = ::OpenSCManager( NULL, NULL, SC_MANAGER_ALL_ACCESS );
+	if ( !hManager )
+		return -1;
+
+	// Open service
+	SC_HANDLE hService = ::OpenService( hManager, pName, SERVICE_ALL_ACCESS );
+	if ( !hService )
+	{	::CloseServiceHandle( hManager );
+		return -2;
+	} // end if
+
+	// Stop the service
+	SERVICE_STATUS ss; ZeroMemory( &ss, sizeof( ss ) );
+	::ControlService( hService, SERVICE_CONTROL_STOP, &ss );
+
+	// Close handles
+	::CloseServiceHandle( hService );
+	::CloseServiceHandle( hManager );
+
+	return 1;
+}
+
+int CServiceImpl::Shutdown( oexCSTR pName )
+{
+	// Open service control manager
+	SC_HANDLE hManager = ::OpenSCManager( NULL, NULL, SC_MANAGER_ALL_ACCESS );
+	if ( !hManager )
+		return -1;
+
+	// Open service
+	SC_HANDLE hService = ::OpenService( hManager, pName, SERVICE_ALL_ACCESS );
+	if ( !hService )
+	{	CloseServiceHandle( hManager );
+		return -2;
+	} // end if
+
+	// Stop the service
+	SERVICE_STATUS ss; ZeroMemory( &ss, sizeof( ss ) );
+	::ControlService( hService, SERVICE_CONTROL_SHUTDOWN, &ss );
+
+	// Close handles
+	::CloseServiceHandle( hService );
+	::CloseServiceHandle( hManager );
+
+	return 1;
+}
+
+int CServiceImpl::Restart( oexCSTR pName )
+{
+	// Open service control manager
+	SC_HANDLE hManager = ::OpenSCManager( NULL, NULL, SC_MANAGER_ALL_ACCESS );
+	if ( !hManager )
+		return -1;
+
+	// Open service
+	SC_HANDLE hService = ::OpenService( hManager, pName, SERVICE_ALL_ACCESS );
+	if ( !hService )
+	{	::CloseServiceHandle( hManager );
+		return -2;
+	} // end if
+
+	// Stop the service
+	SERVICE_STATUS ss; ZeroMemory( &ss, sizeof( ss ) );
+	ControlService( hService, SERVICE_CONTROL_SHUTDOWN, &ss );
+
+	// Start the service
+	::StartService( hService, 0, NULL );
+
+	// Close handles
+	::CloseServiceHandle( hService );
+	::CloseServiceHandle( hManager );
+
+	return 1;
 }
 
 int CServiceImpl::InstallService( oexCSTR pName, oexCSTR pDesc, oexBOOL bAutoRestart )
