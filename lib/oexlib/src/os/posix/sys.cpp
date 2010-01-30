@@ -628,6 +628,17 @@ oexBOOL CSys::GetLocalTime( STime &t )
     return oexTRUE;
 }
 
+oexBOOL CSys::SetLocalTime( STime &t )
+{
+	struct tm tinfo;
+	CSys_STimeToSystemTime( t, &tinfo );
+
+	time_t new_time = timelocal( &tinfo );
+	return 0 == stime( &new_time );
+
+    return oexTRUE;
+}
+
 oexINT CSys::GetLocalTzBias()
 {
 /*    TIME_ZONE_INFORMATION tz;
@@ -667,6 +678,18 @@ oexBOOL CSys::GetSystemTime( STime &t )
 
     return oexTRUE;
 }
+
+oexBOOL CSys::SetSystemTime( STime &t )
+{
+	struct tm tinfo;
+	CSys_STimeToSystemTime( t, &tinfo );
+
+	time_t new_time = timegm( &tinfo );
+	return 0 == stime( &new_time );
+
+    return oexTRUE;
+}
+
 
 // Some helpful delta's
 // 1970 = 1900 + 2208988800

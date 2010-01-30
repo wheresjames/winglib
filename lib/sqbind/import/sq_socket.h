@@ -50,7 +50,7 @@ namespace sqbind
 		CSqSockAddress() {}
 
 		/// Construct from address
-		CSqSockAddress( oexCONST oex::os::CIpAddress &r ) 
+		CSqSockAddress( oexCONST oex::os::CIpAddress &r )
 			: m_address( r )
 		{}
 
@@ -83,14 +83,14 @@ namespace sqbind
 
 		/// Returns a string identifying the dot address
 		sqbind::stdString getDotAddress();
-		
+
 	private:
 
 		/// Address object
 		oex::os::CIpAddress		m_address;
 	};
 
-		
+
 	class CSqSocket
     {
 	public:
@@ -202,16 +202,16 @@ namespace sqbind
 		int setScript( sqbind::CSqMsgQueue *pMsgQueue, const sqbind::stdString &sId, const sqbind::stdString &sScript, const sqbind::stdString &sFunction );
 
 		oex::oexUINT32 htonl( oex::oexUINT32 v )
-		{	return m_socket->htonl( v ); }
+		{	return m_socket->hton_l( v ); }
 		oex::oexUINT32 ntohl( oex::oexUINT32 v )
-		{	return m_socket->ntohl( v ); }
+		{	return m_socket->ntoh_l( v ); }
 		oex::oexUINT16 htons( oex::oexUINT16 v )
-		{	return m_socket->htons( v ); }
+		{	return m_socket->hton_s( v ); }
 		oex::oexUINT16 ntohs( oex::oexUINT16 v )
-		{	return m_socket->ntohs( v ); }
+		{	return m_socket->ntoh_s( v ); }
 
 	private:
-		
+
 		/// Socket class
 		oex::TMem< oex::os::CIpSocket >	m_socket;
 

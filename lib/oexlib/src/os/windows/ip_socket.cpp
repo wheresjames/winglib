@@ -1261,7 +1261,7 @@ oexBOOL CIpSocket::GetLocalAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
     return CIpSocket_GetAddressInfo( x_pIa, &sai );
 }
 
-oexUINT32 CIpSocket::htonl( oexUINT32 v ) { return ::htonl( v ); }
-oexUINT32 CIpSocket::ntohl( oexUINT32 v ) { return ::ntohl( v ); }
-oexUINT16 CIpSocket::htons( oexUINT16 v ) { return ::htons( v ); }
-oexUINT16 CIpSocket::ntohs( oexUINT16 v ) { return ::ntohs( v ); }
+oexUINT32 CIpSocket::hton_l( oexUINT32 v ) { return ::htonl( v ); }
+oexUINT32 CIpSocket::ntoh_l( oexUINT32 v ) { return ::ntohl( v ); }
+oexUINT16 CIpSocket::hton_s( oexUINT16 v ) { return ::htons( v ); }
+oexUINT16 CIpSocket::ntoh_s( oexUINT16 v ) { return ::ntohs( v ); }

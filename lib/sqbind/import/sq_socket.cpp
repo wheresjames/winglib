@@ -37,7 +37,7 @@
 using namespace sqbind;
 
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSockAddress, CSqSockAddress )
-	
+
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, GetId )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, SetId )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, SetDotAddress )
@@ -101,15 +101,15 @@ sqbind::stdString CSqSockAddress::getDotAddress()
 }
 
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSocket, CSqSocket )
-	
+
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Destroy )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Connect )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, CreateUDP )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, CreateUDP )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Bind )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Listen )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Accept )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Share )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, WaitEvent )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, WaitEvent )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Read )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Write )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, ReadFrom )
@@ -159,8 +159,8 @@ void CSqSocket::Destroy()
 
 int CSqSocket::CreateUDP()
 {
-	return m_socket->Create( oex::os::CIpSocket::eAfInet, 
-							 oex::os::CIpSocket::eTypeDgram, 
+	return m_socket->Create( oex::os::CIpSocket::eAfInet,
+							 oex::os::CIpSocket::eTypeDgram,
 							 oex::os::CIpSocket::eProtoUdp );
 }
 
@@ -331,9 +331,7 @@ sqbind::stdString CSqSocket::ReadFrom( int nMax )
 }
 
 int CSqSocket::SendTo( const sqbind::stdString &s, int nMax )
-{
-	return m_socket->SendTo( oexStrToMb( oex::CStr( s.c_str(), s.length() ) ) );
-}
+{	return m_socket->SendTo( oexStrToMb( oex::CStr( s.c_str(), nMax ) ) ); }
 
 int CSqSocket::ReadBin( sqbind::CSqBinary *pBin, int nMax )
 {	if ( !pBin )
