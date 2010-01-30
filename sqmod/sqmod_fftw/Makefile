@@ -21,6 +21,11 @@ PRJ_LIBROOT := ../..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifndef BUILD_FFTW
+UNSUPPORTED := Set make option BUILD_FFTW=1 to build
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 #-------------------------------------------------------------------
 # Source files
 #-------------------------------------------------------------------
@@ -33,4 +38,5 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
+endif
 

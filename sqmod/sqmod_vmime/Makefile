@@ -27,6 +27,11 @@ PRJ_LIBROOT := ../..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifndef BUILD_VMIME
+UNSUPPORTED := Set make option BUILD_VMIME=1 to build
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 ifeq ($(PLATFORM),windows)
 	PRJ_INCS := winglib/dep/etc/vmime/inc/windows $(PRJ_INCS)
 else
@@ -44,3 +49,6 @@ include $(PRJ_LIBROOT)/build.mk
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
+
+endif
+

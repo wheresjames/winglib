@@ -23,6 +23,11 @@ PRJ_LIBROOT := ../..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifndef BUILD_POCO
+UNSUPPORTED := Set make option BUILD_POCO=1 to build
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 ifeq ($(PLATFORM),windows)
 	PRJ_OSLB := $(PRJ_OSLB) iphlpapi.lib
 endif
@@ -38,3 +43,5 @@ include $(PRJ_LIBROOT)/build.mk
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
+
+endif

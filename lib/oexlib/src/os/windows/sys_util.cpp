@@ -59,8 +59,6 @@ static HKEY RootKeyFromName( const CStr &sKey )
 		return HKEY_CLASSES_ROOT;
 	else if ( sKey.ICmp( oexT( "HKPD" ) ) )
 		return HKEY_PERFORMANCE_DATA;
-	else if ( sKey.ICmp( oexT( "HKPT" ) ) )
-		return HKEY_PERFORMANCE_TEXT;
 	else if ( sKey.ICmp( oexT( "HKU" ) ) )
 		return HKEY_USERS;
 

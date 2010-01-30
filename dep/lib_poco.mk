@@ -20,6 +20,11 @@ PRJ_OBJROOT := _0_dep
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifndef BUILD_POCO
+UNSUPPORTED := Set make option BUILD_POCO=1 to build
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 #ifeq ($(PLATFORM),windows)
 #	PRJ_INCS := winglib/dep/etc/mimetic/inc/windows $(PRJ_INCS)
 #else
@@ -78,4 +83,7 @@ include $(PRJ_LIBROOT)/build.mk
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
+
+endif
+
 

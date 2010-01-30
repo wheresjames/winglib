@@ -20,6 +20,11 @@ PRJ_LIBROOT := ../..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifndef BUILD_MYSQL
+UNSUPPORTED := Set make option BUILD_MYSQL=1 to build
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 ifeq ($(PLATFORM),windows)
 	PRJ_INCS := $(PRJ_INCS) mysql/include
 	PRJ_LIBP := mysql/lib/opt
@@ -44,4 +49,5 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
+endif
 
