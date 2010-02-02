@@ -45,7 +45,7 @@ OEX_USING_NAMESPACE
 #endif
 
 oexBOOL CDib::Destroy()
-{
+{_STT();
 	/// Destroy the image buffer
 	m_image.Destroy();
 
@@ -53,7 +53,7 @@ oexBOOL CDib::Destroy()
 }
 
 oexBOOL CDib::Create( oexCSTR x_pShared, os::CFMap::t_HFILEMAP x_hShared, oexINT x_lWidth, oexINT x_lHeight, oexINT x_lBpp, oexBOOL x_bInit )
-{
+{_STT();
 	// Lose any current image
 	Destroy();
 
@@ -156,7 +156,7 @@ static void bayer_bilinear(u8 *pBay, u8 *pRGB24, int x, int y, int w)
 }
 
 static void bayer_to_rgb24(u8 *pBay, u8 *pRGB24, int w, int h)
-{
+{_STT();
 	int i, j;
 
 	for (i = 0; i < w; i += 2)
@@ -168,7 +168,7 @@ static void bayer_to_rgb24(u8 *pBay, u8 *pRGB24, int w, int h)
 }
 
 oexBOOL CDib::SBGGR8toRGB24( oexPVOID x_pDst, oexPVOID x_pSrc, oexINT x_nWidth, oexINT x_nHeight )
-{
+{_STT();
 	if ( !oexCHECK_PTR( x_pDst ) || !oexCHECK_PTR( x_pSrc ) || !x_nWidth || !x_nHeight )
 		return oexFALSE;
 
@@ -178,7 +178,7 @@ oexBOOL CDib::SBGGR8toRGB24( oexPVOID x_pDst, oexPVOID x_pSrc, oexINT x_nWidth, 
 }
 
 oexBOOL CDib::Copy( oexPVOID x_pData, oexINT x_nSize )
-{
+{_STT();
 	if ( !oexCHECK_PTR( x_pData ) || !x_nSize )
 		return oexFALSE;
 
@@ -195,7 +195,7 @@ oexBOOL CDib::Copy( oexPVOID x_pData, oexINT x_nSize )
 
 
 oexBOOL CDib::CopySBGGR8( oexPVOID x_pData )
-{
+{_STT();
 	if ( !m_image.IsValid() )
 		return oexFALSE;
 
@@ -206,7 +206,7 @@ oexBOOL CDib::CopySBGGR8( oexPVOID x_pData )
 }
 
 oexBOOL CDib::CopyGrey( oexPVOID x_pData )
-{
+{_STT();
 	if ( !m_image.IsValid() )
 		return oexFALSE;
 
@@ -228,7 +228,7 @@ oexBOOL CDib::CopyGrey( oexPVOID x_pData )
 }
 
 oexBOOL CDib::SaveDibFile( oexCSTR x_pFile, SImageData *x_pId, oexCPVOID x_pData, oexINT x_nData )
-{
+{_STT();
 	if ( !oexCHECK_PTR( x_pFile ) || !*x_pFile || !oexCHECK_PTR( x_pId ) || !oexCHECK_PTR( x_pData ) || !x_nData )
 	{	oexERROR( -1, oexT( "Invalid parameter" ) );
 		return oexFALSE;
@@ -312,7 +312,7 @@ const oexINT	c_uYvScale = (oexUINT)( (oexDOUBLE)0.71414 * c_u2PowShift );
 	\return Zero if failure, otherwise non-zero.
 */
 oexBOOL CDib::YUV_RGB_1(oexLONG lWidth, oexLONG lHeight, oexBYTE *pSrc, oexBYTE *pDst, oexBOOL bGrayscale)
-{
+{_STT();
 	// Image params
 	oexINT lScanWidth = GetScanWidth( lWidth, 24 );
 //	oexINT lScanWidthDif = lScanWidth - ( lWidth * 3 );
@@ -407,7 +407,7 @@ oexBOOL CDib::YUV_RGB_1(oexLONG lWidth, oexLONG lHeight, oexBYTE *pSrc, oexBYTE 
 	\return Zero if failure, otherwise non-zero.
 */
 oexBOOL CDib::YUV_RGB_2(oexLONG lWidth, oexLONG lHeight, oexBYTE *pSrc, oexBYTE *pDst, oexBOOL bGrayscale)
-{
+{_STT();
 	// Image params
 	oexINT lScanWidth = GetScanWidth( lWidth, 24 );
 //	oexINT lScanWidthDif = lScanWidth - ( lWidth * 3 );
@@ -468,7 +468,7 @@ oexBOOL CDib::YUV_RGB_2(oexLONG lWidth, oexLONG lHeight, oexBYTE *pSrc, oexBYTE 
 }
 
 oexBOOL CDib::YUYV_RGB(oexLONG lWidth, oexLONG lHeight, oexPVOID pSrc, oexPVOID pDst, oexBOOL bGrayscale)
-{
+{_STT();
 	// Image params
 	oexINT lScanWidth = GetScanWidth( lWidth, 24 );
 	oexINT lScanWidthDif = lScanWidth - ( lWidth * 3 );

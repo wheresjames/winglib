@@ -44,11 +44,11 @@ OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::zip;
 
 CZip::CZip()
-{
+{_STT();
 }
 
 CZip::~CZip()
-{
+{_STT();
 }
 
 /// Yup, more indirection
@@ -65,11 +65,13 @@ private:
 };
 
 CCompress::CCompress()
-{   m_pCompress = new COexZipLibCompress( this );
+{_STT();
+	m_pCompress = new COexZipLibCompress( this );
 }
 
 CCompress::~CCompress()
-{   if ( m_pCompress )
+{_STT();
+	if ( m_pCompress )
     {   delete (COexZipLibCompress*)m_pCompress;
         m_pCompress = oexNULL;
     } // end if
@@ -77,11 +79,12 @@ CCompress::~CCompress()
 }
 
 CStr8 CCompress::Compress()
-{   return ( (COexZipLibCompress*)m_pCompress )->Compress();
+{_STT();
+	return ( (COexZipLibCompress*)m_pCompress )->Compress();
 }
 
 oexINT64 CCompress::OnRead( oexSTR8 buf, unsigned size )
-{
+{_STT();
     // From file?
     if ( m_fInput.IsOpen() )
     {   oexINT64 llRead = 0;
@@ -101,7 +104,7 @@ oexINT64 CCompress::OnRead( oexSTR8 buf, unsigned size )
 }
 
 oexINT64 CCompress::OnWrite( oexCSTR8 buf, unsigned *size )
-{
+{_STT();
     // To file?
     if ( m_fOutput.IsOpen() )
     {   oexINT64 llWritten = 0;
@@ -117,7 +120,5 @@ oexINT64 CCompress::OnWrite( oexCSTR8 buf, unsigned *size )
     *size = 0;
     return t;
 }
-
-
 
 #endif // OEX_ENABLE_ZIP

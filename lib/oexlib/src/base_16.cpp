@@ -81,16 +81,17 @@ oexBYTE CBase16::m_b16decode[] =
 
 
 CBase16::CBase16()
-{
+{_STT();
 }
 
 CBase16::~CBase16()
-{
+{_STT();
 
 }
 
 oexINT CBase16::Decode( oexCSTR8 src, oexINT *srcsize, oexBYTE *dst, oexINT *dstsize, oexINT *done )
-{
+{_STT();
+
 	oexINT x = 0, y = 0;
 	oexINT b = 0;
 	oexINT max = *srcsize;
@@ -117,7 +118,8 @@ oexINT CBase16::Decode( oexCSTR8 src, oexINT *srcsize, oexBYTE *dst, oexINT *dst
 }
 
 CStr8 CBase16::Decode( oexCSTR8 src, oexINT srcsize )
-{
+{_STT();
+
 	// Verify pointers
 	if ( !oexCHECK_PTR( src ) || !srcsize )
 		return CStr8();
@@ -136,7 +138,8 @@ CStr8 CBase16::Decode( oexCSTR8 src, oexINT srcsize )
 
 
 oexINT CBase16::Encode( oexSTR8 dst, oexINT dstsize, oexCONST oexBYTE *src, oexINT srcsize )
-{
+{_STT();
+
 	oexINT x = 0, y = 0;
 
 	// Base 16 encoder
@@ -153,7 +156,8 @@ oexINT CBase16::Encode( oexSTR8 dst, oexINT dstsize, oexCONST oexBYTE *src, oexI
 }
 
 CStr8 CBase16::Encode( oexCPVOID src, oexINT srcsize )
-{
+{_STT();
+
 	// Verify pointers
 	if ( !oexCHECK_PTR( src ) || !srcsize )
 		return CStr8();

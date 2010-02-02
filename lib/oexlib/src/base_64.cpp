@@ -87,16 +87,17 @@ oexBYTE CBase64::m_b64decode[] =
 
 
 CBase64::CBase64()
-{
+{_STT();
 }
 
 CBase64::~CBase64()
-{
+{_STT();
 
 }
 
 oexINT CBase64::Decode( oexCSTR8 src, oexINT *srcsize, oexBYTE *dst, oexINT *dstsize, oexINT *done )
-{
+{_STT();
+
 	oexINT x = 0, y = 0;
 	oexINT b = 0;
 	oexINT max = *srcsize;
@@ -154,7 +155,8 @@ oexINT CBase64::Decode( oexCSTR8 src, oexINT *srcsize, oexBYTE *dst, oexINT *dst
 }
 
 CStr8 CBase64::Decode( oexCSTR8 src, oexINT srcsize )
-{
+{_STT();
+
 	// Verify pointers
 	if ( !oexCHECK_PTR( src ) || !srcsize )
 		return CStr8();
@@ -173,7 +175,8 @@ CStr8 CBase64::Decode( oexCSTR8 src, oexINT srcsize )
 
 
 oexINT CBase64::Encode( oexSTR8 dst, oexINT dstsize, oexCONST oexBYTE *src, oexINT srcsize )
-{
+{_STT();
+
 	oexINT x = 0, y = 0;
 	oexINT b = 0;
 	oexINT line = 0;
@@ -237,7 +240,8 @@ oexINT CBase64::Encode( oexSTR8 dst, oexINT dstsize, oexCONST oexBYTE *src, oexI
 }
 
 CStr8 CBase64::Encode( oexCPVOID src, oexINT srcsize )
-{
+{_STT();
+
 	// Verify pointers
 	if ( !oexCHECK_PTR( src ) || !srcsize )
 		return CStr8();

@@ -155,3 +155,78 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x
 #endif
 		Break();
 }
+
+void CreateReport( oexCSTR pUrl, oexCSTR pSub )
+{
+	// Does user want crash reports?
+	if ( ( !pUrl && !*pUrl ) || ( !pSub && !*pSub ) )
+		return;
+
+	// Ensure stack trace object
+	CStackTrace* pSt = CStackTrace::St();
+	if ( !pSt )
+		return;
+
+	// Save to file?
+	if ( pSub && *pSub )
+	{
+		// Save error log
+		CSysTime wt; wt.GetLocalTime();
+		CStr sPath = oexGetModulePath( wt.FormatTime( oexT( "%w_%b_%D_%Y__%g_%m_%s" ) ).Ptr() );
+		oexCreatePath( sPath.Ptr() );
+
+		sPath.BuildPath( oexT( "stack_trace.txt" ) );
+/*
+		CFile f;
+		if ( f.OpenNew( sPath.Ptr() ) )
+		{
+			oexUINT i = 0;
+			while ( CStack *p = pSt->Next( i++ ) )
+			{
+				f.Write( 
+
+			} // end while
+
+		} // end if
+*/
+	} // end if
+
+}
+
+oexCHAR g_szUrl[ oexSTRSIZE ] = { 0 };
+oexCHAR g_szSub[ oexSTRSIZE ] = { 0 };
+
+LONG WINAPI OexExceptionHandler( struct _EXCEPTION_POINTERS *ExceptionInfo )
+{_STT();
+
+	// Don't recurse crash reporting
+	static BOOL bCrashInProgress = FALSE;
+	if ( !bCrashInProgress )
+	{
+		// Crash reporting
+		bCrashInProgress = TRUE;
+
+		// Create the report
+		CreateReport( g_szUrl, g_szSub );
+
+		// Crash Complete
+		bCrashInProgress = FALSE;
+
+	} // end if
+
+	return 0;
+}
+
+void CDebug::EnableCrashReporting( oexCSTR pUrl, oexCSTR pSub )
+{
+	// Save user url
+	if ( oexCHECK_PTR( pUrl ) )
+		zstr::Copy( g_szUrl, oexSizeOfArray( g_szUrl ), pUrl ); 
+
+	if ( oexCHECK_PTR( pSub ) )
+		zstr::Copy( g_szSub, oexSizeOfArray( g_szSub ), pSub ); 
+
+	// Set exception handler
+	::SetUnhandledExceptionFilter( &OexExceptionHandler ); 
+}
+

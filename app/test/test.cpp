@@ -119,7 +119,7 @@ using namespace oex;
 
 
 oex::oexRESULT TestCommon()
-{
+{_STT();
 	oexEcho( oexT( "======== Common..." ) );
 
 	int a[ 100 ]; // = { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, ... };
@@ -155,7 +155,7 @@ oex::oexRESULT TestCommon()
 }
 
 oex::oexRESULT TestAllocator()
-{
+{_STT();
 	oexEcho( oexT( "======== Memory allocator..." ) );
 
     // Veriry over-run / under-run protection
@@ -395,7 +395,7 @@ oex::oexRESULT TestAllocator()
 }
 
 oex::oexRESULT TestBinary()
-{
+{_STT();
 	oexEcho( oexT( "======== Binary buffers..." ) );
 
 	oex::CBin b1;
@@ -553,7 +553,7 @@ oex::oexRESULT TestBinary()
 }
 
 oex::oexRESULT TestStrings()
-{
+{_STT();
 	oexEcho( oexT( "======== String functions..." ) );
 
     oex::CStr str1, str2;
@@ -900,7 +900,7 @@ oex::oexRESULT TestStrings()
 }
 
 oex::oexRESULT TestFileMapping()
-{
+{_STT();
 	oexEcho( oexT( "======== File mapping..." ) );
 
     oex::TFileMapping< oex::oexTCHAR > fm;
@@ -967,7 +967,7 @@ oex::oexRESULT TestFileMapping()
 
 
 oex::oexRESULT TestGuids()
-{
+{_STT();
 	oexEcho( oexT( "======== GUIDS..." ) );
 
     // {6674C3D8-BB11-4a58-BCE0-A34DC74365AF}
@@ -1029,7 +1029,7 @@ struct B
 */
 
 oex::oexRESULT TestLists()
-{
+{_STT();
 	oexEcho( oexT( "======== Linked lists..." ) );
 
 /*
@@ -1280,7 +1280,7 @@ oex::oexRESULT TestLists()
 }
 
 oex::oexRESULT TestAssoLists()
-{
+{_STT();
 	oexEcho( oexT( "======== Mapped lists..." ) );
 
     oex::TAssoList< oex::oexINT, oex::oexINT > alii;
@@ -1396,7 +1396,7 @@ oex::oexRESULT TestAssoLists()
 }
 
 oex::oexRESULT TestPropertyBag()
-{
+{_STT();
 	oexEcho( oexT( "======== Property bags..." ) );
 
     oex::CPropertyBag pb;
@@ -1460,7 +1460,7 @@ oex::oexRESULT TestPropertyBag()
 }
 
 oex::oexRESULT TestParser()
-{
+{_STT();
 	oexEcho( oexT( "======== Text parsers..." ) );
 
 	// Test explode function
@@ -1770,7 +1770,7 @@ oex::oexRESULT TestParser()
 }
 
 oex::oexRESULT TestFile()
-{
+{_STT();
 	oexEcho( oexT( "======== Files..." ) );
 
     oex::CFile f;
@@ -1801,7 +1801,7 @@ oex::oexRESULT TestFile()
 
 
 oex::oexRESULT TestZip()
-{
+{_STT();
 #ifdef OEX_ENABLE_ZIP
 	oexEcho( oexT( "======== Zip file support..." ) );
 
@@ -1852,7 +1852,7 @@ oex::oexRESULT TestZip()
 }
 
 oex::oexRESULT TestResources()
-{
+{_STT();
 	oexEcho( oexT( "======== Resources..." ) );
 
 	// oex::CStr8 res = oexGetResource( "hello.txt" );
@@ -1904,7 +1904,7 @@ oex::oexRESULT TestResources()
 
 
 oex::oexRESULT Test_CSysTime()
-{
+{_STT();
 	oexEcho( oexT( "======== Time functions..." ) );
 
 	oexEcho( oex::CSysTime().GetLocalTime().FormatTime( oexT( "Current Time: %W, %B %D, %Y - %h:%m:%s %A" ) ).Ptr() );
@@ -1968,7 +1968,7 @@ oex::oexRESULT Test_CSysTime()
 }
 
 oex::oexRESULT Test_CIpAddress()
-{
+{_STT();
 	oexEcho( oexT( "======== IP Address..." ) );
 
     oex::oexCSTR pUrl = oexT( "http://user:password@server.com:1111/my/path/doc.php?a=b&c=d" );
@@ -2011,7 +2011,7 @@ oex::oexRESULT Test_CIpAddress()
 #define SOCKET_TIMEOUT	( 3 * 1000 )
 
 oex::oexRESULT Test_CIpSocket()
-{
+{_STT();
 	oexEcho( oexT( "======== Socket support..." ) );
 
     // *** TCP
@@ -2086,7 +2086,7 @@ oex::oexRESULT Test_CIpSocket()
 }
 
 oex::oexRESULT Test_CCircBuf()
-{
+{_STT();
 	oexEcho( oexT( "======== Circular buffers..." ) );
 
     oex::CCircBuf cb;
@@ -2141,7 +2141,7 @@ oex::oexRESULT Test_CCircBuf()
 }
 
 oex::oexRESULT Test_CFifoSync()
-{
+{_STT();
 	oexEcho( oexT( "======== FIFO buffers..." ) );
 
     oex::CFifoSync fs;
@@ -2202,7 +2202,7 @@ oex::oexRESULT Test_CFifoSync()
 }
 
 oex::oexRESULT Test_CDataPacket()
-{
+{_STT();
 	oexEcho( oexT( "======== Packets..." ) );
 
     oex::CDataPacket dp1, dp2, dp3;
@@ -2401,7 +2401,7 @@ public:
 };
 
 oex::oexRESULT Test_Threads()
-{
+{_STT();
 	oexEcho( oexT( "======== Threads..." ) );
 
 	{ // Test resource reference counting
@@ -2581,7 +2581,7 @@ public:
 
 oex::oexINT OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
 						   oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
-{
+{_STT();
 	if ( oexPtrToInt( x_pData ) != 6789 )
 		return 0;
 
@@ -2589,7 +2589,7 @@ oex::oexINT OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oex
 }
 
 oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
-{
+{_STT();
 	if ( oexPtrToInt( x_pData ) != 9876 )
 		return 0;
 
@@ -2599,7 +2599,7 @@ oex::oexINT OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os
 }
 
 oex::oexRESULT Test_CHttpSession()
-{
+{_STT();
 	oexEcho( oexT( "======== HTTP..." ) );
 
 	oex::os::CIpSocket client;
@@ -2721,7 +2721,7 @@ oex::oexRESULT Test_CHttpSession()
 }
 
 oex::oexRESULT Test_MsgParams()
-{
+{_STT();
 //	oex::CMsgParams mp( 1, 2 );
 
 
@@ -2753,7 +2753,7 @@ oex::oexRESULT Test_TArbDelegate()
 
 
 oex::oexRESULT Test_CDispatch()
-{
+{_STT();
 /*    CCallbackClass cc;
 
     // +++ Change "f=Add,p{0=1,1=2}" to "Add{0=1,1=2}"
@@ -2833,7 +2833,7 @@ public:
 */
 
 oex::oexRESULT Test_CMsgParam()
-{
+{_STT();
 
 
     return oex::oexRES_OK;
@@ -3143,7 +3143,7 @@ oex::oexRESULT Test_CVfsSession()
 
 #if defined( OEX_ENABLE_VIDEO )
 oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
-{
+{_STT();
 	oex::vid::CCapture cCapture;
 
 	// Don't flag an error here, maybe there is no capture device
@@ -3210,7 +3210,7 @@ oex::oexRESULT Test_CaptureApi( oex::oexUINT uApi, oex::CStr sFile )
 }
 
 oex::oexRESULT Test_CCapture()
-{
+{_STT();
 	oexEcho( oexT( "======== Video capture API..." ) );
 
 	oexINT idx = -1;
@@ -3245,7 +3245,7 @@ oex::oexRESULT Test_CCapture()
 
 #if defined( OEX_ENABLE_SQLITE )
 oex::oexRESULT Test_CSQLite()
-{
+{_STT();
 	oexEcho( oexT( "======== CSQLite..." ) );
 
 	oex::CSQLite sq;
@@ -3329,7 +3329,11 @@ oex::oexRESULT Test_CSQLite()
 //int wmain( int argc, wchar_t *argv[], wchar_t *envp[] )
 
 int main(int argc, char* argv[])
-{
+{_STT();
+
+	// Enable crash reporting
+	oexEnableCrashReporting( oexNULL, oexT( "logs" ) );
+
     // Initialize the oex library
 	oexINIT();
 

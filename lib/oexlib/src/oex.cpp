@@ -45,11 +45,11 @@ oexINT					COex::m_nShutdownCode = 0;
 COex::CVerifyStartup	COex::m_cVerifyStartup;
 
 COex::CVerifyStartup::CVerifyStartup()
-{
+{_STT();
 }
 
 COex::CVerifyStartup::~CVerifyStartup()
-{
+{_STT();
 /* +++ Fix this check one day
 
 #if defined( oexDEBUG )
@@ -109,7 +109,7 @@ CMemLeak& COex::GetMemLeak()
 #endif
 
 oexINT COex::Init()
-{
+{_STT();
 #if defined( oexDEBUG )
 
 	// Create memory leak detector
@@ -142,7 +142,7 @@ oexINT COex::Init()
 #endif
 
 oexINT COex::Uninit()
-{
+{_STT();
 	m_nShutdownCode = 1;
 
     // We have to allow for the thread pool if it's still running

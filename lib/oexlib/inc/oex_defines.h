@@ -47,6 +47,8 @@
 #define oexVERSION_MINOR( v )		        ( v & 0xffff )
 #define oexVERSION_MAJOR( v )		        ( ( v >> 16 ) & 0xffff )
 
+#define oexEnableCrashReporting				OEX_NAMESPACE::os::CDebug::EnableCrashReporting
+
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 
 // For tracking allocations
@@ -222,6 +224,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #endif
 
 #define oexSizeOfArray( a )         		( sizeof( a ) / sizeof( a[ 0 ] ) )
+#define oexSizeOfElement( a )         		( sizeof( a[ 0 ] ) )
 
 #define oexZeroMemory						OEX_NAMESPACE::os::CSys::Zero
 #define oexZero( o )						oexZeroMemory( &o, sizeof( o ) )
@@ -428,6 +431,12 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #	define _oexCATCH( s )		if ( 0 )
 #	define _oexCATCH_ALL() 		if ( 0 )
 #	define _oexTHROW( s )
+#endif
+
+#if defined( OEXLIB_STACK_TRACING )
+#	define _STT() OEX_NAMESPACE::CLocalStackTrace _l_lst( __FUNCTION__ );
+#else
+#	define _STT()
 #endif
 
 #define oexRUN_SERVICE( cType ) \

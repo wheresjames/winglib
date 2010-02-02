@@ -142,4 +142,19 @@ public:
 	static oexCPVOID GetInstanceHandle();
 
 
+	//==============================================================
+	// EnableCrashReporting()
+	//==============================================================
+	/// Enable crash reporting
+	/**
+		\param [in]	pUrl	- URL to post crash info 
+		\param [in] pSub	- Sub folder in which to save crash reports
+
+		Enables crash reporting.
+
+		\see
+	*/
+	static void EnableCrashReporting( oexCSTR pUrl, oexCSTR pSub );
+
+
 };

@@ -48,18 +48,19 @@
 OEX_USING_NAMESPACE
 
 CThread::CThread()
-{
+{_STT();
     m_pData = 0;
     m_uSleep = 0;
 	m_bInitStatus = oexFALSE;
 }
 
 CThread::~CThread()
-{	Stop();
+{_STT();
+	Stop();
 }
 
 oexPVOID CThread::ThreadProc( oexPVOID x_pData )
-{
+{_STT();
     // Get pointer
     CThread *pThread = (CThread*)x_pData;
     if ( !oexCHECK_PTR( x_pData ) )
@@ -114,7 +115,7 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 }
 
 oexRESULT CThread::Start( oexPVOID x_pData, oexUINT x_uSleep )
-{
+{_STT();
     // Are we already running?
     if ( IsRunning() )
         return 0;
@@ -135,7 +136,7 @@ oexRESULT CThread::Start( oexPVOID x_pData, oexUINT x_uSleep )
 }
 
 oexRESULT CThread::Stop( oexUINT x_uWait, oexBOOL x_bKill )
-{
+{_STT();
 	// Signal that the thread should exit
 	m_evStop.Signal();
 
@@ -159,13 +160,13 @@ oexRESULT CThread::Stop( oexUINT x_uWait, oexBOOL x_bKill )
 }
 
 oexBOOL CThread::IsRunning()
-{
+{_STT();
 	// Has the thread exited?
 	return !WaitThreadExit( 0 );
 }
 
 oexBOOL CThread::WaitThreadExit( oexUINT x_uTimeout )
-{
+{_STT();
 	// Ensure valid thread handle
 	if ( !CResource::IsValid() )
 		return oexTRUE;
@@ -199,7 +200,7 @@ void CThread::DecRunningThreadCount()
 }
 
 oexBOOL CSignal::Create( oexCSTR x_pName )
-{
+{_STT();
 	// Named signal?
 	if ( oexCHECK_PTR( x_pName ) )
 	{	return 0 == NewEvent( CStr( x_pName ).Append( oexT( "_sig" ) ).Ptr(), oexTRUE, oexFALSE )

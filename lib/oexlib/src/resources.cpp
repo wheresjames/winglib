@@ -37,28 +37,28 @@
 OEX_USING_NAMESPACE
 
 COexResourceHelper::COexResourceHelper()
-{
+{_STT();
 	m_oexlib_resources_ptr = 0;
 }
 
 COexResourceHelper::COexResourceHelper( const _SOexResourceInfo *pRes )
-{
+{_STT();
 	m_oexlib_resources_ptr = pRes;
 }
 
 oexBOOL COexResourceHelper::IsResources()
-{
+{_STT();
 	return oexNULL != m_oexlib_resources_ptr;
 }
 
 void COexResourceHelper::SetResourcePtr( const _SOexResourceInfo *pRes )
-{
+{_STT();
 	m_oexlib_resources_ptr = pRes;
 }
 
 
 CStr8 COexResourceHelper::GetResource( CStr sName )
-{
+{_STT();
 	long l = 0;
 	const void *p = oexNULL;
 
@@ -69,7 +69,7 @@ CStr8 COexResourceHelper::GetResource( CStr sName )
 }
 
 oexBOOL COexResourceHelper::GetResource( CStr sName, CStr8 *pRes )
-{
+{_STT();
 	if ( !pRes )
 		return oexFALSE;
 
@@ -85,7 +85,7 @@ oexBOOL COexResourceHelper::GetResource( CStr sName, CStr8 *pRes )
 }
 
 CStr8 COexResourceHelper::GetResource( oexLONG i )
-{
+{_STT();
 	long l = 0;
 	const void *p = oexNULL;
 
@@ -96,7 +96,7 @@ CStr8 COexResourceHelper::GetResource( oexLONG i )
 }
 
 oexLONG COexResourceHelper::GetResource( CStr sName, const void ** p, oexLONG *l )
-{
+{_STT();
 	if ( !m_oexlib_resources_ptr )
 		return -1;
 
@@ -113,7 +113,7 @@ oexLONG COexResourceHelper::GetResource( CStr sName, const void ** p, oexLONG *l
 }
 
 oexLONG COexResourceHelper::GetResource( oexLONG i, const void ** p, oexLONG *l )
-{
+{_STT();
 	if ( !m_oexlib_resources_ptr )
 		return -1;
 
@@ -128,7 +128,7 @@ oexLONG COexResourceHelper::GetResource( oexLONG i, const void ** p, oexLONG *l 
 }
 
 oexLONG COexResourceHelper::GetResourceSize( oexLONG i )
-{
+{_STT();
 	if ( !m_oexlib_resources_ptr )
 		return -1;
 
@@ -139,7 +139,7 @@ oexLONG COexResourceHelper::GetResourceSize( oexLONG i )
 }
 
 oexCPVOID COexResourceHelper::GetResourcePtr( oexLONG i )
-{
+{_STT();
 	if ( !m_oexlib_resources_ptr )
 		return 0;
 
@@ -150,7 +150,7 @@ oexCPVOID COexResourceHelper::GetResourcePtr( oexLONG i )
 }
 
 CStr COexResourceHelper::GetResourceName( oexLONG i )
-{
+{_STT();
 	if ( !m_oexlib_resources_ptr )
 		return CStr();
 
@@ -161,7 +161,7 @@ CStr COexResourceHelper::GetResourceName( oexLONG i )
 }
 
 oexLONG COexResourceHelper::GetResourceCount()
-{
+{_STT();
 	if ( !m_oexlib_resources_ptr )
 		return 0;
 

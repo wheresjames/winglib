@@ -43,11 +43,11 @@ OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::zip;
 
 CUnzip::CUnzip()
-{
+{_STT();
 }
 
 CUnzip::~CUnzip()
-{
+{_STT();
 }
 
 /// Yup, more indirection
@@ -64,14 +64,16 @@ private:
 };
 
 CUncompress::CUncompress()
-{   m_pCompress = new COexZipLibUncompress( this );
+{_STT();
+	m_pCompress = new COexZipLibUncompress( this );
 	m_pInput = oexNULL;
 	m_lInput = 0;
 	m_lInputPos = 0;
 }
 
 CUncompress::~CUncompress()
-{   if ( m_pCompress )
+{_STT();
+	if ( m_pCompress )
     {   delete (COexZipLibUncompress*)m_pCompress;
         m_pCompress = oexNULL;
     } // end if
@@ -79,11 +81,12 @@ CUncompress::~CUncompress()
 }
 
 CStr8 CUncompress::Uncompress()
-{   return ( (COexZipLibUncompress*)m_pCompress )->Uncompress();
+{_STT();
+	return ( (COexZipLibUncompress*)m_pCompress )->Uncompress();
 }
 
 oexINT64 CUncompress::OnRead( oexSTR8 buf, unsigned size )
-{
+{_STT();
 	// From buffer?
 	if ( m_pInput )
 	{
@@ -118,7 +121,7 @@ oexINT64 CUncompress::OnRead( oexSTR8 buf, unsigned size )
 }
 
 oexINT64 CUncompress::OnWrite( oexCSTR8 buf, unsigned *size )
-{
+{_STT();
     // To file?
     if ( m_fOutput.IsOpen() )
     {   oexINT64 llWritten = 0;

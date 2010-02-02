@@ -37,23 +37,23 @@
 OEX_USING_NAMESPACE
 
 CFindFiles::CFindFiles()
-{
+{_STT();
     m_hFind = os::CBaseFile::vInvalidFindHandle();
 }
 
 CFindFiles::CFindFiles( oexCSTR x_pDir, oexCSTR x_pMask )
-{
+{_STT();
 	m_hFind = os::CBaseFile::vInvalidFindHandle();
 	FindFirst( x_pDir, x_pMask );
 }
 
 CFindFiles::~CFindFiles()
-{
+{_STT();
 	Destroy();
 }
 
 void CFindFiles::Destroy()
-{
+{_STT();
 	// Close the find
 	if ( m_hFind != os::CBaseFile::vInvalidFindHandle() )
     {  	os::CBaseFile::FindClose( m_hFind );
@@ -66,7 +66,7 @@ void CFindFiles::Destroy()
 }
 
 oexBOOL CFindFiles::FindFirst( oexCSTR x_pDir, oexCSTR x_pMask )
-{
+{_STT();
 	// Lose previous find
 	Destroy();
 
@@ -91,7 +91,7 @@ oexBOOL CFindFiles::FindFirst( oexCSTR x_pDir, oexCSTR x_pMask )
 }
 
 oexBOOL CFindFiles::FindNext()
-{
+{_STT();
 	// Punt if no find handle
     if ( os::CBaseFile::vInvalidFindHandle() == m_hFind )
         return oexFALSE;
@@ -109,7 +109,7 @@ oexBOOL CFindFiles::FindNext()
 }
 
 oexBOOL CFindFiles::BuildPaths()
-{
+{_STT();
 	// Ensure valid filename
 	if ( !m_fd.sName.Length()
 		 || m_fd.sName.CmpLen( oexT( "." ), 1 )
@@ -133,7 +133,7 @@ oexBOOL CFindFiles::BuildPaths()
 
 
 CStrList CFindFiles::GetFileList( oexCSTR x_pDir, oexCSTR x_pMask )
-{
+{_STT();
     CStrList lst;
 	CFindFiles ff;
 

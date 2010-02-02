@@ -47,7 +47,6 @@ extern "C" {
  #include "../../../../jpeg/jerror.h"
 }
 
-#define _STT()
 #define _STTEX()
 
 // Just ensure our structures are at least the same size

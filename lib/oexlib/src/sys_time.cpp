@@ -57,7 +57,7 @@ static oexCSTR s_fmonths[] = { oexT( "Invalid" ), oexT( "January" ), oexT( "Febr
 #define FTOFF_1980		11960010000LL
 
 oexUINT CSysTime::DivideSeconds(oexUINT totalseconds, oexUINT *days, oexUINT *hours, oexUINT *mins, oexUINT *secs)
-{
+{_STT();
 	oexUINT s = 0, m = 0, h = 0, d = 0;
 
 	// Get number of seconds
@@ -82,7 +82,7 @@ oexUINT CSysTime::DivideSeconds(oexUINT totalseconds, oexUINT *days, oexUINT *ho
 }
 
 oexUINT CSysTime::IntegrateSeconds(oexUINT days, oexUINT hours, oexUINT mins, oexUINT secs)
-{
+{_STT();
 	// Tally total seconds
 	return (	( days * ( 60 * 60 * 24 ) ) +
 				( hours * ( 60 * 60 ) ) +
@@ -91,7 +91,7 @@ oexUINT CSysTime::IntegrateSeconds(oexUINT days, oexUINT hours, oexUINT mins, oe
 }
 
 oexUINT CSysTime::GetUnixTime()
-{
+{_STT();
     oexINT64 ll = os::CSys::SystemTimeToFileTime( m_time );
 
 	ll /= (oexINT64)10000000LL;
@@ -101,7 +101,7 @@ oexUINT CSysTime::GetUnixTime()
 }
 
 CSysTime& CSysTime::SetUnixTime(oexUINT x_uTime, oexINT x_lTzBias )
-{
+{_STT();
 	oexINT64 ll = x_uTime;
 
 	ll += (oexINT64)FTOFF_1970;
@@ -115,7 +115,7 @@ CSysTime& CSysTime::SetUnixTime(oexUINT x_uTime, oexINT x_lTzBias )
 }
 
 oexUINT CSysTime::GetDosTime()
-{
+{_STT();
     oexINT64 ll = os::CSys::SystemTimeToFileTime( m_time );
 
 	ll /= (oexINT64)10000000;
@@ -125,7 +125,7 @@ oexUINT CSysTime::GetDosTime()
 }
 
 CSysTime& CSysTime::SetDosTime(oexUINT x_uTime, oexINT x_lTzBias )
-{
+{_STT();
 	oexINT64 ll = x_uTime;
 
 	ll += (oexINT64)FTOFF_1980;
@@ -139,7 +139,7 @@ CSysTime& CSysTime::SetDosTime(oexUINT x_uTime, oexINT x_lTzBias )
 }
 
 oexUINT CSysTime::GetNetTime()
-{
+{_STT();
     oexINT64 ll = os::CSys::SystemTimeToFileTime( m_time );
 
 	ll /= (oexINT64)10000000;
@@ -149,7 +149,7 @@ oexUINT CSysTime::GetNetTime()
 }
 
 CSysTime& CSysTime::SetNetTime(oexUINT x_uTime, oexINT x_lTzBias )
-{
+{_STT();
 	oexINT64 ll = x_uTime;
 
 	ll += (oexINT64)FTOFF_1900;
@@ -164,22 +164,26 @@ CSysTime& CSysTime::SetNetTime(oexUINT x_uTime, oexINT x_lTzBias )
 
 
 oexCSTR CSysTime::GetAbrMonthName( oexLONG x_m )
-{   if ( x_m < 0 || x_m > 12 ) return s_months[ 0 ];
+{_STT();
+	if ( x_m < 0 || x_m > 12 ) return s_months[ 0 ];
 	return s_months[ x_m ];
 }
 
 oexCSTR CSysTime::GetMonthName( oexLONG x_m )
-{   if ( x_m < 0 || x_m > 12 ) return s_fmonths[ 0 ];
+{_STT();
+	if ( x_m < 0 || x_m > 12 ) return s_fmonths[ 0 ];
 	return s_fmonths[ x_m ];
 }
 
 oexCSTR CSysTime::GetAbrDayName( oexLONG x_d )
-{   if ( x_d < 0 || x_d > 6 ) return s_days[ 7 ];
+{_STT();
+	if ( x_d < 0 || x_d > 6 ) return s_days[ 7 ];
 	return s_days[ x_d ];
 }
 
 oexCSTR CSysTime::GetDayName( oexLONG x_d )
-{   if ( x_d < 0 || x_d > 6 ) return s_fdays[ 7 ];
+{_STT();
+	if ( x_d < 0 || x_d > 6 ) return s_fdays[ 7 ];
 	return s_fdays[ x_d ];
 }
 
@@ -210,7 +214,7 @@ oexCSTR CSysTime::GetDayName( oexLONG x_d )
 // %b = Abbreviated Month [Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec]
 // %B = Month [January,February,March,April,May,June,July,August,September,October,November,December]
 CStr CSysTime::FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors )
-{
+{_STT();
     CStr str;
 	oexUINT x = 0;
 
@@ -327,7 +331,7 @@ CStr CSysTime::FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors )
 }
 
 oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
-{
+{_STT();
     oexUINT x = 0;
 	oexUINT uYear = eInvalid;
 	oexUINT uMonth = eInvalid;

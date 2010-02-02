@@ -475,8 +475,10 @@ namespace os
 #include "inc/alloc.h"
 #include "inc/file_mapping.h"
 #include "inc/memory.h"
+#include "inc/mapped_pool.h"
 #include "inc/thread.h"
 #include "inc/str.h"
+#include "inc/stack_trace.h"
 #include "inc/auto_str.h"
 #include "inc/dib.h"
 

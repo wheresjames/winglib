@@ -171,6 +171,9 @@
 #	define oexPRINT_LOGS 2
 #endif
 
+// Define to generate stack traces
+#define OEXLIB_STACK_TRACING
+
 // Define to include full file paths in log entries
 //#define oexFULL_FILENAME_IN_LOG
 

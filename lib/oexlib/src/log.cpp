@@ -43,14 +43,14 @@ CLog& CLog::GlobalLog()
 }
 
 void CLog::Destroy()
-{
+{_STT();
 	m_file.Flush();
 	m_file.Destroy();
 	m_sPath.Destroy();
 }
 
 oexBOOL CLog::OpenLogFile( oexCSTR x_pPath, oexCSTR x_pFile, oexCSTR x_pExtension )
-{
+{_STT();
 	CStr sFile;
 
 	if ( oexCHECK_PTR( x_pPath ) && *x_pPath )
@@ -77,7 +77,7 @@ oexBOOL CLog::OpenLogFile( oexCSTR x_pPath, oexCSTR x_pFile, oexCSTR x_pExtensio
 }
 
 oexBOOL CLog::Open( oexCSTR x_pPath )
-{
+{_STT();
 	if ( !oexCHECK_PTR( x_pPath ) )
 		return oexFALSE;
 
@@ -115,7 +115,7 @@ oexBOOL CLog::Open( oexCSTR x_pPath )
 }
 
 oexBOOL CLog::Resume( oexCSTR x_pPath )
-{
+{_STT();
 	if ( !oexCHECK_PTR( x_pPath ) )
 		return oexFALSE;
 
@@ -159,7 +159,7 @@ oexBOOL CLog::Resume( oexCSTR x_pPath )
 }
 
 oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT x_uLevel, oexCSTR x_pErr, oexINT x_nErr, oexUINT x_uSkip )
-{
+{_STT();
 	// Ensure valid reporting level
 	if ( x_uLevel < m_uLevel )
 		return x_nErr;

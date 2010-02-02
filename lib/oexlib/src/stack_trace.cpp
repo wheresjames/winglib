@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// util.cpp
+// stack_trace.cpp
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -36,19 +36,9 @@
 
 OEX_USING_NAMESPACE
 
-CStr8 CUtil::md5( CStr8 s )
-{_STT();
-	oexGUID hash;
-	return CBase16::Encode( oss::CMd5::Transform( &hash, s.Ptr(), s.Length() ), sizeof( hash ) );
+/// Set to non-zero on shut down to stop stack tracing
+oexBOOL CStackTrace::m_bShutdown = oexFALSE;
 
-}
+/// Instance of stack trace
+CStackTrace *CStackTrace::m_pst = oexNULL;
 
-CStrW CUtil::md5( CStrW s )
-{_STT();
-#if !defined( OEX_NOWCHAR )
-	oexGUID hash;
-	CStr8 sMb = oexStrWToMb( s );
-	CStrW _s = oexMbToStrW( CBase16::Encode( OEX_NAMESPACE::oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) );
-  	return _s;
-#endif
-}

@@ -37,7 +37,7 @@
 OEX_USING_NAMESPACE
 
 oexBOOL CFile::Destroy()
-{
+{_STT();
     oexBOOL bRet = oexFALSE;
 
     // Close any open file
@@ -53,7 +53,7 @@ oexBOOL CFile::Destroy()
 }
 
 CStr8 CFile::Read( CFile::t_size x_llSize )
-{
+{_STT();
     t_size llSize = Size();
     if ( x_llSize == 0 )
 	{
@@ -88,7 +88,7 @@ CStr8 CFile::Read( CFile::t_size x_llSize )
 }
 
 oexBOOL CFile::DeletePath( oexCSTR x_pPath, oexBOOL x_bEmpty )
-{
+{_STT();
 	CFindFiles ff;
 
     // Are there any files in the directory?
@@ -114,7 +114,7 @@ oexBOOL CFile::DeletePath( oexCSTR x_pPath, oexBOOL x_bEmpty )
 }
 
 oexBOOL CFile::CreatePath( oexCSTR x_pPath )
-{
+{_STT();
 	// Ensure string
 	if ( !oexCHECK_PTR( x_pPath ) || !*x_pPath )
 		return oexFALSE;
@@ -151,7 +151,7 @@ oexBOOL CFile::CreatePath( oexCSTR x_pPath )
 }
 
 CFile::t_size CFile::FindInFile( oexPVOID x_pStr, CFile::t_size x_llLen, CFile::t_size x_llMax )
-{
+{_STT();
 	if ( !x_pStr || !x_llLen || ( x_llMax > 0 && x_llMax < x_llLen ) )
 		return -1;
 

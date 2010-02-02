@@ -37,7 +37,7 @@
 OEX_USING_NAMESPACE
 
 CStr CParser::GetToken( CStr &x_sStr, CStrList x_lst, oexBOOL x_bCaseSensitive )
-{
+{_STT();
     if ( !x_lst.Size() )
         return CStr();
 
@@ -57,7 +57,7 @@ CStr CParser::GetToken( CStr &x_sStr, CStrList x_lst, oexBOOL x_bCaseSensitive )
 }
 
 CStrList CParser::GetTokens( oexCSTR x_pStr, oexCSTR x_pValid )
-{
+{_STT();
 	CStrList lst;
 	if ( !oexVERIFY_PTR( x_pStr ) || !oexVERIFY_PTR( x_pValid ) )
 		return lst;
@@ -277,7 +277,7 @@ CStr CParser::Encode( CPropertyBag &enc, CPropertyBag &fmt, CStr root )
 */
 
 oexLONG CParser::ParseCommandLineItem( oexINT i, TStr< CParser::T_tc > x_sStr, TPropertyBag< TStr< CParser::T_tc > > &x_pb )
-{
+{_STT();
 	typedef T_tc T;
 
 	// Is it a switch?
@@ -300,7 +300,7 @@ oexLONG CParser::ParseCommandLineItem( oexINT i, TStr< CParser::T_tc > x_sStr, T
 }
 
 TPropertyBag< TStr< CParser::T_tc > > CParser::ParseCommandLine( oexINT x_nNum, oexCONST oexCHARW **x_pStr )
-{
+{_STT();
 	typedef T_tc oexCHARW;
 	if ( 2 > x_nNum || !oexCHECK_PTR( x_pStr ) )
 		return TPropertyBag< TStr< T_tc > >();
@@ -317,7 +317,7 @@ TPropertyBag< TStr< CParser::T_tc > > CParser::ParseCommandLine( oexINT x_nNum, 
 }
 
 TPropertyBag< TStr< CParser::T_tc > > CParser::ParseCommandLine( oexINT x_nNum, oexCONST oexCHAR **x_pStr )
-{
+{_STT();
 	if ( 2 > x_nNum || !oexCHECK_PTR( x_pStr ) )
 		return TPropertyBag< TStr< T_tc > >();
 
@@ -329,7 +329,7 @@ TPropertyBag< TStr< CParser::T_tc > > CParser::ParseCommandLine( oexINT x_nNum, 
 }
 
 TPropertyBag< TStr< CParser::T_tc > > CParser::ParseCommandLine( oexCONST TStr< CParser::T_tc > &x_sStr )
-{
+{_STT();
 	typedef T_tc T;
 	TPropertyBag< TStr< T > > pb;
 	ParseCommandLine( x_sStr, pb );
@@ -337,7 +337,7 @@ TPropertyBag< TStr< CParser::T_tc > > CParser::ParseCommandLine( oexCONST TStr< 
 }
 
 oexLONG CParser::ParseCommandLine( oexCONST TStr< CParser::T_tc > &x_sStr, TPropertyBag< TStr< CParser::T_tc > > &x_pb, oexBOOL x_bMerge )
-{
+{_STT();
 	typedef T_tc T;
 
 	// Lose previous contents

@@ -45,19 +45,19 @@
 OEX_USING_NAMESPACE
 
 CSQLite::CSQLite()
-{
+{_STT();
 	m_sqobj = oexNULL;
 	m_nRows = 0;
 	m_bDebugMode = oexFALSE;
 }
 
 CSQLite::~CSQLite()
-{
+{_STT();
 	Destroy();
 }
 
 int CSQLite::_Callback( void *pThis, int argc, char **argv, char **azColName )
-{
+{_STT();
 	if ( !oexCHECK_PTR( pThis ) )
 		return 0;
 
@@ -74,7 +74,7 @@ int CSQLite::_Callback( void *pThis, int argc, char **argv, char **azColName )
 }
 
 int CSQLite::OnCallback( int argc, char **argv, char **azColName )
-{
+{_STT();
 	// What row are we on
 	CPropertyBag &row = m_pbResult[ m_nRows ];
 
@@ -92,7 +92,7 @@ int CSQLite::OnCallback( int argc, char **argv, char **azColName )
 }
 
 void CSQLite::Destroy()
-{
+{_STT();
 	// Lose results
 	Clear();
 
@@ -104,7 +104,7 @@ void CSQLite::Destroy()
 }
 
 void CSQLite::Clear()
-{
+{_STT();
 	m_nRows = 0;
 	m_sQuery.Destroy();
 	m_pbResult.Destroy();
@@ -113,7 +113,7 @@ void CSQLite::Clear()
 }
 
 oexBOOL CSQLite::Open( oexCSTR x_pDb )
-{
+{_STT();
 	if ( !oexCHECK_PTR( x_pDb ) )
 	{	oexERROR( 0, oexT( "Invalid parameter" ) );
 		return oexFALSE;
@@ -132,12 +132,12 @@ oexBOOL CSQLite::Open( oexCSTR x_pDb )
 }
 
 oexBOOL CSQLite::IsTable( oexCSTR x_pTable )
-{
+{_STT();
 	return QueryTableInfo( x_pTable ) && NumRows();
 }
 
 oexBOOL CSQLite::Exec( CStr x_sQuery )
-{
+{_STT();
 	// Lose previous results
 	Clear();
 
@@ -172,18 +172,18 @@ oexBOOL CSQLite::Exec( CStr x_sQuery )
 }
 
 oexBOOL CSQLite::QueryTableInfo( oexCSTR x_pTable )
-{
+{_STT();
 	return Exec( CStr() << oexT( "SELECT * FROM SQLite_Master WHERE `name`='" )
 					   << Escape( x_pTable ) << oexT( "'" ) );
 }
 
 oexBOOL CSQLite::QueryColumnInfo()
-{
+{_STT();
 	return Exec( oexT( "PRAGMA table_info(test)" ) );
 }
 
 CStr CSQLite::Escape( CStr sStr )
-{
+{_STT();
 	char *s = sqlite3_mprintf( "%q", oexStrToMb( sStr ).Ptr() );
 	CStr sRet = oexMbToStr( s );
 	sqlite3_free( s );
@@ -191,7 +191,7 @@ CStr CSQLite::Escape( CStr sStr )
 }
 
 oexBOOL CSQLite::Insert( oexCSTR pTable, CPropertyBag &pb )
-{
+{_STT();
 	if ( !oexCHECK_PTR( pTable ) || !*pTable )
 		return oexFALSE;
 
@@ -209,7 +209,7 @@ oexBOOL CSQLite::Insert( oexCSTR pTable, CPropertyBag &pb )
 }
 
 oexBOOL CSQLite::Update( oexCSTR pTable, oexCSTR pWhere, CPropertyBag &pb )
-{
+{_STT();
 	if ( !oexCHECK_PTR( pTable ) || !*pTable
 		 || !oexCHECK_PTR( pWhere ) || !*pWhere )
 		return oexFALSE;
@@ -228,7 +228,7 @@ oexBOOL CSQLite::Update( oexCSTR pTable, oexCSTR pWhere, CPropertyBag &pb )
 }
 
 oexBOOL CSQLite::Delete( oexCSTR pTable, CPropertyBag &pb, oexCSTR pCond )
-{
+{_STT();
 	if ( !oexCHECK_PTR( pTable ) || !*pTable || !pb.Size() )
 		return oexFALSE;
 

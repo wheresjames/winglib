@@ -37,7 +37,8 @@
 OEX_USING_NAMESPACE
 
 const CBin::t_byte* CBin::Resize( CBin::t_size x_nNewSize )
-{
+{_STT();
+
 	// Ptr buffer?
 	if ( m_ptr )
 	{
@@ -68,7 +69,8 @@ const CBin::t_byte* CBin::Resize( CBin::t_size x_nNewSize )
 
 
 CBin::t_size CBin::Copy( CBin *x_p )
-{
+{_STT();
+
 	// Just ensuring our internal buffer is unshared?
 	if ( !x_p )
 	{
@@ -107,7 +109,8 @@ CBin::t_size CBin::Copy( CBin *x_p )
 }
 
 CBin::t_size CBin::Share( CBin *x_p )
-{
+{_STT();
+
 	if ( !x_p || !x_p->getUsed() )
 	{	Destroy();
 		return 0;
@@ -129,7 +132,8 @@ CBin::t_size CBin::Share( CBin *x_p )
 }
 
 CBin::t_size CBin::AppendBuffer( const CBin::t_byte *x_pBuf, CBin::t_size x_nBytes )
-{
+{_STT();
+
 	// Ptr pointer?
 	if ( m_ptr )
 	{
@@ -159,7 +163,8 @@ CBin::t_size CBin::AppendBuffer( const CBin::t_byte *x_pBuf, CBin::t_size x_nByt
 }
 
 CBin::t_size CBin::LShift( CBin::t_size x_nBytes )
-{
+{_STT();
+
 	// All of it?
 	if ( x_nBytes >= m_nUsed )
 	{	FreePtr();
@@ -191,7 +196,8 @@ CBin::t_size CBin::LShift( CBin::t_size x_nBytes )
 }
 
 void CBinShare::Destroy()
-{
+{_STT();
+
 	oexAutoLock ll( m_lock );
 	if ( !ll.IsLocked() )
 		return;
@@ -210,7 +216,8 @@ void CBinShare::Destroy()
 }
 
 CBin CBinShare::GetBuffer( CStr x_sName, CBinShare::t_size x_uSize )
-{
+{_STT();
+
 	oexAutoLock ll( m_lock );
 	if ( !ll.IsLocked() )
 		return CBin();
@@ -235,7 +242,8 @@ CBin CBinShare::GetBuffer( CStr x_sName, CBinShare::t_size x_uSize )
 }
 
 oexBOOL CBinShare::SetBuffer( CStr x_sName, CBin *x_pBin )
-{
+{_STT();
+
 	oexAutoLock ll( m_lock );
 	if ( !ll.IsLocked() )
 		return oexFALSE;
@@ -255,7 +263,8 @@ oexBOOL CBinShare::SetBuffer( CStr x_sName, CBin *x_pBin )
 }
 
 oexBOOL CBinShare::IsBuffer( CStr x_sName )
-{
+{_STT();
+
 	oexAutoLock ll( m_lock );
 	if ( !ll.IsLocked() )
 		return oexFALSE;
@@ -265,7 +274,8 @@ oexBOOL CBinShare::IsBuffer( CStr x_sName )
 
 
 oexINT CBinShare::Cleanup()
-{
+{_STT();
+
 	oexAutoLock ll( m_lock );
 	if ( !ll.IsLocked() )
 		return -1;
