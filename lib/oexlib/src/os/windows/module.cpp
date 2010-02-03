@@ -45,23 +45,23 @@ oexSTATIC_ASSERT( sizeof( oexPVOID ) == sizeof( HMODULE ) );
 //////////////////////////////////////////////////////////////////////
 
 CModule::CModule()
-{
+{_STT();
 	m_hModule = oexNULL;
 }
 
 CModule::CModule( oexCSTR x_pFile )
-{
+{_STT();
 	CModule();
 	Load( x_pFile );
 }
 
 CModule::~CModule()
-{
+{_STT();
 	Destroy();
 }
 
 oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
-{
+{_STT();
 	// Do we already have this module loaded?
 	if ( oexNULL != m_hModule && x_pFile && m_sFile == x_pFile )
 		return oexTRUE;
@@ -120,7 +120,7 @@ oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 }
 
 void CModule::Destroy()
-{
+{_STT();
 	// Lose the pointers
 	m_ptrs.Destroy();
 
@@ -133,7 +133,7 @@ void CModule::Destroy()
 }
 
 oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
-{
+{_STT();
 	// Sanity check
 	if ( !oexCHECK_PTR( x_pFunctionName ) || !*x_pFunctionName )
 	{	oexERROR( ERROR_INVALID_PARAMETER, oexT( "Invalid function argument" ) );
@@ -180,7 +180,7 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 }
 
 oexPVOID CModule::Addr( oexINT i )
-{
+{_STT();
 	if ( i >= Size() )
 	{	oexERROR( ERROR_INVALID_PARAMETER, CStr().Fmt( oexT( "Invalid function index : %d" ), i ) );
 		return oexNULL;
@@ -190,7 +190,7 @@ oexPVOID CModule::Addr( oexINT i )
 }
 
 oexPVOID CModule::Addr( oexCSTR x_pFunctionName )
-{
+{_STT();
 	if ( !oexCHECK_PTR( x_pFunctionName ) || !*x_pFunctionName )
 	{	oexERROR( ERROR_INVALID_PARAMETER, oexT( "Invalid function name pointer" ) );
 		return oexNULL;

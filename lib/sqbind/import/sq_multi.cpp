@@ -37,7 +37,7 @@
 using namespace sqbind;
 
 CSqMulti::~CSqMulti()
-{
+{_STT();
 	if ( m_def )
 	{	OexAllocDestruct( m_def );
 		m_def = oexNULL;
@@ -45,56 +45,77 @@ CSqMulti::~CSqMulti()
 }
 
 CSqMulti::CSqMulti()
-{	m_def = oexNULL;
+{_STT();
+	m_def = oexNULL;
 }
 
 CSqMulti::CSqMulti( const CSqMulti &m )
-{	m_def = oexNULL;
+{_STT();
+	m_def = oexNULL;
 	m_lst = m.m_lst;
 	m_val = m.m_val;
 }
 
 CSqMulti::CSqMulti( const CSqMulti::t_Obj &s )
-{	m_def = oexNULL;
+{_STT();
+	m_def = oexNULL;
 	deserialize( s );
 }
 
 CSqMulti::CSqMulti( const oex::oexTCHAR *s )
-{	m_def = oexNULL;
+{_STT();
+	m_def = oexNULL;
 	if ( s )
 		deserialize( t_Obj( s ) );
 }
 
 CSqMulti& CSqMulti::operator = ( const CSqMulti &m )
-{	m_def = oexNULL;
+{_STT();
+	m_def = oexNULL;
 	m_lst = m.m_lst;
 	m_val = m.m_val;
 	return *this;
 }
 
 CSqMulti::t_List& CSqMulti::list()
-{   return m_lst; }
+{_STT();
+	return m_lst; 
+}
 
 CSqMulti& CSqMulti::operator []( const CSqMulti::t_Obj &rObj )
-{	return m_lst[ rObj ]; }
+{_STT();
+	return m_lst[ rObj ]; 
+}
 
 CSqMulti& CSqMulti::operator []( const oex::oexTCHAR *p )
-{	return m_lst[ p ]; }
+{_STT();
+	return m_lst[ p ]; 
+}
 
 CSqString* CSqMulti::value()
-{	return &m_val; }
+{_STT();
+	return &m_val; 
+}
 
 sqbind::stdString& CSqMulti::str()
-{	return m_val.str(); }
+{_STT();
+	return m_val.str(); 
+}
 
 int CSqMulti::toint()
-{	return oexStrToLong( m_val.str().c_str() ); }
+{_STT();
+	return oexStrToLong( m_val.str().c_str() ); 
+}
 
 float CSqMulti::tofloat()
-{	return oexStrToFloat( m_val.str().c_str() ); }
+{_STT();
+	return oexStrToFloat( m_val.str().c_str() ); 
+}
 
 int CSqMulti::len()
-{	return m_val.str().length(); }
+{_STT();
+	return m_val.str().length(); 
+}
 
 
 _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
@@ -127,35 +148,39 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 _SQBIND_REGISTER_CLASS_END()
 
 void CSqMulti::Register( sqbind::VM vm )
-{
+{_STT();
 	_SQBIND_EXPORT( vm, CSqMulti );
 }
 
 int CSqMulti::size()
-{	return m_lst.size(); }
+{_STT();
+	return m_lst.size(); 
+}
 
 void CSqMulti::clear()
-{	m_lst.clear(); }
+{_STT();
+	m_lst.clear(); 
+}
 
 void CSqMulti::_serialize( oex::CPropertyBag &pb, CSqMulti::t_List &lst )
-{
+{_STT();
 	SQBIND_MultiToPropertyBag( lst, pb );
 }
 
 CSqParam::t_SqStr CSqMulti::serialize()
-{
+{_STT();
 	oex::CPropertyBag pb;
 	_serialize( pb, m_lst );
 	return oex::CParser::Serialize( pb ).Ptr();
 }
 
 void CSqMulti::_deserialize( oex::CPropertyBag &pb, CSqMulti::t_List &lst )
-{
+{_STT();
 	SQBIND_PropertyBagToMulti( pb, lst );
 }
 
 void CSqMulti::deserialize( const CSqParam::t_SqStr &s )
-{
+{_STT();
 	// Lose old data
 	m_lst.clear();
 
@@ -166,7 +191,7 @@ void CSqMulti::deserialize( const CSqParam::t_SqStr &s )
 }
 
 CSqMulti& CSqMulti::add( CSqMulti &m )
-{
+{_STT();
 	for ( t_List::iterator it = m.m_lst.begin(); it != m.m_lst.end(); it++ )
 	{
 		if ( !it->second.size() )
@@ -181,7 +206,7 @@ CSqMulti& CSqMulti::add( CSqMulti &m )
 }
 
 void CSqMulti::merge( const CSqParam::t_SqStr &s )
-{
+{_STT();
 	// Deserialize data
 	oex::CStr sData( s.c_str(), s.length() );
 	oex::CPropertyBag pb = oex::CParser::Deserialize( sData );
@@ -189,7 +214,7 @@ void CSqMulti::merge( const CSqParam::t_SqStr &s )
 }
 
 CSqMulti::t_Obj CSqMulti::urlencode()
-{
+{_STT();
 	oex::CPropertyBag pb;
 	for ( t_List::iterator it = m_lst.begin(); it != m_lst.end(); it++ )
 		pb[ it->first.c_str() ].ToString().Set( it->second.m_val.str().c_str(), it->second.m_val.str().length() );
@@ -197,7 +222,7 @@ CSqMulti::t_Obj CSqMulti::urlencode()
 }
 
 void CSqMulti::urldecode( const CSqMulti::t_Obj &s )
-{
+{_STT();
 	// Deserialize data
 	oex::CPropertyBag pb = oex::CParser::DecodeUrlParams( s.c_str() );;
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
@@ -205,14 +230,18 @@ void CSqMulti::urldecode( const CSqMulti::t_Obj &s )
 }
 
 void CSqMulti::unset( const CSqMulti::t_Obj &k )
-{	m_lst.erase( k ); }
+{_STT();
+	m_lst.erase( k ); 
+}
 
 
 void CSqMulti::set( const CSqMulti::t_Obj &v )
-{	if ( v.length() ) m_val = v; }
+{_STT();
+	if ( v.length() ) m_val = v; 
+}
 
 void CSqMulti::copy( CSqMulti &m )
-{
+{_STT();
 	// Copy string
 	m_val = m.m_val;
 
@@ -222,19 +251,28 @@ void CSqMulti::copy( CSqMulti &m )
 }
 
 CSqMulti::iterator CSqMulti::begin()
-{	return m_lst.begin(); }
+{_STT();
+	return m_lst.begin(); 
+}
 
 CSqMulti::iterator CSqMulti::end()
-{	return m_lst.end(); }
+{_STT();
+	return m_lst.end(); 
+}
 
 CSqMulti::iterator CSqMulti::find ( const CSqMulti::t_Obj &k )
-{	return m_lst.find( k ); }
+{_STT();
+	return m_lst.find( k ); 
+}
 
 int CSqMulti::isset( const CSqMulti::t_Obj &k )
-{	return ( m_lst.end() != m_lst.find( k ) ) ? 1 : 0; }
+{_STT();
+	return ( m_lst.end() != m_lst.find( k ) ) ? 1 : 0; 
+}
 
 CSqMulti* CSqMulti::get( const CSqMulti::t_Obj &k )
-{	if ( !k.length() )
+{_STT();
+	if ( !k.length() )
 	{	if ( !m_def )
 			m_def = OexAllocConstruct< CSqMulti >();
 		return m_def;
@@ -243,7 +281,7 @@ CSqMulti* CSqMulti::get( const CSqMulti::t_Obj &k )
 }
 
 void CSqMulti::move_up( const t_Obj &k )
-{
+{_STT();
 	t_List::iterator it = m_lst.find( k );
 	if ( m_lst.end() == it )
 		return;
@@ -259,7 +297,7 @@ void CSqMulti::move_up( const t_Obj &k )
 }
 
 void CSqMulti::move_down( const t_Obj &k )
-{
+{_STT();
 	t_List::iterator it = m_lst.find( k );
 	if ( m_lst.end() == it )
 		return;
@@ -277,7 +315,8 @@ void CSqMulti::move_down( const t_Obj &k )
 
 /// Adds an element to the vector
 CSqMulti::t_Obj CSqMulti::find_key( const CSqMulti::t_Obj &k )
-{
+{_STT();
+
     // For each item
     for ( t_List::iterator it = m_lst.begin();
           m_lst.end() != it;
@@ -292,7 +331,8 @@ CSqMulti::t_Obj CSqMulti::find_key( const CSqMulti::t_Obj &k )
 
 /// Adds an element to the vector
 CSqMulti::t_Obj CSqMulti::find_value( const CSqMulti::t_Obj &v )
-{
+{_STT();
+
     // For each item
     for ( t_List::iterator it = m_lst.begin();
           m_lst.end() != it;
@@ -306,7 +346,8 @@ CSqMulti::t_Obj CSqMulti::find_value( const CSqMulti::t_Obj &v )
 }
 
 SquirrelObject CSqMulti::_newslot( HSQUIRRELVM v )
-{
+{_STT();
+
     StackHandler sa( v );
 
 	// Get key
@@ -340,8 +381,9 @@ SquirrelObject CSqMulti::_newslot( HSQUIRRELVM v )
 
 /// Internal squirrel function, returns value of specified item
 SquirrelObject CSqMulti::_get( HSQUIRRELVM v )
-{
-    StackHandler sa( v );
+{_STT();
+
+	StackHandler sa( v );
 
     const SQChar *pKey = sa.GetString( 2 );
     if ( !oexCHECK_PTR( pKey ) || !*pKey )
@@ -371,7 +413,8 @@ SquirrelObject CSqMulti::_get( HSQUIRRELVM v )
 
 /// Internal squirrel function used to iterate list items
 SquirrelObject CSqMulti::_nexti( HSQUIRRELVM v )
-{
+{_STT();
+
     StackHandler sa( v );
 
     SQObjectType type = (SQObjectType)sa.GetType( 2 );
@@ -428,7 +471,8 @@ SquirrelObject CSqMulti::_nexti( HSQUIRRELVM v )
 
 /// Returns non-zero if pPattern matches pString
 bool CSqMulti::match_pattern( const oex::oexTCHAR *pString, const oex::oexTCHAR *pPattern)
-{
+{_STT();
+
     if ( !pString || !pPattern )
         return false;
 
@@ -508,11 +552,14 @@ bool CSqMulti::match_pattern( const oex::oexTCHAR *pString, const oex::oexTCHAR 
 }
 
 static CSqMulti::t_Obj tab( int t )
-{	CSqMulti::t_Obj str; while ( t-- ) str += oexT( "\t" ); return str; }
+{_STT();
+	CSqMulti::t_Obj str; while ( t-- ) str += oexT( "\t" ); return str; 
+}
 
 
 CSqMulti::t_Obj CSqMulti::_print_r( int nShowVals, t_List &rLst, int nDepth )
-{
+{_STT();
+
 	t_Obj sRet;
 	for ( iterator it = rLst.begin(); it != rLst.end(); it++ )
 	{
@@ -549,7 +596,8 @@ CSqMulti::t_Obj CSqMulti::_print_r( int nShowVals, t_List &rLst, int nDepth )
 }
 
 CSqMulti::t_Obj CSqMulti::print_r( int nShowVals )
-{
+{_STT();
+
 	if ( !size() )
 		return m_val.str();
 

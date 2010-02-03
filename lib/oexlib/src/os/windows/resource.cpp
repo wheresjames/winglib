@@ -86,7 +86,10 @@ class CResource::CThreadProcImpl
 {
 public:
     static DWORD WINAPI ThreadProc( LPVOID x_pData )
-    {    return (DWORD)CResource::ThreadProc( x_pData ); }
+    {
+		// Do the thread stuff
+		return (DWORD)CResource::ThreadProc( x_pData );
+	}
 };
 
 
@@ -259,7 +262,7 @@ oexRESULT CResource::NewMutex( oexCSTR x_sName, oexBOOL x_bInitialOwner )
 }
 
 oexRESULT CResource::NewThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData )
-{
+{_STT();
 	// Out with the old
 	Destroy();
 
@@ -308,6 +311,9 @@ oexPVOID CResource::ThreadProc( oexPVOID x_pData )
 
 	// Call user thread
 	oexPVOID pRet = pRi->fnCallback( pRi->pData );
+
+	// Remove the stack trace for this thread
+	CStackTrace::St()->RemoveThread();
 
 	// Uninitialize COM
 	CoUninitialize();

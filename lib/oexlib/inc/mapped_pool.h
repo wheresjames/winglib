@@ -125,12 +125,8 @@ public:
 	{
 		Destroy();
 
-		// Ensure valid pool bits value
-		if ( x_nPoolBits < eDefaultPoolBits || !cmn::IsPowerOf2( x_nPoolBits ) )
-			x_nPoolBits = eDefaultPoolBits;
-
 		// Ensure valid slot mask
-		if ( x_nSlotMask < eDefaultSlotMask || !cmn::IsPowerOf2( x_nSlotMask + 1 ) )
+		if ( !cmn::IsPowerOf2( x_nSlotMask + 1 ) )
 			x_nSlotMask = eDefaultSlotMask;
 
 		// Number of bits in the pool
@@ -170,10 +166,16 @@ public:
 
 	/// Returns non-zero if there is a valid pool
 	oexBOOL isValid()
-	{	if ( !m_pPool || !p )
-			return oexFALSE;
-		return oexTRUE;
-	}
+	{	return ( m_pPool ) ? oexTRUE : oexFALSE; }
+
+	/// How many slots are left in the pool?
+	t_size getFreeSlots() { return m_nPoolSize - m_uCurrentAllocations; }
+
+	/// How many slots are left in the pool?
+	t_size getUsedSlots() { return m_uCurrentAllocations; }
+
+	/// How many slots are in the pool?
+	t_size getTotalSlots() { return m_nPoolSize; }
 
 	/// Adds a pointer to the tracking pool
 	oexBOOL Add( t_key key, T_VAL *val )
@@ -197,8 +199,9 @@ public:
 			if ( m_pPool[ uOffset ].key == key || !m_pPool[ uOffset ].key )
 			{
 				// Save pointer
-				m_pPool[ uOffset ].key = key;
+				// !!! Subtle thing, set the value before the key 
 				m_pPool[ uOffset ].val = val;
+				m_pPool[ uOffset ].key = key;
 
 				return oexTRUE;
 
@@ -233,12 +236,20 @@ public:
 	}
 
 	/// Verify's that a pointer is in the pool
-	T_VAL* Next( t_size i )
+	T_VAL* Next( oexUINT *i )
 	{
-		if ( !m_pPool || i >= m_nPoolSize )
+		if ( !i || !m_pPool )
 			return oexNULL;
 
-		return m_pPool[ i ];
+		// Search for the next empty slot
+		while ( (*i) < m_nPoolSize )
+			if ( !m_pPool[ (*i) ].key )
+				(*i)++;
+			else
+				return m_pPool[ (*i)++ ].val;
+
+		return oexNULL;
+
 	}
 
 	/// Verify's that a pointer is in the pool
@@ -269,7 +280,7 @@ public:
 	/// Removes a pointer from the pool
 	oexBOOL Remove( t_key key )
 	{
-		if ( !m_pPool || !p )
+		if ( !m_pPool )
 			return oexFALSE;
 
 		// Track allocations
@@ -290,6 +301,8 @@ public:
 			if ( m_pPool[ uOffset ].key == key )
 			{
 				// Remove from pool
+				// !!! Subtle thing, set the value before the key 
+				m_pPool[ uOffset ].val = 0;
 				m_pPool[ uOffset ].key = 0;
 
 				return oexTRUE;

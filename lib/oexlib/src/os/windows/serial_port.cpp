@@ -50,7 +50,7 @@ struct SSerialPortSettings
 
 
 CSerialPort::CSerialPort()
-{
+{_STT();
 	m_nError = 0;
 
 	m_nTxBufferSize = eDefaultTxBufferSize;
@@ -68,7 +68,7 @@ CSerialPort::CSerialPort()
 }
 
 CSerialPort::~CSerialPort()
-{
+{_STT();
 	Destroy();
 
 	// Ditch the settings object
@@ -79,7 +79,7 @@ CSerialPort::~CSerialPort()
 }
 
 void CSerialPort::Destroy()
-{
+{_STT();
 	m_sPort.Destroy();
 
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
@@ -88,7 +88,7 @@ void CSerialPort::Destroy()
 }
 
 oexBOOL CSerialPort::Open( oexCSTR x_pPort )
-{
+{_STT();
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS || !x_pPort )
 		return oexFALSE;
@@ -126,7 +126,7 @@ oexBOOL CSerialPort::Open( oexCSTR x_pPort )
 }
 
 oexBOOL CSerialPort::SetStatus()
-{
+{_STT();
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS || INVALID_HANDLE_VALUE == pS->hPort )
 		return oexFALSE;
@@ -147,7 +147,7 @@ oexBOOL CSerialPort::SetStatus()
 }
 
 oexBOOL CSerialPort::SetTimeout( oexINT x_to )
-{
+{_STT();
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS || INVALID_HANDLE_VALUE == pS->hPort )
 		return oexFALSE;
@@ -169,7 +169,7 @@ oexBOOL CSerialPort::SetTimeout( oexINT x_to )
 
 
 oexBOOL CSerialPort::IsPort()
-{
+{_STT();
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS || INVALID_HANDLE_VALUE == pS->hPort )
 		return oexFALSE;
@@ -178,7 +178,7 @@ oexBOOL CSerialPort::IsPort()
 }
 
 oexBOOL CSerialPort::Purge()
-{
+{_STT();
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS || INVALID_HANDLE_VALUE == pS->hPort )
 		return oexFALSE;
@@ -190,7 +190,7 @@ oexBOOL CSerialPort::Purge()
 }
 
 oexBOOL CSerialPort::SetDefaults()
-{
+{_STT();
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS )
 		return oexFALSE;
@@ -225,7 +225,7 @@ oexBOOL CSerialPort::SetDefaults()
 }
 
 oexBOOL CSerialPort::ClearErrors()
-{
+{_STT();
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS || INVALID_HANDLE_VALUE == pS->hPort )
 		return oexFALSE;
@@ -239,7 +239,7 @@ oexBOOL CSerialPort::ClearErrors()
 }
 
 oexSIZE_T CSerialPort::Write( oexCPVOID x_pBuf, oexSIZE_T x_nSize )
-{
+{_STT();
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !x_pBuf || !pS || INVALID_HANDLE_VALUE == pS->hPort )
 		return 0;
@@ -256,7 +256,7 @@ oexSIZE_T CSerialPort::Write( oexCPVOID x_pBuf, oexSIZE_T x_nSize )
 
 /// Reads data from the port
 oexSIZE_T CSerialPort::Read( oexPVOID x_pBuf, oexSIZE_T x_nSize )
-{
+{_STT();
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !x_pBuf || !x_nSize || !pS || INVALID_HANDLE_VALUE == pS->hPort )
 		return 0;
@@ -271,7 +271,7 @@ oexSIZE_T CSerialPort::Read( oexPVOID x_pBuf, oexSIZE_T x_nSize )
 }
 
 CStr8 CSerialPort::Read( oexSIZE_T x_nSize )
-{
+{_STT();
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS || INVALID_HANDLE_VALUE == pS->hPort )
 		return CStr8();
@@ -295,7 +295,7 @@ CStr8 CSerialPort::Read( oexSIZE_T x_nSize )
 
 /// Reads data into a string object
 oexSIZE_T CSerialPort::ReadBin( CBin *bin, oexSIZE_T x_nSize )
-{
+{_STT();
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !bin || !x_nSize || !pS || INVALID_HANDLE_VALUE == pS->hPort )
 		return 0;
@@ -317,68 +317,80 @@ oexSIZE_T CSerialPort::ReadBin( CBin *bin, oexSIZE_T x_nSize )
 }
 
 oexINT CSerialPort::getByteSize()
-{	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+{_STT();
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS ) return -1;
 	return (oexINT)pS->dcb.ByteSize;
 }
 
 void CSerialPort::setByteSize( oexINT v )
-{	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+{_STT();
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( pS ) pS->dcb.ByteSize = v;
 }
 
 oexINT CSerialPort::getBaudRate()
-{	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+{_STT();
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS ) return -1;
 	return (oexINT)pS->dcb.BaudRate;
 }
 
 void CSerialPort::setBaudRate( oexINT v )
-{	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+{_STT();
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( pS ) pS->dcb.BaudRate = v;
 }
 
 oexINT CSerialPort::getStopBits()
-{	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+{_STT();
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS ) return -1;
 	return (oexINT)pS->dcb.StopBits;
 }
 
 void CSerialPort::setStopBits( oexINT v )
-{	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+{_STT();
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( pS ) pS->dcb.StopBits = v;
 }
 
 oexINT CSerialPort::getParity()
-{	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+{_STT();
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS ) return -1;
 	return (oexINT)pS->dcb.Parity;
 }
 
 void CSerialPort::setParity( oexINT v )
-{	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+{_STT();
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( pS ) pS->dcb.Parity = v;
 }
 
 oexINT CSerialPort::getRtsCtrl()
-{	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+{_STT();
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS ) return -1;
 	return (oexINT)pS->dcb.fRtsControl;
 }
 
 void CSerialPort::setRtsCtrl( oexINT v )
-{	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+{_STT();
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( pS ) pS->dcb.fRtsControl = v;
 }
 
 oexINT CSerialPort::getDtrCtrl()
-{	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+{_STT();
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS ) return -1;
 	return (oexINT)pS->dcb.fDtrControl;
 }
 
 void CSerialPort::setDtrCtrl( oexINT v )
-{	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+{_STT();
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( pS ) pS->dcb.fDtrControl = v;
 }
 

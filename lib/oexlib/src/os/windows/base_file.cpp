@@ -45,17 +45,17 @@ const CBaseFile::t_HFILE CBaseFile::c_Invalid = INVALID_HANDLE_VALUE;
 const CBaseFile::t_HFIND CBaseFile::c_InvalidFindHandle = INVALID_HANDLE_VALUE;
 
 oexBOOL CBaseFile::InitFileSystem()
-{
+{_STT();
 	return oexTRUE;
 }
 
 oexBOOL CBaseFile::FreeFileSystem()
-{
+{_STT();
 	return oexTRUE;
 }
 
 CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, oexUINT x_eAccess, oexUINT x_eShare, oexUINT x_uFlags, oexINT *x_pnError )
-{
+{_STT();
     DWORD dwDisposition = OPEN_EXISTING;
     switch( x_eDisposition )
     {   case eDisCreateNew : dwDisposition = CREATE_NEW; break;
@@ -87,7 +87,7 @@ CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, o
 
 
 oexBOOL CBaseFile::Close( CBaseFile::t_HFILE x_hFile, oexINT *x_pnErr )
-{
+{_STT();
     if ( INVALID_HANDLE_VALUE == x_hFile )
         return oexFALSE;
 
@@ -103,7 +103,7 @@ oexBOOL CBaseFile::Close( CBaseFile::t_HFILE x_hFile, oexINT *x_pnErr )
 
 
 oexBOOL CBaseFile::Write( CBaseFile::t_HFILE x_hFile, oexCPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllWritten, oexINT *x_pnErr )
-{
+{_STT();
     DWORD dwWritten = 0;
     oexBOOL bRet = ::WriteFile( x_hFile, x_pData, x_llSize, &dwWritten, NULL ) ? oexTRUE : oexFALSE;
 
@@ -119,7 +119,7 @@ oexBOOL CBaseFile::Write( CBaseFile::t_HFILE x_hFile, oexCPVOID x_pData, oexINT6
 }
 
 oexBOOL CBaseFile::Read( CBaseFile::t_HFILE x_hFile, oexPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllRead, oexINT *x_pnErr )
-{
+{_STT();
     DWORD dwRead = 0;
     oexBOOL bRet = ::ReadFile( x_hFile, x_pData, x_llSize, &dwRead, NULL ) ? oexTRUE : oexFALSE;
 
@@ -138,18 +138,19 @@ oexBOOL CBaseFile::Read( CBaseFile::t_HFILE x_hFile, oexPVOID x_pData, oexINT64 
 }
 
 oexBOOL CBaseFile::Flush( t_HFILE x_hFile )
-{
+{_STT();
 	return ::FlushFileBuffers( x_hFile );
 }
 
 oexINT64 CBaseFile::Size( t_HFILE hFile )
-{   if ( c_Invalid == hFile ) return 0;
+{_STT();
+   if ( c_Invalid == hFile ) return 0;
     DWORD dwHi = 0, dwLo = ::GetFileSize( hFile, &dwHi );
     return (oexINT64)dwLo | ( (oexINT64)dwHi << 32 );
 }
 
 oexINT64 CBaseFile::SetPointer( t_HFILE hFile, oexINT64 llMove, oexINT nMethod )
-{
+{_STT();
     // Get method
     DWORD dwMethod = 0;
     if ( nMethod == eFileOffsetBegin ) dwMethod = FILE_BEGIN;
@@ -171,12 +172,14 @@ oexINT64 CBaseFile::SetPointer( t_HFILE hFile, oexINT64 llMove, oexINT nMethod )
 }
 
 oexBOOL CBaseFile::Delete( oexCSTR x_pFile )
-{	::SetFileAttributes( x_pFile, FILE_ATTRIBUTE_NORMAL );
+{_STT();
+	::SetFileAttributes( x_pFile, FILE_ATTRIBUTE_NORMAL );
     return ::DeleteFile( x_pFile ) ? oexTRUE : oexFALSE;
 }
 
 oexBOOL CBaseFile::RemoveFolder( oexCSTR x_pDir )
-{	::SetFileAttributes( x_pDir, FILE_ATTRIBUTE_NORMAL );
+{_STT();
+	::SetFileAttributes( x_pDir, FILE_ATTRIBUTE_NORMAL );
     return ::RemoveDirectory( x_pDir ) ? oexTRUE : oexFALSE;
 }
 
@@ -201,7 +204,7 @@ static oexUINT g_ConvBaseFileAttribToWinAttrib[] =
 };
 
 static DWORD CBaseFile_ToFileAttributes( oexUINT uAttrib )
-{
+{_STT();
     DWORD dwAttrib = 0;
     for( oexUINT i = 0; -1 != g_ConvBaseFileAttribToWinAttrib[ i ]
                         && -1 != g_ConvBaseFileAttribToWinAttrib[ i + 1 ];
@@ -213,7 +216,7 @@ static DWORD CBaseFile_ToFileAttributes( oexUINT uAttrib )
 }
 
 static oexUINT CBaseFile_ToCBaseFileAttributes( DWORD dwAttrib )
-{
+{_STT();
     DWORD uAttrib = 0;
     for( oexUINT i = 0; -1 != g_ConvBaseFileAttribToWinAttrib[ i ]
                         && -1 != g_ConvBaseFileAttribToWinAttrib[ i + 1 ];
@@ -225,13 +228,18 @@ static oexUINT CBaseFile_ToCBaseFileAttributes( DWORD dwAttrib )
 }
 
 oexUINT CBaseFile::GetFileAttrib( oexCSTR x_pFile )
-{   return CBaseFile_ToCBaseFileAttributes( ::GetFileAttributes( x_pFile ) ); }
+{_STT();
+	return CBaseFile_ToCBaseFileAttributes( ::GetFileAttributes( x_pFile ) ); 
+}
 
 oexBOOL CBaseFile::SetFileAttrib( oexCSTR x_pFile, oexUINT x_uAttrib )
-{   return ::SetFileAttributes( x_pFile, x_uAttrib ) ? oexTRUE : oexFALSE; }
+{_STT();
+	return ::SetFileAttributes( x_pFile, x_uAttrib ) ? oexTRUE : oexFALSE; 
+}
 
 void CBaseFile_InitFindData( CBaseFile::SFindData *x_pFd )
-{   x_pFd->llSize = 0;
+{_STT();
+	x_pFd->llSize = 0;
     x_pFd->sName.Destroy();
     x_pFd->uFileAttributes = 0;
     x_pFd->ftCreated = 0;
@@ -240,7 +248,7 @@ void CBaseFile_InitFindData( CBaseFile::SFindData *x_pFd )
 }
 
 CBaseFile::t_HFIND CBaseFile::FindFirst( oexCSTR x_pPath, oexCSTR x_pMask, CBaseFile::SFindData *x_pFd )
-{
+{_STT();
     // Sanity checks
     if ( !oexVERIFY_PTR( x_pPath ) || !oexVERIFY_PTR( x_pMask ) || !oexVERIFY_PTR( x_pFd ) )
         return oexFALSE;
@@ -266,7 +274,7 @@ CBaseFile::t_HFIND CBaseFile::FindFirst( oexCSTR x_pPath, oexCSTR x_pMask, CBase
 }
 
 oexBOOL CBaseFile::FindNext( t_HFIND x_hFind, CBaseFile::SFindData *x_pFd )
-{
+{_STT();
     // Sanity checks
     if ( !oexVERIFY( vInvalidFindHandle() != x_hFind ) || !oexVERIFY_PTR( x_pFd ) )
         return oexFALSE;
@@ -290,27 +298,32 @@ oexBOOL CBaseFile::FindNext( t_HFIND x_hFind, CBaseFile::SFindData *x_pFd )
 }
 
 oexBOOL CBaseFile::FindClose( t_HFIND x_hFind )
-{   if ( vInvalidFindHandle() == x_hFind )
+{_STT();
+	if ( vInvalidFindHandle() == x_hFind )
         return oexFALSE;
     return ::FindClose( x_hFind ) ? oexTRUE : oexFALSE;
 }
 
 
 oexBOOL CBaseFile::DoesExist( oexCSTR x_pPath )
-{   return INVALID_FILE_ATTRIBUTES != ::GetFileAttributes( x_pPath );
+{_STT();
+	return INVALID_FILE_ATTRIBUTES != ::GetFileAttributes( x_pPath );
 }
 
 oexBOOL CBaseFile::CreateFolder( oexCSTR x_pPath )
-{   return ::CreateDirectory( x_pPath, NULL ) ? oexTRUE : oexFALSE; }
+{_STT();
+	return ::CreateDirectory( x_pPath, NULL ) ? oexTRUE : oexFALSE; 
+}
 
 CStr CBaseFile::GetModPath( oexCSTR x_pPath )
-{	if ( oexCHECK_PTR( x_pPath ) )
+{_STT();
+	if ( oexCHECK_PTR( x_pPath ) )
 		return CBaseFile::GetModFileName().GetPath().BuildPath( x_pPath );
 	return CBaseFile::GetModFileName().GetPath();
 }
 
 CStr CBaseFile::GetModFileName()
-{
+{_STT();
 	oexTCHAR szFilename[ oexSTRSIZE ] = { 0 };
 
 	// Get the module file name

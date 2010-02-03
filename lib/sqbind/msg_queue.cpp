@@ -38,13 +38,13 @@ using namespace sqbind;
 
 /// Default Constructor
 CSqMsgQueue::SMsg::SMsg()
-{
+{_STT();
 	pReply = NULL;
 }
 
 /// Initializer
 CSqMsgQueue::SMsg::SMsg( const stdString x_sPath, const stdString x_sMsg, CSqMap *x_pmapParams, oexEvent *x_evReply, stdString *x_pReply )
-{
+{_STT();
 	sPath = x_sPath;
 	sMsg = x_sMsg;
 
@@ -58,7 +58,8 @@ CSqMsgQueue::SMsg::SMsg( const stdString x_sPath, const stdString x_sMsg, CSqMap
 
 // Copy constructor
 CSqMsgQueue::SMsg::SMsg( const CSqMsgQueue::SMsg &x_rMsg )
-{   sMsg = x_rMsg.sMsg;
+{_STT();
+	sMsg = x_rMsg.sMsg;
 	sPath = x_rMsg.sPath;
 	sParams = x_rMsg.sParams;
 	evReply = x_rMsg.evReply;
@@ -67,14 +68,14 @@ CSqMsgQueue::SMsg::SMsg( const CSqMsgQueue::SMsg &x_rMsg )
 
 /// Default constructor
 CSqMsgQueue::CSqMsgQueue()
-{
+{_STT();
 	m_uOwnerThreadId = 0;
 	m_bWantQuit = oex::oexFALSE;
 }
 
 /// Destructor
 CSqMsgQueue::~CSqMsgQueue()
-{
+{_STT();
 	// Acquire lock
 	oexAutoLock ll( m_cLock );
 	if ( !ll.IsLocked() )
@@ -85,7 +86,7 @@ CSqMsgQueue::~CSqMsgQueue()
 
 /// Releases resources
 void CSqMsgQueue::Destroy()
-{
+{_STT();
 	// Acquire lock
 	oexAutoLock ll( m_cLock );
 	if ( !ll.IsLocked() )
@@ -112,7 +113,7 @@ void CSqMsgQueue::Destroy()
 	from the thread.
 */
 oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapParams, stdString *pReply, oexEvent *pReplyEvent, oex::oexUINT uTimeout )
-{
+{_STT();
 	oex::TMem< oexEvent > mevReply;
 	oex::oexBOOL bRet = oex::oexFALSE;
 
@@ -177,7 +178,7 @@ oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapPara
 
 /// Process messages
 oex::oexBOOL CSqMsgQueue::ProcessMsgs()
-{
+{_STT();
 	// Acquire lock
 	oexAutoLock ll( &m_cLock );
 	if ( !ll.IsLocked() )
@@ -225,30 +226,34 @@ oex::oexBOOL CSqMsgQueue::ProcessMsgs()
 
 /// Process a single message from the queue
 oex::oexBOOL CSqMsgQueue::ProcessMsg( const stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent )
-{
+{_STT();
 	return oex::oexFALSE;
 }
 
 oex::oexBOOL CSqMsgQueue::is_path( const stdString &sPath )
-{	CSqMap params; stdString sMsg = oexT( "is_path" );
+{_STT();
+	CSqMap params; stdString sMsg = oexT( "is_path" );
 	return ProcessMsg( sPath, sMsg, params, oexNULL, oexNULL );
 }
 
 oex::oexBOOL CSqMsgQueue::run( stdString *pReply, const stdString &sPath, const stdString &sScript )
-{	CSqMap params;
+{_STT();
+	CSqMap params;
 	params[ oexT( "run" ) ] = sScript;
 	return Msg( sPath, oexT( "msg" ), &params, pReply );
 }
 
 oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sPath, const stdString &sFunction )
-{	CSqMap params;
+{_STT();
+	CSqMap params;
 	params[ oexT( "execute" ) ] = sFunction;
 	return Msg( sPath, oexT( "msg" ), &params, pReply );
 }
 
 oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sPath, const stdString &sFunction,
 								   const stdString &sP1 )
-{	CSqMap params;
+{_STT();
+	CSqMap params;
 	params[ oexT( "execute1" ) ] = sFunction;
 	params[ oexT( "p1" ) ] = sP1;
 	return Msg( sPath, oexT( "msg" ), &params, pReply );
@@ -256,7 +261,8 @@ oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sPath, co
 
 oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sPath, const stdString &sFunction,
 								   const stdString &sP1, const stdString &sP2 )
-{	CSqMap params;
+{_STT();
+	CSqMap params;
 	params[ oexT( "execute2" ) ] = sFunction;
 	params[ oexT( "p1" ) ] = sP1;
 	params[ oexT( "p2" ) ] = sP2;
@@ -265,7 +271,8 @@ oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sPath, co
 
 oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sPath, const stdString &sFunction,
 								   const stdString &sP1, const stdString &sP2, const stdString &sP3 )
-{	CSqMap params;
+{_STT();
+	CSqMap params;
 	params[ oexT( "execute3" ) ] = sFunction;
 	params[ oexT( "p1" ) ] = sP1;
 	params[ oexT( "p2" ) ] = sP2;
@@ -276,7 +283,8 @@ oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sPath, co
 oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sPath, const stdString &sFunction,
 								   const stdString &sP1, const stdString &sP2, const stdString &sP3,
 								   const stdString &sP4 )
-{	CSqMap params;
+{_STT();
+	CSqMap params;
 	params[ oexT( "execute4" ) ] = sFunction;
 	params[ oexT( "p1" ) ] = sP1;
 	params[ oexT( "p2" ) ] = sP2;
@@ -286,7 +294,7 @@ oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sPath, co
 }
 
 oex::oexBOOL CSqMsgQueue::spawn( stdString *pReply, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile )
-{
+{_STT();
 	CSqMap params;
 	params[ oexT( "name" ) ] = sName;
 	params[ oexT( "script" ) ] = sScript;
@@ -295,24 +303,28 @@ oex::oexBOOL CSqMsgQueue::spawn( stdString *pReply, const stdString &sPath, cons
 }
 
 oex::oexBOOL CSqMsgQueue::kill( stdString *pReply, const stdString &sPath )
-{	CSqMap params;
+{_STT();
+	CSqMap params;
 	return Msg( sPath, oexT( "kill" ), &params, pReply );
 }
 
 oex::oexBOOL CSqMsgQueue::get_children( stdString *pReply, const stdString &sPath )
-{	CSqMap params;
+{_STT();
+	CSqMap params;
 	return Msg( sPath, oexT( "get_children" ), &params, pReply );
 }
 
 void CSqMsgQueue::set( const stdString &sPath, const stdString &sKey, const stdString &sVal )
-{	CSqMap params;
+{_STT();
+	CSqMap params;
 	params[ oexT( "key" ) ] = sKey;
 	params[ oexT( "val" ) ] = sVal;
 	Msg( sPath, oexT( "pb_set" ), &params, oexNULL );
 }
 
 stdString CSqMsgQueue::get( const stdString &sPath, const stdString &sKey )
-{	stdString sRet;
+{_STT();
+	stdString sRet;
 	CSqMap params;
 	params[ oexT( "key" ) ] = sKey;
 	Msg( sPath, oexT( "pb_get" ), &params, &sRet );
@@ -320,7 +332,8 @@ stdString CSqMsgQueue::get( const stdString &sPath, const stdString &sKey )
 }
 
 stdString CSqMsgQueue::isset( const stdString &sPath, const stdString &sKey )
-{	stdString sRet;
+{_STT();
+	stdString sRet;
 	CSqMap params;
 	params[ oexT( "key" ) ] = sKey;
 	Msg( sPath, oexT( "pb_isset" ), &params, &sRet );
@@ -328,7 +341,8 @@ stdString CSqMsgQueue::isset( const stdString &sPath, const stdString &sKey )
 }
 
 stdString CSqMsgQueue::pb( const stdString &sPath )
-{	stdString sRet;
+{_STT();
+	stdString sRet;
 	CSqMap params;
 	Msg( sPath, oexT( "pb_all" ), &params, &sRet );
 	return sRet;

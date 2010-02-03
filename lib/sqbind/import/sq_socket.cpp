@@ -51,52 +51,52 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSockAddress, CSqSockAddress )
 SQBIND_REGISTER_CLASS_END()
 
 void CSqSockAddress::Register( sqbind::VM vm )
-{
+{_STT();
 	SQBIND_EXPORT( vm, CSqSockAddress );
 }
 
 sqbind::stdString CSqSockAddress::GetId()
-{
+{_STT();
 	return m_address.GetId().Ptr();
 }
 
 void CSqSockAddress::SetId( const sqbind::stdString &sId )
-{
+{_STT();
 	m_address.SetId( sId.c_str() );
 }
 
 int CSqSockAddress::SetDotAddress( const sqbind::stdString &sDot, int nPort )
-{
+{_STT();
 	return m_address.SetDotAddress( sDot.c_str(), nPort );
 }
 
 int CSqSockAddress::SetRawAddress( int nAddr, int nPort )
-{
+{_STT();
 	return m_address.SetRawAddress( nAddr, nPort );
 }
 
 int CSqSockAddress::ValidateAddress()
-{
+{_STT();
 	return m_address.ValidateAddress();
 }
 
 int CSqSockAddress::LookupUrl( const sqbind::stdString &sUrl, int nPort )
-{
+{_STT();
 	return m_address.LookupUrl( sUrl.c_str(), nPort );
 }
 
 int CSqSockAddress::LookupHost( const sqbind::stdString &sHost, int nPort )
-{
+{_STT();
 	return m_address.LookupHost( sHost.c_str(), nPort );
 }
 
 int CSqSockAddress::getPort()
-{
+{_STT();
 	return m_address.GetPort();
 }
 
 sqbind::stdString CSqSockAddress::getDotAddress()
-{
+{_STT();
 	return m_address.GetDotAddress().Ptr();
 }
 
@@ -148,17 +148,17 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSocket, CSqSocket )
 SQBIND_REGISTER_CLASS_END()
 
 void CSqSocket::Register( sqbind::VM vm )
-{
+{_STT();
 	SQBIND_EXPORT( vm, CSqSocket );
 }
 
 void CSqSocket::Destroy()
-{
+{_STT();
 	m_socket->Destroy();
 }
 
 int CSqSocket::CreateUDP()
-{
+{_STT();
 	return m_socket->Create( oex::os::CIpSocket::eAfInet,
 							 oex::os::CIpSocket::eTypeDgram,
 							 oex::os::CIpSocket::eProtoUdp );
@@ -166,22 +166,22 @@ int CSqSocket::CreateUDP()
 
 
 int CSqSocket::Connect( const sqbind::stdString &sUrl, int nPort )
-{
+{_STT();
 	return m_socket->Connect( sUrl.c_str(), nPort ) ? 1 : 0;
 }
 
 int CSqSocket::Bind( int nPort )
-{
+{_STT();
 	return m_socket->Bind( nPort );
 }
 
 int CSqSocket::Listen( int nMax )
-{
+{_STT();
 	return m_socket->Listen( nMax );
 }
 
 int CSqSocket::Accept( CSqSocket *pSocket )
-{
+{_STT();
 	if ( !pSocket )
 		return 0;
 
@@ -189,7 +189,7 @@ int CSqSocket::Accept( CSqSocket *pSocket )
 }
 
 int CSqSocket::Share( CSqSocket *pSocket )
-{
+{_STT();
 	if ( !pSocket || !pSocket->m_socket.Ptr() )
 		return 0;
 
@@ -200,7 +200,7 @@ int CSqSocket::Share( CSqSocket *pSocket )
 
 
 int CSqSocket::setScript( sqbind::CSqMsgQueue *pMsgQueue, const sqbind::stdString &sId, const sqbind::stdString &sScript, const sqbind::stdString &sFunction )
-{
+{_STT();
 	// Sanity checks
 	if ( !pMsgQueue || !sScript.length() || !sFunction.length() )
 		return 0;
@@ -241,32 +241,32 @@ int CSqSocket::setScript( sqbind::CSqMsgQueue *pMsgQueue, const sqbind::stdStrin
 
 
 int CSqSocket::getConnectState()
-{
+{_STT();
 	return m_socket->GetConnectState();
 }
 
 int CSqSocket::isRunning( int nCheckActivity )
-{
+{_STT();
 	return m_socket->IsRunning( nCheckActivity );
 }
 
 int CSqSocket::isConnecting()
-{
+{_STT();
 	return m_socket->IsConnecting();
 }
 
 int CSqSocket::isConnected()
-{
+{_STT();
 	return m_socket->IsConnected();
 }
 
 int CSqSocket::isActivity()
-{
+{_STT();
 	return m_socket->IsActivity();
 }
 
 int CSqSocket::getPeerAddress( CSqSockAddress *pAddr )
-{
+{_STT();
 	if ( !pAddr )
 		return 0;
 
@@ -276,7 +276,7 @@ int CSqSocket::getPeerAddress( CSqSockAddress *pAddr )
 }
 
 int CSqSocket::getLocalAddress( CSqSockAddress *pAddr )
-{
+{_STT();
 	if ( !pAddr )
 		return 0;
 
@@ -286,7 +286,7 @@ int CSqSocket::getLocalAddress( CSqSockAddress *pAddr )
 }
 
 int CSqSocket::setPeerAddress( CSqSockAddress *pAddr )
-{
+{_STT();
 	if ( !pAddr )
 		return 0;
 
@@ -296,7 +296,7 @@ int CSqSocket::setPeerAddress( CSqSockAddress *pAddr )
 }
 
 int CSqSocket::setLocalAddress( CSqSockAddress *pAddr )
-{
+{_STT();
 	if ( !pAddr )
 		return 0;
 
@@ -306,55 +306,63 @@ int CSqSocket::setLocalAddress( CSqSockAddress *pAddr )
 }
 
 int CSqSocket::WaitEvent( int nEvent, int nMax )
-{
+{_STT();
 	return m_socket->WaitEvent( nEvent, nMax );
 }
 
 sqbind::stdString CSqSocket::getLastError()
-{
+{_STT();
 	return m_socket->GetLastErrorMsg().Ptr();
 }
 
 sqbind::stdString CSqSocket::Read( int nMax )
-{	oex::CStr s = oexMbToStr( m_socket->Recv( nMax ) );
+{_STT();
+	oex::CStr s = oexMbToStr( m_socket->Recv( nMax ) );
 	return sqbind::stdString( s.Ptr(), s.Length() );
 }
 
 int CSqSocket::Write( const sqbind::stdString &s, int nMax )
-{
+{_STT();
 	return m_socket->Send( oexStrToMb( oex::CStr( s.c_str(), s.length() ) ) );
 }
 
 sqbind::stdString CSqSocket::ReadFrom( int nMax )
-{	oex::CStr s = oexMbToStr( m_socket->RecvFrom( nMax ) );
+{_STT();
+	oex::CStr s = oexMbToStr( m_socket->RecvFrom( nMax ) );
 	return sqbind::stdString( s.Ptr(), s.Length() );
 }
 
 int CSqSocket::SendTo( const sqbind::stdString &s, int nMax )
-{	return m_socket->SendTo( oexStrToMb( oex::CStr( s.c_str(), nMax ) ) ); }
+{_STT();
+	return m_socket->SendTo( oexStrToMb( oex::CStr( s.c_str(), nMax ) ) ); 
+}
 
 int CSqSocket::ReadBin( sqbind::CSqBinary *pBin, int nMax )
-{	if ( !pBin )
+{_STT();
+	if ( !pBin )
 		return 0;
 	*pBin = m_socket->ReadBin( nMax );
 	return pBin->getUsed();
 }
 
 int CSqSocket::WriteBin( sqbind::CSqBinary *pBin, int nMax )
-{	if ( !pBin )
+{_STT();
+	if ( !pBin )
 		return 0;
 	return m_socket->WriteBin( pBin->Mem(), nMax );
 }
 
 int CSqSocket::ReadFromBin( sqbind::CSqBinary *pBin, int nMax )
-{	if ( !pBin )
+{_STT();
+	if ( !pBin )
 		return 0;
 	*pBin = m_socket->ReadFromBin( nMax );
 	return pBin->getUsed();
 }
 
 int CSqSocket::SendToBin( sqbind::CSqBinary *pBin, int nMax )
-{	if ( !pBin )
+{_STT();
+	if ( !pBin )
 		return 0;
 	return m_socket->SendToBin( pBin->Mem(), nMax );
 }

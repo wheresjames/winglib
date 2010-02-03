@@ -37,15 +37,17 @@
 using namespace sqbind;
 
 CModuleInstance::CModuleInstance()
-{
+{_STT();
 	m_fExportSymbols = oexNULL;
 }
 
 CModuleInstance::~CModuleInstance()
-{	Destroy(); }
+{_STT();
+	Destroy(); 
+}
 
 void CModuleInstance::Destroy()
-{
+{_STT();
 	// Release module if loaded
 	if ( m_cModule.IsLoaded() )
 	{
@@ -70,7 +72,7 @@ void CModuleInstance::Destroy()
 }
 
 oex::oexBOOL CModuleInstance::Load( oex::oexCSTR x_pFile )
-{
+{_STT();
 	// Lose the old module
 	Destroy();
 
@@ -95,7 +97,7 @@ oex::oexBOOL CModuleInstance::Load( oex::oexCSTR x_pFile )
 }
 
 oex::oexBOOL CModuleInstance::LoadFunctions()
-{
+{_STT();
 	// Ensure module
 	if ( !IsLoaded() )
 		return oex::oexFALSE;
@@ -154,10 +156,12 @@ oex::oexBOOL CModuleInstance::LoadFunctions()
 }
 
 oex::oexBOOL CModuleInstance::IsLoaded()
-{ return m_cModule.IsLoaded(); }
+{_STT();
+	return m_cModule.IsLoaded(); 
+}
 
 oex::oexBOOL CModuleInstance::Export( sqbind::VM vm )
-{
+{_STT();
 	// Ensure we have an export function
 	if ( !m_fExportSymbols )
 	{	oexERROR( 0, oexMks( oexT( "Invalid export function " ), m_cModule.GetPath() ) );

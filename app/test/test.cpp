@@ -3325,17 +3325,28 @@ oex::oexRESULT Test_CSQLite()
 }
 #endif
 
+oex::oexRESULT Test_CrashReporting()
+{_STT();
+
+	// +++ Crash
+//	*( (char*)0 ) = 0;
+//	int x = 0, y = 10 / x;
+	os::CDebug::CreateCrashReport( oexNULL, oexT( "logs" ), oexT( "Test" ) );
+
+	return oex::oexRES_OK;
+}
+
 //int wmain( int argc, wchar_t *argv[] )
 //int wmain( int argc, wchar_t *argv[], wchar_t *envp[] )
 
 int main(int argc, char* argv[])
 {_STT();
 
-	// Enable crash reporting
-	oexEnableCrashReporting( oexNULL, oexT( "logs" ) );
-
     // Initialize the oex library
 	oexINIT();
+
+	// Enable crash reporting
+	oexEnableCrashReporting( oexNULL, oexT( "logs" ) );
 
 	// Initialize resources
 	oexInitResources();
@@ -3413,8 +3424,10 @@ int main(int argc, char* argv[])
 #endif
 
 #if defined( OEX_ENABLE_VIDEO )
-    Test_CCapture();
+//    Test_CCapture();
 #endif
+
+	Test_CrashReporting();
 
 	// Release sockets
     oex::os::CIpSocket::UninitSockets();

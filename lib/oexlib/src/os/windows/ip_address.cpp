@@ -55,7 +55,7 @@ using namespace OEX_NAMESPACE::os;
 //////////////////////////////////////////////////////////////////////
 
 oexBOOL CIpAddress::SetRawAddress( oexINT64 x_llIp, oexINT32 x_uPort, oexINT32 x_uType )
-{
+{_STT();
     // Set the ip address
     if ( x_uType == eAddrTypeIpv4 )
         m_uIpv4 = (oexUINT32)x_llIp, m_uIpv4Extra = 0;
@@ -77,7 +77,7 @@ oexBOOL CIpAddress::SetRawAddress( oexINT64 x_llIp, oexINT32 x_uPort, oexINT32 x
 }
 
 oexBOOL CIpAddress::ValidateAddress()
-{
+{_STT();
     // Save the crc
     oexUINT16 uCrc = m_uCrc;
 
@@ -102,7 +102,7 @@ oexBOOL CIpAddress::ValidateAddress()
 }
 
 oexBOOL CIpAddress::SetDotAddress( oexCSTR x_pDotAddress, oexINT32 x_uPort, oexINT32 x_uType )
-{
+{_STT();
 #if defined( OEX_NOSOCKET2 )
 	return oexFALSE;
 #else
@@ -121,7 +121,7 @@ oexBOOL CIpAddress::SetDotAddress( oexCSTR x_pDotAddress, oexINT32 x_uPort, oexI
 }
 
 CStr CIpAddress::GetDotAddress()
-{
+{_STT();
 #if defined( OEX_NOSOCKET2 )
 	return oexFALSE;
 #else
@@ -136,19 +136,19 @@ CStr CIpAddress::GetDotAddress()
 }
 
 oexCONST oexGUID* CIpAddress::GetId( oexGUID *x_pGuid )
-{
+{_STT();
     os::CSys::MemCpy( x_pGuid, &m_guid, sizeof( m_guid ) );
     return x_pGuid;
 }
 
 CIpAddress& CIpAddress::SetId( oexCONST oexGUID *x_pGuid )
-{
+{_STT();
     os::CSys::MemCpy( &m_guid, x_pGuid, sizeof( m_guid ) );
     return *this;
 }
 
 CStr CIpAddress::BuildUrl( CPropertyBag &x_pbUi )
-{
+{_STT();
 	CStr str;
 
 	// Scheme
@@ -199,7 +199,7 @@ CStr CIpAddress::BuildUrl( CPropertyBag &x_pbUi )
 // Assuming formating like...
 //  http://user:password@www.somesite.com/directory/somefile.php?param=1&param=2
 CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
-{
+{_STT();
     CPropertyBag pb;
 
     if ( !oexVERIFY( pUrl ) )
@@ -264,7 +264,7 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
 	// Dropping this MS stuff because of problems in WINCE
 
 CStr CIpAddress::BuildUrl( CPropertyBag &x_pbUi )
-{
+{_STT();
     URL_COMPONENTS uc;
     os::CSys::Zero( &uc, sizeof( uc ) );
     uc.dwStructSize = sizeof( URL_COMPONENTS );
@@ -378,7 +378,7 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
 */
 
 oexBOOL CIpAddress::LookupUrl( oexCSTR x_pUrl, oexINT32 x_uPort, oexINT32 x_uType )
-{
+{_STT();
     // Lose old info
     Destroy();
 
@@ -406,7 +406,7 @@ oexBOOL CIpAddress::LookupUrl( oexCSTR x_pUrl, oexINT32 x_uPort, oexINT32 x_uTyp
 }
 
 oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_uType )
-{
+{_STT();
 #if defined( OEX_NOSOCKET2 )
 	return oexFALSE;
 #else

@@ -39,7 +39,7 @@ OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
 CStr CTrace::GetBacktrace( oexUINT x_uSkip, oexUINT x_uMax )
-{
+{_STT();
 	return CStr();
 
 /*	// Allocate space for pointers
@@ -71,7 +71,7 @@ CStr CTrace::GetBacktrace( oexUINT x_uSkip, oexUINT x_uMax )
 }
 
 static BOOL GetWSAErrorMsg(oexSTR pMsg, oexUINT err)
-{
+{_STT();
 	oexCSTR ptr = NULL;
 
 	switch( err )
@@ -251,7 +251,7 @@ static BOOL GetWSAErrorMsg(oexSTR pMsg, oexUINT err)
 }
 
 CStr CTrace::GetErrorMsg( oexINT x_nErr )
-{
+{_STT();
 	oexTCHAR msg[ oexSTRSIZE ] = { 0 };
 
 	// What does windows say this error is?

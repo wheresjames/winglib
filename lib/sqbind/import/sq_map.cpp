@@ -37,28 +37,34 @@
 using namespace sqbind;
 
 CSqMap::CSqMap()
-{
+{_STT();
 }
 
 CSqMap::CSqMap( const CSqMap::t_Obj &s )
-{
+{_STT();
 	deserialize( s );
 }
 
 CSqMap::CSqMap( const oex::oexTCHAR *s )
-{
+{_STT();
 	if ( oexCHECK_PTR( s ) )
 		deserialize( t_Obj( s ) );
 }
 
 CSqMap::t_List& CSqMap::list()
-{   return m_lst; }
+{_STT();
+	return m_lst; 
+}
 
 CSqMap::t_Obj& CSqMap::operator []( const CSqMap::t_Obj &rObj )
-{	return m_lst[ rObj ]; }
+{_STT();
+	return m_lst[ rObj ]; 
+}
 
 CSqMap::t_Obj& CSqMap::operator []( const oex::oexTCHAR *p )
-{	return m_lst[ p ]; }
+{_STT();
+	return m_lst[ p ]; 
+}
 
 _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMap, CSqMap )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMap, serialize )
@@ -82,39 +88,47 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMap, CSqMap )
 _SQBIND_REGISTER_CLASS_END()
 
 void CSqMap::Register( sqbind::VM vm )
-{
+{_STT();
 	_SQBIND_EXPORT( vm, CSqMap );
 }
 
 int CSqMap::size()
-{	return m_lst.size(); }
+{_STT();
+	return m_lst.size(); 
+}
 
 void CSqMap::clear()
-{	m_lst.clear(); }
+{_STT();
+	m_lst.clear(); 
+}
 
 void CSqMap::_serialize( oex::CPropertyBag &pb, CSqMap::t_List &lst )
-{
+{_STT();
+
 	for ( t_List::iterator it = lst.begin(); it != lst.end(); it++ )
 		if ( it->first.length() )
 			pb[ it->first.c_str() ].ToString().Set( it->second.c_str(), it->second.length() );
 }
 
 void CSqMap::_deserialize( oex::CPropertyBag &pb, CSqMap::t_List &lst )
-{
+{_STT();
+
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
 		if ( it.Node()->key.Length() )
 			lst[ it.Node()->key.Ptr() ].assign( it->ToString().Ptr(), it->ToString().Length() );
 }
 
 CSqMap::t_Obj CSqMap::serialize()
-{
+{_STT();
+
 	oex::CPropertyBag pb;
 	_serialize( pb, m_lst );
 	return oex::CParser::Serialize( pb ).Ptr();
 }
 
 void CSqMap::deserialize( const CSqMap::t_Obj &s )
-{
+{_STT();
+
 	// Clear the list
 	m_lst.clear();
 
@@ -125,14 +139,16 @@ void CSqMap::deserialize( const CSqMap::t_Obj &s )
 }
 
 CSqMap& CSqMap::add( CSqMap &m )
-{	
+{_STT();
+	
 	for ( t_List::iterator it = m.m_lst.begin(); it != m.m_lst.end(); it++ )
 		m_lst[ it->first ] = it->second;
 	return *this;
 }
 
 void CSqMap::merge( const CSqMap::t_Obj &s )
-{
+{_STT();
+
 	// Deserialize data
 	oex::CPropertyBag pb = oex::CParser::Deserialize( s.c_str(), oex::oexTRUE );
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
@@ -140,7 +156,8 @@ void CSqMap::merge( const CSqMap::t_Obj &s )
 }
 
 CSqMap::t_Obj CSqMap::urlencode()
-{
+{_STT();
+
 	oex::CPropertyBag pb;
 	for ( t_List::iterator it = m_lst.begin(); it != m_lst.end(); it++ )
 		pb[ it->first.c_str() ].ToString().Set( it->second.c_str(), it->second.length() );
@@ -148,7 +165,8 @@ CSqMap::t_Obj CSqMap::urlencode()
 }
 
 void CSqMap::urldecode( const CSqMap::t_Obj &s )
-{
+{_STT();
+
 	// Clear the list
 	m_lst.clear();
 
@@ -159,30 +177,41 @@ void CSqMap::urldecode( const CSqMap::t_Obj &s )
 }
 
 void CSqMap::unset( const CSqMap::t_Obj &k )
-{
+{_STT();
+
 	m_lst.erase( k );
 }
 
 
 void CSqMap::set( const CSqMap::t_Obj &k, const CSqMap::t_Obj &v )
-{
+{_STT();
+
     m_lst[ k ] = v;
 }
 
 CSqMap::iterator CSqMap::begin()
-{	return m_lst.begin(); }
+{_STT();
+	return m_lst.begin(); 
+}
 
 CSqMap::iterator CSqMap::end()
-{	return m_lst.end(); }
+{_STT();
+	return m_lst.end(); 
+}
 
 CSqMap::iterator CSqMap::find( const CSqMap::t_Obj &k )
-{	return m_lst.find( k ); }
+{_STT();
+	return m_lst.find( k ); 
+}
 
 int CSqMap::isset( const CSqMap::t_Obj &k )
-{	return ( m_lst.end() != m_lst.find( k ) ) ? 1 : 0; }
+{_STT();
+	return ( m_lst.end() != m_lst.find( k ) ) ? 1 : 0; 
+}
 
 CSqMap::t_Obj CSqMap::get( const CSqMap::t_Obj &k )
-{
+{_STT();
+
     if ( m_lst.end() == m_lst.find( k ) )
         return oexT( "" );
 
@@ -191,7 +220,8 @@ CSqMap::t_Obj CSqMap::get( const CSqMap::t_Obj &k )
 
 /// Adds an element to the vector
 CSqMap::t_Obj CSqMap::find_key( const CSqMap::t_Obj &k )
-{
+{_STT();
+
     // For each item
     for ( t_List::iterator it = m_lst.begin();
           m_lst.end() != it;
@@ -207,7 +237,8 @@ CSqMap::t_Obj CSqMap::find_key( const CSqMap::t_Obj &k )
 
 /// Adds an element to the vector
 CSqMap::t_Obj CSqMap::find_value( const CSqMap::t_Obj &v )
-{
+{_STT();
+
     // For each item
     for ( t_List::iterator it = m_lst.begin();
           m_lst.end() != it;
@@ -222,7 +253,8 @@ CSqMap::t_Obj CSqMap::find_value( const CSqMap::t_Obj &v )
 }
 
 SquirrelObject CSqMap::_newslot( HSQUIRRELVM v )
-{
+{_STT();
+
     StackHandler sa( v );
 
 	// Get key
@@ -256,7 +288,8 @@ SquirrelObject CSqMap::_newslot( HSQUIRRELVM v )
 
 /// Internal squirrel function, returns value of specified item
 SquirrelObject CSqMap::_get( HSQUIRRELVM v )
-{
+{_STT();
+
     StackHandler sa( v );
 
     const SQChar *pKey = sa.GetString( 2 );
@@ -279,7 +312,8 @@ SquirrelObject CSqMap::_get( HSQUIRRELVM v )
 
 /// Internal squirrel function used to iterate list items
 SquirrelObject CSqMap::_nexti( HSQUIRRELVM v )
-{
+{_STT();
+
     StackHandler sa( v );
 
     SQObjectType type = (SQObjectType)sa.GetType( 2 );
@@ -337,7 +371,8 @@ SquirrelObject CSqMap::_nexti( HSQUIRRELVM v )
 
 /// Returns non-zero if pPattern matches pString
 bool CSqMap::match_pattern( const oex::oexTCHAR *pString, const oex::oexTCHAR *pPattern)
-{
+{_STT();
+
     if ( !pString || !pPattern )
         return false;
 
@@ -417,7 +452,8 @@ bool CSqMap::match_pattern( const oex::oexTCHAR *pString, const oex::oexTCHAR *p
 }
 
 CSqMap::t_Obj CSqMap::print_r( int nShowVals )
-{
+{_STT();
+
 	t_Obj sRet;
 	for ( iterator it = m_lst.begin(); it != m_lst.end(); it++ )
 	{	sRet += it->first; sRet += oexT( " = " );

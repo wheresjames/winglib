@@ -47,12 +47,13 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqCapture, CSqCapture )
 SQBIND_REGISTER_CLASS_END()
 
 void CSqCapture::Register( sqbind::VM vm )
-{
+{_STT();
 	SQBIND_EXPORT( vm, CSqCapture );
 }
 
 int CSqCapture::Destroy()
-{
+{_STT();
+
 	// Close the capture device
 	m_cap.Destroy();
 
@@ -66,7 +67,8 @@ int CSqCapture::Destroy()
 }
 
 int CSqCapture::Init( int nDevice, int nChannel, int nWidth, int nHeight, int nFps, const stdString &sFormat, int nInit )
-{
+{_STT();
+
 	oex::CStr sFmt = sFormat.c_str();
 
 	if ( sFmt.Length() < 4 )
@@ -93,7 +95,8 @@ int CSqCapture::Init( int nDevice, int nChannel, int nWidth, int nHeight, int nF
 }
 
 stdString SaveImage( void *pBuf, long lSize, long lWidth, long lHeight )
-{
+{_STT();
+
 	if ( !pBuf || !lSize )
 		return stdString();
 
@@ -114,12 +117,14 @@ stdString SaveImage( void *pBuf, long lSize, long lWidth, long lHeight )
 }
 
 stdString CSqCapture::GetSupportedFormats()
-{
+{_STT();
+
 	return m_cap.GetSupportedFormats().Ptr();
 }
 
 stdString CSqCapture::GetFormatDescription( const stdString &sFormat )
-{
+{_STT();
+
 	// Convert to multi-byte
 	oex::CStr8 fmt = oexStrToMb( sFormat.c_str() );
 	if ( fmt.Length() < 4 )
@@ -131,7 +136,8 @@ stdString CSqCapture::GetFormatDescription( const stdString &sFormat )
 
 
 int CSqCapture::Capture( sqbind::CSqBinary *pBuf, int nMaxWait )
-{
+{_STT();
+
 	if ( !pBuf )
 		return -1;
 

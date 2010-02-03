@@ -37,13 +37,17 @@
 using namespace sqbind;
 
 CModuleManager::CModuleManager()
-{}
+{_STT();
+}
 
 CModuleManager::~CModuleManager()
-{	Destroy(); }
+{_STT();
+	Destroy(); 
+}
 
 void CModuleManager::Destroy()
-{
+{_STT();
+
 	// Thread lock
 	oexAutoLock ll( m_lock );
 	if ( !ll.IsLocked() )
@@ -79,7 +83,8 @@ void CModuleManager::Destroy()
 }
 
 CModuleInstance* CModuleManager::Load( oex::oexCSTR x_pFile )
-{
+{_STT();
+
 	if ( !oexCHECK_PTR( x_pFile ) || !*x_pFile )
 		return oexNULL;
 
@@ -111,7 +116,8 @@ CModuleInstance* CModuleManager::Load( oex::oexCSTR x_pFile )
 }
 
 oex::oexBOOL CModuleManager::Exists( oex::oexCSTR x_pFile )
-{
+{_STT();
+
 	// Thread lock
 	oexAutoLock ll( m_lock );
 	if ( !ll.IsLocked() )
@@ -128,7 +134,8 @@ oex::oexBOOL CModuleManager::Exists( oex::oexCSTR x_pFile )
 
 
 oex::oexBOOL CModuleManager::Unload( oex::oexCSTR x_pFile )
-{
+{_STT();
+
 	// Thread lock
 	oexAutoLock ll( m_lock );
 	if ( !ll.IsLocked() )

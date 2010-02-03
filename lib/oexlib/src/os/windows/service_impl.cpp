@@ -182,7 +182,7 @@ static SERVICE_STATUS g_ss;
 
 /// ServiceMain() dispatch function
 static void WINAPI _ServiceMain( int argc, char** argv )
-{
+{_STT();
 	CServiceImpl *pInstance = CServiceImpl::GetInstance();
 	if ( pInstance )
 		pInstance->OnServiceMain( argc, (const char**)argv );
@@ -190,7 +190,7 @@ static void WINAPI _ServiceMain( int argc, char** argv )
 
 /// ServiceHandler() dispatch function
 static void WINAPI _ServiceHandler( DWORD fdwControl )
-{
+{_STT();
 	CServiceImpl *pInstance = CServiceImpl::GetInstance();
 	if ( pInstance )
 		pInstance->OnServiceHandler( fdwControl );
@@ -198,7 +198,7 @@ static void WINAPI _ServiceHandler( DWORD fdwControl )
 
 
 CServiceImpl::CServiceImpl()
-{
+{_STT();
 	// Initialize service structure
 	oexZeroMemory( &g_ss, sizeof( g_ss ) );
 
@@ -226,7 +226,7 @@ CServiceImpl::CServiceImpl()
 }
 
 CServiceImpl::~CServiceImpl()
-{
+{_STT();
 	m_pInstance = oexNULL;
 	m_argc = oexNULL;
 	m_argv = oexNULL;
@@ -235,12 +235,12 @@ CServiceImpl::~CServiceImpl()
 }
 
 CServiceImpl* CServiceImpl::GetInstance()
-{
+{_STT();
 	return m_pInstance;
 }
 
 int CServiceImpl::RunService( int argc, const char** argv, oexCSTR pName, oexCSTR pDesc  )
-{
+{_STT();
 	// Get singleton instance
 	OEX_NAMESPACE::os::CServiceImpl *pInstance = OEX_NAMESPACE::os::CServiceImpl::GetInstance();
 	if ( !pInstance )
@@ -252,7 +252,7 @@ int CServiceImpl::RunService( int argc, const char** argv, oexCSTR pName, oexCST
 }
 
 int CServiceImpl::OnRunService( int argc, const char** argv, oexCSTR pName, oexCSTR pDesc  )
-{
+{_STT();
 	// Set the command line
 	SetCommandLine( argc, argv );
 
@@ -384,7 +384,7 @@ int CServiceImpl::OnRunService( int argc, const char** argv, oexCSTR pName, oexC
 }
 
 void CServiceImpl::SetCommandLine( int argc, const char **argv )
-{
+{_STT();
 	// Save command line pointers
 	m_argc = argc;
 	m_argv = argv;
@@ -397,7 +397,7 @@ void CServiceImpl::SetCommandLine( int argc, const char **argv )
 }
 
 void CServiceImpl::OnServiceMain( int argc, const char** argv )
-{
+{_STT();
 	// Register our service control handler
 	m_hService = (oexPVOID)::RegisterServiceCtrlHandler( GetName().Ptr(), _ServiceHandler );
 
@@ -428,7 +428,7 @@ void CServiceImpl::OnServiceMain( int argc, const char** argv )
 }
 
 void CServiceImpl::OnServiceHandler( unsigned int fdwControl )
-{
+{_STT();
 	switch( fdwControl )
 	{
 		case SERVICE_CONTROL_STOP:
@@ -453,7 +453,7 @@ void CServiceImpl::OnServiceHandler( unsigned int fdwControl )
 }
 
 int CServiceImpl::Start( oexCSTR pName )
-{
+{_STT();
 	// Open service control manager
 	SC_HANDLE hManager = ::OpenSCManager( NULL, NULL, SC_MANAGER_ALL_ACCESS );
 	if ( !hManager )
@@ -477,7 +477,7 @@ int CServiceImpl::Start( oexCSTR pName )
 }
 
 int CServiceImpl::Stop( oexCSTR pName )
-{
+{_STT();
 	// Open service control manager
 	SC_HANDLE hManager = ::OpenSCManager( NULL, NULL, SC_MANAGER_ALL_ACCESS );
 	if ( !hManager )
@@ -502,7 +502,7 @@ int CServiceImpl::Stop( oexCSTR pName )
 }
 
 int CServiceImpl::Shutdown( oexCSTR pName )
-{
+{_STT();
 	// Open service control manager
 	SC_HANDLE hManager = ::OpenSCManager( NULL, NULL, SC_MANAGER_ALL_ACCESS );
 	if ( !hManager )
@@ -527,7 +527,7 @@ int CServiceImpl::Shutdown( oexCSTR pName )
 }
 
 int CServiceImpl::Restart( oexCSTR pName )
-{
+{_STT();
 	// Open service control manager
 	SC_HANDLE hManager = ::OpenSCManager( NULL, NULL, SC_MANAGER_ALL_ACCESS );
 	if ( !hManager )
@@ -555,7 +555,7 @@ int CServiceImpl::Restart( oexCSTR pName )
 }
 
 int CServiceImpl::InstallService( oexCSTR pName, oexCSTR pDesc, oexBOOL bAutoRestart )
-{
+{_STT();
 	if ( !pName || !*pName )
 	{	oexERROR( ERROR_INVALID_PARAMETER, oexT( "Invalid Parameter" ) );
 		return -1;
@@ -619,7 +619,7 @@ int CServiceImpl::InstallService( oexCSTR pName, oexCSTR pDesc, oexBOOL bAutoRes
 }
 
 int CServiceImpl::RemoveService( oexCSTR pName )
-{
+{_STT();
 	if ( !pName )
 	{	oexERROR( ERROR_INVALID_PARAMETER, oexT( "Invalid Parameter" ) );
 		return -1;

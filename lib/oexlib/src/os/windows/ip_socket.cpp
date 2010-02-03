@@ -66,7 +66,7 @@ oexCONST WORD c_MinSocketVersion = MAKEWORD( 1, 1 );
 	\param [in] x_pSai 	-	Address information
 */
 static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, SOCKADDR_IN *x_pSai )
-{
+{_STT();
     // Verify pointers
     if ( !oexVERIFY_PTR( x_pSai ) || !oexVERIFY_PTR( x_pIa ) )
         return oexFALSE;
@@ -86,7 +86,9 @@ static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, SOCKADDR_IN *x_pSai 
 	\param [in] x_pSa 	-	Address information
 */
 static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, SOCKADDR *x_pSa )
-{   return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa ); }
+{_STT();
+	return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa ); 
+}
 
 //==============================================================
 // CIpSocket_SetAddressInfo()
@@ -97,7 +99,7 @@ static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, SOCKADDR *x_pSa )
 	\param [in] x_pSai 	-	Structure to be filled in
 */
 static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, SOCKADDR_IN *x_pSai )
-{
+{_STT();
     // Verify pointers
     if ( !oexVERIFY_PTR( x_pSai ) || !oexVERIFY_PTR( x_pIa ) )
         return oexFALSE;
@@ -120,7 +122,9 @@ static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, SOCKADDR_IN *x_pSai 
 	\param [in] x_pSai 	-	Structure to be filled in
 */
 static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, SOCKADDR *x_pSa )
-{   return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa ); }
+{_STT();
+	return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa ); 
+}
 
 //#endif
 
@@ -141,7 +145,7 @@ oexCONST CIpSocket::t_SOCKET CIpSocket::c_SocketError = (CIpSocket::t_SOCKET)SOC
 
 
 CIpSocket::CIpSocket()
-{
+{_STT();
 	m_hSocket = c_InvalidSocket;
 
 	m_hSocketEvent = c_InvalidEvent;
@@ -163,13 +167,13 @@ CIpSocket::CIpSocket()
 }
 
 CIpSocket::~CIpSocket()
-{
+{_STT();
 	/// Lose the current socket
 	Destroy();
 }
 
 oexBOOL CIpSocket::InitSockets()
-{
+{_STT();
 	// Add ref
 	if ( 1 == oexInterlockedIncrement( &g_CIpSocket_lInitCount ) )
 	{
@@ -188,7 +192,7 @@ oexBOOL CIpSocket::InitSockets()
 }
 
 void CIpSocket::UninitSockets()
-{
+{_STT();
 	// Deref
 	if ( oexInterlockedDecrement( &g_CIpSocket_lInitCount ) )
 		return;
@@ -207,10 +211,12 @@ void CIpSocket::UninitSockets()
 }
 
 oexLONG CIpSocket::GetInitCount()
-{	return 0; }
+{_STT();
+	return 0; 
+}
 
 void CIpSocket::Destroy()
-{
+{_STT();
 	// Punt if not initialized
 	if ( !IsInitialized() )
 		return;
@@ -295,7 +301,7 @@ void CIpSocket::Destroy()
 }
 
 oexBOOL CIpSocket::Shutdown()
-{
+{_STT();
 	if ( c_InvalidSocket == m_hSocket )
         return oexFALSE;
 
@@ -307,7 +313,7 @@ oexBOOL CIpSocket::Shutdown()
 
 
 oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
-{
+{_STT();
 	// Punt if not initialized
 	if ( !IsInitialized() )
 		return FALSE;
@@ -339,7 +345,7 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 }
 
 oexBOOL CIpSocket::Bind( oexUINT x_uPort )
-{
+{_STT();
 	// Punt if not initialized
 	if ( !IsInitialized() )
 		return FALSE;
@@ -374,7 +380,7 @@ oexBOOL CIpSocket::Bind( oexUINT x_uPort )
 }
 
 oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
-{
+{_STT();
 	// Punt if not initialized
 	if ( !IsInitialized() )
 		return FALSE;
@@ -410,7 +416,7 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 }
 
 oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
-{
+{_STT();
 	// Punt if not initialized
 	if ( !IsInitialized() )
 		return oexFALSE;
@@ -455,7 +461,7 @@ oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
 }
 
 oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
-{
+{_STT();
 	if ( !oexVERIFY_PTR( x_pAddress ) )
         return oexFALSE;
 
@@ -477,7 +483,7 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
 }
 
 oexBOOL CIpSocket::Attach( t_SOCKET x_hSocket )
-{
+{_STT();
     Destroy();
 
     m_hSocket = x_hSocket;
@@ -486,7 +492,7 @@ oexBOOL CIpSocket::Attach( t_SOCKET x_hSocket )
 }
 
 oexBOOL CIpSocket::Accept( CIpSocket &x_is )
-{
+{_STT();
     // Punt if no socket
 	if ( !IsSocket() )
 		return FALSE;
@@ -523,7 +529,7 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 }
 
 oexBOOL CIpSocket::CreateEventHandle()
-{
+{_STT();
 #if defined( OEX_NOSOCKET2 )
 	return oexFALSE;
 #else
@@ -540,7 +546,7 @@ oexBOOL CIpSocket::CreateEventHandle()
 }
 
 void CIpSocket::CloseEventHandle()
-{
+{_STT();
 #if defined( OEX_NOSOCKET2 )
 	return;
 #else
@@ -558,7 +564,7 @@ void CIpSocket::CloseEventHandle()
 }
 
 oexBOOL CIpSocket::EventSelect( oexLONG x_lEvents )
-{
+{_STT();
 #if defined( OEX_NOSOCKET2 )
 	return oexFALSE;
 #else
@@ -575,7 +581,7 @@ oexBOOL CIpSocket::EventSelect( oexLONG x_lEvents )
 }
 
 oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
-{
+{_STT();
 #if defined( OEX_NOSOCKET2 )
 	return 0;
 #else
@@ -686,7 +692,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 }
 
 oexUINT CIpSocket::GetEventBit( oexLONG x_lEventMask )
-{
+{_STT();
 #if defined( OEX_NOSOCKET2 )
 	return 0;
 #else
@@ -725,7 +731,7 @@ oexUINT CIpSocket::GetEventBit( oexLONG x_lEventMask )
 }
 
 oexCSTR CIpSocket::GetErrorMsg( oexUINT x_uErr )
-{
+{_STT();
 	oexCSTR ptr = oexT( "Unknown Winsock error" );
 
 	switch( x_uErr )
@@ -902,7 +908,7 @@ oexCSTR CIpSocket::GetErrorMsg( oexUINT x_uErr )
 //oexUINT CIpSocket::CheckReturn() {}
 
 oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, oexUINT x_uFlags )
-{
+{_STT();
 	// Initialize bytes read
 	if ( x_puRead )
         *x_puRead = 0;
@@ -960,7 +966,7 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 }
 
 CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
-{
+{_STT();
     // Do we have a size limit?
     if ( x_uMax )
     {
@@ -1005,7 +1011,7 @@ CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
 
 
 oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, oexUINT x_uFlags )
-{
+{_STT();
 	// Initialize bytes read
 	if ( x_puRead )
         *x_puRead = 0;
@@ -1054,7 +1060,7 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 }
 
 CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
-{
+{_STT();
     // Do we have a size limit?
     if ( x_uMax )
     {
@@ -1116,7 +1122,7 @@ CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
 
 
 oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, oexUINT x_uFlags )
-{
+{_STT();
 	// Initialize bytes sent
 	if ( x_puSent )
         *x_puSent = 0;
@@ -1168,7 +1174,7 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
 
 
 oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, oexUINT x_uFlags )
-{
+{_STT();
 	// Initialize bytes sent
 	if ( x_puSent )
         *x_puSent = 0;
@@ -1212,7 +1218,7 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 }
 
 oexBOOL CIpSocket::GetPeerAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
-{
+{_STT();
     if ( !oexVERIFY_PTR( x_pIa ) )
         return oexFALSE;
 
@@ -1237,7 +1243,7 @@ oexBOOL CIpSocket::GetPeerAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
 }
 
 oexBOOL CIpSocket::GetLocalAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
-{
+{_STT();
     if ( !oexVERIFY_PTR( x_pIa ) )
         return oexFALSE;
 

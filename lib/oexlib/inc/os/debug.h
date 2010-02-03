@@ -150,11 +150,44 @@ public:
 		\param [in]	pUrl	- URL to post crash info 
 		\param [in] pSub	- Sub folder in which to save crash reports
 
-		Enables crash reporting.
-
 		\see
 	*/
 	static void EnableCrashReporting( oexCSTR pUrl, oexCSTR pSub );
+
+	//==============================================================
+	// CreateCrashReport()
+	//==============================================================
+	/// Creates a crash report
+	/**
+		\param [in]	pUrl	- URL to post crash info 
+		\param [in] pSub	- Sub folder in which to save crash reports
+
+		\see
+	*/
+	static void CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo );
+
+
+	//==============================================================
+	// GetExceptionCodeName()
+	//==============================================================
+	/// Returns the name for the exception code
+	/**
+		\param [in]	x_uCode	- Exception code
+
+		\see
+	*/
+	static oexCSTR GetExceptionCodeName( oexUINT x_uCode );
+
+	//==============================================================
+	// GetExceptionCodeDesc()
+	//==============================================================
+	/// Returns the description for the exception code
+	/**
+		\param [in]	x_uCode	- Exception code
+
+		\see
+	*/
+	static oexCSTR GetExceptionCodeDesc( oexUINT x_uCode );
 
 
 };

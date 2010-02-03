@@ -37,36 +37,48 @@
 using namespace sqbind;
 
 CScriptThread::CScriptThread()
-{	m_bQuit = oex::oexFALSE;
+{_STT();
+	m_bQuit = oex::oexFALSE;
 	m_pModuleManager = oexNULL;
 	m_bFile = oex::oexFALSE;
 	m_pParentScript = oexNULL;
 }
 
 CScriptThread::~CScriptThread()
-{	Destroy(); }
+{_STT();
+	Destroy(); 
+}
 
 void CScriptThread::Destroy()
-{	m_bQuit = oex::oexTRUE;
+{_STT();
+	m_bQuit = oex::oexTRUE;
 	Stop();
 	m_pModuleManager = oexNULL;
 	m_pParentScript = oexNULL;
 }
 
 void CScriptThread::SetModuleManager( sqbind::CModuleManager *pMm )
-{   m_pModuleManager = pMm; }
+{_STT();
+	m_pModuleManager = pMm; 
+}
 
 void CScriptThread::SetScript( oex::oexCSTR pScript, oex::oexBOOL bFile )
-{   m_sScript = pScript; m_bFile = bFile; }
+{_STT();
+	m_sScript = pScript; m_bFile = bFile; 
+}
 
 void CScriptThread::SetParentScript( CSqMsgQueue *pParent )
-{   m_pParentScript = pParent; }
+{_STT();
+	m_pParentScript = pParent; 
+}
 
 void CScriptThread::SetExportFunction( PFN_SQBIND_Export_Symbols fn, sqbind::SSqAllocator *pa )
-{	m_cSqEngine.SetExportFunction( fn, pa ); }
+{_STT();
+	m_cSqEngine.SetExportFunction( fn, pa ); 
+}
 
 oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
-{
+{_STT();
 	// +++ Ensure script
 	if ( !m_sScript.length() )
 		return oex::oexFALSE;
@@ -109,7 +121,7 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 }
 
 oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
-{
+{_STT();
 	oex::os::CTimeout toIdle;
 
 	// Until we're told to stop
@@ -155,7 +167,7 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 }
 
 oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
-{
+{_STT();
 	// Lock the queue
 //	while ( CSqMsgQueue::GetLock().Wait( 100 ) )
 //		ProcessMsgs();
@@ -180,7 +192,8 @@ oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 }
 
 oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent )
-{
+{_STT();
+
 	oex::oexBOOL bRet = oex::oexTRUE;
 
 		// Is it a script map?
@@ -311,7 +324,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 }
 
 oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent )
-{
+{_STT();
 	stdString sPath = x_sPath;
 
 //	if ( sMsg == oexT( "kill" ) )
@@ -393,7 +406,7 @@ oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMs
 }
 
 void CScriptThread::CleanupChildScripts()
-{
+{_STT();
 
 	// Kill our script
 	t_ScriptList::iterator it = m_lstScript.begin();
@@ -423,7 +436,7 @@ void CScriptThread::CleanupChildScripts()
 }
 
 void CScriptThread::DestroyChildScripts()
-{
+{_STT();
 	// Kill our script
 	t_ScriptList::iterator it = m_lstScript.begin();
 	while ( m_lstScript.end() != it )
@@ -445,7 +458,7 @@ void CScriptThread::DestroyChildScripts()
 }
 
 void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
-{
+{_STT();
 	// Grab the path
 	stdString sName = mapParams[ oexT( "name" ) ];
 
@@ -524,7 +537,7 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 }
 
 void CScriptThread::OnMsg( CSqMap &mapParams, stdString *pReply )
-{
+{_STT();
 	// Run script?
 	if ( mapParams[ oexT( "run" ) ].length() )
 		m_cSqEngine.Run( mapParams[ oexT( "run" ) ].c_str() );
@@ -551,7 +564,7 @@ void CScriptThread::OnMsg( CSqMap &mapParams, stdString *pReply )
 }
 
 CSqMsgQueue* CScriptThread::GetQueue( const stdString &x_sPath )
-{
+{_STT();
 	stdString sPath = x_sPath.c_str();
 
 	// Us?

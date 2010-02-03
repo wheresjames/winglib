@@ -40,11 +40,11 @@ private:
 
 public:
 
-	static oexINT32 osAllocate();
+	static oexINT32 Allocate();
 
-	static oexBOOL osSetValue( oexINT32 dwIndex, oexPVOID pVal );
+	static oexBOOL SetValue( oexINT32 dwIndex, oexPVOID pVal );
 
-	static oexPVOID osGetValue( oexINT32 dwIndex );
+	static oexPVOID GetValue( oexINT32 dwIndex );
 
 	static oexINT32 vInvalid() { return c_Invalid; }
 

@@ -57,16 +57,16 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSQLite, CSqSQLite )
 SQBIND_REGISTER_CLASS_END()
 
 void CSqSQLite::Register( sqbind::VM vm )
-{
+{_STT();
 	SQBIND_EXPORT( vm, CSqSQLite );
 }
 
 CSqSQLite::CSqSQLite()
-{
+{_STT();
 }
 
 int CSqSQLite::Destroy()
-{
+{_STT();
 	// Lose the database
 	CSQLite::Destroy();
 
@@ -77,81 +77,87 @@ int CSqSQLite::Destroy()
 }
 
 void CSqSQLite::OnClear()
-{
+{_STT();
 	// Lose last result
 	m_mResult.clear();
 }
 
 
 int CSqSQLite::Open( const stdString &sDbName )
-{
+{_STT();
 	return CSQLite::Open( sDbName.c_str() ) ? 1 : 0;
 }
 
 int CSqSQLite::IsTable( const stdString &sTable )
-{
+{_STT();
 	return CSQLite::IsTable( sTable.c_str() ) ? 1 : 0;
 }
 
 void CSqSQLite::DebugMode( int bEnable )
-{	CSQLite::DebugMode( bEnable ? oex::oexTRUE : oex::oexFALSE ); }
+{_STT();
+	CSQLite::DebugMode( bEnable ? oex::oexTRUE : oex::oexFALSE ); 
+}
 
 
 int CSqSQLite::Exec( const stdString &sQuery )
-{
+{_STT();
 	Clear();
 
 	return CSQLite::Exec( sQuery.c_str() ) ? 1 : 0;
 }
 
 int CSqSQLite::Insert( const stdString &sTable, CSqMulti &mData )
-{	oex::CPropertyBag pb;
+{_STT();
+	oex::CPropertyBag pb;
 	CSqMulti::_serialize( pb, mData.list() );
 	return CSQLite::Insert( sTable.c_str(), pb ); 
 }
 
 int CSqSQLite::Delete( const stdString &sTable, CSqMulti &mData, const stdString &sCond )
-{	oex::CPropertyBag pb;
+{_STT();
+	oex::CPropertyBag pb;
 	CSqMulti::_serialize( pb, mData.list() );
 	return CSQLite::Delete( sTable.c_str(), pb, sCond.c_str() ); 
 }
 
 int CSqSQLite::Update( const stdString &sTable, const stdString &sWhere, CSqMulti &mData )
-{	oex::CPropertyBag pb;
+{_STT();
+	oex::CPropertyBag pb;
 	CSqMulti::_serialize( pb, mData.list() );
 	return CSQLite::Update( sTable.c_str(), sWhere.c_str(), pb ); 
 }
 
 int CSqSQLite::QueryTableInfo( const stdString &sTable )
-{
+{_STT();
 	Clear();
 	return CSQLite::QueryTableInfo( sTable.c_str() );
 }
 
 int CSqSQLite::QueryColumnInfo()
-{
+{_STT();
 	Clear();
 	return CSQLite::QueryColumnInfo();
 }
 
 stdString CSqSQLite::Escape( const stdString &sStr )
-{	oex::CStr sEsc( sStr.c_str(), sStr.length() );
+{_STT();
+	oex::CStr sEsc( sStr.c_str(), sStr.length() );
 	sEsc = CSQLite::Escape( sEsc );
 	return stdString().assign( sEsc.Ptr(), sEsc.Length() );
 }
 
 stdString CSqSQLite::GetLastError()
-{
+{_STT();
 	return CSQLite::GetLastError().Ptr();
 }
 
 stdString CSqSQLite::GetLastQuery()
-{
+{_STT();
 	return CSQLite::GetLastQuery().Ptr();
 }
 
 int CSqSQLite::OnCallback( int argc, char **argv, char **azColName )
-{
+{_STT();
 	// Allocate row object
 	CSqMulti &row = m_mResult[ oexMks( NumRows() ).Ptr() ];
 	

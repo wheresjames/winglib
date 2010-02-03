@@ -44,7 +44,7 @@ BOOL WINAPI DllMain( HANDLE hinstDLL, DWORD dwReason, LPVOID lpvReserved ) { ret
 
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_GetModuleInfo );
 extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
-{
+{_STT();
 	if ( !oexCHECK_PTR( pDi ) )
 	{	oexERROR( 0, oexT( "Invalid function argument" ) );
 		return 0;
@@ -75,7 +75,7 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Start );
 extern "C" oex::oexRESULT SRV_Start( oex::SRawAllocator x_sRawAllocator, oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
-{
+{_STT();
 	// Set our allocator
 	oex::CMem::SetRawAllocator( x_sRawAllocator );
 
@@ -84,7 +84,7 @@ extern "C" oex::oexRESULT SRV_Start( oex::SRawAllocator x_sRawAllocator, oex::oe
 
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Stop );
 extern "C" oex::oexRESULT SRV_Stop()
-{
+{_STT();
 	// Switch back to default allocator
 	oex::CMem::SetDefaultRawAllocator();
 
@@ -92,7 +92,7 @@ extern "C" oex::oexRESULT SRV_Stop()
 }
 
 extern "C" oex::oexRESULT SQBIND_Export_Symbols( sqbind::VM x_vm, sqbind::SSqAllocator *x_pAllocator )
-{
+{_STT();
 	// Set the memory allocator
 	// iii kinda obsolete, SRV_Start() does this now
 	// +++ Commenting this out seems to cause memory leaks on posix systems???

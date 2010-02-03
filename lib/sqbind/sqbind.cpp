@@ -39,7 +39,7 @@ using namespace sqbind;
 namespace sqbind
 {
 	void SqBindAll( sqbind::VM x_vm )
-	{
+	{_STT();
 		CSqBinary::Register( x_vm );
 		CSqString::Register( x_vm );
 		CSqVector::Register( x_vm );
@@ -67,7 +67,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqString, CSqString )
 SQBIND_REGISTER_CLASS_END()
 
 void CSqString::Register( sqbind::VM vm )
-{
+{_STT();
 	SQBIND_EXPORT( vm, CSqString );
 }
 
@@ -106,7 +106,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqFile, CSqFile )
 SQBIND_REGISTER_CLASS_END()
 
 void CSqFile::Register( sqbind::VM vm )
-{
+{_STT();
 	SQBIND_EXPORT( vm, CSqFile );
 }
 
@@ -155,7 +155,7 @@ SQBIND_REGISTER_CLASS_END()
 
 
 void CSqTime::Register( sqbind::VM vm )
-{
+{_STT();
 	SQBIND_EXPORT( vm, CSqTime );
 }
 
@@ -175,7 +175,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqImage, CSqImage )
 SQBIND_REGISTER_CLASS_END()
 
 void CSqImage::Register( sqbind::VM vm )
-{
+{_STT();
 	SQBIND_EXPORT( vm, CSqImage );
 }
 
@@ -231,6 +231,6 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 SQBIND_REGISTER_CLASS_END()
 
 void CSqBinary::Register( sqbind::VM vm )
-{
+{_STT();
 	SQBIND_EXPORT( vm, CSqBinary );
 }

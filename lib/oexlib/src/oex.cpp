@@ -117,6 +117,9 @@ oexINT COex::Init()
 
 #endif
 
+	// Enable stack tracing
+	CStackTrace::EnableStackTracing( oexTRUE );
+
 	// Initialize file system
 	os::CBaseFile::InitFileSystem();
 
@@ -142,7 +145,7 @@ oexINT COex::Init()
 #endif
 
 oexINT COex::Uninit()
-{_STT();
+{
 	m_nShutdownCode = 1;
 
     // We have to allow for the thread pool if it's still running
@@ -212,6 +215,9 @@ oexINT COex::Uninit()
 #endif
 
 #if defined( oexDEBUG )
+	
+	// Release stack traces
+	CStackTrace::Release();
 
 	// Freeze memory statistics
 	GetMemLeak().Freeze();

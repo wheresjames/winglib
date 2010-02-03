@@ -45,7 +45,7 @@ using namespace OEX_NAMESPACE::os;
 oexINT64 CHqTimer::m_llFreq = CHqTimer::osGetTimerFreq();
 
 oexINT64 CHqTimer::osGetTimerFreq()
-{
+{_STT();
 	oexINT64 llFreq = 0;
 
 	if ( !QueryPerformanceFrequency( (LARGE_INTEGER*)&llFreq ) )
@@ -55,7 +55,7 @@ oexINT64 CHqTimer::osGetTimerFreq()
 }
 
 oexDOUBLE CHqTimer::GetTimerSeconds()
-{
+{_STT();
 	oexINT64 freq = osGetTimerFreq();
 	if ( !freq )
 		return 0;
@@ -65,7 +65,7 @@ oexDOUBLE CHqTimer::GetTimerSeconds()
 }
 
 oexBOOL CHqTimer::osGetCounts( oexINT64 *pSeconds, oexINT64 *pUSeconds )
-{
+{_STT();
 	oexINT64 freq = osGetTimerFreq();
 	if ( !freq )
 		return 0;
@@ -82,7 +82,7 @@ oexBOOL CHqTimer::osGetCounts( oexINT64 *pSeconds, oexINT64 *pUSeconds )
 }
 
 oexINT64 CHqTimer::osGetTimerValue()
-{
+{_STT();
 	if ( m_llFreq != 1000 )
 	{
 		oexINT64 ll;
@@ -97,7 +97,7 @@ oexINT64 CHqTimer::osGetTimerValue()
 }
 
 oexINT64 CHqTimer::Elapsed( oexINT64 llStart, oexINT64 llStop )
-{
+{_STT();
 	if ( m_llFreq != 1000 )
         return llStop - llStart;
 
@@ -107,6 +107,7 @@ oexINT64 CHqTimer::Elapsed( oexINT64 llStart, oexINT64 llStop )
 }
 
 oexUINT CHqTimer::GetBootCount()
-{   return ::GetTickCount();
+{_STT();
+	return ::GetTickCount();
 }
 

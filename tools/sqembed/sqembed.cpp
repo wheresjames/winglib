@@ -53,6 +53,9 @@ int main(int argc, char* argv[])
     // Initialize the oex library
 	oexINIT();
 
+	// Enable crash reporting
+	oexEnableCrashReporting( oexNULL, oexT( "logs" ) );
+
 	// Initialize resources
 	oexInitResources();
 

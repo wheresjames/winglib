@@ -37,10 +37,13 @@
 using namespace sqbind;
 
 CSqVector::CSqVector()
-{}
+{_STT();
+}
 
 CSqVector::t_List& CSqVector::list()
-{   return m_lst; }
+{_STT();
+   return m_lst; 
+}
 
 _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqVector, CSqVector )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqVector, push_back )
@@ -49,17 +52,20 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqVector, CSqVector )
 _SQBIND_REGISTER_CLASS_END()
 
 void CSqVector::Register( sqbind::VM vm )
-{
+{_STT();
+
 	_SQBIND_EXPORT( vm, CSqVector );
 }
 
 void CSqVector::push_back( const t_Obj &s )
-{
+{_STT();
+
     m_lst.push_back( s );
 }
 
 SquirrelObject CSqVector::_get( HSQUIRRELVM v )
-{
+{_STT();
+
     StackHandler sa( v );
 
     // Ensure valid index
@@ -77,7 +83,8 @@ SquirrelObject CSqVector::_get( HSQUIRRELVM v )
 }
 
 SquirrelObject CSqVector::_nexti( HSQUIRRELVM v )
-{
+{_STT();
+
     StackHandler sa( v );
 
     SQObjectType type = (SQObjectType)sa.GetType( 2 );

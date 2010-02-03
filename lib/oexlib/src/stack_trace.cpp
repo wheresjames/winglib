@@ -36,9 +36,116 @@
 
 OEX_USING_NAMESPACE
 
-/// Set to non-zero on shut down to stop stack tracing
-oexBOOL CStackTrace::m_bShutdown = oexFALSE;
+/// Set to non-zero to enable stack tracing
+oexBOOL CStackTrace::m_bEnable = oexFALSE;
 
 /// Instance of stack trace
 CStackTrace *CStackTrace::m_pst = oexNULL;
 
+#if defined( OEXLIB_USING_TLSAPI )
+
+/// Tls API index
+oexUINT CStackTrace::m_tls_dwIndex = ( (oexUINT)-1 );
+
+#elif defined( OEXLIB_USING_TLS )
+
+/// Thread specific stack pointer
+oexTLS CStackTrace::CStack *CStackTrace::m_tls_pStack = oexNULL;
+
+#endif
+
+CStackTrace::CStack* CStackTrace::GetStack()
+{
+	// Current thread id
+	oexUINT dwThreadId = oexGetCurThreadId();
+	if ( !dwThreadId )
+		return oexNULL;
+
+	// Create stack pool if needed
+	if ( !m_poolStack.isValid() )
+		m_poolStack.Create( eMaxThreadsBits );
+
+	// Attempt to find in pool
+	CStack *p = m_poolStack.Ptr( (t_stack::t_key)dwThreadId );
+	if ( p )
+		return p;
+
+	// Punt if no more free slots
+	if ( !m_poolStack.getFreeSlots() )
+		return oexNULL;
+
+#if defined( OEXLIB_STACK_ENABLE_LOCKS )
+
+	// Have to lock to modify
+	oexAutoLock ll( m_lock );
+	if ( !ll.IsLocked() ) 
+		return oexNULL;
+
+#endif
+
+	// Create a new stack pointer
+	p = OexAllocConstruct< CStack >();
+	if ( !p )
+		return oexNULL;
+
+	// Add to our list
+	if ( !m_poolStack.Add( (t_stack::t_key)dwThreadId, p ) )
+	{	OexAllocDestruct( p ); return oexNULL; }
+
+	// Setup the stack class
+	p->SetThreadId( dwThreadId );
+
+	return p;
+}
+
+oexBOOL CStackTrace::RemoveThread() 
+{
+#if defined( OEXLIB_STACK_KEEP_INACTIVE_TRACES )
+
+	return oexFALSE;
+
+#else
+
+	if ( !m_poolStack.isValid() || !m_bEnable )
+		return oexFALSE;
+
+	// Get current thread id
+	oexUINT dwThreadId = oexGetCurThreadId();
+	if ( !dwThreadId )
+		return oexFALSE;
+
+	// Get stack object for this thread
+	CStack *p = m_poolStack.Ptr( (t_stack::t_key)dwThreadId );
+	if ( !p )
+		return oexFALSE;
+
+#if defined( OEXLIB_STACK_ENABLE_LOCKS )
+
+	// Have to lock to modify
+	oexAutoLock ll( m_lock );
+	if ( !ll.IsLocked() ) 
+		return oexNULL;
+
+#endif
+
+
+#if defined( OEXLIB_USING_TLSAPI )
+
+	if ( ( (oexUINT)-1 ) != m_tls_dwIndex )
+		oexTlsSetValue( m_tls_dwIndex, 0 );
+
+#elif defined( OEXLIB_USING_TLS )
+
+	m_tls_pStack = 0;
+
+#endif
+
+	// Ok to remove us, because only this thread would be accesing this slot
+	m_poolStack.Remove( (t_stack::t_key)dwThreadId );
+
+	// Delete the stack object
+	OexAllocDestruct( p );
+
+	return oexTRUE;
+#endif
+}

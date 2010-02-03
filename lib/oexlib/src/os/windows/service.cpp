@@ -40,12 +40,12 @@ using namespace OEX_NAMESPACE::os;
 
 
 oexINT CService::Run( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay, oexINT x_nFlags )
-{
+{_STT();
 	return RunModule( x_sModule, x_sCommandLine, x_pData, x_pguidType, x_nIdleDelay, x_nFlags );
 }
 
 oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pData, oexGUID *x_pguidType, oexINT x_nIdleDelay, oexINT x_nFlags )
-{
+{_STT();
 	// Load the module
 	CModule mod;
 	if ( !mod.Load( x_sModule.Ptr() ) )

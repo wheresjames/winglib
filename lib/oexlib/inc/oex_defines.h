@@ -331,6 +331,9 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexInterlockedIncrement				OEX_NAMESPACE::os::CSys::InterlockedIncrement
 #define oexInterlockedDecrement				OEX_NAMESPACE::os::CSys::InterlockedDecrement
 #define oexCloseLog							OEX_NAMESPACE::CLog::GlobalLog().Destroy
+#define oexTlsAllocate						OEX_NAMESPACE::os::CThreadLocalStorage::Allocate
+#define oexTlsGetValue						OEX_NAMESPACE::os::CThreadLocalStorage::GetValue
+#define oexTlsSetValue						OEX_NAMESPACE::os::CThreadLocalStorage::SetValue
 
 // std library
 #define oexStdTString( t )	                std::basic_string< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >

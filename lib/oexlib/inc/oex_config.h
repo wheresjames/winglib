@@ -173,6 +173,26 @@
 
 // Define to generate stack traces
 #define OEXLIB_STACK_TRACING
+//#define OEXLIB_STACK_HISTORY
+//#define OEXLIB_STACK_KEEP_INACTIVE_TRACES
+
+#if defined ( OEX_MSC )
+
+// !!! Native TLS support is broken in the Visual Studio Compiler when using DLL's
+//     So you probably want to use the TLS API with VS
+
+//#	define OEXLIB_USING_TLS
+#	define OEXLIB_USING_TLSAPI
+
+#	define oexTLS _declspec( thread )
+
+#else
+
+#	define OEXLIB_USING_TLS
+
+#	define oexTLS _thread
+
+#endif
 
 // Define to include full file paths in log entries
 //#define oexFULL_FILENAME_IN_LOG

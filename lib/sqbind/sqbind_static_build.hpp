@@ -41,7 +41,7 @@
 #endif
 
     static oex::oexRESULT SQBIND_Export_Symbols( sqbind::VM x_vm, sqbind::SSqAllocator *x_pAllocator )
-	{
+	{_STT();
 
 #if defined( SQBIND_STATIC_cell )
 		SQBIND_Export_cell( x_vm );

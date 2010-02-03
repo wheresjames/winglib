@@ -48,7 +48,7 @@ using namespace OEX_NAMESPACE::os;
 #endif
 
 static HKEY RootKeyFromName( const CStr &sKey )
-{
+{_STT();
 	if ( sKey.ICmp( oexT( "HKLM" ) ) )
 		return HKEY_LOCAL_MACHINE;
 	else if ( sKey.ICmp( oexT( "HKCU" ) ) )
@@ -66,7 +66,7 @@ static HKEY RootKeyFromName( const CStr &sKey )
 }
 
 static CStr RegValueToString( DWORD dwType, LPVOID pBuf, DWORD dwSize )
-{
+{_STT();
 	if ( !pBuf || !dwSize )
 		return CStr();
 
@@ -94,7 +94,7 @@ static CStr RegValueToString( DWORD dwType, LPVOID pBuf, DWORD dwSize )
 }
 
 oexBOOL CSysUtil::IsRegKey( const CStr &x_sKey, const CStr &x_sPath )
-{
+{_STT();
 	HKEY hRoot = RootKeyFromName( x_sKey );
 	if ( !hRoot )
 		return oexFALSE;
@@ -110,7 +110,7 @@ oexBOOL CSysUtil::IsRegKey( const CStr &x_sKey, const CStr &x_sPath )
 }
 
 oexBOOL CSysUtil::IsRegValue( const CStr &x_sKey, const CStr &x_sPath, const CStr &x_sName )
-{
+{_STT();
 	HKEY hRoot = RootKeyFromName( x_sKey );
 	if ( !hRoot )
 		return oexFALSE;
@@ -130,7 +130,7 @@ oexBOOL CSysUtil::IsRegValue( const CStr &x_sKey, const CStr &x_sPath, const CSt
 }
 
 CStr CSysUtil::GetRegString( const CStr &x_sKey, const CStr &x_sPath, const CStr &x_sName )
-{
+{_STT();
 	HKEY hRoot = RootKeyFromName( x_sKey );
 	if ( !hRoot )
 		return CStr();
@@ -164,7 +164,7 @@ CStr CSysUtil::GetRegString( const CStr &x_sKey, const CStr &x_sPath, const CStr
 }
 
 oexBOOL CSysUtil::SetRegString( const CStr &x_sKey, const CStr &x_sPath, const CStr &x_sName, const CStr &x_sValue )
-{
+{_STT();
 	HKEY hRoot = RootKeyFromName( x_sKey );
 	if ( !hRoot )
 		return oexFALSE;

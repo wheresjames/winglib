@@ -34,11 +34,10 @@
 
 #pragma once
 
-#define OEXLIB_STACK_HISTORY
-#define OEXLIB_STACK_MAXTHREADS		1024
-
-//#define CStackTrace_USING_TLSAPI
-//#define CStackTrace_USING_TLS
+// iii Things have been carefully designed so that thread locking is not needed.
+//     However, should someone come along and make changes that break it, the
+//     the following macro could come in handy.
+//#define OEXLIB_STACK_ENABLE_LOCKS
 
 // CStackTrace
 //
@@ -52,6 +51,10 @@ class CStackTrace
 public:
 
 	enum { eMaxStack = 1024 };
+
+	/// Max threads that can be tracked simultaniously 
+	/// 10 = 1,024, 11 = 2,048, 12 = 4,096
+	enum { eMaxThreadsBits = 12 };
 	
 	/// Encapsulates stack tracing functionality for a single thread
 	class CStack
@@ -61,6 +64,7 @@ public:
 		/// Constructor
 		CStack() 
 		{
+			m_uCreated = oexGetUnixTime();
 			m_uThreadId = 0;
 			m_uStackPtr = 0; 
 			m_memStack.OexNew( eMaxStack ); 
@@ -153,7 +157,13 @@ public:
 		/// Sets the thread id
 		void SetThreadId( oexUINT id ) { m_uThreadId = id; }
 
+		/// Returns the time stamp when the thread was created
+		oexUINT GetCreatedTime() { return m_uCreated; }
+
 	private:
+
+		/// Time created
+		oexUINT						m_uCreated;
 
 		/// The thread id
 		oexUINT						m_uThreadId;
@@ -199,34 +209,7 @@ public:
 	
 		\see 
 	*/
-	CStack* GetStack()
-	{
-		// Current thread id
-		oexUINT dwThreadId = oexGetCurThreadId();
-		if ( !dwThreadId )
-			return oexNULL;
-
-		// Attempt to find in pool
-		CStack *p = m_poolStack.Ptr( (t_stack::t_key)dwThreadId );
-		if ( p )
-			return p;
-
-		// Have to lock to modify
-		oexAutoLock ll( m_lock );
-		if ( !ll.IsLocked() ) 
-			return oexNULL;
-
-		// Create a new stack pointer
-		p = OexAllocConstruct< CStack >();
-		if ( !p )
-			return oexNULL;
-
-		// Add to our list
-		if ( !m_poolStack.Add( (t_stack::t_key)dwThreadId, p ) )
-		{	OexAllocDestruct( p ); return oexNULL; }
-
-		return p;
-	}
+	CStack* GetStack();
 
 	//==============================================================
 	// InitPush()
@@ -239,51 +222,41 @@ public:
 	*/
 	CStack* InitPush() 
 	{
-
-#if defined( CStackTrace_USING_TLSAPI )
+#if defined( OEXLIB_USING_TLSAPI )
 
 		// Return thread local storage index
 		CStack *pStack;
-		if ( MAXDWORD != m_tls_dwIndex )
-		{	pStack = (CStack*)TlsGetValue( m_tls_dwIndex );
-			if ( pStack != NULL ) 
+		if ( ( (oexUINT)-1 ) != m_tls_dwIndex )
+		{	pStack = (CStack*)oexTlsGetValue( m_tls_dwIndex );
+			if ( pStack != oexNULL ) 
 				return pStack;
 		} // end if
 
-		// Initialize for this thread
-		oexAutoLock ll( m_lock );
-		if ( !ll.IsLocked() ) 
-			return oexNULL;
-
 		// Allocate TLS 
 		if ( ( (oexUINT)-1 ) == m_tls_dwIndex )
-			m_tls_dwIndex = TlsAlloc();
+			m_tls_dwIndex = oexTlsAllocate();
 		
 		// Set stack value
 		pStack = GetStack();
+		if ( !pStack )
+			return oexNULL;
+
+		// Save stack value
 		if ( ( (oexUINT)-1 ) != m_tls_dwIndex ) 
-			TlsSetValue( m_tls_dwIndex, pStack );
+			oexTlsSetValue( m_tls_dwIndex, pStack );
 			
 		return pStack;
 
-#elif defined( CStackTrace_USING_TLS )
+#elif defined( OEXLIB_USING_TLS )
 
 		// Are we already initialized for this thread?
 		if ( m_tls_pStack ) 
 			return m_tls_pStack;
 
-		// Initialize for this thread
-		oexAutoLock ll( m_lock );
-		if ( !ll.IsLocked() ) 
-			return oexNULL;
 		return ( m_tls_pStack = GetStack() );
 
 #else
 
-		// Lock first
-		oexAutoLock ll( m_lock );
-		if ( !ll.IsLocked() ) 
-			return oexNULL;
 		return GetStack(); 
 
 #endif	
@@ -291,15 +264,14 @@ public:
 	}
 
 	//==============================================================
-	// GetList()
+	// RemoveThread()
 	//==============================================================
-	/// Returns a pointer to the stack list
-//	list* GetList() { return &m_lstStack; }
+	/// Removes the stack trace for the calling thread
+	oexBOOL RemoveThread();
 
 	/// Constructor
 	CStackTrace()
 	{
-		m_uNextStackPtr = 0;
 	}
 
 	/// Destructor
@@ -307,24 +279,49 @@ public:
 	{
 	}
 
+	/// Allows iterating through stack pointers
+	CStack* Next( oexUINT *i )
+	{	return m_poolStack.Next( i );
+	}
+
+	/// Number of free stack tracing slots
+	oexUINT getFreeSlots()
+	{	return m_poolStack.getFreeSlots();
+	}
+
+	/// Number of stack tracing slots being used
+	oexUINT getUsedSlots()
+	{	return m_poolStack.getUsedSlots();
+	}
+
+	/// Total number of stack tracing slots
+	oexUINT getTotalSlots()
+	{	return m_poolStack.getTotalSlots();
+	}
+
 private:	
 
 	/// Current stack
 	t_stack							m_poolStack;
 
-	/// Points to the next stack to be allocated
-	oexUINT							m_uNextStackPtr;
+#if defined( OEXLIB_STACK_ENABLE_LOCKS )
 
 	/// Lock
 	oexLock							m_lock;
 
+#endif
+
 public:
+
+#if defined( OEXLIB_STACK_ENABLE_LOCKS )
 
 	//==============================================================
 	// CTlLock*()
 	//==============================================================
 	/// Return the lock object
 	operator oexLock*() { return &m_lock; }
+
+#endif
 
 	//==============================================================
 	// Save()
@@ -340,7 +337,7 @@ public:
 	oexBOOL Save( oexCSTR x_pFile );
 
 	/// Instance of stack trace
-	static CStackTrace			*m_pst;
+	static CStackTrace *m_pst;
 
 	//==============================================================
 	// St()
@@ -353,20 +350,36 @@ public:
 	// Release()
 	//==============================================================
 	/// Releases stack trace object
+	static void EnableStackTracing( oexBOOL bEnable )
+	{	m_bEnable = bEnable; }
+
+	//==============================================================
+	// Release()
+	//==============================================================
+	/// Releases stack trace object
 	static void Release() 
 	{	
 		// No more stack tracing
-		m_bShutdown = oexTRUE; 
+		m_bEnable = oexFALSE; 
 
 		oexTRY
 		{
 			// Delete object if any
 			if ( m_pst )
 			{
+#if defined( OEXLIB_STACK_ENABLE_LOCKS )
+
 				// Lock for good
 				m_pst->m_lock.Wait( 30000 );
 
-				// Delete
+#endif
+
+				// Release stack objects
+				oexUINT i = 0;
+				while ( CStack *p = m_pst->Next( &i ) )
+					OexAllocDestruct( p );
+
+				// Delete stack trace pool
 				OexAllocDestruct( m_pst ); 
 
 			} // end if
@@ -378,16 +391,16 @@ public:
 	}
 
 	/// Release all
-	static oexBOOL		m_bShutdown;
+	static oexBOOL		m_bEnable;
 
-#if defined( CStackTrace_USING_TLSAPI )
+#if defined( OEXLIB_USING_TLSAPI )
 
 	static oexUINT		m_tls_dwIndex;
 
-#elif defined( CStackTrace_USING_TLS )
+#elif defined( OEXLIB_USING_TLS )
 
 	/// Thread specific stack pointer
-	static _declspec( thread ) CStack *m_tls_pStack;
+	static oexTLS CStack *m_tls_pStack;
 
 #endif
 
@@ -409,18 +422,25 @@ public:
 	/// Default Constructor
 	CLocalStackTrace( oexCSTR x_pFunction ) 
 	{
-		if ( !CStackTrace::m_bShutdown )
+		if ( CStackTrace::m_bEnable )
 		{
+			// Get stack object
 			m_pStack = CStackTrace::St()->InitPush(); 
 
+			// Push function if valid
+			if ( m_pStack ) 
+				m_pStack->Push( x_pFunction );
+
 		} // end if
+		else 
+			m_pStack = oexNULL; 
 	
 	}
 
 	/// Destructor
 	~CLocalStackTrace() 
 	{ 
-		if ( CStackTrace::m_bShutdown ) 
+		if ( !CStackTrace::m_bEnable ) 
 			return;
 
 		if ( m_pStack ) 

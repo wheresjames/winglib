@@ -59,6 +59,9 @@ public:
 
 	virtual int OnRun()
 	{
+		// Enable crash reporting
+		oexEnableCrashReporting( oexNULL, oexT( "logs" ) );
+
 		// Initialize resources
 		oexInitResources();
 

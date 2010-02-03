@@ -39,7 +39,9 @@ using namespace sqbind;
 // +++ Not sure this class actually works
 
 CSqList::t_List& CSqList::vector()
-{   return m_lst; }
+{_STT();
+	return m_lst; 
+}
 
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqList, CSqList )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqList, push_back )
@@ -48,17 +50,20 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqList, CSqList )
 SQBIND_REGISTER_CLASS_END()
 
 void CSqList::Register( sqbind::VM vm )
-{
+{_STT();
+
 	SQBIND_EXPORT( vm, CSqList );
 }
 
 void CSqList::push_back( const t_Obj &s )
-{
+{_STT();
+
     m_lst.push_back( s );
 }
 
 SquirrelObject CSqList::_get( HSQUIRRELVM v )
-{
+{_STT();
+
     StackHandler sa( v );
 
     unsigned int idx = (unsigned int)sa.GetInt( 2 );
@@ -80,7 +85,8 @@ SquirrelObject CSqList::_get( HSQUIRRELVM v )
 }
 
 SquirrelObject CSqList::_nexti( HSQUIRRELVM v )
-{
+{_STT();
+
     StackHandler sa( v );
 
     SQObjectType type = (SQObjectType)sa.GetType( 2 );

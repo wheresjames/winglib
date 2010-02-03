@@ -59,7 +59,7 @@ public:
 	*/
 	CDsRenderer( LPUNKNOWN pUnk,HRESULT *phr )
 		: CBaseVideoRenderer( IID_DsRenderer, NAME( "CDsRenderer" ), pUnk, phr )
-	{
+	{_STT();
 		m_nWidth = 0;
 		m_nHeight = 0;
 		m_nScanWidth = 0;
@@ -71,7 +71,9 @@ public:
 	}
 
 	/// Destructor
-	virtual ~CDsRenderer() {}
+	virtual ~CDsRenderer() 
+	{_STT();
+	}
 
 	/// Verifys the compatiblity of the specified media type.
 	/**
@@ -83,7 +85,7 @@ public:
 		\see SetMediaType()
 	*/
     virtual HRESULT CheckMediaType( const CMediaType *pmt )
-	{
+	{_STT();
 		VIDEOINFO *pvi = 0;
 	    
 		if( pmt == NULL )
@@ -120,7 +122,7 @@ public:
 		\see CheckMediaType()
 	*/
 	virtual HRESULT SetMediaType( const CMediaType *pmt )
-	{
+	{_STT();
 		// Retrive the size of this media type
 		VIDEOINFO *pviBmp = (VIDEOINFO *)pmt->Format();
 
@@ -134,7 +136,7 @@ public:
     
 	/// Called by the CBaseVideoRenderer framework when a new sample is available.
 	virtual HRESULT DoRenderSample( IMediaSample *pMediaSample )
-	{
+	{_STT();
 		// Do we have a callback function?
 		if ( oexCHECK_PTR( m_cbfOnFrame ) )
 		{
@@ -202,7 +204,7 @@ public:
 
 	/// Constructor
 	CDsCapture()
-	{
+	{_STT();
 #if defined( OEX_DEBUG )
 		m_dwRotId = 0;
 #endif
@@ -223,7 +225,8 @@ public:
 
 	/// Destructor
 	virtual ~CDsCapture()
-	{	Destroy();
+	{_STT();
+		Destroy();
 		if ( SUCCEEDED( m_hrInitialized ) )
 		{	m_hrInitialized = -1;
 			CoUninitialize();
@@ -231,7 +234,7 @@ public:
 	}
 
 	oexRESULT Init()
-	{
+	{_STT();
 		// Already done that?
 		if ( S_OK == m_hrInitialized )
 			return S_OK;
@@ -246,7 +249,7 @@ public:
 	
 	/// Releases all resources
 	void Destroy()
-	{
+	{_STT();
 		// Stop the graph
 		Stop();
 
@@ -293,7 +296,8 @@ public:
 
 	*/
 	HRESULT Capture( DWORD dwDevice, DWORD dwSource, oexINT nWidth, oexINT nHeight, CCaptureTmpl::cbf_OnFrame cbfOnFrame = 0, oexPVOID pUser = 0 )
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		// Lose old graph
 		Destroy();
@@ -384,7 +388,8 @@ public:
 
 	*/
 	HRESULT Capture( oexCSTR pFile, CCaptureTmpl::cbf_OnFrame cbfOnFrame = 0, oexPVOID pUser = 0 )
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		// Lose old graph
 		Destroy();
@@ -468,7 +473,8 @@ public:
 		\return Windows Error code or S_OK if success.
 	*/
 	HRESULT EnumFilters( TAssoList< CStr, CStr > *pList, const GUID &clsidType )
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		if ( pList == NULL ) return ERROR_INVALID_PARAMETER;
 
@@ -563,7 +569,8 @@ public:
 
 	/// Display properties dialog box for specified IUnknown interface
 	HRESULT PropertiesDialog(HWND hParent, IUnknown *pUnk, LPCTSTR pCaption)
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		// Get property page interface
 		CComPtr< ISpecifyPropertyPages > cpSpp;
@@ -595,7 +602,8 @@ public:
 		\see Attach()
 	*/
 	HRESULT Create()
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		// Initialize
 		if ( S_OK != ( hr = Init() ) )
@@ -635,7 +643,8 @@ public:
 		\see Create(), Detach()
 	*/
 	HRESULT Attach( IGraphBuilder *pGraphBuilder, ICaptureGraphBuilder2 *pCaptureGraphBuilder2 )
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		// Destroy the current graph
 		Destroy();
@@ -690,7 +699,8 @@ public:
 		\see RemoveFromRot()
 	*/
 	static HRESULT AddToRot( IUnknown *pUnkGraph, LPDWORD pdwRotId, LPCTSTR pStr = NULL )
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		// Sanity checks
 		if ( pUnkGraph == NULL ) return ERROR_INVALID_PARAMETER;
@@ -722,7 +732,8 @@ public:
 		\see AddToRot()
 	*/
 	static HRESULT RemoveFromRot( DWORD dwRotId )
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		// Ensure valid ROT ID
 		if ( dwRotId == MAXDWORD ) return ERROR_INVALID_DATA;
@@ -748,7 +759,8 @@ public:
 		\return Windows Error code or S_OK if success.
 	*/
 	HRESULT CreateCaptureFilter( DWORD dwDevice, IBaseFilter **ppSrcFilter )
-	{   HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		try
 		{
@@ -824,7 +836,8 @@ public:
 		\return		Windows error code or S_OK if success.
 	*/
 	HRESULT AddFilter(const GUID &clsid, LPCTSTR pName, IBaseFilter **ppSrcFilter = NULL )
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 		
 		// Create the filter
 		CComPtr< IBaseFilter > cpBf;
@@ -854,7 +867,8 @@ public:
 		\see Stop(), Start(), IsRunning()
 	*/
 	HRESULT AddFilter( IBaseFilter *pFilter, LPCTSTR pName )
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		// Ensure graph
 		if ( !IsGraph() ) 
@@ -877,7 +891,8 @@ public:
 		\return Windows Error code or S_OK if success.
 	*/
 	HRESULT SetFilterSize(IBaseFilter *pBaseFilter, long lWidth, long lHeight)
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		// Get stream config interface
 		CComPtr< IAMStreamConfig > apIAMStreamConfig;
@@ -911,7 +926,8 @@ public:
 		\return Windows Error code or S_OK if success.
 	*/
 	HRESULT SetFilterFrameRate( IBaseFilter *pBaseFilter, double dRate)
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		// Get stream config interface
 		CComPtr< IAMStreamConfig > apIAMStreamConfig;
@@ -944,7 +960,8 @@ public:
 		\return Windows Error code or S_OK if success.
 	*/
 	HRESULT GetIAMStreamConfig(IBaseFilter *pBaseFilter, IAMStreamConfig **pIAMStreamConfig)
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 		
 		if ( !m_cpCaptureGraphBuilder2.p )
 			return E_NOTIMPL;
@@ -969,7 +986,7 @@ public:
 		\return		Windows error code or S_OK if success.
 	*/
 	HRESULT RenderStream( const GUID *pType, IBaseFilter *pSrc, IBaseFilter *pMid, IBaseFilter *pDst )
-	{
+	{_STT();
 		if ( !m_cpCaptureGraphBuilder2.p )
 			return E_NOTIMPL;
 
@@ -982,7 +999,7 @@ public:
 		\return Windows Error code or S_OK if success.
 	*/
 	HRESULT LoopStream()
-	{
+	{_STT();
 		if ( m_cpMediaEvent == NULL || m_cpMediaPosition == NULL ) 
 			return ERROR_INVALID_DATA;
 
@@ -1009,7 +1026,8 @@ public:
 
 	/// Returns settings for the specified filter
 	HRESULT GetFilterSettings(IBaseFilter *pBf, TMem< BYTE > *pMem )
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		// Get the interface
 		CComPtr< IAMVfwCompressDialogs > cpCompressDialogs;
@@ -1051,7 +1069,8 @@ public:
 
 	*/
 	HRESULT SetFilterSettings( IBaseFilter *pBf, LPBYTE pBuf, DWORD dwSize )
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		if ( !pBf ) 
 			return oexERROR( ERROR_INVALID_PARAMETER, oexT( "pBf is NULL" ) );
@@ -1084,7 +1103,8 @@ public:
 		\return Windows error code or S_OK if success.
 	*/
 	HRESULT AddFileSource(LPCTSTR pFile, IBaseFilter **ppSrcFilter)
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		// Ensure file name is valid
 		DWORD dwAttrib = ::GetFileAttributes( pFile );
@@ -1121,7 +1141,8 @@ public:
 		\return Windows error code or S_OK if success.
 	*/
 	HRESULT AddSound( IBaseFilter **ppBf )
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 		
 		CComPtr< IBaseFilter > cpBf;
 
@@ -1143,7 +1164,7 @@ public:
 		\return Windows error code or S_OK if success.
 	*/
 	HRESULT CreateSound(IBaseFilter **ppSrcFilter)
-	{
+	{_STT();
 		HRESULT hr = CreateFilter( CLSID_DSoundRender, ppSrcFilter );
 		
 		if ( FAILED( hr ) ) 
@@ -1160,7 +1181,8 @@ public:
 		\return		Windows error code or S_OK if success.
 	*/
 	HRESULT CreateFilter(const GUID &clsid, IBaseFilter **ppSrcFilter)
-	{	HRESULT hr = -1;
+	{_STT();
+		HRESULT hr = -1;
 
 		// Create the filter
 		CComPtr< IBaseFilter > cpBf;
@@ -1182,7 +1204,7 @@ public:
 		\return Windows Error code or S_OK if success.
 	*/
 	HRESULT Seek( DWORD dwTime, DWORD dwMilliseconds = 0 )
-	{
+	{_STT();
 		HRESULT hr = -1;
 
 		if ( m_cpMediaPosition == NULL ) ERROR_INVALID_DATA;
@@ -1208,7 +1230,8 @@ public:
 
 	/// Starts the graph
 	HRESULT Start()
-	{	m_bStop = FALSE;
+	{_STT();
+		m_bStop = FALSE;
 		if ( m_cpMediaControl == NULL ) 
 			return ERROR_INVALID_DATA;
 		HRESULT hr = m_cpMediaControl->Run();
@@ -1219,7 +1242,8 @@ public:
 
 	/// Stops the graph
 	HRESULT Stop()
-	{	m_bStop = TRUE;
+	{_STT();
+		m_bStop = TRUE;
 		if ( m_cpMediaControl == NULL ) 
 			return ERROR_INVALID_DATA;
 		HRESULT hr = m_cpMediaControl->Stop();
@@ -1230,7 +1254,7 @@ public:
 
 	/// Returns non-zero if the graph is running
 	BOOL IsRunning()
-	{
+	{_STT();
 		if ( m_bStop ) return FALSE;
 		if ( !IsGraph() ) return FALSE;
 		if ( m_cpMediaControl == NULL ) return FALSE;
@@ -1299,7 +1323,7 @@ public:
 
 	/// Default contructor
 	CV4w2()
-	{
+	{_STT();
 		m_pFi = oexNULL;
 		m_nWidth = 0;
 		m_nHeight = 0;
@@ -1310,20 +1334,21 @@ public:
 
 	/// Destructor
 	~CV4w2()
-	{
+	{_STT();
 		Destroy();
 	}
 
 	/// Static callback
 	static oexRESULT _OnFrame( CCaptureTmpl::SFrameInfo *pFi, LPVOID pUser )
-	{	CV4w2 *pThis = (CV4w2*)pUser;
+	{_STT();
+		CV4w2 *pThis = (CV4w2*)pUser;
 		if ( !pThis ) return ERROR_INVALID_PARAMETER;
 		return pThis->OnFrame( pFi, pUser );
 	}
 
 	/// Handles video frame callbacks
 	oexRESULT OnFrame( CCaptureTmpl::SFrameInfo *pFi, LPVOID pUser )
-	{
+	{_STT();
 		m_pFi = pFi;
 		m_bReady = oexTRUE;
 
@@ -1342,7 +1367,7 @@ public:
 		\param [in] x_uDevice	-	Device index
 	*/
 	virtual oexBOOL Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit )
-	{
+	{_STT();
 		Destroy();
 
 		// If width and height are zero, just wanting a query object
@@ -1371,7 +1396,7 @@ public:
 		\param [in] x_pFile		- Video file to open
 	*/
 	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit )
-	{
+	{_STT();
 		if ( !oexCHECK_PTR( x_pFile ) )
 		{	oexERROR( ERROR_INVALID_PARAMETER, "Invalid pointer" );
 			return oexFALSE;
@@ -1399,7 +1424,7 @@ public:
 	//==============================================================
 	/// Closes any open capture device
 	virtual oexBOOL Destroy()
-	{
+	{_STT();
 		// Close the capture device
 		m_cap.Destroy();
 
@@ -1420,8 +1445,8 @@ public:
 	//==============================================================
 	/// Returns non-zero if a capture device is open
 	virtual oexBOOL IsOpen()
-	{
-		return oexTRUE;
+	{_STT();
+		return m_cap.IsRunning();
 	}
 
 	//==============================================================
@@ -1431,7 +1456,7 @@ public:
 	/**
 	*/
 	virtual oexBOOL Init()
-	{
+	{_STT();
 		return S_OK == m_cap.Init();
 	}
 
@@ -1439,7 +1464,7 @@ public:
 	// GetSupportedFormats()
 	//==============================================================
 	virtual CStr GetSupportedFormats()
-	{
+	{_STT();
 		return oexT( "RGB3,YUYV" );
 	}
 
@@ -1447,7 +1472,7 @@ public:
 	// GetFormatDescription()
 	//==============================================================
 	virtual CStr GetFormatDescription( oexUINT x_uFormat )
-	{
+	{_STT();
 		switch( x_uFormat )
 		{
 			case oexFOURCC( 'Y', 'U', 'Y', 'V' ) :
@@ -1467,7 +1492,7 @@ public:
 	// StartCapture()
 	//==============================================================
 	virtual oexBOOL StartCapture()
-	{
+	{_STT();
 		return S_OK == m_cap.Start();
 	}
 
@@ -1476,7 +1501,7 @@ public:
 	//==============================================================
 	/// Stops video capture
 	virtual oexBOOL StopCapture()
-	{
+	{_STT();
 		return S_OK == m_cap.Stop();
 	}
 
@@ -1485,7 +1510,8 @@ public:
 	//==============================================================
 	/// Waits for a new frame of video
 	oexBOOL WaitForFrame( oexUINT x_uTimeout = 0 )
-	{	CTimeout to; to.SetMs( x_uTimeout );
+	{_STT();
+		CTimeout to; to.SetMs( x_uTimeout );
 		while ( !m_bReady && to.IsValid() )
 			Sleep( 15 );
 		return m_bReady;
@@ -1495,7 +1521,7 @@ public:
 	// ReleaseFrame()
 	//==============================================================
 	virtual oexBOOL ReleaseFrame()
-	{
+	{_STT();
 		m_bReady = FALSE;
 
 		return oexTRUE;
@@ -1506,7 +1532,7 @@ public:
 	//==============================================================
 	/// Returns a pointer to the video buffer
 	virtual oexPVOID GetBuffer()
-	{
+	{_STT();
 		if ( !m_pFi )
 			return oexNULL;
 		return m_pFi->pBuf;
@@ -1517,7 +1543,7 @@ public:
 	//==============================================================
 	/// +++ Should return the size of the video buffer
 	virtual oexINT GetImageSize()
-	{
+	{_STT();
 		return CImage::GetScanWidth( m_nWidth, 24 ) * cmn::Abs( m_nHeight ); 
 	}
 
@@ -1525,7 +1551,7 @@ public:
 	// GetBufferSize()
 	//==============================================================
 	oexINT GetBufferSize()
-	{
+	{_STT();
 		if ( !m_pFi )
 			return 0;
 		return m_pFi->lImageSize;
@@ -1536,7 +1562,9 @@ public:
 	//==============================================================
 	/// Returns an image object
 	virtual CImage* GetImage()
-	{	return oexNULL; }
+	{_STT();
+		return oexNULL; 
+	}
 
 	//==============================================================
 	// GetWidth()
