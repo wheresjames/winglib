@@ -11,7 +11,7 @@
 using namespace oex;
 
 int show_use( int nRet, oexCSTR pErr, int bShowUse = 0 )
-{
+{_STT();
 	if ( pErr )
 		oexEcho( pErr );
 
@@ -61,7 +61,7 @@ static oexLONG g_lLastShow = 0;
 static oexUINT g_uCountsTotal = 0, g_uOkTotal = 0, g_uBadTotal = 0;
 
 void show_position( oexBOOL bEnd, oexLONG &lShow, oexLONG lBlockSize )
-{
+{_STT();
 	// Time to show?
 	if ( !bEnd && ( lShow == g_lLastShow || ( lShow % lBlockSize ) ) )
 		return;
@@ -113,7 +113,7 @@ void show_position( oexBOOL bEnd, oexLONG &lShow, oexLONG lBlockSize )
 }
 
 void show_progress( oexCSTR pShow, oexLONG &lShow )
-{
+{_STT();
 	if ( !pShow )
 		return;
 
@@ -131,7 +131,7 @@ void show_progress( oexCSTR pShow, oexLONG &lShow )
 }
 
 int iptest(int argc, char* argv[])
-{
+{_STT();
 	if ( 2 > argc )
 		return show_use( -2, oexT( "Command line variables are invalid" ), 1 );
 

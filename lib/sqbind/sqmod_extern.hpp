@@ -44,7 +44,7 @@ BOOL WINAPI DllMain( HANDLE hinstDLL, DWORD dwReason, LPVOID lpvReserved ) { ret
 
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_GetModuleInfo );
 extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
-{_STT();
+{// _STT();
 	if ( !oexCHECK_PTR( pDi ) )
 	{	oexERROR( 0, oexT( "Invalid function argument" ) );
 		return 0;
@@ -70,21 +70,32 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 	// Set version
 	pDi->lVer = oexVERSION( 1, 0 );
 
+	// Set stack trace object pointer
+	pDi->pSt = oex::CStackTrace::St();
+
 	return 0;
 }
 
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Start );
 extern "C" oex::oexRESULT SRV_Start( oex::SRawAllocator x_sRawAllocator, oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
-{_STT();
+{// _STT();
+
 	// Set our allocator
 	oex::CMem::SetRawAllocator( x_sRawAllocator );
+
+	// Enable stack tracing
+	oex::CStackTrace::EnableStackTracing( oex::oexTRUE );
 
 	return 0;
 }
 
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Stop );
 extern "C" oex::oexRESULT SRV_Stop()
-{_STT();
+{// _STT();
+
+	// Disable stack tracing
+	oex::CStackTrace::EnableStackTracing( oex::oexFALSE );
+
 	// Switch back to default allocator
 	oex::CMem::SetDefaultRawAllocator();
 

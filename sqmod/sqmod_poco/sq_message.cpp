@@ -4,12 +4,12 @@
 #include "stdafx.h"
 
 CPoMessage::CPoMessage()
-{
+{_STT();
 	m_pMsg = OexAllocConstruct< Poco::Net::MailMessage >();
 }
 
 CPoMessage::~CPoMessage()
-{
+{_STT();
 	if ( m_pMsg )
 	{	OexAllocDelete< Poco::Net::MailMessage >( m_pMsg );
 		m_pMsg = oexNULL;
@@ -17,7 +17,7 @@ CPoMessage::~CPoMessage()
 }
 
 void CPoMessage::Destroy()
-{
+{_STT();
 }
 
 #define DEFINE_MSG_PROPERTY( p )										\
@@ -37,7 +37,7 @@ DEFINE_MSG_PROPERTY( Subject )
 DEFINE_MSG_PROPERTY( Content )
 
 void CPoMessage::addRecipient( const sqbind::stdString &sAddress, const sqbind::stdString &sName )
-{
+{_STT();
 	if ( !m_pMsg )
 		return;
 	if ( sName.length() )
@@ -49,7 +49,7 @@ void CPoMessage::addRecipient( const sqbind::stdString &sAddress, const sqbind::
 }
 
 void CPoMessage::addCCRecipient( const sqbind::stdString &sAddress, const sqbind::stdString &sName )
-{
+{_STT();
 	if ( !m_pMsg )
 		return;
 	if ( sName.length() )
@@ -61,7 +61,7 @@ void CPoMessage::addCCRecipient( const sqbind::stdString &sAddress, const sqbind
 }
 
 void CPoMessage::addBCCRecipient( const sqbind::stdString &sAddress, const sqbind::stdString &sName )
-{
+{_STT();
 	if ( !m_pMsg )
 		return;
 	if ( sName.length() )

@@ -3,13 +3,13 @@
 #include "stdafx.h"
 
 CFfTranscode::CFfTranscode()
-{
+{_STT();
 	m_dec_id = 0;
 	m_enc_id = 0;
 }
 
 void CFfTranscode::Destroy()
-{
+{_STT();
 	m_dec_id = 0;
 	m_enc_id = 0;
 	m_enc.Destroy();
@@ -17,7 +17,7 @@ void CFfTranscode::Destroy()
 }
 
 int CFfTranscode::Init( int width, int height, int fps, int brate, int src_codec, int dst_codec )
-{
+{_STT();
 	Destroy();
 
 	if ( 0 >= width || 0 >= height )
@@ -46,7 +46,7 @@ int CFfTranscode::Init( int width, int height, int fps, int brate, int src_codec
 }
 
 int CFfTranscode::Transcode( sqbind::CSqBinary *src, sqbind::CSqBinary *dst, sqbind::CSqMulti *fi )
-{
+{_STT();
 	if ( !isValid() )
 		return 0;
 
@@ -71,7 +71,7 @@ int CFfTranscode::Transcode( sqbind::CSqBinary *src, sqbind::CSqBinary *dst, sqb
 }
 
 int CFfTranscode::GetRaw( sqbind::CSqBinary *buf )
-{
+{_STT();
 	if ( !buf || !m_tmp.getUsed() )
 		return 0;
 
@@ -81,7 +81,7 @@ int CFfTranscode::GetRaw( sqbind::CSqBinary *buf )
 }
 
 int CFfTranscode::GetImage( sqbind::CSqImage *img )
-{
+{_STT();
 	if ( !img || !m_tmp.getUsed() || !isValid() )
 		return 0;
 

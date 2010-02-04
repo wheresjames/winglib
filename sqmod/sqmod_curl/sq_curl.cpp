@@ -4,18 +4,18 @@
 #include "stdafx.h"
 
 CSqCurl::CSqCurl()
-{
+{_STT();
 	m_curl = oexNULL;
 
 }
 
 CSqCurl::~CSqCurl()
-{
+{_STT();
 	Destroy();
 }
 
 void CSqCurl::Destroy()
-{
+{_STT();
 	m_sErr = oexT( "" );
 
 	// Close curl handle
@@ -26,7 +26,7 @@ void CSqCurl::Destroy()
 }
 
 int CSqCurl::StdWriter( char *data, size_t size, size_t nmemb, sqbind::stdString *buffer )
-{
+{_STT();
 	int res = 0;
 	if ( buffer )
 	{	buffer->append(data, size * nmemb);
@@ -36,7 +36,7 @@ int CSqCurl::StdWriter( char *data, size_t size, size_t nmemb, sqbind::stdString
 }
 
 int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqString *sData )
-{
+{_STT();
 	if ( !sUrl.length() )
 		return 0;
 
@@ -77,7 +77,7 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqStrin
 }
 
 int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::stdString &sPost, sqbind::CSqString *sData )
-{
+{_STT();
 	if ( !sUrl.length() )
 		return 0;
 

@@ -51,6 +51,9 @@ void CModuleInstance::Destroy()
 	// Release module if loaded
 	if ( m_cModule.IsLoaded() )
 	{
+		// Unload module
+		oex::CStackTrace::RemoveModule( m_cModule.GetModuleBaseAddress() );
+
 		// Load start function
 		oex::os::service::PFN_SRV_Stop pStop =
 			(oex::os::service::PFN_SRV_Stop)m_cModule.AddFunction( oexT( "SRV_Stop" ) );
@@ -128,6 +131,10 @@ oex::oexBOOL CModuleInstance::LoadFunctions()
 									  oexStrToMbPtr( oexGuidToString( &si.guidType ).Ptr() ) ) );
 		return oex::oexFALSE;
 	} // end if
+
+	// Add module stack trace object
+	oex::CStackTrace::AddModule( m_cModule.GetModuleBaseAddress(), 
+								 si.pSt, m_cModule.GetPath().GetFileName().Ptr() );
 
 	// Load start function
 	oex::os::service::PFN_SRV_Start pStart =

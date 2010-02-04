@@ -21,16 +21,16 @@ for(u32 i = 0;i < meshBufferCount;++i)
 const float CSqirrPhysics::c_fGravity = -9.80665f;
 
 CSqirrPhysics::CSqirrPhysics()
-{
+{_STT();
 }
 
 CSqirrPhysics::~CSqirrPhysics()
-{
+{_STT();
 	Destroy();
 }
 
 void CSqirrPhysics::Destroy()
-{
+{_STT();
 #if !defined( OEX_NOBULLET )
 
 	m_memPhysicsWorld.OexDelete();
@@ -43,7 +43,7 @@ void CSqirrPhysics::Destroy()
 }
 
 int CSqirrPhysics::Init()
-{
+{_STT();
 #if defined( OEX_NOBULLET )
 	return 0;
 #else
@@ -94,7 +94,7 @@ int CSqirrPhysics::Init()
 // new btDefaultCollisionConfiguration();
 
 int CSqirrPhysics::Update( float fElapsed )
-{
+{_STT();
 #if defined( OEX_NOBULLET )
 	return 0;
 #else

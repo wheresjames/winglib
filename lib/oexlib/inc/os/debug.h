@@ -161,6 +161,7 @@ public:
 	/**
 		\param [in]	pUrl	- URL to post crash info 
 		\param [in] pSub	- Sub folder in which to save crash reports
+		\param [in] pEInfo	- Error description
 
 		\see
 	*/

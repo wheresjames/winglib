@@ -23,19 +23,19 @@ BEGIN_EVENT_TABLE( CFrameWnd, wxFrame )
 END_EVENT_TABLE()
 
 CFrameWnd::CFrameWnd()
-{
+{_STT();
 
 }
 
 CFrameWnd::~CFrameWnd()
-{
+{_STT();
 
 }
 
 CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wxSize& x_sizeWin )
 	: wxFrame( (wxFrame*)NULL, -1, x_sTitle, x_ptWin, x_sizeWin, 
 				wxFULL_REPAINT_ON_RESIZE | wxDEFAULT_FRAME_STYLE )
-{
+{_STT();
 //	SetIcon( wxIcon( mondrian_xpm ) ); 
 
 	wxImage::AddHandler( new wxJPEGHandler ); 
@@ -116,12 +116,12 @@ CFrameWnd::CFrameWnd( const wxString& x_sTitle, const wxPoint& x_ptWin, const wx
 }
 
 void CFrameWnd::OnExit( wxCommandEvent& x_wxCe )
-{
+{_STT();
 	Close( TRUE );
 }
 
 void CFrameWnd::OnOpen( wxCommandEvent& x_wxCe )
-{
+{_STT();
 	wxFileDialog fd( this, _T( "Choose AVI file" ),
 					 wxEmptyString, wxEmptyString,
 					 _T( "AVI Files (*.avi)|*.avi" )
@@ -137,7 +137,7 @@ void CFrameWnd::OnOpen( wxCommandEvent& x_wxCe )
 }
 
 void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
-{
+{_STT();
 	wxPaintDC dc( this );
 
 	wxSize sizeClient = GetClientSize();
@@ -170,13 +170,13 @@ void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
 }
 
 void CFrameWnd::OnEraseBackground( wxEraseEvent& x_wxEe )
-{
+{_STT();
 
 
 }
 
 bool CFrameWnd::StretchDraw(wxDC &x_dc, wxImage &x_img, wxRect &x_rect)
-{
+{_STT();
     if ( !x_img.Ok() ) return FALSE;
 
 	// The slow but portable way...

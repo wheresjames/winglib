@@ -4,17 +4,17 @@
 #include "stdafx.h"
 
 CPoSmtp::CPoSmtp()
-{
+{_STT();
 	m_pSession = oexNULL;
 }
 
 CPoSmtp::~CPoSmtp()
-{
+{_STT();
 	Destroy();
 }
 
 void CPoSmtp::Destroy()
-{
+{_STT();
 	try
 	{	
 		// Drop any session
@@ -41,7 +41,7 @@ void CPoSmtp::Destroy()
 }
 
 int CPoSmtp::Open( const sqbind::stdString &sUrl )
-{
+{_STT();
 	Destroy();
 
 	try
@@ -63,7 +63,7 @@ int CPoSmtp::Open( const sqbind::stdString &sUrl )
 }
 
 int CPoSmtp::Login( const sqbind::stdString &sType, const sqbind::stdString &sUsername, const sqbind::stdString &sPassword )
-{
+{_STT();
 	if ( !m_pSession )
 	{	m_sLastError = "Invalid object";
 		return 0;
@@ -90,7 +90,7 @@ int CPoSmtp::Login( const sqbind::stdString &sType, const sqbind::stdString &sUs
 }
 
 int CPoSmtp::Send( CPoMessage *pMsg )
-{
+{_STT();
 	if ( !m_pSession || !pMsg )
 	{	m_sLastError = "Invalid object";
 		return 0;
@@ -109,5 +109,3 @@ int CPoSmtp::Send( CPoMessage *pMsg )
 	
 	return 1;
 }
-
-

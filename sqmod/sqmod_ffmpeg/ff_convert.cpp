@@ -3,16 +3,16 @@
 #include "stdafx.h"
 
 CFfConvert::CFfConvert()
-{
+{_STT();
 }
 
 int CFfConvert::CalcImageSize( int fmt, int width, int height )
-{
+{_STT();
 	return avpicture_get_size( (PixelFormat)fmt, width, height );
 }
 
 int CFfConvert::FillAVPicture( AVPicture *pPic, int fmt, int width, int height, void *buf )
-{
+{_STT();
 	if ( !pPic || !buf )
 		return 0;
 
@@ -28,7 +28,7 @@ int CFfConvert::FillAVPicture( AVPicture *pPic, int fmt, int width, int height, 
 }
 
 int CFfConvert::FillAVFrame( AVFrame *pAv, int fmt, int width, int height, void *buf )
-{
+{_STT();
 	if ( !pAv || !buf )
 		return 0;
 
@@ -49,7 +49,7 @@ int CFfConvert::FillAVFrame( AVFrame *pAv, int fmt, int width, int height, void 
 }
 
 int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, int src_fmt, sqbind::CSqBinary *dst, int dst_fmt, int alg )
-{
+{_STT();
 	if ( !dst )
 		return 0;
 
@@ -109,7 +109,7 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 }
 
 int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, int dst_fmt, int alg, int flip )
-{
+{_STT();
 	if ( !dst )
 		return 0;
 
@@ -180,7 +180,7 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 }
 
 int CFfConvert::ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip )
-{
+{_STT();
 	// Sanity checks
 	if ( !img || 0 >= width || 0 >= height || !src || !src->getUsed() )
 		return 0;
@@ -225,7 +225,7 @@ int CFfConvert::ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, 
 }
 
 int CFfConvert::ConvertColorRI( void *buf, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip )
-{
+{_STT();
 	// Sanity checks
 	if ( !img || 0 >= width || 0 >= height || !buf )
 		return 0;
@@ -270,7 +270,7 @@ int CFfConvert::ConvertColorRI( void *buf, int src_fmt, int width, int height, s
 }
 
 int CFfConvert::ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip )
-{
+{_STT();
 	// Sanity checks
 	if ( !img || 0 >= width || 0 >= height || !pAf )
 		return 0;
@@ -320,7 +320,7 @@ int CFfConvert::ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height
 }
 
 int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height, int dst_fmt, sqbind::CSqBinary *dst, int alg )
-{
+{_STT();
 	// Sanity checks
 	if ( !dst || 0 >= width || 0 >= height || !pAf )
 		return 0;

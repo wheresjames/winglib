@@ -155,10 +155,10 @@ public:
 	}
 
 	//==============================================================
-	// GetModuleHandle()
+	// GetModuleBaseAddress()
 	//==============================================================
-	/// Returns the loaded modules handle
-	oexPVOID GetModuleHandle() { return m_hModule; }
+	/// Returns the loaded modules base address
+	oexPVOID GetModuleBaseAddress() { return m_hModule; }
 
 	//==============================================================
 	// IsLoaded()

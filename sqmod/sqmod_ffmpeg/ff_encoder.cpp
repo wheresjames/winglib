@@ -3,7 +3,7 @@
 #include "stdafx.h"
 
 CFfEncoder::CFfEncoder()
-{
+{_STT();
 	m_nFmt = 0;
 	m_pCodec = oexNULL;
 	m_pCodecContext = oexNULL;
@@ -16,7 +16,7 @@ CFfEncoder::CFfEncoder()
 }
 
 void CFfEncoder::Destroy()
-{
+{_STT();
 	if ( m_pStream )
 	{	av_free( m_pStream );
 		m_pStream = oexNULL;
@@ -42,7 +42,7 @@ void CFfEncoder::Destroy()
 
 // http://lists.mplayerhq.hu/pipermail/libav-user/2009-June/003257.html
 int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, int brate, sqbind::CSqMulti *m )
-{
+{_STT();
 	// Lose previous codec
 	Destroy();
 
@@ -91,7 +91,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 }
 
 int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int sz_in, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
-{
+{_STT();
 	// Ensure codec
 	if ( !m_pCodecContext )
 		return 0;
@@ -145,7 +145,7 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 }
 
 int CFfEncoder::Encode( int fmt, int width, int height, sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
-{
+{_STT();
 	// Sanity checks
 	if ( !in || !in->getUsed() )
 		return 0;
@@ -167,7 +167,7 @@ int CFfEncoder::Encode( int fmt, int width, int height, sqbind::CSqBinary *in, s
 }
 
 int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
-{
+{_STT();
 	// Ensure codec
 	if ( !m_pCodecContext )
 		return 0;

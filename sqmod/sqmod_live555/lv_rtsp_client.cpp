@@ -7,16 +7,16 @@
 
 CLvRtspClient::CVideoSink::CVideoSink( UsageEnvironment& rEnv ) :
 	MediaSink( rEnv )
-{
+{_STT();
 }
 
 CLvRtspClient::CVideoSink::~CVideoSink()
-{
+{_STT();
 	m_buf.Free();
 }
 
 Boolean CLvRtspClient::CVideoSink::continuePlaying()
-{
+{_STT();
 	if ( !fSource )
 		return False;
 
@@ -30,7 +30,7 @@ Boolean CLvRtspClient::CVideoSink::continuePlaying()
 
 void CLvRtspClient::CVideoSink::_afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
 				  									struct timeval presentationTime, unsigned durationInMicroseconds )
-{
+{_STT();
 //	oexEcho( oexMks( "Rx: ", frameSize, ", ", numTruncatedBytes, ", ", durationInMicroseconds ).Ptr() );
 
 	CVideoSink* pVideoSink = (CVideoSink*)clientData;
@@ -41,7 +41,7 @@ void CLvRtspClient::CVideoSink::_afterGettingFrame( void* clientData, unsigned f
 
 void CLvRtspClient::CVideoSink::afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
 				  								   struct timeval presentationTime, unsigned durationInMicroseconds )
-{
+{_STT();
 	if ( !fSource )
 		return;
 
@@ -60,7 +60,7 @@ void CLvRtspClient::CVideoSink::afterGettingFrame( void* clientData, unsigned fr
 }
 
 int CLvRtspClient::CVideoSink::LockFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
-{
+{_STT();
 	// Check to see if a new frame is ready
 	if ( m_sigFrame.Wait( 0 ) )
 		return 0;
@@ -72,7 +72,7 @@ int CLvRtspClient::CVideoSink::LockFrame( sqbind::CSqBinary *dat, sqbind::CSqMul
 }
 
 int CLvRtspClient::CVideoSink::UnlockFrame()
-{
+{_STT();
 	// Unlock the buffer
 	m_sigFrame.Reset();
 
@@ -82,16 +82,16 @@ int CLvRtspClient::CVideoSink::UnlockFrame()
 
 CLvRtspClient::CAudioSink::CAudioSink( UsageEnvironment& rEnv ) :
 	MediaSink( rEnv )
-{
+{_STT();
 }
 
 CLvRtspClient::CAudioSink::~CAudioSink()
-{
+{_STT();
 	m_buf.Free();
 }
 
 Boolean CLvRtspClient::CAudioSink::continuePlaying()
-{
+{_STT();
 	if ( !fSource )
 		return False;
 
@@ -105,7 +105,7 @@ Boolean CLvRtspClient::CAudioSink::continuePlaying()
 
 void CLvRtspClient::CAudioSink::_afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
 				  									struct timeval presentationTime, unsigned durationInMicroseconds )
-{
+{_STT();
 //	oexEcho( oexMks( "Rx: ", frameSize, ", ", numTruncatedBytes, ", ", durationInMicroseconds ).Ptr() );
 
 	CAudioSink* pAudioSink = (CAudioSink*)clientData;
@@ -116,7 +116,7 @@ void CLvRtspClient::CAudioSink::_afterGettingFrame( void* clientData, unsigned f
 
 void CLvRtspClient::CAudioSink::afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
 				  								   struct timeval presentationTime, unsigned durationInMicroseconds )
-{
+{_STT();
 	if ( !fSource )
 		return;
 
@@ -135,7 +135,7 @@ void CLvRtspClient::CAudioSink::afterGettingFrame( void* clientData, unsigned fr
 }
 
 int CLvRtspClient::CAudioSink::LockFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
-{
+{_STT();
 	// Check to see if a new frame is ready
 	if ( m_sigFrame.Wait( 0 ) )
 		return 0;
@@ -147,7 +147,7 @@ int CLvRtspClient::CAudioSink::LockFrame( sqbind::CSqBinary *dat, sqbind::CSqMul
 }
 
 int CLvRtspClient::CAudioSink::UnlockFrame()
-{
+{_STT();
 	// Unlock the buffer
 	m_sigFrame.Reset();
 
@@ -157,7 +157,7 @@ int CLvRtspClient::CAudioSink::UnlockFrame()
 
 
 CLvRtspClient::CLvRtspClient()
-{
+{_STT();
 	m_nFrames = 0;
 	m_pEnv = oexNULL;
 	m_pRtspClient = oexNULL;
@@ -170,7 +170,7 @@ CLvRtspClient::CLvRtspClient()
 }
 
 void CLvRtspClient::Destroy()
-{
+{_STT();
 	// Tell thread loop to exit
 	m_nEnd = 1;
 
@@ -182,7 +182,7 @@ void CLvRtspClient::Destroy()
 }
 
 void CLvRtspClient::ThreadDestroy()
-{
+{_STT();
 	if ( m_pRtspClient && m_pSession )
 		m_pRtspClient->teardownMediaSession( *m_pSession );
 
@@ -202,7 +202,7 @@ void CLvRtspClient::ThreadDestroy()
 }
 
 int CLvRtspClient::Open( const sqbind::stdString &sUrl, int bVideo, int bAudio, sqbind::CSqMulti *m )
-{
+{_STT();
 	Destroy();
 
 	m_sUrl = sUrl;
@@ -218,7 +218,7 @@ int CLvRtspClient::Open( const sqbind::stdString &sUrl, int bVideo, int bAudio, 
 }
 
 int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bAudio, sqbind::CSqMulti *m )
-{
+{_STT();
 	// Lose old container
 	ThreadDestroy();
 
@@ -340,7 +340,7 @@ int nVerbosity = 0;
 }
 
 int CLvRtspClient::InitVideo( MediaSubsession *pss )
-{
+{_STT();
 	if ( !pss )
 	{	oexERROR( 0, oexT( "Invalid video object" ) );
 		return 0;
@@ -385,7 +385,7 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 }
 
 int CLvRtspClient::InitAudio( MediaSubsession *pss )
-{
+{_STT();
 	if ( !pss )
 	{	oexERROR( 0, oexT( "Invalid video object" ) );
 		return 0;
@@ -430,7 +430,7 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 }
 
 int CLvRtspClient::LockVideo( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
-{
+{_STT();
 	if ( !m_bVideo || !m_pVs )
 		return 0;
 
@@ -438,7 +438,7 @@ int CLvRtspClient::LockVideo( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 }
 
 int CLvRtspClient::UnlockVideo()
-{
+{_STT();
 	if ( !m_pVs )
 		return 0;
 
@@ -446,7 +446,7 @@ int CLvRtspClient::UnlockVideo()
 }
 
 int CLvRtspClient::LockAudio( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
-{
+{_STT();
 	if ( !m_bAudio || !m_pAs )
 		return 0;
 
@@ -454,7 +454,7 @@ int CLvRtspClient::LockAudio( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 }
 
 int CLvRtspClient::UnlockAudio()
-{
+{_STT();
 	if ( !m_pAs )
 		return 0;
 
@@ -462,7 +462,7 @@ int CLvRtspClient::UnlockAudio()
 }
 
 oex::oexBOOL CLvRtspClient::InitThread( oex::oexPVOID x_pData )
-{
+{_STT();
 	if ( !ThreadOpen( m_sUrl, m_bVideo, m_bAudio, &m_mParams ) )
 		return oex::oexFALSE;
 
@@ -470,7 +470,7 @@ oex::oexBOOL CLvRtspClient::InitThread( oex::oexPVOID x_pData )
 }
 
 oex::oexBOOL CLvRtspClient::DoThread( oex::oexPVOID x_pData )
-{
+{_STT();
 	// Run the thing
 	if ( !m_pEnv )
 		return oex::oexFALSE;
@@ -481,7 +481,7 @@ oex::oexBOOL CLvRtspClient::DoThread( oex::oexPVOID x_pData )
 }
 
 oex::oexINT CLvRtspClient::EndThread( oex::oexPVOID x_pData )
-{
+{_STT();
 	ThreadDestroy();
 
 	return 0;

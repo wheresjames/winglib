@@ -11,7 +11,7 @@
 #endif
 
 void CSqirrFont::Destroy()
-{
+{_STT();
 //	if ( m_font )
 	{//	OexAllocDelete( m_font );
 //		m_font = oexNULL;
@@ -19,7 +19,7 @@ void CSqirrFont::Destroy()
 }
 
 int CSqirrFont::set( int size, const sqbind::stdString &sFont )
-{
+{_STT();
 	// Lose old font
 	Destroy();
 
@@ -48,7 +48,7 @@ int CSqirrFont::set( int size, const sqbind::stdString &sFont )
 }
 
 int CSqirrFont::Render( const sqbind::stdString &sText )
-{
+{_STT();
 //	if ( !m_font )
 //		return 0;
 

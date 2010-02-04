@@ -113,22 +113,6 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x
 
 void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr, oexINT x_nRes, oexINT x_nErr )
 {// _STT();
-#if defined( oexDEBUG ) && !defined( OEX_NOCRTDEBUG )
-
-#if defined( oexUNICODE )
-
-	if ( 1 == _CrtDbgReport( _CRT_ASSERT, oexStrToMb( x_pFile ).Ptr(), x_uLine,
-                             oexStrToMb( x_pModule ).Replace( '%', '.' ).Ptr(),
-                             oexStrToMb( x_pStr ).Ptr() ) )
-
-#else
-
-    if ( 1 == _CrtDbgReport( _CRT_ASSERT, x_pFile, x_uLine, x_pModule,
-                             ( (CStr)x_pStr ).Replace( '%', '.' ).Ptr() ), x_pStr )
-
-#endif
-
-#else
 
 	CStr str;
 
@@ -141,6 +125,25 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x
 		str << oexT( "Result     : " ) << x_nRes << oexT( " sys:\"" ) << os::CTrace::GetErrorMsg( x_nRes ).Replace( oexT( "%" ), oexT( "%%" ) ).Ptr() << oexT( "\"" ) << oexNL;
 	if ( x_nErr )
 		str << oexT( "Error Code : " ) << x_nErr << oexT( " sys:\"" ) << os::CTrace::GetErrorMsg( x_nErr ).Replace( oexT( "%" ), oexT( "%%" ) ).Ptr() << oexT( "\"" ) << oexNL;
+
+	oex::os::CDebug::CreateCrashReport( oexNULL, oexT( "logs" ), str.Ptr() );
+
+#if defined( oexDEBUG ) && !defined( OEX_NOCRTDEBUG )
+
+#if defined( oexUNICODE )
+
+	if ( 1 == _CrtDbgReport( _CRT_ASSERT, oexStrToMb( x_pFile ).Ptr(), x_uLine,
+                             oexStrToMb( x_pModule ).Replace( '%', '.' ).Ptr(),
+                             oexStrToMb( str ).Ptr() ) )
+
+#else
+
+    if ( 1 == _CrtDbgReport( _CRT_ASSERT, x_pFile, x_uLine, x_pModule,
+                             ( oexStrToMb( str ).Replace( '%', '.' ).Ptr() ), x_pStr ) )
+
+#endif
+
+#else
 
 	// Simulate the _CrtDbgReport box
 	int nRet = MessageBox( NULL, str.Ptr(), oexT( "Program Self Verification Error" ), MB_ICONSTOP | MB_ABORTRETRYIGNORE );
@@ -261,28 +264,22 @@ oexCSTR CDebug::GetExceptionCodeDesc( oexUINT x_uCode )
 
 }
 
-void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
+static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCSTR pName, oexCPVOID pAddress )
 {
-	// Does user want crash reports?
-	if ( ( !pUrl || !*pUrl ) && ( !pSub || !*pSub ) )
-		return;
-
-	// The thread that crashed
-	oexUINT dwCurrentThread = oexGetCurThreadId();
-
-	// Ensure stack trace object
-	CStackTrace* pSt = &oexSt();
 	if ( !pSt )
-		return;
-	
+		return CStr();
+
+	CStr sSt;
 	oexUINT i = 0;
 	CSysTime st; st.GetSystemTime();
 
-	// Stack trace header
-	CStr sSt =    oexFmt( oexT( "Current Thread    : %d (0x%x)" oexNL8 ), dwCurrentThread, dwCurrentThread );
-	sSt << st.FormatTime( oexT( "Current Time      : %Y/%c/%d  %g:%m:%s GMT" oexNL8 ) );
-	sSt <<        oexFmt( oexT( "Stack Trace Slots : Using %d of %d" oexNL8 ), pSt->getUsedSlots(), pSt->getTotalSlots() );
-	sSt <<                oexNL << ( pEInfo ? pEInfo : oexT( "(No other information available)" ) ) << oexNL;
+	// Add module header
+	sSt << oexT( oexNL8 oexNL8 )
+		<<         oexT( "===================================================" oexNL8 )
+		<<         oexT( "= Module  : " ) << ( pName ? pName : oexT( "N/A" ) ) << oexNL
+		<< oexFmt( oexT( "= Address : 0x%08x" oexNL8 ), (oexUINT)pAddress )
+		<<         oexT( "===================================================" oexNL8 );
+
 
 	// Add each thread stack
 	while ( CStackTrace::CStack *p = pSt->Next( &i ) )
@@ -295,7 +292,7 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 			// Show the thread id
 			sSt << oexNL 
 				<< oexT( "---------------------------------------------------" oexNL8 )
-				<< ( p->GetThreadId() == dwCurrentThread 
+				<< ( p->GetThreadId() == uCurrentThreadId 
 				   ? oexT( "***************************************************" oexNL8 ) 
 				   : oexT( "" ) )
 				<< oexFmt( oexT( "Thread  : %d (0x%x)" oexNL8 ), p->GetThreadId(), p->GetThreadId() )
@@ -316,6 +313,50 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 
 	} // end while
 
+	return sSt;
+}
+
+void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
+{
+	// Does user want crash reports?
+	if ( ( !pUrl || !*pUrl ) && ( !pSub || !*pSub ) )
+		return;
+
+	// Ensure stack trace object
+	CStackTrace* pSt = CStackTrace::St();
+	if ( !pSt )
+		return;
+
+	oexUINT uCurrentThreadId = oexGetCurThreadId();
+	CSysTime st; st.GetSystemTime();
+
+	// Stack trace header
+	CStr sSt =    oexFmt( oexT( "Current Thread    : %d (0x%x)" oexNL8 ), uCurrentThreadId, uCurrentThreadId );
+	sSt << st.FormatTime( oexT( "Current Time      : %Y/%c/%d  %g:%m:%s GMT" oexNL8 ) );
+	sSt <<        oexFmt( oexT( "Stack Trace Slots : Using %d of %d" oexNL8 ), pSt->getUsedSlots(), pSt->getTotalSlots() );
+	sSt <<                oexNL << ( pEInfo ? pEInfo : oexT( "(No other information available)" ) ) << oexNL;
+
+	// Create a stack report for the current stack
+	sSt << CreateStackReport( uCurrentThreadId, pSt, oexGetFileName( oexGetModuleFileName() ).Ptr(), GetInstanceHandle() );
+
+	oexUINT i = 0;
+	while ( CStackTrace::SModuleInfo *pSi = pSt->NextModule( &i ) )
+		if ( pSi->pSt )
+		{
+			try
+			{
+				// Create stack report for this module
+				sSt << CreateStackReport( uCurrentThreadId, pSi->pSt, pSi->szName, pSi->pAddress );
+
+			} // end try
+			catch( ... )
+			{
+				sSt << oexT( oexNL8 "!!! Assert in module !!!" oexNL8 );
+
+			} // end catch
+
+		} // end while
+
 	// Save to file?
 	if ( pSub && *pSub )
 	{
@@ -332,6 +373,7 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 	} // end if
 
 }
+
 
 oexCHAR g_szUrl[ oexSTRSIZE ] = { 0 };
 oexCHAR g_szSub[ oexSTRSIZE ] = { 0 };
@@ -370,14 +412,21 @@ LONG WINAPI OexExceptionHandler( struct _EXCEPTION_POINTERS *pEp )
 
 void CDebug::EnableCrashReporting( oexCSTR pUrl, oexCSTR pSub )
 {_STT();
+
 	// Save user url
 	if ( oexCHECK_PTR( pUrl ) )
 		zstr::Copy( g_szUrl, oexSizeOfArray( g_szUrl ), pUrl ); 
+	else
+		*g_szUrl = 0;
 
 	if ( oexCHECK_PTR( pSub ) )
 		zstr::Copy( g_szSub, oexSizeOfArray( g_szSub ), pSub ); 
+	else
+		*g_szSub = 0;
+
+	oexBOOL bEnable = ( *g_szUrl || *g_szSub );
 
 	// Set exception handler
-	::SetUnhandledExceptionFilter( &OexExceptionHandler ); 
+	::SetUnhandledExceptionFilter( bEnable ? &OexExceptionHandler : oexNULL ); 
 }
 

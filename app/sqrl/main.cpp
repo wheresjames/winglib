@@ -19,7 +19,7 @@ sqbind::CScriptThread	*g_psqScriptThread = oexNULL;
 sqbind::CModuleManager	*g_psqModuleManager = oexNULL;
 
 int run(int argc, char* argv[])
-{
+{_STT();
 	oex::CStr sCmd;
 
 	if ( argc > 1 && oexCHECK_PTR( argv[ 1 ] ) )
@@ -96,7 +96,6 @@ int run(int argc, char* argv[])
 
 	if ( g_psqScriptThread->Start() )
 		return oexERROR( -5, oexT( "Failed to start script thread" ) );
-
 
 	// Attempt to execute idle function
 	oex::oexINT gc = 0;

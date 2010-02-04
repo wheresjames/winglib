@@ -14,7 +14,7 @@ sqbind::CModuleManager	*g_psqModuleManager = oexNULL;
 
 // Custom include script
 int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData, sqbind::stdString &sName )
-{
+{_STT();
 	// Sanity checks
 	if ( !sScript.length() )
 		return -1;

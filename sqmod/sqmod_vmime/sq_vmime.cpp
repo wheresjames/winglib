@@ -10,7 +10,7 @@
 #endif
 
 CSqVMime::CSqVMime()
-{
+{_STT();
 #if defined( OEX_WINDOWS )
 	vmime::platform::setHandler<vmime::platforms::windows::windowsHandler>();
 #else
@@ -22,19 +22,19 @@ CSqVMime::CSqVMime()
 }
 
 CSqVMime::~CSqVMime()
-{
+{_STT();
 	Destroy();
 }
 
 void CSqVMime::Destroy()
-{				 
+{_STT();
 //	m_f.detach();
 //	m_st.detach();
 //	m_session.detach();
 }
 
 int CSqVMime::Open( const sqbind::stdString &sUrl )
-{
+{_STT();
 	if ( !m_session )
 		return 0;
 
@@ -86,7 +86,7 @@ int CSqVMime::Open( const sqbind::stdString &sUrl )
 }
 
 int CSqVMime::Close( int expunge )
-{
+{_STT();
 	if ( !m_f )
 		return 0;
 
@@ -104,7 +104,7 @@ int CSqVMime::Close( int expunge )
 
 
 int CSqVMime::getMessageCount()
-{
+{_STT();
 	if ( !m_f )
 		return 0;
 
@@ -119,7 +119,7 @@ int CSqVMime::getMessageCount()
 }
 
 int CSqVMime::deleteMessage( int n )
-{
+{_STT();
 	if ( !m_f )
 		return 0;
 
@@ -136,7 +136,7 @@ int CSqVMime::deleteMessage( int n )
 }
 
 int CSqVMime::deleteMessages( int from, int to )
-{
+{_STT();
 	if ( !m_f )
 		return 0;
 
@@ -154,7 +154,7 @@ int CSqVMime::deleteMessages( int from, int to )
 
 
 CVmMsg CSqVMime::getMessage( int n )
-{
+{_STT();
 	if ( !m_f )
 		return CVmMsg();
 
@@ -180,7 +180,7 @@ CVmMsg CSqVMime::getMessage( int n )
 }
 
 int CSqVMime::addMessage( CVmMsg *pMsg )
-{
+{_STT();
 	if ( !m_f )
 		return 0;
 
@@ -195,7 +195,7 @@ int CSqVMime::addMessage( CVmMsg *pMsg )
 }
 
 static const vmime::string getFolderPathString(vmime::ref <vmime::net::folder> f)
-{
+{_STT();
 	const vmime::string n = f->getName().getBuffer();
 	if ( !n.empty() )
 	{	vmime::ref <vmime::net::folder> p = f->getParent();
@@ -205,7 +205,7 @@ static const vmime::string getFolderPathString(vmime::ref <vmime::net::folder> f
 }
 
 static int mapFolders(sqbind::CSqMulti *m, vmime::ref< vmime::net::folder > folder, const int level = 0)
-{
+{_STT();
 	if ( !m )
 		return 0;
 
@@ -226,7 +226,7 @@ static int mapFolders(sqbind::CSqMulti *m, vmime::ref< vmime::net::folder > fold
 }
 
 int CSqVMime::getFolders( sqbind::CSqMulti *m )
-{
+{_STT();
 	if ( !m || !m_st )
 		return 0;
 
@@ -242,7 +242,7 @@ int CSqVMime::getFolders( sqbind::CSqMulti *m )
 }
 
 int CSqVMime::setFolder( const sqbind::stdString &sFolder )
-{
+{_STT();
 	if ( !m_st )
 		return 0;
 
@@ -286,7 +286,7 @@ int CSqVMime::setFolder( const sqbind::stdString &sFolder )
 }
 
 int CSqVMime::Send( const sqbind::stdString &sUrl, CVmMsg *pMsg )
-{
+{_STT();
 	if ( !pMsg )
 		return 0;
 

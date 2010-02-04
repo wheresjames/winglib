@@ -4,7 +4,7 @@
 #include "stdafx.h"
 
 CSqFftw::CSqFftw()
-{
+{_STT();
 	m_plan_valid = 0;
 	m_in = oexNULL;
 	m_out = oexNULL;
@@ -13,12 +13,12 @@ CSqFftw::CSqFftw()
 }
 
 CSqFftw::~CSqFftw()
-{
+{_STT();
 	Destroy();
 }
 
 void CSqFftw::Destroy()
-{
+{_STT();
 	// Lose plan
 	if ( m_plan_valid )
 		fftw_destroy_plan( m_plan );
@@ -37,7 +37,7 @@ void CSqFftw::Destroy()
 }
 
 int CSqFftw::Allocate( int samples )
-{
+{_STT();
 	Destroy();
 
 	// Must be a power of 2
@@ -72,7 +72,7 @@ int CSqFftw::Allocate( int samples )
 }
 
 int CSqFftw::Plan( int samples, int reverse, int measure )
-{
+{_STT();
 	// Allocate space
 	if ( !Allocate( samples ) )
 		return 0;
@@ -89,7 +89,7 @@ int CSqFftw::Plan( int samples, int reverse, int measure )
 }
 
 int CSqFftw::Execute()
-{
+{_STT();
 	if ( !m_plan_valid )
 		return 0;
 

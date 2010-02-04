@@ -14,7 +14,7 @@
 #endif
 
 CSqIrrlicht::CSqIrrlicht()
-{
+{_STT();
 	m_pCallbackQueue = oexNULL;
 
 	m_pDevice = oexNULL;
@@ -40,7 +40,7 @@ CSqIrrlicht::CSqIrrlicht()
 }
 
 CSqIrrlicht::~CSqIrrlicht()
-{
+{_STT();
 	m_pCallbackQueue = oexNULL;
 
 	m_pSmgr = oexNULL;
@@ -72,7 +72,7 @@ CSqIrrlicht::~CSqIrrlicht()
 }
 
 int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height, int fps )
-{
+{_STT();
 	irr::SIrrlichtCreationParameters param;
 
 #if defined( _WIN32_WCE )
@@ -155,7 +155,7 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height, in
 
 /// Sets the ambient color lighting
 int CSqIrrlicht::SetAmbientLight( CSqirrColorf &x_col )
-{
+{_STT();
 	if ( !m_pDriver )
 		return 0;
 
@@ -165,7 +165,7 @@ int CSqIrrlicht::SetAmbientLight( CSqirrColorf &x_col )
 }
 
 CSqirrNode CSqIrrlicht::AddLight( CSqirrVector3d &pos, CSqirrColorf &col, float rad )
-{
+{_STT();
 	if ( !m_pSmgr )
 		return CSqirrNode();
 
@@ -173,7 +173,7 @@ CSqirrNode CSqIrrlicht::AddLight( CSqirrVector3d &pos, CSqirrColorf &col, float 
 }
 
 CSqirrCamera CSqIrrlicht::AddCamera( CSqirrVector3d &pos, CSqirrVector3d &look )
-{
+{_STT();
 	if ( !m_pSmgr )
 		return CSqirrCamera();
 
@@ -192,7 +192,7 @@ CSqirrCamera CSqIrrlicht::AddCamera( CSqirrVector3d &pos, CSqirrVector3d &look )
 }
 
 CSqirrNode CSqIrrlicht::AddCube( float size )
-{
+{_STT();
 	if ( !m_pSmgr )
 		return CSqirrNode();
 
@@ -200,14 +200,14 @@ CSqirrNode CSqIrrlicht::AddCube( float size )
 }
 
 CSqirrAnimator CSqIrrlicht::AddRotateAnimator( CSqirrVector3d &speed )
-{
+{_STT();
 	CSqirrAnimator rotate( m_pSmgr->createRotationAnimator( speed.Obj() ) );
 	if ( rotate.Ptr() ) rotate.Ptr()->drop();
 	return rotate;
 }
 
 int CSqIrrlicht::Draw( CSqirrColor &bg )
-{
+{_STT();
 	if ( m_bQuit || !m_pDevice || !m_pDevice->run() )
 		return -1;
 
@@ -253,7 +253,7 @@ int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 							   irr::video::SColor colBackground,
 							   float fWidth, float fFocus, int nDriverType,
 							   unsigned long ulREyeKey, unsigned long ulLEyeKey )
-{
+{_STT();
 	// Right eye
 	irr::core::vector3df reye = pCamera->getPosition();
 
@@ -374,7 +374,7 @@ int CSqIrrlicht::DrawAnaglyph( irr::video::IVideoDriver *pDriver,
 }
 
 int CSqIrrlicht::RenderToTexture( CSqirrTexture *txt, CSqirrNode *pCamera )
-{
+{_STT();
 	// Sanity checks
 	if ( !txt || !txt->Ptr() || !m_pSmgr || !m_pDriver )
 		return 0;
@@ -406,7 +406,7 @@ int CSqIrrlicht::RenderToTexture( CSqirrTexture *txt, CSqirrNode *pCamera )
 }
 
 int CSqIrrlicht::Capture( sqbind::CSqBinary *pBin )
-{
+{_STT();
 	if ( !pBin || !m_pDevice || 0 >= getWidth() || 0 >= getHeight() )
 		return 0;
 
@@ -439,7 +439,7 @@ int CSqIrrlicht::Capture( sqbind::CSqBinary *pBin )
 CSqirrNode CSqIrrlicht::AddSkyDome( const sqbind::stdString &sFile,
 									long lHorzRes, long lVertRes,
 							 		float fTxtPercent, float fSpherePercent )
-{
+{_STT();
 	if ( !sFile.length() )
 		return CSqirrNode();
 
@@ -450,7 +450,7 @@ CSqirrNode CSqIrrlicht::AddSkyDome( const sqbind::stdString &sFile,
 
 // local pos = ScreenToPlane( SquirrVector2d( x, y ), 50 );
 CSqirrVector3d CSqIrrlicht::ScreenToPlane( CSqirrVector2d &ptScreen, float fDist )
-{
+{_STT();
     // Must have object
     if ( !m_pCamera || !m_pSmgr )
         return CSqirrVector3d();
@@ -484,7 +484,7 @@ CSqirrVector3d CSqIrrlicht::ScreenToPlane( CSqirrVector2d &ptScreen, float fDist
 }
 
 CSqirrNode CSqIrrlicht::NodeAtScreen( CSqirrVector2d &ptScreen, long lMask )
-{
+{_STT();
     if ( !m_pSmgr || !m_pCamera || 0 > ptScreen.x() || 0 > ptScreen.y() )
         return CSqirrNode();
 
@@ -528,7 +528,7 @@ int CSqIrrlicht::InsertPoints(   irr::scene::IMeshSceneNode *pNode,
                                  irr::scene::SMeshBuffer **pMb,
                                  unsigned int lNewVertices, unsigned int lNewIndices,
                                  unsigned int &vi, unsigned int &ii )
-{
+{_STT();
     // Sanity check
     if ( !pNode || !pMb )
         return 0;
@@ -580,7 +580,7 @@ int CSqIrrlicht::InsertPlane( irr::scene::IMeshSceneNode *pNode,
                                const irr::core::vector3df &bl, const irr::core::vector3df &br,
                                irr::video::SColor &color, long lSides,
                                float minU, float maxU, float minV, float maxV )
-{
+{_STT();
     // Add new points
     unsigned int ovi = 0, oii = 0;
     irr::scene::SMeshBuffer *pMb = NULL;
@@ -635,7 +635,7 @@ int CSqIrrlicht::InsertPlane( irr::scene::IMeshSceneNode *pNode,
 }
 
 CSqirrNode CSqIrrlicht::AddPlane( float fWidth, float fHeight, long lSides, CSqirrColor &rColor )
-{
+{_STT();
     if ( !m_pSmgr )
         return CSqirrNode();
 
@@ -665,7 +665,7 @@ CSqirrNode CSqIrrlicht::AddGrid( float fWidth, float fHeight,
                                  long lXPanels, long lYPanels,
                                  float fSpace, long lSides,
                                  CSqirrColor &rColor )
-{
+{_STT();
     if ( !m_pSmgr )
         return CSqirrNode();
 
@@ -830,7 +830,7 @@ function OnAnimate( n, o, c )
 
 */
 int CSqIrrlicht::AddMeshAnimator( sqbind::CSqEngineExport *e, CSqirrNode &n, SquirrelObject soF, long lFreq )
-{
+{_STT();
     if ( !m_pSmgr || !n.IsValid() || !e || !e->GetVmPtr() )
         return 0;
 
@@ -866,7 +866,7 @@ int CSqIrrlicht::AddMeshAnimator( sqbind::CSqEngineExport *e, CSqirrNode &n, Squ
 }
 
 void CSqIrrlicht::AnimateMeshes()
-{
+{_STT();
 	if ( !m_pSmgr )
 		return;
 
@@ -877,7 +877,7 @@ void CSqIrrlicht::AnimateMeshes()
 }
 
 CSqirrNode CSqIrrlicht::AddMesh( const sqbind::stdString &sFile, float x_fScale, int x_bClearFromCache )
-{
+{_STT();
 	if ( !m_pSmgr || !sFile.length() )
 		return CSqirrNode();
 
@@ -917,7 +917,7 @@ CSqirrNode CSqIrrlicht::AddMesh( const sqbind::stdString &sFile, float x_fScale,
 }
 
 int CSqIrrlicht::SetVertexColors( CSqirrNode &x_node, CSqirrColor &x_col )
-{
+{_STT();
 	if ( !m_pSmgr || !x_node.IsValid() )
 		return 0;
 
@@ -938,7 +938,7 @@ int CSqIrrlicht::SetVertexColors( CSqirrNode &x_node, CSqirrColor &x_col )
 
 
 CSqirrTexture CSqIrrlicht::CreateTexture( long lWidth, long lHeight, int bMipMapping )
-{
+{_STT();
 	if ( !m_pDriver || !m_pSmgr || 0 >= lWidth || 0 >= lHeight )
 		return CSqirrTexture();
 
@@ -956,7 +956,7 @@ CSqirrTexture CSqIrrlicht::CreateTexture( long lWidth, long lHeight, int bMipMap
 }
 
 CSqirrTexture CSqIrrlicht::CreateRenderTexture( long lWidth, long lHeight, int bMipMapping )
-{
+{_STT();
 	if ( !m_pDriver || !m_pSmgr || 0 >= lWidth || 0 >= lHeight )
 		return CSqirrTexture();
 
@@ -975,7 +975,7 @@ CSqirrTexture CSqIrrlicht::CreateRenderTexture( long lWidth, long lHeight, int b
 
 
 CSqirrTexture CSqIrrlicht::LoadTexture( const sqbind::stdString &sFile, int bMipMapping )
-{
+{_STT();
 	if ( !m_pSmgr || !sFile.length() )
 		return CSqirrTexture();
 
@@ -997,7 +997,7 @@ CSqirrTexture CSqIrrlicht::LoadTexture( const sqbind::stdString &sFile, int bMip
 
 int CSqIrrlicht::InsertSphere( irr::scene::SMeshBuffer *pMb, const irr::core::vector3df &center,
                                  float fWidth, float fHeight, long lPoints, const irr::video::SColor &color )
-{
+{_STT();
     float fHWidth = fWidth / 2;
     float fHHeight = fHeight / 2;
 
@@ -1071,7 +1071,7 @@ int CSqIrrlicht::InsertSphere( irr::scene::SMeshBuffer *pMb, const irr::core::ve
 }
 
 CSqirrNode CSqIrrlicht::AddSphere( float fRadius, long lPolyCount )
-{
+{_STT();
 	if ( !m_pSmgr )
 		return CSqirrNode();
 
@@ -1079,7 +1079,7 @@ CSqirrNode CSqIrrlicht::AddSphere( float fRadius, long lPolyCount )
 }
 
 CSqirrNode CSqIrrlicht::AddSphereMesh( float fWidth, float fHeight, long lPoints )
-{
+{_STT();
 	if ( !m_pSmgr )
 		return CSqirrNode();
 
@@ -1114,7 +1114,7 @@ CSqirrNode CSqIrrlicht::AddSphereMesh( float fWidth, float fHeight, long lPoints
 
 int CSqIrrlicht::InsertCylinder( irr::scene::SMeshBuffer *pMb, const irr::core::vector3df &center,
                                  float fWidth, float fHeight, long lPoints, const irr::video::SColor &color )
-{
+{_STT();
 	if ( !pMb )
 		return 0;
 
@@ -1191,7 +1191,7 @@ int CSqIrrlicht::InsertCylinder( irr::scene::SMeshBuffer *pMb, const irr::core::
 }
 
 CSqirrNode CSqIrrlicht::AddCylinderMesh( float fWidth, float fHeight, long lPoints )
-{
+{_STT();
 	if ( !m_pSmgr )
 		return CSqirrNode();
 
@@ -1227,7 +1227,7 @@ CSqirrNode CSqIrrlicht::AddCylinderMesh( float fWidth, float fHeight, long lPoin
 
 
 int CSqIrrlicht::OnEvent( const irr::SEvent& rEvent )
-{
+{_STT();
 	switch( rEvent.EventType )
 	{
 		case irr::EET_KEY_INPUT_EVENT :
@@ -1323,7 +1323,7 @@ int CSqIrrlicht::OnEvent( const irr::SEvent& rEvent )
 }
 
 int CSqIrrlicht::getLineIntersect( CSqirrLine &line, CSqirrVector3d &pt, CSqirrVector3d &axis, CSqirrVector3d *intersect )
-{
+{_STT();
     // Get line
     irr::core::line3df l(  line.start().x(), line.start().y(), line.start().z(),
 							line.end().x(), line.end().y(), line.end().z() );
@@ -1349,7 +1349,7 @@ int CSqIrrlicht::getLineIntersect( CSqirrLine &line, CSqirrVector3d &pt, CSqirrV
 }
 
 int CSqIrrlicht::getIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSqirrVector3d &axis, CSqirrVector3d *intersect )
-{
+{_STT();
     // Must have object
     if ( !m_pCamera || !m_pSmgr )
 		return 0;
@@ -1391,7 +1391,7 @@ int CSqIrrlicht::getIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSq
 }
 
 int CSqIrrlicht::getMouseIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSqirrVector3d &axis, CSqirrVector3d *intersect )
-{
+{_STT();
     // Must have object
     if ( !m_pCamera || !m_pSmgr )
 		return 0;
@@ -1429,7 +1429,7 @@ int CSqIrrlicht::getMouseIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt
 }
 
 int CSqIrrlicht::getPickPoint( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSqirrVector3d *intersect )
-{
+{_STT();
     // Must have object
     if ( !m_pCamera || !m_pSmgr )
 		return 0;
@@ -1454,7 +1454,7 @@ int CSqIrrlicht::getPickPoint( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSq
 }
 
 CSqirrVector2d CSqIrrlicht::getNodeScreenPos( CSqirrNode &rNode )
-{
+{_STT();
     // Must have object
     if ( !m_pCamera || !m_pSmgr )
         return CSqirrVector2d( -1, -1 );
@@ -1470,7 +1470,7 @@ CSqirrVector2d CSqIrrlicht::getNodeScreenPos( CSqirrNode &rNode )
 }
 
 CSqirrVector2d CSqIrrlicht::getScreenPos( CSqirrVector3d &v )
-{
+{_STT();
     // Must have object
     if ( !m_pCamera || !m_pSmgr )
         return CSqirrVector2d( -1, -1 );
@@ -1484,7 +1484,7 @@ CSqirrVector2d CSqIrrlicht::getScreenPos( CSqirrVector3d &v )
 }
 
 int CSqIrrlicht::screenToWorld( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorld, float fDist )
-{
+{_STT();
     // Must have object
     if ( !m_pCamera || !m_pSmgr )
         return 0;
@@ -1508,7 +1508,7 @@ int CSqIrrlicht::screenToWorld( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorl
 }
 
 int CSqIrrlicht::screenToWorldBox( CSqirrRect2d &rcScreen, CSqirrBoundingBox3d *bbWorld, float fDist )
-{
+{_STT();
     // Must have object
     if ( !m_pCamera || !m_pSmgr )
         return 0;
@@ -1548,7 +1548,7 @@ int CSqIrrlicht::screenToWorldBox( CSqirrRect2d &rcScreen, CSqirrBoundingBox3d *
 
 
 int CSqIrrlicht::screenToPlane( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorld, float fDist )
-{
+{_STT();
     // Must have object
     if ( !m_pCamera || !m_pSmgr )
         return 0;
@@ -1582,7 +1582,7 @@ int CSqIrrlicht::screenToPlane( CSqirrVector2d &ptScreen, CSqirrVector3d *ptWorl
 }
 
 int CSqIrrlicht::FillVolume( CSqirrNode &rNode, CSqirrBoundingBox3d &rBb )
-{
+{_STT();
 	if ( !rNode.IsValid() )
 		return 0;
 

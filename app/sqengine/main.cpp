@@ -19,7 +19,7 @@ BOOL WINAPI DllMain( HANDLE hinstDLL, DWORD dwReason, LPVOID lpvReserved ) { ret
 
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_GetModuleInfo );
 extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
-{
+{_STT();
 	if ( !oexCHECK_PTR( pDi ) )
 	{	oexERROR( 0, oexT( "Invalid function argument" ) );
 		return 0;
@@ -50,7 +50,7 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Start );
 extern "C" oex::oexRESULT SRV_Start( oex::SRawAllocator x_sRawAllocator, oex::oexCSTR x_pPath, oex::oexCSTR x_pCommandLine, oex::oexINT x_nCommandLine, oex::oexCPVOID x_pData )
-{
+{_STT();
 	// Set our allocator
 	oex::CMem::SetRawAllocator( x_sRawAllocator );
 
@@ -122,7 +122,7 @@ extern "C" oex::oexRESULT SRV_Start( oex::SRawAllocator x_sRawAllocator, oex::oe
 
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Idle );
 extern "C" oex::oexRESULT SRV_Idle()
-{
+{_STT();
 	// Ensure pointer
 	if ( !oexCHECK_PTR( g_psqScriptThread ) )
 		return -1;
@@ -138,7 +138,7 @@ extern "C" oex::oexRESULT SRV_Idle()
 
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_Stop );
 extern "C" oex::oexRESULT SRV_Stop()
-{
+{_STT();
 	if ( oexCHECK_PTR( g_psqScriptThread ) )
 	{	g_psqScriptThread->Destroy();
 		OexAllocDelete( g_psqScriptThread );

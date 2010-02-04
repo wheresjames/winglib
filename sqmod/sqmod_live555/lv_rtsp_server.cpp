@@ -7,7 +7,7 @@
 
 // CLiveMediaSubsession::createNew
 CLvRtspServer::CLiveMediaSubsession* CLvRtspServer::CLiveMediaSubsession::createNew( UsageEnvironment& env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer )
-{
+{_STT();
 	if ( !pRtspServer )
 		return oexNULL;
 
@@ -16,7 +16,7 @@ CLvRtspServer::CLiveMediaSubsession* CLvRtspServer::CLiveMediaSubsession::create
 
 // CLiveMediaSubsession::createNewStreamSource
 FramedSource* CLvRtspServer::CLiveMediaSubsession::createNewStreamSource( unsigned clientSessionId, unsigned& estBitrate )
-{
+{_STT();
 	if ( !m_pRtspServer )
 		return oexNULL;
 
@@ -34,7 +34,7 @@ FramedSource* CLvRtspServer::CLiveMediaSubsession::createNewStreamSource( unsign
 
 // CLiveMediaSubsession::createNewRTPSink
 RTPSink* CLvRtspServer::CLiveMediaSubsession::createNewRTPSink( Groupsock* rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic, FramedSource* inputSource )
-{
+{_STT();
 	return MPEG4ESVideoRTPSink::createNew( envir(), rtpGroupsock, rtpPayloadTypeIfDynamic, 1000000 / 15 );
 //	return H264VideoRTPSink::createNew( envir(), rtpGroupsock, rtpPayloadTypeIfDynamic, 1000 );
 //	return MPEG1or2VideoRTPSink::createNew( envir(), rtpGroupsock );
@@ -42,7 +42,7 @@ RTPSink* CLvRtspServer::CLiveMediaSubsession::createNewRTPSink( Groupsock* rtpGr
 
 // CLiveMediaSource::createNew()
 CLvRtspServer::CLiveMediaSource* CLvRtspServer::CLiveMediaSource::createNew( UsageEnvironment& env, CLvRtspServer *pRtspServer )
-{
+{_STT();
 	if ( !pRtspServer )
 		return oexNULL;
 
@@ -51,7 +51,7 @@ CLvRtspServer::CLiveMediaSource* CLvRtspServer::CLiveMediaSource::createNew( Usa
 
 // CLiveMediaSource::doGetNextFrame()
 void CLvRtspServer::CLiveMediaSource::doGetNextFrame()
-{
+{_STT();
 	// Call into the script to get the next frame
 	if ( !m_pRtspServer || 0 > m_pRtspServer->CallDoGetNextFrame( &CLvRtspServer::CLiveMediaSource::_deliverFrame, this ) )
 	{	//handleClosure(this);
@@ -64,7 +64,7 @@ void CLvRtspServer::CLiveMediaSource::doGetNextFrame()
 }
 
 void CLvRtspServer::CLiveMediaSource::_deliverFrame( oex::oexPVOID pUserData, sqbind::CSqBinary *pFrame )
-{
+{_STT();
 	CLvRtspServer::CLiveMediaSource *p = (CLvRtspServer::CLiveMediaSource*)pUserData;
 	if ( p )
 		p->deliverFrame( pFrame );
@@ -72,7 +72,7 @@ void CLvRtspServer::CLiveMediaSource::_deliverFrame( oex::oexPVOID pUserData, sq
 
 // CLiveMediaSource::deliverFrame()
 void CLvRtspServer::CLiveMediaSource::deliverFrame( sqbind::CSqBinary *pFrame )
-{
+{_STT();
 	// End of stream?
 	if ( !pFrame || !pFrame->getUsed() )
 	{	fFrameSize = 0; fTo = 0;
@@ -122,7 +122,7 @@ void CLvRtspServer::CLiveMediaSource::deliverFrame( sqbind::CSqBinary *pFrame )
 }
 
 CLvRtspServer::CLvRtspServer()
-{
+{_STT();
 	m_nEnd = 0;
 	m_nFrames = 0;
 	m_pEnv = oexNULL;
@@ -133,7 +133,7 @@ CLvRtspServer::CLvRtspServer()
 }
 
 void CLvRtspServer::Destroy()
-{
+{_STT();
 	// Tell thread loop to exit
 	m_nEnd = 1;
 
@@ -150,7 +150,7 @@ void CLvRtspServer::Destroy()
 }
 
 int CLvRtspServer::StartServer( sqbind::CSqMulti *m )
-{
+{_STT();
 	Destroy();
 
 	// Save off params
@@ -170,7 +170,7 @@ int CLvRtspServer::StartServer( sqbind::CSqMulti *m )
 }
 
 oex::oexBOOL CLvRtspServer::InitThread( oex::oexPVOID x_pData )
-{
+{_STT();
 	// Initialize the video server
 	if ( !ThreadOpen( &m_mParams ) )
 		return oex::oexFALSE;
@@ -179,7 +179,7 @@ oex::oexBOOL CLvRtspServer::InitThread( oex::oexPVOID x_pData )
 }
 
 oex::oexBOOL CLvRtspServer::DoThread( oex::oexPVOID x_pData )
-{
+{_STT();
 	// Run the thing
 	if ( !m_pEnv )
 		return oex::oexFALSE;
@@ -200,7 +200,7 @@ oex::oexBOOL CLvRtspServer::DoThread( oex::oexPVOID x_pData )
 }
 
 oex::oexINT CLvRtspServer::EndThread( oex::oexPVOID x_pData )
-{
+{_STT();
 	// Close everything
 	ThreadDestroy();
 
@@ -208,7 +208,7 @@ oex::oexINT CLvRtspServer::EndThread( oex::oexPVOID x_pData )
 }
 
 void CLvRtspServer::ThreadDestroy()
-{
+{_STT();
 	if ( m_pRtspServer )
 		m_pRtspServer->close( m_pRtspServer );
 
@@ -221,7 +221,7 @@ void CLvRtspServer::ThreadDestroy()
 }
 
 int CLvRtspServer::ThreadOpen( sqbind::CSqMulti *m )
-{
+{_STT();
 	// Lose old container
 	ThreadDestroy();
 
@@ -283,7 +283,7 @@ int CLvRtspServer::ThreadOpen( sqbind::CSqMulti *m )
 }
 
 int CLvRtspServer::CallDoGetNextFrame( f_deliverFrame fDeliverFrame, oex::oexPVOID pUserData )
-{
+{_STT();
 	m_fDeliverFrame = fDeliverFrame;
 	m_pUserData = pUserData;
 

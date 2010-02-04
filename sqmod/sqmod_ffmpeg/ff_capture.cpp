@@ -3,7 +3,7 @@
 #include "stdafx.h"
 
 CFfCapture::CFfCapture()
-{
+{_STT();
 	m_pFormatContext = oexNULL;
 	m_pCodecContext = oexNULL;
 	m_pFrame = oexNULL;
@@ -14,7 +14,7 @@ CFfCapture::CFfCapture()
 }
 
 void CFfCapture::Destroy()
-{
+{_STT();
 	if ( m_pkt.data )
 		av_free_packet( &m_pkt );
 
@@ -34,7 +34,7 @@ void CFfCapture::Destroy()
 }
 
 int CFfCapture::Open( const sqbind::stdString &sFormat, const sqbind::stdString &sDevice, sqbind::CSqMulti *m )
-{
+{_STT();
 	// Lose old container
 	Destroy();
 
@@ -148,7 +148,7 @@ int CFfCapture::Open( const sqbind::stdString &sFormat, const sqbind::stdString 
 }
 
 int CFfCapture::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
-{
+{_STT();
 	if ( !m_pFormatContext )
 		return -1;
 
@@ -183,7 +183,7 @@ int CFfCapture::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 }
 /*
 int CFfCapture::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
-{
+{_STT();
 	// Read a frame from the packet
 	int res = -1;
 

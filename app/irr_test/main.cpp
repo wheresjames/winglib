@@ -13,7 +13,7 @@ public:
 	MyEventReceiver ( irr::IrrlichtDevice *device ): Device ( device ) {}
 
 	virtual bool OnEvent(const irr::SEvent& event)
-	{
+	{_STT();
 		if (event.EventType == irr::EET_GUI_EVENT)
 		{
 			irr::s32 id = event.GUIEvent.Caller->getID();
@@ -44,7 +44,7 @@ int 						g_frames = 0;
 MyEventReceiver				*g_receiver = oexNULL;
 
 void Close()
-{
+{_STT();
 	if ( g_pDevice )
 	{	g_pDevice->closeDevice();
 		g_pDevice->drop();
@@ -53,7 +53,7 @@ void Close()
 }
 
 int Init( int width, int height )
-{
+{_STT();
 
 #if defined( _WIN32_WCE )
 
@@ -158,7 +158,7 @@ int Init( int width, int height )
 }
 
 int Draw()
-{
+{_STT();
 	if ( !g_pDevice || !g_pDevice->run() )
 		return -1;
 

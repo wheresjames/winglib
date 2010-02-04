@@ -3,29 +3,34 @@
 #include "stdafx.h"
 
 void CHttpServer::SetServerCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sServer )
-{	m_pServerMsgQueue = x_pMsgQueue;
+{_STT();
+	m_pServerMsgQueue = x_pMsgQueue;
 	m_sServer = sServer;
 }
 
 void CHttpServer::SetSessionCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sSession )
-{	m_pSessionMsgQueue = x_pMsgQueue;
+{_STT();
+	m_pSessionMsgQueue = x_pMsgQueue;
 	m_sSession = sSession;
 }
 
 void CHttpServer::SetAuthenticationCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sAuthenticate )
-{	m_pAuthenticateMsgQueue = x_pMsgQueue;
+{_STT();
+	m_pAuthenticateMsgQueue = x_pMsgQueue;
 	m_sAuthenticate = sAuthenticate;
 }
 
 void CHttpServer::SetSessionCallbackScript( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sScript, int bFile, const sqbind::stdString &sSession )
-{	m_pSessionMsgQueue = x_pMsgQueue;
+{_STT();
+	m_pSessionMsgQueue = x_pMsgQueue;
 	m_sScript = sScript;
 	m_bFile = bFile;
 	m_sSession = sSession;
 }
 
 int CHttpServer::Start( int nPort )
-{
+{_STT();
+
 	// Set session callback
 	m_server.SetSessionCallback( (oex::oexPVOID)CHttpServer::_OnSessionCallback, this );
 
@@ -44,7 +49,8 @@ int CHttpServer::Start( int nPort )
 
 oex::oexINT CHttpServer::_OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
 										     oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
-{
+{_STT();
+
 	CHttpServer *pServer = (CHttpServer*)x_pData;
 	if ( !oexCHECK_PTR( pServer ) )
 		return -1;
@@ -57,7 +63,8 @@ oex::oexINT CHttpServer::_OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nE
 
 oex::oexINT CHttpServer::OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
 										    oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
-{
+{_STT();
+
 	if ( m_pServerMsgQueue )
 		m_pServerMsgQueue->execute( oexNULL, oexT( "." ), m_sServer );
 
@@ -65,7 +72,8 @@ oex::oexINT CHttpServer::OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEv
 }
 
 oex::oexINT CHttpServer::_OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
-{
+{_STT();
+
 	CHttpServer *pServer = (CHttpServer*)x_pData;
 	if ( !oexCHECK_PTR( pServer ) )
 		return -1;
@@ -77,7 +85,8 @@ oex::oexINT CHttpServer::_OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSe
 }
 
 oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
-{
+{_STT();
+
 	if ( !oexCHECK_PTR( m_pSessionMsgQueue ) || !oexCHECK_PTR( x_pSession ) )
 		return -1;
 
@@ -187,24 +196,28 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 }
 
 int CHttpServer::SetLogFile( const sqbind::stdString &sFile )
-{	return m_server.SetLogFile( sFile.c_str() );
+{_STT();
+	return m_server.SetLogFile( sFile.c_str() );
 }
 
 void CHttpServer::EnableRemoteConnections( int bEnable )
-{
+{_STT();
+
 	// Enable/disable remote connections
 	m_server.EnableRemoteConnections( bEnable ? oex::oexTRUE : oex::oexFALSE );
 
 }
 
 void CHttpServer::EnableSessions( int bEnable )
-{
+{_STT();
+
 	// Enable/disable remote connections
 	m_server.EnableSessions( bEnable ? oex::oexTRUE : oex::oexFALSE );
 
 }
 void CHttpServer::SetSessionTimeout( int nTimeout )
-{
+{_STT();
+
 	if ( 0 > nTimeout )
 		nTimeout = 0;
 
@@ -214,27 +227,32 @@ void CHttpServer::SetSessionTimeout( int nTimeout )
 }
 
 void CHttpServer::EnableMultiThreading( int bEnable )
-{
+{_STT();
+
 	m_server.EnableMultiThreading( bEnable );
 }
 
 void CHttpServer::EnableScriptLinger( int bEnable )
-{
+{_STT();
+
 	m_bScriptsLinger = bEnable;
 }
 
 int CHttpServer::GetNumActiveClients()
-{
+{_STT();
+
 	return m_server.GetNumActiveClients();
 }
 
 int CHttpServer::MapFolder( const sqbind::stdString &sName, const sqbind::stdString &sFolder )
-{
+{_STT();
+
 	return m_server.MapFolder( sName.c_str(), sFolder.c_str() );
 }
 
 oex::oexINT CHttpServer::_OnAuthenticate( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession, oex::oexLONG lType, oex::oexCSTR pData )
-{
+{_STT();
+
 	CHttpServer *pServer = (CHttpServer*)x_pData;
 	if ( !oexCHECK_PTR( pServer ) )
 		return -1;
@@ -246,7 +264,8 @@ oex::oexINT CHttpServer::_OnAuthenticate( oex::oexPVOID x_pData, oex::THttpSessi
 }
 
 oex::oexINT CHttpServer::OnAuthenticate( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession, oex::oexLONG lType, oex::oexCSTR pData )
-{
+{_STT();
+
 	if ( !m_pAuthenticateMsgQueue )
 		return 0;
 

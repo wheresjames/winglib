@@ -16,7 +16,9 @@ extern "C"
 //DECLARE_ALIGNED_8 (const uint64_t, ff_pw_20 ) = 0x0014001400140014ULL;
 
 int snd_strerror( const char *p )
-{ return 0; }
+{_STT();
+	return 0; 
+}
 }
 
 // Export Functions
@@ -208,7 +210,7 @@ DECLARE_INSTANCE_TYPE( CFfCapture );
 
 // Export classes
 static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
-{
+{_STT();
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
 
@@ -247,7 +249,7 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 #else
 
 	static void SQBIND_Export( sqbind::VM x_vm )
-	{	SQBIND_Export_ffmpeg( x_vm ); }
+	{_STT(); SQBIND_Export_ffmpeg( x_vm ); }
 
 	// Include squirrel module exported symbols
 	#include <sqmod_extern.hpp>

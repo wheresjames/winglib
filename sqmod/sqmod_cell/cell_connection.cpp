@@ -4,7 +4,8 @@
 #include "stdafx.h"
 
 CCellConnection::CCellConnection()
-{	m_nTagCacheLimit = eDefaultCacheLimit;
+{_STT();
+	m_nTagCacheLimit = eDefaultCacheLimit;
 	oexZeroMemory( &m_comm, sizeof( m_comm ) );
 	oexZeroMemory( &m_tagsDetails, sizeof( m_tagsDetails ) );
 	m_comm.error = -1;
@@ -12,11 +13,13 @@ CCellConnection::CCellConnection()
 }
 
 CCellConnection::CCellConnection( const CCellConnection &r )
-{	CCellConnection();
+{_STT();
+	CCellConnection();
 }
 
 int CCellConnection::Destroy()
-{
+{_STT();
+
 	// Close the connection
 	if ( m_comm.file_handle )
 	{
@@ -36,7 +39,7 @@ int CCellConnection::Destroy()
 }
 
 int CCellConnection::Connect( const sqbind::stdString &sIp, int nLoadTags )
-{
+{_STT();
 	// Lose old connection
 	Destroy();
 
@@ -87,7 +90,7 @@ int CCellConnection::Connect( const sqbind::stdString &sIp, int nLoadTags )
 }
 
 sqbind::stdString CCellConnection::DumpCache()
-{
+{_STT();
 	sqbind::stdString sRet;
 
 	// Create a string describing the cache
@@ -146,7 +149,7 @@ sqbind::stdString CCellConnection::DumpCache()
 }
 
 int CCellConnection::ReleaseTags()
-{
+{_STT();
 	// Lose the tag map
 	m_mapTags.clear();
 	m_mapSqTags.clear();
@@ -164,7 +167,7 @@ int CCellConnection::ReleaseTags()
 }
 
 int CCellConnection::LoadTags()
-{
+{_STT();
 	int nStatus = 1;
 
 	// Lose old tags
@@ -244,12 +247,12 @@ int CCellConnection::LoadTags()
 }
 
 int CCellConnection::IsResponding()
-{
+{_STT();
 	return ( m_bNotResponding ) ? 0 : 1;
 }
 
 int CCellConnection::IsConnected()
-{
+{_STT();
 	if ( m_bNotResponding )
 		return 0;
 
@@ -257,7 +260,7 @@ int CCellConnection::IsConnected()
 }
 
 oex::oexCSTR CCellConnection::GetTypeName( int nType )
-{
+{_STT();
 #	define SWITCH_TYPE( t )	case CIP_##t		: return oexT( #t );
 
 	// Type
@@ -303,7 +306,7 @@ oex::oexCSTR CCellConnection::GetTypeName( int nType )
 
 
 int CCellConnection::GetTypeFromName( const sqbind::stdString &sType )
-{
+{_STT();
 #	define CHECK_TYPE( t )	if ( sType == oexT( #t ) ) return CIP_##t
 
 	CHECK_TYPE( PROGRAM );
@@ -343,7 +346,7 @@ int CCellConnection::GetTypeFromName( const sqbind::stdString &sType )
 }
 
 int CCellConnection::GetTypeSize( int nType )
-{
+{_STT();
 	// Type
 	switch( nType & 0xff )
 	{
@@ -368,7 +371,7 @@ int CCellConnection::GetTypeSize( int nType )
 }
 
 oex::oexBOOL CCellConnection::GetItemValue( int nType, unsigned char *pData, int nSize, int nBit, sqbind::stdString &sRet )
-{
+{_STT();
 	if ( !nSize || !oexCHECK_PTR( pData ) )
 		return oex::oexFALSE;
 
@@ -465,7 +468,7 @@ oex::oexBOOL CCellConnection::GetItemValue( int nType, unsigned char *pData, int
 }
 
 sqbind::CSqMap CCellConnection::TagToMap( _tag_detail *pTd )
-{
+{_STT();
 	if ( !oexCHECK_PTR( pTd ) )
 		return sqbind::CSqMap();
 
@@ -491,7 +494,7 @@ sqbind::CSqMap CCellConnection::TagToMap( _tag_detail *pTd )
 }
 
 void CCellConnection::VerifyTemplate()
-{
+{_STT();
 	// For each tag name
 	for( sqbind::CSqMulti::t_List::iterator it = m_mapSqTemplates.list().begin();
 		 it != m_mapSqTemplates.list().end(); it++ )
@@ -566,7 +569,7 @@ void CCellConnection::VerifyTemplate()
 }
 
 oex::oexBOOL CCellConnection::ParseTag( const sqbind::stdString &sTag, sqbind::stdString &sName, int &nProgram, int &nTag, int &nIndex, int &nOffset, int &nSize, int &nType, int &nBit )
-{
+{_STT();
 	// Set invalid path
 	nProgram = nTag = nIndex = nOffset = nSize = nType = nBit = -1;
 
@@ -646,7 +649,7 @@ oex::oexBOOL CCellConnection::ParseTag( const sqbind::stdString &sTag, sqbind::s
 }
 
 sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
-{
+{_STT();
 	// Must be connected
 	if ( m_comm.error != OK )
 		return SetLastError( oexT( "#err=Not connected" ) );
@@ -831,7 +834,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 }
 
 sqbind::stdString CCellConnection::GetBackplaneData()
-{
+{_STT();
 	oex::CStr ret;
 
 	LoadTags();

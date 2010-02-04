@@ -3,7 +3,7 @@
 #include "stdafx.h"
 
 CFfContainer::CFfContainer()
-{
+{_STT();
 	m_pFormatContext = oexNULL;
 	m_pCodecContext = oexNULL;
 	m_pFrame = oexNULL;
@@ -17,7 +17,7 @@ CFfContainer::CFfContainer()
 }
 
 void CFfContainer::Destroy()
-{
+{_STT();
 	if ( m_nRead )
 	{
 		if ( m_pkt.data )
@@ -70,7 +70,7 @@ void CFfContainer::Destroy()
 }
 
 int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
-{
+{_STT();
 	// Lose old container
 	Destroy();
 
@@ -169,7 +169,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 }
 
 int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
-{
+{_STT();
 	if ( !m_pFormatContext )
 		return -1;
 
@@ -207,7 +207,7 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 }
 
 int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
-{
+{_STT();
 	// Read a frame from the packet
 	int res = -1;
 
@@ -305,7 +305,7 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 }
 
 int CFfContainer::Create( const sqbind::stdString &sUrl, const sqbind::stdString &sType, sqbind::CSqMulti *m )
-{
+{_STT();
 	Destroy();
 
 	if ( !sUrl.length() )
@@ -374,7 +374,7 @@ int CFfContainer::Create( const sqbind::stdString &sUrl, const sqbind::stdString
 }
 
 int CFfContainer::InitWrite()
-{
+{_STT();
 	if ( !m_pFormatContext || !m_pFormatContext->oformat )
 		return 0;
 
@@ -408,7 +408,7 @@ int CFfContainer::InitWrite()
 }
 
 int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
-{
+{_STT();
 	if ( !m_pFormatContext )
 		return -1;
 
@@ -446,7 +446,7 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 }
 
 int CFfContainer::WriteFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
-{
+{_STT();
 	if ( !m_pFormatContext )
 		return 0;
 

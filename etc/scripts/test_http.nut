@@ -28,11 +28,15 @@ function OnProcessRequest( params )
 
 function _init() : ( _g )
 {
+	local port = 1234;
+
+	_self.echo( "Starting web server on port " + port );
+
 	_g.server = CHttpServer();
 
 	_g.server.SetSessionCallback( _self.queue(), "OnProcessRequest" );
 
-	if ( !_g.server.Start( 1234 ) )
+	if ( !_g.server.Start( port ) )
 		_self.alert( "Unable to start http server" );
 }
 

@@ -4,20 +4,20 @@
 #include "stdafx.h"
 
 CSqXml::CSqXml()
-{
+{_STT();
 }
 
 CSqXml::~CSqXml()
-{
+{_STT();
 	Destroy();
 }
 
 void CSqXml::Destroy()
-{
+{_STT();
 }
 
 static int _Decode( sqbind::CSqMulti *out, TiXmlElement *in, int bIndexed, int nDepth = 0 )
-{
+{_STT();
 	// Sanity check
 	if ( !out || !in || nDepth > CSqXml::eMaxParseDepth )
 		return 0;
@@ -102,7 +102,7 @@ static int _Decode( sqbind::CSqMulti *out, TiXmlElement *in, int bIndexed, int n
 }
 
 int CSqXml::Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int bIndexed )
-{
+{_STT();
 	if ( !sData.length() || !pOut )
 		return 0;
 
@@ -133,7 +133,7 @@ int CSqXml::Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int 
 }
 
 static int _Encode( TiXmlNode *pNode, sqbind::CSqMulti *pData, int bIndexed, int nDepth = 0 )
-{
+{_STT();
 	if ( !pNode || !pData )
 		return 0;
 
@@ -190,7 +190,7 @@ static int _Encode( TiXmlNode *pNode, sqbind::CSqMulti *pData, int bIndexed, int
 sqbind::stdString CSqXml::Encode( sqbind::CSqMulti *pData,
 								  const sqbind::stdString &sLineBreak,
 								  const sqbind::stdString &sTab, int bIndexed )
-{
+{_STT();
 	if ( !pData )
 		return oexT( "" );
 

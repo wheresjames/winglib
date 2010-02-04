@@ -4,16 +4,16 @@
 #include "stdafx.h"
 
 CSqMimetic::CSqMimetic()
-{
+{_STT();
 }
 
 CSqMimetic::~CSqMimetic()
-{
+{_STT();
 	Destroy();
 }
 
 void CSqMimetic::Destroy()
-{
+{_STT();
 }
 
 /*
@@ -32,7 +32,7 @@ static void printMimeStructure(mimetic::MimeEntity* pMe, int tabcount = 0)
 */
 
 int CSqMimetic::Decode( const sqbind::stdString &s )
-{
+{_STT();
 //	printMimeStructure( &m_me );
 	std::stringstream ss; ss.write( s.c_str(), s.length() );
 	m_me.load( ss );
@@ -40,51 +40,51 @@ int CSqMimetic::Decode( const sqbind::stdString &s )
 }
 
 sqbind::stdString CSqMimetic::Encode()
-{
+{_STT();
 	std::stringstream ss; ss << m_me;
 	return sqbind::stdString( ss.str().c_str(), ss.str().length() );
 }
 
 void CSqMimetic::setFrom( const sqbind::stdString &s )
-{
+{_STT();
 	m_me.header().from( s.c_str() );
 }
 
 sqbind::stdString CSqMimetic::getFrom()
-{
+{_STT();
 	return sqbind::stdString( m_me.header().from().str().c_str(), 
 						      m_me.header().from().str().length() );
 }
 
 void CSqMimetic::setTo( const sqbind::stdString &s )
-{
+{_STT();
 	m_me.header().to( s.c_str() );
 }
 
 sqbind::stdString CSqMimetic::getTo()
-{
+{_STT();
 	return sqbind::stdString( m_me.header().to().str().c_str(), 
 						      m_me.header().to().str().length() );
 }
 
 void CSqMimetic::setSubject( const sqbind::stdString &s )
-{
+{_STT();
 	m_me.header().subject( s.c_str() );
 }
 
 sqbind::stdString CSqMimetic::getSubject()
-{
+{_STT();
 	return sqbind::stdString( m_me.header().subject().c_str(), 
 						      m_me.header().subject().length() );
 }
 
 void CSqMimetic::setBody( const sqbind::stdString &s )
-{
+{_STT();
 	m_me.body().assign( s.c_str() );
 }
 
 sqbind::stdString CSqMimetic::getBody()
-{	
+{_STT();
 	std::stringstream ss; ss << m_me.body();
 	return sqbind::stdString( ss.str().c_str(), ss.str().length() );
 }

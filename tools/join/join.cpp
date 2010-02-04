@@ -5,7 +5,7 @@
 using namespace oex;
 
 int process(int argc, char* argv[])
-{
+{_STT();
 	if ( 2 > argc )
 	{	oexEcho( oexT( "Use : join <output file> [file1] [file2] ..." ) );
 		return -1;

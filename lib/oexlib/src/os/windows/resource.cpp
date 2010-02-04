@@ -313,7 +313,7 @@ oexPVOID CResource::ThreadProc( oexPVOID x_pData )
 	oexPVOID pRet = pRi->fnCallback( pRi->pData );
 
 	// Remove the stack trace for this thread
-	oexSt().RemoveThread();
+	CStackTrace::St()->RemoveThread();
 
 	// Uninitialize COM
 	CoUninitialize();

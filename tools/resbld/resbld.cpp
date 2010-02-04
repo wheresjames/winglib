@@ -21,7 +21,7 @@ void chtoa( oexUCHAR *b, oexUCHAR ch )
 }
 
 int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, oex::CStr sSuf, oex::CStr sInc )
-{
+{_STT();
 //	oexCHAR8 *_p = ;
 //	oexINT _l = ;
 //	oexEcho( oexMbToStr( oex::zip::CUncompress::Uncompress( oex::CStr8( _p, _l ) ) ).Ptr() );
@@ -113,7 +113,7 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 			  oex::CStr sPath, oex::CFile *pInc, oex::CFile *pCmp,
 			  oex::CFile *pRes, oex::CFile *pDep, oex::CFile *pSym )
-{
+{_STT();
 	// Ensure directory exists
 	if ( !oexExists( dir.Ptr() ) )
 		return -10;
@@ -175,7 +175,7 @@ int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 int from_dirs( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 			   oex::CStr sPath, oex::CFile *pInc, oex::CFile *pCmp,
 			   oex::CFile *pRes, oex::CFile *pDep, oex::CFile *pSym )
-{
+{_STT();
 	int ret = -1;
 	oex::CStrList lst = oex::CParser::Split( dir.Ptr(), oexT( " \r\n\t" ) );
 	for ( oex::CStrList::iterator it; lst.Next( it ); )
@@ -185,7 +185,7 @@ int from_dirs( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 
 
 int process(int argc, char* argv[])
-{
+{_STT();
 	if ( 2 > argc )
 	{	oexEcho( oexT( "Use : resbld <file>" ) );
 		return -1;

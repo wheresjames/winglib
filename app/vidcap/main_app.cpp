@@ -22,17 +22,17 @@
 IMPLEMENT_APP( CMainApp )
 
 CMainApp::CMainApp()
-{
+{_STT();
 
 }
 
 CMainApp::~CMainApp()
-{
+{_STT();
 
 }
 
 bool CMainApp::OnInit()
-{
+{_STT();
 	// Turn off color mapping
 //	wxSystemOptions::SetOption( _T( "msw.remap" ), 0 );
 

@@ -36,61 +36,23 @@
 
 OEX_USING_NAMESPACE
 
+/// Set to non-zero to enable stack tracing
+oexBOOL CStackTrace::m_bEnable = oexFALSE;
+
+/// Instance of stack trace
+CStackTrace *CStackTrace::m_pst = oexNULL;
+
 #if defined( OEXLIB_USING_TLSAPI )
 
 /// Tls API index
-static oexUINT g_tls_dwIndex = ( (oexUINT)-1 );
+oexUINT CStackTrace::m_tls_dwIndex = ( (oexUINT)-1 );
 
 #elif defined( OEXLIB_USING_TLS )
 
 /// Thread specific stack pointer
-static oexTLS CStackTrace::CStack *g_tls_pStack = oexNULL;
+oexTLS CStackTrace::CStack *CStackTrace::m_tls_pStack = oexNULL;
 
 #endif
-
-
-CStackTrace::CStack* CStackTrace::InitPush() 
-{
-#if defined( OEXLIB_USING_TLSAPI )
-
-	// Return thread local storage index
-	CStack *pStack;
-	if ( ( (oexUINT)-1 ) != g_tls_dwIndex )
-	{	pStack = (CStack*)oexTlsGetValue( g_tls_dwIndex );
-		if ( pStack != oexNULL ) 
-			return pStack;
-	} // end if
-
-	// Allocate TLS 
-	if ( ( (oexUINT)-1 ) == g_tls_dwIndex )
-		g_tls_dwIndex = oexTlsAllocate();
-	
-	// Set stack value
-	pStack = GetStack();
-	if ( !pStack )
-		return oexNULL;
-
-	// Save stack value
-	if ( ( (oexUINT)-1 ) != g_tls_dwIndex ) 
-		oexTlsSetValue( g_tls_dwIndex, pStack );
-		
-	return pStack;
-
-#elif defined( OEXLIB_USING_TLS )
-
-	// Are we already initialized for this thread?
-	if ( g_tls_pStack ) 
-		return g_tls_pStack;
-
-	return ( g_tls_pStack = GetStack() );
-
-#else
-
-	return GetStack(); 
-
-#endif	
-
-}
 
 CStackTrace::CStack* CStackTrace::GetStack()
 {
@@ -169,12 +131,12 @@ oexBOOL CStackTrace::RemoveThread()
 
 #if defined( OEXLIB_USING_TLSAPI )
 
-	if ( ( (oexUINT)-1 ) != g_tls_dwIndex )
-		oexTlsSetValue( g_tls_dwIndex, 0 );
+	if ( ( (oexUINT)-1 ) != m_tls_dwIndex )
+		oexTlsSetValue( m_tls_dwIndex, 0 );
 
 #elif defined( OEXLIB_USING_TLS )
 
-	g_tls_pStack = 0;
+	m_tls_pStack = 0;
 
 #endif
 
@@ -196,21 +158,99 @@ void CStackTrace::Release()
 	oexTRY
 	{
 		// Delete object if any
-		if ( oexSt().getUsedSlots() )
+		if ( m_pst )
 		{
 #if defined( OEXLIB_STACK_ENABLE_LOCKS )
 
 			// Lock for good
-			oexSt().m_lock.Wait( 30000 );
+			m_pst->m_lock.Wait( 30000 );
 
 #endif
+
 			// Release stack objects
 			oexUINT i = 0;
-			while ( CStack *p = oexSt().Next( &i ) )
+			while ( CStack *p = m_pst->Next( &i ) )
 				OexAllocDestruct( p );
+
+			// Delete stack trace pool
+			OexAllocDestruct( m_pst ); 
 
 		} // end if
 
 	} oexCATCH_ALL() {}
+
+	// All gone
+	m_pst = oexNULL; 
 }
+
+oexBOOL CStackTrace::AddModule( oexPVOID x_pBase, CStackTrace* x_pSt, oexCSTR x_pName )
+{
+	oexAutoLock ll( m_lockModules );
+	if ( !ll.IsLocked() )
+		return oexFALSE;
+
+	// Clear list if no modules
+	if ( !m_uModules )
+		oexZero( m_mi );
+
+	// Find an empty slot
+	for ( oexUINT i = 0; i < eMaxModules; i++ )
+		if ( !m_mi[ i ].pAddress )
+		{
+			m_uModules++;
+
+			// Use base address if name not specified
+			CStr s; if ( !x_pName ) x_pName = ( s = oexFmt( oexT( "0x%08x" ), (oexUINT)x_pBase ) ).Ptr();
+
+			// Save module info
+			zstr::Copy( m_mi[ i ].szName, oexSizeOfArray( m_mi[ i ].szName ), x_pName );
+			m_mi[ i ].pAddress = x_pBase;
+			m_mi[ i ].pSt = x_pSt;
+
+			return oexTRUE;
+
+		} // end if
+
+	return oexFALSE;
+}
+
+oexBOOL CStackTrace::RemoveModule( oexPVOID x_pBase )
+{	
+	oexAutoLock ll( m_lockModules );
+	if ( !ll.IsLocked() )
+		return oexFALSE;
+
+	// Find the module
+	for ( oexUINT i = 0; i < eMaxModules; i++ )
+		if ( m_mi[ i ].pAddress == x_pBase )
+		{	if ( m_uModules ) m_uModules--;
+			m_mi[ i ].pSt = 0;
+			m_mi[ i ].pAddress = 0;
+			*m_mi[ i ].szName = 0;
+			return oexTRUE;
+		} // end if
+
+	return oexFALSE;
+}
+
+CStackTrace::SModuleInfo* CStackTrace::NextModule( oexUINT *i )
+{
+	// Sanity checks
+	if ( !i || eMaxModules <= (*i) )
+		return oexNULL;
+
+	// Search for the next empty slot
+	while ( (*i) < eMaxModules )
+		if ( !m_mi[ (*i) ].pAddress )
+			(*i)++;
+		else
+			return &m_mi[ (*i)++ ];
+
+	return oexNULL;
+
+}
+
+CStackTrace::SModuleInfo	CStackTrace::m_mi[ eMaxModules ];
+oexUINT		CStackTrace::m_uModules = 0;	 
+oexLock		CStackTrace::m_lockModules;
 

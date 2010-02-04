@@ -4,13 +4,13 @@
 #include "stdafx.h"
 
 CVmMsg::CVmMsg()
-{
+{_STT();
 	m_flags = 0;
 	m_msg = vmime::create< vmime::message >();
 }
 
 CVmMsg::CVmMsg( vmime::ref < vmime::net::message > &r )
-{
+{_STT();
 	m_flags = 0;
 
 	try
@@ -34,14 +34,14 @@ CVmMsg::CVmMsg( vmime::ref < vmime::net::message > &r )
 }
 
 CVmMsg::CVmMsg( vmime::ref < vmime::message > &r )
-{
+{_STT();
 	m_flags = 0;
 	if ( r )
 		m_msg = r;
 }
 
 CVmMsg::CVmMsg( const CVmMsg &r )
-{
+{_STT();
 	m_flags = r.m_flags;
 	m_sStructure = r.m_sStructure;
 	if ( r.m_msg )
@@ -49,7 +49,7 @@ CVmMsg::CVmMsg( const CVmMsg &r )
 }
 
 CVmMsg& CVmMsg::operator = ( const CVmMsg &r )
-{
+{_STT();
 	m_flags = r.m_flags;
 	m_sStructure = r.m_sStructure;
 	if ( r.m_msg )
@@ -58,25 +58,25 @@ CVmMsg& CVmMsg::operator = ( const CVmMsg &r )
 }
 
 CVmMsg::~CVmMsg()
-{
+{_STT();
 	Destroy();
 }
 
 void CVmMsg::Destroy()
-{
+{_STT();
 	m_flags = 0;
 	m_sStructure = oexT( "" );
 //	m_msg.detach();
 }
 
 int CVmMsg::getFlags()
-{	
+{_STT();
 	return m_flags;
 }
 
 
 sqbind::stdString CVmMsg::getHeader()
-{
+{_STT();
 	if ( !m_msg )
 		return oexT( "" );
 
@@ -88,7 +88,7 @@ sqbind::stdString CVmMsg::getHeader()
 }
 
 int CVmMsg::isField( const sqbind::stdString &sName )
-{
+{_STT();
 	if ( !m_msg )
 		return 0;
 
@@ -99,7 +99,7 @@ int CVmMsg::isField( const sqbind::stdString &sName )
 }
 
 sqbind::stdString CVmMsg::getField( const sqbind::stdString &sName )
-{
+{_STT();
 	if ( !m_msg )
 		return oexT( "" );
 
@@ -115,7 +115,7 @@ sqbind::stdString CVmMsg::getField( const sqbind::stdString &sName )
 }
 
 int CVmMsg::setField( const sqbind::stdString &sName, const sqbind::stdString &sValue )
-{
+{_STT();
 	if ( !m_msg )
 		return 0;
 
@@ -130,7 +130,7 @@ int CVmMsg::setField( const sqbind::stdString &sName, const sqbind::stdString &s
 }
 
 sqbind::stdString CVmMsg::Generate()
-{
+{_STT();
 	if ( !m_msg )
 		return oexT( "" );
 
@@ -146,7 +146,7 @@ sqbind::stdString CVmMsg::Generate()
 }
 
 sqbind::stdString CVmMsg::_getStructure(vmime::ref <const vmime::net::structure> s, const int level)
-{
+{_STT();
 	sqbind::stdString sRet;
 	for ( int i = 0; i < s->getPartCount(); i++ )
 	{
@@ -174,13 +174,13 @@ sqbind::stdString CVmMsg::_getStructure(vmime::ref <const vmime::net::structure>
 }
 
 sqbind::stdString CVmMsg::getStructure()
-{
+{_STT();
 	return m_sStructure;
 }
 
 
 sqbind::stdString CVmMsg::getBody()
-{
+{_STT();
 	if ( !m_msg )
 		return oexT( "" );
 
@@ -195,7 +195,7 @@ sqbind::stdString CVmMsg::getBody()
 }
 
 int CVmMsg::setBody( const sqbind::stdString &sBody )
-{
+{_STT();
 	if ( !m_msg )
 		return 0;
 

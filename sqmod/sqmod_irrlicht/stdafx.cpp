@@ -272,7 +272,7 @@ SQBIND_REGISTER_CLASS_END()
 
 // Export classes
 static void SQBIND_Export_irrlicht( sqbind::VM x_vm )
-{
+{_STT();
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
 
@@ -306,7 +306,7 @@ static void SQBIND_Export_irrlicht( sqbind::VM x_vm )
 #else
 
 	static void SQBIND_Export( sqbind::VM x_vm )
-	{	SQBIND_Export_irrlicht( x_vm ); }
+	{_STT(); SQBIND_Export_irrlicht( x_vm ); }
 
 	// Include squirrel module exported symbols
 	#include <sqmod_extern.hpp>

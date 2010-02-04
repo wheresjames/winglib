@@ -3,7 +3,7 @@
 #include "stdafx.h"
 
 CSqMysql::CSqMysql()
-{
+{_STT();
 	m_bOpen = 0;
 	m_nPort = 3306;
 	oexZero( m_db );
@@ -12,12 +12,12 @@ CSqMysql::CSqMysql()
 }
 
 CSqMysql::~CSqMysql()
-{
+{_STT();
 	Destroy();
 }
 
 void CSqMysql::Destroy()
-{
+{_STT();
 	// Free any left over results
 	FreeResult();
 
@@ -35,7 +35,7 @@ void CSqMysql::Destroy()
 }
 
 void CSqMysql::FreeResult()
-{
+{_STT();
 	try
 	{
 		// Free any result
@@ -49,7 +49,7 @@ void CSqMysql::FreeResult()
 }
 
 int CSqMysql::LogError( oex::oexCSTR pPrefix )
-{
+{_STT();
 	// Grab error info
 	const char *pErr = mysql_error( &m_db );
 	m_nLastError = mysql_errno( &m_db );
@@ -69,7 +69,7 @@ int CSqMysql::Connect(	const sqbind::stdString &sServer,
 						const sqbind::stdString &sUser,
 						const sqbind::stdString &sPass,
 						const sqbind::stdString &sDatabase )
-{
+{_STT();
 	// Lose old connection
 	Destroy();
 	
@@ -126,7 +126,7 @@ int CSqMysql::Connect(	const sqbind::stdString &sServer,
 }
 
 sqbind::stdString CSqMysql::Escape( const sqbind::stdString &s )
-{
+{_STT();
 	if ( !m_bOpen )
 		return oexT( "" );
 
@@ -155,7 +155,7 @@ sqbind::stdString CSqMysql::Escape( const sqbind::stdString &s )
 }
 
 sqbind::stdString CSqMysql::MakePairs( sqbind::CSqMap *mInfo )
-{
+{_STT();
 	if ( !mInfo )
 		return oexT( "" );
 
@@ -177,7 +177,7 @@ sqbind::stdString CSqMysql::MakePairs( sqbind::CSqMap *mInfo )
 }	
 
 sqbind::stdString CSqMysql::MakeInsert( sqbind::CSqMap *mInfo )
-{
+{_STT();
 	if ( !mInfo )
 		return oexT( "" );
 
@@ -214,7 +214,7 @@ sqbind::stdString CSqMysql::MakeInsert( sqbind::CSqMap *mInfo )
 }	
 
 int CSqMysql::Query( const sqbind::stdString &sQuery )
-{
+{_STT();
 	// Ensure open database
 	if ( !m_bOpen )
 		return 0;
@@ -245,7 +245,7 @@ int CSqMysql::Query( const sqbind::stdString &sQuery )
 }
 
 int CSqMysql::getNumRows()
-{
+{_STT();
 	if ( !m_res ) 
 		return 0;
 
@@ -260,7 +260,7 @@ int CSqMysql::getNumRows()
 }
 
 int CSqMysql::getNumFields()
-{
+{_STT();
 	if ( !m_res ) 
 		return 0;
 
@@ -275,7 +275,7 @@ int CSqMysql::getNumFields()
 }
 
 int CSqMysql::getFieldInfo( int i, sqbind::CSqMap *mInfo )
-{
+{_STT();
 	if ( !m_res || !mInfo ) 
 		return 0;
 
@@ -302,7 +302,7 @@ int CSqMysql::getFieldInfo( int i, sqbind::CSqMap *mInfo )
 
 
 int CSqMysql::getRow( sqbind::CSqMap *mRow )
-{
+{_STT();
 	// How many rows are in the result?
 	int nRows = getNumRows();
 	if ( !nRows )

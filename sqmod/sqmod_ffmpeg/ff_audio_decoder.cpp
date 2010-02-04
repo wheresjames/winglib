@@ -8,7 +8,7 @@ extern "C"
 };
 
 CFfAudioDecoder::CFfAudioDecoder()
-{
+{_STT();
 	m_pCodec = oexNULL;
 	m_pCodecContext = oexNULL;
 	m_pFormatContext = oexNULL;
@@ -19,7 +19,7 @@ CFfAudioDecoder::CFfAudioDecoder()
 }
 
 void CFfAudioDecoder::Destroy()
-{
+{_STT();
 	if ( m_pFrame )
 	{	av_free( m_pFrame );
 		m_pFrame = oexNULL;
@@ -41,7 +41,7 @@ void CFfAudioDecoder::Destroy()
 }
 
 int CFfAudioDecoder::Create( int x_nCodec, int fmt )
-{
+{_STT();
 	// Lose previous codec
 	Destroy();
 
@@ -82,7 +82,7 @@ int CFfAudioDecoder::Create( int x_nCodec, int fmt )
 }
 
 int CFfAudioDecoder::FindStreamInfo( sqbind::CSqBinary *in )
-{
+{_STT();
 	if ( !in )
 		return 0;
 
@@ -105,7 +105,7 @@ int CFfAudioDecoder::FindStreamInfo( sqbind::CSqBinary *in )
 }
 
 int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
-{
+{_STT();
 	// Ensure codec
 	if ( !m_pCodecContext )
 		return 0;
@@ -204,7 +204,7 @@ static AVCodecTag g_ff_audio_codec_map[] =
 };
 
 int CFfAudioDecoder::LookupCodecId( const sqbind::stdString &sCodec )
-{
+{_STT();
 	char c[ 5 ] = { ' ', ' ', ' ', ' ', 0 };
 	for ( unsigned int i = 0; i < 4 && i < sCodec.length(); i++ )
 		c[ i ] = (char)sCodec[ i ];
@@ -223,7 +223,7 @@ int CFfAudioDecoder::LookupCodecId( const sqbind::stdString &sCodec )
 }
 
 sqbind::stdString CFfAudioDecoder::LookupCodecName( int nId )
-{
+{_STT();
 	// Find a codec with that id
 	for ( int i = 0; CODEC_ID_NONE != ff_codec_wav_tags[ i ].id; i++ )
 		if ( ff_codec_wav_tags[ i ].id == (CodecID)nId )

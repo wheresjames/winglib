@@ -3331,7 +3331,7 @@ oex::oexRESULT Test_CrashReporting()
 	// +++ Crash
 //	*( (char*)0 ) = 0;
 //	int x = 0, y = 10 / x;
-	os::CDebug::CreateCrashReport( oexNULL, oexT( "logs" ), oexT( "Test" ) );
+	oex::os::CDebug::CreateCrashReport( oexNULL, oexT( "logs" ), oexT( "Test" ) );
 
 	return oex::oexRES_OK;
 }

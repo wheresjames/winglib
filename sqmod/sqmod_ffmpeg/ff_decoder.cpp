@@ -25,7 +25,7 @@ extern "C"
 };
 
 CFfDecoder::CFfDecoder()
-{
+{_STT();
 	m_pCodec = oexNULL;
 	m_pCodecContext = oexNULL;
 	m_pFormatContext = oexNULL;
@@ -36,7 +36,7 @@ CFfDecoder::CFfDecoder()
 }
 
 void CFfDecoder::Destroy()
-{
+{_STT();
 	if ( m_pFrame )
 	{	av_free( m_pFrame );
 		m_pFrame = oexNULL;
@@ -58,7 +58,7 @@ void CFfDecoder::Destroy()
 }
 
 int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, int brate, sqbind::CSqMulti *m )
-{
+{_STT();
 	// Lose previous codec
 	Destroy();
 
@@ -106,7 +106,7 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 }
 
 int CFfDecoder::FindStreamInfo( sqbind::CSqBinary *in )
-{
+{_STT();
 	if ( !in )
 		return 0;
 
@@ -129,7 +129,7 @@ int CFfDecoder::FindStreamInfo( sqbind::CSqBinary *in )
 }
 
 int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
-{
+{_STT();
 	// Ensure codec
 	if ( !m_pCodecContext )
 		return 0;
@@ -205,7 +205,7 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 }
 
 int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbind::CSqMulti *m )
-{
+{_STT();
 	// Ensure codec
 	if ( !m_pCodecContext )
 		return 0;
@@ -267,7 +267,7 @@ static AVCodecTag g_ff_codec_map[] =
 
 
 int CFfDecoder::LookupCodecId( const sqbind::stdString &sCodec )
-{
+{_STT();
 	char c[ 5 ] = { ' ', ' ', ' ', ' ', 0 };
 	for ( oexSIZE_T i = 0; i < 4 && i < sCodec.length(); i++ )
 		c[ i ] = (char)sCodec[ i ];
@@ -286,7 +286,7 @@ int CFfDecoder::LookupCodecId( const sqbind::stdString &sCodec )
 }
 
 sqbind::stdString CFfDecoder::LookupCodecName( int nId )
-{
+{_STT();
 	// Find a codec with that id
 	for ( int i = 0; CODEC_ID_NONE != ff_codec_bmp_tags[ i ].id; i++ )
 		if ( ff_codec_bmp_tags[ i ].id == (CodecID)nId )

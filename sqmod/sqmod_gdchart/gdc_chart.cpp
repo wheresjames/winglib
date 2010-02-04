@@ -10,11 +10,11 @@
 oexLock CGdcChart::m_lock;
 
 CGdcChart::CGdcChart()
-{
+{_STT();
 }
 
 CGdcChart::~CGdcChart()
-{
+{_STT();
 }
 
 #define MAX_DIMENSIONS		9
@@ -23,7 +23,7 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 									  	 const sqbind::stdString &x_sParams,
 									  	 const sqbind::stdString &x_sData,
 									  	 sqbind::CSqImage *x_pImg )
-{
+{_STT();
 	if ( !x_pImg )
 		return oexT( "" );
 
@@ -231,7 +231,7 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 int CGdcChart::SaveChart(	const sqbind::stdString &x_sFile,
 							const sqbind::stdString &x_sParams,
 							const sqbind::stdString &x_sData )
-{
+{_STT();
 	// Create the chart
 	sqbind::CSqImage img;
 	sqbind::CSqMulti mChart = CreateChart( x_sFile, x_sParams, x_sData, &img );

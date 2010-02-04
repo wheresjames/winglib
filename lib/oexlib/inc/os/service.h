@@ -121,6 +121,9 @@ namespace service
 
 		/// Module high version
 		oexLONG				lVer;
+
+		/// Pointer to module's stack trace object
+		CStackTrace			*pSt;
 	};
 
 	//==============================================================

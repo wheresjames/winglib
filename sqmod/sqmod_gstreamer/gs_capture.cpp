@@ -10,15 +10,15 @@
 */
 
 CGsCapture::CGsCapture()
-{
+{_STT();
 }
 
 void CGsCapture::Destroy()
-{
+{_STT();
 }
 
 static void bus_callback(GstBus *bus, GstMessage *message, void *appdata)
-{
+{_STT();
 	oexEcho( "bus_callback()" );
 
 	gchar *message_str;
@@ -80,7 +80,7 @@ static void bus_callback(GstBus *bus, GstMessage *message, void *appdata)
 //#define VIDEO_SRC "gnomevfssrc"
 
 int CGsCapture::Init()
-{
+{_STT();
 	GstElement *pipeline, *camera_src, *screen_sink, *image_sink;
 	GstElement *screen_queue, *image_queue;
 	GstElement *csp_filter, *image_filter, *tee;

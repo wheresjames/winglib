@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 CSqirrMeshAnimator::CSqirrMeshAnimator(void)
-{
+{_STT();
     m_pNode = 0;
     m_psoCallback = 0;
     m_lTick = 0;
@@ -11,17 +11,18 @@ CSqirrMeshAnimator::CSqirrMeshAnimator(void)
 }
 
 CSqirrMeshAnimator::~CSqirrMeshAnimator(void)
-{   Destroy();
+{_STT();
+	Destroy();
 }
 
 void CSqirrMeshAnimator::Destroy()
-{
+{_STT();
     Restore();
     Detach();
 }
 
 void CSqirrMeshAnimator::Detach()
-{
+{_STT();
     m_pNode = 0;
     m_lTick = 0;
     m_lSpeed = 0;
@@ -34,7 +35,7 @@ void CSqirrMeshAnimator::Detach()
 }
 
 int CSqirrMeshAnimator::GetMetrics( irr::video::S3DVertex **pOriginal, irr::video::S3DVertex **pCurrent, unsigned int &uPoints, unsigned int *puPitch )
-{
+{_STT();
     // Sanity checks
     if ( !m_pNode || !m_pNode->getMesh() || !m_pNode->getMesh()->getMeshBufferCount() )
         return 0;
@@ -72,7 +73,7 @@ int CSqirrMeshAnimator::GetMetrics( irr::video::S3DVertex **pOriginal, irr::vide
 }
 
 int CSqirrMeshAnimator::Restore()
-{
+{_STT();
     unsigned int uV = 0, uPitch = 0;
     irr::video::S3DVertex *pO = 0, *pV = 0;
     if ( !GetMetrics( &pO, &pV, uV, &uPitch ) )
@@ -85,7 +86,7 @@ int CSqirrMeshAnimator::Restore()
 }
 
 int CSqirrMeshAnimator::Init( irr::scene::IMeshSceneNode *pNode )
-{
+{_STT();
     // Lose the old thing
     Destroy();
 
@@ -114,7 +115,7 @@ int CSqirrMeshAnimator::Init( irr::scene::IMeshSceneNode *pNode )
 }
 
 int CSqirrMeshAnimator::Run( irr::scene::ISceneManager *pSm, float fClock )
-{
+{_STT();
     // Speed check
     if ( m_lSpeed && m_lTick )
     {
@@ -140,7 +141,7 @@ int CSqirrMeshAnimator::Run( irr::scene::ISceneManager *pSm, float fClock )
 }
 
 int CSqirrMeshAnimator::Run( irr::scene::ISceneManager *pSm, float fClock, sqbind::CSqEngine *pSe )
-{
+{_STT();
 	// Engine specified?
 	if ( !pSe )
 		pSe = m_pSe;
