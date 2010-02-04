@@ -220,48 +220,7 @@ public:
 	
 		\see 
 	*/
-	CStack* InitPush() 
-	{
-#if defined( OEXLIB_USING_TLSAPI )
-
-		// Return thread local storage index
-		CStack *pStack;
-		if ( ( (oexUINT)-1 ) != m_tls_dwIndex )
-		{	pStack = (CStack*)oexTlsGetValue( m_tls_dwIndex );
-			if ( pStack != oexNULL ) 
-				return pStack;
-		} // end if
-
-		// Allocate TLS 
-		if ( ( (oexUINT)-1 ) == m_tls_dwIndex )
-			m_tls_dwIndex = oexTlsAllocate();
-		
-		// Set stack value
-		pStack = GetStack();
-		if ( !pStack )
-			return oexNULL;
-
-		// Save stack value
-		if ( ( (oexUINT)-1 ) != m_tls_dwIndex ) 
-			oexTlsSetValue( m_tls_dwIndex, pStack );
-			
-		return pStack;
-
-#elif defined( OEXLIB_USING_TLS )
-
-		// Are we already initialized for this thread?
-		if ( m_tls_pStack ) 
-			return m_tls_pStack;
-
-		return ( m_tls_pStack = GetStack() );
-
-#else
-
-		return GetStack(); 
-
-#endif	
-
-	}
+	CStack* InitPush();
 
 	//==============================================================
 	// RemoveThread()
@@ -272,6 +231,7 @@ public:
 	/// Constructor
 	CStackTrace()
 	{
+		m_bEnable = oexFALSE;
 	}
 
 	/// Destructor
@@ -336,73 +296,29 @@ public:
 	*/
 	oexBOOL Save( oexCSTR x_pFile );
 
-	/// Instance of stack trace
-	static CStackTrace *m_pst;
-
-	//==============================================================
-	// St()
-	//==============================================================
-	/// Returns instance of stack trace object
-	static CStackTrace* St() 
-	{ 	if ( !m_pst ) m_pst = OexAllocConstruct< CStackTrace >(); return m_pst; }
-
 	//==============================================================
 	// Release()
 	//==============================================================
 	/// Releases stack trace object
-	static void EnableStackTracing( oexBOOL bEnable )
+	void EnableStackTracing( oexBOOL bEnable )
 	{	m_bEnable = bEnable; }
 
 	//==============================================================
+	// isEnabled()
+	//==============================================================
+	/// Returns non zero if stack tracing is enabled
+	oexBOOL isEnabled() { return m_bEnable; }
+
+	//==============================================================
 	// Release()
 	//==============================================================
 	/// Releases stack trace object
-	static void Release() 
-	{	
-		// No more stack tracing
-		m_bEnable = oexFALSE; 
+	void Release();
 
-		oexTRY
-		{
-			// Delete object if any
-			if ( m_pst )
-			{
-#if defined( OEXLIB_STACK_ENABLE_LOCKS )
-
-				// Lock for good
-				m_pst->m_lock.Wait( 30000 );
-
-#endif
-
-				// Release stack objects
-				oexUINT i = 0;
-				while ( CStack *p = m_pst->Next( &i ) )
-					OexAllocDestruct( p );
-
-				// Delete stack trace pool
-				OexAllocDestruct( m_pst ); 
-
-			} // end if
-
-		} oexCATCH_ALL() {}
-
-		// All gone
-		m_pst = oexNULL; 
-	}
+private:
 
 	/// Release all
-	static oexBOOL		m_bEnable;
-
-#if defined( OEXLIB_USING_TLSAPI )
-
-	static oexUINT		m_tls_dwIndex;
-
-#elif defined( OEXLIB_USING_TLS )
-
-	/// Thread specific stack pointer
-	static oexTLS CStack *m_tls_pStack;
-
-#endif
+	oexBOOL				m_bEnable;
 
 };
 
@@ -422,10 +338,10 @@ public:
 	/// Default Constructor
 	CLocalStackTrace( oexCSTR x_pFunction ) 
 	{
-		if ( CStackTrace::m_bEnable )
+		if ( oexSt().isEnabled() )
 		{
 			// Get stack object
-			m_pStack = CStackTrace::St()->InitPush(); 
+			m_pStack = oexSt().InitPush(); 
 
 			// Push function if valid
 			if ( m_pStack ) 
@@ -440,7 +356,7 @@ public:
 	/// Destructor
 	~CLocalStackTrace() 
 	{ 
-		if ( !CStackTrace::m_bEnable ) 
+		if ( !oexSt().isEnabled() ) 
 			return;
 
 		if ( m_pStack ) 

@@ -305,6 +305,9 @@ oexPVOID CResource::ThreadProc( oexPVOID x_pData )
 	// Signal that we're done
 	pRi->cSync.Signal();
 
+	// Remove the stack trace for this thread
+	oexSt().RemoveThread();
+
 	// Quit thread
 	pthread_exit( pRet );
 

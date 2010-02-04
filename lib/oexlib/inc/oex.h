@@ -151,4 +151,7 @@ private:
 	/// Resource helper for this module
 	static COexResourceHelper	m_cResourceHelper;
 
+	/// Stack trace class
+	static CStackTrace			m_cStackTrace;
+
 };

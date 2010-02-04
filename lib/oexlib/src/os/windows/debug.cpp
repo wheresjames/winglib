@@ -46,7 +46,7 @@ using namespace OEX_NAMESPACE::os;
 // http://www.dotnet247.com/247reference/msgs/13/65259.aspx
 
 oexCPVOID CDebug::GetInstanceHandle()
-{_STT();
+{// _STT();
 #if defined( __ImageBase )
 
 	return (oexCPVOID)&__ImageBase;
@@ -63,7 +63,7 @@ oexCPVOID CDebug::GetInstanceHandle()
 }
 
 void CDebug::Trace( oexCSTR x_pStr )
-{_STT();
+{// _STT();
 /*
 #if defined( oexUNICODE )
 #   define TRACE0( s )  _CrtDbgReportW( _CRT_WARN, 0, 0, NULL, x_pStr )
@@ -76,14 +76,14 @@ void CDebug::Trace( oexCSTR x_pStr )
 }
 
 void CDebug::FmtTrace( oexCSTR x_pFmt, ... )
-{_STT();
+{// _STT();
 	oexVaList ap; oexVaStart( ap, x_pFmt );
 	vFmtTrace( x_pFmt, ap );
 	oexVaEnd( ap );
 }
 
 void CDebug::vFmtTrace( oexCSTR x_pFmt, oexVaList &x_pArgs )
-{_STT();
+{// _STT();
 //    oexTCHAR tcMsg[ oexSTRSIZE ] = oexT( "" );
 //    os::CSys::vStrFmt( tcMsg, oexSTRSIZE, x_pFmt, x_pArgs );
 //    Trace( tcMsg );
@@ -92,7 +92,7 @@ void CDebug::vFmtTrace( oexCSTR x_pFmt, oexVaList &x_pArgs )
 }
 
 void CDebug::Break()
-{_STT();
+{// _STT();
 #if defined( oexDEBUG ) && !defined( OEX_NOCRTDEBUG )
 
 	_CrtDbgBreak();
@@ -105,14 +105,14 @@ void CDebug::Break()
 }
 
 void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x_pFunction, oexCSTR x_pStr, oexINT x_nRes, oexINT x_nErr )
-{_STT();
+{// _STT();
 	oexTCHAR tcModule[ oexSTRSIZE ] = oexT( "" );
 	GetModuleFileName( (HMODULE)GetInstanceHandle(), tcModule, sizeof( tcModule ) );
 	Break( x_nType, x_pFile, x_uLine, x_pFunction, tcModule, x_pStr );
 }
 
 void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr, oexINT x_nRes, oexINT x_nErr )
-{_STT();
+{// _STT();
 #if defined( oexDEBUG ) && !defined( OEX_NOCRTDEBUG )
 
 #if defined( oexUNICODE )
@@ -271,7 +271,7 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 	oexUINT dwCurrentThread = oexGetCurThreadId();
 
 	// Ensure stack trace object
-	CStackTrace* pSt = CStackTrace::St();
+	CStackTrace* pSt = &oexSt();
 	if ( !pSt )
 		return;
 	

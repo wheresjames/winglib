@@ -172,9 +172,21 @@ static CLog						g_cLog;
 /// Resource object
 static COexResourceHelper		g_cResourceHelper;
 
+/// Stack trace object
+static CStackTrace				g_cStaticInstance;
+
+
 /// Raw allocator
-SRawAllocator		CMem::m_def = { oex_malloc, oex_realloc, oex_free, &g_cBinShare, &g_cMemLeak, &g_cLog, &g_cResourceHelper };
-SRawAllocator		CMem::m_ra = { oex_malloc, oex_realloc, oex_free, &g_cBinShare, &g_cMemLeak, &g_cLog, &g_cResourceHelper };
+SRawAllocator		CMem::m_def = { oex_malloc, oex_realloc, oex_free, &g_cBinShare, &g_cMemLeak, &g_cLog, &g_cResourceHelper, &g_cStaticInstance };
+SRawAllocator		CMem::m_ra = { oex_malloc, oex_realloc, oex_free, &g_cBinShare, &g_cMemLeak, &g_cLog, &g_cResourceHelper, &g_cStaticInstance };
+
+CStackTrace& CMem::GetStackTrace()
+{
+	CStackTrace *p = CMem::GetRawAllocator().pStackTrace;
+	oexASSERT_PTR( p );
+	return *p;
+}
+
 
 oexPVOID CMem::New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
 {

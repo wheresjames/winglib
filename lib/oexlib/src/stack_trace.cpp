@@ -36,23 +36,61 @@
 
 OEX_USING_NAMESPACE
 
-/// Set to non-zero to enable stack tracing
-oexBOOL CStackTrace::m_bEnable = oexFALSE;
-
-/// Instance of stack trace
-CStackTrace *CStackTrace::m_pst = oexNULL;
-
 #if defined( OEXLIB_USING_TLSAPI )
 
 /// Tls API index
-oexUINT CStackTrace::m_tls_dwIndex = ( (oexUINT)-1 );
+static oexUINT g_tls_dwIndex = ( (oexUINT)-1 );
 
 #elif defined( OEXLIB_USING_TLS )
 
 /// Thread specific stack pointer
-oexTLS CStackTrace::CStack *CStackTrace::m_tls_pStack = oexNULL;
+static oexTLS CStackTrace::CStack *g_tls_pStack = oexNULL;
 
 #endif
+
+
+CStackTrace::CStack* CStackTrace::InitPush() 
+{
+#if defined( OEXLIB_USING_TLSAPI )
+
+	// Return thread local storage index
+	CStack *pStack;
+	if ( ( (oexUINT)-1 ) != g_tls_dwIndex )
+	{	pStack = (CStack*)oexTlsGetValue( g_tls_dwIndex );
+		if ( pStack != oexNULL ) 
+			return pStack;
+	} // end if
+
+	// Allocate TLS 
+	if ( ( (oexUINT)-1 ) == g_tls_dwIndex )
+		g_tls_dwIndex = oexTlsAllocate();
+	
+	// Set stack value
+	pStack = GetStack();
+	if ( !pStack )
+		return oexNULL;
+
+	// Save stack value
+	if ( ( (oexUINT)-1 ) != g_tls_dwIndex ) 
+		oexTlsSetValue( g_tls_dwIndex, pStack );
+		
+	return pStack;
+
+#elif defined( OEXLIB_USING_TLS )
+
+	// Are we already initialized for this thread?
+	if ( g_tls_pStack ) 
+		return g_tls_pStack;
+
+	return ( g_tls_pStack = GetStack() );
+
+#else
+
+	return GetStack(); 
+
+#endif	
+
+}
 
 CStackTrace::CStack* CStackTrace::GetStack()
 {
@@ -131,12 +169,12 @@ oexBOOL CStackTrace::RemoveThread()
 
 #if defined( OEXLIB_USING_TLSAPI )
 
-	if ( ( (oexUINT)-1 ) != m_tls_dwIndex )
-		oexTlsSetValue( m_tls_dwIndex, 0 );
+	if ( ( (oexUINT)-1 ) != g_tls_dwIndex )
+		oexTlsSetValue( g_tls_dwIndex, 0 );
 
 #elif defined( OEXLIB_USING_TLS )
 
-	m_tls_pStack = 0;
+	g_tls_pStack = 0;
 
 #endif
 
@@ -149,3 +187,30 @@ oexBOOL CStackTrace::RemoveThread()
 	return oexTRUE;
 #endif
 }
+
+void CStackTrace::Release() 
+{	
+	// No more stack tracing
+	m_bEnable = oexFALSE; 
+
+	oexTRY
+	{
+		// Delete object if any
+		if ( oexSt().getUsedSlots() )
+		{
+#if defined( OEXLIB_STACK_ENABLE_LOCKS )
+
+			// Lock for good
+			oexSt().m_lock.Wait( 30000 );
+
+#endif
+			// Release stack objects
+			oexUINT i = 0;
+			while ( CStack *p = oexSt().Next( &i ) )
+				OexAllocDestruct( p );
+
+		} // end if
+
+	} oexCATCH_ALL() {}
+}
+

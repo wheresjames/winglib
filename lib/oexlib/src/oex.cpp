@@ -118,7 +118,7 @@ oexINT COex::Init()
 #endif
 
 	// Enable stack tracing
-	CStackTrace::EnableStackTracing( oexTRUE );
+	oexSt().EnableStackTracing( oexTRUE );
 
 	// Initialize file system
 	os::CBaseFile::InitFileSystem();
@@ -217,7 +217,7 @@ oexINT COex::Uninit()
 #if defined( oexDEBUG )
 	
 	// Release stack traces
-	CStackTrace::Release();
+	oexSt().Release();
 
 	// Freeze memory statistics
 	GetMemLeak().Freeze();

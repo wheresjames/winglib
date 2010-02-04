@@ -105,6 +105,8 @@
 #define oexIsBin					OEX_NAMESPACE::COex::GetBinShare().IsBuffer
 #define oexCleanupBin				OEX_NAMESPACE::COex::GetBinShare().Cleanup
 
+#define oexSt						OEX_NAMESPACE::CMem::GetStackTrace
+
 #if defined( OEX_GCC )
 #	define oexVaList				        __builtin_va_list
 #	define oexVaStart				        __builtin_va_start
