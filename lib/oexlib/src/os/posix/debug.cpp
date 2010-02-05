@@ -112,3 +112,260 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x
 	Break();
 }
 
+#define CDEBUG_SIG_NAME( s ) case s: return oexT( #s );
+
+oexCSTR CDebug::GetExceptionCodeName( oexUINT x_uCode )
+{
+	switch( x_uCode )
+	{
+		CDEBUG_SIG_NAME( SIGABRT )
+		CDEBUG_SIG_NAME( SIGALRM )
+		CDEBUG_SIG_NAME( SIGFPE )
+		CDEBUG_SIG_NAME( SIGHUP )
+		CDEBUG_SIG_NAME( SIGILL )
+		CDEBUG_SIG_NAME( SIGINT )
+		CDEBUG_SIG_NAME( SIGKILL )
+		CDEBUG_SIG_NAME( SIGPIPE )
+		CDEBUG_SIG_NAME( SIGQUIT )
+		CDEBUG_SIG_NAME( SIGSEGV )
+		CDEBUG_SIG_NAME( SIGTERM )
+		CDEBUG_SIG_NAME( SIGUSR1 )
+		CDEBUG_SIG_NAME( SIGUSR2 )
+		CDEBUG_SIG_NAME( SIGCHLD )
+		CDEBUG_SIG_NAME( SIGCONT )
+		CDEBUG_SIG_NAME( SIGSTOP )
+		CDEBUG_SIG_NAME( SIGTSTP )
+		CDEBUG_SIG_NAME( SIGTTIN )
+		CDEBUG_SIG_NAME( SIGTTOU )
+		CDEBUG_SIG_NAME( SIGBUS )
+		CDEBUG_SIG_NAME( SIGPOLL )
+		CDEBUG_SIG_NAME( SIGPROF )
+		CDEBUG_SIG_NAME( SIGSYS )
+		CDEBUG_SIG_NAME( SIGTRAP )
+		CDEBUG_SIG_NAME( SIGURG )
+		CDEBUG_SIG_NAME( SIGVTALRM )
+		CDEBUG_SIG_NAME( SIGXCPU )
+		CDEBUG_SIG_NAME( SIGXFSZ )
+		default: break;
+
+	} // end switch
+
+	return oexT( "SIG_UNKNOWN" );
+}
+
+oexCSTR CDebug::GetExceptionCodeDesc( oexUINT x_uCode )
+{
+	switch( x_uCode )
+	{
+		case SIGABRT: return oexT( "Process abort signal" );
+		case SIGALRM: return oexT( "Alarm clock" );
+		case SIGFPE: return oexT( "Erroneous arithmetic operation.  Divide by zero?" );
+		case SIGHUP: return oexT( "Hangup. The controlling terminal has beek disconnected" );
+		case SIGILL: return oexT( "Illegal instruction" );
+		case SIGINT: return oexT( "Terminal interrupt signal. CTRL-C may have been pressed" );
+		case SIGKILL: return oexT( "Kill (cannot be caught or ignored)" );
+		case SIGPIPE: return oexT( "Write on a pipe with no one to read it" );
+		case SIGQUIT: return oexT( "Terminal quit request" );
+		case SIGSEGV: return oexT( "Invalid memory reference.  Program tried to access memory for which it does not have permissions." );
+		case SIGTERM: return oexT( "Termination request" );
+		case SIGUSR1: return oexT( "User-defined signal 1" );
+		case SIGUSR2: return oexT( "User-defined signal 2" );
+		case SIGCHLD: return oexT( "Child process terminated or stopped" );
+		case SIGCONT: return oexT( "Continue executing, if stopped" );
+		case SIGSTOP: return oexT( "Stop executing (cannot be caught or ignored)" );
+		case SIGTSTP: return oexT( "Terminal stop signal" );
+		case SIGTTIN: return oexT( "Background process attempting read" );
+		case SIGTTOU: return oexT( "Background process attempting write" );
+		case SIGBUS: return oexT( "Access to an undefined portion of a memory object" );
+		case SIGPOLL: return oexT( "Pollable event" );
+		case SIGPROF: return oexT( "Profiling timer expired" );
+		case SIGSYS: return oexT( "Bad system call" );
+		case SIGTRAP: return oexT( "Trace/breakpoint trap" );
+		case SIGURG: return oexT( "High bandwidth data is available at a socket" );
+		case SIGVTALRM: return oexT( "Virtual timer expired" );
+		case SIGXCPU: return oexT( "CPU time limit exceeded" );
+		case SIGXFSZ: return oexT( "File size limit exceeded" );
+		default: break;
+
+	} // end switch
+
+	return oexT( "Unknown exception." );
+
+}
+
+static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCSTR pName, oexCPVOID pAddress, oexBOOL bStacks )
+{
+	if ( !pSt )
+		return CStr();
+
+	CStr sSt;
+	oexUINT i = 0;
+	CSysTime st; st.GetSystemTime();
+
+	// Add module header
+	sSt << oexT( oexNL8 oexNL8 )
+		<<         oexT( "===================================================" oexNL8 )
+		<<         oexT( "= Module  : " ) << ( pName ? pName : oexT( "N/A" ) ) << oexNL
+		<< oexFmt( oexT( "= Address : 0x%08x" oexNL8 ), (oexUINT)pAddress )
+		<<         oexT( "===================================================" oexNL8 );
+
+
+	// Add each thread stack
+	if ( bStacks )
+		while ( CStackTrace::CStack *p = pSt->Next( &i ) )
+		{
+			try
+			{
+				// Set the unix time stamp
+				st.SetUnixTime( p->GetCreatedTime() );
+
+				// Show the thread id
+				sSt << oexNL
+					<< oexT( "---------------------------------------------------" oexNL8 )
+					<< ( p->GetThreadId() == uCurrentThreadId
+					   ? oexT( "***************************************************" oexNL8 )
+					   : oexT( "" ) )
+					<< oexFmt( oexT( "Thread  : %d (0x%x)" oexNL8 ), p->GetThreadId(), p->GetThreadId() )
+					<< st.FormatTime( oexT( "Created : %Y/%c/%d  %g:%m:%s GMT" oexNL8 ) )
+					<< oexT( "---------------------------------------------------" oexNL8 );
+
+				// Add the stack
+				for ( oexUINT sp = 0; sp < p->GetStackPtr(); sp++ )
+					if ( p->GetStack()[ sp ] )
+						sSt << p->GetStack()[ sp ] << oexT( "()" ) << oexNL;
+
+			} // end try
+			catch( ... )
+			{
+				sSt << oexT( "!!! ASSERT at on address : " ) << (oexUINT)p << oexNL;
+
+			} // end catch
+
+		} // end while
+
+	return sSt;
+}
+
+void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
+{
+	// Does user want crash reports?
+	if ( ( !pUrl || !*pUrl ) && ( !pSub || !*pSub ) )
+		return;
+
+	// Ensure stack trace object
+	CStackTrace* pSt = CStackTrace::St();
+	if ( !pSt )
+		return;
+
+	oexUINT uCurrentThreadId = oexGetCurThreadId();
+	CSysTime st; st.GetSystemTime();
+
+	// Stack trace header
+	CStr sSt =    oexFmt( oexT( "Current Thread    : %d (0x%x)" oexNL8 ), uCurrentThreadId, uCurrentThreadId );
+	sSt << st.FormatTime( oexT( "Current Time      : %Y/%c/%d  %g:%m:%s GMT" oexNL8 ) );
+	sSt <<        oexFmt( oexT( "Stack Trace Slots : Using %d of %d" oexNL8 ), pSt->getUsedSlots(), pSt->getTotalSlots() );
+	sSt <<                oexNL << ( pEInfo ? pEInfo : oexT( "(No other information available)" ) ) << oexNL;
+
+	// Create a stack report for the current stack
+	sSt << CreateStackReport( uCurrentThreadId, pSt, oexGetFileName( oexGetModuleFileName() ).Ptr(), GetInstanceHandle(), oexTRUE );
+
+	oexUINT i = 0;
+	while ( CStackTrace::SModuleInfo *pSi = pSt->NextModule( &i ) )
+		if ( pSi->pSt )
+		{
+			try
+			{
+				// Create stack report for this module
+				sSt << CreateStackReport( uCurrentThreadId, pSi->pSt, pSi->szName, pSi->pAddress, oexFALSE );
+
+			} // end try
+			catch( ... )
+			{
+				sSt << oexT( oexNL8 "!!! Assert in module !!!" oexNL8 );
+
+			} // end catch
+
+		} // end while
+
+	sSt << oexNL;
+
+	// Save to file?
+	if ( pSub && *pSub )
+	{
+		// Where to save the error log
+		CSysTime wt; wt.GetLocalTime();
+		CStr sPath = oexGetModulePath( pSub );
+		sPath.BuildPath( oexGetFileName( oexGetModuleFileName() ) );
+		sPath.BuildPath( wt.FormatTime( oexT( "%Y_%c_%d__%g_%m_%s" ) ) );
+		oexCreatePath( sPath.Ptr() );
+
+		// Write to file
+		CFile().CreateNew( oexBuildPath( sPath, oexT( "stack_trace.txt" ) ).Ptr() ).Write( sSt );
+
+	} // end if
+
+}
+
+oexCHAR g_szUrl[ oexSTRSIZE ] = { 0 };
+oexCHAR g_szSub[ oexSTRSIZE ] = { 0 };
+
+void sig_callback( int signal_number )
+{
+	oexEcho( oexMks( oexT( "sig_callback( " ), signal_number, oexT( " )" ) ).Ptr() );
+
+	// Don't recurse crash reporting
+	static oexBOOL bCrashInProgress = oexFALSE;
+	if ( !bCrashInProgress )
+	{
+		// Crash reporting
+		bCrashInProgress = oexTRUE;
+
+		// Create the report
+		CStr s;
+		s
+			  << oexFmt( oexT( "Signal Number : %d ( 0x%02x )" oexNL8 ), signal_number, signal_number )
+			  << oexNL
+			  << CDebug::GetExceptionCodeName( signal_number )
+			  << oexT( " - " )
+			  << CDebug::GetExceptionCodeDesc( signal_number )
+			  << oexNL;
+
+		CDebug::CreateCrashReport( g_szUrl, g_szSub, s.Ptr() );
+
+		// Crash Complete
+		bCrashInProgress = oexFALSE;
+
+		exit( -1 );
+
+	} // end if
+
+}
+
+void CDebug::EnableCrashReporting( oexCSTR pUrl, oexCSTR pSub )
+{_STT();
+
+	// Save user url
+	if ( oexCHECK_PTR( pUrl ) )
+		zstr::Copy( g_szUrl, oexSizeOfArray( g_szUrl ), pUrl );
+	else
+		*g_szUrl = 0;
+
+	if ( oexCHECK_PTR( pSub ) )
+		zstr::Copy( g_szSub, oexSizeOfArray( g_szSub ), pSub );
+	else
+		*g_szSub = 0;
+
+	oexBOOL bEnable = ( *g_szUrl || *g_szSub );
+
+	// Set signal handler
+	struct sigaction sa; oexZero( sa );
+	sa.sa_handler = bEnable ? sig_callback : 0;
+	sigemptyset( &sa.sa_mask );
+	sa.sa_flags = SA_RESTART;
+	sigaction( SIGSEGV, &sa, 0 );
+	sigaction( SIGILL, &sa, 0 );
+	sigaction( SIGFPE, &sa, 0 );
+
+}
+
+

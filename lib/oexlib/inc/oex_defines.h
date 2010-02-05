@@ -439,7 +439,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #endif
 
 #if defined( OEXLIB_STACK_TRACING )
-#	define _STT() OEX_NAMESPACE::CLocalStackTrace _l_lst( __FUNCTION__ );
+#	define _STT() OEX_NAMESPACE::CLocalStackTrace _l_lst( oexSTTFUNCTION );
 #else
 #	define _STT()
 #endif

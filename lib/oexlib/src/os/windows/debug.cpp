@@ -165,43 +165,43 @@ oexCSTR CDebug::GetExceptionCodeName( oexUINT x_uCode )
 	{
 		case EXCEPTION_ACCESS_VIOLATION:
 			return oexT( "EXCEPTION_ACCESS_VIOLATION" );
-		case EXCEPTION_ARRAY_BOUNDS_EXCEEDED: 
+		case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
 			return oexT( "EXCEPTION_ARRAY_BOUNDS_EXCEEDED" );
-		case EXCEPTION_BREAKPOINT: 
+		case EXCEPTION_BREAKPOINT:
 			return oexT( "EXCEPTION_BREAKPOINT" );
-		case EXCEPTION_DATATYPE_MISALIGNMENT: 
+		case EXCEPTION_DATATYPE_MISALIGNMENT:
 			return oexT( "EXCEPTION_DATATYPE_MISALIGNMENT" );
-		case EXCEPTION_FLT_DENORMAL_OPERAND: 
+		case EXCEPTION_FLT_DENORMAL_OPERAND:
 			return oexT( "EXCEPTION_FLT_DENORMAL_OPERAND" );
-		case EXCEPTION_FLT_DIVIDE_BY_ZERO: 
+		case EXCEPTION_FLT_DIVIDE_BY_ZERO:
 			return oexT( "EXCEPTION_FLT_DIVIDE_BY_ZERO" );
-		case EXCEPTION_FLT_INEXACT_RESULT: 
+		case EXCEPTION_FLT_INEXACT_RESULT:
 			return oexT( "EXCEPTION_FLT_INEXACT_RESULT" );
-		case EXCEPTION_FLT_INVALID_OPERATION: 
+		case EXCEPTION_FLT_INVALID_OPERATION:
 			return oexT( "EXCEPTION_FLT_INVALID_OPERATION" );
-		case EXCEPTION_FLT_OVERFLOW: 
+		case EXCEPTION_FLT_OVERFLOW:
 			return oexT( "EXCEPTION_FLT_OVERFLOW" );
-		case EXCEPTION_FLT_STACK_CHECK: 
+		case EXCEPTION_FLT_STACK_CHECK:
 			return oexT( "EXCEPTION_FLT_STACK_CHECK" );
-		case EXCEPTION_FLT_UNDERFLOW: 
+		case EXCEPTION_FLT_UNDERFLOW:
 			return oexT( "EXCEPTION_FLT_UNDERFLOW" );
-		case EXCEPTION_ILLEGAL_INSTRUCTION: 
+		case EXCEPTION_ILLEGAL_INSTRUCTION:
 			return oexT( "EXCEPTION_ILLEGAL_INSTRUCTION" );
-		case EXCEPTION_IN_PAGE_ERROR: 
+		case EXCEPTION_IN_PAGE_ERROR:
 			return oexT( "EXCEPTION_IN_PAGE_ERROR" );
-		case EXCEPTION_INT_DIVIDE_BY_ZERO: 
+		case EXCEPTION_INT_DIVIDE_BY_ZERO:
 			return oexT( "EXCEPTION_INT_DIVIDE_BY_ZERO" );
-		case EXCEPTION_INT_OVERFLOW: 
+		case EXCEPTION_INT_OVERFLOW:
 			return oexT( "EXCEPTION_INT_OVERFLOW" );
-		case EXCEPTION_INVALID_DISPOSITION: 
+		case EXCEPTION_INVALID_DISPOSITION:
 			return oexT( "EXCEPTION_INVALID_DISPOSITION" );
-		case EXCEPTION_NONCONTINUABLE_EXCEPTION: 
+		case EXCEPTION_NONCONTINUABLE_EXCEPTION:
 			return oexT( "EXCEPTION_NONCONTINUABLE_EXCEPTION" );
-		case EXCEPTION_PRIV_INSTRUCTION: 
+		case EXCEPTION_PRIV_INSTRUCTION:
 			return oexT( "EXCEPTION_PRIV_INSTRUCTION" );
-		case EXCEPTION_SINGLE_STEP: 
+		case EXCEPTION_SINGLE_STEP:
 			return oexT( "EXCEPTION_SINGLE_STEP" );
-		case EXCEPTION_STACK_OVERFLOW: 
+		case EXCEPTION_STACK_OVERFLOW:
 			return oexT( "EXCEPTION_STACK_OVERFLOW" );
 		default:
 			break;
@@ -217,43 +217,43 @@ oexCSTR CDebug::GetExceptionCodeDesc( oexUINT x_uCode )
 	{
 		case EXCEPTION_ACCESS_VIOLATION:
 			return oexT( "The thread tried to read from or write to a virtual address for which it does not have the appropriate access." );
-		case EXCEPTION_ARRAY_BOUNDS_EXCEEDED: 
+		case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
 			return oexT( "The thread tried to access an array element that is out of bounds and the underlying hardware supports bounds checking." );
-		case EXCEPTION_BREAKPOINT: 
+		case EXCEPTION_BREAKPOINT:
 			return oexT( "A breakpoint was encountered." );
-		case EXCEPTION_DATATYPE_MISALIGNMENT: 
+		case EXCEPTION_DATATYPE_MISALIGNMENT:
 			return oexT( "The thread tried to read or write data that is misaligned on hardware that does not provide alignment. For example, 16-bit values must be aligned on 2-byte boundaries; 32-bit values on 4-byte boundaries, and so on." );
-		case EXCEPTION_FLT_DENORMAL_OPERAND: 
+		case EXCEPTION_FLT_DENORMAL_OPERAND:
 			return oexT( "One of the operands in a floating-point operation is denormal. A denormal value is one that is too small to represent as a standard floating-point value." );
-		case EXCEPTION_FLT_DIVIDE_BY_ZERO: 
+		case EXCEPTION_FLT_DIVIDE_BY_ZERO:
 			return oexT( "The thread tried to divide a floating-point value by a floating-point divisor of zero." );
-		case EXCEPTION_FLT_INEXACT_RESULT: 
+		case EXCEPTION_FLT_INEXACT_RESULT:
 			return oexT( "The result of a floating-point operation cannot be represented exactly as a decimal fraction." );
-		case EXCEPTION_FLT_INVALID_OPERATION: 
+		case EXCEPTION_FLT_INVALID_OPERATION:
 			return oexT( "This exception represents any floating-point exception not included in this list." );
-		case EXCEPTION_FLT_OVERFLOW: 
+		case EXCEPTION_FLT_OVERFLOW:
 			return oexT( "The exponent of a floating-point operation is greater than the magnitude allowed by the corresponding type." );
-		case EXCEPTION_FLT_STACK_CHECK: 
+		case EXCEPTION_FLT_STACK_CHECK:
 			return oexT( "The stack overflowed or underflowed as the result of a floating-point operation." );
-		case EXCEPTION_FLT_UNDERFLOW: 
+		case EXCEPTION_FLT_UNDERFLOW:
 			return oexT( "The exponent of a floating-point operation is less than the magnitude allowed by the corresponding type." );
-		case EXCEPTION_ILLEGAL_INSTRUCTION: 
+		case EXCEPTION_ILLEGAL_INSTRUCTION:
 			return oexT( "The thread tried to execute an invalid instruction." );
-		case EXCEPTION_IN_PAGE_ERROR: 
+		case EXCEPTION_IN_PAGE_ERROR:
 			return oexT( "The thread tried to access a page that was not present, and the system was unable to load the page.\nFor example, this exception might occur if a network connection is lost while running a program over the network." );
-		case EXCEPTION_INT_DIVIDE_BY_ZERO: 
+		case EXCEPTION_INT_DIVIDE_BY_ZERO:
 			return oexT( "The thread tried to divide an integer value by an integer divisor of zero." );
-		case EXCEPTION_INT_OVERFLOW: 
+		case EXCEPTION_INT_OVERFLOW:
 			return oexT( "The result of an integer operation caused a carry out of the most significant bit of the result." );
-		case EXCEPTION_INVALID_DISPOSITION: 
+		case EXCEPTION_INVALID_DISPOSITION:
 			return oexT( "An exception handler returned an invalid disposition to the exception dispatcher.\nProgrammers using a high-level language such as C should never encounter this exception." );
-		case EXCEPTION_NONCONTINUABLE_EXCEPTION: 
+		case EXCEPTION_NONCONTINUABLE_EXCEPTION:
 			return oexT( "The thread tried to continue execution after a noncontinuable exception occurred." );
-		case EXCEPTION_PRIV_INSTRUCTION: 
+		case EXCEPTION_PRIV_INSTRUCTION:
 			return oexT( "The thread tried to execute an instruction whose operation is not allowed in the current machine mode." );
-		case EXCEPTION_SINGLE_STEP: 
+		case EXCEPTION_SINGLE_STEP:
 			return oexT( "A trace trap or other single-instruction mechanism signaled that one instruction has been executed." );
-		case EXCEPTION_STACK_OVERFLOW: 
+		case EXCEPTION_STACK_OVERFLOW:
 			return oexT( "The thread used up its stack." );
 		default:
 			break;
@@ -283,17 +283,17 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 
 	// Add each thread stack
 	while ( CStackTrace::CStack *p = pSt->Next( &i ) )
-	{	
+	{
 		try
 		{
 			// Set the unix time stamp
 			st.SetUnixTime( p->GetCreatedTime() );
 
 			// Show the thread id
-			sSt << oexNL 
+			sSt << oexNL
 				<< oexT( "---------------------------------------------------" oexNL8 )
-				<< ( p->GetThreadId() == uCurrentThreadId 
-				   ? oexT( "***************************************************" oexNL8 ) 
+				<< ( p->GetThreadId() == uCurrentThreadId
+				   ? oexT( "***************************************************" oexNL8 )
 				   : oexT( "" ) )
 				<< oexFmt( oexT( "Thread  : %d (0x%x)" oexNL8 ), p->GetThreadId(), p->GetThreadId() )
 				<< st.FormatTime( oexT( "Created : %Y/%c/%d  %g:%m:%s GMT" oexNL8 ) )
@@ -357,6 +357,8 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 
 		} // end while
 
+	sSt << oexNL;
+
 	// Save to file?
 	if ( pSub && *pSub )
 	{
@@ -381,6 +383,8 @@ oexCHAR g_szSub[ oexSTRSIZE ] = { 0 };
 LONG WINAPI OexExceptionHandler( struct _EXCEPTION_POINTERS *pEp )
 {_STT();
 
+	oexEcho( oexFmt( oexT( "exception( 0x%08x )" oexNL8 ), pEp->ExceptionRecord->ExceptionCode ).Ptr() );
+
 	// Don't recurse crash reporting
 	static BOOL bCrashInProgress = FALSE;
 	if ( !bCrashInProgress )
@@ -397,7 +401,7 @@ LONG WINAPI OexExceptionHandler( struct _EXCEPTION_POINTERS *pEp )
 			  << oexNL
 			  << CDebug::GetExceptionCodeName( pEp->ExceptionRecord->ExceptionCode )
 			  << oexT( " - " )
-			  << CDebug::GetExceptionCodeDesc( pEp->ExceptionRecord->ExceptionCode ) 
+			  << CDebug::GetExceptionCodeDesc( pEp->ExceptionRecord->ExceptionCode )
 			  << oexNL;
 
 		CDebug::CreateCrashReport( g_szUrl, g_szSub, s.Ptr() );
@@ -415,18 +419,18 @@ void CDebug::EnableCrashReporting( oexCSTR pUrl, oexCSTR pSub )
 
 	// Save user url
 	if ( oexCHECK_PTR( pUrl ) )
-		zstr::Copy( g_szUrl, oexSizeOfArray( g_szUrl ), pUrl ); 
+		zstr::Copy( g_szUrl, oexSizeOfArray( g_szUrl ), pUrl );
 	else
 		*g_szUrl = 0;
 
 	if ( oexCHECK_PTR( pSub ) )
-		zstr::Copy( g_szSub, oexSizeOfArray( g_szSub ), pSub ); 
+		zstr::Copy( g_szSub, oexSizeOfArray( g_szSub ), pSub );
 	else
 		*g_szSub = 0;
 
 	oexBOOL bEnable = ( *g_szUrl || *g_szSub );
 
 	// Set exception handler
-	::SetUnhandledExceptionFilter( bEnable ? &OexExceptionHandler : oexNULL ); 
+	::SetUnhandledExceptionFilter( bEnable ? &OexExceptionHandler : oexNULL );
 }
 

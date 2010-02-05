@@ -2657,7 +2657,7 @@ oex::oexRESULT Test_CHttpSession()
 	if ( !oexVERIFY( max ) )
 	{	oexSHOW( oexMbToStr( sData ) );
 		return -11;
-	} // end if	
+	} // end if
 
 	client.Destroy();
 
@@ -3330,8 +3330,9 @@ oex::oexRESULT Test_CrashReporting()
 
 	// +++ Crash
 //	*( (char*)0 ) = 0;
-//	int x = 0, y = 10 / x;
-	oex::os::CDebug::CreateCrashReport( oexNULL, oexT( "logs" ), oexT( "Test" ) );
+//	int x = 1, y = 10 / --x; oexEcho( oexMks( y ).Ptr() );
+
+	oex::os::CDebug::CreateCrashReport( oexNULL, oexT( "logs" ), oexT( "Just testing..." ) );
 
 	return oex::oexRES_OK;
 }

@@ -380,10 +380,29 @@ oexBOOL CBaseFile::DoesExist( oexCSTR x_pPath )
 #endif
 }
 
+static oexBOOL _CreateFolder( oexCONST CStr &x_sPath )
+{
+	// Attempt to make the specified folder
+	oexBOOL bRet = !mkdir( oexStrToMb( x_sPath ).Ptr(), 0755 ) ? oexTRUE : oexFALSE;
+	if ( bRet )
+	{	chmod( oexStrToMb( x_sPath ).Ptr(), 0755 );
+		return oexTRUE;
+	} // end if
+
+	// Create sub path
+	CStr sPath = x_sPath.GetPath();
+	if ( sPath.Length() != x_sPath.Length() )
+		return _CreateFolder( sPath );
+
+	return oexFALSE;
+}
+
 oexBOOL CBaseFile::CreateFolder( oexCSTR x_pPath )
-{	oexBOOL bRet = !mkdir( oexStrToMbPtr( x_pPath ), 0 ) ? oexFALSE : oexTRUE;
-	chmod( oexStrToMbPtr( x_pPath ), 0755 );
-	return bRet;
+{
+	if ( !x_pPath || !*x_pPath )
+		return oexFALSE;
+
+	return _CreateFolder( x_pPath );
 }
 
 CStr CBaseFile::GetModPath( oexCSTR x_pPath )

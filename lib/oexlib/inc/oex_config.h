@@ -190,7 +190,7 @@
 
 #	define OEXLIB_USING_TLS
 
-#	define oexTLS _thread
+#	define oexTLS __thread
 
 #endif
 
@@ -210,9 +210,11 @@
 #if defined( OEX_LINUX )
 #	define oexFUNCTION			__FUNCTION__
 #	define oexPRETTYFUNCTION	__PRETTY_FUNCTION__
+#	define oexSTTFUNCTION		__PRETTY_FUNCTION__
 #else
 #	define oexFUNCTION			__FUNCTION__
 #	define oexPRETTYFUNCTION	__FUNCTION__ oexT( "()" )
+#	define oexSTTFUNCTION		__FUNCTION__
 #endif
 
 #if defined( OEX_WINDOWS )

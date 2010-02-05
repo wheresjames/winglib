@@ -93,7 +93,7 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	sqbind::stdString	sReply;
 
 	// Save information
-	sqbind::CSqMulti	mParams, mR;
+	sqbind::CSqMulti mParams, mR;
 	SQBIND_PropertyBag8ToMulti( x_pSession->Get(), mParams[ oexT( "GET" ) ] );
 	SQBIND_PropertyBag8ToMulti( x_pSession->Post(), mParams[ oexT( "POST" ) ] );
 	SQBIND_PropertyBag8ToMulti( x_pSession->RxHeaders(), mParams[ oexT( "HEADERS" ) ] );

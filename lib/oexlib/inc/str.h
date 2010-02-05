@@ -2594,7 +2594,7 @@ public:
 
 	// +++ Make this more efficient by removing the double search for separators
     /// Returns the root path of str
-    TStr GetPath()
+    TStr GetPath() oexCONST
     {   TStr str( *this );
 		oexINT nOffset = str.RFindChars( oexTT( T, "\\/" ) );
 		if ( 0 > nOffset )
