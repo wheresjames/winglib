@@ -200,7 +200,7 @@ oexBOOL CStackTrace::AddModule( oexPVOID x_pBase, CStackTrace* x_pSt, oexCSTR x_
 			m_uModules++;
 
 			// Use base address if name not specified
-			CStr s; if ( !x_pName ) x_pName = ( s = oexFmt( oexT( "0x%08x" ), (oexUINT)x_pBase ) ).Ptr();
+                        CStr s; if ( !x_pName ) x_pName = ( s = oexFmt( oexT( "0x%08x" ), oexPtrToInt( x_pBase ) ) ).Ptr();
 
 			// Save module info
 			zstr::Copy( m_mi[ i ].szName, oexSizeOfArray( m_mi[ i ].szName ), x_pName );
