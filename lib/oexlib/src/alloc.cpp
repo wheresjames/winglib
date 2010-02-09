@@ -118,7 +118,7 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
 
     // Could get an exception if it's not our memory block
     // But we can't force people to use our allocation routines ;)
-    oexTRY
+    try
     {
         if ( !oexVERIFY_PTR( x_pMem ) )
             return oexFALSE;
@@ -192,12 +192,14 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
 
     } // end try
 
-    oexCATCH_ALL()
+    catch( ... )
     {
 
     } // end catch
 
-	zstr::Copy( pMsg, oexT( " Assert while trying to interpret memory block.  Perhaps it's someone else's memory block?" oexNL8 ) );
+	os::CSys::StrFmt( pMsg, uBuf, 
+		oexT( " Assert while trying to interpret memory block : %08x : %d bytes" oexNL8 ),
+		oexPtrToInt( x_pMem ), uSize );
 
 	return oexFALSE;
 }

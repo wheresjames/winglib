@@ -238,22 +238,6 @@ oexINT COex::Uninit()
 
 #endif
 
-
-/*
-#if !defined( OEX_NOCRTDEBUG ) && defined( OEX_CRT_LEAK_DETECTION ) && defined( oexDEBUG ) && defined( OEX_WIN32 )
-
-    oexTRACE( oexT( "\n-------------------------------- oexlib is dumping memory leaks ---\n" ) );
-
-    os::CMem::DumpLeaks();
-
-      oexTRACE( oexT( "-------------------------------- Memory Report --------------------\n" ) );
-
-    os::CMem::MemReport();
-
-      oexTRACE( oexT( "-------------------------------- End oexlib memory report ---------\n\n" ) );
-#endif
-*/
-
 	return m_nShutdownCode;
 }
 

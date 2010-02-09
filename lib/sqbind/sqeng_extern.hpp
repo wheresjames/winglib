@@ -39,7 +39,7 @@ namespace sqbind
 	static SSqAllocator g_SqAllocator = { 0, 0, 0 };
 
 	oex::oexRESULT SQBIND_SetAllocator( sqbind::SSqAllocator *x_pAllocator )
-	{_STT();
+	{// _STT();
 		if ( x_pAllocator )
 			oexMemCpy( &g_SqAllocator, x_pAllocator, sizeof( g_SqAllocator ) );
 		else
@@ -50,14 +50,14 @@ namespace sqbind
 }; // end namespace sqbind
 
 void *sq_vm_malloc( SQUnsignedInteger size )
-{_STT();
+{//_STT();
 	if ( oexCHECK_PTR( sqbind::g_SqAllocator.fnMalloc ) )
 		return sqbind::g_SqAllocator.fnMalloc( size );
 	return oex::CMem::New( size, oexLINE, oexTEXT( oexFILE ) );
 }
 
 void *sq_vm_realloc( void *p, SQUnsignedInteger oldsize, SQUnsignedInteger size )
-{_STT();
+{//_STT();
 	if ( oexCHECK_PTR( sqbind::g_SqAllocator.fnRealloc ) )
 		return sqbind::g_SqAllocator.fnRealloc( p, size );
 
@@ -65,7 +65,7 @@ void *sq_vm_realloc( void *p, SQUnsignedInteger oldsize, SQUnsignedInteger size 
 }
 
 void sq_vm_free( void *p, SQUnsignedInteger size )
-{_STT();
+{//_STT();
 	if ( oexCHECK_PTR( sqbind::g_SqAllocator.fnFree ) )
 	{	sqbind::g_SqAllocator.fnFree( p );
 		return;

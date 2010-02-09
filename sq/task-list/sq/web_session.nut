@@ -43,13 +43,13 @@ function OnProcessRequest( params )
 		case "" :
 		case "/" :
 		case "/home" :
-			_self.include( "pg/home.nut" );
-			page = pg_run( mParams );
+			_self.include_once( "pg/home.nut" );
+			page = pg_home( mParams );
 			break;
 
 		case "/signup" :
-			_self.include( "pg/signup.nut" );
-			page = pg_run( mParams );
+			_self.include_once( "pg/signup.nut" );
+			page = pg_signup( mParams );
 			break;
 
 		case "/test" :

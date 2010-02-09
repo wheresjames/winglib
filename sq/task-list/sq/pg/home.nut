@@ -8,7 +8,8 @@ function pg_home( mParams )
 	{
 		// Ensure proper shutdown code
 		if ( mParams[ "GET" ][ "exit" ].str() == _self.get( "/", "exit_code" ) )
-			_self.terminate( -1 );
+			_self.kill( "/" );
+//			_self.terminate( -1 );
 
 		// Set new code
 		local id = _self.unique();

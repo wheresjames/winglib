@@ -45,7 +45,7 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="make -C ../.. BUILD=vs SQMOD=1 BUILD_CURL=1 BUILD_FFMPEG=1 BUILD_LIVE555=1 3D=1"
+				BuildCommandLine="make -C ../.. BUILD=vs BUILDDEP=1 SQMOD=1 BUILD_CURL=1 BUILD_FFMPEG=1 BUILD_LIVE555=1 3D=1 BUILD_FFTW=1 BUILD_MYSQL=1 BUILD_POCO=1 BUILD_VMIME=1"
 				ReBuildCommandLine="make -C ../.. BUILD=vs BUILDDEP=1 SQMOD=1 BUILDTYPE=rebuild"
 				CleanCommandLine="make -C ../.. BUILD=vs BUILDDEP=1 SQMOD=1 BUILDTYPE=clean"
 				Output=""

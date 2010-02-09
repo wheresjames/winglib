@@ -166,7 +166,6 @@ void CStackTrace::Release()
 			m_pst->m_lock.Wait( 30000 );
 
 #endif
-
 			// Release stack objects
 			oexUINT i = 0;
 			while ( CStack *p = m_pst->Next( &i ) )
@@ -215,7 +214,7 @@ oexBOOL CStackTrace::AddModule( oexPVOID x_pBase, CStackTrace* x_pSt, oexCSTR x_
 }
 
 oexBOOL CStackTrace::RemoveModule( oexPVOID x_pBase )
-{	
+{
 	oexAutoLock ll( m_lockModules );
 	if ( !ll.IsLocked() )
 		return oexFALSE;

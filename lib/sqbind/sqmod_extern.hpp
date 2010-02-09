@@ -96,6 +96,9 @@ extern "C" oex::oexRESULT SRV_Stop()
 	// Disable stack tracing
 	oex::CStackTrace::EnableStackTracing( oex::oexFALSE );
 
+	// Release module stack tracing
+	oex::CStackTrace::Release();
+
 	// Switch back to default allocator
 	oex::CMem::SetDefaultRawAllocator();
 
@@ -103,7 +106,7 @@ extern "C" oex::oexRESULT SRV_Stop()
 }
 
 extern "C" oex::oexRESULT SQBIND_Export_Symbols( sqbind::VM x_vm, sqbind::SSqAllocator *x_pAllocator )
-{_STT();
+{// _STT();
 	// Set the memory allocator
 	// iii kinda obsolete, SRV_Start() does this now
 	// +++ Commenting this out seems to cause memory leaks on posix systems???

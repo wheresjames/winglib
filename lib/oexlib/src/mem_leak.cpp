@@ -278,7 +278,6 @@ CStr CMemLeak::Report( t_size *pLeaks )
 					 );
 
 
-	oexULONG uLeaks = 0;
 	t_size uOffset = 0;
     oexTCHAR szMsg[ 1024 * 16 ] = oexEMPTY_STRING;
 	do
@@ -292,7 +291,9 @@ CStr CMemLeak::Report( t_size *pLeaks )
 			// Append to string
 			s << oexFmt( oexT( "0x%x : " ), oexPtrToInt( m_pPool[ uOffset ] ) ) << szMsg << oexNL;
 
-			uLeaks++;
+			// Track number of leaks
+			if ( pLeaks )
+				(*pLeaks)++;
 
 		} // end if
 
@@ -303,10 +304,6 @@ CStr CMemLeak::Report( t_size *pLeaks )
 	} while ( uOffset );
 
 	s << oexNL << oexT( "---------------- End Memory Report ------------------" ) << oexNL;
-
-	// Let use know how many leaks there were
-	if ( pLeaks )
-		*pLeaks = uLeaks;
 
 	return s;
 }
