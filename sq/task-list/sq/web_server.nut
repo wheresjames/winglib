@@ -26,6 +26,8 @@ function _init() : ( _g )
 
 	SetWebLog();
 	
+	_g.server.MapFolder( "js", _self.path( "js" ) );
+
 	_g.server.EnableMultiThreading( 0 );
 	if ( !_g.server.Start( _cfg( "tcp_port" ) ) )
 		_self.alert( "Unable to start http server" );

@@ -71,7 +71,7 @@ extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 	pDi->lVer = oexVERSION( 1, 0 );
 
 	// Set stack trace object pointer
-	pDi->pSt = oex::CStackTrace::St();
+//	pDi->pSt = oex::CStackTrace::St();
 
 	return 0;
 }
@@ -84,7 +84,7 @@ extern "C" oex::oexRESULT SRV_Start( oex::SRawAllocator x_sRawAllocator, oex::oe
 	oex::CMem::SetRawAllocator( x_sRawAllocator );
 
 	// Enable stack tracing
-	oex::CStackTrace::EnableStackTracing( oex::oexTRUE );
+//	oex::CStackTrace::EnableStackTracing( oex::oexTRUE );
 
 	return 0;
 }
@@ -94,10 +94,10 @@ extern "C" oex::oexRESULT SRV_Stop()
 {// _STT();
 
 	// Disable stack tracing
-	oex::CStackTrace::EnableStackTracing( oex::oexFALSE );
+//	oex::CStackTrace::EnableStackTracing( oex::oexFALSE );
 
 	// Release module stack tracing
-	oex::CStackTrace::Release();
+//	oex::CStackTrace::Release();
 
 	// Switch back to default allocator
 	oex::CMem::SetDefaultRawAllocator();

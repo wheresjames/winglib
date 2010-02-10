@@ -50,8 +50,6 @@ class CStackTrace
 {
 public:
 
-	/// Module mapping
-	enum { eMaxModules = 128 };
 
 	/// Maxium stack size
 	enum { eMaxStack = 1024 };
@@ -59,21 +57,7 @@ public:
 	/// Max threads that can be tracked simultaniously 
 	/// 10 = 1,024, 11 = 2,048, 12 = 4,096
 	enum { eMaxThreadsBits = 12 };
-
-	/// Holds information for module stack trace objects
-	struct SModuleInfo
-	{
-		/// Module name
-		oexCHAR			szName[ 64 ];
-
-		/// Module base address
-		oexPVOID		pAddress;
-
-		/// Module stack trace object
-		CStackTrace		*pSt;
-
-	};
-
+	
 	/// Encapsulates stack tracing functionality for a single thread
 	class CStack
 	{
@@ -238,48 +222,7 @@ public:
 	
 		\see 
 	*/
-	CStack* InitPush() 
-	{
-#if defined( OEXLIB_USING_TLSAPI )
-
-		// Return thread local storage index
-		CStack *pStack;
-		if ( ( (oexUINT)-1 ) != m_tls_dwIndex )
-		{	pStack = (CStack*)oexTlsGetValue( m_tls_dwIndex );
-			if ( pStack != oexNULL ) 
-				return pStack;
-		} // end if
-
-		// Allocate TLS 
-		if ( ( (oexUINT)-1 ) == m_tls_dwIndex )
-			m_tls_dwIndex = oexTlsAllocate();
-		
-		// Set stack value
-		pStack = GetStack();
-		if ( !pStack )
-			return oexNULL;
-
-		// Save stack value
-		if ( ( (oexUINT)-1 ) != m_tls_dwIndex ) 
-			oexTlsSetValue( m_tls_dwIndex, pStack );
-			
-		return pStack;
-
-#elif defined( OEXLIB_USING_TLS )
-
-		// Are we already initialized for this thread?
-		if ( m_tls_pStack ) 
-			return m_tls_pStack;
-
-		return ( m_tls_pStack = GetStack() );
-
-#else
-
-		return GetStack(); 
-
-#endif	
-
-	}
+	CStack* InitPush();
 
 	//==============================================================
 	// RemoveThread()
@@ -290,6 +233,7 @@ public:
 	/// Constructor
 	CStackTrace()
 	{
+		m_bEnable = oexFALSE;
 	}
 
 	/// Destructor
@@ -354,84 +298,29 @@ public:
 	*/
 	oexBOOL Save( oexCSTR x_pFile );
 
-	/// Instance of stack trace
-	static CStackTrace *m_pst;
-
-	//==============================================================
-	// St()
-	//==============================================================
-	/// Returns instance of stack trace object
-	static CStackTrace* St() 
-	{ 	if ( !m_pst ) m_pst = OexAllocConstruct< CStackTrace >(); return m_pst; }
-
 	//==============================================================
 	// Release()
 	//==============================================================
 	/// Releases stack trace object
-	static void EnableStackTracing( oexBOOL bEnable )
+	void EnableStackTracing( oexBOOL bEnable )
 	{	m_bEnable = bEnable; }
 
 	//==============================================================
+	// isEnabled()
+	//==============================================================
+	/// Returns non zero if stack tracing is enabled
+	oexBOOL isEnabled() { return m_bEnable; }
+
+	//==============================================================
 	// Release()
 	//==============================================================
 	/// Releases stack trace object
-	static void Release();
-
-	/// Release all
-	static oexBOOL		m_bEnable;
-
-#if defined( OEXLIB_USING_TLSAPI )
-
-	static oexUINT		m_tls_dwIndex;
-
-#elif defined( OEXLIB_USING_TLS )
-
-	/// Thread specific stack pointer
-	static oexTLS CStack *m_tls_pStack;
-
-#endif
-
-
-public:
-
-	/// Scope helper function
-	class CLocalModuleInfo
-	{
-	public:
-
-		CLocalModuleInfo( oexPVOID x_pBase, CStackTrace* x_pSt, oexCSTR x_pName )
-		{	if ( x_pBase ) CStackTrace::AddModule( x_pBase, x_pSt, x_pName ); m_pBase = x_pBase; }
-
-		~CLocalModuleInfo() { if ( m_pBase ) RemoveModule( m_pBase ); }
-
-	private:
-
-		oexPVOID m_pBase;
-
-	};
-
-	/// Adds a module for stack trace capture
-	static oexBOOL AddModule( oexPVOID x_pBase, CStackTrace* x_pSt, oexCSTR x_pName );
-
-	/// Removes a module from stack trace capture
-	static oexBOOL RemoveModule( oexPVOID x_pBase );
-	
-	/// Returns static pointer to module lock
-	static oexLock& ModuleLock() { return m_lockModules; }
-
-	/// Iterates through the modules
-	static SModuleInfo* NextModule( oexUINT *i );
+	void Release();
 
 private:
 
-	/// List of module information
-	static SModuleInfo			m_mi[ eMaxModules ];
-
-	/// Module list lock
-	static oexLock				m_lockModules;
-
-	/// Number of modules
-	static oexUINT				m_uModules;
+	/// Release all
+	oexBOOL				m_bEnable;
 
 };
 
@@ -451,25 +340,18 @@ public:
 	/// Default Constructor
 	CLocalStackTrace( oexCSTR x_pFunction ) 
 	{
-		if ( CStackTrace::m_bEnable )
-		{
-			// Get stack object
-			m_pStack = CStackTrace::St()->InitPush(); 
+		// Get stack object
+		m_pStack = oexSt().InitPush(); 
 
-			// Push function if valid
-			if ( m_pStack ) 
-				m_pStack->Push( x_pFunction );
-
-		} // end if
-		else 
-			m_pStack = oexNULL; 
-	
+		// Push function if valid
+		if ( m_pStack ) 
+			m_pStack->Push( x_pFunction );
 	}
 
 	/// Destructor
 	~CLocalStackTrace() 
 	{ 
-		if ( !CStackTrace::m_bEnable ) 
+		if ( !oexSt().isEnabled() ) 
 			return;
 
 		if ( m_pStack ) 

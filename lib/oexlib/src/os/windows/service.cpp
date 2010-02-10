@@ -71,7 +71,7 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 	} // end if
 
 	// Add module stack trace object
-	CStackTrace::CLocalModuleInfo _mi( mod.GetModuleBaseAddress(), si.pSt, x_sModule.GetFileName().Ptr() );
+//	CStackTrace::CLocalModuleInfo _mi( mod.GetModuleBaseAddress(), si.pSt, x_sModule.GetFileName().Ptr() );
 
 	// Verify correct module type
 	if ( oexCHECK_PTR( x_pguidType ) && !guid::CmpGuid( x_pguidType, &si.guidType ) )

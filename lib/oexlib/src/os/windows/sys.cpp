@@ -118,7 +118,7 @@ const oexUINT       CSys::c_uMaximumWaitObjects = MAXIMUM_WAIT_OBJECTS;
 oexSTATIC_ASSERT( CSys::eMaximumWaitObjects == MAXIMUM_WAIT_OBJECTS );
 
 oexINT CSys::ShowMessageBox( oexCSTR x_pTitle, oexCSTR x_pStr )
-{_STT();
+{//_STT();
 	if ( !oexCHECK_PTR( x_pTitle ) )
 		x_pTitle = oexT( "" );
  	if ( !oexCHECK_PTR( x_pStr ) )
@@ -127,17 +127,17 @@ oexINT CSys::ShowMessageBox( oexCSTR x_pTitle, oexCSTR x_pStr )
 }
 
 oexINT CSys::Quit( oexINT x_nReturnCode )
-{_STT();
+{//_STT();
 	return PostThreadMessage( 0, WM_QUIT, x_nReturnCode, 0L );
 }
 
 void CSys::Exit( oexINT x_nRet )
-{_STT();
+{//_STT();
 	exit( x_nRet );
 }
 
 oexINT CSys::Flush_stdout()
-{_STT();
+{//_STT();
 	return fflush( stdout );
 }
 
@@ -145,7 +145,7 @@ oexINT CSys::Flush_stdout()
 // **** Multi-byte
 
 oexCSTR8 CSys::StrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, ... )
-{_STT();
+{//_STT();
 	oexVaList ap; oexVaStart( ap, x_pFmt );
 	oexCSTR8 pStr = vStrFmt( x_pDst, x_uMax, x_pFmt, ap );
 	oexVaEnd( ap );
@@ -154,12 +154,12 @@ oexCSTR8 CSys::StrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, ... )
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
 oexCSTR8 CSys::vStrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, oexVaList x_pArgs )
-{_STT();
+{//_STT();
 	return vStrFmt( oexNULL, x_pDst, x_uMax, x_pFmt, x_pArgs );
 }
 
 oexCSTR8 CSys::StrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, ... )
-{_STT();
+{//_STT();
 	oexVaList ap; oexVaStart( ap, x_pFmt );
 	oexCSTR8 pStr = vStrFmt( x_pRes, x_pDst, x_uMax, x_pFmt, ap );
 	oexVaEnd( ap );
@@ -168,7 +168,7 @@ oexCSTR8 CSys::StrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCST
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
 oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, oexVaList x_pArgs )
-{_STT();
+{//_STT();
 	if ( x_pRes )
 		*x_pRes = 0;
 
@@ -215,42 +215,42 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 }
 
 oexINT64 CSys::StrToInt64( oexCSTR8 x_pStr, oexUINT x_uRadix )
-{_STT();
+{//_STT();
 	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
     return STRTOLL( x_pStr, NULL, x_uRadix );
 }
 
 oexUINT64 CSys::StrToUInt64( oexCSTR8 x_pStr, oexUINT x_uRadix )
-{_STT();
+{//_STT();
 	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
     return STRTOLL( x_pStr, NULL, x_uRadix );
 }
 
 oexLONG CSys::StrToLong( oexCSTR8 x_pStr, oexUINT x_uRadix )
-{_STT();
+{//_STT();
 	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 	return strtol( x_pStr, NULL, x_uRadix );
 }
 
 oexULONG CSys::StrToULong( oexCSTR8 x_pStr, oexUINT x_uRadix )
-{_STT();
+{//_STT();
 	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 	return strtoul( x_pStr, NULL, x_uRadix );
 }
 
 oexFLOAT CSys::StrToFloat( oexCSTR8 x_pStr )
-{_STT();
+{//_STT();
 	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 	return (oexFLOAT)strtod( x_pStr, NULL );
 }
 
 oexDOUBLE CSys::StrToDouble( oexCSTR8 x_pStr )
-{_STT();
+{//_STT();
 	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 	return strtod( x_pStr, NULL );
@@ -259,7 +259,7 @@ oexDOUBLE CSys::StrToDouble( oexCSTR8 x_pStr )
 // **** Unicode
 
 oexCSTRW CSys::StrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, ... )
-{_STT();
+{//_STT();
 	oexVaList ap; oexVaStart( ap, x_pFmt );
 	oexCSTRW pStr = vStrFmt( x_pDst, x_uMax, x_pFmt, ap );
 	oexVaEnd( ap );
@@ -268,12 +268,12 @@ oexCSTRW CSys::StrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, ... )
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
 oexCSTRW CSys::vStrFmt( oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, oexVaList x_pArgs )
-{_STT();
+{//_STT();
 	return vStrFmt( oexNULL, x_pDst, x_uMax, x_pFmt, x_pArgs );
 }
 
 oexCSTRW CSys::StrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, ... )
-{_STT();
+{//_STT();
 	oexVaList ap; oexVaStart( ap, x_pFmt );
 	oexCSTRW pStr = vStrFmt( x_pRes, x_pDst, x_uMax, x_pFmt, ap );
 	oexVaEnd( ap );
@@ -282,7 +282,7 @@ oexCSTRW CSys::StrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCST
 
 //	wvsprintf( pDst, pFmt, (va_list)pArgs );
 oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCSTRW x_pFmt, oexVaList x_pArgs )
-{_STT();
+{//_STT();
 	if ( x_pRes )
 		*x_pRes = 0;
 
@@ -346,42 +346,42 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 }
 
 oexINT64 CSys::StrToInt64( oexCSTRW x_pStr, oexUINT x_uRadix )
-{_STT();
+{//_STT();
 	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 	return WCSTOLL( x_pStr, NULL, x_uRadix );
 }
 
 oexUINT64 CSys::StrToUInt64( oexCSTRW x_pStr, oexUINT x_uRadix )
-{_STT();
+{//_STT();
 	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 	return WCSTOLL( x_pStr, NULL, x_uRadix );
 }
 
 oexLONG CSys::StrToLong( oexCSTRW x_pStr, oexUINT x_uRadix )
-{_STT();
+{//_STT();
 	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 	return wcstol( x_pStr, NULL, x_uRadix );
 }
 
 oexULONG CSys::StrToULong( oexCSTRW x_pStr, oexUINT x_uRadix )
-{_STT();
+{//_STT();
 	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 	return wcstoul( x_pStr, NULL, x_uRadix );
 }
 
 oexFLOAT CSys::StrToFloat( oexCSTRW x_pStr )
-{_STT();
+{//_STT();
 	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 	return (oexFLOAT)wcstod( x_pStr, NULL );
 }
 
 oexDOUBLE CSys::StrToDouble( oexCSTRW x_pStr )
-{_STT();
+{//_STT();
 	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
 	return wcstod( x_pStr, NULL );
@@ -389,13 +389,13 @@ oexDOUBLE CSys::StrToDouble( oexCSTRW x_pStr )
 
 /// vprintf
 int CSys::vPrintf( oexCSTRW x_pFmt, oexVaList pArgs )
-{_STT();
+{//_STT();
 	return ::vwprintf( x_pFmt, (va_list)pArgs );
 }
 
 /// printf function
 int CSys::Printf( oexCSTRW x_pFmt, ... )
-{_STT();
+{//_STT();
 	oexVaList ap; oexVaStart( ap, x_pFmt );
 	int ret = ::vwprintf( x_pFmt, (va_list)ap );
 	oexVaEnd( ap );
@@ -403,34 +403,34 @@ int CSys::Printf( oexCSTRW x_pFmt, ... )
 }
 
 int CSys::Echo( oexCSTRW x_pFmt )
-{_STT();
+{//_STT();
 	return ::puts( oexStrWToMbPtr( x_pFmt ) );
 }
 
 oexPVOID CSys::MemCpy( oexPVOID x_pDst, oexCPVOID x_pSrc, oexUINT x_uSize )
-{// _STT();
+{// //_STT();
 	return ::memcpy( x_pDst, x_pSrc, x_uSize );
 }
 
 oexINT CSys::MemCmp( oexCPVOID x_pDst, oexCPVOID x_pSrc, oexUINT x_uSize )
-{// _STT();
+{// //_STT();
 	return ::memcmp( x_pDst, x_pSrc, x_uSize );
 }
 
 oexPVOID CSys::MemSet( oexPVOID x_pDst, oexINT x_nCh, oexUINT x_uSize )
-{// _STT();
+{// //_STT();
 	return ::memset( x_pDst, x_nCh, x_uSize );
 }
 
 oexGUID * CSys::CreateGuid( oexGUID *pGuid )
-{_STT();
+{//_STT();
     CoCreateGuid( (GUID*)pGuid );
     return pGuid;
 }
 
 
 void CSys::Sleep( oexUINT uMilliseconds, oexUINT uSeconds )
-{_STT();
+{//_STT();
 	::Sleep( uMilliseconds + ( uSeconds * 1000 ) );
 }
 
@@ -440,7 +440,7 @@ static oexINT   g_microsleep_socket_init = -1;
 static SOCKET   g_microsleep_socket = INVALID_SOCKET;
 
 static oexBOOL CSys_ReleaseMicroSleep()
-{_STT();
+{//_STT();
     if ( INVALID_SOCKET != g_microsleep_socket )
     {   closesocket( g_microsleep_socket );
         g_microsleep_socket = INVALID_SOCKET;
@@ -458,7 +458,7 @@ static oexBOOL CSys_ReleaseMicroSleep()
 }
 
 static oexBOOL CSys_InitMicroSleep()
-{_STT();
+{//_STT();
     if ( 0 <= g_microsleep_socket_init )
         return oexTRUE;
 
@@ -484,7 +484,7 @@ static oexBOOL CSys_InitMicroSleep()
 
 // +++ Anyone know of another accurate microsecond wait on Windows?
 oexBOOL CSys::MicroSleep( oexUINT uMicroseconds, oexUINT uSeconds )
-{_STT();
+{//_STT();
     // Ensure we're initialized
     if ( 0 > g_microsleep_socket_init )
         if ( !CSys_InitMicroSleep() )
@@ -503,7 +503,7 @@ oexBOOL CSys::MicroSleep( oexUINT uMicroseconds, oexUINT uSeconds )
 }
 
 oexBOOL CSys::Init()
-{_STT();
+{//_STT();
 #if defined( OEX_WINCE )
 	CoInitializeEx( NULL, COINIT_MULTITHREADED );
 #else
@@ -514,7 +514,7 @@ oexBOOL CSys::Init()
 }
 
 oexBOOL CSys::Uninit()
-{_STT();
+{//_STT();
 	CoUninitialize();
 
 	if ( g_lockCpu )
@@ -542,12 +542,12 @@ oexBOOL CSys::Uninit()
 }
 
 void CSys::CloseHandle( t_WAITABLE x_pHandle )
-{_STT();
+{//_STT();
 	if ( x_pHandle ) CloseHandle( (HANDLE)x_pHandle );
 }
 
 CSys::t_WAITABLE CSys::DuplicateHandle( t_WAITABLE x_pHandle )
-{_STT();
+{//_STT();
     HANDLE hDup = NULL;
     if ( !::DuplicateHandle( GetCurrentProcess(), (HANDLE)x_pHandle,
                              GetCurrentProcess(), &hDup,
@@ -557,7 +557,7 @@ CSys::t_WAITABLE CSys::DuplicateHandle( t_WAITABLE x_pHandle )
 }
 
 oexINT CSys::WaitForSingleObject( CSys::t_WAITABLE x_pHandle, oexUINT x_uTimeout )
-{_STT();
+{//_STT();
 	DWORD dwRet = ::WaitForSingleObject( (HANDLE)x_pHandle, (DWORD)x_uTimeout );
 	if ( WAIT_OBJECT_0 == dwRet )
         return waitSuccess;
@@ -567,7 +567,7 @@ oexINT CSys::WaitForSingleObject( CSys::t_WAITABLE x_pHandle, oexUINT x_uTimeout
 }
 
 oexINT CSys::WaitForMultipleObjects( oexUINT x_uObjects, CSys::t_WAITABLE *x_pHandle, oexBOOL x_bWaitAll, oexUINT x_uTimeout )
-{_STT();
+{//_STT();
     // Currently 64, don't blame me, this is a Windows limitation...
     oexASSERT( MAXIMUM_WAIT_OBJECTS >= x_uObjects );
 
@@ -591,17 +591,17 @@ oexINT CSys::WaitForMultipleObjects( oexUINT x_uObjects, CSys::t_WAITABLE *x_pHa
 }
 
 oexLONG CSys::InterlockedIncrement( oexLONG *x_puVal )
-{_STT();
+{//_STT();
 	return ::InterlockedIncrement( x_puVal );
 }
 
 oexLONG CSys::InterlockedDecrement( oexLONG *x_puVal )
-{_STT();
+{//_STT();
 	return ::InterlockedDecrement( x_puVal );
 }
 
 void CSys_SystemTimeToSTime( SYSTEMTIME &st, CSys::STime &t )
-{_STT();
+{//_STT();
     t.uYear = st.wYear;
     t.uMonth = st.wMonth;
     t.uDayOfWeek = st.wDayOfWeek;
@@ -613,7 +613,7 @@ void CSys_SystemTimeToSTime( SYSTEMTIME &st, CSys::STime &t )
 }
 
 void CSys_STimeToSystemTime( CSys::STime &t, SYSTEMTIME &st )
-{_STT();
+{//_STT();
     st.wYear = t.uYear;
     st.wMonth = t.uMonth;
     st.wDayOfWeek = t.uDayOfWeek;
@@ -625,7 +625,7 @@ void CSys_STimeToSystemTime( CSys::STime &t, SYSTEMTIME &st )
 }
 
 oexBOOL CSys::GetLocalTime( STime &t )
-{_STT();
+{//_STT();
     CSys::Zero( &t, sizeof( t ) );
 
     SYSTEMTIME st;
@@ -644,7 +644,7 @@ oexBOOL CSys::GetLocalTime( STime &t )
 }
 
 oexBOOL CSys::SetLocalTime( STime &t )
-{_STT();
+{//_STT();
     SYSTEMTIME st;
     CSys::Zero( &st, sizeof( st ) );
 
@@ -660,7 +660,7 @@ oexBOOL CSys::SetLocalTime( STime &t )
 }
 
 oexINT CSys::GetLocalTzBias()
-{_STT();
+{//_STT();
     TIME_ZONE_INFORMATION tz;
     CSys::Zero( &tz, sizeof( tz ) );
 
@@ -670,7 +670,7 @@ oexINT CSys::GetLocalTzBias()
 
 
 oexBOOL CSys::GetSystemTime( STime &t )
-{_STT();
+{//_STT();
     CSys::Zero( &t, sizeof( t ) );
 
     SYSTEMTIME st;
@@ -683,7 +683,7 @@ oexBOOL CSys::GetSystemTime( STime &t )
 }
 
 oexBOOL CSys::SetSystemTime( STime &t )
-{_STT();
+{//_STT();
     SYSTEMTIME st;
     CSys::Zero( &st, sizeof( st ) );
 
@@ -696,7 +696,7 @@ oexBOOL CSys::SetSystemTime( STime &t )
 
 /// Converts an STime structure to file time
 oexINT64 CSys::SystemTimeToFileTime( STime &x_st )
-{_STT();
+{//_STT();
     SYSTEMTIME st;
     CSys_STimeToSystemTime( x_st, st );
 
@@ -708,7 +708,7 @@ oexINT64 CSys::SystemTimeToFileTime( STime &x_st )
 
 /// Converts a file time to an STime structure
 void CSys::FileTimeToSystemTime( STime &x_st, oexINT64 x_ft )
-{_STT();
+{//_STT();
     FILETIME ft;
     ft.dwLowDateTime = (oexINT32)( x_ft & 0xffffffff );
     ft.dwHighDateTime = (oexINT32)( ( x_ft >> 32 ) & 0xffffffff );
@@ -720,13 +720,13 @@ void CSys::FileTimeToSystemTime( STime &x_st, oexINT64 x_ft )
 }
 
 oexUINT CSys::GetUnixTime()
-{// _STT();
+{// //_STT();
 	return time( NULL );
 }
 
 
 oexUINT CSys::WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen )
-{_STT();
+{//_STT();
 	if ( !pSrc || !uLen )
 		return 0;
 
@@ -737,7 +737,7 @@ oexUINT CSys::WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen 
 }
 
 oexUINT CSys::MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen )
-{_STT();
+{//_STT();
 	if ( !pSrc || !uLen )
 		return 0;
 
@@ -748,7 +748,7 @@ oexUINT CSys::MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen 
 }
 
 oexCSTR CSys::SetLocale( oexINT nCategory, oexCSTR pLocal )
-{_STT();
+{//_STT();
 //  +++ Resolve temporary string problem
 //	return setlocale( nCategory, oexStrToMbPtr( pLocal ) );
 	return oexT( "" );
@@ -756,7 +756,7 @@ oexCSTR CSys::SetLocale( oexINT nCategory, oexCSTR pLocal )
 
 /// printf function
 int CSys::Printf( oexCSTR8 x_pFmt, ... )
-{_STT();
+{//_STT();
 	oexVaList ap; oexVaStart( ap, x_pFmt );
 	int ret = vprintf( x_pFmt, (va_list)ap );
 	oexVaEnd( ap );
@@ -765,22 +765,22 @@ int CSys::Printf( oexCSTR8 x_pFmt, ... )
 
 /// vprintf
 int CSys::vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs )
-{_STT();
+{//_STT();
 	return ::vprintf( x_pFmt, (va_list)pArgs );
 }
 
 int CSys::Echo( oexCSTR8 x_pFmt )
-{_STT();
+{//_STT();
 	return ::puts( x_pFmt );
 }
 
 oexUINT CSys::GetCurThreadId()
-{// _STT();
+{// //_STT();
 	return GetCurrentThreadId();
 }
 
 oexBOOL CSys::PumpThreadMessages()
-{_STT();
+{//_STT();
     MSG msg;
 
     // See if a message is waiting
@@ -819,7 +819,7 @@ extern "C" oex::oexRESULT OEX_SRVMODULE_20081230192357EST_Run( oex::oexCSTR x_pP
 */
 
 oexINT CSys::Fork( oexCSTR x_pWorkingDirectory, oexCSTR x_pLogFile )
-{_STT();
+{//_STT();
 
 	// Hmmmmm
 	oexERROR( 0, oexT( "Cant fork() on Windows" ) );
@@ -828,7 +828,7 @@ oexINT CSys::Fork( oexCSTR x_pWorkingDirectory, oexCSTR x_pLogFile )
 }
 
 oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
-{_STT();
+{//_STT();
 	if ( !oexCHECK_PTR( x_pFile ) )
 		return oexFALSE;
 
@@ -861,7 +861,7 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 #if !defined( OEX_GCC )
 
 oexDOUBLE CSys::GetCpuLoad()
-{_STT();
+{//_STT();
 	if ( !g_lockCpu )
 		g_lockCpu = OexAllocConstruct< oexLock >();
 	if ( !g_lockCpu )
@@ -880,7 +880,7 @@ oexDOUBLE CSys::GetCpuLoad()
 }
 
 oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName )
-{_STT();
+{//_STT();
 	if ( !g_lockCpu )
 		g_lockCpu = OexAllocConstruct< oexLock >();
 	if ( !g_lockCpu )
@@ -904,12 +904,12 @@ oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName )
 //     and isn't working anyway
 
 oexDOUBLE CSys::GetCpuLoad()
-{_STT();
+{//_STT();
 	return 0;
 }
 
 oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName )
-{_STT();
+{//_STT();
 	return 0;
 }
 

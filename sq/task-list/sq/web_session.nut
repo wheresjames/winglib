@@ -27,6 +27,22 @@ function OnProcessRequest( params )
 
 	local login_menu = "";
 	local loggedin = DoLogin( mParams );
+
+	// Handle raw requests
+	if ( mParams[ "GET" ].isset( "_rid" ) )
+	{
+		if ( loggedin )
+			switch ( mParams[ "REQUEST" ][ "path" ].str() )
+			{	case "/tasks" :
+					_self.include_once( "pg/tasks.nut" );
+					mReply.set( "content", raw_tasks( mParams ) );
+					return mReply.serialize();
+			} // end switch
+
+		return mReply.serialize();
+
+	} // end if
+
 	local login_menu = loggedin ? "<a href='?logout=1'>Logout</a>" : "<a href='?login=1'>Login</a>";
 
 	local menu_items =
@@ -52,6 +68,11 @@ function OnProcessRequest( params )
 			page = pg_signup( mParams );
 			break;
 
+		case "/tasks" :
+			_self.include_once( "pg/tasks.nut" );
+			page = pg_tasks( mParams );
+			break;
+
 		case "/test" :
 			page = "<font color='" + _cfg( "col_text" ) + "'><pre>"
 				    + mParams.print_r( 1 )
@@ -68,9 +89,9 @@ function OnProcessRequest( params )
 	local content = "<html>\r\n"
 		+ "<!--Remote:" + mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str() + "-->\r\n"
 		+ "<!--Local:" + mParams[ "REQUEST" ][ "SERVER_ADDR" ].str() + "-->\r\n"
-		+ @"
-			<body bgcolor='" + _cfg( "col_bg" ) + "' text='" + _cfg( "col_fg" ) + "' link='" + _cfg( "col_link" ) + "' vlink='" + _cfg( "col_link" ) + @"'>
-		"
+		+ "<body bgcolor='" + _cfg( "col_bg" ) + "' text='" + _cfg( "col_fg" ) + "' link='" + _cfg( "col_link" ) + "' vlink='" + _cfg( "col_link" ) + "'>\r\n"
+	    + " <script type='text/javascript' src='/js/strings.js'></script>\r\n"
+	    + " <script type='text/javascript' src='/js/jquery-1.3.2.min.js'></script>\r\n"
 		+ show_menu( mParams[ "REQUEST" ][ "path" ].str(), menu_items, login_menu )
 		+ page
 		+ @"

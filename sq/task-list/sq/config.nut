@@ -8,7 +8,31 @@ local _g_cfg =
 	db_name		= "task-list.db",
 	db_tables	= {
 					users = 
-					[	"CREATE TABLE users ( uid INTEGER NOT NULL, user CHAR(64), display CHAR(64), title CHAR(64), PRIMARY KEY(uid) )",
+					[	"CREATE TABLE users ( "
+										   + "uid INTEGER NOT NULL"
+										 + ", user CHAR(64) UNIQUE"
+										 + ", display CHAR(64)"
+										 + ", title CHAR(64)"
+										 + ", PRIMARY KEY(uid) )"
+					]
+					tasks = 
+					[	"CREATE TABLE tasks ( "
+										   + "uid INTEGER NOT NULL"
+										 + ", title CHAR(64)"
+										 + ", body TEXT"
+										 + ", PRIMARY KEY(uid) )"
+					]
+					assignments = 
+					[	"CREATE TABLE assignments ( "
+										   + "uid INTEGER NOT NULL"
+										 + ", user INTEGER"
+										 + ", task INTEGER"
+										 + ", PRIMARY KEY(uid)"
+										 + ", FOREIGN KEY(user) REFERENCES users(uid)"
+										 + ", FOREIGN KEY(task) REFERENCES tasks(uid)"
+										 + ");"
+						 + "CREATE INDEX idx_user ON assignments(user);"
+						 + "CREATE INDEX idx_task ON assignments(task);"
 					]
 				  },
 

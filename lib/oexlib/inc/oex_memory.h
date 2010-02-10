@@ -42,6 +42,7 @@ class CMemLeak;
 class CBinShare;
 class CLog;
 class COexResourceHelper;
+class CStackTrace;
 struct SRawAllocator
 {
 	/// Allocates memory
@@ -64,6 +65,9 @@ struct SRawAllocator
 
 	/// Resource helper
 	COexResourceHelper	*pResourceHelper;
+
+	/// Stack trace object
+	CStackTrace			*pStackTrace;
 };
 
 class CMem
@@ -101,6 +105,9 @@ public:
 	/// Sets the default raw allocator function pointers
 	static void SetDefaultRawAllocator()
 	{	m_ra = m_def; }
+
+	/// Returns a pointer to the stack trace object
+	static CStackTrace& GetStackTrace();
 
 private:
 

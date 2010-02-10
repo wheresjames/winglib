@@ -52,7 +52,7 @@ void CModuleInstance::Destroy()
 	if ( m_cModule.IsLoaded() )
 	{
 		// Unload module
-		oex::CStackTrace::RemoveModule( m_cModule.GetModuleBaseAddress() );
+//		oex::CStackTrace::RemoveModule( m_cModule.GetModuleBaseAddress() );
 
 		// Load start function
 		oex::os::service::PFN_SRV_Stop pStop =
@@ -133,8 +133,8 @@ oex::oexBOOL CModuleInstance::LoadFunctions()
 	} // end if
 
 	// Add module stack trace object
-	oex::CStackTrace::AddModule( m_cModule.GetModuleBaseAddress(), 
-								 si.pSt, m_cModule.GetPath().GetFileName().Ptr() );
+//	oex::CStackTrace::AddModule( m_cModule.GetModuleBaseAddress(), 
+//								 si.pSt, m_cModule.GetPath().GetFileName().Ptr() );
 
 	// Load start function
 	oex::os::service::PFN_SRV_Start pStart =

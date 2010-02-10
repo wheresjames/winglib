@@ -1,5 +1,6 @@
 
 _self.load_module( "curl", "" );
+_self.load_module( "tinyxml", "" );
 
 class CGlobal
 {

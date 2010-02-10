@@ -123,7 +123,7 @@ namespace service
 		oexLONG				lVer;
 
 		/// Pointer to module's stack trace object
-		CStackTrace			*pSt;
+//		CStackTrace			*pSt;
 	};
 
 	//==============================================================
