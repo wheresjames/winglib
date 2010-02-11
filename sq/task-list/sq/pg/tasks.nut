@@ -3,10 +3,37 @@ _self.include_once( "config.nut" );
 
 function raw_tasks( mParams )
 {
+	local db = CSqSQLite();
+//	db.DebugMode( 1 );
+	if ( !db.Open( _cfg( "db_name" ) ) )
+	{	_self.echo( db.GetLastError() );
+		return "";
+	} // end if
 
+	// Add?
+	if ( mParams[ "GET" ].isset( "_add" ) && mParams[ "GET" ].isset( "_dat" ) )
+	{
+		local inf = CSqMulti();
+		inf.deserialize( mParams[ "GET" ][ "_dat" ].str() );
+//		_self.echo( inf.print_r( 1 ) );
 
+		// Insert the user into the database
+		if ( !db.Insert( "tasks", inf ) )
+			_self.echo( db.GetLastError() );
 
-	return "1=hello,2=world";
+	} // end if
+
+	if ( !db.Exec( "SELECT * FROM tasks" ) )
+	{	_self.echo( db.GetLastError() );
+		return "";
+	} // end if
+
+//	_self.echo( db.Result().serialize() );
+
+	return db.Result().serialize();
+
+//	local tasks = db.Result();
+//	return "1=hello,2=world";
 }
 
 function pg_tasks( mParams )
@@ -43,14 +70,14 @@ function pg_tasks( mParams )
 				var g_submit_items = {};
 				function submitItem()
 				{
-					g_submit_items[ getLength( g_submit_items ) ] 
-						= document.getElementById( 'title' ).value;
+					g_submit_items[ 'title' ] = document.getElementById( 'title' ).value;
+					document.getElementById( 'title' ).value = '';
 				}
 
-				function addItem( id, str ) 
+				function addItem( id, arr ) 
 				{
 					g_current_items[ id ] = 1;
-					$('#items').prepend( '<li style=\'display:none;list-style-type:none\' id=\'item' + id + '\'>' + str + '</li>' );
+					$('#items').prepend( '<li style=\'display:none;list-style-type:none\' id=\'item' + id + '\'>' + arr[ 'title' ] + '</li>' );
      				$('#item' + id).fadeIn();
 					$('#item' + id).click( function() { removeItem( id ); $(this).fadeOut(); } );
 				}
@@ -77,7 +104,7 @@ function pg_tasks( mParams )
 				}
 
 				setInterval( 'updateList();', 3000 );
-
+				
 				function DataCallback( data )
 				{
 					if ( data.length )
@@ -92,7 +119,7 @@ function pg_tasks( mParams )
 				{
 					var getp = '_rid=0';
 					if ( getLength( g_submit_items ) )
-					{	getp += '&_add=1&' + ScsSerialize( g_submit_items );
+					{	getp += '&_add=1&_dat=' + escape( ScsSerialize( g_submit_items ) );
 						g_submit_items = {};
 					} // end if
 
@@ -107,6 +134,7 @@ function pg_tasks( mParams )
 				}
 
 				setTimeout( 'StartPolling();', 1000 );
+//				setInterval( 'StartPolling();', 3000 );
 
 			</script>
 		";

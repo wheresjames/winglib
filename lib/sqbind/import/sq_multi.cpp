@@ -121,6 +121,8 @@ int CSqMulti::len()
 _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, serialize )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, deserialize )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, serialize_filter )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, deserialize_filter )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, merge )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, urlencode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, urldecode )
@@ -141,6 +143,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, clear )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_key )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_value )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, filter )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, _get )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, _nexti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, _newslot )
@@ -187,6 +190,24 @@ void CSqMulti::deserialize( const CSqParam::t_SqStr &s )
 	// Deserialize data
 	oex::CStr sData( s.c_str(), s.length() );
 	oex::CPropertyBag pb = oex::CParser::Deserialize( sData );
+	_deserialize( pb, m_lst );
+}
+
+CSqParam::t_SqStr CSqMulti::serialize_filter( const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase )
+{_STT();
+	oex::CPropertyBag pb;
+	_serialize( pb, m_lst );
+	return oex::CParser::SerializeFilter( pb, sFilter.c_str(), x_bInclude, x_bIgnoreCase ).Ptr();
+}
+
+void CSqMulti::deserialize_filter( const CSqParam::t_SqStr &s, const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase )
+{_STT();
+	// Lose old data
+	m_lst.clear();
+
+	// Deserialize data
+	oex::CStr sData( s.c_str(), s.length() );
+	oex::CPropertyBag pb = oex::CParser::DeserializeFilter( sData, sFilter.c_str(), x_bInclude, x_bIgnoreCase );
 	_deserialize( pb, m_lst );
 }
 
@@ -467,6 +488,22 @@ SquirrelObject CSqMulti::_nexti( HSQUIRRELVM v )
     // ???
     sa.ThrowError( oexT( "Invalid index type" ) );
     return SquirrelObject( v );
+}
+
+int CSqMulti::filter( const t_Obj &sFilter, int bInclude )
+{
+	int nErased = 0;
+
+    // For each item
+    for ( t_List::iterator it = m_lst.begin();
+          m_lst.end() != it;
+          it++ )
+
+		// Is the sub string in the key?
+		if ( ( bInclude ? 0 : 1 ) == ( match_pattern( it->first.c_str(), sFilter.c_str() ) ? 0 : 1 ) )
+            m_lst.erase( it++ ), nErased++;
+
+	return nErased;
 }
 
 /// Returns non-zero if pPattern matches pString

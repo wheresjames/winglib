@@ -61,6 +61,9 @@ namespace sqbind
 		static void _serialize( oex::CPropertyBag &pb, CSqMulti::t_List &lst );
 		static void _deserialize( oex::CPropertyBag &pb, CSqMulti::t_List &lst );
 
+		t_SqStr serialize_filter( const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase );
+		void deserialize_filter( const t_SqStr &s, const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase );
+
     private:
 
         /// List
@@ -147,6 +150,9 @@ namespace sqbind
 
         /// Removes the specified element
         void unset( const t_Obj &k );
+
+		/// Filters items
+		int filter( const t_Obj &sFilter, int bInclude );
 
         /// Gets an element
         CSqMulti* get( const t_Obj &k );

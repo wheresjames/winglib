@@ -699,7 +699,188 @@ public:
         return sStr;
     }
 
+    /// Generic property bag deserializing
+    template< typename T >
+        static TPropertyBag< TStr< T > > DeserializeFilter( oexCONST T *x_pStr, oexCONST T *x_pFilter, oexBOOL x_bInclude, oexBOOL x_bIgnoreCase, oexBOOL x_bMerge = oexFALSE )
+    {   TPropertyBag< TStr< T > > pb;
+        TStr< T > str( x_pStr );
+        DeserializeFilter( str, pb, x_pFilter, x_bInclude, x_bIgnoreCase, x_bMerge );
+        return pb;
+    }
 
+    /// Generic property bag deserializing
+    template< typename T >
+        static TPropertyBag< TStr< T > > DeserializeFilter( oexCONST TStr< T > &x_sStr, oexCONST T *x_pFilter, oexBOOL x_bInclude, oexBOOL x_bIgnoreCase, oexBOOL x_bMerge = oexFALSE )
+    {   TPropertyBag< TStr< T > > pb; DeserializeFilter( x_sStr, pb, x_pFilter, x_bInclude, x_bIgnoreCase, x_bMerge ); return pb; }
+
+    template< typename T >
+        static oexLONG DeserializeFilter( oexCONST TStr< T > &x_sStr, TPropertyBag< TStr< T > > &x_pb, oexCONST T *x_pFilter, oexBOOL x_bInclude, oexBOOL x_bIgnoreCase, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
+    {
+		if ( !x_pFilter || !*x_pFilter )
+			return Deserialize( x_sStr, x_pb, x_bMerge, x_pLast );
+
+		TStr< T > sFilter( x_pFilter );
+
+        // Lose previous contents
+        if ( !x_bMerge )
+            x_pb.Destroy();
+
+        // Punt if null string
+        if ( !x_sStr.Length() )
+            return 0;
+
+        oexLONG lItems = 0;
+        oexLONG lLen = x_sStr.Length(), s = 0, e = 0;
+
+        while ( e <= lLen )
+        {
+            switch( x_sStr[ e ] )
+            {
+                case oexTC( T, ',' ) : case oexTC( T, '}' ) : case 0 :
+                {
+                    if ( 0 < e - s )
+                    {
+                        // Find '='
+                        oexLONG a = s;
+                        while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] )
+							a++;
+
+                        TStr< T > sKey, sVal;
+
+						// NULL key?
+						if ( e <= s )
+							; // sKey = oexTT( T, "" );
+
+                        // First character is separator
+                        else if ( a == s )
+                            sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
+
+                        else sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
+
+						// Does it match the filter?
+						if ( ( x_bInclude ? 1 : 0 ) == ( sFilter.MatchPattern( sKey, x_bIgnoreCase ) ? 1 : 0 ) )
+						{
+							// Single token
+							if ( 1 >= e - a )
+								x_pb[ sKey ] = oexTT( T, "" );
+
+							// Both tokens present
+							else
+								x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).DropWhiteSpace() );
+
+							// Count one item
+							lItems++;
+
+						} // end if
+
+                    } // end if
+
+                    // Next element
+                    s = e + 1;
+
+                    // Time to exit?
+                    if ( oexTC( T, '}' ) == x_sStr[ e ] )
+                    {   if ( x_pLast ) *x_pLast = e + 1; return lItems; }
+
+                } break;
+
+                case oexTC( T, '{' ) :
+                {
+                    // Get key
+                    TStr< T > sKey;
+
+                    // Find '='
+                    oexLONG a = s;
+                    while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] )
+						a++;
+
+                    // NULL key?
+					if ( e <= s )
+						; // sKey = oexTT( T, "" );
+
+                    else if ( a == s )
+                        sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
+
+                    // No default value
+                    else if ( a >= e )
+                        sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), e - s ).DropWhiteSpace() );
+
+                    else if ( a < e )
+                    {   sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
+                        x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).DropWhiteSpace() );
+                        lItems++;
+                    } // end if
+
+                    // Filter test
+					if ( ( x_bInclude ? 1 : 0 ) == ( sFilter.MatchPattern( sKey, x_bIgnoreCase ) ? 1 : 0 ) )
+                    {
+                        // This will point to the end of the array we're about to decode
+                        oexLONG lEnd = 0;
+
+                        // Get the sub array
+                        lItems += Deserialize(  TStr< T >( x_sStr.Ptr( e + 1 ) ),
+                                                x_pb[ sKey ], oexTRUE, &lEnd );
+
+                        // Skip the array we just decoded
+                        e += lEnd;
+
+                    } // end if
+
+                    // Skip this token
+                    s = e + 1;
+
+                } break;
+
+            } // end switch
+
+            // Next i
+            e++;
+
+        } // end while
+
+        return lItems;
+    }
+
+
+    template< typename T >
+        static TStr< T > SerializeFilter( TPropertyBag< TStr< T > > &x_pb, oexCONST T *x_pFilter, oexBOOL x_bInclude, oexBOOL x_bIgnoreCase )
+    {
+		if ( !x_pFilter || !*x_pFilter )
+			return Serialize( x_pb );
+
+		TStr< T > sFilter( x_pFilter );
+
+        // Just return default value if not an array
+        if ( !x_pb.IsArray() )
+            return TStr< T >();
+
+        TStr< T > sStr;
+        for ( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+        {
+			// Does it match the filter?
+			if ( ( x_bInclude ? 1 : 0 ) == ( sFilter.MatchPattern( it.Node()->key, x_bIgnoreCase ) ? 1 : 0 ) )
+			{
+				// Add separator if needed
+				if ( sStr.Length() )
+					sStr << oexTC( T, ',' );
+
+				// Set the key
+				sStr << CParser::UrlEncode( it.Node()->key );
+
+				// Encode default value
+				if ( it->IsDefaultValue() )
+					sStr << oexTC( T, '=' ) << CParser::UrlEncode( it->ToString() );
+
+				// Recurse for array
+				if ( it->IsArray() )
+					sStr << oexTC( T, '{' ) << Serialize( *it ) << oexTC( T, '}' );
+
+			} // end if
+
+        } // end for
+
+        return sStr;
+    }
 
     /// Returns the next token in x_sStr if it is in lst
     static CStr GetToken( CStr &x_sStr, CStrList x_lst, oexBOOL x_bCaseSensitive );

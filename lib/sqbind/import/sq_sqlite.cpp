@@ -108,6 +108,7 @@ int CSqSQLite::Exec( const stdString &sQuery )
 
 int CSqSQLite::Insert( const stdString &sTable, CSqMulti &mData )
 {_STT();
+	if ( !mData.size() ) return 0;
 	oex::CPropertyBag pb;
 	CSqMulti::_serialize( pb, mData.list() );
 	return CSQLite::Insert( sTable.c_str(), pb ); 
@@ -122,6 +123,7 @@ int CSqSQLite::Delete( const stdString &sTable, CSqMulti &mData, const stdString
 
 int CSqSQLite::Update( const stdString &sTable, const stdString &sWhere, CSqMulti &mData )
 {_STT();
+	if ( !mData.size() ) return 0;
 	oex::CPropertyBag pb;
 	CSqMulti::_serialize( pb, mData.list() );
 	return CSQLite::Update( sTable.c_str(), sWhere.c_str(), pb ); 

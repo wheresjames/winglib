@@ -6,7 +6,7 @@ function pg_signup( mParams )
 	local db = CSqSQLite();
 //	db.DebugMode( 1 );
 	if ( !db.Open( _cfg( "db_name" ) ) )
-	{	self.error( db.GetLastError() );
+	{	_self.error( db.GetLastError() );
 		return "Database unavailable";
 	} // end if
 
