@@ -146,6 +146,9 @@ namespace sqbind
 		static int delete_path( const stdString &sPath )
 		{	return oexDeletePath( sPath.c_str() ); }
 
+		static int rename( const stdString &sOld, const stdString &sNew )
+		{	return oexRename( sOld.c_str(), sNew.c_str() ); }
+
 		static int exists( const stdString &sFile )
 		{	return oexExists( sFile.c_str() ); }
 

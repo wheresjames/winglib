@@ -282,6 +282,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexCreatePath						OEX_NAMESPACE::CFile::CreatePath
 #define oexDelete							OEX_NAMESPACE::CFile::Delete
 #define oexExists							OEX_NAMESPACE::CFile::Exists
+#define oexRename							OEX_NAMESPACE::CFile::Rename
 #define oexBuildPath						OEX_NAMESPACE::CStr::BuildPath
 #define oexGetPath( f )						OEX_NAMESPACE::CStr( f ).GetPath()
 #define oexGetFileName( f )					OEX_NAMESPACE::CStr( f ).GetFileName()

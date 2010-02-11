@@ -306,7 +306,7 @@ oexPVOID CResource::ThreadProc( oexPVOID x_pData )
 	pRi->cSync.Signal();
 
 	// Remove the stack trace for this thread
-	CStackTrace::St()->RemoveThread();
+	oexSt().RemoveThread();
 
 	// Quit thread
 	pthread_exit( pRet );

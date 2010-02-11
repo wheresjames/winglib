@@ -253,7 +253,7 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 		return;
 
 	// Ensure stack trace object
-	CStackTrace* pSt = CStackTrace::St();
+	CStackTrace* pSt = &oexSt();
 	if ( !pSt )
 		return;
 
@@ -268,7 +268,7 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 
 	// Create a stack report for the current stack
 	sSt << CreateStackReport( uCurrentThreadId, pSt, oexGetFileName( oexGetModuleFileName() ).Ptr(), GetInstanceHandle(), oexTRUE );
-
+/*
 	oexUINT i = 0;
 	while ( CStackTrace::SModuleInfo *pSi = pSt->NextModule( &i ) )
 		if ( pSi->pSt )
@@ -286,7 +286,7 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 			} // end catch
 
 		} // end while
-
+*/
 	sSt << oexNL;
 
 	// Save to file?

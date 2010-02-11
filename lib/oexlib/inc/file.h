@@ -387,6 +387,10 @@ public:
     static oexBOOL Exists( oexCSTR x_pPath )
     {   return os::CBaseFile::DoesExist( x_pPath ); }
 
+    /// Returns non-zero if the path exists
+    static oexBOOL Rename( oexCSTR x_pOld, oexCSTR x_pNew )
+    {   return os::CBaseFile::Rename( x_pOld, x_pNew ); }
+
 private:
 
     /// File handle

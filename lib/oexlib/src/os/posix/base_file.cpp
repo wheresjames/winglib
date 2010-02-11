@@ -432,4 +432,12 @@ CStr CBaseFile::GetModFileName()
 	return oexStr8ToStr( g_szModulePath );
 }
 
+oexBOOL CBaseFile::Rename( oexCSTR x_pOld, oexCSTR x_pNew )
+{
+	if ( !x_pOld || !*x_pOld || !x_pNew || !*x_pNew )
+		return oexFALSE; 
+
+	return rename( oexStrToMbPtr( x_pOld ), oexStrToMbPtr( x_pNew ) );
+}
+
 

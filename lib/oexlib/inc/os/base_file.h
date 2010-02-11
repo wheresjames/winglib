@@ -171,6 +171,9 @@ public:
 
 	/// Deletes the specified file
     static oexBOOL Delete( oexCSTR x_pFile );
+    
+    /// Renames the specified file
+	static oexBOOL Rename( oexCSTR x_pOld, oexCSTR x_pNew );    
 
 	/// Gets file attributes
     static oexUINT GetFileAttrib( oexCSTR x_pFile );
