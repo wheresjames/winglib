@@ -38,10 +38,12 @@ OEX_USING_NAMESPACE
 
 #define _STTEX()
 
+#if defined( OEX_NOIMAGE )
+#	undef OEX_ENABLE_XIMAGE
+#endif
+
 #if defined( OEX_ENABLE_XIMAGE )
-
-#include "../../../../CxImage/ximage.h"
-
+#	include "../../../../CxImage/ximage.h"
 #endif
 
 #if !defined( CXIMAGE_SUPPORT_JPG )

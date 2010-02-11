@@ -111,6 +111,10 @@ ifdef UNICODE
 	CFG_CEXTRA := $(CFG_CEXTRA) -DUNICODE -D_UNICODE
 endif
 
+ifdef NOIMAGE
+	CFG_CEXTRA := $(CFG_CEXTRA) -DOEX_NOIMAGE
+endif
+
 ifeq ($(BUILD),vs)
 
 	OS := win32
