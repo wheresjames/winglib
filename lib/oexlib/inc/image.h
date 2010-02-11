@@ -34,8 +34,6 @@
 
 #pragma once
 
-#ifdef OEX_ENABLE_XIMAGE
-
 struct oexSRect
 {
 	oexLONG		left;
@@ -1124,4 +1122,3 @@ private:
 
 };
 
-#endif // OEX_ENABLE_XIMAGE

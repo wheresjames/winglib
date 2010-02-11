@@ -36,7 +36,13 @@
 
 OEX_USING_NAMESPACE
 
-#ifdef OEX_ENABLE_XIMAGE
+#define _STTEX()
+
+#if !defined( CXIMAGE_SUPPORT_JPG )
+#	undef OEX_ENABLE_XIMAGE
+#endif
+
+#if defined( OEX_ENABLE_XIMAGE )
 
 #include "../../../../CxImage/ximage.h"
 
@@ -47,12 +53,11 @@ extern "C" {
  #include "../../../../jpeg/jerror.h"
 }
 
-#define _STTEX()
-
 // Just ensure our structures are at least the same size
 oexSTATIC_ASSERT( sizeof( RECT) == sizeof( oexSRect ) );
 oexSTATIC_ASSERT( sizeof( RGBQUAD ) == sizeof( oexSRgbQuad ) );
 oexSTATIC_ASSERT( sizeof( COLORREF ) == sizeof( oexSColorRef ) );
+
 
 //==================================================================
 // CCxCustomImg
@@ -101,8 +106,12 @@ extern "C"
 	t_cx_free cximage_free = _cximage_free;
 };
 
+#endif
+
 CImage::CImage()
 {_STT();
+
+#if defined( OEX_ENABLE_XIMAGE )
 
 	m_pimg = OexAllocConstruct< CCxCustomImg >();
 
@@ -115,10 +124,15 @@ CImage::CImage()
 
 	m_pMem = oexNULL;
 	m_uMemSize = 0;
+
+#endif
+
 }
 
 CImage::CImage( const CImage &img )
 {
+#if defined( OEX_ENABLE_XIMAGE )
+
 	m_pimg = OexAllocConstruct< CCxCustomImg >();
 
 	m_pEncoderState = oexNULL;
@@ -132,6 +146,7 @@ CImage::CImage( const CImage &img )
 
 	m_pMem = oexNULL;
 	m_uMemSize = 0;
+#endif
 }
 
 
@@ -144,6 +159,8 @@ CImage::~CImage()
 
 void CImage::Destroy()
 {_STT();
+
+#if defined( OEX_ENABLE_XIMAGE )
 
 	// Get image object
 	if ( oexCHECK_PTR( m_pimg ) )
@@ -158,10 +175,17 @@ void CImage::Destroy()
 
 	// Release encoder memory
 	ReleaseEncodeJpg();
+
+#endif
 }
 
 CStr CImage::GetLastError()
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return CStr();
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexT( "Invalid Object" );
@@ -169,11 +193,16 @@ CStr CImage::GetLastError()
 
 	// Return last error string
 	return oexMbToStr( pimg->GetLastError() );
+#endif
 }
 
 oexINT CImage::GetFileType( oexCSTR x_pFile )
 {_STT();
-	// Sanity check
+#if !defined( OEX_ENABLE_XIMAGE )
+	return -1;
+#else
+
+// Sanity check
 	if ( !oexCHECK_PTR( x_pFile ) )
 		return -1;
 
@@ -223,10 +252,16 @@ oexINT CImage::GetFileType( oexCSTR x_pFile )
 //#endif
 
 	return type;
+
+#endif
 }
 
 oexBOOL CImage::Load( oexCSTR x_pFile, oexCSTR x_pType )
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
 
 	if ( !oexCHECK_PTR( x_pFile ) )
 		return oexFALSE;
@@ -260,10 +295,16 @@ oexBOOL CImage::Load( oexCSTR x_pFile, oexCSTR x_pType )
 	GetRect();
 
 	return bRet;
+
+#endif
 }
 
 oexBOOL CImage::Save( oexCSTR x_pFile, oexCSTR x_pType )
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
 
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
@@ -290,10 +331,17 @@ oexBOOL CImage::Save( oexCSTR x_pFile, oexCSTR x_pType )
 	return pimg->Save( oexStrToMbPtr( x_pFile ), type );
 
 #endif
+
+#endif
 }
 
 oexBOOL CImage::Decode( oexPBYTE x_buf, oexINT x_size, oexCSTR x_pType )
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
@@ -315,10 +363,15 @@ oexBOOL CImage::Decode( oexPBYTE x_buf, oexINT x_size, oexCSTR x_pType )
 	GetRect();
 
 	return TRUE;
+#endif
 }
 
 CBin& CImage::Encode( oexCSTR x_pType )
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return m_mem;
+#else
 
 	// Encode the image
 	oexPBYTE pBuf; oexINT nSize;
@@ -332,10 +385,16 @@ CBin& CImage::Encode( oexCSTR x_pType )
 	m_mem.MemCpy( (CBin::t_byte*)pBuf, nSize );
 
 	return m_mem;
+
+#endif
 }
 
 oexINT CImage::Encode( oexPBYTE *x_buf, oexINT *x_pnSize, oexCSTR x_pType )
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return 0;
+#else
 
 	// Lose old memory
 	ReleaseEncodeMemory();
@@ -376,10 +435,16 @@ oexINT CImage::Encode( oexPBYTE *x_buf, oexINT *x_pnSize, oexCSTR x_pType )
 		*x_pnSize = m_uMemSize;
 
 	return lSize;
+
+#endif
 }
 
 void CImage::ReleaseEncodeMemory()
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return;
+#else
 
 	// Hmmm.... not releasing this means we won't have to realloc
 	// it all the time
@@ -390,6 +455,8 @@ void CImage::ReleaseEncodeMemory()
 	if ( oexCHECK_PTR( m_pMem ) )
 		free( (void*)m_pMem );
 	m_pMem = oexNULL;
+
+#endif
 }
 
 /*
@@ -436,32 +503,52 @@ BOOL CImage::Draw(HDC hDC, LPRECT pRect, BOOL bStretch)
 
 oexINT CImage::GetWidth()
 {_STTEX();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return 0;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return 0;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->GetWidth();
+
+#endif
 }
 
 oexINT CImage::GetHeight()
 {_STTEX();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return 0;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return 0;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->GetHeight();
+
+#endif
 }
 
 oexBOOL CImage::IsValid()
 {_STTEX();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->IsValid();
+#endif
 }
 /*
 BOOL CImage::CreateFromHBITMAP(HBITMAP hBmp)
@@ -481,6 +568,11 @@ BOOL CImage::CreateFromHBITMAP(HBITMAP hBmp)
 */
 oexBOOL CImage::SetQuality(oexINT q)
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
@@ -490,6 +582,7 @@ oexBOOL CImage::SetQuality(oexINT q)
 	pimg->SetJpegQuality( (BYTE)q );
 
 	return oexTRUE;
+#endif
 }
 /*
 HICON CImage::CreateIcon(long w, long h, COLORREF bck, HDC hDC)
@@ -577,46 +670,75 @@ HICON CImage::CreateIcon(long w, long h, COLORREF bck, HDC hDC)
 */
 oexBOOL CImage::Mirror()
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->Mirror();
+#endif
 }
 
 oexBOOL CImage::Flip()
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->Flip();
+#endif
 }
 
 oexBOOL CImage::GrayScale()
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->GrayScale();
+#endif
 }
 
 oexBOOL CImage::Negative()
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->Negative();
+#endif
 }
 
 oexBOOL CImage::Rotate(oexFLOAT x_angle, CImage *x_pDst)
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
@@ -627,10 +749,16 @@ oexBOOL CImage::Rotate(oexFLOAT x_angle, CImage *x_pDst)
 		pdst = (CCxCustomImg*)x_pDst->m_pimg;
 
 	return pimg->Rotate( x_angle, pdst );
+#endif
 }
 
 oexBOOL CImage::Resample(oexINT x_newx, oexINT x_newy, oexINT x_fast)
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !IsValid() )
 		return oexFALSE;
@@ -641,10 +769,17 @@ oexBOOL CImage::Resample(oexINT x_newx, oexINT x_newy, oexINT x_fast)
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->Resample( x_newx, x_newy, x_fast );
+
+#endif
 }
 
 oexBOOL CImage::Dither(oexINT x_method)
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !IsValid() )
 		return oexFALSE;
@@ -655,10 +790,17 @@ oexBOOL CImage::Dither(oexINT x_method)
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->Dither( x_method );
+
+#endif
 }
 
 oexBOOL CImage::Crop(oexINT x_left, oexINT x_top, oexINT x_right, oexINT x_bottom, CImage *x_pDst)
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
@@ -669,107 +811,162 @@ oexBOOL CImage::Crop(oexINT x_left, oexINT x_top, oexINT x_right, oexINT x_botto
 		pdst = (CCxCustomImg*)x_pDst->m_pimg;
 
 	return pimg->Crop( x_left, x_top, x_right, x_bottom, pdst );
+
+#endif
 }
 
 oexBOOL CImage::Noise(oexINT x_level)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->Noise( x_level );
+
+#endif
 }
 
 oexBOOL CImage::Median(oexINT x_Ksize)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->Median( x_Ksize );
+
+#endif
 }
 
 oexBOOL CImage::Gamma(oexFLOAT x_gamma)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->Gamma( x_gamma );
+
+#endif
 }
 
 oexBOOL CImage::ShiftRGB(oexINT x_r, oexINT x_g, oexINT x_b)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->ShiftRGB( x_r, x_g, x_b );
+#endif
 }
 
 oexBOOL CImage::Threshold(oexINT x_level)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->Threshold( (oexBYTE)x_level );
+#endif
 }
 
 oexBOOL CImage::Colorize(oexINT x_hue, oexINT x_sat)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->Colorize( (oexBYTE)x_hue, (oexBYTE)x_sat );
+#endif
 }
 
 oexBOOL CImage::Light(oexINT x_level, oexINT x_contrast)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->Light( x_level, x_contrast );
+#endif
 }
 
 
 oexBOOL CImage::Erode(oexINT x_Ksize)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->Erode( x_Ksize );
+#endif
 }
 
 oexBOOL CImage::Dilate(oexINT x_Ksize)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->Dilate( x_Ksize );
+#endif
 }
 
 oexINT CImage::Histogram(oexLONG *x_red, oexLONG *x_green, oexLONG *x_blue, oexLONG *x_gray, oexLONG x_colorspace)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return 0;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return 0;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->Histogram( x_red, x_green, x_blue, x_gray, x_colorspace );
+#endif
 }
 
 /*
@@ -813,26 +1010,40 @@ oexBOOL CImage::LoadFromResource(LPCTSTR pResource, LPCTSTR pResType, LPCTSTR pI
 
 oexPVOID CImage::GetBits()
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexNULL;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexNULL;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->GetBits();
+#endif
 }
 
 oexINT CImage::GetEffWidth()
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return 0;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return 0;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->GetEffWidth();
+#endif
 }
 
 oexBOOL CImage::Create(oexINT x_w, oexINT x_h, oexINT x_bpp)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
@@ -845,10 +1056,15 @@ oexBOOL CImage::Create(oexINT x_w, oexINT x_h, oexINT x_bpp)
 		return TRUE;
 
 	return ( pimg->Create( x_w, x_h, x_bpp ) != NULL );
+#endif
 }
 
 oexBOOL CImage::Copy(CImage *pImg)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Ensure image to copy
 	if ( !oexCHECK_PTR( pImg ) || !oexCHECK_PTR( pImg->m_pimg ) )
 		return oexFALSE;
@@ -862,16 +1078,22 @@ oexBOOL CImage::Copy(CImage *pImg)
 	pimg->Copy( *( (CCxCustomImg*)pImg->m_pimg ) );
 
 	return IsValid();
+#endif
 }
 
 oexBOOL CImage::Resample( oexSRect *x_pRect, oexINT x_fast)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return pimg->Resample( cmn::RW( x_pRect ), cmn::RH( x_pRect ), x_fast );
+#endif
 }
 
 /*
@@ -889,6 +1111,10 @@ HBITMAP CImage::CreateHBITMAP( HDC hDC )
 
 oexBOOL CImage::IsTransparent()
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
@@ -896,10 +1122,15 @@ oexBOOL CImage::IsTransparent()
 
 	// Create bitmap
 	return pimg->IsTransparent();
+#endif
 }
 
 oexBOOL CImage::SetTransColor( oexSRgbQuad x_rgb )
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
@@ -909,10 +1140,15 @@ oexBOOL CImage::SetTransColor( oexSRgbQuad x_rgb )
 	pimg->SetTransColor( *(RGBQUAD*)&x_rgb );
 
 	return TRUE;
+#endif
 }
 
 oexSRgbQuad CImage::GetTransColor()
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexSRgbQuad();
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 	{	oexSRgbQuad rgb = { 0, 0, 0, 0 }; return rgb; }
@@ -921,10 +1157,15 @@ oexSRgbQuad CImage::GetTransColor()
 	// Create bitmap
 	register RGBQUAD rgb = pimg->GetTransColor();
 	return *(oexSRgbQuad*)&rgb;
+#endif
 }
 
 oexINT CImage::GetBpp()
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
@@ -932,10 +1173,15 @@ oexINT CImage::GetBpp()
 
 	// Create bitmap
 	return pimg->GetBpp();
+#endif
 }
 
 oexBOOL CImage::IncreaseBpp(oexINT x_bpp)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
@@ -943,10 +1189,15 @@ oexBOOL CImage::IncreaseBpp(oexINT x_bpp)
 
 	// Create bitmap
 	return pimg->IncreaseBpp( x_bpp );
+#endif
 }
 
 oexSRgbQuad CImage::GetPixel(oexINT x_x, oexINT x_y)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexSRgbQuad();
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 	{	oexSRgbQuad rgb = { 0, 0, 0, 0 }; return rgb; }
@@ -955,11 +1206,15 @@ oexSRgbQuad CImage::GetPixel(oexINT x_x, oexINT x_y)
 	// Create bitmap
 	register RGBQUAD rgb = pimg->GetPixelColor( x_x, x_y );
 	return *(oexSRgbQuad*)&rgb;
-
+#endif
 }
 
 oexBOOL CImage::SetPixel(oexINT x_x, oexINT x_y, oexSRgbQuad x_rgb)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
@@ -969,21 +1224,31 @@ oexBOOL CImage::SetPixel(oexINT x_x, oexINT x_y, oexSRgbQuad x_rgb)
 	pimg->SetPixelColor( x_x, x_y, *(RGBQUAD*)&x_rgb );
 
 	return oexTRUE;
+#endif
 }
 
 oexINT CImage::GetTransIndex()
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return 0;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	// Create bitmap
-	return pimg->GetTransIndex( );
+	return pimg->GetTransIndex();
+#endif
 }
 
 oexBOOL CImage::SetTransIndex(oexINT x_index)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
@@ -992,11 +1257,16 @@ oexBOOL CImage::SetTransIndex(oexINT x_index)
 	// Create bitmap
 	pimg->SetTransIndex( x_index );
 
-	return TRUE;
+	return oexTRUE;
+#endif
 }
 
 oexINT CImage::GetNearestIndex(oexSRgbQuad x_rgb)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return 0;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
@@ -1004,10 +1274,15 @@ oexINT CImage::GetNearestIndex(oexSRgbQuad x_rgb)
 
 	// Create bitmap
 	return pimg->GetNearestIndex( *(RGBQUAD*)&x_rgb );
+#endif
 }
 
 oexBOOL CImage::DecreaseBpp(oexINT x_bpp, oexBOOL x_bErrorDiffusion, oexSRgbQuad *x_ppal)
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
@@ -1015,6 +1290,7 @@ oexBOOL CImage::DecreaseBpp(oexINT x_bpp, oexBOOL x_bErrorDiffusion, oexSRgbQuad
 
 	// Create bitmap
 	return pimg->DecreaseBpp( x_bpp, x_bErrorDiffusion, (RGBQUAD*)x_ppal );
+#endif
 }
 
 /*
@@ -1078,6 +1354,10 @@ oexBOOL CImage::ToClipboard( HWND hWnd )
 
 oexBOOL CImage::HasAlpha()
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
@@ -1085,10 +1365,15 @@ oexBOOL CImage::HasAlpha()
 
 	// Create bitmap
 	return pimg->IsTransparent();
+#endif
 }
 
 oexBOOL CImage::AlphaDelete()
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return oexFALSE;
@@ -1098,6 +1383,7 @@ oexBOOL CImage::AlphaDelete()
 	pimg->AlphaDelete();
 
 	return oexTRUE;
+#endif
 }
 /*
 oexBOOL CImage::Tile(HDC hDC, LPRECT pRect)
@@ -1121,6 +1407,10 @@ oexBOOL CImage::Tile(HDC hDC, LPRECT pRect)
 
 IplImage* CImage::InitIplHeader( CImage *pImg, IplImage *pIpl )
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexNULL;
+#else
+
 	ZeroMemory( pIpl, sizeof( IplImage ) );
 
 	// Fill in the structure
@@ -1138,9 +1428,12 @@ IplImage* CImage::InitIplHeader( CImage *pImg, IplImage *pIpl )
 	pIpl->imageDataOrigin = (char*)pImg->GetBits();
 
 	return pIpl;
+#endif
 }
 
 #endif
+
+#if defined( OEX_ENABLE_XIMAGE )
 
 typedef class s_tagCxMemFile : public CxMemFile
 {public:
@@ -1153,8 +1446,14 @@ typedef class s_tagCxMemFile : public CxMemFile
 	void Detach() { GetBuffer( true ); }
 }s_CxMemFile;
 
+#endif
+
 oexINT CImage::Encode( oexPBYTE x_pBuf, oexINT x_nSize, oexCSTR x_pType )
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return 0;
+#else
 
 	// Sanity checks
 	if ( oexCHECK_PTR( x_pBuf ) || !x_nSize )
@@ -1188,20 +1487,31 @@ oexINT CImage::Encode( oexPBYTE x_pBuf, oexINT x_nSize, oexCSTR x_pType )
 	mf.Detach();
 
 	return nEncoded;
+
+#endif
 }
 
 oexINT CImage::GetImageSize()
 {_STT();
+#if !defined( OEX_ENABLE_XIMAGE )
+	return 0;
+#else
+
 	// Get image object
 	if ( !oexCHECK_PTR( m_pimg ) )
 		return 0;
 	CCxCustomImg *pimg = (CCxCustomImg*)m_pimg;
 
 	return ( pimg->GetEffWidth() * pimg->GetHeight() );
+#endif
 }
 
 oexINT CImage::CopyBits( oexPVOID x_buf, oexINT x_nSize )
 {
+#if !defined( OEX_ENABLE_XIMAGE )
+	return 0;
+#else
+
 	// Sanity checks
 	if ( !x_buf || !x_nSize )
 		return 0;
@@ -1220,10 +1530,15 @@ oexINT CImage::CopyBits( oexPVOID x_buf, oexINT x_nSize )
 	memcpy( pBits, x_buf, nSize );
 
 	return nSize;
+#endif
 }
 
 oexINT CImage::GetBits( oexPVOID x_buf, oexINT x_nSize )
 {
+#if !defined( OEX_ENABLE_XIMAGE )
+	return 0;
+#else
+
 	// Sanity checks
 	if ( !x_buf || !x_nSize )
 		return 0;
@@ -1242,8 +1557,10 @@ oexINT CImage::GetBits( oexPVOID x_buf, oexINT x_nSize )
 	memcpy( x_buf, pBits, nSize );
 
 	return nSize;
+#endif
 }
 
+#if defined( OEX_ENABLE_XIMAGE )
 
 class CJpegErr : public jpeg_error_mgr
 {
@@ -1315,8 +1632,14 @@ typedef struct tagSJpegEncState
 
 } SJpegEncState;
 
+#endif
+
 oexBOOL CImage::InitEncodeJpg( oexINT x_nWidth, oexINT x_nHeight, oexINT x_nQuality )
 {
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
+
 	// Lose old encoder
 	ReleaseEncodeJpg();
 
@@ -1354,10 +1677,15 @@ oexBOOL CImage::InitEncodeJpg( oexINT x_nWidth, oexINT x_nHeight, oexINT x_nQual
 	jpeg_set_quality( &pState->cinfo, x_nQuality, true );
 
 	return oexTRUE;
+#endif
 }
 
 void CImage::ReleaseEncodeJpg()
 {
+#if !defined( OEX_ENABLE_XIMAGE )
+	return;
+#else
+
 	if ( m_pEncoderState == NULL ) return;
 	SJpegEncState *pState = (SJpegEncState*)m_pEncoderState;
 	m_pEncoderState = NULL;
@@ -1366,10 +1694,15 @@ void CImage::ReleaseEncodeJpg()
 	jpeg_destroy_compress( &pState->cinfo );
 
 	delete pState;
+#endif
 }
 
 oexINT CImage::EncodeJpg(oexPBYTE x_pSrc, oexINT x_nWidth, oexINT x_nHeight, oexPBYTE x_pDst, oexINT x_nDst, oexINT x_nQuality )
 {_STT();
+
+#if !defined( OEX_ENABLE_XIMAGE )
+	return oexFALSE;
+#else
 
 	// Sanity checks
 	if ( !oexCHECK_PTR( x_pDst ) || !x_nDst )
@@ -1404,10 +1737,15 @@ oexINT CImage::EncodeJpg(oexPBYTE x_pSrc, oexINT x_nWidth, oexINT x_nHeight, oex
 
 	// Return number of bytes writen
 	return x_nDst - pState->dmgr.free_in_buffer;
+#endif
 }
 
 CStr CImage::GetUserImageStr()
 {
+#if !defined( OEX_ENABLE_XIMAGE )
+	return CStr();
+#else
+
 #if defined( OEX_WINDOWS ) && !defined( OEX_WINCE )
 
 	return oexT( "All Images ("	"" )
@@ -1594,6 +1932,6 @@ CStr CImage::GetUserImageStr()
 #endif
 											);
 #endif // OEX_WINDOWS
-}
 
 #endif // OEX_ENABLE_XIMAGE
+}
