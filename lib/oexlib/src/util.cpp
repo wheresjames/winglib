@@ -52,3 +52,40 @@ CStrW CUtil::md5( CStrW s )
   	return _s;
 #endif
 }
+
+// +++ This isn't really thread safe, it's ok if we assume that
+//     Output capture will only be turned off after all other threads
+//	   have been released, which is currently the case.
+//	   PS : CCircBuf is internally thread safe.
+static CCircBuf *g_pCircBuf = oexNULL;
+oexBOOL CUtil::EnableOutputCapture( oexUINT x_uSize )
+{
+	if ( !g_pCircBuf )
+		g_pCircBuf = OexAllocConstruct< CCircBuf >();
+	else
+		OexAllocDelete( g_pCircBuf ), g_pCircBuf = oexNULL;
+}
+
+CCircBuf* CUtil::getOutputBuffer()
+{
+	return g_pCircBuf;
+}
+
+oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize )
+{
+	// Sanity checks
+	if ( !g_pCircBuf || !x_pStr || !*x_pStr )
+		return oexFALSE;
+
+	if ( !x_uSize )
+		x_uSize = zstr::Length( x_pStr );
+
+	if ( !x_uSize )
+		return oexFALSE;
+
+	// Write the data to the buffer
+	g_pCircBuf->Write( x_pStr, x_uSize * sizeof( x_pStr[ 0 ] ) );
+
+	return oexTRUE;
+}
+

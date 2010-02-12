@@ -307,6 +307,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexPrintf							OEX_NAMESPACE::os::CSys::Printf
 #define oexEcho								OEX_NAMESPACE::os::CSys::Echo
 #define oexFlush_stdout						OEX_NAMESPACE::os::CSys::Flush_stdout
+#define oexEnableOutputCapture()			OEX_NAMESPACE::CUtil::EnableOutputCapture( OEX_NAMESPACE::oexTRUE )
 #define oexFmt								OEX_NAMESPACE::CStr().Fmt
 #define oexAlert							OEX_NAMESPACE::os::CSys::ShowMessageBox
 #define oexFork								OEX_NAMESPACE::os::CSys::Fork

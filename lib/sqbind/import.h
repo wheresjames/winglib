@@ -45,6 +45,7 @@
 #include "import/sq_socket.h"
 #include "import/sq_image.h"
 #include "import/sq_capture.h"
+#include "import/sq_http_server.h"
 
 #include "import/sq_sqlite.h"
 

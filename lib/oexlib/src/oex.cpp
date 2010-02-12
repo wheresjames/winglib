@@ -191,6 +191,9 @@ oexINT COex::Uninit()
 	// Verify sockets were released correctly
 //	oexVERIFY( !os::CIpSocket::GetInitCount() );
 
+	// Turn off output capture
+	CUtil::EnableOutputCapture( 0 );
+
 	// Close the log file
 	oexCloseLog();
 
@@ -215,7 +218,7 @@ oexINT COex::Uninit()
 #endif
 
 #if defined( oexDEBUG )
-	
+
 	// Release stack traces
 	oexSt().Release();
 

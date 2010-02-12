@@ -1,11 +1,9 @@
 
 _self.include( "config.nut" );
 
-_self.load_module( "http", "" );
-
 class CGlobal
 {
-	server = CHttpServer();
+	server = CSqHttpServer();
 
 	tick = 0;
 	day = 0;

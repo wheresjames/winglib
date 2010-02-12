@@ -1,11 +1,9 @@
 
 _self.include( "config.nut" );
 
-_self.load_module( "http", "" );
-
 class CGlobal
 {
-	server = CHttpServer();
+	server = CSqHttpServer();
 
 	tick = 0;
 	day = 0;
@@ -25,7 +23,7 @@ function _init() : ( _g )
 	CSqFile().mkdir( _self.root( "weblogs" ) );
 
 	SetWebLog();
-	
+
 	_g.server.MapFolder( "js", _self.path( "js" ) );
 
 	_g.server.EnableMultiThreading( 0 );

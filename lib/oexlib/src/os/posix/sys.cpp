@@ -743,12 +743,11 @@ oexUINT CSys::GetUnixTime()
 	return time( NULL );
 }
 
-
 /// printf function
 int CSys::Printf( oexCSTR8 x_pFmt, ... )
 {
 	oexVaList ap; oexVaStart( ap, x_pFmt );
-	int ret = vprintf( x_pFmt, ap );
+	int ret = ::vprintf( x_pFmt, ap );
 	oexVaEnd( ap );
 	return ret;
 }
@@ -759,7 +758,8 @@ int CSys::vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs )
 }
 
 int CSys::Echo( oexCSTR8 x_pFmt )
-{	return ::puts( x_pFmt );
+{	CUtil::AddOutput( x_pFmt, 0 );
+	return ::puts( x_pFmt );
 }
 
 oexUINT CSys::GetCurThreadId()

@@ -26,7 +26,6 @@ ifdef SQMOD
 							  sqmod/sqmod_ffmpeg \
 	                          sqmod/sqmod_gdchart \
 							  sqmod/sqmod_gstreamer \
-	                          sqmod/sqmod_http \
 	                          sqmod/sqmod_live555 \
 	                          sqmod/sqmod_mimetic \
 	                          sqmod/sqmod_mysql \

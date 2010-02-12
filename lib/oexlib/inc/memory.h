@@ -677,6 +677,46 @@ public:
         return *this;
     }
 
+    /// Copy data from a raw buffer
+    t_size getCpy( T *x_pBuf, t_size x_uSize )
+    {
+        // Verify pointer
+        if ( !oexVERIFY_PTR( x_pBuf ) || !x_uSize )
+            return 0;
+
+        // Is there that much data?
+        if ( Size() < x_uSize )
+        	x_uSize = Size();
+
+        // Copy data if all the stars align
+        os::CSys::MemCpy( x_pBuf, Ptr(), x_uSize * sizeof( T ) );
+
+        return x_uSize;
+    }
+
+    /// Append data from a raw buffer
+    t_size getCpyAt( T *x_pBuf, t_size x_uPos, t_size x_uSize )
+    {
+        // Verify pointer
+        if ( !oexVERIFY_PTR( x_pBuf ) || !x_uSize )
+            return 0;
+
+		// Anything to copy
+		t_size uSize = Size();
+		if ( x_uPos >= uSize )
+			return 0;
+
+		// Amount of space available
+		uSize -= x_uPos;
+		if ( x_uSize > uSize )
+			x_uSize = uSize;
+
+        // Copy data if all the stars align
+        os::CSys::MemCpy( x_pBuf, Ptr( x_uPos ), x_uSize * sizeof( T ) );
+
+        return x_uSize;
+    }
+
 	/// Removes data from the beginning of the buffer
 	//  Not efficient
     TMem& LShift( t_size x_uPos, t_size x_uSize )

@@ -540,34 +540,7 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL Write( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT x_uEncode = 0 )
-	{
-		// Sanity check
-		if ( !oexCHECK_PTR( x_pvBuf ) || !x_uSize )
-			return oexFALSE;
-
-	    // Lock the buffer
-	    oexAutoLock ll( &m_lock );
-	    if ( !ll.IsLocked() )
-            return oexFALSE;
-
-        if ( m_bAutoGrow )
-        {
-            if ( !m_pBi )
-                Allocate( x_uSize );
-            else
-                EnsureWriteSpace( x_uSize, m_pBi->uReadPtr, m_pBi->uWritePtr, m_uSize );
-
-        } // end if
-
-        if ( !m_pBi )
-            return oexFALSE;
-
-		if ( !Write( x_pvBuf, x_uSize, &m_pBi->uWritePtr, x_uEncode ) )
-            return oexFALSE;
-
-		return OnWrite();
-	}
+	virtual oexBOOL Write( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT x_uEncode = 0 );
 
 	//==============================================================
 	// InitPoke()

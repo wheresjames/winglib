@@ -323,7 +323,7 @@ public:
 			oexAddRef( m_ptr );
 	}
 
-	/// Sets a Ptr buffer pointer ( make sure it doesn't go away before this class! )
+	/// Copys the specified data into the buffer
 	t_size MemCpy( oexCONST t_byte *ptr, t_size size )
 	{
 		// Free any Ptr buffer
@@ -331,6 +331,24 @@ public:
 
 		// Copy data
 		if ( m_buf.MemCpy( ptr, size ).Size() < size )
+		{	m_nUsed = 0;
+			return 0;
+		} // end if
+
+		// Update used count
+		m_nUsed = size;
+
+		return m_nUsed;
+	}
+
+	/// Copys the specified data into the buffer
+	t_size MemCpyAt( oexCONST t_byte *ptr, t_size pos, t_size size )
+	{
+		// Free any Ptr buffer
+		FreePtr();
+
+		// Copy data
+		if ( m_buf.MemCpyAt( ptr, pos, size ).Size() < size )
 		{	m_nUsed = 0;
 			return 0;
 		} // end if
