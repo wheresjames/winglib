@@ -1,26 +1,82 @@
-// http_server.cpp
+/*------------------------------------------------------------------
+// sq_http_server.cpp
+//
+// Copyright (c) 1997
+// Robert Umbehant
+// winglib@wheresjames.com
+// http://www.wheresjames.com
+//
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
+// conditions are met:
+//
+// * Redistributions of source code must retain the above copyright
+//   notice, this list of conditions and the following disclaimer.
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
+//   specific prior written permission.
+//
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+//   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//----------------------------------------------------------------*/
 
-#include "stdafx.h"
+#include "../stdafx.h"
 
-void CHttpServer::SetServerCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sServer )
+using namespace sqbind;
+
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CSqHttpServer, CSqHttpServer )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, Start )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, SetSessionCallback )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, SetSessionCallbackScript )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, SetAuthenticationCallback )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, SetServerCallback )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, SetLogFile )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, EnableRemoteConnections )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, EnableSessions )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, EnableMultiThreading )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, SetSessionTimeout )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, GetNumActiveClients )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, MapFolder )
+
+SQBIND_REGISTER_CLASS_END()
+
+void CSqHttpServer::Register( VM vm )
+{_STT();
+	_SQBIND_EXPORT( vm, CSqHttpServer );
+}
+
+void CSqHttpServer::SetServerCallback( CSqMsgQueue *x_pMsgQueue, const stdString &sServer )
 {_STT();
 	m_pServerMsgQueue = x_pMsgQueue;
 	m_sServer = sServer;
 }
 
-void CHttpServer::SetSessionCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sSession )
+void CSqHttpServer::SetSessionCallback( CSqMsgQueue *x_pMsgQueue, const stdString &sSession )
 {_STT();
 	m_pSessionMsgQueue = x_pMsgQueue;
 	m_sSession = sSession;
 }
 
-void CHttpServer::SetAuthenticationCallback( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sAuthenticate )
+void CSqHttpServer::SetAuthenticationCallback( CSqMsgQueue *x_pMsgQueue, const stdString &sAuthenticate )
 {_STT();
 	m_pAuthenticateMsgQueue = x_pMsgQueue;
 	m_sAuthenticate = sAuthenticate;
 }
 
-void CHttpServer::SetSessionCallbackScript( sqbind::CSqMsgQueue *x_pMsgQueue, const sqbind::stdString &sScript, int bFile, const sqbind::stdString &sSession )
+void CSqHttpServer::SetSessionCallbackScript( CSqMsgQueue *x_pMsgQueue, const stdString &sScript, int bFile, const stdString &sSession )
 {_STT();
 	m_pSessionMsgQueue = x_pMsgQueue;
 	m_sScript = sScript;
@@ -28,30 +84,30 @@ void CHttpServer::SetSessionCallbackScript( sqbind::CSqMsgQueue *x_pMsgQueue, co
 	m_sSession = sSession;
 }
 
-int CHttpServer::Start( int nPort )
+int CSqHttpServer::Start( int nPort )
 {_STT();
 
 	// Set session callback
-	m_server.SetSessionCallback( (oex::oexPVOID)CHttpServer::_OnSessionCallback, this );
+	m_server.SetSessionCallback( (oex::oexPVOID)CSqHttpServer::_OnSessionCallback, this );
 
 	// Set session callback
-	m_server.SetAuthCallback( (oex::oexPVOID)CHttpServer::_OnAuthenticate, this );
+	m_server.SetAuthCallback( (oex::oexPVOID)CSqHttpServer::_OnAuthenticate, this );
 
 	// Enable sessions by default
 	m_server.EnableSessions( oex::oexTRUE );
 
 	// Start the server
-	if ( !m_server.StartServer( nPort, CHttpServer::_OnServerEvent, this ) )
+	if ( !m_server.StartServer( nPort, CSqHttpServer::_OnServerEvent, this ) )
 		return 0;
 
 	return 1;
 }
 
-oex::oexINT CHttpServer::_OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
+oex::oexINT CSqHttpServer::_OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
 										     oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
 {_STT();
 
-	CHttpServer *pServer = (CHttpServer*)x_pData;
+	CSqHttpServer *pServer = (CSqHttpServer*)x_pData;
 	if ( !oexCHECK_PTR( pServer ) )
 		return -1;
 
@@ -61,7 +117,7 @@ oex::oexINT CHttpServer::_OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nE
 	return pServer->OnServerEvent( x_pData, x_nEvent, x_nErr, x_pServer );
 }
 
-oex::oexINT CHttpServer::OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
+oex::oexINT CSqHttpServer::OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
 										    oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
 {_STT();
 
@@ -71,10 +127,10 @@ oex::oexINT CHttpServer::OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEv
 	return 0;
 }
 
-oex::oexINT CHttpServer::_OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
+oex::oexINT CSqHttpServer::_OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
 {_STT();
 
-	CHttpServer *pServer = (CHttpServer*)x_pData;
+	CSqHttpServer *pServer = (CSqHttpServer*)x_pData;
 	if ( !oexCHECK_PTR( pServer ) )
 		return -1;
 
@@ -84,23 +140,23 @@ oex::oexINT CHttpServer::_OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSe
 	return pServer->OnSessionCallback( x_pData, x_pSession );
 }
 
-oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
+oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
 {_STT();
 
 	if ( !oexCHECK_PTR( m_pSessionMsgQueue ) || !oexCHECK_PTR( x_pSession ) )
 		return -1;
 
-	sqbind::stdString	sReply;
+	stdString	sReply;
 
 	// Save information
-	sqbind::CSqMulti mParams, mR;
+	CSqMulti mParams, mR;
 	SQBIND_PropertyBag8ToMulti( x_pSession->Get(), mParams[ oexT( "GET" ) ] );
 	SQBIND_PropertyBag8ToMulti( x_pSession->Post(), mParams[ oexT( "POST" ) ] );
 	SQBIND_PropertyBag8ToMulti( x_pSession->RxHeaders(), mParams[ oexT( "HEADERS" ) ] );
 	SQBIND_PropertyBag8ToMulti( x_pSession->Request(), mParams[ oexT( "REQUEST" ) ] );
 	SQBIND_PropertyBag8ToMulti( x_pSession->Session(), mParams[ oexT( "SESSION" ) ] );
 
-	sqbind::CSqMsgQueue *q = m_pSessionMsgQueue;
+	CSqMsgQueue *q = m_pSessionMsgQueue;
 
 	// Are we executing a child script?
 	if ( m_sScript.length() )
@@ -135,7 +191,7 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 			return 0;
 
 		// Get a pointer to the engine
-		sqbind::CSqEngine *pEngine = q->GetEngine();
+		CSqEngine *pEngine = q->GetEngine();
 		if ( !pEngine )
 			return 0;
 
@@ -147,7 +203,7 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 */
 
 	// Decode the reply
-	sqbind::CSqMap mReply;
+	CSqMap mReply;
 	mReply.deserialize( sReply );
 
 	// Set the content
@@ -182,7 +238,7 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 
 	// Set any headers that were returned
 	if ( mReply[ oexT( "headers" ) ].length() )
-	{	sqbind::CSqMulti t( mReply[ oexT( "headers" ) ] );
+	{	CSqMulti t( mReply[ oexT( "headers" ) ] );
 		SQBIND_StdToPropertyBag8( t, x_pSession->TxHeaders() );
 	} // end if
 
@@ -195,12 +251,12 @@ oex::oexINT CHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSes
 	return 0;
 }
 
-int CHttpServer::SetLogFile( const sqbind::stdString &sFile )
+int CSqHttpServer::SetLogFile( const stdString &sFile )
 {_STT();
 	return m_server.SetLogFile( sFile.c_str() );
 }
 
-void CHttpServer::EnableRemoteConnections( int bEnable )
+void CSqHttpServer::EnableRemoteConnections( int bEnable )
 {_STT();
 
 	// Enable/disable remote connections
@@ -208,14 +264,14 @@ void CHttpServer::EnableRemoteConnections( int bEnable )
 
 }
 
-void CHttpServer::EnableSessions( int bEnable )
+void CSqHttpServer::EnableSessions( int bEnable )
 {_STT();
 
 	// Enable/disable remote connections
 	m_server.EnableSessions( bEnable ? oex::oexTRUE : oex::oexFALSE );
 
 }
-void CHttpServer::SetSessionTimeout( int nTimeout )
+void CSqHttpServer::SetSessionTimeout( int nTimeout )
 {_STT();
 
 	if ( 0 > nTimeout )
@@ -226,34 +282,34 @@ void CHttpServer::SetSessionTimeout( int nTimeout )
 
 }
 
-void CHttpServer::EnableMultiThreading( int bEnable )
+void CSqHttpServer::EnableMultiThreading( int bEnable )
 {_STT();
 
 	m_server.EnableMultiThreading( bEnable );
 }
 
-void CHttpServer::EnableScriptLinger( int bEnable )
+void CSqHttpServer::EnableScriptLinger( int bEnable )
 {_STT();
 
 	m_bScriptsLinger = bEnable;
 }
 
-int CHttpServer::GetNumActiveClients()
+int CSqHttpServer::GetNumActiveClients()
 {_STT();
 
 	return m_server.GetNumActiveClients();
 }
 
-int CHttpServer::MapFolder( const sqbind::stdString &sName, const sqbind::stdString &sFolder )
+int CSqHttpServer::MapFolder( const stdString &sName, const stdString &sFolder )
 {_STT();
 
 	return m_server.MapFolder( sName.c_str(), sFolder.c_str() );
 }
 
-oex::oexINT CHttpServer::_OnAuthenticate( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession, oex::oexLONG lType, oex::oexCSTR pData )
+oex::oexINT CSqHttpServer::_OnAuthenticate( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession, oex::oexLONG lType, oex::oexCSTR pData )
 {_STT();
 
-	CHttpServer *pServer = (CHttpServer*)x_pData;
+	CSqHttpServer *pServer = (CSqHttpServer*)x_pData;
 	if ( !oexCHECK_PTR( pServer ) )
 		return -1;
 
@@ -263,21 +319,21 @@ oex::oexINT CHttpServer::_OnAuthenticate( oex::oexPVOID x_pData, oex::THttpSessi
 	return pServer->OnAuthenticate( x_pData, x_pSession, lType, pData );
 }
 
-oex::oexINT CHttpServer::OnAuthenticate( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession, oex::oexLONG lType, oex::oexCSTR pData )
+oex::oexINT CSqHttpServer::OnAuthenticate( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession, oex::oexLONG lType, oex::oexCSTR pData )
 {_STT();
 
 	if ( !m_pAuthenticateMsgQueue )
 		return 0;
 
-	sqbind::stdString sType = oexMks( lType ).Ptr();
-	sqbind::stdString sData = ( pData ? pData : oexT( "" ) );
+	stdString sType = oexMks( lType ).Ptr();
+	stdString sData = ( pData ? pData : oexT( "" ) );
 
-	sqbind::CSqMulti mParams;
+	CSqMulti mParams;
 	SQBIND_PropertyBag8ToMulti( x_pSession->RxHeaders(), mParams[ oexT( "HEADERS" ) ] );
 	SQBIND_PropertyBag8ToMulti( x_pSession->Request(), mParams[ oexT( "REQUEST" ) ] );
 	SQBIND_PropertyBag8ToMulti( x_pSession->Session(), mParams[ oexT( "SESSION" ) ] );
 
-	sqbind::stdString sReply;
+	stdString sReply;
 	m_pAuthenticateMsgQueue->execute( &sReply, oexT( "." ), m_sAuthenticate, sType, sData, mParams.serialize() );
 	return (oex::oexINT)oexStrToLong( sReply.c_str() );
 }
