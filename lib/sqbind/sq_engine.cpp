@@ -91,6 +91,7 @@ int CSqEngineExport::kill( const stdString &sPath )
 	if ( !q ) return -1;
 	return q->kill( oexNULL, sPath );
 }
+
 int CSqEngineExport::kill_wait( const stdString &sPath )
 {_STT();
 	CSqMsgQueue *q = queue();
@@ -212,11 +213,24 @@ int CSqEngineExport::enable_output_capture( int buf_size )
 
 stdString CSqEngineExport::get_output( int max )
 {_STT();
+
+	oex::CFifoSync *p = oex::CUtil::getOutputBuffer();
+	if ( !p )
+		return oexT( "" );	
+
+	oex::CStr8 s;
+	oex::CFifoSync::t_size b = 0;
+	while ( p->Peek( b++, s, 0, oex::oexTRUE ) )
+		s << oexNL8;
+	return stdString( s.Ptr(), s.Length() );
+
+/*
 	oex::CCircBuf *p = oex::CUtil::getOutputBuffer();
 	if ( !p )
 		return oexT( "" );
 	oex::CStr s = oexMbToStr( p->Peek( max ) );
 	return stdString( s.Ptr(), s.Length() );
+*/
 }
 
 stdString CSqEngineExport::base64_encode( const stdString &sStr )

@@ -57,25 +57,58 @@ CStrW CUtil::md5( CStrW s )
 //     Output capture will only be turned off after all other threads
 //	   have been released, which is currently the case.
 //	   PS : CCircBuf is internally thread safe.
-static CCircBuf *g_pCircBuf = oexNULL;
+//static CCircBuf *g_pCircBuf = oexNULL;
+static CFifoSync *g_pFifoSync = oexNULL;
 oexBOOL CUtil::EnableOutputCapture( oexUINT x_uSize )
 {
+	if ( x_uSize && !g_pFifoSync )
+	{	if ( 4 > x_uSize ) x_uSize = 4;
+		g_pFifoSync = OexAllocConstruct< CFifoSync >( oexFALSE, x_uSize * 256, 
+													  CCircBuf::eWmOverwrite, x_uSize );
+	} // end if
+	else if ( !x_uSize )
+		OexAllocDelete( g_pFifoSync ), g_pFifoSync = oexNULL;
+	return oexTRUE;
+
+/*
 	if ( x_uSize && !g_pCircBuf )
 	{	if ( 32 > x_uSize ) x_uSize = 32;
-		g_pCircBuf = OexAllocConstruct< CCircBuf >( oexFALSE, x_uSize, oexFALSE );
+		g_pCircBuf = OexAllocConstruct< CCircBuf >( oexFALSE, x_uSize, CCircBuf::eWmOverwrite );
 	} // end if
 	else if ( !x_uSize )
 		OexAllocDelete( g_pCircBuf ), g_pCircBuf = oexNULL;
 	return oexTRUE;
+*/	
 }
 
-CCircBuf* CUtil::getOutputBuffer()
+//CCircBuf* CUtil::getOutputBuffer()
+CFifoSync* CUtil::getOutputBuffer()
 {
-	return g_pCircBuf;
+	return g_pFifoSync;
+//	return g_pCircBuf;
 }
 
 oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 {
+	// Sanity checks
+	if ( !g_pFifoSync || !x_pStr || !*x_pStr )
+		return oexFALSE;
+
+	if ( !x_uSize )
+		x_uSize = zstr::Length( x_pStr );
+
+	if ( !x_uSize )
+		return oexFALSE;
+
+	// Write the data to the buffer
+	g_pFifoSync->Write( x_pStr, x_uSize * sizeof( x_pStr[ 0 ] ) );
+
+//	if ( x_bNewLine )
+//		g_pCircBuf->Write( oexNL, oexNL_LEN * sizeof( oexCHAR ) );
+
+	return oexTRUE;
+
+/*
 	// Sanity checks
 	if ( !g_pCircBuf || !x_pStr || !*x_pStr )
 		return oexFALSE;
@@ -93,5 +126,6 @@ oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 		g_pCircBuf->Write( oexNL, oexNL_LEN * sizeof( oexCHAR ) );
 
 	return oexTRUE;
+*/
 }
 

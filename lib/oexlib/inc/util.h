@@ -57,7 +57,7 @@ public:
 	static oexBOOL AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine );
 
 	/// Returns the output circular buffer or 0 if ther is none
-	static CCircBuf* getOutputBuffer();
+	static CFifoSync* getOutputBuffer();
 
 };
 

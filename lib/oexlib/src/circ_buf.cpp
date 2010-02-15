@@ -386,7 +386,7 @@ CCircBuf::t_size CCircBuf::Write( oexCPVOID x_pvBuf, t_size x_uSize, t_size *x_p
     } // end if
 
 	// Where to start?
-	t_size uPtr = NormalizePtr( x_puPtr ? *x_puPtr : 0, m_uSize );
+	t_size uPtr = x_puPtr ? *x_puPtr : 0;
 
 	// How much space to write in?
 	t_size uSize = GetMaxWrite( m_pBi->uReadPtr, uPtr, m_uSize );
@@ -407,7 +407,7 @@ CCircBuf::t_size CCircBuf::Write( oexCPVOID x_pvBuf, t_size x_uSize, t_size *x_p
 
 			// Make enough room in the buffer
 			else
-				AdvanceReadPtr( x_uSize - uSize );
+				AdvanceReadPtr( x_uSize - uSize + 1 );
 
 		} // end if
 

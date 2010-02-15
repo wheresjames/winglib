@@ -198,7 +198,7 @@ public:
 	oexBOOL AllocateBuffers();
 
 	/// Constructor
-	CFifoSync();
+	CFifoSync( oexBOOL x_bSync = oexTRUE, t_size x_uSize = 0, oexINT x_nWriteMode = eWmGrow, t_size x_uMaxBuffers = eDefaultMaxBuffers );
 
 	/// Destructor
 	virtual ~CFifoSync();
@@ -294,10 +294,17 @@ public:
 	*/
 	virtual oexBOOL Peek( oexPVOID x_pBuf, t_size x_uSize, t_size *x_puRead, oexLONG x_lOffset = 0, oexUINT x_uEncode = 0 );
 
-    virtual oexBOOL Peek( CStr8 &x_sStr, t_size x_uMax = 0 );
+    virtual oexBOOL Peek( CStr8 &x_sStr, t_size x_uMax = 0, oexBOOL x_bAppend = oexFALSE );
 
     virtual CStr8 Peek( t_size x_uMax = 0 )
     {   CStr8 str; Peek( str, x_uMax ); return str; }
+
+	virtual oexBOOL Peek( t_size x_uBuffer, oexPVOID x_pBuf, t_size x_uSize, t_size *x_puRead, oexLONG x_lOffset = 0, oexUINT x_uEncode = 0 );
+
+    virtual oexBOOL Peek( t_size x_uBuffer, CStr8 &x_sStr, t_size x_uMax = 0, oexBOOL x_bAppend = oexFALSE );
+
+    virtual CStr8 Peek( t_size x_uBuffer, t_size x_uMax = 0 )
+    {   CStr8 str; Peek( x_uBuffer, str, x_uMax ); return str; }
 
 	//==============================================================
 	// GetMaxBuffers()
@@ -338,6 +345,9 @@ private:
 
     /// Buffer information
     SBufferInfo                 *m_pBi;
+
+	/// Buffer information
+	SBufferInfo					m_bi;
 
     /// Pointer to size buffer
     t_size                      *m_pBuf;
