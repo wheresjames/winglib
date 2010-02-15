@@ -47,42 +47,42 @@ using namespace sqbind;
 
 int CSqEngineExport::alert( const stdString &sMsg )
 {_STT();
-	return oex::os::CSys::ShowMessageBox( oexT( "Script Message" ), sMsg.c_str() ); 
+	return oex::os::CSys::ShowMessageBox( oexT( "Script Message" ), sMsg.c_str() );
 }
 
 int CSqEngineExport::print( const stdString &sMsg )
 {_STT();
-	return oexPrintf( sMsg.c_str() ); 
+	return oexPrintf( sMsg.c_str() );
 }
 
 int CSqEngineExport::echo( const stdString &sMsg )
 {_STT();
-	return oexEcho( sMsg.c_str() ); 
+	return oexEcho( sMsg.c_str() );
 }
 
 int CSqEngineExport::flush()
 {_STT();
-	return oex::os::CSys::Flush_stdout(); 
+	return oex::os::CSys::Flush_stdout();
 }
 
 int CSqEngineExport::import( const stdString &sClass )
 {_STT();
-	return OnImport( sClass ); 
+	return OnImport( sClass );
 }
 
 int CSqEngineExport::include( const stdString &sScript )
 {_STT();
-	return OnInclude( sScript ); 
+	return OnInclude( sScript );
 }
 
 int CSqEngineExport::include_once( const stdString &sScript )
 {_STT();
-	return OnIncludeOnce( sScript ); 
+	return OnIncludeOnce( sScript );
 }
 
 int CSqEngineExport::load_module( const stdString &sModule, const stdString &sPath )
 {_STT();
-	return OnLoadModule( sModule, sPath ); 
+	return OnLoadModule( sModule, sPath );
 }
 
 int CSqEngineExport::kill( const stdString &sPath )
@@ -111,37 +111,37 @@ void CSqEngineExport::terminate( int nExitCode )
 
 stdString CSqEngineExport::get_name()
 {_STT();
-	return m_sScriptName; 
+	return m_sScriptName;
 }
 
 stdString CSqEngineExport::path( const stdString &sPath )
 {_STT();
-	return OnPath( sPath ); 
+	return OnPath( sPath );
 }
 
 stdString CSqEngineExport::decorate( const stdString &sPath, int bExe, int bLib )
 {_STT();
-	return oex::CStr( sPath.c_str() ).DecorateName( bExe, bLib ).Ptr(); 
+	return oex::CStr( sPath.c_str() ).DecorateName( bExe, bLib ).Ptr();
 }
 
 stdString CSqEngineExport::build_path( const stdString &sS1,  const stdString &sS2 )
 {_STT();
-	return oexBuildPath( sS1.c_str(), sS2.c_str() ).Ptr(); 
+	return oexBuildPath( sS1.c_str(), sS2.c_str() ).Ptr();
 }
 
 stdString CSqEngineExport::root( const stdString &sPath )
 {_STT();
-	return oexGetModulePath( sPath.c_str() ).Ptr(); 
+	return oexGetModulePath( sPath.c_str() ).Ptr();
 }
 
 stdString CSqEngineExport::module_name()
 {_STT();
-	return oexGetModuleFileName().Ptr(); 
+	return oexGetModuleFileName().Ptr();
 }
 
 stdString CSqEngineExport::module_path()
 {_STT();
-	return oexGetModulePath().Ptr(); 
+	return oexGetModulePath().Ptr();
 }
 
 stdString CSqEngineExport::get_resource( const stdString &sRes, int bFileOverrideOk )
@@ -183,7 +183,7 @@ stdString CSqEngineExport::get_resource( const stdString &sRes, int bFileOverrid
 /// Returns the buffer for a binary share
 CSqBinary CSqEngineExport::get_binshare( const stdString &sName )
 {_STT();
-	return oexGetBin( sName.c_str() ); 
+	return oexGetBin( sName.c_str() );
 }
 
 /// Returns the buffer for a binary share
@@ -196,13 +196,27 @@ int CSqEngineExport::set_binshare( const stdString &sName, CSqBinary *pBin )
 /// Returns the buffer for a binary share
 int CSqEngineExport::is_binshare( const stdString &sName )
 {_STT();
-	return oexIsBin( sName.c_str() ); 
+	return oexIsBin( sName.c_str() );
 }
 
 /// Runs garbage collection on binary shares
 int CSqEngineExport::cleanup_binshare()
 {_STT();
-	return oexCleanupBin(); 
+	return oexCleanupBin();
+}
+
+int CSqEngineExport::enable_output_capture( int buf_size )
+{_STT();
+	return oexEnableOutputCapture( buf_size );
+}
+
+stdString CSqEngineExport::get_output( int max )
+{_STT();
+	oex::CCircBuf *p = oex::CUtil::getOutputBuffer();
+	if ( !p )
+		return oexT( "" );
+	oex::CStr s = oexMbToStr( p->Peek( max ) );
+	return stdString( s.Ptr(), s.Length() );
 }
 
 stdString CSqEngineExport::base64_encode( const stdString &sStr )
@@ -250,22 +264,22 @@ stdString CSqEngineExport::unique()
 
 int CSqEngineExport::local_time()
 {_STT();
-	return oexLocalTime().GetUnixTime(); 
+	return oexLocalTime().GetUnixTime();
 }
 
 int CSqEngineExport::gmt_time()
 {_STT();
-	return oexGmtTime().GetUnixTime(); 
+	return oexGmtTime().GetUnixTime();
 }
 
 stdString CSqEngineExport::local_timestr( const stdString &fmt )
 {_STT();
-	return oexLocalTimeStr( fmt.c_str() ).Ptr(); 
+	return oexLocalTimeStr( fmt.c_str() ).Ptr();
 }
 
 stdString CSqEngineExport::gmt_timestr( const stdString &fmt )
 {_STT();
-	return oexGmtTimeStr( fmt.c_str() ).Ptr(); 
+	return oexGmtTimeStr( fmt.c_str() ).Ptr();
 }
 
 stdString CSqEngineExport::ltrim( const stdString &sS, const stdString &sChs )
@@ -374,7 +388,7 @@ int CSqEngineExport::spawn( int nRet, const stdString &sPath, const stdString &s
 
 double CSqEngineExport::get_cpu_load()
 {_STT();
-	return oexGetCpuLoad(); 
+	return oexGetCpuLoad();
 }
 
 double CSqEngineExport::boot_time()
@@ -437,7 +451,7 @@ CSqMulti CSqEngineExport::pb( const stdString &sPath )
 
 int CSqEngineExport::shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory )
 {_STT();
-	return oexShell( sFile.c_str(), sParams.c_str(), sDirectory.c_str() ); 
+	return oexShell( sFile.c_str(), sParams.c_str(), sDirectory.c_str() );
 }
 
 
@@ -450,17 +464,17 @@ int CSqEngineExport::is_path( const stdString &sPath )
 
 void CSqEngineExport::error( int e, const stdString &sStr )
 {_STT();
-	oexERROR( 0, sStr.c_str() ); 
+	oexERROR( 0, sStr.c_str() );
 }
 
 void CSqEngineExport::warning( int e, const stdString &sStr )
 {_STT();
-	oexWARNING( 0, sStr.c_str() ); 
+	oexWARNING( 0, sStr.c_str() );
 }
 
 void CSqEngineExport::notice( int e, const stdString &sStr )
 {_STT();
-	oexNOTICE( 0, sStr.c_str() ); 
+	oexNOTICE( 0, sStr.c_str() );
 }
 
 
@@ -556,102 +570,102 @@ stdString CSqEngineExport::execute4( int nRet, const stdString &sPath, const std
 
 void CSqEngineExport::sleep( int nMsTime )
 {_STT();
-	oex::os::CSys::Sleep( nMsTime ); 
+	oex::os::CSys::Sleep( nMsTime );
 }
 
 float CSqEngineExport::clock()
 {_STT();
-	return oexGetBootSeconds(); 
+	return oexGetBootSeconds();
 }
 
 unsigned int CSqEngineExport::ticks()
 {_STT();
-	return oexGetBootCount(); 
+	return oexGetBootCount();
 }
 
 CSqMsgQueue* CSqEngineExport::queue()
 {_STT();
-	return OnGetQueue(); 
+	return OnGetQueue();
 }
 
 int CSqEngineExport::OnImport( const stdString &sClass )
 {_STT();
-	return 0; 
+	return 0;
 }
 
 int CSqEngineExport::OnInclude( const stdString &sClass )
 {_STT();
-	return 0; 
+	return 0;
 }
 
 int CSqEngineExport::OnIncludeOnce( const stdString &sClass )
 {_STT();
-	return 0; 
+	return 0;
 }
 
 int CSqEngineExport::OnLoadModule( const stdString &sModule, const stdString &sPath )
 {_STT();
-	return 0; 
+	return 0;
 }
 
 SquirrelVM* CSqEngineExport::GetVmPtr()
 {_STT();
-	return 0; 
+	return 0;
 }
 
 CSqEngine* CSqEngineExport::GetEnginePtr()
 {_STT();
-	return 0; 
+	return 0;
 }
 
 stdString CSqEngineExport::OnPath( stdString sPath )
 {_STT();
-	return oexBuildPath( m_sRoot.c_str(), sPath.c_str() ).Ptr(); 
+	return oexBuildPath( m_sRoot.c_str(), sPath.c_str() ).Ptr();
 }
 
 CSqMsgQueue* CSqEngineExport::OnGetQueue()
 {_STT();
-	return oexNULL; 
+	return oexNULL;
 }
 
 BOOL CSqEngine::IsScript()
 {_STT();
-	return m_bLoaded; 
+	return m_bLoaded;
 }
 
 stdString& CSqEngine::GetLastError()
 {_STT();
-	return m_sErr; 
+	return m_sErr;
 }
 
 stdString& CSqEngine::GetOutput()
 {_STT();
-	return m_sOutput; 
+	return m_sOutput;
 }
 
 SquirrelVM& CSqEngine::GetVM()
 {_STT();
-	return m_vm; 
+	return m_vm;
 }
 
 CSqEngine::operator SquirrelVM&()
 {_STT();
-	return m_vm; 
+	return m_vm;
 }
 
 SquirrelObject& CSqEngine::GetScriptObj()
 {_STT();
-	return m_script; 
+	return m_script;
 }
 
 const SquirrelObject& CSqEngine::GetRootTable()
 {_STT();
-	return m_vm.GetRootTable(); 
+	return m_vm.GetRootTable();
 }
 
 SquirrelVM* CSqEngine::GetVmPtr()
 {_STT();
-	return &m_vm; 
+	return &m_vm;
 }
 
 
@@ -739,7 +753,7 @@ CSqEngine::CSqEngine() :
 
 CSqEngine::~CSqEngine()
 {_STT();
-	Destroy(); 
+	Destroy();
 }
 
 void CSqEngine::Exit()
@@ -774,15 +788,15 @@ void CSqEngine::Destroy()
 // Message box and logging functions / Mostly for debugging ;)
 static int _msg( const stdString &sTitle, const stdString &sMsg )
 {_STT();
-	return oex::os::CSys::ShowMessageBox( sTitle.c_str(), sMsg.c_str() ); 
+	return oex::os::CSys::ShowMessageBox( sTitle.c_str(), sMsg.c_str() );
 }
 static int _log( int nErr, const stdString &sMsg )
 {_STT();
-	return oexNOTICE( nErr, sMsg.c_str() ); 
+	return oexNOTICE( nErr, sMsg.c_str() );
 }
 static int _break( const stdString &sError )
 {_STT();
-	oexBREAK( sError.c_str() ); return 0; 
+	oexBREAK( sError.c_str() ); return 0;
 }
 
 /*
@@ -886,6 +900,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_binshare )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_binshare )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, cleanup_binshare )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, enable_output_capture )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_output )
 
 SQBIND_REGISTER_CLASS_END()
 
@@ -1227,7 +1243,7 @@ oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, oex::oexCSTR x_pErr, oex
 
 void CSqEngine::SetModuleManager( CModuleManager *x_pMm )
 {_STT();
-	m_pModuleManager = x_pMm; 
+	m_pModuleManager = x_pMm;
 }
 
 int CSqEngine::OnImport( const stdString &sClass )
@@ -1316,11 +1332,11 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 
 void CSqEngine::SetMessageQueue( CSqMsgQueue *pMq )
 {_STT();
-	m_pMsgQueue = pMq; 
+	m_pMsgQueue = pMq;
 }
 
 CSqMsgQueue* CSqEngine::OnGetQueue()
 {_STT();
-	return m_pMsgQueue; 
+	return m_pMsgQueue;
 }
 

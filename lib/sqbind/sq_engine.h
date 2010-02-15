@@ -68,6 +68,12 @@ public:
 	/// Runs garbage collection on binary shares
 	int cleanup_binshare();
 
+	/// Enables capturing console output
+	int enable_output_capture( int buf_size );
+
+	/// Returns console output
+	stdString get_output( int max );
+
 	/// Sets the specified property
 	void set( const stdString &sPath, const stdString &sKey, const stdString &sVal );
 

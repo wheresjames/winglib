@@ -390,7 +390,11 @@ int CSys::Printf( oexCSTRW x_pFmt, ... )
 }
 
 int CSys::Echo( oexCSTRW x_pFmt )
-{	return ::puts( oexStrWToMbPtr( x_pFmt ) );
+{	if ( !x_pFmt )
+		return 0;
+	CStr8 s = oexStrWToStr( x_pFmt );
+	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
+	return ::puts( s.Ptr() );
 }
 
 #endif // OEX_NOWCHAR
@@ -758,7 +762,9 @@ int CSys::vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs )
 }
 
 int CSys::Echo( oexCSTR8 x_pFmt )
-{	CUtil::AddOutput( x_pFmt, 0 );
+{	if ( !x_pFmt )
+		return 0;
+	CUtil::AddOutput( x_pFmt, 0, oexTRUE );
 	return ::puts( x_pFmt );
 }
 

@@ -53,15 +53,18 @@ public:
         eDefaultMaxBuffers = 1024
     };
 
+	/// Size type
+	typedef CCircBuf::t_size	t_size;
+
 #pragma pack( push, 1 )
 
     struct SBufferInfo
     {
 	    /// Fifo head pointer
-	    oexUINT				        uHeadPtr;
+	    t_size				        uHeadPtr;
 
 	    /// Fifo tail pointer
-	    oexUINT				        uTailPtr;
+	    t_size				        uTailPtr;
     };
 
 #pragma pack( pop )
@@ -79,7 +82,7 @@ public:
                                 NULL terminated.
 
     */
-    virtual CFifoSync& SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
+    virtual CFifoSync& SetName( oexCSTR x_pName, t_size x_uLen = 0 )
     {
         if ( x_pName && !x_uLen )
             x_uLen = zstr::Length( x_pName );
@@ -107,7 +110,7 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL Allocate( oexUINT x_uSize )
+	virtual oexBOOL Allocate( t_size x_uSize )
     {
         if ( !CCircBuf::Allocate( x_uSize ) )
             return oexFALSE;
@@ -127,7 +130,7 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL Allocate( oexUINT x_uSize, oexUINT x_uMaxBuffers )
+	virtual oexBOOL Allocate( t_size x_uSize, t_size x_uMaxBuffers )
     {
         if ( !CCircBuf::Allocate( x_uSize ) )
             return oexFALSE;
@@ -168,7 +171,7 @@ public:
 	/**
 		\return Non-zero if success
 	*/
-	oexBOOL InitFifoWrite( oexUINT x_uSize );
+	oexBOOL InitFifoWrite( t_size x_uSize );
 
 	//==============================================================
 	// AddFifo()
@@ -183,7 +186,7 @@ public:
 
 		\see
 	*/
-	oexBOOL AddFifo( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT x_uEncode = 0 );
+	oexBOOL AddFifo( oexCPVOID x_pBuf, t_size x_uSize, oexUINT x_uEncode = 0 );
 
 	//==============================================================
 	// AllocateBuffers()
@@ -215,11 +218,11 @@ public:
 		\param [in] x_uSize		-	Size of the data in x_pBuf
 		\param [in] x_uEncode	-	Optional encoding
 
-		\return Non-zero if success
+		\return Number of bytes written
 
 		\see
 	*/
-	virtual oexBOOL Write( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT x_uEncode = 0 );
+	virtual t_size Write( oexCPVOID x_pBuf, t_size x_uSize, oexUINT x_uEncode = 0 );
 
 	//==============================================================
 	// Write()
@@ -228,11 +231,11 @@ public:
 	/**
 		\param [in] x_pStr	-	String value to write to buffer
 
-		\return Non-zero if success.
+		\return Number of bytes written
 
 		\see
 	*/
-	virtual oexBOOL Write( oexCSTR8 x_pStr )
+	virtual t_size Write( oexCSTR8 x_pStr )
     {   return Write( x_pStr, zstr::Length( x_pStr ) ); }
 
 	//==============================================================
@@ -242,11 +245,11 @@ public:
 	/**
 		\param [in] x_sStr	-	String to write
 
-		\return Non-zero if success.
+		\return Number of bytes written
 
 		\see
 	*/
-	virtual oexBOOL Write( CStr8 x_sStr )
+	virtual t_size Write( CStr8 x_sStr )
     {   return Write( x_sStr.Ptr(), x_sStr.Length() ); }
 
 	// Import read functions
@@ -266,11 +269,11 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL Read( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oexUINT x_uEncode = 0 );
+	virtual oexBOOL Read( oexPVOID x_pBuf, t_size x_uSize, t_size *x_puRead, oexUINT x_uEncode = 0 );
 
-    virtual oexBOOL Read( CStr8 &x_sStr, oexUINT x_uMax = 0 );
+    virtual oexBOOL Read( CStr8 &x_sStr, t_size x_uMax = 0 );
 
-    virtual CStr8 Read( oexUINT x_uMax = 0 )
+    virtual CStr8 Read( t_size x_uMax = 0 )
     {   CStr8 str; Read( str, x_uMax ); return str; }
 
 
@@ -289,18 +292,18 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL Peek( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oexLONG x_lOffset = 0, oexUINT x_uEncode = 0 );
+	virtual oexBOOL Peek( oexPVOID x_pBuf, t_size x_uSize, t_size *x_puRead, oexLONG x_lOffset = 0, oexUINT x_uEncode = 0 );
 
-    virtual oexBOOL Peek( CStr8 &x_sStr, oexUINT x_uMax = 0 );
+    virtual oexBOOL Peek( CStr8 &x_sStr, t_size x_uMax = 0 );
 
-    virtual CStr8 Peek( oexUINT x_uMax = 0 )
+    virtual CStr8 Peek( t_size x_uMax = 0 )
     {   CStr8 str; Peek( str, x_uMax ); return str; }
 
 	//==============================================================
 	// GetMaxBuffers()
 	//==============================================================
 	/// Returns the number of total buffer slots in the fifo
-	oexUINT GetMaxBuffers() { return m_uMaxBuffers; }
+	t_size GetMaxBuffers() { return m_uMaxBuffers; }
 
 	//==============================================================
 	// SetMaxBuffers()
@@ -309,14 +312,14 @@ public:
 	/**
 		\param [in] x_uMaxBuffers	-	Number of buffers
 	*/
-	void SetMaxBuffers( oexUINT x_uMaxBuffers )
+	void SetMaxBuffers( t_size x_uMaxBuffers )
     {   m_uMaxBuffers = cmn::NextPower2( x_uMaxBuffers ); }
 
 	//==============================================================
 	// GetUsedBuffers()
 	//==============================================================
 	/// Returns the number of buffer slots in the fifo that are in use
-	oexUINT GetUsedBuffers()
+	t_size GetUsedBuffers()
 	{
         oexAutoLock ll( *this );
 	    if ( !ll.IsLocked() )
@@ -331,14 +334,14 @@ public:
 private:
 
 	/// Maximum fifo buffer size
-	oexUINT				        m_uMaxBuffers;
+	t_size				        m_uMaxBuffers;
 
     /// Buffer information
     SBufferInfo                 *m_pBi;
 
     /// Pointer to size buffer
-    oexUINT                     *m_pBuf;
+    t_size                      *m_pBuf;
 
 	/// Fifo block size values
-	TMem< oexUINT >             m_auSize;
+	TMem< t_size >              m_auSize;
 };

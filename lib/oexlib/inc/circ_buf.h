@@ -90,16 +90,32 @@ public:
         eDefaultMaxBufferSize = ( 32 * 1048576 )
     };
 
+	// What to do when the buffer is full
+    enum
+    {
+		/// Writes fail if not enough room in the buffer
+		eWmFail			= 0,
+
+		/// The buffer is automatically expanded to hold new data
+		eWmGrow			= 1,
+
+		/// Overwrite old data
+		eWmOverwrite	= 2
+	};
+
+	/// Size type
+	typedef oexUINT				t_size;
+
 #pragma pack( push, 1 )
 
     /// Contains information about the buffer
     struct SBufferInfo
     {
 	    /// The position of the next character slot available for reading
-	    oexUINT					uReadPtr;
+	    t_size					uReadPtr;
 
 	    /// The position of the next character slot available for writing
-	    oexUINT					uWritePtr;
+	    t_size					uWritePtr;
     };
 
 #pragma pack( pop )
@@ -119,6 +135,17 @@ protected:
 public:
 
 	//==============================================================
+	// CCircBuf()
+	//==============================================================
+	/// Constructor
+	/**
+		\param [in] x_bSync			-	Non-zero to enable thread synchronization
+		\param [in] x_uSize			-	Number of bytes to allocate.
+		\param [in] x_nWriteMode	-	What to do when the buffer is full
+	*/
+	CCircBuf( oexBOOL x_bSync = oexTRUE, t_size x_uSize = 0, oexINT x_nWriteMode = eWmGrow );
+
+	//==============================================================
 	// SetName()
 	//==============================================================
     /// Sets the shared memory name
@@ -129,7 +156,7 @@ public:
                                 NULL terminated.
 
     */
-    virtual CCircBuf& SetName( oexCSTR x_pName, oexUINT x_uLen = 0 )
+    virtual CCircBuf& SetName( oexCSTR x_pName, t_size x_uLen = 0 )
     {   NameEvents( x_pName );
         m_memBuffer.SetName( x_pName, x_uLen );
         return *this;
@@ -199,7 +226,7 @@ public:
 
 		\see GetReadView
 	*/
-	oexBOOL GetWriteView( oexUINT x_uView, oexUINT x_uOffset, oexUINT x_uSize, oexUCHAR **x_ppucBuf, oexUINT *x_puSize )
+	oexBOOL GetWriteView( t_size x_uView, t_size x_uOffset, t_size x_uSize, oexUCHAR **x_ppucBuf, t_size *x_puSize )
 	{
         if ( !m_pBi )
             return oexFALSE;
@@ -224,7 +251,7 @@ public:
 
 		\see GetWriteView
 	*/
-	oexBOOL GetReadView( oexUINT x_uView, oexUINT x_uOffset, oexUINT x_uSize, oexUCHAR **x_ppucBuf, oexUINT *x_puSize )
+	oexBOOL GetReadView( t_size x_uView, t_size x_uOffset, t_size x_uSize, oexUCHAR **x_ppucBuf, t_size *x_puSize )
 	{
         if ( !m_pBi )
             return oexFALSE;
@@ -246,7 +273,7 @@ public:
 
 		\see
 	*/
-	oexUINT NormalizePtr( oexUINT x_uPtr, oexUINT x_uMax );
+	t_size NormalizePtr( t_size x_uPtr, t_size x_uMax );
 
 	//==============================================================
 	// AdvanceReadPtr()
@@ -308,7 +335,7 @@ public:
 
 		\see
 	*/
-	static oexUINT AdvancePtr( oexUINT x_uPtr, oexLONG x_lStep, oexUINT x_uMax );
+	static t_size AdvancePtr( t_size x_uPtr, oexLONG x_lStep, t_size x_uMax );
 
 	//==============================================================
 	// GetView()
@@ -327,7 +354,7 @@ public:
 
 		\see
 	*/
-	static oexBOOL GetView( oexUINT x_uView, oexUINT x_uPtr, oexUINT x_uSize, oexUCHAR *x_pucRing, oexUINT x_uMax, oexUCHAR **x_pucBuf, oexUINT *x_puSize );
+	static oexBOOL GetView( t_size x_uView, t_size x_uPtr, t_size x_uSize, oexUCHAR *x_pucRing, t_size x_uMax, oexUCHAR **x_pucBuf, t_size *x_puSize );
 
 	//==============================================================
 	// Defrag()
@@ -356,7 +383,7 @@ public:
 
 		\see
 	*/
-	oexUINT EnsureWriteSpace( oexUINT x_uSize, oexUINT x_uReadPtr, oexUINT x_uWritePtr, oexUINT x_uMax );
+	t_size EnsureWriteSpace( t_size x_uSize, t_size x_uReadPtr, t_size x_uWritePtr, t_size x_uMax );
 
 	//==============================================================
 	// Resize()
@@ -369,7 +396,7 @@ public:
 
 		\see
 	*/
-	oexUINT Resize( oexUINT x_uNewSize );
+	t_size Resize( t_size x_uNewSize );
 
 	//==============================================================
 	// Read()
@@ -383,7 +410,7 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL Read( oexSTR8 x_pStr, oexUINT x_uMax );
+	virtual oexBOOL Read( oexSTR8 x_pStr, t_size x_uMax );
 
 	//==============================================================
 	// Read()
@@ -397,7 +424,7 @@ public:
 
 		\see
 	*/
-    virtual CStr8 Read( oexUINT x_uMax = 0 )
+    virtual CStr8 Read( t_size x_uMax = 0 )
     {   CStr8 str; Read( str, x_uMax ); return str; }
 
 	//==============================================================
@@ -414,11 +441,11 @@ public:
         function multiple times with the same CStr object will reuse
         the previously allocated memory.
 
-		\return CStr object containing the data
+		\return Non-zero if success
 
 		\see
 	*/
-    virtual oexBOOL Read( CStr8 &x_sStr, oexUINT x_uMax = 0 );
+    virtual oexBOOL Read( CStr8 &x_sStr, t_size x_uMax = 0 );
 
 	//==============================================================
 	// Write()
@@ -431,7 +458,7 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL Write( oexCSTR8 x_pStr )
+	virtual t_size Write( oexCSTR8 x_pStr )
 	{	return Write( x_pStr, zstr::Length( x_pStr ) ); }
 
 	//==============================================================
@@ -445,7 +472,7 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL Write( CStr8 x_sStr )
+	virtual t_size Write( CStr8 x_sStr )
     {   return Write( x_sStr.Ptr(), x_sStr.Length() ); }
 
 
@@ -462,7 +489,7 @@ public:
 
 		\see
 	*/
-	static oexUINT GetMaxWrite( oexUINT x_uReadPtr, oexUINT x_uWritePtr, oexUINT x_uMax );
+	static t_size GetMaxWrite( t_size x_uReadPtr, t_size x_uWritePtr, t_size x_uMax );
 
 	//==============================================================
 	// GetMaxWrite()
@@ -471,7 +498,7 @@ public:
 	/**
 		\return Number of bytes that can be written
 	*/
-	oexUINT GetMaxWrite()
+	t_size GetMaxWrite()
     {   if ( !m_pBi )
             return oexFALSE;
         return GetMaxWrite( m_pBi->uReadPtr, m_pBi->uWritePtr, m_uSize );
@@ -490,7 +517,7 @@ public:
 
 		\see
 	*/
-	static oexUINT GetMaxRead( oexUINT x_uReadPtr, oexUINT x_uWritePtr, oexUINT x_uMax );
+	static t_size GetMaxRead( t_size x_uReadPtr, t_size x_uWritePtr, t_size x_uMax );
 
 	//==============================================================
 	// GetMaxRead()
@@ -499,7 +526,7 @@ public:
 	/**
 		\return Number of bytes that can be read
 	*/
-	oexUINT GetMaxRead()
+	t_size GetMaxRead()
     {   if ( !m_pBi )
             return oexFALSE;
         return GetMaxRead( m_pBi->uReadPtr, m_pBi->uWritePtr, m_uSize );
@@ -521,11 +548,11 @@ public:
 		\param [in] x_puPtr		-	Write pointer position
 		\param [in] x_uEncode	-	Optional encoding
 
-		\return Non-zero on success.
+		\return Number of bytes written
 
 		\see
 	*/
-	oexBOOL Write( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT *x_puPtr, oexUINT x_uEncode = 0 );
+	t_size Write( oexCPVOID x_pvBuf, t_size x_uSize, t_size *x_puPtr, oexUINT x_uEncode = 0 );
 
 	//==============================================================
 	// Write()
@@ -536,11 +563,11 @@ public:
 		\param [in] x_uSize		-	Size of the buffer in pBuf.
 		\param [in] x_uEncode	-	Optional encoding
 
-		\return Non-zero on success
+		\return Number of bytes written
 
 		\see
 	*/
-	virtual oexBOOL Write( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT x_uEncode = 0 );
+	virtual t_size Write( oexCPVOID x_pvBuf, t_size x_uSize, oexUINT x_uEncode = 0 );
 
 	//==============================================================
 	// InitPoke()
@@ -592,9 +619,9 @@ public:
 
 		\see InitPoke(), CancelPoke(), EndPoke(), GetPokeSize()
 	*/
-	oexBOOL Poke( oexCPVOID x_pvBuf, oexUINT x_uSize, oexUINT x_uEncode = 0 )
+	oexBOOL Poke( oexCPVOID x_pvBuf, t_size x_uSize, oexUINT x_uEncode = 0 )
 	{
-        if ( m_bAutoGrow )
+        if ( eWmGrow == m_nWriteMode )
         {
             if ( !m_pBi )
                 Allocate( x_uSize );
@@ -641,7 +668,7 @@ public:
 
 		\see InitPoke(), CancelPoke(), Poke(), EndPoke()
 	*/
-	oexUINT GetPokeSize()
+	t_size GetPokeSize()
 	{
         if ( !m_pBi )
             return 0;
@@ -659,7 +686,7 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL OnWrite()
+	virtual t_size OnWrite()
     {   DataReady(); return oexTRUE; }
 
 	//==============================================================
@@ -677,7 +704,7 @@ public:
 
 		\see
 	*/
-	oexBOOL Read( oexPVOID x_pvBuf, oexUINT x_uMax, oexUINT *x_puRead, oexUINT *x_puPtr, oexUINT x_uEncode = 0 );
+	oexBOOL Read( oexPVOID x_pvBuf, t_size x_uMax, t_size *x_puRead, t_size *x_puPtr, oexUINT x_uEncode = 0 );
 
 	//==============================================================
 	// Read()
@@ -693,7 +720,7 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL Read( oexPVOID x_pvBuf, oexUINT x_uMax, oexUINT *x_puRead, oexUINT x_uEncode = 0 );
+	virtual oexBOOL Read( oexPVOID x_pvBuf, t_size x_uMax, t_size *x_puRead, oexUINT x_uEncode = 0 );
 
 	//==============================================================
 	// Peek()
@@ -710,11 +737,11 @@ public:
 
 		\see
 	*/
-	oexBOOL Peek( oexPVOID x_pvBuf, oexUINT x_uMax, oexUINT *x_puRead, oexLONG x_lOffset = 0, oexUINT x_uEncode = 0 );
+	oexBOOL Peek( oexPVOID x_pvBuf, t_size x_uMax, t_size *x_puRead, oexLONG x_lOffset = 0, oexUINT x_uEncode = 0 );
 
-    virtual oexBOOL Peek( CStr8 &x_sStr, oexUINT x_uMax = 0 );
+    virtual oexBOOL Peek( CStr8 &x_sStr, t_size x_uMax = 0 );
 
-    virtual CStr8 Peek( oexUINT x_uMax = 0 )
+    virtual CStr8 Peek( t_size x_uMax = 0 )
     {   CStr8 str; Peek( str, x_uMax ); return str; }
 
 	//==============================================================
@@ -728,18 +755,7 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL Allocate( oexUINT x_uSize );
-
-	//==============================================================
-	// CCircBuf()
-	//==============================================================
-	/// Constructor
-	/**
-		\param [in] x_bSync		-	Non-zero to enable thread synchronization
-		\param [in] x_uSize		-	Number of bytes to allocate.
-		\param [in] x_bAutoGrow	-	Non-zero if buffer should auto-grow on writes.
-	*/
-	CCircBuf( oexBOOL x_bSync = oexTRUE, oexUINT x_uSize = 0, oexBOOL x_bAutoGrow = oexTRUE );
+	virtual oexBOOL Allocate( t_size x_uSize );
 
 	/// Destructor
 	virtual ~CCircBuf();
@@ -751,7 +767,7 @@ public:
 	/**
 		\param [in] x_uPtr	-	New value for read pointer.
 	*/
-	oexBOOL SetReadPtr( oexUINT x_uPtr )
+	oexBOOL SetReadPtr( t_size x_uPtr )
     {
         if ( !m_pBi )
             return oexFALSE;
@@ -766,7 +782,7 @@ public:
 	/**
 		\return read pointer position
 	*/
-	oexUINT GetReadPtr()
+	t_size GetReadPtr()
     {   if ( !m_pBi )
             return 0;
         return m_pBi->uReadPtr;
@@ -779,7 +795,7 @@ public:
 	/**
 		\param [in] x_uPtr	-	New value for write pointer.
 	*/
-	oexBOOL SetWritePtr( oexUINT x_uPtr )
+	oexBOOL SetWritePtr( t_size x_uPtr )
     {   if ( !m_pBi )
             return oexFALSE;
         m_pBi->uWritePtr = x_uPtr;
@@ -793,7 +809,7 @@ public:
 	/**
 		\return write pointer position
 	*/
-	oexUINT GetWritePtr()
+	t_size GetWritePtr()
     {   if ( !m_pBi )
             return 0;
         return m_pBi->uWritePtr;
@@ -812,9 +828,9 @@ public:
 
 		\warning This should really be set to something reasonable!
 
-		\see SetAutoGrow(), SetAutoGrow(), SetMaxSize()
+		\see GetWriteMode(), SetWriteMode(), SetMaxSize()
 	*/
-	void SetMaxSize( oexUINT x_uMaxSize )
+	void SetMaxSize( t_size x_uMaxSize )
     {   m_uMaxSize = x_uMaxSize; }
 
 	//==============================================================
@@ -824,13 +840,13 @@ public:
 	/**
 		\return Returns the maximum size for the circular buffer.
 
-		\see GetAutoGrow(), SetAutoGrow(), SetMaxSize()
+		\see GetWriteMode(), SetWriteMode(), SetMaxSize()
 	*/
-	oexUINT GetMaxSize()
+	t_size GetMaxSize()
     {   return m_uMaxSize; }
 
 	//==============================================================
-	// SetAutoGrow()
+	// SetWriteMode()
 	//==============================================================
 	/// Enables / disables the auto resizing feature of CCircBuf
 	/**
@@ -839,31 +855,30 @@ public:
 		Sets auto grow enable / disable. If auto grow is enabled, the buffer will
 		automatically resized to accomidate any write less than m_dwMaxSize.
 
-		\see GetAutoGrow(), SetMaxSize(), GetMaxSize()
+		\see SetWriteMode(), SetMaxSize(), GetMaxSize()
 	*/
-	oexBOOL SetAutoGrow( oexBOOL b )
+	oexINT SetWriteMode( oexINT x_nWriteMode )
     {
+		m_nWriteMode = x_nWriteMode;
+
         // Can't resize shared memory
-        if ( m_memBuffer.IsMapped() )
-            m_bAutoGrow = oexFALSE;
+        if ( eWmGrow == m_nWriteMode && m_memBuffer.IsMapped() )
+        	m_nWriteMode = eWmFail;
 
-        else
-            m_bAutoGrow = b;
-
-        return m_bAutoGrow;
+        return m_nWriteMode;
     }
 
 	//==============================================================
-	// GetAutoGrow()
+	// GetWriteMode()
 	//==============================================================
 	/// Returns the auto grow status
 	/**
 		\return Non-zero if auto-grow is enabled.
 
-		\see SetAutoGrow(), SetMaxSize(), GetMaxSize()
+		\see SetWriteMode(), SetMaxSize(), GetMaxSize()
 	*/
-	oexBOOL GetAutoGrow()
-    {   return m_bAutoGrow; }
+	oexINT GetWriteMode()
+    {   return m_nWriteMode; }
 
 	//==============================================================
 	// IsEmpty()
@@ -936,7 +951,7 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL OnInspectRead( oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize )
+	virtual oexBOOL OnInspectRead( t_size x_uBlock, oexUCHAR *x_pucBuf, t_size x_uSize )
     {   return oexTRUE; }
 
 	//==============================================================
@@ -952,7 +967,7 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL OnInspectWrite( oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize )
+	virtual oexBOOL OnInspectWrite( t_size x_uBlock, oexUCHAR *x_pucBuf, t_size x_uSize )
     {   return oexTRUE; }
 
 	/// Over-ride this function to enable generic block encoding
@@ -970,7 +985,7 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL OnEncode( oexUINT x_uType, oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize )
+	virtual oexBOOL OnEncode( t_size x_uType, t_size x_uBlock, oexUCHAR *x_pucBuf, t_size x_uSize )
     {   return oexTRUE; }
 
 	/// Over-ride this function to enable generic block decoding
@@ -988,7 +1003,7 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL OnDecode( oexUINT x_uType, oexUINT x_uBlock, oexUCHAR *x_pucBuf, oexUINT x_uSize )
+	virtual oexBOOL OnDecode( oexUINT x_uType, t_size x_uBlock, oexUCHAR *x_pucBuf, t_size x_uSize )
     {   return oexTRUE; }
 
 	//==============================================================
@@ -998,7 +1013,7 @@ public:
 	/**
 		\return	Total size of the circular buffer
 	*/
-	oexUINT GetBufferSize()
+	t_size GetBufferSize()
     {   return m_uSize; }
 
 private:
@@ -1015,14 +1030,14 @@ private:
 	/// Non-zero if buffer is empty
 	oexBOOL					m_bEmpty;
 
-	/// Set to non-zero to allow the buffer to grow during write operations
-	oexBOOL					m_bAutoGrow;
+	/// What to do when the buffer is full
+	oexINT					m_nWriteMode;
 
 	/// Sets the maximum size for the circular buffer
-	oexUINT					m_uMaxSize;
+	t_size					m_uMaxSize;
 
     /// Current size of circular buffer
-    oexUINT                 m_uSize;
+    t_size                 m_uSize;
 
     /// Pointer to the start of the buffer
     oexUCHAR                *m_pBuf;
@@ -1031,7 +1046,7 @@ private:
     SBufferInfo             *m_pBi;
 
 	/// Position of data that is being poked into the buffer
-	oexUINT					m_uPokePtr;
+	t_size					m_uPokePtr;
 
 	/// Encapsulates the actual circular buffer memory
 	TMem< oexUCHAR >		m_memBuffer;

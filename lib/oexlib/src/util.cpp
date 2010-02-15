@@ -60,10 +60,13 @@ CStrW CUtil::md5( CStrW s )
 static CCircBuf *g_pCircBuf = oexNULL;
 oexBOOL CUtil::EnableOutputCapture( oexUINT x_uSize )
 {
-	if ( !g_pCircBuf )
-		g_pCircBuf = OexAllocConstruct< CCircBuf >();
-	else
+	if ( x_uSize && !g_pCircBuf )
+	{	if ( 32 > x_uSize ) x_uSize = 32;
+		g_pCircBuf = OexAllocConstruct< CCircBuf >( oexFALSE, x_uSize, oexFALSE );
+	} // end if
+	else if ( !x_uSize )
 		OexAllocDelete( g_pCircBuf ), g_pCircBuf = oexNULL;
+	return oexTRUE;
 }
 
 CCircBuf* CUtil::getOutputBuffer()
@@ -71,7 +74,7 @@ CCircBuf* CUtil::getOutputBuffer()
 	return g_pCircBuf;
 }
 
-oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize )
+oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 {
 	// Sanity checks
 	if ( !g_pCircBuf || !x_pStr || !*x_pStr )
@@ -85,6 +88,9 @@ oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize )
 
 	// Write the data to the buffer
 	g_pCircBuf->Write( x_pStr, x_uSize * sizeof( x_pStr[ 0 ] ) );
+
+	if ( x_bNewLine )
+		g_pCircBuf->Write( oexNL, oexNL_LEN * sizeof( oexCHAR ) );
 
 	return oexTRUE;
 }

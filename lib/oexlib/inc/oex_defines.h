@@ -236,9 +236,11 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #if defined( OEX_WIN32 )
 #	define oexNL							oexT( "\r\n" )
 #	define oexNL8							"\r\n"
+#	define oexNL_LEN						2
 #else
 #	define oexNL							oexT( "\n" )
 #	define oexNL8							"\n"
+#	define oexNL_LEN						1
 #endif
 
 // Resource macros
@@ -307,7 +309,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexPrintf							OEX_NAMESPACE::os::CSys::Printf
 #define oexEcho								OEX_NAMESPACE::os::CSys::Echo
 #define oexFlush_stdout						OEX_NAMESPACE::os::CSys::Flush_stdout
-#define oexEnableOutputCapture()			OEX_NAMESPACE::CUtil::EnableOutputCapture( OEX_NAMESPACE::oexTRUE )
+#define oexEnableOutputCapture				OEX_NAMESPACE::CUtil::EnableOutputCapture
 #define oexFmt								OEX_NAMESPACE::CStr().Fmt
 #define oexAlert							OEX_NAMESPACE::os::CSys::ShowMessageBox
 #define oexFork								OEX_NAMESPACE::os::CSys::Fork

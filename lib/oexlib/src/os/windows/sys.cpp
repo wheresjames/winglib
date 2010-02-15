@@ -404,7 +404,11 @@ int CSys::Printf( oexCSTRW x_pFmt, ... )
 
 int CSys::Echo( oexCSTRW x_pFmt )
 {//_STT();
-	return ::puts( oexStrWToMbPtr( x_pFmt ) );
+	if ( !x_pFmt )
+		return 0;
+	CStr8 s = oexStrWToStr( x_pFmt );
+	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
+	return ::puts( s.Ptr() );
 }
 
 oexPVOID CSys::MemCpy( oexPVOID x_pDst, oexCPVOID x_pSrc, oexUINT x_uSize )
@@ -771,6 +775,9 @@ int CSys::vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs )
 
 int CSys::Echo( oexCSTR8 x_pFmt )
 {//_STT();
+	if ( !x_pFmt )
+		return 0;
+	CUtil::AddOutput( x_pFmt, 0, oexTRUE );
 	return ::puts( x_pFmt );
 }
 

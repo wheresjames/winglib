@@ -229,12 +229,12 @@ static oexUINT CBaseFile_ToCBaseFileAttributes( DWORD dwAttrib )
 
 oexUINT CBaseFile::GetFileAttrib( oexCSTR x_pFile )
 {_STT();
-	return CBaseFile_ToCBaseFileAttributes( ::GetFileAttributes( x_pFile ) ); 
+	return CBaseFile_ToCBaseFileAttributes( ::GetFileAttributes( x_pFile ) );
 }
 
 oexBOOL CBaseFile::SetFileAttrib( oexCSTR x_pFile, oexUINT x_uAttrib )
 {_STT();
-	return ::SetFileAttributes( x_pFile, x_uAttrib ) ? oexTRUE : oexFALSE; 
+	return ::SetFileAttributes( x_pFile, x_uAttrib ) ? oexTRUE : oexFALSE;
 }
 
 void CBaseFile_InitFindData( CBaseFile::SFindData *x_pFd )
@@ -312,7 +312,7 @@ oexBOOL CBaseFile::DoesExist( oexCSTR x_pPath )
 
 oexBOOL CBaseFile::CreateFolder( oexCSTR x_pPath )
 {_STT();
-	return ::CreateDirectory( x_pPath, NULL ) ? oexTRUE : oexFALSE; 
+	return ::CreateDirectory( x_pPath, NULL ) ? oexTRUE : oexFALSE;
 }
 
 CStr CBaseFile::GetModPath( oexCSTR x_pPath )
@@ -333,4 +333,13 @@ CStr CBaseFile::GetModFileName()
 	szFilename[ oexSTRSIZE - 1 ] = 0;
 
 	return szFilename;
+}
+
+oexBOOL CBaseFile::Rename( oexCSTR x_pOld, oexCSTR x_pNew )
+{
+	if ( !x_pOld || !*x_pOld || !x_pNew || !*x_pNew )
+		return oexFALSE;
+
+	return MoveFileEx( oexStrToMbPtr( x_pOld ), oexStrToMbPtr( x_pNew ),
+					   MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING );
 }

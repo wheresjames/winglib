@@ -6,29 +6,29 @@
 // winglib@wheresjames.com
 // http://www.wheresjames.com
 //
-// Redistribution and use in source and binary forms, with or 
-// without modification, are permitted for commercial and 
-// non-commercial purposes, provided that the following 
+// Redistribution and use in source and binary forms, with or
+// without modification, are permitted for commercial and
+// non-commercial purposes, provided that the following
 // conditions are met:
 //
-// * Redistributions of source code must retain the above copyright 
+// * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// * The names of the developers or contributors may not be used to 
-//   endorse or promote products derived from this software without 
+// * The names of the developers or contributors may not be used to
+//   endorse or promote products derived from this software without
 //   specific prior written permission.
 //
-//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+//   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
@@ -39,7 +39,7 @@ OEX_USING_NAMESPACE
 CFifoSync::CFifoSync()
 {
     // Must be power of two
-    m_uMaxBuffers = cmn::NextPower2( (oexUINT)eDefaultMaxBuffers );
+    m_uMaxBuffers = cmn::NextPower2( (t_size)eDefaultMaxBuffers );
 
     m_pBi = oexNULL;
     m_pBuf = oexNULL;
@@ -53,7 +53,7 @@ void CFifoSync::Destroy2()
 {
 	// Lock the buffer
 	oexAutoLock ll( *this );
-	if ( !ll.IsLocked() ) 
+	if ( !ll.IsLocked() )
         return;
 
     m_pBi = oexNULL;
@@ -69,15 +69,15 @@ void CFifoSync::Destroy()
 }
 
 
-oexBOOL CFifoSync::Write( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT x_uEncode )
+CCircBuf::t_size CFifoSync::Write( oexCPVOID x_pBuf, t_size x_uSize, oexUINT x_uEncode )
 {
 	// Lock the buffer
 	oexAutoLock ll( *this );
-	if ( !ll.IsLocked() ) 
+	if ( !ll.IsLocked() )
         return oexFALSE;
 
 	// Prepare to write data
-	if ( !InitFifoWrite( x_uSize ) ) 
+	if ( !InitFifoWrite( x_uSize ) )
 		return oexFALSE;
 
 	// Add data to the buffer
@@ -92,7 +92,7 @@ oexBOOL CFifoSync::AllocateBuffers()
 {
 	// Lock the buffer
 	oexAutoLock ll( *this );
-	if ( !ll.IsLocked() ) 
+	if ( !ll.IsLocked() )
         return oexFALSE;
 
     // Ensure size tag space
@@ -121,11 +121,11 @@ oexBOOL CFifoSync::AllocateBuffers()
 	return oexTRUE;
 }
 
-oexBOOL CFifoSync::AddFifo( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT x_uEncode )
+oexBOOL CFifoSync::AddFifo( oexCPVOID x_pBuf, t_size x_uSize, oexUINT x_uEncode )
 {
 	// Lock the buffer
 	oexAutoLock ll( *this );
-	if ( !ll.IsLocked() ) 
+	if ( !ll.IsLocked() )
         return oexFALSE;
 
     if ( !m_pBi )
@@ -141,11 +141,11 @@ oexBOOL CFifoSync::AddFifo( oexCPVOID x_pBuf, oexUINT x_uSize, oexUINT x_uEncode
 	return oexTRUE;
 }
 
-oexBOOL CFifoSync::InitFifoWrite( oexUINT x_uSize )
+oexBOOL CFifoSync::InitFifoWrite( t_size x_uSize )
 {
 	// Lock the buffer
 	oexAutoLock ll( *this );
-	if ( !ll.IsLocked() ) 
+	if ( !ll.IsLocked() )
         return oexFALSE;
 
     // Ensure buffer space
@@ -154,7 +154,7 @@ oexBOOL CFifoSync::InitFifoWrite( oexUINT x_uSize )
 
 	// Do we have a buffer?
 	if ( !GetMaxWrite( m_pBi->uTailPtr, m_pBi->uHeadPtr, m_uMaxBuffers ) )
-    {   
+    {
         // Can't grow shared memory
         if ( m_auSize.IsMapped() )
             return oexFALSE;
@@ -182,7 +182,7 @@ oexBOOL CFifoSync::EndFifoWrite()
 {
 	// Lock the buffer
 	oexAutoLock ll( *this );
-	if ( !ll.IsLocked() ) 
+	if ( !ll.IsLocked() )
         return oexFALSE;
 
     if ( !m_pBi )
@@ -194,11 +194,11 @@ oexBOOL CFifoSync::EndFifoWrite()
 	return EndPoke();
 }
 
-oexBOOL CFifoSync::Read( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oexUINT x_uEncode )
+oexBOOL CFifoSync::Read( oexPVOID x_pBuf, t_size x_uSize, t_size *x_puRead, oexUINT x_uEncode )
 {
 	// Lock the buffer
 	oexAutoLock ll( *this );
-	if ( !ll.IsLocked() ) 
+	if ( !ll.IsLocked() )
         return oexFALSE;
 
     if ( !m_pBi )
@@ -208,23 +208,23 @@ oexBOOL CFifoSync::Read( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oe
 	oexBOOL bRet = Peek( x_pBuf, x_uSize, x_puRead, 0, x_uEncode );
 
 	// Next read block
-	if ( x_pBuf && x_uSize ) 
+	if ( x_pBuf && x_uSize )
         SkipBlock();
 
 	return bRet;
 }
 
-oexBOOL CFifoSync::Read( CStr8 &x_sStr, oexUINT x_uMax )
+oexBOOL CFifoSync::Read( CStr8 &x_sStr, t_size x_uMax )
 {
 	// Lock the buffer
 	oexAutoLock ll( *this );
-	if ( !ll.IsLocked() ) 
+	if ( !ll.IsLocked() )
         return oexFALSE;
 
     if ( !m_pBi )
         return oexFALSE;
 
-    oexUINT uRead = 0;
+    t_size uRead = 0;
     oexBOOL bRet = Peek( oexNULL, 0, &uRead );
 
     if ( !bRet || !uRead )
@@ -233,7 +233,7 @@ oexBOOL CFifoSync::Read( CStr8 &x_sStr, oexUINT x_uMax )
     } // end if
 
     // Range check
-    if ( !x_uMax || x_uMax > uRead ) 
+    if ( !x_uMax || x_uMax > uRead )
         x_uMax = uRead;
 
     // Allocate memory
@@ -253,17 +253,17 @@ oexBOOL CFifoSync::Read( CStr8 &x_sStr, oexUINT x_uMax )
 }
 
 
-oexBOOL CFifoSync::Peek( CStr8 &x_sStr, oexUINT x_uMax )
+oexBOOL CFifoSync::Peek( CStr8 &x_sStr, t_size x_uMax )
 {
 	// Lock the buffer
 	oexAutoLock ll( *this );
-	if ( !ll.IsLocked() ) 
+	if ( !ll.IsLocked() )
         return oexFALSE;
 
     if ( !m_pBi )
         return oexFALSE;
 
-    oexUINT uRead = 0;
+    t_size uRead = 0;
     oexBOOL bRet = Peek( oexNULL, 0, &uRead );
 
     if ( !bRet || !uRead )
@@ -272,7 +272,7 @@ oexBOOL CFifoSync::Peek( CStr8 &x_sStr, oexUINT x_uMax )
     } // end if
 
     // Range check
-    if ( !x_uMax || x_uMax > uRead ) 
+    if ( !x_uMax || x_uMax > uRead )
         x_uMax = uRead;
 
     // Allocate memory
@@ -295,7 +295,7 @@ oexBOOL CFifoSync::SkipBlock()
 {
 	// Lock the buffer
 	oexAutoLock ll( *this );
-	if ( !ll.IsLocked() ) 
+	if ( !ll.IsLocked() )
         return oexFALSE;
 
     if ( !m_pBi )
@@ -318,11 +318,11 @@ oexBOOL CFifoSync::SkipBlock()
 	return oexTRUE;
 }
 
-oexBOOL CFifoSync::Peek( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oexLONG x_lOffset, oexUINT x_uEncode )
+oexBOOL CFifoSync::Peek( oexPVOID x_pBuf, t_size x_uSize, t_size *x_puRead, oexLONG x_lOffset, oexUINT x_uEncode )
 {
 	// Lock the buffer
 	oexAutoLock ll( *this );
-	if ( !ll.IsLocked() ) 
+	if ( !ll.IsLocked() )
         return oexFALSE;
 
     if ( !m_pBi )
@@ -335,14 +335,14 @@ oexBOOL CFifoSync::Peek( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oe
 	// Are they asking for the size?
 	if ( !x_pBuf || !x_uSize )
 	{
-        if ( !x_puRead ) 
+        if ( !x_puRead )
             return oexFALSE;
 
 		// Get the buffer size
 		*x_puRead = m_pBuf[ m_pBi->uTailPtr ];
 
 		// Correct for offset
-		if ( x_lOffset > (long)*x_puRead ) 
+		if ( x_lOffset > (long)*x_puRead )
             return oexFALSE;
 
 		*x_puRead -= x_lOffset;
@@ -352,15 +352,15 @@ oexBOOL CFifoSync::Peek( oexPVOID x_pBuf, oexUINT x_uSize, oexUINT *x_puRead, oe
 	} // end if
 
 	// What's the maximum amount of data in this block
-	if ( x_uSize > m_pBuf[ m_pBi->uTailPtr ] ) 
+	if ( x_uSize > m_pBuf[ m_pBi->uTailPtr ] )
 		x_uSize = m_pBuf[ m_pBi->uTailPtr ];
 
 	// Anything left to read?
-	if ( x_uSize <= (oexUINT)x_lOffset ) 
+	if ( x_uSize <= (t_size)x_lOffset )
         return oexFALSE;
 
 	// Subtract the offset
-	x_uSize -= (oexUINT)x_lOffset;
+	x_uSize -= (t_size)x_lOffset;
 
 	// Peek the data
 	return CCircBuf::Peek( x_pBuf, x_uSize, x_puRead, x_lOffset, x_uEncode );

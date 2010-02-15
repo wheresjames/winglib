@@ -29,7 +29,11 @@ include $(PRJ_LIBROOT)/unsupported.mk
 else
 
 ifeq ($(PLATFORM),windows)
-	PRJ_OSLB := $(PRJ_OSLB) iphlpapi.lib
+	ifneq ($(BUILD),gcc)
+		PRJ_OSLB := $(PRJ_OSLB) iphlpapi.lib
+	else
+		PRJ_OSLB := $(PRJ_OSLB) iphlpapi
+	endif
 endif
 
 #-------------------------------------------------------------------
