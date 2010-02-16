@@ -39,13 +39,10 @@ OEX_USING_NAMESPACE
 CFifoSync::CFifoSync( oexBOOL x_bSync, t_size x_uSize, oexINT x_nWriteMode, t_size x_uMaxBuffers ) :
 	CCircBuf( x_bSync, 0, x_nWriteMode )
 {
-    // Must be power of two
-    m_uMaxBuffers = cmn::NextPower2( (t_size)x_uMaxBuffers );
-
     m_pBi = oexNULL;
     m_pBuf = oexNULL;
 
-	Allocate( x_uSize );
+	Allocate( x_uSize, x_uMaxBuffers );
 }
 
 CFifoSync::~CFifoSync()
@@ -107,15 +104,12 @@ oexBOOL CFifoSync::AllocateBuffers()
         return oexTRUE;
 
 //	if ( !m_auSize.ReSize( m_uMaxBuffers ) )        // +++ Would have to defrag the circular buffer
-        if ( !m_auSize.OexNew( m_uMaxBuffers ).Ptr() )
+        if ( !m_auSize.OexNew( m_uMaxBuffers + sizeof( SBufferInfo ) ).Ptr() )
     	    return oexFALSE;
 
     // Get buffer pointers
-    m_pBuf = m_auSize.Ptr();
-
-	// Get a block info
-	// Why does it work this way? ... it's a long story ...
-    m_pBi = &m_bi;
+    m_pBi = (SBufferInfo*)m_auSize.Ptr();
+    m_pBuf = m_auSize.Ptr( sizeof( SBufferInfo ) );
 
     // Save head and tail pointer
     m_pBi->uHeadPtr = 0;
@@ -153,19 +147,63 @@ oexBOOL CFifoSync::InitFifoWrite( t_size x_uSize )
 
     // Ensure buffer space
     if ( !m_pBi )
-        Allocate( x_uSize );
+	{
+		if ( CCircBuf::eWmGrow != GetWriteMode() )
+			return oexFALSE;
 
-	// Do we have a buffer?
-	if ( !GetMaxWrite( m_pBi->uTailPtr, m_pBi->uHeadPtr, m_uMaxBuffers ) )
+		Allocate( x_uSize );
+
+		if ( !m_pBi )
+			return oexFALSE;
+
+	} // end if
+
+	// How much space in the buffer
+	t_size uBuffers = GetMaxWrite( m_pBi->uTailPtr, m_pBi->uHeadPtr, m_uMaxBuffers );
+	t_size uAvail = GetMaxWrite();
+
+	// Enough buffer space?
+	if ( !uBuffers || uAvail < x_uSize )
     {
-        // Can't grow shared memory
-        if ( m_auSize.IsMapped() )
-            return oexFALSE;
+		// How much total space in the buffer
+		t_size uMax = GetBufferSize();
 
-        // Attempt to get more space
-        m_uMaxBuffers = cmn::NextPower2( m_uMaxBuffers * 2 );
-        if ( !Allocate( x_uSize ) )
-            return oexFALSE;
+		// Are we allowed to grow?
+		if ( CCircBuf::eWmGrow == GetWriteMode() )
+		{
+			// Can't grow shared memory
+			if ( m_auSize.IsMapped() )
+				return oexFALSE;
+
+			// Do we need more buffers?
+			if ( !uBuffers )
+				m_uMaxBuffers = cmn::NextPower2( m_uMaxBuffers * 2 );
+
+			// Attempt to get more space
+			if ( !Allocate( uMax + x_uSize ) )
+				return oexFALSE;
+								   
+		} // end if
+
+		// Overwriting?
+		else if ( CCircBuf::eWmOverwrite == GetWriteMode() )
+		{
+			// All of it?
+			if ( uMax <= x_uSize )
+				Empty();
+
+			// Start knocking stuff out of the buffer
+			else
+				while ( !GetMaxWrite( m_pBi->uTailPtr, m_pBi->uHeadPtr, m_uMaxBuffers )
+					    || GetMaxWrite() < x_uSize )
+					SkipBlock();
+
+		} // end else if
+
+		// Fail
+		else
+			return oexFALSE;
+
 
     } // end if
 

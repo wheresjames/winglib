@@ -115,6 +115,8 @@ public:
         if ( !CCircBuf::Allocate( x_uSize ) )
             return oexFALSE;
 
+        m_uMaxBuffers = cmn::NextPower2( x_uSize / 16 );
+
         return AllocateBuffers();
     }
 
@@ -306,6 +308,22 @@ public:
     virtual CStr8 Peek( t_size x_uBuffer, t_size x_uMax = 0 )
     {   CStr8 str; Peek( x_uBuffer, str, x_uMax ); return str; }
 
+	virtual oexBOOL Empty()
+	{
+		oexAutoLock ll( *this );
+		if ( !ll.IsLocked() )
+            return oexFALSE;
+
+		// Reset buffer pointers
+		if ( m_pBi )
+		{	m_pBi->uHeadPtr = 0;
+			m_pBi->uTailPtr = 0;
+		} // endi f
+
+		// Empty the circular buffer
+		return CCircBuf::Empty();
+	}
+
 	//==============================================================
 	// GetMaxBuffers()
 	//==============================================================
@@ -319,8 +337,8 @@ public:
 	/**
 		\param [in] x_uMaxBuffers	-	Number of buffers
 	*/
-	void SetMaxBuffers( t_size x_uMaxBuffers )
-    {   m_uMaxBuffers = cmn::NextPower2( x_uMaxBuffers ); }
+//	void SetMaxBuffers( t_size x_uMaxBuffers, t_size x_uBufferSize )
+//    {   m_uMaxBuffers = cmn::NextPower2( x_uMaxBuffers ); Allocate( x_uBufferSize ); }
 
 	//==============================================================
 	// GetUsedBuffers()

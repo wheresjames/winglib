@@ -192,7 +192,7 @@ oexINT COex::Uninit()
 //	oexVERIFY( !os::CIpSocket::GetInitCount() );
 
 	// Turn off output capture
-	CUtil::EnableOutputCapture( 0 );
+	CUtil::EnableOutputCapture( 0, 0 );
 
 	// Close the log file
 	oexCloseLog();

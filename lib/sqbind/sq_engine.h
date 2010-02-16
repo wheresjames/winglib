@@ -69,7 +69,7 @@ public:
 	int cleanup_binshare();
 
 	/// Enables capturing console output
-	int enable_output_capture( int buf_size );
+	int enable_output_capture( int buffers, int buf_size );
 
 	/// Returns console output
 	stdString get_output( int max );

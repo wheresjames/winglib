@@ -2146,7 +2146,7 @@ oex::oexRESULT Test_CFifoSync()
 
     oex::CFifoSync fs;
 
-    fs.SetMaxBuffers( 10000 );
+    fs.Allocate( 10000 * 16, 10000 );
 
     oex::oexCSTR pStr = oexT( "Hello World" );
     oexSIZE_T uBufferedData = 0;
@@ -2166,7 +2166,7 @@ oex::oexRESULT Test_CFifoSync()
         uBufferedData--;
 
     } // end for
-
+	
     oexSIZE_T uUsed = fs.GetUsedBuffers();
   	if ( !oexVERIFY( fs.GetUsedBuffers() == uBufferedData ) )
         return -2;

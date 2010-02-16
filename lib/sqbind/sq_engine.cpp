@@ -206,9 +206,9 @@ int CSqEngineExport::cleanup_binshare()
 	return oexCleanupBin();
 }
 
-int CSqEngineExport::enable_output_capture( int buf_size )
+int CSqEngineExport::enable_output_capture( int buffers, int buf_size )
 {_STT();
-	return oexEnableOutputCapture( buf_size );
+	return oexEnableOutputCapture( buffers, buf_size );
 }
 
 stdString CSqEngineExport::get_output( int max )

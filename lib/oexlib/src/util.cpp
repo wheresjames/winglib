@@ -59,14 +59,14 @@ CStrW CUtil::md5( CStrW s )
 //	   PS : CCircBuf is internally thread safe.
 //static CCircBuf *g_pCircBuf = oexNULL;
 static CFifoSync *g_pFifoSync = oexNULL;
-oexBOOL CUtil::EnableOutputCapture( oexUINT x_uSize )
+oexBOOL CUtil::EnableOutputCapture( oexUINT x_uBuffers, oexUINT x_uSize )
 {
-	if ( x_uSize && !g_pFifoSync )
+	if ( x_uBuffers && x_uSize && !g_pFifoSync )
 	{	if ( 4 > x_uSize ) x_uSize = 4;
-		g_pFifoSync = OexAllocConstruct< CFifoSync >( oexFALSE, x_uSize * 256, 
-													  CCircBuf::eWmOverwrite, x_uSize );
+		g_pFifoSync = OexAllocConstruct< CFifoSync >( oexFALSE, x_uSize, 
+													  CCircBuf::eWmOverwrite, x_uBuffers );
 	} // end if
-	else if ( !x_uSize )
+	else if ( ( !x_uBuffers || !x_uSize ) && g_pFifoSync )
 		OexAllocDelete( g_pFifoSync ), g_pFifoSync = oexNULL;
 	return oexTRUE;
 
@@ -102,9 +102,6 @@ oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 
 	// Write the data to the buffer
 	g_pFifoSync->Write( x_pStr, x_uSize * sizeof( x_pStr[ 0 ] ) );
-
-//	if ( x_bNewLine )
-//		g_pCircBuf->Write( oexNL, oexNL_LEN * sizeof( oexCHAR ) );
 
 	return oexTRUE;
 

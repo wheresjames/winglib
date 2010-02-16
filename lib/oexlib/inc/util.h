@@ -51,7 +51,7 @@ public:
 	static CStrW md5( CStrW s );
 
 	/// Enable / disable output capture
-	static oexBOOL EnableOutputCapture( oexUINT x_uSize );
+	static oexBOOL EnableOutputCapture( oexUINT x_uBuffers, oexUINT x_uSize );
 
 	/// Add string to output capture
 	static oexBOOL AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine );

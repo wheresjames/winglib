@@ -104,6 +104,9 @@ oexBOOL CCircBuf::Allocate( t_size x_uSize )
 	// Lose the old buffer
 	Destroy();
 
+	if ( !x_uSize )
+		return oexFALSE;
+
 	// Create a new buffer
 	if ( !m_memBuffer.OexNew( x_uSize + sizeof( SBufferInfo ), oexFALSE, oexTRUE ).Ptr() )
 		return oexFALSE;

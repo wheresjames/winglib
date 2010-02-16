@@ -921,7 +921,7 @@ public:
 	/**
 		\return Non-zero if success.
 	*/
-	oexBOOL Empty()
+	virtual oexBOOL Empty()
 	{	oexAutoLock ll( &m_lock );
 		if ( !ll.IsLocked() )
             return oexFALSE;
