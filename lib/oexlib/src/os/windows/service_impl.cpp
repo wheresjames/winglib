@@ -240,7 +240,10 @@ CServiceImpl* CServiceImpl::GetInstance()
 }
 
 int CServiceImpl::RunService( int argc, const char** argv, oexCSTR pName, oexCSTR pDesc  )
-{_STT();
+{//_STT();
+
+	oexINIT();
+
 	// Get singleton instance
 	OEX_NAMESPACE::os::CServiceImpl *pInstance = OEX_NAMESPACE::os::CServiceImpl::GetInstance();
 	if ( !pInstance )
@@ -248,7 +251,11 @@ int CServiceImpl::RunService( int argc, const char** argv, oexCSTR pName, oexCST
 		return -1;
 	} // end if
 
-	return pInstance->OnRunService( argc, argv, pName, pDesc );
+	int nRet = pInstance->OnRunService( argc, argv, pName, pDesc );
+
+	oexUINT();
+
+	return nRet;
 }
 
 int CServiceImpl::OnRunService( int argc, const char** argv, oexCSTR pName, oexCSTR pDesc  )

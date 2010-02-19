@@ -50,8 +50,6 @@ COex::CVerifyStartup::CVerifyStartup()
 
 COex::CVerifyStartup::~CVerifyStartup()
 {_STT();
-/* +++ Fix this check one day
-
 #if defined( oexDEBUG )
 
 	if ( !COex::GetStartupCode() )
@@ -73,8 +71,6 @@ COex::CVerifyStartup::~CVerifyStartup()
 	} // end else if
 
 #endif
-
-*/
 }
 
 oexINT COex::GetStartupCode()

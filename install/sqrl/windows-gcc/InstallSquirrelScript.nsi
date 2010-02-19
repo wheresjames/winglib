@@ -58,7 +58,6 @@ Section "Squirrel Script Engine (required)"
   File "..\..\..\..\..\bin\windows-gcc-win32-i386-mingw32-static\_sqmod\sqmod_ffmpeg.dll"
 ;  File "..\..\..\..\..\bin\windows-gcc-win32-i386-mingw32-static\_sqmod\sqmod_fftw.dll"
   File "..\..\..\..\..\bin\windows-gcc-win32-i386-mingw32-static\_sqmod\sqmod_gdchart.dll"
-  File "..\..\..\..\..\bin\windows-gcc-win32-i386-mingw32-static\_sqmod\sqmod_http.dll"
   File "..\..\..\..\..\bin\windows-gcc-win32-i386-mingw32-static\_sqmod\sqmod_irrlicht.dll"
   File "..\..\..\..\..\bin\windows-gcc-win32-i386-mingw32-static\_sqmod\sqmod_live555.dll"
 ;  File "..\..\..\..\..\bin\windows-gcc-win32-i386-mingw32-static\_sqmod\sqmod_mysql.dll"
@@ -105,7 +104,6 @@ Section "Uninstall"
   Delete $INSTDIR\modules\sqmod_ffmpeg.dll
   Delete $INSTDIR\modules\sqmod_fftw.dll
   Delete $INSTDIR\modules\sqmod_gdchart.dll
-  Delete $INSTDIR\modules\sqmod_http.dll
   Delete $INSTDIR\modules\sqmod_irrlicht.dll
   Delete $INSTDIR\modules\sqmod_live555.dll
   Delete $INSTDIR\modules\sqmod_mysql.dll
