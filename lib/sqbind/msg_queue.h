@@ -178,6 +178,15 @@ public:
 	/// Gets the property bag
 	stdString pb( const stdString &sPath );
 
+	/// Sets the specified timer
+	stdString set_timer( const stdString &sPath, const stdString &sTo, const stdString &sCallback );
+
+	/// Sets the specified timeout
+	stdString set_timeout( const stdString &sPath, const stdString &sTo, const stdString &sCallback );
+
+	/// Kills the specified tiemr
+	stdString kill_timer( const stdString &sPath, const stdString &sId );
+
 	/// Return a reference to the message queue lock
 	oexLock& GetLock() { return m_cLock; }
 

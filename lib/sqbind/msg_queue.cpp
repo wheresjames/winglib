@@ -347,3 +347,32 @@ stdString CSqMsgQueue::pb( const stdString &sPath )
 	Msg( sPath, oexT( "pb_all" ), &params, &sRet );
 	return sRet;
 }
+
+stdString CSqMsgQueue::set_timer( const stdString &sPath, const stdString &sTo, const stdString &sCallback )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	params[ oexT( "to" ) ] = sTo;
+	params[ oexT( "cb" ) ] = sCallback;
+	Msg( sPath, oexT( "set_timer" ), &params, &sRet );
+	return sRet;
+}
+
+stdString CSqMsgQueue::set_timeout( const stdString &sPath, const stdString &sTo, const stdString &sCallback )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	params[ oexT( "to" ) ] = sTo;
+	params[ oexT( "cb" ) ] = sCallback;
+	Msg( sPath, oexT( "set_timeout" ), &params, &sRet );
+	return sRet;
+}
+
+stdString CSqMsgQueue::kill_timer( const stdString &sPath, const stdString &sId )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	params[ oexT( "id" ) ] = sId;
+	Msg( sPath, oexT( "kill_timer" ), &params, &sRet );
+	return sRet;
+}

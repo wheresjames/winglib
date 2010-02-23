@@ -44,7 +44,17 @@ public:
 	CSqirrNode( irr::scene::IMeshSceneNode *p ) : m_type( 0 ), m_p( 0 ) { SetPtr( p, eTypeMesh ); }
 	CSqirrNode& operator = ( irr::scene::IMeshSceneNode *p ) { SetPtr( p, eTypeMesh ); return *this; }
 
-	void SetPtr( irr::scene::ISceneNode *p, int t ) { Destroy(); if ( p ) { m_p = p; p->grab(); m_type = t; } }
+	void SetPtr( irr::scene::ISceneNode *p, int t ) 
+	{
+		Destroy(); 
+		if ( p ) 
+		{ 
+			m_p = p; 
+			p->grab(); 
+			m_type = t; 
+		} 
+	}
+
 	~CSqirrNode() { Destroy(); }
 	void Destroy() { if ( m_p ) { m_p->drop(); m_p = 0; } }
 
@@ -220,6 +230,55 @@ public:
 
 	int IsValid()
 	{	return m_p ? 1 : 0; }
+
+    void SetAbsolutePosition( CSqirrVector3d &x_v )
+	{   if ( !m_p ) return;
+
+        irr::scene::ISceneNode *pParent =  m_p->getParent();
+        if ( !pParent ) m_p->setPosition( x_v.Obj() );
+        else
+        {   irr::core::vector3df v( x_v.Obj() - pParent->getAbsolutePosition() );
+            pParent->getAbsoluteTransformation().inverseRotateVect( v );
+            m_p->setPosition( v ); 
+        } // end else
+        m_p->updateAbsolutePosition();
+    }
+
+    CSqirrVector3d GetAbsolutePosition()
+    {   if ( !m_p ) return CSqirrVector3d();
+        return m_p->getAbsolutePosition();
+    }
+
+	CSqirrVector3d GetAbsoluteCenter()
+	{   if ( !m_p ) return CSqirrVector3d();
+		m_p->updateAbsolutePosition();
+		CSqirrVector3d pos = m_p->getAbsolutePosition() + ( m_p->getBoundingBox().getCenter() * m_p->getScale() );
+		return pos;
+	}
+
+	void SetAbsoluteCenter( CSqirrVector3d &x_v )
+	{   if ( !m_p ) return;
+
+		irr::scene::ISceneNode *pParent =  m_p->getParent();
+		if ( !pParent ) SetCenter( x_v );
+		else
+		{   CSqirrVector3d v( x_v.Obj() - pParent->getAbsolutePosition() );
+			pParent->getAbsoluteTransformation().inverseRotateVect( v.Obj() );                
+			SetCenter( v ); 
+		} // end else
+		m_p->updateAbsolutePosition();
+	}
+
+    CSqirrVector3d GetCenter()
+    {   if ( !m_p ) return CSqirrVector3d();
+        return m_p->getPosition() + ( m_p->getBoundingBox().getCenter() * m_p->getScale() );
+    }
+
+    void SetCenter( CSqirrVector3d &v )
+    {   if ( !m_p ) return;
+        m_p->setPosition( v.Obj() - ( m_p->getBoundingBox().getCenter() * m_p->getScale() ) );
+        m_p->updateAbsolutePosition();
+    }
 
 protected:
 

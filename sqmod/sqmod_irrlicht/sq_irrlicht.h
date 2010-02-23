@@ -7,7 +7,7 @@ class CSqIrrlicht
 public:
 
 	/// Mesh animator list type
-    typedef oexStdMap( CSqirrNode*, CSqirrMeshAnimator ) t_MeshAnimators;
+	typedef oexStdMap( CSqirrNode*, CSqirrMeshAnimator ) t_MeshAnimators;
 
 public:
 
@@ -99,35 +99,47 @@ public:
 	/// Sets the vertex colors on a mesh
 	int SetVertexColors( CSqirrNode &x_node, CSqirrColor &x_col );
 
+	/// Sets the vertex alpha
+	int SetVertexColorAlpha( CSqirrNode &x_node, float x_fAlpha );
+
 	/// Inserts a sphere mesh
 	CSqirrNode AddSphereMesh( float fWidth, float fHeight, long lPoints );
 
 	/// Inserts a cylinder mesh
 	CSqirrNode AddCylinderMesh( float fWidth, float fHeight, long lPoints );
 
+	/// Inserts a cone mesh
+	CSqirrNode AddConeMesh( float fWidth, float fHeight, long lPoints );
+
+	/// Inserts an arrow mesh
+	CSqirrNode AddArrowMesh( float fWidth, float fConeHeight, float fShaftHeight, long lPoints );
 
 public:
 
 	/// Convert screen coords into world coords
 	CSqirrVector3d ScreenToPlane( CSqirrVector2d &ptScreen, float fDist );
 
+	/// Returns the first node at the given screen position
 	CSqirrNode NodeAtScreen( CSqirrVector2d &ptScreen, long lMask );
+
+	/// Returns the distance from the camera to the specified node
+	float getNodeDist( CSqirrNode &v );
 
 public:
 
-    /// Appends specified number of vertices and indices to the end
-    /// of a mesh.
-    static int InsertPoints( irr::scene::IMeshSceneNode *pNode,
-                       		 irr::scene::SMeshBuffer **pMb,
-                             unsigned int lNewVertices, unsigned int lNewIndices,
-                             unsigned int &vi, unsigned int &ii );
+	/// Appends specified number of vertices and indices to the end
+	/// of a mesh.
+	static int InsertPoints( irr::scene::IMeshSceneNode *pNode,
+							 irr::scene::SMeshBuffer **pMb,
+							 unsigned int lNewVertices, unsigned int lNewIndices,
+							 unsigned int &vi, unsigned int &ii );
 
-    /// Inserts a plane into the mesh
-    static int InsertPlane( irr::scene::IMeshSceneNode *pNode,
-                            const irr::core::vector3df &tl, const irr::core::vector3df &tr,
-                            const irr::core::vector3df &bl, const irr::core::vector3df &br,
-                            irr::video::SColor &color, long lSides,
-                            float minU = 0, float maxU = 1, float minV = 0, float maxV = 1 );
+	/// Inserts a plane into the mesh
+	static int InsertPlane( irr::scene::IMeshSceneNode *pNode,
+							const irr::core::vector3df &tl, const irr::core::vector3df &tr,
+							const irr::core::vector3df &bl, const irr::core::vector3df &br,
+							irr::video::SColor &color, long lSides,
+							float minU = 0, float maxU = 1, float minV = 0, float maxV = 1 );
 
 	/// Inserts a cylinder intot the mesh
 	static int InsertCylinder( irr::scene::SMeshBuffer *pMb, const irr::core::vector3df &center,
@@ -136,7 +148,11 @@ public:
 
 	/// Inserts a sphere into a mesh
 	static int InsertSphere( irr::scene::SMeshBuffer *pMb, const irr::core::vector3df &center,
-	       		             float fWidth, float fHeight, long lPoints, const irr::video::SColor &color );
+							 float fWidth, float fHeight, long lPoints, const irr::video::SColor &color );
+
+	/// Inserts a cone into a mesh
+	static int InsertCone( irr::scene::SMeshBuffer *pMb, irr::core::vector3df center,
+						   float fWidth, float fHeight, long lPoints, irr::video::SColor &color );
 
 
 	/// Adds a sphere
@@ -277,10 +293,10 @@ private:
 	float							m_fStereoFocus;
 
 	/// Mesh animators
-    t_MeshAnimators                 m_lstMeshAnimators;
+	t_MeshAnimators                 m_lstMeshAnimators;
 
 	/// World physics
-    CSqirrPhysics					m_cPhysics;
+	CSqirrPhysics					m_cPhysics;
 
 	/// Non-zero if engine should quit
 	int								m_bQuit;

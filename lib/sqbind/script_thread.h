@@ -40,12 +40,35 @@ class CScriptThread :
 {
 public:
 
+	struct STimerInfo
+	{
+		/// Timeout time in seconds
+		oex::oexUINT	uTimeout;
+
+		/// Timeout in milli-seconds
+		oex::oexUINT	uMsTimeout;
+
+		/// Timeout value
+		oex::oexUINT	uTo;
+
+		/// callback function
+		stdString		sCallback;
+	};
+
+public:
+
     /// Map type for child script  thread objects
 	typedef oexStdMap( stdString, CScriptThread* )		t_ScriptList;
 
 	/// Property bag type
 //	typedef oexStdMap( stdString, stdString )			t_PropertyBag;
 	typedef oex::CPropertyBag							t_PropertyBag;
+
+    /// Map type for child script  thread objects
+	typedef oexStdMap( stdString, CScriptThread* )		t_ScriptList;
+
+	/// Map type for timer callbacks
+	typedef oexStdMap( oex::oexUINT, STimerInfo )		t_TimerList;
 
 public:
 
@@ -134,6 +157,18 @@ public:
 
 	/// Returns the queue for the specified path
 	virtual CSqMsgQueue* GetQueue( const stdString &x_sPath );
+	
+	/// Sets a timer
+	oex::oexUINT SetTimer( oex::oexUINT x_uTo, const stdString &x_sCallback );
+
+	/// Sets a timeout
+	oex::oexUINT SetTimeout( oex::oexUINT x_uTo, const stdString &x_sCallback );
+
+	/// Kills the specified timer
+	oex::oexBOOL KillTimer( oex::oexUINT x_uId );
+
+	/// Executes timer callbacks
+	oex::oexINT RunTimers();
 
 private:
 
@@ -164,4 +199,17 @@ private:
 	/// Generic property bag
 	t_PropertyBag						m_pb;
 
+	/// Timers
+	t_TimerList							m_to;
+
+	/// Next timer id
+	oex::oexUINT						m_tid;
+
+	/// Timeout frequency
+	oex::oexUINT						m_uToFreq;
+
+	/// Elapsed time
+	oex::oexUINT						m_uToElapsed;
+
+	oex::oexDOUBLE						m_dToValue;
 };

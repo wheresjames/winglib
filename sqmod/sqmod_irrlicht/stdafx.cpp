@@ -31,12 +31,15 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqIrrlicht, CSqIrrlicht )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddPlane )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddSphereMesh )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddCylinderMesh )
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddConeMesh )
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddArrowMesh )
 
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, LoadTexture )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, CreateTexture )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, CreateRenderTexture )
 
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, SetVertexColors )
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, SetVertexColorAlpha )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddRotateAnimator )
 
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddGrid )
@@ -45,6 +48,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqIrrlicht, CSqIrrlicht )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, ScreenToPlane )
 
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, NodeAtScreen )
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, getNodeDist )
+
 
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, getLineIntersect )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, getIntersect )
@@ -78,6 +83,12 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqirrNode, CSqirrNode )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, GetPosition )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetRotation )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, GetRotation )
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetAbsolutePosition )
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, GetAbsolutePosition )	
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetCenter )
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, GetCenter )
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetAbsoluteCenter )
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, GetAbsoluteCenter )	
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, FaceTarget )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, FaceTargetY )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, FaceTargetX )
@@ -112,7 +123,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqirrNode, CSqirrNode )
 	SQBIND_CONST( irr::video, EMF_NORMALIZE_NORMALS )
 	SQBIND_CONST( irr::video, EMF_TEXTURE_WRAP )
 	SQBIND_CONST( irr::video, EMF_MATERIAL_FLAG_COUNT )
-
+	
 	// Material types
 	SQBIND_CONST( irr::video, EMT_SOLID )
 	SQBIND_CONST( irr::video, EMT_SOLID_2_LAYER )

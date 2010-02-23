@@ -86,6 +86,15 @@ public:
 	/// Returns a copy of the entire property bag
 	CSqMulti pb( const stdString &sPath );
 
+	/// Sets the specified timer
+	int set_timer( const stdString &sPath, int to, const stdString &sCallback );
+
+	/// Sets the specified timeout
+	int set_timeout( const stdString &sPath, int to, const stdString &sCallback );
+
+	/// Kills the specified timer
+	int kill_timer( const stdString &sPath, int id );
+
 	/// Requests the appliation exit
 	void exit( int nExitCode );
 

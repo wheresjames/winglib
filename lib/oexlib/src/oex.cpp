@@ -51,7 +51,7 @@ COex::CVerifyStartup::CVerifyStartup()
 COex::CVerifyStartup::~CVerifyStartup()
 {_STT();
 #if defined( oexDEBUG )
-
+/*
 	if ( !COex::GetStartupCode() )
 	{//	oexTRACE( oexT( "! oexlib - oex::COex::Init() was not called!\n" ) );
 		oexBREAK( oexT( "oex::COex::Init() was not called!" ) );
@@ -69,7 +69,7 @@ COex::CVerifyStartup::~CVerifyStartup()
 	{//	oexTRACE( oexFmt( oexT( "! oexlib - oex::COex::Uninit() reported error code %d\n" ), COex::GetShutdownCode() ) );
 		oexBREAK( oexT( "oex::COex::Uninit() reported an error" ) );
 	} // end else if
-
+*/
 #endif
 }
 

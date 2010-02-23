@@ -296,6 +296,28 @@ stdString CSqEngineExport::gmt_timestr( const stdString &fmt )
 	return oexGmtTimeStr( fmt.c_str() ).Ptr();
 }
 
+int CSqEngineExport::set_timer( const stdString &sPath, int to, const stdString &sCallback )
+{
+	CSqMsgQueue *q = queue();
+	if ( !q ) return 0;
+	return oexStrToLong( q->set_timer( sPath, oexMks( to ).Ptr(), sCallback ).c_str() );
+}
+
+int CSqEngineExport::set_timeout( const stdString &sPath, int to, const stdString &sCallback )
+{
+	CSqMsgQueue *q = queue();
+	if ( !q ) return 0;
+	return oexStrToLong( q->set_timeout( sPath, oexMks( to ).Ptr(), sCallback ).c_str() );
+}
+
+int CSqEngineExport::kill_timer( const stdString &sPath, int id )
+{
+	CSqMsgQueue *q = queue();
+	if ( !q ) return 0;
+	return oexStrToLong( q->kill_timer( sPath, oexMks( id ).Ptr() ).c_str() );
+}
+
+
 stdString CSqEngineExport::ltrim( const stdString &sS, const stdString &sChs )
 {_STT();
 	oex::CStr s( sS.c_str(), sS.length() );
@@ -891,6 +913,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_timer_useconds )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, local_timestr )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, gmt_timestr )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_timer )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_timeout )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill_timer )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tolong )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tofloat )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, todouble )
@@ -1114,13 +1139,13 @@ int CSqEngine::OnInclude( const stdString &sScript )
 	int nRet = 0;
 	stdString sScriptName = m_sScriptName;
 
+	oex::oexBOOL bFile = oex::oexTRUE;
+	oex::oexCSTR pScript = sScript.c_str();
+	stdString sData;
+
 	_oexTRY
 	{
-		oex::oexBOOL bFile = oex::oexTRUE;
-		oex::oexCSTR pScript = sScript.c_str();
-
 		// See if there is an embedded include handler
-		stdString sData;
 		if ( m_fIncludeScript )
 		{
 			if ( m_fIncludeScript( sScript, sData, m_sScriptName ) || !sData.length() )
@@ -1144,7 +1169,8 @@ int CSqEngine::OnInclude( const stdString &sScript )
 	{	nRet = LogError( -2, e );
 	}
 	_oexCATCH( SquirrelError &e )
-	{	nRet = LogErrorM( -3, e.desc );
+	{	nRet = LogErrorM( -3, oexMks( e.desc, oexT( " : " ), 
+							  ( bFile && pScript ) ? pScript : oexT( "N/A" ) ).Ptr() );
 	}
 
 	if ( sScriptName.length() )

@@ -77,6 +77,10 @@ public:
 		n.Obj() = l.getVector().normalize();
 	}
 
+	/// Returns the line length
+	float GetLength()
+	{	return ( m_end.Obj() - m_start.Obj() ).getLength(); }
+
 private:
 
 	CSqirrVector3d			m_start;

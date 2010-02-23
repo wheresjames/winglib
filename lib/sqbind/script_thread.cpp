@@ -42,6 +42,10 @@ CScriptThread::CScriptThread()
 	m_pModuleManager = oexNULL;
 	m_bFile = oex::oexFALSE;
 	m_pParentScript = oexNULL;
+	m_tid = 0;
+	m_uToFreq = 100;
+	m_uToElapsed = 0;
+	m_dToValue = 0;
 }
 
 CScriptThread::~CScriptThread()
@@ -128,7 +132,7 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 	while ( GetStopEvent().Wait( 0 ) )
 	{
 		// Wait for a message
-		CSqMsgQueue::Wait( 100 );
+		CSqMsgQueue::Wait( m_uToFreq );
 
 		// Have we gotten a quit flag?
 		if ( m_bQuit )
@@ -136,6 +140,9 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 
 		// Process script messages
 		ProcessMsgs();
+
+		// Run timers
+		RunTimers();
 
 		// Punt if quit has been requested
 		if ( WantQuit() )
@@ -166,6 +173,7 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 	return oex::oexFALSE;
 }
 
+
 oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 {_STT();
 	// Lock the queue
@@ -184,12 +192,123 @@ oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 	// Lose the engine
 	m_cSqEngine.Destroy();
 
-	// Let the user know we're starting a thread
+	// Lose timeouts
+	m_to.clear();
+
+	// Reset timeout frequency
+	m_uToFreq = 100;
+
+	m_dToValue = 0;
+
+	// Let the user know we're ending a thread
 //	oexPrintf( oexT( "Exiting : 0x%08x : %s\n" ),
 //			   (unsigned int)oexGetCurThreadId(), m_sName.c_str() );
 
 	return 0;
 }
+
+oex::oexINT CScriptThread::RunTimers()
+{
+	oex::oexDOUBLE dTm = oex::os::CHqTimer::GetTimerSeconds();
+
+	if ( !m_dToValue )
+	{	m_dToValue = dTm;
+		return 0;
+	} // end if
+	
+	oex::oexUINT uE = (oex::oexUINT)( ( dTm - m_dToValue ) * 1000 );
+	m_dToValue = dTm;
+
+	oex::oexINT n = 0;
+	for ( t_TimerList::iterator it = m_to.begin(); m_to.end() != it; )
+	{
+		oex::oexBOOL bErase = oex::oexFALSE;
+
+		// Timeout?
+		if ( it->second.uTimeout )
+		{	int nRet = 0;
+			if ( it->second.uTimeout < oexGetUnixTime() )
+			{	n++, m_cSqEngine.Execute( &nRet, it->second.sCallback.c_str() );
+				bErase = oex::oexTRUE;
+			} // end if
+		} // end if
+
+		// Timer?
+		else if ( it->second.uMsTimeout )
+		{
+			it->second.uTo += uE;
+			if ( it->second.uTo >= it->second.uMsTimeout )
+			{
+				n++;
+				it->second.uTo -= it->second.uMsTimeout;
+				int nRet = 0;
+				m_cSqEngine.Execute( &nRet, it->second.sCallback.c_str() );
+
+				if ( 0 > nRet )
+					bErase = oex::oexTRUE;
+
+			} // end if
+
+		} // end else if
+
+		// ???
+		else
+			bErase = oex::oexTRUE;
+
+		if ( bErase )
+			m_to.erase( it++ );
+		else
+			it++;
+
+	} // end for
+
+	return n;
+}
+
+oex::oexUINT CScriptThread::SetTimer( oex::oexUINT x_uTo, const stdString &x_sCallback )
+{
+	if ( !x_uTo || !x_sCallback.length() )
+		return 0;
+
+	STimerInfo ti;
+	ti.uTo = 0;
+	ti.uTimeout = 0;
+	ti.uMsTimeout = x_uTo;
+	ti.sCallback = x_sCallback;
+	m_to[ ++m_tid ] = ti;
+
+	if ( m_uToFreq > x_uTo )
+		m_uToFreq = oex::cmn::Range( x_uTo, (oex::oexUINT)1, (oex::oexUINT)100 );
+
+	return m_tid;
+}
+
+oex::oexUINT CScriptThread::SetTimeout( oex::oexUINT x_uTo, const stdString &x_sCallback )
+{
+	if ( !x_uTo || !x_sCallback.length() )
+		return 0;
+
+	STimerInfo ti;
+	ti.uTo = 0;
+	ti.uTimeout = x_uTo;
+	ti.uMsTimeout = 0;
+	ti.sCallback = x_sCallback;
+
+	m_to[ ++m_tid ] = ti;
+	return m_tid;
+}
+
+oex::oexBOOL CScriptThread::KillTimer( oex::oexUINT x_uId )
+{
+	t_TimerList::iterator it = m_to.find( x_uId );
+	if ( it == m_to.end() )
+		return oex::oexFALSE;
+
+	m_to.erase( it );
+
+	return oex::oexTRUE;
+}
+
 
 oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent )
 {_STT();
@@ -312,6 +431,20 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 	// Quit command
 	else if ( sMsg == oexT( "kill" ) )
 		RequestQuit();
+
+	// Set timer command
+	else if ( sMsg == oexT( "set_timer" ) )
+		*pReply = oexMks( SetTimer( oexStrToULong( mapParams[ oexT( "to" ) ].c_str() ),
+						  mapParams[ oexT( "cb" ) ] ) ).Ptr();
+
+	// Set time out command
+	else if ( sMsg == oexT( "set_timeout" ) )
+		*pReply = oexMks( SetTimeout( oexStrToULong( mapParams[ oexT( "to" ) ].c_str() ),
+						  mapParams[ oexT( "cb" ) ] ) ).Ptr();
+
+	// Set time out command
+	else if ( sMsg == oexT( "kill_timer" ) )
+		KillTimer( oexStrToULong( mapParams[ oexT( "id" ) ].c_str() ) );
 
 	else
 		bRet = oex::oexFALSE;
