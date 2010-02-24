@@ -22,7 +22,7 @@ public:
 
 	void UpdateCamera()
 	{
-		if ( !m_p || GetNodeType() != eTypeCamera )
+		if ( !m_p )
 			return;
 
 		( (irr::scene::ICameraSceneNode*)m_p )->OnRegisterSceneNode();
@@ -30,7 +30,7 @@ public:
 
 	void SetTarget( CSqirrVector3d &v )
 	{
-		if ( !m_p || GetNodeType() != eTypeCamera )
+		if ( !m_p )
 			return;
 
 		( (irr::scene::ICameraSceneNode*)m_p )->setTarget( v.Obj() );
@@ -38,7 +38,7 @@ public:
 
 	CSqirrVector3d GetTarget()
 	{
-		if ( !m_p || GetNodeType() != eTypeCamera )
+		if ( !m_p )
 			return CSqirrVector3d();
 
 		return ( (irr::scene::ICameraSceneNode*)m_p )->getTarget();
@@ -46,7 +46,7 @@ public:
 
 	void SyncTargetToRotation()
 	{
-		if ( !m_p || GetNodeType() != eTypeCamera )
+		if ( !m_p )
 			return;
 
 		irr::core::vector3df p = m_p->getPosition();
@@ -64,7 +64,7 @@ public:
 
 	void SetFov( float fFov )
 	{
-		if ( !m_p || GetNodeType() != eTypeCamera )
+		if ( !m_p )
 			return;
 
 		( (irr::scene::ICameraSceneNode*)m_p )->setFOV( fFov );
@@ -72,7 +72,7 @@ public:
 
 	void SetAspectRatio( float fRatio )
 	{
-		if ( !m_p || GetNodeType() != eTypeCamera )
+		if ( !m_p )
 			return;
 
 		( (irr::scene::ICameraSceneNode*)m_p )->setAspectRatio( fRatio );
@@ -113,7 +113,7 @@ public:
 
 	void SetFarValue( long lValue )
 	{
-		if ( !m_p || GetNodeType() != eTypeCamera )
+		if ( !m_p )
 			return;
 
 		( (irr::scene::ICameraSceneNode*)m_p )->setFarValue( (float)lValue );
@@ -121,12 +121,33 @@ public:
 
 	void SetNearValue( long lValue )
 	{
-		if ( !m_p || GetNodeType() != eTypeCamera )
+		if ( !m_p )
 			return;
 
 		( (irr::scene::ICameraSceneNode*)m_p )->setNearValue( (float)lValue );
 	}
 
+	void Move( CSqirrVector3d &v, int bUpdateTarget )
+	{
+		if ( !m_p )
+			return;
+
+		irr::core::matrix4 m;
+		m.setRotationDegrees( m_p->getRotation() );
+		m.transformVect( v.Obj() );
+
+		m_p->setPosition( m_p->getPosition() + v.Obj() );
+
+		if ( bUpdateTarget )
+		{
+			CSqirrVector3d t( ( (irr::scene::ICameraSceneNode*)m_p )->getTarget() + v.Obj() );
+			( (irr::scene::ICameraSceneNode*)m_p )->setTarget( t.Obj() );
+			FaceTarget( t );
+
+		} // end if
+
+		m_p->updateAbsolutePosition();
+	}
 
 };
 

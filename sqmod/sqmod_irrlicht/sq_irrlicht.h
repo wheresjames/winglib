@@ -218,6 +218,10 @@ public:
 	/// Scales the node to fill the specified volume
 	int FillVolume( CSqirrNode &rNode, CSqirrBoundingBox3d &rBb );
 
+	/// Return default camera
+	CSqirrCamera getCamera() 
+	{	if ( !m_pCamera ) return CSqirrCamera(); return m_pCamera; }
+
 public:
 
 	void SetStereo( int b ) { m_bStereo = b; }

@@ -21,6 +21,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqIrrlicht, CSqIrrlicht )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, SetLEyeKey )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, GetLEyeKey )
 
+	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, getCamera )
+
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, SetAmbientLight )
 
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, AddLight )
@@ -107,7 +109,11 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqirrNode, CSqirrNode )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetID )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, GetID )
 	SQBIND_MEMBER_FUNCTION( CSqirrNode, Point )
-
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, IsEqual )
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, GetPivotAngle )
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, GetPivotDist )
+	SQBIND_MEMBER_FUNCTION( CSqirrNode, SetPivot )
+		
 	// Material flags
 	SQBIND_CONST( irr::video, EMF_WIREFRAME )
 	SQBIND_CONST( irr::video, EMF_POINTCLOUD )
@@ -168,6 +174,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqirrCamera, CSqirrCamera )
 	SQBIND_MEMBER_FUNCTION( CSqirrCamera, UpdateCamera )
 	SQBIND_MEMBER_FUNCTION( CSqirrCamera, SetTarget )
 	SQBIND_MEMBER_FUNCTION( CSqirrCamera, GetTarget )
+	SQBIND_MEMBER_FUNCTION( CSqirrCamera, Move )
 	SQBIND_MEMBER_FUNCTION( CSqirrCamera, SyncTargetToRotation )
 	SQBIND_MEMBER_FUNCTION( CSqirrCamera, SetFov )
 	SQBIND_MEMBER_FUNCTION( CSqirrCamera, SetAspectRatio )

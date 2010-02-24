@@ -1548,6 +1548,14 @@ int CSqIrrlicht::getMouseIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt
 					getRayFromScreenCoordinates( irr::core::position2di( ptScreen.x(), ptScreen.y() ),
 												 m_pCamera );
 
+	// Picky thing, line should intersect plane
+	if ( ml.start.X == ml.end.X )
+		ml.end.X += 1;
+	if ( ml.start.Y == ml.end.Y )
+		ml.end.Y += 1;
+	if ( ml.start.Z == ml.end.Z )
+		ml.end.Z += 1;
+
 	// Pick an axis we don't need as the normal for the plane
 	irr::core::vector3df normal;
 	if ( !axis.x() ) normal.X = 1;
@@ -1557,7 +1565,7 @@ int CSqIrrlicht::getMouseIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt
 
 	// Get mouse line / plane intersection
 	if ( !irr::core::plane3df( pt.Obj(), normal ).
-					getIntersectionWithLine( ml.getMiddle(), ml.getVector(), intersect->Obj() ) )
+			getIntersectionWithLimitedLine( ml.start, ml.end, intersect->Obj() ) )
 		return 0;
 
 	// Revert the axis we don't want to change

@@ -62,6 +62,9 @@ public:
 	CSqirrNode( const CSqirrNode &r ) : m_type( 0 ), m_p( 0 ) { SetPtr( r.m_p, r.m_type ); }
 	CSqirrNode& operator = ( const CSqirrNode &r ) { SetPtr( r.m_p, r.m_type ); return *this; }
 
+	bool operator == ( const CSqirrNode &r ) { return r.m_p == m_p; }
+	int IsEqual ( CSqirrNode *r ) { if ( !r ) return 0; return ( r->m_p == m_p ) ? 1 : 0; }
+
 	irr::scene::ISceneNode* Ptr() { return m_p; }
 	irr::scene::ISceneNode& Obj() { return *m_p; }
 	int GetNodeType() { return m_type; }
@@ -279,6 +282,38 @@ public:
         m_p->setPosition( v.Obj() - ( m_p->getBoundingBox().getCenter() * m_p->getScale() ) );
         m_p->updateAbsolutePosition();
     }
+
+	void ConvertAngleToNormalXY( const irr::core::vector3df &a, irr::core::vector3df &n )
+	{	irr::core::matrix4 m;
+		m.setRotationDegrees( a );
+		n.X = n.Y = 0; n.Z = -1;
+		m.transformVect( n );
+	}
+
+	void ConvertNormalToAngleXY( const irr::core::vector3df &n, irr::core::vector3df &a )
+	{   a.Y = atan2( n.X, n.Z ) * 180.f / irr::core::PI;
+		a.X = -atan2( n.Y, sqrt( n.X * n.X + n.Z * n.Z ) ) * 180.f / irr::core::PI;
+		a.Z = 0;
+	}
+
+	void GetPivotAngle( CSqirrVector3d &v, CSqirrVector3d &a )
+	{	if ( !m_p ) return;
+		ConvertNormalToAngleXY( v.Obj() - m_p->getPosition(), a.Obj() );
+	}
+
+	float GetPivotDist( CSqirrVector3d &v )
+	{	if ( !m_p ) return 0;
+		irr::core::line3df l( v.Obj(), m_p->getPosition() );
+		return (float)l.getLength();
+	}
+
+	void SetPivot( CSqirrVector3d &s, CSqirrVector3d &a, float fDist )
+	{	if ( !m_p ) return;
+		irr::core::vector3df n;
+		ConvertAngleToNormalXY( a.Obj(), n );
+		m_p->setPosition( s.Obj() + ( n * fDist ) );
+		m_p->updateAbsolutePosition();
+	}
 
 protected:
 
