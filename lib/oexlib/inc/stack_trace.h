@@ -165,19 +165,19 @@ public:
 		oexUINT GetCreatedTime() { return m_uCreated; }
 
 		/// Sets the thread name
-		void SetName( oexCONST CStr x_sName ) { m_sName = x_sName; }
+		oexCONST CStr SetName( oexCONST CStr x_sName ) { m_sName = x_sName; return x_sName; }
 
 		/// Gets the thread name
 		CStr GetName() { return m_sName; } 
 
 		/// Sets the thread tag
-		void SetTag( oexCONST CStr x_sTag ) { m_sTag = x_sTag; }
+		oexCONST CStr SetTag( oexCONST CStr x_sTag ) { m_sTag = x_sTag; return x_sTag; }
 
 		/// Gets the thread tag
 		CStr GetTag() { return m_sTag; } 
 
 		/// Sets the checkpoint value
-		void SetCheckpoint( oexLONG cp ) { m_lCheckPoint = cp; }
+		oexLONG SetCheckpoint( oexLONG cp ) { m_lCheckPoint = cp; return cp; }
 
 		/// Returns the checkpoint value
 		oexLONG GetCheckpoint() { return m_lCheckPoint; }

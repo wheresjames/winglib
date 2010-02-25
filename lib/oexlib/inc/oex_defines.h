@@ -444,11 +444,11 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #if defined( OEXLIB_STACK_TRACING )
 #	define _STT()					OEX_NAMESPACE::CLocalStackTrace _l_lst( oexSTTFUNCTION );
 #	define _STT_SET_NAME( v )		{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->SetName( v ) : 0 ); }
-#	define _STT_GET_NAME( v )		{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->GetName() : 0 ); }
+#	define _STT_GET_NAME()			{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->GetName() : CStr() ); }
 #	define _STT_SET_TAG( v )		{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->SetTag( v ) : 0 ); }
-#	define _STT_GET_TAG()			{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->GetTag() : 0 ); }
+#	define _STT_GET_TAG()			{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->GetTag() : CStr() ); }
 #	define _STT_SET_CHECKPOINT( v )	{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->SetCheckpoint( v ) : 0 ); }
-#	define _STT_GET_CHECKPOINT()	{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->GetCheckpoint() : 0 ); }
+#	define _STT_GET_CHECKPOINT()	{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->GetCheckpoint() : CStr() ); }
 #else
 #	define _STT()
 #	define _STT_SET_NAME( v )
