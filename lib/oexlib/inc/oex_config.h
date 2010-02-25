@@ -223,7 +223,7 @@
 #define oexGetBuildTime()		OEX_NAMESPACE::CSysTime( oexT( "%b %d %Y %g:%m:%s" ), \
 														 oexT( oexDATE " " oexTIME ) )
 
-#define oexVersion()			oexGetBuildTime().FormatTime( "%y.%C.%D.%G%m" )
+#define oexVersion()			oexGetBuildTime().FormatTime( oexT( "%y.%C.%D.%G%m" ) )
 
 #if defined( OEX_WINDOWS )
 #	undef OEX_CASE_SENSITIVE_FILES
