@@ -36,7 +36,7 @@
 
 OEX_USING_NAMESPACE
 
-CFifoSync::CFifoSync( oexBOOL x_bSync, t_size x_uSize, oexINT x_nWriteMode, t_size x_uMaxBuffers ) :
+CFifoSync::CFifoSync( oexBOOL x_bSync, t_size x_uSize, CCircBuf::t_eWm x_nWriteMode, t_size x_uMaxBuffers ) :
 	CCircBuf( x_bSync, 0, x_nWriteMode )
 {
     m_pBi = oexNULL;

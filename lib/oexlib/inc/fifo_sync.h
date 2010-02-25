@@ -71,6 +71,18 @@ public:
 
 public:
 
+	/// Constructor
+	CFifoSync( oexBOOL x_bSync = oexTRUE, t_size x_uSize = 0, CCircBuf::t_eWm x_nWriteMode = eWmGrow, t_size x_uMaxBuffers = eDefaultMaxBuffers );
+
+	/// Destructor
+	virtual ~CFifoSync();
+
+  	//==============================================================
+	// Destroy()
+	//==============================================================
+	/// Releases all resources associated with the circular buffer.
+	virtual void Destroy();
+
 	//==============================================================
 	// SetName()
 	//==============================================================
@@ -198,18 +210,6 @@ public:
 		\return Non-zero if success
 	*/
 	oexBOOL AllocateBuffers();
-
-	/// Constructor
-	CFifoSync( oexBOOL x_bSync = oexTRUE, t_size x_uSize = 0, oexINT x_nWriteMode = eWmGrow, t_size x_uMaxBuffers = eDefaultMaxBuffers );
-
-	/// Destructor
-	virtual ~CFifoSync();
-
-  	//==============================================================
-	// Destroy()
-	//==============================================================
-	/// Releases all resources associated with the circular buffer.
-	virtual void Destroy();
 
 	//==============================================================
 	// Write()

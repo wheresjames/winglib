@@ -91,7 +91,7 @@ public:
     };
 
 	// What to do when the buffer is full
-    enum
+    enum t_eWm
     {
 		/// Writes fail if not enough room in the buffer
 		eWmFail			= 0,
