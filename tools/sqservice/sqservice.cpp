@@ -38,7 +38,7 @@ int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData, s
 	// Embedded version?
 	if ( !s.Length() )
 	{	s = oexMbToStr( oexGetResource( oexBuildPath( oexT( "sq" ), sScript.c_str() ) ) );
-		sName = ( oexGetModuleFileName() << oexT( ":" ) << sScript.c_str() ).Ptr();
+		sName = ( oexGetModuleFileName().GetFileName() << oexT( ":" ) << sScript.c_str() ).Ptr();
 	} // end if
 
 	// Assign data if any
@@ -60,6 +60,7 @@ public:
 	virtual int OnRun()
 	{
 		// Enable crash reporting
+		_STT_SET_NAME( oexT( "Main Thread" ) );
 		oexEnableCrashReporting( oexNULL, oexT( "logs" ) );
 
 		// Initialize resources
@@ -88,6 +89,9 @@ public:
 
 		// Log the script name
 		oexNOTICE( 0, oexT( "Running script : embedded:main.nut" ) );
+
+		// Script name
+		g_psqScriptThread->SetScriptName( oexT( "embedded:main.nut" ) );
 
 		// Set pointer to module manager
 		g_psqScriptThread->SetModuleManager( g_psqModuleManager );

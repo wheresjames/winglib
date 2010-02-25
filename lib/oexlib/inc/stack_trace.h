@@ -68,10 +68,12 @@ public:
 		{
 			m_uCreated = oexGetUnixTime();
 			m_uThreadId = 0;
-			m_uStackPtr = 0; 
+			m_uStackPtr = 0;
 			m_memStack.OexNew( eMaxStack ); 
 			m_memStack.Zero();
 			m_pStack = m_memStack.Ptr();
+
+			m_lCheckPoint = 0;
 
 #ifdef OEXLIB_STACK_HISTORY
 
@@ -162,6 +164,24 @@ public:
 		/// Returns the time stamp when the thread was created
 		oexUINT GetCreatedTime() { return m_uCreated; }
 
+		/// Sets the thread name
+		void SetName( oexCONST CStr x_sName ) { m_sName = x_sName; }
+
+		/// Gets the thread name
+		CStr GetName() { return m_sName; } 
+
+		/// Sets the thread tag
+		void SetTag( oexCONST CStr x_sTag ) { m_sTag = x_sTag; }
+
+		/// Gets the thread tag
+		CStr GetTag() { return m_sTag; } 
+
+		/// Sets the checkpoint value
+		void SetCheckpoint( oexLONG cp ) { m_lCheckPoint = cp; }
+
+		/// Returns the checkpoint value
+		oexLONG GetCheckpoint() { return m_lCheckPoint; }
+
 	private:
 
 		/// Time created
@@ -178,6 +198,15 @@ public:
 
 		/// Stack memory pointer
 		oexCSTR						*m_pStack;
+
+		/// Stack name
+		CStr						m_sName;
+
+		/// Tag
+		CStr						m_sTag;
+
+		/// Checkpoint
+		oexLONG						m_lCheckPoint;
 
 #ifdef OEXLIB_STACK_HISTORY
 

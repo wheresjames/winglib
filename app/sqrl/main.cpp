@@ -18,12 +18,10 @@ sqbind::CScriptThread	*g_psqScriptThread = oexNULL;
 /// Pointer to module manager
 sqbind::CModuleManager	*g_psqModuleManager = oexNULL;
 
-int run(int argc, char* argv[])
+int run( oex::CPropertyBag &pbCmdLine )
 {_STT();
-	oex::CStr sCmd;
 
-	if ( argc > 1 && oexCHECK_PTR( argv[ 1 ] ) )
-		sCmd = oexMbToStrPtr( argv[ 1 ] );
+	oex::CStr sCmd = pbCmdLine[ 0 ].ToString();
 
 	// Calculate a module name if not specified
 	if ( !sCmd.Length() )
@@ -88,6 +86,8 @@ int run(int argc, char* argv[])
 	// Log the script name
 	oexNOTICE( 0, oexMks( oexT( "Running script : " ), sCmd ) );
 
+	g_psqScriptThread->SetScriptName( sCmd.Ptr() );
+
 	g_psqScriptThread->SetModuleManager( g_psqModuleManager );
 
 	g_psqScriptThread->SetScript( sCmd.Ptr(), oex::oexTRUE );
@@ -128,8 +128,20 @@ int main(int argc, char* argv[])
 {
     // Initialize the oex library
 	oexINIT();
+	
+	// Parse the command line
+	oex::CPropertyBag pbCmdLine = oex::CParser::ParseCommandLine( argc, (const char**)argv );
 
+	// Check for version request
+	if ( pbCmdLine.IsKey( oexT( "version" ) ) )
+	{	oexEcho( oexVersion().Ptr() );		
+		pbCmdLine.Destroy();
+	    oexUNINIT();
+		return 0;					  
+	} // end if
+	
 	// Enable crash reporting
+	_STT_SET_NAME( oexT( "Main Thread" ) );
 	oexEnableCrashReporting( oexNULL, oexT( "logs" ) );
 
 	// Initialize sockets
@@ -140,7 +152,7 @@ int main(int argc, char* argv[])
 	oexNOTICE( 0, oexT( "Application startup" ) );
 
 	// Run the app
-	int nRet = run( argc, argv );
+	int nRet = run( pbCmdLine );
 
 	oexNOTICE( 0, oexT( "Shutting down..." ) );
 

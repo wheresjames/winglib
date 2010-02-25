@@ -125,6 +125,11 @@ public:
             oexZeroMemory( &m_time, sizeof( m_time ) );
     }
 
+	// Initializes object with string
+    CSysTime( oexCSTR x_sTmpl, oexCONST CStr x_sStr )
+	{	ParseTime( x_sTmpl, CStr( x_sStr ) );
+	} 
+
     /// Destructor
     virtual ~CSysTime()
     {
@@ -163,18 +168,7 @@ public:
 	CSysTime& SetTime(	oexUINT uYear = eInvalid, oexUINT uMonth = eInvalid, oexUINT uDay = eInvalid,
 					oexUINT uHour = eInvalid, oexUINT uMinute = eInvalid, oexUINT uSecond = eInvalid,
 					oexUINT uMilliseconds = eInvalid, oexUINT uMicrosecond = eInvalid, oexUINT uNanoseconds = eInvalid,
-					oexUINT uDayOfWeek = eInvalid, oexINT nTzBias = eInvalid )
-	{	if ( uYear != eInvalid ) m_time.uYear = uYear;
-		if ( uMonth != eInvalid ) m_time.uMonth = uMonth;
-		if ( uDay != eInvalid ) m_time.uDay = uDay;
-		if ( uHour != eInvalid ) m_time.uHour = uHour;
-		if ( uMinute != eInvalid ) m_time.uMinute = uMinute;
-		if ( uSecond != eInvalid ) m_time.uSecond = uSecond;
-		if ( uMilliseconds != eInvalid ) m_time.uMillisecond = uMilliseconds;
-		if ( uDayOfWeek != eInvalid ) m_time.uDayOfWeek = uDayOfWeek;
-		if ( nTzBias != eInvalid ) m_time.nTzBias = nTzBias;
-        return *this;
-	}
+					oexUINT uDayOfWeek = eInvalid, oexINT nTzBias = eInvalid );
 
 	//==============================================================
 	// GetYear()
@@ -471,7 +465,7 @@ public:
 
 		\return This function returns Zero if the format does not match the template
 
-		\see GetString()
+		\see FormatTime()
 	*/
     oexBOOL ParseTime( oexCSTR x_sTmpl, CStr x_sStr );
 

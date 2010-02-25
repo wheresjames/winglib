@@ -267,7 +267,7 @@ CStr CSysTime::FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors )
 
 			case oexT( 'I' ) : str.AppendNum( oexT( "%u" ), (oexUINT)m_time.uDayOfWeek + 1 ); break;
 
-			case oexT( 'y' ) : str.AppendNum( oexT( "%0.2u" ), (oexUINT)m_time.uYear ); break;
+			case oexT( 'y' ) : str.AppendNum( oexT( "%0.2u" ), (oexUINT)( m_time.uYear % 100 ) ); break;
 
 			case oexT( 'Y' ) : str.AppendNum( oexT( "%u" ), (oexUINT)m_time.uYear ); break;
 
@@ -581,5 +581,23 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 	SetTime( uYear, uMonth, uDay, uHour, uMinute, uSecond, uMillisecond, uMicrosecond, uNanosecond, uDayOfWeek, nTzBias );
 
     return oexTRUE;
+}
+
+CSysTime& CSysTime::SetTime( oexUINT uYear, oexUINT uMonth, oexUINT uDay,
+							 oexUINT uHour, oexUINT uMinute, oexUINT uSecond,
+							 oexUINT uMilliseconds, oexUINT uMicrosecond, oexUINT uNanoseconds,
+							 oexUINT uDayOfWeek, oexINT nTzBias )
+{
+	if ( uYear != eInvalid ) m_time.uYear = uYear;
+	if ( uMonth != eInvalid ) m_time.uMonth = uMonth;
+	if ( uDay != eInvalid ) m_time.uDay = uDay;
+	if ( uHour != eInvalid ) m_time.uHour = uHour;
+	if ( uMinute != eInvalid ) m_time.uMinute = uMinute;
+	if ( uSecond != eInvalid ) m_time.uSecond = uSecond;
+	if ( uMilliseconds != eInvalid ) m_time.uMillisecond = uMilliseconds;
+	if ( uDayOfWeek != eInvalid ) m_time.uDayOfWeek = uDayOfWeek;
+	if ( nTzBias != eInvalid ) m_time.nTzBias = nTzBias;
+
+    return *this;
 }
 

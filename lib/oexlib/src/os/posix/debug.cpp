@@ -225,8 +225,11 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 					<< ( p->GetThreadId() == uCurrentThreadId
 					   ? oexT( "***************************************************" oexNL8 )
 					   : oexT( "" ) )
-					<< oexFmt( oexT( "Thread  : %d (0x%x)" oexNL8 ), p->GetThreadId(), p->GetThreadId() )
-					<< st.FormatTime( oexT( "Created : %Y/%c/%d  %g:%m:%s GMT" oexNL8 ) )
+					<< oexFmt(        oexT( "Thread     : %d (0x%x)" oexNL8 ), p->GetThreadId(), p->GetThreadId() )
+					<< st.FormatTime( oexT( "Created    : %Y/%c/%d  %g:%m:%s GMT" oexNL8 ) )
+					<<                oexT( "Name       : " ) << p->GetName() << oexNL
+					<<                oexT( "Tag        : " ) << p->GetTag() << oexNL
+					<< oexFmt(        oexT( "CheckPoint : %d (0x%x)" oexNL8 ), p->GetCheckpoint(), p->GetCheckpoint() )
 					<< oexT( "---------------------------------------------------" oexNL8 );
 
 				// Add the stack
@@ -261,7 +264,10 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 	CSysTime st; st.GetSystemTime();
 
 	// Stack trace header
-	CStr sSt =    oexFmt( oexT( "Current Thread    : %d (0x%x)" oexNL8 ), uCurrentThreadId, uCurrentThreadId );
+	CStr sSt = oexNL;
+	sSt <<                oexT( "Module            : " ) << oexGetModuleFileName() << oexNL;
+	sSt <<                oexT( "Version           : " ) << oexVersion() << oexNL;
+	sSt <<		  oexFmt( oexT( "Current Thread    : %d (0x%x)" oexNL8 ), uCurrentThreadId, uCurrentThreadId );
 	sSt << st.FormatTime( oexT( "Current Time      : %Y/%c/%d  %g:%m:%s GMT" oexNL8 ) );
 	sSt <<        oexFmt( oexT( "Stack Trace Slots : Using %d of %d" oexNL8 ), pSt->getUsedSlots(), pSt->getTotalSlots() );
 	sSt <<                oexNL << ( pEInfo ? pEInfo : oexT( "(No other information available)" ) ) << oexNL;

@@ -126,6 +126,12 @@ public:
 	{
 	public:
 
+		virtual oex::oexBOOL InitThread( oex::oexPVOID x_pData )
+		{
+			_STT_SET_NAME( oexT( "CSessionThread" ) );
+			return oexTRUE;
+		}
+
 		virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
 		{
 			// While thread is running and no transactions
@@ -154,6 +160,12 @@ public:
 		{
 			m_pSessionInfo = oexNULL;
 			m_pSessionLock = oexNULL;
+		}
+
+		virtual oex::oexBOOL InitThread( oex::oexPVOID x_pData )
+		{
+			_STT_SET_NAME( oexT( "CSingleSessionThread" ) );
+			return oexTRUE;
 		}
 
 		/// Do the work
@@ -310,6 +322,8 @@ protected:
 
 	virtual oexBOOL InitThread( oex::oexPVOID x_pData )
 	{
+		_STT_SET_NAME( oexT( "THttpServer" ) );
+
 		// Attempt to start the server
 		if ( !ThreadStartServer() )
 			return oexFALSE;

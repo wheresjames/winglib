@@ -110,6 +110,12 @@ void CSqEngineExport::terminate( int nExitCode )
 	oex::os::CSys::Exit( nExitCode );
 }
 
+stdString CSqEngineExport::get_build_version()
+{_STT();
+	return oexVersion().Ptr();
+}
+
+
 stdString CSqEngineExport::get_name()
 {_STT();
 	return m_sScriptName;
@@ -863,6 +869,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, alert )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, print )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, echo )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_build_version )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, flush )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include )
@@ -1233,6 +1240,11 @@ void CSqEngine::SetScriptName( oex::oexCSTR pScriptName )
 		m_sScriptName = pScriptName;
 	else
 		m_sScriptName = oexT( "" );
+}
+
+stdString CSqEngine::GetScriptName()
+{_STT();
+	return m_sScriptName;
 }
 
 oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e )

@@ -38,7 +38,7 @@ int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData, s
 	// Embedded version?
 	if ( !s.Length() )
 	{	s = oexMbToStr( oexGetResource( oexBuildPath( oexT( "sq" ), sScript.c_str() ) ) );
-		sName = ( oexGetModuleFileName() << oexT( ":" ) << sScript.c_str() ).Ptr();
+		sName = ( oexGetModuleFileName().GetFileName() << oexT( ":" ) << sScript.c_str() ).Ptr();
 	} // end if
 
 	// Assign data if any
@@ -53,7 +53,19 @@ int main(int argc, char* argv[])
     // Initialize the oex library
 	oexINIT();
 
+	// Parse the command line
+	oex::CPropertyBag pbCmdLine = oex::CParser::ParseCommandLine( argc, (const char**)argv );
+
+	// Check for version request
+	if ( pbCmdLine.IsKey( oexT( "version" ) ) )
+	{	oexEcho( oexVersion().Ptr() );		
+		pbCmdLine.Destroy();
+	    oexUNINIT();
+		return 0;					  
+	} // end if
+	
 	// Enable crash reporting
+	_STT_SET_NAME( oexT( "Main Thread" ) );
 	oexEnableCrashReporting( oexNULL, oexT( "logs" ) );
 
 	// Initialize resources
@@ -82,6 +94,8 @@ int main(int argc, char* argv[])
 
 	// Log the script name
 	oexNOTICE( 0, oexT( "Running script : embedded:main.nut" ) );
+
+	g_psqScriptThread->SetScriptName( oexT( "embedded:main.nut" ) );
 
 	g_psqScriptThread->SetModuleManager( g_psqModuleManager );
 

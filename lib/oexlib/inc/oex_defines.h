@@ -105,8 +105,6 @@
 #define oexIsBin					OEX_NAMESPACE::COex::GetBinShare().IsBuffer
 #define oexCleanupBin				OEX_NAMESPACE::COex::GetBinShare().Cleanup
 
-#define oexSt						OEX_NAMESPACE::CMem::GetStackTrace
-
 #if defined( OEX_GCC )
 #	define oexVaList				        __builtin_va_list
 #	define oexVaStart				        __builtin_va_start
@@ -442,13 +440,42 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #	define _oexTHROW( s )
 #endif
 
+#define oexSt						OEX_NAMESPACE::CMem::GetStackTrace
 #if defined( OEXLIB_STACK_TRACING )
-#	define _STT() OEX_NAMESPACE::CLocalStackTrace _l_lst( oexSTTFUNCTION );
+#	define _STT()					OEX_NAMESPACE::CLocalStackTrace _l_lst( oexSTTFUNCTION );
+#	define _STT_SET_NAME( v )		{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->SetName( v ) : 0 ); }
+#	define _STT_GET_NAME( v )		{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->GetName() : 0 ); }
+#	define _STT_SET_TAG( v )		{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->SetTag( v ) : 0 ); }
+#	define _STT_GET_TAG()			{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->GetTag() : 0 ); }
+#	define _STT_SET_CHECKPOINT( v )	{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->SetCheckpoint( v ) : 0 ); }
+#	define _STT_GET_CHECKPOINT()	{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->GetCheckpoint() : 0 ); }
 #else
 #	define _STT()
+#	define _STT_SET_NAME( v )
+#	define _STT_GET_NAME()
+#	define _STT_SET_TAG( v )
+#	define _STT_GET_TAG()
+#	define _STT_SET_CHECKPOINT( v )
+#	define _STT_GET_CHECKPOINT()
 #endif
 
-#define oexRUN_SERVICE( cType ) \
-	cType theApp; \
-	int main( int argc, char* argv[] ) \
-	{	return OEX_NAMESPACE::os::CServiceImpl::RunService( argc, (const char**)argv, oexTEXT( OEX_PROJECT_NAME ), oexTEXT( OEX_PROJECT_DESC ) ); }
+#define oexRUN_SERVICE( cType )													\
+	cType theApp;																\
+	int main( int argc, char* argv[] )											\
+	{																			\
+		oexINIT();																\
+		oex::CPropertyBag pbCmdLine												\
+			= oex::CParser::ParseCommandLine( argc, (const char**)argv );		\
+		if ( pbCmdLine.IsKey( oexT( "version" ) ) )								\
+		{	oexEcho( oexVersion().Ptr() );										\
+			pbCmdLine.Destroy();												\
+			oexUNINIT();														\
+			return 0;															\
+		}																		\
+		int ret = OEX_NAMESPACE::os::CServiceImpl::RunService(					\
+					argc, (const char**)argv,									\
+					oexTEXT( OEX_PROJECT_NAME ), oexTEXT( OEX_PROJECT_DESC ) );	\
+		oexUNINIT();															\
+		return ret;																\
+	}
+

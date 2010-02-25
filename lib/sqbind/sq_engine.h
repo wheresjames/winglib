@@ -139,6 +139,9 @@ public:
 	/// Returns boot count
 	unsigned int ticks();
 
+	/// Returns the build version
+	stdString get_build_version();
+
 	/// Returns the script name
 	stdString get_name();
 
@@ -445,6 +448,9 @@ public:
 
 	*/
 	void SetScriptName( oex::oexCSTR pScriptName );
+
+	/// Gets the name of the script used for debugging
+	stdString GetScriptName();
 
 	/// Loads a script and prepares it for execution
 	/**

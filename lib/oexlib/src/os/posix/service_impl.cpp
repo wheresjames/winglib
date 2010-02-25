@@ -77,9 +77,6 @@ CServiceImpl* CServiceImpl::GetInstance()
 
 int CServiceImpl::RunService( int argc, const char** argv, oexCSTR pName, oexCSTR pDesc  )
 {
-	// Initialize the oex library
-	oexINIT();
-
 	// Get singleton instance
 	OEX_NAMESPACE::os::CServiceImpl *pInstance = OEX_NAMESPACE::os::CServiceImpl::GetInstance();
 	if ( !pInstance )
@@ -89,9 +86,6 @@ int CServiceImpl::RunService( int argc, const char** argv, oexCSTR pName, oexCST
 	
 	// Scope in
 	oexINT nRet = pInstance->OnRunService( argc, argv, pName, pDesc );
-	
-	// Uninitialize the oex library
-	oexUNINIT();
 	
 	return nRet;
 }

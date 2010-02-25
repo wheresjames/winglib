@@ -3332,6 +3332,10 @@ oex::oexRESULT Test_CrashReporting()
 //	*( (char*)0 ) = 0;
 //	int x = 1, y = 10 / --x; oexEcho( oexMks( y ).Ptr() );
 
+	// Set local crash report variables
+	_STT_SET_TAG( oexT( "Test: Tag" ) );
+	_STT_SET_CHECKPOINT( -1 );
+
 	oex::os::CDebug::CreateCrashReport( oexNULL, oexT( "logs" ), oexT( "Just testing..." ) );
 
 	return oex::oexRES_OK;
@@ -3345,8 +3349,20 @@ int main(int argc, char* argv[])
 
     // Initialize the oex library
 	oexINIT();
+	
+	// Parse the command line
+	oex::CPropertyBag pbCmdLine = oex::CParser::ParseCommandLine( argc, (const char**)argv );
 
+	// Check for version request
+	if ( pbCmdLine.IsKey( oexT( "version" ) ) )
+	{	oexEcho( oexVersion().Ptr() );		
+		pbCmdLine.Destroy();
+	    oexUNINIT();
+		return 0;					  
+	} // end if
+	
 	// Enable crash reporting
+	_STT_SET_NAME( oexT( "Main Thread" ) );
 	oexEnableCrashReporting( oexNULL, oexT( "logs" ) );
 
 	// Initialize resources

@@ -270,6 +270,14 @@ int CServiceImpl::OnRunService( int argc, const char** argv, oexCSTR pName, oexC
 	// Flag set if we execute a command
 	oexBOOL bExit = oexFALSE;
 
+	if ( CommandLine().IsKey( oexT( "version" ) ) )
+	{
+		oexEcho( oexVersion().Ptr() );
+
+		return 0;
+
+	} // end if
+
 	if ( CommandLine().IsKey( oexT( "install" ) ) )
 	{
 		int nErr = InstallService( pName, pDesc, getAutoRestart() );

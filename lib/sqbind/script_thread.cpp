@@ -99,6 +99,9 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 	// Let the user know we're starting a thread
 //	oexPrintf( oexT( "Spawning : 0x%08x : %s : %s\n" ),
 //			  (unsigned int)oexGetCurThreadId(), m_sName.c_str(), oexGetFileName( m_sScript.c_str() ).Ptr() );
+	
+	// Set script name for debugging
+	_STT_SET_NAME( oex::CStr() << m_cSqEngine.GetScriptName().c_str() << oexT( " : " ) <<  m_sName.c_str() );
 
 	// Start the script
 	if ( !m_cSqEngine.Load( m_sScript.c_str(), m_bFile, FALSE ) )
@@ -315,10 +318,14 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 	oex::oexBOOL bRet = oex::oexTRUE;
 
-		// Is it a script map?
+	// Is it a script map?
 	if ( ( sMsg == oexT( "pb_get" ) || sMsg == oexT( "pb_set" ) ) 
 		 && *mapParams[ oexT( "key" ) ].c_str() == oexT( '@' ) )
 	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
 		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
 		oex::CStr sKey( key.c_str(), key.length() );
 
@@ -369,6 +376,10 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 	// Property bag set
 	else if ( sMsg == oexT( "pb_set" ) )
 	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
 		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
 		if ( mapParams[ oexT( "val" ) ].length() )
 			m_pb.at( key.c_str() ) = mapParams[ oexT( "val" ) ].c_str();
@@ -381,6 +392,10 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 	// Property bag get
 	else if ( sMsg == oexT( "pb_get" ) )
 	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
 		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
 
 		oex::CPropertyBag &pb = m_pb.at( key.c_str() );
@@ -393,19 +408,32 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 	// Does property value exist?
 	else if ( sMsg == oexT( "pb_isset" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
 		*pReply = ( m_pb.find_at( mapParams[ oexT( "key" ) ].c_str() ).IsValid() ) ? oexT( "1" ) : oexT( "" );
+
+	} // end else if
 
 	// Return serialized property bag
 	else if ( sMsg == oexT( "pb_all" ) )
-	{	oex::CStr s = oex::CParser::Serialize( m_pb );
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		oex::CStr s = oex::CParser::Serialize( m_pb );
 		pReply->assign( s.Ptr(), s.Length() );
+
 	} // end else if
 
 	// Just a path check?
 	else if ( sMsg == oexT( "is_path" ) )
 		bRet = oex::oexTRUE;
 
-	// Just post it to the queue if not our thread
+	// Our own thread must handle the rest
 	else if ( GetOwnerThreadId() != oexGetCurThreadId() )
 		return Msg( stdString(), sMsg, &mapParams, pReply, pReplyEvent );
 

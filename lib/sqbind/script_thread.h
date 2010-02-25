@@ -196,6 +196,9 @@ private:
     /// Parent script
     CSqMsgQueue							*m_pParentScript;
 
+	/// Property bag lock
+	oexLock								m_lockPb;
+
 	/// Generic property bag
 	t_PropertyBag						m_pb;
 
