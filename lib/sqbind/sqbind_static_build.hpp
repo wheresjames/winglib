@@ -20,10 +20,6 @@
 #	include "../../sqmod/sqmod_gdchart/stdafx.cpp"
 #endif
 
-#	if defined( SQBIND_STATIC_http )
-#	include "../../sqmod/sqmod_http/stdafx.cpp"
-#endif
-
 #	if defined( SQBIND_STATIC_irrlicht )
 #	include "../../sqmod/sqmod_irrlicht/stdafx.cpp"
 #endif
