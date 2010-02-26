@@ -924,7 +924,7 @@ CSqirrNode CSqIrrlicht::AddMesh( const sqbind::stdString &sFile, float x_fScale,
 }
 
 int CSqIrrlicht::SetVertexColorAlpha( CSqirrNode &x_node, float x_fAlpha )
-{   
+{
 	if ( !m_pSmgr || !x_node.IsValid() )
 		return 0;
 
@@ -935,7 +935,7 @@ int CSqIrrlicht::SetVertexColorAlpha( CSqirrNode &x_node, float x_fAlpha )
 	else if ( CSqirrNode::eTypeAnimatedMesh == x_node.GetNodeType() )
         m_pSmgr->getMeshManipulator()->setVertexColorAlpha( ( (irr::scene::IAnimatedMeshSceneNode*)x_node.Ptr() )->getMesh()->getMesh( 0 ), (irr::s32)x_fAlpha );
 
-    else 
+    else
 		return 0;
 
     return 1;
@@ -1251,13 +1251,14 @@ CSqirrNode CSqIrrlicht::AddCylinderMesh( float fWidth, float fHeight, long lPoin
 }
 
 int CSqIrrlicht::InsertCone( irr::scene::SMeshBuffer *pMb, irr::core::vector3df center,
-							 float fWidth, float fHeight, long lPoints, irr::video::SColor &color )
+							 float fWidth, float fHeight, long lPoints, const irr::video::SColor &color )
 {_STT();
+
 	float fHWidth = fWidth / 2;
 
-	USHORT uPoints = (USHORT)lPoints;
+	oex::oexUSHORT uPoints = (oex::oexUSHORT)lPoints;
 
-	USHORT vi = pMb->Vertices.size();
+	oex::oexUSHORT vi = pMb->Vertices.size();
 	if ( vi ) pMb->Vertices.reallocate( vi + ( lPoints + 1 ) );
 	pMb->Vertices.set_used( vi + ( lPoints + 1 ) );
 
@@ -1269,15 +1270,15 @@ int CSqIrrlicht::InsertCone( irr::scene::SMeshBuffer *pMb, irr::core::vector3df 
 	pMb->Vertices[ vi + uPoints ] = irr::video::S3DVertex( 0.f, fHeight, 0.f,  0.f, 1.f, 0.f, color, 0.5f, 0.5f );
 
 	// Create the bottom of the cone
-	for ( USHORT i = 0; i < lPoints; i++ )
+	for ( oex::oexUSHORT i = 0; i < lPoints; i++ )
 	{
 		// Create vertex
-		irr::core::vector3df v( center.X + cos( irr::core::PI * 2 * i / uPoints ) * fHWidth,  
-								center.Y + 0.f,  
+		irr::core::vector3df v( center.X + cos( irr::core::PI * 2 * i / uPoints ) * fHWidth,
+								center.Y + 0.f,
 								center.Z + sin( irr::core::PI * 2 * i / uPoints ) * fHWidth );
 
-		pMb->Vertices[ vi + i ] = irr::video::S3DVertex( v, irr::core::vector3df( v ).normalize(), color, 
-														 irr::core::vector2df( cos( irr::core::PI * 2 * i / uPoints ), 
+		pMb->Vertices[ vi + i ] = irr::video::S3DVertex( v, irr::core::vector3df( v ).normalize(), color,
+														 irr::core::vector2df( cos( irr::core::PI * 2 * i / uPoints ),
 																			   sin( irr::core::PI * 2 * i / uPoints ) ) );
 
 		// Side
@@ -1296,7 +1297,7 @@ int CSqIrrlicht::InsertCone( irr::scene::SMeshBuffer *pMb, irr::core::vector3df 
 
 	} // end for
 
-	return TRUE;
+	return 1;
 }
 
 CSqirrNode CSqIrrlicht::AddConeMesh( float fWidth, float fHeight, long lPoints )
@@ -1339,13 +1340,13 @@ CSqirrNode CSqIrrlicht::AddArrowMesh( float fWidth, float fConeHeight, float fSh
 
 	if ( 2 > lPoints )
 		return CSqirrNode();
-         
+
     irr::scene::SMeshBuffer *pMb = new irr::scene::SMeshBuffer();
 
     InsertCone( pMb, irr::core::vector3df(), fWidth, fConeHeight, lPoints, irr::video::SColor( 255, 255, 255, 255 ) );
     InsertCylinder( pMb, irr::core::vector3df( 0, -( fShaftHeight / 2.f ), 0 ), fWidth / 3.f, fShaftHeight, lPoints, irr::video::SColor( 255, 255, 255, 255 ) );
 
-    pMb->recalculateBoundingBox();    
+    pMb->recalculateBoundingBox();
 
     irr::scene::SMesh *pMesh = new irr::scene::SMesh();
     pMesh->addMeshBuffer( pMb );
@@ -1353,11 +1354,11 @@ CSqirrNode CSqIrrlicht::AddArrowMesh( float fWidth, float fConeHeight, float fSh
 
     pMesh->recalculateBoundingBox();
 
-    irr::scene::IMeshSceneNode *pNode = 
+    irr::scene::IMeshSceneNode *pNode =
         m_pSmgr->addMeshSceneNode( pMesh );
     pMesh->drop();
 
-    for ( UINT i = 0; i < pNode->getMaterialCount(); i++ )
+    for ( oex::oexUINT i = 0; i < pNode->getMaterialCount(); i++ )
     {   pNode->getMaterial( i ).NormalizeNormals = true;
         pNode->getMaterial( i ).Shininess = 0;
     } // end for

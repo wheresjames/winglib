@@ -57,9 +57,6 @@ public:
 
 public:
 
-    /// Map type for child script  thread objects
-	typedef oexStdMap( stdString, CScriptThread* )		t_ScriptList;
-
 	/// Property bag type
 //	typedef oexStdMap( stdString, stdString )			t_PropertyBag;
 	typedef oex::CPropertyBag							t_PropertyBag;
@@ -157,7 +154,7 @@ public:
 
 	/// Returns the queue for the specified path
 	virtual CSqMsgQueue* GetQueue( const stdString &x_sPath );
-	
+
 	/// Sets a timer
 	oex::oexUINT SetTimer( oex::oexUINT x_uTo, const stdString &x_sCallback );
 

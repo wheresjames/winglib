@@ -152,7 +152,7 @@ public:
 
 	/// Inserts a cone into a mesh
 	static int InsertCone( irr::scene::SMeshBuffer *pMb, irr::core::vector3df center,
-						   float fWidth, float fHeight, long lPoints, irr::video::SColor &color );
+						   float fWidth, float fHeight, long lPoints, const irr::video::SColor &color );
 
 
 	/// Adds a sphere
@@ -219,7 +219,7 @@ public:
 	int FillVolume( CSqirrNode &rNode, CSqirrBoundingBox3d &rBb );
 
 	/// Return default camera
-	CSqirrCamera getCamera() 
+	CSqirrCamera getCamera()
 	{	if ( !m_pCamera ) return CSqirrCamera(); return m_pCamera; }
 
 public:
