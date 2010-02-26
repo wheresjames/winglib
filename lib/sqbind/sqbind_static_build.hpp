@@ -55,10 +55,6 @@
 		SQBIND_Export_ffmpeg( x_vm );
 #endif
 
-#if defined( SQBIND_STATIC_http )
-		SQBIND_Export_http( x_vm );
-#endif
-
 #if defined( SQBIND_STATIC_irrlicht )
 		SQBIND_Export_irrlicht( x_vm );
 #endif
