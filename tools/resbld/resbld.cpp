@@ -195,6 +195,12 @@ int process(int argc, char* argv[])
 	oex::CPropertyBag pb = oex::CParser::ParseCommandLine( argc, (const char**)argv );
 //	oexEcho( oexMks( oexT( "Command Line = " ), pb.PrintR() ).Ptr() );
 
+	// Check for version request
+	if ( pb.IsKey( oexT( "version" ) ) )
+	{	oexEcho( oexVersion().Ptr() );		
+		return 0;					  
+	} // end if
+
 	// Was an entire directory specified?
 	if ( pb.IsKey( oexT( "d" ) ) )
 	{
@@ -211,6 +217,7 @@ int process(int argc, char* argv[])
 		if ( fInc.CreateAlways( oexBuildPath( sOutDir, oexT( "oexres.h" ) ).Ptr() ).IsOpen() )
 			fInc.Write( CStr8() << oexNL8
 				"#define OEX_RESOURCES 1" oexNL8
+				"#define OEX_RES_VERSION \"" << oexStrToMb( oexVersion() ) << "\"" oexNL8
 				"#if defined( OEX_NO_RESOURCES )" oexNL8
 				"#\terror 'oexres.h' MUST be included BEFORE 'oexlib.h'" oexNL8
 				"#endif" oexNL8

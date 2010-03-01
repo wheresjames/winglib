@@ -352,16 +352,31 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
     CStr::t_size nEnd = 0;
 
 	// Process the template
-	while ( x_sTmpl[ x ] != 0 )
+	while ( x_sTmpl[ x ] && *x_sStr )
     {
 		// If not the escape character
-		if ( x_sTmpl[ x ] != '%' )
+		if ( oexT( '%' ) != x_sTmpl[ x ]  )
 		{
-            // Check character
-			if ( x_sTmpl[ x ] != '*' && x_sTmpl[ x ] != '?' && *x_sStr != x_sTmpl[ x ] )
-                bErrors = oexTRUE;
+            // Skip char type?
+			if ( oexT( '*' ) == x_sTmpl[ x ] )
+			{
+				x++;
 
-            x_sStr++;
+				// Skip all occurences of the next character
+				while ( *x_sStr && *x_sStr == x_sTmpl[ x ] )
+					x_sStr++;
+
+			} // end if
+
+			else
+			{
+				// Erros?
+				if ( oexT( '?' ) != x_sTmpl[ x ] && *x_sStr != x_sTmpl[ x ] )
+					bErrors = oexTRUE;
+
+	            x_sStr++;
+
+			} // end else
 		}
 
         else switch ( x_sTmpl[ ++x ] )
@@ -580,7 +595,7 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 	// Set valid parts of the time
 	SetTime( uYear, uMonth, uDay, uHour, uMinute, uSecond, uMillisecond, uMicrosecond, uNanosecond, uDayOfWeek, nTzBias );
 
-    return oexTRUE;
+    return !bErrors;
 }
 
 CSysTime& CSysTime::SetTime( oexUINT uYear, oexUINT uMonth, oexUINT uDay,

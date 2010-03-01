@@ -218,10 +218,13 @@
 #endif
 
 #define oexDATE					__DATE__
-#define oexTIME					__TIME__
+#define oexDATE_FMT				"%b* %D %Y"
 
-#define oexGetBuildTime()		OEX_NAMESPACE::CSysTime( oexT( "%b %d %Y %g:%m:%s" ), \
-														 oexT( oexDATE " " oexTIME ) )
+#define oexTIME					__TIME__
+#define oexTIME_FMT				"%g:%m:%s"
+
+#define oexGetBuildTime()		OEX_NAMESPACE::CSysTime( oexT( oexDATE_FMT	" "	oexTIME_FMT	), \
+														 oexT( oexDATE		" "	oexTIME		) )
 
 #define oexVersion()			oexGetBuildTime().FormatTime( oexT( "%y.%C.%D.%G%m" ) )
 

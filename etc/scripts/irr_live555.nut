@@ -3,6 +3,7 @@ _self.load_module( "irrlicht", "" );
 _self.load_module( "live555", "" );
 _self.load_module( "ffmpeg", "" );
 
+
 class CGlobal
 {
 	irr = 0;
@@ -61,9 +62,13 @@ function _init() : ( _g )
 
 			live555		= [ "live555", 		"rtsp://192.168.2.200:8554/vid1" ]
 
-			ser			= [ "ser", 			"rtsp://204.232.210.57" ]
+//			ser			= [ "ser", 			"rtsp://192.168.2.251" ]
+			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&x0=0&y0=0&x1=1600&y1=1200&qp=30&ssn=1&doublescan=0" ]
+			
 
 		};
+
+	// Check UDP ports 6970-9999
 
 	StartStream( rtsp_video[ "ser" ] );
 
@@ -71,6 +76,8 @@ function _init() : ( _g )
 
 function StartStream( inf ) : ( _g )
 {
+	_self.echo( "\nConnecting to : " + inf[ 1 ] + "...\n" );
+
 	_g.rtsp = CLvRtspClient();
 	if ( !_g.rtsp.Open( inf[ 1 ], 1, 0, CSqMulti() ) )
 	{	_self.echo( "Failed to open RTSP stream " + inf[ 1 ] );
@@ -124,7 +131,7 @@ function UpdateVideo() : ( _g )
 	// Are we doing video?
 	if ( _g.dec && _g.rtsp.LockVideo( frame, CSqMulti() ) )
 	{
-//		_self.echo( "Video data : " + frame.getUsed() );
+		_self.echo( "Video data : " + frame.getUsed() );
 
 		if ( !_g.tex )
 		{
@@ -169,3 +176,10 @@ function _idle() : ( _g )
 	return _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
 }
 
+/*
+-	RFC 3550 for RTCP
+-	RFC 1889 for RTP
+-	RFC 2327 for SDP
+-	RFC 2326 for RTSP
+-	RFC 3984 for the data format of H.264 streaming over RTP
+*/

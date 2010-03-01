@@ -241,7 +241,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 		return 0;
 	} // end if
 
-#if defined( OEX_DEBUG )
+#if defined( oexDEBUG )
 int nVerbosity = 1;
 #else
 int nVerbosity = 0;
@@ -313,7 +313,8 @@ int nVerbosity = 0;
 	m_bVideo = bFoundVideo;
 	m_bAudio = bFoundAudio;
 
-	m_pRtspClient->playMediaSession( *m_pSession, 0, 0, 1.f );
+//	m_pRtspClient->playMediaSession( *m_pSession, 0, 0, 1.f );
+	m_pRtspClient->playMediaSession( *m_pSession, 0, -1.f, 1.f );
 
 /*
 	int width = 640;
