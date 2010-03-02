@@ -18,6 +18,7 @@ CFfContainer::CFfContainer()
 
 void CFfContainer::Destroy()
 {_STT();
+
 	if ( m_nRead )
 	{
 		if ( m_pkt.data )
@@ -232,9 +233,11 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 
 	// Data left over from last time?
 	if ( m_buf.getUsed() )
-	{	m_buf.AppendBuffer( (sqbind::CSqBinary::t_byte*)m_pkt.data, m_pkt.size );
+	{
+		m_buf.AppendBuffer( (sqbind::CSqBinary::t_byte*)m_pkt.data, m_pkt.size );
 		m_pkt.data = (uint8_t*)m_buf._Ptr();
 		m_pkt.size = m_buf.getUsed();
+
 	} // end if
 
 	// Video only atm

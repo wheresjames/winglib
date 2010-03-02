@@ -85,14 +85,25 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
     m_pCodecContext->codec_id = (CodecID)x_nCodec;
     m_pCodecContext->codec_type = CODEC_TYPE_VIDEO;
     m_pCodecContext->bit_rate = brate;
-    m_pCodecContext->width = width;
-    m_pCodecContext->height = height;
+    m_pCodecContext->width = /*m_pCodecContext->coded_width =*/ width;
+    m_pCodecContext->height = /*m_pCodecContext->coded_height =*/ height;
     m_pCodecContext->time_base.den = fps;
     m_pCodecContext->time_base.num = 1;
     m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
 	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
 
-	int res = avcodec_open( m_pCodecContext, m_pCodec );
+    if ( CODEC_ID_H264 == x_nCodec )
+    {
+        m_pCodecContext->workaround_bugs = FF_BUG_AUTODETECT;
+        m_pCodecContext->error_recognition = FF_ER_AGGRESSIVE;
+        m_pCodecContext->idct_algo = FF_IDCT_H264;
+        m_pCodecContext->error_concealment = FF_EC_GUESS_MVS | FF_EC_DEBLOCK;
+        m_pCodecContext->flags = CODEC_FLAG_INPUT_PRESERVED | CODEC_FLAG_EMU_EDGE;
+        m_pCodecContext->flags2 = CODEC_FLAG2_BRDO | CODEC_FLAG2_MEMC_ONLY | CODEC_FLAG2_DROP_FRAME_TIMECODE | CODEC_FLAG2_SKIP_RD | CODEC_FLAG2_CHUNKS;
+
+    } // end if
+
+    int res = avcodec_open( m_pCodecContext, m_pCodec );
 	if ( 0 > res )
 	{	oexERROR( res, oexT( "avcodec_open() failed" ) );
 		m_pCodecContext = oexNULL;

@@ -68,7 +68,8 @@ include $(PRJ_LIBROOT)/build.mk
 export LOC_TAG := libavformat
 LOC_CXX_libavformat := c
 LOC_SRC_libavformat := $(CFG_LIBROOT)/ffmpeg/libavformat
-LOC_EXC_libavformat := avisynth libnut matroskadec mov
+LOC_EXC_libavformat := avisynth libnut
+#LOC_EXC_libavformat := avisynth libnut matroskadec mov
 #ifeq ($(PROC),arm)
 #	LOC_EXC_libavformat := $(LOC_EXC_libavformat) ipmovie mpegts sierravmd
 #endif
@@ -100,17 +101,17 @@ include $(PRJ_LIBROOT)/build.mk
 export LOC_TAG := libavcodec
 LOC_CXX_libavcodec := c
 LOC_SRC_libavcodec := $(CFG_LIBROOT)/ffmpeg/libavcodec
-LOC_EXC_libavcodec := acelp_filters \
-					  \
-					  vaapi vaapi_mpeg2 vaapi_mpeg4 vaapi_vc1 \
+LOC_EXC_libavcodec := vaapi vaapi_h264 vaapi_mpeg2 vaapi_mpeg4 vaapi_vc1 \
 					  \
 					  libamr libdiracdec libdiracenc \
 					  libfaac libfaad libgsm libmp3lame libopenjpeg libschroedinger \
 					  libschroedingerdec libschroedingerenc libspeexdec libtheoraenc \
 					  libvorbis libx264 libxvidff libxvid_rc \
 					  \
-					  aacenc aacpsy beosthread g729dec imgconvert_template motion_est_template \
-					  mpegvideo_xvmc os2thread svq3 vdpau
+					  beosthread g729dec imgconvert_template motion_est_template \
+					  mpegvideo_xvmc os2thread vdpau \
+					  \
+					  dxva2 dxva2_h264 dxva2_vc1
 
 ifeq ($(PROC),arm)
 	ifeq ($(PLATFORM),windows)

@@ -10,7 +10,7 @@ public:
 
 		enum
 		{
-			eDefaultBufferSize = 200000
+            eDefaultBufferSize = 1000000
 		};
 
 	public:
@@ -57,7 +57,7 @@ public:
 
 		enum
 		{
-			eDefaultBufferSize = 200000
+            eDefaultBufferSize = 1000000
 		};
 
 	public:
@@ -65,7 +65,8 @@ public:
 		/// Constructor
 		CAudioSink( UsageEnvironment &rEnv );
 
-		/// Reads frame info
+        /// Reads frame infofile:///home/landshark/code/lib2/winglib/sqmod/sqmod_live555/lv_rtsp_server.cpp
+
 		int LockFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
 
 		/// Releases the frame buffer

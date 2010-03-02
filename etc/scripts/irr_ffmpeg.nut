@@ -4,6 +4,8 @@ _self.load_module( "ffmpeg", "" );
 
 class CGlobal
 {
+	quit = 0;
+
 	irr = 0;
 	video = 0;
 	tex = 0;
@@ -54,10 +56,16 @@ function _init() : ( _g )
 			western		= [ "Westerns", 	"rtsp://video2.multicasttech.com/AFTVWesterns3GPP296.sdp" ],
 			espana		= [ "Espana", 		"rtsp://video3.multicasttech.com/EspanaFree3GPP296.sdp" ],
 
-			utube1		= [ "utube1",		"rtsp://v2.cache1.c.youtube.com/CkgLENy73wIaPwlnoDu0pt7zDRMYDSANFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNaDkNsaWNrVGh1bWJuYWlsYOmkotHXgfvJRgw=/0/0/0/video.3gp" ]
+			utube1		= [ "utube1",		"rtsp://v2.cache1.c.youtube.com/CkgLENy73wIaPwlnoDu0pt7zDRMYDSANFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNaDkNsaWNrVGh1bWJuYWlsYOmkotHXgfvJRgw=/0/0/0/video.3gp" ],
+//			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half" ]
+			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ]
+
 		};
 
-	StartStream( rtsp_video[ "local1" ] );
+	StartStream( rtsp_video[ "ser" ] );
+
+	_self.set_timer( ".", 15, "OnTimer" );
+
 }
 
 function StartStream( inf ) : ( _g )
@@ -85,9 +93,19 @@ function UpdateVideo() : ( _g )
 		_g.tex.Unlock();
 }
 
+function OnTimer() : ( _g )
+{
+	if ( _g.quit )
+		return;
+
+	UpdateVideo();
+
+	_g.quit = _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
+}
+
+
 function _idle() : ( _g )
 {
-	UpdateVideo();
-	return _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
+	return _g.quit;
 }
 

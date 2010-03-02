@@ -268,8 +268,8 @@ int nVerbosity = 0;
 
 	char *pSdp = oexNULL;
 	if ( m && m->isset( oexT( "username" ) ) )
-		pSdp = m_pRtspClient->describeWithPassword( oexStrToMbPtr( sUrl.c_str() ), 
-													oexStrToMbPtr( (*m)[ oexT( "username" ) ].str().c_str() ), 
+		pSdp = m_pRtspClient->describeWithPassword( oexStrToMbPtr( sUrl.c_str() ),
+													oexStrToMbPtr( (*m)[ oexT( "username" ) ].str().c_str() ),
 													oexStrToMbPtr( (*m)[ oexT( "password" ) ].str().c_str() ) );
 	else
 		pSdp = m_pRtspClient->describeURL( oexStrToMbPtr( sUrl.c_str() ) );
@@ -297,7 +297,7 @@ int nVerbosity = 0;
 	MediaSubsession *pss;
 	int bFoundVideo = 0, bFoundAudio = 0;
 	oex::CStr8 sVTag = "video", sATag = "audio";
-	while ( 0 != ( pss = iter.next() ) 
+	while ( 0 != ( pss = iter.next() )
 			&& ( ( bVideo && !bFoundVideo ) || ( bAudio && !bFoundAudio ) ) )
 	{
 //		oexEcho( oexMks( pss->mediumName(), " - ", pss->codecName() ).Ptr() )

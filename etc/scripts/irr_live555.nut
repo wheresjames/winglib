@@ -6,6 +6,8 @@ _self.load_module( "ffmpeg", "" );
 
 class CGlobal
 {
+	quit = 0;
+
 	irr = 0;
 	video = 0;
 	tex = 0;
@@ -13,6 +15,9 @@ class CGlobal
 	rtsp = 0;
 	dec = 0;
 	adec = 0;
+
+	w = 0;
+	h = 0;
 };
 
 local _g = CGlobal();
@@ -60,21 +65,28 @@ function _init() : ( _g )
 
 			utube1		= [ "utube1",		"rtsp://v2.cache1.c.youtube.com/CkgLENy73wIaPwlnoDu0pt7zDRMYDSANFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNaDkNsaWNrVGh1bWJuYWlsYOmkotHXgfvJRgw=/0/0/0/video.3gp" ],
 
-			live555		= [ "live555", 		"rtsp://192.168.2.200:8554/vid1" ]
+			live555		= [ "live555", 		"rtsp://192.168.2.200:8554/vid1" ],
 
+//			ser			= [ "ser", 			"rtsp://192.168.2.87" ]
 //			ser			= [ "ser", 			"rtsp://192.168.2.251" ]
-			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&x0=0&y0=0&x1=1600&y1=1200&qp=30&ssn=1&doublescan=0" ]
-			
+//			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&x0=0&y0=0&x1=1600&y1=1200&qp=30&ssn=1&doublescan=0" ]
+			arecont		= [ "arecont",		"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ]
+
+			panasonic	= [ "panasonic",	"rtsp://192.168.2.57/Mediainput/mpeg4" ]
 
 		};
 
-	// Check UDP ports 6970-9999
+	// Check TCP Port 554 and UDP ports 6970-9999
 
-	StartStream( rtsp_video[ "ser" ] );
+//	StartStream( rtsp_video[ "panasonic" ], 0, 0 );
+	StartStream( rtsp_video[ "arecont" ], 800, 600 );
+//	StartStream( rtsp_video[ "nasa" ], 320, 240 );
+
+	_self.set_timer( ".", 15, "OnTimer" );
 
 }
 
-function StartStream( inf ) : ( _g )
+function StartStream( inf, w, h ) : ( _g )
 {
 	_self.echo( "\nConnecting to : " + inf[ 1 ] + "...\n" );
 
@@ -84,6 +96,9 @@ function StartStream( inf ) : ( _g )
 		return 0;
 	} // end if
 
+	_g.w = w;
+	_g.h = h;
+
 	return 1;
 }
 
@@ -92,11 +107,11 @@ function UpdateVideo() : ( _g )
 	// Has it connected?
 	if ( !_g.rtsp.waitInit( 0 ) )
 	{	_self.print( "." ); _self.flush();
-		return;
+		return 0;
 	} // end if
 
 	if ( !_g.rtsp.isOpen() )
-		return;
+		return 0;
 
 	// Do we need to create the video decoder?
 	if ( !_g.dec && _g.rtsp.isVideo() )
@@ -104,7 +119,7 @@ function UpdateVideo() : ( _g )
 		_self.echo( "Creating video decoder for " + _g.rtsp.getVideoCodecName() );
 		_g.dec = CFfDecoder();
 		if ( !_g.dec.Create( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ), CFfConvert().PIX_FMT_YUV420P,
-							 0, 0, 0, 0, CSqMulti() ) )
+							 _g.w, _g.h, 5, 0, CSqMulti( "cmp=-2" ) ) )
 			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getVideoCodecName() );
 
 	} // end if
@@ -168,12 +183,26 @@ function UpdateVideo() : ( _g )
 
 	} // end if
 
+	return 1;
 }
+
+function OnTimer() : ( _g )
+{
+	if ( _g.quit )
+		return;
+
+	UpdateVideo();
+	_g.quit = _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
+
+//	if ( UpdateVideo() )
+//		_g.quit = _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
+
+}
+
 
 function _idle() : ( _g )
 {
-	UpdateVideo();
-	return _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
+	return _g.quit;
 }
 
 /*
