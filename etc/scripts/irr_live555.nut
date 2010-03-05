@@ -69,8 +69,11 @@ function _init() : ( _g )
 
 //			ser			= [ "ser", 			"rtsp://192.168.2.87" ]
 //			ser			= [ "ser", 			"rtsp://192.168.2.251" ]
-//			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&x0=0&y0=0&x1=1600&y1=1200&qp=30&ssn=1&doublescan=0" ]
-			arecont		= [ "arecont",		"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ]
+			arecont		= [ "arecont",		"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ],
+//			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&x0=0&y0=0&x1=1600&y1=1200&qp=30&ssn=1&doublescan=0" ],
+			arecont		= [ "arecont",		"rtsp://192.168.2.251/image?res=half&x0=0&y0=0&x1=1600&y1=1200"
+										    + "&fps=5&quality=15&doublescan=0"
+										    + "&ssn=" + _self.gmt_time().tointeger() + "&id=" + ( _self.gmt_time() + 1 ).tointeger() ],
 
 			panasonic	= [ "panasonic",	"rtsp://192.168.2.57/Mediainput/mpeg4" ]
 
@@ -80,7 +83,8 @@ function _init() : ( _g )
 
 //	StartStream( rtsp_video[ "panasonic" ], 0, 0 );
 	StartStream( rtsp_video[ "arecont" ], 800, 600 );
-//	StartStream( rtsp_video[ "nasa" ], 320, 240 );
+//	StartStream( rtsp_video[ "arecont" ], 800, 592 );
+//	StartStream( rtsp_video[ "nasa" ], 0, 0 );
 
 	_self.set_timer( ".", 15, "OnTimer" );
 
@@ -119,7 +123,7 @@ function UpdateVideo() : ( _g )
 		_self.echo( "Creating video decoder for " + _g.rtsp.getVideoCodecName() );
 		_g.dec = CFfDecoder();
 		if ( !_g.dec.Create( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ), CFfConvert().PIX_FMT_YUV420P,
-							 _g.w, _g.h, 5, 0, CSqMulti( "cmp=-2" ) ) )
+							 _g.w, _g.h, 5, 2000000, CSqMulti( "cmp=-2" ) ) )
 			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getVideoCodecName() );
 
 	} // end if
@@ -165,8 +169,13 @@ function UpdateVideo() : ( _g )
 		{
 			local tex = _g.tex.Lock();
 			if ( tex.getUsed() )
-				_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti() ),
+			{
+				if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti() ) )
+					_self.echo( "failed to decode frame" );
+
 				_g.tex.Unlock();
+
+			} // end if
 
 		} // end else
 

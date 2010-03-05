@@ -183,6 +183,7 @@ void CLvRtspClient::Destroy()
 
 void CLvRtspClient::ThreadDestroy()
 {_STT();
+
 	if ( m_pRtspClient && m_pSession )
 		m_pRtspClient->teardownMediaSession( *m_pSession );
 
@@ -219,6 +220,7 @@ int CLvRtspClient::Open( const sqbind::stdString &sUrl, int bVideo, int bAudio, 
 
 int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bAudio, sqbind::CSqMulti *m )
 {_STT();
+
 	// Lose old container
 	ThreadDestroy();
 

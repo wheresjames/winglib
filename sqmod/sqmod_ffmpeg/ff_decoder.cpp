@@ -85,21 +85,41 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
     m_pCodecContext->codec_id = (CodecID)x_nCodec;
     m_pCodecContext->codec_type = CODEC_TYPE_VIDEO;
     m_pCodecContext->bit_rate = brate;
-    m_pCodecContext->width = /*m_pCodecContext->coded_width =*/ width;
-    m_pCodecContext->height = /*m_pCodecContext->coded_height =*/ height;
+    m_pCodecContext->width = width ? width : 320;
+    m_pCodecContext->height = height ? height : 240;
     m_pCodecContext->time_base.den = fps;
     m_pCodecContext->time_base.num = 1;
     m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
 	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
 
+	m_pCodecContext->flags = CODEC_FLAG_LOW_DELAY;
+
     if ( CODEC_ID_H264 == x_nCodec )
     {
+		oexEcho( "!!! H264 Codec Settings" );
+		m_pCodecContext->bits_per_coded_sample = 32;
+	    m_pCodecContext->gop_size = 10;
+	    m_pCodecContext->dct_algo = 0;
+	    m_pCodecContext->me_pre_cmp = 2;
+	    m_pCodecContext->cqp = 26;
+	    m_pCodecContext->me_method = 7;
+	    m_pCodecContext->qmin = 3;
+	    m_pCodecContext->qmax = 31;
+	    m_pCodecContext->max_qdiff = 3;
+	    m_pCodecContext->max_b_frames = 1;
+	    m_pCodecContext->qcompress = 0.5;
+	    m_pCodecContext->nsse_weight = 8;
+	    m_pCodecContext->i_quant_factor = 0.8;
+	    m_pCodecContext->b_quant_factor = 1.25;
+	    m_pCodecContext->b_quant_offset = 1.25;
+//	    m_pCodecContext-> = ;
+
         m_pCodecContext->workaround_bugs = FF_BUG_AUTODETECT;
         m_pCodecContext->error_recognition = FF_ER_AGGRESSIVE;
         m_pCodecContext->idct_algo = FF_IDCT_H264;
         m_pCodecContext->error_concealment = FF_EC_GUESS_MVS | FF_EC_DEBLOCK;
-        m_pCodecContext->flags = CODEC_FLAG_INPUT_PRESERVED | CODEC_FLAG_EMU_EDGE;
-        m_pCodecContext->flags2 = CODEC_FLAG2_BRDO | CODEC_FLAG2_MEMC_ONLY | CODEC_FLAG2_DROP_FRAME_TIMECODE | CODEC_FLAG2_SKIP_RD | CODEC_FLAG2_CHUNKS;
+        m_pCodecContext->flags |= CODEC_FLAG_INPUT_PRESERVED | CODEC_FLAG_EMU_EDGE;
+        m_pCodecContext->flags2 |= CODEC_FLAG2_BRDO | CODEC_FLAG2_MEMC_ONLY | CODEC_FLAG2_DROP_FRAME_TIMECODE | CODEC_FLAG2_SKIP_RD | CODEC_FLAG2_CHUNKS;
 
     } // end if
 
