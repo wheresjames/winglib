@@ -337,7 +337,7 @@ void CIpSocket::Destroy()
 //		fcntl( oexPtrToInt( m_hSocket ), F_SETFL, flags & ~O_NONBLOCK );
 
 		struct linger lopt;
-		lopt.l_onoff = 0;
+		lopt.l_onoff = 1;
 		lopt.l_linger = 60;
 
 		if ( -1 == setsockopt( oexPtrToInt( hSocket ), SOL_SOCKET, SO_LINGER, &lopt, sizeof( lopt ) ) )
@@ -346,11 +346,11 @@ void CIpSocket::Destroy()
 		} // end if
 
 		// Shutdown the socket
-		if ( -1 == shutdown( oexPtrToInt( hSocket ), SHUT_RDWR ) )
-		{	m_uLastError = errno;
-			if ( ENOTCONN != errno )
-				oexERROR( errno, oexT( "shutdown() failed" ) );
-		} // end if
+//		if ( -1 == shutdown( oexPtrToInt( hSocket ), SHUT_RDWR ) )
+//		{	m_uLastError = errno;
+//			if ( ENOTCONN != errno )
+//				oexERROR( errno, oexT( "shutdown() failed" ) );
+//		} // end if
 
 		// Close the socket
 		if ( -1 == close( oexPtrToInt( hSocket ) ) )

@@ -150,8 +150,10 @@ oexINT COex::Uninit()
 //        uAllowedThreads++;
 
     // You should have shutdown all threads by now!
-    if ( !oexVERIFY( CThread::GetRunningThreadCount() == 0 ) )
-	{	oexERROR( 0, oexT( "Shutdown attempted while threads are still running" ) );
+    if ( CThread::GetRunningThreadCount() )
+	{
+		oexASSERT( !CThread::GetRunningThreadCount() );
+		oexERROR( 0, oexT( "Shutdown attempted while threads are still running" ) );
 
 		// Give threads a moment to shutdown
 		oexUINT uTimeout = oexDEFAULT_WAIT_TIMEOUT * 1000;
