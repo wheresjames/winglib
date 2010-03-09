@@ -36,13 +36,21 @@ function _idle() : ( _g )
 			continue;
 		} // end if
 
+		local addr = CSqSockAddress();
+		_g.socket.getPeerAddress( addr );
+		local server = addr.getDotAddress();
+		_self.echo( "Data read from client : " + server) );
+
+//		CSqFile().put_contents_bin( "sntp.in." + server + ".dat", pkt );
+
 		if ( pkt.getUsed() < pkt_size )
 		{	_self.echo( "Too few bytes sent from client : " + pkt.getUsed() );
 			continue;
 		} // end if
 
 		// What is the clients time
-		local ts_client = _g.socket.ntohl( pkt.getUINT( 6 ) ) - NTP_EPOCH;
+		local ts_client = _g.socket.ntohl( pkt.getUINT( 6 ) );
+		ts_client = ( ts_client >= NTP_EPOCH ) ? ts_client -= NTP_EPOCH : 0;
 		local ts_server = _self.gmt_time();
 
 		local tm = CSqTime();
@@ -56,18 +64,30 @@ function _idle() : ( _g )
 		pkt.setUsed( pkt_size );
 
 		local dw0 = 0;
-	//	dw0 = dw0 | ( 0 & 0x03 );			// LI
-		dw0 = dw0 | ( ( 3 & 0x07 ) << 2 );	// VN
-		dw0 = dw0 | ( ( 4 & 0x07 ) << 5 );	// Mode
-	//	dw0 = dw0 | ( ( 0 & 0xff << 8 ) );	// Stratum
-	//	dw0 = dw0 | ( ( 0 & 0xff << 16 ) );	// Poll
-	//	dw0 = dw0 | ( ( 0 & 0xff << 24 ) );	// Precision
+		dw0 = dw0 | ( ( 0 & 0x03 ) << 30 );	// LI
+		dw0 = dw0 | ( ( 3 & 0x07 ) << 27 );	// VN
+		dw0 = dw0 | ( ( 4 & 0x07 ) << 24 );	// Mode
+		dw0 = dw0 | ( ( 2 & 0x0f ) << 16 );	// Stratum
+		dw0 = dw0 | ( ( 6 & 0xff ) << 8 );	// Poll
+//		dw0 = dw0 | ( ( 0 & 0xff ) << 0 );	// Precision
+		pkt.setUINT( 0, _g.socket.htonl( dw0 ) );
 
-		// Set up request
-		pkt.setUINT( 0, dw0 );
-		pkt.setUINT( 6, _g.socket.htonl( ts_client + NTP_EPOCH ) );
+		// 3	= Reference Identifier
+		pkt.setUINT( 3, _g.socket.htonl( ts_server ) );
 
+		// 4-5	= Reference Timestamp 
+		pkt.setUINT( 4, _g.socket.htonl( ts_server + NTP_EPOCH ) );
+
+		// 6-7	= Originate Timestamp
+		if ( ts_client ) pkt.setUINT( 6, _g.socket.htonl( ts_client + NTP_EPOCH ) );
+
+		// 8-9	= Receive Timestamp
+		pkt.setUINT( 8, _g.socket.htonl( ts_server + NTP_EPOCH ) );
+
+		// 10-11= Transmit Timestamp
 		pkt.setUINT( 10, _g.socket.htonl( ts_server + NTP_EPOCH ) );
+
+//		CSqFile().put_contents_bin( "sntp.out." + server + ".dat", pkt );
 
 		// Write data
 		if ( !_g.socket.SendToBin( pkt, 0 ) )

@@ -44,16 +44,17 @@ function _init() : ( _g )
 	pkt.Zero();
 	pkt.setUsed( pkt_size );
 
+	// Get local time
 	local dw0 = 0;
-	dw0 = dw0 | ( 3 & 0x07 );			// Mode
-	dw0 = dw0 | ( ( 3 & 0x07 ) << 3 );	// VN
-//	dw0 = dw0 | ( ( 0 & 0x03 ) << 6 );	// LI
-//	dw0 = dw0 | ( ( 0 & 0xff << 8 ) );	// Stratum
-//	dw0 = dw0 | ( ( 0 & 0xff << 16 ) );	// Poll
-//	dw0 = dw0 | ( ( 0 & 0xff << 24 ) );	// Precision
+	dw0 = dw0 | ( ( 0 & 0x03 ) << 30 );	// LI
+	dw0 = dw0 | ( ( 3 & 0x07 ) << 27 );	// VN
+	dw0 = dw0 | ( ( 3 & 0x07 ) << 24 );	// Mode
+//	dw0 = dw0 | ( ( 0 & 0x0f ) << 16 );	// Stratum
+//	dw0 = dw0 | ( ( 0 & 0xff ) << 8 );	// Poll
+//	dw0 = dw0 | ( ( 0 & 0xff ) << 0 );	// Precision
+	pkt.setUINT( 0, socket.htonl( dw0 ) );
 
-	// Set up request
-	pkt.setUINT( 0, dw0 );
+	// Set current time
 	pkt.setUINT( 6, socket.htonl( _self.gmt_time() + NTP_EPOCH ) );
 
 	// Write data
@@ -80,7 +81,7 @@ function _init() : ( _g )
 
 	// Get timestamp from server packet
 	local ts_server = socket.ntohl( pkt.getUINT( 10 ) ) - NTP_EPOCH;
-	local ft = socket.ntohl( pkt.getUINT( 11 ) ) /4295;
+	local ft = socket.ntohl( pkt.getUINT( 11 ) ) / 4295;
 
 	// Local time
 	local ts_client = _self.gmt_time();
@@ -97,11 +98,14 @@ function _init() : ( _g )
 //	if ( ts_client != ts_server )
 //		tm.SetSystemTime();
 
+//	CSqFile().put_contents_bin( "sntp." + server + ".dat", pkt );
+
+
 	_self.echo( "\n...done...\n" );
 }
 
 function _idle() : ( _g )
 {
-	return -1;
+	return 1;
 }
 
