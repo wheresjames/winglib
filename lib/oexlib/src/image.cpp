@@ -222,38 +222,38 @@ oexINT CImage::GetFileType( oexCSTR x_pFile )
 	if ( 0 );
 
 	// Check for bitmap
-#if defined( CXIMAGE_SUPPORT_JPG )
+#if defined( CXIMAGE_SUPPORT_JPG ) && CXIMAGE_SUPPORT_JPG
 	else if ( sExt == oexT( "jpg" ) || sExt == oexT( "jpeg" ) ) type = CXIMAGE_FORMAT_JPG;
 #endif
-#if defined( CXIMAGE_SUPPORT_BMP )
+#if defined( CXIMAGE_SUPPORT_BMP ) && CXIMAGE_SUPPORT_BMP
 	else if ( sExt == oexT( "bmp" ) || sExt == oexT( "dib" ) ) type = CXIMAGE_FORMAT_BMP;
 #endif
-#if defined( CXIMAGE_SUPPORT_PNG )
+#if defined( CXIMAGE_SUPPORT_PNG ) && CXIMAGE_SUPPORT_PNG
 	else if ( sExt == oexT( "png" ) ) type = CXIMAGE_FORMAT_PNG;
 #endif
-#if defined( CXIMAGE_SUPPORT_WMF )
+#if defined( CXIMAGE_SUPPORT_WMF ) && CXIMAGE_SUPPORT_WMF
 	else if ( sExt == oexT( "wmf" ) ) type = CXIMAGE_FORMAT_WMF;
 	else if ( sExt == oexT( "emf" ) ) type = CXIMAGE_FORMAT_WMF;
 #endif
-#if defined( CXIMAGE_SUPPORT_GIF )
+#if defined( CXIMAGE_SUPPORT_GIF ) && CXIMAGE_SUPPORT_GIF
 	else if ( sExt == oexT( "gif" ) ) type = CXIMAGE_FORMAT_GIF;
 #endif
-//#if defined( CXIMAGE_SUPPORT_MNG )
+//#if defined( CXIMAGE_SUPPORT_MNG ) && CXIMAGE_SUPPORT_MNG
 //	else if ( sExt == oexT( "mng" ) ) type = CXIMAGE_FORMAT_MNG;
 //#endif
-#if defined( CXIMAGE_SUPPORT_ICO )
+#if defined( CXIMAGE_SUPPORT_ICO ) && CXIMAGE_SUPPORT_ICO
 	else if ( sExt == oexT( "ico" ) ) type = CXIMAGE_FORMAT_ICO;
 #endif
-#if defined( CXIMAGE_SUPPORT_TIF )
+#if defined( CXIMAGE_SUPPORT_TIF ) && CXIMAGE_SUPPORT_TIF
 	else if ( sExt == oexT( "tif" ) || sExt == oexT( "tiff" ) ) type = CXIMAGE_FORMAT_TIF;
 #endif
-#if defined( CXIMAGE_SUPPORT_TGA )
+#if defined( CXIMAGE_SUPPORT_TGA ) && CXIMAGE_SUPPORT_TGA
 	else if ( sExt == oexT( "tga" ) ) type = CXIMAGE_FORMAT_TGA;
 #endif
-#if defined( CXIMAGE_SUPPORT_PCX )
+#if defined( CXIMAGE_SUPPORT_PCX ) && CXIMAGE_SUPPORT_PCX
 	else if ( sExt == oexT( "pcx" ) ) type = CXIMAGE_FORMAT_PCX;
 #endif
-//#if defined( CXIMAGE_SUPPORT_JP2 )
+//#if defined( CXIMAGE_SUPPORT_JP2 ) && CXIMAGE_SUPPORT_JP2
 //	else if ( sExt == oexT( "jp2" ) ) type = CXIMAGE_FORMAT_JP2;
 //#endif
 
@@ -1756,91 +1756,91 @@ CStr CImage::GetUserImageStr()
 
 	return oexT( "All Images ("	"" )
 
-#if defined( CXIMAGE_SUPPORT_JPG )
+#if defined( CXIMAGE_SUPPORT_JPG ) && CXIMAGE_SUPPORT_JPG
 											oexT( "*.jpg;*.jpeg;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_PNG )
+#if defined( CXIMAGE_SUPPORT_PNG ) && CXIMAGE_SUPPORT_PNG
 											oexT( "*.png;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_GIF )
+#if defined( CXIMAGE_SUPPORT_GIF ) && CXIMAGE_SUPPORT_GIF
 											oexT( "*.gif;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_ICO )
+#if defined( CXIMAGE_SUPPORT_ICO ) && CXIMAGE_SUPPORT_ICO
 											oexT( "*.ico;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_TIF )
+#if defined( CXIMAGE_SUPPORT_TIF ) && CXIMAGE_SUPPORT_TIF
 											oexT( "*.tif;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_TGA )
+#if defined( CXIMAGE_SUPPORT_TGA ) && CXIMAGE_SUPPORT_TGA
 											oexT( "*.tga;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_WMF )
+#if defined( CXIMAGE_SUPPORT_WMF ) && CXIMAGE_SUPPORT_WMF
 											oexT( "*.wmf;*.emf;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_JP2 )
+#if defined( CXIMAGE_SUPPORT_JP2 ) && CXIMAGE_SUPPORT_JP2
 											oexT( "*.jp2;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_BMP )
+#if defined( CXIMAGE_SUPPORT_BMP ) && CXIMAGE_SUPPORT_BMP
 											oexT( "*.bmp;*.dib" )
 #endif
 
 											oexT( ")\x0" )
 
-#if defined( CXIMAGE_SUPPORT_JPG )
+#if defined( CXIMAGE_SUPPORT_JPG ) && CXIMAGE_SUPPORT_JPG
 											oexT( "*.jpg;*.jpeg;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_PNG )
+#if defined( CXIMAGE_SUPPORT_PNG ) && CXIMAGE_SUPPORT_PNG
 											oexT( "*.png;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_GIF )
+#if defined( CXIMAGE_SUPPORT_GIF ) && CXIMAGE_SUPPORT_GIF
 											oexT( "*.gif;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_ICO )
+#if defined( CXIMAGE_SUPPORT_ICO ) && CXIMAGE_SUPPORT_ICO
 											oexT( "*.ico;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_TIF )
+#if defined( CXIMAGE_SUPPORT_TIF ) && CXIMAGE_SUPPORT_TIF
 											oexT( "*.tif;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_TGA )
+#if defined( CXIMAGE_SUPPORT_TGA ) && CXIMAGE_SUPPORT_TGA
 											oexT( "*.tga;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_WMF )
+#if defined( CXIMAGE_SUPPORT_WMF ) && CXIMAGE_SUPPORT_WMF
 											oexT( "*.wmf;*.emf;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_JP2 )
+#if defined( CXIMAGE_SUPPORT_JP2 ) && CXIMAGE_SUPPORT_BMP
 											oexT( "*.jp2;" )
 #endif
-#if defined( CXIMAGE_SUPPORT_BMP )
+#if defined( CXIMAGE_SUPPORT_BMP ) && CXIMAGE_SUPPORT_BMP
 											oexT( "*.bmp;*.dib" )
 #endif
 
 											oexT( "\x0" )
 
-#if defined( CXIMAGE_SUPPORT_JPG )
+#if defined( CXIMAGE_SUPPORT_JPG ) && CXIMAGE_SUPPORT_JPG
 											oexT( "JPEG (*.jpg;*.jpeg)\x0*.jpg;*.jpeg\x0" )
 #endif
-#if defined( CXIMAGE_SUPPORT_PNG )
+#if defined( CXIMAGE_SUPPORT_PNG ) && CXIMAGE_SUPPORT_PNG
 											oexT( "Portable Network Graphic (*.png)\x0*.png\x0" )
 #endif
-#if defined( CXIMAGE_SUPPORT_GIF )
+#if defined( CXIMAGE_SUPPORT_GIF ) && CXIMAGE_SUPPORT_GIF
 											oexT( "Graphic Interchange Format (*.gif)\x0*.png\x0" )
 #endif
-#if defined( CXIMAGE_SUPPORT_ICO )
+#if defined( CXIMAGE_SUPPORT_ICO ) && CXIMAGE_SUPPORT_ICO
 											oexT( "Windows Icon (*.ico)\x0*.ico\x0" )
 #endif
-#if defined( CXIMAGE_SUPPORT_TIF )
+#if defined( CXIMAGE_SUPPORT_TIF ) && CXIMAGE_SUPPORT_TIF
 											oexT( "Tagged Image File (*.tif; *.tiff)\x0*.tif;*.tiff\x0" )
 #endif
-#if defined( CXIMAGE_SUPPORT_TGA )
+#if defined( CXIMAGE_SUPPORT_TGA ) && CXIMAGE_SUPPORT_TGA
 											oexT( "Targa (*.tga)\x0*.tga\x0" )
 #endif
-#if defined( CXIMAGE_SUPPORT_WMF )
+#if defined( CXIMAGE_SUPPORT_WMF ) && CXIMAGE_SUPPORT_WMF
 											oexT( "Windows Metafile (*.wmf;*.emf)\x0*.wmf;*.emf\x0" )
 #endif
-#if defined( CXIMAGE_SUPPORT_JP2 )
+#if defined( CXIMAGE_SUPPORT_JP2 ) && CXIMAGE_SUPPORT_JP
 											oexT( "JPEG 2000 (*.jp2)\x0*.jp2\x0" )
 #endif
-#if defined( CXIMAGE_SUPPORT_BMP )
+#if defined( CXIMAGE_SUPPORT_BMP ) && CXIMAGE_SUPPORT_BMP
 											oexT( "Windows Bitmap (*.bmp;*.dib)\x0*.bmp;*.dib\x0" )
 #endif
 											;
@@ -1849,91 +1849,91 @@ CStr CImage::GetUserImageStr()
 
 	return oexT( "All Images ("	""
 
-#if defined( CXIMAGE_SUPPORT_JPG )
+#if defined( CXIMAGE_SUPPORT_JPG ) && CXIMAGE_SUPPORT_JPG
 											"*.jpg;*.jpeg;"
 #endif
-#if defined( CXIMAGE_SUPPORT_PNG )
+#if defined( CXIMAGE_SUPPORT_PNG ) && CXIMAGE_SUPPORT_PNG
 											"*.png;"
 #endif
-#if defined( CXIMAGE_SUPPORT_GIF )
+#if defined( CXIMAGE_SUPPORT_GIF ) && CXIMAGE_SUPPORT_GIF
 											"*.gif;"
 #endif
-#if defined( CXIMAGE_SUPPORT_ICO )
+#if defined( CXIMAGE_SUPPORT_ICO ) && CXIMAGE_SUPPORT_ICO
 											"*.ico;"
 #endif
-#if defined( CXIMAGE_SUPPORT_TIF )
+#if defined( CXIMAGE_SUPPORT_TIF ) && CXIMAGE_SUPPORT_TIF
 											"*.tif;"
 #endif
-#if defined( CXIMAGE_SUPPORT_TGA )
+#if defined( CXIMAGE_SUPPORT_TGA ) && CXIMAGE_SUPPORT_TGA
 											"*.tga;"
 #endif
-#if defined( CXIMAGE_SUPPORT_WMF )
+#if defined( CXIMAGE_SUPPORT_WMF ) && CXIMAGE_SUPPORT_WMF
 											"*.wmf;*.emf;"
 #endif
-#if defined( CXIMAGE_SUPPORT_JP2 )
+#if defined( CXIMAGE_SUPPORT_JP2 ) && CXIMAGE_SUPPORT_JP
 											"*.jp2;"
 #endif
-#if defined( CXIMAGE_SUPPORT_BMP )
+#if defined( CXIMAGE_SUPPORT_BMP ) && CXIMAGE_SUPPORT_BMP
 											"*.bmp;*.dib"
 #endif
 
 											")\x0"
 
-#if defined( CXIMAGE_SUPPORT_JPG )
+#if defined( CXIMAGE_SUPPORT_JPG ) && CXIMAGE_SUPPORT_JPG
 											"*.jpg;*.jpeg;"
 #endif
-#if defined( CXIMAGE_SUPPORT_PNG )
+#if defined( CXIMAGE_SUPPORT_PNG ) && CXIMAGE_SUPPORT_PNG
 											"*.png;"
 #endif
-#if defined( CXIMAGE_SUPPORT_GIF )
+#if defined( CXIMAGE_SUPPORT_GIF ) && CXIMAGE_SUPPORT_GIF
 											"*.gif;"
 #endif
-#if defined( CXIMAGE_SUPPORT_ICO )
+#if defined( CXIMAGE_SUPPORT_ICO ) && CXIMAGE_SUPPORT_ICO
 											"*.ico;"
 #endif
-#if defined( CXIMAGE_SUPPORT_TIF )
+#if defined( CXIMAGE_SUPPORT_TIF ) && CXIMAGE_SUPPORT_TIF
 											"*.tif;"
 #endif
-#if defined( CXIMAGE_SUPPORT_TGA )
+#if defined( CXIMAGE_SUPPORT_TGA ) && CXIMAGE_SUPPORT_TGA
 											"*.tga;"
 #endif
-#if defined( CXIMAGE_SUPPORT_WMF )
+#if defined( CXIMAGE_SUPPORT_WMF ) && CXIMAGE_SUPPORT_WMF
 											"*.wmf;*.emf;"
 #endif
-#if defined( CXIMAGE_SUPPORT_JP2 )
+#if defined( CXIMAGE_SUPPORT_JP2 ) && CXIMAGE_SUPPORT_JP2
 											"*.jp2;"
 #endif
-#if defined( CXIMAGE_SUPPORT_BMP )
+#if defined( CXIMAGE_SUPPORT_BMP ) && CXIMAGE_SUPPORT_BMP
 											"*.bmp;*.dib"
 #endif
 
 											"\x0"
 
-#if defined( CXIMAGE_SUPPORT_JPG )
+#if defined( CXIMAGE_SUPPORT_JPG ) && CXIMAGE_SUPPORT_JPG
 											"JPEG (*.jpg;*.jpeg)\x0*.jpg;*.jpeg\x0"
 #endif
-#if defined( CXIMAGE_SUPPORT_PNG )
+#if defined( CXIMAGE_SUPPORT_PNG ) && CXIMAGE_SUPPORT_PNG
 											"Portable Network Graphic (*.png)\x0*.png\x0"
 #endif
-#if defined( CXIMAGE_SUPPORT_GIF )
+#if defined( CXIMAGE_SUPPORT_GIF ) && CXIMAGE_SUPPORT_GIF
 											"Graphic Interchange Format (*.gif)\x0*.png\x0"
 #endif
-#if defined( CXIMAGE_SUPPORT_ICO )
+#if defined( CXIMAGE_SUPPORT_ICO ) && CXIMAGE_SUPPORT_ICO
 											"Windows Icon (*.ico)\x0*.ico\x0"
 #endif
-#if defined( CXIMAGE_SUPPORT_TIF )
+#if defined( CXIMAGE_SUPPORT_TIF ) && CXIMAGE_SUPPORT_TIF
 											"Tagged Image File (*.tif; *.tiff)\x0*.tif;*.tiff\x0"
 #endif
-#if defined( CXIMAGE_SUPPORT_TGA )
+#if defined( CXIMAGE_SUPPORT_TGA ) && CXIMAGE_SUPPORT_TGA
 											"Targa (*.tga)\x0*.tga\x0"
 #endif
-#if defined( CXIMAGE_SUPPORT_WMF )
+#if defined( CXIMAGE_SUPPORT_WMF ) && CXIMAGE_SUPPORT_WMF
 											"Windows Metafile (*.wmf;*.emf)\x0*.wmf;*.emf\x0"
 #endif
-#if defined( CXIMAGE_SUPPORT_JP2 )
+#if defined( CXIMAGE_SUPPORT_JP2 ) && CXIMAGE_SUPPORT_JP2
 											"JPEG 2000 (*.jp2)\x0*.jp2\x0"
 #endif
-#if defined( CXIMAGE_SUPPORT_BMP )
+#if defined( CXIMAGE_SUPPORT_BMP ) && CXIMAGE_SUPPORT_BMP
 											"Windows Bitmap (*.bmp;*.dib)\x0*.bmp;*.dib\x0"
 #endif
 											);
