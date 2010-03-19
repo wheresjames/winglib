@@ -36,8 +36,8 @@
 
 //#	define SQBIND_NEW( m_type ) new m_type
 //#	define SQBIND_DELETE( m_instance) delete m_instance
-#include "../../sqbind/include/sqbind.h"
 #ifdef SQBIND_SQBIND
+#include "../../sqbind/include/sqbind.h"
 
 #   define SQBIND_REGISTER_CLASS_BEGIN( c, s )				static void __SqReg_sqbind_##s( HSQUIRRELVM vm ) { \
 																SqBind< c >::init( vm, oexT( #s ) );
@@ -209,6 +209,8 @@ namespace SqPlus
 }
 #endif
 
+#ifdef SQBIND_SQBIND
+
 template<>
 class SqBind<sqbind::stdString> {
 public:
@@ -239,3 +241,4 @@ public:
 		sq_pushstring(v,p_value.c_str(),p_value.length());
 	}
 };
+#endif
