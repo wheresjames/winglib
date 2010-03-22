@@ -32,8 +32,8 @@ include $(PRJ_LIBROOT)/build.mk
 export LOC_TAG := gd
 LOC_CXX_gd := c
 LOC_BLD_gd := cpp
-LOC_INC_gd := $(CFG_LIBROOT)/gdchart/gd
-LOC_SRC_gd := $(CFG_LIBROOT)/gdchart/gd
+LOC_INC_gd := $(CFG_LIBROOT)/gdchart/gd1.3
+LOC_SRC_gd := $(CFG_LIBROOT)/gdchart/gd1.3
 LOC_EXC_gd := gddemo giftogd webgif mathmake mtables
 include $(PRJ_LIBROOT)/build.mk
 

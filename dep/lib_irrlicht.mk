@@ -8,7 +8,7 @@ PRJ_NAME := irrlicht
 PRJ_TYPE := lib
 PRJ_INCS := jpeg png tiff zlib
 PRJ_LIBS := 
-PRJ_DEFS := _IRR_COMPILE_WITH_OPENGL_
+# PRJ_DEFS := _IRR_COMPILE_WITH_OPENGL_
 
 PRJ_LIBROOT := ..
 PRJ_OBJROOT := _0_dep
