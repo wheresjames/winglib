@@ -28,8 +28,8 @@ export LOC_TAG := def
 LOC_CXX_def := c
 LOC_INC_def := $(CFG_LIBROOT)/jpeg
 LOC_SRC_def := $(CFG_LIBROOT)/jpeg
-LOC_EXC_def := ansi2knr cjpeg djpeg jpegtran wrjpgcom rdjpegcom \
-			   ckconfig jmemdos jmemmac
+LOC_EXC_def := ansi2knr cdjpeg ckconfig cjpeg djpeg jpegtran \
+			   jmemdos jmemmac rdjpgcom wrjpgcom
 include $(PRJ_LIBROOT)/build.mk
 
 #-------------------------------------------------------------------
