@@ -111,7 +111,9 @@ LOC_EXC_libavcodec := vaapi vaapi_h264 vaapi_mpeg2 vaapi_mpeg4 vaapi_vc1 \
 					  beosthread g729dec imgconvert_template motion_est_template \
 					  mpegvideo_xvmc os2thread vdpau \
 					  \
-					  dxva2 dxva2_h264 dxva2_vc1
+					  dxva2 dxva2_h264 dxva2_vc1 \
+					  \
+					  dv_tablegen
 
 ifeq ($(PROC),arm)
 	ifeq ($(PLATFORM),windows)
