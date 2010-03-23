@@ -21,6 +21,11 @@ PRJ_LIBROOT := ../..
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifeq ($(PLC),)
+UNSUPPORTED := Set make option PLC=1 to build
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------
@@ -32,4 +37,4 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-
+endif

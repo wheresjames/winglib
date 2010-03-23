@@ -4,58 +4,35 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := ftgl
+PRJ_NAME := bzip2
 PRJ_TYPE := lib
-PRJ_INCS := freetype2/include ftgl/src  ftgl/msvc
+PRJ_INCS := 
 PRJ_LIBS := 
+PRJ_OBJROOT := _0_dep
 
 PRJ_LIBROOT := ..
-PRJ_OBJROOT := _0_dep
 
 #-------------------------------------------------------------------
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-ifeq ($(FTGL),)
-UNSUPPORTED := Set make option FTGL=1 to build
-include $(PRJ_LIBROOT)/unsupported.mk
-else
-
-PRJ_DEFS := M_PI=3.14159265358979323846 
-
-ifeq ($(PLATFORM),windows)
-	PRJ_DEFS := $(PRJ_DEFS) FTGL_LIBRARY_STATIC
+ifeq ($(OS),wince)
+	PRJ_DEFS := NO_ERRNO_H
 endif
 
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------
-
 export LOC_TAG := def
-LOC_SRC_def := $(CFG_LIBROOT)/ftgl/src
-include $(PRJ_LIBROOT)/build.mk
-
-export LOC_TAG := font
-LOC_SRC_font := $(CFG_LIBROOT)/ftgl/src/FTFont
-include $(PRJ_LIBROOT)/build.mk
-
-export LOC_TAG := gl
-LOC_SRC_gl := $(CFG_LIBROOT)/ftgl/src/FTGl
-include $(PRJ_LIBROOT)/build.mk
-
-export LOC_TAG := glyph
-LOC_SRC_glyph := $(CFG_LIBROOT)/ftgl/src/FTGlyph
-include $(PRJ_LIBROOT)/build.mk
-
-export LOC_TAG := layout
-LOC_SRC_layout := $(CFG_LIBROOT)/ftgl/src/FTLayout
+LOC_CXX_def := c
+LOC_INC_def := $(CFG_LIBROOT)/bzip2
+LOC_SRC_def := $(CFG_LIBROOT)/bzip2
+LOC_EXC_def := bzip2 bzip2recover dlltest mk251 spewG unzcrash
 include $(PRJ_LIBROOT)/build.mk
 
 #-------------------------------------------------------------------
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
-
-endif
 

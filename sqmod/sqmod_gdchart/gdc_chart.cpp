@@ -4,7 +4,7 @@
 
 #include "gdc.h"
 #include "gdchart.h"
-#include "gd/gd.h"
+#include "gd1.3/gd.h"
 
 /// Unfortunately, the gdchart library is not thread safe
 oexLock CGdcChart::m_lock;

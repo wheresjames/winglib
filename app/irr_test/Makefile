@@ -27,7 +27,7 @@ ifeq ($(PROC),arm)
 	PRJ_LIBS := $(PRJ_LIBS) irrlicht-es jpeg png tiff zlib
 else
 	PRJ_INCS := $(PRJ_INCS) irrlicht/include
-	PRJ_LIBS := $(PRJ_LIBS) irrlicht jpeg png tiff zlib
+	PRJ_LIBS := $(PRJ_LIBS) irrlicht jpeg png tiff zlib bzip2
 endif
 
 #_IRR_USE_WINDOWS_CE_DEVICE_
@@ -38,7 +38,7 @@ ifeq ($(PLATFORM),posix)
 		PRJ_DEFS := $(PRJ_DEFS) _IRR_USE_LINUX_DEVICE_ _IRR_COMPILE_WITH_X11_
 	endif
 else
-	PRJ_DEFS := _IRR_STATIC_LIB_
+	PRJ_DEFS := _IRR_STATIC_LIB_  _IRR_MULTI_ZLIB_
 	ifeq ($(OS),wince)
 		#PRJ_OSLB := libGLES_CM
 		#PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OGLES1_
@@ -46,6 +46,8 @@ else
 	else
 		ifeq ($(BUILD),gcc)
 			PRJ_OSLB := opengl32
+		else
+			PRJ_OSLB := winmm.lib
 		endif
 #		PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OPENGL_
 	endif	

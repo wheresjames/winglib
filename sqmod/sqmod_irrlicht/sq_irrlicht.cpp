@@ -975,7 +975,8 @@ CSqirrTexture CSqIrrlicht::CreateTexture( long lWidth, long lHeight, int bMipMap
 	m_pDriver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, bMipMapping ? true : false );
 
 	// Create texture
-	CSqirrTexture tex( m_pDriver->addTexture( irr::core::dimension2d< D2D_TYPE >( lWidth, lHeight ), "Texture" /*, ECF_A8R8G8B8 */ ) );
+//	CSqirrTexture tex( m_pDriver->addTexture( irr::core::dimension2d< D2D_TYPE >( lWidth, lHeight ), "Texture" /*, ECF_A8R8G8B8 */ ) );
+	CSqirrTexture tex( m_pDriver->addTexture( irr::core::dimension2d< irr::u32 >( lWidth, lHeight ), "Texture" /*, ECF_A8R8G8B8 */ ) );
 
 	// Restore mip mapping state
 	m_pDriver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, bCurMipMapping ? true : false );
@@ -993,7 +994,8 @@ CSqirrTexture CSqIrrlicht::CreateRenderTexture( long lWidth, long lHeight, int b
 	m_pDriver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, bMipMapping ? true : false );
 
 	// Create texture
-	CSqirrTexture tex( m_pDriver->createRenderTargetTexture( irr::core::dimension2d< irr::s32 >( lWidth, lHeight ) ) );
+//	CSqirrTexture tex( m_pDriver->createRenderTargetTexture( irr::core::dimension2d< irr::s32 >( lWidth, lHeight ) ) );
+	CSqirrTexture tex( m_pDriver->addRenderTargetTexture( irr::core::dimension2d< irr::u32 >( lWidth, lHeight ) ) );
 
 	// Restore mip mapping state
 	m_pDriver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, bCurMipMapping ? true : false );

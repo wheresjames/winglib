@@ -6,7 +6,7 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_NAME := irrlicht
 PRJ_TYPE := lib
-PRJ_INCS := jpeg png tiff zlib
+PRJ_INCS := irrlicht/include jpeg png tiff zlib
 PRJ_LIBS := 
 # PRJ_DEFS := _IRR_COMPILE_WITH_OPENGL_
 
@@ -43,8 +43,16 @@ endif
 #-------------------------------------------------------------------
 
 export LOC_TAG := def
-LOC_INC_def := $(CFG_LIBROOT)/irrlicht/include
 LOC_SRC_def := $(CFG_LIBROOT)/irrlicht/source/Irrlicht
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := aes
+LOC_SRC_aes := $(CFG_LIBROOT)/irrlicht/source/Irrlicht/aesGladman
+include $(PRJ_LIBROOT)/build.mk
+
+export LOC_TAG := lzma
+LOC_CXX_lzma := c
+LOC_SRC_lzma := $(CFG_LIBROOT)/irrlicht/source/Irrlicht/lzma
 include $(PRJ_LIBROOT)/build.mk
 
 #-------------------------------------------------------------------

@@ -8,9 +8,9 @@ PRJ_NAME := sqmod_irrlicht
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/sqbind winglib/lib/oexlib \
 			SqPlus/include SqPlus/sqplus bullet/src \
-			freetype/include ftgl/src
+			freetype2/include ftgl/src
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel \
-			bullet freetype ftgl
+			bullet freetype2 ftgl bzip2
 PRJ_DEFS := 
 
 PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
