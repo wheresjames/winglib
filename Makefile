@@ -51,16 +51,6 @@ ifdef GUI
 	endif
 endif
 
-ifdef BUILDDEP
-	ifdef GUI
-		BUILDDIRS := dep/gui $(BUILDDIRS)
-	endif
-	ifdef GUI_ES
-		BUILDDIRS := dep/gui_es $(BUILDDIRS)
-	endif
-	BUILDDIRS := dep $(BUILDDIRS)
-endif
-
 .PHONY all: $(BUILDDIRS)
 
 .PHONY $(BUILDDIRS) :

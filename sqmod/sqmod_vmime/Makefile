@@ -1,4 +1,7 @@
 
+PRJ_RELROOT := ../..
+include $(PRJ_RELROOT)/buildpath.mk
+
 default_target: all
 
 #-------------------------------------------------------------------
@@ -19,8 +22,6 @@ PRJ_DEFS := VMIME_HAVE_MESSAGING_FEATURES VMIME_HAVE_FILESYSTEM_FEATURES
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
 PRJ_SUBROOT := _sqmod
-
-PRJ_LIBROOT := ../..
 
 #-------------------------------------------------------------------
 # Configure build

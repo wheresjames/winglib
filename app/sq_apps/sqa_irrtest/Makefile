@@ -1,4 +1,7 @@
 
+PRJ_RELROOT := ../../..
+include $(PRJ_RELROOT)/buildpath.mk
+
 default_target: all
 
 #-------------------------------------------------------------------
@@ -8,8 +11,6 @@ PRJ_SQRL := yes
 PRJ_NAME := sqa_irrtest
 
 SQMOD_STATIC := irrlicht
-
-PRJ_LIBROOT := ../../..
 
 #-------------------------------------------------------------------
 # Configure build

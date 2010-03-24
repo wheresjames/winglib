@@ -1,4 +1,7 @@
 
+PRJ_RELROOT := ../..
+include $(PRJ_RELROOT)/buildpath.mk
+
 default_target: all
 
 #-------------------------------------------------------------------
@@ -9,8 +12,6 @@ PRJ_NAME := task-list
 PRJ_DESC := Task list manager
 
 SQMOD_STATIC := http
-
-PRJ_LIBROOT := ../..
 
 #-------------------------------------------------------------------
 # Configure build

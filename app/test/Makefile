@@ -1,4 +1,7 @@
 
+PRJ_RELROOT := ../..
+include $(PRJ_RELROOT)/buildpath.mk
+
 default_target: all
 
 #-------------------------------------------------------------------
@@ -10,8 +13,6 @@ PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib 
 PRJ_OSLB := 
 PRJ_RESD := res res2
-
-PRJ_LIBROOT := ../..
 
 #-------------------------------------------------------------------
 # Configure build

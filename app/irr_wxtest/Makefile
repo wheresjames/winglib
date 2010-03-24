@@ -1,4 +1,7 @@
 
+PRJ_RELROOT := ../..
+include $(PRJ_RELROOT)/buildpath.mk
+
 default_target: all
 
 #-------------------------------------------------------------------
@@ -8,8 +11,6 @@ PRJ_NAME := irr_wxtest
 PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib irrlicht/include
 PRJ_LIBS := oexlib irrlicht cximage jpeg png tiff zlib
-
-PRJ_LIBROOT := ../..
 
 #-------------------------------------------------------------------
 # Configure build

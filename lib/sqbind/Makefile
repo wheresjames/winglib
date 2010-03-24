@@ -1,4 +1,7 @@
 
+PRJ_RELROOT := ../..
+include $(PRJ_RELROOT)/buildpath.mk
+
 default_target: all
 
 #-------------------------------------------------------------------
@@ -8,8 +11,6 @@ PRJ_NAME := sqbind
 PRJ_TYPE := lib
 PRJ_INCS := winglib/lib/oexlib SqPlus/include SqPlus/sqplus
 PRJ_LIBS := 
-
-PRJ_LIBROOT := ../..
 
 #-------------------------------------------------------------------
 # Configure build

@@ -1,4 +1,7 @@
 
+PRJ_RELROOT := ../..
+include $(PRJ_RELROOT)/buildpath.mk
+
 default_target: all
 
 #-------------------------------------------------------------------
@@ -11,8 +14,6 @@ PRJ_LIBS := oexlib
 PRJ_OSLB :=
  
 PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Stop
-
-PRJ_LIBROOT := ../..
 
 #-------------------------------------------------------------------
 # Configure build

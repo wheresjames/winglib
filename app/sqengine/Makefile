@@ -1,4 +1,7 @@
 
+PRJ_RELROOT := ../..
+include $(PRJ_RELROOT)/buildpath.mk
+
 default_target: all
 
 #-------------------------------------------------------------------
@@ -11,8 +14,6 @@ PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib
 PRJ_OSLB :=
  
 PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Idle SRV_Stop
-
-PRJ_LIBROOT := ../..
 
 ifdef SQMOD_STATIC
 	PRJ_INCS := $(PRJ_INCS) gdchart cell/lib

@@ -1,4 +1,7 @@
 
+PRJ_RELROOT := ../..
+include $(PRJ_RELROOT)/buildpath.mk
+
 default_target: all
 
 #-------------------------------------------------------------------
@@ -13,8 +16,6 @@ PRJ_LIBS := gstreamer glib xml zlib
 PRJ_DEFS := 
 PRJ_LIBP :=
 PRJ_OSLB :=
- 
-PRJ_LIBROOT := ../..
 
 #-------------------------------------------------------------------
 # Configure build

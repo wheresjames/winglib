@@ -1,4 +1,7 @@
 
+PRJ_RELROOT := ../..
+include $(PRJ_RELROOT)/buildpath.mk
+
 default_target: all
 
 #-------------------------------------------------------------------
@@ -9,8 +12,6 @@ PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib
 PRJ_OSLB :=
-
-PRJ_LIBROOT := ../..
 
 ifdef SQMOD_STATIC
 	PRJ_INCS := $(PRJ_INCS) gdchart cell/lib

@@ -1,4 +1,7 @@
 
+PRJ_RELROOT := ../..
+include $(PRJ_RELROOT)/buildpath.mk
+
 default_target: all
 
 #-------------------------------------------------------------------
@@ -9,8 +12,6 @@ PRJ_TYPE := exe
 PRJ_INCS := 
 PRJ_LIBS := 
 PRJ_OSLB := 
-
-PRJ_LIBROOT := ../..
 
 #-------------------------------------------------------------------
 # Configure build
