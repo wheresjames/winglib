@@ -59,10 +59,13 @@ function _init() : ( _g )
 			utube1		= [ "utube1",		"rtsp://v2.cache1.c.youtube.com/CkgLENy73wIaPwlnoDu0pt7zDRMYDSANFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNaDkNsaWNrVGh1bWJuYWlsYOmkotHXgfvJRgw=/0/0/0/video.3gp" ],
 //			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half" ]
 			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ]
+			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200"
+										    + "&fps=5&quality=15&doublescan=0"
+										    + "&ssn=" + _self.gmt_time().tointeger() + "&id=" + ( _self.gmt_time() + 1 ).tointeger() ],
 
 		};
 
-	StartStream( rtsp_video[ "ser" ] );
+	StartStream( rtsp_video[ "arecont" ] );
 
 	_self.set_timer( ".", 15, "OnTimer" );
 
@@ -72,7 +75,9 @@ function StartStream( inf ) : ( _g )
 {
 	_g.rtsp = CFfContainer();
 	if ( !_g.rtsp.Open( inf[ 1 ], CSqMulti() ) )
+	{	_self.echo( "Failed to open link : " + inf[ 1 ] );
 		return 0;
+	} // end if
 
 	_self.echo( "Video File : " + _g.rtsp.getWidth() + "x" + _g.rtsp.getHeight() );
 

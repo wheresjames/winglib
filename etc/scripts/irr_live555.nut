@@ -18,6 +18,9 @@ class CGlobal
 
 	w = 0;
 	h = 0;
+
+	rec_avi = 0;
+
 };
 
 local _g = CGlobal();
@@ -71,18 +74,19 @@ function _init() : ( _g )
 //			ser			= [ "ser", 			"rtsp://192.168.2.251" ]
 			arecont		= [ "arecont",		"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ],
 //			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&x0=0&y0=0&x1=1600&y1=1200&qp=30&ssn=1&doublescan=0" ],
-			arecont		= [ "arecont",		"rtsp://192.168.2.251/image?res=half&x0=0&y0=0&x1=1600&y1=1200"
+			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200"
 										    + "&fps=5&quality=15&doublescan=0"
 										    + "&ssn=" + _self.gmt_time().tointeger() + "&id=" + ( _self.gmt_time() + 1 ).tointeger() ],
 
-			panasonic	= [ "panasonic",	"rtsp://192.168.2.57/Mediainput/mpeg4" ]
+//			panasonic	= [ "panasonic",	"rtsp://192.168.2.251/Mediainput/mpeg4" ]
+			panasonic	= [ "panasonic",	"rtsp://192.168.2.251" ]
 
 		};
 
 	// Check TCP Port 554 and UDP ports 6970-9999
 
-//	StartStream( rtsp_video[ "panasonic" ], 0, 0 );
-	StartStream( rtsp_video[ "arecont" ], 800, 600 );
+	StartStream( rtsp_video[ "panasonic" ], 0, 0 );
+//	StartStream( rtsp_video[ "arecont" ], 800, 600 );
 //	StartStream( rtsp_video[ "arecont" ], 800, 592 );
 //	StartStream( rtsp_video[ "nasa" ], 0, 0 );
 
@@ -115,7 +119,9 @@ function UpdateVideo() : ( _g )
 	} // end if
 
 	if ( !_g.rtsp.isOpen() )
+	{	_g.quit = 1;
 		return 0;
+	} // end if
 
 	// Do we need to create the video decoder?
 	if ( !_g.dec && _g.rtsp.isVideo() )
@@ -124,7 +130,7 @@ function UpdateVideo() : ( _g )
 		_g.dec = CFfDecoder();
 		if ( !_g.dec.Create( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ), CFfConvert().PIX_FMT_YUV420P,
 							 _g.w, _g.h, 5, 2000000, CSqMulti( "cmp=-2" ) ) )
-			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getVideoCodecName() );
+			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getVideoCodecName() ), _g.quit = 1;
 
 	} // end if
 
@@ -135,9 +141,12 @@ function UpdateVideo() : ( _g )
 		_g.adec = CFfAudioDecoder();
 		if ( !_g.adec.Create( CFfAudioDecoder().LookupCodecId( _g.rtsp.getAudioCodecName() ), CFfConvert().PIX_FMT_YUV420P,
 							 0, 0, 0 ) )
-			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getAudioCodecName() );
+			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getAudioCodecName() ), _g.quit = 1;
 
 	} // end if
+
+	if ( _g.quit )
+		return 0;
 
 	if ( !_g.dec && !_g.adec )
 	{	_self.echo( "Closing stream because there are no decoders" );
@@ -151,6 +160,22 @@ function UpdateVideo() : ( _g )
 	if ( _g.dec && _g.rtsp.LockVideo( frame, CSqMulti() ) )
 	{
 		_self.echo( "Video data : " + frame.getUsed() );
+
+		if ( !_g.rec_avi )
+		{
+			_g.rec_avi = CFfContainer();
+			if ( !_g.rec_avi.Create( "irr_live555.avi", "", CSqMulti() ) )
+				_self.echo( "Failed to create avi" );
+			else if ( 0 > _g.rec_avi.AddVideoStream( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ),
+													 _g.dec.getWidth(), _g.dec.getHeight(), 30 ) )
+				_self.echo( "Failed to add video stream" );
+			else if ( !_g.rec_avi.InitWrite() )
+				_self.echo( "Failed to initiailze avi" );
+
+		} // end if
+
+		if ( !_g.rec_avi.WriteFrame( frame, CSqMulti() ) )
+			_self.echo( "Failed to write to avi file" );
 
 		if ( !_g.tex )
 		{
