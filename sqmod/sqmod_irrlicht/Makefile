@@ -10,11 +10,13 @@ default_target: all
 PRJ_NAME := sqmod_irrlicht
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/sqbind winglib/lib/oexlib \
-			SqPlus/include SqPlus/sqplus bullet/src \
+			SqPlus/include SqPlus/sqplus \
 			freetype2/include ftgl/src
+#			bullet/src 
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel \
-			bullet freetype2 ftgl bzip2
-PRJ_DEFS := 
+			freetype2 ftgl
+#			bullet
+PRJ_DEFS := OEX_NOBULLET
 
 PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
@@ -31,10 +33,10 @@ endif
 
 ifeq ($(PROC),arm)
 	PRJ_INCS := $(PRJ_INCS) irrlicht-es/include
-	PRJ_LIBS := $(PRJ_LIBS) irrlicht-es cximage jpeg png tiff zlib
+	PRJ_LIBS := $(PRJ_LIBS) irrlicht-es cximage jpeg png tiff zlib bzip2
 else
 	PRJ_INCS := $(PRJ_INCS) irrlicht/include
-	PRJ_LIBS := $(PRJ_LIBS) irrlicht cximage jpeg png tiff zlib
+	PRJ_LIBS := $(PRJ_LIBS) irrlicht cximage jpeg png tiff zlib bzip2
 endif
 
 #_IRR_USE_WINDOWS_CE_DEVICE_
@@ -50,7 +52,9 @@ else
 		PRJ_DEFS := $(PRJ_DEFS) OEX_NOBULLET
 	else
 		ifeq ($(BUILD),gcc)
-			PRJ_OSLB := opengl32
+			PRJ_OSLB := opengl32 winmm
+		else
+			PRJ_OSLB := winmm.lib
 		endif
 #		PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OPENGL_
 	endif	

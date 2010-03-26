@@ -88,7 +88,8 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height, in
 #else
 	param.Bits = 32;
 	param.AntiAlias = true;
-#	if defined( OEX_WINDOWS )
+
+#	if defined( OEX_WINDOWS ) && defined( _IRR_COMPILE_WITH_DIRECT3D_9_ )
 		param.DriverType = irr::video::EDT_DIRECT3D9;
 #	else
 		param.DriverType = irr::video::EDT_OPENGL;

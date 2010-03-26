@@ -25,7 +25,7 @@ else
 
 ifeq ($(PROC),arm)
 	PRJ_INCS := $(PRJ_INCS) irrlicht-es/include
-	PRJ_LIBS := $(PRJ_LIBS) irrlicht-es jpeg png tiff zlib
+	PRJ_LIBS := $(PRJ_LIBS) irrlicht-es jpeg png tiff zlib bzip2
 else
 	PRJ_INCS := $(PRJ_INCS) irrlicht/include
 	PRJ_LIBS := $(PRJ_LIBS) irrlicht jpeg png tiff zlib bzip2
@@ -46,7 +46,7 @@ else
 		#PRJ_INCS := $(PRJ_INCS) ogles/include
 	else
 		ifeq ($(BUILD),gcc)
-			PRJ_OSLB := opengl32
+			PRJ_OSLB := opengl32 winmm
 		else
 			PRJ_OSLB := winmm.lib
 		endif
