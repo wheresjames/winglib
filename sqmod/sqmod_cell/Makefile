@@ -8,6 +8,7 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_cell
+PRJ_DEPS := cell
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus cell/lib
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cell cximage jpeg png tiff zlib
@@ -22,11 +23,6 @@ PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-ifeq ($(PLC),)
-UNSUPPORTED := Set make option PLC=1 to build
-include $(PRJ_LIBROOT)/unsupported.mk
-else
-
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------
@@ -38,4 +34,3 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-endif

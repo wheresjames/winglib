@@ -8,23 +8,19 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_mysql
+PRJ_DEPS := mysql
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib
 
 PRJ_SUBROOT := _sqmod
- 
+
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
 #-------------------------------------------------------------------
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
-
-ifndef BUILD_MYSQL
-UNSUPPORTED := Set make option BUILD_MYSQL=1 to build
-include $(PRJ_LIBROOT)/unsupported.mk
-else
 
 ifeq ($(PLATFORM),windows)
 	PRJ_INCS := $(PRJ_INCS) mysql/include
@@ -50,5 +46,4 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-endif
 

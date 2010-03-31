@@ -8,6 +8,7 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_live555
+PRJ_DEPS := live555
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus ffmpeg \
 			live555/liveMedia/include live555/UsageEnvironment/include \
@@ -26,11 +27,6 @@ PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-ifndef BUILD_LIVE555
-UNSUPPORTED := Set make option BUILD_LIVE555=1 to build
-include $(PRJ_LIBROOT)/unsupported.mk
-else
-
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------
@@ -41,6 +37,4 @@ include $(PRJ_LIBROOT)/build.mk
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
-
-endif
 

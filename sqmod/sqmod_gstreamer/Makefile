@@ -8,6 +8,7 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_gstreamer
+PRJ_DEPS := gstreamer
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 			gstreamer/gstreamer winglib/dep/etc/gstreamer/inc/posix \
@@ -29,11 +30,6 @@ PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-ifndef BUILD_GSTREAMER
-UNSUPPORTED := Set make option BUILD_GSTREAMER=1 to build
-include $(PRJ_LIBROOT)/unsupported.mk
-else
-
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------
@@ -45,4 +41,4 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-endif
+

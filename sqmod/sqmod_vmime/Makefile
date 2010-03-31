@@ -8,9 +8,10 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_vmime
+PRJ_DEPS := vmime
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
-			libvmime
+			vmime/vmime
 
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib \
 		    vmime 
@@ -27,11 +28,6 @@ PRJ_SUBROOT := _sqmod
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
-
-ifndef BUILD_VMIME
-UNSUPPORTED := Set make option BUILD_VMIME=1 to build
-include $(PRJ_LIBROOT)/unsupported.mk
-else
 
 ifeq ($(PLATFORM),windows)
 	PRJ_INCS := winglib/dep/etc/vmime/inc/windows $(PRJ_INCS)
@@ -50,6 +46,4 @@ include $(PRJ_LIBROOT)/build.mk
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
-
-endif
 

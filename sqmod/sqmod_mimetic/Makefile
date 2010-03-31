@@ -8,6 +8,7 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_mimetic
+PRJ_DEPS := mimetic
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 			mimetic
@@ -25,11 +26,6 @@ PRJ_SUBROOT := _sqmod
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-ifndef BUILD_MIMETIC
-UNSUPPORTED := Set make option BUILD_MIMETIC=1 to build
-include $(PRJ_LIBROOT)/unsupported.mk
-else
-
 #-------------------------------------------------------------------
 # Source files
 #-------------------------------------------------------------------
@@ -42,5 +38,4 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-endif
 

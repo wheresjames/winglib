@@ -8,6 +8,7 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := gstest
+PRJ_DEPS := gstreamer
 PRJ_TYPE := exe
 PRJ_INCS := gstreamer/gstreamer winglib/dep/etc/gstreamer/inc/posix \
 			glib glib/glib glib/gmodule glib/gobject \
@@ -22,11 +23,6 @@ PRJ_OSLB :=
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-ifndef BUILD_GSTREAMER
-UNSUPPORTED := Set make option BUILD_GSTREAMER=1 to build
-include $(PRJ_LIBROOT)/unsupported.mk
-else
-
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------
@@ -38,4 +34,4 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-endif
+

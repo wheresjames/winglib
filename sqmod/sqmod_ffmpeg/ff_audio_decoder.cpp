@@ -68,6 +68,9 @@ int CFfAudioDecoder::Create( int x_nCodec, int fmt )
 //	m_pCodecContext->strict_std_compliance = cmp;
 //	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
 
+	if( 0 != ( m_pCodec->capabilities & CODEC_CAP_TRUNCATED ) )
+		m_pCodecContext->flags |= CODEC_FLAG_TRUNCATED;
+
 	int res = avcodec_open( m_pCodecContext, m_pCodec );
 	if ( 0 > res )
 	{	oexERROR( res, oexT( "avcodec_open() failed" ) );
@@ -171,7 +174,7 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *
 #else
 
 	int gpp = 0;
-	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, in->_Ptr(), in->getUsed() );
+	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (uint8_t*)in->_Ptr(), in->getUsed() );
 	if ( 0 >= used )
 	{	oexEcho( "!used" );
 		return -1;

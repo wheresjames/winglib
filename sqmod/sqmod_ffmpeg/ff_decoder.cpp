@@ -92,8 +92,9 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
     m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
 	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
 
-	m_pCodecContext->flags = CODEC_FLAG_LOW_DELAY;
+//	m_pCodecContext->flags = CODEC_FLAG_LOW_DELAY;
 
+/*
     if ( CODEC_ID_H264 == x_nCodec )
     {
 		oexEcho( "!!! H264 Codec Settings" );
@@ -122,6 +123,9 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
         m_pCodecContext->flags2 |= CODEC_FLAG2_BRDO | CODEC_FLAG2_MEMC_ONLY | CODEC_FLAG2_DROP_FRAME_TIMECODE | CODEC_FLAG2_SKIP_RD | CODEC_FLAG2_CHUNKS;
 
     } // end if
+*/
+	if( 0 != ( m_pCodec->capabilities & CODEC_CAP_TRUNCATED ) )
+		m_pCodecContext->flags |= CODEC_FLAG_TRUNCATED;
 
     int res = avcodec_open( m_pCodecContext, m_pCodec );
 	if ( 0 > res )
@@ -174,7 +178,7 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 	int nPadding = in->Size() - in->getUsed();
 	if ( 0 < nPadding )
 	{
-		// Don't zero mor than twice the padding size
+		// Don't zero more than twice the padding size
 		if ( nPadding > ( FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
 			nPadding = FF_INPUT_BUFFER_PADDING_SIZE * 2;
 
@@ -183,12 +187,14 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 
 	} // end if
 
-	if ( m_pFrame )
-	{	av_free( m_pFrame );
-		m_pFrame = oexNULL;
-	} // end if
+//	if ( m_pFrame )
+//	{	av_free( m_pFrame );
+//		m_pFrame = oexNULL;
+//	} // end if
 
-	m_pFrame = avcodec_alloc_frame();
+	if ( !m_pFrame )
+		m_pFrame = avcodec_alloc_frame();
+
 	if ( !m_pFrame )
 		return 0;
 

@@ -8,6 +8,7 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_gdchart
+PRJ_DEPS := gdchart
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind \
 			SqPlus/include SqPlus/sqplus gdchart

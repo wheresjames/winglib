@@ -72,7 +72,7 @@ function _init() : ( _g )
 
 //			ser			= [ "ser", 			"rtsp://192.168.2.87" ]
 //			ser			= [ "ser", 			"rtsp://192.168.2.251" ]
-			arecont		= [ "arecont",		"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ],
+//			arecont		= [ "arecont",		"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ],
 //			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&x0=0&y0=0&x1=1600&y1=1200&qp=30&ssn=1&doublescan=0" ],
 			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200"
 										    + "&fps=5&quality=15&doublescan=0"
@@ -87,8 +87,8 @@ function _init() : ( _g )
 
 //	StartStream( rtsp_video[ "panasonic" ], 0, 0 );
 //	StartStream( rtsp_video[ "arecont" ], 800, 600 );
-//	StartStream( rtsp_video[ "arecont" ], 800, 592 );
-	StartStream( rtsp_video[ "nasa" ], 0, 0 );
+	StartStream( rtsp_video[ "arecont" ], 800, 592 );
+//	StartStream( rtsp_video[ "nasa" ], 0, 0 );
 
 	_self.set_timer( ".", 15, "OnTimer" );
 

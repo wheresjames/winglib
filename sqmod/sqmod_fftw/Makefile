@@ -8,6 +8,7 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_fftw
+PRJ_DEPS := fftw
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus fftw/api
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib fftw fftw_rdft
@@ -22,11 +23,6 @@ PRJ_SUBROOT := _sqmod
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-ifndef BUILD_FFTW
-UNSUPPORTED := Set make option BUILD_FFTW=1 to build
-include $(PRJ_LIBROOT)/unsupported.mk
-else
-
 #-------------------------------------------------------------------
 # Source files
 #-------------------------------------------------------------------
@@ -39,5 +35,4 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-endif
 

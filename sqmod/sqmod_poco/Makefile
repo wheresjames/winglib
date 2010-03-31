@@ -8,9 +8,10 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_poco
+PRJ_DEPS := poco
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
-			poco/Poco/Foundation/include poco/Poco/Net/include 
+			poco/Foundation/include poco/Net/include 
 
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib poco
 PRJ_DEFS := POCO_NO_AUTOMATIC_LIBS
@@ -23,11 +24,6 @@ PRJ_SUBROOT := _sqmod
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
-
-ifndef BUILD_POCO
-UNSUPPORTED := Set make option BUILD_POCO=1 to build
-include $(PRJ_LIBROOT)/unsupported.mk
-else
 
 ifeq ($(PLATFORM),windows)
 	ifneq ($(BUILD),gcc)
@@ -49,4 +45,4 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-endif
+

@@ -8,6 +8,7 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_irrlicht
+PRJ_DEPS := irrlicht
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/sqbind winglib/lib/oexlib \
 			SqPlus/include SqPlus/sqplus \

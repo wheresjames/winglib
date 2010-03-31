@@ -8,6 +8,7 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_curl
+PRJ_DEPS := curl
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus curl/include
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel curl cximage jpeg png tiff zlib
@@ -21,11 +22,6 @@ PRJ_SUBROOT := _sqmod
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
-
-ifeq ($(BUILD_CURL),)
-	UNSUPPORTED := Set BUILD_CURL=1 to build this project
-	include $(PRJ_LIBROOT)/unsupported.mk
-else
 
 ifeq ($(PLATFORM),posix)
 	PRJ_OSLB := ssl crypto idn ldap
@@ -47,5 +43,4 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-endif
 
