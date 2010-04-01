@@ -11,7 +11,7 @@ PRJ_NAME := sqmod_ffmpeg
 PRJ_DEPS := ffmpeg
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus ffmpeg
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage ffmpeg jpeg png tiff zlib			
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage ffmpeg jpeg png tiff zlib x264
 PRJ_DEFS := HAVE_AV_CONFIG_H=1
 PRJ_LIBP :=
 PRJ_OSLB :=
