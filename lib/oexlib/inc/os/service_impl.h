@@ -42,7 +42,7 @@ public:
 	CServiceImpl();
 
 	/// Destructor
-	~CServiceImpl();
+	virtual ~CServiceImpl();
 
 	/// Sets the command line
 	void SetCommandLine( int argc, const char **argv );

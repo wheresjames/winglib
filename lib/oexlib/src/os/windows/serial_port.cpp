@@ -133,7 +133,8 @@ oexBOOL CSerialPort::SetStatus()
 
 	unsigned long ulCommErr;
 	oexBOOL success = SetCommState( pS->hPort, &pS->dcb );
-	oexRESULT err = GetLastError();
+	if ( !success )
+		oexERROR( GetLastError(), oexT( "SetCommState() failed" ) );		
 
 	SetupComm( pS->hPort, m_nRxBufferSize, m_nTxBufferSize );
 

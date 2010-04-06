@@ -120,11 +120,13 @@ static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, SOCKADDR_IN *x_pSai 
 /**
 	\param [in] x_pIa	-	Address information
 	\param [in] x_pSai 	-	Structure to be filled in
-*/
+* /
+/ *
 static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, SOCKADDR *x_pSa )
 {_STT();
 	return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa ); 
 }
+*/
 
 //#endif
 
@@ -605,7 +607,8 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 			if ( x_uTimeout )
 			{
 				// Wait for event
-				UINT uRet = WaitForSingleObject( m_hSocketEvent, x_uTimeout );
+//				UINT uRet = 
+					WaitForSingleObject( m_hSocketEvent, x_uTimeout );
 
 				// Check for timeout or error
 //		        if ( uRet != WAIT_OBJECT_0 )
@@ -972,13 +975,15 @@ CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
 	{
 		// Allocate buffer
 		CStr8 sBuf;
-		oexCHAR *pBuf = sBuf.Allocate( x_uMax );
+		if ( sBuf.Allocate( x_uMax ) )
+		{
+			// Attempt to read data
+			oexUINT uRead = RecvFrom( sBuf._Ptr(), x_uMax, oexNULL, x_uFlags );
 
-		// Attempt to read data
-		oexUINT uRead = RecvFrom( sBuf._Ptr(), x_uMax, oexNULL, x_uFlags );
-
-		// Accept as the length
-		sBuf.SetLength( uRead );
+			// Accept as the length
+			sBuf.SetLength( uRead );
+			
+		} // end if
 
 		return sBuf;
 
@@ -994,7 +999,7 @@ CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
 
 	// Read all available data
 	while ( 0 < ( uRead = RecvFrom( sBuf._Ptr( uOffset ), oexSTRSIZE, oexNULL, x_uFlags ) )
-			&& uRead >= oexSTRSIZE )
+			&& uRead >= (oexUINT)oexSTRSIZE )
 	{
 		// Allocate more space
 		uOffset += uRead;
@@ -1066,13 +1071,15 @@ CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
 	{
 		// Allocate buffer
 		CStr8 sBuf;
-		oexCHAR *pBuf = sBuf.Allocate( x_uMax );
+		if ( sBuf.Allocate( x_uMax ) )
+		{
+			// Attempt to read data
+			oexUINT uRead = Recv( sBuf._Ptr(), x_uMax, oexNULL, x_uFlags );
 
-		// Attempt to read data
-		oexUINT uRead = Recv( sBuf._Ptr(), x_uMax, oexNULL, x_uFlags );
-
-		// Accept as the length
-		sBuf.SetLength( uRead );
+			// Accept as the length
+			sBuf.SetLength( uRead );
+			
+		} // end if
 
 		return sBuf;
 
@@ -1102,9 +1109,9 @@ CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
 
 	// Read all available data
 	while ( 0 < ( uRead = Recv( sBuf._Ptr( uOffset ), oexSTRSIZE, oexNULL, x_uFlags ) )
-			&& uRead >= oexSTRSIZE )
+			&& uRead >= (oexUINT)oexSTRSIZE )
 	{
-		if ( uRead > oexSTRSIZE )
+		if ( uRead > (oexUINT)oexSTRSIZE )
 			uRead = oexSTRSIZE;
 
 		// Allocate more space

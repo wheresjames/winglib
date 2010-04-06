@@ -94,27 +94,23 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 //	m_pCodecContext->flags = CODEC_FLAG_LOW_DELAY;
 
-/*
+
     if ( CODEC_ID_H264 == x_nCodec )
     {
 		oexEcho( "!!! H264 Codec Settings" );
-		m_pCodecContext->bits_per_coded_sample = 32;
-	    m_pCodecContext->gop_size = 10;
-	    m_pCodecContext->dct_algo = 0;
-	    m_pCodecContext->me_pre_cmp = 2;
-	    m_pCodecContext->cqp = 26;
-	    m_pCodecContext->me_method = 7;
-	    m_pCodecContext->qmin = 3;
-	    m_pCodecContext->qmax = 31;
-	    m_pCodecContext->max_qdiff = 3;
-	    m_pCodecContext->max_b_frames = 1;
-	    m_pCodecContext->qcompress = 0.5;
-	    m_pCodecContext->nsse_weight = 8;
-	    m_pCodecContext->i_quant_factor = 0.8;
-	    m_pCodecContext->b_quant_factor = 1.25;
-	    m_pCodecContext->b_quant_offset = 1.25;
-//	    m_pCodecContext-> = ;
+/*
+		m_pCodecContext->extradata_size = 19;
+		m_pCodecContext->extradata = (uint8_t*)av_mallocz( m_pCodecContext->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE );
 
+        m_pCodecContext->profile = 66;
+
+        m_pCodecContext->scenechange_factor = 0;
+
+		m_pCodecContext->thread_count = 1;
+		m_pCodecContext->ticks_per_frame = 2;
+		m_pCodecContext->use_lpc = -1;
+*/
+//        m_pCodecContext->strict_std_compliance = -2;
         m_pCodecContext->workaround_bugs = FF_BUG_AUTODETECT;
         m_pCodecContext->error_recognition = FF_ER_AGGRESSIVE;
         m_pCodecContext->idct_algo = FF_IDCT_H264;
@@ -123,7 +119,7 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
         m_pCodecContext->flags2 |= CODEC_FLAG2_BRDO | CODEC_FLAG2_MEMC_ONLY | CODEC_FLAG2_DROP_FRAME_TIMECODE | CODEC_FLAG2_SKIP_RD | CODEC_FLAG2_CHUNKS;
 
     } // end if
-*/
+
 	if( 0 != ( m_pCodec->capabilities & CODEC_CAP_TRUNCATED ) )
 		m_pCodecContext->flags |= CODEC_FLAG_TRUNCATED;
 

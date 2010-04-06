@@ -358,7 +358,7 @@ public:
 	//==============================================================
 	/// Returns
 	oexINT GetActivityTimeout()
-	{	return m_toActivity.Remaining();
+	{	return (oexINT)m_toActivity.Remaining();
 	}
 
 	//==============================================================

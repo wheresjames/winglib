@@ -11,6 +11,8 @@ class CGlobal
 	tex = 0;
 
 	rtsp = 0;
+
+	frames = 0;
 };
 
 local _g = CGlobal();
@@ -57,15 +59,19 @@ function _init() : ( _g )
 			espana		= [ "Espana", 		"rtsp://video3.multicasttech.com/EspanaFree3GPP296.sdp" ],
 
 			utube1		= [ "utube1",		"rtsp://v2.cache1.c.youtube.com/CkgLENy73wIaPwlnoDu0pt7zDRMYDSANFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNaDkNsaWNrVGh1bWJuYWlsYOmkotHXgfvJRgw=/0/0/0/video.3gp" ],
-//			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half" ]
-			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ]
-			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200"
-										    + "&fps=5&quality=15&doublescan=0"
-										    + "&ssn=" + _self.gmt_time().tointeger() + "&id=" + ( _self.gmt_time() + 1 ).tointeger() ],
+//			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half" ],
+			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ],
+			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200" ],
+//			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200"
+//										    + "&fps=5&quality=15" ],
+//										    + "&ssn=" + _self.gmt_time().tointeger() + "&id=" + ( _self.gmt_time() + 1 ).tointeger() ],
+//			panasonic	= [ "panasonic",	"rtsp://192.168.2.251" ]
+//			panasonic	= [ "panasonic",	"rtsp://192.168.2.57/Mediainput/mpeg4" ]
 
 		};
 
 	StartStream( rtsp_video[ "arecont" ] );
+//	StartStream( rtsp_video[ "nasa" ] );
 
 	_self.set_timer( ".", 15, "OnTimer" );
 
@@ -91,6 +97,11 @@ function UpdateVideo() : ( _g )
 {
 	if ( !_g.rtsp.isOpen() )
 		return;
+
+	_g.frames++;
+
+//	if ( 1 < _g.frames )
+//		return;
 
 	local buf = _g.tex.Lock();
 	if ( buf.getUsed() )

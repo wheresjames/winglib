@@ -14,7 +14,11 @@ public:
 	/// Destructor
 	virtual ~CFfContainer() { Destroy(); }
 
+	/// Frees all resources
 	void Destroy();
+
+	/// Closes the stream without releasing codecs
+	int CloseStream();
 
 	/// Open link
 	int Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m );
@@ -24,6 +28,9 @@ public:
 
 	/// Reads and decodes a frame
 	int DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
+
+	/// Decodes a frame from the specified buffer
+	int DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m );
 
 	/// Creates a container
 	int Create( const sqbind::stdString &sUrl, const sqbind::stdString &sType, sqbind::CSqMulti *m );

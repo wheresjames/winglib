@@ -8,6 +8,7 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := wx_webkit
+PRJ_DEPS := WebKit
 PRJ_TYPE := exe
 PRJ_LIBS := oexlib
 PRJ_INCS := winglib/lib/oexlib curl/include WebKit/WebKit/win

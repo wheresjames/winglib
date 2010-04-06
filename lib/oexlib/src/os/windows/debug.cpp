@@ -282,7 +282,8 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 
 
 	// Add each thread stack
-	while ( CStackTrace::CStack *p = pSt->Next( &i ) )
+	CStackTrace::CStack *p = oexNULL;
+	while ( p = pSt->Next( &i ) )
 	{
 		try
 		{

@@ -17,7 +17,7 @@ extern "C"
 
 int snd_strerror( const char *p )
 {_STT();
-	return 0; 
+	return 0;
 }
 }
 
@@ -151,6 +151,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, isOpen )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, ReadFrame )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, DecodeFrame )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, DecodeFrameBin )
 
 	SQBIND_MEMBER_FUNCTION( CFfContainer, Create )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, InitWrite )
@@ -158,6 +159,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, WriteFrame )
 
 	SQBIND_MEMBER_FUNCTION( CFfContainer, Destroy )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, CloseStream )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getWidth )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getHeight )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoFormat )

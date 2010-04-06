@@ -253,8 +253,6 @@ int CServiceImpl::RunService( int argc, const char** argv, oexCSTR pName, oexCST
 
 	int nRet = pInstance->OnRunService( argc, argv, pName, pDesc );
 
-	oexUINT();
-
 	return nRet;
 }
 
@@ -420,7 +418,7 @@ void CServiceImpl::OnServiceMain( int argc, const char** argv )
 	int nErr = OnInitService();
 	if ( 0 > nErr )
 	{	g_ss.dwCurrentState = SERVICE_STOPPED;
-		g_ss.dwWin32ExitCode = -1;
+		g_ss.dwWin32ExitCode = (DWORD)-1;
 		SetServiceStatus ( (SERVICE_STATUS_HANDLE)m_hService, &g_ss );
 		return;
 	} // end if

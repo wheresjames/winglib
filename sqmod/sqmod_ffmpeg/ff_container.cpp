@@ -19,14 +19,30 @@ CFfContainer::CFfContainer()
 void CFfContainer::Destroy()
 {_STT();
 
+	CloseStream();
+
+	if ( m_pkt.data )
+		av_free_packet( &m_pkt );
+
+	if ( m_pCodecContext )
+		avcodec_close( m_pCodecContext );
+
+	m_pCodecContext = oexNULL;
+	m_pFrame = oexNULL;
+	m_nVideoStream = -1;
+	m_nAudioStream = -1;
+	m_nWrite = 0;
+	m_nRead = 0;
+	m_bKeyRxd = 0;
+	m_nFrames = 0;
+	m_buf.Free();
+	oexZero( m_pkt );
+}
+
+int CFfContainer::CloseStream()
+{_STT();
 	if ( m_nRead )
 	{
-		if ( m_pkt.data )
-			av_free_packet( &m_pkt );
-
-		if ( m_pCodecContext )
-			avcodec_close( m_pCodecContext );
-
 		if ( m_pFormatContext )
 			av_close_input_file( m_pFormatContext );
 
@@ -58,17 +74,9 @@ void CFfContainer::Destroy()
 	} // end else if
 
 	m_pFormatContext = oexNULL;
-	m_pCodecContext = oexNULL;
-	m_pFrame = oexNULL;
-	m_nVideoStream = -1;
-	m_nAudioStream = -1;
-	m_nWrite = 0;
-	m_nRead = 0;
-	m_bKeyRxd = 0;
-	m_nFrames = 0;
-	m_buf.Free();
-	oexZero( m_pkt );
+
 }
+
 
 int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 {_STT();
@@ -149,15 +157,18 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 		 &&  m_pFormatContext->streams[ m_nVideoStream ]->codec )
 	{
 		m_pCodecContext = m_pFormatContext->streams[ m_nVideoStream ]->codec;
-//		m_pCodecContext->workaround_bugs |= FF_BUG_AUTODETECT;
-//		m_pCodecContext->error_concealment = FF_EC_GUESS_MVS;
-//		m_pCodecContext->error_recognition = FF_ER_CAREFUL;
 		AVCodec *pCodec = avcodec_find_decoder( m_pCodecContext->codec_id );
 		if ( !pCodec )
 			m_pCodecContext = oexNULL;
 
-		else if ( 0 > avcodec_open( m_pCodecContext, pCodec ) )
-				m_pCodecContext = oexNULL;
+		m_pCodecContext->workaround_bugs |= FF_BUG_AUTODETECT;
+		m_pCodecContext->error_concealment = FF_EC_GUESS_MVS;
+		m_pCodecContext->error_recognition = FF_ER_CAREFUL;
+		if( pCodec->capabilities & CODEC_CAP_TRUNCATED )
+			m_pCodecContext->flags |= CODEC_FLAG_TRUNCATED;
+
+		if ( 0 > avcodec_open( m_pCodecContext, pCodec ) )
+			m_pCodecContext = oexNULL;
 
 	} // end if
 
@@ -179,7 +190,10 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 
 	int res = av_read_frame( m_pFormatContext, &m_pkt );
 	if ( res )
+	{	oexSHOW( m_pkt.size );
+		oexEcho( "no frame" );
 		return -1;
+	} // end if
 
 	if ( m )
 	{
@@ -192,13 +206,6 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 		(*m)[ oexT( "duration" ) ].set( oexMks( m_pkt.duration ).Ptr() );
 //		(*m)[ oexT( "convergence_duration" ) ].set( oexMks( pkt.convergence_duration ).Ptr() );
 
-	} // end if
-
-	// Waiting key frame?
-	if ( !m_bKeyRxd )
-	{	if ( 0 == ( m_pkt.flags & PKT_FLAG_KEY ) )
-			return -1;
-		m_bKeyRxd = 1;
 	} // end if
 
 	if ( dat )
@@ -223,23 +230,54 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 
 	} while ( res != stream );
 
-//	oexPrintf( oexMks( m_pkt.flags, " : ", m_pkt.size, " : ", m_buf.getUsed(), "    " ).Ptr() );
-//	oex::os::CSys::Flush_stdout();
+	// Waiting key frame?
+	if ( !m_bKeyRxd )
+	{	if ( 0 == ( m_pkt.flags & PKT_FLAG_KEY ) )
+			return -1;
+		m_bKeyRxd = 1;
+	} // end if
+
+	oexPrintf( oexMks( m_pkt.flags, " : ", m_pkt.size, " : ", m_buf.getUsed(), "    " ).Ptr() );
+	oex::os::CSys::Flush_stdout();
 
 	if ( 0 != ( m_pkt.flags & PKT_FLAG_KEY ) )
 		oexEcho( " key frame" );
-//	else if ( m_pkt.size > 2000 )
-//		oexEcho( " large" );
+	else
+		oexEcho( " i frame" );
 
-	// Data left over from last time?
-	if ( m_buf.getUsed() )
+//	if ( m_pkt.size > 150000 || m_pkt.size < 140000 )
+//	{
+//		oexEcho( "bad packet" );
+//		return -1;
+//	} // end if
+
+/*
+	m_buf.setUsed( 0 );
+
+	// Ensure buffer size
+	if ( ( m_buf.Size() - m_buf.getUsed() ) < ( m_pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) )
+		m_buf.Allocate( 2 * ( m_buf.Size() + m_pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) );
+
+	// Add new data
+	m_buf.AppendBuffer( (sqbind::CSqBinary::t_byte*)m_pkt.data, m_pkt.size );
+	m_pkt.data = (uint8_t*)m_buf._Ptr();
+	m_pkt.size = m_buf.getUsed();
+
+	// Zero padding
+	int nPadding = m_buf.Size() - m_buf.getUsed();
+	if ( 0 < nPadding )
 	{
-		m_buf.AppendBuffer( (sqbind::CSqBinary::t_byte*)m_pkt.data, m_pkt.size );
-		m_pkt.data = (uint8_t*)m_buf._Ptr();
-		m_pkt.size = m_buf.getUsed();
+		// Don't zero more than twice the padding size
+		if ( nPadding > ( FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
+			nPadding = FF_INPUT_BUFFER_PADDING_SIZE * 2;
+
+		// Set end to zero to ensure no overreading on damaged blocks
+		oexZeroMemory( &m_buf._Ptr()[ m_buf.getUsed() ], nPadding );
+
+		oexSHOW( nPadding );
 
 	} // end if
-
+*/
 	// Video only atm
 	if ( !dat || stream != m_nVideoStream || !m_pCodecContext )
 		return -1;
@@ -249,26 +287,26 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 	if ( !m_pFrame )
 		return -1;
 
+	int gpp = 0, used = 0;
+
 #if defined( FFSQ_VIDEO2 )
 
-	int gpp = 0;
-	int used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
+	used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
 	if ( 0 >= used )
-	{	oexEcho( "!used" );
+	{	oexSHOW( used );
 		return -1;
 	} // end if
 
 #else
 
-	int gpp = 0;
-	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, m_pkt.data, m_pkt.size );
+	used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, m_pkt.data, m_pkt.size );
+//	used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (const uint8_t*)m_buf.Ptr(), m_buf.getUsed() );
 	if ( 0 >= used )
-	{	oexEcho( "!used" );
+	{	oexSHOW( used );
 		return -1;
 	} // end if
 
 #endif
-
 
 /*
 	// Left over data?
@@ -277,13 +315,12 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 		if ( m_buf.getUsed() )
 			m_buf.LShift( used );
 		else
-			m_buf.AppendBuffer( &m_pkt.data[ used ], m_pkt.size - used );
+			m_buf.AppendBuffer( (sqbind::CSqBinary::t_byte*)&m_pkt.data[ used ], m_pkt.size - used );
 
 	} // end if
 	else
 		m_buf.setUsed( 0 );
 */
-
 	if ( !gpp )
 		return -1;
 
@@ -306,6 +343,106 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 
 	return m_pkt.stream_index;
 }
+
+int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
+{_STT();
+
+	if ( m_pkt.data )
+		av_free_packet( &m_pkt );
+	oexZero( m_pkt );
+
+	m_pkt.data = (uint8_t*)in->Ptr();
+	m_pkt.size = in->getUsed();
+
+	m_buf.setUsed( 0 );
+
+	// Ensure buffer size
+	if ( ( m_buf.Size() - m_buf.getUsed() ) < ( m_pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) )
+		m_buf.Allocate( 2 * ( m_buf.Size() + m_pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) );
+
+	// Add new data
+	m_buf.AppendBuffer( (sqbind::CSqBinary::t_byte*)m_pkt.data, m_pkt.size );
+	m_pkt.data = (uint8_t*)m_buf._Ptr();
+	m_pkt.size = m_buf.getUsed();
+
+	// Zero padding
+	int nPadding = m_buf.Size() - m_buf.getUsed();
+	if ( 0 < nPadding )
+	{
+		// Don't zero more than twice the padding size
+		if ( nPadding > ( FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
+			nPadding = FF_INPUT_BUFFER_PADDING_SIZE * 2;
+
+		// Set end to zero to ensure no overreading on damaged blocks
+		oexZeroMemory( &m_buf._Ptr()[ m_buf.getUsed() ], nPadding );
+
+		oexSHOW( nPadding );
+
+	} // end if
+
+
+	if ( !m_pFrame )
+		m_pFrame = avcodec_alloc_frame();
+	if ( !m_pFrame )
+		return -1;
+
+	int gpp = 0, used = 0;
+
+#if defined( FFSQ_VIDEO2 )
+
+	used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
+	if ( 0 >= used )
+	{	oexSHOW( used );
+		return -1;
+	} // end if
+
+#else
+
+	used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, m_pkt.data, m_pkt.size );
+//	used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (const uint8_t*)m_buf.Ptr(), m_buf.getUsed() );
+	if ( 0 >= used )
+	{	oexSHOW( used );
+		return -1;
+	} // end if
+
+#endif
+
+/*
+	// Left over data?
+	if ( used < m_pkt.size )
+	{
+		if ( m_buf.getUsed() )
+			m_buf.LShift( used );
+		else
+			m_buf.AppendBuffer( (sqbind::CSqBinary::t_byte*)&m_pkt.data[ used ], m_pkt.size - used );
+
+	} // end if
+	else
+		m_buf.setUsed( 0 );
+*/
+	if ( !gpp )
+		return -1;
+
+	// Is it already the right format?
+	if ( fmt == (int)m_pCodecContext->pix_fmt )
+	{	int nSize = CFfConvert::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
+		out->setBuffer( (sqbind::CSqBinary::t_byte*)m_pFrame->data[ 0 ], nSize, 0 );
+		m_nFrames++;
+		return m_pkt.stream_index;
+	} // end if
+
+	// Do colorspace conversion
+	if ( !CFfConvert::ConvertColorFB( m_pFrame, m_pCodecContext->pix_fmt,
+									  m_pCodecContext->width, m_pCodecContext->height,
+									  fmt, out, SWS_FAST_BILINEAR ) )
+		return -1;
+
+	// Frame
+	m_nFrames++;
+
+	return 1;
+}
+
 
 int CFfContainer::Create( const sqbind::stdString &sUrl, const sqbind::stdString &sType, sqbind::CSqMulti *m )
 {_STT();

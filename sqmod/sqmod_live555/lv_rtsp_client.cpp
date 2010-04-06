@@ -363,7 +363,7 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 	pss->rtpSource()->setPacketReorderingThresholdTime( 2000000 );
 
 	int sn = pss->rtpSource()->RTPgs()->socketNum();
-	setReceiveBufferTo( *m_pEnv, sn, 1000000 );
+	setReceiveBufferTo( *m_pEnv, sn, 2000000 );
 
 	if ( pss->codecName() )
 		m_sVideoCodec = oexMbToStrPtr( pss->codecName() );
@@ -408,7 +408,7 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 	pss->rtpSource()->setPacketReorderingThresholdTime( 2000000 );
 
 	int sn = pss->rtpSource()->RTPgs()->socketNum();
-	setReceiveBufferTo( *m_pEnv, sn, 1000000 );
+	setReceiveBufferTo( *m_pEnv, sn, 2000000 );
 
 	if ( pss->codecName() )
 		m_sAudioCodec = oexMbToStrPtr( pss->codecName() );

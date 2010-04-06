@@ -160,7 +160,7 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 
 	// Re allocate space for pointers
 	oexUINT uSize = m_ptrs.Size();
-	if ( uSize <= index )
+	if ( uSize <= (oexUINT)index )
 	{
 		// What size to use?
 		uSize = index;

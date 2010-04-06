@@ -44,7 +44,7 @@ public:
     CSQLite();
 
 	/// Destructor
-    ~CSQLite();
+    virtual ~CSQLite();
 
 	/// Frees any open database resources
 	void Destroy();

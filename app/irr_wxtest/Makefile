@@ -8,6 +8,7 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := irr_wxtest
+PRJ_DEPS := WxWidgets
 PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib irrlicht/include
 PRJ_LIBS := oexlib irrlicht cximage jpeg png tiff zlib

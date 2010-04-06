@@ -147,7 +147,7 @@ void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
 	dcMem.SelectObject( bmMem );
 	dc.Blit( 0, 0, dcMem.GetSize().GetWidth(), dcMem.GetSize().GetHeight(), &dcMem, 0, 0 );
 
-/*
+/ *
 
 	// Attempt to open the device
 	int dev = open( "/dev/video0" / *oexStrToMbPtr( oex::CStr().Fmt( oexT( "/dev/video%d" ), 0 ).Ptr() ) * /, O_RDONLY );
@@ -158,9 +158,9 @@ void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
 	} // end if
 
 	close( dev );
-*/
+* /
 
-/*
+/ *
     video_capability vc;
 	oexZeroMemory( &vc, sizeof( vc ) );
 	if( -1 == ioctl( dev, VIDIOCGCAP, &vc ) )
@@ -193,14 +193,14 @@ void CFrameWnd::OnPaint( wxPaintEvent& x_wxPe )
 		dc.DrawRectangle( rect.x, rect.y, rect.width, rect.height );
 		return;
 	} // end if
-*/
+* /
 
 //    struct video_picture vid_pic;
 //    struct video_window vid_win;
 //    struct video_mbuf vid_buf;
 //    struct video_mmap vid_map;
 
-/*
+/ *
 	wxImage		imgMem( 100, 100, (unsigned char*)pData, true );
 	wxBitmap	bmMem( imgMem );
 

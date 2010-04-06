@@ -120,7 +120,7 @@ oexINT COex::Init()
 	os::CBaseFile::InitFileSystem();
 
     // Initialize system
-    oexVERIFY( os::CSys::Init() );
+    oexASSERT( os::CSys::Init() );
 
 #ifdef OEX_ENABLE_TESTS
 

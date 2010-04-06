@@ -200,14 +200,14 @@ static oexUINT g_ConvBaseFileAttribToWinAttrib[] =
     CBaseFile::eFileAttribOffline,              FILE_ATTRIBUTE_OFFLINE,
     CBaseFile::eFileAttribNotContentIndexed,    FILE_ATTRIBUTE_NOT_CONTENT_INDEXED,
     CBaseFile::eFileAttribEncrypted,            FILE_ATTRIBUTE_ENCRYPTED,
-    -1, -1
+    (oexUINT)-1, (oexUINT)-1
 };
 
 static DWORD CBaseFile_ToFileAttributes( oexUINT uAttrib )
 {_STT();
     DWORD dwAttrib = 0;
-    for( oexUINT i = 0; -1 != g_ConvBaseFileAttribToWinAttrib[ i ]
-                        && -1 != g_ConvBaseFileAttribToWinAttrib[ i + 1 ];
+    for( oexUINT i = 0; (DWORD)-1 != g_ConvBaseFileAttribToWinAttrib[ i ]
+                        && (DWORD)-1 != g_ConvBaseFileAttribToWinAttrib[ i + 1 ];
                         i += 2 )
     if ( 0 != ( uAttrib & g_ConvBaseFileAttribToWinAttrib[ i ] ) )
         dwAttrib |= g_ConvBaseFileAttribToWinAttrib[ i + 1 ];
@@ -218,8 +218,8 @@ static DWORD CBaseFile_ToFileAttributes( oexUINT uAttrib )
 static oexUINT CBaseFile_ToCBaseFileAttributes( DWORD dwAttrib )
 {_STT();
     DWORD uAttrib = 0;
-    for( oexUINT i = 0; -1 != g_ConvBaseFileAttribToWinAttrib[ i ]
-                        && -1 != g_ConvBaseFileAttribToWinAttrib[ i + 1 ];
+    for( oexUINT i = 0; (DWORD)-1 != g_ConvBaseFileAttribToWinAttrib[ i ]
+                        && (DWORD)-1 != g_ConvBaseFileAttribToWinAttrib[ i + 1 ];
                         i += 2 )
     if ( 0 != ( dwAttrib & g_ConvBaseFileAttribToWinAttrib[ i + 1 ] ) )
         uAttrib |= g_ConvBaseFileAttribToWinAttrib[ i ];

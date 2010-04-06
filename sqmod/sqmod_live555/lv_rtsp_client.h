@@ -10,7 +10,7 @@ public:
 
 		enum
 		{
-            eDefaultBufferSize = 1000000
+            eDefaultBufferSize = 2000000
 		};
 
 	public:
@@ -57,7 +57,7 @@ public:
 
 		enum
 		{
-            eDefaultBufferSize = 1000000
+            eDefaultBufferSize = 2000000
 		};
 
 	public:
@@ -166,7 +166,7 @@ public:
 	{	return !GetInitEvent().Wait( nMax ); }
 
 	/// Returns non-zero if video was enabled and the open stream contains video
-	int isVideo() 
+	int isVideo()
 	{	return m_bVideo; }
 
 	/// Returns non-zero if audio was enabled and the open stream contains audio
