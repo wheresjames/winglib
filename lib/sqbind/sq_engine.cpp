@@ -228,7 +228,12 @@ stdString CSqEngineExport::get_output( int max )
 	oex::CFifoSync::t_size b = 0;
 	while ( p->Peek( b++, s, 0, oex::oexTRUE ) )
 		s << oexNL8;
+#if defined( oexUNICODE )
+	oex::CStr w = oexMbToStr( s );
+	return stdString( w.Ptr(), w.Length() );
+#else
 	return stdString( s.Ptr(), s.Length() );
+#endif
 
 /*
 	oex::CCircBuf *p = oex::CUtil::getOutputBuffer();

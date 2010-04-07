@@ -51,8 +51,8 @@ public:
 
 		// points per step?
 		if ( pps )
-		{	steps = Distance( pt ) / pps;
-			if ( steps < 1 ) 
+		{	steps = (int)( Distance( pt ) / pps );
+			if ( steps < 1 )
 				steps = 1;
 		} // end if
 
@@ -70,20 +70,20 @@ public:
 		float dy = pt.Obj().Y - Obj().Y;
 		float dz = pt.Obj().Z - Obj().Z;
 
-		if ( !dx && !dy && !dz ) 
+		if ( !dx && !dy && !dz )
 			return 0;
 
-		if ( dx < min && dx > -min ) 
+		if ( dx < min && dx > -min )
 			Obj().X = pt.Obj().X;
 		else
 			Obj().X += speed.Obj().X;
 
-		if ( dy < min && dy > -min ) 
+		if ( dy < min && dy > -min )
 			Obj().Y = pt.Obj().Y;
 		else
 			Obj().Y += speed.Obj().Y;
 
-		if ( dz < min && dz > -min ) 
+		if ( dz < min && dz > -min )
 			Obj().Z = pt.Obj().Z;
 		else
 			Obj().Z += speed.Obj().Z;
@@ -97,7 +97,7 @@ public:
 		float dy = b.Obj().Y - Obj().Y;
 		float dz = b.Obj().Z - Obj().Z;
 
-		if ( !dx && !dy && !dz ) 
+		if ( !dx && !dy && !dz )
 			return 0;
 
 		if ( div < 1 ) div = 1;

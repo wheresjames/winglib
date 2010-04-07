@@ -1549,7 +1549,7 @@ int CSqIrrlicht::getMouseIntersect( CSqirrVector2d &ptScreen, CSqirrVector3d &pt
 	// Get mouse line
 	irr::core::line3df ml =
 		m_pSmgr->getSceneCollisionManager()->
-					getRayFromScreenCoordinates( irr::core::position2di( ptScreen.x(), ptScreen.y() ),
+					getRayFromScreenCoordinates( irr::core::position2di( (int)ptScreen.x(), (int)ptScreen.y() ),
 												 m_pCamera );
 
 	// Picky thing, line should intersect plane
@@ -1595,7 +1595,7 @@ int CSqIrrlicht::getPickPoint( CSqirrVector2d &ptScreen, CSqirrVector3d &pt, CSq
 	// Get mouse line
 	irr::core::line3df ml =
 		m_pSmgr->getSceneCollisionManager()->
-					getRayFromScreenCoordinates( irr::core::position2di( ptScreen.x(), ptScreen.y() ),
+					getRayFromScreenCoordinates( irr::core::position2di( (int)ptScreen.x(), (int)ptScreen.y() ),
 												 m_pCamera );
 
 	// New position

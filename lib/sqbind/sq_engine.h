@@ -56,6 +56,9 @@ public:
 	SQBIND_CLASS_CTOR_BEGIN( CSqEngineExport )
 	SQBIND_CLASS_CTOR_END( CSqEngineExport )
 
+	/// Destructor
+	virtual ~CSqEngineExport() {}
+
 	/// Returns the buffer for a binary share
 	CSqBinary get_binshare( const stdString &sName );
 

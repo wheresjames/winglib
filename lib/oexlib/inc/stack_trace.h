@@ -58,6 +58,9 @@ public:
 	/// 10 = 1,024, 11 = 2,048, 12 = 4,096
 	enum { eMaxThreadsBits = 12 };
 	
+	/// String type
+	typedef oexSTTSTR t_str;
+	
 	/// Encapsulates stack tracing functionality for a single thread
 	class CStack
 	{
@@ -96,7 +99,7 @@ public:
 
 			\see Pop()
 		*/
-		void Push( oexCSTR x_pFunction )
+		void Push( t_str x_pFunction )
 		{
 			// Normal stack
 			if ( eMaxStack > m_uStackPtr )
@@ -136,7 +139,7 @@ public:
 		{	return m_uStackPtr; }
 
 		/// Retuns the actual stack
-		oexCSTR* GetStack() 
+		t_str* GetStack() 
 		{	return m_memStack.Ptr(); }
 
 #ifdef OEXLIB_STACK_HISTORY
@@ -150,7 +153,7 @@ public:
 		{	return m_uStackHistoryPtr; }
 
 		/// Returns the history stack
-		oexCSTR* GetHistory() 
+		t_str* GetHistory() 
 		{	return m_memStackHistory.Ptr(); }
 
 #endif
@@ -194,10 +197,10 @@ public:
 		oexUINT						m_uStackPtr;
 
 		/// Stack memory
-		TMem< oexCSTR >				m_memStack;
+		TMem< t_str >				m_memStack;
 
 		/// Stack memory pointer
-		oexCSTR						*m_pStack;
+		t_str						*m_pStack;
 
 		/// Stack name
 		CStr						m_sName;
@@ -217,10 +220,10 @@ public:
 		oexUINT						m_uStackHistoryPtr;
 
 		/// Stack history
-		TMem< oexCSTR >				m_memStackHistory;
+		TMem< t_str >				m_memStackHistory;
 
 		/// Stack history pointer
-		oexCSTR						*m_pStackHistory;
+		t_str						*m_pStackHistory;
 
 #endif
 
@@ -367,7 +370,7 @@ class CLocalStackTrace
 public:
 
 	/// Default Constructor
-	CLocalStackTrace( oexCSTR x_pFunction ) 
+	CLocalStackTrace( CStackTrace::t_str x_pFunction ) 
 	{
 		// Get stack object
 		m_pStack = oexSt().InitPush(); 

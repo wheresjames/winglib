@@ -26,11 +26,16 @@ PRJ_SUBROOT := _sqmod
 include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(PLATFORM),windows)
+	ifneq ($(UNICODE),)
+		PRJ_DEFS := $(PRJ_DEFS) POCO_WIN32_UTF8
+	endif
+
 	ifneq ($(BUILD),gcc)
 		PRJ_OSLB := $(PRJ_OSLB) iphlpapi.lib
 	else
 		PRJ_OSLB := $(PRJ_OSLB) iphlpapi
 	endif
+	
 endif
 
 #-------------------------------------------------------------------

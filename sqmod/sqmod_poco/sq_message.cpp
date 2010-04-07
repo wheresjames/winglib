@@ -20,16 +20,31 @@ void CPoMessage::Destroy()
 {_STT();
 }
 
-#define DEFINE_MSG_PROPERTY( p )										\
-	void CPoMessage::set##p( const sqbind::stdString &s )				\
-	{	if ( m_pMsg )													\
-			m_pMsg->set##p( std::string( s.c_str(), s.length() ) ); 	\
-	}																	\
-	sqbind::stdString CPoMessage::get##p()								\
-	{	if ( !m_pMsg )													\
-			return oexT( "" );											\
-		const std::string &s = m_pMsg->get##p();						\
-		return sqbind::stdString( s.c_str(), s.length() ); 				\
+#if defined( oexUNICODE )
+static sqbind::stdString StrToWStr( const std::string& s )
+{	sqbind::stdString temp( s.length(), L' ' );
+	std::copy( s.begin(), s.end(), temp.begin() );
+	return temp;
+}
+static std::string WStrToStr( const sqbind::stdString& s )
+{	std::string temp( s.length(), ' ' );
+	std::copy( s.begin(), s.end(), temp.begin() );
+	return temp;
+}
+#else
+#	define StrToWStr( s )	s.c_str()
+#	define WStrToStr( s )	s.c_str()
+#endif
+
+#define DEFINE_MSG_PROPERTY( p )												\
+	void CPoMessage::set##p( const sqbind::stdString &s )						\
+	{	if ( m_pMsg )															\
+			m_pMsg->set##p( WStrToStr( s ) ); 									\
+	}																			\
+	sqbind::stdString CPoMessage::get##p()										\
+	{	if ( !m_pMsg )															\
+			return oexT( "" );													\
+		return StrToWStr( m_pMsg->get##p() );									\
 	}
 
 DEFINE_MSG_PROPERTY( Sender )
@@ -42,10 +57,10 @@ void CPoMessage::addRecipient( const sqbind::stdString &sAddress, const sqbind::
 		return;
 	if ( sName.length() )
 		m_pMsg->addRecipient( Poco::Net::MailRecipient( Poco::Net::MailRecipient::PRIMARY_RECIPIENT,
-														sAddress.c_str(), sName.c_str() ) );
+														WStrToStr( sAddress ), WStrToStr( sName ) ) );
 	else
 		m_pMsg->addRecipient( Poco::Net::MailRecipient( Poco::Net::MailRecipient::PRIMARY_RECIPIENT,
-														sAddress.c_str() ) );
+														WStrToStr( sAddress ) ) );
 }
 
 void CPoMessage::addCCRecipient( const sqbind::stdString &sAddress, const sqbind::stdString &sName )
@@ -54,10 +69,10 @@ void CPoMessage::addCCRecipient( const sqbind::stdString &sAddress, const sqbind
 		return;
 	if ( sName.length() )
 		m_pMsg->addRecipient( Poco::Net::MailRecipient( Poco::Net::MailRecipient::CC_RECIPIENT,
-														sAddress.c_str(), sName.c_str() ) );
+														WStrToStr( sAddress ), WStrToStr( sName ) ) );
 	else
 		m_pMsg->addRecipient( Poco::Net::MailRecipient( Poco::Net::MailRecipient::CC_RECIPIENT,
-														sAddress.c_str() ) );
+														WStrToStr( sAddress ) ) );
 }
 
 void CPoMessage::addBCCRecipient( const sqbind::stdString &sAddress, const sqbind::stdString &sName )
@@ -66,9 +81,9 @@ void CPoMessage::addBCCRecipient( const sqbind::stdString &sAddress, const sqbin
 		return;
 	if ( sName.length() )
 		m_pMsg->addRecipient( Poco::Net::MailRecipient( Poco::Net::MailRecipient::BCC_RECIPIENT,
-														sAddress.c_str(), sName.c_str() ) );
+														WStrToStr( sAddress ), WStrToStr( sName ) ) );
 	else
 		m_pMsg->addRecipient( Poco::Net::MailRecipient( Poco::Net::MailRecipient::BCC_RECIPIENT,
-														sAddress.c_str() ) );
+														WStrToStr( sAddress ) ) );
 }
 

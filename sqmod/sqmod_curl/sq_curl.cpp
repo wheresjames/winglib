@@ -29,7 +29,13 @@ int CSqCurl::StdWriter( char *data, size_t size, size_t nmemb, sqbind::stdString
 {_STT();
 	int res = 0;
 	if ( buffer )
-	{	buffer->append(data, size * nmemb);
+	{	
+#if defined( oexUNICODE )
+		oex::CStr s = oexMbToStr( oex::CStr8( data, size * nmemb ) );
+		buffer->append( s.Ptr(), s.Length() );
+#else
+		buffer->append( data, size * nmemb );
+#endif
 		res = size * nmemb;
 	} // end if
 	return res;
@@ -69,7 +75,7 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqStrin
 	CURLcode res = curl_easy_perform( m_curl );
 
 	if ( CURLE_OK != res )
-	{	m_sErr = sErr;
+	{	m_sErr = oexMbToStrPtr( sErr );
 		return 0;
 	} // end if
 
@@ -115,7 +121,7 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::s
 	CURLcode res = curl_easy_perform( m_curl );
 
 	if ( CURLE_OK != res )
-	{	m_sErr = sErr;
+	{	m_sErr = oexMbToStrPtr( sErr );
 		return 0;
 	} // end if
 

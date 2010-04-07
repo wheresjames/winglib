@@ -8,7 +8,7 @@ public:
     CSqirrMeshAnimator(void);
 
     /// Destructor
-    ~CSqirrMeshAnimator(void);
+    virtual ~CSqirrMeshAnimator(void);
 
     /// Release resources
     void Destroy();

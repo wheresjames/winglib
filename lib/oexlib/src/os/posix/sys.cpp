@@ -392,8 +392,12 @@ int CSys::Printf( oexCSTRW x_pFmt, ... )
 int CSys::Echo( oexCSTRW x_pFmt )
 {	if ( !x_pFmt )
 		return 0;
-	CStr8 s = oexStrWToStr( x_pFmt );
+	CStr8 s = oexStrWToMb( x_pFmt );	
+#if defined( oexUNICODE )
+	CUtil::AddOutput( x_pFmt, s.Length(), oexTRUE );
+#else
 	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
+#endif
 	return ::puts( s.Ptr() );
 }
 
@@ -762,9 +766,14 @@ int CSys::vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs )
 }
 
 int CSys::Echo( oexCSTR8 x_pFmt )
-{	if ( !x_pFmt )
+{	if ( !oexCHECK_PTR( x_pFmt ) )
 		return 0;
+#if defined( oexUNICODE )
+	CStr s = oexMbToStr( x_pFmt );
+	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
+#else
 	CUtil::AddOutput( x_pFmt, 0, oexTRUE );
+#endif
 	return ::puts( x_pFmt );
 }
 
@@ -874,6 +883,7 @@ struct SProcStatInfo
 	CPropertyBag	pb;
 };
 
+/*
 static oexBOOL UpdateProcStat( SProcStatInfo *pPsi )
 {
 	// Verify processor pointer
@@ -893,7 +903,7 @@ static oexBOOL UpdateProcStat( SProcStatInfo *pPsi )
 	pPsi->fProcStat.SetPtrPosBegin( 0 );
 
 	// Read in info
-	CStr sInfo = pPsi->fProcStat.Read( 64 * 1024 );
+	CStr sInfo = oexMbToStr( pPsi->fProcStat.Read( 64 * 1024 ) );
 	if ( !sInfo.Length() )
 		return oexFALSE;
 
@@ -918,6 +928,7 @@ static oexBOOL UpdateProcStat( SProcStatInfo *pPsi )
 
 	return oexTRUE;
 }
+*/
 
 static oexBOOL UpdateProcStatItem( SProcStatInfo *pPsi, oexCSTR pItem )
 {
@@ -938,7 +949,7 @@ static oexBOOL UpdateProcStatItem( SProcStatInfo *pPsi, oexCSTR pItem )
 	pPsi->fProcStat.SetPtrPosBegin( 0 );
 
 	// Read in info
-	CStr sInfo = pPsi->fProcStat.Read( 64 * 1024 );
+	CStr sInfo = oexMbToStr( pPsi->fProcStat.Read( 64 * 1024 ) );
 	if ( !sInfo.Length() )
 		return oexFALSE;
 

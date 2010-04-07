@@ -50,7 +50,7 @@ CScriptThread::CScriptThread()
 
 CScriptThread::~CScriptThread()
 {_STT();
-	Destroy(); 
+	Destroy();
 }
 
 void CScriptThread::Destroy()
@@ -63,22 +63,22 @@ void CScriptThread::Destroy()
 
 void CScriptThread::SetModuleManager( sqbind::CModuleManager *pMm )
 {_STT();
-	m_pModuleManager = pMm; 
+	m_pModuleManager = pMm;
 }
 
 void CScriptThread::SetScript( oex::oexCSTR pScript, oex::oexBOOL bFile )
 {_STT();
-	m_sScript = pScript; m_bFile = bFile; 
+	m_sScript = pScript; m_bFile = bFile;
 }
 
 void CScriptThread::SetParentScript( CSqMsgQueue *pParent )
 {_STT();
-	m_pParentScript = pParent; 
+	m_pParentScript = pParent;
 }
 
 void CScriptThread::SetExportFunction( PFN_SQBIND_Export_Symbols fn, sqbind::SSqAllocator *pa )
 {_STT();
-	m_cSqEngine.SetExportFunction( fn, pa ); 
+	m_cSqEngine.SetExportFunction( fn, pa );
 }
 
 oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
@@ -99,7 +99,7 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 	// Let the user know we're starting a thread
 //	oexPrintf( oexT( "Spawning : 0x%08x : %s : %s\n" ),
 //			  (unsigned int)oexGetCurThreadId(), m_sName.c_str(), oexGetFileName( m_sScript.c_str() ).Ptr() );
-	
+
 	// Set script name for debugging
 	_STT_SET_NAME( oex::CStr() << m_cSqEngine.GetScriptName().c_str() << oexT( " : " ) <<  m_sName.c_str() );
 
@@ -218,7 +218,7 @@ oex::oexINT CScriptThread::RunTimers()
 	{	m_dToValue = dTm;
 		return 0;
 	} // end if
-	
+
 	oex::oexUINT uE = (oex::oexUINT)( ( dTm - m_dToValue ) * 1000 );
 	m_dToValue = dTm;
 
@@ -319,7 +319,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 	oex::oexBOOL bRet = oex::oexTRUE;
 
 	// Is it a script map?
-	if ( ( sMsg == oexT( "pb_get" ) || sMsg == oexT( "pb_set" ) ) 
+	if ( ( sMsg == oexT( "pb_get" ) || sMsg == oexT( "pb_set" ) )
 		 && *mapParams[ oexT( "key" ) ].c_str() == oexT( '@' ) )
 	{
 		oexAutoLock ll( m_lockPb );
@@ -352,9 +352,9 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 				while( i < 4 && sKey.Length() )
 				{	sP[ i ] = sKey.Parse( oexT( ":" ) ).Ptr();
-					if ( !sP[ i ].length() ) 
+					if ( !sP[ i ].length() )
 						sP[ i ] = sKey.Ptr(), sKey.Destroy();
-					else 
+					else
 						sKey++;
 					i++;
 				} // end if
@@ -367,7 +367,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 					default : pEngine->Execute( pReply, sFunction.c_str(), sP[ 0 ], sP[ 1 ], sP[ 2 ], sP[ 3 ] ); break;
 				} // end switch
 
-			} // end if					
+			} // end if
 
 		} // end if
 
@@ -492,7 +492,7 @@ oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMs
 //		oexPrintf( oexT( "ProcessMsg(): %s, To: %s, Caller: 0x%08x, Owner: 0x%08x\n" ), sMsg.c_str(), x_sPath.c_str(), (unsigned int)oexGetCurThreadId(), GetOwnerThreadId() );
 
 	// Is it bound for another computer
-	int pos = sPath.find_first_of( oexT( ":" ), -1 );
+	int pos = sPath.find_first_of( oexT( ":" ), (size_t)-1 );
 	if ( 0 <= pos )
 	{
 		oexPrintf( "Remote routing not supported\n" );
@@ -733,7 +733,7 @@ CSqMsgQueue* CScriptThread::GetQueue( const stdString &x_sPath )
 		return this;
 
 	// Can't get remote objects
-	int pos = sPath.find_first_of( oexT( ":" ), -1 );
+	int pos = sPath.find_first_of( oexT( ":" ), (size_t)-1 );
 	if ( 0 <= pos )
 		return oexNULL;
 

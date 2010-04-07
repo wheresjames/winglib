@@ -58,6 +58,8 @@ namespace sqbind
 		CSqHttpServer( const CSqHttpServer &r ) {}
 		CSqHttpServer& operator =( const CSqHttpServer &r ) { return *this; }
 
+		virtual ~CSqHttpServer() {}
+
 		static void Register( VM vm );
 
 		void SetServerCallback( CSqMsgQueue *x_pMsgQueue, const stdString &sServer );

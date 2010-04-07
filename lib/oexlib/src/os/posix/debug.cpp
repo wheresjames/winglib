@@ -203,7 +203,7 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 	CSysTime st; st.GetSystemTime();
 
 	// Add module header
-	sSt << oexT( oexNL8 oexNL8 )
+	sSt << 		oexNL << oexNL
 		<<         oexT( "===================================================" oexNL8 )
 		<<         oexT( "= Module  : " ) << ( pName ? pName : oexT( "N/A" ) ) << oexNL
                 << oexFmt( oexT( "= Address : 0x%08x" oexNL8 ), oexPtrToInt( pAddress ) )
@@ -235,7 +235,7 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 				// Add the stack
 				for ( oexUINT sp = 0; sp < p->GetStackPtr(); sp++ )
 					if ( p->GetStack()[ sp ] )
-						sSt << p->GetStack()[ sp ] << oexT( "()" ) << oexNL;
+						sSt << oexMbToStr( p->GetStack()[ sp ] ) << oexT( "()" ) << oexNL;
 
 			} // end try
 			catch( ... )
@@ -312,8 +312,8 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 
 }
 
-oexCHAR g_szUrl[ oexSTRSIZE ] = { 0 };
-oexCHAR g_szSub[ oexSTRSIZE ] = { 0 };
+oexTCHAR g_szUrl[ oexSTRSIZE ] = { 0 };
+oexTCHAR g_szSub[ oexSTRSIZE ] = { 0 };
 
 void sig_callback( int signal_number )
 {

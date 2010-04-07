@@ -171,6 +171,8 @@
 #	define oexPRINT_LOGS 2
 #endif
 
+//#define OEXLIB_EXTRA_POINTER_CHECK
+
 // Define to generate stack traces
 #define OEXLIB_STACK_TRACING
 //#define OEXLIB_STACK_HISTORY
@@ -211,10 +213,12 @@
 #	define oexFUNCTION			__FUNCTION__
 #	define oexPRETTYFUNCTION	__PRETTY_FUNCTION__
 #	define oexSTTFUNCTION		__PRETTY_FUNCTION__
+#	define oexSTTSTR			oexCSTR8
 #else
 #	define oexFUNCTION			__FUNCTION__
 #	define oexPRETTYFUNCTION	__FUNCTION__ oexT( "()" )
 #	define oexSTTFUNCTION		__FUNCTION__
+#	define oexSTTSTR			oexCSTR
 #endif
 
 #define oexDATE					__DATE__
@@ -223,8 +227,9 @@
 #define oexTIME					__TIME__
 #define oexTIME_FMT				"%g:%m:%s"
 
-#define oexGetBuildTime()		OEX_NAMESPACE::CSysTime( oexT( oexDATE_FMT	" "	oexTIME_FMT	), \
-														 oexT( oexDATE		" "	oexTIME		) )
+
+#define oexGetBuildTime()		OEX_NAMESPACE::CSysTime( oexTEXT( oexDATE_FMT )	oexT( " " )	oexTEXT( oexTIME_FMT ), \
+														 oexTEXT( oexDATE )		oexT( " " ) oexTEXT( oexTIME ) )
 
 #define oexVersion()			oexGetBuildTime().FormatTime( oexT( "%y.%C.%D.%G%m" ) )
 
@@ -251,3 +256,4 @@
 
 #define oexMAX_SIZE					( (oexSIZE_T)-1 )
 #define oexMAX_FILESIZE				( (oexFILESIZE_T)-1 )
+

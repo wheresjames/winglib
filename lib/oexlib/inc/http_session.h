@@ -353,7 +353,7 @@ public:
 			sMapped++;
 
 			// Build full path
-			sMapped.BuildPath( sPath );
+			sMapped.BuildPath( oexMbToStr( sPath ) );
 
 			// Get the resource
 			if ( !oexGetResource( sMapped, &m_sContent ) )
@@ -368,7 +368,7 @@ public:
 
 		} // end if
 
-		CStr8 sFile = sMapped;
+		CStr8 sFile = oexStrToMb( sMapped );
 		sFile.BuildPath( sPath );
 
 		if ( !oexExists( oexMbToStr( sFile ).Ptr() ) )
@@ -376,7 +376,7 @@ public:
 			return oexTRUE;
 		} // end if
 
-		if ( !SendFile( sFile.Ptr() ) )
+		if ( !SendFile( oexMbToStr( sFile ).Ptr() ) )
 			SendErrorMsg( HTTP_SERVER_ERROR, "File error" );
 
 		return oexTRUE;

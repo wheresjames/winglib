@@ -41,6 +41,7 @@ void CFfContainer::Destroy()
 
 int CFfContainer::CloseStream()
 {_STT();
+
 	if ( m_nRead )
 	{
 		if ( m_pFormatContext )
@@ -74,7 +75,8 @@ int CFfContainer::CloseStream()
 	} // end else if
 
 	m_pFormatContext = oexNULL;
-
+	
+	return 1;
 }
 
 
@@ -237,7 +239,7 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 		m_bKeyRxd = 1;
 	} // end if
 
-	oexPrintf( oexMks( m_pkt.flags, " : ", m_pkt.size, " : ", m_buf.getUsed(), "    " ).Ptr() );
+	oexPrintf( oexMks( m_pkt.flags, oexT( " : " ), m_pkt.size, oexT( " : " ), m_buf.getUsed(), oexT( "    " ) ).Ptr() );
 	oex::os::CSys::Flush_stdout();
 
 	if ( 0 != ( m_pkt.flags & PKT_FLAG_KEY ) )
@@ -357,7 +359,7 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 	m_buf.setUsed( 0 );
 
 	// Ensure buffer size
-	if ( ( m_buf.Size() - m_buf.getUsed() ) < ( m_pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) )
+	if ( ( m_buf.Size() - m_buf.getUsed() ) < (sqbind::CSqBinary::t_size)( m_pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) )
 		m_buf.Allocate( 2 * ( m_buf.Size() + m_pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) );
 
 	// Add new data

@@ -78,11 +78,11 @@ namespace sqbind { typedef HSQUIRRELVM VM; }
 
 #   include <sqplus.h>
 #   define _SQBIND_REGISTER_CLASS_BEGIN( c, s ) 			static void __SqReg_sqplus_##s( SquirrelVM *vm ) { \
-															oexVERIFY_PTR( vm ); \
+															oexASSERT_PTR( vm ); \
     	                                       				SqPlus::SQClassDef< c >( *vm, oexT( #s ) ) \
 															. staticFunc( &c::sq_construct_##s, oexT( "constructor" ) )
 #   define _SQBIND_REGISTER_CLASS_BEGIN_NOCTOR( c, s )		static void __SqReg_sqplus_##s( SquirrelVM *vm ) { \
-															oexVERIFY_PTR( vm ); \
+															oexASSERT_PTR( vm ); \
     	                                       				SqPlus::SQClassDef< c >( *vm, oexT( #s ) )
 #   define _SQBIND_REGISTER_CLASS_END()       				; }
 #   define _SQBIND_EXPORT( vm, c )            				__SqReg_sqplus_##c( vm )

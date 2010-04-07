@@ -82,7 +82,7 @@ namespace sqbind
 		SQBIND_CLASS_CTOR_END( CSqMulti )
 
 		/// Destructor
-		~CSqMulti();
+		virtual ~CSqMulti();
 
 		/// Default constructor
 		CSqMulti();

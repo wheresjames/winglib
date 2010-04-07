@@ -110,14 +110,22 @@ template < const int T > class oex_static_assert{};
 
 // Verify macros show a dialog box even in release mode
 #	define oexVERIFY_PTR_NULL_OK( ptr )     oexVERIFY( oexVerifyPtrNullOk( (OEX_NAMESPACE::oexCPVOID)ptr ) )
-#	define oexVERIFY_PTR( ptr )             oexVERIFY( OEX_NAMESPACE::oexVerifyPtr( (OEX_NAMESPACE::oexCPVOID)ptr ) )
+#	define oexVERIFY_PTR( ptr )             oexVERIFY( oexVerifyPtr( (OEX_NAMESPACE::oexCPVOID)ptr ) )
 #	define oexVERIFY( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
 #	define oexVERIFYPOS( s )	            ({ OEX_NAMESPACE::oexRESULT r = s; ( 0 <= r ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, oexT( #s ), r ), OEX_NAMESPACE::oexFALSE ); })
 #	define oexVERIFYZERO( s )	            ({ OEX_NAMESPACE::oexRESULT r = s; ( !r ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, oexT( #s ), r ), OEX_NAMESPACE::oexFALSE ); })
 
 #	define oexCHECK_PTR_NULL_OK( ptr )      oexCHECK( oexVerifyPtrNullOk( (OEX_NAMESPACE::oexCPVOID)ptr ) )
-#	define oexCHECK_PTR( ptr )              oexCHECK( OEX_NAMESPACE::oexVerifyPtr( (OEX_NAMESPACE::oexCPVOID)ptr ) )
+#	define oexCHECK_PTR( ptr )              oexCHECK( oexVerifyPtr( (OEX_NAMESPACE::oexCPVOID)ptr ) )
 #	define oexCHECK( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE :  OEX_NAMESPACE::oexFALSE )
+
+#if defined( OEXLIB_EXTRA_POINTER_CHECK )
+#	define oexVerifyPtr( p )				( _oexVerifyPtr( p ) )
+#	define oexVerifyPtrNullOk( p )			( _oexVerifyPtrNullOk( p ) )
+#else
+#	define oexVerifyPtr( p )				( oexNULL != ( p ) )
+#	define oexVerifyPtrNullOk( p )			( oexTRUE )
+#endif
 
 #ifdef oexDEBUG
 
@@ -125,6 +133,7 @@ template < const int T > class oex_static_assert{};
 #	define oexASSERT_PTR( ptr )             oexIGNORE oexVERIFY( oexVerifyPtr( (OEX_NAMESPACE::oexCPVOID)ptr ) )
 #	define oexASSERT( s )		            oexIGNORE ( ( s ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, oexT( #s ) ), OEX_NAMESPACE::oexFALSE ) )
 
+#	if defined( OEXLIB_EXTRA_POINTER_CHECK )
 // +++ Only works for 32-bit processors
 //
 // 0xABABABAB	-	LocalAlloc()
@@ -140,7 +149,7 @@ template < const int T > class oex_static_assert{};
 // 0xDEADBABE	-	Linux / Unix
 // 0xA5A5A5A5	-	Embedded
 // 0xFFFFFFFF	-	Invalid
-static inline oexBOOL oexVerifyPtrNullOk( oexCPVOID ptr )
+static inline oexBOOL _oexVerifyPtrNullOk( oexCPVOID ptr )
 {	if ( !ptr ) return oexTRUE;
     return (       ( (oexTYPEOF_PTR)ptr >  oexPtrToPtr( 0x00000032 ) )
                 && ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xABABABAB ) )
@@ -158,22 +167,24 @@ static inline oexBOOL oexVerifyPtrNullOk( oexCPVOID ptr )
 				&& ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xFFFFFFFF ) ) );
 }
 
-static inline oexBOOL oexVerifyPtr( oexCPVOID ptr )
+static inline oexBOOL _oexVerifyPtr( oexCPVOID ptr )
 {	return	( (oexTYPEOF_PTR)oexNULL != (oexTYPEOF_PTR)ptr ) &&
-			oexVerifyPtrNullOk( ptr );
+			_oexVerifyPtrNullOk( ptr );
 }
-
+#	endif
 #else
 
 #	define oexASSERT_PTR( ptr )
 #	define oexASSERT_PTR_NULL_OK( ptr )
 #	define oexASSERT( s )
 
-static inline oexBOOL oexVerifyPtrNullOk( oexCPVOID ptr )
+#	if defined( OEXLIB_EXTRA_POINTER_CHECK )
+static inline oexBOOL _oexVerifyPtrNullOk( oexCPVOID ptr )
 {	return oexTRUE; }
 
-static inline oexBOOL oexVerifyPtr( oexCPVOID ptr )
+static inline oexBOOL _oexVerifyPtr( oexCPVOID ptr )
 {	return	( (oexTYPEOF_PTR)oexNULL != (oexTYPEOF_PTR)ptr ); }
+#	endif
 
 #endif
 

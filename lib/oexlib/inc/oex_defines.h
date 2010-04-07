@@ -177,7 +177,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 
 #if defined( oexUNICODE )
 
-#	define oexT( s )				        ( L##s )
+#	define oexT( s )				        L##s
 #	define oexTEXT( s )				        oexT( s )
 
 #	define oexStrToMb( s )			        OEX_NAMESPACE::CStr8().ToMb( s )

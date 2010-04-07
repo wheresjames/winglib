@@ -561,7 +561,7 @@ public:
 	{
 		for ( oexINT i = 0; i < (oexINT)oexSizeOfArray( _g_oexvid_formats ); i++ )
 				if ( _g_oexvid_formats[ i ].uId == x_uFormat )
-						return CStr().Fmt( "0x%x - ", x_uFormat ) << _g_oexvid_formats[ i ].sId;
+						return CStr().Fmt( oexT( "0x%x - " ), x_uFormat ) << _g_oexvid_formats[ i ].sId;
 
 		return oexT( "" );
 	}
