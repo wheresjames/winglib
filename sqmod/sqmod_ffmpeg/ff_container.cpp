@@ -75,7 +75,7 @@ int CFfContainer::CloseStream()
 	} // end else if
 
 	m_pFormatContext = oexNULL;
-	
+
 	return 1;
 }
 
@@ -218,6 +218,11 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 
 int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 {_STT();
+
+	if ( m_pkt.data )
+		av_free_packet( &m_pkt );
+	oexZero( m_pkt );
+
 	// Read a frame from the packet
 	int res = -1;
 
@@ -239,7 +244,7 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 		m_bKeyRxd = 1;
 	} // end if
 
-	oexPrintf( oexMks( m_pkt.flags, oexT( " : " ), m_pkt.size, oexT( " : " ), m_buf.getUsed(), oexT( "    " ) ).Ptr() );
+	oexPrintf( oexMks( m_nFrames, oexT( " : " ), m_pkt.flags, oexT( " : " ), m_pkt.size, oexT( " : " ), m_buf.getUsed(), oexT( "    " ) ).Ptr() );
 	oex::os::CSys::Flush_stdout();
 
 	if ( 0 != ( m_pkt.flags & PKT_FLAG_KEY ) )

@@ -59,9 +59,12 @@ function _init() : ( _g )
 			espana		= [ "Espana", 		"rtsp://video3.multicasttech.com/EspanaFree3GPP296.sdp" ],
 
 			utube1		= [ "utube1",		"rtsp://v2.cache1.c.youtube.com/CkgLENy73wIaPwlnoDu0pt7zDRMYDSANFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNaDkNsaWNrVGh1bWJuYWlsYOmkotHXgfvJRgw=/0/0/0/video.3gp" ],
+			utube2		= [ "utube2",		"rtsp://rtsp2.youtube.com/ChoLENy73wIaEQmJv18x7xfevhMYESARFEgGDA==/0/0/0/video.3gp" ],
+
+
 //			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half" ],
-			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ],
-			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200" ],
+			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=15" ],
+			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200&fps=5" ],
 //			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200"
 //										    + "&fps=5&quality=15" ],
 //										    + "&ssn=" + _self.gmt_time().tointeger() + "&id=" + ( _self.gmt_time() + 1 ).tointeger() ],
@@ -73,7 +76,7 @@ function _init() : ( _g )
 	StartStream( rtsp_video[ "arecont" ] );
 //	StartStream( rtsp_video[ "nasa" ] );
 
-	_self.set_timer( ".", 15, "OnTimer" );
+	_self.set_timer( ".", 30, "OnTimer" );
 
 }
 
