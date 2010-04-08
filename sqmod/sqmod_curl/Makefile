@@ -27,7 +27,7 @@ ifeq ($(PLATFORM),posix)
 	PRJ_OSLB := ssl crypto idn ldap
 else
 	ifeq ($(BUILD),vs)
-		PRJ_INCS := $(PRJ_INCS) winglib/dep/etc/vs/inc/c99
+		PRJ_INCS := $(PRJ_INCS) $(CFG_LIB2BLD)/dep/etc/vs/inc/c99
 	endif
 endif
 

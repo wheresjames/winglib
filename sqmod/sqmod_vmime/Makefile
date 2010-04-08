@@ -30,9 +30,9 @@ PRJ_SUBROOT := _sqmod
 include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(PLATFORM),windows)
-	PRJ_INCS := winglib/dep/etc/vmime/inc/windows $(PRJ_INCS)
+	PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/vmime/inc/windows $(PRJ_INCS)
 else
-	PRJ_INCS := winglib/dep/etc/vmime/inc/posix $(PRJ_INCS)
+	PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/vmime/inc/posix $(PRJ_INCS)
 endif
 
 #-------------------------------------------------------------------

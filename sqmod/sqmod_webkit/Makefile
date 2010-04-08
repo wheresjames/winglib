@@ -53,16 +53,16 @@ ifeq ($(PLATFORM),windows)
 	PRJ_OSLB := comctl32 comdlg32 uuid oleaut32 opengl32
 	PRJ_LIBS := $(PRJ_LIBS) wxWidgets
 	PRJ_DEFS := $(PRJ_DEFS)
-	PRJ_INCS := $(PRJ_INCS) winglib/dep/etc/wxWidgets/inc/windows wxWidgets/include
+	PRJ_INCS := $(PRJ_INCS) $(CFG_LIB2BLD)/dep/etc/wxWidgets/inc/windows wxWidgets/include
 	
-#	PRJ_INCS := winglib/dep/etc/WebKit/inc/windows winglib/dep/etc/cairo/inc/windows \
+#	PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/WebKit/inc/windows $(CFG_LIB2BLD)/dep/etc/cairo/inc/windows \
 #				$(PRJ_INCS) pthreads \
 #				WebKit/WebKit/wx WebKit/WebKit/wx/WebCoreSupport WebKit/WebKit/wx/webkit \
 #				WebKit/WebCore/platform/wx WebKit/WebCore/platform/graphics/wx \
 #				WebKit/WebCore/accessibility/wx WebKit/WebCore/loader/wx WebKit/WebCore/page/wx \
 #				WebKit/WebCore/platform/graphics/cairo WebKit/WebCore/platform/network/curl
 
-#	PRJ_INCS := winglib/dep/etc/WebKit/inc/windows winglib/dep/etc/cairo/inc/windows \
+#	PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/WebKit/inc/windows $(CFG_LIB2BLD)/dep/etc/cairo/inc/windows \
 #				$(PRJ_INCS) pthreads \
 #				WebKit/WebKit/win WebKit/WebKit/win/WebCoreSupport WebKit/WebKit/win/webkit \
 #				WebKit/WebCore/platform/win WebKit/WebCore/platform/graphics/win \
@@ -75,7 +75,7 @@ else
 	PRJ_EXTL := `wx-config --libs`
 #	PRJ_OSLB := X11 GLU Xxf86vm
 
-	PRJ_INCS := winglib/dep/etc/WebKit/inc/posix winglib/dep/etc/cairo/inc/posix $(PRJ_INCS) \
+	PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/WebKit/inc/posix $(CFG_LIB2BLD)/dep/etc/cairo/inc/posix $(PRJ_INCS) \
 				WebKit/WebKit/gtk WebKit/WebKit/gtk/WebCoreSupport WebKit/WebKit/gtk/webkit \
 				WebKit/WebCore/platform/gtk WebKit/WebCore/platform/graphics/gtk \
 				WebKit/WebCore/accessibility/gtk WebKit/WebCore/loader/gtk WebKit/WebCore/page/gtk \
