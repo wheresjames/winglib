@@ -90,4 +90,10 @@ CStr CTrace::GetErrorMsg( oexINT x_nErr )
 	return CStr( oexMbToStr( pErr ) );
 }
 
+oexINT CTrace::GetLastError()
+{
+	return errno;
+}
+
+
 

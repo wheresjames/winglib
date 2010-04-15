@@ -264,4 +264,10 @@ CStr CTrace::GetErrorMsg( oexINT x_nErr )
 	return msg;
 }
 
+oexINT CTrace::GetLastError()
+{
+	return ::GetLastError();
+}
+
+
 

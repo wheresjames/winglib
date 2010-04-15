@@ -78,4 +78,15 @@ public:
 	*/
 	static CStr GetErrorMsg( oexINT x_nErr );
 
+	//==============================================================
+	// GetLastError()
+	//==============================================================
+	/// Returns a value signifying the last error that occured
+	/**
+		\return Returns the error code
+
+		\see
+	*/
+	static oexINT GetLastError();
+
 };

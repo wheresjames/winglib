@@ -26,6 +26,7 @@ BUILDDIRS := $(BUILDDIRS) sqmod/sqmod_cell \
                           sqmod/sqmod_live555 \
                           sqmod/sqmod_mimetic \
                           sqmod/sqmod_mysql \
+                          sqmod/sqmod_openssl \
                           sqmod/sqmod_poco \
 						  sqmod/sqmod_test \
 						  sqmod/sqmod_tinyxml \
