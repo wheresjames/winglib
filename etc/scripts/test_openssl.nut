@@ -15,10 +15,17 @@ function _init() : ( _g )
 
 	_g.ossl = CSqOpenSSL();
 
+	// Create test keys
 	if ( !CreateKeys( "TEST_KEYS", "challenge" ) )
 	{	_self.echo( "CreateKeys() failed" ); return 0; }
-	
-	Sign( _g.key, "Alice loves Bob" );
+
+	// Sign with key
+	if ( !Sign( _g.key, "Alice loves Bob" ) )
+	{	_self.echo( "Sign() failed" ); return 0; }
+
+	// From file
+	if ( !Sign2( "TEST_KEYS", "Alice loves Bob" ) )
+	{	_self.echo( "Sign2() failed" ); return 0; }
 
 	_self.echo( "\n...done...\n" );
 }
@@ -31,21 +38,21 @@ function CreateKeys( name, challenge ) : ( _g )
 
 	if ( !_g.key.CreateRsa( name, 512 ) )
 	{	_self.echo( "CreateRsa() failed" ); return 0; }
-	
+
 	if ( !_g.key.SetChallenge( challenge ) )
 	{	_self.echo( "SetChallenge() failed" ); return 0; }
-	
-	if ( !_g.key.SaveKeys( name, name + ".key", name + ".pki" ) )
+
+	if ( !_g.key.SaveKeys( name, name + ".key", name + ".pub" ) )
 	{	_self.echo( "SaveKeys() failed" ); return 0; }
 
 	_self.echo( "Verifying keys : " + name );
 
-	local prv = COsslKey();	
+	local prv = COsslKey();
 	if ( !prv.LoadPrivateKey( name + ".key", name ) )
 	{	_self.echo( "LoadPrivateKey() failed" ); return 0; }
-	
+
 	local pub = COsslKey();
-	if ( !pub.LoadPublicKey( name + ".pki", name ) )
+	if ( !pub.LoadPublicKey( name + ".pub", name ) )
 	{	_self.echo( "LoadPublicKey() failed" ); return 0; }
 
 	return 1;
@@ -53,17 +60,52 @@ function CreateKeys( name, challenge ) : ( _g )
 
 function Sign( key, data ) : ( _g )
 {
-	_self.echo( "Signing : " + key + " : " + data );
+	_self.echo( "Signing with " + key.getName() + " : " + data );
 
 	local sig = CSqBinary();
-	if ( !_g.ossl.Sign( key, "Hello World!", sig ) )
-	{	_self.echo( "LoadPublicKey() failed" ); return 0; }
-
+	if ( !_g.ossl.Sign( key, data, sig ) )
+	{	_self.echo( "Sign() failed" ); return 0; }
 
 	_self.echo( "Signature length = " + sig.getUsed() );
-	
+//	_self.echo( sig.AsciiHexStr( 16, 0 ) );
+	_self.echo( sig.Fingerprint( 32, 10, 1 ) );
+
+	if ( !_g.ossl.Verify( key, data, sig ) )
+	{	_self.echo( "Verify() failed" ); return 0; }
+
+	_self.echo( "Signature verified!" );
+
 	return 1;
-		
+
+}
+
+function Sign2( name, data ) : ( _g )
+{
+	_self.echo( "Signing with " + name + " : " + data );
+
+	local prv = COsslKey();
+	if ( !prv.LoadPrivateKey( name + ".key", name ) )
+	{	_self.echo( "LoadPrivateKey() failed" ); return 0; }
+
+	local sig = CSqBinary();
+	if ( !_g.ossl.Sign( prv, data, sig ) )
+	{	_self.echo( "Sign() failed" ); return 0; }
+
+	_self.echo( "Signature length = " + sig.getUsed() );
+//	_self.echo( sig.AsciiHexStr( 16, 0 ) );
+	_self.echo( sig.Fingerprint( 32, 10, 1 ) );
+
+	local pub = COsslKey();
+	if ( !pub.LoadPublicKey( name + ".pub", name ) )
+	{	_self.echo( "LoadPublicKey() failed" ); return 0; }
+
+	if ( !_g.ossl.Verify( pub, data, sig ) )
+	{	_self.echo( "Verify() failed" ); return 0; }
+
+	_self.echo( "Signature verified!" );
+
+	return 1;
+
 }
 
 function _idle() : ( _g )

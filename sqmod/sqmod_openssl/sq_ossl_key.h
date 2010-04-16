@@ -19,7 +19,7 @@ public:
 
 	/// Releases resources
 	void Destroy();
-	
+
 	/// Creates the specified key
 	int CreateRsa( const sqbind::stdString &sKey, int nSize );
 
@@ -34,21 +34,33 @@ public:
 
 	/// Load private key from a file
 	int LoadPrivateKey( const sqbind::stdString &sFile, const sqbind::stdString &sName );
-	
+
 	/// Load public key
 	int LoadPublicKey( const sqbind::stdString &sFile, const sqbind::stdString &sName );
-	
+
+	/// Returns a pointer to the private key
 	EVP_PKEY* getPrivateKey() { return m_pkey; }
-	
-	NETSCAPE_SPKI* getPublicKey() { return m_spki; }
-	
+
+	/// Returns a pointer to the public key
+	EVP_PKEY* getPublicKey() { return m_pkey; }
+
+	/// Returns the key name
+	sqbind::stdString getName() { return m_sName; }
+
+	/// Sets the key name
+	void setName( const sqbind::stdString &sName )
+	{	m_sName = sName; }
+
 private:
+
+	/// Key name
+	sqbind::stdString	m_sName;
 
 	/// Private key object
 	EVP_PKEY 			*m_pkey;
-	
+
 	/// Public key object
-	NETSCAPE_SPKI 		*m_spki;
+//	NETSCAPE_SPKI 		*m_spki;
 
 };
 

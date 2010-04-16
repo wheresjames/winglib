@@ -222,7 +222,7 @@ stdString CSqEngineExport::get_output( int max )
 
 	oex::CFifoSync *p = oex::CUtil::getOutputBuffer();
 	if ( !p )
-		return oexT( "" );	
+		return oexT( "" );
 
 	oex::CStr8 s;
 	oex::CFifoSync::t_size b = 0;
@@ -279,6 +279,14 @@ stdString CSqEngineExport::md5( const stdString &sStr )
 	oex::CStr sRes = oexMbToStr( oex::CBase16::Encode( oex::oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) );
 	return stdString().assign( sRes.Ptr(), sRes.Length() );
 }
+
+// mandelbrot( 64, 16, 0, -15, 40, 15 );
+stdString CSqEngineExport::mandelbrot( int w, int h, int x1, int y1, int x2, int y2 )
+{_STT();
+	oex::CStr s = oexMandelbrot( w, h, x1, y1, x2, y2 );
+	return sqbind::stdString( s.Ptr(), s.Length() );
+}
+
 
 stdString CSqEngineExport::unique()
 {_STT();
@@ -919,6 +927,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base16_decode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base16_encode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, unique )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, mandelbrot )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, local_time )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, gmt_time )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_timer_seconds )
@@ -1181,7 +1190,7 @@ int CSqEngine::OnInclude( const stdString &sScript )
 	{	nRet = LogError( -2, e );
 	}
 	_oexCATCH( SquirrelError &e )
-	{	nRet = LogErrorM( -3, oexMks( e.desc, oexT( " : " ), 
+	{	nRet = LogErrorM( -3, oexMks( e.desc, oexT( " : " ),
 							  ( bFile && pScript ) ? pScript : oexT( "N/A" ) ).Ptr() );
 	}
 

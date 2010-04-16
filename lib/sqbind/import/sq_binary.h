@@ -176,6 +176,18 @@ namespace sqbind
 		t_size LShift( t_size x_nBytes )
 		{	return m_bin.LShift( x_nBytes ); }
 
+		/// Returns a ascii / hex string
+		sqbind::stdString AsciiHexStr( int nLineLen, int nMaxLines )
+		{	oex::CStr s = oexBinToAsciiHexStr( &m_bin, 0, nLineLen, nMaxLines );
+			return sqbind::stdString( s.Ptr(), s.Length() );
+		}
+
+		/// Returns an ascii 'fingerprint' of the binary buffer
+		sqbind::stdString Fingerprint( int w, int h, int frame )
+		{	oex::CStr s = oexFingerprint( &m_bin, w, h, frame );
+			return sqbind::stdString( s.Ptr(), s.Length() );
+		}
+
 		/// Returns reference to buffer object
 		t_buffer& Mem() { return m_bin; }
 

@@ -20,12 +20,12 @@ public:
 	/// Releases resources
 	void Destroy();
 
-	/// Sign data	
+	/// Sign data
 	static int Sign( COsslKey *pKey, const sqbind::stdString &sData, sqbind::CSqBinary *sig );
 
 	/// Verify sig
 	static int Verify( COsslKey *pKey, const sqbind::stdString &sData, sqbind::CSqBinary *sig );
-	
+
 private:
 
 };

@@ -235,7 +235,7 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 				// Add the stack
 				for ( oexUINT sp = 0; sp < p->GetStackPtr(); sp++ )
 					if ( p->GetStack()[ sp ] )
-						sSt << oexMbToStr( p->GetStack()[ sp ] ) << oexT( "()" ) << oexNL;
+						sSt << oexMbToStr( p->GetStack()[ sp ] ) << oexNL;
 
 			} // end try
 			catch( ... )

@@ -241,6 +241,10 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #	define oexNL_LEN						1
 #endif
 
+#define oexBinToAsciiHexStr					OEX_NAMESPACE::CUtil::BinToAsciiHexStr
+#define oexFingerprint						OEX_NAMESPACE::CUtil::Fingerprint
+#define oexMandelbrot						OEX_NAMESPACE::CUtil::Mandelbrot
+
 // Resource macros
 #define oexInitResources()					OEX_NAMESPACE::COex::GetResourceHelper().SetResourcePtr( (const OEX_NAMESPACE::_SOexResourceInfo*)_g_oexlib_resources )
 #define oexIsResources						OEX_NAMESPACE::COex::GetResourceHelper().IsResources

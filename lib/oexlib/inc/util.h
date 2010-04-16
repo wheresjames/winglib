@@ -59,6 +59,18 @@ public:
 	/// Returns the output circular buffer or 0 if ther is none
 	static CFifoSync* getOutputBuffer();
 
+	/// Creates a ascii view of a binary buffer
+	static CStr BinToAsciiHexStr( CBin *x_pBin, oexSIZE_T x_uLen, oexSIZE_T x_nLineLen, oexSIZE_T x_nMaxLines );
+
+	/// Creates a ascii view of a binary buffer
+	static CStr BinToAsciiHexStr( oexCPVOID x_pBuf, oexSIZE_T x_uLen, oexSIZE_T x_nLineLen, oexSIZE_T x_nMaxLines );
+
+	/// Creates an ascii 'fingerprint' of the specified binary buffer
+	static CStr Fingerprint( CBin *buf, oexINT w, oexINT h, oexINT frame );
+
+	/// Creates an ascii mandelbrot image
+	static CStr Mandelbrot( int w, int h, int x1, int y1, int x2, int y2 );
+
 };
 
 

@@ -154,6 +154,8 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
             os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
                               oexT( "%s(%u) : Freed" oexNL8 ), pBh->ai[ 2 ].pFile, pBh->ai[ 2 ].uLine );
 
+// +++ Replace with oexBinToAsciiStr()
+
 #if defined( OEX_MAX_LINES_IN_MEMDUMP )
 
 		oexSIZE_T i = 0;
@@ -197,7 +199,7 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
 
     } // end catch
 
-	os::CSys::StrFmt( pMsg, uBuf, 
+	os::CSys::StrFmt( pMsg, uBuf,
 		oexT( " Assert while trying to interpret memory block : %08x : %d bytes" oexNL8 ),
 		oexPtrToInt( x_pMem ), uSize );
 

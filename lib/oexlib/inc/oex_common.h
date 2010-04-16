@@ -420,10 +420,12 @@ namespace cmn
             masks and copying multiple bits at once, but that would make my
             brain hurt at the moment.
     */
-    template < typename T >
-        void CopyBits( T *dst, oexUINT doff, T *src, oexUINT soff, oexUINT bits )
-    {   while ( bits-- )
-            SetBit( dst, doff++, GetBit( src, soff++ ) );
+    template < typename TD, typename TS >
+        void CopyBits( TD *dst, oexUINT doff, TS *src, oexUINT soff, oexUINT bits )
+    {
+		if ( 0 < bits )
+			while ( bits-- )
+            	SetBit( dst, doff++, GetBit( src, soff++ ) );
     }
 
 	template < typename T >

@@ -195,6 +195,7 @@ CBin::t_size CBin::LShift( CBin::t_size x_nBytes )
 	return m_nUsed;
 }
 
+
 void CBinShare::Destroy()
 {_STT();
 
