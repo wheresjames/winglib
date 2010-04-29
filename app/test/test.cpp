@@ -549,6 +549,33 @@ oex::oexRESULT TestBinary()
 
 	b1.Destroy();
 
+	b1.setString( oexT( "Hello World!" ) );
+
+	b1.setOffset( 6 );
+
+	if ( !oexVERIFY( 6 == b1.getOffset() ) )
+		return -37;
+
+	if ( !oexVERIFY( 6 == b1.getUsed() ) )
+		return -37;
+
+	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "World!", b1.getUsed() ) ) )
+		return -38;
+
+	if ( !oexVERIFY( b1.getString() == "World!" ) )
+		return -39;
+
+	if ( !oexVERIFY( 2 == b1.findCHAR( 'r', 0, 0 ) ) )
+		return -40;
+
+	b2 = b1.Sub( 6, 5 );
+
+	if ( !oexVERIFY( b2.getUsed() == 5 ) )
+		return -41;
+
+	if ( !oexVERIFY( b2.getString() == "World" ) )
+		return -42;
+
 	return oex::oexRES_OK;
 }
 
@@ -2166,7 +2193,7 @@ oex::oexRESULT Test_CFifoSync()
         uBufferedData--;
 
     } // end for
-	
+
     oexSIZE_T uUsed = fs.GetUsedBuffers();
   	if ( !oexVERIFY( fs.GetUsedBuffers() == uBufferedData ) )
         return -2;
@@ -3349,18 +3376,18 @@ int main(int argc, char* argv[])
 
     // Initialize the oex library
 	oexINIT();
-	
+
 	// Parse the command line
 	oex::CPropertyBag pbCmdLine = oex::CParser::ParseCommandLine( argc, (const char**)argv );
 
 	// Check for version request
 	if ( pbCmdLine.IsKey( oexT( "version" ) ) )
-	{	oexEcho( oexVersion().Ptr() );		
+	{	oexEcho( oexVersion().Ptr() );
 		pbCmdLine.Destroy();
 	    oexUNINIT();
-		return 0;					  
+		return 0;
 	} // end if
-	
+
 	// Enable crash reporting
 	_STT_SET_NAME( oexT( "Main Thread" ) );
 	oexEnableCrashReporting( oexNULL, oexT( "logs" ) );

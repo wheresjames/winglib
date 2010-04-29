@@ -70,6 +70,8 @@ function _init() : ( _g )
 
 			live555		= [ "live555", 		"rtsp://192.168.2.200:8554/vid1" ],
 
+			bosch		= [ "bosch", 		"rtsp://192.168.2.253/?inst=1" ],
+//			bosch		= [ "bosch", 		"rtsp://192.168.2.253/rtsp_tunnel" ],
 //			ser			= [ "ser", 			"rtsp://192.168.2.87" ]
 //			ser			= [ "ser", 			"rtsp://192.168.2.251" ]
 //			arecont		= [ "arecont",		"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ],
@@ -87,7 +89,7 @@ function _init() : ( _g )
 
 //	StartStream( rtsp_video[ "panasonic" ], 0, 0 );
 //	StartStream( rtsp_video[ "arecont" ], 800, 600 );
-	StartStream( rtsp_video[ "arecont" ], 800, 592 );
+	StartStream( rtsp_video[ "bosch" ], 0, 0 );
 //	StartStream( rtsp_video[ "nasa" ], 0, 0 );
 
 	_self.set_timer( ".", 15, "OnTimer" );

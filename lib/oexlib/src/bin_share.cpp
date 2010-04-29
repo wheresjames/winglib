@@ -83,27 +83,22 @@ CBin::t_size CBin::Copy( CBin *x_p )
 		else
 			m_buf.Unshare();
 
-		return m_nUsed;
+		return getUsed();
 
 	} // end if
 
-	// Whats the new size?
-	if ( !x_p->m_nUsed )
+	// Valid buffer?
+	if ( !x_p->Ptr() || !x_p->getUsed() )
 	{	Destroy();
 		return 0;
 	} // end if
 
 	// Lose Ptr buffer if any
 	FreePtr();
-	m_nUsed = x_p->m_nUsed;
+	m_nUsed = x_p->getUsed();
 
 	// Ptr buffer?
-	if ( x_p->m_ptr )
-		m_buf.MemCpy( x_p->m_ptr, m_nUsed );
-
-	// Copy static buffer
-	else if ( x_p->m_buf.Ptr() )
-		m_buf.MemCpy( x_p->m_buf.Ptr(), m_nUsed );
+	m_buf.MemCpy( x_p->Ptr(), m_nUsed );
 
 	return m_nUsed;
 }
@@ -121,11 +116,12 @@ CBin::t_size CBin::Share( CBin *x_p )
 
 	// Ptr buffer?
 	if ( x_p->m_ptr )
-		setBuffer( x_p->m_ptr, x_p->getUsed() );
+		setBuffer( x_p->m_ptr, x_p->m_nUsed, x_p->m_nOffset );
 
 	// Share native buffer
 	else
 		m_nUsed = x_p->m_nUsed,
+		m_nOffset = x_p->m_nOffset,
 		m_buf.Share( x_p->m_buf );
 
 	return m_nUsed;
@@ -169,8 +165,12 @@ CBin::t_size CBin::LShift( CBin::t_size x_nBytes )
 	if ( x_nBytes >= m_nUsed )
 	{	FreePtr();
 		m_nUsed = 0;
+		m_nOffset = 0;
 		return 0;
 	} // end if
+
+	// Adjust offset
+	m_nOffset = ( m_nOffset > x_nBytes ) ? m_nOffset =- x_nBytes : 0;
 
 	// Copy Ptr buffer if needed
 	if ( m_ptr )

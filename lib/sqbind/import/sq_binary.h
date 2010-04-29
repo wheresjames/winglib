@@ -34,15 +34,17 @@
 
 #pragma once
 
-#define SQBIND_SQBINARY_DECLARE_TYPE( t )				\
-	oex::oex##t get##t( t_size x_nOffset )				\
-	{ return m_bin.get##t( x_nOffset ); }				\
-	void set##t( t_size x_nOffset, oex::oex##t val )	\
-	{ m_bin.set##t( x_nOffset, val ); }					\
-	oex::oex##t getAbs##t( t_size x_nOffset )			\
-	{ return m_bin.getAbs##t( x_nOffset ); }			\
-	void setAbs##t( t_size x_nOffset, oex::oex##t val )	\
-	{ m_bin.setAbs##t( x_nOffset, val ); }
+#define SQBIND_SQBINARY_DECLARE_TYPE( t )								\
+	oex::oex##t get##t( t_size x_nOffset )								\
+	{ return m_bin.get##t( x_nOffset ); }								\
+	void set##t( t_size x_nOffset, oex::oex##t val )					\
+	{ m_bin.set##t( x_nOffset, val ); }									\
+	oex::oex##t getAbs##t( t_size x_nOffset )							\
+	{ return m_bin.getAbs##t( x_nOffset ); }							\
+	void setAbs##t( t_size x_nOffset, oex::oex##t val )					\
+	{ m_bin.setAbs##t( x_nOffset, val ); }								\
+	t_size find##t( oex::oex##t val, t_size x_nStart, t_size x_nMax )	\
+	{ return m_bin.find##t( val, x_nStart, x_nMax ); }
 
 
 // namespace
@@ -124,6 +126,12 @@ namespace sqbind
 		/// Returns the number of bytes in the buffer being used
 		t_size getUsed() { return m_bin.getUsed(); }
 
+		/// Sets the buffer offset
+		void setOffset( t_size x_o ) { m_bin.setOffset( x_o ); }
+
+		/// Returns the current buffer offset
+		t_size getOffset() { return m_bin.getOffset(); }
+
 		/// Sets the share name
 		void SetName( const stdString &s ) { m_bin.SetName( s.c_str() ); }
 
@@ -188,12 +196,28 @@ namespace sqbind
 			return sqbind::stdString( s.Ptr(), s.Length() );
 		}
 
+		/// Locates the specified string in the buffer
+		t_size FindBin( CSqBinary *p, int x_nStart, int x_nMax )
+		{	return m_bin.Find( p->m_bin, x_nStart, x_nMax ); }
+
+		/// Returns a view of the specified location
+		int Sub( CSqBinary *p, int x_nStart, int x_nSize )
+		{	if ( !p ) return 0;
+			 *p = m_bin.Sub( x_nStart, x_nSize );
+			 return p->getUsed();
+		}
+
+		/// Value returned on failure
+		int failed() { return m_bin.failed(); }
+
 		/// Returns reference to buffer object
 		t_buffer& Mem() { return m_bin; }
 
 		// Accessor functions
 		SQBIND_SQBINARY_DECLARE_TYPE( CHAR );
 		SQBIND_SQBINARY_DECLARE_TYPE( UCHAR );
+		SQBIND_SQBINARY_DECLARE_TYPE( SHORT );
+		SQBIND_SQBINARY_DECLARE_TYPE( USHORT );
 		SQBIND_SQBINARY_DECLARE_TYPE( INT );
 		SQBIND_SQBINARY_DECLARE_TYPE( UINT );
 		SQBIND_SQBINARY_DECLARE_TYPE( LONG );

@@ -76,13 +76,14 @@ namespace sqbind
 		{	return oexBinToStr( m_f.Read() ).Ptr(); }
 
 		CSqBinary ReadBin( int nBytes )
-		{	if ( !nBytes )
-				return CSqBinary();
-
+		{
 			// Don't read more than is available
 			oex::oexINT64 nSize = m_f.Size();
-			if ( nSize < nBytes )
+			if ( !nBytes || !nSize || nSize < nBytes )
 				nBytes = (int)nSize;
+
+			if ( !nBytes )
+				return CSqBinary();
 
 			// Allocate buffer
 			CSqBinary buf;
@@ -114,7 +115,7 @@ namespace sqbind
 		static int put_contents_bin( const stdString &sFile, CSqBinary *sData )
 		{	if ( !sData ) return 0;
 			CSqFile f; if ( !f.CreateAlways( sFile.c_str() ) ) return 0;
-			return f.WriteBin( sData ); 
+			return f.WriteBin( sData );
 		}
 
 		static int append_contents( const stdString &sFile, const stdString &sData )

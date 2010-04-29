@@ -34,25 +34,40 @@
 
 #pragma once
 
-#define OEX_CBIN_DECLARE_TYPE_ACCESS( t )							\
-	oex##t get##t( t_size x_nOffset )								\
-	{	x_nOffset = x_nOffset * sizeof( oex##t );					\
-		if ( x_nOffset + sizeof( oex##t ) >= Size() ) return 0;		\
-		return *( (oex##t*)Ptr( x_nOffset ) );						\
-	}																\
-	void set##t( t_size x_nOffset, oex##t val )						\
-	{	x_nOffset = x_nOffset * sizeof( oex##t );					\
-		if ( x_nOffset + sizeof( oex##t ) >= Size() ) return;		\
-		*( (oex##t*)Ptr( x_nOffset ) ) = val;						\
-	}																\
-	oex##t getAbs##t( t_size x_nOffset )							\
-	{	if ( x_nOffset + sizeof( oex##t ) >= Size() ) return 0;		\
-		return *( (oex##t*)Ptr( x_nOffset ) );						\
-	}																\
-	void setAbs##t( t_size x_nOffset, oex##t val )					\
-	{	if ( x_nOffset + sizeof( oex##t ) >= Size() ) return;		\
-		*( (oex##t*)Ptr( x_nOffset ) ) = val;						\
+#define OEX_CBIN_DECLARE_TYPE_ACCESS( t )											\
+	oex##t get##t( t_size x_nOffset )												\
+	{	x_nOffset = x_nOffset * sizeof( oex##t );									\
+		if ( x_nOffset + sizeof( oex##t ) >= getUsed() ) return 0;					\
+		return *( (oex##t*)Ptr( x_nOffset ) );										\
+	}																				\
+	void set##t( t_size x_nOffset, oex##t val )										\
+	{	x_nOffset = x_nOffset * sizeof( oex##t );									\
+		if ( x_nOffset + sizeof( oex##t ) >= Size() ) return;						\
+		*( (oex##t*)Ptr( x_nOffset ) ) = val;										\
+	}																				\
+	oex##t getAbs##t( t_size x_nOffset )											\
+	{	if ( x_nOffset + sizeof( oex##t ) >= getUsed() ) return 0;					\
+		return *( (oex##t*)Ptr( x_nOffset ) );										\
+	}																				\
+	void setAbs##t( t_size x_nOffset, oex##t val )									\
+	{	if ( x_nOffset + sizeof( oex##t ) >= Size() ) return;						\
+		*( (oex##t*)Ptr( x_nOffset ) ) = val;										\
+	}																				\
+	t_size find##t( oex##t val, t_size x_nStart, t_size x_nMax )					\
+	{	if ( !x_nMax ) x_nMax = getUsed();											\
+		else																		\
+		{	x_nMax += x_nStart;														\
+			if ( x_nMax > getUsed() ) x_nMax = getUsed();							\
+		}																			\
+		if ( x_nMax < sizeof( oex##t ) ) return failed();							\
+		x_nMax -= sizeof( oex##t );													\
+		while( x_nStart <= x_nMax )													\
+			if ( *( (oex##t*)Ptr( x_nStart ) ) == val )								\
+				return x_nStart;													\
+			else x_nStart++;														\
+		return failed();															\
 	}
+
 
 /// Shared memory block
 class CBin
@@ -68,12 +83,16 @@ public:
 	/// Buffer type
 	typedef CStr8::t_buffer		t_buffer;
 
+	/// Failed value
+	const t_size failed() const { return (t_size)-1; }
+
 public:
 
 	/// Default constructor
 	CBin()
 	{
 		m_nUsed = 0;
+		m_nOffset = 0;
 		m_ptr = oexNULL;
 		m_bFree = oexFALSE;
 	}
@@ -83,13 +102,14 @@ public:
 		m_buf( r.m_buf )
 	{
 		m_nUsed = 0;
+		m_nOffset = 0;
 		m_ptr = oexNULL;
 		m_bFree = oexFALSE;
 
 		if ( r.m_ptr )
-			setBuffer( r.m_ptr, r.m_nUsed, r.m_bFree );
+			setBuffer( r.m_ptr, r.m_nUsed, r.m_nOffset, r.m_bFree );
 		else
-			m_nUsed = r.m_nUsed;
+			m_nUsed = r.m_nUsed, m_nOffset = r.m_nOffset;
 	}
 
 	/// Assignment operator
@@ -100,11 +120,12 @@ public:
 
 		// Ptr?
 		if ( x_r.m_ptr )
-			setBuffer( x_r.m_ptr, x_r.m_nUsed, x_r.m_bFree );
+			setBuffer( x_r.m_ptr, x_r.m_nUsed, x_r.m_nOffset, x_r.m_bFree );
 
 		else
 		{	m_buf.Share( x_r.m_buf );
 			m_nUsed = x_r.m_nUsed;
+			m_nOffset = x_r.m_nOffset;
 		} // end else
 
 		return *this;
@@ -114,19 +135,21 @@ public:
 	/**
 		Creates from buffer
 	*/
-	CBin( const t_buffer &x_r, t_size x_nUsed = 0 ) : m_buf( x_r )
+	CBin( const t_buffer &x_r, t_size x_nUsed = 0, t_size x_nOffset = 0 ) : m_buf( x_r )
 	{
 		m_nUsed = x_nUsed;
+		m_nOffset = x_nOffset;
 		m_ptr = oexNULL;
 		m_bFree = oexFALSE;
 	}
 
 	/// Creates a buffer from raw pointer and size
-	CBin( t_byte *x_ptr, t_size x_size, oexBOOL x_bFree = oexTRUE )
+	CBin( t_byte *x_ptr, t_size x_nSize, t_size x_nOffset, oexBOOL x_bFree = oexTRUE )
 	{	m_nUsed = 0;
+		m_nOffset = 0;
 		m_ptr = oexNULL;
 		m_bFree = oexFALSE;
-		setBuffer( x_ptr, x_size, x_bFree );
+		setBuffer( x_ptr, x_nSize, x_nOffset, x_bFree );
 	}
 
 
@@ -136,6 +159,7 @@ public:
 	/// Frees the buffer
 	void Destroy()
 	{	m_nUsed = 0;
+		m_nOffset = 0;
 		FreePtr();
 		m_buf.Destroy();
 	}
@@ -145,6 +169,8 @@ public:
 			OexAllocDelete< t_byte >( m_ptr );
 		m_ptr = oexNULL;
 		m_bFree = oexFALSE;
+		m_nUsed = 0;
+		m_nOffset = 0;
 	}
 
 	/// Allocate specified number of bytes
@@ -161,7 +187,7 @@ public:
 	t_size Unshare()
 	{	return Copy(); }
 
-	/// Initializes all byetes in the memory block to zero
+	/// Initializes all bytes in the memory block to zero
 	void Zero()
 	{	if ( _Ptr() && Size() ) oexZeroMemory( _Ptr(), Size() ); }
 
@@ -177,21 +203,27 @@ public:
 	/// Shares another buffer
 	t_size Share( CBin &x_r ) { return Share( &x_r ); }
 
-	/// Returns the size of the current buffer
-	t_size Size()
+	/// Returns the raw size, ignoring the offset
+	t_size _Size() const
 	{
-		// Ptr buffer?
-		if ( m_ptr )
-			return m_nUsed;
+		return ( m_ptr ) ? m_nUsed : m_buf.Size();
+	}
 
-		// Native buffer size
-		return (t_size)m_buf.Size();
+	/// Returns the size of the current buffer
+	t_size Size() const
+	{
+		const t_size sz = _Size();
+		if ( sz <= m_nOffset )
+			return 0;
+		return sz - m_nOffset;
 	}
 
 	/// Returns character value at i
 	t_byte get( t_size i )
 	{
-		if ( i >= m_nUsed )
+		i += m_nOffset;
+
+		if ( i >= _Size() )
 			return 0;
 
 		if ( m_ptr )
@@ -203,7 +235,9 @@ public:
 	/// Sets character value at i
 	void set( t_size i, t_byte v )
 	{
-		if ( i >= m_nUsed )
+		i += m_nOffset;
+
+		if ( i >= _Size() )
 			return;
 
 		if ( m_ptr )
@@ -216,30 +250,47 @@ public:
 	void setUsed( t_size n )
 	{
 		// Set new used size
-		m_nUsed = n;
+		m_nUsed = n + m_nOffset;
 
 		// Ensure valid
 		if ( 0 > m_nUsed )
 			m_nUsed = 0;
 
 		// Ensure valid
-		else if ( m_nUsed > Size() )
-			m_nUsed = Size();
+		else if ( m_nUsed > _Size() )
+			m_nUsed = _Size();
 	}
 
 	/// Returns the number of bytes in the buffer being used
-	t_size getUsed()
+	t_size getUsed() const
 	{
-		if ( 0 > m_nUsed )
-			m_nUsed = 0;
+		t_size u = m_nUsed;
 
-		if ( m_ptr )
-			return m_nUsed;
+		if ( 0 > u )
+			return 0;
 
-		else if ( Size() < m_nUsed )
-			m_nUsed = Size();
+		if ( _Size() < u )
+			u = Size();
 
-		return m_nUsed;
+		if ( u <= m_nOffset )
+			return 0;
+
+		return u - m_nOffset;
+	}
+
+	/// Sets the buffer offset point
+	void setOffset( t_size o )
+	{
+		if ( o > _Size() )
+			o = _Size();
+
+		m_nOffset = o;
+	}
+
+	/// Returns the current buffer offset point
+	t_size getOffset() const
+	{
+		return cmn::Min( m_nOffset, _Size() );
 	}
 
 	/// Sets the share name
@@ -266,7 +317,7 @@ public:
 	CStr8 getString()
 	{
 		// Must copy if outside ptr
-		if ( m_ptr )
+		if ( m_ptr || m_nOffset )
 			return getSafeString();
 
 		// Return share
@@ -302,13 +353,29 @@ public:
 	}
 
 	/// Returns a pointer to the buffer
-	const t_byte* Ptr( t_size o = 0 ) { if ( m_ptr ) return m_ptr + o; return m_buf.Ptr( o ); }
+	const t_byte* Ptr( t_size o = 0 )
+	{
+		o += m_nOffset;
+
+		if ( m_ptr )
+			return m_ptr + o;
+
+		return m_buf.Ptr( o );
+	}
 
 	/// Returns a writable pointer to the buffer
-	t_byte* _Ptr( t_size o = 0 ) { if ( m_ptr ) return m_ptr + o; return m_buf.Ptr( o ); }
+	t_byte* _Ptr( t_size o = 0 )
+	{
+		o += m_nOffset;
+
+		if ( m_ptr )
+			return m_ptr + o;
+
+		return m_buf.Ptr( o );
+	}
 
 	/// Sets a Ptr buffer pointer ( make sure it doesn't go away before this class! )
-	void setBuffer( t_byte *x_ptr, t_size x_size, oexBOOL x_bFree = oexTRUE )
+	void setBuffer( t_byte *x_ptr, t_size x_size, t_size x_offset = 0, oexBOOL x_bFree = oexTRUE )
 	{
 		Destroy();
 
@@ -317,6 +384,7 @@ public:
 
 		// Save Ptr buffer info
 		m_nUsed = x_size;
+		m_nOffset = x_offset;
 		m_ptr = x_ptr;
 		m_bFree = x_bFree;
 		if ( m_ptr && m_bFree )
@@ -359,6 +427,57 @@ public:
 		return 1;
 	}
 
+	/// Returns a 'view' of a part of the buffer
+	CBin Sub( t_size x_nStart, t_size x_nSize )
+	{	CBin t( *this );
+		t.setOffset( x_nStart );
+		t.setUsed( x_nSize );
+		return t;
+	}
+
+	/// Finds the offset of the first occurence matching the supplied buffer
+	t_size Find( CBin *x_p, t_size x_nStart, t_size x_nMax )
+	{	if ( !x_p ) return failed();
+		return Find( x_p->Ptr(), x_p->getUsed(), x_nStart, x_nMax );
+	}
+
+	/// Finds the offset of the first occurence matching the supplied buffer
+	t_size Find( CBin &x_r, t_size x_nStart, t_size x_nMax )
+	{	return Find( x_r.Ptr(), x_r.getUsed(), x_nStart, x_nMax ); }
+
+	/// Finds the offset of the first occurence matching the supplied buffer
+	t_size Find( oexCPVOID buf, t_size len, t_size x_nStart, t_size x_nMax )
+	{
+		// Sanity check
+		if ( !buf || !len )
+			return failed();
+
+		// All of buffer?
+		if ( !x_nMax )
+			x_nMax = getUsed();
+		else
+		{	x_nMax += x_nStart;
+			if ( x_nMax > getUsed() )
+				x_nMax = getUsed();
+		} // end else
+
+		// Is there enough room for said object?
+		if ( x_nMax < len )
+			return failed();
+
+		// Don't overflow the buffer
+		x_nMax -= len;
+
+		// Attempt to find a match for the data
+		while( x_nStart <= x_nMax )
+			if ( !oex::os::CSys::MemCmp( Ptr( x_nStart), buf, len ) )
+				return x_nStart;
+			else
+				x_nStart++;
+
+		return failed();
+	}
+
 	/// Append buffer
 	t_size Append( CBin *x_p )
 	{
@@ -377,6 +496,8 @@ public:
 	/// Declare access types
 	OEX_CBIN_DECLARE_TYPE_ACCESS( CHAR );
 	OEX_CBIN_DECLARE_TYPE_ACCESS( UCHAR );
+	OEX_CBIN_DECLARE_TYPE_ACCESS( SHORT );
+	OEX_CBIN_DECLARE_TYPE_ACCESS( USHORT );
 	OEX_CBIN_DECLARE_TYPE_ACCESS( INT );
 	OEX_CBIN_DECLARE_TYPE_ACCESS( UINT );
 	OEX_CBIN_DECLARE_TYPE_ACCESS( LONG );
@@ -399,6 +520,9 @@ private:
 
 	/// Outside buffer pointer
 	t_byte			*m_ptr;
+
+	/// Buffer offset
+	t_size			m_nOffset;
 
 	/// Non-zero if the Ptr buffer needs to be freed
 	oexBOOL			m_bFree;

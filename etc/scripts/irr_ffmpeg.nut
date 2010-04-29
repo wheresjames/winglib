@@ -62,9 +62,11 @@ function _init() : ( _g )
 			utube2		= [ "utube2",		"rtsp://rtsp2.youtube.com/ChoLENy73wIaEQmJv18x7xfevhMYESARFEgGDA==/0/0/0/video.3gp" ],
 
 
+			bosch		= [ "bosch", 		"rtsp://192.168.2.253/?inst=2" ],
+//			bosch		= [ "bosch", 		"rtsp://192.168.2.253/rtsp_tunnel" ],
 //			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half" ],
-			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=15" ],
-			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200&quality=15&fps=15" ],
+//			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=15" ],
+//			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200&quality=15&fps=15" ],
 //			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200"
 //										    + "&fps=5&quality=15" ],
 //										    + "&ssn=" + _self.gmt_time().tointeger() + "&id=" + ( _self.gmt_time() + 1 ).tointeger() ],
@@ -73,7 +75,7 @@ function _init() : ( _g )
 
 		};
 
-	StartStream( rtsp_video[ "arecont" ] );
+	StartStream( rtsp_video[ "bosch" ] );
 //	StartStream( rtsp_video[ "nasa" ] );
 
 	_self.set_timer( ".", 30, "OnTimer" );
