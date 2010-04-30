@@ -58,9 +58,7 @@ function _init() : ( _g )
 
 				} // end if
 
-
 			} // end if
-
 
 //		local fname = _self.build_path( dir, "Img_" + i + ".jpg" );
 //			CSqFile().put_contents_bin( fname, img );
@@ -87,7 +85,6 @@ function OpenAviFile( file, width, height, fps ) : ( _g )
 	else if ( !_g.rec_enc.Create( _g.rec_avi.getVideoCodecId(), CFfConvert().PIX_FMT_YUV420P,
 								  width, height, 10, 800000, CSqMulti() ) )
 		_self.echo( "Failed to create encoder" );
-
 }
 
 function _idle()
