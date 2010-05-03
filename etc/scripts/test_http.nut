@@ -32,7 +32,7 @@ function _init() : ( _g )
 
 	_self.echo( "Starting web server on port " + port );
 
-	_g.server = CHttpServer();
+	_g.server = CSqHttpServer();
 
 	_g.server.SetSessionCallback( _self.queue(), "OnProcessRequest" );
 
