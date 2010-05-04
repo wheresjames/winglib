@@ -251,14 +251,14 @@ public:
 	    return pb;
     }
 
-
 	/// Encodes url type params such as "a=b&c=d"
     template< typename T >
-        static TStr< T > EncodeUrlParams( TPropertyBag< TStr< T > > x_pb )
+        static TStr< T > EncodeUrlParams( oexCONST TPropertyBag< TStr< T > > &x_pb )
     {
 	    TStr< T > str;
+	    TPropertyBag< TStr< T > > &pb = (TPropertyBag< TStr< T > >&)x_pb;
 
-	    for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+	    for( typename TPropertyBag< TStr< T > >::iterator it; pb.List().Next( it ); )
 	    {
 		    if ( str.Length() )
                 str << oexTC( T, '&' );
@@ -1412,6 +1412,162 @@ public:
 		return x_pb.Size();
 	}
 */
+
+    template< typename T >
+        static TStr< T > EncodeJSON( TPropertyBag< TStr< T > > &x_pb, oexLONG x_depth = 0 )
+    {
+		oexLONG i = 0;
+		TStr< T > sTab, sTab1;
+		for ( oexLONG t = 0; t < x_depth; t++ )
+			sTab << oexTC( T, '\t' );
+		sTab1 << oexTC( T, '\t' ) << sTab;
+
+	    TStr< T > sStr = oexTT( T, "{" oexNL8 );
+	    for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+	    {
+			// Add comma if needed
+		    if ( !i )
+                i++;
+            else
+            	sStr << oexTT( T, "," oexNL8 );
+
+			// Add key
+            sStr << sTab1 << oexTC( T, '\"' ) << it.Node()->key.Escape( oexTT( T, "\"" ), oexTC( T, '\\' ) ) << oexTT( T, "\": " );
+
+			// Single value
+            if ( it->IsDefaultValue() )
+	            sStr << oexTC( T, '\"' ) << it->ToString().Escape( oexTT( T, "\"" ), oexTC( T, '\\' ) ) << oexTC( T, '\"' );
+
+            // Recurse for array
+            else if ( it->IsArray() )
+            	sStr << EncodeJSON( *it, x_depth + 1 );
+
+			// Empty
+            else
+            	sStr << oexTT( T, "\"\"" );
+
+	    } // end for
+
+		sStr << oexNL << sTab << oexTC( T, '}' );
+
+	    return sStr;
+    }
+
+    template< typename T >
+        static oexLONG DecodeJSON( TStr< T > x_sStr, TPropertyBag< TStr< T > > &x_pb, oexLONG x_lArrayType = 0, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
+        {	return _DecodeJSON( x_sStr, x_pb, x_lArrayType, x_bMerge, x_pLast ); }
+
+    template< typename T >
+        static oexLONG _DecodeJSON( TStr< T > &x_sStr, TPropertyBag< TStr< T > > &x_pb, oexLONG x_lArrayType = 0, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
+    {
+        // Lose previous contents
+        if ( !x_bMerge )
+            x_pb.Destroy();
+
+        // Punt if null string
+        if ( !x_sStr.Length() )
+            return 0;
+
+		// Find array or
+        if ( !x_lArrayType )
+        {
+			// Figure out array type
+			switch( *x_sStr.Find( oexTT( T, "{[" ) ) )
+			{	case oexTC( T, '{' ) : x_lArrayType = 1; break;
+				case oexTC( T, '[' ) : x_lArrayType = 2; break;
+				default : return 0;
+			} // end switch
+
+			x_sStr++;
+
+		} // end if
+
+        oexLONG lItems = 0;
+        oexLONG lMode = 0;
+        TStr< T > sKey;
+
+		while ( x_sStr.Length() )
+		{
+			x_sStr.SkipWhiteSpace();
+
+			oexCONST T ch = x_sStr[ 0 ];
+
+			// Check for array
+			if ( oexTC( T, '{' ) == ch || oexTC( T, '[' ) == ch )
+			{
+				x_sStr++;
+
+				if ( !lMode )
+					sKey = lItems++;
+
+				_DecodeJSON( x_sStr, x_pb[ sKey ], oexTC( T, '{' ) == ch ? 1 : 2 );
+
+				lMode = 0;
+
+			} // end if
+
+			// End array
+			else if ( oexTC( T, '}' ) == ch || oexTC( T, ']' ) == ch )
+			{
+				x_sStr++;
+				return lItems;
+
+			} // end of array?
+
+			else if ( oexTC( T, ':' ) == ch )
+			{
+				x_sStr++;
+
+			} // end else if
+
+			else if ( oexTC( T, ',' ) == ch )
+			{
+				if ( lMode )
+				{
+					if ( !x_lArrayType )
+						x_pb[ sKey ] = "";
+					else
+						x_pb[ CStr( lItems++ ) ] = sKey;
+				} // end if
+
+				x_sStr++;
+
+			} // end else if
+
+			// Parse string
+			else if ( oexTC( T, '"' ) == ch )
+			{
+				if ( !lMode )
+					lMode = 1,
+					sKey = x_sStr.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) );
+
+				else if ( lMode )
+					lMode = ( 1 == lMode ) ? 0 : lMode,
+					x_pb[ sKey ] = x_sStr.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) );
+
+				lItems++;
+
+			} // end if
+
+			// Parse token
+			else
+			{
+				if ( !lMode )
+					lMode = 1,
+					sKey = x_sStr.Parse( oexTT( T, ",:{}\r\n\t" ) ).TrimWhiteSpace();
+				else if ( lMode )
+					lMode = ( 1 == lMode ) ? 0 : lMode,
+					x_pb[ sKey ] = x_sStr.Parse( oexTT( T, ",:{}\r\n\t" ) ).TrimWhiteSpace();
+
+				x_sStr++;
+				lItems++;
+
+			} // end if
+
+		} // end while
+
+        return lItems;
+    }
 
 protected:
 

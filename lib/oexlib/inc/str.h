@@ -2251,6 +2251,97 @@ public:
 		return *this;
 	}
 
+	/// Escapes the specified characters
+	TStr Escape( oexCONST T* pChars, oexCONST T cEscape )
+	{
+		if ( !pChars )
+			return TStr();
+
+		TStr s;
+		oexSIZE_T lc = zstr::Length( pChars ), ls = Length();
+		oexCONST T* pSrc = Ptr();
+
+		// Can't be larger than twice the length
+		T* pDst = s.OexAllocate( ls * 2 );
+
+		// While we have a string
+		while ( ls )
+		{
+			// Find escape character
+			oexINT p = str::FindCharacters( pSrc, ls, pChars, lc );
+
+			// Did we find an escape character
+			if ( 0 <= p )
+			{
+				// Copy raw block
+				if ( 0 < p )
+					oexMemCpy( pDst, pSrc, sizeof( T ) * p ),
+					pDst += p, pSrc += p, ls -= p;
+
+				// Escape the character
+				*pDst = cEscape, pDst++, *pDst = *pSrc, pDst++, pSrc++, ls--;
+
+			} // end if
+
+			// Are we done?
+			else if ( ls )
+				oexMemCpy( pDst, pSrc, ls ),
+				pDst += ls, ls = 0;
+
+		} // end while
+
+		// Set length of escaped string
+		s.SetLength( pDst - s.Ptr() );
+
+		return s;
+	}
+
+	/// Escapes the specified characters
+	TStr EscapeRange( oexCONST T tMin, oexCONST T tMax, oexBOOL bInclusive, oexCONST T cEscape )
+	{
+		/// +++ Please implement
+		oexVERIFY( oexFALSE != bInclusive );
+
+		TStr s;
+		oexSIZE_T ls = Length();
+		oexCONST T* pSrc = Ptr();
+
+		// Can't be larger than twice the length
+		T* pDst = s.OexAllocate( ls * 2 );
+
+		// While we have a string
+		while ( ls )
+		{
+			// Find escape character
+			//oexINT p = str::FindCharacters( pSrc, ls, pChars, lc );
+	        oexINT p = str::FindInRange( pSrc, ls, tMin, tMax );
+
+			// Did we find an escape character
+			if ( 0 <= p )
+			{
+				// Copy raw block
+				if ( 0 < p )
+					oexMemCpy( pDst, pSrc, sizeof( T ) * p ),
+					pDst += p, pSrc += p, ls -= p;
+
+				// Escape the character
+				*pDst = cEscape, pDst++, *pDst = *pSrc, pDst++, pSrc++, ls--;
+
+			} // end if
+
+			// Are we done?
+			else if ( ls )
+				oexMemCpy( pDst, pSrc, ls ),
+				pDst += ls, ls = 0;
+
+		} // end while
+
+		// Set length of escaped string
+		s.SetLength( pDst - s.Ptr() );
+
+		return s;
+	}
+
 	/// Returns the offset of the first character in pChars found in the string
 	/// Returns -1 if no characters found
 	oexINT FindChars( oexCONST T* pChars )
@@ -2308,12 +2399,16 @@ public:
 	/// Splits off a token and returns it
 	TStr ParseQuoted( oexCONST T *pOpen, oexCONST T *pClose, oexCONST T *pEscape = oexNULL )
     {	oexIGNORE oexVERIFY_PTR_NULL_OK( pEscape );
+    	if ( !Length() ) return TStr();
         oexINT i = str::ParseQuoted(    Ptr(), Length(),
                                         pOpen, zstr::Length( pOpen ),
                                         pClose, zstr::Length( pOpen ),
                                         pEscape, pEscape ? zstr::Length( pEscape ) : 0 );
-		if ( 0 >= i ) return TStr();
-		TStr str = SubStr( 1, i - 1 );
+		if ( 0 > i )
+			return TStr();
+		TStr str;
+		if ( 1 < i )
+			str = SubStr( 1, i - 1 );
 		LTrim( i + 1 );
 		return str;
 	}
@@ -2321,14 +2416,19 @@ public:
 	/// Splits off a token and returns it
 	TStr& Unquote( oexCONST T *pOpen, oexCONST T *pClose, oexCONST T *pEscape = oexNULL )
     {	oexIGNORE oexVERIFY_PTR_NULL_OK( pEscape );
+    	if ( !Length() ) return *this;
         oexINT i = str::ParseQuoted(    Ptr(), Length(),
                                         pOpen, zstr::Length( pOpen ),
                                         pClose, zstr::Length( pOpen ),
                                         pEscape, pEscape ? zstr::Length( pEscape ) : 0 );
-		if ( 0 >= i )
+		if ( 0 > i )
 			return *this;
 
-		Sub( 1, i - 1 );
+		if ( 1 < i )
+			Sub( 1, i - 1 );
+		else
+			Destroy();
+
 		return *this;
 	}
 

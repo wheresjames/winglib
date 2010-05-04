@@ -919,6 +919,31 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str1.ParseNextToken() == oexT( "1.1" ) ) )
 		return 68;
 
+	str1 = oexT( "0123456789" );
+	if ( !oexVERIFY( str1.Escape( oexT( "456" ), oexT( '^' ) ) == oexT( "0123^4^5^6789" ) ) )
+		return -69;
+
+	if ( !oexVERIFY( str1.Escape( oexT( "059" ), oexT( '^' ) ) == oexT( "^01234^5678^9" ) ) )
+		return -70;
+
+//	if ( !oexVERIFY( str1.EscapeRange( oexT( '4' ), oexT( '6' ), oexTRUE, oexT( '^' ) ) == oexT( "0123^4^5^6789" ) ) )
+//		return -71;
+
+	str1 = oexT( "\"hello\"\"world\"" );
+
+	if ( !oexVERIFY( str1.ParseQuoted( oexT( "\"" ), oexT( "\"" ), oexNULL ) == oexT( "hello" ) ) )
+		return -72;
+
+	if ( !oexVERIFY( str1.ParseQuoted( oexT( "\"" ), oexT( "\"" ), oexNULL ) == oexT( "world" ) ) )
+		return -73;
+
+	str1 = oexT( "\"\"\"world\"" );
+
+	if ( !oexVERIFY( str1.ParseQuoted( oexT( "\"" ), oexT( "\"" ), oexNULL ) == oexT( "" ) ) )
+		return -74;
+
+	if ( !oexVERIFY( str1.ParseQuoted( oexT( "\"" ), oexT( "\"" ), oexNULL ) == oexT( "world" ) ) )
+		return -75;
 
 	// +++ This caused a crash somehow, note sSub passed as parameter
 	// oex::CStr sSub = oexBuildPath( sRoot, oexBuildPath( sSub, sScript.c_str() ) );
@@ -1758,6 +1783,35 @@ oex::oexRESULT TestParser()
 
     if ( !oexVERIFY( pb[ oexT( "e" ) ].ToString() == oexT( "f" ) ) )
         return -48;
+
+	pb = oex::CParser::Deserialize( oexT( "a = b, c = d, e = { x = 1, y = 2, z = 3 }, f = { abc, def, ghi }" ) );
+
+	if ( !oexVERIFY( oex::CParser::DecodeJSON( oex::CParser::EncodeJSON( pb ), pb2 ) ) )
+		return -49;
+
+    if ( !oexVERIFY( pb2[ oexT( "a" ) ].ToString() == oexT( "b" ) ) )
+        return -50;
+
+    if ( !oexVERIFY( pb2[ oexT( "c" ) ].ToString() == oexT( "d" ) ) )
+        return -51;
+
+    if ( !oexVERIFY( pb2[ oexT( "e" ) ][ oexT( "x" ) ].ToString() == oexT( "1" ) ) )
+        return -52;
+
+    if ( !oexVERIFY( pb2[ oexT( "e" ) ][ oexT( "y" ) ].ToString() == oexT( "2" ) ) )
+        return -53;
+
+    if ( !oexVERIFY( pb2[ oexT( "e" ) ][ oexT( "z" ) ].ToString() == oexT( "3" ) ) )
+        return -54;
+
+    if ( !oexVERIFY( pb2[ oexT( "f" ) ].IsKey( oexT( "abc" ) ) ) )
+        return -55;
+
+    if ( !oexVERIFY( pb2[ oexT( "f" ) ].IsKey( oexT( "def" ) ) ) )
+        return -56;
+
+    if ( !oexVERIFY( pb2[ oexT( "f" ) ].IsKey( oexT( "ghi" ) ) ) )
+        return -57;
 /*
     oex::CPropertyBag url = oex::CParser::DecodeUrlParams( oexT( "a=b&c=d&e=&f" );
 
