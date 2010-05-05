@@ -37,20 +37,20 @@
 #define OEX_CBIN_DECLARE_TYPE_ACCESS( t )											\
 	oex##t get##t( t_size x_nOffset )												\
 	{	x_nOffset = x_nOffset * sizeof( oex##t );									\
-		if ( x_nOffset + sizeof( oex##t ) >= getUsed() ) return 0;					\
+		if ( x_nOffset + sizeof( oex##t ) > getUsed() ) return 0;					\
 		return *( (oex##t*)Ptr( x_nOffset ) );										\
 	}																				\
 	void set##t( t_size x_nOffset, oex##t val )										\
 	{	x_nOffset = x_nOffset * sizeof( oex##t );									\
-		if ( x_nOffset + sizeof( oex##t ) >= Size() ) return;						\
+		if ( x_nOffset + sizeof( oex##t ) > Size() ) return;						\
 		*( (oex##t*)Ptr( x_nOffset ) ) = val;										\
 	}																				\
 	oex##t getAbs##t( t_size x_nOffset )											\
-	{	if ( x_nOffset + sizeof( oex##t ) >= getUsed() ) return 0;					\
+	{	if ( x_nOffset + sizeof( oex##t ) > getUsed() ) return 0;					\
 		return *( (oex##t*)Ptr( x_nOffset ) );										\
 	}																				\
 	void setAbs##t( t_size x_nOffset, oex##t val )									\
-	{	if ( x_nOffset + sizeof( oex##t ) >= Size() ) return;						\
+	{	if ( x_nOffset + sizeof( oex##t ) > Size() ) return;						\
 		*( (oex##t*)Ptr( x_nOffset ) ) = val;										\
 	}																				\
 	t_size find##t( oex##t val, t_size x_nStart, t_size x_nMax )					\
@@ -66,7 +66,23 @@
 				return x_nStart;													\
 			else x_nStart++;														\
 		return failed();															\
-	}
+	}																				\
+	oex##t LE_get##t( t_size x_nOffset )											\
+	{	oex##t v = get##t( x_nOffset ); return  oexLE_##t( v ); }					\
+	void LE_set##t( t_size x_nOffset, oex##t val )									\
+	{	set##t( x_nOffset, oexLE_##t( val ) ); }									\
+	oex##t BE_get##t( t_size x_nOffset )											\
+	{	oex##t v = get##t( x_nOffset ); return  oexBE_##t( v ); }					\
+	void BE_set##t( t_size x_nOffset, oex##t val )									\
+	{	set##t( x_nOffset, oexBE_##t( val ) ); }									\
+	oex##t LE_getAbs##t( t_size x_nOffset )											\
+	{	oex##t v = getAbs##t( x_nOffset ); return  oexLE_##t( v ); }				\
+	void LE_setAbs##t( t_size x_nOffset, oex##t val )								\
+	{	setAbs##t( x_nOffset, oexLE_##t( val ) ); }									\
+	oex##t BE_getAbs##t( t_size x_nOffset )											\
+	{	oex##t v = getAbs##t( x_nOffset ); return  oexBE_##t( v ); }				\
+	void BE_setAbs##t( t_size x_nOffset, oex##t val )								\
+	{	setAbs##t( x_nOffset, oexBE_##t( val ) ); }
 
 
 /// Shared memory block

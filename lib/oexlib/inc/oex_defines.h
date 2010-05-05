@@ -485,3 +485,74 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 		return ret;																\
 	}
 
+#if defined( OEX_LITTLE_ENDIAN )
+
+#define OEX_LE_INT16( v )	v
+#define OEX_LE_INT32( v )	v
+#define OEX_LE_INT64( v )	v
+
+#define OEX_BE_INT16( v )	( ( ( (oexUSHORT)v & 0x00ff ) << 8 )			\
+							| ( ( (oexUSHORT)v & 0xff00 ) >> 8 ) )
+#define OEX_BE_INT32( v )	( ( ( (oexUINT)v & 0x000000ff ) << 24 ) 		\
+							| ( ( (oexUINT)v & 0x0000ff00 ) << 8 )			\
+							| ( ( (oexUINT)v & 0x00ff0000 ) >> 8 )			\
+							| ( ( (oexUINT)v & 0xff000000 ) >> 24 ) )
+#define OEX_BE_INT64( v )	( ( ( (oexUINT64)v & 0x00000000000000ffll ) << 56 ) 	\
+							| ( ( (oexUINT64)v & 0x000000000000ff00ll ) << 40 )		\
+							| ( ( (oexUINT64)v & 0x0000000000ff0000ll ) << 24 )		\
+							| ( ( (oexUINT64)v & 0x00000000ff000000ll ) << 8 )		\
+							| ( ( (oexUINT64)v & 0x000000ff00000000ll ) >> 8 ) 		\
+							| ( ( (oexUINT64)v & 0x0000ff0000000000ll ) >> 24 ) 	\
+							| ( ( (oexUINT64)v & 0x00ff000000000000ll ) >> 40 ) 	\
+							| ( ( (oexUINT64)v & 0xff00000000000000ll ) >> 56 ) )
+
+#endif
+
+#if defined( OEX_BIG_ENDIAN )
+
+#define OEX_BE_INT16( v )	v
+#define OEX_BE_INT32( v )	v
+#define OEX_BE_INT64( v )	v
+
+#define OEX_LE_INT16( v )	( ( ( (oexUSHORT)v & 0x00ff ) << 8 )			\
+							| ( ( (oexUSHORT)v & 0xff00 ) >> 8 ) )
+#define OEX_LE_INT32( v )	( ( ( (oexUINT)v & 0x000000ff ) << 24 ) 		\
+							| ( ( (oexUINT)v & 0x0000ff00 ) << 8 )			\
+							| ( ( (oexUINT)v & 0x00ff0000 ) >> 8 ) 			\
+							| ( ( (oexUINT)v & 0xff000000 ) >> 24 ) )
+#define OEX_LE_INT64( v )	( ( ( (oexUINT64)v & 0x00000000000000ffll ) << 56 ) 	\
+							| ( ( (oexUINT64)v & 0x000000000000ff00ll ) << 40 ) 	\
+							| ( ( (oexUINT64)v & 0x0000000000ff0000ll ) << 24 ) 	\
+							| ( ( (oexUINT64)v & 0x00000000ff000000ll ) << 8 ) 		\
+							| ( ( (oexUINT64)v & 0x000000ff00000000ll ) >> 8 ) 		\
+							| ( ( (oexUINT64)v & 0x0000ff0000000000ll ) >> 24 ) 	\
+							| ( ( (oexUINT64)v & 0x00ff000000000000ll ) >> 40 ) 	\
+							| ( ( (oexUINT64)v & 0xff00000000000000ll ) >> 56 ) )
+
+#endif
+
+#define oexLE_CHAR( v )			v
+#define oexLE_UCHAR( v )		v
+#define oexLE_SHORT( v )		OEX_LE_INT16( v )
+#define oexLE_USHORT( v )		OEX_LE_INT16( v )
+#define oexLE_INT( v )			OEX_LE_INT32( v )
+#define oexLE_UINT( v )			OEX_LE_INT32( v )
+#define oexLE_LONG( v )			OEX_LE_INT32( v )
+#define oexLE_ULONG( v )		OEX_LE_INT32( v )
+#define oexLE_INT64( v )		OEX_LE_INT64( v )
+#define oexLE_UINT64( v )		OEX_LE_INT64( v )
+#define oexLE_FLOAT( v )		OEX_LE_INT32( v )
+#define oexLE_DOUBLE( v )		OEX_LE_INT64( v )
+
+#define oexBE_CHAR( v )			v
+#define oexBE_UCHAR( v )		v
+#define oexBE_SHORT( v )		OEX_BE_INT16( v )
+#define oexBE_USHORT( v )		OEX_BE_INT16( v )
+#define oexBE_INT( v )			OEX_BE_INT32( v )
+#define oexBE_UINT( v )			OEX_BE_INT32( v )
+#define oexBE_LONG( v )			OEX_BE_INT32( v )
+#define oexBE_ULONG( v )		OEX_BE_INT32( v )
+#define oexBE_INT64( v )		OEX_BE_INT64( v )
+#define oexBE_UINT64( v )		OEX_BE_INT64( v )
+#define oexBE_FLOAT( v )		OEX_BE_INT32( v )
+#define oexBE_DOUBLE( v )		OEX_BE_INT64( v )

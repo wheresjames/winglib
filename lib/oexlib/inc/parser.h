@@ -1454,6 +1454,13 @@ public:
     }
 
     template< typename T >
+        static TPropertyBag< TStr< T > > DecodeJSON( TStr< T > x_sStr, oexLONG x_lArrayType = 0, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
+        {	TPropertyBag< TStr< T > > pb;
+			_DecodeJSON( x_sStr, pb, x_lArrayType, x_bMerge, x_pLast );
+			return pb;
+		}
+
+    template< typename T >
         static oexLONG DecodeJSON( TStr< T > x_sStr, TPropertyBag< TStr< T > > &x_pb, oexLONG x_lArrayType = 0, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
         {	return _DecodeJSON( x_sStr, x_pb, x_lArrayType, x_bMerge, x_pLast ); }
 

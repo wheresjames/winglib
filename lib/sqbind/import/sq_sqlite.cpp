@@ -95,7 +95,7 @@ int CSqSQLite::IsTable( const stdString &sTable )
 
 void CSqSQLite::DebugMode( int bEnable )
 {_STT();
-	CSQLite::DebugMode( bEnable ? oex::oexTRUE : oex::oexFALSE ); 
+	CSQLite::DebugMode( bEnable ? oex::oexTRUE : oex::oexFALSE );
 }
 
 
@@ -110,23 +110,23 @@ int CSqSQLite::Insert( const stdString &sTable, CSqMulti &mData )
 {_STT();
 	if ( !mData.size() ) return 0;
 	oex::CPropertyBag pb;
-	CSqMulti::_serialize( pb, mData.list() );
-	return CSQLite::Insert( sTable.c_str(), pb ); 
+	SQBIND_MultiToPropertyBag( mData.list(), pb );
+	return CSQLite::Insert( sTable.c_str(), pb );
 }
 
 int CSqSQLite::Delete( const stdString &sTable, CSqMulti &mData, const stdString &sCond )
 {_STT();
 	oex::CPropertyBag pb;
-	CSqMulti::_serialize( pb, mData.list() );
-	return CSQLite::Delete( sTable.c_str(), pb, sCond.c_str() ); 
+	SQBIND_MultiToPropertyBag( mData.list(), pb );
+	return CSQLite::Delete( sTable.c_str(), pb, sCond.c_str() );
 }
 
 int CSqSQLite::Update( const stdString &sTable, const stdString &sWhere, CSqMulti &mData )
 {_STT();
 	if ( !mData.size() ) return 0;
 	oex::CPropertyBag pb;
-	CSqMulti::_serialize( pb, mData.list() );
-	return CSQLite::Update( sTable.c_str(), sWhere.c_str(), pb ); 
+	SQBIND_MultiToPropertyBag( mData.list(), pb );
+	return CSQLite::Update( sTable.c_str(), sWhere.c_str(), pb );
 }
 
 int CSqSQLite::QueryTableInfo( const stdString &sTable )
@@ -162,17 +162,17 @@ int CSqSQLite::OnCallback( int argc, char **argv, char **azColName )
 {_STT();
 	// Allocate row object
 	CSqMulti &row = m_mResult[ oexMks( NumRows() ).Ptr() ];
-	
+
 	// Add rows
 	for ( int i = 0; i < argc; i++ )
 	{
 		if ( oexCHECK_PTR( azColName[ i ] ) )
-			row[ oexMbToStrPtr( azColName[ i ] ) ].set( oexCHECK_PTR( argv[ i ] ) 
-														? oexMbToStrPtr( argv[ i ] ) 
+			row[ oexMbToStrPtr( azColName[ i ] ) ].set( oexCHECK_PTR( argv[ i ] )
+														? oexMbToStrPtr( argv[ i ] )
 														: oexT( "" ) );
 		else
-			row[ oexT( "*" ) ].set( oexCHECK_PTR( argv[ i ] ) 
-													? oexMbToStrPtr( argv[ i ] ) 
+			row[ oexT( "*" ) ].set( oexCHECK_PTR( argv[ i ] )
+													? oexMbToStrPtr( argv[ i ] )
 													: oexT( "" ) );
 	} // end for
 

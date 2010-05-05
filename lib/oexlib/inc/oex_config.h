@@ -92,6 +92,9 @@
 #	define OEX_CPU_ARM
 #endif
 
+#define OEX_LITTLE_ENDIAN
+//#define OEX_BIG_ENDIAN
+
 // Debug build?
 #if defined ( _DEBUG )
 #	define oexDEBUG

@@ -142,11 +142,11 @@ CStr CUtil::BinToAsciiHexStr( oexCPVOID x_pBuf, oexSIZE_T x_uLen, oexSIZE_T x_nL
 {_STT();
 
 	// Sanity checks
-	if ( !x_pBuf || !x_uLen || !x_nLineLen )
+	if ( !x_pBuf || !x_uLen || !x_nLineLen || !x_nMaxLines )
 		return oexT( "" );
 
 	// Allocate buffer for string
-	oexSIZE_T nBytes = ( x_uLen * 4 ) + ( x_uLen / x_nLineLen * 16 );
+	oexSIZE_T nBytes = ( ( x_nLineLen * 4 ) + x_nLineLen + 4 ) * x_nMaxLines;
 	CStr s; CStr::t_char *p = s.OexAllocate( nBytes );
 	if ( !p )
 		return oexT( "" );
@@ -154,13 +154,13 @@ CStr CUtil::BinToAsciiHexStr( oexCPVOID x_pBuf, oexSIZE_T x_uLen, oexSIZE_T x_nL
 	oexSIZE_T i = 0, b = 0;
 	oexBYTE *pBuf = (oexBYTE*)x_pBuf;
 	oexSIZE_T szNL = zstr::Length( oexNL8 );
-	for ( oexSIZE_T l = 0; 0 < nBytes && i < x_uLen && ( !x_nMaxLines || l < x_nMaxLines ); l++, i += 16 )
+	for ( oexSIZE_T l = 0; 0 < nBytes && i < x_uLen && ( !x_nMaxLines || l < x_nMaxLines ); l++, i += x_nLineLen )
 	{
 		for ( b = 0; 0 < nBytes && ( i + b ) < x_uLen && b < x_nLineLen; b++ )
 			os::CSys::StrFmt( p, nBytes, oexT( "%0.2X " ), (oexUINT)pBuf[ i + b ] ),
 			p += 3, nBytes -= 3;
 
-		while ( 0 < nBytes && b < 16 )
+		while ( 0 < nBytes && b < x_nLineLen )
 			zstr::Copy( p, nBytes, oexT( "   " ) ),
 			p += 3, nBytes -= 3, b++;
 
@@ -205,7 +205,7 @@ CStr CUtil::Fingerprint( CBin *buf, oexINT w, oexINT h, oexINT frame )
 	{
 		// Init frame
 		for ( int x = 0; x < w; x++ )
-			if ( !frame || ( !y || ( y + 1 ) == h ) && ( !x || ( x + 1 ) == w ) )
+			if ( !frame || ( ( !y || ( y + 1 ) == h ) && ( !x || ( x + 1 ) == w ) ) )
 				p[ i++ ] = oexT( ' ' );
 			else if ( !y || ( y + 1 ) == h )
 				p[ i++ ] = oexT( '-' );

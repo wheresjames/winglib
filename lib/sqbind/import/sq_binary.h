@@ -44,7 +44,23 @@
 	void setAbs##t( t_size x_nOffset, oex::oex##t val )					\
 	{ m_bin.setAbs##t( x_nOffset, val ); }								\
 	t_size find##t( oex::oex##t val, t_size x_nStart, t_size x_nMax )	\
-	{ return m_bin.find##t( val, x_nStart, x_nMax ); }
+	{ return m_bin.find##t( val, x_nStart, x_nMax ); }					\
+	oex::oex##t LE_get##t( t_size x_nOffset )							\
+	{ return m_bin.LE_get##t( x_nOffset ); }							\
+	void LE_set##t( t_size x_nOffset, oex::oex##t val )					\
+	{ m_bin.LE_set##t( x_nOffset, val ); }								\
+	oex::oex##t LE_getAbs##t( t_size x_nOffset )						\
+	{ return m_bin.LE_getAbs##t( x_nOffset ); }							\
+	void LE_setAbs##t( t_size x_nOffset, oex::oex##t val )				\
+	{ m_bin.LE_setAbs##t( x_nOffset, val ); }							\
+	oex::oex##t BE_get##t( t_size x_nOffset )							\
+	{ return m_bin.BE_get##t( x_nOffset ); }							\
+	void BE_set##t( t_size x_nOffset, oex::oex##t val )					\
+	{ m_bin.BE_set##t( x_nOffset, val ); }								\
+	oex::oex##t BE_getAbs##t( t_size x_nOffset )						\
+	{ return m_bin.BE_getAbs##t( x_nOffset ); }							\
+	void BE_setAbs##t( t_size x_nOffset, oex::oex##t val )				\
+	{ m_bin.BE_setAbs##t( x_nOffset, val ); }							\
 
 
 // namespace

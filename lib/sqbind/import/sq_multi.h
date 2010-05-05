@@ -58,11 +58,11 @@ namespace sqbind
 		virtual void deserialize( const t_SqStr &s );
 		virtual void merge( const t_SqStr &s );
 
-		static void _serialize( oex::CPropertyBag &pb, CSqMulti::t_List &lst );
-		static void _deserialize( oex::CPropertyBag &pb, CSqMulti::t_List &lst );
-
 		t_SqStr serialize_filter( const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase );
 		void deserialize_filter( const t_SqStr &s, const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase );
+
+		t_SqStr getJSON();
+		void setJSON( const t_SqStr &s );
 
     private:
 

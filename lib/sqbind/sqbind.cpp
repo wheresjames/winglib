@@ -181,6 +181,21 @@ void CSqImage::Register( sqbind::VM vm )
 	SQBIND_EXPORT( vm, CSqImage );
 }
 
+#define REGISTER_TYPE_ACCESS( t )	\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, set##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, get##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setAbs##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getAbs##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, LE_set##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, LE_get##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, LE_setAbs##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, LE_getAbs##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_set##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_get##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_setAbs##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_getAbs##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, find##t )
+
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Allocate )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Free )
@@ -200,59 +215,22 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getUsed )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setString )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getString )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setCHAR )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getCHAR )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setUCHAR )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getUCHAR )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setSHORT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getSHORT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setUSHORT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getUSHORT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setINT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getINT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setUINT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getUINT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setLONG )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getLONG )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setULONG )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getULONG )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setFLOAT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getFLOAT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setDOUBLE )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getDOUBLE )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setAbsCHAR )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getAbsCHAR )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setAbsUCHAR )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getAbsUCHAR )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setAbsSHORT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getAbsSHORT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setAbsUSHORT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getAbsUSHORT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setAbsINT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getAbsINT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setAbsUINT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getAbsUINT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setAbsLONG )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getAbsLONG )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setAbsULONG )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getAbsULONG )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setAbsFLOAT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getAbsFLOAT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setAbsDOUBLE )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getAbsDOUBLE )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findCHAR )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findUCHAR )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findSHORT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findUSHORT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findINT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findUINT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findLONG )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findULONG )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findFLOAT )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findDOUBLE )
+
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FindBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Sub )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, failed )
+
+	REGISTER_TYPE_ACCESS( CHAR )
+	REGISTER_TYPE_ACCESS( UCHAR )
+	REGISTER_TYPE_ACCESS( SHORT )
+	REGISTER_TYPE_ACCESS( USHORT )
+	REGISTER_TYPE_ACCESS( INT )
+	REGISTER_TYPE_ACCESS( UINT )
+	REGISTER_TYPE_ACCESS( LONG )
+	REGISTER_TYPE_ACCESS( ULONG )
+	REGISTER_TYPE_ACCESS( FLOAT )
+	REGISTER_TYPE_ACCESS( DOUBLE )
+
 SQBIND_REGISTER_CLASS_END()
 
 void CSqBinary::Register( sqbind::VM vm )
