@@ -1,26 +1,178 @@
 
+class CModbusClient
+{
+	socket = CSqSocket();
+	addr = CSqSockAddress();
+	mode = 0;
+	io = CSqMulti();
+	lio = CSqMulti();
+	quit = 0;
+
+	constructor()
+	{
+		InitIo();
+	}
+
+	function InitIo()
+	{
+		io.clear();
+		lio.clear();
+		for ( local i = 0; i < 8; i++ )
+			io[ "inputs" ][ i.tostring() ] <- "",
+			io[ "outputs" ][ i.tostring() ] <- "";
+	}
+
+	function Disconnect()
+	{
+		socket.Destroy();
+		mode = 0;
+		quit = 0;
+		InitIo();
+	}
+
+	function Connect( ip )
+	{
+		Disconnect();
+
+		if ( !socket.Connect( ip, 1502 ) )
+		{	::_self.echo( "Connect() : " + socket.getLastError() );
+			return 0;
+		} // end if
+
+		if ( !socket.WaitEvent( CSqSocket().EVT_CONNECT, 3000 ) )
+		{	::_self.echo( "WaitEvent( EVT_CONNECT ) : " + socket.getLastError() );
+			return 0;
+		} // end if
+
+		io[ "connected" ] <- ip;
+
+		return 1;
+	}
+
+	function isConnected() { return io.isset( "connected" ); }
+
+	function getPeerAddress() { return io.isset( "connected" ) ? io[ "connected" ].str() : ""; }
+
+	function Update()
+	{
+		if ( !socket.isActivity() )
+			return;
+
+		if ( quit )
+		{	Destroy();
+			return;
+		} // end if
+
+		if ( 0 == mode )
+		{	mode++;
+
+			::_self.echo( "sending packet" );
+
+			local pkt_size = 8 + 4;
+			local pkt = CSqBinary();
+			if ( !pkt.Allocate( pkt_size ) )
+			{	::_self.echo( "Failed to allocate memory for packet" );
+				return;
+			} // end if
+
+			pkt.Zero();
+			pkt.setUsed( pkt_size );
+
+			pkt.BE_setAbsUSHORT( 0, 0 );
+			pkt.BE_setAbsUSHORT( 2, 0 );
+			pkt.BE_setAbsUSHORT( 4, pkt_size - 6 );
+			pkt.BE_setAbsUCHAR( 6, 255 );
+			pkt.BE_setAbsUCHAR( 7, 1 );
+
+			// Read coils
+			pkt.BE_setAbsUSHORT( 8, 0 );
+			pkt.BE_setAbsUSHORT( 10, 8 );
+
+			if ( !socket.WriteBin( pkt, 0 ) )
+			{	::_self.echo( "Write() : " + socket.getLastError() );
+				quit = 1;
+			} // end if
+
+		} // end if
+
+		else if ( 1 == mode )
+		{
+			if ( socket.WaitEvent( CSqSocket().EVT_READ, 0 ) )
+			{	mode++;
+
+				local pkt = CSqBinary();
+
+				if ( socket.ReadFromBin( pkt, 0 ) )
+					ProcessReply( pkt );
+
+			} // end if
+
+		} // end else if
+
+		else //if ( 5 < _g.session_mode++ )
+			mode = 0;
+	}
+
+	function ProcessReply( pkt )
+	{
+		::_self.echo( "Modbus : Data Rx'd : " + pkt.getUsed() );
+
+		::_self.echo( pkt.AsciiHexStr( 8, 4 ) );
+
+		local cmd = pkt.getAbsUCHAR( 7 );
+		if ( cmd & 0x80 )
+		{	::_self.echo( "!!! ERROR : " + pkt.getAbsUCHAR( 8 ) );
+			return;
+		} // end if
+
+		switch ( cmd )
+		{
+			case 1 :
+
+				local bytes = pkt.getAbsUCHAR( 8 );
+				local bits = bytes * 8;
+
+				local pos = 9;
+				for ( local c = 0; c < bytes; c++ )
+				{
+					local data = pkt.getAbsUCHAR( pos++ );
+
+					local mask = 1;
+					for( local b = 0; b < 8 && bits; b++, bits-- )
+					{	io[ "outputs" ][ b.tostring() ] <- ( ( data & mask ) ? 1 : 0 ).tostring();
+						mask = mask << 1;
+					} // end for
+
+				} // end for
+
+				break;
+
+			default :
+				::_self.echo( "!!! Unknown command : " + cmd );
+				break;
+
+		} // end switch
+
+	}
+
+};
+
 class CGlobal
 {
 	quit = 1;
 	http = CSqHttpServer();
-	session = CSqSocket();
-	session_addr = CSqSockAddress();
-	session_mode = 0;
 
 	connect = "";
 	disconnect = 0;
 
-	io = CSqMulti();
+	modbus = CModbusClient();
+
 };
 
 local _g = CGlobal();
 
 function _init() : ( _g )
 {
-	for ( local i = 0; i < 8; i++ )
-		_g.io[ "inputs" ][ i.tostring() ] <- "",
-		_g.io[ "outputs" ][ i.tostring() ] <- "";
-
 	if ( !StartWebServer( 1235 ) )
 		return;
 
@@ -39,30 +191,20 @@ function _idle() : ( _g )
 
 		local ip = _g.connect;
 		_g.connect = "";
-		_g.session_mode = 0;
 
-		if ( !_g.session.Connect( ip, 1502 ) )
-		{	_self.echo( "Connect() : " + _g.session.getLastError() );
+		if ( !_g.modbus.Connect( ip ) )
+		{	_self.echo( "Connect() failed "  );
 			return 0;
 		} // end if
 
-		if ( !_g.session.WaitEvent( CSqSocket().EVT_CONNECT, 3000 ) )
-		{	_self.echo( "WaitEvent( EVT_CONNECT ) : " + _g.session.getLastError() );
-			return 0;
-		} // end if
-
-		_g.io[ "connected" ] <- ip;
 
 	} // end if
 
-	else if ( _g.disconnect && _g.io.isset( "connected" ) )
-	{	_self.echo( "Disconnecting from : " + _g.io[ "connected" ].str() );
-		_g.io.unset( "connected" );
+	else if ( _g.disconnect && _g.modbus.isConnected() )
+	{
+		_self.echo( "Disconnecting from : " + _g.modbus.getPeerAddress() );
 		_g.disconnect = 0;
-		_g.session.Destroy();
-		for ( local i = 0; i < 8; i++ )
-			_g.io[ "inputs" ][ i.tostring() ] <- "",
-			_g.io[ "outputs" ][ i.tostring() ] <- "";
+		_g.modbus.Disconnect();
 	} // end else if
 
 	return 0;
@@ -74,101 +216,9 @@ function _idle() : ( _g )
 
 function UpdateModbusServer() : ( _g )
 {
-	if ( !_g.session.isActivity() )
-		return;
-
-	if ( 0 == _g.session_mode )
-	{	_g.session_mode++;
-
-		_self.echo( "sending packet" );
-
-		local pkt_size = 8 + 4;
-		local pkt = CSqBinary();
-		if ( !pkt.Allocate( pkt_size ) )
-		{	_self.echo( "Failed to allocate memory for packet" );
-			return;
-		} // end if
-
-		pkt.Zero();
-		pkt.setUsed( pkt_size );
-
-		pkt.BE_setAbsUSHORT( 0, 0 );
-		pkt.BE_setAbsUSHORT( 2, 0 );
-		pkt.BE_setAbsUSHORT( 4, pkt_size - 6 );
-		pkt.setAbsUCHAR( 6, 255 );
-		pkt.setAbsUCHAR( 7, 1 );
-
-		// Read coils
-		pkt.BE_setAbsUSHORT( 8, 0 );
-		pkt.BE_setAbsUSHORT( 10, 8 );
-
-		if ( !_g.session.WriteBin( pkt, 0 ) )
-		{	_self.echo( "Write() : " + _g.session.getLastError() );
-			_g.disconnect = 1;
-		} // end if
-
-	} // end if
-
-	else if ( 1 == _g.session_mode )
-	{
-		if ( _g.session.WaitEvent( CSqSocket().EVT_READ, 0 ) )
-		{	_g.session_mode++;
-
-			local pkt = CSqBinary();
-
-			if ( _g.session.ReadFromBin( pkt, 0 ) )
-				ProcessReply( pkt );
-
-		} // end if
-
-	} // end else if
-
-	else if ( 5 < _g.session_mode++ )
-		_g.session_mode = 0;
-
+	_g.modbus.Update();
 }
 
-function ProcessReply( pkt ) : ( _g )
-{
-	_self.echo( "Modbus : Data Rx'd : " + pkt.getUsed() );
-
-	_self.echo( pkt.AsciiHexStr( 8, 4 ) );
-
-	local cmd = pkt.getAbsUCHAR( 7 );
-	if ( cmd & 0x80 )
-	{	_self.echo( "!!! ERROR : " + pkt.getAbsUCHAR( 8 ) );
-		return;
-	} // end if
-
-	switch ( cmd )
-	{
-		case 1 :
-
-			local bytes = pkt.getAbsUCHAR( 8 );
-			local bits = bytes * 8;
-
-			local pos = 9;
-			for ( local c = 0; c < bytes; c++ )
-			{
-				local data = pkt.getAbsUCHAR( pos++ );
-
-				local mask = 1;
-				for( local b = 0; b < 8 && bits; b++, bits-- )
-				{	_g.io[ "outputs" ][ b.tostring() ] <- ( ( data & mask ) ? 1 : 0 ).tostring();
-					mask = mask << 1;
-				} // end for
-
-			} // end for
-
-			break;
-
-		default :
-			_self.echo( "!!! Unknown command : " + cmd );
-			break;
-
-	} // end switch
-
-}
 
 //-------------------------------------------------------------------
 // Web Server
@@ -208,11 +258,21 @@ function OnProcessRequest( params ) : ( _g )
 			break;
 
 		case "/data" :
+
 			if ( mParams[ "GET" ].isset( "connect" ) )
 				_g.connect = mParams[ "GET" ][ "connect" ].str();
+
 			if ( mParams[ "GET" ].isset( "disconnect" ) )
 				_g.disconnect = 1;
-			raw = _g.io.getJSON();
+
+			if ( mParams[ "GET" ].isset( "toggle_output" ) )
+			{	local n = mParams[ "GET" ][ "toggle_output" ].str();
+				if ( _g.modbus.io[ "outputs" ].isset( n ) )
+					_g.modbus.io[ "outputs" ][ n ] <- ( _g.modbus.io[ "outputs" ][ n ].toint() ? "0" : "1" );
+			} // end if
+
+			raw = _g.modbus.io.getJSON();
+
 			break;
 
 	} // end switch
@@ -253,17 +313,18 @@ function pgHome() : ( _g )
 	page += "</tr><tr><td><b>Status</b></td><td colspan='99'><div id='status' align='center' style='background-color:#b0b0b0'></div>";
 
 	page += "</tr><tr><td><b>Inputs</b></td>";
-	if ( _g.io.isset( "inputs" ) )
-		foreach ( k,v in _g.io[ "inputs" ] )
+
+	if ( _g.modbus.io.isset( "inputs" ) )
+		foreach ( k,v in _g.modbus.io[ "inputs" ] )
 			div_ids += ( div_ids.len() ? ", " : "" ) + "'i_" + k + "'",
 			page += "<td><div id='i_" + k + "' style='" + border + "background-color:#b0b0b0;' align='center' >"
 					+ "&nbsp;" + k + "&nbsp;</div></td>";
 
 	page += "</tr><tr><td><b>Outputs</b></td>";
-	if ( _g.io.isset( "outputs" ) )
-		foreach ( k,v in _g.io[ "outputs" ] )
+	if ( _g.modbus.io.isset( "outputs" ) )
+		foreach ( k,v in _g.modbus.io[ "outputs" ] )
 			div_ids += ( div_ids.len() ? ", " : "" ) + "'o_" + k + "'",
-			page += "<td><div id='o_" + k + "' style='" + border + "background-color:#b0b0b0;' align='center' >"
+			page += "<td><div id='o_" + k + "' style='" + border + "background-color:#b0b0b0;' align='center' onclick='toggleOutput( " + k + " )' >"
 					+ "&nbsp;" + k + "&nbsp;</div></td>";
 
 	page += "</table>";
@@ -282,6 +343,10 @@ function pgHome() : ( _g )
 			{	g_req += ( g_req.length ? '&' : '' ) + 'disconnect=1';
 			}
 
+			function toggleOutput( n )
+			{	g_req += ( g_req.length ? '&' : '' ) + 'toggle_output=' + n;
+			}
+
 			function setState( id, state )
 			{	var cols = Array( '#400000', '#ff0000', '#b0b0b0' );
 				if ( $('#'+id).css( 'backgroundColor' ) != cols[ parseInt( state ) ] )
@@ -295,12 +360,12 @@ function pgHome() : ( _g )
 			}
 
 			function data_success( data )
-			{	if ( !data || !data[ 'inputs' ] || !data[ 'outputs' ] ) return data_error();
+			{	if ( !data ) return data_error();
 				if ( data[ 'connected' ] && data[ 'connected' ].length )
 				{
 					$('#status').animate( { backgroundColor: '#00a000' }, 500 ), $('#status').html( data[ 'connected' ] );
-					for( var i in data[ 'inputs' ] ) setState( 'i_' + i, data[ 'inputs' ][ i ] );
-					for( var i in data[ 'outputs' ] ) setState( 'o_' + i, data[ 'outputs' ][ i ] );
+					if ( data[ 'inputs' ] ) for( var i in data[ 'inputs' ] ) setState( 'i_' + i, data[ 'inputs' ][ i ] );
+					if ( data[ 'outputs' ] ) for( var i in data[ 'outputs' ] ) setState( 'o_' + i, data[ 'outputs' ][ i ] );
 				} // end if
 				else
 				{	for ( var i in g_div_ids ) setState( g_div_ids[ i ], 2 );
@@ -320,3 +385,4 @@ function pgHome() : ( _g )
 
 	return page;
 }
+

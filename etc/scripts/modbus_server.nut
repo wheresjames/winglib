@@ -100,9 +100,9 @@ function ProcessRequest( session, pkt ) : ( _g )
 			tx.BE_setAbsUSHORT( 0, 0 );
 			tx.BE_setAbsUSHORT( 2, 0 );
 			tx.BE_setAbsUSHORT( 4, tx_size - 6 );
-			tx.setAbsUCHAR( 6, 255 );
-			tx.setAbsUCHAR( 7, 1 );
-			tx.setAbsUCHAR( 8, bytes );
+			tx.BE_setAbsUCHAR( 6, 255 );
+			tx.BE_setAbsUCHAR( 7, 1 );
+			tx.BE_setAbsUCHAR( 8, bytes );
 
 			local pos = 9;
 			for ( local c = 0; c < bytes; c++ )
@@ -114,7 +114,7 @@ function ProcessRequest( session, pkt ) : ( _g )
 					mask = mask << 1;
 				} // end for
 
-				tx.setAbsUCHAR( pos++, data );
+				tx.BE_setAbsUCHAR( pos++, data );
 
 			} // end for
 
@@ -212,6 +212,13 @@ function OnProcessRequest( params ) : ( _g )
 			break;
 
 		case "/data" :
+
+			if ( mParams[ "GET" ].isset( "toggle_output" ) )
+			{	local n = mParams[ "GET" ][ "toggle_output" ].str();
+				if ( _g.io[ "outputs" ].isset( n ) )
+					_g.io[ "outputs" ][ n ] <- ( _g.io[ "outputs" ][ n ].toint() ? "0" : "1" );
+			} // end if
+
 			raw = _g.io.getJSON();
 			break;
 
@@ -251,7 +258,7 @@ function pgHome() : ( _g )
 	if ( _g.io.isset( "outputs" ) )
 		foreach ( k,v in _g.io[ "outputs" ] )
 			div_ids += ( div_ids.len() ? ", " : "" ) + "'o_" + k + "'",
-			page += "<td><div id='o_" + k + "' style='" + border + "background-color:#b0b0b0;' >"
+			page += "<td><div id='o_" + k + "' style='" + border + "background-color:#b0b0b0;' onclick='toggleOutput( " + k + " )' >"
 					+ "&nbsp;" + k + "&nbsp;</div></td>";
 
 	page += "</tr><tr><td><b>Clients</b></td><td colspan='99'><div id='clients'></div>";
@@ -261,7 +268,12 @@ function pgHome() : ( _g )
 	page += @"
 		<script type='text/javascript'>
 
-			var div_ids = Array( " + div_ids + @" );
+			var g_req = '';
+			var g_div_ids = Array( " + div_ids + @" );
+
+			function toggleOutput( n )
+			{	g_req += ( g_req.length ? '&' : '' ) + 'toggle_output=' + n;
+			}
 
 			function setState( id, state )
 			{	var cols = Array( '#400000', '#ff0000', '#b0b0b0' );
@@ -271,7 +283,7 @@ function pgHome() : ( _g )
 
 			function data_error()
 			{	$('#clients').html( '' );
-				for ( var i in div_ids ) setState( div_ids[ i ], 2 );
+				for ( var i in g_div_ids ) setState( g_div_ids[ i ], 2 );
 			}
 
 			function data_success( data )
@@ -281,7 +293,12 @@ function pgHome() : ( _g )
 				$('#clients').html( data[ 'clients' ] ? data[ 'clients' ] : '' );
 			}
 
-			setInterval( function() { $.ajax( { url: '/data', dataType: 'json', success: data_success, error: data_error }) }, 1000 );
+			function poll()
+			{	$.ajax( { url: '/data', dataType: 'json', success: data_success, error: data_error, data: g_req })
+				g_req = '';
+			}
+
+			setInterval( poll, 1000 );
 
 		</script>
 	";
