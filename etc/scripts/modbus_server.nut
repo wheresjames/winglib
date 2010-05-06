@@ -21,7 +21,7 @@ function _init() : ( _g )
 	if ( !StartWebServer( 1234 ) )
 		return;
 
-	if ( !StartModbusServer( 1502 ) )
+	if ( !StartModbusServer( 502 ) )
 		return;
 
 	_g.quit = 0;
@@ -70,7 +70,9 @@ function SendError( session, pkt, err )
 
 function ProcessRequest( session, pkt ) : ( _g )
 {
-	_self.echo( "Modbus : Data Rx'd : " + pkt.getUsed() );
+//	_self.echo( "Modbus : Data Rx'd : " + pkt.getUsed() );
+
+//	_self.echo( pkt.AsciiHexStr( 8, 4 ) );
 
 	// Signal error
 //	pkt.setAbsUCHAR( 7, pkt.getAbsUCHAR( 7 ) | 0x80 );
@@ -92,7 +94,7 @@ function ProcessRequest( session, pkt ) : ( _g )
 
 			local bytes = bits / 8 + ( ( bits % 8 ) ? 1 : 0 );
 
-			_self.echo( "requested: " + bits + "/" + bytes );
+//			_self.echo( "requested: " + bits + "/" + bytes );
 
 			local tx_size = 8 + 1 + bytes;
 			tx.setUsed( tx_size );
@@ -100,7 +102,7 @@ function ProcessRequest( session, pkt ) : ( _g )
 			tx.BE_setAbsUSHORT( 0, 0 );
 			tx.BE_setAbsUSHORT( 2, 0 );
 			tx.BE_setAbsUSHORT( 4, tx_size - 6 );
-			tx.BE_setAbsUCHAR( 6, 255 );
+			tx.BE_setAbsUCHAR( 6, 5 );
 			tx.BE_setAbsUCHAR( 7, 1 );
 			tx.BE_setAbsUCHAR( 8, bytes );
 
@@ -117,6 +119,63 @@ function ProcessRequest( session, pkt ) : ( _g )
 				tx.BE_setAbsUCHAR( pos++, data );
 
 			} // end for
+
+			break;
+
+		case 2 :
+
+			local bits = pkt.BE_getAbsUSHORT( 10 );
+			if ( !bits )
+				return SendError( session, pkt, 3 );
+
+			local bytes = bits / 8 + ( ( bits % 8 ) ? 1 : 0 );
+
+//			_self.echo( "requested: " + bits + "/" + bytes );
+
+			local tx_size = 8 + 1 + bytes;
+			tx.setUsed( tx_size );
+
+			tx.BE_setAbsUSHORT( 0, 0 );
+			tx.BE_setAbsUSHORT( 2, 0 );
+			tx.BE_setAbsUSHORT( 4, tx_size - 6 );
+			tx.BE_setAbsUCHAR( 6, 5 );
+			tx.BE_setAbsUCHAR( 7, 2 );
+			tx.BE_setAbsUCHAR( 8, bytes );
+
+			local pos = 9;
+			for ( local c = 0; c < bytes; c++ )
+			{
+				local mask = 1, data = 0;
+				for( local b = 0; b < 8 && bits; b++, bits-- )
+				{	if ( _g.io[ "inputs" ][ b.tostring() ].toint() )
+						data = data | mask;
+					mask = mask << 1;
+				} // end for
+
+				tx.BE_setAbsUCHAR( pos++, data );
+
+			} // end for
+
+			break;
+
+		case 5 :
+
+			local offset = pkt.BE_getAbsUSHORT( 8 );
+			local value = pkt.BE_getAbsUSHORT( 10 );
+			if ( !_g.io[ "outputs" ].isset( offset.tostring() ) )
+				return SendError( session, pkt, 3 );
+
+			_g.io[ "outputs" ][ offset.tostring() ] <- value.tostring();
+
+			local tx_size = 8 + 2;
+			tx.setUsed( tx_size );
+			tx.BE_setAbsUSHORT( 0, 0 );
+			tx.BE_setAbsUSHORT( 2, 0 );
+			tx.BE_setAbsUSHORT( 4, tx_size - 6 );
+			tx.BE_setAbsUCHAR( 6, 5 );
+			tx.BE_setAbsUCHAR( 7, 1 );
+			tx.BE_setAbsUSHORT( 8, offset );
+			tx.BE_setAbsUSHORT( 8, value );
 
 			break;
 
@@ -213,6 +272,12 @@ function OnProcessRequest( params ) : ( _g )
 
 		case "/data" :
 
+			if ( mParams[ "GET" ].isset( "toggle_input" ) )
+			{	local n = mParams[ "GET" ][ "toggle_input" ].str();
+				if ( _g.io[ "inputs" ].isset( n ) )
+					_g.io[ "inputs" ][ n ] <- ( _g.io[ "inputs" ][ n ].toint() ? "0" : "1" );
+			} // end if
+
 			if ( mParams[ "GET" ].isset( "toggle_output" ) )
 			{	local n = mParams[ "GET" ][ "toggle_output" ].str();
 				if ( _g.io[ "outputs" ].isset( n ) )
@@ -250,7 +315,7 @@ function pgHome() : ( _g )
 	if ( _g.io.isset( "inputs" ) )
 		foreach ( k,v in _g.io[ "inputs" ] )
 			div_ids += ( div_ids.len() ? ", " : "" ) + "'i_" + k + "'",
-			page += "<td><div id='i_" + k + "' style='" + border + "background-color:#b0b0b0;' >"
+			page += "<td><div id='i_" + k + "' style='" + border + "background-color:#b0b0b0;' onclick='toggleInput( " + k + " )' >"
 					+ "&nbsp;" + k + "&nbsp;</div></td>";
 
 	page += "</tr><tr><td><b>Outputs</b></td>";
@@ -271,6 +336,10 @@ function pgHome() : ( _g )
 			var g_req = '';
 			var g_div_ids = Array( " + div_ids + @" );
 
+			function toggleInput( n )
+			{	g_req += ( g_req.length ? '&' : '' ) + 'toggle_input=' + n;
+			}
+
 			function toggleOutput( n )
 			{	g_req += ( g_req.length ? '&' : '' ) + 'toggle_output=' + n;
 			}
@@ -278,7 +347,8 @@ function pgHome() : ( _g )
 			function setState( id, state )
 			{	var cols = Array( '#400000', '#ff0000', '#b0b0b0' );
 				if ( $('#'+id).css( 'backgroundColor' ) != cols[ parseInt( state ) ] )
-					$('#'+id).animate( { backgroundColor: cols[ parseInt( state ) ] }, 500 );
+					$('#'+id).css( 'backgroundColor', cols[ parseInt( state ) ] );
+//					$('#'+id).animate( { backgroundColor: cols[ parseInt( state ) ] }, 500 );
 			}
 
 			function data_error()
@@ -298,7 +368,7 @@ function pgHome() : ( _g )
 				g_req = '';
 			}
 
-			setInterval( poll, 1000 );
+			setInterval( poll, 500 );
 
 		</script>
 	";

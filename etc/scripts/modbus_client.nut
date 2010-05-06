@@ -7,6 +7,10 @@ class CModbusClient
 	io = CSqMulti();
 	lio = CSqMulti();
 	quit = 0;
+	trans = 0;
+	reply = 0;
+	dev = 5;
+	pto = 3;
 
 	constructor()
 	{
@@ -27,6 +31,7 @@ class CModbusClient
 		socket.Destroy();
 		mode = 0;
 		quit = 0;
+		reply = 0;
 		InitIo();
 	}
 
@@ -34,13 +39,15 @@ class CModbusClient
 	{
 		Disconnect();
 
-		if ( !socket.Connect( ip, 1502 ) )
+		if ( !socket.Connect( ip, 502 ) )
 		{	::_self.echo( "Connect() : " + socket.getLastError() );
+			quit = 1;
 			return 0;
 		} // end if
 
 		if ( !socket.WaitEvent( CSqSocket().EVT_CONNECT, 3000 ) )
 		{	::_self.echo( "WaitEvent( EVT_CONNECT ) : " + socket.getLastError() );
+			quit = 1;
 			return 0;
 		} // end if
 
@@ -53,71 +60,119 @@ class CModbusClient
 
 	function getPeerAddress() { return io.isset( "connected" ) ? io[ "connected" ].str() : ""; }
 
+	function SendPacket( cmd, pkt )
+	{
+		local tx_size = 8;
+		local tx = CSqBinary();
+		if ( !tx.Allocate( tx_size ) )
+		{	::_self.echo( "Failed to allocate memory for packet" );
+			return 0;
+		} // end if
+
+		tx.Zero();
+		tx.setUsed( tx_size );
+
+		tx.BE_setAbsUSHORT( 0, trans++ );
+		tx.BE_setAbsUSHORT( 2, 0 );
+		tx.BE_setAbsUSHORT( 4, tx_size + pkt.getUsed() - 6 );
+		tx.BE_setAbsUCHAR( 6, dev );
+		tx.BE_setAbsUCHAR( 7, cmd );
+
+		tx.Append( pkt );
+
+//		::_self.echo( tx.AsciiHexStr( 8, 4 ) );
+		if ( !socket.WriteBin( tx, 0 ) )
+		{	::_self.echo( "Write() : " + socket.getLastError() );
+			quit = 1;
+			return 0;
+		} // end if
+
+		reply = ::_self.gmt_time() + pto;
+
+		return 1;
+	}
+
 	function Update()
 	{
 		if ( !socket.isActivity() )
 			return;
 
 		if ( quit )
-		{	Destroy();
+		{	Disconnect();
 			return;
 		} // end if
 
-		if ( 0 == mode )
-		{	mode++;
-
-			::_self.echo( "sending packet" );
-
-			local pkt_size = 8 + 4;
-			local pkt = CSqBinary();
-			if ( !pkt.Allocate( pkt_size ) )
-			{	::_self.echo( "Failed to allocate memory for packet" );
+		if ( reply >= ::_self.gmt_time() )
+		{
+			if ( !socket.WaitEvent( CSqSocket().EVT_READ, 0 ) )
 				return;
-			} // end if
 
-			pkt.Zero();
-			pkt.setUsed( pkt_size );
-
-			pkt.BE_setAbsUSHORT( 0, 0 );
-			pkt.BE_setAbsUSHORT( 2, 0 );
-			pkt.BE_setAbsUSHORT( 4, pkt_size - 6 );
-			pkt.BE_setAbsUCHAR( 6, 255 );
-			pkt.BE_setAbsUCHAR( 7, 1 );
-
-			// Read coils
-			pkt.BE_setAbsUSHORT( 8, 0 );
-			pkt.BE_setAbsUSHORT( 10, 8 );
-
-			if ( !socket.WriteBin( pkt, 0 ) )
-			{	::_self.echo( "Write() : " + socket.getLastError() );
-				quit = 1;
-			} // end if
+			reply = 0;
+			local pkt = CSqBinary();
+			if ( socket.ReadFromBin( pkt, 0 ) )
+				ProcessReply( pkt );
 
 		} // end if
 
-		else if ( 1 == mode )
+		switch( mode )
 		{
-			if ( socket.WaitEvent( CSqSocket().EVT_READ, 0 ) )
-			{	mode++;
+			case 0 :
+//				::_self.echo( "Updating outputs" );
+				if ( !UpdateOutputs() )
+					mode++;
+				break;
 
-				local pkt = CSqBinary();
+			case 1 :
+//				::_self.echo( "Reading outputs" );
+				ReadOutputs();
+				mode++;
+				break;
 
-				if ( socket.ReadFromBin( pkt, 0 ) )
-					ProcessReply( pkt );
+			case 2 :
+//				::_self.echo( "Reading inputs" );
+				ReadInputs();
+				mode++;
+				break;
 
-			} // end if
+			default :
+				mode = 0;
+				break;
 
-		} // end else if
+		} // end switch
 
-		else //if ( 5 < _g.session_mode++ )
-			mode = 0;
+	}
+
+	function UpdateOutputs()
+	{	if ( io.isset( "soutputs" ) )
+			foreach ( k,v in io[ "soutputs" ] )
+				if ( v.str() != io[ "outputs" ][ k ].str() )
+				{	io[ "outputs" ][ k ] <- v.str();
+					local pkt = CSqBinary( 4, 4 );
+					pkt.BE_setAbsUSHORT( 0, k.tointeger() );
+					pkt.BE_setAbsUSHORT( 2, v.toint() );
+					return SendPacket( 5, pkt );
+				} // end if
+		return 0;
+	}
+
+	function ReadOutputs()
+	{	local pkt = CSqBinary( 4, 4 );
+		pkt.BE_setAbsUSHORT( 0, 0 );
+		pkt.BE_setAbsUSHORT( 2, 8 );
+		return SendPacket( 1, pkt );
+	}
+
+	function ReadInputs()
+	{	local pkt = CSqBinary( 4, 4 );
+		pkt.BE_setAbsUSHORT( 0, 0 );
+		pkt.BE_setAbsUSHORT( 2, 8 );
+		return SendPacket( 2, pkt );
 	}
 
 	function ProcessReply( pkt )
 	{
-		::_self.echo( "Modbus : Data Rx'd : " + pkt.getUsed() );
-
-		::_self.echo( pkt.AsciiHexStr( 8, 4 ) );
+//		::_self.echo( "Modbus : Data Rx'd : " + pkt.getUsed() );
+//		::_self.echo( pkt.AsciiHexStr( 8, 4 ) );
 
 		local cmd = pkt.getAbsUCHAR( 7 );
 		if ( cmd & 0x80 )
@@ -140,6 +195,29 @@ class CModbusClient
 					local mask = 1;
 					for( local b = 0; b < 8 && bits; b++, bits-- )
 					{	io[ "outputs" ][ b.tostring() ] <- ( ( data & mask ) ? 1 : 0 ).tostring();
+						if ( io[ "soutputs" ].isset( b.tostring() )
+						     && io[ "outputs" ][ b.tostring() ].str() == io[ "soutputs" ][ b.tostring() ].str() )
+							io[ "soutputs" ].unset( b.tostring() );
+						mask = mask << 1;
+					} // end for
+
+				} // end for
+
+				break;
+
+			case 2 :
+
+				local bytes = pkt.getAbsUCHAR( 8 );
+				local bits = bytes * 8;
+
+				local pos = 9;
+				for ( local c = 0; c < bytes; c++ )
+				{
+					local data = pkt.getAbsUCHAR( pos++ );
+
+					local mask = 1;
+					for( local b = 0; b < 8 && bits; b++, bits-- )
+					{	io[ "inputs" ][ b.tostring() ] <- ( ( data & mask ) ? 1 : 0 ).tostring();
 						mask = mask << 1;
 					} // end for
 
@@ -176,7 +254,7 @@ function _init() : ( _g )
 	if ( !StartWebServer( 1235 ) )
 		return;
 
-	_self.set_timer( ".", 1000, "UpdateModbusServer" );
+	_self.set_timer( ".", 500, "UpdateModbusServer" );
 
 	_g.quit = 0;
 }
@@ -267,8 +345,10 @@ function OnProcessRequest( params ) : ( _g )
 
 			if ( mParams[ "GET" ].isset( "toggle_output" ) )
 			{	local n = mParams[ "GET" ][ "toggle_output" ].str();
-				if ( _g.modbus.io[ "outputs" ].isset( n ) )
-					_g.modbus.io[ "outputs" ][ n ] <- ( _g.modbus.io[ "outputs" ][ n ].toint() ? "0" : "1" );
+				if ( _g.modbus.io[ "soutputs" ].isset( n ) )
+					_g.modbus.io[ "soutputs" ][ n ] <- ( _g.modbus.io[ "soutputs" ][ n ].toint() ? "0" : "1" );
+				else if ( _g.modbus.io[ "outputs" ].isset( n ) )
+					_g.modbus.io[ "soutputs" ][ n ] <- ( _g.modbus.io[ "outputs" ][ n ].toint() ? "0" : "1" );
 			} // end if
 
 			raw = _g.modbus.io.getJSON();
@@ -347,10 +427,12 @@ function pgHome() : ( _g )
 			{	g_req += ( g_req.length ? '&' : '' ) + 'toggle_output=' + n;
 			}
 
-			function setState( id, state )
+			function setState( id, state, setstate )
 			{	var cols = Array( '#400000', '#ff0000', '#b0b0b0' );
+				if ( setstate ) cols = Array( '#404000', '#ffff00', '#b0b0b0' ), state = setstate;
 				if ( $('#'+id).css( 'backgroundColor' ) != cols[ parseInt( state ) ] )
-					$('#'+id).animate( { backgroundColor: cols[ parseInt( state ) ] }, 500 );
+					$('#'+id).css( 'backgroundColor', cols[ parseInt( state ) ] );
+					// $('#'+id).animate( { backgroundColor: cols[ parseInt( state ) ] }, 500 );
 			}
 
 			function data_error()
@@ -362,10 +444,9 @@ function pgHome() : ( _g )
 			function data_success( data )
 			{	if ( !data ) return data_error();
 				if ( data[ 'connected' ] && data[ 'connected' ].length )
-				{
-					$('#status').animate( { backgroundColor: '#00a000' }, 500 ), $('#status').html( data[ 'connected' ] );
-					if ( data[ 'inputs' ] ) for( var i in data[ 'inputs' ] ) setState( 'i_' + i, data[ 'inputs' ][ i ] );
-					if ( data[ 'outputs' ] ) for( var i in data[ 'outputs' ] ) setState( 'o_' + i, data[ 'outputs' ][ i ] );
+				{	$('#status').animate( { backgroundColor: '#00a000' }, 500 ), $('#status').html( data[ 'connected' ] );
+					if ( data[ 'inputs' ] ) for( var i in data[ 'inputs' ] ) setState( 'i_' + i, data[ 'inputs' ][ i ], 0 );
+					if ( data[ 'outputs' ] ) for( var i in data[ 'outputs' ] ) setState( 'o_' + i, data[ 'outputs' ][ i ], data[ 'soutputs' ][ i ] );
 				} // end if
 				else
 				{	for ( var i in g_div_ids ) setState( g_div_ids[ i ], 2 );
@@ -378,7 +459,7 @@ function pgHome() : ( _g )
 				g_req = '';
 			}
 
-			setInterval( poll, 1000 );
+			setInterval( poll, 500 );
 
 		</script>
 	";

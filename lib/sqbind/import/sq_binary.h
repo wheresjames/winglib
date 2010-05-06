@@ -82,10 +82,16 @@ namespace sqbind
 	public:
 
 		SQBIND_CLASS_CTOR_BEGIN( CSqBinary )
+			_SQBIND_CLASS_CTOR( CSqBinary, 1 ) ( sa.GetInt( 2 ) )
+			_SQBIND_CLASS_CTOR( CSqBinary, 2 ) ( sa.GetInt( 2 ), sa.GetInt( 3 ) )
 		SQBIND_CLASS_CTOR_END( CSqBinary )
 
 		/// Default constructor
 		CSqBinary() {}
+
+		/// Allocate constructor
+		CSqBinary( t_size x_size ) : m_bin( x_size ) { }
+		CSqBinary( t_size x_size, t_size x_used ) : m_bin( x_size, x_used ) { }
 
 		/// Copy constructor
 		CSqBinary( const CSqBinary &r ) : m_bin( r.m_bin ) { }

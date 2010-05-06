@@ -113,6 +113,27 @@ public:
 		m_bFree = oexFALSE;
 	}
 
+	/// Allocate constructor
+	CBin( t_size x_nSize )
+	{
+		m_nUsed = 0;
+		m_nOffset = 0;
+		m_ptr = oexNULL;
+		m_bFree = oexFALSE;
+		Allocate( x_nSize );
+	}
+
+	/// Allocate constructor
+	CBin( t_size x_nSize, t_size x_nUsed )
+	{
+		m_nUsed = 0;
+		m_nOffset = 0;
+		m_ptr = oexNULL;
+		m_bFree = oexFALSE;
+		Allocate( x_nSize );
+		setUsed( x_nUsed );
+	}
+
 	/// Copy constructor
 	CBin( const CBin &r ) :
 		m_buf( r.m_buf )
