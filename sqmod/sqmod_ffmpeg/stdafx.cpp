@@ -19,6 +19,11 @@ int snd_strerror( const char *p )
 {_STT();
 	return 0;
 }
+
+#if defined( OEX_WINDOWS )
+	extern "C" int usleep( int usec ) { oexMicroSleep( usec ); return usec; }
+#endif
+
 }
 
 // Export Functions

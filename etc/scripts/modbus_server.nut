@@ -2,6 +2,7 @@
 class CGlobal
 {
 	quit = 1;
+	ticks = 0;
 	http = CSqHttpServer();
 	modbus = CSqSocket();
 	session = CSqSocket();
@@ -18,6 +19,9 @@ function _init() : ( _g )
 		_g.io[ "inputs" ][ i.tostring() ] <- "0",
 		_g.io[ "outputs" ][ i.tostring() ] <- ( i & 1).tostring();
 
+	for ( local i = 0; i < 2; i++ )
+		_g.io[ "analogs" ][ i.tostring() ] <- "0";
+
 	if ( !StartWebServer( 1234 ) )
 		return;
 
@@ -33,6 +37,9 @@ function _idle() : ( _g )
 		return -1;
 
 	UpdateModbusServer();
+
+	_g.io[ "analogs" ][ "0" ] <- _self.gmt_time().tostring();
+	_g.io[ "analogs" ][ "1" ] <- ( _g.ticks++ ).tostring();
 
 	return 0;
 }
@@ -155,6 +162,29 @@ function ProcessRequest( session, pkt ) : ( _g )
 				tx.BE_setAbsUCHAR( pos++, data );
 
 			} // end for
+
+			break;
+
+		case 4 :
+
+			local bytes = pkt.BE_getAbsUSHORT( 10 ) * 2;
+			local vals = bytes / 2;
+			if ( !bytes || !vals )
+				return SendError( session, pkt, 3 );
+
+			local tx_size = 8 + 1 + bytes;
+			tx.setUsed( tx_size );
+
+			tx.BE_setAbsUSHORT( 0, 0 );
+			tx.BE_setAbsUSHORT( 2, 0 );
+			tx.BE_setAbsUSHORT( 4, tx_size - 6 );
+			tx.BE_setAbsUCHAR( 6, 5 );
+			tx.BE_setAbsUCHAR( 7, 4 );
+			tx.BE_setAbsUCHAR( 8, bytes );
+
+			local pos = 9;
+			for ( local b = 0; b < vals; b++ )
+				tx.BE_setAbsUCHAR( pos++, _g.io[ "analogs" ][ b.tostring() ].toint() ), pos++;
 
 			break;
 
@@ -309,13 +339,13 @@ function pgHome() : ( _g )
 	local border = "border-left: 1px solid #000000;border-top: 1px solid #000000;" +
 				   "border-bottom: 1px solid #000000;border-right: 1px solid #000000;";
 
-	local div_ids = "";
-	local page = "<table><tr><td><b>Inputs</b></td>";
+	local div_ids = "", div_as = "";
+	local page = "<table width='400'><tr><td><b>Inputs</b></td>";
 
 	if ( _g.io.isset( "inputs" ) )
 		foreach ( k,v in _g.io[ "inputs" ] )
 			div_ids += ( div_ids.len() ? ", " : "" ) + "'i_" + k + "'",
-			page += "<td><div id='i_" + k + "' style='" + border + "background-color:#b0b0b0;' onclick='toggleInput( " + k + " )' >"
+			page += "<td><div id='i_" + k + "' style='" + border + "background-color:#b0b0b0;' onclick='toggleInput( " + k + " )' align='center' >"
 					+ "&nbsp;" + k + "&nbsp;</div></td>";
 
 	page += "</tr><tr><td><b>Outputs</b></td>";
@@ -323,8 +353,14 @@ function pgHome() : ( _g )
 	if ( _g.io.isset( "outputs" ) )
 		foreach ( k,v in _g.io[ "outputs" ] )
 			div_ids += ( div_ids.len() ? ", " : "" ) + "'o_" + k + "'",
-			page += "<td><div id='o_" + k + "' style='" + border + "background-color:#b0b0b0;' onclick='toggleOutput( " + k + " )' >"
+			page += "<td><div id='o_" + k + "' style='" + border + "background-color:#b0b0b0;' onclick='toggleOutput( " + k + " )' align='center' >"
 					+ "&nbsp;" + k + "&nbsp;</div></td>";
+
+	page += "</tr><tr><td><b>Analogs</b></td><td colspan='99' align='left'>";
+	if ( _g.io.isset( "analogs" ) )
+		foreach ( k,v in _g.io[ "analogs" ] )
+			div_as += ( div_as.len() ? ", " : "" ) + "'a_" + k + "'",
+			page += "&nbsp;" + k + "&nbsp;<input id='a_" + k + "' type='input' style='width:40%;" + border + "background-color:#b0b0b0;' align='left' >";
 
 	page += "</tr><tr><td><b>Clients</b></td><td colspan='99'><div id='clients'></div>";
 
@@ -335,6 +371,7 @@ function pgHome() : ( _g )
 
 			var g_req = '';
 			var g_div_ids = Array( " + div_ids + @" );
+			var g_div_as = Array( " + div_as + @" );
 
 			function toggleInput( n )
 			{	g_req += ( g_req.length ? '&' : '' ) + 'toggle_input=' + n;
@@ -351,15 +388,27 @@ function pgHome() : ( _g )
 //					$('#'+id).animate( { backgroundColor: cols[ parseInt( state ) ] }, 500 );
 			}
 
+			function setAnalog( id, value )
+			{	var cols = Array( '#b0b0b0', '#00ff00' );
+				if ( !value )
+					$('#'+id).attr( 'value', '' ),
+					$('#'+id).css( 'backgroundColor', cols[ 0 ] );
+				else
+					$('#'+id).attr( 'value', value ),
+					$('#'+id).css( 'backgroundColor', cols[ 1 ] );
+			}
+
 			function data_error()
 			{	$('#clients').html( '' );
 				for ( var i in g_div_ids ) setState( g_div_ids[ i ], 2 );
+				for ( var i in g_div_as ) setAnalog( g_div_as[ i ], undefined );
 			}
 
 			function data_success( data )
 			{	if ( !data || !data[ 'inputs' ] || !data[ 'outputs' ] ) return data_error();
 				for( var i in data[ 'inputs' ] ) setState( 'i_' + i, data[ 'inputs' ][ i ] );
 				for( var i in data[ 'outputs' ] ) setState( 'o_' + i, data[ 'outputs' ][ i ] );
+				for( var i in data[ 'analogs' ] ) setAnalog( 'a_' + i, data[ 'analogs' ][ i ] );
 				$('#clients').html( data[ 'clients' ] ? data[ 'clients' ] : '' );
 			}
 

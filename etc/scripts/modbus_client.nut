@@ -11,6 +11,9 @@ class CModbusClient
 	reply = 0;
 	dev = 5;
 	pto = 3;
+	inputs = 8;
+	outputs = 8;
+	analogs = 2;
 
 	constructor()
 	{
@@ -21,9 +24,36 @@ class CModbusClient
 	{
 		io.clear();
 		lio.clear();
-		for ( local i = 0; i < 8; i++ )
-			io[ "inputs" ][ i.tostring() ] <- "",
+		for ( local i = 0; i < inputs; i++ )
+			io[ "inputs" ][ i.tostring() ] <- "";
+
+		for ( local i = 0; i < outputs; i++ )
 			io[ "outputs" ][ i.tostring() ] <- "";
+
+		for ( local i = 0; i < analogs; i++ )
+			io[ "analogs" ][ i.tostring() ] <- "";
+	}
+
+	function getInput( i )
+	{	return !io[ "inputs" ].isset( i.tostring() ) 
+				? 0 : io[ "inputs" ][ i.tostring() ].toint();
+			return 0;
+	}
+
+	function getOutput( i )
+	{	return !io[ "outputs" ].isset( i.tostring() ) 
+				? 0 : io[ "outputs" ][ i.tostring() ].toint();
+			return 0;
+	}
+
+	function setOutput( i, v )
+	{	io[ "soutputs" ][ i.tostring() ] <- v.tostring();
+	}
+
+	function getAnalog( i )
+	{	return !io[ "analogs" ].isset( i.tostring() ) 
+				? 0 : io[ "analogs" ][ i.tostring() ].toint();
+			return 0;
 	}
 
 	function Disconnect()
@@ -123,14 +153,17 @@ class CModbusClient
 				break;
 
 			case 1 :
-//				::_self.echo( "Reading outputs" );
 				ReadOutputs();
 				mode++;
 				break;
 
 			case 2 :
-//				::_self.echo( "Reading inputs" );
 				ReadInputs();
+				mode++;
+				break;
+
+			case 3 :
+				ReadAnalogs();
 				mode++;
 				break;
 
@@ -158,15 +191,22 @@ class CModbusClient
 	function ReadOutputs()
 	{	local pkt = CSqBinary( 4, 4 );
 		pkt.BE_setAbsUSHORT( 0, 0 );
-		pkt.BE_setAbsUSHORT( 2, 8 );
+		pkt.BE_setAbsUSHORT( 2, outputs );
 		return SendPacket( 1, pkt );
 	}
 
 	function ReadInputs()
 	{	local pkt = CSqBinary( 4, 4 );
 		pkt.BE_setAbsUSHORT( 0, 0 );
-		pkt.BE_setAbsUSHORT( 2, 8 );
+		pkt.BE_setAbsUSHORT( 2, inputs );
 		return SendPacket( 2, pkt );
+	}
+
+	function ReadAnalogs()
+	{	local pkt = CSqBinary( 4, 4 );
+		pkt.BE_setAbsUSHORT( 0, 0 );
+		pkt.BE_setAbsUSHORT( 2, analogs );
+		return SendPacket( 4, pkt );
 	}
 
 	function ProcessReply( pkt )
@@ -225,6 +265,17 @@ class CModbusClient
 
 				break;
 
+			case 4 :
+
+				local bytes = pkt.getAbsUCHAR( 8 ) / 2;
+				local pos = 9;
+				for ( local b = 0; b < bytes; b++ )
+				{	local data = pkt.getAbsUSHORT( pos++ ); pos++;
+					io[ "analogs" ][ b.tostring() ] <- data.tostring();
+				} // end for
+
+				break;
+
 			default :
 				::_self.echo( "!!! Unknown command : " + cmd );
 				break;
@@ -254,7 +305,7 @@ function _init() : ( _g )
 	if ( !StartWebServer( 1235 ) )
 		return;
 
-	_self.set_timer( ".", 500, "UpdateModbusServer" );
+	_self.set_timer( ".", 250, "UpdateModbusServer" );
 
 	_g.quit = 0;
 }
@@ -275,7 +326,6 @@ function _idle() : ( _g )
 			return 0;
 		} // end if
 
-
 	} // end if
 
 	else if ( _g.disconnect && _g.modbus.isConnected() )
@@ -283,6 +333,7 @@ function _idle() : ( _g )
 		_self.echo( "Disconnecting from : " + _g.modbus.getPeerAddress() );
 		_g.disconnect = 0;
 		_g.modbus.Disconnect();
+
 	} // end else if
 
 	return 0;
@@ -377,22 +428,22 @@ function pgHome() : ( _g )
 	local border = "border-left: 1px solid #000000;border-top: 1px solid #000000;" +
 				   "border-bottom: 1px solid #000000;border-right: 1px solid #000000;";
 
-	local div_ids = "";
-	local page = "<table>";
+	local div_ids = "", div_as = "";
+	local page = "<table width='400'>";
 
 	page += "<tr><td colspan='99'>";
 	page += @"
-			<table><tr>
+			<table width='100%'><tr>
 				<td><input id='ip' type='text' style='width:100%'></td>
 				<td><input type='submit' value='Connect' onclick='doConnect()'></td>
 				<td><input type='submit' value='Disconnect' onclick='doDisconnect()'></td>
 			</tr></table>
 		";
-	page += "</td>";
+	page += "</td></tr>";
 
-	page += "</tr><tr><td><b>Status</b></td><td colspan='99'><div id='status' align='center' style='background-color:#b0b0b0'></div>";
+	page += "<tr><td><b>Status</b></td><td colspan='99'><div id='status' align='center' style='background-color:#b0b0b0'></div></td></tr>";
 
-	page += "</tr><tr><td><b>Inputs</b></td>";
+	page += "<tr><td><b>Inputs</b></td>";
 
 	if ( _g.modbus.io.isset( "inputs" ) )
 		foreach ( k,v in _g.modbus.io[ "inputs" ] )
@@ -407,13 +458,20 @@ function pgHome() : ( _g )
 			page += "<td><div id='o_" + k + "' style='" + border + "background-color:#b0b0b0;' align='center' onclick='toggleOutput( " + k + " )' >"
 					+ "&nbsp;" + k + "&nbsp;</div></td>";
 
-	page += "</table>";
+	page += "</tr><tr><td><b>Analogs</b></td><td colspan='99' align='left'>";
+	if ( _g.modbus.io.isset( "analogs" ) )
+		foreach ( k,v in _g.modbus.io[ "analogs" ] )
+			div_as += ( div_as.len() ? ", " : "" ) + "'a_" + k + "'",
+			page += "&nbsp;" + k + "&nbsp;<input id='a_" + k + "' type='input' style='width:40%;" + border + "background-color:#b0b0b0;' align='left' >";
+
+	page += "</td></tr></table>";
 
 	page += @"
 		<script type='text/javascript'>
 
 			var g_req = '';
 			var g_div_ids = Array( " + div_ids + @" );
+			var g_div_as = Array( " + div_as + @" );
 
 			function doConnect()
 			{	g_req += ( g_req.length ? '&' : '' ) + 'connect=' + $('#ip').attr( 'value' );
@@ -435,10 +493,21 @@ function pgHome() : ( _g )
 					// $('#'+id).animate( { backgroundColor: cols[ parseInt( state ) ] }, 500 );
 			}
 
+			function setAnalog( id, value )
+			{	var cols = Array( '#b0b0b0', '#00ff00' );
+				if ( !value )
+					$('#'+id).attr( 'value', '' ),
+					$('#'+id).css( 'backgroundColor', cols[ 0 ] );
+				else
+					$('#'+id).attr( 'value', value ),
+					$('#'+id).css( 'backgroundColor', cols[ 1 ] );
+			}
+
 			function data_error()
 			{	$('#status').html( '' );
-				$('#status').animate( { backgroundColor: '#b0b0b0' }, 500 );
+				$('#status').css( 'backgroundColor', '#b0b0b0' );
 				for ( var i in g_div_ids ) setState( g_div_ids[ i ], 2 );
+				for ( var i in g_div_as ) setAnalog( g_div_as[ i ], undefined );
 			}
 
 			function data_success( data )
@@ -446,10 +515,12 @@ function pgHome() : ( _g )
 				if ( data[ 'connected' ] && data[ 'connected' ].length )
 				{	$('#status').animate( { backgroundColor: '#00a000' }, 500 ), $('#status').html( data[ 'connected' ] );
 					if ( data[ 'inputs' ] ) for( var i in data[ 'inputs' ] ) setState( 'i_' + i, data[ 'inputs' ][ i ], 0 );
-					if ( data[ 'outputs' ] ) for( var i in data[ 'outputs' ] ) setState( 'o_' + i, data[ 'outputs' ][ i ], data[ 'soutputs' ][ i ] );
+					if ( data[ 'outputs' ] ) for( var i in data[ 'outputs' ] ) setState( 'o_' + i, data[ 'outputs' ][ i ], ( data[ 'soutputs' ] ) ? data[ 'soutputs' ][ i ] : 0 );
+					if ( data[ 'analogs' ] ) for( var i in data[ 'analogs' ] ) setAnalog( 'a_' + i, data[ 'analogs' ][ i ] );
 				} // end if
 				else
 				{	for ( var i in g_div_ids ) setState( g_div_ids[ i ], 2 );
+					for ( var i in g_div_as ) setAnalog( g_div_as[ i ], undefined );
 					$('#status').animate( { backgroundColor: '#a00000' }, 500 ), $('#status').html( 'Disconnected' );
 				} // end else
 

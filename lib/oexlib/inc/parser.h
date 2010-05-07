@@ -1422,14 +1422,14 @@ public:
 			sTab << oexTC( T, '\t' );
 		sTab1 << oexTC( T, '\t' ) << sTab;
 
-	    TStr< T > sStr = oexTT( T, "{" oexNL8 );
+	    TStr< T > sStr; sStr << oexTT( T, "{" ) << oexTTEXT( T, oexNL8 );
 	    for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
 	    {
 			// Add comma if needed
 		    if ( !i )
                 i++;
             else
-            	sStr << oexTT( T, "," oexNL8 );
+            	sStr << oexTT( T, "," ) << oexTTEXT( T, oexNL8 );
 
 			// Add key
             sStr << sTab1 << oexTC( T, '\"' ) << it.Node()->key.Escape( oexTT( T, "\"" ), oexTC( T, '\\' ) ) << oexTT( T, "\": " );
