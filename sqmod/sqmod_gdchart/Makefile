@@ -14,6 +14,7 @@ PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind \
 			SqPlus/include SqPlus/sqplus gdchart
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel gdchart \
 			cximage jpeg png zlib tiff
+PRJ_DEFS := GD_CUSTOM_ALLOCATOR=1
 PRJ_OSLB :=
  
 PRJ_SUBROOT := _sqmod

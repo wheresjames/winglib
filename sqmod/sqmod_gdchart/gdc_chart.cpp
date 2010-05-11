@@ -6,6 +6,30 @@
 #include "gdchart.h"
 #include "gd1.3/gd.h"
 
+#if defined( GD_CUSTOM_ALLOCATOR )
+extern "C" void* gd_malloc( size_t size )
+{
+	return oex::CMem::New( size, oexLINE, oexTEXT( oexFILE ) );
+}
+
+extern "C" void* gd_calloc( size_t num, size_t size )
+{
+	void *ptr = oex::CMem::New( num * size, oexLINE, oexTEXT( oexFILE ) );
+	oexZeroMemory( ptr, num * size );
+	return ptr;
+}
+
+extern "C" void* gd_realloc( void *ptr, size_t size )
+{
+	return oex::CMem::Resize( ptr, size, oexLINE, oexTEXT( oexFILE ) );
+}
+
+extern "C" void gd_free( void *ptr )
+{
+	return oex::CMem::Delete( ptr );
+}
+#endif
+
 /// Unfortunately, the gdchart library is not thread safe
 oexLock CGdcChart::m_lock;
 

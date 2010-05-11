@@ -45,12 +45,12 @@ const CBaseFile::t_HFILE CBaseFile::c_Invalid = INVALID_HANDLE_VALUE;
 const CBaseFile::t_HFIND CBaseFile::c_InvalidFindHandle = INVALID_HANDLE_VALUE;
 
 oexBOOL CBaseFile::InitFileSystem()
-{_STT();
+{//_STT();
 	return oexTRUE;
 }
 
 oexBOOL CBaseFile::FreeFileSystem()
-{_STT();
+{//_STT();
 	return oexTRUE;
 }
 

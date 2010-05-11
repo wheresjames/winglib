@@ -124,6 +124,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSocket, CSqSocket )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, setLocalAddress )
 
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, getLastError )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, getLastErrorValue )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, getNumReads )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, getNumWrites )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, getNumAccepts )
@@ -313,6 +314,11 @@ int CSqSocket::WaitEvent( int nEvent, int nMax )
 sqbind::stdString CSqSocket::getLastError()
 {_STT();
 	return m_socket->GetLastErrorMsg().Ptr();
+}
+
+int CSqSocket::getLastErrorValue()
+{_STT();
+	return m_socket->GetLastError();
 }
 
 sqbind::stdString CSqSocket::Read( int nMax )

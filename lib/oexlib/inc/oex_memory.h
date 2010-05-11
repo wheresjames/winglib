@@ -34,9 +34,15 @@
 
 #pragma once
 
-typedef void* (*PFN_malloc)( oexSIZE_T size );
-typedef void* (*PFN_realloc)( oexPVOID ptr, oexSIZE_T size );
+typedef oexPVOID (*PFN_malloc)( oexSIZE_T size );
+typedef oexPVOID (*PFN_calloc)( oexSIZE_T num, oexSIZE_T size );
+typedef oexPVOID (*PFN_realloc)( oexPVOID ptr, oexSIZE_T size );
 typedef void (*PFN_free)( oexPVOID free );
+
+oexPVOID oex_malloc( oexSIZE_T x_nSize );
+oexPVOID oex_calloc( oexSIZE_T x_nNum, oexSIZE_T x_nSize );
+oexPVOID oex_realloc( oexPVOID x_ptr, oexSIZE_T x_nSize );
+void oex_free( oexPVOID x_ptr );
 
 class CMemLeak;
 class CBinShare;

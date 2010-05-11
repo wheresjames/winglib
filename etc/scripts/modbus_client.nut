@@ -37,13 +37,11 @@ class CModbusClient
 	function getInput( i )
 	{	return !io[ "inputs" ].isset( i.tostring() ) 
 				? 0 : io[ "inputs" ][ i.tostring() ].toint();
-			return 0;
 	}
 
 	function getOutput( i )
 	{	return !io[ "outputs" ].isset( i.tostring() ) 
 				? 0 : io[ "outputs" ][ i.tostring() ].toint();
-			return 0;
 	}
 
 	function setOutput( i, v )
@@ -53,7 +51,13 @@ class CModbusClient
 	function getAnalog( i )
 	{	return !io[ "analogs" ].isset( i.tostring() ) 
 				? 0 : io[ "analogs" ][ i.tostring() ].toint();
-			return 0;
+	}
+
+	function RefreshOutput( b, v )
+	{	io[ "outputs" ][ b.tostring() ] <- ( v ? 1 : 0 ).tostring();
+		if ( io[ "soutputs" ].isset( b.tostring() )
+			     && io[ "outputs" ][ b.tostring() ].str() == io[ "soutputs" ][ b.tostring() ].str() )
+				io[ "soutputs" ].unset( b.tostring() );
 	}
 
 	function Disconnect()
@@ -70,17 +74,24 @@ class CModbusClient
 		Disconnect();
 
 		if ( !socket.Connect( ip, 502 ) )
-		{	::_self.echo( "Connect() : " + socket.getLastError() );
+		{	::_self.echo( "Connect() : " + ip + " : " + socket.getLastError() );
 			quit = 1;
 			return 0;
 		} // end if
 
 		if ( !socket.WaitEvent( CSqSocket().EVT_CONNECT, 3000 ) )
-		{	::_self.echo( "WaitEvent( EVT_CONNECT ) : " + socket.getLastError() );
+		{	::_self.echo( "WaitEvent( EVT_CONNECT ) : " + ip + " : " + socket.getLastError() );
 			quit = 1;
 			return 0;
 		} // end if
 
+		if ( socket.getLastErrorValue() )
+		{	::_self.echo( "WaitEvent( EVT_CONNECT ) : " + ip + " : " + socket.getLastError() );
+			quit = 1;
+			return 0;
+		} // end if
+
+		::_self.echo( "Connected to : " + ip );
 		io[ "connected" ] <- ip;
 
 		return 1;
@@ -163,8 +174,10 @@ class CModbusClient
 				break;
 
 			case 3 :
-				ReadAnalogs();
-				mode++;
+				if ( analogs )
+				{	ReadAnalogs();
+					mode++;
+				} else mode = 0;
 				break;
 
 			default :
@@ -182,7 +195,7 @@ class CModbusClient
 				{	io[ "outputs" ][ k ] <- v.str();
 					local pkt = CSqBinary( 4, 4 );
 					pkt.BE_setAbsUSHORT( 0, k.tointeger() );
-					pkt.BE_setAbsUSHORT( 2, v.toint() );
+					pkt.BE_setAbsUSHORT( 2, ( v.toint() ? 0xff00 : 0 ) );
 					return SendPacket( 5, pkt );
 				} // end if
 		return 0;
@@ -217,6 +230,7 @@ class CModbusClient
 		local cmd = pkt.getAbsUCHAR( 7 );
 		if ( cmd & 0x80 )
 		{	::_self.echo( "!!! ERROR : " + pkt.getAbsUCHAR( 8 ) );
+			::_self.echo( pkt.AsciiHexStr( 8, 4 ) );
 			return;
 		} // end if
 
@@ -234,10 +248,7 @@ class CModbusClient
 
 					local mask = 1;
 					for( local b = 0; b < 8 && bits; b++, bits-- )
-					{	io[ "outputs" ][ b.tostring() ] <- ( ( data & mask ) ? 1 : 0 ).tostring();
-						if ( io[ "soutputs" ].isset( b.tostring() )
-						     && io[ "outputs" ][ b.tostring() ].str() == io[ "soutputs" ][ b.tostring() ].str() )
-							io[ "soutputs" ].unset( b.tostring() );
+					{	RefreshOutput( b, data & mask );
 						mask = mask << 1;
 					} // end for
 
@@ -276,6 +287,10 @@ class CModbusClient
 
 				break;
 
+			case 5 :
+				RefreshOutput( pkt.getAbsUSHORT( 8 ), pkt.getAbsUSHORT( 10 ) );
+				break;
+
 			default :
 				::_self.echo( "!!! Unknown command : " + cmd );
 				break;
@@ -295,7 +310,6 @@ class CGlobal
 	disconnect = 0;
 
 	modbus = CModbusClient();
-
 };
 
 local _g = CGlobal();

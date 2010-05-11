@@ -43,6 +43,8 @@ OEX_USING_NAMESPACE
 #endif
 
 #if defined( OEX_ENABLE_XIMAGE )
+#define CXIMAGE_CUSTOM_ALLOCATOR	1 
+//#define CX_FORCE_CUSTOM_ALLOCATOR	1
 #	include "../../../../CxImage/ximage.h"
 #endif
 
@@ -168,11 +170,6 @@ void CImage::Destroy()
 
 #if defined( OEX_ENABLE_XIMAGE )
 
-	// Get image object
-	if ( oexCHECK_PTR( m_pimg ) )
-		OexAllocDestruct( (CCxCustomImg*)m_pimg );
-	m_pimg = oexNULL;
-
 	// Lose
 	m_filename.Destroy();
 
@@ -181,6 +178,11 @@ void CImage::Destroy()
 
 	// Release encoder memory
 	ReleaseEncodeJpg();
+
+	// Get image object
+	if ( oexCHECK_PTR( m_pimg ) )
+		OexAllocDestruct( (CCxCustomImg*)m_pimg );
+	m_pimg = oexNULL;
 
 #endif
 }
@@ -456,10 +458,11 @@ void CImage::ReleaseEncodeMemory()
 	// it all the time
 //	m_mem.Destroy();
 
-	// Release the memory
+	// Release memory buffer
+	if ( oexCHECK_PTR( m_pimg ) && oexCHECK_PTR( m_pMem ) )
+			((CCxCustomImg*)m_pimg)->FreeMemory( (void*)m_pMem );
+
 	m_uMemSize = 0;
-	if ( oexCHECK_PTR( m_pMem ) )
-		free( (void*)m_pMem );
 	m_pMem = oexNULL;
 
 #endif

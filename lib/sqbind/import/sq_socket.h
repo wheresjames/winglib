@@ -159,6 +159,9 @@ namespace sqbind
 		/// Returns a string describing the last error
 		sqbind::stdString getLastError();
 
+		/// Returns last error value
+		int getLastErrorValue();
+
 		/// Returns a reference to the wrapped socket object
 		oex::os::CIpSocket* Ptr() { return m_socket.Ptr(); }
 

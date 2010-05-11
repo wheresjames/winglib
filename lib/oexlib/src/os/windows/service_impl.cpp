@@ -242,8 +242,6 @@ CServiceImpl* CServiceImpl::GetInstance()
 int CServiceImpl::RunService( int argc, const char** argv, oexCSTR pName, oexCSTR pDesc  )
 {//_STT();
 
-	oexINIT();
-
 	// Get singleton instance
 	OEX_NAMESPACE::os::CServiceImpl *pInstance = OEX_NAMESPACE::os::CServiceImpl::GetInstance();
 	if ( !pInstance )
