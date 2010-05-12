@@ -22,6 +22,9 @@ public:
 	/// Opens the specified output stream
 	int Open( int bBlocking, int nDev, int nChannels, int nFormat, double dLatency, double dSRate, int fpb );
 
+	/// Returns non-zero if a device is open
+	int isOpen() { return ( oexNULL != m_stream ) ? 1 : 0; }
+	
 	/// Starts audio output device
 	int Start();
 

@@ -21,7 +21,7 @@ function _init() : ( _g )
 	local file = _self.path( "../../../../vhe.mp3" );
 
 	_self.echo( "=====================================================" );
-	_self.echo( " Playing : " + file );
+	_self.echo( " Playing  : " + file );
 	_self.echo( " Blocking : " + _g.blocking );
 	_self.echo( "=====================================================" );
 

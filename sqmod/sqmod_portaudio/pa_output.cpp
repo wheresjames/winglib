@@ -144,7 +144,7 @@ int CPaOutput::Open( int bBlocking, int nDev, int nChannels, int nFormat, double
 	m_nFrameBytes = getFormatBytes( nFormat ) * nChannels;
 
 	// Attempt to open output stream
-
+	
 	if ( bBlocking )
 		m_errLast = Pa_OpenStream( &m_stream, 0, &psp, dSRate, fpb, 0, 0, this );
 	else
