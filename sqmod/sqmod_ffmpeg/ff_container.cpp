@@ -4,39 +4,52 @@
 
 CFfContainer::CFfContainer()
 {_STT();
+
 	m_pFormatContext = oexNULL;
 	m_pCodecContext = oexNULL;
 	m_pFrame = oexNULL;
 	m_nVideoStream = -1;
+
+	m_pAudioCodecContext = oexNULL;
 	m_nAudioStream = -1;
+
 	m_nWrite = 0;
 	m_nRead = 0;
 	m_bKeyRxd = 0;
 	m_nFrames = 0;
+	m_nAudioFrames = 0;
 	oexZero( m_pkt );
 }
 
 void CFfContainer::Destroy()
 {_STT();
 
-	CloseStream();
-
-	if ( m_pkt.data )
-		av_free_packet( &m_pkt );
+// +++ ??? memory leaking?
+//	if ( m_pkt.data )
+//		av_free_packet( &m_pkt );
 
 	if ( m_pCodecContext )
 		avcodec_close( m_pCodecContext );
 
+	if ( m_pAudioCodecContext )
+		avcodec_close( m_pAudioCodecContext );
+
+	CloseStream();
+
 	m_pCodecContext = oexNULL;
 	m_pFrame = oexNULL;
 	m_nVideoStream = -1;
+	m_buf.Free();
+	oexZero( m_pkt );
+	m_nFrames = 0;
+
+	m_pAudioCodecContext = oexNULL;
 	m_nAudioStream = -1;
+	m_nAudioFrames = 0;
+
 	m_nWrite = 0;
 	m_nRead = 0;
 	m_bKeyRxd = 0;
-	m_nFrames = 0;
-	m_buf.Free();
-	oexZero( m_pkt );
 }
 
 int CFfContainer::CloseStream()
@@ -82,6 +95,7 @@ int CFfContainer::CloseStream()
 
 int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 {_STT();
+
 	// Lose old container
 	Destroy();
 
@@ -152,7 +166,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 		Destroy();
 		return 0;
 	} // end if
-
+	
 	// Video stream
 	if ( 0 <= m_nVideoStream
 	     && m_pFormatContext->streams[ m_nVideoStream ]
@@ -163,14 +177,43 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 		if ( !pCodec )
 			m_pCodecContext = oexNULL;
 
-		m_pCodecContext->workaround_bugs |= FF_BUG_AUTODETECT;
-		m_pCodecContext->error_concealment = FF_EC_GUESS_MVS;
-		m_pCodecContext->error_recognition = FF_ER_CAREFUL;
-		if( pCodec->capabilities & CODEC_CAP_TRUNCATED )
-			m_pCodecContext->flags |= CODEC_FLAG_TRUNCATED;
+		else
+		{
+			m_pCodecContext->workaround_bugs |= FF_BUG_AUTODETECT;
+			m_pCodecContext->error_concealment = FF_EC_GUESS_MVS;
+			m_pCodecContext->error_recognition = FF_ER_CAREFUL;
+			if( pCodec->capabilities & CODEC_CAP_TRUNCATED )
+				m_pCodecContext->flags |= CODEC_FLAG_TRUNCATED;
 
-		if ( 0 > avcodec_open( m_pCodecContext, pCodec ) )
-			m_pCodecContext = oexNULL;
+			if ( 0 > avcodec_open( m_pCodecContext, pCodec ) )
+				m_pCodecContext = oexNULL;
+
+		} // end else
+
+	} // end if
+
+	// Audio stream
+	if ( 0 <= m_nAudioStream
+	     && m_pFormatContext->streams[ m_nAudioStream ]
+		 &&  m_pFormatContext->streams[ m_nAudioStream ]->codec )
+	{
+		m_pAudioCodecContext = m_pFormatContext->streams[ m_nAudioStream ]->codec;
+		AVCodec *pCodec = avcodec_find_decoder( m_pAudioCodecContext->codec_id );
+		if ( !pCodec )
+			m_pAudioCodecContext = oexNULL;
+
+		else
+		{
+			m_pAudioCodecContext->workaround_bugs |= FF_BUG_AUTODETECT;
+			m_pAudioCodecContext->error_concealment = FF_EC_GUESS_MVS;
+			m_pAudioCodecContext->error_recognition = FF_ER_CAREFUL;
+			if( pCodec->capabilities & CODEC_CAP_TRUNCATED )
+				m_pAudioCodecContext->flags |= CODEC_FLAG_TRUNCATED;
+
+			if ( 0 > avcodec_open( m_pAudioCodecContext, pCodec ) )
+				m_pAudioCodecContext = oexNULL;
+
+		} // end if
 
 	} // end if
 
@@ -192,10 +235,7 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 
 	int res = av_read_frame( m_pFormatContext, &m_pkt );
 	if ( res )
-	{	oexSHOW( m_pkt.size );
-		oexEcho( "no frame" );
 		return -1;
-	} // end if
 
 	if ( m )
 	{
@@ -219,14 +259,8 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 {_STT();
 
-	if ( m_pkt.data )
-		av_free_packet( &m_pkt );
-	oexZero( m_pkt );
-
 	// Read a frame from the packet
 	int res = -1;
-
-//	oexPrintf( oexMks( oexT( "\r" ),  m_nFrames, oexT( " : " ) ).Ptr() );
 
 	do
 	{
@@ -266,7 +300,6 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 #else
 
 	used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, m_pkt.data, m_pkt.size );
-//	used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (const uint8_t*)m_buf.Ptr(), m_buf.getUsed() );
 	if ( 0 >= used )
 	{	oexSHOW( used );
 		return -1;
@@ -300,10 +333,6 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
 {_STT();
 
-	if ( m_pkt.data )
-		av_free_packet( &m_pkt );
-	oexZero( m_pkt );
-
 	m_pkt.data = (uint8_t*)in->Ptr();
 	m_pkt.size = in->getUsed();
 
@@ -329,10 +358,7 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 		// Set end to zero to ensure no overreading on damaged blocks
 		oexZeroMemory( &m_buf._Ptr()[ m_buf.getUsed() ], nPadding );
 
-		oexSHOW( nPadding );
-
 	} // end if
-
 
 	if ( !m_pFrame )
 		m_pFrame = avcodec_alloc_frame();
@@ -352,7 +378,6 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 #else
 
 	used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, m_pkt.data, m_pkt.size );
-//	used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (const uint8_t*)m_buf.Ptr(), m_buf.getUsed() );
 	if ( 0 >= used )
 	{	oexSHOW( used );
 		return -1;
@@ -360,19 +385,6 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 
 #endif
 
-/*
-	// Left over data?
-	if ( used < m_pkt.size )
-	{
-		if ( m_buf.getUsed() )
-			m_buf.LShift( used );
-		else
-			m_buf.AppendBuffer( (sqbind::CSqBinary::t_byte*)&m_pkt.data[ used ], m_pkt.size - used );
-
-	} // end if
-	else
-		m_buf.setUsed( 0 );
-*/
 	if ( !gpp )
 		return -1;
 
@@ -392,6 +404,78 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 
 	// Frame
 	m_nFrames++;
+
+	return 1;
+}
+
+int CFfContainer::DecodeAudioFrameBin( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
+{_STT();
+
+	if ( !in || !out )
+		return 0;
+
+	int in_size = in->getUsed();
+	const uint8_t* in_ptr = (const uint8_t*)in->Ptr();
+/*
+	m_audio_buf.setUsed( 0 );
+
+	// Ensure buffer size
+	if ( ( m_audio_buf.Size() - m_audio_buf.getUsed() ) < (sqbind::CSqBinary::t_size)( in_size + FF_INPUT_BUFFER_PADDING_SIZE ) )
+		m_audio_buf.Allocate( 2 * ( m_audio_buf.Size() + in_size + FF_INPUT_BUFFER_PADDING_SIZE ) );
+
+	// Add new data
+	m_audio_buf.AppendBuffer( (sqbind::CSqBinary::t_byte*)in_ptr, in_size );
+	in_ptr = (uint8_t*)m_audio_buf._Ptr();
+	in_size = m_audio_buf.getUsed();
+
+	// Zero padding
+	int nPadding = m_audio_buf.Size() - m_audio_buf.getUsed();
+	if ( 0 < nPadding )
+	{
+		// Don't zero more than twice the padding size
+		if ( nPadding > ( FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
+			nPadding = FF_INPUT_BUFFER_PADDING_SIZE * 2;
+
+		// Set end to zero to ensure no overreading on damaged blocks
+		oexZeroMemory( &m_audio_buf._Ptr()[ m_audio_buf.getUsed() ], nPadding );
+
+	} // end if
+*/
+
+	int out_size = oex::cmn::Max( (int)(in->getUsed() * 2), (int)AVCODEC_MAX_AUDIO_FRAME_SIZE );
+	if ( out->Size() < out_size ) 
+		out->Allocate( out_size );
+
+	int used = avcodec_decode_audio2( m_pAudioCodecContext, 
+									  (int16_t*)out->_Ptr(), &out_size, 
+									  (const uint8_t*)in_ptr, in_size );
+
+	out->setUsed( out_size );
+
+	if ( 0 >= used )
+	{	oexSHOW( used );
+		return -1;
+	} // end if
+
+	if ( used != in->getUsed() )
+		oexSHOW( "!!! Left over data !!!" );
+
+/*
+	// Left over data?
+	if ( used < m_pkt.size )
+	{
+		if ( m_buf.getUsed() )
+			m_buf.LShift( used );
+		else
+			m_buf.AppendBuffer( (sqbind::CSqBinary::t_byte*)&m_pkt.data[ used ], m_pkt.size - used );
+
+	} // end if
+	else
+		m_buf.setUsed( 0 );
+*/
+
+	// Frame
+	m_nAudioFrames++;
 
 	return 1;
 }

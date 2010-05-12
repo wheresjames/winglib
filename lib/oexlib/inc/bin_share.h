@@ -82,7 +82,11 @@
 	oex##t BE_getAbs##t( t_size x_nOffset )											\
 	{	oex##t v = getAbs##t( x_nOffset ); return  oexBE_##t( v ); }				\
 	void BE_setAbs##t( t_size x_nOffset, oex##t val )								\
-	{	setAbs##t( x_nOffset, oexBE_##t( val ) ); }
+	{	setAbs##t( x_nOffset, oexBE_##t( val ) ); }									\
+	t_size size##t()																\
+	{	return sizeof( oex##t ); }													\
+	const t_byte* Allocate##t( t_size x_nSize )										\
+	{	return Allocate##t( sizeof( oex##t ) * x_nSize ); }
 
 
 /// Shared memory block

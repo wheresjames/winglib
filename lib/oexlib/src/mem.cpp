@@ -168,6 +168,7 @@ oexPVOID oex_calloc( oexSIZE_T x_nNum, oexSIZE_T x_nSize )
 	oexPVOID p = oex_malloc( sz );
 	if ( !p ) return 0;
 	oexZeroMemory( p, sz );
+	return p;
 }
 
 }

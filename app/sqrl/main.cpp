@@ -124,11 +124,8 @@ int run( oex::CPropertyBag &pbCmdLine )
 	return 0;
 }
 
-int main(int argc, char* argv[])
+int run(int argc, char* argv[])
 {
-    // Initialize the oex library
-	oexINIT();
-	
 	// Parse the command line
 	oex::CPropertyBag pbCmdLine = oex::CParser::ParseCommandLine( argc, (const char**)argv );
 
@@ -158,6 +155,17 @@ int main(int argc, char* argv[])
 
 	// Uninitialize sockets
     oex::os::CIpSocket::UninitSockets();
+
+	return nRet;
+}
+
+int main(int argc, char* argv[])
+{
+    // Initialize the oex library
+	oexINIT();
+
+	// Run the app
+	int nRet = run( argc, argv );
 
 	// Uninitialize the oex library
     oexUNINIT();

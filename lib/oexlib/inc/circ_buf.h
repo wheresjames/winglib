@@ -720,7 +720,7 @@ public:
 
 		\see
 	*/
-	virtual oexBOOL Read( oexPVOID x_pvBuf, t_size x_uMax, t_size *x_puRead, oexUINT x_uEncode = 0 );
+	virtual oexBOOL Read( oexPVOID x_pvBuf, t_size x_uMax, t_size *x_puRead = oexNULL, oexUINT x_uEncode = 0 );
 
 	//==============================================================
 	// Peek()
@@ -737,7 +737,7 @@ public:
 
 		\see
 	*/
-	oexBOOL Peek( oexPVOID x_pvBuf, t_size x_uMax, t_size *x_puRead, oexLONG x_lOffset = 0, oexUINT x_uEncode = 0 );
+	oexBOOL Peek( oexPVOID x_pvBuf, t_size x_uMax, t_size *x_puRead = oexNULL, oexLONG x_lOffset = 0, oexUINT x_uEncode = 0 );
 
     virtual oexBOOL Peek( CStr8 &x_sStr, t_size x_uMax = 0 );
 

@@ -162,15 +162,20 @@ CBin::t_size CBin::LShift( CBin::t_size x_nBytes )
 {_STT();
 
 	// All of it?
-	if ( x_nBytes >= m_nUsed )
+	if ( x_nBytes >= getUsed() )
 	{	FreePtr();
 		m_nUsed = 0;
 		m_nOffset = 0;
 		return 0;
 	} // end if
 
-	// Adjust offset
-	m_nOffset = ( m_nOffset > x_nBytes ) ? m_nOffset =- x_nBytes : 0;
+	// Account for the offset
+	x_nBytes += m_nOffset;
+	m_nOffset = 0;
+
+	// Are we doing any work?
+	if ( !x_nBytes )
+		return m_nUsed;
 
 	// Copy Ptr buffer if needed
 	if ( m_ptr )

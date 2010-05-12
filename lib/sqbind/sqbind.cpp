@@ -194,7 +194,9 @@ void CSqImage::Register( sqbind::VM vm )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_get##t )			\
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_setAbs##t )		\
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_getAbs##t )		\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, find##t )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, find##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, size##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Allocate##t )
 
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Allocate )
@@ -205,6 +207,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Append )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Share )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Size )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, RawSize )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, AsciiHexStr )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Fingerprint )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, get )

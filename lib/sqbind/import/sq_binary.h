@@ -61,6 +61,10 @@
 	{ return m_bin.BE_getAbs##t( x_nOffset ); }							\
 	void BE_setAbs##t( t_size x_nOffset, oex::oex##t val )				\
 	{ m_bin.BE_setAbs##t( x_nOffset, val ); }							\
+	t_size size##t()													\
+	{ return sizeof( oex::oex##t ); }									\
+	int Allocate##t( t_size x_nSize )									\
+	{	return Allocate( sizeof( oex::oex##t ) * x_nSize ); }
 
 
 // namespace
@@ -135,6 +139,9 @@ namespace sqbind
 
 		/// Returns the raw size of the buffer
 		t_size Size() { return m_bin.Size(); }
+
+		/// Returns the raw size of the buffer
+		t_size RawSize() { return m_bin._Size(); }
 
 		/// Returns the value of the byte at i
 		int get( t_size x_i ) { return (int)m_bin.get( x_i ); }

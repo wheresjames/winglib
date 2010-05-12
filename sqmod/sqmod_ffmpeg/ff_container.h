@@ -32,6 +32,9 @@ public:
 	/// Decodes a frame from the specified buffer
 	int DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m );
 
+	/// Decodes an audio frame from the specified buffer
+	int DecodeAudioFrameBin( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m );
+
 	/// Creates a container
 	int Create( const sqbind::stdString &sUrl, const sqbind::stdString &sType, sqbind::CSqMulti *m );
 
@@ -76,6 +79,50 @@ public:
 		return m_pFormatContext->streams[ m_nVideoStream ]->codec->pix_fmt;
 	}
 
+	/// Returns the audio sample rate
+	int getAudioSampleRate()
+	{	if ( !m_pAudioCodecContext ) return 0;
+		return m_pAudioCodecContext->sample_rate;
+	}
+
+	/// Returns the audio bit rate
+	int getAudioBitRate()
+	{	if ( !m_pAudioCodecContext ) return 0;
+		return m_pAudioCodecContext->bit_rate;
+	}
+
+	/// Returns the audio channels
+	int getAudioChannels()
+	{	if ( !m_pAudioCodecContext ) return 0;
+		return m_pAudioCodecContext->channels;
+	}
+
+	/// Returns the audio frame size
+	int getAudioFrameSize()
+	{	if ( !m_pAudioCodecContext ) return 0;
+		return m_pAudioCodecContext->frame_size;
+	}
+
+	/// Returns the audio codec id
+	int getAudioCodecID()
+	{	if ( !m_pAudioCodecContext ) return 0;
+		return m_pAudioCodecContext->codec_id;
+	}
+
+	/// Returns the codec type
+	sqbind::stdString getAudioType()
+	{	if ( !m_pAudioCodecContext || !m_pAudioCodecContext->codec )
+			return oexT( "" );
+		return oexMbToStrPtr( m_pAudioCodecContext->codec->name );
+	}
+
+	/// Returns the codec name
+	sqbind::stdString getAudioName()
+	{	if ( !m_pAudioCodecContext || !m_pAudioCodecContext->codec )
+			return oexT( "" );
+		return oexMbToStrPtr( m_pAudioCodecContext->codec->long_name );
+	}
+
 	/// Returns video stream index
 	int getVideoStream()
 	{	return m_nVideoStream;
@@ -83,7 +130,7 @@ public:
 
 	/// Returns video stream index
 	int getAudioStream()
-	{	return m_nVideoStream;
+	{	return m_nAudioStream;
 	}
 
 	/// Returns non-zero if a container is open
@@ -95,6 +142,15 @@ public:
 	int getFrameCount()
 	{	return m_nFrames;
 	}
+
+	/// Returns non zero if there is a valid audio codec
+	int isAudioCodec()
+	{	return m_pAudioCodecContext ? 1 : 0; }
+
+	/// Returns non zero if there is a valid video codec
+	int isVideoCodec()
+	{	return m_pCodecContext ? 1 : 0; }
+
 
 private:
 
@@ -130,5 +186,14 @@ private:
 
 	/// Number of frames that have been processed
 	int						m_nFrames;
+
+	/// Number of frames that have been processed
+	int						m_nAudioFrames;
+
+	/// Codec context
+	AVCodecContext			*m_pAudioCodecContext;
+
+	/// Left over packet data
+	sqbind::CSqBinary		m_audio_buf;
 
 };
