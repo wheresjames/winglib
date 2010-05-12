@@ -35,6 +35,7 @@ void CPaOutput::Destroy()
 		Pa_StopStream( m_stream ),
 		Pa_CloseStream( m_stream );
 
+	m_buf.Destroy();
 	m_pdi = oexNULL;  
 	m_stream = oexNULL;
 	m_bBlocking = 0;
@@ -100,7 +101,16 @@ int CPaOutput::PaStreamCallback( const void *input, void *output, unsigned long 
 	// Do we have the minimum required number of bytes?
 	int bytes = frameCount * getFrameBytes();
 	if ( bytes > m_buf.GetMaxRead() )
-		return paContinue;
+	{
+		// Play what's left
+		bytes = m_buf.GetMaxRead();
+
+		// Forget what's left
+//		m_buf.Empty();
+
+//		return paComplete;
+
+	} // end if
 
 	// Copy data from the ring buffer
 	m_buf.Read( output, bytes );

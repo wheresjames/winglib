@@ -91,6 +91,12 @@ public:
 		return m_pAudioCodecContext->bit_rate;
 	}
 
+	/// Returns the audio bit rate
+	int getAudioBitsPerSample()
+	{	if ( !m_pAudioCodecContext ) return 0;
+		return m_pAudioCodecContext->bits_per_coded_sample;
+	}
+
 	/// Returns the audio channels
 	int getAudioChannels()
 	{	if ( !m_pAudioCodecContext ) return 0;
