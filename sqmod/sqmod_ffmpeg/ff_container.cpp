@@ -166,7 +166,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 		Destroy();
 		return 0;
 	} // end if
-	
+
 	// Video stream
 	if ( 0 <= m_nVideoStream
 	     && m_pFormatContext->streams[ m_nVideoStream ]
@@ -251,7 +251,7 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 	} // end if
 
 	if ( dat )
-		dat->setBuffer( (sqbind::CSqBinary::t_byte*)m_pkt.data, m_pkt.size, 0 );
+		dat->setBuffer( (sqbind::CSqBinary::t_byte*)m_pkt.data, m_pkt.size, 0, 0 );
 
 	return m_pkt.stream_index;
 }
@@ -313,7 +313,7 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 	// Is it already the right format?
 	if ( fmt == (int)m_pCodecContext->pix_fmt )
 	{	int nSize = CFfConvert::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
-		dat->setBuffer( (sqbind::CSqBinary::t_byte*)m_pFrame->data[ 0 ], nSize, 0 );
+		dat->setBuffer( (sqbind::CSqBinary::t_byte*)m_pFrame->data[ 0 ], nSize, 0, 0 );
 		m_nFrames++;
 		return m_pkt.stream_index;
 	} // end if
@@ -391,7 +391,7 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 	// Is it already the right format?
 	if ( fmt == (int)m_pCodecContext->pix_fmt )
 	{	int nSize = CFfConvert::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
-		out->setBuffer( (sqbind::CSqBinary::t_byte*)m_pFrame->data[ 0 ], nSize, 0 );
+		out->setBuffer( (sqbind::CSqBinary::t_byte*)m_pFrame->data[ 0 ], nSize, 0, 0 );
 		m_nFrames++;
 		return m_pkt.stream_index;
 	} // end if
@@ -443,11 +443,11 @@ int CFfContainer::DecodeAudioFrameBin( sqbind::CSqBinary *in, sqbind::CSqBinary 
 */
 
 	int out_size = oex::cmn::Max( (int)(in->getUsed() * 2), (int)AVCODEC_MAX_AUDIO_FRAME_SIZE );
-	if ( out->Size() < out_size ) 
+	if ( (int)out->Size() < out_size )
 		out->Allocate( out_size );
 
-	int used = avcodec_decode_audio2( m_pAudioCodecContext, 
-									  (int16_t*)out->_Ptr(), &out_size, 
+	int used = avcodec_decode_audio2( m_pAudioCodecContext,
+									  (int16_t*)out->_Ptr(), &out_size,
 									  (const uint8_t*)in_ptr, in_size );
 
 	out->setUsed( out_size );
@@ -457,8 +457,8 @@ int CFfContainer::DecodeAudioFrameBin( sqbind::CSqBinary *in, sqbind::CSqBinary 
 		return -1;
 	} // end if
 
-	if ( used != in->getUsed() )
-		oexSHOW( "!!! Left over data !!!" );
+//	if ( used != in->getUsed() )
+//		oexSHOW( "!!! Left over data !!!" );
 
 /*
 	// Left over data?

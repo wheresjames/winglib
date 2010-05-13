@@ -15,7 +15,6 @@ PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel jpeg png zlib tiff \
 			portaudio
 PRJ_DEFS := 
-PRJ_OSLB :=
  
 PRJ_SUBROOT := _sqmod
 
@@ -25,6 +24,14 @@ PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
+
+ifeq ($(PLATFORM),windows)
+ifneq ($(BUILD),vs)
+	PRJ_OSLB := $(PRJ_OSLB) winmm 
+endif
+else
+	PRJ_OSLB := $(PRJ_OSLB) asound
+endif
 
 #-------------------------------------------------------------------
 # File locations

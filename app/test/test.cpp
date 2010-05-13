@@ -475,7 +475,7 @@ oex::oexRESULT TestBinary()
 	if ( !oexVERIFY( 1 == oexGetRefCount( pChar ) ) )
 		return -19;
 
-	b2.setBuffer( pChar, 100 );
+	b2.setBuffer( pChar, 100, 0, oex::oexTRUE );
 
 	if ( !oexVERIFY( pChar == b2.Ptr() ) )
 		return -20;

@@ -36,7 +36,7 @@ void CPaOutput::Destroy()
 		Pa_CloseStream( m_stream );
 
 	m_buf.Destroy();
-	m_pdi = oexNULL;  
+	m_pdi = oexNULL;
 	m_stream = oexNULL;
 	m_bBlocking = 0;
 }
@@ -145,6 +145,9 @@ int CPaOutput::Open( int bBlocking, int nDev, int nChannels, int nFormat, double
 	PaStreamParameters psp;
 	oexZero( psp );
 
+	if ( 0 >= fpb )
+		fpb = 1024;
+
 	psp.device = nDev;
 	psp.channelCount = nChannels;
 	psp.sampleFormat = nFormat;
@@ -154,7 +157,7 @@ int CPaOutput::Open( int bBlocking, int nDev, int nChannels, int nFormat, double
 	m_nFrameBytes = getFormatBytes( nFormat ) * nChannels;
 
 	// Attempt to open output stream
-	
+
 	if ( bBlocking )
 		m_errLast = Pa_OpenStream( &m_stream, 0, &psp, dSRate, fpb, 0, 0, this );
 	else

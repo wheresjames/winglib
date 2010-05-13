@@ -15,10 +15,10 @@ extern "C"
 //const unsigned long long ff_pw_20 = 0x0014001400140014ULL;
 //DECLARE_ALIGNED_8 (const uint64_t, ff_pw_20 ) = 0x0014001400140014ULL;
 
-int snd_strerror( const char *p )
-{_STT();
-	return 0;
-}
+//int snd_strerror( const char *p )
+//{_STT();
+//	return 0;
+//}
 
 #if defined( OEX_WINDOWS )
 	extern "C" int usleep( int usec ) { oexMicroSleep( usec ); return usec; }
@@ -157,7 +157,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, ReadFrame )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, DecodeFrame )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, DecodeFrameBin )
-	SQBIND_MEMBER_FUNCTION( CFfContainer, DecodeAudioFrameBin )	
+	SQBIND_MEMBER_FUNCTION( CFfContainer, DecodeAudioFrameBin )
 
 	SQBIND_MEMBER_FUNCTION( CFfContainer, Create )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, InitWrite )
@@ -178,7 +178,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioSampleRate )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioBitRate )
-	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioBitsPerSample )	
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioBitsPerSample )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioChannels )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioFrameSize )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioCodecID )

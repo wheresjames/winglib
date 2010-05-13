@@ -40,7 +40,7 @@ ifeq ($(PLATFORM),windows)
 		endif
 	else
 		PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/windows/gcc $(PRJ_INCS) zlib
-		PRJ_LIBS := $(PRJ_LIBS) ffmpeg
+		PRJ_LIBS := $(PRJ_LIBS) ffmpeg zlib
 		ifneq ($(PROC),arm)
 			PRJ_OSLB := $(PRJ_OSLB) vfw32
 		endif
@@ -48,6 +48,7 @@ ifeq ($(PLATFORM),windows)
 else
 	PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/posix $(PRJ_INCS)
 	PRJ_LIBS := $(PRJ_LIBS) ffmpeg
+	PRJ_OSLB := $(PRJ_OSLB) z
 endif
 
 #-------------------------------------------------------------------

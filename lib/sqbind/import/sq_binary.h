@@ -194,8 +194,8 @@ namespace sqbind
 		t_byte* _Ptr( t_size o = 0 ) { return m_bin._Ptr( o ); }
 
 		/// Sets a raw buffer
-		void setBuffer( t_byte *x_ptr, t_size x_size, int x_bFree = 1 )
-		{	m_bin.setBuffer( x_ptr, x_size, x_bFree ? oex::oexTRUE : oex::oexFALSE ); }
+        void setBuffer( t_byte *x_ptr, t_size x_size, t_size x_offset, int x_bFree )
+        {	m_bin.setBuffer( x_ptr, x_size, x_offset, x_bFree ? oex::oexTRUE : oex::oexFALSE ); }
 
 		/// Copies data from a raw buffer
 		t_size MemCpy( oexCONST t_byte *x_ptr, t_size x_size )

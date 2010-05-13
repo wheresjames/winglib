@@ -177,7 +177,7 @@ int CFfCapture::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 	} // end if
 
 	if ( dat )
-		dat->setBuffer( (sqbind::CSqBinary::t_byte*)m_pkt.data, m_pkt.size, 0 );
+		dat->setBuffer( (sqbind::CSqBinary::t_byte*)m_pkt.data, m_pkt.size, 0, 0 );
 
 	return m_pkt.stream_index;
 }

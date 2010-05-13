@@ -47,7 +47,7 @@ public:
 			return sqbind::CSqBinary();
 
 		sqbind::CSqBinary buf;
-		buf.setBuffer( (sqbind::CSqBinary::t_byte*)pBuf, nSize, 0 );
+		buf.setBuffer( (sqbind::CSqBinary::t_byte*)pBuf, nSize, 0, 0 );
 		return buf;
 
 	} // end if

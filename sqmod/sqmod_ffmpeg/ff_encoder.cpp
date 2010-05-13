@@ -110,7 +110,7 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 
 	// How much room could we possibly need
 	int nSize = CFfConvert::CalcImageSize( fmt, width, height ) * 2;
-	if ( out->Size() < nSize && !out->Mem().Mem().OexNew( nSize ).Ptr() )
+	if ( (int)out->Size() < nSize && !out->Mem().Mem().OexNew( nSize ).Ptr() )
 		return 0;
 
 	AVFrame *paf = avcodec_alloc_frame();

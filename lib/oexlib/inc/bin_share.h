@@ -416,7 +416,7 @@ public:
 	}
 
 	/// Sets a Ptr buffer pointer ( make sure it doesn't go away before this class! )
-	void setBuffer( t_byte *x_ptr, t_size x_size, t_size x_offset = 0, oexBOOL x_bFree = oexTRUE )
+    void setBuffer( t_byte *x_ptr, t_size x_size, t_size x_offset, oexBOOL x_bFree )
 	{
 		Destroy();
 

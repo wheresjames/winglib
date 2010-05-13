@@ -10,7 +10,7 @@ class CGlobal
 	pa = CPaOutput();
 
 	dec = CSqBinary();
-	frame = CSqBinary();	
+	frame = CSqBinary();
 };
 
 local _g = CGlobal();
@@ -18,12 +18,9 @@ local _g = CGlobal();
 function _init() : ( _g )
 {
 //	local file = _self.path( "../media/440hz.ogg" );
-	local file = _self.path( "../../../../vhe.mp3" );
-//	local file = _self.path( "../../../../audio_alarm/9000g.wav" );
-//	local file = _self.path( "../../../../audio_alarm/cuckoo.wav" );
-//	local file = _self.path( "../../../../audio_alarm/doggrowl.wav" );
-//	local file = _self.path( "../../../../audio_alarm/gun.wav" );
-//	local file = _self.path( "../../../../audio_alarm/tinkalink2.wav" );
+//	local file = _self.path( "../../../../vhe.mp3" );
+//	local file = _self.root( "audio_alarm/wav1.wav" );
+	local file = _self.root( "audio_alarm/wav0.wav" );
 
 	_self.echo( "=====================================================" );
 	_self.echo( " Playing  : " + file );
@@ -61,8 +58,8 @@ function _init() : ( _g )
 	} // end switch
 
 	local fsize = _g.f.getAudioFrameSize();
-	if ( !_g.pa.Open( _g.blocking, _g.pa.getDefaultOutputDevice(), 
-					  _g.f.getAudioChannels(), fmt, 0.2, 
+	if ( !_g.pa.Open( _g.blocking, _g.pa.getDefaultOutputDevice(),
+					  _g.f.getAudioChannels(), fmt, 0.2,
 				      _g.f.getAudioSampleRate().tofloat(), fsize ) )
 	{   _self.echo( "!!! Failed to open output stream : " + _g.pa.getLastError() );
 		return 0;
@@ -82,12 +79,14 @@ function _idle() : ( _g )
 		if ( _g.pa.getBufferedBytes() )
 			return 0;
 
+		_self.echo( "---- SUCCESS ----" );
+
 		return 1;
 
 	} // end if
 
 	local frame_info = CSqMulti();
-	local min_buf = 128 * 1024;
+	local min_buf = 64 * 1024;
 
 	if ( _g.pa.getBufferedBytes() < min_buf )
 	{

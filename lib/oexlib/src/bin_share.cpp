@@ -116,7 +116,7 @@ CBin::t_size CBin::Share( CBin *x_p )
 
 	// Ptr buffer?
 	if ( x_p->m_ptr )
-		setBuffer( x_p->m_ptr, x_p->m_nUsed, x_p->m_nOffset );
+		setBuffer( x_p->m_ptr, x_p->m_nUsed, x_p->m_nOffset, x_p->m_bFree );
 
 	// Share native buffer
 	else

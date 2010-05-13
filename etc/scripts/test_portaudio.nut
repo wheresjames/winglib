@@ -56,8 +56,8 @@ function TestOutput( pa )
 
 	_self.echo( "*** Opening output device : " + pa.getDefaultOutputDevice() );
 
-	if ( !pa.Open( pa.getDefaultOutputDevice(), 1, 
-				   CPaOutput().paFloat32, 0.4, sps, bsize ) )
+	if ( !pa.Open( 1, pa.getDefaultOutputDevice(), 1, 
+				   CPaOutput().paFloat32, 0.2, sps, bsize ) )
 	{   _self.echo( "!!! Failed to open output stream : " + pa.getLastError() );
 		return 0;
 	} // end if
