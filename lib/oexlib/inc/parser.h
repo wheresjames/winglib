@@ -58,55 +58,55 @@ private:
 public:
 
 	/// Parsers a list by breaking it at separator strings
-    template < typename T >
-        static TList< TStr< T > > Explode( oexCONST T * pStr, oexCONST T * pSep )
+	template < typename T >
+		static TList< TStr< T > > Explode( oexCONST T * pStr, oexCONST T * pSep )
 	{	return Explode( pStr, zstr::Length( pStr ), pSep, zstr::Length( pSep ) ); }
 
-    template < typename T >
-        static TList< TStr< T > > Explode( TStr< T > sStr, oexCONST T * pSep )
+	template < typename T >
+		static TList< TStr< T > > Explode( TStr< T > sStr, oexCONST T * pSep )
 	{	return Explode( sStr.Ptr(), sStr.Length(), pSep, zstr::Length( pSep ) ); }
 
-    template < typename T >
-        static TList< TStr< T > > Explode( TStr< T > sStr, TStr< T > sSep )
+	template < typename T >
+		static TList< TStr< T > > Explode( TStr< T > sStr, TStr< T > sSep )
 	{	return Explode( sStr.Ptr(), sStr.Length(), sSep.Ptr(), sSep.Length() ); }
 
-    template < typename T >
-        static TList< TStr< T > > Explode( oexCONST T *x_pStr, oexUINT x_uSize, oexCONST T *x_pSep, oexUINT x_uSep )
-    {
-	    TList< TStr< T > > lst;
-	    if ( !oexVERIFY_PTR( x_pStr ) )
-		    return lst;
+	template < typename T >
+		static TList< TStr< T > > Explode( oexCONST T *x_pStr, oexUINT x_uSize, oexCONST T *x_pSep, oexUINT x_uSep )
+	{
+		TList< TStr< T > > lst;
+		if ( !oexVERIFY_PTR( x_pStr ) )
+			return lst;
 
-	    if ( !x_pSep ) x_uSep = 0;
-	    else if ( !oexVERIFY_PTR( x_pSep ) )
-		    return lst;
+		if ( !x_pSep ) x_uSep = 0;
+		else if ( !oexVERIFY_PTR( x_pSep ) )
+			return lst;
 
-	    // Breaking down to chars?
-	    if ( !x_uSep )
-	    {	while ( *x_pStr )
-			    lst << *x_pStr, x_pStr++;
-		    return lst;
-	    } // end if
+		// Breaking down to chars?
+		if ( !x_uSep )
+		{	while ( *x_pStr )
+				lst << *x_pStr, x_pStr++;
+			return lst;
+		} // end if
 
-	    oexUINT i = 0;
-	    while ( x_uSize )
-	    {
-		    // Separator?
-		    if ( !str::CompareLen( &x_pStr[ i ], x_uSize, x_pSep, x_uSep, x_uSep ) )
-		    {	lst << CStr( x_pStr, 0, i );
-			    x_pStr = &x_pStr[ i + x_uSep ];
-			    x_uSize -= x_uSep; i = 0;
-		    } // end if
+		oexUINT i = 0;
+		while ( x_uSize )
+		{
+			// Separator?
+			if ( !str::CompareLen( &x_pStr[ i ], x_uSize, x_pSep, x_uSep, x_uSep ) )
+			{	lst << CStr( x_pStr, 0, i );
+				x_pStr = &x_pStr[ i + x_uSep ];
+				x_uSize -= x_uSep; i = 0;
+			} // end if
 
-		    else i++, x_uSize--;
+			else i++, x_uSize--;
 
-	    } // end while
+		} // end while
 
-	    // Add last item
-	    if ( i ) lst << CStr( x_pStr, 0, i );
+		// Add last item
+		if ( i ) lst << CStr( x_pStr, 0, i );
 
-	    return lst;
-    }
+		return lst;
+	}
 
 	template < typename T_LIST >
 		static CStr Implode( oexCONST T_LIST &lst, oexCSTR pSep )
@@ -134,67 +134,67 @@ public:
 	static CStrList GetTokens( oexCSTR pStr, oexCSTR pValid );
 
 	/// Splits a string into an array by cutting on any character in pSep
-    template < typename T >
-        static TList< TStr< T > > Split( oexCONST T *x_pStr, oexUINT x_uSize, oexCONST T *x_pSep )
-    {
-	    TList< TStr< T > > lst;
-	    if ( !oexVERIFY_PTR( x_pStr ) )
-		    return lst;
+	template < typename T >
+		static TList< TStr< T > > Split( oexCONST T *x_pStr, oexUINT x_uSize, oexCONST T *x_pSep )
+	{
+		TList< TStr< T > > lst;
+		if ( !oexVERIFY_PTR( x_pStr ) )
+			return lst;
 
-	    oexUINT x_uSep = 0;
-	    if ( !x_pSep ) x_uSep = 0;
-	    else if ( !oexVERIFY_PTR( x_pSep ) )
-		    return lst;
-	    else x_uSep = zstr::Length( x_pSep );
+		oexUINT x_uSep = 0;
+		if ( !x_pSep ) x_uSep = 0;
+		else if ( !oexVERIFY_PTR( x_pSep ) )
+			return lst;
+		else x_uSep = zstr::Length( x_pSep );
 
-	    // Breaking down to chars?
-	    if ( !x_uSep )
-	    {	while ( *x_pStr )
-			    lst << *x_pStr, x_pStr++;
-		    return lst;
-	    } // end if
+		// Breaking down to chars?
+		if ( !x_uSep )
+		{	while ( *x_pStr )
+				lst << *x_pStr, x_pStr++;
+			return lst;
+		} // end if
 
-	    while ( x_uSize )
-	    {
-		    // Find a separator
-		    oexINT nSep = str::FindCharacters( x_pStr, x_uSize, x_pSep, x_uSep );
+		while ( x_uSize )
+		{
+			// Find a separator
+			oexINT nSep = str::FindCharacters( x_pStr, x_uSize, x_pSep, x_uSep );
 
-		    if ( 0 > nSep )
-		    {	lst << x_pStr;
-			    return lst;
-		    } // end if
+			if ( 0 > nSep )
+			{	lst << x_pStr;
+				return lst;
+			} // end if
 
-		    else
-		    {
-		    	if ( nSep )
-		    	{	x_uSize -= nSep;
-                	lst << TStr< T >( x_pStr, 0, nSep );
+			else
+			{
+				if ( nSep )
+				{	x_uSize -= nSep;
+					lst << TStr< T >( x_pStr, 0, nSep );
 				} // end if
 
-                oexINT nEnd = str::SkipCharacters( &x_pStr[ nSep ], x_uSize, x_pSep, x_uSep );
+				oexINT nEnd = str::SkipCharacters( &x_pStr[ nSep ], x_uSize, x_pSep, x_uSep );
 
-			    if ( 0 <= nEnd )
-			    	x_pStr += nSep + nEnd, x_uSize -= nEnd;
+				if ( 0 <= nEnd )
+					x_pStr += nSep + nEnd, x_uSize -= nEnd;
 
-			    else
-			    	return lst;
+				else
+					return lst;
 
-		    } // end else
+			} // end else
 
-	    } // end while
+		} // end while
 
-	    // Add last item
-	    if ( *x_pStr ) lst << x_pStr;
+		// Add last item
+		if ( *x_pStr ) lst << x_pStr;
 
-	    return lst;
-    }
+		return lst;
+	}
 
-    template < typename T >
-        static TList< TStr< T > > Split( oexCONST T *pStr, oexCONST T *pSep )
+	template < typename T >
+		static TList< TStr< T > > Split( oexCONST T *pStr, oexCONST T *pSep )
 	{	return Split< T >( pStr, zstr::Length( pStr ), pSep ); }
 
-    template < typename T >
-    	static TList< TStr< T > > Split( TStr< T > &str, oexCONST T *pSep )
+	template < typename T >
+		static TList< TStr< T > > Split( TStr< T > &str, oexCONST T *pSep )
 	{	return Split< T >( str.Ptr(), str.Length(), pSep ); }
 
 	/// Parses an array template
@@ -214,143 +214,143 @@ public:
 
 
 	/// Decodes url type params such as "a=b&c=d"
-    template< typename T >
-        static TPropertyBag< TStr< T > > DecodeUrlParams( oexCONST T *x_pStr )
-        {   oexASSERT_PTR( x_pStr );
+	template< typename T >
+		static TPropertyBag< TStr< T > > DecodeUrlParams( oexCONST T *x_pStr )
+		{   oexASSERT_PTR( x_pStr );
 			return DecodeUrlParams( TStr< T >( x_pStr ) );
 		}
 
-    template< typename T >
-        static TPropertyBag< TStr< T > > DecodeUrlParams( TStr< T > x_str )
-    {
-        TPropertyBag< TStr< T > > pb;
-	    TStr< T > key, val;
+	template< typename T >
+		static TPropertyBag< TStr< T > > DecodeUrlParams( TStr< T > x_str )
+	{
+		TPropertyBag< TStr< T > > pb;
+		TStr< T > key, val;
 
-	    TList< TStr< T > > lst = CParser::Split< T >( x_str, oexTT( T, "&" ) );
+		TList< TStr< T > > lst = CParser::Split< T >( x_str, oexTT( T, "&" ) );
 
-	    for ( typename TList< TStr< T > >::iterator it; lst.Next( it ); )
-	    {
-		    key = UrlDecode( it->Parse( oexTT( T, "=" ) ) );
-		    if ( key.Length() ) (*it)++;
-		    val = UrlDecode( it.Obj() );
+		for ( typename TList< TStr< T > >::iterator it; lst.Next( it ); )
+		{
+			key = UrlDecode( it->Parse( oexTT( T, "=" ) ) );
+			if ( key.Length() ) (*it)++;
+			val = UrlDecode( it.Obj() );
 
-		    // Key value pair
-		    if ( key.Length() && val.Length() )
-			    pb[ key ] = val;
+			// Key value pair
+			if ( key.Length() && val.Length() )
+				pb[ key ] = val;
 
-		    // NULL key assignment
-		    else if ( key.Length() )
-			    pb[ key ] = oexTT( T, "" );
+			// NULL key assignment
+			else if ( key.Length() )
+				pb[ key ] = oexTT( T, "" );
 
-		    // Assume NULL key assignment
-		    else if ( val.Length() )
-			    pb[ val ] = oexTT( T, "" );
+			// Assume NULL key assignment
+			else if ( val.Length() )
+				pb[ val ] = oexTT( T, "" );
 
-	    } // end while
+		} // end while
 
-	    return pb;
-    }
+		return pb;
+	}
 
 	/// Encodes url type params such as "a=b&c=d"
-    template< typename T >
-        static TStr< T > EncodeUrlParams( oexCONST TPropertyBag< TStr< T > > &x_pb )
-    {
-	    TStr< T > str;
-	    TPropertyBag< TStr< T > > &pb = (TPropertyBag< TStr< T > >&)x_pb;
+	template< typename T >
+		static TStr< T > EncodeUrlParams( oexCONST TPropertyBag< TStr< T > > &x_pb )
+	{
+		TStr< T > str;
+		TPropertyBag< TStr< T > > &pb = (TPropertyBag< TStr< T > >&)x_pb;
 
-	    for( typename TPropertyBag< TStr< T > >::iterator it; pb.List().Next( it ); )
-	    {
-		    if ( str.Length() )
-                str << oexTC( T, '&' );
+		for( typename TPropertyBag< TStr< T > >::iterator it; pb.List().Next( it ); )
+		{
+			if ( str.Length() )
+				str << oexTC( T, '&' );
 
-		    str << UrlEncode( it.Node()->key ) << oexTT( T, "=" ) << UrlEncode( it->ToString() );
+			str << UrlEncode( it.Node()->key ) << oexTT( T, "=" ) << UrlEncode( it->ToString() );
 
-	    } // end for
+		} // end for
 
-	    return str;
-    }
+		return str;
+	}
 
 	/// Returns non-zero if the character is a valid url character
-    template< typename T >
-        static oexBOOL IsUrlChar( T x_ch )
-    {   return  ( oexTC( T, 'a' ) <= x_ch && oexTC( T, 'z' ) >= x_ch ) ||
-                ( oexTC( T, 'A' ) <= x_ch && oexTC( T, 'Z' ) >= x_ch ) ||
-                ( oexTC( T, '0' ) <= x_ch && oexTC( T, '9' ) >= x_ch ) ||
-                oexTC( T, '_' ) == x_ch || oexTC( T, '-' ) == x_ch ||
-                oexTC( T, '.' ) == x_ch;
-    }
+	template< typename T >
+		static oexBOOL IsUrlChar( T x_ch )
+	{   return  ( oexTC( T, 'a' ) <= x_ch && oexTC( T, 'z' ) >= x_ch ) ||
+				( oexTC( T, 'A' ) <= x_ch && oexTC( T, 'Z' ) >= x_ch ) ||
+				( oexTC( T, '0' ) <= x_ch && oexTC( T, '9' ) >= x_ch ) ||
+				oexTC( T, '_' ) == x_ch || oexTC( T, '-' ) == x_ch ||
+				oexTC( T, '.' ) == x_ch;
+	}
 
 	/// Encoded a url string "Hello World" -> "Hello%20World"
-    template< typename T >
-        static TStr< T > UrlEncode( oexCONST T *x_pStr )
-        {	oexASSERT_PTR( x_pStr );
+	template< typename T >
+		static TStr< T > UrlEncode( oexCONST T *x_pStr )
+		{	oexASSERT_PTR( x_pStr );
 			return UrlEncode( TStr< T >( x_pStr ) );
 		}
 
-    template< typename T >
-        static TStr< T > UrlEncode( TStr< T > x_str )
-    {
-	    TStr< T > ret, num;
-	    oexINT nLen = x_str.Length();
+	template< typename T >
+		static TStr< T > UrlEncode( TStr< T > x_str )
+	{
+		TStr< T > ret, num;
+		oexINT nLen = x_str.Length();
 
-	    while ( 0 < nLen-- )
-	    {
-		    if ( IsUrlChar( *x_str ) )
-			    ret << *x_str;
-		    else
-			    ret << num.Fmt( oexTT( T, "%%%02X" ), (oexUCHAR)*x_str );
+		while ( 0 < nLen-- )
+		{
+			if ( IsUrlChar( *x_str ) )
+				ret << *x_str;
+			else
+				ret << num.Fmt( oexTT( T, "%%%02X" ), (oexUCHAR)*x_str );
 
-		    x_str++;
+			x_str++;
 
-	    } // end while
+		} // end while
 
-	    return ret;
-    }
+		return ret;
+	}
 
 	/// Decodes a url string "Hello%20World" -> "Hello World"
-    template< typename T >
-        static TStr< T > UrlDecode( oexCONST T *x_pStr )
-        {   oexASSERT_PTR( x_pStr );
+	template< typename T >
+		static TStr< T > UrlDecode( oexCONST T *x_pStr )
+		{   oexASSERT_PTR( x_pStr );
 			return UrlDecode( TStr< T >( x_pStr ) );
 		}
 
-    template< typename T >
-        static TStr< T > UrlDecode( TStr< T > x_str )
-    {
-	    TStr< T > ret, num;
-	    oexINT nLen = x_str.Length();
+	template< typename T >
+		static TStr< T > UrlDecode( TStr< T > x_str )
+	{
+		TStr< T > ret, num;
+		oexINT nLen = x_str.Length();
 
-	    while ( 0 < nLen-- )
-	    {
+		while ( 0 < nLen-- )
+		{
 			if ( oexTC( T, '+' ) == *x_str )
 				ret << oexTC( T, ' ' );
 
-		    else if ( oexTC( T, '%' ) != *x_str )
-			    ret << *x_str;
+			else if ( oexTC( T, '%' ) != *x_str )
+				ret << *x_str;
 
-		    else
-		    {
-			    x_str++;
+			else
+			{
+				x_str++;
 
-			    if ( x_str.IsMatchAt( 0, oexTT( T, "0123456789abcdefABCDEF" ) ) )
-				    ret << ( (oexTCHAR)num.Sub( x_str, 0, 2 ).ToLong( 16 ) ), x_str++, nLen -= 2;
+				if ( x_str.IsMatchAt( 0, oexTT( T, "0123456789abcdefABCDEF" ) ) )
+					ret << ( (oexTCHAR)num.Sub( x_str, 0, 2 ).ToLong( 16 ) ), x_str++, nLen -= 2;
 
-			    else
-				    ret << *x_str;
+				else
+					ret << *x_str;
 
-		    } // end else
+			} // end else
 
-		    x_str++;
+			x_str++;
 
-	    } // end while
+		} // end while
 
-	    return ret;
-    }
+		return ret;
+	}
 
 	/// Returns non-zero if the character is a valid html character
-    template< typename T >
-        static oexBOOL IsHtmlChar( T x_ch )
-    {   if (	   ( oexTC( T, 'a' ) <= x_ch && oexTC( T, 'z' ) >= x_ch )
+	template< typename T >
+		static oexBOOL IsHtmlChar( T x_ch )
+	{   if (	   ( oexTC( T, 'a' ) <= x_ch && oexTC( T, 'z' ) >= x_ch )
 				|| ( oexTC( T, 'A' ) <= x_ch && oexTC( T, 'Z' ) >= x_ch )
 				|| ( oexTC( T, '0' ) <= x_ch && oexTC( T, '9' ) >= x_ch	)
 			) return oexTRUE;
@@ -378,9 +378,9 @@ public:
 
 		// Invalid
 		return oexFALSE;
-    }
+	}
 
-    template< typename T >
+	template< typename T >
 		static TStr< T > HtmlEncodeChar( T x_ch )
 		{
 			switch( x_ch )
@@ -416,40 +416,40 @@ public:
 		}
 
 	/// Encoded a string "<b>Hello World</b>" -> "&lt;b&gt;Hello&nbsp;World&lt;/b&gt;"
-    template< typename T >
-        static TStr< T > HtmlEncode( oexCONST T *x_pStr )
-        {	oexASSERT_PTR( x_pStr );
+	template< typename T >
+		static TStr< T > HtmlEncode( oexCONST T *x_pStr )
+		{	oexASSERT_PTR( x_pStr );
 			return HtmlEncode( TStr< T >( x_pStr ) );
 		}
 
-    template< typename T >
-        static TStr< T > HtmlEncode( TStr< T > x_str )
-    {
-	    TStr< T > ret, num;
-	    oexINT nLen = x_str.Length();
+	template< typename T >
+		static TStr< T > HtmlEncode( TStr< T > x_str )
+	{
+		TStr< T > ret, num;
+		oexINT nLen = x_str.Length();
 
-	    while ( 0 < nLen-- )
-	    {
-		    if ( IsHtmlChar( *x_str ) )
-			    ret << *x_str;
-		    else
-			    ret << HtmlEncodeChar( *x_str );
+		while ( 0 < nLen-- )
+		{
+			if ( IsHtmlChar( *x_str ) )
+				ret << *x_str;
+			else
+				ret << HtmlEncodeChar( *x_str );
 
-		    x_str++;
+			x_str++;
 
-	    } // end while
+		} // end while
 
-	    return ret;
-    }
+		return ret;
+	}
 
-    template< typename T >
+	template< typename T >
 		static TStr< T > HtmlDecodeChar( oexCONST T *x_pStr )
-        {	oexASSERT_PTR( x_pStr );
+		{	oexASSERT_PTR( x_pStr );
 			return HtmlDecodeChar( TStr< T >( x_pStr ) );
 		}
 
 
-    template< typename T >
+	template< typename T >
 		struct SHtmlItem
 		{
 			oexCONST T		ch;
@@ -458,7 +458,7 @@ public:
 		};
 
 
-    template< typename T >
+	template< typename T >
 		static T HtmlDecodeChar( TStr< T > &x_str )
 		{
 			static const SHtmlItem< T > c_cnv[] =
@@ -507,14 +507,14 @@ public:
 
 
 	/// Decodes an html string "&lt;b&gt;Hello&nbsp;World&lt;/b&gt;" -> "<b>Hello World</b>"
-    template< typename T >
-        static TStr< T > HtmlDecode( oexCONST T *x_pStr )
-        {   return HtmlDecode( TStr< T >( x_pStr ) ); }
+	template< typename T >
+		static TStr< T > HtmlDecode( oexCONST T *x_pStr )
+		{   return HtmlDecode( TStr< T >( x_pStr ) ); }
 
-    template< typename T >
-        static TStr< T > HtmlDecode( TStr< T > x_str )
-    {
-	    TStr< T > ret;
+	template< typename T >
+		static TStr< T > HtmlDecode( TStr< T > x_str )
+	{
+		TStr< T > ret;
 
 		do
 		{
@@ -535,227 +535,248 @@ public:
 		} while ( x_str.Length() );
 
 		return ret;
-    }
+	}
 
-    /// Generic property bag deserializing
-    template< typename T >
-        static TPropertyBag< TStr< T > > Deserialize( oexCONST T *x_pStr, oexBOOL x_bMerge = oexFALSE )
-    {   TPropertyBag< TStr< T > > pb;
-        TStr< T > str( x_pStr );
-        Deserialize( str, pb, x_bMerge );
-        return pb;
-    }
+	/// Generic property bag deserializing
+	template< typename T >
+		static TPropertyBag< TStr< T > > Deserialize( oexCONST T *x_pStr, oexBOOL x_bMerge = oexFALSE )
+	{	TPropertyBag< TStr< T > > pb;
+		TStr< T > str( x_pStr );
+		Deserialize( str, pb, x_bMerge );
+		return pb;
+	}
 
-    /// Generic property bag deserializing
-    template< typename T >
-        static TPropertyBag< TStr< T > > Deserialize( oexCONST TStr< T > &x_sStr, oexBOOL x_bMerge = oexFALSE )
-    {   TPropertyBag< TStr< T > > pb; Deserialize( x_sStr, pb, x_bMerge ); return pb; }
+	/// Generic property bag deserializing
+	template< typename T >
+		static TPropertyBag< TStr< T > > Deserialize( oexCONST TStr< T > &x_sStr, oexBOOL x_bMerge = oexFALSE )
+	{   TPropertyBag< TStr< T > > pb; Deserialize( x_sStr, pb, x_bMerge ); return pb; }
 
-    template< typename T >
-        static oexLONG Deserialize( oexCONST TStr< T > &x_sStr, TPropertyBag< TStr< T > > &x_pb, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
-    {
-        // Lose previous contents
-        if ( !x_bMerge )
-            x_pb.Destroy();
+	template< typename T >
+		static oexLONG Deserialize( oexCONST T *x_pStr, TPropertyBag< TStr< T > > &x_pb, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
+	{	return Deserialize( TStr< T >( x_pStr ), x_pb, x_bMerge, x_pLast );
+	}
+		
+	template< typename T >
+		static oexLONG Deserialize( oexCONST TStr< T > &x_sStr, TPropertyBag< TStr< T > > &x_pb, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
+	{
+		// Lose previous contents
+		if ( !x_bMerge )
+			x_pb.Destroy();
 
-        // Punt if null string
-        if ( !x_sStr.Length() )
-            return 0;
+		// Punt if null string
+		if ( !x_sStr.Length() )
+			return 0;
 
-        oexLONG lItems = 0;
-        oexLONG lLen = x_sStr.Length(), s = 0, e = 0;
+		oexLONG lItems = 0;
+		oexLONG lLen = x_sStr.Length(), s = 0, e = 0;
 
-        while ( e <= lLen )
-        {
-            switch( x_sStr[ e ] )
-            {
-                case oexTC( T, ',' ) : case oexTC( T, '}' ) : case 0 :
-                {
-                    if ( 0 < e - s )
-                    {
-                        // Find '='
-                        oexLONG a = s;
-                        while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] )
+		while ( e <= lLen )
+		{
+			switch( x_sStr[ e ] )
+			{
+				case oexTC( T, ',' ) : case oexTC( T, '}' ) : case 0 :
+				{
+					if ( 0 < e - s )
+					{
+						// Find '='
+						oexLONG a = s;
+						while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] )
 							a++;
 
-                        TStr< T > sKey, sVal;
+						TStr< T > sKey, sVal;
 
 						// NULL key?
 						if ( e <= s )
 							; // sKey = oexTT( T, "" );
 
-                        // First character is separator
-                        else if ( a == s )
-                            sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
+						// First character is separator
+						else if ( a == s )
+							sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
 
-                        else sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
+						else sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
 
-                        // Single token
-                        if ( 1 >= e - a )
-                            x_pb[ sKey ] = oexTT( T, "" );
+						// Single token
+						if ( 1 >= e - a )
+							x_pb[ sKey ] = oexTT( T, "" );
 
-                        // Both tokens present
-                        else
+						// Both tokens present
+						else
 							x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).DropWhiteSpace() );
 
-                        // Count one item
-                        lItems++;
+						// Count one item
+						lItems++;
 
-                    } // end if
+					} // end if
 
-                    // Next element
-                    s = e + 1;
+					// Next element
+					s = e + 1;
 
-                    // Time to exit?
-                    if ( oexTC( T, '}' ) == x_sStr[ e ] )
-                    {   if ( x_pLast ) *x_pLast = e + 1; return lItems; }
+					// Time to exit?
+					if ( oexTC( T, '}' ) == x_sStr[ e ] )
+					{   if ( x_pLast ) *x_pLast = e + 1; return lItems; }
 
-                } break;
+				} break;
 
-                case oexTC( T, '{' ) :
-                {
-                    // Get key
-                    TStr< T > sKey;
+				case oexTC( T, '{' ) :
+				{
+					// Get key
+					TStr< T > sKey;
 
-                    // Find '='
-                    oexLONG a = s;
-                    while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] )
+					// Find '='
+					oexLONG a = s;
+					while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] )
 						a++;
 
-                    // NULL key?
+					// NULL key?
 					if ( e <= s )
 						; // sKey = oexTT( T, "" );
 
-                    else if ( a == s )
-                        sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
+					else if ( a == s )
+						sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
 
-                    // No default value
-                    else if ( a >= e )
-                        sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), e - s ).DropWhiteSpace() );
+					// No default value
+					else if ( a >= e )
+						sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), e - s ).DropWhiteSpace() );
 
-                    else if ( a < e )
-                    {   sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
-                        x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).DropWhiteSpace() );
-                        lItems++;
-                    } // end if
+					else if ( a < e )
+					{   sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
+						x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).DropWhiteSpace() );
+						lItems++;
+					} // end if
 
-                    // Do we have a key?
+					// Do we have a key?
 //                    if ( sKey.Length() )
-                    {
-                        // This will point to the end of the array we're about to decode
-                        oexLONG lEnd = 0;
+					{
+						// This will point to the end of the array we're about to decode
+						oexLONG lEnd = 0;
 
-                        // Get the sub array
-                        lItems += Deserialize(  TStr< T >( x_sStr.Ptr( e + 1 ) ),
-                                                x_pb[ sKey ], oexTRUE, &lEnd );
+						// Get the sub array
+						lItems += Deserialize(  TStr< T >( x_sStr.Ptr( e + 1 ) ),
+												x_pb[ sKey ], oexTRUE, &lEnd );
 
-                        // Skip the array we just decoded
-                        e += lEnd;
+						// Skip the array we just decoded
+						e += lEnd;
 
-                    } // end if
+					} // end if
 
-                    // Skip this token
-                    s = e + 1;
+					// Skip this token
+					s = e + 1;
 
-                } break;
+				} break;
 
-            } // end switch
+			} // end switch
 
-            // Next i
-            e++;
+			// Next i
+			e++;
 
-        } // end while
+		} // end while
 
-        return lItems;
-    }
+		return lItems;
+	}
 
-    template< typename T >
-        static TStr< T > Serialize( TPropertyBag< TStr< T > > &x_pb )
-    {
-        // Just return default value if not an array
-        if ( !x_pb.IsArray() )
-            return TStr< T >();
+	template< typename T >
+		static TStr< T > Serialize( TPropertyBag< TStr< T > > &x_pb )
+	{
+		// Just return default value if not an array
+		if ( !x_pb.IsArray() )
+			return TStr< T >();
 
-        TStr< T > sStr;
-        for ( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
-        {
-            // Add separator if needed
-            if ( sStr.Length() )
-                sStr << oexTC( T, ',' );
+		TStr< T > sStr;
+		for ( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+		{
+			// Add separator if needed
+			if ( sStr.Length() )
+				sStr << oexTC( T, ',' );
 
-            // Set the key
-            sStr << CParser::UrlEncode( it.Node()->key );
+			// Set the key
+			sStr << CParser::UrlEncode( it.Node()->key );
 
-            // Encode default value
-            if ( it->IsDefaultValue() )
-                sStr << oexTC( T, '=' ) << CParser::UrlEncode( it->ToString() );
+			// Encode default value
+			if ( it->IsDefaultValue() )
+				sStr << oexTC( T, '=' ) << CParser::UrlEncode( it->ToString() );
 
-            // Recurse for array
-            if ( it->IsArray() )
-                sStr << oexTC( T, '{' ) << Serialize( *it ) << oexTC( T, '}' );
+			// Recurse for array
+			if ( it->IsArray() )
+				sStr << oexTC( T, '{' ) << Serialize( *it ) << oexTC( T, '}' );
 
-        } // end for
+		} // end for
 
-        return sStr;
-    }
+		return sStr;
+	}
 
-    /// Generic property bag deserializing
-    template< typename T >
-        static TPropertyBag< TStr< T > > DeserializeFilter( oexCONST T *x_pStr, oexCONST T *x_pFilter, oexBOOL x_bInclude, oexBOOL x_bIgnoreCase, oexBOOL x_bMerge = oexFALSE )
-    {   TPropertyBag< TStr< T > > pb;
-        TStr< T > str( x_pStr );
-        DeserializeFilter( str, pb, x_pFilter, x_bInclude, x_bIgnoreCase, x_bMerge );
-        return pb;
-    }
+	template< typename T >
+		static TList< TStr< T > > Keys( TPropertyBag< TStr< T > > &x_pb )
+	{
+		// Just return default value if not an array
+		if ( !x_pb.IsArray() )
+			return TList< TStr< T > >();
 
-    /// Generic property bag deserializing
-    template< typename T >
-        static TPropertyBag< TStr< T > > DeserializeFilter( oexCONST TStr< T > &x_sStr, oexCONST T *x_pFilter, oexBOOL x_bInclude, oexBOOL x_bIgnoreCase, oexBOOL x_bMerge = oexFALSE )
-    {   TPropertyBag< TStr< T > > pb; DeserializeFilter( x_sStr, pb, x_pFilter, x_bInclude, x_bIgnoreCase, x_bMerge ); return pb; }
+		// Create list of keys
+		TList< TStr< T > > sLst;
+		for ( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+			sLst << it.Node()->key;
 
-    template< typename T >
-        static oexLONG DeserializeFilter( oexCONST TStr< T > &x_sStr, TPropertyBag< TStr< T > > &x_pb, oexCONST T *x_pFilter, oexBOOL x_bInclude, oexBOOL x_bIgnoreCase, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
-    {
+		return sLst;
+
+	}
+
+	/// Generic property bag deserializing
+	template< typename T >
+		static TPropertyBag< TStr< T > > DeserializeFilter( oexCONST T *x_pStr, oexCONST T *x_pFilter, oexBOOL x_bInclude, oexBOOL x_bIgnoreCase, oexBOOL x_bMerge = oexFALSE )
+	{   TPropertyBag< TStr< T > > pb;
+		TStr< T > str( x_pStr );
+		DeserializeFilter( str, pb, x_pFilter, x_bInclude, x_bIgnoreCase, x_bMerge );
+		return pb;
+	}
+
+	/// Generic property bag deserializing
+	template< typename T >
+		static TPropertyBag< TStr< T > > DeserializeFilter( oexCONST TStr< T > &x_sStr, oexCONST T *x_pFilter, oexBOOL x_bInclude, oexBOOL x_bIgnoreCase, oexBOOL x_bMerge = oexFALSE )
+	{   TPropertyBag< TStr< T > > pb; DeserializeFilter( x_sStr, pb, x_pFilter, x_bInclude, x_bIgnoreCase, x_bMerge ); return pb; }
+
+	template< typename T >
+		static oexLONG DeserializeFilter( oexCONST TStr< T > &x_sStr, TPropertyBag< TStr< T > > &x_pb, oexCONST T *x_pFilter, oexBOOL x_bInclude, oexBOOL x_bIgnoreCase, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
+	{
 		if ( !x_pFilter || !*x_pFilter )
 			return Deserialize( x_sStr, x_pb, x_bMerge, x_pLast );
 
 		TStr< T > sFilter( x_pFilter );
 
-        // Lose previous contents
-        if ( !x_bMerge )
-            x_pb.Destroy();
+		// Lose previous contents
+		if ( !x_bMerge )
+			x_pb.Destroy();
 
-        // Punt if null string
-        if ( !x_sStr.Length() )
-            return 0;
+		// Punt if null string
+		if ( !x_sStr.Length() )
+			return 0;
 
-        oexLONG lItems = 0;
-        oexLONG lLen = x_sStr.Length(), s = 0, e = 0;
+		oexLONG lItems = 0;
+		oexLONG lLen = x_sStr.Length(), s = 0, e = 0;
 
-        while ( e <= lLen )
-        {
-            switch( x_sStr[ e ] )
-            {
-                case oexTC( T, ',' ) : case oexTC( T, '}' ) : case 0 :
-                {
-                    if ( 0 < e - s )
-                    {
-                        // Find '='
-                        oexLONG a = s;
-                        while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] )
+		while ( e <= lLen )
+		{
+			switch( x_sStr[ e ] )
+			{
+				case oexTC( T, ',' ) : case oexTC( T, '}' ) : case 0 :
+				{
+					if ( 0 < e - s )
+					{
+						// Find '='
+						oexLONG a = s;
+						while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] )
 							a++;
 
-                        TStr< T > sKey, sVal;
+						TStr< T > sKey, sVal;
 
 						// NULL key?
 						if ( e <= s )
 							; // sKey = oexTT( T, "" );
 
-                        // First character is separator
-                        else if ( a == s )
-                            sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
+						// First character is separator
+						else if ( a == s )
+							sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
 
-                        else sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
+						else sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
 
 						// Does it match the filter?
 						if ( ( x_bInclude ? 1 : 0 ) == ( sFilter.MatchPattern( sKey, x_bIgnoreCase ) ? 1 : 0 ) )
@@ -773,90 +794,90 @@ public:
 
 						} // end if
 
-                    } // end if
+					} // end if
 
-                    // Next element
-                    s = e + 1;
+					// Next element
+					s = e + 1;
 
-                    // Time to exit?
-                    if ( oexTC( T, '}' ) == x_sStr[ e ] )
-                    {   if ( x_pLast ) *x_pLast = e + 1; return lItems; }
+					// Time to exit?
+					if ( oexTC( T, '}' ) == x_sStr[ e ] )
+					{   if ( x_pLast ) *x_pLast = e + 1; return lItems; }
 
-                } break;
+				} break;
 
-                case oexTC( T, '{' ) :
-                {
-                    // Get key
-                    TStr< T > sKey;
+				case oexTC( T, '{' ) :
+				{
+					// Get key
+					TStr< T > sKey;
 
-                    // Find '='
-                    oexLONG a = s;
-                    while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] )
+					// Find '='
+					oexLONG a = s;
+					while ( a < e && oexTC( T, '=' ) != x_sStr[ a ] )
 						a++;
 
-                    // NULL key?
+					// NULL key?
 					if ( e <= s )
 						; // sKey = oexTT( T, "" );
 
-                    else if ( a == s )
-                        sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
+					else if ( a == s )
+						sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
 
-                    // No default value
-                    else if ( a >= e )
-                        sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), e - s ).DropWhiteSpace() );
+					// No default value
+					else if ( a >= e )
+						sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), e - s ).DropWhiteSpace() );
 
-                    else if ( a < e )
-                    {   sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
-                        x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).DropWhiteSpace() );
-                        lItems++;
-                    } // end if
+					else if ( a < e )
+					{   sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
+						x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).DropWhiteSpace() );
+						lItems++;
+					} // end if
 
-                    // Filter test
+					// Filter test
 					if ( ( x_bInclude ? 1 : 0 ) == ( sFilter.MatchPattern( sKey, x_bIgnoreCase ) ? 1 : 0 ) )
-                    {
-                        // This will point to the end of the array we're about to decode
-                        oexLONG lEnd = 0;
+					{
+						// This will point to the end of the array we're about to decode
+						oexLONG lEnd = 0;
 
-                        // Get the sub array
-                        lItems += Deserialize(  TStr< T >( x_sStr.Ptr( e + 1 ) ),
-                                                x_pb[ sKey ], oexTRUE, &lEnd );
+						// Get the sub array
+						lItems += Deserialize(  TStr< T >( x_sStr.Ptr( e + 1 ) ),
+												x_pb[ sKey ], oexTRUE, &lEnd );
 
-                        // Skip the array we just decoded
-                        e += lEnd;
+						// Skip the array we just decoded
+						e += lEnd;
 
-                    } // end if
+					} // end if
 
-                    // Skip this token
-                    s = e + 1;
+					// Skip this token
+					s = e + 1;
 
-                } break;
+				} break;
 
-            } // end switch
+			} // end switch
 
-            // Next i
-            e++;
+			// Next i
+			e++;
 
-        } // end while
+		} // end while
 
-        return lItems;
-    }
+		return lItems;
+	}
 
 
-    template< typename T >
-        static TStr< T > SerializeFilter( TPropertyBag< TStr< T > > &x_pb, oexCONST T *x_pFilter, oexBOOL x_bInclude, oexBOOL x_bIgnoreCase )
-    {
+	template< typename T >
+		static TStr< T > SerializeFilter( TPropertyBag< TStr< T > > &x_pb, oexCONST T *x_pFilter, oexBOOL x_bInclude, oexBOOL x_bIgnoreCase )
+	{
 		if ( !x_pFilter || !*x_pFilter )
 			return Serialize( x_pb );
 
 		TStr< T > sFilter( x_pFilter );
 
-        // Just return default value if not an array
-        if ( !x_pb.IsArray() )
-            return TStr< T >();
+		// Just return default value if not an array
+		if ( !x_pb.IsArray() )
+			return TStr< T >();
 
-        TStr< T > sStr;
-        for ( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
-        {
+		TStr< T > sStr;
+		for ( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+		{
 			// Does it match the filter?
 			if ( ( x_bInclude ? 1 : 0 ) == ( sFilter.MatchPattern( it.Node()->key, x_bIgnoreCase ) ? 1 : 0 ) )
 			{
@@ -877,50 +898,50 @@ public:
 
 			} // end if
 
-        } // end for
+		} // end for
 
-        return sStr;
-    }
+		return sStr;
+	}
 
-    /// Returns the next token in x_sStr if it is in lst
-    static CStr GetToken( CStr &x_sStr, CStrList x_lst, oexBOOL x_bCaseSensitive );
+	/// Returns the next token in x_sStr if it is in lst
+	static CStr GetToken( CStr &x_sStr, CStrList x_lst, oexBOOL x_bCaseSensitive );
 
-    /// Returns the next token in x_sStr if it is in lst
-    template< typename T >
-        static TStr< T > ParseToken( TStr< T > &x_sStr, TList< TStr< T > > x_lst, oexBOOL x_bCaseSensitive )
-    {
-        if ( !x_lst.Size() )
-            return TStr< T >();
+	/// Returns the next token in x_sStr if it is in lst
+	template< typename T >
+		static TStr< T > ParseToken( TStr< T > &x_sStr, TList< TStr< T > > x_lst, oexBOOL x_bCaseSensitive )
+	{
+		if ( !x_lst.Size() )
+			return TStr< T >();
 
-        // Case sensitive?
-        if ( x_bCaseSensitive )
-        {   for ( typename TList< TStr< T > >::iterator it; x_lst.Next( it ); )
-                if ( x_sStr.CmpLen( it->Ptr(), it->Length() ) )
-                {   x_sStr.LTrim( it->Length() ); return it.Obj(); }
-        } // end if
+		// Case sensitive?
+		if ( x_bCaseSensitive )
+		{   for ( typename TList< TStr< T > >::iterator it; x_lst.Next( it ); )
+				if ( x_sStr.CmpLen( it->Ptr(), it->Length() ) )
+				{   x_sStr.LTrim( it->Length() ); return it.Obj(); }
+		} // end if
 
-        else
-	        for ( typename TList< TStr< T > >::iterator it; x_lst.Next( it ); )
-                if ( x_sStr.ICmpLen( it->Ptr(), it->Length() ) )
-                {   x_sStr.LTrim( it->Length() ); return it.Obj(); }
+		else
+			for ( typename TList< TStr< T > >::iterator it; x_lst.Next( it ); )
+				if ( x_sStr.ICmpLen( it->Ptr(), it->Length() ) )
+				{   x_sStr.LTrim( it->Length() ); return it.Obj(); }
 
-        return TStr< T >();
-    }
+		return TStr< T >();
+	}
 
-    /// Decode MIME
-    template< typename T >
-        static TPropertyBag< TStr< T > > DecodeMIME( TStr< T > x_sStr )
-    {
-        TPropertyBag< TStr< T > > pb;
+	/// Decode MIME
+	template< typename T >
+		static TPropertyBag< TStr< T > > DecodeMIME( TStr< T > x_sStr )
+	{
+		TPropertyBag< TStr< T > > pb;
 
-        while ( x_sStr.Length() )
-        {
-            TStr< T > sKey = x_sStr.Parse( oexTT( T, ":\r\n" ) ), sVal;
-            if ( *x_sStr == oexTC( T, ':' ) ) x_sStr++;
+		while ( x_sStr.Length() )
+		{
+			TStr< T > sKey = x_sStr.Parse( oexTT( T, ":\r\n" ) ), sVal;
+			if ( *x_sStr == oexTC( T, ':' ) ) x_sStr++;
 
-            // Read value string
-            do
-            {
+			// Read value string
+			do
+			{
 				// Skip to data
 				if ( !x_sStr.IsMatchAt( 0, oexTT( T, "\r\n" ) ) )
 				{
@@ -942,43 +963,43 @@ public:
 				else
 					x_sStr.NextLine();
 
-            } while ( x_sStr.Length() && x_sStr.IsWhiteSpaceAt( 0 ) );
+			} while ( x_sStr.Length() && x_sStr.IsWhiteSpaceAt( 0 ) );
 
-            // Ensure valid strings
-            if ( sKey.Length() && sVal.Length() )
-                pb[ sKey ] = sVal;
+			// Ensure valid strings
+			if ( sKey.Length() && sVal.Length() )
+				pb[ sKey ] = sVal;
 
-        } // end while
+		} // end while
 
-        return pb;
-    }
+		return pb;
+	}
 
-    /// Encode MIME
-    template< typename T >
-        static TStr< T > EncodeMime( TPropertyBag< TStr< T > > &x_pb )
-    {
-	    TStr< T > str;
+	/// Encode MIME
+	template< typename T >
+		static TStr< T > EncodeMime( TPropertyBag< TStr< T > > &x_pb )
+	{
+		TStr< T > str;
 
-        // Write out each value
-	    for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+		// Write out each value
+		for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
 
-            if ( it.Node()->key.Length() && it->ToString().Length() )
+			if ( it.Node()->key.Length() && it->ToString().Length() )
 
-                str << it.Node()->key << oexTT( T, ": " ) << it->ToString() << oexTT( T, "\r\n" );
+				str << it.Node()->key << oexTT( T, ": " ) << it->ToString() << oexTT( T, "\r\n" );
 
-	    return str;
-    }
+		return str;
+	}
 
-    /// Encode INI File
-    template< typename T >
-        static TStr< T > EncodeIni( TPropertyBag< TStr< T > > &x_pb, TStr< T > x_root = oexTT( T, "" ) )
-    {
-	    TStr< T > str;
+	/// Encode INI File
+	template< typename T >
+		static TStr< T > EncodeIni( TPropertyBag< TStr< T > > &x_pb, TStr< T > x_root = oexTT( T, "" ) )
+	{
+		TStr< T > str;
 
-        // Write out each value
-	    for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+		// Write out each value
+		for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
 
-            if ( it.Node()->key.Length() )
+			if ( it.Node()->key.Length() )
 			{
 				if ( it->IsArray() )
 				{
@@ -997,24 +1018,24 @@ public:
 
 			} // end if
 
-	    return str;
-    }
+		return str;
+	}
 
 	/// Decodes a url string "Hello%20World" -> "Hello World"
-    template< typename T >
-        static TPropertyBag< TStr< T > > DecodeIni( oexCONST T *x_pStr )
-        {   return DecodeIni( TStr< T >( x_pStr ) ); }
+	template< typename T >
+		static TPropertyBag< TStr< T > > DecodeIni( oexCONST T *x_pStr )
+		{   return DecodeIni( TStr< T >( x_pStr ) ); }
 
 	/// Decode INI File
-    template< typename T >
-        static TPropertyBag< TStr< T > > DecodeIni( TStr< T > x_sStr )
-    {
-        TPropertyBag< TStr< T > > pb;
+	template< typename T >
+		static TPropertyBag< TStr< T > > DecodeIni( TStr< T > x_sStr )
+	{
+		TPropertyBag< TStr< T > > pb;
 		TStr< T > sGroup;
 
 		x_sStr << oexTT( T, "\r\n" );
-        while ( x_sStr.Length() )
-        {
+		while ( x_sStr.Length() )
+		{
 			x_sStr.SkipWhiteSpace();
 
 			// Comment
@@ -1055,104 +1076,104 @@ public:
 
 			x_sStr.NextLine();
 
-        } // end while
+		} // end while
 
-        return pb;
-    }
+		return pb;
+	}
 
 
-    /// Creates a list of all permutations of the specified character string
-    /**
-        \param [in] x_sStr  -   String of characters in which to permutate
+	/// Creates a list of all permutations of the specified character string
+	/**
+		\param [in] x_sStr  -   String of characters in which to permutate
 
-        \return List of permutations
+		\return List of permutations
 
-      \code
+	  \code
 
-        CStrList lst = StringPermutations( _T( "abc" ) );
+		CStrList lst = StringPermutations( _T( "abc" ) );
 
-      \endcode
-    */
-    template < typename T >
-        static TList< TStr< T > > StringPermutations( TStr< T > x_sStr )
-        {
-            // It really isn't practical to go higher
-            oexASSERT( x_sStr.Length() <= 8 );
+	  \endcode
+	*/
+	template < typename T >
+		static TList< TStr< T > > StringPermutations( TStr< T > x_sStr )
+		{
+			// It really isn't practical to go higher
+			oexASSERT( x_sStr.Length() <= 8 );
 
-            TList< TStr< T > > lst;
+			TList< TStr< T > > lst;
 
 #if defined( oexDEBUG )
 
-            oexUINT u = StringPermutations( lst, (T*)x_sStr.Ptr(), (T*)0 );
+			oexUINT u = StringPermutations( lst, (T*)x_sStr.Ptr(), (T*)0 );
 
-            oexASSERT( u == lst.Size() );
+			oexASSERT( u == lst.Size() );
 
-            // Verify known lengths
-            switch( x_sStr.Length() )
-            {
-                case 0 : oexASSERT( 0 == u ); break;
-                case 1 : oexASSERT( 1 == u ); break;
-                case 2 : oexASSERT( 2 == u ); break;
-                case 3 : oexASSERT( 6 == u ); break;
-                case 4 : oexASSERT( 24 == u ); break;
-                case 5 : oexASSERT( 120 == u ); break;
-                case 6 : oexASSERT( 720 == u ); break;
-                case 7 : oexASSERT( 5040 == u ); break;
-                case 8 : oexASSERT( 40320 == u ); break;
-                case 9 : oexASSERT( 362880 == u ); break;
-                case 10 : oexASSERT( 3628800 == u ); break;
-            };
+			// Verify known lengths
+			switch( x_sStr.Length() )
+			{
+				case 0 : oexASSERT( 0 == u ); break;
+				case 1 : oexASSERT( 1 == u ); break;
+				case 2 : oexASSERT( 2 == u ); break;
+				case 3 : oexASSERT( 6 == u ); break;
+				case 4 : oexASSERT( 24 == u ); break;
+				case 5 : oexASSERT( 120 == u ); break;
+				case 6 : oexASSERT( 720 == u ); break;
+				case 7 : oexASSERT( 5040 == u ); break;
+				case 8 : oexASSERT( 40320 == u ); break;
+				case 9 : oexASSERT( 362880 == u ); break;
+				case 10 : oexASSERT( 3628800 == u ); break;
+			};
 #else
-            StringPermutations( lst, (T*)x_sStr.Ptr(), (T*)0 );
+			StringPermutations( lst, (T*)x_sStr.Ptr(), (T*)0 );
 
 #endif
-            return lst;
-        }
+			return lst;
+		}
 
 
-    /// Creates a list of all permutations of the specified character string
-    /**
-        \param [in] x_lst   -   List that will contain permutations
-        \param [in] x_sStr  -   String of characters in which to permutate
-        \param [in] p       -   Internal parameter used for recursion
+	/// Creates a list of all permutations of the specified character string
+	/**
+		\param [in] x_lst   -   List that will contain permutations
+		\param [in] x_sStr  -   String of characters in which to permutate
+		\param [in] p       -   Internal parameter used for recursion
 
-      \code
+	  \code
 
-        CStrList lst;
-        TCHAR s[] = _T( "abc" );
-        int nNumPermutations = StringPermutations( lst, s );
+		CStrList lst;
+		TCHAR s[] = _T( "abc" );
+		int nNumPermutations = StringPermutations( lst, s );
 
-      \endcode
-    */
-    template < typename T >
-        static int StringPermutations( TList< TStr< T > > &x_lst, T *s, T *p = 0 )
-    {
-        if ( !p )
-            p = s;
+	  \endcode
+	*/
+	template < typename T >
+		static int StringPermutations( TList< TStr< T > > &x_lst, T *s, T *p = 0 )
+	{
+		if ( !p )
+			p = s;
 
-        int t = 0;
-        T *n = p;
-        while ( *p && *n )
-        {
-            cmn::Swap( *p, *n );
+		int t = 0;
+		T *n = p;
+		while ( *p && *n )
+		{
+			cmn::Swap( *p, *n );
 
-            if ( *( p + 1 ) && *( p + 2 ) )
-                t += StringPermutations( x_lst, s, p + 1 );
-            else
-                t++, x_lst << s;
+			if ( *( p + 1 ) && *( p + 2 ) )
+				t += StringPermutations( x_lst, s, p + 1 );
+			else
+				t++, x_lst << s;
 
-            cmn::Swap( *p, *n );
+			cmn::Swap( *p, *n );
 
-            n++;
+			n++;
 
-        } // end while
+		} // end while
 
-        return t;
-    }
+		return t;
+	}
 
 public:
 
-    template < typename T >
+	template < typename T >
 		static oexUINT ahtodw( oexCONST T* pBuffer, oexUINT uBytes )
 		{
 			oexUINT num = 0;
@@ -1177,7 +1198,7 @@ public:
 			return num;
 		}
 
-    template < typename T >
+	template < typename T >
 		static oexUINT HtmlToRgb( oexCONST T* pHtml )
 		{
 			if ( !oexCHECK_PTR( pHtml ) || *pHtml != oexTC( T, '#' ) )
@@ -1189,7 +1210,7 @@ public:
 				   | ( ahtodw( &pHtml[ 5 ], 2 ) << 16 );
 		}
 
-    template < typename T >
+	template < typename T >
 		oexUINT dwtohstr( oexUINT num, T *buf, oexUINT index, oexUINT pad = 2, oexUINT max = 2 )
 		{
 			oexUINT i = 0;
@@ -1204,7 +1225,7 @@ public:
 				if ( buf[ i ] > oexTC( T, '9' ) ) buf[ i ] += oexTC( T, 'A' ) - oexTC( T, '9' ) - 1;
 				if ( pad >= c || i || buf[ i ] != oexTC( T, '0' ) ) if ( i < max ) i++;
 				num <<= 4;
- 				c--;
+				c--;
 
 			} // end while
 
@@ -1215,7 +1236,7 @@ public:
 			return i;
 		}
 
-    template < typename T >
+	template < typename T >
 		TStr< T > RgbToHtml( oexUINT rgb )
 		{
 			oexUINT i = 0;
@@ -1235,7 +1256,7 @@ public:
 		}
 
 	// Match against list of file patterns
-    template < typename T >
+	template < typename T >
 		oexBOOL MatchPatterns( TStr< T > x_s, TList< TStr< T > > x_lstPatterns, oexBOOL x_bIgnoreCase )
 		{	for ( typename TList< TStr< T > >::iterator it; x_lstPatterns.Next( it ); )
 				if ( x_s.MatchPattern( it.Obj(), x_bIgnoreCase ) )
@@ -1307,7 +1328,7 @@ public:
 
 	/// Parses command line variables in a typical format
 	/*
-	 	example :
+		example :
 
 		-a -simple:param -file:'C:/Program Files/myfile.txt' -two:'hi and\\'hi' -empty: hello world
 
@@ -1413,71 +1434,71 @@ public:
 	}
 */
 
-    template< typename T >
-        static TStr< T > EncodeJSON( TPropertyBag< TStr< T > > &x_pb, oexLONG x_depth = 0 )
-    {
+	template< typename T >
+		static TStr< T > EncodeJSON( TPropertyBag< TStr< T > > &x_pb, oexLONG x_depth = 0 )
+	{
 		oexLONG i = 0;
 		TStr< T > sTab, sTab1;
 		for ( oexLONG t = 0; t < x_depth; t++ )
 			sTab << oexTC( T, '\t' );
 		sTab1 << oexTC( T, '\t' ) << sTab;
 
-	    TStr< T > sStr; sStr << oexTT( T, "{" ) << oexTTEXT( T, oexNL8 );
-	    for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
-	    {
+		TStr< T > sStr; sStr << oexTT( T, "{" ) << oexTTEXT( T, oexNL8 );
+		for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+		{
 			// Add comma if needed
-		    if ( !i )
-                i++;
-            else
-            	sStr << oexTT( T, "," ) << oexTTEXT( T, oexNL8 );
+			if ( !i )
+				i++;
+			else
+				sStr << oexTT( T, "," ) << oexTTEXT( T, oexNL8 );
 
 			// Add key
-            sStr << sTab1 << oexTC( T, '\"' ) << it.Node()->key.Escape( oexTT( T, "\"" ), oexTC( T, '\\' ) ) << oexTT( T, "\": " );
+			sStr << sTab1 << oexTC( T, '\"' ) << it.Node()->key.Escape( oexTT( T, "\"" ), oexTC( T, '\\' ) ) << oexTT( T, "\": " );
 
 			// Single value
-            if ( it->IsDefaultValue() )
-	            sStr << oexTC( T, '\"' ) << it->ToString().Escape( oexTT( T, "\"" ), oexTC( T, '\\' ) ) << oexTC( T, '\"' );
+			if ( it->IsDefaultValue() )
+				sStr << oexTC( T, '\"' ) << it->ToString().Escape( oexTT( T, "\"" ), oexTC( T, '\\' ) ) << oexTC( T, '\"' );
 
-            // Recurse for array
-            else if ( it->IsArray() )
-            	sStr << EncodeJSON( *it, x_depth + 1 );
+			// Recurse for array
+			else if ( it->IsArray() )
+				sStr << EncodeJSON( *it, x_depth + 1 );
 
 			// Empty
-            else
-            	sStr << oexTT( T, "\"\"" );
+			else
+				sStr << oexTT( T, "\"\"" );
 
-	    } // end for
+		} // end for
 
 		sStr << oexNL << sTab << oexTC( T, '}' );
 
-	    return sStr;
-    }
+		return sStr;
+	}
 
-    template< typename T >
-        static TPropertyBag< TStr< T > > DecodeJSON( TStr< T > x_sStr, oexLONG x_lArrayType = 0, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
-        {	TPropertyBag< TStr< T > > pb;
+	template< typename T >
+		static TPropertyBag< TStr< T > > DecodeJSON( TStr< T > x_sStr, oexLONG x_lArrayType = 0, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
+		{	TPropertyBag< TStr< T > > pb;
 			_DecodeJSON( x_sStr, pb, x_lArrayType, x_bMerge, x_pLast );
 			return pb;
 		}
 
-    template< typename T >
-        static oexLONG DecodeJSON( TStr< T > x_sStr, TPropertyBag< TStr< T > > &x_pb, oexLONG x_lArrayType = 0, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
-        {	return _DecodeJSON( x_sStr, x_pb, x_lArrayType, x_bMerge, x_pLast ); }
+	template< typename T >
+		static oexLONG DecodeJSON( TStr< T > x_sStr, TPropertyBag< TStr< T > > &x_pb, oexLONG x_lArrayType = 0, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
+		{	return _DecodeJSON( x_sStr, x_pb, x_lArrayType, x_bMerge, x_pLast ); }
 
-    template< typename T >
-        static oexLONG _DecodeJSON( TStr< T > &x_sStr, TPropertyBag< TStr< T > > &x_pb, oexLONG x_lArrayType = 0, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
-    {
-        // Lose previous contents
-        if ( !x_bMerge )
-            x_pb.Destroy();
+	template< typename T >
+		static oexLONG _DecodeJSON( TStr< T > &x_sStr, TPropertyBag< TStr< T > > &x_pb, oexLONG x_lArrayType = 0, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
+	{
+		// Lose previous contents
+		if ( !x_bMerge )
+			x_pb.Destroy();
 
-        // Punt if null string
-        if ( !x_sStr.Length() )
-            return 0;
+		// Punt if null string
+		if ( !x_sStr.Length() )
+			return 0;
 
 		// Find array or
-        if ( !x_lArrayType )
-        {
+		if ( !x_lArrayType )
+		{
 			// Figure out array type
 			switch( *x_sStr.Find( oexTT( T, "{[" ) ) )
 			{	case oexTC( T, '{' ) : x_lArrayType = 1; break;
@@ -1489,9 +1510,9 @@ public:
 
 		} // end if
 
-        oexLONG lItems = 0;
-        oexLONG lMode = 0;
-        TStr< T > sKey;
+		oexLONG lItems = 0;
+		oexLONG lMode = 0;
+		TStr< T > sKey;
 
 		while ( x_sStr.Length() )
 		{
@@ -1573,8 +1594,8 @@ public:
 
 		} // end while
 
-        return lItems;
-    }
+		return lItems;
+	}
 
 protected:
 

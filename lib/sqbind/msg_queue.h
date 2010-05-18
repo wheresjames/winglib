@@ -169,8 +169,17 @@ public:
 	/// Sets the specified property
 	void set( const stdString &sPath, const stdString &sKey, const stdString &sVal );
 
+	/// Sets the specified property array
+	void aset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
+	/// Sets the specified property array
+	void mset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
 	/// Gets the specified property
 	stdString get( const stdString &sPath, const stdString &sKey );
+
+	/// Gets the specified property's keys
+	stdString kget( const stdString &sPath, const stdString &sKey );
 
 	/// Returns non-zero if the specified value exists
 	stdString isset( const stdString &sPath, const stdString &sKey );

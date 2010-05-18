@@ -195,7 +195,7 @@ function ProcessRequest( session, pkt ) : ( _g )
 			if ( !_g.io[ "outputs" ].isset( offset.tostring() ) )
 				return SendError( session, pkt, 3 );
 
-			_g.io[ "outputs" ][ offset.tostring() ] <- value.tostring();
+			_g.io[ "outputs" ][ offset.tostring() ] <- ( value ? 1 : 0 ).tostring();
 
 			local tx_size = 8 + 2;
 			tx.setUsed( tx_size );

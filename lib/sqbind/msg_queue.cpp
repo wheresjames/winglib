@@ -322,12 +322,37 @@ void CSqMsgQueue::set( const stdString &sPath, const stdString &sKey, const stdS
 	Msg( sPath, oexT( "pb_set" ), &params, oexNULL );
 }
 
+void CSqMsgQueue::aset( const stdString &sPath, const stdString &sKey, const stdString &sVal )
+{_STT();
+	CSqMap params;
+	params[ oexT( "key" ) ] = sKey;
+	params[ oexT( "val" ) ] = sVal;
+	Msg( sPath, oexT( "pb_aset" ), &params, oexNULL );
+}
+
+void CSqMsgQueue::mset( const stdString &sPath, const stdString &sKey, const stdString &sVal )
+{_STT();
+	CSqMap params;
+	params[ oexT( "key" ) ] = sKey;
+	params[ oexT( "val" ) ] = sVal;
+	Msg( sPath, oexT( "pb_mset" ), &params, oexNULL );
+}
+
 stdString CSqMsgQueue::get( const stdString &sPath, const stdString &sKey )
 {_STT();
 	stdString sRet;
 	CSqMap params;
 	params[ oexT( "key" ) ] = sKey;
 	Msg( sPath, oexT( "pb_get" ), &params, &sRet );
+	return sRet;
+}
+
+stdString CSqMsgQueue::kget( const stdString &sPath, const stdString &sKey )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	params[ oexT( "key" ) ] = sKey;
+	Msg( sPath, oexT( "pb_kget" ), &params, &sRet );
 	return sRet;
 }
 

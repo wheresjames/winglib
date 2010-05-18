@@ -417,6 +417,51 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 	} // end else if
 
+	// Property bag set	array
+	else if ( sMsg == oexT( "pb_aset" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
+		if ( mapParams[ oexT( "val" ) ].length() )
+			m_pb.at( key.c_str() ) = oex::CParser::Deserialize( mapParams[ oexT( "val" ) ].c_str() );
+		else
+			m_pb.erase_at( key.c_str() );
+
+	} // end if
+
+	// Property bag merge array
+	else if ( sMsg == oexT( "pb_mset" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
+		oex::CParser::Deserialize( mapParams[ oexT( "val" ) ].c_str(), 
+								   m_pb.at( key.c_str() ), oex::oexTRUE );
+
+	} // end if
+
+	// Property bag get
+	else if ( sMsg == oexT( "pb_kget" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
+
+		oex::CPropertyBag &pb = m_pb.at( key.c_str() );
+		if ( pb.Size() )
+		{	oex::CStr s = oex::CParser::Implode( oex::CParser::Keys( pb ), oexT( "," ) );
+			*pReply = sqbind::stdString( s.Ptr(), s.Length() );
+		} // end if
+
+	} // end else if
+
 	// Return serialized property bag
 	else if ( sMsg == oexT( "pb_all" ) )
 	{

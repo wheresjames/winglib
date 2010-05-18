@@ -86,6 +86,15 @@ public:
 	/// Returns non-zero if the specified value exists
 	int isset( const stdString &sPath, const stdString &sKey );
 
+	/// Sets the specified property
+	void aset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
+	/// Sets the specified property
+	void mset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
+	/// Gets the specified property
+	stdString kget( const stdString &sPath, const stdString &sKey );
+
 	/// Returns a copy of the entire property bag
 	CSqMulti pb( const stdString &sPath );
 
