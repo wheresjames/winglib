@@ -61,6 +61,8 @@ class CCameraMover
 				return 0;
 		} // end switch
 
+		m_camera.UpdateCamera();
+
 		return 1;
 	}
 
@@ -222,7 +224,6 @@ class C3dEditCursor
 	{
 		m_btn = 0;
 		m_dir = 0;
-
 	}
 
 	function OnMouseMove( x, y )
@@ -261,7 +262,7 @@ class C3dEditCursor
 				m_cm.MoveCamera( 1, m_sel.GetAbsolutePosition(), x, y );
 			else
 				m_cm.MoveCamera( 1, CSqirrVector3d(), x, y );
-
+			
 			UpdateCursor();
 
 		} // end else if
@@ -274,6 +275,7 @@ class C3dEditCursor
 				m_cm.MoveCamera( 2, CSqirrVector3d(), x, y );
 
 			UpdateCursor();
+
 		} // end else if
 
 	}

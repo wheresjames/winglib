@@ -73,6 +73,11 @@ public:
 
 public:
 
+	void UpdateAbsolutePosition()
+	{   if ( !m_p ) return;
+		m_p->updateAbsolutePosition();
+	}
+
 	void AddAnimator( CSqirrAnimator &ani )
 	{	if ( !m_p || !ani.Ptr() ) return;
 		m_p->addAnimator( ani.Ptr() );
