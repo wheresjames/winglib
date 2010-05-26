@@ -18,6 +18,7 @@ void CSqXml::Destroy()
 
 static int _Decode( sqbind::CSqMulti *out, TiXmlElement *in, int bIndexed, int nDepth = 0 )
 {_STT();
+
 	// Sanity check
 	if ( !out || !in || nDepth > CSqXml::eMaxParseDepth )
 		return 0;
@@ -103,6 +104,7 @@ static int _Decode( sqbind::CSqMulti *out, TiXmlElement *in, int bIndexed, int n
 
 int CSqXml::Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int bIndexed )
 {_STT();
+
 	if ( !sData.length() || !pOut )
 		return 0;
 

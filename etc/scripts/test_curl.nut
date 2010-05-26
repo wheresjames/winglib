@@ -13,7 +13,7 @@ function _init() : ( _g )
 	local url = "http://www.google.com/";
 	local curl = CSqCurl();
 
-	_self.echo( "\n" + url +"\n" );
+	_self.echo( "\n" + url + "\n" );
 
 	local data = CSqString();
 	if ( curl.GetUrl( url, 0, data ) )

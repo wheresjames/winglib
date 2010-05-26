@@ -591,9 +591,9 @@ public:
 
 						// First character is separator
 						else if ( a == s )
-							sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
+							sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).TrimWhiteSpace() );
 
-						else sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
+						else sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).TrimWhiteSpace() );
 
 						// Single token
 						if ( 1 >= e - a )
@@ -601,7 +601,7 @@ public:
 
 						// Both tokens present
 						else
-							x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).DropWhiteSpace() );
+							x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).TrimWhiteSpace() );
 
 						// Count one item
 						lItems++;
@@ -632,15 +632,15 @@ public:
 						; // sKey = oexTT( T, "" );
 
 					else if ( a == s )
-						sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
+						sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).TrimWhiteSpace() );
 
 					// No default value
 					else if ( a >= e )
-						sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), e - s ).DropWhiteSpace() );
+						sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), e - s ).TrimWhiteSpace() );
 
 					else if ( a < e )
-					{   sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
-						x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).DropWhiteSpace() );
+					{   sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).TrimWhiteSpace() );
+						x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).TrimWhiteSpace() );
 						lItems++;
 					} // end if
 
@@ -774,9 +774,9 @@ public:
 
 						// First character is separator
 						else if ( a == s )
-							sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
+							sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).TrimWhiteSpace() );
 
-						else sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
+						else sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).TrimWhiteSpace() );
 
 						// Does it match the filter?
 						if ( ( x_bInclude ? 1 : 0 ) == ( sFilter.MatchPattern( sKey, x_bIgnoreCase ) ? 1 : 0 ) )
@@ -787,7 +787,7 @@ public:
 
 							// Both tokens present
 							else
-								x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).DropWhiteSpace() );
+								x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).TrimWhiteSpace() );
 
 							// Count one item
 							lItems++;
@@ -820,15 +820,15 @@ public:
 						; // sKey = oexTT( T, "" );
 
 					else if ( a == s )
-						sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).DropWhiteSpace() );
+						sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s + 1 ), e - s - 1 ).TrimWhiteSpace() );
 
 					// No default value
 					else if ( a >= e )
-						sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), e - s ).DropWhiteSpace() );
+						sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), e - s ).TrimWhiteSpace() );
 
 					else if ( a < e )
-					{   sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).DropWhiteSpace() );
-						x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).DropWhiteSpace() );
+					{   sKey = UrlDecode( TStr< T >( x_sStr.Ptr( s ), a - s ).TrimWhiteSpace() );
+						x_pb[ sKey ] = UrlDecode( TStr< T >( x_sStr.Ptr( a + 1 ), e - a - 1 ).TrimWhiteSpace() );
 						lItems++;
 					} // end if
 

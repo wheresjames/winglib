@@ -63,6 +63,9 @@ namespace sqbind
 		/// Returns the image data
 		int Capture( sqbind::CSqBinary *pBuf, int nMaxWait );
 
+		/// Call to release memory returned by Capture()
+		int ReleaseFrame();
+
 		/// Returns a string describing the supported formats
 		stdString GetSupportedFormats();
 
@@ -74,6 +77,9 @@ namespace sqbind
 
 		/// Returns the capture image height
 		int getHeight() { return m_cap.GetHeight(); }
+
+		/// Returns the capture fps
+		float getFps() { return m_cap.GetFps(); }
 
 	private:
 

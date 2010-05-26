@@ -40,10 +40,12 @@ using namespace sqbind;
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqCapture, CSqCapture )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, Init )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, Capture )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, ReleaseFrame )	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, GetSupportedFormats )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, GetFormatDescription )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, getWidth )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, getHeight )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, getFps )	
 SQBIND_REGISTER_CLASS_END()
 
 void CSqCapture::Register( sqbind::VM vm )
@@ -150,20 +152,20 @@ int CSqCapture::Capture( sqbind::CSqBinary *pBuf, int nMaxWait )
 
 	// Did we get valid info?
 	if ( m_cap.GetBuffer() && m_cap.GetBufferSize() )
+		pBuf->setBuffer( (sqbind::CSqBinary::t_byte*)m_cap.GetBuffer(), (CSqBinary::t_size)m_cap.GetBufferSize(), 0, 0 );
 
-		// Ensure we have space, really just an optimization to allocate
-		// twice the needed space since MemCpy() does this anyway.
-		if ( (oexSIZE_T)pBuf->Size() >= (oexSIZE_T)m_cap.GetBufferSize()
-			 || pBuf->Allocate( m_cap.GetBufferSize() * 2 ) )
+	return pBuf->getUsed();
+}
 
-			// Copy the buffer
-			pBuf->MemCpy( (CSqBinary::t_byte*)m_cap.GetBuffer(), (CSqBinary::t_size)m_cap.GetBufferSize() );
-
+int CSqCapture::ReleaseFrame()
+{_STT();
 
 	// Release the memory
 	m_cap.ReleaseFrame();
 
-	return pBuf->getUsed();
+	return 1;
+}
+
 
 /*
 	// Convert to multi-byte
@@ -264,4 +266,3 @@ int CSqCapture::Capture( sqbind::CSqBinary *pBuf, int nMaxWait )
 
 	return ret;
 */
-}

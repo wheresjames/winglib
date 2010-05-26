@@ -205,7 +205,7 @@ public:
 	/// Constructor
 	CDsCapture()
 	{_STT();
-#if defined( OEX_DEBUG )
+#if defined( oexDEBUG )
 		m_dwRotId = 0;
 #endif
 
@@ -265,7 +265,7 @@ public:
 
 		// *** Graph
 
-#if defined( OEX_DEBUG )
+#if defined( oexDEBUG )
 		// Remove from GraphEdit
 		RemoveFromRot( m_dwRotId );
 		m_dwRotId = 0;
@@ -680,7 +680,7 @@ public:
 		if ( FAILED( hr ) ) 
 			oexERROR( hr, "Query IID_IMediaFilter" );
 
-#if defined ( OEX_DEBUG )
+#if defined ( oexDEBUG )
 		// Add to GraphEdit
 		hr = AddToRot( m_cpGraphBuilder, &m_dwRotId );
 #endif
@@ -1294,7 +1294,7 @@ private:
 	// *** Graph
 
 	// ROT id for graph edit
-#if defined( OEX_DEBUG )
+#if defined( oexDEBUG )
 	DWORD								m_dwRotId;
 #endif
 
@@ -1352,10 +1352,10 @@ public:
 		m_pFi = pFi;
 		m_bReady = oexTRUE;
 
-		while ( m_bReady && m_cap.IsRunning() )
-			Sleep( 15 );
+//		while ( m_bReady && m_cap.IsRunning() )
+//			Sleep( 15 );
 
-		m_pFi = oexNULL;
+//		m_pFi = oexNULL;
 
 		return 0;
 	}
@@ -1373,6 +1373,9 @@ public:
 		// If width and height are zero, just wanting a query object
 		if ( !x_nWidth && !x_nHeight )
 			return oexTRUE;
+
+		// Set the frame rate
+		m_cap.SetFrameRate( x_fFps );
 
 		HRESULT hr = m_cap.Capture( x_uDevice, x_uSource, x_nWidth, x_nHeight, CV4w2::_OnFrame, this );
 		if ( S_OK != hr )
