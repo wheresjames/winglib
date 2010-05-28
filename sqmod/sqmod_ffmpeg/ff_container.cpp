@@ -25,8 +25,8 @@ void CFfContainer::Destroy()
 {_STT();
 
 // +++ ??? memory leaking?
-//	if ( m_pkt.data )
-//		av_free_packet( &m_pkt );
+	if ( m_pkt.data )
+		av_free_packet( &m_pkt );
 
 	if ( m_pCodecContext )
 		avcodec_close( m_pCodecContext );
@@ -232,6 +232,10 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 
 	if ( !m_nRead )
 		return -1;
+
+	if ( m_pkt.data )
+		av_free_packet( &m_pkt );
+	oexZero( m_pkt );
 
 	int res = av_read_frame( m_pFormatContext, &m_pkt );
 	if ( res )

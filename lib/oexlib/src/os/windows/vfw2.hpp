@@ -1329,7 +1329,6 @@ public:
 		m_nHeight = 0;
 		m_uFormat = 0;
 		m_fFps = 0;
-		m_bReady = FALSE;
 	}
 
 	/// Destructor
@@ -1349,13 +1348,29 @@ public:
 	/// Handles video frame callbacks
 	oexRESULT OnFrame( CCaptureTmpl::SFrameInfo *pFi, LPVOID pUser )
 	{_STT();
+/*
+		// Wait on user to use old buffer
+		m_sigReady.GetResetEvent().Wait();
+
+		// Copy stuff
+		m_sfi.lSize = pFi->lSize;
+		m_sfi.lImageSize = pFi->lImageSize;
+		m_sfi.llFrame = pFi->llFrame;
+		m_sfi.lWidth = pFi->lWidth;
+		m_sfi.lHeight = pFi->lHeight;
+		m_sfi.lScanWidth = pFi->lScanWidth;
+		m_img.MemCpy( (CBin::t_byte*)pFi->pBuf, pFi->lImageSize );
+		m_sfi.pBuf = (oexPVOID)m_img.Ptr();
+		m_pFi = &m_sfi;
+
+		// New frame is ready
+		m_sigReady.Signal();
+*/
+
 		m_pFi = pFi;
-		m_bReady = oexTRUE;
-
-//		while ( m_bReady && m_cap.IsRunning() )
-//			Sleep( 15 );
-
-//		m_pFi = oexNULL;
+		m_sigReady.Signal();
+		m_sigReady.GetResetEvent().Wait();
+		m_pFi = oexNULL;
 
 		return 0;
 	}
@@ -1436,7 +1451,6 @@ public:
 		m_nHeight = 0;
 		m_uFormat = 0;
 		m_fFps = 0;
-		m_bReady = FALSE;
 
 		return oexTRUE;
 	}
@@ -1514,10 +1528,7 @@ public:
 	/// Waits for a new frame of video
 	oexBOOL WaitForFrame( oexUINT x_uTimeout = 0 )
 	{_STT();
-		CTimeout to; to.SetMs( x_uTimeout );
-		while ( !m_bReady && to.IsValid() )
-			Sleep( 15 );
-		return m_bReady;
+		return ( CResource::waitSuccess == m_sigReady.Wait( x_uTimeout ) );
 	}
 
 	//==============================================================
@@ -1525,8 +1536,7 @@ public:
 	//==============================================================
 	virtual oexBOOL ReleaseFrame()
 	{_STT();
-		m_bReady = FALSE;
-
+		m_sigReady.Reset();
 		return oexTRUE;
 	}
 
@@ -1630,8 +1640,14 @@ private:
 	/// Holds image frame info during callback
 	CCaptureTmpl::SFrameInfo		*m_pFi;
 
-	/// +++ Replace with signal
-	volatile BOOL					m_bReady;
+	/// Callback pointer to copy of frame pointer
+	CCaptureTmpl::SFrameInfo		m_sfi;
+
+	/// Callback copy of image buffer
+	CBin							m_img;		
+
+	/// Frame ready signal
+	CSignal							m_sigReady;
 	
 };
 
