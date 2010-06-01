@@ -20,6 +20,9 @@ extern "C"
 #define FFSQ_VIDEO2
 #undef printf
 
+// FFMPEG is not quite thread safe
+extern "C" oexLock _g_ffmpeg_lock;
+
 #include "ff_decoder.h"
 #include "ff_encoder.h"
 #include "ff_audio_decoder.h"

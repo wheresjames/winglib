@@ -9,6 +9,7 @@ extern "C"
 
 CFfAudioDecoder::CFfAudioDecoder()
 {_STT();
+
 	m_pCodec = oexNULL;
 	m_pCodecContext = oexNULL;
 	m_pFormatContext = oexNULL;
@@ -20,6 +21,10 @@ CFfAudioDecoder::CFfAudioDecoder()
 
 void CFfAudioDecoder::Destroy()
 {_STT();
+
+	oexAutoLock ll( _g_ffmpeg_lock );
+	if ( !ll.IsLocked() ) return;
+
 	if ( m_pFrame )
 	{	av_free( m_pFrame );
 		m_pFrame = oexNULL;
@@ -42,6 +47,10 @@ void CFfAudioDecoder::Destroy()
 
 int CFfAudioDecoder::Create( int x_nCodec, int fmt )
 {_STT();
+
+	oexAutoLock ll( _g_ffmpeg_lock );
+	if ( !ll.IsLocked() ) return 0;
+
 	// Lose previous codec
 	Destroy();
 

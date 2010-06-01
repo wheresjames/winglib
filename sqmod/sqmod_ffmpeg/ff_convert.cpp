@@ -50,6 +50,7 @@ int CFfConvert::FillAVFrame( AVFrame *pAv, int fmt, int width, int height, void 
 
 int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, int src_fmt, sqbind::CSqBinary *dst, int dst_fmt, int alg )
 {_STT();
+	
 	if ( !dst )
 		return 0;
 
@@ -66,7 +67,7 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 
 	if ( !src || !src->getUsed() )
 		return 0;
-
+	
 	// How big is the destination image?
 	oexSIZE_T nSize = CalcImageSize( dst_fmt, width, height );
 	if ( !nSize )
@@ -84,9 +85,9 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 
 	// Flip?
 	if ( flip )
-	{	apSrc.data[ 0 ] = apSrc.data[ 0 ] + ( height - 1 ) * apSrc.linesize[ 0 ];
-		apSrc.linesize[ 0 ] = -apSrc.linesize[ 0 ];
-	} // end if
+		for ( int i = 0; i < oexSizeOfArray( apSrc.linesize ); i++ )
+			apSrc.data[ i ] = apSrc.data[ i ] + ( height - 1 ) * apSrc.linesize[ i ],
+			apSrc.linesize[ i ] = -apSrc.linesize[ i ];
 
 	// Create conversion
 	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,

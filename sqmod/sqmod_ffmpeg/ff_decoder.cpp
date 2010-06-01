@@ -37,6 +37,10 @@ CFfDecoder::CFfDecoder()
 
 void CFfDecoder::Destroy()
 {_STT();
+
+	oexAutoLock ll( _g_ffmpeg_lock );
+	if ( !ll.IsLocked() ) return;
+
 	if ( m_pFrame )
 	{	av_free( m_pFrame );
 		m_pFrame = oexNULL;
@@ -59,6 +63,10 @@ void CFfDecoder::Destroy()
 
 int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, int brate, sqbind::CSqMulti *m )
 {_STT();
+
+	oexAutoLock ll( _g_ffmpeg_lock );
+	if ( !ll.IsLocked() ) return 0;
+
 	// Lose previous codec
 	Destroy();
 

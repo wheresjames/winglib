@@ -2,6 +2,8 @@
 
 #include "stdafx.h"
 
+oexLock _g_ffmpeg_lock;
+
 #ifndef assert
 extern "C"  void assert(int expression)
 {
@@ -95,6 +97,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfConvert, CFfConvert )
 	SQBIND_GLOBALCONST( PIX_FMT_YUVJ444P )
 	SQBIND_GLOBALCONST( PIX_FMT_YUVJ440P )
 	SQBIND_GLOBALCONST( PIX_FMT_YUVA420P )
+
+	SQBIND_GLOBALCONST( PIX_FMT_UYVY422 )
+	SQBIND_GLOBALCONST( PIX_FMT_UYYVYY411 )
 
 	// Processing types
 	SQBIND_GLOBALCONST( SWS_FAST_BILINEAR )

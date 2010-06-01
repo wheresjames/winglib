@@ -1370,7 +1370,7 @@ public:
 		m_pFi = pFi;
 		m_sigReady.Signal();
 		m_sigReady.GetResetEvent().Wait();
-		m_pFi = oexNULL;
+//		m_pFi = oexNULL;
 
 		return 0;
 	}

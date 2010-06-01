@@ -4,6 +4,7 @@
 
 CFfEncoder::CFfEncoder()
 {_STT();
+
 	m_nFmt = 0;
 	m_pCodec = oexNULL;
 	m_pCodecContext = oexNULL;
@@ -17,6 +18,10 @@ CFfEncoder::CFfEncoder()
 
 void CFfEncoder::Destroy()
 {_STT();
+
+	oexAutoLock ll( _g_ffmpeg_lock );
+	if ( !ll.IsLocked() ) return;
+
 	if ( m_pStream )
 	{	av_free( m_pStream );
 		m_pStream = oexNULL;
@@ -43,6 +48,10 @@ void CFfEncoder::Destroy()
 // http://lists.mplayerhq.hu/pipermail/libav-user/2009-June/003257.html
 int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, int brate, sqbind::CSqMulti *m )
 {_STT();
+
+	oexAutoLock ll( _g_ffmpeg_lock );
+	if ( !ll.IsLocked() ) return 0;
+
 	// Lose previous codec
 	Destroy();
 

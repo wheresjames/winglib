@@ -15,6 +15,10 @@ CFfCapture::CFfCapture()
 
 void CFfCapture::Destroy()
 {_STT();
+
+	oexAutoLock ll( _g_ffmpeg_lock );
+	if ( !ll.IsLocked() ) return;
+
 	if ( m_pkt.data )
 		av_free_packet( &m_pkt );
 
@@ -35,6 +39,10 @@ void CFfCapture::Destroy()
 
 int CFfCapture::Open( const sqbind::stdString &sFormat, const sqbind::stdString &sDevice, sqbind::CSqMulti *m )
 {_STT();
+
+	oexAutoLock ll( _g_ffmpeg_lock );
+	if ( !ll.IsLocked() ) return 0;
+
 	// Lose old container
 	Destroy();
 

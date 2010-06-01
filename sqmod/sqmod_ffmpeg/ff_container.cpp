@@ -24,7 +24,9 @@ CFfContainer::CFfContainer()
 void CFfContainer::Destroy()
 {_STT();
 
-// +++ ??? memory leaking?
+	oexAutoLock ll( _g_ffmpeg_lock );
+	if ( !ll.IsLocked() ) return;
+
 	if ( m_pkt.data )
 		av_free_packet( &m_pkt );
 
@@ -55,6 +57,9 @@ void CFfContainer::Destroy()
 int CFfContainer::CloseStream()
 {_STT();
 
+	oexAutoLock ll( _g_ffmpeg_lock );
+	if ( !ll.IsLocked() ) return 0;
+
 	if ( m_nRead )
 	{
 		if ( m_pFormatContext )
@@ -73,13 +78,13 @@ int CFfContainer::CloseStream()
 			for ( unsigned int i = 0; i < m_pFormatContext->nb_streams; i++ )
 				if (  m_pFormatContext->streams[ i ] )
 					av_freep( m_pFormatContext->streams[ i ] );
-/*
+
 			// Close file / socket resources
 			if ( m_pFormatContext->oformat
 				 && !( m_pFormatContext->oformat->flags & AVFMT_NOFILE )
 				 && m_pFormatContext->pb )
 				url_fclose( m_pFormatContext->pb );
-*/
+
 			// Free the stream
 			av_free( m_pFormatContext );
 
@@ -102,6 +107,9 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 	// Did we get a valid string?
 	if ( !sUrl.length() )
 		return 0;
+
+	oexAutoLock ll( _g_ffmpeg_lock );
+	if ( !ll.IsLocked() ) return 0;
 
 //	AVFormatParameters	fp;
 //	oexZero( fp );
