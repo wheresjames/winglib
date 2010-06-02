@@ -241,6 +241,32 @@ public:
 		// Return TRUE if we found any drivers
 		return ( m_dwNumDrivers > 0 );
 	}
+
+	//==============================================================
+	// DriverConnect()
+	//==============================================================
+	/// Connects to the specified device driver
+	/**
+		\param [in] hWnd	-	Window handle
+		\param [in] i		-	The index of the driver to connect to.
+
+		iii. capDriverConnect() does all kinds of stupid things when
+			 the specified device is already open.
+
+		\return Returns non-zero if success.
+	*/
+	static BOOL DriverConnect( HWND hWnd, DWORD i )
+	{
+		DWORD err = 0;
+		__try {
+			// Attempt to connect to the specified driver
+			if ( !capDriverConnect( hWnd, i ) )
+				return FALSE;
+		} __except( err = GetExceptionCode() ) { return FALSE; }
+
+		return TRUE;
+	}
+
 	
 	//==============================================================
 	// Connect()
@@ -256,13 +282,26 @@ public:
 		if ( !IsWnd() ) 
 			return FALSE;
 
+		oexAutoLock ll( m_lock );
+		if ( !ll.IsLocked() )
+			return FALSE;
+
 		// Disconnect from old driver
 		Disconnect();
 
-		// Attempt to connect to the specified driver
-		m_bConnected = capDriverConnect( m_hWnd, i );
-		if ( !m_bConnected ) 
+		// This basically checks driver existence
+		TCHAR szName[ oexSTRSIZE ] = { 0 }, szVer[ oexSTRSIZE ] = { 0 };
+		if ( !capGetDriverDescription( i, szName, oexSTRSIZE, szVer, oexSTRSIZE ) )
 			return FALSE;
+
+		// Attempt connection
+		try	{
+			if ( !DriverConnect( m_hWnd, i ) )
+				return FALSE;
+		} catch( ... ) { return FALSE; }
+
+		// We're connected
+		m_bConnected = oexTRUE;
 
 		// Save the driver number
 		m_dwCurrentDriver = i;
@@ -1360,7 +1399,7 @@ private:
 	DWORD				m_dwNumDrivers;
 
 	/// Information about installed capture drivers
-	SDriverInfo		m_vdi[ eMaxDrivers ];
+	SDriverInfo			m_vdi[ eMaxDrivers ];
 
 	/// Video format information
 	LPBITMAPINFO		m_pVideoFormat;
@@ -1389,6 +1428,9 @@ private:
 	/// Frame callback information
 	SFrameCallbackInfo	m_fci;
 
+	/// Lock to protect multiple capture driver threads
+	static oexLock		m_lock;
+
 public:
 
 	//==============================================================
@@ -1400,6 +1442,11 @@ public:
 	*/
 	BOOL Reconnect()
 	{_STT();
+
+		oexAutoLock ll( m_lock );
+		if ( !ll.IsLocked() )
+			return FALSE;
+
 		// Disconnect from capture driver
 		if ( !m_bConnected ) return FALSE;
 
@@ -1569,30 +1616,29 @@ public:
 	{_STT();
 		if ( !IsWnd() ) return;
 
-		try
+		oexAutoLock ll( m_lock );
+		if ( !ll.IsLocked() )
+			return;
+
+		// Disconnect from capture driver
+		if ( m_bConnected ) 
 		{
 			// No more callbacks
 			DisableCallbacks();
 
-			// Disconnect from capture driver
-			if ( m_bConnected ) 
-			{
-				capDriverDisconnect( m_hWnd );
-				m_bConnected = FALSE;
-			} // end if
+			// Disconnect driver
+			capDriverDisconnect( m_hWnd );
 
-			if ( m_hDrawDib != NULL ) 
-			{	DrawDibClose( m_hDrawDib );
-				m_hDrawDib = NULL;
-			} // end if
+			// Not connected
+			m_bConnected = FALSE;
 
-		} // end try
+		} // end if
 
-		catch( ... )
-		{
-			oexERROR( 0, oexT( "Capture driver crashed on shutdown - check for mis-behaving capture driver." ) );
+		if ( m_hDrawDib ) 
+		{	DrawDibClose( m_hDrawDib );
+			m_hDrawDib = NULL;
+		} // end if
 
-		} // end catch
 	}
 
 	//==============================================================
@@ -1601,6 +1647,9 @@ public:
 	/// Disables frame callbacks
 	void DisableCallbacks()
 	{_STT();
+
+		BOOL bDelay = m_bCallbacksEnabled;
+
 		m_bCallbacksEnabled = FALSE;
 
 		capSetCallbackOnError( m_hWnd, NULL );
@@ -1608,7 +1657,8 @@ public:
 		capSetCallbackOnFrame( m_hWnd, NULL );
 		capSetCallbackOnVideoStream( m_hWnd, NULL );
 
-		Sleep( 1000 );
+		if ( bDelay )
+			Sleep( 1000 );
 	}
 
 	//==============================================================
@@ -1638,6 +1688,7 @@ public:
 			return FALSE;
 		} // end if
 
+		// Callbacks are enabled
 		m_bCallbacksEnabled = TRUE;
 
 		// Enable error callbacks
@@ -1913,36 +1964,42 @@ private:
 		HRESULT hr = -1;
 		if ( FAILED( hr = ::CoInitialize( NULL ) ) )
 		{	oexERROR( hr, oexT( "::CoInitialize() failed" ) );
-			return -2;
+			return -1;
 		} // end if
 
 		// Pump messages
 		MessagePump();
 
+		CStr sTitle = oexFmt( oexT( "oex_vfw_%u" ), m_uDevice );
+		if ( FindWindowEx( NULL, NULL, NULL, sTitle.Ptr() ) )
+		{	oexERROR( -1, oexFmt( oexT( "Capture device is already open : %u" ), m_uDevice ) );
+			Close(); return -2;
+		} // end if
+
 		// Create capture window
-		BOOL bRes = Create( "CVfw1", NULL, WS_VISIBLE | WS_OVERLAPPEDWINDOW,
+		BOOL bRes = Create( sTitle.Ptr(), NULL, WS_VISIBLE | WS_OVERLAPPEDWINDOW,
 						    0, 0, m_nWidth, m_nHeight, 0 );
 		if ( !bRes )
 		{	oexERROR( GetLastError(), oexT( "Failed to open capture device" ) );
-			Close(); return -2;
+			Close(); return -3;
 		} // end if
 
 		// Attempt to connect to specified device
 		if ( !Connect( m_uDevice ) )
 		{	oexERROR( GetLastError(), CStr().Fmt( oexT( "Unable to open specified device : %d" ), (int)m_uDevice ) );
-			Close(); return -3;
+			Close(); return -4;
 		} // end if
 
 		// Enable video callbacks
 		if ( !EnableCallbacks() )
 		{	oexERROR( GetLastError(), oexT( "Video callback unsupported" ) );
-			Close(); return -4;
+			Close(); return -5;
 		} // end if
 
 		// Set frame rate
 		if ( !SetPreviewRate( m_fFps ) )
 		{	oexERROR( GetLastError(), CStr().Fmt( oexT( "Unable to set frame rate : %d" ), (int)m_fFps ) );
-			Close(); return -5;
+			Close(); return -6;
 		} // end if
 
 		// Let creator know we succeeded
@@ -1951,16 +2008,17 @@ private:
 		if ( !CaptureSequenceNoFile() )
 //		if ( !GrabFrame() )
 		{	oexERROR( GetLastError(), CStr().Fmt( oexT( "Failed to get image : %d" ), (int)m_fFps ) );
-			Close(); return -6;
+			Close(); return -7;
 		} // end if
 
 		DWORD dwDelay = (DWORD)( m_fFps / 2 );
-		if ( 1 > dwDelay ) dwDelay = 1;
+		if ( 1 > dwDelay ) 
+			dwDelay = 1;
 
 		// If there is a message
 		while (	MessagePump()
 			    && WAIT_OBJECT_0 != ::WaitForSingleObject( m_hStop, dwDelay ) )
-			int x = 0;
+			;
 
 		// Kill the capture stuff
 		Close();
@@ -1984,6 +2042,9 @@ private:
 	HANDLE							m_hSuccess;
 
 };
+
+// Global lock for vfw capture devices
+oexLock		CVfwCap::m_lock;
 
 
 class CV4w1 : public CCaptureTmpl
@@ -2064,6 +2125,9 @@ public:
 			return oexFALSE;
 		} // end if
 
+		// We're running
+		m_sigRunning.Signal();
+
 		return oexTRUE;
 	}
 
@@ -2094,6 +2158,9 @@ public:
 		m_uFormat = 0;
 		m_fFps = 0;
 		m_bReady = FALSE;
+
+		// We're not running
+		m_sigRunning.Reset();
 
 		return oexTRUE;
 	}

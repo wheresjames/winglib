@@ -36,7 +36,6 @@
 
 using namespace sqbind;
 
-
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqCapture, CSqCapture )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, Init )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, Capture )
@@ -46,6 +45,8 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqCapture, CSqCapture )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, getWidth )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, getHeight )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, getFps )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, isOpen )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, isRunning )	
 SQBIND_REGISTER_CLASS_END()
 
 void CSqCapture::Register( sqbind::VM vm )

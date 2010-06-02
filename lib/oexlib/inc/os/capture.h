@@ -192,6 +192,11 @@ public:
 	virtual CStr GetSupportedFormats() = 0;
 	virtual CStr GetFormatDescription( oexUINT x_uFormat ) = 0;
 
+	/// Returns non-zero once the capture device is up and running
+	virtual oexBOOL IsRunning( oexUINT x_uTimeout = 0 )
+	{	return os::CResource::waitSuccess == m_sigRunning.Wait( x_uTimeout );
+	}
+
 	/// Returns the number of available sub systems
 	static oexINT GetAvailableSystems()
 	{	return oexSizeOfArray( g_VideoSystemInfo ); }
@@ -235,6 +240,12 @@ public:
 
 		return oexNULL;
 	}
+
+protected:
+
+	/// Set once the graph is running
+	oexSignal			m_sigRunning;
+
 };
 
 //==================================================================
@@ -369,6 +380,15 @@ public:
 			return oexFALSE;
 
 		return m_pDevice->IsOpen();
+	}
+
+	/// Returns non-zero once the capture device is up and running
+	virtual oexBOOL IsRunning( oexUINT x_uTimeout = 0 )
+	{
+		if ( !oexCHECK_PTR( m_pDevice ) )
+			return oexFALSE;
+
+		return m_pDevice->IsRunning( x_uTimeout );
 	}
 
 	/// Starts video capture
@@ -521,5 +541,6 @@ private:
 
 	/// The type of capture system being used
 	oexUINT				m_uType;
+
 };
 

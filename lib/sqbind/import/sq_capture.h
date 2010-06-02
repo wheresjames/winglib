@@ -81,6 +81,12 @@ namespace sqbind
 		/// Returns the capture fps
 		float getFps() { return m_cap.GetFps(); }
 
+		/// Returns non-zero if a capture device is open
+		int isOpen() { return m_cap.IsOpen(); }
+
+		/// Returns non-zero when the capture device is up and running
+		int isRunning( int nTimeout ) { return m_cap.IsRunning( nTimeout ); }
+
 	private:
 
 		/// Capture device

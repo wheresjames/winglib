@@ -250,6 +250,9 @@ public:
 	/// Releases all resources
 	void Destroy()
 	{_STT();
+
+		BOOL bDelay = ( NULL != m_pVideoRenderer );
+
 		// Stop the graph
 		Stop();
 
@@ -285,7 +288,11 @@ public:
 		if ( m_cpCaptureGraphBuilder2.p ) 
 			m_cpCaptureGraphBuilder2.Release();
 		if ( m_cpGraphBuilder.p ) 
-			m_cpGraphBuilder.Release();
+			m_cpGraphBuilder.Detach();
+//			m_cpGraphBuilder.Release();
+
+		if ( bDelay )
+			Sleep( 1000 );
 	}
 
 	/// Initializes capture device
@@ -313,7 +320,7 @@ public:
 
 		// Create the capture filter
 		if ( FAILED( hr = CreateCaptureFilter( dwDevice, &m_cpCaptureSource ) ) )
-		{	Destroy(); return oexERROR( hr, oexT( "Error creating capture filter" ) ); 
+		{	Destroy(); return oexERROR( hr, oexFmt( oexT( "Error creating capture filter : %u:%u" ), dwDevice, dwSource ) ); 
 		} // end if
 
 		// Get the capture source
@@ -807,8 +814,9 @@ public:
 			if ( FAILED( hr = cpClassEnum->Next( 1, &cpMoniker, &cFetched ) ) )
 				return oexERROR( hr, "IEnumMoniker::Next() failed" );
 
-			if ( cpMoniker == NULL ) 
-				return oexERROR( hr, "cpMoniker is NULL" );
+			if ( !cpMoniker ) 
+				return E_INVALIDARG; // no more devices
+//				return oexERROR( hr, "cpMoniker is NULL" );
 
 			// Bind Moniker to a filter object
 			CComPtr< IBaseFilter > cpSrc;
@@ -817,6 +825,8 @@ public:
 
 			// Save the pointer
 			*ppSrcFilter = cpSrc.Detach();
+			if ( !ppSrcFilter )
+				return E_INVALIDARG;
 
 			return S_OK;
 
@@ -1249,6 +1259,7 @@ public:
 		HRESULT hr = m_cpMediaControl->Stop();
 		if ( FAILED( hr ) )
 			return oexERROR( hr, oexT( "IMediaControl::Stop() failed" ) );
+		Sleep( 1000 );
 		return S_OK;
 	}
 
@@ -1394,15 +1405,16 @@ public:
 
 		HRESULT hr = m_cap.Capture( x_uDevice, x_uSource, x_nWidth, x_nHeight, CV4w2::_OnFrame, this );
 		if ( S_OK != hr )
-		{	oexERROR( hr, "Failed to open capture device" );
 			return oexFALSE;
-		} // end if
 
 		// Save information
 		m_nWidth = x_nWidth;
 		m_nHeight = x_nHeight;
 		m_uFormat = x_uFormat;
 		m_fFps = x_fFps;
+
+		// We're running
+		m_sigRunning.Signal();
 
 		return oexTRUE;
 	}
@@ -1434,6 +1446,9 @@ public:
 		m_uFormat = x_uFormat;
 		m_fFps = x_fFps;
 
+		// We're running
+		m_sigRunning.Signal();
+
 		return oexTRUE;
 	}
 
@@ -1451,6 +1466,8 @@ public:
 		m_nHeight = 0;
 		m_uFormat = 0;
 		m_fFps = 0;
+
+		m_sigRunning.Reset();
 
 		return oexTRUE;
 	}

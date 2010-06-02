@@ -60,35 +60,30 @@ int CFfContainer::CloseStream()
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) return 0;
 
-	if ( m_nRead )
-	{
-		if ( m_pFormatContext )
-			av_close_input_file( m_pFormatContext );
+	if ( !m_pFormatContext )
+		return 0;
 
-	} // end if
+	if ( m_nRead )
+			av_close_input_file( m_pFormatContext );
 
 	else if ( 1 < m_nWrite )
 	{
-		if ( m_pFormatContext )
-		{
-			// Write the rest of the file
-			av_write_trailer( m_pFormatContext );
+		// Write the rest of the file
+		av_write_trailer( m_pFormatContext );
 
-			// Free streams
-			for ( unsigned int i = 0; i < m_pFormatContext->nb_streams; i++ )
-				if (  m_pFormatContext->streams[ i ] )
-					av_freep( m_pFormatContext->streams[ i ] );
+		// Free streams
+		for ( unsigned int i = 0; i < m_pFormatContext->nb_streams; i++ )
+			if (  m_pFormatContext->streams[ i ] )
+				av_freep( m_pFormatContext->streams[ i ] );
 
-			// Close file / socket resources
-			if ( m_pFormatContext->oformat
-				 && !( m_pFormatContext->oformat->flags & AVFMT_NOFILE )
-				 && m_pFormatContext->pb )
-				url_fclose( m_pFormatContext->pb );
+		// Close file / socket resources
+		if ( m_pFormatContext->oformat
+			 && !( m_pFormatContext->oformat->flags & AVFMT_NOFILE )
+			 && m_pFormatContext->pb )
+			url_fclose( m_pFormatContext->pb );
 
-			// Free the stream
-			av_free( m_pFormatContext );
-
-		} // end if
+		// Free the stream
+		av_free( m_pFormatContext );
 
 	} // end else if
 

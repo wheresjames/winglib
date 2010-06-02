@@ -83,7 +83,6 @@ using namespace OEX_NAMESPACE::vid;
 
 #endif
 
-
 CCapture::CCapture()
 {
 	m_uType = oexVIDSUB_AUTO;
@@ -152,7 +151,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 		case oexVIDSUB_AUTO :
 
 #if !defined( OEX_NODSHOW )
-
+			
 			m_pDevice = OexAllocConstruct< CV4w2 >();
 			if ( !oexCHECK_PTR( m_pDevice ) )
 			{	Destroy();
