@@ -4,7 +4,6 @@
 
 #include "GroupsockHelper.hh"
 
-
 // CLiveMediaSubsession::createNew
 CLvRtspServer::CLiveMediaSubsession* CLvRtspServer::CLiveMediaSubsession::createNew( UsageEnvironment& env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer )
 {_STT();

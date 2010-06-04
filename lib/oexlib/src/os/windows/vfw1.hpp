@@ -1154,6 +1154,27 @@ public:
 		return ::ShowWindow( m_hWnd, uCmdShow ); 
 	}
 
+	/// Returns a list of available devices
+	static oexINT GetDevices( oexUINT x_uType, oex::CPropertyBag *pList )
+	{
+		if ( !pList )
+			return 0;
+
+		// Get driver info
+		TCHAR szName[ oexSTRSIZE ] = { 0 };
+		TCHAR szVer[ oexSTRSIZE ] = { 0 };
+		for ( DWORD i = 0; i < 32; i++ )
+			if ( capGetDriverDescription( i, szName, oexSTRSIZE, szVer, oexSTRSIZE ) )
+			{	CPropertyBag &r = (*pList)[ i ];
+				r[ oexT( "name" ) ] = szName;
+				r[ oexT( "ver" ) ] = szVer;
+			} // end if
+
+		return pList->Size();
+	}
+
+
+
 private:
 
 	/// HDC that receives a copy of the video frame
@@ -1382,7 +1403,6 @@ protected:
 
 		return TRUE;
 	}
-
 
 private:
 
@@ -2333,6 +2353,18 @@ public:
 	/// Returns the current frame index
 	virtual oexINT64 GetFrame()
 	{	return m_llFrame; }
+
+	//==============================================================
+	// GetDevices()
+	//==============================================================
+	/// Returns a list of available input devices
+	static oexINT GetDevices( oexUINT x_uType, oex::CPropertyBag *pList )
+	{
+		if ( !pList )
+			return 0;
+
+		return CVfwCap::GetDevices( x_uType, pList );
+	}
 
 private:
 

@@ -38,6 +38,7 @@ using namespace sqbind;
 
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqCapture, CSqCapture )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, Init )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, Destroy )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, Capture )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, ReleaseFrame )	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, GetSupportedFormats )
@@ -47,12 +48,54 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqCapture, CSqCapture )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, getFps )	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, isOpen )	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqCapture, isRunning )	
+
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqCapture, GetNextAvailableSystem )
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqCapture, GetDevices )	
+
 SQBIND_REGISTER_CLASS_END()
 
 void CSqCapture::Register( sqbind::VM vm )
 {_STT();
 	SQBIND_EXPORT( vm, CSqCapture );
 }
+
+int CSqCapture::GetNextAvailableSystem( int i, sqbind::CSqMulti *inf )
+{
+	if ( !inf )
+		return 0;
+
+	inf->clear();
+
+	// Get next info block
+	oexCONST oex::vid::SVideoSystemInfo* pVsi = oex::vid::CCapture::GetNextAvailableSystem( i );
+	if ( !pVsi )
+		return 0;
+
+	(*inf)[ "index" ].setstr( oexMks( pVsi->nIndex ) );
+	(*inf)[ "type" ].setstr( oexMks( pVsi->uType ) );
+	(*inf)[ "supported" ].setstr( oexMks( pVsi->bSupported ) );
+	if ( pVsi->pTag ) (*inf)[ "tag" ].setstr( pVsi->pTag );
+	if ( pVsi->pName ) (*inf)[ "name" ].setstr( pVsi->pName );
+
+	return 1;
+}
+
+int CSqCapture::GetDevices( int type, sqbind::CSqMulti *inf )
+{
+	if ( !inf )
+		return 0;
+
+	inf->clear();
+
+	oex::CPropertyBag pb;
+	int n = oex::vid::CCapture::GetDevices( type, &pb );
+	if ( !n )
+		return 0;
+
+	inf->fromPb( pb );
+	return inf->size();
+}
+
 
 int CSqCapture::Destroy()
 {_STT();

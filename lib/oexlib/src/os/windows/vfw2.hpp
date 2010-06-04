@@ -288,8 +288,7 @@ public:
 		if ( m_cpCaptureGraphBuilder2.p ) 
 			m_cpCaptureGraphBuilder2.Release();
 		if ( m_cpGraphBuilder.p ) 
-			m_cpGraphBuilder.Detach();
-//			m_cpGraphBuilder.Release();
+			m_cpGraphBuilder.Release();
 
 		if ( bDelay )
 			Sleep( 1000 );
@@ -474,31 +473,27 @@ public:
 
 	/// Enumerates specified filters
 	/**
-		\param [out] lstFilter		-	List of available filters
+		\param [out] pList			-	List of available filters
 		\param [in] clsidType		-	Type of filters to list
 
 		\return Windows Error code or S_OK if success.
 	*/
-	HRESULT EnumFilters( TAssoList< CStr, CStr > *pList, const GUID &clsidType )
+	static HRESULT EnumFilters( CPropertyBag *pList, const GUID &clsidType )
 	{_STT();
 		HRESULT hr = -1;
 
-		if ( pList == NULL ) return ERROR_INVALID_PARAMETER;
+		if ( pList == NULL ) 
+			return ERROR_INVALID_PARAMETER;
 
 		// Ensure the list is empty
 		pList->Destroy();
 
-		CComPtr< ICaptureGraphBuilder > cpCgb;
 		CComPtr< ICreateDevEnum > cpCreateDevEnum;
 		CComPtr< IEnumMoniker > cpEm;
 		CComPtr< IMoniker > cpDev;
 
 		try
 		{
-			// Create the graph builder
-			if ( hr = cpCgb.CoCreateInstance( CLSID_CaptureGraphBuilder ) != S_OK )
-				return hr;
-
 			// Create dev enumerator
 			if ( hr = cpCreateDevEnum.CoCreateInstance( CLSID_SystemDeviceEnum ) != S_OK )
 				return hr;
@@ -539,9 +534,14 @@ public:
 								CComVariant var; var.vt = VT_BSTR;
 								hr = cpPBag->Read( L"FriendlyName", &var, NULL );
 
+								CPropertyBag &r = (*pList)[ i ];
+
+								r[ oexT( "id" ) ] = oexStdString( (_bstr_t)pMonikerName ).c_str();
+								r[ oexT( "name" ) ] = oexStdString( (_bstr_t)var.bstrVal ).c_str();
+
 								// Add it to the list
-								(*pList)[ oexStdString( (_bstr_t)pMonikerName ).c_str() ] 
-									= oexStdString( (_bstr_t)var.bstrVal ).c_str(); 
+//								(*pList)[ oexStdString( (_bstr_t)pMonikerName ).c_str() ] 
+//									= oexStdString( (_bstr_t)var.bstrVal ).c_str(); 
 
 								// Free string
 								CoTaskMemFree( pMonikerName );
@@ -551,6 +551,8 @@ public:
 						} // end if
 					
 					} // end if
+
+					i++;
 
 					cpDev.Release();
 
@@ -575,7 +577,7 @@ public:
 	}
 
 	/// Display properties dialog box for specified IUnknown interface
-	HRESULT PropertiesDialog(HWND hParent, IUnknown *pUnk, LPCTSTR pCaption)
+	static HRESULT PropertiesDialog(HWND hParent, IUnknown *pUnk, LPCTSTR pCaption)
 	{_STT();
 		HRESULT hr = -1;
 
@@ -1630,6 +1632,21 @@ public:
 	/// Returns the current frame index
 	virtual oexINT64 GetFrame()
 	{	return m_llFrame; }
+
+	//==============================================================
+	// GetDevices()
+	//==============================================================
+	/// Returns a list of available input devices
+	static oexINT GetDevices( oexUINT x_uType, oex::CPropertyBag *pList )
+	{
+		if ( !pList )
+			return 0;
+
+		if ( CDsCapture::EnumFilters( pList, CLSID_VideoInputDeviceCategory ) )
+			return 0;
+
+		return pList->Size();
+	}
 
 private:
 

@@ -95,6 +95,44 @@ CCapture::~CCapture()
 	Destroy();
 }
 
+oexINT CCapture::GetDevices( oexUINT x_uType, oex::CPropertyBag *pList )
+{
+#ifdef OEX_NOVIDEO
+	return 0;
+#else
+
+	if ( !pList )
+		return 0;
+
+	switch( x_uType )
+	{
+
+			case oexVIDSUB_AUTO :
+#if !defined( OEX_NODSHOW )
+			case oexVIDSUB_DSHOW :
+
+				if ( !CDsCapture::EnumFilters( pList, CLSID_VideoInputDeviceCategory ) )
+					return pList->Size();
+
+				if ( x_uType != oexVIDSUB_AUTO )
+					return 0;
+#endif
+
+#if !defined( OEX_NOVFW )
+			case oexVIDSUB_VFW :
+				return CVfwCap::GetDevices( x_uType, pList );
+				break;
+#endif
+			default :
+				break;
+
+	} // end switch
+
+	return 0;
+
+#endif
+}
+
 oexBOOL CCapture::Destroy()
 {
 #ifdef OEX_NOVIDEO
@@ -117,21 +155,23 @@ oexBOOL CCapture::Destroy()
 				OexAllocDestruct( (CV4w2*)m_pDevice );
 				break;
 #endif
+			default :
+				return oexFALSE;
 
 		} // end switch
-
-	} // end if
-
-	m_uType = oexVIDSUB_AUTO;
-	m_pDevice = oexNULL;
 
 #if defined( OEX_WIN32 )
 
 	// In Windows, you can't immediately reopen the capture device,
 	// so this is just to make sure no one tries
-	os::CSys::Sleep( 1000 );
+	oexSleep( 1000 );
 
 #endif
+
+	} // end if
+
+	m_uType = oexVIDSUB_AUTO;
+	m_pDevice = oexNULL;
 
 	return oexTRUE;
 #endif

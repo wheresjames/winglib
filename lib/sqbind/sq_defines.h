@@ -180,6 +180,7 @@ namespace sqbind
 		{	m_str = x_str; return m_str; }
 		stdString& operator = ( const stdString &x_str ) { return m_str = x_str; }
 		stdString& operator = ( const oex::oexTCHAR *x_str ) { if ( x_str ) m_str = x_str; return m_str; }
+		stdString& operator = ( const oex::CStr &x_str ) { m_str.assign( x_str.Ptr(), x_str.Length() ); return m_str; }
 
 		static void Register( sqbind::VM vm );
 	private:

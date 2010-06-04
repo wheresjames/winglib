@@ -185,6 +185,16 @@ void CSqMulti::setJSON( const CSqParam::t_SqStr &s )
 	SQBIND_PropertyBagToMulti( pb, m_lst );
 }
 
+void CSqMulti::fromPb( oex::CPropertyBag &pb )
+{	m_lst.clear();
+	SQBIND_PropertyBagToMulti( pb, m_lst );
+
+}
+
+void CSqMulti::toPb( oex::CPropertyBag &pb )
+{	SQBIND_MultiToPropertyBag( m_lst, pb );
+}
+
 CSqParam::t_SqStr CSqMulti::serialize()
 {_STT();
 	oex::CPropertyBag pb;
@@ -265,6 +275,11 @@ void CSqMulti::unset( const CSqMulti::t_Obj &k )
 	m_lst.erase( k );
 }
 
+
+void CSqMulti::setstr( const oex::CStr &s )
+{_STT();
+	m_val = s;
+}
 
 void CSqMulti::set( const CSqMulti::t_Obj &v )
 {_STT();

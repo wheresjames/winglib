@@ -163,6 +163,7 @@ void CSqTime::Register( sqbind::VM vm )
 
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqImage, CSqImage )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Create )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Destroy )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Load )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Save )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Encode )

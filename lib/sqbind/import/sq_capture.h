@@ -87,6 +87,12 @@ namespace sqbind
 		/// Returns non-zero when the capture device is up and running
 		int isRunning( int nTimeout ) { return m_cap.IsRunning( nTimeout ); }
 
+		/// Iterates capture drivers
+		static int GetNextAvailableSystem( int i, sqbind::CSqMulti *inf );
+
+		/// Iterates capture devices
+		static int GetDevices( int type, sqbind::CSqMulti *inf );
+
 	private:
 
 		/// Capture device

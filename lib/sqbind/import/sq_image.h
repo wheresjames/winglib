@@ -61,6 +61,13 @@ namespace sqbind
 			return *this;
 		}
 
+		void Destroy()
+		{
+#if defined( OEX_ENABLE_XIMAGE )
+			m_img.Destroy();
+#endif
+		}
+
 		int Create( int width, int height )
 		{
 #if !defined( OEX_ENABLE_XIMAGE )

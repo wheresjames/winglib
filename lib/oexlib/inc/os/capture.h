@@ -86,8 +86,8 @@ static oexCONST SVideoSystemInfo g_VideoSystemInfo[] =
 {
 	{ 0, oexVIDSUB_AUTO, oexVIDSUB_AUTO_TAG, oexVIDSUB_AUTO_STR, 1 },
 
-	{ 1, oexVIDSUB_VFL1, oexVIDSUB_VFL1_TAG, oexVIDSUB_VFL1_STR,
-#if defined( OEX_LINUX )
+	{ 1, oexVIDSUB_DAVINCI, oexVIDSUB_DAVINCI_TAG, oexVIDSUB_DAVINCI_STR,
+#if defined( OEX_LINUX ) && defined( OEX_CPU_ARM )
 	1,
 #else
 	0,
@@ -102,15 +102,15 @@ static oexCONST SVideoSystemInfo g_VideoSystemInfo[] =
 #endif
 	},
 
-	{ 3, oexVIDSUB_DAVINCI, oexVIDSUB_DAVINCI_TAG, oexVIDSUB_DAVINCI_STR,
-#if defined( OEX_LINUX ) && defined( OEX_CPU_ARM )
+	{ 3, oexVIDSUB_VFL1, oexVIDSUB_VFL1_TAG, oexVIDSUB_VFL1_STR,
+#if defined( OEX_LINUX )
 	1,
 #else
 	0,
 #endif
 	},
 
-	{ 4, oexVIDSUB_VFW, oexVIDSUB_VFW_TAG, oexVIDSUB_VFW_STR,
+	{ 4, oexVIDSUB_DSHOW, oexVIDSUB_DSHOW_TAG, oexVIDSUB_DSHOW_STR,
 #if defined( OEX_WINDOWS )
 	1,
 #else
@@ -118,13 +118,14 @@ static oexCONST SVideoSystemInfo g_VideoSystemInfo[] =
 #endif
 	},
 
-	{ 5, oexVIDSUB_DSHOW, oexVIDSUB_DSHOW_TAG, oexVIDSUB_DSHOW_STR,
+	{ 5, oexVIDSUB_VFW, oexVIDSUB_VFW_TAG, oexVIDSUB_VFW_STR,
 #if defined( OEX_WINDOWS )
 	1,
 #else
 	0,
 #endif
 	}
+
 };
 
 //==================================================================
@@ -533,6 +534,8 @@ public:
 		return m_pDevice->GetFormatDescription( x_uFormat );
 	}
 
+	/// Returns a list of devices for the specified driver   type
+	static oexINT GetDevices( oexUINT x_uType, oex::CPropertyBag *pList );
 
 private:
 

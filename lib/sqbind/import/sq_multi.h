@@ -148,6 +148,9 @@ namespace sqbind
         /// Adds an element
         void set( const t_Obj &v );
 
+		/// Adds a string element
+		void setstr( const oex::CStr &s );
+
         /// Removes the specified element
         void unset( const t_Obj &k );
 
@@ -192,6 +195,15 @@ namespace sqbind
 
         /// Internal squirrel function used to add a new item
         SquirrelObject _newslot( HSQUIRRELVM v );
+
+	public:
+		
+		/// Converts from oex property bag
+		void fromPb( oex::CPropertyBag &pb );
+
+		/// Converts to oex property bag
+		void toPb( oex::CPropertyBag &pb );
+
 
 	private:
 
