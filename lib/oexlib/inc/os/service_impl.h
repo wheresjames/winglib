@@ -92,6 +92,26 @@ public:
 	/// Restarts the service
 	static int Restart( oexCSTR pName );
 
+	/// Registers the specified server
+	static oexINT RegisterServer( oexCSTR pID, oexCONST oexGUID &guidCLSID, 
+								  oexCSTR pThreadingModel, oexCSTR pPath, 
+								  oexBOOL bControl, oexCONST oexGUID *pguidTypeLib );
+	static oexINT RegisterServer( oexCSTR pID, oexCSTR pCLSID, 
+								  oexCSTR pThreadingModel, oexCSTR pPath, 
+								  oexBOOL bControl, oexCSTR pTypeLib );
+
+	/// Unregisters the specified server
+	static oexINT UnregisterServer( oexCSTR pID, oexCONST oexGUID &guidCLSID );
+	static oexINT UnregisterServer( oexCSTR pID, oexCSTR pCLSID );
+
+	/// Register the specified interface
+	static oexINT RegisterInterface( oexCSTR pName, oexCONST oexGUID &guidID, oexLONG nNumMethods );
+	static oexINT RegisterInterface( oexCSTR pName, oexCSTR pID, oexLONG nNumMethods );
+
+	/// Unregisters the specified interface
+	static oexINT UnregisterInterface( oexCONST oexGUID &guidID );
+	static oexINT UnregisterInterface( oexCSTR pID );
+
 public:
 
 	/// Call from main() to make this thing go

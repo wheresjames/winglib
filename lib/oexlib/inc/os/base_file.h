@@ -191,7 +191,7 @@ public:
 	static CStr GetModPath( oexCSTR x_pPath = oexNULL );
 
 	/// Returns the fully qualified file name the to the current module
-	static CStr GetModFileName();
+	static CStr GetModFileName( oexCPVOID x_pInstance = oexNULL );
 
 	/// Flushes file data to disk
 	static oexBOOL Flush( t_HFILE x_hFile );

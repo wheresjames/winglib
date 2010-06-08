@@ -5,7 +5,8 @@
 BUILDDIRS := app/hello lib/oexlib \
 			 tools/resbld tools/join \
 			 app/test app/iptest app/srvrund app/srvmod app/modrun \
-			 app/gstest app/irr_test
+			 app/gstest app/irr_test \
+			 app/axtest
 
 #-------------------------------------------------------------------
 # Squirrel engine

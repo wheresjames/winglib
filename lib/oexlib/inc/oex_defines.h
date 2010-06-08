@@ -293,6 +293,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexGetFileExtension( f )			OEX_NAMESPACE::CStr( f ).GetFileExtension()
 #define oexGetModuleFileName				OEX_NAMESPACE::os::CBaseFile::GetModFileName
 #define oexGetModulePath					OEX_NAMESPACE::os::CBaseFile::GetModPath
+#define oexGetInstanceHandle				OEX_NAMESPACE::os::CSys::GetInstanceHandle
 #define oexFileGetContents( f )				OEX_NAMESPACE::CFile().OpenExisting( f ).Read()
 #define oexFilePutContents( f, c )			OEX_NAMESPACE::CFile().CreateAlways( f ).Write( c )
 #define oexFilePutContentsLen( f, c, l )	OEX_NAMESPACE::CFile().CreateAlways( f ).Write( c, l )

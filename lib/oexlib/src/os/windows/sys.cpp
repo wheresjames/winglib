@@ -117,6 +117,23 @@ const oexUINT       CSys::c_uMaximumWaitObjects = MAXIMUM_WAIT_OBJECTS;
 
 oexSTATIC_ASSERT( CSys::eMaximumWaitObjects == MAXIMUM_WAIT_OBJECTS );
 
+oexCPVOID CSys::GetInstanceHandle()
+{
+#if defined( __ImageBase )
+
+	return (oexCPVOID)&__ImageBase;
+
+#else
+
+	MEMORY_BASIC_INFORMATION mbi;
+	static int dummy;
+	VirtualQuery( &dummy, &mbi, sizeof( mbi ) );
+
+	return (oexCPVOID)mbi.AllocationBase;
+
+#endif
+}
+
 oexINT CSys::ShowMessageBox( oexCSTR x_pTitle, oexCSTR x_pStr )
 {//_STT();
 	if ( !oexCHECK_PTR( x_pTitle ) )

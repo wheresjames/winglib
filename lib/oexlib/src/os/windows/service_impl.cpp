@@ -710,3 +710,189 @@ int CServiceImpl::RemoveService( oexCSTR pName )
 	return 0;
 }
 
+static oexINT REG_SetValue( HKEY hRoot, oexCSTR pKey, oexCSTR pName, oexCSTR pValue )
+{
+	HKEY hKey = NULL;
+	LONG lRes = RegCreateKeyEx( hRoot, pKey,
+								0, NULL, 0, 
+								KEY_WRITE | KEY_SET_VALUE, 
+								NULL, &hKey, NULL );
+	if ( ERROR_SUCCESS != lRes )
+		return lRes;
+
+	lRes = RegSetValueEx( hKey, pName, 0, REG_SZ, 
+						  (const BYTE*)pValue, zstr::Length( pValue ) );
+
+	if ( hKey )
+		RegCloseKey( hKey ), hKey = NULL;
+
+	return lRes;
+}
+
+static oexINT REG_DeleteKey( HKEY hRoot, oexCSTR pRoot, oexCSTR pKey )
+{
+	if ( !pKey )
+		return -1;
+
+	HKEY hKey = NULL;
+	LONG lRes = RegCreateKeyEx( hRoot, pRoot ? ( CStr() << pRoot << oexT( "\\" ) << pKey ).Ptr() : pKey,
+								0, NULL, 0, KEY_WRITE | KEY_SET_VALUE | KEY_ENUMERATE_SUB_KEYS, 
+								NULL, &hKey, NULL );
+	if ( ERROR_SUCCESS != lRes )
+		return lRes;
+
+	// Enumerate / delete sub keys
+	DWORD i = 0;
+	TCHAR szName[ 1024 ] = { 0 };
+	DWORD dwName = sizeof( szName ) / sizeof( TCHAR );
+	while ( ERROR_SUCCESS == RegEnumKeyEx( hKey, i, szName, &dwName, 0, 0, 0, 0 ) )
+	{
+		// Attempt to delete this key
+		if ( ERROR_SUCCESS != RegDeleteKey( hKey, szName ) )
+			i++;
+
+		// Reset name variable
+		*szName = 0;
+		dwName = sizeof( szName ) / sizeof( TCHAR );
+
+	} // end while
+
+	RegCloseKey( hKey );
+
+	if ( !pRoot )
+		return RegDeleteKey( hRoot, pKey );
+
+	lRes = RegCreateKeyEx( hRoot, pRoot,
+						   0, NULL, 0, KEY_WRITE | KEY_SET_VALUE, NULL, &hKey, NULL );
+	if ( ERROR_SUCCESS != lRes )
+		return lRes;
+
+	lRes = RegDeleteKey( hKey, pKey );
+
+	RegCloseKey( hKey );
+
+	return lRes;
+}
+
+oexINT CServiceImpl::RegisterServer( oexCSTR pID, oexCONST oexGUID &guidCLSID, 
+									 oexCSTR pThreadingModel, oexCSTR pPath, 
+									 oexBOOL bControl, oexCONST oexGUID *pguidTypeLib )
+{
+	return RegisterServer( pID, ( CStr() << oexT( "{" ) << guidCLSID << oexT( "}" ) ).Ptr(),
+						   pThreadingModel, pPath, bControl, 
+						   pguidTypeLib ? ( CStr() << oexT( "{" ) << *pguidTypeLib << oexT( "}" ) ).Ptr() : NULL );
+}
+
+
+oexINT CServiceImpl::RegisterServer( oexCSTR pID, oexCSTR pCLSID, 
+									 oexCSTR pThreadingModel, oexCSTR pPath, 
+									 oexBOOL bControl, oexCSTR pTypeLib )
+{
+	if ( !pID || !pCLSID || !pPath )
+		return -1;
+
+	if ( ERROR_SUCCESS != REG_SetValue( HKEY_CLASSES_ROOT, 
+									    pID, 
+										NULL, pID ) )
+		return -2;
+
+	if ( ERROR_SUCCESS != REG_SetValue( HKEY_CLASSES_ROOT, 
+										( CStr() << pID << oexT( "\\CLSID" ) ).Ptr(), 
+										NULL, pCLSID ) )
+		return -3;
+
+	CStr sKey; sKey << oexT( "CLSID\\" ) << pCLSID;
+	if ( ERROR_SUCCESS != REG_SetValue( HKEY_CLASSES_ROOT, 
+										sKey.Ptr(), 
+										NULL, pID ) )
+		return -4;
+
+	if ( ERROR_SUCCESS != REG_SetValue( HKEY_CLASSES_ROOT, 
+										( CStr() << sKey << oexT( "\\ProgID" ) ).Ptr(), 
+										NULL, pID ) )
+		return -5;
+
+	if ( ERROR_SUCCESS != REG_SetValue( HKEY_CLASSES_ROOT, 
+										( CStr() << sKey << oexT( "\\InprocServer32" ) ).Ptr(), 
+										NULL, pPath ) )
+		return -5;
+
+	if ( ERROR_SUCCESS != REG_SetValue( HKEY_CLASSES_ROOT, 
+										( CStr() << sKey << oexT( "\\Version" ) ).Ptr(), 
+										NULL, oexVersion().Ptr() ) )
+		return -6;
+
+	if ( pThreadingModel )
+		if ( ERROR_SUCCESS != REG_SetValue( HKEY_CLASSES_ROOT, 
+											( CStr() << sKey << oexT( "\\InprocServer32" ) ).Ptr(), 
+											oexT( "ThreadingModel" ), pThreadingModel ) )
+			return -7;
+
+	if ( bControl )
+		if ( ERROR_SUCCESS != REG_SetValue( HKEY_CLASSES_ROOT, 
+											( CStr() << sKey << oexT( "\\Control" ) ).Ptr(), 
+											NULL, "" ) )
+			return -8;
+
+	if ( pTypeLib )
+		if ( ERROR_SUCCESS != REG_SetValue( HKEY_CLASSES_ROOT, 
+											( CStr() << sKey << oexT( "\\TypeLib" ) ).Ptr(), 
+											NULL, pTypeLib ) )
+			return -8;
+
+	return 0;
+}
+
+oexINT CServiceImpl::UnregisterServer( oexCSTR pID, oexCONST oexGUID &guidCLSID )
+{
+	return UnregisterServer( pID, ( CStr() << oexT( "{" ) << guidCLSID << oexT( "}" ) ).Ptr() );
+}
+
+oexINT CServiceImpl::UnregisterServer( oexCSTR pID, oexCSTR pCLSID )
+{
+	if ( !pID || !pCLSID )
+		return -1;
+
+	oexLONG lRes = REG_DeleteKey( HKEY_CLASSES_ROOT, NULL, pID )
+				   | REG_DeleteKey( HKEY_CLASSES_ROOT, oexT( "CLSID" ), pCLSID );
+
+	return lRes;
+}
+
+oexINT CServiceImpl::RegisterInterface( oexCSTR pName, oexCONST oexGUID &guidID, oexLONG nNumMethods )
+{
+	return RegisterInterface( pName, ( CStr() << oexT( "{" ) << guidID << oexT( "}" ) ).Ptr(), nNumMethods );
+}
+
+oexINT CServiceImpl::RegisterInterface( oexCSTR pName, oexCSTR pID, oexLONG nNumMethods )
+{
+	if ( !pName || !pID )
+		return -1;
+
+	CStr sKey; sKey << oexT( "Interface\\" ) << pID;
+	if ( ERROR_SUCCESS != REG_SetValue( HKEY_CLASSES_ROOT, 
+									    sKey.Ptr(),
+										NULL, pName ) )
+		return -2;
+
+	if ( ERROR_SUCCESS != REG_SetValue( HKEY_CLASSES_ROOT, 
+									    ( CStr() << sKey << oexT( "\\NumMethods" ) ).Ptr(),
+										NULL, oexMks( nNumMethods ).Ptr() ) )
+		return -2;
+
+	return 0;
+}
+
+oexINT CServiceImpl::UnregisterInterface( oexCONST oexGUID &guidID )
+{	
+	return UnregisterInterface( ( CStr() << oexT( "{" ) << guidID << oexT( "}" ) ).Ptr() );
+}
+
+oexINT CServiceImpl::UnregisterInterface( oexCSTR pID )
+{
+	if ( !pID )
+		return -1;
+
+	return REG_DeleteKey( HKEY_CLASSES_ROOT, oexT( "Interface" ), pID );
+}
+

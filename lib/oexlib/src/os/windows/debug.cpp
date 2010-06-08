@@ -45,23 +45,6 @@ using namespace OEX_NAMESPACE::os;
 // http://www.codeguru.com/Cpp/W-P/dll/tips/article.php/c3635/
 // http://www.dotnet247.com/247reference/msgs/13/65259.aspx
 
-oexCPVOID CDebug::GetInstanceHandle()
-{// _STT();
-#if defined( __ImageBase )
-
-	return (oexCPVOID)&__ImageBase;
-
-#else
-
-	MEMORY_BASIC_INFORMATION mbi;
-	static int dummy;
-	VirtualQuery( &dummy, &mbi, sizeof( mbi ) );
-
-	return (oexCPVOID)mbi.AllocationBase;
-
-#endif
-}
-
 void CDebug::Trace( oexCSTR x_pStr )
 {// _STT();
 /*
@@ -107,7 +90,7 @@ void CDebug::Break()
 void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x_pFunction, oexCSTR x_pStr, oexINT x_nRes, oexINT x_nErr )
 {// _STT();
 	oexTCHAR tcModule[ oexSTRSIZE ] = oexT( "" );
-	GetModuleFileName( (HMODULE)GetInstanceHandle(), tcModule, sizeof( tcModule ) );
+	GetModuleFileName( (HMODULE)oexGetInstanceHandle(), tcModule, sizeof( tcModule ) );
 	Break( x_nType, x_pFile, x_uLine, x_pFunction, tcModule, x_pStr );
 }
 
@@ -344,7 +327,7 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 	sSt <<                oexNL << ( pEInfo ? pEInfo : oexT( "(No other information available)" ) ) << oexNL;
 
 	// Create a stack report for the current stack
-	sSt << CreateStackReport( uCurrentThreadId, pSt, oexGetFileName( oexGetModuleFileName() ).Ptr(), GetInstanceHandle() );
+	sSt << CreateStackReport( uCurrentThreadId, pSt, oexGetFileName( oexGetModuleFileName() ).Ptr(), oexGetInstanceHandle() );
 /*
 	oexUINT i = 0;
 	while ( CStackTrace::SModuleInfo *pSi = pSt->NextModule( &i ) )

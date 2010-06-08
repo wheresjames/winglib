@@ -45,6 +45,20 @@ private:
 
 public:
 
+	//==============================================================
+	// GetInstanceHandle()
+	//==============================================================
+	/// Returns the module instance handle
+	/**
+		In Windows, this is the application instance handle.
+		In Linux, this is the process ID
+
+		\return Instance handle
+
+		\see
+	*/
+	static oexCPVOID GetInstanceHandle();
+
     /// Initializes os system stuff
     static oexBOOL Init();
 

@@ -128,21 +128,6 @@ public:
 	static void Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr, oexINT x_nRes = 0, oexINT x_nErr = 0 );
 
 	//==============================================================
-	// GetInstanceHandle()
-	//==============================================================
-	/// Returns the module instance handle
-	/**
-		In Windows, this is the application instance handle.
-		In Linux, this is the process ID
-
-		\return Module instance handle
-
-		\see
-	*/
-	static oexCPVOID GetInstanceHandle();
-
-
-	//==============================================================
 	// EnableCrashReporting()
 	//==============================================================
 	/// Enable crash reporting

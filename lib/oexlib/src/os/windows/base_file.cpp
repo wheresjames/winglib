@@ -322,12 +322,12 @@ CStr CBaseFile::GetModPath( oexCSTR x_pPath )
 	return CBaseFile::GetModFileName().GetPath();
 }
 
-CStr CBaseFile::GetModFileName()
+CStr CBaseFile::GetModFileName( oexCPVOID x_pInstance )
 {_STT();
 	oexTCHAR szFilename[ oexSTRSIZE ] = { 0 };
 
 	// Get the module file name
-	GetModuleFileName( oexNULL, szFilename, oexSTRSIZE );
+	GetModuleFileName( (HMODULE)x_pInstance, szFilename, oexSTRSIZE );
 
 	// Ensure it's NULL terminated
 	szFilename[ oexSTRSIZE - 1 ] = 0;
