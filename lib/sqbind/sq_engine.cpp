@@ -1079,6 +1079,21 @@ oex::oexBOOL CSqEngine::Init()
 	return oex::oexTRUE;
 }
 
+SQInteger str_write(SQUserPointer str,SQUserPointer p,SQInteger size)
+{
+	( (oex::CStr8*)str )->Append( (oex::CStr8::t_char*)p, size );
+	return size;
+}
+
+oex::CStr8 CSqEngine::GetCompiledScript()
+{
+	oex::CStr8 buf;
+	sq_pushobject( m_vm.GetVMHandle(), m_script.GetObjectHandle() );
+	sq_writeclosure( m_vm.GetVMHandle(), str_write, &buf );
+	sq_pop( m_vm.GetVMHandle(), 1 );
+	return buf;
+}
+
 oex::oexBOOL CSqEngine::Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oexBOOL bRelative, oex::oexBOOL bStart )
 {_STT();
 	if ( !oexCHECK_PTR( pScript ) || !*pScript )

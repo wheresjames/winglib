@@ -1041,6 +1041,9 @@ public:
 	t_IncludeScript GetIncludeScriptFunction()
 	{	return m_fIncludeScript; }
 
+	/// Returns the compiled script
+	oex::CStr8 GetCompiledScript();
+
 private:
 
 	/// Non-zero if a script is loaded

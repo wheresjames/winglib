@@ -64,8 +64,8 @@ extern oex::oexLONG _g_oex_lRefCount;
 	virtual _OEXCOM_ULONG _OEXCOM_STDCALL QueryInterface( oexCONST _OEXCOM_IID& iid,void** ppv ) \
 	{	if ( !ppv ) return _OEXCOM_E_INVALIDARG; \
 		*ppv = 0; \
-		if ( !_OEXCOM_CMPGUID( &_OEXCOM_IID_IUnknown, &iid ) ) \
-		{	*ppv = (void*)this; return _OEXCOM_S_OK; } \
+		if ( _OEXCOM_CMPGUID( &_OEXCOM_IID_IUnknown, &iid ) ) \
+		{	AddRef(); *ppv = (void*)this; return _OEXCOM_S_OK; } \
 		return OnQueryInterface( iid, ppv ); \
 	} \
 	virtual _OEXCOM_ULONG _OEXCOM_STDCALL AddRef() \
@@ -88,7 +88,7 @@ extern oex::oexLONG _g_oex_lRefCount;
 	{	if ( !ppv ) return _OEXCOM_E_INVALIDARG;
 #define _OEXCOM_END_INTERFACE_MAP return _OEXCOM_E_NOINTERFACE; }
 #define _OEXCOM_DECLARE_INTERFACE( n, c ) \
-	if ( !_OEXCOM_CMPGUID( &n, &iid ) ) \
+	if ( _OEXCOM_CMPGUID( &n, &iid ) ) \
 	{	AddRef(); \
 		*ppv = (void*)(c*)this; \
 		return _OEXCOM_S_OK; \
@@ -100,7 +100,7 @@ extern oex::oexLONG _g_oex_lRefCount;
 class _OEXCOM_IReference
 {
 public:
-	_OEXCOM_IReference() : _m_ref_count( 1 ) {}
+	_OEXCOM_IReference() : _m_ref_count( 0 ) { }
 	_OEXCOM_LONG _m_ref_count;
 };
 
@@ -111,7 +111,7 @@ public:
 	_OEXCOM_IUnknown_Interface();
 };
 
-class _OEXCOM_IClassFactory
+class _OEXCOM_IClassFactory : public _OEXCOM_IUnknown
 {
 public:
 
@@ -130,8 +130,8 @@ public:
 	virtual _OEXCOM_ULONG _OEXCOM_STDCALL QueryInterface( oexCONST _OEXCOM_IID& iid,void** ppv )
 	{	if ( !ppv ) return _OEXCOM_E_INVALIDARG;
 		*ppv = 0;
-		if ( !_OEXCOM_CMPGUID( &_OEXCOM_IID_IUnknown, &iid ) )
-		{	*ppv = (void*)this; return _OEXCOM_S_OK; }
+		if ( _OEXCOM_CMPGUID( &_OEXCOM_IID_IUnknown, &iid ) )
+		{	AddRef(); *ppv = (void*)(_OEXCOM_IUnknown*)this; return _OEXCOM_S_OK; }
 		return OnQueryInterface( iid, ppv );
 	}
 
@@ -143,7 +143,8 @@ public:
 	virtual _OEXCOM_ULONG _OEXCOM_STDCALL Release()
 	{	oexInterlockedDecrement( &_g_oex_lRefCount );
 		_OEXCOM_ULONG c = oexInterlockedDecrement( &_m_ref._m_ref_count );
-		if ( !c ) _OEXCOM_DeleteInstance( this );
+		if ( !c ) 
+			_OEXCOM_DeleteInstance( this );
 		return c;
 	}
 
@@ -166,7 +167,7 @@ public:
 		if ( !ppv ) 
 			return _OEXCOM_E_INVALIDARG;
 
-		if ( !_OEXCOM_CMPGUID( &_OEXCOM_IID_IClassFactory, &iid ) )
+		if ( _OEXCOM_CMPGUID( &_OEXCOM_IID_IClassFactory, &iid ) )
 		{	AddRef();
 			*ppv = (void*)(_OEXCOM_CClassFactory*)this;
 			return _OEXCOM_S_OK;

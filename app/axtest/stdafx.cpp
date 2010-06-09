@@ -35,7 +35,7 @@ _OEXCOM_STDAPI DllGetClassObject( const _OEXCOM_IID &clsid, const _OEXCOM_IID &i
 
 _OEXCOM_STDAPI DllRegisterServer()
 {
-	oex::oexLONG lRes = oex::os::CServiceImpl::RegisterInterface( oexT( "IAxTest" ), IID_IAxTest, 1 );
+	oex::oexLONG lRes = oex::os::CServiceImpl::RegisterInterface( oexT( "IAxTest" ), IID_IAxTest, 4 );
 	if ( _OEXCOM_S_OK != lRes )
 		return lRes;
 
