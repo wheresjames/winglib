@@ -47,7 +47,7 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 	else
 	{	
 		sqbind::CSqEngine se;
-		if ( se.Load( sIn.Ptr(), oex::oexTRUE, oex::oexFALSE, oex::oexFALSE ) )
+		if ( se.Load( sIn.Ptr(), oexNULL, oex::oexTRUE, oex::oexFALSE, oex::oexFALSE ) )
 			sData = oex::zip::CCompress::Compress( se.GetCompiledScript() );
 
 	} // end else

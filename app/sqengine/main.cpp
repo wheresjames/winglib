@@ -105,7 +105,7 @@ extern "C" oex::oexRESULT SRV_Start( oex::SRawAllocator x_sRawAllocator, oex::oe
 
 			g_psqScriptThread->SetModuleManager( g_psqModuleManager );
 
-			g_psqScriptThread->SetScript( sFile.Ptr(), oex::oexTRUE );
+			g_psqScriptThread->SetScript( oexStrToMb( sFile ), oex::oexTRUE );
 
 			if ( g_psqScriptThread->Start() )
 				oexERROR( 0, oexT( "Failed to start script thread" ) );

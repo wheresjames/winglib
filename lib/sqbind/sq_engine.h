@@ -473,7 +473,7 @@ public:
 		\param [in] bFile       -   If non-zero, pScript contains a file name.
 
 	*/
-	oex::oexBOOL Load( const stdString &sScript, oex::oexBOOL bFile, oex::oexBOOL bRelative = FALSE, oex::oexBOOL bStart = TRUE );
+	oex::oexBOOL Load( const stdString &sScript, oex::CStr8 *pbScript, oex::oexBOOL bFile, oex::oexBOOL bRelative = FALSE, oex::oexBOOL bStart = TRUE );
 
 	/// Runs the script an executes the initialization function
 	/**

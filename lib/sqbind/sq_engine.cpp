@@ -1123,10 +1123,10 @@ oex::oexBOOL CSqEngine::SetCompiledScript( oex::CStr8 buf )
 } // end if
 
 
-oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::oexBOOL bFile, oex::oexBOOL bRelative, oex::oexBOOL bStart )
+oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::CStr8 *pbScript, oex::oexBOOL bFile, oex::oexBOOL bRelative, oex::oexBOOL bStart )
 {_STT();
 
-	if ( !sScript.length() )
+	if ( !sScript.length() && ( !pbScript || !pbScript->Length() ) )
 		return oex::oexFALSE;
 
 	if ( !Init() )
@@ -1143,7 +1143,10 @@ oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::oexBOOL bFile, oex:
 			// +++ Change this to current working directory
 			//     Add oexWorkingDirectory()
 
-			sFile = sScript;
+			if ( sScript.length() )
+				sFile = sScript;
+			else if ( pbScript && pbScript->Length() )
+				sFile = oexMbToStr( *pbScript ).Ptr();
 
 			// Does it point to a valid file?
 			if ( oexExists( sFile.c_str() ) )
@@ -1187,14 +1190,17 @@ oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::oexBOOL bFile, oex:
 			m_sRoot = oexGetModulePath().Ptr();
 
 		// Check for pre-compiled script
-		if ( 2 <= sScript.length() && ( *(oex::oexUSHORT*)sScript.c_str() ) == SQ_BYTECODE_STREAM_TAG )
-		{	oex::CStr8 buf( sScript.c_str(), sScript.length() );
-			SetCompiledScript( buf );
-		} // end if
+		if ( pbScript && 2 <= pbScript->Length() && ( *(oex::oexUSHORT*)pbScript->Ptr() ) == SQ_BYTECODE_STREAM_TAG )
+			SetCompiledScript( *pbScript );
+
+		else if ( bFile )
+			m_script = m_vm.CompileScript( sFile.c_str() );
+
+		else if ( pbScript && pbScript->Length() )
+			m_vm.CompileBuffer( pbScript->Ptr() );
 
 		else
-			m_script = bFile ? m_vm.CompileScript( sFile.c_str() )
-							 : m_vm.CompileBuffer( sScript.c_str() );
+			m_vm.CompileBuffer( sScript.c_str() );
 
 		if ( bStart )
 		{

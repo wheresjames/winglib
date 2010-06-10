@@ -82,7 +82,7 @@ public:
 	void SetModuleManager( sqbind::CModuleManager *pMm );
 
     /// Sets the script information
-	void SetScript( const sqbind::stdString &sScript, oex::oexBOOL bFile );
+	void SetScript( oex::CStr8 &sScript, oex::oexBOOL bFile );
 
     /// Sets the parent script pointer
     void SetParentScript( CSqMsgQueue *pParent );
@@ -185,7 +185,7 @@ private:
     stdString							m_sName;
 
     /// Script to load
-    stdString							m_sScript;
+	oex::CStr8							m_sScript;
 
     /// If non-zero, m_sScript contains a file name
 	oex::oexBOOL						m_bFile;

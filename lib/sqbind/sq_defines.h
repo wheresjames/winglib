@@ -187,6 +187,24 @@ namespace sqbind
 		stdString m_str;
 	};
 
+	template < typename T >
+		static sqbind::stdString oex2std( T &s )
+		{	return sqbind::stdString( s.Ptr(), s.Length() ); }
+
+	template < typename T >
+		static sqbind::stdString oex82std( T &s )
+		{	oex::CStr t = oexMbToStr( s );
+			return sqbind::stdString( t.Ptr(), t.Length() ); 
+		}
+
+	template < typename T >
+		static oex::CStr std2oex( T &s )
+		{	return oex::CStr( s.c_str(), s.length() ); }
+
+	template < typename T >
+		static oex::CStr8 std2oex8( T &s )
+		{	return oexStrToMb( oex::CStr( s.c_str(), s.length() ) ); }
+
 }
 
 #if defined( SQBIND_SQPLUS )

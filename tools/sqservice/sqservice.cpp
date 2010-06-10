@@ -74,7 +74,7 @@ public:
 		oexNOTICE( 0, oexT( "Application startup" ) );
 
 		// Get main script file
-		oex::CStr sScript = oexMbToStr( oexGetResource( oexT( "sq/main.nut" ) ) );
+		oex::CStr8 sScript = oexGetResource( oexT( "sq/main.nut" ) );
 		if ( !sScript.Length() )
 			return oexERROR( -2, oexT( "embedded:main.nut not found" ) );
 
@@ -97,7 +97,7 @@ public:
 		g_psqScriptThread->SetModuleManager( g_psqModuleManager );
 
 		// Path to the script we will run
-		g_psqScriptThread->SetScript( sScript.Ptr(), oex::oexFALSE );
+		g_psqScriptThread->SetScript( sScript, oex::oexFALSE );
 
 		// Function to export embedded squirrel functions
 		g_psqScriptThread->SetExportFunction( SQBIND_Export_Symbols, oexNULL );

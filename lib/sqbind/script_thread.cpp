@@ -66,7 +66,7 @@ void CScriptThread::SetModuleManager( sqbind::CModuleManager *pMm )
 	m_pModuleManager = pMm;
 }
 
-void CScriptThread::SetScript( const sqbind::stdString &sScript, oex::oexBOOL bFile )
+void CScriptThread::SetScript( oex::CStr8 &sScript, oex::oexBOOL bFile )
 {_STT();
 	m_sScript = sScript; m_bFile = bFile;
 }
@@ -84,7 +84,7 @@ void CScriptThread::SetExportFunction( PFN_SQBIND_Export_Symbols fn, sqbind::SSq
 oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 {_STT();
 	// +++ Ensure script
-	if ( !m_sScript.length() )
+	if ( !m_sScript.Length() )
 		return oex::oexFALSE;
 
 	// Save thread id
@@ -104,12 +104,12 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 	_STT_SET_NAME( oex::CStr() << m_cSqEngine.GetScriptName().c_str() << oexT( " : " ) <<  m_sName.c_str() );
 
 	// Start the script
-	if ( !m_cSqEngine.Load( m_sScript, m_bFile, FALSE ) )
+	if ( !m_cSqEngine.Load( stdString(), &m_sScript, m_bFile, FALSE ) )
 	{
 		stdString sErr = oexT( "File : " );
 
 		if ( m_bFile )
-			sErr += m_sScript + oexT( "\r\n\r\n" );
+			sErr += stdString( oexMbToStr( m_sScript ).Ptr() ) + oexT( "\r\n\r\n" );
 		else
 			sErr += oexT( "(buffer)\r\n\r\n" );
 
@@ -706,7 +706,7 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 		{
 			// Does the path specified exist?
 			if ( oexExists( mapParams[ oexT( "script" ) ].c_str() ) )
-				pSt->SetScript( mapParams[ oexT( "script" ) ], 1 );
+				pSt->SetScript( std2oex8( mapParams[ oexT( "script" ) ] ), 1 );
 
 			// Custom include engine?
 			else if ( m_cSqEngine.GetIncludeScriptFunction() )
@@ -715,7 +715,7 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 				if ( m_cSqEngine.GetIncludeScriptFunction()( mapParams[ oexT( "script" ) ], sData, sName ) )
 					*pReply = oexT( "FAILED" );
 				else
-					pSt->SetScript( sData, 0 );
+					pSt->SetScript( std2oex8( sData ), 0 );
 
 				// Set the script name
 				pSt->SetScriptName( sName );
@@ -723,13 +723,13 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 			} // end if
 
 			else
-				pSt->SetScript( m_cSqEngine.path( mapParams[ oexT( "script" ) ] ), 1 );
+				pSt->SetScript( std2oex8( m_cSqEngine.path( mapParams[ oexT( "script" ) ] ) ), 1 );
 
 		} // end if
 
 		else
 			// Load script information
-			pSt->SetScript( mapParams[ oexT( "script" ) ], 0 );
+			pSt->SetScript( std2oex8( mapParams[ oexT( "script" ) ] ), 0 );
 
 		// Create the thread
 		pSt->Start();

@@ -90,7 +90,7 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 	g_psqScriptThread->SetModuleManager( g_psqModuleManager );
 
-	g_psqScriptThread->SetScript( sCmd.Ptr(), oex::oexTRUE );
+	g_psqScriptThread->SetScript( oexStrToMb( sCmd ), oex::oexTRUE );
 
 	g_psqScriptThread->SetExportFunction( SQBIND_Export_Symbols, oexNULL );
 
