@@ -66,9 +66,9 @@ void CScriptThread::SetModuleManager( sqbind::CModuleManager *pMm )
 	m_pModuleManager = pMm;
 }
 
-void CScriptThread::SetScript( oex::oexCSTR pScript, oex::oexBOOL bFile )
+void CScriptThread::SetScript( const sqbind::stdString &sScript, oex::oexBOOL bFile )
 {_STT();
-	m_sScript = pScript; m_bFile = bFile;
+	m_sScript = sScript; m_bFile = bFile;
 }
 
 void CScriptThread::SetParentScript( CSqMsgQueue *pParent )
@@ -104,7 +104,7 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 	_STT_SET_NAME( oex::CStr() << m_cSqEngine.GetScriptName().c_str() << oexT( " : " ) <<  m_sName.c_str() );
 
 	// Start the script
-	if ( !m_cSqEngine.Load( m_sScript.c_str(), m_bFile, FALSE ) )
+	if ( !m_cSqEngine.Load( m_sScript, m_bFile, FALSE ) )
 	{
 		stdString sErr = oexT( "File : " );
 
@@ -706,7 +706,7 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 		{
 			// Does the path specified exist?
 			if ( oexExists( mapParams[ oexT( "script" ) ].c_str() ) )
-				pSt->SetScript( mapParams[ oexT( "script" ) ].c_str(), 1 );
+				pSt->SetScript( mapParams[ oexT( "script" ) ], 1 );
 
 			// Custom include engine?
 			else if ( m_cSqEngine.GetIncludeScriptFunction() )
@@ -715,7 +715,7 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 				if ( m_cSqEngine.GetIncludeScriptFunction()( mapParams[ oexT( "script" ) ], sData, sName ) )
 					*pReply = oexT( "FAILED" );
 				else
-					pSt->SetScript( sData.c_str(), 0 );
+					pSt->SetScript( sData, 0 );
 
 				// Set the script name
 				pSt->SetScriptName( sName );
@@ -723,13 +723,13 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 			} // end if
 
 			else
-				pSt->SetScript( m_cSqEngine.path( mapParams[ oexT( "script" ) ] ).c_str(), 1 );
+				pSt->SetScript( m_cSqEngine.path( mapParams[ oexT( "script" ) ] ), 1 );
 
 		} // end if
 
 		else
 			// Load script information
-			pSt->SetScript( mapParams[ oexT( "script" ) ].c_str(), 0 );
+			pSt->SetScript( mapParams[ oexT( "script" ) ], 0 );
 
 		// Create the thread
 		pSt->Start();

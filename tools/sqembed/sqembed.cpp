@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
 	oexNOTICE( 0, oexT( "Application startup" ) );
 
 	// Get main script file
-	oex::CStr sScript = oexMbToStr( oexGetResource( oexT( "sq/main.nut" ) ) );
+	oex::CStr8 sScript = oexGetResource( oexT( "sq/main.nut" ) );
 	if ( !sScript.Length() )
 		return oexERROR( -2, oexT( "embedded:main.nut not found" ) );
 
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
 
 	g_psqScriptThread->SetModuleManager( g_psqModuleManager );
 
-	g_psqScriptThread->SetScript( sScript.Ptr(), oex::oexFALSE );
+	g_psqScriptThread->SetScript( sqbind::stdString( sScript.Ptr(), sScript.Length() ), oex::oexFALSE );
 
 	g_psqScriptThread->SetExportFunction( SQBIND_Export_Symbols, oexNULL );
 

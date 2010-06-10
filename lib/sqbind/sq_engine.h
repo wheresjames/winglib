@@ -469,11 +469,11 @@ public:
 
 	/// Loads a script and prepares it for execution
 	/**
-		\param [in] pScript     -   The script or a file name.
+		\param [in] sScript     -   The script or a file name.
 		\param [in] bFile       -   If non-zero, pScript contains a file name.
 
 	*/
-	oex::oexBOOL Load( oex::oexCSTR pScript, oex::oexBOOL bFile, oex::oexBOOL bRelative = FALSE, oex::oexBOOL bStart = TRUE );
+	oex::oexBOOL Load( const stdString &sScript, oex::oexBOOL bFile, oex::oexBOOL bRelative = FALSE, oex::oexBOOL bStart = TRUE );
 
 	/// Runs the script an executes the initialization function
 	/**
@@ -1043,6 +1043,9 @@ public:
 
 	/// Returns the compiled script
 	oex::CStr8 GetCompiledScript();
+
+	/// Sets a pre compiled script
+	oex::oexBOOL SetCompiledScript( oex::CStr8 buf );
 
 private:
 

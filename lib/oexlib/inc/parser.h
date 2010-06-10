@@ -1257,7 +1257,7 @@ public:
 
 	// Match against list of file patterns
 	template < typename T >
-		static oexBOOL MatchPatterns( TStr< T > x_s, TList< TStr< T > > x_lstPatterns, oexBOOL x_bIgnoreCase )
+		static oexBOOL MatchPatterns( TStr< T > x_s, TList< TStr< T > > &x_lstPatterns, oexBOOL x_bIgnoreCase )
 		{	for ( typename TList< TStr< T > >::iterator it; x_lstPatterns.Next( it ); )
 				if ( x_s.MatchPattern( it.Obj(), x_bIgnoreCase ) )
 					return oexTRUE;
