@@ -194,7 +194,7 @@ namespace sqbind
 	template < typename T >
 		static sqbind::stdString oex82std( T &s )
 		{	oex::CStr t = oexMbToStr( s );
-			return sqbind::stdString( t.Ptr(), t.Length() ); 
+			return sqbind::stdString( t.Ptr(), t.Length() );
 		}
 
 	template < typename T >
@@ -202,7 +202,7 @@ namespace sqbind
 		{	return oex::CStr( s.c_str(), s.length() ); }
 
 	template < typename T >
-		static oex::CStr8 std2oex8( T &s )
+		static oex::CStr8 std2oex8( const T &s )
 		{	return oexStrToMb( oex::CStr( s.c_str(), s.length() ) ); }
 
 }

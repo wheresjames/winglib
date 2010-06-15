@@ -88,6 +88,37 @@ oexBOOL CCapture::Destroy()
 #endif
 }
 
+oexINT CCapture::GetDevices( oexUINT x_uType, oex::CPropertyBag *pList )
+{
+#ifdef OEX_NOVIDEO
+	return 0;
+#else
+
+	if ( !pList )
+		return 0;
+
+	switch( x_uType )
+	{
+
+			case oexVIDSUB_AUTO :
+			case oexVIDSUB_DSHOW :
+
+				if ( x_uType != oexVIDSUB_AUTO )
+					return 0;
+
+			case oexVIDSUB_VFW :
+				break;
+
+			default :
+				break;
+
+	} // end switch
+
+	return 0;
+
+#endif
+}
+
 oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit )
 {
 #ifdef OEX_NOVIDEO

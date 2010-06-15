@@ -66,7 +66,7 @@ void CScriptThread::SetModuleManager( sqbind::CModuleManager *pMm )
 	m_pModuleManager = pMm;
 }
 
-void CScriptThread::SetScript( oex::CStr8 &sScript, oex::oexBOOL bFile )
+void CScriptThread::SetScript( oexCONST oex::CStr8 &sScript, oex::oexBOOL bFile )
 {_STT();
 	m_sScript = sScript; m_bFile = bFile;
 }
@@ -440,7 +440,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 			return oex::oexFALSE;
 
 		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
-		oex::CParser::Deserialize( mapParams[ oexT( "val" ) ].c_str(), 
+		oex::CParser::Deserialize( mapParams[ oexT( "val" ) ].c_str(),
 								   m_pb.at( key.c_str() ), oex::oexTRUE );
 
 	} // end if
