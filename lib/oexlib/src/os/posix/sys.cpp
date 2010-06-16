@@ -142,6 +142,11 @@ oexINT CSys::ShowMessageBox( oexCSTR x_pTitle, oexCSTR x_pStr )
 	return -2;
 }
 
+oexCPVOID CSys::GetInstanceHandle()
+{
+	return (oexCPVOID)getpid();
+}
+
 oexINT CSys::Quit( oexINT x_nReturnCode )
 {	return -1;
 }
@@ -392,7 +397,7 @@ int CSys::Printf( oexCSTRW x_pFmt, ... )
 int CSys::Echo( oexCSTRW x_pFmt )
 {	if ( !x_pFmt )
 		return 0;
-	CStr8 s = oexStrWToMb( x_pFmt );	
+	CStr8 s = oexStrWToMb( x_pFmt );
 #if defined( oexUNICODE )
 	CUtil::AddOutput( x_pFmt, s.Length(), oexTRUE );
 #else

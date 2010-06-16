@@ -41,11 +41,6 @@ using namespace OEX_NAMESPACE::os;
 // http://www.codeguru.com/Cpp/W-P/dll/tips/article.php/c3635/
 // http://www.dotnet247.com/247reference/msgs/13/65259.aspx
 
-oexCPVOID CDebug::GetInstanceHandle()
-{
-	return (oexCPVOID)getpid();
-}
-
 void CDebug::Trace( oexCSTR x_pStr )
 {
 	puts( oexStrToMbPtr( x_pStr ) );
@@ -273,7 +268,7 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 	sSt <<                oexNL << ( pEInfo ? pEInfo : oexT( "(No other information available)" ) ) << oexNL;
 
 	// Create a stack report for the current stack
-	sSt << CreateStackReport( uCurrentThreadId, pSt, oexGetFileName( oexGetModuleFileName() ).Ptr(), GetInstanceHandle(), oexTRUE );
+	sSt << CreateStackReport( uCurrentThreadId, pSt, oexGetFileName( oexGetModuleFileName() ).Ptr(), oexGetInstanceHandle(), oexTRUE );
 /*
 	oexUINT i = 0;
 	while ( CStackTrace::SModuleInfo *pSi = pSt->NextModule( &i ) )

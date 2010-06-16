@@ -66,7 +66,7 @@ void CScriptThread::SetModuleManager( sqbind::CModuleManager *pMm )
 	m_pModuleManager = pMm;
 }
 
-void CScriptThread::SetScript( oex::CStr8 &sScript, oex::oexBOOL bFile )
+void CScriptThread::SetScript( oexCONST oex::CStr8 &sScript, oex::oexBOOL bFile )
 {_STT();
 	m_sScript = sScript; m_bFile = bFile;
 }
@@ -452,8 +452,6 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 		oex::CParser::Deserialize( std2oex( mapParams[ oexT( "val" ) ] ), 
 								   m_pb.at( std2oex( mapParams[ oexT( "key" ) ] ) ), 
-								   oex::oexTRUE );
-
 	} // end if
 
 	// Property bag get

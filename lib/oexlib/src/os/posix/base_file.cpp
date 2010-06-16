@@ -424,7 +424,7 @@ CStr CBaseFile::GetModPath( oexCSTR x_pPath )
 
 }
 
-CStr CBaseFile::GetModFileName()
+CStr CBaseFile::GetModFileName( oexCPVOID x_pInstance )
 {
 	if ( !g_szModulePath )
 		return CStr();
@@ -435,7 +435,7 @@ CStr CBaseFile::GetModFileName()
 oexBOOL CBaseFile::Rename( oexCSTR x_pOld, oexCSTR x_pNew )
 {
 	if ( !x_pOld || !*x_pOld || !x_pNew || !*x_pNew )
-		return oexFALSE; 
+		return oexFALSE;
 
 	return rename( oexStrToMbPtr( x_pOld ), oexStrToMbPtr( x_pNew ) );
 }
