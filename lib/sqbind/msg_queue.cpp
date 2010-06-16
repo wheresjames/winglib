@@ -66,14 +66,25 @@ CSqMsgQueue::SMsg::SMsg( const CSqMsgQueue::SMsg &x_rMsg )
 	pReply = x_rMsg.pReply;
 }
 
-/// Default constructor
+// assignment
+CSqMsgQueue::SMsg& CSqMsgQueue::SMsg::operator = ( const CSqMsgQueue::SMsg &x_rMsg )
+{_STT();
+	sMsg = x_rMsg.sMsg;
+	sPath = x_rMsg.sPath;
+	sParams = x_rMsg.sParams;
+	evReply = x_rMsg.evReply;
+	pReply = x_rMsg.pReply;
+	return *this;
+}
+
+// Default constructor
 CSqMsgQueue::CSqMsgQueue()
 {_STT();
 	m_uOwnerThreadId = 0;
 	m_bWantQuit = oex::oexFALSE;
 }
 
-/// Destructor
+// Destructor
 CSqMsgQueue::~CSqMsgQueue()
 {_STT();
 	// Acquire lock
@@ -84,7 +95,7 @@ CSqMsgQueue::~CSqMsgQueue()
 	Destroy();
 }
 
-/// Releases resources
+// Releases resources
 void CSqMsgQueue::Destroy()
 {_STT();
 	// Acquire lock
@@ -101,7 +112,7 @@ void CSqMsgQueue::Destroy()
 	m_bWantQuit = oex::oexFALSE;
 }
 
-/// Sends a command to the thread
+// Sends a command to the thread
 /**
 	\param [in]     sMsg        -   Command
 	\param [in]     mapParams   -   Parameters
@@ -176,9 +187,47 @@ oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMap *pmapPara
 	return bRet;
 }
 
-/// Process messages
+// Process messages
 oex::oexBOOL CSqMsgQueue::ProcessMsgs()
 {_STT();
+
+	// forever
+	for( ; ; ) 
+	{
+		SMsg msg;
+		{ // Check for a message
+
+			oexAutoLock ll( &m_cLock );
+			if ( !ll.IsLocked() )
+				return oex::oexFALSE;
+
+			// Any messages waiting?
+			if ( m_lstMsgQueue.begin() == m_lstMsgQueue.end() )
+				return oex::oexTRUE;
+
+			// Get message info
+			msg = *m_lstMsgQueue.begin();
+			m_lstMsgQueue.erase( m_lstMsgQueue.begin() );
+
+			// Is it empty now?
+			if ( m_lstMsgQueue.begin() == m_lstMsgQueue.end() )
+				Reset();
+
+		} // end scope
+
+		// Deserialize params
+		CSqMap mapParams( msg.sParams );
+
+		// Process the message
+		ProcessMsg( msg.sPath, msg.sMsg, mapParams, msg.pReply, &msg.evReply );
+
+		// We must stop processing if someone is waiting for a reply
+		if ( msg.pReply )
+			return oex::oexTRUE;
+
+	} // end for
+
+/*
 	// Acquire lock
 	oexAutoLock ll( &m_cLock );
 	if ( !ll.IsLocked() )
@@ -222,9 +271,10 @@ oex::oexBOOL CSqMsgQueue::ProcessMsgs()
 	Reset();
 
 	return oex::oexTRUE;
+*/
 }
 
-/// Process a single message from the queue
+// Process a single message from the queue
 oex::oexBOOL CSqMsgQueue::ProcessMsg( const stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent )
 {_STT();
 	return oex::oexFALSE;
@@ -400,4 +450,30 @@ stdString CSqMsgQueue::kill_timer( const stdString &sPath, const stdString &sId 
 	params[ oexT( "id" ) ] = sId;
 	Msg( sPath, oexT( "kill_timer" ), &params, &sRet );
 	return sRet;
+}
+
+stdString CSqMsgQueue::jget( const stdString &sPath, const stdString &sKey )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	params[ oexT( "key" ) ] = sKey;
+	Msg( sPath, oexT( "pb_jget" ), &params, &sRet );
+	return sRet;
+}
+
+void CSqMsgQueue::jset( const stdString &sPath, const stdString &sKey, const stdString &sVal )
+{_STT();
+	CSqMap params;
+	params[ oexT( "key" ) ] = sKey;
+	params[ oexT( "val" ) ] = sVal;
+	Msg( sPath, oexT( "pb_jset" ), &params, oexNULL );
+}
+
+int CSqMsgQueue::asize( const stdString &sPath, const stdString &sKey )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	params[ oexT( "key" ) ] = sKey;
+	Msg( sPath, oexT( "pb_asize" ), &params, &sRet );
+	return std2oex( sRet ).ToInt();
 }

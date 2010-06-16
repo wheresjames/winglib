@@ -382,10 +382,10 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
 		if ( mapParams[ oexT( "val" ) ].length() )
-			m_pb.at( key.c_str() ) = mapParams[ oexT( "val" ) ].c_str();
+			m_pb.at( std2oex( key ) ) = std2oex( mapParams[ oexT( "val" ) ] );
 
 		else
-			m_pb.erase_at( key.c_str() );
+			m_pb.erase_at( std2oex( key ) );
 
 	} // end if
 
@@ -398,7 +398,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
 
-		oex::CPropertyBag &pb = m_pb.at( key.c_str() );
+		oex::CPropertyBag &pb = m_pb.at( std2oex( key ) );
 		if ( pb.Size() )
 			*pReply = oex::CParser::Serialize( pb ).Ptr();
 		else
@@ -417,6 +417,17 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 	} // end else if
 
+	// Property bag array size
+	else if ( sMsg == oexT( "pb_asize" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		oex::CPropertyBag &pb = m_pb.at( std2oex( mapParams[ oexT( "key" ) ] ) );
+		*pReply = oex2std( oexMks( pb.Size() ) );
+	}
+
 	// Property bag set	array
 	else if ( sMsg == oexT( "pb_aset" ) )
 	{
@@ -426,9 +437,9 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
 		if ( mapParams[ oexT( "val" ) ].length() )
-			m_pb.at( key.c_str() ) = oex::CParser::Deserialize( mapParams[ oexT( "val" ) ].c_str() );
+			m_pb.at( std2oex( key ) ) = oex::CParser::Deserialize( std2oex( mapParams[ oexT( "val" ) ] ) );
 		else
-			m_pb.erase_at( key.c_str() );
+			m_pb.erase_at( std2oex( key ) );
 
 	} // end if
 
@@ -439,9 +450,9 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 		if ( !ll.IsLocked() )
 			return oex::oexFALSE;
 
-		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
-		oex::CParser::Deserialize( mapParams[ oexT( "val" ) ].c_str(), 
-								   m_pb.at( key.c_str() ), oex::oexTRUE );
+		oex::CParser::Deserialize( std2oex( mapParams[ oexT( "val" ) ] ), 
+								   m_pb.at( std2oex( mapParams[ oexT( "key" ) ] ) ), 
+								   oex::oexTRUE );
 
 	} // end if
 
@@ -452,15 +463,41 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 		if ( !ll.IsLocked() )
 			return oex::oexFALSE;
 
-		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
-
-		oex::CPropertyBag &pb = m_pb.at( key.c_str() );
+		oex::CPropertyBag &pb = m_pb.at( std2oex( mapParams[ oexT( "key" ) ] ) );
 		if ( pb.Size() )
-		{	oex::CStr s = oex::CParser::Implode( oex::CParser::Keys( pb ), oexT( "," ) );
-			*pReply = sqbind::stdString( s.Ptr(), s.Length() );
-		} // end if
+			*pReply = oex2std( oex::CParser::Implode( oex::CParser::Keys( pb ), oexT( "," ) ) );
 
 	} // end else if
+
+	// Property bag JSON get
+	else if ( sMsg == oexT( "pb_jget" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		oex::CPropertyBag &pb = m_pb.at( std2oex( mapParams[ oexT( "key" ) ] ) );
+		if ( pb.Size() )
+			*pReply = oex::CParser::EncodeJSON( pb ).Ptr();
+		else
+			*pReply = pb.ToString().Ptr();
+
+	} // end else if
+
+	// Property bag set	JSON
+	else if ( sMsg == oexT( "pb_jset" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
+		if ( mapParams[ oexT( "val" ) ].length() )
+			m_pb.at( std2oex( key ) ) = oex::CParser::DecodeJSON( std2oex( mapParams[ oexT( "val" ) ] ) );
+		else
+			m_pb.erase_at( std2oex( key ) );
+
+	} // end if
 
 	// Return serialized property bag
 	else if ( sMsg == oexT( "pb_all" ) )
@@ -469,8 +506,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 		if ( !ll.IsLocked() )
 			return oex::oexFALSE;
 
-		oex::CStr s = oex::CParser::Serialize( m_pb );
-		pReply->assign( s.Ptr(), s.Length() );
+		*pReply = oex2std( oex::CParser::Serialize( m_pb ) );
 
 	} // end else if
 

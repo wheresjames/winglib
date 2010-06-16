@@ -540,7 +540,7 @@ function pgHome() : ( _g )
 
 			}
 			function poll()
-			{	$.ajax( { url: '/data', dataType: 'json', success: data_success, error: data_error, data: g_req })
+			{	$.ajax( { url: '/data', dataType: 'json', success: data_success, error: data_error, data: g_req, cache: false })
 				g_req = '';
 			}
 

@@ -2342,6 +2342,104 @@ public:
 		return s;
 	}
 
+	/// Escapes the specified characters
+	TStr EscapeWs( oexCONST T cEscape )
+	{
+		TStr s;
+		oexSIZE_T ls = Length();
+		oexCONST T* pSrc = Ptr();
+
+		// Can't be larger than twice the length
+		T* pDst = s.OexAllocate( ls * 2 );
+
+		// While we have a string
+		while ( ls )
+		{
+			switch( *pSrc )
+			{
+				case oexTC( T, '\r' ) :
+					*pDst = cEscape, pDst++;
+					*pDst = oexTC( T, 'r' ), pDst++;
+					break;
+
+				case oexTC( T, '\n' ) :
+					*pDst = cEscape, pDst++;
+					*pDst = oexTC( T, 'n' ), pDst++;
+					break;
+
+				case oexTC( T, '\t' ) :
+					*pDst = cEscape, pDst++;
+					*pDst = oexTC( T, 't' ), pDst++;
+					break;
+
+				default :
+					*pDst = *pSrc, pDst++;
+					break;
+
+			} // end switch
+
+			pSrc++, ls--;
+
+		} // end while
+
+		// Set length of escaped string
+		s.SetLength( pDst - s.Ptr() );
+
+		return s;
+	}
+
+	/// Unescapes the specified characters
+	TStr UnescapeWs( oexCONST T cEscape )
+	{
+		TStr s;
+		oexSIZE_T ls = Length();
+		oexCONST T* pSrc = Ptr();
+
+		// Can't be larger than the length
+		T* pDst = s.OexAllocate( ls );
+
+		// While we have a string
+		while ( ls )
+		{
+			if ( cEscape != *pSrc )
+				*pDst = *pSrc, pDst++;
+
+			else
+			{
+				pSrc++, ls--;
+
+				switch( *pSrc )
+				{
+					case oexTC( T, 'r' ) :
+						*pDst = oexTC( T, '\r' ), pDst++;
+						break;
+
+					case oexTC( T, 'n' ) :
+						*pDst = oexTC( T, '\n' ), pDst++;
+						break;
+
+					case oexTC( T, 't' ) :
+						*pDst = oexTC( T, '\t' ), pDst++;
+						break;
+
+					default :
+						*pDst = *pSrc, pDst++;
+						break;
+
+				} // end switch
+
+			} // end else
+
+			pSrc++, ls--;
+
+		} // end while
+
+		// Set length of escaped string
+		s.SetLength( pDst - s.Ptr() );
+
+		return s;
+	}
+
 	/// Returns the offset of the first character in pChars found in the string
 	/// Returns -1 if no characters found
 	oexINT FindChars( oexCONST T* pChars )

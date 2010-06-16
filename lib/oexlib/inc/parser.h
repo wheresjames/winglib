@@ -1453,11 +1453,11 @@ public:
 				sStr << oexTT( T, "," ) << oexTTEXT( T, oexNL8 );
 
 			// Add key
-			sStr << sTab1 << oexTC( T, '\"' ) << it.Node()->key.Escape( oexTT( T, "\"" ), oexTC( T, '\\' ) ) << oexTT( T, "\": " );
+			sStr << sTab1 << oexTC( T, '\"' ) << it.Node()->key.Escape( oexTT( T, "\"" ), oexTC( T, '\\' ) ).EscapeWs( oexTC( T, '\\' ) ) << oexTT( T, "\": " );
 
 			// Single value
 			if ( it->IsDefaultValue() )
-				sStr << oexTC( T, '\"' ) << it->ToString().Escape( oexTT( T, "\"" ), oexTC( T, '\\' ) ) << oexTC( T, '\"' );
+				sStr << oexTC( T, '\"' ) << it->ToString().Escape( oexTT( T, "\"" ), oexTC( T, '\\' ) ).EscapeWs( oexTC( T, '\\' ) ) << oexTC( T, '\"' );
 
 			// Recurse for array
 			else if ( it->IsArray() )
@@ -1567,11 +1567,11 @@ public:
 			{
 				if ( !lMode )
 					lMode = 1,
-					sKey = x_sStr.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) );
+					sKey = x_sStr.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) ).UnescapeWs( oexTC( T, '\\' ) );
 
 				else if ( lMode )
 					lMode = ( 1 == lMode ) ? 0 : lMode,
-					x_pb[ sKey ] = x_sStr.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) );
+					x_pb[ sKey ] = x_sStr.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) ).UnescapeWs( oexTC( T, '\\' ) );
 
 				lItems++;
 

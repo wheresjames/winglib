@@ -93,6 +93,7 @@ public:
 
 		// Copy constructor
 		SMsg( const SMsg &x_rMsg );
+		SMsg& operator = ( const SMsg &x_rMsg );
 
 		/// Command
 		stdString									sMsg;
@@ -180,6 +181,15 @@ public:
 
 	/// Gets the specified property's keys
 	stdString kget( const stdString &sPath, const stdString &sKey );
+
+	/// Gets the specified property array size
+	int asize( const stdString &sPath, const stdString &sKey );
+
+	/// Sets the specified property
+	void jset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
+	/// Gets the specified property
+	stdString jget( const stdString &sPath, const stdString &sKey );
 
 	/// Returns non-zero if the specified value exists
 	stdString isset( const stdString &sPath, const stdString &sKey );

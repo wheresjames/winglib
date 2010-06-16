@@ -83,6 +83,15 @@ public:
 	/// Gets the specified property
 	stdString get( const stdString &sPath, const stdString &sKey );
 
+	/// Sets the specified property
+	void jset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
+	/// Gets the specified property
+	stdString jget( const stdString &sPath, const stdString &sKey );
+
+	/// Returns the sizeof the current array
+	int asize( const stdString &sPath, const stdString &sKey );
+
 	/// Returns non-zero if the specified value exists
 	int isset( const stdString &sPath, const stdString &sKey );
 
