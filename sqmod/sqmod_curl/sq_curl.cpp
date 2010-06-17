@@ -59,6 +59,12 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqStrin
 	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYPEER, 0 );
 	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYHOST, 0 );
 
+	if ( m_sUsername.length() || m_sPassword.length() )
+	{	curl_easy_setopt( m_curl, CURLOPT_USERPWD, 
+						  ( sqbind::stdString() + m_sUsername + oexT( ":" ) + m_sPassword ).c_str() );
+		curl_easy_setopt( m_curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC );
+	} // end if
+
 	char sErr[ CURL_ERROR_SIZE ] = { 0 };
 	curl_easy_setopt( m_curl, CURLOPT_ERRORBUFFER, &sErr[ 0 ] );
 
@@ -105,6 +111,12 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::s
 	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYPEER, 0 );
 	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYHOST, 0 );
 
+	if ( m_sUsername.length() || m_sPassword.length() )
+	{	curl_easy_setopt( m_curl, CURLOPT_USERPWD, 
+						  ( sqbind::stdString() + m_sUsername + oexT( ":" ) + m_sPassword ).c_str() );
+		curl_easy_setopt( m_curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC );
+	} // end if
+
 	char sErr[ CURL_ERROR_SIZE ] = { 0 };
 	curl_easy_setopt( m_curl, CURLOPT_ERRORBUFFER, &sErr[ 0 ] );
 
@@ -127,4 +139,12 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::s
 
 	return 1;
 }
+
+int CSqCurl::SetBasicAuth( const sqbind::stdString &sUsername, const sqbind::stdString &sPassword )
+{
+	m_sUsername = sUsername;
+	m_sPassword = sPassword;
+	return ( m_sUsername.length() || m_sPassword.length() );
+}
+
 

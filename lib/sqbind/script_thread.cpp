@@ -451,7 +451,9 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 			return oex::oexFALSE;
 
 		oex::CParser::Deserialize( std2oex( mapParams[ oexT( "val" ) ] ), 
-								   m_pb.at( std2oex( mapParams[ oexT( "key" ) ] ) ), 
+								   m_pb.at( std2oex( mapParams[ oexT( "key" ) ] ) ),
+								   oex::oexTRUE );
+
 	} // end if
 
 	// Property bag get

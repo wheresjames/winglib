@@ -281,7 +281,7 @@ oexRESULT CResource::NewThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData )
 	// Create a thread
 	pRi->hHandle = CreateThread(	(LPSECURITY_ATTRIBUTES)NULL,
 									0,
-						            CThreadProcImpl::ThreadProc,
+									CThreadProcImpl::ThreadProc,
 									(LPVOID)pRi,
 									0,
 									(LPDWORD)&pRi->uThreadId );
