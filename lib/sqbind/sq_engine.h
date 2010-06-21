@@ -80,6 +80,9 @@ public:
 	/// Sets the specified property
 	void set( const stdString &sPath, const stdString &sKey, const stdString &sVal );
 
+	/// Sets a key timeout
+	void tset( const stdString &sPath, const stdString &sKey, unsigned int uTo );
+
 	/// Gets the specified property
 	stdString get( const stdString &sPath, const stdString &sKey );
 

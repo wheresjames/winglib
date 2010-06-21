@@ -67,6 +67,9 @@ public:
 	/// Map type for timer callbacks
 	typedef oexStdMap( oex::oexUINT, STimerInfo )		t_TimerList;
 
+    /// Map type for keys to timeout values
+	typedef oexStdMap( stdString, oex::oexUINT )		t_TimeoutList;
+
 public:
 
     /// Default constructor
@@ -107,8 +110,8 @@ protected:
     /// Releases all child scripts
     void DestroyChildScripts();
 
-	/// Frees stopped child scripts
-    void CleanupChildScripts();
+	/// Cleanup tasks
+    void Cleanup();
 
 	/// Returns non-zero when messages will no longer be processed
 	virtual oex::oexBOOL Running() { return CThread::IsRunning(); }
@@ -211,5 +214,12 @@ private:
 	/// Elapsed time
 	oex::oexUINT						m_uToElapsed;
 
+	/// timeout value
 	oex::oexDOUBLE						m_dToValue;
+
+	/// Property bag timeout lock
+	oexLock								m_lockTo;
+
+	/// Key timeout list
+	t_TimeoutList						m_lstKeyTimeouts;
 };

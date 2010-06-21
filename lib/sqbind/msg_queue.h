@@ -170,6 +170,9 @@ public:
 	/// Sets the specified property
 	void set( const stdString &sPath, const stdString &sKey, const stdString &sVal );
 
+	/// Sets a keys timeout value
+	void tset( const stdString &sPath, const stdString &sKey, unsigned int uTo );
+
 	/// Sets the specified property array
 	void aset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
 

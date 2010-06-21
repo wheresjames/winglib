@@ -364,6 +364,15 @@ oex::oexBOOL CSqMsgQueue::get_children( stdString *pReply, const stdString &sPat
 	return Msg( sPath, oexT( "get_children" ), &params, pReply );
 }
 
+void CSqMsgQueue::tset( const stdString &sPath, const stdString &sKey, unsigned int uTo )
+{_STT();
+	CSqMap params;
+	params[ oexT( "key" ) ] = sKey;
+	params[ oexT( "to" ) ] = oex2std( oexMks( uTo ) );
+	Msg( sPath, oexT( "pb_tset" ), &params, oexNULL );
+}
+
+
 void CSqMsgQueue::set( const stdString &sPath, const stdString &sKey, const stdString &sVal )
 {_STT();
 	CSqMap params;

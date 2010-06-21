@@ -129,6 +129,8 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 
 oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 {_STT();
+
+	oex::oexINT nDiv = 0;
 	oex::os::CTimeout toIdle;
 
 	// Until we're told to stop
@@ -162,12 +164,18 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 			if ( !m_cSqEngine.Execute( &nRet, SQEXE_FN_IDLE ) )
 				return oex::oexFALSE;
 
-			// Cleanup child scripts
-			CleanupChildScripts();
-
 			// Did idle function indicate exit?
 			if ( nRet )
 				return oex::oexFALSE;
+
+			// Once per second
+			if ( 10 <= ++nDiv )
+			{	nDiv = 0;
+				
+				// Cleanup tasks
+				Cleanup();
+
+			} // end if
 
 		} // end if
 
@@ -386,6 +394,19 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 		else
 			m_pb.erase_at( std2oex( key ) );
+
+	} // end if
+
+	// Property bag timeout
+	else if ( sMsg == oexT( "pb_tset" ) )
+	{
+		oexAutoLock ll( m_lockTo );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+		
+		// Set the key timeout value
+		m_lstKeyTimeouts[ mapParams[ oexT( "key" ) ] ] 
+			= oexGmtTime().GetUnixTime() + std2oex( mapParams[ oexT( "to" ) ] ).ToUInt();
 
 	} // end if
 
@@ -647,10 +668,10 @@ oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMs
 	return oex::oexFALSE;
 }
 
-void CScriptThread::CleanupChildScripts()
+void CScriptThread::Cleanup()
 {_STT();
 
-	// Kill our script
+	// For all child scripts
 	t_ScriptList::iterator it = m_lstScript.begin();
 	while ( m_lstScript.end() != it )
 	{
@@ -674,6 +695,36 @@ void CScriptThread::CleanupChildScripts()
 //			it = m_lstScript.erase( it );
 
 	} // end while
+
+	// Any time limited keys?
+	if ( m_lstKeyTimeouts.size() )
+	{
+		// Check key timeouts
+		oexAutoLock ll( m_lockTo );
+		if ( ll.IsLocked() )
+		{	oex::oexUINT gmt = oexGmtTime().GetUnixTime();
+			t_TimeoutList::iterator it = m_lstKeyTimeouts.begin();
+			while ( m_lstKeyTimeouts.end() != it )
+			{
+				// Has this key timed out?
+				if ( it->second < gmt )
+				{	
+					oexAutoLock ll( m_lockPb );
+					if ( ll.IsLocked() )
+					{	m_pb.erase_at( std2oex( it->first ) );
+						m_lstKeyTimeouts.erase( it++ );
+					} // end if
+
+				} // end if
+
+				else
+					it++;
+
+			} // end while
+
+		} // end if
+
+	} // end if
 
 }
 

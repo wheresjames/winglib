@@ -482,6 +482,13 @@ void CSqEngineExport::set( const stdString &sPath, const stdString &sKey, const 
 		q->set( sPath, sKey, sVal );
 }
 
+void CSqEngineExport::tset( const stdString &sPath, const stdString &sKey, unsigned int uTo )
+{_STT();
+	CSqMsgQueue *q = queue();
+	if ( q )
+		q->tset( sPath, sKey, uTo );
+}
+
 stdString CSqEngineExport::get( const stdString &sPath, const stdString &sKey )
 {_STT();
 	CSqMsgQueue *q = queue();
@@ -937,6 +944,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, spawn )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tset )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, jget )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, jset )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kget )
