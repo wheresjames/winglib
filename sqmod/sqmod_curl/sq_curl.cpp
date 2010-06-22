@@ -110,6 +110,7 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::s
 	curl_easy_setopt( m_curl, CURLOPT_FOLLOWLOCATION, 1 );
 	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYPEER, 0 );
 	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYHOST, 0 );
+//	curl_easy_setopt( m_curl, CURLOPT_BINARYTRANSFER, 1 );
 
 	if ( m_sUsername.length() || m_sPassword.length() )
 	{	curl_easy_setopt( m_curl, CURLOPT_USERPWD, 

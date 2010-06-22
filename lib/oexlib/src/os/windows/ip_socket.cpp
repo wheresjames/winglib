@@ -263,9 +263,14 @@ void CIpSocket::Destroy()
 //		fcntl( oexPtrToInt( m_hSocket ), F_SETFL, flags & ~O_NONBLOCK );
 
 		struct linger lopt;
-		lopt.l_onoff = 1;
-		lopt.l_linger = 60;
 
+//		lopt.l_onoff = 0; lopt.l_linger = 0;
+//		if ( SOCKET_ERROR == setsockopt( hSocket, SOL_SOCKET, SO_DONTLINGER, (const char*)&lopt, sizeof( lopt ) ) )
+
+//		lopt.l_onoff = 1; lopt.l_linger = 60;
+//		if ( SOCKET_ERROR == setsockopt( hSocket, SOL_SOCKET, SO_LINGER, (const char*)&lopt, sizeof( lopt ) ) )
+
+		lopt.l_onoff = 0; lopt.l_linger = 0;
 		if ( SOCKET_ERROR == setsockopt( hSocket, SOL_SOCKET, SO_LINGER, (const char*)&lopt, sizeof( lopt ) ) )
 		{	m_uLastError = WSAGetLastError();
 //			oexERROR( m_uLastError, oexT( "setsockopt() failed" ) );
@@ -398,7 +403,7 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 		x_uMaxConnections = SOMAXCONN;
 
 	// Start the socket listening
-	int nRet = listen( (SOCKET)m_hSocket, (int)x_uMaxConnections );
+	int nRet = listen( (SOCKET)m_hSocket, (int)( x_uMaxConnections ? x_uMaxConnections : SOMAXCONN ) );
 
 	// Save the last error code
 	m_uLastError = WSAGetLastError();

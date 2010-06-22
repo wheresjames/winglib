@@ -307,7 +307,7 @@ protected:
 		} // end if
 
 		// Listen
-		if ( !m_server.Listen( 1 ) )
+		if ( !m_server.Listen( 0 ) )
 		{	if ( m_fnOnServerEvent )
 				m_fnOnServerEvent( m_pData, eSeConnect, -2, this );
 			return oexFALSE;
