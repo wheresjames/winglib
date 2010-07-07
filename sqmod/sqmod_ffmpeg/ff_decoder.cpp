@@ -32,7 +32,6 @@ CFfDecoder::CFfDecoder()
 	m_pFrame = oexNULL;
 	m_nFmt = 0;
 	oexZero( m_pkt );
-
 }
 
 void CFfDecoder::Destroy()
@@ -100,36 +99,16 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
     m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
 	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
 
-//	m_pCodecContext->flags = CODEC_FLAG_LOW_DELAY;
-
-
-    if ( CODEC_ID_H264 == x_nCodec )
-    {
-		oexEcho( "!!! H264 Codec Settings" );
-/*
-		m_pCodecContext->extradata_size = 19;
-		m_pCodecContext->extradata = (uint8_t*)av_mallocz( m_pCodecContext->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE );
-
-        m_pCodecContext->profile = 66;
-
-        m_pCodecContext->scenechange_factor = 0;
-
-		m_pCodecContext->thread_count = 1;
-		m_pCodecContext->ticks_per_frame = 2;
-		m_pCodecContext->use_lpc = -1;
-*/
-//        m_pCodecContext->strict_std_compliance = -2;
-        m_pCodecContext->workaround_bugs = FF_BUG_AUTODETECT;
-        m_pCodecContext->error_recognition = FF_ER_AGGRESSIVE;
-        m_pCodecContext->idct_algo = FF_IDCT_H264;
-        m_pCodecContext->error_concealment = FF_EC_GUESS_MVS | FF_EC_DEBLOCK;
-        m_pCodecContext->flags |= CODEC_FLAG_INPUT_PRESERVED | CODEC_FLAG_EMU_EDGE;
-        m_pCodecContext->flags2 |= CODEC_FLAG2_BRDO | CODEC_FLAG2_MEMC_ONLY | CODEC_FLAG2_DROP_FRAME_TIMECODE | CODEC_FLAG2_SKIP_RD | CODEC_FLAG2_CHUNKS;
-
-    } // end if
-
+	// Truncated data
 	if( 0 != ( m_pCodec->capabilities & CODEC_CAP_TRUNCATED ) )
 		m_pCodecContext->flags |= CODEC_FLAG_TRUNCATED;
+
+	// Codec context
+	if ( m_extra.getUsed() )
+	{	m_pCodecContext->extradata_size = m_extra.getUsed();
+		m_pCodecContext->extradata = (uint8_t*)m_extra._Ptr();
+		m_pCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
+	} // end if
 
     int res = avcodec_open( m_pCodecContext, m_pCodec );
 	if ( 0 > res )
@@ -177,6 +156,37 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 	if ( !in || !in->getUsed() || !out )
 		return 0;
 
+/*
+	AVPacket pkt; oexZero( pkt );
+	pkt.data = (uint8_t*)in->_Ptr();
+	pkt.size = in->getUsed();
+
+	// Ensure buffer size
+	if ( ( m_tmp.Size() - m_tmp.getUsed() ) < (sqbind::CSqBinary::t_size)( pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) )
+		m_tmp.Allocate( 2 * ( m_tmp.Size() + pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) );
+
+	// Add new data
+	m_tmp.AppendBuffer( (sqbind::CSqBinary::t_byte*)pkt.data, pkt.size );
+
+oexSHOW( m_tmp.getUsed() );
+
+	// Create packet
+	pkt.data = (uint8_t*)m_tmp._Ptr();
+	pkt.size = m_tmp.getUsed();
+
+	// Zero padding
+	int nPadding = m_tmp.Size() - m_tmp.getUsed();
+	if ( 0 < nPadding )
+	{
+		// Don't zero more than twice the padding size
+		if ( nPadding > ( FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
+			nPadding = FF_INPUT_BUFFER_PADDING_SIZE * 2;
+
+		// Set end to zero to ensure no overreading on damaged blocks
+		oexZeroMemory( &m_tmp._Ptr()[ m_tmp.getUsed() ], nPadding );
+
+	} // end if
+*/
 	// How much padding is there in the buffer
 	// If not enough, we assume the caller took care of it
 	int nPadding = in->Size() - in->getUsed();
@@ -191,47 +201,50 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 
 	} // end if
 
-//	if ( m_pFrame )
-//	{	av_free( m_pFrame );
-//		m_pFrame = oexNULL;
-//	} // end if
-
 	if ( !m_pFrame )
 		m_pFrame = avcodec_alloc_frame();
 
 	if ( !m_pFrame )
 		return 0;
 
-	// Init packet
-	oexZero( m_pkt );
-	av_init_packet( &m_pkt );
-
-	if ( m )
-	{
-		if ( m->isset( oexT( "flags" ) ) )
-			m_pkt.flags = (*m)[ oexT( "flags" ) ].toint();
-		if ( m->isset( oexT( "size" ) ) )
-			m_pkt.size = (*m)[ oexT( "size" ) ].toint();
-		if ( m->isset( oexT( "stream_index" ) ) )
-			m_pkt.stream_index = (*m)[ oexT( "stream_index" ) ].toint();
-		if ( m->isset( oexT( "pos" ) ) )
-			m_pkt.pos = (*m)[ oexT( "pos" ) ].toint();
-		if ( m->isset( oexT( "dts" ) ) )
-			m_pkt.dts = (*m)[ oexT( "dts" ) ].toint();
-		if ( m->isset( oexT( "pts" ) ) )
-			m_pkt.pts = (*m)[ oexT( "pts" ) ].toint();
-		if ( m->isset( oexT( "duration" ) ) )
-			m_pkt.duration = (*m)[ oexT( "duration" ) ].toint();
-
-	} // end if
-
-	m_pkt.data = (uint8_t*)in->_Ptr();
-	m_pkt.size = in->getUsed();
-
 	int gpp = 0;
-//	int used =
+	int used = 0;
 #if defined( FFSQ_VIDEO2 )
-		avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
+
+		// Init packet
+		AVPacket pkt; oexZero( pkt );
+//		av_init_packet( &pkt );
+
+		if ( m )
+		{
+			if ( m->isset( oexT( "flags" ) ) )
+				pkt.flags = (*m)[ oexT( "flags" ) ].toint();
+			if ( m->isset( oexT( "stream_index" ) ) )
+				pkt.stream_index = (*m)[ oexT( "stream_index" ) ].toint();
+			if ( m->isset( oexT( "pos" ) ) )
+				pkt.pos = (*m)[ oexT( "pos" ) ].toint64();
+			if ( m->isset( oexT( "dts" ) ) )
+				pkt.dts = (*m)[ oexT( "dts" ) ].toint64();
+			if ( m->isset( oexT( "pts" ) ) )
+				pkt.pts = (*m)[ oexT( "pts" ) ].toint64();
+			if ( m->isset( oexT( "duration" ) ) )
+				pkt.duration = (*m)[ oexT( "duration" ) ].toint();
+			if ( m->isset( oexT( "convergence_duration" ) ) )
+				pkt.duration = (*m)[ oexT( "convergence_duration" ) ].toint();
+
+//oexSHOW( m->serialize().c_str() );
+
+		} // end if
+
+		pkt.data = (uint8_t*)in->_Ptr();
+		pkt.size = in->getUsed();
+
+		used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &pkt );
+		if ( 0 >= used )
+		{	oexSHOW( used );
+			return 0;
+		} // end if
+
 #else
 		avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (uint8_t*)in->_Ptr(), in->getUsed() );
 #endif

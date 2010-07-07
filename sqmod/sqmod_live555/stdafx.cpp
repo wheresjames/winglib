@@ -20,6 +20,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CLvRtspClient, CLvRtspClient )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getAudioCodecName )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, isVideo )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, isAudio )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getExtraVideoData )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getExtraAudioData )
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CLvRtspClient );

@@ -213,6 +213,18 @@ namespace sqbind
 		t_size LShift( t_size x_nBytes )
 		{	return m_bin.LShift( x_nBytes ); }
 
+		/// Inserts specified number of bytes at the specified position
+		t_size Insert( t_size x_nBytes, t_size x_nOffset )
+		{	return m_bin.Insert( x_nBytes, x_nOffset ); }
+
+		/// Inserts specified number of bytes at the specified position
+		t_size InsertBin( CSqBinary *x_p, t_size x_nOffset )
+		{	if ( x_p && x_p->getUsed() )
+				if ( m_bin.Insert( x_p->getUsed(), x_nOffset ) )
+					m_bin.MemCpyAt( x_p->Ptr(), x_nOffset, x_p->getUsed() );
+			return getUsed();
+		}
+
 		/// Returns a ascii / hex string
 		sqbind::stdString AsciiHexStr( int nLineLen, int nMaxLines )
 		{	oex::CStr s = oexBinToAsciiHexStr( &m_bin, 0, nLineLen, nMaxLines );

@@ -94,10 +94,10 @@ public:
 	static oexCSTR8 vStrFmt( oexRESULT *pRes, oexSTR8 pDst, oexUINT uMax, oexCSTR8 pFmt, oexVaList pArgs );
 
     /// Converts to int64
-    static oexINT64 StrToInt64( oexCSTR8 x_pStr, oexUINT x_uRadix );
+    static oexINT64 StrToInt64( oexCSTR8 x_pStr, oexUINT x_uRadix = 10 );
 
     /// Converts to uint64
-    static oexUINT64 StrToUInt64( oexCSTR8 x_pStr, oexUINT x_uRadix );
+    static oexUINT64 StrToUInt64( oexCSTR8 x_pStr, oexUINT x_uRadix = 10 );
 
 	/// Converts to long
 	static oexLONG StrToLong( oexCSTR8 pStr, oexUINT uRadix = 10 );
@@ -133,10 +133,10 @@ public:
 	static oexCSTRW vStrFmt( oexRESULT *pRes, oexSTRW pDst, oexUINT uMax, oexCSTRW pFmt, oexVaList pArgs );
 
     /// Converts to int64
-    static oexINT64 StrToInt64( oexCSTRW x_pStr, oexUINT x_uRadix );
+    static oexINT64 StrToInt64( oexCSTRW x_pStr, oexUINT x_uRadix = 10 );
 
     /// Converts to uint64
-    static oexUINT64 StrToUInt64( oexCSTRW x_pStr, oexUINT x_uRadix );
+    static oexUINT64 StrToUInt64( oexCSTRW x_pStr, oexUINT x_uRadix = 10 );
 
 	/// Converts to long
 	static oexLONG StrToLong( oexCSTRW pStr, oexUINT uRadix = 10 );

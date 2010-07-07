@@ -107,6 +107,12 @@ int CSqMulti::toint()
 	return oexStrToLong( m_val.str().c_str() );
 }
 
+oex::oexINT64 CSqMulti::toint64()
+{_STT();
+	return oexStrToInt64( m_val.str().c_str() );
+}
+
+
 float CSqMulti::tofloat()
 {_STT();
 	return oexStrToFloat( m_val.str().c_str() );
@@ -139,6 +145,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, value )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, toint )
+//	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, toint64 ) // +++ Hmmm
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, tofloat )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, len )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, unset )

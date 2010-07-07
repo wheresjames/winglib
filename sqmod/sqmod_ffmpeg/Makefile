@@ -12,7 +12,7 @@ PRJ_DEPS := ffmpeg
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus ffmpeg
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib
-PRJ_DEFS := HAVE_AV_CONFIG_H=1
+PRJ_DEFS := HAVE_AV_CONFIG_H=1 __STDC_CONSTANT_MACROS
 PRJ_LIBP :=
 PRJ_OSLB :=
 

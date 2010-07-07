@@ -41,6 +41,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfDecoder, CFfDecoder )
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, getHeight )
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, getFps )
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, getBitRate )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, setExtraData )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, getExtraData )
 
 	SQBIND_STATIC_FUNCTION( CFfDecoder, LookupCodecId )
 	SQBIND_STATIC_FUNCTION( CFfDecoder, LookupCodecName )

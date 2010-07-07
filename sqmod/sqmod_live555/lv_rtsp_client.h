@@ -135,12 +135,12 @@ public:
 
 	/// Returns video width
 	int getWidth()
-	{	return 0;
+	{	return m_width;
 	}
 
 	/// Returns video width
 	int getHeight()
-	{	return 0;
+	{	return m_height;
 	}
 
 	/// Returns non-zero if a container is open
@@ -172,6 +172,12 @@ public:
 	/// Returns non-zero if audio was enabled and the open stream contains audio
 	int isAudio()
 	{	return m_bAudio; }
+
+	/// Returns a pointer to the any extra codec data
+	sqbind::CSqBinary getExtraVideoData() { return m_extraVideo; }
+
+	/// Returns a pointer to the any extra codec data
+	sqbind::CSqBinary getExtraAudioData() { return m_extraAudio; }
 
 protected:
 
@@ -225,6 +231,7 @@ private:
 	/// Session object
 	MediaSession			*m_pSession;
 
+
 	/// Video sink
 	CVideoSink				*m_pVs;
 
@@ -234,7 +241,19 @@ private:
 	/// Left over packet data
 	sqbind::CSqBinary		m_buf;
 
+	/// Extra video codec data
+	sqbind::CSqBinary		m_extraVideo;
+
+	/// Extra audio codec data
+	sqbind::CSqBinary		m_extraAudio;
+
 	/// Number of frames that have been processed
 	int						m_nFrames;
+
+	/// Video frame width
+	int						m_width;
+
+	/// Video frame height
+	int						m_height;
 
 };

@@ -76,8 +76,9 @@ function _init() : ( _g )
 //			ser			= [ "ser", 			"rtsp://192.168.2.251" ]
 //			arecont		= [ "arecont",		"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ],
 //			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&x0=0&y0=0&x1=1600&y1=1200&qp=30&ssn=1&doublescan=0" ],
-			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200" ],
-//										    + "&fps=5&quality=15&doublescan=0"
+//			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200&fps=10&quality=10&doublescan=0" ],
+			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=400&y0=0&x1=1200&y1=600"
+										    + "&fps=30&quality=15&doublescan=0" ],
 //										    + "&ssn=" + _self.gmt_time().tointeger() + "&id=" + ( _self.gmt_time() + 1 ).tointeger() ],
 
 //			panasonic	= [ "panasonic",	"rtsp://192.168.2.251/Mediainput/mpeg4" ]
@@ -88,8 +89,9 @@ function _init() : ( _g )
 	// Check TCP Port 554 and UDP ports 6970-9999
 
 //	StartStream( rtsp_video[ "panasonic" ], 0, 0 );
+	StartStream( rtsp_video[ "arecont" ], 384, 288 );
 //	StartStream( rtsp_video[ "arecont" ], 800, 600 );
-	StartStream( rtsp_video[ "bosch" ], 0, 0 );
+//	StartStream( rtsp_video[ "bosch" ], 0, 0 );
 //	StartStream( rtsp_video[ "nasa" ], 0, 0 );
 
 	_self.set_timer( ".", 15, "OnTimer" );
@@ -98,7 +100,7 @@ function _init() : ( _g )
 
 function StartStream( inf, w, h ) : ( _g )
 {
-	_self.echo( "\nConnecting to : " + inf[ 1 ] + "...\n" );
+	_self.echo( "\nConnecting to : " + inf[ 1 ] + "\n" );
 
 	_g.rtsp = CLvRtspClient();
 	if ( !_g.rtsp.Open( inf[ 1 ], 1, 0, CSqMulti() ) )
@@ -128,11 +130,17 @@ function UpdateVideo() : ( _g )
 	// Do we need to create the video decoder?
 	if ( !_g.dec && _g.rtsp.isVideo() )
 	{
+		_self.echo( "Video Size = " + _g.rtsp.getWidth() + " x " + _g.rtsp.getHeight() );
+		_self.echo( "Video Size = " + _g.w + " x " + _g.h );
+
 		_self.echo( "Creating video decoder for " + _g.rtsp.getVideoCodecName() );
 		_g.dec = CFfDecoder();
+		_g.dec.setExtraData( _g.rtsp.getExtraVideoData() );
 		if ( !_g.dec.Create( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ), CFfConvert().PIX_FMT_YUV420P,
 							 _g.w, _g.h, 5, 2000000, CSqMulti( "cmp=-2" ) ) )
 			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getVideoCodecName() ), _g.quit = 1;
+
+//		_g.dec.Decode( _g.rtsp.getExtraVideoData(), CFfConvert().PIX_FMT_RGB32, CSqBinary(), CSqMulti() );
 
 	} // end if
 
@@ -161,7 +169,23 @@ function UpdateVideo() : ( _g )
 	// Are we doing video?
 	if ( _g.dec && _g.rtsp.LockVideo( frame, CSqMulti() ) )
 	{
-		_self.echo( "Video data : " + frame.getUsed() );
+		_self.echo( "Frame Size : " + frame.getUsed() );
+
+		if ( "H264" == _g.rtsp.getVideoCodecName() )
+		{
+//			_self.echo( "H264 hack" );
+
+//			frame.InsertBin( _g.rtsp.getExtraVideoData(), 0 );
+
+			// I don't know what this is...
+			frame.Insert( 3, 0 );
+			frame.setUCHAR( 0, 0 );
+			frame.setUCHAR( 1, 0 );
+			frame.setUCHAR( 2, 1 );
+
+		} // end if
+
+//		_self.echo( frame.AsciiHexStr( 16, 16 ) );
 
 		if ( !_g.rec_avi )
 		{
@@ -197,7 +221,9 @@ function UpdateVideo() : ( _g )
 			local tex = _g.tex.Lock();
 			if ( tex.getUsed() )
 			{
-				if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti() ) )
+				// dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808,size=165698,stream_index=0
+				if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti( "dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808" ) ) )
+//				if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti( "" ) ) )
 					_self.echo( "failed to decode frame" );
 
 				_g.tex.Unlock();
@@ -225,7 +251,7 @@ function UpdateVideo() : ( _g )
 function OnTimer() : ( _g )
 {
 	if ( _g.quit )
-		return;
+		return -1;
 
 	UpdateVideo();
 	_g.quit = _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
@@ -233,6 +259,7 @@ function OnTimer() : ( _g )
 //	if ( UpdateVideo() )
 //		_g.quit = _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
 
+	return 0;
 }
 
 

@@ -158,6 +158,46 @@ CBin::t_size CBin::AppendBuffer( const CBin::t_byte *x_pBuf, CBin::t_size x_nByt
 	return m_nUsed;
 }
 
+CBin::t_size CBin::Insert( CBin::t_size x_nBytes, CBin::t_size x_nOffset = 0 )
+{_STT();
+
+	if ( !x_nBytes )
+		return 0;
+
+	// Is it past the end?
+	if ( !getUsed() || x_nOffset >= getUsed() )
+	{
+		// Resize the buffer
+		Resize( x_nOffset + x_nBytes );
+
+		// Zero space between end of buffer and offset
+		t_size over = x_nOffset - getUsed();
+		if ( over ) oexZeroMemory( _Ptr( getUsed() ), over );
+
+		// Update used value
+		setUsed( x_nOffset + x_nBytes );
+
+		return getUsed();
+
+	} // end if
+
+	// Allocate space
+	Resize( getUsed() + x_nBytes );
+
+	// Move block ( can't use memcpy because blocks overlap )
+	t_size copy = getUsed() - x_nOffset;
+    if ( copy )
+    {   t_byte *dst = _Ptr( x_nOffset + x_nBytes + copy - 1 ), *src = _Ptr( x_nOffset + copy - 1 );
+        while ( copy-- ) *dst-- = *src--;
+    } // end if
+
+	// Set new size
+	setUsed( getUsed() + x_nBytes );
+
+	return getUsed();
+}
+
+
 CBin::t_size CBin::LShift( CBin::t_size x_nBytes )
 {_STT();
 

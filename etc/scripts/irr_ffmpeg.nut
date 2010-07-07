@@ -10,9 +10,10 @@ class CGlobal
 	video = 0;
 	tex = 0;
 
-	rtsp = 0;
+	ffmpeg = 0;
 
 	frames = 0;
+	frame = CSqBinary();
 };
 
 local _g = CGlobal();
@@ -66,33 +67,34 @@ function _init() : ( _g )
 //			bosch		= [ "bosch", 		"rtsp://192.168.2.253/rtsp_tunnel" ],
 //			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half" ],
 //			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=15" ],
-//			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200&quality=15&fps=15" ],
-//			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200"
-//										    + "&fps=5&quality=15" ],
+			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200&quality=10&fps=30" ],
+//			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=400&y0=0&x1=1200&y1=600"
+//										    + "&fps=15&quality=15&doublescan=0" ],
 //										    + "&ssn=" + _self.gmt_time().tointeger() + "&id=" + ( _self.gmt_time() + 1 ).tointeger() ],
 //			panasonic	= [ "panasonic",	"rtsp://192.168.2.251" ]
 //			panasonic	= [ "panasonic",	"rtsp://192.168.2.57/Mediainput/mpeg4" ]
 
 		};
 
-	StartStream( rtsp_video[ "bosch" ] );
+	StartStream( rtsp_video[ "arecont" ] );
+//	StartStream( rtsp_video[ "bosch" ] );
 //	StartStream( rtsp_video[ "nasa" ] );
 
-	_self.set_timer( ".", 30, "OnTimer" );
+	_self.set_timer( ".", 60, "OnTimer" );
 
 }
 
 function StartStream( inf ) : ( _g )
 {
-	_g.rtsp = CFfContainer();
-	if ( !_g.rtsp.Open( inf[ 1 ], CSqMulti() ) )
+	_g.ffmpeg = CFfContainer();
+	if ( !_g.ffmpeg.Open( inf[ 1 ], CSqMulti() ) )
 	{	_self.echo( "Failed to open link : " + inf[ 1 ] );
 		return 0;
 	} // end if
 
-	_self.echo( "Video File : " + _g.rtsp.getWidth() + "x" + _g.rtsp.getHeight() );
+	_self.echo( "Video File : " + _g.ffmpeg.getWidth() + "x" + _g.ffmpeg.getHeight() );
 
-	_g.tex = _g.irr.CreateTexture( _g.rtsp.getWidth(), _g.rtsp.getHeight(), 0 );
+	_g.tex = _g.irr.CreateTexture( _g.ffmpeg.getWidth(), _g.ffmpeg.getHeight(), 0 );
     _g.video.SetTexture( 0, _g.tex );
 
 	return 1;
@@ -100,7 +102,7 @@ function StartStream( inf ) : ( _g )
 
 function UpdateVideo() : ( _g )
 {
-	if ( !_g.rtsp.isOpen() )
+	if ( !_g.ffmpeg.isOpen() )
 		return;
 
 	_g.frames++;
@@ -110,8 +112,34 @@ function UpdateVideo() : ( _g )
 
 	local buf = _g.tex.Lock();
 	if ( buf.getUsed() )
-		_g.rtsp.DecodeFrame( _g.rtsp.getVideoStream(), CFfConvert().PIX_FMT_RGB32, buf, CSqMulti() ),
+	{
+//		_self.echo( "Texture locked : " + buf.getUsed() );
+
+		local inf = CSqMulti();
+
+		if ( _g.ffmpeg.getVideoStream() != _g.ffmpeg.ReadFrame( _g.frame, inf ) )
+			_self.echo( "Not a video frame" );
+
+		else
+		{
+			_self.echo( "Frame Size : " + _g.frame.getUsed() );
+
+//			_self.echo( inf.serialize() );
+
+//			_self.echo( _g.frame.AsciiHexStr( 16, 16 ) );
+
+			if ( !_g.ffmpeg.DecodeFrameBin( _g.frame, CFfConvert().PIX_FMT_RGB32, buf, inf ) )
+				_self.echo( "Error decoding frame" );
+
+		} // end else
+
+//	Deprecated, use above method
+//		if ( _g.ffmpeg.DecodeFrame( _g.ffmpeg.getVideoStream(), CFfConvert().PIX_FMT_RGB32, buf, CSqMulti() ) )
+//			_self.echo( "Error decoding frame" );
+
 		_g.tex.Unlock();
+
+	} // end if
 }
 
 function OnTimer() : ( _g )

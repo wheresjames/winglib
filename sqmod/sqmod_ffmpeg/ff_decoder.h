@@ -68,6 +68,12 @@ public:
 	/// Lookup a codec based on id
 	static sqbind::stdString LookupCodecName( int nId );
 
+	/// Returns extra codec data
+	sqbind::CSqBinary getExtraData() { return m_extra; }
+
+	/// Sets extra codec data
+	void setExtraData( sqbind::CSqBinary *p ) { if ( p ) m_extra = *p; }
+
 private:
 
 	/// Image format
@@ -90,5 +96,8 @@ private:
 
 	/// Temp buffer
 	sqbind::CSqBinary		m_tmp;
+
+	/// Extra codec data
+	sqbind::CSqBinary		m_extra;
 
 };

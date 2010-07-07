@@ -137,34 +137,34 @@ public:
 
 	virtual _OEXCOM_ULONG _OEXCOM_STDCALL AddRef()
 	{	oexInterlockedIncrement( &_g_oex_lRefCount );
-		return (_OEXCOM_ULONG)oexInterlockedIncrement( &_m_ref._m_ref_count ); 
+		return (_OEXCOM_ULONG)oexInterlockedIncrement( &_m_ref._m_ref_count );
 	}
 
 	virtual _OEXCOM_ULONG _OEXCOM_STDCALL Release()
 	{	oexInterlockedDecrement( &_g_oex_lRefCount );
 		_OEXCOM_ULONG c = oexInterlockedDecrement( &_m_ref._m_ref_count );
-		if ( !c ) 
+		if ( !c )
 			_OEXCOM_DeleteInstance( this );
 		return c;
 	}
 
-	template< typename T > static T* _OEXCOM_CreateInstance()
-		{ 
-			T *p = _OEXCOM_NEW< T >(); 
-			if ( p ) 
-				p->AddRef(); 
-			return p; 
+	template< typename TT > static TT* _OEXCOM_CreateInstance()
+		{
+			TT *p = _OEXCOM_NEW< TT >();
+			if ( p )
+				p->AddRef();
+			return p;
 		}
 
-	template< typename T > static void _OEXCOM_DeleteInstance( T *p ) 
+	template< typename TT > static void _OEXCOM_DeleteInstance( TT *p )
 	{ if ( p ) _OEXCOM_DELETE( p ); }
 
 	_OEXCOM_IReference _m_ref;
 
 
-	virtual _OEXCOM_ULONG OnQueryInterface( oexCONST _OEXCOM_IID& iid,void** ppv ) 
+	virtual _OEXCOM_ULONG OnQueryInterface( oexCONST _OEXCOM_IID& iid,void** ppv )
 	{
-		if ( !ppv ) 
+		if ( !ppv )
 			return _OEXCOM_E_INVALIDARG;
 
 		if ( _OEXCOM_CMPGUID( &_OEXCOM_IID_IClassFactory, &iid ) )
@@ -172,7 +172,7 @@ public:
 			*ppv = (void*)(_OEXCOM_CClassFactory*)this;
 			return _OEXCOM_S_OK;
 		}
-		return _OEXCOM_E_NOINTERFACE; 
+		return _OEXCOM_E_NOINTERFACE;
 	}
 
 
@@ -182,7 +182,7 @@ public:
 
 	virtual _OEXCOM_HRESULT _OEXCOM_STDCALL CreateInstance( _OEXCOM_IUnknown* pUnkOuter, const _OEXCOM_IID& iid, void** ppv )
 	{
-		if ( !ppv ) 
+		if ( !ppv )
 			return _OEXCOM_E_INVALIDARG;
 
 		*ppv = oexNULL;
@@ -190,7 +190,7 @@ public:
 		if ( pUnkOuter )
 			return _OEXCOM_E_NOAGGREGATION;
 
-		T *p = T::_OEXCOM_CreateInstance< T >();
+		T *p = _OEXCOM_CreateInstance< T >();
 		if ( !p )
 			return _OEXCOM_E_OUTOFMEMORY;
 

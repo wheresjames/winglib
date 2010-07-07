@@ -99,18 +99,17 @@ oexINT CCapture::GetDevices( oexUINT x_uType, oex::CPropertyBag *pList )
 
 	switch( x_uType )
 	{
+		case oexVIDSUB_AUTO :
+		case oexVIDSUB_DSHOW :
 
-			case oexVIDSUB_AUTO :
-			case oexVIDSUB_DSHOW :
+			if ( x_uType != oexVIDSUB_AUTO )
+				return 0;
 
-				if ( x_uType != oexVIDSUB_AUTO )
-					return 0;
+		case oexVIDSUB_VFW :
+			break;
 
-			case oexVIDSUB_VFW :
-				break;
-
-			default :
-				break;
+		default :
+			break;
 
 	} // end switch
 

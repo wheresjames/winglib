@@ -453,8 +453,8 @@ public:
 	/// Copys the specified data into the buffer
 	t_size MemCpyAt( oexCONST t_byte *ptr, t_size pos, t_size size )
 	{
-		// Free any Ptr buffer
-		FreePtr();
+        // Copy existing const data
+        Unshare();
 
 		// Copy data
 		if ( m_buf.MemCpyAt( ptr, pos, size ).Size() < size )
@@ -463,7 +463,8 @@ public:
 		} // end if
 
 		// Update used count
-		m_nUsed = size;
+        if ( pos + size > m_nUsed )
+            m_nUsed = pos + size;
 
 		return 1;
 	}
@@ -533,6 +534,9 @@ public:
 
 	/// Shift the data in the buffer to the left
 	t_size LShift( t_size x_nBytes );
+
+	/// Inserts specified number of bytes at the specified position
+	t_size Insert( t_size x_nBytes, t_size x_nOffset );
 
 	/// Declare access types
 	OEX_CBIN_DECLARE_TYPE_ACCESS( CHAR );

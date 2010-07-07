@@ -64,7 +64,7 @@ int CFfContainer::CloseStream()
 		return 0;
 
 	if ( m_nRead )
-			av_close_input_file( m_pFormatContext );
+		av_close_input_file( m_pFormatContext );
 
 	else if ( 1 < m_nWrite )
 	{
@@ -230,6 +230,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 
 int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 {_STT();
+
 	if ( !m_pFormatContext )
 		return -1;
 
@@ -340,19 +341,23 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
 {_STT();
 
-	m_pkt.data = (uint8_t*)in->Ptr();
-	m_pkt.size = in->getUsed();
+	AVPacket pkt; oexZero( pkt );
+	pkt.data = (uint8_t*)in->Ptr();
+	pkt.size = in->getUsed();
 
+/*
 	m_buf.setUsed( 0 );
 
 	// Ensure buffer size
-	if ( ( m_buf.Size() - m_buf.getUsed() ) < (sqbind::CSqBinary::t_size)( m_pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) )
-		m_buf.Allocate( 2 * ( m_buf.Size() + m_pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) );
+	if ( ( m_buf.Size() - m_buf.getUsed() ) < (sqbind::CSqBinary::t_size)( pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) )
+		m_buf.Allocate( 2 * ( m_buf.Size() + pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) );
 
 	// Add new data
-	m_buf.AppendBuffer( (sqbind::CSqBinary::t_byte*)m_pkt.data, m_pkt.size );
-	m_pkt.data = (uint8_t*)m_buf._Ptr();
-	m_pkt.size = m_buf.getUsed();
+	m_buf.AppendBuffer( (sqbind::CSqBinary::t_byte*)pkt.data, pkt.size );
+
+	// Create packet
+	pkt.data = (uint8_t*)m_buf._Ptr();
+	pkt.size = m_buf.getUsed();
 
 	// Zero padding
 	int nPadding = m_buf.Size() - m_buf.getUsed();
@@ -366,6 +371,7 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 		oexZeroMemory( &m_buf._Ptr()[ m_buf.getUsed() ], nPadding );
 
 	} // end if
+*/
 
 	if ( !m_pFrame )
 		m_pFrame = avcodec_alloc_frame();
@@ -376,7 +382,19 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 
 #if defined( FFSQ_VIDEO2 )
 
-	used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
+	if ( m )
+	{
+		pkt.flags 					= (*m)[ oexT( "flags" ) ].toint();
+		pkt.stream_index 			= (*m)[ oexT( "stream_index" ) ].toint();
+		pkt.pos 					= (*m)[ oexT( "pos" ) ].toint64();
+		pkt.dts 					= (*m)[ oexT( "dts" ) ].toint64();
+		pkt.pts 					= (*m)[ oexT( "pts" ) ].toint64();
+		pkt.duration 				= (*m)[ oexT( "duration" ) ].toint();
+		pkt.convergence_duration 	= (*m)[ oexT( "convergence_duration" ) ].toint64();
+
+	} // end if
+
+	used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &pkt );
 	if ( 0 >= used )
 	{	oexSHOW( used );
 		return -1;
@@ -384,7 +402,7 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 
 #else
 
-	used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, m_pkt.data, m_pkt.size );
+	used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, pkt.data, pkt.size );
 	if ( 0 >= used )
 	{	oexSHOW( used );
 		return -1;

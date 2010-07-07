@@ -8,6 +8,7 @@
 CLvRtspClient::CVideoSink::CVideoSink( UsageEnvironment& rEnv ) :
 	MediaSink( rEnv )
 {_STT();
+
 }
 
 CLvRtspClient::CVideoSink::~CVideoSink()
@@ -167,6 +168,8 @@ CLvRtspClient::CLvRtspClient()
 	m_nEnd = 0;
 	m_bVideo = 1;
 	m_bAudio = 1;
+	m_width = 0;
+	m_height = 0;
 }
 
 void CLvRtspClient::Destroy()
@@ -179,6 +182,8 @@ void CLvRtspClient::Destroy()
 	m_nEnd = 0;
 	m_sUrl = oexT( "" );
 	m_mParams.clear();
+	m_width = 0;
+	m_height = 0;
 }
 
 void CLvRtspClient::ThreadDestroy()
@@ -200,6 +205,8 @@ void CLvRtspClient::ThreadDestroy()
 	m_pVs = oexNULL;
 	m_pAs = oexNULL;
 	m_sVideoCodec = oexT( "" );
+	m_width = 0;
+	m_height = 0;
 }
 
 int CLvRtspClient::Open( const sqbind::stdString &sUrl, int bVideo, int bAudio, sqbind::CSqMulti *m )
@@ -302,13 +309,31 @@ int nVerbosity = 0;
 	while ( 0 != ( pss = iter.next() )
 			&& ( ( bVideo && !bFoundVideo ) || ( bAudio && !bFoundAudio ) ) )
 	{
-//		oexEcho( oexMks( pss->mediumName(), " - ", pss->codecName() ).Ptr() )
-
 		if ( bVideo && !bFoundVideo && sVTag == pss->mediumName() )
-			InitVideo( pss ), bFoundVideo = 1;
+		{
+			// +++ Think fmtp_config() needs to be handled
+
+			// sprop-parameter-sets= base64(SPS),base64(PPS)[,base64(SEI)]
+			oex::TList< oex::CStr8 > lst = oex::CParser::Explode( pss->fmtp_spropparametersets(), oexT( "," ) );
+			for ( oex::TList< oex::CStr8 >::iterator it; lst.Next( it ); )
+			{	m_extraVideo.AppendBuffer( "\x00\x00\x01", 3 );
+				m_extraVideo.Mem().appendString( oex::CBase64::Decode( *it ) );
+			} // end for
+
+			InitVideo( pss ); bFoundVideo = 1;
+
+		} // end if
 
 		else if ( bAudio && !bFoundAudio && sATag == pss->mediumName() )
-			InitAudio( pss ), bFoundAudio = 1;
+		{	oex::TList< oex::CStr8 > lst = oex::CParser::Explode( pss->fmtp_spropparametersets(), oexT( "," ) );
+			for ( oex::TList< oex::CStr8 >::iterator it; lst.Next( it ); )
+			{	m_extraAudio.AppendBuffer( "\x00\x00\x01", 3 );
+				m_extraAudio.Mem().appendString( oex::CBase64::Decode( *it ) );
+			} // end for
+
+			InitAudio( pss ); bFoundAudio = 1;
+
+		} // end else if
 
 	} // end while
 
@@ -318,27 +343,6 @@ int nVerbosity = 0;
 //	m_pRtspClient->playMediaSession( *m_pSession, 0, 0, 1.f );
 	m_pRtspClient->playMediaSession( *m_pSession, 0, -1.f, 1.f );
 
-/*
-	int width = 640;
-	int height = 480;
-	int fps = 30;
-
-	AVIFileSink *pAfs = AVIFileSink::createNew( *m_pEnv, *m_pSession, "rtsp_test.avi",
-												100000, width, height, fps, False );
-	if ( !pAfs )
-	{	oexERROR( 0, oexT( "AVIFileSink::createNew() failed" ) );
-		ThreadDestroy();
-		return 0;
-	} // end if
-
-	if ( !pAfs->startPlaying( NULL, NULL ) )
-	{	oexERROR( 0, oexT( "AVIFileSink::startPlaying() failed" ) );
-		ThreadDestroy();
-		return 0;
-	} // end if
-
-	m_pRtspClient->playMediaSession( *m_pSession, 0, 0, 1.f );
-*/
 	return 1;
 }
 
@@ -383,6 +387,9 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 	{	oexERROR( 0, oexT( "CVideoSink::startPlaying() failed" ) );
 		return 0;
 	} // end if
+
+	m_width = pss->videoWidth();
+	m_height = pss->videoWidth();
 
 	return 1;
 }

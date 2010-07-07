@@ -114,10 +114,13 @@ namespace sqbind
 		/// Returns a string representation of the value
 		stdString& str();
 
-		/// Returns a string representation of the value
+		/// Returns a integer representation of the value
 		int toint();
 
-		/// Returns a string representation of the value
+		/// Returns a integer representation of the value
+		oex::oexINT64 toint64();
+
+		/// Returns a float representation of the value
 		float tofloat();
 
 		/// Returns the length of the string value
@@ -197,7 +200,7 @@ namespace sqbind
         SquirrelObject _newslot( HSQUIRRELVM v );
 
 	public:
-		
+
 		/// Converts from oex property bag
 		void fromPb( oex::CPropertyBag &pb );
 

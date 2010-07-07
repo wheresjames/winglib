@@ -188,17 +188,17 @@ namespace sqbind
 	};
 
 	template < typename T >
-		static sqbind::stdString oex2std( T &s )
+		static sqbind::stdString oex2std( const T &s )
 		{	return sqbind::stdString( s.Ptr(), s.Length() ); }
 
 	template < typename T >
-		static sqbind::stdString oex82std( T &s )
+		static sqbind::stdString oex82std( const T &s )
 		{	oex::CStr t = oexMbToStr( s );
 			return sqbind::stdString( t.Ptr(), t.Length() );
 		}
 
 	template < typename T >
-		static oex::CStr std2oex( T &s )
+		static oex::CStr std2oex( const T &s )
 		{	return oex::CStr( s.c_str(), s.length() ); }
 
 	template < typename T >

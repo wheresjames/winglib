@@ -163,7 +163,7 @@ private:
 	/// Write ability?
 	int 					m_nWrite;
 
-	/// Write ability?
+	/// Read ability?
 	int 					m_nRead;
 
 	/// Output container context
