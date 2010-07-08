@@ -94,6 +94,8 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 	g_psqScriptThread->SetExportFunction( SQBIND_Export_Symbols, oexNULL );
 
+	g_psqScriptThread->Pb()[ oexT( "cmdline" ) ] = pbCmdLine;
+
 	if ( g_psqScriptThread->Start() )
 		return oexERROR( -5, oexT( "Failed to start script thread" ) );
 

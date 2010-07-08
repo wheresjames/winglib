@@ -229,7 +229,7 @@ public:
 #endif
 
 #if defined ( oexDEBUG )
-        if ( !Ptr() )
+        if ( !Ptr() || IsPlainShare() )
             m_pBh = oexNULL;
         else
             m_pBh = CAlloc::GetBlockHeader( Ptr() );
@@ -244,7 +244,7 @@ public:
         if ( !pPtr )
             return 0;
 
-        if ( sizeof( T ) )
+        if ( sizeof( T ) && !IsPlainShare() )
             return CAlloc().ArraySize( pPtr );
         else
             return 0;
@@ -519,7 +519,10 @@ public:
             return oexNULL;
 
         // Out of bounds
-        oexASSERT( ( Size() * sizeof( T_AS ) / sizeof( T ) ) > x_uOffset );
+#if defined( oexDEBUG )
+		if ( !IsPlainShare() )		
+			oexASSERT( ( Size() * sizeof( T_AS ) / sizeof( T ) ) > x_uOffset );
+#endif
 
         return &pPtr[ x_uOffset ];
     }
@@ -551,7 +554,10 @@ public:
             return oexNULL;
 
         // Out of bounds
-        oexASSERT( ( Size() * sizeof( T_AS ) / sizeof( T ) ) > x_uOffset );
+#if defined( oexDEBUG )
+		if ( !IsPlainShare() )		
+			oexASSERT( ( Size() * sizeof( T_AS ) / sizeof( T ) ) > x_uOffset );
+#endif
 
         return &pPtr[ x_uOffset ];
     }
@@ -1079,7 +1085,7 @@ public:
 	{	m_fm.Plain( x_bPlain ); }
 
 	/// Returns non-zero if plain share
-	oexBOOL IsPlainShare()
+	oexBOOL IsPlainShare() const
 	{	return m_fm.IsPlain(); }
 
 	/// Sets the file mapping segment offset

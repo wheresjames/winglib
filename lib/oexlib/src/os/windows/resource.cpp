@@ -42,7 +42,7 @@ using namespace OEX_NAMESPACE::os;
 
 const CResource::t_HANDLE CResource::c_Invalid = (oexPVOID)0xffffffff;
 
-const oexUINT CResource::c_Infinite = 0xffffffff;
+const oexUINT CResource::c_Infinite = INFINITE; //0xffffffff;
 
 namespace OEX_NAMESPACE
 {

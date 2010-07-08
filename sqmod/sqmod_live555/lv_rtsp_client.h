@@ -17,6 +17,7 @@ public:
 
 		/// Constructor
 		CVideoSink( UsageEnvironment &rEnv );
+		virtual ~CVideoSink();
 
 		/// Reads frame info
 		int LockFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
@@ -24,14 +25,17 @@ public:
 		/// Releases the frame buffer
 		int UnlockFrame();
 
+		/// Sets the packet header
+		void setHeader( sqbind::CSqBinary *header );
+
 	private:
 
 		/// Destructor
-		virtual ~CVideoSink();
+//		virtual ~CVideoSink();
 
 		/// Grabs next frame
 		virtual Boolean continuePlaying();
-
+		
 	private:
 
 		static void _afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
@@ -43,11 +47,17 @@ public:
 
 	private:
 
+		/// Packet header to add
+		sqbind::CSqBinary		m_header;
+
 		/// Data buffer
 		sqbind::CSqBinary		m_buf;
 
 		/// Signals when a new frame is ready
 		oex::CSignal			m_sigFrame;
+
+		/// Data lock
+		oexLock					m_lock;
 
 	};
 
@@ -64,6 +74,7 @@ public:
 
 		/// Constructor
 		CAudioSink( UsageEnvironment &rEnv );
+		virtual ~CAudioSink();
 
         /// Reads frame infofile:///home/landshark/code/lib2/winglib/sqmod/sqmod_live555/lv_rtsp_server.cpp
 
@@ -75,7 +86,7 @@ public:
 	private:
 
 		/// Destructor
-		virtual ~CAudioSink();
+//		virtual ~CAudioSink();
 
 		/// Grabs next frame
 		virtual Boolean continuePlaying();
@@ -179,6 +190,14 @@ public:
 	/// Returns a pointer to the any extra codec data
 	sqbind::CSqBinary getExtraAudioData() { return m_extraAudio; }
 
+	/// Sets the video header
+	void setVideoHeader( sqbind::CSqBinary *header )
+	{	if ( m_pVs ) m_pVs->setHeader( header );
+	} // end 
+
+	/// Signal start
+	void Play() { m_evtPlay.Signal(); }
+
 protected:
 
 	/// Initializes thread
@@ -198,7 +217,7 @@ protected:
 
 	/// Initializes video stream
 	int InitAudio( MediaSubsession *pss );
-
+	
 private:
 
 	/// Flag to end loop
@@ -231,12 +250,17 @@ private:
 	/// Session object
 	MediaSession			*m_pSession;
 
-
 	/// Video sink
 	CVideoSink				*m_pVs;
 
+	/// Video sub session
+	MediaSubsession			*m_pVsPss;
+
 	/// Audio sink
 	CAudioSink				*m_pAs;
+
+	/// Audio sub session
+	MediaSubsession			*m_pAsPss;
 
 	/// Left over packet data
 	sqbind::CSqBinary		m_buf;
@@ -255,5 +279,8 @@ private:
 
 	/// Video frame height
 	int						m_height;
+
+	/// Signal to start RTSP stream
+	oexEvent				m_evtPlay;
 
 };

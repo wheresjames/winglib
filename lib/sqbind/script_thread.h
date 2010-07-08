@@ -170,6 +170,9 @@ public:
 	/// Executes timer callbacks
 	oex::oexINT RunTimers();
 
+	/// Returns a reference to the property bag
+	t_PropertyBag& Pb() { return m_pb; }
+
 private:
 
 	/// Set to non-zero when the thread should exit

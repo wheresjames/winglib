@@ -105,6 +105,8 @@ int main(int argc, char* argv[])
 
 	g_psqScriptThread->SetIncludeScriptFunction( &IncludeScript );
 
+	g_psqScriptThread->Pb()[ oexT( "cmdline" ) ] = pbCmdLine;
+
 	if ( g_psqScriptThread->Start() )
 		return oexERROR( -5, oexT( "Failed to start script thread" ) );
 

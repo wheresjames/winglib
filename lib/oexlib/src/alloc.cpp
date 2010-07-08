@@ -141,6 +141,8 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
 		else
 			os::CSys::StrFmt( pMsg, uBuf, oexT( "Block: %u, Protected: %u, Refs: %u, Flags: %u" oexNL8 ),
 													  uBlockSize, pBh->uSize, pBh->uRef, pBh->uFlags );
+/*
+	+++ This code crashes if pBh->ai[ xxx ].pFile was allocated from the heap of another module
 
         if ( pBh->ai[ 0 ].pFile )
             os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
@@ -153,7 +155,7 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
         if ( pBh->ai[ 2 ].pFile )
             os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
                               oexT( "%s(%u) : Freed" oexNL8 ), pBh->ai[ 2 ].pFile, pBh->ai[ 2 ].uLine );
-
+*/
 // +++ Replace with oexBinToAsciiStr()
 
 #if defined( OEX_MAX_LINES_IN_MEMDUMP )

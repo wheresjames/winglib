@@ -183,6 +183,12 @@ namespace sqbind
 		t_size setString( const stdString &s )
 		{	return m_bin.setString( oexStrToMb( oex::CStr( s.c_str(), s.length() ) ) ); }
 
+		/// Sets a sub string into the binary object
+		t_size setSubString( const stdString &s, int start, int len )
+		{	if ( start >= s.length() || ( start + len ) > s.length() ) { Free(); return 0; }
+			return m_bin.setString( oexStrToMb( oex::CStr( &(s.c_str()[ start ]), len ) ) ); 
+		}
+
 		/// Appends the string data to the buffer
 		t_size appendString( const stdString &s )
 		{	return m_bin.appendString( oexStrToMb( oex::CStr( s.c_str(), s.length() ) ) ); }
@@ -222,6 +228,13 @@ namespace sqbind
 		{	if ( x_p && x_p->getUsed() )
 				if ( m_bin.Insert( x_p->getUsed(), x_nOffset ) )
 					m_bin.MemCpyAt( x_p->Ptr(), x_nOffset, x_p->getUsed() );
+			return getUsed();
+		}
+
+		/// Copys specified number of bytes at the specified position
+		t_size MemCpyAt( CSqBinary *x_p, t_size x_nOffset )
+		{	if ( x_p && x_p->getUsed() )
+				m_bin.MemCpyAt( x_p->Ptr(), x_nOffset, x_p->getUsed() );
 			return getUsed();
 		}
 

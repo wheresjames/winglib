@@ -443,7 +443,7 @@ public:
     {	m_bPlain = x_bPlain; }
 
 	/// Returns non-zero if plain share
-    oexBOOL IsPlain()
+    oexBOOL IsPlain() const
     {	return m_bPlain; }
 
 	/// Sets the nmap offset

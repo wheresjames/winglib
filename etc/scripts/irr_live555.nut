@@ -20,6 +20,7 @@ class CGlobal
 	h = 0;
 
 	rec_avi = 0;
+//	rec_avi = CFfContainer();
 
 };
 
@@ -76,11 +77,8 @@ function _init() : ( _g )
 //			ser			= [ "ser", 			"rtsp://192.168.2.251" ]
 //			arecont		= [ "arecont",		"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ],
 //			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&x0=0&y0=0&x1=1600&y1=1200&qp=30&ssn=1&doublescan=0" ],
-//			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200&fps=10&quality=10&doublescan=0" ],
-			arecont		= [ "arecont",		"rtsp://192.168.2.252/image?res=half&x0=400&y0=0&x1=1200&y1=600"
-										    + "&fps=30&quality=15&doublescan=0" ],
-//										    + "&ssn=" + _self.gmt_time().tointeger() + "&id=" + ( _self.gmt_time() + 1 ).tointeger() ],
-
+			arecont_hi	= [ "arecont_hi",	"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200&fps=15&quality=10&doublescan=0" ],
+			arecont_low	= [ "arecont_low",	"rtsp://192.168.2.252/image?res=half&x0=400&y0=0&x1=1200&y1=600&fps=30&quality=15&doublescan=0" ],
 //			panasonic	= [ "panasonic",	"rtsp://192.168.2.251/Mediainput/mpeg4" ]
 			panasonic	= [ "panasonic",	"rtsp://192.168.2.251" ]
 
@@ -89,10 +87,11 @@ function _init() : ( _g )
 	// Check TCP Port 554 and UDP ports 6970-9999
 
 //	StartStream( rtsp_video[ "panasonic" ], 0, 0 );
-	StartStream( rtsp_video[ "arecont" ], 384, 288 );
-//	StartStream( rtsp_video[ "arecont" ], 800, 600 );
+//	StartStream( rtsp_video[ "arecont_hi" ], 0, 0 );
+	StartStream( rtsp_video[ "arecont_low" ], 0, 0 );
 //	StartStream( rtsp_video[ "bosch" ], 0, 0 );
 //	StartStream( rtsp_video[ "nasa" ], 0, 0 );
+//	StartStream( rtsp_video[ "adventure" ], 0, 0 );
 
 	_self.set_timer( ".", 15, "OnTimer" );
 
@@ -130,8 +129,15 @@ function UpdateVideo() : ( _g )
 	// Do we need to create the video decoder?
 	if ( !_g.dec && _g.rtsp.isVideo() )
 	{
-		_self.echo( "Video Size = " + _g.rtsp.getWidth() + " x " + _g.rtsp.getHeight() );
-		_self.echo( "Video Size = " + _g.w + " x " + _g.h );
+		// Insert H264 Header if needed
+		if ( "H264" == _g.rtsp.getVideoCodecName() )
+		{	local header = CSqBinary();
+			header.setString( "\x00\x00\x01" );
+			_g.rtsp.setVideoHeader( header );
+		} // end if
+
+//		_self.echo( "Video Size = " + _g.rtsp.getWidth() + " x " + _g.rtsp.getHeight() );
+//		_self.echo( "Video Size = " + _g.w + " x " + _g.h );
 
 		_self.echo( "Creating video decoder for " + _g.rtsp.getVideoCodecName() );
 		_g.dec = CFfDecoder();
@@ -139,6 +145,9 @@ function UpdateVideo() : ( _g )
 		if ( !_g.dec.Create( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ), CFfConvert().PIX_FMT_YUV420P,
 							 _g.w, _g.h, 5, 2000000, CSqMulti( "cmp=-2" ) ) )
 			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getVideoCodecName() ), _g.quit = 1;
+
+		_self.echo( " !!! STARTING RTSP STREAM !!!" );
+		_g.rtsp.Play();
 
 //		_g.dec.Decode( _g.rtsp.getExtraVideoData(), CFfConvert().PIX_FMT_RGB32, CSqBinary(), CSqMulti() );
 
@@ -166,42 +175,31 @@ function UpdateVideo() : ( _g )
 
 	local frame = CSqBinary();
 
-	// Are we doing video?
 	if ( _g.dec && _g.rtsp.LockVideo( frame, CSqMulti() ) )
 	{
-		_self.echo( "Frame Size : " + frame.getUsed() );
-
-		if ( "H264" == _g.rtsp.getVideoCodecName() )
-		{
-//			_self.echo( "H264 hack" );
-
-//			frame.InsertBin( _g.rtsp.getExtraVideoData(), 0 );
-
-			// I don't know what this is...
-			frame.Insert( 3, 0 );
-			frame.setUCHAR( 0, 0 );
-			frame.setUCHAR( 1, 0 );
-			frame.setUCHAR( 2, 1 );
-
-		} // end if
-
+//		_self.echo( "Frame Size : " + frame.getUsed() );
 //		_self.echo( frame.AsciiHexStr( 16, 16 ) );
 
-		if ( !_g.rec_avi )
+		// Saving to avi?
+		if ( _g.rec_avi )
 		{
-			_g.rec_avi = CFfContainer();
-			if ( !_g.rec_avi.Create( "irr_live555.avi", "", CSqMulti() ) )
-				_self.echo( "Failed to create avi" );
-			else if ( 0 > _g.rec_avi.AddVideoStream( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ),
-													 _g.dec.getWidth(), _g.dec.getHeight(), 30 ) )
-				_self.echo( "Failed to add video stream" );
-			else if ( !_g.rec_avi.InitWrite() )
-				_self.echo( "Failed to initiailze avi" );
+			if ( !_g.rec_avi.isOpen() && 0 < _g.dec.getWidth() && 0 < _g.dec.getHeight() )
+			{
+				if ( !_g.rec_avi.Create( "irr_live555.avi", "", CSqMulti() ) )
+					_self.echo( "Failed to create avi" );
+				else if ( 0 > _g.rec_avi.AddVideoStream( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ),
+														 _g.dec.getWidth(), _g.dec.getHeight(), 30 ) )
+					_self.echo( "Failed to add video stream" );
+				else if ( !_g.rec_avi.InitWrite() )
+					_self.echo( "Failed to initiailze avi" );
+
+			} // end if
+
+			// Save frame to avi
+			if ( !_g.rec_avi.WriteFrame( frame, CSqMulti() ) )
+				_self.echo( "Failed to write to avi file" );
 
 		} // end if
-
-		if ( !_g.rec_avi.WriteFrame( frame, CSqMulti() ) )
-			_self.echo( "Failed to write to avi file" );
 
 		if ( !_g.tex )
 		{
@@ -222,8 +220,8 @@ function UpdateVideo() : ( _g )
 			if ( tex.getUsed() )
 			{
 				// dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808,size=165698,stream_index=0
-				if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti( "dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808" ) ) )
-//				if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti( "" ) ) )
+//				if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti( "dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808" ) ) )
+				if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti( "" ) ) )
 					_self.echo( "failed to decode frame" );
 
 				_g.tex.Unlock();

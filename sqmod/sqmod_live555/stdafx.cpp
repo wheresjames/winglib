@@ -7,6 +7,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CLvRtspClient, CLvRtspClient )
 
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, Destroy )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, Open )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, Play )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, waitInit )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, LockVideo )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, UnlockVideo )
@@ -22,6 +23,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CLvRtspClient, CLvRtspClient )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, isAudio )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getExtraVideoData )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getExtraAudioData )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, setVideoHeader )
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CLvRtspClient );
