@@ -18,9 +18,11 @@ local _g = CGlobal();
 function _init() : ( _g )
 {
 //	local file = _self.path( "../media/440hz.ogg" );
+	local file = _self.path( "../../../../vhe.avi" );
 //	local file = _self.path( "../../../../vhe.mp3" );
-//	local file = _self.root( "audio_alarm/wav1.wav" );
-	local file = _self.root( "audio_alarm/wav0.wav" );
+//	local file = _self.path( "../../../../vhe.mpg" );
+//	local file = _self.path( "../../../../vhe.ogg" );
+//	local file = _self.path( "../../../../vhe.wav" );
 
 	_self.echo( "=====================================================" );
 	_self.echo( " Playing  : " + file );

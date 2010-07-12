@@ -105,7 +105,8 @@ public:
 		// Function that will find script data
 		g_psqScriptThread->SetIncludeScriptFunction( &IncludeScript );
 
-		g_psqScriptThread->Pb()[ oexT( "cmdline" ) ] = pbCmdLine;
+		// Set command line
+		g_psqScriptThread->Pb()[ oexT( "cmdline" ) ] = CommandLine();
 
 		// Start the script
 		if ( g_psqScriptThread->Start() )

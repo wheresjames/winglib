@@ -244,7 +244,9 @@ public:
         if ( !pPtr )
             return 0;
 
-        if ( sizeof( T ) && !IsPlainShare() )
+		if ( IsPlainShare() )
+			return m_fm.Size();
+        else if ( sizeof( T ) )
             return CAlloc().ArraySize( pPtr );
         else
             return 0;
@@ -257,7 +259,8 @@ public:
 
     /// Returns non-zero if the object was constructed
     oexBOOL IsConstructed() const
-    {   return ( CAlloc::eF1Constructed & CAlloc::GetFlags( c_Ptr() ) ) ? oexTRUE : oexFALSE;
+    {   if ( IsPlainShare() ) return 0;
+		return ( CAlloc::eF1Constructed & CAlloc::GetFlags( c_Ptr() ) ) ? oexTRUE : oexFALSE;
     }
 
     /// Deletes the object
@@ -284,7 +287,8 @@ public:
 
     void Destruct()
     {
-		CAlloc::SetFlags( m_pMem, CAlloc::eF1Constructed | CAlloc::GetFlags( m_pMem ) );
+		if ( !IsPlainShare() )
+			CAlloc::SetFlags( m_pMem, CAlloc::eF1Constructed | CAlloc::GetFlags( m_pMem ) );
         Delete();
     }
 
