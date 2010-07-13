@@ -21,7 +21,7 @@ public:
 	int Init( int width, int height, int fps, int brate, int src_codec, int dst_codec );
 
 	/// Encode binary buffer
-	int Transcode( sqbind::CSqBinary *src, sqbind::CSqBinary *dst, sqbind::CSqMulti *fi );
+	int Transcode( sqbind::CSqBinary *src, sqbind::CSqBinary *dst, sqbind::CSqMulti *fi, int flip );
 
 	/// Get raw intermediate image
 	int GetRaw( sqbind::CSqBinary *img );

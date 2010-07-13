@@ -71,6 +71,9 @@ public:
 	/// Runs garbage collection on binary shares
 	int cleanup_binshare();
 
+	/// Returns the module instance handle
+	unsigned int get_instance_handle();
+
 	/// Enables capturing console output
 	int enable_output_capture( int buffers, int buf_size );
 
@@ -189,6 +192,9 @@ public:
 
 	/// Returns the md5 for the specified string
 	stdString md5( const stdString &sStr );
+
+	/// Returns a guid representation of the md5 hash
+	stdString guid( const stdString &sStr );
 
 	/// Base64 encodes a string
 	stdString base64_encode( const stdString &sStr );

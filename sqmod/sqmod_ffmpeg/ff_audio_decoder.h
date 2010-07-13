@@ -18,13 +18,13 @@ public:
 	void Destroy();
 
 	/// Creates a decoder
-	int Create( int x_nCodec, int fmt );
+	int Create( int x_nCodec );
 
 	/// Reads info from a stream
 	int FindStreamInfo( sqbind::CSqBinary *in );
 
 	/// Encodes the specified image
-	int Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m );
+	int Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m );
 
 	/// Lookup a codec based on name
 	static int LookupCodecId( const sqbind::stdString &sCodec );
@@ -34,8 +34,8 @@ public:
 
 private:
 
-	/// Image format
-	int						m_nFmt;
+	/// Number of frames decoded
+	long					m_lFrames;
 
 	/// Pointer to codec object
     AVCodec 				*m_pCodec;

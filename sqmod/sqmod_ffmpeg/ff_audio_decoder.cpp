@@ -14,9 +14,8 @@ CFfAudioDecoder::CFfAudioDecoder()
 	m_pCodecContext = oexNULL;
 	m_pFormatContext = oexNULL;
 	m_pFrame = oexNULL;
-	m_nFmt = 0;
+	m_lFrames = 0;
 	oexZero( m_pkt );
-
 }
 
 void CFfAudioDecoder::Destroy()
@@ -40,12 +39,12 @@ void CFfAudioDecoder::Destroy()
 		m_pFormatContext = oexNULL;
 	} // end if
 
-	m_nFmt = 0;
 	m_pCodec = oexNULL;
 	oexZero( m_pkt );
+	m_lFrames = 0;
 }
 
-int CFfAudioDecoder::Create( int x_nCodec, int fmt )
+int CFfAudioDecoder::Create( int x_nCodec )
 {_STT();
 
 	oexAutoLock ll( _g_ffmpeg_lock );
@@ -88,8 +87,6 @@ int CFfAudioDecoder::Create( int x_nCodec, int fmt )
 		return 0;
 	} // end if
 
-	m_nFmt = fmt;
-
 	return 1;
 }
 
@@ -116,94 +113,33 @@ int CFfAudioDecoder::FindStreamInfo( sqbind::CSqBinary *in )
 	return 1;
 }
 
-int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
+int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
 {_STT();
-	// Ensure codec
-	if ( !m_pCodecContext )
+	if ( !in || !out )
 		return 0;
 
-	// Validate params
-	if ( !in || !in->getUsed() || !out )
-		return 0;
+	int in_size = in->getUsed();
+	const uint8_t* in_ptr = (const uint8_t*)in->Ptr();
 
-	// How much padding is there in the buffer
-	// If not enough, we assume the caller took care of it
-	int nPadding = in->Size() - in->getUsed();
-	if ( 0 < nPadding )
-	{
-		// Don't zero more than twice the padding size
-		if ( nPadding > ( FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
-			nPadding = FF_INPUT_BUFFER_PADDING_SIZE * 2;
+	int out_size = oex::cmn::Max( (int)(in->getUsed() * 2), (int)AVCODEC_MAX_AUDIO_FRAME_SIZE );
+	if ( (int)out->Size() < out_size )
+		out->Allocate( out_size );
 
-		// Set end to zero to ensure no overreading on damaged blocks
-		oexZeroMemory( &in->_Ptr()[ in->getUsed() ], nPadding );
+	int used = avcodec_decode_audio2( m_pCodecContext,
+									  (int16_t*)out->_Ptr(), &out_size,
+									  (const uint8_t*)in_ptr, in_size );
 
-	} // end if
+	out->setUsed( out_size );
 
-	if ( m_pFrame )
-	{	av_free( m_pFrame );
-		m_pFrame = oexNULL;
-	} // end if
-
-	m_pFrame = avcodec_alloc_frame();
-	if ( !m_pFrame )
-		return 0;
-
-	// Init packet
-	oexZero( m_pkt );
-	av_init_packet( &m_pkt );
-
-	if ( m )
-	{
-		if ( m->isset( oexT( "flags" ) ) )
-			m_pkt.flags = (*m)[ oexT( "flags" ) ].toint();
-		if ( m->isset( oexT( "size" ) ) )
-			m_pkt.size = (*m)[ oexT( "size" ) ].toint();
-		if ( m->isset( oexT( "stream_index" ) ) )
-			m_pkt.stream_index = (*m)[ oexT( "stream_index" ) ].toint();
-		if ( m->isset( oexT( "pos" ) ) )
-			m_pkt.pos = (*m)[ oexT( "pos" ) ].toint();
-		if ( m->isset( oexT( "dts" ) ) )
-			m_pkt.dts = (*m)[ oexT( "dts" ) ].toint();
-		if ( m->isset( oexT( "pts" ) ) )
-			m_pkt.pts = (*m)[ oexT( "pts" ) ].toint();
-		if ( m->isset( oexT( "duration" ) ) )
-			m_pkt.duration = (*m)[ oexT( "duration" ) ].toint();
-
-	} // end if
-
-	m_pkt.data = (uint8_t*)in->_Ptr();
-	m_pkt.size = in->getUsed();
-
-#if defined( FFSQ_VIDEO2 )
-
-	int gpp = 0;
-	int used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
-
-#else
-
-	int gpp = 0;
-	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (uint8_t*)in->_Ptr(), in->getUsed() );
 	if ( 0 >= used )
-	{	oexEcho( "!used" );
+	{	oexSHOW( used );
 		return -1;
 	} // end if
 
-#endif
+	// Frame count
+	m_lFrames++;
 
-	if ( used != m_pkt.size )
-		oexEcho( "Unsed data!!!" );
-
-//	int gpp = 0;
-//	int used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, in->_Ptr(), in->getUsed() );
-
-	if ( 0 >= gpp )
-		return 0;
-
-	// Convert
-	int res = CFfConvert::ConvertColorFB( m_pFrame, m_nFmt, m_pCodecContext->width, m_pCodecContext->height, fmt, out, SWS_FAST_BILINEAR );
-
-	return res ? 1 : 0;
+	return 1;
 }
 
 static AVCodecTag g_ff_audio_codec_map[] =

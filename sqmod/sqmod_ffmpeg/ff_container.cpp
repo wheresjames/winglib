@@ -264,7 +264,7 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 	return m_pkt.stream_index;
 }
 
-int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
+int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbind::CSqMulti *m, int flip )
 {_STT();
 
 	// Read a frame from the packet
@@ -329,7 +329,7 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 	// Do colorspace conversion
 	if ( !CFfConvert::ConvertColorFB( m_pFrame, m_pCodecContext->pix_fmt,
 									  m_pCodecContext->width, m_pCodecContext->height,
-									  fmt, dat, SWS_FAST_BILINEAR ) )
+									  fmt, dat, SWS_FAST_BILINEAR, flip ) )
 		return -1;
 
 	// Frame
@@ -338,7 +338,7 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 	return m_pkt.stream_index;
 }
 
-int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
+int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m, int flip )
 {_STT();
 
 	AVPacket pkt; oexZero( pkt );
@@ -424,7 +424,7 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 	// Do colorspace conversion
 	if ( !CFfConvert::ConvertColorFB( m_pFrame, m_pCodecContext->pix_fmt,
 									  m_pCodecContext->width, m_pCodecContext->height,
-									  fmt, out, SWS_FAST_BILINEAR ) )
+									  fmt, out, SWS_FAST_BILINEAR, flip ) )
 		return -1;
 
 	// Frame

@@ -454,7 +454,10 @@ public:
 	t_size MemCpyAt( oexCONST t_byte *ptr, t_size pos, t_size size )
 	{
         // Copy existing const data
-        Unshare();
+//        Unshare();
+
+		if ( pos > Size() || ( pos + size ) > Size() )
+			return 0;
 
 		// Copy data
 		if ( m_buf.MemCpyAt( ptr, pos, size ).Size() < size )

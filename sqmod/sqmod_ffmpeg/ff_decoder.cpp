@@ -146,7 +146,7 @@ int CFfDecoder::FindStreamInfo( sqbind::CSqBinary *in )
 	return 1;
 }
 
-int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
+int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m, int flip )
 {_STT();
 	// Ensure codec
 	if ( !m_pCodecContext )
@@ -253,12 +253,12 @@ oexSHOW( m_tmp.getUsed() );
 		return 0;
 
 	// Convert
-	int res = CFfConvert::ConvertColorFB( m_pFrame, m_nFmt, m_pCodecContext->width, m_pCodecContext->height, fmt, out, SWS_FAST_BILINEAR );
+	int res = CFfConvert::ConvertColorFB( m_pFrame, m_nFmt, m_pCodecContext->width, m_pCodecContext->height, fmt, out, SWS_FAST_BILINEAR, flip );
 
 	return res ? 1 : 0;
 }
 
-int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbind::CSqMulti *m )
+int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbind::CSqMulti *m, int flip )
 {_STT();
 	// Ensure codec
 	if ( !m_pCodecContext )
@@ -306,7 +306,7 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 		return 0;
 
 	// Convert
-	int res = CFfConvert::ConvertColorFI( m_pFrame, m_nFmt, m_pCodecContext->width, m_pCodecContext->height, img, SWS_FAST_BILINEAR, 1 );
+	int res = CFfConvert::ConvertColorFI( m_pFrame, m_nFmt, m_pCodecContext->width, m_pCodecContext->height, img, SWS_FAST_BILINEAR, flip );
 
 	return res ? 1 : 0;
 }

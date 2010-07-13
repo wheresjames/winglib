@@ -24,10 +24,10 @@ public:
 	int FindStreamInfo( sqbind::CSqBinary *in );
 
 	/// Encodes the specified image
-	int Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m );
+	int Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m, int flip );
 
 	/// Encodes the specified image
-	int DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbind::CSqMulti *m );
+	int DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbind::CSqMulti *m, int flip );
 
 	/// Returns non-zero if valid codec
 	int isValid() { return 0 != m_pCodecContext; }

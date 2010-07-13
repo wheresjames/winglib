@@ -27,10 +27,10 @@ public:
 	int ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
 
 	/// Reads and decodes a frame
-	int DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
+	int DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbind::CSqMulti *m, int flip );
 
 	/// Decodes a frame from the specified buffer
-	int DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m );
+	int DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m, int flip );
 
 	/// Decodes an audio frame from the specified buffer
 	int DecodeAudioFrameBin( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m );

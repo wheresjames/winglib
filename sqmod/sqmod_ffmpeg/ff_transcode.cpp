@@ -45,7 +45,7 @@ int CFfTranscode::Init( int width, int height, int fps, int brate, int src_codec
 	return 1;
 }
 
-int CFfTranscode::Transcode( sqbind::CSqBinary *src, sqbind::CSqBinary *dst, sqbind::CSqMulti *fi )
+int CFfTranscode::Transcode( sqbind::CSqBinary *src, sqbind::CSqBinary *dst, sqbind::CSqMulti *fi, int flip )
 {_STT();
 	if ( !isValid() )
 		return 0;
@@ -59,8 +59,8 @@ int CFfTranscode::Transcode( sqbind::CSqBinary *src, sqbind::CSqBinary *dst, sqb
 		return 1;
 	} // end if
 
-	// Decode in comming
-	if ( !m_dec.Decode( src, PIX_FMT_YUV420P, &m_tmp, fi ) )
+	// Decode incoming
+	if ( !m_dec.Decode( src, PIX_FMT_YUV420P, &m_tmp, fi, flip ) )
 		return 0;
 
 	// Encode in new format

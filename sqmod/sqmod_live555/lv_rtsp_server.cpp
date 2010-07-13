@@ -66,8 +66,11 @@ void CLvRtspServer::CLiveMediaSource::doGetNextFrame()
 
 int CLvRtspServer::CLiveMediaSource::queueFrame( oex::CBin *pFrame )
 {
-	if ( !pFrame )
+	// Terminate stream?
+	if ( !pFrame || !pFrame->getUsed() )
+	{	handleClosure( this );
 		return 0;
+	} // end if
 
 	// Must use previous frame first
 	// +++ May need frame buffering
@@ -352,10 +355,33 @@ void CLvRtspServer::ProcessMsg( const sqbind::stdString &sCmd, sqbind::CSqMulti 
 	if ( sCmd == oexT( "CreateStream" ) )
 		CreateStream( (*pParams)[ "id" ].str(), (*pParams)[ "desc" ].str() );
 
+	else if ( sCmd == oexT( "CloseStream" ) )
+		CloseStream( (*pParams)[ "id" ].str() );
+
 	// DeliverFrame
 	else if ( sCmd == oexT( "DeliverFrame" ) )
 		DeliverFrame( (*pParams)[ "stream_id" ].str(), (*pParams)[ "frame_id" ].str() );
 
+}
+
+int CLvRtspServer::CloseStream( const sqbind::stdString &sId )
+{_STT();
+
+	if ( !m_pEnv || !m_pRtspServer || !sId.length() )
+		return 0;
+
+	// Do we have such a session?
+	t_SessionMap::iterator it = m_mapSession.find( sId );
+	if ( m_mapSession.end() == it || !it->second )
+		return 0;
+
+	// Remove from server
+	m_pRtspServer->removeServerMediaSession( it->second->Session() );
+
+	// Drop from the map
+	m_mapSession.erase( it );
+
+	return 1;
 }
 
 int CLvRtspServer::CreateStream( const sqbind::stdString &sId, const sqbind::stdString &sDesc )
@@ -394,7 +420,7 @@ int CLvRtspServer::DeliverFrame( const sqbind::stdString &sStreamId, const sqbin
 {_STT();
 
 	// Sanity checks
-	if ( !sStreamId.length() || !sFrameId.length() )
+	if ( !sStreamId.length() )
 		return 0;
 
 	// Do we have such a session?
@@ -403,9 +429,14 @@ int CLvRtspServer::DeliverFrame( const sqbind::stdString &sStreamId, const sqbin
 		return 0;
 
 	// Check for a valid frame
-	oex::CBin binFrame = oexGetBin( sFrameId.c_str() );
-	if ( !binFrame.getUsed() )
-		return 0;
+	oex::CBin binFrame;
+	
+	// Frame id?
+	if ( sFrameId.length() ) 
+	{	binFrame = oexGetBin( sFrameId.c_str() );
+		if ( !binFrame.getUsed() )
+			return 0;
+	} // end if
 
 	// Deliver the frame to the session
 	it->second->queueFrame( &binFrame );

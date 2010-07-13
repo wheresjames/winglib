@@ -74,6 +74,9 @@ public:
 		/// Returns non-zero if the session needs a frame
 		int needFrame() { if ( !m_pSource ) return 0; return m_pSource->needFrame(); }
 
+		/// Returns pointer to session object
+		ServerMediaSession* Session() { return m_pSms; }
+
 	private:
 
 		/// Creates a new frame source instance
@@ -204,6 +207,9 @@ public:
 
 	/// Creates a stream on the server
 	int CreateStream( const sqbind::stdString &sId, const sqbind::stdString &sDesc );
+
+	/// Closes the specified stream
+	int CloseStream( const sqbind::stdString &sId );
 
 	/// Adds frame to the output stream queue
 	int DeliverFrame( const sqbind::stdString &sStreamId, const sqbind::stdString &sFrameId );

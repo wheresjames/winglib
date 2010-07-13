@@ -244,6 +244,12 @@ stdString CSqEngineExport::get_output( int max )
 */
 }
 
+/// Returns the buffer for a binary share
+unsigned int CSqEngineExport::get_instance_handle()
+{_STT();
+	return (unsigned int)oex::os::CSys::GetInstanceHandle();
+}
+
 stdString CSqEngineExport::base64_encode( const stdString &sStr )
 {_STT();
 	oex::CStr8 sMb = oexStrToMb( oex::CStr( sStr.c_str(), sStr.length() ) );
@@ -277,6 +283,15 @@ stdString CSqEngineExport::md5( const stdString &sStr )
 	oex::oexGUID hash;
 	oex::CStr8 sMb = oexStrToMb( oex::CStr( sStr.c_str(), sStr.length() ) );
 	oex::CStr sRes = oexMbToStr( oex::CBase16::Encode( oex::oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) );
+	return stdString().assign( sRes.Ptr(), sRes.Length() );
+}
+
+stdString CSqEngineExport::guid( const stdString &sStr )
+{_STT();
+	oex::oexGUID hash;
+	oex::CStr8 sMb = oexStrToMb( oex::CStr( sStr.c_str(), sStr.length() ) );
+	oex::oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() );
+	oex::CStr sRes = oexMbToStr( hash );
 	return stdString().assign( sRes.Ptr(), sRes.Length() );
 }
 
@@ -956,6 +971,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_cpu_load )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_instance_handle )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, boot_time )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, error )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, warning )
@@ -978,6 +994,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, decorate )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, md5 )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, guid )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base64_decode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base64_encode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base16_decode )
