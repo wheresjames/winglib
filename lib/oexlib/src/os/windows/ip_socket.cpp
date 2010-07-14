@@ -400,7 +400,7 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 
 	// Valid number of connections?
 	if ( x_uMaxConnections == 0 )
-		x_uMaxConnections = SOMAXCONN;
+		x_uMaxConnections = 16; // SOMAXCONN;
 
 	// Start the socket listening
 	int nRet = listen( (SOCKET)m_hSocket, (int)( x_uMaxConnections ? x_uMaxConnections : SOMAXCONN ) );
