@@ -19,8 +19,11 @@ public:
 		CVideoSink( UsageEnvironment &rEnv );
 		virtual ~CVideoSink();
 
+		/// Returns non-zero if new frame is needed
+		int needFrame();
+
 		/// Reads frame info
-		int LockFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
+		int LockFrame( sqbind::CSqBinary *dat, int to );
 
 		/// Releases the frame buffer
 		int UnlockFrame();
@@ -28,14 +31,14 @@ public:
 		/// Sets the packet header
 		void setHeader( sqbind::CSqBinary *header );
 
+		/// Grabs next frame
+		virtual Boolean continuePlaying();
+
 	private:
 
 		/// Destructor
 //		virtual ~CVideoSink();
-
-		/// Grabs next frame
-		virtual Boolean continuePlaying();
-		
+	
 	private:
 
 		static void _afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
@@ -53,8 +56,11 @@ public:
 		/// Data buffer
 		sqbind::CSqBinary		m_buf;
 
-		/// Signals when a new frame is ready
-		oex::CSignal			m_sigFrame;
+		/// Non-zero when a new frame is ready
+		int						m_nFrameReady;
+
+		/// Non-zero when a new frame is being captured
+		int						m_nFrameGrabbing;
 
 		/// Data lock
 		oexLock					m_lock;
@@ -78,18 +84,21 @@ public:
 
         /// Reads frame infofile:///home/landshark/code/lib2/winglib/sqmod/sqmod_live555/lv_rtsp_server.cpp
 
-		int LockFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
+		/// Returns non-zero if new frame is needed
+		int needFrame();
+
+		int LockFrame( sqbind::CSqBinary *dat, int to );
 
 		/// Releases the frame buffer
 		int UnlockFrame();
+
+		/// Grabs next frame
+		virtual Boolean continuePlaying();
 
 	private:
 
 		/// Destructor
 //		virtual ~CAudioSink();
-
-		/// Grabs next frame
-		virtual Boolean continuePlaying();
 
 	private:
 
@@ -105,8 +114,11 @@ public:
 		/// Data buffer
 		sqbind::CSqBinary		m_buf;
 
-		/// Signals when a new frame is ready
-		oex::CSignal			m_sigFrame;
+		/// Non-zero when a new frame is ready
+		int						m_nFrameReady;
+
+		/// Non-zero when a new frame is being captured
+		int						m_nFrameGrabbing;
 
 	};
 
@@ -133,13 +145,13 @@ public:
 	int ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bAudio, sqbind::CSqMulti *m );
 
 	/// Reads frame data, good until UnlockFrame() is called
-	int LockVideo( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
+	int LockVideo( sqbind::CSqBinary *dat, int to );
 
 	/// Releases the frame buffer
 	int UnlockVideo();
 
 	/// Reads frame data, good until UnlockFrame() is called
-	int LockAudio( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
+	int LockAudio( sqbind::CSqBinary *dat, int to );
 
 	/// Releases the frame buffer
 	int UnlockAudio();
@@ -197,6 +209,12 @@ public:
 
 	/// Signal start
 	void Play() { m_evtPlay.Signal(); }
+
+	/// Idle processing static function
+	static void _OnIdle( void *pData );
+
+	/// Idle processing
+	void OnIdle();
 
 protected:
 
