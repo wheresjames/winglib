@@ -87,6 +87,10 @@ namespace sqbind
 		/// Default constructor
 		CSqMulti();
 
+		/// Copy from pointer
+		CSqMulti( const CSqMulti *m )
+		{	if ( m ) *this = *m; }
+
 		/// Copy constructor
 		CSqMulti( const CSqMulti &m );
 

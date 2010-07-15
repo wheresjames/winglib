@@ -5,12 +5,12 @@
 #include "GroupsockHelper.hh"
 
 // CLiveMediaSubsession::createNew
-CLvRtspServer::CLiveMediaSubsession* CLvRtspServer::CLiveMediaSubsession::createNew( UsageEnvironment& env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer, ServerMediaSession *pSms )
+CLvRtspServer::CLiveMediaSubsession* CLvRtspServer::CLiveMediaSubsession::createNew( UsageEnvironment& env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer, ServerMediaSession *pSms, sqbind::CSqMulti *mParams )
 {_STT();
 	if ( !pRtspServer )
 		return oexNULL;
 
-	return new CLvRtspServer::CLiveMediaSubsession( env, reuseFirstSource, pRtspServer, pSms );
+	return new CLvRtspServer::CLiveMediaSubsession( env, reuseFirstSource, pRtspServer, pSms, mParams );
 }
 
 // CLiveMediaSubsession::createNewStreamSource
@@ -19,23 +19,35 @@ FramedSource* CLvRtspServer::CLiveMediaSubsession::createNewStreamSource( unsign
 	if ( !m_pRtspServer )
 		return oexNULL;
 
-	m_pSource = CLvRtspServer::CLiveMediaSource::createNew( envir(), m_pRtspServer );
+	m_pSource = CLvRtspServer::CLiveMediaSource::createNew( envir(), m_pRtspServer, &m_p );
 
 	estBitrate = 500;
 
 	// Create a framer for the video stream
-//	return MPEG4VideoStreamFramer::createNew( envir(), m_pSource );
-	return MPEG4VideoStreamDiscreteFramer::createNew( envir(), m_pSource );
-//	return H264VideoStreamFramer::createNew( envir(), m_pSource );
-//	return MPEG1or2VideoStreamDiscreteFramer::createNew( envir(), m_pSource );
+//	if ( m_p[ oexT( "codec" ) ].str() == oexT( "H264" ) )
+//		return H264VideoStreamDiscreteFramer::createNew( envir(), m_pSource );
+//		return new H264VideoStreamFramer( envir(), m_pSource );
+//	else if ( m_p[ oexT( "codec" ) ].str() == oexT( "MPG1" ) || m_p[ oexT( "codec" ) ].str() == oexT( "MPG2" ) )
+//		return MPEG1or2VideoStreamDiscreteFramer::createNew( envir(), m_pSource );
+//	else
+		return MPEG4VideoStreamDiscreteFramer::createNew( envir(), m_pSource );
 }
 
 // CLiveMediaSubsession::createNewRTPSink
 RTPSink* CLvRtspServer::CLiveMediaSubsession::createNewRTPSink( Groupsock* rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic, FramedSource* inputSource )
 {_STT();
-	return MPEG4ESVideoRTPSink::createNew( envir(), rtpGroupsock, rtpPayloadTypeIfDynamic, 1000000 / 15 );
-//	return H264VideoRTPSink::createNew( envir(), rtpGroupsock, rtpPayloadTypeIfDynamic, 1000 );
-//	return MPEG1or2VideoRTPSink::createNew( envir(), rtpGroupsock );
+
+	// Get frame rate
+	long fps = m_p[ oexT( "fps" ) ].toint();
+	if ( 0 >= fps || 100 < fps ) fps = 15;
+
+	// Create proper video sink
+//	if ( m_p[ oexT( "codec" ) ].str() == oexT( "H264" ) )
+//		return H264VideoRTPSink::createNew( envir(), rtpGroupsock, rtpPayloadTypeIfDynamic, 1000000 / fps );
+//	else if ( m_p[ oexT( "codec" ) ].str() == oexT( "MPG1" ) || m_p[ oexT( "codec" ) ].str() == oexT( "MPG2" ) )
+//		return MPEG1or2VideoRTPSink::createNew( envir(), rtpGroupsock );
+//	else
+		return MPEG4ESVideoRTPSink::createNew( envir(), rtpGroupsock, rtpPayloadTypeIfDynamic, 1000000 / fps );
 }
 
 int CLvRtspServer::CLiveMediaSubsession::queueFrame( oex::CBin *pFrame )
@@ -47,12 +59,13 @@ int CLvRtspServer::CLiveMediaSubsession::queueFrame( oex::CBin *pFrame )
 }
 
 // CLiveMediaSource::createNew()
-CLvRtspServer::CLiveMediaSource* CLvRtspServer::CLiveMediaSource::createNew( UsageEnvironment& env, CLvRtspServer *pRtspServer )
+CLvRtspServer::CLiveMediaSource* CLvRtspServer::CLiveMediaSource::createNew( UsageEnvironment& env, CLvRtspServer *pRtspServer, sqbind::CSqMulti *mParams )
 {_STT();
+
 	if ( !pRtspServer )
 		return oexNULL;
 
-	return new CLvRtspServer::CLiveMediaSource( env, pRtspServer );
+	return new CLvRtspServer::CLiveMediaSource( env, pRtspServer, mParams );
 }
 
 
@@ -353,7 +366,7 @@ void CLvRtspServer::ProcessMsg( const sqbind::stdString &sCmd, sqbind::CSqMulti 
 
 	// CreateStream
 	if ( sCmd == oexT( "CreateStream" ) )
-		CreateStream( (*pParams)[ "id" ].str(), (*pParams)[ "desc" ].str() );
+		CreateStream( (*pParams)[ "id" ].str(), pParams );
 
 	else if ( sCmd == oexT( "CloseStream" ) )
 		CloseStream( (*pParams)[ "id" ].str() );
@@ -384,13 +397,14 @@ int CLvRtspServer::CloseStream( const sqbind::stdString &sId )
 	return 1;
 }
 
-int CLvRtspServer::CreateStream( const sqbind::stdString &sId, const sqbind::stdString &sDesc )
+int CLvRtspServer::CreateStream( const sqbind::stdString &sId, sqbind::CSqMulti *pParams )
 {_STT();
 
 	if ( !m_pEnv || !m_pRtspServer || !sId.length() )
 		return 0;
 
 	// Create media session
+	sqbind::stdString sDesc = (*pParams)[ "desc" ].str();
 	ServerMediaSession* pSms = ServerMediaSession::createNew( *m_pEnv, sId.c_str(), sId.c_str(), 
 															  sDesc.length() ? sDesc.c_str() : sId.c_str() );
 	if ( !pSms )
@@ -400,17 +414,17 @@ int CLvRtspServer::CreateStream( const sqbind::stdString &sId, const sqbind::std
 	} // end if
 
 	// Add subsession
-	CLiveMediaSubsession *pLms = CLiveMediaSubsession::createNew( *m_pEnv, True, this, pSms );
+	CLiveMediaSubsession *pLms = CLiveMediaSubsession::createNew( *m_pEnv, True, this, pSms, pParams );
 	if ( !pLms || !pSms->addSubsession( pLms ) )
 	{	oexERROR( 0, oexMks( oexT( "ServerMediaSession::addSubsession() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) );
 		ThreadDestroy();
 		return 0;
 	} // end if
 
-	/// Add session option to server
+	// Add session option to server
 	m_pRtspServer->addServerMediaSession( pSms );
 
-	/// Save session pointer
+	// Save session pointer
 	m_mapSession[ sId ] = pLms;
 
 	return 1;

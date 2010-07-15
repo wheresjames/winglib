@@ -348,7 +348,7 @@ public:
 
 	/// Returns non-zero if plain share
 	oexBOOL IsPlainShare()
-	{	return m_buf.IsPlainShare(); }
+	{	return ( m_ptr && !m_bFree ) || m_buf.IsPlainShare(); }
 
 	/// Returns a string representation of the buffer
 	/**

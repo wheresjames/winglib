@@ -290,6 +290,13 @@ CBin CBinShare::GetBuffer( CStr x_sName, CBinShare::t_size x_uSize )
 oexBOOL CBinShare::SetBuffer( CStr x_sName, CBin *x_pBin )
 {_STT();
 
+	// You can't share a plain buffer
+//	if ( x_pBin && x_pBin->IsPlainShare() )
+//	{	oexERROR( 0, CStr() << oexT( "Attempt to shared plain buffer : " ) << x_sName );
+//		oexASSERT( 0 );
+//		return oexFALSE;
+//	} // end if
+
 	oexAutoLock ll( m_lock );
 	if ( !ll.IsLocked() )
 		return oexFALSE;
@@ -344,7 +351,7 @@ oexINT CBinShare::Cleanup()
 			it = m_buffers.Erase( it );
 
 		// Reset timeout if it's being used
-		else if ( 1 < oexGetRefCount( it->bin.Ptr() ) )
+		else if ( !it->bin.IsPlainShare() && 1 < oexGetRefCount( it->bin.Ptr() ) )
 			it->to = tm;
 
 		// Erase once it times out

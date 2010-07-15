@@ -16,7 +16,7 @@ public:
 	{
 	public:
 
-		static CLiveMediaSource* createNew( UsageEnvironment& env, CLvRtspServer *pRtspServer );
+		static CLiveMediaSource* createNew( UsageEnvironment& env, CLvRtspServer *pRtspServer, sqbind::CSqMulti *mParams );
 
 		/// Queues a frame
 		int queueFrame( oex::CBin *pFrame );
@@ -26,8 +26,8 @@ public:
 
 	protected:
 
-		CLiveMediaSource( UsageEnvironment& env, CLvRtspServer *pRtspServer )
-			: FramedSource( env ), m_pRtspServer( pRtspServer )
+		CLiveMediaSource( UsageEnvironment& env, CLvRtspServer *pRtspServer, sqbind::CSqMulti *mParams )
+			: FramedSource( env ), m_pRtspServer( pRtspServer ), m_p( mParams )
 		{
 			m_bFrameReady = 0;
 		}
@@ -56,6 +56,9 @@ public:
 
 		/// Pointer to the video server
 		CLvRtspServer 				*m_pRtspServer;
+
+		/// Params
+		sqbind::CSqMulti			m_p;
 	};
 
 	class CLiveMediaSubsession : public OnDemandServerMediaSubsession
@@ -63,7 +66,7 @@ public:
 	public:
 
 		/// Creates an instance of this class
-		static CLiveMediaSubsession* createNew( UsageEnvironment& env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer, ServerMediaSession *pSms );
+		static CLiveMediaSubsession* createNew( UsageEnvironment& env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer, ServerMediaSession *pSms, sqbind::CSqMulti *mParams );
 
 		/// Queues a frame
 		int queueFrame( oex::CBin *pFrame );
@@ -94,10 +97,11 @@ public:
 	protected:
 
 		/// Constructor
-		CLiveMediaSubsession( UsageEnvironment &env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer, ServerMediaSession *pSms )
+		CLiveMediaSubsession( UsageEnvironment &env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer, ServerMediaSession *pSms, sqbind::CSqMulti *mParams )
 			: OnDemandServerMediaSubsession( env, reuseFirstSource ),
 			  m_pRtspServer( pRtspServer ),
-			  m_pSms( pSms )
+			  m_pSms( pSms ),
+			  m_p( mParams )
 		{
 			m_pSource = oexNULL;
 
@@ -134,6 +138,12 @@ public:
 
 		/// The url that can be used to access the stream
 		sqbind::stdString			m_sUrl;
+
+		/// Video codec
+		sqbind::stdString			m_sVideoCodec;
+
+		/// Params
+		sqbind::CSqMulti			m_p;
 
 	};
 
@@ -206,7 +216,7 @@ public:
 	void ProcessMsg( const sqbind::stdString &sCmd, sqbind::CSqMulti *pParams );
 
 	/// Creates a stream on the server
-	int CreateStream( const sqbind::stdString &sId, const sqbind::stdString &sDesc );
+	int CreateStream( const sqbind::stdString &sId, sqbind::CSqMulti *pParams );
 
 	/// Closes the specified stream
 	int CloseStream( const sqbind::stdString &sId );

@@ -162,7 +162,6 @@ void CLvRtspClient::CAudioSink::afterGettingFrame( void* clientData, unsigned fr
 	// Signal that a frame is ready
 	m_nFrameReady = 1;
 	m_nFrameGrabbing = 0;
-
 }
 
 int CLvRtspClient::CAudioSink::needFrame()
