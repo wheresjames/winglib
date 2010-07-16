@@ -141,6 +141,35 @@ stdString CSqEngineExport::root( const stdString &sPath )
 	return oexGetModulePath( sPath.c_str() ).Ptr();
 }
 
+stdString CSqEngineExport::get_sys_folder( const stdString &sId )
+{_STT();
+
+	oex::oexINT nId = oexStrToLong( sId.c_str() );
+	if ( !nId )
+	{
+		if ( sId == oexT( "temp" ) )
+			nId = oex::os::CBaseFile::eFidTemp;
+
+		else if ( sId == oexT( "sys" ) )
+			nId = oex::os::CBaseFile::eFidUserSystem;
+
+		else if ( sId == oexT( "os" ) )
+			nId = oex::os::CBaseFile::eFidUserOs;
+
+		else if ( sId == oexT( "current" ) )
+			nId = oex::os::CBaseFile::eFidCurrent;
+
+		else if ( sId == oexT( "root" ) )
+			nId = oex::os::CBaseFile::eFidDefRoot;
+
+		else if ( sId == oexT( "fonts" ) )
+			nId = oex::os::CBaseFile::eFidFonts;
+
+	} // end if
+	
+	return sqbind::oex2std( oexGetSysFolder( nId ) );
+}
+
 stdString CSqEngineExport::module_name()
 {_STT();
 	return oexGetModuleFileName().Ptr();
@@ -993,6 +1022,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, build_path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, decorate )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_sys_folder )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, md5 )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, guid )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base64_decode )

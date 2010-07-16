@@ -23,6 +23,9 @@ public:
 	/// Load font from file
 	int LoadFile( CFtFace *pFace, const sqbind::stdString &sFile, int nIndex );
 
+	/// Loads font from system font folder
+	int LoadFont( CFtFace *pFace, const sqbind::stdString &sFont, int nIndex );
+
 private:
 
 	// Last error

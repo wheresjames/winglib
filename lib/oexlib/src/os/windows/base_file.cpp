@@ -35,6 +35,9 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
+#include <ShlObj.h>
+#include <Shellapi.h>
+
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
@@ -324,6 +327,7 @@ CStr CBaseFile::GetModPath( oexCSTR x_pPath )
 
 CStr CBaseFile::GetModFileName( oexCPVOID x_pInstance )
 {_STT();
+
 	oexTCHAR szFilename[ oexSTRSIZE ] = { 0 };
 
 	// Get the module file name
@@ -343,3 +347,68 @@ oexBOOL CBaseFile::Rename( oexCSTR x_pOld, oexCSTR x_pNew )
 	return MoveFileEx( oexStrToMbPtr( x_pOld ), oexStrToMbPtr( x_pNew ),
 					   MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING );
 }
+
+CStr CBaseFile::GetSysFolder( oexINT x_nFolderId, oexINT x_nMaxLength )
+{
+	// Ensure at least MAX_PATH bytes
+	if ( MAX_PATH > x_nMaxLength )
+		x_nMaxLength = MAX_PATH;
+
+	CStr s;
+	if ( !s.OexAllocate( x_nMaxLength ) )
+		return s;
+
+	// Get the folder
+	switch( x_nFolderId )
+	{
+		case eFidNone :
+			return CStr();
+
+		case eFidTemp :
+			s.SetLength( ::GetTempPath( x_nMaxLength, s._Ptr() ) );
+			return s;
+
+		case eFidUserSystem :
+			s.SetLength( ::GetSystemDirectory( s._Ptr(), x_nMaxLength ) );
+			return s;
+
+		case eFidUserOs :
+			s.SetLength( ::GetWindowsDirectory( s._Ptr(), x_nMaxLength ) );
+			return s;
+
+		case eFidCurrent :
+			s.SetLength( ::GetCurrentDirectory( x_nMaxLength, s._Ptr() ) );
+			return s;
+
+		case eFidDefRoot :
+			s.SetLength( cmn::Min( (UINT)3, ::GetWindowsDirectory( s._Ptr(), x_nMaxLength ) ) );
+			return s;
+
+		case eFidFonts :
+			x_nFolderId = CSIDL_FONTS; 
+			break;
+
+		default : 
+			break;
+
+	} // end switch
+
+	LPITEMIDLIST pidl;
+	if ( SHGetSpecialFolderLocation( NULL, x_nFolderId, &pidl ) != NOERROR )
+		return CStr();
+
+	// Get the path name
+	BOOL ret = SHGetPathFromIDList( pidl, s._Ptr() );
+
+	// Free the memory
+	LPMALLOC pMalloc;
+	if ( SHGetMalloc( &pMalloc ) == NOERROR )
+		pMalloc->Free( pidl );
+
+	if ( !ret )
+		return CStr();
+
+	return s;
+}
+
+

@@ -2790,6 +2790,10 @@ public:
         return *this;
     }
 
+    /// Concatinates two strings into a path
+    static TStr BuildPath( oexINT x_nId, TStr x_sPath, T tSep = oexTCPathSep( T ) )
+    {   return BuildPath( oexGetSysFolder( x_nId ), x_sPath ); }
+
 	// +++ Make this more efficient by removing the double search for separators
     /// Returns the root path of str
     TStr GetPath() oexCONST

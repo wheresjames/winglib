@@ -28,11 +28,21 @@ int CFtLibrary::LoadFile( CFtFace *pFace, const sqbind::stdString &sFile, int nI
 	if ( !pFace )
 		return 0;
 
-	// oexSysDir( file );
+	if ( !oexExists( sFile.c_str() ) )
+		return 0;
 
 	// Attempt to load font
 	m_last_error = FT_New_Face( m_library, sFile.c_str(), nIndex, &pFace->Obj() );
 
 	return m_last_error ? 0 : 1;
+}
+
+int CFtLibrary::LoadFont( CFtFace *pFace, const sqbind::stdString &sFont, int nIndex )
+{_STT();
+
+	if ( !pFace )
+		return 0;
+
+	return LoadFile( pFace, sqbind::oex2std( oexBuildPath( oex::os::CBaseFile::eFidFonts, sFont.c_str() ) ), nIndex );
 }
 

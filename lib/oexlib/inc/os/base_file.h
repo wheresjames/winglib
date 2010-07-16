@@ -126,6 +126,24 @@ public:
 
     };
 
+	/// Special folder id's
+	enum
+	{
+		eFidNone = 0xff00,
+
+		eFidTemp,
+
+		eFidUserSystem,
+
+		eFidUserOs,
+
+		eFidCurrent,
+
+		eFidDefRoot,
+
+		eFidFonts
+	};
+
 private:
 
 	/// Default constructor
@@ -195,6 +213,9 @@ public:
 
 	/// Flushes file data to disk
 	static oexBOOL Flush( t_HFILE x_hFile );
+
+	/// Returns the path to the specified folder
+	static CStr GetSysFolder( oexINT x_nFolderId, oexINT x_nMaxLength = oexSTRSIZE );
 
 public:
 

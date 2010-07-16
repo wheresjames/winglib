@@ -81,6 +81,8 @@ function _init() : ( _g )
 			arecont_low	= [ "arecont_low",	"rtsp://192.168.2.252/image?res=half&x0=400&y0=0&x1=1200&y1=600&fps=30&quality=15&doublescan=0" ],
 //			panasonic	= [ "panasonic",	"rtsp://192.168.2.251/Mediainput/mpeg4" ]
 			panasonic	= [ "panasonic",	"rtsp://192.168.2.251" ]
+			
+			// Axis = rtsp://x.x.x.x/axis-media/media.amp
 
 		};
 
