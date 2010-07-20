@@ -40,6 +40,7 @@ namespace sqbind
 {
 	void SqBindAll( sqbind::VM x_vm )
 	{_STT();
+		CSqSize::Register( x_vm );
 		CSqBinary::Register( x_vm );
 		CSqString::Register( x_vm );
 		CSqVector::Register( x_vm );
@@ -249,4 +250,18 @@ SQBIND_REGISTER_CLASS_END()
 void CSqBinary::Register( sqbind::VM vm )
 {_STT();
 	SQBIND_EXPORT( vm, CSqBinary );
+}
+
+
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSize, CSqSize )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSize, set )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSize, setX )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSize, getX )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSize, setY )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSize, getY )
+SQBIND_REGISTER_CLASS_END()
+
+void CSqSize::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CSqSize );
 }

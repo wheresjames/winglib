@@ -4,6 +4,11 @@ class CFtFace
 {
 public:
 
+	// Glyph map type
+	typedef oexStdMap( oex::oexTCHAR, FT_BitmapGlyph ) t_GlyphMap;
+
+public:
+
 	// Declare constructors
 	_SQBIND_CLASS_CTOR_BEGIN( CFtFace )
 	_SQBIND_CLASS_CTOR_END( CFtFace )
@@ -18,13 +23,22 @@ public:
 	void Destroy();
 
 	/// Loads a character image
-	int LoadChar( int nChar );
+	int LoadChar( const sqbind::stdString &c );
 
 	/// Returns the last error
 	int getLastError() { return m_last_error; }
 
+	/// Returns the bitmap for the specified character
+	FT_Bitmap* getCharBmp( oex::oexTCHAR c );
+
+	/// Returns the glyph for the specified character
+	FT_BitmapGlyph getCharGlyph( oex::oexTCHAR c );
+
 	/// Set font char params
 	int setCharSize( int width, int height, int hrez, int vrez );
+
+	/// Calculate string width
+	int CalcSize( const sqbind::stdString &s, sqbind::CSqSize *pSize );
 
 	/// Set font angle
 	void setAngle( double d );
@@ -47,24 +61,33 @@ public:
 	/// Gets the pen y
 	int getPenY() { return m_pen.y; }
 
+	/// Returns an ascii map of the first character
+	int Char2Ascii( long *ox, long *oy, long tw, FT_Bitmap *pBmp, sqbind::stdString *sOut, const sqbind::stdString &sChars, const sqbind::stdString &sEol );
+
+	/// Returns a scaled ascii map of the string
+	sqbind::stdString Str2Ascii( int width, int height, const sqbind::stdString &sStr, const sqbind::stdString &sChars, const sqbind::stdString &sEol );
+
 	/// Returns the native object
 	FT_Face& Obj() { return m_face; }
 
 private:
 
-	// Last error
+	/// Last error
 	FT_Error				m_last_error;
 
-	// Free type font
+	/// Free type font
 	FT_Face					m_face;
 
-	// Matrix transformation
+	/// Matrix transformation
 	FT_Matrix				m_matrix;
 
-	// Font pen
+	/// Font pen
 	FT_Vector				m_pen;
 
-	// Font angle
+	/// Font angle
 	double					m_dAngle;
+
+	/// Glyph map
+	t_GlyphMap				m_mapGlyph;
 
 };

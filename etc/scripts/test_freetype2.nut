@@ -9,7 +9,10 @@ local _g = CGlobal();
 
 function _init() : ( _g )
 {
-	local font_name = "Arial.ttf";
+	local font_name = "arial.ttf";
+//	local font_name = "comic.ttf";
+//	local font_name = "cour.ttf";
+//	local font_name = "webdings.ttf";
 
 	_self.echo( "\n=== STARTING ===\n" );
 
@@ -33,7 +36,18 @@ function _init() : ( _g )
 	// Set pen position
 	face.setPen( 300 * 64, ( 480 - 200 ) * 64 );
 
-	// local font = 
+	local sz = CSqSize();
+	face.CalcSize( "hi", sz );
+	_self.echo( "Size of 'hi' = " + sz.getX() + " x " + sz.getY() );
+
+	// Show ascii bitmap string
+	_self.echo( face.Str2Ascii( 0, 0, "hi", " .", "\n" ) );
+
+	// Load a letter
+//	face.LoadChar( "e" );
+
+	// Show string
+//	_self.echo( face.Char2Ascii( " .", "\n" ) );
 
 	_self.echo( "\n=== DONE ===\n" );
 
