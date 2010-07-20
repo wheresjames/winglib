@@ -103,7 +103,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 	if ( !sUrl.length() )
 		return 0;
 
-	oexAutoLock ll( _g_ffmpeg_lock );
+	oexAutoLock ll( _g_ffmpeg_lock );	
 	if ( !ll.IsLocked() ) return 0;
 
 //	AVFormatParameters	fp;
