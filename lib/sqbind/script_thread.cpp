@@ -274,6 +274,14 @@ oex::oexINT CScriptThread::RunTimers()
 
 	} // end for
 
+	// Remove timers
+	for ( t_RemoveTimers::iterator it = m_lstRemoveTo.begin(); it != m_lstRemoveTo.end(); )
+	{	t_TimerList::iterator itErase = m_to.find( *it );
+		if ( itErase != m_to.end() )
+			m_to.erase( itErase );
+		m_lstRemoveTo.erase( it++ );
+	}
+
 	return n;
 }
 
@@ -316,7 +324,7 @@ oex::oexBOOL CScriptThread::KillTimer( oex::oexUINT x_uId )
 	if ( it == m_to.end() )
 		return oex::oexFALSE;
 
-	m_to.erase( it );
+	m_lstRemoveTo.push_back( x_uId );
 
 	return oex::oexTRUE;
 }

@@ -228,6 +228,7 @@ void CLvRtspClient::Destroy()
 	m_mParams.clear();
 	m_width = 0;
 	m_height = 0;
+	m_pEnv = 0;
 	m_pRtspClient = oexNULL;
 	m_pSession = oexNULL;
 	m_pVs = oexNULL;
@@ -596,6 +597,7 @@ void CLvRtspClient::OnIdle()
 		m_pAs->continuePlaying();
 
 	// Schedule us to run again
-	m_pEnv->taskScheduler().scheduleDelayedTask( 15, (TaskFunc*)CLvRtspClient::_OnIdle, this );
+	if ( !m_nEnd )
+		m_pEnv->taskScheduler().scheduleDelayedTask( 15, (TaskFunc*)CLvRtspClient::_OnIdle, this );
 }
 

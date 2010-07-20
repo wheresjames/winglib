@@ -353,7 +353,8 @@ void CLvRtspServer::ProcessMsgs()
 	m_evtMsgReady.Reset();
 
 	// Schedule us to run again
-	m_pEnv->taskScheduler().scheduleDelayedTask( 15, (TaskFunc*)CLvRtspServer::_ProcessMsgs, this );
+	if ( !m_nEnd )
+		m_pEnv->taskScheduler().scheduleDelayedTask( 15, (TaskFunc*)CLvRtspServer::_ProcessMsgs, this );
 
 }
 

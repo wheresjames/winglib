@@ -70,6 +70,9 @@ public:
     /// Map type for keys to timeout values
 	typedef oexStdMap( stdString, oex::oexUINT )		t_TimeoutList;
 
+	/// List of timers to remove
+	typedef oexStdList( oex::oexUINT )					t_RemoveTimers;
+
 public:
 
     /// Default constructor
@@ -208,6 +211,9 @@ private:
 	/// Timers
 	t_TimerList							m_to;
 
+	/// Timers to remove
+	t_RemoveTimers						m_lstRemoveTo;
+
 	/// Next timer id
 	oex::oexUINT						m_tid;
 
@@ -225,4 +231,5 @@ private:
 
 	/// Key timeout list
 	t_TimeoutList						m_lstKeyTimeouts;
+
 };
