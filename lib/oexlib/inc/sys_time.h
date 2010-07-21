@@ -94,6 +94,8 @@ public:
     */
     CSysTime( oexUINT x_uInitTime = eNullTime )
     {
+		m_tEscape = oexT( '%' );
+
         if ( eLocalTime == x_uInitTime )
             GetLocalTime();
 
@@ -105,11 +107,16 @@ public:
     }
 
     CSysTime( oexCONST CSysTime &x_st )
-    {   os::CSys::MemCpy( &m_time, &x_st.m_time, sizeof( m_time ) ); }
+    {
+		m_tEscape = oexT( '%' );
+		os::CSys::MemCpy( &m_time, &x_st.m_time, sizeof( m_time ) ); 
+	}
 
     CSysTime( oexINT x_nTimeFormat, oexINT64 x_llTime, oexINT x_lTzBias = eInvalid )
     {
-        if ( eFmtFile == x_nTimeFormat )
+		m_tEscape = oexT( '%' );
+
+		if ( eFmtFile == x_nTimeFormat )
             SetFileTime( x_llTime, x_lTzBias );
 
         else if ( eFmtUnix == x_nTimeFormat )
@@ -127,14 +134,17 @@ public:
 
 	// Initializes object with string
     CSysTime( oexCSTR x_sTmpl, oexCONST CStr x_sStr )
-	{	ParseTime( x_sTmpl, CStr( x_sStr ) );
+	{
+		m_tEscape = oexT( '%' );
+
+		ParseTime( x_sTmpl, CStr( x_sStr ) );
 	} 
 
     /// Destructor
     virtual ~CSysTime()
     {
     }
-
+	
     CSysTime& GetLocalTime()
     {   os::CSys::GetLocalTime( m_time ); return *this; }
 
@@ -146,6 +156,18 @@ public:
 
     CSysTime& SetSystemTime()
     {   os::CSys::SetSystemTime( m_time ); return *this; }
+
+	//==============================================================
+	// setEscapeChar()
+	//==============================================================
+	/// Sets the format escape charachter
+	void setEscapeChar( oexTCHAR c ) {	m_tEscape = c; };
+
+	//==============================================================
+	// getEscapeChar()
+	//==============================================================
+	/// Gets the format escape charachter
+	oexTCHAR getEscapeChar() {	return m_tEscape; };
 
 	//==============================================================
 	// SetTime()
@@ -483,8 +505,10 @@ public:
 
 private:
 
+	oexTCHAR								m_tEscape;
+
     /// Time structure
-    os::CSys::STime                       m_time;
+    os::CSys::STime							m_time;
 
 };
 

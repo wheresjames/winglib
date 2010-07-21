@@ -134,6 +134,24 @@ namespace sqbind
 #endif
 		}
 
+		int getScanWidth()
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.GetEffWidth();
+#endif
+		}
+
+		CSqSize getSize()
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return CSqSize( m_img.GetWidth(), m_img.GetHeight() );
+#endif
+		}
+
 		// Copy image
 		int CopyImage( CSqImage *p )
 		{
@@ -186,6 +204,27 @@ namespace sqbind
 
 			// Copy the image data
 			dat->MemCpy( (CSqBinary::t_byte*)m_img.GetBits(), nSize );
+
+			// Return image size
+			return nSize;
+#endif
+		}
+
+		int refPixels( CSqBinary *dat )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			if ( !dat )
+				return 0;
+
+			// How large is the image?
+			int nSize = m_img.GetImageSize();
+			if ( 0 >= nSize )
+				return 0;
+
+			// Return reference to pixel buffer
+			dat->setBuffer( (CSqBinary::t_byte*)m_img.GetBits(), nSize, 0, 0 );
 
 			// Return image size
 			return nSize;

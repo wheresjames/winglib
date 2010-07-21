@@ -31,23 +31,31 @@ function _init() : ( _g )
 	} // end if
 
 	// Set font size
-	face.setCharSize( 50 * 64, 0, 100, 0 );
+	face.setCharSize( 25 * 64, 0, 100, 0 );
 
-	// Set pen position
-	face.setPen( 300 * 64, ( 480 - 200 ) * 64 );
+//	face.setAngle( 10. );
 
 	local sz = CSqSize();
 	face.CalcSize( "hi", sz );
 	_self.echo( "Size of 'hi' = " + sz.getX() + " x " + sz.getY() );
-
-	// Show ascii bitmap string
 	_self.echo( face.Str2Ascii( 0, 0, "hi", " .", "\n" ) );
 
-	// Load a letter
-//	face.LoadChar( "e" );
+	// Create image
+	local img = CSqImage();
+	img.Create( 320, 100 );
 
-	// Show string
-//	_self.echo( face.Char2Ascii( " .", "\n" ) );
+	local pix = CSqBinary();
+	if ( img.refPixels( pix ) ) pix.Zero();	
+
+	local str = "Hello World!";
+	face.CalcSize( str, sz );
+	face.setColor( 128, 0, 0 );
+	face.DrawImg( str, CSqPos( 22, 22 + sz.getY() ), img, 1 );
+
+	face.setColor( 255, 255, 255 );
+	face.DrawImg( str, CSqPos( 20, 20 + sz.getY() ), img, 1 );
+
+	img.Save( "fonttest.jpg", "" );
 
 	_self.echo( "\n=== DONE ===\n" );
 

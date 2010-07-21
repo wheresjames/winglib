@@ -76,7 +76,47 @@ namespace sqbind
 
 	};
 
+	class CSqPos
+	{
+	public:
+
+		static void Register( sqbind::VM vm );
+
+		SQBIND_CLASS_CTOR_BEGIN( CSqPos )
+			_SQBIND_CLASS_CTOR( CSqPos, 1 ) ( sa.GetInt( 2 ) )
+			_SQBIND_CLASS_CTOR( CSqPos, 2 ) ( sa.GetInt( 2 ), sa.GetInt( 3 ) )
+		SQBIND_CLASS_CTOR_END( CSqPos )
+
+		CSqPos() { m_x = 0; m_y = 0; }
+
+		CSqPos( int n ) { m_x = m_y = n; }
+
+		CSqPos( int x, int y ) { m_x = x; m_y = y; }
+
+		// Copy semantics
+		CSqPos( const CSqPos &r ) { m_x = r.m_x; m_y = r.m_y; }
+		CSqPos& operator=( const CSqPos &r ) { m_x = r.m_x; m_y = r.m_y; return *this; }
+
+		void set( int x, int y ) { m_x = x; m_y = y; }
+
+		int getX() { return m_x; }
+
+		void setX( int x ) { m_x = x; }
+
+		int getY() { return m_y; }
+
+		void setY( int y ) { m_y = y; }
+
+	private:
+
+		int		m_x;
+
+		int		m_y;
+
+	};
+
 }; // end namespace
 
 // Declare type for use as squirrel parameters
 SQBIND_DECLARE_INSTANCE( sqbind::CSqSize, CSqSize )
+SQBIND_DECLARE_INSTANCE( sqbind::CSqPos, CSqPos )

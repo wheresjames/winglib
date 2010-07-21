@@ -2,12 +2,20 @@
 
 #include "stdafx.h"
 
+#define CFtFace_FONT_SCALE 0x10000L
+
 CFtFace::CFtFace()
 {_STT();
 
 	m_face = 0;
-
+	m_pen.x = 0;
+	m_pen.y = 0;
 	setAngle( 0 );
+
+	m_red = 255;
+	m_green = 255;
+	m_blue = 255;
+
 //	setCharSize( 50 * 64, 0, 100, 0 );
 
 }
@@ -33,10 +41,10 @@ void CFtFace::Destroy()
 void CFtFace::setAngle( double d )
 {
 	m_dAngle = d; 
-	m_matrix.xx = (FT_Fixed)( cos( m_dAngle ) * 0x10000L );
-	m_matrix.xy = (FT_Fixed)(-sin( m_dAngle ) * 0x10000L );
-	m_matrix.yx = (FT_Fixed)( sin( m_dAngle ) * 0x10000L );
-	m_matrix.yy = (FT_Fixed)( cos( m_dAngle ) * 0x10000L );
+	m_matrix.xx = (FT_Fixed)( cos( m_dAngle ) * CFtFace_FONT_SCALE );
+	m_matrix.xy = (FT_Fixed)(-sin( m_dAngle ) * CFtFace_FONT_SCALE );
+	m_matrix.yx = (FT_Fixed)( sin( m_dAngle ) * CFtFace_FONT_SCALE );
+	m_matrix.yy = (FT_Fixed)( cos( m_dAngle ) * CFtFace_FONT_SCALE );
 }
 
 
@@ -120,10 +128,16 @@ int CFtFace::CalcSize( const sqbind::stdString &s, sqbind::CSqSize *pSize )
 		{
 			FT_Glyph_Get_CBox( (FT_Glyph)glyph, FT_GLYPH_BBOX_PIXELS, &gbox );
 
-			if ( gbox.xMax > gbox.xMin )
+			if ( glyph->root.advance.x )
+				_w += abs( ( glyph->root.advance.x ) / CFtFace_FONT_SCALE );
+
+			else if ( gbox.xMax > gbox.xMin )
 				_w += gbox.xMax - gbox.xMin;
 
-			if ( gbox.yMax > gbox.yMin )
+			if ( glyph->root.advance.y )
+				_h += abs( ( glyph->root.advance.y ) / CFtFace_FONT_SCALE );
+
+			else if ( gbox.yMax > gbox.yMin )
 				_h = oex::cmn::Max( _h, (int)( gbox.yMax - gbox.yMin ) );
 
 		} // end if
@@ -171,15 +185,6 @@ int CFtFace::Char2Ascii( long *ox, long *oy, long tw, FT_Bitmap *pBmp, sqbind::s
 
 	} // end for
 
-	// Add character width to output
-	if ( ox )
-	{
-		*ox += w;
-
-//		*ox += slot->advance.x >> 6
-
-	} // end if
-
 	return 1;
 }
 
@@ -193,10 +198,8 @@ sqbind::stdString CFtFace::Str2Ascii( int width, int height, const sqbind::stdSt
 	if ( !CalcSize( sStr, &sz ) )
 		return sqbind::stdString();
 
-	long xm = 2;
-
 	if ( !width )
-		width = sz.getX() + sEol.length() + ( sStr.length() * xm );
+		width = sz.getX() + sEol.length();
 
 	if ( !height )
 		height = sz.getY();
@@ -207,16 +210,121 @@ sqbind::stdString CFtFace::Str2Ascii( int width, int height, const sqbind::stdSt
 	long x = 0, y = 0;
 	for ( long i = 0; i < sStr.length(); i++ )
 	{
-		Char2Ascii( &x, &y, width, getCharBmp( sStr[ i ] ), &s, sChars, oexT( "" ) );
+		FT_BitmapGlyph glyph = getCharGlyph( sStr[ i ] );
+		if ( glyph )
+		{
+			// Draw the character
+			Char2Ascii( &x, &y, width, &glyph->bitmap, &s, sChars, oexT( "" ) );
 
-		x += xm;
+			// Next font position
+			x += abs( ( glyph->root.advance.x ) / CFtFace_FONT_SCALE );
+			y += abs( ( glyph->root.advance.y ) / CFtFace_FONT_SCALE );
+
+		} // end if
 
 	} // end for
 
 	if ( sEol.length() )
 		for ( long y = 0; y < height; y++ )
 			for ( long i = 0; i < sEol.length(); i++ )
-				s[ y * width + sz.getX() + ( sStr.length() * xm ) + i ] = sEol[ i ];
+				s[ y * width + sz.getX() + i ] = sEol[ i ];
 
 	return s;
 }
+
+int CFtFace::DrawImg( const sqbind::stdString &sStr, sqbind::CSqPos *pPos, sqbind::CSqImage *pImg, int flip )
+{
+	// Sanity checks
+	if ( !pImg || 0 >= pImg->getWidth() || !pPos || 0 >= pImg->getHeight() || !sStr.length() )
+		return 0;
+
+	// Get pixel buffer
+	sqbind::CSqBinary buf;
+	if ( !pImg->refPixels( &buf ) )
+		return 0;
+
+	// Draw the font
+	return DrawBin( sStr, pPos, &buf, 0, &pImg->getSize(), pImg->getScanWidth(), flip );
+}
+
+int CFtFace::DrawBin( const sqbind::stdString &sStr, sqbind::CSqPos *pPos, sqbind::CSqBinary *pBin, int fmt, sqbind::CSqSize *pSize, int sw, int flip )
+{
+	// Sanity checks
+	if ( !pBin || 0 >= pBin->getUsed() || !pPos || !pSize || 0 >= pSize->getX() || 0 >= pSize->getY() || !sStr.length() )
+		return 0;
+
+	// Get string size
+	sqbind::CSqSize sz;
+	if ( !CalcSize( sStr, &sz ) )
+		return 0;
+
+	int x = pPos->getX(), y = pPos->getY();
+	for ( long i = 0; i < sStr.length(); i++ )
+	{
+		FT_BitmapGlyph glyph = getCharGlyph( sStr[ i ] );
+		if ( glyph )
+		{
+			// Draw the character
+			DrawCharBin( glyph, x, y, pBin, fmt, pSize->getX(), pSize->getY(), sw, flip );
+
+			// Next font position
+			x += abs( ( glyph->root.advance.x ) / CFtFace_FONT_SCALE );
+			y += abs( ( glyph->root.advance.y ) / CFtFace_FONT_SCALE );
+
+		} // end if
+
+	} // end for
+
+
+	return 1;
+}
+
+int CFtFace::DrawCharBin( FT_BitmapGlyph g, int x, int y, sqbind::CSqBinary *pBin, int fmt, int w, int h, int sw, int flip )
+{
+	if ( !pBin || 0 >= pBin->getUsed() || 0 >= w || 0 >= h || !g )
+		return 0;
+
+	// Source
+	int bw = g->bitmap.width;
+	int bh = g->bitmap.rows;
+	unsigned char *ps = g->bitmap.buffer;
+
+	// Add character offsets
+	x += g->left;
+	y += flip ? -g->top : g->top;
+
+	// Get pointer to buffer
+	sqbind::CSqBinary::t_byte *p = pBin->_Ptr();
+	sqbind::CSqBinary::t_size max = pBin->getUsed();
+
+	for ( long _y = 0; _y < bh; _y++ )
+	{
+		for ( long _x = 0; _x < bw; _x++ )
+		{
+			// Get character
+			int c = (int)(unsigned char)ps[ _y * bw + _x ];
+
+			if ( c )
+			{
+				int py = y + _y;
+				int px = x + _x;
+				if ( 0 <= py && py <= h && 0 <= px && px <= w )
+				{	int m;
+					if ( !flip ) m = py * sw + ( px * 3 );
+					else m = ( h - py ) * sw + ( px * 3 );
+					if ( 0 <= m && m < max )
+					{	p[ m ] = ( m_blue * c ) >> 8;
+						p[ m + 1 ] = ( m_green * c ) >> 8;
+						p[ m + 2 ] = ( m_red * c ) >> 8;
+					} // end if
+				} // end if
+
+			} // end if
+
+		} // end for
+
+	} // end for
+
+	return 1;
+}
+

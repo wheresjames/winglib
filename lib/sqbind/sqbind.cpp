@@ -41,6 +41,7 @@ namespace sqbind
 	void SqBindAll( sqbind::VM x_vm )
 	{_STT();
 		CSqSize::Register( x_vm );
+		CSqPos::Register( x_vm );
 		CSqBinary::Register( x_vm );
 		CSqString::Register( x_vm );
 		CSqVector::Register( x_vm );
@@ -154,6 +155,9 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqTime, CSqTime )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, FormatTime )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, ParseTime )
 
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, setEscapeChar )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, getEscapeChar )
+
 SQBIND_REGISTER_CLASS_END()
 
 
@@ -171,11 +175,14 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqImage, CSqImage )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Decode )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, getWidth )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, getHeight )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, getSize )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, getScanWidth )	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, CopyImage )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Resample )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, isValid )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, setPixels )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, getPixels )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, refPixels )
 SQBIND_REGISTER_CLASS_END()
 
 void CSqImage::Register( sqbind::VM vm )
@@ -264,4 +271,17 @@ SQBIND_REGISTER_CLASS_END()
 void CSqSize::Register( sqbind::VM vm )
 {_STT();
 	SQBIND_EXPORT( vm, CSqSize );
+}
+
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqPos, CSqPos )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqPos, set )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqPos, setX )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqPos, getX )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqPos, setY )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqPos, getY )
+SQBIND_REGISTER_CLASS_END()
+
+void CSqPos::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CSqPos );
 }

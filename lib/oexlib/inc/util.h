@@ -72,9 +72,7 @@ public:
 	static CStr Mandelbrot( int w, int h, int x1, int y1, int x2, int y2 );
 
     /// Concatinates two strings into a path
-    template < typename T >
-	    static TStr< T > BuildPath( oexINT x_nId, oexCONST TStr< T > &x_sPath, T tSep = oexTCPathSep( T ) )
-    	{   return TStr< T >().BuildPath( oexGetSysFolder( x_nId ), x_sPath ); }
+	static CStr BuildPath( oexINT x_nId, oexCONST CStr &x_sPath, oexTCHAR tSep = oexTCPathSep( oexTCHAR ) );
 };
 
 

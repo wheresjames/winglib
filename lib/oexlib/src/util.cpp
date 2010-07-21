@@ -325,3 +325,6 @@ CStr CUtil::Mandelbrot( int w, int h, int x1, int y1, int x2, int y2 )
 	return s;
 }
 
+CStr CUtil::BuildPath( oexINT x_nId, oexCONST CStr &x_sPath, oexTCHAR tSep )
+{	return oexBuildPath( oexGetSysFolder( x_nId ), x_sPath ); }
+

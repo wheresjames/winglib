@@ -61,6 +61,19 @@ public:
 	/// Gets the pen y
 	int getPenY() { return m_pen.y; }
 
+	/// Set font color
+	void setColor( int r, int g, int b )
+	{	m_red = r; m_green = g; m_blue = b; }
+
+	/// Draws the string into the specified image
+	int DrawImg( const sqbind::stdString &sStr, sqbind::CSqPos *pPos, sqbind::CSqImage *pImg, int flip );
+
+	/// Draws the string into a binary buffer
+	int DrawBin( const sqbind::stdString &sStr, sqbind::CSqPos *pPos, sqbind::CSqBinary *pBin, int fmt, sqbind::CSqSize *pSize, int sw, int flip );
+
+	/// Draws the character into a binary buffer
+	int DrawCharBin( FT_BitmapGlyph g, int x, int y, sqbind::CSqBinary *pBin, int fmt, int w, int h, int sw, int flip );
+
 	/// Returns an ascii map of the first character
 	int Char2Ascii( long *ox, long *oy, long tw, FT_Bitmap *pBmp, sqbind::stdString *sOut, const sqbind::stdString &sChars, const sqbind::stdString &sEol );
 
@@ -90,4 +103,12 @@ private:
 	/// Glyph map
 	t_GlyphMap				m_mapGlyph;
 
+	/// Color red
+	int						m_red;
+
+	/// Color green
+	int						m_green;
+
+	/// Color blue
+	int						m_blue;
 };

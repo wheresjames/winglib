@@ -222,7 +222,8 @@ CStr CSysTime::FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors )
 	while ( x_sTmpl[ x ] != 0 )
 	{
 		// If not the escape character
-		if ( x_sTmpl[ x ] != '%' ) str << x_sTmpl[ x ];
+		if ( x_sTmpl[ x ] != m_tEscape ) 
+			str << x_sTmpl[ x ];
 
 		// Replace escape sequence
 		else switch( x_sTmpl[ ++x ] )
@@ -311,9 +312,9 @@ CStr CSysTime::FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors )
 			default :
 
                 // Ensure valid template string
-                oexASSERT( '%' == x_sTmpl[ x ] );
+                oexASSERT( m_tEscape == x_sTmpl[ x ] );
 
-                if ( x_bErrors && '%' != x_sTmpl[ x ] )
+                if ( x_bErrors && m_tEscape != x_sTmpl[ x ] )
                     *x_bErrors = oexTRUE;
 
                 str << x_sTmpl[ x ];
@@ -355,7 +356,7 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 	while ( x_sTmpl[ x ] && *x_sStr )
     {
 		// If not the escape character
-		if ( oexT( '%' ) != x_sTmpl[ x ]  )
+		if ( m_tEscape != x_sTmpl[ x ]  )
 		{
             // Skip char type?
 			if ( oexT( '*' ) == x_sTmpl[ x ] )

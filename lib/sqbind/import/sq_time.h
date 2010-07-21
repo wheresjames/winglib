@@ -50,6 +50,10 @@ namespace sqbind
 		CSqTime( const CSqTime &r ) { m_t = r.m_t; }
 		CSqTime& operator=( const CSqTime &r ) { m_t = r.m_t; return *this; }
 
+		void setEscapeChar( const stdString &s ) { if ( s.length() ) m_t.setEscapeChar( s[ 0 ] ); }
+
+		stdString getEscapeChar() { oex::oexTCHAR tc[ 2 ] = { m_t.getEscapeChar(), 0 }; return tc; }
+
 		void GetLocalTime()
 		{	m_t.GetLocalTime(); }
 
