@@ -38,7 +38,7 @@ public:
 
 		/// Destructor
 //		virtual ~CVideoSink();
-	
+
 	private:
 
 		static void _afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
@@ -135,6 +135,10 @@ public:
 	/// Destructor
 	virtual ~CLvRtspClient() { Destroy(); }
 
+	/// Copy
+	CLvRtspClient( const CLvRtspClient &r ) { }
+	CLvRtspClient& operator = ( const CLvRtspClient &r ) { return *this; }
+
 	/// Destroy connection
 	void Destroy();
 
@@ -205,7 +209,7 @@ public:
 	/// Sets the video header
 	void setVideoHeader( sqbind::CSqBinary *header )
 	{	if ( m_pVs ) m_pVs->setHeader( header );
-	} // end 
+	} // end
 
 	/// Signal start
 	void Play() { m_evtPlay.Signal(); }
@@ -235,7 +239,7 @@ protected:
 
 	/// Initializes video stream
 	int InitAudio( MediaSubsession *pss );
-	
+
 private:
 
 	/// Flag to end loop

@@ -134,7 +134,7 @@ public:
 		CLvRtspServer 				*m_pRtspServer;
 
 		/// Pointer to the ServerMediaSession object
-		ServerMediaSession			*m_pSms; 
+		ServerMediaSession			*m_pSms;
 
 		/// The url that can be used to access the stream
 		sqbind::stdString			m_sUrl;
@@ -162,6 +162,10 @@ public:
 
 	/// Destructor
 	virtual ~CLvRtspServer() { Destroy(); }
+
+	/// Copy
+	CLvRtspServer( const CLvRtspServer &r ) { }
+	CLvRtspServer& operator = ( const CLvRtspServer &r ) { return *this; }
 
 	/// Destroy connection
 	void Destroy();
@@ -235,7 +239,7 @@ private:
 	t_MsgList				m_lstMsgs;
 
 	/// Message list lock
-	oexLock					m_lockMsgs;	
+	oexLock					m_lockMsgs;
 
 	/// Session callback queue
 	sqbind::CSqMsgQueue		*m_pMsgQueue;

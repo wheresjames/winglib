@@ -35,8 +35,10 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
-#include <ShlObj.h>
-#include <Shellapi.h>
+#if !defined( __MINGW32__ )
+#	include <ShlObj.h>
+#	include <Shellapi.h>
+#endif
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
@@ -385,16 +387,24 @@ CStr CBaseFile::GetSysFolder( oexINT x_nFolderId, oexINT x_nMaxLength )
 			return s;
 
 		case eFidFonts :
-			x_nFolderId = CSIDL_FONTS; 
+#if !defined( __MINGW32__ )
+			x_nFolderId = CSIDL_FONTS;
+#else
+			s.SetLength( ::GetWindowsDirectory( s._Ptr(), x_nMaxLength ) );
+			if ( !s.Length() ) s = oexT( "c:\\windows" );
+			return s.BuildPath( oexT( "fonts" ) );
+#endif
 			break;
 
-		default : 
+		default :
 			break;
 
 	} // end switch
 
+#if !defined( __MINGW32__ )
+
 	LPITEMIDLIST pidl;
-	if ( SHGetSpecialFolderLocation( NULL, x_nFolderId, &pidl ) != NOERROR )
+	if ( SHGetSpecialFolderLocation( NULL, x_nFolderId, &pidl ) != NOERROR || !pidl )
 		return CStr();
 
 	// Get the path name
@@ -407,6 +417,8 @@ CStr CBaseFile::GetSysFolder( oexINT x_nFolderId, oexINT x_nMaxLength )
 
 	if ( !ret )
 		return CStr();
+
+#endif
 
 	return s;
 }
