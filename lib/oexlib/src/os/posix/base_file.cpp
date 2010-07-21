@@ -440,4 +440,43 @@ oexBOOL CBaseFile::Rename( oexCSTR x_pOld, oexCSTR x_pNew )
 	return rename( oexStrToMbPtr( x_pOld ), oexStrToMbPtr( x_pNew ) );
 }
 
+CStr CBaseFile::GetSysFolder( oexINT x_nFolderId, oexINT x_nMaxLength )
+{
+	// Get the folder
+	switch( x_nFolderId )
+	{
+		case eFidNone :
+			break;
 
+		case eFidTemp :
+		{	const char *pTmp = getenv( "TMPDIR" );
+			if ( !pTmp ) pTmp = getenv( "TEMP" );
+			if ( !pTmp ) pTmp = getenv( "TMP" );
+			if ( !pTmp ) pTmp = "/tmp";
+			return oexMbToStr( pTmp );
+		} // end case
+
+		case eFidUserSystem :
+		{	const char *pHome = getenv( "HOME" );
+			return pHome ? oexMbToStr( pHome ) : oexT( "" );
+		} // end case
+
+		case eFidUserOs :
+			return oexT( "/sys" );
+
+		case eFidCurrent :
+			break;
+
+		case eFidDefRoot :
+			break;
+
+		case eFidFonts :
+			return oexT( "/usr/share/fonts/truetype/msttcorefonts" );
+
+		default :
+			break;
+
+	} // end switch
+
+	return oexT( "" );
+}

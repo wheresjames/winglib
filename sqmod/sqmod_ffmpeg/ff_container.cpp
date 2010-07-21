@@ -103,7 +103,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 	if ( !sUrl.length() )
 		return 0;
 
-	oexAutoLock ll( _g_ffmpeg_lock );	
+	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) return 0;
 
 //	AVFormatParameters	fp;
@@ -119,6 +119,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 		return 0;
 	} // end if
 
+    // +++ Holy crap this function can be slow
 	res = av_find_stream_info( m_pFormatContext );
 	if ( 0 > res )
 	{	oexERROR( res, oexT( "av_find_stream_info() failed" ) );

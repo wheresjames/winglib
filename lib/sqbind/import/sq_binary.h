@@ -185,8 +185,8 @@ namespace sqbind
 
 		/// Sets a sub string into the binary object
 		t_size setSubString( const stdString &s, int start, int len )
-		{	if ( start >= s.length() || ( start + len ) > s.length() ) { Free(); return 0; }
-			return m_bin.setString( oexStrToMb( oex::CStr( &(s.c_str()[ start ]), len ) ) ); 
+		{	if ( start >= (int)s.length() || ( start + len ) > (int)s.length() ) { Free(); return 0; }
+			return m_bin.setString( oexStrToMb( oex::CStr( &(s.c_str()[ start ]), len ) ) );
 		}
 
 		/// Appends the string data to the buffer
