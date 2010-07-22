@@ -279,6 +279,22 @@ unsigned int CSqEngineExport::get_instance_handle()
 	return (unsigned int)oex::os::CSys::GetInstanceHandle();
 }
 
+stdString CSqEngineExport::build_url( CSqMulti *pUrl )
+{_STT();
+	if ( !pUrl ) 
+		return oexT( "" );
+	oex::CPropertyBag pb;
+	SQBIND_MultiToPropertyBag( *pUrl, pb );
+	return oex2std( oex::os::CIpAddress::BuildUrl( pb ) );
+}
+
+CSqMulti CSqEngineExport::parse_url( const stdString &sUrl )
+{_STT();
+	CSqMulti m;
+	SQBIND_PropertyBagToMulti( oex::os::CIpAddress::ParseUrl( sUrl.c_str(), sUrl.length() ), m );
+	return m;
+}
+
 stdString CSqEngineExport::base64_encode( const stdString &sStr )
 {_STT();
 	oex::CStr8 sMb = oexStrToMb( oex::CStr( sStr.c_str(), sStr.length() ) );
@@ -1025,6 +1041,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_sys_folder )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, md5 )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, guid )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, parse_url )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, build_url )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base64_decode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base64_encode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base16_decode )

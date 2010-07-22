@@ -199,6 +199,12 @@ public:
 	/// Returns a guid representation of the md5 hash
 	stdString guid( const stdString &sStr );
 
+	/// Builds a url from components
+	stdString build_url( CSqMulti *pUrl );
+
+	/// Parses a url into its components
+	CSqMulti parse_url( const stdString &sUrl );
+
 	/// Base64 encodes a string
 	stdString base64_encode( const stdString &sStr );
 

@@ -59,7 +59,7 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	int flip = 0;
 	if ( 0 > height ) { flip = 1; height = -height; }
 
-	if ( 0 >= width || 0 >= height )
+	if ( 0 >= width || 0 >= height || 0 != ( width % 4 ) )
 		return 0;
 
 	if ( !src || !src->getUsed() )
