@@ -3,6 +3,8 @@ _self.load_module( "irrlicht", "" );
 
 class CGlobal
 {
+	quit = 0;
+
 	// 3D engine
 	irr = 0;
 
@@ -77,9 +79,17 @@ function _init() : ( _g )
 	// Add a rotator
 	local ani = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.4, 0 ) );
 	_g.ball.AddAnimator( ani );
+
+	// Set draw function
+	_self.set_timer( ".", 30, "OnDraw" )
 }
 
 function _idle() : ( _g )
+{
+	return _g.quit;
+}
+
+function OnDraw() : ( _g )
 {
 	// Bounce off sides
 	if ( -50 > _g.xpos || 50 < _g.xpos )
@@ -106,7 +116,9 @@ function _idle() : ( _g )
 	// Set the balls new position
 	_g.ball.SetPosition( CSqirrVector3d( _g.xpos, _g.ypos, _g.zpos ) );
 
-	return _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
+	_g.quit = _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
+
+	return 1;
 }
 
 

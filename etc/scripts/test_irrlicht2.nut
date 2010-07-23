@@ -4,6 +4,8 @@ _self.load_module( "ffmpeg", "" );
 
 class CGlobal
 {
+	quit = 0;
+
 	irr = 0;
 
 	rec_avi = 0;
@@ -17,7 +19,7 @@ function _init() : ( _g )
 {
 	_g.irr = CSqIrrlicht();
 
-	_g.irr.SetStereo( 1 );
+//	_g.irr.SetStereo( 1 );
 //	_g.irr.SetREyeKey( 0x000000ff );
 //	_g.irr.SetLEyeKey( 0x00ffff00 );
 //	_g.irr.Init( "Irr Test", 240, 320, 1 );
@@ -39,10 +41,18 @@ function _init() : ( _g )
     node.AddAnimator( rotate );
 
 	// Save to file
-	RecordToFile( _self.root( "math-stuff.avi" ) );
+//	RecordToFile( _self.root( "math-stuff.avi" ) );
+
+	// Set draw function
+	_self.set_timer( ".", 30, "OnDraw" )
 }
 
 function _idle() : ( _g )
+{
+	return _g.quit;
+}
+
+function OnDraw() : ( _g )
 {
 	RenderFile();
 	return _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );

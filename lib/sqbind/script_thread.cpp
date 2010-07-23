@@ -106,19 +106,30 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 	// Start the script
 	if ( !m_cSqEngine.Load( stdString(), &m_sScript, m_bFile, FALSE ) )
 	{
-		stdString sErr = oexT( "File : " );
+		stdString sErr;
 
 		if ( m_bFile )
-			sErr += stdString( oexMbToStr( m_sScript ).Ptr() ) + oexT( "\r\n\r\n" );
-		else
-			sErr += oexT( "(buffer)\r\n\r\n" );
+			sErr += oexT( "File : " ),
+			sErr += oex2std( oexMbToStr( m_sScript ) ) + oexT( "\r\n\r\n" );
+		else 
+		{
+			if ( m_cSqEngine.GetScriptName().length() )
+				sErr += oexT( "Name : " ),
+				sErr += m_cSqEngine.GetScriptName(),
+				sErr += oexT( "\r\n" );
+
+			if ( m_sScript.Length() )
+				sErr += oex2std( oexBinToAsciiHexStr( &oex::CBin( m_sScript ), 0, 16, 4 ) ),
+				sErr += oexT( "\r\n" );
+			sErr += oexT( "\r\n" );
+		}
 
 		if ( m_cSqEngine.GetLastError().length() )
 			sErr += m_cSqEngine.GetLastError();
 		else
 			sErr += oexT( "Error loading script" );
 
-		oexERROR( 0, oexMks( oexT( "Script Error : " ), sErr.c_str() ) );
+		oexERROR( 0, oexMks( oexT( "Script Error : " ), std2oex( sErr ) ) );
 
 		return oex::oexFALSE;
 

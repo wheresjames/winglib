@@ -1300,21 +1300,36 @@ oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::CStr8 *pbScript, oe
 			m_vm.CompileBuffer( sScript.c_str() );
 
 		if ( bStart )
-		{
+
 			// Initialize the script
 			m_vm.RunScript( m_script );
-
-			// Execute init function
-			Execute( WSQBIND_NOREPLY, SQEXE_FN_INIT );
-
-		} // end if
 
 	} // end try
 
 	_oexCATCH( SScriptErrorInfo &e )
 	{	return LogError( oex::oexFALSE, e ); }
 	_oexCATCH( SquirrelError &e )
-	{	return LogErrorM( oex::oexFALSE, e.desc ); }
+	{	// +++ I don't know why RunScript() *sometimes* throws this error
+		if ( oex::CStr( e.desc ) != oexT( "the index doesn't exist" ) )
+			return LogErrorM( oex::oexFALSE, e.desc ); 
+	} // end catch
+
+	if ( bStart )
+	{
+		_oexTRY
+		{
+
+			// Execute init function
+			Execute( WSQBIND_NOREPLY, SQEXE_FN_INIT );
+
+		} // end try
+
+		_oexCATCH( SScriptErrorInfo &e )
+		{	return LogError( oex::oexFALSE, e ); }
+		_oexCATCH( SquirrelError &e )
+		{	return LogErrorM( oex::oexFALSE, e.desc ); }
+
+	} // end if
 
 	// Save script source information
 	m_bFile = bFile;

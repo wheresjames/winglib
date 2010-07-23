@@ -172,6 +172,24 @@ public:
 		return *this;
 	}
 
+	/// From a string
+	CBin( const CStr8 &s )
+	{	m_nOffset = 0;
+		m_ptr = oexNULL;
+		m_bFree = oexFALSE;
+		m_buf.Share( s.c_Mem() );
+		m_nUsed = s.Length();
+	}
+
+	/// From a string
+	CBin& operator = ( const CStr8 &s )
+	{	m_nOffset = 0;
+		FreePtr();
+		m_buf.Share( s.c_Mem() );
+		m_nUsed = s.Length();
+		return *this;
+	}
+
 	/// Copy constructor
 	/**
 		Creates from buffer
@@ -381,6 +399,7 @@ public:
 	// Returns the number of bytes in the buffer
 	t_size setString( const CStr8 &s )
 	{	FreePtr();
+		m_nOffset = 0;
 		m_buf.Share( s.c_Mem() );
 		m_nUsed = s.Length();
 		return getUsed();
