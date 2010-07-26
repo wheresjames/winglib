@@ -143,6 +143,12 @@ public:
 	stdString GetName()
 	{	return m_sName; }
 
+	/// Sets the root path in the engine
+	void SetRoot( const stdString &s ) { m_cSqEngine.SetRoot( s ); }
+
+	/// Returns the root path from the engine
+	stdString GetRoot() { return m_cSqEngine.GetRoot(); }
+
 	/// Call to set a function that is called when thread starts
 	/// to export custom symbols
 	void SetExportFunction( PFN_SQBIND_Export_Symbols fn, sqbind::SSqAllocator *pa );

@@ -344,6 +344,8 @@ public:
 	double todouble( const stdString &s )
 	{	return oexStrToDouble( s.c_str() ); }
 
+	void SetRoot( const stdString &s ) { m_sRoot = s; }
+
 	stdString& GetRoot() { return m_sRoot; }
 
 protected:

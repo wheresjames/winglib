@@ -72,7 +72,6 @@ oexBOOL CLog::OpenLogFile( oexCSTR x_pPath, oexCSTR x_pFile, oexCSTR x_pExtensio
 		sFile << oexT( ".debug.log" );
 #endif
 
-
 	return Open( sFile.Ptr() );
 }
 
@@ -101,13 +100,19 @@ oexBOOL CLog::Open( oexCSTR x_pPath )
 		return oexFALSE;
 	} // end if
 
+#if defined( oexDEBUG )
+	CStr sFilename = oexGetModuleFileName();
+#else
+	CStr sFilename = oexGetModuleFileName().GetFileName();
+#endif
+
 	// Create log header
 	oexUINT uThreadId = oexGetCurThreadId();
 	m_file.Write( oexMks(	oexT( ";====================================================================" ), oexNL,
 							oexT( "; Log file    : " ), x_pPath, oexNL,
 							oexT( "; Local Time  : " ), oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL,
 							oexT( "; GMT Time    : " ), oexGmtTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL,
-							oexT( "; Application : " ), oexGetModuleFileName(), oexNL,
+							oexT( "; Application : " ), sFilename, oexNL,
 							oexT( "; Thread      : " ), oexFmt( oexT( "%u (0x%x)" ), uThreadId, uThreadId ), oexNL, oexNL
 						) );
 
@@ -143,13 +148,18 @@ oexBOOL CLog::Resume( oexCSTR x_pPath )
 		if ( !m_file.CreateAlways( x_pPath ).IsOpen() )
 			return oexFALSE;
 
+#if defined( oexDEBUG )
+	CStr sFilename = oexGetModuleFileName();
+#else
+	CStr sFilename = oexGetModuleFileName().GetFileName();
+#endif
 		// Create log header
 		oexUINT uThreadId = oexGetCurThreadId();
 		m_file.Write( oexMks(	oexT( ";====================================================================" ), oexNL,
 								oexT( "; Log file    : " ), x_pPath, oexNL,
 								oexT( "; Local Time  : " ), oexLocalTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL,
 								oexT( "; GMT Time    : " ), oexGmtTimeStr( oexT( "%W, %B %D, %Y - %h:%m:%s %A" ) ), oexNL,
-								oexT( "; Application : " ), oexGetModuleFileName(), oexNL,
+								oexT( "; Application : " ), sFilename, oexNL,
 								oexT( "; Thread      : " ), oexFmt( oexT( "%u (0x%x)" ), uThreadId, uThreadId ), oexNL, oexNL
 							) );
 

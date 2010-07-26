@@ -835,8 +835,14 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 		} // end if
 
 		else
+		{
+			// Same root as us then
+			pSt->SetRoot( GetRoot() );
+
 			// Load script information
 			pSt->SetScript( std2oex8( mapParams[ oexT( "script" ) ] ), 0 );
+
+		} // end else
 
 		// Create the thread
 		pSt->Start();

@@ -1283,7 +1283,7 @@ oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::CStr8 *pbScript, oe
 		} // end if
 
 		// Save away root path
-		else
+		else if ( !m_sRoot.length() )
 			m_sRoot = oexGetModulePath().Ptr();
 
 		// Check for pre-compiled script
@@ -1294,10 +1294,10 @@ oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::CStr8 *pbScript, oe
 			m_script = m_vm.CompileScript( sFile.c_str() );
 
 		else if ( pbScript && pbScript->Length() )
-			m_vm.CompileBuffer( pbScript->Ptr() );
+			m_script = m_vm.CompileBuffer( pbScript->Ptr() );
 
 		else
-			m_vm.CompileBuffer( sScript.c_str() );
+			m_script = m_vm.CompileBuffer( sScript.c_str() );
 
 		if ( bStart )
 
@@ -1309,9 +1309,7 @@ oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::CStr8 *pbScript, oe
 	_oexCATCH( SScriptErrorInfo &e )
 	{	return LogError( oex::oexFALSE, e ); }
 	_oexCATCH( SquirrelError &e )
-	{	// +++ I don't know why RunScript() *sometimes* throws this error
-		if ( oex::CStr( e.desc ) != oexT( "the index doesn't exist" ) )
-			return LogErrorM( oex::oexFALSE, e.desc ); 
+	{	return LogErrorM( oex::oexFALSE, e.desc );
 	} // end catch
 
 	if ( bStart )
