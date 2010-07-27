@@ -139,6 +139,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, add )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, set )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, get )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, at )	
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, copy )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_up )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_down )
@@ -331,6 +332,25 @@ CSqMulti* CSqMulti::get( const CSqMulti::t_Obj &k )
 		return m_def;
 	} // end if
 	return &m_lst[ k ];
+}
+
+CSqMulti* CSqMulti::at( const stdString &path )
+{
+	if ( !path.length() )
+	{	if ( !m_def )
+			m_def = OexAllocConstruct< CSqMulti >();
+		return m_def;
+	} // end if
+
+	// Find separator
+	int p = path.find( oexT( '.' ) );
+
+	// Is it us?
+	if ( path.npos == p )
+		return &m_lst[ path ];
+
+	// Next path
+	return m_lst[ path.substr( 0, p ) ].at( path.substr( p + 1 ) );
 }
 
 void CSqMulti::move_up( const t_Obj &k )

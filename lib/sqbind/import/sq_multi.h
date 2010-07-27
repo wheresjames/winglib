@@ -167,6 +167,9 @@ namespace sqbind
         /// Gets an element
         CSqMulti* get( const t_Obj &k );
 
+		/// Gets an element using a path
+		CSqMulti* at( const stdString &path );
+
         /// Finds an element
         t_Obj find_key( const t_Obj &k );
 
