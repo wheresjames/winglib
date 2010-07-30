@@ -236,7 +236,7 @@ CStr CUtil::Fingerprint( CBin *buf, oexINT w, oexINT h, oexINT frame )
 	int x =psrc[ 0 ] % ( w - 2 );
 	int y = psrc[ 1 ] % ( h - 2 );
 	int d = 0, m = 0;
-	int n = 16, max = nsrc * 8;
+	int n = 0, max = nsrc * 8;
 
 	while ( n < max )
 	{
@@ -249,7 +249,6 @@ CStr CUtil::Fingerprint( CBin *buf, oexINT w, oexINT h, oexINT frame )
 		// Pick the glyph
 		int g = 0, o = x + ( y * ( w + snl ) );
 		if ( max > n ) oex::cmn::CopyBits( &g, 0, psrc, n, ( ( max - n ) < bits ) ? ( max - n ) : bits ), n += bits;
-//		p[ o ] = glyph[ g ];
 
 		// Increment colliding glyphs
 		int u = g & mask;
@@ -324,6 +323,138 @@ CStr CUtil::Mandelbrot( int w, int h, int x1, int y1, int x2, int y2 )
 
 	return s;
 }
+
+template< typename T >
+	void CUTIL_FP_SET_PIXEL( T *p, oexINT x, oexINT y, T *c, oexINT ci, oexINT s, oexINT w )
+	{	c = &c[ ci * 3 ]; w *= 3; x *= s; y *= s;
+		for ( oexINT _y = 0; _y < s; _y++ )
+			for ( oexINT _x = 0; _x < s; _x++ )
+			{	T *_p = &p[ ( y + _y ) * w + ( x + _x ) * 3 ];
+				_p[ 0 ] = c[ ci ], _p[ 1 ] = c[ 1 ], _p[ 2 ] = c[ 2 ]; 
+			} // end for
+	}
+
+template< typename T >
+	void CUTIL_FP_XOR_PIXEL( T *p, oexINT x, oexINT y, T *c, oexINT ci, oexINT s, oexINT w )
+	{	c = &c[ ci * 3 ]; w *= 3; x *= s; y *= s;
+		for ( oexINT _y = 0; _y < s; _y++ )
+			for ( oexINT _x = 0; _x < s; _x++ )
+			{	T *_p = &p[ ( y + _y ) * w + ( x + _x ) * 3 ];
+				_p[ 0 ] |= c[ 0 ], _p[ 1 ] |= c[ 1 ], _p[ 2 ] |= c[ 2 ]; 
+			} // end for
+	}
+
+static CBin::t_byte g_default_colors[] = 
+{
+	0,		0,		0,
+	0,		0,		0,
+	0x80,	0,		0,
+	0,		0x80,	0,
+	0,		0,		0x80,
+	0x7F,	0,		0,
+	0,		0x7F,	0,
+	0,		0,		0x7F
+};
+
+oexBOOL CUtil::Fingerprint( CBin *buf, CBin *img, oexINT fmt, oexINT w, oexINT h, CBin *col, oexINT scale )
+{
+	if ( 0 >= w || 0 >= h )
+		return oexFALSE;
+
+	if ( !buf || !buf->getUsed() || !img || !img->getUsed() )
+		return oexFALSE;
+
+	// Glyphs
+	int bits = 3;
+	int mask = 0x07;
+
+	if ( scale < 1 ) scale = 1;
+	int _w = w / scale;
+	int _h = h / scale;
+
+	// Ensure space
+	int sz = w * h * 3;
+	if ( img->getUsed() < sz )
+		return oexFALSE;
+
+	// Pointers
+	CBin::t_byte *p = img->_Ptr();
+	CBin::t_byte *c = ( col && col->getUsed() ) ? col->_Ptr() : g_default_colors;
+	oexINT ncols = ( ( col && col->getUsed() ) ? col->getUsed() : sizeof( g_default_colors ) ) / 3;
+
+	// Initialize the image
+	for ( int i = 0, y = 0; y < _h; y++ )
+	{
+		// Init frame
+		for ( int x = 0; x < _w; x++ )
+			if ( ( !y || ( y + 1 ) == _h ) && ( !x || ( x + 1 ) == _w ) )
+				CUTIL_FP_SET_PIXEL( p, x, y, c, 1, scale, w ), i++;
+			else if ( !y || ( y + 1 ) == _h )
+				CUTIL_FP_SET_PIXEL( p, x, y, c, 0, scale, w ), i++;
+			else if ( !x || ( x + 1 ) == _w )
+				CUTIL_FP_SET_PIXEL( p, x, y, c, 0, scale, w ), i++;
+			else
+				CUTIL_FP_SET_PIXEL( p, x, y, c, 1, scale, w ), i++;
+
+	} // end for
+
+	// Hash the data
+	oex::oexGUID hash;
+	oex::oss::CMd5::Transform( &hash, buf->Ptr(), buf->getUsed() );
+	oex::oexUCHAR *psrc = (oex::oexUCHAR*)&hash;
+	oex::oexINT nsrc = sizeof( hash );
+
+	// Draw something
+	int x = psrc[ 0 ] % ( _w - 2 );
+	int y = psrc[ 1 ] % ( _h - 2 );
+	int d = 0, m = 0;
+	int n = 0, max = nsrc * 8;
+
+	while ( n < max )
+	{
+		// Keep cursor in bounds
+		if ( x <= 1 ) x = _w - 2;
+		else if ( x >= ( _w - 2 ) ) x = 1;
+		if ( y <= 1 ) y = _h - 2;
+		else if ( y >= ( _h - 2 ) ) y = 1;
+
+		// Pick the glyph
+		int g = 0; //, o = x + ( y * _w );
+		if ( max > n ) 
+			oex::cmn::CopyBits( &g, 0, psrc, n, ( ( max - n ) < bits ) ? ( max - n ) : bits ), n += bits;
+
+		// Skip border and background colors
+		g += 2;
+
+		// Do we have enough colors?
+		while ( g >= ncols ) g--;
+		if ( g ) CUTIL_FP_XOR_PIXEL( p, x, _h - y - 1, c, g, scale, w );
+
+		// Get new speed and direction
+		if ( !m )
+		{	if ( max > n )
+				oex::cmn::CopyBits( &m, 0,psrc, n, ( ( max - n ) < 2 ) ? ( max - n ) : 2 ), n += 2;
+			if ( max > n )
+				oex::cmn::CopyBits( &d, 0, psrc, n, ( ( max - n ) < 2 ) ? ( max - n ) : 2 ), n += 2;
+		} // end if
+		else
+			m--;
+
+		// Move cursor
+		switch( d )
+		{	case 0 : x += 1; break;
+			case 1 : x -= 1; break;
+			case 2 : y += 1; break;
+			default : y -= 1; break;
+		} // end switch
+
+	} // end while
+
+	return oexTRUE;
+}
+
+
+
 
 CStr CUtil::BuildPath( oexINT x_nId, oexCONST CStr &x_sPath, oexTCHAR tSep )
 {	return oexBuildPath( oexGetSysFolder( x_nId ), x_sPath ); }

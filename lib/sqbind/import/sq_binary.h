@@ -66,10 +66,11 @@
 	int Allocate##t( t_size x_nSize )									\
 	{	return Allocate( sizeof( oex::oex##t ) * x_nSize ); }
 
-
 // namespace
 namespace sqbind
 {
+	class CSqImage;
+
     class CSqBinary
     {
 	public:
@@ -248,6 +249,15 @@ namespace sqbind
 		sqbind::stdString Fingerprint( int w, int h, int frame )
 		{	oex::CStr s = oexFingerprint( &m_bin, w, h, frame );
 			return sqbind::stdString( s.Ptr(), s.Length() );
+		}
+
+		/// Returns an ascii 'fingerprint' of the binary buffer
+		int FingerprintImage( CSqImage *img, CSqBinary *col, int scale );
+
+		/// Returns an ascii 'fingerprint' of the binary buffer
+		int FingerprintBin( CSqBinary *img, int fmt, int w, int h, CSqBinary *col, int scale )
+		{	if ( !img || !col ) return 0;
+			return oexFingerprint( &m_bin, &img->Mem(), fmt, w, h, &col->Mem(), scale );
 		}
 
 		/// Locates the specified string in the buffer

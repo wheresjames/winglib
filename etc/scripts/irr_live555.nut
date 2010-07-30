@@ -75,12 +75,13 @@ function _init() : ( _g )
 //			bosch		= [ "bosch", 		"rtsp://192.168.2.253/rtsp_tunnel" ],
 //			ser			= [ "ser", 			"rtsp://192.168.2.87" ]
 //			ser			= [ "ser", 			"rtsp://192.168.2.251" ]
-//			arecont		= [ "arecont",		"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ],
+			arecont		= [ "arecont",		"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ],
 //			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&x0=0&y0=0&x1=1600&y1=1200&qp=30&ssn=1&doublescan=0" ],
 			arecont_hi	= [ "arecont_hi",	"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200&fps=15&quality=10&doublescan=0" ],
 			arecont_low	= [ "arecont_low",	"rtsp://192.168.2.252/image?res=half&x0=400&y0=0&x1=1200&y1=600&fps=30&quality=15&doublescan=0" ],
-//			panasonic	= [ "panasonic",	"rtsp://192.168.2.251/Mediainput/mpeg4" ]
-			panasonic	= [ "panasonic",	"rtsp://192.168.2.251" ]
+			panasonic	= [ "panasonic",	"rtsp://192.168.2.251/Mediainput/mpeg4" ]
+//			panasonic	= [ "panasonic",	"rtsp://192.168.2.251" ]
+			axis		= [ "axis",			"rtsp://192.168.2.202/axis-media/media.amp" ]
 			
 			// Axis = rtsp://x.x.x.x/axis-media/media.amp
 
@@ -90,10 +91,11 @@ function _init() : ( _g )
 
 //	StartStream( rtsp_video[ "panasonic" ], 0, 0 );
 //	StartStream( rtsp_video[ "arecont_hi" ], 0, 0 );
-	StartStream( rtsp_video[ "arecont_low" ], 0, 0 );
+//	StartStream( rtsp_video[ "arecont_low" ], 0, 0 );
 //	StartStream( rtsp_video[ "bosch" ], 0, 0 );
 //	StartStream( rtsp_video[ "nasa" ], 0, 0 );
 //	StartStream( rtsp_video[ "adventure" ], 0, 0 );
+	StartStream( rtsp_video[ "axis" ], 0, 0 );
 
 	_self.set_timer( ".", 15, "OnTimer" );
 
@@ -177,7 +179,7 @@ function UpdateVideo() : ( _g )
 
 	local frame = CSqBinary();
 
-	if ( _g.dec && _g.rtsp.LockVideo( frame, CSqMulti() ) )
+	if ( _g.dec && _g.rtsp.LockVideo( frame, 1000 ) )
 	{
 //		_self.echo( "Frame Size : " + frame.getUsed() );
 //		_self.echo( frame.AsciiHexStr( 16, 16 ) );
@@ -206,7 +208,7 @@ function UpdateVideo() : ( _g )
 		if ( !_g.tex )
 		{
 			// Decode a frame to get the width / height
-			_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, CSqBinary(), CSqMulti() );
+			_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, CSqBinary(), CSqMulti(), 0 );
 			if ( 0 < _g.dec.getWidth() && 0 < _g.dec.getHeight() )
 			{	_g.tex = _g.irr.CreateTexture( _g.dec.getWidth(), _g.dec.getHeight(), 0 );
 				_g.video.SetTexture( 0, _g.tex );
@@ -223,7 +225,7 @@ function UpdateVideo() : ( _g )
 			{
 				// dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808,size=165698,stream_index=0
 //				if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti( "dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808" ) ) )
-				if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti( "" ) ) )
+				if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti(), 0 ) )
 					_self.echo( "failed to decode frame" );
 
 				_g.tex.Unlock();

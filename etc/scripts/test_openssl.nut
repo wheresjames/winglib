@@ -70,6 +70,13 @@ function Sign( key, data ) : ( _g )
 //	_self.echo( sig.AsciiHexStr( 16, 0 ) );
 	_self.echo( sig.Fingerprint( 32, 10, 1 ) );
 
+	// Attempt to create fingerprint image
+	local img = CSqImage();
+	if ( img.Create( 32 * 6, 10 * 6 ) )
+	{	sig.FingerprintImage( img, CSqBinary(), 6 );
+		img.Save( "fingerprint.jpg", "" );
+	} // end if
+
 	if ( !_g.ossl.Verify( key, data, sig ) )
 	{	_self.echo( "Verify() failed" ); return 0; }
 
@@ -103,7 +110,7 @@ function Sign2( name, data ) : ( _g )
 	{	_self.echo( "Verify() failed" ); return 0; }
 
 	_self.echo( "Signature verified!" );
-
+	
 	return 1;
 
 }
