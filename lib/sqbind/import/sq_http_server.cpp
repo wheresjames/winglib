@@ -50,6 +50,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqHttpServer, CSqHttpServer )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, SetSessionTimeout )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, GetNumActiveClients )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, MapFolder )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, setPortFactory )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, getPortFactory )
 
 SQBIND_REGISTER_CLASS_END()
 
@@ -82,6 +84,17 @@ void CSqHttpServer::SetSessionCallbackScript( CSqMsgQueue *x_pMsgQueue, const st
 	m_sScript = sScript;
 	m_bFile = bFile;
 	m_sSession = sSession;
+}
+
+void CSqHttpServer::setPortFactory( CSqFactory *p )
+{
+	if ( p )
+		m_server.SetPortFactory( p->getFactory() );
+}
+
+CSqFactory CSqHttpServer::getPortFactory()
+{
+	return m_server.GetPortFactory();
 }
 
 int CSqHttpServer::Start( int nPort )

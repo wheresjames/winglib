@@ -87,7 +87,7 @@ static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, SOCKADDR_IN *x_pSai 
 */
 static oexBOOL CIpSocket_GetAddressInfo( CIpAddress *x_pIa, SOCKADDR *x_pSa )
 {_STT();
-	return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa ); 
+	return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa );
 }
 
 //==============================================================
@@ -124,7 +124,7 @@ static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, SOCKADDR_IN *x_pSai 
 / *
 static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, SOCKADDR *x_pSa )
 {_STT();
-	return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa ); 
+	return CIpSocket_GetAddressInfo( x_pIa, (SOCKADDR_IN*)x_pSa );
 }
 */
 
@@ -214,7 +214,7 @@ void CIpSocket::UninitSockets()
 
 oexLONG CIpSocket::GetInitCount()
 {_STT();
-	return 0; 
+	return 0;
 }
 
 void CIpSocket::Destroy()
@@ -337,6 +337,12 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 	// Was there an error?
 	if ( c_InvalidSocket == m_hSocket )
 	{	m_uConnectState |= eCsError;
+		return oexFALSE;
+	} // end if
+
+	// Process socket creation
+	if ( !OnAttach() )
+	{	Destroy();
 		return oexFALSE;
 	} // end if
 
@@ -491,11 +497,18 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
 
 oexBOOL CIpSocket::Attach( t_SOCKET x_hSocket )
 {_STT();
-	Destroy();
+	// Lose the old socket
+    Destroy();
 
-	m_hSocket = x_hSocket;
+	// Save socket handle
+    m_hSocket = x_hSocket;
 
-	return IsSocket();
+	// Call on attach
+	if ( !OnAttach() )
+		Destroy();
+
+	// How'd it go?
+    return IsSocket();
 }
 
 oexBOOL CIpSocket::Accept( CIpSocket &x_is )
@@ -612,7 +625,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 			if ( x_uTimeout )
 			{
 				// Wait for event
-//				UINT uRet = 
+//				UINT uRet =
 					WaitForSingleObject( m_hSocketEvent, x_uTimeout );
 
 				// Check for timeout or error
@@ -913,7 +926,21 @@ oexCSTR CIpSocket::GetErrorMsg( oexUINT x_uErr )
 	return ptr;
 }
 
-//oexUINT CIpSocket::CheckReturn() {}
+int CIpSocket::v_recvfrom( int socket, void *buffer, int length, int flags )
+{
+	SOCKADDR_IN si;
+	int nSize = sizeof( si );
+	os::CSys::Zero( &si, sizeof( si ) );
+	si.sin_family = m_uSocketFamily;
+
+	// Receive data from socket
+	int res = recvfrom( socket, buffer, length, flags, (LPSOCKADDR)&si, &nSize );
+
+    // Save the address
+    CIpSocket_GetAddressInfo( &m_addrPeer, &si );
+
+	return res;
+}
 
 oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, oexUINT x_uFlags )
 {_STT();
@@ -925,14 +952,8 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 	if ( !IsSocket() )
 		return 0;
 
-	SOCKADDR_IN si;
-	int nSize = sizeof( si );
-	os::CSys::Zero( &si, sizeof( si ) );
-	si.sin_family = m_uSocketFamily;
-
 	// Receive data from socket
-	int nRet = recvfrom( (SOCKET)m_hSocket, (LPSTR)x_pData, (int)x_uSize,
-						 (int)x_uFlags, (LPSOCKADDR)&si, &nSize );
+	int nRet = v_recvfrom( (SOCKET)m_hSocket, (LPSTR)x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uReads++;
 	m_toActivity.SetMs( eActivityTimeout );
@@ -987,7 +1008,7 @@ CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
 
 			// Accept as the length
 			sBuf.SetLength( uRead );
-			
+
 		} // end if
 
 		return sBuf;
@@ -1019,6 +1040,10 @@ CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
 	return sBuf;
 }
 
+int CIpSocket::v_recv( int socket, void *buffer, int length, int flags )
+{
+	return recv( socket, buffer, length, flags );
+}
 
 oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, oexUINT x_uFlags )
 {_STT();
@@ -1031,7 +1056,7 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 		return oexFALSE;
 
 	// Receive data from socket
-	int nRet = recv( (SOCKET)m_hSocket, (LPSTR)x_pData, (int)x_uSize, (int)x_uFlags );
+	int nRet = v_recv( (SOCKET)m_hSocket, (LPSTR)x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uReads++;
 	m_toActivity.SetMs( eActivityTimeout );
@@ -1083,26 +1108,12 @@ CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
 
 			// Accept as the length
 			sBuf.SetLength( uRead );
-			
+
 		} // end if
 
 		return sBuf;
 
 	} // end if
-
-/*  // +++ Old method
-
-	// Allocate buffer
-	CStr sBuf;
-	oexUINT uRead;
-	oexTCHAR ucBuf[ oexSTRSIZE ];
-
-	// Read all available data
-	while ( 0 < ( uRead = Recv( ucBuf, sizeof( ucBuf ), oexNULL, x_uFlags ) ) )
-		sBuf.Append( ucBuf, uRead );
-
-	return sBuf;
-*/
 
 	// Allocate buffer
 	CStr8 sBuf;
@@ -1133,6 +1144,19 @@ CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
 }
 
 
+int CIpSocket::v_sendto(int socket, const void *message, int length, int flags )
+{
+	// Use the peer address
+	SOCKADDR_IN si;
+	os::CSys::Zero( &si, sizeof( si ) );
+	si.sin_family = m_uSocketFamily;
+	CIpSocket_SetAddressInfo( &m_addrPeer, &si );
+
+	// Send the data
+	return sendto( socket, message, length, flags, (LPSOCKADDR)&si, sizeof( si ) );
+}
+
+
 oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, oexUINT x_uFlags )
 {_STT();
 	// Initialize bytes sent
@@ -1143,15 +1167,8 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
 	if ( !IsSocket() )
 		return 0;
 
-	// Use the peer address
-	SOCKADDR_IN si;
-	os::CSys::Zero( &si, sizeof( si ) );
-	si.sin_family = m_uSocketFamily;
-	CIpSocket_SetAddressInfo( &m_addrPeer, &si );
-
 	// Send the data
-	int nRet = sendto( (SOCKET)m_hSocket, (LPCSTR)x_pData, (int)x_uSize,
-					   (int)x_uFlags, (LPSOCKADDR)&si, sizeof( si ) );
+	int nRet = v_sendto( (SOCKET)m_hSocket, (LPCSTR)x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uWrites++;
 	m_toActivity.SetMs( eActivityTimeout );
@@ -1184,6 +1201,10 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
 	return nRet;
 }
 
+int CIpSocket::v_send( int socket, const void *buffer, int length, int flags )
+{
+	return send( socket, buffer, length, flags );
+}
 
 oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, oexUINT x_uFlags )
 {_STT();
@@ -1196,7 +1217,7 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 		return 0;
 
 	// Attempt to send the data
-	int nRet = send( (SOCKET)m_hSocket, (LPCSTR)x_pData, (int)x_uSize, (int)x_uFlags );
+	int nRet = v_send( (SOCKET)m_hSocket, (LPCSTR)x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uWrites++;
 	m_toActivity.SetMs( eActivityTimeout );

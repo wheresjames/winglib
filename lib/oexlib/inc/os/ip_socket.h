@@ -280,6 +280,16 @@ public:
 
 public:
 
+	/// Override to provide custom read
+	virtual int v_recv( int socket, void *buffer, int length, int flags );
+	virtual int v_recvfrom( int socket, void *buffer, int length, int flags );
+
+	/// Override to provide custom write
+	virtual int v_send( int socket, const void *buffer, int length, int flags );
+	virtual int v_sendto(int socket, const void *message, int length, int flags );
+
+public:
+
 	//==============================================================
 	// Attach()
 	//==============================================================
@@ -290,6 +300,16 @@ public:
 		\return Returns non-zero if success
 	*/
 	oexBOOL Attach( t_SOCKET x_hSocket );
+
+	//==============================================================
+	// OnAttach()
+	//==============================================================
+	/// Called when attaching to a new socket
+	/**
+
+		\return Returns non-zero if success
+	*/
+	virtual oexBOOL OnAttach() { return oexTRUE; }
 
 	//==============================================================
 	// Detach()

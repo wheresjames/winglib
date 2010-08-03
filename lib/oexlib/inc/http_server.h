@@ -48,7 +48,7 @@
 */
 //==================================================================
 
-template < typename T_PORT, typename T_SESSION > class THttpServer : public CThread
+template < typename T_SPORT, typename T_SESSION, typename T_CPORT = T_SPORT > class THttpServer : public CThread
 {
 public:
 
@@ -76,7 +76,7 @@ public:
 	};
 
 	/// Server callback
-	typedef oexINT (*PFN_OnServerEvent)( oexPVOID x_pData, oexINT x_nEvent, oexINT x_nErr, THttpServer< T_PORT, T_SESSION > *x_pServer );
+	typedef oexINT (*PFN_OnServerEvent)( oexPVOID x_pData, oexINT x_nEvent, oexINT x_nErr, THttpServer< T_SPORT, T_SESSION, T_CPORT > *x_pServer );
 
 public:
 
@@ -86,13 +86,26 @@ public:
 	public:
 
 		/// Constructor
-		CSessionInfo() { }
+		CSessionInfo()
+		{
+			pPortFactory = oexNULL;
+			port = oexNULL;
+		}
+
+		/// Destructor
+		~CSessionInfo()
+		{
+			if ( pPortFactory && port )
+				pPortFactory->Free( port );
+			pPortFactory = oexNULL;
+			port = oexNULL;
+		}
 
 		/// Returns non-zero if we need to keep the connection running
 		oex::oexBOOL IsValid()
 		{
 			// Does it need updating?
-			if ( session.GetTransactions() || !port.IsRunning( 1 ) )
+			if ( session.GetTransactions() || !port->IsRunning( 1 ) )
 				return oexFALSE;
 
 			return oexTRUE;
@@ -101,22 +114,33 @@ public:
 		// Updates the connection
 		oex::oexRESULT Update( oexUINT x_uTimeout )
 		{
+			if ( !port )
+				return -1;
+
 			// Any data waiting?
-			if ( !port.WaitEvent( oex::os::CIpSocket::eReadEvent, x_uTimeout ) )
+			if ( !port->WaitEvent( oex::os::CIpSocket::eReadEvent, x_uTimeout ) )
 				return 0;
 
 			// Go process it
 			if ( 0 > session.OnRead( 0 ) )
-				return -1;
+				return -2;
 
 			return 1;
 		}
 
+		/// Sets port and free function
+		void SetPort( T_CPORT *p, CFactory *f )
+		{	port = p; pPortFactory = f; }
+
 		/// Session object
-		T_SESSION		session;
+		T_SESSION			session;
 
 		/// Session port
-		T_PORT			port;
+		T_CPORT				*port;
+
+		/// Function that frees the port
+		CFactory			*pPortFactory;
+
 	};
 
 	/// Holds information about a session
@@ -203,7 +227,9 @@ public:
 							oexRESULT r = it->Update( uWait );
 
 							if ( 0 > r )
-								it->port.Destroy();
+							{	if ( it->port )
+									it->port->Destroy();
+							} // end if
 							else if ( r )
 								bUpdate = oexTRUE;
 
@@ -266,6 +292,7 @@ public:
 		m_uSessionTimeout = 60 * 60;
 		m_uCleanup = 0;
 		m_bMultiThreaded = oexTRUE;
+		m_pPortFactory = oexNULL;
 	}
 
 	~THttpServer()
@@ -281,6 +308,7 @@ public:
 		m_pAuthCallback = oexNULL;
 		m_bEnableSessions = oexFALSE;
 		m_bLocalOnly = oexFALSE;
+		m_pPortFactory = oexNULL;
 	}
 
 	oexBOOL StartServer( oexINT x_nPort, PFN_OnServerEvent fnOnServerEvent = oexNULL, oexPVOID x_pData = oexNULL )
@@ -294,6 +322,12 @@ public:
 
 		return 0 == CThread::Start();
 	}
+
+	void SetPortFactory( CFactory *p )
+	{	m_pPortFactory = p; }
+
+	CFactory* GetPortFactory()
+	{ return m_pPortFactory; }
 
 protected:
 
@@ -332,7 +366,7 @@ protected:
 	}
 
 	/// Authenticate the connection
-	virtual oexBOOL OnAuthenticate( T_PORT &port )
+	virtual oexBOOL OnAuthenticate( T_CPORT &port )
 	{
 		// Accepting anyone?
 		if ( !m_bLocalOnly )
@@ -349,7 +383,7 @@ protected:
 		return oexTRUE;
 	}
 
-	oexBOOL InformSession( T_SESSION &session, T_PORT &port )
+	oexBOOL InformSession( T_SESSION &session, T_CPORT &port )
 	{
 		// Count a transaction
 		session.SetTransactionId( m_nTransactions++ );
@@ -385,11 +419,23 @@ protected:
 	/// Accepts multi-threaded connection
 	oexBOOL MultiAccept()
 	{
+		// Allocate a new port object
+		T_CPORT *port = oexNULL;
+		if ( m_pPortFactory )
+			port = (T_CPORT*)m_pPortFactory->Create();
+		else
+			port = (T_CPORT*)m_cDefaultPortFactory.Create();
+		if ( !port )
+			return oexFALSE;
+
 		// Add a new session
 		typename THttpServer::t_LstSessionThread::iterator it = m_lstSessionThread.Append();
 
+		// Set the port
+		it->SetPort( port, m_pPortFactory ? m_pPortFactory : &m_cDefaultPortFactory );
+
 		// Attempt to connect session
-		if ( !m_server.Accept( it->port ) )
+		if ( !m_server.Accept( *it->port ) )
 		{
 			// Erase session
 			m_lstSessionThread.Erase( it );
@@ -403,7 +449,7 @@ protected:
 		else
 		{
 			// Authenticate the connection
-			if ( !OnAuthenticate( it->port ) )
+			if ( !OnAuthenticate( *it->port ) )
 			{
 				m_lstSessionThread.Erase( it );
 
@@ -415,7 +461,7 @@ protected:
 			else
 			{
 				// Fill in session information
-				InformSession( it->session, it->port );
+				InformSession( it->session, *it->port );
 
 				// Notify of new connection
 				if ( m_fnOnServerEvent )
@@ -434,6 +480,15 @@ protected:
 	/// Accepts single-threaded connection
 	oexBOOL SingleAccept()
 	{
+		// Allocate a new port object
+		T_CPORT *port = oexNULL;
+		if ( m_pPortFactory )
+			port = (T_CPORT*)m_pPortFactory->Create();
+		else
+			port = (T_CPORT*)m_cDefaultPortFactory.Create();
+		if ( !port )
+			return oexFALSE;
+
 		// Must lock to make changes
 		oexAutoLock ll( m_lockSessionInfo );
 		if ( !ll.IsLocked() )
@@ -442,8 +497,11 @@ protected:
 		// Add a new session
 		typename THttpServer::t_LstSessionInfo::iterator it = m_lstSessionInfo.Append();
 
+		// Set the port
+		it->SetPort( port, m_pPortFactory ? m_pPortFactory : &m_cDefaultPortFactory );
+
 		// Attempt to connect session
-		if ( !m_server.Accept( it->port ) )
+		if ( !m_server.Accept( *it->port ) )
 		{
 			// Erase session
 			m_lstSessionInfo.Erase( it );
@@ -457,7 +515,7 @@ protected:
 		else
 		{
 			// Authenticate the connection
-			if ( !OnAuthenticate( it->port ) )
+			if ( !OnAuthenticate( *it->port ) )
 			{
 				m_lstSessionInfo.Erase( it );
 
@@ -469,7 +527,7 @@ protected:
 			else
 			{
 				// Fill in session information
-				InformSession( it->session, it->port );
+				InformSession( it->session, *it->port );
 
 				// Notify of new connection
 				if ( m_fnOnServerEvent )
@@ -631,7 +689,7 @@ public:
 	}
 
 	/// Returns reference to port object
-	T_PORT& Port() { return m_server; }
+	T_SPORT& Port() { return m_server; }
 
 	/// Enable / disable sessions
 	void EnableSessions( oexBOOL b ) { m_bEnableSessions = b; }
@@ -669,7 +727,7 @@ private:
 	oexINT						m_nPort;
 
 	/// Server port
-	T_PORT						m_server;
+	T_SPORT						m_server;
 
 	/// Transactions
 	oexLONG						m_nTransactions;
@@ -737,4 +795,9 @@ private:
 	/// List of mapped folders
 	CStrAssoList				m_lstMappedFolders;
 
+	/// Manages port creation / destruction
+	CFactory					*m_pPortFactory;
+
+	/// Default port factory
+	TFactory< T_CPORT >			m_cDefaultPortFactory;
 };

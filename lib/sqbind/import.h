@@ -35,6 +35,7 @@
 #pragma once
 
 // stl classes we will import to squirrel
+#include "import/sq_factory.h"
 #include "import/sq_generic.h"
 #include "import/sq_binary.h"
 #include "import/sq_vector.h"

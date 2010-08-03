@@ -473,6 +473,7 @@ namespace os
 //------------------------------------------------------------------
 //#include "inc/arb_delegates.h"
 #include "inc/alloc.h"
+#include "inc/factory.h"
 #include "inc/file_mapping.h"
 #include "inc/memory.h"
 #include "inc/mapped_pool.h"

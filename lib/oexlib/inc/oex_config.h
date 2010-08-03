@@ -242,7 +242,7 @@
 #	define OEX_CASE_SENSITIVE_FILES
 #endif
 
-// Native processor integer size in bits
+// Native processor integer size in bytes
 #define oexSIZEOFINT 4
 
 #if defined( OEX_CPU_64 ) || defined( OEX_IPHONE )

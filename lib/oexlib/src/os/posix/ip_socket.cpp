@@ -395,6 +395,12 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 		return oexFALSE;
 	} // end if
 
+	// Process socket creation
+	if ( !OnAttach() )
+	{	Destroy();
+		return oexFALSE;
+	} // end if
+
 	m_uLastError = 0;
 
     // Save socket connect params
@@ -551,10 +557,17 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
 
 oexBOOL CIpSocket::Attach( t_SOCKET x_hSocket )
 {
+	// Lose the old socket
     Destroy();
 
+	// Save socket handle
     m_hSocket = x_hSocket;
 
+	// Call on attach
+	if ( !OnAttach() )
+		Destroy();
+
+	// How'd it go?
     return IsSocket();
 }
 
@@ -972,7 +985,21 @@ oexCSTR CIpSocket::GetErrorMsg( oexUINT x_uErr )
 	} // end switch
 */
 
-//oexUINT CIpSocket::CheckReturn() {}
+int CIpSocket::v_recvfrom( int socket, void *buffer, int length, int flags )
+{
+    sockaddr_in si;
+    socklen_t nSize = sizeof( si );
+    os::CSys::Zero( &si, sizeof( si ) );
+    si.sin_family = m_uSocketFamily;
+
+	// Receive data from socket
+	int res = recvfrom( socket, buffer, length, flags, (sockaddr*)&si, &nSize );
+
+    // Save the address
+    CIpSocket_GetAddressInfo( &m_addrPeer, &si );
+
+	return res;
+}
 
 oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, oexUINT x_uFlags )
 {
@@ -984,15 +1011,9 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 	if ( !IsSocket() )
         return oexFALSE;
 
-    sockaddr_in si;
-    socklen_t nSize = sizeof( si );
-    os::CSys::Zero( &si, sizeof( si ) );
-    si.sin_family = m_uSocketFamily;
-
 	// Receive data from socket
 	x_uFlags |= MSG_NOSIGNAL;
-	int nRes = recvfrom( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize,
-                         (int)x_uFlags, (sockaddr*)&si, &nSize );
+	int nRes = v_recvfrom( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uLastError = errno;
 
@@ -1009,9 +1030,6 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 	} // end if
 
 	m_uLastError = 0;
-
-    // Save the address
-    CIpSocket_GetAddressInfo( &m_addrPeer, &si );
 
 	// Check for closed socket
 	if ( !nRes )
@@ -1079,6 +1097,10 @@ CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
     return sBuf;
 }
 
+int CIpSocket::v_recv( int socket, void *buffer, int length, int flags )
+{
+	return recv( socket, buffer, length, flags );
+}
 
 oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, oexUINT x_uFlags )
 {
@@ -1092,7 +1114,7 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 
 	// Receive data from socket
 	x_uFlags |= MSG_NOSIGNAL;
-	int nRes = recv( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
+	int nRes = v_recv( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uLastError = errno;
 
@@ -1181,6 +1203,18 @@ CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
     return sBuf;
 }
 
+int CIpSocket::v_sendto(int socket, const void *message, int length, int flags )
+{
+    // Use the peer address
+    sockaddr_in si;
+    os::CSys::Zero( &si, sizeof( si ) );
+    si.sin_family = m_uSocketFamily;
+    CIpSocket_SetAddressInfo( &m_addrPeer, &si );
+
+	// Send the data
+	return sendto( socket, message, length, flags, (sockaddr*)&si, sizeof( si ) );
+}
+
 oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, oexUINT x_uFlags )
 {
 	// Initialize bytes sent
@@ -1191,16 +1225,9 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
 	if ( !IsSocket() )
         return 0;
 
-    // Use the peer address
-    sockaddr_in si;
-    os::CSys::Zero( &si, sizeof( si ) );
-    si.sin_family = m_uSocketFamily;
-    CIpSocket_SetAddressInfo( &m_addrPeer, &si );
-
     // Send the data
 	x_uFlags |= MSG_NOSIGNAL;
-    int nRes = sendto( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize,
-                       (int)x_uFlags, (sockaddr*)&si, sizeof( si ) );
+    int nRes = v_sendto( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uLastError = errno;
 
@@ -1234,6 +1261,11 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
 	return nRes;
 }
 
+int CIpSocket::v_send( int socket, const void *buffer, int length, int flags )
+{
+	return send( socket, buffer, length, flags );
+}
+
 oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, oexUINT x_uFlags )
 {
 	// Initialize bytes sent
@@ -1246,7 +1278,7 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 
 	// Attempt to send the data
 	x_uFlags |= MSG_NOSIGNAL;
-	int nRes = send( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
+	int nRes = v_send( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uLastError = errno;
 

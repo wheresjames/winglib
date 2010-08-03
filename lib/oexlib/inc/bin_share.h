@@ -573,6 +573,7 @@ public:
 	OEX_CBIN_DECLARE_TYPE_ACCESS( UINT64 );
 	OEX_CBIN_DECLARE_TYPE_ACCESS( FLOAT );
 	OEX_CBIN_DECLARE_TYPE_ACCESS( DOUBLE );
+	OEX_CBIN_DECLARE_TYPE_ACCESS( PVOID );
 
 	/// Returns buffer object reference
 	t_buffer& Mem() { return m_buf; }

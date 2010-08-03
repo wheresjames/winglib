@@ -493,6 +493,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define OEX_LE_INT16( v )	v
 #define OEX_LE_INT32( v )	v
 #define OEX_LE_INT64( v )	v
+#define OEX_LE_PVOID( v )	v
 
 #define OEX_BE_INT16( v )	( ( ( (oexUSHORT)v & 0x00ff ) << 8 )			\
 							| ( ( (oexUSHORT)v & 0xff00 ) >> 8 ) )
@@ -508,6 +509,23 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 							| ( ( (oexUINT64)v & 0x0000ff0000000000ll ) >> 24 ) 	\
 							| ( ( (oexUINT64)v & 0x00ff000000000000ll ) >> 40 ) 	\
 							| ( ( (oexUINT64)v & 0xff00000000000000ll ) >> 56 ) )
+#	if defined( OEX_CPU_64 )
+#define OEX_BE_PVOID( v )	( (oexPVOID)(											\
+							( ( ( (oexUINT64)v & 0x00000000000000ffll ) << 56 ) 	\
+							| ( ( (oexUINT64)v & 0x000000000000ff00ll ) << 40 )		\
+							| ( ( (oexUINT64)v & 0x0000000000ff0000ll ) << 24 )		\
+							| ( ( (oexUINT64)v & 0x00000000ff000000ll ) << 8 )		\
+							| ( ( (oexUINT64)v & 0x000000ff00000000ll ) >> 8 ) 		\
+							| ( ( (oexUINT64)v & 0x0000ff0000000000ll ) >> 24 ) 	\
+							| ( ( (oexUINT64)v & 0x00ff000000000000ll ) >> 40 ) 	\
+							| ( ( (oexUINT64)v & 0xff00000000000000ll ) >> 56 ) ) ) )
+#	else
+#define OEX_BE_PVOID( v )	( (oexPVOID)(									\
+							( ( ( (oexUINT)v & 0x000000ff ) << 24 ) 		\
+							| ( ( (oexUINT)v & 0x0000ff00 ) << 8 )			\
+							| ( ( (oexUINT)v & 0x00ff0000 ) >> 8 )			\
+							| ( ( (oexUINT)v & 0xff000000 ) >> 24 ) ) ) )
+#	endif
 
 #endif
 
@@ -516,6 +534,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define OEX_BE_INT16( v )	v
 #define OEX_BE_INT32( v )	v
 #define OEX_BE_INT64( v )	v
+#define OEX_BE_PVOID( v )	v
 
 #define OEX_LE_INT16( v )	( ( ( (oexUSHORT)v & 0x00ff ) << 8 )			\
 							| ( ( (oexUSHORT)v & 0xff00 ) >> 8 ) )
@@ -531,6 +550,23 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 							| ( ( (oexUINT64)v & 0x0000ff0000000000ll ) >> 24 ) 	\
 							| ( ( (oexUINT64)v & 0x00ff000000000000ll ) >> 40 ) 	\
 							| ( ( (oexUINT64)v & 0xff00000000000000ll ) >> 56 ) )
+#	if defined( OEX_CPU_64 )
+#define OEX_LE_PVOID( v )	( (oexPVOID)(											\
+							( ( ( (oexUINT64)v & 0x00000000000000ffll ) << 56 ) 	\
+							| ( ( (oexUINT64)v & 0x000000000000ff00ll ) << 40 )		\
+							| ( ( (oexUINT64)v & 0x0000000000ff0000ll ) << 24 )		\
+							| ( ( (oexUINT64)v & 0x00000000ff000000ll ) << 8 )		\
+							| ( ( (oexUINT64)v & 0x000000ff00000000ll ) >> 8 ) 		\
+							| ( ( (oexUINT64)v & 0x0000ff0000000000ll ) >> 24 ) 	\
+							| ( ( (oexUINT64)v & 0x00ff000000000000ll ) >> 40 ) 	\
+							| ( ( (oexUINT64)v & 0xff00000000000000ll ) >> 56 ) ) ) )
+#	else
+#define OEX_LE_PVOID( v )	( (oexPVOID)(									\
+							( ( ( (oexUINT)v & 0x000000ff ) << 24 ) 		\
+							| ( ( (oexUINT)v & 0x0000ff00 ) << 8 )			\
+							| ( ( (oexUINT)v & 0x00ff0000 ) >> 8 )			\
+							| ( ( (oexUINT)v & 0xff000000 ) >> 24 ) ) ) )
+#	endif
 
 #endif
 
@@ -546,6 +582,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexLE_UINT64( v )		OEX_LE_INT64( v )
 #define oexLE_FLOAT( v )		OEX_LE_INT32( v )
 #define oexLE_DOUBLE( v )		OEX_LE_INT64( v )
+#define oexLE_PVOID( v )		OEX_LE_PVOID( v )
 
 #define oexBE_CHAR( v )			v
 #define oexBE_UCHAR( v )		v
@@ -559,3 +596,4 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexBE_UINT64( v )		OEX_BE_INT64( v )
 #define oexBE_FLOAT( v )		OEX_BE_INT32( v )
 #define oexBE_DOUBLE( v )		OEX_BE_INT64( v )
+#define oexBE_PVOID( v )		OEX_BE_PVOID( v )
