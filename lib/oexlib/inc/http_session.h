@@ -147,7 +147,6 @@ public:
 	/// Buffer type
 	typedef CBin			t_buffer;
 
-
 public:
 
     /// Default constructor
@@ -209,7 +208,6 @@ public:
     T_PORT* GetPort()
     {	return m_pPort;
     }
-
 
 	//==============================================================
 	// OnProcessRequest()
@@ -381,7 +379,6 @@ public:
 
 		return oexTRUE;
 	}
-
 
 	//==============================================================
 	// OnClose()

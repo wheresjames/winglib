@@ -74,7 +74,7 @@ function Sign( key, data ) : ( _g )
 	local img = CSqImage();
 	if ( img.Create( 32 * 6, 10 * 6 ) )
 	{	sig.FingerprintImage( img, CSqBinary(), 6 );
-		img.Save( "fingerprint.jpg", "" );
+		img.Save( "fingerprint.png", "" );
 	} // end if
 
 	if ( !_g.ossl.Verify( key, data, sig ) )

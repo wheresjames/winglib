@@ -330,7 +330,7 @@ template< typename T >
 		for ( oexINT _y = 0; _y < s; _y++ )
 			for ( oexINT _x = 0; _x < s; _x++ )
 			{	T *_p = &p[ ( y + _y ) * w + ( x + _x ) * 3 ];
-				_p[ 0 ] = c[ ci ], _p[ 1 ] = c[ 1 ], _p[ 2 ] = c[ 2 ]; 
+				_p[ 0 ] = c[ 0 ], _p[ 1 ] = c[ 1 ], _p[ 2 ] = c[ 2 ]; 
 			} // end for
 	}
 
@@ -346,8 +346,8 @@ template< typename T >
 
 static CBin::t_byte g_default_colors[] = 
 {
-	0,		0,		0,
-	0,		0,		0,
+	32,		32,		32,
+	32,		32,		32,
 	0x80,	0,		0,
 	0,		0x80,	0,
 	0,		0,		0x80,
@@ -452,8 +452,6 @@ oexBOOL CUtil::Fingerprint( CBin *buf, CBin *img, oexINT fmt, oexINT w, oexINT h
 
 	return oexTRUE;
 }
-
-
 
 
 CStr CUtil::BuildPath( oexINT x_nId, oexCONST CStr &x_sPath, oexTCHAR tSep )
