@@ -96,22 +96,18 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 	// Pointer to our message queue
 	m_cSqEngine.SetMessageQueue( this );
 
-	// Let the user know we're starting a thread
-//	oexPrintf( oexT( "Spawning : 0x%08x : %s : %s\n" ),
-//			  (unsigned int)oexGetCurThreadId(), m_sName.c_str(), oexGetFileName( m_sScript.c_str() ).Ptr() );
-
 	// Set script name for debugging
-	_STT_SET_NAME( oex::CStr() << m_cSqEngine.GetScriptName().c_str() << oexT( " : " ) <<  m_sName.c_str() );
+	_STT_SET_NAME( oex::CStr() << std2oex( m_cSqEngine.GetScriptName() ) << oexT( " : " ) <<  std2oex( m_sName ) );
 
 	// Start the script
-	if ( !m_cSqEngine.Load( stdString(), &m_sScript, m_bFile, FALSE ) )
+	if ( !m_cSqEngine.Load( stdString(), &m_sScript, m_bFile, oex::oexFALSE ) )
 	{
 		stdString sErr;
 
 		if ( m_bFile )
 			sErr += oexT( "File : " ),
 			sErr += oex2std( oexMbToStr( m_sScript ) ) + oexT( "\r\n\r\n" );
-		else 
+		else
 		{
 			if ( m_cSqEngine.GetScriptName().length() )
 				sErr += oexT( "Name : " ),
@@ -182,7 +178,7 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 			// Once per second
 			if ( 10 <= ++nDiv )
 			{	nDiv = 0;
-				
+
 				// Cleanup tasks
 				Cleanup();
 
@@ -355,14 +351,14 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 			return oex::oexFALSE;
 
 		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
-		oex::CStr sKey( key.c_str(), key.length() );
+		oex::CStr sKey = std2oex( key );
 
 		// Skip '@'
 		sKey++;
 
 		// Where to map
-		sqbind::stdString sFunction  = sKey.Parse( oexT( ":" ) ).Ptr();
-		if ( !sFunction.length() ) sFunction = sKey.Ptr(), sKey.Destroy();
+		sqbind::stdString sFunction  = oex2std( sKey.Parse( oexT( ":" ) ) );
+		if ( !sFunction.length() ) sFunction = oex2std( sKey ), sKey.Destroy();
 		else sKey++;
 
 		// Did we get a function?
@@ -379,9 +375,9 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 					sP[ i++ ] = mapParams[ oexT( "val" ) ];
 
 				while( i < 4 && sKey.Length() )
-				{	sP[ i ] = sKey.Parse( oexT( ":" ) ).Ptr();
+				{	sP[ i ] = oex2std( sKey.Parse( oexT( ":" ) ) );
 					if ( !sP[ i ].length() )
-						sP[ i ] = sKey.Ptr(), sKey.Destroy();
+						sP[ i ] = oex2std( sKey ), sKey.Destroy();
 					else
 						sKey++;
 					i++;
@@ -423,9 +419,9 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 		oexAutoLock ll( m_lockTo );
 		if ( !ll.IsLocked() )
 			return oex::oexFALSE;
-		
+
 		// Set the key timeout value
-		m_lstKeyTimeouts[ mapParams[ oexT( "key" ) ] ] 
+		m_lstKeyTimeouts[ mapParams[ oexT( "key" ) ] ]
 			= oexGmtTime().GetUnixTime() + std2oex( mapParams[ oexT( "to" ) ] ).ToUInt();
 
 	} // end if
@@ -441,9 +437,9 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 		oex::CPropertyBag &pb = m_pb.at( std2oex( key ) );
 		if ( pb.Size() )
-			*pReply = oex::CParser::Serialize( pb ).Ptr();
+			*pReply = oex2std( oex::CParser::Serialize( pb ) );
 		else
-			*pReply = pb.ToString().Ptr();
+			*pReply = oex2std( pb.ToString() );
 
 	} // end else if
 
@@ -491,7 +487,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 		if ( !ll.IsLocked() )
 			return oex::oexFALSE;
 
-		oex::CParser::Deserialize( std2oex( mapParams[ oexT( "val" ) ] ), 
+		oex::CParser::Deserialize( std2oex( mapParams[ oexT( "val" ) ] ),
 								   m_pb.at( std2oex( mapParams[ oexT( "key" ) ] ) ),
 								   oex::oexTRUE );
 
@@ -519,9 +515,9 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 		oex::CPropertyBag &pb = m_pb.at( std2oex( mapParams[ oexT( "key" ) ] ) );
 		if ( pb.Size() )
-			*pReply = oex::CParser::EncodeJSON( pb ).Ptr();
+			*pReply = oex2std( oex::CParser::EncodeJSON( pb ) );
 		else
-			*pReply = pb.ToString().Ptr();
+			*pReply = oex2std( pb.ToString() );
 
 	} // end else if
 
@@ -573,8 +569,8 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 			for (	t_ScriptList::iterator it = m_lstScript.begin();
 					m_lstScript.end() != it; it++ )
 				if ( oexCHECK_PTR( it->second ) && it->second->IsRunning() && !it->second->WantQuit() )
-					strlst << oex::CParser::UrlEncode( it->second->GetName().c_str() );
-			*pReply = oex::CParser::Implode( strlst, oexT( "," ) ).Ptr();
+					strlst << oex::CParser::UrlEncode( std2oex( it->second->GetName() ) );
+			*pReply = oex2std( oex::CParser::Implode( strlst, oexT( "," ) ) );
 		} // end if
 	} // end else if
 
@@ -584,17 +580,17 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 	// Set timer command
 	else if ( sMsg == oexT( "set_timer" ) )
-		*pReply = oexMks( SetTimer( oexStrToULong( mapParams[ oexT( "to" ) ].c_str() ),
-						  mapParams[ oexT( "cb" ) ] ) ).Ptr();
+		*pReply = oex2std( oexMks( SetTimer( std2oex( mapParams[ oexT( "to" ) ] ).ToULong(),
+						  					 mapParams[ oexT( "cb" ) ] ) ) );
 
 	// Set time out command
 	else if ( sMsg == oexT( "set_timeout" ) )
-		*pReply = oexMks( SetTimeout( oexStrToULong( mapParams[ oexT( "to" ) ].c_str() ),
-						  mapParams[ oexT( "cb" ) ] ) ).Ptr();
+		*pReply = oex2std( oexMks( SetTimeout( std2oex( mapParams[ oexT( "to" ) ] ).ToULong(),
+						  			  		   mapParams[ oexT( "cb" ) ] ) ) );
 
 	// Set time out command
 	else if ( sMsg == oexT( "kill_timer" ) )
-		KillTimer( oexStrToULong( mapParams[ oexT( "id" ) ].c_str() ) );
+		KillTimer( std2oex( mapParams[ oexT( "id" ) ] ).ToULong() );
 
 	else
 		bRet = oex::oexFALSE;
@@ -728,7 +724,7 @@ void CScriptThread::Cleanup()
 			{
 				// Has this key timed out?
 				if ( it->second < gmt )
-				{	
+				{
 					oexAutoLock ll( m_lockPb );
 					if ( ll.IsLocked() )
 					{	m_pb.erase_at( std2oex( it->first ) );
@@ -809,7 +805,7 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 		pSt->SetExportFunction( m_cSqEngine.GetExportFunction(), m_cSqEngine.GetAllocator() );
 
 		// Is it a file?
-		if ( 0 != oex::CStr( mapParams[ oexT( "file" ) ].c_str() ).ToULong() )
+		if ( 0 != std2oex( mapParams[ oexT( "file" ) ] ).ToULong() )
 		{
 			// Does the path specified exist?
 			if ( oexExists( mapParams[ oexT( "script" ) ].c_str() ) )
@@ -884,7 +880,7 @@ void CScriptThread::OnMsg( CSqMap &mapParams, stdString *pReply )
 
 CSqMsgQueue* CScriptThread::GetQueue( const stdString &x_sPath )
 {_STT();
-	stdString sPath = x_sPath.c_str();
+	stdString sPath = x_sPath;
 
 	// Us?
 	if ( !sPath.length() || sPath == oexT( "." ) || sPath == m_sName )

@@ -56,11 +56,13 @@ public:
 	/// Add string to output capture
 	static oexBOOL AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine );
 
-	/// Returns the output circular buffer or 0 if ther is none
+	/// Returns the output circular buffer or 0 if there is none
 	static CFifoSync* getOutputBuffer();
 
 	/// Creates a ascii view of a binary buffer
 	static CStr BinToAsciiHexStr( CBin *x_pBin, oexSIZE_T x_uLen, oexSIZE_T x_nLineLen, oexSIZE_T x_nMaxLines );
+	static CStr BinToAsciiHexStr( const CBin &x_rBin, oexSIZE_T x_uLen, oexSIZE_T x_nLineLen, oexSIZE_T x_nMaxLines )
+	{	return BinToAsciiHexStr( &x_rBin, x_uLen, x_nLineLen, x_nMaxLines ); }
 
 	/// Creates a ascii view of a binary buffer
 	static CStr BinToAsciiHexStr( oexCPVOID x_pBuf, oexSIZE_T x_uLen, oexSIZE_T x_nLineLen, oexSIZE_T x_nMaxLines );
