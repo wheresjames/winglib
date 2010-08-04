@@ -58,7 +58,7 @@ namespace sqbind
 		CSqHttpServer( const CSqHttpServer &r ) {}
 		CSqHttpServer& operator =( const CSqHttpServer &r ) { return *this; }
 
-		virtual ~CSqHttpServer() {}
+		virtual ~CSqHttpServer() { Stop(); }
 
 		static void Register( VM vm );
 
@@ -71,6 +71,8 @@ namespace sqbind
 		void SetSessionCallbackScript( CSqMsgQueue *x_pMsgQueue, const stdString &sScript, int bFile, const stdString &sSession );
 
 		virtual int Start( int nPort );
+
+		virtual int Stop();
 
 		/// Server callback
 		static oex::oexINT _OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,

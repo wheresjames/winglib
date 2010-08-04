@@ -39,6 +39,7 @@ using namespace sqbind;
 // Export Functions
 SQBIND_REGISTER_CLASS_BEGIN( CSqHttpServer, CSqHttpServer )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, Start )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, Stop )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, SetSessionCallback )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, SetSessionCallbackScript )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, SetAuthenticationCallback )
@@ -114,6 +115,12 @@ int CSqHttpServer::Start( int nPort )
 		return 0;
 
 	return 1;
+}
+
+int CSqHttpServer::Stop()
+{_STT();
+	
+	return m_server.Stop();
 }
 
 oex::oexINT CSqHttpServer::_OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,

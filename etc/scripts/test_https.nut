@@ -4,6 +4,7 @@ _self.load_module( "openssl", "" );
 
 class CGlobal
 {
+	quit = 0;
 	server = 0;
 	ssl = 0;
 };
@@ -32,31 +33,33 @@ function _init() : ( _g )
 {
 	local port = 1234;
 
-	_self.echo( "Starting web server on port " + port );
+	_self.echo( "Starting web server at https://localhost:" + port + "/" );
 
 	_g.server = CSqHttpServer();
 
 	_g.ssl = CSqSSLPortFactory();
 	if ( !_g.ssl.Initialize() || !_g.ssl.LoadCerts( "cert", "pkey" ) )
-	{	_self.echo( _g.ssl.getLastError() ); return 0; }
+	{	_self.echo( _g.ssl.getLastError() ); _g.quit = 1; return 0; }
 
 	_g.server.setPortFactory( _g.ssl.getFactory() );
 
 	_g.server.SetSessionCallback( _self.queue(), "OnProcessRequest" );
 
 	if ( !_g.server.Start( port ) )
+		_g.quit = 1,
 		_self.alert( "Unable to start http server" );
 }
 
-function _idle()
+function _idle() : ( _g )
 {
 //	_self.alert( "Waiting..." );
 
-	return 0;
+	return _g.quit;
 }
 
-function _exit()
+function _exit() : ( _g )
 {
-	_g.server.Destroy();
+	_g.server.Stop();
+	_g.ssl.Destroy();
 }
 

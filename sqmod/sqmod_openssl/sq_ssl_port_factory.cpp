@@ -145,18 +145,20 @@ int CSqSSLPortFactory::CPortFactory::LoadCerts( const sqbind::stdString &sCertCh
 	// Load certificate chain
   	if ( 0 >= SSL_CTX_use_certificate_chain_file( m_ctx, sCertChain.c_str() ) )
 	{	m_sLastError = ERR_error_string( ERR_get_error(), 0 );
+		m_sLastError += oexT( " : Failed to load certificate chain file" );
 		return 0;
 	} // end if
 
 	// Load private key
   	if ( 0 >= SSL_CTX_use_PrivateKey_file( m_ctx, sPrivateKey.c_str(), SSL_FILETYPE_PEM ) )
 	{	m_sLastError = ERR_error_string( ERR_get_error(), 0 );
+		m_sLastError += oexT( " : Failed to load private key file" );
 		return 0;
 	} // end if
 
 	// Verify key matches cert chain
 	if ( !SSL_CTX_check_private_key( m_ctx ) )
-	{	m_sLastError = oexT( "Certificate chain does not match private key" );
+	{	m_sLastError = oexT( "OpenSSL Error : Certificate chain does not match private key" );
 		return 0;
 	} // end if
 
