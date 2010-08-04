@@ -934,7 +934,7 @@ int CIpSocket::v_recvfrom( int socket, void *buffer, int length, int flags )
 	si.sin_family = m_uSocketFamily;
 
 	// Receive data from socket
-	int res = recvfrom( socket, buffer, length, flags, (LPSOCKADDR)&si, &nSize );
+	int res = recvfrom( socket, (char*)buffer, length, flags, (LPSOCKADDR)&si, &nSize );
 
     // Save the address
     CIpSocket_GetAddressInfo( &m_addrPeer, &si );
@@ -953,16 +953,13 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 		return 0;
 
 	// Receive data from socket
-	int nRet = v_recvfrom( (SOCKET)m_hSocket, (LPSTR)x_pData, (int)x_uSize, (int)x_uFlags );
+	int nRet = v_recvfrom( (SOCKET)m_hSocket, x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uReads++;
 	m_toActivity.SetMs( eActivityTimeout );
 
 	// Grab the last error code
 	m_uLastError = WSAGetLastError();
-
-	// Save the address
-	CIpSocket_GetAddressInfo( &m_addrPeer, &si );
 
 	// Check for closed socket
 	if ( !nRet )
@@ -1042,7 +1039,7 @@ CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
 
 int CIpSocket::v_recv( int socket, void *buffer, int length, int flags )
 {
-	return recv( socket, buffer, length, flags );
+	return recv( socket, (char*)buffer, length, flags );
 }
 
 oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, oexUINT x_uFlags )
@@ -1056,7 +1053,7 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 		return oexFALSE;
 
 	// Receive data from socket
-	int nRet = v_recv( (SOCKET)m_hSocket, (LPSTR)x_pData, (int)x_uSize, (int)x_uFlags );
+	int nRet = v_recv( (SOCKET)m_hSocket, x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uReads++;
 	m_toActivity.SetMs( eActivityTimeout );
@@ -1153,7 +1150,7 @@ int CIpSocket::v_sendto(int socket, const void *message, int length, int flags )
 	CIpSocket_SetAddressInfo( &m_addrPeer, &si );
 
 	// Send the data
-	return sendto( socket, message, length, flags, (LPSOCKADDR)&si, sizeof( si ) );
+	return sendto( socket, (const char*)message, length, flags, (LPSOCKADDR)&si, sizeof( si ) );
 }
 
 
@@ -1168,7 +1165,7 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
 		return 0;
 
 	// Send the data
-	int nRet = v_sendto( (SOCKET)m_hSocket, (LPCSTR)x_pData, (int)x_uSize, (int)x_uFlags );
+	int nRet = v_sendto( (SOCKET)m_hSocket, x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uWrites++;
 	m_toActivity.SetMs( eActivityTimeout );
@@ -1203,7 +1200,7 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
 
 int CIpSocket::v_send( int socket, const void *buffer, int length, int flags )
 {
-	return send( socket, buffer, length, flags );
+	return send( socket, (const char*)buffer, length, flags );
 }
 
 oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, oexUINT x_uFlags )
@@ -1217,7 +1214,7 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 		return 0;
 
 	// Attempt to send the data
-	int nRet = v_send( (SOCKET)m_hSocket, (LPCSTR)x_pData, (int)x_uSize, (int)x_uFlags );
+	int nRet = v_send( (SOCKET)m_hSocket, x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uWrites++;
 	m_toActivity.SetMs( eActivityTimeout );

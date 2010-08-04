@@ -41,21 +41,21 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
 	m_ssl = SSL_new( m_ctx );
 	if ( !m_ssl )
 	{	m_sLastError = ERR_error_string( ERR_get_error(), 0 );
-		oexSHOW( m_sLastError.c_str() );
+//		oexSHOW( m_sLastError.c_str() );
 		return oex::oexFALSE;
 	} // end if
 
 	// Set socket handle
 	if ( !SSL_set_fd( m_ssl, (int)GetSocketHandle() ) )
 	{	m_sLastError = ERR_error_string( ERR_get_error(), 0 );
-		oexSHOW( m_sLastError.c_str() );
+//		oexSHOW( m_sLastError.c_str() );
 		return oex::oexFALSE;
 	} // end if
 
 	// SSL accept
-	if( -1 == SSL_accept( m_ssl ) )
+	if( -1 == SSL_accept( m_ssl ) && ERR_get_error() )
 	{	m_sLastError = ERR_error_string( ERR_get_error(), 0 );
-		oexSHOW( m_sLastError.c_str() );
+//		oexSHOW( m_sLastError.c_str() );
 		return oex::oexFALSE;
 	} // end if
 
