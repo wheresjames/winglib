@@ -28,19 +28,34 @@ SQBIND_REGISTER_CLASS_BEGIN( COsslKey, COsslKey )
 
 SQBIND_REGISTER_CLASS_END()
 
+SQBIND_REGISTER_CLASS_BEGIN( CSqSSLPortFactory, CSqSSLPortFactory )
+
+	SQBIND_MEMBER_FUNCTION( CSqSSLPortFactory, getFactory )
+	SQBIND_MEMBER_FUNCTION( CSqSSLPortFactory, Initialize )
+	SQBIND_MEMBER_FUNCTION( CSqSSLPortFactory, Destroy )
+	SQBIND_MEMBER_FUNCTION( CSqSSLPortFactory, LoadCerts )
+	SQBIND_MEMBER_FUNCTION( CSqSSLPortFactory, getLastError )
+
+SQBIND_REGISTER_CLASS_END()
+
 // Export classes
 static void SQBIND_Export_openssl( sqbind::VM x_vm )
 {_STT();
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
 
+	// Initialize SSL
+	SSL_library_init();
+
     SQBIND_EXPORT( x_vm, CSqOpenSSL );
     SQBIND_EXPORT( x_vm, COsslKey );
+    SQBIND_EXPORT( x_vm, CSqSSLPortFactory );
 }
 
 #if defined( SQBIND_STATIC )
 	#include "sq_openssl.cpp"
 	#include "sq_ossl_key.cpp"
+	#include "sq_ssl_port_factory.cpp"
 #else
 
 	static void SQBIND_Export( sqbind::VM x_vm )
