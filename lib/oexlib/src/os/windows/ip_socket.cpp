@@ -418,7 +418,7 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 
 	// Valid number of connections?
 	if ( x_uMaxConnections == 0 )
-		x_uMaxConnections = 16; // SOMAXCONN;
+		x_uMaxConnections = SOMAXCONN;
 
 	// Start the socket listening
 	int nRet = listen( (SOCKET)m_hSocket, (int)( x_uMaxConnections ? x_uMaxConnections : SOMAXCONN ) );
@@ -433,8 +433,8 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 	} // end if
 
 	// We're trying to connect
-	m_uConnectState |= eCsConnecting;
 	m_toActivity.SetMs( eActivityTimeout );
+	m_uConnectState |= eCsConnecting;
 
 	// Return the result
 	return oexTRUE;
@@ -478,8 +478,8 @@ oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
 	} // end if
 
 	// We're trying to connect
-	m_uConnectState |= eCsConnecting;
 	m_toActivity.SetMs( eActivityTimeout );
+	m_uConnectState |= eCsConnecting;
 
 	// Return the result
 	return oexTRUE;
@@ -550,12 +550,12 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 	// Capture all events
 	x_is.EventSelect();
 
-	// Child is connecting
-	x_is.m_uConnectState |= eCsConnecting;
-	x_is.m_toActivity.SetMs( eActivityTimeout );
-
 	m_uAccepts++;
 	m_toActivity.SetMs( eActivityTimeout );
+
+	// Child is connecting
+	x_is.m_toActivity.SetMs( eActivityTimeout );
+	x_is.m_uConnectState |= eCsConnecting;
 
 	return oexTRUE;
 }

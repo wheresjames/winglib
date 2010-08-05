@@ -215,6 +215,7 @@ public:
 
 				// Get current size of the list
 				oexUINT uSize = m_pSessionInfo->Size();
+				oexUINT uProcessed = 0;
 
 				// Anything to do?
 				if ( !uSize )
@@ -222,39 +223,46 @@ public:
 
 				else
 					for ( typename t_LstSessionInfo::iterator it; uSize-- && m_pSessionInfo->Next( it ); )
-						if ( it->IsValid() )
-						{
-							oexRESULT r = it->Update( uWait );
-
-							if ( 0 > r )
-							{	if ( it->port )
-									it->port->Destroy();
-							} // end if
-							else if ( r )
-								bUpdate = oexTRUE;
-
-							uWait = 0;
-
-						} // end if
-						else
-						{
-							if ( 2 > uSize )
+						if ( it->port->GetConnectState() )
+						{	uProcessed++;
+							if ( it->IsValid() )
 							{
-								// Must lock if we're close to the end
-								oexAutoLock ll( m_pSessionLock );
-								if ( !ll.IsLocked() )
-									return oexFALSE;
+								oexRESULT r = it->Update( uWait );
 
-								// Erase item
-								it = m_pSessionInfo->Erase( it );
+								if ( 0 > r )
+								{	if ( it->port )
+										it->port->Destroy();
+								} // end if
+								else if ( r )
+									bUpdate = oexTRUE;
+
+								uWait = 0;
 
 							} // end if
+							else if ( it->port )
+							{
+								if ( 2 > uSize )
+								{
+									// Must lock if we're close to the end
+									oexAutoLock ll( m_pSessionLock );
+									if ( !ll.IsLocked() )
+										return oexFALSE;
 
-							else
-								// Ok to modify this one without locking
-								it = m_pSessionInfo->Erase( it );
+									// Erase item
+									it = m_pSessionInfo->Erase( it );
 
+								} // end if
+
+								else
+									// Ok to modify this one without locking
+									it = m_pSessionInfo->Erase( it );
+
+							} // end if
 						} // end if
+
+				// Maybe we had sockets that weren't ready?
+				if ( uSize && !uProcessed )
+					oexSleep( 15 );
 
 				// Don't hog the processor
 				if ( !bUpdate )

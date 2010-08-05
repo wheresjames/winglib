@@ -482,8 +482,8 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 	m_uLastError = 0;
 
 	// We're trying to connect
-	m_uConnectState |= eCsConnecting;
 	m_toActivity.SetMs( eActivityTimeout );
+	m_uConnectState |= eCsConnecting;
 
     // Return the result
 	return !nRet;
@@ -530,8 +530,8 @@ oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
 	m_uLastError = 0;
 
 	// We're trying to connect
-	m_uConnectState |= eCsConnecting;
 	m_toActivity.SetMs( eActivityTimeout );
+	m_uConnectState |= eCsConnecting;
 
 	return oexTRUE;
 }
@@ -605,13 +605,13 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 	// Capture all events
 	x_is.EventSelect();
 
-	// Child is connecting
-	x_is.m_uConnectState |= eCsConnecting;
-	x_is.m_toActivity.SetMs( eActivityTimeout );
-
 	// Accepted
 	m_uAccepts++;
 	m_toActivity.SetMs( eActivityTimeout );
+
+	// Child is connecting
+	x_is.m_toActivity.SetMs( eActivityTimeout );
+	x_is.m_uConnectState |= eCsConnecting;
 
     return oexTRUE;
 }

@@ -46,12 +46,13 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
 		return oex::oexFALSE;
 	} // end if
 
-	int err = 0, max = 60000 / 15;
+	int err = 0;
+	oex::os::CTimeout to; to.SetMs( oexDEFAULT_WAIT_TIMEOUT );
 	do
 	{
 		// Wait for data?
 		if ( err )
-			oexSleep( 15 );
+			oexSleep( 0 );
 
 		// SSL accept
 		if( -1 == SSL_accept( m_ssl ) )
@@ -59,7 +60,7 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
 		else
 			err = 0;
 
-	} while ( --max && ( SSL_ERROR_WANT_READ == err || SSL_ERROR_WANT_WRITE == err ) );
+	} while ( to.IsValid() && ( SSL_ERROR_WANT_READ == err || SSL_ERROR_WANT_WRITE == err ) );
 
 	if ( err )
 	{	m_sLastError = sqbind::oex2std( oexMks( oexT( "SSL_accept() failed : " ), err ) );
@@ -75,9 +76,7 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnClose()
 
 	// Close the socket
 	if ( m_ssl )
-	{
-oexM();
-		SSL_shutdown( m_ssl );
+	{	SSL_shutdown( m_ssl );
 		SSL_free( m_ssl );
 	} // end if
 
