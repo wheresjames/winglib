@@ -86,6 +86,15 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
 //	m_pCodecContext->qmin = m_pCodecContext->qmax = 100;
 
+	// Special h264 defaults
+	if ( CODEC_ID_H264 == m_pCodecContext->codec_id )
+	{	m_pCodecContext->me_range = 16;
+		m_pCodecContext->max_qdiff = 4;
+		m_pCodecContext->qmin = 10;
+		m_pCodecContext->qmax = 51;
+		m_pCodecContext->qcompress = 0.6;
+	} // end if
+
 	int res = avcodec_open( m_pCodecContext, m_pCodec );
 	if ( 0 > res )
 	{	oexERROR( res, oexT( "avcodec_open() failed" ) );

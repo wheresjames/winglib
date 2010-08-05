@@ -8,7 +8,7 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_ffmpeg
-PRJ_DEPS := ffmpeg
+PRJ_DEPS := ffmpeg x264
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus ffmpeg
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib
@@ -40,14 +40,14 @@ ifeq ($(PLATFORM),windows)
 		endif
 	else
 		PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/windows/gcc $(PRJ_INCS) zlib
-		PRJ_LIBS := $(PRJ_LIBS) ffmpeg zlib
+		PRJ_LIBS := $(PRJ_LIBS) ffmpeg zlib x264
 		ifneq ($(PROC),arm)
 			PRJ_OSLB := $(PRJ_OSLB) vfw32
 		endif
 	endif
 else
 	PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/posix $(PRJ_INCS)
-	PRJ_LIBS := $(PRJ_LIBS) ffmpeg
+	PRJ_LIBS := $(PRJ_LIBS) ffmpeg x264
 	PRJ_OSLB := $(PRJ_OSLB) z
 endif
 
