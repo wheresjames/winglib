@@ -297,6 +297,10 @@ void CIpSocket::UninitSockets()
 
 void CIpSocket::Destroy()
 {
+	// Let everyone know we're closing
+	if ( c_InvalidSocket != m_hSocket )
+		OnClose();
+
 	// Ditch the event handle
 	CloseEventHandle();
 

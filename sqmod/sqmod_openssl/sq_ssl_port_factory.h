@@ -30,7 +30,11 @@ public:
 
 	public:
 
+		/// Called when opening a new socket
 		virtual oex::oexBOOL OnAttach();
+
+		/// Called before closing a socket
+		virtual oex::oexBOOL OnClose();
 
 		/// Override to provide custom read
 		virtual int v_recv( int socket, void *buffer, int length, int flags );

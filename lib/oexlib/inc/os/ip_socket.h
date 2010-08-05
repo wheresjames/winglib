@@ -245,6 +245,15 @@ public:
 	void Destroy();
 
 	//==============================================================
+	// OnClose()
+	//==============================================================
+	/// Called when closing a socket
+	/**
+		\return Returns non-zero if success
+	*/
+	virtual oexBOOL OnClose() { return oexTRUE; }
+
+	//==============================================================
 	// InitSockets()
 	//==============================================================
 	/// Initializes the Socket API

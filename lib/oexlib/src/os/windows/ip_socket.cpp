@@ -148,6 +148,10 @@ oexCONST CIpSocket::t_SOCKET CIpSocket::c_SocketError = (CIpSocket::t_SOCKET)SOC
 
 CIpSocket::CIpSocket()
 {_STT();
+
+	// Initialize socket library
+	InitSockets();
+
 	m_hSocket = c_InvalidSocket;
 
 	m_hSocketEvent = c_InvalidEvent;
@@ -170,8 +174,12 @@ CIpSocket::CIpSocket()
 
 CIpSocket::~CIpSocket()
 {_STT();
-	/// Lose the current socket
+
+	// Lose the current socket
 	Destroy();
+
+	// Uninitialize socket library
+	UninitSockets();
 }
 
 oexBOOL CIpSocket::InitSockets()
@@ -222,6 +230,10 @@ void CIpSocket::Destroy()
 	// Punt if not initialized
 	if ( !IsInitialized() )
 		return;
+
+	// Let everyone know we're closing
+	if ( c_InvalidSocket != m_hSocket )
+		OnClose();
 
 	// Ditch the event handle
 	CloseEventHandle();
@@ -505,7 +517,7 @@ oexBOOL CIpSocket::Attach( t_SOCKET x_hSocket )
 
 	// Call on attach
 	if ( !OnAttach() )
-		Destroy();
+		m_hSocket = c_InvalidSocket;
 
 	// How'd it go?
     return IsSocket();

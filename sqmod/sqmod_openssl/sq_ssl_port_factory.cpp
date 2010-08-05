@@ -22,13 +22,7 @@ CSqSSLPortFactory::CSqSSLPort::CSqSSLPort( SSL_CTX *ctx )
 CSqSSLPortFactory::CSqSSLPort::~CSqSSLPort()
 {_STT();
 
-	if ( m_ssl )
-	{	SSL_shutdown( m_ssl );
-		SSL_free( m_ssl );
-	} // end if
-
-	m_ctx = oexNULL;
-	m_ssl = oexNULL;
+//	OnClose();
 }
 
 oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
@@ -52,15 +46,47 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
 		return oex::oexFALSE;
 	} // end if
 
-	// SSL accept
-	if( -1 == SSL_accept( m_ssl ) && ERR_get_error() )
-	{	m_sLastError = ERR_error_string( ERR_get_error(), 0 );
+	int err = 0, max = 60000 / 15;
+	do
+	{
+		// Wait for data?
+		if ( err )
+			oexSleep( 15 );
+
+		// SSL accept
+		if( -1 == SSL_accept( m_ssl ) )
+			err = SSL_get_error( m_ssl, -1 );
+		else
+			err = 0;
+
+	} while ( --max && ( SSL_ERROR_WANT_READ == err || SSL_ERROR_WANT_WRITE == err ) );
+
+	if ( err )
+	{	m_sLastError = sqbind::oex2std( oexMks( oexT( "SSL_accept() failed : " ), err ) );
 //		oexSHOW( m_sLastError.c_str() );
 		return oex::oexFALSE;
 	} // end if
 
 	return oex::oexTRUE;
 }
+
+oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnClose()
+{_STT();
+
+	// Close the socket
+	if ( m_ssl )
+	{
+oexM();
+		SSL_shutdown( m_ssl );
+		SSL_free( m_ssl );
+	} // end if
+
+	m_ctx = oexNULL;
+	m_ssl = oexNULL;
+
+	return oex::oexTRUE;
+}
+
 
 int CSqSSLPortFactory::CSqSSLPort::v_recv( int socket, void *buffer, int length, int flags )
 {_STT();

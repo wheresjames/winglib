@@ -38,7 +38,7 @@ function _init() : ( _g )
 	_g.server = CSqHttpServer();
 
 	_g.ssl = CSqSSLPortFactory();
-	if ( !_g.ssl.Initialize() || !_g.ssl.LoadCerts( "cert", "pkey" ) )
+	if ( !_g.ssl.Initialize() || !_g.ssl.LoadCerts( _self.root( "cert" ), _self.root( "pkey" ) ) )
 	{	_self.echo( _g.ssl.getLastError() ); _g.quit = 1; return 0; }
 
 	_g.server.setPortFactory( _g.ssl.getFactory() );

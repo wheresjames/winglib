@@ -1,95 +1,82 @@
 
 _self.load_module( "ffmpeg", "" );
 
-class CGlobal
+local rec_avi = 0;
+local rec_enc = 0;
+local rec_frame = 0;
+
+local in_file = _self.get( "/", "cmdline.1" );
+local out_file = in_file + ".avi";
+local fps = _self.tolong( _self.get( "/", "cmdline.2" ) );
+if ( 0 >= fps || 100 < fps ) fps = 15;
+
+_self.echo( "input  : " + in_file );
+_self.echo( "output : " + out_file );
+_self.echo( "fps    : " + fps );
+
+local data = CSqFile().get_contents_bin( in_file, 0 );
+_self.echo( "fsize  : " + data.getUsed() );
+
+local frame = CSqBinary(), inf = CSqMulti();
+local i = 0, start = 0, end = 0, max = data.getUsed();
+
+local img = CSqImage();
+
+while ( 1 )
 {
-	rec_avi = 0;
-	rec_enc = 0;
-	rec_frame = 0;
-};
+	// Find beginning and end of image
+	start = data.findUSHORT( 0xd8ff, end, 0 );
+	end = data.findUSHORT( 0xd9ff, start, 0 );
 
-local _g = CGlobal();
+	// Did we find an image?
+	if ( start == data.failed() || end == data.failed() )
+	{	_self.echo( "Extracted " + i + " images." );
+		return;
+	} // end if
 
-function _init() : ( _g )
-{
-//	local dir = _self.root( "imgs" );
-//	CSqFile().mkdir( dir );
+	end += 2;
+	_self.echo( i + " : start = " + start + ", end = " + end );
 
-	local file = "/media/System/C2_1272399000.jem";
-	local file = "/media/System/IDK_1272399600.jem";
-
-	local data = CSqFile().get_contents_bin( file, 0 );
-	_self.echo( "File size = " + data.getUsed() );
-
-	local frame = CSqBinary(), inf = CSqMulti();
-	local i = 0, start = 0, end = 0, max = data.getUsed();
-
-	local img = CSqImage();
-
-	while ( 1 )
+	if ( data.Sub( frame, start, end - start ) )
 	{
-		// Find beginning and end of image
-		start = data.findUSHORT( 0xd8ff, end, 0 );
-		end = data.findUSHORT( 0xd9ff, start, 0 );
-
-		// Did we find an image?
-		if ( start == data.failed() || end == data.failed() )
-		{	_self.echo( "Extracted " + i + " images." );
-			return -1;
-		} // end if
-
-		end += 2;
-		_self.echo( i + " : start = " + start + ", end = " + end );
-
-		if ( data.Sub( frame, start, end - start ) )
-			if ( img.Decode( "jpg", frame ) )
+		if ( img.Decode( "jpg", frame ) )
+		{
+			if ( !rec_enc )
 			{
-				if ( !_g.rec_enc )
-					OpenAviFile( _self.root( "Vid_" + img.getWidth() + "x" + img.getHeight() + ".avi" ),
-								 img.getWidth(), img.getHeight(), 15 );
+				local width = img.getWidth();
+				local height = img.getHeight();
 
-				if ( _g.rec_enc )
-				{
-					if ( !_g.rec_enc.EncodeImage( img, _g.rec_frame, inf ) )
-						_self.echo( "Failed to encode frame" );
+				rec_avi = CFfContainer();
+				rec_enc = CFfEncoder();
+				rec_frame = CSqBinary();
 
-					else if ( !_g.rec_avi.WriteFrame( _g.rec_frame, inf ) )
-						_self.echo( "Failed to write to avi file" );
+				if ( !rec_avi.Create( out_file, "", CSqMulti() ) )
+					_self.echo( "Failed to create avi" );
+				else if ( 0 > rec_avi.AddVideoStream( CFfDecoder().LookupCodecId( "MP42" ), width, height, fps ) )
+					_self.echo( "Failed to add video stream" );
+				else if ( !rec_avi.InitWrite() )
+					_self.echo( "Failed to initiailze avi" );
 
-				} // end if
+				else if ( !rec_enc.Create( rec_avi.getVideoCodecId(), CFfConvert().PIX_FMT_YUV420P,
+										   width, height, fps, 1000000, CSqMulti() ) )
+					_self.echo( "Failed to create encoder" );
 
 			} // end if
 
-//		local fname = _self.build_path( dir, "Img_" + i + ".jpg" );
-//			CSqFile().put_contents_bin( fname, img );
+			if ( rec_enc )
+			{
+				if ( !rec_enc.EncodeImage( img, rec_frame, inf ) )
+					_self.echo( "Failed to encode frame" );
 
-		i++;
+				else if ( !rec_avi.WriteFrame( rec_frame, inf ) )
+					_self.echo( "Failed to write to avi file" );
 
-	} // end while
+			} // end if
 
-}
+		} // end if
+	} // end if
 
-function OpenAviFile( file, width, height, fps ) : ( _g )
-{
-	_g.rec_avi = CFfContainer();
-	_g.rec_enc = CFfEncoder();
-	_g.rec_frame = CSqBinary();
+	i++;
 
-	if ( !_g.rec_avi.Create( file, "", CSqMulti() ) )
-		_self.echo( "Failed to create avi" );
-	else if ( 0 > _g.rec_avi.AddVideoStream( CFfDecoder().LookupCodecId( "MP42" ), width, height, fps ) )
-		_self.echo( "Failed to add video stream" );
-	else if ( !_g.rec_avi.InitWrite() )
-		_self.echo( "Failed to initiailze avi" );
-
-	else if ( !_g.rec_enc.Create( _g.rec_avi.getVideoCodecId(), CFfConvert().PIX_FMT_YUV420P,
-								  width, height, 10, 800000, CSqMulti() ) )
-		_self.echo( "Failed to create encoder" );
-}
-
-function _idle()
-{
-
-	return 1;
-}
+} // end while
 
