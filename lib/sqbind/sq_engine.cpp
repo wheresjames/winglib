@@ -1493,7 +1493,11 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 #if !defined( oexDEBUG )
 
 		// Check install folder
+#	if defined( __MINGW32__ )
+		oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\OSVSquirrelScript" ), oexT( "Install_Dir" ) );
+#	else
 		oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\SquirrelScript" ), oexT( "Install_Dir" ) );
+#	endif
 		if ( sInstallRoot.Length() )
 			sFull = FindFile( oex2std( sInstallRoot ), lstSubs, sFile );
 

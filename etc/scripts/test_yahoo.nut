@@ -77,7 +77,7 @@ function RecordToFile( file ) : ( _g )
 
 	if ( !_g.rec_avi.Create( file, "", CSqMulti() ) )
 		_self.echo( "Failed to create avi" );
-	else if ( 0 > _g.rec_avi.AddVideoStream( CFfDecoder().LookupCodecId( "MP42" ), width, height, 10 ) )
+	else if ( 0 > _g.rec_avi.AddVideoStream( CFfDecoder().LookupCodecId( "H264" ), width, height, 10 ) )
 		_self.echo( "Failed to add video stream" );
 	else if ( !_g.rec_avi.InitWrite() )
 		_self.echo( "Failed to initiailze avi" );
