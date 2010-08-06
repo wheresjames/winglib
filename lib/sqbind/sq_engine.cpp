@@ -1490,22 +1490,23 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 
 	else
 	{
+		// First search our local directory
+		sFull = FindFile( oex2std( oexGetModulePath() ), lstSubs, sFile );
+
 #if !defined( oexDEBUG )
 
-		// Check install folder
-#	if defined( __MINGW32__ )
-		oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\OSVSquirrelScript" ), oexT( "Install_Dir" ) );
-#	else
-		oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\SquirrelScript" ), oexT( "Install_Dir" ) );
-#	endif
-		if ( sInstallRoot.Length() )
-			sFull = FindFile( oex2std( sInstallRoot ), lstSubs, sFile );
-
-#endif
-
-		// Check exe folder
+		// Check Install directory
 		if ( !sFull.Length() )
-			sFull = FindFile( oex2std( oexGetModulePath() ), lstSubs, sFile );
+		{
+#	if defined( __MINGW32__ )
+			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\OSVSquirrelScript" ), oexT( "Install_Dir" ) );
+#	else
+			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\SquirrelScript" ), oexT( "Install_Dir" ) );
+#	endif
+			if ( sInstallRoot.Length() )
+				sFull = FindFile( oex2std( sInstallRoot ), lstSubs, sFile );
+		} // end if
+#endif
 
 	} // end else
 
