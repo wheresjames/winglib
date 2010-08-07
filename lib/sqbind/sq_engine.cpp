@@ -1456,12 +1456,12 @@ int CSqEngine::OnImport( const stdString &sClass )
 	return -1;
 }
 
-static oex::CStr FindFile( const stdString &sRoot, oex::CStrList &lstSubs, oex::CStr &sFile )
+static oex::CStr FindFile( oex::CStr &sRoot, oex::CStrList &lstSubs, oex::CStr &sFile )
 {_STT();
 	// Check all possible sub folders
 	for ( oex::CStrList::iterator it; lstSubs.Next( it ); )
-	{	oex::CStr sFull = oexBuildPath( std2oex( sRoot ), *it );
-		sFull.BuildPath( sFile );
+	{	oex::CStr sFull = sRoot;
+		sFull.BuildPath( *it ).BuildPath( sFile );
 		if ( oexExists( sFull.Ptr() ) )
 			return sFull;
 	} // end for
@@ -1486,12 +1486,12 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 
 	// User path?
 	if ( sPath.length() )
-		sFull = FindFile( sPath, lstSubs, sFile );
+		sFull = FindFile( std2oex( sPath ), lstSubs, sFile );
 
 	else
 	{
 		// First search our local directory
-		sFull = FindFile( oex2std( oexGetModulePath() ), lstSubs, sFile );
+		sFull = FindFile( oexGetModulePath(), lstSubs, sFile );
 
 #if !defined( oexDEBUG )
 
@@ -1504,7 +1504,7 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\SquirrelScript" ), oexT( "Install_Dir" ) );
 #	endif
 			if ( sInstallRoot.Length() )
-				sFull = FindFile( oex2std( sInstallRoot ), lstSubs, sFile );
+				sFull = FindFile( sInstallRoot, lstSubs, sFile );
 		} // end if
 #endif
 
