@@ -109,8 +109,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 		m_pCodecContext->keyint_min = 6; // i_keyint_min
 		m_pCodecContext->max_qdiff = 4; // i_qp_step
 		m_pCodecContext->level = -1; // if(avctx->level > 0) x4->params.i_level_idc = avctx->level;
-//		m_pCodecContext->scenechange_threshold = 40; // i_scenecut_threshold
-		m_pCodecContext->scenechange_threshold = 1; // i_scenecut_threshold
+		m_pCodecContext->scenechange_threshold = 40; // i_scenecut_threshold
 		m_pCodecContext->b_frame_strategy = 1; // i_bframe_adaptive
 		m_pCodecContext->bframebias = 0; // i_bframe_bias
 //		m_pCodecContext->flags2 = m_pCodecContext->flags2 & ~CODEC_FLAG2_BPYRAMID; // clear param->b_bframe_pyramid
