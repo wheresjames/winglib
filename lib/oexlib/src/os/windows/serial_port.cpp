@@ -96,18 +96,18 @@ void CSerialPort::Destroy()
 	} // end if
 }
 
-oexBOOL Open( oexINT x_nPort )
+oexBOOL CSerialPort::Open( oexINT x_nPort )
 {_STT();
 
-	// iii Zero based because unix ports zero based
+	// iii Zero based because unix ports are zero based
 
 	// Build port name
 	oexBOOL bRes = oexFALSE; 
 
 	if ( x_nPort < 9 )
-		Open( ( CStr() << oexT( "COM" ) << ( x_nPort + 1 ) ).Ptr() );
+		bRes = Open( ( CStr() << oexT( "COM" ) << ( x_nPort + 1 ) ).Ptr() );
 	else
-		Open( ( CStr() << oexT( "\\\\.\\COM" ) << ( x_nPort + 1 ) ).Ptr() );	
+		bRes = Open( ( CStr() << oexT( "\\\\.\\COM" ) << ( x_nPort + 1 ) ).Ptr() );	
 
 	// Save port index
 	if ( bRes )
@@ -238,11 +238,12 @@ oexBOOL CSerialPort::SetDefaults()
 
 	// Common defaults
 	pS->dcb.ByteSize = 8;
-	pS->dcb.BaudRate = eBaud_9600;
-	pS->dcb.Parity = eParity_None;
-	pS->dcb.StopBits = eStopBits_One;
-	pS->dcb.fDtrControl = eXCtrlDisable;
-	pS->dcb.fRtsControl = eXCtrlDisable;
+	pS->dcb.BaudRate = CBR_9600;
+	pS->dcb.fParity = FALSE;
+	pS->dcb.Parity = NOPARITY;
+	pS->dcb.StopBits = ONESTOPBIT;
+	pS->dcb.fDtrControl = 0;
+	pS->dcb.fRtsControl = 0;
 
 	// Not so common settings
 	pS->dcb.fBinary = FALSE;
