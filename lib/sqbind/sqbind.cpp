@@ -54,6 +54,7 @@ namespace sqbind
 		CSqImage::Register( x_vm );
 		CSqCapture::Register( x_vm );
 		CSqSocket::Register( x_vm );
+		CSqSerialPort::Register( x_vm );
 		CSqSockAddress::Register( x_vm );
 		CSqHttpServer::Register( x_vm );
 
@@ -121,6 +122,37 @@ SQBIND_REGISTER_CLASS_END()
 void CSqFile::Register( sqbind::VM vm )
 {_STT();
 	SQBIND_EXPORT( vm, CSqFile );
+}
+
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSerialPort, CSqSerialPort )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, Open )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, OpenNamed )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, Destroy )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getName )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getIndex )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, WriteBin )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, ReadBin )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, Write )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, Read )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, setBaudRate )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getBaudRate )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, setStopBits )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getStopBits )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, setParity )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getParity )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, setRtsCtrl )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getRtsCtrl )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getDtrCtrl )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getDtrCtrl )
+
+SQBIND_REGISTER_CLASS_END()
+
+void CSqSerialPort::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CSqSerialPort );
 }
 
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqTime, CSqTime )

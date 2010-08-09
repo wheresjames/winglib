@@ -51,8 +51,9 @@ struct SSerialPortSettings
 
 CSerialPort::CSerialPort()
 {_STT();
-	m_nError = 0;
 
+	m_nError = 0;
+	m_nPort = -1;
 	m_nTxBufferSize = eDefaultTxBufferSize;
 	m_nRxBufferSize = eDefaultRxBufferSize;
 
@@ -80,12 +81,41 @@ CSerialPort::~CSerialPort()
 
 void CSerialPort::Destroy()
 {_STT();
+
 	m_sPort.Destroy();
+	m_nPort = -1;
 
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS )
 		return;
+
+	// Close any open port
+	if ( pS->hPort )
+	{	CloseHandle( pS->hPort );
+		pS->hPort = oexNULL;
+	} // end if
 }
+
+oexBOOL Open( oexINT x_nPort )
+{_STT();
+
+	// iii Zero based because unix ports zero based
+
+	// Build port name
+	oexBOOL bRes = oexFALSE; 
+
+	if ( x_nPort < 9 )
+		Open( ( CStr() << oexT( "COM" ) << ( x_nPort + 1 ) ).Ptr() );
+	else
+		Open( ( CStr() << oexT( "\\\\.\\COM" ) << ( x_nPort + 1 ) ).Ptr() );	
+
+	// Save port index
+	if ( bRes )
+		m_nPort = x_nPort;
+
+	return bRes;
+}
+
 
 oexBOOL CSerialPort::Open( oexCSTR x_pPort )
 {_STT();
@@ -95,6 +125,10 @@ oexBOOL CSerialPort::Open( oexCSTR x_pPort )
 
 	// Lose previous port
 	Destroy();
+
+	// Ensure valid port name
+	if ( !x_pPort || !*x_pPort )
+		return oexFALSE; 
 
 	// Open the port
 	pS->hPort = CreateFile(	x_pPort, 
@@ -347,13 +381,26 @@ oexINT CSerialPort::getStopBits()
 {_STT();
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS ) return -1;
-	return (oexINT)pS->dcb.StopBits;
+
+	switch( (oexINT)pS->dcb.StopBits )
+	{	case 0 : return eStopBits_One;
+		case 1 : return eStopBits_One5;
+		case 2 : return eStopBits_Two;
+		default : break;
+	} // end switch
+	return -1;
 }
 
 void CSerialPort::setStopBits( oexINT v )
 {_STT();
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
-	if ( pS ) pS->dcb.StopBits = v;
+	if ( !pS ) return;
+	switch( v )
+	{	case eStopBits_One : pS->dcb.StopBits = 0;
+		case eStopBits_One5 : pS->dcb.StopBits = 1;
+		case eStopBits_Two : pS->dcb.StopBits = 2;
+		default : break;
+	} // end switch
 }
 
 oexINT CSerialPort::getParity()

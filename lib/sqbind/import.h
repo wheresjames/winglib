@@ -45,6 +45,7 @@
 #include "import/sq_file.h"
 #include "import/sq_time.h"
 #include "import/sq_socket.h"
+#include "import/sq_serial_port.h"
 #include "import/sq_image.h"
 #include "import/sq_capture.h"
 #include "import/sq_http_server.h"

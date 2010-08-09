@@ -58,9 +58,9 @@ public:
 	// Stop bit settings
 	enum StopBits
 	{
-		eStopBits_One			= 0,
-		eStopBits_One5			= 1,
-		eStopBits_Two			= 2
+		eStopBits_One			= 1,
+		eStopBits_Two			= 2,
+		eStopBits_One5			= 3
 	};
 
 	// Baud rates
@@ -80,7 +80,20 @@ public:
 		eBaud_57600				= 57600,
 		eBaud_115200			= 115200,
 		eBaud_128000			= 128000,
-		eBaud_2560000			= 256000
+		eBaud_230400			= 230400,
+		eBaud_256000			= 256000,
+		eBaud_460800			= 460800,
+		eBaud_500000			= 500000,
+		eBaud_576000			= 576000,
+		eBaud_921600			= 921600,
+		eBaud_1000000			= 1000000,
+		eBaud_1152000			= 1152000,
+		eBaud_1500000			= 1500000,
+		eBaud_2000000			= 2000000,
+		eBaud_2500000			= 2500000,
+		eBaud_3000000			= 3000000,
+		eBaud_3500000			= 3500000,
+		eBaud_4000000			= 4000000
 	};
 
 	// Flow control values
@@ -114,6 +127,12 @@ public:
 		\param [in] x_pPort	- Name of the port to open
 	*/
 	oexBOOL Open( oexCSTR x_pPort );
+
+	/// Opens the specified port
+	/**
+		\param [in] x_pPort	- Port index
+	*/
+	oexBOOL Open( oexINT x_nPort );
 
 	/// Purges the port
 	oexBOOL Purge();
@@ -220,7 +239,10 @@ public:
 	{	m_nRxBufferSize = v; }
 
 	/// Returns the name of the open port
-	CStr& GetPortName() { return m_sPort; }
+	CStr& GetName() { return m_sPort; }
+
+	/// Returns the port index if any
+	oexINT GetIndex() { return m_nPort; }
 
 private:
 
@@ -232,6 +254,9 @@ private:
 
 	/// Port name
 	CStr					m_sPort;
+
+	/// Port index
+	oexINT					m_nPort;
 
 	/// Tx buffer size
 	oexINT					m_nTxBufferSize;
