@@ -1456,7 +1456,7 @@ int CSqEngine::OnImport( const stdString &sClass )
 	return -1;
 }
 
-static oex::CStr FindFile( oex::CStr &sRoot, oex::CStrList &lstSubs, oex::CStr &sFile )
+static oex::CStr FindFile( oex::CStr sRoot, oex::CStrList &lstSubs, oex::CStr &sFile )
 {_STT();
 	// Check all possible sub folders
 	for ( oex::CStrList::iterator it; lstSubs.Next( it ); )
