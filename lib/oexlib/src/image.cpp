@@ -104,7 +104,7 @@ static void* _cximage_realloc( void *ptr, size_t size )
 
 static void _cximage_free( void *ptr )
 {
-	return oex::CMem::Delete( ptr );
+	oex::CMem::Delete( ptr );
 }
 
 extern "C"

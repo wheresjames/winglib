@@ -86,6 +86,11 @@ static CStr RegValueToString( DWORD dwType, LPVOID pBuf, DWORD dwSize )
 		case REG_SZ :
 		case REG_MULTI_SZ :
 		case REG_EXPAND_SZ :
+
+			// Size includes NULL string
+			if ( dwSize )
+				dwSize--;
+
 			return CStr( (oexCSTR)pBuf, dwSize );
 
 	} // end switch
