@@ -257,6 +257,6 @@
 	typedef long long				oexFILESIZE_T;
 #endif
 
-#define oexMAX_SIZE					( (oexSIZE_T)-1 )
-#define oexMAX_FILESIZE				( (oexFILESIZE_T)-1 )
+#define oexMAXSIZE					( (oexSIZE_T)-1 )
+#define oexMAXFILESIZE				( (oexFILESIZE_T)-1 )
 

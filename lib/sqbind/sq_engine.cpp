@@ -570,11 +570,45 @@ CSqMulti CSqEngineExport::pb( const stdString &sPath )
 	return CSqMulti( q->pb( sPath ) );
 }
 
+int CSqEngineExport::addlog( const stdString &sPath, const stdString &sKey )
+{_STT();
+	CSqMsgQueue *q = queue();
+	if ( !q ) return 0;
+	return q->addlog( sPath, sKey );
+}
+
+int CSqEngineExport::removelog( const stdString &sPath, const stdString &sKey )
+{_STT();
+	CSqMsgQueue *q = queue();
+	if ( !q ) return 0;
+	return q->removelog( sPath, sKey );
+}
+
+int CSqEngineExport::setlogroot( const stdString &sPath, const stdString &sRoot )
+{_STT();
+	CSqMsgQueue *q = queue();
+	if ( !q ) return 0;
+	return q->setlogroot( sPath, sRoot );
+}
+
+int CSqEngineExport::setlogfreq( const stdString &sPath, int nFreq )
+{_STT();
+	CSqMsgQueue *q = queue();
+	if ( !q ) return 0;
+	return q->setlogfreq( sPath, nFreq );
+}
+
+int CSqEngineExport::getlogfreq( const stdString &sPath )
+{_STT();
+	CSqMsgQueue *q = queue();
+	if ( !q ) return 0;
+	return q->getlogfreq( sPath );
+}
+
 int CSqEngineExport::shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory )
 {_STT();
 	return oexShell( sFile.c_str(), sParams.c_str(), sDirectory.c_str() );
 }
-
 
 int CSqEngineExport::is_path( const stdString &sPath )
 {_STT();
@@ -597,7 +631,6 @@ void CSqEngineExport::notice( int e, const stdString &sStr )
 {_STT();
 	oexNOTICE( 0, std2oex( sStr ) );
 }
-
 
 stdString CSqEngineExport::get_children( const stdString &sPath )
 {_STT();
@@ -949,6 +982,11 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, mset )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, isset )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, pb )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, addlog )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, removelog )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, setlogroot )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, setlogfreq )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getlogfreq )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_cpu_load )

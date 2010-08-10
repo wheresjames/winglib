@@ -73,6 +73,9 @@ public:
 	/// List of timers to remove
 	typedef oexStdList( oex::oexUINT )					t_RemoveTimers;
 
+    /// Map type for keys to log
+	typedef oexStdMap( stdString, oex::oexUINT )		t_LogList;
+
 public:
 
     /// Default constructor
@@ -179,6 +182,9 @@ public:
 	/// Executes timer callbacks
 	oex::oexINT RunTimers();
 
+	/// Logs property bag variables
+	oex::oexBOOL LogVariables();
+
 	/// Returns a reference to the property bag
 	t_PropertyBag& Pb() { return m_pb; }
 
@@ -237,5 +243,17 @@ private:
 
 	/// Key timeout list
 	t_TimeoutList						m_lstKeyTimeouts;
+
+	/// Variables to log
+	t_LogList							m_lstLog;
+
+	/// Logging timeout
+	oex::os::CTimeout					m_toLog;
+
+	/// Logging frequency
+	oex::oexUINT						m_uLogFreq;
+
+	/// Data logging object
+	oex::CDataLog						m_log;
 
 };

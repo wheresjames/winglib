@@ -113,6 +113,21 @@ public:
 	/// Returns a copy of the entire property bag
 	CSqMulti pb( const stdString &sPath );
 
+	/// Adds a key to the logger
+	int addlog( const stdString &sPath, const stdString &sKey );
+
+	/// Removes a key from the logger
+	int removelog( const stdString &sPath, const stdString &sKey );
+
+	/// Sets the logger output folder
+	int setlogroot( const stdString &sPath, const stdString &sRoot );
+
+	/// Sets the logger frequency
+	int setlogfreq( const stdString &sPath, int nFreq );
+
+	/// Returns the logger frequency
+	int getlogfreq( const stdString &sPath );
+
 	/// Sets the specified timer
 	int set_timer( const stdString &sPath, int to, const stdString &sCallback );
 

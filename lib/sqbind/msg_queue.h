@@ -209,6 +209,21 @@ public:
 	/// Kills the specified tiemr
 	stdString kill_timer( const stdString &sPath, const stdString &sId );
 
+	/// Adds a key to the logger
+	int addlog( const stdString &sPath, const stdString &sKey );
+
+	/// Removes a key from the logger
+	int removelog( const stdString &sPath, const stdString &sKey );
+
+	/// Sets the logger output folder
+	int setlogroot( const stdString &sPath, const stdString &sRoot );
+
+	/// Sets the logger frequency
+	int setlogfreq( const stdString &sPath, int nFreq );
+
+	/// Returns the logger frequency
+	int getlogfreq( const stdString &sPath );
+
 	/// Return a reference to the message queue lock
 	oexLock& GetLock() { return m_cLock; }
 

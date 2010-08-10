@@ -391,6 +391,26 @@ public:
     static oexBOOL Rename( oexCSTR x_pOld, oexCSTR x_pNew )
     {   return os::CBaseFile::Rename( x_pOld, x_pNew ); }
 
+	/// Appends a string to the end of a file
+	static t_size AppendContents( const CStr &sFile, const CStr &sData )
+	{	oex::CFile f;
+		if ( !f.OpenAlways( sFile.Ptr() ).IsOpen() )
+			return 0;
+		f.SetPtrPosEnd( 0 );
+		return f.Write( sData.Ptr(), sData.Length() );
+	}
+
+	/// Appends binary data to the end of a file
+	static t_size AppendContents( const CStr &sFile, CBin &bin )
+	{	if ( !bin.getUsed() ) return 0;
+		oex::CFile f;
+		if ( !f.OpenAlways( sFile.Ptr() ).IsOpen() )
+			return 0;
+		f.SetPtrPosEnd( 0 );
+		return f.Write( bin.Ptr(), bin.getUsed() );
+	}
+
+
 private:
 
     /// File handle

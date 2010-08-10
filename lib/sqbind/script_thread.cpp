@@ -46,6 +46,7 @@ CScriptThread::CScriptThread()
 	m_uToFreq = 100;
 	m_uToElapsed = 0;
 	m_dToValue = 0;
+	m_uLogFreq = 1000;
 }
 
 CScriptThread::~CScriptThread()
@@ -137,7 +138,7 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 {_STT();
 
-	oex::oexINT nDiv = 0;
+	oex::oexINT nDiv = 0, nDiv10 = 0;
 	oex::os::CTimeout toIdle;
 
 	// Until we're told to stop
@@ -166,6 +167,9 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 			// About every 100 milli-seconds
 			toIdle.SetMs( 100 );
 
+			// Run logging
+			LogVariables();
+
 			// Idle processing
 			int nRet = 0;
 			if ( !m_cSqEngine.Execute( &nRet, SQEXE_FN_IDLE ) )
@@ -181,6 +185,15 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 
 				// Cleanup tasks
 				Cleanup();
+
+				// Every 10 seconds
+				if ( 10 <= ++nDiv10 )
+				{	nDiv10 = 0;
+
+					if ( m_lstLog.size() )
+						m_log.Flush();
+
+				} // end if
 
 			} // end if
 
@@ -225,6 +238,42 @@ oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 
 	return 0;
 }
+
+oex::oexBOOL CScriptThread::LogVariables()
+{
+	// Are we logging anything?
+	if ( !m_lstLog.size() )
+		return oex::oexFALSE;
+
+	// Is it time?
+	if ( m_toLog.IsValid() )
+		return oex::oexFALSE;
+	
+	// Not too fast
+	if ( 100 > m_uLogFreq )
+		m_uLogFreq = 1000;
+
+	m_toLog.SetMs( m_uLogFreq );
+
+	// Lock the property bag
+	oexAutoLock ll( m_lockPb );
+	if ( !ll.IsLocked() )
+		return oex::oexFALSE;
+
+	// What time is it?
+	oex::CSysTime st( oex::CSysTime::eGmtTime );
+	oex::oexUINT gmt = st.GetUnixTime();
+	oex::oexUINT gmtms = st.GetMilliSecond();
+
+	// Start knocking out the list
+	for ( t_LogList::iterator it = m_lstLog.begin(); it != m_lstLog.end(); it++ )
+	{	oex::CStr &s = m_pb.at( std2oex( it->first ) ).ToString();
+		m_log.Log( it->second, s.Ptr(), s.Length(), gmt, gmtms );
+	} // end while
+
+	return oex::oexTRUE;
+}
+
 
 oex::oexINT CScriptThread::RunTimers()
 {
@@ -342,9 +391,13 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 	oex::oexBOOL bRet = oex::oexTRUE;
 
+	// Just a path check?
+	if ( sMsg == oexT( "is_path" ) )
+		bRet = oex::oexTRUE;
+
 	// Is it a script map?
-	if ( ( sMsg == oexT( "pb_get" ) || sMsg == oexT( "pb_set" ) )
-		 && *mapParams[ oexT( "key" ) ].c_str() == oexT( '@' ) )
+	else if ( ( sMsg == oexT( "pb_get" ) || sMsg == oexT( "pb_set" ) )
+			  && *mapParams[ oexT( "key" ) ].c_str() == oexT( '@' ) )
 	{
 		oexAutoLock ll( m_lockPb );
 		if ( !ll.IsLocked() )
@@ -547,9 +600,74 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 	} // end else if
 
-	// Just a path check?
-	else if ( sMsg == oexT( "is_path" ) )
-		bRet = oex::oexTRUE;
+	// Add key to be logged
+	else if ( sMsg == oexT( "pb_addlog" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		oex::oexINT nKey = m_log.AddKey( mapParams[ oexT( "key" ) ].c_str() );
+
+		if ( 0 <= nKey )
+			m_lstLog[ mapParams[ oexT( "key" ) ] ] = nKey;
+
+		*pReply = oex2std( oexMks( nKey ) );
+
+	} // end else if
+
+	// Remove key from logging
+	else if ( sMsg == oexT( "pb_removelog" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		oex::oexINT nKey = m_log.FindKey( mapParams[ oexT( "key" ) ].c_str() );
+		if ( 0 <= nKey )
+			m_log.RemoveKey( nKey );
+
+		m_lstLog.erase( mapParams[ oexT( "key" ) ] );
+
+		*pReply = oex2std( oexMks( nKey ) );
+
+	} // end else if
+
+	// Set logging root folder
+	else if ( sMsg == oexT( "pb_setlogroot" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		*pReply = oex2std( oexMks( m_log.SetRoot( mapParams[ oexT( "root" ) ].c_str() ) ) );
+
+	} // end else if
+
+	// Set logging root folder
+	else if ( sMsg == oexT( "pb_setlogfreq" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		// Set logging frequency
+		m_uLogFreq = oexStrToULong( mapParams[ oexT( "freq" ) ].c_str() );
+		*pReply = oex2std( oexMks( m_uLogFreq ) );
+
+	} // end else if
+
+	// Set logging root folder
+	else if ( sMsg == oexT( "pb_getlogfreq" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		// Set logging frequency
+		*pReply = oex2std( oexMks( m_uLogFreq ) );
+
+	} // end else if
 
 	// Our own thread must handle the rest
 	else if ( GetOwnerThreadId() != oexGetCurThreadId() )

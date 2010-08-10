@@ -52,6 +52,9 @@ typedef long long			   		oexINT64;
 typedef unsigned long long		    oexUINT64;
 #endif
 
+#define oexMAXUINT16	( (UINT16) -1 )
+#define oexMAXUINT32	( (UINT32) -1 )
+#define oexMAXUINT64	( (UINT64) -1 )
 
 typedef int							oexINT;
 typedef unsigned int				oexUINT;
@@ -66,7 +69,9 @@ typedef bool						oexBOOL;
 typedef char						oexCHAR;
 typedef unsigned char				oexUCHAR;
 
-#define oexMAXSIZE	( (oexSIZE_T) -1 )
+#define oexMAXUSHORT	( (oexUSHORT) -1 )
+#define oexMAXUINT		( (oexUINT) -1 )
+#define oexMAXULONG		( (oexULONG) -1 )
 
 // String types
 typedef char                        oexCHAR8;

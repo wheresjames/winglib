@@ -337,7 +337,7 @@ public:
 
 		// We'll scan for the length of the buffer later
 		else
-            m_nLength = oexMAXSIZE;
+			m_nLength = oexMAXSIZE;
 
 		return pMem;
     }

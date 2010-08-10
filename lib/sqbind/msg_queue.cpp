@@ -486,3 +486,48 @@ int CSqMsgQueue::asize( const stdString &sPath, const stdString &sKey )
 	Msg( sPath, oexT( "pb_asize" ), &params, &sRet );
 	return std2oex( sRet ).ToInt();
 }
+
+int CSqMsgQueue::addlog( const stdString &sPath, const stdString &sKey )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	params[ oexT( "key" ) ] = sKey;
+	Msg( sPath, oexT( "pb_addlog" ), &params, &sRet );
+	return std2oex( sRet ).ToInt();
+}
+
+int CSqMsgQueue::removelog( const stdString &sPath, const stdString &sKey )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	params[ oexT( "key" ) ] = sKey;
+	Msg( sPath, oexT( "pb_removelog" ), &params, &sRet );
+	return std2oex( sRet ).ToInt();
+}
+
+int CSqMsgQueue::setlogroot( const stdString &sPath, const stdString &sRoot )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	params[ oexT( "root" ) ] = sRoot;
+	Msg( sPath, oexT( "pb_setlogroot" ), &params, &sRet );
+	return std2oex( sRet ).ToInt();
+}
+
+int CSqMsgQueue::setlogfreq( const stdString &sPath, int nFreq )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	params[ oexT( "freq" ) ] = oex2std( oexMks( nFreq ) );
+	Msg( sPath, oexT( "pb_setlogfreq" ), &params, &sRet );
+	return std2oex( sRet ).ToInt();
+}
+
+int CSqMsgQueue::getlogfreq( const stdString &sPath )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	Msg( sPath, oexT( "pb_getlogfreq" ), &params, &sRet );
+	return std2oex( sRet ).ToInt();
+}
+

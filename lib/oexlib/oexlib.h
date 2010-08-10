@@ -529,6 +529,7 @@ namespace os
 #include "inc/fifo_sync.h"
 #include "inc/data_packet.h"
 #include "inc/resources.h"
+#include "inc/data_log.h"
 
 //------------------------------------------------------------------
 // Static features
