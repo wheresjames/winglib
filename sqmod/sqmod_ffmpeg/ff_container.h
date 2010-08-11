@@ -48,6 +48,18 @@ public:
 	int WriteFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
 
 	/// Returns video width
+	double getFps()
+	{	if ( !m_pFormatContext || 0 > m_nVideoStream
+			 || !m_pFormatContext->streams[ m_nVideoStream ]->codec )
+			return 0;
+		long den = m_pFormatContext->streams[ m_nVideoStream ]->codec->time_base.den;
+		long num = m_pFormatContext->streams[ m_nVideoStream ]->codec->time_base.num;
+		if ( !num ) num = 1;
+
+		return (double)den / (double)num;
+	}
+
+	/// Returns video width
 	int getWidth()
 	{	if ( !m_pFormatContext || 0 > m_nVideoStream
 			 || !m_pFormatContext->streams[ m_nVideoStream ]->codec )

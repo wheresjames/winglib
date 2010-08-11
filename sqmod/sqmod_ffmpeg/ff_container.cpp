@@ -170,7 +170,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 		Destroy();
 		return 0;
 	} // end if
-
+	
 	// Video stream
 	if ( 0 <= m_nVideoStream
 	     && m_pFormatContext->streams[ m_nVideoStream ]

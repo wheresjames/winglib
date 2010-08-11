@@ -170,9 +170,10 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, InitWrite )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, AddVideoStream )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, WriteFrame )
-
+	
 	SQBIND_MEMBER_FUNCTION( CFfContainer, Destroy )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, CloseStream )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getFps )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getWidth )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getHeight )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoFormat )
