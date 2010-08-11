@@ -124,11 +124,10 @@ oexINT CDataLog::AddKey( oexCSTR x_pKey, oexUINT x_uTime )
 			m_pLogs[ i ]->sName = x_pKey;
 
 			// Name hash, this will be the file names
-			oexGUID hash; CStr8 sMb = oexStrToMb( m_pLogs[ i ]->sName );
-			m_pLogs[ i ]->sHash = oexMbToStr( CBase16::Encode( oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) );
+			CStr8 sMb = oexStrToMb( x_pKey );
+			m_pLogs[ i ]->sHash = oexMbToStr( CBase16::Encode( oss::CMd5::Transform( &m_pLogs[ i ]->hash, sMb.Ptr(), sMb.Length() ), sizeof( m_pLogs[ i ]->hash ) ) );
 
 			// Init vars
-			oexZero( m_pLogs[ i ]->hash );
 			m_pLogs[ i ]->valid = 0;			
 			m_pLogs[ i ]->plast = 0;
 			m_pLogs[ i ]->olast = 0;
@@ -148,12 +147,12 @@ oexINT CDataLog::AddKey( oexCSTR x_pKey, oexUINT x_uTime )
 				x_uTime = x_uTime - ( x_uTime % eIndexStep );
 
 				// Resume existing index
-				SIterator it;
-				if ( FindValue( m_sRoot, m_pLogs[ i ]->sHash, x_uTime, 0, it, eDtNone, eMethodNone ) )
+				SIterator it; it.Init( m_sRoot, x_pKey );
+				if ( FindValue( it, x_uTime, 0, eDtNone, eMethodNone ) )
 				{	while ( it.vi.uNext > it.pos )
 					{	it.pos = it.vi.uNext;
 						it.fData.SetPtrPosBegin( it.vi.uNext );
-						if ( !it.fData.Read( &it.vi, sizeof( it.vi ) ) )
+						if ( !it.fData.Read( &it.vi, sizeof( it.vi ) ) || it.hash.Data1 != it.vi.uHash )
 							it.vi.uNext = 0;
 					} // end while
 					m_pLogs[ i ]->plast = it.pos;
@@ -196,14 +195,14 @@ oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, oexUI
 	oexGUID hash;
 	oss::CMd5::Transform( &hash, x_pValue, x_uSize );
 	if ( m_pLogs[ x_nKey ]->valid > x_uTime
-		 && guid::CmpGuid( &hash, &m_pLogs[ x_nKey ]->hash ) )
+		 && guid::CmpGuid( &hash, &m_pLogs[ x_nKey ]->changed ) )
 		return oexTRUE;
 
 	// Set timeout
 	m_pLogs[ x_nKey ]->valid = x_uTime + eMaxValid;
 
 	// Copy the guid
-	guid::CopyGuid( &m_pLogs[ x_nKey ]->hash, &hash );
+	guid::CopyGuid( &m_pLogs[ x_nKey ]->changed, &hash );
 
 	// Did user provide a time?
 	if ( !x_uTime )
@@ -219,6 +218,7 @@ oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, oexUI
 	vi.uTimeMs = x_uTimeMs;
 	vi.uSize = x_uSize;
 	vi.uPrev = m_pLogs[ x_nKey ]->olast;
+	vi.uHash = m_pLogs[ x_nKey ]->hash.Data1;
 	vi.uNext = 0;
 
 	// Update last pointer
@@ -387,9 +387,13 @@ CPropertyBag CDataLog::GetKeyList( oexUINT x_uTime )
 
 oexBOOL CDataLog::IsKeyData( CStr x_sRoot, CStr x_sHash, oexUINT x_uTime )
 {
-	// Build root to data based on starting timestamp
-	x_sRoot.BuildPath( x_uTime / eLogBase ).BuildPath( x_sHash ) << oexT( ".bin" );
+	if ( !x_uTime )
+		x_uTime = oexGetUnixTime();
 
+	// Build root to data based on starting timestamp
+	if ( !oexExists( ( x_sRoot.BuildPath( x_uTime / eLogBase ).BuildPath( x_sHash ) << oexT( ".bin" ) ).Ptr() ) )
+		return oexFALSE;
+	
 	return oexTRUE;
 }
 
@@ -455,7 +459,7 @@ oexBOOL CDataLog::OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, oexUINT
 	return oexTRUE;
 }
 
-oexBOOL CDataLog::FindValue( CStr &x_sRoot, CStr &x_sHash, oexUINT x_uTime, oexUINT x_uTimeMs, SIterator &x_it, oexINT x_nDataType, oexINT x_nMethod )
+oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs, oexINT x_nDataType, oexINT x_nMethod )
 {
 	// Get db metrics
 	oexBOOL bNew = oexFALSE;
@@ -469,7 +473,7 @@ oexBOOL CDataLog::FindValue( CStr &x_sRoot, CStr &x_sHash, oexUINT x_uTime, oexU
 		x_it.uB = _uB;
 
 		// Open the database containing data for this time
-		if ( !OpenDb( oexFALSE, x_sRoot, x_sHash, x_uTime, &x_it.fIdx, &x_it.fData ) )
+		if ( !OpenDb( oexFALSE, x_it.sRoot, x_it.sHash, x_uTime, &x_it.fIdx, &x_it.fData ) )
 			return oexFALSE;
 
 		bNew = oexTRUE;
@@ -513,7 +517,7 @@ oexBOOL CDataLog::FindValue( CStr &x_sRoot, CStr &x_sHash, oexUINT x_uTime, oexU
 
 			// Read the header
 			x_it.fData.SetPtrPosBegin( x_it.vi.uNext );
-			if ( !x_it.fData.Read( &x_it.vi, sizeof( x_it.vi ) ) )
+			if ( !x_it.fData.Read( &x_it.vi, sizeof( x_it.vi ) ) || x_it.hash.Data1 != x_it.vi.uHash )
 				return oexFALSE;
 
 			// Get values
@@ -568,16 +572,9 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd,
 	if ( !x_pKey || !*x_pKey || !m_sRoot.Length() || x_uStart > x_uEnd )
 		return CPropertyBag();
 
-	// The hash of the key is used to build the filenames
-	oexGUID hash; CStr8 sMb = oexStrToMb( x_pKey );
-	CStr sHash = oexMbToStr( CBase16::Encode( oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) );
-
-	// Verify there is key data
-	if ( !IsKeyData( m_sRoot, sHash, x_uStart ) )
-		return CPropertyBag();
-
 	SIterator it;
-	CPropertyBag pb;
+	if ( !it.Init( m_sRoot, x_pKey ) || !it.IsData( x_uStart ) )
+		return CPropertyBag();
 	
 	// Align with the interval
 	oexUINT uAlign = x_uInterval / 1000;
@@ -586,11 +583,12 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd,
 		x_uEnd -= ( x_uEnd % uAlign );
 
 	// Create data
+	CPropertyBag pb;
 	oexUINT uTime = x_uStart, uTimeMs = 0;
 	while ( uTime <= x_uEnd )
 	{
 		// Find the value for this time
-		if ( FindValue( m_sRoot, sHash, uTime, uTimeMs, it, x_nDataType, x_nMethod ) )
+		if ( FindValue( it, uTime, uTimeMs, x_nDataType, x_nMethod ) )
 		{	if ( uTimeMs )
 				pb[ oexFmt( oexT( "%u.%u" ), uTime, uTimeMs ) ].ToString() = it.sValue;
 			else
@@ -619,17 +617,10 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexU
 	if ( !x_pKey || !*x_pKey || !m_sRoot.Length() || x_uStart > x_uEnd )
 		return oexT( "" );
 
-	// The hash of the key is used to build the filenames
-	oexGUID hash; CStr8 sMb = oexStrToMb( x_pKey );
-	CStr sHash = oexMbToStr( CBase16::Encode( oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) );
-
-	// Verify there is key data
-	if ( !IsKeyData( m_sRoot, sHash, x_uStart ) )
+	SIterator it;
+	if ( !it.Init( m_sRoot, x_pKey ) || !it.IsData( x_uStart ) )
 		return oexT( "" );
 
-	SIterator it;
-	CPropertyBag pb;
-	
 	// Align with the interval
 	oexUINT uAlign = x_uInterval / 1000;
 	if ( uAlign )
@@ -641,11 +632,12 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexU
 	CBin bin( nItems * sizeof( float ), nItems * sizeof( float ) );
 
 	// Create data
+	CPropertyBag pb;
 	oexUINT uTime = x_uStart, uTimeMs = 0, i = 0;
 	while ( i < nItems && uTime <= x_uEnd )
 	{
 		// Find the value for this time
-		if ( FindValue( m_sRoot, sHash, uTime, uTimeMs, it, x_nDataType, x_nMethod ) )
+		if ( FindValue( it, uTime, uTimeMs, x_nDataType, x_nMethod ) )
 			bin.setFLOAT( i++, it.fValue );
 		else
 			bin.setFLOAT( i++, 0.f );

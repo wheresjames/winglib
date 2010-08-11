@@ -91,22 +91,25 @@ public:
 	struct SValueIndex
 	{
 		/// Size of this structure
-		oexUINT			uBytes;
+		oexUINT32			uBytes;
+
+		/// Key ID
+		oexUINT32			uHash;
 
 		/// Timestamp
-		oexUINT			uTime;
+		oexUINT32			uTime;
 
 		/// Timestamp milliseconds
-		oexUINT			uTimeMs;
+		oexUINT32			uTimeMs;
 
 		/// Size of the data in this block
-		CFile::t_size	uSize;
+		CFile::t_size		uSize;
 
 		/// Offset to the next block of data for this value
-		CFile::t_size	uNext;
+		CFile::t_size		uNext;
 
 		/// Offset to the previous block of data for this value
-		CFile::t_size	uPrev;
+		CFile::t_size		uPrev;
 	};
 
 	/// Holds info on a logging buffer
@@ -121,8 +124,11 @@ public:
 		/// Data buffer
 		CBin			bin;
 
-		/// Data hash
+		/// Key hash
 		oex::oexGUID	hash;
+
+		/// Data hash
+		oex::oexGUID	changed;
 
 		/// Every so often, write the data anyway
 		oexUINT			valid;
@@ -157,7 +163,34 @@ public:
 			return oexTRUE;
 		} // end if
 
+		// Sets the key and calculates the hash
+		oexBOOL Init( CStr x_sRoot, oexCSTR x_pKey )
+		{	if ( !x_sRoot.Length() || !x_pKey || !*x_pKey )
+				return oexFALSE;
+			sRoot = x_sRoot;
+			sKey = oexStrToMb( x_pKey );
+			sHash = oexMbToStr( CBase16::Encode( oss::CMd5::Transform( &hash, sKey.Ptr(), sKey.Length() ), sizeof( hash ) ) );
+			return oexTRUE;
+		}
+
+		// Returns non-zero if there is data for the iterator
+		oexBOOL IsData( oexUINT x_uTime = 0 )
+		{
+			if ( !x_uTime )
+				x_uTime = oexGetUnixTime();
+
+			// Build root to data based on starting timestamp
+			if ( !oexExists( ( oex::CStr( sRoot ).BuildPath( x_uTime / eLogBase ).BuildPath( sHash ) << oexT( ".bin" ) ).Ptr() ) )
+				return oexFALSE;
+			
+			return oexTRUE;
+		}
+
 		// Variables
+		CStr			sRoot;
+		CStr8			sKey;
+		CStr			sHash;
+		oexGUID			hash;
 		oexUINT			uB;
 		oexUINT			uI;
 		SValueIndex		vi;
@@ -220,7 +253,7 @@ public:
 	static oexBOOL OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, oexUINT x_uTime, CFile *x_pIdx, CFile *x_pData );
 
 	/// Finds the value for the specified time in an open database
-	static oexBOOL FindValue( CStr &x_sRoot, CStr &x_sHash, oexUINT x_uTime, oexUINT x_uTimeMs, SIterator &x_it, oexINT x_nDataType, oexINT x_nMethod );
+	static oexBOOL FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs, oexINT x_nDataType, oexINT x_nMethod );
 
 private:
 
