@@ -591,6 +591,13 @@ int CSqEngineExport::setlogroot( const stdString &sPath, const stdString &sRoot 
 	return q->setlogroot( sPath, sRoot );
 }
 
+stdString CSqEngineExport::getlogroot( const stdString &sPath )
+{_STT();
+	CSqMsgQueue *q = queue();
+	if ( !q ) return oexT( "" );
+	return q->getlogroot( sPath );
+}
+
 int CSqEngineExport::setlogfreq( const stdString &sPath, int nFreq )
 {_STT();
 	CSqMsgQueue *q = queue();
@@ -603,6 +610,33 @@ int CSqEngineExport::getlogfreq( const stdString &sPath )
 	CSqMsgQueue *q = queue();
 	if ( !q ) return 0;
 	return q->getlogfreq( sPath );
+}
+
+CSqMulti CSqEngineExport::getlogkeys( const stdString &sPath, int nTime )
+{_STT();
+	CSqMsgQueue *q = queue();
+	if ( !q ) return CSqMulti();
+	return q->getlogkeys( sPath, nTime );
+}
+
+CSqMulti CSqEngineExport::getlog( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, int nDataType, int nMethod )
+{
+	CSqMsgQueue *q = queue();
+	if ( !q ) return CSqMulti();
+	return q->getlog( sPath, sKey, nStart, nStop, nInterval, nDataType, nMethod );
+}
+
+stdString CSqEngineExport::getlogbin( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, int nDataType, int nMethod )
+{	CSqMsgQueue *q = queue();
+	if ( !q ) return oexT( "" );
+	return q->getlogbin( sPath, sKey, nStart, nStop, nInterval, nDataType, nMethod );
+}
+
+
+int CSqEngineExport::resetlog( const stdString &sPath )
+{	CSqMsgQueue *q = queue();
+	if ( !q ) return 0;
+	return q->resetlog( sPath );
 }
 
 int CSqEngineExport::shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory )
@@ -985,8 +1019,13 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, addlog )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, removelog )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, setlogroot )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getlogroot )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, setlogfreq )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getlogfreq )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getlogkeys )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getlog )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getlogbin )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, resetlog )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_cpu_load )

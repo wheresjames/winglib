@@ -65,17 +65,23 @@ void CDataLog::Destroy()
 	m_sRoot.Destroy();
 }
 
-oexBOOL CDataLog::SetRoot( oexCSTR x_pRoot, oexBOOL x_bChangesOnly )
+oexBOOL CDataLog::SetRoot( oexCSTR x_pRoot )
 {_STT();
 
 	// Ensure valid root folder
-	if ( !x_pRoot || !*x_pRoot || !oexExists( x_pRoot ) )
+	if ( !x_pRoot || !*x_pRoot )
+		return oexFALSE;
+
+	// Create folder if it doesn't exist
+	if ( !oexExists( x_pRoot ) )
+		oexCreatePath( x_pRoot );
+
+	// Punt if that failed
+	if ( !oexExists( x_pRoot ) )
 		return oexFALSE;
 
 	// Save path to root folder
 	m_sRoot = x_pRoot;
-
-	m_bChangesOnly = x_bChangesOnly;
 
 	return oexTRUE;
 }
@@ -95,7 +101,7 @@ oexINT CDataLog::FindKey( oexCSTR x_pKey )
 	return -1;
 }
 
-oexINT CDataLog::AddKey( oexCSTR x_pKey )
+oexINT CDataLog::AddKey( oexCSTR x_pKey, oexUINT x_uTime )
 {_STT();
 
 	// Ensure valid key name
@@ -105,16 +111,58 @@ oexINT CDataLog::AddKey( oexCSTR x_pKey )
 	// Add a new logging key
 	for( oexINT i = 0; i < eMaxKeys; i++ )
 		if ( !m_pLogs[ i ] )
-		{	m_pLogs[ i ] = OexAllocConstruct< SLogKey >();
-			if ( !m_pLogs[ i ] ) return -1;
+		{
+			// Create logging object
+			m_pLogs[ i ] = OexAllocConstruct< SLogKey >();
+			if ( !m_pLogs[ i ] ) 
+				return -1;
+
+			// Allocate some initial space
 			m_pLogs[ i ]->bin.Allocate( eInitBuffer );
+
+			// Save key name
 			m_pLogs[ i ]->sName = x_pKey;
-			oex::oexGUID hash; oex::CStr8 sMb = oexStrToMb( m_pLogs[ i ]->sName );
-			m_pLogs[ i ]->sHash = oexMbToStr( oex::CBase16::Encode( oex::oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) );
+
+			// Name hash, this will be the file names
+			oexGUID hash; CStr8 sMb = oexStrToMb( m_pLogs[ i ]->sName );
+			m_pLogs[ i ]->sHash = oexMbToStr( CBase16::Encode( oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) );
+
+			// Init vars
 			oexZero( m_pLogs[ i ]->hash );
+			m_pLogs[ i ]->valid = 0;			
 			m_pLogs[ i ]->plast = 0;
 			m_pLogs[ i ]->olast = 0;
+
+			if ( m_sRoot.Length() )
+			{ 	
+				// Save key name to file
+				if ( !x_uTime )
+					x_uTime = oexGetUnixTime();
+				CStr sRoot = m_sRoot;
+				sRoot.BuildPath( x_uTime / eLogBase );
+				oexCreatePath( sRoot.Ptr() );
+				CFile().CreateAlways( ( sRoot.BuildPath( m_pLogs[ i ]->sHash ) << oexT( ".txt" ) ).Ptr() )
+					.Write( oexStrToMbPtr( x_pKey ) );
+
+				// Get root index time
+				x_uTime = x_uTime - ( x_uTime % eIndexStep );
+
+				// Resume existing index
+				SIterator it;
+				if ( FindValue( m_sRoot, m_pLogs[ i ]->sHash, x_uTime, 0, it, eDtNone, eMethodNone ) )
+				{	while ( it.vi.uNext > it.pos )
+					{	it.pos = it.vi.uNext;
+						it.fData.SetPtrPosBegin( it.vi.uNext );
+						if ( !it.fData.Read( &it.vi, sizeof( it.vi ) ) )
+							it.vi.uNext = 0;
+					} // end while
+					m_pLogs[ i ]->plast = it.pos;
+				} // end if
+
+			} // end write name
+			
 			return i;
+
 		} // end if
 
 	return -1;
@@ -140,14 +188,22 @@ oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, oexUI
 	if ( 0 > x_nKey || eMaxKeys <= x_nKey || !m_pLogs[ x_nKey ] )
 		return oexFALSE;
 
+	// Grab time
+	if ( !x_uTime )
+		x_uTime = oexGetUnixTime();
+
 	// First, determine if the data has changed since we last logged it
-	oex::oexGUID hash;
-	oex::oss::CMd5::Transform( &hash, x_pValue, x_uSize );
-	if ( oex::guid::CmpGuid( &hash, &m_pLogs[ x_nKey ]->hash ) )
+	oexGUID hash;
+	oss::CMd5::Transform( &hash, x_pValue, x_uSize );
+	if ( m_pLogs[ x_nKey ]->valid > x_uTime
+		 && guid::CmpGuid( &hash, &m_pLogs[ x_nKey ]->hash ) )
 		return oexTRUE;
 
+	// Set timeout
+	m_pLogs[ x_nKey ]->valid = x_uTime + eMaxValid;
+
 	// Copy the guid
-	oex::guid::CopyGuid( &m_pLogs[ x_nKey ]->hash, &hash );
+	guid::CopyGuid( &m_pLogs[ x_nKey ]->hash, &hash );
 
 	// Did user provide a time?
 	if ( !x_uTime )
@@ -165,12 +221,18 @@ oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, oexUI
 	vi.uPrev = m_pLogs[ x_nKey ]->olast;
 	vi.uNext = 0;
 
+	// Update last pointer
+	if ( m_pLogs[ x_nKey ]->bin.getUsed() )
+	{	SValueIndex *viLast = (SValueIndex*)m_pLogs[ x_nKey ]->bin.Ptr( m_pLogs[ x_nKey ]->olast );
+		if ( viLast ) viLast->uNext = m_pLogs[ x_nKey ]->bin.getUsed();
+	} // end if
+
 	// Save pointer to this structure
 	m_pLogs[ x_nKey ]->olast = m_pLogs[ x_nKey ]->bin.getUsed();
 
 	// Write the value to the memory log
-	if ( !m_pLogs[ x_nKey ]->bin.AppendBuffer( (oex::CBin::t_byte*)&vi, vi.uBytes ) 
-		 || !m_pLogs[ x_nKey ]->bin.AppendBuffer( (oex::CBin::t_byte*)x_pValue, x_uSize ) )
+	if ( !m_pLogs[ x_nKey ]->bin.AppendBuffer( (CBin::t_byte*)&vi, vi.uBytes ) 
+		 || !m_pLogs[ x_nKey ]->bin.AppendBuffer( (CBin::t_byte*)x_pValue, x_uSize ) )
 		return oexFALSE;
 
 	return oexTRUE;
@@ -187,24 +249,10 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 	if ( !x_uTime )
 		x_uTime = oexGetUnixTime();
 
-	// Create root folder
-	CStr sRoot = m_sRoot;
-	sRoot.BuildPath( x_uTime / eLogBase );
-	oexCreatePath( sRoot.Ptr() );
-
-	CStr sData = sRoot; sData.BuildPath( "data.bin" );
-	oexBOOL x_bExists = oexExists( sData.Ptr() );
-
-	oex::CFile fData;
-	if ( !fData.OpenAlways( sData.Ptr() ).IsOpen() )
-		return 0;
-
-	// Don't let the file have a zero length
-	if ( !x_bExists )
-		fData.Write( CStr8( "Hey, you, get off of my cloud." ) );
-
-	// Move to the end of the file
-	fData.SetPtrPosEnd( 0 );
+	// Open the database
+	CFile fData;
+	if ( !OpenDb( oexTRUE, m_sRoot, oexT( "" ), x_uTime, oexNULL, &fData ) )
+		return oexFALSE;
 
 	// Flush data to disk
 	for( oexINT i = 0; i < eMaxKeys; i++ )
@@ -217,7 +265,7 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 			oexUINT n = 0;
 			while ( m_pLogs[ i ]->bin.getUsed() >= sizeof( SValueIndex ) )
 			{	
-				// See if this block should go in the index
+				// Get block info
 				SValueIndex *pvi = (SValueIndex*)m_pLogs[ i ]->bin.Ptr();
 
 				// Track prev/next pointers
@@ -226,7 +274,7 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 					// Do we need to update a previous item?
 					if ( m_pLogs[ i ]->plast )
 					{	SValueIndex vi;
-						oex::CFile::CRestoreFilePos rfp( &fData );
+						CFile::CRestoreFilePos rfp( &fData );
 						fData.SetPtrPosBegin( m_pLogs[ i ]->plast );
 						if ( fData.Read( &vi, sizeof( vi ) ) )
 						{	vi.uNext = pos;
@@ -242,8 +290,10 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 				else
 				{	pvi->uPrev += pos;
 					if ( pvi->uNext ) pvi->uNext += pos;
-					m_pLogs[ i ]->plast = pos + m_pLogs[ i ]->bin.getOffset();
 				} // end else
+
+				// Save last index
+				m_pLogs[ i ]->plast = pos + m_pLogs[ i ]->bin.getOffset();
 
 				// Skip this block
 				m_pLogs[ i ]->bin.setOffset( m_pLogs[ i ]->bin.getOffset() + pvi->uBytes + pvi->uSize ); 
@@ -256,22 +306,9 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 			// Write data to file
 			if ( fData.Write( m_pLogs[ i ]->bin.Ptr(), m_pLogs[ i ]->bin.getUsed() ) )
 			{
-				// Update the index file
-				CStr sIndex = sRoot; 
-				sIndex.BuildPath( m_pLogs[ i ]->sHash );
-				sIndex += oexT( ".bin" );
-				oex::CFile fIdx;
-
-				// Initialize the index if needed
-				if ( !fIdx.OpenExisting( sIndex.Ptr() ).IsOpen() )
-					if ( fIdx.OpenAlways( sIndex.Ptr() ).IsOpen() )
-					{	CFile::t_size uOffset = 0;
-						for ( oexINT i = 0; i < eLogBase; i += eIndexStep )
-							fIdx.Write( &uOffset, sizeof( uOffset ) );
-					} // end if
-
 				// Update the index
-				if ( fData.IsOpen() )
+				CFile fIdx;
+				if ( OpenDb( oexTRUE, m_sRoot, m_pLogs[ i ]->sHash, x_uTime, &fIdx, oexNULL ) )
 				{
 					// While we have blocks
 					CFile::t_size ex = 0;
@@ -313,4 +350,316 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 		} // end if
 
 	return oexTRUE;
+}
+
+CPropertyBag CDataLog::GetKeyList( oexUINT x_uTime )
+{_STT();
+
+	// Ensure we have a root
+	if ( !m_sRoot.Length() )
+		return CPropertyBag();
+
+	// Use current time if not specified
+	if ( !x_uTime )
+		x_uTime = oexGetUnixTime();
+
+	// Build root to data based on timestamp
+	CStr sRoot = m_sRoot;
+	sRoot.BuildPath( x_uTime / eLogBase );
+	if ( !oexExists( sRoot.Ptr() ) )
+		return CPropertyBag();
+
+	CPropertyBag pb;
+
+	CFindFiles ff;
+	if ( ff.FindFirst( sRoot.Ptr(), oexT( "*.txt" ) ) )
+		do
+		{
+			// Read key name into property bag
+			if ( !ff.IsDirectory() )
+				pb[ ff.GetFileName() ] = CFile()
+					.OpenExisting( ( CStr( sRoot ).BuildPath( ff.GetFileName() ) ).Ptr() ).Read();
+
+		} while ( ff.FindNext() );
+
+	return pb;
+}
+
+oexBOOL CDataLog::IsKeyData( CStr x_sRoot, CStr x_sHash, oexUINT x_uTime )
+{
+	// Build root to data based on starting timestamp
+	x_sRoot.BuildPath( x_uTime / eLogBase ).BuildPath( x_sHash ) << oexT( ".bin" );
+
+	return oexTRUE;
+}
+
+oexBOOL CDataLog::OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, oexUINT x_uTime, CFile *x_pIdx, CFile *x_pData )
+{
+	// Build root to data based on starting timestamp
+	x_sRoot.BuildPath( x_uTime / eLogBase );
+	if ( !oexExists( x_sRoot.Ptr() ) )
+	{	if ( !x_bCreate )
+			return oexFALSE;
+		else
+			oexCreatePath( x_sRoot.Ptr() );
+	} // end if
+
+	// Data file?
+	if ( x_pData )
+	{
+		// Data file path
+		CStr sData = x_sRoot; sData.BuildPath( "data.bin" );
+		oexBOOL bExists = oexExists( sData.Ptr() );
+		if ( !bExists && !x_bCreate )
+			return oexFALSE;
+
+		// Open the data file
+		if ( x_bCreate 
+			 ? !x_pData->OpenAlways( sData.Ptr() ).IsOpen() 
+			 : !x_pData->OpenExisting( sData.Ptr() ).IsOpen() )
+			return oexFALSE;
+
+		// Initialize?
+		if ( x_bCreate && !bExists )
+			x_pData->Write( CStr8( "Hey, you, get off of my cloud." ) );
+
+		// Move to the end of the file
+		x_pData->SetPtrPosEnd( 0 );
+
+	} // end if
+
+	// Index file?
+	if ( x_pIdx )
+	{
+		// Open key index
+		CStr sIndex( x_sRoot ); sIndex.BuildPath( x_sHash ) << oexT( ".bin" );
+		oexBOOL bExists = oexExists( sIndex.Ptr() );
+		if ( !bExists && !x_bCreate )
+			return oexFALSE;
+
+		// Open the index file
+		if ( x_bCreate 
+			 ? !x_pIdx->OpenAlways( sIndex.Ptr() ).IsOpen() 
+			 : !x_pIdx->OpenExisting( sIndex.Ptr() ).IsOpen() )
+			return oexFALSE;
+
+		// Initialize index file if needed
+		if ( x_bCreate && !bExists )
+		{	CFile::t_size uOffset = 0;
+			for ( oexINT i = 0; i < eLogBase; i += eIndexStep )
+				x_pIdx->Write( &uOffset, sizeof( uOffset ) );
+		} // end if
+
+	} // end if
+
+	return oexTRUE;
+}
+
+oexBOOL CDataLog::FindValue( CStr &x_sRoot, CStr &x_sHash, oexUINT x_uTime, oexUINT x_uTimeMs, SIterator &x_it, oexINT x_nDataType, oexINT x_nMethod )
+{
+	// Get db metrics
+	oexBOOL bNew = oexFALSE;
+	oexUINT _uB = x_uTime / eLogBase;
+	oexUINT _uI = ( x_uTime % eLogBase ) / eIndexStep;
+
+	// Ensure we have the correct database open
+	if ( oexMAXUINT == x_it.uB || _uB != x_it.uB )
+	{	
+		// Save open db index
+		x_it.uB = _uB;
+
+		// Open the database containing data for this time
+		if ( !OpenDb( oexFALSE, x_sRoot, x_sHash, x_uTime, &x_it.fIdx, &x_it.fData ) )
+			return oexFALSE;
+
+		bNew = oexTRUE;
+
+	} // end if
+
+	// Time to index?
+	if ( oexMAXUINT == _uI || _uI != x_it.uI )
+	{
+		// Save index offset
+		x_it.uI = _uI;
+
+		// Header invalid now
+		x_it.vi.uTime = 0;
+
+		// Point to index position
+		x_it.fIdx.SetPtrPosBegin( x_it.uI * sizeof( CFile::t_size ) );
+
+		// Update the index if blank
+		CFile::t_size ex;
+		if ( x_it.fIdx.Read( &ex, sizeof( ex ) ) && ex )
+			x_it.pos = ex;
+
+		bNew = oexTRUE;
+
+	} // end if
+
+	// Do we have a data position?
+	if ( !x_it.pos )
+		return oexFALSE;
+
+	// Do we need new data?
+	if ( x_it.vi.uTime < x_uTime || ( x_it.vi.uTime == x_uTime && x_it.vi.uTimeMs < x_uTimeMs ) )
+	{
+		x_it.nCount = 0;
+		x_it.vi.uNext = x_it.pos;
+		do
+		{
+			// Save last valid position
+			x_it.pos = x_it.vi.uNext;
+
+			// Read the header
+			x_it.fData.SetPtrPosBegin( x_it.vi.uNext );
+			if ( !x_it.fData.Read( &x_it.vi, sizeof( x_it.vi ) ) )
+				return oexFALSE;
+
+			// Get values
+			if ( !bNew && eDtString < x_nDataType && eMethodAverage == x_nMethod )
+			{
+				// Get string value
+				if ( x_it.getValue( x_it.sValue ) )
+				{
+					// Reset 
+					if ( !x_it.nCount++ )
+						x_it.fValue = 0, x_it.nValue = 0;
+
+					if ( eDtInt == x_nDataType )
+						x_it.nValue += x_it.sValue.ToInt();
+
+					else if ( eDtFloat == x_nDataType )
+						x_it.fValue += x_it.sValue.ToFloat();
+
+				} // end if
+
+			} // end if
+
+		} while ( ( x_it.vi.uTime < x_uTime || ( x_it.vi.uTime == x_uTime && x_it.vi.uTimeMs < x_uTimeMs ) ) && x_it.vi.uNext > x_it.pos );
+
+		// Point to data
+		x_it.fData.SetPtrPosBegin( x_it.pos + x_it.vi.uBytes );
+
+		// Scale averages
+		if ( !bNew && eDtString < x_nDataType && eMethodAverage == x_nMethod )
+		{	if ( 0 < x_it.nCount )
+				x_it.fValue /= x_it.nCount,
+				x_it.nValue /= x_it.nCount;
+		} // end if
+
+		// Read discrete values
+		else 
+		{	x_it.getValue( x_it.sValue );
+			if ( eDtInt == x_nDataType )
+				x_it.nValue = x_it.sValue.ToInt();
+			else if ( eDtFloat == x_nDataType )
+				x_it.fValue = x_it.sValue.ToFloat();
+		} // end else
+
+	} // end if
+
+	return oexTRUE;
+}
+
+CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod )
+{
+	// Sanity checks
+	if ( !x_pKey || !*x_pKey || !m_sRoot.Length() || x_uStart > x_uEnd )
+		return CPropertyBag();
+
+	// The hash of the key is used to build the filenames
+	oexGUID hash; CStr8 sMb = oexStrToMb( x_pKey );
+	CStr sHash = oexMbToStr( CBase16::Encode( oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) );
+
+	// Verify there is key data
+	if ( !IsKeyData( m_sRoot, sHash, x_uStart ) )
+		return CPropertyBag();
+
+	SIterator it;
+	CPropertyBag pb;
+	
+	// Align with the interval
+	oexUINT uAlign = x_uInterval / 1000;
+	if ( uAlign )
+		x_uStart -= ( x_uStart % uAlign ),
+		x_uEnd -= ( x_uEnd % uAlign );
+
+	// Create data
+	oexUINT uTime = x_uStart, uTimeMs = 0;
+	while ( uTime <= x_uEnd )
+	{
+		// Find the value for this time
+		if ( FindValue( m_sRoot, sHash, uTime, uTimeMs, it, x_nDataType, x_nMethod ) )
+		{	if ( uTimeMs )
+				pb[ oexFmt( oexT( "%u.%u" ), uTime, uTimeMs ) ].ToString() = it.sValue;
+			else
+				pb[ uTime ].ToString() = it.sValue;
+		} // end if
+			
+		else if( uTimeMs )
+			pb[ oexFmt( oexT( "%u.%u" ), uTime, uTimeMs ) ] = oexT( "" );
+
+		else
+			pb[ uTime ].ToString() = oexT( "" );
+
+		// Update time
+		uTimeMs += x_uInterval;
+		uTime += uTimeMs / 1000;
+		uTimeMs %= 1000;
+
+	} // end for
+
+	return pb;
+}
+
+CStr CDataLog::GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod )
+{
+	// Sanity checks
+	if ( !x_pKey || !*x_pKey || !m_sRoot.Length() || x_uStart > x_uEnd )
+		return oexT( "" );
+
+	// The hash of the key is used to build the filenames
+	oexGUID hash; CStr8 sMb = oexStrToMb( x_pKey );
+	CStr sHash = oexMbToStr( CBase16::Encode( oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) );
+
+	// Verify there is key data
+	if ( !IsKeyData( m_sRoot, sHash, x_uStart ) )
+		return oexT( "" );
+
+	SIterator it;
+	CPropertyBag pb;
+	
+	// Align with the interval
+	oexUINT uAlign = x_uInterval / 1000;
+	if ( uAlign )
+		x_uStart -= ( x_uStart % uAlign ),
+		x_uEnd -= ( x_uEnd % uAlign );
+
+	// Allocate space for binary data
+	oexUINT nItems = ( x_uEnd - x_uStart ) * 1000 / x_uInterval;
+	CBin bin( nItems * sizeof( float ), nItems * sizeof( float ) );
+
+	// Create data
+	oexUINT uTime = x_uStart, uTimeMs = 0, i = 0;
+	while ( i < nItems && uTime <= x_uEnd )
+	{
+		// Find the value for this time
+		if ( FindValue( m_sRoot, sHash, uTime, uTimeMs, it, x_nDataType, x_nMethod ) )
+			bin.setFLOAT( i++, it.fValue );
+		else
+			bin.setFLOAT( i++, 0.f );
+
+		// Update time
+		uTimeMs += x_uInterval;
+		uTime += uTimeMs / 1000;
+		uTimeMs %= 1000;
+
+	} // end for
+
+	// Set the binary share
+	CStr sId = oexGuidToString();
+	oexSetBin( sId, &bin );
+
+	return sId;
 }

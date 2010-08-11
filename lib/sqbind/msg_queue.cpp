@@ -484,7 +484,7 @@ int CSqMsgQueue::asize( const stdString &sPath, const stdString &sKey )
 	CSqMap params;
 	params[ oexT( "key" ) ] = sKey;
 	Msg( sPath, oexT( "pb_asize" ), &params, &sRet );
-	return std2oex( sRet ).ToInt();
+	return oexStrToLong( sRet.c_str() );
 }
 
 int CSqMsgQueue::addlog( const stdString &sPath, const stdString &sKey )
@@ -493,7 +493,7 @@ int CSqMsgQueue::addlog( const stdString &sPath, const stdString &sKey )
 	CSqMap params;
 	params[ oexT( "key" ) ] = sKey;
 	Msg( sPath, oexT( "pb_addlog" ), &params, &sRet );
-	return std2oex( sRet ).ToInt();
+	return oexStrToLong( sRet.c_str() );
 }
 
 int CSqMsgQueue::removelog( const stdString &sPath, const stdString &sKey )
@@ -502,7 +502,7 @@ int CSqMsgQueue::removelog( const stdString &sPath, const stdString &sKey )
 	CSqMap params;
 	params[ oexT( "key" ) ] = sKey;
 	Msg( sPath, oexT( "pb_removelog" ), &params, &sRet );
-	return std2oex( sRet ).ToInt();
+	return oexStrToLong( sRet.c_str() );
 }
 
 int CSqMsgQueue::setlogroot( const stdString &sPath, const stdString &sRoot )
@@ -511,7 +511,15 @@ int CSqMsgQueue::setlogroot( const stdString &sPath, const stdString &sRoot )
 	CSqMap params;
 	params[ oexT( "root" ) ] = sRoot;
 	Msg( sPath, oexT( "pb_setlogroot" ), &params, &sRet );
-	return std2oex( sRet ).ToInt();
+	return oexStrToLong( sRet.c_str() );
+}
+
+stdString CSqMsgQueue::getlogroot( const stdString &sPath )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	Msg( sPath, oexT( "pb_getlogroot" ), &params, &sRet );
+	return sRet;
 }
 
 int CSqMsgQueue::setlogfreq( const stdString &sPath, int nFreq )
@@ -520,7 +528,7 @@ int CSqMsgQueue::setlogfreq( const stdString &sPath, int nFreq )
 	CSqMap params;
 	params[ oexT( "freq" ) ] = oex2std( oexMks( nFreq ) );
 	Msg( sPath, oexT( "pb_setlogfreq" ), &params, &sRet );
-	return std2oex( sRet ).ToInt();
+	return oexStrToLong( sRet.c_str() );
 }
 
 int CSqMsgQueue::getlogfreq( const stdString &sPath )
@@ -528,6 +536,51 @@ int CSqMsgQueue::getlogfreq( const stdString &sPath )
 	stdString sRet;
 	CSqMap params;
 	Msg( sPath, oexT( "pb_getlogfreq" ), &params, &sRet );
-	return std2oex( sRet ).ToInt();
+	return oexStrToLong( sRet.c_str() );
+}
+
+CSqMulti CSqMsgQueue::getlogkeys( const stdString &sPath, int nTime )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	params[ oexT( "freq" ) ] = oex2std( oexMks( nTime ) );
+	Msg( sPath, oexT( "pb_getlogkeys" ), &params, &sRet );
+	return sRet;
+}
+
+CSqMulti CSqMsgQueue::getlog( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, int nDataType, int nMethod )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	params[ oexT( "key" ) ] = sKey;
+	params[ oexT( "start" ) ] = oex2std( oexMks( nStart ) );
+	params[ oexT( "stop" ) ] = oex2std( oexMks( nStop ) );
+	params[ oexT( "interval" ) ] = oex2std( oexMks( nInterval ) );
+	params[ oexT( "type" ) ] = oex2std( oexMks( nDataType ) );
+	params[ oexT( "method" ) ] = oex2std( oexMks( nMethod ) );
+	Msg( sPath, oexT( "pb_getlog" ), &params, &sRet );
+	return sRet;
+}
+
+stdString CSqMsgQueue::getlogbin( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, int nDataType, int nMethod )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	params[ oexT( "key" ) ] = sKey;
+	params[ oexT( "start" ) ] = oex2std( oexMks( nStart ) );
+	params[ oexT( "stop" ) ] = oex2std( oexMks( nStop ) );
+	params[ oexT( "interval" ) ] = oex2std( oexMks( nInterval ) );
+	params[ oexT( "type" ) ] = oex2std( oexMks( nDataType ) );
+	params[ oexT( "method" ) ] = oex2std( oexMks( nMethod ) );
+	Msg( sPath, oexT( "pb_getlogbin" ), &params, &sRet );
+	return sRet;
+}
+
+int CSqMsgQueue::resetlog( const stdString &sPath )
+{_STT();
+	stdString sRet;
+	CSqMap params;
+	Msg( sPath, oexT( "pb_resetlog" ), &params, &sRet );
+	return oexStrToLong( sRet.c_str() );
 }
 

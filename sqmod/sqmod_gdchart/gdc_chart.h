@@ -41,6 +41,12 @@ public:
 							      const sqbind::stdString &x_sData,
 							      sqbind::CSqImage *x_pImg );
 
+	/// Generates a chart and returns it
+	sqbind::CSqMulti CreateChartBin( const sqbind::stdString &x_sType,
+									 const sqbind::stdString &x_sParams,
+									 sqbind::CSqMulti *x_mData,
+									 sqbind::CSqImage *x_pImg );
+
 	/// Creates a chart and saves it to disk
 	int SaveChart(  const sqbind::stdString &x_sFile,
 					const sqbind::stdString &x_sParams,

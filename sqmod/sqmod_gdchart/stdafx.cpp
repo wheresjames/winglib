@@ -7,6 +7,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CGdcChart, CGdcChart )
 
 	SQBIND_MEMBER_FUNCTION( CGdcChart, SaveChart )
 	SQBIND_MEMBER_FUNCTION( CGdcChart, CreateChart )
+	SQBIND_MEMBER_FUNCTION( CGdcChart, CreateChartBin )
 
 //	SQBIND_ENUM( CGdcChart::GDC_LINE, "GDC_LINE" )
 //	SQBIND_ENUM( CGdcChart::GDC_LINE, "GDC_AREA" )

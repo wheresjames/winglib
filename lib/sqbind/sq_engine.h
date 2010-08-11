@@ -122,11 +122,26 @@ public:
 	/// Sets the logger output folder
 	int setlogroot( const stdString &sPath, const stdString &sRoot );
 
+	/// Returns the root logging folder
+	stdString getlogroot( const stdString &sPath );
+
 	/// Sets the logger frequency
 	int setlogfreq( const stdString &sPath, int nFreq );
 
 	/// Returns the logger frequency
 	int getlogfreq( const stdString &sPath );
+
+	/// Returns a list of keys that are being logged
+	CSqMulti getlogkeys( const stdString &sPath, int nTime );
+
+	/// Returns log data for the specified key
+	CSqMulti getlog( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, int nDataType, int nMethod );
+
+	/// Returns log data for the specified key in a binary share
+	stdString getlogbin( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, int nDataType, int nMethod );
+
+	/// Resets the logger
+	int resetlog( const stdString &sPath );
 
 	/// Sets the specified timer
 	int set_timer( const stdString &sPath, int to, const stdString &sCallback );

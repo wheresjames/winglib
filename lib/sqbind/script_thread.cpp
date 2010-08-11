@@ -633,7 +633,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 	} // end else if
 
-	// Set logging root folder
+	// pb_setlogroot
 	else if ( sMsg == oexT( "pb_setlogroot" ) )
 	{
 		oexAutoLock ll( m_lockPb );
@@ -644,7 +644,29 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 	} // end else if
 
-	// Set logging root folder
+	// pb_setlogroot
+	else if ( sMsg == oexT( "pb_resetlog" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		m_log.Destroy();
+
+	} // end else if
+
+	// pb_getlogroot
+	else if ( sMsg == oexT( "pb_getlogroot" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		*pReply = oex2std( m_log.GetRoot() );
+
+	} // end else if
+
+	// pb_setlogfreq
 	else if ( sMsg == oexT( "pb_setlogfreq" ) )
 	{
 		oexAutoLock ll( m_lockPb );
@@ -657,7 +679,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 	} // end else if
 
-	// Set logging root folder
+	// pb_getlogfreq
 	else if ( sMsg == oexT( "pb_getlogfreq" ) )
 	{
 		oexAutoLock ll( m_lockPb );
@@ -666,6 +688,62 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 		// Set logging frequency
 		*pReply = oex2std( oexMks( m_uLogFreq ) );
+
+	} // end else if
+
+	// pb_getlogkeys
+	else if ( sMsg == oexT( "pb_getlogkeys" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		// Return list of keys being logged
+		*pReply = oex2std( oex::CParser::Serialize( m_log.GetKeyList( oexStrToULong( mapParams[ oexT( "time" ) ].c_str() ) ) ) );
+
+	} // end else if
+
+	// pb_getlog
+	else if ( sMsg == oexT( "pb_getlog" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		// Write any pending data to the disk
+		m_log.Flush();
+
+		// Return list of keys being logged
+		*pReply = 
+			oex2std( oex::CParser::Serialize( m_log.GetLog( mapParams[ oexT( "key" ) ].c_str(),
+															oexStrToULong( mapParams[ oexT( "start" ) ].c_str() ),
+															oexStrToULong( mapParams[ oexT( "stop" ) ].c_str() ),
+															oexStrToULong( mapParams[ oexT( "interval" ) ].c_str() ),
+															oexStrToULong( mapParams[ oexT( "type" ) ].c_str() ),
+															oexStrToULong( mapParams[ oexT( "method" ) ].c_str() )
+															) ) );
+
+	} // end else if
+
+	// pb_getlog
+	else if ( sMsg == oexT( "pb_getlogbin" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		// Write any pending data to the disk
+		m_log.Flush();
+
+		// Return list of keys being logged
+		*pReply = 
+			oex2std( m_log.GetLogBin( mapParams[ oexT( "key" ) ].c_str(),
+									  oexStrToULong( mapParams[ oexT( "start" ) ].c_str() ),
+									  oexStrToULong( mapParams[ oexT( "stop" ) ].c_str() ),
+									  oexStrToULong( mapParams[ oexT( "interval" ) ].c_str() ),
+									  oexStrToULong( mapParams[ oexT( "type" ) ].c_str() ),
+									  oexStrToULong( mapParams[ oexT( "method" ) ].c_str() )
+									) );
 
 	} // end else if
 

@@ -49,6 +49,27 @@ public:
 
 	enum
 	{
+		eDtNone = 0,
+
+		eDtString = 1,
+
+		eDtInt = 2,
+
+		eDtFloat = 3
+
+	};
+
+	enum
+	{
+		eMethodNone = 0,
+
+		eMethodDiscrete = 1,
+
+		eMethodAverage = 2,
+	};
+
+	enum
+	{
 		/// Maximum number of keys that can be logged
 		eMaxKeys = 1024,
 
@@ -59,7 +80,11 @@ public:
 		eIndexStep = 60 * 10,
 
 		/// Per day
-		eLogBase = 60 * 60 * 24
+		eLogBase = 60 * 60 * 24,
+
+		/// Write data every 60 seconds regardless
+		eMaxValid = eIndexStep / 2
+
 	};
 
 	/// Index info on a value
@@ -99,6 +124,9 @@ public:
 		/// Data hash
 		oex::oexGUID	hash;
 
+		/// Every so often, write the data anyway
+		oexUINT			valid;
+
 		/// Pointer to last structure
 		oexUINT			olast;
 
@@ -106,6 +134,41 @@ public:
 		CFile::t_size	plast;
 	};
 
+	struct SIterator
+	{
+		// Constructor
+		SIterator() 
+		{	uB = uI = oexMAXUINT;
+			pos = 0;
+			oexZero( vi );
+			nValue = 0;
+			fValue = 0.f;
+			nCount = 0;
+		}
+
+		// Read value from the data file into the specified string
+		oexBOOL getValue( CStr &s )
+		{	if ( !fData.IsOpen() ) return oexFALSE;
+			if ( !vi.uSize ) { s.Destroy(); return oexTRUE; }
+			oexSTR p = s.OexAllocate( vi.uSize );
+			if ( !p ) return oexFALSE;
+			fData.Read( p, vi.uSize );
+			s.SetLength( vi.uSize );
+			return oexTRUE;
+		} // end if
+
+		// Variables
+		oexUINT			uB;
+		oexUINT			uI;
+		SValueIndex		vi; 
+		CFile::t_size	pos;
+		CFile			fData;
+		CFile			fIdx;
+		CStr			sValue;
+		oexINT			nValue;
+		oexFLOAT		fValue;
+		oexINT			nCount;
+	};
 
 public:
 
@@ -119,10 +182,13 @@ public:
     void Destroy();
 
 	/// Sets the logging folder
-	oexBOOL SetRoot( oexCSTR x_pRoot, oexBOOL x_bChangesOnly = oexTRUE );
+	oexBOOL SetRoot( oexCSTR x_pRoot );
+
+	/// Returns the root logging folder
+	CStr GetRoot() { return m_sRoot; }
 
 	/// Creates a logging key for the specified value, return less than zero on failure
-	oexINT AddKey( oexCSTR x_pKey );
+	oexINT AddKey( oexCSTR x_pKey, oexUINT x_uTime = 0 );
 
 	/// Removes a key from the logger
 	oexINT RemoveKey( oexINT x_nKey );
@@ -135,6 +201,26 @@ public:
 
 	/// Flushes data to disk
 	oexBOOL Flush( oexUINT x_uTime = 0 );
+
+	/// Returns a list of key names and hashes
+	CPropertyBag GetKeyList( oexUINT x_uTime = 0 );
+
+	/// Returns the log for the specified key and time range
+	CPropertyBag GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod );
+
+	/// Returns the log for the specified key and time range in a shared binary buffer
+	CStr GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod );
+
+public:
+
+	/// Returns non-zero if there is an index file for the specified key hash
+	static oexBOOL IsKeyData( CStr x_sRoot, CStr x_sHash, oexUINT x_uTime );
+
+	/// Opens / Creates specified database files
+	static oexBOOL OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, oexUINT x_uTime, CFile *x_pIdx, CFile *x_pData );
+
+	/// Finds the value for the specified time in an open database
+	static oexBOOL FindValue( CStr &x_sRoot, CStr &x_sHash, oexUINT x_uTime, oexUINT x_uTimeMs, SIterator &x_it, oexINT x_nDataType, oexINT x_nMethod );
 
 private:
 

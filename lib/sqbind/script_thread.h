@@ -61,76 +61,76 @@ public:
 //	typedef oexStdMap( stdString, stdString )			t_PropertyBag;
 	typedef oex::CPropertyBag							t_PropertyBag;
 
-    /// Map type for child script  thread objects
+	/// Map type for child script  thread objects
 	typedef oexStdMap( stdString, CScriptThread* )		t_ScriptList;
 
 	/// Map type for timer callbacks
 	typedef oexStdMap( oex::oexUINT, STimerInfo )		t_TimerList;
 
-    /// Map type for keys to timeout values
+	/// Map type for keys to timeout values
 	typedef oexStdMap( stdString, oex::oexUINT )		t_TimeoutList;
 
 	/// List of timers to remove
 	typedef oexStdList( oex::oexUINT )					t_RemoveTimers;
 
-    /// Map type for keys to log
+	/// Map type for keys to log
 	typedef oexStdMap( stdString, oex::oexUINT )		t_LogList;
 
 public:
 
-    /// Default constructor
-    CScriptThread();
+	/// Default constructor
+	CScriptThread();
 
-    /// Destructor
+	/// Destructor
 	virtual ~CScriptThread();
 
-    /// Releases resources
-    void Destroy();
+	/// Releases resources
+	void Destroy();
 
-    /// Sets the module manager pointer
+	/// Sets the module manager pointer
 	void SetModuleManager( sqbind::CModuleManager *pMm );
 
-    /// Sets the script information
+	/// Sets the script information
 	void SetScript( oexCONST oex::CStr8 &sScript, oex::oexBOOL bFile );
 
-    /// Sets the parent script pointer
-    void SetParentScript( CSqMsgQueue *pParent );
+	/// Sets the parent script pointer
+	void SetParentScript( CSqMsgQueue *pParent );
 
 protected:
 
-    /// Initialize Squirrel engine
+	/// Initialize Squirrel engine
 	virtual oex::oexBOOL InitThread( oex::oexPVOID x_pData );
 
-    /// Run the thing
+	/// Run the thing
 	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData );
 
-    /// Shutdown Squirrel engine
+	/// Shutdown Squirrel engine
 	virtual oex::oexINT EndThread( oex::oexPVOID x_pData );
 
-    /// Process a single message from the queue
+	/// Process a single message from the queue
 	virtual oex::oexBOOL ProcessMsg( const stdString &x_sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent );
 
 	/// Executes a single message
 	oex::oexBOOL ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent );
 
-    /// Releases all child scripts
-    void DestroyChildScripts();
+	/// Releases all child scripts
+	void DestroyChildScripts();
 
 	/// Cleanup tasks
-    void Cleanup();
+	void Cleanup();
 
 	/// Returns non-zero when messages will no longer be processed
 	virtual oex::oexBOOL Running() { return CThread::IsRunning(); }
 
 protected:
 
-    /// Spawns a new child script thread
+	/// Spawns a new child script thread
 	void OnSpawn( CSqMap &mapParams, stdString *pReply );
 
-    /// Routes a message to the proper script
+	/// Routes a message to the proper script
 	void OnMsg( CSqMap &mapParams, stdString *pReply );
 
-    /// Processes a script message
+	/// Processes a script message
 //	void OnOnMsg( CSqMap &mapParams, stdString *pReply );
 
 public:
@@ -193,26 +193,26 @@ private:
 	/// Set to non-zero when the thread should exit
 	oex::oexBOOL						m_bQuit;
 
-    /// Squirrel engine
+	/// Squirrel engine
 	sqbind::CSqEngine					m_cSqEngine;
 
-    /// Pointer to the module manager
-    sqbind::CModuleManager  			*m_pModuleManager;
+	/// Pointer to the module manager
+	sqbind::CModuleManager  			*m_pModuleManager;
 
-    /// List of child scripts
-    t_ScriptList					 	m_lstScript;
+	/// List of child scripts
+	t_ScriptList					 	m_lstScript;
 
-    /// Script to load
-    stdString							m_sName;
+	/// Script to load
+	stdString							m_sName;
 
-    /// Script to load
+	/// Script to load
 	oex::CStr8							m_sScript;
 
-    /// If non-zero, m_sScript contains a file name
+	/// If non-zero, m_sScript contains a file name
 	oex::oexBOOL						m_bFile;
 
-    /// Parent script
-    CSqMsgQueue							*m_pParentScript;
+	/// Parent script
+	CSqMsgQueue							*m_pParentScript;
 
 	/// Property bag lock
 	oexLock								m_lockPb;

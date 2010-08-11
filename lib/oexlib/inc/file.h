@@ -391,6 +391,18 @@ public:
     static oexBOOL Rename( oexCSTR x_pOld, oexCSTR x_pNew )
     {   return os::CBaseFile::Rename( x_pOld, x_pNew ); }
 
+	/// Returns the contents of a file
+	static CStr8 GetContents( oexCSTR x_pFile )
+	{	if ( !x_pFile || !*x_pFile ) return CStr8();
+		return oex::CFile().OpenExisting( x_pFile ).Read();
+	}
+
+	/// Writes the data to a file
+	static oexBOOL PutContents( oexCSTR x_pFile, const CStr8 &sData )
+	{	if ( !x_pFile || !*x_pFile ) return oexFALSE;
+		return oex::CFile().CreateAlways( x_pFile ).Write( sData ); 
+	}
+
 	/// Appends a string to the end of a file
 	static t_size AppendContents( const CStr &sFile, const CStr &sData )
 	{	oex::CFile f;
