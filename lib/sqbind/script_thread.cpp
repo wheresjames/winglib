@@ -116,8 +116,11 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 				sErr += oexT( "\r\n" );
 
 			if ( m_sScript.Length() )
-				sErr += oex2std( oexBinToAsciiHexStr( &oex::CBin( m_sScript ), 0, 16, 4 ) ),
+			{	oex::CBin bin( m_sScript );
+				sErr += oex2std( oexBinToAsciiHexStr( &bin, 0, 16, 4 ) );
 				sErr += oexT( "\r\n" );
+			} // end if
+
 			sErr += oexT( "\r\n" );
 		}
 
@@ -248,7 +251,7 @@ oex::oexBOOL CScriptThread::LogVariables()
 	// Is it time?
 	if ( m_toLog.IsValid() )
 		return oex::oexFALSE;
-	
+
 	// Not too fast
 	if ( 100 > m_uLogFreq )
 		m_uLogFreq = 1000;
@@ -698,8 +701,11 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 		if ( !ll.IsLocked() )
 			return oex::oexFALSE;
 
+		// Get log keys
+		oex::CPropertyBag pb = m_log.GetKeyList( oexStrToULong( mapParams[ oexT( "time" ) ].c_str() ) );
+
 		// Return list of keys being logged
-		*pReply = oex2std( oex::CParser::Serialize( m_log.GetKeyList( oexStrToULong( mapParams[ oexT( "time" ) ].c_str() ) ) ) );
+		*pReply = oex2std( oex::CParser::Serialize( pb ) );
 
 	} // end else if
 
@@ -713,15 +719,18 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 		// Write any pending data to the disk
 		m_log.Flush();
 
+		// Grab log
+		oex::CPropertyBag pb
+			= m_log.GetLog( mapParams[ oexT( "key" ) ].c_str(),
+							oexStrToULong( mapParams[ oexT( "start" ) ].c_str() ),
+							oexStrToULong( mapParams[ oexT( "stop" ) ].c_str() ),
+							oexStrToULong( mapParams[ oexT( "interval" ) ].c_str() ),
+							oexStrToULong( mapParams[ oexT( "type" ) ].c_str() ),
+							oexStrToULong( mapParams[ oexT( "method" ) ].c_str() )
+						  );
+
 		// Return list of keys being logged
-		*pReply = 
-			oex2std( oex::CParser::Serialize( m_log.GetLog( mapParams[ oexT( "key" ) ].c_str(),
-															oexStrToULong( mapParams[ oexT( "start" ) ].c_str() ),
-															oexStrToULong( mapParams[ oexT( "stop" ) ].c_str() ),
-															oexStrToULong( mapParams[ oexT( "interval" ) ].c_str() ),
-															oexStrToULong( mapParams[ oexT( "type" ) ].c_str() ),
-															oexStrToULong( mapParams[ oexT( "method" ) ].c_str() )
-															) ) );
+		*pReply = oex2std( oex::CParser::Serialize( pb ) );
 
 	} // end else if
 
@@ -736,7 +745,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 		m_log.Flush();
 
 		// Return list of keys being logged
-		*pReply = 
+		*pReply =
 			oex2std( m_log.GetLogBin( mapParams[ oexT( "key" ) ].c_str(),
 									  oexStrToULong( mapParams[ oexT( "start" ) ].c_str() ),
 									  oexStrToULong( mapParams[ oexT( "stop" ) ].c_str() ),

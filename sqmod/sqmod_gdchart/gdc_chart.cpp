@@ -7,27 +7,36 @@
 #include "gd1.3/gd.h"
 
 #if defined( GD_CUSTOM_ALLOCATOR )
-extern "C" void* gd_malloc( size_t size )
+extern "C"
 {
-	return oex::CMem::New( size, oexLINE, oexTEXT( oexFILE ) );
-}
+	void* _gd_malloc( GD_size_t size )
+	{
+		return oex::CMem::New( size, oexLINE, oexTEXT( oexFILE ) );
+	}
 
-extern "C" void* gd_calloc( size_t num, size_t size )
-{
-	void *ptr = oex::CMem::New( num * size, oexLINE, oexTEXT( oexFILE ) );
-	oexZeroMemory( ptr, num * size );
-	return ptr;
-}
+	extern "C" void* _gd_calloc( GD_size_t num, GD_size_t size )
+	{
+		void *ptr = oex::CMem::New( num * size, oexLINE, oexTEXT( oexFILE ) );
+		oexZeroMemory( ptr, num * size );
+		return ptr;
+	}
 
-extern "C" void* gd_realloc( void *ptr, size_t size )
-{
-	return oex::CMem::Resize( ptr, size, oexLINE, oexTEXT( oexFILE ) );
-}
+	extern "C" void* _gd_realloc( void *ptr, GD_size_t size )
+	{
+		return oex::CMem::Resize( ptr, size, oexLINE, oexTEXT( oexFILE ) );
+	}
 
-extern "C" void gd_free( void *ptr )
-{
-	return oex::CMem::Delete( ptr );
-}
+	extern "C" void _gd_free( void *ptr )
+	{
+		return oex::CMem::Delete( ptr );
+	}
+
+	t_gd_malloc gd_malloc = _gd_malloc;
+	t_gd_calloc gd_calloc = _gd_calloc;
+	t_gd_realloc gd_realloc = _gd_realloc;
+	t_gd_free gd_free = _gd_free;
+
+};
 #endif
 
 /// Unfortunately, the gdchart library is not thread safe
@@ -151,7 +160,7 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 	if ( mParams.isset( oexT( "col_plot4" ) ) )
 		GDC_SetColor[ 3 ]
 			= oexHtmlToRgb( mParams[ oexT( "col_plot4" ) ].str().c_str() );
-	
+
 	// Write out the graph to the pipe
 	switch ( nDimensions )
 	{
@@ -370,7 +379,7 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 						  = oexHtmlToRgb( mParams[ oexT( "col_plot7" ) ].str().c_str() );
 	if ( mParams.isset( oexT( "col_plot8" ) ) )
 		GDC_SetColor[ 7 ] = oexHtmlToRgb( mParams[ oexT( "col_plot8" ) ].str().c_str() );
-	
+
 	// Write out the graph to the pipe
 	switch ( nDimensions )
 	{
@@ -379,7 +388,7 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
 				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
-				   bin[ 0 ].Ptr(), 
+				   bin[ 0 ].Ptr(),
 				   bin[ 0 ].Ptr() );
 		break;
 
@@ -388,7 +397,7 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
 				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
-				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), 
+				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(),
 				   bin[ 0 ].Ptr() );
 		break;
 
@@ -397,7 +406,7 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
 				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
-				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), 
+				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(),
 				   bin[ 0 ].Ptr() );
 		break;
 
@@ -406,7 +415,7 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
 				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
-				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), bin[ 3 ].Ptr(), 
+				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), bin[ 3 ].Ptr(),
 				   bin[ 0 ].Ptr() );
 		break;
 
@@ -415,7 +424,7 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
 				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
-				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), bin[ 3 ].Ptr(), 
+				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), bin[ 3 ].Ptr(),
 				   bin[ 4 ].Ptr(), bin[ 0 ].Ptr() );
 		break;
 
@@ -424,7 +433,7 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
 				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
-				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), bin[ 3 ].Ptr(), 
+				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), bin[ 3 ].Ptr(),
 				   bin[ 4 ].Ptr(), bin[ 5 ].Ptr(), bin[ 0 ].Ptr() );
 		break;
 
@@ -433,7 +442,7 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
 				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
-				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), bin[ 3 ].Ptr(), 
+				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), bin[ 3 ].Ptr(),
 				   bin[ 4 ].Ptr(), bin[ 5 ].Ptr(), bin[ 6 ].Ptr(), bin[ 0 ].Ptr() );
 		break;
 
@@ -442,7 +451,7 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
 				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
-				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), bin[ 3 ].Ptr(), 
+				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), bin[ 3 ].Ptr(),
 				   bin[ 4 ].Ptr(), bin[ 5 ].Ptr(), bin[ 6 ].Ptr(), bin[ 7 ].Ptr(), bin[ 0 ].Ptr() );
 		break;
 

@@ -137,7 +137,7 @@ public:
 	struct SIterator
 	{
 		// Constructor
-		SIterator() 
+		SIterator()
 		{	uB = uI = oexMAXUINT;
 			pos = 0;
 			oexZero( vi );
@@ -160,7 +160,7 @@ public:
 		// Variables
 		oexUINT			uB;
 		oexUINT			uI;
-		SValueIndex		vi; 
+		SValueIndex		vi;
 		CFile::t_size	pos;
 		CFile			fData;
 		CFile			fIdx;
@@ -194,7 +194,7 @@ public:
 	oexINT RemoveKey( oexINT x_nKey );
 
 	/// Returns the index of the named key if it exists, otherwise returns less than zero
-	oexINT CDataLog::FindKey( oexCSTR x_pKey );
+	oexINT FindKey( oexCSTR x_pKey );
 
 	/// Logs the specified value
 	oexBOOL Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, oexUINT x_uTime, oexUINT x_uTimeMs );
