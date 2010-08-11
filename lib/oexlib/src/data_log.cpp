@@ -142,7 +142,7 @@ oexINT CDataLog::AddKey( oexCSTR x_pKey, oexUINT x_uTime )
 				oexCreatePath( sRoot.Ptr() );
 				CFile().CreateAlways( ( sRoot.BuildPath( m_pLogs[ i ]->sHash ) << oexT( ".txt" ) ).Ptr() )
 					.Write( oexStrToMbPtr( x_pKey ) );
-
+/*
 				// Get root index time
 				x_uTime = x_uTime - ( x_uTime % eIndexStep );
 
@@ -157,7 +157,7 @@ oexINT CDataLog::AddKey( oexCSTR x_pKey, oexUINT x_uTime )
 					} // end while
 					m_pLogs[ i ]->plast = it.pos;
 				} // end if
-
+*/
 			} // end write name
 			
 			return i;
@@ -261,6 +261,41 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 			// Where will this block start?
 			CFile::t_size pos = (oexUINT)fData.GetPtrPos();
 
+			// +++ Setting this to zero causes more overhead, but allows 'fixing'
+			//     currupt file entries, which I currently seem to be seeing very occasionally.
+//			m_pLogs[ i ]->plast = 0;
+
+			// Validate last entry
+			if ( m_pLogs[ i ]->plast )
+			{	SValueIndex vi;
+				CFile::CRestoreFilePos rfp( &fData );
+				fData.SetPtrPosBegin( m_pLogs[ i ]->plast );
+				if ( !fData.Read( &vi, sizeof( vi ) ) || m_pLogs[ i ]->hash.Data1 != vi.uHash )
+					m_pLogs[ i ]->plast = 0;
+			} // end if
+
+			// Should we resume?
+			if ( !m_pLogs[ i ]->plast )
+			{
+				// Get root index time
+				oexUINT uRootTime = x_uTime - ( x_uTime % eIndexStep );
+
+				// Resume existing index
+				SIterator itR; itR.Init( m_sRoot, m_pLogs[ i ]->sName.Ptr() );
+				if ( FindValue( itR, uRootTime, 0, eDtNone, eMethodNone ) )
+				{	m_pLogs[ i ]->plast = itR.pos;
+					while ( itR.vi.uNext > itR.pos )
+					{	itR.pos = itR.vi.uNext;
+						itR.fData.SetPtrPosBegin( itR.vi.uNext );
+						if ( !itR.fData.Read( &itR.vi, sizeof( itR.vi ) ) || itR.hash.Data1 != itR.vi.uHash )
+							itR.vi.uNext = 0;
+						else
+							m_pLogs[ i ]->plast = itR.pos;
+					} // end while
+				} // end if
+
+			} // end if
+
 			// Update prev/next	pointers
 			oexUINT n = 0;
 			while ( m_pLogs[ i ]->bin.getUsed() >= sizeof( SValueIndex ) )
@@ -276,7 +311,7 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 					{	SValueIndex vi;
 						CFile::CRestoreFilePos rfp( &fData );
 						fData.SetPtrPosBegin( m_pLogs[ i ]->plast );
-						if ( fData.Read( &vi, sizeof( vi ) ) )
+						if ( fData.Read( &vi, sizeof( vi ) ) && m_pLogs[ i ]->hash.Data1 == vi.uHash )
 						{	vi.uNext = pos;
 							fData.SetPtrPosBegin( m_pLogs[ i ]->plast );
 							fData.Write( &vi, sizeof( vi ) );
@@ -611,11 +646,19 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd,
 	return pb;
 }
 
-CStr CDataLog::GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod )
+CStr CDataLog::GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod, float x_fScale )
 {
 	// Sanity checks
 	if ( !x_pKey || !*x_pKey || !m_sRoot.Length() || x_uStart > x_uEnd )
 		return oexT( "" );
+
+	// Set defaults
+	if ( eDtNone == x_nDataType ) 
+		x_nDataType = eDtFloat;
+	if ( eMethodNone == x_nMethod ) 
+		x_nMethod = eMethodAverage;
+	if ( !x_fScale )
+		x_fScale = 1.f;
 
 	SIterator it;
 	if ( !it.Init( m_sRoot, x_pKey ) || !it.IsData( x_uStart ) )
@@ -638,7 +681,7 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexU
 	{
 		// Find the value for this time
 		if ( FindValue( it, uTime, uTimeMs, x_nDataType, x_nMethod ) )
-			bin.setFLOAT( i++, it.fValue );
+			bin.setFLOAT( i++, it.fValue * x_fScale );
 		else
 			bin.setFLOAT( i++, 0.f );
 

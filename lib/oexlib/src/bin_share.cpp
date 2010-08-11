@@ -201,6 +201,10 @@ CBin::t_size CBin::Insert( CBin::t_size x_nBytes, CBin::t_size x_nOffset = 0 )
 CBin::t_size CBin::LShift( CBin::t_size x_nBytes )
 {_STT();
 
+	// Anything to do?
+	if ( !x_nBytes && !m_nOffset )
+		return 0;
+
 	// All of it?
 	if ( x_nBytes >= getUsed() )
 	{	FreePtr();

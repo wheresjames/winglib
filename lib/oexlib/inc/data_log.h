@@ -77,12 +77,12 @@ public:
 		eInitBuffer = 1024,
 
 		/// Index step size
-		eIndexStep = 60 * 10,
+		eIndexStep = 60 * 5,
 
 		/// Per day
 		eLogBase = 60 * 60 * 24,
 
-		/// Write data every 60 seconds regardless
+		/// Write data every half step
 		eMaxValid = eIndexStep / 2
 
 	};
@@ -242,7 +242,7 @@ public:
 	CPropertyBag GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod );
 
 	/// Returns the log for the specified key and time range in a shared binary buffer
-	CStr GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod );
+	CStr GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod, float x_fScale );
 
 public:
 

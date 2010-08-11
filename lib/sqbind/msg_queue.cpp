@@ -562,7 +562,7 @@ CSqMulti CSqMsgQueue::getlog( const stdString &sPath, const stdString &sKey, int
 	return sRet;
 }
 
-stdString CSqMsgQueue::getlogbin( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, int nDataType, int nMethod )
+stdString CSqMsgQueue::getlogbin( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, const stdString &sExt )
 {_STT();
 	stdString sRet;
 	CSqMap params;
@@ -570,8 +570,7 @@ stdString CSqMsgQueue::getlogbin( const stdString &sPath, const stdString &sKey,
 	params[ oexT( "start" ) ] = oex2std( oexMks( nStart ) );
 	params[ oexT( "stop" ) ] = oex2std( oexMks( nStop ) );
 	params[ oexT( "interval" ) ] = oex2std( oexMks( nInterval ) );
-	params[ oexT( "type" ) ] = oex2std( oexMks( nDataType ) );
-	params[ oexT( "method" ) ] = oex2std( oexMks( nMethod ) );
+	params[ oexT( "ext" ) ] = sExt;
 	Msg( sPath, oexT( "pb_getlogbin" ), &params, &sRet );
 	return sRet;
 }

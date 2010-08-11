@@ -626,10 +626,10 @@ CSqMulti CSqEngineExport::getlog( const stdString &sPath, const stdString &sKey,
 	return q->getlog( sPath, sKey, nStart, nStop, nInterval, nDataType, nMethod );
 }
 
-stdString CSqEngineExport::getlogbin( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, int nDataType, int nMethod )
+stdString CSqEngineExport::getlogbin( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, const stdString &sExt )
 {	CSqMsgQueue *q = queue();
 	if ( !q ) return oexT( "" );
-	return q->getlogbin( sPath, sKey, nStart, nStop, nInterval, nDataType, nMethod );
+	return q->getlogbin( sPath, sKey, nStart, nStop, nInterval, sExt );
 }
 
 

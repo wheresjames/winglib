@@ -193,6 +193,10 @@ oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 				if ( 10 <= ++nDiv10 )
 				{	nDiv10 = 0;
 
+					oexAutoLock ll( m_lockPb );
+					if ( !ll.IsLocked() )
+						return oex::oexFALSE;
+
 					if ( m_lstLog.size() )
 						m_log.Flush();
 
@@ -744,14 +748,18 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 		// Write any pending data to the disk
 		m_log.Flush();
 
+		// Extract extra params
+		oex::CPropertyBag ext = oex::CParser::Deserialize( mapParams[ oexT( "ext" ) ].c_str() );
+
 		// Return list of keys being logged
 		*pReply =
 			oex2std( m_log.GetLogBin( mapParams[ oexT( "key" ) ].c_str(),
 									  oexStrToULong( mapParams[ oexT( "start" ) ].c_str() ),
 									  oexStrToULong( mapParams[ oexT( "stop" ) ].c_str() ),
 									  oexStrToULong( mapParams[ oexT( "interval" ) ].c_str() ),
-									  oexStrToULong( mapParams[ oexT( "type" ) ].c_str() ),
-									  oexStrToULong( mapParams[ oexT( "method" ) ].c_str() )
+									  ext[ oexT( "type" ) ].ToInt(),
+									  ext[ oexT( "method" ) ].ToInt(),
+									  ext[ oexT( "scale" ) ].ToFloat()
 									) );
 
 	} // end else if

@@ -282,22 +282,28 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 		// Get a pointer to the data
 		bin[ nDimensions ] = oexGetBin( it->second.str().c_str() );
 
-		// Use smallest size
-		if ( !nDataPts )
+		// How many data points in this buffer?
+		int pts = bin[ nDimensions ].getUsed() / sizeof( float );
+		if ( pts )
 		{
-			// How many data points?
-			nDataPts = bin[ nDimensions ].getUsed() / sizeof( float );
+			// Do we have a size?
 			if ( !nDataPts )
-			{//	oexERROR( 0, oexT( "No data" ) );
-				return oexT( "" );
-			} // end if
+				nDataPts = pts;
+
+			// Use smallest size
+			else if ( pts < nDataPts )
+				nDataPts = pts;
+
+			// Count a dimension
+			nDimensions++;
 
 		} // end if
 
-		// Count a dimension
-		nDimensions++;
-
 	} // end for
+
+	// Did we find any data to graph?
+	if ( !nDimensions )
+		return oexT( "" );
 
 	// For some stupid reason, we have to have as many labels as points
 	if ( !memLabels.OexNew( nDataPts ).Ptr() )

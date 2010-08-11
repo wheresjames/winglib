@@ -133,6 +133,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSerialPort, CSqSerialPort )
 
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, WriteBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, ReadBin )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, AppendBin )	
 
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, Write )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, Read )
@@ -279,6 +280,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setString )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getString )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setSubString )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getSubString )	
 
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FindBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Sub )

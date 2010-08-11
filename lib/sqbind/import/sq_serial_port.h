@@ -106,6 +106,31 @@ namespace sqbind
 			return nRead;
 		}
 
+		/// Appends binary data from the serial port
+		int AppendBin( CSqBinary *pBin, int nBytes )
+		{
+			if ( !pBin )
+				return 0;
+
+			// Allocate buffer
+			if ( (int)pBin->Size() < nBytes )
+				if ( !pBin->Allocate( nBytes ) )
+					return 0;
+
+			// Is the buffer full?
+			if ( pBin->getUsed() >= pBin->Size() )
+				return pBin->getUsed();
+
+			// Attempt read
+			int nRead = (int)m_port.Read( pBin->_Ptr( pBin->getUsed() ), nBytes );
+			if ( 0 > nRead ) nRead = 0;
+
+			// How'd it go?
+			pBin->setUsed( pBin->getUsed() + nRead );
+
+			return pBin->getUsed();
+		}
+
 		/// Sets the baud rate
 		void setBaudRate( int v ) { m_port.setBaudRate( v ); }
 

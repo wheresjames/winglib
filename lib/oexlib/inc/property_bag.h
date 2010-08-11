@@ -492,6 +492,14 @@ public:
         return m_t.Ptr()->ToUInt64();
     }
 
+	/// Converts to float
+	oexFLOAT ToFloat()
+    {
+        if ( !m_t.Ptr() )
+            return 0;
+        return m_t.Ptr()->ToFloat();
+    }
+
 	/// Converts to double
 	oexDOUBLE ToDouble()
     {
