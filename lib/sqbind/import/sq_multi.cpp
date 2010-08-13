@@ -139,7 +139,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, add )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, set )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, get )
-	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, at )	
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, at )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, copy )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_up )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_down )
@@ -343,7 +343,7 @@ CSqMulti* CSqMulti::at( const stdString &path )
 	} // end if
 
 	// Find separator
-	int p = path.find( oexT( '.' ) );
+	stdString::size_type p = path.find( oexT( '.' ) );
 
 	// Is it us?
 	if ( path.npos == p )

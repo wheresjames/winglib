@@ -192,7 +192,7 @@ namespace sqbind
 
 		/// Sets a sub string into the binary object
 		stdString getSubString( int start, int len )
-		{	if ( start >= m_bin.getUsed() ) return oexT( "" );
+		{	if ( start >= (int)m_bin.getUsed() ) return oexT( "" );
 			int max = m_bin.getUsed() - start;
 			if ( !len || len > max ) len = max;
 			return oex2std( oexStrToMb( oex::CStr8( m_bin.Ptr(), start, len ) ) );
