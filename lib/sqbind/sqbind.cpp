@@ -284,6 +284,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FindBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Sub )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getSub )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, failed )
 
 	REGISTER_TYPE_ACCESS( CHAR )

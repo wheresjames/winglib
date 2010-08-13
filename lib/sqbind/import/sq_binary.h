@@ -279,6 +279,10 @@ namespace sqbind
 			 return p->getUsed();
 		}
 
+		/// Returns a view of the specified location
+		CSqBinary getSub( int x_nStart, int x_nSize )
+		{	return m_bin.Sub( x_nStart, x_nSize ); }
+
 		/// Value returned on failure
 		int failed() { return m_bin.failed(); }
 

@@ -456,6 +456,7 @@ namespace os
 namespace os
 {
 #   include "inc/os/sys.h"
+#	include "inc/os/math.h"
 #	include "inc/os/resource.h"
 #   include "inc/os/fmap.h"
 #   include "inc/os/tls.h"
@@ -539,6 +540,7 @@ namespace os
 //------------------------------------------------------------------
 // Higher level features
 //------------------------------------------------------------------
+#include "inc/polygon.h"
 #include "inc/image.h"
 #include "inc/sqlite.h"
 #include "inc/http_session.h"

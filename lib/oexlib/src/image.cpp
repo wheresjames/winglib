@@ -1431,9 +1431,9 @@ IplImage* CImage::InitIplHeader( CImage *pImg, IplImage *pIpl )
 	pIpl->align = 4;
 	pIpl->width = pImg->GetWidth();
 	pIpl->height = pImg->GetHeight();
-	pIpl->imageSize = CWinDc::GetScanWidth( pImg->GetWidth() ) * pImg->GetHeight();
+	pIpl->imageSize = GetScanWidth( pImg->GetWidth() ) * pImg->GetHeight();
 	pIpl->imageData = (char*)pImg->GetBits();
-	pIpl->widthStep = CWinDc::GetScanWidth( pImg->GetWidth() );
+	pIpl->widthStep = GetScanWidth( pImg->GetWidth() );
 	pIpl->imageDataOrigin = (char*)pImg->GetBits();
 
 	return pIpl;

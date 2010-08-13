@@ -270,11 +270,12 @@ public:
 		// Save size used to create the mapping
 		m_llOpenSize = llSize;
 
-        // Save block size
-        *(t_size*)m_pPtr = (t_size)llSize;
-
 		if ( !m_bPlain )
 		{
+			// Save block size
+			*(t_size*)m_pPtr = (t_size)llSize;
+
+			// Skip the size
 			m_pPtr += sizeof( t_size );
 
 			// Look for abandoned blocks ( this mostly for Linux )

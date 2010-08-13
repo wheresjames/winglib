@@ -497,9 +497,9 @@ oexBOOL CDataLog::OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, oexUINT
 oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs, oexINT x_nDataType, oexINT x_nMethod )
 {
 	// Get db metrics
-	oexBOOL bNew = oexFALSE;
 	oexUINT _uB = x_uTime / eLogBase;
 	oexUINT _uI = ( x_uTime % eLogBase ) / eIndexStep;
+	oexBOOL bNew = oexFALSE;
 
 	// Ensure we have the correct database open
 	if ( oexMAXUINT == x_it.uB || _uB != x_it.uB )
@@ -511,6 +511,8 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 		if ( !OpenDb( oexFALSE, x_it.sRoot, x_it.sHash, x_uTime, &x_it.fIdx, &x_it.fData ) )
 			return oexFALSE;
 
+		// No good
+		x_it.vi.uHash = 0;
 		bNew = oexTRUE;
 
 	} // end if
@@ -532,6 +534,8 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 		if ( x_it.fIdx.Read( &ex, sizeof( ex ) ) && ex )
 			x_it.pos = ex;
 
+		// No good
+		x_it.vi.uHash = 0;
 		bNew = oexTRUE;
 
 	} // end if
@@ -547,6 +551,34 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 		x_it.vi.uNext = x_it.pos;
 		do
 		{
+			// Do we have a previous valid data?
+			if ( x_it.hash.Data1 == x_it.vi.uHash )
+			{
+				// Point to data
+				x_it.fData.SetPtrPosBegin( x_it.pos + x_it.vi.uBytes );
+
+				// Get string value
+				if ( x_it.getValue( x_it.sValue ) )
+				{
+					// Average values if needed
+					if ( !bNew && eDtString < x_nDataType && eMethodAverage == x_nMethod )
+					{
+						// Reset 
+						if ( !x_it.nCount++ )
+							x_it.fValue = 0, x_it.nValue = 0;
+
+						if ( eDtInt == x_nDataType )
+							x_it.nValue += x_it.sValue.ToInt();
+
+						else if ( eDtFloat == x_nDataType )
+							x_it.fValue += x_it.sValue.ToFloat();
+
+					} // end if
+
+				} // end if
+
+			} // end if
+
 			// Save last valid position
 			x_it.pos = x_it.vi.uNext;
 
@@ -555,46 +587,21 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 			if ( !x_it.fData.Read( &x_it.vi, sizeof( x_it.vi ) ) || x_it.hash.Data1 != x_it.vi.uHash )
 				return oexFALSE;
 
-			// Get values
-			if ( !bNew && eDtString < x_nDataType && eMethodAverage == x_nMethod )
-			{
-				// Get string value
-				if ( x_it.getValue( x_it.sValue ) )
-				{
-					// Reset 
-					if ( !x_it.nCount++ )
-						x_it.fValue = 0, x_it.nValue = 0;
-
-					if ( eDtInt == x_nDataType )
-						x_it.nValue += x_it.sValue.ToInt();
-
-					else if ( eDtFloat == x_nDataType )
-						x_it.fValue += x_it.sValue.ToFloat();
-
-				} // end if
-
-			} // end if
-
 		} while ( ( x_it.vi.uTime < x_uTime || ( x_it.vi.uTime == x_uTime && x_it.vi.uTimeMs < x_uTimeMs ) ) && x_it.vi.uNext > x_it.pos );
-
-		// Point to data
-		x_it.fData.SetPtrPosBegin( x_it.pos + x_it.vi.uBytes );
 
 		// Scale averages
 		if ( !bNew && eDtString < x_nDataType && eMethodAverage == x_nMethod )
 		{	if ( 0 < x_it.nCount )
 				x_it.fValue /= x_it.nCount,
 				x_it.nValue /= x_it.nCount;
+			x_it.nCount = 0;
 		} // end if
 
-		// Read discrete values
-		else 
-		{	x_it.getValue( x_it.sValue );
-			if ( eDtInt == x_nDataType )
-				x_it.nValue = x_it.sValue.ToInt();
-			else if ( eDtFloat == x_nDataType )
-				x_it.fValue = x_it.sValue.ToFloat();
-		} // end else
+		else if ( eDtInt == x_nDataType )
+			x_it.nValue = x_it.sValue.ToInt();
+
+		else if ( eDtFloat == x_nDataType )
+			x_it.fValue = x_it.sValue.ToFloat();
 
 	} // end if
 

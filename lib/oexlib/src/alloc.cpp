@@ -213,6 +213,7 @@ oexPVOID CAlloc::Alloc( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile, oexUI
     // If this asserts you didn't use the logging macro
     // Instead of Allocate, use OexAllocate
     // Instead of New use OexNew
+	// Resize to OexResize
     // Construct to OexConstruct
     // ConstructArray to OexConstructArray
     // etc...
