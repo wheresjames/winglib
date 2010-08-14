@@ -147,6 +147,7 @@ public:
 		{	uB = uI = oexMAXUINT;
 			pos = 0;
 			oexZero( vi );
+			oexZero( viNext );
 			nValue = 0;
 			fValue = 0.f;
 			nCount = 0;
@@ -194,6 +195,7 @@ public:
 		oexUINT			uB;
 		oexUINT			uI;
 		SValueIndex		vi;
+		SValueIndex		viNext;
 		CFile::t_size	pos;
 		CFile			fData;
 		CFile			fIdx;

@@ -237,6 +237,14 @@ namespace sqbind
 			return m_img.IsValid() ? 1 : 0;
 		}
 
+		/// Returns a const pointer to the image data
+		const void* Ptr() { return m_img.GetBits(); }
+
+		/// Returns a writable pointer to the image data
+		void* _Ptr() { return m_img.GetBits(); }
+
+		/// Returns the size of the image buffer
+		int getUsed() { return m_img.GetImageSize(); }
 
 		static void Register( sqbind::VM vm );
 

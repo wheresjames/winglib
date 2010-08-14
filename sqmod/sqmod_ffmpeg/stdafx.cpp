@@ -170,6 +170,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, InitWrite )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, AddVideoStream )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, WriteFrame )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, Seek )
 	
 	SQBIND_MEMBER_FUNCTION( CFfContainer, Destroy )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, CloseStream )

@@ -169,6 +169,16 @@ public:
 	int isVideoCodec()
 	{	return m_pCodecContext ? 1 : 0; }
 
+	/// Seeks to the specified time
+	/**
+		\param [in] nStreamId		-	Stream Id to use as a reference
+		\param [in] nOffset			-	Seek offset
+		\param [in] nFlags			-	1 = Seek backward
+										2 = Seek in bytes
+										4 = Seek to any frame (not just key frames)
+										8 = Seek based on frame number
+	*/
+	int Seek( int nStreamId, int nOffset, int nFlags );
 
 private:
 

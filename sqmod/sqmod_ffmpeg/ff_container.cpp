@@ -1,5 +1,7 @@
 // ff_container.cpp
 
+// http://dranger.com/ffmpeg/functions.html
+
 #include "stdafx.h"
 
 CFfContainer::CFfContainer()
@@ -709,3 +711,28 @@ int CFfContainer::WriteFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 	return 1;
 }
 
+// http://dranger.com/ffmpeg/tutorial07.html
+
+/// Seeks to the specified time
+int CFfContainer::Seek( int nStreamId, int nOffset, int nFlags )
+{
+	if ( !m_pFormatContext )
+		return 0;
+
+	// Convert to uS offset
+	oex::oexINT64 t;
+	if ( 0 > nStreamId )
+		t = nOffset * AV_TIME_BASE / 1000;
+
+	else if ( !m_pFormatContext->streams[ nStreamId ] )
+		return 0;
+
+	else
+	{	AVRational q = { 1, AV_TIME_BASE };
+		t = av_rescale_q( nOffset * 1000, q, m_pFormatContext->streams[ m_nVideoStream ]->time_base );
+	} // end else
+
+	int res = av_seek_frame( m_pFormatContext, nStreamId, t, nFlags );
+
+	return 0 <= res ? 1 : 0;
+}

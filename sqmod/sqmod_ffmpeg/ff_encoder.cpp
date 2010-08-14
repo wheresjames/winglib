@@ -199,6 +199,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int sz_in, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
 {_STT();
+
 	// Ensure codec
 	if ( !m_pCodecContext )
 		return 0;
@@ -242,6 +243,18 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 		out->setUsed( 0 );
 		av_free( paf );
 		return 0;
+	} // end if
+
+	if ( m )
+	{
+		// Save key frame information
+		int flags = (*m)[ oexT( "flags" ) ].toint();
+		(*m)[ oexT( "flags" ) ]
+			.set( sqbind::oex2std( oexMks( ( m_pCodecContext->coded_frame->key_frame ) 
+										  ? ( flags | PKT_FLAG_KEY )
+										  : ( flags & ~PKT_FLAG_KEY ) ) ) );
+		(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pts ) ) );
+
 	} // end if
 
 	av_free( paf );

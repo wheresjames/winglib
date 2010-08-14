@@ -142,22 +142,7 @@ oexINT CDataLog::AddKey( oexCSTR x_pKey, oexUINT x_uTime )
 				oexCreatePath( sRoot.Ptr() );
 				CFile().CreateAlways( ( sRoot.BuildPath( m_pLogs[ i ]->sHash ) << oexT( ".txt" ) ).Ptr() )
 					.Write( oexStrToMbPtr( x_pKey ) );
-/*
-				// Get root index time
-				x_uTime = x_uTime - ( x_uTime % eIndexStep );
 
-				// Resume existing index
-				SIterator it; it.Init( m_sRoot, x_pKey );
-				if ( FindValue( it, x_uTime, 0, eDtNone, eMethodNone ) )
-				{	while ( it.vi.uNext > it.pos )
-					{	it.pos = it.vi.uNext;
-						it.fData.SetPtrPosBegin( it.vi.uNext );
-						if ( !it.fData.Read( &it.vi, sizeof( it.vi ) ) || it.hash.Data1 != it.vi.uHash )
-							it.vi.uNext = 0;
-					} // end while
-					m_pLogs[ i ]->plast = it.pos;
-				} // end if
-*/
 			} // end write name
 			
 			return i;
@@ -188,18 +173,19 @@ oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, oexUI
 		return oexFALSE;
 
 	// Grab time
-	if ( !x_uTime )
-		x_uTime = oexGetUnixTime();
+	oexUINT uTime = x_uTime;
+	if ( !uTime )
+		uTime = oexGetUnixTime();
 
 	// First, determine if the data has changed since we last logged it
 	oexGUID hash;
 	oss::CMd5::Transform( &hash, x_pValue, x_uSize );
-	if ( m_pLogs[ x_nKey ]->valid > x_uTime
+	if ( m_pLogs[ x_nKey ]->valid > uTime
 		 && guid::CmpGuid( &hash, &m_pLogs[ x_nKey ]->changed ) )
 		return oexTRUE;
 
 	// Set timeout
-	m_pLogs[ x_nKey ]->valid = x_uTime + eMaxValid;
+	m_pLogs[ x_nKey ]->valid = uTime + eMaxValid;
 
 	// Copy the guid
 	guid::CopyGuid( &m_pLogs[ x_nKey ]->changed, &hash );
@@ -284,11 +270,11 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 				SIterator itR; itR.Init( m_sRoot, m_pLogs[ i ]->sName.Ptr() );
 				if ( FindValue( itR, uRootTime, 0, eDtNone, eMethodNone ) )
 				{	m_pLogs[ i ]->plast = itR.pos;
-					while ( itR.vi.uNext > itR.pos )
-					{	itR.pos = itR.vi.uNext;
-						itR.fData.SetPtrPosBegin( itR.vi.uNext );
-						if ( !itR.fData.Read( &itR.vi, sizeof( itR.vi ) ) || itR.hash.Data1 != itR.vi.uHash )
-							itR.vi.uNext = 0;
+					while ( itR.viNext.uNext > itR.pos )
+					{	itR.pos = itR.viNext.uNext;
+						itR.fData.SetPtrPosBegin( itR.viNext.uNext );
+						if ( !itR.fData.Read( &itR.viNext, sizeof( itR.viNext ) ) || itR.hash.Data1 != itR.viNext.uHash )
+							itR.viNext.uNext = 0;
 						else
 							m_pLogs[ i ]->plast = itR.pos;
 					} // end while
@@ -506,25 +492,27 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 	{	
 		// Save open db index
 		x_it.uB = _uB;
+		x_it.uI = oexMAXUINT;
 
 		// Open the database containing data for this time
 		if ( !OpenDb( oexFALSE, x_it.sRoot, x_it.sHash, x_uTime, &x_it.fIdx, &x_it.fData ) )
 			return oexFALSE;
 
-		// No good
-		x_it.vi.uHash = 0;
-		bNew = oexTRUE;
-
 	} // end if
 
 	// Time to index?
-	if ( oexMAXUINT == _uI || _uI != x_it.uI )
+	if ( oexMAXUINT == x_it.uI || _uI != x_it.uI )
 	{
 		// Save index offset
 		x_it.uI = _uI;
 
-		// Header invalid now
-		x_it.vi.uTime = 0;
+		// Reset headers
+		oexZero( x_it.vi );
+		oexZero( x_it.viNext );
+		x_it.pos = 0;
+
+		// New read
+		bNew = oexTRUE;
 
 		// Point to index position
 		x_it.fIdx.SetPtrPosBegin( x_it.uI * sizeof( CFile::t_size ) );
@@ -532,78 +520,98 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 		// Update the index if blank
 		CFile::t_size ex;
 		if ( x_it.fIdx.Read( &ex, sizeof( ex ) ) && ex )
-			x_it.pos = ex;
-
-		// No good
-		x_it.vi.uHash = 0;
-		bNew = oexTRUE;
+			x_it.viNext.uNext = ex;
 
 	} // end if
 
-	// Do we have a data position?
-	if ( !x_it.pos )
+	// Do we have data?
+	if ( !x_it.viNext.uNext )
 		return oexFALSE;
 
+	// Is our last value still valid?
+	if ( x_it.viNext.uTime > x_uTime || ( x_it.viNext.uTime == x_uTime && x_it.viNext.uTimeMs > x_uTimeMs ) )
+		return oexTRUE;
+
 	// Do we need new data?
-	if ( x_it.vi.uTime < x_uTime || ( x_it.vi.uTime == x_uTime && x_it.vi.uTimeMs < x_uTimeMs ) )
+	CFile::t_size p = 0;
+	while ( p < x_it.viNext.uNext )
 	{
-		x_it.nCount = 0;
-		x_it.vi.uNext = x_it.pos;
-		do
+		// Ensure we have a valid object
+		if ( !x_it.viNext.uNext )
+			return oexFALSE;
+
+		// Read the header
+		p = x_it.viNext.uNext;
+		x_it.fData.SetPtrPosBegin( p );
+		if ( !x_it.fData.Read( &x_it.viNext, sizeof( x_it.viNext ) ) || x_it.hash.Data1 != x_it.viNext.uHash )
+		{	x_it.viNext.uNext = 0;
+			return oexFALSE;
+		} // end if
+
+		// Is it after the time we're looking for?
+		if ( x_it.viNext.uTime > x_uTime || ( x_it.viNext.uTime == x_uTime && x_it.viNext.uTimeMs > x_uTimeMs ) )
+			p = x_it.viNext.uNext;
+
+		else
 		{
-			// Do we have a previous valid data?
-			if ( x_it.hash.Data1 == x_it.vi.uHash )
+			// Copy structure
+			oexMemCpy( &x_it.vi, &x_it.viNext, sizeof( x_it.vi ) );
+
+			// Save position
+			x_it.pos = p;
+
+			// Average values if needed
+			if ( !bNew && eDtString < x_nDataType && eMethodAverage == x_nMethod )
 			{
-				// Point to data
+				// Point to the data
 				x_it.fData.SetPtrPosBegin( x_it.pos + x_it.vi.uBytes );
 
 				// Get string value
 				if ( x_it.getValue( x_it.sValue ) )
 				{
-					// Average values if needed
-					if ( !bNew && eDtString < x_nDataType && eMethodAverage == x_nMethod )
-					{
-						// Reset 
-						if ( !x_it.nCount++ )
-							x_it.fValue = 0, x_it.nValue = 0;
+					// Reset 
+					if ( !x_it.nCount++ )
+						x_it.fValue = 0, x_it.nValue = 0;
 
-						if ( eDtInt == x_nDataType )
-							x_it.nValue += x_it.sValue.ToInt();
+					if ( eDtInt == x_nDataType )
+						x_it.nValue += x_it.sValue.ToInt();
 
-						else if ( eDtFloat == x_nDataType )
-							x_it.fValue += x_it.sValue.ToFloat();
-
-					} // end if
+					else if ( eDtFloat == x_nDataType )
+						x_it.fValue += x_it.sValue.ToFloat();
 
 				} // end if
 
 			} // end if
 
-			// Save last valid position
-			x_it.pos = x_it.vi.uNext;
-
-			// Read the header
-			x_it.fData.SetPtrPosBegin( x_it.vi.uNext );
-			if ( !x_it.fData.Read( &x_it.vi, sizeof( x_it.vi ) ) || x_it.hash.Data1 != x_it.vi.uHash )
-				return oexFALSE;
-
-		} while ( ( x_it.vi.uTime < x_uTime || ( x_it.vi.uTime == x_uTime && x_it.vi.uTimeMs < x_uTimeMs ) ) && x_it.vi.uNext > x_it.pos );
-
-		// Scale averages
-		if ( !bNew && eDtString < x_nDataType && eMethodAverage == x_nMethod )
-		{	if ( 0 < x_it.nCount )
-				x_it.fValue /= x_it.nCount,
-				x_it.nValue /= x_it.nCount;
-			x_it.nCount = 0;
 		} // end if
 
-		else if ( eDtInt == x_nDataType )
-			x_it.nValue = x_it.sValue.ToInt();
+	} // end while
 
-		else if ( eDtFloat == x_nDataType )
-			x_it.fValue = x_it.sValue.ToFloat();
-
+	// Scale averages
+	if ( !bNew && eDtString < x_nDataType && eMethodAverage == x_nMethod )
+	{	if ( 0 < x_it.nCount )
+			x_it.fValue /= x_it.nCount,
+			x_it.nValue /= x_it.nCount;
+		x_it.nCount = 0;
 	} // end if
+
+	else if ( x_it.pos )
+	{
+		// Point to the data
+		x_it.fData.SetPtrPosBegin( x_it.pos + x_it.vi.uBytes );
+
+		// Read the value
+		if ( x_it.getValue( x_it.sValue ) )
+		{
+			if ( eDtInt == x_nDataType )
+				x_it.nValue = x_it.sValue.ToInt();
+
+			else if ( eDtFloat == x_nDataType )
+				x_it.fValue = x_it.sValue.ToFloat();
+
+		} // end if
+
+	} // end else
 
 	return oexTRUE;
 }
@@ -623,6 +631,14 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd,
 	if ( uAlign )
 		x_uStart -= ( x_uStart % uAlign ),
 		x_uEnd -= ( x_uEnd % uAlign );
+
+	// Just so the averaging is correct, use one interval before the start
+	if ( eMethodAverage == x_nMethod )
+	{	oexINT64 t = (oexINT64)x_uStart * 1000ll - (oexINT64)x_uInterval;
+		oexUINT s = t / 1000;
+		oexUINT ms = t % 1000;
+		FindValue( it, s, ms, x_nDataType, x_nMethod );
+	} // end if
 
 	// Create data
 	CPropertyBag pb;
@@ -676,6 +692,14 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexU
 	if ( uAlign )
 		x_uStart -= ( x_uStart % uAlign ),
 		x_uEnd -= ( x_uEnd % uAlign );
+
+	// Just so the averaging is correct, use one interval before the start
+	if ( eMethodAverage == x_nMethod )
+	{	oexINT64 t = (oexINT64)x_uStart * 1000ll - (oexINT64)x_uInterval;
+		oexUINT s = t / 1000;
+		oexUINT ms = t % 1000;
+		FindValue( it, s, ms, x_nDataType, x_nMethod );
+	} // end if
 
 	// Allocate space for binary data
 	oexUINT nItems = ( x_uEnd - x_uStart ) * 1000 / x_uInterval;

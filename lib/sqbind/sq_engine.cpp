@@ -408,7 +408,7 @@ stdString CSqEngineExport::replace( const stdString &sS, const stdString &sFind,
 
 stdString CSqEngineExport::drop( const stdString &sS, const stdString &sDrop, int bInclusive )
 {_STT();
-	return oex2std( std2oex( sS ).Replace( std2oex( sDrop ), bInclusive ) );
+	return oex2std( std2oex( sS ).Drop( sDrop.c_str(), bInclusive ) );
 }
 
 stdString CSqEngineExport::drop_range( const stdString &sS, const stdString &sBegin, const stdString &sEnd, int bInclusive )
