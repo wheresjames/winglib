@@ -119,7 +119,7 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexFILESIZE_
 //		mkstemp( sPath._Ptr() );
 
 		// Attempt to build a file name
-		zstr::Copy( pPath, "/oex.mem.027ed44e-1208-4a38-9a48-9f97df77250b." );
+		zstr::Copy( pPath, "/027ed44e-1208-4a38-9a48-9f97df77250b." );
 //		zstr::Copy( pPath, "/tmp/oex.shared." );
 		zstr::Append( pPath, sName.Ptr() );
 
@@ -219,13 +219,13 @@ oexBOOL CFMap::Release( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexFILESI
 		CStr8 sPath = g_lstFileMappingInfo[ oexPtrToInt( x_hFileMap ) ];
 
 		// Unlink this name
-		if ( sPath.Length() )
-			shm_unlink( sPath.Ptr() );
+//		if ( sPath.Length() )
+//			shm_unlink( sPath.Ptr() );
 
 	} // end if
 
 // +++ Do we need to release the file handle here?
-//	close( (int)x_hFileMap );
+    close( (int)x_hFileMap );
 
 #endif
 
