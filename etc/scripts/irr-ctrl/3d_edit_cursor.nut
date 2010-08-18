@@ -20,13 +20,21 @@ class CCameraMover
 		if ( !m_camera || !m_camera.node().IsValid() ) return;
 
 		// Camera position
+		m_vTarget = m_camera.GetTarget();
+		m_camera.node().FaceTarget( m_vTarget );
 		m_vRotation = m_camera.node().GetRotation();
 		m_vPosition = m_camera.node().GetPosition();
-		m_vTarget = m_camera.GetTarget();
 
 		m_vPivotPoint = pivot;
 		m_camera.node().GetPivotAngle( m_vPivotPoint, m_vPivotAngle );
 		m_fPivotDist = m_camera.node().GetPivotDist( m_vPivotPoint );
+
+		m_camera.node().SetPivot( m_vPivotPoint, CSqirrVector3d( m_vPivotAngle.x(), m_vPivotAngle.y(), 0. ), m_fPivotDist );
+		m_camera.SetTarget( m_vPivotPoint );
+		m_camera.node().FaceTarget( m_vPivotPoint );
+		m_camera.UpdateCamera();
+		m_vTarget = m_vPivotPoint;
+
 	}
 
 	function MoveCamera( type, pivot, x, y )

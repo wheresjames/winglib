@@ -127,6 +127,9 @@ public:
 		/// Key hash
 		oex::oexGUID	hash;
 
+		/// Root index
+		oexUINT			uRi;
+
 		/// Data hash
 		oex::oexGUID	changed;
 
@@ -146,6 +149,7 @@ public:
 		SIterator()
 		{	uB = uI = oexMAXUINT;
 			pos = 0;
+			npos = 0;
 			oexZero( vi );
 			oexZero( viNext );
 			nValue = 0;
@@ -197,6 +201,7 @@ public:
 		SValueIndex		vi;
 		SValueIndex		viNext;
 		CFile::t_size	pos;
+		CFile::t_size	npos;
 		CFile			fData;
 		CFile			fIdx;
 		CStr			sValue;
@@ -255,7 +260,7 @@ public:
 	static oexBOOL OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, oexUINT x_uTime, CFile *x_pIdx, CFile *x_pData );
 
 	/// Finds the value for the specified time in an open database
-	static oexBOOL FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs, oexINT x_nDataType, oexINT x_nMethod );
+	static oexBOOL FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod );
 
 private:
 

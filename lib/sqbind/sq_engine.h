@@ -368,6 +368,12 @@ public:
 	int toulong( const stdString &s )
 	{	return oexStrToULong( s.c_str() ); }
 
+	int strtol( const stdString &s, int nRadix )
+	{	return oexStrToLong( s.c_str(), nRadix ); }
+
+	int strtoul( const stdString &s, int nRadix )
+	{	return oexStrToULong( s.c_str(), nRadix ); }
+
 	float tofloat( const stdString &s )
 	{	return oexStrToFloat( s.c_str() ); }
 
