@@ -11,6 +11,8 @@ function _init() : ( _g )
 {
 	_self.echo( "\n===== Begin Serial Test =====\n" );
 
+	_g.port.setBaudRate( 57600 );
+
 	// Show port params
 	_self.echo( "baud = " + _g.port.getBaudRate()
                 + ", stop bits = " + _g.port.getStopBits()
@@ -36,10 +38,10 @@ function _idle() : ( _g )
 	} // end if
 
 	_self.echo( "Read : " + _g.buf.getUsed() );
-	_self.echo( _g.buf.getString() );
+	_self.echo( _g.buf.AsciiHexStr( 16, 32 ) );
 
-	_self.echo( "\n...done...\n" );
+//	_self.echo( "\n...done...\n" );
 
-	return 1;
+	return 0;
 }
 

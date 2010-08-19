@@ -494,7 +494,7 @@ public:
 	/// Returns a 'view' of a part of the buffer
 	CBin Sub( t_size x_nStart, t_size x_nSize )
 	{	CBin t( *this );
-		t.setOffset( x_nStart );
+		t.setOffset( getOffset() + x_nStart );
 		t.setUsed( x_nSize );
 		return t;
 	}
