@@ -38,6 +38,27 @@ public:
 	/// Convert AVFrame
 	static int ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height, int dst_fmt, sqbind::CSqBinary *dst, int alg, int flip );
 
+	/// Converts image colorspace
+	static int Rotate( int deg, sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqBinary *dst, int dst_fmt );
+
+	/// Rotates an image 90 degrees
+	static int Rotate90_3( void *src, void *dst, int width, int height );
+
+	/// Rotates an image 180 degrees
+	static int Rotate180_3( void *src, void *dst, int width, int height );
+
+	/// Rotates an image 270 degrees
+	static int Rotate270_3( void *src, void *dst, int width, int height );
+
+	/// Rotates an image 90 degrees
+	static int Rotate90_4( void *src, void *dst, int width, int height );
+
+	/// Rotates an image 180 degrees
+	static int Rotate180_4( void *src, void *dst, int width, int height );
+
+	/// Rotates an image 270 degrees
+	static int Rotate270_4( void *src, void *dst, int width, int height );
+
 private:
 
 

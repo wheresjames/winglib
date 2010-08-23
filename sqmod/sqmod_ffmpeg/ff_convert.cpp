@@ -373,3 +373,190 @@ int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height
 
 	return 1;
 }
+
+int CFfConvert::Rotate( int deg, sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqBinary *dst, int dst_fmt )
+{
+	// Sanity checks
+	if ( !src || !dst || 0 >= width || 0 == height )
+		return 0;
+
+	// RGB24
+	if ( ( PIX_FMT_BGR24 == src_fmt || PIX_FMT_RGB24 == src_fmt )
+		 && ( PIX_FMT_BGR24 == dst_fmt || PIX_FMT_RGB24 == dst_fmt ) )
+	{	
+		int sw = oex::CImage::GetScanWidth( width, 24 );
+		int sz = sw * height;
+
+		// Ensure source buffer is large enough
+		if ( src->getUsed() < sz )
+			return 0;
+
+		// Ensure destination buffer is large enough
+		if ( dst->getUsed() < sz )
+		{	if ( !dst->Allocate( sz ) )
+				return 0;
+			else
+				dst->setUsed( sz );
+		} // end if		
+
+		// Do the rotation
+		if ( 90 == deg )
+			return Rotate90_3( src->_Ptr(), dst->_Ptr(), width, height );
+
+		else if ( 180 == deg )
+			return Rotate180_3( src->_Ptr(), dst->_Ptr(), width, height );
+
+		else if ( 270 == deg )
+			return Rotate90_3( src->_Ptr(), dst->_Ptr(), width, height );
+
+	} // end if
+
+	// RGB32
+	else if ( ( PIX_FMT_BGR32 == src_fmt || PIX_FMT_RGB32 == src_fmt )
+			  && ( PIX_FMT_BGR32 == dst_fmt || PIX_FMT_RGB32 == dst_fmt ) )
+	{	
+		int sw = oex::CImage::GetScanWidth( width, 32 );
+		int sz = sw * height;
+
+		// Ensure source buffer is large enough
+		if ( src->getUsed() < sz )
+			return 0;
+
+		// Ensure destination buffer is large enough
+		if ( dst->getUsed() < sz )
+		{	if ( !dst->Allocate( sz ) )
+				return 0;
+			else
+				dst->setUsed( sz );
+		} // end if		
+
+		// Do the rotation
+		if ( 90 == deg )
+			return Rotate90_4( src->_Ptr(), dst->_Ptr(), width, height );
+
+		else if ( 180 == deg )
+			return Rotate180_4( src->_Ptr(), dst->_Ptr(), width, height );
+
+		else if ( 270 == deg )
+			return Rotate90_4( src->_Ptr(), dst->_Ptr(), width, height );
+
+	} // end if
+
+	return 0;
+}
+
+
+int CFfConvert::Rotate90_3( void *src, void *dst, int width, int height )
+{_STT();
+
+	// Sanity checks
+	if ( !src || !dst || 0 >= width || 0 == height )
+		return 0;
+
+	// Rotate the image
+	int sstride = oex::CImage::GetScanWidth( width, 24 );
+	int sdiff = sstride - ( width * 3 );
+	int dstride = oex::CImage::GetScanWidth( height, 24 );
+	int ddiff = dstride - ( height * 3 );
+	unsigned char *s = (unsigned char*)src + sstride - 3;
+	for ( int y = 0; y < height; y++, s += sstride << 1 )
+	{	unsigned char *d = (unsigned char*)dst + ( y * 3 );
+		for ( int x = 0; x < width; x++, s -= 3, d += dstride )
+			d[ 0 ] = s[ 0 ], d[ 1 ] = s[ 1 ], d[ 2 ] = s[ 2 ];
+	} // end for
+
+	return 1;
+}
+
+int CFfConvert::Rotate180_3( void *src, void *dst, int width, int height )
+{_STT();
+
+	// Sanity checks
+	if ( !src || !dst || 0 >= width || 0 == height )
+		return 0;
+
+	// Rotate the image
+	int stride = oex::CImage::GetScanWidth( width, 24 );
+	int diff = stride - ( width * 3 );
+	unsigned char *s = (unsigned char*)src;
+	unsigned char *d = (unsigned char*)dst + ( height * stride ) - 3;
+	for ( int y = 0; y < height; y++, s += diff, d -= diff )
+		for ( int x = 0; x < width; x++, s += 3, d -= 3 )
+			d[ 0 ] = s[ 0 ], d[ 1 ] = s[ 1 ], d[ 2 ] = s[ 2 ];
+
+	return 1;
+}
+
+int CFfConvert::Rotate270_3( void *src, void *dst, int width, int height )
+{_STT();
+
+	// Sanity checks
+	if ( !src || !dst || 0 >= width || 0 == height )
+		return 0;
+
+	// Rotate the image
+	int sstride = oex::CImage::GetScanWidth( width, 24 );
+	int sdiff = sstride - ( width * 3 );
+	int dstride = oex::CImage::GetScanWidth( height, 24 );
+	int ddiff = dstride - ( height * 3 );
+	unsigned char *s = (unsigned char*)src + sstride - 3;
+	for ( int y = 0; y < height; y++, s += sstride << 1 )
+	{	unsigned char *d = (unsigned char*)dst + ( dstride * width ) - ( y * 3 ) - 3;
+		for ( int x = 0; x < width; x++, s -= 3, d -= dstride )
+			d[ 0 ] = s[ 0 ], d[ 1 ] = s[ 1 ], d[ 2 ] = s[ 2 ];
+	} // end for
+
+	return 1;
+}
+
+int CFfConvert::Rotate90_4( void *src, void *dst, int width, int height )
+{_STT();
+
+	// Sanity checks
+	if ( !src || !dst || 0 >= width || 0 == height )
+		return 0;
+
+	// Rotate the image
+	unsigned int *s = (unsigned int*)src + width - 1;
+	for ( int y = 0; y < height; y++, s += width << 1 )
+	{	unsigned int *d = (unsigned int*)dst + y;
+		for ( int x = 0; x < width; x++, s--, d += height )
+			*d = *s;
+	} // end for
+
+	return 1;
+}
+
+int CFfConvert::Rotate180_4( void *src, void *dst, int width, int height )
+{_STT();
+
+	// Sanity checks
+	if ( !src || !dst || 0 >= width || 0 == height )
+		return 0;
+
+	// Rotate the image
+	unsigned int *s = (unsigned int*)src;
+	unsigned int *d = (unsigned int*)dst + height - 1;
+	for ( int i = width * height; i; i--, s++, d-- )
+		*d = *s;
+
+	return 1;
+}
+
+int CFfConvert::Rotate270_4( void *src, void *dst, int width, int height )
+{_STT();
+
+	// Sanity checks
+	if ( !src || !dst || 0 >= width || 0 == height )
+		return 0;
+
+	// Rotate the image
+	unsigned int *s = (unsigned int*)src + width - 3;
+	for ( int y = 0; y < height; y++, s += width << 1 )
+	{	unsigned int *d = (unsigned int*)dst + ( height * width ) - y - 1;
+		for ( int x = 0; x < width; x++, s--, d -= height )
+			*d = *s;
+	} // end for
+
+	return 1;
+}

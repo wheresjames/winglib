@@ -72,6 +72,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfConvert, CFfConvert )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorBB )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorIB )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorBI )
+	SQBIND_STATIC_FUNCTION( CFfConvert, Rotate )
 
 	// Format tyeps
 	SQBIND_GLOBALCONST( PIX_FMT_RGB24 )
