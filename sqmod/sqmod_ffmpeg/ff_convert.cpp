@@ -445,7 +445,6 @@ int CFfConvert::Rotate( int deg, sqbind::CSqBinary *src, int src_fmt, int width,
 	return 0;
 }
 
-
 int CFfConvert::Rotate90_3( void *src, void *dst, int width, int height )
 {_STT();
 
