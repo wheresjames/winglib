@@ -644,6 +644,14 @@ int CSqEngineExport::shell( const stdString &sFile, const stdString &sParams, co
 	return oexShell( sFile.c_str(), sParams.c_str(), sDirectory.c_str() );
 }
 
+CSqMulti CSqEngineExport::get_system_drive_info( const stdString &sDrive )
+{_STT();
+	CSqMulti m;
+	oex::CPropertyBag pb = oex::os::CSysUtil::GetDiskInfo( std2oex( sDrive ) );
+	SQBIND_PropertyBagToMulti( pb, m );
+	return m;
+}
+
 int CSqEngineExport::is_path( const stdString &sPath )
 {_STT();
 	CSqMsgQueue *q = queue();
@@ -1028,6 +1036,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, resetlog )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_system_drive_info )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_cpu_load )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_instance_handle )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, boot_time )

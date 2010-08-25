@@ -346,6 +346,9 @@ public:
 	/// Returns a linked in resource
 	stdString get_resource( const stdString &sRes, int bFileOverrideOk );
 
+	/// Returns information about the specified system drive
+	CSqMulti get_system_drive_info( const stdString &sDrive );
+
 	/// Execute functions
 	stdString execute( int nRet, const stdString &sPath, const stdString &sFunction );
 	stdString execute1( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1 );

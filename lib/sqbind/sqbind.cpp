@@ -279,6 +279,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getUsed )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setString )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getString )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, appendString )	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setSubString )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getSubString )	
 

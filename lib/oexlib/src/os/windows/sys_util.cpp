@@ -184,3 +184,32 @@ oexBOOL CSysUtil::SetRegString( const CStr &x_sKey, const CStr &x_sPath, const C
 
 	return oexFALSE;
 }
+
+CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
+{_STT();
+	// Sanity check
+	if ( !x_sDrive.Length() ) 
+		return CPropertyBag();
+
+	DWORD 	dwSn = 0;
+	DWORD	dwMax = 0;
+	DWORD	dwFlags = 0;
+	char	szVolume[ 1024 * 8 ] = { 0 };
+	char	szFileSystem[ 1024 * 8 ] = { 0 };
+	
+	// Get volume information
+	if ( !GetVolumeInformation(	x_sDrive.Ptr(), szVolume, sizeof( szVolume ),
+								&dwSn, &dwMax, &dwFlags,
+								szFileSystem, sizeof( szFileSystem ) ) )
+		return CPropertyBag();
+
+	CPropertyBag pb;
+	pb[ "drive" ] = x_sDrive;
+	pb[ "volume" ] = oexMbToStrPtr( szVolume );
+	pb[ "serial" ] = dwSn;
+	pb[ "max_filename" ] = dwMax;
+	pb[ "flags" ] = dwFlags;
+	pb[ "file_system" ] = oexMbToStrPtr( szFileSystem );
+
+	return pb;
+}

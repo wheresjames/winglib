@@ -106,5 +106,14 @@ public:
 	static oexBOOL IsRegValue( const CStr &x_sKey, const CStr &x_sPath, const CStr &x_sName );
 
 
+	//==============================================================
+	// GetDiskInfo()
+	//==============================================================
+	/// Returns information about the specified drive
+	/**
+		\param [in] x_sDrive	-	System drive path
+	*/
+	static CPropertyBag GetDiskInfo( const CStr &x_sDrive );
+
 };
 

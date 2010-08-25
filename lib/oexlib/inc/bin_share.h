@@ -389,10 +389,10 @@ public:
 	/// Returns a string representation of the buffer, it will be null terminated
 	/**
 		At the cost of copying the buffer, this string will always be null terminated
-
 	*/
 	CStr8 getSafeString()
-	{	return CStr8( Ptr(), getUsed() );
+	{	if ( !getUsed() ) return CStr8();
+		return CStr8( Ptr(), getUsed() );
 	}
 
 	/// Converts a string to a binary buffer
@@ -495,7 +495,7 @@ public:
 	CBin Sub( t_size x_nStart, t_size x_nSize )
 	{	CBin t( *this );
 		t.setOffset( getOffset() + x_nStart );
-		t.setUsed( x_nSize );
+		if ( 0 < x_nSize ) t.setUsed( x_nSize );
 		return t;
 	}
 
