@@ -53,6 +53,9 @@ public:
 	/// Enable / disable output capture
 	static oexBOOL EnableOutputCapture( oexUINT x_uBuffers, oexUINT x_uSize );
 
+	/// Enable / disable output capture to file
+	static oexBOOL EnableOutputFileCapture( oexCSTR x_pFile, oexUINT x_uTimestampFreq );
+
 	/// Add string to output capture
 	static oexBOOL AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine );
 

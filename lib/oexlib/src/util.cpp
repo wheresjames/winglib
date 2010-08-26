@@ -69,29 +69,36 @@ oexBOOL CUtil::EnableOutputCapture( oexUINT x_uBuffers, oexUINT x_uSize )
 	else if ( ( !x_uBuffers || !x_uSize ) && g_pFifoSync )
 		OexAllocDelete( g_pFifoSync ), g_pFifoSync = oexNULL;
 	return oexTRUE;
-
-/*
-	if ( x_uSize && !g_pCircBuf )
-	{	if ( 32 > x_uSize ) x_uSize = 32;
-		g_pCircBuf = OexAllocConstruct< CCircBuf >( oexFALSE, x_uSize, CCircBuf::eWmOverwrite );
-	} // end if
-	else if ( !x_uSize )
-		OexAllocDelete( g_pCircBuf ), g_pCircBuf = oexNULL;
-	return oexTRUE;
-*/
 }
+
+//static oexLock g_lock;
+static oexUINT g_uTimestampFreq = 0;
+static oexUINT g_uNextTimestamp = 0;
+static oexTCHAR g_szFile[ 8 * 1024 ] = { 0 };
+oexBOOL CUtil::EnableOutputFileCapture( oexCSTR x_pFile, oexUINT x_uTimestampFreq )
+{
+//	oexAutoLock ll( g_lock );
+//	if ( !ll.IsLocked() )
+//		return oexFALSE;
+
+	g_uTimestampFreq = x_uTimestampFreq;
+	if ( !x_pFile || !*x_pFile )
+		*g_szFile = 0;
+	zstr::Copy( g_szFile, oexSizeOfArray( g_szFile ), x_pFile );
+	return *g_szFile;
+}
+
 
 //CCircBuf* CUtil::getOutputBuffer()
 CFifoSync* CUtil::getOutputBuffer()
 {
 	return g_pFifoSync;
-//	return g_pCircBuf;
 }
 
 oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 {
 	// Sanity checks
-	if ( !g_pFifoSync || !x_pStr || !*x_pStr )
+	if ( ( !g_pFifoSync && !*g_szFile ) || !x_pStr || !*x_pStr )
 		return oexFALSE;
 
 	if ( !x_uSize )
@@ -100,30 +107,38 @@ oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 	if ( !x_uSize )
 		return oexFALSE;
 
+	// Write to file?
+	if ( g_szFile )
+	{	oex::CFile f;
+		if ( f.OpenAlways( g_szFile ).IsOpen() )
+		{
+			CStr8 s;
+			f.SetPtrPosEnd( 0 );
+
+			// Add timestamp if needed
+			if ( g_uTimestampFreq )
+			{	oexUINT uGmt = oexGetUnixTime();
+				if ( uGmt > g_uNextTimestamp )
+				{	g_uNextTimestamp = uGmt + g_uTimestampFreq;
+					s << "\n   --- " << uGmt << " - " 
+					  << oexStrToMb( oexLocalTimeStr( oexT( "%Y/%c/%d - %g:%m:%s.%l\n" ) ) );
+				} // end if
+			} // end if
+
+			// Sux that it doesn't have a lf at the end
+			s << oexStrToMb( CStr( x_pStr, x_uSize ) ) << "\n";
+
+			// Write to file
+			f.Write( s );
+
+		} // end if
+	} // end if
+
 	// Write the data to the buffer
-	g_pFifoSync->Write( x_pStr, x_uSize * sizeof( x_pStr[ 0 ] ) );
+	if ( g_pFifoSync )
+		g_pFifoSync->Write( x_pStr, x_uSize * sizeof( x_pStr[ 0 ] ) );
 
 	return oexTRUE;
-
-/*
-	// Sanity checks
-	if ( !g_pCircBuf || !x_pStr || !*x_pStr )
-		return oexFALSE;
-
-	if ( !x_uSize )
-		x_uSize = zstr::Length( x_pStr );
-
-	if ( !x_uSize )
-		return oexFALSE;
-
-	// Write the data to the buffer
-	g_pCircBuf->Write( x_pStr, x_uSize * sizeof( x_pStr[ 0 ] ) );
-
-	if ( x_bNewLine )
-		g_pCircBuf->Write( oexNL, oexNL_LEN * sizeof( oexCHAR ) );
-
-	return oexTRUE;
-*/
 }
 
 CStr CUtil::BinToAsciiHexStr( CBin *x_pBin, oexSIZE_T x_uLen, oexSIZE_T x_nLineLen, oexSIZE_T x_nMaxLines )

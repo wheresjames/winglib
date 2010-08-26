@@ -245,6 +245,11 @@ int CSqEngineExport::enable_output_capture( int buffers, int buf_size )
 	return oexEnableOutputCapture( buffers, buf_size );
 }
 
+int CSqEngineExport::enable_output_file_capture( const stdString &sName, unsigned int uTimestampFreq )
+{_STT();
+	return oexEnableOutputFileCapture( sName.c_str(), uTimestampFreq );
+}
+
 stdString CSqEngineExport::get_output( int max )
 {_STT();
 
@@ -1107,6 +1112,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_binshare )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, cleanup_binshare )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, enable_output_capture )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, enable_output_file_capture )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_output )
 
 SQBIND_REGISTER_CLASS_END()

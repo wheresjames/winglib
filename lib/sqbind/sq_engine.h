@@ -77,6 +77,9 @@ public:
 	/// Enables capturing console output
 	int enable_output_capture( int buffers, int buf_size );
 
+	/// Enables capturing console output to file
+	int enable_output_file_capture( const stdString &sFile, unsigned int uTimestampFreq );
+
 	/// Returns console output
 	stdString get_output( int max );
 

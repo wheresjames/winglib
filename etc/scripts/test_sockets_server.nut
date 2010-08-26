@@ -101,7 +101,7 @@ function _idle() : ( _g )
 
 		// Show connection info
 		local addr = CSqSockAddress();
-		_g.server.PeerAddress( addr );
+		_g.server.getPeerAddress( addr );
 		_self.echo( "Connection from : " + addr.getDotAddress() );
 
 		// Set the script that will handle the session
