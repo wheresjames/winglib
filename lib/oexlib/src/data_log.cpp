@@ -166,7 +166,17 @@ oexINT CDataLog::RemoveKey( oexINT x_nKey )
 	return x_nKey;
 }
 
-oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, oexUINT x_uTime, oexUINT x_uTimeMs )
+oexINT CDataLog::GetBufferSize( oexINT x_nKey )
+{_STT();
+
+	// Ensure valid key
+	if ( 0 > x_nKey || eMaxKeys <= x_nKey || !m_pLogs[ x_nKey ] )
+		return -1;
+
+	return m_pLogs[ x_nKey ]->bin.getUsed();
+}
+
+oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, oexUINT x_uTime, oexUINT x_uTimeMs, oexBOOL bBuffering )
 {
 	// Ensure valid key
 	if ( 0 > x_nKey || eMaxKeys <= x_nKey || !m_pLogs[ x_nKey ] )
@@ -221,10 +231,91 @@ oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, oexUI
 	// Save pointer to this structure
 	m_pLogs[ x_nKey ]->olast = m_pLogs[ x_nKey ]->bin.getUsed();
 
+	if ( !bBuffering )
+		return FlushBuffer( x_nKey, &vi, x_pValue, x_uSize );
+
 	// Write the value to the memory log
 	if ( !m_pLogs[ x_nKey ]->bin.AppendBuffer( (CBin::t_byte*)&vi, vi.uBytes ) 
 		 || !m_pLogs[ x_nKey ]->bin.AppendBuffer( (CBin::t_byte*)x_pValue, x_uSize ) )
 		return oexFALSE;
+
+	return oexTRUE;
+}
+
+oexBOOL CDataLog::FlushBuffer( oexINT x_nKey, SValueIndex *pVi, oexCPVOID pBuf, oexUINT uSize )
+{
+	// Ensure valid key
+	if ( 0 > x_nKey || eMaxKeys <= x_nKey || !m_pLogs[ x_nKey ] )
+		return oexFALSE;
+
+	// Punt if no root folder
+	if ( !m_sRoot.Length() )
+		return oexFALSE;
+
+	// Get timestamp if needed
+	if ( !pVi->uTime )
+		pVi->uTime = oexGetUnixTime();
+
+	// Open the database
+	CFile fData;
+	if ( !OpenDb( oexTRUE, m_sRoot, oexT( "" ), pVi->uTime, oexNULL, &fData ) )
+		return oexFALSE;
+
+	// Where will this block start?
+	CFile::t_size pos = (oexUINT)fData.GetPtrPos();
+
+	// Validate last entry
+	if ( m_pLogs[ x_nKey ]->plast )
+	{	SValueIndex vi;
+		CFile::CRestoreFilePos rfp( &fData );
+		fData.SetPtrPosBegin( m_pLogs[ x_nKey ]->plast );
+		if ( !fData.Read( &vi, sizeof( vi ) ) || m_pLogs[ x_nKey ]->hash.Data1 != vi.uHash )
+			m_pLogs[ x_nKey ]->plast = 0;
+	} // end if
+
+	// Should we resume?
+	if ( !m_pLogs[ x_nKey ]->plast )
+	{
+		// Get root index time
+		oexUINT uRootTime = pVi->uTime - ( pVi->uTime % eIndexStep );
+
+		// Resume existing index
+		SIterator itR; itR.Init( m_sRoot, m_pLogs[ x_nKey ]->sName.Ptr() );
+		if ( FindValue( itR, uRootTime, 0, 0, eDtNone, eMethodNone ) )
+		{	m_pLogs[ x_nKey ]->plast = itR.pos;
+			while ( itR.viNext.uNext > itR.pos )
+			{	itR.pos = itR.viNext.uNext;
+				itR.fData.SetPtrPosBegin( itR.viNext.uNext );
+				if ( !itR.fData.Read( &itR.viNext, sizeof( itR.viNext ) ) || itR.hash.Data1 != itR.viNext.uHash )
+					itR.viNext.uNext = 0;
+				else
+					m_pLogs[ x_nKey ]->plast = itR.pos;
+			} // end while
+		} // end if
+
+	} // end if
+
+	// Write data to file
+	if ( !fData.Write( pVi, sizeof( SValueIndex ) ) || !fData.Write( pBuf, uSize ) )
+		return oexFALSE;
+
+	// Update the index
+	CFile fIdx;
+	if ( OpenDb( oexTRUE, m_sRoot, m_pLogs[ x_nKey ]->sHash, pVi->uTime, &fIdx, oexNULL ) )
+	{
+		oexUINT uI = ( pVi->uTime % eLogBase ) / eIndexStep;
+
+		// Point to index position
+		fIdx.SetPtrPosBegin( uI * sizeof( pos ) );
+
+		// Update the index if blank
+		CFile::t_size ex = 0;
+		if ( fIdx.Read( &ex, sizeof( ex ) ) && !ex )
+			ex = pos + m_pLogs[ x_nKey ]->bin.getOffset(), 
+			fIdx.SetPtrPosBegin( uI * sizeof( pos ) ),
+			fIdx.Write( &ex, sizeof( ex ) );
+
+	} // end if
 
 	return oexTRUE;
 }
@@ -251,10 +342,6 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 		{
 			// Where will this block start?
 			CFile::t_size pos = (oexUINT)fData.GetPtrPos();
-
-			// +++ Setting this to zero causes more overhead, but allows 'fixing'
-			//     currupt file entries, which I currently seem to be seeing very occasionally.
-//			m_pLogs[ i ]->plast = 0;
 
 			// Validate last entry
 			if ( m_pLogs[ i ]->plast )
@@ -374,7 +461,6 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 			m_pLogs[ i ]->olast = 0;
 
 		} // end if
-
 	return oexTRUE;
 }
 
@@ -511,11 +597,6 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 		// Save index offset
 		x_it.uI = _uI;
 
-		// Reset headers
-//		oexZero( x_it.vi );
-//		oexZero( x_it.viNext );
-//		x_it.pos = 0;
-
 		// New read
 		bNew = oexTRUE;
 
@@ -531,16 +612,16 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 
 	// Do we have more data?
 	if ( !x_it.npos )
-		return x_it.pos ? oexTRUE : oexFALSE;
+		return ( !x_uInterval ) ? oexFALSE : ( x_it.pos ? oexTRUE : oexFALSE );
 
 	// Is our last value still valid?
-	if ( x_it.pos )
+	if ( x_uInterval && x_it.pos )
 		if ( x_it.viNext.uTime > x_uTime || ( x_it.viNext.uTime == x_uTime && x_it.viNext.uTimeMs > x_uTimeMs ) )
 			return oexTRUE;
 
 	// Do we need new data?
 	CFile::t_size p = 0;
-	oexUINT uMin = x_uTime - x_uInterval;
+	oexUINT uMin = x_uTime - ( x_uInterval / 1000 );
 	while ( p < x_it.npos )
 	{
 		// Read the header
@@ -548,6 +629,32 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 		x_it.fData.SetPtrPosBegin( p );
 		if ( !x_it.fData.Read( &x_it.viNext, sizeof( x_it.viNext ) ) || x_it.hash.Data1 != x_it.viNext.uHash )
 			p = x_it.npos = 0;
+
+		// Simple iteration?
+		else if ( !x_uInterval )
+		{
+			x_it.npos = p;
+
+			// Copy structure
+			oexMemCpy( &x_it.vi, &x_it.viNext, sizeof( x_it.vi ) );
+
+			// Point to the data
+			x_it.fData.SetPtrPosBegin( x_it.pos + x_it.vi.uBytes );
+
+			// Read the value
+			if ( !x_it.getValue( x_it.sValue ) )
+			{
+				if ( eDtInt == x_nDataType )
+					x_it.nValue = x_it.sValue.ToInt();
+
+				else if ( eDtFloat == x_nDataType )
+					x_it.fValue = x_it.sValue.ToFloat();
+
+			} // end if
+
+			return oexTRUE;
+
+		} // end if
 
 		// Is it after the time we're looking for?
 		else if ( x_it.viNext.uTime > x_uTime || ( x_it.viNext.uTime == x_uTime && x_it.viNext.uTimeMs > x_uTimeMs ) )
@@ -563,7 +670,7 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 			x_it.npos = x_it.viNext.uNext;
 
 			// Average values if needed
-			if ( !bNew && uMin <= x_it.vi.uTime && eDtString < x_nDataType && eMethodAverage == x_nMethod )
+			if ( !bNew && uMin <= x_it.vi.uTime && eDtString < x_nDataType && eMethodAverage & x_nMethod )
 			{
 				// Point to the data
 				x_it.fData.SetPtrPosBegin( x_it.pos + x_it.vi.uBytes );
@@ -633,7 +740,7 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd,
 		x_uEnd -= ( x_uEnd % uAlign );
 
 	// Just so the averaging is correct, use one interval before the start
-	if ( eMethodAverage == x_nMethod )
+	if ( x_uInterval && eMethodAverage & x_nMethod )
 	{	oexINT64 t = (oexINT64)x_uStart * 1000ll - (oexINT64)x_uInterval;
 		oexUINT s = t / 1000;
 		oexUINT ms = t % 1000;
@@ -652,17 +759,25 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd,
 			else
 				pb[ uTime ].ToString() = it.sValue;
 		} // end if
-			
+
 		else if( uTimeMs )
 			pb[ oexFmt( oexT( "%u.%u" ), uTime, uTimeMs ) ] = oexT( "" );
 
 		else
 			pb[ uTime ].ToString() = oexT( "" );
 
-		// Update time
-		uTimeMs += x_uInterval;
-		uTime += uTimeMs / 1000;
-		uTimeMs %= 1000;
+		// Calculate next timestamp
+		if ( !x_uInterval )
+		{	uTime = it.viNext.uTime;
+			uTimeMs = it.viNext.uTimeMs;
+		} // end if
+
+		else
+		{	// Update time
+			uTimeMs += x_uInterval;
+			uTime += uTimeMs / 1000;
+			uTimeMs %= 1000;
+		} // end else
 
 	} // end for
 
@@ -694,7 +809,7 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexU
 		x_uEnd -= ( x_uEnd % uAlign );
 
 	// Just so the averaging is correct, use one interval before the start
-	if ( eMethodAverage == x_nMethod )
+	if ( eMethodAverage & x_nMethod )
 	{	oexINT64 t = (oexINT64)x_uStart * 1000ll - (oexINT64)x_uInterval;
 		oexUINT s = t / 1000;
 		oexUINT ms = t % 1000;

@@ -820,7 +820,7 @@ public:
 
 		\see InitEncodeJpg(), ReleaseEncodeJpg()
 	*/
-	oexINT EncodeJpg(oexPBYTE x_pSrc, oexINT x_nWidth, oexINT x_nHeight, oexPBYTE x_pDst, oexINT x_nDst, oexINT x_nQuality );
+	oexINT EncodeJpg(oexCPVOID x_pSrc, oexINT x_nWidth, oexINT x_nHeight, oexPVOID x_pDst, oexINT x_nDst, oexINT x_nQuality );
 
 
 	//==============================================================

@@ -1706,7 +1706,7 @@ void CImage::ReleaseEncodeJpg()
 #endif
 }
 
-oexINT CImage::EncodeJpg(oexPBYTE x_pSrc, oexINT x_nWidth, oexINT x_nHeight, oexPBYTE x_pDst, oexINT x_nDst, oexINT x_nQuality )
+oexINT CImage::EncodeJpg(oexCPVOID x_pSrc, oexINT x_nWidth, oexINT x_nHeight, oexPVOID x_pDst, oexINT x_nDst, oexINT x_nQuality )
 {_STT();
 
 #if !defined( OEX_ENABLE_XIMAGE )
@@ -1719,9 +1719,9 @@ oexINT CImage::EncodeJpg(oexPBYTE x_pSrc, oexINT x_nWidth, oexINT x_nHeight, oex
 
 	// Initialize encoder
 	SJpegEncState *pState = (SJpegEncState*)m_pEncoderState;
-	if ( oexCHECK_PTR( pState ) || x_nWidth != pState->lWidth || x_nHeight != pState->lHeight )
+	if ( !pState || x_nWidth != pState->lWidth || x_nHeight != pState->lHeight )
 		if ( !InitEncodeJpg( x_nWidth, x_nHeight, x_nQuality ) )
-		return oexFALSE;
+			return oexFALSE;
 
 	// Get structure
 	pState = (SJpegEncState*)m_pEncoderState;
@@ -1729,17 +1729,23 @@ oexINT CImage::EncodeJpg(oexPBYTE x_pSrc, oexINT x_nWidth, oexINT x_nHeight, oex
 	// Scan width
 	oexLONG lScanWidth = GetScanWidth( x_nWidth, 24 );
 
-	pState->dmgr.Init( x_pDst, x_nDst );
+	pState->dmgr.Init( (oexPBYTE)x_pDst, x_nDst );
 
 	// Initialize compressor
 	jpeg_start_compress( &pState->cinfo, true );
 
-	// Compress each line
-	oexPBYTE pLine = &x_pSrc[ ( x_nHeight - 1 ) * lScanWidth ];
-	for ( oexINT y = 0; y < x_nHeight; y++, pLine -= lScanWidth )
-	{	SwapRB( pLine, lScanWidth );
-		jpeg_write_scanlines( &pState->cinfo, (JSAMPROW*)&pLine, 1 );
-	} // end for
+	oexPBYTE pLine = new oexBYTE[ lScanWidth ];
+	if ( pLine )
+	{	oexPBYTE pSrcLine = &((oexPBYTE)x_pSrc)[ ( x_nHeight - 1 ) * lScanWidth ];
+		for ( oexINT y = 0; y < x_nHeight; y++, pSrcLine -= lScanWidth )
+		{	for ( oexINT i = 0; i < lScanWidth; i += 3 )
+				pLine[ i ] = pSrcLine[ i + 2 ], 
+				pLine[ i + 1 ] = pSrcLine[ i + 1 ], 
+				pLine[ i + 2 ] = pSrcLine[ i ];
+			jpeg_write_scanlines( &pState->cinfo, (JSAMPROW*)&pLine, 1 );
+		} // end for
+		delete pLine;
+	} // end if
 
 	// Complete image
 	jpeg_finish_compress( &pState->cinfo );

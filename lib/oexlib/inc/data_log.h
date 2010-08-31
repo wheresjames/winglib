@@ -55,17 +55,20 @@ public:
 
 		eDtInt = 2,
 
-		eDtFloat = 3
+		eDtFloat = 3,
 
+		eDtFile = 4
 	};
 
 	enum
 	{
-		eMethodNone = 0,
+		eMethodNone			= 0x00,
+		
+		eMethodDiscrete		= 0x01,
 
-		eMethodDiscrete = 1,
+		eMethodReverse		= 0x02,
 
-		eMethodAverage = 2,
+		eMethodAverage		= 0x04
 	};
 
 	enum
@@ -157,6 +160,23 @@ public:
 			nCount = 0;
 		}
 
+		~SIterator()
+		{	Destroy();
+		}
+
+		void Destroy()
+		{	uB = uI = oexMAXUINT;
+			pos = 0;
+			npos = 0;
+			oexZero( vi );
+			oexZero( viNext );
+			nValue = 0;
+			fValue = 0.f;
+			nCount = 0;
+			fIdx.Destroy();
+			fData.Destroy();			
+		}
+
 		// Read value from the data file into the specified string
 		oexBOOL getValue( CStr &s )
 		{	if ( !fData.IsOpen() ) return oexFALSE;
@@ -166,6 +186,12 @@ public:
 			fData.Read( p, vi.uSize );
 			s.SetLength( vi.uSize );
 			return oexTRUE;
+		} // end if
+
+		CBin getValueBin()
+		{	if ( !fData.IsOpen() ) return oexFALSE;
+			if ( !vi.uSize ) return CBin();
+			return fData.Read( vi.uSize );
 		} // end if
 
 		// Sets the key and calculates the hash
@@ -233,14 +259,20 @@ public:
 	/// Removes a key from the logger
 	oexINT RemoveKey( oexINT x_nKey );
 
+	/// Returns the number of bytes currently being buffered
+	oexINT GetBufferSize( oexINT x_nKey );
+
 	/// Returns the index of the named key if it exists, otherwise returns less than zero
 	oexINT FindKey( oexCSTR x_pKey );
 
 	/// Logs the specified value
-	oexBOOL Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, oexUINT x_uTime, oexUINT x_uTimeMs );
+	oexBOOL Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, oexUINT x_uTime, oexUINT x_uTimeMs, oexBOOL bBuffering = oexTRUE );
 
-	/// Flushes data to disk
+	/// Flushes all buffered data to disk
 	oexBOOL Flush( oexUINT x_uTime = 0 );
+
+	/// Flushes a single buffer value
+	oexBOOL FlushBuffer( oexINT x_nKey, SValueIndex *pVi, oexCPVOID pBuf, oexUINT uSize );
 
 	/// Returns a list of key names and hashes
 	CPropertyBag GetKeyList( oexUINT x_uTime = 0 );

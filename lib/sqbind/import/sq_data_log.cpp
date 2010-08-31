@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// import.h
+// sq_data_log.cpp
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -32,24 +32,18 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#pragma once
+#include "../stdafx.h"
 
-// stl classes we will import to squirrel
-#include "import/sq_factory.h"
-#include "import/sq_generic.h"
-#include "import/sq_binary.h"
-#include "import/sq_vector.h"
-#include "import/sq_list.h"
-#include "import/sq_map.h"
-#include "import/sq_multi.h"
-#include "import/sq_file.h"
-#include "import/sq_time.h"
-#include "import/sq_socket.h"
-#include "import/sq_serial_port.h"
-#include "import/sq_image.h"
-#include "import/sq_capture.h"
-#include "import/sq_http_server.h"
-#include "import/sq_data_log.h"
+using namespace sqbind;
 
-#include "import/sq_sqlite.h"
+CSqMulti CSqDataLog::getKeyList( int nTime )
+{	CSqMulti m;
+	SQBIND_PropertyBagToMulti( m_dl.GetKeyList( nTime ), m );
+	return m;
+}
 
+CSqMulti CSqDataLog::getLog( const stdString &sKey, int nStart, int nEnd, int nInterval, int nType, int nMethod )
+{	CSqMulti m;
+	SQBIND_PropertyBagToMulti( m_dl.GetLog( sKey.c_str(), nStart, nEnd, nInterval, nType, nMethod ), m );
+	return m;
+}

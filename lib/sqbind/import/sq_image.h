@@ -116,6 +116,35 @@ namespace sqbind
 #endif
 		}
 
+		int EncodeJpg( CSqBinary *pSrc, CSqBinary *pDst, int w, int h, int q )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			if ( !pSrc || !pDst || 0 >= w || 0 >= h )
+				return 0;
+
+			if ( !q )
+				q = 85;
+
+			int nImageSize = h * oex::CImage::GetScanWidth( w, 24 );
+			if ( pSrc->getUsed() < nImageSize )
+				return 0;
+
+			if ( pDst->Size() < nImageSize )
+				if ( !pDst->Allocate( nImageSize ) )
+					return 0;
+
+			int nBytes = m_img.EncodeJpg( pSrc->Ptr(), w, h, pDst->_Ptr(), nImageSize, q );
+			if ( 0 > nBytes )
+				nBytes = 0;
+
+			pDst->setUsed( nBytes );
+
+			return nBytes;
+#endif
+		}
+
 		int getWidth()
 		{
 #if !defined( OEX_ENABLE_XIMAGE )

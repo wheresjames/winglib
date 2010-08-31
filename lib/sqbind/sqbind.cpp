@@ -44,6 +44,7 @@ namespace sqbind
 		CSqSize::Register( x_vm );
 		CSqPos::Register( x_vm );
 		CSqBinary::Register( x_vm );
+		CSqDataLog::Register( x_vm );
 		CSqString::Register( x_vm );
 		CSqVector::Register( x_vm );
 		CSqList::Register( x_vm );
@@ -225,6 +226,8 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqImage, CSqImage )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, setPixels )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, getPixels )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, refPixels )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, EncodeJpg )	
+
 SQBIND_REGISTER_CLASS_END()
 
 void CSqImage::Register( sqbind::VM vm )
@@ -332,3 +335,34 @@ void CSqPos::Register( sqbind::VM vm )
 {_STT();
 	SQBIND_EXPORT( vm, CSqPos );
 }
+
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqDataLog, CSqDataLog )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, Destroy )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, setRoot )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getRoot )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, AddKey )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, RemoveKey )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, FindKey )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, Log )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, Flush )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getKeyList )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getLog )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getLogBin )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getBufferSize )	
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itStart )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itNext )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itPrev )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itClose )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itTimeMs )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itSize )
+
+SQBIND_REGISTER_CLASS_END()
+
+void CSqDataLog::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CSqDataLog );
+}
+
+
