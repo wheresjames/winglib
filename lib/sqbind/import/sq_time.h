@@ -72,6 +72,7 @@ namespace sqbind
 		int GetYear() { return m_t.GetYear(); }
 		int GetMonth() { return m_t.GetMonth(); }
 		int GetDay() { return m_t.GetDay(); }
+		int GetDayOfWeek() { return m_t.GetDayOfWeek(); }		
 		int GetHour() { return m_t.GetHour(); }
 		int Get12Hour() { return m_t.Get12Hour(); }
 		int GetMinute() { return m_t.GetMinute(); }
@@ -83,6 +84,7 @@ namespace sqbind
 		void SetYear( int n ) { m_t.SetYear( n ); }
 		void SetMonth( int n ) { m_t.SetMonth( n ); }
 		void SetDay( int n ) { m_t.SetDay( n ); }
+		void SetDayOfWeek( int n ) { m_t.SetDayOfWeek( n ); }
 		void SetHour( int n ) { m_t.SetHour( n ); }
 		void Set12Hour( int n ) { m_t.Set12Hour( n ); }
 		void SetMinute( int n ) { m_t.SetMinute( n ); }
@@ -162,6 +164,22 @@ namespace sqbind
 
 		int ParseTime( const stdString &sTmpl, const stdString &sTime )
 		{	return m_t.ParseTime( sTmpl.c_str(), sTime.c_str() ); }
+
+		/// Returns the abbreviated month name
+		stdString getAbrMonthName( int x_m )
+		{	return m_t.GetAbrMonthName( x_m ); }
+
+		/// Returns the month name
+		stdString getMonthName( int x_m )
+		{	return m_t.GetMonthName( x_m ); }
+
+		/// Returns the abbreviated day name
+		stdString getAbrDayName( int x_d )
+		{	return m_t.GetAbrDayName( x_d ); }
+
+		/// Returns the day name
+		stdString getDayName( int x_d )
+		{	return m_t.GetDayName( x_d ); }
 
 		static void Register( sqbind::VM vm );
 

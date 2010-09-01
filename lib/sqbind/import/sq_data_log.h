@@ -66,6 +66,12 @@ namespace sqbind
 		/// Returns the root path of the data logs
 		stdString getRoot() { return oex2std( m_dl.GetRoot() ); }
 
+		/// Returns the log base
+		int getBase() { return m_dl.GetBase(); }
+
+		/// Returns the index step size
+		int getStep() { return m_dl.GetStep(); }
+
 		/// Adds a key to the data log
 		/**
 			\param [in] sName	-	Key name
@@ -98,6 +104,10 @@ namespace sqbind
 		int getBufferSize( int nKey )
 		{	return m_dl.GetBufferSize( nKey ); }
 
+		/// Set up log params
+		void setLogParams( int nBase, int nStep )
+		{	m_dl.SetLogParams( nBase, nStep ); }
+
 		/// Returns a list of keys using the index for the specified time
 		CSqMulti getKeyList( int nTime );
 
@@ -120,7 +130,8 @@ namespace sqbind
 
 			// Find the first matching value
 			if ( !m_dl.FindValue( m_it, nTime, nTimeMs, 0, 
-								  oex::CDataLog::eDtFile, oex::CDataLog::eMethodDiscrete ) )
+								  oex::CDataLog::eDtFile, oex::CDataLog::eMethodDiscrete,
+								  m_dl.GetBase(), m_dl.GetStep() ) )
 				return 0;
 
 			return 1;
@@ -129,14 +140,16 @@ namespace sqbind
 		/// Next item
 		int itNext()
 		{	return m_dl.FindValue( m_it, m_it.viNext.uTime, m_it.viNext.uTimeMs, 0, 
-									oex::CDataLog::eDtFile, oex::CDataLog::eMethodDiscrete );
+									oex::CDataLog::eDtFile, oex::CDataLog::eMethodDiscrete,
+									m_dl.GetBase(), m_dl.GetStep() );
 		}
 
 		/// Previous item
 		int itPrev()
 		{	return m_dl.FindValue( m_it, m_it.viNext.uTime, m_it.viNext.uTimeMs, 0, 
 									oex::CDataLog::eDtFile, 
-									oex::CDataLog::eMethodDiscrete | oex::CDataLog::eMethodReverse );
+									oex::CDataLog::eMethodDiscrete | oex::CDataLog::eMethodReverse,
+									m_dl.GetBase(), m_dl.GetStep() );
 		}
 
 		/// Read item data

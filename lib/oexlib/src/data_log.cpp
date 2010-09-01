@@ -39,6 +39,8 @@ OEX_USING_NAMESPACE
 CDataLog::CDataLog()
 {_STT();
 
+	SetLogParams( eLogBase, eIndexStep );
+
 	m_bChangesOnly = oexTRUE;
 
 	oexZero( m_pLogs );
@@ -63,6 +65,18 @@ void CDataLog::Destroy()
 
 	// Forget the root
 	m_sRoot.Destroy();
+}
+
+void CDataLog::SetLogParams( oexUINT uBase, oexUINT uStep )
+{_STT();
+	if ( 0 < uBase )
+		m_uLogBase = uBase;
+	if ( 0 < uStep )
+	{	m_uIndexStep = uStep;
+		m_uMaxValid = uStep >> 1;
+		if ( !m_uMaxValid ) 
+			m_uMaxValid = 1;
+	} // end if
 }
 
 oexBOOL CDataLog::SetRoot( oexCSTR x_pRoot )
@@ -138,7 +152,7 @@ oexINT CDataLog::AddKey( oexCSTR x_pKey, oexUINT x_uTime )
 				if ( !x_uTime )
 					x_uTime = oexGetUnixTime();
 				CStr sRoot = m_sRoot;
-				sRoot.BuildPath( x_uTime / eLogBase );
+				sRoot.BuildPath( x_uTime / m_uLogBase );
 				oexCreatePath( sRoot.Ptr() );
 				CFile().CreateAlways( ( sRoot.BuildPath( m_pLogs[ i ]->sHash ) << oexT( ".txt" ) ).Ptr() )
 					.Write( oexStrToMbPtr( x_pKey ) );
@@ -190,7 +204,7 @@ oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, oexUI
 	// First, determine if the data has changed since we last logged it
 	oexGUID hash;
 	oss::CMd5::Transform( &hash, x_pValue, x_uSize );
-	oexUINT uRi = ( x_uTime % eLogBase ) / eIndexStep;
+	oexUINT uRi = ( x_uTime % m_uLogBase ) / m_uIndexStep;
 
 	// We don't log if nothing has changed
 	if ( uRi == m_pLogs[ x_nKey ]->uRi
@@ -199,7 +213,7 @@ oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, oexUI
 		return oexTRUE;
 
 	// Set timeout
-	m_pLogs[ x_nKey ]->valid = uTime + eMaxValid;
+	m_pLogs[ x_nKey ]->valid = uTime + m_uMaxValid;
 
 	// Copy the data state hash and root index
 	m_pLogs[ x_nKey ]->uRi = uRi;
@@ -243,7 +257,7 @@ oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, oexUI
 }
 
 oexBOOL CDataLog::FlushBuffer( oexINT x_nKey, SValueIndex *pVi, oexCPVOID pBuf, oexUINT uSize )
-{
+{_STT();
 	// Ensure valid key
 	if ( 0 > x_nKey || eMaxKeys <= x_nKey || !m_pLogs[ x_nKey ] )
 		return oexFALSE;
@@ -258,7 +272,7 @@ oexBOOL CDataLog::FlushBuffer( oexINT x_nKey, SValueIndex *pVi, oexCPVOID pBuf, 
 
 	// Open the database
 	CFile fData;
-	if ( !OpenDb( oexTRUE, m_sRoot, oexT( "" ), pVi->uTime, oexNULL, &fData ) )
+	if ( !OpenDb( oexTRUE, m_sRoot, oexT( "" ), pVi->uTime, oexNULL, &fData, m_uLogBase, m_uIndexStep ) )
 		return oexFALSE;
 
 	// Where will this block start?
@@ -277,11 +291,11 @@ oexBOOL CDataLog::FlushBuffer( oexINT x_nKey, SValueIndex *pVi, oexCPVOID pBuf, 
 	if ( !m_pLogs[ x_nKey ]->plast )
 	{
 		// Get root index time
-		oexUINT uRootTime = pVi->uTime - ( pVi->uTime % eIndexStep );
+		oexUINT uRootTime = pVi->uTime - ( pVi->uTime % m_uIndexStep );
 
 		// Resume existing index
 		SIterator itR; itR.Init( m_sRoot, m_pLogs[ x_nKey ]->sName.Ptr() );
-		if ( FindValue( itR, uRootTime, 0, 0, eDtNone, eMethodNone ) )
+		if ( FindValue( itR, uRootTime, 0, 0, eDtNone, eMethodNone, m_uLogBase, m_uIndexStep ) )
 		{	m_pLogs[ x_nKey ]->plast = itR.pos;
 			while ( itR.viNext.uNext > itR.pos )
 			{	itR.pos = itR.viNext.uNext;
@@ -301,9 +315,9 @@ oexBOOL CDataLog::FlushBuffer( oexINT x_nKey, SValueIndex *pVi, oexCPVOID pBuf, 
 
 	// Update the index
 	CFile fIdx;
-	if ( OpenDb( oexTRUE, m_sRoot, m_pLogs[ x_nKey ]->sHash, pVi->uTime, &fIdx, oexNULL ) )
+	if ( OpenDb( oexTRUE, m_sRoot, m_pLogs[ x_nKey ]->sHash, pVi->uTime, &fIdx, oexNULL, m_uLogBase, m_uIndexStep ) )
 	{
-		oexUINT uI = ( pVi->uTime % eLogBase ) / eIndexStep;
+		oexUINT uI = ( pVi->uTime % m_uLogBase ) / m_uIndexStep;
 
 		// Point to index position
 		fIdx.SetPtrPosBegin( uI * sizeof( pos ) );
@@ -333,7 +347,7 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 
 	// Open the database
 	CFile fData;
-	if ( !OpenDb( oexTRUE, m_sRoot, oexT( "" ), x_uTime, oexNULL, &fData ) )
+	if ( !OpenDb( oexTRUE, m_sRoot, oexT( "" ), x_uTime, oexNULL, &fData, m_uLogBase, m_uIndexStep ) )
 		return oexFALSE;
 
 	// Flush data to disk
@@ -356,11 +370,11 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 			if ( !m_pLogs[ i ]->plast )
 			{
 				// Get root index time
-				oexUINT uRootTime = x_uTime - ( x_uTime % eIndexStep );
+				oexUINT uRootTime = x_uTime - ( x_uTime % m_uIndexStep );
 
 				// Resume existing index
 				SIterator itR; itR.Init( m_sRoot, m_pLogs[ i ]->sName.Ptr() );
-				if ( FindValue( itR, uRootTime, 0, 0, eDtNone, eMethodNone ) )
+				if ( FindValue( itR, uRootTime, 0, 0, eDtNone, eMethodNone, m_uLogBase, m_uIndexStep ) )
 				{	m_pLogs[ i ]->plast = itR.pos;
 					while ( itR.viNext.uNext > itR.pos )
 					{	itR.pos = itR.viNext.uNext;
@@ -421,7 +435,7 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 			{
 				// Update the index
 				CFile fIdx;
-				if ( OpenDb( oexTRUE, m_sRoot, m_pLogs[ i ]->sHash, x_uTime, &fIdx, oexNULL ) )
+				if ( OpenDb( oexTRUE, m_sRoot, m_pLogs[ i ]->sHash, x_uTime, &fIdx, oexNULL, m_uLogBase, m_uIndexStep ) )
 				{
 					// While we have blocks
 					CFile::t_size ex = 0;
@@ -430,7 +444,7 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 					{	
 						// See if this block should go in the index
 						SValueIndex *pvi = (SValueIndex*)m_pLogs[ i ]->bin.Ptr();
-						oexUINT uI = ( pvi->uTime % eLogBase ) / eIndexStep;
+						oexUINT uI = ( pvi->uTime % m_uLogBase ) / m_uIndexStep;
 						if ( oexMAXUINT == uLast || uLast < uI )
 						{
 							uLast = uI;
@@ -477,7 +491,7 @@ CPropertyBag CDataLog::GetKeyList( oexUINT x_uTime )
 
 	// Build root to data based on timestamp
 	CStr sRoot = m_sRoot;
-	sRoot.BuildPath( x_uTime / eLogBase );
+	sRoot.BuildPath( x_uTime / m_uLogBase );
 	if ( !oexExists( sRoot.Ptr() ) )
 		return CPropertyBag();
 
@@ -497,22 +511,22 @@ CPropertyBag CDataLog::GetKeyList( oexUINT x_uTime )
 	return pb;
 }
 
-oexBOOL CDataLog::IsKeyData( CStr x_sRoot, CStr x_sHash, oexUINT x_uTime )
-{
+oexBOOL CDataLog::IsKeyData( CStr x_sRoot, CStr x_sHash, oexUINT x_uTime, oexUINT uLogBase )
+{_STT();
 	if ( !x_uTime )
 		x_uTime = oexGetUnixTime();
 
 	// Build root to data based on starting timestamp
-	if ( !oexExists( ( x_sRoot.BuildPath( x_uTime / eLogBase ).BuildPath( x_sHash ) << oexT( ".bin" ) ).Ptr() ) )
+	if ( !oexExists( ( x_sRoot.BuildPath( x_uTime / uLogBase ).BuildPath( x_sHash ) << oexT( ".bin" ) ).Ptr() ) )
 		return oexFALSE;
 	
 	return oexTRUE;
 }
 
-oexBOOL CDataLog::OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, oexUINT x_uTime, CFile *x_pIdx, CFile *x_pData )
-{
+oexBOOL CDataLog::OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, oexUINT x_uTime, CFile *x_pIdx, CFile *x_pData, oexUINT uLogBase, oexUINT uIndexStep )
+{_STT();
 	// Build root to data based on starting timestamp
-	x_sRoot.BuildPath( x_uTime / eLogBase );
+	x_sRoot.BuildPath( x_uTime / uLogBase );
 	if ( !oexExists( x_sRoot.Ptr() ) )
 	{	if ( !x_bCreate )
 			return oexFALSE;
@@ -562,7 +576,7 @@ oexBOOL CDataLog::OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, oexUINT
 		// Initialize index file if needed
 		if ( x_bCreate && !bExists )
 		{	CFile::t_size uOffset = 0;
-			for ( oexINT i = 0; i < eLogBase; i += eIndexStep )
+			for ( oexINT i = 0; i < uLogBase; i += uIndexStep )
 				x_pIdx->Write( &uOffset, sizeof( uOffset ) );
 		} // end if
 
@@ -571,11 +585,11 @@ oexBOOL CDataLog::OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, oexUINT
 	return oexTRUE;
 }
 
-oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod )
-{
+oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod, oexUINT uLogBase, oexUINT uIndexStep )
+{_STT();
 	// Get db metrics
-	oexUINT _uB = x_uTime / eLogBase;
-	oexUINT _uI = ( x_uTime % eLogBase ) / eIndexStep;
+	oexUINT _uB = x_uTime / uLogBase;
+	oexUINT _uI = ( x_uTime % uLogBase ) / uIndexStep;
 	oexBOOL bNew = oexFALSE;
 
 	// Ensure we have the correct database open
@@ -586,7 +600,7 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 		x_it.uI = oexMAXUINT;
 
 		// Open the database containing data for this time
-		if ( !OpenDb( oexFALSE, x_it.sRoot, x_it.sHash, x_uTime, &x_it.fIdx, &x_it.fData ) )
+		if ( !OpenDb( oexFALSE, x_it.sRoot, x_it.sHash, x_uTime, &x_it.fIdx, &x_it.fData, uLogBase, uIndexStep ) )
 			return oexFALSE;
 
 	} // end if
@@ -724,7 +738,7 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 }
 
 CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod )
-{
+{_STT();
 	// Sanity checks
 	if ( !x_pKey || !*x_pKey || !m_sRoot.Length() || x_uStart > x_uEnd )
 		return CPropertyBag();
@@ -744,7 +758,7 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd,
 	{	oexINT64 t = (oexINT64)x_uStart * 1000ll - (oexINT64)x_uInterval;
 		oexUINT s = t / 1000;
 		oexUINT ms = t % 1000;
-		FindValue( it, s, ms, x_uInterval, x_nDataType, x_nMethod );
+		FindValue( it, s, ms, x_uInterval, x_nDataType, x_nMethod, m_uLogBase, m_uIndexStep );
 	} // end if
 
 	// Create data
@@ -753,7 +767,7 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd,
 	while ( uTime <= x_uEnd )
 	{
 		// Find the value for this time
-		if ( FindValue( it, uTime, uTimeMs, x_uInterval, x_nDataType, x_nMethod ) )
+		if ( FindValue( it, uTime, uTimeMs, x_uInterval, x_nDataType, x_nMethod, m_uLogBase, m_uIndexStep ) )
 		{	if ( uTimeMs )
 				pb[ oexFmt( oexT( "%u.%u" ), uTime, uTimeMs ) ].ToString() = it.sValue;
 			else
@@ -785,7 +799,7 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd,
 }
 
 CStr CDataLog::GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod, float x_fScale )
-{
+{_STT();
 	// Sanity checks
 	if ( !x_pKey || !*x_pKey || !m_sRoot.Length() || x_uStart > x_uEnd )
 		return oexT( "" );
@@ -813,7 +827,7 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexU
 	{	oexINT64 t = (oexINT64)x_uStart * 1000ll - (oexINT64)x_uInterval;
 		oexUINT s = t / 1000;
 		oexUINT ms = t % 1000;
-		FindValue( it, s, ms, x_uInterval, x_nDataType, x_nMethod );
+		FindValue( it, s, ms, x_uInterval, x_nDataType, x_nMethod, m_uLogBase, m_uIndexStep );
 	} // end if
 
 	// Allocate space for binary data
@@ -826,7 +840,7 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexU
 	while ( i < nItems && uTime <= x_uEnd )
 	{
 		// Find the value for this time
-		if ( FindValue( it, uTime, uTimeMs, x_uInterval, x_nDataType, x_nMethod ) )
+		if ( FindValue( it, uTime, uTimeMs, x_uInterval, x_nDataType, x_nMethod, m_uLogBase, m_uIndexStep ) )
 			bin.setFLOAT( i++, it.fValue * x_fScale );
 		else
 			bin.setFLOAT( i++, 0.f );
