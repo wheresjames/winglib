@@ -1545,7 +1545,7 @@ oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e, o
 		sErr = oex::CStr().Fmt( oexT( "%s(%u)\r\n   %s" ), x_e.sSource.c_str(), x_e.uLine, x_e.sDesc.c_str() );
 
 	if ( x_pExtra && *x_pExtra )
-		sErr += x_pExtra;
+		sErr << oexNL << x_pExtra;
 
 	oexERROR( 0, sErr );
 
@@ -1574,7 +1574,7 @@ oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, oex::oexCSTR x_pErr, oex
 		sErr = oex::CStr().Fmt( oexT( "%s(%u)\r\n   %s" ), x_pFile, x_uLine, x_pErr );
 
 	if ( x_pExtra && *x_pExtra )
-		sErr += x_pExtra;
+		sErr << oexNL << x_pExtra;
 
 	oexERROR( 0, sErr );
 

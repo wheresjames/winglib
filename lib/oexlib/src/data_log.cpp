@@ -744,7 +744,7 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd,
 		return CPropertyBag();
 
 	SIterator it;
-	if ( !it.Init( m_sRoot, x_pKey ) || !it.IsData( x_uStart ) )
+	if ( !it.Init( m_sRoot, x_pKey ) || !it.IsData( m_uLogBase, x_uStart ) )
 		return CPropertyBag();
 	
 	// Align with the interval
@@ -813,7 +813,7 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexU
 		x_fScale = 1.f;
 
 	SIterator it;
-	if ( !it.Init( m_sRoot, x_pKey ) || !it.IsData( x_uStart ) )
+	if ( !it.Init( m_sRoot, x_pKey ) || !it.IsData( m_uLogBase, x_uStart ) )
 		return oexT( "" );
 
 	// Align with the interval
