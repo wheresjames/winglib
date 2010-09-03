@@ -291,7 +291,9 @@ void CSqMulti::setstr( const oex::CStr &s )
 
 void CSqMulti::set( const CSqMulti::t_Obj &v )
 {_STT();
-	if ( v.length() ) m_val = v;
+	// +++ why the if? why?
+	// if ( v.length() ) 
+		m_val = v;
 }
 
 void CSqMulti::copy( CSqMulti &m )
