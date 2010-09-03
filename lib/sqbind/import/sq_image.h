@@ -128,10 +128,10 @@ namespace sqbind
 				q = 85;
 
 			int nImageSize = h * oex::CImage::GetScanWidth( w, 24 );
-			if ( pSrc->getUsed() < nImageSize )
+			if ( pSrc->getUsed() < (oex::oexUINT)nImageSize )
 				return 0;
 
-			if ( pDst->Size() < nImageSize )
+			if ( pDst->Size() < (oex::oexUINT)nImageSize )
 				if ( !pDst->Allocate( nImageSize ) )
 					return 0;
 

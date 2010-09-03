@@ -23,7 +23,7 @@ PRJ_EXPORTS := DllMain DllGetClassObject DllCanUnloadNow \
 include $(PRJ_LIBROOT)/config.mk
 
 ifneq ($(PLATFORM),windows)
-UNSUPPORTED := BUILD=$(BUILD) is invalid, ffmpeg can only be built with 'gcc'
+UNSUPPORTED := BUILD=$(BUILD) is invalid, axtest can only be built on windows
 include $(PRJ_LIBROOT)/unsupported.mk
 else
 

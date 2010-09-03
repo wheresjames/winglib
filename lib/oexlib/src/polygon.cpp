@@ -145,7 +145,7 @@ oexBOOL CPolygon::GetBoundingRect( t_rect *x_pRect )
 
 #define BP( x, y, w ) ( ( y * w ) + x )
 #define BPSW( x, y, w, sw ) ( ( ( y * w ) + x ) * 3 ) + ( y * sw )
-oexBOOL CPolygon::FromMap(t_size *x_map, t_pos x_x, t_pos x_y, t_pos x_w, t_pos x_h, t_pos x_th, oexUCHAR *x_buf)
+oexBOOL CPolygon::FromMap(t_size *x_map, t_pos x_x, t_pos x_y, t_pos x_w, t_pos x_h, t_size x_th, oexUCHAR *x_buf)
 {_STT();
 	// Get the size
 	long sz = x_w * x_h; 
@@ -295,11 +295,11 @@ oexBOOL CPolygon::ConvexHull()
 
 	// Find the bottom
 	t_pos i, minmin = 0, minmax, xmin = pPts[ 0 ].x;
-	for ( i = 1; i < uPoints && pPts[ i ].x == xmin; i++ );
+	for ( i = 1; i < (t_pos)uPoints && pPts[ i ].x == xmin; i++ );
 	minmax = i - 1;
 
 	// Verify valid points
-	if ( i == uPoints ) 
+	if ( i == (t_pos)uPoints ) 
 		return oexFALSE;
 
 	// Find the top
@@ -381,7 +381,7 @@ CPolygon::t_float CPolygon::SimpleArea()
 
 	// Calculate area
     t_float area = 0;
-    for ( t_pos i = 1, j = 2, k = 0; j < uPoints; i++, j++, k++ )
+    for ( t_pos i = 1, j = 2, k = 0; j < (t_pos)uPoints; i++, j++, k++ )
         area += pPts[ i ].x * ( pPts[ j ].y - pPts[ k ].y );
 	if ( area < 0 ) area = -area;
 
@@ -403,7 +403,7 @@ CPolygon::t_float CPolygon::ConvexArea()
 		return 0;
 
 	t_float area = 0;
-	for ( t_pos a = 0, b = 1, c = 2; c < uPoints; b++, c++ )
+	for ( t_pos a = 0, b = 1, c = 2; c < (t_pos)uPoints; b++, c++ )
 
 		// Add the area of this triangle
 		area += TriangleArea(	(t_float)pPts[ a ].x, (t_float)pPts[ a ].y,
@@ -422,8 +422,8 @@ CPolygon::t_float CPolygon::ConvexArea()
 oexBOOL CPolygon::ApxConvexHull()
 {_STT();
 	// How many points?
-	t_size lPoints = getNumPoints();
-	if ( lPoints <= 3 ) 
+	t_size uPoints = getNumPoints();
+	if ( uPoints <= 3 ) 
 		return oexTRUE;
 
 	// Get edge pointer
@@ -433,13 +433,13 @@ oexBOOL CPolygon::ApxConvexHull()
 
 	// Allocate new array of points
 	TMem< t_point > npts;
-	if ( !npts.OexNew( lPoints ).Ptr() ) 
+	if ( !npts.OexNew( uPoints ).Ptr() ) 
 		return oexFALSE;
 	t_point *pNPts = npts.Ptr();
 
 	// Find xrange
 	t_pos i, xmin = pPts[ 0 ].x, xmax = pPts[ 0 ].x;
-	for ( i = 1; i < lPoints; i++ )
+	for ( i = 1; i < (t_pos)uPoints; i++ )
 		if ( pPts[ i ].x < xmin ) xmin = pPts[ i ].x;
 		else if ( pPts[ i ].x > xmax ) xmax = pPts[ i ].x;
 
@@ -464,7 +464,7 @@ oexBOOL CPolygon::ApxConvexHull()
 	t_point min = pPts[ 0 ], max = pPts[ 0 ];
 
 	// Get min/max points
-	for ( i = 0; i < lPoints; i++ )	
+	for ( i = 0; i < (t_pos)uPoints; i++ )	
 	{
 		if ( pPts[ i ].x < min.x ) min = pPts[ i ];
 		else if ( pPts[ i ].x == min.x && pPts[ i ].y < min.y )
@@ -476,7 +476,7 @@ oexBOOL CPolygon::ApxConvexHull()
 	} // end if
 
 	// Get ranges
-	for ( i = 0; i < lPoints; i++ )	
+	for ( i = 0; i < (t_pos)uPoints; i++ )	
 	{	
 		t_pos xi = ( ( pPts[ i ].x - xmin ) * ( HULL_SECTIONS - 1 ) / xr );
 
@@ -498,7 +498,7 @@ oexBOOL CPolygon::ApxConvexHull()
 	
 	// First the top half
 	t_pos lNPoints = 0;
-	for ( i = 0; lNPoints < lPoints && i < HULL_SECTIONS; i++ )
+	for ( i = 0; lNPoints < (t_pos)uPoints && i < HULL_SECTIONS; i++ )
 	{	
 		// If valid max
 		if ( bin[ i ].max.x != oexMAXLONG )
@@ -516,7 +516,7 @@ oexBOOL CPolygon::ApxConvexHull()
 		
 	// Now for the bottom half
 	t_pos lRight = lNPoints + 1;
-	for ( i = HULL_SECTIONS - 1; lNPoints < lPoints && i >= 0; i-- )
+	for ( i = HULL_SECTIONS - 1; lNPoints < (t_pos)uPoints && i >= 0; i-- )
 	{	
 		// If valid min
 		if ( bin[ i ].min.x != oexMAXLONG )

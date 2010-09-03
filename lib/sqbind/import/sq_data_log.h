@@ -115,8 +115,8 @@ namespace sqbind
 		CSqMulti getLog( const stdString &sKey, int nStart, int nEnd, int nInterval, int nType, int nMethod );
 
 		/// Returns the log for the specified key and time range in a shared binary buffer
-		CSqBinary getLogBin( const stdString &sKey, int nStart, int nEnd, int nInterval, int nType, int nMethod, float fScale )
-		{	return m_dl.GetLogBin( sKey.c_str(), nStart, nEnd, nInterval, nType, nMethod, fScale ); }
+		stdString getLogBin( const stdString &sKey, int nStart, int nEnd, int nInterval, int nType, int nMethod, float fScale )
+		{	return oex2std( m_dl.GetLogBin( sKey.c_str(), nStart, nEnd, nInterval, nType, nMethod, fScale ) ); }
 		
 		/// Starts iteration
 		int itStart( const stdString &sKey, int nTime, int nTimeMs )

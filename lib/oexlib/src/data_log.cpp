@@ -576,7 +576,7 @@ oexBOOL CDataLog::OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, oexUINT
 		// Initialize index file if needed
 		if ( x_bCreate && !bExists )
 		{	CFile::t_size uOffset = 0;
-			for ( oexINT i = 0; i < uLogBase; i += uIndexStep )
+			for ( oexUINT i = 0; i < uLogBase; i += uIndexStep )
 				x_pIdx->Write( &uOffset, sizeof( uOffset ) );
 		} // end if
 

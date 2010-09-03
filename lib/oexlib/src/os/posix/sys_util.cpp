@@ -58,3 +58,52 @@ oexBOOL CSysUtil::SetRegString( const CStr &x_sKey, const CStr &x_sPath, const C
 {
 	return oexFALSE;
 }
+
+CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
+{_STT();
+
+	return CPropertyBag();
+/*
+	// Sanity check
+	if ( !x_sDrive.Length() ) 
+		return CPropertyBag();
+
+	// Must be root
+//    if ( geteuid() ) 
+//    {	oexERROR( 0, oexT( "Only root can call GetDiskInfo()" ) ); 
+//    	return CPropertyBag();
+//    } // end if
+/*
+	static struct hd_driveid hd;
+    int fd;
+	
+	// Open the drive
+	if ( 0 > ( fd = open( oexStrToMb( x_sDrive ).Ptr(), O_RDONLY | O_NONBLOCK ) ) )	
+    	return CPropertyBag();
+	
+	if ( ioctl( fd, HDIO_GET_IDENTITY, &hd ) )
+		return CPropertyBag();
+		
+//        printf("Hard Disk Model: %.40s\n", hd.model);
+ //       printf("  Serial Number: %.20s\n", hd.serial_no);
+
+	
+	
+	// Get volume information
+//	if ( !GetVolumeInformation(	x_sDrive.Ptr(), szVolume, sizeof( szVolume ),
+//								&dwSn, &dwMax, &dwFlags,
+//								szFileSystem, sizeof( szFileSystem ) ) )
+//		return CPropertyBag();
+
+	CPropertyBag pb;
+	pb[ "drive" ] = x_sDrive;
+	pb[ "volume" ] = oexMbToStrPtr( szVolume );
+	pb[ "serial" ] = dwSn;
+	pb[ "max_filename" ] = dwMax;
+	pb[ "flags" ] = dwFlags;
+	pb[ "file_system" ] = oexMbToStrPtr( szFileSystem );
+
+	return pb;
+*/
+}
+
