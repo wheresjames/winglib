@@ -286,10 +286,11 @@ oex::oexBOOL CSqMsgQueue::is_path( const stdString &sPath )
 	return ProcessMsg( sPath, sMsg, params, oexNULL, oexNULL );
 }
 
-oex::oexBOOL CSqMsgQueue::run( stdString *pReply, const stdString &sPath, const stdString &sScript )
+oex::oexBOOL CSqMsgQueue::run( stdString *pReply, const stdString &sPath, const stdString &sName, const stdString &sScript )
 {_STT();
 	CSqMap params;
 	params[ oexT( "run" ) ] = sScript;
+	params[ oexT( "name" ) ] = sName;
 	return Msg( sPath, oexT( "msg" ), &params, pReply );
 }
 

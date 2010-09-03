@@ -1068,7 +1068,7 @@ void CScriptThread::OnMsg( CSqMap &mapParams, stdString *pReply )
 {_STT();
 	// Run script?
 	if ( mapParams[ oexT( "run" ) ].length() )
-		m_cSqEngine.Run( mapParams[ oexT( "run" ) ].c_str() );
+		m_cSqEngine.Run( pReply, mapParams[ oexT( "name" ) ].c_str(), mapParams[ oexT( "run" ) ].c_str() );
 
 	// Execute function?
 	else if ( mapParams[ oexT( "execute" ) ].length() )

@@ -326,7 +326,7 @@ public:
 	int spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
 
 	/// Executes the specified script
-	int run( const stdString &sPath, const stdString &sScript );
+	stdString run( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript );
 
 	/// Checks for path/threads existence
 	int is_path( const stdString &sPath );
@@ -423,7 +423,8 @@ protected:
 // Declare class functions
 }; SQBIND_DECLARE_INSTANCE( sqbind::CSqEngineExport, CSqEngineExport ); namespace sqbind {
 
-#define LogErrorM( r, e )	LogError( r, e, oexTEXT( __FILE__ ), __LINE__ )
+#define LogErrorM( r, e )		LogError( r, e, oexNULL, oexTEXT( __FILE__ ), __LINE__ )
+#define LogErrorME( r, e, x )	LogError( r, e, x, oexTEXT( __FILE__ ), __LINE__ )
 
 /// Squirrel engine
 class CSqEngine : public CSqEngineExport
@@ -556,13 +557,12 @@ public:
 	/// Destroys the virtual machine and prepares the class for re-use
 	oex::oexBOOL Idle();
 
-
 	/// Executes the specified buffer
-	oex::oexBOOL Run( oex::oexCSTR pScript );
+	oex::oexBOOL Run( sqbind::stdString *pReply, oex::oexCSTR pName, oex::oexCSTR pScript );
 
-	oex::oexINT LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e );
+	oex::oexINT LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e, oex::oexCSTR x_pExtra = oexNULL );
 
-	oex::oexINT LogError( oex::oexINT x_nReturn, oex::oexCSTR x_pErr, oex::oexCSTR x_pFile, oex::oexUINT x_uLine );
+	oex::oexINT LogError( oex::oexINT x_nReturn, oex::oexCSTR x_pErr, oex::oexCSTR x_pExtra, oex::oexCSTR x_pFile, oex::oexUINT x_uLine );
 
 public:
 

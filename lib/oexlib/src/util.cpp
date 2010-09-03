@@ -120,13 +120,13 @@ oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 			{	oexUINT uGmt = oexGetUnixTime();
 				if ( uGmt > g_uNextTimestamp )
 				{	g_uNextTimestamp = uGmt + g_uTimestampFreq;
-					s << "\n   --- " << uGmt << " - " 
-					  << oexStrToMb( oexLocalTimeStr( oexT( "%Y/%c/%d - %g:%m:%s.%l\n" ) ) );
+					s << oexNL8 "   --- " << uGmt << " - " 
+					  << oexStrToMb( oexLocalTimeStr( oexT( "%Y/%c/%d - %g:%m:%s.%l" oexNL8 ) ) );
 				} // end if
 			} // end if
 
 			// Sux that it doesn't have a lf at the end
-			s << oexStrToMb( CStr( x_pStr, x_uSize ) ) << "\n";
+			s << oexStrToMb( CStr( x_pStr, x_uSize ) ) << oexNL8;
 
 			// Write to file
 			f.Write( s );

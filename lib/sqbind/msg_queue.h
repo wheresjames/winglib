@@ -133,7 +133,7 @@ public:
 	oex::oexBOOL is_path( const stdString &sPath );
 
 	/// Runs the specified script
-	oex::oexBOOL run( stdString *pReply, const stdString &sPath, const stdString &sScript );
+	oex::oexBOOL run( stdString *pReply, const stdString &sPath, const stdString &sName, const stdString &sScript );
 
 	/// Executes the specified function with params
 	oex::oexBOOL execute( stdString *pReply, const stdString &sPath, const stdString &sFunction );
