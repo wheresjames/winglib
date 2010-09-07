@@ -1100,6 +1100,10 @@ public:
 	oexINT64 GetOffset()
 	{	return m_fm.GetOffset(); }
 
+	/// Returns Non-zero if file mapping already existed
+	oexBOOL Existing()
+	{	return m_fm.Ptr() && m_fm.Existing(); }
+
 private:
 
     /// Pointer to the memory

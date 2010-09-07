@@ -560,6 +560,9 @@ public:
 	/// Inserts specified number of bytes at the specified position
 	t_size Insert( t_size x_nBytes, t_size x_nOffset );
 
+	/// Returns non-zero if the file mapped share already existed
+	oexBOOL Existing() { return m_buf.Existing(); }
+
 	/// Declare access types
 	OEX_CBIN_DECLARE_TYPE_ACCESS( CHAR );
 	OEX_CBIN_DECLARE_TYPE_ACCESS( UCHAR );

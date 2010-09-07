@@ -68,7 +68,9 @@ public:
 
 		eMethodReverse		= 0x02,
 
-		eMethodAverage		= 0x04
+		eMethodAverage		= 0x04,
+
+		eMethodNoRead		= 0x10
 	};
 
 	enum

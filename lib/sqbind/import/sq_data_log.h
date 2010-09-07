@@ -125,12 +125,12 @@ namespace sqbind
 			m_it.Destroy();
 
 			// Start iterator
-			if ( !m_it.Init( m_dl.GetRoot(), sKey.c_str() ) || !m_it.IsData( nTime ) )
+			if ( !m_it.Init( m_dl.GetRoot(), sKey.c_str() ) || !m_it.IsData( m_dl.GetBase(), nTime ) )
 				return 0;
 
 			// Find the first matching value
-			if ( !m_dl.FindValue( m_it, nTime, nTimeMs, 0, 
-								  oex::CDataLog::eDtFile, oex::CDataLog::eMethodDiscrete,
+			if ( !m_dl.FindValue( m_it, nTime, nTimeMs, 1, 
+								  oex::CDataLog::eDtFile, oex::CDataLog::eMethodDiscrete | oex::CDataLog::eMethodNoRead,
 								  m_dl.GetBase(), m_dl.GetStep() ) )
 				return 0;
 
@@ -140,7 +140,7 @@ namespace sqbind
 		/// Next item
 		int itNext()
 		{	return m_dl.FindValue( m_it, m_it.viNext.uTime, m_it.viNext.uTimeMs, 0, 
-									oex::CDataLog::eDtFile, oex::CDataLog::eMethodDiscrete,
+									oex::CDataLog::eDtFile, oex::CDataLog::eMethodDiscrete | oex::CDataLog::eMethodNoRead,
 									m_dl.GetBase(), m_dl.GetStep() );
 		}
 
@@ -148,7 +148,7 @@ namespace sqbind
 		int itPrev()
 		{	return m_dl.FindValue( m_it, m_it.viNext.uTime, m_it.viNext.uTimeMs, 0, 
 									oex::CDataLog::eDtFile, 
-									oex::CDataLog::eMethodDiscrete | oex::CDataLog::eMethodReverse,
+									oex::CDataLog::eMethodDiscrete | oex::CDataLog::eMethodReverse | oex::CDataLog::eMethodNoRead,
 									m_dl.GetBase(), m_dl.GetStep() );
 		}
 

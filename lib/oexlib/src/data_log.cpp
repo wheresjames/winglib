@@ -452,6 +452,8 @@ oexBOOL CDataLog::Flush( oexUINT x_uTime )
 							// Point to index position
 							fIdx.SetPtrPosBegin( uI * sizeof( pos ) );
 
+							// +++ Change to only read the index if we haven't written it
+
 							// Update the index if blank
 							if ( fIdx.Read( &ex, sizeof( ex ) ) && !ex )
 								ex = pos + m_pLogs[ i ]->bin.getOffset(), 
@@ -637,7 +639,7 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 	CFile::t_size p = 0;
 	oexUINT uMin = x_uTime - ( x_uInterval / 1000 );
 	while ( p < x_it.npos )
-	{
+	{	
 		// Read the header
 		p = x_it.npos;
 		x_it.fData.SetPtrPosBegin( p );
@@ -653,16 +655,21 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 			oexMemCpy( &x_it.vi, &x_it.viNext, sizeof( x_it.vi ) );
 
 			// Point to the data
-			x_it.fData.SetPtrPosBegin( x_it.pos + x_it.vi.uBytes );
+			x_it.fData.SetPtrPosBegin( x_it.npos + x_it.vi.uBytes );
 
-			// Read the value
-			if ( !x_it.getValue( x_it.sValue ) )
+			// Do we want to read values?
+			if ( !( oex::CDataLog::eMethodNoRead & x_nMethod ) )
 			{
-				if ( eDtInt == x_nDataType )
-					x_it.nValue = x_it.sValue.ToInt();
+				// Read the value
+				if ( !x_it.getValue( x_it.sValue ) )
+				{
+					if ( eDtInt == x_nDataType )
+						x_it.nValue = x_it.sValue.ToInt();
 
-				else if ( eDtFloat == x_nDataType )
-					x_it.fValue = x_it.sValue.ToFloat();
+					else if ( eDtFloat == x_nDataType )
+						x_it.fValue = x_it.sValue.ToFloat();
+
+				} // end if
 
 			} // end if
 
@@ -689,18 +696,23 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 				// Point to the data
 				x_it.fData.SetPtrPosBegin( x_it.pos + x_it.vi.uBytes );
 
-				// Get string value
-				if ( x_it.getValue( x_it.sValue ) )
+				// Do we want to read values?
+				if ( !( oex::CDataLog::eMethodNoRead & x_nMethod ) )
 				{
-					// Reset 
-					if ( !x_it.nCount++ )
-						x_it.fValue = 0, x_it.nValue = 0;
+					// Get string value
+					if ( x_it.getValue( x_it.sValue ) )
+					{
+						// Reset 
+						if ( !x_it.nCount++ )
+							x_it.fValue = 0, x_it.nValue = 0;
 
-					if ( eDtInt == x_nDataType )
-						x_it.nValue += x_it.sValue.ToInt();
+						if ( eDtInt == x_nDataType )
+							x_it.nValue += x_it.sValue.ToInt();
 
-					else if ( eDtFloat == x_nDataType )
-						x_it.fValue += x_it.sValue.ToFloat();
+						else if ( eDtFloat == x_nDataType )
+							x_it.fValue += x_it.sValue.ToFloat();
+
+					} // end if
 
 				} // end if
 
@@ -721,14 +733,19 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 		// Point to the data
 		x_it.fData.SetPtrPosBegin( x_it.pos + x_it.vi.uBytes );
 
-		// Read the value
-		if ( x_it.getValue( x_it.sValue ) )
+		// Do we want to read the value?
+		if ( !( oex::CDataLog::eMethodNoRead & x_nMethod ) )
 		{
-			if ( eDtInt == x_nDataType )
-				x_it.nValue = x_it.sValue.ToInt();
+			// Read the value
+			if ( x_it.getValue( x_it.sValue ) )
+			{
+				if ( eDtInt == x_nDataType )
+					x_it.nValue = x_it.sValue.ToInt();
 
-			else if ( eDtFloat == x_nDataType )
-				x_it.fValue = x_it.sValue.ToFloat();
+				else if ( eDtFloat == x_nDataType )
+					x_it.fValue = x_it.sValue.ToFloat();
+
+			} // end if
 
 		} // end if
 

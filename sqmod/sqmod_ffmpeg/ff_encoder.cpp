@@ -73,17 +73,17 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 	avcodec_get_context_defaults( m_pCodecContext );
 
-    m_pCodecContext->codec_id = (CodecID)x_nCodec;
-    m_pCodecContext->codec_type = CODEC_TYPE_VIDEO;
-    m_pCodecContext->bit_rate = brate;
+	m_pCodecContext->codec_id = (CodecID)x_nCodec;
+	m_pCodecContext->codec_type = CODEC_TYPE_VIDEO;
+	m_pCodecContext->bit_rate = brate;
 	m_pCodecContext->bit_rate_tolerance = brate / 5;
-    m_pCodecContext->width = width;
-    m_pCodecContext->height = height;
-    m_pCodecContext->gop_size = 12;
-    m_pCodecContext->time_base.den = fps;
-    m_pCodecContext->time_base.num = 1;
-    m_pCodecContext->me_method = 1;
-    m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
+	m_pCodecContext->width = width;
+	m_pCodecContext->height = height;
+	m_pCodecContext->gop_size = 12;
+	m_pCodecContext->time_base.den = fps;
+	m_pCodecContext->time_base.num = 1;
+	m_pCodecContext->me_method = 1;
+	m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
 	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
 
 	// Special h264 defaults
@@ -184,6 +184,22 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 	} // end if
 
+	if ( m->isset( oexT( "quality" ) ) )
+	{
+		m_pCodecContext->qmin = m_pCodecContext->qmax 
+			= (*m)[ oexT( "quality" ) ].toint();
+
+		m_pCodecContext->mb_lmin = m_pCodecContext->lmin = 
+			m_pCodecContext->qmin * FF_QP2LAMBDA;
+
+		m_pCodecContext->mb_lmax = m_pCodecContext->lmax = 
+			m_pCodecContext->qmax * FF_QP2LAMBDA;
+
+		m_pCodecContext->flags |= CODEC_FLAG_QSCALE;
+		m_pCodecContext->global_quality = m_pCodecContext->qmin * FF_QP2LAMBDA;
+
+	} // end if
+
 	int res = avcodec_open( m_pCodecContext, m_pCodec );
 	if ( 0 > res )
 	{	oexERROR( res, oexT( "avcodec_open() failed" ) );
@@ -235,7 +251,14 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 		else
 			paf->key_frame = 0;
 
+		if ( m->isset( oexT( "quality" ) ) && ( (*m)[ oexT( "quality" ) ].toint() ) )
+			paf->quality = (*m)[ oexT( "quality" ) ].toint();
+		else
+			paf->quality = m_pCodecContext->global_quality;
+
 	} // end if
+
+//	paf->quality = m_pCodecContext->qmax;
 
 	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->Ptr(), nSize, paf );
 	if ( 0 > nBytes )

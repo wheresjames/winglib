@@ -283,6 +283,9 @@ namespace sqbind
 		CSqBinary getSub( int x_nStart, int x_nSize )
 		{	return m_bin.Sub( x_nStart, x_nSize ); }
 
+		/// Returns non-zero if the file mapped share already existed
+		int Existing() { return m_bin.Existing(); }
+
 		/// Value returned on failure
 		int failed() { return m_bin.failed(); }
 

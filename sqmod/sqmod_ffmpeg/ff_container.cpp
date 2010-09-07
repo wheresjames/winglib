@@ -230,6 +230,17 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 
 	return 1;
 }
+/*
+	pfp.device = sFile;
+	pfp.channel = 0;
+	pfp.standard = "ntsc";
+	pfp.width = 320;
+	pfp.height = 240;
+	pfp.time_base.den = 25;
+	pfp.time_base.num = 1;
+	pfp.pix_fmt = PIX_FMT_NONE;
+	pfp = av_find_input_format( "video4linux" );
+*/
 
 int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 {_STT();

@@ -9,7 +9,7 @@ if ( 0 > usb.Init() )
 {	_self.echo( "Init() failed" );
 } // end if
 
-// Show the list of usb devices
+// Show the list of usb devices / returns CSqMulti()
 local list = usb.getDeviceList();
 _self.echo( list.print_r( 1 ) );
 
