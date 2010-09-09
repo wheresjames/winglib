@@ -83,6 +83,10 @@ extern "C" oex::oexRESULT SRV_Start( oex::SRawAllocator x_sRawAllocator, oex::oe
 	// Set our allocator
 	oex::CMem::SetRawAllocator( x_sRawAllocator );
 
+#if defined( SQBIND_Init )
+	SQBIND_Init
+#endif
+
 	// Enable stack tracing
 //	oex::CStackTrace::EnableStackTracing( oex::oexTRUE );
 
@@ -98,6 +102,10 @@ extern "C" oex::oexRESULT SRV_Stop()
 
 	// Release module stack tracing
 //	oex::CStackTrace::Release();
+
+#if defined( SQBIND_Exit )
+	SQBIND_Exit
+#endif
 
 	// Switch back to default allocator
 	oex::CMem::SetDefaultRawAllocator();

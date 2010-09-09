@@ -190,6 +190,12 @@ public:
 	*/
 	virtual oexRESULT Destroy( oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT, oexBOOL x_bForce = oexTRUE );
 
+	/// Detaches from the resource without freeing it
+	void Detach()
+	{	m_hHandle = cInvalid();
+		m_eType = eRtInvalid;
+	}
+
 	/// Creates a mutex object
 	/**
 		\param [in] x_sName 		-	Name for the mutex

@@ -248,25 +248,41 @@ CBin::t_size CBin::LShift( CBin::t_size x_nBytes )
 void CBinShare::Destroy()
 {_STT();
 
-	oexAutoLock ll( m_lock );
-	if ( !ll.IsLocked() )
+	if ( !m_lock.IsValid() )
 		return;
+
+	{ // Scope lock
+
+		oexAutoLock ll( m_lock );
+		if ( !ll.IsLocked() )
+			return;
 
 #if defined( oexDEBUG )
 
-	// Warn user if they are not running garbage collection
-	if ( m_buffers.Size() && ( m_uTime + 3 ) < oexGetUnixTime() )
-	{	oexERROR( 0, oexT( "You are using oexGetBin() / oexSetBin(), but not calling oexCleanupBin()" ) );
-	} // edn if
+		// Warn user if they are not running garbage collection
+		if ( m_buffers.Size() && ( m_uTime + 3 ) < oexGetUnixTime() )
+		{	oexERROR( 0, oexT( "You are using oexGetBin() / oexSetBin(), but not calling oexCleanupBin()" ) );
+		} // edn if
 
 #endif
 
-	// Lose the whole list
-	m_buffers.Destroy();
+		// Lose the whole list
+		m_buffers.Destroy();
+
+	} // end scope
+
+	// +++ Leaking to avoid crash on ctrl+c, please fix one day!
+	//m_lock.Detach();
+
+	// Lose the lock
+	 m_lock.Destroy();
 }
 
 CBin CBinShare::GetBuffer( CStr x_sName, CBinShare::t_size x_uSize )
 {_STT();
+
+	if ( !m_lock.IsValid() )
+		return CBin();
 
 	oexAutoLock ll( m_lock );
 	if ( !ll.IsLocked() )
@@ -293,6 +309,9 @@ CBin CBinShare::GetBuffer( CStr x_sName, CBinShare::t_size x_uSize )
 
 oexBOOL CBinShare::SetBuffer( CStr x_sName, CBin *x_pBin )
 {_STT();
+
+	if ( !m_lock.IsValid() )
+		return oexFALSE;
 
 	// You can't share a plain buffer
 //	if ( x_pBin && x_pBin->IsPlainShare() )
@@ -322,6 +341,9 @@ oexBOOL CBinShare::SetBuffer( CStr x_sName, CBin *x_pBin )
 oexBOOL CBinShare::IsBuffer( CStr x_sName )
 {_STT();
 
+	if ( !m_lock.IsValid() )
+		return oexFALSE;
+
 	oexAutoLock ll( m_lock );
 	if ( !ll.IsLocked() )
 		return oexFALSE;
@@ -332,6 +354,9 @@ oexBOOL CBinShare::IsBuffer( CStr x_sName )
 
 oexINT CBinShare::Cleanup()
 {_STT();
+
+	if ( !m_lock.IsValid() )
+		return -1;
 
 	oexAutoLock ll( m_lock );
 	if ( !ll.IsLocked() )

@@ -282,6 +282,9 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 	static void SQBIND_Export( sqbind::VM x_vm )
 	{_STT(); SQBIND_Export_ffmpeg( x_vm ); }
 
+	// +++ Leaking to avoid crash on ctrl+c, please fix one day!
+//	#define SQBIND_Exit _g_ffmpeg_lock.Detach();
+
 	// Include squirrel module exported symbols
 	#include <sqmod_extern.hpp>
 

@@ -46,6 +46,10 @@
 class CDataLog
 {
 public:
+		/// Time type
+		typedef oexLONG		t_time;
+		
+public:
 
 	enum
 	{
@@ -57,7 +61,9 @@ public:
 
 		eDtFloat = 3,
 
-		eDtFile = 4
+		eDtFile = 4,
+
+		eDtSize = 5
 	};
 
 	enum
@@ -204,16 +210,16 @@ public:
 		}
 
 		// Returns non-zero if there is data for the iterator
-		oexBOOL IsData( oexINT nLogBase, oexUINT x_uTime = 0 )
+		oexBOOL IsData( oexINT nLogBase, t_time x_tTime = 0 )
 		{
 			if ( 0 >= nLogBase )
 				return oexFALSE;
 
-			if ( !x_uTime )
-				x_uTime = oexGetUnixTime();
+			if ( !x_tTime )
+				x_tTime = oexGetUnixTime();
 
 			// Build root to data based on starting timestamp
-			if ( !oexExists( ( oex::CStr( sRoot ).BuildPath( x_uTime / nLogBase ).BuildPath( sHash ) << oexT( ".bin" ) ).Ptr() ) )
+			if ( !oexExists( ( oex::CStr( sRoot ).BuildPath( x_tTime / nLogBase ).BuildPath( sHash ) << oexT( ".bin" ) ).Ptr() ) )
 				return oexFALSE;
 			
 			return oexTRUE;
@@ -256,7 +262,7 @@ public:
 	CStr GetRoot() { return m_sRoot; }
 
 	/// Creates a logging key for the specified value, return less than zero on failure
-	oexINT AddKey( oexCSTR x_pKey, oexUINT x_uTime = 0 );
+	oexINT AddKey( oexCSTR x_pKey, t_time x_tTime = 0 );
 
 	/// Removes a key from the logger
 	oexINT RemoveKey( oexINT x_nKey );
@@ -268,42 +274,45 @@ public:
 	oexINT FindKey( oexCSTR x_pKey );
 
 	/// Logs the specified value
-	oexBOOL Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, oexUINT x_uTime, oexUINT x_uTimeMs, oexBOOL bBuffering = oexTRUE );
+	oexBOOL Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, t_time x_tTime, t_time x_tTimeMs, oexBOOL bBuffering = oexTRUE );
 
 	/// Flushes all buffered data to disk
-	oexBOOL Flush( oexUINT x_uTime = 0 );
+	oexBOOL Flush( t_time x_tTime = 0 );
 
 	/// Flushes a single buffer value
 	oexBOOL FlushBuffer( oexINT x_nKey, SValueIndex *pVi, oexCPVOID pBuf, oexUINT uSize );
 
 	/// Returns a list of key names and hashes
-	CPropertyBag GetKeyList( oexUINT x_uTime = 0 );
+	CPropertyBag GetKeyList( t_time x_tTime = 0 );
 
 	/// Returns the log for the specified key and time range
-	CPropertyBag GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod );
+	CPropertyBag GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time x_tInterval, oexINT x_nDataType, oexINT x_nMethod );
 
 	/// Returns the log for the specified key and time range in a shared binary buffer
-	CStr GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod, float x_fScale );
+	CStr GetLogBin( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time x_tInterval, oexINT x_nDataType, oexINT x_nMethod, float x_fScale );
 
 	/// Sets up log params
-	void SetLogParams( oexUINT uBase, oexUINT uStep );
+	void SetLogParams( t_time tBase, t_time tStep );
 
 	/// Returns the root base for the logs
-	oexUINT GetBase() { return m_uLogBase; }
+	t_time GetBase() { return m_tLogBase; }
 
 	/// Returns the index step
-	oexUINT GetStep() { return m_uIndexStep; }
+	t_time GetStep() { return m_tIndexStep; }
+
+	/// Calculate time range
+	static void CalculateTimes( t_time *tMin, t_time *tMax );
 
 public:
 
 	/// Returns non-zero if there is an index file for the specified key hash
-	static oexBOOL IsKeyData( CStr x_sRoot, CStr x_sHash, oexUINT x_uTime, oexUINT uLogBase );
+	static oexBOOL IsKeyData( CStr x_sRoot, CStr x_sHash, t_time x_tTime, t_time tLogBase );
 
 	/// Opens / Creates specified database files
-	static oexBOOL OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, oexUINT x_uTime, CFile *x_pIdx, CFile *x_pData, oexUINT uLogBase, oexUINT uIndexStep );
+	static oexBOOL OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, t_time x_tTime, CFile *x_pIdx, CFile *x_pData, t_time tLogBase, t_time tIndexStep );
 
 	/// Finds the value for the specified time in an open database
-	static oexBOOL FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod, oexUINT uLogBase, oexUINT uIndexStep );
+	static oexBOOL FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, t_time x_tInterval, oexINT x_nDataType, oexINT x_nMethod, t_time tLogBase, t_time tIndexStep );
 
 private:
 
@@ -317,13 +326,13 @@ private:
 	SLogKey			*m_pLogs[ eMaxKeys ];
 
 	/// Index step
-	oexUINT			m_uIndexStep;
+	t_time			m_tIndexStep;
 
 	/// Base for log root
-	oexUINT			m_uLogBase;
+	t_time			m_tLogBase;
 
 	/// Maximum value valid time
-	oexUINT			m_uMaxValid;
+	t_time			m_tMaxValid;
 
 };
 

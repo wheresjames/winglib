@@ -660,8 +660,8 @@ public:
 #endif
     }
 
-    /// Destructor
-    virtual ~CBinShare()
+	/// Destructor
+	virtual ~CBinShare()
 	{
 		Destroy();
 	}
