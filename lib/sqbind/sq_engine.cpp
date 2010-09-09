@@ -627,17 +627,17 @@ int CSqEngineExport::getlogfreq( const stdString &sPath )
 	return q->getlogfreq( sPath );
 }
 
-CSqMulti CSqEngineExport::getlogkeys( const stdString &sPath, int nTime )
+stdString CSqEngineExport::getlogkeys( const stdString &sPath, int nTime )
 {_STT();
 	CSqMsgQueue *q = queue();
-	if ( !q ) return CSqMulti();
+	if ( !q ) return stdString();
 	return q->getlogkeys( sPath, nTime );
 }
 
-CSqMulti CSqEngineExport::getlog( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, int nDataType, int nMethod )
+stdString CSqEngineExport::getlog( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, int nDataType, int nMethod )
 {
 	CSqMsgQueue *q = queue();
-	if ( !q ) return CSqMulti();
+	if ( !q ) return stdString();
 	return q->getlog( sPath, sKey, nStart, nStop, nInterval, nDataType, nMethod );
 }
 

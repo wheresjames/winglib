@@ -540,7 +540,7 @@ int CSqMsgQueue::getlogfreq( const stdString &sPath )
 	return oexStrToLong( sRet.c_str() );
 }
 
-CSqMulti CSqMsgQueue::getlogkeys( const stdString &sPath, int nTime )
+stdString CSqMsgQueue::getlogkeys( const stdString &sPath, int nTime )
 {_STT();
 	stdString sRet;
 	CSqMap params;
@@ -549,7 +549,7 @@ CSqMulti CSqMsgQueue::getlogkeys( const stdString &sPath, int nTime )
 	return sRet;
 }
 
-CSqMulti CSqMsgQueue::getlog( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, int nDataType, int nMethod )
+stdString CSqMsgQueue::getlog( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, int nDataType, int nMethod )
 {_STT();
 	stdString sRet;
 	CSqMap params;

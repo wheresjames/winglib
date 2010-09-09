@@ -646,37 +646,6 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, oexUINT x_uTime, oexUINT x_uTimeMs
 		if ( !x_it.fData.Read( &x_it.viNext, sizeof( x_it.viNext ) ) || x_it.hash.Data1 != x_it.viNext.uHash )
 			p = x_it.npos = 0;
 
-		// Simple iteration?
-		else if ( !x_uInterval )
-		{
-			x_it.npos = p;
-
-			// Copy structure
-			oexMemCpy( &x_it.vi, &x_it.viNext, sizeof( x_it.vi ) );
-
-			// Point to the data
-			x_it.fData.SetPtrPosBegin( x_it.npos + x_it.vi.uBytes );
-
-			// Do we want to read values?
-			if ( !( oex::CDataLog::eMethodNoRead & x_nMethod ) )
-			{
-				// Read the value
-				if ( !x_it.getValue( x_it.sValue ) )
-				{
-					if ( eDtInt == x_nDataType )
-						x_it.nValue = x_it.sValue.ToInt();
-
-					else if ( eDtFloat == x_nDataType )
-						x_it.fValue = x_it.sValue.ToFloat();
-
-				} // end if
-
-			} // end if
-
-			return oexTRUE;
-
-		} // end if
-
 		// Is it after the time we're looking for?
 		else if ( x_it.viNext.uTime > x_uTime || ( x_it.viNext.uTime == x_uTime && x_it.viNext.uTimeMs > x_uTimeMs ) )
 			x_it.npos = p;
@@ -785,11 +754,31 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd,
 	{
 		// Find the value for this time
 		if ( FindValue( it, uTime, uTimeMs, x_uInterval, x_nDataType, x_nMethod, m_uLogBase, m_uIndexStep ) )
-		{	if ( uTimeMs )
+		{
+			if ( !x_uInterval )
+			{
+				// Ensure it falls within our time range
+				if ( it.vi.uTime >= x_uStart &&
+					 ( it.vi.uTime < x_uEnd || ( it.vi.uTime == x_uEnd && !it.vi.uTimeMs ) ) )
+				{
+					if ( it.vi.uTimeMs )
+						pb[ oexFmt( oexT( "%u.%u" ), it.vi.uTime, it.vi.uTimeMs ) ].ToString() = it.sValue;
+					else
+						pb[ it.vi.uTime ].ToString() = it.sValue;
+				} // end if
+
+			} // end if
+			
+			else if ( uTimeMs )
 				pb[ oexFmt( oexT( "%u.%u" ), uTime, uTimeMs ) ].ToString() = it.sValue;
+
 			else
 				pb[ uTime ].ToString() = it.sValue;
+
 		} // end if
+		
+		else if ( !x_uInterval )
+			;
 
 		else if( uTimeMs )
 			pb[ oexFmt( oexT( "%u.%u" ), uTime, uTimeMs ) ] = oexT( "" );
@@ -799,8 +788,19 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd,
 
 		// Calculate next timestamp
 		if ( !x_uInterval )
-		{	uTime = it.viNext.uTime;
-			uTimeMs = it.viNext.uTimeMs;
+		{
+			// Next index?
+			if ( it.npos <= it.pos )
+			{	uTime += m_uIndexStep;
+				uTime -= uTime % m_uIndexStep;
+				uTimeMs = 0;
+			} // end if
+
+			else
+			{	uTime = it.viNext.uTime;
+				uTimeMs = it.viNext.uTimeMs;
+			} // end else
+
 		} // end if
 
 		else
@@ -818,7 +818,7 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd,
 CStr CDataLog::GetLogBin( oexCSTR x_pKey, oexUINT x_uStart, oexUINT x_uEnd, oexUINT x_uInterval, oexINT x_nDataType, oexINT x_nMethod, float x_fScale )
 {_STT();
 	// Sanity checks
-	if ( !x_pKey || !*x_pKey || !m_sRoot.Length() || x_uStart > x_uEnd )
+	if ( !x_pKey || !*x_pKey || !m_sRoot.Length() || x_uStart > x_uEnd || !x_uInterval )
 		return oexT( "" );
 
 	// Set defaults

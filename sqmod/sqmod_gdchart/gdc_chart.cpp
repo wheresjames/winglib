@@ -341,15 +341,21 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 	// How many labels provided?
 	int l = (*x_mData)[ oexT( "labels" ) ].size();
 	if ( l )
-	{	int step = nDataPts / l;
-		if ( !step ) step = 1;
+	{
 		sqbind::CSqMulti::iterator it = (*x_mData)[ oexT( "labels" ) ].begin();
-		for ( int i = 0, li = 0; i < nDataPts; i++, li++ )
-		{	if ( li > step ) li = 0, it++;
+		for ( int i = 0, m = 0; i < nDataPts; i++ )
+		{	
+			// Save label into array
 			if ( it != (*x_mData)[ oexT( "labels" ) ].end() )
 				memLabels[ i ] = it->second.str().c_str();
 			else
 				memLabels[ i ] = oexT( "" );
+
+			// Good ol' Bresenham
+			m += l;
+			while ( m > nDataPts )
+				m -= nDataPts, it++;
+
 		} // end for
 	} // end if
 
