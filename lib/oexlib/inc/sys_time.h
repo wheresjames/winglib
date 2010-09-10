@@ -51,111 +51,116 @@ class CSysTime
 {
 public:
 
-    enum
-    {
-        /// Invalid time component
-        eInvalid = (oexINT)0x7fffffff
-    };
-
-    enum
-    {
-        /// Value indicating uninitialized time
-        eNullTime  = 0,
-
-        /// Value indicating local time
-        eLocalTime  = 1,
-
-        /// Value indicating GMT time
-        eGmtTime = 2
-    };
-
-    enum
-    {
-        /// File time format
-        eFmtFile = 1,
-
-        /// Unix timestamp format
-        eFmtUnix = 2,
-
-        /// Dos timestamp format
-        eFmtDos = 3,
-
-        /// Net timestamp format
-        eFmtNet = 4
-    };
+	// Time type
+	typedef oexINT64		t_time;
 
 public:
 
-    /// Constructor
-    /**
-        \param [in] x_uInitTime -   0   =   Uninitialized
-                                    1   =   Local time
-                                    2   =   GMT time
-    */
-    CSysTime( oexUINT x_uInitTime = eNullTime )
-    {
+	enum
+	{
+		/// Invalid time component
+		eInvalid = (oexINT)0x7fffffff
+	};
+
+	enum
+	{
+		/// Value indicating uninitialized time
+		eNullTime  = 0,
+
+		/// Value indicating local time
+		eLocalTime  = 1,
+
+		/// Value indicating GMT time
+		eGmtTime = 2
+	};
+
+	enum
+	{
+		/// File time format
+		eFmtFile = 1,
+
+		/// Unix timestamp format
+		eFmtUnix = 2,
+
+		/// Dos timestamp format
+		eFmtDos = 3,
+
+		/// Net timestamp format
+		eFmtNet = 4
+	};
+
+public:
+
+	/// Constructor
+	/**
+		\param [in] x_uInitTime -   0   =   Uninitialized
+									1   =   Local time
+									2   =   GMT time
+	*/
+	CSysTime( oexUINT x_uInitTime = eNullTime )
+	{
 		m_tEscape = oexT( '%' );
 
-        if ( eLocalTime == x_uInitTime )
-            GetLocalTime();
+		if ( eLocalTime == x_uInitTime )
+			GetLocalTime();
 
-        else if ( eGmtTime == x_uInitTime )
-            GetSystemTime();
+		else if ( eGmtTime == x_uInitTime )
+			GetSystemTime();
 
-        else
-        	oexZeroMemory( &m_time, sizeof( m_time ) );
-    }
+		else
+			oexZeroMemory( &m_time, sizeof( m_time ) );
+	}
 
-    CSysTime( oexCONST CSysTime &x_st )
-    {
+	CSysTime( oexCONST CSysTime &x_st )
+	{
 		m_tEscape = oexT( '%' );
 		os::CSys::MemCpy( &m_time, &x_st.m_time, sizeof( m_time ) ); 
 	}
 
-    CSysTime( oexINT x_nTimeFormat, oexINT64 x_llTime, oexINT x_lTzBias = eInvalid )
-    {
+	CSysTime( oexINT x_nTimeFormat, oexINT64 x_llTime, oexINT x_lTzBias = eInvalid )
+	{
 		m_tEscape = oexT( '%' );
 
 		if ( eFmtFile == x_nTimeFormat )
-            SetFileTime( x_llTime, x_lTzBias );
+			SetFileTime( x_llTime, x_lTzBias );
 
-        else if ( eFmtUnix == x_nTimeFormat )
-            SetUnixTime( (oexUINT)x_llTime, x_lTzBias );
+		else if ( eFmtUnix == x_nTimeFormat )
+			SetUnixTime( (oexUINT)x_llTime, x_lTzBias );
 
-        else if ( eFmtDos == x_nTimeFormat )
-            SetDosTime( (oexUINT)x_llTime, x_lTzBias );
+		else if ( eFmtDos == x_nTimeFormat )
+			SetDosTime( (oexUINT)x_llTime, x_lTzBias );
 
-        else if ( eFmtNet == x_nTimeFormat )
-            SetNetTime( (oexUINT)x_llTime, x_lTzBias );
+		else if ( eFmtNet == x_nTimeFormat )
+			SetNetTime( (oexUINT)x_llTime, x_lTzBias );
 
-        else
-            oexZeroMemory( &m_time, sizeof( m_time ) );
-    }
+		else
+			oexZeroMemory( &m_time, sizeof( m_time ) );
+	}
 
 	// Initializes object with string
-    CSysTime( oexCSTR x_sTmpl, oexCONST CStr x_sStr )
+	CSysTime( oexCSTR x_sTmpl, oexCONST CStr x_sStr )
 	{
 		m_tEscape = oexT( '%' );
 
 		ParseTime( x_sTmpl, CStr( x_sStr ) );
 	} 
 
-    /// Destructor
-    virtual ~CSysTime()
-    {
-    }
+	/// Destructor
+	virtual ~CSysTime()
+	{
+	}
 	
-    CSysTime& GetLocalTime()
-    {   os::CSys::GetLocalTime( m_time ); return *this; }
+	CSysTime& GetLocalTime()
+	{   os::CSys::GetLocalTime( m_time ); return *this; }
 
-    CSysTime& SetLocalTime()
-    {   os::CSys::SetLocalTime( m_time ); return *this; }
+	CSysTime& SetLocalTime()
+	{   os::CSys::SetLocalTime( m_time ); return *this; }
 
 	CSysTime& GetSystemTime()
-    {   os::CSys::GetSystemTime( m_time ); return *this; }
+	{   os::CSys::GetSystemTime( m_time ); return *this; }
 
-    CSysTime& SetSystemTime()
-    {   os::CSys::SetSystemTime( m_time ); return *this; }
+	CSysTime& SetSystemTime()
+	{   os::CSys::SetSystemTime( m_time ); return *this; }
 
 	//==============================================================
 	// setEscapeChar()
@@ -197,93 +202,93 @@ public:
 	//==============================================================
 	/// Returns the four digit year
 	oexUINT GetYear() { return m_time.uYear; }
-    oexUINT SetYear( oexUINT y )
-    {   if ( y > 9999 ) y = 9999; return m_time.uYear = y; }
+	oexUINT SetYear( oexUINT y )
+	{   if ( y > 9999 ) y = 9999; return m_time.uYear = y; }
 
 	//==============================================================
 	// GetMonth()
 	//==============================================================
 	/// Returns the month ( 1 - 12 )
 	oexUINT GetMonth() { return m_time.uMonth; }
-    oexUINT SetMonth( oexUINT m )
-    {   if ( m > 12 ) m = 1; return m_time.uMonth = m; }
+	oexUINT SetMonth( oexUINT m )
+	{   if ( m > 12 ) m = 1; return m_time.uMonth = m; }
 
 	//==============================================================
 	// GetDay()
 	//==============================================================
 	/// Returns the day ( 1 - 31 )
 	oexUINT GetDay() { return m_time.uDay; }
-    oexUINT SetDay( oexUINT d )
-    {   if ( d > 31 ) d = 1; return m_time.uDay = d; }
+	oexUINT SetDay( oexUINT d )
+	{   if ( d > 31 ) d = 1; return m_time.uDay = d; }
 
 	//==============================================================
 	// GetDayOfWeek()
 	//==============================================================
 	/// Returns the day of the week ( 1 - 7 )
 	oexUINT GetDayOfWeek() { return m_time.uDayOfWeek; }
-    oexUINT SetDayOfWeek( oexUINT d )
-    {   if ( d > 7 ) d = 1; return m_time.uDayOfWeek = d; }
+	oexUINT SetDayOfWeek( oexUINT d )
+	{   if ( d > 7 ) d = 1; return m_time.uDayOfWeek = d; }
 
 	//==============================================================
 	// GetHour()
 	//==============================================================
 	/// Returns the hour ( 0 - 23 ).  For 12-hour value, see Get12Hour()
 	oexUINT GetHour() { return m_time.uHour; }
-    oexUINT SetHour( oexUINT h )
-    {   if ( h >= 24 ) h %= 24; return m_time.uHour = h; }
+	oexUINT SetHour( oexUINT h )
+	{   if ( h >= 24 ) h %= 24; return m_time.uHour = h; }
 
 	//==============================================================
 	// Get12Hour()
 	//==============================================================
-    /// Returns the 12-hour value for the hour. ( 1 - 12 )
+	/// Returns the 12-hour value for the hour. ( 1 - 12 )
 	oexUINT Get12Hour()
 	{	oexUINT hour = m_time.uHour;
 		if ( hour > 12 ) hour -= 12;
 		else if ( hour == 0 ) hour = 12;
 		return hour;
 	}
-    oexUINT Set12Hour( oexUINT h )
-    {   if ( h < 1 || h > 12 ) h %= 12, h++; return m_time.uHour = h; }
+	oexUINT Set12Hour( oexUINT h )
+	{   if ( h < 1 || h > 12 ) h %= 12, h++; return m_time.uHour = h; }
 
 	//==============================================================
 	// GetMinute()
 	//==============================================================
 	/// Returns the minute ( 0 - 59 )
 	oexUINT GetMinute() { return m_time.uMinute; }
-    oexUINT SetMinute( oexUINT m )
-    {   if ( m >= 60 ) m %= 60; return m_time.uMinute = m; }
+	oexUINT SetMinute( oexUINT m )
+	{   if ( m >= 60 ) m %= 60; return m_time.uMinute = m; }
 
 	//==============================================================
 	// GetSecond()
 	//==============================================================
 	/// Returns the second ( 0 - 59 )
 	oexUINT GetSecond() { return m_time.uSecond; }
-    oexUINT SetSecond( oexUINT s )
-    {   if ( s >= 60 ) s %= 60; return m_time.uSecond = s; }
+	oexUINT SetSecond( oexUINT s )
+	{   if ( s >= 60 ) s %= 60; return m_time.uSecond = s; }
 
 	//==============================================================
 	// GetMilliSecond()
 	//==============================================================
 	/// Returns the milli-second value ( 0 - 999 )
 	oexUINT GetMilliSecond() { return m_time.uMillisecond; }
-    oexUINT SetMilliSecond( oexUINT m )
-    {   if ( m >= 1000 ) m %= 1000; return m_time.uMillisecond = m; }
+	oexUINT SetMilliSecond( oexUINT m )
+	{   if ( m >= 1000 ) m %= 1000; return m_time.uMillisecond = m; }
 
 	//==============================================================
 	// GetMicroSecond()
 	//==============================================================
 	/// Returns the micro-second value ( 0 - 999 )
 	oexUINT GetMicroSecond() { return m_time.uMicrosecond; }
-    oexUINT SetMicroSecond( oexUINT m )
-    {   if ( m >= 1000 ) m %= 1000; return m_time.uMicrosecond = m; }
+	oexUINT SetMicroSecond( oexUINT m )
+	{   if ( m >= 1000 ) m %= 1000; return m_time.uMicrosecond = m; }
 
 	//==============================================================
 	// GetNanoSecond()
 	//==============================================================
 	/// Returns the nano-second value ( 0 - 999 )
 	oexUINT GetNanoSecond() { return m_time.uNanosecond; }
-    oexUINT SetNanoSecond( oexUINT m )
-    {   if ( m >= 1000 ) m %= 1000; return m_time.uNanosecond = m; }
+	oexUINT SetNanoSecond( oexUINT m )
+	{   if ( m >= 1000 ) m %= 1000; return m_time.uNanosecond = m; }
 
 	//==============================================================
 	// IsPM()
@@ -317,54 +322,56 @@ public:
 	// GetTzBias()
 	//==============================================================
 	/// Returns the current timezone bias
-	oexINT GetTzBias()
-	{	return m_time.nTzBias; }
+	oexINT GetTzBias() { return m_time.nTzBias; }
 
-    /// Divide seconds
-    oexUINT DivideSeconds(oexUINT totalseconds, oexUINT *days = oexNULL, oexUINT *hours = oexNULL, oexUINT *mins = oexNULL, oexUINT *secs = oexNULL);
+	/// Divide seconds
+	oexUINT DivideSeconds(oexUINT totalseconds, oexUINT *days = oexNULL, oexUINT *hours = oexNULL, oexUINT *mins = oexNULL, oexUINT *secs = oexNULL);
 
-    /// Integrate seconds
-    oexUINT IntegrateSeconds(oexUINT days, oexUINT hours = 0, oexUINT mins = 0, oexUINT secs = 0);
+	/// Integrate seconds
+	oexUINT IntegrateSeconds(oexUINT days, oexUINT hours = 0, oexUINT mins = 0, oexUINT secs = 0);
 
-    /// Returns the unix time stamp
-    oexUINT GetUnixTime();
+	/// Returns the unix time stamp
+	oexUINT GetUnixTime();
 
-    /// Sets the unix timestamp
-    CSysTime& SetUnixTime( oexUINT x_uTime, oexINT x_lTzBias = eInvalid );
+	/// Returns the unix time stamp with time zone bias
+	oexUINT GetTzUnixTime();
 
-    /// Returns the dos timestamp
-    oexUINT GetDosTime();
+	/// Sets the unix timestamp
+	CSysTime& SetUnixTime( oexUINT x_uTime, oexINT x_lTzBias = eInvalid );
 
-    /// Sets the dos timestamp
-    CSysTime& SetDosTime( oexUINT x_uTime, oexINT x_lTzBias = eInvalid );
+	/// Returns the dos timestamp
+	oexUINT GetDosTime();
 
-    /// Returns the net timestamp
-    oexUINT GetNetTime();
+	/// Sets the dos timestamp
+	CSysTime& SetDosTime( oexUINT x_uTime, oexINT x_lTzBias = eInvalid );
 
-    /// Sets the net timestamp
-    CSysTime& SetNetTime( oexUINT x_uTime, oexINT x_lTzBias = eInvalid );
+	/// Returns the net timestamp
+	oexUINT GetNetTime();
 
-    /// Returns the abbreviated month name
-    static oexCSTR GetAbrMonthName( oexLONG x_m );
+	/// Sets the net timestamp
+	CSysTime& SetNetTime( oexUINT x_uTime, oexINT x_lTzBias = eInvalid );
 
-    /// Returns the month name
-    static oexCSTR GetMonthName( oexLONG x_m );
+	/// Returns the abbreviated month name
+	static oexCSTR GetAbrMonthName( oexLONG x_m );
 
-    /// Returns the abbreviated day name
-    static oexCSTR GetAbrDayName( oexLONG x_d );
+	/// Returns the month name
+	static oexCSTR GetMonthName( oexLONG x_m );
 
-    /// Returns the day name
-    static oexCSTR GetDayName( oexLONG x_d );
+	/// Returns the abbreviated day name
+	static oexCSTR GetAbrDayName( oexLONG x_d );
 
-    /// Returns the file time format
-    oexINT64 GetFileTime()
-    {   return os::CSys::SystemTimeToFileTime( m_time ); }
+	/// Returns the day name
+	static oexCSTR GetDayName( oexLONG x_d );
 
-    /// Sets the file time format
-    void SetFileTime( oexINT64 x_llFt, oexINT x_lTzBias )
-    {   if ( eInvalid != x_lTzBias ) m_time.nTzBias = x_lTzBias;
-        os::CSys::FileTimeToSystemTime( m_time, x_llFt );
-    }
+	/// Returns the file time format
+	oexINT64 GetFileTime()
+	{   return os::CSys::SystemTimeToFileTime( m_time ); }
+
+	/// Sets the file time format
+	void SetFileTime( oexINT64 x_llFt, oexINT x_lTzBias )
+	{   if ( eInvalid != x_lTzBias ) m_time.nTzBias = x_lTzBias;
+		os::CSys::FileTimeToSystemTime( m_time, x_llFt );
+	}
 
 
 	//==============================================================
@@ -373,9 +380,9 @@ public:
 	/// Returns a formated time string
 	/**
 		\param [in] x_sTmpl	    -	Template string
-        \param [out] x_bErrors  -   Optional parameter that is set
-                                    to non-zero if any errors are
-                                    detected while decoding.
+		\param [out] x_bErrors  -   Optional parameter that is set
+									to non-zero if any errors are
+									detected while decoding.
 
 		Formats a time string based on the specified template.
 
@@ -419,18 +426,18 @@ public:
 		-	\%Zz = Time zone offset in minutes with leading +/-
 		-	\%ZZ = Time zone offset in seconds with leading +/-
 
-        Some examples:
+		Some examples:
 
-        -   "%W, %B %D, %Y - %h:%m:%s %A"	= Thursday, December 25, 1997 - 04:15:30 PM
-        -   "%Y/%c/%d - %g:%m:%s.%l"		= 1997/12/25 - 16:15:30.500
-        -   "%w, %d %b %Y %g:%m:%s GMT"		= Thu, 25 Dec 1997 16:15:30 GMT
+		-   "%W, %B %D, %Y - %h:%m:%s %A"	= Thursday, December 25, 1997 - 04:15:30 PM
+		-   "%Y/%c/%d - %g:%m:%s.%l"		= 1997/12/25 - 16:15:30.500
+		-   "%w, %d %b %Y %g:%m:%s GMT"		= Thu, 25 Dec 1997 16:15:30 GMT
 		-	"%c/%b/%Y:%g:%m:%s %Zs%Zh%Zm"	= 25/Dec/1997:16:15:30 -0500
 
 		\return Formated string
 
 		\see ParseString()
 	*/
-    CStr FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors = oexNULL );
+	CStr FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors = oexNULL );
 
 	//==============================================================
 	// ParseString()
@@ -489,26 +496,28 @@ public:
 
 		\see FormatTime()
 	*/
-    oexBOOL ParseTime( oexCSTR x_sTmpl, CStr x_sStr );
+	oexBOOL ParseTime( oexCSTR x_sTmpl, CStr x_sStr );
 
-    /// Copy operator
-    CSysTime& operator = ( oexCONST CSysTime &x_st )
-    {   os::CSys::MemCpy( &m_time, &x_st.m_time, sizeof( m_time ) ); return *this; }
+	/// Copy operator
+	CSysTime& operator = ( oexCONST CSysTime &x_st )
+	{   os::CSys::MemCpy( &m_time, &x_st.m_time, sizeof( m_time ) ); return *this; }
 
-    /// Compare
-    oexBOOL operator == ( oexCONST CSysTime &x_st )
-    {   return !os::CSys::MemCmp( &m_time, &x_st.m_time, sizeof( m_time ) ) ? oexTRUE : oexFALSE; }
+	/// Compare
+	oexBOOL operator == ( oexCONST CSysTime &x_st )
+	{   return !os::CSys::MemCmp( &m_time, &x_st.m_time, sizeof( m_time ) ) ? oexTRUE : oexFALSE; }
 
-    oexBOOL operator != ( oexCONST CSysTime &x_st )
-    {   return os::CSys::MemCmp( &m_time, &x_st.m_time, sizeof( m_time ) ) ? oexTRUE : oexFALSE; }
+	oexBOOL operator != ( oexCONST CSysTime &x_st )
+	{   return os::CSys::MemCmp( &m_time, &x_st.m_time, sizeof( m_time ) ) ? oexTRUE : oexFALSE; }
 
+	/// Calculate time range
+	static oexBOOL CalculateTimes( t_time *tMin, t_time *tMax, t_time tDefaultRange );
 
 private:
 
 	oexTCHAR								m_tEscape;
 
-    /// Time structure
-    os::CSys::STime							m_time;
+	/// Time structure
+	os::CSys::STime							m_time;
 
 };
 

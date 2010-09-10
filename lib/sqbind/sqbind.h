@@ -66,6 +66,13 @@ namespace sqbind
 {
 	// There will be a class called CSqMsgQueue
 	class CSqMsgQueue;
+
+	/// Squirrel types
+	typedef long				SQBOOL;
+	typedef long				SQINT;
+	typedef unsigned long		SQUINT;
+	typedef float				SQFLOAT;
+	typedef double				SQDOUBLE;
 }
 // stl classes we will import to squirrel
 #include "import.h"

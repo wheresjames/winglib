@@ -51,6 +51,7 @@ namespace sqbind
 		CSqMap::Register( x_vm );
 		CSqMulti::Register( x_vm );
 		CSqFile::Register( x_vm );
+		CSqTimeRange::Register( x_vm );
 		CSqTime::Register( x_vm );
 		CSqImage::Register( x_vm );
 		CSqCapture::Register( x_vm );
@@ -157,6 +158,31 @@ void CSqSerialPort::Register( sqbind::VM vm )
 	SQBIND_EXPORT( vm, CSqSerialPort );
 }
 
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqTimeRange, CSqTimeRange )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getStart )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setStart )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getStartMs )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setStartMs )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setStartStr )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getStartStr )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getEnd )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setEnd )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getEndMs )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setEndMs )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setEndStr )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getEndStr )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, CalculateTime )
+
+SQBIND_REGISTER_CLASS_END()
+
+void CSqTimeRange::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CSqTimeRange );
+}
+
+
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqTime, CSqTime )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetLocalTime )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetLocalTime )
@@ -190,6 +216,10 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqTime, CSqTime )
 
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, IsPM )
 
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetTzBias )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetTzBias )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetTzUnixTime )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetUnixTime )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetUnixTime )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetDosTime )
@@ -360,7 +390,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqDataLog, CSqDataLog )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, setLogParams )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getBase )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getStep )
-
+	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itStart )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itNext )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itPrev )

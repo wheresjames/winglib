@@ -92,10 +92,23 @@ oexUINT CSysTime::IntegrateSeconds(oexUINT days, oexUINT hours, oexUINT mins, oe
 
 oexUINT CSysTime::GetUnixTime()
 {_STT();
+
     oexINT64 ll = os::CSys::SystemTimeToFileTime( m_time );
 
 	ll /= (oexINT64)10000000LL;
 	ll -= (oexINT64)FTOFF_1970;
+
+	return (oexUINT)ll;
+}
+
+oexUINT CSysTime::GetTzUnixTime()
+{_STT();
+
+    oexINT64 ll = os::CSys::SystemTimeToFileTime( m_time );
+
+	ll /= (oexINT64)10000000LL;
+	ll -= (oexINT64)FTOFF_1970;
+	ll += m_time.nTzBias;
 
 	return (oexUINT)ll;
 }
@@ -616,4 +629,55 @@ CSysTime& CSysTime::SetTime( oexUINT uYear, oexUINT uMonth, oexUINT uDay,
 
     return *this;
 }
+
+oexBOOL CSysTime::CalculateTimes( t_time *tMin, t_time *tMax, t_time tDefaultRange )
+{
+	if ( !tMin || !tMax ) 
+		return oexFALSE;
+	t_time &min = *tMin, &max = *tMax;
+
+	// Handle relative times
+	if ( 0 >= max && 0 >= min )
+	{
+		t_time lRef = -max;
+		if ( !lRef ) 
+			lRef = tDefaultRange;
+
+		// Use Current time as reference for max if not specified
+		if ( !max ) 
+			max = oexGetUnixTime();
+
+		// Use as offset from current time
+		else 
+			max = oexGetUnixTime() + max;
+
+		// Offset by default if min not specified
+		if ( !min )
+			min = max - lRef;
+
+		// Offset by minimum
+		else 
+			min = max + min;
+
+	} // end if
+
+	// If no minimum offset by default
+	else if ( 0 == min )
+		min = max - tDefaultRange;
+
+	// Use minimum as offset
+	else if ( 0 > min )
+		min = max + min;
+
+	// If no max, use default
+	else if ( 0 == max )
+		max = min + tDefaultRange;
+
+	// Use max as offset
+	else if ( 0 > max )
+		max = min - max;
+
+	return oexTRUE;
+}
+
 

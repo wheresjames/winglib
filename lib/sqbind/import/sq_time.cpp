@@ -36,16 +36,3 @@
 
 using namespace sqbind;
 
-CSqMulti CSqDataLog::getKeyList( SQINT nTime )
-{	CSqMulti m;
-	oex::CPropertyBag pb( m_dl.GetKeyList( nTime ) );
-	SQBIND_PropertyBagToMulti( pb, m );
-	return m;
-}
-
-CSqMulti CSqDataLog::getLog( const stdString &sKey, SQINT nStart, SQINT nEnd, SQINT nInterval, SQINT nType, SQINT nMethod )
-{	CSqMulti m;
-	oex::CPropertyBag pb( m_dl.GetLog( sKey.c_str(), nStart, nEnd, nInterval, nType, nMethod ) );
-	SQBIND_PropertyBagToMulti( pb, m );
-	return m;
-}

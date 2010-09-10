@@ -445,7 +445,7 @@ oexBOOL CDataLog::Flush( t_time x_tTime )
 						// See if this block should go in the index
 						SValueIndex *pvi = (SValueIndex*)m_pLogs[ i ]->bin.Ptr();
 						t_time tI = ( pvi->uTime % m_tLogBase ) / m_tIndexStep;
-						if ( oexMAXUINT == tLast || tLast < tI )
+						if ( oexMAXLONG == tLast || tLast < tI )
 						{
 							tLast = tI;
 
@@ -595,11 +595,11 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 	oexBOOL bNew = oexFALSE;
 
 	// Ensure we have the correct database open
-	if ( oexMAXUINT == x_it.uB || _tB != x_it.uB )
+	if ( oexMAXLONG == x_it.uB || _tB != x_it.uB )
 	{	
 		// Save open db index
 		x_it.uB = _tB;
-		x_it.uI = oexMAXUINT;
+		x_it.uI = oexMAXLONG;
 
 		// Open the database containing data for this time
 		if ( !OpenDb( oexFALSE, x_it.sRoot, x_it.sHash, x_tTime, &x_it.fIdx, &x_it.fData, tLogBase, tIndexStep ) )
@@ -608,7 +608,7 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 	} // end if
 
 	// Time to index?
-	if ( oexMAXUINT == x_it.uI || _tI != x_it.uI )
+	if ( oexMAXLONG == x_it.uI || _tI != x_it.uI )
 	{
 		// Save index offset
 		x_it.uI = _tI;
@@ -724,63 +724,12 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 }
 
 
-void CDataLog::CalculateTimes( t_time *tMin, t_time *tMax )
-{
-	const oexLONG cRef = ( 10 * 60 );
-
-	if ( !tMin || !tMax ) 
-		return;
-	t_time &min = *tMin, &max = *tMax;
-
-	// Handle relative times
-	if ( 0 >= max && 0 >= min )
-	{
-		oexLONG lRef = -max;
-		if ( !lRef ) 
-			lRef = cRef;
-
-		// Use Current time as reference for max if not specified
-		if ( !max ) 
-			max = oexGetUnixTime();
-
-		// Use as offset from current time
-		else 
-			max = oexGetUnixTime() + max;
-
-		// Offset by default if min not specified
-		if ( !min )
-			min = max - lRef;
-
-		// Offset by minimum
-		else 
-			min = max + min;
-
-	} // end if
-
-	// If no minimum offset by default
-	else if ( 0 == min )
-		min = max - cRef;
-
-	// Use minimum as offset
-	else if ( 0 > min )
-		min = max + min;
-
-	// If no max, use default
-	else if ( 0 == max )
-		max = min + cRef;
-
-	// Use max as offset
-	else if ( 0 > max )
-		max = min - max;
-}
-
-
 
 CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time x_tInterval, oexINT x_nDataType, oexINT x_nMethod )
 {_STT();
 
 	// Calculate proper start / stop times
-	CalculateTimes( &x_tStart, &x_tEnd );
+	CSysTime::CalculateTimes( &x_tStart, &x_tEnd, 60 );
 
 	// Sanity checks
 	if ( !x_pKey || !*x_pKey || !m_sRoot.Length() || x_tStart > x_tEnd )
@@ -883,7 +832,7 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time
 {_STT();
 
 	// Calculate proper start / stop times
-	CalculateTimes( &x_tStart, &x_tEnd );
+	CSysTime::CalculateTimes( &x_tStart, &x_tEnd, 60 );
 
 	// Sanity checks
 	if ( !x_pKey || !*x_pKey || !m_sRoot.Length() || x_tStart > x_tEnd || !x_tInterval )

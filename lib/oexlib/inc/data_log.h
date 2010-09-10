@@ -47,7 +47,7 @@ class CDataLog
 {
 public:
 		/// Time type
-		typedef oexLONG		t_time;
+		typedef CSysTime::t_time		t_time;
 		
 public:
 
@@ -155,7 +155,7 @@ public:
 	{
 		// Constructor
 		SIterator()
-		{	uB = uI = oexMAXUINT;
+		{	uB = uI = oexMAXLONG;
 			pos = 0;
 			npos = 0;
 			oexZero( vi );
@@ -170,7 +170,7 @@ public:
 		}
 
 		void Destroy()
-		{	uB = uI = oexMAXUINT;
+		{	uB = uI = oexMAXLONG;
 			pos = 0;
 			npos = 0;
 			oexZero( vi );
@@ -299,9 +299,6 @@ public:
 
 	/// Returns the index step
 	t_time GetStep() { return m_tIndexStep; }
-
-	/// Calculate time range
-	static void CalculateTimes( t_time *tMin, t_time *tMax );
 
 public:
 
