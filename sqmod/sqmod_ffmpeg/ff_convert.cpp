@@ -59,20 +59,30 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	int flip = 0;
 	if ( 0 > height ) { flip = 1; height = -height; }
 
-	if ( 0 >= width || 0 >= height || 0 != ( width % 4 ) )
+	if ( 0 >= width || 0 >= height || ( width % 4 ) )
 		return 0;
 
 	if ( !src || !src->getUsed() )
 		return 0;
 	
+_STT_SET_CHECKPOINT( 1 );
+
 	// How big is the destination image?
 	oexSIZE_T nSize = CalcImageSize( dst_fmt, width, height );
 	if ( !nSize )
 		return 0;
 
+_STT_SET_CHECKPOINT( 2 );
+
+	// Ensure source buffer is large enough
+	if ( src->getUsed() < nSize )
+		return 0;
+
 	// Allocate memory for destination image
 	if ( dst->Size() < nSize && !dst->Mem().Mem().OexNew( nSize ).Ptr() )
 		return 0;
+
+_STT_SET_CHECKPOINT( 3 );
 
 	// Fill in picture data
 	AVPicture apSrc, apDst;
@@ -80,11 +90,15 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	     || !FillAVPicture( &apDst, dst_fmt, width, height, dst->_Ptr() ) )
 		return 0;
 
+_STT_SET_CHECKPOINT( 4 );
+
 	// Flip?
 	if ( flip )
 		for ( int z = 0; z < oexSizeOfArray( apSrc.linesize ); z++ )
-			apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ],
+			apSrc.data[ z ] = apSrc.data[ z ] + ( height ) * apSrc.linesize[ z ],
 			apSrc.linesize[ z ] = -apSrc.linesize[ z ];
+
+_STT_SET_CHECKPOINT( 5 );
 
 	// Create conversion
 	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
@@ -93,8 +107,12 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	if ( !psc )
 		return 0;
 
+_STT_SET_CHECKPOINT( 6 );
+
 	int nRet = sws_scale(	psc, apSrc.data, apSrc.linesize, 0, height,
 							apDst.data, apDst.linesize );
+
+_STT_SET_CHECKPOINT( 7 );
 
 	sws_freeContext( psc );
 
