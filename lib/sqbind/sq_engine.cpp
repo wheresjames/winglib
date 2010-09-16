@@ -45,6 +45,66 @@
 
 using namespace sqbind;
 
+int CSqEngineExport::isDebugBuild()
+{_STT();
+#if defined( oexDEBUG )
+	return 1;
+#else
+	return 0;
+#endif
+}
+
+stdString CSqEngineExport::getCompiler()
+{_STT();
+
+#if defined( OEX_GCC )
+	return oexT( "gcc" );
+#endif
+
+#if defined( OEX_MSC )
+	return oexT( "msvc" );
+#endif
+
+	return "";
+}
+
+stdString CSqEngineExport::getPlatform()
+{_STT();
+
+#if defined( _WIN32_WCE ) || defined( _WIN64_WCE )
+	return oexT( "wince" );
+#endif
+
+#if defined( OEX_WINDOWS )
+	return oexT( "windows" );
+#endif
+
+#if defined( OEX_IPHONE )
+	return oexT( "iphone" );
+#endif
+
+	return oexT( "posix" );
+}
+
+int CSqEngineExport::getCpuSize()
+{_STT();
+#if defined( OEX_CPU_64 )
+	return 64;
+#else
+	return 32;
+#endif
+}
+
+stdString CSqEngineExport::getCpuType()
+{_STT();
+
+#if defined( CPU_ARM )
+	return oexT( "arm" );
+#endif
+
+	return oexT( "x86" );
+}
+
 int CSqEngineExport::alert( const stdString &sMsg )
 {_STT();
 	return oex::os::CSys::ShowMessageBox( oexT( "Script Message" ), sMsg.c_str() );
@@ -1014,6 +1074,11 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqMsgQueue, CSqMsgQueue )
 SQBIND_REGISTER_CLASS_END()
 
 SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, isDebugBuild )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getCompiler )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getCpuSize )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getCpuType )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getPlatform )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, alert )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, print )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, echo )

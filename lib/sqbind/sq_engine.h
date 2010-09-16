@@ -62,6 +62,21 @@ public:
 	/// Returns the buffer for a binary share
 	CSqBinary get_binshare( const stdString &sName );
 
+	/// Returns non zero if squirrel is a debug build
+	int isDebugBuild();
+
+	/// Returns string indicating compiler used to build
+	stdString getCompiler();
+
+	/// Returns the cpu size
+	int getCpuSize();
+
+	/// Returns the cpu size
+	stdString getCpuType();
+
+	/// Returns the cpu size
+	stdString getPlatform();
+
 	/// Returns the buffer for a binary share
 	int set_binshare( const stdString &sName, CSqBinary *pBin );
 
