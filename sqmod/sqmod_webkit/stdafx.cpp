@@ -4,6 +4,7 @@
 
 // Export Functions
 SQBIND_REGISTER_CLASS_BEGIN( CSqWebkit, CSqWebkit )
+	SQBIND_MEMBER_FUNCTION( CSqWebkit, Destroy )
 SQBIND_REGISTER_CLASS_END()
 
 // Export classes

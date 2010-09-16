@@ -11,6 +11,9 @@ public:
 	/// Default constructor
 	CFfConvert();
 
+	/// Patches broken formats
+	static int FmtEquiv( int fmt );
+
 	/// Fills in frame data for specified format
 	static int FillAVFrame( AVFrame *pAv, int fmt, int width, int height, void *buf );
 

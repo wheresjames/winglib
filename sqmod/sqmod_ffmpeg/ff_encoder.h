@@ -82,7 +82,7 @@ private:
 	/// Output container context
 	AVFormatContext			*m_pFormatContext;
 
-	/// Temp buffer
-	sqbind::CSqBinary		m_tmp;
+	/// Temp buffers
+	sqbind::CSqBinary		m_tmp, m_tmp2;
 
 };

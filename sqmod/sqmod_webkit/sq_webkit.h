@@ -1,5 +1,7 @@
-
 // sq_webkit.h
+
+// http://trac.webkit.org/browser/trunk/WebKitTools/WinLauncher
+// http://siphon9.net/loune/2009/07/compiling-webkitcairo-on-windows-with-visual-c-express/
 
 #pragma once
 

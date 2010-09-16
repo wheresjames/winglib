@@ -97,8 +97,13 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x
 void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x_pFunction, oexCSTR x_pModule, oexCSTR x_pStr, oexINT x_nRes, oexINT x_nErr )
 {// _STT();
 
-	CStr str;
+	static int bOnce = 0;
+	if ( bOnce )
+		return;
+	bOnce = 1;
 
+	CStr str;
+	
 	str << oexT( "Module : " ) << x_pModule << oexNL;
 	str << oexT( "File : " ) << x_pFile << oexNL;
 	str << oexT( "Line : " ) << x_uLine << oexNL << oexNL;
@@ -140,6 +145,8 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x
 
 #endif
 		Break();
+
+	bOnce = 0;
 }
 
 oexCSTR CDebug::GetExceptionCodeName( oexUINT x_uCode )
@@ -275,7 +282,7 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 
 			// Show the thread id
 			sSt << oexNL
-				<< oexT( "---------------------------------------------------" oexNL8 )
+				<< oexT( "===================================================" oexNL8 )
 				<< ( p->GetThreadId() == uCurrentThreadId
 				   ? oexT( "***************************************************" oexNL8 )
 				   : oexT( "" ) )

@@ -43,6 +43,7 @@ void CFfEncoder::Destroy()
 	m_pCodecContext = oexNULL;
 
 	m_tmp.Free();
+	m_tmp2.Free();
 }
 
 // http://lists.mplayerhq.hu/pipermail/libav-user/2009-June/003257.html
@@ -184,10 +185,13 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 	} // end if
 
-	if ( m->isset( oexT( "quality" ) ) )
+	if ( m && m->isset( oexT( "quality" ) ) )
 	{
-		m_pCodecContext->qmin = m_pCodecContext->qmax 
-			= (*m)[ oexT( "quality" ) ].toint();
+		int q = (*m)[ oexT( "quality" ) ].toint();
+		if ( !q ) 
+			q = 5;
+
+		m_pCodecContext->qmin = m_pCodecContext->qmax = q;
 
 		m_pCodecContext->mb_lmin = m_pCodecContext->lmin = 
 			m_pCodecContext->qmin * FF_QP2LAMBDA;
@@ -225,16 +229,17 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 		return 0;
 
 	// Check for inverted image
+	int flip = 0;
 	if ( 0 > height )
-		height = -height;
+	{	flip = 1; height = -height; }
 
 	// Validate buffer size
-	if ( CFfConvert::CalcImageSize( fmt, width, height ) > sz_in )
+	int nSize = CFfConvert::CalcImageSize( fmt, width, height );
+	if ( nSize > sz_in )
 		return 0;
 
 	// How much room could we possibly need
-	int nSize = CFfConvert::CalcImageSize( fmt, width, height ) * 2;
-	if ( (int)out->Size() < nSize && !out->Mem().Mem().OexNew( nSize ).Ptr() )
+	if ( (int)out->Size() < ( nSize << 1 ) && !out->Allocate( ( nSize << 1 ) ) )
 		return 0;
 
 	AVFrame *paf = avcodec_alloc_frame();
@@ -246,10 +251,12 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 
 	if ( m )
 	{
-		if ( m->isset( oexT( "flags" ) ) && ( (*m)[ oexT( "flags" ) ].toint() & 0x01 ) )
-			paf->key_frame = 1;
-		else
-			paf->key_frame = 0;
+		if ( m->isset( oexT( "flags" ) ) )
+		{	if ( (*m)[ oexT( "flags" ) ].toint() & 0x01 )
+				paf->key_frame = 1;
+			else
+				paf->key_frame = 0;
+		} // end if
 
 		if ( m->isset( oexT( "quality" ) ) && ( (*m)[ oexT( "quality" ) ].toint() ) )
 			paf->quality = (*m)[ oexT( "quality" ) ].toint();
@@ -258,9 +265,8 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 
 	} // end if
 
-//	paf->quality = m_pCodecContext->qmax;
-
-	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->Ptr(), nSize, paf );
+	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->Ptr(), out->Size(), paf );
+	if ( !nBytes ) nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->Ptr(), out->Size(), paf );
 	if ( 0 > nBytes )
 	{	oexERROR( nBytes, oexT( "avcodec_encode_video() failed" ) );
 		out->setUsed( 0 );

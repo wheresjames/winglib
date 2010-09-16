@@ -216,7 +216,7 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 
 				// Show the thread id
 				sSt << oexNL
-					<< oexT( "---------------------------------------------------" oexNL8 )
+					<< oexT( "===================================================" oexNL8 )
 					<< ( p->GetThreadId() == uCurrentThreadId
 					   ? oexT( "***************************************************" oexNL8 )
 					   : oexT( "" ) )
