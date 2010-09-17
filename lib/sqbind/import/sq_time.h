@@ -88,7 +88,7 @@ namespace sqbind
 		void setStartStr( const stdString &s )
 		{	m_nStart = oexStrToLong( s.c_str() );
 			stdString::size_type pos = s.find_first_of( oexT( '.' ) );
-			m_nStartMs = ( stdString::npos != pos ) ? oexStrToLong( s.substr( pos ).c_str() ) : 0;
+			m_nStartMs = ( stdString::npos != pos ) ? oexStrToLong( s.substr( pos + 1, 3 ).c_str() ) : 0;
 		}
 
 		/// Returns start time as "t.ms"
@@ -99,7 +99,7 @@ namespace sqbind
 		void setEndStr( const stdString &s )
 		{	m_nEnd = oexStrToLong( s.c_str() );
 			stdString::size_type pos = s.find_first_of( oexT( '.' ) );
-			m_nEndMs = ( stdString::npos != pos ) ? oexStrToLong( s.substr( pos ).c_str() ) : 0;
+			m_nEndMs = ( stdString::npos != pos ) ? oexStrToLong( s.substr( pos + 1, 3 ).c_str() ) : 0;
 		}
 
 		/// Returns end time as "t.ms"
@@ -113,6 +113,24 @@ namespace sqbind
 			oex::CSysTime::CalculateTimes( &tMin, &tMax, nDefaultRange );
 			m_nStart = (SQINT)tMin; m_nStartMs = 0;
 			m_nEnd = (SQINT)tMax; m_nEndMs = 0;
+		}
+
+		/// Compares time passed in to start time
+		int CompareStart( int t, int ms )
+		{	if ( t < m_nStart || t == m_nStart && ms < m_nStartMs )
+				return -1;
+			if ( t > m_nStart || t == m_nStart && ms > m_nStartMs )
+				return 1; 
+			return 0;
+		}
+
+		/// Compares time passed in to end time
+		int CompareEnd( int t, int ms )
+		{	if ( t < m_nStart || t == m_nStart && ms < m_nStartMs )
+				return -1;
+			if ( t > m_nStart || t == m_nStart && ms > m_nStartMs )
+				return 1; 
+			return 0;
 		}
 
 	private:

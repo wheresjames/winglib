@@ -174,6 +174,8 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqTimeRange, CSqTimeRange )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getEndStr )
 
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, CalculateTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, CompareStart )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, CompareEnd )
 
 SQBIND_REGISTER_CLASS_END()
 

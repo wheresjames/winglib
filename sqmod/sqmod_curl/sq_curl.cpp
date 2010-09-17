@@ -25,24 +25,23 @@ void CSqCurl::Destroy()
 	} // end if
 }
 
-int CSqCurl::StdWriter( char *data, size_t size, size_t nmemb, sqbind::stdString *buffer )
+int CSqCurl::StdWriter( char *data, size_t size, size_t nmemb, sqbind::CSqBinary *buffer )
 {_STT();
 	int res = 0;
-	if ( buffer )
-	{	
-#if defined( oexUNICODE )
-		oex::CStr s = oexMbToStr( oex::CStr8( data, size * nmemb ) );
-		buffer->append( s.Ptr(), s.Length() );
-#else
-		buffer->append( data, size * nmemb );
-#endif
-		res = size * nmemb;
-	} // end if
+	if ( buffer && data && size && nmemb )
+		res = size * nmemb,
+		buffer->AppendBuffer( data, res );
 	return res;
 }
 
-int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqString *sData )
+int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqBinary *sData )
 {_STT();
+
+	if ( !sData )
+		return 0;
+
+	sData->setUsed( 0 );
+
 	if ( !sUrl.length() )
 		return 0;
 
@@ -73,8 +72,7 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqStrin
 	if ( lPort )
 		curl_easy_setopt( m_curl, CURLOPT_PORT, lPort );
 
-	sqbind::stdString sOut;
-	curl_easy_setopt( m_curl, CURLOPT_WRITEDATA, sData->ptr() );
+	curl_easy_setopt( m_curl, CURLOPT_WRITEDATA, sData );
 	curl_easy_setopt( m_curl, CURLOPT_WRITEFUNCTION, StdWriter );
 
 	// Do the thing
@@ -84,12 +82,18 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqStrin
 	{	m_sErr = oexMbToStrPtr( sErr );
 		return 0;
 	} // end if
-
+	
 	return 1;
 }
 
-int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::stdString &sPost, sqbind::CSqString *sData )
+int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::stdString &sPost, sqbind::CSqBinary *sData )
 {_STT();
+
+	if ( !sData )
+		return 0;
+
+	sData->setUsed( 0 );
+
 	if ( !sUrl.length() )
 		return 0;
 
@@ -100,7 +104,7 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::s
 	m_curl = curl_easy_init();
 	if ( !m_curl )
 		return 0;
-
+	
 	curl_easy_setopt( m_curl, CURLOPT_POST, 1 );
 
 	curl_easy_setopt( m_curl, CURLOPT_POSTFIELDS, sPost.c_str() );
@@ -126,8 +130,7 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::s
 	if ( lPort )
 		curl_easy_setopt( m_curl, CURLOPT_PORT, lPort );
 
-	sqbind::stdString sOut;
-	curl_easy_setopt( m_curl, CURLOPT_WRITEDATA, sData->ptr() );
+	curl_easy_setopt( m_curl, CURLOPT_WRITEDATA, sData );
 	curl_easy_setopt( m_curl, CURLOPT_WRITEFUNCTION, StdWriter );
 
 	// Do the thing

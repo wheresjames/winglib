@@ -325,14 +325,14 @@ public:
 	//==============================================================
 	/// Detaches from existing socket handle without releasing it.
 	void Detach()
-    {   m_hSocket = c_InvalidSocket; }
+	{   m_hSocket = c_InvalidSocket; }
 
 	//==============================================================
 	// IsSocket()
 	//==============================================================
 	/// Returns non-zero if the class contains a valid socket handle
 	oexBOOL IsSocket()
-    {   return ( m_hSocket != c_InvalidSocket ); }
+	{   return ( m_hSocket != c_InvalidSocket ); }
 
 	//==============================================================
 	// GetConnectState()
@@ -343,8 +343,8 @@ public:
 			bit 2	-	non zero if connected
 			bit 3	-	non zero if connecting
 	*/
-    oexINT GetConnectState()
-    {	return m_uConnectState; }
+	oexINT GetConnectState()
+	{	return m_uConnectState; }
 
 	//==============================================================
 	// IsConnected()
@@ -421,7 +421,7 @@ public:
 	//==============================================================
 	/// Returns a handle to the socket
 	t_SOCKET GetSocketHandle()
-    {   return m_hSocket; }
+	{	return m_hSocket; }
 
 	//==============================================================
 	// Create()
