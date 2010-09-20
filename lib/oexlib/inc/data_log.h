@@ -230,8 +230,8 @@ public:
 		CStr8			sKey;
 		CStr			sHash;
 		oexGUID			hash;
-		oexUINT			uB;
-		oexUINT			uI;
+		oexULONG		uB;
+		oexULONG		uI;
 		SValueIndex		vi;
 		SValueIndex		viNext;
 		CFile::t_size	pos;
