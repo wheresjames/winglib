@@ -112,6 +112,9 @@ namespace sqbind
 		/// Map folder
 		int MapFolder( const stdString &sName, const stdString &sFolder );
 
+		/// Unmap folder
+		int UnmapFolder( const stdString &sName, const stdString &sFolder );
+
 		/// Sets the port factory on the server
 		void setPortFactory( CSqFactory *p );
 

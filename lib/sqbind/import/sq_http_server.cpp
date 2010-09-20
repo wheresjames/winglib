@@ -51,6 +51,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqHttpServer, CSqHttpServer )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, SetSessionTimeout )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, GetNumActiveClients )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, MapFolder )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, UnmapFolder )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, setPortFactory )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, getPortFactory )
 
@@ -119,7 +120,7 @@ int CSqHttpServer::Start( int nPort )
 
 int CSqHttpServer::Stop()
 {_STT();
-	
+
 	return m_server.Stop();
 }
 
@@ -323,7 +324,13 @@ int CSqHttpServer::GetNumActiveClients()
 int CSqHttpServer::MapFolder( const stdString &sName, const stdString &sFolder )
 {_STT();
 
-	return m_server.MapFolder( sName.c_str(), sFolder.c_str() );
+	return m_server.MapFolder( sName.c_str(), sFolder.c_str(), oex::oexTRUE );
+}
+
+int CSqHttpServer::UnmapFolder( const stdString &sName, const stdString &sFolder )
+{_STT();
+
+	return m_server.MapFolder( sName.c_str(), sFolder.c_str(), oex::oexFALSE );
 }
 
 oex::oexINT CSqHttpServer::_OnAuthenticate( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession, oex::oexLONG lType, oex::oexCSTR pData )

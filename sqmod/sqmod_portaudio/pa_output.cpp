@@ -100,7 +100,7 @@ int CPaOutput::PaStreamCallback( const void *input, void *output, unsigned long 
 
 	// Do we have the minimum required number of bytes?
 	int bytes = frameCount * getFrameBytes();
-	if ( bytes > m_buf.GetMaxRead() )
+	if ( bytes > (int)m_buf.GetMaxRead() )
 	{
 		// Play what's left
 		bytes = m_buf.GetMaxRead();
