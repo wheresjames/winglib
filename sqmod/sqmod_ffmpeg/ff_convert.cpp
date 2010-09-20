@@ -103,7 +103,7 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 
 	// Flip?
 	if ( flip )
-		for ( int z = 0; z < oexSizeOfArray( apSrc.linesize ); z++ )
+		for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
 		{	if ( apSrc.data[ z ] )
 				apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
 			if ( apSrc.linesize[ z ] )
@@ -168,7 +168,7 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 	// Flip?
 	if ( flip )
 	{	if ( src_fmt )
-			for ( int z = 0; z < oexSizeOfArray( apSrc.linesize ); z++ )
+			for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
 			{	if ( apSrc.data[ z ] )
 					apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
 				if ( apSrc.linesize[ z ] )
@@ -176,7 +176,7 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 			} // end for
 
 		else
-			for ( int z = 0; z < oexSizeOfArray( apDst.linesize ); z++ )
+			for ( int z = 0; z < (int)oexSizeOfArray( apDst.linesize ); z++ )
 			{	if ( apDst.data[ z ] )
 					apDst.data[ z ] = apDst.data[ z ] + ( height - 1 ) * apDst.linesize[ z ];
 				if ( apDst.linesize[ z ] )
@@ -247,7 +247,7 @@ int CFfConvert::ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, 
 	// Flip?
 	if ( flip )
 	{	if ( src_fmt )
-			for ( int z = 0; z < oexSizeOfArray( apSrc.linesize ); z++ )
+			for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
 			{	if ( apSrc.data[ z ] )
 					apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
 				if ( apSrc.linesize[ z ] )
@@ -255,7 +255,7 @@ int CFfConvert::ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, 
 			} // end for
 
 		else
-			for ( int z = 0; z < oexSizeOfArray( apDst.linesize ); z++ )
+			for ( int z = 0; z < (int)oexSizeOfArray( apDst.linesize ); z++ )
 			{	if ( apDst.data[ z ] )
 					apDst.data[ z ] = apDst.data[ z ] + ( height - 1 ) * apDst.linesize[ z ];
 				if ( apDst.linesize[ z ] )
@@ -311,7 +311,7 @@ int CFfConvert::ConvertColorRI( void *buf, int src_fmt, int width, int height, s
 	// Flip?
 	if ( flip )
 	{	if ( src_fmt )
-			for ( int z = 0; z < oexSizeOfArray( apSrc.linesize ); z++ )
+			for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
 			{	if ( apSrc.data[ z ] )
 					apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
 				if ( apSrc.linesize[ z ] )
@@ -319,7 +319,7 @@ int CFfConvert::ConvertColorRI( void *buf, int src_fmt, int width, int height, s
 			} // end for
 
 		else
-			for ( int z = 0; z < oexSizeOfArray( apDst.linesize ); z++ )
+			for ( int z = 0; z < (int)oexSizeOfArray( apDst.linesize ); z++ )
 			{	if ( apDst.data[ z ] )
 					apDst.data[ z ] = apDst.data[ z ] + ( height - 1 ) * apDst.linesize[ z ];
 				if ( apDst.linesize[ z ] )
@@ -370,7 +370,7 @@ int CFfConvert::ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height
 	AVPicture apSrc, apDst;
 
 	// Copy source information
-	for ( int i = 0; i < oexSizeOfArray( apSrc.linesize ); i++ )
+	for ( int i = 0; i < (int)oexSizeOfArray( apSrc.linesize ); i++ )
 		apSrc.data[ i ] = pAf->data[ i ],
 		apSrc.linesize[ i ] = pAf->linesize[ i ];
 
@@ -380,7 +380,7 @@ int CFfConvert::ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height
 	// Flip?
 	if ( flip )
 	{	if ( src_fmt )
-			for ( int z = 0; z < oexSizeOfArray( apSrc.linesize ); z++ )
+			for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
 			{	if ( apSrc.data[ z ] )
 					apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
 				if ( apSrc.linesize[ z ] )
@@ -388,7 +388,7 @@ int CFfConvert::ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height
 			} // end for
 
 		else
-			for ( int z = 0; z < oexSizeOfArray( apDst.linesize ); z++ )
+			for ( int z = 0; z < (int)oexSizeOfArray( apDst.linesize ); z++ )
 			{	if ( apDst.data[ z ] )
 					apDst.data[ z ] = apDst.data[ z ] + ( height - 1 ) * apDst.linesize[ z ];
 				if ( apDst.linesize[ z ] )
@@ -441,7 +441,7 @@ int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height
 	AVPicture apSrc, apDst;
 
 	// Copy source information
-	for ( int i = 0; i < oexSizeOfArray( apSrc.linesize ); i++ )
+	for ( int i = 0; i < (int)oexSizeOfArray( apSrc.linesize ); i++ )
 		apSrc.data[ i ] = pAf->data[ i ],
 		apSrc.linesize[ i ] = pAf->linesize[ i ];
 
@@ -451,7 +451,7 @@ int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height
 	// Flip?
 	if ( flip )
 	{	if ( src_fmt )
-			for ( int z = 0; z < oexSizeOfArray( apSrc.linesize ); z++ )
+			for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
 			{	if ( apSrc.data[ z ] )
 					apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
 				if ( apSrc.linesize[ z ] )
@@ -459,7 +459,7 @@ int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height
 			} // end for
 
 		else
-			for ( int z = 0; z < oexSizeOfArray( apDst.linesize ); z++ )
+			for ( int z = 0; z < (int)oexSizeOfArray( apDst.linesize ); z++ )
 			{	if ( apDst.data[ z ] )
 					apDst.data[ z ] = apDst.data[ z ] + ( height - 1 ) * apDst.linesize[ z ];
 				if ( apDst.linesize[ z ] )
@@ -503,16 +503,16 @@ int CFfConvert::Rotate( int deg, sqbind::CSqBinary *src, int src_fmt, int width,
 		int sz = sw * height;
 
 		// Ensure source buffer is large enough
-		if ( src->getUsed() < sz )
+		if ( (int)src->getUsed() < sz )
 			return 0;
 
 		// Ensure destination buffer is large enough
-		if ( dst->getUsed() < sz )
+		if ( (int)dst->getUsed() < sz )
 		{	if ( !dst->Allocate( sz ) )
 				return 0;
 			else
 				dst->setUsed( sz );
-		} // end if		
+		} // end if
 
 		// Do the rotation
 		if ( 90 == deg )
@@ -529,21 +529,21 @@ int CFfConvert::Rotate( int deg, sqbind::CSqBinary *src, int src_fmt, int width,
 	// RGB32
 	else if ( ( PIX_FMT_BGR32 == src_fmt || PIX_FMT_RGB32 == src_fmt )
 			  && ( PIX_FMT_BGR32 == dst_fmt || PIX_FMT_RGB32 == dst_fmt ) )
-	{	
+	{
 		int sw = oex::CImage::GetScanWidth( width, 32 );
 		int sz = sw * height;
 
 		// Ensure source buffer is large enough
-		if ( src->getUsed() < sz )
+		if ( (int)src->getUsed() < sz )
 			return 0;
 
 		// Ensure destination buffer is large enough
-		if ( dst->getUsed() < sz )
+		if ( (int)dst->getUsed() < sz )
 		{	if ( !dst->Allocate( sz ) )
 				return 0;
 			else
 				dst->setUsed( sz );
-		} // end if		
+		} // end if
 
 		// Do the rotation
 		if ( 90 == deg )
@@ -569,9 +569,7 @@ int CFfConvert::Rotate90_3( void *src, void *dst, int width, int height )
 
 	// Rotate the image
 	int sstride = oex::CImage::GetScanWidth( width, 24 );
-	int sdiff = sstride - ( width * 3 );
 	int dstride = oex::CImage::GetScanWidth( height, 24 );
-	int ddiff = dstride - ( height * 3 );
 	unsigned char *s = (unsigned char*)src + sstride - 3;
 	for ( int y = 0; y < height; y++, s += sstride << 1 )
 	{	unsigned char *d = (unsigned char*)dst + ( y * 3 );
@@ -610,9 +608,7 @@ int CFfConvert::Rotate270_3( void *src, void *dst, int width, int height )
 
 	// Rotate the image
 	int sstride = oex::CImage::GetScanWidth( width, 24 );
-	int sdiff = sstride - ( width * 3 );
 	int dstride = oex::CImage::GetScanWidth( height, 24 );
-	int ddiff = dstride - ( height * 3 );
 	unsigned char *s = (unsigned char*)src + sstride - 3;
 	for ( int y = 0; y < height; y++, s += sstride << 1 )
 	{	unsigned char *d = (unsigned char*)dst + ( dstride * width ) - ( y * 3 ) - 3;

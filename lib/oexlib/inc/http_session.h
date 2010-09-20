@@ -327,7 +327,7 @@ public:
 		sPath.LTrim( "\\/" );
 		CStr8 sName = sPath.Parse( "\\/" );
 		CStr sStrName = oexMbToStr( sName );
-		if ( !sName.Length() || !m_pMappedFolders->IsKey( sStrName ) )
+		if ( !sName.Length() || !m_pMappedFolders->IsKey( sStrName ) || !(*m_pMappedFolders)[ sStrName ].Size() )
 			return oexFALSE;
 
 		if ( m_fnAuthenticate )
@@ -336,46 +336,60 @@ public:
 				return oexTRUE;
 			} // end if
 
-		CStr sMapped = (*m_pMappedFolders)[ sStrName ].ToString();
-
-		// Is it a resource?
-		if ( oexT( '#' ) == *sMapped.Ptr() )
+		for ( oex::CPropertyBag::iterator it; m_pMappedFolders->List().Next( it ); )
 		{
-			// Are there any resources?
-			if ( !oexIsResources() )
-			{	SendErrorMsg( HTTP_NOT_FOUND, "File not found" );
-				return oexTRUE;
-			} // end if
+			// Is this the correct folder?
+			if ( it.Node()->key == sName )
+				for ( oex::CPropertyBag::iterator itF; it->List().Next( itF ); )
+				{
+					CStr sMapped = itF.Node()->key;
 
-			// Drop the '#'
-			sMapped++;
+					// Is it a resource?
+					if ( oexT( '#' ) == *sMapped.Ptr() )
+					{
+						// Are there any resources?
+						if ( oexIsResources() )
+						{
+							// Drop the '#'
+							sMapped++;
 
-			// Build full path
-			sMapped.BuildPath( oexMbToStr( sPath ) );
+							// Build full path
+							sMapped.BuildPath( oexMbToStr( sPath ) );
 
-			// Get the resource
-			if ( !oexGetResource( sMapped, &m_sContent ) )
-			{	SendErrorMsg( HTTP_NOT_FOUND, "File not found" );
-				return oexTRUE;
-			} // end if
+							// Get the resource
+							if ( oexGetResource( sMapped, &m_sContent ) )
+							{	SendReply();
+								return oexTRUE;
+							} // end if
 
-			// Send the reply
-			SendReply();
+						} // end if
 
-			return oexTRUE;
+					} // end if
 
-		} // end if
+					else
+					{
+						// Build full file path
+						CStr8 sFile = oexStrToMb( sMapped );
+						sFile.BuildPath( sPath );
 
-		CStr8 sFile = oexStrToMb( sMapped );
-		sFile.BuildPath( sPath );
+						// Attempt to send it if it exists
+						if ( oexExists( oexMbToStr( sFile ).Ptr() ) )
+						{
+							// Send the file
+							if ( !SendFile( oexMbToStr( sFile ).Ptr() ) )
+								SendErrorMsg( HTTP_SERVER_ERROR, "File error" );
 
-		if ( !oexExists( oexMbToStr( sFile ).Ptr() ) )
-		{	SendErrorMsg( HTTP_NOT_FOUND, "File not found" );
-			return oexTRUE;
-		} // end if
+							return oexTRUE;
 
-		if ( !SendFile( oexMbToStr( sFile ).Ptr() ) )
-			SendErrorMsg( HTTP_SERVER_ERROR, "File error" );
+						} // end if
+
+					} // end else
+
+				} // end for
+
+		} // end for
+
+		SendErrorMsg( HTTP_NOT_FOUND, "File not found" );
 
 		return oexTRUE;
 	}
@@ -1111,7 +1125,7 @@ public:
 	{	return m_nTransactionId; }
 
 	/// Sets the mapped folders list
-	void SetMappedFoldersList( CStrAssoList *pList, oexLock *pLock )
+	void SetMappedFoldersList( CPropertyBag *pList, oexLock *pLock )
 	{	m_pMappedFolders = pList; m_pMappedFoldersLock = pLock; }
 
 private:
@@ -1204,7 +1218,7 @@ private:
 	oexLONG						m_nTransactionId;
 
 	/// Pointer to list of mapped folders
-	CStrAssoList				*m_pMappedFolders;
+	CPropertyBag				*m_pMappedFolders;
 
 	/// Pointer to mapped folders lock
 	oexLock						*m_pMappedFoldersLock;

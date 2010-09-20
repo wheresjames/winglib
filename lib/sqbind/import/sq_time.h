@@ -117,18 +117,18 @@ namespace sqbind
 
 		/// Compares time passed in to start time
 		int CompareStart( int t, int ms )
-		{	if ( t < m_nStart || t == m_nStart && ms < m_nStartMs )
+		{	if ( t < m_nStart || ( t == m_nStart && ms < m_nStartMs ) )
 				return -1;
-			if ( t > m_nStart || t == m_nStart && ms > m_nStartMs )
+			if ( t > m_nStart || ( t == m_nStart && ms > m_nStartMs ) )
 				return 1; 
 			return 0;
 		}
 
 		/// Compares time passed in to end time
 		int CompareEnd( int t, int ms )
-		{	if ( t < m_nStart || t == m_nStart && ms < m_nStartMs )
+		{	if ( t < m_nStart || ( t == m_nStart && ms < m_nStartMs ) )
 				return -1;
-			if ( t > m_nStart || t == m_nStart && ms > m_nStartMs )
+			if ( t > m_nStart || ( t == m_nStart && ms > m_nStartMs ) )
 				return 1; 
 			return 0;
 		}

@@ -415,7 +415,7 @@ protected:
 		session.SetServerId( m_sServerId );
 
 		// Mapped folders
-		session.SetMappedFoldersList( &m_lstMappedFolders, &m_lockMappedFolders );
+		session.SetMappedFoldersList( &m_pbMappedFolders, &m_lockMappedFolders );
 
 		// Enable sessions?
 		if ( m_bEnableSessions )
@@ -716,15 +716,25 @@ public:
 	{	m_bMultiThreaded = b; }
 
 	/// Maps / unmaps a folder
-	oexBOOL MapFolder( oexCSTR pName, oexCSTR pFolder )
+	oexBOOL MapFolder( oexCSTR pName, oexCSTR pFolder, oexBOOL bMap )
 	{
 		if ( !pName || !*pName )
 			return oexFALSE;
 
-		if ( pFolder && *pFolder )
-			m_lstMappedFolders[ pName ] = pFolder;
+		if ( !pFolder || !*pFolder )
+			return oexFALSE;
+
+		oexAutoLock ll( m_lockMappedFolders );
+		if ( !ll.IsLocked() )
+			return oexFALSE;
+
+		if ( bMap )
+			m_pbMappedFolders[ pName ][ pFolder ] = 1;
 		else
-			m_lstMappedFolders.Unset( pName );
+		{	m_pbMappedFolders[ pName ].Unset( pFolder );
+			if ( !m_pbMappedFolders[ pName ].Size() )
+				m_pbMappedFolders = 0;
+		} // end else
 
 		return oexTRUE;
 	}
@@ -801,7 +811,7 @@ private:
 	oexLock						m_lockMappedFolders;
 
 	/// List of mapped folders
-	CStrAssoList				m_lstMappedFolders;
+	CPropertyBag				m_pbMappedFolders;
 
 	/// Manages port creation / destruction
 	CFactory					*m_pPortFactory;

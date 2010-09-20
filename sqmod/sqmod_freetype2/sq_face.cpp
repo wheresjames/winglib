@@ -20,9 +20,9 @@ CFtFace::CFtFace()
 
 }
 
-CFtFace::~CFtFace() 
+CFtFace::~CFtFace()
 {
-	Destroy(); 
+	Destroy();
 }
 
 
@@ -40,7 +40,7 @@ void CFtFace::Destroy()
 
 void CFtFace::setAngle( double d )
 {
-	m_dAngle = d; 
+	m_dAngle = d;
 	m_matrix.xx = (FT_Fixed)( cos( m_dAngle ) * CFtFace_FONT_SCALE );
 	m_matrix.xy = (FT_Fixed)(-sin( m_dAngle ) * CFtFace_FONT_SCALE );
 	m_matrix.yx = (FT_Fixed)( sin( m_dAngle ) * CFtFace_FONT_SCALE );
@@ -90,7 +90,7 @@ FT_BitmapGlyph CFtFace::getCharGlyph( oex::oexTCHAR c )
 
 	// Render to bitmap if needed
 	if ( FT_GLYPH_FORMAT_BITMAP != glyph->format )
-		if ( m_last_error = FT_Glyph_To_Bitmap( &glyph, FT_RENDER_MODE_NORMAL, 0, 1 ) )
+		if ( ( m_last_error = FT_Glyph_To_Bitmap( &glyph, FT_RENDER_MODE_NORMAL, 0, 1 ) ) )
 			return 0;
 
 	// Bitmap glyph
@@ -111,9 +111,9 @@ int CFtFace::LoadChar( const sqbind::stdString &c )
 
 int CFtFace::CalcSize( const sqbind::stdString &s, sqbind::CSqSize *pSize )
 {
-	if ( !pSize ) 
+	if ( !pSize )
 		return 0;
-	
+
 	if ( !m_face )
 	{	pSize->set( 0, 0 );
 		return 0;
@@ -123,7 +123,7 @@ int CFtFace::CalcSize( const sqbind::stdString &s, sqbind::CSqSize *pSize )
 	FT_BitmapGlyph glyph;
 	int _w = 0, _h = 0;
 
-	for ( int i = 0; i < s.length(); i++ )
+	for ( int i = 0; i < (int)s.length(); i++ )
 		if ( ( glyph = getCharGlyph( s[ i ] ) ) )
 		{
 			FT_Glyph_Get_CBox( (FT_Glyph)glyph, FT_GLYPH_BBOX_PIXELS, &gbox );
@@ -161,8 +161,8 @@ int CFtFace::Char2Ascii( long *ox, long *oy, long tw, FT_Bitmap *pBmp, sqbind::s
 	// Ensure string is at least as large as we need
 	long _ox = ox ? *ox : 0, _oy = oy ? *oy : 0;
 	long sw = ( _oy + h ) * ( _ox + w + sEol.length() );
-	if ( sOut->length() < sw )
-		sOut->resize( sw, sChars[ 0 ] ), 
+	if ( (long)sOut->length() < sw )
+		sOut->resize( sw, sChars[ 0 ] ),
 		tw = _ox + w + sEol.length();
 
 	for ( long y = 0; y < h; y++ )
@@ -180,7 +180,7 @@ int CFtFace::Char2Ascii( long *ox, long *oy, long tw, FT_Bitmap *pBmp, sqbind::s
 
 		// Copy end of line string
 		if ( sEol.length() )
-			for ( long i = 0; i < sEol.length(); i++ )
+			for ( long i = 0; i < (long)sEol.length(); i++ )
 				(*sOut)[ ( _oy + y ) * tw + ( _ox + w + i ) ] = sEol[ i ];
 
 	} // end for
@@ -203,12 +203,12 @@ sqbind::stdString CFtFace::Str2Ascii( int width, int height, const sqbind::stdSt
 
 	if ( !height )
 		height = sz.getY();
-	
+
 	sqbind::stdString s;
 	s.resize( width * height, sChars[ 0 ] );
 
 	long x = 0, y = 0;
-	for ( long i = 0; i < sStr.length(); i++ )
+	for ( long i = 0; i < (long)sStr.length(); i++ )
 	{
 		FT_BitmapGlyph glyph = getCharGlyph( sStr[ i ] );
 		if ( glyph )
@@ -226,7 +226,7 @@ sqbind::stdString CFtFace::Str2Ascii( int width, int height, const sqbind::stdSt
 
 	if ( sEol.length() )
 		for ( long y = 0; y < height; y++ )
-			for ( long i = 0; i < sEol.length(); i++ )
+			for ( long i = 0; i < (long)sEol.length(); i++ )
 				s[ y * width + sz.getX() + i ] = sEol[ i ];
 
 	return s;
@@ -244,7 +244,8 @@ int CFtFace::DrawImg( const sqbind::stdString &sStr, sqbind::CSqPos *pPos, sqbin
 		return 0;
 
 	// Draw the font
-	return DrawBin( sStr, pPos, &buf, 0, &pImg->getSize(), pImg->getScanWidth(), flip );
+	sqbind::CSqSize sz = pImg->getSize();
+	return DrawBin( sStr, pPos, &buf, 0, &sz, pImg->getScanWidth(), flip );
 }
 
 int CFtFace::DrawBin( const sqbind::stdString &sStr, sqbind::CSqPos *pPos, sqbind::CSqBinary *pBin, int fmt, sqbind::CSqSize *pSize, int sw, int flip )
@@ -259,7 +260,7 @@ int CFtFace::DrawBin( const sqbind::stdString &sStr, sqbind::CSqPos *pPos, sqbin
 		return 0;
 
 	int x = pPos->getX(), y = pPos->getY();
-	for ( long i = 0; i < sStr.length(); i++ )
+	for ( long i = 0; i < (long)sStr.length(); i++ )
 	{
 		FT_BitmapGlyph glyph = getCharGlyph( sStr[ i ] );
 		if ( glyph )
@@ -312,7 +313,7 @@ int CFtFace::DrawCharBin( FT_BitmapGlyph g, int x, int y, sqbind::CSqBinary *pBi
 				{	int m;
 					if ( !flip ) m = py * sw + ( px * 3 );
 					else m = ( h - py ) * sw + ( px * 3 );
-					if ( 0 <= m && m < max )
+					if ( 0 <= m && m < (int)max )
 					{	p[ m ] = ( m_blue * c ) >> 8;
 						p[ m + 1 ] = ( m_green * c ) >> 8;
 						p[ m + 2 ] = ( m_red * c ) >> 8;
