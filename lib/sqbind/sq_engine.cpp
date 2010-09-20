@@ -331,7 +331,7 @@ stdString CSqEngineExport::get_output( int max )
 /// Returns the buffer for a binary share
 unsigned int CSqEngineExport::get_instance_handle()
 {_STT();
-	return (unsigned int)oex::os::CSys::GetInstanceHandle();
+	return (unsigned int)(unsigned long)oex::os::CSys::GetInstanceHandle();
 }
 
 stdString CSqEngineExport::build_url( CSqMulti *pUrl )
@@ -725,6 +725,21 @@ CSqMulti CSqEngineExport::get_system_drive_info( const stdString &sDrive )
 	oex::CPropertyBag pb = oex::os::CSysUtil::GetDiskInfo( std2oex( sDrive ) );
 	SQBIND_PropertyBagToMulti( pb, m );
 	return m;
+}
+
+int CSqEngineExport::reg_is_key( const stdString &sKey, const stdString &sPath, const stdString &sName )
+{_STT();
+	return oex::os::CSysUtil::IsRegValue( std2oex( sKey ), std2oex( sPath ), std2oex( sName ) );
+}
+
+stdString CSqEngineExport::reg_get_str( const stdString &sKey, const stdString &sPath, const stdString &sName )
+{_STT();
+	return oex2std( oex::os::CSysUtil::GetRegString( std2oex( sKey ), std2oex( sPath ), std2oex( sName ) ) );
+}
+
+int CSqEngineExport::reg_set_str( const stdString &sKey, const stdString &sPath, const stdString &sName, const stdString &sValue )
+{_STT();
+	return oex::os::CSysUtil::SetRegString( std2oex( sKey ), std2oex( sPath ), std2oex( sName ), std2oex( sValue ) );
 }
 
 int CSqEngineExport::is_path( const stdString &sPath )
@@ -1189,6 +1204,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, enable_output_capture )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, enable_output_file_capture )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_output )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_is_key )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_get_str )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_set_str )	
 
 SQBIND_REGISTER_CLASS_END()
 

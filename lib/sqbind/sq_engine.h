@@ -367,6 +367,15 @@ public:
 	/// Returns information about the specified system drive
 	CSqMulti get_system_drive_info( const stdString &sDrive );
 
+	/// Returns non-zero if registry key exists
+	int reg_is_key( const stdString &sKey, const stdString &sPath, const stdString &sName );
+
+	/// Returns non-zero if registry key exists
+	stdString reg_get_str( const stdString &sKey, const stdString &sPath, const stdString &sName );
+
+	/// Returns non-zero if registry key exists
+	int reg_set_str( const stdString &sKey, const stdString &sPath, const stdString &sName, const stdString &sValue );
+
 	/// Execute functions
 	stdString execute( int nRet, const stdString &sPath, const stdString &sFunction );
 	stdString execute1( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1 );
