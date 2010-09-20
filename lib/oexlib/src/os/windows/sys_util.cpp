@@ -206,12 +206,8 @@ oexBOOL CSysUtil::DeleteRegKey( const CStr &x_sKey, const CStr &x_sPath, oexBOOL
 	return ( RegDeleteKey( hRoot, x_sPath.Ptr() ) == ERROR_SUCCESS ) ? oexTRUE : oexFALSE;
 }
 
-oexBOOL CSysUtil::DeleteRegSubKeys( const CStr &x_sKey, const CStr &x_sPath )
+oexBOOL _DeleteRegSubKeys( HKEY hRoot, const CStr &x_sPath )
 {_STT();
-
-	HKEY hRoot = RootKeyFromName( x_sKey );
-	if ( !hRoot )
-		return oexFALSE;
 
 	HKEY		hKey = NULL;
 	char		szKey[ oexSTRSIZE ];
@@ -226,7 +222,7 @@ oexBOOL CSysUtil::DeleteRegSubKeys( const CStr &x_sKey, const CStr &x_sPath )
 							NULL, NULL, NULL, NULL ) == ERROR_SUCCESS )
 	{
 		// A little recursion
-		DeleteRegSubKeys( x_sKey, szKey );
+		_DeleteRegSubKeys( hKey, szKey );
 
 		// Attempt to delete the key
 		RegDeleteKey( hKey, szKey );
@@ -240,6 +236,68 @@ oexBOOL CSysUtil::DeleteRegSubKeys( const CStr &x_sKey, const CStr &x_sPath )
 	RegCloseKey( hKey );
 
 	return oexTRUE;
+}
+
+oexBOOL CSysUtil::DeleteRegSubKeys( const CStr &x_sKey, const CStr &x_sPath )
+{_STT();
+	return _DeleteRegSubKeys( RootKeyFromName( x_sKey ), x_sPath );
+}
+
+oexLONG _GetRegKeys( CPropertyBag &pb, HKEY hRoot, const CStr &x_sPath, oexBOOL x_bValues, oexBOOL x_bSubKeys )
+{_STT();
+
+	if ( !hRoot )
+		return 0;
+
+	HKEY		hKey = NULL;
+	char		szKey[ oexSTRSIZE ];
+	DWORD		dwSize = oexSTRSIZE - 1;
+
+	// Open The Key
+	if( RegOpenKeyEx( hRoot, x_sPath.Ptr(), 0, KEY_ALL_ACCESS, &hKey ) != ERROR_SUCCESS )
+		return 0;
+
+	// For each sub key
+	oexLONG lCount = 0;
+	while ( RegEnumKeyEx(	hKey, 0, szKey, &dwSize, 
+							NULL, NULL, NULL, NULL ) == ERROR_SUCCESS )
+	{
+		lCount++;
+
+		if ( !x_bValues )
+			pb[ szKey ] = oexT( "" );
+
+		else
+		{
+			CBin buf;
+			DWORD dwType = 0, dwSize = 0;
+			if ( ERROR_SUCCESS == RegQueryValueEx( hKey, szKey, 0, &dwType, 0, &dwSize ) )
+				if ( buf.Allocate( dwSize ) )
+					if ( ERROR_SUCCESS == RegQueryValueEx( hKey, szKey, 0, &dwType, (LPBYTE)buf._Ptr(), &dwSize ) )
+						pb[ szKey ] = RegValueToString( dwType, buf._Ptr(), dwSize );
+
+		} // end if
+
+		// Add sub keys
+		if ( x_bSubKeys )
+			lCount += _GetRegKeys( pb[ szKey ], hKey, szKey, x_bValues, x_bSubKeys );
+
+		// Reset size
+		dwSize = oexSTRSIZE - 1;
+
+	} // end while
+
+	// Close the key
+	RegCloseKey( hKey );
+
+	return lCount;
+}
+
+CPropertyBag CSysUtil::GetRegKeys( const CStr &x_sKey, const CStr &x_sPath, oexBOOL x_bValues, oexBOOL x_bSubKeys )
+{_STT();
+	CPropertyBag pb;
+	_GetRegKeys( pb, RootKeyFromName( x_sKey ), x_sPath, x_bValues, x_bSubKeys );
+	return pb;
 }
 
 CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)

@@ -137,6 +137,22 @@ public:
 	*/
 	static oexBOOL DeleteRegSubKeys( const CStr &x_sKey, const CStr &x_sPath );
 
+	//==============================================================
+	// GetRegKeys()
+	//==============================================================
+	/// Gets a list of the specified sub keys
+	/**
+		\param [in] x_sKey		-	Key name
+		\param [in] x_sPath		-	Registry path
+		\param [in] x_bValues	-	Non-zero to return key values
+		\param [in] x_bSubKeys	-	Non-zero to enumerate sub keys
+
+		\return Non-zero if success
+
+		\see
+	*/
+	static CPropertyBag GetRegKeys( const CStr &x_sKey, const CStr &x_sPath, oexBOOL x_bValues, oexBOOL x_bSubKeys );
+
 
 	//==============================================================
 	// GetDiskInfo()
