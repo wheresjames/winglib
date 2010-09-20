@@ -225,7 +225,7 @@ oexBOOL CFMap::Release( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexFILESI
 	} // end if
 
 // +++ Do we need to release the file handle here?
-    close( (int)x_hFileMap );
+    close( (int)(long)x_hFileMap );
 
 #endif
 
