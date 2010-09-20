@@ -59,6 +59,16 @@ oexBOOL CSysUtil::SetRegString( const CStr &x_sKey, const CStr &x_sPath, const C
 	return oexFALSE;
 }
 
+oexBOOL CSysUtil::DeleteRegKey( const CStr &x_sKey, const CStr &x_sPath, oexBOOL x_bSubKeys )
+{
+	return oexFALSE;
+}
+
+oexBOOL CSysUtil::DeleteRegSubKeys( const CStr &x_sKey, const CStr &x_sPath )
+{
+	return oexFALSE;
+}
+
 CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 {_STT();
 
