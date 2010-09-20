@@ -370,11 +370,17 @@ public:
 	/// Returns non-zero if registry key exists
 	int reg_is_key( const stdString &sKey, const stdString &sPath, const stdString &sName );
 
-	/// Returns non-zero if registry key exists
+	/// Returns the string value of the specified key
 	stdString reg_get_str( const stdString &sKey, const stdString &sPath, const stdString &sName );
 
-	/// Returns non-zero if registry key exists
+	/// Sets the specified registry key
 	int reg_set_str( const stdString &sKey, const stdString &sPath, const stdString &sName, const stdString &sValue );
+
+	/// Deletes the specified registry key
+	int reg_del_key( const stdString &sKey, const stdString &sPath, int bSubKeys );
+
+	/// Deletes child keys of the specified key
+	int reg_del_sub_keys( const stdString &sKey, const stdString &sPath );
 
 	/// Execute functions
 	stdString execute( int nRet, const stdString &sPath, const stdString &sFunction );

@@ -180,9 +180,66 @@ oexBOOL CSysUtil::SetRegString( const CStr &x_sKey, const CStr &x_sPath, const C
 	if ( ERROR_SUCCESS != lRes || !hKey )
 		return oexFALSE;
 
+	// +++ Should we do mb/unicode here?
+
+	// Set the value
+	CStr8 val = oexStrToMb( x_sValue );
+	RegSetValueEx( hKey, x_sName.Ptr(), 0, REG_SZ, (const BYTE *)val.Ptr(), val.Length() );
+
 	RegCloseKey( hKey );
 
 	return oexFALSE;
+}
+
+oexBOOL CSysUtil::DeleteRegKey( const CStr &x_sKey, const CStr &x_sPath, oexBOOL x_bSubKeys )
+{_STT();
+
+	HKEY hRoot = RootKeyFromName( x_sKey );
+	if ( !hRoot )
+		return oexFALSE;
+
+	// Delete sub keys if needed
+	if ( x_bSubKeys ) 
+		DeleteRegSubKeys( x_sKey, x_sPath );
+
+	// Attempt to delete the key
+	return ( RegDeleteKey( hRoot, x_sPath.Ptr() ) == ERROR_SUCCESS ) ? oexTRUE : oexFALSE;
+}
+
+oexBOOL CSysUtil::DeleteRegSubKeys( const CStr &x_sKey, const CStr &x_sPath )
+{_STT();
+
+	HKEY hRoot = RootKeyFromName( x_sKey );
+	if ( !hRoot )
+		return oexFALSE;
+
+	HKEY		hKey = NULL;
+	char		szKey[ oexSTRSIZE ];
+	DWORD		dwSize = oexSTRSIZE - 1;
+
+	// Open The Key
+	if( RegOpenKeyEx( hRoot, x_sPath.Ptr(), 0, KEY_ALL_ACCESS, &hKey ) != ERROR_SUCCESS )
+		return oexFALSE;
+
+	// For each sub key
+	while ( RegEnumKeyEx(	hKey, 0, szKey, &dwSize, 
+							NULL, NULL, NULL, NULL ) == ERROR_SUCCESS )
+	{
+		// A little recursion
+		DeleteRegSubKeys( x_sKey, szKey );
+
+		// Attempt to delete the key
+		RegDeleteKey( hKey, szKey );
+
+		// Reset size
+		dwSize = oexSTRSIZE - 1;
+
+	} // end while
+
+	// Close the key
+	RegCloseKey( hKey );
+
+	return oexTRUE;
 }
 
 CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)

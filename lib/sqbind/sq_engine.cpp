@@ -742,6 +742,16 @@ int CSqEngineExport::reg_set_str( const stdString &sKey, const stdString &sPath,
 	return oex::os::CSysUtil::SetRegString( std2oex( sKey ), std2oex( sPath ), std2oex( sName ), std2oex( sValue ) );
 }
 
+int CSqEngineExport::reg_del_key( const stdString &sKey, const stdString &sPath, int bSubKeys )
+{_STT();
+	return oex::os::CSysUtil::DeleteRegKey( std2oex( sKey ), std2oex( sPath ), bSubKeys );
+}
+
+int CSqEngineExport::reg_del_sub_keys( const stdString &sKey, const stdString &sPath )
+{_STT();
+	return oex::os::CSysUtil::DeleteRegSubKeys( std2oex( sKey ), std2oex( sPath ) );
+}
+
 int CSqEngineExport::is_path( const stdString &sPath )
 {_STT();
 	CSqMsgQueue *q = queue();
@@ -1206,7 +1216,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_output )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_is_key )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_get_str )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_set_str )	
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_set_str )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_del_key )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_del_sub_keys )
 
 SQBIND_REGISTER_CLASS_END()
 

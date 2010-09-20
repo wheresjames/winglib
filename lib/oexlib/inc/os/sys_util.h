@@ -105,6 +105,38 @@ public:
 	*/
 	static oexBOOL IsRegValue( const CStr &x_sKey, const CStr &x_sPath, const CStr &x_sName );
 
+	//==============================================================
+	// DeleteRegKey()
+	//==============================================================
+	/// Deletes a registry key
+	/**
+		\param [in] x_sKey		-	Key name
+		\param [in] x_sPath		-	Registry path
+		\param [in] x_bSubKeys	-	Non-zero to delete sub keys as well.
+									If this value is zero, the key will
+									only be deleted if there are no sub
+									keys.
+
+		\return Non-zero if success
+
+		\see
+	*/
+	static oexBOOL DeleteRegKey( const CStr &x_sKey, const CStr &x_sPath, oexBOOL x_bSubKeys );
+
+	//==============================================================
+	// DeleteRegSubKeys()
+	//==============================================================
+	/// Deletes registry sub keys
+	/**
+		\param [in] x_sKey		-	Key name
+		\param [in] x_sPath		-	Registry path
+
+		\return Non-zero if success
+
+		\see
+	*/
+	static oexBOOL DeleteRegSubKeys( const CStr &x_sKey, const CStr &x_sPath );
+
 
 	//==============================================================
 	// GetDiskInfo()
