@@ -90,8 +90,8 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_l
 	sa.nLength = sizeof( SECURITY_ATTRIBUTES );
 	sa.bInheritHandle = TRUE;
 	sa.lpSecurityDescriptor = (SECURITY_DESCRIPTOR*)LocalAlloc(LPTR,SECURITY_DESCRIPTOR_MIN_LENGTH);
-	InitializeSecurityDescriptor( sa.lpSecurityDescriptor,SECURITY_DESCRIPTOR_REVISION );
-	SetSecurityDescriptorDacl( sa.lpSecurityDescriptor, TRUE, (PACL)NULL, FALSE );
+	InitializeSecurityDescriptor( (SECURITY_DESCRIPTOR*)sa.lpSecurityDescriptor, SECURITY_DESCRIPTOR_REVISION );
+	SetSecurityDescriptorDacl( (SECURITY_DESCRIPTOR*)sa.lpSecurityDescriptor, TRUE, (PACL)NULL, FALSE );
 
 	// Create the file mapping
 	HANDLE hFile = CreateFileMapping( hFileHandle, &sa, dwAccess, 
