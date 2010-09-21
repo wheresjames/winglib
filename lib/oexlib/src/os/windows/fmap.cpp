@@ -85,8 +85,16 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_l
 	} // end if
 	else hFileHandle = (HANDLE)0xffffffff;
 
+	// Allow anyone access
+	SECURITY_ATTRIBUTES  sa;
+	sa.nLength = sizeof( SECURITY_ATTRIBUTES );
+	sa.bInheritHandle = TRUE;
+	sa.lpSecurityDescriptor = (SECURITY_DESCRIPTOR*)LocalAlloc(LPTR,SECURITY_DESCRIPTOR_MIN_LENGTH);
+	InitializeSecurityDescriptor( sa.lpSecurityDescriptor,SECURITY_DESCRIPTOR_REVISION );
+	SetSecurityDescriptorDacl( sa.lpSecurityDescriptor, TRUE, (PACL)NULL, FALSE );
+
 	// Create the file mapping
-	HANDLE hFile = CreateFileMapping( hFileHandle, NULL, dwAccess, 
+	HANDLE hFile = CreateFileMapping( hFileHandle, &sa, dwAccess, 
 			    					  (DWORD)( x_llSize >> 32 ), (DWORD)( x_llSize & 0xffffffff ), x_pName );
 
 	// Do they want to know if it was pre-existing?
