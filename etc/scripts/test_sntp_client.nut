@@ -5,6 +5,11 @@ class CGlobal
 
 local _g = CGlobal();
 
+function WaitKey()
+{	_self.echo( "\n...press any key...\n" );
+	_self.get_key();
+}
+
 function _init() : ( _g )
 {
 	local server = "time-a.nist.gov";
@@ -66,16 +71,19 @@ function _init() : ( _g )
 	// Wait for data
 	if ( !socket.WaitEvent( CSqSocket().EVT_READ, 8000 ) )
 	{	_self.echo( "WaitEvent( EVT_READ ) : " + socket.getLastError() );
+		WaitKey();
 		return;
 	} // end if
 
 	if ( !socket.ReadFromBin( pkt, 0 ) )
 	{	_self.echo( "ReadFromBin() : " + socket.getLastError() );
+		WaitKey();
 		return;
 	} // end if
 
 	if ( pkt.getUsed() < pkt_size )
 	{	_self.echo( "Too few bytes returned from server : " + pkt.getUsed() );
+		WaitKey();
 		return;
 	} // end if
 
@@ -102,6 +110,9 @@ function _init() : ( _g )
 
 
 	_self.echo( "\n...done...\n" );
+
+	WaitKey();
+
 }
 
 function _idle() : ( _g )

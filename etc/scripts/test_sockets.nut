@@ -5,6 +5,11 @@ class CGlobal
 
 local _g = CGlobal();
 
+function WaitKey()
+{	_self.echo( "\n...press any key...\n" );
+	_self.get_key();
+}
+
 function _init() : ( _g )
 {
 	local server = "google.com";
@@ -15,24 +20,28 @@ function _init() : ( _g )
 	local socket = CSqSocket();
 	if ( !socket.Connect( server, port ) )
 	{	_self.echo( "Connect() : " + socket.getLastError() );
+		WaitKey();
 		return;
 	} // end if
 
 	// Wait for connect
 	if ( !socket.WaitEvent( CSqSocket().EVT_CONNECT, 3000 ) )
 	{	_self.echo( "WaitEvent( EVT_CONNECT ) : " + socket.getLastError() );
+		WaitKey();
 		return;
 	} // end if
 
 	// Write data
 	if ( !socket.Write( "GET / HTTP/1.1\r\n\r\n", 0 ) )
 	{	_self.echo( "Write() : " + socket.getLastError() );
+		WaitKey();
 		return;
 	} // end if
 
 	// Wait for data
 	if ( !socket.WaitEvent( CSqSocket().EVT_READ, 3000 ) )
 	{	_self.echo( "WaitEvent( EVT_READ ) : " + socket.getLastError() );
+		WaitKey();
 		return;
 	} // end if
 
@@ -40,6 +49,8 @@ function _init() : ( _g )
 	_self.echo( " Data: " + socket.Read( 0 ) );
 
 	_self.echo( "\n...done...\n" );
+
+	WaitKey();
 }
 
 function _idle() : ( _g )

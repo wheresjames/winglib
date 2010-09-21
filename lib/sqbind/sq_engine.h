@@ -280,6 +280,12 @@ public:
 	/// Logs a message
 	void notice( int e, const stdString &sStr );
 
+	/// Returns the value of the last key press, blocks if no key has been pressed
+	int get_key();
+
+	/// Returns non-zero if there is a key press
+	int is_key();
+
 	/// Trims the specified characters from the beginning of the string
 	stdString ltrim( const stdString &sS, const stdString &sChs );
 

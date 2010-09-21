@@ -37,6 +37,7 @@
 #include "std_os.h"
 
 #include <stdlib.h>
+#include <conio.h>
 #if defined( OEX_WINCE ) || defined( __MINGW32__ )
 //#	include <wtypes.h>
 #	define VSNPRINTF	vsnprintf
@@ -156,6 +157,16 @@ void CSys::Exit( oexINT x_nRet )
 oexINT CSys::Flush_stdout()
 {//_STT();
 	return fflush( stdout );
+}
+
+int CSys::GetKey()
+{//_STT();
+	return _getch();
+}
+
+int CSys::IsKey()
+{//_STT();
+	return _kbhit();
 }
 
 

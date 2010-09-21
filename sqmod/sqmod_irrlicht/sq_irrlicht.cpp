@@ -90,7 +90,8 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height, in
 	param.AntiAlias = true;
 
 #	if defined( OEX_WINDOWS ) && defined( _IRR_COMPILE_WITH_DIRECT3D_9_ )
-		param.DriverType = irr::video::EDT_DIRECT3D9;
+//		param.DriverType = irr::video::EDT_DIRECT3D9;
+		param.DriverType = irr::video::EDT_OPENGL;
 #	else
 		param.DriverType = irr::video::EDT_OPENGL;
 #	endif
@@ -666,6 +667,11 @@ CSqirrNode CSqIrrlicht::AddPlane( float fWidth, float fHeight, long lSides, CSqi
 						irr::core::vector3df( fWidth, 0, 0 ),
 						rColor.Obj(), lSides, 0, 1, 0, 1 );
 
+	for ( unsigned int i = 0; i < pNode->getMaterialCount(); i++ )
+	{   pNode->getMaterial( i ).NormalizeNormals = true;
+		pNode->getMaterial( i ).Shininess = 0;
+	} // end for
+
 	return pNode;
 }
 
@@ -713,6 +719,11 @@ CSqirrNode CSqIrrlicht::AddGrid( float fWidth, float fHeight,
 								(float)y / (float)sy, (float)( y + 1 ) / (float)sy );
 		} // end for
 
+	} // end for
+
+	for ( unsigned int i = 0; i < pNode->getMaterialCount(); i++ )
+	{   pNode->getMaterial( i ).NormalizeNormals = true;
+		pNode->getMaterial( i ).Shininess = 0;
 	} // end for
 
 	return pNode;

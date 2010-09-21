@@ -27,7 +27,8 @@ function _init() : ( _g )
 	if ( !Sign2( "TEST_KEYS", "Alice loves Bob" ) )
 	{	_self.echo( "Sign2() failed" ); return 0; }
 
-	_self.echo( "\n...done...\n" );
+	_self.echo( "\n...press any key...\n" );
+	_self.get_key();
 }
 
 function CreateKeys( name, challenge ) : ( _g )

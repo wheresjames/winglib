@@ -6,19 +6,28 @@ class CGlobal
 
 local _g = CGlobal();
 
+function WaitKey()
+{	_self.echo( "\n...press any key...\n" );
+	_self.get_key();
+}
+
 function _init() : ( _g )
 {
 	if ( !_g.socket.CreateUDP() )
 	{	_self.echo( "CreateUDP() : " + _g.socket.getLastError() );
-		return;
+		WaitKey();
+		return 0;
 	} // end if
 
 	if ( !_g.socket.Bind( 12345 ) )
 	{	_self.echo( "Bind() : " + _g.socket.getLastError() );
-		return;
+		WaitKey();
+		return 0;
 	} // end if
 
 	_self.echo( "SNTP server is running..." );
+
+	return 0;
 }
 
 function _idle() : ( _g )
@@ -39,7 +48,7 @@ function _idle() : ( _g )
 		local addr = CSqSockAddress();
 		_g.socket.getPeerAddress( addr );
 		local server = addr.getDotAddress();
-		_self.echo( "Data read from client : " + server) );
+		_self.echo( "Data read from client : " + server );
 
 //		CSqFile().put_contents_bin( "sntp.in." + server + ".dat", pkt );
 

@@ -7,6 +7,11 @@ class CGlobal
 
 local _g = CGlobal();
 
+function WaitKey()
+{	_self.echo( "\n...press any key...\n" );
+	_self.get_key();
+}
+
 function _init() : ( _g )
 {
 	local smtp = CPoSmtp();
@@ -18,10 +23,10 @@ function _init() : ( _g )
 	_self.echo( "\n------ Starting ------\n" );
 
 	if ( !smtp.Open( host ) )
-	{	_self.echo( smtp.getLastError() ); return 0; }
+	{	_self.echo( smtp.getLastError() ); WaitKey(); return 0; }
 	
 	if ( !smtp.Login( "LOGIN", user, pass ) )
-	{	_self.echo( smtp.getLastError() ); return 0; }
+	{	_self.echo( smtp.getLastError() ); WaitKey(); return 0; }
 
 	local msg = CPoMessage();
 	
@@ -31,9 +36,11 @@ function _init() : ( _g )
 	msg.setContent( "This is the content" );
 	
 	if ( !smtp.Send( msg ) )
-	{	_self.echo( smtp.getLastError() ); return 0; }
+	{	_self.echo( smtp.getLastError() ); WaitKey(); return 0; }
 
 	_self.echo( "\n...done...\n" );
+
+	WaitKey();
 }
 
 function _idle() : ( _g )

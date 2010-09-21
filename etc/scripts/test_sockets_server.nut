@@ -6,19 +6,29 @@ class CGlobal
 
 local _g = CGlobal();
 
+function WaitKey()
+{	_self.echo( "\n...press any key...\n" );
+	_self.get_key();
+}
+
 function _init() : ( _g )
 {
 	_self.echo( "\n... Starting server ...\n" );
 
 	if ( !_g.server.Bind( 9876 ) )
 	{	_self.echo( "Bind() : " + _g.server.getLastError() );
+		WaitKey();
 		return;
 	} // end if
 
 	if ( !_g.server.Listen( 0 ) )
 	{	_self.echo( "Listen() : " + _g.server.getLastError() );
+		WaitKey();
 		return;
 	} // end if
+
+	_self.echo( "server listening on : http://localhost:9876" ); 
+
 /*
 	while( 1 )
 	{
@@ -26,6 +36,7 @@ function _init() : ( _g )
 	// Wait for connect
 	if ( !_g.server.WaitEvent( CSqSocket().EVT_ACCEPT, 30000 ) )
 	{	_self.echo( "WaitEvent( EVT_ACCEPT ) : " + _g.server.getLastError() );
+		WaitKey();
 		return;
 	} // end if
 
@@ -34,6 +45,7 @@ function _init() : ( _g )
 		local session = CSqSocket();
 		if ( !_g.server.Accept( session ) )
 		{	_self.echo( "Accept() : " + _g.server.getLastError() );
+			WaitKey();
 			return;
 		} // end if
 
@@ -43,6 +55,7 @@ function _init() : ( _g )
 		local write = "HTTP/1.1 200\r\nContent-Length: " + data.len() + "\r\n\r\n" + data;
 		if ( !session.Write( write, 0 ) )
 		{	_self.echo( "Write() : " + session.getLastError() );
+			WaitKey();
 			return;
 		} // end if
 		_self.echo( write );
@@ -56,6 +69,7 @@ function _init() : ( _g )
 	// Wait for connect
 	if ( !_g.server.WaitEvent( CSqSocket().EVT_ACCEPT, 30000 ) )
 	{	_self.echo( "WaitEvent( EVT_ACCEPT ) : " + _g.server.getLastError() );
+		WaitKey();
 		return;
 	} // end if
 
@@ -66,6 +80,7 @@ function _init() : ( _g )
 		// Accept the session
 		if ( !_g.server.Accept( session ) )
 		{	_self.echo( "Accept() : " + _g.server.getLastError() );
+			WaitKey();
 			return;
 		} // end if
 

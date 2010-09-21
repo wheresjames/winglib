@@ -109,7 +109,8 @@ public:
 		if ( !m_p ) return;
 
 		if ( 0 <= lMaterial )
-			m_p->setMaterialTexture( lMaterial, st.Ptr() );
+			m_p->setMaterialTexture( lMaterial, st.Ptr() ),
+			m_p->getMaterial( lMaterial ).SpecularColor.set( 0, 0, 0, 0 );
 
 		else for ( unsigned int i = 0; i < m_p->getMaterialCount(); i++ )
 			m_p->setMaterialTexture( i, st.Ptr() );

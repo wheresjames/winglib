@@ -53,6 +53,9 @@ function _init()
 
 	_self.echo( "\r\n === End" );
 
+	_self.echo( "\n...press any key...\n" );
+	_self.get_key();
+
 }
 
 

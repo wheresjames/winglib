@@ -170,6 +170,17 @@ void CSqEngineExport::terminate( int nExitCode )
 	oex::os::CSys::Exit( nExitCode );
 }
 
+int CSqEngineExport::get_key()
+{_STT();
+	return oexGetKey();
+}
+
+int CSqEngineExport::is_key()
+{_STT();
+	return oexIsKey();
+}
+
+
 stdString CSqEngineExport::get_build_version()
 {_STT();
 	return oex2std( oexVersion() );
@@ -1107,6 +1118,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, alert )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, print )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, echo )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_key )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_key )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_build_version )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, flush )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )

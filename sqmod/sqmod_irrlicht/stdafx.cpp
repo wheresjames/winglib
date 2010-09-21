@@ -51,8 +51,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqIrrlicht, CSqIrrlicht )
 
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, NodeAtScreen )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, getNodeDist )
-
-
+	
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, getLineIntersect )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, getIntersect )
 	SQBIND_MEMBER_FUNCTION( CSqIrrlicht, getMouseIntersect )

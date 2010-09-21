@@ -63,8 +63,8 @@ function _init() : ( _g )
 	_g.irr.SetAmbientLight( CSqirrColorf( 0.5, 0.5, 0.5 ) );
 
 	// Add point lights
-	_g.irr.AddLight( CSqirrVector3d( 0., 200., 0. ), CSqirrColorf( 0.5, 0.5, 0.5 ), 100. );
-	_g.irr.AddLight( CSqirrVector3d( 50., 200., 100. ), CSqirrColorf( 0.5, 0.5, 0.5 ), 100. );
+	_g.irr.AddLight( CSqirrVector3d( 0., 1000., 0. ), CSqirrColorf( 0.5, 0.5, 0.5 ), 1000. );
+	_g.irr.AddLight( CSqirrVector3d( 50., 1000., 1000. ), CSqirrColorf( 0.5, 0.5, 0.5 ), 1000. );
 
 	// Add default camera
 	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 50, 100 ), CSqirrVector3d( 0, 0, 0 ) );

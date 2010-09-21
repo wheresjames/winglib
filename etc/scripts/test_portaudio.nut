@@ -1,17 +1,7 @@
 
 _self.load_module( "portaudio", "" );
 
-class CGlobal
-{
-	to = _self.gmt_time() + 3;
-
-	quit = 0;
-};
-
-local _g = CGlobal();
-
-
-function _init() : ( _g )
+function _init()
 {
 	local pa = CPaOutput();
 
@@ -37,15 +27,9 @@ function _init() : ( _g )
 
 	_self.echo( "=====================================================" );
 
-	_g.quit = 1;
-}
-
-function _idle() : ( _g )
-{
-//	if ( _g.to >= _self.gmt_time() )
-//		return 0;
-
-	return _g.quit;
+	_self.echo( "\n...press any key...\n" );
+	_self.get_key();
+	return 0;
 }
 
 function TestOutput( pa )

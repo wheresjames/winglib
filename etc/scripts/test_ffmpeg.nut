@@ -58,7 +58,7 @@ function _init()
 
 //	test_rtsp( ffmpeg_root, "rtsp://a1352.l1857053128.c18570.g.lq.akamaistream.net/D/1352/18570/v0001/reflector:53128", 30 );
 //	test_rtsp( ffmpeg_root, "rtsp://v2.cache1.c.youtube.com/CkgLENy73wIaPwlnoDu0pt7zDRMYDSANFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNaDkNsaWNrVGh1bWJuYWlsYOmkotHXgfvJRgw=/0/0/0/video.3gp", 15 );
-	test_rtsp( ffmpeg_root, "rtsp://video2.multicasttech.com/AFTVSciFi3GPP296.sdp", 15 );
+//	test_rtsp( ffmpeg_root, "rtsp://video2.multicasttech.com/AFTVSciFi3GPP296.sdp", 15 );
 
 	_self.echo( "" );
 }
@@ -174,7 +174,7 @@ function test_avi_write( root, file )
 
 	local enc = CFfEncoder();
 	if ( !enc.Create( vid.getVideoCodecId(), CFfConvert().PIX_FMT_YUV420P,
-					  img.getWidth(), img.getHeight(), 0 ) )
+					  img.getWidth(), img.getHeight(), 15, 2000000, CSqMulti() ) )
 	{	_self.echo( "failed to create encoder" );
 		return;
 	} // end if
@@ -219,7 +219,7 @@ function test_avi_read( root, file )
 
 	local dec = CFfDecoder();
 	if ( !dec.Create( vid.getVideoCodecId(), vid.getVideoFormat(),
-					  vid.getWidth(), vid.getHeight(), 0 ) )
+					  vid.getWidth(), vid.getHeight(), 0, 0, CSqMulti() ) )
 	{	_self.echo( "failed to create decoder" );
 		return;
 	} // end if
@@ -233,7 +233,7 @@ function test_avi_read( root, file )
 		if ( vid.getVideoStream() == stream )
 		{
 			local img = CSqImage();
-			if ( !dec.DecodeImage( frame, img, frame_info ) )
+			if ( !dec.DecodeImage( frame, img, frame_info, 1 ) )
 			{	_self.echo( "failed to decode image" );
 				return;
 			} // end if
@@ -288,7 +288,7 @@ function test_encode( frame, img, fmt, cmp, cs )
 	_self.echo( "\nTesting encoder..." );
 
 	local enc = CFfEncoder();
-	if ( !enc.Create( fmt, cs, img.getWidth(), img.getHeight(), cmp ) )
+	if ( !enc.Create( fmt, cs, img.getWidth(), img.getHeight(), 15, 0, CSqMulti( "cmp=" + cmp ) ) )
 	{	_self.echo( "failed to create encoder" );
 		return;
 	} // end if
@@ -307,12 +307,12 @@ function test_decode( frame, img, fmt, cmp, cs )
 	_self.echo( "\nTesting decoder..." );
 
 	local dec = CFfDecoder();
-	if ( !dec.Create( fmt, cs, img.getWidth(), img.getHeight(), cmp ) )
+	if ( !dec.Create( fmt, cs, img.getWidth(), img.getHeight(), 15, 0, CSqMulti( "cmp=" + cmp ) ) )
 	{	_self.echo( "failed to create decoder" );
 		return;
 	} // end if
 
-	if ( !dec.DecodeImage( frame, img, CSqMulti() ) )
+	if ( !dec.DecodeImage( frame, img, CSqMulti(), 1 ) )
 	{	_self.echo( "failed to decode image" );
 		return;
 	} // end if

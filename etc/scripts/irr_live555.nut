@@ -68,34 +68,11 @@ function _init() : ( _g )
 			espana		= [ "Espana", 		"rtsp://video3.multicasttech.com/EspanaFree3GPP296.sdp" ],
 
 			utube1		= [ "utube1",		"rtsp://v2.cache1.c.youtube.com/CkgLENy73wIaPwlnoDu0pt7zDRMYDSANFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNaDkNsaWNrVGh1bWJuYWlsYOmkotHXgfvJRgw=/0/0/0/video.3gp" ],
-
-			live555		= [ "live555", 		"rtsp://192.168.2.200:8554/vid1" ],
-
-			bosch		= [ "bosch", 		"rtsp://192.168.2.253/?inst=1" ],
-//			bosch		= [ "bosch", 		"rtsp://192.168.2.253/rtsp_tunnel" ],
-//			ser			= [ "ser", 			"rtsp://192.168.2.87" ]
-//			ser			= [ "ser", 			"rtsp://192.168.2.251" ]
-			arecont		= [ "arecont",		"rtsp://192.168.2.251/h264.sdp?res=half&ssn=1234&fps=5" ],
-//			ser			= [ "ser", 			"rtsp://192.168.2.251/h264.sdp?res=half&x0=0&y0=0&x1=1600&y1=1200&qp=30&ssn=1&doublescan=0" ],
-			arecont_hi	= [ "arecont_hi",	"rtsp://192.168.2.252/image?res=half&x0=0&y0=0&x1=1600&y1=1200&fps=15&quality=10&doublescan=0" ],
-			arecont_low	= [ "arecont_low",	"rtsp://192.168.2.252/image?res=half&x0=400&y0=0&x1=1200&y1=600&fps=30&quality=15&doublescan=0" ],
-			panasonic	= [ "panasonic",	"rtsp://192.168.2.251/Mediainput/mpeg4" ]
-//			panasonic	= [ "panasonic",	"rtsp://192.168.2.251" ]
-			axis		= [ "axis",			"rtsp://192.168.2.202/axis-media/media.amp" ]
-			
-			// Axis = rtsp://x.x.x.x/axis-media/media.amp
-
 		};
 
 	// Check TCP Port 554 and UDP ports 6970-9999
 
-//	StartStream( rtsp_video[ "panasonic" ], 0, 0 );
-//	StartStream( rtsp_video[ "arecont_hi" ], 0, 0 );
-//	StartStream( rtsp_video[ "arecont_low" ], 0, 0 );
-//	StartStream( rtsp_video[ "bosch" ], 0, 0 );
-//	StartStream( rtsp_video[ "nasa" ], 0, 0 );
-//	StartStream( rtsp_video[ "adventure" ], 0, 0 );
-	StartStream( rtsp_video[ "axis" ], 0, 0 );
+	StartStream( rtsp_video[ "nasa" ], 0, 0 );
 
 	_self.set_timer( ".", 15, "OnTimer" );
 
@@ -147,7 +124,7 @@ function UpdateVideo() : ( _g )
 		_g.dec = CFfDecoder();
 		_g.dec.setExtraData( _g.rtsp.getExtraVideoData() );
 		if ( !_g.dec.Create( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ), CFfConvert().PIX_FMT_YUV420P,
-							 _g.w, _g.h, 5, 2000000, CSqMulti( "cmp=-2" ) ) )
+							 0, 0, 5, 2000000, CSqMulti( "cmp=-2" ) ) )
 			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getVideoCodecName() ), _g.quit = 1;
 
 		_self.echo( " !!! STARTING RTSP STREAM !!!" );

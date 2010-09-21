@@ -160,6 +160,16 @@ void CSys::Exit( oexINT x_nRet )
 	exit( x_nRet );
 }
 
+int CSys::GetKey()
+{//_STT();
+	return getch();
+}
+
+int CSys::IsKey()
+{//_STT();
+	return kbhit();
+}
+
 
 // **** Multi-byte
 

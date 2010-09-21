@@ -77,6 +77,12 @@ public:
 	/// Flushes the standard output buffer
 	static oexINT Flush_stdout();
 
+	/// Returns last key press value, blocks until a key press occurs
+	static int GetKey();
+
+	/// Returns non-zero if a key has been pressed
+	static int IsKey();
+
 	// String conversion
 public:
 

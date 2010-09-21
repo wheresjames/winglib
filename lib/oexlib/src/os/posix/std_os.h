@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <conio.h>
 
 #if !defined( OEX_NODIRENT )
 #	include <dirent.h>

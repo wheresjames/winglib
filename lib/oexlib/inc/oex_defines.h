@@ -323,6 +323,8 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexGetCpuLoad						OEX_NAMESPACE::os::CSys::GetCpuLoad
 #define oexGetLastError						OEX_NAMESPACE::os::CTrace::GetLastError
 #define oexGetLastErrorStr					OEX_NAMESPACE::os::CTrace::GetErrorMsg( oexGetLastError() )
+#define oexGetKey							OEX_NAMESPACE::os::CSys::GetKey
+#define oexIsKey							OEX_NAMESPACE::os::CSys::IsKey
 
 #define oexMd5								OEX_NAMESPACE::CUtil::md5
 #define oexGuidToString						OEX_NAMESPACE::CStr().GuidToString

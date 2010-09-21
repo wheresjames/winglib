@@ -14,3 +14,6 @@ local list = usb.getDeviceList();
 _self.echo( list.print_r( 1 ) );
 
 _self.echo( "\n--- DONE --\n" );
+
+_self.echo( "\n...press any key...\n" );
+_self.get_key();

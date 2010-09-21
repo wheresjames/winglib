@@ -118,7 +118,7 @@ int CSqCapture::Init( int nDevice, int nChannel, int nWidth, int nHeight, int nF
 	oex::CStr sFmt = sFormat.c_str();
 
 	if ( sFmt.Length() < 4 )
-		sFmt = oexT( "JPEG" );
+		sFmt = oexT( "RGB3" );
 
 	// Open the capture device
 	if ( !m_cap.Open( 0, nDevice, nChannel, nWidth, nHeight, *(const oex::oexUINT*)sFmt.Ptr(), nFps, 0 ) )

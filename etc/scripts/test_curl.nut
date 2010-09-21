@@ -15,14 +15,14 @@ function _init() : ( _g )
 
 	_self.echo( "\n" + url + "\n" );
 
-	local data = CSqString();
+	local data = CSqBinary();
 	if ( curl.GetUrl( url, 0, data ) )
-		_self.echo( data.str() );
+		_self.echo( data.getString() );
 	else
 		_self.echo( "Error\n" );
 
-	_self.echo( "\n...done...\n" );
-
+	_self.echo( "\n...press any key...\n" );
+	_self.get_key();
 }
 
 function _idle() : ( _g )

@@ -50,6 +50,9 @@ function _init()
 		_self.echo( "Rows : " + sq.NumRows() ),
 		_self.echo( sq.Result().print_r( 1 ) );
 
+	_self.echo( "\n...press any key...\n" );
+	_self.get_key();
+
 }
 
 

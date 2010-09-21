@@ -1,6 +1,11 @@
 
 _self.load_module( "mysql", "" );
 
+function WaitKey()
+{	_self.echo( "\n...press any key...\n" );
+	_self.get_key();
+}
+
 function _init()
 {
 	local server = "localhost";
@@ -12,10 +17,10 @@ function _init()
 	local sq = CSqMysql();
 
 	if ( !sq.Connect( server, 0, user, pass, db_name ) )
-	{	_self.echo( sq.getLastError() ); return; }
+	{	_self.echo( sq.getLastError() ); WaitKey(); return; }
 
 	if ( !sq.Query( "SELECT * FROM `" + db_table + "`" ) )
-	{	_self.echo( sq.getLastError() ); return; }
+	{	_self.echo( sq.getLastError() ); WaitKey(); return; }
 
 	local rows = sq.getNumRows();
 	local fields = sq.getNumFields();
@@ -57,6 +62,9 @@ function _init()
 	_self.echo( "Pairs = " + sq.MakePairs( m ) );
 
 	_self.echo( "=== END ===" );
+
+	WaitKey();
+
 }
 
 
