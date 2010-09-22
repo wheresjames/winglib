@@ -45,6 +45,8 @@
 
 
 #include "std_os.h"
+#include <termios.h>
+
 /*
 #include <stdlib.h>
 #include <tchar.h>
@@ -160,14 +162,37 @@ void CSys::Exit( oexINT x_nRet )
 	exit( x_nRet );
 }
 
-int CSys::GetKey()
-{//_STT();
-	return getch();
+int _is_key( int to )
+{	struct timeval tv;
+	fd_set read_fd;
+	tv.tv_sec = 0;
+	tv.tv_usec = to * 1000;
+	FD_ZERO( &read_fd );
+	FD_SET( 0, &read_fd );
+	if ( -1 != select( 1, &read_fd, NULL, NULL, &tv )
+	     && FD_ISSET( 0, &read_fd ) )
+		return 1;
+	return 0;
 }
 
 int CSys::IsKey()
 {//_STT();
-	return kbhit();
+	return _is_key( 0 );
+}
+
+int CSys::GetKey()
+{//_STT();
+
+	char ch;
+	struct termios otios, tios;
+	ioctl( 0, TCGETS, &tios );
+	otios.c_lflag = tios.c_lflag;
+	tios.c_lflag &= ~( ECHO | ICANON );
+	ioctl( 0, TCSETS, &tios );
+	read( 0, &ch, 1 );
+	tios.c_lflag = otios.c_lflag;
+	ioctl( 0, TCSETS, &tios );
+	return ch;
 }
 
 

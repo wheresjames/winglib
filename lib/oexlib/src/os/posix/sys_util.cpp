@@ -69,7 +69,7 @@ oexBOOL CSysUtil::DeleteRegSubKeys( const CStr &x_sKey, const CStr &x_sPath )
 	return oexFALSE;
 }
 
-CProperyBag CSysUtil::GetRegKeys( const CStr &x_sKey, const CStr &x_sPath, oexBOOL x_bValues, oexBOOL x_bSubKeys )
+CPropertyBag CSysUtil::GetRegKeys( const CStr &x_sKey, const CStr &x_sPath, oexBOOL x_bValues, oexBOOL x_bSubKeys )
 {
 	return CPropertyBag();
 }
@@ -80,30 +80,30 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 	return CPropertyBag();
 /*
 	// Sanity check
-	if ( !x_sDrive.Length() ) 
+	if ( !x_sDrive.Length() )
 		return CPropertyBag();
 
 	// Must be root
-//    if ( geteuid() ) 
-//    {	oexERROR( 0, oexT( "Only root can call GetDiskInfo()" ) ); 
+//    if ( geteuid() )
+//    {	oexERROR( 0, oexT( "Only root can call GetDiskInfo()" ) );
 //    	return CPropertyBag();
 //    } // end if
 /*
 	static struct hd_driveid hd;
     int fd;
-	
+
 	// Open the drive
-	if ( 0 > ( fd = open( oexStrToMb( x_sDrive ).Ptr(), O_RDONLY | O_NONBLOCK ) ) )	
+	if ( 0 > ( fd = open( oexStrToMb( x_sDrive ).Ptr(), O_RDONLY | O_NONBLOCK ) ) )
     	return CPropertyBag();
-	
+
 	if ( ioctl( fd, HDIO_GET_IDENTITY, &hd ) )
 		return CPropertyBag();
-		
+
 //        printf("Hard Disk Model: %.40s\n", hd.model);
  //       printf("  Serial Number: %.20s\n", hd.serial_no);
 
-	
-	
+
+
 	// Get volume information
 //	if ( !GetVolumeInformation(	x_sDrive.Ptr(), szVolume, sizeof( szVolume ),
 //								&dwSn, &dwMax, &dwFlags,
