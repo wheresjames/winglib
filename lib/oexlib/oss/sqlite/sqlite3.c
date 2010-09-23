@@ -22,6 +22,8 @@
 #include "../../inc/oex_config.h"
 #if defined ( OEX_ENABLE_SQLITE )
 
+#define SQLITE_OMIT_LOAD_EXTENSION
+
 #define SQLITE_CORE 1
 #define SQLITE_AMALGAMATION 1
 #ifndef SQLITE_PRIVATE

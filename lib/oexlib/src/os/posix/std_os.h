@@ -95,7 +95,9 @@ extern int daylight;
 #	endif
 #endif
 
-#include <sys/sem.h>
+#include <dirent.h>
+
+//#include <sys/sem.h>
 
 #include <dlfcn.h>
 

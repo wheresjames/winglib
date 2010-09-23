@@ -123,6 +123,8 @@ void SResInfo::Release( SResInfo *x_pRi )
 
 oexINT CSys::ShowMessageBox( oexCSTR x_pTitle, oexCSTR x_pStr )
 {
+#if !defined( OEX_NOMSGBOX )
+
 	if ( !oexCHECK_PTR( x_pTitle ) )
 		x_pTitle = oexT( "" );
  	if ( !oexCHECK_PTR( x_pStr ) )
@@ -142,6 +144,9 @@ oexINT CSys::ShowMessageBox( oexCSTR x_pTitle, oexCSTR x_pStr )
 		return 0;
 
 	return -2;
+#else
+	return 0;
+#endif
 }
 
 oexCPVOID CSys::GetInstanceHandle()
@@ -360,13 +365,21 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 oexINT64 CSys::StrToInt64( oexCSTRW x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
+#if !defined( OEX_NOWCSTO )
 	return wcstoll( x_pStr, NULL, x_uRadix );
+#else
+	return 0;
+#endif
 }
 
 oexUINT64 CSys::StrToUInt64( oexCSTRW x_pStr, oexUINT x_uRadix )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
+#if !defined( OEX_NOWCSTO )
 	return wcstoll( x_pStr, NULL, x_uRadix );
+#else
+	return 0;
+#endif
 }
 
 oexLONG CSys::StrToLong( oexCSTRW x_pStr, oexUINT x_uRadix )
@@ -384,14 +397,25 @@ oexULONG CSys::StrToULong( oexCSTRW x_pStr, oexUINT x_uRadix )
 oexFLOAT CSys::StrToFloat( oexCSTRW x_pStr )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
+#if !defined( OEX_NOWCSTO )
 	return wcstof( x_pStr, NULL );
+#else
+	return 0;
+#endif
 }
 
 oexDOUBLE CSys::StrToDouble( oexCSTRW x_pStr )
 {	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-	return wcstod( x_pStr, NULL );
+	return wcstod( x_pStr, oexNULL );
 }
+
+#if defined( OEX_NOWCSTO )
+size_t wcstombs( char* mbstr, const wchar_t* wcstr, size_t max )
+{
+	return wcsrtombs( mbstr, (const wchar_t**)&wcstr, max, oexNULL );
+}
+#endif
 
 oexUINT CSys::WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen )
 {
@@ -403,6 +427,13 @@ oexUINT CSys::WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen 
 
 	return wcstombs( pDst, pSrc, uMax );
 }
+
+#if defined( OEX_NOWCSTO )
+size_t mbstowcs(wchar_t* wcstr, const char* mbstr, size_t max)
+{
+	return mbsrtowcs(wcstr, (const char**)&mbstr, max, oexNULL );
+}
+#endif
 
 oexUINT CSys::MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen )
 {
@@ -678,6 +709,9 @@ oexBOOL CSys::GetLocalTime( STime &t )
 
 oexBOOL CSys::SetLocalTime( STime &t )
 {
+#if defined( OEX_NOSETTIME )
+	return oexFALSE;
+#else
 	struct tm tinfo;
 	CSys_STimeToSystemTime( t, &tinfo );
 
@@ -685,6 +719,7 @@ oexBOOL CSys::SetLocalTime( STime &t )
 	return 0 == stime( &new_time );
 
     return oexTRUE;
+#endif
 }
 
 oexINT CSys::GetLocalTzBias()
@@ -729,6 +764,9 @@ oexBOOL CSys::GetSystemTime( STime &t )
 
 oexBOOL CSys::SetSystemTime( STime &t )
 {
+#if defined( OEX_NOSETTIME )
+	return oexFALSE;
+#else
 	struct tm tinfo;
 	CSys_STimeToSystemTime( t, &tinfo );
 
@@ -736,6 +774,7 @@ oexBOOL CSys::SetSystemTime( STime &t )
 	return 0 == stime( &new_time );
 
     return oexTRUE;
+#endif
 }
 
 
@@ -750,6 +789,22 @@ oexBOOL CSys::SetSystemTime( STime &t )
 #define FTOFF_1900		9435484800LL
 #define FTOFF_1970		11644473600LL
 #define FTOFF_1980		11960010000LL
+
+#if defined( OEX_NOTIMEGM )
+time_t timegm (struct tm *tm) {
+    time_t ret;
+    char *tz = getenv( "TZ" );
+    setenv( "TZ", "", 1 );
+    tzset();
+    ret = mktime( tm );
+    if ( tz )
+        setenv( "TZ", tz, 1 );
+    else
+        unsetenv( "TZ" );
+    tzset();
+    return ret;
+}
+#endif
 
 /// Converts an STime structure to file time
 oexINT64 CSys::SystemTimeToFileTime( STime &x_st )

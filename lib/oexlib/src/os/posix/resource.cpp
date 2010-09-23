@@ -35,7 +35,9 @@
 #include "../../../oexlib.h"
 #include "std_os.h"
 
-#define OEX_THREAD_TIMEOUTS
+#if !defined( OEX_NOTHREADTIMEOUTS )
+#	define OEX_THREAD_TIMEOUTS
+#endif
 #define OEX_THREAD_FORCEFAIRNESS
 //#define OEX_THREAD_USE_GETTIMEOFDAY
 
@@ -157,10 +159,15 @@ static oexINT FreeRi( SResourceInfo* x_pRi, oexINT x_eType, oexUINT x_uTimeout, 
 				//      figure out how to shut this thread down properly!
 				oexWARNING( nErr, oexT( "!! Terminating thread !!" ) );
 
+#ifndef OEX_NOPTHREADCANCEL
 				// Kill the thread
 				if ( x_bForce )
 					if ( ( nErr = pthread_cancel( x_pRi->hThread ) ) )
 						oexERROR( nErr, oexT( "pthread_cancel() failed" ) );
+#else
+				if ( x_bForce )
+					oexERROR( nErr, oexT( "pthread_cancel() not available" ) );
+#endif
 
 			} // end if
 
