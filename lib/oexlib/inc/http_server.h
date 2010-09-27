@@ -241,7 +241,7 @@ public:
 							} // end if
 							else if ( it->port )
 							{
-								if ( 2 > uSize )
+								if ( 3 > uSize )
 								{
 									// Must lock if we're close to the end
 									oexAutoLock ll( m_pSessionLock );

@@ -43,6 +43,7 @@ namespace sqbind
 		CSqFactory::Register( x_vm );
 		CSqSize::Register( x_vm );
 		CSqPos::Register( x_vm );
+		CSqColor::Register( x_vm );
 		CSqBinary::Register( x_vm );
 		CSqDataLog::Register( x_vm );
 		CSqString::Register( x_vm );
@@ -248,6 +249,29 @@ void CSqTime::Register( sqbind::VM vm )
 	SQBIND_EXPORT( vm, CSqTime );
 }
 
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqColor, CSqColor )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqColor, r )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqColor, g )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqColor, b )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqColor, a )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqColor, setR )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqColor, setG )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqColor, setB )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqColor, setA )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqColor, set )
+
+SQBIND_REGISTER_CLASS_END()
+
+
+void CSqColor::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CSqColor );
+}
+
+
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqImage, CSqImage )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Create )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Destroy )
@@ -312,6 +336,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Fingerprint )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FingerprintBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FingerprintImage )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, GraphFloat )	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, get )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, set )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getOffset )

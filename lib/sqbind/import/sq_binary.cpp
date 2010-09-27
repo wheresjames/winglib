@@ -41,3 +41,9 @@ int CSqBinary::FingerprintImage( CSqImage *img, CSqBinary *col, int scale )
 	CSqBinary buf; if ( !img->refPixels( &buf ) ) return 0;
 	return oexFingerprint( &m_bin, &buf.Mem(), 0, img->getWidth(), img->getHeight(), &col->Mem(), scale );
 }
+
+int CSqBinary::GraphFloat( CSqImage *img, CSqColor *c, float scale )
+{	if ( !img || !img->getUsed() || !getUsed() ) return 0;
+	CSqBinary buf; if ( !img->refPixels( &buf ) ) return 0;
+	return oex::CUtil::GraphFloat( &buf.Mem(), 0, img->getWidth(), img->getHeight(), img->getScanWidth(), c->Ptr(), (oex::oexFLOAT*)Ptr(), getUsed() / sizeof( oex::oexFLOAT ), scale );
+}

@@ -82,6 +82,12 @@ public:
     /// Concatinates two strings into a path
 	static CStr BuildPath( oexINT x_nId, oexCONST CStr &x_sPath, oexTCHAR tSep = oexTCPathSep( oexTCHAR ) );
 
+	/// Bresenham's line drawing
+	static oexBOOL DrawLine( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *pc, oexINT x1, oexINT y1, oexINT x2, oexINT y2 );
+
+	/// Draws a graph of an array of float values
+	static oexBOOL GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *pc, oexFLOAT *pf, oexINT n, oexFLOAT scale );
+
 };
 
 

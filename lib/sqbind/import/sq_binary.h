@@ -268,6 +268,9 @@ namespace sqbind
 			return oexFingerprint( &m_bin, &img->Mem(), fmt, w, h, &col->Mem(), scale );
 		}
 
+		/// Graphs an array of floats
+		int GraphFloat( CSqImage *img, CSqColor *c, float scale );
+
 		/// Locates the specified string in the buffer
 		t_size FindBin( CSqBinary *p, int x_nStart, int x_nMax )
 		{	return m_bin.Find( p->m_bin, x_nStart, x_nMax ); }

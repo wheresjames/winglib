@@ -468,6 +468,111 @@ oexBOOL CUtil::Fingerprint( CBin *buf, CBin *img, oexINT fmt, oexINT w, oexINT h
 	return oexTRUE;
 }
 
+template< typename T >
+	void CUTIL_SET_PIXEL( T *b, oexINT sw, oexINT x, oexINT y, oexINT *c )
+	{	oexINT o = y * sw + ( x * 3 );
+		b[ o + 2] = (T)c[ 0 ];
+		b[ o + 1 ] = (T)c[ 1 ];
+		b[ o ] = (T)c[ 2 ];
+	}
+
+// Bresenham
+oexBOOL CUtil::DrawLine( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *pc, oexINT x1, oexINT y1, oexINT x2, oexINT y2 )
+{
+	if ( 0 >= w || 0 >= h )
+		return oexFALSE;
+
+	if ( !img || !img->getUsed() )
+		return oexFALSE;
+
+	// Adjust range on variables
+	if ( x1 < 0 ) x1 = 0; else if ( x1 > w - 1 ) x1 = w - 1;
+	if ( y1 < 0 ) y1 = 0; else if ( y1 > h - 1 ) y1 = h - 1;
+	if ( x2 < 0 ) x2 = 0; else if ( x2 > w - 1 ) x2 = w - 1;
+	if ( y2 < 0 ) y2 = 0; else if ( y2 > h - 1 ) y2 = h - 1;
+
+	oexBYTE *p = (oexBYTE*)img->_Ptr();
+	oexINT xe = x2 - x1; if ( 0 > xe ) xe = -xe;
+	oexINT ye = y2 - y1; if ( 0 > ye ) ye = -ye;
+	oexINT xm = 0, xd = ( x1 < x2 ) ? 1 : -1;
+	oexINT ym = 0, yd = ( y1 < y2 ) ? 1 : -1;
+	while ( y1 != y2 || x1 != x2 )
+	{
+		CUTIL_SET_PIXEL( p, sw, x1, y1, pc );
+
+		ym += ye;
+		if ( ym >= xe ) 
+		{	ym -= xe;
+			if ( y1 != y2 ) 
+				y1 += yd;
+		} // end while
+
+		xm += xe;
+		if ( xm >= ye ) 
+		{	xm -= ye;
+			if ( x1 != x2 ) 
+				x1 += xd;
+		} // end while
+
+	} // end while
+
+	return oexTRUE;
+}
+
+#define CUTIL_YMARGIN 8
+oexBOOL CUtil::GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *pc, oexFLOAT *pf, oexINT n, oexFLOAT scale )
+{
+	if ( 0 >= w || 0 >= h || 1 >= n )
+		return oexFALSE;
+
+	if ( !img || !img->getUsed() )
+		return oexFALSE;
+
+	// Ensure space
+	int sz = sw * h;
+	if ( img->getUsed() < sz )
+		return oexFALSE;
+
+	// Determine the range
+	oexFLOAT min = pf[ 0 ], max = pf[ 0 ];
+	for ( oexINT i = 1; i < n; i++ )
+		if ( min > ( pf[ i ] * scale ) ) min = ( pf[ i ] * scale );
+		else if ( max < ( pf[ i ] * scale ) ) max = ( pf[ i ] * scale );
+	oexFLOAT range = max - min;
+	if ( !range ) range = .001;
+
+	// Draw the graph
+	oexINT x = 0, xl = 0, mx = 0, mn = 0, ni = 0;
+	oexFLOAT y, yl = ( CUTIL_YMARGIN / 2 ) + ( ( ( pf[ 0 ] * scale ) - min ) * ( h - CUTIL_YMARGIN ) / range );
+	while ( ni < n )
+	{
+		// Next y
+		y = ( CUTIL_YMARGIN / 2 ) + ( ( ( pf[ ni ] * scale ) - min ) * ( h - CUTIL_YMARGIN ) / range );
+
+		// Next x
+		mx += w;
+		while ( mx >= n )
+		{	if ( x < w - 1 ) 
+				x++;
+			mx -= n;
+		} // end if
+
+		// Draw the line
+		DrawLine( img, fmt, w, h, sw, pc, xl, yl, x, y );
+
+		// Next value
+		mn += n;
+		while ( mn >= w )
+			ni++, mn -= w;
+
+		// Last position
+		xl = x;
+		yl = y;
+
+	} // end for
+
+	return oexTRUE;
+}
 
 CStr CUtil::BuildPath( oexINT x_nId, oexCONST CStr &x_sPath, oexTCHAR tSep )
 {	return oexBuildPath( oexGetSysFolder( x_nId ), x_sPath ); }

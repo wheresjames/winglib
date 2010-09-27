@@ -37,6 +37,7 @@
 // namespace
 namespace sqbind
 {
+
     class CSqImage
     {
 	public:

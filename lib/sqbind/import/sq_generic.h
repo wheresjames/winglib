@@ -115,8 +115,49 @@ namespace sqbind
 
 	};
 
+	class CSqColor
+	{
+	public:
+
+		_SQBIND_CLASS_CTOR_BEGIN( CSqColor )
+			_SQBIND_CLASS_CTOR( CSqColor, 3 ) ( sa.GetInt( 2 ), sa.GetInt( 3 ), sa.GetInt( 4 ), 255 )
+			_SQBIND_CLASS_CTOR( CSqColor, 4 ) ( sa.GetInt( 2 ), sa.GetInt( 3 ), sa.GetInt( 4 ), sa.GetInt( 5 ) )
+		_SQBIND_CLASS_CTOR_END( CSqColor )
+
+		static void Register( sqbind::VM vm );
+
+		/// Default constructor
+		CSqColor() { m_c[ 0 ] = m_c[ 1 ] = m_c[ 2 ] = m_c[ 3 ] = 0; }
+		CSqColor( int r, int g, int b, int a ) { m_c[ 0 ] = r; m_c[ 1 ] = g; m_c[ 2 ] = b; m_c[ 3 ] = a; }
+		~CSqColor() {}
+
+		// Copy semantics
+		CSqColor( const CSqColor &r ) { m_c[ 0 ] = r.m_c[ 1 ]; m_c[ 1 ] = r.m_c[ 2 ]; m_c[ 2 ] = r.m_c[ 2 ]; m_c[ 3 ] = r.m_c[ 3 ]; }
+		CSqColor& operator =( const CSqColor &r ) { m_c[ 0 ] = r.m_c[ 1 ]; m_c[ 1 ] = r.m_c[ 2 ]; m_c[ 2 ] = r.m_c[ 2 ]; m_c[ 3 ] = r.m_c[ 3 ]; return *this; }
+
+		void set( int r, int g, int b, int a ) { m_c[ 0 ] = r; m_c[ 1 ] = g; m_c[ 2 ] = b; m_c[ 3 ] = a; }
+
+		int r() { return  m_c[ 0 ]; }
+		void setR( int v ) { m_c[ 0 ] = v; }
+		int g() { return  m_c[ 1 ]; }
+		void setG( int v ) { m_c[ 1 ] = v; }
+		int b() { return  m_c[ 2 ]; }
+		void setB( int v ) { m_c[ 2 ] = v; }
+		int a() { return  m_c[ 3 ]; }
+		void setA( int v ) { m_c[ 3 ] = v; }
+
+		int* Ptr() { return m_c; }
+
+	private:
+
+		/// Color components
+		int m_c[ 4 ];
+	};
+
+
 }; // end namespace
 
 // Declare type for use as squirrel parameters
 SQBIND_DECLARE_INSTANCE( sqbind::CSqSize, CSqSize )
 SQBIND_DECLARE_INSTANCE( sqbind::CSqPos, CSqPos )
+SQBIND_DECLARE_INSTANCE( sqbind::CSqColor, CSqColor )
