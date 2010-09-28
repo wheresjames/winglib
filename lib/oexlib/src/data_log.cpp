@@ -864,9 +864,15 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time
 		FindValue( it, s, ms, x_tInterval, x_nDataType, x_nMethod, m_tLogBase, m_tIndexStep );
 	} // end if
 
-	// Allocate space for binary data
+	// Calculate number of positions needed
 	oexUINT nItems = ( x_tEnd - x_tStart ) * 1000 / x_tInterval;
+	if ( !nItems )
+		return oexT( "" );
+
+	// Allocate space for binary data
 	CBin bin( nItems * sizeof( float ), nItems * sizeof( float ) );
+	if ( !bin.Ptr() )
+		return oexT( "" );
 
 	// Create data
 	CPropertyBag pb;
@@ -885,6 +891,9 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time
 		tTimeMs %= 1000;
 
 	} // end for
+
+	// The number of valid items	
+	bin.setUsed( i ? ( i - 1 ) * sizeof( float ) : 0 );
 
 	// Set the binary share
 	CStr sId = oexGuidToString();

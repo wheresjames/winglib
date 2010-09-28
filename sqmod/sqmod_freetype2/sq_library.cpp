@@ -5,6 +5,8 @@
 CFtLibrary::CFtLibrary()
 {_STT();
 
+	m_library = 0;
+
 	// Initialize freetype library
 	m_last_error = FT_Init_FreeType( &m_library );
 
@@ -19,7 +21,10 @@ CFtLibrary::~CFtLibrary()
 void CFtLibrary::Destroy()
 {_STT();
 
-	FT_Done_FreeType( m_library );
+	if ( m_library )
+	{	FT_Done_FreeType( m_library );
+		m_library = 0;
+	} // end if
 }
 
 int CFtLibrary::LoadFile( CFtFace *pFace, const sqbind::stdString &sFile, int nIndex )

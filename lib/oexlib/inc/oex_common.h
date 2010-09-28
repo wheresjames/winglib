@@ -145,6 +145,12 @@ namespace cmn
 	template <>
 		inline oexUINT Mod< oexUINT >( oexUINT x, oexUINT y )
 		{	return x % y; }
+	template <>
+		inline oexLONG Mod< oexLONG >( oexLONG x, oexLONG y )
+		{	return x % y; }
+	template <>
+		inline oexULONG Mod< oexULONG >( oexULONG x, oexULONG y )
+		{	return x % y; }
 
     /// Scales a value v from range( 0, cur ) to range( 0, tgt )
     template < typename T >

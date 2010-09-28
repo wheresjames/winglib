@@ -29,13 +29,18 @@ CFtFace::~CFtFace()
 void CFtFace::Destroy()
 {_STT();
 
-	t_GlyphMap::iterator it = m_mapGlyph.begin();
-	while ( it != m_mapGlyph.end() )
-		FT_Done_Glyph( (FT_Glyph)it->second ),
-		m_mapGlyph.erase( it++ );
+	if ( m_face )
+	{
+		t_GlyphMap::iterator it = m_mapGlyph.begin();
+		while ( it != m_mapGlyph.end() )
+			FT_Done_Glyph( (FT_Glyph)it->second ),
+			m_mapGlyph.erase( it++ );
 
+		FT_Done_Face( m_face );
 
-	FT_Done_Face( m_face );
+		m_face = 0;
+
+	} // end if
 }
 
 void CFtFace::setAngle( double d )

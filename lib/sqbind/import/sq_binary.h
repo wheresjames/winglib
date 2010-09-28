@@ -269,7 +269,7 @@ namespace sqbind
 		}
 
 		/// Graphs an array of floats
-		int GraphFloat( CSqImage *img, CSqColor *c, float scale );
+		int GraphFloat( CSqImage *img, CSqColor *c, float scale, float min, float max );
 
 		/// Locates the specified string in the buffer
 		t_size FindBin( CSqBinary *p, int x_nStart, int x_nMax )

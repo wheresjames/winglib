@@ -486,10 +486,10 @@ oexBOOL CUtil::DrawLine( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, o
 		return oexFALSE;
 
 	// Adjust range on variables
-	if ( x1 < 0 ) x1 = 0; else if ( x1 > w - 1 ) x1 = w - 1;
-	if ( y1 < 0 ) y1 = 0; else if ( y1 > h - 1 ) y1 = h - 1;
-	if ( x2 < 0 ) x2 = 0; else if ( x2 > w - 1 ) x2 = w - 1;
-	if ( y2 < 0 ) y2 = 0; else if ( y2 > h - 1 ) y2 = h - 1;
+	x1 = cmn::Range( x1, 0, w - 1 );
+	y1 = cmn::Range( y1, 0, h - 1 );
+	x2 = cmn::Range( x2, 0, w - 1 );
+	y2 = cmn::Range( y2, 0, h - 1 );
 
 	oexBYTE *p = (oexBYTE*)img->_Ptr();
 	oexINT xe = x2 - x1; if ( 0 > xe ) xe = -xe;
@@ -516,11 +516,14 @@ oexBOOL CUtil::DrawLine( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, o
 
 	} // end while
 
+	// Set the last pixel
+	CUTIL_SET_PIXEL( p, sw, x2, y2, pc );
+
 	return oexTRUE;
 }
 
 #define CUTIL_YMARGIN 8
-oexBOOL CUtil::GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *pc, oexFLOAT *pf, oexINT n, oexFLOAT scale )
+oexBOOL CUtil::GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *pc, oexFLOAT *pf, oexINT n, oexFLOAT scale, oexFLOAT min, oexFLOAT max )
 {
 	if ( 0 >= w || 0 >= h || 1 >= n )
 		return oexFALSE;
@@ -533,18 +536,22 @@ oexBOOL CUtil::GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw,
 	if ( img->getUsed() < sz )
 		return oexFALSE;
 
-	// Determine the range
-	oexFLOAT min = pf[ 0 ], max = pf[ 0 ];
-	for ( oexINT i = 1; i < n; i++ )
-		if ( min > ( pf[ i ] * scale ) ) min = ( pf[ i ] * scale );
-		else if ( max < ( pf[ i ] * scale ) ) max = ( pf[ i ] * scale );
+	// Was a range provided?
+	if ( !min && !max )
+	{	min = pf[ 0 ], max = pf[ 0 ];
+		for ( oexINT i = 1; i < n; i++ )
+			if ( min > ( pf[ i ] * scale ) ) min = ( pf[ i ] * scale );
+			else if ( max < ( pf[ i ] * scale ) ) max = ( pf[ i ] * scale );
+	} // end if
+
+	// Calculate range
 	oexFLOAT range = max - min;
 	if ( !range ) range = .001;
 
 	// Draw the graph
 	oexINT x = 0, xl = 0, mx = 0, mn = 0, ni = 0;
 	oexFLOAT y, yl = ( CUTIL_YMARGIN / 2 ) + ( ( ( pf[ 0 ] * scale ) - min ) * ( h - CUTIL_YMARGIN ) / range );
-	while ( ni < n )
+	while ( ni < n || x < ( w - 1 ) )
 	{
 		// Next y
 		y = ( CUTIL_YMARGIN / 2 ) + ( ( ( pf[ ni ] * scale ) - min ) * ( h - CUTIL_YMARGIN ) / range );
@@ -552,7 +559,7 @@ oexBOOL CUtil::GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw,
 		// Next x
 		mx += w;
 		while ( mx >= n )
-		{	if ( x < w - 1 ) 
+		{	if ( x < ( w - 1 ) )
 				x++;
 			mx -= n;
 		} // end if
@@ -563,7 +570,10 @@ oexBOOL CUtil::GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw,
 		// Next value
 		mn += n;
 		while ( mn >= w )
-			ni++, mn -= w;
+		{	if ( ni < n )
+				ni++;
+			mn -= w;
+		} // end while
 
 		// Last position
 		xl = x;

@@ -86,7 +86,7 @@ public:
 	static oexBOOL DrawLine( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *pc, oexINT x1, oexINT y1, oexINT x2, oexINT y2 );
 
 	/// Draws a graph of an array of float values
-	static oexBOOL GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *pc, oexFLOAT *pf, oexINT n, oexFLOAT scale );
+	static oexBOOL GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *pc, oexFLOAT *pf, oexINT n, oexFLOAT scale, oexFLOAT min, oexFLOAT max );
 
 };
 
