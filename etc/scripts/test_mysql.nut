@@ -33,7 +33,7 @@ function _init()
 	// Show field info
 	for( local f = 0; f < fields; f++ )
 	{
-		local fi = CSqMap();
+		local fi = CSqMulti();
 		if ( !sq.getFieldInfo( f, fi ) )
 			_self.echo( "!!! Error getting info for field : " + f );
 		else
@@ -44,7 +44,7 @@ function _init()
 	_self.echo( "\n=== ROWS ===\n" );
 
 	local r = 0;
-	local row = CSqMap();
+	local row = CSqMulti();
 	while ( sq.getRow( row ) )
 		_self.echo( _self.replace( "Row " + r++ + " = " + row.print_r( 1 ), "\r\n", ", " ) );
 
@@ -53,7 +53,7 @@ function _init()
 	local test_str = "Hello 'World!'";
 	_self.echo( "Escape Test : " + test_str + " = " + sq.Escape( test_str ) );
 
-	local m = CSqMap();
+	local m = CSqMulti();
 	m[ "1" ] <- "first";
 	m[ "2" ] <- "'second'";
 	m[ "3" ] <- "`third`";

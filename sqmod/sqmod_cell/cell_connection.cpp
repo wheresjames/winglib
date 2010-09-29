@@ -180,7 +180,7 @@ int CCellConnection::LoadTags()
 		for ( int i = 0; i < m_tagsDetails.count; i++ )
 			if ( !get_object_details( &m_comm, &m_path, m_tagsDetails.tag[ i ], 0 ) )
 			{	m_mapTags[ oexMbToStrPtr( (const char*)m_tagsDetails.tag[ i ]->name ) ] = m_tagsDetails.tag[ i ];
-				m_mapSqTags.set( oexMbToStrPtr( (const char*)m_tagsDetails.tag[ i ]->name ), oexMks( i ).Ptr() );
+				m_mapSqTags[ oexMbToStrPtr( (const char*)m_tagsDetails.tag[ i ]->name ) ] = oexMks( i ).Ptr();
 			} // end if
 
 	// Get program tags
@@ -229,7 +229,7 @@ int CCellConnection::LoadTags()
 													  oexMbToStrPtr( (char*)m_tagsProgram[ i ].tag[ j ]->name ) );
 
 							m_mapTags[ sName.Ptr() ] = m_tagsProgram[ i ].tag[ j ];
-							m_mapSqTags.set( sName.Ptr(), oexMks( i, oexT( "." ), j ).Ptr() );
+							m_mapSqTags[ sName.Ptr() ] = oexMks( i, oexT( "." ), j ).Ptr();
 
 						} // end if
 
@@ -467,28 +467,28 @@ oex::oexBOOL CCellConnection::GetItemValue( int nType, unsigned char *pData, int
 	return oex::oexTRUE;
 }
 
-sqbind::CSqMap CCellConnection::TagToMap( _tag_detail *pTd )
+sqbind::CSqMulti CCellConnection::TagToMap( _tag_detail *pTd )
 {_STT();
 	if ( !oexCHECK_PTR( pTd ) )
-		return sqbind::CSqMap();
+		return sqbind::CSqMulti();
 
-	sqbind::CSqMap mRet;
-	mRet.set( oexT( "topbase" ), 		oexMks( (unsigned int)pTd->topbase ).Ptr() );
-	mRet.set( oexT( "base" ), 			oexMks( (unsigned int)pTd->base ).Ptr() );
-	mRet.set( oexT( "id" ), 			oexMks( (unsigned int)pTd->id ).Ptr() );
-	mRet.set( oexT( "linkid" ), 		oexMks( (unsigned int)pTd->linkid ).Ptr() );
-	mRet.set( oexT( "type" ), 			oexMks( (unsigned int)( pTd->type & 0x0fff ) ).Ptr() );
-	mRet.set( oexT( "dim" ),			oexMks( (unsigned int)( ( pTd->type & 0x6000 ) >> 13 ) ).Ptr() );
-	mRet.set( oexT( "struct" ),			oexMks( (unsigned int)( ( pTd->type & 0x8000 ) ? 1 : 0 ) ).Ptr() );
-	mRet.set( oexT( "bytes" ), 			oexMks( (unsigned int)pTd->size ).Ptr() );
-	mRet.set( oexT( "memory" ), 		oexMks( (unsigned int)pTd->memory ).Ptr() );
-	mRet.set( oexT( "displaytype" ), 	oexMks( (unsigned int)pTd->displaytype ).Ptr() );
-	mRet.set( oexT( "name" ), 			oexMbToStrPtr( (const char*)pTd->name ) );
-	mRet.set( oexT( "a1_size" ), 		oexMks( (unsigned int)pTd->arraysize1 ).Ptr() );
-	mRet.set( oexT( "a2_size" ), 		oexMks( (unsigned int)pTd->arraysize2 ).Ptr() );
-	mRet.set( oexT( "a3_size" ),	 	oexMks( (unsigned int)pTd->arraysize3 ).Ptr() );
-	mRet.set( oexT( "type_name" ), 		GetTypeName( pTd->type ) );
-	mRet.set( oexT( "datalen" ),	 	oexMks( (unsigned int)pTd->datalen ).Ptr() );
+	sqbind::CSqMulti mRet;
+	mRet[ oexT( "topbase" ) ] =		oexMks( (unsigned int)pTd->topbase ).Ptr();
+	mRet[ oexT( "base" ) ] =		oexMks( (unsigned int)pTd->base ).Ptr();
+	mRet[ oexT( "id" ) ] = 			oexMks( (unsigned int)pTd->id ).Ptr();
+	mRet[ oexT( "linkid" ) ] = 		oexMks( (unsigned int)pTd->linkid ).Ptr();
+	mRet[ oexT( "type" ) ] = 		oexMks( (unsigned int)( pTd->type & 0x0fff ) ).Ptr();
+	mRet[ oexT( "dim" ) ] =			oexMks( (unsigned int)( ( pTd->type & 0x6000 ) >> 13 ) ).Ptr();
+	mRet[ oexT( "struct" ) ] =		oexMks( (unsigned int)( ( pTd->type & 0x8000 ) ? 1 : 0 ) ).Ptr();
+	mRet[ oexT( "bytes" ) ] =		oexMks( (unsigned int)pTd->size ).Ptr();
+	mRet[ oexT( "memory" ) ] =		oexMks( (unsigned int)pTd->memory ).Ptr();
+	mRet[ oexT( "displaytype" ) ] =	oexMks( (unsigned int)pTd->displaytype ).Ptr();
+	mRet[ oexT( "name" ) ] =		oexMbToStrPtr( (const char*)pTd->name );
+	mRet[ oexT( "a1_size" ) ] =		oexMks( (unsigned int)pTd->arraysize1 ).Ptr();
+	mRet[ oexT( "a2_size" ) ] =		oexMks( (unsigned int)pTd->arraysize2 ).Ptr();
+	mRet[ oexT( "a3_size" ) ] =	 	oexMks( (unsigned int)pTd->arraysize3 ).Ptr();
+	mRet[ oexT( "type_name" ) ] =	GetTypeName( pTd->type );
+	mRet[ oexT( "datalen" ) ] =	 	oexMks( (unsigned int)pTd->datalen ).Ptr();
 
 	return mRet;
 }
@@ -648,7 +648,7 @@ oex::oexBOOL CCellConnection::ParseTag( const sqbind::stdString &sTag, sqbind::s
 	return oex::oexFALSE;
 }
 
-sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
+sqbind::CSqMulti CCellConnection::ReadTag( const sqbind::stdString &sTag )
 {_STT();
 	// Must be connected
 	if ( m_comm.error != OK )
@@ -680,7 +680,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 
 	} // end if
 
-	sqbind::CSqMap		mRet;
+	sqbind::CSqMulti		mRet;
 	int					nLen = 0;
 	unsigned char *		pDat = oexNULL;
 
@@ -780,10 +780,10 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 			nMask <<= 1, i--;
 
 		// Capture the bit value
-		mRet.set( oexT( "value" ), 0 != ( nMask & ptr[ nByte ] ) ? oexT( "1" ) : oexT( "0" ) );
-		mRet.set( oexT( "type_name" ), oexT( "BIT" ) );
-		mRet.set( oexT( "byte" ), oexMks( nByte ).Ptr() );
-		mRet.set( oexT( "bit" ), oexMks( nBit % 8 ).Ptr() );
+		mRet[ oexT( "value" ) ] = 0 != ( nMask & ptr[ nByte ] ) ? oexT( "1" ) : oexT( "0" );
+		mRet[ oexT( "type_name" ) ] = oexT( "BIT" );
+		mRet[ oexT( "byte" ) ] = oexMks( nByte ).Ptr();
+		mRet[ oexT( "bit" ) ] = oexMks( nBit % 8 ).Ptr();
 
 	} // end if
 
@@ -796,7 +796,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 
 		sqbind::stdString sVal;
 		if ( GetItemValue( pTd->tag[ nTag ]->type, pDat, nLen, nBit, sVal ) )
-			mRet.set( oexT( "value" ), sVal.c_str() );
+			mRet[ oexT( "value" ) ] = sVal.c_str();
 
 	} // end if
 
@@ -808,12 +808,12 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 
 		sqbind::stdString sVal;
 		if ( GetItemValue( nType, &pDat[ nOffset ], nSize, nBit, sVal ) )
-			mRet.set( oexT( "value" ), sVal );
+			mRet[ oexT( "value" ) ] = sVal;
 
-		mRet.set( oexT( "type" ), oexMks( nType ).Ptr() );
-		mRet.set( oexT( "type_name" ), GetTypeName( nType ) );
-		mRet.set( oexT( "bytes" ), oexMks( nSize ).Ptr() );
-		mRet.set( oexT( "offset" ), oexMks( nOffset ).Ptr() );
+		mRet[ oexT( "type" ) ] = oexMks( nType ).Ptr();
+		mRet[ oexT( "type_name" ) ] = GetTypeName( nType );
+		mRet[ oexT( "bytes" ) ] = oexMks( nSize ).Ptr();
+		mRet[ oexT( "offset" ) ] = oexMks( nOffset ).Ptr();
 
 	} // end else
 
@@ -822,7 +822,7 @@ sqbind::CSqMap CCellConnection::ReadTag( const sqbind::stdString &sTag )
 	{	sqbind::stdString sVal = oexT( "" );
 		for ( int b = 0; b < nLen; b++ )
 			sVal += oexFmt( oexT( "%02X" ), (int)pDat[ b ] ).Ptr();
-		mRet.set( oexT( "raw_value" ), sVal );
+		mRet[ oexT( "raw_value" ) ] = sVal;
 	} // end if
 
 	// Cache the result

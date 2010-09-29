@@ -49,7 +49,7 @@ function OnProcessRequest( params ) : ( _g, _cfg )
 	} // end if
 
 	if ( !page.len() )
-	{	mReply.set( "content", "Access Denied" );
+	{	mReply[ "content" ] <- "Access Denied";
 		return mReply.serialize();
 	} // end if
 	local content = "<html>\r\n"
@@ -64,7 +64,7 @@ function OnProcessRequest( params ) : ( _g, _cfg )
 	</body>
 </html>";
 
-	mReply.set( "content", content );
+	mReply[ "content" ] <- content;
 	return mReply.serialize();
 }
 

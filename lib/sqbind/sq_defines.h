@@ -144,7 +144,8 @@ namespace sqbind { typedef script::VMCore VM; }
 
 namespace sqbind
 {
-	typedef oexStdTString( oex::oexTCHAR ) stdString;
+	typedef oex::oexTCHAR stdChar;
+	typedef oexStdTString( stdChar ) stdString;
 
 	class CSqParam
 	{

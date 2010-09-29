@@ -16,7 +16,7 @@ function OnServerEvent( server, data )
 
 function OnProcessRequest( params ) : ( _g )
 {
-	local mReply = CSqMap();
+	local mReply = CSqMulti();
 
 	local mParams = CSqMulti();
 	mParams.deserialize( params );
@@ -40,8 +40,8 @@ function OnProcessRequest( params ) : ( _g )
 			_self.set_binshare( id, img.Encode( "jpg" ) )
 
 			// Return to web server
-			mReply.set( "binary", id ),
-			mReply.set( "binary_type", "jpg" );
+			mReply[ "binary" ] <- id,
+			mReply[ "binary_type" ] <- "jpg";
 			return mReply.serialize();
 
 		} // end if
@@ -54,7 +54,7 @@ function OnProcessRequest( params ) : ( _g )
 		err = _g.cap.getLastErrorStr();
 
 
-	mReply.set( "content", "Capture Failed : " + err );
+	mReply[ "content" ] <- "Capture Failed : " + err;
 
 	return mReply.serialize();
 }

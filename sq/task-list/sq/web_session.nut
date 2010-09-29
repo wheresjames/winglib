@@ -35,7 +35,7 @@ function OnProcessRequest( params )
 			switch ( mParams[ "REQUEST" ][ "path" ].str() )
 			{	case "/tasks" :
 					_self.include_once( "pg/tasks.nut" );
-					mReply.set( "content", raw_tasks( mParams ) );
+					mReply[ "content" ] <- raw_tasks( mParams );
 					return mReply.serialize();
 			} // end switch
 
@@ -83,7 +83,7 @@ function OnProcessRequest( params )
 	} // end if
 
 	if ( !page.len() )
-	{	mReply.set( "content", "Access Denied" );
+	{	mReply[ "content" ] <- "Access Denied";
 		return mReply.serialize();
 	} // end if
 	local content = "<html>\r\n"
@@ -98,8 +98,8 @@ function OnProcessRequest( params )
 	</body>
 </html>";
 
-	mReply.set( "session", mParams[ "SESSION" ].serialize() );
-	mReply.set( "content", content );
+	mReply[ "session" ] <- mParams[ "SESSION" ].serialize();
+	mReply[ "content" ] <- content;
 	return mReply.serialize();
 }
 

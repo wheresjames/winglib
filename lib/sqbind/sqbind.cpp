@@ -49,7 +49,6 @@ namespace sqbind
 		CSqString::Register( x_vm );
 		CSqVector::Register( x_vm );
 		CSqList::Register( x_vm );
-		CSqMap::Register( x_vm );
 		CSqMulti::Register( x_vm );
 		CSqFile::Register( x_vm );
 		CSqTimeRange::Register( x_vm );

@@ -58,6 +58,9 @@ namespace sqbind
 		virtual void deserialize( const t_SqStr &s );
 		virtual void merge( const t_SqStr &s );
 
+		void mset( CSqMulti *m );
+		void mmerge( CSqMulti *m );
+
 		t_SqStr serialize_filter( const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase );
 		void deserialize_filter( const t_SqStr &s, const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase );
 
@@ -107,10 +110,28 @@ namespace sqbind
         t_List& list();
 
 		/// Returns a reference to the list item
+		CSqMulti& operator []( const CSqMulti &m );
+
+		/// Returns a reference to the list item
 		CSqMulti& operator []( const t_Obj &rObj );
 
 		/// Returns a reference to the list item
 		CSqMulti& operator []( const oex::oexTCHAR *p );
+
+		/// Assignment operator
+		CSqMulti& operator = ( const stdString &s );
+
+		/// Assignment operator
+		CSqMulti& operator = ( const oex::oexTCHAR *p );
+
+		/// Returns a reference to the string object
+		operator stdString&() { return str(); }
+
+		/// Returns a const char pointer
+		const stdChar* c_str() const { return m_val.c_str().c_str(); }
+
+		/// Returns the length of the string
+		int length() const { return m_val.c_str().length(); }
 
 		/// Returns the value of this node
 		CSqString* value();

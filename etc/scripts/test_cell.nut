@@ -32,11 +32,11 @@ function parse_tag( name )
 
 function pg_data( mParams ) : ( _g )
 {
-	local mReply = CSqMap();
+	local mReply = CSqMulti();
 
 	if ( mParams[ "GET" ].isset( "quit" ) )
 	{	_g.quit = 1;
-		mReply.set( "content", "Quitting" );
+		mReply[ "content" ] <- "Quitting";
 		return mReply.serialize();
 	} // end if
 
@@ -44,19 +44,19 @@ function pg_data( mParams ) : ( _g )
 		_g.tc.Destroy();
 
 	if ( !_g.tc.IsConnected() && !mParams[ "GET" ][ "ip" ].len() )
-	{	mReply.set( "content", "Not connected and no ip specified" );
+	{	mReply[ "content" ] <- "Not connected and no ip specified";
 		return mReply.serialize();
 	} // end if
 
 	if ( !_g.tc.IsConnected() || 
 		 ( mParams[ "GET" ][ "ip" ].len() && mParams[ "GET" ][ "ip" ].str() != _g.tc.GetIp() ) )
 		if ( !_g.tc.Connect( mParams[ "GET" ][ "ip" ].str(), 1 ) )
-		{	mReply.set( "content", "Unable to connect to " + mParams[ "GET" ][ "ip" ].str() );
+		{	mReply[( "content" ] <- "Unable to connect to " + mParams[ "GET" ][ "ip" ].str();
 			return mReply.serialize();
 		} // end if
 
 	if ( !_g.tc.IsConnected() )
-		mReply.set( "content", "Not connected" );
+		mReply[ "content" ] <- "Not connected";
 
 	else
 	{
@@ -64,9 +64,9 @@ function pg_data( mParams ) : ( _g )
 		{
 			local tag_name = parse_tag( mParams[ "GET" ][ "tag" ].str() );
 			if ( !_g.tc.tags()[ tag_name ] )
-				mReply.set( "content", "Base tag not found " + tag_name );
+				mReply[ "content" ] <- "Base tag not found " + tag_name;
 			else
-				mReply.set( "content", _g.tc.ReadTag( mParams[ "GET" ][ "tag" ].str() ).serialize() );
+				mReply[ "content" ] <- _g.tc.ReadTag( mParams[ "GET" ][ "tag" ].str() ).serialize();
 
 		} // end if
 
@@ -108,7 +108,7 @@ function pg_data( mParams ) : ( _g )
 
 			s += "</table>";
 
-			mReply.set( "content", s );
+			mReply[ "content" ] <- s;
 
 		} // end if
 
@@ -409,8 +409,8 @@ function pg_admin( mParams ) : ( _g )
 </html>
 		";
 
-	local mReply = CSqMap();
-	mReply.set( "content", content );
+	local mReply = CSqMulti();
+	mReply[ "content" ] <- content;
 	return mReply.serialize();
 }
 
@@ -430,8 +430,8 @@ function OnProcessRequest( params ) : ( _g )
 
 	} // end if
 
-	local mReply = CSqMap();
-	mReply.set( "content", "Access Denied" );
+	local mReply = CSqMulti();
+	mReply[ "content" ] <- "Access Denied";
 	return mReply.serialize();
 }
 

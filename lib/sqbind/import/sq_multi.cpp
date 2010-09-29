@@ -77,6 +77,18 @@ CSqMulti& CSqMulti::operator = ( const CSqMulti &m )
 	return *this;
 }
 
+CSqMulti& CSqMulti::operator = ( const stdString &s )
+{_STT();
+	m_val = s;
+	return *this;
+}
+
+CSqMulti& CSqMulti::operator = ( const oex::oexTCHAR *p )
+{_STT();
+	if ( p ) m_val = p;
+	return *this;
+}
+
 CSqMulti::t_List& CSqMulti::list()
 {_STT();
 	return m_lst;
@@ -85,6 +97,11 @@ CSqMulti::t_List& CSqMulti::list()
 CSqMulti& CSqMulti::operator []( const CSqMulti::t_Obj &rObj )
 {_STT();
 	return m_lst[ rObj ];
+}
+
+CSqMulti& CSqMulti::operator []( const CSqMulti &m )
+{_STT();
+	return m_lst[ m.c_str() ];
 }
 
 CSqMulti& CSqMulti::operator []( const oex::oexTCHAR *p )
@@ -132,6 +149,8 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, setJSON )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, getJSON )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, merge )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mmerge )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mset )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, urlencode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, urldecode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, isset )
@@ -260,6 +279,21 @@ void CSqMulti::merge( const CSqParam::t_SqStr &s )
 	oex::CStr sData( s.c_str(), s.length() );
 	oex::CPropertyBag pb = oex::CParser::Deserialize( sData, oex::oexTRUE );
 	SQBIND_PropertyBagToMulti( pb, m_lst );
+}
+
+void CSqMulti::mset( CSqMulti *m )
+{_STT();
+	if ( m ) m_lst = m->m_lst;
+}
+
+void CSqMulti::mmerge( CSqMulti *m )
+{_STT();
+	
+	if ( !m ) 
+		return;
+
+	for ( CSqMulti::iterator it = m->begin(); it != m->end(); it++ )
+		m_lst[ it->first.c_str() ] = it->second.str().c_str();
 }
 
 CSqMulti::t_Obj CSqMulti::urlencode()

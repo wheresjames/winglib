@@ -34,10 +34,10 @@ public:
 	sqbind::stdString Escape( const sqbind::stdString &s );
 
 	/// Escapes a list so it is safe to put into the database
-	sqbind::stdString MakeInsert( sqbind::CSqMap *mInfo );
+	sqbind::stdString MakeInsert( sqbind::CSqMulti *mInfo );
 
 	/// Escapes a list so it is safe to put into the database
-	sqbind::stdString MakePairs( sqbind::CSqMap *mInfo );
+	sqbind::stdString MakePairs( sqbind::CSqMulti *mInfo );
 
 	/// Get number of rows available from last query
 	int getNumRows();
@@ -46,7 +46,7 @@ public:
 	int getNumFields();
 
 	/// Returns information about the specified field
-	int getFieldInfo( int i, sqbind::CSqMap *mInfo );
+	int getFieldInfo( int i, sqbind::CSqMulti *mInfo );
 
 	/// Records the last error from mysql
 	int LogError( oex::oexCSTR pPrefix );
@@ -64,7 +64,7 @@ public:
 	{	return m_bOpen; }
 
 	/// Returns a row of data
-	int getRow( sqbind::CSqMap *mRow );
+	int getRow( sqbind::CSqMulti *mRow );
 
 private:
 

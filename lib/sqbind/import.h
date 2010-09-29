@@ -40,7 +40,6 @@
 #include "import/sq_binary.h"
 #include "import/sq_vector.h"
 #include "import/sq_list.h"
-#include "import/sq_map.h"
 #include "import/sq_multi.h"
 #include "import/sq_file.h"
 #include "import/sq_time.h"

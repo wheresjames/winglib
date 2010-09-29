@@ -78,7 +78,7 @@ public:
 		If pmapReply is not NULL, the function waits for a reply
 		from the thread.
 	*/
-	oex::oexBOOL Msg( stdString sPath, stdString sMsg, CSqMap *pmapParams = oexNULL, stdString *pReply = oexNULL, oexEvent *pReplyEvent = oexNULL, oex::oexUINT uTimeout = eLockTimeout );
+	oex::oexBOOL Msg( stdString sPath, stdString sMsg, CSqMulti *pmapParams = oexNULL, stdString *pReply = oexNULL, oexEvent *pReplyEvent = oexNULL, oex::oexUINT uTimeout = eLockTimeout );
 
 public:
 
@@ -89,7 +89,7 @@ public:
 		SMsg();
 
 		/// Initializer
-		SMsg( const stdString x_sPath, const stdString x_sMsg, CSqMap *x_pmapParams, oexEvent *x_evReply, stdString *x_pReply );
+		SMsg( const stdString x_sPath, const stdString x_sMsg, CSqMulti *x_pmapParams, oexEvent *x_evReply, stdString *x_pReply );
 
 		// Copy constructor
 		SMsg( const SMsg &x_rMsg );
@@ -113,7 +113,7 @@ public:
 	};
 
 	/// Process a single message from the queue
-	virtual oex::oexBOOL ProcessMsg( const stdString &sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent );
+	virtual oex::oexBOOL ProcessMsg( const stdString &sPath, stdString &sMsg, CSqMulti &mapParams, stdString *pReply, oexEvent *pReplyEvent );
 
 protected:
 

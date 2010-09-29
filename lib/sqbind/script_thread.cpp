@@ -393,7 +393,7 @@ oex::oexBOOL CScriptThread::KillTimer( oex::oexUINT x_uId )
 }
 
 
-oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent )
+oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, stdString *pReply, oexEvent *pReplyEvent )
 {_STT();
 
 	oex::oexBOOL bRet = oex::oexTRUE;
@@ -404,7 +404,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 
 	// Is it a script map?
 	else if ( ( sMsg == oexT( "pb_get" ) || sMsg == oexT( "pb_set" ) )
-			  && *mapParams[ oexT( "key" ) ].c_str() == oexT( '@' ) )
+			  && *mapParams[ oexT( "key" ) ].str().c_str() == oexT( '@' ) )
 	{
 		oexAutoLock ll( m_lockPb );
 		if ( !ll.IsLocked() )
@@ -465,7 +465,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 			return oex::oexFALSE;
 
 		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
-		if ( mapParams[ oexT( "val" ) ].length() )
+		if ( mapParams[ oexT( "val" ) ].len() )
 			m_pb.at( std2oex( key ) ) = std2oex( mapParams[ oexT( "val" ) ] );
 
 		else
@@ -815,7 +815,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdS
 	return bRet;
 }
 
-oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent )
+oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMsg, CSqMulti &mapParams, stdString *pReply, oexEvent *pReplyEvent )
 {_STT();
 	stdString sPath = x_sPath;
 
@@ -979,7 +979,7 @@ void CScriptThread::DestroyChildScripts()
 	} // end while
 }
 
-void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
+void CScriptThread::OnSpawn( CSqMulti &mapParams, stdString *pReply )
 {_STT();
 	// Grab the path
 	stdString sName = mapParams[ oexT( "name" ) ];
@@ -1064,31 +1064,31 @@ void CScriptThread::OnSpawn( CSqMap &mapParams, stdString *pReply )
 	} // end if
 }
 
-void CScriptThread::OnMsg( CSqMap &mapParams, stdString *pReply )
+void CScriptThread::OnMsg( CSqMulti &mapParams, stdString *pReply )
 {_STT();
 	// Run script?
 	if ( mapParams[ oexT( "run" ) ].length() )
 		m_cSqEngine.Run( pReply, mapParams[ oexT( "name" ) ].c_str(), mapParams[ oexT( "run" ) ].c_str() );
 
 	// Execute function?
-	else if ( mapParams[ oexT( "execute" ) ].length() )
+	else if ( mapParams.isset( oexT( "execute" ) ) )
 		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute" ) ].c_str() );
 
 	// Execute one param
-	else if ( mapParams[ oexT( "execute1" ) ].length() )
-		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute1" ) ].c_str(), mapParams[ oexT( "p1" ) ] );
+	else if ( mapParams.isset( oexT( "execute1" ) ) )
+		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute1" ) ].c_str(), mapParams[ oexT( "p1" ) ].str() );
 
 	// Execute 2 params
-	else if ( mapParams[ oexT( "execute2" ) ].length() )
-		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute2" ) ].c_str(), mapParams[ oexT( "p1" ) ], mapParams[ oexT( "p2" ) ] );
+	else if ( mapParams.isset( oexT( "execute2" ) ) )
+		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute2" ) ].c_str(), mapParams[ oexT( "p1" ) ].str(), mapParams[ oexT( "p2" ) ].str() );
 
 	// Execute 3 params
-	else if ( mapParams[ oexT( "execute3" ) ].length() )
-		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute3" ) ].c_str(), mapParams[ oexT( "p1" ) ], mapParams[ oexT( "p2" ) ], mapParams[ oexT( "p3" ) ] );
+	else if ( mapParams.isset( oexT( "execute3" ) ) )
+		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute3" ) ].c_str(), mapParams[ oexT( "p1" ) ].str(), mapParams[ oexT( "p2" ) ].str(), mapParams[ oexT( "p3" ) ].str() );
 
 	// Execute 4 params
-	else if ( mapParams[ oexT( "execute4" ) ].length() )
-		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute4" ) ].c_str(), mapParams[ oexT( "p1" ) ], mapParams[ oexT( "p2" ) ], mapParams[ oexT( "p3" ) ], mapParams[ oexT( "p4" ) ] );
+	else if ( mapParams.isset( oexT( "execute4" ) ) )
+		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute4" ) ].c_str(), mapParams[ oexT( "p1" ) ].str(), mapParams[ oexT( "p2" ) ].str(), mapParams[ oexT( "p3" ) ].str(), mapParams[ oexT( "p4" ) ].str() );
 }
 
 CSqMsgQueue* CScriptThread::GetQueue( const stdString &x_sPath )

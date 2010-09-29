@@ -29,7 +29,7 @@ public:
 		oex::oexUINT			uTime;
 
 		/// Tag value
-		sqbind::CSqMap			mVal;
+		sqbind::CSqMulti		mVal;
 	};
 
 	// Tag value cache
@@ -100,7 +100,7 @@ public:
 	oex::oexBOOL ParseTag( const sqbind::stdString &sTag, sqbind::stdString &sName, int &nProgram, int &nTag, int &nIndex, int &nOffset, int &nSize, int &nType, int &nBit );
 
 	/// Read the specified tag
-	sqbind::CSqMap ReadTag( const sqbind::stdString &sTag );
+	sqbind::CSqMulti ReadTag( const sqbind::stdString &sTag );
 
 	/// Returns a string describing backplane data
 	sqbind::stdString GetBackplaneData();
@@ -118,11 +118,11 @@ public:
 	{	return m_sIp; }
 
 	/// Returns a list of tags to squirrel
-	sqbind::CSqMap* tags()
+	sqbind::CSqMulti* tags()
 	{	return &m_mapSqTags; }
 
 	/// Creates a map from tag details structure
-	sqbind::CSqMap TagToMap( _tag_detail *pTd );
+	sqbind::CSqMulti TagToMap( _tag_detail *pTd );
 
 	/// Returns the tag template map
 	sqbind::CSqMulti* tmpl()
@@ -180,7 +180,7 @@ private:
 	t_DataCache					m_mapDataCache;
 
 	/// Tag map for squirrel
-	sqbind::CSqMap				m_mapSqTags;
+	sqbind::CSqMulti			m_mapSqTags;
 
 	/// Tag templates
 	sqbind::CSqMulti			m_mapSqTemplates;

@@ -24,8 +24,8 @@ function OnProcessRequest( params )
 
 	local page = "<pre>" + mParams.print_r( 1 ) + "</pre>";
 
-	local mReply = CSqMap();
-	mReply.set( "content", page );
+	local mReply = CSqMulti();
+	mReply[ "content" ] <- page;
 	return mReply.serialize();
 }
 

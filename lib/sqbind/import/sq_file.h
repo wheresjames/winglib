@@ -162,10 +162,10 @@ namespace sqbind
 		static stdString get_extension( const stdString &sFile )
 		{	return oexGetFileExtension( sFile.c_str() ).Ptr(); }
 
-		static CSqMap get_dirlist( const stdString &sDir, const stdString &sMask, int bFiles, int bDirs )
+		static CSqMulti get_dirlist( const stdString &sDir, const stdString &sMask, int bFiles, int bDirs )
 		{
 			oex::CFindFiles ff;
-			CSqMap mRet;
+			CSqMulti mRet;
 			if ( ff.FindFirst( sDir.c_str(), sMask.c_str() ) )
 				do
 				{

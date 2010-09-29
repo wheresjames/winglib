@@ -108,10 +108,10 @@ protected:
 	virtual oex::oexINT EndThread( oex::oexPVOID x_pData );
 
 	/// Process a single message from the queue
-	virtual oex::oexBOOL ProcessMsg( const stdString &x_sPath, stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent );
+	virtual oex::oexBOOL ProcessMsg( const stdString &x_sPath, stdString &sMsg, CSqMulti &mapParams, stdString *pReply, oexEvent *pReplyEvent );
 
 	/// Executes a single message
-	oex::oexBOOL ExecuteMsg( stdString &sMsg, CSqMap &mapParams, stdString *pReply, oexEvent *pReplyEvent );
+	oex::oexBOOL ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, stdString *pReply, oexEvent *pReplyEvent );
 
 	/// Releases all child scripts
 	void DestroyChildScripts();
@@ -125,10 +125,10 @@ protected:
 protected:
 
 	/// Spawns a new child script thread
-	void OnSpawn( CSqMap &mapParams, stdString *pReply );
+	void OnSpawn( CSqMulti &mapParams, stdString *pReply );
 
 	/// Routes a message to the proper script
-	void OnMsg( CSqMap &mapParams, stdString *pReply );
+	void OnMsg( CSqMulti &mapParams, stdString *pReply );
 
 	/// Processes a script message
 //	void OnOnMsg( CSqMap &mapParams, stdString *pReply );

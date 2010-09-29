@@ -432,8 +432,8 @@ function OnProcessRequest( params ) : ( _g )
 		</body>
 	</html>";
 
-	local mReply = CSqMap();
-	mReply.set( "content", page );
+	local mReply = CSqMulti();
+	mReply[ "content" ] <- page;
 	return mReply.serialize();
 }
 

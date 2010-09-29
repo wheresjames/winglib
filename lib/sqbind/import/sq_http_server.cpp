@@ -224,7 +224,7 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 */
 
 	// Decode the reply
-	CSqMap mReply;
+	CSqMulti mReply;
 	mReply.deserialize( sReply );
 
 	// Set the content

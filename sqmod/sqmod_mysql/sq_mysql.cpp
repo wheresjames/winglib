@@ -154,13 +154,13 @@ sqbind::stdString CSqMysql::Escape( const sqbind::stdString &s )
 	return sqbind::stdString( sRet.Ptr(), sRet.Length() );
 }
 
-sqbind::stdString CSqMysql::MakePairs( sqbind::CSqMap *mInfo )
+sqbind::stdString CSqMysql::MakePairs( sqbind::CSqMulti *mInfo )
 {_STT();
 	if ( !mInfo )
 		return oexT( "" );
 
 	sqbind::stdString s;
-	for ( sqbind::CSqMap::t_List::iterator it = mInfo->list().begin(); it != mInfo->list().end(); it++ )
+	for ( sqbind::CSqMulti::t_List::iterator it = mInfo->list().begin(); it != mInfo->list().end(); it++ )
 	{
 		if ( s.length() )
 			s += oexT( "," );
@@ -176,14 +176,14 @@ sqbind::stdString CSqMysql::MakePairs( sqbind::CSqMap *mInfo )
 	return s;
 }	
 
-sqbind::stdString CSqMysql::MakeInsert( sqbind::CSqMap *mInfo )
+sqbind::stdString CSqMysql::MakeInsert( sqbind::CSqMulti *mInfo )
 {_STT();
 	if ( !mInfo )
 		return oexT( "" );
 
 	int n = 0;
 	sqbind::stdString s = oexT( "(" );
-	for ( sqbind::CSqMap::t_List::iterator it = mInfo->list().begin(); it != mInfo->list().end(); it++ )
+	for ( sqbind::CSqMulti::t_List::iterator it = mInfo->list().begin(); it != mInfo->list().end(); it++ )
 	{
 		if ( n++ )
 			s += oexT( "," );
@@ -197,7 +197,7 @@ sqbind::stdString CSqMysql::MakeInsert( sqbind::CSqMap *mInfo )
 	s += oexT( ") VALUES (" );
 
 	n = 0;
-	for ( sqbind::CSqMap::t_List::iterator it = mInfo->list().begin(); it != mInfo->list().end(); it++ )
+	for ( sqbind::CSqMulti::t_List::iterator it = mInfo->list().begin(); it != mInfo->list().end(); it++ )
 	{
 		if ( n++ )
 			s += oexT( "," );
@@ -274,7 +274,7 @@ int CSqMysql::getNumFields()
 	return 0;
 }
 
-int CSqMysql::getFieldInfo( int i, sqbind::CSqMap *mInfo )
+int CSqMysql::getFieldInfo( int i, sqbind::CSqMulti *mInfo )
 {_STT();
 	if ( !m_res || !mInfo ) 
 		return 0;
@@ -288,11 +288,11 @@ int CSqMysql::getFieldInfo( int i, sqbind::CSqMap *mInfo )
 
 		// Grab field information
 		if ( field->name )
-			mInfo->set( oexT( "name" ), oexMbToStrPtr( field->name ) );
+			(*mInfo)[ oexT( "name" ) ] = oexMbToStrPtr( field->name );
 		if ( field->def )
-			mInfo->set( oexT( "def" ), oexMbToStrPtr( field->def ) );
-		mInfo->set( oexT( "type" ), oexMks( (int)field->type ).Ptr() );
-		mInfo->set( oexT( "max_length" ), oexMks( (int)field->max_length ).Ptr() );
+			(*mInfo)[ oexT( "def" ) ] = oexMbToStrPtr( field->def );
+		(*mInfo)[ oexT( "type" ) ] = oexMks( (int)field->type ).Ptr();
+		(*mInfo)[ oexT( "max_length" ) ] = oexMks( (int)field->max_length ).Ptr();
 		
 	} // end try
 	catch( ... ) { oexERROR( 0, oexT( "Exception in mysql_num_rows()" ) ); return 0; }
@@ -301,7 +301,7 @@ int CSqMysql::getFieldInfo( int i, sqbind::CSqMap *mInfo )
 }
 
 
-int CSqMysql::getRow( sqbind::CSqMap *mRow )
+int CSqMysql::getRow( sqbind::CSqMulti *mRow )
 {_STT();
 	// How many rows are in the result?
 	int nRows = getNumRows();
@@ -327,10 +327,10 @@ int CSqMysql::getRow( sqbind::CSqMap *mRow )
 	try
 	{
 		// Compile row data
-		sqbind::CSqMap mFi;
+		sqbind::CSqMulti mFi;
 		for ( int i = 0; i < nFields; i++ )
 			if ( getFieldInfo( i, &mFi ) )
-				mRow->set( mFi[ "name" ], row[ i ] ? oexMbToStrPtr( (const char*)row[ i ] ) : oexT( "" ) );
+				(*mRow)[ mFi[ "name" ] ] = row[ i ] ? oexMbToStrPtr( (const char*)row[ i ] ) : oexT( "" );
 
 	} // end try
 	catch( ... ) { oexERROR( 0, oexT( "Exception in reading row data from mysql_fetch_row()" ) ); return 0; }

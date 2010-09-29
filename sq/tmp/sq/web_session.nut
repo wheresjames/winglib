@@ -29,7 +29,7 @@ function OnProcessRequest( params )
 	
 	if ( "/data" == mParams[ "REQUEST" ][ "path" ].str() )
 	{	_self.include_once( "pg/data.nut" );
-		mReply.set( "content", pg_data( mParams, loggedin ) );
+		mReply[ "content" ] <- pg_data( mParams, loggedin );
 		return mReply.serialize();
 	} // end if
 
@@ -54,7 +54,7 @@ function OnProcessRequest( params )
 
 			case "/data" :
 				_self.include_once( "pg/data.nut" );
-				mReply.set( "content", pg_data( mParams ) );
+				mReply[ "content" ] <- pg_data( mParams );
 				return mReply.serialize();
 				break;
 
@@ -72,7 +72,7 @@ function OnProcessRequest( params )
 	} // end else
 
 	if ( !page.len() )
-	{	mReply.set( "content", "Access Denied" );
+	{	mReply[ "content" ] <- "Access Denied";
 		return mReply.serialize();
 	} // end if
 
@@ -91,8 +91,8 @@ function OnProcessRequest( params )
 	</body>
 </html>";
 
-	mReply.set( "session", mParams[ "SESSION" ].serialize() );
-	mReply.set( "content", content );
+	mReply[ "session" ] <- mParams[ "SESSION" ].serialize();
+	mReply[ "content" ] <- content;
 	return mReply.serialize();
 }
 

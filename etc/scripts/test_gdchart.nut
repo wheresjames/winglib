@@ -23,7 +23,7 @@ function OnProcessRequest( params ) : ( _g )
 	mParams.deserialize( params );
 	_self.echo( mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str() + " : " + mParams[ "REQUEST" ][ "REQUEST_STRING" ].str() );
 
-	local mReply = CSqMap();
+	local mReply = CSqMulti();
 
 	local l = CSqMulti();
 	l.deserialize( "0=1,1=1,2=2" );
@@ -44,7 +44,7 @@ function OnProcessRequest( params ) : ( _g )
 	local gdc = CGdcChart();
 	local inf = gdc.CreateChart( "png", "width=400,height=300,type=14", data.serialize(), img );
 	if ( !inf.size() || !img.isValid() )
-	{	mReply.set( "content", "Error creating chart" );
+	{	mReply[ "content" ] <- "Error creating chart";
 		return mReply.serialize();
 	} // end if
 
@@ -54,7 +54,7 @@ function OnProcessRequest( params ) : ( _g )
 	// Encode the image
 	local enc = img.Encode( "png" );
 	if ( !enc.getUsed() )
-	{	mReply.set( "content", "#err=Error encoding chart" );
+	{	mReply[ "content" ] <- "#err=Error encoding chart";
 		return mReply.serialize();
 	} // end if
 
@@ -63,8 +63,8 @@ function OnProcessRequest( params ) : ( _g )
 	_self.set_binshare( id, enc );
 
 	// Set image info
-	mReply.set( "binary", id );
-	mReply.set( "binary_type", "png" );
+	mReply[ "binary" ] <- id;
+	mReply[ "binary_type" ] <- "png";
 
 	return mReply.serialize();
 }
