@@ -568,7 +568,7 @@ oex::oexRESULT TestBinary()
 	if ( !oexVERIFY( 2 == b1.findCHAR( 'r', 0, 0 ) ) )
 		return -40;
 
-	b2 = b1.Sub( 6, 5 );
+	b2 = b1.Sub( 0, 5 );
 
 	if ( !oexVERIFY( b2.getUsed() == 5 ) )
 		return -41;

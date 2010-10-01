@@ -248,13 +248,22 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
 	// Grab the path
 	pb[ oexT( "path" ) ].ToString() = str.Parse( oexT( "?" ) );
 
-	// Trim separator if any
-    if ( oexT( '?' ) == *str.Ptr() )
-        str.LTrim( 1 );
-
-	// Anything left over?
 	if ( str.Length() )
-		pb[ oexT( "extra" ) ].ToString() = str;
+	{
+		// Trim separator if any
+		if ( oexT( '?' ) == *str.Ptr() )
+		{
+			str.LTrim( 1 );
+
+			// Anything left over?
+			if ( str.Length() )
+				pb[ oexT( "extra" ) ].ToString() = str;
+		} // end if
+
+		else
+			pb[ oexT( "path" ) ].ToString() += str; 
+
+	} // end if
 
 	return pb;
 }
