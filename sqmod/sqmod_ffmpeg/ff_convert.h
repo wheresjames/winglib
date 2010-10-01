@@ -62,6 +62,15 @@ public:
 	/// Rotates an image 270 degrees
 	static int Rotate270_4( void *src, void *dst, int width, int height );
 
+	/// Flips image verticaly
+	static int FlipVert( sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqBinary *dst, int dst_fmt );
+
+	/// Flips image vertically
+	static int FlipVert_3( void *src, void *dst, int width, int height );
+
+	/// Flips image vertically
+	static int FlipVert_4( void *src, void *dst, int width, int height );
+
 private:
 
 

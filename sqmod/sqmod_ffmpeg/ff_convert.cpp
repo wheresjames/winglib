@@ -646,7 +646,7 @@ int CFfConvert::Rotate180_4( void *src, void *dst, int width, int height )
 
 	// Rotate the image
 	unsigned int *s = (unsigned int*)src;
-	unsigned int *d = (unsigned int*)dst + height - 1;
+	unsigned int *d = (unsigned int*)dst + ( height * width ) - 1;
 	for ( int i = width * height; i; i--, s++, d-- )
 		*d = *s;
 
@@ -669,4 +669,96 @@ int CFfConvert::Rotate270_4( void *src, void *dst, int width, int height )
 	} // end for
 
 	return 1;
+}
+
+int CFfConvert::FlipVert_3( void *src, void *dst, int width, int height )
+{_STT();
+
+	// Sanity checks
+	if ( !src || !dst || 0 >= width || 0 == height )
+		return 0;
+
+	// Flip the image
+	int stride = oex::CImage::GetScanWidth( width, 24 );
+	int diff = stride - ( width * 3 );
+	unsigned char *s = (unsigned char*)src;
+	unsigned char *d = (unsigned char*)dst + ( ( height - 1 ) * stride );
+	for ( int y = 0; y < height; y++, s += diff, d -= ( stride * 2 ) )
+		for ( int x = 0; x < width; x++, s += 3, d += 3 )
+			d[ 0 ] = s[ 0 ], d[ 1 ] = s[ 1 ], d[ 2 ] = s[ 2 ];
+
+	return 1;
+}
+
+int CFfConvert::FlipVert_4( void *src, void *dst, int width, int height )
+{_STT();
+
+	// Sanity checks
+	if ( !src || !dst || 0 >= width || 0 == height )
+		return 0;
+
+	// Flip the image
+	unsigned int *s = (unsigned int*)src;
+	unsigned int *d = (unsigned int*)dst + ( ( height - 1 ) * width );
+	for ( int y = 0; y < height; y++, d -= ( width * 2 ) )
+		for ( int x = 0; x < width; x++, s++, d++ )
+			*d = *s;
+
+	return 1;
+}
+
+int CFfConvert::FlipVert( sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqBinary *dst, int dst_fmt )
+{_STT();
+
+	// Sanity checks
+	if ( !src || !dst || 0 >= width || 0 == height )
+		return 0;
+
+	// RGB24
+	if ( ( PIX_FMT_BGR24 == src_fmt || PIX_FMT_RGB24 == src_fmt )
+		 && ( PIX_FMT_BGR24 == dst_fmt || PIX_FMT_RGB24 == dst_fmt ) )
+	{
+		int sw = oex::CImage::GetScanWidth( width, 24 );
+		int sz = sw * height;
+
+		// Ensure source buffer is large enough
+		if ( (int)src->getUsed() < sz )
+			return 0;
+
+		// Ensure destination buffer is large enough
+		if ( (int)dst->getUsed() < sz )
+		{	if ( !dst->Allocate( sz ) )
+				return 0;
+			else
+				dst->setUsed( sz );
+		} // end if
+
+		return FlipVert_3( src->_Ptr(), dst->_Ptr(), width, height );
+
+	} // end if
+
+	// RGB32
+	else if ( ( PIX_FMT_BGR32 == src_fmt || PIX_FMT_RGB32 == src_fmt )
+			  && ( PIX_FMT_BGR32 == dst_fmt || PIX_FMT_RGB32 == dst_fmt ) )
+	{
+		int sw = oex::CImage::GetScanWidth( width, 32 );
+		int sz = sw * height;
+
+		// Ensure source buffer is large enough
+		if ( (int)src->getUsed() < sz )
+			return 0;
+
+		// Ensure destination buffer is large enough
+		if ( (int)dst->getUsed() < sz )
+		{	if ( !dst->Allocate( sz ) )
+				return 0;
+			else
+				dst->setUsed( sz );
+		} // end if
+
+		return FlipVert_4( src->_Ptr(), dst->_Ptr(), width, height );
+
+	} // end if
+
+	return 0;
 }
