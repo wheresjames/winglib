@@ -129,6 +129,9 @@ public:
 		/// Key hash
 		CStr			sHash;
 
+		/// Key data file
+		CStr			sFile;
+
 		/// Data buffer
 		CBin			bin;
 
