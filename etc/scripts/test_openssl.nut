@@ -27,8 +27,45 @@ function _init() : ( _g )
 	if ( !Sign2( "TEST_KEYS", "Alice loves Bob" ) )
 	{	_self.echo( "Sign2() failed" ); return 0; }
 
+	// Create a certificate
+	if ( !CreateCertificate( _g.key ) )
+	{	_self.echo( "CreateCertificate() failed" ); return 0; }
+
 	_self.echo( "\n...press any key...\n" );
 	_self.get_key();
+}
+
+function CreateCertificate( key )
+{
+	// Create a certificate
+	local cert = COsslCert();
+	if ( !cert.Create( key, 512, 0, 365 * 24 * 60 * 60 ) )
+	{	_self.echo( "Failed to create certificate" ); return 0; }
+
+	// Set cert names
+	cert.SetNameField( "C",  "US" );
+	cert.SetNameField( "CN", "Company" );
+	cert.SetNameField( "O",  "Organization" );
+
+	// Set cert extensions
+	cert.SetExtension( "nsCertType", "server" );
+	cert.SetExtension( "nsComment", "This is a comment" );
+	cert.SetExtension( "nsSslServerName", "www.myserver.com" );
+	cert.SetExtension( "basicConstraints", "critical,CA:TRUE" );
+	cert.SetExtension( "keyUsage", "critical,keyCertSign,cRLSign" );
+	cert.SetExtension( "subjectKeyIdentifier", "hash" );
+	cert.SetExtension( "nsCertType", "sslCA" );
+
+	// Sign the certificate
+	cert.Sign( key );
+
+	// Save certificate to a file
+	if ( !cert.SaveFile( _self.root( "cert.pem" ) ) )
+	{	_self.echo( "Failed to save certificate to file" ); return 0; }
+
+	_self.echo( "Certificate Created!" );
+
+	return 1;
 }
 
 function CreateKeys( name, challenge ) : ( _g )

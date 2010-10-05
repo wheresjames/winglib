@@ -8,7 +8,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqOpenSSL, CSqOpenSSL )
 	SQBIND_MEMBER_FUNCTION( CSqOpenSSL, Destroy )
 
 	SQBIND_STATIC_FUNCTION( CSqOpenSSL, Sign )
+	SQBIND_STATIC_FUNCTION( CSqOpenSSL, SignBin )
 	SQBIND_STATIC_FUNCTION( CSqOpenSSL, Verify )
+	SQBIND_STATIC_FUNCTION( CSqOpenSSL, VerifyBin )
 
 SQBIND_REGISTER_CLASS_END()
 
@@ -20,11 +22,25 @@ SQBIND_REGISTER_CLASS_BEGIN( COsslKey, COsslKey )
 	SQBIND_MEMBER_FUNCTION( COsslKey, GenPublicKey )
 	SQBIND_MEMBER_FUNCTION( COsslKey, SetChallenge )
 	SQBIND_MEMBER_FUNCTION( COsslKey, SaveKeys )
+	SQBIND_MEMBER_FUNCTION( COsslKey, SavePrivateKey )
+	SQBIND_MEMBER_FUNCTION( COsslKey, SavePublicKey )	
 	SQBIND_MEMBER_FUNCTION( COsslKey, LoadPrivateKey )
 	SQBIND_MEMBER_FUNCTION( COsslKey, LoadPublicKey )
 
 	SQBIND_MEMBER_FUNCTION( COsslKey, getName )
 	SQBIND_MEMBER_FUNCTION( COsslKey, setName )
+
+SQBIND_REGISTER_CLASS_END()
+
+SQBIND_REGISTER_CLASS_BEGIN( COsslCert, COsslCert )
+
+	SQBIND_MEMBER_FUNCTION( COsslCert, Destroy )
+	SQBIND_MEMBER_FUNCTION( COsslCert, Create )
+	SQBIND_MEMBER_FUNCTION( COsslCert, Sign )
+	SQBIND_MEMBER_FUNCTION( COsslCert, SaveFile )
+
+	SQBIND_MEMBER_FUNCTION( COsslCert, SetNameField )
+	SQBIND_MEMBER_FUNCTION( COsslCert, SetExtension )
 
 SQBIND_REGISTER_CLASS_END()
 
@@ -49,12 +65,14 @@ static void SQBIND_Export_openssl( sqbind::VM x_vm )
 
     SQBIND_EXPORT( x_vm, CSqOpenSSL );
     SQBIND_EXPORT( x_vm, COsslKey );
+    SQBIND_EXPORT( x_vm, COsslCert );
     SQBIND_EXPORT( x_vm, CSqSSLPortFactory );
 }
 
 #if defined( SQBIND_STATIC )
 	#include "sq_openssl.cpp"
 	#include "sq_ossl_key.cpp"
+	#include "sq_ossl_cert.cpp"
 	#include "sq_ssl_port_factory.cpp"
 #else
 

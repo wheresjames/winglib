@@ -11,7 +11,7 @@ PRJ_NAME := sqmod_openssl
 PRJ_DEPS := openssl
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
-			openssl/include 
+			openssl/include openssl
 
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib \
 			openssl_a openssl_b openssl_a openssl_b

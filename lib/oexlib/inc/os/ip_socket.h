@@ -297,6 +297,10 @@ public:
 	virtual int v_send( int socket, const void *buffer, int length, int flags );
 	virtual int v_sendto(int socket, const void *message, int length, int flags );
 
+	/// Transport type
+	virtual oexCSTR v_get_transport_type() { return oexT( "raw" ); }
+	virtual oexCSTR v_get_transport_name() { return oexT( "socket" ); }
+
 public:
 
 	//==============================================================

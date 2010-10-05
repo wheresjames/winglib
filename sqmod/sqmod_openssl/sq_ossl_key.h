@@ -32,6 +32,12 @@ public:
 	/// Save keys to a file
 	int SaveKeys( const sqbind::stdString &sName, const sqbind::stdString &sPrivate, const sqbind::stdString &sPublic );
 
+	/// Saves the private key to a file
+	int SavePrivateKey( const sqbind::stdString &sPrivate );
+
+	/// Saves the public key to a file
+	int SavePublicKey( const sqbind::stdString &sPublic );
+
 	/// Load private key from a file
 	int LoadPrivateKey( const sqbind::stdString &sFile, const sqbind::stdString &sName );
 

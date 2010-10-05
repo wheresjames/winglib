@@ -3,7 +3,7 @@
 
 #pragma once
 
-class CSqSSLPortFactory : public oex::os::CIpSocket
+class CSqSSLPortFactory// : public oex::os::CIpSocket
 {
 public:
 	_SQBIND_CLASS_CTOR_BEGIN( CSqSSLPortFactory )
@@ -43,6 +43,9 @@ public:
 		/// Override to provide custom write
 		virtual int v_send( int socket, const void *buffer, int length, int flags );
 		virtual int v_sendto(int socket, const void *message, int length, int flags );
+
+		virtual oex::oexCSTR v_get_transport_type() { return oexT( "https" ); }
+		virtual oex::oexCSTR v_get_transport_name() { return oexT( "OpenSSL" ); }
 
 	private:
 

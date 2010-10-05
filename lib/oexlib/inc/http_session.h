@@ -528,6 +528,8 @@ public:
 		m_pbRequest[ "REMOTE_ADDR" ] = sRemote;
 		m_pbRequest[ "REMOTE_PORT" ] = m_pPort->PeerAddress().GetPort();
 		m_pbRequest[ "IS_REMOTE" ] = ( sLocal != sRemote && sRemote != "127.0.0.1" ) ? "1" : "";
+		m_pbRequest[ "TRANSPORT_TYPE" ] = m_pPort->v_get_transport_type();
+		m_pbRequest[ "TRANSPORT_NAME" ] = m_pPort->v_get_transport_name();
 	}
 
     /// Reads in the http headers

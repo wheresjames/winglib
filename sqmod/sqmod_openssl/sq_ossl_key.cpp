@@ -118,6 +118,49 @@ int COsslKey::SaveKeys( const sqbind::stdString &sName, const sqbind::stdString 
 	return 1;
 }
 
+int COsslKey::SavePrivateKey( const sqbind::stdString &sPrivate )
+{_STT();
+
+	if ( !m_pkey || !sPrivate.length() )
+		return 0;
+
+	oex::CStr8 name = oexStrToMb( oex::CStr( sPrivate.c_str(), sPrivate.length() ) );
+	FILE *fp = fopen( ( oex::CStr8() << name ).Ptr(), "w" );
+	if ( !fp )
+		oexERROR( oexGetLastError(), oexMks( oexT( "fopen( '" ), oexMbToStr( name ), oexT( "' ) failed" ) ) );
+	else
+	{
+
+		PEM_write_RSAPrivateKey( fp, m_pkey->pkey.rsa, NULL, NULL, 0, NULL, NULL );
+
+		fclose( fp );
+
+	} // end else
+
+	return 1;
+}
+
+int COsslKey::SavePublicKey( const sqbind::stdString &sPublic )
+{_STT();
+
+	if ( !m_pkey || !sPublic.length() )
+		return 0;
+
+	oex::CStr8 name = oexStrToMb( oex::CStr( sPublic.c_str(), sPublic.length() ) );
+	FILE *fp = fopen( ( oex::CStr8() << name ).Ptr(), "w" );
+	if ( !fp )
+		oexERROR( oexGetLastError(), oexMks( oexT( "fopen( '" ), oexMbToStr( name ), oexT( "' ) failed" ) ) );
+	else
+	{
+		PEM_write_RSAPublicKey( fp, m_pkey->pkey.rsa );
+
+		fclose( fp );
+
+	} // end else
+
+	return 1;
+}
+
 int COsslKey::LoadPrivateKey( const sqbind::stdString &sFile, const sqbind::stdString &sName )
 {_STT();
 
