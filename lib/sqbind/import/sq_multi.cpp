@@ -129,7 +129,6 @@ oex::oexINT64 CSqMulti::toint64()
 	return oexStrToInt64( m_val.str().c_str() );
 }
 
-
 float CSqMulti::tofloat()
 {_STT();
 	return oexStrToFloat( m_val.str().c_str() );
@@ -140,6 +139,35 @@ int CSqMulti::len()
 	return m_val.str().length();
 }
 
+stdString CSqMulti::str_urlenc()
+{_STT();
+	return oex2std( oexUrlEncode( std2oex( m_val.str() ) ) );
+}
+
+stdString CSqMulti::str_urldec()
+{_STT();
+	return oex2std( oexUrlDecode( std2oex( m_val.str() ) ) );
+}
+
+stdString CSqMulti::str_htmlenc()
+{_STT();
+	return oex2std( oexHtmlEncode( std2oex( m_val.str() ) ) );
+}
+
+stdString CSqMulti::str_htmldec()
+{_STT();
+	return oex2std( oexHtmlDecode( std2oex( m_val.str() ) ) );
+}
+
+stdString CSqMulti::str_compress()
+{_STT();
+	return oex2std( oexCompressStr( std2oex( m_val.str() ) ) );
+}
+
+stdString CSqMulti::str_uncompress()
+{_STT();
+	return oex2std( oexUncompressStr( std2oex( m_val.str() ) ) );
+}
 
 _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, serialize )
@@ -168,6 +196,12 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 //	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, toint64 ) // +++ Hmmm
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, tofloat )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, len )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_urlenc )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_urldec )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_htmlenc )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_htmldec )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_compress )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_uncompress )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, unset )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, clear )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_key )

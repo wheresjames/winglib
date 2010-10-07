@@ -151,6 +151,24 @@ namespace sqbind
 		/// Returns the length of the string value
 		int len();
 
+		/// Returns url encoded string
+		stdString str_urlenc();
+
+		/// Returns url decoded string
+		stdString str_urldec();
+
+		/// Return html encoded string
+		stdString str_htmlenc();
+
+		/// Returns html decoded string
+		stdString str_htmldec();
+
+		/// Returns zlib compressed string
+		stdString str_compress();
+
+		/// Returns zlib decompressed string
+		stdString str_uncompress();
+
         /// Registers the vector class for use with Squirrel
         static void Register( sqbind::VM vm );
 
