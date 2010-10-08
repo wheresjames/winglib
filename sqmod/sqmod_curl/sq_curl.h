@@ -31,6 +31,9 @@ public:
 	/// Returns the last error
 	sqbind::stdString GetLastError() { return m_sErr; }
 
+	/// Returns ssl certificates if any
+	sqbind::CSqMulti getCerts() { return m_mCerts; }
+
 private:
 
 	/// Curl writer
@@ -46,6 +49,8 @@ private:
 	sqbind::stdString			m_sUsername;
 
 	sqbind::stdString			m_sPassword;
+
+	sqbind::CSqMulti			m_mCerts;
 
 };
 SQBIND_DECLARE_INSTANCE( CSqCurl, CSqCurl );

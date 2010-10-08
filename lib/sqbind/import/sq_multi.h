@@ -81,7 +81,7 @@ namespace sqbind
     public:
 
 		SQBIND_CLASS_CTOR_BEGIN( CSqMulti )
-			_SQBIND_CLASS_CTOR( CSqMulti, 1 ) ( sa.GetString( 2 ) )
+			_SQBIND_CLASS_CTOR( CSqMulti, 1 ) ( sa.GetString( 2 ), sq_getsize( x_v, 2 ) )
 		SQBIND_CLASS_CTOR_END( CSqMulti )
 
 		/// Destructor
@@ -104,7 +104,7 @@ namespace sqbind
 		CSqMulti( const t_Obj &s );
 
 		/// Deserializing constructor
-		CSqMulti( const oex::oexTCHAR *s );
+		CSqMulti( const oex::oexTCHAR *s, SQINT sz );
 
         /// Returns a reference to the underlying vector
         t_List& list();

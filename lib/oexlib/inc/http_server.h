@@ -326,10 +326,23 @@ public:
 		m_nPort = x_nPort;
 		m_pData = x_pData;
 		m_fnOnServerEvent = fnOnServerEvent;
-		m_sServerId = oexStrToMb( oexGuidToString() );
+
+		// Ensure we have a server id
+		if ( !m_sServerId.Length() )
+			m_sServerId = oexStrToMb( oexGuidToString() );
 
 		return 0 == CThread::Start();
 	}
+
+	void SetServerId( oexCSTR8 x_pServerId )
+	{
+		if ( x_pServerId )
+			m_sServerId = x_pServerId;
+		else
+			m_sServerId.Destroy();
+	}
+
+	CStr8& GetServerId() { return m_sServerId; }
 
 	void SetPortFactory( CFactory *p )
 	{	m_pPortFactory = p; }

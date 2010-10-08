@@ -62,11 +62,11 @@ CSqMulti::CSqMulti( const CSqMulti::t_Obj &s )
 	deserialize( s );
 }
 
-CSqMulti::CSqMulti( const oex::oexTCHAR *s )
+CSqMulti::CSqMulti( const oex::oexTCHAR *s, SQINT sz )
 {_STT();
 	m_def = oexNULL;
 	if ( s )
-		deserialize( t_Obj( s ) );
+		deserialize( t_Obj( s, sz ) );
 }
 
 CSqMulti& CSqMulti::operator = ( const CSqMulti &m )
@@ -327,7 +327,7 @@ void CSqMulti::mmerge( CSqMulti *m )
 		return;
 
 	for ( CSqMulti::iterator it = m->begin(); it != m->end(); it++ )
-		m_lst[ it->first.c_str() ] = it->second.str().c_str();
+		m_lst[ it->first.c_str() ] = it->second.str();
 }
 
 CSqMulti::t_Obj CSqMulti::urlencode()
@@ -494,20 +494,25 @@ SquirrelObject CSqMulti::_newslot( HSQUIRRELVM v )
     StackHandler sa( v );
 
 	// Get key
-    const SQChar *pKey = sa.GetString( 2 );
-    if ( !pKey || !*pKey )
+	const SQChar * pKey = 0;
+	int szKey = sq_getsize( v, 2 );
+	SQPLUS_CHECK_GET(sq_getstring( v, 2, &pKey ));
+    if ( !szKey || !pKey || !*pKey )
         return SquirrelObject( v );
+	stdString sKey( pKey, szKey );
 
 	// Get value
-    const SQChar *pVal = sa.GetString( 3 );
+	const SQChar * pVal = 0;
+	int szVal = sq_getsize( v, 3 );
+	SQPLUS_CHECK_GET(sq_getstring( v, 3, &pVal ));
     if ( !pVal )
         return SquirrelObject( v );
 
 	// Add to list
-	m_lst[ pKey ].set( pVal );
+	m_lst[ sKey ].str().assign( pVal, szVal );
 
 	// Find the new value
-    t_List::iterator it = m_lst.find( pKey );
+    t_List::iterator it = m_lst.find( sKey );
     if ( m_lst.end() == it )
         return SquirrelObject( v );
 
@@ -528,25 +533,15 @@ SquirrelObject CSqMulti::_get( HSQUIRRELVM v )
 
 	StackHandler sa( v );
 
-    const SQChar *pKey = sa.GetString( 2 );
-    if ( !oexCHECK_PTR( pKey ) || !*pKey )
+	const SQChar *pKey = 0;
+	int szKey = sq_getsize( v, 2 );
+	SQPLUS_CHECK_GET(sq_getstring( v, 2, &pKey ));
+    if ( !szKey || !pKey || !*pKey )
         return SquirrelObject( v );
-
-//    t_List::iterator it = m_lst.find( pKey );
-//   if ( m_lst.end() == it )
-//        return SquirrelObject( v );
+	stdString sKey( pKey, szKey );
 
 	SquirrelObject so( v );
-
-	SqPlus::Push( v, &m_lst[ pKey ] );
-
-	// Is it an array?
-//	if ( m_lst.size() )
-//		SqPlus::Push( v, &it->second );
-
-	// Push value
-//	else
-//		sq_pushstring( v, it->second.m_val.get()->c_str(), (int)it->second.m_val.get()->length() );
+	SqPlus::Push( v, &m_lst[ sKey ] );
 
 	so.AttachToStackObject( -1 );
 	sq_pop( v, 1 );
@@ -580,11 +575,15 @@ SquirrelObject CSqMulti::_nexti( HSQUIRRELVM v )
 
         case OT_STRING:
         {
-            const SQChar *pKey = sa.GetString( 2 );
-            if ( !pKey || !*pKey )
-                return SquirrelObject( v );
+			// Get key
+			const SQChar * pKey = 0;
+			int szKey = sq_getsize( v, 2 );
+			SQPLUS_CHECK_GET(sq_getstring( v, 2, &pKey ));
+			if ( !szKey || !pKey || !*pKey )
+				return SquirrelObject( v );
+			stdString sKey( pKey, szKey );
 
-            t_List::iterator it = m_lst.find( pKey );
+            t_List::iterator it = m_lst.find( sKey );
             if ( m_lst.end() == it )
                 return SquirrelObject( v );
 

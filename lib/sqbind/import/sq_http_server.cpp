@@ -54,6 +54,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqHttpServer, CSqHttpServer )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, UnmapFolder )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, setPortFactory )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, getPortFactory )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, getServerId )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, setServerId )
 
 SQBIND_REGISTER_CLASS_END()
 
@@ -117,6 +119,19 @@ int CSqHttpServer::Start( int nPort )
 
 	return 1;
 }
+
+void CSqHttpServer::setServerId( const stdString &sId )
+{_STT();
+
+	m_server.SetServerId( oexStrToMb( std2oex( sId ) ).Ptr() );
+}
+
+stdString CSqHttpServer::getServerId()
+{_STT();
+
+	return oex2std( oexMbToStr( m_server.GetServerId() ) );
+}
+
 
 int CSqHttpServer::Stop()
 {_STT();

@@ -16,7 +16,11 @@ CSqCurl::~CSqCurl()
 
 void CSqCurl::Destroy()
 {_STT();
+
 	m_sErr = oexT( "" );
+
+	// Lose certs
+	m_mCerts.clear();
 
 	// Close curl handle
 	if ( m_curl )
@@ -57,12 +61,15 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqBinar
 	curl_easy_setopt( m_curl, CURLOPT_FOLLOWLOCATION, 1 );
 	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYPEER, 0 );
 	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYHOST, 0 );
+	curl_easy_setopt( m_curl, CURLOPT_CERTINFO, 1 );
 
 	if ( m_sUsername.length() || m_sPassword.length() )
 	{	curl_easy_setopt( m_curl, CURLOPT_USERPWD, 
 						  ( sqbind::stdString() + m_sUsername + oexT( ":" ) + m_sPassword ).c_str() );
 		curl_easy_setopt( m_curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC );
 	} // end if
+	else
+		curl_easy_setopt( m_curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY );
 
 	char sErr[ CURL_ERROR_SIZE ] = { 0 };
 	curl_easy_setopt( m_curl, CURLOPT_ERRORBUFFER, &sErr[ 0 ] );
@@ -83,6 +90,32 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqBinar
 		return 0;
 	} // end if
 	
+	// See if there are certs
+	struct curl_certinfo *ci = NULL;
+	res = curl_easy_getinfo( m_curl, CURLINFO_CERTINFO, &ci );
+	if ( !res && ci )
+		for ( int i = 0; i < ci->num_of_certs; i++ )
+			for ( struct curl_slist *slist = ci->certinfo[ i ]; slist; slist = slist->next )
+				if ( slist->data && *slist->data )
+				{
+					// We're going to add as key / value pairs
+					oex::CStr s = oexMbToStr( slist->data );
+					oex::oexCSTR k = s.Ptr(), v = oexNULL;
+
+					// Split key / value
+					int c = 0;
+					while ( c < s.Length() && s[ c ] != oexT( ':' ) ) c++;
+
+					// Did we find a divider
+					if ( s[ c ] == oexT( ':' ) )
+						*s._Ptr( c++ ) = 0, v = s.Ptr( c );
+
+					// Save cert data
+					if ( k && v )
+						m_mCerts[ oexMks( i ).Ptr() ][ k ] = v;
+
+				} // end for
+
 	return 1;
 }
 
@@ -114,6 +147,7 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::s
 	curl_easy_setopt( m_curl, CURLOPT_FOLLOWLOCATION, 1 );
 	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYPEER, 0 );
 	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYHOST, 0 );
+	curl_easy_setopt( m_curl, CURLOPT_CERTINFO, 1 );
 //	curl_easy_setopt( m_curl, CURLOPT_BINARYTRANSFER, 1 );
 
 	if ( m_sUsername.length() || m_sPassword.length() )
@@ -140,6 +174,32 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::s
 	{	m_sErr = oexMbToStrPtr( sErr );
 		return 0;
 	} // end if
+
+	// See if there are certs
+	struct curl_certinfo *ci = NULL;
+	res = curl_easy_getinfo( m_curl, CURLINFO_CERTINFO, &ci );
+	if ( !res && ci )
+		for ( int i = 0; i < ci->num_of_certs; i++ )
+			for ( struct curl_slist *slist = ci->certinfo[ i ]; slist; slist = slist->next )
+				if ( slist->data && *slist->data )
+				{
+					// We're going to add as key / value pairs
+					oex::CStr s = oexMbToStr( slist->data );
+					oex::oexCSTR k = s.Ptr(), v = oexNULL;
+
+					// Split key / value
+					int c = 0;
+					while ( c < s.Length() && s[ c ] != oexT( ':' ) ) c++;
+
+					// Did we find a divider
+					if ( s[ c ] == oexT( ':' ) )
+						*s._Ptr( c++ ) = 0, v = s.Ptr( c );
+
+					// Save cert data
+					if ( k && v )
+						m_mCerts[ oexMks( i ).Ptr() ][ k ] = v;
+
+				} // end for
 
 	return 1;
 }
