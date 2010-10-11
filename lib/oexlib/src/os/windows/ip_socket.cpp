@@ -170,6 +170,8 @@ CIpSocket::CIpSocket()
 	m_uReads = 0;
 	m_uWrites = 0;
 	m_uAccepts = 0;
+
+	m_uFlags = 0;
 }
 
 CIpSocket::~CIpSocket()
@@ -260,6 +262,7 @@ void CIpSocket::Destroy()
 	m_uReads = 0;
 	m_uWrites = 0;
 	m_uAccepts = 0;
+	m_uFlags = 0;
 
 	// Reset activity timeout
 	m_toActivity.Clear();
@@ -1226,6 +1229,7 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 		return 0;
 
 	// Attempt to send the data
+	setWouldBlock( 0 );
 	int nRet = v_send( (SOCKET)m_hSocket, x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uWrites++;
@@ -1235,13 +1239,17 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 	m_uLastError = WSAGetLastError();
 
 	// Check for error
-	if ( SOCKET_ERROR == nRet )
+	if ( SOCKET_ERROR == nRet || 0 > nRet )
 	{
 		// Is the socket blocking?
-		if ( WSAEWOULDBLOCK != m_uLastError )
+		if ( !getWouldBlock() && WSAEWOULDBLOCK != m_uLastError )
 		{	m_uConnectState |= eCsError;
+			oexEcho( "ERRRROROROROROROROR" );
 			return 0;
 		} // end if
+
+		// Not an error
+		m_uConnectState &= ~eCsError;
 
 		// Number of bytes sent
 		if ( x_puSent )

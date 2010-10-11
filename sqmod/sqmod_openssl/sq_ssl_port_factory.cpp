@@ -84,8 +84,26 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnClose()
 
 	// Close the socket
 	if ( m_ssl )
-	{	SSL_shutdown( m_ssl );
-		SSL_free( m_ssl );
+	{
+//		SSL_set_shutdown( m_ssl, SSL_RECEIVED_SHUTDOWN );
+		
+		oex::oexUINT uTo = 0;
+		int res = SSL_shutdown( m_ssl );
+		while ( !res )
+		{	oexSleep( 15 );
+			if ( !uTo ) uTo = oexGetUnixTime() + 60;
+			else if ( uTo < oexGetUnixTime() ) res = 0;
+			else res = SSL_shutdown( m_ssl );
+		} // end while
+/*		if ( !res )
+		{
+			struct linger lopt;
+			lopt.l_onoff = 0; lopt.l_linger = 0;
+			setsockopt( (int)(long)GetSocketHandle(), SOL_SOCKET, SO_LINGER, (const char*)&lopt, sizeof( lopt ) );
+			shutdown( (int)(long)GetSocketHandle(), 1 );
+			SSL_shutdown( m_ssl );
+		} // end if
+*/		SSL_free( m_ssl );
 	} // end if
 
 	m_ctx = oexNULL;
@@ -97,6 +115,10 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnClose()
 
 int CSqSSLPortFactory::CSqSSLPort::v_recv( int socket, void *buffer, int length, int flags )
 {_STT();
+	oexAutoLock ll( m_lock ); 
+	if ( !ll.IsLocked() ) 
+		return 0;
+
 	return SSL_read( m_ssl, buffer, length );
 }
 
@@ -107,7 +129,20 @@ int CSqSSLPortFactory::CSqSSLPort::v_recvfrom( int socket, void *buffer, int len
 
 int CSqSSLPortFactory::CSqSSLPort::v_send( int socket, const void *buffer, int length, int flags )
 {_STT();
-	return SSL_write( m_ssl, buffer, length );
+
+	oexAutoLock ll( m_lock ); 
+	if ( !ll.IsLocked() ) 
+		return 0;
+
+	int ret = SSL_write( m_ssl, buffer, length );
+	if ( 0 > ret && SSL_ERROR_WANT_WRITE == SSL_get_error( m_ssl, ret ) )
+	{
+		oexEcho( "would block" );
+		setWouldBlock( oex::oexTRUE );
+		return -1;
+	} // end if
+
+	return ret;
 }
 
 int CSqSSLPortFactory::CSqSSLPort::v_sendto(int socket, const void *message, int length, int flags )

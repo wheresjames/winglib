@@ -787,16 +787,50 @@ public:
 		m_pbTxHeaders[ "Content-length" ] = pSend->Length();
 
 		// Send the header
-		m_pPort->Write( GetErrorString( m_nErrorCode ) );
+		WritePort( GetErrorString( m_nErrorCode ) );
 
 		// Send the headers
-		m_pPort->Write( CParser::EncodeMime( m_pbTxHeaders ) << "\r\n" );
+		WritePort( CParser::EncodeMime( m_pbTxHeaders ) << "\r\n" );
 
 		// Send the content
-		m_pPort->Write( *pSend );
+		WritePort( *pSend );
 
 		return oexTRUE;
 
+	}
+
+	oexBOOL WritePort( const CStr8 &sStr )
+	{	return WritePort( sStr._Ptr(), sStr.Length() );
+	}
+
+	oexBOOL WritePort( const t_byte *pBuf, oexSIZE_T uSize = 0 )
+	{
+		if ( !uSize )
+			uSize = zstr::Length( pBuf );
+
+		if ( !uSize )
+			return oexFALSE;
+
+		// Send the data
+		oexSIZE_T uSent = 0;
+		while ( uSent < uSize )
+		{
+			// Send out as much data as we can
+			oexUINT uRet = m_pPort->Send( &pBuf[ uSent ], uSize - uSent );
+			if ( !uRet && m_pPort->IsError() )
+				return oexFALSE;
+
+			// Track bytes sent
+			uSent += uRet;
+
+			// Wait if buffer is full
+			if ( uSent < uSize )
+				if ( !m_pPort->WaitEvent( os::CIpSocket::eWriteEvent ) )
+					return oexFALSE;
+
+		} // end while
+
+		return oexTRUE;
 	}
 
     oexBOOL SendBinary( t_buffer *x_pBuffer, oexCSTR x_pType = oexNULL )
@@ -813,11 +847,13 @@ public:
 		m_pbTxHeaders[ "Content-length" ] = x_pBuffer->getUsed();
 
 		// Send the header
-		m_pPort->Write( GetErrorString( m_nErrorCode ) );
+		WritePort( GetErrorString( m_nErrorCode ) );
 
 		// Send the headers
-		m_pPort->Write( CParser::EncodeMime( m_pbTxHeaders ) << "\r\n" );
+		WritePort( CParser::EncodeMime( m_pbTxHeaders ) << "\r\n" );
 
+		return WritePort( x_pBuffer->Ptr(), x_pBuffer->getUsed() );
+/*
 		// Send the data
 		oexSIZE_T uSent = 0;
 		oexSIZE_T uSize = x_pBuffer->getUsed();
@@ -825,7 +861,7 @@ public:
 		{
 			// Send out as much data as we can
 			oexUINT uRet = m_pPort->Send( x_pBuffer->Ptr( uSent ), uSize - uSent );
-			if ( !uRet )
+			if ( !uRet && m_pPort->IsError() )
 				return oexFALSE;
 
 			// Track bytes sent
@@ -839,7 +875,7 @@ public:
 		} // end while
 
 		return oexTRUE;
-	}
+*/	}
 
     oexBOOL SendFile( oexCSTR x_pFile, oexCSTR x_pType = oexNULL )
 	{
@@ -862,10 +898,10 @@ public:
 		m_pbTxHeaders[ "Content-length" ] = (oexUINT)f.Size();
 
 		// Send the header
-		m_pPort->Write( GetErrorString( m_nErrorCode ) );
+		WritePort( GetErrorString( m_nErrorCode ) );
 
 		// Send the headers
-		m_pPort->Write( CParser::EncodeMime( m_pbTxHeaders ) << "\r\n" );
+		WritePort( CParser::EncodeMime( m_pbTxHeaders ) << "\r\n" );
 
 		// Write out the file
 		// Do this in chunks in case the file is huge
@@ -880,8 +916,8 @@ public:
 			{
 				// Send what we can
 				oexUINT uRet = m_pPort->Send( &buf[ uSent ], read - uSent );
-//				if ( !uRet )
-//					return oexFALSE;
+				if ( !uRet && m_pPort->IsError() )
+					return oexFALSE;
 
 				// Add bytes sent
 				uSent += uRet;

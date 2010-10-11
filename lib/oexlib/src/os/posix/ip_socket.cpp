@@ -247,6 +247,7 @@ CIpSocket::CIpSocket()
 	m_uReads = 0;
 	m_uWrites = 0;
 	m_uAccepts = 0;
+	m_uFlags = 0;
 
 	m_bEventsHooked = oexFALSE;
 }
@@ -328,6 +329,7 @@ void CIpSocket::Destroy()
 	m_uReads = 0;
 	m_uWrites = 0;
 	m_uAccepts = 0;
+	m_uFlags = 0;
 	m_toActivity.Clear();
 
 	// Ensure valid socket handle

@@ -214,6 +214,12 @@ public:
 		eCsError						= 0x00010000
 	};
 
+	enum
+	{
+		// Operation would have blocked
+		eFlagWouldBlock					= 0x00000001
+	};
+
     /// Socket handle type
     typedef oexPVOID t_SOCKET;
 
@@ -426,6 +432,22 @@ public:
 	/// Returns a handle to the socket
 	t_SOCKET GetSocketHandle()
 	{	return m_hSocket; }
+
+	//==============================================================
+	// getWouldBlock()
+	//==============================================================
+	/// Returns non-zero if the socket is in the process of connecting
+	oexBOOL getWouldBlock()
+	{	return ( m_uFlags & eFlagWouldBlock ) ? oexTRUE : oexFALSE;
+	}
+
+	//==============================================================
+	// setWouldBlock()
+	//==============================================================
+	/// Returns non-zero if the socket is in the process of connecting
+	void setWouldBlock( oexBOOL b )
+	{	m_uFlags = b ? ( m_uFlags | eFlagWouldBlock ) : ( m_uFlags & ~eFlagWouldBlock );
+	}
 
 	//==============================================================
 	// Create()
@@ -1021,6 +1043,9 @@ private:
 
 	/// Non-zero if events have been hooked
 	oexBOOL					m_bEventsHooked;
+
+	/// Flags
+	oexULONG				m_uFlags;
 };
 
 
