@@ -355,6 +355,21 @@ public:
 	/// Executes shell command
 	int shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
 
+	/// Installs a service
+	int service_install( const stdString &sName, const stdString &sDesc, const stdString &sExe, int bAutoRestart );
+
+	/// Removes a service
+	int service_remove( const stdString &sName );
+
+	/// Starts a service
+	int service_start( const stdString &sName );
+
+	/// Stops a service
+	int service_stop( const stdString &sName );
+
+	/// Restarts a service
+	int service_restart( const stdString &sName );
+
 	/// Returns the current cpu load
 	double get_cpu_load();
 

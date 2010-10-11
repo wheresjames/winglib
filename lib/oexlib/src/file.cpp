@@ -92,7 +92,7 @@ oexBOOL CFile::DeletePath( oexCSTR x_pPath, oexBOOL x_bEmpty )
 	CFindFiles ff;
 
     // Are there any files in the directory?
-	if ( !ff.FindFirst( x_pPath, oexT( "*.*" ) ) )
+	if ( !ff.FindFirst( x_pPath, oexT( "*" ) ) )
         return os::CBaseFile::RemoveFolder( x_pPath );
 
     // Dump everything in the directory

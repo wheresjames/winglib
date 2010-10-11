@@ -37,15 +37,15 @@
 // namespace
 namespace sqbind
 {
-    /// Squirrel map adaptor class
-    class CSqMulti : CSqParam
-    {
-    public:
+	/// Squirrel map adaptor class
+	class CSqMulti : CSqParam
+	{
+	public:
 
-        /// List object type
+		/// List object type
 		typedef stdString						t_Obj;
 
-        /// List type
+		/// List type
 		typedef oexStdMap( t_Obj, CSqMulti )	t_List;
 
 		/// List iterator type
@@ -67,18 +67,18 @@ namespace sqbind
 		t_SqStr getJSON();
 		void setJSON( const t_SqStr &s );
 
-    private:
+	private:
 
-        /// List
-        t_List					m_lst;
+		/// List
+		t_List					m_lst;
 
 		/// This objects value
-        CSqString				m_val;
+		CSqString				m_val;
 
 		/// Default object
 		CSqMulti				*m_def;
 
-    public:
+	public:
 
 		SQBIND_CLASS_CTOR_BEGIN( CSqMulti )
 			_SQBIND_CLASS_CTOR( CSqMulti, 1 ) ( sa.GetString( 2 ), sq_getsize( x_v, 2 ) )
@@ -106,8 +106,8 @@ namespace sqbind
 		/// Deserializing constructor
 		CSqMulti( const oex::oexTCHAR *s, SQINT sz );
 
-        /// Returns a reference to the underlying vector
-        t_List& list();
+		/// Returns a reference to the underlying vector
+		t_List& list();
 
 		/// Returns a reference to the list item
 		CSqMulti& operator []( const CSqMulti &m );
@@ -169,8 +169,8 @@ namespace sqbind
 		/// Returns zlib decompressed string
 		stdString str_uncompress();
 
-        /// Registers the vector class for use with Squirrel
-        static void Register( sqbind::VM vm );
+		/// Registers the vector class for use with Squirrel
+		static void Register( sqbind::VM vm );
 
 		t_Obj urlencode();
 
@@ -189,40 +189,40 @@ namespace sqbind
 		void clear();
 
 		/// Copys a key
-        void copy( CSqMulti &m );
+		void copy( CSqMulti &m );
 
-        /// Adds an element
-        void set( const t_Obj &v );
+		/// Adds an element
+		void set( const t_Obj &v );
 
 		/// Adds a string element
 		void setstr( const oex::CStr &s );
 
-        /// Removes the specified element
-        void unset( const t_Obj &k );
+		/// Removes the specified element
+		void unset( const t_Obj &k );
 
 		/// Filters items
 		int filter( const t_Obj &sFilter, int bInclude );
 
-        /// Gets an element
-        CSqMulti* get( const t_Obj &k );
+		/// Gets an element
+		CSqMulti* get( const t_Obj &k );
 
 		/// Gets an element using a path
 		CSqMulti* at( const stdString &path );
 
-        /// Finds an element
-        t_Obj find_key( const t_Obj &k );
+		/// Finds an element
+		t_Obj find_key( const t_Obj &k );
 
-        /// Finds an element by value
-        t_Obj find_value( const t_Obj &v );
+		/// Finds an element by value
+		t_Obj find_value( const t_Obj &v );
 
 		/// Returns the first item in the list
-        iterator begin();
+		iterator begin();
 
 		/// Returns the last item in the list
-        iterator end();
+		iterator end();
 
 		/// Returns the specified list item
-        iterator find ( const t_Obj &k );
+		iterator find ( const t_Obj &k );
 
 		// Moves the specified item up in the list
 		void move_up( const t_Obj &k );
@@ -236,14 +236,14 @@ namespace sqbind
 		/// Recursive
 		static t_Obj _print_r( int nShowVals, t_List &rLst, int nDepth = 0 );
 
-        /// Internal squirrel function, returns value of specified item
-        SquirrelObject _get( HSQUIRRELVM v );
+		/// Internal squirrel function, returns value of specified item
+		SquirrelObject _get( HSQUIRRELVM v );
 
-        /// Internal squirrel function used to iterate list items
-        SquirrelObject _nexti( HSQUIRRELVM v );
+		/// Internal squirrel function used to iterate list items
+		SquirrelObject _nexti( HSQUIRRELVM v );
 
-        /// Internal squirrel function used to add a new item
-        SquirrelObject _newslot( HSQUIRRELVM v );
+		/// Internal squirrel function used to add a new item
+		SquirrelObject _newslot( HSQUIRRELVM v );
 
 	public:
 
@@ -256,10 +256,10 @@ namespace sqbind
 
 	private:
 
-        /// Returns non-zero if pPattern matches pString
-        static bool match_pattern( const oex::oexTCHAR *pString, const oex::oexTCHAR *pPattern);
+		/// Returns non-zero if pPattern matches pString
+		static bool match_pattern( const oex::oexTCHAR *pString, const oex::oexTCHAR *pPattern);
 
-    };
+	};
 
 }; // end namespace
 

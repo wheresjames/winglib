@@ -440,6 +440,35 @@ oexBOOL CBaseFile::Rename( oexCSTR x_pOld, oexCSTR x_pNew )
 	return rename( oexStrToMbPtr( x_pOld ), oexStrToMbPtr( x_pNew ) );
 }
 
+oexBOOL CBaseFile::Copy( oexCSTR x_pOld, oexCSTR x_pNew )
+{
+	if ( !x_pOld || !*x_pOld || !x_pNew || !*x_pNew )
+		return oexFALSE;
+
+	// Source file
+	int fSrc = open( oexStrToMbPtr( x_pOld ), O_RDONLY, 0777 );
+	if ( -1 == fd )
+		return oexFALSE;
+
+	int fDst = open( oexStrToMbPtr( x_pOld ), O_CREAT | O_WRONLY, 0777 );
+	if ( -1 == fd )
+	{	close( fSrc );
+		return oexFALSE;
+	} // end if
+
+	// Copy file data
+	char buf[ 1024 ];	
+	int nRead = 0, nTotal = 0;
+	while ( 0 < ( nRead = read( fSrc, buf, sizeof( buf ) ) ) )
+		write( fDst, buf, nRead ), nTotal += nRead;
+
+	// Close file handles
+	close( fSrc );
+	close( fDst );
+
+	return nTotal;
+}
+
 CStr CBaseFile::GetSysFolder( oexINT x_nFolderId, oexINT x_nMaxLength )
 {
 	// Get the folder

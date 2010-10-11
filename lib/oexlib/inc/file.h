@@ -387,9 +387,13 @@ public:
     static oexBOOL Exists( oexCSTR x_pPath )
     {   return os::CBaseFile::DoesExist( x_pPath ); }
 
-    /// Returns non-zero if the path exists
+    /// Renames the specified file
     static oexBOOL Rename( oexCSTR x_pOld, oexCSTR x_pNew )
     {   return os::CBaseFile::Rename( x_pOld, x_pNew ); }
+
+    /// Renames the specified file
+    static oexBOOL Copy( oexCSTR x_pOld, oexCSTR x_pNew )
+    {   return os::CBaseFile::Copy( x_pOld, x_pNew ); }
 
 	/// Returns the contents of a file
 	static CStr8 GetContents( oexCSTR x_pFile )

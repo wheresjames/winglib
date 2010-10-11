@@ -346,8 +346,15 @@ oexBOOL CBaseFile::Rename( oexCSTR x_pOld, oexCSTR x_pNew )
 	if ( !x_pOld || !*x_pOld || !x_pNew || !*x_pNew )
 		return oexFALSE;
 
-	return MoveFileEx( oexStrToMbPtr( x_pOld ), oexStrToMbPtr( x_pNew ),
-					   MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING );
+	return MoveFileEx( x_pOld, x_pNew, MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING );
+}
+
+oexBOOL CBaseFile::Copy( oexCSTR x_pOld, oexCSTR x_pNew )
+{
+	if ( !x_pOld || !*x_pOld || !x_pNew || !*x_pNew )
+		return oexFALSE;
+
+	return CopyFile( x_pOld, x_pNew, FALSE );
 }
 
 CStr CBaseFile::GetSysFolder( oexINT x_nFolderId, oexINT x_nMaxLength )

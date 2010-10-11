@@ -193,6 +193,9 @@ public:
     /// Renames the specified file
 	static oexBOOL Rename( oexCSTR x_pOld, oexCSTR x_pNew );    
 
+    /// Copies the specified file
+	static oexBOOL Copy( oexCSTR x_pOld, oexCSTR x_pNew );    
+
 	/// Gets file attributes
     static oexUINT GetFileAttrib( oexCSTR x_pFile );
 

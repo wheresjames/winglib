@@ -20,7 +20,7 @@ public:
 	public:
 
 		/// Default constructor
-		CSqSSLPort( SSL_CTX *ctx );
+		CSqSSLPort( SSL_CTX *ctx, oexLock *lock );
 
 		/// Destructor
 		virtual ~CSqSSLPort();
@@ -58,6 +58,9 @@ public:
 		/// SSL object
 		SSL					*m_ssl;
 
+		/// Thread lock
+		oexLock				m_lock;
+
 	};
 
 	class CPortFactory : public oex::CFactory
@@ -89,11 +92,15 @@ public:
 
 		/// Creates an object instance
 		virtual oex::oexPVOID Create()
-		{	return (oex::oexPVOID)(oex::os::CIpSocket*)OexAllocConstruct< CSqSSLPort >( m_ctx ); }
+		{	oexAutoLock ll( m_lock ); if ( !ll.IsLocked() ) return 0;
+			return (oex::oexPVOID)(oex::os::CIpSocket*)OexAllocConstruct< CSqSSLPort >( m_ctx, &m_lock ); 
+		}
 
 		/// Frees an object instance
 		virtual void Free( oex::oexPVOID p )
-		{	if ( p ) OexAllocDestruct< CSqSSLPort >( (CSqSSLPort*)(oex::os::CIpSocket*)p ); }
+		{	oexAutoLock ll( m_lock ); if ( !ll.IsLocked() ) return;
+			if ( p ) OexAllocDestruct< CSqSSLPort >( (CSqSSLPort*)(oex::os::CIpSocket*)p ); 
+		}
 
 	protected:
 
@@ -103,10 +110,13 @@ public:
 	private:
 
 		/// SSL context
-		SSL_CTX 			*m_ctx;
+		SSL_CTX 				*m_ctx;
 
 		/// String describing the last error
 		sqbind::stdString		m_sLastError;
+
+		/// Apparently, openssl is not thread safe
+		oexLock					m_lock;
 
 	};
 

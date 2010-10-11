@@ -49,7 +49,7 @@
 
 	CFindFiles ff;
 
-	if ( ff.FindFirst( "C:\\", "*.*" ) )
+	if ( ff.FindFirst( "C:\\", "*" ) )
 		do
 		{
 
@@ -104,7 +104,7 @@ public:
 
 		\see
 	*/
-	oexBOOL FindFirst( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*.*" ) );
+	oexBOOL FindFirst( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*" ) );
 
 	/// Constructor
 	CFindFiles();
@@ -121,7 +121,7 @@ public:
 
 		\see
 	*/
-	CFindFiles( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*.*" ) );
+	CFindFiles( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*" ) );
 
 	/// Destructor
 	virtual ~CFindFiles();
@@ -171,7 +171,7 @@ public:
     os::CBaseFile::SFindData& FileData() { return m_fd; }
 
     /// Returns a list of all matching files
-    static CStrList GetFileList( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*.*" ) );
+    static CStrList GetFileList( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*" ) );
 
 	/// File pattern
     CStr GetPattern() { return m_sPattern; }
@@ -222,7 +222,7 @@ private:
 
 	TRecursiveFindFiles< 16 > rff;
 
-	if ( rff.FindFirst( "C:\\", "*.*" ) )
+	if ( rff.FindFirst( "C:\\", "*" ) )
 		do
 		{
 
@@ -258,7 +258,7 @@ public:
 
 		\see
 	*/
-	TRecursiveFindFiles( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*.*" ) )
+	TRecursiveFindFiles( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*" ) )
 	{	m_uDepth = 0; FindFirst( x_pDir, x_pMask ); }
 
 	//==============================================================
@@ -326,22 +326,14 @@ public:
 		} // end if
 
 		// Try to find another file
-		for( ; ; )
+		do
 		{
 			// Is there another file at this depth?
 			if ( m_ff[ m_uDepth ].FindNext() )
 				return oexTRUE;
 
-			// Any higher ground?
-			if ( !m_uDepth )
-                return oexFALSE;
+		} while ( m_uDepth-- );
 
-			// Next depth
-			m_uDepth--;
-
-		} // end for
-
-		// Unreachable...
 		return oexFALSE;
 	}
 
@@ -357,7 +349,7 @@ public:
 
 		\see
 	*/
-	oexBOOL FindFirst( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*.*" ) )
+	oexBOOL FindFirst( oexCSTR x_pDir, oexCSTR x_pMask = oexT( "*" ) )
 	{
         if ( !oexVERIFY_PTR( x_pDir ) || !oexVERIFY_PTR( x_pMask ) )
             return oexFALSE;
@@ -387,6 +379,17 @@ public:
 	//==============================================================
 	/// Returns the filename for the current matching file
 	CStr GetFileName() { return m_ff[ m_uDepth ].GetFileName(); }
+
+	//==============================================================
+	// GetRelativePath()
+	//==============================================================
+	/// Returns the relative filename for the current matching file
+	CStr GetRelativePath()
+	{	CStr sRel;
+		for( oexUINT i = 0; i <= m_uDepth; i++ )
+			sRel.BuildPath( m_ff[ i ].GetFileName() );
+		return sRel;
+	}
 
 	//==============================================================
 	// GetFileAttributes()

@@ -276,7 +276,7 @@ int CServiceImpl::OnRunService( int argc, const char** argv, oexCSTR pName, oexC
 
 	if ( CommandLine().IsKey( oexT( "install" ) ) )
 	{
-		int nErr = InstallService( pName, pDesc, getAutoRestart() );
+		int nErr = InstallService( pName, pDesc, oexNULL, getAutoRestart() );
 		if ( 0 > nErr )
 		{	oexEcho( oexT( "Error installing service" ) );
 			return nErr;
@@ -565,7 +565,7 @@ int CServiceImpl::Restart( oexCSTR pName )
 	return 1;
 }
 
-int CServiceImpl::InstallService( oexCSTR pName, oexCSTR pDesc, oexBOOL bAutoRestart )
+int CServiceImpl::InstallService( oexCSTR pName, oexCSTR pDesc, oexCSTR pExe, oexBOOL bAutoRestart )
 {_STT();
 	if ( !pName || !*pName )
 	{	oexERROR( ERROR_INVALID_PARAMETER, oexT( "Invalid Parameter" ) );
@@ -587,7 +587,7 @@ int CServiceImpl::InstallService( oexCSTR pName, oexCSTR pDesc, oexBOOL bAutoRes
 	SC_HANDLE hService = CreateService( hSCManager, pName, pDesc, SERVICE_ALL_ACCESS,
 									    SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
 									    SERVICE_AUTO_START, SERVICE_ERROR_NORMAL,
-									    oexGetModuleFileName().Ptr(),
+										pExe && *pExe ? pExe : oexGetModuleFileName().Ptr(),
 									    NULL, NULL, NULL, NULL, NULL );
 	if( !hService )
 	{	oexERROR( GetLastError(), oexMks( oexT( "CreateService() failed : " ), pName ) );

@@ -150,6 +150,9 @@ namespace sqbind
 		static int rename( const stdString &sOld, const stdString &sNew )
 		{	return oexRename( sOld.c_str(), sNew.c_str() ); }
 
+		static int copy( const stdString &sOld, const stdString &sNew )
+		{	return oexCopy( sOld.c_str(), sNew.c_str() ); }
+
 		static int exists( const stdString &sFile )
 		{	return oexExists( sFile.c_str() ); }
 
@@ -178,6 +181,28 @@ namespace sqbind
 					// File
 					else if ( bFiles )
 						mRet[ ff.GetFileName().Ptr() ] = oexT( "f" );
+
+				} while ( ff.FindNext() );
+
+			return mRet;
+		}
+
+		static CSqMulti get_dirlist_r( const stdString &sDir, const stdString &sMask, int bFiles, int bDirs )
+		{
+			oex::TRecursiveFindFiles< 16 > ff;
+			CSqMulti mRet;
+			if ( ff.FindFirst( sDir.c_str(), sMask.c_str() ) )
+				do
+				{
+					// Directory
+					if ( ff.IsDirectory() )
+					{	if ( bDirs )
+							mRet[ ff.GetRelativePath().Ptr() ] = oexT( "d" );
+					} // end if
+
+					// File
+					else if ( bFiles )
+						mRet[ ff.GetRelativePath().Ptr() ] = oexT( "f" );
 
 				} while ( ff.FindNext() );
 

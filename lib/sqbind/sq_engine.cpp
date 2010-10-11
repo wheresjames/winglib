@@ -730,6 +730,32 @@ int CSqEngineExport::shell( const stdString &sFile, const stdString &sParams, co
 	return oexShell( sFile.c_str(), sParams.c_str(), sDirectory.c_str() );
 }
 
+int CSqEngineExport::service_install( const stdString &sName, const stdString &sDesc, const stdString &sExe, int bAutoRestart )
+{_STT();
+	return oex::os::CServiceImpl::InstallService( sName.c_str(), sDesc.c_str(), sExe.c_str(), bAutoRestart );
+}
+
+int CSqEngineExport::service_remove( const stdString &sName )
+{_STT();
+	return oex::os::CServiceImpl::RemoveService( sName.c_str() );
+}
+
+int CSqEngineExport::service_start( const stdString &sName )
+{_STT();
+	return oex::os::CServiceImpl::Start( sName.c_str() );
+}
+
+int CSqEngineExport::service_stop( const stdString &sName )
+{_STT();
+	return oex::os::CServiceImpl::Stop( sName.c_str() );
+}
+
+int CSqEngineExport::service_restart( const stdString &sName )
+{_STT();
+	return oex::os::CServiceImpl::Restart( sName.c_str() );
+}
+
+
 CSqMulti CSqEngineExport::get_system_drive_info( const stdString &sDrive )
 {_STT();
 	CSqMulti m;
@@ -1154,6 +1180,11 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, resetlog )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_install )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_remove )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_start )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_stop )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_restart )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_system_drive_info )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_cpu_load )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_instance_handle )

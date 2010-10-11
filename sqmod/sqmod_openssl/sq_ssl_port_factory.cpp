@@ -12,11 +12,11 @@ CSqSSLPortFactory::~CSqSSLPortFactory()
 }
 
 
-CSqSSLPortFactory::CSqSSLPort::CSqSSLPort( SSL_CTX *ctx )
+CSqSSLPortFactory::CSqSSLPort::CSqSSLPort( SSL_CTX *ctx, oexLock *lock )
 {_STT();
-
 	m_ctx = ctx;
 	m_ssl = oexNULL;
+	if ( lock ) m_lock = *lock;
 }
 
 CSqSSLPortFactory::CSqSSLPort::~CSqSSLPort()
@@ -27,6 +27,10 @@ CSqSSLPortFactory::CSqSSLPort::~CSqSSLPort()
 
 oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
 {_STT();
+
+	oexAutoLock ll( m_lock ); 
+	if ( !ll.IsLocked() ) 
+		return oex::oexFALSE;
 
 	if ( !m_ctx )
 		return oex::oexFALSE;
@@ -73,6 +77,10 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
 
 oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnClose()
 {_STT();
+
+	oexAutoLock ll( m_lock ); 
+	if ( !ll.IsLocked() ) 
+		return oex::oexFALSE;
 
 	// Close the socket
 	if ( m_ssl )
@@ -121,6 +129,11 @@ CSqSSLPortFactory::CPortFactory::~CPortFactory()
 
 void CSqSSLPortFactory::CPortFactory::Destroy()
 {_STT();
+
+	oexAutoLock ll( m_lock ); 
+	if ( !ll.IsLocked() ) 
+		return;
+
 	if ( m_ctx )
 		SSL_CTX_free( m_ctx );
 
@@ -139,6 +152,10 @@ int CSqSSLPortFactory::CPortFactory::Initialize()
 
 int CSqSSLPortFactory::CPortFactory::CreateCtx()
 {_STT();
+
+	oexAutoLock ll( m_lock ); 
+	if ( !ll.IsLocked() ) 
+		return 0;
 
 	// Initialize openssl
 	OpenSSL_add_all_algorithms();
@@ -163,6 +180,10 @@ int CSqSSLPortFactory::CPortFactory::CreateCtx()
 
 int CSqSSLPortFactory::CPortFactory::LoadCerts( const sqbind::stdString &sCertChain, const sqbind::stdString &sPrivateKey )
 {_STT();
+
+	oexAutoLock ll( m_lock ); 
+	if ( !ll.IsLocked() ) 
+		return 0;
 
 	if ( !m_ctx )
 		return 0;

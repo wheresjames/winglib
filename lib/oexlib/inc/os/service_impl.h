@@ -75,7 +75,7 @@ public:
 	static int RunService( int argc, const char** argv, oexCSTR pName, oexCSTR pDesc );
 
 	/// Installs the service
-	static int InstallService( oexCSTR pName, oexCSTR pDesc, oexBOOL bAutoRestart );
+	static int InstallService( oexCSTR pName, oexCSTR pDesc, oexCSTR pExe, oexBOOL bAutoRestart );
 
 	/// Uninstalls the service
 	static int RemoveService( oexCSTR pName );
