@@ -136,9 +136,7 @@ int CSqSSLPortFactory::CSqSSLPort::v_send( int socket, const void *buffer, int l
 
 	int ret = SSL_write( m_ssl, buffer, length );
 	if ( 0 > ret && SSL_ERROR_WANT_WRITE == SSL_get_error( m_ssl, ret ) )
-	{
-		oexEcho( "would block" );
-		setWouldBlock( oex::oexTRUE );
+	{	setWouldBlock( oex::oexTRUE );
 		return -1;
 	} // end if
 

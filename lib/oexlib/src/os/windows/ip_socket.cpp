@@ -1244,7 +1244,6 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 		// Is the socket blocking?
 		if ( !getWouldBlock() && WSAEWOULDBLOCK != m_uLastError )
 		{	m_uConnectState |= eCsError;
-			oexEcho( "ERRRROROROROROROROR" );
 			return 0;
 		} // end if
 
