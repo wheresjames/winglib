@@ -383,6 +383,10 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexDeserialize						OEX_NAMESPACE::CParser::Deserialize
 #define oexHtmlEncode						OEX_NAMESPACE::CParser::HtmlEncode
 #define oexHtmlDecode						OEX_NAMESPACE::CParser::HtmlDecode
+#define oexBase64Encode						OEX_NAMESPACE::CBase64::Encode
+#define oexBase64Decode						OEX_NAMESPACE::CBase64::Decode
+#define oexBase16Encode						OEX_NAMESPACE::CBase16::Encode
+#define oexBase16Decode						OEX_NAMESPACE::CBase16::Decode
 
 /// oexRETRY() - Retry something up to m times
 /**

@@ -29,14 +29,14 @@ function OnProcessRequest( params )
 	return mReply.serialize();
 }
 
-function CreateCertificate( name, keyfile, certfile )
+function CreateCertificate( certfile, keyfile )
 {
 	if ( CSqFile().exists( keyfile ) && CSqFile().exists( certfile ) )
 		return 1;
 
 	local key = COsslKey();
 
-	if ( !key.CreateRsa( name, 512 ) )
+	if ( !key.CreateRsa( 512 ) )
 	{	_self.echo( "CreateRsa() failed" ); return 0; }
 
 	if ( !key.SavePrivateKey( keyfile ) )
@@ -79,9 +79,9 @@ function _init() : ( _g )
 
 	_g.server = CSqHttpServer();
 
-	local keyfile = _self.root( "ssl_key" );
-	local certfile = _self.root( "ssl_cert" );
-	if ( !CreateCertificate( "ssl_keys", keyfile, certfile ) )
+	local keyfile = _self.root( "test_ssl_key" );
+	local certfile = _self.root( "test_ssl_cert" );
+	if ( !CreateCertificate( certfile, keyfile ) )
 	{	_g.quit = 1; return 0; }
 
 	_g.ssl = CSqSSLPortFactory();

@@ -215,6 +215,22 @@ public:
 	}
 
 	//==============================================================
+	// Lock()
+	//==============================================================
+	/// Locks a CResource object.  Returns true only if lock was achieved
+	/**
+		\param [in] x_lock		-	Reference to CResource object
+		\param [in] x_uTimeout	-	Maximum time in milli-seconds to
+									wait for lock.
+
+		\return Non-zero if lock was acquired.
+
+		\see
+	*/
+	oexBOOL Lock( os::CResource &x_lock, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
+	{	return Lock( &x_lock, x_uTimeout ); }
+
+	//==============================================================
 	// Unlock()
 	//==============================================================
 	/// Unlocks attached CResource object

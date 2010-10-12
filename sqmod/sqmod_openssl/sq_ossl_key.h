@@ -21,7 +21,7 @@ public:
 	void Destroy();
 
 	/// Creates the specified key
-	int CreateRsa( const sqbind::stdString &sKey, int nSize );
+	int CreateRsa( int nSize );
 
 	/// Generates a public key from the private key
 	int GenPublicKey();
@@ -30,7 +30,7 @@ public:
 	int SetChallenge( const sqbind::stdString &sChallenge );
 
 	/// Save keys to a file
-	int SaveKeys( const sqbind::stdString &sName, const sqbind::stdString &sPrivate, const sqbind::stdString &sPublic );
+	int SaveKeys( const sqbind::stdString &sPrivate, const sqbind::stdString &sPublic );
 
 	/// Saves the private key to a file
 	int SavePrivateKey( const sqbind::stdString &sPrivate );
@@ -39,34 +39,57 @@ public:
 	int SavePublicKey( const sqbind::stdString &sPublic );
 
 	/// Load private key from a file
-	int LoadPrivateKey( const sqbind::stdString &sFile, const sqbind::stdString &sName );
+	int LoadPrivateKey( const sqbind::stdString &sFile );
 
 	/// Load public key
-	int LoadPublicKey( const sqbind::stdString &sFile, const sqbind::stdString &sName );
+	int LoadPublicKey( const sqbind::stdString &sFile );
+
+	/// Load private key from memory buffer
+	int setPrivateKey( sqbind::CSqBinary *pBin );
+
+	/// Loads a public key from a buffer
+	int setPublicKey( sqbind::CSqBinary *pBin );
+
+	/// Returns the priate key in a binary buffer
+	sqbind::CSqBinary getPrivateKey();
+
+	/// Returns the public key in a binary buffer
+	sqbind::CSqBinary getPublicKey();
+
+	/// Sign data
+	int Sign( const sqbind::stdString &sData, sqbind::CSqBinary *sig );
+
+	/// Sign data
+	int SignBin(sqbind::CSqBinary *pData, sqbind::CSqBinary *sig );
+
+	/// Verify sig
+	int Verify( const sqbind::stdString &sData, sqbind::CSqBinary *sig );
+
+	/// Verify sig
+	int VerifyBin( sqbind::CSqBinary *pData, sqbind::CSqBinary *sig );
 
 	/// Returns a pointer to the private key
-	EVP_PKEY* getPrivateKey() { return m_pkey; }
+	EVP_PKEY* getPrivateKeyPtr() { return m_pkey; }
 
 	/// Returns a pointer to the public key
-	EVP_PKEY* getPublicKey() { return m_pkey; }
+	EVP_PKEY* getPublicKeyPtr() { return m_pkey; }
 
-	/// Returns the key name
-	sqbind::stdString getName() { return m_sName; }
+	/// Returns the key password
+	sqbind::stdString getPassword() { return sqbind::oex2std( oexMbToStr( m_sPassword ) ); }
 
-	/// Sets the key name
-	void setName( const sqbind::stdString &sName )
-	{	m_sName = sName; }
+	/// Sets the key password
+	void setPassword( const sqbind::stdString &s ) { m_sPassword = oexStrToMb( sqbind::std2oex( s ) ); }
+
+	/// Returns a pointer to the password phrase or null if none
+	char* getPasswordPtr() { return m_sPassword.Length() ? (char*)m_sPassword.Ptr() : NULL; }
 
 private:
 
-	/// Key name
-	sqbind::stdString	m_sName;
-
-	/// Private key object
+	/// Key object
 	EVP_PKEY 			*m_pkey;
 
-	/// Public key object
-//	NETSCAPE_SPKI 		*m_spki;
+	/// Key password
+	oex::CStr8			m_sPassword;
 
 };
 

@@ -16,6 +16,7 @@ CSqSSLPortFactory::CSqSSLPort::CSqSSLPort( SSL_CTX *ctx, oexLock *lock )
 {_STT();
 	m_ctx = ctx;
 	m_ssl = oexNULL;
+	m_cert = oexNULL;
 	if ( lock ) m_lock = *lock;
 }
 
@@ -56,7 +57,11 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
 	{
 		// Wait for data?
 		if ( err )
-			oexSleep( 0 );
+		{	ll.Unlock();
+			oexSleep( 15 );
+			if ( !ll.Lock( m_lock ) )
+				return oex::oexFALSE;
+		} // end if
 
 		// SSL accept
 		if( -1 == SSL_accept( m_ssl ) )
@@ -72,6 +77,26 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
 		return oex::oexFALSE;
 	} // end if
 
+	oex::CPropertyBag pb;
+	long lVerify = SSL_get_verify_result( m_ssl );
+	pb[ oexT( "cert_verify" ) ] = ( X509_V_OK == lVerify );
+
+	// Get peer certificate
+	m_cert = SSL_get_peer_certificate( m_ssl );
+	pb[ oexT( "cert_valid" ) ] = ( X509_V_OK == lVerify ) && m_cert;
+	if ( m_cert )
+	{	X509_NAME *pName = X509_get_subject_name( m_cert );
+		if ( pName )
+			for ( int i = 0; i < X509_NAME_entry_count( pName ); i++ )
+			{	X509_NAME_ENTRY *e = X509_NAME_get_entry( pName, i );
+				
+			} // end for
+
+	} // end if
+
+	// Set port properties string
+	m_sProperties = oex::CParser::Serialize( pb );
+
 	return oex::oexTRUE;
 }
 
@@ -82,28 +107,27 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnClose()
 	if ( !ll.IsLocked() ) 
 		return oex::oexFALSE;
 
+	// Free certificate
+	if ( m_cert )
+		X509_free( m_cert );
+	m_cert = oexNULL;
+
 	// Close the socket
 	if ( m_ssl )
 	{
-//		SSL_set_shutdown( m_ssl, SSL_RECEIVED_SHUTDOWN );
-		
 		oex::oexUINT uTo = 0;
 		int res = SSL_shutdown( m_ssl );
 		while ( !res )
-		{	oexSleep( 15 );
-			if ( !uTo ) uTo = oexGetUnixTime() + 60;
-			else if ( uTo < oexGetUnixTime() ) res = 0;
-			else res = SSL_shutdown( m_ssl );
+		{	ll.Unlock();
+			oexSleep( 15 );
+			if ( ll.Lock( m_lock ) )
+			{	if ( !uTo ) uTo = oexGetUnixTime() + ( oexDEFAULT_WAIT_TIMEOUT / 1000 );
+				else if ( uTo < oexGetUnixTime() ) res = 0;
+				else res = SSL_shutdown( m_ssl );
+			} // end if
+			else res = 0;
 		} // end while
-/*		if ( !res )
-		{
-			struct linger lopt;
-			lopt.l_onoff = 0; lopt.l_linger = 0;
-			setsockopt( (int)(long)GetSocketHandle(), SOL_SOCKET, SO_LINGER, (const char*)&lopt, sizeof( lopt ) );
-			shutdown( (int)(long)GetSocketHandle(), 1 );
-			SSL_shutdown( m_ssl );
-		} // end if
-*/		SSL_free( m_ssl );
+		SSL_free( m_ssl );
 	} // end if
 
 	m_ctx = oexNULL;
@@ -222,7 +246,7 @@ int CSqSSLPortFactory::CPortFactory::LoadCerts( const sqbind::stdString &sCertCh
 		return 0;
 
 	// Load certificate chain
-  	if ( 0 >= SSL_CTX_use_certificate_chain_file( m_ctx, sCertChain.c_str() ) )
+	if ( 0 >= SSL_CTX_use_certificate_chain_file( m_ctx, sCertChain.c_str() ) )
 	{	m_sLastError = ERR_error_string( ERR_get_error(), 0 );
 		m_sLastError += oexT( " : Failed to load certificate chain file" );
 		return 0;

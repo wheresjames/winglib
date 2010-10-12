@@ -28,7 +28,7 @@ sqbind::SQINT COsslCert::Create( COsslKey *x_pKey, sqbind::SQINT x_nSerialNumber
 	// Lose old cert
 	Destroy();
 
-	if ( !x_pKey || ! x_pKey->getPublicKey() )
+	if ( !x_pKey || ! x_pKey->getPublicKeyPtr() )
 		return 0;
 
 	m_pX509 = X509_new();
@@ -44,7 +44,7 @@ sqbind::SQINT COsslCert::Create( COsslKey *x_pKey, sqbind::SQINT x_nSerialNumber
 
 	X509_gmtime_adj( X509_get_notAfter( m_pX509 ), x_nSecondsValid );
 
-	X509_set_pubkey( m_pX509, x_pKey->getPublicKey() );
+	X509_set_pubkey( m_pX509, x_pKey->getPublicKeyPtr() );
 
 	return 1;
 }
@@ -56,7 +56,7 @@ sqbind::SQINT COsslCert::Sign( COsslKey *x_pKey )
 		return 0;
 
 	// Sign the cert
-	X509_sign( m_pX509, x_pKey->getPublicKey(), EVP_sha1() );
+	X509_sign( m_pX509, x_pKey->getPublicKeyPtr(), EVP_sha1() );
 
 	return 1;
 }

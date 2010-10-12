@@ -244,6 +244,71 @@ CBin::t_size CBin::LShift( CBin::t_size x_nBytes )
 	return m_nUsed;
 }
 
+CStr8 CBin::base64_encode()
+{_STT();
+	return CBase64::Encode( m_buf.Ptr(), getUsed() ); 
+}
+
+CStr8 CBin::base64_decode()
+{_STT();
+	return CBase64::Decode( m_buf.Ptr(), getUsed() );
+}
+
+CStr8 CBin::base16_encode()
+{_STT();
+	return CBase16::Encode( m_buf.Ptr(), getUsed() ); 
+}
+
+CStr8 CBin::base16_decode()
+{_STT();
+	return CBase16::Decode( m_buf.Ptr(), getUsed() ); 
+}
+
+CStr8 CBin::compress()
+{_STT();
+	return oexCompress( CStr8( m_buf, getUsed() ) ); 
+}
+
+CStr8 CBin::uncompress()
+{_STT();
+	return oexUncompress( CStr8( m_buf.Ptr(), getUsed() ) ); 
+}
+
+CBin& CBin::base64_encode( oexCONST CStr8 &s )
+{_STT();
+	setString( CBase64::Encode( s ) ); 
+	return *this;
+}
+
+CBin& CBin::base64_decode( oexCONST CStr8 &s )
+{_STT();
+	setString( CBase64::Decode( s ) ); 
+	return *this;
+}
+
+CBin& CBin::base16_encode( oexCONST CStr8 &s )
+{_STT();
+	setString( CBase16::Encode( s ) ); 
+	return *this;
+}
+
+CBin& CBin::base16_decode( oexCONST CStr8 &s )
+{_STT();
+	setString( CBase16::Decode( s ) ); 
+	return *this;
+}
+
+CBin& CBin::compress( oexCONST CStr8 &s )
+{_STT();
+	setString( oexCompress( s ) ); 
+	return *this;
+}
+
+CBin& CBin::uncompress( oexCONST CStr8 &s )
+{_STT();
+	setString( oexUncompress( s ) ); 
+	return *this;
+}
 
 void CBinShare::Destroy()
 {_STT();
@@ -391,3 +456,4 @@ oexINT CBinShare::Cleanup()
 
 	return (oexINT)m_buffers.Size();
 }
+

@@ -84,6 +84,17 @@ public:
 #endif
     }
 
+	TStr( oexCONST t_buffer &buf, t_size uLength )
+	{	m_nLength = uLength;
+        m_nOffset = 0;
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
+        m_mem.Share( buf );
+	}
+
+
 	TStr( oexCONST TStr &str )
 	{	m_nLength = 0;
         m_nOffset = 0;

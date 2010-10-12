@@ -578,6 +578,42 @@ public:
 	OEX_CBIN_DECLARE_TYPE_ACCESS( DOUBLE );
 	OEX_CBIN_DECLARE_TYPE_ACCESS( PVOID );
 
+	/// Base64 encodes data
+	CStr8 base64_encode();
+
+	/// Base64 encodes data
+	CStr8 base64_decode();
+
+	/// Base16 encodes data
+	CStr8 base16_encode();
+
+	/// Base16 encodes data
+	CStr8 base16_decode();
+
+	/// Compersses the data
+	CStr8 compress();
+
+	/// Uncompresses data
+	CStr8 uncompress();
+
+	/// Base64 encodes data
+	CBin& base64_encode( oexCONST CStr8 &s );
+
+	/// Base64 encodes data
+	CBin& base64_decode( oexCONST CStr8 &s );
+
+	/// Base16 encodes data
+	CBin& base16_encode( oexCONST CStr8 &s );
+
+	/// Base16 encodes data
+	CBin& base16_decode( oexCONST CStr8 &s );
+
+	/// Compersses the data
+	CBin& compress( oexCONST CStr8 &s );
+
+	/// Uncompresses data
+	CBin& uncompress( oexCONST CStr8 &s );
+
 	/// Returns buffer object reference
 	t_buffer& Mem() { return m_buf; }
 

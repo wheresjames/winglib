@@ -21,17 +21,13 @@ void COsslKey::Destroy()
 		EVP_PKEY_free( m_pkey );
 
 	m_pkey = oexNULL;
-	m_sName = oexT( "" );
 }
 
-int COsslKey::CreateRsa( const sqbind::stdString &sName, int nSize )
+int COsslKey::CreateRsa( int nSize )
 {_STT();
 
 	// Lose old key
 	Destroy();
-
-	// Save key name
-	m_sName = sName;
 
 	// Create a new key
 	m_pkey = EVP_PKEY_new();
@@ -74,11 +70,8 @@ int COsslKey::SetChallenge( const sqbind::stdString &sChallenge )
 
 }
 
-int COsslKey::SaveKeys( const sqbind::stdString &sName, const sqbind::stdString &sPrivate, const sqbind::stdString &sPublic )
+int COsslKey::SaveKeys( const sqbind::stdString &sPrivate, const sqbind::stdString &sPublic )
 {_STT();
-
-	// Save key name
-	m_sName = sName;
 
 	// Public key?
 	if ( m_pkey )
@@ -161,13 +154,76 @@ int COsslKey::SavePublicKey( const sqbind::stdString &sPublic )
 	return 1;
 }
 
-int COsslKey::LoadPrivateKey( const sqbind::stdString &sFile, const sqbind::stdString &sName )
+int COsslKey::setPrivateKey( sqbind::CSqBinary *pBin )
 {_STT();
 
 	Destroy();
 
-	// Save key name
-	m_sName = sName;
+	if ( !pBin || !pBin->getUsed() )
+		return 0;
+
+	m_pkey = EVP_PKEY_new();
+	if ( !m_pkey )
+	{	oexERROR( 0, oexT( "EVP_PKEY_new() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+
+	BIO *pBio = BIO_new_mem_buf( pBin->_Ptr(), pBin->getUsed() );
+	if ( !pBio )
+	{	oexERROR( 0, oexT( "BIO_new_mem_buf() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+
+	RSA *rsa = 0;
+	if ( !PEM_read_bio_RSAPrivateKey( pBio, &rsa, NULL, NULL ) )
+	{	oexERROR( 0, oexT( "PEM_read_bio_RSA_PUBKEY() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+
+	// Assign key
+	if ( !EVP_PKEY_assign_RSA( m_pkey, rsa ) )
+	{	oexERROR( 0, oexT( "EVP_PKEY_assign_RSA() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+	rsa = NULL;
+
+	BIO_free( pBio );
+
+	return 1;
+}
+
+sqbind::CSqBinary COsslKey::getPrivateKey()
+{_STT();
+
+	if ( !m_pkey )
+		return sqbind::CSqBinary();
+
+	BIO *pBio = BIO_new( BIO_s_mem() );
+	if ( !pBio )
+	{	oexERROR( 0, oexT( "BIO_new_mem_buf() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+
+	if ( !PEM_write_bio_RSAPrivateKey( pBio, m_pkey->pkey.rsa, NULL, NULL, 0, NULL, NULL ) )
+	{	oexERROR( 0, oexT( "PEM_read_bio_RSA_PUBKEY() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+
+	BIO_free( pBio );
+
+	return 1;
+}
+
+int COsslKey::LoadPrivateKey( const sqbind::stdString &sFile )
+{_STT();
+
+	Destroy();
 
 	oex::CStr8 name = oexStrToMb( oex::CStr( sFile.c_str(), sFile.length() ) );
 
@@ -206,13 +262,76 @@ int COsslKey::LoadPrivateKey( const sqbind::stdString &sFile, const sqbind::stdS
 	return GenPublicKey();
 }
 
-int COsslKey::LoadPublicKey( const sqbind::stdString &sFile, const sqbind::stdString &sName )
+int COsslKey::setPublicKey( sqbind::CSqBinary *pBin )
 {_STT();
 
 	Destroy();
 
-	// Save key name
-	m_sName = sName;
+	if ( !pBin || !pBin->getUsed() )
+		return 0;
+
+	m_pkey = EVP_PKEY_new();
+	if ( !m_pkey )
+	{	oexERROR( 0, oexT( "EVP_PKEY_new() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+
+	BIO *pBio = BIO_new_mem_buf( pBin->_Ptr(), pBin->getUsed() );
+	if ( !pBio )
+	{	oexERROR( 0, oexT( "BIO_new_mem_buf() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+
+	RSA *rsa = 0;
+	if ( !PEM_read_bio_RSAPublicKey( pBio, &rsa, NULL, NULL ) )
+	{	oexERROR( 0, oexT( "PEM_read_bio_RSA_PUBKEY() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+
+	// Assign key
+	if ( !EVP_PKEY_assign_RSA( m_pkey, rsa ) )
+	{	oexERROR( 0, oexT( "EVP_PKEY_assign_RSA() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+	rsa = NULL;
+
+	BIO_free( pBio );
+
+	return 1;
+}
+
+sqbind::CSqBinary COsslKey::getPublicKey()
+{_STT();
+
+	if ( !m_pkey )
+		return sqbind::CSqBinary();
+
+	BIO *pBio = BIO_new( BIO_s_mem() );
+	if ( !pBio )
+	{	oexERROR( 0, oexT( "BIO_new_mem_buf() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+
+	if ( !PEM_write_bio_RSAPublicKey( pBio, m_pkey->pkey.rsa ) )
+	{	oexERROR( 0, oexT( "PEM_read_bio_RSA_PUBKEY() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+
+	BIO_free( pBio );
+
+	return 1;
+}
+
+int COsslKey::LoadPublicKey( const sqbind::stdString &sFile )
+{_STT();
+
+	Destroy();
 
 	m_pkey = EVP_PKEY_new();
 	if ( !m_pkey )
@@ -251,5 +370,130 @@ int COsslKey::LoadPublicKey( const sqbind::stdString &sFile, const sqbind::stdSt
 	return 1;
 }
 
+int COsslKey::Sign( const sqbind::stdString &sData, sqbind::CSqBinary *sig )
+{_STT();
+
+	if ( !sig || !getPrivateKeyPtr() )
+		return 0;
+
+	EVP_MD_CTX md_ctx;
+
+	// Initialize
+	if ( !EVP_SignInit( &md_ctx, EVP_sha1() ) )
+	{	oexERROR( 0, oexT( "EVP_SignInit() failed" ) );
+		return 0;
+	} // end if
+
+	if ( !EVP_SignUpdate( &md_ctx, sData.c_str(), sData.length() ) )
+	{	oexERROR( 0, oexT( "EVP_SignUpdate() failed" ) );
+		return 0;
+	} // end if
+
+	if ( !sig->Allocate( 2 * 1024 ) )
+	{	oexERROR( 0, oexT( "EVP_SignUpdate() failed" ) );
+		return 0;
+	} // end if
+
+	unsigned int sig_len = sig->Size();
+	int err = EVP_SignFinal( &md_ctx, (unsigned char*)sig->Ptr(), &sig_len, getPrivateKeyPtr() );
+	if ( 1 != err )
+	{	oexERROR( err, oexT( "EVP_SignFinal() failed" ) );
+		return 0;
+	} // end if
+
+	sig->setUsed( sig_len );
+
+	return 1;
+}
+
+int COsslKey::SignBin( sqbind::CSqBinary *pData, sqbind::CSqBinary *sig )
+{_STT();
+
+	if ( !pData || !sig || !getPrivateKeyPtr() )
+		return 0;
+
+	EVP_MD_CTX md_ctx;
+
+	// Initialize
+	if ( !EVP_SignInit( &md_ctx, EVP_sha1() ) )
+	{	oexERROR( 0, oexT( "EVP_SignInit() failed" ) );
+		return 0;
+	} // end if
+
+	if ( !EVP_SignUpdate( &md_ctx, pData->Ptr(), pData->getUsed() ) )
+	{	oexERROR( 0, oexT( "EVP_SignUpdate() failed" ) );
+		return 0;
+	} // end if
+
+	if ( !sig->Allocate( 2 * 1024 ) )
+	{	oexERROR( 0, oexT( "EVP_SignUpdate() failed" ) );
+		return 0;
+	} // end if
+
+	unsigned int sig_len = sig->Size();
+	int err = EVP_SignFinal( &md_ctx, (unsigned char*)sig->Ptr(), &sig_len, getPrivateKeyPtr() );
+	if ( 1 != err )
+	{	oexERROR( err, oexT( "EVP_SignFinal() failed" ) );
+		return 0;
+	} // end if
+
+	sig->setUsed( sig_len );
+
+	return 1;
+}
+
+int COsslKey::Verify( const sqbind::stdString &sData, sqbind::CSqBinary *sig )
+{_STT();
+
+	if ( !sig || !getPublicKeyPtr() )
+		return 0;
+
+	EVP_MD_CTX md_ctx;
+
+	if ( !EVP_VerifyInit( &md_ctx, EVP_sha1() ) )
+	{	oexERROR( 0, oexT( "EVP_VerifyInit() failed" ) );
+		return 0;
+	} // end if
+
+	if ( !EVP_VerifyUpdate( &md_ctx, sData.c_str(), sData.length() ) )
+	{	oexERROR( 0, oexT( "EVP_VerifyUpdate() failed" ) );
+		return 0;
+	} // end if
+
+	int err = EVP_VerifyFinal( &md_ctx, (unsigned char*)sig->Ptr(), sig->getUsed(), getPublicKeyPtr() );
+	if ( err != 1 )
+	{	oexERROR( err, oexT( "EVP_VerifyFinal() failed" ) );
+		return 0;
+	} // end if
+
+	return 1;
+}
+
+int COsslKey::VerifyBin( sqbind::CSqBinary *pData, sqbind::CSqBinary *sig )
+{_STT();
+
+	if ( !pData || !sig || !getPublicKeyPtr() )
+		return 0;
+
+	EVP_MD_CTX md_ctx;
+
+	if ( !EVP_VerifyInit( &md_ctx, EVP_sha1() ) )
+	{	oexERROR( 0, oexT( "EVP_VerifyInit() failed" ) );
+		return 0;
+	} // end if
+
+	if ( !EVP_VerifyUpdate( &md_ctx, pData->Ptr(), pData->getUsed() ) )
+	{	oexERROR( 0, oexT( "EVP_VerifyUpdate() failed" ) );
+		return 0;
+	} // end if
+
+	int err = EVP_VerifyFinal( &md_ctx, (unsigned char*)sig->Ptr(), sig->getUsed(), getPublicKeyPtr() );
+	if ( err != 1 )
+	{	oexERROR( err, oexT( "EVP_VerifyFinal() failed" ) );
+		return 0;
+	} // end if
+
+	return 1;
+}
 
 

@@ -81,7 +81,7 @@ namespace sqbind
 	public:
 
 		SQBIND_CLASS_CTOR_BEGIN( CSqMulti )
-			_SQBIND_CLASS_CTOR( CSqMulti, 1 ) ( sa.GetString( 2 ), sq_getsize( x_v, 2 ) )
+			_SQBIND_CLASS_CTOR1( CSqMulti, OT_STRING ) ( sa.GetString( 2 ), sq_getsize( x_v, 2 ) )
 		SQBIND_CLASS_CTOR_END( CSqMulti )
 
 		/// Destructor
@@ -168,6 +168,18 @@ namespace sqbind
 
 		/// Returns zlib decompressed string
 		stdString str_uncompress();
+
+		/// Returns base16 encoded string
+		stdString str_base16_encode();
+
+		/// Returns base16 decoded string
+		stdString str_base16_decode();
+
+		/// Returns base64 encoded string
+		stdString str_base64_encode();
+
+		/// Returns base64 decoded string
+		stdString str_base64_decode();
 
 		/// Registers the vector class for use with Squirrel
 		static void Register( sqbind::VM vm );

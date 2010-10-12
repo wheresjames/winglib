@@ -3,7 +3,7 @@
 
 #pragma once
 
-class CSqSSLPortFactory// : public oex::os::CIpSocket
+class CSqSSLPortFactory
 {
 public:
 	_SQBIND_CLASS_CTOR_BEGIN( CSqSSLPortFactory )
@@ -46,6 +46,7 @@ public:
 
 		virtual oex::oexCSTR v_get_transport_type() { return oexT( "https" ); }
 		virtual oex::oexCSTR v_get_transport_name() { return oexT( "OpenSSL" ); }
+		virtual oex::CStr v_get_transport_properties() { return m_sProperties; }
 
 	private:
 
@@ -57,6 +58,12 @@ public:
 
 		/// SSL object
 		SSL					*m_ssl;
+
+		/// Peer SSL certificate
+		X509				*m_cert;
+
+		/// Port properties
+		oex::CStr			m_sProperties;
 
 		/// Thread lock
 		oexLock				m_lock;

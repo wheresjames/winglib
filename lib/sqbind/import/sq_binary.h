@@ -87,8 +87,9 @@ namespace sqbind
 	public:
 
 		SQBIND_CLASS_CTOR_BEGIN( CSqBinary )
-			_SQBIND_CLASS_CTOR( CSqBinary, 1 ) ( sa.GetInt( 2 ) )
-			_SQBIND_CLASS_CTOR( CSqBinary, 2 ) ( sa.GetInt( 2 ), sa.GetInt( 3 ) )
+			_SQBIND_CLASS_CTOR1( CSqBinary, OT_STRING ) ( (t_byte*)sa.GetString( 2 ), sq_getsize( x_v, 2 ) )
+			_SQBIND_CLASS_CTOR1( CSqBinary, OT_INTEGER ) ( sa.GetInt( 2 ) )
+			_SQBIND_CLASS_CTOR2( CSqBinary, OT_INTEGER, OT_INTEGER ) ( sa.GetInt( 2 ), sa.GetInt( 3 ) )
 		SQBIND_CLASS_CTOR_END( CSqBinary )
 
 		/// Default constructor
@@ -113,9 +114,12 @@ namespace sqbind
 		{	m_bin = r; return *this; }
 
 		/// Construct from raw buffer
-		CSqBinary( t_byte *x_ptr, t_size x_size, int x_bFree = 0 )
-			: m_bin( x_ptr, x_size, x_bFree ? oex::oexTRUE : oex::oexFALSE )
-		{}
+		CSqBinary( t_byte *x_ptr, t_size x_size, int x_bFree = 0 )			
+		{	if ( x_bFree )
+				m_bin.setBuffer( x_ptr, x_size, 0, oex::oexTRUE );
+			else
+				m_bin.MemCpy( x_ptr, x_size );
+		}
 
 		/// Registers the class
 		static void Register( sqbind::VM vm );
@@ -281,6 +285,54 @@ namespace sqbind
 			 *p = m_bin.Sub( x_nStart, x_nSize );
 			 return p->getUsed();
 		}
+
+		/// Base64 encodes data
+		stdString base64_encode()
+		{	return oex2std( oexMbToStr( m_bin.base64_encode() ) ); }
+
+		/// Base64 decodes data
+		stdString base64_decode()
+		{	return oex2std( oexMbToStr( m_bin.base64_decode() ) ); }
+
+		/// Base16 encodes data
+		stdString base16_encode()
+		{	return oex2std( oexMbToStr( m_bin.base16_encode() ) ); }
+
+		/// Base16 decodes data
+		stdString base16_decode()
+		{	return oex2std( oexMbToStr( m_bin.base16_decode() ) ); }
+
+		/// Compress data
+		stdString compress()
+		{	return oex2std( oexMbToStr( m_bin.compress() ) ); }
+
+		/// Uncompresses data
+		stdString uncompress()
+		{	return oex2std( oexMbToStr( m_bin.uncompress() ) ); }
+
+		/// Base64 encodes data
+		void base64_encode_str( const stdString &s )
+		{	m_bin.base64_encode( oexStrToMb( std2oex( s ) ) ); }
+
+		/// Base64 encodes data
+		void base64_decode_str( const stdString &s )
+		{	m_bin.base64_decode( oexStrToMb( std2oex( s ) ) ); }
+
+		/// Base16 encodes data
+		void base16_encode_str( const stdString &s )
+		{	m_bin.base16_encode( oexStrToMb( std2oex( s ) ) ); }
+
+		/// Base16 encodes data
+		void base16_decode_str( const stdString &s )
+		{	m_bin.base16_decode( oexStrToMb( std2oex( s ) ) ); }
+
+		/// Compress data
+		void compress_str( const stdString &s )
+		{	m_bin.compress( oexStrToMb( std2oex( s ) ) ); }
+
+		/// Uncompresses data
+		void uncompress_str( const stdString &s )
+		{	m_bin.uncompress( oexStrToMb( std2oex( s ) ) ); }
 
 		/// Returns a view of the specified location
 		CSqBinary getSub( int x_nStart, int x_nSize )

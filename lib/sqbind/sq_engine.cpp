@@ -257,27 +257,28 @@ stdString CSqEngineExport::get_resource( const stdString &sRes, int bFileOverrid
 
 	if ( bFileOverrideOk )
 	{
+		// +++ This really isn't the way to handle the paths.
+		//     I can't think of a good approach atm, so will
+		//     think this through later.
+
 		// Look in script path
-		stdString sSub = path( sRes );
+		stdString sSub = path( build_path( oexT( ".." ), sRes ) );
+//		oexSHOW( sSub.c_str() );
 		if ( oexExists( sSub.c_str() ) )
 			s = oexMbToStr( oexFileGetContents( sSub.c_str() ) );
 
 		// Look in binary path
 		else
-		{	stdString sSub = root( sRes );
+		{	sSub = root( sRes );
 			if ( oexExists( sSub.c_str() ) )
 				s = oexMbToStr( oexFileGetContents( sSub.c_str() ) );
 		} // end else
 
 	} // end if
 
-#if defined( OEX_RESOURCES )
-
 	// Check for resource
 	if ( !s.Length() )
 		s = oexGetResource( sRes.c_str() );
-
-#endif
 
 	// Punt if no data
 	if ( !s.Length() )

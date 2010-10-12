@@ -114,15 +114,26 @@ namespace sqbind { typedef HSQUIRRELVM VM; }
 
 	};
 
-*/
-#	define _SQBIND_CLASS_CTOR_BEGIN( c ) 	static int sq_construct_##c( HSQUIRRELVM x_v ) \
-											{ StackHandler sa( x_v ); c *p = 0; if( 0 )
-#	define _SQBIND_CLASS_CTOR_END( c ) 		; else p = new c(); \
-											return SqPlus::PostConstruct<c>( x_v, p, SqPlus::ReleaseClassPtr< c >::release); }
-#	define _SQBIND_CLASS_CTOR( c, n )		; else if ( ( n + 1 ) == sa.GetParamCount() ) p = new c
-#	define _SQBIND_CLASS_BIND_CTOR( c )		.staticFunc( &c::sq_construct_##c, oexT( "constructor" ) )
+	// Squirrel types
+	OT_NULL, OT_INTEGER, OT_FLOAT, OT_BOOL, OT_STRING, OT_TABLE, OT_ARRAY,
+	OT_USERDATA, OT_CLOSURE, OT_NATIVECLOSURE, OT_GENERATOR, OT_USERPOINTER,
+	OT_THREAD, OT_FUNCPROTO, OT_CLASS, OT_INSTANCE, OT_WEAKREF
 
-#	define _SQBIND_DECLARE_INSTANCE( c, n )	DECLARE_INSTANCE_TYPE_NAME( c, n )
+*/
+#	define _SQBIND_CLASS_CTOR_BEGIN( c )			static int sq_construct_##c( HSQUIRRELVM x_v ) \
+													{ StackHandler sa( x_v ); c *p = 0; if( 0 )
+#	define _SQBIND_CLASS_CTOR_END( c ) 				; else p = new c(); \
+													return SqPlus::PostConstruct<c>( x_v, p, SqPlus::ReleaseClassPtr< c >::release); }
+#	define _SQBIND_CLASS_CTOR1( c, t )				; else if ( ( 1 + 1 ) == sa.GetParamCount() && t == sa.GetType( 2 ) ) p = new c
+#	define _SQBIND_CLASS_CTOR2( c, t1, t2 )			; else if ( ( 2 + 1 ) == sa.GetParamCount() && t1 == sa.GetType( 2 ) && t2 == sa.GetType( 3 ) ) p = new c
+#	define _SQBIND_CLASS_CTOR3( c, t1, t2, t3 )		; else if ( ( 3 + 1 ) == sa.GetParamCount() && t1 == sa.GetType( 2 ) && t2 == sa.GetType( 3 ) && t3 == sa.GetType( 4 ) ) p = new c
+#	define _SQBIND_CLASS_CTOR( c, n )				; else if ( ( n + 1 ) == sa.GetParamCount() ) p = new c
+#	define _SQBIND_CLASS_CTORT1( c, n, t )			; else if ( ( n + 1 ) == sa.GetParamCount() && t == sa.GetType( 2 ) ) p = new c
+#	define _SQBIND_CLASS_CTORT2( c, n, t1, t2 )		; else if ( ( n + 1 ) == sa.GetParamCount() && t1 == sa.GetType( 2 ) && t2 == sa.GetType( 3 ) ) p = new c
+#	define _SQBIND_CLASS_CTORT3( c, n, t1, t2, t3 )	; else if ( ( n + 1 ) == sa.GetParamCount() && t1 == sa.GetType( 2 ) && t2 == sa.GetType( 3 ) && t3 == sa.GetType( 4 ) ) p = new c
+#	define _SQBIND_CLASS_BIND_CTOR( c )				.staticFunc( &c::sq_construct_##c, oexT( "constructor" ) )
+
+#	define _SQBIND_DECLARE_INSTANCE( c, n )			DECLARE_INSTANCE_TYPE_NAME( c, n )
 
 #	if !defined( SQBIND_SQBIND )
 namespace sqbind { typedef SquirrelVM *VM; }

@@ -306,6 +306,7 @@ public:
 	/// Transport type
 	virtual oexCSTR v_get_transport_type() { return oexT( "raw" ); }
 	virtual oexCSTR v_get_transport_name() { return oexT( "socket" ); }
+	virtual CStr v_get_transport_properties() { return CStr(); }
 
 public:
 

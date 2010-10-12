@@ -169,6 +169,26 @@ stdString CSqMulti::str_uncompress()
 	return oex2std( oexUncompressStr( std2oex( m_val.str() ) ) );
 }
 
+stdString CSqMulti::str_base16_encode()
+{_STT();
+	return oex2std( oexBase16Encode( std2oex( m_val.str() ) ) );
+}
+
+stdString CSqMulti::str_base16_decode()
+{_STT();
+	return oex2std( oexBase16Decode( std2oex( m_val.str() ) ) );
+}
+
+stdString CSqMulti::str_base64_encode()
+{_STT();
+	return oex2std( oexBase64Encode( std2oex( m_val.str() ) ) );
+}
+
+stdString CSqMulti::str_base64_decode()
+{_STT();
+	return oex2std( oexBase64Decode( std2oex( m_val.str() ) ) );
+}
+
 _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, serialize )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, deserialize )
@@ -202,6 +222,10 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_htmldec )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_compress )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_uncompress )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base16_encode )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base16_decode )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base64_encode )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base64_decode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, unset )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, clear )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_key )
