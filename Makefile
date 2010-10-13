@@ -45,6 +45,13 @@ BUILDDIRS := $(BUILDDIRS) app/vidcap app/avi_scan \
 						  app/irr_wxtest \
 						  app/wx_webkit
 
+#-------------------------------------------------------------------
+# doxygen
+#-------------------------------------------------------------------
+ifdef DOX
+BUILDDIRS := $(BUILDDIRS) dox
+endif
+						  
 .PHONY all: $(BUILDDIRS)
 
 .PHONY $(BUILDDIRS) :

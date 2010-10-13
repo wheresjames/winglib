@@ -78,9 +78,6 @@
         add things like <b>#include &lt;Windows.h&gt;</b> or <b>#include &lt;string&gt;</b> to
         header files.  Isolate dependencies into the <b>os</b> folder.
 
-    -   Do *not* use tabs.  Use spaces only.  This library is meant to be cross
-        platform and all editors do not support tabs the same way.
-
     -   All functionality should be well documented using Doxygen.
 
     -   Hungarian notation would be nice.  Currently using

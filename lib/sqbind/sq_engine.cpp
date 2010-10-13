@@ -719,7 +719,6 @@ stdString CSqEngineExport::getlogbin( const stdString &sPath, const stdString &s
 	return q->getlogbin( sPath, sKey, nStart, nStop, nInterval, sExt );
 }
 
-
 int CSqEngineExport::resetlog( const stdString &sPath )
 {	CSqMsgQueue *q = queue();
 	if ( !q ) return 0;
