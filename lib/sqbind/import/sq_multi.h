@@ -104,7 +104,7 @@ namespace sqbind
 		CSqMulti( const t_Obj &s );
 
 		/// Deserializing constructor
-		CSqMulti( const oex::oexTCHAR *s, SQINT sz );
+		CSqMulti( const oex::oexTCHAR *s, SQINT sz = 0 );
 
 		/// Returns a reference to the underlying vector
 		t_List& list();
