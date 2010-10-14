@@ -19,7 +19,7 @@ function _init() : ( _g )
 		return 0;
 	} // end if
 
-	if ( !_g.socket.Bind( 12345 ) )
+	if ( !_g.socket.Bind( 123 ) )
 	{	_self.echo( "Bind() : " + _g.socket.getLastError() );
 		WaitKey();
 		return 0;
@@ -33,6 +33,7 @@ function _init() : ( _g )
 function _idle() : ( _g )
 {
 	local NTP_EPOCH = ( 86400 * ( 365 * 70 + 17 ) );
+	local BPMS = 4294967; // Beats per millisecond = 0x100000000 / 1000
 
 	// Wait for connect request
 	while ( _g.socket.WaitEvent( CSqSocket().EVT_READ, 1000 ) )
@@ -49,6 +50,7 @@ function _idle() : ( _g )
 		_g.socket.getPeerAddress( addr );
 		local server = addr.getDotAddress();
 		_self.echo( "Data read from client : " + server );
+		_self.echo( pkt.AsciiHexStr( 16, 16 ) );
 
 //		CSqFile().put_contents_bin( "sntp.in." + server + ".dat", pkt );
 
@@ -58,18 +60,23 @@ function _idle() : ( _g )
 		} // end if
 
 		// What is the clients time
-		local ts_client = _g.socket.ntohl( pkt.getUINT( 6 ) );
+		local ts_client = _g.socket.ntohl( pkt.getUINT( 10 ) );
+		local tms_client = _g.socket.ntohl( pkt.getUINT( 11 ) ) / BPMS;
 		ts_client = ( ts_client >= NTP_EPOCH ) ? ts_client -= NTP_EPOCH : 0;
-		local ts_server = _self.gmt_time();
 
-		local tm = CSqTime();
-		tm.SetUnixTime( ts_server );
-		_self.echo( "Server Time : " + tm.FormatTime( "%W, %B %D, %Y - %h:%m:%s %A" ) );
+		local tm = CSqTime(); tm.GetSystemTime();
+		local ts_server = tm.GetUnixTime();
+		local tms_server = tm.GetMilliSecond();
+		local tf_server = tms_server * BPMS;
+		_self.echo( "Server Time : " + tm.FormatTime( "%W, %B %D, %Y - %h:%m:%s.%l %A" ) );
+
 		tm.SetUnixTime( ts_client );
-		_self.echo( "Local  Time : " + tm.FormatTime( "%W, %B %D, %Y - %h:%m:%s %A" ) );
+		tm.SetMilliSecond( tms_client );
+		_self.echo( "Local  Time : " + tm.FormatTime( "%W, %B %D, %Y - %h:%m:%s.%l %A" ) );
 		_self.echo( "\nClient time is off by " + ( ts_client - ts_server ) + " seconds" );
 
-		pkt.Zero();
+		// Setup the response
+//		pkt.Zero();
 		pkt.setUsed( pkt_size );
 
 		local dw0 = 0;
@@ -81,20 +88,33 @@ function _idle() : ( _g )
 //		dw0 = dw0 | ( ( 0 & 0xff ) << 0 );	// Precision
 		pkt.setUINT( 0, _g.socket.htonl( dw0 ) );
 
-		// 3	= Reference Identifier
-		pkt.setUINT( 3, _g.socket.htonl( ts_server ) );
+		// Root delay
+		pkt.setUINT( 1, 0 );
+
+		// Root dispersion
+		pkt.setUINT( 2, 0 );
+
+		// 3	= Reference Identifier / we're nobody
+		pkt.setUINT( 3, 0 );
 
 		// 4-5	= Reference Timestamp 
 		pkt.setUINT( 4, _g.socket.htonl( ts_server + NTP_EPOCH ) );
+		pkt.setUINT( 5, _g.socket.htonl( tf_server ) );
 
 		// 6-7	= Originate Timestamp
-		if ( ts_client ) pkt.setUINT( 6, _g.socket.htonl( ts_client + NTP_EPOCH ) );
+		pkt.setUINT( 6, pkt.getUINT( 10 ) );
+		pkt.setUINT( 7, pkt.getUINT( 11 ) );
 
 		// 8-9	= Receive Timestamp
 		pkt.setUINT( 8, _g.socket.htonl( ts_server + NTP_EPOCH ) );
+		pkt.setUINT( 9, _g.socket.htonl( tf_server ) );
 
 		// 10-11= Transmit Timestamp
 		pkt.setUINT( 10, _g.socket.htonl( ts_server + NTP_EPOCH ) );
+		pkt.setUINT( 11, _g.socket.htonl( tf_server ) );
+
+		_self.echo( "reply" );
+		_self.echo( pkt.AsciiHexStr( 16, 16 ) );
 
 //		CSqFile().put_contents_bin( "sntp.out." + server + ".dat", pkt );
 

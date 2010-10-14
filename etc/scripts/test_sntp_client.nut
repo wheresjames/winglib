@@ -13,12 +13,12 @@ function WaitKey()
 function _init() : ( _g )
 {
 	local server = "time-a.nist.gov";
-//	local server = "nist1.columbiacountyga.gov";
 //	local server = "localhost";
 	
 	local port = 123;
 //	local port = 12345;
 	local NTP_EPOCH = ( 86400 * ( 365 * 70 + 17 ) );
+	local BPMS = 4294967; // Beats per millisecond = 0x100000000 / 1000
 
 	_self.echo( "\n Getting Time from : " + server + ":" + port +"\n" );
 
@@ -60,7 +60,10 @@ function _init() : ( _g )
 	pkt.setUINT( 0, socket.htonl( dw0 ) );
 
 	// Set current time
-	pkt.setUINT( 6, socket.htonl( _self.gmt_time() + NTP_EPOCH ) );
+	local tm = CSqTime(); tm.GetSystemTime();
+	local ts = socket.htonl( tm.GetUnixTime() + NTP_EPOCH );
+	local tms = socket.htonl( tm.GetMilliSecond() * BPMS );
+	pkt.setUINT( 10, ts ); pkt.setUINT( 11, tms );
 
 	// Write data
 	if ( !socket.SendToBin( pkt, 0 ) )
@@ -87,6 +90,13 @@ function _init() : ( _g )
 		return;
 	} // end if
 
+	// Verify it's a response to the packet we sent
+	if ( pkt.getUINT( 6 ) != ts || pkt.getUINT( 7 ) != tms )
+	{	_self.echo( "Invalid packet response or packets received out of order" );
+		WaitKey();
+		return;
+	} // end if
+
 	// Get timestamp from server packet
 	local ts_server = socket.ntohl( pkt.getUINT( 10 ) ) - NTP_EPOCH;
 	local ft = socket.ntohl( pkt.getUINT( 11 ) ) / 4295;
@@ -107,7 +117,6 @@ function _init() : ( _g )
 //		tm.SetSystemTime();
 
 //	CSqFile().put_contents_bin( "sntp." + server + ".dat", pkt );
-
 
 	_self.echo( "\n...done...\n" );
 
