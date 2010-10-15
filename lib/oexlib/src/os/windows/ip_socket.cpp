@@ -1242,7 +1242,7 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 	if ( SOCKET_ERROR == nRet || 0 > nRet )
 	{
 		// Is the socket blocking?
-		if ( !getWouldBlock() && WSAEWOULDBLOCK != m_uLastError )
+		if ( !getWouldBlock() && m_uLastError && WSAEWOULDBLOCK != m_uLastError )
 		{	m_uConnectState |= eCsError;
 			return 0;
 		} // end if
@@ -1254,7 +1254,7 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 		if ( x_puSent )
 			*x_puSent = 0;
 
-		// Error
+		// no bytes sent
 		return 0;
 
 	} // end if
