@@ -220,6 +220,9 @@ public:
 	/// Returns the script name
 	stdString get_name();
 
+	/// Returns the script or script filename
+	stdString get_script();
+
 	/// Get child scripts
 	stdString get_children( const stdString &sPath );
 
@@ -355,6 +358,9 @@ public:
 	/// Executes shell command
 	int shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
 
+	/// Attempts to find the squirrel interpreter and execute the specified params
+	int sqexe( const stdString &sParams, const stdString &sDir );
+
 	/// Installs a service
 	int service_install( const stdString &sName, const stdString &sDesc, const stdString &sExe, int bAutoRestart );
 
@@ -467,7 +473,7 @@ protected:
 	stdString           m_sRoot;
 
 	/// Name of the script
-	stdString					m_sScriptName;
+	stdString			m_sScriptName;
 
 };
 

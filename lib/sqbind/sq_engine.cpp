@@ -191,6 +191,11 @@ stdString CSqEngineExport::get_name()
 	return m_sScriptName;
 }
 
+stdString CSqEngineExport::get_script()
+{_STT();
+	return m_sScript;
+}
+
 stdString CSqEngineExport::path( const stdString &sPath )
 {_STT();
 	return OnPath( sPath );
@@ -755,7 +760,6 @@ int CSqEngineExport::service_restart( const stdString &sName )
 	return oex::os::CServiceImpl::Restart( sName.c_str() );
 }
 
-
 CSqMulti CSqEngineExport::get_system_drive_info( const stdString &sDrive )
 {_STT();
 	CSqMulti m;
@@ -899,6 +903,41 @@ stdString CSqEngineExport::execute4( int nRet, const stdString &sPath, const std
 	stdString sRet;
 	q->execute( &sRet, sPath, sFunction, sP1, sP2, sP3, sP4 );
 	return sRet;
+}
+
+int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )
+{_STT();
+
+	// Ensure a valid script was supplied
+	if ( !sParams.length() )
+		return -1;
+
+	// What's the name of the squirrel exe?
+	stdString sFull, sExeName = oex2std( oex::CStr( oexT( "sqrl" ) ).DecorateName( oex::oexTRUE, oex::oexFALSE ) );
+
+	if ( oexExists( path( sExeName ).c_str() ) )
+		sFull = path( sExeName );
+	else if ( oexExists( root( sExeName ).c_str() ) )
+		sFull = root( sExeName );
+	else
+	{
+		stdString sRoot = reg_get_str( oexT( "HKLM" ), oexT( "Software\\SquirrelScript" ), oexT( "Install_Dir" ) );
+		if ( sRoot.length() && oexExists( build_path( sRoot, sExeName ).c_str() ) )
+			sFull = build_path( sRoot, sExeName );
+		else
+		{	sRoot = reg_get_str( oexT( "HKLM" ), oexT( "Software\\OSVSquirrelScript" ), oexT( "Install_Dir" ) );
+			if ( sRoot.length() && oexExists( build_path( sRoot, sExeName ).c_str() ) )
+				sFull = build_path( sRoot, sExeName );
+		} // end else
+
+	} // end else
+
+	// Did we find the file?
+	if ( !sFull.length() )
+		return -2;
+
+	// Let's try and execute
+	return oexShell( sFull.c_str(), sParams.c_str(), sDir.length() ? sDir.c_str() : path( stdString() ).c_str() );
 }
 
 void CSqEngineExport::sleep( int nMsTime )
@@ -1180,6 +1219,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, resetlog )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sqexe )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_install )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_remove )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_start )
@@ -1251,6 +1291,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, uncompress )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_resource )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_name )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_script )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_binshare )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_binshare )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_binshare )

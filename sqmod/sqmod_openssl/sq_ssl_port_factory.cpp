@@ -47,6 +47,7 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
 	// Set socket handle
 	if ( !SSL_set_fd( m_ssl, (int)(long)GetSocketHandle() ) )
 	{	m_sLastError = ERR_error_string( ERR_get_error(), 0 );
+		OnClose();
 //		oexSHOW( m_sLastError.c_str() );
 		return oex::oexFALSE;
 	} // end if
@@ -60,7 +61,9 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
 		{	ll.Unlock();
 			oexSleep( 15 );
 			if ( !ll.Lock( m_lock ) )
+			{	OnClose();
 				return oex::oexFALSE;
+			} // end if
 		} // end if
 
 		// SSL accept
@@ -74,6 +77,7 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
 	if ( err )
 	{	m_sLastError = sqbind::oex2std( oexMks( oexT( "SSL_accept() failed : " ), err ) );
 //		oexSHOW( m_sLastError.c_str() );
+		OnClose();
 		return oex::oexFALSE;
 	} // end if
 
@@ -84,16 +88,17 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
 	// Get peer certificate
 	m_cert = SSL_get_peer_certificate( m_ssl );
 	pb[ oexT( "cert_valid" ) ] = ( X509_V_OK == lVerify ) && m_cert;
-	if ( m_cert )
+	
+	// +++ Fill in certificate information
+/*	if ( m_cert )
 	{	X509_NAME *pName = X509_get_subject_name( m_cert );
 		if ( pName )
 			for ( int i = 0; i < X509_NAME_entry_count( pName ); i++ )
 			{	X509_NAME_ENTRY *e = X509_NAME_get_entry( pName, i );
 				
 			} // end for
-
 	} // end if
-
+*/
 	// Set port properties string
 	m_sProperties = oex::CParser::Serialize( pb );
 
