@@ -218,6 +218,11 @@ int process(int argc, char* argv[])
 		return 0;					  
 	} // end if
 
+	else if ( pb.IsKey( oexT( "build" ) ) )
+	{	oexEcho( oexBuild().Ptr() );		
+		return 0;					  
+	} // end if
+
 	// File extensions to compile
 	oex::CStrList lstCmp = oex::CParser::Split( pb[ oexT( "c" ) ].ToString(), oexT( ";" ) );
 
@@ -238,6 +243,7 @@ int process(int argc, char* argv[])
 			fInc.Write( CStr8() << oexNL8
 				"#define OEX_RESOURCES 1" oexNL8
 				"#define OEX_RES_VERSION \"" << oexStrToMb( oexVersion() ) << "\"" oexNL8
+				"#define OEX_RES_BUILD \"" << oexStrToMb( oexBuild() ) << "\"" oexNL8
 				"#if defined( OEX_NO_RESOURCES )" oexNL8
 				"#\terror 'oexres.h' MUST be included BEFORE 'oexlib.h'" oexNL8
 				"#endif" oexNL8

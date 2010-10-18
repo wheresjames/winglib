@@ -201,6 +201,11 @@ int process(int argc, char* argv[])
 		return 0;					  
 	} // end if
 
+	else if ( pb.IsKey( oexT( "build" ) ) )
+	{	oexEcho( oexBuild().Ptr() );		
+		return 0;					  
+	} // end if
+
 	// Was an entire directory specified?
 	if ( pb.IsKey( oexT( "d" ) ) )
 	{

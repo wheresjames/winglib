@@ -138,6 +138,14 @@ int run(int argc, char* argv[])
 	    oexUNINIT();
 		return 0;					  
 	} // end if
+
+	// Check for version request
+	else if ( pbCmdLine.IsKey( oexT( "build" ) ) )
+	{	oexEcho( oexBuild().Ptr() );		
+		pbCmdLine.Destroy();
+	    oexUNINIT();
+		return 0;					  
+	} // end if
 	
 	// Enable crash reporting
 	_STT_SET_NAME( oexT( "Main Thread" ) );

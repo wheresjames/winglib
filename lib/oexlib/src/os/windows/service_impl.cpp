@@ -268,7 +268,15 @@ int CServiceImpl::OnRunService( int argc, const char** argv, oexCSTR pName, oexC
 
 	if ( CommandLine().IsKey( oexT( "version" ) ) )
 	{
-		oexEcho( oexVersion().Ptr() );
+		oexEcho( oexVersionPtr() );
+
+		return 0;
+
+	} // end if
+
+	if ( CommandLine().IsKey( oexT( "build" ) ) )
+	{
+		oexEcho( oexBuildPtr() );
 
 		return 0;
 
@@ -819,7 +827,7 @@ oexINT CServiceImpl::RegisterServer( oexCSTR pID, oexCSTR pCLSID,
 
 	if ( ERROR_SUCCESS != REG_SetValue( HKEY_CLASSES_ROOT, 
 										( CStr() << sKey << oexT( "\\Version" ) ).Ptr(), 
-										NULL, oexVersion().Ptr() ) )
+										NULL, oexVersionPtr() ) )
 		return -6;
 
 	if ( pThreadingModel )

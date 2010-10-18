@@ -181,7 +181,12 @@ int CSqEngineExport::is_key()
 }
 
 
-stdString CSqEngineExport::get_build_version()
+stdString CSqEngineExport::get_build()
+{_STT();
+	return oex2std( oexBuild() );
+}
+
+stdString CSqEngineExport::get_version()
 {_STT();
 	return oex2std( oexVersion() );
 }
@@ -1185,7 +1190,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, echo )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_key )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_key )	
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_build_version )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_build )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_version )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, flush )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include )

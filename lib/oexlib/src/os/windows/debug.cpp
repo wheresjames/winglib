@@ -328,6 +328,7 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 	CStr sSt = oexNL;
 	sSt <<                oexT( "Module            : " ) << oexGetModuleFileName() << oexNL;
 	sSt <<                oexT( "Version           : " ) << oexVersion() << oexNL;
+	sSt <<                oexT( "Build             : " ) << oexBuild() << oexNL;
 	sSt <<		  oexFmt( oexT( "Current Thread    : %d (0x%x)" oexNL8 ), uCurrentThreadId, uCurrentThreadId );
 	sSt << st.FormatTime( oexT( "Current Time      : %Y/%c/%d  %g:%m:%s GMT" oexNL8 ) );
 	sSt <<        oexFmt( oexT( "Stack Trace Slots : Using %d of %d" oexNL8 ), pSt->getUsedSlots(), pSt->getTotalSlots() );

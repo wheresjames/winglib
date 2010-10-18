@@ -64,6 +64,13 @@ int main(int argc, char* argv[])
 		return 0;					  
 	} // end if
 	
+	else if ( pbCmdLine.IsKey( oexT( "build" ) ) )
+	{	oexEcho( oexBuild().Ptr() );		
+		pbCmdLine.Destroy();
+	    oexUNINIT();
+		return 0;					  
+	} // end if
+	
 	// Enable crash reporting
 	_STT_SET_NAME( oexT( "Main Thread" ) );
 	oexEnableCrashReporting( oexNULL, oexT( "logs" ) );

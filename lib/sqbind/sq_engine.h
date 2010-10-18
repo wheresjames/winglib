@@ -214,8 +214,11 @@ public:
 	/// Returns boot count
 	unsigned int ticks();
 
-	/// Returns the build version
-	stdString get_build_version();
+	/// Returns the version
+	stdString get_version();
+
+	/// Returns the build
+	stdString get_build();
 
 	/// Returns the script name
 	stdString get_name();
