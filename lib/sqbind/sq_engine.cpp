@@ -930,7 +930,7 @@ int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )
 		if ( sRoot.length() && oexExists( build_path( sRoot, sExeName ).c_str() ) )
 			sFull = build_path( sRoot, sExeName );
 		else
-		{	sRoot = reg_get_str( oexT( "HKLM" ), oexT( "Software\\OSVSquirrelScript" ), oexT( "Install_Dir" ) );
+		{	sRoot = reg_get_str( oexT( "HKLM" ), oexT( "Software\\WinglibScriptEngine" ), oexT( "Install_Dir" ) );
 			if ( sRoot.length() && oexExists( build_path( sRoot, sExeName ).c_str() ) )
 				sFull = build_path( sRoot, sExeName );
 		} // end else
@@ -1827,7 +1827,7 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 		if ( !sFull.Length() )
 		{
 #	if defined( __MINGW32__ )
-			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\OSVSquirrelScript" ), oexT( "Install_Dir" ) );
+			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\WinglibScriptEngine" ), oexT( "Install_Dir" ) );
 #	else
 			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\SquirrelScript" ), oexT( "Install_Dir" ) );
 #	endif
