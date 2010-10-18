@@ -12,5 +12,5 @@ function UnregisterFileExtension( ext, id )
 	_self.reg_del_key( "HKCR", id, 1 );
 }
 
-//RegisterFileExtension( ".nut", "open", "SquirrelEngine.Script", "Squirrel Script", _self.module_name() );
-UnregisterFileExtension( ".nut", "SquirrelEngine.Script" );
+RegisterFileExtension( ".nut", "open", "WinglibEngine.Script", "Winglib Script", _self.module_name() );
+//UnregisterFileExtension( ".nut", "WinglibEngine.Script" );
