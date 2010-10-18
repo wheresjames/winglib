@@ -69,22 +69,6 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_l
 	else if ( eAccessWrite & x_eAccess ) 
 		dwAccess = PAGE_READWRITE, dwMemAccess = FILE_MAP_WRITE;
 
-	HANDLE hFileHandle = oexNULL;
-	if ( x_pFile )
-	{	hFileHandle = CreateFile( x_pFile, GENERIC_READ | GENERIC_WRITE,
-									 FILE_SHARE_READ | FILE_SHARE_WRITE,
-									 NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
-		if ( !oexVERIFY( INVALID_HANDLE_VALUE != hFileHandle ) ) 
-			return c_Failed;
-
-		if ( !x_llSize )
-		{	DWORD dwHi, dwLo = GetFileSize( hFileHandle, &dwHi );
-			x_llSize = (oexINT64)dwLo | ( (oexINT64)dwHi << 32 );
-		} // end if
-
-	} // end if
-	else hFileHandle = (HANDLE)0xffffffff;
-
 	// Allow access
 	SECURITY_ATTRIBUTES  sa, *pSa = NULL;
 	sa.nLength = sizeof( SECURITY_ATTRIBUTES );
@@ -94,6 +78,25 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_l
 		 && InitializeSecurityDescriptor( (SECURITY_DESCRIPTOR*)sa.lpSecurityDescriptor, SECURITY_DESCRIPTOR_REVISION )
 		 && SetSecurityDescriptorDacl( (SECURITY_DESCRIPTOR*)sa.lpSecurityDescriptor, TRUE, (PACL)NULL, FALSE ) )
 		pSa = &sa;
+
+	HANDLE hFileHandle = oexNULL;
+	if ( x_pFile )
+	{	hFileHandle = CreateFile( x_pFile, GENERIC_READ | GENERIC_WRITE,
+									 FILE_SHARE_READ | FILE_SHARE_WRITE,
+									 pSa, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
+		if ( !oexVERIFY( INVALID_HANDLE_VALUE != hFileHandle ) ) 
+		{	if ( pSa )
+				LocalFree( pSa->lpSecurityDescriptor );
+			return c_Failed;
+		} // end if
+
+		if ( !x_llSize )
+		{	DWORD dwHi, dwLo = GetFileSize( hFileHandle, &dwHi );
+			x_llSize = (oexINT64)dwLo | ( (oexINT64)dwHi << 32 );
+		} // end if
+
+	} // end if
+	else hFileHandle = (HANDLE)0xffffffff;
 
 	// Create the file mapping
 	HANDLE hFile = CreateFileMapping( hFileHandle, pSa, dwAccess, 

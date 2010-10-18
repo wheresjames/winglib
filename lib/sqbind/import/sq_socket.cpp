@@ -325,6 +325,7 @@ sqbind::stdString CSqSocket::Read( int nMax )
 {_STT();
 	oex::CStr s = oexMbToStr( m_socket->Recv( nMax ) );
 	return sqbind::stdString( s.Ptr(), s.Length() );
+
 }
 
 int CSqSocket::Write( const sqbind::stdString &s, int nMax )

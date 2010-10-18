@@ -79,7 +79,20 @@ CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, o
 	if ( 0 != ( x_eShare & eShareRead ) ) dwShare |= FILE_SHARE_READ;
 	if ( 0 != ( x_eShare & eShareWrite ) ) dwShare |= FILE_SHARE_WRITE;
 
-	t_HFILE hFile = ::CreateFile( x_pFile, dwAccess, dwShare, NULL, dwDisposition, x_uFlags, NULL );
+	// Allow access
+	SECURITY_ATTRIBUTES  sa, *pSa = NULL;
+	sa.nLength = sizeof( SECURITY_ATTRIBUTES );
+	sa.bInheritHandle = TRUE;
+	sa.lpSecurityDescriptor = (SECURITY_DESCRIPTOR*)LocalAlloc(LPTR,SECURITY_DESCRIPTOR_MIN_LENGTH);
+	if ( sa.lpSecurityDescriptor
+		 && InitializeSecurityDescriptor( (SECURITY_DESCRIPTOR*)sa.lpSecurityDescriptor, SECURITY_DESCRIPTOR_REVISION )
+		 && SetSecurityDescriptorDacl( (SECURITY_DESCRIPTOR*)sa.lpSecurityDescriptor, TRUE, (PACL)NULL, FALSE ) )
+		pSa = &sa;
+
+	t_HFILE hFile = ::CreateFile( x_pFile, dwAccess, dwShare, pSa, dwDisposition, x_uFlags, NULL );
+
+	if ( pSa )
+		LocalFree( pSa->lpSecurityDescriptor );
 
 	if ( x_pnError )
 	{	if ( INVALID_HANDLE_VALUE == hFile )

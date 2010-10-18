@@ -309,7 +309,7 @@ public:
 	static oexBOOL IsKeyData( CStr x_sRoot, CStr x_sHash, t_time x_tTime, t_time tLogBase );
 
 	/// Opens / Creates specified database files
-	static oexBOOL OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, t_time x_tTime, CFile *x_pIdx, CFile *x_pData, t_time tLogBase, t_time tIndexStep );
+	static oexBOOL OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, t_time x_tTime, CFile *x_pIdx, CFile *x_pData, t_time tLogBase, t_time tIndexStep, oexBOOL &bNew );
 
 	/// Finds the value for the specified time in an open database
 	static oexBOOL FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, t_time x_tInterval, oexINT x_nDataType, oexINT x_nMethod, t_time tLogBase, t_time tIndexStep );

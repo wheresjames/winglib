@@ -73,10 +73,10 @@ void CDataLog::SetLogParams( t_time tBase, t_time tStep )
 		m_tLogBase = tBase;
 	if ( 0 < tStep )
 	{	m_tIndexStep = tStep;
-		m_tMaxValid = tStep >> 1;
-		if ( !m_tMaxValid ) 
-			m_tMaxValid = 1;
+		m_tMaxValid = tStep >> 2;
 	} // end if
+	if ( !m_tMaxValid ) 
+		m_tMaxValid = 1;
 }
 
 oexBOOL CDataLog::SetRoot( oexCSTR x_pRoot )
@@ -271,9 +271,14 @@ oexBOOL CDataLog::FlushBuffer( oexINT x_nKey, SValueIndex *pVi, oexCPVOID pBuf, 
 		pVi->uTime = oexGetUnixTime();
 
 	// Open the database
-	CFile fData;
-	if ( !OpenDb( oexTRUE, m_sRoot, oexT( "" ), pVi->uTime, oexNULL, &fData, m_tLogBase, m_tIndexStep ) )
+	CFile fData; oexBOOL bNewDb = oexFALSE;
+	if ( !OpenDb( oexTRUE, m_sRoot, oexT( "" ), pVi->uTime, oexNULL, &fData, m_tLogBase, m_tIndexStep, bNewDb ) )
 		return oexFALSE;
+
+	// Invalidate timers if new database
+	if ( bNewDb )
+		for( oexINT i = 0; i < eMaxKeys; i++ )
+			if ( m_pLogs[ i ] ) m_pLogs[ i ]->valid = 0;
 
 	// Where will this block start?
 	CFile::t_size pos = (oexUINT)fData.GetPtrPos();
@@ -315,7 +320,7 @@ oexBOOL CDataLog::FlushBuffer( oexINT x_nKey, SValueIndex *pVi, oexCPVOID pBuf, 
 
 	// Update the index
 	CFile fIdx;
-	if ( OpenDb( oexTRUE, m_sRoot, m_pLogs[ x_nKey ]->sHash, pVi->uTime, &fIdx, oexNULL, m_tLogBase, m_tIndexStep ) )
+	if ( OpenDb( oexTRUE, m_sRoot, m_pLogs[ x_nKey ]->sHash, pVi->uTime, &fIdx, oexNULL, m_tLogBase, m_tIndexStep, bNewDb ) )
 	{
 		t_time tI = ( pVi->uTime % m_tLogBase ) / m_tIndexStep;
 
@@ -350,9 +355,14 @@ oexBOOL CDataLog::Flush( t_time x_tTime )
 		x_tTime = oexGetUnixTime();
 
 	// Open the database
-	CFile fData;
-	if ( !OpenDb( oexTRUE, m_sRoot, oexT( "" ), x_tTime, oexNULL, &fData, m_tLogBase, m_tIndexStep ) )
+	CFile fData; oexBOOL bNewDb = oexFALSE;
+	if ( !OpenDb( oexTRUE, m_sRoot, oexT( "" ), x_tTime, oexNULL, &fData, m_tLogBase, m_tIndexStep, bNewDb ) )
 		return oexFALSE;
+
+	// Invalidate timers if new database
+	if ( bNewDb )
+		for( oexINT i = 0; i < eMaxKeys; i++ )
+			if ( m_pLogs[ i ] ) m_pLogs[ i ]->valid = 0;
 
 	// Flush data to disk
 	for( oexINT i = 0; i < eMaxKeys; i++ )
@@ -438,8 +448,8 @@ oexBOOL CDataLog::Flush( t_time x_tTime )
 			if ( fData.Write( m_pLogs[ i ]->bin.Ptr(), m_pLogs[ i ]->bin.getUsed() ) )
 			{
 				// Update the index
-				CFile fIdx;
-				if ( OpenDb( oexTRUE, m_sRoot, m_pLogs[ i ]->sHash, x_tTime, &fIdx, oexNULL, m_tLogBase, m_tIndexStep ) )
+				CFile fIdx; oexBOOL bNewDb = oexFALSE;
+				if ( OpenDb( oexTRUE, m_sRoot, m_pLogs[ i ]->sHash, x_tTime, &fIdx, oexNULL, m_tLogBase, m_tIndexStep, bNewDb ) )
 				{
 					// While we have blocks
 					CFile::t_size ex = 0;
@@ -533,8 +543,12 @@ oexBOOL CDataLog::IsKeyData( CStr x_sRoot, CStr x_sHash, t_time x_tTime, t_time 
 	return oexTRUE;
 }
 
-oexBOOL CDataLog::OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, t_time x_tTime, CFile *x_pIdx, CFile *x_pData, t_time uLogBase, t_time uIndexStep )
+oexBOOL CDataLog::OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, t_time x_tTime, CFile *x_pIdx, CFile *x_pData, t_time uLogBase, t_time uIndexStep, oexBOOL &bNew )
 {_STT();
+
+	// Assume existing
+	bNew = oexFALSE;
+
 	// Build root to data based on starting timestamp
 	x_sRoot.BuildPath( x_tTime / uLogBase );
 	if ( !oexExists( x_sRoot.Ptr() ) )
@@ -561,7 +575,7 @@ oexBOOL CDataLog::OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, t_time 
 
 		// Initialize?
 		if ( x_bCreate && !bExists )
-			x_pData->Write( CStr8( "Hey, you, get off of my cloud." ) );
+			bNew = oexTRUE, x_pData->Write( CStr8( "Hey, you, get off of my cloud." ) );
 
 		// Move to the end of the file
 		x_pData->SetPtrPosEnd( 0 );
@@ -585,7 +599,8 @@ oexBOOL CDataLog::OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, t_time 
 
 		// Initialize index file if needed
 		if ( x_bCreate && !bExists )
-		{	CFile::t_size uOffset = 0;
+		{	bNew = oexTRUE;
+			CFile::t_size uOffset = 0;
 			for ( oexUINT i = 0; i < uLogBase; i += uIndexStep )
 				x_pIdx->Write( &uOffset, sizeof( uOffset ) );
 		} // end if
@@ -610,7 +625,8 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 		x_it.uI = oexMAXLONG;
 
 		// Open the database containing data for this time
-		if ( !OpenDb( oexFALSE, x_it.sRoot, x_it.sHash, x_tTime, &x_it.fIdx, &x_it.fData, tLogBase, tIndexStep ) )
+		oexBOOL bNewDb = oexFALSE;
+		if ( !OpenDb( oexFALSE, x_it.sRoot, x_it.sHash, x_tTime, &x_it.fIdx, &x_it.fData, tLogBase, tIndexStep, bNewDb ) )
 			return oexFALSE;
 
 	} // end if

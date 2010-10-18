@@ -506,7 +506,7 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 	// Get the image buffer info
 	gdImagePtr graph = (gdImagePtr)GDC_image;
 	if ( !oexCHECK_PTR( graph ) || !oexCHECK_PTR( graph->pixels ) )
-	{	oexERROR( 0, oexT( "Inavlid image pointer" ) );
+	{	oexERROR( 0, oexT( "Invalid image pointer" ) );
 		GDC_image = NULL;
 		GDC_SetColor = NULL;
 		return oexT( "" );

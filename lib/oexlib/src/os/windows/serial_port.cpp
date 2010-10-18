@@ -130,14 +130,27 @@ oexBOOL CSerialPort::Open( oexCSTR x_pPort )
 	if ( !x_pPort || !*x_pPort )
 		return oexFALSE; 
 
+	// Allow access
+	SECURITY_ATTRIBUTES  sa, *pSa = NULL;
+	sa.nLength = sizeof( SECURITY_ATTRIBUTES );
+	sa.bInheritHandle = TRUE;
+	sa.lpSecurityDescriptor = (SECURITY_DESCRIPTOR*)LocalAlloc(LPTR,SECURITY_DESCRIPTOR_MIN_LENGTH);
+	if ( sa.lpSecurityDescriptor
+		 && InitializeSecurityDescriptor( (SECURITY_DESCRIPTOR*)sa.lpSecurityDescriptor, SECURITY_DESCRIPTOR_REVISION )
+		 && SetSecurityDescriptorDacl( (SECURITY_DESCRIPTOR*)sa.lpSecurityDescriptor, TRUE, (PACL)NULL, FALSE ) )
+		pSa = &sa;
+
 	// Open the port
 	pS->hPort = CreateFile(	x_pPort, 
 							GENERIC_READ | GENERIC_WRITE,
 							0,
-							NULL,
+							pSa,
 							OPEN_EXISTING,
 							FILE_ATTRIBUTE_NORMAL,
 							NULL );
+
+	if ( pSa )
+		LocalFree( pSa->lpSecurityDescriptor );
 
 	if ( INVALID_HANDLE_VALUE == pS->hPort )
 	{	m_nError = GetLastError();
