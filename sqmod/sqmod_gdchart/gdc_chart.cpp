@@ -87,8 +87,15 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 	if ( !x_pImg )
 		return oexT( "" );
 
-	sqbind::CSqMulti mParams( x_sParams.c_str() );
-	sqbind::CSqMulti mData( x_sData.c_str() );
+	sqbind::CSqMulti mParams( x_sParams );
+	sqbind::CSqMulti mData( x_sData );
+
+	// Get image width / height
+	int nWidth = mParams[ oexT( "width" ) ].toint();
+	int nHeight = mParams[ oexT( "height" ) ].toint();
+	int nType = mParams[ oexT( "type" ) ].toint();
+	if ( 0 >= nWidth || 0 >= nHeight )
+		return oexT( "" );
 
 	int nDataPts = 0;
 	oex::TMem< oex::oexCSTR > memLabels;
@@ -192,33 +199,25 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 	switch ( nDimensions )
 	{
 	case 1:
-		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
-	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
-				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+		out_graph( nWidth, nHeight, 0, (GDC_CHART_T)nType,
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
 				   memPts[ 0 ].Ptr(), memPts[ 1 ].Ptr() );
 		break;
 
 	case 2:
-		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
-	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
-				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+		out_graph( nWidth, nHeight, 0, (GDC_CHART_T)nType,
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
 				   memPts[ 0 ].Ptr(), memPts[ 1 ].Ptr(), memPts[ 2 ].Ptr() );
 		break;
 
 	case 3:
-		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
-	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
-				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+		out_graph( nWidth, nHeight, 0, (GDC_CHART_T)nType,
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
 				   memPts[ 0 ].Ptr(), memPts[ 1 ].Ptr(), memPts[ 2 ].Ptr(), memPts[ 3 ].Ptr() );
 		break;
 
 	case 4:
-		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
-	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
-				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+		out_graph( nWidth, nHeight, 0, (GDC_CHART_T)nType,
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
 				   memPts[ 0 ].Ptr(), memPts[ 1 ].Ptr(), memPts[ 2 ].Ptr(), memPts[ 3 ].Ptr(),
 				   memPts[ 4 ].Ptr() );
@@ -275,10 +274,11 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 
 	// Save image information
 	sqbind::CSqMulti mImg;
-	mImg[ oexT( "type" ) ].set( x_sType.c_str() );
-	mImg[ oexT( "width" ) ].set( oexMks( graph->sx ).Ptr() );
-	mImg[ oexT( "height" ) ].set( oexMks( graph->sy ).Ptr() );
-	mImg[ oexT( "size" ) ].set( oexMks( lSize ).Ptr() );
+	mImg[ oexT( "type" ) ] = x_sType;
+	mImg[ oexT( "width" ) ] = sqbind::oex2std( oexMks( graph->sx ) );
+	mImg[ oexT( "height" ) ] = sqbind::oex2std( oexMks( graph->sy ) );
+	mImg[ oexT( "size" ) ] = sqbind::oex2std( oexMks( lSize ) );
+
 
 	// Lose the image buffer
 	gdImageDestroy( graph );
@@ -296,7 +296,14 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 	if ( !x_pImg || !x_mData )
 		return oexT( "" );
 
-	sqbind::CSqMulti mParams( x_sParams.c_str() );
+	sqbind::CSqMulti mParams( x_sParams );
+
+	// Get image width / height
+	int nWidth = mParams[ oexT( "width" ) ].toint();
+	int nHeight = mParams[ oexT( "height" ) ].toint();
+	int nType = mParams[ oexT( "type" ) ].toint();
+	if ( 0 >= nWidth || 0 >= nHeight )
+		return oexT( "" );
 
 	int nDataPts = 0;
 	oex::TMem< oex::oexCSTR > memLabels;
@@ -423,72 +430,56 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 	switch ( nDimensions )
 	{
 	case 1:
-		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
-	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
-				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+		out_graph( nWidth, nHeight, 0, (GDC_CHART_T)nType,
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
 				   bin[ 0 ].Ptr(),
 				   bin[ 0 ].Ptr() );
 		break;
 
 	case 2:
-		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
-	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
-				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+		out_graph( nWidth, nHeight, 0, (GDC_CHART_T)nType,
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
 				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(),
 				   bin[ 0 ].Ptr() );
 		break;
 
 	case 3:
-		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
-	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
-				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+		out_graph( nWidth, nHeight, 0, (GDC_CHART_T)nType,
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
 				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(),
 				   bin[ 0 ].Ptr() );
 		break;
 
 	case 4:
-		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
-	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
-				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+		out_graph( nWidth, nHeight, 0, (GDC_CHART_T)nType,
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
 				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), bin[ 3 ].Ptr(),
 				   bin[ 0 ].Ptr() );
 		break;
 
 	case 5:
-		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
-	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
-				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+		out_graph( nWidth, nHeight, 0, (GDC_CHART_T)nType,
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
 				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), bin[ 3 ].Ptr(),
 				   bin[ 4 ].Ptr(), bin[ 0 ].Ptr() );
 		break;
 
 	case 6:
-		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
-	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
-				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+		out_graph( nWidth, nHeight, 0, (GDC_CHART_T)nType,
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
 				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), bin[ 3 ].Ptr(),
 				   bin[ 4 ].Ptr(), bin[ 5 ].Ptr(), bin[ 0 ].Ptr() );
 		break;
 
 	case 7:
-		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
-	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
-				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+		out_graph( nWidth, nHeight, 0, (GDC_CHART_T)nType,
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
 				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), bin[ 3 ].Ptr(),
 				   bin[ 4 ].Ptr(), bin[ 5 ].Ptr(), bin[ 6 ].Ptr(), bin[ 0 ].Ptr() );
 		break;
 
 	case 8:
-		out_graph( oexStrToLong( mParams[ oexT( "width" ) ].str().c_str() ),
-	   			   oexStrToLong( mParams[ oexT( "height" ) ].str().c_str() ),
-				   0, (GDC_CHART_T)oexStrToLong( mParams[ oexT( "type" ) ].str().c_str() ),
+		out_graph( nWidth, nHeight, 0, (GDC_CHART_T)nType,
 				   nDataPts, (char**)memLabels.Ptr(), nDimensions,
 				   bin[ 0 ].Ptr(), bin[ 1 ].Ptr(), bin[ 2 ].Ptr(), bin[ 3 ].Ptr(),
 				   bin[ 4 ].Ptr(), bin[ 5 ].Ptr(), bin[ 6 ].Ptr(), bin[ 7 ].Ptr(), bin[ 0 ].Ptr() );
@@ -545,10 +536,10 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 
 	// Save image information
 	sqbind::CSqMulti mImg;
-	mImg[ oexT( "type" ) ].set( x_sType.c_str() );
-	mImg[ oexT( "width" ) ].set( oexMks( graph->sx ).Ptr() );
-	mImg[ oexT( "height" ) ].set( oexMks( graph->sy ).Ptr() );
-	mImg[ oexT( "size" ) ].set( oexMks( lSize ).Ptr() );
+	mImg[ oexT( "type" ) ] = x_sType;
+	mImg[ oexT( "width" ) ] = sqbind::oex2std( oexMks( graph->sx ) );
+	mImg[ oexT( "height" ) ] = sqbind::oex2std( oexMks( graph->sy ) );
+	mImg[ oexT( "size" ) ] = sqbind::oex2std( oexMks( lSize ) );
 
 	// Lose the image buffer
 	gdImageDestroy( graph );

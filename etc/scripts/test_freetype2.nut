@@ -59,6 +59,9 @@ function _init() : ( _g )
 
 	_self.echo( "\n=== DONE ===\n" );
 
+	_self.echo( "\n...press any key...\n" );
+	_self.get_key();
+
 	return 1;
 }
 

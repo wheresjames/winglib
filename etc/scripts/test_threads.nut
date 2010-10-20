@@ -24,7 +24,7 @@ function _init() : ( _g )
 	// Force script to exit with thread 2 call still in the queue
 	_self.echo( "Main : CallMe() returned : " + _self.execute( 1, "/1", "CallMe" ) );
 
-	_self.echo( "Now you have to wait 60 seconds for Thread 2 to time out.  It shouldn't crash" );
+	_self.echo( "Now you have to wait for Thread 2 to time out.  It shouldn't crash" );
 
 }
 
