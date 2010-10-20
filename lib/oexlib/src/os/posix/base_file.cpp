@@ -447,11 +447,11 @@ oexBOOL CBaseFile::Copy( oexCSTR x_pOld, oexCSTR x_pNew )
 
 	// Source file
 	int fSrc = open( oexStrToMbPtr( x_pOld ), O_RDONLY, 0777 );
-	if ( -1 == fd )
+	if ( -1 == fSrc )
 		return oexFALSE;
 
 	int fDst = open( oexStrToMbPtr( x_pOld ), O_CREAT | O_WRONLY, 0777 );
-	if ( -1 == fd )
+	if ( -1 == fDst )
 	{	close( fSrc );
 		return oexFALSE;
 	} // end if
