@@ -101,7 +101,7 @@ int CServiceImpl::OnRunService( int argc, const char** argv, oexCSTR pName, oexC
 
 	if ( CommandLine().IsKey( oexT( "install" ) ) )
 	{
-		int nErr = InstallService( pName, pDesc, getAutoRestart() );
+		int nErr = InstallService( pName, pDesc, , getAutoRestart() );
 		if ( 0 > nErr )
 		{	oexEcho( oexT( "Error installing service" ) );
 			return nErr;
@@ -168,11 +168,12 @@ void CServiceImpl::OnServiceHandler( unsigned int fdwControl )
 	return; 
 }
 
-/// +++ Figure out Linux deamon install / uninstall 
+/// +++ Figure out Linux init.d deamon install / uninstall 
 
-int CServiceImpl::InstallService( oexCSTR pName, oexCSTR pDesc, oexBOOL bAutoRestart )
+int CServiceImpl::InstallService( oexCSTR pName, oexCSTR pDesc, oexCSTR pExe, oexBOOL bAutoRestart )
 {
-	if ( !pName || !*pName )
+	// Sanity check
+	if ( !pName || !*pName || !pExe || !*pExe )
 	{	oexERROR( 0, oexT( "Invalid Parameter" ) );
 		return -1;
 	} // end if
