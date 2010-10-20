@@ -101,7 +101,7 @@ int CServiceImpl::OnRunService( int argc, const char** argv, oexCSTR pName, oexC
 
 	if ( CommandLine().IsKey( oexT( "install" ) ) )
 	{
-		int nErr = InstallService( pName, pDesc, , getAutoRestart() );
+		int nErr = InstallService( pName, pDesc, oexNULL, getAutoRestart() );
 		if ( 0 > nErr )
 		{	oexEcho( oexT( "Error installing service" ) );
 			return nErr;
@@ -173,7 +173,7 @@ void CServiceImpl::OnServiceHandler( unsigned int fdwControl )
 int CServiceImpl::InstallService( oexCSTR pName, oexCSTR pDesc, oexCSTR pExe, oexBOOL bAutoRestart )
 {
 	// Sanity check
-	if ( !pName || !*pName || !pExe || !*pExe )
+	if ( !pName || !*pName )
 	{	oexERROR( 0, oexT( "Invalid Parameter" ) );
 		return -1;
 	} // end if
@@ -181,6 +181,11 @@ int CServiceImpl::InstallService( oexCSTR pName, oexCSTR pDesc, oexCSTR pExe, oe
 	// Use name as description if not specified
 	if ( !pDesc || !*pDesc )
 		pDesc = pName;
+
+	// Use our own exe if not provided
+	oex::CStr sExe;
+	if ( !pExe || !*pExe )
+		pExe = ( sExe = oexGetModuleFileName() ).Ptr();
 
 	oexEcho( "Service Install/Uninstall Not Implemented" );
 

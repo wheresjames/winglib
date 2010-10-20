@@ -460,7 +460,10 @@ oexBOOL CBaseFile::Copy( oexCSTR x_pOld, oexCSTR x_pNew )
 	char buf[ 1024 ];	
 	int nRead = 0, nTotal = 0;
 	while ( 0 < ( nRead = read( fSrc, buf, sizeof( buf ) ) ) )
-		(void)write( fDst, buf, nRead ), nTotal += nRead;
+	{	int nErr =  write( fDst, buf, nRead );
+		if ( 0 > nErr ) return oexFALSE;
+		nTotal += nRead;
+	} // end while
 
 	// Close file handles
 	close( fSrc );
