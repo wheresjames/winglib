@@ -194,7 +194,7 @@ int CSys::GetKey()
 	otios.c_lflag = tios.c_lflag;
 	tios.c_lflag &= ~( ECHO | ICANON );
 	ioctl( 0, TCSETS, &tios );
-	read( 0, &ch, 1 );
+	ssize_t nRead = read( 0, &ch, 1 );
 	tios.c_lflag = otios.c_lflag;
 	ioctl( 0, TCSETS, &tios );
 	return ch;
