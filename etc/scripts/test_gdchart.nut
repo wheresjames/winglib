@@ -25,16 +25,6 @@ function OnProcessRequest( params ) : ( _g )
 
 	local mReply = CSqMulti();
 
-	local l = CSqMulti();
-	l.deserialize( "0=1,1=1,2=2" );
-
-	local p = CSqMulti();
-	p.deserialize( "width=320,height=240,type=0" );
-
-	local m1 = CSqMulti(), m2 = CSqMulti();
-	m1.deserialize( "0=5,1=30,2=88" );
-	m2.deserialize( "0=10,1=10,2=20" );
-
 	local data = CSqMulti();
 	data[ "0" ][ "title" ].set( "Set 0" );
 	for ( local i = 0; i < 21; i++ )
@@ -76,7 +66,9 @@ function _init() : ( _g )
 	_g.server.SetSessionCallback( _self.queue(), "OnProcessRequest" );
 
 	if ( !_g.server.Start( 1234 ) )
-		_self.alert( "Unable to start http server" );
+		_self.echo( "Unable to start http server" );
+	else
+		_self.echo( "server started on http://localhost:1234" );
 }
 
 function _idle() : ( _g )
