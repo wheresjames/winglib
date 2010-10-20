@@ -204,3 +204,67 @@ int CServiceImpl::RemoveService( oexCSTR pName )
 	return -1;
 }
 
+int CServiceImpl::Start( oexCSTR pName )
+{_STT();
+	return -1;
+}
+
+int CServiceImpl::Stop( oexCSTR pName )
+{_STT();
+	return -1;
+}
+
+int CServiceImpl::Shutdown( oexCSTR pName )
+{_STT();
+	return -1;
+}
+
+int CServiceImpl::Restart( oexCSTR pName )
+{_STT();
+	return -1;
+}
+
+oexINT CServiceImpl::RegisterServer( oexCSTR pID, oexCONST oexGUID &guidCLSID, 
+					   oexCSTR pThreadingModel, oexCSTR pPath, 
+					   oexBOOL bControl, oexCONST oexGUID *pguidTypeLib )
+{_STT();
+	return -1;
+}
+
+oexINT CServiceImpl::RegisterServer( oexCSTR pID, oexCSTR pCLSID, 
+					   oexCSTR pThreadingModel, oexCSTR pPath, 
+					   oexBOOL bControl, oexCSTR pTypeLib )
+{_STT();
+	return -1;
+}
+
+oexINT CServiceImpl::UnregisterServer( oexCSTR pID, oexCONST oexGUID &guidCLSID )
+{_STT();
+	return -1;
+}
+
+oexINT CServiceImpl::UnregisterServer( oexCSTR pID, oexCSTR pCLSID )
+{_STT();
+	return -1;
+}
+
+oexINT CServiceImpl::RegisterInterface( oexCSTR pName, oexCONST oexGUID &guidID, oexLONG nNumMethods )
+{_STT();
+	return -1;
+}
+
+oexINT CServiceImpl::RegisterInterface( oexCSTR pName, oexCSTR pID, oexLONG nNumMethods )
+{_STT();
+	return -1;
+}
+
+oexINT CServiceImpl::UnregisterInterface( oexCONST oexGUID &guidID )
+{_STT();
+	return -1;
+}
+
+oexINT CServiceImpl::UnregisterInterface( oexCSTR pID )
+{_STT();
+	return -1;
+}
+
