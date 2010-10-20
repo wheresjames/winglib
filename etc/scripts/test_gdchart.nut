@@ -17,7 +17,7 @@ function OnServerEvent( server, data )
 
 function OnProcessRequest( params ) : ( _g )
 {
-	_g.quit = 1;
+//	_g.quit = 1;
 
 	local mParams = CSqMulti();
 	mParams.deserialize( params );
