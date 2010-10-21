@@ -659,6 +659,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, st
 			return oex::oexFALSE;
 
 		m_log.Destroy();
+		m_lstLog.clear();
 
 	} // end else if
 
