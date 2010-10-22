@@ -336,9 +336,15 @@ oexBOOL CDataLog::FlushBuffer( oexINT x_nKey, SValueIndex *pVi, oexCPVOID pBuf, 
 
 	} // end if
 
-	// Ensure tag file
-	if ( m_pLogs[ x_nKey ]->sFile.Length() && !oexExists( m_pLogs[ x_nKey ]->sFile.Ptr() ) )
-		CFile().CreateAlways( m_pLogs[ x_nKey ]->sFile.Ptr() ).Write( oexStrToMbPtr( m_pLogs[ x_nKey ]->sName ) );
+	// Ensure key name file
+	if ( m_sRoot.Length() )
+	{ 	t_time tTime = pVi->uTime;
+		CStr sRoot = m_sRoot;
+		sRoot.BuildPath( tTime / m_tLogBase );
+		m_pLogs[ x_nKey ]->sFile = sRoot.BuildPath( m_pLogs[ x_nKey ]->sHash ) << oexT( ".txt" );
+		if ( m_pLogs[ x_nKey ]->sFile.Length() && !oexExists( m_pLogs[ x_nKey ]->sFile.Ptr() ) )
+			CFile().CreateAlways( m_pLogs[ x_nKey ]->sFile.Ptr() ).Write( oexStrToMbPtr( m_pLogs[ x_nKey ]->sName ) );
+	} // end write name
 
 	return oexTRUE;
 }
@@ -490,9 +496,14 @@ oexBOOL CDataLog::Flush( t_time x_tTime )
 			m_pLogs[ i ]->bin.setUsed( 0 );
 			m_pLogs[ i ]->olast = 0;
 
-			// Ensure tag file
-			if ( m_pLogs[ i ]->sFile.Length() && !oexExists( m_pLogs[ i ]->sFile.Ptr() ) )
-				CFile().CreateAlways( m_pLogs[ i ]->sFile.Ptr() ).Write( oexStrToMbPtr( m_pLogs[ i ]->sName ) );
+			// Ensure key name file
+			if ( m_sRoot.Length() )
+			{ 	CStr sRoot = m_sRoot;
+				sRoot.BuildPath( x_tTime / m_tLogBase );
+				m_pLogs[ i ]->sFile = sRoot.BuildPath( m_pLogs[ i ]->sHash ) << oexT( ".txt" );
+				if ( m_pLogs[ i ]->sFile.Length() && !oexExists( m_pLogs[ i ]->sFile.Ptr() ) )
+					CFile().CreateAlways( m_pLogs[ i ]->sFile.Ptr() ).Write( oexStrToMbPtr( m_pLogs[ i ]->sName ) );
+			} // end write name
 
 		} // end if
 	return oexTRUE;
