@@ -38,13 +38,23 @@ int CSqCurl::StdWriter( char *data, size_t size, size_t nmemb, sqbind::CSqBinary
 	return res;
 }
 
+int CSqCurl::StdFileWriter( char *data, size_t size, size_t nmemb, sqbind::CSqFile *file )
+{_STT();
+	int res = 0;
+	if ( file && data && size && nmemb )
+		res = size * nmemb,
+		file->Obj().Write( data, res );
+	return res;
+}
+
 int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqBinary *sData )
 {_STT();
 
-	if ( !sData )
+	if ( !sData && !m_sFile.length() )
 		return 0;
 
-	sData->setUsed( 0 );
+	if ( sData )
+		sData->setUsed( 0 );
 
 	if ( !sUrl.length() )
 		return 0;
@@ -78,9 +88,18 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqBinar
 	curl_easy_setopt( m_curl, CURLOPT_URL, sUrl.c_str() );
 	if ( lPort )
 		curl_easy_setopt( m_curl, CURLOPT_PORT, lPort );
-
-	curl_easy_setopt( m_curl, CURLOPT_WRITEDATA, sData );
-	curl_easy_setopt( m_curl, CURLOPT_WRITEFUNCTION, StdWriter );
+	
+	// Setup output
+	sqbind::CSqFile fOut;
+	if ( m_sFile.length() )
+	{	if ( !fOut.OpenAlways( m_sFile ) ) return 0;
+		curl_easy_setopt( m_curl, CURLOPT_WRITEDATA, &fOut );
+		curl_easy_setopt( m_curl, CURLOPT_WRITEFUNCTION, StdFileWriter );
+	} // endif
+	else if ( sData )
+	{	curl_easy_setopt( m_curl, CURLOPT_WRITEDATA, sData );
+		curl_easy_setopt( m_curl, CURLOPT_WRITEFUNCTION, StdWriter );
+	} // end else
 
 	// Do the thing
 	CURLcode res = curl_easy_perform( m_curl );
@@ -122,10 +141,11 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqBinar
 int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::stdString &sPost, sqbind::CSqBinary *sData )
 {_STT();
 
-	if ( !sData )
+	if ( !sData && !m_sFile.length() )
 		return 0;
 
-	sData->setUsed( 0 );
+	if ( sData )
+		sData->setUsed( 0 );
 
 	if ( !sUrl.length() )
 		return 0;
@@ -164,8 +184,18 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::s
 	if ( lPort )
 		curl_easy_setopt( m_curl, CURLOPT_PORT, lPort );
 
-	curl_easy_setopt( m_curl, CURLOPT_WRITEDATA, sData );
-	curl_easy_setopt( m_curl, CURLOPT_WRITEFUNCTION, StdWriter );
+	// Setup output
+	sqbind::CSqFile fOut;
+	if ( m_sFile.length() )
+	{	oexSHOW( m_sFile.c_str() );
+		if ( !fOut.OpenAlways( m_sFile ) ) return 0;
+		curl_easy_setopt( m_curl, CURLOPT_WRITEDATA, &fOut );
+		curl_easy_setopt( m_curl, CURLOPT_WRITEFUNCTION, StdFileWriter );
+	} // endif
+	else if ( sData )
+	{	curl_easy_setopt( m_curl, CURLOPT_WRITEDATA, sData );
+		curl_easy_setopt( m_curl, CURLOPT_WRITEFUNCTION, StdWriter );
+	} // end else
 
 	// Do the thing
 	CURLcode res = curl_easy_perform( m_curl );

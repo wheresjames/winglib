@@ -34,10 +34,19 @@ public:
 	/// Returns ssl certificates if any
 	sqbind::CSqMulti getCerts() { return m_mCerts; }
 
+	/// Sets the output file
+	void setFile( const sqbind::stdString &sFile ) { m_sFile = sFile; }
+
+	/// Returns the name of the output file
+	sqbind::stdString getFile() { return m_sFile; }
+
 private:
 
 	/// Curl writer
 	static int StdWriter( char *data, size_t size, size_t nmemb, sqbind::CSqBinary *buffer );
+
+	static int StdFileWriter( char *data, size_t size, size_t nmemb, sqbind::CSqFile *file );
+
 
 private:
 
@@ -51,6 +60,9 @@ private:
 	sqbind::stdString			m_sPassword;
 
 	sqbind::CSqMulti			m_mCerts;
+
+	/// Sets output file
+	sqbind::stdString			m_sFile;
 
 };
 SQBIND_DECLARE_INSTANCE( CSqCurl, CSqCurl );

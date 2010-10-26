@@ -44,6 +44,8 @@ namespace sqbind
 		SQBIND_CLASS_CTOR_BEGIN( CSqFile )
 		SQBIND_CLASS_CTOR_END( CSqFile )
 
+		oex::CFile& Obj() { return m_f; }
+
 		int CreateAlways( const stdString &sFile )
 		{	return m_f.CreateAlways( sFile.c_str() ).IsOpen(); }
 
