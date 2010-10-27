@@ -740,6 +740,11 @@ int CSqEngineExport::shell( const stdString &sFile, const stdString &sParams, co
 	return oexShell( sFile.c_str(), sParams.c_str(), sDirectory.c_str() );
 }
 
+int CSqEngineExport::process_system_messages()
+{
+	return oex::os::CSys::PumpThreadMessages();
+}
+
 int CSqEngineExport::service_install( const stdString &sName, const stdString &sDesc, const stdString &sExe, int bAutoRestart )
 {_STT();
 	return oex::os::CServiceImpl::InstallService( sName.c_str(), sDesc.c_str(), sExe.c_str(), bAutoRestart );
@@ -1225,6 +1230,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, resetlog )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, process_system_messages )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sqexe )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_install )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_remove )

@@ -358,6 +358,9 @@ public:
 	/// Checks for path/threads existence
 	int is_path( const stdString &sPath );
 
+	/// Processes system messages
+	int process_system_messages();
+
 	/// Executes shell command
 	int shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
 
