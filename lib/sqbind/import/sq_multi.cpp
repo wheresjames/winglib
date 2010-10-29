@@ -198,6 +198,8 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, getJSON )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, merge )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mmerge )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, join )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, tmpl )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mset )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, urlencode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, urldecode )
@@ -351,8 +353,25 @@ void CSqMulti::mmerge( CSqMulti *m )
 		return;
 
 	for ( CSqMulti::iterator it = m->begin(); it != m->end(); it++ )
-		m_lst[ it->first.c_str() ] = it->second.str();
+		m_lst[ it->first ] = it->second.str();
 }
+
+CSqMulti::t_Obj CSqMulti::tmpl( const t_Obj &tmpl )
+{_STT();
+	return SQBIND_StrReplace( tmpl, t_Obj( oexT( "$v" ) ), m_val.str() );
+}
+
+CSqMulti::t_Obj CSqMulti::join( const t_Obj &glue, const t_Obj &tmpl )
+{_STT();
+	t_Obj s, kr = oexT( "$k" ), vr = oexT( "$v" );
+	SQINT n = 0;
+	for ( t_List::iterator it = m_lst.begin(); it != m_lst.end(); it++ )
+	{	if ( n++ ) s += glue;
+		s += SQBIND_StrReplace( SQBIND_StrReplace( tmpl, kr, it->first ), vr, it->second.str() );
+	} // end for
+	return s;
+}
+
 
 CSqMulti::t_Obj CSqMulti::urlencode()
 {_STT();

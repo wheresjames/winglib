@@ -191,6 +191,12 @@ namespace sqbind
 		/// Merges in the specified array
 		CSqMulti& add( CSqMulti &m );
 
+		/// Formats value according to template
+		t_Obj tmpl( const t_Obj &tmpl );
+
+		/// Joins all elements in the array
+		t_Obj join( const t_Obj &glue, const t_Obj &tmpl );
+
 		/// Returns non-zero if the specified key exists
 		int isset( const t_Obj &k );
 

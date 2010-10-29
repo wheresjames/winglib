@@ -64,7 +64,7 @@ function _init() : ( _g )
 
 		};
 
-	StartStream( rtsp_video[ "utube1" ] );
+	StartStream( rtsp_video[ "nasa" ] );
 
 	_self.set_timer( ".", 60, "OnTimer" );
 
