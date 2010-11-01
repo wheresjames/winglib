@@ -970,6 +970,27 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 	return system( oexStrToMb( sCmd ).Ptr() ) ? oexTRUE : oexFALSE;
 }
 
+oexUINT CSys::StartProcess( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
+{
+	if ( !oexCHECK_PTR( x_pFile ) )
+		return oexFALSE;
+
+	// Fork the process
+	int nRet = CSys::Fork( x_pDirectory );
+	if ( 0 > nRet )
+		return oexFALSE;
+	else if ( 0 < nRet )
+		return (oexUINT)nRet;
+
+	// Switch to user process
+	execv( x_pFile, x_pParams );
+
+	// Error / quit child process
+	exit( EXIT_SUCCESS );
+	return oexFALSE;
+}
+
+
 struct SProcStatInfo
 {
 	// Proc stat file

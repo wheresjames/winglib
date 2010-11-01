@@ -42,7 +42,14 @@ Boolean CLvRtspClient::CVideoSink::continuePlaying()
 
 		oexAutoLock ll( m_lock ); 
 		if ( ll.IsLocked() )
+		{
 			m_buf.MemCpyAt( &m_header, 0 );
+
+#if defined( oexDEBUG )
+			oexSHOW( m_header.getUsed() );
+			oexEcho( oexBinToAsciiHexStr( m_header.Mem(), 0, 16, 16 ).Ptr() );
+#endif
+		} // end if
 
 	} // end if
 

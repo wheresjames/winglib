@@ -893,6 +893,28 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 #endif
 }
 
+oexUINT CSys::StartProcess( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
+{//_STT();
+
+	if ( !oexCHECK_PTR( x_pFile ) )
+		return 0;
+
+#if !defined( OEX_WINCE )
+
+#else
+
+	PROCESS_INFORMATION pi; oexZeroMemory( &pi );
+	if ( !CreateProcess( x_pFile, x_pParams, NULL, NULL, FALSE, 0, NULL, x_pDirectory, NULL, &pi ) )
+		return 0;
+
+	CloseHandle( pi.hThread );
+	CloseHandle( pi.hProcess );
+
+	return (oexUINT)pi.dwProcessId;
+
+#endif
+}
+
 #if !defined( OEX_GCC )
 
 oexDOUBLE CSys::GetCpuLoad()

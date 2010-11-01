@@ -435,6 +435,19 @@ public:
 	static oexBOOL Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory );
 
 	//==============================================================
+	// StartProcess()
+	//==============================================================
+	/// Creates the specified process
+	/**
+		\param [in] x_pFile			- File to execute
+		\param [in] x_pParams		- Parmeters to pass to file
+		\param [in] x_pDirectory	- Directory to start in
+
+		\return Process ID or zero if failure
+	*/
+	static oexUINT StartProcess( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory );
+
+	//==============================================================
 	// GetCpuLoad()
 	//==============================================================
 	/// Returns a value between 0 and 100 representing the current

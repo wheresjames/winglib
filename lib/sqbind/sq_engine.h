@@ -364,6 +364,9 @@ public:
 	/// Executes shell command
 	int shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
 
+	/// Executes shell command
+	int exec( const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
+
 	/// Attempts to find the squirrel interpreter and execute the specified params
 	int sqexe( const stdString &sParams, const stdString &sDir );
 

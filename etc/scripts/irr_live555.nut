@@ -72,7 +72,7 @@ function _init() : ( _g )
 
 	// Check TCP Port 554 and UDP ports 6970-9999
 
-	StartStream( rtsp_video[ "nasa" ], 0, 0 );
+	StartStream( rtsp_video[ "scifi" ], 0, 0 );
 
 	_self.set_timer( ".", 15, "OnTimer" );
 

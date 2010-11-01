@@ -321,6 +321,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexAlert							OEX_NAMESPACE::os::CSys::ShowMessageBox
 #define oexFork								OEX_NAMESPACE::os::CSys::Fork
 #define oexShell							OEX_NAMESPACE::os::CSys::Shell
+#define oexExec								OEX_NAMESPACE::os::CSys::StartProcess
 #define oexGetCpuLoad						OEX_NAMESPACE::os::CSys::GetCpuLoad
 #define oexGetLastError						OEX_NAMESPACE::os::CTrace::GetLastError
 #define oexGetLastErrorStr					OEX_NAMESPACE::os::CTrace::GetErrorMsg( oexGetLastError() )

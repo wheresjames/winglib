@@ -740,6 +740,11 @@ int CSqEngineExport::shell( const stdString &sFile, const stdString &sParams, co
 	return oexShell( sFile.c_str(), sParams.c_str(), sDirectory.c_str() );
 }
 
+int CSqEngineExport::exec( const stdString &sFile, const stdString &sParams, const stdString &sDirectory )
+{_STT();
+	return oexExec( sFile.c_str(), sParams.c_str(), sDirectory.c_str() );
+}
+
 int CSqEngineExport::process_system_messages()
 {
 	return oex::os::CSys::PumpThreadMessages();
@@ -947,7 +952,7 @@ int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )
 		return -2;
 
 	// Let's try and execute
-	return oexShell( sFull.c_str(), sParams.c_str(), sDir.length() ? sDir.c_str() : path( stdString() ).c_str() );
+	return oexExec( sFull.c_str(), sParams.c_str(), sDir.length() ? sDir.c_str() : path( stdString() ).c_str() );
 }
 
 void CSqEngineExport::sleep( int nMsTime )
@@ -1230,6 +1235,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, resetlog )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, exec )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, process_system_messages )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sqexe )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_install )
