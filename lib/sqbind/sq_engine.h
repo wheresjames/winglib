@@ -200,7 +200,7 @@ public:
 	int include_once( const stdString &sScript );
 
 	/// Includes the specified inline script
-	int include_inline( const stdString &sScript );
+	stdString include_inline( const stdString &sScript );
 
 	/// Loads the specified module
 	int load_module( const stdString &sModule, const stdString &sPath );
@@ -479,7 +479,7 @@ protected:
 
 	virtual int OnIncludeOnce( const stdString &sScript );
 
-	virtual int OnIncludeInline( const stdString &sScript );
+	virtual stdString OnIncludeInline( const stdString &sScript );
 
 	virtual int OnLoadModule( const stdString &sModule, const stdString &sPath );
 
@@ -1163,7 +1163,7 @@ public:
 	virtual int OnIncludeOnce( const stdString &sScript );
 
 	/// Includes the specified inline script
-	virtual int OnIncludeInline( const stdString &sScript );
+	virtual stdString OnIncludeInline( const stdString &sScript );
 
 	/// Loads the specified module
 	virtual int OnLoadModule( const stdString &sModule, const stdString &sPath );

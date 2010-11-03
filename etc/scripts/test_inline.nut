@@ -17,8 +17,10 @@ function OnProcessRequest( params )
 	local mParams = CSqMulti( params );
 	_self.echo( mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str() + " : " + mParams[ "REQUEST" ][ "REQUEST_STRING" ].str() );
 
-	local script = _self.prepare_inline( _self.path( "test_inline.squ" ), 1 );
-	local page = _self.run( 1, "", "page", script );
+//	local script = _self.prepare_inline( _self.path( "test_inline.squ" ), 1 );
+//	local page = _self.run( 1, "", "page", script );
+
+	local page = _self.include_inline( "test_inline.squ" );
 
 	local mReply = CSqMulti();
 	mReply[ "content" ] <- page;

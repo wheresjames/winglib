@@ -140,7 +140,7 @@ int CSqEngineExport::include_once( const stdString &sScript )
 	return OnIncludeOnce( sScript );
 }
 
-int CSqEngineExport::include_inline( const stdString &sScript )
+stdString CSqEngineExport::include_inline( const stdString &sScript )
 {_STT();
 	return OnIncludeInline( sScript );
 }
@@ -1140,7 +1140,7 @@ int CSqEngineExport::OnIncludeOnce( const stdString &sClass )
 	return 0;
 }
 
-int CSqEngineExport::OnIncludeInline( const stdString &sClass )
+stdString CSqEngineExport::OnIncludeInline( const stdString &sClass )
 {_STT();
 	return 0;
 }
@@ -1731,9 +1731,54 @@ int CSqEngine::OnIncludeOnce( const stdString &sScript )
 	return OnInclude( sScript );
 }
 
-int CSqEngine::OnIncludeInline( const stdString &sScript )
+
+stdString CSqEngine::OnIncludeInline( const stdString &sScript )
 {_STT();
-	return 0;
+
+	// Push script name
+	int nRet = 0;
+	stdString sScriptName = m_sScriptName;
+	oex::oexBOOL bFile = oex::oexTRUE;
+	stdString sData;
+	stdString sUseScript = sScript;
+
+	_oexTRY
+	{
+		// See if there is an embedded include handler
+		if ( m_fIncludeScript )
+		{
+			if ( m_fIncludeScript( sScript, sData, m_sScriptName ) || !sData.length() )
+				return oexT( "" );
+
+			sUseScript = sData;
+			bFile = oex::oexFALSE;
+
+		} // end if
+
+		// Check for pre-compiled script
+		if ( 2 <= sUseScript.length() && ( *(oex::oexUSHORT*)sUseScript.c_str() ) == SQ_BYTECODE_STREAM_TAG )
+		{	oex::CStr8 buf( sUseScript.c_str(), sUseScript.length() );
+			SetCompiledScript( buf );
+		} // end if
+
+		else
+			m_script = m_vm.CompileBuffer( bFile 
+										   ? prepare_inline( std2oex( m_sRoot ).BuildPath( std2oex( sUseScript ) ).Ptr(), 1 ).c_str()
+										   : prepare_inline( sUseScript.c_str(), 0 ).c_str() );
+
+		return obj2str( m_vm.RunScript( m_script ) );
+
+	} // end try
+
+	_oexCATCH( SScriptErrorInfo &e )
+	{	nRet = LogError( -2, e );
+	}
+	_oexCATCH( SquirrelError &e )
+	{	nRet = LogErrorM( -3, oexMks( e.desc, oexT( " : " ),
+							  ( bFile && sScript.length() ) ? sScript.c_str() : oexT( "N/A" ) ).Ptr() );
+	}
+
+	return oexT( "" );
 }
 
 int CSqEngine::OnInclude( const stdString &sScript )
@@ -1828,36 +1873,7 @@ oex::oexBOOL CSqEngine::Run( sqbind::stdString *pReply, oex::oexCSTR pName, oex:
 		script = m_vm.CompileBuffer( pScript );
 		SquirrelObject o = m_vm.RunScript( script );
 		if ( pReply )
-		{
-			switch( sq_type( o.GetObjectHandle() ) )
-			{
-				case OT_STRING :
-				{	int nLen = o.Len();
-					const SQChar *pStr = o.ToString();
-					if ( nLen && pStr )
-						pReply->assign( pStr, nLen );
-					else
-						pReply->clear();
-				} break;
-
-				case OT_INTEGER :
-					*pReply = oex2std( oexMks( o.ToInteger() ) );
-					break;
-
-				case OT_FLOAT :
-					*pReply = oex2std( oexMks( o.ToFloat() ) );
-					break;
-
-				case OT_BOOL :
-					*pReply = o.ToBool() ? oexT( "1" ) : oexT( "0" );
-					break;
-
-				default:
-					pReply->clear();
-					break;
-
-			} // end switch
-		} // end if
+			*pReply = obj2str( o );
 
 	} // end try
 

@@ -217,6 +217,37 @@ namespace sqbind
 		static oex::CStr8 std2oex8( const T &s )
 		{	return oexStrToMb( oex::CStr( s.c_str(), s.length() ) ); }
 
+	template< typename T >
+		stdString obj2str( T &o )
+		{
+			switch( sq_type( o.GetObjectHandle() ) )
+			{
+				case OT_STRING :
+				{	int nLen = o.Len();
+					const SQChar *pStr = o.ToString();
+					if ( nLen && pStr )
+						return stdString( pStr, nLen );
+				} break;
+
+				case OT_INTEGER :
+					return oex2std( oexMks( o.ToInteger() ) );
+					break;
+
+				case OT_FLOAT :
+					return oex2std( oexMks( o.ToFloat() ) );
+					break;
+
+				case OT_BOOL :
+					return o.ToBool() ? oexT( "1" ) : oexT( "0" );
+					break;
+
+				default:
+					break;
+
+			} // end switch
+
+			return oexT( "" );
+		}
 }
 
 #if defined( SQBIND_SQPLUS )
