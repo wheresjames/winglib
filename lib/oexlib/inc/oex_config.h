@@ -234,12 +234,34 @@
 #define oexGetBuildTime()		OEX_NAMESPACE::CSysTime( oexTEXT( oexDATE_FMT )	oexT( " " )	oexTEXT( oexTIME_FMT ), \
 														 oexTEXT( oexDATE )		oexT( " " ) oexTEXT( oexTIME ) )
 
+#if defined( OEX_PROJECT_NAME )
+#define oexAppNamePtr()			oexTEXT( OEX_PROJECT_NAME )
+#else
+#define oexAppNamePtr()			oexT( "" )
+#endif
+
+#if defined( OEX_PROJECT_DESC )
+#define oexAppDescPtr()			oexTEXT( OEX_PROJECT_DESC )
+#else
+#define oexAppDescPtr()			oexAppNamePtr()
+#endif
+
+#if defined( OEX_PROJECT_LNAME )
+#define oexAppLongNamePtr()		oexTEXT( OEX_PROJECT_LNAME )
+#else
+#define oexAppLongNamePtr()		oexAppDescPtr()
+#endif
+
+#define oexAppName()			OEX_NAMESPACE::CStr( oexAppNamePtr() )
+#define oexAppDesc()			OEX_NAMESPACE::CStr( oexAppDescPtr() )
+#define oexAppLongName()		OEX_NAMESPACE::CStr( oexAppLongNamePtr() )
+
 #define oexBuild()				oexGetBuildTime().FormatTime( oexT( "%y.%C.%D.%G%m" ) )
 #define oexBuildPtr()			oexGetBuildTime().FormatTime( oexT( "%y.%C.%D.%G%m" ) ).Ptr()
 
 #if defined( OEX_PROJECT_VERSION )
-#	define oexVersion()			OEX_NAMESPACE::CStr( OEX_PROJECT_VERSION )
-#	define oexVersionPtr()		OEX_PROJECT_VERSION
+#	define oexVersion()			OEX_NAMESPACE::CStr( oexTEXT( OEX_PROJECT_VERSION ) )
+#	define oexVersionPtr()		oexTEXT( OEX_PROJECT_VERSION )
 #else
 #	define oexVersion()			oexBuild()
 #	define oexVersionPtr()		oexBuildPtr()

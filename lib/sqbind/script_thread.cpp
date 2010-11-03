@@ -47,11 +47,39 @@ CScriptThread::CScriptThread()
 	m_uToElapsed = 0;
 	m_dToValue = 0;
 	m_uLogFreq = 1000;
+
 }
 
 CScriptThread::~CScriptThread()
 {_STT();
 	Destroy();
+}
+
+// Application description pointers
+oex::oexCSTR CScriptThread::m_pAppName = oexNULL;
+oex::oexCSTR CScriptThread::m_pAppLongName = oexNULL;
+oex::oexCSTR CScriptThread::m_pAppDescription = oexNULL;
+
+void CScriptThread::SetAppInfo( oex::oexCSTR pName, oex::oexCSTR pLName, oex::oexCSTR pDesc )
+{
+	m_pAppName = pName;
+	m_pAppLongName = pLName;
+	m_pAppDescription = pDesc;
+}
+
+oex::oexCSTR CScriptThread::getAppName() 
+{
+	return m_pAppName; 
+}
+
+oex::oexCSTR CScriptThread::getAppLongName() 
+{
+	return m_pAppLongName; 
+}
+
+oex::oexCSTR CScriptThread::getAppDescription() 
+{
+	return m_pAppDescription; 
 }
 
 void CScriptThread::Destroy()

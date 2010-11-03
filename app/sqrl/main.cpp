@@ -86,6 +86,8 @@ int run( oex::CPropertyBag &pbCmdLine )
 	// Log the script name
 	oexNOTICE( 0, oexMks( oexT( "Running script : " ), sCmd ) );
 
+	sqbind::CScriptThread::SetAppInfo( oexAppNamePtr(), oexAppLongNamePtr(), oexAppDescPtr() );
+
 	g_psqScriptThread->SetScriptName( sCmd.Ptr() );
 
 	g_psqScriptThread->SetModuleManager( g_psqModuleManager );

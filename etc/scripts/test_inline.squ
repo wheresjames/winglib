@@ -1,0 +1,28 @@
+<html>
+	<head>
+		<title>Inline Test</title>				
+	</head>
+	<body>		
+		
+		var i = "1 + 1 = <?sq echo( ( 1 + 1 ).tostring() ) ?>";
+		
+		<table>
+			<tr>
+				<td>
+					<b>App Name : </b>
+				</td>
+				<td>
+					<?sq echo( _self.get_app_name() ) ?>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<b>CPU : </b>
+				</td>
+				<td>
+					<?sq echo( _self.get_cpu_load() ) ?>%
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>

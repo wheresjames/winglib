@@ -478,7 +478,6 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #endif
 
 #define oexRUN_SERVICE( cType )													\
-	cType theApp;																\
 	int main( int argc, char* argv[] )											\
 	{																			\
 		oexINIT();																\
@@ -490,9 +489,18 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 			oexUNINIT();														\
 			return 0;															\
 		}																		\
-		int ret = OEX_NAMESPACE::os::CServiceImpl::RunService(					\
-					argc, (const char**)argv,									\
-					oexTEXT( OEX_PROJECT_NAME ), oexTEXT( OEX_PROJECT_DESC ) );	\
+		if ( pbCmdLine.IsKey( oexT( "build" ) ) )								\
+		{	oexEcho( oexBuild().Ptr() );										\
+			pbCmdLine.Destroy();												\
+			oexUNINIT();														\
+			return 0;															\
+		}																		\
+		{	cType theApp;														\
+			int ret = OEX_NAMESPACE::os::CServiceImpl::RunService(				\
+						argc, (const char**)argv,								\
+						oexAppNamePtr(), oexAppLongNamePtr() );					\
+		}																		\
+		pbCmdLine.Destroy();													\
 		oexUNINIT();															\
 		return ret;																\
 	}

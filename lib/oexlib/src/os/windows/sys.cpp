@@ -901,16 +901,16 @@ oexUINT CSys::StartProcess( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirec
 
 #if !defined( OEX_WINCE )
 
-#else
-
-	PROCESS_INFORMATION pi; oexZeroMemory( &pi );
-	if ( !CreateProcess( x_pFile, x_pParams, NULL, NULL, FALSE, 0, NULL, x_pDirectory, NULL, &pi ) )
+	PROCESS_INFORMATION pi; oexZero( pi );
+	if ( !CreateProcess( x_pFile, (LPSTR)NULL, NULL, NULL, FALSE, 0, NULL, x_pDirectory, NULL, &pi ) )
 		return 0;
 
 	CloseHandle( pi.hThread );
 	CloseHandle( pi.hProcess );
 
 	return (oexUINT)pi.dwProcessId;
+
+#else
 
 #endif
 }

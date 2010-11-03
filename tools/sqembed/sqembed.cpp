@@ -102,6 +102,8 @@ int main(int argc, char* argv[])
 	// Log the script name
 	oexNOTICE( 0, oexT( "Running script : embedded:main.nut" ) );
 
+	sqbind::CScriptThread::SetAppInfo( oexAppNamePtr(), oexAppLongNamePtr(), oexAppDescPtr() );
+
 	g_psqScriptThread->SetScriptName( oexT( "embedded:main.nut" ) );
 
 	g_psqScriptThread->SetModuleManager( g_psqModuleManager );

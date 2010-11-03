@@ -187,6 +187,15 @@ public:
 
 	/// Returns a reference to the property bag
 	t_PropertyBag& Pb() { return m_pb; }
+	
+	/// Set application information
+	static void SetAppInfo( oex::oexCSTR pName, oex::oexCSTR pLName, oex::oexCSTR pDesc );
+
+	static oex::oexCSTR getAppName();
+
+	static oex::oexCSTR getAppLongName();
+
+	static oex::oexCSTR getAppDescription();
 
 private:
 
@@ -256,4 +265,12 @@ private:
 	/// Data logging object
 	oex::CDataLog						m_log;
 
+	/// App name
+	static oex::oexCSTR 				m_pAppName;
+
+	/// App long name
+	static oex::oexCSTR 				m_pAppLongName;
+
+	/// App description
+	static oex::oexCSTR 				m_pAppDescription;
 };

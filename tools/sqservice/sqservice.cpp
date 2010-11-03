@@ -54,9 +54,8 @@ public:
 
 	CSqService()
 	{_STT();
-		SetName( oexTEXT( OEX_PROJECT_NAME ) );
 	}
-
+	
 	virtual int OnRun()
 	{
 		// Enable crash reporting
@@ -89,6 +88,9 @@ public:
 
 		// Log the script name
 		oexNOTICE( 0, oexT( "Running script : embedded:main.nut" ) );
+
+		// Set application information
+		sqbind::CScriptThread::SetAppInfo( oexAppNamePtr(), oexAppLongNamePtr(), oexAppDescPtr() );
 
 		// Script name
 		g_psqScriptThread->SetScriptName( oexT( "embedded:main.nut" ) );

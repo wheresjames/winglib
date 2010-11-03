@@ -199,6 +199,10 @@ static void WINAPI _ServiceHandler( DWORD fdwControl )
 
 CServiceImpl::CServiceImpl()
 {_STT();
+
+	// Save instance pointer
+	m_pInstance = this;
+
 	// Initialize service structure
 	oexZeroMemory( &g_ss, sizeof( g_ss ) );
 
@@ -206,9 +210,6 @@ CServiceImpl::CServiceImpl()
 	g_ss.dwServiceType = SERVICE_WIN32;
 	g_ss.dwCurrentState = SERVICE_START_PENDING;
 	g_ss.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN;
-
-	// Save instance pointer
-	m_pInstance = this;
 
 	// No command line yet
 	m_argc = oexNULL;
@@ -223,6 +224,10 @@ CServiceImpl::CServiceImpl()
 
 	// Auto restart service by default
 	m_bAutoRestart = oexTRUE;
+
+	// Default name
+	SetName( oexAppNamePtr() );
+
 }
 
 CServiceImpl::~CServiceImpl()

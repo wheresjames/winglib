@@ -199,6 +199,9 @@ public:
 	/// ignores further calls to include the same script
 	int include_once( const stdString &sScript );
 
+	/// Includes the specified inline script
+	int include_inline( const stdString &sScript );
+
 	/// Loads the specified module
 	int load_module( const stdString &sModule, const stdString &sPath );
 
@@ -219,6 +222,15 @@ public:
 
 	/// Returns the build
 	stdString get_build();
+
+	/// Returns the application name
+	stdString get_app_name();
+
+	/// Returns the application name
+	stdString get_app_long_name();
+
+	/// Returns the application description
+	stdString get_app_description();
 
 	/// Returns the script name
 	stdString get_name();
@@ -355,6 +367,9 @@ public:
 	/// Executes the specified script
 	stdString run( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript );
 
+	/// Prepares an inline script for processing
+	stdString prepare_inline( const stdString &sScript, int bFile );
+
 	/// Checks for path/threads existence
 	int is_path( const stdString &sPath );
 
@@ -463,6 +478,8 @@ protected:
 	virtual int OnInclude( const stdString &sScript );
 
 	virtual int OnIncludeOnce( const stdString &sScript );
+
+	virtual int OnIncludeInline( const stdString &sScript );
 
 	virtual int OnLoadModule( const stdString &sModule, const stdString &sPath );
 
@@ -1144,6 +1161,9 @@ public:
 
 	/// Includes the specified script
 	virtual int OnIncludeOnce( const stdString &sScript );
+
+	/// Includes the specified inline script
+	virtual int OnIncludeInline( const stdString &sScript );
 
 	/// Loads the specified module
 	virtual int OnLoadModule( const stdString &sModule, const stdString &sPath );

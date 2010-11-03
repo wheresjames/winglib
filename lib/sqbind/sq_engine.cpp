@@ -140,6 +140,11 @@ int CSqEngineExport::include_once( const stdString &sScript )
 	return OnIncludeOnce( sScript );
 }
 
+int CSqEngineExport::include_inline( const stdString &sScript )
+{_STT();
+	return OnIncludeInline( sScript );
+}
+
 int CSqEngineExport::load_module( const stdString &sModule, const stdString &sPath )
 {_STT();
 	return OnLoadModule( sModule, sPath );
@@ -189,6 +194,24 @@ stdString CSqEngineExport::get_build()
 stdString CSqEngineExport::get_version()
 {_STT();
 	return oex2std( oexVersion() );
+}
+
+stdString CSqEngineExport::get_app_name()
+{_STT();
+	oex::oexCSTR p = CScriptThread::getAppName();
+	return p ? p : oexT( "" );
+}
+
+stdString CSqEngineExport::get_app_long_name()
+{_STT();
+	oex::oexCSTR p = CScriptThread::getAppLongName();
+	return p ? p : oexT( "" );
+}
+
+stdString CSqEngineExport::get_app_description()
+{_STT();
+	oex::oexCSTR p = CScriptThread::getAppDescription();
+	return p ? p : oexT( "" );
 }
 
 stdString CSqEngineExport::get_name()
@@ -587,6 +610,133 @@ stdString CSqEngineExport::run( int nRet, const stdString &sPath, const stdStrin
 	stdString sRet;
 	q->run( &sRet, sPath, sName, sScript );
 	return sRet;
+}
+
+stdString CSqEngineExport::prepare_inline( const stdString &sScript, int bFile )
+{_STT();
+
+	// Code header / footer
+	static oex::oexTCHAR szHeader[] = oexT( "{ class __buffer { buf = \"\"; }; local __out = __buffer(); function echo( s ) : ( __out ) { __out.buf += s; }" ) oexNL;
+	static oex::oexTCHAR szFooter[] = oexNL oexT( "return __out.buf; }" );
+	static oex::oexTCHAR szOpenStr[] = oexNL oexT( "echo( @\"" );
+	static oex::oexTCHAR szCloseStr[] = oexT( "\" );" ) oexNL;
+
+	// Get the source data
+	oex::CStr sSrc;
+	if ( bFile )
+		sSrc = oexFileGetContents( sScript.c_str() );
+	else 
+		sSrc = std2oex( sScript );
+
+	// Did we get anything
+	oex::oexCSTR pSrc = sSrc.Ptr();
+	oex::CStr::t_size szSrc = sSrc.Length(), nPos = 0, nStart = 0;
+	if ( !szSrc )
+		return oexT( "" );
+
+	// Allocate space for output
+	oex::CStr sDst;
+	oex::CStr::t_size nDst = 0;
+	oex::oexSTR pDst = sDst.OexAllocate( ( szSrc * 2 ) + sizeof( szHeader ) + sizeof( szFooter ) );
+	if ( !pDst )
+		return oexT( "" );
+
+	// Copy header into buffer
+	oexMemCpy( &pDst[ nDst ], szHeader, sizeof( szHeader ) - sizeof( oex::oexTCHAR ) );
+	nDst += sizeof( szHeader ) - sizeof( oex::oexTCHAR );
+
+	// Open tag
+	oex::oexTCHAR tcOpen[] = oexT( "<?sq" );
+	oex::CStr::t_size nOpen = 0, szOpen = (oex::CStr::t_size)oex::zstr::Length( tcOpen );
+
+	// Close tag
+	oex::oexTCHAR tcClose[] = oexT( "?>" );
+	oex::CStr::t_size nClose = 0, szClose = (oex::CStr::t_size)oex::zstr::Length( tcClose );
+
+	// iii Not using standard search and replace because we need speed here
+
+	// We must have at least six characters for a complete tag
+	while ( ( nPos + szOpen + szClose ) < szSrc )
+	{
+		// Initialize
+		nStart = nPos;
+		nOpen = nClose = szSrc;
+
+		// Attempt to find an open bracket
+		while ( nOpen == szSrc && ( nPos + szOpen + szClose ) < szSrc )
+			if ( !oexMemCmp( &pSrc[ nPos ], tcOpen, szOpen ) )
+				nOpen = nPos;
+			else
+				nPos++;
+
+		// Find a closing bracket
+		while ( nClose == szSrc && ( nPos + szClose ) < szSrc )
+			if ( !oexMemCmp( &pSrc[ nPos ], tcClose, szClose ) )
+				nClose = nPos;
+			else
+				nPos++;
+		
+		// Did we find embedded code?
+		if ( nOpen < szSrc && nClose < szSrc )
+		{
+			// Text data to be copied?
+			if ( nStart < nOpen )
+			{	oexMemCpy( &pDst[ nDst ], szOpenStr, sizeof( szOpenStr ) - sizeof( oex::oexTCHAR ) );
+				nDst += sizeof( szOpenStr ) - sizeof( oex::oexTCHAR );
+				while ( nStart < nOpen )
+				{	if ( oexT( '"' ) == pSrc[ nStart ] )
+						pDst[ nDst++ ] = oexT( '"' );
+					pDst[ nDst++ ] = pSrc[ nStart++ ];
+				} // end while
+				oexMemCpy( &pDst[ nDst ], szCloseStr, sizeof( szCloseStr ) - sizeof( oex::oexTCHAR ) );
+				nDst += sizeof( szCloseStr ) - sizeof( oex::oexTCHAR );
+			} // end if
+
+			// Any code to copy?
+			nOpen += szOpen;
+			if ( nOpen < nClose )
+			{
+				// Add new line
+				oexMemCpy( &pDst[ nDst ], oexNL, sizeof( oexNL ) - sizeof( oex::oexTCHAR ) );
+				nDst += sizeof( oexNL ) - sizeof( oex::oexTCHAR );
+
+				// Copy the code
+				oexMemCpy( &pDst[ nDst ], &pSrc[ nOpen ], nClose - nOpen );
+				nDst += nClose - nOpen;
+
+				// Close statement, just in case
+				pDst[ nDst++ ] = oexT( ';' );
+
+			} // endif
+
+			// Point to data after code
+			nPos += szClose;
+
+		} // end if
+
+	} // end while
+
+	// Copy whatever remains
+	if ( nStart < szSrc )
+	{	oexMemCpy( &pDst[ nDst ], szOpenStr, sizeof( szOpenStr ) - sizeof( oex::oexTCHAR ) );
+		nDst += sizeof( szOpenStr ) - sizeof( oex::oexTCHAR );
+		while ( nStart < szSrc )
+		{	if ( oexT( '"' ) == pSrc[ nStart ] )
+				pDst[ nDst++ ] = oexT( '"' );
+			pDst[ nDst++ ] = pSrc[ nStart++ ];
+		} // end while
+		oexMemCpy( &pDst[ nDst ], szCloseStr, sizeof( szCloseStr ) - sizeof( oex::oexTCHAR ) );
+		nDst += sizeof( szCloseStr ) - sizeof( oex::oexTCHAR );
+	} // end if
+
+	// Copy footer into buffer
+	oexMemCpy( &pDst[ nDst ], szFooter, sizeof( szFooter ) - sizeof( oex::oexTCHAR ) );
+	nDst += sizeof( szFooter ) - sizeof( oex::oexTCHAR );
+
+	// Set the number of bytes in the string
+	sDst.SetLength( nDst );
+
+	return oex2std( sDst );
 }
 
 void CSqEngineExport::set( const stdString &sPath, const stdString &sKey, const stdString &sVal )
@@ -990,6 +1140,11 @@ int CSqEngineExport::OnIncludeOnce( const stdString &sClass )
 	return 0;
 }
 
+int CSqEngineExport::OnIncludeInline( const stdString &sClass )
+{_STT();
+	return 0;
+}
+
 int CSqEngineExport::OnLoadModule( const stdString &sModule, const stdString &sPath )
 {_STT();
 	return 0;
@@ -1206,6 +1361,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include_once )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include_inline )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, load_module )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_children )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sleep )
@@ -1234,6 +1390,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getlogbin )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, resetlog )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, prepare_inline )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, exec )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, process_system_messages )	
@@ -1309,6 +1466,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, uncompress )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_resource )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_name )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_app_name )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_app_long_name )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_app_description )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_script )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_binshare )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_binshare )
@@ -1368,24 +1528,6 @@ oex::oexBOOL CSqEngine::Init()
 		SQBIND_EXPORT( &m_vm, CSqMsgQueue );
 		SQBIND_EXPORT( &m_vm, CSqEngineExport );
 #endif
-//		SQBIND_EXPORT( &m_vm, CTestClass );
-/*
-
-		sq_pushroottable(v);
-		sq_pushstring(v,p_constant,-1);
-		sq_pushinteger(v,p_value);
-		sq_newslot(v,-3,false);
-		sq_pop(v,1); // pop roottable
-
-
-		sqbind::VM v = m_vm.GetVMHandle();
-		sq_pushobject( v, SqBind< CSqEngineExport >::get_id() ); // push class
-		sq_pushstring( v, SQEXE_SELF, -1 );
-		sqbind_push_method_userdata( v, (CSqEngineExport*)this );
-		sq_newclosure(v,_sqbind_sqmethod_1<T,P1>,1);
-		sq_newslot(v,-3,false);
-		sq_pop(v,1); // pop class
-*/
 
 		BindRootVariable( (CSqEngineExport*)this, SQEXE_SELF );
 
@@ -1394,6 +1536,7 @@ oex::oexBOOL CSqEngine::Init()
 
 		// Custom registrations
 		if ( m_fExportSymbols )
+
 #if defined( SQBIND_SQBIND )
 			m_fExportSymbols( m_vm.GetVMHandle(), m_pSqAllocator );
 #else
@@ -1586,6 +1729,11 @@ int CSqEngine::OnIncludeOnce( const stdString &sScript )
 
 	// Include the thing
 	return OnInclude( sScript );
+}
+
+int CSqEngine::OnIncludeInline( const stdString &sScript )
+{_STT();
+	return 0;
 }
 
 int CSqEngine::OnInclude( const stdString &sScript )

@@ -1,4 +1,5 @@
 
-_self.exec( "notpad", "", "" );
+_self.exec( "c:/windows/notepad.exe", "", "" );
+				  
+//_self.shell( "notepad", "", "" );
 
-//_self.shell( "notpad", "", "" );
