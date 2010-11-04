@@ -205,7 +205,7 @@ function ProcessRequest( session, pkt ) : ( _g )
 			tx.BE_setAbsUCHAR( 6, 5 );
 			tx.BE_setAbsUCHAR( 7, 1 );
 			tx.BE_setAbsUSHORT( 8, offset );
-			tx.BE_setAbsUSHORT( 8, value );
+			tx.BE_setAbsUSHORT( 10, value );
 
 			break;
 
