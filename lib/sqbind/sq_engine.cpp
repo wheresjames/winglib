@@ -693,11 +693,13 @@ stdString CSqEngineExport::prepare_inline( const stdString &sScript, int bFile )
 {_STT();
 
 	// Code header / footer
-//	static oex::oexTCHAR szHeader[] = oexT( "{ function echo( s ) { ::_self.append_stack_output( s ); }" ) oexNL;
 	static oex::oexTCHAR szHeader[] = oexT( "{ local _p = ::_self.get_stack_params(); function echo( s ) { ::_self.append_stack_output( s.tostring() ); }" ) oexNL;
 	static oex::oexTCHAR szFooter[] = oexNL oexT( "}" );
 	static oex::oexTCHAR szOpenStr[] = oexNL oexT( "echo( @\"" );
 	static oex::oexTCHAR szCloseStr[] = oexT( "\" );" ) oexNL;
+	static oex::CStr::t_size nOverhead = (oex::CStr::t_size)
+											 sizeof( szHeader ) + sizeof( szFooter )
+											 + sizeof( szOpenStr ) + sizeof( szCloseStr );
 
 	// Get the source data
 	oex::CStr sSrc;
@@ -715,7 +717,7 @@ stdString CSqEngineExport::prepare_inline( const stdString &sScript, int bFile )
 	// Allocate space for output
 	oex::CStr sDst;
 	oex::CStr::t_size nDst = 0;
-	oex::oexSTR pDst = sDst.OexAllocate( ( szSrc * 2 ) + sizeof( szHeader ) + sizeof( szFooter ) );
+	oex::oexSTR pDst = sDst.OexAllocate( ( szSrc * 2 ) + nOverhead );
 	if ( !pDst )
 		return oexT( "" );
 
@@ -736,6 +738,10 @@ stdString CSqEngineExport::prepare_inline( const stdString &sScript, int bFile )
 	// We must have at least six characters for a complete tag
 	while ( ( nPos + szOpen + szClose ) < szSrc )
 	{
+		// Ensure we have space
+		if ( ( sDst.Size() - nDst ) < ( ( szSrc - nPos ) * 2 ) + nOverhead )
+			pDst = sDst.OexAllocate( sDst.Size() * 2 );
+
 		// Initialize
 		nStart = nPos;
 		nOpen = nClose = szSrc;

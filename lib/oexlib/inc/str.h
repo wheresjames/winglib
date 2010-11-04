@@ -480,6 +480,12 @@ public:
         return m_nLength;
     }
 
+	/// Returns the size of the underlying memory buffer
+	t_size Size()
+	{
+		return (t_size)m_mem.Size();
+	}
+
     /// Returns the size in bytes, of a single character
     t_size SizeOfChar() oexCONST
     {   return sizeof( T ); }
