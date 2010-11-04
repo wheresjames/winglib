@@ -46,8 +46,11 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 		sData = oex::zip::CCompress::Compress( CFile().OpenExisting( sIn.Ptr() ).Read() );
 	else
 	{	
+		// Check for inline extension
+		oex::oexBOOL bInline = sIn.GetFileExtension() == oexT( "squ" );
+
 		sqbind::CSqEngine se;
-		if ( se.Load( sIn.Ptr(), oexNULL, oex::oexTRUE, oex::oexFALSE, oex::oexFALSE ) )
+		if ( se.Load( sIn.Ptr(), oexNULL, oex::oexTRUE, oex::oexFALSE, oex::oexFALSE, bInline ) )
 			sData = oex::zip::CCompress::Compress( se.GetCompiledScript() );
 
 	} // end else

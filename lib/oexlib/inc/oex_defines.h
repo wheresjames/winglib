@@ -495,8 +495,9 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 			oexUNINIT();														\
 			return 0;															\
 		}																		\
+		int ret = 0;															\
 		{	cType theApp;														\
-			int ret = OEX_NAMESPACE::os::CServiceImpl::RunService(				\
+			ret = OEX_NAMESPACE::os::CServiceImpl::RunService(					\
 						argc, (const char**)argv,								\
 						oexAppNamePtr(), oexAppLongNamePtr() );					\
 		}																		\

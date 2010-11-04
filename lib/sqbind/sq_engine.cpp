@@ -45,6 +45,18 @@
 
 using namespace sqbind;
 
+
+CSqEngineExport::CSqEngineExport()
+{_STT();
+
+	m_bFile = oex::oexFALSE;
+}
+
+CSqEngineExport::~CSqEngineExport()
+{
+}
+
+
 int CSqEngineExport::isDebugBuild()
 {_STT();
 #if defined( oexDEBUG )
@@ -140,10 +152,75 @@ int CSqEngineExport::include_once( const stdString &sScript )
 	return OnIncludeOnce( sScript );
 }
 
-stdString CSqEngineExport::include_inline( const stdString &sScript )
+stdString CSqEngineExport::include_inline( const stdString &sScript, CSqMulti *mParams )
 {_STT();
-	return OnIncludeInline( sScript );
+	push_stack( mParams );
+	OnIncludeInline( sScript );
+	return pop_stack();
 }
+
+stdString CSqEngineExport::get_script_return_value()
+{_STT();
+	return m_sReturnData;
+}
+
+
+int CSqEngineExport::push_stack( CSqMulti *mParams )
+{_STT();
+	m_lstScriptData.push_back( mParams );
+	return m_lstScriptData.size();	
+}
+
+stdString CSqEngineExport::pop_stack()
+{_STT();
+	
+	if ( !m_lstScriptData.size() )
+		return oexT( "" );
+
+	stdString sOutput = m_lstScriptData.rbegin()->sOutput;
+	m_lstScriptData.pop_back();
+
+	return sOutput;
+}
+
+CSqMulti CSqEngineExport::get_stack_params()
+{_STT();
+	if ( !m_lstScriptData.size() ) return oexT( "" );
+	return m_lstScriptData.rbegin()->mParams;
+}
+
+int CSqEngineExport::set_stack_params( CSqMulti *mParams )
+{_STT();
+	if ( !mParams || !m_lstScriptData.size() ) return 0;
+	m_lstScriptData.rbegin()->mParams = *mParams;
+	return m_lstScriptData.size();
+}
+
+stdString CSqEngineExport::get_stack_output()
+{_STT();
+	if ( !m_lstScriptData.size() ) return oexT( "" );
+	return m_lstScriptData.rbegin()->sOutput;
+}
+
+int CSqEngineExport::set_stack_output( const stdString &sOutput )
+{_STT();
+	if ( !m_lstScriptData.size() ) return 0;
+	m_lstScriptData.rbegin()->sOutput = sOutput;
+	return m_lstScriptData.size();
+}
+
+int CSqEngineExport::append_stack_output( const stdString &sOutput )
+{_STT();
+	if ( !m_lstScriptData.size() ) return 0;
+	m_lstScriptData.rbegin()->sOutput += sOutput;
+	return m_lstScriptData.size();
+}
+
+int CSqEngineExport::get_stack_size()
+{_STT();
+	return m_lstScriptData.size();
+}
+
 
 int CSqEngineExport::load_module( const stdString &sModule, const stdString &sPath )
 {_STT();
@@ -616,8 +693,9 @@ stdString CSqEngineExport::prepare_inline( const stdString &sScript, int bFile )
 {_STT();
 
 	// Code header / footer
-	static oex::oexTCHAR szHeader[] = oexT( "{ class __buffer { buf = \"\"; }; local __out = __buffer(); function echo( s ) : ( __out ) { __out.buf += s; }" ) oexNL;
-	static oex::oexTCHAR szFooter[] = oexNL oexT( "return __out.buf; }" );
+//	static oex::oexTCHAR szHeader[] = oexT( "{ function echo( s ) { ::_self.append_stack_output( s ); }" ) oexNL;
+	static oex::oexTCHAR szHeader[] = oexT( "{ local _p = ::_self.get_stack_params(); function echo( s ) { ::_self.append_stack_output( s.tostring() ); }" ) oexNL;
+	static oex::oexTCHAR szFooter[] = oexNL oexT( "}" );
 	static oex::oexTCHAR szOpenStr[] = oexNL oexT( "echo( @\"" );
 	static oex::oexTCHAR szCloseStr[] = oexT( "\" );" ) oexNL;
 
@@ -1140,7 +1218,7 @@ int CSqEngineExport::OnIncludeOnce( const stdString &sClass )
 	return 0;
 }
 
-stdString CSqEngineExport::OnIncludeInline( const stdString &sClass )
+int CSqEngineExport::OnIncludeInline( const stdString &sClass )
 {_STT();
 	return 0;
 }
@@ -1362,6 +1440,15 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include_once )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include_inline )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_script_return_value )	
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, push_stack )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, pop_stack )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_stack_size )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_stack_params )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_stack_params )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_stack_output )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_stack_output )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, append_stack_output )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, load_module )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_children )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sleep )
@@ -1602,7 +1689,9 @@ oex::oexBOOL CSqEngine::SetCompiledScript( oex::CStr8 buf )
 } // end if
 
 
-oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::CStr8 *pbScript, oex::oexBOOL bFile, oex::oexBOOL bRelative, oex::oexBOOL bStart )
+oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::CStr8 *pbScript, 
+							  oex::oexBOOL bFile, oex::oexBOOL bRelative, 
+							  oex::oexBOOL bStart, oex::oexBOOL bInline )
 {_STT();
 
 	if ( !sScript.length() && ( !pbScript || !pbScript->Length() ) )
@@ -1672,19 +1761,22 @@ oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::CStr8 *pbScript, oe
 		if ( pbScript && 2 <= pbScript->Length() && ( *(oex::oexUSHORT*)pbScript->Ptr() ) == SQ_BYTECODE_STREAM_TAG )
 			SetCompiledScript( *pbScript );
 
+		else if ( bFile && bInline )
+			m_script = m_vm.CompileBuffer( prepare_inline( sFile.c_str(), 1 ).c_str() );
+
 		else if ( bFile )
 			m_script = m_vm.CompileScript( sFile.c_str() );
 
 		else if ( pbScript && pbScript->Length() )
-			m_script = m_vm.CompileBuffer( pbScript->Ptr() );
+			m_script = m_vm.CompileBuffer( bInline ? prepare_inline( oex82std( *pbScript ), 0 ).c_str() : pbScript->Ptr() );
 
 		else
-			m_script = m_vm.CompileBuffer( sScript.c_str() );
+			m_script = m_vm.CompileBuffer( bInline ? prepare_inline( sScript, 0 ).c_str() : sScript.c_str() );
 
 		if ( bStart )
 
 			// Initialize the script
-			m_vm.RunScript( m_script );
+			m_sReturnData = obj2str( m_vm.RunScript( m_script ) );
 
 	} // end try
 
@@ -1732,7 +1824,7 @@ int CSqEngine::OnIncludeOnce( const stdString &sScript )
 }
 
 
-stdString CSqEngine::OnIncludeInline( const stdString &sScript )
+int CSqEngine::OnIncludeInline( const stdString &sScript )
 {_STT();
 
 	// Push script name
@@ -1748,7 +1840,7 @@ stdString CSqEngine::OnIncludeInline( const stdString &sScript )
 		if ( m_fIncludeScript )
 		{
 			if ( m_fIncludeScript( sScript, sData, m_sScriptName ) || !sData.length() )
-				return oexT( "" );
+				return -1;
 
 			sUseScript = sData;
 			bFile = oex::oexFALSE;
@@ -1766,7 +1858,7 @@ stdString CSqEngine::OnIncludeInline( const stdString &sScript )
 										   ? prepare_inline( std2oex( m_sRoot ).BuildPath( std2oex( sUseScript ) ).Ptr(), 1 ).c_str()
 										   : prepare_inline( sUseScript.c_str(), 0 ).c_str() );
 
-		return obj2str( m_vm.RunScript( m_script ) );
+		m_sReturnData = obj2str( m_vm.RunScript( m_script ) );
 
 	} // end try
 
@@ -1778,7 +1870,7 @@ stdString CSqEngine::OnIncludeInline( const stdString &sScript )
 							  ( bFile && sScript.length() ) ? sScript.c_str() : oexT( "N/A" ) ).Ptr() );
 	}
 
-	return oexT( "" );
+	return nRet;
 }
 
 int CSqEngine::OnInclude( const stdString &sScript )
@@ -1817,7 +1909,7 @@ int CSqEngine::OnInclude( const stdString &sScript )
 							 : m_vm.CompileBuffer( sUseScript.c_str() );
 
 		// Run the script
-		m_vm.RunScript( m_script );
+		m_sReturnData = obj2str( m_vm.RunScript( m_script ) );
 
 	} // end try
 
@@ -1843,7 +1935,7 @@ oex::oexBOOL CSqEngine::Start()
 	_oexTRY
 	{
 		// Initialize the script
-		m_vm.RunScript( m_script );
+		m_sReturnData = obj2str( m_vm.RunScript( m_script ) );
 
 		// Execute init function
 		Execute( WSQBIND_NOREPLY, SQEXE_FN_INIT );
@@ -1872,8 +1964,9 @@ oex::oexBOOL CSqEngine::Run( sqbind::stdString *pReply, oex::oexCSTR pName, oex:
 		SquirrelObject script( m_vm.GetVMHandle() );
 		script = m_vm.CompileBuffer( pScript );
 		SquirrelObject o = m_vm.RunScript( script );
+		m_sReturnData = obj2str( m_vm.RunScript( script ) );
 		if ( pReply )
-			*pReply = obj2str( o );
+			*pReply = m_sReturnData;
 
 	} // end try
 

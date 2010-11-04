@@ -51,13 +51,36 @@ public:
 		eStrSize = 1024
 	};
 
+	struct SScriptData
+	{
+		// Constructors
+		SScriptData() {}
+		SScriptData( CSqMulti *m ) { if ( m ) mParams = *m; }
+
+		// Copy
+		SScriptData( const SScriptData &r ) { mParams = r.mParams; sOutput = r.sOutput; }
+		SScriptData& operator = ( const SScriptData &r ) { mParams = r.mParams; sOutput = r.sOutput; return *this; }
+
+		/// Params passed to script
+		CSqMulti mParams;
+
+		/// Script output
+		stdString sOutput;
+	};
+
+	/// Script data stack
+	typedef oexStdList( SScriptData )	t_ScriptData;
+
 public:
 
 	SQBIND_CLASS_CTOR_BEGIN( CSqEngineExport )
 	SQBIND_CLASS_CTOR_END( CSqEngineExport )
 
+	/// Default constructor
+	CSqEngineExport();
+
 	/// Destructor
-	virtual ~CSqEngineExport() {}
+	virtual ~CSqEngineExport();
 
 	/// Returns the buffer for a binary share
 	CSqBinary get_binshare( const stdString &sName );
@@ -200,7 +223,34 @@ public:
 	int include_once( const stdString &sScript );
 
 	/// Includes the specified inline script
-	stdString include_inline( const stdString &sScript );
+	stdString include_inline( const stdString &sScript, CSqMulti *pParams );
+
+	/// Returns the result of the last script execution
+	stdString get_script_return_value();
+
+	/// Push include stack
+	int push_stack( CSqMulti *pParams );
+
+	/// Pop include stack
+	stdString pop_stack();
+
+	/// Returns the size of the include stack
+	int get_stack_size();
+
+	/// Gets current include params
+	CSqMulti get_stack_params();
+
+	/// Sets current include params
+	int set_stack_params( CSqMulti *sParams );
+
+	/// Returns current output buffer
+	stdString get_stack_output();
+
+	/// Sets the current output buffer
+	int set_stack_output( const stdString &sOutput );
+
+	/// Appends the current output buffer
+	int append_stack_output( const stdString &sOutput );
 
 	/// Loads the specified module
 	int load_module( const stdString &sModule, const stdString &sPath );
@@ -479,7 +529,7 @@ protected:
 
 	virtual int OnIncludeOnce( const stdString &sScript );
 
-	virtual stdString OnIncludeInline( const stdString &sScript );
+	virtual int OnIncludeInline( const stdString &sScript );
 
 	virtual int OnLoadModule( const stdString &sModule, const stdString &sPath );
 
@@ -500,6 +550,12 @@ protected:
 
 	/// Name of the script
 	stdString			m_sScriptName;
+
+	/// Script include stack data
+	t_ScriptData		m_lstScriptData;
+
+	/// Return data from last script execution
+	stdString			m_sReturnData;
 
 };
 
@@ -625,10 +681,16 @@ public:
 	/// Loads a script and prepares it for execution
 	/**
 		\param [in] sScript     -   The script or a file name.
+		\param [in] pbScript	-	Binary script object
 		\param [in] bFile       -   If non-zero, pScript contains a file name.
+		\param [in] bRelative	-	Non-zero if path is relative
+		\param [in] bStart		-	Non-zero if script should be initialized
+		\param [in] bInline		-	Non-zero if script is inline
 
 	*/
-	oex::oexBOOL Load( const stdString &sScript, oex::CStr8 *pbScript, oex::oexBOOL bFile, oex::oexBOOL bRelative = FALSE, oex::oexBOOL bStart = TRUE );
+	oex::oexBOOL Load( const stdString &sScript, oex::CStr8 *pbScript, oex::oexBOOL bFile, 
+					   oex::oexBOOL bRelative = oex::oexFALSE, oex::oexBOOL bStart = oex::oexTRUE, 
+					   oex::oexBOOL bInline = oex::oexFALSE );
 
 	/// Runs the script an executes the initialization function
 	/**
@@ -1163,7 +1225,7 @@ public:
 	virtual int OnIncludeOnce( const stdString &sScript );
 
 	/// Includes the specified inline script
-	virtual stdString OnIncludeInline( const stdString &sScript );
+	virtual int OnIncludeInline( const stdString &sScript );
 
 	/// Loads the specified module
 	virtual int OnLoadModule( const stdString &sModule, const stdString &sPath );
