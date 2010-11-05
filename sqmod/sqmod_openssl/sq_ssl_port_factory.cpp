@@ -23,7 +23,7 @@ CSqSSLPortFactory::CSqSSLPort::CSqSSLPort( SSL_CTX *ctx, oexLock *lock )
 CSqSSLPortFactory::CSqSSLPort::~CSqSSLPort()
 {_STT();
 
-//	OnClose();
+	OnClose();
 }
 
 oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
