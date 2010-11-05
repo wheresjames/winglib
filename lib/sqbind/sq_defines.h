@@ -218,8 +218,9 @@ namespace sqbind
 		{	return oexStrToMb( oex::CStr( s.c_str(), s.length() ) ); }
 
 	template< typename T >
-		stdString obj2str( T &o )
+		stdString obj2str( const T &_o )
 		{
+			T &o = (T&)_o;
 			switch( sq_type( o.GetObjectHandle() ) )
 			{
 				case OT_STRING :

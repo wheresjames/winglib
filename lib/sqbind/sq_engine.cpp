@@ -1975,7 +1975,7 @@ oex::oexBOOL CSqEngine::Run( sqbind::stdString *pReply, oex::oexCSTR pName, oex:
 			*pReply = m_sReturnData;
 
 	} // end try
-
+	
 	_oexCATCH( SScriptErrorInfo &e )
 	{	return LogError( oex::oexFALSE, e, pName ); }
 	_oexCATCH( SquirrelError &e )
