@@ -983,7 +983,7 @@ oexUINT CSys::StartProcess( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirec
 		return (oexUINT)nRet;
 
 	// Switch to user process
-	execv( x_pFile, x_pParams );
+	execv( oexStrToMbPtr( x_pFile ), (char*const*)oexStrToMbPtr( x_pParams ) );
 
 	// Error / quit child process
 	exit( EXIT_SUCCESS );

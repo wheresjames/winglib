@@ -139,7 +139,7 @@ template < typename T_STD, typename T_PB  >
 
 template < typename T >
 	T SQBIND_StrReplace( T str, const T &fstr, const T &rstr )
-	{	T::size_type pos = 0, flen = fstr.length();
+	{	typename T::size_type pos = 0, flen = fstr.length();
 		while ( T::npos != ( pos = str.find( fstr, pos ) ) )
 			str.replace( pos, flen, rstr ), pos += flen;
 		return str;
