@@ -61,9 +61,6 @@ public:
 		SScriptData( const SScriptData &r ) { mParams = r.mParams; sOutput = r.sOutput; }
 		SScriptData& operator = ( const SScriptData &r ) { mParams = r.mParams; sOutput = r.sOutput; return *this; }
 
-		bool operator == ( const SScriptData &r ) { return this == &r; }
-		bool operator != ( const SScriptData &r ) { return this != &r; }
-
 		/// Params passed to script
 		CSqMulti mParams;
 
