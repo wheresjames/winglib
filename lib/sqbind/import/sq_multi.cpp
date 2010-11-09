@@ -199,6 +199,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, merge )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mmerge )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, join )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, parse )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, tmpl )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mset )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, urlencode )
@@ -348,8 +349,8 @@ void CSqMulti::mset( CSqMulti *m )
 
 void CSqMulti::mmerge( CSqMulti *m )
 {_STT();
-	
-	if ( !m ) 
+
+	if ( !m )
 		return;
 
 	for ( CSqMulti::iterator it = m->begin(); it != m->end(); it++ )
@@ -372,6 +373,14 @@ CSqMulti::t_Obj CSqMulti::join( const t_Obj &glue, const t_Obj &tmpl )
 	return s;
 }
 
+int CSqMulti::parse( const t_Obj &s, const t_Obj &glue, const t_Obj &sep, int bTrimWs )
+{_STT();
+	// Deserialize data
+	oex::CStr sData( s.c_str(), s.length() );
+	oex::CPropertyBag pb = oex::CParser::Parse( sData, glue.c_str(), sep.c_str(), bTrimWs );
+	SQBIND_PropertyBagToMulti( pb, m_lst );
+	return m_lst.size();
+}
 
 CSqMulti::t_Obj CSqMulti::urlencode()
 {_STT();
@@ -403,7 +412,7 @@ void CSqMulti::setstr( const oex::CStr &s )
 void CSqMulti::set( const CSqMulti::t_Obj &v )
 {_STT();
 	// +++ why the if? why?
-	// if ( v.length() ) 
+	// if ( v.length() )
 		m_val = v;
 }
 

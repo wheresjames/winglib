@@ -170,6 +170,21 @@ public:
 	{	return m_height;
 	}
 
+	/// Returns video width
+	int getFps()
+	{	return m_fps;
+	}
+
+	/// Returns the sdp object
+	sqbind::CSqMulti getSDP()
+	{	return m_mSdp;
+	}
+
+	/// Returns a single sdp value
+	sqbind::CSqMulti getSDPValue( const sqbind::stdString &k )
+	{	return m_mSdp[ k ];
+	}
+
 	/// Returns non-zero if a container is open
 	int isOpen()
 	{	return m_pRtspClient ? 1 : 0;
@@ -302,7 +317,13 @@ private:
 	/// Video frame height
 	int						m_height;
 
+	/// Video frame height
+	int						m_fps;
+
 	/// Signal to start RTSP stream
 	oexEvent				m_evtPlay;
+
+	/// SDP string
+	sqbind::CSqMulti		m_mSdp;
 
 };

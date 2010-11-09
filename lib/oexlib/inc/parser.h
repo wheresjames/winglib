@@ -215,6 +215,44 @@ public:
 
 	/// Decodes url type params such as "a=b&c=d"
 	template< typename T >
+		static TPropertyBag< TStr< T > > Parse( oexCONST T *x_pStr, oexCONST T *x_pGlue, oexCONST T *x_pSep, oexBOOL x_bTrimWs )
+		{   oexASSERT_PTR( x_pStr );
+			return Parse( TStr< T >( x_pStr ), x_pGlue, x_pSep, x_bTrimWs );
+		}
+
+	template< typename T >
+		static TPropertyBag< TStr< T > > Parse( TStr< T > x_str, oexCONST T *x_pGlue, oexCONST T *x_pSep, oexBOOL x_bTrimWs )
+	{
+		TPropertyBag< TStr< T > > pb;
+		TStr< T > key, val;
+
+		TList< TStr< T > > lst = CParser::Split< T >( x_str, x_pGlue );
+
+		for ( typename TList< TStr< T > >::iterator it; lst.Next( it ); )
+		{
+			key = UrlDecode( it->Parse( x_pSep ) );
+			if ( key.Length() ) (*it)++;
+			val = UrlDecode( it.Obj() );
+
+			// Key value pair
+			if ( key.Length() && val.Length() )
+				pb[ x_bTrimWs ? key.TrimWhiteSpace() : key ] = x_bTrimWs ? val.TrimWhiteSpace() : val;
+
+			// NULL key assignment
+			else if ( key.Length() )
+				pb[ x_bTrimWs ? key.TrimWhiteSpace() : key ] = oexTT( T, "" );
+
+			// Assume NULL key assignment
+			else if ( val.Length() )
+				pb[ x_bTrimWs ? val.TrimWhiteSpace() : val ] = oexTT( T, "" );
+
+		} // end while
+
+		return pb;
+	}
+
+	/// Decodes url type params such as "a=b&c=d"
+	template< typename T >
 		static TPropertyBag< TStr< T > > DecodeUrlParams( oexCONST T *x_pStr )
 		{   oexASSERT_PTR( x_pStr );
 			return DecodeUrlParams( TStr< T >( x_pStr ) );
@@ -555,7 +593,7 @@ public:
 		static oexLONG Deserialize( oexCONST T *x_pStr, TPropertyBag< TStr< T > > &x_pb, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
 	{	return Deserialize( TStr< T >( x_pStr ), x_pb, x_bMerge, x_pLast );
 	}
-		
+
 	template< typename T >
 		static oexLONG Deserialize( oexCONST TStr< T > &x_sStr, TPropertyBag< TStr< T > > &x_pb, oexBOOL x_bMerge = oexFALSE, oexLONG *x_pLast = oexNULL )
 	{

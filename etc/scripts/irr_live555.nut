@@ -70,9 +70,18 @@ function _init() : ( _g )
 			utube1		= [ "utube1",		"rtsp://v2.cache1.c.youtube.com/CkgLENy73wIaPwlnoDu0pt7zDRMYDSANFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNaDkNsaWNrVGh1bWJuYWlsYOmkotHXgfvJRgw=/0/0/0/video.3gp" ],
 		};
 
-	// Check TCP Port 554 and UDP ports 6970-9999
+	local channel = _self.get( "/", "cmdline.channel" );
+	if ( !channel.len() )
+	{	channel = "scifi";
+		local link = _self.get( "/", "cmdline.rtsp" );
+		if ( link.len() )
+		{	channel = "user";
+			rtsp_video[ "user" ] <- [ "User", link ];
+		} // end if
+	} // end if
 
-	StartStream( rtsp_video[ "scifi" ], 0, 0 );
+	// Check TCP Port 554 and UDP ports 6970-9999
+	StartStream( rtsp_video[ channel ], 0, 0 );
 
 	_self.set_timer( ".", 15, "OnTimer" );
 
@@ -117,14 +126,14 @@ function UpdateVideo() : ( _g )
 			_g.rtsp.setVideoHeader( header );
 		} // end if
 
-//		_self.echo( "Video Size = " + _g.rtsp.getWidth() + " x " + _g.rtsp.getHeight() );
+//		_self.echo( "Video Size = " + _g.rtsp.getWidth() + " x " + _g.rtsp.getHeight() + " - " + _g.rtsp.getFps() + "fps" );
 //		_self.echo( "Video Size = " + _g.w + " x " + _g.h );
 
 		_self.echo( "Creating video decoder for " + _g.rtsp.getVideoCodecName() );
 		_g.dec = CFfDecoder();
 		_g.dec.setExtraData( _g.rtsp.getExtraVideoData() );
 		if ( !_g.dec.Create( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ), CFfConvert().PIX_FMT_YUV420P,
-							 0, 0, 5, 2000000, CSqMulti( "cmp=-2" ) ) )
+							 _g.rtsp.getWidth(), _g.rtsp.getHeight(), 5, 2000000, CSqMulti( "cmp=-2" ) ) )
 			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getVideoCodecName() ), _g.quit = 1;
 
 		_self.echo( " !!! STARTING RTSP STREAM !!!" );
@@ -182,38 +191,49 @@ function UpdateVideo() : ( _g )
 
 		} // end if
 
-		if ( !_g.tex )
-		{
-			// Decode a frame to get the width / height
-			_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, CSqBinary(), CSqMulti(), 0 );
-			if ( 0 < _g.dec.getWidth() && 0 < _g.dec.getHeight() )
-			{	_g.tex = _g.irr.CreateTexture( _g.dec.getWidth(), _g.dec.getHeight(), 0 );
-				_g.video.SetTexture( 0, _g.tex );
-			} // end if
-
-			_self.echo( _g.dec.getWidth() + " x " + _g.dec.getHeight() );
-
-		} // end if
-
-		else
-		{
-			local tex = _g.tex.Lock();
-			if ( tex.getUsed() )
-			{
-				// dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808,size=165698,stream_index=0
-//				if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti( "dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808" ) ) )
-				if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti(), 0 ) )
-					_self.echo( "failed to decode frame" );
-
-				_g.tex.Unlock();
-
-			} // end if
-
-		} // end else
+		_g.dec.BufferData( frame, CSqMulti() );
 
 		_g.rtsp.UnlockVideo();
 
 	} // end if
+
+	//	if ( _g.dec.Decode( CSqBinary(), CFfConvert().PIX_FMT_RGB32, CSqBinary(), CSqMulti(), 0 ) )
+		if ( 0 < _g.dec.getBufferSize() )
+		{
+//			::_self.echo( "buffered : " + _g.dec.getBufferSize() );
+
+			if ( !_g.tex )
+			{
+				// Decode a frame to get the width / height
+				_g.dec.Decode( CSqBinary(), CFfConvert().PIX_FMT_RGB32, CSqBinary(), CSqMulti(), 0 );
+				if ( 0 < _g.dec.getWidth() && 0 < _g.dec.getHeight() )
+				{	_g.tex = _g.irr.CreateTexture( _g.dec.getWidth(), _g.dec.getHeight(), 0 );
+					_g.video.SetTexture( 0, _g.tex );
+				} // end if
+
+				_self.echo( _g.dec.getWidth() + " x " + _g.dec.getHeight() );
+
+			} // end if
+
+			else
+			{
+				local tex = _g.tex.Lock();
+				if ( tex.getUsed() )
+				{
+					// dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808,size=165698,stream_index=0
+//					if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti( "dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808" ) ) )
+//					if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti(), 0 ) )
+					if ( !_g.dec.Decode( CSqBinary(), CFfConvert().PIX_FMT_RGB32, tex, CSqMulti(), 0 ) )
+						;
+//						_self.echo( "failed to decode frame" );
+
+					_g.tex.Unlock();
+
+				} // end if
+
+			} // end else
+
+		} // end if
 
 	// Is there audio?
 	if ( _g.adec && _g.rtsp.LockAudio( frame, CSqMulti() ) )

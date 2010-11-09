@@ -359,6 +359,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexStdMap( k, v )	                std::map< k, v, std::less< k >, OEX_NAMESPACE::COexStdAllocator< k > >
 #define oexStdList( t )		                std::list< t, OEX_NAMESPACE::COexStdAllocator< t > >
 #define oexStdVector( t )	                std::vector< t, OEX_NAMESPACE::COexStdAllocator< t > >
+#define oexStdIStringStream( t )			std::basic_istringstream< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
 
 #define oexCompress							OEX_NAMESPACE::zip::CCompress::Compress
 #define oexUncompress						OEX_NAMESPACE::zip::CUncompress::Uncompress

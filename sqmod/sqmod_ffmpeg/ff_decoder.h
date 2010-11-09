@@ -74,6 +74,15 @@ public:
 	/// Sets extra codec data
 	void setExtraData( sqbind::CSqBinary *p ) { if ( p ) m_extra = *p; }
 
+	/// Appends data to temporary buffer and initializes padding
+	int BufferData( sqbind::CSqBinary *in, sqbind::CSqMulti *m );
+
+	/// Dequeues data from buffer
+	int UnBufferData( int uUsed );
+
+	/// Returns the amount of data buffered
+	int getBufferSize();
+
 private:
 
 	/// Image format
@@ -91,8 +100,8 @@ private:
 	/// Decode frame buffer
 	AVFrame 				*m_pFrame;
 
-	/// Frame packet
-	AVPacket				m_pkt;
+	/// Packet structure
+	AVPacket 				m_pkt;
 
 	/// Temp buffer
 	sqbind::CSqBinary		m_tmp;

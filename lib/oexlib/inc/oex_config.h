@@ -291,3 +291,11 @@
 #define oexMAXSIZE					( (oexSIZE_T)-1 )
 #define oexMAXFILESIZE				( (oexFILESIZE_T)-1 )
 
+#if defined( OEX_WINDOWS )
+#	define oexTmpPath				"C:/Temp"
+#else		
+#	define oexTmpPath				"/tmp"	
+#endif
+
+
+

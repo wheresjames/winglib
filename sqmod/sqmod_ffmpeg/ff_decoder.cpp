@@ -146,33 +146,46 @@ int CFfDecoder::FindStreamInfo( sqbind::CSqBinary *in )
 	return 1;
 }
 
-int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m, int flip )
-{_STT();
-	// Ensure codec
-	if ( !m_pCodecContext )
-		return 0;
+int CFfDecoder::BufferData( sqbind::CSqBinary *in, sqbind::CSqMulti *m )
+{
+	// Init packet
+	oexZero( m_pkt );
 
-	// Validate params
-	if ( !in || !in->getUsed() || !out )
-		return 0;
+	// Init other packet data
+	if ( m )
+	{
+		if ( m->isset( oexT( "flags" ) ) )
+			m_pkt.flags = (*m)[ oexT( "flags" ) ].toint();
+		if ( m->isset( oexT( "stream_index" ) ) )
+			m_pkt.stream_index = (*m)[ oexT( "stream_index" ) ].toint();
+		if ( m->isset( oexT( "pos" ) ) )
+			m_pkt.pos = (*m)[ oexT( "pos" ) ].toint64();
+		if ( m->isset( oexT( "dts" ) ) )
+			m_pkt.dts = (*m)[ oexT( "dts" ) ].toint64();
+		if ( m->isset( oexT( "pts" ) ) )
+			m_pkt.pts = (*m)[ oexT( "pts" ) ].toint64();
+		if ( m->isset( oexT( "duration" ) ) )
+			m_pkt.duration = (*m)[ oexT( "duration" ) ].toint();
+		if ( m->isset( oexT( "convergence_duration" ) ) )
+			m_pkt.duration = (*m)[ oexT( "convergence_duration" ) ].toint();
 
-/*
-	AVPacket pkt; oexZero( pkt );
-	pkt.data = (uint8_t*)in->_Ptr();
-	pkt.size = in->getUsed();
+	} // end if
 
-	// Ensure buffer size
-	if ( ( m_tmp.Size() - m_tmp.getUsed() ) < (sqbind::CSqBinary::t_size)( pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) )
-		m_tmp.Allocate( 2 * ( m_tmp.Size() + pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) );
+	// Are we adding data?
+	if ( in && in->getUsed() )
+	{
+		// Ensure buffer size
+		if ( ( m_tmp.Size() - m_tmp.getUsed() ) < (sqbind::CSqBinary::t_size)( in->getUsed() + FF_INPUT_BUFFER_PADDING_SIZE ) )
+			m_tmp.Allocate( 2 * ( m_tmp.Size() + in->getUsed() + FF_INPUT_BUFFER_PADDING_SIZE ) );
 
-	// Add new data
-	m_tmp.AppendBuffer( (sqbind::CSqBinary::t_byte*)pkt.data, pkt.size );
+		// Add new data to buffer
+		m_tmp.Append( in );
 
-oexSHOW( m_tmp.getUsed() );
+	} // end if
 
-	// Create packet
-	pkt.data = (uint8_t*)m_tmp._Ptr();
-	pkt.size = m_tmp.getUsed();
+	// Get buffer pointers
+	m_pkt.data = (uint8_t*)m_tmp._Ptr();
+	m_pkt.size = m_tmp.getUsed();
 
 	// Zero padding
 	int nPadding = m_tmp.Size() - m_tmp.getUsed();
@@ -183,23 +196,43 @@ oexSHOW( m_tmp.getUsed() );
 			nPadding = FF_INPUT_BUFFER_PADDING_SIZE * 2;
 
 		// Set end to zero to ensure no overreading on damaged blocks
-		oexZeroMemory( &m_tmp._Ptr()[ m_tmp.getUsed() ], nPadding );
+		oexZeroMemory( &m_pkt.data[ m_pkt.size ], nPadding );
 
 	} // end if
-*/
-	// How much padding is there in the buffer
-	// If not enough, we assume the caller took care of it
-	int nPadding = in->Size() - in->getUsed();
-	if ( 0 < nPadding )
-	{
-		// Don't zero more than twice the padding size
-		if ( nPadding > ( FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
-			nPadding = FF_INPUT_BUFFER_PADDING_SIZE * 2;
 
-		// Set end to zero to ensure no overreading on damaged blocks
-		oexZeroMemory( &in->_Ptr()[ in->getUsed() ], nPadding );
+	return m_pkt.size;
+}
 
-	} // end if
+int CFfDecoder::UnBufferData( int uUsed )
+{
+	if ( 0 > uUsed )
+		m_tmp.setUsed( 0 );
+	else if ( 0 < uUsed )
+		m_tmp.LShift( uUsed );
+
+	// Ensure packet pointers are valid
+	m_pkt.data = (uint8_t*)m_tmp._Ptr();
+	m_pkt.size = m_tmp.getUsed();
+
+	return m_pkt.size;
+}
+
+int CFfDecoder::getBufferSize()
+{	if ( !m_pkt.data )
+		return 0;
+	return m_pkt.size;
+}
+
+int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m, int flip )
+{_STT();
+
+	// Ensure codec
+	if ( !m_pCodecContext )
+		return 0;
+
+	// Get data packet
+	if ( !in || !out || !BufferData( in, m ) )
+		return 0;
 
 	if ( !m_pFrame )
 		m_pFrame = avcodec_alloc_frame();
@@ -210,44 +243,12 @@ oexSHOW( m_tmp.getUsed() );
 	int gpp = 0;
 	int used = 0;
 #if defined( FFSQ_VIDEO2 )
-
-		// Init packet
-		AVPacket pkt; oexZero( pkt );
-//		av_init_packet( &pkt );
-
-		if ( m )
-		{
-			if ( m->isset( oexT( "flags" ) ) )
-				pkt.flags = (*m)[ oexT( "flags" ) ].toint();
-			if ( m->isset( oexT( "stream_index" ) ) )
-				pkt.stream_index = (*m)[ oexT( "stream_index" ) ].toint();
-			if ( m->isset( oexT( "pos" ) ) )
-				pkt.pos = (*m)[ oexT( "pos" ) ].toint64();
-			if ( m->isset( oexT( "dts" ) ) )
-				pkt.dts = (*m)[ oexT( "dts" ) ].toint64();
-			if ( m->isset( oexT( "pts" ) ) )
-				pkt.pts = (*m)[ oexT( "pts" ) ].toint64();
-			if ( m->isset( oexT( "duration" ) ) )
-				pkt.duration = (*m)[ oexT( "duration" ) ].toint();
-			if ( m->isset( oexT( "convergence_duration" ) ) )
-				pkt.duration = (*m)[ oexT( "convergence_duration" ) ].toint();
-
-//oexSHOW( m->serialize().c_str() );
-
-		} // end if
-
-		pkt.data = (uint8_t*)in->_Ptr();
-		pkt.size = in->getUsed();
-
-		used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &pkt );
-		if ( 0 >= used )
-		{	oexSHOW( used );
-			return 0;
-		} // end if
-
+		used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
 #else
-		avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (uint8_t*)in->_Ptr(), in->getUsed() );
+		used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (uint8_t*)m_pkt.data, m_pkt.size );
 #endif
+
+	UnBufferData( used );
 
 	if ( 0 >= gpp )
 		return 0;
@@ -264,43 +265,28 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 	if ( !m_pCodecContext )
 		return 0;
 
-	// Validate params
-	if ( !in || !in->getUsed() || !img )
+	// Ensure codec
+	if ( !m_pCodecContext )
 		return 0;
 
-	// How much padding is there in the buffer
-	// If not enough, we assume the caller took care of it
-	int nPadding = in->Size() - in->getUsed();
-	if ( 0 < nPadding )
-	{
-		// Don't zero more than twice the padding size
-		if ( nPadding > ( FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
-			nPadding = FF_INPUT_BUFFER_PADDING_SIZE * 2;
+	// Get data packet
+	if ( !in || !img || !BufferData( in, m ) )
+		return 0;
 
-		// Set end to zero to ensure no overreading on damaged blocks
-		oexZeroMemory( &in->_Ptr()[ in->getUsed() ], nPadding );
+	if ( !m_pFrame )
+		m_pFrame = avcodec_alloc_frame();
 
-	} // end if
-
-	if ( m_pFrame )
-	{	av_free( m_pFrame );
-		m_pFrame = oexNULL;
-	} // end if
-
-	m_pFrame = avcodec_alloc_frame();
 	if ( !m_pFrame )
 		return 0;
 
-	m_pkt.data = (uint8_t*)in->_Ptr();
-	m_pkt.size = in->getUsed();
-
 	int gpp = 0;
-//	int used =
+	int used = 0;
 #if defined( FFSQ_VIDEO2 )
-		avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
+		used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
 #else
-		avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (uint8_t*)in->_Ptr(), in->getUsed() );
+		used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (uint8_t*)in->_Ptr(), in->getUsed() );
 #endif
+		UnBufferData( used );
 
 	if ( 0 >= gpp )
 		return 0;

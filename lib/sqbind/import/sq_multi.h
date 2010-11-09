@@ -197,6 +197,9 @@ namespace sqbind
 		/// Joins all elements in the array
 		t_Obj join( const t_Obj &glue, const t_Obj &tmpl );
 
+		/// Parses a key/value string
+		int parse( const t_Obj &s, const t_Obj &glue, const t_Obj &sep, int bTrimWs );
+
 		/// Returns non-zero if the specified key exists
 		int isset( const t_Obj &k );
 

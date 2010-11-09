@@ -4,6 +4,11 @@
 
 #include "GroupsockHelper.hh"
 
+#include <iostream>
+#include <sstream>
+#include <algorithm>
+#include <iterator>
+
 
 CLvRtspClient::CVideoSink::CVideoSink( UsageEnvironment& rEnv ) :
 	MediaSink( rEnv )
@@ -22,10 +27,10 @@ CLvRtspClient::CVideoSink::~CVideoSink()
 
 void CLvRtspClient::CVideoSink::setHeader( sqbind::CSqBinary *header )
 {_STT();
-	oexAutoLock ll( m_lock ); 
-	if ( !ll.IsLocked() ) 
+	oexAutoLock ll( m_lock );
+	if ( !ll.IsLocked() )
 		return;
-	if ( header ) 
+	if ( header )
 		m_header = *header;
 }
 
@@ -40,7 +45,7 @@ Boolean CLvRtspClient::CVideoSink::continuePlaying()
 	{
 		m_buf.Mem().Mem().OexNew( eDefaultBufferSize );
 
-		oexAutoLock ll( m_lock ); 
+		oexAutoLock ll( m_lock );
 		if ( ll.IsLocked() )
 		{
 			m_buf.MemCpyAt( &m_header, 0 );
@@ -219,6 +224,7 @@ CLvRtspClient::CLvRtspClient()
 	m_bAudio = 1;
 	m_width = 0;
 	m_height = 0;
+	m_fps = 0;
 	m_pVsPss = oexNULL;
 	m_pAsPss = oexNULL;
 }
@@ -235,6 +241,7 @@ void CLvRtspClient::Destroy()
 	m_mParams.clear();
 	m_width = 0;
 	m_height = 0;
+	m_fps = 0;
 	m_pEnv = 0;
 	m_pRtspClient = oexNULL;
 	m_pSession = oexNULL;
@@ -271,8 +278,10 @@ void CLvRtspClient::ThreadDestroy()
 	m_sVideoCodec = oexT( "" );
 	m_width = 0;
 	m_height = 0;
+	m_fps = 0;
 	m_pVsPss = oexNULL;
 	m_pAsPss = oexNULL;
+	m_mSdp.clear();
 }
 
 int CLvRtspClient::Open( const sqbind::stdString &sUrl, int bVideo, int bAudio, sqbind::CSqMulti *m )
@@ -354,6 +363,9 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 		return 0;
 	} // end if
 
+	// Parse params
+	m_mSdp.parse( oexMbToStrPtr( pSdp ), oexT( "\r\n" ), oexT( ":" ), 1 );
+
 	// Create session
 	m_pSession = MediaSession::createNew( *m_pEnv, pSdp );
 
@@ -422,8 +434,43 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 		} // end for
 	} // end if
 
+	// Try to get the image width / height
 	m_width = pss->videoWidth();
 	m_height = pss->videoWidth();
+	m_fps = pss->videoFPS();
+
+	// a=framesize:96 176-144
+	if ( !m_width || !m_height )
+	{	sqbind::stdString s = m_mSdp[ oexT( "a=framesize" ) ].str();
+		if ( s.length() )
+		{	oex::TList< oex::CStr > lst = oex::CParser::Split( s.c_str(), s.length(), oexT( " " ) );
+			if ( 1 < lst.Size() )
+			{	oex::TList< oex::CStr > nums = oex::CParser::Split( lst[ 1 ]->Ptr(), lst[ 1 ]->Length(), oexT( "-" ) );
+				if ( 1 < nums.Size() )
+					m_width = nums[ 0 ]->ToLong(),
+					m_height = nums[ 1 ]->ToLong();
+			} // end if
+		} // end if
+	} // end if
+
+	// a=cliprect:0,0,144,176
+	if ( !m_width || !m_height )
+	{	sqbind::stdString s = m_mSdp[ oexT( "a=cliprect" ) ].str();
+		if ( s.length() )
+		{	oex::TList< oex::CStr > nums = oex::CParser::Split( s.c_str(), s.length(), oexT( "," ) );
+			if ( 3 < nums.Size() )
+				m_width = nums[ 3 ]->ToLong(),
+				m_height = nums[ 2 ]->ToLong();
+		} // end if
+	} // end if
+
+	// a=framerate:30
+	if ( !m_fps )
+		m_fps = m_mSdp[ oexT( "a=framerate" ) ].toint();
+
+	// a=maxprate:30
+//	if ( !m_fps )
+	//	m_fps = m_mSdp[ oexT( "a=maxprate" ) ].toint();
 
 	pss->rtpSource()->setPacketReorderingThresholdTime( 2000000 );
 

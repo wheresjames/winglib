@@ -43,6 +43,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfDecoder, CFfDecoder )
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, getBitRate )
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, setExtraData )
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, getExtraData )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, BufferData )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, UnBufferData )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, getBufferSize )
 
 	SQBIND_STATIC_FUNCTION( CFfDecoder, LookupCodecId )
 	SQBIND_STATIC_FUNCTION( CFfDecoder, LookupCodecName )
@@ -73,7 +76,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfConvert, CFfConvert )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorIB )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorBI )
 	SQBIND_STATIC_FUNCTION( CFfConvert, Rotate )
-	SQBIND_STATIC_FUNCTION( CFfConvert, FlipVert )	
+	SQBIND_STATIC_FUNCTION( CFfConvert, FlipVert )
 	SQBIND_STATIC_FUNCTION( CFfConvert, FmtEquiv )
 
 	// Format tyeps
@@ -174,7 +177,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, AddVideoStream )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, WriteFrame )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, Seek )
-	
+
 	SQBIND_MEMBER_FUNCTION( CFfContainer, Destroy )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, CloseStream )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getFps )

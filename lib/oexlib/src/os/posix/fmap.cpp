@@ -118,10 +118,20 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexFILESIZE_
 		// Make a temporary file #406080
 //		mkstemp( sPath._Ptr() );
 
+		// Ensure temp path exists
+//		if ( !oexExists( oexTmpPath ) )
+//		{	oexCreatePath( oexTmpPath );
+//			if ( !oexExists( oexTmpPath ) )
+//			{	oexERROR( -1, oexT( "Invalid Temp path : " oexTmpPath ) );
+//				return CFMap::c_Failed;
+//			} // end else
+//		} // end if
+			
 		// Attempt to build a file name
-		zstr::Copy( pPath, "/027ed44e-1208-4a38-9a48-9f97df77250b." );
-//		zstr::Copy( pPath, "/tmp/oex.shared." );
-		zstr::Append( pPath, sName.Ptr() );
+//		zstr::Copy( pPath, oexTmpPath "/027ed44e-1208-4a38-9a48-9f97df77250b." );
+
+		zstr::Copy( pPath, "/oex.shared." );
+		zstr::Append( pPath, oexMd5( sName ).Ptr() );
 
 	} // end if
 
@@ -169,7 +179,7 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexFILESIZE_
 //		bExists = oexFALSE;
 
 	// Go ahead and unlink
-//	shm_unlink( sPath.Ptr() );
+	shm_unlink( sPath.Ptr() );
 
 	// Add file mapping name to list
 	oexAutoLock ll( g_lstFileMappingInfoLock );

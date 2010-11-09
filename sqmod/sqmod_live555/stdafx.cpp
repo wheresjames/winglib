@@ -16,6 +16,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CLvRtspClient, CLvRtspClient )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, isOpen )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getWidth )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getHeight )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getFps )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getFrameCount )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getVideoCodecName )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getAudioCodecName )
@@ -24,6 +25,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CLvRtspClient, CLvRtspClient )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getExtraVideoData )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getExtraAudioData )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, setVideoHeader )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getSDP )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getSDPValue )
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CLvRtspClient );
@@ -35,9 +38,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CLvRtspServer, CLvRtspServer )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, StartServer )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, isThread )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, getUrl )
-	SQBIND_MEMBER_FUNCTION( CLvRtspServer, needFrame )	
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, needFrame )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, Msg )
-	
+
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CLvRtspServer );
 
