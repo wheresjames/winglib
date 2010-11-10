@@ -168,18 +168,15 @@ stdString CSqEngineExport::get_script_return_value()
 int CSqEngineExport::push_stack( CSqMulti *mParams )
 {_STT();
 	m_lstScriptData.push_back( mParams );
-	return m_lstScriptData.size();	
+	return m_lstScriptData.size();
 }
 
 stdString CSqEngineExport::pop_stack()
 {_STT();
-	
 	if ( !m_lstScriptData.size() )
 		return oexT( "" );
-
 	stdString sOutput = m_lstScriptData.rbegin()->sOutput;
 	m_lstScriptData.pop_back();
-
 	return sOutput;
 }
 
@@ -676,10 +673,10 @@ stdString CSqEngineExport::run( int nRet, const stdString &sPath, const stdStrin
 {_STT();
 
 	CSqMsgQueue *q = queue();
-	if ( !q ) 
+	if ( !q )
 		return oexT( "" );
 
-	if ( !nRet ) 
+	if ( !nRet )
 	{	q->run( oexNULL, sPath, sName, sScript );
 		return oexT( "" );
 	} // end if
@@ -705,7 +702,7 @@ stdString CSqEngineExport::prepare_inline( const stdString &sScript, int bFile )
 	oex::CStr sSrc;
 	if ( bFile )
 		sSrc = oexFileGetContents( sScript.c_str() );
-	else 
+	else
 		sSrc = std2oex( sScript );
 
 	// Did we get anything
@@ -759,7 +756,7 @@ stdString CSqEngineExport::prepare_inline( const stdString &sScript, int bFile )
 				nClose = nPos;
 			else
 				nPos++;
-		
+
 		// Did we find embedded code?
 		if ( nOpen < szSrc && nClose < szSrc )
 		{
@@ -1438,7 +1435,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, print )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, echo )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_key )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_key )	
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_key )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_build )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_version )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, flush )
@@ -1446,7 +1443,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include_once )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include_inline )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_script_return_value )	
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_script_return_value )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, push_stack )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, pop_stack )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_stack_size )
@@ -1483,17 +1480,17 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getlogbin )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, resetlog )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, prepare_inline )	
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, prepare_inline )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, exec )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, process_system_messages )	
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, process_system_messages )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sqexe )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_install )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_remove )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_start )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_stop )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_restart )	
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_system_drive_info )	
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_restart )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_system_drive_info )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_cpu_load )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_instance_handle )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, boot_time )
@@ -1561,7 +1558,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_name )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_app_name )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_app_long_name )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_app_description )	
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_app_description )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_script )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_binshare )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_binshare )
@@ -1695,8 +1692,8 @@ oex::oexBOOL CSqEngine::SetCompiledScript( oex::CStr8 buf )
 } // end if
 
 
-oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::CStr8 *pbScript, 
-							  oex::oexBOOL bFile, oex::oexBOOL bRelative, 
+oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::CStr8 *pbScript,
+							  oex::oexBOOL bFile, oex::oexBOOL bRelative,
 							  oex::oexBOOL bStart, oex::oexBOOL bInline )
 {_STT();
 
@@ -1860,7 +1857,7 @@ int CSqEngine::OnIncludeInline( const stdString &sScript )
 		} // end if
 
 		else
-			m_script = m_vm.CompileBuffer( bFile 
+			m_script = m_vm.CompileBuffer( bFile
 										   ? prepare_inline( std2oex( m_sRoot ).BuildPath( std2oex( sUseScript ) ).Ptr(), 1 ).c_str()
 										   : prepare_inline( sUseScript.c_str(), 0 ).c_str() );
 
@@ -1975,7 +1972,7 @@ oex::oexBOOL CSqEngine::Run( sqbind::stdString *pReply, oex::oexCSTR pName, oex:
 			*pReply = m_sReturnData;
 
 	} // end try
-	
+
 	_oexCATCH( SScriptErrorInfo &e )
 	{	return LogError( oex::oexFALSE, e, pName ); }
 	_oexCATCH( SquirrelError &e )

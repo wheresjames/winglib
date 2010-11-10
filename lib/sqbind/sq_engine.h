@@ -61,9 +61,6 @@ public:
 		SScriptData( const SScriptData &r ) { mParams = r.mParams; sOutput = r.sOutput; }
 		SScriptData& operator = ( const SScriptData &r ) { mParams = r.mParams; sOutput = r.sOutput; return *this; }
 
-		bool operator == ( const SScriptData &r ) const { return this == &r; }
-		bool operator != ( const SScriptData &r ) const { return this != &r; }
-
 		/// Params passed to script
 		CSqMulti mParams;
 
@@ -81,6 +78,12 @@ public:
 
 	/// Default constructor
 	CSqEngineExport();
+
+	/// Copy constructor
+	CSqEngineExport( const CSqEngineExport &r ) {}
+
+	/// Copy operator
+	CSqEngineExport& operator = ( const CSqEngineExport &r ) { return *this; }
 
 	/// Destructor
 	virtual ~CSqEngineExport();
@@ -691,8 +694,8 @@ public:
 		\param [in] bInline		-	Non-zero if script is inline
 
 	*/
-	oex::oexBOOL Load( const stdString &sScript, oex::CStr8 *pbScript, oex::oexBOOL bFile, 
-					   oex::oexBOOL bRelative = oex::oexFALSE, oex::oexBOOL bStart = oex::oexTRUE, 
+	oex::oexBOOL Load( const stdString &sScript, oex::CStr8 *pbScript, oex::oexBOOL bFile,
+					   oex::oexBOOL bRelative = oex::oexFALSE, oex::oexBOOL bStart = oex::oexTRUE,
 					   oex::oexBOOL bInline = oex::oexFALSE );
 
 	/// Runs the script an executes the initialization function
