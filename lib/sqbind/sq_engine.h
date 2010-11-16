@@ -265,7 +265,10 @@ public:
 	int kill( const stdString &sPath );
 
 	/// Sends the kills message to the specified thread and doesn't return until it exits
-	int kill_wait( const stdString &sPath );
+	int kill_wait( const stdString &sPath, int nTimeout, int bTerminate );
+
+	/// Sends the terminate mesage to the specified thread
+	int terminate_thread( const stdString &sPath );
 
 	/// Returns boot time in seconds
 	float clock();
@@ -1279,6 +1282,9 @@ private:
 
 	/// Squirrel virtual machine
 	SquirrelVM              	m_vm;
+
+	/// ID of the thread that created the vm
+	oex::oexUINT				m_uThreadId;
 
 	/// Pointer to module manager object
 	CModuleManager          	*m_pModuleManager;

@@ -161,6 +161,11 @@ oexRESULT CThread::Stop( oexUINT x_uWait, oexBOOL x_bKill )
 
 oexBOOL CThread::IsRunning()
 {_STT();
+
+	// Ensure thread resource is valid
+	if ( !CResource::IsValid() )
+		return oexFALSE;
+
 	// Has the thread exited?
 	return !WaitThreadExit( 0 );
 }

@@ -116,9 +116,6 @@ protected:
 	/// Releases all child scripts
 	void DestroyChildScripts();
 
-	/// Cleanup tasks
-	void Cleanup();
-
 	/// Returns non-zero when messages will no longer be processed
 	virtual oex::oexBOOL Running() { return CThread::IsRunning(); }
 
@@ -163,6 +160,9 @@ public:
 	/// Sets the script name
 	void SetScriptName( sqbind::stdString sName )
 	{	m_cSqEngine.SetScriptName( sName.c_str() ); }
+
+	/// Cleanup tasks
+	virtual void Cleanup();
 
 	/// Return a pointer to the engine
 	virtual CSqEngine* GetEngine() { return &m_cSqEngine; }

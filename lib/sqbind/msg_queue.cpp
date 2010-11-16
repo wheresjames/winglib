@@ -125,6 +125,10 @@ void CSqMsgQueue::Destroy()
 */
 oex::oexBOOL CSqMsgQueue::Msg( stdString sPath, stdString sMsg, CSqMulti *pmapParams, stdString *pReply, oexEvent *pReplyEvent, oex::oexUINT uTimeout )
 {_STT();
+
+	if ( WantQuit() )
+		return oex::oexFALSE;
+
 	oex::TMem< oexEvent > mevReply;
 	oex::oexBOOL bRet = oex::oexFALSE;
 
@@ -227,51 +231,6 @@ oex::oexBOOL CSqMsgQueue::ProcessMsgs()
 
 	} // end for
 
-/*
-	// Acquire lock
-	oexAutoLock ll( &m_cLock );
-	if ( !ll.IsLocked() )
-		return oex::oexFALSE;
-
-	// Any messages waiting?
-	if ( m_lstMsgQueue.begin() == m_lstMsgQueue.end() )
-		return oex::oexTRUE;
-
-	// Process messages
-	t_MsgQueue::iterator it;
-	while ( m_lstMsgQueue.end() != ( it = m_lstMsgQueue.begin() ) )
-	{
-		// Deserialize params
-		CSqMulti mapParams( it->sParams );
-
-		// Process the message
-		ProcessMsg( it->sPath, it->sMsg, mapParams, it->pReply, &it->evReply );
-
-		// We must stop processing if someone is waiting for a reply
-		if ( it->pReply )
-		{
-			// Signal that reply is ready
-//			it->evReply.Signal();
-			m_lstMsgQueue.erase( it );
-
-			// Reset signal if queue is empty
-			if ( !m_lstMsgQueue.size() )
-				Reset();
-
-			return oex::oexTRUE;
-
-		} // end if
-
-		// Ditch the message
-		m_lstMsgQueue.erase( it );
-
-	} // end while
-
-	// Reset signal
-	Reset();
-
-	return oex::oexTRUE;
-*/
 }
 
 // Process a single message from the queue
@@ -357,6 +316,12 @@ oex::oexBOOL CSqMsgQueue::kill( stdString *pReply, const stdString &sPath )
 {_STT();
 	CSqMulti params;
 	return Msg( sPath, oexT( "kill" ), &params, pReply );
+}
+
+oex::oexBOOL CSqMsgQueue::terminate_thread( stdString *pReply, const stdString &sPath )
+{_STT();
+	CSqMulti params;
+	return Msg( sPath, oexT( "terminate_thread" ), &params, pReply );
 }
 
 oex::oexBOOL CSqMsgQueue::get_children( stdString *pReply, const stdString &sPath )

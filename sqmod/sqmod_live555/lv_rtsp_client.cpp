@@ -231,24 +231,19 @@ CLvRtspClient::CLvRtspClient()
 
 void CLvRtspClient::Destroy()
 {_STT();
+
 	// Tell thread loop to exit
 	m_nEnd = 1;
 
 	Stop();
 
-	m_nEnd = 0;
+	// Verify things shutdown smoothly
+	if ( m_pRtspClient || m_pSession || m_pVs || m_pAs || m_pEnv )
+	{	oexERROR( 0, oexT( "RTSP Client failed to shutdown correctly" ) );
+	} // end if			
+
 	m_sUrl = oexT( "" );
 	m_mParams.clear();
-	m_width = 0;
-	m_height = 0;
-	m_fps = 0;
-	m_pEnv = 0;
-	m_pRtspClient = oexNULL;
-	m_pSession = oexNULL;
-	m_pVs = oexNULL;
-	m_pAs = oexNULL;
-	m_pVsPss = oexNULL;
-	m_pAsPss = oexNULL;
 }
 
 void CLvRtspClient::ThreadDestroy()
@@ -295,6 +290,7 @@ int CLvRtspClient::Open( const sqbind::stdString &sUrl, int bVideo, int bAudio, 
 	m_bVideo = bVideo;
 	m_bAudio = bAudio;
 
+	m_nEnd = 0;
 	Start();
 
 	return 1;
@@ -314,14 +310,12 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	TaskScheduler* scheduler = BasicTaskScheduler::createNew();
 	if ( !scheduler )
 	{	oexERROR( 0, oexMks( oexT( "BasicTaskScheduler::createNew() failed : " ), m_pEnv->getResultMsg() ) );
-		ThreadDestroy();
 		return 0;
 	} // end if
 
 	m_pEnv = BasicUsageEnvironment::createNew( *scheduler );
 	if ( !m_pEnv )
 	{	oexERROR( 0, oexMks( oexT( "BasicUsageEnvironment::createNew() failed : " ), m_pEnv->getResultMsg() ) );
-		ThreadDestroy();
 		return 0;
 	} // end if
 
@@ -335,14 +329,12 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	m_pRtspClient = RTSPClient::createNew( *m_pEnv, nVerbosity, "CLvRtspClient", 0 );
 	if ( !m_pRtspClient )
 	{	oexERROR( 0, oexMks( oexT( "RTSPClient::createNew() failed : " ), m_pEnv->getResultMsg() ) );
-		ThreadDestroy();
 		return 0;
 	} // end if
 
 	char *pOptions = m_pRtspClient->sendOptionsCmd( oexStrToMbPtr( sUrl.c_str() ), 0, 0 );
 	if ( !pOptions )
-	{	oexERROR( 0, oexMks( oexT( "sendOptionsCmd() failed : " ), m_pEnv->getResultMsg() ) );
-		ThreadDestroy();
+	{//	oexERROR( 0, oexMks( oexT( "sendOptionsCmd() failed : " ), m_pEnv->getResultMsg() ) );
 		return 0;
 	} // end if
 
@@ -359,7 +351,6 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 		pSdp = m_pRtspClient->describeURL( oexStrToMbPtr( sUrl.c_str() ) );
 	if ( !pSdp )
 	{	oexERROR( 0, oexMks( oexT( "describeURL() failed : " ), m_pEnv->getResultMsg() ) );
-		ThreadDestroy();
 		return 0;
 	} // end if
 
@@ -375,7 +366,6 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 
 	if ( !m_pSession )
 	{	oexERROR( 0, oexMks( oexT( "MediaSession::createNew() failed : " ), m_pEnv->getResultMsg() ) );
-		ThreadDestroy();
 		return 0;
 	} // end if
 
@@ -406,10 +396,20 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 
 int CLvRtspClient::InitVideo( MediaSubsession *pss )
 {_STT();
+
+	_STT_SET_CHECKPOINT( 1 );
+
+	if ( !m_pRtspClient )
+	{	oexERROR( 0, oexT( "Invalid rtsp client object" ) );
+		return 0;
+	} // end if
+
 	if ( !pss )
 	{	oexERROR( 0, oexT( "Invalid video object" ) );
 		return 0;
 	} // end if
+
+	_STT_SET_CHECKPOINT( 2 );
 
 	// Create receiver for stream
 	if ( !pss->initiate( -1 ) )
@@ -417,12 +417,16 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 		return 0;
 	} // end if
 
+	_STT_SET_CHECKPOINT( 3 );
+
 	if ( !pss->rtpSource() )
 	{	oexERROR( 0, oexMks( oexT( "RTP source is null : " ), m_pEnv->getResultMsg() ) );
 		return 0;
 	} // end if
 
 	// +++ Think fmtp_config() needs to be handled
+
+	_STT_SET_CHECKPOINT( 4 );
 
 	// sprop-parameter-sets= base64(SPS),base64(PPS)[,base64(SEI)]
 	const char *props = pss->fmtp_spropparametersets();
@@ -434,10 +438,14 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 		} // end for
 	} // end if
 
+	_STT_SET_CHECKPOINT( 5 );
+
 	// Try to get the image width / height
 	m_width = pss->videoWidth();
 	m_height = pss->videoWidth();
 	m_fps = pss->videoFPS();
+
+	_STT_SET_CHECKPOINT( 6 );
 
 	// a=framesize:96 176-144
 	if ( !m_width || !m_height )
@@ -453,6 +461,8 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 		} // end if
 	} // end if
 
+	_STT_SET_CHECKPOINT( 7 );
+
 	// a=cliprect:0,0,144,176
 	if ( !m_width || !m_height )
 	{	sqbind::stdString s = m_mSdp[ oexT( "a=cliprect" ) ].str();
@@ -464,6 +474,8 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 		} // end if
 	} // end if
 
+	_STT_SET_CHECKPOINT( 8 );
+
 	// a=framerate:30
 	if ( !m_fps )
 		m_fps = m_mSdp[ oexT( "a=framerate" ) ].toint();
@@ -472,24 +484,36 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 //	if ( !m_fps )
 	//	m_fps = m_mSdp[ oexT( "a=maxprate" ) ].toint();
 
+	_STT_SET_CHECKPOINT( 9 );
+
 	pss->rtpSource()->setPacketReorderingThresholdTime( 2000000 );
+
+	_STT_SET_CHECKPOINT( 10 );
 
 	int sn = pss->rtpSource()->RTPgs()->socketNum();
 	setReceiveBufferTo( *m_pEnv, sn, 2000000 );
 
+	_STT_SET_CHECKPOINT( 11 );
+
 	if ( pss->codecName() )
 		m_sVideoCodec = oexMbToStrPtr( pss->codecName() );
+
+	_STT_SET_CHECKPOINT( 12 );
 
 	if ( !m_pRtspClient->setupMediaSubsession( *pss, False, False ) )
 	{	oexERROR( 0, oexMks( oexT( "setupMediaSubsession() failed, Codec : " ), m_sVideoCodec.c_str(), oexT( " : " ), m_pEnv->getResultMsg() ).Ptr() );
 		return 0;
 	} // end if
 
+	_STT_SET_CHECKPOINT( 13 );
+
 	m_pVs = new CVideoSink( *m_pEnv );
 	if ( !m_pVs )
 	{	oexERROR( 0, oexMks( oexT( "CVideoSink::createNew() failed" ), oexT( " : " ), m_pEnv->getResultMsg() ) );
 		return 0;
 	} // end if
+
+	_STT_SET_CHECKPOINT( 14 );
 
 	m_pVsPss = pss;
 
@@ -498,6 +522,12 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 
 int CLvRtspClient::InitAudio( MediaSubsession *pss )
 {_STT();
+	
+	if ( !m_pRtspClient )
+	{	oexERROR( 0, oexT( "Invalid rtsp client object" ) );
+		return 0;
+	} // end if
+
 	if ( !pss )
 	{	oexERROR( 0, oexT( "Invalid video object" ) );
 		return 0;
@@ -580,10 +610,14 @@ int CLvRtspClient::UnlockAudio()
 oex::oexBOOL CLvRtspClient::InitThread( oex::oexPVOID x_pData )
 {_STT();
 	if ( !ThreadOpen( m_sUrl, m_bVideo, m_bAudio, &m_mParams ) )
+	{	ThreadDestroy();
 		return oex::oexFALSE;
+	} // end if
 
 	if ( !m_pRtspClient )
+	{	ThreadDestroy();
 		return oex::oexFALSE;
+	} // end if
 
 	return oex::oexTRUE;
 }

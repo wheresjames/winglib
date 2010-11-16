@@ -430,6 +430,13 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, st
 	if ( sMsg == oexT( "is_path" ) )
 		bRet = oex::oexTRUE;
 
+	// Terminate thread?  
+	else if ( sMsg == oexT( "terminate_thread" ) )
+	{	if ( GetOwnerThreadId() == oexGetCurThreadId() ) EndThread( 0 );
+		bRet = CThread::Stop( 0, oex::oexTRUE ) ? oex::oexFALSE : oex::oexTRUE;
+		EndThread( 0 );
+	} // end else if
+
 	// Is it a script map?
 	else if ( ( sMsg == oexT( "pb_get" ) || sMsg == oexT( "pb_set" ) )
 			  && *mapParams[ oexT( "key" ) ].str().c_str() == oexT( '@' ) )
@@ -934,7 +941,7 @@ void CScriptThread::Cleanup()
 	while ( m_lstScript.end() != it )
 	{
 		// Delete node if child has stopped
-		if ( it->second && !it->second->GetInitEvent().Wait( 0 ) && !it->second->IsRunning() )
+		if ( it->second && !it->second->IsRunning() )
 		{	it->second->Stop();
 			OexAllocDestruct( it->second );
 			it->second = oexNULL;

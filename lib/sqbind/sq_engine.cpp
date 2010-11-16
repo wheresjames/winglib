@@ -231,12 +231,55 @@ int CSqEngineExport::kill( const stdString &sPath )
 	return q->kill( oexNULL, sPath );
 }
 
-int CSqEngineExport::kill_wait( const stdString &sPath )
+int CSqEngineExport::kill_wait( const stdString &sPath, int nTimeout, int bTerminate )
+{_STT();
+
+	CSqMsgQueue *q = queue();
+	if ( !q ) return -1;
+
+	// Send thread the kill signal
+	q->kill( oexNULL, sPath );
+
+	// Use default timeout
+	if ( 0 >= nTimeout )
+		nTimeout = ( oexDEFAULT_WAIT_TIMEOUT / 1000 );
+
+	// Wait for thread to shutdown
+	oex::oexUINT uStart = oexGetUnixTime() + nTimeout;
+	while ( is_path( sPath ) )
+	{ 
+		// Wait a bit
+		oexSleep( oexWAIT_RESOLUTION / 1000 );
+
+		// Call cleanup in case it's our own thread
+		q->Cleanup();
+
+		// Are we timed out?
+		if ( uStart < oexGetUnixTime() )
+		{
+			// Are we killing the thread?
+			if ( !bTerminate )
+				return 0;
+
+			// Kill it and wait again
+			bTerminate = 0;
+			q->terminate_thread( oexNULL, sPath );
+			uStart = oexGetUnixTime() + nTimeout;
+
+		} // end if
+
+	} // end while
+
+	return 1;
+}
+
+int CSqEngineExport::terminate_thread( const stdString &sPath )
 {_STT();
 	CSqMsgQueue *q = queue();
 	if ( !q ) return -1;
-	stdString sRet;
-	return q->kill( &sRet, sPath );
+	int ret = q->terminate_thread( oexNULL, sPath );
+	q->Cleanup();
+	return ret;
 }
 
 void CSqEngineExport::exit( int nExitCode )
@@ -1188,7 +1231,7 @@ int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )
 
 void CSqEngineExport::sleep( int nMsTime )
 {_STT();
-	oex::os::CSys::Sleep( nMsTime );
+	oexSleep( nMsTime );
 }
 
 float CSqEngineExport::clock()
@@ -1372,6 +1415,8 @@ CSqEngine::CSqEngine() :
 	m_pSqAllocator = oexNULL;
 	m_fIncludeScript = oexNULL;
 	m_bCallExit = oex::oexFALSE;
+	m_uThreadId = 0;
+
 }
 
 CSqEngine::~CSqEngine()
@@ -1396,10 +1441,15 @@ void CSqEngine::Destroy()
 
 	m_script.Reset();
 
-	m_vm.Shutdown();
+	// Only the smame thread can delete the vm
+//	if ( m_uThreadId == oexGetCurThreadId() )
+		m_vm.Shutdown();
+//	else
+//		m_vm.Detach();
 
 	m_mapIncludeScriptCache.clear();
 
+	m_uThreadId = 0;
 	m_sErr = oexT( "" );
 	m_sOutput = oexT( "" );
 	m_sRoot = oexT( "" );
@@ -1507,6 +1557,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, terminate )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill_wait )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, terminate_thread )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, module_name )
@@ -1586,6 +1637,12 @@ oex::oexBOOL CSqEngine::Init()
 
 	_oexTRY
 	{
+		// Out with the old
+//		Destroy();
+
+		// Save away the id of the thread that created the vm
+		m_uThreadId = oexGetCurThreadId();
+
 		// Initialize the virtual machine
 		m_vm.Init();
 

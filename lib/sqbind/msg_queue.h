@@ -130,6 +130,7 @@ public:
 	/// Spawns a script in another thread
 	oex::oexBOOL spawn( stdString *pReply, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
 	oex::oexBOOL kill( stdString *pReply, const stdString &sPath );
+	oex::oexBOOL terminate_thread( stdString *pReply, const stdString &sPath );
 	oex::oexBOOL is_path( const stdString &sPath );
 
 	/// Runs the specified script
@@ -166,6 +167,9 @@ public:
 
 	/// Returns non-zero when messages will no longer be processed
 	virtual oex::oexBOOL Running() { return oex::oexFALSE; }
+
+	/// Cleanup tasks
+	virtual void Cleanup() {}
 
 	/// Sets the specified property
 	void set( const stdString &sPath, const stdString &sKey, const stdString &sVal );
