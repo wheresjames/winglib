@@ -50,10 +50,10 @@ RTPSink* CLvRtspServer::CLiveMediaSubsession::createNewRTPSink( Groupsock* rtpGr
 		return MPEG4ESVideoRTPSink::createNew( envir(), rtpGroupsock, rtpPayloadTypeIfDynamic, 1000000 / fps );
 }
 
-int CLvRtspServer::CLiveMediaSubsession::queueFrame( oex::CBin *pFrame )
+int CLvRtspServer::CLiveMediaSubsession::queueFrame( oex::CBin *pFrame, int fps )
 {
 	if ( m_pSource )
-		m_pSource->queueFrame( pFrame );
+		m_pSource->queueFrame( pFrame, fps );
 
 	return 1;
 }
@@ -77,7 +77,7 @@ void CLvRtspServer::CLiveMediaSource::doGetNextFrame()
 	m_bFrameReady = 0;
 }
 
-int CLvRtspServer::CLiveMediaSource::queueFrame( oex::CBin *pFrame )
+int CLvRtspServer::CLiveMediaSource::queueFrame( oex::CBin *pFrame, int fps )
 {
 	// Terminate stream?
 	if ( !pFrame || !pFrame->getUsed() )
@@ -94,15 +94,20 @@ int CLvRtspServer::CLiveMediaSource::queueFrame( oex::CBin *pFrame )
 	m_frame = *pFrame;
 	m_bFrameReady = 1;
 
-	deliverFrame( &m_frame );
+	deliverFrame( &m_frame, fps );
 
 	return 1;
 }
 
 
 // CLiveMediaSource::deliverFrame()
-void CLvRtspServer::CLiveMediaSource::deliverFrame( oex::CBin *pFrame )
+void CLvRtspServer::CLiveMediaSource::deliverFrame( oex::CBin *pFrame, int fps )
 {_STT();
+
+	// ???
+	if ( !fTo )
+		return;
+
 	// End of stream?
 	if ( !pFrame || !pFrame->getUsed() )
 	{	fFrameSize = 0; fTo = 0;
@@ -123,13 +128,13 @@ void CLvRtspServer::CLiveMediaSource::deliverFrame( oex::CBin *pFrame )
 	} // end if
 	else
 		fNumTruncatedBytes = 0;
-
+	
 	// Copy the data
 	// +++ anyway to get out of this???
 //	fTo = (unsigned char*)pFrame->_Ptr();
 	oexMemCpy( fTo, pFrame->Ptr(), fFrameSize );
 
-	double dFps = 15;
+	double dFps = ( 0 < fps && 120 > fps ) ? (double)fps : 30;
 	fDurationInMicroseconds = (unsigned int)( double( 1000000 ) / dFps );
 
 	// Use current time on first frame
@@ -374,7 +379,8 @@ void CLvRtspServer::ProcessMsg( const sqbind::stdString &sCmd, sqbind::CSqMulti 
 
 	// DeliverFrame
 	else if ( sCmd == oexT( "DeliverFrame" ) )
-		DeliverFrame( (*pParams)[ "stream_id" ].str(), (*pParams)[ "frame_id" ].str() );
+		DeliverFrame( (*pParams)[ "stream_id" ].str(), (*pParams)[ "frame_id" ].str(),
+					  (*pParams)[ "fps" ].toint() );
 
 }
 
@@ -431,7 +437,7 @@ int CLvRtspServer::CreateStream( const sqbind::stdString &sId, sqbind::CSqMulti 
 	return 1;
 }
 
-int CLvRtspServer::DeliverFrame( const sqbind::stdString &sStreamId, const sqbind::stdString &sFrameId )
+int CLvRtspServer::DeliverFrame( const sqbind::stdString &sStreamId, const sqbind::stdString &sFrameId, int fps )
 {_STT();
 
 	// Sanity checks
@@ -454,7 +460,7 @@ int CLvRtspServer::DeliverFrame( const sqbind::stdString &sStreamId, const sqbin
 	} // end if
 
 	// Deliver the frame to the session
-	it->second->queueFrame( &binFrame );
+	it->second->queueFrame( &binFrame, fps );
 
 	return 1;
 }

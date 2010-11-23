@@ -1,4 +1,4 @@
-// pa_output.cpp
+// sq_usb.cpp
 
 #include "stdafx.h"
 

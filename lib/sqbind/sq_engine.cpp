@@ -692,7 +692,7 @@ double CSqEngineExport::get_cpu_load()
 
 double CSqEngineExport::boot_time()
 {_STT();
-	oexSHOW( oex::os::CHqTimer::GetTimerSeconds() );
+//	oexSHOW( oex::os::CHqTimer::GetTimerSeconds() );
 	return oex::os::CHqTimer::GetTimerSeconds();
 }
 

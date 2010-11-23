@@ -274,6 +274,7 @@ void CSqColor::Register( sqbind::VM vm )
 
 
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqImage, CSqImage )
+
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Create )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Destroy )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Load )
@@ -291,6 +292,23 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqImage, CSqImage )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, getPixels )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, refPixels )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, EncodeJpg )	
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Dilate )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Erode )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Light )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Colorize )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Threshold )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, ShiftRGB )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Gamma )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Median )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Noise )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Crop )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Dither )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Rotate )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Negative )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, GrayScale )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Flip )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqImage, Mirror )	
 
 SQBIND_REGISTER_CLASS_END()
 

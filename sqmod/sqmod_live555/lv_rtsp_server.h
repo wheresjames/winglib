@@ -19,7 +19,7 @@ public:
 		static CLiveMediaSource* createNew( UsageEnvironment& env, CLvRtspServer *pRtspServer, sqbind::CSqMulti *mParams );
 
 		/// Queues a frame
-		int queueFrame( oex::CBin *pFrame );
+		int queueFrame( oex::CBin *pFrame, int fps );
 
 		/// Returns non-zero if the session needs a frame
 		int needFrame() { return !m_bFrameReady; } // { return !m_sigFrameReady.Wait( 0 ) ? 0 : 1; }
@@ -29,6 +29,7 @@ public:
 		CLiveMediaSource( UsageEnvironment& env, CLvRtspServer *pRtspServer, sqbind::CSqMulti *mParams )
 			: FramedSource( env ), m_pRtspServer( pRtspServer ), m_p( mParams )
 		{
+			fTo = 0;
 			m_bFrameReady = 0;
 		}
 
@@ -43,7 +44,7 @@ public:
 		virtual void doGetNextFrame();
 
 //		static void _deliverFrame( oex::oexPVOID pUserData, sqbind::CSqBinary *pFrame );
-		void deliverFrame( oex::CBin *pFrame );
+		void deliverFrame( oex::CBin *pFrame, int fps );
 
 	private:
 
@@ -69,7 +70,7 @@ public:
 		static CLiveMediaSubsession* createNew( UsageEnvironment& env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer, ServerMediaSession *pSms, sqbind::CSqMulti *mParams );
 
 		/// Queues a frame
-		int queueFrame( oex::CBin *pFrame );
+		int queueFrame( oex::CBin *pFrame, int fps );
 
 		/// Returns the url string for this item
 		sqbind::stdString getUrl() { return m_sUrl; }
@@ -226,7 +227,7 @@ public:
 	int CloseStream( const sqbind::stdString &sId );
 
 	/// Adds frame to the output stream queue
-	int DeliverFrame( const sqbind::stdString &sStreamId, const sqbind::stdString &sFrameId );
+	int DeliverFrame( const sqbind::stdString &sStreamId, const sqbind::stdString &sFrameId, int fps );
 
 public:
 

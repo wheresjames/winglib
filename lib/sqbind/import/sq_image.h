@@ -261,6 +261,165 @@ namespace sqbind
 #endif
 		}
 
+public:
+
+		/// Dilates the image
+		int Dilate( int x_Ksize )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Dilate( x_Ksize );
+#endif
+		}
+
+		/// Erodes the image
+		int Erode( int x_Ksize )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Erode( x_Ksize );
+#endif
+		}
+
+		/// Lightens the image
+		int Light( int x_level, int x_contrast )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Light( x_level, x_contrast );
+#endif
+		}
+
+		/// Colorizes the image
+		int Colorize( int x_hue, int x_sat )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Colorize( x_hue, x_sat );
+#endif
+		}
+
+		/// Thresholds the image
+		int Threshold( int x_level )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Threshold( x_level );
+#endif
+		}
+
+		int ShiftRGB( int x_r, int x_g, int x_b )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.ShiftRGB( x_r, x_g, x_b );
+#endif
+		}
+
+		int Gamma( float x_fGamma )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Gamma( x_fGamma );
+#endif
+		}
+
+		int Median( int x_Ksize )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Median( x_Ksize );
+#endif
+		}
+
+		int Noise( int x_level )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Noise( x_level );
+#endif
+		}
+
+		int Crop( int x_left, int x_top, int x_right, int x_bottom, CSqImage *x_pDst )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			if ( !x_pDst )
+				return 0;
+
+			return m_img.Crop( x_left, x_top, x_right, x_bottom, &x_pDst->Obj() );
+#endif
+		}
+
+		int Dither( int x_method )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Dither( x_method );
+#endif
+		}
+
+		int Rotate( float x_angle, CSqImage *x_pDst )
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			if ( !x_pDst )
+				return 0;
+
+			return m_img.Rotate( x_angle, &x_pDst->Obj() );
+#endif
+		}
+
+		int Negative()
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Negative();
+#endif
+		}
+
+		int GrayScale()
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.GrayScale();
+#endif
+		}
+
+		int Flip()
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Flip();
+#endif
+		}
+
+		int Mirror()
+		{
+#if !defined( OEX_ENABLE_XIMAGE )
+			return 0;
+#else
+			return m_img.Mirror();
+#endif
+		}
+
+public:
+
 		/// Returns non-zero if there is a valid image buffer
 		int isValid()
 		{

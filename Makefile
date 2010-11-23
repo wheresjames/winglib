@@ -22,6 +22,7 @@ BUILDDIRS := $(BUILDDIRS) sqmod/sqmod_cell \
                           sqmod/sqmod_curl \
 						  sqmod/sqmod_fftw \
 						  sqmod/sqmod_ffmpeg \
+						  sqmod/sqmod_freenect \
 						  sqmod/sqmod_freetype2 \
                           sqmod/sqmod_gdchart \
 						  sqmod/sqmod_gstreamer \
