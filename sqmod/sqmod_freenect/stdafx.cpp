@@ -7,6 +7,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqFreenect, CSqFreenect )
 
 	SQBIND_MEMBER_FUNCTION( CSqFreenect, Init )
 	SQBIND_MEMBER_FUNCTION( CSqFreenect, Destroy )
+	SQBIND_MEMBER_FUNCTION( CSqFreenect, getNumDevices )
 	SQBIND_MEMBER_FUNCTION( CSqFreenect, getDeviceList )
 	SQBIND_MEMBER_FUNCTION( CSqFreenect, OpenDevice )
 	SQBIND_MEMBER_FUNCTION( CSqFreenect, CloseDevice )

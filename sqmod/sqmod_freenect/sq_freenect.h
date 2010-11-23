@@ -19,6 +19,9 @@ public:
 	/// Initializes output device information
 	int Init();
 
+	/// Returns the number of devices
+	int getNumDevices();
+
 	/// Opens the specified output stream
 	sqbind::CSqMulti getDeviceList();
 

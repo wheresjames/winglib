@@ -39,12 +39,22 @@ int CSqFreenect::Init()
 	// Initialize USB library
 	m_nInit = freenect_init( &m_pfc, NULL );
 	if ( 0 > m_nInit )
+	{	m_pfc = oexNULL;
 		return 0;
+	} // end if
 
 	// Set logging level
 	freenect_set_log_level( m_pfc, FREENECT_LOG_DEBUG );
 
 	return 1;
+}
+
+int CSqFreenect::getNumDevices()
+{
+	if ( !m_pfc )
+		return 0;
+
+	return freenect_num_devices( m_pfc );
 }
 
 int CSqFreenect::CloseDevice()
@@ -60,7 +70,7 @@ int CSqFreenect::CloseDevice()
 
 int CSqFreenect::OpenDevice( int i )
 {
-	if ( 0 > m_nInit )
+	if ( !m_pfc )
 		return 0;
 
 	// Attempt to open the device
