@@ -24,10 +24,11 @@ include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(PLATFORM),windows)
 	PRJ_INCS := $(PRJ_INCS) mysql/include
-	PRJ_LIBP := $(CFG_LIBROOT)/mysql/lib/opt
 	ifeq ($(BUILD),vs)
+		PRJ_LIBP := $(CFG_LIBROOT)/mysql/lib/opt
 		PRJ_OSLB := libmysql.lib
 	else
+		PRJ_LIBP := $(CFG_LIBROOT)/mysql/lib/gcc
 		PRJ_OSLB := mysql
 	endif
 else
