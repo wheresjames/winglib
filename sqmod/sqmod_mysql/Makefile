@@ -41,11 +41,13 @@ ifeq ($(TOOLS),mingw32)
 	PRJ_EXSY := LIBMYSQL_NULL_THUNK_DATA
 endif
 
+
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------
 export LOC_TAG := def
 include $(PRJ_LIBROOT)/build.mk
+
 
 #-------------------------------------------------------------------
 # Execute the build
