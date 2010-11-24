@@ -1,4 +1,3 @@
-_self.load_module( "http", "" );
 
 class CGlobal
 {

@@ -1,5 +1,5 @@
 
-_self.exec( "c:/windows/notepad.exe", "", "" );
+//_self.exec( "c:/windows/notepad.exe", "", "" );
 				  
-//_self.shell( "notepad", "", "" );
+_self.shell( "notepad", "", "" );
 

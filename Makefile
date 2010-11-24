@@ -33,6 +33,7 @@ BUILDDIRS := $(BUILDDIRS) sqmod/sqmod_cell \
                           sqmod/sqmod_openssl \
                           sqmod/sqmod_poco \
                           sqmod/sqmod_portaudio \
+                          sqmod/sqmod_quickfix \
 						  sqmod/sqmod_test \
 						  sqmod/sqmod_tinyxml \
                           sqmod/sqmod_usb \

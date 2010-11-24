@@ -25,7 +25,7 @@ static void SQBIND_Export_freenect( sqbind::VM x_vm )
 }
 
 #if defined( SQBIND_STATIC )
-	#include "sq_usb.cpp"
+	#include "sq_freenect.cpp"
 #else
 
 	static void SQBIND_Export( sqbind::VM x_vm )
