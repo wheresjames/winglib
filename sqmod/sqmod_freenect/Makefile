@@ -30,6 +30,8 @@ ifeq ($(PLATFORM),windows)
 	PRJ_LIBS := $(PRJ_LIBS) usb-win32
 	ifeq ($(BUILD),vs)
 		PRJ_OSLB := Setupapi.lib
+	else
+		PRJ_OSLB := Setupapi
 	endif
 else
 	PRJ_INCS := $(PRJ_INCS) libusb/libusb
