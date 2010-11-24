@@ -26,7 +26,9 @@ include $(PRJ_LIBROOT)/config.mk
 ifeq ($(PLATFORM),windows)
 	PRJ_INCS := $(PRJ_INCS) libusb-win32/libusb libusb-win32/msvc
 	PRJ_LIBS := $(PRJ_LIBS) usb-win32
-	PRJ_OSLB := Setupapi.lib
+	ifeq ($(BUILD),vs)
+		PRJ_OSLB := Setupapi.lib
+	endif
 else
 	PRJ_INCS := $(PRJ_INCS) libusb/libusb
 	PRJ_LIBS := $(PRJ_LIBS) usb
