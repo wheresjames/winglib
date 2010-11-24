@@ -31,7 +31,7 @@ ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),vs)
 		PRJ_OSLB := Setupapi.lib
 	else
-		PRJ_OSLB := Setupapi
+		PRJ_OSLB := setupapi
 	endif
 else
 	PRJ_INCS := $(PRJ_INCS) libusb/libusb
