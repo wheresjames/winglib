@@ -13,12 +13,18 @@ class CGlobal
 
 local _g = CGlobal();
 
+function WaitKey()
+{	_self.echo( "\n...press any key...\n" );
+	_self.get_key();
+}
+
 function _init() : ( _g )
 {
 	_g.fn = CSqFreenect();
 
 	if ( !_g.fn.Init() )
 	{	_self.echo( "Failed to initialize freenect library" );
+		WaitKey();
 		return 0;
 	} // end if
 
@@ -29,6 +35,7 @@ function _init() : ( _g )
 	
 	if ( !ndev )
 	{	_self.echo( "Exiting since no devices were found\n" );
+		WaitKey();
 		return 0;
 	} // end if
 
