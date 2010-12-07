@@ -660,6 +660,20 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 		CFile::t_size ex;
 		if ( x_it.fIdx.Read( &ex, sizeof( ex ) ) && ex )
 			x_it.npos = ex;
+		
+		// Are we reading backward?
+		if ( x_it.npos && ( eMethodReverse & x_nMethod ) )
+		{	oexBOOL bFwd = oexTRUE;
+			do
+			{	x_it.fData.SetPtrPosBegin( x_it.npos );
+				if ( !x_it.fData.Read( &x_it.viNext, sizeof( x_it.viNext ) ) || x_it.hash.Data1 != x_it.viNext.uHash )
+					x_it.npos = 0;
+				else if ( x_it.npos >= x_it.viNext.uNext || ( x_it.viNext.uTime > x_tTime || ( x_it.viNext.uTime == x_tTime && x_it.viNext.uTimeMs > x_tTimeMs ) ) )
+					bFwd = oexFALSE;
+				else
+					x_it.npos = x_it.viNext.uNext; 
+			} while ( x_it.npos && bFwd );
+		} // end if
 
 	} // end if
 
@@ -669,13 +683,16 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 
 	// Is our last value still valid?
 	if ( x_tInterval && x_it.pos )
-		if ( x_it.viNext.uTime > x_tTime || ( x_it.viNext.uTime == x_tTime && x_it.viNext.uTimeMs > x_tTimeMs ) )
+		if ( !( eMethodReverse & x_nMethod )
+			 ? ( x_it.viNext.uTime > x_tTime || ( x_it.viNext.uTime == x_tTime && x_it.viNext.uTimeMs > x_tTimeMs ) ) 
+			 : ( x_it.viNext.uTime < x_tTime || ( x_it.viNext.uTime == x_tTime && x_it.viNext.uTimeMs < x_tTimeMs ) )
+			 )
 			return oexTRUE;
 
 	// Do we need new data?
-	CFile::t_size p = 0;
+	CFile::t_size p = ( eMethodReverse & x_nMethod ) ? ( x_it.npos + 1 ) : 0;
 	t_time tMin = x_tTime - ( x_tInterval / 1000 );
-	while ( p < x_it.npos )
+	while ( ( eMethodReverse & x_nMethod ) ? p > x_it.npos : p < x_it.npos )
 	{	
 		// Read the header
 		p = x_it.npos;
@@ -684,7 +701,12 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 			p = x_it.npos = 0;
 
 		// Is it after the time we're looking for?
-		else if ( x_it.viNext.uTime > x_tTime || ( x_it.viNext.uTime == x_tTime && x_it.viNext.uTimeMs > x_tTimeMs ) )
+		else if ( 
+//				  ( x_it.viNext.uTime > x_tTime || ( x_it.viNext.uTime == x_tTime && x_it.viNext.uTimeMs > x_tTimeMs ) ) 
+				  !( eMethodReverse & x_nMethod )
+				  ? ( x_it.viNext.uTime > x_tTime || ( x_it.viNext.uTime == x_tTime && x_it.viNext.uTimeMs > x_tTimeMs ) ) 
+				  : ( x_it.viNext.uTime < x_tTime || ( x_it.viNext.uTime == x_tTime && x_it.viNext.uTimeMs < x_tTimeMs ) )
+				)
 			x_it.npos = p;
 
 		else
@@ -694,10 +716,18 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 
 			// Save position
 			x_it.pos = p;
-			x_it.npos = x_it.viNext.uNext;
+
+			// Get next object position
+			if ( eMethodReverse & x_nMethod )
+				x_it.npos = x_it.viNext.uPrev;
+			else
+				x_it.npos = x_it.viNext.uNext;
 
 			// Average values if needed
-			if ( !bNew && tMin <= x_it.vi.uTime && eDtString < x_nDataType && eMethodAverage & x_nMethod )
+			if ( !bNew 
+				&& ( !( eMethodReverse & x_nMethod ) || tMin <= x_it.vi.uTime )
+				 && eDtString < x_nDataType 
+				 && eMethodAverage & x_nMethod )
 			{
 				// Point to the data
 				x_it.fData.SetPtrPosBegin( x_it.pos + x_it.vi.uBytes );
@@ -764,6 +794,7 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 {_STT();
 
 	// Unbounded?
+	if ( !x_tStart && !x_tInterval ) { x_tStart = x_tEnd; x_tEnd = 0; x_nMethod |= eMethodReverse; }
 	oexBOOL bUnbounded = ( !x_tEnd ) ? oex::oexTRUE : oex::oexFALSE;
 
 	// Calculate proper start / stop times
@@ -797,22 +828,29 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 
 	// Create data
 	CPropertyBag pb;
-	oexUINT uN = 0;
+	oexUINT uN = 0, uSkips = 100;
 	t_time tTime = x_tStart, tTimeMs = 0;
 	while ( ( bUnbounded || tTime <= x_tEnd ) && uN < m_uLimit )
 	{
-		// Count a sample
-		uN++;
-
 		// Find the value for this time
 		if ( FindValue( it, tTime, tTimeMs, x_tInterval, x_nDataType, x_nMethod, m_tLogBase, m_tIndexStep ) )
 		{
 			if ( !x_tInterval )
 			{
 				// Ensure it falls within our time range
-				if ( it.vi.uTime >= x_tStart &&
-					 ( bUnbounded || ( it.vi.uTime < x_tEnd || ( it.vi.uTime == x_tEnd && !it.vi.uTimeMs ) ) ) )
+				if ( ( ( eMethodReverse & x_nMethod ) 
+					   ? ( it.vi.uTime < x_tStart || ( it.vi.uTime == x_tStart && !it.vi.uTimeMs ) )
+					   : it.vi.uTime >= x_tStart 
+					 )
+					 && ( bUnbounded || ( it.vi.uTime < x_tEnd || ( it.vi.uTime == x_tEnd && !it.vi.uTimeMs ) ) ) 
+					)
 				{
+					// Count a sample
+					uN++;
+
+					// Reset skips +++ Move to header
+					uSkips = 100;
+
 					if ( eDtSize == x_nDataType )
 						it.sValue = it.vi.uSize;
 
@@ -832,25 +870,30 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 
 		} // end if
 
-		else if ( bUnbounded )
-			return pb;
-		
-		else if ( !x_tInterval )
-			;
+		else if ( bUnbounded || !x_tInterval )
+		{	if ( !--uSkips )
+				return pb;
+		} // end else if
 
 		else if( tTimeMs )
-			pb[ oexFmt( oexT( "%u.%.3u" ), tTime, tTimeMs ) ] = oexT( "" );
+			uN++, pb[ oexFmt( oexT( "%u.%.3u" ), tTime, tTimeMs ) ] = oexT( "" );
 
 		else
-			pb[ tTime ].ToString() = oexT( "" );
+			uN++, pb[ tTime ].ToString() = oexT( "" );
 
 		// Calculate next timestamp
 		if ( !x_tInterval )
 		{
 			// Next index?
-			if ( it.npos <= it.pos )
+			if ( !( eMethodReverse & x_nMethod ) && it.npos <= it.pos )
 			{	tTime += m_tIndexStep;
 				tTime -= tTime % m_tIndexStep;
+				tTimeMs = 0;
+			} // end if
+
+			else if ( ( eMethodReverse & x_nMethod ) && ( !it.npos || it.npos > it.pos ) )
+			{	tTime -= m_tIndexStep;
+				tTime += m_tIndexStep - ( tTime % m_tIndexStep );
 				tTimeMs = 0;
 			} // end if
 
