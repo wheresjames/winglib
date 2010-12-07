@@ -118,6 +118,12 @@ namespace sqbind
 		stdString getLogBin( const stdString &sKey, SQINT nStart, SQINT nEnd, SQINT nInterval, SQINT nType, SQINT nMethod, SQFLOAT fScale )
 		{	return oex2std( m_dl.GetLogBin( sKey.c_str(), nStart, nEnd, nInterval, nType, nMethod, fScale ) ); }
 		
+		/// Sets the fetch limit
+		void setLimit( int nLimit ) { m_dl.SetLimit( (oex::oexUINT)nLimit ); }
+
+		/// Returns the fetch limit
+		int getLimit() { return (int)m_dl.GetLimit(); }
+
 		/// Starts iteration
 		SQINT itStart( const stdString &sKey, SQINT nTime, SQINT nTimeMs )
 		{

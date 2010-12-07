@@ -44,6 +44,8 @@ CDataLog::CDataLog()
 	m_bChangesOnly = oexTRUE;
 
 	oexZero( m_pLogs );
+
+	m_uLimit = eDefaultFetchLimit;
 }
 
 CDataLog::~CDataLog()
@@ -758,10 +760,11 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 	return oexTRUE;
 }
 
-
-
 CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time x_tInterval, oexINT x_nDataType, oexINT x_nMethod )
 {_STT();
+
+	// Unbounded?
+	oexBOOL bUnbounded = ( !x_tEnd ) ? oex::oexTRUE : oex::oexFALSE;
 
 	// Calculate proper start / stop times
 	CSysTime::CalculateTimes( &x_tStart, &x_tEnd, 60 );
@@ -794,9 +797,13 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 
 	// Create data
 	CPropertyBag pb;
+	oexUINT uN = 0;
 	t_time tTime = x_tStart, tTimeMs = 0;
-	while ( tTime <= x_tEnd )
+	while ( ( bUnbounded || tTime <= x_tEnd ) && uN < m_uLimit )
 	{
+		// Count a sample
+		uN++;
+
 		// Find the value for this time
 		if ( FindValue( it, tTime, tTimeMs, x_tInterval, x_nDataType, x_nMethod, m_tLogBase, m_tIndexStep ) )
 		{
@@ -804,7 +811,7 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 			{
 				// Ensure it falls within our time range
 				if ( it.vi.uTime >= x_tStart &&
-					 ( it.vi.uTime < x_tEnd || ( it.vi.uTime == x_tEnd && !it.vi.uTimeMs ) ) )
+					 ( bUnbounded || ( it.vi.uTime < x_tEnd || ( it.vi.uTime == x_tEnd && !it.vi.uTimeMs ) ) ) )
 				{
 					if ( eDtSize == x_nDataType )
 						it.sValue = it.vi.uSize;
@@ -824,6 +831,9 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 				pb[ tTime ].ToString() = it.sValue;
 
 		} // end if
+
+		else if ( bUnbounded )
+			return pb;
 		
 		else if ( !x_tInterval )
 			;
@@ -866,6 +876,9 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 CStr CDataLog::GetLogBin( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time x_tInterval, oexINT x_nDataType, oexINT x_nMethod, float x_fScale )
 {_STT();
 
+	// Unbounded?
+	oexBOOL bUnbounded = ( !x_tEnd ) ? oex::oexTRUE : oex::oexFALSE;
+
 	// Calculate proper start / stop times
 	CSysTime::CalculateTimes( &x_tStart, &x_tEnd, 60 );
 
@@ -904,6 +917,10 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time
 	if ( !nItems )
 		return oexT( "" );
 
+	// Ensure we don't go over the maximum limit
+	if ( nItems > m_uLimit )
+		nItems = m_uLimit;
+
 	// Allocate space for binary data
 	CBin bin( nItems * sizeof( float ), nItems * sizeof( float ) );
 	if ( !bin.Ptr() )
@@ -911,9 +928,13 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time
 
 	// Create data
 	CPropertyBag pb;
+	oexUINT uN = 0;
 	t_time tTime = x_tStart, tTimeMs = 0, i = 0;
-	while ( i < nItems && tTime <= x_tEnd )
+	while ( i < nItems && ( bUnbounded || tTime <= x_tEnd ) )
 	{
+		// Count a sample
+		uN++;
+
 		// Find the value for this time
 		if ( FindValue( it, tTime, tTimeMs, x_tInterval, x_nDataType, x_nMethod, m_tLogBase, m_tIndexStep ) )
 			bin.setFLOAT( i++, it.fValue * x_fScale );

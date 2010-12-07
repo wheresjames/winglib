@@ -105,7 +105,7 @@ public:
 		oex::oexBOOL IsValid()
 		{
 			// Does it need updating?
-			if ( session.GetTransactions() || !port->IsRunning( 1 ) )
+			if ( !session.KeepAlive() || !port->IsRunning( 1 ) )
 				return oexFALSE;
 
 			return oexTRUE;

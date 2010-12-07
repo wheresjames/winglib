@@ -96,7 +96,8 @@ int CSqMysql::Connect(	const sqbind::stdString &sServer,
 		// Attempt to connect the database
 		if ( !mysql_real_connect( &m_db, sServer.c_str(), 
 								  sUser.c_str(), sPass.c_str(), 
-								  sDatabase.c_str(), nPort, NULL, 0 ) )
+								  sDatabase.length() ? sDatabase.c_str() : NULL, 
+								  nPort, NULL, 0 ) )
 		{	LogError( oexMks( oexT( "mysql_real_connect( " ),
 							  sServer.c_str(), oexT( ", " ),
 							  sDatabase.c_str(), oexT( ", " ),

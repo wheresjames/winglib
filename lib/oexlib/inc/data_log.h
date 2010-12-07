@@ -87,6 +87,9 @@ public:
 		/// Default size of logging buffer
 		eInitBuffer = 1024,
 
+		/// Default maximum number of values to return
+		eDefaultFetchLimit = 1024,
+
 		/// Index step size
 		eIndexStep = 60 * 5,
 
@@ -303,6 +306,12 @@ public:
 	/// Returns the index step
 	t_time GetStep() { return m_tIndexStep; }
 
+	/// Returns default fetch limit
+	oexUINT GetLimit() { return m_uLimit; }
+
+	/// Sets the default fetch limit
+	void SetLimit( oexUINT uLimit ) { m_uLimit = uLimit; }
+
 public:
 
 	/// Returns non-zero if there is an index file for the specified key hash
@@ -333,6 +342,9 @@ private:
 
 	/// Maximum value valid time
 	t_time			m_tMaxValid;
+
+	/// Maximum return limit
+	oexUINT			m_uLimit;
 
 };
 

@@ -133,6 +133,12 @@ public:
 		eAuthRequest = 0,
 
 		eAuthMappedFolder = 1
+		
+	};
+
+	enum
+	{
+		eDefaultKeepAlive = 30
 	};
 
 	/// Server callback
@@ -171,6 +177,7 @@ public:
 		m_plockSession = oexNULL;
 		m_pMappedFolders = oexNULL;
 		m_pMappedFoldersLock = oexNULL;
+		m_uKeepAlive = 0;
     }
 
     THttpSession( T_PORT *x_pPort )
@@ -227,6 +234,14 @@ public:
     }
 
 	//==============================================================
+	// KeepAlive()
+	//==============================================================
+	/// Returns zero if connection should be terminated
+    oexBOOL KeepAlive()
+	{	return !GetTransactions() || m_uKeepAlive > oexGetUnixTime();
+	}
+
+	//==============================================================
 	// OnRead()
 	//==============================================================
 	/// Called when new data arrives
@@ -241,6 +256,9 @@ public:
 	{
 		if ( !oexCHECK_PTR( m_pPort ) )
 			return -1;
+
+		// Reset keep alive counter
+		m_uKeepAlive = oexGetUnixTime() + eDefaultKeepAlive;
 
 		// Read in data if port is available
 		CStr8 sData = m_pPort->Read();
@@ -530,6 +548,7 @@ public:
 		m_pbRequest[ "IS_REMOTE" ] = ( sLocal != sRemote && sRemote != "127.0.0.1" ) ? "1" : "";
 		m_pbRequest[ "TRANSPORT_TYPE" ] = m_pPort->v_get_transport_type();
 		m_pbRequest[ "TRANSPORT_NAME" ] = m_pPort->v_get_transport_name();
+		m_pbRequest[ "TRANSACTION" ] = GetTransactions();
 	}
 
     /// Reads in the http headers
@@ -1245,6 +1264,9 @@ private:
 
 	/// Length of time in seconds that session data is to be valid
 	oexUINT						m_uSessionTimeout;
+
+	/// Keep-alive timeout
+	oexUINT						m_uKeepAlive;
 
 	/// Binary data to send back to client
 	t_buffer					m_buf;

@@ -449,6 +449,8 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqDataLog, CSqDataLog )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, setLogParams )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getBase )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getStep )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getLimit )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, setLimit )
 	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itStart )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itNext )
