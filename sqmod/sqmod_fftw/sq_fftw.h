@@ -44,9 +44,7 @@ public:
 
 	/// Sets an input value
 	void setInput( int i, double real, double imag )
-	{	getInput().setDOUBLE( i * 2, real );
-		getInput().setDOUBLE( i * 2 + 1, imag );
-	}
+	{	m_in[ i * 2 ][ 0 ] = real; m_in[ i * 2 ][ 1 ] = imag; }
 
 	/// Returns the output real component
 	double getInputReal( int i ) { return getInput().getDOUBLE( i * 2 ); }
@@ -56,17 +54,17 @@ public:
 
 	/// Gets the output magnitude
 	double getInputMag( int i ) 
-	{	double real = getInput().getDOUBLE( i * 2 );
-		double imag = getInput().getDOUBLE( i * 2 + 1 );
+	{	double real = m_in[ i * 2 ][ 0 ];
+		double imag = m_in[ i * 2 ][ 1 ];
 		if ( !imag ) return real; if ( !real ) return imag;
 		return sqrt( real * real + imag * imag );
 	}
 
 	/// Gets the output phase
 	double getInputPhase( int i ) 
-	{	double real = getInput().getDOUBLE( i * 2 );
+	{	double real = m_in[ i * 2 ][ 0 ];
 		if ( !real ) return 0;
-		double imag = getInput().getDOUBLE( i * 2 + 1 );
+		double imag = m_in[ i * 2 ][ 1 ];
 		if ( !imag ) return 0;
 //		return atan( imag / real );
 		return atan2( imag, real );
@@ -74,29 +72,29 @@ public:
 
 	/// Sets an input value
 	void setOutput( int i, double real, double imag )
-	{	getOutput().setDOUBLE( i * 2, real );
-		getOutput().setDOUBLE( i * 2 + 1, imag );
+	{	m_out[ i * 2 ][ 0 ] = real;
+		m_out[ i * 2 ][ 1 ] = imag;
 	}
 
 	/// Returns the output real component
-	double getOutputReal( int i ) { return getOutput().getDOUBLE( i * 2 ); }
+	double getOutputReal( int i ) { return m_out[ i * 2 ][ 0 ]; }
 
 	/// Returns the output imaginary component
-	double getOutputImag( int i ) { return getOutput().getDOUBLE( i * 2 + 1 ); }
+	double getOutputImag( int i ) { return m_out[ i * 2 ][ 1 ]; }
 
 	/// Gets the output magnitude
 	double getOutputMag( int i ) 
-	{	double real = getOutput().getDOUBLE( i * 2 );
-		double imag = getOutput().getDOUBLE( i * 2 + 1 );
+	{	double real = m_out[ i * 2 ][ 0 ];
+		double imag = m_out[ i * 2 ][ 1 ];
 		if ( !imag ) return real; if ( !real ) return imag;
 		return sqrt( real * real + imag * imag );
 	}
 
 	/// Gets the output phase
 	double getOutputPhase( int i ) 
-	{	double real = getOutput().getDOUBLE( i * 2 );
+	{	double real = m_out[ i * 2 ][ 0 ];
 		if ( !real ) return 0;
-		double imag = getOutput().getDOUBLE( i * 2 + 1 );
+		double imag = m_out[ i * 2 ][ 1 ];
 		if ( !imag ) return 0;
 //		return atan( imag / real );
 		return atan2( imag, real );

@@ -61,7 +61,7 @@ const CBin::t_byte* CBin::Resize( CBin::t_size x_nNewSize )
 
 	// Simple resize
 	else
-		m_buf.Resize( x_nNewSize );
+		m_buf.OexResize( x_nNewSize );
 
 	// How did it go?
 	return Ptr();

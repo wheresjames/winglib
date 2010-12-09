@@ -356,6 +356,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FingerprintBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FingerprintImage )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, GraphFloat )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Graph )		
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, get )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, set )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getOffset )
@@ -369,7 +370,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, appendString )	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setSubString )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getSubString )	
-
+	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FindBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Sub )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getSub )
@@ -398,6 +399,11 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	REGISTER_TYPE_ACCESS( ULONG )
 	REGISTER_TYPE_ACCESS( FLOAT )
 	REGISTER_TYPE_ACCESS( DOUBLE )
+
+	SQBIND_ENUM( oex::CUtil::eGtHorz,		eGtHorz )
+	SQBIND_ENUM( oex::CUtil::eGtVert,		eGtVert )
+	SQBIND_ENUM( oex::CUtil::eGtHorzFft,	eGtHorzFft )
+	SQBIND_ENUM( oex::CUtil::eGtVertFft,	eGtVertFft )
 
 SQBIND_REGISTER_CLASS_END()
 

@@ -11,4 +11,5 @@
 
 #include "portaudio.h"
 
+#include "pa_input.h"
 #include "pa_output.h"

@@ -7,6 +7,7 @@ function _init()
 
 	_self.echo( "=====================================================" );
 	_self.echo( "Total Devices         : " + pa.getDeviceCount() );
+	_self.echo( "Default input device  : " + pa.getDefaultInputDevice() );
 	_self.echo( "Default output device : " + pa.getDefaultOutputDevice() );
 	_self.echo( "=====================================================" );
 
@@ -23,7 +24,13 @@ function _init()
 
 	_self.echo( "=====================================================" );
 	
-	TestOutput( pa );
+	TestInput();
+
+	_self.echo( "=====================================================" );
+	_self.echo( "" );
+	_self.echo( "=====================================================" );
+	
+	TestOutput();
 
 	_self.echo( "=====================================================" );
 
@@ -32,8 +39,58 @@ function _init()
 	return 0;
 }
 
-function TestOutput( pa )
+function TestInput()
 {
+	local pa = CPaInput();
+
+	_self.echo( "*** Opening input device : " + pa.getDefaultInputDevice() );
+
+	if ( !pa.Open( 1, pa.getDefaultInputDevice(), 1, 
+				   CPaInput().paFloat32, 0.2, 44100., 0 ) )
+	{   _self.echo( "!!! Failed to open input stream : " + pa.getLastError() );
+		return 0;
+	} // end if
+
+	_self.echo( "*** Starting the input device" );
+
+	if ( !pa.Start() )
+	{   _self.echo( "!!! Failed to start input stream : " + pa.getLastError() );
+		return 0;
+	} // end if
+
+	_self.print( "*** Capturing audio : 0" );
+
+	// at 44khz, we should read 1MB in just under eight seconds
+	local maxread = 1024 * 1024;
+	local to = _self.gmt_time() + 8;
+	local dat = CSqBinary();
+	while ( _self.gmt_time() < to && dat.getUsed() < maxread )
+	{	_self.sleep( 15 );
+		if ( pa.Read( dat, 0 ) )
+			_self.print( "\r*** Capturing audio : " + dat.getUsed() );
+	} // end while
+
+	_self.echo( "\n*** Stoping the input device" );
+
+	if ( !pa.Stop() )
+	{   _self.echo( "!!! Failed to stop input stream : " + pa.getLastError() );
+		return 0;
+	} // end if
+
+	// Did we get data?
+	if ( dat.getUsed() < maxread )
+		_self.echo( "!!! " + dat.getUsed() + " bytes captured.  Input test failed" );
+	else
+		_self.echo( "*** Input test successfull" );
+
+	return 1;
+
+}
+
+function TestOutput()
+{
+	local pa = CPaOutput();
+
 	local hz = 440;
 	local sps = 44100.;
 	local bsize = ( sps / hz * 200 ).tointeger();

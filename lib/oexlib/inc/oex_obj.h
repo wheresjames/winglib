@@ -110,6 +110,48 @@ namespace obj
         eTypeGuid           = 32
     };
 
+	template< typename T >
+		oexSIZE_T StaticSize( T t )
+	{
+		switch( t )
+		{
+			case eTypeBin : return 1;
+			case eTypeInt : return sizeof( oexINT );
+			case eTypeUInt : return sizeof( oexUINT );
+			case eTypeInt8 : return 1;
+			case eTypeUInt8 : return 1;
+			case eTypeInt16 : return 2;
+			case eTypeUInt16 : return 2;
+			case eTypeInt32 : return 4;
+			case eTypeUInt32 : return 4;
+			case eTypeInt64 : return 8;
+			case eTypeUInt64 : return 8;
+			case eTypeChar8 : return 1;
+			case eTypeUChar8 : return 1;
+			case eTypeChar16 : return 2;
+			case eTypeUChar16 : return 2;
+			case eTypeChar32 : return 4;
+			case eTypeUChar32 : return 4;
+			case eTypeChar64 : return 8;
+			case eTypeUChar64 : return 8;
+			case eTypeFloat : return sizeof( oexFLOAT );
+			case eTypeDouble : return sizeof( oexDOUBLE );
+			case eTypeLongDouble : return sizeof( oexLONGDOUBLE );
+			case eTypeStrW : return 2;
+			case eTypeStr8 : return 1;
+			case eTypeStr16 : return 2;
+			case eTypeStr32 : return 4;
+			case eTypeStr64 : return 8;
+			case eTypeGuid : return sizeof( oexGUID );
+
+			case eTypeInvalid :
+			default : break;
+
+		} // end switch
+
+		return 0;
+	}
+
 	//==============================================================
 	// Size()
 	//==============================================================

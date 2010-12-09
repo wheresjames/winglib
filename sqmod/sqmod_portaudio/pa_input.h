@@ -1,17 +1,17 @@
-// pa_output.h
+// pa_input.h
 
-class CPaOutput
+class CPaInput
 {
 public:
 
-	_SQBIND_CLASS_CTOR_BEGIN( CPaOutput )
-	_SQBIND_CLASS_CTOR_END( CPaOutput )
+	_SQBIND_CLASS_CTOR_BEGIN( CPaInput )
+	_SQBIND_CLASS_CTOR_END( CPaInput )
 
 	/// Default constructor
-	CPaOutput();
+	CPaInput();
 
 	/// Destructor
-	virtual ~CPaOutput();
+	virtual ~CPaInput();
 
 	/// Releases resources
 	void Destroy();
@@ -25,10 +25,10 @@ public:
 	/// Returns non-zero if a device is open
 	int isOpen() { return ( oexNULL != m_stream ) ? 1 : 0; }
 	
-	/// Starts audio output device
+	/// Starts audio input device
 	int Start();
 
-	/// Stops audio output device
+	/// Stops audio input device
 	int Stop();
 
 	/// Returns the initialize error
@@ -37,11 +37,11 @@ public:
 	/// Returns the initialize error
 	int getLastError() { return (int)m_errLast; }
 
-	/// Returns the default output device
-	int getDefaultOutputDevice();
-
 	/// Returns the default input device
 	int getDefaultInputDevice();
+
+	/// Returns the default output device
+	int getDefaultOutputDevice();
 
 	/// Returns the number of available devices
 	int getDeviceCount();
@@ -49,8 +49,8 @@ public:
 	/// Queries information about the specified device
 	int getDeviceInfo( int nDev, sqbind::CSqMulti *pInf );
 
-	/// Writes data to the device
-	int Write( sqbind::CSqBinary *data, int frames );
+	/// Reads data from the device
+	int Read( sqbind::CSqBinary *data, int frames );
 
 	/// Returns number of bytes currently waiting in the buffer
 	int getBufferedBytes() { return m_buf.GetMaxRead(); }
@@ -61,6 +61,9 @@ public:
 	/// Returns the number of bytes required for one frame in a particular format
 	int getFormatBytes( int nFmt );
 
+	/// Returns the frame block size
+	int getFrameBlockSize() { return m_nFrameBlockSize; }
+
 protected:
 
 	/// Static callback
@@ -69,6 +72,7 @@ protected:
 	/// Callback
 	int PaStreamCallback( const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo  *timeInfo, PaStreamCallbackFlags  statusFlags );
 
+
 private:
 
 	/// Non-zero if blocking mode is enabled
@@ -76,6 +80,9 @@ private:
 
 	/// Number of bytes in a frame
 	int						m_nFrameBytes;
+
+	/// Number of frames per block
+	int						m_nFrameBlockSize;
 
 	/// Initialize result
 	PaError					m_errInit;	

@@ -1,9 +1,9 @@
-// pa_output.cpp
+// pa_input.cpp
 
 #include "stdafx.h"
 
 
-CPaOutput::CPaOutput()
+CPaInput::CPaInput()
 {_STT();
 
 	m_errInit = -1;
@@ -11,12 +11,13 @@ CPaOutput::CPaOutput()
 	m_stream = oexNULL;
 	m_errLast = paNoError;
 	m_bBlocking = 0;
+	m_nFrameBlockSize = 0;
 
 	// Initialize portaudio
 	Init();
 }
 
-CPaOutput::~CPaOutput()
+CPaInput::~CPaInput()
 {_STT();
 
 	Destroy();
@@ -27,7 +28,7 @@ CPaOutput::~CPaOutput()
 	} // end if
 }
 
-void CPaOutput::Destroy()
+void CPaInput::Destroy()
 {_STT();
 
 	// Close the stream
@@ -39,9 +40,10 @@ void CPaOutput::Destroy()
 	m_pdi = oexNULL;
 	m_stream = oexNULL;
 	m_bBlocking = 0;
+	m_nFrameBlockSize = 0;
 }
 
-int CPaOutput::Init()
+int CPaInput::Init()
 {_STT();
 
 	// Initialize
@@ -52,22 +54,22 @@ int CPaOutput::Init()
 	return 1;
 }
 
-int CPaOutput::getDeviceCount()
+int CPaInput::getDeviceCount()
 {_STT();
 	return Pa_GetDeviceCount();
 }
 
-int CPaOutput::getDefaultOutputDevice()
-{_STT();
-	return Pa_GetDefaultOutputDevice();
-}
-
-int CPaOutput::getDefaultInputDevice()
+int CPaInput::getDefaultInputDevice()
 {_STT();
 	return Pa_GetDefaultInputDevice();
 }
 
-int CPaOutput::getDeviceInfo( int nDev, sqbind::CSqMulti *pInf )
+int CPaInput::getDefaultOutputDevice()
+{_STT();
+	return Pa_GetDefaultOutputDevice();
+}
+
+int CPaInput::getDeviceInfo( int nDev, sqbind::CSqMulti *pInf )
 {_STT();
 
 	// Read output device information
@@ -91,13 +93,13 @@ int CPaOutput::getDeviceInfo( int nDev, sqbind::CSqMulti *pInf )
 	return 1;
 }
 
-int CPaOutput::_PaStreamCallback( const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo  *timeInfo, PaStreamCallbackFlags  statusFlags, void *userData )
-{	CPaOutput *p = (CPaOutput*)userData;
+int CPaInput::_PaStreamCallback( const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo  *timeInfo, PaStreamCallbackFlags  statusFlags, void *userData )
+{	CPaInput *p = (CPaInput*)userData;
 	if ( !p ) return 0;
 	return p->PaStreamCallback( input, output, frameCount, timeInfo, statusFlags );
 }
 
-int CPaOutput::PaStreamCallback( const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo  *timeInfo, PaStreamCallbackFlags  statusFlags )
+int CPaInput::PaStreamCallback( const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo  *timeInfo, PaStreamCallbackFlags  statusFlags )
 {
 	// Anything to do?
 	if ( 0 >= frameCount )
@@ -105,43 +107,26 @@ int CPaOutput::PaStreamCallback( const void *input, void *output, unsigned long 
 
 	// Do we have the minimum required number of bytes?
 	int bytes = frameCount * getFrameBytes();
-	if ( bytes > (int)m_buf.GetMaxRead() )
-	{
-		// Play what's left
-		bytes = m_buf.GetMaxRead();
+	if ( 0 >= bytes )
+		return paAbort;
 
-		// Forget what's left
-//		m_buf.Empty();
+	// Stuff the data into the ring buffer
+	m_buf.Write( input, bytes );
 
-//		return paComplete;
-
-	} // end if
-
-	// Copy data from the ring buffer
-	m_buf.Read( output, bytes );
-
-	return paContinue; // paComplete paAbort
+	return paContinue;
 }
 
-int CPaOutput::getFormatBytes( int nFmt )
+int CPaInput::getFormatBytes( int nFmt )
 {_STT();
 
-	switch( nFmt )
-	{
-		default : break;
-		case paFloat32 : return 4;
-		case paInt32 : return 4;
-		case paInt24 : return 3;
-		case paInt16 : return 2;
-		case paInt8 : return 1;
-
-	} // end switch
-
-	return 1;
+	int nSize = Pa_GetSampleSize( nFmt );
+	if ( paSampleFormatNotSupported == nSize )
+		return 0;
+	return nSize;
 }
 
 
-int CPaOutput::Open( int bBlocking, int nDev, int nChannels, int nFormat, double dLatency, double dSRate, int fpb )
+int CPaInput::Open( int bBlocking, int nDev, int nChannels, int nFormat, double dLatency, double dSRate, int fpb )
 {_STT();
 
 	// Lose old stream
@@ -159,14 +144,15 @@ int CPaOutput::Open( int bBlocking, int nDev, int nChannels, int nFormat, double
 	psp.suggestedLatency = dLatency;
 
 	m_bBlocking = bBlocking;
+	m_nFrameBlockSize = fpb;
 	m_nFrameBytes = getFormatBytes( nFormat ) * nChannels;
 
 	// Attempt to open output stream
 
 	if ( bBlocking )
-		m_errLast = Pa_OpenStream( &m_stream, 0, &psp, dSRate, fpb, 0, 0, this );
+		m_errLast = Pa_OpenStream( &m_stream, &psp, 0, dSRate, fpb, 0, 0, this );
 	else
-		m_errLast = Pa_OpenStream( &m_stream, 0, &psp, dSRate, fpb, 0, &_PaStreamCallback, this );
+		m_errLast = Pa_OpenStream( &m_stream, &psp, 0, dSRate, fpb, 0, &_PaStreamCallback, this );
 
 	if ( paNoError != m_errLast )
 		return 0;
@@ -174,7 +160,7 @@ int CPaOutput::Open( int bBlocking, int nDev, int nChannels, int nFormat, double
 	return 1;
 }
 
-int CPaOutput::Start()
+int CPaInput::Start()
 {_STT();
 
 	if ( !m_stream )
@@ -188,7 +174,7 @@ int CPaOutput::Start()
 	return 1;
 }
 
-int CPaOutput::Stop()
+int CPaInput::Stop()
 {_STT();
 
 	if ( !m_stream )
@@ -202,25 +188,58 @@ int CPaOutput::Stop()
 	return 1;
 }
 
-int CPaOutput::Write( sqbind::CSqBinary *data, int frames )
+int CPaInput::Read( sqbind::CSqBinary *data, int frames )
 {_STT();
 
 	// Sanity checks
-	if ( !m_stream || !data || !data->getUsed() || !frames )
+	if ( !m_stream || !data )
 		return 0;
+
+	// Use number of bytes available if blocking
+	if ( m_bBlocking && 0 >= frames )
+		frames = Pa_GetStreamReadAvailable( m_stream );
+
+	// How many bytes to read?
+	int bytes = frames * getFrameBytes();
+	if ( !m_bBlocking && 0 >= bytes )
+		bytes = m_buf.GetMaxRead();
+
+	// Ensure space
+	int total = bytes + data->getUsed();
+	if ( data->Size() < total )
+		if ( !data->Resize( total ) )
+			return data->getUsed();
 
 	if ( m_bBlocking )
 	{
-		m_errLast = Pa_WriteStream( m_stream, data->Ptr(), frames );
-		if ( paNoError != m_errLast )
-			return 0;
+		// Must specify an amount for blocking read
+		if ( 0 >= bytes )
+			return data->getUsed();
+
+		// Read from stream
+		m_errLast = Pa_ReadStream( m_stream, (void*)data->Ptr( data->getUsed() ), frames );
+		if ( paNoError == m_errLast )
+			data->setUsed( total );
 
 	} // end if
 
 	else
+	{
+		oex::CCircBuf::t_size uRead = 0;
 
-		// Stuff in the ring buffer
-		m_buf.Write( data->Ptr(), data->getUsed() );
+		// Read the string from the buffer
+		m_buf.Read( (oex::oexPVOID)data->Ptr( data->getUsed() ), bytes, &uRead );
 
-	return 1;
+		// Bounds check bytes read
+		if ( uRead < 0 ) 
+			uRead = 0;
+		else if ( uRead > bytes ) 
+			uRead = bytes;
+
+		// Set new buffer size
+		data->setUsed( data->getUsed() + uRead );
+
+	} // end else
+
+	return data->getUsed();
 }

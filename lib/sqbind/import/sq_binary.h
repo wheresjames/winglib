@@ -275,6 +275,9 @@ namespace sqbind
 		/// Graphs an array of floats
 		int GraphFloat( CSqImage *img, CSqColor *c, float scale, float min, float max );
 
+		/// Creates the specified graph
+		int Graph( int nSamples, int nInterval, int nType, CSqImage *img, CSqColor *bg, CSqColor *fg, const stdString &sParams );
+
 		/// Locates the specified string in the buffer
 		t_size FindBin( CSqBinary *p, int x_nStart, int x_nMax )
 		{	return m_bin.Find( p->m_bin, x_nStart, x_nMax ); }

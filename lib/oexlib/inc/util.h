@@ -36,6 +36,21 @@
 
 class CUtil
 {
+public:
+
+	// Graph types
+	enum
+	{
+		eGtNone		= 0x010000,
+		eGtHorz		= 0x020000,
+		eGtVert		= 0x030000,
+		eGtHorzFft	= 0x040000,
+		eGtVertFft	= 0x050000,
+
+		eDtMask		= 0x0000ff,
+		eGtMask		= 0xff0000
+	};
+
 private:
 
 	CUtil() {}
@@ -87,6 +102,9 @@ public:
 
 	/// Draws a graph of an array of float values
 	static oexBOOL GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *pc, oexFLOAT *pf, oexINT n, oexFLOAT scale, oexFLOAT min, oexFLOAT max );
+
+	/// Draws the specified graph
+	static oexBOOL Graph( oexINT nSamples, oexINT nInterval, oexINT nType, CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *fg, oexINT *bg, oexCPVOID p, oexINT n, oexCSTR pParams );
 
 };
 

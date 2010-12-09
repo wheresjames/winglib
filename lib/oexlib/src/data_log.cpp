@@ -809,7 +809,7 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 		x_nMethod |= eMethodNoRead;
 
 	SIterator it;
-	if ( !it.Init( m_sRoot, x_pKey ) || !it.IsData( m_tLogBase, x_tStart ) )
+	if ( !it.Init( m_sRoot, x_pKey ) /*|| !it.IsData( m_tLogBase, x_tStart )*/ )
 		return CPropertyBag();
 
 	// Align with the interval
@@ -828,7 +828,7 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 
 	// Create data
 	CPropertyBag pb;
-	oexUINT uN = 0, uSkips = 100;
+	oexUINT uN = 0, uSkips = 2048;
 	t_time tTime = x_tStart, tTimeMs = 0;
 	while ( ( bUnbounded || tTime <= x_tEnd ) && uN < m_uLimit )
 	{
@@ -838,7 +838,8 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 			if ( !x_tInterval )
 			{
 				// Ensure it falls within our time range
-				if ( ( ( eMethodReverse & x_nMethod ) 
+				if ( 0 < it.vi.uTime &&
+					 ( ( eMethodReverse & x_nMethod ) 
 					   ? ( it.vi.uTime < x_tStart || ( it.vi.uTime == x_tStart && !it.vi.uTimeMs ) )
 					   : it.vi.uTime >= x_tStart 
 					 )
@@ -849,7 +850,7 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 					uN++;
 
 					// Reset skips +++ Move to header
-					uSkips = 100;
+					uSkips = 2048;
 
 					if ( eDtSize == x_nDataType )
 						it.sValue = it.vi.uSize;
@@ -892,9 +893,13 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 			} // end if
 
 			else if ( ( eMethodReverse & x_nMethod ) && ( !it.npos || it.npos > it.pos ) )
-			{	tTime -= m_tIndexStep;
-				tTime += m_tIndexStep - ( tTime % m_tIndexStep );
-				tTimeMs = 0;
+			{
+				tTime -= 1 + ( tTime % m_tIndexStep );
+				tTimeMs = 999;
+				
+			 //	tTime -= m_tIndexStep;
+			 //	tTime += m_tIndexStep - ( tTime % m_tIndexStep );
+			 //	tTimeMs = 0;
 			} // end if
 
 			else

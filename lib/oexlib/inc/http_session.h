@@ -238,7 +238,7 @@ public:
 	//==============================================================
 	/// Returns zero if connection should be terminated
     oexBOOL KeepAlive()
-	{	return !GetTransactions() || m_uKeepAlive > oexGetUnixTime();
+	{	return !GetTransactions(); // || m_uKeepAlive > oexGetUnixTime();
 	}
 
 	//==============================================================

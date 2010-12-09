@@ -469,11 +469,19 @@ oexBOOL CUtil::Fingerprint( CBin *buf, CBin *img, oexINT fmt, oexINT w, oexINT h
 }
 
 template< typename T >
-	void CUTIL_SET_PIXEL( T *b, oexINT sw, oexINT x, oexINT y, oexINT *c )
+	void CUTIL_SET_PIXEL24( T *b, oexINT sw, oexINT x, oexINT y, oexINT *c )
 	{	oexINT o = y * sw + ( x * 3 );
-		b[ o + 2] = (T)c[ 0 ];
+		b[ o + 2 ] = (T)c[ 0 ];
 		b[ o + 1 ] = (T)c[ 1 ];
 		b[ o ] = (T)c[ 2 ];
+	}
+
+template< typename T >
+	void CUTIL_SCALE_PIXEL24( T *b, oexINT sw, oexINT x, oexINT y, oexINT *c1, oexINT *c2, oexINT scale )
+	{	oexINT o = y * sw + ( x * 3 );
+		b[ o + 2 ] = (T)c1[ 0 ] + (T)( (oexINT)( c2[ 0 ] - c1[ 0 ] ) * scale / (oexINT)255 );
+		b[ o + 1 ] = (T)c1[ 1 ] + (T)( (oexINT)( c2[ 1 ] - c1[ 1 ] ) * scale / (oexINT)255 );
+		b[ o ] = (T)c1[ 2 ] + (T)( (oexINT)( c2[ 2 ] - c1[ 2 ] ) * scale / (oexINT)255 );
 	}
 
 // Bresenham
@@ -498,7 +506,7 @@ oexBOOL CUtil::DrawLine( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, o
 	oexINT ym = 0, yd = ( y1 < y2 ) ? 1 : -1;
 	while ( y1 != y2 || x1 != x2 )
 	{
-		CUTIL_SET_PIXEL( p, sw, x1, y1, pc );
+		CUTIL_SET_PIXEL24( p, sw, x1, y1, pc );
 
 		ym += ye;
 		if ( ym >= xe ) 
@@ -517,7 +525,7 @@ oexBOOL CUtil::DrawLine( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, o
 	} // end while
 
 	// Set the last pixel
-	CUTIL_SET_PIXEL( p, sw, x2, y2, pc );
+	CUTIL_SET_PIXEL24( p, sw, x2, y2, pc );
 
 	return oexTRUE;
 }
@@ -587,3 +595,73 @@ oexBOOL CUtil::GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw,
 CStr CUtil::BuildPath( oexINT x_nId, oexCONST CStr &x_sPath, oexTCHAR tSep )
 {	return oexBuildPath( oexGetSysFolder( x_nId ), x_sPath ); }
 
+
+oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType, 
+					  CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, 
+					  oexINT *fg, oexINT *bg, oexCPVOID p, oexINT n, 
+					  oexCSTR pParams )
+{
+	if ( 0 >= w || 0 >= h || 1 >= n )
+		return oexFALSE;
+
+	if ( !img || !img->getUsed() )
+		return oexFALSE;
+
+//	if ( 0 >= nInterval ) 
+//		nInterval = oex::obj::StaticSize( oex::CUtil::eDtMask & nType );
+
+	// Get data size
+	int nSize = oex::obj::StaticSize( oex::CUtil::eDtMask & nType );
+	if ( 0 >= nSize )
+		return oexFALSE;
+
+	if ( 0 >= nSamples )
+		nSamples = img->getUsed() / nSize;
+
+	// Ensure space
+	int sz = sw * h;
+	if ( img->getUsed() < sz )
+		return oexFALSE;
+
+	// Pointer to image data
+	oexBYTE *pi = (oexBYTE*)img->_Ptr();
+
+	CPropertyBag pb;
+	if ( pParams )
+		pb = CParser::Deserialize( pParams );
+
+	if ( eGtHorzFft == ( eGtMask & nType ) )
+	{
+		if ( 0 >= nInterval )
+			nInterval = 1;
+
+		// Find the range
+		oexFLOAT fMin = *(oexFLOAT*)p, fMax = fMin;
+		for( oexINT i = 0; i < nSamples; i++ )
+			if ( ( (oexFLOAT*)p )[ i ] < fMin )
+				fMin = ( (oexFLOAT*)p )[ i ];
+			else if ( ( (oexFLOAT*)p )[ i ] > fMax )
+				fMax = ( (oexFLOAT*)p )[ i ];
+		oexFLOAT fRange = fMax - fMin;
+		if ( !fRange ) 
+			return oexFALSE;
+
+		for ( int x = 0, i = 0; x < w; x++, i += nInterval )
+			for ( int y = 0, o = 0; y < h; y++, o++ )
+			{
+				int _i = i + o;
+				if ( _i < nSamples )
+				{
+					oexFLOAT f = ( ( (oexFLOAT*)p )[ _i ] - fMin ) * 255. / fRange;
+
+					CUTIL_SCALE_PIXEL24( pi, sw, x, y, bg, fg, f );
+//					CUTIL_SET_PIXEL24( pi, sw, x, y, fg );
+
+				} // end if
+
+			} // end for
+
+	} // end if
+
+	return oexTRUE;
+}

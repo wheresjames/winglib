@@ -47,3 +47,11 @@ int CSqBinary::GraphFloat( CSqImage *img, CSqColor *c, float scale, float min, f
 	CSqBinary buf; if ( !img->refPixels( &buf ) ) return 0;
 	return oex::CUtil::GraphFloat( &buf.Mem(), 0, img->getWidth(), img->getHeight(), img->getScanWidth(), c->Ptr(), (oex::oexFLOAT*)Ptr(), getUsed() / sizeof( oex::oexFLOAT ), scale, min, max );
 }
+
+int CSqBinary::Graph( int nSamples, int nInterval, int nType, CSqImage *img, CSqColor *bg, CSqColor *fg, const stdString &sParams )
+{	if ( !img || !img->getUsed() || !getUsed() ) return 0;
+	CSqBinary buf; if ( !img->refPixels( &buf ) ) return 0;
+	return oex::CUtil::Graph( nSamples, nInterval, nType, &buf.Mem(), 0,
+							  img->getWidth(), img->getHeight(), img->getScanWidth(), 
+							  fg->Ptr(), bg->Ptr(), Ptr(), getUsed(), sParams.c_str() );
+}
