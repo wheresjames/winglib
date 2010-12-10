@@ -50,7 +50,7 @@ public:
 		typedef CSysTime::t_time		t_time;
 		
 public:
-
+/*
 	enum
 	{
 		eDtNone = 0,
@@ -65,7 +65,7 @@ public:
 
 		eDtSize = 5
 	};
-
+*/
 	enum
 	{
 		eMethodNone			= 0x00,

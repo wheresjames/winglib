@@ -136,7 +136,7 @@ namespace sqbind
 
 			// Find the first matching value
 			if ( !m_dl.FindValue( m_it, nTime, nTimeMs, 1, 
-								  oex::CDataLog::eDtFile, oex::CDataLog::eMethodDiscrete | oex::CDataLog::eMethodNoRead,
+								  oex::obj::tInvalid, oex::CDataLog::eMethodDiscrete | oex::CDataLog::eMethodNoRead,
 								  m_dl.GetBase(), m_dl.GetStep() ) )
 				return 0;
 
@@ -146,14 +146,14 @@ namespace sqbind
 		/// Next item
 		SQINT itNext()
 		{	return m_dl.FindValue( m_it, m_it.viNext.uTime, m_it.viNext.uTimeMs, 0, 
-									oex::CDataLog::eDtFile, oex::CDataLog::eMethodDiscrete | oex::CDataLog::eMethodNoRead,
+									oex::obj::tInvalid, oex::CDataLog::eMethodDiscrete | oex::CDataLog::eMethodNoRead,
 									m_dl.GetBase(), m_dl.GetStep() );
 		}
 
 		/// Previous item
 		SQINT itPrev()
 		{	return m_dl.FindValue( m_it, m_it.viNext.uTime, m_it.viNext.uTimeMs, 0, 
-									oex::CDataLog::eDtFile, 
+									oex::obj::tInvalid, 
 									oex::CDataLog::eMethodDiscrete | oex::CDataLog::eMethodReverse | oex::CDataLog::eMethodNoRead,
 									m_dl.GetBase(), m_dl.GetStep() );
 		}

@@ -130,6 +130,10 @@ CBin::t_size CBin::Share( CBin *x_p )
 CBin::t_size CBin::AppendBuffer( const CBin::t_byte *x_pBuf, CBin::t_size x_nBytes )
 {_STT();
 
+	// Null Append?
+	if ( !x_pBuf || !x_nBytes )
+		return m_nUsed;
+
 	// Ptr pointer?
 	if ( m_ptr )
 	{

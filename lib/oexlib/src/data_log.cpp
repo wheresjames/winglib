@@ -302,7 +302,7 @@ oexBOOL CDataLog::FlushBuffer( oexINT x_nKey, SValueIndex *pVi, oexCPVOID pBuf, 
 
 		// Resume existing index
 		SIterator itR; itR.Init( m_sRoot, m_pLogs[ x_nKey ]->sName.Ptr() );
-		if ( FindValue( itR, tRootTime, 0, 0, eDtNone, eMethodNone, m_tLogBase, m_tIndexStep ) )
+		if ( FindValue( itR, tRootTime, 0, 0, obj::tInvalid, eMethodNone, m_tLogBase, m_tIndexStep ) )
 		{	m_pLogs[ x_nKey ]->plast = itR.pos;
 			while ( itR.viNext.uNext > itR.pos )
 			{	itR.pos = itR.viNext.uNext;
@@ -396,7 +396,7 @@ oexBOOL CDataLog::Flush( t_time x_tTime )
 
 				// Resume existing index
 				SIterator itR; itR.Init( m_sRoot, m_pLogs[ i ]->sName.Ptr() );
-				if ( FindValue( itR, tRootTime, 0, 0, eDtNone, eMethodNone, m_tLogBase, m_tIndexStep ) )
+				if ( FindValue( itR, tRootTime, 0, 0, obj::tInvalid, eMethodNone, m_tLogBase, m_tIndexStep ) )
 				{	m_pLogs[ i ]->plast = itR.pos;
 					while ( itR.viNext.uNext > itR.pos )
 					{	itR.pos = itR.viNext.uNext;
@@ -722,11 +722,11 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 				x_it.npos = x_it.viNext.uPrev;
 			else
 				x_it.npos = x_it.viNext.uNext;
-
+			
 			// Average values if needed
 			if ( !bNew 
 				&& ( !( eMethodReverse & x_nMethod ) || tMin <= x_it.vi.uTime )
-				 && eDtString < x_nDataType 
+				&& !( obj::eTypeArray & x_nDataType )
 				 && eMethodAverage & x_nMethod )
 			{
 				// Point to the data
@@ -742,10 +742,10 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 						if ( !x_it.nCount++ )
 							x_it.fValue = 0, x_it.nValue = 0;
 
-						if ( eDtInt == x_nDataType )
+						if ( obj::tInt == x_nDataType )
 							x_it.nValue += x_it.sValue.ToInt();
 
-						else if ( eDtFloat == x_nDataType )
+						else if ( obj::tFloat == x_nDataType )
 							x_it.fValue += x_it.sValue.ToFloat();
 
 					} // end if
@@ -775,10 +775,10 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 			// Read the value
 			if ( x_it.getValue( x_it.sValue ) )
 			{
-				if ( eDtInt == x_nDataType )
+				if ( obj::tInt == x_nDataType )
 					x_it.nValue = x_it.sValue.ToInt();
 
-				else if ( eDtFloat == x_nDataType )
+				else if ( obj::tFloat == x_nDataType )
 					x_it.fValue = x_it.sValue.ToFloat();
 
 			} // end if
@@ -805,7 +805,7 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 		return CPropertyBag();
 
 	// Don't read data if we're just returning the size
-	if ( eDtSize == x_nDataType )
+	if ( obj::eTypeSize == x_nDataType )
 		x_nMethod |= eMethodNoRead;
 
 	SIterator it;
@@ -852,7 +852,7 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 					// Reset skips +++ Move to header
 					uSkips = 2048;
 
-					if ( eDtSize == x_nDataType )
+					if ( obj::eTypeSize == x_nDataType )
 						it.sValue = it.vi.uSize;
 
 					if ( it.vi.uTimeMs )
@@ -935,8 +935,8 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time
 		return oexT( "" );
 
 	// Set defaults
-	if ( eDtNone == x_nDataType ) 
-		x_nDataType = eDtFloat;
+	if ( obj::tInvalid == x_nDataType ) 
+		x_nDataType = obj::tFloat;
 	if ( eMethodNone == x_nMethod ) 
 		x_nMethod = eMethodAverage;
 	if ( !x_fScale )

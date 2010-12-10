@@ -40,116 +40,101 @@ namespace obj
     // iii Unfortunately, Doxygen craps out on these next
     //     function templates.
 
-	// Data types
+	// Data type masks
     enum
     {
-        eTypeInvalid        = 0,
+		// Data element size
+		eTypeSize			= 0x00ff,
 
-        eTypeBin            = 1,
+		// Elements are signed values
+		eTypeSigned			= 0x0100,
 
-        eTypeInt            = 2,
+		// Array
+		eTypeElement		= 0x0200,
 
-        eTypeUInt           = 3,
+		// Array
+		eTypeFloating		= 0x0400,
 
-        eTypeInt8           = 4,
+		// Array
+		eTypeArray			= 0x1000,
 
-        eTypeUInt8          = 5,
+		// Null terminated
+		eTypeNullTerm		= 0x2000,
 
-        eTypeInt16          = 6,
+	};
 
-        eTypeUInt16         = 7,
+	enum
+	{
+		// Types
+        tInvalid        = 0,
 
-        eTypeInt32          = 8,
+        tBin            = ( eTypeArray | 1 ),
 
-        eTypeUInt32         = 9,
+        tInt            = ( eTypeSigned | sizeof( oexINT ) ),
 
-        eTypeInt64          = 10,
+        tUInt           = ( sizeof( oexUINT ) ),
 
-        eTypeUInt64         = 11,
+		tInt8           = ( eTypeSigned | 1 ),
 
-        eTypeChar           = 12,
+        tUInt8          = ( 1 ),
 
-        eTypeUChar          = 13,
+        tInt16          = ( eTypeSigned | 2 ),
 
-        eTypeCharW          = 14,
+        tUInt16         = ( 2 ),
 
-        eTypeUCharW         = 15,
+        tInt32          = ( eTypeSigned | 4 ),
 
-        eTypeChar8          = 16,
+        tUInt32         = ( 4 ),
 
-        eTypeUChar8         = 17,
+        tInt64          = ( eTypeSigned | 8 ),
 
-        eTypeChar16         = 18,
+        tUInt64         = ( 8 ),
 
-        eTypeUChar16        = 19,
+        tChar           = ( eTypeSigned | eTypeElement | 8 ),
 
-        eTypeChar32         = 20,
+        tUChar          = ( eTypeElement | 8 ),
 
-        eTypeUChar32        = 21,
+        tChar8          = ( eTypeSigned | eTypeElement | sizeof( oexCHAR ) ),
 
-        eTypeChar64         = 22,
+        tUChar8         = ( eTypeElement | sizeof( oexUCHAR ) ),
 
-        eTypeUChar64        = 23,
+        tChar16         = ( eTypeSigned | eTypeElement | 2 ),
 
-        eTypeFloat          = 24,
+        tUChar16        = ( eTypeElement | 2 ),
 
-        eTypeDouble         = 25,
+        tChar32         = ( eTypeSigned | eTypeElement | 4 ),
 
-        eTypeLongDouble     = 26,
+        tUChar32        = ( eTypeElement | 4 ),
 
-        eTypeStrW           = 27,
+        tChar64         = ( eTypeSigned | eTypeElement | 8 ),
 
-        eTypeStr8           = 28,
+        tUChar64        = ( eTypeElement | 8 ),
 
-        eTypeStr16          = 29,
+        tFloat          = ( eTypeFloating | sizeof( oexFLOAT ) ),
 
-        eTypeStr32          = 30,
+        tDouble         = ( eTypeFloating | sizeof( oexDOUBLE ) ),
 
-        eTypeStr64          = 31,
+        tLongDouble     = ( eTypeFloating | sizeof( oexLONGDOUBLE ) ),
 
-        eTypeGuid           = 32
+        tStr			= ( eTypeArray | eTypeNullTerm | sizeof( oexTCHAR ) ),
+
+		tStrW           = ( eTypeArray | eTypeNullTerm | sizeof( oexCHARW ) ),
+
+        tStr8           = ( eTypeArray | eTypeNullTerm | 1 ),
+
+        tStr16          = ( eTypeArray | eTypeNullTerm | 2 ),
+
+        tStr32          = ( eTypeArray | eTypeNullTerm | 4 ),
+
+        tStr64          = ( eTypeArray | eTypeNullTerm | 8 ),
+
+        tGuid           = ( 16 )
     };
 
 	template< typename T >
 		oexSIZE_T StaticSize( T t )
 	{
-		switch( t )
-		{
-			case eTypeBin : return 1;
-			case eTypeInt : return sizeof( oexINT );
-			case eTypeUInt : return sizeof( oexUINT );
-			case eTypeInt8 : return 1;
-			case eTypeUInt8 : return 1;
-			case eTypeInt16 : return 2;
-			case eTypeUInt16 : return 2;
-			case eTypeInt32 : return 4;
-			case eTypeUInt32 : return 4;
-			case eTypeInt64 : return 8;
-			case eTypeUInt64 : return 8;
-			case eTypeChar8 : return 1;
-			case eTypeUChar8 : return 1;
-			case eTypeChar16 : return 2;
-			case eTypeUChar16 : return 2;
-			case eTypeChar32 : return 4;
-			case eTypeUChar32 : return 4;
-			case eTypeChar64 : return 8;
-			case eTypeUChar64 : return 8;
-			case eTypeFloat : return sizeof( oexFLOAT );
-			case eTypeDouble : return sizeof( oexDOUBLE );
-			case eTypeLongDouble : return sizeof( oexLONGDOUBLE );
-			case eTypeStrW : return 2;
-			case eTypeStr8 : return 1;
-			case eTypeStr16 : return 2;
-			case eTypeStr32 : return 4;
-			case eTypeStr64 : return 8;
-			case eTypeGuid : return sizeof( oexGUID );
-
-			case eTypeInvalid :
-			default : break;
-
-		} // end switch
-
-		return 0;
+		return ( t & eTypeSize );
 	}
 
 	//==============================================================
@@ -248,121 +233,144 @@ namespace obj
 
     template<> oexITS oexUINT GetType< oexCHAR >()
     {	switch( sizeof( oexCHAR ) )
-		{	case 1 : return eTypeChar8;
-			case 2 : return eTypeChar16;
-			case 4 : return eTypeChar32;
-			case 8 : return eTypeChar64;
+		{	case 1 : return tChar8;
+			case 2 : return tChar16;
+			case 4 : return tChar32;
+			case 8 : return tChar64;
 		} // end switch
-		return eTypeInvalid;
+		return tInvalid;
     }
 
     template<> oexITS oexUINT GetType< oexUCHAR >()
     {	switch( sizeof( oexUCHAR ) )
-		{	case 1 : return eTypeUChar8;
-			case 2 : return eTypeUChar16;
-			case 4 : return eTypeUChar32;
-			case 8 : return eTypeUChar64;
+		{	case 1 : return tUChar8;
+			case 2 : return tUChar16;
+			case 4 : return tUChar32;
+			case 8 : return tUChar64;
 		} // end switch
-		return eTypeInvalid;
+		return tInvalid;
     }
 
     template<> oexITS oexUINT GetType< oexCHARW >()
     {	switch( sizeof( oexCHARW ) )
-		{	case 1 : return eTypeChar8;
-			case 2 : return eTypeChar16;
-			case 4 : return eTypeChar32;
-			case 8 : return eTypeChar64;
+		{	case 1 : return tChar8;
+			case 2 : return tChar16;
+			case 4 : return tChar32;
+			case 8 : return tChar64;
 		} // end switch
-		return eTypeInvalid;
+		return tInvalid;
     }
 
     template<> oexITS oexUINT GetType< oexSHORT >()
     {	switch( sizeof( oexSHORT ) )
-		{	case 1 : return eTypeInt8;
-			case 2 : return eTypeInt16;
-			case 4 : return eTypeInt32;
-			case 8 : return eTypeInt64;
+		{	case 1 : return tInt8;
+			case 2 : return tInt16;
+			case 4 : return tInt32;
+			case 8 : return tInt64;
 		} // end switch
-		return eTypeInvalid;
+		return tInvalid;
     }
 
     template<> oexITS oexUINT GetType< oexUSHORT >()
     {	switch( sizeof( oexUSHORT ) )
-		{	case 1 : return eTypeUInt8;
-			case 2 : return eTypeUInt16;
-			case 4 : return eTypeUInt32;
-			case 8 : return eTypeUInt64;
+		{	case 1 : return tUInt8;
+			case 2 : return tUInt16;
+			case 4 : return tUInt32;
+			case 8 : return tUInt64;
 		} // end switch
-		return eTypeInvalid;
+		return tInvalid;
     }
 
     template<> oexITS oexUINT GetType< oexINT >()
     {	switch( sizeof( oexINT ) )
-		{	case 1 : return eTypeInt8;
-			case 2 : return eTypeInt16;
-			case 4 : return eTypeInt32;
-			case 8 : return eTypeInt64;
+		{	case 1 : return tInt8;
+			case 2 : return tInt16;
+			case 4 : return tInt32;
+			case 8 : return tInt64;
 		} // end switch
-		return eTypeInvalid;
+		return tInvalid;
     }
 
     template<> oexITS oexUINT GetType< oexUINT >()
     {	switch( sizeof( oexUINT ) )
-		{	case 1 : return eTypeUInt8;
-			case 2 : return eTypeUInt16;
-			case 4 : return eTypeUInt32;
-			case 8 : return eTypeUInt64;
+		{	case 1 : return tUInt8;
+			case 2 : return tUInt16;
+			case 4 : return tUInt32;
+			case 8 : return tUInt64;
 		} // end switch
-		return eTypeInvalid;
+		return tInvalid;
     }
 
     template<> oexITS oexUINT GetType< oexLONG >()
     {	switch( sizeof( oexLONG ) )
-		{	case 1 : return eTypeInt8;
-			case 2 : return eTypeInt16;
-			case 4 : return eTypeInt32;
-			case 8 : return eTypeInt64;
+		{	case 1 : return tInt8;
+			case 2 : return tInt16;
+			case 4 : return tInt32;
+			case 8 : return tInt64;
 		} // end switch
-		return eTypeInvalid;
+		return tInvalid;
     }
 
     template<> oexITS oexUINT GetType< oexULONG >()
     {	switch( sizeof( oexULONG ) )
-		{	case 1 : return eTypeUInt8;
-			case 2 : return eTypeUInt16;
-			case 4 : return eTypeUInt32;
-			case 8 : return eTypeUInt64;
+		{	case 1 : return tUInt8;
+			case 2 : return tUInt16;
+			case 4 : return tUInt32;
+			case 8 : return tUInt64;
 		} // end switch
-		return eTypeInvalid;
+		return tInvalid;
+    }
+
+    template<> oexITS oexUINT GetType< oexINT64 >()
+    {	switch( sizeof( oexLONG ) )
+		{	case 1 : return tInt8;
+			case 2 : return tInt16;
+			case 4 : return tInt32;
+			case 8 : return tInt64;
+		} // end switch
+		return tInvalid;
+    }
+
+    template<> oexITS oexUINT GetType< oexUINT64 >()
+    {	switch( sizeof( oexULONG ) )
+		{	case 1 : return tUInt8;
+			case 2 : return tUInt16;
+			case 4 : return tUInt32;
+			case 8 : return tUInt64;
+		} // end switch
+		return tInvalid;
     }
 
     template<> oexITS oexUINT GetType< oexFLOAT >()
-    {   return eTypeFloat; }
+    {   return tFloat; }
 
     template<> oexITS oexUINT GetType< oexDOUBLE >()
-    {   return eTypeDouble; }
+    {   return tDouble; }
+
+    template<> oexITS oexUINT GetType< oexLONGDOUBLE >()
+    {   return tDouble; }
 
     template<> oexITS oexUINT GetType< oexCONST oexCHAR * >()
     {	switch( sizeof( oexCHAR ) )
-		{	case 1 : return eTypeStr8;
-			case 2 : return eTypeStr16;
-			case 4 : return eTypeStr32;
-			case 8 : return eTypeStr64;
+		{	case 1 : return tStr8;
+			case 2 : return tStr16;
+			case 4 : return tStr32;
+			case 8 : return tStr64;
 		} // end switch
-		return eTypeInvalid;
+		return tInvalid;
     }
 
     template<> oexITS oexUINT GetType< oexCONST oexCHARW * >()
-    {	switch( sizeof( oexCHAR ) )
-		{	case 1 : return eTypeStr8;
-			case 2 : return eTypeStr16;
-			case 4 : return eTypeStr32;
-			case 8 : return eTypeStr64;
+    {	switch( sizeof( oexCHARW ) )
+		{	case 1 : return tStr8;
+			case 2 : return tStr16;
+			case 4 : return tStr32;
+			case 8 : return tStr64;
 		} // end switch
-		return eTypeInvalid;
+		return tInvalid;
     }
 
     template<> oexITS oexUINT GetType< oexGUID >()
-    {   return eTypeGuid; }
+    {   return tGuid; }
 
 };

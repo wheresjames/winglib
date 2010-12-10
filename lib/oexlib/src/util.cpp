@@ -607,16 +607,13 @@ oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType,
 	if ( !img || !img->getUsed() )
 		return oexFALSE;
 
-//	if ( 0 >= nInterval ) 
-//		nInterval = oex::obj::StaticSize( oex::CUtil::eDtMask & nType );
-
 	// Get data size
 	int nSize = oex::obj::StaticSize( oex::CUtil::eDtMask & nType );
 	if ( 0 >= nSize )
 		return oexFALSE;
 
 	if ( 0 >= nSamples )
-		nSamples = img->getUsed() / nSize;
+		nSamples = n / nSize;
 
 	// Ensure space
 	int sz = sw * h;
@@ -630,34 +627,70 @@ oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType,
 	if ( pParams )
 		pb = CParser::Deserialize( pParams );
 
+	// +++ Wow, this desperately needs improvement
 	if ( eGtHorzFft == ( eGtMask & nType ) )
 	{
-		if ( 0 >= nInterval )
-			nInterval = 1;
+		// There is no good default interval
+		if ( 0 >= nInterval ) 
+			return oexFALSE;
 
 		// Find the range
-		oexFLOAT fMin = *(oexFLOAT*)p, fMax = fMin;
-		for( oexINT i = 0; i < nSamples; i++ )
-			if ( ( (oexFLOAT*)p )[ i ] < fMin )
-				fMin = ( (oexFLOAT*)p )[ i ];
-			else if ( ( (oexFLOAT*)p )[ i ] > fMax )
-				fMax = ( (oexFLOAT*)p )[ i ];
-		oexFLOAT fRange = fMax - fMin;
+		oexFLOAT fMin = 0, fMax = 0;
+		for( oexINT i = 0, c = 0; i < nSamples; i++ )
+		{	//oexFLOAT fV = ( (oexFLOAT*)p )[ i ];
+			oexFLOAT fV = oex::cmn::Abs( ( (oexFLOAT*)p )[ i ] );
+			if ( oex::cmn::Abs( fV ) < 1000000.f )
+			{	if ( !c )
+					fMin = fV, fMax = fV, c++;
+				else if ( fMin > fV )
+					fMin = fV;
+				else if ( fMax < fV )
+					fMax = fV;
+			} // end if
+		} // end for
+
+		oexFLOAT fRange = pb[ "range" ].ToFloat();
+		if ( !fRange )
+			fRange = fMax - fMin;
 		if ( !fRange ) 
 			return oexFALSE;
 
-		for ( int x = 0, i = 0; x < w; x++, i += nInterval )
-			for ( int y = 0, o = 0; y < h; y++, o++ )
-			{
-				int _i = i + o;
-				if ( _i < nSamples )
-				{
-					oexFLOAT f = ( ( (oexFLOAT*)p )[ _i ] - fMin ) * 255. / fRange;
+		oexINT nMag = oex::cmn::Max( 0, pb[ "mag" ].ToInt() );
+		oexINT nHo = oex::cmn::Max( 0, pb[ "ho" ].ToInt() );
 
-					CUTIL_SCALE_PIXEL24( pi, sw, x, y, bg, fg, f );
-//					CUTIL_SET_PIXEL24( pi, sw, x, y, fg );
+		oexINT scale = -1;
+		for ( int x = 0, i = 0; x < w; x++, i += nInterval )
+			for ( int y = 0, o = -1, _o = 0; y < h; y++, o++ )
+			{
+				if ( ( o >> nMag ) != _o )
+				{
+					_o = o >> nMag;
+					if ( _o < nHo || ( _o - nHo ) >= nInterval )
+						scale = -1;
+					else
+					{	
+						int _i = i + _o - nHo;
+						if (  _i >= nSamples )
+							scale = -1;
+						else
+						{
+//							oexFLOAT f = ( (oexFLOAT*)p )[ _i ];
+							oexFLOAT f = oex::cmn::Abs( ( (oexFLOAT*)p )[ _i ] );
+							if ( f <= fMin ) scale = 0;
+							else if ( f >= fMax ) scale = 255;
+							else
+							{	f -= fMin;
+								if ( f >= fRange ) scale = 255;
+								else scale = (oexINT)( f * 255. / fRange );
+							} // end else
+
+						} // end else
+					} // end else
 
 				} // end if
+
+				if ( 0 <= scale )
+					CUTIL_SCALE_PIXEL24( pi, sw, x, y, bg, fg, scale );
 
 			} // end for
 

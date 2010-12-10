@@ -8,8 +8,15 @@ class CGlobal
 	quit = 0;
 	server = 0;
 	pa = 0;
+	buf = CSqBinary();
 	dat = CSqBinary();
+	fft = CSqBinary();
 	img = CSqImage();
+
+	fftw = 0;
+
+	fftsize = 64;
+	imgwidth = 800;
 };
 
 local _g = CGlobal();
@@ -30,13 +37,17 @@ function getImage( mReply ) : ( _g )
 		return;
 
 	if ( !_g.img.getWidth() || !_g.img.getHeight() )
-		if ( !_g.img.Create( 320, 240 ) )
+		if ( !_g.img.Create( _g.imgwidth, _g.fftsize * 4 ) )
 			return;
 
 	// Create graph
-	_g.dat.Graph( 0, 128, _self.tFloat | _g.dat.eGtHorzFft, 
+	_g.fft.Graph( 0, _g.fftsize / 2, _self.tFloat | _g.dat.eGtHorzFft, 
+				  _g.img, CSqColor( 0, 0, 128 ), CSqColor( 255, 128, 0 ),
+				  "mag=2" );
+
+	_g.dat.Graph( 0, _g.fftsize, _self.tFloat | _g.dat.eGtHorzFft, 
 				  _g.img, CSqColor( 0, 0, 0 ), CSqColor( 255, 255, 255 ),
-				  "" );
+				  "mag=2,ho=" + ( _g.fftsize / 2 ) );
 
 	// Encode the image
 	local enc = _g.img.Encode( "png" );
@@ -114,13 +125,18 @@ function _init() : ( _g )
 	else
 		_self.echo( "server started on http://localhost:1234" );
 
+	_g.fftw = CSqFftw();
+	if ( !_g.fftw.Plan( _g.fftsize, 0, 0 ) )
+	{   _self.echo( "!!! Failed to create fft plan" );
+		WaitKey(); _g.quit = 1; return 0;
+	} // end if
+
 	_g.pa = CPaInput();
 	if ( !_g.pa.Open( 0, _g.pa.getDefaultInputDevice(), 1, 
-				   CPaInput().paFloat32, 0.2, 44100., 0 ) )
+//				   CPaInput().paFloat32, 0.2, 44100., 0 ) )
+				   CPaInput().paFloat32, 0.2, 11000., 0 ) )
 	{   _self.echo( "!!! Failed to open input stream : " + _g.pa.getLastError() );
-		WaitKey();
-		_g.quit = 1;
-		return 0;
+		WaitKey(); _g.quit = 1; return 0;
 	} // end if
 
 	if ( !_g.pa.Start() )
@@ -132,17 +148,43 @@ function _init() : ( _g )
 
 	_self.echo( "Capturing audio data..." );
 
+	_self.set_timer( ".", 100, "Update" );
+
 	return 1;
 }
 
 function _idle() : ( _g )
 {
-	// Read the latest data
-	_g.pa.Read( _g.dat, 0 );
-
-	local sz = _g.dat.getUsed(), max = 256 * 1024;
-	if ( sz > max ) _g.dat.LShift( sz - max );
-
 	return _g.quit;
 }
+
+function Update() : ( _g )
+{
+	// Read the latest data
+	_g.pa.Read( _g.buf, 0 );
+	if ( _g.buf.getUsed() )
+	{
+		local fft = CSqBinary();
+		local used = _g.fftw.CalcMagnitudes( _self.tFloat, 0, _g.buf, _self.tFloat, 0, fft );
+	
+		// Accumulate data
+		_g.fft.InsertBin( fft, 0 );
+		if ( used ) _g.dat.InsertBin( _g.buf, 0 ), _g.buf.LShift( used );
+
+//		_self.echo( ": " + used + ", fft=" + _g.fft.getUsed() + ", dat=" + _g.dat.getUsed() );
+
+		// Limit buffer sizes
+		local max = ( _g.fftsize / 2 ) * _g.imgwidth * 4;
+		local sz = _g.fft.getUsed();
+		if ( sz > max ) _g.fft.setUsed( max );
+
+		max = _g.fftsize * _g.imgwidth * 4;
+		sz = _g.dat.getUsed();
+		if ( sz > max ) _g.dat.setUsed( max );
+
+	} // end if
+
+	return 0;
+}
+
 

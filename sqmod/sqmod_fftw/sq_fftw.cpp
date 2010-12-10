@@ -98,3 +98,149 @@ int CSqFftw::Execute()
 	return 1;
 }
 
+int CSqFftw::ReadInput( int nType, int nInterval, sqbind::CSqBinary *bin )
+{
+	if ( !m_plan_valid || !bin || !bin->getUsed() )
+		return 0;
+
+	int nSize = oex::obj::StaticSize( nType );
+	if ( 0 >= nSize )
+		return 0;
+
+	if ( nSize > nInterval )
+		nInterval = nSize;
+
+	// How many samples to read?
+	int nSamples = bin->getUsed() / nInterval;
+	if ( 0 >= nSamples )
+		return 0;
+
+	// Don't overrun the buffer
+	if ( nSamples > m_samples )
+		nSamples = m_samples;
+
+	switch( nType )
+	{
+		case oex::obj::tFloat :
+			for ( int i = 0; i < nSamples; i++ )
+				setInput( i, *(oex::oexFLOAT*)bin->Ptr( i * nInterval ), 0 );
+			break;
+
+		case oex::obj::tDouble :
+			for ( int i = 0; i < nSamples; i++ )
+				setInput( i, *(oex::oexDOUBLE*)bin->Ptr( i * nInterval ), 0 );
+			break;
+
+	} // end switch
+
+	return nSamples;
+}
+
+int CSqFftw::ReadOutputMagnitudes( int nMax, int nType, int nInterval, sqbind::CSqBinary *bin )
+{
+	if ( !m_plan_valid || !bin )
+		return 0;
+
+	int nSize = oex::obj::StaticSize( nType );
+	if ( 0 >= nSize )
+		return 0;
+
+	if ( nSize > nInterval )
+		nInterval = nSize;
+
+	// Bounds check
+	if ( 0 >= nMax || m_samples < nMax )
+		nMax = m_samples;
+
+	// How much space do we need?
+	int nBytes = nMax * nInterval;
+	if ( 0 >= nBytes )
+		return 0;
+
+	// Ensure space
+	if ( bin->Size() < nBytes )
+		if ( !bin->Allocate( nBytes ) )
+			return 0;
+
+	switch( nType )
+	{
+		case oex::obj::tFloat :
+			for ( int i = 0; i < nMax; i++ )
+				*(oex::oexFLOAT*)bin->Ptr( i * nInterval ) = getOutputMag( i );
+			break;
+
+		case oex::obj::tDouble :
+			for ( int i = 0; i < nMax; i++ )
+				*(oex::oexDOUBLE*)bin->Ptr( i * nInterval ) = getOutputMag( i );
+			break;
+
+	} // end switch
+
+	// Set the number of bytes used
+	bin->setUsed( nBytes );
+
+	return 1;
+}
+
+int CSqFftw::CalcMagnitudes( int nInType, int nInInterval, sqbind::CSqBinary *in, int nOutType, int nOutInterval, sqbind::CSqBinary *out )
+{
+	if ( !m_plan_valid || !in || !out )
+		return 0;
+
+	int nInSize = oex::obj::StaticSize( nInType );
+	if ( 0 >= nInSize )
+		return 0;
+
+	if ( nInSize > nInInterval )
+		nInInterval = nInSize;
+
+	int nInSamples = in->getUsed() / nInInterval;
+	int nInSets = nInSamples / m_samples;
+	if ( !nInSets )
+		return 0;
+
+	int nOutSize = oex::obj::StaticSize( nOutType );
+	if ( 0 >= nOutSize )
+		return 0;
+
+	if ( nOutSize > nOutInterval )
+		nOutInterval = nOutSize;
+
+	// How much space do we need for output?
+	int nOutSamples = m_samples / 2;
+	int nOutOffset = out->getUsed();
+	int nOutBytes = nOutOffset + nInSets * nOutSamples * nOutInterval;
+	if ( out->Size() < nOutBytes )
+		if ( !out->Resize( nOutBytes ) )
+			return 0;
+
+	sqbind::CSqBinary view;
+	for ( int i = 0; i < nInSets; i++ )
+	{
+		// Get view of input data
+		if ( !in->Sub( &view, i * m_samples * nInInterval, m_samples * nInInterval ) )
+			return 0;
+
+		// Read in the data
+		if ( !ReadInput( nInType, nInInterval, &view ) )
+			return 0;
+
+		Execute();
+
+		// Get view of output data
+		if ( !out->Sub( &view, nOutOffset + i * nOutSamples * nOutInterval, nOutSamples * nOutInterval ) )
+			return 0;
+
+		// Read the output data
+		if ( !ReadOutputMagnitudes( nOutSamples, nOutType, nOutInterval, &view ) )
+			return 0;
+
+	} // end for
+
+	// Set the output size
+	out->setUsed( nOutBytes );
+
+	// How many input bytes did we use?
+	return nInSets * m_samples * nInInterval;
+}
+
