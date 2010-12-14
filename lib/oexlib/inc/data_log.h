@@ -168,6 +168,8 @@ public:
 			dValue = 0;
 			nCount = 0;
 			uType = 0;
+			uElements = 0;
+			uEi = 0;
 		}
 
 		~SIterator()
@@ -185,8 +187,73 @@ public:
 			dValue = 0;
 			nCount = 0;
 			uType = 0;
+			uElements = 0;
+			uEi = 0;
 			fIdx.Destroy();
 			fData.Destroy();			
+		}
+
+		oexFLOAT getFloat()
+		{	
+			if ( uElements && uEi >= uElements )
+				return 0.f;
+
+			switch( vi.uType )
+			{
+				case obj::tDouble :
+					return (oexFLOAT)getDouble();
+
+				case obj::tInt :
+					return (oexFLOAT)getInt();
+
+				case obj::tFloat :
+					return ( (oexFLOAT*)sValue.Ptr() )[ uElements ? uEi++ : 0 ];
+
+			} // end switch
+
+			return sValue.ToFloat();
+		}
+
+		oexINT getInt()
+		{	
+			if ( uElements && uEi >= uElements )
+				return 0.f;
+
+			switch( vi.uType )
+			{
+				case obj::tDouble :
+					return (oexINT)getDouble();
+
+				case obj::tInt :
+					return ( (oexINT*)sValue.Ptr() )[ uElements ? uEi++ : 0 ];
+
+				case obj::tFloat :
+					return (oexINT)getFloat();
+
+			} // end switch
+
+			return sValue.ToInt();
+		}
+
+		oexINT getDouble()
+		{	
+			if ( uElements && uEi >= uElements )
+				return 0.f;
+
+			else if ( uElements ) switch( vi.uType )
+			{
+				case obj::tDouble :
+					return ( (oexDOUBLE*)sValue.Ptr() )[ uElements ? uEi++ : 0 ];
+
+				case obj::tInt :
+					return (oexDOUBLE)getInt();
+
+				case obj::tFloat :
+					return (oexDOUBLE)getFloat();
+
+			} // end switch
+
+			return sValue.ToDouble();
 		}
 
 		oexFLOAT getAvgFloat()
@@ -266,13 +333,32 @@ public:
 
 		// Read value from the data file into the specified string
 		oexBOOL getValue( CStr8 &s )
-		{	if ( !fData.IsOpen() ) return oexFALSE;
-			if ( !vi.uSize ) { s.Destroy(); return oexTRUE; }
+		{
+			if ( !fData.IsOpen() ) 
+				return oexFALSE;
+
+			if ( !vi.uSize ) 
+			{ s.Destroy(); return oexTRUE; }
+
 			oexSTR p = s.OexAllocate( vi.uSize );
-			if ( !p ) return oexFALSE;
+			if ( !p ) 
+				return oexFALSE;
+
 			fData.Read( p, vi.uSize );
 			s.SetLength( vi.uSize );
+
+			// Is it an array?
+			uEi = 0; uElements = 0;
+			switch( vi.uType )
+			{	case obj::tInt :
+				case obj::tFloat :
+				case obj::tDouble :
+					oexINT uSz = oex::obj::StaticSize( vi.uType );
+					if ( vi.uSize >= uSz ) uElements = vi.uSize / uSz;
+			} // end switch
+
 			return oexTRUE;
+
 		} // end if
 
 		CBin getValueBin()
@@ -329,6 +415,8 @@ public:
 		oexFLOAT		fValue;
 		oexDOUBLE		dValue;
 		oexINT			nCount;
+		oexUINT			uElements;
+		oexUINT			uEi;
 	};
 
 public:

@@ -726,6 +726,27 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 			 )
 			return oexTRUE;
 
+	// Do we still have a valid array?
+	if ( !x_tInterval && x_it.pos && x_it.uElements > x_it.uEi )
+	{
+		if ( !( eMethodReverse & x_nMethod )
+			 ? ( x_it.viNext.uTime > x_tTime || ( x_it.viNext.uTime == x_tTime && x_it.viNext.uTimeMs > x_tTimeMs ) ) 
+			 : ( x_it.viNext.uTime < x_tTime || ( x_it.viNext.uTime == x_tTime && x_it.viNext.uTimeMs < x_tTimeMs ) )
+			 )
+		{
+			if ( obj::tInt == x_nDataType )
+			{	x_it.nValue = x_it.getInt(); return oexTRUE; }
+
+			else if ( obj::tFloat == x_nDataType )
+			{	x_it.fValue = x_it.getFloat(); return oexTRUE; }
+
+			else if ( obj::tDouble == x_nDataType )
+			{	x_it.dValue = x_it.getDouble(); return oexTRUE; }
+
+		} // end if
+
+	} // end if
+
 	// Do we need new data?
 	CFile::t_size p = ( eMethodReverse & x_nMethod ) ? ( x_it.npos + 1 ) : 0;
 	t_time tMin = x_tTime - ( x_tInterval / c_IntervalBase );
@@ -761,7 +782,7 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 				x_it.npos = x_it.viNext.uNext;
 			
 			// Average values if needed
-			if ( !bNew 
+			if ( !bNew && x_tInterval
 				&& ( !( eMethodReverse & x_nMethod ) || tMin <= x_it.vi.uTime )
 				&& !( obj::eTypeArray & x_nDataType )
 				 && eMethodAverage & x_nMethod )
@@ -813,8 +834,22 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 		// Do we want to read the value?
 		if ( !( oex::CDataLog::eMethodNoRead & x_nMethod ) )
 		{
+			// Are there any elements?
+			if ( !x_tInterval && x_it.uElements )
+			{
+				if ( obj::tInt == x_nDataType )
+					x_it.nValue = x_it.getInt();
+
+				else if ( obj::tFloat == x_nDataType )
+					x_it.fValue = x_it.getFloat();
+
+				else if ( obj::tDouble == x_nDataType )
+					x_it.dValue = x_it.getDouble();
+
+			} // end if
+
 			// Read the value
-			if ( x_it.getValue( x_it.sValue ) )
+			else if ( x_it.getValue( x_it.sValue ) )
 			{
 				if ( obj::tInt == x_nDataType )
 					x_it.nValue = x_it.getAvgInt();
@@ -970,7 +1005,7 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time
 	CSysTime::CalculateTimes( &x_tStart, &x_tEnd, 60 );
 
 	// Sanity checks
-	if ( !x_pKey || !*x_pKey || !m_sRoot.Length() || x_tStart > x_tEnd || !x_tInterval )
+	if ( !x_pKey || !*x_pKey || !m_sRoot.Length() || x_tStart > x_tEnd )
 		return oexT( "" );
 
 	// Set defaults
@@ -1000,28 +1035,31 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time
 	} // end if
 
 	// Calculate number of positions needed
-	oexUINT nItems = ( x_tEnd - x_tStart ) * c_IntervalBase / x_tInterval;
-	if ( !nItems )
+	oexUINT uItems = m_uLimit;
+	if ( x_tInterval )
+		uItems = ( x_tEnd - x_tStart ) * c_IntervalBase / x_tInterval;
+
+	if ( !uItems )
 		return oexT( "" );
 
 	// Ensure we don't go over the maximum limit
-	if ( nItems > m_uLimit )
-		nItems = m_uLimit;
+	if ( uItems > m_uLimit )
+		uItems = m_uLimit;
 
 	int nElementSize = obj::StaticSize( x_nDataType );
 	if ( !nElementSize )
 		return oexT( "" );
 
 	// Allocate space for binary data
-	CBin bin( nItems * nElementSize, nItems * nElementSize );
+	CBin bin( uItems * nElementSize, uItems * nElementSize );
 	if ( !bin.Ptr() )
 		return oexT( "" );
 
 	// Create data
 	CPropertyBag pb;
-	oexUINT uN = 0;
-	t_time tTime = x_tStart, tTimeMs = 0, i = 0;
-	while ( i < nItems && ( bUnbounded || tTime <= x_tEnd ) )
+	oexUINT uN = 0, i = 0;
+	t_time tTime = x_tStart, tTimeMs = 0;
+	while ( uN < uItems && ( bUnbounded || tTime <= x_tEnd ) )
 	{
 		// Count a sample
 		uN++;

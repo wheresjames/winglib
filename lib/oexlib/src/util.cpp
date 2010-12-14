@@ -657,19 +657,21 @@ oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType,
 
 		oexINT nMag = oex::cmn::Max( 0, pb[ "mag" ].ToInt() );
 		oexINT nHo = oex::cmn::Max( 0, pb[ "ho" ].ToInt() );
+		if ( 0 >= nMag ) nMag = 1;
+		if ( 0 >= nHo || nHo >= h ) nHo = 0;
 
 		oexINT scale = -1;
 		for ( int x = 0, i = 0; x < w; x++, i += nInterval )
-			for ( int y = 0, o = -1, _o = 0; y < h; y++, o++ )
+			for ( int y = nHo, o = 0, _o = -1; y < h; y++, o++ )
 			{
-				if ( ( o >> nMag ) != _o )
+				if ( ( o / nMag ) != _o )
 				{
-					_o = o >> nMag;
-					if ( _o < nHo || ( _o - nHo ) >= nInterval )
+					_o = o / nMag;
+					if ( _o >= nInterval )
 						scale = -1;
 					else
 					{	
-						int _i = i + _o - nHo;
+						int _i = i + _o;
 						if (  _i >= nSamples )
 							scale = -1;
 						else

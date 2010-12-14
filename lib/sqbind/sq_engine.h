@@ -88,9 +88,6 @@ public:
 	/// Destructor
 	virtual ~CSqEngineExport();
 
-	/// Returns the buffer for a binary share
-	CSqBinary get_binshare( const stdString &sName );
-
 	/// Returns non zero if squirrel is a debug build
 	int isDebugBuild();
 
@@ -105,6 +102,9 @@ public:
 
 	/// Returns the cpu size
 	stdString getPlatform();
+
+	/// Returns the buffer for a binary share
+	CSqBinary get_binshare( const stdString &sName );
 
 	/// Returns the buffer for a binary share
 	int set_binshare( const stdString &sName, CSqBinary *pBin );
