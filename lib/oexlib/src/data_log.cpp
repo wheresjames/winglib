@@ -117,7 +117,7 @@ oexINT CDataLog::FindKey( oexCSTR x_pKey )
 	return -1;
 }
 
-oexINT CDataLog::AddKey( oexCSTR x_pKey, t_time x_tTime )
+oexINT CDataLog::AddKey( oexCSTR x_pKey, oexUINT x_uType, t_time x_tTime, oexCSTR x_pParams )
 {_STT();
 
 	// Ensure valid key name
@@ -139,6 +139,9 @@ oexINT CDataLog::AddKey( oexCSTR x_pKey, t_time x_tTime )
 			// Save key name
 			m_pLogs[ i ]->sName = x_pKey;
 
+			// Save key type
+			m_pLogs[ i ]->uType = x_uType;
+
 			// Name hash, this will be the file names
 			CStr8 sMb = oexStrToMb( x_pKey );
 			m_pLogs[ i ]->sHash = oexMbToStr( CBase16::Encode( oss::CMd5::Transform( &m_pLogs[ i ]->hash, sMb.Ptr(), sMb.Length() ), sizeof( m_pLogs[ i ]->hash ) ) );
@@ -157,7 +160,12 @@ oexINT CDataLog::AddKey( oexCSTR x_pKey, t_time x_tTime )
 				sRoot.BuildPath( x_tTime / m_tLogBase );
 				oexCreatePath( sRoot.Ptr() );
 				m_pLogs[ i ]->sFile = sRoot.BuildPath( m_pLogs[ i ]->sHash ) << oexT( ".txt" );
-				CFile().CreateAlways( m_pLogs[ i ]->sFile.Ptr() ).Write( oexStrToMbPtr( x_pKey ) );
+
+				// Save key information
+				m_pLogs[ i ]->params = CParser::Deserialize( oexStrToMb( x_pParams ) );
+				m_pLogs[ i ]->params[ "name" ] = oexStrToMb( x_pKey ); 
+				m_pLogs[ i ]->params[ "type" ] = x_uType;
+				CFile().CreateAlways( m_pLogs[ i ]->sFile.Ptr() ).Write( CParser::Serialize( m_pLogs[ i ]->params ) );
 
 			} // end write name
 			
@@ -192,7 +200,33 @@ oexINT CDataLog::GetBufferSize( oexINT x_nKey )
 	return m_pLogs[ x_nKey ]->bin.getUsed();
 }
 
-oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, t_time x_tTime, t_time x_tTimeMs, oexBOOL bBuffering )
+oexBOOL CDataLog::LogBin( oexCSTR x_pKey, oexCSTR x_pBin, oexINT x_nType, t_time x_tTime, t_time x_tTimeMs, oexBOOL x_bBuffering )
+{
+	// Sanity checks
+	if ( !x_pKey || !*x_pKey || !x_pBin || !*x_pBin )
+		return oexFALSE;
+
+	// Find the binary object
+	CBin bin = oexGetBin( x_pBin );
+	if ( !bin.getUsed() )
+		return oexFALSE;
+
+	// See if a key by that name exists
+	oexINT nKey = -1;
+	for( oexINT i = 0; 0 > nKey && i < eMaxKeys; i++ )
+		if ( m_pLogs[ i ] && m_pLogs[ i ]->sName == x_pKey )
+			nKey = i;
+
+	// Create key if it doesn't exist
+	if ( 0 > nKey )
+		if ( 0 > ( nKey = AddKey( x_pKey, x_nType ) ) )
+			return oexFALSE;
+
+	// Log the data
+	return Log( nKey, bin.Ptr(), bin.getUsed(), x_tTime, x_tTimeMs, x_bBuffering );
+}
+
+oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, t_time x_tTime, t_time x_tTimeMs, oexBOOL x_bBuffering )
 {
 	// Ensure valid key
 	if ( 0 > x_nKey || eMaxKeys <= x_nKey || !m_pLogs[ x_nKey ] )
@@ -236,6 +270,7 @@ oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, t_tim
 	vi.uSize = x_uSize;
 	vi.uPrev = m_pLogs[ x_nKey ]->olast;
 	vi.uHash = m_pLogs[ x_nKey ]->hash.Data1;
+	vi.uType = m_pLogs[ x_nKey ]->uType;
 	vi.uNext = 0;
 
 	// Update last pointer
@@ -247,7 +282,7 @@ oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, t_tim
 	// Save pointer to this structure
 	m_pLogs[ x_nKey ]->olast = m_pLogs[ x_nKey ]->bin.getUsed();
 
-	if ( !bBuffering )
+	if ( !x_bBuffering )
 		return FlushBuffer( x_nKey, &vi, x_pValue, x_uSize );
 
 	// Write the value to the memory log
@@ -345,7 +380,7 @@ oexBOOL CDataLog::FlushBuffer( oexINT x_nKey, SValueIndex *pVi, oexCPVOID pBuf, 
 		sRoot.BuildPath( tTime / m_tLogBase );
 		m_pLogs[ x_nKey ]->sFile = sRoot.BuildPath( m_pLogs[ x_nKey ]->sHash ) << oexT( ".txt" );
 		if ( m_pLogs[ x_nKey ]->sFile.Length() && !oexExists( m_pLogs[ x_nKey ]->sFile.Ptr() ) )
-			CFile().CreateAlways( m_pLogs[ x_nKey ]->sFile.Ptr() ).Write( oexStrToMbPtr( m_pLogs[ x_nKey ]->sName ) );
+			CFile().CreateAlways( m_pLogs[ x_nKey ]->sFile.Ptr() ).Write( CParser::Serialize( m_pLogs[ x_nKey ]->params ) );
 	} // end write name
 
 	return oexTRUE;
@@ -504,7 +539,7 @@ oexBOOL CDataLog::Flush( t_time x_tTime )
 				sRoot.BuildPath( x_tTime / m_tLogBase );
 				m_pLogs[ i ]->sFile = sRoot.BuildPath( m_pLogs[ i ]->sHash ) << oexT( ".txt" );
 				if ( m_pLogs[ i ]->sFile.Length() && !oexExists( m_pLogs[ i ]->sFile.Ptr() ) )
-					CFile().CreateAlways( m_pLogs[ i ]->sFile.Ptr() ).Write( oexStrToMbPtr( m_pLogs[ i ]->sName ) );
+					CFile().CreateAlways( m_pLogs[ i ]->sFile.Ptr() ).Write( CParser::Serialize( m_pLogs[ i ]->params ) );
 			} // end write name
 
 		} // end if
@@ -536,8 +571,10 @@ CPropertyBag CDataLog::GetKeyList( t_time x_tTime )
 		{
 			// Read key name into property bag
 			if ( !ff.IsDirectory() )
-				pb[ ff.GetFileName() ] = CFile()
-					.OpenExisting( ( CStr( sRoot ).BuildPath( ff.GetFileName() ) ).Ptr() ).Read();
+			{	CStr8 dat = CFile().OpenExisting( ( CStr( sRoot ).BuildPath( ff.GetFileName() ) ).Ptr() ).Read();
+				CStr name = CParser::Deserialize( dat )[ "name" ].ToString();
+				pb[ ff.GetFileName() ] = name.Length() ? name : oexMbToStr( dat );
+			} // end if
 
 		} while ( ff.FindNext() );
 
@@ -691,7 +728,7 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 
 	// Do we need new data?
 	CFile::t_size p = ( eMethodReverse & x_nMethod ) ? ( x_it.npos + 1 ) : 0;
-	t_time tMin = x_tTime - ( x_tInterval / 1000 );
+	t_time tMin = x_tTime - ( x_tInterval / c_IntervalBase );
 	while ( ( eMethodReverse & x_nMethod ) ? p > x_it.npos : p < x_it.npos )
 	{	
 		// Read the header
@@ -731,7 +768,7 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 			{
 				// Point to the data
 				x_it.fData.SetPtrPosBegin( x_it.pos + x_it.vi.uBytes );
-
+				
 				// Do we want to read values?
 				if ( !( oex::CDataLog::eMethodNoRead & x_nMethod ) )
 				{
@@ -740,13 +777,16 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 					{
 						// Reset 
 						if ( !x_it.nCount++ )
-							x_it.fValue = 0, x_it.nValue = 0;
+							x_it.dValue = 0, x_it.fValue = 0, x_it.nValue = 0;
 
 						if ( obj::tInt == x_nDataType )
-							x_it.nValue += x_it.sValue.ToInt();
+							x_it.nValue += x_it.getAvgInt();
 
 						else if ( obj::tFloat == x_nDataType )
-							x_it.fValue += x_it.sValue.ToFloat();
+							x_it.fValue += x_it.getAvgFloat();
+
+						else if ( obj::tDouble == x_nDataType )
+							x_it.dValue += x_it.getAvgDouble();
 
 					} // end if
 
@@ -760,6 +800,7 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 
 	// Scale averages
 	if ( 0 < x_it.nCount )
+			x_it.dValue /= x_it.nCount,
 			x_it.fValue /= x_it.nCount,
 			x_it.nValue /= x_it.nCount,
 			x_it.nCount = 0;
@@ -776,10 +817,13 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 			if ( x_it.getValue( x_it.sValue ) )
 			{
 				if ( obj::tInt == x_nDataType )
-					x_it.nValue = x_it.sValue.ToInt();
+					x_it.nValue = x_it.getAvgInt();
 
 				else if ( obj::tFloat == x_nDataType )
-					x_it.fValue = x_it.sValue.ToFloat();
+					x_it.fValue = x_it.getAvgFloat();
+
+				else if ( obj::tDouble == x_nDataType )
+					x_it.dValue = x_it.getAvgDouble();
 
 			} // end if
 
@@ -813,16 +857,16 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 		return CPropertyBag();
 
 	// Align with the interval
-	t_time tAlign = x_tInterval / 1000;
+	t_time tAlign = x_tInterval / c_IntervalBase;
 	if ( tAlign )
 		x_tStart -= ( x_tStart % tAlign ),
 		x_tEnd -= ( x_tEnd % tAlign );
 
 	// Just so the averaging is correct, use one interval before the start
 	if ( x_tInterval && eMethodAverage & x_nMethod )
-	{	oexINT64 t = (oexINT64)x_tStart * 1000ll - (oexINT64)x_tInterval;
-		t_time s = t / 1000;
-		t_time ms = t % 1000;
+	{	oexINT64 t = (oexINT64)x_tStart * c_IntervalBase - (oexINT64)x_tInterval;
+		t_time s = t / c_IntervalBase;
+		t_time ms = t % c_IntervalBase;
 		FindValue( it, s, ms, x_tInterval, x_nDataType, x_nMethod, m_tLogBase, m_tIndexStep );
 	} // end if
 
@@ -893,13 +937,8 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 			} // end if
 
 			else if ( ( eMethodReverse & x_nMethod ) && ( !it.npos || it.npos > it.pos ) )
-			{
-				tTime -= 1 + ( tTime % m_tIndexStep );
+			{	tTime -= 1 + ( tTime % m_tIndexStep );
 				tTimeMs = 999;
-				
-			 //	tTime -= m_tIndexStep;
-			 //	tTime += m_tIndexStep - ( tTime % m_tIndexStep );
-			 //	tTimeMs = 0;
 			} // end if
 
 			else
@@ -912,8 +951,8 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 		else
 		{	// Update time
 			tTimeMs += x_tInterval;
-			tTime += tTimeMs / 1000;
-			tTimeMs %= 1000;
+			tTime += tTimeMs / c_IntervalBase;
+			tTimeMs %= c_IntervalBase;
 		} // end else
 
 	} // end for
@@ -947,21 +986,21 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time
 		return oexT( "" );
 
 	// Align with the interval
-	t_time tAlign = x_tInterval / 1000;
+	t_time tAlign = x_tInterval / c_IntervalBase;
 	if ( tAlign )
 		x_tStart -= ( x_tStart % tAlign ),
 		x_tEnd -= ( x_tEnd % tAlign );
 
 	// Just so the averaging is correct, use one interval before the start
 	if ( eMethodAverage & x_nMethod )
-	{	oexINT64 t = (oexINT64)x_tStart * 1000ll - (oexINT64)x_tInterval;
-		t_time s = t / 1000;
-		t_time ms = t % 1000;
+	{	oexINT64 t = (oexINT64)x_tStart * c_IntervalBase - (oexINT64)x_tInterval;
+		t_time s = t / c_IntervalBase;
+		t_time ms = t % c_IntervalBase;
 		FindValue( it, s, ms, x_tInterval, x_nDataType, x_nMethod, m_tLogBase, m_tIndexStep );
 	} // end if
 
 	// Calculate number of positions needed
-	oexUINT nItems = ( x_tEnd - x_tStart ) * 1000 / x_tInterval;
+	oexUINT nItems = ( x_tEnd - x_tStart ) * c_IntervalBase / x_tInterval;
 	if ( !nItems )
 		return oexT( "" );
 
@@ -969,8 +1008,12 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time
 	if ( nItems > m_uLimit )
 		nItems = m_uLimit;
 
+	int nElementSize = obj::StaticSize( x_nDataType );
+	if ( !nElementSize )
+		return oexT( "" );
+
 	// Allocate space for binary data
-	CBin bin( nItems * sizeof( float ), nItems * sizeof( float ) );
+	CBin bin( nItems * nElementSize, nItems * nElementSize );
 	if ( !bin.Ptr() )
 		return oexT( "" );
 
@@ -985,19 +1028,53 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time
 
 		// Find the value for this time
 		if ( FindValue( it, tTime, tTimeMs, x_tInterval, x_nDataType, x_nMethod, m_tLogBase, m_tIndexStep ) )
-			bin.setFLOAT( i++, it.fValue * x_fScale );
+		{	switch( x_nDataType )
+			{	case obj::tInt : bin.setINT( i++, it.nValue * (oexINT)x_fScale ); break;
+				case obj::tFloat : bin.setFLOAT( i++, it.fValue * x_fScale ); break;
+				case obj::tDouble : bin.setDOUBLE( i++, it.dValue * (oexDOUBLE)x_fScale ); break;
+			} // end switch
+		} // end if
 		else
-			bin.setFLOAT( i++, 0.f );
+		{	switch( x_nDataType )
+			{	case obj::tInt : bin.setINT( i++, 0 ); break;
+				case obj::tFloat : bin.setFLOAT( i++, 0.f ); break;
+				case obj::tDouble : bin.setDOUBLE( i++, 0 ); break;
+			} // end switch
+		} // end else
 
-		// Update time
-		tTimeMs += x_tInterval;
-		tTime += tTimeMs / 1000;
-		tTimeMs %= 1000;
+		// Calculate next timestamp
+		if ( !x_tInterval )
+		{
+			// Next index?
+			if ( !( eMethodReverse & x_nMethod ) && it.npos <= it.pos )
+			{	tTime += m_tIndexStep;
+				tTime -= tTime % m_tIndexStep;
+				tTimeMs = 0;
+			} // end if
+
+			else if ( ( eMethodReverse & x_nMethod ) && ( !it.npos || it.npos > it.pos ) )
+			{	tTime -= 1 + ( tTime % m_tIndexStep );
+				tTimeMs = 999;
+			} // end if
+
+			else
+			{	tTime = it.viNext.uTime;
+				tTimeMs = it.viNext.uTimeMs;
+			} // end else
+
+		} // end if
+
+		else
+		{	// Update time
+			tTimeMs += x_tInterval;
+			tTime += tTimeMs / c_IntervalBase;
+			tTimeMs %= c_IntervalBase;
+		} // end else
 
 	} // end for
 
 	// The number of valid items	
-	bin.setUsed( i ? ( i - 1 ) * sizeof( float ) : 0 );
+	bin.setUsed( i ? ( i - 1 ) * nElementSize : 0 );
 
 	// Set the binary share
 	CStr sId = oexGuidToString();

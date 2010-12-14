@@ -453,11 +453,12 @@ int CSqMsgQueue::asize( const stdString &sPath, const stdString &sKey )
 	return oexStrToLong( sRet.c_str() );
 }
 
-int CSqMsgQueue::addlog( const stdString &sPath, const stdString &sKey )
+int CSqMsgQueue::addlog( const stdString &sPath, const stdString &sKey, int uType )
 {_STT();
 	stdString sRet;
 	CSqMulti params;
 	params[ oexT( "key" ) ] = sKey;
+	params[ oexT( "type" ) ] = oex2std( oexMks( uType ) );
 	Msg( sPath, oexT( "pb_addlog" ), &params, &sRet );
 	return oexStrToLong( sRet.c_str() );
 }
@@ -540,6 +541,19 @@ stdString CSqMsgQueue::getlogbin( const stdString &sPath, const stdString &sKey,
 	Msg( sPath, oexT( "pb_getlogbin" ), &params, &sRet );
 	return sRet;
 }
+
+void CSqMsgQueue::logbin( const stdString &sPath, const stdString &sKey, const stdString &sBin, int nType, int nTime, int nTimeMs, int nBuffering )
+{_STT();
+	CSqMulti params;
+	params[ oexT( "key" ) ] = sKey;
+	params[ oexT( "bin" ) ] = sBin;
+	params[ oexT( "type" ) ] = oex2std( oexMks( nType ) );
+	params[ oexT( "time" ) ] = oex2std( oexMks( nTime ) );
+	params[ oexT( "timems" ) ] = oex2std( oexMks( nTimeMs ) );
+	params[ oexT( "buffering" ) ] = oex2std( oexMks( nBuffering ) );
+	Msg( sPath, oexT( "pb_logbin" ), &params, oexNULL );
+}
+
 
 int CSqMsgQueue::resetlog( const stdString &sPath )
 {_STT();

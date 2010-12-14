@@ -941,11 +941,11 @@ CSqMulti CSqEngineExport::pb( const stdString &sPath )
 	return CSqMulti( q->pb( sPath ) );
 }
 
-int CSqEngineExport::addlog( const stdString &sPath, const stdString &sKey )
+int CSqEngineExport::addlog( const stdString &sPath, const stdString &sKey, int nType )
 {_STT();
 	CSqMsgQueue *q = queue();
 	if ( !q ) return 0;
-	return q->addlog( sPath, sKey );
+	return q->addlog( sPath, sKey, nType );
 }
 
 int CSqEngineExport::removelog( const stdString &sPath, const stdString &sKey )
@@ -1002,6 +1002,14 @@ stdString CSqEngineExport::getlogbin( const stdString &sPath, const stdString &s
 	if ( !q ) return oexT( "" );
 	return q->getlogbin( sPath, sKey, nStart, nStop, nInterval, sExt );
 }
+
+int CSqEngineExport::logbin( const stdString &sPath, const stdString &sKey, const stdString &sBin, int nType, int nTime, int nTimeMs, int nBuffering )
+{	CSqMsgQueue *q = queue();
+	if ( !q ) return 0;
+	q->logbin( sPath, sKey, sBin, nType, nTime, nTimeMs, nBuffering );
+	return 1;
+}
+
 
 int CSqEngineExport::resetlog( const stdString &sPath )
 {	CSqMsgQueue *q = queue();
@@ -1528,6 +1536,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getlogkeys )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getlog )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getlogbin )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, logbin )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, resetlog )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, prepare_inline )

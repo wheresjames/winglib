@@ -161,7 +161,7 @@ public:
 	CSqMulti pb( const stdString &sPath );
 
 	/// Adds a key to the logger
-	int addlog( const stdString &sPath, const stdString &sKey );
+	int addlog( const stdString &sPath, const stdString &sKey, int nType );
 
 	/// Removes a key from the logger
 	int removelog( const stdString &sPath, const stdString &sKey );
@@ -186,6 +186,9 @@ public:
 
 	/// Returns log data for the specified key in a binary share
 	stdString getlogbin( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, const stdString &sExt );
+
+	/// Adds binary information to the data log
+	int logbin( const stdString &sPath, const stdString &sKey, const stdString &sBin, int nType, int nTime, int nTimeMs, int nBuffering );
 
 	/// Resets the logger
 	int resetlog( const stdString &sPath );

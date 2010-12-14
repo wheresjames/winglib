@@ -154,7 +154,6 @@ public:
         return *this;
     }
 
-
     /// Closes the file
     oexBOOL Close() { return Destroy(); }
 

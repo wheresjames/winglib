@@ -649,7 +649,8 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, st
 		if ( !ll.IsLocked() )
 			return oex::oexFALSE;
 
-		oex::oexINT nKey = m_log.AddKey( mapParams[ oexT( "key" ) ].c_str() );
+		oex::oexINT nKey = m_log.AddKey( mapParams[ oexT( "key" ) ].c_str(),
+										 oexStrToULong( mapParams[ oexT( "type" ) ].c_str() ) );
 
 		if ( 0 <= nKey )
 			m_lstLog[ mapParams[ oexT( "key" ) ] ] = nKey;
@@ -797,6 +798,25 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, st
 									  ext[ oexT( "method" ) ].ToInt(),
 									  ext[ oexT( "scale" ) ].ToFloat()
 									) );
+
+	} // end else if
+
+	// pb_getlog
+	else if ( sMsg == oexT( "pb_logbin" ) )
+	{
+		oexAutoLock ll( m_lockPb );
+		if ( !ll.IsLocked() )
+			return oex::oexFALSE;
+
+		// Log the data
+		m_log.LogBin( mapParams[ oexT( "key" ) ].c_str(),
+					  mapParams[ oexT( "bin" ) ].c_str(),
+					  oexStrToULong( mapParams[ oexT( "type" ) ].c_str() ),
+					  oexStrToULong( mapParams[ oexT( "time" ) ].c_str() ),
+					  oexStrToULong( mapParams[ oexT( "timems" ) ].c_str() ),
+					  oexStrToULong( mapParams[ oexT( "buffering" ) ].c_str() )
+					);
+
 
 	} // end else if
 

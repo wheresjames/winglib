@@ -191,7 +191,7 @@ namespace obj
 	//==============================================================
 	/// Returns a pointer to the memory
 	/**
-		\param [in] x_ptr		-	The object whose size will be
+		\param [in] x_ptr		-	The object whose pointer will be
 									returned.
 	*/
 	template < typename T >

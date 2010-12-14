@@ -49,23 +49,11 @@ public:
 		/// Time type
 		typedef CSysTime::t_time		t_time;
 		
+		/// Interval base = microseconds
+		static const oexINT64 c_IntervalBase = 1000000ll;
+
 public:
-/*
-	enum
-	{
-		eDtNone = 0,
 
-		eDtString = 1,
-
-		eDtInt = 2,
-
-		eDtFloat = 3,
-
-		eDtFile = 4,
-
-		eDtSize = 5
-	};
-*/
 	enum
 	{
 		eMethodNone			= 0x00,
@@ -110,7 +98,7 @@ public:
 		/// Timestamp
 		oexUINT32			uTime;
 
-		/// Timestamp milliseconds
+		/// Timestamp microseconds
 		oexUINT32			uTimeMs;
 
 		/// Size of the data in this block
@@ -121,6 +109,9 @@ public:
 
 		/// Offset to the previous block of data for this value
 		CFile::t_size		uPrev;
+
+		/// Timestamp microseconds
+		oexUINT32			uType;
 	};
 
 	/// Holds info on a logging buffer
@@ -138,14 +129,17 @@ public:
 		/// Data buffer
 		CBin			bin;
 
+		/// Data type
+		oexUINT			uType;
+
 		/// Key hash
-		oex::oexGUID	hash;
+		oexGUID			hash;
 
 		/// Root index
 		oexUINT			uRi;
 
 		/// Data hash
-		oex::oexGUID	changed;
+		oexGUID			changed;
 
 		/// Every so often, write the data anyway
 		oexUINT			valid;
@@ -155,6 +149,9 @@ public:
 
 		/// Position of last header
 		CFile::t_size	plast;
+
+		/// Key parameters
+		CPropertyBag	params;
 	};
 
 	struct SIterator
@@ -168,7 +165,9 @@ public:
 			oexZero( viNext );
 			nValue = 0;
 			fValue = 0.f;
+			dValue = 0;
 			nCount = 0;
+			uType = 0;
 		}
 
 		~SIterator()
@@ -183,13 +182,90 @@ public:
 			oexZero( viNext );
 			nValue = 0;
 			fValue = 0.f;
+			dValue = 0;
 			nCount = 0;
+			uType = 0;
 			fIdx.Destroy();
 			fData.Destroy();			
 		}
 
+		oexFLOAT getAvgFloat()
+		{	
+			switch( vi.uType )
+			{
+				case obj::tDouble :
+					return (oexFLOAT)getAvgDouble();
+
+				case obj::tInt :
+					return (oexFLOAT)getAvgInt();
+
+				case obj::tFloat :
+				{	oexFLOAT fAcc = 0.f, *p = (oexFLOAT*)sValue.Ptr();					
+					oexUINT nSize = sValue.Length() / obj::StaticSize( uType );
+					if ( !nSize )
+						return 0.f;
+					for ( oexUINT i = 0; i < nSize; i++ )
+						fAcc += p[ i ];
+					return fAcc / nSize;
+				} break;
+
+			} // end switch
+
+			return sValue.ToFloat();
+		}
+
+		oexDOUBLE getAvgDouble()
+		{	
+			switch( vi.uType )
+			{
+				case obj::tFloat :
+					return (oexDOUBLE)getAvgFloat();
+
+				case obj::tInt :
+					return (oexDOUBLE)getAvgInt();
+
+				case obj::tDouble :
+				{	oexDOUBLE dAcc = 0.f, *p = (oexDOUBLE*)sValue.Ptr();					
+					oexUINT nSize = sValue.Length() / obj::StaticSize( uType );
+					if ( !nSize )
+						return 0.f;
+					for ( oexUINT i = 0; i < nSize; i++ )
+						dAcc += p[ i ];
+					return dAcc / nSize;
+				} break;
+
+			} // end switch
+
+			return sValue.ToDouble();
+		}
+
+		oexINT getAvgInt()
+		{	
+			switch( vi.uType )
+			{
+				case obj::tFloat :
+					return (oexINT)getAvgFloat();
+
+				case obj::tDouble :
+					return (oexINT)getAvgDouble();
+
+				case obj::tInt :
+				{	oexINT nAcc = 0, *p = (oexINT*)sValue.Ptr();					
+					oexUINT nSize = sValue.Length() / obj::StaticSize( uType );
+					if ( !nSize )
+						return 0;
+					for ( oexUINT i = 0; i < nSize; i++ )
+						nAcc += p[ i ];
+					return nAcc / nSize;
+				} break;
+
+			} // end switch
+
+			return sValue.ToInt();
+		}
+
 		// Read value from the data file into the specified string
-		oexBOOL getValue( CStr &s )
+		oexBOOL getValue( CStr8 &s )
 		{	if ( !fData.IsOpen() ) return oexFALSE;
 			if ( !vi.uSize ) { s.Destroy(); return oexTRUE; }
 			oexSTR p = s.OexAllocate( vi.uSize );
@@ -200,7 +276,7 @@ public:
 		} // end if
 
 		CBin getValueBin()
-		{	if ( !fData.IsOpen() ) return oexFALSE;
+		{	if ( !fData.IsOpen() ) return CBin();
 			if ( !vi.uSize ) return CBin();
 			return fData.Read( vi.uSize );
 		} // end if
@@ -227,7 +303,10 @@ public:
 			// Build root to data based on starting timestamp
 			if ( !oexExists( ( oex::CStr( sRoot ).BuildPath( x_tTime / nLogBase ).BuildPath( sHash ) << oexT( ".bin" ) ).Ptr() ) )
 				return oexFALSE;
-			
+
+			// Get type from file
+			uType = CParser::Deserialize( CFile().OpenExisting( ( CStr( sRoot ).BuildPath( x_tTime / nLogBase ).BuildPath( CStr( sHash ) << oexT( ".txt" ) ) ).Ptr() ).Read() )[ "type" ].ToUInt();
+
 			return oexTRUE;
 		}
 
@@ -235,6 +314,7 @@ public:
 		CStr			sRoot;
 		CStr8			sKey;
 		CStr			sHash;
+		oexUINT			uType;
 		oexGUID			hash;
 		oexULONG		uB;
 		oexULONG		uI;
@@ -244,9 +324,10 @@ public:
 		CFile::t_size	npos;
 		CFile			fData;
 		CFile			fIdx;
-		CStr			sValue;
+		CStr8			sValue;
 		oexINT			nValue;
 		oexFLOAT		fValue;
+		oexDOUBLE		dValue;
 		oexINT			nCount;
 	};
 
@@ -268,7 +349,7 @@ public:
 	CStr GetRoot() { return m_sRoot; }
 
 	/// Creates a logging key for the specified value, return less than zero on failure
-	oexINT AddKey( oexCSTR x_pKey, t_time x_tTime = 0 );
+	oexINT AddKey( oexCSTR x_pKey, oexUINT x_uType, t_time x_tTime = 0, oexCSTR x_pParams = oexNULL );
 
 	/// Removes a key from the logger
 	oexINT RemoveKey( oexINT x_nKey );
@@ -279,8 +360,11 @@ public:
 	/// Returns the index of the named key if it exists, otherwise returns less than zero
 	oexINT FindKey( oexCSTR x_pKey );
 
+	/// Logs the specified value from a shared buffer
+	oexBOOL LogBin( oexCSTR x_pKey, oexCSTR x_pBin, oexINT x_nType, t_time x_tTime, t_time x_tTimeMs, oexBOOL x_bBuffering );
+
 	/// Logs the specified value
-	oexBOOL Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, t_time x_tTime, t_time x_tTimeMs, oexBOOL bBuffering = oexTRUE );
+	oexBOOL Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, t_time x_tTime, t_time x_tTimeMs, oexBOOL x_bBuffering = oexTRUE );
 
 	/// Flushes all buffered data to disk
 	oexBOOL Flush( t_time x_tTime = 0 );
@@ -305,6 +389,9 @@ public:
 
 	/// Returns the index step
 	t_time GetStep() { return m_tIndexStep; }
+
+	/// Returns the base interval in counts per second
+	t_time GetInterval() { return c_IntervalBase; }
 
 	/// Returns default fetch limit
 	oexUINT GetLimit() { return m_uLimit; }
