@@ -563,6 +563,9 @@ public:
 	/// Returns non-zero if the file mapped share already existed
 	oexBOOL Existing() { return m_buf.Existing(); }
 
+	/// Calculates a group average
+	oexUINT GroupAvg( oexINT nType, oexUINT uOffset, oexUINT uInterval, oexUINT uGroups, CBin &bin, oexINT nFlags );
+
 	/// Declare access types
 	OEX_CBIN_DECLARE_TYPE_ACCESS( CHAR );
 	OEX_CBIN_DECLARE_TYPE_ACCESS( UCHAR );

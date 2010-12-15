@@ -47,7 +47,7 @@ function getImage( mReply ) : ( _g )
 
 	_g.dat.Graph( 0, _g.fftsize, _self.tFloat | _g.dat.eGtHorzFft, 
 				  _g.img, CSqColor( 0, 0, 0 ), CSqColor( 255, 255, 255 ),
-				  "mag=2,ho=" + _g.fftsize );
+				  "mag=2,ho=" + _g.fftsize * 2 );
 
 	// Encode the image
 	local enc = _g.img.Encode( "png" );

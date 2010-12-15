@@ -278,6 +278,12 @@ namespace sqbind
 		/// Creates the specified graph
 		int Graph( int nSamples, int nInterval, int nType, CSqImage *img, CSqColor *bg, CSqColor *fg, const stdString &sParams );
 
+		/// Calculates a grouped average
+		int GroupAvg( int nType, int nOffset, int nInterval, int nGroups, CSqBinary *in, int nFlags )
+		{	if ( !in ) return 0;
+			return m_bin.GroupAvg( nType, nOffset, nInterval, nGroups, in->Mem(), nFlags );
+		}
+
 		/// Locates the specified string in the buffer
 		t_size FindBin( CSqBinary *p, int x_nStart, int x_nMax )
 		{	return m_bin.Find( p->m_bin, x_nStart, x_nMax ); }

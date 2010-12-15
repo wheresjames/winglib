@@ -140,11 +140,11 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSocket, CSqSocket )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, htons )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, ntohs )
 
-	SQBIND_ENUM( oex::os::CIpSocket::eReadEvent,		"EVT_READ" )
-	SQBIND_ENUM( oex::os::CIpSocket::eWriteEvent,		"EVT_WRITE" )
-	SQBIND_ENUM( oex::os::CIpSocket::eConnectEvent,		"EVT_CONNECT" )
-	SQBIND_ENUM( oex::os::CIpSocket::eCloseEvent,		"EVT_CLOSE" )
-	SQBIND_ENUM( oex::os::CIpSocket::eAcceptEvent,		"EVT_ACCEPT" )
+	SQBIND_ENUM( oex::os::CIpSocket::eReadEvent,		EVT_READ )
+	SQBIND_ENUM( oex::os::CIpSocket::eWriteEvent,		EVT_WRITE )
+	SQBIND_ENUM( oex::os::CIpSocket::eConnectEvent,		EVT_CONNECT )
+	SQBIND_ENUM( oex::os::CIpSocket::eCloseEvent,		EVT_CLOSE )
+	SQBIND_ENUM( oex::os::CIpSocket::eAcceptEvent,		EVT_ACCEPT )
 
 SQBIND_REGISTER_CLASS_END()
 

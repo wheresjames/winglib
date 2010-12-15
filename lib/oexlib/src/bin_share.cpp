@@ -248,6 +248,114 @@ CBin::t_size CBin::LShift( CBin::t_size x_nBytes )
 	return m_nUsed;
 }
 
+oexUINT CBin::GroupAvg( oexINT nType, oexUINT uOffset, oexUINT uInterval, oexUINT uGroups, CBin &bin, oexINT nFlags )
+{
+	// Sanity check
+	if ( 0 >= uGroups || !getUsed() )
+		return 0;
+
+	// Get skip value
+	oexUINT uSkip = nFlags & 0x0f;
+	if ( uSkip >= uGroups )
+		uSkip = 0;
+
+	// Get element size
+	oexUINT uESize = obj::StaticSize( nType );
+	if ( !uESize )
+		return 0;
+
+	// Total samples
+	oexUINT uSamples = getUsed() / uESize;
+	if ( uSamples < uInterval )
+		return 0;
+
+	// How many samples per group
+	oexUINT nSamplesPerGroup = ( uInterval - uSkip ) / ( uGroups - uSkip );
+	if ( !nSamplesPerGroup )
+		return 0;
+
+	// Allocate memory
+	oexUINT uBytes = uGroups * uESize;
+	if ( bin.Size() < uBytes )
+		if ( !bin.Allocate( uBytes ) )
+			return oexFALSE;
+
+	// Allocate an array to hold the counts
+	TMem< oexUINT > aCnts;
+	if ( !aCnts.OexNew( uGroups ).Ptr() )
+		return oexFALSE;
+
+	// Memory to hold acc
+	TMem< oexLONGDOUBLE > aAcc;
+	if ( !aAcc.OexNew( uGroups ).Ptr() )
+		return oexFALSE;
+
+	// Initialize group averages
+	for ( oexUINT i = 0; i < uGroups; i++ )
+		aAcc[ i ] = 0, aCnts[ i ] = 0;
+
+	// Accumulate all samples
+	while( ( uOffset + uInterval ) < uSamples )
+	{
+		// Accumulate samples in this interval
+		for ( oexUINT s = 0; s < uInterval; s++ )
+		{
+			// Get the value
+			oexLONGDOUBLE dV;
+			switch( nType )
+			{	case obj::tInt : dV = getINT( uOffset + s ); break;
+				case obj::tFloat : dV = getFLOAT( uOffset + s ); break;
+				case obj::tDouble : dV = getDOUBLE( uOffset + s ); break;
+				default : dV = 0;
+			} // end switch
+
+			// Range check and add
+//			if ( 1000000 > oex::cmn::Abs( dV ) && .0000001 < oex::cmn::Abs( dV ) )
+
+			if ( s < uSkip )
+				aAcc[ s ] = dV, aCnts[ s ]++;
+			else
+			{	oexUINT o = uSkip + s / nSamplesPerGroup;
+				if ( o >= uGroups ) o = uGroups - 1;
+				aAcc[ o ] += dV; aCnts[ o ]++;
+			} // end else
+
+		} // end for
+
+		uOffset += uInterval;
+
+	} // end while
+
+	// Calculate averages
+	switch( nType )
+	{
+		case obj::tInt :
+			for ( oexUINT g = 0; g < uGroups; g++ )
+				bin.setINT( g, aCnts[ g ] ? oexINT( aAcc[ g ] / aCnts[ g ] ) : 0 );
+			break;
+
+		case obj::tFloat :
+			for ( oexUINT g = 0; g < uGroups; g++ )
+				bin.setFLOAT( g, aCnts[ g ] ? oexFLOAT( aAcc[ g ] / aCnts[ g ] ) : 0 );
+			break;
+
+		case obj::tDouble :
+			for ( oexUINT g = 0; g < uGroups; g++ )
+				bin.setDOUBLE( g, aCnts[ g ] ? oexDOUBLE( aAcc[ g ] / aCnts[ g ] ) : 0 );
+			break;
+
+		default :
+			return 0;
+
+	} // end switch
+
+	// Number of bytes we used
+	bin.setUsed( uBytes );
+
+	return uOffset;
+}
+
+
 CStr8 CBin::base64_encode()
 {_STT();
 	return CBase64::Encode( m_buf.Ptr(), getUsed() ); 
