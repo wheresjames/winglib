@@ -1237,6 +1237,11 @@ int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )
 	return oexExec( sFull.c_str(), sParams.c_str(), sDir.length() ? sDir.c_str() : path( stdString() ).c_str() );
 }
 
+int CSqEngineExport::type_size( int type )
+{	return oex::obj::StaticSize( type );
+}
+
+
 void CSqEngineExport::sleep( int nMsTime )
 {_STT();
 	oexSleep( nMsTime );
@@ -1632,6 +1637,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_set_str )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_del_key )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_del_sub_keys )
+
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, type_size )
 
 	SQBIND_ENUM( oex::obj::tInt,		tInt )
 	SQBIND_ENUM( oex::obj::tUInt,		tUInt )

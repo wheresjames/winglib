@@ -2,6 +2,7 @@
 class CGlobal
 {
 	file = "";
+	raw = "";
 	port = CSqSerialPort();
 	buf = CSqBinary();
 };
@@ -11,16 +12,19 @@ local _g = CGlobal();
 function _init() : ( _g )
 {
 	local port = "COM1";
+	local dir = "c:/serial_data";
 
 	_self.echo( "\n===== Begin Serial Test =====\n" );
 
 	// Where to put stuff
-	CSqFile().mkdir( "c:/serial_data" );
+	CSqFile().mkdir( dir );
 
 	local t = CSqTime(); t.GetSystemTime();
-	_g.file = "c:/serial_data/" + port + "_" + t.FormatTime( "%Y%c%d_%g%m%s" ) + ".txt";
+	_g.raw = dir + "/" + port + "_" + t.FormatTime( "%Y%c%d_%g%m%s" ) + ".raw";
+	_g.file = dir + "/" + port + "_" + t.FormatTime( "%Y%c%d_%g%m%s" ) + ".txt";
 
 	_g.port.setBaudRate( 9600 );
+//	_g.port.setBaudRate( 115200 );
 
 	// Show port params
 	_self.echo( "baud = " + _g.port.getBaudRate()
@@ -46,6 +50,7 @@ function _idle() : ( _g )
 
 	// Append data to file
 	local t = CSqTime(); t.GetLocalTime();
+	CSqFile().append_contents_bin( _g.raw, _g.buf );
 	CSqFile().append_contents( _g.file,	  "Time : " + t.FormatTime( "%Y/%c/%d %g:%m:%s" ) + " - "
 										+ "Read : " + _g.buf.getUsed() + "\r\n"
 										+ _g.buf.AsciiHexStr( 16, 1000 ) + "\r\n\r\n" );

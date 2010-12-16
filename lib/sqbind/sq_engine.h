@@ -273,6 +273,9 @@ public:
 	/// Sends the terminate mesage to the specified thread
 	int terminate_thread( const stdString &sPath );
 
+	/// Returns the size of the specified type
+	int type_size( int type );
+
 	/// Returns boot time in seconds
 	float clock();
 
