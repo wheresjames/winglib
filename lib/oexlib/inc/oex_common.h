@@ -474,6 +474,18 @@ namespace cmn
 			return -1;
 		}
 
+#if defined( OEX_LITTLE_ENDIAN )
+	template< typename T > T LE( T v ) { return v; }
+	template< typename T > T setLE( oexPVOID p, T v ) { if ( p ) *(T*)p = v; return v; }
+	template< typename T > T BE( T v ) { RevBytes( &v, sizeof( v ) ); return v; }
+	template< typename T > T setBE( oexPVOID p, T v ) { RevBytes( &v, sizeof( v ) ); if ( p ) *(T*)p = v; return v; }
+#else
+	template< typename T > T LE( T v ) { RevBytes( &v, sizeof( v ) ); return v; }
+	template< typename T > T setLE( oexPVOID p, T v ) { RevBytes( &v, sizeof( v ) ); if ( p ) *(T*)p = v; return v; }
+	template< typename T > T BE( T v ) { return v; }
+	template< typename T > T setBE( oexPVOID p, T v ) { if ( p ) *(T*)p = v; return v; }
+#endif
+
 
 };
 

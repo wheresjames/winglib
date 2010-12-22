@@ -158,7 +158,7 @@ public:
 	{	return m_hShareHandle; }
 
 	/// Returns non-zero if a share handle has been specified
-	oexBOOL IsShareHandle()
+	oexBOOL IsShareHandle() const
 	{	return os::CFMap::vFailed() != m_hShareHandle; }
 
 	void ClearShares()
@@ -202,7 +202,7 @@ public:
     	m_hFile = oexNULL;
     	m_llOpenSize = 0;
         m_bExisting = oexFALSE;
-		m_bPlain = oexFALSE;
+//		m_bPlain = oexFALSE;
 	}
 
 	//==============================================================

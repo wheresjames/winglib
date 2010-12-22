@@ -335,8 +335,7 @@ public:
 	// Detach()
 	//==============================================================
 	/// Detaches from existing socket handle without releasing it.
-	void Detach()
-	{   m_hSocket = c_InvalidSocket; }
+	void Detach();
 
 	//==============================================================
 	// IsSocket()

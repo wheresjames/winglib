@@ -296,6 +296,12 @@ void CIpSocket::UninitSockets()
 	m_lInit	= -1;
 }
 
+void CIpSocket::Detach()
+{   m_hSocket = c_InvalidSocket; 
+	m_hSocketEvent = c_InvalidEvent;
+	Destroy();
+}
+
 void CIpSocket::Destroy()
 {
 	// Let everyone know we're closing

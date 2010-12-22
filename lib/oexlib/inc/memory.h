@@ -244,7 +244,7 @@ public:
         if ( !pPtr )
             return 0;
 
-		if ( IsPlainShare() )
+		if ( m_fm.c_Ptr() && IsPlainShare() )
 			return m_fm.Size();
         else if ( sizeof( T ) )
             return CAlloc().ArraySize( pPtr );
@@ -259,7 +259,7 @@ public:
 
     /// Returns non-zero if the object was constructed
     oexBOOL IsConstructed() const
-    {   if ( IsPlainShare() ) return 0;
+    {   if ( m_fm.c_Ptr() && IsPlainShare() ) return 0;
 		return ( CAlloc::eF1Constructed & CAlloc::GetFlags( c_Ptr() ) ) ? oexTRUE : oexFALSE;
     }
 

@@ -227,6 +227,13 @@ oexLONG CIpSocket::GetInitCount()
 	return 0;
 }
 
+void CIpSocket::Detach()
+{   m_hSocket = c_InvalidSocket; 
+	m_hSocketEvent = c_InvalidEvent;
+	Destroy();
+}
+
+
 void CIpSocket::Destroy()
 {_STT();
 	// Punt if not initialized
