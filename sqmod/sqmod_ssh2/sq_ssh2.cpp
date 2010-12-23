@@ -2,6 +2,11 @@
 
 #include "stdafx.h"
 
+#define SQSSH2_RETRY( f )																			\
+	int nErr = 0, nTo = oexGetUnixTime() + ( oexDEFAULT_WAIT_TIMEOUT / 1000 );						\
+	do { nErr = f; if ( nErr == LIBSSH2_ERROR_EAGAIN && nTo > oexGetUnixTime() ) oexSleep( 15 );	\
+	} while ( nErr == LIBSSH2_ERROR_EAGAIN && nTo > oexGetUnixTime() );
+
 CSqSsh2::CSqSsh2()
 {_STT();
 
@@ -14,6 +19,28 @@ CSqSsh2::~CSqSsh2()
 {_STT();
 	Destroy();
 }
+
+int CSqSsh2::logerr( int nRet, int nErr, const sqbind::stdString &sF )
+{_STT();
+
+	m_nErr = nErr;
+	m_sErr += sF;
+
+	if ( nErr )
+		m_sErr += oexT( " : " ),
+		m_sErr += sqbind::oex2std( oexMks( nErr ) ),
+		m_sErr += oexT( " : " ),
+		m_sErr += getErrorDesc( nErr );
+
+	if ( m_session )
+		m_sErr += oexT( " : " ),
+		m_sErr += sqbind::oex2std( oexMks( libssh2_session_last_errno( m_session ) ) ),
+		m_sErr += oexT( " : " ),
+		m_sErr += getLastErrorStr();
+
+	return nRet;
+}
+
 
 void CSqSsh2::Destroy()
 {_STT();
@@ -49,16 +76,14 @@ void CSqSsh2::Destroy()
 }
 
 int CSqSsh2::Connect( sqbind::CSqSocket *x_pSock )
-{
+{_STT();
 	// Out with the old
 	m_sErr = oexT( "" );
 	Destroy();
 
 	// Ensure valid socket
 	if ( !x_pSock || !x_pSock->isConnected() || !x_pSock->Ptr() )
-	{	m_sErr = oexT( "Invalid socket" );
-		return 0;
-	} // end if
+		return logerr( 0, 0, "Invalid socket" );
 
 	// Steal the socket handle
 	m_socket = (int)x_pSock->Ptr()->GetSocketHandle();
@@ -67,7 +92,7 @@ int CSqSsh2::Connect( sqbind::CSqSocket *x_pSock )
 	// Initialize SSH2
     m_init = libssh2_init( 0 );
     if ( m_init )
-	{	m_sErr = sqbind::oex2std( oexMks( oexT( "Failed to initialize libssh2 : " ), m_init ) );
+	{	logerr( 0, m_init, oexT( "Failed to initialize libssh2 : libssh2_init()" ) );
 		Destroy();
 		return 0;
 	} // end if
@@ -75,7 +100,7 @@ int CSqSsh2::Connect( sqbind::CSqSocket *x_pSock )
 	// Initialize a session
     m_session = libssh2_session_init();
 	if ( !m_session )
-	{	m_sErr = oexT( "Failed to create new ssh2 session object" );
+	{	logerr( 0, 0, oexT( "Failed to create new ssh2 session object : libssh2_session_init()" ) );
 		Destroy();
 		return 0;
 	} // end if
@@ -83,7 +108,7 @@ int CSqSsh2::Connect( sqbind::CSqSocket *x_pSock )
 	// Execute session startup
 	int nErr = 0;
     if ( ( nErr = libssh2_session_startup( m_session, m_socket ) ) )
-	{	m_sErr = sqbind::oex2std( oexMks( oexT( "libssh2_session_startup() Failed : " ), nErr ) );
+	{	logerr( 0, nErr, oexT( "libssh2_session_startup() failed" ) );
 		Destroy();
 		return 0;
 	} // end if
@@ -92,10 +117,10 @@ int CSqSsh2::Connect( sqbind::CSqSocket *x_pSock )
 }
 
 sqbind::CSqBinary CSqSsh2::getFingerprint()
-{
+{_STT();
 	sqbind::CSqBinary bin;
 	if ( !m_session )
-	{	m_sErr = oexT( "Invalid session" );
+	{	logerr( 0, 0, oexT( "Invalid session" ) );
 		return bin;
 	} // end if
 
@@ -111,10 +136,10 @@ sqbind::CSqBinary CSqSsh2::getFingerprint()
 
 
 sqbind::stdString CSqSsh2::getAuthorizationMethods()
-{
+{_STT();
 	// Ensure session pointer
 	if ( !m_session )
-	{	m_sErr = oexT( "Invalid session" );
+	{	logerr( 0, 0, oexT( "Invalid session" ) );
 		return oexT( "" );
 	} // end if
 
@@ -127,23 +152,77 @@ sqbind::stdString CSqSsh2::getAuthorizationMethods()
 }
 
 int CSqSsh2::authUsernamePassword( const sqbind::stdString &sUsername, const sqbind::stdString &sPassword )
-{
+{_STT();
 	if ( !m_session )
-	{	m_sErr = oexT( "Invalid session" );
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "Invalid session" ) );
 
-	int nErr = libssh2_userauth_password( m_session, oexStrToMbPtr( sUsername.c_str() ), oexStrToMbPtr( sPassword.c_str() ) );
-	if ( nErr )
-	{	m_sErr = sqbind::oex2std( oexMks( oexT( "libssh2_userauth_password() Failed : " ), nErr ) );
-		return 0;
-	} // end if
+	SQSSH2_RETRY( libssh2_userauth_password( m_session, oexStrToMbPtr( sUsername.c_str() ), oexStrToMbPtr( sPassword.c_str() ) ) );
+
+	if ( nErr ) 
+		return logerr( 0, nErr, oexT( "libssh2_userauth_password() Failed" ) );
 
 	return 1;
 }
 
+int CSqSsh2::authPublicKey( const sqbind::stdString &sUsername, const sqbind::stdString &sPassword,
+							const sqbind::stdString &sPrvKey, const sqbind::stdString &sPubKey )
+{_STT();
+	if ( !m_session )
+		return logerr( 0, 0, oexT( "Invalid session" ) );
+
+	SQSSH2_RETRY( libssh2_userauth_publickey_fromfile_ex( m_session, 
+														  oexStrToMbPtr( sUsername.c_str() ),
+														  sUsername.length(),
+														  sPubKey.length() ? oexStrToMbPtr( sPubKey.c_str() ) : oexNULL,
+														  oexStrToMbPtr( sPrvKey.c_str() ),
+														  sPassword.length() ? oexStrToMbPtr( sPassword.c_str() ) : 0 ) );
+
+	if ( nErr ) 
+		return logerr( 0, nErr, oexT( "libssh2_userauth_publickey_fromfile_ex() Failed" ) );
+
+	return 1;
+}
+
+int CSqSsh2::authPublicKeyBin( const sqbind::stdString &sUsername,
+							   sqbind::CSqBinary *pPrv, sqbind::CSqBinary *pPub )
+{_STT();
+
+	if ( !sUsername.length() || !pPrv || !pPub || !pPrv->getUsed() || !pPub->getUsed() )
+		return logerr( 0, 0, oexT( "Invalid parameters" ) );
+
+	if ( !m_session )
+		return logerr( 0, 0, oexT( "Invalid session" ) );
+
+	SQSSH2_RETRY( libssh2_userauth_publickey( m_session,
+											  oexStrToMbPtr( sUsername.c_str() ),
+											  (const unsigned char*)pPub->Ptr(), pPub->getUsed(),
+											  _sign_callback, (void**)this ) );
+
+	if ( nErr ) 
+		return logerr( 0, nErr, oexT( "libssh2_userauth_publickey() Failed" ) );
+
+	return 1;
+}
+
+int CSqSsh2::_sign_callback( LIBSSH2_SESSION *session, unsigned char **sig, size_t *sig_len,
+							 const unsigned char *data, size_t data_len, void **user )
+{_STT();
+	CSqSsh2 *p = (CSqSsh2*)user;
+	if ( !p ) return LIBSSH2_ERROR_BAD_USE;
+	return sign_callback( session, sig, sig_len, data, data_len );
+}
+
+int CSqSsh2::sign_callback( LIBSSH2_SESSION *session, unsigned char **sig, size_t *sig_len,
+							const unsigned char *data, size_t data_len )
+{_STT();
+
+
+
+	return 0;
+}
+
 int CSqSsh2::CloseAllChannels()
-{
+{_STT();
 	// For each channel
 	if ( m_session )
 		for ( t_channelmap::iterator it = m_channels.begin(); it != m_channels.end(); it++ )
@@ -159,7 +238,7 @@ int CSqSsh2::CloseAllChannels()
 int CSqSsh2::MsgFwd( sqbind::CSqBinary *bin, 
 					 const sqbind::stdString &sHost1, int nHost1, 
 					 const sqbind::stdString &sHost2, int nHost2 )
-{
+{_STT();
 	if ( !bin )
 		return 0;
 
@@ -188,16 +267,12 @@ int CSqSsh2::MsgFwd( sqbind::CSqBinary *bin,
 
 int CSqSsh2::OpenChannel( const sqbind::stdString &sName, const sqbind::stdString &sType,
 						  int nWindowSize, int nPacketSize, sqbind::CSqBinary *pMsg )
-{
+{_STT();
 	if ( !sName.length() || !pMsg )
-	{	m_sErr = oexT( "Invalid channel name" );
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "Invalid parameters" ) );
 
 	if ( !m_session )
-	{	m_sErr = oexT( "Invalid session" );
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "Invalid session" ) );
 
 	if ( 0 >= nWindowSize )
 		nWindowSize = LIBSSH2_CHANNEL_WINDOW_DEFAULT;
@@ -211,10 +286,7 @@ int CSqSsh2::OpenChannel( const sqbind::stdString &sName, const sqbind::stdStrin
 												   nWindowSize, nPacketSize,
 												   pMsg->Ptr(), pMsg->getUsed() );
 	if ( !ch )
-	{	m_sErr = oexMks( oexT( "libssh2_channel_open_session() failed : " ), 
-						 libssh2_session_last_errno( m_session ) ).Ptr();
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "libssh2_channel_open_session() failed" ) );
 
 	// Save in map
 	m_channels[ sName ] = ch;
@@ -225,26 +297,20 @@ int CSqSsh2::OpenChannel( const sqbind::stdString &sName, const sqbind::stdStrin
 int CSqSsh2::OpenChannelDirectTcpip( const sqbind::stdString &sName, 
 									 const sqbind::stdString &sHost, int nPort, 
 									 const sqbind::stdString &sSHost, int nSPort )
-{
+{_STT();
+
 	if ( !sName.length() )
-	{	m_sErr = oexT( "Invalid channel name" );
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "Invalid parameters" ) );
 
 	if ( !m_session )
-	{	m_sErr = oexT( "Invalid session" );
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "Invalid session" ) );
 
 	// Attempt ot open the channel
-	LIBSSH2_CHANNEL *ch = libssh2_channel_direct_tcpip_ex ( m_session, 
-															sHost.c_str(), nPort,
-															sSHost.c_str(), nSPort );
+	LIBSSH2_CHANNEL *ch = libssh2_channel_direct_tcpip_ex( m_session, 
+														   sHost.c_str(), nPort,
+														   sSHost.c_str(), nSPort );
 	if ( !ch )
-	{	m_sErr = oexMks( oexT( "libssh2_channel_direct_tcpip_ex() failed : " ), 
-						 libssh2_session_last_errno( m_session ) ).Ptr();
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "libssh2_channel_direct_tcpip_ex() failed" ) );
 
 	// Save in map
 	m_channels[ sName ] = ch;
@@ -253,23 +319,17 @@ int CSqSsh2::OpenChannelDirectTcpip( const sqbind::stdString &sName,
 }
 
 int CSqSsh2::CloseChannel( const sqbind::stdString &sName )
-{
+{_STT();
 	if ( !sName.length() )
-	{	m_sErr = oexT( "Invalid parameter" );
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "Invalid parameters" ) );
 
 	if ( !m_session )
-	{	m_sErr = oexT( "Invalid session" );
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "Invalid session" ) );
 
 	// Ensure there is such a channel
 	t_channelmap::iterator it = m_channels.find( sName.c_str() );
 	if ( it != m_channels.end() )
-	{	m_sErr = oexT( "Specified channel does not exist" );
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "Specified channel does not exist" ) );
 
 	// Set environment variable
 	int nErr = libssh2_channel_free( it->second );
@@ -278,32 +338,24 @@ int CSqSsh2::CloseChannel( const sqbind::stdString &sName )
 	it->second = 0; m_channels.erase( it );
 
 	if ( nErr )
-	{	m_sErr = sqbind::oex2std( oexMks( oexT( "libssh2_channel_free() Failed : " ), nErr ) );
-		return 0;
-	} // end if
+		return logerr( 0, nErr, oexT( "libssh2_channel_free() Failed" ) );
 
 	return 1;
 }
 
 /// Sets environment variable on channel
 int CSqSsh2::ChannelSetEnv( const sqbind::stdString &sChannel, const sqbind::stdString &sName, const sqbind::stdString &sValue )
-{
+{_STT();
 	if ( !sChannel.length() || !sName.length() )
-	{	m_sErr = oexT( "Invalid parameter" );
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "Invalid parameters" ) );
 
 	if ( !m_session )
-	{	m_sErr = oexT( "Invalid session" );
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "Invalid session" ) );
 
 	// Ensure there is such a channel
 	t_channelmap::iterator it = m_channels.find( sChannel.c_str() );
-	if ( it != m_channels.end() )
-	{	m_sErr = oexT( "Specified channel does not exist" );
-		return 0;
-	} // end if
+	if ( it == m_channels.end() )
+		return logerr( 0, 0, oexT( "Specified channel does not exist" ) );
 
 	// Set environment variable
 	int nErr = libssh2_channel_setenv_ex( it->second, 
@@ -311,32 +363,24 @@ int CSqSsh2::ChannelSetEnv( const sqbind::stdString &sChannel, const sqbind::std
 										  sValue.c_str(), sValue.length() );
 
 	if ( nErr )
-	{	m_sErr = sqbind::oex2std( oexMks( oexT( "libssh2_channel_setenv_ex() Failed : " ), nErr ) );
-		return 0;
-	} // end if
+		return logerr( 0, nErr, oexT( "libssh2_channel_setenv_ex() Failed" ) );
 
 	return 1;
 }
 
 /// Sets environment variable on channel
 int CSqSsh2::ChannelRead( const sqbind::stdString &sChannel, int nStream, sqbind::CSqBinary *bin )
-{
+{_STT();
 	if ( !sChannel.length() || !bin )
-	{	m_sErr = oexT( "Invalid parameter" );
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "Invalid parameters" ) );
 
 	if ( !m_session )
-	{	m_sErr = oexT( "Invalid session" );
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "Invalid session" ) );
 
 	// Ensure there is such a channel
 	t_channelmap::iterator it = m_channels.find( sChannel.c_str() );
-	if ( it != m_channels.end() )
-	{	m_sErr = oexT( "Specified channel does not exist" );
-		return 0;
-	} // end if
+	if ( it == m_channels.end() )
+		return logerr( 0, 0, oexT( "Specified channel does not exist" ) );
 
 	// Set environment variable
 	int nBytes = 0, nTotal = 0;
@@ -351,35 +395,98 @@ int CSqSsh2::ChannelRead( const sqbind::stdString &sChannel, int nStream, sqbind
 	} while ( 0 < nBytes && nBytes <= sizeof( buf ) );
 
 	if ( 0 > nBytes )
-		m_sErr = sqbind::oex2std( oexMks( oexT( "libssh2_channel_read_ex() Failed : " ), nBytes ) );
+		logerr( 0, nBytes, oexT( "libssh2_channel_read_ex() Failed" ) );
 
 	return nTotal;
 }
 
 /// Sets environment variable on channel
 int CSqSsh2::ChannelWrite( const sqbind::stdString &sChannel, int nStream, sqbind::CSqBinary *bin )
-{
+{_STT();
+
 	if ( !sChannel.length() || !bin || !bin->getUsed() )
-	{	m_sErr = oexT( "Invalid parameter" );
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "Invalid parameters" ) );
 
 	if ( !m_session )
-	{	m_sErr = oexT( "Invalid session" );
-		return 0;
-	} // end if
+		return logerr( 0, 0, oexT( "Invalid session" ) );
 
 	// Ensure there is such a channel
 	t_channelmap::iterator it = m_channels.find( sChannel.c_str() );
-	if ( it != m_channels.end() )
-	{	m_sErr = oexT( "Specified channel does not exist" );
-		return 0;
-	} // end if
+	if ( it == m_channels.end() )
+		return logerr( 0, 0, oexT( "Specified channel does not exist" ) );
 
 	// Read a block of data
 	int nBytes = libssh2_channel_write_ex( it->second, nStream, bin->Ptr(), bin->getUsed() );
 	if ( 0 > nBytes )
-		m_sErr = sqbind::oex2std( oexMks( oexT( "libssh2_channel_write_ex() Failed : " ), nBytes ) );
+		logerr( 0, nBytes, oexT( "libssh2_channel_write_ex() Failed" ) );
 
 	return nBytes;
+}
+
+sqbind::stdString CSqSsh2::getLastErrorStr()
+{_STT();
+	if ( !m_session )
+		return oexT( "No active session" );
+
+	char *str = 0; int len = 0;
+	libssh2_session_last_error( m_session, &str, &len, 0 );
+	if ( !str || 0 >= len )
+		return oexT( "Unspecified error" );
+
+	return sqbind::oex2std( oexMbToStr( oex::CStr8( str, len ) ) );
+}
+
+sqbind::stdString CSqSsh2::getErrorDesc( int nCode )
+{_STT();
+	
+	switch ( nCode )
+	{
+		case LIBSSH2_ERROR_NONE :					return oexT( "None" );
+		case LIBSSH2_ERROR_SOCKET_NONE :			return oexT( "Socket Error" );
+		case LIBSSH2_ERROR_BANNER_NONE :			return oexT( "Banner error" );
+		case LIBSSH2_ERROR_BANNER_SEND :			return oexT( "Banner failed to send" );
+		case LIBSSH2_ERROR_INVALID_MAC :			return oexT( "Invalid MAC" );
+		case LIBSSH2_ERROR_KEX_FAILURE :			return oexT( "Key failure" );
+		case LIBSSH2_ERROR_ALLOC :					return oexT( "Memory allocation failure" );
+		case LIBSSH2_ERROR_SOCKET_SEND :			return oexT( "Socket send() failed" );
+		case LIBSSH2_ERROR_KEY_EXCHANGE_FAILURE :	return oexT( "Key exchange failed" );
+		case LIBSSH2_ERROR_TIMEOUT :				return oexT( "Timeout" );
+		case LIBSSH2_ERROR_HOSTKEY_INIT :			return oexT( "Host key init failed" );
+		case LIBSSH2_ERROR_HOSTKEY_SIGN :			return oexT( "Host key sign failed" );
+		case LIBSSH2_ERROR_DECRYPT :				return oexT( "Decrypt failed" );
+		case LIBSSH2_ERROR_SOCKET_DISCONNECT :		return oexT( "Socket disconnect" );
+		case LIBSSH2_ERROR_PROTO :					return oexT( "Proto failed" );
+		case LIBSSH2_ERROR_PASSWORD_EXPIRED :		return oexT( "Password has expired" );
+		case LIBSSH2_ERROR_FILE :					return oexT( "File error" );
+		case LIBSSH2_ERROR_METHOD_NONE :			return oexT( "Method failed" );
+		case LIBSSH2_ERROR_AUTHENTICATION_FAILED :	return oexT( "Authentication failed" );
+//		case LIBSSH2_ERROR_PUBLICKEY_UNRECOGNIZED : return oexT( "Public key not recognized" );
+		case LIBSSH2_ERROR_PUBLICKEY_UNVERIFIED :	return oexT( "Unable to verify public key" );
+		case LIBSSH2_ERROR_CHANNEL_OUTOFORDER :		return oexT( "Channel out of order" );
+		case LIBSSH2_ERROR_CHANNEL_FAILURE :		return oexT( "Channel failure" );
+		case LIBSSH2_ERROR_CHANNEL_REQUEST_DENIED : return oexT( "Channel request denied" );
+		case LIBSSH2_ERROR_CHANNEL_UNKNOWN :		return oexT( "Unspecified channel error" );
+		case LIBSSH2_ERROR_CHANNEL_WINDOW_EXCEEDED : return oexT( "Channel window exceeded" );
+		case LIBSSH2_ERROR_CHANNEL_PACKET_EXCEEDED : return oexT( "Channel packet exceeded" );
+		case LIBSSH2_ERROR_CHANNEL_CLOSED :			return oexT( "Channel closed" );
+		case LIBSSH2_ERROR_CHANNEL_EOF_SENT :		return oexT( "Channel EOF sent" );
+		case LIBSSH2_ERROR_SCP_PROTOCOL :			return oexT( "SCP protocol error" );
+		case LIBSSH2_ERROR_ZLIB :					return oexT( "ZLIB error" );
+		case LIBSSH2_ERROR_SOCKET_TIMEOUT :			return oexT( "Socket timeout" );
+		case LIBSSH2_ERROR_SFTP_PROTOCOL :			return oexT( "SFTP Protocol error" );
+		case LIBSSH2_ERROR_REQUEST_DENIED :			return oexT( "Request denied" );
+		case LIBSSH2_ERROR_METHOD_NOT_SUPPORTED :	return oexT( "Method not supported" );
+		case LIBSSH2_ERROR_INVAL :					return oexT( "Inval error" );
+		case LIBSSH2_ERROR_INVALID_POLL_TYPE :		return oexT( "Invalid poll type" );
+		case LIBSSH2_ERROR_PUBLICKEY_PROTOCOL :		return oexT( "Public key protocol error" );
+		case LIBSSH2_ERROR_EAGAIN :					return oexT( "Error, try again" );
+		case LIBSSH2_ERROR_BUFFER_TOO_SMALL :		return oexT( "Buffer is too small" );
+		case LIBSSH2_ERROR_BAD_USE :				return oexT( "Invalid parameter" );
+		case LIBSSH2_ERROR_COMPRESS :				return oexT( "Compress error" );
+		case LIBSSH2_ERROR_OUT_OF_BOUNDARY :		return oexT( "Out of boundary" );
+		case LIBSSH2_ERROR_AGENT_PROTOCOL :			return oexT( "Agent protocol error" );
+		case LIBSSH2_INIT_NO_CRYPTO :				return oexT( "Init, No crypto" );
+	};
+
+	return oexT( "Unknown" );
 }

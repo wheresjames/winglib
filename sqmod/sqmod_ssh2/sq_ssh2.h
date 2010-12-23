@@ -26,8 +26,17 @@ public:
 	/// Initializes the ssh connection to the server
 	int Connect( sqbind::CSqSocket *x_pSock );
 
+	/// Returns the error description for the specified code
+	sqbind::stdString getErrorDesc( int nCode );
+
+	/// Returns a string describing the last error
+	sqbind::stdString getLastErrorStr();
+
 	/// Returns a string describing the last error
 	sqbind::stdString getLastError() { return m_sErr; }
+
+	/// Returns the last error code
+	int getLastErrorCode() { return m_nErr; }
 
 	/// Returns the connected hosts fingerprint
 	sqbind::CSqBinary getFingerprint();
@@ -41,6 +50,22 @@ public:
 
 	/// Attempts authentication using username and password
 	int authUsernamePassword( const sqbind::stdString &sUsername, const sqbind::stdString &sPassword );
+
+	/// Attempts authentication using public key
+	int authPublicKey( const sqbind::stdString &sUsername, const sqbind::stdString &sPassword,
+					   const sqbind::stdString &sPrvKey, const sqbind::stdString &sPubKey );
+
+	/// Attempts authentication using public key
+	int authPublicKeyBin( const sqbind::stdString &sUsername,
+						  sqbind::CSqBinary *pPrv, sqbind::CSqBinary *pPub );
+
+	/// Sign callback proxy
+	static int _sign_callback( LIBSSH2_SESSION *session, unsigned char **sig, size_t *sig_len,
+							   const unsigned char *data, size_t data_len, void **user );
+
+	/// Sign data callback
+	static int sign_callback( LIBSSH2_SESSION *session, unsigned char **sig, size_t *sig_len,
+							  const unsigned char *data, size_t data_len );
 
 public:
 
@@ -72,6 +97,9 @@ public:
 								const sqbind::stdString &sHost, int nPort, 
 								const sqbind::stdString &sSHost, int nSPort );
 
+	/// Log generic error
+	int logerr( int nRet, int nErr, const sqbind::stdString &sF );
+
 private:
 
 	/// Init status
@@ -94,6 +122,9 @@ private:
 
 	/// Message describing the last error
 	sqbind::stdString			m_sErr;
+
+	/// Last error code
+	int							m_nErr;
 
 };
 SQBIND_DECLARE_INSTANCE( CSqSsh2, CSqSsh2 );

@@ -362,6 +362,12 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 		return oexFALSE;
 	} // end if
 
+	// Setup socket timeout defaults
+	struct timeval tv;
+	tv.tv_usec = 0; tv.tv_sec = ( oexDEFAULT_WAIT_TIMEOUT / 1000 );
+	setsockopt( (SOCKET)m_hSocket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof( tv ) );
+	setsockopt( (SOCKET)m_hSocket, SOL_SOCKET, SO_SNDTIMEO, (const char *)&tv, sizeof( tv ) );
+
 	// Process socket creation
 	if ( !OnAttach() )
 	{	Destroy();
@@ -592,9 +598,17 @@ void CIpSocket::CloseEventHandle()
 #if defined( OEX_NOSOCKET2 )
 	return;
 #else
+
 	// Do we have a valid handle?
 	if ( c_InvalidEvent != m_hSocketEvent )
 	{
+		// Blocking socket
+		if ( c_InvalidSocket != m_hSocket )
+		{	WSAEventSelect( (SOCKET)m_hSocket, (WSAEVENT)m_hSocketEvent, 0 );
+			WSAEventSelect( (SOCKET)m_hSocket, (WSAEVENT)0, 0 );
+			ioctlsocket( (SOCKET)m_hSocket, FIONBIO, 0 );
+		} // end if
+
 		// Close the event handle
 		WSACloseEvent( m_hSocketEvent );
 

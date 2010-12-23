@@ -44,17 +44,29 @@ public:
 	/// Load public key
 	int LoadPublicKey( const sqbind::stdString &sFile );
 
-	/// Load private key from memory buffer
+	/// Load a PEM encoded private key from memory buffer
 	int setPrivateKey( sqbind::CSqBinary *pBin );
 
-	/// Loads a public key from a buffer
+	/// Loads a PEM encoded public key from a buffer
 	int setPublicKey( sqbind::CSqBinary *pBin );
 
-	/// Returns the priate key in a binary buffer
+	/// Returns the PEM encoded priate key in a binary buffer
 	sqbind::CSqBinary getPrivateKey();
 
-	/// Returns the public key in a binary buffer
+	/// Returns the PEM encoded public key in a binary buffer
 	sqbind::CSqBinary getPublicKey();
+
+	/// Load raw private key from memory buffer
+	int setPrivateKeyRaw( sqbind::CSqBinary *pBin );
+
+	/// Loads raw public key from a buffer
+	int setPublicKeyRaw( sqbind::CSqBinary *pBin );
+
+	/// Returns the raw private key in a binary buffer
+	sqbind::CSqBinary getPrivateKeyRaw();
+
+	/// Returns the raw public key in a binary buffer
+	sqbind::CSqBinary getPublicKeyRaw();
 
 	/// Sign data
 	int Sign( const sqbind::stdString &sData, sqbind::CSqBinary *sig );

@@ -105,6 +105,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSocket, CSqSocket )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Destroy )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Connect )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, CreateUDP )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, setBlockingMode )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Bind )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Listen )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Accept )
@@ -165,6 +166,16 @@ int CSqSocket::CreateUDP()
 							 oex::os::CIpSocket::eProtoUdp );
 }
 
+int CSqSocket::setBlockingMode( int nEnable )
+{_STT();
+
+	if ( nEnable )
+		m_socket->CloseEventHandle();
+	else
+		m_socket->EventSelect();
+
+	return 1;
+}
 
 int CSqSocket::Connect( const sqbind::stdString &sUrl, int nPort )
 {_STT();

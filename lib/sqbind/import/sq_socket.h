@@ -132,6 +132,9 @@ namespace sqbind
 		/// Waits for the specified event(s)
 		int WaitEvent( int nEvent, int nMax );
 
+		/// Sets blocking mode
+		int setBlockingMode( int nEnable );
+
 		/// Reads from the port
 		sqbind::stdString Read( int nMax );
 

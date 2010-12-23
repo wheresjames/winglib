@@ -193,7 +193,7 @@ int COsslKey::setPrivateKey( sqbind::CSqBinary *pBin )
 
 	BIO_free( pBio );
 
-	return 1;
+	return GenPublicKey();
 }
 
 sqbind::CSqBinary COsslKey::getPrivateKey()
@@ -206,18 +206,81 @@ sqbind::CSqBinary COsslKey::getPrivateKey()
 	if ( !pBio )
 	{	oexERROR( 0, oexT( "BIO_new_mem_buf() failed" ) );
 		Destroy();
-		return 0;
+		return sqbind::CSqBinary();
 	} // end if
 
 	if ( !PEM_write_bio_RSAPrivateKey( pBio, m_pkey->pkey.rsa, NULL, NULL, 0, NULL, NULL ) )
 	{	oexERROR( 0, oexT( "PEM_read_bio_RSA_PUBKEY() failed" ) );
 		Destroy();
-		return 0;
+		return sqbind::CSqBinary();
 	} // end if
+
+	BUF_MEM *bm = oexNULL;
+	BIO_get_mem_ptr( pBio, &bm );
+
+	sqbind::CSqBinary bin;
+	bin.MemCpy( bm->data, bm->length );
 
 	BIO_free( pBio );
 
-	return 1;
+	return bin;
+}
+
+int COsslKey::setPrivateKeyRaw( sqbind::CSqBinary *pBin )
+{_STT();
+
+	Destroy();
+
+	if ( !pBin || !pBin->getUsed() )
+		return 0;
+
+	m_pkey = EVP_PKEY_new();
+	if ( !m_pkey )
+	{	oexERROR( 0, oexT( "EVP_PKEY_new() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+
+	const unsigned char *p = (const unsigned char*)pBin->Ptr();
+	RSA *rsa = d2i_RSAPrivateKey( NULL, &p, pBin->getUsed() );
+	if ( !rsa )
+	{	oexERROR( 0, oexT( "d2i_RSAPrivateKey() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+
+	// Assign key
+	if ( !EVP_PKEY_assign_RSA( m_pkey, rsa ) )
+	{	oexERROR( 0, oexT( "EVP_PKEY_assign_RSA() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+	rsa = NULL;
+
+	return GenPublicKey();
+}
+
+sqbind::CSqBinary COsslKey::getPrivateKeyRaw()
+{_STT();
+
+	if ( !m_pkey )
+		return sqbind::CSqBinary();
+		
+	// How big is the key?
+	int nSize = i2d_RSAPrivateKey( m_pkey->pkey.rsa, NULL );
+	if ( 0 >= nSize )
+		return sqbind::CSqBinary();
+
+	// Allocate space
+	sqbind::CSqBinary bin;
+	if ( !bin.Allocate( nSize ) )
+		return bin;
+
+	// Get the key data
+	unsigned char *p = (unsigned char*)bin._Ptr();
+	bin.setUsed( i2d_RSAPrivateKey( m_pkey->pkey.rsa, &p ) );
+
+	return bin;
 }
 
 int COsslKey::LoadPrivateKey( const sqbind::stdString &sFile )
@@ -314,18 +377,81 @@ sqbind::CSqBinary COsslKey::getPublicKey()
 	if ( !pBio )
 	{	oexERROR( 0, oexT( "BIO_new_mem_buf() failed" ) );
 		Destroy();
-		return 0;
+		return sqbind::CSqBinary();
 	} // end if
 
 	if ( !PEM_write_bio_RSAPublicKey( pBio, m_pkey->pkey.rsa ) )
 	{	oexERROR( 0, oexT( "PEM_read_bio_RSA_PUBKEY() failed" ) );
 		Destroy();
-		return 0;
+		return sqbind::CSqBinary();
 	} // end if
+
+	BUF_MEM *bm = oexNULL;
+	BIO_get_mem_ptr( pBio, &bm );
+
+	sqbind::CSqBinary bin;
+	bin.MemCpy( bm->data, bm->length );
 
 	BIO_free( pBio );
 
+	return bin;
+}
+
+int COsslKey::setPublicKeyRaw( sqbind::CSqBinary *pBin )
+{_STT();
+
+	Destroy();
+
+	if ( !pBin || !pBin->getUsed() )
+		return 0;
+
+	m_pkey = EVP_PKEY_new();
+	if ( !m_pkey )
+	{	oexERROR( 0, oexT( "EVP_PKEY_new() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+
+	const unsigned char *p = (const unsigned char*)pBin->Ptr();
+	RSA *rsa = d2i_RSAPublicKey( NULL, &p, pBin->getUsed() );
+	if ( !rsa )
+	{	oexERROR( 0, oexT( "d2i_RSAPrivateKey() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+
+	// Assign key
+	if ( !EVP_PKEY_assign_RSA( m_pkey, rsa ) )
+	{	oexERROR( 0, oexT( "EVP_PKEY_assign_RSA() failed" ) );
+		Destroy();
+		return 0;
+	} // end if
+	rsa = NULL;
+
 	return 1;
+}
+
+sqbind::CSqBinary COsslKey::getPublicKeyRaw()
+{_STT();
+
+	if ( !m_pkey )
+		return sqbind::CSqBinary();
+		
+	// How big is the key?
+	int nSize = i2d_RSAPublicKey( m_pkey->pkey.rsa, NULL );
+	if ( 0 >= nSize )
+		return sqbind::CSqBinary();
+
+	// Allocate space
+	sqbind::CSqBinary bin;
+	if ( !bin.Allocate( nSize ) )
+		return bin;
+
+	// Get the key data
+	unsigned char *p = (unsigned char*)bin._Ptr();
+	bin.setUsed( i2d_RSAPublicKey( m_pkey->pkey.rsa, &p ) );
+
+	return bin;
 }
 
 int COsslKey::LoadPublicKey( const sqbind::stdString &sFile )
