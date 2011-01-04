@@ -16,9 +16,9 @@ function _init() : ( _g )
 {
 	local smtp = CPoSmtp();
 	
-	local host = "smtp.gmail.com";
-	local user = "ru@duostech.com";
-	local pass = "T3x@s!23";
+	local host = "";
+	local user = "";
+	local pass = "";
 
 	_self.echo( "\n------ Starting ------\n" );
 
@@ -32,7 +32,7 @@ function _init() : ( _g )
 
 	local msg = CPoMessage();
 	
-	msg.setSender( "ru@duostech.com" );
+	msg.setSender( "test@wheresjames.com" );
 	msg.addRecipient( "test@wheresjames.com", "Test" );
 	msg.setSubject( "This is a subject" );
 	msg.setContent( "This is the content" );
