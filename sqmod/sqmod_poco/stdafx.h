@@ -13,6 +13,8 @@
 #include "Poco/Net/MailMessage.h"
 #include "Poco/Net/MailRecipient.h"
 #include "Poco/Net/SMTPClientSession.h"
+#include "Poco/Net/Context.h"
+#include "Poco/Net/SecureSMTPClientSession.h"
 #include "Poco/Net/StringPartSource.h"
 #include "Poco/Path.h"
 #include "Poco/Exception.h"

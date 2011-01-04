@@ -21,7 +21,7 @@ public:
 	void Destroy();
 
 	/// Opens the smtp connection
-	int Open( const sqbind::stdString &sUrl );
+	int Open( const sqbind::stdString &sUrl, int nSecure );
 
 	/// Opens the smtp connection
 	int Login( const sqbind::stdString &sType, const sqbind::stdString &sUsername, const sqbind::stdString &sPassword );
@@ -38,6 +38,9 @@ private:
 	/// SMTP session object
 	Poco::Net::SMTPClientSession			*m_pSession;
 	
+	/// Context for secure connections
+	Poco::Net::Context						*m_pContext;
+
 	/// String describing the last error
 	sqbind::stdString						m_sLastError;
 

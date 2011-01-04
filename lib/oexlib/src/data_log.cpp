@@ -707,8 +707,9 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 					x_it.npos = 0;
 				else if ( x_it.npos >= x_it.viNext.uNext || ( x_it.viNext.uTime > x_tTime || ( x_it.viNext.uTime == x_tTime && x_it.viNext.uTimeMs > x_tTimeMs ) ) )
 					bFwd = oexFALSE;
-				else
+				else if ( x_it.npos < x_it.viNext.uNext )
 					x_it.npos = x_it.viNext.uNext; 
+				else x_it.npos = 0;
 			} while ( x_it.npos && bFwd );
 		} // end if
 
@@ -750,7 +751,7 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 	// Do we need new data?
 	CFile::t_size p = ( eMethodReverse & x_nMethod ) ? ( x_it.npos + 1 ) : 0;
 	t_time tMin = x_tTime - ( x_tInterval / c_IntervalBase );
-	while ( ( eMethodReverse & x_nMethod ) ? p > x_it.npos : p < x_it.npos )
+	while ( ( eMethodReverse & x_nMethod ) ? ( p > x_it.npos ) : ( p < x_it.npos ) )
 	{	
 		// Read the header
 		p = x_it.npos;
@@ -914,6 +915,9 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 		// Find the value for this time
 		if ( FindValue( it, tTime, tTimeMs, x_tInterval, x_nDataType, x_nMethod, m_tLogBase, m_tIndexStep ) )
 		{
+			// Count a sample
+			uN++;
+
 			if ( !x_tInterval )
 			{
 				// Ensure it falls within our time range
@@ -925,8 +929,6 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 					 && ( bUnbounded || ( it.vi.uTime < x_tEnd || ( it.vi.uTime == x_tEnd && !it.vi.uTimeMs ) ) ) 
 					)
 				{
-					// Count a sample
-					uN++;
 
 					// Reset skips +++ Move to header
 					uSkips = 2048;

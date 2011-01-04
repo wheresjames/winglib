@@ -22,6 +22,7 @@ static std::string WStrToStr( const sqbind::stdString& s )
 CPoSmtp::CPoSmtp()
 {_STT();
 	m_pSession = oexNULL;
+	m_pContext = oexNULL;
 }
 
 CPoSmtp::~CPoSmtp()
@@ -31,6 +32,7 @@ CPoSmtp::~CPoSmtp()
 
 void CPoSmtp::Destroy()
 {_STT();
+
 	try
 	{	
 		// Drop any session
@@ -53,20 +55,57 @@ void CPoSmtp::Destroy()
 	{	m_sLastError = StrToWStr( exc.displayText() );
 	} // end catch
 
+	try
+	{	
+		// Drop any session
+		if ( m_pContext )
+			m_pContext = oexNULL;
+//			OexAllocDelete< Poco::Net::Context >( m_pContext );
+		
+	} // end try
+	catch ( Poco::Exception& exc )
+	{	m_sLastError = StrToWStr( exc.displayText() );
+	} // end catch
+
+	m_pContext = oexNULL;
 	m_pSession = oexNULL;
 }
 
-int CPoSmtp::Open( const sqbind::stdString &sUrl )
+int CPoSmtp::Open( const sqbind::stdString &sUrl, int nSecure )
 {_STT();
 	Destroy();
 
 	try
 	{	
-		m_pSession = OexAllocConstruct< Poco::Net::SMTPClientSession >( WStrToStr( sUrl ) );
-		if ( !m_pSession )
-		{	m_sLastError = oexT( "Out of memory" );
-			return 0;
-		} // end if		
+		if ( nSecure )
+		{
+
+			Poco::Net::SecureSMTPClientSession *pSscs = OexAllocConstruct< Poco::Net::SecureSMTPClientSession >( WStrToStr( sUrl ) );
+			if ( !pSscs )
+			{	m_sLastError = oexT( "Out of memory" );
+				return 0;
+			} // end if		
+
+			m_pContext = OexAllocConstruct< Poco::Net::Context >( Poco::Net::Context::CLIENT_USE, oexT( "" ), oexT( "" ), oexT( "" ), Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH" );
+			if ( !m_pContext )
+			{	m_sLastError = oexT( "Out of memory" );
+				Destroy();
+				return 0;
+			} // end if		
+
+			m_pSession = pSscs;
+
+		} // end if
+
+		else
+		{
+			m_pSession = OexAllocConstruct< Poco::Net::SMTPClientSession >( WStrToStr( sUrl ) );
+			if ( !m_pSession )
+			{	m_sLastError = oexT( "Out of memory" );
+				return 0;
+			} // end if		
+
+		} // end else
 		
 	} // end try
 	
@@ -84,15 +123,29 @@ int CPoSmtp::Login( const sqbind::stdString &sType, const sqbind::stdString &sUs
 	{	m_sLastError = oexT( "Invalid object" );
 		return 0;
 	} // end if
-
+	
 	try
 	{	
 		Poco::Net::SMTPClientSession::LoginMethod lm = Poco::Net::SMTPClientSession::AUTH_NONE;
-		if ( sType == oexT( "LOGIN" ) )
-			lm = Poco::Net::SMTPClientSession::AUTH_LOGIN;
+		if ( sType == oexT( "CRAMSHA1" ) )
+			lm = Poco::Net::SMTPClientSession::AUTH_CRAM_SHA1;	
 		else if ( sType == oexT( "CRAMMD5" ) )
 			lm = Poco::Net::SMTPClientSession::AUTH_CRAM_MD5;	
-		
+		else if ( sType == oexT( "LOGIN" ) )
+			lm = Poco::Net::SMTPClientSession::AUTH_LOGIN;
+
+		// TLS?
+		if ( m_pContext )
+		{
+			m_pSession->login( oexT( "SMTP" ) );
+
+			if ( !( (Poco::Net::SecureSMTPClientSession*)m_pSession)->startTLS( m_pContext ) )
+			{	m_sLastError = oexT( "Failed to start TLS" );
+				return 0;
+			} // end if
+
+		} // end if
+
 		m_pSession->login( lm, WStrToStr( sUsername ), WStrToStr( sPassword ) );
 
 	} // end try

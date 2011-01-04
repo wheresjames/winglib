@@ -36,7 +36,10 @@ static void SQBIND_Export_poco( sqbind::VM x_vm )
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
 
-    SQBIND_EXPORT( x_vm, CPoSmtp );
+//	Poco::Net::Context::Ptr pContext = new Context(Context::CLIENT_USE, "", "", "rootcert.pem", Context::VERIFY_RELAXED, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+//	SSLManager::instance().initializeClient(0, 0, pContext);
+
+	SQBIND_EXPORT( x_vm, CPoSmtp );
     SQBIND_EXPORT( x_vm, CPoMessage );
 }
 
