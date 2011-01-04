@@ -2,13 +2,28 @@
 
 #include "stdafx.h"
 
-#define SQSSH2_RETRY( f )																			\
-	int nErr = 0, nTo = oexGetUnixTime() + ( oexDEFAULT_WAIT_TIMEOUT / 1000 );						\
-	do { nErr = f; if ( nErr == LIBSSH2_ERROR_EAGAIN && nTo > oexGetUnixTime() ) oexSleep( 15 );	\
-	} while ( nErr == LIBSSH2_ERROR_EAGAIN && nTo > oexGetUnixTime() );
+#define SQSSH2_RETRY( e, f )																	\
+	{	int nTo = oexGetUnixTime() + ( oexDEFAULT_WAIT_TIMEOUT / 1000 );						\
+		do { e = f; if ( e == LIBSSH2_ERROR_EAGAIN && nTo > oexGetUnixTime() ) oexSleep( 15 );	\
+		} while ( e == LIBSSH2_ERROR_EAGAIN && nTo > oexGetUnixTime() );						\
+	}
 
-#if defined( LIBSSH2DEBUG_USERCALLBACK )
+// +++ This doesn't work right, need to figure out non-blocking in libssh2
+#define SQSSH2_RETRY2( e, r, s, f )																\
+	{	int nTo = oexGetUnixTime() + ( oexDEFAULT_WAIT_TIMEOUT / 1000 );						\
+		r = f;																					\
+		do { e = libssh2_session_last_errno( s );												\
+		 if ( e == LIBSSH2_ERROR_EAGAIN && nTo > oexGetUnixTime() )								\
+			e = _libssh2_wait_socket( s );															\
+		} while ( e == LIBSSH2_ERROR_EAGAIN && nTo > oexGetUnixTime() );						\
+	}
+
+// From libssh2/src/session.h
+extern "C" int _libssh2_wait_socket( LIBSSH2_SESSION *session );
+
+#if defined( LIBSSH2DEBUG_USERCALLBACK ) && !defined( LIBSSH2DEBUG )
 static int CSqSsh2_echo_debug_msgs = 0;
+// From libssh2/src/misc.c
 extern "C" void _libssh2_debug(LIBSSH2_SESSION * session, int context, const char *format, ...)
 {
 	if ( CSqSsh2_echo_debug_msgs )
@@ -31,7 +46,7 @@ extern "C" void _libssh2_debug(LIBSSH2_SESSION * session, int context, const cha
 
 int CSqSsh2::print_debug_information( int bEnable )
 {
-#if defined( LIBSSH2DEBUG_USERCALLBACK )
+#if defined( LIBSSH2DEBUG_USERCALLBACK ) && !defined( LIBSSH2DEBUG )
 	CSqSsh2_echo_debug_msgs = bEnable;
 	return 1;
 #else
@@ -140,11 +155,14 @@ int CSqSsh2::Connect( sqbind::CSqSocket *x_pSock )
 
 	// Execute session startup
 	int nErr = 0;
-    if ( ( nErr = libssh2_session_startup( m_session, m_socket ) ) )
+    if ( 0 > ( nErr = libssh2_session_startup( m_session, m_socket ) ) )
 	{	Destroy();
 		logerr( 0, nErr, oexT( "libssh2_session_startup() failed" ) );
 		return 0;
 	} // end if
+
+	// Turn off blocking
+//	libssh2_session_set_blocking( m_session, 0 );
 
 	return 1;
 }
@@ -177,7 +195,13 @@ sqbind::stdString CSqSsh2::getAuthorizationMethods()
 	} // end if
 
 	// Get the list
-	char *pList = libssh2_userauth_list( m_session, m_sUsername.c_str(), m_sUsername.length() );
+	int nErr = 0;
+	char *pList = 0; // libssh2_userauth_list( m_session, m_sUsername.c_str(), m_sUsername.length() );
+	SQSSH2_RETRY2( nErr, pList, m_session, libssh2_userauth_list( m_session, m_sUsername.c_str(), m_sUsername.length() ) );
+
+	if ( 0 > nErr ) 
+	{	logerr( 0, nErr, oexT( "libssh2_userauth_list() Failed" ) ); return oexT( "" ); }
+
 	if ( !pList )
 		return oexT( "" );
 
@@ -189,9 +213,10 @@ int CSqSsh2::authUsernamePassword( const sqbind::stdString &sUsername, const sqb
 	if ( !m_session )
 		return logerr( 0, 0, oexT( "Invalid session" ) );
 
-	SQSSH2_RETRY( libssh2_userauth_password( m_session, oexStrToMbPtr( sUsername.c_str() ), oexStrToMbPtr( sPassword.c_str() ) ) );
+	int nErr = 0;
+	SQSSH2_RETRY( nErr, libssh2_userauth_password( m_session, oexStrToMbPtr( sUsername.c_str() ), oexStrToMbPtr( sPassword.c_str() ) ) );
 
-	if ( nErr ) 
+	if ( 0 > nErr ) 
 		return logerr( 0, nErr, oexT( "libssh2_userauth_password() Failed" ) );
 
 	return 1;
@@ -203,14 +228,15 @@ int CSqSsh2::authPublicKey( const sqbind::stdString &sUsername, const sqbind::st
 	if ( !m_session )
 		return logerr( 0, 0, oexT( "Invalid session" ) );
 
-	SQSSH2_RETRY( libssh2_userauth_publickey_fromfile_ex( m_session, 
-														  oexStrToMbPtr( sUsername.c_str() ),
-														  sUsername.length(),
-														  sPubKey.length() ? oexStrToMbPtr( sPubKey.c_str() ) : oexNULL,
-														  oexStrToMbPtr( sPrvKey.c_str() ),
-														  sPassword.length() ? oexStrToMbPtr( sPassword.c_str() ) : 0 ) );
+	int nErr = 0;
+	SQSSH2_RETRY( nErr, libssh2_userauth_publickey_fromfile_ex( m_session, 
+																oexStrToMbPtr( sUsername.c_str() ),
+																sUsername.length(),
+																sPubKey.length() ? oexStrToMbPtr( sPubKey.c_str() ) : oexNULL,
+																oexStrToMbPtr( sPrvKey.c_str() ),
+																sPassword.length() ? oexStrToMbPtr( sPassword.c_str() ) : 0 ) );
 
-	if ( nErr ) 
+	if ( 0 > nErr ) 
 		return logerr( 0, nErr, oexT( "libssh2_userauth_publickey_fromfile_ex() Failed" ) );
 
 	return 1;
@@ -226,12 +252,13 @@ int CSqSsh2::authPublicKeyBin( const sqbind::stdString &sUsername,
 	if ( !m_session )
 		return logerr( 0, 0, oexT( "Invalid session" ) );
 
-	SQSSH2_RETRY( libssh2_userauth_publickey( m_session,
-											  oexStrToMbPtr( sUsername.c_str() ),
-											  (const unsigned char*)pPub->Ptr(), pPub->getUsed(),
-											  _sign_callback, (void**)this ) );
+	int nErr = 0;
+	SQSSH2_RETRY( nErr, libssh2_userauth_publickey( m_session,
+													oexStrToMbPtr( sUsername.c_str() ),
+													(const unsigned char*)pPub->Ptr(), pPub->getUsed(),
+													_sign_callback, (void**)this ) );
 
-	if ( nErr ) 
+	if ( 0 > nErr ) 
 		return logerr( 0, nErr, oexT( "libssh2_userauth_publickey() Failed" ) );
 
 	return 1;
@@ -314,12 +341,17 @@ int CSqSsh2::OpenChannel( const sqbind::stdString &sName, const sqbind::stdStrin
 		nPacketSize = LIBSSH2_CHANNEL_PACKET_DEFAULT;
 
 	// Attempt ot open the channel
-	LIBSSH2_CHANNEL *ch = libssh2_channel_open_ex( m_session, 
-												   sType.c_str(), sType.length(),
-												   nWindowSize, nPacketSize,
-												   pMsg->Ptr(), pMsg->getUsed() );
+	int nErr = 0;
+	LIBSSH2_CHANNEL *ch = 0;
+	SQSSH2_RETRY2( nErr, ch, m_session, libssh2_channel_open_ex( m_session, 
+																 sType.c_str(), sType.length(),
+																 nWindowSize, nPacketSize,
+																 pMsg->Ptr(), pMsg->getUsed() ) );
+	if ( !ch && 0 > nErr )
+		return logerr( 0, nErr, oexT( "libssh2_channel_direct_tcpip_ex() failed" ) );
+
 	if ( !ch )
-		return logerr( 0, 0, oexT( "libssh2_channel_open_session() failed" ) );
+		return logerr( 0, 0, oexT( "libssh2_channel_open_session() returned null pointer" ) );
 
 	// Save in map
 	m_channels[ sName ] = ch;
@@ -349,12 +381,22 @@ int CSqSsh2::OpenChannelDirectTcpip( const sqbind::stdString &sName,
 	if ( !m_session )
 		return logerr( 0, 0, oexT( "Invalid session" ) );
 
-	// Attempt ot open the channel
-	LIBSSH2_CHANNEL *ch = libssh2_channel_direct_tcpip_ex( m_session, 
-														   sHost.c_str(), nPort,
-														   sSHost.c_str(), nSPort );
+//	libssh2_session_set_blocking( m_session, 0 );
+
+	int nErr = 0;
+	LIBSSH2_CHANNEL *ch = 0;
+	
+	SQSSH2_RETRY2( nErr, ch, m_session, libssh2_channel_direct_tcpip_ex( m_session, 
+																		 sHost.c_str(), nPort,
+																		 sSHost.c_str(), nSPort ) );
+	if ( 0 > nErr )
+		return logerr( 0, nErr, oexT( "libssh2_channel_direct_tcpip_ex() failed" ) );
+
 	if ( !ch )
-		return logerr( 0, 0, oexT( "libssh2_channel_direct_tcpip_ex() failed" ) );
+		return logerr( 0, 0, oexT( "libssh2_channel_direct_tcpip_ex() returned null pointer" ) );
+
+	// Turn off blocking on this channel, ( this function currently just calls libssh2_session_set_blocking() )
+	libssh2_channel_set_blocking( ch, 0 );
 
 	// Save in map
 	m_channels[ sName ] = ch;
@@ -429,7 +471,7 @@ int CSqSsh2::ChannelRead( const sqbind::stdString &sChannel, int nStream, sqbind
 	// Set environment variable
 	int nBytes = 0, nTotal = 0;
 	unsigned int uTo = ( 0 < timeout ) ? oexGetUnixTime() + timeout : 0;
-	sqbind::CSqBinary::t_byte buf[ 64 ];
+	sqbind::CSqBinary::t_byte buf[ 1024 ];
 	do
 	{
 		// Read a block of data
@@ -443,8 +485,7 @@ int CSqSsh2::ChannelRead( const sqbind::stdString &sChannel, int nStream, sqbind
 		if ( LIBSSH2_ERROR_EAGAIN == nBytes )
 			oexSleep( 15 );
 
-	} while ( ( ( 0 <= nBytes && nBytes <= sizeof( buf ) ) 
-		        || LIBSSH2_ERROR_EAGAIN == nBytes )
+	} while ( ( nBytes == sizeof( buf ) || LIBSSH2_ERROR_EAGAIN == nBytes )
 		      && uTo && uTo > oexGetUnixTime() );
 
 	if ( 0 > nBytes )

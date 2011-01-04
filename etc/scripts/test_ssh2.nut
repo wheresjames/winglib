@@ -19,7 +19,7 @@ function WaitKey()
 function _init() : ( _g )
 {
 	// Connection information
-	local server = "192.168.2.33", port = 22;
+	local server = "", port = 22;
 	local username = "", password = "";
 	local pubkey = "", prvkey = "";
 //	local pubkey = _self.root( "pubkey" ), prvkey = _self.root( "prvkey" );
@@ -86,14 +86,11 @@ function _init() : ( _g )
 	if ( !ssh2.OpenChannelDirectTcpip( "test", thost, tport, "", 0 ) )
 	{	_self.echo( "!!! Failed to open channel : " + ssh2.getLastError() ); WaitKey(); return; }
 
-	// Turn off blocking
-	ssh2.setBlockingMode( 0 );
-
 	if ( !ssh2.ChannelWrite( "test", 0, CSqBinary( "GET / HTTP/1.1\r\n\r\n" ) ) )
 	{	_self.echo( "!!! ChannelWrite() failed : " + ssh2.getLastError() ); WaitKey(); return; }
 
 	local buf = CSqBinary();
-	if ( 0 > ssh2.ChannelRead( "test", 100, buf, 8 ) )
+	if ( 0 > ssh2.ChannelRead( "test", 0, buf, 8 ) )
 	{	_self.echo( "!!! ChannelRead() failed : " + ssh2.getLastError() ); WaitKey(); return; }
 
 	_self.echo( "\n Read " + buf.getUsed() + " bytes \n" );
