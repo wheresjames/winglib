@@ -26,6 +26,9 @@ public:
 	/// Initializes the ssh connection to the server
 	int Connect( sqbind::CSqSocket *x_pSock );
 
+	/// Enable / disable blocking mode
+	int setBlockingMode( int bEnable );
+
 	/// Returns the error description for the specified code
 	sqbind::stdString getErrorDesc( int nCode );
 
@@ -84,7 +87,7 @@ public:
 	int ChannelSetEnv( const sqbind::stdString &sChannel, const sqbind::stdString &sName, const sqbind::stdString &sValue );
 
 	/// Reads data from the specified channel
-	int ChannelRead( const sqbind::stdString &sChannel, int nStream, sqbind::CSqBinary *bin );
+	int ChannelRead( const sqbind::stdString &sChannel, int nStream, sqbind::CSqBinary *bin, int timeout );
 
 	/// Writes data to the specified channel
 	int ChannelWrite( const sqbind::stdString &sChannel, int nStream, sqbind::CSqBinary *bin );
@@ -99,6 +102,9 @@ public:
 
 	/// Log generic error
 	int logerr( int nRet, int nErr, const sqbind::stdString &sF );
+
+	/// Echo's SSH debug information to terminal
+	int print_debug_information( int bEnable );
 
 private:
 

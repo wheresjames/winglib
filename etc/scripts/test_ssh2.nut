@@ -19,26 +19,29 @@ function WaitKey()
 function _init() : ( _g )
 {
 	// Connection information
-	local server = "", port = 22;
+	local server = "192.168.2.33", port = 22;
 	local username = "", password = "";
-	local pubkey = _self.root( "pubkey" ), prvkey = _self.root( "prvkey" );
-	local thost = "72.14.204.103", tport = 80;
+	local pubkey = "", prvkey = "";
+//	local pubkey = _self.root( "pubkey" ), prvkey = _self.root( "prvkey" );
+	local thost = "74.125.229.16", tport = 80;
 
-	_self.echo( "\nConnecting to : " + server + ":" + port +"\n" );
+	_self.echo( "\nConnecting to : " + username + "@" + server + ":" + port +"\n" );
 
 	local socket = CSqSocket();
 	if ( !socket.Connect( server, port ) )
 	{	_self.echo( "Connect() : " + socket.getLastError() ); WaitKey(); return; }
 
 	// Wait for connect
-	if ( !socket.WaitEvent( CSqSocket().EVT_CONNECT, 3000 ) )
+	if ( !socket.WaitEvent( CSqSocket().EVT_CONNECT, 30000 ) )
 	{	_self.echo( "WaitEvent( EVT_CONNECT ) : " + socket.getLastError() ); WaitKey(); return; }
 
 	// Turn on socket blocking
-	socket.setBlockingMode( 1 );
+//	socket.setBlockingMode( 1 );
 
 	// SSH2 object
 	local ssh2 = CSqSsh2();
+	ssh2.setUserInfo( username, "" );
+//	ssh2.print_debug_information( 1 );
 
 	// Start SSH connection
 	if ( !ssh2.Connect( socket ) )
@@ -83,11 +86,14 @@ function _init() : ( _g )
 	if ( !ssh2.OpenChannelDirectTcpip( "test", thost, tport, "", 0 ) )
 	{	_self.echo( "!!! Failed to open channel : " + ssh2.getLastError() ); WaitKey(); return; }
 
+	// Turn off blocking
+	ssh2.setBlockingMode( 0 );
+
 	if ( !ssh2.ChannelWrite( "test", 0, CSqBinary( "GET / HTTP/1.1\r\n\r\n" ) ) )
 	{	_self.echo( "!!! ChannelWrite() failed : " + ssh2.getLastError() ); WaitKey(); return; }
 
 	local buf = CSqBinary();
-	if ( !ssh2.ChannelRead( "test", 0, buf ) )
+	if ( 0 > ssh2.ChannelRead( "test", 100, buf, 8 ) )
 	{	_self.echo( "!!! ChannelRead() failed : " + ssh2.getLastError() ); WaitKey(); return; }
 
 	_self.echo( "\n Read " + buf.getUsed() + " bytes \n" );

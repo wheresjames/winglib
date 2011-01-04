@@ -7,10 +7,43 @@
 	do { nErr = f; if ( nErr == LIBSSH2_ERROR_EAGAIN && nTo > oexGetUnixTime() ) oexSleep( 15 );	\
 	} while ( nErr == LIBSSH2_ERROR_EAGAIN && nTo > oexGetUnixTime() );
 
+#if defined( LIBSSH2DEBUG_USERCALLBACK )
+static int CSqSsh2_echo_debug_msgs = 0;
+extern "C" void _libssh2_debug(LIBSSH2_SESSION * session, int context, const char *format, ...)
+{
+	if ( CSqSsh2_echo_debug_msgs )
+	{
+		oex::CStr sRes;
+		
+		if ( format )
+		{	oexVaList ap; oexVaStart( ap, format );
+			sRes.vPrint( ( oex::CStr() << oexT( "CSqSsh2 : " ) << oexMbToStrPtr( format ) ).Ptr(), ap );
+			oexVaEnd( ap );
+		} // end if
+
+		oexEcho( sRes.Ptr() );
+
+	} // end if
+
+
+}
+#endif
+
+int CSqSsh2::print_debug_information( int bEnable )
+{
+#if defined( LIBSSH2DEBUG_USERCALLBACK )
+	CSqSsh2_echo_debug_msgs = bEnable;
+	return 1;
+#else
+	return 0;
+#endif
+}
+
 CSqSsh2::CSqSsh2()
 {_STT();
 
 	m_init = -1;
+	m_nErr = 0;
 	m_session = oexNULL;
 
 }
@@ -24,7 +57,7 @@ int CSqSsh2::logerr( int nRet, int nErr, const sqbind::stdString &sF )
 {_STT();
 
 	m_nErr = nErr;
-	m_sErr += sF;
+	m_sErr = sF;
 
 	if ( nErr )
 		m_sErr += oexT( " : " ),
@@ -45,6 +78,7 @@ int CSqSsh2::logerr( int nRet, int nErr, const sqbind::stdString &sF )
 void CSqSsh2::Destroy()
 {_STT();
 
+	m_nErr = 0;
 	m_sErr = oexT( "" );
 
 	// Lose all channels
@@ -78,7 +112,6 @@ void CSqSsh2::Destroy()
 int CSqSsh2::Connect( sqbind::CSqSocket *x_pSock )
 {_STT();
 	// Out with the old
-	m_sErr = oexT( "" );
 	Destroy();
 
 	// Ensure valid socket
@@ -92,24 +125,24 @@ int CSqSsh2::Connect( sqbind::CSqSocket *x_pSock )
 	// Initialize SSH2
     m_init = libssh2_init( 0 );
     if ( m_init )
-	{	logerr( 0, m_init, oexT( "Failed to initialize libssh2 : libssh2_init()" ) );
-		Destroy();
+	{	Destroy();
+		logerr( 0, m_init, oexT( "Failed to initialize libssh2 : libssh2_init()" ) );		
 		return 0;
 	} // end if
 
 	// Initialize a session
     m_session = libssh2_session_init();
 	if ( !m_session )
-	{	logerr( 0, 0, oexT( "Failed to create new ssh2 session object : libssh2_session_init()" ) );
-		Destroy();
+	{	Destroy();
+		logerr( 0, 0, oexT( "Failed to create new ssh2 session object : libssh2_session_init()" ) );
 		return 0;
 	} // end if
 
 	// Execute session startup
 	int nErr = 0;
     if ( ( nErr = libssh2_session_startup( m_session, m_socket ) ) )
-	{	logerr( 0, nErr, oexT( "libssh2_session_startup() failed" ) );
-		Destroy();
+	{	Destroy();
+		logerr( 0, nErr, oexT( "libssh2_session_startup() failed" ) );
 		return 0;
 	} // end if
 
@@ -144,7 +177,7 @@ sqbind::stdString CSqSsh2::getAuthorizationMethods()
 	} // end if
 
 	// Get the list
-	char *pList = libssh2_userauth_list( m_session, m_sUsername.c_str(), m_sPassword.length() );
+	char *pList = libssh2_userauth_list( m_session, m_sUsername.c_str(), m_sUsername.length() );
 	if ( !pList )
 		return oexT( "" );
 
@@ -294,6 +327,17 @@ int CSqSsh2::OpenChannel( const sqbind::stdString &sName, const sqbind::stdStrin
 	return 1;
 }
 
+int CSqSsh2::setBlockingMode( int bEnable )
+{
+	if ( !m_session )
+		return logerr( 0, 0, oexT( "Invalid session" ) );
+
+	// Disable blocking
+	libssh2_session_set_blocking( m_session, bEnable );
+
+	return 1;
+}
+
 int CSqSsh2::OpenChannelDirectTcpip( const sqbind::stdString &sName, 
 									 const sqbind::stdString &sHost, int nPort, 
 									 const sqbind::stdString &sSHost, int nSPort )
@@ -369,7 +413,7 @@ int CSqSsh2::ChannelSetEnv( const sqbind::stdString &sChannel, const sqbind::std
 }
 
 /// Sets environment variable on channel
-int CSqSsh2::ChannelRead( const sqbind::stdString &sChannel, int nStream, sqbind::CSqBinary *bin )
+int CSqSsh2::ChannelRead( const sqbind::stdString &sChannel, int nStream, sqbind::CSqBinary *bin, int timeout )
 {_STT();
 	if ( !sChannel.length() || !bin )
 		return logerr( 0, 0, oexT( "Invalid parameters" ) );
@@ -384,15 +428,24 @@ int CSqSsh2::ChannelRead( const sqbind::stdString &sChannel, int nStream, sqbind
 
 	// Set environment variable
 	int nBytes = 0, nTotal = 0;
-	sqbind::CSqBinary::t_byte buf[ 1024 ];
+	unsigned int uTo = ( 0 < timeout ) ? oexGetUnixTime() + timeout : 0;
+	sqbind::CSqBinary::t_byte buf[ 64 ];
 	do
 	{
 		// Read a block of data
+//		SQSSH2_RETRY( libssh2_channel_read_ex( it->second, nStream, buf, sizeof( buf ) ) );
+//		nBytes = nErr;
 		nBytes = libssh2_channel_read_ex( it->second, nStream, buf, sizeof( buf ) );
 		if ( 0 < nBytes && nBytes <= sizeof( buf ) )
 			bin->AppendBuffer( buf, nBytes ), nTotal += nBytes;
 
-	} while ( 0 < nBytes && nBytes <= sizeof( buf ) );
+		// Wait a bit
+		if ( LIBSSH2_ERROR_EAGAIN == nBytes )
+			oexSleep( 15 );
+
+	} while ( ( ( 0 <= nBytes && nBytes <= sizeof( buf ) ) 
+		        || LIBSSH2_ERROR_EAGAIN == nBytes )
+		      && uTo && uTo > oexGetUnixTime() );
 
 	if ( 0 > nBytes )
 		logerr( 0, nBytes, oexT( "libssh2_channel_read_ex() Failed" ) );
@@ -416,6 +469,8 @@ int CSqSsh2::ChannelWrite( const sqbind::stdString &sChannel, int nStream, sqbin
 		return logerr( 0, 0, oexT( "Specified channel does not exist" ) );
 
 	// Read a block of data
+//	SQSSH2_RETRY( libssh2_channel_write_ex( it->second, nStream, bin->Ptr(), bin->getUsed() ) );
+//	int nBytes = nErr;
 	int nBytes = libssh2_channel_write_ex( it->second, nStream, bin->Ptr(), bin->getUsed() );
 	if ( 0 > nBytes )
 		logerr( 0, nBytes, oexT( "libssh2_channel_write_ex() Failed" ) );
@@ -443,7 +498,7 @@ sqbind::stdString CSqSsh2::getErrorDesc( int nCode )
 	{
 		case LIBSSH2_ERROR_NONE :					return oexT( "None" );
 		case LIBSSH2_ERROR_SOCKET_NONE :			return oexT( "Socket Error" );
-		case LIBSSH2_ERROR_BANNER_NONE :			return oexT( "Banner error" );
+		case LIBSSH2_ERROR_BANNER_RECV :			return oexT( "Banner failed to receive" );
 		case LIBSSH2_ERROR_BANNER_SEND :			return oexT( "Banner failed to send" );
 		case LIBSSH2_ERROR_INVALID_MAC :			return oexT( "Invalid MAC" );
 		case LIBSSH2_ERROR_KEX_FAILURE :			return oexT( "Key failure" );
@@ -486,6 +541,9 @@ sqbind::stdString CSqSsh2::getErrorDesc( int nCode )
 		case LIBSSH2_ERROR_OUT_OF_BOUNDARY :		return oexT( "Out of boundary" );
 		case LIBSSH2_ERROR_AGENT_PROTOCOL :			return oexT( "Agent protocol error" );
 		case LIBSSH2_INIT_NO_CRYPTO :				return oexT( "Init, No crypto" );
+		case LIBSSH2_ERROR_SOCKET_RECV :			return oexT( "Socket recieve error" );
+		case LIBSSH2_ERROR_ENCRYPT :				return oexT( "Encryption error" );
+		case LIBSSH2_ERROR_BAD_SOCKET :				return oexT( "Bad Socket" );
 	};
 
 	return oexT( "Unknown" );

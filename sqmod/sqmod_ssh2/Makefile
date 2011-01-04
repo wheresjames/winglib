@@ -14,7 +14,7 @@ PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 			libssh2/include openssl/include zlib
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel curl cximage jpeg png tiff zlib \
 			ssh2 openssl_a openssl_b openssl_a openssl_b
-PRJ_DEFS := 
+PRJ_DEFS := LIBSSH2DEBUG_USERCALLBACK
  
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
