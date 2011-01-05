@@ -735,14 +735,20 @@ public:
         if ( m_pTail )
             m_pTail->SetAt( m_pTail->Prev(), x_lst.m_pHead );
 
-        // Update our head pointer
+		// Update nodes prev pointer
+		x_lst.m_pHead->SetAt( m_pTail, x_lst.m_pHead->Next() );
+
+		// Update our head pointer
         if ( !m_pHead )
             m_pHead = x_lst.m_pHead;
 
-        // Update our tail pointer
+		// Update our tail pointer
         m_pTail = x_lst.m_pTail;
 
-        // Relieve the list of it's burden
+		// We grew
+		m_uSize += x_lst.Size();
+
+		// Relieve the list of it's burden
         x_lst.Detach();
 
         return *this;
@@ -763,18 +769,24 @@ public:
         if ( !x_lst.Size() || !x_lst.m_pHead || !x_lst.m_pTail )
             return *this;
 
-        // Update our tail pointer if any
+        // Update our head pointer if any
         if ( m_pHead )
-            m_pHead->SetAt( x_lst.m_pTail, m_pTail->Next() );
+            m_pHead->SetAt( x_lst.m_pTail, m_pHead->Next() );
 
-        // Update our head pointer
+		// Update list tail next pointer
+		x_lst.m_pTail->SetAt( x_lst.m_pTail->Prev(), m_pHead );
+
+        // Update our tail pointer
         if ( !m_pTail )
             m_pTail = x_lst.m_pTail;
 
         // Update our tail pointer
         m_pHead = x_lst.m_pHead;
 
-        // Relieve the list of it's burden
+		// How much bigger are we?
+		m_uSize += x_lst.Size();
+
+		// Relieve the list of it's burden
         x_lst.Detach();
 
         return *this;
@@ -1329,6 +1341,10 @@ public:
         // Unlink the item
         Unlink( x_it );
 
+        // One less item
+        if ( m_uSize )
+            m_uSize--;
+
         return x_it;
     }
 
@@ -1629,6 +1645,69 @@ public:
 	/// Returns the number of items in the list
 	oexUINT Size()
     {   return m_uSize; }
+
+	//==============================================================
+	// VerifyListIntegrity()
+	//==============================================================
+	/// Returns non-zero if the list contains no errors
+	oexBOOL VerifyListIntegrity()
+	{
+		// Verify empty list
+		if ( !m_uSize )
+			return !m_pHead && !m_pTail;
+
+		// Verify head and tail pointers are valid and at the beginning and end of list
+		if ( !m_pHead || !m_pTail || m_pHead->Prev() || m_pTail->Next() )
+			return oexFALSE;
+
+		// Verify list with one thing
+		if ( 1 == m_uSize )
+			return m_pHead && m_pHead == m_pTail && !m_pHead->Next();
+
+		// Verify next and prev pointers are valid
+		if ( !m_pHead->Next() || !m_pTail->Prev() )
+			return oexFALSE;
+
+		// Verify a list with two things
+		if ( 2 == m_uSize )
+			return m_pHead && m_pTail && m_pHead == m_pTail->Prev() && m_pTail == m_pHead->Next();
+
+		// Must be something in between
+		if ( m_pHead->Next() == m_pTail || m_pTail->Prev() == m_pHead )
+			return oexFALSE;
+
+		// Verify size and that there are no loops in the list
+		oexUINT uSize = 1;
+		for ( T_NODE *n1 = m_pHead, *n2 = m_pHead->Next(); n1 && n2; n1 = n1->Next() )
+		{
+			if ( n1 == n2 )
+				return oexFALSE;
+
+			if ( n2->Next() && n2 != n2->Next()->Prev() )
+				return oexFALSE;
+
+			uSize++, n2 = n2->Next();
+
+			if ( n1 == n2 )
+				return oexFALSE;
+
+			if ( n2 ) 
+			{
+				if ( n2->Next() && n2 != n2->Next()->Prev() )
+					return oexFALSE;
+
+				uSize++, n2 = n2->Next();
+
+			} // end if
+
+		} // end for
+
+		// Verify size
+		if ( m_uSize != uSize )
+			return oexFALSE;
+
+		return oexTRUE;
+	}
 
 private:
 

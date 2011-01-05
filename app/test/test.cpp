@@ -1062,16 +1062,30 @@ oex::oexRESULT TestLists()
 
 	// List
 	oex::TList< int > lst;
+	if ( !oexVERIFY( lst.VerifyListIntegrity() ) )
+		return -1000;
 
 	// Iterator
-	oex::TList< int >::iterator it =
-		lst.Append( 4 );
-
+	oex::TList< int >::iterator it = lst.Append( 4 );
+	if ( !oexVERIFY( lst.VerifyListIntegrity() ) )
+		return -1001;
+	
 	// Add nodes
 	lst.Append( 8 );
+	if ( !oexVERIFY( lst.VerifyListIntegrity() ) )
+		return -1002;
+
 	lst.Append( 16 );
+	if ( !oexVERIFY( lst.VerifyListIntegrity() ) )
+		return -1003;
+
 	lst.Append( 32 );
+	if ( !oexVERIFY( lst.VerifyListIntegrity() ) )
+		return -1004;
+
 	lst.Append( 64 );
+	if ( !oexVERIFY( lst.VerifyListIntegrity() ) )
+		return -1005;
 
 	// *** Verify size
 	if ( !oexVERIFY( lst.Size() == 5 ) )
@@ -1132,8 +1146,10 @@ oex::oexRESULT TestLists()
 		i--;
 
 	} // end if
-
+	
 	lst.Insert( 11 );
+	if ( !oexVERIFY( lst.VerifyListIntegrity() ) )
+		return -1006;
 
 	if( !oexVERIFY( lst.First().Obj() == 11 ) )
 		return -7;
@@ -1141,8 +1157,11 @@ oex::oexRESULT TestLists()
 	oex::TList< int > lst_2;
 
 	oex::TList< int >::iterator itMove = lst.First();
-
+	
 	lst.Remove( itMove );
+	if ( !oexVERIFY( lst.VerifyListIntegrity() ) )
+		return -1007;
+
 	lst_2.Insert( itMove );
 
 	if( !oexVERIFY( lst.First().Obj() == 4 ) )
@@ -1150,18 +1169,33 @@ oex::oexRESULT TestLists()
 
 	if( !oexVERIFY( lst_2.First().Obj() == 11 ) )
 		return -9;
-
+	
 	// Append second list onto the first
 	lst.Append( lst_2 );
-
+	if ( !oexVERIFY( lst.VerifyListIntegrity() ) )
+		return -1008;
+	
 	if( !oexVERIFY( lst.Last().Obj() == 11 ) )
 		return -10;
 
 	if( !oexVERIFY( !lst_2.Size() ) )
 		return -11;
 
+	lst.Remove( itMove );
+	if ( !oexVERIFY( lst.VerifyListIntegrity() ) )
+		return -1009;
+	
+	lst_2.Insert( itMove );
+	
+	// Insert second list in front of the first
+	lst.Insert( lst_2 );
+	if ( !oexVERIFY( lst.VerifyListIntegrity() ) )
+		return -1010;
+	
 	// Destroy the list
 	lst.Destroy();
+	if ( !oexVERIFY( lst.VerifyListIntegrity() ) )
+		return -1011;
 
 	// Iterator should not be in the list now
 	if ( !oexVERIFY( it.Begin() && it.End() ) )
