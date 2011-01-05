@@ -288,6 +288,7 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 	return mImg;
 }
 
+#define CDCHART_RANGE 1000000000.f
 sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 									  		const sqbind::stdString &x_sParams,
 											sqbind::CSqMulti *x_mData,
@@ -320,16 +321,28 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 		int pts = bin[ nDimensions ].getUsed() / sizeof( float );
 		if ( pts )
 		{
-			// Do we have a size?
-			if ( !nDataPts )
-				nDataPts = pts;
+			float *pF = (float*)bin[ nDimensions ]._Ptr();
+			if ( pF )
+			{
+				// Enforce a reasonable range
+				for ( int i = 0; i < pts; i++ )
+					if ( pF[ i ] > CDCHART_RANGE )
+						pF[ i ] = CDCHART_RANGE;
+					else if ( pF[ i ] < -CDCHART_RANGE )
+						pF[ i ] = -CDCHART_RANGE;
 
-			// Use smallest size
-			else if ( pts < nDataPts )
-				nDataPts = pts;
+				// Do we have a size?
+				if ( !nDataPts )
+					nDataPts = pts;
 
-			// Count a dimension
-			nDimensions++;
+				// Use smallest size
+				else if ( pts < nDataPts )
+					nDataPts = pts;
+
+				// Count a dimension
+				nDimensions++;
+
+			} // end if
 
 		} // end if
 
