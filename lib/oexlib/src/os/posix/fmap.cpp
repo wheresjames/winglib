@@ -130,7 +130,7 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexFILESIZE_
 		// Attempt to build a file name
 //		zstr::Copy( pPath, oexTmpPath "/027ed44e-1208-4a38-9a48-9f97df77250b." );
 
-		zstr::Copy( pPath, "/oex.shared." );
+        zstr::Copy( pPath, "/.oex.shared." );
 		zstr::Append( pPath, oexMd5( sName ).Ptr() );
 
 	} // end if
@@ -179,12 +179,19 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexFILESIZE_
 //		bExists = oexFALSE;
 
 	// Go ahead and unlink
-	shm_unlink( sPath.Ptr() );
+//	shm_unlink( sPath.Ptr() );
 
-	// Add file mapping name to list
-	oexAutoLock ll( g_lstFileMappingInfoLock );
-	if ( ll.IsLocked() )
-		g_lstFileMappingInfo[ fd ] = sPath;
+    // +++ This whole thing is kind of a hack, need to find a way to unlink
+    //     after the last reference dissappears, you know, like Windows ;)
+    // We will be the one to release it
+    if ( !bExists )
+    {
+        // Add file mapping name to list
+        oexAutoLock ll( g_lstFileMappingInfoLock );
+        if ( ll.IsLocked() )
+            g_lstFileMappingInfo[ fd ] = sPath;
+
+    } // end if
 
 	if ( x_pMem )
 		*x_pMem = pMem;
@@ -217,22 +224,25 @@ oexBOOL CFMap::Release( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexFILESI
 // +++ Need to get some equivalent on the arm
 #ifndef OEX_NOSHM
 
-	// Lock the list
-	oexAutoLock ll( g_lstFileMappingInfoLock );
-	if ( !ll.IsLocked() )
-		return oexFALSE;
+    // Ensure valid file handle
+    if ( c_Failed == x_hFileMap )
+        return oexFALSE;
 
-	// Unlink
-	if ( c_Failed != x_hFileMap )
-	{
-		// Attempt to retrieve path
-		CStr8 sPath = g_lstFileMappingInfo[ oexPtrToInt( x_hFileMap ) ];
+    // Lock the list
+    oexAutoLock ll( g_lstFileMappingInfoLock );
+    if ( ll.IsLocked() && g_lstFileMappingInfo.IsKey( oexPtrToInt( x_hFileMap ) ) )
+    {
+        // Attempt to retrieve path
+        CStr8 sPath = g_lstFileMappingInfo[ oexPtrToInt( x_hFileMap ) ];
 
-		// Unlink this name
-//		if ( sPath.Length() )
-//			shm_unlink( sPath.Ptr() );
+        // Unlink this name
+        if ( sPath.Length() )
+            shm_unlink( sPath.Ptr() );
 
-	} // end if
+        // Lose this mapping
+        g_lstFileMappingInfo.Unset( oexPtrToInt( x_hFileMap ) );
+
+    } // end if
 
 // +++ Do we need to release the file handle here?
     close( (int)(long)x_hFileMap );

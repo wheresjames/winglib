@@ -27,6 +27,8 @@ include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(PLATFORM),windows)
 	PRJ_INCS := $(PRJ_INCS) libssh2/win32
+else
+	PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/libssh2/inc/posix $(PRJ_INCS)
 endif
 
 #-------------------------------------------------------------------

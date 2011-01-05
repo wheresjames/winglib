@@ -1,67 +1,6 @@
 // test.cpp : Defines the entry point for the console application.
 //
 
-/*
-
-Im trying to tell you something about my life
-Maybe give me insight between black and white
-And the best thing youve ever done for me
-Is to help me take my life less seriously
-Its only life after all
-Yeah
-
-Well darkness has a hunger thats insatiable
-And lightness has a call thats hard to hear
-I wrap my fear around me like a blanket
-I sailed my ship of safety till I sank it
-Im crawling on your shores
-
-I went to the doctor, I went to the mountains
-I looked to the children, I drank from the fountains
-Theres more than one answer to these questions
-Pointing me in a crooked line
-And the less I seek my source for some definitive
-(the less I seek my source)
-The closer I am to fine
-The closer I am to fine
-
-And I went to see the doctor of philosophy
-With a poster of rasputin and a beard down to his knee
-He never did marry or see a b-grade movie
-He graded my performance, he said he could see through me
-I spent four years prostrate to the higher mind
-Got my paper and I was free
-
-I went to the doctor, I went to the mountains
-I looked to the children, I drank from the fountains
-Theres more than one answer to these questions
-Pointing me in a crooked line
-The less I seek my source for some definitive
-(the less I seek my source)
-The closer I am to fine
-The closer I am to fine
-
-I stopped by the bar at 3 a.m.
-To seek solace in a bottle or possibly a friend
-And I woke up with a headache like my head against a board
-Twice as cloudy as Id been the night before
-And I went in seeking clarity.
-
-I went to the doctor, I went to the mountains
-I looked to the children, I drank from the fountains
-Yeah we go to the doctor, we go to the mountains
-We look to the children, we drink from the fountains
-Yeah we go to the bible, we go through the workout
-We read up on revival and we stand up for the lookout
-Theres more than one answer to these questions
-Pointing me in a crooked line
-The less I seek my source for some definitive
-(the less I seek my source)
-The closer I am to fine
-
-- Indigo Girls
-
-*/
 
 #define TEST_TCP_PORT	21216
 

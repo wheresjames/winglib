@@ -23,7 +23,7 @@ function _init() : ( _g )
 	local username = "", password = "";
 	local pubkey = "", prvkey = "";
 //	local pubkey = _self.root( "pubkey" ), prvkey = _self.root( "prvkey" );
-	local thost = "74.125.229.16", tport = 80;
+	local thost = "google.com", tport = 80;
 
 	_self.echo( "\nConnecting to : " + username + "@" + server + ":" + port +"\n" );
 

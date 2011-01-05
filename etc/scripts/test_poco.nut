@@ -32,8 +32,8 @@ function _init() : ( _g )
 
 	local msg = CPoMessage();
 	
-	msg.setSender( "test@wheresjames.com" );
-	msg.addRecipient( "test@wheresjames.com", "Test" );
+	msg.setSender( "ru@duostech.com" );
+	msg.addRecipient( "rumbehant@wheresjames.com", "Test" );
 	msg.setSubject( "This is a subject" );
 	msg.setContent( "This is the content" );
 	

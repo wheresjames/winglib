@@ -411,8 +411,8 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 	struct timeval tv;
 	tv.tv_sec = ( oexDEFAULT_WAIT_TIMEOUT / 1000 );
 	tv.tv_usec = ( oexDEFAULT_WAIT_TIMEOUT % 1000 ) * 1000;
-	setsockopt( (SOCKET)m_hSocket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof( tv ) );
-	setsockopt( (SOCKET)m_hSocket, SOL_SOCKET, SO_SNDTIMEO, (const char *)&tv, sizeof( tv ) );
+	setsockopt( (int)m_hSocket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof( tv ) );
+	setsockopt( (int)m_hSocket, SOL_SOCKET, SO_SNDTIMEO, (const char *)&tv, sizeof( tv ) );
 
 	// Process socket creation
 	if ( !OnAttach() )

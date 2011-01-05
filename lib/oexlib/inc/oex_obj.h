@@ -228,7 +228,7 @@ namespace obj
     template< typename T >
         static oexUINT GetType()
         {   oexASSERT( 0 );
-            return eTypeInvalid;
+            return tInvalid;
         }
 
     template<> oexITS oexUINT GetType< oexCHAR >()
