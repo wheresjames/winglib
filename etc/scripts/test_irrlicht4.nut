@@ -4,6 +4,7 @@ _self.load_module( "irrlicht", "" );
 class CGlobal
 {
 	irr = 0;
+	quit = 0;
 };
 
 local _g = CGlobal();
@@ -34,9 +35,17 @@ function _init() : ( _g )
 
 	local tex = _g.irr.LoadTexture( _self.path( "../media/wheresjames_logo.png" ), 1 );
     node.SetTexture( 0, tex );
+
+	// Set draw function
+	_self.set_timer( ".", 30, "OnDraw" )
 }
 
 function _idle() : ( _g )
+{
+	return _g.quit;
+}
+
+function OnDraw() : ( _g )
 {
 	return _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
 }

@@ -29,11 +29,11 @@ ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),vs)
 		PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/windows/vs xlibs $(PRJ_INCS)
 		PRJ_PLIB := libgcc.a libmingwex.a 
-		# libmsvcr80d.a libmoldname.a
+		# libmoldname.a
 		ifdef DBG
-			PRJ_PLIB := $(PRJ_PLIB) ffmpeg_d.lib x264_d.lib
+			PRJ_PLIB := $(PRJ_PLIB) ffmpeg_d.lib x264_d.lib libmsvcr80d.a
 		else
-			PRJ_PLIB := $(PRJ_PLIB) ffmpeg.lib x264.lib
+			PRJ_PLIB := $(PRJ_PLIB) ffmpeg.lib x264.lib libmsvcr80.a
 		endif
 		PRJ_LIBP := $(CFG_LIBROOT)/xlibs
 		ifneq ($(PROC),arm)

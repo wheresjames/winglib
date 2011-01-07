@@ -698,6 +698,7 @@ public:
 	COexStdAllocator& operator =( const COexStdAllocator& ) { return *this; }
 
 	bool operator ==( const COexStdAllocator& ) const { return true; }
+	bool operator !=( const COexStdAllocator& ) const { return false; }
 
 	void construct( pointer p, const T& val ) { new ( (pointer)p ) T( val ); }
 
