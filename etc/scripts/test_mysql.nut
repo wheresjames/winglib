@@ -1,10 +1,15 @@
 
-_self.load_module( "mysql", "" );
-
 function WaitKey()
 {	_self.echo( "\n...press any key...\n" );
 	_self.get_key();
 }
+
+// Load module
+if ( _self.load_module( "mysql", "" ) )
+{	_self.echo( "!!! Failed to load MySQL module" );
+	WaitKey();
+	return 0;
+} // end if
 
 function _init()
 {

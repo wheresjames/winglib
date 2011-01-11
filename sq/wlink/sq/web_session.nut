@@ -11,9 +11,11 @@ function Exe( mParams, mReply )
 	} // end if
 
 	local img = CSqImage();
+	local w = mParams[ "GET" ][ "w" ].toint(); if ( 0 >= w ) w = 400;
+	local h = mParams[ "GET" ][ "h" ].toint(); if ( 0 >= h ) h = 24;
 
 	// Create image
-	if ( !img.Create( 400, 24 ) )
+	if ( !img.Create( w, h ) )
 	{	mReply[ "content" ] <- "Error creating image";
 		return 0;
 	} // end if
