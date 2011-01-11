@@ -12,6 +12,15 @@ extern "C"  void assert(int expression)
 
 extern "C"
 {
+
+#if defined( _MSC_VER ) && _MSC_VER >= 1600
+	int _imp____lc_codepage = 0; // CP_ACP 1252;
+#endif
+
+#if defined( OEX_WINDOWS )
+	extern "C" int usleep( int usec ) { oexMicroSleep( usec ); return usec; }
+#endif
+
 //const uint64_t ff_pw_20 = 0x0014001400140014ULL;
 //const uint64_t ff_pw_20 __attribute__ ((aligned (8))) = 0x0014001400140014ULL;
 //const unsigned long long ff_pw_20 = 0x0014001400140014ULL;
@@ -21,10 +30,6 @@ extern "C"
 //{_STT();
 //	return 0;
 //}
-
-#if defined( OEX_WINDOWS )
-	extern "C" int usleep( int usec ) { oexMicroSleep( usec ); return usec; }
-#endif
 
 }
 
