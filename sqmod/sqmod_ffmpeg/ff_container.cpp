@@ -604,6 +604,8 @@ int CFfContainer::InitWrite()
 		return 0;
 	} // end if
 
+	// +++ Below Seems to memleak when url_fopen fails
+
 	if ( !( m_pFormatContext->oformat->flags & AVFMT_NOFILE ) )
 		if ( 0 > ( res = url_fopen( &m_pFormatContext->pb, m_pFormatContext->filename, URL_WRONLY ) ) )
 		{	oexERROR( res, oexT( "url_fopen() failed" ) );

@@ -288,7 +288,8 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 	return mImg;
 }
 
-#define CDCHART_RANGE 1000000000.f
+// iii GDChart doesn't handle big numbers very well
+#define GDCHART_RANGE 1000000.f
 sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 									  		const sqbind::stdString &x_sParams,
 											sqbind::CSqMulti *x_mData,
@@ -303,6 +304,9 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 	int nWidth = mParams[ oexT( "width" ) ].toint();
 	int nHeight = mParams[ oexT( "height" ) ].toint();
 	int nType = mParams[ oexT( "type" ) ].toint();
+	float fRange = mParams.isset( oexT( "range" ) ) 
+				   ? mParams[ oexT( "range" ) ].tofloat() 
+				   : GDCHART_RANGE;
 	if ( 0 >= nWidth || 0 >= nHeight )
 		return oexT( "" );
 
@@ -326,10 +330,10 @@ sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 			{
 				// Enforce a reasonable range
 				for ( int i = 0; i < pts; i++ )
-					if ( pF[ i ] > CDCHART_RANGE )
-						pF[ i ] = CDCHART_RANGE;
-					else if ( pF[ i ] < -CDCHART_RANGE )
-						pF[ i ] = -CDCHART_RANGE;
+					if ( pF[ i ] > fRange )
+						pF[ i ] = fRange;
+					else if ( pF[ i ] < -fRange )
+						pF[ i ] = -fRange;
 
 				// Do we have a size?
 				if ( !nDataPts )
