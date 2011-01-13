@@ -48,7 +48,14 @@ void CPoSmtp::Destroy()
 	{	
 		// Drop any session
 		if ( m_pSession )
-			OexAllocDelete< Poco::Net::SMTPClientSession >( m_pSession );
+		{
+			// Secure?
+//			if ( m_pContext )
+//				OexAllocDelete< Poco::Net::SecureSMTPClientSession >
+//					( (Poco::Net::SecureSMTPClientSession*)m_pSession );
+//			else
+//				OexAllocDelete< Poco::Net::SMTPClientSession >( m_pSession );
+		} // end if
 		
 	} // end try
 	catch ( Poco::Exception& exc )
@@ -58,8 +65,7 @@ void CPoSmtp::Destroy()
 	try
 	{	
 		// Drop any session
-		if ( m_pContext )
-			m_pContext = oexNULL;
+//		if ( m_pContext )
 //			OexAllocDelete< Poco::Net::Context >( m_pContext );
 		
 	} // end try
