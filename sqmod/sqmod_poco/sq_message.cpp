@@ -32,9 +32,10 @@ static std::string WStrToStr( const sqbind::stdString& s )
 	return temp;
 }
 #else
-#	define StrToWStr( s )	s.c_str()
-#	define WStrToStr( s )	s.c_str()
+#	define StrToWStr( s )	sqbind::stdString( s.c_str(), s.length() )
+#	define WStrToStr( s )	std::string( s.c_str(), s.length() )
 #endif
+#define BinToStr( b )		std::string( (b).Ptr(), (b).getUsed() )
 
 #define DEFINE_MSG_PROPERTY( p )												\
 	void CPoMessage::set##p( const sqbind::stdString &s )						\
@@ -50,6 +51,7 @@ static std::string WStrToStr( const sqbind::stdString& s )
 DEFINE_MSG_PROPERTY( Sender )
 DEFINE_MSG_PROPERTY( Subject )
 DEFINE_MSG_PROPERTY( Content )
+DEFINE_MSG_PROPERTY( ContentType )
 
 void CPoMessage::addRecipient( const sqbind::stdString &sAddress, const sqbind::stdString &sName )
 {_STT();
@@ -87,3 +89,113 @@ void CPoMessage::addBCCRecipient( const sqbind::stdString &sAddress, const sqbin
 														WStrToStr( sAddress ) ) );
 }
 
+int CPoMessage::Encode( sqbind::CSqBinary *pBin )
+{
+	if ( !pBin )
+		return 0;
+
+	if ( !m_pMsg )
+	{	pBin->setUsed( 0 );
+		return 0;
+	} // end if
+
+	sqbind::stdOStream out;
+	m_pMsg->write( out );
+
+	pBin->setString( out.str() );
+	return pBin->getUsed();
+}
+
+int CPoMessage::Decode( sqbind::CSqBinary *pBin )
+{
+	if ( !pBin )
+		return 0;
+
+	if ( !m_pMsg )
+		return 0;
+
+	sqbind::stdIStream in( pBin->getString() );
+	m_pMsg->read( in );
+
+	return 1;
+}
+
+int CPoMessage::addPartFile( const sqbind::stdString &sName, const sqbind::stdString &sType, const sqbind::stdString &sFile )
+{
+	if ( !m_pMsg || !sType.length() || !sFile.length() )
+		return 0;
+
+	m_pMsg->addPart( WStrToStr( ( sName.length() ? sName : sFile ) ),
+					 new Poco::Net::FilePartSource( WStrToStr( sFile ), WStrToStr( sType ) ),
+					 Poco::Net::MailMessage::CONTENT_INLINE, Poco::Net::MailMessage::ENCODING_QUOTED_PRINTABLE
+					 );
+
+	return 1;
+}
+
+int CPoMessage::addPartBin( const sqbind::stdString &sName, const sqbind::stdString &sType, sqbind::CSqBinary *pBin )
+{
+	if ( !m_pMsg || !sName.length() || !sType.length() || !pBin || !pBin->getUsed() )
+		return 0;
+
+	m_pMsg->addPart( WStrToStr( sName ), 
+					 new Poco::Net::StringPartSource( BinToStr( *pBin ), WStrToStr( sType ), WStrToStr( sName ) ),
+					 Poco::Net::MailMessage::CONTENT_INLINE, Poco::Net::MailMessage::ENCODING_QUOTED_PRINTABLE
+					 );
+
+	return pBin->getUsed();
+}
+
+int CPoMessage::addPartStr( const sqbind::stdString &sName, const sqbind::stdString &sType, const sqbind::stdString &sContent )
+{
+	if ( !m_pMsg || !sName.length() || !sType.length() )
+		return 0;
+
+	m_pMsg->addPart( WStrToStr( sName ), 
+					 new Poco::Net::StringPartSource( WStrToStr( sContent ), WStrToStr( sType ), WStrToStr( sName ) ),
+					 Poco::Net::MailMessage::CONTENT_INLINE, Poco::Net::MailMessage::ENCODING_QUOTED_PRINTABLE
+					 );
+
+	return sContent.length();
+}
+
+int CPoMessage::addAttachmentFile( const sqbind::stdString &sName, const sqbind::stdString &sType, const sqbind::stdString &sFile )
+{
+	if ( !m_pMsg || !sType.length() || !sFile.length() )
+		return 0;
+
+	m_pMsg->addAttachment( WStrToStr( ( sName.length() ? sName : sFile ) ),
+						   new Poco::Net::FilePartSource( WStrToStr( sFile ), WStrToStr( sType ) ) );
+
+	return 1;
+}
+
+int CPoMessage::addAttachmentBin( const sqbind::stdString &sName, const sqbind::stdString &sType, sqbind::CSqBinary *pBin )
+{
+	if ( !m_pMsg || !sName.length() || !sType.length() || !pBin || !pBin->getUsed() )
+		return 0;
+
+	m_pMsg->addAttachment( WStrToStr( sName ), new Poco::Net::StringPartSource( BinToStr( *pBin ), WStrToStr( sType ), WStrToStr( sName ) ) );
+
+	return pBin->getUsed();
+}
+
+int CPoMessage::addAttachmentStr( const sqbind::stdString &sName, const sqbind::stdString &sType, const sqbind::stdString &sContent )
+{
+	if ( !m_pMsg || !sName.length() || !sType.length() )
+		return 0;
+
+	m_pMsg->addAttachment( WStrToStr( sName ), new Poco::Net::StringPartSource( WStrToStr( sContent ), WStrToStr( sType ), WStrToStr( sName ) ) );
+
+	return sContent.length();
+}
+
+int CPoMessage::setPartHeader( const sqbind::stdString &sPart, const sqbind::stdString &sName, const sqbind::stdString &sValue )
+{
+	if ( !m_pMsg || !sPart.length() || !sName.length() )
+		return 0;
+
+	m_pMsg->setPartHeader( WStrToStr( sPart ), WStrToStr( sName ), WStrToStr( sValue ) );
+
+	return 1;
+}

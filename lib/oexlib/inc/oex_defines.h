@@ -354,6 +354,12 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexTlsSetValue						OEX_NAMESPACE::os::CThreadLocalStorage::SetValue
 
 // std library
+#define oexStdTStream( t )	                std::basic_stringstream< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
+#define oexStdStream		                oexStdTStream( OEX_NAMESPACE::oexTCHAR )
+#define oexStdTIStream( t )	                std::basic_istringstream< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
+#define oexStdIStream		                oexStdTIStream( OEX_NAMESPACE::oexTCHAR )
+#define oexStdTOStream( t )	                std::basic_ostringstream< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
+#define oexStdOStream		                oexStdTStream( OEX_NAMESPACE::oexTCHAR )
 #define oexStdTString( t )	                std::basic_string< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
 #define oexStdString		                oexStdTString( OEX_NAMESPACE::oexTCHAR )
 #define oexStdMap( k, v )	                std::map< k, v, std::less< k >, OEX_NAMESPACE::COexStdAllocator< k > >

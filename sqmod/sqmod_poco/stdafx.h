@@ -16,6 +16,7 @@
 #include "Poco/Net/Context.h"
 #include "Poco/Net/SecureSMTPClientSession.h"
 #include "Poco/Net/StringPartSource.h"
+#include "Poco/Net/FilePartSource.h"
 #include "Poco/Path.h"
 #include "Poco/Exception.h"
 

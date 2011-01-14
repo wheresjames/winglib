@@ -33,6 +33,26 @@ function _init() : ( _g )
 	_self.echo( "Subject : " + dec.getSubject() );
 	_self.echo( "Body    : " + dec.getBody() );
 
+	// Create image
+	local img = CSqImage();
+	img.Create( 320, 240 );
+	local pix = CSqBinary();
+	if ( img.refPixels( pix ) ) 
+		pix.Zero();	
+
+	_self.echo( "\n------ Adding MIME attachments ------\n" );
+
+	// Add image as attachment
+//	mime.setAttachment( "Image.png", "image/png", img.Encode( "png" ) );
+
+	_self.echo( "\n------ MIME Structure ------\n" );
+
+	_self.echo( mime.getStructure().print_r( 1 ) );
+
+	_self.echo( "\n------ Encoding MIME message ------\n" );
+
+	_self.echo( mime.Encode() );
+
 	_self.echo( "\n...done...\n" );
 }
 

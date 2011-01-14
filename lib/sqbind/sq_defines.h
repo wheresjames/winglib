@@ -157,6 +157,10 @@ namespace sqbind
 {
 	typedef oex::oexTCHAR stdChar;
 	typedef oexStdTString( stdChar ) stdString;
+	typedef oexStdTStream( stdChar ) stdStream;
+	typedef oexStdTIStream( stdChar ) stdIStream;
+	typedef oexStdTOStream( stdChar ) stdOStream;
+
 
 	class CSqParam
 	{

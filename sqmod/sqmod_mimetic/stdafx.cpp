@@ -15,6 +15,11 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqMimetic, CSqMimetic )
 	SQBIND_MEMBER_FUNCTION( CSqMimetic, getBody )
 	SQBIND_MEMBER_FUNCTION( CSqMimetic, Encode )	
 	SQBIND_MEMBER_FUNCTION( CSqMimetic, Decode )
+	SQBIND_MEMBER_FUNCTION( CSqMimetic, getStructure )
+	SQBIND_MEMBER_FUNCTION( CSqMimetic, getAttachment )
+	SQBIND_MEMBER_FUNCTION( CSqMimetic, setAttachment )
+	SQBIND_MEMBER_FUNCTION( CSqMimetic, hasField )
+//	SQBIND_MEMBER_FUNCTION( CSqMimetic,  )	
 SQBIND_REGISTER_CLASS_END()
 
 // Export classes

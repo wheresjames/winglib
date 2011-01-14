@@ -13,6 +13,9 @@ public:
 	/// Default constructor
 	CSqMimetic();
 
+	/// from mime entity
+	CSqMimetic( const mimetic::MimeEntity &r );
+
 	/// Destructor
 	virtual ~CSqMimetic();
 
@@ -24,6 +27,9 @@ public:
 
 	/// Parses a MIME message
 	int Decode( const sqbind::stdString &s );
+
+	/// returns non-zero if field exists
+	int hasField( const sqbind::stdString &s );
 
 	/// Sets from field
 	void setFrom( const sqbind::stdString &s );
@@ -48,6 +54,15 @@ public:
 
 	/// Gets the body field
 	sqbind::stdString CSqMimetic::getBody();
+
+	/// Adds / updates / deletes an attachment
+	int setAttachment( const sqbind::stdString &sName, const sqbind::stdString &sType, sqbind::CSqBinary *pData );
+
+	/// Gets attachment data
+	int getAttachment( const sqbind::stdString &sName, sqbind::CSqBinary *pData );
+
+	/// Gets a list of the MIME structure
+	sqbind::CSqMulti getStructure();
 
 private:
 
