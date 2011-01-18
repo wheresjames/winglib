@@ -170,17 +170,17 @@ int CPoSmtp::Send( CPoMessage *pMsg )
 	{	m_sLastError = oexT( "Invalid object" );
 		return 0;
 	} // end if
-		
+
 	try
-	{	
+	{
 		m_pSession->sendMessage( *pMsg->Ptr() );
 
 	} // end try
-	
+
 	catch ( Poco::Exception& exc )
 	{	m_sLastError = StrToWStr( exc.displayText() );
 		return 0;
 	} // end catch
-	
+
 	return 1;
 }

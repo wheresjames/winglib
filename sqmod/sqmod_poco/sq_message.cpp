@@ -8,6 +8,12 @@ CPoMessage::CPoMessage()
 	m_pMsg = OexAllocConstruct< Poco::Net::MailMessage >();
 }
 
+CPoMessage::CPoMessage( const sqbind::stdString &s )
+{
+	m_pMsg = OexAllocConstruct< Poco::Net::MailMessage >();
+	DecodeStr( s );
+}
+
 CPoMessage::~CPoMessage()
 {_STT();
 	if ( m_pMsg )
@@ -106,6 +112,17 @@ int CPoMessage::Encode( sqbind::CSqBinary *pBin )
 	return pBin->getUsed();
 }
 
+sqbind::stdString CPoMessage::EncodeStr()
+{
+	if ( !m_pMsg )
+		return sqbind::stdString();
+
+	sqbind::stdOStream out;
+	m_pMsg->write( out );
+
+	return out.str();
+}
+
 int CPoMessage::Decode( sqbind::CSqBinary *pBin )
 {
 	if ( !pBin )
@@ -120,12 +137,27 @@ int CPoMessage::Decode( sqbind::CSqBinary *pBin )
 	return 1;
 }
 
+int CPoMessage::DecodeStr( const sqbind::stdString &s )
+{
+	if ( !s.length() )
+		return 0;
+
+	if ( !m_pMsg )
+		return 0;
+
+	sqbind::stdIStream in( s );
+	m_pMsg->read( in );
+
+	return 1;
+}
+
+
 int CPoMessage::addPartFile( const sqbind::stdString &sName, const sqbind::stdString &sType, const sqbind::stdString &sFile )
 {
 	if ( !m_pMsg || !sType.length() || !sFile.length() )
 		return 0;
 
-	m_pMsg->addPart( WStrToStr( ( sName.length() ? sName : sFile ) ),
+	m_pMsg->addPart( WStrToStr( sName ),
 					 new Poco::Net::FilePartSource( WStrToStr( sFile ), WStrToStr( sType ) ),
 					 Poco::Net::MailMessage::CONTENT_INLINE, Poco::Net::MailMessage::ENCODING_QUOTED_PRINTABLE
 					 );
@@ -135,7 +167,7 @@ int CPoMessage::addPartFile( const sqbind::stdString &sName, const sqbind::stdSt
 
 int CPoMessage::addPartBin( const sqbind::stdString &sName, const sqbind::stdString &sType, sqbind::CSqBinary *pBin )
 {
-	if ( !m_pMsg || !sName.length() || !sType.length() || !pBin || !pBin->getUsed() )
+	if ( !m_pMsg || !sType.length() || !pBin || !pBin->getUsed() )
 		return 0;
 
 	m_pMsg->addPart( WStrToStr( sName ), 
@@ -148,7 +180,7 @@ int CPoMessage::addPartBin( const sqbind::stdString &sName, const sqbind::stdStr
 
 int CPoMessage::addPartStr( const sqbind::stdString &sName, const sqbind::stdString &sType, const sqbind::stdString &sContent )
 {
-	if ( !m_pMsg || !sName.length() || !sType.length() )
+	if ( !m_pMsg || !sType.length() )
 		return 0;
 
 	m_pMsg->addPart( WStrToStr( sName ), 

@@ -18,7 +18,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CPoMessage, CPoMessage )
 
 	SQBIND_MEMBER_FUNCTION( CPoMessage, Destroy )
 	SQBIND_MEMBER_FUNCTION( CPoMessage, Encode )
+	SQBIND_MEMBER_FUNCTION( CPoMessage, EncodeStr )
 	SQBIND_MEMBER_FUNCTION( CPoMessage, Decode )
+	SQBIND_MEMBER_FUNCTION( CPoMessage, DecodeStr )
 
 	SQBIND_MEMBER_FUNCTION( CPoMessage, setSender )
 	SQBIND_MEMBER_FUNCTION( CPoMessage, getSender )
@@ -39,7 +41,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CPoMessage, CPoMessage )
 	SQBIND_MEMBER_FUNCTION( CPoMessage, addAttachmentFile )
 	SQBIND_MEMBER_FUNCTION( CPoMessage, addAttachmentBin )
 	SQBIND_MEMBER_FUNCTION( CPoMessage, addAttachmentStr )
-//	SQBIND_MEMBER_FUNCTION( CPoMessage,  )
 //	SQBIND_MEMBER_FUNCTION( CPoMessage,  )
 	
 SQBIND_REGISTER_CLASS_END()

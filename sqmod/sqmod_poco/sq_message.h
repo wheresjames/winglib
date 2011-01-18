@@ -9,10 +9,14 @@ class CPoMessage
 public:
 
 	_SQBIND_CLASS_CTOR_BEGIN( CPoMessage )
+		_SQBIND_CLASS_CTOR1( CPoMessage, OT_STRING ) ( sqbind::stdString( sa.GetString( 2 ), sq_getsize( x_v, 2 ) ) )
 	_SQBIND_CLASS_CTOR_END( CPoMessage )
 
 	/// Default constructor
 	CPoMessage();
+
+	/// From MIME string
+	CPoMessage( const sqbind::stdString &s );
 
 	/// Destructor
 	virtual ~CPoMessage();
@@ -44,8 +48,14 @@ public:
 	/// Encodes MIME to a buffer
 	int Encode( sqbind::CSqBinary *pBin );
 
+	/// Encodes MIME and returns as a string
+	sqbind::stdString EncodeStr();
+
 	/// Decodes MIME from a buffer
 	int Decode( sqbind::CSqBinary *pBin );
+
+	/// Decodes MIME from a string
+	int DecodeStr( const sqbind::stdString &s );
 
 	/// Add part from disk
 	int addPartFile( const sqbind::stdString &sName, const sqbind::stdString &sType, const sqbind::stdString &sFile );
