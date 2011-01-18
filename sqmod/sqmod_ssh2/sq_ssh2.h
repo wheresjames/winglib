@@ -90,7 +90,7 @@ public:
 	int ChannelRead( const sqbind::stdString &sChannel, int nStream, sqbind::CSqBinary *bin, int timeout );
 
 	/// Writes data to the specified channel
-	int ChannelWrite( const sqbind::stdString &sChannel, int nStream, sqbind::CSqBinary *bin );
+	int ChannelWrite( const sqbind::stdString &sChannel, int nStream, sqbind::CSqBinary *bin, int timeout );
 
 	/// Creates port forward message
 	int MsgFwd( sqbind::CSqBinary *bin, const sqbind::stdString &sHost1, int nHost1, const sqbind::stdString &sHost2, int nHost2 );

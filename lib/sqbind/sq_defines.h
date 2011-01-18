@@ -194,6 +194,7 @@ namespace sqbind
 		const stdString* c_ptr() const { return &m_str; }
 		stdString set( const stdString &x_str )
 		{	m_str = x_str; return m_str; }
+		stdString::size_type length() { return m_str.length(); }
 		stdString& operator = ( const stdString &x_str ) { return m_str = x_str; }
 		stdString& operator = ( const oex::oexTCHAR *x_str ) { if ( x_str ) m_str = x_str; return m_str; }
 		stdString& operator = ( const oex::CStr &x_str ) { m_str.assign( x_str.Ptr(), x_str.Length() ); return m_str; }

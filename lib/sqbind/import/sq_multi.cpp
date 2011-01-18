@@ -119,6 +119,12 @@ sqbind::stdString& CSqMulti::str()
 	return m_val.str();
 }
 
+CSqBinary CSqMulti::bin()
+{_STT();
+	return std2oex8( m_val.str() ).Mem();
+}
+
+
 int CSqMulti::toint()
 {_STT();
 	return oexStrToLong( m_val.str().c_str() );
@@ -189,6 +195,56 @@ stdString CSqMulti::str_base64_decode()
 	return oex2std( oexBase64Decode( std2oex( m_val.str() ) ) );
 }
 
+CSqBinary CSqMulti::bin_urlenc()
+{_STT();
+	return oexUrlEncode( std2oex( m_val.str() ) );
+}
+
+CSqBinary CSqMulti::bin_urldec()
+{_STT();
+	return oexUrlDecode( std2oex( m_val.str() ) );
+}
+
+CSqBinary CSqMulti::bin_htmlenc()
+{_STT();
+	return oexHtmlEncode( std2oex( m_val.str() ) );
+}
+
+CSqBinary CSqMulti::bin_htmldec()
+{_STT();
+	return oexHtmlDecode( std2oex( m_val.str() ) );
+}
+
+CSqBinary CSqMulti::bin_compress()
+{_STT();
+	return oexCompressStr(  m_val.c_str().c_str(), m_val.length() );
+}
+
+CSqBinary CSqMulti::bin_uncompress()
+{_STT();
+	return oexUncompressStr(  m_val.c_str().c_str(), m_val.length() );
+}
+
+CSqBinary CSqMulti::bin_base16_encode()
+{_STT();
+	return oexBase16Encode( m_val.c_str().c_str(), m_val.length() );
+}
+
+CSqBinary CSqMulti::bin_base16_decode()
+{_STT();
+	return oexBase16Decode( m_val.c_str().c_str(), m_val.length() );
+}
+
+CSqBinary CSqMulti::bin_base64_encode()
+{_STT();
+	return oexBase64Encode( m_val.c_str().c_str(), m_val.length() );
+}
+
+CSqBinary CSqMulti::bin_base64_decode()
+{_STT();
+	return oexBase64Decode( m_val.c_str().c_str(), m_val.length() );
+}
+
 _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, serialize )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, deserialize )
@@ -229,6 +285,16 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base16_decode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base64_encode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base64_decode )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_urlenc )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_urldec )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_htmlenc )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_htmldec )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_compress )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_uncompress )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_base16_encode )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_base16_decode )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_base64_encode )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_base64_decode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, unset )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, clear )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_key )

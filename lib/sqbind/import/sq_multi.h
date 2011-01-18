@@ -139,6 +139,9 @@ namespace sqbind
 		/// Returns a string representation of the value
 		stdString& str();
 
+		/// Returns a binary representation of the value
+		CSqBinary bin();
+
 		/// Returns a integer representation of the value
 		int toint();
 
@@ -180,6 +183,36 @@ namespace sqbind
 
 		/// Returns base64 decoded string
 		stdString str_base64_decode();
+
+		/// Returns url encoded string
+		CSqBinary bin_urlenc();
+
+		/// Returns url decoded string
+		CSqBinary bin_urldec();
+
+		/// Return html encoded string
+		CSqBinary bin_htmlenc();
+
+		/// Returns html decoded string
+		CSqBinary bin_htmldec();
+
+		/// Returns zlib compressed string
+		CSqBinary bin_compress();
+
+		/// Returns zlib decompressed string
+		CSqBinary bin_uncompress();
+
+		/// Returns base16 encoded string
+		CSqBinary bin_base16_encode();
+
+		/// Returns base16 decoded string
+		CSqBinary bin_base16_decode();
+
+		/// Returns base64 encoded string
+		CSqBinary bin_base64_encode();
+
+		/// Returns base64 decoded string
+		CSqBinary bin_base64_decode();
 
 		/// Registers the vector class for use with Squirrel
 		static void Register( sqbind::VM vm );

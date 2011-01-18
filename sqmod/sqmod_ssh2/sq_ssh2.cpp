@@ -470,6 +470,7 @@ int CSqSsh2::ChannelRead( const sqbind::stdString &sChannel, int nStream, sqbind
 
 	// Set environment variable
 	int nBytes = 0, nTotal = 0;
+	if ( 0 > timeout ) timeout = oexDEFAULT_WAIT_TIMEOUT / 1000;
 	unsigned int uTo = ( 0 < timeout ) ? oexGetUnixTime() + timeout : 0;
 	sqbind::CSqBinary::t_byte buf[ 1024 ];
 	do
@@ -495,7 +496,7 @@ int CSqSsh2::ChannelRead( const sqbind::stdString &sChannel, int nStream, sqbind
 }
 
 /// Sets environment variable on channel
-int CSqSsh2::ChannelWrite( const sqbind::stdString &sChannel, int nStream, sqbind::CSqBinary *bin )
+int CSqSsh2::ChannelWrite( const sqbind::stdString &sChannel, int nStream, sqbind::CSqBinary *bin, int timeout )
 {_STT();
 
 	if ( !sChannel.length() || !bin || !bin->getUsed() )
@@ -511,12 +512,33 @@ int CSqSsh2::ChannelWrite( const sqbind::stdString &sChannel, int nStream, sqbin
 
 	// Read a block of data
 //	SQSSH2_RETRY( libssh2_channel_write_ex( it->second, nStream, bin->Ptr(), bin->getUsed() ) );
-//	int nBytes = nErr;
-	int nBytes = libssh2_channel_write_ex( it->second, nStream, bin->Ptr(), bin->getUsed() );
-	if ( 0 > nBytes )
-		logerr( 0, nBytes, oexT( "libssh2_channel_write_ex() Failed" ) );
+	int nSent = 0;
+	if ( 0 > timeout ) timeout = oexDEFAULT_WAIT_TIMEOUT / 1000;
+	unsigned int uTo = ( 0 < timeout ) ? oexGetUnixTime() + timeout : 0;
+	do
+	{
+		// Seems to have problems if we try really large writes
+		int nMax = bin->getUsed() - nSent;
+		if ( nMax > 1024 )
+			nMax = 32 * 1024;
 
-	return nBytes;
+		// Attempt to send some data
+		int nBytes = libssh2_channel_write_ex( it->second, nStream, bin->Ptr( nSent ), nMax );
+		if ( 0 > nBytes )
+		{	logerr( 0, nBytes, oexT( "libssh2_channel_write_ex() Failed" ) );
+			return nBytes;
+		} // end if
+
+		// Don't hog the cpu if the write thing is busy
+		if ( nBytes < nMax )
+			oexSleep( 15 );
+
+		// Add number of bytes sent
+		nSent += nBytes;
+
+	} while( nSent < bin->getUsed() && uTo && uTo > oexGetUnixTime() );
+
+	return nSent;
 }
 
 sqbind::stdString CSqSsh2::getLastErrorStr()

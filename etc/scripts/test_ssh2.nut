@@ -86,7 +86,7 @@ function _init() : ( _g )
 	if ( !ssh2.OpenChannelDirectTcpip( "test", thost, tport, "", 0 ) )
 	{	_self.echo( "!!! Failed to open channel : " + ssh2.getLastError() ); WaitKey(); return; }
 
-	if ( !ssh2.ChannelWrite( "test", 0, CSqBinary( "GET / HTTP/1.1\r\n\r\n" ) ) )
+	if ( !ssh2.ChannelWrite( "test", 0, CSqBinary( "GET / HTTP/1.1\r\n\r\n" ), 8 ) )
 	{	_self.echo( "!!! ChannelWrite() failed : " + ssh2.getLastError() ); WaitKey(); return; }
 
 	local buf = CSqBinary();
