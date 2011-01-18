@@ -524,6 +524,12 @@ int CSqSsh2::ChannelWrite( const sqbind::stdString &sChannel, int nStream, sqbin
 
 		// Attempt to send some data
 		int nBytes = libssh2_channel_write_ex( it->second, nStream, bin->Ptr( nSent ), nMax );
+		
+		// Just ignore try again messages if timeout
+		if ( LIBSSH2_ERROR_EAGAIN == nBytes && uTo )
+			nBytes = 0;
+
+		// Was there an error?
 		if ( 0 > nBytes )
 		{	logerr( 0, nBytes, oexT( "libssh2_channel_write_ex() Failed" ) );
 			return nBytes;
