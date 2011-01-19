@@ -545,7 +545,7 @@ oexBOOL CUtil::GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw,
 		return oexFALSE;
 
 	// Was a range provided?
-	if ( !min && !max )
+	if ( min >= max )
 	{	min = pf[ 0 ], max = pf[ 0 ];
 		for ( oexINT i = 1; i < n; i++ )
 			if ( min > ( pf[ i ] * scale ) ) min = ( pf[ i ] * scale );
@@ -562,7 +562,7 @@ oexBOOL CUtil::GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw,
 	while ( ni < n || x < ( w - 1 ) )
 	{
 		// Next y
-		y = ( CUTIL_YMARGIN / 2 ) + ( ( ( pf[ ni ] * scale ) - min ) * ( h - CUTIL_YMARGIN ) / range );
+		y = (oexINT)( (oexFLOAT)( ( CUTIL_YMARGIN / 2 ) ) + ( ( ( pf[ ni ] * scale ) - min ) * ( (oexFLOAT)( h - CUTIL_YMARGIN ) ) / range ) );
 
 		// Next x
 		mx += w;
