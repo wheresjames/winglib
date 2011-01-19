@@ -359,17 +359,28 @@ public:
 
 			return oexTRUE;
 
-		} // end if
+		}
 
 		CBin getValueBin()
-		{	if ( !fData.IsOpen() ) return CBin();
-			if ( !vi.uSize ) return CBin();
+		{	
+			if ( !fData.IsOpen() ) 
+				return CBin();
+			if ( !vi.uSize ) 
+				return CBin();
 			return fData.Read( vi.uSize );
-		} // end if
+		}
+
+		oexINT getValueSize()
+		{
+			if ( !fData.IsOpen() ) 
+				return 0;
+			return vi.uSize;
+		}
 
 		// Sets the key and calculates the hash
 		oexBOOL Init( CStr x_sRoot, oexCSTR x_pKey )
-		{	if ( !x_sRoot.Length() || !x_pKey || !*x_pKey )
+		{	
+			if ( !x_sRoot.Length() || !x_pKey || !*x_pKey )
 				return oexFALSE;
 			sRoot = x_sRoot;
 			sKey = oexStrToMb( x_pKey );

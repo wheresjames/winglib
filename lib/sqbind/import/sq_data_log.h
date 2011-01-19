@@ -140,7 +140,11 @@ namespace sqbind
 								  m_dl.GetBase(), m_dl.GetStep() ) )
 				return 0;
 
-			return 1;
+			// Backup one if there's no object here
+			if ( !m_it.getValueSize() )
+				itPrev();
+
+			return m_it.getValueSize();
 		}
 
 		/// Next item
