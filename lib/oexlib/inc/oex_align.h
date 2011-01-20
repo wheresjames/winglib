@@ -93,7 +93,7 @@
 
 #	define oexAsmRet()
 
-#elif defined( OEX_MSC )
+#elif defined( OEX_WIN32 )
 
 #	define oexNaked							__declspec( naked )
 

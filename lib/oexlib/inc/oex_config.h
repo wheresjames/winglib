@@ -69,19 +69,19 @@
 #endif
 
 // Are we using windows?
-#if defined( _WIN32_WCE )
-#	define OEX_WINCE
-#	define OEX_WIN32
-#	define OEX_WINDOWS
-#elif defined( _WIN64_WCE )
+#if defined( _WIN64_WCE )
 #	define OEX_WINCE
 #	define OEX_WIN64
 #	define OEX_WINDOWS
-#elif defined( WIN32 ) || defined( _WIN32 )
+#elif defined( _WIN32_WCE )
+#	define OEX_WINCE
 #	define OEX_WIN32
 #	define OEX_WINDOWS
 #elif defined( WIN64 ) || defined( _WIN64 )
 #	define OEX_WIN64
+#	define OEX_WINDOWS
+#elif defined( WIN32 ) || defined( _WIN32 )
+#	define OEX_WIN32
 #	define OEX_WINDOWS
 #else
 #	define OEX_LINUX
@@ -276,7 +276,9 @@
 // Native processor integer size in bytes
 #define oexSIZEOFINT 4
 
-#if defined( OEX_CPU_64 ) || defined( OEX_IPHONE )
+#if defined( OEX_WIN64 )
+	typedef size_t					oexSIZE_T;
+#elif defined( OEX_CPU_64 ) || defined( OEX_IPHONE )
 	typedef long unsigned int		oexSIZE_T;
 #else
 	typedef unsigned int			oexSIZE_T;
