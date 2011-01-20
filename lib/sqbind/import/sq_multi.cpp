@@ -121,7 +121,7 @@ sqbind::stdString& CSqMulti::str()
 
 CSqBinary CSqMulti::bin()
 {_STT();
-	return std2oex8( m_val.str() ).Mem();
+	return std2bin( m_val.str() );
 }
 
 
@@ -167,12 +167,12 @@ stdString CSqMulti::str_htmldec()
 
 stdString CSqMulti::str_compress()
 {_STT();
-	return oex2std( oexCompressStr( std2oex( m_val.str() ) ) );
+	return oex2std( oexCompress( std2oex( m_val.str() ) ) );
 }
 
 stdString CSqMulti::str_uncompress()
 {_STT();
-	return oex2std( oexUncompressStr( std2oex( m_val.str() ) ) );
+	return oex2std( oexUncompress( std2oex( m_val.str() ) ) );
 }
 
 stdString CSqMulti::str_base16_encode()
@@ -197,52 +197,52 @@ stdString CSqMulti::str_base64_decode()
 
 CSqBinary CSqMulti::bin_urlenc()
 {_STT();
-	return oexUrlEncode( std2oex( m_val.str() ) );
+	CSqBinary bin( oexUrlEncode( std2oex( m_val.str() ) ) ); return bin;
 }
 
 CSqBinary CSqMulti::bin_urldec()
 {_STT();
-	return oexUrlDecode( std2oex( m_val.str() ) );
+	CSqBinary bin( oexUrlDecode( std2oex( m_val.str() ) ) ); return bin;
 }
 
 CSqBinary CSqMulti::bin_htmlenc()
 {_STT();
-	return oexHtmlEncode( std2oex( m_val.str() ) );
+	CSqBinary bin( oexHtmlEncode( std2oex( m_val.str() ) ) ); return bin;
 }
 
 CSqBinary CSqMulti::bin_htmldec()
 {_STT();
-	return oexHtmlDecode( std2oex( m_val.str() ) );
+	CSqBinary bin( oexHtmlDecode( std2oex( m_val.str() ) ) ); return bin;
 }
 
 CSqBinary CSqMulti::bin_compress()
 {_STT();
-	return oexCompressStr(  m_val.c_str().c_str(), m_val.length() );
+	CSqBinary bin( oexCompress( std2oex8( m_val.str() ) ) ); return bin;
 }
 
 CSqBinary CSqMulti::bin_uncompress()
 {_STT();
-	return oexUncompressStr(  m_val.c_str().c_str(), m_val.length() );
+	CSqBinary bin( oexUncompress( std2oex8( m_val.str() ) ) ); return bin;
 }
 
 CSqBinary CSqMulti::bin_base16_encode()
 {_STT();
-	return oexBase16Encode( m_val.c_str().c_str(), m_val.length() );
+	CSqBinary bin( oexBase16Encode( std2oex8( m_val.str() ) ) ); return bin;
 }
 
 CSqBinary CSqMulti::bin_base16_decode()
 {_STT();
-	return oexBase16Decode( m_val.c_str().c_str(), m_val.length() );
+	CSqBinary bin( oexBase16Decode( std2oex8( m_val.str() ) ) ); return bin;
 }
 
 CSqBinary CSqMulti::bin_base64_encode()
 {_STT();
-	return oexBase64Encode( m_val.c_str().c_str(), m_val.length() );
+	CSqBinary bin( oexBase64Encode( std2oex8( m_val.str() ) ) ); return bin;
 }
 
 CSqBinary CSqMulti::bin_base64_decode()
 {_STT();
-	return oexBase64Decode( m_val.c_str().c_str(), m_val.length() );
+	CSqBinary bin( oexBase64Decode( std2oex8( m_val.str() ) ) ); return bin;
 }
 
 _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )

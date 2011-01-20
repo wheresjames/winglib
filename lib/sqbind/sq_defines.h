@@ -194,7 +194,7 @@ namespace sqbind
 		const stdString* c_ptr() const { return &m_str; }
 		stdString set( const stdString &x_str )
 		{	m_str = x_str; return m_str; }
-		stdString::size_type length() { return m_str.length(); }
+		stdString::size_type length() const { return m_str.length(); }
 		stdString& operator = ( const stdString &x_str ) { return m_str = x_str; }
 		stdString& operator = ( const oex::oexTCHAR *x_str ) { if ( x_str ) m_str = x_str; return m_str; }
 		stdString& operator = ( const oex::CStr &x_str ) { m_str.assign( x_str.Ptr(), x_str.Length() ); return m_str; }
@@ -221,6 +221,14 @@ namespace sqbind
 	template < typename T >
 		static oex::CStr8 std2oex8( const T &s )
 		{	return oexStrToMb( oex::CStr( s.c_str(), s.length() ) ); }
+
+	template < typename T >
+		static oex::CBin std2bin( const T &s )
+		{	return oex::CBin( oexStrToMb( std2oex( s ) ) ); }
+
+	template < typename T >
+		static oex::CStr bin2std( const T &b )
+		{	return oex2std( oexMbToStr( oex::CStr8( b.Mem(), b.getUsed() ) ) ); }
 
 	template< typename T >
 		stdString obj2str( const T &_o )

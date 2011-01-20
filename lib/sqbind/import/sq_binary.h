@@ -102,6 +102,11 @@ namespace sqbind
 		/// Copy constructor
 		CSqBinary( const CSqBinary &r ) : m_bin( r.m_bin ) { }
 
+		/// Rvalue Copy constructor
+//#if defined( OEX_CPP0X )
+//		CSqBinary( CSqBinary &&r ) : m_bin( r.m_bin ) { }
+//#endif
+
 		/// Assignment operator
 		CSqBinary& operator = ( const CSqBinary &r )
 		{	m_bin = r.m_bin; return *this; }
@@ -114,7 +119,7 @@ namespace sqbind
 		{	m_bin = r; return *this; }
 
 		/// Construct from raw buffer
-		CSqBinary( t_byte *x_ptr, t_size x_size, int x_bFree = 0 )			
+		CSqBinary( t_byte *x_ptr, t_size x_size, int x_bFree = 0 )
 		{	if ( x_bFree )
 				m_bin.setBuffer( x_ptr, x_size, 0, oex::oexTRUE );
 			else

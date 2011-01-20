@@ -51,6 +51,11 @@
 //#define OEX_ENABLE_RELEASE_MODE_MEM_CHECK
 #undef OEX_ENABLE_RELEASE_MODE_MEM_CHECK
 
+// Detec C++0x
+#if ( __cplusplus > 199711L ) // || defined( __GXX_EXPERIMENTAL_CXX0X__ )
+#	define OEX_CPP0X
+#endif
+
 // Attempt to detect 64 bit processor
 #if defined( _WIN64 ) || defined( _M_X64 ) || defined( __amd64__ ) || defined( _LP64 )
 #	define OEX_CPU_64
@@ -295,8 +300,8 @@
 
 #if defined( OEX_WINDOWS )
 #	define oexTmpPath				"C:/Temp"
-#else		
-#	define oexTmpPath				"/tmp"	
+#else
+#	define oexTmpPath				"/tmp"
 #endif
 
 
