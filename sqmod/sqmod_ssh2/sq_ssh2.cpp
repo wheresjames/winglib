@@ -496,6 +496,7 @@ int CSqSsh2::ChannelRead( const sqbind::stdString &sChannel, int nStream, sqbind
 }
 
 /// Sets environment variable on channel
+#define CSQSSH2_MAX_WRITE_BLOCK		( 32 * 1024 )
 int CSqSsh2::ChannelWrite( const sqbind::stdString &sChannel, int nStream, sqbind::CSqBinary *bin, int timeout )
 {_STT();
 
@@ -519,8 +520,8 @@ int CSqSsh2::ChannelWrite( const sqbind::stdString &sChannel, int nStream, sqbin
 	{
 		// Seems to have problems if we try really large writes
 		int nMax = bin->getUsed() - nSent;
-		if ( nMax > 1024 )
-			nMax = 32 * 1024;
+		if ( nMax > CSQSSH2_MAX_WRITE_BLOCK )
+			nMax = CSQSSH2_MAX_WRITE_BLOCK;
 
 		// Attempt to send some data
 		int nBytes = libssh2_channel_write_ex( it->second, nStream, bin->Ptr( nSent ), nMax );
@@ -532,7 +533,7 @@ int CSqSsh2::ChannelWrite( const sqbind::stdString &sChannel, int nStream, sqbin
 		// Was there an error?
 		if ( 0 > nBytes )
 		{	logerr( 0, nBytes, oexT( "libssh2_channel_write_ex() Failed" ) );
-			return nBytes;
+			return ( 0 < nSent ) ? nSent : nBytes;
 		} // end if
 
 		// Don't hog the cpu if the write thing is busy
