@@ -34,6 +34,16 @@
 
 #include "../oexlib.h"
 
+#if     !defined(_WIN32)
+#error ERROR: Only Win32 target supported!
+#endif
+
+//#include <cstdarg>
+//#include <stdio.h>
+//#include "stdint.h"
+//#include <crtdefs.h>
+//#include <varargs.h>
+#include <stdarg.h>
 #include <stdlib.h>
 
 OEX_USING_NAMESPACE

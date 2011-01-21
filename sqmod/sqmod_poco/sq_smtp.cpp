@@ -85,7 +85,6 @@ int CPoSmtp::Open( const sqbind::stdString &sUrl, int nSecure )
 	{	
 		if ( nSecure )
 		{
-
 			Poco::Net::SecureSMTPClientSession *pSscs = OexAllocConstruct< Poco::Net::SecureSMTPClientSession >( WStrToStr( sUrl ) );
 			if ( !pSscs )
 			{	m_sLastError = oexT( "Out of memory" );

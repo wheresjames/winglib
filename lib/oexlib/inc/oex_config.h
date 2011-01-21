@@ -279,7 +279,11 @@
 #endif
 
 // Native processor integer size in bytes
-#define oexSIZEOFINT 4
+#if defined( OEX_CPU_64 )
+#	define oexSIZEOFINT 8
+#else
+#	define oexSIZEOFINT 4
+#endif
 
 #if defined( OEX_WIN64 )
 	typedef size_t					oexSIZE_T;

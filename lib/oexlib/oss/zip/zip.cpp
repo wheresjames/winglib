@@ -1,5 +1,5 @@
 
-#ifdef WIN32
+#if defined( WIN32 ) || defined( WIN64 )
 #	include <windows.h>
 #else
 #	include <stdarg.h>
@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef WIN32
+#if defined( WIN32 ) || defined( WIN64 )
 #	include <tchar.h>
 #	if !defined( OEX_NOCRTDEBUG )
 #		include <crtdbg.h>

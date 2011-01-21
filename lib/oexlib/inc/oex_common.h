@@ -310,6 +310,16 @@ namespace cmn
         oexBOOL IsAligned64( T val )
     {   return Align64( val ) == val; }
 
+	/// Aligns value on n byte boundry, where n is a power of 2
+	template< typename T >
+		T AlignN( T val, T n )
+	{	return ( val + ( n - 1 ) ) & ( ~( n - 1 ) ); }
+
+    /// Returns non-zero if aligned on 512 bit boundry
+    template < typename T >
+        oexBOOL IsAlignedN( T val )
+    {   return AlignN( val ) == val; }
+
     /// Aligns value on processor dependent boundry
 #if oexSIZEOFINT == 2
     template < typename T >
