@@ -187,7 +187,7 @@ CIpSocket::~CIpSocket()
 oexBOOL CIpSocket::InitSockets()
 {_STT();
 	// Add ref
-	if ( 1 == oexInterlockedIncrement( &g_CIpSocket_lInitCount ) )
+	if ( 1 == oexIncrement( &g_CIpSocket_lInitCount ) )
 	{
 		// Quit if already initialized
 		if ( m_lInit == 0 )
@@ -206,7 +206,7 @@ oexBOOL CIpSocket::InitSockets()
 void CIpSocket::UninitSockets()
 {_STT();
 	// Deref
-	if ( oexInterlockedDecrement( &g_CIpSocket_lInitCount ) )
+	if ( oexDecrement( &g_CIpSocket_lInitCount ) )
 		return;
 
 	// Punt if not initialized

@@ -774,7 +774,7 @@ public:
 				oex::oexLONG l = o.Len();
 				oex::oexCSTR p = o.ToString();
 				if ( oexCHECK_PTR( p ) && l )
-					pRet->assign( p, l );
+					pRet->assign( p, (stdString::size_type)l );
 
 			} // end if
 			else
@@ -814,7 +814,7 @@ template< typename T_P1 >
 				oex::oexLONG l = o.Len();
 				oex::oexCSTR p = o.ToString();
 				if ( oexCHECK_PTR( p ) && l )
-					pRet->assign( p, l );
+					pRet->assign( p, (stdString::size_type)l );
 
 			} // end if
 			else
@@ -855,7 +855,7 @@ template< typename T_P1, typename T_P2 >
 				oex::oexLONG l = o.Len();
 				oex::oexCSTR p = o.ToString();
 				if ( oexCHECK_PTR( p ) && l )
-					pRet->assign( p, l );
+					pRet->assign( p, (stdString::size_type)l );
 
 			} // end if
 			else
@@ -895,7 +895,7 @@ template< typename T_P1, typename T_P2, typename T_P3 >
 				oex::oexLONG l = o.Len();
 				oex::oexCSTR p = o.ToString();
 				if ( oexCHECK_PTR( p ) && l )
-					pRet->assign( p, l );
+					pRet->assign( p, (stdString::size_type)l );
 
 			} // end if
 			else
@@ -935,7 +935,7 @@ template< typename T_P1, typename T_P2, typename T_P3, typename T_P4 >
 				oex::oexLONG l = o.Len();
 				oex::oexCSTR p = o.ToString();
 				if ( oexCHECK_PTR( p ) && l )
-					pRet->assign( p, l );
+					pRet->assign( p, (stdString::size_type)l );
 
 			} // end if
 			else

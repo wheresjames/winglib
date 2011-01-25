@@ -35,7 +35,11 @@ ifeq ($(PLATFORM),windows)
 		else
 			PRJ_PLIB := $(PRJ_PLIB) ffmpeg.lib x264.lib
 		endif
-		PRJ_LIBP := $(CFG_LIBROOT)/xlibs
+		ifeq ($(OS),win64)
+			PRJ_LIBP := $(CFG_LIBROOT)/xlibs/x64
+		else
+			PRJ_LIBP := $(CFG_LIBROOT)/xlibs/x86
+		endif
 		ifneq ($(PROC),arm)
 			PRJ_OSLB := $(PRJ_OSLB) vfw32.lib
 		endif

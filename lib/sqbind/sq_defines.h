@@ -120,7 +120,7 @@ namespace sqbind { typedef HSQUIRRELVM VM; }
 	OT_THREAD, OT_FUNCPROTO, OT_CLASS, OT_INSTANCE, OT_WEAKREF
 
 */
-#	define _SQBIND_CLASS_CTOR_BEGIN( c )			static int sq_construct_##c( HSQUIRRELVM x_v ) \
+#	define _SQBIND_CLASS_CTOR_BEGIN( c )			static SQInteger sq_construct_##c( HSQUIRRELVM x_v ) \
 													{ StackHandler sa( x_v ); c *p = 0; if( 0 )
 #	define _SQBIND_CLASS_CTOR_END( c ) 				; else p = new c(); \
 													return SqPlus::PostConstruct<c>( x_v, p, SqPlus::ReleaseClassPtr< c >::release); }
@@ -197,7 +197,7 @@ namespace sqbind
 		stdString::size_type length() const { return m_str.length(); }
 		stdString& operator = ( const stdString &x_str ) { return m_str = x_str; }
 		stdString& operator = ( const oex::oexTCHAR *x_str ) { if ( x_str ) m_str = x_str; return m_str; }
-		stdString& operator = ( const oex::CStr &x_str ) { m_str.assign( x_str.Ptr(), x_str.Length() ); return m_str; }
+		stdString& operator = ( const oex::CStr &x_str ) { m_str.assign( x_str.Ptr(), (stdString::size_type)x_str.Length() ); return m_str; }
 
 		static void Register( sqbind::VM vm );
 	private:
@@ -206,12 +206,12 @@ namespace sqbind
 
 	template < typename T >
 		static sqbind::stdString oex2std( const T &s )
-		{	return sqbind::stdString( s.Ptr(), s.Length() ); }
+		{	return sqbind::stdString( s.Ptr(), (sqbind::stdString::size_type)s.Length() ); }
 
 	template < typename T >
 		static sqbind::stdString oex82std( const T &s )
 		{	oex::CStr t = oexMbToStr( s );
-			return sqbind::stdString( t.Ptr(), t.Length() );
+			return sqbind::stdString( t.Ptr(), (sqbind::stdString::size_type)t.Length() );
 		}
 
 	template < typename T >
@@ -237,10 +237,10 @@ namespace sqbind
 			switch( sq_type( o.GetObjectHandle() ) )
 			{
 				case OT_STRING :
-				{	int nLen = o.Len();
+				{	SQInteger nLen = o.Len();
 					const SQChar *pStr = o.ToString();
 					if ( nLen && pStr )
-						return stdString( pStr, nLen );
+						return stdString( pStr, (sqbind::stdString::size_type)nLen );
 				} break;
 
 				case OT_INTEGER :
@@ -278,9 +278,9 @@ namespace SqPlus
 	{	return sq_gettype(v,idx) == OT_STRING; }
 	inline sqbind::stdString Get(TypeWrapper<const sqbind::stdString&>,HSQUIRRELVM v,int idx)
 	{	const SQChar * s = 0;
-		int sz = sq_getsize(v,idx);
+		SQInteger sz = sq_getsize(v,idx);
 		SQPLUS_CHECK_GET(sq_getstring(v,idx,&s));
-		return sqbind::stdString(s,sz);
+		return sqbind::stdString(s,(sqbind::stdString::size_type)sz);
 	}
 }
 #endif
@@ -308,9 +308,9 @@ public:
 			return sqbind::stdString();
 		}
 		const SQChar * str;
-		int sz = sq_getsize(v,p_idx);
+		SQInteger sz = sq_getsize(v,p_idx);
 		sq_getstring(v,p_idx,&str);
-		return sqbind::stdString(str,sz);
+		return sqbind::stdString(str,(sqbind::stdString::size_type)sz);
 	}
 
 	static void push(HSQUIRRELVM v, const sqbind::stdString& p_value) {

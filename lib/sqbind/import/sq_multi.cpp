@@ -461,7 +461,7 @@ void CSqMulti::urldecode( const CSqMulti::t_Obj &s )
 	// Deserialize data
 	oex::CPropertyBag pb = oex::CParser::DecodeUrlParams( s.c_str() );;
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
-		m_lst[ it.Node()->key.Ptr() ].m_val.str().assign( it->ToString().Ptr(), it->ToString().Length() );
+		m_lst[ it.Node()->key.Ptr() ].m_val.str().assign( it->ToString().Ptr(), (stdString::size_type)it->ToString().Length() );
 }
 
 void CSqMulti::unset( const CSqMulti::t_Obj &k )
@@ -621,13 +621,13 @@ SquirrelObject CSqMulti::_newslot( HSQUIRRELVM v )
 
 	// Get value
 	const SQChar * pVal = 0;
-	int szVal = sq_getsize( v, 3 );
+	SQInteger szVal = sq_getsize( v, 3 );
 	SQPLUS_CHECK_GET(sq_getstring( v, 3, &pVal ));
     if ( !pVal )
         return SquirrelObject( v );
 
 	// Add to list
-	m_lst[ sKey ].str().assign( pVal, szVal );
+	m_lst[ sKey ].str().assign( pVal, (stdString::size_type)szVal );
 
 	// Find the new value
     t_List::iterator it = m_lst.find( sKey );

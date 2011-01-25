@@ -175,14 +175,14 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT 
 		return x_nErr;
 
 	// Log count
-	if ( 1 == os::CSys::InterlockedIncrement( &m_lInLog ) )
+	if ( 1 == oexIncrement( &m_lInLog ) )
 	{
 		_oexTRY
 		{
 			// Create log file if needed
 			if ( !m_file.IsOpen() )
 				if ( !OpenLogFile() )
-				{	os::CSys::InterlockedDecrement( &m_lInLog );
+				{	oexDecrement( &m_lInLog );
 					return x_nErr;
 				} // end if
 
@@ -268,7 +268,7 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT 
 	} // end if
 
 	// Reduce log count
-	os::CSys::InterlockedDecrement( &m_lInLog );
+	oexDecrement( &m_lInLog );
 
 	return x_nErr;
 }

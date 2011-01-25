@@ -301,7 +301,7 @@ public:
 
 		\see
 	*/
-	static oexLONG InterlockedIncrement( oexLONG *x_puVal );
+	static oexLONG increment( oexLONG *x_puVal );
 
 	//==============================================================
 	// InterlockedDecrement()
@@ -314,7 +314,7 @@ public:
 
 		\see
 	*/
-	static oexLONG InterlockedDecrement( oexLONG *x_puVal );
+	static oexLONG decrement( oexLONG *x_puVal );
 
 	//==============================================================
 	// vInfinite()

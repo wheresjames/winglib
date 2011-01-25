@@ -351,8 +351,8 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexEvent							OEX_NAMESPACE::CEvent
 #define oexSignal							OEX_NAMESPACE::CSignal
 #define oexWaitMultiple						OEX_NAMESPACE::CResource::WaitMultiple
-#define oexInterlockedIncrement				OEX_NAMESPACE::os::CSys::InterlockedIncrement
-#define oexInterlockedDecrement				OEX_NAMESPACE::os::CSys::InterlockedDecrement
+#define oexIncrement						OEX_NAMESPACE::os::CSys::increment
+#define oexDecrement						OEX_NAMESPACE::os::CSys::decrement
 #define oexCloseLog							OEX_NAMESPACE::CLog::GlobalLog().Destroy
 #define oexTlsAllocate						OEX_NAMESPACE::os::CThreadLocalStorage::Allocate
 #define oexTlsGetValue						OEX_NAMESPACE::os::CThreadLocalStorage::GetValue

@@ -70,7 +70,7 @@ template < typename T_PB, typename T_STD  >
 				sKey = oexT( "*" );
 
 			if ( !it->Size() )
-				m[ sKey ].str().assign( it->ToString().Ptr(), it->ToString().Length() );
+				m[ sKey ].str().assign( it->ToString().Ptr(), (stdString::size_type)it->ToString().Length() );
 
 			else
 				SQBIND_PropertyBagToMulti( *it, m[ sKey ].list() );
@@ -90,7 +90,7 @@ template < typename T_PB, typename T_STD  >
 
 			if ( !it->Size() )
 			{	oex::CStr s = oexMbToStr( it->ToString() );
-				m[ sKey ].str().assign( s.Ptr(), s.Length() );
+				m[ sKey ].str().assign( s.Ptr(), (stdString::size_type)s.Length() );
 			} // end if
 
 			else

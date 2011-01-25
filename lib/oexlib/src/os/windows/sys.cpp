@@ -622,12 +622,12 @@ oexINT CSys::WaitForMultipleObjects( oexUINT x_uObjects, CSys::t_WAITABLE *x_pHa
 	return waitFailed;
 }
 
-oexLONG CSys::InterlockedIncrement( oexLONG *x_puVal )
+oexLONG CSys::increment( oexLONG *x_puVal )
 {//_STT();
 	return ::InterlockedIncrement( x_puVal );
 }
 
-oexLONG CSys::InterlockedDecrement( oexLONG *x_puVal )
+oexLONG CSys::decrement( oexLONG *x_puVal )
 {//_STT();
 	return ::InterlockedDecrement( x_puVal );
 }

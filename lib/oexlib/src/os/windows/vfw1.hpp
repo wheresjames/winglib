@@ -32,6 +32,15 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
+#if defined( OEX_WIN64 )
+#	define CVFWCAP_GetWindowLong( h )		GetWindowLongPtr( h, 0 )
+#	define CVFWCAP_SetWindowLong( h, ptr )	SetWindowLongPtr( h, 0, (LONG_PTR)ptr )
+#else
+#	define CVFWCAP_GetWindowLong( h )		GetWindowLong( h, GWL_USERDATA )
+#	define CVFWCAP_SetWindowLong( h, ptr )	SetWindowLong( h, GWL_USERDATA, (LONG)ptr ) 
+#endif
+
+
 //==================================================================
 // CVfwCap
 //
@@ -1212,8 +1221,9 @@ protected:
 	/// Static function proxies video status callbacks
 	static LRESULT PASCAL StatusCallbackProc(HWND hWnd, int nID, LPSTR lpStatusText)
 	{_STT();
+
 		// Retrieve our class pointer
-		CVfwCap *pCap = (CVfwCap*)GetWindowLong( hWnd, GWL_USERDATA );
+		CVfwCap *pCap = (CVfwCap*)CVFWCAP_GetWindowLong( hWnd );
 		if ( pCap == NULL ) return 0;
 
 		return pCap->OnStatus( nID, lpStatusText );
@@ -1226,7 +1236,7 @@ protected:
 	static LRESULT PASCAL ErrorCallbackProc(HWND hWnd, int nErrID, LPSTR lpErrorText)
 	{_STT();
 		// Retrieve our class pointer
-		CVfwCap *pCap = (CVfwCap*)GetWindowLong( hWnd, GWL_USERDATA );
+		CVfwCap *pCap = (CVfwCap*)CVFWCAP_GetWindowLong( hWnd );
 		if ( pCap == NULL ) return 0;
 
 		return pCap->OnError( nErrID, lpErrorText );
@@ -1239,7 +1249,7 @@ protected:
 	static LRESULT PASCAL FrameCallbackProc(HWND hWnd, LPVIDEOHDR lpVHdr)
 	{_STT();
 		// Retrieve our class pointer
-		CVfwCap *pCap = (CVfwCap*)GetWindowLong( hWnd, GWL_USERDATA );
+		CVfwCap *pCap = (CVfwCap*)CVFWCAP_GetWindowLong( hWnd );
 		if ( pCap == NULL ) return 0;
 
 		return pCap->OnFrame( lpVHdr );
@@ -1252,7 +1262,7 @@ protected:
 	static LRESULT CALLBACK StreamCallbackProc(HWND hWnd, LPVIDEOHDR lpVHdr)
 	{_STT();
 		// Retrieve our class pointer
-		CVfwCap *pCap = (CVfwCap*)GetWindowLong( hWnd, GWL_USERDATA );
+		CVfwCap *pCap = (CVfwCap*)CVFWCAP_GetWindowLong( hWnd );
 		if ( pCap == NULL ) return 0;
 
 		return pCap->OnStream( lpVHdr );
@@ -1700,9 +1710,9 @@ public:
 
 		// Set our class pointer
 		SetLastError( 0 );
+
 		// Give the window a pointer to the class
-		if ( !SetWindowLong( GetSafeHwnd(), GWL_USERDATA, (LONG)this ) 
-			 && GetLastError() != 0 )
+		if ( !CVFWCAP_SetWindowLong( GetSafeHwnd(), this ) && GetLastError() != 0 )
 		{
 			// Give up if we can't set the class pointer
 			return FALSE;

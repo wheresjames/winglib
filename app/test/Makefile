@@ -10,8 +10,8 @@ default_target: all
 PRJ_NAME := test
 PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib
-PRJ_LIBS := oexlib 
-PRJ_OSLB := 
+PRJ_LIBS := oexlib dshowbase
+PRJ_OSLB := winmm.lib strmiids.lib
 PRJ_RESD := res res2
 
 #-------------------------------------------------------------------

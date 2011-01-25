@@ -194,14 +194,14 @@ oexUINT CThread::GetRunningThreadCount()
 {   return m_lRunningThreadCount; }
 
 void CThread::IncThreadCount()
-{   os::CSys::InterlockedIncrement( &m_lThreadCount ); }
+{   oexIncrement( &m_lThreadCount ); }
 
 void CThread::IncRunningThreadCount()
-{   os::CSys::InterlockedIncrement( &m_lRunningThreadCount ); }
+{   oexIncrement( &m_lRunningThreadCount ); }
 
 void CThread::DecRunningThreadCount()
 {   if ( oexVERIFY( m_lRunningThreadCount ) )
-        os::CSys::InterlockedDecrement( &m_lRunningThreadCount );
+        oexDecrement( &m_lRunningThreadCount );
 }
 
 oexBOOL CSignal::Create( oexCSTR x_pName )

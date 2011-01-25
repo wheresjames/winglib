@@ -56,13 +56,10 @@
 #include <dshow.h>
 #include <streams.h>
 
-#ifdef oexDEBUG
-#pragma comment( lib, "strmbasd.lib" )
-#else
-#pragma comment( lib, "strmbase.lib" )
-#endif
-
-#pragma comment( lib, "winmm.lib" )
+// *** strmiids.lib
+// Problem: Fatal error LNK1103: debugging information corrupt. 
+// MS changed from V8-V9, get hot fix
+// http://support.microsoft.com/kb/949009/
 
 #endif
 #endif

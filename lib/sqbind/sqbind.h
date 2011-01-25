@@ -53,6 +53,8 @@
 #define WSQBIND_NEW(__ptr,__type) {__ptr=(__type *)sq_vm_malloc(sizeof(__type));new (__ptr) __type;}
 #define WSQBIND_DELETE(__ptr,__type) {__ptr->~__type();sq_vm_free(__ptr,sizeof(__type));}
 
+#include <string>
+
 // Include squirrel headers
 #include <squirrel.h>
 #include <sqstdio.h>

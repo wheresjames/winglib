@@ -186,7 +186,7 @@ namespace sqbind
 		/// Returns a string representation of the data
 		stdString getString()
 		{	oex::CStr s = oexMbToStr( m_bin.getString() );
-			return stdString( s.Ptr(), s.Length() );
+			return stdString( s.Ptr(), (sqbind::stdString::size_type)s.Length() );
 		}
 
 		/// Initializes the binary buffer from a string
@@ -259,13 +259,13 @@ namespace sqbind
 		/// Returns a ascii / hex string
 		sqbind::stdString AsciiHexStr( int nLineLen, int nMaxLines )
 		{	oex::CStr s = oexBinToAsciiHexStr( &m_bin, 0, nLineLen, nMaxLines );
-			return sqbind::stdString( s.Ptr(), s.Length() );
+			return sqbind::stdString( s.Ptr(), (sqbind::stdString::size_type)s.Length() );
 		}
 
 		/// Returns an ascii 'fingerprint' of the binary buffer
 		sqbind::stdString Fingerprint( int w, int h, int frame )
 		{	oex::CStr s = oexFingerprint( &m_bin, w, h, frame );
-			return sqbind::stdString( s.Ptr(), s.Length() );
+			return sqbind::stdString( s.Ptr(), (sqbind::stdString::size_type)s.Length() );
 		}
 
 		/// Returns an ascii 'fingerprint' of the binary buffer

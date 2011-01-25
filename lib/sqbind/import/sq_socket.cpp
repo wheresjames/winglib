@@ -335,7 +335,7 @@ int CSqSocket::getLastErrorValue()
 sqbind::stdString CSqSocket::Read( int nMax )
 {_STT();
 	oex::CStr s = oexMbToStr( m_socket->Recv( nMax ) );
-	return sqbind::stdString( s.Ptr(), s.Length() );
+	return sqbind::stdString( s.Ptr(), (sqbind::stdString::size_type)s.Length() );
 
 }
 
@@ -347,7 +347,7 @@ int CSqSocket::Write( const sqbind::stdString &s, int nMax )
 sqbind::stdString CSqSocket::ReadFrom( int nMax )
 {_STT();
 	oex::CStr s = oexMbToStr( m_socket->RecvFrom( nMax ) );
-	return sqbind::stdString( s.Ptr(), s.Length() );
+	return sqbind::stdString( s.Ptr(), (sqbind::stdString::size_type)s.Length() );
 }
 
 int CSqSocket::SendTo( const sqbind::stdString &s, int nMax )

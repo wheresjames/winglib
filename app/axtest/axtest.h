@@ -28,13 +28,13 @@ public:
 	}
 
 	virtual _OEXCOM_ULONG _OEXCOM_STDCALL AddRef()
-	{	oexInterlockedIncrement( &_g_oex_lRefCount );
-		return (_OEXCOM_ULONG)oexInterlockedIncrement( &_m_ref._m_ref_count ); 
+	{	oexIncrement( &_g_oex_lRefCount );
+		return (_OEXCOM_ULONG)oexIncrement( &_m_ref._m_ref_count ); 
 	}
 
 	virtual _OEXCOM_ULONG _OEXCOM_STDCALL Release()
-	{	oexInterlockedDecrement( &_g_oex_lRefCount );
-		_OEXCOM_ULONG c = oexInterlockedDecrement( &_m_ref._m_ref_count );
+	{	oexDecrement( &_g_oex_lRefCount );
+		_OEXCOM_ULONG c = oexDecrement( &_m_ref._m_ref_count );
 		if ( !c ) 
 			_OEXCOM_DeleteInstance( this );
 		return c;

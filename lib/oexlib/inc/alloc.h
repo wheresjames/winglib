@@ -671,8 +671,9 @@ template < class T > class COexStdAllocator
 {
 public:
 
-	typedef oexUINT    	size_type;
-	typedef oexINT		difference_type;
+	typedef oexSIZE_T  	size_type;
+	typedef oexSIZE_T	difference_type;
+//	typedef oexINT		difference_type;
 	typedef T*        	pointer;
 	typedef const T*  	const_pointer;
 	typedef T&        	reference;

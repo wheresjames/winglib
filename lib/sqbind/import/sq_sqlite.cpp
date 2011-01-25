@@ -145,7 +145,7 @@ stdString CSqSQLite::Escape( const stdString &sStr )
 {_STT();
 	oex::CStr sEsc( sStr.c_str(), sStr.length() );
 	sEsc = CSQLite::Escape( sEsc );
-	return stdString().assign( sEsc.Ptr(), sEsc.Length() );
+	return stdString().assign( sEsc.Ptr(), (stdString::size_type)sEsc.Length() );
 }
 
 stdString CSqSQLite::GetLastError()

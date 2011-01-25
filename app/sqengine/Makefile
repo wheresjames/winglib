@@ -10,7 +10,7 @@ default_target: all
 PRJ_NAME := sqengine
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib
+PRJ_LIBS := sqbind oexlib dshowbase sqplus sqstdlib squirrel cximage jpeg png tiff zlib
 PRJ_OSLB :=
  
 PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Idle SRV_Stop
