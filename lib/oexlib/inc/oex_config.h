@@ -286,11 +286,14 @@
 #endif
 
 #if defined( OEX_WIN64 )
-	typedef size_t					oexSIZE_T;
+		typedef __int64					oexSIZE_T;
+		typedef size_t					oexNEWSIZE_T;
 #elif defined( OEX_CPU_64 ) || defined( OEX_IPHONE )
 	typedef long unsigned int		oexSIZE_T;
+	typedef oexSIZE_T				oexNEWSIZE_T;
 #else
 	typedef unsigned int			oexSIZE_T;
+	typedef oexSIZE_T				oexNEWSIZE_T;
 #endif
 
 #if defined( _MSC_VER )

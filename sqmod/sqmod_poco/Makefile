@@ -16,6 +16,7 @@ PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib \
 			poco_a poco_b poco_a poco_b openssl_a openssl_b openssl_a openssl_b zlib
 PRJ_DEFS := HAVE_MEMMOVE POCO_NO_AUTOMATIC_LIBS XML_STATIC PCRE_STATIC
+PRJ_WINL := iphlpapi
  
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
@@ -31,12 +32,6 @@ ifeq ($(PLATFORM),windows)
 		PRJ_DEFS := $(PRJ_DEFS) POCO_WIN32_UTF8
 	endif
 
-	ifneq ($(BUILD),gcc)
-		PRJ_OSLB := $(PRJ_OSLB) iphlpapi.lib
-	else
-		PRJ_OSLB := $(PRJ_OSLB) iphlpapi
-	endif
-	
 endif
 
 #-------------------------------------------------------------------

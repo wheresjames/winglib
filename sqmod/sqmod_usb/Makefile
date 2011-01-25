@@ -13,6 +13,7 @@ PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel jpeg png zlib tiff 
 PRJ_DEFS := 
+PRJ_WINL := setupapi
  
 PRJ_SUBROOT := _sqmod
 
@@ -26,11 +27,6 @@ include $(PRJ_LIBROOT)/config.mk
 ifeq ($(PLATFORM),windows)
 	PRJ_INCS := $(PRJ_INCS) libusb-win32/libusb libusb-win32/msvc
 	PRJ_LIBS := $(PRJ_LIBS) usb-win32
-	ifeq ($(BUILD),vs)
-		PRJ_OSLB := Setupapi.lib
-	else
-		PRJ_OSLB := setupapi
-	endif
 else
 	PRJ_INCS := $(PRJ_INCS) libusb/libusb
 	PRJ_LIBS := $(PRJ_LIBS) usb

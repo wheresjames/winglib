@@ -15,6 +15,7 @@ PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib
 PRJ_DEFS := HAVE_AV_CONFIG_H=1 __STDC_CONSTANT_MACROS
 PRJ_LIBP :=
 PRJ_OSLB :=
+PRJ_WINL := vfw32
 
 PRJ_SUBROOT := _sqmod
 
@@ -39,9 +40,6 @@ ifeq ($(PLATFORM),windows)
 			PRJ_LIBP := $(CFG_LIBROOT)/xlibs/x64
 		else
 			PRJ_LIBP := $(CFG_LIBROOT)/xlibs/x86
-		endif
-		ifneq ($(PROC),arm)
-			PRJ_OSLB := $(PRJ_OSLB) vfw32.lib
 		endif
 	else
 		PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/windows/gcc $(PRJ_INCS) zlib

@@ -18,6 +18,7 @@ PRJ_LIBS := sqbind oexlib dshowbase sqplus sqstdlib squirrel \
 			freetype2 ftgl
 #			bullet
 PRJ_DEFS := OEX_NOBULLET
+PRJ_WINL := strmiids winmm
 
 PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
@@ -53,9 +54,7 @@ else
 		PRJ_DEFS := $(PRJ_DEFS) OEX_NOBULLET
 	else
 		ifeq ($(BUILD),gcc)
-			PRJ_OSLB := opengl32 winmm
-		else
-			PRJ_OSLB := winmm.lib
+			PRJ_OSLB := opengl32
 		endif
 #		PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OPENGL_
 	endif	

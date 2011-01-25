@@ -18,7 +18,7 @@ PRJ_LIBS := oexlib
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-ifeq ($(OS),win32)
+ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),gcc)
 		PRJ_OSLB := comctl32 comdlg32 uuid oleaut32
 	endif

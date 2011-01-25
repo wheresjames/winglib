@@ -52,7 +52,7 @@ namespace OEX_NAMESPACE {
 
 #if !defined( OEX_ALIGNEDMEM ) || 0 == OEX_ALIGNEDMEM
 
-oexPVOID oex_malloc( oexSIZE_T x_nSize )
+oexPVOID oex_malloc( oexNEWSIZE_T x_nSize )
 {
 #if defined( oexDEBUG )
 	oexPVOID p = malloc( (size_t)x_nSize );
@@ -63,7 +63,7 @@ oexPVOID oex_malloc( oexSIZE_T x_nSize )
 #endif
 }
 
-oexPVOID oex_realloc( oexPVOID x_ptr, oexSIZE_T x_nSize )
+oexPVOID oex_realloc( oexPVOID x_ptr, oexNEWSIZE_T x_nSize )
 {
 #if defined( oexDEBUG )
 	oexPVOID p = realloc( x_ptr, x_nSize );
@@ -88,7 +88,7 @@ void oex_free( oexPVOID x_ptr )
 // Ensure OEX_ALIGNEDMEM is a power of 2
 oexSTATIC_ASSERT( 0 == ( OEX_ALIGNEDMEM & ( OEX_ALIGNEDMEM - 1 ) ) );
 
-oexPVOID oex_malloc( oexSIZE_T x_nSize )
+oexPVOID oex_malloc( oexNEWSIZE_T x_nSize )
 {
 	// Allocate memory
 	void *ptr = malloc( (size_t)x_nSize + OEX_ALIGNEDMEM + sizeof( void* ) );
@@ -109,7 +109,7 @@ oexPVOID oex_malloc( oexSIZE_T x_nSize )
 	return ptr2;
 }
 
-oexPVOID oex_realloc( oexPVOID x_ptr, oexSIZE_T x_nSize )
+oexPVOID oex_realloc( oexPVOID x_ptr, oexNEWSIZE_T x_nSize )
 {
 	if ( !x_ptr )
 		return oex_malloc( x_nSize );
@@ -172,7 +172,7 @@ void oex_free( oexPVOID x_ptr )
 
 #endif
 
-oexPVOID oex_calloc( oexSIZE_T x_nNum, oexSIZE_T x_nSize )
+oexPVOID oex_calloc( oexSIZE_T x_nNum, oexNEWSIZE_T x_nSize )
 {	oexSIZE_T sz = x_nNum * x_nSize;
 	if ( !sz ) return 0;
 	oexPVOID p = oex_malloc( sz );

@@ -38,8 +38,8 @@
 #	ifndef __PLACEMENT_NEW_INLINE
 #		define __PLACEMENT_NEW_INLINE
 
-		/// Placement new
-		inline void * oexCDECL operator new( oexSIZE_T, void *p ) { return p; }
+			/// Placement new
+			inline void * oexCDECL operator new( oexNEWSIZE_T, void *p ) { return p; }
 
 		/// Placement delete
 #		if !defined( _MSC_VER ) || _MSC_VER >= 1200

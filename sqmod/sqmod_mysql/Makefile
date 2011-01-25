@@ -23,14 +23,18 @@ PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(PLATFORM),windows)
-	PRJ_INCS := $(PRJ_INCS) mysql/include
+
 	ifeq ($(BUILD),vs)
-		PRJ_LIBP := $(CFG_LIBROOT)/mysql/lib/opt
-		PRJ_OSLB := libmysql.lib
+		PRJ_WINL := libmysql
 	else
-		PRJ_LIBP := $(CFG_LIBROOT)/mysql/lib/opt
-#		PRJ_LIBP := $(CFG_LIBROOT)/mysql/lib/gcc
-		PRJ_OSLB := mysql
+		PRJ_WINL := mysql
+	endif
+
+	PRJ_INCS := $(PRJ_INCS) mysql/include
+	ifeq ($(OS),win64)
+		PRJ_LIBP := $(CFG_LIBROOT)/mysql/x64/lib/
+	else
+		PRJ_LIBP := $(CFG_LIBROOT)/mysql/x86/lib
 	endif
 else
 	PRJ_LIBP := /usr/lib/mysql

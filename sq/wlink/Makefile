@@ -8,6 +8,7 @@ PRJ_SQRL := service
 PRJ_NAME := wlink
 PRJ_DESC := wlink
 PRJ_DEFS := 
+PRJ_WINL := winmm strmiids
 
 SQMOD_STATIC :=
 
