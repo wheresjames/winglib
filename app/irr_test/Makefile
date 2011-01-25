@@ -12,6 +12,7 @@ PRJ_DEPS := irrlicht
 PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib
+PRJ_WINL := winmm
 PRJ_DEFS := 
 
 #-------------------------------------------------------------------
@@ -47,9 +48,7 @@ else
 		#PRJ_INCS := $(PRJ_INCS) ogles/include
 	else
 		ifeq ($(BUILD),gcc)
-			PRJ_OSLB := opengl32 winmm
-		else
-			PRJ_OSLB := winmm.lib
+			PRJ_OSLB := opengl32
 		endif
 #		PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OPENGL_
 	endif	

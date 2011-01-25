@@ -16,6 +16,7 @@ PRJ_DEFS := HAVE_AV_CONFIG_H=1 __STDC_CONSTANT_MACROS
 PRJ_LIBP :=
 PRJ_OSLB :=
 PRJ_WINL := vfw32
+PRJ_WINX := libgcc.a libmingwex.a
 
 PRJ_SUBROOT := _sqmod
 
@@ -29,13 +30,8 @@ include $(PRJ_LIBROOT)/config.mk
 ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),vs)
 		PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/windows/vs xlibs $(PRJ_INCS)
-		PRJ_PLIB := libgcc.a libmingwex.a 
-		# libmoldname.a libmsvcr**d.a libmsvcr**.a
-		ifdef DBG
-			PRJ_PLIB := $(PRJ_PLIB) ffmpeg_d.lib x264_d.lib
-		else
-			PRJ_PLIB := $(PRJ_PLIB) ffmpeg.lib x264.lib
-		endif
+		
+		PRJ_PLIB := ffmpeg x264
 		ifeq ($(OS),win64)
 			PRJ_LIBP := $(CFG_LIBROOT)/xlibs/x64
 		else

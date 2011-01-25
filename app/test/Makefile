@@ -11,7 +11,7 @@ PRJ_NAME := test
 PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib dshowbase
-PRJ_OSLB := winmm.lib strmiids.lib
+PRJ_WINL := winmm strmiids
 PRJ_RESD := res res2
 
 #-------------------------------------------------------------------
