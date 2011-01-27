@@ -114,7 +114,12 @@ stdString CSqEngineExport::getCpuType()
 	return oexT( "arm" );
 #endif
 
+#if defined( OEX_CPU_64 )
+	return oexT( "x64" );
+#endif
+
 	return oexT( "x86" );
+
 }
 
 int CSqEngineExport::alert( const stdString &sMsg )
