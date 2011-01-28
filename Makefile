@@ -55,9 +55,23 @@ BUILDDIRS := $(BUILDDIRS) app/vidcap app/avi_scan \
 ifdef DOX
 BUILDDIRS := $(BUILDDIRS) dox
 endif
-						  
+			
+#-------------------------------------------------------------------
+# multithreading
+#-------------------------------------------------------------------
+ifeq ($(NOMULTI),)
+ifeq ($(NUMJOBS),)
+ifdef NUMBER_OF_PROCESSORS
+NUMJOBS := -j$(NUMBER_OF_PROCESSORS)
+else
+NUMJOBS := -j2
+endif
+endif
+endif
+
+
 .PHONY all: $(BUILDDIRS)
 
 .PHONY $(BUILDDIRS) :
-	$(MAKE) -C $@ $(BUILDTYPE)
+	$(MAKE) $(NUMJOBS) -C $@ $(BUILDTYPE)
 

@@ -32,12 +32,12 @@ ifeq ($(PLATFORM),windows)
 
 	PRJ_INCS := $(PRJ_INCS) mysql/include
 	ifeq ($(OS),win64)
-		PRJ_LIBP := $(CFG_LIBROOT)/mysql/x64/lib/
+		PRJ_LIBP := $(PRJ_LIBP) $(CFG_LIBROOT)/mysql/x64/lib/
 	else
-		PRJ_LIBP := $(CFG_LIBROOT)/mysql/x86/lib
+		PRJ_LIBP := $(PRJ_LIBP) $(CFG_LIBROOT)/mysql/x86/lib
 	endif
 else
-	PRJ_LIBP := /usr/lib/mysql
+	PRJ_LIBP := $(PRJ_LIBP) /usr/lib/mysql
 	PRJ_OSLB := mysqlclient
 endif
 

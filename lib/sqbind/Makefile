@@ -24,6 +24,7 @@ export LOC_TAG := def
 include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := import
+LOC_INC_import := $(CFG_LIBROOT)/winglib/lib/sqbind
 LOC_SRC_import := $(CFG_LIBROOT)/winglib/lib/sqbind/import
 include $(PRJ_LIBROOT)/build.mk
 

@@ -531,7 +531,8 @@ public:
 							if ( SUCCEEDED( hr ) && cpPBag != NULL )
 							{
 								// Get friendly name
-								CComVariant var; var.vt = VT_BSTR;
+//								CComVariant var; var.vt = VT_BSTR;
+								VARIANT var; var.vt = VT_BSTR;
 								hr = cpPBag->Read( L"FriendlyName", &var, NULL );
 
 								CPropertyBag &r = (*pList)[ i ];
@@ -544,8 +545,8 @@ public:
 //									= oexStdString( (_bstr_t)var.bstrVal ).c_str(); 
 
 								// Free string
-								CoTaskMemFree( pMonikerName );
-
+								CoTaskMemFree( pMonikerName );	  
+								CoTaskMemFree( &var );
 							} // end if	
 
 						} // end if
@@ -888,7 +889,7 @@ public:
 
 		// Add filter
 		if ( pName == NULL ) pName = "";
-		if ( FAILED( hr = m_cpGraphBuilder->AddFilter( pFilter, (CComBSTR)pName ) ) )
+		if ( FAILED( hr = m_cpGraphBuilder->AddFilter( pFilter, oexStrToStrWPtr( pName ) ) ) )
 			return oexERROR( hr, CStr().Fmt( oexT( "Adding Filter to Graph : %s" ), pName ) );
 
 		return S_OK;
@@ -1132,8 +1133,8 @@ public:
 
 		// Create source filter
 		CComPtr< IBaseFilter > cpBaseFilter;
-		if ( FAILED( hr = m_cpGraphBuilder->AddSourceFilter( (CComBSTR)pFile, 
-															 (CComBSTR)sFilterName.c_str(), 
+		if ( FAILED( hr = m_cpGraphBuilder->AddSourceFilter( oexStrToStrWPtr( pFile ), 
+															 oexStrToStrWPtr( sFilterName.c_str() ), 
 															 &cpBaseFilter ) ) )
 			return oexERROR( hr, CStr().Fmt( oexT( "IGraphBuilder::AddSourceFilter() failed, %s" ), pFile ) );
 

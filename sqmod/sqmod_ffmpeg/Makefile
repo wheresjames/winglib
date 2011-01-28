@@ -33,9 +33,9 @@ ifeq ($(PLATFORM),windows)
 		
 		PRJ_PLIB := ffmpeg x264
 		ifeq ($(OS),win64)
-			PRJ_LIBP := $(CFG_LIBROOT)/xlibs/x64
+			PRJ_LIBP := $(PRJ_LIBP) $(CFG_LIBROOT)/xlibs/x64
 		else
-			PRJ_LIBP := $(CFG_LIBROOT)/xlibs/x86
+			PRJ_LIBP := $(PRJ_LIBP) $(CFG_LIBROOT)/xlibs/x86
 		endif
 	else
 		PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/windows/gcc $(PRJ_INCS) zlib

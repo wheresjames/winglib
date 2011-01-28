@@ -48,9 +48,8 @@
 #if !defined( OEX_NODSHOW )
 
 // Just to make things a little easier
-#include <atlbase.h>
+#include "comptr.h"
 #include <string>
-#include <comutil.h>
 
 // *** DirectShow
 #include <dshow.h>
