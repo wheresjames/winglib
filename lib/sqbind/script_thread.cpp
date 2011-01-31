@@ -909,9 +909,11 @@ oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMs
 			return m_pParentScript->ProcessMsg( sPath, sMsg, mapParams, pReply, pReplyEvent );
 
 		// Shave off parent sep
-		while ( sPath[ 0 ] == oexT( '/' )
-				|| sPath[ 0 ] == oexT( '\\' )
-				|| sPath[ 0 ] == oexT( '.' ) )
+		while ( sPath.length()
+				&& ( sPath[ 0 ] == oexT( '/' )
+					 || sPath[ 0 ] == oexT( '\\' )
+					 || sPath[ 0 ] == oexT( '.' ) 
+					) )
 			sPath = sPath.substr( 1 );
 
 		// Is it ours?
