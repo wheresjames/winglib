@@ -12,6 +12,7 @@ PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib
 PRJ_WINL := winmm strmiids
+PRJ_VSLB := dshowbase
  
 PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Idle SRV_Stop
 
@@ -24,10 +25,6 @@ endif
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
-
-ifeq ($(BUILD),vs)
-	PRJ_LIBS := $(PRJ_LIBS) dshowbase
-endif
 
 #-------------------------------------------------------------------
 # File locations

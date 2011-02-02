@@ -19,6 +19,7 @@ PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel \
 #			bullet
 PRJ_DEFS := OEX_NOBULLET
 PRJ_WINL := strmiids winmm
+PRJ_VSLB := dshowbase
 
 PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
@@ -28,10 +29,6 @@ PRJ_SUBROOT := _sqmod
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
-
-ifeq ($(BUILD),vs)
-	PRJ_LIBS := $(PRJ_LIBS) dshowbase
-endif
 
 ifeq ($(PLATFORM),windows)
 	PRJ_DEFS := $(PRJ_DEFS) FTGL_LIBRARY_STATIC

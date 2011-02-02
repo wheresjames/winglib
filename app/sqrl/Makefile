@@ -12,6 +12,7 @@ PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib
 PRJ_WINL := winmm strmiids
+PRJ_VSLB := dshowbase
 
 ifdef SQMOD_STATIC
 	PRJ_INCS := $(PRJ_INCS) gdchart cell/lib
@@ -22,10 +23,6 @@ endif
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
-
-ifeq ($(BUILD),vs)
-	PRJ_LIBS := $(PRJ_LIBS) dshowbase
-endif
 
 #-------------------------------------------------------------------
 # File locations

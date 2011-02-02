@@ -12,16 +12,13 @@ PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib
 PRJ_WINL := winmm strmiids
+PRJ_VSLB := dshowbase
 PRJ_RESD := res res2
 
 #-------------------------------------------------------------------
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
-
-ifeq ($(BUILD),vs)
-	PRJ_LIBS := $(PRJ_LIBS) dshowbase
-endif
 
 #-------------------------------------------------------------------
 # File locations

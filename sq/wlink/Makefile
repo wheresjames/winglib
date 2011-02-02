@@ -9,6 +9,7 @@ PRJ_NAME := wlink
 PRJ_DESC := wlink
 PRJ_DEFS := 
 PRJ_WINL := winmm strmiids
+PRJ_VSLB := dshowbase
 
 SQMOD_STATIC :=
 

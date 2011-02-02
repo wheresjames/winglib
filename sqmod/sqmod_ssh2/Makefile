@@ -16,6 +16,7 @@ PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel curl cximage jpeg png tiff zl
 			ssh2 openssl_a openssl_b openssl_a openssl_b
 PRJ_DEFS := LIBSSH2DEBUG_USERCALLBACK
 PRJ_WINL := strmiids winmm
+PRJ_VSLB := dshowbase
  
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
@@ -25,10 +26,6 @@ PRJ_SUBROOT := _sqmod
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
-
-ifeq ($(BUILD),vs)
-	PRJ_LIBS := $(PRJ_LIBS) dshowbase
-endif
 
 ifeq ($(PLATFORM),windows)
 	PRJ_INCS := $(PRJ_INCS) libssh2/win32
