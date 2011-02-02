@@ -265,7 +265,7 @@ oexLONG CIpSocket::GetInitCount()
 oexBOOL CIpSocket::InitSockets()
 {
 	// Add ref
-	if ( 1 == oexInterlockedIncrement( &g_CIpSocket_lInitCount ) )
+	if ( 1 == oexIncrement( &g_CIpSocket_lInitCount ) )
 	{
 		// Quit if already initialized
 		if ( m_lInit == 0 )
@@ -285,7 +285,7 @@ oexBOOL CIpSocket::InitSockets()
 void CIpSocket::UninitSockets()
 {
 	// Deref
-	if ( oexInterlockedDecrement( &g_CIpSocket_lInitCount ) )
+	if ( oexDecrement( &g_CIpSocket_lInitCount ) )
 		return;
 
 	// Punt if not initialized
@@ -297,7 +297,7 @@ void CIpSocket::UninitSockets()
 }
 
 void CIpSocket::Detach()
-{   m_hSocket = c_InvalidSocket; 
+{   m_hSocket = c_InvalidSocket;
 	m_hSocketEvent = c_InvalidEvent;
 	Destroy();
 }

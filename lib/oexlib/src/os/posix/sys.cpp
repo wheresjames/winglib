@@ -194,7 +194,7 @@ int CSys::GetKey()
 	otios.c_lflag = tios.c_lflag;
 	tios.c_lflag &= ~( ECHO | ICANON );
 	ioctl( 0, TCSETS, &tios );
-	if ( 0 > read( 0, &ch, 1 ) ) 
+	if ( 0 > read( 0, &ch, 1 ) )
 		ch = 0;
 	tios.c_lflag = otios.c_lflag;
 	ioctl( 0, TCSETS, &tios );
@@ -635,14 +635,14 @@ oexINT CSys::WaitForMultipleObjects( oexUINT x_uObjects, CSys::t_WAITABLE *x_pHa
 	return waitFailed;
 }
 
-oexLONG CSys::InterlockedIncrement( oexLONG *x_puVal )
+oexLONG CSys::increment( oexLONG *x_puVal )
 {
 	// +++ Need this functionality
 	//return ::InterlockedIncrement( x_puVal );
 	return ++(*x_puVal);
 }
 
-oexLONG CSys::InterlockedDecrement( oexLONG *x_puVal )
+oexLONG CSys::decrement( oexLONG *x_puVal )
 {
 	// +++ Need this functionality
 //	return ::InterlockedDecrement( x_puVal );
