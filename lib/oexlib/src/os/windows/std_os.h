@@ -52,6 +52,5 @@
 #endif
 
 #include <windows.h>
-#include <comdef.h>
 
 

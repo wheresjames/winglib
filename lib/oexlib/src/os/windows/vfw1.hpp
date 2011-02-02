@@ -37,7 +37,7 @@
 #	define CVFWCAP_SetWindowLong( h, ptr )	SetWindowLongPtr( h, 0, (LONG_PTR)ptr )
 #else
 #	define CVFWCAP_GetWindowLong( h )		GetWindowLong( h, GWL_USERDATA )
-#	define CVFWCAP_SetWindowLong( h, ptr )	SetWindowLong( h, GWL_USERDATA, (LONG)ptr ) 
+#	define CVFWCAP_SetWindowLong( h, ptr )	SetWindowLong( h, GWL_USERDATA, (LONG)ptr )
 #endif
 
 
@@ -131,7 +131,7 @@ public:
 		m_dwOnStatus = 0;
 		m_dwOnError = 0;
 		m_llFrame = 0;
-		
+
 		m_hFrameWnd = NULL;
 		m_uFrameMsg = 0;
 
@@ -240,7 +240,7 @@ public:
 			*m_vdi[ m_dwNumDrivers ].szVer = 0;
 
 			// Attempt to get video driver information
-			if ( capGetDriverDescription(	i, 
+			if ( capGetDriverDescription(	i,
 											m_vdi[ m_dwNumDrivers ].szName, sizeof( m_vdi[ m_dwNumDrivers ].szName ),
 											m_vdi[ m_dwNumDrivers ].szVer, sizeof( m_vdi[ m_dwNumDrivers ].szVer ) ) )
 				m_vdi[ m_dwNumDrivers++ ].index = i;
@@ -267,16 +267,21 @@ public:
 	static BOOL DriverConnect( HWND hWnd, DWORD i )
 	{
 		DWORD err = 0;
+#if defined( _MSC_VER )
 		__try {
+#endif
 			// Attempt to connect to the specified driver
 			if ( !capDriverConnect( hWnd, i ) )
 				return FALSE;
+
+#if defined( _MSC_VER )
 		} __except( err = GetExceptionCode() ) { return FALSE; }
+#endif
 
 		return TRUE;
 	}
 
-	
+
 	//==============================================================
 	// Connect()
 	//==============================================================
@@ -288,7 +293,7 @@ public:
 	*/
 	BOOL Connect( DWORD i )
 	{_STT();
-		if ( !IsWnd() ) 
+		if ( !IsWnd() )
 			return FALSE;
 
 		oexAutoLock ll( m_lock );
@@ -321,7 +326,7 @@ public:
 		// Initialize draw dib
 //		m_hDrawDib = DrawDibOpen();
 
-		return TRUE;		
+		return TRUE;
 	}
 
 	//==============================================================
@@ -346,7 +351,7 @@ public:
 			{	CloseHandle( m_hGrab );
 				m_hGrab = NULL;
 			} // end if
-			
+
 			// Release allocated buffers
 			ReleaseVideoFormatData();
 			ReleaseAudioFormatData();
@@ -371,7 +376,7 @@ public:
 		m_nHeight = 0;
 
 /*
-		if ( m_hDrawDib != NULL ) 
+		if ( m_hDrawDib != NULL )
 		{	DrawDibClose( m_hDrawDib );
 			m_hDrawDib = NULL;
 		} // end if
@@ -394,14 +399,14 @@ public:
 
 		\return Returns non-zero if success.
 	*/
-	BOOL Create(	LPCTSTR pTitle = NULL, HWND hwndParent = NULL, 
-					DWORD dwStyle = WS_VISIBLE | WS_OVERLAPPEDWINDOW, 
-					long x = 10, long y = 10, long width = 320, long height = 240, 
+	BOOL Create(	LPCTSTR pTitle = NULL, HWND hwndParent = NULL,
+					DWORD dwStyle = WS_VISIBLE | WS_OVERLAPPEDWINDOW,
+					long x = 10, long y = 10, long width = 320, long height = 240,
 					int nID = 0 )
 	{_STT();
 		// Lose old window
 		Close();
-		
+
 		// Attempt to create a capture window
 //#if defined( OEX_DEBUG )
 //		m_hWnd = capCreateCaptureWindow( pTitle, dwStyle, 0, 0, 320, 240, hwndParent, nID );
@@ -431,9 +436,9 @@ public:
 	// IsWnd()
 	//==============================================================
 	/// Returns non-zero if there is a valid capture window
-	BOOL IsWnd() 
+	BOOL IsWnd()
 	{_STT();
-		return ( m_hWnd && ::IsWindow( m_hWnd ) ); 
+		return ( m_hWnd && ::IsWindow( m_hWnd ) );
 	}
 
 	//==============================================================
@@ -470,10 +475,10 @@ public:
 	*/
 	BOOL GetDriverInfo( DWORD i, SDriverInfo *pcdi )
 	{_STT();
-		if ( !m_dwNumDrivers || !LoadDriverInfo() ) 
+		if ( !m_dwNumDrivers || !LoadDriverInfo() )
 			return FALSE;
 
-		if ( pcdi == NULL || i >= m_dwNumDrivers ) 
+		if ( pcdi == NULL || i >= m_dwNumDrivers )
 			return FALSE;
 
 		memcpy( pcdi, &m_vdi[ i ], sizeof( SDriverInfo ) );
@@ -487,7 +492,7 @@ public:
 	/// Retuns the number of installed capture devices.
 	DWORD GetNumDrivers()
 	{_STT();
-		if ( !m_dwNumDrivers ) LoadDriverInfo(); return m_dwNumDrivers; 
+		if ( !m_dwNumDrivers ) LoadDriverInfo(); return m_dwNumDrivers;
 	}
 
 	//==============================================================
@@ -496,7 +501,7 @@ public:
 	/// Returns non-zero if a capture device is connected
 	BOOL GetStatus()
 	{_STT();
-		return capGetStatus( m_hWnd, &m_cs, sizeof( m_cs ) ); 
+		return capGetStatus( m_hWnd, &m_cs, sizeof( m_cs ) );
 	}
 
 	//==============================================================
@@ -506,9 +511,9 @@ public:
 	/**
 		\return Returns non-zero if success.
 	*/
-	BOOL ShowVideoSourceDlg() 
+	BOOL ShowVideoSourceDlg()
 	{_STT();
-		return ShowDialogBox( eDlgVideoSource ); 
+		return ShowDialogBox( eDlgVideoSource );
 	}
 
 	//==============================================================
@@ -518,9 +523,9 @@ public:
 	/**
 		\return Returns non-zero if success.
 	*/
-	BOOL ShowVideoFormatDlg() 
+	BOOL ShowVideoFormatDlg()
 	{_STT();
-		return ShowDialogBox( eDlgVideoFormat ); 
+		return ShowDialogBox( eDlgVideoFormat );
 	}
 
 	//==============================================================
@@ -530,9 +535,9 @@ public:
 	/**
 		\return Returns non-zero if success.
 	*/
-	BOOL ShowVideoDisplayDlg() 
+	BOOL ShowVideoDisplayDlg()
 	{_STT();
-		return ShowDialogBox( eDlgVideoDisplay ); 
+		return ShowDialogBox( eDlgVideoDisplay );
 	}
 
 	//==============================================================
@@ -542,9 +547,9 @@ public:
 	/**
 		\return Returns non-zero if success.
 	*/
-	BOOL ShowVideoCompressionDlg() 
+	BOOL ShowVideoCompressionDlg()
 	{_STT();
-		return ShowDialogBox( eDlgVideoCompression ); 
+		return ShowDialogBox( eDlgVideoCompression );
 	}
 
 	//==============================================================
@@ -556,9 +561,9 @@ public:
 
 		\return Returns non-zero if success.
 	*/
-	BOOL Preview( BOOL en ) 
+	BOOL Preview( BOOL en )
 	{_STT();
-		return capPreview( m_hWnd, en ); 
+		return capPreview( m_hWnd, en );
 	};
 
 	//==============================================================
@@ -570,11 +575,11 @@ public:
 
 		\return Returns non-zero if success.
 	*/
-	BOOL SetPreviewRate( DWORD rate = 30 ) 
+	BOOL SetPreviewRate( DWORD rate = 30 )
 	{_STT();
-		return capPreviewRate( m_hWnd, rate ); 
+		return capPreviewRate( m_hWnd, rate );
 	}
-	
+
 	//==============================================================
 	// PreviewStretching()
 	//==============================================================
@@ -584,9 +589,9 @@ public:
 
 		\return Returns non-zero if success.
 	*/
-	BOOL PreviewStretching( BOOL en ) 
+	BOOL PreviewStretching( BOOL en )
 	{_STT();
-		return capPreviewScale( m_hWnd, en ); 
+		return capPreviewScale( m_hWnd, en );
 	}
 
 	//==============================================================
@@ -615,7 +620,7 @@ public:
 	*/
 	BOOL SetCaptureFileName( LPCTSTR pName )
 	{_STT();
-		if ( pName == NULL ) return FALSE; 
+		if ( pName == NULL ) return FALSE;
 		if ( !capFileSetCaptureFile( m_hWnd, pName ) ) return FALSE;
 		strcpy( m_szCaptureFileName, pName );
 		return TRUE;
@@ -625,10 +630,10 @@ public:
 	// GetCaptureFileName()
 	//==============================================================
 	/// Returns the currently set capture filename
-	LPCTSTR GetCaptureFileName() 
+	LPCTSTR GetCaptureFileName()
 	{_STT();
 		GetCaptureFileName( m_szCaptureFileName );
-		return m_szCaptureFileName; 
+		return m_szCaptureFileName;
 	}
 
 	//==============================================================
@@ -642,7 +647,7 @@ public:
 	*/
 	BOOL GetCaptureFileName( LPSTR buf )
 	{_STT();
-		return capFileGetCaptureFile( m_hWnd, buf, MAX_PATH - 1 ); 
+		return capFileGetCaptureFile( m_hWnd, buf, MAX_PATH - 1 );
 	}
 
 	//==============================================================
@@ -654,9 +659,9 @@ public:
 
 		\return Returns non-zero if success.
 	*/
-	BOOL FileAlloc( DWORD size ) 
+	BOOL FileAlloc( DWORD size )
 	{_STT();
-		return capFileAlloc( m_hWnd, size ); 
+		return capFileAlloc( m_hWnd, size );
 	}
 
 	//==============================================================
@@ -668,7 +673,7 @@ public:
 	*/
 	BOOL CaptureToFile()
 	{_STT();
-		return capCaptureSequence( m_hWnd ); 
+		return capCaptureSequence( m_hWnd );
 	}
 
 	//==============================================================
@@ -685,7 +690,7 @@ public:
 	*/
 	BOOL SaveAs( LPCTSTR pName )
 	{_STT();
-		return capFileSaveAs( m_hWnd, pName ); 
+		return capFileSaveAs( m_hWnd, pName );
 	}
 
 	//==============================================================
@@ -701,10 +706,10 @@ public:
 	/**
 		\return Returns non-zero if success.
 	*/
-	BOOL SetAudioFormat() 
+	BOOL SetAudioFormat()
 	{_STT();
 		if ( !IsAudioFormatData() ) return FALSE;
-		return capSetAudioFormat( m_hWnd, m_pAudioFormat, sizeof( m_dwAudioDataSize ) ); 
+		return capSetAudioFormat( m_hWnd, m_pAudioFormat, sizeof( m_dwAudioDataSize ) );
 	}
 
 	//==============================================================
@@ -714,9 +719,9 @@ public:
 	/**
 		\return Returns non-zero if success.
 	*/
-	BOOL GetCaptureSetup() 
+	BOOL GetCaptureSetup()
 	{_STT();
-		return capCaptureGetSetup( m_hWnd, &m_cp, sizeof( m_cp ) ); 
+		return capCaptureGetSetup( m_hWnd, &m_cp, sizeof( m_cp ) );
 	}
 
 	//==============================================================
@@ -726,9 +731,9 @@ public:
 	/**
 		\return Returns non-zero if success.
 	*/
-	BOOL SetCaptureSetup() 
+	BOOL SetCaptureSetup()
 	{_STT();
-		return capCaptureSetSetup( m_hWnd, &m_cp, sizeof( m_cp ) ); 
+		return capCaptureSetSetup( m_hWnd, &m_cp, sizeof( m_cp ) );
 	}
 
 	//==============================================================
@@ -737,7 +742,7 @@ public:
 	/// Set audio capture flag in capture setup structure m_cp
 	void SetCaptureAudio( BOOL ca )
 	{_STT();
-		GetCaptureSetup(); m_cp.fCaptureAudio = ca; SetCaptureSetup(); 
+		GetCaptureSetup(); m_cp.fCaptureAudio = ca; SetCaptureSetup();
 	}
 
 	//==============================================================
@@ -746,7 +751,7 @@ public:
 	/// Sets yield bit in capture setup structure m_cp
 	void SetYield( BOOL yield )
 	{_STT();
-		GetCaptureSetup(); m_cp.fYield = yield; SetCaptureSetup(); 
+		GetCaptureSetup(); m_cp.fYield = yield; SetCaptureSetup();
 	}
 
 	//==============================================================
@@ -758,7 +763,7 @@ public:
 	*/
 	BOOL CaptureSingleFrameOpen()
 	{_STT();
-		return capCaptureSingleFrameOpen( m_hWnd ); 
+		return capCaptureSingleFrameOpen( m_hWnd );
 	}
 
 	//==============================================================
@@ -770,7 +775,7 @@ public:
 	*/
 	BOOL CaptureSingleFrameClose()
 	{_STT();
-		return capCaptureSingleFrameClose( m_hWnd ); 
+		return capCaptureSingleFrameClose( m_hWnd );
 	}
 
 	//==============================================================
@@ -782,7 +787,7 @@ public:
 	*/
 	BOOL CaptureSingleFrame()
 	{_STT();
-		return capCaptureSingleFrame( m_hWnd ); 
+		return capCaptureSingleFrame( m_hWnd );
 	}
 
 	//==============================================================
@@ -794,7 +799,7 @@ public:
 	*/
 	BOOL CaptureSequence()
 	{_STT();
-		return capCaptureSequence( m_hWnd ); 
+		return capCaptureSequence( m_hWnd );
 	}
 
 	//==============================================================
@@ -806,7 +811,7 @@ public:
 	*/
 	BOOL CaptureSequenceNoFile()
 	{_STT();
-		return capCaptureSequenceNoFile( m_hWnd ); 
+		return capCaptureSequenceNoFile( m_hWnd );
 	}
 
 	//==============================================================
@@ -818,7 +823,7 @@ public:
 	*/
 	BOOL CaptureStop()
 	{_STT();
-		return capCaptureStop( m_hWnd ); 
+		return capCaptureStop( m_hWnd );
 	}
 
 	//==============================================================
@@ -830,7 +835,7 @@ public:
 	*/
 	BOOL CaptureAbort()
 	{_STT();
-		return capCaptureAbort( m_hWnd ); 
+		return capCaptureAbort( m_hWnd );
 	}
 
 	//==============================================================
@@ -842,7 +847,7 @@ public:
 	*/
 	BOOL CopyToClipboard()
 	{_STT();
-		return capEditCopy( m_hWnd ); 
+		return capEditCopy( m_hWnd );
 	}
 
 	//==============================================================
@@ -857,9 +862,9 @@ public:
 	BOOL SaveAsDIB( LPCTSTR pFile )
 	{_STT();
 		if ( pFile == NULL ) return FALSE;
-		return capFileSaveDIB( m_hWnd, pFile ); 
+		return capFileSaveDIB( m_hWnd, pFile );
 	}
-	
+
 	//==============================================================
 	// SetMCIDeviceName()
 	//==============================================================
@@ -871,7 +876,7 @@ public:
 	*/
 	BOOL SetMCIDeviceName( LPCTSTR pName )
 	{_STT();
-		return capSetMCIDeviceName( m_hWnd, pName ); 
+		return capSetMCIDeviceName( m_hWnd, pName );
 	}
 
 	//==============================================================
@@ -885,7 +890,7 @@ public:
 	*/
 	BOOL GetMCIDeviceName( LPSTR pName )
 	{_STT();
-		return capGetMCIDeviceName( m_hWnd, pName, MAX_PATH - 1 ); 
+		return capGetMCIDeviceName( m_hWnd, pName, MAX_PATH - 1 );
 	}
 
 	//==============================================================
@@ -899,7 +904,7 @@ public:
 	*/
 	BOOL SetUserData( long data )
 	{_STT();
-		return capSetUserData( m_hWnd, data ); 
+		return capSetUserData( m_hWnd, data );
 	}
 
 	//==============================================================
@@ -911,7 +916,7 @@ public:
 	*/
 	long GetUserData()
 	{_STT();
-		return (long)capGetUserData( m_hWnd ); 
+		return (long)capGetUserData( m_hWnd );
 	}
 
 	//==============================================================
@@ -928,13 +933,13 @@ public:
 		try
 		{
 			// Grab frame
-			bRet = capGrabFrame( m_hWnd ); 
-			
+			bRet = capGrabFrame( m_hWnd );
+
 		} // end try
-		
+
 		catch( ... )
 		{	oexERROR( 0, "Assert in capGrabFrame()" );
-			return FALSE; 
+			return FALSE;
 		} // end catch
 
 		return bRet;
@@ -943,7 +948,7 @@ public:
 	//==============================================================
 	// GrabFrameNoStop()
 	//==============================================================
-	/// Grabs a single frame of video from the current video device 
+	/// Grabs a single frame of video from the current video device
 	/// without stopping the capture.
 	/**
 		\return Returns non-zero if success.
@@ -955,13 +960,13 @@ public:
 		try
 		{
 			// Grab frame
-			bRet = capGrabFrameNoStop( m_hWnd ); 
-			
+			bRet = capGrabFrameNoStop( m_hWnd );
+
 		} // end try
-		
+
 		catch( ... )
-		{	oexERROR( 0, "Assert in capGrabFrameNoStop()" );; 
-			return FALSE; 
+		{	oexERROR( 0, "Assert in capGrabFrameNoStop()" );;
+			return FALSE;
 		} // end catch
 
 		return bRet;
@@ -979,7 +984,7 @@ public:
 	*/
 	BOOL WaitGrab( DWORD timeout = 3000 )
 	{_STT();
-		return ( WaitForSingleObject( m_hGrab, timeout ) != WAIT_TIMEOUT ); 
+		return ( WaitForSingleObject( m_hGrab, timeout ) != WAIT_TIMEOUT );
 	}
 
 	//==============================================================
@@ -994,7 +999,7 @@ public:
 	*/
 	BOOL PaletteAuto( DWORD frames, DWORD colors )
 	{_STT();
-		return capPaletteAuto( m_hWnd, frames, colors ); 
+		return capPaletteAuto( m_hWnd, frames, colors );
 	}
 
 	//==============================================================
@@ -1012,7 +1017,7 @@ public:
 	*/
 	BOOL PaletteManual( BOOL grab, DWORD colors )
 	{_STT();
-		return capPaletteManual( m_hWnd, grab, colors ); 
+		return capPaletteManual( m_hWnd, grab, colors );
 	}
 
 	//==============================================================
@@ -1026,7 +1031,7 @@ public:
 	*/
 	BOOL LoadPalette( LPCTSTR pFile )
 	{_STT();
-		return capPaletteOpen( m_hWnd, pFile ); 
+		return capPaletteOpen( m_hWnd, pFile );
 	}
 
 	//==============================================================
@@ -1038,7 +1043,7 @@ public:
 	*/
 	BOOL GetPaletteFromClipboard()
 	{_STT();
-		return capPalettePaste( m_hWnd ); 
+		return capPalettePaste( m_hWnd );
 	}
 
 	//==============================================================
@@ -1052,7 +1057,7 @@ public:
 	*/
 	BOOL SavePalette( LPCTSTR pFile )
 	{_STT();
-		return capPaletteSave( m_hWnd, pFile ); 
+		return capPaletteSave( m_hWnd, pFile );
 	}
 
 	//==============================================================
@@ -1107,7 +1112,7 @@ public:
 	*/
 	BOOL SetPos( long x, long y )
 	{_STT();
-		return SetWindowPos( m_hWnd, NULL, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE ); 
+		return SetWindowPos( m_hWnd, NULL, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE );
 	}
 
 	//==============================================================
@@ -1122,7 +1127,7 @@ public:
 	*/
 	BOOL SetSize( long x, long y )
 	{_STT();
-		return SetWindowPos( m_hWnd, NULL, 0, 0, x, y, SWP_NOZORDER | SWP_NOMOVE ); 
+		return SetWindowPos( m_hWnd, NULL, 0, 0, x, y, SWP_NOZORDER | SWP_NOMOVE );
 	}
 
 	//==============================================================
@@ -1138,14 +1143,14 @@ public:
 	BOOL SetWindow( LPRECT pRect )
 	{_STT();
 	 	if ( pRect == NULL ) return FALSE;
-		return SetWindowPos(	m_hWnd, NULL, 
-								pRect->left, 
-								pRect->top, 
+		return SetWindowPos(	m_hWnd, NULL,
+								pRect->left,
+								pRect->top,
 								pRect->right - pRect->left,
 								pRect->bottom - pRect->top,
-								SWP_NOZORDER ); 
+								SWP_NOZORDER );
 	}
-	
+
 	//==============================================================
 	// ShowWindow()
 	//==============================================================
@@ -1160,7 +1165,7 @@ public:
 	*/
 	BOOL ShowWindow( UINT uCmdShow = SW_SHOWNORMAL )
 	{_STT();
-		return ::ShowWindow( m_hWnd, uCmdShow ); 
+		return ::ShowWindow( m_hWnd, uCmdShow );
 	}
 
 	/// Returns a list of available devices
@@ -1308,13 +1313,13 @@ protected:
 		\param [in] pVHdr	-	Video header information.
 
 		Video header structure
-		
+
 		\code
-		
-		typedef struct 
+
+		typedef struct
 		{
 			LPSTR lpData;            // address of video buffer
-			DWORD dwBufferLength;    // size, in bytes, of the 
+			DWORD dwBufferLength;    // size, in bytes, of the
 									 // data buffer
 			DWORD dwBytesUsed;       // see below
 			DWORD dwTimeCaptured;    // see below
@@ -1324,39 +1329,39 @@ protected:
 		} VIDEOHDR;
 
 		\endcode
- 
+
 		- Members -
 
 		<b>dwBytesUsed</b>:
-		Number of bytes used in the data buffer. 
+		Number of bytes used in the data buffer.
 
 		<b>dwTimeCaptured</b>:
-		Time, in milliseconds, when the frame was captured relative to 
-		the first frame in the stream. 
-		Synchronization of audio and video in the resulting AVI file 
-		depends solely on this parameter, which should be derived 
-		directly from a counter (VSYNC_Count) incremented by a vertical 
-		sync interrupt. When using NTSC frame rates and frame-based 
-		interrupts, the returned value would be: 
+		Time, in milliseconds, when the frame was captured relative to
+		the first frame in the stream.
+		Synchronization of audio and video in the resulting AVI file
+		depends solely on this parameter, which should be derived
+		directly from a counter (VSYNC_Count) incremented by a vertical
+		sync interrupt. When using NTSC frame rates and frame-based
+		interrupts, the returned value would be:
 
 		<b>dwTimeCaptured</b> = VSYNC_Count * 1/29.97.
- 
-		The capture driver must maintain VSYNC_Count accurately by 
-		allowing recursive entry into the interrupt service routine 
+
+		The capture driver must maintain VSYNC_Count accurately by
+		allowing recursive entry into the interrupt service routine
 		(if only for the purpose of incrementing VSYNC_Count) and by not
-		disabling interrupts for long periods of time. 
+		disabling interrupts for long periods of time.
 
 		<b>dwFlags</b>:
-		Flags giving information about the data buffer. The following 
-		flags are defined for this field: VHDR_DONE  Set by the device 
+		Flags giving information about the data buffer. The following
+		flags are defined for this field: VHDR_DONE  Set by the device
 		driver to indicate it is finished with the data buffer and it is
-		returning the buffer to the application.  
+		returning the buffer to the application.
 
-		VHDR_PREPARED	Set by the system to indicate the data buffer has 
-						been prepared with videoStreamPrepareHeader.  
-		VHDR_INQUEUE	Set by the system to indicate the data buffer is 
-						queued for playback.  
-		VHDR_KEYFRAME	Set by the device driver to indicate a key frame.  
+		VHDR_PREPARED	Set by the system to indicate the data buffer has
+						been prepared with videoStreamPrepareHeader.
+		VHDR_INQUEUE	Set by the system to indicate the data buffer is
+						queued for playback.
+		VHDR_KEYFRAME	Set by the device driver to indicate a key frame.
 	*/
 	virtual BOOL OnFrame( LPVIDEOHDR pVHdr )
 	{_STT();
@@ -1376,7 +1381,7 @@ protected:
 			// Make the callback
 			m_cbfOnFrame( &si, m_pUser );
 
-		} // end if	   
+		} // end if
 
 		// Count frames
 		m_llFrame++;
@@ -1406,7 +1411,7 @@ protected:
 			// Make the callback
 			m_cbfOnFrame( &si, m_pUser );
 
-		} // end if	   
+		} // end if
 
 		// Count frames
 		m_llFrame++;
@@ -1442,7 +1447,7 @@ private:
 
 	/// Currently set capture filename
 	TCHAR				m_szCaptureFileName[ oexSTRSIZE ];
-	
+
 	/// Audio format information
 	LPWAVEFORMATEX		m_pAudioFormat;
 
@@ -1525,7 +1530,7 @@ public:
 
 		// Save information
 		m_hDrawDc = hDC;
-		m_hFrameWnd = hWnd; 
+		m_hFrameWnd = hWnd;
 		m_uFrameMsg = uMsg;
 
 		// Get the bitmap information
@@ -1533,10 +1538,10 @@ public:
 		if ( !GetVideoFormat( &pbi ) || pbi == NULL ) return FALSE;
 
 		// Set up the DrawDib
-		return DrawDibBegin(	m_hDrawDib, hDC, 
+		return DrawDibBegin(	m_hDrawDib, hDC,
 								( pRect->right - pRect->left ),
 								( pRect->bottom - pRect->top ),
-								(LPBITMAPINFOHEADER)pbi, 
+								(LPBITMAPINFOHEADER)pbi,
 								pbi->bmiHeader.biWidth,
 								pbi->bmiHeader.biHeight,
 								0 );//DDF_DONTDRAW );
@@ -1618,7 +1623,7 @@ public:
 		// Allocate memory
 		m_pAudioData = new BYTE[ m_dwAudioDataSize + 1 ];
 		if ( m_pAudioData == NULL )
-		{ 
+		{
 			m_dwAudioDataSize = 0;
 			return FALSE;
 		} // end if
@@ -1651,7 +1656,7 @@ public:
 			return;
 
 		// Disconnect from capture driver
-		if ( m_bConnected ) 
+		if ( m_bConnected )
 		{
 			// No more callbacks
 			DisableCallbacks();
@@ -1664,7 +1669,7 @@ public:
 
 		} // end if
 
-		if ( m_hDrawDib ) 
+		if ( m_hDrawDib )
 		{	DrawDibClose( m_hDrawDib );
 			m_hDrawDib = NULL;
 		} // end if
@@ -1700,7 +1705,7 @@ public:
 	*/
 	BOOL EnableCallbacks()
 	{_STT();
-		if ( !IsWnd() ) 
+		if ( !IsWnd() )
 			return FALSE;
 
 		// Reset the number of callbacks
@@ -1744,7 +1749,7 @@ public:
 		\param [in] type	-	Value specifying info chunk type.
 		\param [in] buf		-	Buffer containing info chunk data.
 		\param [in] size	-	size of the buffer in buf.
-		
+
 		Use this function to add arbitrary data into the current
 		AVI video stream.
 
@@ -1789,7 +1794,7 @@ public:
 		// Allocate memory
 		m_pVideoData = new BYTE[ m_dwVideoDataSize + 1 ];
 		if ( m_pVideoData == NULL )
-		{ 
+		{
 			m_dwVideoDataSize = 0;
 			return FALSE;
 		} // end if
@@ -1825,7 +1830,7 @@ public:
 	*/
 	BOOL SetVideoFormat( LPBITMAPINFO pbmp, DWORD size )
 	{_STT();
-		return capSetVideoFormat( m_hWnd, pbmp, size ); 
+		return capSetVideoFormat( m_hWnd, pbmp, size );
 	}
 
 private:
@@ -1842,7 +1847,7 @@ private:
 public:
 
 	/// Set frame callback function
-	void SetFrameCallback( CCaptureTmpl::cbf_OnFrame &f, oexPVOID u ) 
+	void SetFrameCallback( CCaptureTmpl::cbf_OnFrame &f, oexPVOID u )
 	{	m_cbfOnFrame = f; m_pUser = u; }
 
 private:
@@ -1878,7 +1883,7 @@ public:
 	//==============================================================
 	/// Opens the capture device and starts the capture
 	BOOL Open( oexUINT x_uDevice, oexUINT x_uSource, oexINT x_nWidth, oexINT x_nHeight,
-			   oexUINT x_uFormat, oexFLOAT x_fFps, CCaptureTmpl::cbf_OnFrame x_cbfOnFrame, 
+			   oexUINT x_uFormat, oexFLOAT x_fFps, CCaptureTmpl::cbf_OnFrame x_cbfOnFrame,
 			   oexPVOID x_pUser, oexUINT x_uTimeout = oexDEFAULT_WAIT_TIMEOUT )
 	{_STT();
 		Destroy();
@@ -1899,7 +1904,7 @@ public:
 
 		// Create a thread
 		m_hThread = CreateThread(	(LPSECURITY_ATTRIBUTES)NULL, 0,
-									&CVfwCap::_CaptureThread, (LPVOID)this,	
+									&CVfwCap::_CaptureThread, (LPVOID)this,
 									0, &m_dwThreadId );
 
 		if ( INVALID_HANDLE_VALUE == m_hThread )
@@ -1948,7 +1953,7 @@ public:
 	{_STT();
 		if ( INVALID_HANDLE_VALUE == m_hThread ) return FALSE;
 		if ( INVALID_HANDLE_VALUE == m_hStop ) return FALSE;
-		return WAIT_OBJECT_0 != ::WaitForSingleObject( m_hStop, 0 ); 
+		return WAIT_OBJECT_0 != ::WaitForSingleObject( m_hStop, 0 );
 	}
 
 private:
@@ -1968,7 +1973,7 @@ private:
 
 		// If there is a message
 		while (	PeekMessage( &msg, NULL, NULL, NULL, PM_REMOVE ) )
-		{	
+		{
 			if ( eVfwQuitMsg == msg.message )
 				return oexFALSE;
 
@@ -1976,7 +1981,7 @@ private:
 	//		if ( !TranslateAccelerator( msg.hwnd, hAccel, &msg ) )
 			{
 				// Translate key strokes
-				TranslateMessage( &msg );	
+				TranslateMessage( &msg );
 
 				// Dispatch the message
 				DispatchMessage( &msg );
@@ -2042,7 +2047,7 @@ private:
 		} // end if
 
 		DWORD dwDelay = (DWORD)( m_fFps / 2 );
-		if ( 1 > dwDelay ) 
+		if ( 1 > dwDelay )
 			dwDelay = 1;
 
 		// If there is a message
@@ -2147,7 +2152,7 @@ public:
 		m_fFps = x_fFps;
 
 		// Create capture window
-		BOOL bRes = m_cap.Open( x_uDevice, x_uSource, x_nWidth, x_nHeight, 
+		BOOL bRes = m_cap.Open( x_uDevice, x_uSource, x_nWidth, x_nHeight,
 			                    x_uFormat, x_fFps, CV4w1::_OnFrame, this );
 		if ( !bRes )
 		{	oexERROR( GetLastError(), oexT( "Failed to open capture device" ) );
@@ -2307,7 +2312,7 @@ public:
 	/// +++ Should return the size of the video buffer
 	virtual oexINT GetImageSize()
 	{_STT();
-		return CImage::GetScanWidth( m_nWidth, 24 ) * cmn::Abs( m_nHeight ); 
+		return CImage::GetScanWidth( m_nWidth, 24 ) * cmn::Abs( m_nHeight );
 	}
 
 	//==============================================================
@@ -2326,7 +2331,7 @@ public:
 	/// Returns an image object
 	virtual CImage* GetImage()
 	{_STT();
-		return oexNULL; 
+		return oexNULL;
 	}
 
 	//==============================================================
@@ -2404,7 +2409,7 @@ private:
 
 	/// +++ Replace with signal
 	volatile BOOL					m_bReady;
-	
+
 };
 
 

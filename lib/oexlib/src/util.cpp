@@ -108,7 +108,7 @@ oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 		return oexFALSE;
 
 	// Write to file?
-	if ( g_szFile )
+	if ( g_szFile[ 0 ] )
 	{	oex::CFile f;
 		if ( f.OpenAlways( g_szFile ).IsOpen() )
 		{
@@ -120,7 +120,7 @@ oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 			{	oexUINT uGmt = oexGetUnixTime();
 				if ( uGmt > g_uNextTimestamp )
 				{	g_uNextTimestamp = uGmt + g_uTimestampFreq;
-					s << oexNL8 "   --- " << uGmt << " - " 
+					s << oexNL8 "   --- " << uGmt << " - "
 					  << oexStrToMb( oexLocalTimeStr( oexT( "%Y/%c/%d - %g:%m:%s.%l" oexNL8 ) ) );
 				} // end if
 			} // end if
@@ -345,7 +345,7 @@ template< typename T >
 		for ( oexINT _y = 0; _y < s; _y++ )
 			for ( oexINT _x = 0; _x < s; _x++ )
 			{	T *_p = &p[ ( y + _y ) * w + ( x + _x ) * 3 ];
-				_p[ 0 ] = c[ 0 ], _p[ 1 ] = c[ 1 ], _p[ 2 ] = c[ 2 ]; 
+				_p[ 0 ] = c[ 0 ], _p[ 1 ] = c[ 1 ], _p[ 2 ] = c[ 2 ];
 			} // end for
 	}
 
@@ -355,11 +355,11 @@ template< typename T >
 		for ( oexINT _y = 0; _y < s; _y++ )
 			for ( oexINT _x = 0; _x < s; _x++ )
 			{	T *_p = &p[ ( y + _y ) * w + ( x + _x ) * 3 ];
-				_p[ 0 ] |= c[ 0 ], _p[ 1 ] |= c[ 1 ], _p[ 2 ] |= c[ 2 ]; 
+				_p[ 0 ] |= c[ 0 ], _p[ 1 ] |= c[ 1 ], _p[ 2 ] |= c[ 2 ];
 			} // end for
 	}
 
-static CBin::t_byte g_default_colors[] = 
+static CBin::t_byte g_default_colors[] =
 {
 	32,		32,		32,
 	32,		32,		32,
@@ -389,7 +389,7 @@ oexBOOL CUtil::Fingerprint( CBin *buf, CBin *img, oexINT fmt, oexINT w, oexINT h
 
 	// Ensure space
 	int sz = w * h * 3;
-	if ( img->getUsed() < sz )
+	if ( img->getUsed() < (CBin::t_size)sz )
 		return oexFALSE;
 
 	// Pointers
@@ -435,7 +435,7 @@ oexBOOL CUtil::Fingerprint( CBin *buf, CBin *img, oexINT fmt, oexINT w, oexINT h
 
 		// Pick the glyph
 		int g = 0; //, o = x + ( y * _w );
-		if ( max > n ) 
+		if ( max > n )
 			oex::cmn::CopyBits( &g, 0, psrc, n, ( ( max - n ) < bits ) ? ( max - n ) : bits ), n += bits;
 
 		// Skip border and background colors
@@ -509,16 +509,16 @@ oexBOOL CUtil::DrawLine( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, o
 		CUTIL_SET_PIXEL24( p, sw, x1, y1, pc );
 
 		ym += ye;
-		if ( ym >= xe ) 
+		if ( ym >= xe )
 		{	ym -= xe;
-			if ( y1 != y2 ) 
+			if ( y1 != y2 )
 				y1 += yd;
 		} // end while
 
 		xm += xe;
-		if ( xm >= ye ) 
+		if ( xm >= ye )
 		{	xm -= ye;
-			if ( x1 != x2 ) 
+			if ( x1 != x2 )
 				x1 += xd;
 		} // end while
 
@@ -596,9 +596,9 @@ CStr CUtil::BuildPath( oexINT x_nId, oexCONST CStr &x_sPath, oexTCHAR tSep )
 {	return oexBuildPath( oexGetSysFolder( x_nId ), x_sPath ); }
 
 
-oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType, 
-					  CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, 
-					  oexINT *fg, oexINT *bg, oexCPVOID p, oexINT n, 
+oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType,
+					  CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw,
+					  oexINT *fg, oexINT *bg, oexCPVOID p, oexINT n,
 					  oexCSTR pParams )
 {
 	if ( 0 >= w || 0 >= h || 1 >= n )
@@ -631,7 +631,7 @@ oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType,
 	if ( eGtHorzFft == ( eGtMask & nType ) )
 	{
 		// There is no good default interval
-		if ( 0 >= nInterval ) 
+		if ( 0 >= nInterval )
 			return oexFALSE;
 
 		// Find the range
@@ -652,7 +652,7 @@ oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType,
 		oexFLOAT fRange = pb[ "range" ].ToFloat();
 		if ( !fRange )
 			fRange = fMax - fMin;
-		if ( !fRange ) 
+		if ( !fRange )
 			return oexFALSE;
 
 		oexINT nMag = oex::cmn::Max( 0, pb[ "mag" ].ToInt() );
@@ -670,7 +670,7 @@ oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType,
 					if ( _o >= nInterval )
 						scale = -1;
 					else
-					{	
+					{
 						int _i = i + _o;
 						if (  _i >= nSamples )
 							scale = -1;

@@ -40,7 +40,6 @@
 #if !defined( OEX_NOVFW )
 // *** Video For Windows
 #include <vfw.h>
-#pragma comment( lib, "Vfw32.lib" )
 #include "stdio.h"
 
 #endif
@@ -51,12 +50,8 @@
 #include "comptr.h"
 #include <string>
 
-// *** DirectShow
-#include <dshow.h>
-#include <streams.h>
-
 // *** strmiids.lib
-// Problem: Fatal error LNK1103: debugging information corrupt. 
+// Problem: Fatal error LNK1103: debugging information corrupt.
 // MS changed from V8-V9, get hot fix
 // http://support.microsoft.com/kb/949009/
 
@@ -69,13 +64,17 @@ using namespace OEX_NAMESPACE::vid;
 
 #ifndef OEX_NOVIDEO
 
-#if !defined( OEX_NOVFW )
-#include "vfw1.hpp"
-#endif
+// *** DirectShow
+#	if !defined( OEX_NODSHOW )
+#		include <comdef.h>
+#		include <dshow.h>
+#		include <streams.h>
+#		include "vfw2.hpp"
+#	endif
 
-#if !defined( OEX_NODSHOW )
-#include "vfw2.hpp"
-#endif
+#	if !defined( OEX_NOVFW )
+#		include "vfw1.hpp"
+#	endif
 
 #endif
 
@@ -187,7 +186,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 		case oexVIDSUB_AUTO :
 
 #if !defined( OEX_NODSHOW )
-			
+
 			m_pDevice = OexAllocConstruct< CV4w2 >();
 			if ( !oexCHECK_PTR( m_pDevice ) )
 			{	Destroy();
