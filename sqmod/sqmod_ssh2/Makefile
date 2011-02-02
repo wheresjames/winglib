@@ -12,7 +12,7 @@ PRJ_DEPS := libssh2
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 			libssh2/include openssl/include zlib
-PRJ_LIBS := sqbind oexlib dshowbase sqplus sqstdlib squirrel curl cximage jpeg png tiff zlib \
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel curl cximage jpeg png tiff zlib \
 			ssh2 openssl_a openssl_b openssl_a openssl_b
 PRJ_DEFS := LIBSSH2DEBUG_USERCALLBACK
 PRJ_WINL := strmiids winmm
@@ -25,6 +25,10 @@ PRJ_SUBROOT := _sqmod
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
+
+ifeq ($(BUILD),vs)
+	PRJ_LIBS := $(PRJ_LIBS) dshowbase
+endif
 
 ifeq ($(PLATFORM),windows)
 	PRJ_INCS := $(PRJ_INCS) libssh2/win32

@@ -14,7 +14,7 @@ PRJ_INCS := winglib/lib/sqbind winglib/lib/oexlib \
 			SqPlus/include SqPlus/sqplus \
 			freetype2/include ftgl/src
 #			bullet/src 
-PRJ_LIBS := sqbind oexlib dshowbase sqplus sqstdlib squirrel \
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel \
 			freetype2 ftgl
 #			bullet
 PRJ_DEFS := OEX_NOBULLET
@@ -28,6 +28,10 @@ PRJ_SUBROOT := _sqmod
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
+
+ifeq ($(BUILD),vs)
+	PRJ_LIBS := $(PRJ_LIBS) dshowbase
+endif
 
 ifeq ($(PLATFORM),windows)
 	PRJ_DEFS := $(PRJ_DEFS) FTGL_LIBRARY_STATIC
