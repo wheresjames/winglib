@@ -9,8 +9,6 @@
 #if defined( GD_CUSTOM_ALLOCATOR )
 extern "C"
 {
-#if defined( OEX_WINDOWS )
-
 	void* gd_malloc( GD_size_t size )
 	{
 		return oex::CMem::New( size, oexLINE, oexTEXT( oexFILE ) );
@@ -33,36 +31,6 @@ extern "C"
 		return oex::CMem::Delete( ptr );
 	}
 
-#else
-
-	void* _gd_malloc( GD_size_t size )
-	{
-		return oex::CMem::New( size, oexLINE, oexTEXT( oexFILE ) );
-	}
-
-	extern "C" void* _gd_calloc( GD_size_t num, GD_size_t size )
-	{
-		void *ptr = oex::CMem::New( num * size, oexLINE, oexTEXT( oexFILE ) );
-		oexZeroMemory( ptr, num * size );
-		return ptr;
-	}
-
-	extern "C" void* _gd_realloc( void *ptr, GD_size_t size )
-	{
-		return oex::CMem::Resize( ptr, size, oexLINE, oexTEXT( oexFILE ) );
-	}
-
-	extern "C" void _gd_free( void *ptr )
-	{
-		return oex::CMem::Delete( ptr );
-	}
-
-	t_gd_malloc gd_malloc = _gd_malloc;
-	t_gd_calloc gd_calloc = _gd_calloc;
-	t_gd_realloc gd_realloc = _gd_realloc;
-	t_gd_free gd_free = _gd_free;
-
-#endif
 };
 #endif
 
