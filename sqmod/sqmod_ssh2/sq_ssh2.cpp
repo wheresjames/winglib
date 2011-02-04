@@ -3,18 +3,18 @@
 #include "stdafx.h"
 
 #define SQSSH2_RETRY( e, f )																	\
-	{	int nTo = oexGetUnixTime() + ( oexDEFAULT_WAIT_TIMEOUT / 1000 );						\
+	{	unsigned int nTo = oexGetUnixTime() + ( oexDEFAULT_WAIT_TIMEOUT / 1000 );				\
 		do { e = f; if ( e == LIBSSH2_ERROR_EAGAIN && nTo > oexGetUnixTime() ) oexSleep( 15 );	\
 		} while ( e == LIBSSH2_ERROR_EAGAIN && nTo > oexGetUnixTime() );						\
 	}
 
 // +++ This doesn't work right, need to figure out non-blocking in libssh2
 #define SQSSH2_RETRY2( e, r, s, f )																\
-	{	int nTo = oexGetUnixTime() + ( oexDEFAULT_WAIT_TIMEOUT / 1000 );						\
+	{	unsigned int nTo = oexGetUnixTime() + ( oexDEFAULT_WAIT_TIMEOUT / 1000 );				\
 		r = f;																					\
 		do { e = libssh2_session_last_errno( s );												\
 		 if ( e == LIBSSH2_ERROR_EAGAIN && nTo > oexGetUnixTime() )								\
-			e = _libssh2_wait_socket( s );															\
+			e = _libssh2_wait_socket( s );														\
 		} while ( e == LIBSSH2_ERROR_EAGAIN && nTo > oexGetUnixTime() );						\
 	}
 
@@ -134,7 +134,7 @@ int CSqSsh2::Connect( sqbind::CSqSocket *x_pSock )
 		return logerr( 0, 0, "Invalid socket" );
 
 	// Steal the socket handle
-	m_socket = (int)x_pSock->Ptr()->GetSocketHandle();
+	m_socket = oexPtrToInt( x_pSock->Ptr()->GetSocketHandle() );
 	x_pSock->Ptr()->Detach();
 
 	// Initialize SSH2
@@ -302,7 +302,7 @@ int CSqSsh2::MsgFwd( sqbind::CSqBinary *bin,
 	if ( !bin )
 		return 0;
 
-	int nSize = 4 + sHost1.length() + 4 + 4 + sHost2.length() + 4;
+	unsigned int nSize = 4 + sHost1.length() + 4 + 4 + sHost2.length() + 4;
 	if ( bin->Size() < nSize )
 		if ( !bin->Allocate( nSize ) )
 			return 0;

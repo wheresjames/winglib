@@ -158,7 +158,7 @@ public:
 	{
 		// Constructor
 		SIterator()
-		{	uB = uI = oexMAXLONG;
+		{	uB = uI = oexMAXULONG;
 			pos = 0;
 			npos = 0;
 			oexZero( vi );
@@ -177,7 +177,7 @@ public:
 		}
 
 		void Destroy()
-		{	uB = uI = oexMAXLONG;
+		{	uB = uI = oexMAXULONG;
 			pos = 0;
 			npos = 0;
 			oexZero( vi );

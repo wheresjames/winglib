@@ -267,13 +267,13 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 	sSt << oexT( oexNL8 oexNL8 )
 		<<         oexT( "===================================================" oexNL8 )
 		<<         oexT( "= Module  : " ) << ( pName ? pName : oexT( "N/A" ) ) << oexNL
-		<< oexFmt( oexT( "= Address : 0x%08x" oexNL8 ), (oexUINT)pAddress )
+		<< oexFmt( oexT( "= Address : 0x%08x" oexNL8 ), oexPtrToInt( pAddress ) )
 		<<         oexT( "===================================================" oexNL8 );
 
 
 	// Add each thread stack
 	CStackTrace::CStack *p = oexNULL;
-	while ( p = pSt->Next( &i ) )
+	while ( ( p = pSt->Next( &i ) ) )
 	{
 		try
 		{
@@ -301,7 +301,7 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 		} // end try
 		catch( ... )
 		{
-			sSt << oexT( "!!! ASSERT at on address : " ) << (oexUINT)p << oexNL;
+			sSt << oexT( "!!! ASSERT at on address : " ) << oexPtrToInt( p ) << oexNL;
 
 		} // end catch
 

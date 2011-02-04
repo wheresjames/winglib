@@ -57,7 +57,7 @@
 #endif
 
 // Attempt to detect 64 bit processor
-#if defined( _WIN64 ) || defined( _M_X64 ) || defined( __amd64__ ) || defined( _LP64 )
+#if defined( _WIN64 ) || defined( _M_X64 ) || defined( __amd64__ ) || defined( _LP64 ) || defined( __MINGW64 )
 #	define OEX_CPU_64
 #endif
 
@@ -285,11 +285,11 @@
 #	define oexSIZEOFINT 4
 #endif
 
-#if defined( OEX_WIN64 )
-		typedef __int64					oexSIZE_T;
-		typedef size_t					oexNEWSIZE_T;
+#if defined( OEX_WIN64 ) && !defined( OEX_GCC )
+	typedef __int64					oexSIZE_T;
+	typedef size_t					oexNEWSIZE_T;
 #elif defined( OEX_CPU_64 ) || defined( OEX_IPHONE )
-	typedef long unsigned int		oexSIZE_T;
+	typedef long long unsigned int	oexSIZE_T;
 	typedef oexSIZE_T				oexNEWSIZE_T;
 #else
 	typedef unsigned int			oexSIZE_T;

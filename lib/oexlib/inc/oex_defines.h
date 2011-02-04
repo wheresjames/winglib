@@ -149,15 +149,22 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #	define oexTCPathSep( c )	oexTC( c, '/' )
 //#endif
 
+// +++ Figure out if mingw is going to change to match vc...
+#if defined( __MINGW64__ )
+#define oexPtrType OEX_NAMESPACE::oexUINT64
+#else
+#define oexPtrType OEX_NAMESPACE::oexULONG
+#endif
+
 // Pointer conversion
 #if defined( OEX_NOCASTPTR )
-#	define oexPtrToInt( p )					( (OEX_NAMESPACE::oexINT)(OEX_NAMESPACE::oexULONG)p )
-#	define oexPtrToUInt( p ) 				( (OEX_NAMESPACE::oexUINT)(OEX_NAMESPACE::oexULONG)p )
-#	define oexPtrToLong( p ) 				( (OEX_NAMESPACE::oexLONG)(OEX_NAMESPACE::oexULONG)p )
-#	define oexPtrToULong( p ) 				( (OEX_NAMESPACE::oexULONG)(OEX_NAMESPACE::oexULONG)p )
-#	define oexPtrToInt64( p ) 				( (OEX_NAMESPACE::oexINT64)(OEX_NAMESPACE::oexULONG)p )
-#	define oexPtrToUInt64( p ) 				( (OEX_NAMESPACE::oexUINT64)(OEX_NAMESPACE::oexULONG)p )
-#	define oexPtrToPtr( p ) 				( (OEX_NAMESPACE::oexPVOID)(OEX_NAMESPACE::oexULONG)p )
+#	define oexPtrToInt( p )					( (OEX_NAMESPACE::oexINT)(oexPtrType)p )
+#	define oexPtrToUInt( p ) 				( (OEX_NAMESPACE::oexUINT)(oexPtrType)p )
+#	define oexPtrToLong( p ) 				( (OEX_NAMESPACE::oexLONG)(oexPtrType)p )
+#	define oexPtrToULong( p ) 				( (OEX_NAMESPACE::oexULONG)(oexPtrType)p )
+#	define oexPtrToInt64( p ) 				( (OEX_NAMESPACE::oexINT64)(oexPtrType)p )
+#	define oexPtrToUInt64( p ) 				( (OEX_NAMESPACE::oexUINT64)(oexPtrType)p )
+#	define oexPtrToPtr( p ) 				( (OEX_NAMESPACE::oexPVOID)(oexPtrType)p )
 //#	define oexPtrToInt( p )					OEX_NAMESPACE::__oexCPtrCnv( p ).nInt
 //#	define oexPtrToUInt( p ) 				OEX_NAMESPACE::__oexCPtrCnv( p ).uInt
 //#	define oexPtrToLong( p ) 				OEX_NAMESPACE::__oexCPtrCnv( p ).lInt

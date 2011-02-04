@@ -869,9 +869,9 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 
 #if !defined( OEX_WINCE )
 
-	return ( 32 < (unsigned int)ShellExecute( NULL, oexT( "open" ),
-											  x_pFile, x_pParams,
-											  x_pDirectory, SW_SHOWNORMAL ) )
+	return ( 32 < oexPtrToInt( ShellExecute( NULL, oexT( "open" ),
+											 x_pFile, x_pParams,
+											 x_pDirectory, SW_SHOWNORMAL ) ) )
 		   ? oexTRUE : oexFALSE;
 #else
 

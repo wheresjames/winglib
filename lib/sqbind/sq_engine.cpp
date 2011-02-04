@@ -498,7 +498,7 @@ stdString CSqEngineExport::get_output( int max )
 /// Returns the buffer for a binary share
 unsigned int CSqEngineExport::get_instance_handle()
 {_STT();
-	return (unsigned int)(unsigned long)oex::os::CSys::GetInstanceHandle();
+	return oexPtrToInt( oex::os::CSys::GetInstanceHandle() );
 }
 
 stdString CSqEngineExport::build_url( CSqMulti *pUrl )

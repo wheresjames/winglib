@@ -9,7 +9,7 @@
 #if defined( GD_CUSTOM_ALLOCATOR )
 extern "C"
 {
-#if defined( OEX_WINDOWS ) && !defined( OEX_GCC )
+#if defined( OEX_WINDOWS )
 
 	void* gd_malloc( GD_size_t size )
 	{

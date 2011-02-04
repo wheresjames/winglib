@@ -115,9 +115,16 @@ template < const int T > class oex_static_assert{};
 #	define oexVERIFYPOS( s )	            ({ OEX_NAMESPACE::oexRESULT r = s; ( 0 <= r ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, oexT( #s ), r ), OEX_NAMESPACE::oexFALSE ); })
 #	define oexVERIFYZERO( s )	            ({ OEX_NAMESPACE::oexRESULT r = s; ( !r ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, oexT( #s ), r ), OEX_NAMESPACE::oexFALSE ); })
 
+// +++ mingw-w64 is broken atm
+#if defined( __MINGW64__ )
+#	define oexCHECK_PTR_NULL_OK( ptr )      ( 1 )
+#	define oexCHECK_PTR( ptr )              ( ( ptr ) ? OEX_NAMESPACE::oexTRUE :  OEX_NAMESPACE::oexFALSE )
+#	define oexCHECK( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE :  OEX_NAMESPACE::oexFALSE )
+#else
 #	define oexCHECK_PTR_NULL_OK( ptr )      oexCHECK( oexVerifyPtrNullOk( (OEX_NAMESPACE::oexCPVOID)ptr ) )
 #	define oexCHECK_PTR( ptr )              oexCHECK( oexVerifyPtr( (OEX_NAMESPACE::oexCPVOID)ptr ) )
 #	define oexCHECK( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE :  OEX_NAMESPACE::oexFALSE )
+#endif
 
 #if defined( OEXLIB_EXTRA_POINTER_CHECK )
 #	define oexVerifyPtr( p )				( _oexVerifyPtr( p ) )
@@ -149,7 +156,8 @@ template < const int T > class oex_static_assert{};
 // 0xDEADBABE	-	Linux / Unix
 // 0xA5A5A5A5	-	Embedded
 // 0xFFFFFFFF	-	Invalid
-static inline oexBOOL _oexVerifyPtrNullOk( oexCPVOID ptr )
+template < typename T >
+	oexBOOL _oexVerifyPtrNullOk( T ptr )
 {	if ( !ptr ) return oexTRUE;
     return (       ( (oexTYPEOF_PTR)ptr >  oexPtrToPtr( 0x00000032 ) )
                 && ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xABABABAB ) )
@@ -167,7 +175,8 @@ static inline oexBOOL _oexVerifyPtrNullOk( oexCPVOID ptr )
 				&& ( (oexTYPEOF_PTR)ptr != oexPtrToPtr( 0xFFFFFFFF ) ) );
 }
 
-static inline oexBOOL _oexVerifyPtr( oexCPVOID ptr )
+template < typename T >
+	oexBOOL _oexVerifyPtr( T ptr )
 {	return	( (oexTYPEOF_PTR)oexNULL != (oexTYPEOF_PTR)ptr ) &&
 			_oexVerifyPtrNullOk( ptr );
 }

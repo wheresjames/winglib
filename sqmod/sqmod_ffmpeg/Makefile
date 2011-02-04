@@ -39,9 +39,6 @@ ifeq ($(PLATFORM),windows)
 	else
 		PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/windows/gcc $(PRJ_INCS) zlib
 		PRJ_LIBS := $(PRJ_LIBS) ffmpeg x264 zlib
-		ifneq ($(PROC),arm)
-			PRJ_OSLB := $(PRJ_OSLB) vfw32
-		endif
 	endif
 else
 	PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/posix $(PRJ_INCS)

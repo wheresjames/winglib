@@ -88,7 +88,7 @@ public:
     static DWORD WINAPI ThreadProc( LPVOID x_pData )
     {
 		// Do the thread stuff
-		return (DWORD)CResource::ThreadProc( x_pData );
+		return (DWORD)oexPtrToInt( CResource::ThreadProc( x_pData ) );
 	}
 };
 

@@ -321,11 +321,11 @@ oex::oexRESULT TestAllocator()
 	oexAligned16( oexCHAR, buf16[ 2 ] ) = { 0 };
 
 	// Verify buffer alignments
-	if ( !oexVERIFY( oexIsAligned( (oexLONG)bufp ) )
-		 || !oexVERIFY( oexIsAligned2( (oexLONG)buf2 ) )
-		 || !oexVERIFY( oexIsAligned4( (oexLONG)buf4 ) )
-		 || !oexVERIFY( oexIsAligned8( (oexLONG)buf8 ) )
-		 || !oexVERIFY( oexIsAligned16( (oexLONG)buf16 ) )
+	if ( !oexVERIFY( oexIsAligned( oexPtrToInt( bufp ) ) )
+		 || !oexVERIFY( oexIsAligned2( oexPtrToInt( buf2 ) ) )
+		 || !oexVERIFY( oexIsAligned4( oexPtrToInt( buf4 ) ) )
+		 || !oexVERIFY( oexIsAligned8( oexPtrToInt( buf8 ) ) )
+		 || !oexVERIFY( oexIsAligned16( oexPtrToInt( buf16 ) ) )
 	   )
 		return -23;
 #endif

@@ -45,7 +45,7 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
 	} // end if
 
 	// Set socket handle
-	if ( !SSL_set_fd( m_ssl, (int)(long)GetSocketHandle() ) )
+	if ( !SSL_set_fd( m_ssl, oexPtrToInt( GetSocketHandle() ) ) )
 	{	m_sLastError = ERR_error_string( ERR_get_error(), 0 );
 		OnClose();
 //		oexSHOW( m_sLastError.c_str() );
