@@ -292,7 +292,7 @@
 	typedef long long unsigned int	oexSIZE_T;
 	typedef oexSIZE_T				oexNEWSIZE_T;
 #elif defined( OEX_CPU_64 ) || defined( OEX_IPHONE )
-	typedef long long unsigned int	oexSIZE_T;
+	typedef long unsigned int		oexSIZE_T;
 	typedef size_t					oexNEWSIZE_T;
 #else
 	typedef unsigned int			oexSIZE_T;
