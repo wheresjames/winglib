@@ -12,6 +12,7 @@ PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib
 PRJ_OSLB :=
+PRJ_HACK := win_fwd_slashes
 
 #-------------------------------------------------------------------
 # Configure build

@@ -12,6 +12,7 @@ PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib
 PRJ_OSLB :=
+PRJ_HACK := win_fwd_slashes
  
 PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Stop
 

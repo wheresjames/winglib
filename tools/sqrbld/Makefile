@@ -14,6 +14,7 @@ PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib
 PRJ_WINL := winmm strmiids
 PRJ_VSLB := dshowbase
 PRJ_TOOL := 1
+PRJ_HACK := win_fwd_slashes
 
 #-------------------------------------------------------------------
 # Configure build

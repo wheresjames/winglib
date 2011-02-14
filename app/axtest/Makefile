@@ -13,6 +13,7 @@ PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib 
 PRJ_OSLB := 
 PRJ_RESD :=
+PRJ_HACK := win_fwd_slashes
 
 PRJ_EXPORTS := DllMain DllGetClassObject DllCanUnloadNow \
 			   DllRegisterServer DllUnregisterServer
