@@ -42,7 +42,7 @@
 #	define HANDLE	void*
 #	define DECLARE_HANDLE(name) typedef void * name
 #endif
-#include "../../oexlib.h"
+#include "oexlib.h"
 #include "zip.h"
 
 #ifdef oexDEBUG
@@ -62,7 +62,7 @@
 
 #include <stdio.h>
 #include <tchar.h>
-#include "../../oexlib.h"
+#include "oexlib.h"
 #include "zip.h"
 
 #include <crtdbg.h>

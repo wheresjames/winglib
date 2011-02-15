@@ -164,7 +164,7 @@ Shall be lifted - nevermore!
 
 */
 
-#include "../../../oexlib.h"
+#include "oexlib.h"
 #include "std_os.h"
 
 OEX_USING_NAMESPACE

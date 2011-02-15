@@ -43,7 +43,7 @@
 							 `~'    `-.____.-'
 */
 
-#include "../oexlib.h"
+#include "oexlib.h"
 
 OEX_USING_NAMESPACE
 

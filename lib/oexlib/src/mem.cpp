@@ -32,7 +32,7 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#include "../oexlib.h"
+#include "oexlib.h"
 
 //#include <cstdarg>
 //#include <stdio.h>

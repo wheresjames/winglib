@@ -33,7 +33,7 @@
 //----------------------------------------------------------------*/
 
 
-#include "../oexlib.h"
+#include "oexlib.h"
 
 #if defined( OEX_ENABLE_ZIP )
 

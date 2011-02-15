@@ -32,7 +32,7 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#include "../oexlib.h"
+#include "oexlib.h"
 
 #if defined( OEX_ENABLE_ZIP )
 

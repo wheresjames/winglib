@@ -32,7 +32,7 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#include "../oexlib.h"
+#include "oexlib.h"
 
 // Include md5 functions
 #include "../oss/md5/md5rsa.cpp"

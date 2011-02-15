@@ -34,7 +34,7 @@
 #	define HANDLE	void*
 #	define DECLARE_HANDLE(name) typedef void * name
 #endif
-#include "../../oexlib.h"
+#include "oexlib.h"
 #include "unzip.h"
 
 #ifdef oexDEBUG

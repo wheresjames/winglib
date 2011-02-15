@@ -32,6 +32,6 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#include "../oexlib.h"
+#include "oexlib.h"
 OEX_USING_NAMESPACE
 

@@ -64,7 +64,7 @@ I've got a pair of Gohills boots
 And I've got fading roots.
 */
 
-#include "../../../oexlib.h"
+#include "oexlib.h"
 #include "std_os.h"
 
 OEX_USING_NAMESPACE
