@@ -2210,10 +2210,17 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 		if ( !sFull.Length() )
 		{
 #	if defined( __MINGW32__ )
-			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\WinglibScriptEngine" ), oexT( "Install_Dir" ) );
+#		define SQKEYNAME "WinglibScriptEngine"
 #	else
-			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\SquirrelScript" ), oexT( "Install_Dir" ) );
+#		define SQKEYNAME "SquirrelScript"
 #	endif
+#	if defined( OEX_CPU_64 )
+#		define SQKEYCPU "x64"
+#	else
+#		define SQKEYCPU "x86"
+#	endif
+
+			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\" SQKEYNAME "_" SQKEYCPU ), oexT( "Install_Dir" ) );
 			if ( sInstallRoot.Length() )
 				sFull = FindFile( sInstallRoot, lstSubs, sFile );
 		} // end if
