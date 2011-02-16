@@ -318,6 +318,9 @@ public:
 	/// Returns the specified system folder
 	stdString get_sys_folder( const stdString &sId );
 
+	/// Returns the specified system and path
+	stdString get_sys_path( const stdString &sId, const stdString &sPath );
+
 	/// Returns the file path of the current executable
 	stdString module_path();
 

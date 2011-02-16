@@ -27,6 +27,7 @@ BUILDDIRS := $(BUILDDIRS) sqmod/sqmod_cell \
 						  sqmod/sqmod_freetype2 \
                           sqmod/sqmod_gdchart \
 						  sqmod/sqmod_gstreamer \
+						  sqmod/sqmod_haru \
 						  sqmod/sqmod_irrlicht \
                           sqmod/sqmod_live555 \
                           sqmod/sqmod_mimetic \

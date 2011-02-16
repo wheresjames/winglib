@@ -366,6 +366,12 @@ stdString CSqEngineExport::root( const stdString &sPath )
 	return oex2std( oexGetModulePath( sPath.c_str() ) );
 }
 
+stdString CSqEngineExport::get_sys_path( const stdString &sId, const stdString &sPath )
+{_STT();
+	return build_path( get_sys_folder( sId ), sPath );
+}
+
+
 stdString CSqEngineExport::get_sys_folder( const stdString &sId )
 {_STT();
 
@@ -1585,6 +1591,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, decorate )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_sys_folder )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_sys_path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, md5 )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, guid )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, parse_url )
