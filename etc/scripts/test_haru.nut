@@ -85,12 +85,15 @@ function _init()
 
 	pdf.EndText();
 
-	if ( !pdf.Save( _self.root( "test.pdf" ) ) )
+	if ( !pdf.Save( "test.pdf" ) )
 	{	_self.echo( "Error saving to file : " + pdf.getLastError() ); WaitKey(); return; }
 
+	_self.echo( "\nCreated file : test.pdf" );
+	
 	local bin = CSqBinary();
 	if ( pdf.getBin( bin ) )
-		CSqFile().put_contents_bin( _self.root( "test_bin.pdf" ), bin );
+		CSqFile().put_contents_bin( "test_bin.pdf", bin ),
+		_self.echo( "\nCreated file : test_bin.pdf" );
 
 	_self.echo( "\n=== DONE ===\n" );
 	
