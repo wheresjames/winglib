@@ -61,7 +61,10 @@ public:
 
 	/// Sets the current font
 	int SetFont( const sqbind::stdString &sName, int nSize );
-	
+
+	/// Sets the font from a TTF file
+	int SetTtfFont( const sqbind::stdString &sFile, int nSize );
+
 	/// Starts page text
 	int BeginText();
 	

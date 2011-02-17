@@ -14,7 +14,7 @@ function WaitKey()
 
 function _init()
 {
-	_self.echo( "\n=== FIELDS ===\n" );
+	_self.echo( "\n=== BEGIN ===\n" );
 
 	_self.echo( "Fonts folder : '" + _self.get_sys_folder( "fonts" ) + "'" );
 	
@@ -34,21 +34,63 @@ function _init()
 	pdf.Rectangle( 50, 50, w - 100, h - 100 );
 	pdf.Stroke();
 	
-	// Draw title
-	local title = "PDF Test", tw = pdf.getTextWidth( title );
-
-	if ( !pdf.SetFont( _self.get_sys_path( "fonts", "arial.ttf" ), 24 ) )
+	// Set font
+//	if ( !pdf.SetTtfFont( _self.get_sys_path( "fonts", "arial.ttf" ), 24 ) )
+	if ( !pdf.SetFont( "Helvetica", 24 ) )
 	{	_self.echo( "Error setting font : " + pdf.getLastError() ); WaitKey(); return; }
 
+	// Draw title
+	local title = "PDF Test";
+	local tw = pdf.getTextWidth( title );
 	pdf.BeginText();
-
-	if ( !pdf.TextOut( w - tw, h - 50, title ) )
+	if ( !pdf.TextOut( ( w - tw ) / 2, h - 40, title ) )
 	{	_self.echo( "Error writing text : " + pdf.getLastError() ); WaitKey(); return; }
-
 	pdf.EndText();	
-	
+
+	local text = "abcdefgABCDEFG12345!#$%&+-@?";
+	local fonts = 
+	[
+			"Courier",
+			"Courier-Bold",
+			"Courier-Oblique",
+			"Courier-BoldOblique",
+			"Helvetica",
+			"Helvetica-Bold",
+			"Helvetica-Oblique",
+			"Helvetica-BoldOblique",
+			"Times-Roman",
+			"Times-Bold",
+			"Times-Italic",
+			"Times-BoldItalic",
+			"Symbol",
+			"ZapfDingbats"
+		];
+
+	pdf.BeginText();
+	pdf.MoveTextPos( 60, h - 105 );
+
+	foreach( f in fonts )
+	{
+		_self.echo( "Printing : " + f );
+
+		pdf.SetFont( f, 9 );
+		pdf.ShowText( f );
+		pdf.MoveTextPos( 0, -18 );
+
+		pdf.SetFont( f, 20 );
+		pdf.ShowText( text );
+		pdf.MoveTextPos( 0, -20 );
+
+	} // end foreach
+
+	pdf.EndText();
+
 	if ( !pdf.Save( _self.root( "test.pdf" ) ) )
 	{	_self.echo( "Error saving to file : " + pdf.getLastError() ); WaitKey(); return; }
+
+	local bin = CSqBinary();
+	if ( pdf.getBin( bin ) )
+		CSqFile().put_contents_bin( _self.root( "test_bin.pdf" ), bin );
 
 	_self.echo( "\n=== DONE ===\n" );
 	

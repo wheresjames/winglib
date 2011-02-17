@@ -79,7 +79,7 @@ int CHaruPdf::getBin( sqbind::CSqBinary *pBin )
 		return 0;
 
 	// Reset stream
-	HPDF_ResetStream( m_pdf );
+//	HPDF_ResetStream( m_pdf );
 		
 	// Save to file
 	if ( HPDF_OK != HPDF_SaveToStream( m_pdf ) )
@@ -170,16 +170,8 @@ int CHaruPdf::SetFont( const sqbind::stdString &sName, int nSize )
 	if ( !m_pdf || !m_page )
 		return 0;
 		
-	// Attempt to load font from file
-	const char *pFont = HPDF_LoadTTFontFromFile( m_pdf, sName.c_str(), HPDF_TRUE );
-	if ( !pFont )
-	{	sqbind::stdString sErr = oexT( "Loading font " );
-		sErr += sName; sErr += oexT( " : " ); m_sLastError = sErr + m_sLastError;
-		return 0;
-	} // end if
-
 	// Attempt to get the specified font
-	m_font = HPDF_GetFont( m_pdf, pFont, oexNULL );
+	m_font = HPDF_GetFont( m_pdf, sName.c_str(), oexNULL );
 	if ( !m_font )
 		return 0;
 		
@@ -190,6 +182,24 @@ int CHaruPdf::SetFont( const sqbind::stdString &sName, int nSize )
 	return 1;
 }
 
+int CHaruPdf::SetTtfFont( const sqbind::stdString &sName, int nSize )
+{_STT();
+
+	// Sanity checks
+	if ( !m_pdf || !m_page )
+		return 0;
+		
+	// Attempt to load font from file
+	const char *pFont = HPDF_LoadTTFontFromFile( m_pdf, sName.c_str(), HPDF_TRUE );
+	if ( !pFont )
+	{	sqbind::stdString sErr = oexT( "Loading font " );
+		sErr += sName; sErr += oexT( " : " ); m_sLastError = sErr + m_sLastError;
+		return 0;
+	} // end if
+
+	return SetFont( pFont, nSize );
+}
+
 int CHaruPdf::BeginText()
 {_STT();
 
@@ -197,7 +207,7 @@ int CHaruPdf::BeginText()
 	if ( !m_page )
 		return 0;
 
-	// Commit drawing
+	// Begin text
 	if ( HPDF_OK != HPDF_Page_BeginText( m_page ) )
 		return 0;
 
@@ -211,7 +221,7 @@ int CHaruPdf::EndText()
 	if ( !m_page )
 		return 0;
 
-	// Commit drawing
+	// End text
 	if ( HPDF_OK != HPDF_Page_EndText( m_page ) )
 		return 0;
 
@@ -225,11 +235,8 @@ int CHaruPdf::getTextWidth( const sqbind::stdString &sText )
 	if ( !m_page )
 		return 0;
 
-	// Commit drawing
-	if ( HPDF_OK != HPDF_Page_TextWidth( m_page, sText.c_str() ) )
-		return 0;
-
-	return 1;
+	// Get text width
+	return HPDF_Page_TextWidth( m_page, sText.c_str() );
 }
 
 int CHaruPdf::getTextHeight( const sqbind::stdString &sText )
@@ -239,11 +246,9 @@ int CHaruPdf::getTextHeight( const sqbind::stdString &sText )
 	if ( !m_page )
 		return 0;
 
-	// Commit drawing
-//	if ( HPDF_OK != HPDF_Page_TextHeight( m_page, sText.c_str() ) )
-//		return 0;
+	// Get text height
+//	return HPDF_Page_TextHeight( m_page, sText.c_str() );
 
-	return 1;
 }
 
 int CHaruPdf::TextOut( int x, int y, const sqbind::stdString &sText )
