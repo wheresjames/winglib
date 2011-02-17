@@ -11,7 +11,7 @@ public:
 
 	/// Default constructor
 	CSqirrTexture() { m_p = 0; }
-	CSqirrTexture( irr::video::ITexture *p ) { if ( p ) { m_p = p; p->grab(); } }
+	CSqirrTexture( irr::video::ITexture *p ) { m_p = 0; if ( p ) { m_p = p; p->grab(); } }
 
 	~CSqirrTexture() { Destroy(); }
 	void Destroy() { if ( m_p ) { m_p->drop(); m_p = 0; } }
