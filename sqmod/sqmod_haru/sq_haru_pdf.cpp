@@ -248,7 +248,7 @@ int CHaruPdf::getTextHeight( const sqbind::stdString &sText )
 
 	// Get text height
 //	return HPDF_Page_TextHeight( m_page, sText.c_str() );
-
+	return 0;
 }
 
 int CHaruPdf::TextOut( int x, int y, const sqbind::stdString &sText )

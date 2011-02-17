@@ -13,8 +13,7 @@ PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 			haru/include
 
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib \
-		    haru
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel haru cximage jpeg png tiff zlib
 PRJ_DEFS := 
  
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
