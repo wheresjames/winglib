@@ -78,7 +78,6 @@ class CRtspStream
 		return 1;
 	}
 
-
 	function Draw( buffer )
 	{
 		if ( !isReady() )
@@ -95,8 +94,11 @@ class CRtspStream
 		if ( 0 >= dec.getBufferSize() )
 			return 0;
 
+		::_self.echo( "sz = " + dec.getBufferSize() );
+
 		return dec.Decode( CSqBinary(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
 	}
+
 }
 
 class CGlobal

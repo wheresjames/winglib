@@ -1019,7 +1019,7 @@ CStr CDataLog::GetLogBin( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t_time
 		x_fScale = 1.f;
 
 	SIterator it;
-	if ( !it.Init( m_sRoot, x_pKey ) ) //|| !it.IsData( m_tLogBase, x_tStart ) )
+	if ( !it.Init( m_sRoot, x_pKey ) || !it.IsData( m_tLogBase, x_tStart ) )
 		return oexT( "" );
 
 	// Align with the interval
