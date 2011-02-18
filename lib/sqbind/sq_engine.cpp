@@ -715,12 +715,12 @@ unsigned int CSqEngineExport::get_timer_seconds()
 	return (unsigned int)nVal;
 }
 
-unsigned int CSqEngineExport::get_timer_useconds()
+oex::oexINT64 CSqEngineExport::get_timer_useconds()
 {_STT();
 	oex::oexINT64 nVal = 0;
 	if ( !oex::os::CHqTimer::osGetCounts( oexNULL, &nVal ) )
 		return 0;
-	return (unsigned int)nVal;
+	return (oex::oexINT64)nVal;
 }
 
 stdString CSqEngineExport::run( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript )
