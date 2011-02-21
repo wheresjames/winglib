@@ -435,6 +435,9 @@ public:
 	/// Executes the specified script
 	stdString run( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript );
 
+	/// Executes the specified script within the current thread
+	SquirrelObject run2( const stdString &sName, const stdString &sScript );
+
 	/// Prepares an inline script for processing
 	stdString prepare_inline( const stdString &sScript, int bFile );
 
@@ -483,6 +486,9 @@ public:
 	/// Returns a linked in resource
 	stdString get_resource( const stdString &sRes, int bFileOverrideOk );
 
+	/// Finds resources matching the pattern in sName
+	CSqMulti find_resource( const stdString &sName, int bIgnoreCase, int bFileOverrideOk );
+	
 	/// Returns information about the specified system drive
 	CSqMulti get_system_drive_info( const stdString &sDrive );
 
@@ -552,6 +558,8 @@ protected:
 	virtual int OnLoadModule( const stdString &sModule, const stdString &sPath );
 
 	virtual stdString OnPath( stdString sPath );
+	
+	virtual SquirrelObject OnRun( const stdString &sName, const stdString &sScript );
 
 	virtual CSqMsgQueue* OnGetQueue();
 
@@ -722,7 +730,10 @@ public:
 
 	/// Executes the specified buffer
 	oex::oexBOOL Run( sqbind::stdString *pReply, oex::oexCSTR pName, oex::oexCSTR pScript );
-
+	
+	/// Executes the specified script within the current vm
+	virtual SquirrelObject OnRun( const stdString &sName, const stdString &sScript );
+	
 	oex::oexINT LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e, oex::oexCSTR x_pExtra = oexNULL );
 
 	oex::oexINT LogError( oex::oexINT x_nReturn, oex::oexCSTR x_pErr, oex::oexCSTR x_pExtra, oex::oexCSTR x_pFile, oex::oexUINT x_uLine );

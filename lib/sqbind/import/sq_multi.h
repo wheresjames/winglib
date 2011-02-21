@@ -106,6 +106,12 @@ namespace sqbind
 		/// Deserializing constructor
 		CSqMulti( const oex::oexTCHAR *s, SQINT sz = 0 );
 
+		/// Deserializing constructor
+		CSqMulti( const oex::CStrList &l );
+
+		/// Assignment operator
+		CSqMulti& operator = ( const oex::CStrList &l );
+		
 		/// Returns a reference to the underlying vector
 		t_List& list();
 
@@ -257,6 +263,9 @@ namespace sqbind
 		/// Filters items
 		int filter( const t_Obj &sFilter, int bInclude );
 
+		/// Extracts the comma separated items sItems = "item1,item2,..."
+		CSqMulti extract( const t_Obj &sItems );
+		
 		/// Gets an element
 		CSqMulti* get( const t_Obj &k );
 

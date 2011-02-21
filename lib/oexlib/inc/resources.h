@@ -96,6 +96,9 @@ public:
 	/// Gets total resource count
 	oexLONG GetResourceCount();
 
+	/// Returns a list of resources matching a pattern
+	CStrList FindResource( CStr sName, oexBOOL bIgnoreCase = oexFALSE );
+
 private:
 
 	/// Pointer to resources

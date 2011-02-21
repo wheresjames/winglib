@@ -69,6 +69,21 @@ CSqMulti::CSqMulti( const oex::oexTCHAR *s, SQINT sz )
 		deserialize( t_Obj( s, sz ) );
 }
 
+CSqMulti::CSqMulti( const oex::CStrList &l )
+{_STT();
+	m_def = oexNULL;
+	SQBIND_StrListToStd( l, m_lst, oexT( "1" ) );
+}
+
+CSqMulti& CSqMulti::operator = ( const oex::CStrList &l )
+{_STT();
+	m_def = oexNULL;
+	m_val.clear();
+	m_lst.clear();
+	SQBIND_StrListToStd( l, m_lst, oexT( "1" ) );
+	return *this;
+}
+
 CSqMulti& CSqMulti::operator = ( const CSqMulti &m )
 {_STT();
 	m_def = oexNULL;
@@ -300,6 +315,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_key )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_value )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, filter )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, extract )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, _get )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, _nexti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, _newslot )
@@ -727,6 +743,18 @@ SquirrelObject CSqMulti::_nexti( HSQUIRRELVM v )
     // ???
     sa.ThrowError( oexT( "Invalid index type" ) );
     return SquirrelObject( v );
+}
+
+CSqMulti CSqMulti::extract( const t_Obj &sItems )
+{_STT();
+	CSqMulti m;
+	oex::CStrList items = oex::CParser::Explode( sItems.c_str(), oexT( "," ) );
+	for ( oex::CStrList::iterator it; items.Next( it ); )
+	{	sqbind::stdString sKey = oex2std( *it );
+		if ( isset( sKey ) )
+			m.list()[ sKey ] = m_lst[ sKey ];
+	} // end for
+	return m;
 }
 
 int CSqMulti::filter( const t_Obj &sFilter, int bInclude )

@@ -265,6 +265,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexGetResourceName					OEX_NAMESPACE::COex::GetResourceHelper().GetResourceName
 #define oexGetResourceSize					OEX_NAMESPACE::COex::GetResourceHelper().GetResourceSize
 #define oexGetResourcePtr					OEX_NAMESPACE::COex::GetResourceHelper().GetResourcePtr
+#define oexFindResource						OEX_NAMESPACE::COex::GetResourceHelper().FindResource
 
 #define oexMemCmp							OEX_NAMESPACE::os::CSys::MemCmp
 #define oexMemCpy							OEX_NAMESPACE::os::CSys::MemCpy

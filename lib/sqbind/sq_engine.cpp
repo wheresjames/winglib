@@ -411,6 +411,36 @@ stdString CSqEngineExport::module_path()
 	return oex2std( oexGetModulePath() );
 }
 
+CSqMulti CSqEngineExport::find_resource( const stdString &sName, int bIgnoreCase, int bFileOverrideOk )
+{_STT();
+
+	// Get a list of resources matching the pattern
+	oex::CStrList l = oexFindResource( std2oex( sName ), bIgnoreCase );
+	if ( l.Size() )
+	{	CSqMulti m; 
+		SQBIND_StrListToStd( l, m.list(), oexT( "f" ) );	
+		return m;
+	} // end if
+	
+	// If none, check file path
+	if ( !bFileOverrideOk )
+		return CSqMulti();
+
+	// Attempt to get the list from disk
+	stdString sSub = CSqFile::get_path( sName );
+	CSqMulti files = CSqFile::get_dirlist( path( build_path( oexT( ".." ), sSub ) ), 
+										   CSqFile::get_filename( sName ), 1, 0 );
+	if ( !files.size() )
+		return CSqMulti();
+		
+	// Make the paths look right
+	CSqMulti m;
+	for ( CSqMulti::iterator it = files.begin(); it != files.end(); it++ )
+		m[ build_path( sSub, it->first ) ] = it->second.str();
+	
+	return m;
+}
+
 stdString CSqEngineExport::get_resource( const stdString &sRes, int bFileOverrideOk )
 {_STT();
 	// Data container
@@ -739,6 +769,12 @@ stdString CSqEngineExport::run( int nRet, const stdString &sPath, const stdStrin
 	q->run( &sRet, sPath, sName, sScript );
 	return sRet;
 }
+
+SquirrelObject CSqEngineExport::run2( const stdString &sName, const stdString &sScript )
+{_STT();
+	return OnRun( sName, sScript );
+}
+
 
 stdString CSqEngineExport::prepare_inline( const stdString &sScript, int bFile )
 {_STT();
@@ -1298,6 +1334,11 @@ int CSqEngineExport::OnLoadModule( const stdString &sModule, const stdString &sP
 	return 0;
 }
 
+SquirrelObject CSqEngineExport::OnRun( const stdString &sName, const stdString &sScript )
+{_STT();
+	return 0;
+}
+
 SquirrelVM* CSqEngineExport::GetVmPtr()
 {_STT();
 	return 0;
@@ -1555,6 +1596,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, logbin )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, resetlog )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run2 )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, prepare_inline )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, exec )
@@ -1631,6 +1673,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, htmldecode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, compress )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, uncompress )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, find_resource )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_resource )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_name )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_app_name )
@@ -2097,6 +2140,21 @@ oex::oexBOOL CSqEngine::Run( sqbind::stdString *pReply, oex::oexCSTR pName, oex:
 	{	return LogErrorME( oex::oexFALSE, e.desc, pName ); }
 
 	return oex::oexTRUE;
+}
+
+SquirrelObject CSqEngine::OnRun( const stdString &sName, const stdString &sScript )
+{
+	_oexTRY
+	{
+		return m_vm.RunScript( m_vm.CompileBuffer( sScript.c_str() ) );
+	} // end try
+
+	_oexCATCH( SScriptErrorInfo &e )
+	{	LogError( oex::oexFALSE, e, sName.c_str() ); }
+	_oexCATCH( SquirrelError &e )
+	{	LogErrorME( oex::oexFALSE, e.desc, sName.c_str() ); }
+
+	return SquirrelObject( m_vm.GetVMHandle() );
 }
 
 void CSqEngine::SetScriptName( oex::oexCSTR pScriptName )

@@ -137,6 +137,13 @@ template < typename T_STD, typename T_PB  >
 		} // end for
 	}
 
+template < typename T_SL, typename T_STD, typename T_DEF >
+	void SQBIND_StrListToStd( T_SL &sl, T_STD &m, T_DEF ch )
+	{	for ( T_SL::iterator it; sl.Next( it ); )
+			m[ oex2std( *it ) ] = ch;
+	}
+
+
 template < typename T >
 	T SQBIND_StrReplace( T str, const T &fstr, const T &rstr )
 	{	typename T::size_type pos = 0, flen = fstr.length();
