@@ -99,6 +99,16 @@ CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, o
 			*x_pnError = GetLastError();
 		else *x_pnError = 0;
 	} // end if
+	
+	// Was there an error
+	if ( INVALID_HANDLE_VALUE == hFile )
+		return hFile;
+
+	// Truncate file
+	if ( eDisCreateAlways == x_eDisposition  || eDisCreateNew == x_eDisposition )
+	{	SetPointer( hFile, 0, os::CBaseFile::eFileOffsetBegin );
+		::SetEndOfFile( hFile );
+	} // end if
 
 	return hFile;
 }

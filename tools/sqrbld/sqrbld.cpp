@@ -101,21 +101,23 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 
 	CStr8 buf;
 	oexUCHAR *t = (oexUCHAR*)"0x.., ";
+	oexINT tl = oex::zstr::Length( t );
 	oexUCHAR *r = (oexUCHAR*)"0x..," oexNL8 "\t ";
-	oexUCHAR *b = (oexUCHAR*)buf.OexAllocate( 1024 ), *s;
+	oexINT rl = oex::zstr::Length( r );
+	oexUCHAR *b = (oexUCHAR*)buf.OexAllocate( 4 * 1024 ), *s;
 	oexINT bl = 0;
 	for ( oexULONG i = 0; i < u; i++ )
 	{
 		s = &b[ bl ];
 
 		if ( !( ( i + 1 ) & 0xf ) )
-			oexMemCpy( s, r, 8 ), bl += 8;
+			oexMemCpy( s, r, rl ), bl += rl;
 		else
-			oexMemCpy( s, t, 6 ), bl += 6;
+			oexMemCpy( s, t, tl ), bl += tl;
 
 		chtoa( &s[ 2 ], (oexUCHAR)p[ i ] );
 
-		if ( 1000 < bl )
+		if ( 4000 < bl )
 			f.Write( b, bl ), bl = 0;
 
 	} // end for
