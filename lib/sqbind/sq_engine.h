@@ -481,7 +481,7 @@ public:
 	unsigned int get_timer_seconds();
 
 	/// Tick count micro seconds
-	oex::oexINT64 get_timer_useconds();
+	SQInteger get_timer_useconds();
 
 	/// Returns a linked in resource
 	stdString get_resource( const stdString &sRes, int bFileOverrideOk );

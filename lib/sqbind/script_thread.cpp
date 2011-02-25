@@ -897,7 +897,9 @@ oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMs
 	} // end if
 
 	// Is it for us?
-	if ( !sPath.length() || sPath == _T( "." ) || sPath == m_sName )
+    if ( !sPath.length()
+         || ( sPath[ 0 ] == oexT( '.' ) && 1 == sPath.length() ) // sPath == oexT( "." ) - !!! SIGSEGV in __strlen_sse2()
+         || sPath == m_sName )
 		return ExecuteMsg( sMsg, mapParams, pReply, pReplyEvent );
 
 	// All the way to the top?

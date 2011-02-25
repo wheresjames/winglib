@@ -53,7 +53,7 @@ public:
 	typedef oexLONG		t_pos;
 
 	/// Size type
-	typedef oexUINT		t_size;
+	typedef oexULONG	t_size;
 
 	/// Floating point type
 	typedef oexFLOAT	t_float;
@@ -366,7 +366,7 @@ public:
 	
 		\see 
 	*/
-	oexBOOL FromMap( oexUINT *x_map, t_pos x_x, t_pos x_y, t_pos x_w, t_pos x_h, t_size x_th, oexUCHAR *x_buf = oexNULL );
+	oexBOOL FromMap( t_size *x_map, t_pos x_x, t_pos x_y, t_pos x_w, t_pos x_h, t_size x_th, oexUCHAR *x_buf = oexNULL );
 
 	/// Default constructor
 	CPolygon() 

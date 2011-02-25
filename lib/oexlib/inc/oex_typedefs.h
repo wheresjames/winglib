@@ -52,13 +52,13 @@ typedef long long			   		oexINT64;
 typedef unsigned long long		    oexUINT64;
 #endif
 
-#define oexMAXUINT16	( (oexUINT16) -1 )
-#define oexMAXUINT32	( (oexUINT32) -1 )
-#define oexMAXUINT64	( (oexUINT64) -1 )
+#define oexMAXUINT16	( (oexUINT16) ~0 )
+#define oexMAXUINT32	( (oexUINT32) ~0 )
+#define oexMAXUINT64	( (oexUINT64) ~(0LLU) )
 
-#define oexMAXINT16		( (oexINT16) 0x7fff )
-#define oexMAXINT32		( (oexINT32) 0x7fffffff )
-#define oexMAXINT64		( (oexINT64) 0x7fffffffffffffff )
+#define oexMAXINT16		( (oexINT16) ( oexMAXUINT16 >> 1 ) )
+#define oexMAXINT32		( (oexINT32) ( oexMAXUINT32 >> 1 ) )
+#define oexMAXINT64		( (oexINT64) ( oexMAXUINT64 >> 1 ) )
 
 typedef int							oexINT;
 typedef unsigned int				oexUINT;
@@ -73,16 +73,17 @@ typedef bool						oexBOOL;
 typedef char						oexCHAR;
 typedef unsigned char				oexUCHAR;
 
-#define oexMAXUSHORT	( (oexUSHORT) -1 )
-#define oexMAXUINT		( (oexUINT) -1 )
-#define oexMAXULONG		( (oexULONG) -1 )
+#define oexMAXUSHORT	oexMAXUINT16
+#define oexMAXUINT		oexMAXUINT32
 
 #define oexMAXSHORT		oexMAXINT16
 #define oexMAXINT		oexMAXINT32
 
 #if defined( OEX_CPU_64 )
+#	define oexMAXULONG		oexMAXUINT64
 #	define oexMAXLONG		oexMAXINT64
 #else
+#	define oexMAXULONG		oexMAXUINT32
 #	define oexMAXLONG		oexMAXINT32
 #endif
 

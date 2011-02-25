@@ -1522,7 +1522,7 @@ public:
 		if ( hDC == NULL || pRect == NULL || hWnd == NULL )
 		{	m_hDrawDc = NULL;
 			m_hFrameWnd = NULL;
-			m_uFrameMsg = NULL;
+			m_uFrameMsg = 0;
 		} // end if
 
 		// Copy the destination rectangle
@@ -1972,7 +1972,7 @@ private:
 		MSG msg;
 
 		// If there is a message
-		while (	PeekMessage( &msg, NULL, NULL, NULL, PM_REMOVE ) )
+		while (	PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) )
 		{
 			if ( eVfwQuitMsg == msg.message )
 				return oexFALSE;

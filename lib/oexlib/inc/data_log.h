@@ -156,9 +156,12 @@ public:
 
 	struct SIterator
 	{
+		// Invalid value
+		static const oexULONG c_Invalid = oexMAXUINT32;
+	
 		// Constructor
 		SIterator()
-		{	uB = uI = oexMAXULONG;
+		{	uB = uI = c_Invalid;
 			pos = 0;
 			npos = 0;
 			oexZero( vi );
@@ -177,7 +180,7 @@ public:
 		}
 
 		void Destroy()
-		{	uB = uI = oexMAXULONG;
+		{	uB = uI = c_Invalid;
 			pos = 0;
 			npos = 0;
 			oexZero( vi );

@@ -134,7 +134,7 @@ int Init( int width, int height )
 			smgr->addLightSceneNode( 0, irr::core::vector3df( 0, 100, -50 ),
 									 irr::video::SColorf( 0.5f, 0.5f, 0.5f ), 100 );
 
-			irr::scene::ICameraSceneNode *camera =
+//			irr::scene::ICameraSceneNode *camera =
 				smgr->addCameraSceneNode( 0, irr::core::vector3df( 0, 30, -40 ),
 										  irr::core::vector3df( 0, 5, 0 ) );
 

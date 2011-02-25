@@ -94,7 +94,7 @@ class CRtspStream
 		if ( 0 >= dec.getBufferSize() )
 			return 0;
 
-		::_self.echo( "sz = " + dec.getBufferSize() );
+//		::_self.echo( "sz = " + dec.getBufferSize() );
 
 		return dec.Decode( CSqBinary(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
 	}

@@ -367,18 +367,33 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexTlsSetValue						OEX_NAMESPACE::os::CThreadLocalStorage::SetValue
 
 // std library
-#define oexStdTStream( t )	                std::basic_stringstream< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
-#define oexStdStream		                oexStdTStream( OEX_NAMESPACE::oexTCHAR )
-#define oexStdTIStream( t )	                std::basic_istringstream< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
-#define oexStdIStream		                oexStdTIStream( OEX_NAMESPACE::oexTCHAR )
-#define oexStdTOStream( t )	                std::basic_ostringstream< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
-#define oexStdOStream		                oexStdTStream( OEX_NAMESPACE::oexTCHAR )
-#define oexStdTString( t )	                std::basic_string< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
-#define oexStdString		                oexStdTString( OEX_NAMESPACE::oexTCHAR )
-#define oexStdMap( k, v )	                std::map< k, v, std::less< k >, OEX_NAMESPACE::COexStdAllocator< k > >
-#define oexStdList( t )		                std::list< t, OEX_NAMESPACE::COexStdAllocator< t > >
-#define oexStdVector( t )	                std::vector< t, OEX_NAMESPACE::COexStdAllocator< t > >
-#define oexStdIStringStream( t )			std::basic_istringstream< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
+#if defined( OEXLIB_CUSTOM_STD_ALLOCATOR )
+#   define oexStdTStream( t )	                std::basic_stringstream< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
+#   define oexStdStream                         oexStdTStream( OEX_NAMESPACE::oexTCHAR )
+#   define oexStdTIStream( t )	                std::basic_istringstream< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
+#   define oexStdIStream		                oexStdTIStream( OEX_NAMESPACE::oexTCHAR )
+#   define oexStdTOStream( t )	                std::basic_ostringstream< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
+#   define oexStdOStream		                oexStdTStream( OEX_NAMESPACE::oexTCHAR )
+#   define oexStdTString( t )	                std::basic_string< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
+#   define oexStdString                         oexStdTString( OEX_NAMESPACE::oexTCHAR )
+#   define oexStdMap( k, v )	                std::map< k, v, std::less< k >, OEX_NAMESPACE::COexStdAllocator< k > >
+#   define oexStdList( t )		                std::list< t, OEX_NAMESPACE::COexStdAllocator< t > >
+#   define oexStdVector( t )	                std::vector< t, OEX_NAMESPACE::COexStdAllocator< t > >
+#   define oexStdIStringStream( t )             std::basic_istringstream< t, std::char_traits< t >, OEX_NAMESPACE::COexStdAllocator< t > >
+#else
+#   define oexStdTStream( t )	                std::basic_stringstream< t, std::char_traits< t > >
+#   define oexStdStream                         oexStdTStream( OEX_NAMESPACE::oexTCHAR )
+#   define oexStdTIStream( t )	                std::basic_istringstream< t, std::char_traits< t > >
+#   define oexStdIStream		                oexStdTIStream( OEX_NAMESPACE::oexTCHAR )
+#   define oexStdTOStream( t )	                std::basic_ostringstream< t, std::char_traits< t > >
+#   define oexStdOStream		                oexStdTStream( OEX_NAMESPACE::oexTCHAR )
+#   define oexStdTString( t )	                std::basic_string< t, std::char_traits< t > >
+#   define oexStdString                         oexStdTString( OEX_NAMESPACE::oexTCHAR )
+#   define oexStdMap( k, v )	                std::map< k, v, std::less< k > >
+#   define oexStdList( t )		                std::list< t >
+#   define oexStdVector( t )	                std::vector< t >
+#   define oexStdIStringStream( t )             std::basic_istringstream< t, std::char_traits< t > >
+#endif
 
 #define oexCompress							OEX_NAMESPACE::zip::CCompress::Compress
 #define oexUncompress						OEX_NAMESPACE::zip::CUncompress::Uncompress

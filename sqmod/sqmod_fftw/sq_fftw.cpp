@@ -158,7 +158,7 @@ int CSqFftw::ReadOutputMagnitudes( int nMax, int nType, int nInterval, sqbind::C
 		return 0;
 
 	// Ensure space
-	if ( bin->Size() < nBytes )
+	if ( bin->Size() < (unsigned int)nBytes )
 		if ( !bin->Allocate( nBytes ) )
 			return 0;
 

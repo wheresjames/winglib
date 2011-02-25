@@ -745,7 +745,7 @@ unsigned int CSqEngineExport::get_timer_seconds()
 	return (unsigned int)nVal;
 }
 
-oex::oexINT64 CSqEngineExport::get_timer_useconds()
+SQInteger CSqEngineExport::get_timer_useconds()
 {_STT();
 	oex::oexINT64 nVal = 0;
 	if ( !oex::os::CHqTimer::osGetCounts( oexNULL, &nVal ) )

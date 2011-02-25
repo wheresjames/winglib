@@ -139,7 +139,7 @@ template < typename T_STD, typename T_PB  >
 
 template < typename T_SL, typename T_STD, typename T_DEF >
 	void SQBIND_StrListToStd( T_SL &sl, T_STD &m, T_DEF ch )
-	{	for ( T_SL::iterator it; sl.Next( it ); )
+	{	for ( oex::CStrList::iterator it; sl.Next( it ); )
 			m[ oex2std( *it ) ] = ch;
 	}
 

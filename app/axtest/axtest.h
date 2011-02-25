@@ -19,6 +19,15 @@ class CAxTest : IAxTest
 {
 public:
 
+//	_OEXCOM_BEGIN_INTERFACE_MAP
+//		_OEXCOM_DECLARE_INTERFACE( IID_IAxTest, CAxTest )
+//	_OEXCOM_END_INTERFACE_MAP
+
+	virtual int _OEXCOM_STDCALL Add( int a, int b ) { return a + b; }
+
+
+public:
+
 	virtual _OEXCOM_ULONG _OEXCOM_STDCALL QueryInterface( oexCONST _OEXCOM_IID& iid,void** ppv )
 	{	if ( !ppv ) return _OEXCOM_E_INVALIDARG;
 		*ppv = 0;
@@ -66,12 +75,6 @@ public:
 		}
 		return _OEXCOM_E_NOINTERFACE; 
 	}
-
-//	_OEXCOM_BEGIN_INTERFACE_MAP
-//		_OEXCOM_DECLARE_INTERFACE( IID_IAxTest, CAxTest )
-//	_OEXCOM_END_INTERFACE_MAP
-
-	virtual int _OEXCOM_STDCALL Add( int a, int b ) { return a + b; }
 
 };
 

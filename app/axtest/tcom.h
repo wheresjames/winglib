@@ -23,7 +23,11 @@
 // COM types
 //------------------------------------------------------------------
 
-#define _OEXCOM_STDCALL				__stdcall
+#if !defined ( OEX_CPU_64 )
+#	define _OEXCOM_STDCALL				__stdcall
+#else
+#	define _OEXCOM_STDCALL
+#endif
 #define _OEXCOM_STDAPI				extern "C" _OEXCOM_HRESULT _OEXCOM_STDCALL
 
 #define _OEXCOM_HRESULT				oex::oexULONG
@@ -230,3 +234,4 @@ _OEXCOM_STDAPI DllGetClassObject( const _OEXCOM_IID &clsid, const _OEXCOM_IID &i
 	}
 
 #define _OEXCOM_END_FACTORY return _OEXCOM_E_NOTIMPL; }
+

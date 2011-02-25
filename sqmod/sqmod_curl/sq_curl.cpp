@@ -122,7 +122,7 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqBinar
 					oex::oexCSTR k = s.Ptr(), v = oexNULL;
 
 					// Split key / value
-					int c = 0;
+					unsigned int c = 0;
 					while ( c < s.Length() && s[ c ] != oexT( ':' ) ) c++;
 
 					// Did we find a divider

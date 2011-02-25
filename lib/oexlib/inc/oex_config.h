@@ -186,6 +186,8 @@
 //#define OEXLIB_STACK_HISTORY
 //#define OEXLIB_STACK_KEEP_INACTIVE_TRACES
 
+//#define OEXLIB_CUSTOM_STD_ALLOCATOR
+
 #if defined ( OEX_WINDOWS )
 
 // !!! Native TLS support is broken in the Visual Studio Compiler when using DLL's

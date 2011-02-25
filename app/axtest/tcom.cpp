@@ -26,7 +26,7 @@ extern const _OEXCOM_IID _OEXCOM_IID_IDispatch =
 // IID_IOleControl				{B196B288-BAB4-101A-B69C-00AA00341D07}
 // IID_IOleControlSite			{B196B289-BAB4-101A-B69C-00AA00341D07}
 
-extern oex::oexLONG _g_oex_lRefCount = 0;
+oex::oexLONG _g_oex_lRefCount = 0;
 
 _OEXCOM_BOOL _OEXCOM_STDCALL DllMain( _OEXCOM_HANDLE InsModule, _OEXCOM_UINT dwReason, void* lpReserved )
 {

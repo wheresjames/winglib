@@ -479,7 +479,7 @@ int CSqSsh2::ChannelRead( const sqbind::stdString &sChannel, int nStream, sqbind
 //		SQSSH2_RETRY( libssh2_channel_read_ex( it->second, nStream, buf, sizeof( buf ) ) );
 //		nBytes = nErr;
 		nBytes = libssh2_channel_read_ex( it->second, nStream, buf, sizeof( buf ) );
-		if ( 0 < nBytes && nBytes <= sizeof( buf ) )
+		if ( 0 < nBytes && (unsigned int)nBytes <= sizeof( buf ) )
 			bin->AppendBuffer( buf, nBytes ), nTotal += nBytes;
 
 		// Wait a bit
