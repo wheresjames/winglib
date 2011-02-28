@@ -2274,7 +2274,7 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 		// Check Install directory
 		if ( !sFull.Length() )
 		{
-#	if defined( __MINGW32__ )
+#	if defined( OEX_GCC )
 #		define SQKEYNAME "WinglibScriptEngine"
 #	else
 #		define SQKEYNAME "SquirrelScript"
