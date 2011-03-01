@@ -331,7 +331,7 @@ public:
 		// Verify we got valid memory
         if ( !oexVERIFY_PTR( pMem ) )
         {	oexDSHOWVAL( (oexUINT)x_uSize, "%u : " );
-        	oexDSHOWVAL( (oexUINT)pMem, "0x%x\n" );
+        	oexDSHOWVAL( (oexUINT)oexPtrToInt( pMem ), "0x%x\n" );
 		    return oexNULL;
 		} // endi f
 
