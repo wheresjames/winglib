@@ -2274,7 +2274,9 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 		// Check Install directory
 		if ( !sFull.Length() )
 		{
-#	if defined( OEX_GCC )
+#	if defined( OEX_SQENGINE )
+#		define SQKEYNAME OEX_SQENGINE
+#	elif defined( OEX_GCC )
 #		define SQKEYNAME "WinglibScriptEngine"
 #	else
 #		define SQKEYNAME "SquirrelScript"
@@ -2284,7 +2286,6 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 #	else
 #		define SQKEYCPU "x86"
 #	endif
-
 			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\" SQKEYNAME "_" SQKEYCPU ), oexT( "Install_Dir" ) );
 			if ( sInstallRoot.Length() )
 				sFull = FindFile( sInstallRoot, lstSubs, sFile );
