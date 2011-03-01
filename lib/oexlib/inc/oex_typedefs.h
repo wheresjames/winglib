@@ -54,7 +54,7 @@ typedef unsigned long long		    oexUINT64;
 
 #define oexMAXUINT16	( (oexUINT16) ~0 )
 #define oexMAXUINT32	( (oexUINT32) ~0 )
-#define oexMAXUINT64	( (oexUINT64) ~(0LLU) )
+#define oexMAXUINT64	( (oexUINT64) ~(0ULL) )
 
 #define oexMAXINT16		( (oexINT16) ( oexMAXUINT16 >> 1 ) )
 #define oexMAXINT32		( (oexINT32) ( oexMAXUINT32 >> 1 ) )
