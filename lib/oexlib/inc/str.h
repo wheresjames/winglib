@@ -2855,7 +2855,7 @@ public:
 
 	TStr& DecorateName( TStr &sFile, oexBOOL bExe, oexBOOL bLib )
 	{
-#if defined( OEX_WIN32 )
+#if defined( OEX_WINDOWS )
 #	if defined( oexDEBUG )
 		return DecorateName( sFile, bExe, bLib, oexTRUE, oexTRUE );
 #	else

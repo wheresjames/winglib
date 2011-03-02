@@ -2234,6 +2234,7 @@ int CSqEngine::OnImport( const stdString &sClass )
 
 static oex::CStr FindFile( oex::CStr sRoot, oex::CStrList &lstSubs, oex::CStr &sFile )
 {_STT();
+
 	// Check all possible sub folders
 	for ( oex::CStrList::iterator it; lstSubs.Next( it ); )
 	{	oex::CStr sFull = sRoot;
@@ -2286,16 +2287,21 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 #	else
 #		define SQKEYCPU "x86"
 #	endif
-			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "Software\\" SQKEYNAME "_" SQKEYCPU ), oexT( "Install_Dir" ) );
+
+			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "SOFTWARE\\" SQKEYNAME "_" SQKEYCPU ), oexT( "Install_Dir" ) );
 			if ( sInstallRoot.Length() )
 				sFull = FindFile( sInstallRoot, lstSubs, sFile );
+			else
+				oexNOTICE( 0, oexT( "!!! Script Engine is Not Installed !!!" ) );
 		} // end if
 #endif
 
 	} // end else
 
 	if ( !sFull.Length() )
+	{	oexERROR( 0, oexMks( oexT( "Module not found : " ), sModule.c_str() ) );
 		return -3;
+	} // end if
 
 	// See if the module is already loaded
 	oex::oexBOOL bExists = m_pModuleManager->Exists( sFull.Ptr() );
@@ -2303,7 +2309,7 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 	// Attempt to load the module
 	CModuleInstance *pMi = m_pModuleManager->Load( sFull.Ptr() );
 	if ( !pMi )
-	{	oexERROR( 0, oexMks( oexT( "Failed to load module " ), sFull ) );
+	{	oexERROR( 0, oexMks( oexT( "Failed to load module : " ), sFull ) );
 		return -4;
 	} // end if
 

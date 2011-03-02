@@ -155,7 +155,7 @@ oexBOOL CCapture::Destroy()
 
 		} // end switch
 
-#if defined( OEX_WIN32 )
+#if defined( OEX_WINDOWS )
 
 	// In Windows, you can't immediately reopen the capture device,
 	// so this is just to make sure no one tries

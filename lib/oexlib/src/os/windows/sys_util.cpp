@@ -81,7 +81,7 @@ static CStr RegValueToString( DWORD dwType, LPVOID pBuf, DWORD dwSize )
 			return CStr( *( (oexUINT64*)pBuf ) );
 
 		case REG_BINARY :
-			return CStr();
+			return oexMbToStr( CStr8( (oexCSTR8)pBuf, dwSize ) );
 
 		case REG_SZ :
 		case REG_MULTI_SZ :
@@ -92,6 +92,10 @@ static CStr RegValueToString( DWORD dwType, LPVOID pBuf, DWORD dwSize )
 				dwSize--;
 
 			return CStr( (oexCSTR)pBuf, dwSize );
+			
+		default :
+			oexWARNING( 0, oexMks( oexT( "Unknown Registry key Type : " ), dwType ) );
+			break;
 
 	} // end switch
 
@@ -144,12 +148,24 @@ CStr CSysUtil::GetRegString( const CStr &x_sKey, const CStr &x_sPath, const CStr
 	LONG lRes = RegCreateKeyEx( hRoot, x_sPath.Ptr(),
 								0, NULL, 0, KEY_READ | KEY_QUERY_VALUE, NULL, &hKey, NULL );
 	if ( ERROR_SUCCESS != lRes || !hKey )
+	{	// iii This is expected to fail if key doesn't exist
+//		oexNOTICE( lRes, oexMks( oexT( "RegCreateKeyEx() failed : " ), 
+//								x_sKey.Ptr(), oexT( " : " ), 
+//								x_sPath.Ptr() ) );
 		return CStr();
+	} // end if
+
+	// RegDisableReflectionKey( hKey );
 
 	DWORD dwType = 0, dwSize = 0;
 	lRes = RegQueryValueEx( hKey, x_sName.Ptr(), 0, &dwType, 0, &dwSize );
 	if ( ERROR_SUCCESS != lRes )
-	{	RegCloseKey( hKey );
+	{	// iii This is expected to fail if value doesn't exist
+//		oexNOTICE( lRes, oexMks( oexT( "RegQueryValueEx() failed : " ), 
+//								x_sKey.Ptr(), oexT( " : " ), 
+//								x_sPath.Ptr(), oexT( " : " ),
+//								x_sName.Ptr() ) );
+		RegCloseKey( hKey );
 		return CStr();
 	} // end if
 
@@ -160,7 +176,11 @@ CStr CSysUtil::GetRegString( const CStr &x_sKey, const CStr &x_sPath, const CStr
 
 	lRes = RegQueryValueEx( hKey, x_sName.Ptr(), 0, &dwType, (LPBYTE)buf._Ptr(), &dwSize );
 	if ( ERROR_SUCCESS != lRes )
-	{	RegCloseKey( hKey );
+	{	oexERROR( lRes, oexMks( oexT( "RegQueryValueEx() failed : " ), 
+								x_sKey.Ptr(), oexT( " : " ), 
+								x_sPath.Ptr(), oexT( " : " ),
+								x_sName.Ptr() ) );
+		RegCloseKey( hKey );
 		return CStr();
 	} // end if
 
@@ -178,13 +198,22 @@ oexBOOL CSysUtil::SetRegString( const CStr &x_sKey, const CStr &x_sPath, const C
 	LONG lRes = RegCreateKeyEx( hRoot, x_sPath.Ptr(),
 								0, NULL, 0, KEY_WRITE | KEY_SET_VALUE, NULL, &hKey, NULL );
 	if ( ERROR_SUCCESS != lRes || !hKey )
+	{	oexERROR( lRes, oexMks( oexT( "RegCreateKeyEx() failed : " ), 
+								x_sKey.Ptr(), oexT( " : " ), 
+								x_sPath.Ptr() ) );
 		return oexFALSE;
+	} // end if
 
 	// +++ Should we do mb/unicode here?
 
 	// Set the value
 	CStr8 val = oexStrToMb( x_sValue );
-	RegSetValueEx( hKey, x_sName.Ptr(), 0, REG_SZ, (const BYTE *)val.Ptr(), val.Length() );
+	lRes = RegSetValueEx( hKey, x_sName.Ptr(), 0, REG_SZ, (const BYTE *)val.Ptr(), val.Length() );
+	if ( ERROR_SUCCESS != lRes )
+		oexERROR( lRes, oexMks( oexT( "RegSetValueEx() failed : " ), 
+								x_sKey.Ptr(), oexT( " : " ), 
+								x_sPath.Ptr(), oexT( " : " ),
+								x_sName.Ptr() ) );
 
 	RegCloseKey( hKey );
 

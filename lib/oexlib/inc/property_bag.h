@@ -535,7 +535,7 @@ public:
         return pb;
     }
 
-//#if defined( WIN32 ) && !defined( OEX_ARM )
+//#if defined( OEX_WINDOWS ) && !defined( OEX_ARM )
 //#if defined( OEX_DEBUG )
 
 	//==============================================================

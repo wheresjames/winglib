@@ -243,7 +243,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 
 #define oexEMPTY_STRING             		oexT( "" )
 
-#if defined( OEX_WIN32 )
+#if defined( OEX_WINDOWS )
 #	define oexNL							oexT( "\r\n" )
 #	define oexNL8							"\r\n"
 #	define oexNL_LEN						2
