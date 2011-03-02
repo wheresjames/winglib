@@ -98,6 +98,8 @@ function _init()
 	_self.echo( "\n=== DONE ===\n" );
 	
 	WaitKey();
+	
+	return -1;
 }
 
 function _idle()
