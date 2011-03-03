@@ -10,7 +10,7 @@ default_target: all
 PRJ_NAME := oexlib
 PRJ_TYPE := lib
 PRJ_INCS := winglib/lib/oexlib
-#PRJ_HACK := win_fwd_slashes
+PRJ_HACK := win_fwd_slashes
 
 #-------------------------------------------------------------------
 # Configure build
