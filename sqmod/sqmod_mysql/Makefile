@@ -23,6 +23,18 @@ PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(PLATFORM),windows)
+	ifeq ($(BUILD),gcc)
+		ifeq ($(PROC),x86)
+			UNSUPPORTED := x86-gcc-windows does not link for whatever reason
+		endif
+	endif
+endif
+
+ifneq ($(UNSUPPORTED),)
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
+ifeq ($(PLATFORM),windows)
 
 	ifeq ($(BUILD),vs)
 		PRJ_WINL := libmysql
@@ -58,4 +70,5 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
+endif
 

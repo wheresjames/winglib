@@ -1,5 +1,4 @@
 
-_self.load_module( "http", "" );
 _self.load_module( "cell", "" );
 
 class CGlobal
@@ -51,7 +50,7 @@ function pg_data( mParams ) : ( _g )
 	if ( !_g.tc.IsConnected() || 
 		 ( mParams[ "GET" ][ "ip" ].len() && mParams[ "GET" ][ "ip" ].str() != _g.tc.GetIp() ) )
 		if ( !_g.tc.Connect( mParams[ "GET" ][ "ip" ].str(), 1 ) )
-		{	mReply[( "content" ] <- "Unable to connect to " + mParams[ "GET" ][ "ip" ].str();
+		{	mReply[ "content" ] <- "Unable to connect to " + mParams[ "GET" ][ "ip" ].str();
 			return mReply.serialize();
 		} // end if
 
@@ -162,7 +161,7 @@ function show_tag( name ) : ( _g )
 	return content;
 }
 
-function edit_template( mParams ) : ( _g )
+function edit_template( name, mParams ) : ( _g )
 {
 	// Cut off template stuff
 	local full_tag = name;
@@ -390,7 +389,7 @@ function pg_admin( mParams ) : ( _g )
 			<table>
 				<tr valign='top'>
 					<td>
-						" + edit_template( tag, request, headers, get, post ) + @"
+						" + edit_template( tag, mParams ) + @"
 					</td>
 					<td style='border-right:2px inset black'>
 						&nbsp;
@@ -441,12 +440,14 @@ function _init() : ( _g )
 	_g.tc.tmpl().deserialize( CSqFile().get_contents( _g.tmpl_cfg ) );
 	_g.tc.VerifyTemplate();
 
-	_g.server = CHttpServer();
+	_g.server = CSqHttpServer();
 
 	_g.server.SetSessionCallback( _self.queue(), "OnProcessRequest" );
 
 	if ( !_g.server.Start( 1234 ) )
-		_self.alert( "Unable to start http server" );
+		_self.echo( "Unable to start http server" );
+	else
+		_self.echo( "Server started at http://localhost:1234/admin" );
 }
 
 function _idle() : ( _g )
