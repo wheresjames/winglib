@@ -42,8 +42,8 @@ namespace sqbind
 	public:
 
 		SQBIND_CLASS_CTOR_BEGIN( CSqTimeRange )
-			_SQBIND_CLASS_CTOR( CSqTimeRange, 1 ) ( sa.GetInt( 1 ) )
-			_SQBIND_CLASS_CTOR( CSqTimeRange, 2 ) ( sa.GetInt( 1 ), sa.GetInt( 2 ) )
+			_SQBIND_CLASS_CTOR( CSqTimeRange, 1 ) ( sa.GetInt( 2 ) )
+			_SQBIND_CLASS_CTOR( CSqTimeRange, 2 ) ( sa.GetInt( 2 ), sa.GetInt( 3 ) )
 		SQBIND_CLASS_CTOR_END( CSqTimeRange )
 
 		static void Register( sqbind::VM vm );
@@ -153,10 +153,20 @@ namespace sqbind
 	public:
 
 		SQBIND_CLASS_CTOR_BEGIN( CSqTime )
+			_SQBIND_CLASS_CTOR1( CSqTime, OT_INTEGER ) ( sa.GetInt( 2 ) )
+			_SQBIND_CLASS_CTOR2( CSqTime, OT_STRING, OT_STRING ) 
+				( sqbind::stdString( sa.GetString( 2 ), sq_getsize( x_v, 2 ) ),
+				  sqbind::stdString( sa.GetString( 3 ), sq_getsize( x_v, 3 ) ) )
 		SQBIND_CLASS_CTOR_END( CSqTime )
 
 		CSqTime() {}
 
+		// Initialize with unix timestamp
+		CSqTime( SQInteger n ) { SetUnixTime( n ); }
+		
+		// Initialize with time string
+		CSqTime( const sqbind::stdString &sTmpl, const sqbind::stdString sTime ) { ParseTime( sTmpl, sTime ); }
+		
 		// Copy semantics
 		CSqTime( const CSqTime &r ) { m_t = r.m_t; }
 		CSqTime& operator=( const CSqTime &r ) { m_t = r.m_t; return *this; }

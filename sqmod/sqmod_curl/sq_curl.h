@@ -20,10 +20,10 @@ public:
 	void Destroy();
 
 	/// Grab url
-	int GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqBinary *sData );
+	int GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSqBinary *sData );
 
 	/// HTTP Post
-	int PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::stdString &sPost, sqbind::CSqBinary *sData );
+	int PostUrl( const sqbind::stdString &sUrl, SQInteger lPort, const sqbind::stdString &sPost, sqbind::CSqBinary *sData );
 
 	/// Enable basic http authentication
 	int SetBasicAuth( const sqbind::stdString &sUsername, const sqbind::stdString &sPassword );
@@ -39,7 +39,19 @@ public:
 
 	/// Returns the name of the output file
 	sqbind::stdString getFile() { return m_sFile; }
+	
+	/// Sets the connect timeout
+	void setConnectTimeout( SQInteger to ) { m_nConnectTimeout = to; }
+	
+	/// Returns the current connect timeout
+	SQInteger getConnectTimeout() { return m_nConnectTimeout; }
 
+	/// Sets the overall transaction timeout
+	void setTimeout( SQInteger to ) { m_nTimeout = to; }
+	
+	/// Returns the overall transaction timeout
+	SQInteger getTimeout() { return m_nTimeout; }
+	
 private:
 
 	/// Curl writer
@@ -53,17 +65,27 @@ private:
 	/// Curl handle
 	CURL						*m_curl;
 
+	/// String describing the last error
 	sqbind::stdString			m_sErr;
 
+	/// Username to use with connection
 	sqbind::stdString			m_sUsername;
 
+	/// Password to use with connection
 	sqbind::stdString			m_sPassword;
 
+	/// List of HTTPS certs
 	sqbind::CSqMulti			m_mCerts;
 
 	/// Sets output file
 	sqbind::stdString			m_sFile;
+	
+	/// Sets the connect timeout CURLOPT_CONNECTTIMEOUT
+	SQInteger					m_nConnectTimeout;
 
+	/// Sets the transaction timeout CURLOPT_TIMEOUT
+	SQInteger					m_nTimeout;
+	
 };
 SQBIND_DECLARE_INSTANCE( CSqCurl, CSqCurl );
 

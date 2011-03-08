@@ -143,6 +143,9 @@ namespace sqbind
 		static int rmdir( const stdString &sDir )
 		{	return oexDeletePath( sDir.c_str() ); }
 
+		static int unlink( const stdString &sPath )
+		{	return oexDelete( sPath.c_str() ); }
+
 		static int delete_file( const stdString &sPath )
 		{	return oexDelete( sPath.c_str() ); }
 

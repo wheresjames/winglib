@@ -6,7 +6,8 @@
 CSqCurl::CSqCurl()
 {_STT();
 	m_curl = oexNULL;
-
+	m_nTimeout = 0;
+	m_nConnectTimeout = 0;
 }
 
 CSqCurl::~CSqCurl()
@@ -47,7 +48,7 @@ int CSqCurl::StdFileWriter( char *data, size_t size, size_t nmemb, sqbind::CSqFi
 	return res;
 }
 
-int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqBinary *sData )
+int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSqBinary *sData )
 {_STT();
 
 	if ( !sData && !m_sFile.length() )
@@ -67,6 +68,12 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqBinar
 	if ( !m_curl )
 		return 0;
 
+	if ( 0 <= m_nConnectTimeout )
+		curl_easy_setopt( m_curl, CURLOPT_CONNECTTIMEOUT_MS, m_nConnectTimeout );
+		
+	if ( 0 <= m_nTimeout )
+		curl_easy_setopt( m_curl, CURLOPT_TIMEOUT_MS, m_nTimeout );
+		
 	curl_easy_setopt( m_curl, CURLOPT_HEADER, 0 );
 	curl_easy_setopt( m_curl, CURLOPT_FOLLOWLOCATION, 1 );
 	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYPEER, 0 );
@@ -138,7 +145,7 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, long lPort, sqbind::CSqBinar
 	return 1;
 }
 
-int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::stdString &sPost, sqbind::CSqBinary *sData )
+int CSqCurl::PostUrl( const sqbind::stdString &sUrl, SQInteger lPort, const sqbind::stdString &sPost, sqbind::CSqBinary *sData )
 {_STT();
 
 	if ( !sData && !m_sFile.length() )
@@ -158,8 +165,13 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, long lPort, const sqbind::s
 	if ( !m_curl )
 		return 0;
 	
-	curl_easy_setopt( m_curl, CURLOPT_POST, 1 );
+	if ( 0 <= m_nConnectTimeout )
+		curl_easy_setopt( m_curl, CURLOPT_CONNECTTIMEOUT_MS, m_nConnectTimeout );
+		
+	if ( 0 <= m_nTimeout )
+		curl_easy_setopt( m_curl, CURLOPT_TIMEOUT_MS, m_nTimeout );
 
+	curl_easy_setopt( m_curl, CURLOPT_POST, 1 );
 	curl_easy_setopt( m_curl, CURLOPT_POSTFIELDS, sPost.c_str() );
 	curl_easy_setopt( m_curl, CURLOPT_POSTFIELDSIZE, sPost.length() );
 

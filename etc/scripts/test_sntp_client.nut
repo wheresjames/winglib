@@ -104,8 +104,7 @@ function _init() : ( _g )
 	// Local time
 	local ts_client = _self.gmt_time();
 
-	local tm = CSqTime();
-	tm.SetUnixTime( ts_client );
+	local tm = CSqTime( ts_client );
 	_self.echo( "Local  Time : " + tm.FormatTime( "%W, %B %D, %Y - %h:%m:%s %A" ) );
 	tm.SetUnixTime( ts_server );
 	_self.echo( "Server Time : " + tm.FormatTime( "%W, %B %D, %Y - %h:%m:%s %A" ) );

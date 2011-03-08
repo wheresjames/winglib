@@ -43,9 +43,15 @@ namespace sqbind
 	public:
 
 		SQBIND_CLASS_CTOR_BEGIN( CSqImage )
+			_SQBIND_CLASS_CTOR2( CSqImage, OT_INTEGER, OT_INTEGER ) ( sa.GetInt( 2 ), sa.GetInt( 3 ) )
+			_SQBIND_CLASS_CTOR2( CSqImage, OT_STRING, OT_STRING )
+				( sqbind::stdString( sa.GetString( 2 ), sq_getsize( x_v, 2 ) ),
+				  sqbind::stdString( sa.GetString( 3 ), sq_getsize( x_v, 3 ) ) )
 		SQBIND_CLASS_CTOR_END( CSqImage )
 
 		CSqImage() {}
+		CSqImage( SQInteger width, SQInteger height ) { Create( width, height ); }
+		CSqImage( const sqbind::stdString &sFile, const sqbind::stdString &sType ) { Load( sFile, sType ); }
 
 		// Copy semantics
 		CSqImage( const CSqImage &r )

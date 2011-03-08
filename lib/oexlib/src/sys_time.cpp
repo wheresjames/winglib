@@ -598,7 +598,7 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 
     // If this asserts you're time stamp did not match
     // the template passed to CSysTime::ParseTime()
-    oexASSERT( !bErrors );
+//    oexASSERT( !bErrors );
 
 	// Calculate bias
 	oexINT nTzBias = eInvalid;

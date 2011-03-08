@@ -47,8 +47,6 @@ namespace sqbind
 		CSqBinary::Register( x_vm );
 		CSqDataLog::Register( x_vm );
 		CSqString::Register( x_vm );
-		CSqVector::Register( x_vm );
-		CSqList::Register( x_vm );
 		CSqMulti::Register( x_vm );
 		CSqFile::Register( x_vm );
 		CSqTimeRange::Register( x_vm );
@@ -112,6 +110,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqFile, CSqFile )
 	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, mkdir )
 	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, rmdir )
 	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, exists )
+	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, unlink )
 	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, delete_file )
 	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, delete_path )
 	SQBIND_STATIC_FUNCTION(  sqbind::CSqFile, rename )
