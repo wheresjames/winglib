@@ -37,6 +37,9 @@
 // 3rd party stuff
 #define OEX_ENABLE_SQLITE
 
+// Custom std allocator
+#define OEXLIB_CUSTOM_STD_ALLOCATOR
+
 // Compile messages
 #define OEX_VERBOSE_COMPILE
 
