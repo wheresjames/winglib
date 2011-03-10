@@ -1265,14 +1265,14 @@ int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )
 	// What's the name of the squirrel exe?
 	stdString sFull, sExeName = oex2std( oex::CStr( oexT( "sqrl" ) ).DecorateName( oex::oexTRUE, oex::oexFALSE ) );
 
-//	if ( oexExists( path( sExeName ).c_str() ) )
-//		sFull = path( sExeName );
-//	else if ( oexExists( root( sExeName ).c_str() ) )
-//		sFull = root( sExeName );
+	if ( oexExists( path( sExeName ).c_str() ) )
+		sFull = path( sExeName );
+	else if ( oexExists( root( sExeName ).c_str() ) )
+		sFull = root( sExeName );
 
 #if defined( OEX_WINDOWS )
 
-//	else
+	else
 	{
 		#	if defined( OEX_SQENGINE )
 		#		define SQKEYNAME OEX_SQENGINE
