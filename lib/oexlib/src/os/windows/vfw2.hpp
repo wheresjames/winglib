@@ -531,23 +531,23 @@ public:
 							if ( SUCCEEDED( hr ) && cpPBag != NULL )
 							{
 								// Get friendly name
-//								CComVariant var; var.vt = VT_BSTR;
-								VARIANT var; var.vt = VT_BSTR;
-								hr = cpPBag->Read( L"FriendlyName", &var, NULL );
+								VARIANT var; oexZero( var ); var.vt = VT_BSTR;
+								if ( SUCCEEDED( hr = cpPBag->Read( L"FriendlyName", &var, NULL ) ) )
+								{
+									// Save data
+									CPropertyBag &r = (*pList)[ i ];
+									r[ oexT( "id" ) ] = oexStdString( (_bstr_t)pMonikerName ).c_str();
+									r[ oexT( "name" ) ] = oexStdString( (_bstr_t)var.bstrVal ).c_str();
 
-								CPropertyBag &r = (*pList)[ i ];
+									// Free string
+									CoTaskMemFree( &var );
 
-								r[ oexT( "id" ) ] = oexStdString( (_bstr_t)pMonikerName ).c_str();
-								r[ oexT( "name" ) ] = oexStdString( (_bstr_t)var.bstrVal ).c_str();
+								} // end if
 
-								// Add it to the list
-//								(*pList)[ oexStdString( (_bstr_t)pMonikerName ).c_str() ] 
-//									= oexStdString( (_bstr_t)var.bstrVal ).c_str(); 
-
-								// Free string
-								CoTaskMemFree( pMonikerName );	  
-								CoTaskMemFree( &var );
 							} // end if	
+
+							// Free string
+							CoTaskMemFree( pMonikerName );	  
 
 						} // end if
 					
