@@ -21,27 +21,23 @@ sqbind::CModuleManager	*g_psqModuleManager = oexNULL;
 int run( oex::CPropertyBag &pbCmdLine )
 {_STT();
 
+	oex::oexBOOL bFile = oex::oexTRUE;
 	oex::CStr sCmd = pbCmdLine[ 0 ].ToString();
 
 	// Calculate a module name if not specified
 	if ( !sCmd.Length() )
 	{
-		// Look for a .cfg file
-		oex::CStr sSettings = oexGetModuleFileName() << oexT( ".cfg" );
-		if ( oex::CFile::Exists( sSettings.Ptr() ) )
-		{
-			// Decode settings file
-			oex::CPropertyBag pb = oex::CParser::DecodeIni( oexMbToStr( oex::CFile().OpenExisting( sSettings.Ptr() ).Read() ) );
-
-			// Command line?
-			if ( pb.IsKey( oexT( "cmd" ) ) )
-				sCmd = pb[ oexT( "cmd" ) ].ToString();
-
-		} // end if
-
+		// Raw script on the command line?
+		if ( pbCmdLine.IsKey( "s" ) )
+			bFile = oex::oexFALSE, sCmd = pbCmdLine[ "s" ].ToString();
+		
+		else if ( pbCmdLine.IsKey( "script" ) )
+			bFile = oex::oexFALSE, sCmd = pbCmdLine[ "script" ].ToString();
+			
 		else
-		{
-			sSettings = oexGetModuleFileName() << oexT( ".cfg.txt" );
+		{	
+			// Look for a .cfg file
+			oex::CStr sSettings = oexGetModuleFileName() << oexT( ".cfg" );
 			if ( oex::CFile::Exists( sSettings.Ptr() ) )
 			{
 				// Decode settings file
@@ -53,6 +49,22 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 			} // end if
 
+			else
+			{
+				sSettings = oexGetModuleFileName() << oexT( ".cfg.txt" );
+				if ( oex::CFile::Exists( sSettings.Ptr() ) )
+				{
+					// Decode settings file
+					oex::CPropertyBag pb = oex::CParser::DecodeIni( oexMbToStr( oex::CFile().OpenExisting( sSettings.Ptr() ).Read() ) );
+
+					// Command line?
+					if ( pb.IsKey( oexT( "cmd" ) ) )
+						sCmd = pb[ oexT( "cmd" ) ].ToString();
+
+				} // end if
+
+			} // end else
+			
 		} // end else
 
 	} // end if
@@ -62,7 +74,7 @@ int run( oex::CPropertyBag &pbCmdLine )
 		return oexERROR( -1, oexT( "Script not specified" ) );
 
 	// Ensure the file exists
-	if ( !oexExists( sCmd.Ptr() ) )
+	if ( bFile && !oexExists( sCmd.Ptr() ) )
 	{
 		if ( oexExists( oexGetModulePath( oexT( "scripts" ) ).BuildPath( sCmd ).Ptr() ) )
 			sCmd = oexGetModulePath( oexT( "scripts" ) ).BuildPath( sCmd );
@@ -92,11 +104,11 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 	g_psqScriptThread->SetModuleManager( g_psqModuleManager );
 
-	g_psqScriptThread->SetScript( oexStrToMb( sCmd ), oex::oexTRUE );
+	g_psqScriptThread->SetScript( oexStrToMb( sCmd ), bFile );
 
 	g_psqScriptThread->SetExportFunction( SQBIND_Export_Symbols, oexNULL );
 
-	g_psqScriptThread->Pb()[ oexT( "cmdline" ) ] = pbCmdLine;
+	g_psqScriptThread->Pb()[ oexT( "cmdline" ) ] = pbCmdLine.Copy();
 
 	if ( g_psqScriptThread->Start() )
 		return oexERROR( -5, oexT( "Failed to start script thread" ) );
@@ -160,8 +172,20 @@ int run(int argc, char* argv[])
 	// Start a log file
 	oexNOTICE( 0, oexT( "Application startup" ) );
 
+	// Show command line input
+	if ( pbCmdLine.IsKey( "show" ) )
+		oexEcho( pbCmdLine.PrintR().Ptr() );
+
+	// Pause before starting
+	if ( pbCmdLine.IsKey( "pause" ) )
+		oexSleep( pbCmdLine[ "pause" ].ToInt() );
+
 	// Run the app
 	int nRet = run( pbCmdLine );
+
+	// Wait at the end
+	if ( pbCmdLine.IsKey( "pause_end" ) )
+		oexSleep( pbCmdLine[ "pause_end" ].ToInt() );
 
 	oexNOTICE( 0, oexT( "Shutting down..." ) );
 

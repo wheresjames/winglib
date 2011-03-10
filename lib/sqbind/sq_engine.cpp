@@ -1249,6 +1249,12 @@ stdString CSqEngineExport::execute4( int nRet, const stdString &sPath, const std
 	return sRet;
 }
 
+int CSqEngineExport::sqexe_script( const stdString &sScript, const stdString &sDir )
+{_STT();
+	stdString sEscaped = oex2std( std2oex( sScript ).Escape( "\\\"\'", '\\' ) );
+	return sqexe( stdString( oexT( "-s:\"" ) ) + sEscaped + oexT( "\"" ), sDir );
+}
+
 int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )
 {_STT();
 
@@ -1259,29 +1265,58 @@ int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )
 	// What's the name of the squirrel exe?
 	stdString sFull, sExeName = oex2std( oex::CStr( oexT( "sqrl" ) ).DecorateName( oex::oexTRUE, oex::oexFALSE ) );
 
-	if ( oexExists( path( sExeName ).c_str() ) )
-		sFull = path( sExeName );
-	else if ( oexExists( root( sExeName ).c_str() ) )
-		sFull = root( sExeName );
-	else
+//	if ( oexExists( path( sExeName ).c_str() ) )
+//		sFull = path( sExeName );
+//	else if ( oexExists( root( sExeName ).c_str() ) )
+//		sFull = root( sExeName );
+
+#if defined( OEX_WINDOWS )
+
+//	else
 	{
-		stdString sRoot = reg_get_str( oexT( "HKLM" ), oexT( "Software\\SquirrelScript" ), oexT( "Install_Dir" ) );
-		if ( sRoot.length() && oexExists( build_path( sRoot, sExeName ).c_str() ) )
-			sFull = build_path( sRoot, sExeName );
-		else
-		{	sRoot = reg_get_str( oexT( "HKLM" ), oexT( "Software\\WinglibScriptEngine" ), oexT( "Install_Dir" ) );
-			if ( sRoot.length() && oexExists( build_path( sRoot, sExeName ).c_str() ) )
-				sFull = build_path( sRoot, sExeName );
-		} // end else
+		#	if defined( OEX_SQENGINE )
+		#		define SQKEYNAME OEX_SQENGINE
+		#	elif defined( OEX_GCC )
+		#		define SQKEYNAME "WinglibScriptEngine"
+		#	else
+		#		define SQKEYNAME "SquirrelScript"
+		#	endif
+		#	if defined( OEX_CPU_64 )
+		#		define SQKEYCPU "x64"
+		#	else
+		#		define SQKEYCPU "x86"
+		#	endif
+
+		// Posible squirrel engines
+		oex::oexCSTR sKeys[] = 
+		{	
+			oexT( "SOFTWARE\\" SQKEYNAME "_" SQKEYCPU ),
+			oexT( "SOFTWARE\\SquirrelScript_x86" ),
+			oexT( "SOFTWARE\\SquirrelScript_x64" ),
+			oexT( "SOFTWARE\\WinglibScriptEngine_x86" ),
+			oexT( "SOFTWARE\\WinglibScriptEngine_x64" ),
+			0
+		};
+
+		// Find a squirrel engine install
+		stdString sRoot; oex::oexINT i = 0;
+		while ( !sRoot.length() && sKeys[ i ] )
+			sRoot = reg_get_str( oexT( "HKLM" ), sKeys[ i++ ], oexT( "Install_Dir" ) );
+
+		// Did we find an installed engine?
+		if ( sRoot.length() )
+			sFull = build_path( sRoot, oexT( "sqrl.exe" ) );
 
 	} // end else
+
+#endif
 
 	// Did we find the file?
 	if ( !sFull.length() )
 		return -2;
-
+	
 	// Let's try and execute
-	return oexExec( sFull.c_str(), sParams.c_str(), sDir.length() ? sDir.c_str() : path( stdString() ).c_str() );
+	return oexShell( sFull.c_str(), sParams.c_str(), sDir.length() ? sDir.c_str() : path( stdString() ).c_str() );
 }
 
 int CSqEngineExport::type_size( int type )
@@ -1602,6 +1637,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, exec )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, process_system_messages )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sqexe )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sqexe_script )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_install )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_remove )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_start )

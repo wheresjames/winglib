@@ -2546,6 +2546,30 @@ public:
 
 		return *this;
 	}
+	
+	/// Returns quoted string
+	TStr Quote( oexCONST T *pOpen, oexCONST T *pClose, oexCONST T pEscape )
+	{
+		TStr s;
+		T find[ 2 ] = { 0, 0 };
+		T escp[ 3 ] = { 0, pEscape, 0 };
+		
+		// Escape escape chars
+		find[ 0 ] = pEscape, escp[ 0 ] = pEscape, s = Replace( find, escp );
+		
+		// Escape open chars
+		if ( pOpen )
+			for ( oexINT i = 0; pOpen[ i ]; i++ )
+				find[ 0 ] = pOpen[ i ], escp[ 0 ] = pOpen[ i ], s = Replace( find, escp );
+		
+		// Escape close chars
+		if ( pClose )
+			for ( oexINT i = 0; pClose[ i ]; i++ )
+				find[ 0 ] = pClose[ i ], escp[ 0 ] = pClose[ i ], s = Replace( find, escp );
+
+		find[ 0 ] = pEscape;
+		return ( TStr() << find << s << find );
+	}
 
 	/// Splits off a token and returns it
 	TStr ParseWithQuoted( oexCONST T *pOpen, oexCONST T *pTerm, oexCONST T *pClose, oexCONST T *pEscape = oexNULL )

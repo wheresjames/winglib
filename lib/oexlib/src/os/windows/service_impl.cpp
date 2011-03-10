@@ -510,7 +510,8 @@ int CServiceImpl::Stop( oexCSTR pName )
 	// Open service
 	SC_HANDLE hService = ::OpenService( hManager, pName, SERVICE_ALL_ACCESS );
 	if ( !hService )
-	{	::CloseServiceHandle( hManager );
+	{	DWORD dwRet = ::GetLastError();
+		::CloseServiceHandle( hManager );		
 		return -2;
 	} // end if
 
