@@ -51,8 +51,8 @@ Boolean CLvRtspClient::CVideoSink::continuePlaying()
 			m_buf.MemCpyAt( &m_header, 0 );
 
 #if defined( oexDEBUG )
-			oexSHOW( m_header.getUsed() );
-			oexEcho( oexBinToAsciiHexStr( m_header.Mem(), 0, 16, 16 ).Ptr() );
+//			oexSHOW( m_header.getUsed() );
+//			oexEcho( oexBinToAsciiHexStr( m_header.Mem(), 0, 16, 16 ).Ptr() );
 #endif
 		} // end if
 
@@ -545,11 +545,14 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 	} // end if
 
 	// Read extradata
-	oex::TList< oex::CStr8 > lst = oex::CParser::Explode( pss->fmtp_spropparametersets(), oexT( "," ) );
-	for ( oex::TList< oex::CStr8 >::iterator it; lst.Next( it ); )
-	{	m_extraAudio.AppendBuffer( "\x00\x00\x01", 3 );
-		m_extraAudio.Mem().appendString( oex::CBase64::Decode( *it ) );
-	} // end for
+    const char *props = pss->fmtp_spropparametersets();
+    if ( props )
+    {	oex::TList< oex::CStr8 > lst = oex::CParser::Explode( props, oexT( "," ) );
+        for ( oex::TList< oex::CStr8 >::iterator it; lst.Next( it ); )
+        {	m_extraAudio.AppendBuffer( "\x00\x00\x01", 3 );
+            m_extraAudio.Mem().appendString( oex::CBase64::Decode( *it ) );
+        } // end for
+    } // end if
 
 	pss->rtpSource()->setPacketReorderingThresholdTime( 2000000 );
 

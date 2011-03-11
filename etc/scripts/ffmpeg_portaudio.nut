@@ -17,8 +17,8 @@ local _g = CGlobal();
 
 function _init() : ( _g )
 {
-//	local file = _self.path( "../media/440hz.ogg" );
-	local file = _self.path( "../../../../vhe.avi" );
+	local file = _self.path( "../media/440hz.ogg" );
+//	local file = _self.path( "../../../../vhe.avi" );
 //	local file = _self.path( "../../../../vhe.mp3" );
 //	local file = _self.path( "../../../../vhe.mpg" );
 //	local file = _self.path( "../../../../vhe.ogg" );

@@ -45,6 +45,8 @@ namespace zstr
     template < typename T >
         oexSIZE_T Length( oexCONST T *s )
         {   oexASSERT_PTR( s );
+            if ( !s )
+                return 0;
             oexCONST T *p = s;
             while ( *p )
             	p++;

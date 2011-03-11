@@ -132,9 +132,12 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 	out->setUsed( out_size );
 
 	if ( 0 >= used )
-	{	oexSHOW( used );
+//	{	oexSHOW( used );
 		return -1;
-	} // end if
+//	} // end if
+
+	if ( 0 >= out_size )
+		return 0;
 
 	// Frame count
 	m_lFrames++;
@@ -147,7 +150,14 @@ static AVCodecTag g_ff_audio_codec_map[] =
     { CODEC_ID_AAC,				MKTAG('A', 'M', 'R', ' ') },
     { CODEC_ID_AMR_NB,			MKTAG('A', 'M', 'R', ' ') },
     { CODEC_ID_AMR_WB,			MKTAG('A', 'M', 'R', ' ') },
+    { CODEC_ID_AAC,				MKTAG('M', 'P', '4', 'A') },
 
+    { CODEC_ID_MP2,				MKTAG('M', 'P', '2', '_') },
+    { CODEC_ID_MP3,				MKTAG('M', 'P', '3', '_') },
+    { CODEC_ID_AAC,				MKTAG('A', 'A', 'C', '_') },
+    { CODEC_ID_AC3,				MKTAG('A', 'C', '3', '_') },
+
+    
 	{ CODEC_ID_NONE,			0 }
 };
 
@@ -182,3 +192,4 @@ sqbind::stdString CFfAudioDecoder::LookupCodecName( int nId )
 
 	return oexT( "" );
 }
+
