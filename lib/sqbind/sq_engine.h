@@ -291,6 +291,9 @@ public:
 	/// Returns the application name
 	stdString get_app_name();
 
+	/// Returns the application service name
+	stdString get_service_name();
+
 	/// Returns the application name
 	stdString get_app_long_name();
 

@@ -57,12 +57,14 @@ CScriptThread::~CScriptThread()
 
 // Application description pointers
 oex::oexCSTR CScriptThread::m_pAppName = oexNULL;
+oex::oexCSTR CScriptThread::m_pAppNameProc = oexNULL;
 oex::oexCSTR CScriptThread::m_pAppLongName = oexNULL;
 oex::oexCSTR CScriptThread::m_pAppDescription = oexNULL;
 
-void CScriptThread::SetAppInfo( oex::oexCSTR pName, oex::oexCSTR pLName, oex::oexCSTR pDesc )
+void CScriptThread::SetAppInfo( oex::oexCSTR pName, oex::oexCSTR pNameProc, oex::oexCSTR pLName, oex::oexCSTR pDesc )
 {
 	m_pAppName = pName;
+	m_pAppNameProc = pNameProc;
 	m_pAppLongName = pLName;
 	m_pAppDescription = pDesc;
 }
@@ -70,6 +72,11 @@ void CScriptThread::SetAppInfo( oex::oexCSTR pName, oex::oexCSTR pLName, oex::oe
 oex::oexCSTR CScriptThread::getAppName() 
 {
 	return m_pAppName; 
+}
+
+oex::oexCSTR CScriptThread::getAppNameProc() 
+{
+	return m_pAppNameProc; 
 }
 
 oex::oexCSTR CScriptThread::getAppLongName() 

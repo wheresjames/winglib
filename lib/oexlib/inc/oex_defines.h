@@ -534,7 +534,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 		{	cType theApp;														\
 			ret = OEX_NAMESPACE::os::CServiceImpl::RunService(					\
 						argc, (const char**)argv,								\
-						oexAppNamePtr(), oexAppLongNamePtr() );					\
+						oexAppNameProcPtr(), oexAppLongNamePtr() );				\
 		}																		\
 		pbCmdLine.Destroy();													\
 		oexUNINIT();															\

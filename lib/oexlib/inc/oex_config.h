@@ -245,21 +245,33 @@
 														 oexTEXT( oexDATE )		oexT( " " ) oexTEXT( oexTIME ) )
 
 #if defined( OEX_PROJECT_NAME )
-#define oexAppNamePtr()			oexTEXT( OEX_PROJECT_NAME )
+#	define oexAppNamePtr()			oexTEXT( OEX_PROJECT_NAME )
+#	define oexAppNameSPtr( s )		oexTEXT( OEX_PROJECT_NAME "_" s )
 #else
-#define oexAppNamePtr()			oexT( "" )
+#	define oexAppNamePtr()			oexT( "" )
+#	define oexAppNameSPtr( s )		oexT( "_" s )
+#endif
+
+#if defined( OEX_CPU_ARM )
+#	define oexAppNameProcPtr()		oexAppNameSPtr( "arm" )
+#else
+#	if defined( OEX_CPU_64 )
+#		define oexAppNameProcPtr()		oexAppNameSPtr( "x64" )
+#	else
+#		define oexAppNameProcPtr()		oexAppNameSPtr( "x86" )
+#	endif
 #endif
 
 #if defined( OEX_PROJECT_DESC )
-#define oexAppDescPtr()			oexTEXT( OEX_PROJECT_DESC )
+#	define oexAppDescPtr()			oexTEXT( OEX_PROJECT_DESC )
 #else
-#define oexAppDescPtr()			oexAppNamePtr()
+#	define oexAppDescPtr()			oexAppNamePtr()
 #endif
 
 #if defined( OEX_PROJECT_LNAME )
-#define oexAppLongNamePtr()		oexTEXT( OEX_PROJECT_LNAME )
+#	define oexAppLongNamePtr()		oexTEXT( OEX_PROJECT_LNAME )
 #else
-#define oexAppLongNamePtr()		oexAppDescPtr()
+#	define oexAppLongNamePtr()		oexAppDescPtr()
 #endif
 
 #define oexAppName()			OEX_NAMESPACE::CStr( oexAppNamePtr() )

@@ -189,9 +189,11 @@ public:
 	t_PropertyBag& Pb() { return m_pb; }
 	
 	/// Set application information
-	static void SetAppInfo( oex::oexCSTR pName, oex::oexCSTR pLName, oex::oexCSTR pDesc );
+	static void SetAppInfo( oex::oexCSTR pName, oex::oexCSTR pNameProc, oex::oexCSTR pLName, oex::oexCSTR pDesc );
 
 	static oex::oexCSTR getAppName();
+
+	static oex::oexCSTR getAppNameProc();
 
 	static oex::oexCSTR getAppLongName();
 
@@ -267,6 +269,9 @@ private:
 
 	/// App name
 	static oex::oexCSTR 				m_pAppName;
+
+	/// App name
+	static oex::oexCSTR 				m_pAppNameProc;
 
 	/// App long name
 	static oex::oexCSTR 				m_pAppLongName;

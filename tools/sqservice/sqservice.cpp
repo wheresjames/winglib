@@ -90,7 +90,7 @@ public:
 		oexNOTICE( 0, oexT( "Running script : embedded:main.nut" ) );
 
 		// Set application information
-		sqbind::CScriptThread::SetAppInfo( oexAppNamePtr(), oexAppLongNamePtr(), oexAppDescPtr() );
+		sqbind::CScriptThread::SetAppInfo( oexAppNamePtr(), oexAppNameProcPtr(), oexAppLongNamePtr(), oexAppDescPtr() );
 
 		// Script name
 		g_psqScriptThread->SetScriptName( oexT( "embedded:main.nut" ) );

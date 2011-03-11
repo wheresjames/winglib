@@ -324,6 +324,12 @@ stdString CSqEngineExport::get_app_name()
 	return p ? p : oexT( "" );
 }
 
+stdString CSqEngineExport::get_service_name()
+{_STT();
+	oex::oexCSTR p = CScriptThread::getAppNameProc();
+	return p ? p : oexT( "" );
+}
+
 stdString CSqEngineExport::get_app_long_name()
 {_STT();
 	oex::oexCSTR p = CScriptThread::getAppLongName();
@@ -1713,6 +1719,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_resource )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_name )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_app_name )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_service_name )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_app_long_name )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_app_description )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_script )
