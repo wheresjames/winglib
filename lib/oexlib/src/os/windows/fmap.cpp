@@ -72,7 +72,7 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_l
 	// Allow access
 	SECURITY_ATTRIBUTES  sa, *pSa = NULL;
 	sa.nLength = sizeof( SECURITY_ATTRIBUTES );
-	sa.bInheritHandle = TRUE;
+	sa.bInheritHandle = FALSE;
 	sa.lpSecurityDescriptor = (SECURITY_DESCRIPTOR*)LocalAlloc(LPTR,SECURITY_DESCRIPTOR_MIN_LENGTH);
 	if ( sa.lpSecurityDescriptor
 		 && InitializeSecurityDescriptor( (SECURITY_DESCRIPTOR*)sa.lpSecurityDescriptor, SECURITY_DESCRIPTOR_REVISION )
@@ -96,7 +96,7 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_l
 		} // end if
 
 	} // end if
-	else hFileHandle = (HANDLE)0xffffffff;
+	else hFileHandle = (HANDLE)~0;
 
 	// Create the file mapping
 	HANDLE hFile = CreateFileMapping( hFileHandle, pSa, dwAccess, 
