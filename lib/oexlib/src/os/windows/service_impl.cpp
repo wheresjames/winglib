@@ -289,7 +289,7 @@ int CServiceImpl::OnRunService( int argc, const char** argv, oexCSTR pName, oexC
 
 	if ( CommandLine().IsKey( oexT( "install" ) ) )
 	{
-		int nErr = InstallService( pName, pDesc, oexNULL, getAutoRestart() );
+		int nErr = InstallService( pName, ( CStr( pDesc ) << oexT( " " ) << OEX_PROC_STR ).Ptr(), oexNULL, getAutoRestart() );
 		if ( 0 > nErr )
 		{	oexEcho( oexT( "Error installing service" ) );
 			return nErr;

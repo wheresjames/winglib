@@ -253,14 +253,16 @@
 #endif
 
 #if defined( OEX_CPU_ARM )
-#	define oexAppNameProcPtr()		oexAppNameSPtr( "arm" )
+#	define OEX_PROC_STR				"arm"
 #else
 #	if defined( OEX_CPU_64 )
-#		define oexAppNameProcPtr()		oexAppNameSPtr( "x64" )
+#		define OEX_PROC_STR			"x64"
 #	else
-#		define oexAppNameProcPtr()		oexAppNameSPtr( "x86" )
+#		define OEX_PROC_STR			"x86"
 #	endif
 #endif
+
+#define oexAppNameProcPtr()			oexAppNameSPtr( " " OEX_PROC_STR )
 
 #if defined( OEX_PROJECT_DESC )
 #	define oexAppDescPtr()			oexTEXT( OEX_PROJECT_DESC )
