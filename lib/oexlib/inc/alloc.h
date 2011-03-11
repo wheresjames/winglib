@@ -671,8 +671,8 @@ template < class T > class COexStdAllocator
 {
 public:
 
-	typedef oexSIZE_T  	size_type;
-	typedef oexSIZE_T	difference_type;
+	typedef oexULONG  	size_type;
+	typedef oexLONG		difference_type;
 //	typedef oexINT		difference_type;
 	typedef T*        	pointer;
 	typedef const T*  	const_pointer;
@@ -705,7 +705,7 @@ public:
 
 	void destroy( pointer p ) { p->~T(); }
 
-	size_type max_size() const { return size_type( -1 ) / sizeof( T ); }
+	size_type max_size() const { return oexMAXLONG / sizeof( T ); }
 
 	template< class U >
 		struct rebind { typedef COexStdAllocator< U > other; };
