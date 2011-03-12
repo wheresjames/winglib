@@ -6,6 +6,10 @@ _self.load_module( "portaudio", "" );
 
 class CRtspStream
 {
+	bDecodeVideo = 1;
+	bDecodeAudio = 1;
+	bPlayAudio = 0;
+
 	rtsp = 0;
 
 	dec = 0;
@@ -57,14 +61,13 @@ class CRtspStream
 
 	function Play( link )
 	{
-		local bWantVideo = 1, bWantAudio = 1;
 	
 		Close();
 
 		::_self.echo( "\nConnecting to : " + link + "\n" );
 
 		rtsp = CLvRtspClient();
-		if ( !rtsp.Open( link, bWantVideo, bWantAudio, CSqMulti() ) )
+		if ( !rtsp.Open( link, bDecodeVideo, bDecodeAudio, CSqMulti() ) )
 		{	::_self.echo( "Failed to open RTSP stream : " + link );
 			return 0;
 		} // end if
@@ -118,22 +121,26 @@ class CRtspStream
 			{
 				araw = CSqBinary(), aframe = CSqBinary();
 				
-				pa = CPaOutput();
-				local fmt;
-				switch( 16 )
-				{	case 8 : fmt = CPaOutput().paUInt8; break;
-					default : fmt = CPaOutput().paInt16; break;
-				} // end switch
-				local fsize = 2;
+				if ( bPlayAudio )
+				{				
+					pa = CPaOutput();
+					local fmt;
+					switch( 8 )
+					{	case 8 : fmt = CPaOutput().paUInt8; break;
+						default : fmt = CPaOutput().paInt16; break;
+					} // end switch
+					local fsize = 2;
 				
-				if ( !pa.Open( 0, pa.getDefaultOutputDevice(), 1, fmt, 0.2, 8000., fsize ) )
-				{   _self.echo( "!!! Failed to open output stream : " + pa.getLastError() );
-					pa = 0;
-				} // end if
+					if ( !pa.Open( 0, pa.getDefaultOutputDevice(), 1, fmt, 0.2, 8000., fsize ) )
+					{   _self.echo( "!!! Failed to open output stream : " + pa.getLastError() );
+						pa = 0;
+					} // end if
 				
-				else if ( !pa.Start() )
-				{   _self.echo( "!!! Failed to start output stream : " + pa.getLastError() );
-					pa = 0;
+					else if ( !pa.Start() )
+					{   _self.echo( "!!! Failed to start output stream : " + pa.getLastError() );
+						pa = 0;
+					} // end if
+					
 				} // end if
 								
 			} // end else
@@ -164,14 +171,19 @@ class CRtspStream
 		if ( aframe.getUsed() )
 		{
 //			::_self.echo( "asz = " + aframe.getUsed() );
+//			if ( !pa.Write( aframe, aframe.getUsed() / pa.getFrameBytes() ) );
+			
+//			::_self.echo( aframe.AsciiHexStr( 16, 16 ) );
+			
 			if ( 0 < adec.Decode( aframe, araw, CSqMulti() ) )
 			{
 				::_self.echo( " ++++++++++++++++++ AUDIO PACKET : " + araw.getUsed() );		
 				
-				if ( !pa.Write( aframe, aframe.getUsed() / pa.getFrameBytes() ) )
-				{	_self.echo( "Failed to write audio data" );
-					return -1;
-				} // end if
+				if ( pa )
+					if ( !pa.Write( araw, araw.getUsed() / pa.getFrameBytes() ) )
+					{	_self.echo( "Failed to write audio data" );
+						return -1;
+					} // end if
 				
 			} // end if
 			

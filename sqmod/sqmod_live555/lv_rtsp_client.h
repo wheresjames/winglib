@@ -67,7 +67,7 @@ public:
 
 	};
 
-	class CAudioSink : public MediaSink
+	class CAudioSink : public MediaSink // public MPEG4LATMAudioRTPSink 
 	{
 	public:
 

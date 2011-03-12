@@ -123,7 +123,7 @@ int CLvRtspClient::CVideoSink::UnlockFrame()
 
 
 CLvRtspClient::CAudioSink::CAudioSink( UsageEnvironment& rEnv ) :
-	MediaSink( rEnv )
+	MediaSink( rEnv ) // MPEG4LATMAudioRTPSink( rEnv )
 {_STT();
 	m_nFrameReady = 0;
 	m_nFrameGrabbing = 0;

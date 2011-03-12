@@ -150,7 +150,8 @@ static AVCodecTag g_ff_audio_codec_map[] =
     { CODEC_ID_AAC,				MKTAG('A', 'M', 'R', ' ') },
     { CODEC_ID_AMR_NB,			MKTAG('A', 'M', 'R', ' ') },
     { CODEC_ID_AMR_WB,			MKTAG('A', 'M', 'R', ' ') },
-    { CODEC_ID_AAC,				MKTAG('M', 'P', '4', 'A') },
+    { CODEC_ID_AAC_LATM,		MKTAG('M', 'P', '4', 'A') },
+    { CODEC_ID_AAC_LATM,		MKTAG('L', 'A', 'T', 'M') },
 
     { CODEC_ID_MP2,				MKTAG('M', 'P', '2', '_') },
     { CODEC_ID_MP3,				MKTAG('M', 'P', '3', '_') },
