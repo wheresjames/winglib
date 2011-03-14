@@ -7,7 +7,7 @@ _self.load_module( "portaudio", "" );
 class CRtspStream
 {
 	bDecodeVideo = 1;
-	bDecodeAudio = 1;
+	bDecodeAudio = 0;
 	bPlayAudio = 0;
 
 	rtsp = 0;
@@ -110,7 +110,8 @@ class CRtspStream
 			::_self.echo( "iii Creating audio decoder for " + rtsp.getAudioCodecName() );
 			
 			adec = CFfAudioDecoder();
-			if ( !adec.Create( CFfAudioDecoder().LookupCodecId( rtsp.getAudioCodecName() ) ) )
+			// if ( !adec.Create( CFfAudioDecoder().LookupCodecId( rtsp.getAudioCodecName() ) ) )
+			if ( !adec.Create( CFfAudioDecoder().LookupCodecId( "LATM" ) ) )
 			{	::_self.echo( "!!! Failed to create decoder for " + rtsp.getAudioCodecName() );
 				adec = 0;
 				afail = 1;
@@ -170,7 +171,7 @@ class CRtspStream
 			
 		if ( aframe.getUsed() )
 		{
-//			::_self.echo( "asz = " + aframe.getUsed() );
+			::_self.echo( "asz = " + aframe.getUsed() );
 //			if ( !pa.Write( aframe, aframe.getUsed() / pa.getFrameBytes() ) );
 			
 //			::_self.echo( aframe.AsciiHexStr( 16, 16 ) );
@@ -209,12 +210,13 @@ class CRtspStream
 		if ( rtsp.LockVideo( frame, 0 ) )
 		{	dec.BufferData( frame, CSqMulti() );
 			rtsp.UnlockVideo();
+			::_self.echo( "lv" );
 		} // end if
 
 		if ( 0 >= dec.getBufferSize() )
 			return 0;
 
-//		::_self.echo( "sz = " + dec.getBufferSize() );
+		::_self.echo( "sz = " + dec.getBufferSize() );
 
 		return dec.Decode( CSqBinary(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
 	}

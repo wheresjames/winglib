@@ -38,6 +38,19 @@
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
+/*
+#ifdef _MSC_VER
+static inline oexINT64 rdtsc()
+{
+   __asm {
+      XOR eax, eax
+      CPUID
+      RDTSC
+   }
+}
+#endif
+*/
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////

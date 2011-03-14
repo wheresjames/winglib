@@ -116,7 +116,7 @@ int CSqXml::Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int 
 #if !defined( oexUNICODE )
 		if ( !xmlDoc.Parse( sData.c_str() ) )
 #else
-		if ( !xmlDoc.Parse( oexStrToMb( oex::CStr( sData.c_str(), sData.length() ) ).Ptr() ) )
+		if ( !xmlDoc.Parse( oexStrToMb( oex::std2oex( sData ) ).Ptr() ) )
 #endif
 			; // return 0;
 
@@ -127,7 +127,7 @@ int CSqXml::Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int 
 	catch( ... )
 	{
 		// Just flag an error
-		oexERROR( 0, oexT( "Exception while decoding XML string" ) );
+		oexERROR( 0, oexMks( oexT( "Exception while decoding XML string : " ), std2oex( sData ) ) );
 
 	} // end catch
 
