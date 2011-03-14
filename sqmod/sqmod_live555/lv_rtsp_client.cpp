@@ -481,8 +481,8 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 		m_fps = m_mSdp[ oexT( "a=framerate" ) ].toint();
 
 	// a=maxprate:30
-//	if ( !m_fps )
-	//	m_fps = m_mSdp[ oexT( "a=maxprate" ) ].toint();
+	if ( !m_fps )
+		m_fps = m_mSdp[ oexT( "a=maxprate" ) ].toint();
 
 	_STT_SET_CHECKPOINT( 9 );
 

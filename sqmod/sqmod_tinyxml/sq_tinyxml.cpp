@@ -127,7 +127,8 @@ int CSqXml::Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int 
 	catch( ... )
 	{
 		// Just flag an error
-		oexERROR( 0, oexMks( oexT( "Exception while decoding XML string : " ), std2oex( sData ) ) );
+		oexERROR( 0, oexMks( oexT( "Exception while decoding XML string : " ), 
+						sqbind::std2oex( sData ) ) );
 
 	} // end catch
 
