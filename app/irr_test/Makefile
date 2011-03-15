@@ -12,7 +12,7 @@ PRJ_DEPS := irrlicht
 PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib
-PRJ_WINL := winmm
+PRJ_WINL := winmm opengl32 glu32
 PRJ_DEFS := 
 
 #-------------------------------------------------------------------
@@ -41,7 +41,7 @@ ifeq ($(PLATFORM),posix)
 		PRJ_DEFS := $(PRJ_DEFS) _IRR_USE_LINUX_DEVICE_
 	endif
 else
-	PRJ_DEFS := _IRR_STATIC_LIB_  _IRR_MULTI_ZLIB_
+	PRJ_DEFS := $(PRJ_DEFS) _IRR_STATIC_LIB_ _IRR_MULTI_ZLIB_
 	ifeq ($(OS),wince)
 		#PRJ_OSLB := libGLES_CM
 		#PRJ_DEFS := $(PRJ_DEFS) _IRR_COMPILE_WITH_OGLES1_

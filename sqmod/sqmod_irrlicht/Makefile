@@ -18,7 +18,7 @@ PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel \
 			freetype2 ftgl
 #			bullet
 PRJ_DEFS := OEX_NOBULLET
-PRJ_WINL := strmiids winmm
+PRJ_WINL := strmiids winmm opengl32 glu32
 PRJ_VSLB := dshowbase
 
 PRJ_EXPORTS := DllMain SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
@@ -47,7 +47,7 @@ ifeq ($(PLATFORM),posix)
 	PRJ_OSLB := X11 GLU Xxf86vm
 #	PRJ_DEFS := $(PRJ_DEFS) _IRR_USE_LINUX_DEVICE_ _IRR_COMPILE_WITH_X11_
 else
-	PRJ_DEFS := $(PRJ_DEFS) _IRR_STATIC_LIB_
+	PRJ_DEFS := $(PRJ_DEFS) _IRR_STATIC_LIB_ _IRR_MULTI_ZLIB_
 	ifeq ($(OS),wince)
 		#_IRR_COMPILE_WITH_OGLES1_
 #		PRJ_OSLB := libGLES_CM
