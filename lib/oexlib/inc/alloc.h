@@ -668,15 +668,17 @@ public:
 	Allocator for use with std templates
 */
 template < class T > class COexStdAllocator
-//template < class T, typename T_SZ = oex::oexUINT, typename T_DIF = oex::oexINT > class COexStdAllocator
 {
 public:
 
-//	typedef T_SZ  			size_type;
-//	typedef T_DIF			difference_type;
+#if defined( _MSC_VER ) && defined( OEX_WIN64 )
+	typedef oex::oexUINT64	size_type;
+	typedef oex::oexINT64	difference_type;
+#else
+	typedef oex::oexULONG	size_type;
+	typedef oex::oexLONG	difference_type;
+#endif
 
-	typedef oex::oexUINT	size_type;
-	typedef oex::oexINT		difference_type;
 	typedef T*        		pointer;
 	typedef const T*  		const_pointer;
 	typedef T&        		reference;

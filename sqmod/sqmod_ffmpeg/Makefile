@@ -25,6 +25,13 @@ PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifeq ($(BUILD),vs)
+	ifeq ($(PROC),x64)
+		UNSUPPORTED := PROC=$(PROC) + BUILD=$(BUILD) is not supported
+		include $(PRJ_LIBROOT)/unsupported.mk
+	endif
+else
+
 ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),vs)
 		PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/windows/vs xlibs $(PRJ_INCS)
@@ -57,4 +64,4 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-
+endif
