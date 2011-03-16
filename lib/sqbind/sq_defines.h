@@ -192,12 +192,11 @@ namespace sqbind
 		const stdString& c_str() const { return m_str; }
 		stdString* ptr() { return &m_str; }
 		const stdString* c_ptr() const { return &m_str; }
-		stdString set( const stdString &x_str )
-		{	m_str = x_str; return m_str; }
-		stdString::size_type length() const { return m_str.length(); }
+		stdString set( const stdString &x_str ) { m_str = x_str; return m_str; }
+		stdString::size_type length() const { return (sqbind::stdString::size_type)m_str.length(); }
 		stdString& operator = ( const stdString &x_str ) { return m_str = x_str; }
 		stdString& operator = ( const oex::oexTCHAR *x_str ) { if ( x_str ) m_str = x_str; return m_str; }
-		stdString& operator = ( const oex::CStr &x_str ) { m_str.assign( x_str.Ptr(), (stdString::size_type)x_str.Length() ); return m_str; }
+		stdString& operator = ( const oex::CStr &x_str ) { m_str.assign( x_str.Ptr(), (sqbind::stdString::size_type)x_str.Length() ); return m_str; }
 		void clear() { m_str.clear(); }
 		bool empty() { return m_str.empty(); }
 		static void Register( sqbind::VM vm );
