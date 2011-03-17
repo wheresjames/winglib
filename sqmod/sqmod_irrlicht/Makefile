@@ -17,7 +17,7 @@ PRJ_INCS := winglib/lib/sqbind winglib/lib/oexlib \
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel \
 			freetype2 ftgl
 #			bullet
-PRJ_DEFS := OEX_NOBULLET
+PRJ_DEFS := OEX_NOBULLET _STDCALL_SUPPORTED
 PRJ_WINL := strmiids winmm opengl32 glu32
 PRJ_VSLB := dshowbase
 

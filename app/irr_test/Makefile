@@ -13,7 +13,7 @@ PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib
 PRJ_WINL := winmm opengl32 glu32
-PRJ_DEFS := 
+PRJ_DEFS := _STDCALL_SUPPORTED
 
 #-------------------------------------------------------------------
 # Configure build
