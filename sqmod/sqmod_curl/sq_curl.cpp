@@ -48,6 +48,33 @@ int CSqCurl::StdFileWriter( char *data, size_t size, size_t nmemb, sqbind::CSqFi
 	return res;
 }
 
+int CSqCurl::urlInclude( sqbind::CSqEngineExport *pEngine, const sqbind::stdString &sUrl )
+{
+	if ( !pEngine )
+		return 0;
+
+	sqbind::CSqBinary dat;
+	
+	if ( !GetUrl( sUrl, 0, &dat ) || !dat.getUsed() )
+		return 0;
+	
+	return pEngine->include( dat.getString() );	
+}
+
+sqbind::stdString CSqCurl::urlInline( sqbind::CSqEngineExport *pEngine, const sqbind::stdString &sUrl, sqbind::CSqMulti *pParams )
+{
+	if ( !pEngine )
+		return sqbind::stdString();
+
+	sqbind::CSqBinary dat;
+	
+	if ( !GetUrl( sUrl, 0, &dat ) || !dat.getUsed() )
+		return sqbind::stdString();
+	
+	sqbind::stdString pEngine->include_inline( dat.getString(), pParams );	
+}
+
+
 int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSqBinary *sData )
 {_STT();
 
