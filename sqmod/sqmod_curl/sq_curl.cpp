@@ -71,7 +71,7 @@ sqbind::stdString CSqCurl::urlInline( sqbind::CSqEngineExport *pEngine, const sq
 	if ( !GetUrl( sUrl, 0, &dat ) || !dat.getUsed() )
 		return sqbind::stdString();
 	
-	sqbind::stdString pEngine->include_inline( dat.getString(), pParams );	
+	return pEngine->include_inline( dat.getString(), pParams );
 }
 
 
