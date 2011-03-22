@@ -784,136 +784,7 @@ SquirrelObject CSqEngineExport::run2( const stdString &sName, const stdString &s
 
 stdString CSqEngineExport::prepare_inline( const stdString &sScript, int bFile )
 {_STT();
-
-	// Code header / footer
-	static oex::oexTCHAR szHeader[] = oexT( "{ local _p = ::_self.get_stack_params(); function echo( s ) { ::_self.append_stack_output( s.tostring() ); }" ) oexNL;
-	static oex::oexTCHAR szFooter[] = oexNL oexT( "}" );
-	static oex::oexTCHAR szOpenStr[] = oexNL oexT( "echo( @\"" );
-	static oex::oexTCHAR szCloseStr[] = oexT( "\" );" ) oexNL;
-	static oex::CStr::t_size nOverhead = (oex::CStr::t_size)
-											 sizeof( szHeader ) + sizeof( szFooter )
-											 + sizeof( szOpenStr ) + sizeof( szCloseStr );
-
-	// Get the source data
-	oex::CStr sSrc;
-	if ( bFile )
-		sSrc = oexFileGetContents( sScript.c_str() );
-	else
-		sSrc = std2oex( sScript );
-
-	// Did we get anything
-	oex::oexCSTR pSrc = sSrc.Ptr();
-	oex::CStr::t_size szSrc = sSrc.Length(), nPos = 0, nStart = 0;
-	if ( !szSrc )
-		return oexT( "" );
-
-	// Allocate space for output
-	oex::CStr sDst;
-	oex::CStr::t_size nDst = 0;
-	oex::oexSTR pDst = sDst.OexAllocate( ( szSrc * 2 ) + nOverhead );
-	if ( !pDst )
-		return oexT( "" );
-
-	// Copy header into buffer
-	oexMemCpy( &pDst[ nDst ], szHeader, sizeof( szHeader ) - sizeof( oex::oexTCHAR ) );
-	nDst += sizeof( szHeader ) - sizeof( oex::oexTCHAR );
-
-	// Open tag
-	oex::oexTCHAR tcOpen[] = oexT( "<?sq" );
-	oex::CStr::t_size nOpen = 0, szOpen = (oex::CStr::t_size)oex::zstr::Length( tcOpen );
-
-	// Close tag
-	oex::oexTCHAR tcClose[] = oexT( "?>" );
-	oex::CStr::t_size nClose = 0, szClose = (oex::CStr::t_size)oex::zstr::Length( tcClose );
-
-	// iii Not using standard search and replace because we need speed here
-
-	// We must have at least six characters for a complete tag
-	while ( ( nPos + szOpen + szClose ) < szSrc )
-	{
-		// Ensure we have space
-		if ( ( sDst.Size() - nDst ) < ( ( szSrc - nPos ) * 2 ) + nOverhead )
-			pDst = sDst.OexAllocate( sDst.Size() * 2 );
-
-		// Initialize
-		nStart = nPos;
-		nOpen = nClose = szSrc;
-
-		// Attempt to find an open bracket
-		while ( nOpen == szSrc && ( nPos + szOpen + szClose ) < szSrc )
-			if ( !oexMemCmp( &pSrc[ nPos ], tcOpen, szOpen ) )
-				nOpen = nPos;
-			else
-				nPos++;
-
-		// Find a closing bracket
-		while ( nClose == szSrc && ( nPos + szClose ) < szSrc )
-			if ( !oexMemCmp( &pSrc[ nPos ], tcClose, szClose ) )
-				nClose = nPos;
-			else
-				nPos++;
-
-		// Did we find embedded code?
-		if ( nOpen < szSrc && nClose < szSrc )
-		{
-			// Text data to be copied?
-			if ( nStart < nOpen )
-			{	oexMemCpy( &pDst[ nDst ], szOpenStr, sizeof( szOpenStr ) - sizeof( oex::oexTCHAR ) );
-				nDst += sizeof( szOpenStr ) - sizeof( oex::oexTCHAR );
-				while ( nStart < nOpen )
-				{	if ( oexT( '"' ) == pSrc[ nStart ] )
-						pDst[ nDst++ ] = oexT( '"' );
-					pDst[ nDst++ ] = pSrc[ nStart++ ];
-				} // end while
-				oexMemCpy( &pDst[ nDst ], szCloseStr, sizeof( szCloseStr ) - sizeof( oex::oexTCHAR ) );
-				nDst += sizeof( szCloseStr ) - sizeof( oex::oexTCHAR );
-			} // end if
-
-			// Any code to copy?
-			nOpen += szOpen;
-			if ( nOpen < nClose )
-			{
-				// Add new line
-				oexMemCpy( &pDst[ nDst ], oexNL, sizeof( oexNL ) - sizeof( oex::oexTCHAR ) );
-				nDst += sizeof( oexNL ) - sizeof( oex::oexTCHAR );
-
-				// Copy the code
-				oexMemCpy( &pDst[ nDst ], &pSrc[ nOpen ], nClose - nOpen );
-				nDst += nClose - nOpen;
-
-				// Close statement, just in case
-				pDst[ nDst++ ] = oexT( ';' );
-
-			} // endif
-
-			// Point to data after code
-			nPos += szClose;
-
-		} // end if
-
-	} // end while
-
-	// Copy whatever remains
-	if ( nStart < szSrc )
-	{	oexMemCpy( &pDst[ nDst ], szOpenStr, sizeof( szOpenStr ) - sizeof( oex::oexTCHAR ) );
-		nDst += sizeof( szOpenStr ) - sizeof( oex::oexTCHAR );
-		while ( nStart < szSrc )
-		{	if ( oexT( '"' ) == pSrc[ nStart ] )
-				pDst[ nDst++ ] = oexT( '"' );
-			pDst[ nDst++ ] = pSrc[ nStart++ ];
-		} // end while
-		oexMemCpy( &pDst[ nDst ], szCloseStr, sizeof( szCloseStr ) - sizeof( oex::oexTCHAR ) );
-		nDst += sizeof( szCloseStr ) - sizeof( oex::oexTCHAR );
-	} // end if
-
-	// Copy footer into buffer
-	oexMemCpy( &pDst[ nDst ], szFooter, sizeof( szFooter ) - sizeof( oex::oexTCHAR ) );
-	nDst += sizeof( szFooter ) - sizeof( oex::oexTCHAR );
-
-	// Set the number of bytes in the string
-	sDst.SetLength( nDst );
-
-	return oex2std( sDst );
+	return sqbind::prepare_inline( sScript, bFile );
 }
 
 void CSqEngineExport::set( const stdString &sPath, const stdString &sKey, const stdString &sVal )
@@ -1867,7 +1738,6 @@ oex::CStr8 CSqEngine::GetCompiledScript()
 	return buf;
 }
 
-
 static SQInteger str_read(SQUserPointer str,SQUserPointer buf,SQInteger size)
 {
 	SQInteger len = ( (oex::CStr8*)str )->Length();
@@ -1894,7 +1764,6 @@ oex::oexBOOL CSqEngine::SetCompiledScript( oex::CStr8 buf )
 	return oex::oexTRUE;
 
 } // end if
-
 
 oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::CStr8 *pbScript,
 							  oex::oexBOOL bFile, oex::oexBOOL bRelative,
@@ -2029,7 +1898,6 @@ int CSqEngine::OnIncludeOnce( const stdString &sScript )
 	// Include the thing
 	return OnInclude( sScript );
 }
-
 
 int CSqEngine::OnIncludeInline( const stdString &sScript )
 {_STT();

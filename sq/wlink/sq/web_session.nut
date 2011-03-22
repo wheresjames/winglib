@@ -37,15 +37,13 @@ function Exe( mParams, mReply )
 	if ( img.refPixels( pix ) )
 		pix.Zero();
 
-	local name = mParams[ "GET" ][ "start" ].str();
-	
-	local res = CSqCurl().urlInclude( _self.queue(), webpath( "http://localhost/ed/prj", name ) );
+	local name = mParams[ "GET" ][ "start" ].str();	
+	local url = webpath( "http://localhost/ed/prj", name );
+	local res = CSqCurl().urlSpawn( _self.queue(), "", _self.md5( url ), url );
 	if ( !res )
 		font.Draw( img, "Failed to start : " + name );
 	else
 		font.Draw( img, "Running : " + name );
-
-//	font.Draw( img, webpath( "http://localhost/ed/prj", name ) );
 
 	// Encode the image
 	local enc = img.Encode( "png" );

@@ -48,38 +48,50 @@ int CSqCurl::StdFileWriter( char *data, size_t size, size_t nmemb, sqbind::CSqFi
 	return res;
 }
 
-int CSqCurl::urlInclude( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sUrl )
+int CSqCurl::urlInclude( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, const sqbind::stdString &sUrl )
 {
 	if ( !pQ )
 		return 0;
 
-	sqbind::CSqBinary dat;
-	
+	// Grab the data
+	sqbind::CSqBinary dat;	
 	if ( !GetUrl( sUrl, 0, &dat ) || !dat.getUsed() )
 		return 0;
 	
-	return pQ->run( oexNULL, sqbind::stdString(), sUrl, dat.getString() );
-
-//	return pEngine->include( dat.getString() );	
+	// Run the script
+	return pQ->run( oexNULL, sPath, sUrl, dat.getString() );
 }
 
-sqbind::stdString CSqCurl::urlInline( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sUrl, sqbind::CSqMulti *pParams )
+sqbind::stdString CSqCurl::urlInline( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, const sqbind::stdString &sUrl, sqbind::CSqMulti *pParams )
 {
 	if ( !pQ )
 		return sqbind::stdString();
 
-	sqbind::CSqBinary dat;
-	
+	// Grab the data
+	sqbind::CSqBinary dat;	
 	if ( !GetUrl( sUrl, 0, &dat ) || !dat.getUsed() )
 		return sqbind::stdString();
-	
-	pQ->run( oexNULL, sqbind::stdString(), sUrl, dat.getString() );
 
-	return sqbind::stdString();
+	// Run inlined data
+	sqbind::stdString res;
+	pQ->run( &res, sqbind::stdString(), sUrl, sqbind::prepare_inline( dat.getString(), oex::oexFALSE ) );
 
-//	return pQ->include_inline( dat.getString(), pParams );
+	return res;
 }
 
+int CSqCurl::urlSpawn( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, const sqbind::stdString &sName, const sqbind::stdString &sUrl )
+{_STT();
+
+	if ( !pQ )
+		return 0;
+
+	// Grab the data
+	sqbind::CSqBinary dat;	
+	if ( !GetUrl( sUrl, 0, &dat ) || !dat.getUsed() )
+		return 0;
+
+	return pQ->spawn( oexNULL, sPath, sName, dat.getString(), oex::oexFALSE );
+}
 
 int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSqBinary *sData )
 {_STT();
