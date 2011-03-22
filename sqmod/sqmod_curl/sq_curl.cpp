@@ -48,9 +48,9 @@ int CSqCurl::StdFileWriter( char *data, size_t size, size_t nmemb, sqbind::CSqFi
 	return res;
 }
 
-int CSqCurl::urlInclude( sqbind::CSqEngineExport *pEngine, const sqbind::stdString &sUrl )
+int CSqCurl::urlInclude( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sUrl )
 {
-	if ( !pEngine )
+	if ( !pQ )
 		return 0;
 
 	sqbind::CSqBinary dat;
@@ -58,12 +58,14 @@ int CSqCurl::urlInclude( sqbind::CSqEngineExport *pEngine, const sqbind::stdStri
 	if ( !GetUrl( sUrl, 0, &dat ) || !dat.getUsed() )
 		return 0;
 	
-	return pEngine->include( dat.getString() );	
+	return pQ->run( oexNULL, sqbind::stdString(), sUrl, dat.getString() );
+
+//	return pEngine->include( dat.getString() );	
 }
 
-sqbind::stdString CSqCurl::urlInline( sqbind::CSqEngineExport *pEngine, const sqbind::stdString &sUrl, sqbind::CSqMulti *pParams )
+sqbind::stdString CSqCurl::urlInline( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sUrl, sqbind::CSqMulti *pParams )
 {
-	if ( !pEngine )
+	if ( !pQ )
 		return sqbind::stdString();
 
 	sqbind::CSqBinary dat;
@@ -71,7 +73,11 @@ sqbind::stdString CSqCurl::urlInline( sqbind::CSqEngineExport *pEngine, const sq
 	if ( !GetUrl( sUrl, 0, &dat ) || !dat.getUsed() )
 		return sqbind::stdString();
 	
-	return pEngine->include_inline( dat.getString(), pParams );
+	pQ->run( oexNULL, sqbind::stdString(), sUrl, dat.getString() );
+
+	return sqbind::stdString();
+
+//	return pQ->include_inline( dat.getString(), pParams );
 }
 
 
@@ -257,7 +263,7 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, SQInteger lPort, const sqbi
 					oex::oexCSTR k = s.Ptr(), v = oexNULL;
 
 					// Split key / value
-					int c = 0;
+					oex::CStr::t_size c = 0;
 					while ( c < s.Length() && s[ c ] != oexT( ':' ) ) c++;
 
 					// Did we find a divider

@@ -26,10 +26,10 @@ public:
 	int PostUrl( const sqbind::stdString &sUrl, SQInteger lPort, const sqbind::stdString &sPost, sqbind::CSqBinary *sData );
 
 	/// Downloads and includes the specified url
-	int urlInclude( sqbind::CSqEngineExport *pEngine, const sqbind::stdString &sUrl );
+	int urlInclude( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sUrl );
 
 	/// Downloads and inlines the specified url
-	sqbind::stdString urlInline( sqbind::CSqEngineExport *pEngine, const sqbind::stdString &sUrl, sqbind::CSqMulti *pParams );
+	sqbind::stdString urlInline( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sUrl, sqbind::CSqMulti *pParams );
 
 	/// Enable basic http authentication
 	int SetBasicAuth( const sqbind::stdString &sUsername, const sqbind::stdString &sPassword );

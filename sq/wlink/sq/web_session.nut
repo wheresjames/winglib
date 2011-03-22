@@ -1,9 +1,21 @@
 
+_self.load_module( "curl", "" );
+
 _self.include( "config.nut" );
 _self.include( "font.nut" );
 
+function webpath( root, name )
+{	local path = "", hash = ::_self.md5( name );
+	for ( local p = 0, i = 0; i < 3; i++, p += 3 )
+		path = ::_self.build_path( path, hash.slice( p, p + 3 ) );
+	return ::_self.build_path( ::_self.build_path( root, path ), hash );
+}
+
+
 function Exe( mParams, mReply )
 {
+//	_self.echo( "Fonts folder : '" + _self.get_sys_folder( "fonts" ) + "'" );
+
 	local font = CFont(), fn = "arial.ttf";
 	if ( !font.Create( fn ) )
 	{	mReply[ "content" ] <- "Error creating font : " + fn;
@@ -11,7 +23,7 @@ function Exe( mParams, mReply )
 	} // end if
 
 	local img = CSqImage();
-	local w = mParams[ "GET" ][ "w" ].toint(); if ( 0 >= w ) w = 400;
+	local w = mParams[ "GET" ][ "w" ].toint(); if ( 0 >= w ) w = 600;
 	local h = mParams[ "GET" ][ "h" ].toint(); if ( 0 >= h ) h = 24;
 
 	// Create image
@@ -25,7 +37,15 @@ function Exe( mParams, mReply )
 	if ( img.refPixels( pix ) )
 		pix.Zero();
 
-	font.Draw( img, mParams[ "GET" ][ "cmd" ].str() );
+	local name = mParams[ "GET" ][ "start" ].str();
+	
+	local res = CSqCurl().urlInclude( _self.queue(), webpath( "http://localhost/ed/prj", name ) );
+	if ( !res )
+		font.Draw( img, "Failed to start : " + name );
+	else
+		font.Draw( img, "Running : " + name );
+
+//	font.Draw( img, webpath( "http://localhost/ed/prj", name ) );
 
 	// Encode the image
 	local enc = img.Encode( "png" );
@@ -63,7 +83,7 @@ function OnProcessRequest( params )
 			break;
 
 		default :
-			mReply[ "content" ] <- ::_self.include_inline( "pg/home.nut", mParams );
+			mReply[ "content" ] <- ::_self.include_inline( "pg/home.squ", mParams );
 			break;
 
 	} // end switch

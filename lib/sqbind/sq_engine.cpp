@@ -2170,7 +2170,7 @@ oex::oexBOOL CSqEngine::Run( sqbind::stdString *pReply, oex::oexCSTR pName, oex:
 	{
 		SquirrelObject script( m_vm.GetVMHandle() );
 		script = m_vm.CompileBuffer( pScript );
-		SquirrelObject o = m_vm.RunScript( script );
+//		SquirrelObject o = m_vm.RunScript( script );
 		m_sReturnData = obj2str( m_vm.RunScript( script ) );
 		if ( pReply )
 			*pReply = m_sReturnData;

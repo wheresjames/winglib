@@ -31,14 +31,15 @@ function _init() : ( _g )
 	} // end if
 
 	// Set font size
-	face.setCharSize( 25 * 64, 0, 100, 0 );
+	face.setCharSize( 25 * 64, 15 * 64, 100, 0 );
+//	face.setCharSize( 25 * 64, 0, 100, 0 );
 
-//	face.setAngle( 10. );
+//	face.setAngle( 180. );
 
 	local sz = CSqSize();
 	face.CalcSize( "hi", sz );
-	_self.echo( "Size of 'hi' = " + sz.getX() + " x " + sz.getY() );
-	_self.echo( face.Str2Ascii( 0, 0, "hi", " .", "\n" ) );
+	_self.echo( "Size of 'hi' = " + sz.getX() + " x " + sz.getY() + "\n" );
+	_self.echo( face.Str2Ascii( 0, 0, "hi", " .o#", "\n" ) );
 
 	// Create image
 	local img = CSqImage();
