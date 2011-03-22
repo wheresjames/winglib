@@ -154,6 +154,96 @@ namespace sqbind
 		int m_c[ 4 ];
 	};
 
+	class CSq3dVector
+	{
+
+	public:
+
+		static void Register( sqbind::VM vm );
+
+		SQBIND_CLASS_CTOR_BEGIN( CSq3dVector )
+			_SQBIND_CLASS_CTOR( CSq3dVector, 1 ) ( sa.GetInt( 2 ) )
+			_SQBIND_CLASS_CTOR( CSq3dVector, 2 ) ( sa.GetInt( 2 ), sa.GetInt( 3 ), sa.GetInt( 4 ) )
+		SQBIND_CLASS_CTOR_END( CSq3dVector )
+
+		CSq3dVector() { m_x = 0; m_y = 0; m_z = 0; }
+
+		CSq3dVector( int n ) { m_x = m_y = m_z = n; }
+
+		CSq3dVector( int x, int y, int z ) { m_x = x; m_y = y; m_z = z; }
+
+		// Copy semantics
+		CSq3dVector( const CSq3dVector &r ) { m_x = r.m_x; m_y = r.m_y; m_z = r.m_z; }
+		CSq3dVector& operator=( const CSq3dVector &r ) { m_x = r.m_x; m_y = r.m_y; m_z = r.m_z; return *this; }
+
+		void set( int x, int y ) { m_x = x; m_y = y; }
+
+		int getX() { return m_x; }
+
+		void setX( int x ) { m_x = x; }
+
+		int getY() { return m_y; }
+
+		void setY( int y ) { m_y = y; }
+
+		int getZ() { return m_z; }
+
+		void setZ( int z ) { m_z = z; }
+		
+	private:
+
+		int		m_x;
+
+		int		m_y;
+
+		int		m_z;
+	};
+
+	class CSq3dVectord
+	{
+
+	public:
+
+		static void Register( sqbind::VM vm );
+
+		SQBIND_CLASS_CTOR_BEGIN( CSq3dVectord )
+			_SQBIND_CLASS_CTOR( CSq3dVectord, 1 ) ( sa.GetFloat( 2 ) )
+			_SQBIND_CLASS_CTOR( CSq3dVectord, 2 ) ( sa.GetFloat( 2 ), sa.GetFloat( 3 ), sa.GetFloat( 4 ) )
+		SQBIND_CLASS_CTOR_END( CSq3dVectord )
+
+		CSq3dVectord() { m_x = 0; m_y = 0; m_z = 0; }
+
+		CSq3dVectord( double n ) { m_x = m_y = m_z = n; }
+
+		CSq3dVectord( double x, double y, double z ) { m_x = x; m_y = y; m_z = z; }
+
+		// Copy semantics
+		CSq3dVectord( const CSq3dVectord &r ) { m_x = r.m_x; m_y = r.m_y; m_z = r.m_z; }
+		CSq3dVectord& operator=( const CSq3dVectord &r ) { m_x = r.m_x; m_y = r.m_y; m_z = r.m_z; return *this; }
+
+		void set( double x, double y ) { m_x = x; m_y = y; }
+
+		double getX() { return m_x; }
+
+		void setX( double x ) { m_x = x; }
+
+		double getY() { return m_y; }
+
+		void setY( double y ) { m_y = y; }
+
+		double getZ() { return m_z; }
+
+		void setZ( double z ) { m_z = z; }
+		
+	private:
+
+		double		m_x;
+
+		double		m_y;
+
+		double		m_z;
+	};
+
 
 }; // end namespace
 
@@ -161,3 +251,5 @@ namespace sqbind
 SQBIND_DECLARE_INSTANCE( sqbind::CSqSize, CSqSize )
 SQBIND_DECLARE_INSTANCE( sqbind::CSqPos, CSqPos )
 SQBIND_DECLARE_INSTANCE( sqbind::CSqColor, CSqColor )
+SQBIND_DECLARE_INSTANCE( sqbind::CSq3dVector, CSq3dVector )
+SQBIND_DECLARE_INSTANCE( sqbind::CSq3dVectord, CSq3dVectord )

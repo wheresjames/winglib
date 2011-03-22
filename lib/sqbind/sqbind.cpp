@@ -43,6 +43,8 @@ namespace sqbind
 		CSqFactory::Register( x_vm );
 		CSqSize::Register( x_vm );
 		CSqPos::Register( x_vm );
+		CSq3dVector::Register( x_vm );
+		CSq3dVectord::Register( x_vm );
 		CSqColor::Register( x_vm );
 		CSqBinary::Register( x_vm );
 		CSqDataLog::Register( x_vm );
@@ -437,6 +439,36 @@ SQBIND_REGISTER_CLASS_END()
 void CSqPos::Register( sqbind::VM vm )
 {_STT();
 	SQBIND_EXPORT( vm, CSqPos );
+}
+
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSq3dVector, CSq3dVector )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSq3dVector, set )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSq3dVector, setX )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSq3dVector, getX )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSq3dVector, setY )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSq3dVector, getY )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSq3dVector, setZ )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSq3dVector, getZ )
+SQBIND_REGISTER_CLASS_END()
+
+void CSq3dVector::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CSq3dVector );
+}
+
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSq3dVectord, CSq3dVectord )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSq3dVectord, set )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSq3dVectord, setX )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSq3dVectord, getX )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSq3dVectord, setY )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSq3dVectord, getY )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSq3dVectord, setZ )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSq3dVectord, getZ )
+SQBIND_REGISTER_CLASS_END()
+
+void CSq3dVectord::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CSq3dVectord );
 }
 
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqDataLog, CSqDataLog )
