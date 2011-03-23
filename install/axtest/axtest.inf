@@ -1,0 +1,16 @@
+
+; INF File for @NAME - @VER
+
+[version]
+  signature="$CHICAGO$"
+  AdvancedINF=2.0
+  
+[Add.code]
+  axtest.dll=axtest.dll
+  
+[axtest.dll]
+  file-win32-x86=thiscab
+  clsid={50B3ED5F-DF15-4d26-BA57-94EA8F53D145}
+  FileVersion=@CVER
+  RegisterServer=yes
+ 

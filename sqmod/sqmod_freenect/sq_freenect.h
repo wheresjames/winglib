@@ -67,7 +67,7 @@ private:
 	static void _LogCallback( freenect_context *dev, freenect_loglevel level, const char *msg );
 	
 	/// Log callback
-	static void LogCallback( freenect_loglevel level, const char *msg );
+	void LogCallback( freenect_loglevel level, const char *msg );
 	
 	/// Proxy called when there is new depth information
 	static void _OnDepth( freenect_device *dev, void *depth, uint32_t timestamp );
