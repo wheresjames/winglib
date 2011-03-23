@@ -33,6 +33,8 @@ mk_inf :
 	@echo $(foreach f,$(MK_COPY),$(shell $(CFG_CPY) "$(f)" "./"))
 	$(CFG_SAR) "s/@NAME/$(PRJ_NAME)/g" "$(MK_INF_DST)"
 	$(CFG_SAR) "s/@VER/$(subst .,\.,$(CFG_VER))/g" "$(MK_INF_DST)"
+	$(CFG_SAR) "s/@OS/$(OS)/g" "$(MK_INF_DST)"
+	$(CFG_SAR) "s/@PROC/$(PROC)/g" "$(MK_INF_DST)"
 	$(CFG_SAR) "s/@CVER/$(subst .,\$(CFG_COMMA),$(CFG_VER))/g" "$(MK_INF_DST)"
 
 ifneq ($(GO_SIGN_ENABLED),)
