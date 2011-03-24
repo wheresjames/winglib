@@ -2825,9 +2825,20 @@ public:
 
     /// Concatinates two strings into a path
     TStr& BuildPath( TStr x_sPath, T tSep = oexTCPathSep( T ) )
-    {   RTrim( oexTT( T, "\\/" ) );
+    {   
+		if ( !x_sPath.Length() ) 
+			return *this;
+			
+		if ( !Length() ) 
+		{	*this = x_sPath;
+			return *this;
+		} // end if
+
+		// Build the path
+		RTrim( oexTT( T, "\\/" ) );
         *this << tSep << x_sPath.LTrim( oexTT( T, "\\/" ) );
         RTrim( oexTT( T, "\\/" ) );
+		
         return *this;
     }
 

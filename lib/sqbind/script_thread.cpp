@@ -41,13 +41,13 @@ CScriptThread::CScriptThread()
 	m_bQuit = oex::oexFALSE;
 	m_pModuleManager = oexNULL;
 	m_bFile = oex::oexFALSE;
+	m_bInline = oex::oexFALSE;
 	m_pParentScript = oexNULL;
 	m_tid = 0;
 	m_uToFreq = 100;
 	m_uToElapsed = 0;
 	m_dToValue = 0;
 	m_uLogFreq = 1000;
-
 }
 
 CScriptThread::~CScriptThread()
@@ -117,8 +117,8 @@ void CScriptThread::SetExportFunction( PFN_SQBIND_Export_Symbols fn, sqbind::SSq
 	m_cSqEngine.SetExportFunction( fn, pa );
 }
 
-oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
-{_STT();
+oex::oexBOOL CScriptThread::InitEngine()
+{
 	// +++ Ensure script
 	if ( !m_sScript.Length() )
 		return oex::oexFALSE;
@@ -134,9 +134,19 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 
 	// Set script name for debugging
 	_STT_SET_NAME( oex::CStr() << std2oex( m_cSqEngine.GetScriptName() ) << oexT( " : " ) <<  std2oex( m_sName ) );
+	
+	return oex::oexTRUE;
+}
+
+oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
+{_STT();
+
+	// Initialize the engine
+	if ( !InitEngine() )
+		return oex::oexFALSE;
 
 	// Start the script
-	if ( !m_cSqEngine.Load( stdString(), &m_sScript, m_bFile, oex::oexFALSE ) )
+	if ( !m_cSqEngine.Load( stdString(), &m_sScript, m_bFile, oex::oexFALSE, oex::oexTRUE, m_bInline ) )
 	{
 		stdString sErr;
 
@@ -175,6 +185,10 @@ oex::oexBOOL CScriptThread::InitThread( oex::oexPVOID x_pData )
 
 oex::oexBOOL CScriptThread::DoThread( oex::oexPVOID x_pData )
 {_STT();
+
+	// Inline scripts should not have idle loops
+	if ( m_bInline )
+		return oex::oexFALSE;
 
 	oex::oexINT nDiv = 0, nDiv10 = 0;
 	oex::os::CTimeout toIdle;

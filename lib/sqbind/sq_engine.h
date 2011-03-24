@@ -550,6 +550,8 @@ public:
 	void SetRoot( const stdString &s ) { m_sRoot = s; }
 
 	stdString& GetRoot() { return m_sRoot; }
+	
+	stdString& GetReturnData() { return m_sReturnData; }
 
 protected:
 

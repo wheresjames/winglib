@@ -435,8 +435,25 @@ int CSys::Echo( oexCSTRW x_pFmt )
 	if ( !x_pFmt )
 		return 0;
 	CStr8 s = oexStrWToStr( x_pFmt );
+#if defined( oexUNICODE )
+	CUtil::AddOutput( x_pFmt, s.Length(), oexTRUE );
+#else
 	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
+#endif
 	return ::puts( s.Ptr() );
+}
+
+int CSys::Echo( oexCSTRW x_pFmt, oexLONG x_lLen )
+{//_STT();
+	if ( !x_pFmt || 0 >= x_lLen )
+		return 0;
+#if defined( oexUNICODE )
+	CUtil::AddOutput( x_pFmt, x_lLen, oexTRUE );
+#else
+	CStr8 s = oexStrWToStr( x_pFmt, x_lLen );
+	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
+#endif
+	return ::fwrite( x_pFmt, 1, x_lLen, stdout );
 }
 
 oexPVOID CSys::MemCpy( oexPVOID x_pDst, oexCPVOID x_pSrc, oexUINT x_uSize )
@@ -805,8 +822,26 @@ int CSys::Echo( oexCSTR8 x_pFmt )
 {//_STT();
 	if ( !x_pFmt )
 		return 0;
+#if defined( oexUNICODE )
+	CStr s = oexMbToStr( x_pFmt );
+	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
+#else
 	CUtil::AddOutput( x_pFmt, 0, oexTRUE );
+#endif
 	return ::puts( x_pFmt );
+}
+
+int CSys::Echo( oexCSTR8 x_pFmt, oexLONG x_lLen )
+{//_STT();
+	if ( !x_pFmt || 0 >= x_lLen )
+		return 0;
+#if !defined( oexUNICODE )
+	CUtil::AddOutput( x_pFmt, x_lLen, oexTRUE );
+#else
+	CStr s = oexStrToStrW( CStr8( x_pFmt, x_lLen ) );
+	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
+#endif
+	return ::fwrite( x_pFmt, 1, x_lLen, stdout );
 }
 
 oexUINT CSys::GetCurThreadId()

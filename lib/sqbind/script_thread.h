@@ -96,6 +96,9 @@ public:
 	/// Sets the parent script pointer
 	void SetParentScript( CSqMsgQueue *pParent );
 
+	/// Initializes the engine object
+	oex::oexBOOL InitEngine();
+
 protected:
 
 	/// Initialize Squirrel engine
@@ -188,6 +191,12 @@ public:
 	/// Returns a reference to the property bag
 	t_PropertyBag& Pb() { return m_pb; }
 	
+	/// Set to non-zero to process the script as inline
+	void setInline( oex::oexBOOL b ) { m_bInline = b; }
+	
+	/// Returns the inline status of the script
+	oex::oexBOOL getInline() { return m_bInline; }
+	
 	/// Set application information
 	static void SetAppInfo( oex::oexCSTR pName, oex::oexCSTR pNameProc, oex::oexCSTR pLName, oex::oexCSTR pDesc );
 
@@ -221,6 +230,9 @@ private:
 
 	/// If non-zero, m_sScript contains a file name
 	oex::oexBOOL						m_bFile;
+	
+	/// Non-zero if script should be processed as an inline file
+	oex::oexBOOL						m_bInline;
 
 	/// Parent script
 	CSqMsgQueue							*m_pParentScript;

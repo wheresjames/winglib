@@ -12,7 +12,7 @@ BUILDDIRS := app/hello lib/oexlib \
 # Squirrel engine
 #-------------------------------------------------------------------
 BUILDDIRS := $(BUILDDIRS) lib/sqbind tools/sqrbld \
-						  app/sqrl app/sqengine \
+						  app/sqrl app/sqrl-cgi app/sqengine \
 						  sq/wlink
 
 

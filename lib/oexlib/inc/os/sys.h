@@ -126,6 +126,9 @@ public:
 	/// Writes data on stdout
 	static int Echo( oexCSTR8 x_pFmt );
 
+	/// Writes data to stdout with length
+	static int Echo( oexCSTR8 x_pFmt, oexLONG x_lLen );
+
     // Unicode
 #if !defined( OEX_NOWCHAR )
 public:
@@ -167,6 +170,9 @@ public:
 	/// Writes data on stdout
 	static int Echo( oexCSTRW x_pFmt );
 
+	/// Writes data to stdout with length
+	static int Echo( oexCSTRW x_pFmt, oexLONG x_lLen );
+	
 	static oexUINT WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen );
 
 	static oexUINT MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen );
