@@ -91,6 +91,10 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 	} // end if
 
+	// Check for inline type
+	if ( bFile && sCmd.GetFileExtension().ToLower() == oexT( "squ" ) )
+		bInline = oex::oexTRUE;
+	
 	// Create objects
 	g_psqScriptThread = OexAllocConstruct< sqbind::CScriptThread >();
 	if ( !oexCHECK_PTR( g_psqScriptThread ) )
