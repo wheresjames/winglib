@@ -23,6 +23,7 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 	oex::oexBOOL bFile = oex::oexTRUE;
 	oex::CStr sCmd = pbCmdLine[ 0 ].ToString();
+	oex::oexBOOL bInline = pbCmdLine.IsKey( "i" );
 
 	// Calculate a module name if not specified
 	if ( !sCmd.Length() )
@@ -69,6 +70,10 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 	} // end if
 
+	// Stdin?
+	if ( !sCmd.Length() )
+		sCmd = oexReadStdin(), bFile = oex::oexFALSE;
+
 	// Do we have a script
 	if ( !sCmd.Length() )
 		return oexERROR( -1, oexT( "Script not specified" ) );
@@ -100,7 +105,9 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 	sqbind::CScriptThread::SetAppInfo( oexAppNamePtr(), oexAppNameProcPtr(), oexAppLongNamePtr(), oexAppDescPtr() );
 
-	g_psqScriptThread->SetScriptName( sCmd.Ptr() );
+	g_psqScriptThread->setInline( bInline );
+
+	g_psqScriptThread->SetScriptName( bFile ? sCmd.Ptr() : oexT( "buffer" ) );
 
 	g_psqScriptThread->SetModuleManager( g_psqModuleManager );
 
@@ -110,6 +117,11 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 	g_psqScriptThread->Pb()[ oexT( "cmdline" ) ] = pbCmdLine.Copy();
 
+	// Push the stack if inlined
+	if ( bInline )
+		g_psqScriptThread->GetEngine()->push_stack( oexNULL );
+
+	// Start the thread
 	if ( g_psqScriptThread->Start() )
 		return oexERROR( -5, oexT( "Failed to start script thread" ) );
 
@@ -125,6 +137,12 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 	} // end while
 
+	// Echo output if inline
+	if ( bInline )
+	{	sqbind::stdString sRet = g_psqScriptThread->GetEngine()->pop_stack();
+		oexEcho( sRet.c_str(), sRet.length() );
+	} // end if	
+	
 	oexNOTICE( 0, oexT( "Script thread has terminated" ) );
 
 	if ( oexCHECK_PTR( g_psqScriptThread ) )

@@ -23,6 +23,7 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 	oex::oexBOOL bFile = oex::oexTRUE;
 	oex::CStr sCmd = pbCmdLine[ 0 ].ToString();
+	oex::oexBOOL bInline = !pbCmdLine.IsKey( "I" );
 
 	// Calculate a module name if not specified
 	if ( !sCmd.Length() )
@@ -69,6 +70,10 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 	} // end if
 
+	// Stdin?
+	if ( !sCmd.Length() )
+		sCmd = oexReadStdin(), bFile = oex::oexFALSE;
+	
 	// Do we have a script
 	if ( !sCmd.Length() )
 		return oexERROR( -1, oexT( "Script not specified" ) );
@@ -100,9 +105,9 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 	sqbind::CScriptThread::SetAppInfo( oexAppNamePtr(), oexAppNameProcPtr(), oexAppLongNamePtr(), oexAppDescPtr() );
 
-	g_psqScriptThread->setInline( oex::oexTRUE );
-	
-	g_psqScriptThread->SetScriptName( sCmd.Ptr() );
+	g_psqScriptThread->setInline( bInline );
+
+	g_psqScriptThread->SetScriptName( bFile ? sCmd.Ptr() : oexT( "buffer" ) );
 
 	g_psqScriptThread->SetModuleManager( g_psqModuleManager );
 
@@ -112,14 +117,43 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 	g_psqScriptThread->Pb()[ oexT( "cmdline" ) ] = pbCmdLine.Copy();
 
-	// Initialize the engine
-	if ( !g_psqScriptThread->InitEngine() || !g_psqScriptThread->GetEngine()->Init() )
-		return oexERROR( -5, oexT( "Engine failed to initialize" ) );
-	
-	if ( bFile )
-	{	sqbind::stdString sRet = g_psqScriptThread->GetEngine()->include_inline( sqbind::oex2std( sCmd ), oexNULL );
+	// Process the script
+	if ( bInline )
+	{	
+		// Initialize the engine
+		if ( !g_psqScriptThread->InitEngine() || !g_psqScriptThread->GetEngine()->Init() )
+			return oexERROR( -5, oexT( "Engine failed to initialize" ) );
+
+		sqbind::stdString sRet;
+		if ( bFile )
+			sRet = g_psqScriptThread->GetEngine()->include_inline( sqbind::oex2std( sCmd ), oexNULL );
+		else
+			sRet = g_psqScriptThread->GetEngine()->run_inline( sqbind::oex2std( sCmd ), oexNULL );
+
+		// Echo output
 		oexEcho( sRet.c_str(), sRet.length() );
+
 	} // end if
+	
+	else 
+	{
+		// Start the thread
+		if ( g_psqScriptThread->Start() )
+			return oexERROR( -5, oexT( "Failed to start script thread" ) );
+
+		// Attempt to execute idle function
+		oex::oexINT gc = 0;
+		while ( g_psqScriptThread->IsRunning() )
+		{
+			// Clean up binary shares
+			if ( gc ) gc--; else { gc = 10; oexCleanupBin(); }
+
+			// Wait
+			oexSleep( 100 );
+
+		} // end while
+		
+	} // end else
 
 	oexNOTICE( 0, oexT( "Script thread has terminated" ) );
 

@@ -128,6 +128,9 @@ public:
 
 	/// Writes data to stdout with length
 	static int Echo( oexCSTR8 x_pFmt, oexLONG x_lLen );
+	
+	/// Read data from stdin
+	static oexLONG Read_stdin( oexSTR8 x_pBuf, oexLONG x_lMax );
 
     // Unicode
 #if !defined( OEX_NOWCHAR )

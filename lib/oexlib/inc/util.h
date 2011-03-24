@@ -106,6 +106,9 @@ public:
 	/// Draws the specified graph
 	static oexBOOL Graph( oexINT nSamples, oexINT nInterval, oexINT nType, CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *fg, oexINT *bg, oexCPVOID p, oexINT n, oexCSTR pParams );
 
+	/// Reads data from stdin
+	static CStr ReadStdin( oexLONG lMax = 0 );
+	
 };
 
 

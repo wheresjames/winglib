@@ -327,6 +327,8 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexMicroSleep						OEX_NAMESPACE::os::CSys::MicroSleep
 #define oexPrintf							OEX_NAMESPACE::os::CSys::Printf
 #define oexEcho								OEX_NAMESPACE::os::CSys::Echo
+#define oexRead_stdin						OEX_NAMESPACE::os::CSys::Read_stdin
+#define oexReadStdin						OEX_NAMESPACE::CUtil::ReadStdin
 #define oexFlush_stdout						OEX_NAMESPACE::os::CSys::Flush_stdout
 #define oexEnableOutputCapture				OEX_NAMESPACE::CUtil::EnableOutputCapture
 #define oexEnableOutputFileCapture			OEX_NAMESPACE::CUtil::EnableOutputFileCapture

@@ -700,3 +700,34 @@ oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType,
 
 	return oexTRUE;
 }
+
+CStr CUtil::ReadStdin( oexLONG lMax )
+{_STT();
+
+	oex::CStr s;
+	if ( 0 < lMax )
+		if ( !s.OexAllocate( lMax ) )
+			return s;
+	
+	char buf[ 1024 ];
+	oex::oexLONG lTotal = 0;
+	do
+	{
+		// How much to try and read?
+		oex::oexLONG lRead = sizeof( buf );
+		if ( 0 < lMax && lRead > lMax - lTotal ) 
+			lRead = lMax - lTotal;
+		
+		// Read some data
+		lRead = oexRead_stdin( buf, lRead );
+		if ( 0 >= lRead )
+			return s;
+
+		// Add to buffer
+		s.Append( buf, lRead );
+		lTotal += lRead;
+	
+	} while ( lTotal < lMax );
+
+	return s;
+}

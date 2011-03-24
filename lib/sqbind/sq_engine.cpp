@@ -137,6 +137,11 @@ int CSqEngineExport::echo( const stdString &sMsg )
 	return oexEcho( sMsg.c_str() );
 }
 
+stdString CSqEngineExport::read_stdin( int nMax )
+{_STT();
+	return oex2std( oexReadStdin( nMax ) );
+}
+
 int CSqEngineExport::flush()
 {_STT();
 	return oex::os::CSys::Flush_stdout();
@@ -161,6 +166,13 @@ stdString CSqEngineExport::include_inline( const stdString &sScript, CSqMulti *m
 {_STT();
 	push_stack( mParams );
 	OnIncludeInline( sScript );
+	return pop_stack();
+}
+
+stdString CSqEngineExport::run_inline( const stdString &sScript, CSqMulti *mParams )
+{_STT();
+	push_stack( mParams );
+	OnRunInline( sScript );
 	return pop_stack();
 }
 
@@ -1241,6 +1253,11 @@ int CSqEngineExport::OnIncludeInline( const stdString &sClass )
 	return 0;
 }
 
+int CSqEngineExport::OnRunInline( const stdString &sClass )
+{_STT();
+	return 0;
+}
+
 int CSqEngineExport::OnLoadModule( const stdString &sModule, const stdString &sPath )
 {_STT();
 	return 0;
@@ -1461,6 +1478,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, alert )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, print )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, echo )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, read_stdin )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_key )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_key )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_build )
@@ -1470,6 +1488,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include_once )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include_inline )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run_inline )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_script_return_value )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, push_stack )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, pop_stack )
@@ -1943,6 +1962,40 @@ int CSqEngine::OnIncludeInline( const stdString &sScript )
 	_oexCATCH( SquirrelError &e )
 	{	nRet = LogErrorM( -3, oexMks( e.desc, oexT( " : " ),
 							  ( bFile && sScript.length() ) ? sScript.c_str() : oexT( "N/A" ) ).Ptr() );
+	}
+
+	return nRet;
+}
+
+int CSqEngine::OnRunInline( const stdString &sScript )
+{_STT();
+
+	// Push script name
+	int nRet = 0;
+	stdString sScriptName = m_sScriptName;
+	stdString sData;
+
+	_oexTRY
+	{
+		// Check for pre-compiled script
+		if ( 2 <= sScript.length() && ( *(oex::oexUSHORT*)sScript.c_str() ) == SQ_BYTECODE_STREAM_TAG )
+		{	oex::CStr8 buf( sScript.c_str(), sScript.length() );
+			SetCompiledScript( buf );
+		} // end if
+
+		else
+			m_script = m_vm.CompileBuffer( prepare_inline( sScript.c_str(), 0 ).c_str() );
+
+		m_sReturnData = obj2str( m_vm.RunScript( m_script ) );
+
+	} // end try
+
+	_oexCATCH( SScriptErrorInfo &e )
+	{	nRet = LogError( -2, e );
+	}
+	_oexCATCH( SquirrelError &e )
+	{	nRet = LogErrorM( -3, oexMks( e.desc, oexT( " : " ),
+							  ( sScript.length() ) ? sScript.c_str() : oexT( "N/A" ) ).Ptr() );
 	}
 
 	return nRet;

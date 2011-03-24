@@ -217,6 +217,9 @@ public:
 	/// Sends data to STDOUT
 	//  Same as print, but appends new line
 	int echo( const stdString &sMsg );
+	
+	/// Read data from stdin
+	stdString read_stdin( int nMax );
 
 	/// Flushes STDOUT
 	int flush();
@@ -233,6 +236,9 @@ public:
 
 	/// Includes the specified inline script
 	stdString include_inline( const stdString &sScript, CSqMulti *pParams );
+
+	/// Includes the specified inline script
+	stdString run_inline( const stdString &sScript, CSqMulti *pParams );
 
 	/// Returns the result of the last script execution
 	stdString get_script_return_value();
@@ -563,6 +569,8 @@ protected:
 
 	virtual int OnIncludeInline( const stdString &sScript );
 
+	virtual int OnRunInline( const stdString &sScript );
+	
 	virtual int OnLoadModule( const stdString &sModule, const stdString &sPath );
 
 	virtual stdString OnPath( stdString sPath );
@@ -1263,6 +1271,9 @@ public:
 
 	/// Includes the specified inline script
 	virtual int OnIncludeInline( const stdString &sScript );
+
+	/// Includes the specified inline script
+	virtual int OnRunInline( const stdString &sScript );
 
 	/// Loads the specified module
 	virtual int OnLoadModule( const stdString &sModule, const stdString &sPath );

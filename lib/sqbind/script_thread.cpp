@@ -134,7 +134,7 @@ oex::oexBOOL CScriptThread::InitEngine()
 
 	// Set script name for debugging
 	_STT_SET_NAME( oex::CStr() << std2oex( m_cSqEngine.GetScriptName() ) << oexT( " : " ) <<  std2oex( m_sName ) );
-	
+
 	return oex::oexTRUE;
 }
 

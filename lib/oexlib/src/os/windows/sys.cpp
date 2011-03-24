@@ -450,7 +450,7 @@ int CSys::Echo( oexCSTRW x_pFmt, oexLONG x_lLen )
 #if defined( oexUNICODE )
 	CUtil::AddOutput( x_pFmt, x_lLen, oexTRUE );
 #else
-	CStr8 s = oexStrWToStr( x_pFmt, x_lLen );
+	CStr s = oexStrWToStr( CStrW( x_pFmt, x_lLen ) );
 	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
 #endif
 	return ::fwrite( x_pFmt, 1, x_lLen, stdout );
@@ -842,6 +842,30 @@ int CSys::Echo( oexCSTR8 x_pFmt, oexLONG x_lLen )
 	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
 #endif
 	return ::fwrite( x_pFmt, 1, x_lLen, stdout );
+}
+
+oexLONG CSys::Read_stdin( oexSTR8 x_pBuf, oexLONG x_lMax )
+{//_STT();
+
+	if ( !x_pBuf || 0 >= x_lMax )
+		return 0;
+
+	char  c;
+	DWORD dwRead = 0;
+    HANDLE h = GetStdHandle( STD_INPUT_HANDLE );
+	if ( INVALID_HANDLE_VALUE == h )
+		return 0;
+		
+	DWORD dwEvents = 0;
+	if ( GetNumberOfConsoleInputEvents( h, &dwEvents ) && !dwEvents )
+		dwRead = 0;
+		
+	else if ( !PeekNamedPipe( h, x_pBuf, (DWORD)x_lMax, &dwRead, NULL, NULL ) )
+		dwRead = 0;
+		
+	CloseHandle( h );
+		
+	return (oexLONG)dwRead;
 }
 
 oexUINT CSys::GetCurThreadId()

@@ -900,6 +900,16 @@ int CSys::Echo( oexCSTR8 x_pFmt, oexLONG x_lLen )
 	return ::fwrite( x_pFmt, 1, x_lLen, stdout );
 }
 
+oexLONG CSys::Read_stdin( oexSTR8 x_pBuf, oexLONG x_lMax )
+{//_STT();
+
+	if ( !x_pBuf )
+		return 0;
+
+	fcntl( stdin, F_SETFL, fcntl( stdin, GETFL ) | O_NONBLOCK )
+	return fread( x_pBuf, 1, x_lMax, stdin );
+}
+
 oexUINT CSys::GetCurThreadId()
 {	return (oexUINT)::pthread_self();
 }
