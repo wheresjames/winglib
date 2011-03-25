@@ -120,7 +120,7 @@ int CSqFreenect::OpenDevice( int i )
 	
 	// Set callbacks
 	freenect_set_depth_callback( m_pfd, CSqFreenect::_OnDepth );
-	freenect_set_rgb_callback( m_pfd, CSqFreenect::_OnRGB );
+	freenect_set_video_callback( m_pfd, CSqFreenect::_OnRGB );
 	
 	return 1;
 }
@@ -159,7 +159,7 @@ void CSqFreenect::OnDepth( void *depth, uint32_t timestamp )
 
 }
 
-void CSqFreenect::_OnRGB( freenect_device *dev, freenect_pixel *rgb, uint32_t timestamp )
+void CSqFreenect::_OnRGB( freenect_device *dev, void *rgb, uint32_t timestamp )
 {_STT();
 
 	if ( !dev )
@@ -170,7 +170,7 @@ void CSqFreenect::_OnRGB( freenect_device *dev, freenect_pixel *rgb, uint32_t ti
 		p->OnRGB( rgb, timestamp );
 }
 
-void CSqFreenect::OnRGB( freenect_pixel *rgb, uint32_t timestamp )
+void CSqFreenect::OnRGB( void *rgb, uint32_t timestamp )
 {_STT();
 
 }
@@ -194,13 +194,22 @@ void CSqFreenect::setTilt( double dAngle )
 	freenect_set_tilt_degs( m_pfd, dAngle );
 }
 
+double CSqFreenect::getTilt()
+{_STT();
+	if ( !m_pfd )
+		return 0;
+
+	return freenect_get_tilt_degs( freenect_get_tilt_state( m_pfd ) );
+}
+
+
 void CSqFreenect::StartRGB()
 {_STT();
 
 	if ( !m_pfd )
 		return;
 
-	freenect_start_rgb( m_pfd );
+	freenect_start_video( m_pfd );
 }
 
 void CSqFreenect::StopRGB()
@@ -209,7 +218,7 @@ void CSqFreenect::StopRGB()
 	if ( !m_pfd )
 		return;
 
-	freenect_stop_rgb( m_pfd );
+	freenect_stop_video( m_pfd );
 }
 
 void CSqFreenect::StartDepth()
@@ -237,7 +246,7 @@ sqbind::CSq3dVector CSqFreenect::getRawAccel()
 		return sqbind::CSq3dVector();
 		
 	int16_t x = 0, y = 0, z = 0;
-	freenect_get_raw_accel( m_pfd, &x, &y, &z );
+//	freenect_get_raw_accel( m_pfd, &x, &y, &z );
 	
 	return sqbind::CSq3dVector( (SQInteger)x, (SQInteger)y, (SQInteger)z );
 }
@@ -249,7 +258,7 @@ sqbind::CSq3dVectord CSqFreenect::getMksAccel()
 		return sqbind::CSq3dVectord();
 
 	double x = 0, y = 0, z = 0;
-	freenect_get_mks_accel( m_pfd, &x, &y, &z );
+	freenect_get_mks_accel( freenect_get_tilt_state( m_pfd ), &x, &y, &z );
 	
 	return sqbind::CSq3dVectord( x, y, z );
 }

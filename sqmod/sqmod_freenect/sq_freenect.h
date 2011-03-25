@@ -49,6 +49,9 @@ public:
 	/// Sets the tilt angle
 	void setTilt( double dAngle );
 	
+	/// Gets the tilt angle
+	double getTilt();
+	
 	/// Start streaming rgb image
 	void StartRGB();
 	
@@ -76,10 +79,10 @@ private:
 	void OnDepth( void *depth, uint32_t timestamp );
 	
 	/// Proxy called when there is new RGB information
-	static void _OnRGB( freenect_device *dev, freenect_pixel *rgb, uint32_t timestamp );
+	static void _OnRGB( freenect_device *dev, void *rgb, uint32_t timestamp );
 
 	/// Called when there is new RGB information
-	void OnRGB( freenect_pixel *rgb, uint32_t timestamp );
+	void OnRGB( void *rgb, uint32_t timestamp );
 
 	/// Get raw acceleration?
 	sqbind::CSq3dVector getRawAccel();

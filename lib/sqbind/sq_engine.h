@@ -36,6 +36,10 @@
 
 class CSqEngine;
 
+/**
+	\defgroup SQAPI Squirrel Engine API
+*/
+
 //==================================================================
 // CSqEngineExport
 //
@@ -43,6 +47,497 @@ class CSqEngine;
 //==================================================================
 class CSqEngineExport
 {
+
+public:
+
+	/** \addtogroup SQAPI
+		@{
+	*/
+
+		SQBIND_CLASS_CTOR_BEGIN( CSqEngineExport )
+		SQBIND_CLASS_CTOR_END( CSqEngineExport )
+
+		/// Returns non zero if squirrel is a debug build
+		int isDebugBuild();
+
+		/// Returns string indicating compiler used to build
+		stdString getCompiler();
+
+		/// Returns the cpu size in bits ( 16, 32, 64, etc... )
+		int getCpuSize();
+
+		/// Returns the cpu type name
+		stdString getCpuType();
+
+		/// Returns the platform name
+		stdString getPlatform();
+
+		/// Returns the buffer for a binary share
+		/**
+			@param [in] sName	- The share name
+			
+			@return A CSqBinary object wrapping the share buffer
+		*/
+		CSqBinary get_binshare( const stdString &sName );
+
+		/// Shares the binary buffer with the specified name
+		/**
+			@param [in] sName	- The share name
+			@param [in] pBin	- The binary buffe to share
+			
+			@return Non-zero on success
+		*/
+		int set_binshare( const stdString &sName, CSqBinary *pBin );
+
+		/// Return non-zero if the specified share exists
+		/**
+			@param [in] sName	- The share name
+			
+			@return Non-zero if the share exists
+		*/
+		int is_binshare( const stdString &sName );
+
+		/// Runs garbage collection on binary shares
+		int cleanup_binshare();
+
+		/// Returns the module instance handle
+		unsigned int get_instance_handle();
+
+		/// Enables capturing console output
+		int enable_output_capture( int buffers, int buf_size );
+
+		/// Enables capturing console output to file
+		int enable_output_file_capture( const stdString &sFile, unsigned int uTimestampFreq );
+
+		/// Returns console output
+		stdString get_output( int max );
+
+		/// Sets the specified property
+		void set( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
+		/// Sets a key timeout
+		void tset( const stdString &sPath, const stdString &sKey, unsigned int uTo );
+
+		/// Gets the specified property
+		stdString get( const stdString &sPath, const stdString &sKey );
+
+		/// Sets the specified property
+		void jset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
+		/// Gets the specified property
+		stdString jget( const stdString &sPath, const stdString &sKey );
+
+		/// Returns the sizeof the current array
+		int asize( const stdString &sPath, const stdString &sKey );
+
+		/// Returns non-zero if the specified value exists
+		int isset( const stdString &sPath, const stdString &sKey );
+
+		/// Sets the specified property
+		void aset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
+		/// Sets the specified property
+		void mset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
+		/// Gets the specified property
+		stdString kget( const stdString &sPath, const stdString &sKey );
+
+		/// Returns a copy of the entire property bag
+		CSqMulti pb( const stdString &sPath );
+
+		/// Adds a key to the logger
+		int addlog( const stdString &sPath, const stdString &sKey, int nType );
+
+		/// Removes a key from the logger
+		int removelog( const stdString &sPath, const stdString &sKey );
+
+		/// Sets the logger output folder
+		int setlogroot( const stdString &sPath, const stdString &sRoot );
+
+		/// Returns the root logging folder
+		stdString getlogroot( const stdString &sPath );
+
+		/// Sets the logger frequency
+		int setlogfreq( const stdString &sPath, int nFreq );
+
+		/// Returns the logger frequency
+		int getlogfreq( const stdString &sPath );
+
+		/// Returns a list of keys that are being logged
+		stdString getlogkeys( const stdString &sPath, int nTime );
+
+		/// Returns log data for the specified key
+		stdString getlog( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, int nDataType, int nMethod );
+
+		/// Returns log data for the specified key in a binary share
+		stdString getlogbin( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, const stdString &sExt );
+
+		/// Adds binary information to the data log
+		int logbin( const stdString &sPath, const stdString &sKey, const stdString &sBin, int nType, int nTime, int nTimeMs, int nBuffering );
+
+		/// Resets the logger
+		int resetlog( const stdString &sPath );
+
+		/// Sets the specified timer
+		int set_timer( const stdString &sPath, int to, const stdString &sCallback );
+
+		/// Sets the specified timeout
+		int set_timeout( const stdString &sPath, int to, const stdString &sCallback );
+
+		/// Kills the specified timer
+		int kill_timer( const stdString &sPath, int id );
+
+		/// Requests the appliation exit
+		void exit( int nExitCode );
+
+		/// Immediatly stops the application
+		void terminate( int nExitCode );
+
+		/// Displays a message box containing string
+		int alert( const stdString &sMsg );
+
+		/// Sends data to STDOUT
+		int print( const stdString &sMsg );
+
+		/// Sends data to STDOUT
+		//  Same as print, but appends new line
+		int echo( const stdString &sMsg );
+		
+		/// Read data from stdin
+		stdString read_stdin( int nMax );
+
+		/// Flushes STDOUT
+		int flush();
+
+		/// Imports the specified class
+		int import( const stdString &sClass );
+
+		/// Includes the specified script
+		int include( const stdString &sScript );
+
+		/// Includes the specified script the first time,
+		/// ignores further calls to include the same script
+		int include_once( const stdString &sScript );
+
+		/// Includes the specified inline script
+		stdString include_inline( const stdString &sScript, CSqMulti *pParams );
+
+		/// Includes the specified inline script
+		stdString run_inline( const stdString &sScript, CSqMulti *pParams );
+
+		/// Returns the result of the last script execution
+		stdString get_script_return_value();
+
+		/// Push include stack
+		int push_stack( CSqMulti *pParams );
+
+		/// Pop include stack
+		stdString pop_stack();
+
+		/// Returns the size of the include stack
+		int get_stack_size();
+
+		/// Gets current include params
+		CSqMulti get_stack_params();
+
+		/// Sets current include params
+		int set_stack_params( CSqMulti *sParams );
+
+		/// Returns current output buffer
+		stdString get_stack_output();
+
+		/// Sets the current output buffer
+		int set_stack_output( const stdString &sOutput );
+
+		/// Appends the current output buffer
+		int append_stack_output( const stdString &sOutput );
+
+		/// Loads the specified module
+		int load_module( const stdString &sModule, const stdString &sPath );
+
+		/// Sends the kills message to the specified thread
+		int kill( const stdString &sPath );
+
+		/// Sends the kills message to the specified thread and doesn't return until it exits
+		int kill_wait( const stdString &sPath, int nTimeout, int bTerminate );
+
+		/// Sends the terminate mesage to the specified thread
+		int terminate_thread( const stdString &sPath );
+
+		/// Returns the size of the specified type
+		int type_size( int type );
+
+		/// Returns boot time in seconds
+		float clock();
+
+		/// Returns boot count
+		unsigned int ticks();
+
+		/// Returns the version
+		stdString get_version();
+
+		/// Returns the build
+		stdString get_build();
+
+		/// Returns the application name
+		stdString get_app_name();
+
+		/// Returns the application service name
+		stdString get_service_name();
+
+		/// Returns the application name
+		stdString get_app_long_name();
+
+		/// Returns the application description
+		stdString get_app_description();
+
+		/// Returns the script name
+		stdString get_name();
+
+		/// Returns the script or script filename
+		stdString get_script();
+
+		/// Get child scripts
+		stdString get_children( const stdString &sPath );
+
+		/// Decorates the file with appropriate compile time options
+		stdString decorate( const stdString &sPath, int bExe, int bLib );
+
+		/// Returns the file path to the current script
+		stdString path( const stdString &sPath );
+
+		/// Returns the file path to the current executable
+		stdString root( const stdString &sPath );
+
+		/// Returns the specified system folder
+		stdString get_sys_folder( const stdString &sId );
+
+		/// Returns the specified system and path
+		stdString get_sys_path( const stdString &sId, const stdString &sPath );
+
+		/// Returns the file path of the current executable
+		stdString module_path();
+
+		/// Returns the file name of the current executable
+		stdString module_name();
+
+		/// Returns the md5 for the specified string
+		stdString md5( const stdString &sStr );
+
+		/// Returns a guid representation of the md5 hash
+		stdString guid( const stdString &sStr );
+
+		/// Builds a url from components
+		stdString build_url( CSqMulti *pUrl );
+
+		/// Parses a url into its components
+		CSqMulti parse_url( const stdString &sUrl );
+
+		/// Base64 encodes a string
+		stdString base64_encode( const stdString &sStr );
+
+		/// Base64 decodes a string
+		stdString base64_decode( const stdString &sStr );
+
+		/// Base16 encodes a string
+		stdString base16_encode( const stdString &sStr );
+
+		/// Base16 decodes a string
+		stdString base16_decode( const stdString &sStr );
+
+		/// Returns the file path to the current script
+		stdString build_path( const stdString &sS1,  const stdString &sS2 );
+
+		/// Returns an ascii mandelbrot image
+		stdString mandelbrot( int w, int h, int x1, int y1, int x2, int y2 );
+
+		/// Logs an error
+		void error( int e, const stdString &sStr );
+
+		/// Logs a warning
+		void warning( int e, const stdString &sStr );
+
+		/// Logs a message
+		void notice( int e, const stdString &sStr );
+
+		/// Returns the value of the last key press, blocks if no key has been pressed
+		int get_key();
+
+		/// Returns non-zero if there is a key press
+		int is_key();
+
+		/// Trims the specified characters from the beginning of the string
+		stdString ltrim( const stdString &sS, const stdString &sChs );
+
+		/// Trims the specified characters from the end of the string
+		stdString rtrim( const stdString &sS, const stdString &sChs );
+
+		/// Trims the specified characters from the beginning and end of the string
+		stdString trim( const stdString &sS, const stdString &sChs );
+
+		/// Trims the white space from the beginning and end of the string
+		stdString trimws( const stdString &sS );
+
+		/// Finds sub string sSub in sS, returns offset or less than zero if not found
+		int find( const stdString &sS, const stdString &sSub );
+
+		/// Replaces the occurences of the specified string
+		stdString replace( const stdString &sS, const stdString &sFind, const stdString &sReplace );
+
+		/// Drop specified characters from a string or all but
+		stdString drop( const stdString &sS, const stdString &sDrop, int bInclusive );
+
+		/// Drop the specified range of characters from a string or all but
+		stdString drop_range( const stdString &sS, const stdString &sBegin, const stdString &sEnd, int bInclusive );
+
+		/// URL encodes the string
+		stdString urlencode( const stdString &sS );
+
+		/// URL decodes the string
+		stdString urldecode( const stdString &sS );
+
+		/// HTML encodes the string
+		stdString htmlencode( const stdString &sS );
+
+		/// HTML decodes the string
+		stdString htmldecode( const stdString &sS );
+
+		/// Compresses string using zlib/deflate
+		stdString compress( const stdString &sS );
+
+		/// Uncompresses string using zlib/inflate
+		stdString uncompress( const stdString &sS );
+
+		/// Returns a unique md5 hash
+		stdString unique();
+
+		/// Returns local time stamp
+		int local_time();
+
+		/// Returns gmt time stamp
+		int gmt_time();
+
+		/// Returns a formated time string
+		stdString local_timestr( const stdString &fmt );
+
+		/// Returns a formated time string
+		stdString gmt_timestr( const stdString &fmt );
+
+		/// Creates a thread
+		int spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
+
+		/// Executes the specified script
+		stdString run( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript );
+
+		/// Executes the specified script within the current thread
+		SquirrelObject run2( const stdString &sName, const stdString &sScript );
+
+		/// Prepares an inline script for processing
+		stdString prepare_inline( const stdString &sScript, int bFile );
+
+		/// Checks for path/threads existence
+		int is_path( const stdString &sPath );
+
+		/// Processes system messages
+		int process_system_messages();
+
+		/// Executes shell command
+		int shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
+
+		/// Executes shell command
+		int exec( const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
+
+		/// Attempts to find the squirrel interpreter and execute the specified params
+		int sqexe( const stdString &sParams, const stdString &sDir );
+
+		/// Attempts to find the squirrel interpreter and execute the specified script
+		int sqexe_script( const stdString &sScript, const stdString &sDir );
+		
+		/// Installs a service
+		int service_install( const stdString &sName, const stdString &sDesc, const stdString &sExe, int bAutoRestart );
+
+		/// Removes a service
+		int service_remove( const stdString &sName );
+
+		/// Starts a service
+		int service_start( const stdString &sName );
+
+		/// Stops a service
+		int service_stop( const stdString &sName );
+
+		/// Restarts a service
+		int service_restart( const stdString &sName );
+
+		/// Returns the current cpu load
+		double get_cpu_load();
+
+		/// Amount of time in seconds, since the computer started
+		double boot_time();
+
+		/// Tick count seconds
+		unsigned int get_timer_seconds();
+
+		/// Tick count micro seconds
+		SQInteger get_timer_useconds();
+
+		/// Returns a linked in resource
+		stdString get_resource( const stdString &sRes, int bFileOverrideOk );
+
+		/// Finds resources matching the pattern in sName
+		CSqMulti find_resource( const stdString &sName, int bIgnoreCase, int bFileOverrideOk );
+		
+		/// Returns information about the specified system drive
+		CSqMulti get_system_drive_info( const stdString &sDrive );
+
+		/// Returns non-zero if registry key exists
+		int reg_is_key( const stdString &sKey, const stdString &sPath, const stdString &sName );
+
+		/// Returns the string value of the specified key
+		stdString reg_get_str( const stdString &sKey, const stdString &sPath, const stdString &sName );
+
+		/// Sets the specified registry key
+		int reg_set_str( const stdString &sKey, const stdString &sPath, const stdString &sName, const stdString &sValue );
+
+		/// Deletes the specified registry key
+		int reg_del_key( const stdString &sKey, const stdString &sPath, int bSubKeys );
+
+		/// Deletes child keys of the specified key
+		int reg_del_sub_keys( const stdString &sKey, const stdString &sPath );
+
+		int tolong( const stdString &s )
+		{	return oexStrToLong( s.c_str() ); }
+
+		int toulong( const stdString &s )
+		{	return oexStrToULong( s.c_str() ); }
+
+		int strtol( const stdString &s, int nRadix )
+		{	return oexStrToLong( s.c_str(), nRadix ); }
+
+		int strtoul( const stdString &s, int nRadix )
+		{	return oexStrToULong( s.c_str(), nRadix ); }
+
+		float tofloat( const stdString &s )
+		{	return oexStrToFloat( s.c_str() ); }
+
+		double todouble( const stdString &s )
+		{	return oexStrToDouble( s.c_str() ); }
+
+		/// Execute functions
+		stdString execute( int nRet, const stdString &sPath, const stdString &sFunction );
+		stdString execute1( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1 );
+		stdString execute2( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2 );
+		stdString execute3( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 );
+		stdString execute4( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 );
+
+		/// Causes the thread to sleep for the specified amount of time in milliseconds
+		void sleep( int nMsTime );
+
+		/// Returns a reference to the threads message queue object
+		CSqMsgQueue* queue();
+
+	// SQAPI
+	/** @} */
+
 public:
 
 	enum
@@ -73,9 +568,6 @@ public:
 
 public:
 
-	SQBIND_CLASS_CTOR_BEGIN( CSqEngineExport )
-	SQBIND_CLASS_CTOR_END( CSqEngineExport )
-
 	/// Default constructor
 	CSqEngineExport();
 
@@ -88,470 +580,9 @@ public:
 	/// Destructor
 	virtual ~CSqEngineExport();
 
-	/// Returns non zero if squirrel is a debug build
-	int isDebugBuild();
-
-	/// Returns string indicating compiler used to build
-	stdString getCompiler();
-
-	/// Returns the cpu size
-	int getCpuSize();
-
-	/// Returns the cpu size
-	stdString getCpuType();
-
-	/// Returns the cpu size
-	stdString getPlatform();
-
-	/// Returns the buffer for a binary share
-	CSqBinary get_binshare( const stdString &sName );
-
-	/// Returns the buffer for a binary share
-	int set_binshare( const stdString &sName, CSqBinary *pBin );
-
-	/// Returns the buffer for a binary share
-	int is_binshare( const stdString &sName );
-
-	/// Runs garbage collection on binary shares
-	int cleanup_binshare();
-
-	/// Returns the module instance handle
-	unsigned int get_instance_handle();
-
-	/// Enables capturing console output
-	int enable_output_capture( int buffers, int buf_size );
-
-	/// Enables capturing console output to file
-	int enable_output_file_capture( const stdString &sFile, unsigned int uTimestampFreq );
-
-	/// Returns console output
-	stdString get_output( int max );
-
-	/// Sets the specified property
-	void set( const stdString &sPath, const stdString &sKey, const stdString &sVal );
-
-	/// Sets a key timeout
-	void tset( const stdString &sPath, const stdString &sKey, unsigned int uTo );
-
-	/// Gets the specified property
-	stdString get( const stdString &sPath, const stdString &sKey );
-
-	/// Sets the specified property
-	void jset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
-
-	/// Gets the specified property
-	stdString jget( const stdString &sPath, const stdString &sKey );
-
-	/// Returns the sizeof the current array
-	int asize( const stdString &sPath, const stdString &sKey );
-
-	/// Returns non-zero if the specified value exists
-	int isset( const stdString &sPath, const stdString &sKey );
-
-	/// Sets the specified property
-	void aset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
-
-	/// Sets the specified property
-	void mset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
-
-	/// Gets the specified property
-	stdString kget( const stdString &sPath, const stdString &sKey );
-
-	/// Returns a copy of the entire property bag
-	CSqMulti pb( const stdString &sPath );
-
-	/// Adds a key to the logger
-	int addlog( const stdString &sPath, const stdString &sKey, int nType );
-
-	/// Removes a key from the logger
-	int removelog( const stdString &sPath, const stdString &sKey );
-
-	/// Sets the logger output folder
-	int setlogroot( const stdString &sPath, const stdString &sRoot );
-
-	/// Returns the root logging folder
-	stdString getlogroot( const stdString &sPath );
-
-	/// Sets the logger frequency
-	int setlogfreq( const stdString &sPath, int nFreq );
-
-	/// Returns the logger frequency
-	int getlogfreq( const stdString &sPath );
-
-	/// Returns a list of keys that are being logged
-	stdString getlogkeys( const stdString &sPath, int nTime );
-
-	/// Returns log data for the specified key
-	stdString getlog( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, int nDataType, int nMethod );
-
-	/// Returns log data for the specified key in a binary share
-	stdString getlogbin( const stdString &sPath, const stdString &sKey, int nStart, int nStop, int nInterval, const stdString &sExt );
-
-	/// Adds binary information to the data log
-	int logbin( const stdString &sPath, const stdString &sKey, const stdString &sBin, int nType, int nTime, int nTimeMs, int nBuffering );
-
-	/// Resets the logger
-	int resetlog( const stdString &sPath );
-
-	/// Sets the specified timer
-	int set_timer( const stdString &sPath, int to, const stdString &sCallback );
-
-	/// Sets the specified timeout
-	int set_timeout( const stdString &sPath, int to, const stdString &sCallback );
-
-	/// Kills the specified timer
-	int kill_timer( const stdString &sPath, int id );
-
-	/// Requests the appliation exit
-	void exit( int nExitCode );
-
-	/// Immediatly stops the application
-	void terminate( int nExitCode );
-
-	/// Displays a message box containing string
-	int alert( const stdString &sMsg );
-
-	/// Sends data to STDOUT
-	int print( const stdString &sMsg );
-
-	/// Sends data to STDOUT
-	//  Same as print, but appends new line
-	int echo( const stdString &sMsg );
-	
-	/// Read data from stdin
-	stdString read_stdin( int nMax );
-
-	/// Flushes STDOUT
-	int flush();
-
-	/// Imports the specified class
-	int import( const stdString &sClass );
-
-	/// Includes the specified script
-	int include( const stdString &sScript );
-
-	/// Includes the specified script the first time,
-	/// ignores further calls to include the same script
-	int include_once( const stdString &sScript );
-
-	/// Includes the specified inline script
-	stdString include_inline( const stdString &sScript, CSqMulti *pParams );
-
-	/// Includes the specified inline script
-	stdString run_inline( const stdString &sScript, CSqMulti *pParams );
-
-	/// Returns the result of the last script execution
-	stdString get_script_return_value();
-
-	/// Push include stack
-	int push_stack( CSqMulti *pParams );
-
-	/// Pop include stack
-	stdString pop_stack();
-
-	/// Returns the size of the include stack
-	int get_stack_size();
-
-	/// Gets current include params
-	CSqMulti get_stack_params();
-
-	/// Sets current include params
-	int set_stack_params( CSqMulti *sParams );
-
-	/// Returns current output buffer
-	stdString get_stack_output();
-
-	/// Sets the current output buffer
-	int set_stack_output( const stdString &sOutput );
-
-	/// Appends the current output buffer
-	int append_stack_output( const stdString &sOutput );
-
-	/// Loads the specified module
-	int load_module( const stdString &sModule, const stdString &sPath );
-
-	/// Sends the kills message to the specified thread
-	int kill( const stdString &sPath );
-
-	/// Sends the kills message to the specified thread and doesn't return until it exits
-	int kill_wait( const stdString &sPath, int nTimeout, int bTerminate );
-
-	/// Sends the terminate mesage to the specified thread
-	int terminate_thread( const stdString &sPath );
-
-	/// Returns the size of the specified type
-	int type_size( int type );
-
-	/// Returns boot time in seconds
-	float clock();
-
-	/// Returns boot count
-	unsigned int ticks();
-
-	/// Returns the version
-	stdString get_version();
-
-	/// Returns the build
-	stdString get_build();
-
-	/// Returns the application name
-	stdString get_app_name();
-
-	/// Returns the application service name
-	stdString get_service_name();
-
-	/// Returns the application name
-	stdString get_app_long_name();
-
-	/// Returns the application description
-	stdString get_app_description();
-
-	/// Returns the script name
-	stdString get_name();
-
-	/// Returns the script or script filename
-	stdString get_script();
-
-	/// Get child scripts
-	stdString get_children( const stdString &sPath );
-
-	/// Decorates the file with appropriate compile time options
-	stdString decorate( const stdString &sPath, int bExe, int bLib );
-
-	/// Returns the file path to the current script
-	stdString path( const stdString &sPath );
-
-	/// Returns the file path to the current executable
-	stdString root( const stdString &sPath );
-
-	/// Returns the specified system folder
-	stdString get_sys_folder( const stdString &sId );
-
-	/// Returns the specified system and path
-	stdString get_sys_path( const stdString &sId, const stdString &sPath );
-
-	/// Returns the file path of the current executable
-	stdString module_path();
-
-	/// Returns the file name of the current executable
-	stdString module_name();
-
-	/// Returns the md5 for the specified string
-	stdString md5( const stdString &sStr );
-
-	/// Returns a guid representation of the md5 hash
-	stdString guid( const stdString &sStr );
-
-	/// Builds a url from components
-	stdString build_url( CSqMulti *pUrl );
-
-	/// Parses a url into its components
-	CSqMulti parse_url( const stdString &sUrl );
-
-	/// Base64 encodes a string
-	stdString base64_encode( const stdString &sStr );
-
-	/// Base64 decodes a string
-	stdString base64_decode( const stdString &sStr );
-
-	/// Base16 encodes a string
-	stdString base16_encode( const stdString &sStr );
-
-	/// Base16 decodes a string
-	stdString base16_decode( const stdString &sStr );
-
-	/// Returns the file path to the current script
-	stdString build_path( const stdString &sS1,  const stdString &sS2 );
-
-	/// Returns an ascii mandelbrot image
-	stdString mandelbrot( int w, int h, int x1, int y1, int x2, int y2 );
-
-	/// Logs an error
-	void error( int e, const stdString &sStr );
-
-	/// Logs a warning
-	void warning( int e, const stdString &sStr );
-
-	/// Logs a message
-	void notice( int e, const stdString &sStr );
-
-	/// Returns the value of the last key press, blocks if no key has been pressed
-	int get_key();
-
-	/// Returns non-zero if there is a key press
-	int is_key();
-
-	/// Trims the specified characters from the beginning of the string
-	stdString ltrim( const stdString &sS, const stdString &sChs );
-
-	/// Trims the specified characters from the end of the string
-	stdString rtrim( const stdString &sS, const stdString &sChs );
-
-	/// Trims the specified characters from the beginning and end of the string
-	stdString trim( const stdString &sS, const stdString &sChs );
-
-	/// Trims the white space from the beginning and end of the string
-	stdString trimws( const stdString &sS );
-
-	/// Finds sub string sSub in sS, returns offset or less than zero if not found
-	int find( const stdString &sS, const stdString &sSub );
-
-	/// Replaces the occurences of the specified string
-	stdString replace( const stdString &sS, const stdString &sFind, const stdString &sReplace );
-
-	/// Drop specified characters from a string or all but
-	stdString drop( const stdString &sS, const stdString &sDrop, int bInclusive );
-
-	/// Drop the specified range of characters from a string or all but
-	stdString drop_range( const stdString &sS, const stdString &sBegin, const stdString &sEnd, int bInclusive );
-
-	/// URL encodes the string
-	stdString urlencode( const stdString &sS );
-
-	/// URL decodes the string
-	stdString urldecode( const stdString &sS );
-
-	/// HTML encodes the string
-	stdString htmlencode( const stdString &sS );
-
-	/// HTML decodes the string
-	stdString htmldecode( const stdString &sS );
-
-	/// Compresses string using zlib/deflate
-	stdString compress( const stdString &sS );
-
-	/// Uncompresses string using zlib/inflate
-	stdString uncompress( const stdString &sS );
-
-	/// Returns a unique md5 hash
-	stdString unique();
-
-	/// Returns local time stamp
-	int local_time();
-
-	/// Returns gmt time stamp
-	int gmt_time();
-
-	/// Returns a formated time string
-	stdString local_timestr( const stdString &fmt );
-
-	/// Returns a formated time string
-	stdString gmt_timestr( const stdString &fmt );
-
-	/// Creates a thread
-	int spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
-
-	/// Executes the specified script
-	stdString run( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript );
-
-	/// Executes the specified script within the current thread
-	SquirrelObject run2( const stdString &sName, const stdString &sScript );
-
-	/// Prepares an inline script for processing
-	stdString prepare_inline( const stdString &sScript, int bFile );
-
-	/// Checks for path/threads existence
-	int is_path( const stdString &sPath );
-
-	/// Processes system messages
-	int process_system_messages();
-
-	/// Executes shell command
-	int shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
-
-	/// Executes shell command
-	int exec( const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
-
-	/// Attempts to find the squirrel interpreter and execute the specified params
-	int sqexe( const stdString &sParams, const stdString &sDir );
-
-	/// Attempts to find the squirrel interpreter and execute the specified script
-	int sqexe_script( const stdString &sScript, const stdString &sDir );
-	
-	/// Installs a service
-	int service_install( const stdString &sName, const stdString &sDesc, const stdString &sExe, int bAutoRestart );
-
-	/// Removes a service
-	int service_remove( const stdString &sName );
-
-	/// Starts a service
-	int service_start( const stdString &sName );
-
-	/// Stops a service
-	int service_stop( const stdString &sName );
-
-	/// Restarts a service
-	int service_restart( const stdString &sName );
-
-	/// Returns the current cpu load
-	double get_cpu_load();
-
-	/// Amount of time in seconds, since the computer started
-	double boot_time();
-
-	/// Tick count seconds
-	unsigned int get_timer_seconds();
-
-	/// Tick count micro seconds
-	SQInteger get_timer_useconds();
-
-	/// Returns a linked in resource
-	stdString get_resource( const stdString &sRes, int bFileOverrideOk );
-
-	/// Finds resources matching the pattern in sName
-	CSqMulti find_resource( const stdString &sName, int bIgnoreCase, int bFileOverrideOk );
-	
-	/// Returns information about the specified system drive
-	CSqMulti get_system_drive_info( const stdString &sDrive );
-
-	/// Returns non-zero if registry key exists
-	int reg_is_key( const stdString &sKey, const stdString &sPath, const stdString &sName );
-
-	/// Returns the string value of the specified key
-	stdString reg_get_str( const stdString &sKey, const stdString &sPath, const stdString &sName );
-
-	/// Sets the specified registry key
-	int reg_set_str( const stdString &sKey, const stdString &sPath, const stdString &sName, const stdString &sValue );
-
-	/// Deletes the specified registry key
-	int reg_del_key( const stdString &sKey, const stdString &sPath, int bSubKeys );
-
-	/// Deletes child keys of the specified key
-	int reg_del_sub_keys( const stdString &sKey, const stdString &sPath );
-
-	/// Execute functions
-	stdString execute( int nRet, const stdString &sPath, const stdString &sFunction );
-	stdString execute1( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1 );
-	stdString execute2( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2 );
-	stdString execute3( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3 );
-	stdString execute4( int nRet, const stdString &sPath, const stdString &sFunction, const stdString &sP1, const stdString &sP2, const stdString &sP3, const stdString &sP4 );
-
-	void sleep( int nMsTime );
-
-	// _self.queue()
-	CSqMsgQueue* queue();
-
 	virtual SquirrelVM* GetVmPtr();
 
 	virtual CSqEngine* GetEnginePtr();
-
-	int tolong( const stdString &s )
-	{	return oexStrToLong( s.c_str() ); }
-
-	int toulong( const stdString &s )
-	{	return oexStrToULong( s.c_str() ); }
-
-	int strtol( const stdString &s, int nRadix )
-	{	return oexStrToLong( s.c_str(), nRadix ); }
-
-	int strtoul( const stdString &s, int nRadix )
-	{	return oexStrToULong( s.c_str(), nRadix ); }
-
-	float tofloat( const stdString &s )
-	{	return oexStrToFloat( s.c_str() ); }
-
-	double todouble( const stdString &s )
-	{	return oexStrToDouble( s.c_str() ); }
 
 	void SetRoot( const stdString &s ) { m_sRoot = s; }
 

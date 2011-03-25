@@ -33,12 +33,18 @@ function _init() : ( _g )
 	local ndev = _g.fn.getNumDevices();
 	_self.echo( "Number of devices : " + ndev + "\n" );
 	
-	if ( !ndev )
-	{	_self.echo( "Exiting since no devices were found\n" );
+//	if ( !ndev )
+//	{	_self.echo( "Exiting since no devices were found\n" );
+//		WaitKey();
+//		return 0;
+//	} // end if
+
+	if ( !_g.fn.OpenDevice( 0 ) )
+	{	_self.echo( "Error opening device\n" );
 		WaitKey();
 		return 0;
 	} // end if
-
+	
 	_g.irr = CSqIrrlicht();
 
 //	_g.irr.SetStereo( 1 );
