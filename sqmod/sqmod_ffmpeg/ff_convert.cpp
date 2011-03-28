@@ -70,7 +70,8 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	if ( !dst )
 		return 0;
 
-	dst->setUsed( 0 );
+// +++ Can't do this if it's wrapping a raw buffer
+//	dst->setUsed( 0 );
 
 	int flip = 0;
 	if ( 0 > height ) { flip = 1; height = -height; }

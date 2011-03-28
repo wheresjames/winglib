@@ -480,7 +480,7 @@ int CSys::Echo( oexCSTRW x_pFmt, oexLONG x_lLen )
 #if defined( oexUNICODE )
 	CUtil::AddOutput( x_pFmt, x_lLen, oexTRUE );
 #else
-	CStr8 s = oexStrWToStr( x_pFmt, x_lLen );
+	CStr8 s = oexStrWToStr( CStrW( x_pFmt, x_lLen ) );
 	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
 #endif
 	return ::fwrite( x_pFmt, 1, x_lLen, stdout );
@@ -894,7 +894,7 @@ int CSys::Echo( oexCSTR8 x_pFmt, oexLONG x_lLen )
 #if !defined( oexUNICODE )
 	CUtil::AddOutput( x_pFmt, x_lLen, oexTRUE );
 #else
-	CStr8 s = oexStrToStrW( x_pFmt, x_lLen );
+	CStr s = oexStrToStrW( CStr8( x_pFmt, x_lLen ) );
 	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
 #endif
 	return ::fwrite( x_pFmt, 1, x_lLen, stdout );
@@ -906,7 +906,7 @@ oexLONG CSys::Read_stdin( oexSTR8 x_pBuf, oexLONG x_lMax )
 	if ( !x_pBuf )
 		return 0;
 
-	fcntl( stdin, F_SETFL, fcntl( stdin, GETFL ) | O_NONBLOCK )
+	fcntl( 0, F_SETFL, fcntl( 0, F_GETFL, 0 ) | O_NONBLOCK );
 	return fread( x_pBuf, 1, x_lMax, stdin );
 }
 

@@ -11,7 +11,7 @@ PRJ_NAME := sqmod_freenect
 PRJ_DEPS := libfreenect
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
-			libfreenect/include
+			libfreenect/include libfreenect/src
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel jpeg png zlib tiff \
 			freenect
 PRJ_DEFS := 
