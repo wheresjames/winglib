@@ -26,6 +26,9 @@ public:
 	/// Converts image colorspace
 	static int ConvertColorBB( int width, int height, sqbind::CSqBinary *src, int src_fmt, sqbind::CSqBinary *dst, int dst_fmt, int alg );
 
+	/// Converts image colorspace and size
+	static int ConvertColorBB2( int width, int height, sqbind::CSqBinary *src, int src_fmt, int dst_width, int dst_height, sqbind::CSqBinary *dst, int dst_fmt, int alg );
+
 	/// Converts image colorspace
 	static int ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, int dst_fmt, int alg, int flip );
 

@@ -131,6 +131,74 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	return 1;
 }
 
+int CFfConvert::ConvertColorBB2( int width, int height, sqbind::CSqBinary *src, int src_fmt, int dst_width, int dst_height, sqbind::CSqBinary *dst, int dst_fmt, int alg )
+{_STT();
+
+	// Fix broken formats
+	src_fmt = FmtEquiv( src_fmt );
+	dst_fmt = FmtEquiv( dst_fmt );
+
+	if ( !dst )
+		return 0;
+
+	int flip = 0;
+	if ( 0 > height ) { flip = 1; height = -height; }
+
+	if ( 0 >= width || 0 >= height || ( width % 4 ) )
+		return 0;
+
+	if ( !src || !src->getUsed() )
+		return 0;
+
+	// How big is the destination image?
+	oexSIZE_T nDstSize = CalcImageSize( dst_fmt, dst_width, dst_height );
+	if ( !nDstSize )
+		return 0;
+
+	// Allocate memory for destination image
+	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize ) )
+		return 0;
+
+	// Ensure source buffer is large enough
+	oexSIZE_T nSrcSize = CalcImageSize( src_fmt, width, height );
+	if ( src->getUsed() < nSrcSize )
+		return 0;
+
+	// Fill in picture data
+	AVPicture apSrc, apDst;
+	if ( !FillAVPicture( &apSrc, src_fmt, width, height, src->_Ptr() )
+	     || !FillAVPicture( &apDst, dst_fmt, dst_width, dst_height, dst->_Ptr() ) )
+		return 0;
+
+	// Flip?
+	if ( flip )
+		for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
+		{	if ( apSrc.data[ z ] )
+				apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
+			if ( apSrc.linesize[ z ] )
+				apSrc.linesize[ z ] = -apSrc.linesize[ z ];
+		} // end for
+
+	// Create conversion
+	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
+										dst_width, dst_height, (PixelFormat)dst_fmt,
+										alg, NULL, NULL, NULL );
+	if ( !psc )
+		return 0;
+
+	int nRet = sws_scale(	psc, apSrc.data, apSrc.linesize, 0, height,
+							apDst.data, apDst.linesize );
+
+	sws_freeContext( psc );
+
+	if ( 0 >= nRet )
+		return 0;
+
+	dst->setUsed( nDstSize );
+
+	return 1;
+}
+
 int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, int dst_fmt, int alg, int flip )
 {_STT();
 

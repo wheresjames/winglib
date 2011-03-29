@@ -248,6 +248,99 @@ CBin::t_size CBin::LShift( CBin::t_size x_nBytes )
 	return m_nUsed;
 }
 
+#define OEX_CBIN_SCALE_TYPE( ot, t, e )	case obj::ot : \
+	{	oex##t *p = (oex##t*)_Ptr( uOffset ); if ( !p ) return 0; \
+		if ( 1 == e ) while ( uSamples ) { p[ uOffset ] = oexLE_##t( (oex##t)( oexLE_##t( p[ uOffset ] ) * dScale ) ); uOffset++; uSamples--; } \
+		else if ( 2 == e ) while ( uSamples ) { p[ uOffset ] = oexBE_##t( (oex##t)( oexBE_##t( p[ uOffset ] ) * dScale ) ); uOffset++; uSamples--; } \
+		else if ( 3 == e ) while ( uSamples ) { p[ uOffset ] = (oex##t)( oexLE_##t( p[ uOffset ] ) * dScale ); uOffset++; uSamples--; } \
+		else if ( 4 == e ) while ( uSamples ) { p[ uOffset ] = (oex##t)( oexBE_##t( p[ uOffset ] ) * dScale ); uOffset++; uSamples--; } \
+		else while ( uSamples ) { p[ uOffset ] = (oex##t)( p[ uOffset ] * dScale ); uOffset++; uSamples--; } \
+	} break;
+
+oexUINT CBin::Scale( oexINT nType, oexUINT uOffset, oexUINT uSamples, oexUINT uE, oexDOUBLE dScale )
+{_STT();
+	// Get element size
+	oexUINT uESize = obj::StaticSize( nType );
+	if ( !uESize )
+		return 0;
+
+	// Starting in the buffer?
+	if ( ( uOffset + uESize ) >= getUsed() )
+		return 0;
+
+	// Boundry limit samples
+	oexUINT uMaxSamples = ( getUsed() - uOffset ) / uESize;
+	if ( !uSamples || uSamples > uMaxSamples )
+		uSamples = uMaxSamples;
+
+	switch( nType )
+	{
+		OEX_CBIN_SCALE_TYPE( tInt8, CHAR, uE );
+		OEX_CBIN_SCALE_TYPE( tUInt8, UCHAR, uE );
+		OEX_CBIN_SCALE_TYPE( tInt16, SHORT, uE );
+		OEX_CBIN_SCALE_TYPE( tUInt16, USHORT, uE );
+		OEX_CBIN_SCALE_TYPE( tInt32, INT, uE );
+		OEX_CBIN_SCALE_TYPE( tUInt32, UINT, uE );
+		OEX_CBIN_SCALE_TYPE( tInt64, INT64, uE );
+		OEX_CBIN_SCALE_TYPE( tUInt64, UINT64, uE );
+		OEX_CBIN_SCALE_TYPE( tFloat, FLOAT, uE );
+		OEX_CBIN_SCALE_TYPE( tDouble, DOUBLE, uE );
+
+		default : break;
+
+	} // end switch
+
+	return uESize;
+}
+
+#define OEX_CBIN_TH_TYPE( ot, t, e )	case obj::ot : \
+	{	oex##t *p = (oex##t*)_Ptr( uOffset ); if ( !p ) return 0; \
+		oex##t t, lo = (oex##t)dLower, hi = (oex##t)dUpper; \
+		if ( 1 == e ) { oex##t lo_def = oexLE_##t( (oex##t)dLowerDef ), hi_def = oexLE_##t( (oex##t)dUpperDef ); \
+			while ( uSamples ) { t = oexLE_##t( p[ uOffset ] ); if ( t < lo ) p[ uOffset ] = lo_def; else if ( t > hi ) p[ uOffset ] = hi_def; uSamples--; uOffset++; } } \
+		else if ( 2 == e ) { oex##t lo_def = oexBE_##t( (oex##t)dLowerDef ), hi_def = oexBE_##t( (oex##t)dUpperDef ); \
+			while ( uSamples ) { t = oexBE_##t( p[ uOffset ] ); if ( t < lo ) p[ uOffset ] = lo_def; else if ( t > hi ) p[ uOffset ] = hi_def; uSamples--; uOffset++; } } \
+		else { oex##t lo_def = (oex##t)dLowerDef, hi_def = (oex##t)dUpperDef; \
+			while ( uSamples ) { t = oexBE_##t( p[ uOffset ] ); if ( t < lo ) p[ uOffset ] = lo_def; else if ( t > hi ) p[ uOffset ] = hi_def; uSamples--; uOffset++; } } \
+	} break;
+
+oexUINT CBin::Threshold( oexINT nType, oexUINT uOffset, oexUINT uSamples, oexUINT uE, oexDOUBLE dUpper, oexDOUBLE dUpperDef, oexDOUBLE dLower, oexDOUBLE dLowerDef )
+{_STT();
+	// Get element size
+	oexUINT uESize = obj::StaticSize( nType );
+	if ( !uESize )
+		return 0;
+
+	// Starting in the buffer?
+	if ( ( uOffset + uESize ) >= getUsed() )
+		return 0;
+
+	// Boundry limit samples
+	oexUINT uMaxSamples = ( getUsed() - uOffset ) / uESize;
+	if ( !uSamples || uSamples > uMaxSamples )
+		uSamples = uMaxSamples;
+
+	switch( nType )
+	{
+		OEX_CBIN_TH_TYPE( tInt8, CHAR, uE );
+		OEX_CBIN_TH_TYPE( tUInt8, UCHAR, uE );
+		OEX_CBIN_TH_TYPE( tInt16, SHORT, uE );
+		OEX_CBIN_TH_TYPE( tUInt16, USHORT, uE );
+		OEX_CBIN_TH_TYPE( tInt32, INT, uE );
+		OEX_CBIN_TH_TYPE( tUInt32, UINT, uE );
+		OEX_CBIN_TH_TYPE( tInt64, INT64, uE );
+		OEX_CBIN_TH_TYPE( tUInt64, UINT64, uE );
+		OEX_CBIN_TH_TYPE( tFloat, FLOAT, uE );
+		OEX_CBIN_TH_TYPE( tDouble, DOUBLE, uE );
+
+		default : break;
+
+	} // end switch
+
+	return uESize;
+}
+
+
 oexUINT CBin::GroupAvg( oexINT nType, oexUINT uOffset, oexUINT uInterval, oexUINT uGroups, CBin &bin, oexINT nFlags )
 {
 	// Sanity check

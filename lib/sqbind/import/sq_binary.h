@@ -283,6 +283,14 @@ namespace sqbind
 		/// Creates the specified graph
 		int Graph( int nSamples, int nInterval, int nType, CSqImage *img, CSqColor *bg, CSqColor *fg, const stdString &sParams );
 
+		/// Scales a range of values
+		int Scale( int nType, int nOffset, int nSamples, int nE, double dScale )
+		{	return m_bin.Scale( nType, nOffset, nSamples, nE, dScale ); }
+
+		/// Threshold a range of values
+		int Threshold( int nType, int nOffset, int nSamples, int nE, double dUpper, double dUpperDef, double dLower, double dLowerDef )
+		{	return m_bin.Threshold( nType, nOffset, nSamples, nE, dUpper, dUpperDef, dLower, dLowerDef ); }
+
 		/// Calculates a grouped average
 		int GroupAvg( int nType, int nOffset, int nInterval, int nGroups, CSqBinary *in, int nFlags )
 		{	if ( !in ) return 0;

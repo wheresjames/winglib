@@ -68,19 +68,19 @@
 		return failed();															\
 	}																				\
 	oex##t LE_get##t( t_size x_nOffset )											\
-	{	oex##t v = get##t( x_nOffset ); return  oexLE_##t( v ); }					\
+	{	oex##t v = get##t( x_nOffset ); return oexLE_##t( v ); }					\
 	void LE_set##t( t_size x_nOffset, oex##t val )									\
 	{	set##t( x_nOffset, oexLE_##t( val ) ); }									\
 	oex##t BE_get##t( t_size x_nOffset )											\
-	{	oex##t v = get##t( x_nOffset ); return  oexBE_##t( v ); }					\
+	{	oex##t v = get##t( x_nOffset ); return oexBE_##t( v ); }					\
 	void BE_set##t( t_size x_nOffset, oex##t val )									\
 	{	set##t( x_nOffset, oexBE_##t( val ) ); }									\
 	oex##t LE_getAbs##t( t_size x_nOffset )											\
-	{	oex##t v = getAbs##t( x_nOffset ); return  oexLE_##t( v ); }				\
+	{	oex##t v = getAbs##t( x_nOffset ); return oexLE_##t( v ); }					\
 	void LE_setAbs##t( t_size x_nOffset, oex##t val )								\
 	{	setAbs##t( x_nOffset, oexLE_##t( val ) ); }									\
 	oex##t BE_getAbs##t( t_size x_nOffset )											\
-	{	oex##t v = getAbs##t( x_nOffset ); return  oexBE_##t( v ); }				\
+	{	oex##t v = getAbs##t( x_nOffset ); return oexBE_##t( v ); }					\
 	void BE_setAbs##t( t_size x_nOffset, oex##t val )								\
 	{	setAbs##t( x_nOffset, oexBE_##t( val ) ); }									\
 	t_size size##t()																\
@@ -565,6 +565,12 @@ public:
 
 	/// Calculates a group average
 	oexUINT GroupAvg( oexINT nType, oexUINT uOffset, oexUINT uInterval, oexUINT uGroups, CBin &bin, oexINT nFlags );
+
+	/// Scales values
+	oexUINT Scale( oexINT nType, oexUINT uOffset, oexUINT uSamples, oexUINT uE, oexDOUBLE dScale );
+
+	/// Threshold values
+	oexUINT Threshold( oexINT nType, oexUINT uOffset, oexUINT uSamples, oexUINT uE, oexDOUBLE dUpper, oexDOUBLE dUpperDef, oexDOUBLE dLower, oexDOUBLE dLowerDef );
 
 	/// Declare access types
 	OEX_CBIN_DECLARE_TYPE_ACCESS( CHAR );

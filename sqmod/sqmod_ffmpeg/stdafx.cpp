@@ -78,6 +78,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfConvert, CFfConvert )
 
 	SQBIND_STATIC_FUNCTION( CFfConvert, CalcImageSize )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorBB )
+	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorBB2 )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorIB )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorBI )
 	SQBIND_STATIC_FUNCTION( CFfConvert, Rotate )
