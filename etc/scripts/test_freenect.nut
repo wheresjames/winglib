@@ -103,7 +103,7 @@ function _init() : ( _g )
     _g.irr.AddMeshAnimator( _self, _g.video2, OnAnimate, 1 );
 
 	// Save to file
-	RecordToFile( _self.root( "freenect.avi" ) );
+//	RecordToFile( _self.root( "freenect.avi" ) );
 
 	_g.quit = 0;
 }
