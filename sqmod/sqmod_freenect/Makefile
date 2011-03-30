@@ -26,12 +26,10 @@ PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-ifeq ($(PLATFORM),windows)
-	ifeq ($(BUILD),vs)
-		PRJ_INCS := $(PRJ_INCS) $(CFG_LIB2BLD)/dep/etc/vs/inc/c99 libusb-win32/msvc
-		PRJ_DEFS := ssize_t=unsigned
-	endif
-	PRJ_INCS := $(PRJ_INCS) libusb-win32/libusb
+ifeq ($(BUILD),vs)
+	PRJ_INCS := $(PRJ_INCS) $(CFG_LIB2BLD)/dep/etc/vs/inc/c99 \
+							libusb-win32/libusb libusb-win32/msvc
+	PRJ_DEFS := ssize_t=unsigned
 	PRJ_LIBS := $(PRJ_LIBS) usb-win32
 else
 	PRJ_INCS := $(PRJ_INCS) libusb/libusb
