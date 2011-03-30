@@ -223,7 +223,7 @@ function RecordToFile( file ) : ( _g )
 		_self.echo( "Failed to initiailze avi" );
 
 	else if ( !_g.rec_enc.Create( _g.rec_avi.getVideoCodecId(), CFfConvert().PIX_FMT_YUV420P, 
-								  width, height, 10, 800000, CSqMulti() ) )
+								  width, height, 10, 2000000, CSqMulti() ) )
 		_self.echo( "Failed to create encoder" );
 
 }

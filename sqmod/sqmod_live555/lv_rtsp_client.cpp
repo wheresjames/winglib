@@ -649,7 +649,7 @@ oex::oexBOOL CLvRtspClient::DoThread( oex::oexPVOID x_pData )
 		} // end if
 
 	// Let's go...
-	m_pRtspClient->playMediaSession( *m_pSession, 0, -1.f, 1.f );
+	m_pRtspClient->playMediaSession( *m_pSession, 0.f, -1.f, 1.f );
 
 	// Schedule idle processing
 	m_pEnv->taskScheduler().scheduleDelayedTask( 15, (TaskFunc*)CLvRtspClient::_OnIdle, this );
