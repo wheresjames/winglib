@@ -6,7 +6,7 @@ default_target: all
 #-------------------------------------------------------------------
 PRJ_SQRL := service
 PRJ_NAME := wlink
-PRJ_DESC := wlink
+PRJ_DESC := WetCoin.com Site Integration Service
 PRJ_DEFS := 
 PRJ_WINL := winmm strmiids
 PRJ_VSLB := dshowbase

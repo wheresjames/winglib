@@ -4,7 +4,7 @@ local _g_cfg =
 	// Server TCP port
 	tcp_port	= 14509,
 
-	code_server	= "http://192.168.1.99/ed/prj"
+	code_server	= "http://www.wetcoin.com/ed/prj"
 
 	// Scheme colors
 	col_bg		= "#ffffff",
