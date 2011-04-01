@@ -32,7 +32,7 @@ public:
 	sqbind::stdString urlInline( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, const sqbind::stdString &sUrl, sqbind::CSqMulti *pParams );
 
 	/// Downloads and spawns the specified url
-	int urlSpawn( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, const sqbind::stdString &sName, const sqbind::stdString &sUrl );
+	int urlSpawn( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, const sqbind::stdString &sName, const sqbind::stdString &sScriptName, const sqbind::stdString &sUrl );
 	
 	/// Enable basic http authentication
 	int SetBasicAuth( const sqbind::stdString &sUsername, const sqbind::stdString &sPassword );

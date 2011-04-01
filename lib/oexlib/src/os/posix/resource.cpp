@@ -152,7 +152,7 @@ static oexINT FreeRi( SResourceInfo* x_pRi, oexINT x_eType, oexUINT x_uTimeout, 
 
 			// Wait for thread to exit
 			if ( x_pRi->cSync.Wait( x_uTimeout )
-				 && pthread_kill( x_pRi->hThread, 0 )
+				 && pthread_cancel( x_pRi->hThread )
 				 && x_pRi->cSync.Wait( x_uTimeout ) )
 			{
 				// iii  This should not happen, don't ignore the problem,
@@ -160,6 +160,7 @@ static oexINT FreeRi( SResourceInfo* x_pRi, oexINT x_eType, oexUINT x_uTimeout, 
 				oexWARNING( nErr, oexT( "!! Terminating thread !!" ) );
 
 #ifndef OEX_NOPTHREADCANCEL
+
 				// Kill the thread
 				if ( x_bForce )
 					if ( ( nErr = pthread_cancel( x_pRi->hThread ) ) )
@@ -299,6 +300,10 @@ oexRESULT CResource::NewThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData )
 
 oexPVOID CResource::ThreadProc( oexPVOID x_pData )
 {
+	// Allow thread to be canceled
+	pthread_setcancelstate( PTHREAD_CANCEL_ENABLE, 0 );
+	pthread_setcanceltype( PTHREAD_CANCEL_ASYNCHRONOUS, 0 );
+
 	// Get pointer to resource information
 	SResourceInfo *pRi = (SResourceInfo*)x_pData;
 	if ( !pRi )

@@ -285,7 +285,7 @@ function run_test( root, name, img, fmt, cmp, cs )
 
 function test_encode( frame, img, fmt, cmp, cs )
 {
-	_self.echo( "\nTesting encoder..." );
+	_self.echo( "\nTesting encoder ( " + img.getWidth() + " x " + img.getHeight() + " ) ..." );
 
 	local enc = CFfEncoder();
 	if ( !enc.Create( fmt, cs, img.getWidth(), img.getHeight(), 15, 0, CSqMulti( "cmp=" + cmp ) ) )

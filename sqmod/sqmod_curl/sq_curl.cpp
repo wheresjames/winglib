@@ -79,7 +79,7 @@ sqbind::stdString CSqCurl::urlInline( sqbind::CSqMsgQueue *pQ, const sqbind::std
 	return res;
 }
 
-int CSqCurl::urlSpawn( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, const sqbind::stdString &sName, const sqbind::stdString &sUrl )
+int CSqCurl::urlSpawn( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, const sqbind::stdString &sName, const sqbind::stdString &sScriptName, const sqbind::stdString &sUrl )
 {_STT();
 
 	if ( !pQ )
@@ -90,7 +90,7 @@ int CSqCurl::urlSpawn( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, 
 	if ( !GetUrl( sUrl, 0, &dat ) || !dat.getUsed() )
 		return 0;
 
-	return pQ->spawn( oexNULL, sPath, sName, dat.getString(), oex::oexFALSE );
+	return pQ->spawn2( oexNULL, sPath, sName, sScriptName, dat.getString(), oex::oexFALSE );
 }
 
 int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSqBinary *sData )

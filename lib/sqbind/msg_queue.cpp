@@ -312,6 +312,16 @@ oex::oexBOOL CSqMsgQueue::spawn( stdString *pReply, const stdString &sPath, cons
 	return Msg( sPath, oexT( "spawn" ), &params, pReply );
 }
 
+oex::oexBOOL CSqMsgQueue::spawn2( stdString *pReply, const stdString &sPath, const stdString &sName, const stdString &sScriptName, const stdString &sScript, int bFile )
+{_STT();
+	CSqMulti params;
+	params[ oexT( "name" ) ] = sName;
+	params[ oexT( "script" ) ] = sScript;
+	params[ oexT( "script_name" ) ] = sScriptName;
+	params[ oexT( "file" ) ] = bFile ? oexT( "1" ) : oexT( "0" );
+	return Msg( sPath, oexT( "spawn" ), &params, pReply );
+}
+
 oex::oexBOOL CSqMsgQueue::kill( stdString *pReply, const stdString &sPath )
 {_STT();
 	CSqMulti params;

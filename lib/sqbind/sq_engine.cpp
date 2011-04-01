@@ -129,6 +129,7 @@ int CSqEngineExport::alert( const stdString &sMsg )
 
 int CSqEngineExport::print( const stdString &sMsg )
 {_STT();
+	oex::CUtil::AddOutput( sMsg.c_str(), sMsg.length(), oex::oexTRUE );
 	return oexPrintf( sMsg.c_str() );
 }
 
@@ -742,6 +743,18 @@ int CSqEngineExport::spawn( int nRet, const stdString &sPath, const stdString &s
 
 	stdString sRet;
 	return q->spawn( &sRet, sPath, sName, sScript, bFile );
+}
+
+int CSqEngineExport::spawn2( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScriptName, const stdString &sScript, int bFile )
+{_STT();
+	CSqMsgQueue *q = queue();
+	if ( !q ) return -1;
+
+	if ( !nRet )
+		return q->spawn2( oexNULL, sPath, sName, sScriptName, sScript, bFile );
+
+	stdString sRet;
+	return q->spawn2( &sRet, sPath, sName, sScriptName, sScript, bFile );
 }
 
 double CSqEngineExport::get_cpu_load()
@@ -2152,7 +2165,7 @@ oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e, o
 #if defined( OEX_WINDOWS )
 	oexRTRACE( oexT( "%s\n" ), m_sErr.c_str() );
 #endif
-	oexPrintf( oexT( "%s\n" ), m_sErr.c_str() );
+	oexEcho( m_sErr.c_str() );
 
 	return x_nReturn;
 }
@@ -2169,7 +2182,7 @@ oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, oex::oexCSTR x_pErr, oex
 	if ( !x_pFile || oex::CStr( x_pFile ) == oexT( "console_buffer" ) )
 		sErr = oex::CStr().Fmt( oexT( "%s(%u)\r\n   %s" ), m_sScriptName.c_str(), x_uLine, x_pErr );
 	else
-		sErr = oex::CStr().Fmt( oexT( "%s(%u)\r\n   %s" ), x_pFile, x_uLine, x_pErr );
+		sErr = oex::CStr().Fmt( oexT( "%s(%u)\r\n   %s" ), oex::CStr( x_pFile ).GetFileName().Ptr(), x_uLine, x_pErr );
 
 	if ( x_pExtra && *x_pExtra )
 		sErr << oexNL << x_pExtra;
@@ -2181,7 +2194,7 @@ oex::oexINT CSqEngine::LogError( oex::oexINT x_nReturn, oex::oexCSTR x_pErr, oex
 #if defined( OEX_WINDOWS )
 	oexRTRACE( oexT( "%s\n" ), m_sErr.c_str() );
 #endif
-	oexPrintf( oexT( "%s\n" ), m_sErr.c_str() );
+	oexEcho( m_sErr.c_str() );
 
 	return x_nReturn;
 }

@@ -249,6 +249,9 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 	if ( !CFfConvert::FillAVFrame( paf, fmt, width, height, (void*)in ) )
 		return 0;
 
+	// Assume key frame
+	paf->key_frame = 1;
+
 	if ( m )
 	{
 		if ( m->isset( oexT( "flags" ) ) )
@@ -265,7 +268,7 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 
 	} // end if
 
-	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->Ptr(), out->Size(), paf );
+	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->_Ptr(), out->Size(), paf );
 	if ( !nBytes ) nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->Ptr(), out->Size(), paf );
 	if ( 0 > nBytes )
 	{	oexERROR( nBytes, oexT( "avcodec_encode_video() failed" ) );
@@ -328,6 +331,8 @@ int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, sqbi
 	// Do we need to convert the colorspace?
 	if ( PIX_FMT_BGR24 == m_nFmt )
 		return EncodeRaw( PIX_FMT_BGR24, img->getWidth(), img->getHeight(), img->Obj().GetBits(), img->Obj().GetImageSize(), out, m );
+
+	m_tmp.Allocate( 1000000 );
 
 	// Must convert to input format
 	if ( !CFfConvert::ConvertColorIB( img, &m_tmp, m_nFmt, SWS_FAST_BILINEAR, 1 ) )

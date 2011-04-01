@@ -11,6 +11,84 @@ function webpath( root, name )
 	return ::_self.build_path( ::_self.build_path( root, path ), hash );
 }
 
+function Stop( name )
+{
+	if ( name == "all" )
+		name = "";
+
+	local devlist = split( _self.get_children( "." ), "," );
+	foreach( k in devlist )
+	{	local n = _self.urldecode( k );
+		if ( !name.len() || name == k )
+			_self.set( "/", "running." + n, "" ),
+			_self.kill_wait( n, 3, 1 );
+	} // end foreach
+
+	return 1;	
+}
+
+function Start( name )
+{
+	// Stop all
+	Stop( "" );
+
+	if ( !name.len() ) 
+		return;
+
+	// Attempt to start the script
+	local id = _self.md5( name );
+	local url = webpath( "http://localhost/ed/prj", name );
+	if ( !CSqCurl().urlSpawn( _self.queue(), "", id, name, url ) )
+		return 0;
+
+	// Map name
+	_self.set( "/", "running." + id, name );
+
+	return 1;
+}
+
+function Cmd( mParams, font, img )
+{
+	// Starting script?
+	if ( mParams[ "GET" ][ "start" ].len() )
+	{	local name = mParams[ "GET" ][ "start" ].str();
+		_self.echo( "Starting : " + name );
+		font.Draw( 1, img, ( Start( name ) ? "Starting : " : "Failed to start : " ) + name );
+	} // end if
+
+	else if ( mParams[ "GET" ][ "stop" ].len() )
+	{	local name = mParams[ "GET" ][ "stop" ].str();
+		_self.echo( "Stoping : " + name );
+		font.Draw( 1, img, ( Stop( name ) ? "Stopping : " : "Failed to stop : " ) + name );
+	} // end if
+
+	else
+	{
+		local devlist = split( _self.get_children( "." ), "," );
+		if ( !devlist.len() )
+			font.Draw( 1, img, "Engine is idle" );
+		else
+		{	local running = "";
+			foreach( k in devlist )
+			{	local id = _self.urldecode( k );
+				local name = _self.get( "/", "running." + id );
+				if ( running.len() ) running += ", ";
+				if ( name.len() ) running += name;
+				else running += id;
+			} // end foreach
+			font.Draw( 1, img, "Running : " + running );
+		} // end else
+
+	} // end else
+
+}
+
+function Console( mParams, font, img )
+{
+	local lines = split( _self.get_output( 0 ), "\r\n" ), max = 20;
+	local off = ( lines.len() > max ) ? ( lines.len() - max ) : 0;
+	foreach( l in lines ) if ( off ) off--; else if ( l.len() ) font.Draw( 0, img, l );
+}
 
 function Exe( mParams, mReply )
 {
@@ -22,9 +100,11 @@ function Exe( mParams, mReply )
 		return 0;
 	} // end if
 
+	local bConsole = mParams[ "GET" ].isset( "console" );
+
 	local img = CSqImage();
 	local w = mParams[ "GET" ][ "w" ].toint(); if ( 0 >= w ) w = 600;
-	local h = mParams[ "GET" ][ "h" ].toint(); if ( 0 >= h ) h = 24;
+	local h = mParams[ "GET" ][ "h" ].toint(); if ( 0 >= h ) h = bConsole ? 400 : 24;
 
 	// Create image
 	if ( !img.Create( w, h ) )
@@ -37,13 +117,10 @@ function Exe( mParams, mReply )
 	if ( img.refPixels( pix ) )
 		pix.Zero();
 
-	local name = mParams[ "GET" ][ "start" ].str();	
-	local url = webpath( "http://localhost/ed/prj", name );
-	local res = CSqCurl().urlSpawn( _self.queue(), "", _self.md5( url ), url );
-	if ( !res )
-		font.Draw( img, "Failed to start : " + name );
+	if ( bConsole )
+		Console( mParams, font, img );
 	else
-		font.Draw( img, "Running : " + name );
+		Cmd( mParams, font, img );
 
 	// Encode the image
 	local enc = img.Encode( "png" );

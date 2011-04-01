@@ -454,7 +454,8 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, st
 	// Terminate thread?  
 	else if ( sMsg == oexT( "terminate_thread" ) )
 	{	if ( GetOwnerThreadId() == oexGetCurThreadId() ) EndThread( 0 );
-		bRet = CThread::Stop( 0, oex::oexTRUE ) ? oex::oexFALSE : oex::oexTRUE;
+		RequestQuit();
+		bRet = CThread::Stop( 3000, oex::oexTRUE ) ? oex::oexFALSE : oex::oexTRUE;
 		EndThread( 0 );
 	} // end else if
 
@@ -1064,6 +1065,9 @@ void CScriptThread::OnSpawn( CSqMulti &mapParams, stdString *pReply )
 {_STT();
 	// Grab the path
 	stdString sName = mapParams[ oexT( "name" ) ];
+	stdString sScriptName = mapParams[ oexT( "script_name" ) ];
+	if ( !sScriptName.length() )
+		sScriptName = sName;
 
 	// Lose current script engine at this tag if any
 	t_ScriptList::iterator it = m_lstScript.find( sName );
@@ -1087,7 +1091,7 @@ void CScriptThread::OnSpawn( CSqMulti &mapParams, stdString *pReply )
 
 		// Let the script know it's name
 		pSt->SetName( sName );
-		pSt->SetScriptName( sName );
+		pSt->SetScriptName( sScriptName );
 
 		// Set us as the parent
 		pSt->SetParentScript( this );

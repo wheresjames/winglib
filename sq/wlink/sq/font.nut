@@ -5,6 +5,7 @@ class CFont
 {
 	m_face = 0;
 	m_ft = 0;
+	m_y = 2;
 
 	function Destroy()
 	{	if ( m_face ) m_face.Destroy(), m_face = 0;
@@ -31,7 +32,7 @@ class CFont
 		return 1;
 	}
 
-	function Draw( img, txt )
+	function Draw( center, img, txt )
 	{
 		if ( !m_ft || !m_face )
 			return 0;
@@ -43,15 +44,20 @@ class CFont
 		if ( !img.refPixels( pix ) )
 			return 0;
 
-		m_face.CalcSize( txt, sz );
-		m_face.setColor( 0, 128, 0 );
-		m_face.DrawImg( txt, CSqPos( 2, 1 + ( ( img.getHeight() - sz.getY() ) / 2 ) + sz.getY() ), img, 1 );
+		local y = 0;
 
-		m_face.setColor( 255, 255, 255 );
-		m_face.DrawImg( txt, CSqPos( 1, ( ( img.getHeight() - sz.getY() ) / 2 ) + sz.getY() ), img, 1 );
+		if ( center )
+			y = ( ( img.getHeight() - sz.getY() ) / 2 ) + sz.getY();
+		else
+			m_y += sz.getY() + 4, y = m_y;
+
+		m_face.CalcSize( txt, sz );
+		m_face.setColor( 0, 255, 0 );
+		m_face.DrawImg( txt, CSqPos( 4, y ), img, 1 );
 
 		return 1;
 
 	}
 
 };
+

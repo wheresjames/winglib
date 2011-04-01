@@ -115,9 +115,9 @@
 
 // Align memory on 16 byte boundry
 // OEX_ALIGNEDMEM must be set to a power of 2
-#if defined( OEX_WINDOWS )
-//#	define OEX_ALIGNEDMEM 16
-#endif
+//#if defined( OEX_WINDOWS )
+#	define OEX_ALIGNEDMEM 16
+//#endif
 
 // By default, the thread locks time out and usually the function
 // will give up and treat it as an error, sixty seconds should be
@@ -189,7 +189,7 @@
 //#define OEXLIB_STACK_HISTORY
 //#define OEXLIB_STACK_KEEP_INACTIVE_TRACES
 
-//#define OEXLIB_CUSTOM_STD_ALLOCATOR
+#define OEXLIB_CUSTOM_STD_ALLOCATOR
 
 #if defined ( OEX_WINDOWS )
 
@@ -276,19 +276,19 @@
 #	define oexAppLongNamePtr()		oexAppDescPtr()
 #endif
 
-#define oexAppName()			OEX_NAMESPACE::CStr( oexAppNamePtr() )
-#define oexAppDesc()			OEX_NAMESPACE::CStr( oexAppDescPtr() )
-#define oexAppLongName()		OEX_NAMESPACE::CStr( oexAppLongNamePtr() )
+#define oexAppName()				OEX_NAMESPACE::CStr( oexAppNamePtr() )
+#define oexAppDesc()				OEX_NAMESPACE::CStr( oexAppDescPtr() )
+#define oexAppLongName()			OEX_NAMESPACE::CStr( oexAppLongNamePtr() )
 
-#define oexBuild()				oexGetBuildTime().FormatTime( oexT( "%y.%C.%D.%G%m" ) )
-#define oexBuildPtr()			oexGetBuildTime().FormatTime( oexT( "%y.%C.%D.%G%m" ) ).Ptr()
+#define oexBuild()					oexGetBuildTime().FormatTime( oexT( "%y.%C.%D.%G%m" ) )
+#define oexBuildPtr()				oexGetBuildTime().FormatTime( oexT( "%y.%C.%D.%G%m" ) ).Ptr()
 
 #if defined( OEX_PROJECT_VERSION )
-#	define oexVersion()			OEX_NAMESPACE::CStr( oexTEXT( OEX_PROJECT_VERSION ) )
-#	define oexVersionPtr()		oexTEXT( OEX_PROJECT_VERSION )
+#	define oexVersion()				OEX_NAMESPACE::CStr( oexTEXT( OEX_PROJECT_VERSION ) )
+#	define oexVersionPtr()			oexTEXT( OEX_PROJECT_VERSION )
 #else
-#	define oexVersion()			oexBuild()
-#	define oexVersionPtr()		oexBuildPtr()
+#	define oexVersion()				oexBuild()
+#	define oexVersionPtr()			oexBuildPtr()
 #endif
 
 #if defined( OEX_WINDOWS )

@@ -54,7 +54,7 @@ template < const int T > class oex_static_assert{};
 #	define oexS( s )					OEX_NAMESPACE::os::CSys::Printf( oexT( "%s:(%d): %s() : (%u) : %s" oexNL8 ), oexGetFileName( oexTEXT( oexFILE ) ).Ptr(), oexLINE, oexFUNCTION, (oex::oexUINT)oexGetCurThreadId(), s ? s : oexT( "" ) )
 #endif
 #define oexLM()							oexM(), oexNOTICE( 0, oexT( "**** MARKER ****" ) )
-#define oexSHOWVAL( v, t )				oexPrintf( oexT( #v " = " t ), ( v ) )
+#define oexSHOWVAL( v, t )				oexPrintf( oexT( #v " = " t oexNL ), ( v ) )
 
 #ifdef oexDEBUG
 

@@ -426,6 +426,9 @@ public:
 		/// Creates a thread
 		int spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
 
+		/// Creates a thread
+		int spawn2( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScriptName, const stdString &sScript, int bFile );
+
 		/// Executes the specified script
 		stdString run( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript );
 
@@ -828,16 +831,7 @@ public:
 
 			// Call the function
 			if ( oexCHECK_PTR( pRet ) )
-			{
-				SquirrelObject o( m_vm.GetVMHandle() );
-				o = f();
-
-				oex::oexLONG l = o.Len();
-				oex::oexCSTR p = o.ToString();
-				if ( oexCHECK_PTR( p ) && l )
-					pRet->assign( p, (stdString::size_type)l );
-
-			} // end if
+				*pRet = sqbind::obj2str( f() );
 			else
 				f();
 
@@ -868,16 +862,7 @@ template< typename T_P1 >
 
 			// Call the function
 			if ( oexCHECK_PTR( pRet ) )
-			{
-				SquirrelObject o( m_vm.GetVMHandle() );
-				o = f( p1 );
-
-				oex::oexLONG l = o.Len();
-				oex::oexCSTR p = o.ToString();
-				if ( oexCHECK_PTR( p ) && l )
-					pRet->assign( p, (stdString::size_type)l );
-
-			} // end if
+				*pRet = sqbind::obj2str( f( p1 ) );
 			else
 				f( p1 );
 
@@ -909,16 +894,7 @@ template< typename T_P1, typename T_P2 >
 
 			// Call the function
 			if ( oexCHECK_PTR( pRet ) )
-			{
-				SquirrelObject o( m_vm.GetVMHandle() );
-				o = f( p1, p2 );
-
-				oex::oexLONG l = o.Len();
-				oex::oexCSTR p = o.ToString();
-				if ( oexCHECK_PTR( p ) && l )
-					pRet->assign( p, (stdString::size_type)l );
-
-			} // end if
+				*pRet = sqbind::obj2str( f( p1, p2 ) );
 			else
 				f( p1, p2 );
 
@@ -949,16 +925,7 @@ template< typename T_P1, typename T_P2, typename T_P3 >
 
 			// Call the function
 			if ( oexCHECK_PTR( pRet ) )
-			{
-				SquirrelObject o( m_vm.GetVMHandle() );
-				o = f( p1, p2, p3 );
-
-				oex::oexLONG l = o.Len();
-				oex::oexCSTR p = o.ToString();
-				if ( oexCHECK_PTR( p ) && l )
-					pRet->assign( p, (stdString::size_type)l );
-
-			} // end if
+				*pRet = sqbind::obj2str( f( p1, p2, p3 ) );
 			else
 				f( p1, p2, p3 );
 
@@ -989,16 +956,7 @@ template< typename T_P1, typename T_P2, typename T_P3, typename T_P4 >
 
 			// Call the function
 			if ( oexCHECK_PTR( pRet ) )
-			{
-				SquirrelObject o( m_vm.GetVMHandle() );
-				o = f( p1, p2, p3, p4 );
-
-				oex::oexLONG l = o.Len();
-				oex::oexCSTR p = o.ToString();
-				if ( oexCHECK_PTR( p ) && l )
-					pRet->assign( p, (stdString::size_type)l );
-
-			} // end if
+				*pRet = sqbind::obj2str( f( p1, p2, p3, p4 ) );
 			else
 				f( p1, p2, p3, p4 );
 

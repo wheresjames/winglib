@@ -23,7 +23,7 @@ function OnAuthenticate( type, data, params )
 	} // end if
 
 //	_self.echo( mParams.print_r( 1 ) );
-	_self.echo( type + ":" + data + " - " + mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str() + " - " + mParams[ "REQUEST" ][ "REQUEST_STRING" ].str() );
+//	_self.echo( type + ":" + data + " - " + mParams[ "REQUEST" ][ "REMOTE_ADDR" ].str() + " - " + mParams[ "REQUEST" ][ "REQUEST_STRING" ].str() );
 
 	if ( !type )
 		return 1;
@@ -31,7 +31,7 @@ function OnAuthenticate( type, data, params )
 	if ( mParams[ "SESSION" ].isset( "user" ) )
 		return 1;
 
-	return -1;
+	return 1;
 }
 
 function _init() : ( _g )
@@ -55,7 +55,7 @@ function _init() : ( _g )
 	if ( !_g.server.Start( _cfg( "tcp_port" ) ) )
 		_self.alert( "Unable to start http server" );
 
-	_self.echo( "web server is running..." );
+	_self.echo( "web server is running at http://localhost:" + _cfg( "tcp_port" ) + "/" );
 }
 
 function SetWebLog() : ( _g )

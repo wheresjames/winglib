@@ -129,6 +129,7 @@ public:
 
 	/// Spawns a script in another thread
 	oex::oexBOOL spawn( stdString *pReply, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
+	oex::oexBOOL spawn2( stdString *pReply, const stdString &sPath, const stdString &sName, const stdString &sScriptName, const stdString &sScript, int bFile );
 	oex::oexBOOL kill( stdString *pReply, const stdString &sPath );
 	oex::oexBOOL terminate_thread( stdString *pReply, const stdString &sPath );
 	oex::oexBOOL is_path( const stdString &sPath );
