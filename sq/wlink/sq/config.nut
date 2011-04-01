@@ -4,6 +4,8 @@ local _g_cfg =
 	// Server TCP port
 	tcp_port	= 14509,
 
+	code_server	= "http://192.168.1.99/ed/prj"
+
 	// Scheme colors
 	col_bg		= "#ffffff",
 	col_fg 		= "#000000",

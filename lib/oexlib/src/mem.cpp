@@ -121,13 +121,22 @@ oexPVOID oex_realloc( oexPVOID x_ptr, oexNEWSIZE_T x_nSize )
 	if ( ptr2 == ptr )
 		return x_ptr;
 
+#if defined( oexDEBUG )
+	COex::GetMemLeak().Remove( x_ptr );
+#endif
+
 	// Great, the os moved the block
 	void *ptr3 = (oexBYTE*)ptr2 + ( (oexLONG)x_ptr - (oexLONG)ptr );
 	*( (void**)ptr3 - 1 ) = ptr2;
 
 	// Is it still aligned?
 	if ( 0 == ( (oexLONG)ptr3 & ( OEX_ALIGNEDMEM - 1 ) ) )
+	{
+#if defined( oexDEBUG )
+		COex::GetMemLeak().Add( ptr3 );
+#endif
 		return ptr3;
+	} // end if
 
 //	oexEcho( "+++ inefficient realloc()" );
 
@@ -135,11 +144,6 @@ oexPVOID oex_realloc( oexPVOID x_ptr, oexNEWSIZE_T x_nSize )
 	// I don't know what to do except allocate another aligned block and copy
 	void *ptr4 = oex_malloc( x_nSize );
 	oexMemCpy( ptr4, ptr3, x_nSize );
-
-#if defined( oexDEBUG )
-	COex::GetMemLeak().Remove( ptr2 );
-	COex::GetMemLeak().Add( ptr4 );
-#endif
 
 	// Free the realloc() pointer
 	free( ptr2 );
@@ -153,15 +157,15 @@ void oex_free( oexPVOID x_ptr )
 	if ( !x_ptr )
 		return;
 
+#if defined( oexDEBUG )
+	COex::GetMemLeak().Remove( x_ptr );
+#endif
+
 	// Get original pointer
 	void *ptr = *( (void**)x_ptr - 1 );
 
 	// Ensure it's sane
 	oexASSERT( cmn::Dif( (oexULONG)ptr, (oexULONG)x_ptr ) <= OEX_ALIGNEDMEM + sizeof( void* ) );
-
-#if defined( oexDEBUG )
-	COex::GetMemLeak().Remove( ptr );
-#endif
 
 	return free( ptr );
 }

@@ -37,7 +37,7 @@ function Start( name )
 
 	// Attempt to start the script
 	local id = _self.md5( name );
-	local url = webpath( "http://localhost/ed/prj", name );
+	local url = webpath( _cfg( "code_server" ), name );
 	if ( !CSqCurl().urlSpawn( _self.queue(), "", id, name, url ) )
 		return 0;
 
