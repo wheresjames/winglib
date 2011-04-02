@@ -126,11 +126,11 @@ oexPVOID oex_realloc( oexPVOID x_ptr, oexNEWSIZE_T x_nSize )
 #endif
 
 	// Great, the os moved the block
-	void *ptr3 = (oexBYTE*)ptr2 + ( (oexLONG)x_ptr - (oexLONG)ptr );
+	void *ptr3 = (oexBYTE*)ptr2 + ( (oexPtrType)x_ptr - (oexPtrType)ptr );
 	*( (void**)ptr3 - 1 ) = ptr2;
 
 	// Is it still aligned?
-	if ( 0 == ( (oexLONG)ptr3 & ( OEX_ALIGNEDMEM - 1 ) ) )
+	if ( 0 == ( (oexPtrType)ptr3 & ( OEX_ALIGNEDMEM - 1 ) ) )
 	{
 #if defined( oexDEBUG )
 		COex::GetMemLeak().Add( ptr3 );
