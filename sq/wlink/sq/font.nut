@@ -6,13 +6,17 @@ class CFont
 	m_face = 0;
 	m_ft = 0;
 	m_y = 2;
+	m_h = 0;
+	m_lines = 0;
+
+	function getLines() { return m_lines; }
 
 	function Destroy()
 	{	if ( m_face ) m_face.Destroy(), m_face = 0;
 		if ( m_ft ) m_ft.Destroy(), m_ft = 0;
 	}
 
-	function Create( font_name )
+	function Create( font_name, img_height )
 	{
 		m_ft = CFtLibrary();
 		if ( m_ft.getLastError() )
@@ -27,7 +31,14 @@ class CFont
 		} // end if
 
 		// Set font size
-		m_face.setCharSize( 12 * 64, 0, 100, 0 );
+		m_face.setCharSize( 10 * 64, 0, 100, 0 );
+
+		local sz = CSqSize();
+		m_face.CalcSize( "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", sz );
+
+		// Calculate metrics
+		m_h = sz.getY() + 2;
+		m_lines = img_height / m_h;
 
 		return 1;
 	}
@@ -49,7 +60,7 @@ class CFont
 		if ( center )
 			y = ( ( img.getHeight() - sz.getY() ) / 2 ) + sz.getY();
 		else
-			m_y += sz.getY() + 4, y = m_y;
+			m_y += m_h, y = m_y;
 
 		m_face.CalcSize( txt, sz );
 		m_face.setColor( 0, 255, 0 );

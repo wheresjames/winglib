@@ -85,26 +85,31 @@ function Cmd( mParams, font, img )
 
 function Console( mParams, font, img )
 {
-	local lines = split( _self.get_output( 0 ), "\r\n" ), max = 20;
+	local lines = split( _self.get_output( 0 ), "\r\n" ), max = font.getLines();
 	local off = ( lines.len() > max ) ? ( lines.len() - max ) : 0;
-	foreach( l in lines ) if ( off ) off--; else if ( l.len() ) font.Draw( 0, img, l );
+	foreach( l in lines ) 
+		if ( 0 < off ) 
+			off--; 
+		else
+			font.Draw( 0, img, _self.replace( l, "\t", "  " ) );
 }
 
 function Exe( mParams, mReply )
 {
 //	_self.echo( "Fonts folder : '" + _self.get_sys_folder( "fonts" ) + "'" );
 
-	local font = CFont(), fn = "arial.ttf";
-	if ( !font.Create( fn ) )
-	{	mReply[ "content" ] <- "Error creating font : " + fn;
-		return 0;
-	} // end if
-
-	local bConsole = mParams[ "GET" ].isset( "console" );
-
-	local img = CSqImage();
+	local img = CSqImage(), bConsole = mParams[ "GET" ].isset( "console" );
 	local w = mParams[ "GET" ][ "w" ].toint(); if ( 0 >= w ) w = 600;
 	local h = mParams[ "GET" ][ "h" ].toint(); if ( 0 >= h ) h = bConsole ? 400 : 24;
+
+	local font = CFont(), fn = "courbd.ttf";
+	if ( !font.Create( fn, h ) )
+	{	font = CFont(), fn = "cour.ttf";
+		if ( !font.Create( fn, h ) )
+		{	mReply[ "content" ] <- "Error creating font : " + fn;
+			return 0;
+		} // end if
+	} // end if
 
 	// Create image
 	if ( !img.Create( w, h ) )
