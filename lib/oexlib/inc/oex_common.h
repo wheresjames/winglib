@@ -317,8 +317,8 @@ namespace cmn
 
     /// Returns non-zero if aligned on 512 bit boundry
     template < typename T >
-        oexBOOL IsAlignedN( T val )
-    {   return AlignN( val ) == val; }
+        oexBOOL IsAlignedN( T val, T n )
+    {   return AlignN( val, n ) == val; }
 
     /// Aligns value on processor dependent boundry
 #if oexSIZEOFINT == 2

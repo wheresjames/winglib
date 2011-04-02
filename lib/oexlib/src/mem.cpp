@@ -93,7 +93,7 @@ oexPVOID oex_malloc( oexNEWSIZE_T x_nSize )
 
 	// Align pointer
 	oexBYTE *ptr2 = (oexBYTE*)ptr + sizeof( void* );
-	ptr2 += OEX_ALIGNEDMEM - ( (oexLONG)ptr2 & ( OEX_ALIGNEDMEM - 1 ) );
+	ptr2 = (oexBYTE*)cmn::AlignN( (oexPtrType)ptr2, (oexPtrType)OEX_ALIGNEDMEM );
 
 	// Save original pointer
 	*( (void**)ptr2 - 1 ) = ptr;
