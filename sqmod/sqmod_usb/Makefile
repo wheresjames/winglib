@@ -26,11 +26,12 @@ include $(PRJ_LIBROOT)/config.mk
 
 ifeq ($(BUILD),vs)
 	PRJ_INCS := $(PRJ_INCS) $(CFG_LIB2BLD)/dep/etc/vs/inc/c99 \
-							libusb-win32/libusb libusb-win32/msvc
-	PRJ_DEFS := ssize_t=unsigned
-	PRJ_LIBS := $(PRJ_LIBS) usb-win32
+							libusb libusb/libusb
+#							libusb-win32/libusb libusb-win32/msvc
+	PRJ_DEFS := $(PRJ_DEFS) ssize_t=unsigned
+	PRJ_LIBS := $(PRJ_LIBS) usb
 else
-	PRJ_INCS := $(PRJ_INCS) libusb/libusb
+	PRJ_INCS := $(PRJ_INCS) libusb libusb/libusb
 	PRJ_LIBS := $(PRJ_LIBS) usb
 endif
 
