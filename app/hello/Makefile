@@ -12,7 +12,6 @@ PRJ_TYPE := exe
 PRJ_INCS := 
 PRJ_LIBS := 
 PRJ_OSLB := 
-PRJ_HACK := win_fwd_slashes
 
 #-------------------------------------------------------------------
 # Configure build
