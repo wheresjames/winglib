@@ -784,6 +784,14 @@ SQInteger CSqEngineExport::get_timer_useconds()
 	return (oex::oexINT64)nVal;
 }
 
+SQInteger CSqEngineExport::get_total_useconds()
+{_STT();
+	oex::oexINT64 nS = 0, nU = 0;
+	if ( !oex::os::CHqTimer::osGetCounts( &nS, &nU ) )
+		return 0;
+	return (SQInteger)( ( nS * 1000000 ) + nU );
+}
+
 stdString CSqEngineExport::run( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript )
 {_STT();
 
@@ -1593,6 +1601,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, gmt_time )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_timer_seconds )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_timer_useconds )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_total_useconds )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, local_timestr )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, gmt_timestr )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_timer )

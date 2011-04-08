@@ -483,6 +483,9 @@ public:
 		/// Tick count micro seconds
 		SQInteger get_timer_useconds();
 
+		/// Tick count micro seconds
+		SQInteger get_total_useconds();
+
 		/// Returns a linked in resource
 		stdString get_resource( const stdString &sRes, int bFileOverrideOk );
 

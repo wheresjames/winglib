@@ -283,7 +283,7 @@ oexBOOL CDib::SaveDibFile( oexCSTR x_pFile, SImageData *x_pId, oexCPVOID x_pData
 	return oexTRUE;
 }
 
-// Integer conversion coefficients for Yuv2Rgb()
+// Integer conversion coefficients for YUV / RGB conversions()
 const oexINT	c_uShift = 12;
 const oexINT	c_u2PowShift = 4096; // 2 ^ c_uShift
 const oexINT	c_uUScale = (oexUINT)( (oexDOUBLE)1.772 * c_u2PowShift );
@@ -362,18 +362,20 @@ oexBOOL CDib::YUV_RGB_1(oexLONG lWidth, oexLONG lHeight, oexBYTE *pSrc, oexBYTE 
 				} // end if
 
 				// Prescale
-				lY <<= c_uShift; lU -= 128; lV -= 128;
+				lY <<= c_uShift; 
+				lU = ( lU - 128 ) << c_uShift; 
+				lV = ( lV - 128 ) << c_uShift;
 
 				// Blue
-				lT = ( lY + c_uUScale * lU ) >> c_uShift;
+				lT = ( lY + lU ) >> c_uShift;
 				pPixDst[ 0 ] = cmn::Range( lT, 0, 255 );
 
 				// Green
-				lT = ( lY - c_uYuScale * lU - c_uYvScale * lV ) >> c_uShift;
+				lT = ( lY - lU - lV ) >> c_uShift;
 				pPixDst[ 1 ] = cmn::Range( lT, 0, 255 );
 
 				// Red
-				lT = ( lY + c_uVScale * lV ) >> c_uShift;
+				lT = ( lY + lV ) >> c_uShift;
 				pPixDst[ 2 ] = cmn::Range( lT, 0, 255 );
 
 			} // end for
@@ -446,18 +448,20 @@ oexBOOL CDib::YUV_RGB_2(oexLONG lWidth, oexLONG lHeight, oexBYTE *pSrc, oexBYTE 
 				lV = pSrc[ lVOffset + ( i >> 1 ) ];
 
 				// Prescale
-				lY <<= c_uShift; lU -= 128; lV -= 128;
+				lY <<= c_uShift; 
+				lU = ( lU - 128 ) << c_uShift; 
+				lV = ( lV - 128 ) << c_uShift;
 
 				// Blue
-				lT = ( lY + c_uUScale * lU ) >> c_uShift;
+				lT = ( lY + lU ) >> c_uShift;
 				pPixDst[ 0 ] = cmn::Range( lT, 0, 255 );
 
 				// Green
-				lT = ( lY - c_uYuScale * lU - c_uYvScale * lV ) >> c_uShift;
+				lT = ( lY - lU - lV ) >> c_uShift;
 				pPixDst[ 1 ] = cmn::Range( lT, 0, 255 );
 
 				// Red
-				lT = ( lY + c_uVScale * lV ) >> c_uShift;
+				lT = ( lY + lV ) >> c_uShift;
 				pPixDst[ 2 ] = cmn::Range( lT, 0, 255 );
 
 			} // end for
@@ -499,32 +503,32 @@ oexBOOL CDib::YUYV_RGB(oexLONG lWidth, oexLONG lHeight, oexPVOID pSrc, oexPVOID 
 				// Prescale
 				lY1 <<= c_uShift;
 				lY2 <<= c_uShift;
-				lU -= 128;
-				lV -= 128;
+				lU = ( lU - 128 ) << c_uShift; 
+				lV = ( lV - 128 ) << c_uShift;
 
 				// Blue
-				oexINT lT = ( lY1 + c_uUScale * lU ) >> c_uShift;
+				oexINT lT = ( lY1 + lU ) >> c_uShift;
 				pPixDst[ 0 ] = cmn::Range( lT, 0, 255 );
 
 				// Green
-				lT = ( lY1 - c_uYuScale * lU - c_uYvScale * lV ) >> c_uShift;
+				lT = ( lY1 - lU - lV ) >> c_uShift;
 				pPixDst[ 1 ] = cmn::Range( lT, 0, 255 );
 
 				// Red
-				lT = ( lY1 + c_uVScale * lV ) >> c_uShift;
+				lT = ( lY1 + lV ) >> c_uShift;
 				pPixDst[ 2 ] = cmn::Range( lT, 0, 255 );
 
 
 				// Blue
-				lT = ( lY2 + c_uUScale * lU ) >> c_uShift;
+				lT = ( lY2 + lU ) >> c_uShift;
 				pPixDst[ 3 ] = cmn::Range( lT, 0, 255 );
 
 				// Green
-				lT = ( lY2 - c_uYuScale * lU - c_uYvScale * lV ) >> c_uShift;
+				lT = ( lY2 - lU - lV ) >> c_uShift;
 				pPixDst[ 4 ] = cmn::Range( lT, 0, 255 );
 
 				// Red
-				lT = ( lY2 + c_uVScale * lV ) >> c_uShift;
+				lT = ( lY2 + lV ) >> c_uShift;
 				pPixDst[ 5 ] = cmn::Range( lT, 0, 255 );
 
 			} // end for
