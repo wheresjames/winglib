@@ -23,6 +23,10 @@ public:
 	const irr::core::vector3df& c_Obj() const { return m_v; }
 	irr::core::vector3df& Obj() { return m_v; }
 
+	/** \addtogroup CSqirrVector3d
+		@{
+	*/
+
 	void set( float x, float y, float z )
 	{
 		m_v.X = x;
@@ -114,6 +118,7 @@ public:
 		return 1;
 	}
 
+	/** @} */
 
 private:
 
@@ -144,6 +149,10 @@ public:
 	CSqirrVector2d& operator =( const CSqirrVector2d &r ) { m_v = r.m_v; return *this; }
 	const irr::core::vector2df& Obj() const { return m_v; }
 
+	/** \addtogroup CSqirrVector2d
+		@{
+	*/
+
 	void set( float x, float y )
 	{
 		m_v.X = x;
@@ -154,6 +163,8 @@ public:
 	float& y() { return m_v.Y; }
 
 	void inflate( float v ) { m_v.X *= v; m_v.Y *= v; }
+
+	/** @} */
 
 private:
 
@@ -180,6 +191,10 @@ public:
 	// Copy semantics
 	CSqirrVertexArray( const CSqirrVertexArray &r ) { m_len = r.m_len; m_pv = r.m_pv; }
 	CSqirrVertexArray& operator =( const CSqirrVertexArray &r ) { m_len = r.m_len; m_pv = r.m_pv; return *this; }
+
+	/** \addtogroup CSqirrVertexArray
+		@{
+	*/
 
 	void set( long i, float x, float y, float z )
 	{
@@ -223,6 +238,8 @@ public:
 		} // end for
 	}
 
+	/** @} */
+
 private:
 
 	long                    m_len;
@@ -251,6 +268,10 @@ public:
 	CSqirrRect2d( const CSqirrRect2d &r ) { m_lt = r.m_lt; m_rb = r.m_rb; }
 	CSqirrRect2d& operator =( const CSqirrRect2d &r ) { m_lt = r.m_lt; m_rb = r.m_rb; return *this; }
 
+	/** \addtogroup CSqirrRect2d
+		@{
+	*/
+
 	void set( float l, float t, float r, float b )
 	{
 		m_lt.X = l;
@@ -272,6 +293,8 @@ public:
 
 	void inflate( float v )
 	{	m_lt.X *= v; m_lt.Y *= v; m_rb.X *= v; m_rb.Y *= v; }
+
+	/** @} */
 
 private:
 
@@ -301,6 +324,10 @@ public:
 	CSqirrRect3d( const CSqirrRect3d &r ) { m_ltf = r.m_ltf; m_rbb = r.m_rbb; }
 	CSqirrRect3d& operator =( const CSqirrRect3d &r ) { m_ltf = r.m_ltf; m_rbb = r.m_rbb; return *this; }
 
+	/** \addtogroup CSqirrRect3d
+		@{
+	*/
+
 	void set( float l, float t, float f, float r, float b, float bk )
 	{
 		m_ltf.X = l;
@@ -320,6 +347,8 @@ public:
 
 	void inflate( float v )
 	{	m_ltf.X *= v; m_ltf.Y *= v; m_ltf.Z *= v; m_rbb.X *= v; m_rbb.Y *= v; m_rbb.Z *= v; }
+
+	/** @} */
 
 private:
 
@@ -349,6 +378,10 @@ public:
 	CSqirrBoundingBox3d( const CSqirrBoundingBox3d &r ) { m_bb = r.m_bb; }
 	CSqirrBoundingBox3d& operator =( const CSqirrBoundingBox3d &r ) { m_bb = r.m_bb; return *this; }
 
+	/** \addtogroup CSqirrBoundingBox3d
+		@{
+	*/
+
 	void set( float l, float t, float f, float r, float b, float bk )
 	{
 		m_bb.MinEdge.X = l;
@@ -373,6 +406,8 @@ public:
 	}
 
 	irr::core::aabbox3df& Obj() { return m_bb; }
+
+	/** @} */
 
 private:
 

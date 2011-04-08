@@ -50,12 +50,12 @@ class CSqEngineExport
 
 public:
 
+	SQBIND_CLASS_CTOR_BEGIN( CSqEngineExport )
+	SQBIND_CLASS_CTOR_END( CSqEngineExport )
+
 	/** \addtogroup SQAPI
 		@{
 	*/
-
-		SQBIND_CLASS_CTOR_BEGIN( CSqEngineExport )
-		SQBIND_CLASS_CTOR_END( CSqEngineExport )
 
 		/// Returns non zero if squirrel is a debug build
 		int isDebugBuild();

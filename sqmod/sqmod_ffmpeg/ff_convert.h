@@ -11,6 +11,10 @@ public:
 	/// Default constructor
 	CFfConvert();
 
+	/** \addtogroup CFfConvert
+		@{
+	*/
+
 	/// Patches broken formats
 	static int FmtEquiv( int fmt );
 
@@ -35,9 +39,6 @@ public:
 	/// Converts image colorspace
 	static int ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip );
 
-	/// Convert raw buffer to image
-	static int ConvertColorRI( void *buf, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip );
-
 	/// Convert AVFrame to image
 	static int ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip );
 
@@ -46,6 +47,14 @@ public:
 
 	/// Converts image colorspace
 	static int Rotate( int deg, sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqBinary *dst, int dst_fmt );
+
+	/// Flips image verticaly
+	static int FlipVert( sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqBinary *dst, int dst_fmt );
+
+	/** @} */
+
+	/// Convert raw buffer to image
+	static int ConvertColorRI( void *buf, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip );
 
 	/// Rotates an image 90 degrees
 	static int Rotate90_3( void *src, void *dst, int width, int height );
@@ -64,9 +73,6 @@ public:
 
 	/// Rotates an image 270 degrees
 	static int Rotate270_4( void *src, void *dst, int width, int height );
-
-	/// Flips image verticaly
-	static int FlipVert( sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqBinary *dst, int dst_fmt );
 
 	/// Flips image vertically
 	static int FlipVert_3( void *src, void *dst, int width, int height );

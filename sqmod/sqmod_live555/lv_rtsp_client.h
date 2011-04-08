@@ -139,6 +139,10 @@ public:
 	CLvRtspClient( const CLvRtspClient &r ) { }
 	CLvRtspClient& operator = ( const CLvRtspClient &r ) { return *this; }
 
+	/** \addtogroup CLvRtspClient
+		@{
+	*/
+
 	/// Destroy connection
 	void Destroy();
 
@@ -228,6 +232,8 @@ public:
 
 	/// Signal start
 	void Play() { m_evtPlay.Signal(); }
+
+	/** @} */
 
 	/// Idle processing static function
 	static void _OnIdle( void *pData );

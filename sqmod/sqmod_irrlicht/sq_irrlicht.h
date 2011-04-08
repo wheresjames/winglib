@@ -52,6 +52,10 @@ public:
 	CSqIrrlicht( const CSqIrrlicht &r ) {}
 	CSqIrrlicht& operator =( const CSqIrrlicht &r ) { return *this; }
 
+	/** \addtogroup CSqIrrlicht
+		@{
+	*/
+
 	/// Initializes irrlicht engine
 	int Init( const sqbind::stdString &sName, int width, int height, int fps );
 
@@ -239,6 +243,8 @@ public:
 
 	int getWidth() { return m_nWidth; }
 	int getHeight() { return m_nHeight; }
+
+	/** @} */
 
 private:
 

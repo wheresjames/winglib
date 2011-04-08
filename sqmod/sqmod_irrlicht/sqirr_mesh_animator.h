@@ -10,6 +10,10 @@ public:
     /// Destructor
     virtual ~CSqirrMeshAnimator(void);
 
+	/** \addtogroup CSqirrMeshAnimator
+		@{
+	*/
+
     /// Release resources
     void Destroy();
 
@@ -52,6 +56,8 @@ public:
 
     /// Execute squirrel process
     int Run( irr::scene::ISceneManager *pSm, float fClock, sqbind::CSqEngine *pSe );
+
+	/** @} */
 
 private:
 

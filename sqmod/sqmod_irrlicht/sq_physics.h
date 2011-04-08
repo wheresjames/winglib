@@ -28,6 +28,10 @@ public:
 	CSqirrPhysics( const CSqirrPhysics &r ) {}
 	CSqirrPhysics& operator =( const CSqirrPhysics &r ) { return *this; }
 
+	/** \addtogroup CSqirrPhysics
+		@{
+	*/
+
 	/// Initializes the physics engine
 	int Init();
 
@@ -37,6 +41,7 @@ public:
 	/// Updates physics world
 	int Update( float fElapsed );
 
+	/** @} */
 
 private:
 

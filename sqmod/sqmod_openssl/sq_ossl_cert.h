@@ -16,6 +16,10 @@ public:
 	/// Destructor
 	virtual ~COsslCert();
 
+	/** \addtogroup COsslCert
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
 
@@ -33,6 +37,8 @@ public:
 
 	/// Saves the cert to a file
 	sqbind::SQINT SaveFile( const sqbind::stdString &sFile );
+
+	/** @} */
 
 private:
 

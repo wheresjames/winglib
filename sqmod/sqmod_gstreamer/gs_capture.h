@@ -14,11 +14,17 @@ public:
 	/// Destructor
 	~CGsCapture() { Destroy(); }
 
+	/** \addtogroup CGsCapture
+		@{
+	*/
+
 	/// Releases all resources
 	void Destroy();
 
 	/// Initializes capture stream
 	int Init();
+
+	/** @} */
 
 private:
 

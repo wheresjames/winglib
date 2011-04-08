@@ -21,6 +21,10 @@ public:
 	CSqirrTexture& operator = ( const CSqirrTexture &r ) { Destroy(); m_p = r.m_p; if ( m_p ) m_p->grab(); return *this; }
 	irr::video::ITexture* Ptr() { return m_p; }
 
+	/** \addtogroup CSqirrTexture
+		@{
+	*/
+
 	long GetWidth()
 	{   if ( !m_p )
 			return 0;
@@ -61,6 +65,8 @@ public:
 
 		return 1;
 	}
+
+	/** @} */
 
 protected:
 

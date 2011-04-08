@@ -14,6 +14,10 @@ public:
 	/// Destructor
 	virtual ~CFfTranscode() { Destroy(); }
 
+	/** \addtogroup CFfTranscode
+		@{
+	*/
+
 	/// Release resources
 	void Destroy();
 
@@ -49,6 +53,8 @@ public:
 
 	/// Returns the bit rate
 	int getBitRate() { return m_enc.getBitRate(); }
+
+	/** @} */
 
 private:
 

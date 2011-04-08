@@ -23,10 +23,16 @@ public:
 	irr::video::SColor& Obj() { return m_col; }
 	const irr::video::SColor& c_Obj() const { return m_col; }
 
+	/** \addtogroup CSqirrColor
+		@{
+	*/
+
 	int r() { return m_col.getRed(); }
 	int g() { return m_col.getGreen(); }
 	int b() { return m_col.getBlue(); }
 	int a() { return m_col.getAlpha(); }
+
+	/** @} */
 
 private:
 

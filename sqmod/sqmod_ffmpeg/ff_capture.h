@@ -14,6 +14,10 @@ public:
 	/// Destructor
 	virtual ~CFfCapture() { Destroy(); }
 
+	/** \addtogroup CFfCapture
+		@{
+	*/
+
 	void Destroy();
 
 	/// Open link
@@ -66,6 +70,8 @@ public:
 	int getFrameCount()
 	{	return m_nFrames;
 	}
+
+	/** @} */
 
 private:
 

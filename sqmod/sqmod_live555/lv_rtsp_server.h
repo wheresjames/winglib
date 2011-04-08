@@ -168,6 +168,10 @@ public:
 	CLvRtspServer( const CLvRtspServer &r ) { }
 	CLvRtspServer& operator = ( const CLvRtspServer &r ) { return *this; }
 
+	/** \addtogroup CLvRtspServer
+		@{
+	*/
+
 	/// Destroy connection
 	void Destroy();
 
@@ -179,23 +183,6 @@ public:
 	/// Returns non-zero if the server thread is running
 	int isThread()
 	{	return CThread::IsRunning(); }
-
-protected:
-
-	/// Initializes thread
-	virtual oex::oexBOOL InitThread( oex::oexPVOID x_pData );
-
-	/// Runs the thread
-	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData );
-
-	/// Cleanup
-	virtual oex::oexINT EndThread( oex::oexPVOID x_pData );
-
-	/// Thread cleanup
-	void ThreadDestroy();
-
-	/// Initializes the threaded environment
-	int ThreadOpen();
 
 public:
 
@@ -228,6 +215,26 @@ public:
 
 	/// Adds frame to the output stream queue
 	int DeliverFrame( const sqbind::stdString &sStreamId, const sqbind::stdString &sFrameId, int fps );
+
+	/** @} */
+
+protected:
+
+	/// Initializes thread
+	virtual oex::oexBOOL InitThread( oex::oexPVOID x_pData );
+
+	/// Runs the thread
+	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData );
+
+	/// Cleanup
+	virtual oex::oexINT EndThread( oex::oexPVOID x_pData );
+
+	/// Thread cleanup
+	void ThreadDestroy();
+
+	/// Initializes the threaded environment
+	int ThreadOpen();
+
 
 public:
 

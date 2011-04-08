@@ -14,6 +14,10 @@ public:
 	/// Destructor
 	virtual ~CFfAudioDecoder() { Destroy(); }
 
+	/** \addtogroup CFfAudioDecoder
+		@{
+	*/
+
 	/// Releases all resources
 	void Destroy();
 
@@ -31,6 +35,8 @@ public:
 
 	/// Lookup a codec based on id
 	static sqbind::stdString LookupCodecName( int nId );
+
+	/** @} */
 
 private:
 

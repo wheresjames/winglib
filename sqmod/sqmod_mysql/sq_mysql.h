@@ -14,6 +14,10 @@ public:
 	/// Destructor
 	~CSqMysql();
 
+	/** \addtogroup CSqMysql
+		@{
+	*/
+
 	/// Disconnects from the database
 	void Destroy();
 
@@ -65,6 +69,8 @@ public:
 
 	/// Returns a row of data
 	int getRow( sqbind::CSqMulti *mRow );
+
+	/** @} */
 
 private:
 

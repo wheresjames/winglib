@@ -19,6 +19,10 @@ public:
 	/// Destructor
 	virtual ~CFtFace();
 
+	/** \addtogroup CFtFace
+		@{
+	*/
+
 	/// Destroy connection
 	void Destroy();
 
@@ -79,6 +83,8 @@ public:
 
 	/// Returns a scaled ascii map of the string
 	sqbind::stdString Str2Ascii( int width, int height, const sqbind::stdString &sStr, const sqbind::stdString &sChars, const sqbind::stdString &sEol );
+
+	/** @} */
 
 	/// Returns the native object
 	FT_Face& Obj() { return m_face; }

@@ -20,6 +20,10 @@ public:
 	/// Destructor
 	virtual ~CSqFreenect();
 
+	/** \addtogroup CSqFreenect
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
 
@@ -112,6 +116,8 @@ public:
 
 	/// Returns the height of a depth frame
 	int getDepthHeight() { return FREENECT_IR_FRAME_H; }
+
+	/** @} */
 
 private:
 

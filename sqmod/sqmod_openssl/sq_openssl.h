@@ -17,8 +17,14 @@ public:
 	/// Destructor
 	virtual ~CSqOpenSSL();
 
+	/** \addtogroup CSqOpenSSL
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
+
+	/** @} */
 
 private:
 
