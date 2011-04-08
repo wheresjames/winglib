@@ -35,6 +35,10 @@ public:
 	/// Destructor
 	virtual ~CGdcChart();
 
+	/** \addtogroup CGdcChart
+		@{
+	*/
+
 	/// Generates a chart and returns it
 	sqbind::CSqMulti CreateChart( const sqbind::stdString &x_sType,
 							      const sqbind::stdString &x_sParams,
@@ -51,6 +55,8 @@ public:
 	int SaveChart(  const sqbind::stdString &x_sFile,
 					const sqbind::stdString &x_sParams,
 					const sqbind::stdString &x_sData );
+
+	/** @} */
 
 private:
 

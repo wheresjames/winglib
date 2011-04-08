@@ -73,6 +73,10 @@ public:
 
 public:
 
+	/** \addtogroup CSqirrNode
+		@{
+	*/
+
 	void UpdateAbsolutePosition()
 	{   if ( !m_p ) return;
 		m_p->updateAbsolutePosition();
@@ -320,6 +324,8 @@ public:
 		m_p->setPosition( s.Obj() + ( n * fDist ) );
 		m_p->updateAbsolutePosition();
 	}
+
+	/** @} */
 
 protected:
 

@@ -66,6 +66,10 @@ public:
 	/// Copy operator
 	CCellConnection& operator = ( const CCellConnection &r ) { return *this; }
 
+	/** \addtogroup CCellConnection
+		@{
+	*/
+
 	/// Closes the connection and releases resources
 	int Destroy();
 
@@ -137,6 +141,8 @@ public:
 
 	/// Dump the cache to a string
 	sqbind::stdString DumpCache();
+
+	/** @} */
 
 private:
 

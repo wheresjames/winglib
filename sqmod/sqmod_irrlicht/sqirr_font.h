@@ -19,6 +19,10 @@ public:
 	{	set( size, sFont ); }
 	~CSqirrFont() {}
 
+	/** \addtogroup CSqirrFont
+		@{
+	*/
+
 	/// Releases font
 	void Destroy();
 
@@ -31,6 +35,8 @@ public:
 
 	/// Renders the specified text
 	int Render( const sqbind::stdString &sText );
+
+	/** @} */
 
 private:
 

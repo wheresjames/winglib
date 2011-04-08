@@ -16,6 +16,10 @@ public:
 	/// Destructor
 	~CSqCurl();
 
+	/** \addtogroup CSqCurl
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
 
@@ -61,6 +65,8 @@ public:
 	/// Returns the overall transaction timeout
 	SQInteger getTimeout() { return m_nTimeout; }
 	
+	/** @} */
+
 private:
 
 	/// Curl writer

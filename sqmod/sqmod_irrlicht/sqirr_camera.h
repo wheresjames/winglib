@@ -15,6 +15,10 @@ public:
 	CSqirrCamera( irr::scene::ICameraSceneNode *p ) { SetPtr( p, eTypeCamera ); }
 	CSqirrCamera& operator = ( irr::scene::ICameraSceneNode *p ) { SetPtr( p, eTypeCamera ); return *this; }
 
+	/** \addtogroup CSqirrCamera
+		@{
+	*/
+
 	CSqirrNode* node()
 	{
 		return (CSqirrNode*)this;
@@ -83,6 +87,7 @@ public:
 		\param [in] lCcdWidth   -   CCD width in mm
 		\param [in] lCcdHeight  -   CCD height in mm
 
+		\code
 										CCD       Width   Height
 										-----------------------
 										1/4     - 3.2   x 2.4
@@ -95,6 +100,7 @@ public:
 										2/3     - 8.8   x 6.6
 										1       - 12.8  x 9.6
 										4/3     - 18    x 13.5
+		\endcode
 	*/
 	void SetLens( float fLens, float fCcdWidth, float fCcdHeight )
 	{
@@ -149,6 +155,7 @@ public:
 		m_p->updateAbsolutePosition();
 	}
 
+	/** @} */
 };
 
 _SQBIND_DECLARE_INSTANCE( CSqirrCamera, CSqirrCamera );

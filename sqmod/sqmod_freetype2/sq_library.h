@@ -14,6 +14,10 @@ public:
 	/// Destructor
 	virtual ~CFtLibrary();
 
+	/** \addtogroup CFtLibrary
+		@{
+	*/
+
 	/// Destroy connection
 	void Destroy();
 
@@ -25,6 +29,8 @@ public:
 
 	/// Loads font from system font folder
 	int LoadFont( CFtFace *pFace, const sqbind::stdString &sFont, int nIndex );
+
+	/** @} */
 
 private:
 

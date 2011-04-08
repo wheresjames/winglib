@@ -127,6 +127,10 @@ public:
 
 	};
 
+	/** \addtogroup CSqSSLPortFactory
+		@{
+	*/
+
 	/// Returns the port factory
 	sqbind::CSqFactory getFactory() { return (oex::CFactory*)&m_cFactory; }
 
@@ -144,6 +148,8 @@ public:
 
 	/// Returns a string describing the last error
 	sqbind::stdString getLastError() { return m_cFactory.getLastError(); }
+
+	/** @} */
 
 private:
 

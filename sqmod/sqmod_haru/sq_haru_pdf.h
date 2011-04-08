@@ -16,6 +16,10 @@ public:
 	/// Destructor
 	virtual ~CHaruPdf();
 	
+	/** \addtogroup CHaruPdf
+		@{
+	*/
+
 	/// Release document resources
 	void Destroy();
 
@@ -37,6 +41,8 @@ public:
 	/// Saves to a binary object
 	int getBin( sqbind::CSqBinary *pBin );
 	
+	/** @} */
+
 public:
 	
 	/// Adds a page to the document

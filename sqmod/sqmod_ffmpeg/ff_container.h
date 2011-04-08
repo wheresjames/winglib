@@ -14,6 +14,10 @@ public:
 	/// Destructor
 	virtual ~CFfContainer() { Destroy(); }
 
+	/** \addtogroup CFfContainer
+		@{
+	*/
+
 	/// Frees all resources
 	void Destroy();
 
@@ -179,6 +183,8 @@ public:
 										8 = Seek based on frame number
 	*/
 	int Seek( int nStreamId, int nOffset, int nFlags );
+
+	/** @} */
 
 private:
 

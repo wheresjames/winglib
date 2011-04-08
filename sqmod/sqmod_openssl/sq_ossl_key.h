@@ -17,6 +17,10 @@ public:
 	/// Destructor
 	virtual ~COsslKey();
 
+	/** \addtogroup COsslKey
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
 
@@ -94,6 +98,8 @@ public:
 
 	/// Returns a pointer to the password phrase or null if none
 	char* getPasswordPtr() { return m_sPassword.Length() ? (char*)m_sPassword.Ptr() : NULL; }
+
+	/** @} */
 
 private:
 

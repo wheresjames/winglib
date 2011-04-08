@@ -19,6 +19,10 @@ public:
 	/// Destructor
 	virtual ~CSqMimetic();
 
+	/** \addtogroup CSqMimetic
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
 
@@ -63,6 +67,8 @@ public:
 
 	/// Gets a list of the MIME structure
 	sqbind::CSqMulti getStructure();
+
+	/** @} */
 
 private:
 

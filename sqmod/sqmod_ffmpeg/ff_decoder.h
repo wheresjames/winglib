@@ -14,6 +14,10 @@ public:
 	/// Destructor
 	virtual ~CFfDecoder() { Destroy(); }
 
+	/** \addtogroup CFfDecoder
+		@{
+	*/
+
 	/// Releases all resources
 	void Destroy();
 
@@ -82,6 +86,8 @@ public:
 
 	/// Returns the amount of data buffered
 	int getBufferSize();
+
+	/** @} */
 
 private:
 

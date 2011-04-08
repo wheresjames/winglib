@@ -14,6 +14,10 @@ public:
 	/// Destructor
 	virtual ~CFfEncoder() { Destroy(); }
 
+	/** \addtogroup CFfEncoder
+		@{
+	*/
+
 	/// Releases all resources
 	void Destroy();
 
@@ -61,6 +65,8 @@ public:
 			return 0;
 		return m_pCodecContext->bit_rate;
 	}
+
+	/** @} */
 
 private:
 

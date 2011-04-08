@@ -16,6 +16,10 @@ public:
 	/// Destructor
 	~CSqFftw();
 
+	/** \addtogroup CSqFftw
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
 
@@ -106,6 +110,8 @@ public:
 
 	/// Reads output values into an array
 	int ReadOutputMagnitudes( int nMax, int nType, int nInterval, sqbind::CSqBinary *bin );
+
+	/** @} */
 
 private:
 

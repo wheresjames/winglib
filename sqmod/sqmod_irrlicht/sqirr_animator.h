@@ -14,7 +14,14 @@ public:
 	CSqirrAnimator( irr::scene::ISceneNodeAnimator *p ) { if ( p ) { m_p = p; p->grab(); } }
 
 	~CSqirrAnimator() { Destroy(); }
+
+	/** \addtogroup CSqirrAnimator
+		@{
+	*/
+
 	void Destroy() { if ( m_p ) { m_p->drop(); m_p = 0; } }
+
+	/** @} */
 
 	// Copy semantics
 	CSqirrAnimator( const CSqirrAnimator &r ) { m_p = r.m_p; if ( m_p ) m_p->grab(); }
