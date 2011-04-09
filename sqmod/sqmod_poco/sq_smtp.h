@@ -17,6 +17,10 @@ public:
 	/// Destructor
 	virtual ~CPoSmtp();
 
+	/** \addtogroup CPoSmtp
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
 
@@ -32,6 +36,8 @@ public:
 	/// Returns a string describing the last error that occured
 	sqbind::stdString getLastError()
 	{	return m_sLastError; }
+
+	/** @} */
 
 private:
 

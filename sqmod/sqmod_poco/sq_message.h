@@ -21,6 +21,13 @@ public:
 	/// Destructor
 	virtual ~CPoMessage();
 
+	/// Returns a pointer to the message object
+	const Poco::Net::MailMessage* Ptr() { return m_pMsg; }
+
+	/** \addtogroup CPoMessage
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
 
@@ -42,9 +49,6 @@ public:
 	/// Add blind carbon copy recipient
 	void addBCCRecipient( const sqbind::stdString &sAddress, const sqbind::stdString &sName );
 	
-	/// Returns a pointer to the message object
-	const Poco::Net::MailMessage* Ptr() { return m_pMsg; }
-
 	/// Encodes MIME to a buffer
 	int Encode( sqbind::CSqBinary *pBin );
 
@@ -77,6 +81,8 @@ public:
 	
 	/// Sets part header values
 	int setPartHeader( const sqbind::stdString &sPart, const sqbind::stdString &sName, const sqbind::stdString &sValue );
+
+	/** @} */
 
 private:
 
