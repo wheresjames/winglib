@@ -29,6 +29,10 @@ public:
 	/// Destructor
 	virtual ~CVmMsg();
 
+	/** \addtogroup CVmMsg
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
 
@@ -64,6 +68,8 @@ public:
 
 	/// Returns a string describing the message structure
 	sqbind::stdString getStructure();
+
+	/** @} */
 
 protected: 
 

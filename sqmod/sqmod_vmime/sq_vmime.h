@@ -41,6 +41,10 @@ public:
 	/// Destructor
 	virtual ~CSqVMime();
 
+	/** \addtogroup CSqVMime
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
 
@@ -93,6 +97,8 @@ public:
 
 	/// Sends the specified message
 	int Send( const sqbind::stdString &sUrl, CVmMsg *pMsg );
+
+	/** @} */
 
 private:
 	

@@ -113,6 +113,8 @@ public:
 	/// Echo's SSH debug information to terminal
 	int print_debug_information( int bEnable );
 
+	/** @} */
+
 private:
 
 	/// Init status

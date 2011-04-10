@@ -18,9 +18,14 @@ public:
 	/// Destructor
 	~CSqWebkit();
 
+	/** \addtogroup CSqWebkit
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
 
+	/** @} */
 
 private:
 
