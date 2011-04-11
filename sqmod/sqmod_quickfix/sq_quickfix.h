@@ -13,6 +13,10 @@ public:
 	/// Destructor
 	virtual ~CSqQuickfix();
 
+	/** \addtogroup CSqQuickfix
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
 
@@ -21,6 +25,8 @@ public:
 
 	/// Returns a string describing the last error
 	sqbind::stdString getLastError() { return m_sLastError; }
+
+	/** @} */
 	
 private:
 

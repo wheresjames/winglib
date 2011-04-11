@@ -13,6 +13,10 @@ public:
 	/// Destructor
 	virtual ~CPaOutput();
 
+	/** \addtogroup CPaOutput
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
 
@@ -40,9 +44,6 @@ public:
 	/// Returns the default output device
 	int getDefaultOutputDevice();
 
-	/// Returns the default input device
-	int getDefaultInputDevice();
-
 	/// Returns the number of available devices
 	int getDeviceCount();
 
@@ -60,6 +61,8 @@ public:
 
 	/// Returns the number of bytes required for one frame in a particular format
 	int getFormatBytes( int nFmt );
+
+	/** @} */
 
 protected:
 

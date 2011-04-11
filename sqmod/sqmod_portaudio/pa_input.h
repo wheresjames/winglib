@@ -13,6 +13,10 @@ public:
 	/// Destructor
 	virtual ~CPaInput();
 
+	/** \addtogroup CPaInput
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
 
@@ -40,9 +44,6 @@ public:
 	/// Returns the default input device
 	int getDefaultInputDevice();
 
-	/// Returns the default output device
-	int getDefaultOutputDevice();
-
 	/// Returns the number of available devices
 	int getDeviceCount();
 
@@ -63,6 +64,8 @@ public:
 
 	/// Returns the frame block size
 	int getFrameBlockSize() { return m_nFrameBlockSize; }
+
+	/** @} */
 
 protected:
 

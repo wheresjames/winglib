@@ -64,11 +64,6 @@ int CPaInput::getDefaultInputDevice()
 	return Pa_GetDefaultInputDevice();
 }
 
-int CPaInput::getDefaultOutputDevice()
-{_STT();
-	return Pa_GetDefaultOutputDevice();
-}
-
 int CPaInput::getDeviceInfo( int nDev, sqbind::CSqMulti *pInf )
 {_STT();
 

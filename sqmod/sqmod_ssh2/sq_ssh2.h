@@ -20,6 +20,10 @@ public:
 	/// CSqSsh2
 	~CSqSsh2();
 
+	/** \addtogroup CSqSsh2
+		@{
+	*/
+
 	/// Releases resources
 	void Destroy();
 
@@ -61,6 +65,9 @@ public:
 	/// Attempts authentication using public key
 	int authPublicKeyBin( const sqbind::stdString &sUsername,
 						  sqbind::CSqBinary *pPrv, sqbind::CSqBinary *pPub );
+
+
+	/** @} */
 
 	/// Sign callback proxy
 	static int _sign_callback( LIBSSH2_SESSION *session, unsigned char **sig, size_t *sig_len,
