@@ -67,6 +67,10 @@ class CRtspStream
 		::_self.echo( "\nConnecting to : " + link + "\n" );
 
 		rtsp = CLvRtspClient();
+		
+//		rtsp.setStreamOverTCP( 0 );
+//		rtsp.setTunnelOverHTTPPort( 0 );
+		
 		if ( !rtsp.Open( link, bDecodeVideo, bDecodeAudio, CSqMulti() ) )
 		{	::_self.echo( "Failed to open RTSP stream : " + link );
 			return 0;
@@ -306,7 +310,11 @@ function OnDraw() : ( _g )
 		// Decode a frame to get the width / height
 		if ( 0 < _g.stream.getWidth() && 0 < _g.stream.getHeight() )
 		{	_g.tex = _g.irr.CreateTexture( _g.stream.getWidth(), _g.stream.getHeight(), 0 );
-			if ( _g.tex ) _g.cube.SetTexture( 0, _g.tex );
+			if ( _g.tex )
+			{	_g.cube.SetTexture( 0, _g.tex );
+				_self.echo ( "iii Created texture " + _g.stream.getWidth() + " x " + _g.stream.getHeight() );
+			} // end if
+			else _self.echo( "!!! Error creating texture " + _g.stream.getWidth() + " x " + _g.stream.getHeight() );
 		} // end if
 
 	} // end if
