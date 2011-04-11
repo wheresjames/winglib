@@ -67,6 +67,10 @@ class CRtspStream
 		::_self.echo( "\nConnecting to : " + link + "\n" );
 
 		rtsp = CLvRtspClient();
+		
+//		rtsp.setStreamOverTCP( 0 );
+//		rtsp.setTunnelOverHTTPPort( 0 );
+		
 		if ( !rtsp.Open( link, bDecodeVideo, bDecodeAudio, CSqMulti() ) )
 		{	::_self.echo( "Failed to open RTSP stream : " + link );
 			return 0;

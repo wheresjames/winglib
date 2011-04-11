@@ -58,7 +58,8 @@ Boolean CLvRtspClient::CVideoSink::continuePlaying()
 
 	} // end if
 
-	fSource->getNextFrame( (unsigned char*)m_buf._Ptr( m_header.getUsed() ), m_buf.Size(), _afterGettingFrame, this, onSourceClosure, this );
+	fSource->getNextFrame( (unsigned char*)m_buf._Ptr( m_header.getUsed() ), m_buf.Size(), 
+						   _afterGettingFrame, this, onSourceClosure, this );
 
 	return True;
 }
@@ -146,7 +147,8 @@ Boolean CLvRtspClient::CAudioSink::continuePlaying()
 	if ( !m_buf.Size() )
 		m_buf.Mem().Mem().OexNew( eDefaultBufferSize );
 
-	fSource->getNextFrame( (unsigned char*)m_buf._Ptr(), m_buf.Size(), _afterGettingFrame, this, onSourceClosure, this );
+	fSource->getNextFrame( (unsigned char*)m_buf._Ptr(), m_buf.Size(), 
+						   _afterGettingFrame, this, onSourceClosure, this );
 
 	return True;
 }
@@ -227,6 +229,8 @@ CLvRtspClient::CLvRtspClient()
 	m_fps = 0;
 	m_pVsPss = oexNULL;
 	m_pAsPss = oexNULL;
+	m_bStreamOverTCP = 0;
+	m_nTunnelOverHTTPPort = 0;
 }
 
 void CLvRtspClient::Destroy()
@@ -281,6 +285,7 @@ void CLvRtspClient::ThreadDestroy()
 
 int CLvRtspClient::Open( const sqbind::stdString &sUrl, int bVideo, int bAudio, sqbind::CSqMulti *m )
 {_STT();
+
 	Destroy();
 
 	m_sUrl = sUrl;
@@ -326,7 +331,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 #endif
 
 	// Create rtsp client
-	m_pRtspClient = RTSPClient::createNew( *m_pEnv, nVerbosity, "CLvRtspClient", 0 );
+	m_pRtspClient = RTSPClient::createNew( *m_pEnv, nVerbosity, "CLvRtspClient", m_nTunnelOverHTTPPort );
 	if ( !m_pRtspClient )
 	{	oexERROR( 0, oexMks( oexT( "RTSPClient::createNew() failed : " ), m_pEnv->getResultMsg() ) );
 		return 0;
@@ -388,6 +393,11 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	m_bVideo = bFoundVideo;
 	m_bAudio = bFoundAudio;
 
+	if ( !m_bVideo && !m_bAudio )
+	{	oexERROR( 0, oexMks( oexT( "No Video or audio : " ), m_pEnv->getResultMsg() ) );
+		return 0;
+	} // end if
+
 //	m_pRtspClient->playMediaSession( *m_pSession, 0, 0, 1.f );
 //	m_pRtspClient->playMediaSession( *m_pSession, 0, -1.f, 1.f );
 
@@ -396,8 +406,6 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 
 int CLvRtspClient::InitVideo( MediaSubsession *pss )
 {_STT();
-
-	_STT_SET_CHECKPOINT( 1 );
 
 	if ( !m_pRtspClient )
 	{	oexERROR( 0, oexT( "Invalid rtsp client object" ) );
@@ -409,15 +417,11 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 		return 0;
 	} // end if
 
-	_STT_SET_CHECKPOINT( 2 );
-
 	// Create receiver for stream
 	if ( !pss->initiate( -1 ) )
 	{	oexERROR( 0, oexMks( oexT( "initiate() video stream failed : " ), m_pEnv->getResultMsg() ) );
 		return 0;
 	} // end if
-
-	_STT_SET_CHECKPOINT( 3 );
 
 	if ( !pss->rtpSource() )
 	{	oexERROR( 0, oexMks( oexT( "RTP source is null : " ), m_pEnv->getResultMsg() ) );
@@ -425,8 +429,6 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 	} // end if
 
 	// +++ Think fmtp_config() needs to be handled
-
-	_STT_SET_CHECKPOINT( 4 );
 
 	// sprop-parameter-sets= base64(SPS),base64(PPS)[,base64(SEI)]
 	const char *props = pss->fmtp_spropparametersets();
@@ -438,14 +440,10 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 		} // end for
 	} // end if
 
-	_STT_SET_CHECKPOINT( 5 );
-
 	// Try to get the image width / height
 	m_width = pss->videoWidth();
 	m_height = pss->videoWidth();
 	m_fps = pss->videoFPS();
-
-	_STT_SET_CHECKPOINT( 6 );
 
 	// a=framesize:96 176-144
 	if ( !m_width || !m_height )
@@ -461,8 +459,6 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 		} // end if
 	} // end if
 
-	_STT_SET_CHECKPOINT( 7 );
-
 	// a=cliprect:0,0,144,176
 	if ( !m_width || !m_height )
 	{	sqbind::stdString s = m_mSdp[ oexT( "a=cliprect" ) ].str();
@@ -474,8 +470,6 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 		} // end if
 	} // end if
 
-	_STT_SET_CHECKPOINT( 8 );
-
 	// a=framerate:30
 	if ( !m_fps )
 		m_fps = m_mSdp[ oexT( "a=framerate" ) ].toint();
@@ -484,36 +478,24 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 	if ( !m_fps )
 		m_fps = m_mSdp[ oexT( "a=maxprate" ) ].toint();
 
-	_STT_SET_CHECKPOINT( 9 );
-
-	pss->rtpSource()->setPacketReorderingThresholdTime( 2000000 );
-
-	_STT_SET_CHECKPOINT( 10 );
+	pss->rtpSource()->setPacketReorderingThresholdTime( 1000000 );
 
 	int sn = pss->rtpSource()->RTPgs()->socketNum();
 	setReceiveBufferTo( *m_pEnv, sn, 2000000 );
 
-	_STT_SET_CHECKPOINT( 11 );
-
 	if ( pss->codecName() )
 		m_sVideoCodec = oexMbToStrPtr( pss->codecName() );
 
-	_STT_SET_CHECKPOINT( 12 );
-
-	if ( !m_pRtspClient->setupMediaSubsession( *pss, False, False ) )
+	if ( !m_pRtspClient->setupMediaSubsession( *pss, m_bStreamOverTCP, False ) )
 	{	oexERROR( 0, oexMks( oexT( "setupMediaSubsession() failed, Codec : " ), m_sVideoCodec.c_str(), oexT( " : " ), m_pEnv->getResultMsg() ).Ptr() );
 		return 0;
 	} // end if
-
-	_STT_SET_CHECKPOINT( 13 );
 
 	m_pVs = new CVideoSink( *m_pEnv );
 	if ( !m_pVs )
 	{	oexERROR( 0, oexMks( oexT( "CVideoSink::createNew() failed" ), oexT( " : " ), m_pEnv->getResultMsg() ) );
 		return 0;
 	} // end if
-
-	_STT_SET_CHECKPOINT( 14 );
 
 	m_pVsPss = pss;
 

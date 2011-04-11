@@ -233,6 +233,18 @@ public:
 	/// Signal start
 	void Play() { m_evtPlay.Signal(); }
 
+	/// Set to non-zero to enable streaming over tcp
+	void setStreamOverTCP( int b ) { m_bStreamOverTCP = b; }
+
+	/// Returns non-zero to enable streaming over tcp
+	int getStreamOverTCP() { return m_bStreamOverTCP; }
+
+	/// Set to nonzero http port to use for tunneling
+	void setTunnelOverHTTPPort( int p ) { m_nTunnelOverHTTPPort = p; }
+
+	/// Returns the port used for HTTP tunneling
+	int getTunnelOverHTTPPort() { return m_nTunnelOverHTTPPort; }
+
 	/** @} */
 
 	/// Idle processing static function
@@ -332,4 +344,10 @@ private:
 	/// SDP string
 	sqbind::CSqMulti		m_mSdp;
 
+	/// Non-zero to stream over TCP
+	int						m_bStreamOverTCP;
+
+	/// Non-zero to specify the HTTP port used to tunnel
+	int						m_nTunnelOverHTTPPort;
 };
+
