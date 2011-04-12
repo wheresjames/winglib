@@ -287,7 +287,10 @@ int CLvRtspServer::ThreadOpen()
 	// Authentication module
 	UserAuthenticationDatabase* pUad = oexNULL;
 
-	// Create the RTSP server:
+	// Buffer size
+//	OutPacketBuffer::maxSize = 2000000;
+
+		// Create the RTSP server:
 	m_pRtspServer = RTSPServer::createNew( *m_pEnv, m_nPort, pUad );
 	if ( !m_pRtspServer )
 	{	oexERROR( 0, oexMks( oexT( "RTSPServer::createNew() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) );
