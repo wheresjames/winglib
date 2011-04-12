@@ -4,6 +4,8 @@ _self.load_module( "ffmpeg", "" );
 
 class CGlobal
 {
+	file = _self.path( "../media/nurse_shark.avi" );
+
 	fps = 15;
 	brate = 2000000;
 
@@ -16,8 +18,6 @@ class CGlobal
 	tc = CFfTranscode();
 	frame = CSqBinary();
 	
-	fid = "";
-	tframe = CSqBinary();
 };
 
 local _g = CGlobal();
@@ -34,10 +34,7 @@ function _init() : ( _g )
 
 function StartServer() : ( _g )
 {
-	local file = _self.path( "../media/nurse_shark.avi" );
-//	local file = "test.avi";
-
-	if ( !_g.vid.Open( file, CSqMulti() ) )
+	if ( !_g.vid.Open( _g.file, CSqMulti() ) )
 	{	_self.echo( "failed to open file" );
 		return;
 	} // end if
@@ -78,19 +75,18 @@ function DeliverFrame() : ( _g )
 	{
 		if ( _g.vid.getVideoStream() == stream )
 		{
-			_self.echo( "input image = " + _g.frame.getUsed() );
-			if ( !_g.tc.Transcode( _g.frame, _g.tframe, frame_info, 0 ) )
+//			_self.echo( "input image = " + _g.frame.getUsed() );
+			local tframe = CSqBinary();
+			if ( !_g.tc.Transcode( _g.frame, tframe, frame_info, 0 ) )
 			{	_self.echo( "Transcode() failed" );
 				return;
 			} // end if		
 		
 			// Send encoded frame to rtsp server
-			if ( !_g.fid.len() )
-			{	_g.fid = _self.unique();
-				_self.set_binshare( _g.fid, _g.tframe );
-			} // end if
+			local fid = _self.unique();
+			_self.set_binshare( fid, tframe );
 			
-			_g.l555.Msg( "cmd=DeliverFrame,stream_id=shark,frame_id=" + _g.fid );
+			_g.l555.Msg( "cmd=DeliverFrame,stream_id=shark,frame_id=" + fid );
 			
 			return;
 		
@@ -98,40 +94,10 @@ function DeliverFrame() : ( _g )
 		
 	} // end while
 
-	// We're done
-//	_g.l555.deliverFrame( CSqBinary() );
+	// Reopen file
+	_g.vid.Open( _g.file, CSqMulti() );
 
 }
-
-/*
-function doGetNextFrame() : ( _g )
-{
-	local stream = -1;
-	local frame_info = CSqMulti();
-	while ( 0 <= ( stream = _g.vid.ReadFrame( _g.frame, frame_info ) ) )
-	{
-		if ( _g.vid.getVideoStream() == stream )
-		{
-//			_self.echo( "input image = " + _g.frame.getUsed() );
-			if ( !_g.tc.Transcode( _g.frame, _g.tframe, frame_info ) )
-			{	_self.echo( "Transcode() failed" );
-				return;
-			} // end if
-
-//			_self.echo( "delivering frame - " + _g.tframe.getUsed() );
-			_g.l555.deliverFrame( _g.tframe );
-
-			return;
-
-		} // end if
-
-	} // end while
-
-	// We're done
-	_g.l555.deliverFrame( CSqBinary() );
-
-}
-*/
 
 function _idle() : ( _g )
 {
