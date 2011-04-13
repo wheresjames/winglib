@@ -1159,10 +1159,11 @@ stdString CSqEngineExport::execute4( int nRet, const stdString &sPath, const std
 	return sRet;
 }
 
-int CSqEngineExport::sqexe_script( const stdString &sScript, const stdString &sDir )
+int CSqEngineExport::sqexe_script( const stdString &sScript, const stdString &sParams, const stdString &sDir )
 {_STT();
-	stdString sEscaped = oex2std( std2oex( sScript ).Escape( "\\\"\'", '\\' ) );
-	return sqexe( stdString( oexT( "-s:\"" ) ) + sEscaped + oexT( "\"" ), sDir );
+	stdString p = stdString( oexT( " -b:\"" ) ) + base64_encode( sScript ) + oexT( "\"" );
+	if ( sParams.length() ) p = p + oexT( " " ) + sParams;
+	return sqexe( p, sDir );
 }
 
 int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )

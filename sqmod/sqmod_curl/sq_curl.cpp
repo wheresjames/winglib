@@ -93,6 +93,20 @@ int CSqCurl::urlSpawn( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, 
 	return pQ->spawn2( oexNULL, sPath, sName, sScriptName, dat.getString(), oex::oexFALSE );
 }
 
+int CSqCurl::urlSqExe( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, const sqbind::stdString &sDir, const sqbind::stdString &sUrl )
+{_STT();
+
+	if ( !pQ )
+		return 0;
+
+	// Grab the data
+	sqbind::CSqBinary dat;	
+	if ( !GetUrl( sUrl, 0, &dat ) || !dat.getUsed() )
+		return 0;
+
+	return pQ->sqexe_script( oexNULL, sPath, sqbind::stdString(), dat.getString(), sDir );
+}
+
 int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSqBinary *sData )
 {_STT();
 

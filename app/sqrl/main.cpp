@@ -32,6 +32,11 @@ int run( oex::CPropertyBag &pbCmdLine )
 		if ( pbCmdLine.IsKey( "s" ) )
 			bFile = oex::oexFALSE, sCmd = pbCmdLine[ "s" ].ToString();
 		
+		// Base64 encoded script?
+		if ( pbCmdLine.IsKey( "b" ) )
+			bFile = oex::oexFALSE, sCmd = oex::CBase64::Decode( pbCmdLine[ "b" ].ToString() );
+
+		// Scrit?
 		else if ( pbCmdLine.IsKey( "script" ) )
 			bFile = oex::oexFALSE, sCmd = pbCmdLine[ "script" ].ToString();
 			

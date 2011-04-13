@@ -137,6 +137,18 @@ public:
 	/// Runs the specified script
 	oex::oexBOOL run( stdString *pReply, const stdString &sPath, const stdString &sName, const stdString &sScript );
 
+	/// Executes shell command
+	int shell( stdString *pReply, const stdString &sPath, const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
+
+	/// Executes shell command
+	int exec( stdString *pReply, const stdString &sPath, const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
+
+		/// Attempts to find the squirrel interpreter and execute the specified params
+	int sqexe( stdString *pReply, const stdString &sPath, const stdString &sParams, const stdString &sDir );
+
+	/// Attempts to find the squirrel interpreter and execute the specified script
+	int sqexe_script( stdString *pReply, const stdString &sPath, const stdString &sScript, const stdString &sParams, const stdString &sDir );
+
 	/// Executes the specified function with params
 	oex::oexBOOL execute( stdString *pReply, const stdString &sPath, const stdString &sFunction );
 	oex::oexBOOL execute( stdString *pReply, const stdString &sPath, const stdString &sFunction,

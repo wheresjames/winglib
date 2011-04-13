@@ -253,6 +253,41 @@ oex::oexBOOL CSqMsgQueue::run( stdString *pReply, const stdString &sPath, const 
 	return Msg( sPath, oexT( "msg" ), &params, pReply );
 }
 
+int CSqMsgQueue::shell( stdString *pReply, const stdString &sPath, const stdString &sFile, const stdString &sParams, const stdString &sDirectory )
+{_STT();
+	CSqMulti params;
+	params[ oexT( "shell" ) ] = sFile;
+	params[ oexT( "params" ) ] = sParams;
+	params[ oexT( "dir" ) ] = sDirectory;
+	return Msg( sPath, oexT( "msg" ), &params, pReply );
+}
+
+int CSqMsgQueue::exec( stdString *pReply, const stdString &sPath, const stdString &sFile, const stdString &sParams, const stdString &sDirectory )
+{_STT();
+	CSqMulti params;
+	params[ oexT( "exec" ) ] = sFile;
+	params[ oexT( "params" ) ] = sParams;
+	params[ oexT( "dir" ) ] = sDirectory;
+	return Msg( sPath, oexT( "msg" ), &params, pReply );
+}
+
+int CSqMsgQueue::sqexe( stdString *pReply, const stdString &sPath, const stdString &sParams, const stdString &sDir )
+{_STT();
+	CSqMulti params;
+	params[ oexT( "sqexe" ) ] = sParams;
+	params[ oexT( "dir" ) ] = sDir;
+	return Msg( sPath, oexT( "msg" ), &params, pReply );
+}
+
+int CSqMsgQueue::sqexe_script( stdString *pReply, const stdString &sPath, const stdString &sScript, const stdString &sParams, const stdString &sDir )
+{_STT();
+	CSqMulti params;
+	params[ oexT( "sqexe_script" ) ] = sScript;
+	params[ oexT( "params" ) ] = sParams;
+	params[ oexT( "dir" ) ] = sDir;
+	return Msg( sPath, oexT( "msg" ), &params, pReply );
+}
+
 oex::oexBOOL CSqMsgQueue::execute( stdString *pReply, const stdString &sPath, const stdString &sFunction )
 {_STT();
 	CSqMulti params;

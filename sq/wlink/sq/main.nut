@@ -9,6 +9,9 @@ function _init()
 	// Echo the version / build to make life easy
 	_self.echo( "WetCoin.com Integration Service : " + _self.get_version() + " / " + _self.get_build() );
 
+	// Set unique id for process spawn
+	_self.set( "/", "spawnid", _self.unique() );
+
 	// Start the web server
 	_self.spawn( 1, "", "web_server", "web_server.nut", 1 );
 }

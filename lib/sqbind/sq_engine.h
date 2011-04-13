@@ -454,7 +454,7 @@ public:
 		int sqexe( const stdString &sParams, const stdString &sDir );
 
 		/// Attempts to find the squirrel interpreter and execute the specified script
-		int sqexe_script( const stdString &sScript, const stdString &sDir );
+		int sqexe_script( const stdString &sScript, const stdString &sParams, const stdString &sDir );
 		
 		/// Installs a service
 		int service_install( const stdString &sName, const stdString &sDesc, const stdString &sExe, int bAutoRestart );

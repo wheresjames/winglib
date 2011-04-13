@@ -1,0 +1,48 @@
+
+_self.load_module( "curl", "" );
+
+local id = _self.get( "/", "cmdline.id" );
+local url = _self.get( "/", "cmdline.url" );
+
+if ( !id.len() || !url.len() )
+	_self.echo( "Invalid URL" );
+else
+{
+	local name = id;
+
+	if ( !CSqCurl().urlSpawn( _self.queue(), "", id, name, url ) )
+		_self.echo( "Failed to start : " + url );
+	else
+	{
+		local share = CSqBinary();
+		share.SetName( id );
+		share.PlainShare( 1 );
+		share.Allocate( 8 );
+		share.setUsed( 8 );
+		share.setUINT( 0, 0 );
+		share.setUINT( 1, _self.gmt_time() );
+	
+		_self.echo( "Running : " + url );
+
+		local devlist = "";
+		do
+		{	
+			// Every so often
+			_self.sleep( 1000 );
+
+			// Verify heartbeat
+			if ( share.getUINT( 1 ) < ( _self.gmt_time() - 30 ) )
+			{	_self.echo( "Heartbeat failed" );
+				share.setUINT( 0, 1 );
+			} // end if
+			
+			// Check that the script is still running
+			else devlist = split( _self.get_children( "." ), "," );
+			
+		} while ( !share.getUINT( 0 ) && devlist.len() );
+
+		_self.echo( "Script exited : " + url );
+	}
+}
+
+_self.sleep( 3000 );
