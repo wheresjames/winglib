@@ -1,6 +1,4 @@
 
-_self.load_module( "http", "" );
-
 class CGlobal
 {
 	server = 0;
@@ -42,17 +40,23 @@ function OnProcessRequest( params ) : ( _g )
 			// Return to web server
 			mReply[ "binary" ] <- id,
 			mReply[ "binary_type" ] <- "jpg";
+			
+			// Release capture buffer
+			_g.cap.ReleaseFrame();
+			
 			return mReply.serialize();
 
 		} // end if
 		else
 			err = img.getLastErrorStr();
 
+		// Release capture buffer
+		_g.cap.ReleaseFrame();
+
 	} // end if
 
 	else
 		err = _g.cap.getLastErrorStr();
-
 
 	mReply[ "content" ] <- "Capture Failed : " + err;
 
