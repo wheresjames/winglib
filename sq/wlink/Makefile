@@ -10,6 +10,7 @@ PRJ_DESC := WetCoin.com Site Integration Service
 PRJ_DEFS := 
 PRJ_WINL := winmm strmiids
 PRJ_VSLB := dshowbase
+PRJ_RESD := res
 
 SQMOD_STATIC :=
 

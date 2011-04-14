@@ -64,8 +64,8 @@ function StartServer() : ( _g )
 
 function DeliverFrame() : ( _g )
 {
-	if ( !_g.running && _g.l555.isThread() )
-	{	_g.running = 1;
+	if ( !_g.running )
+	{	if ( !_g.l555.isThread() ) return; _g.running = 1;
 		_self.echo( "RTSP Server running : " + _g.l555.getUrl( "shark" ) );
 	} // end if
 	else if ( !_g.running ) return;
@@ -85,7 +85,6 @@ function DeliverFrame() : ( _g )
 			// Send encoded frame to rtsp server
 			local fid = _self.unique();
 			_self.set_binshare( fid, tframe );
-			
 			_g.l555.Msg( "cmd=DeliverFrame,stream_id=shark,frame_id=" + fid );
 			
 			return;
@@ -101,7 +100,7 @@ function DeliverFrame() : ( _g )
 
 function _idle() : ( _g )
 {
-	if ( !_g.l555.isThread() )
+	if ( _g.running && !_g.l555.isThread() )
 	{	_self.echo( "Server thread has stopped" );
 		return 1;
 	} // end if

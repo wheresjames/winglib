@@ -1151,10 +1151,48 @@ void CScriptThread::OnSpawn( CSqMulti &mapParams, stdString *pReply )
 
 void CScriptThread::OnMsg( CSqMulti &mapParams, stdString *pReply )
 {_STT();
+
+	int ret = 0;
+
 	// Run script?
 	if ( mapParams[ oexT( "run" ) ].length() )
 		m_cSqEngine.Run( pReply, mapParams[ oexT( "name" ) ].c_str(), mapParams[ oexT( "run" ) ].c_str() );
 
+	// shell
+	else if ( mapParams[ oexT( "shell" ) ].length() )
+	{	ret = m_cSqEngine.shell( mapParams[ oexT( "shell" ) ].c_str(), 
+								 mapParams[ oexT( "params" ) ].c_str(),
+								 mapParams[ oexT( "dir" ) ].c_str() );
+		if ( pReply ) 
+			*pReply = oex2std( oexMks( ret ) );
+	} // end if
+
+	// exec
+	else if ( mapParams[ oexT( "exec" ) ].length() )
+	{	ret = m_cSqEngine.exec( mapParams[ oexT( "exec" ) ].c_str(), 
+								mapParams[ oexT( "params" ) ].c_str(),
+								mapParams[ oexT( "dir" ) ].c_str() );
+		if ( pReply ) 
+			*pReply = oex2std( oexMks( ret ) );
+	} // end if
+
+	// sqexe
+	else if ( mapParams[ oexT( "sqexe" ) ].length() )
+	{	ret = m_cSqEngine.sqexe( mapParams[ oexT( "sqexe" ) ].c_str(), 
+								 mapParams[ oexT( "dir" ) ].c_str() );
+		if ( pReply ) 
+			*pReply = oex2std( oexMks( ret ) );
+	} // end if
+		
+	// sqexe_script
+	else if ( mapParams[ oexT( "sqexe_script" ) ].length() )
+	{	ret = m_cSqEngine.sqexe_script( mapParams[ oexT( "sqexe_script" ) ].c_str(), 
+										mapParams[ oexT( "params" ) ].c_str(),
+										mapParams[ oexT( "dir" ) ].c_str() );
+		if ( pReply ) 
+			*pReply = oex2std( oexMks( ret ) );
+	} // end if
+		
 	// Execute function?
 	else if ( mapParams.isset( oexT( "execute" ) ) )
 		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute" ) ].c_str() );
