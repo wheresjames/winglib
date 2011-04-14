@@ -3,11 +3,12 @@ _self.load_module( "portaudio", "" );
 
 function _init()
 {
+	local pi = CPaInput();
 	local pa = CPaOutput();
 
 	_self.echo( "=====================================================" );
 	_self.echo( "Total Devices         : " + pa.getDeviceCount() );
-	_self.echo( "Default input device  : " + pa.getDefaultInputDevice() );
+	_self.echo( "Default input device  : " + pi.getDefaultInputDevice() );
 	_self.echo( "Default output device : " + pa.getDefaultOutputDevice() );
 	_self.echo( "=====================================================" );
 
@@ -24,13 +25,13 @@ function _init()
 
 	_self.echo( "=====================================================" );
 	
-	TestInput();
+	TestInput( pi );
 
 	_self.echo( "=====================================================" );
 	_self.echo( "" );
 	_self.echo( "=====================================================" );
 	
-	TestOutput();
+	TestOutput( pa );
 
 	_self.echo( "=====================================================" );
 
@@ -39,22 +40,20 @@ function _init()
 	return 0;
 }
 
-function TestInput()
+function TestInput( pi )
 {
-	local pa = CPaInput();
+	_self.echo( "*** Opening input device : " + pi.getDefaultInputDevice() );
 
-	_self.echo( "*** Opening input device : " + pa.getDefaultInputDevice() );
-
-	if ( !pa.Open( 1, pa.getDefaultInputDevice(), 1, 
+	if ( !pi.Open( 1, pi.getDefaultInputDevice(), 1, 
 				   CPaInput().paFloat32, 0.2, 44100., 0 ) )
-	{   _self.echo( "!!! Failed to open input stream : " + pa.getLastError() );
+	{   _self.echo( "!!! Failed to open input stream : " + pi.getLastError() );
 		return 0;
 	} // end if
 
 	_self.echo( "*** Starting the input device" );
 
-	if ( !pa.Start() )
-	{   _self.echo( "!!! Failed to start input stream : " + pa.getLastError() );
+	if ( !pi.Start() )
+	{   _self.echo( "!!! Failed to start input stream : " + pi.getLastError() );
 		return 0;
 	} // end if
 
@@ -66,14 +65,14 @@ function TestInput()
 	local dat = CSqBinary();
 	while ( _self.gmt_time() < to && dat.getUsed() < maxread )
 	{	_self.sleep( 15 );
-		if ( pa.Read( dat, 0 ) )
+		if ( pi.Read( dat, 0 ) )
 			_self.print( "\r*** Capturing audio : " + dat.getUsed() );
 	} // end while
 
 	_self.echo( "\n*** Stoping the input device" );
 
-	if ( !pa.Stop() )
-	{   _self.echo( "!!! Failed to stop input stream : " + pa.getLastError() );
+	if ( !pi.Stop() )
+	{   _self.echo( "!!! Failed to stop input stream : " + pi.getLastError() );
 		return 0;
 	} // end if
 
@@ -87,10 +86,8 @@ function TestInput()
 
 }
 
-function TestOutput()
+function TestOutput( pa )
 {
-	local pa = CPaOutput();
-
 	local hz = 440;
 	local sps = 44100.;
 	local bsize = ( sps / hz * 200 ).tointeger();

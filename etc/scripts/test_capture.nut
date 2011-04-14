@@ -24,7 +24,7 @@ function OnProcessRequest( params ) : ( _g )
 	local pix = CSqBinary();
 
 	// Lock the capture frame
-	if ( 0 < _g.cap.Capture( pix, 3000 ) )
+	if ( 0 < _g.cap.Capture( pix, 100 ) )
 	{
 		// Create an image to do the encoding
 		local img = CSqImage();
@@ -41,14 +41,10 @@ function OnProcessRequest( params ) : ( _g )
 			mReply[ "binary" ] <- id,
 			mReply[ "binary_type" ] <- "jpg";
 			
-			// Release capture buffer
-			_g.cap.ReleaseFrame();
-			
-			return mReply.serialize();
-
 		} // end if
+		
 		else
-			err = img.getLastErrorStr();
+			mReply[ "content" ] <- "Failed to create image buffer : " + err;
 
 		// Release capture buffer
 		_g.cap.ReleaseFrame();
@@ -56,9 +52,7 @@ function OnProcessRequest( params ) : ( _g )
 	} // end if
 
 	else
-		err = _g.cap.getLastErrorStr();
-
-	mReply[ "content" ] <- "Capture Failed : " + err;
+		mReply[ "content" ] <- "Capture Failed : " + err;
 
 	return mReply.serialize();
 }
