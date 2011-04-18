@@ -65,8 +65,10 @@ function StartServer() : ( _g )
 function DeliverFrame() : ( _g )
 {
 	if ( !_g.running )
-	{	if ( !_g.l555.isThread() ) return; _g.running = 1;
-		_self.echo( "RTSP Server running : " + _g.l555.getUrl( "shark" ) );
+	{	if ( !_g.l555.isThread() ) return; 
+		local url = _g.l555.getUrl( "shark" ); 
+		if ( !url.len() ) return; _g.running = 1;
+		_self.echo( "RTSP Server running : " + url );
 	} // end if
 	else if ( !_g.running ) return;
 
