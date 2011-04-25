@@ -36,6 +36,41 @@
 
 using namespace sqbind;
 
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqDataLog, CSqDataLog )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, Destroy )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, setRoot )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getRoot )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, AddKey )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, RemoveKey )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, FindKey )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, Log )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, Flush )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getKeyList )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getLog )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getLogBin )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getBufferSize )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, setLogParams )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getBase )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getStep )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getLimit )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, setLimit )
+	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itStart )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itNext )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itPrev )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itRead )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itClose )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itTimeMs )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itSize )
+	
+SQBIND_REGISTER_CLASS_END()
+
+void CSqDataLog::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CSqDataLog );
+}
+
 CSqMulti CSqDataLog::getKeyList( SQINT nTime )
 {	CSqMulti m;
 	oex::CPropertyBag pb( m_dl.GetKeyList( nTime ) );

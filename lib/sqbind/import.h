@@ -38,6 +38,7 @@
 #include "import/sq_factory.h"
 #include "import/sq_generic.h"
 #include "import/sq_binary.h"
+#include "import/sq_video_share.h"
 #include "import/sq_multi.h"
 #include "import/sq_file.h"
 #include "import/sq_time.h"

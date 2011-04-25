@@ -393,3 +393,4 @@ namespace sqbind
 
 // Declare type for use as squirrel parameters
 SQBIND_DECLARE_INSTANCE( sqbind::CSqBinary, CSqBinary )
+

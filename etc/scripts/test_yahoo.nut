@@ -146,4 +146,3 @@ function _idle() : ( _g )
 	return _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
 }
 
-

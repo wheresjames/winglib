@@ -320,6 +320,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexLocalTimeStr						OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eLocalTime ).FormatTime
 #define oexGmtTimeStr						OEX_NAMESPACE::CSysTime( OEX_NAMESPACE::CSysTime::eGmtTime ).FormatTime
 #define oexGetUnixTime						OEX_NAMESPACE::os::CSys::GetUnixTime
+#define oexTimeout							OEX_NAMESPACE::os::CTimeout
 
 #define oexSleep							OEX_NAMESPACE::os::CSys::Sleep
 #define oexGetBootCount						OEX_NAMESPACE::os::CHqTimer::GetBootCount
@@ -344,6 +345,8 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexIsKey							OEX_NAMESPACE::os::CSys::IsKey
 
 #define oexMd5								OEX_NAMESPACE::CUtil::md5
+#define oexGuid								OEX_NAMESPACE::CUtil::guid
+#define oexUnique							OEX_NAMESPACE::CStr().GuidToString
 #define oexGuidToString						OEX_NAMESPACE::CStr().GuidToString
 #define oexUniqueGuid( g )					OEX_NAMESPACE::guid::StringToGuid( g, (OEX_NAMESPACE::oexCSTR)NULL, 0 )
 #ifndef OEX_NOSTRUCTINIT
@@ -367,6 +370,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexTlsAllocate						OEX_NAMESPACE::os::CThreadLocalStorage::Allocate
 #define oexTlsGetValue						OEX_NAMESPACE::os::CThreadLocalStorage::GetValue
 #define oexTlsSetValue						OEX_NAMESPACE::os::CThreadLocalStorage::SetValue
+#define oexPumpThreadMessages				OEX_NAMESPACE::os::CSys::PumpThreadMessages
 
 // std library
 #if defined( OEXLIB_CUSTOM_STD_ALLOCATOR )
