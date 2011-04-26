@@ -45,7 +45,7 @@ public:
 	/// Convert AVFrame
 	static int ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height, int dst_fmt, sqbind::CSqBinary *dst, int alg, int flip );
 
-	/// Converts image colorspace
+	/// Rotates an image
 	static int Rotate( int deg, sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqBinary *dst, int dst_fmt );
 
 	/// Flips image verticaly

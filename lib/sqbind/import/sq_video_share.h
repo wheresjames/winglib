@@ -43,6 +43,7 @@ namespace sqbind
 		// Key values
 #		define SQSVS_PREFIX		oexT( "oex_video_share_" )
 #		define SQSVS_CBID		0xBEBADDBA
+#		define SQSVS_PADDING	64
 	
 	public:
 
@@ -131,6 +132,18 @@ namespace sqbind
 		/// Returns non-zero if global access to share is enabled
 		int getGlobal() { return m_bGlobal; }
 
+		/// Sets the amount of padding to add to the end of the image buffer
+		/**
+			Many codecs read over the end of the buffer, and so padding is required.
+		*/
+		void setPadding( int n ) { m_nPadding = n; }
+		
+		/// Returns the amount of padding added to the end of the image buffer
+		/**
+			Many codecs read over the end of the buffer, and so padding is required.
+		*/
+		int getPadding() { return m_nPadding; }
+		
 		/// Returns the number of image buffers from the control block
 		int getBuffers()
 		{	if ( !m_cb.getUsed() ) 
@@ -158,7 +171,14 @@ namespace sqbind
 				return 0;
 			return m_cb.getINT( 5 );
 		}
-		
+
+		/// Returns the image format from the control block
+		int getFmt()
+		{	if ( !m_cb.getUsed() ) 
+				return 0;
+			return m_cb.getINT( 6 );
+		}
+
 		/// Returns the image size from the control block
 		int getImageSize()
 		{	if ( !m_cb.getUsed() ) 
@@ -208,7 +228,9 @@ namespace sqbind
 		*/
 		int WriteFrame( sqbind::CSqBinary *frame );
 		
-		
+		/// Returns non-zero if a share is open
+		int isOpen() { return ( m_cb.getUsed() && m_buf.getUsed() ); }
+
 		/** @} */
 	
 	private:
@@ -221,6 +243,9 @@ namespace sqbind
 		
 		/// Non-zero to allow frame skipping
 		int						m_bAllowFrameSkipping;
+		
+		/// Padding added to the end of the allocated buffer
+		int						m_nPadding;
 		
 		/// Control block id
 		oex::oexUINT			m_uCbId;

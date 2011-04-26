@@ -59,7 +59,6 @@ int CFfConvert::FmtEquiv( int fmt )
 	} // end switch
 }
 
-
 int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, int src_fmt, sqbind::CSqBinary *dst, int dst_fmt, int alg )
 {_STT();
 
@@ -71,7 +70,10 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 		return 0;
 
 	int flip = 0;
-	if ( 0 > height ) { flip = 1; height = -height; }
+	if ( 0 > height ) 
+	{ 	flip = 1; 
+		height = -height; 
+	} // end if
 
 	if ( 0 >= width || 0 >= height || ( width % 4 ) )
 		return 0;
@@ -99,13 +101,21 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	     || !FillAVPicture( &apDst, dst_fmt, width, height, dst->_Ptr() ) )
 		return 0;
 
+//	if ( flip )
+//		for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
+//		{	if ( apSrc.data[ z ] )
+//				apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
+//			if ( apSrc.linesize[ z ] )
+//				apSrc.linesize[ z ] = -apSrc.linesize[ z ];
+//		} // end for
+
 	// Flip?
 	if ( flip )
-		for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
-		{	if ( apSrc.data[ z ] )
-				apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
-			if ( apSrc.linesize[ z ] )
-				apSrc.linesize[ z ] = -apSrc.linesize[ z ];
+		for ( int z = 0; z < (int)oexSizeOfArray( apDst.linesize ); z++ )
+		{	if ( apDst.data[ z ] )
+				apDst.data[ z ] = apDst.data[ z ] + ( height - 1 ) * apDst.linesize[ z ];
+			if ( apDst.linesize[ z ] )
+				apDst.linesize[ z ] = -apDst.linesize[ z ];
 		} // end for
 
 	// Create conversion
@@ -529,6 +539,7 @@ int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height
 				if ( apDst.linesize[ z ] )
 					apDst.linesize[ z ] = -apDst.linesize[ z ];
 			} // end for
+			
 	} // end if
 
 	// Create conversion

@@ -51,6 +51,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqVideoShare, CSqVideoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getWidth )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getHeight )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getFps )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getFmt )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getImageSize )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getNextImg )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getLastImg )
@@ -61,6 +62,10 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqVideoShare, CSqVideoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, setLastErrorStr )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getWriteImg )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, incWritePtr )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, isOpen )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, setPadding )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getPadding )
+//	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare,  )
 //	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare,  )
 
 SQBIND_REGISTER_CLASS_END()
@@ -77,6 +82,7 @@ CSqVideoShare::CSqVideoShare()
 	m_iRead = 0;
 	m_bGlobal = 1;
 	m_bWrite = 0;
+	m_nPadding = SQSVS_PADDING;
 	m_bAllowFrameSkipping = 0;
 }
 
@@ -87,6 +93,7 @@ CSqVideoShare::CSqVideoShare( const sqbind::stdString &sPrefix, SQInteger nId, S
 {
 	m_iRead = 0;
 	m_bWrite = 0;
+	m_nPadding = SQSVS_PADDING;
 	m_bAllowFrameSkipping = 0;
 }
 
@@ -98,6 +105,7 @@ CSqVideoShare::CSqVideoShare( const CSqVideoShare &r )
 {
 	m_iRead = 0;
 	m_bWrite = 0;
+	m_nPadding = SQSVS_PADDING;
 	m_bAllowFrameSkipping = 0;
 }
 
@@ -107,6 +115,7 @@ void CSqVideoShare::Destroy()
 
 	m_sName = oexT( "" );
 	m_cb.Free();
+	m_buf.Free();
 
 	m_bWrite = 0;
 	m_bAllowFrameSkipping = 0;
@@ -128,7 +137,7 @@ int CSqVideoShare::Create( const sqbind::stdString &sName, int nBuffers, int nIm
 
 	// Structure size
 	int struct_size = 4 * 11;
-	
+
 	// Share name
 	sqbind::stdString sid = m_bGlobal ? oexT( "Global\\" ) : oexT( "" ); 
 	sid += oex2std( oexGuid( std2oex( sqbind::stdString( m_sPrefix ) + m_sName ) ) );
@@ -168,15 +177,16 @@ int CSqVideoShare::Create( const sqbind::stdString &sName, int nBuffers, int nIm
 
 	// Image buffer share name
 	sid = m_bGlobal ? oexT( "Global\\" ) : oexT( "" ); 
-	sid += oex2std( oexMd5( std2oex( sqbind::stdString( m_sPrefix ) + oexT( "buffer_" ) + m_sName ) ) );
+	sid += oex2std( oexGuid( std2oex( sqbind::stdString( m_sPrefix ) + oexT( "buffer_" ) + m_sName ) ) );
 	
 	// Set image buffer info
 	m_buf.SetName( sid );
 	m_buf.PlainShare( 1 );
 	
 	// Attempt to allocate the image buffer
-	if ( !m_buf.Allocate( nBuffers * nImgSize ) )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate image buffer of " ), nBuffers * nImgSize, oexT( " bytes : " ), std2oex( m_sName ) ) );
+	int size = nBuffers * nImgSize + m_nPadding;
+	if ( !m_buf.Allocate( size ) )
+	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate image buffer of " ), size, oexT( " bytes : " ), std2oex( m_sName ) ) );
 		Destroy();
 		return 0;
 	} // end if
@@ -209,7 +219,7 @@ int CSqVideoShare::Open( const sqbind::stdString &sName, int bAllowFrameSkipping
 	
 	// Share name
 	sqbind::stdString sid = m_bGlobal ? oexT( "Global\\" ) : oexT( "" ); 
-	sid += oex2std( oexMd5( std2oex( sqbind::stdString( m_sPrefix ) + sName ) ) );
+	sid += oex2std( oexGuid( std2oex( sqbind::stdString( m_sPrefix ) + sName ) ) );
 	
 	// Set share info
 	m_cb.SetName( sid ); 
@@ -217,13 +227,13 @@ int CSqVideoShare::Open( const sqbind::stdString &sName, int bAllowFrameSkipping
 
 	// Attempt to open existing share
 	if ( !m_cb.Allocate( struct_size ) )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate control block of " ), struct_size, oexT( " bytes : " ), std2oex( m_sName ) ) );
+	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate control block of " ), struct_size, oexT( " bytes : " ), std2oex( sName ) ) );
 		Destroy();
 		return 0;
 	} // end if
 	
 	if ( !m_cb.Existing() )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Share control block does not exist : " ), std2oex( m_sName ) ) );
+	{	m_sLastErr = oex2std( oexMks( oexT( "Share control block does not exist : " ), std2oex( sName ) ) );
 		Destroy();
 		return 0;
 	} // end if
@@ -252,22 +262,23 @@ int CSqVideoShare::Open( const sqbind::stdString &sName, int bAllowFrameSkipping
 
 	// Image buffer share name
 	sid = m_bGlobal ? oexT( "Global\\" ) : oexT( "" ); 
-	sid += oex2std( oexMd5( std2oex( sqbind::stdString( m_sPrefix ) + oexT( "buffer_" ) + sName ) ) );
+	sid += oex2std( oexGuid( std2oex( sqbind::stdString( m_sPrefix ) + oexT( "buffer_" ) + sName ) ) );
 	
 	// Set image buffer info
 	m_buf.SetName( sid );
 	m_buf.PlainShare( 1 );
 	
 	// Attempt to allocate the image buffer
-	if ( !m_buf.Allocate( nBuffers * nImgSize ) )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate image buffer of " ), nBuffers * nImgSize, oexT( " bytes : " ), std2oex( m_sName ) ) );
+	int size = nBuffers * nImgSize + m_nPadding;
+	if ( !m_buf.Allocate( size ) )
+	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate image buffer of " ), size, oexT( " bytes : " ), std2oex( sName ) ) );
 		Destroy();
 		return 0;
 	} // end if
 
 	// Punt if it doesn't exist
 	if ( !m_buf.Existing() )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Share image buffer does not exist : " ), std2oex( m_sName ) ) );
+	{	m_sLastErr = oex2std( oexMks( oexT( "Share image buffer does not exist : " ), std2oex( sName ), oexT( " : " ), std2oex( sid ) ) );
 		Destroy();
 		return 0;
 	} // end if
@@ -365,7 +376,7 @@ sqbind::CSqBinary CSqVideoShare::getWriteImg()
 	if ( 0 > i || i >= nBuffers )
 		i = 0;
 
-	// Return the latest frame
+	// Return the next frame buffer
 	return m_buf.getSub( i * nImgSize, nImgSize );
 }
 
@@ -422,9 +433,15 @@ int CSqVideoShare::WriteFrame( sqbind::CSqBinary *frame )
 	int nImgSize = getImageSize();
 	if ( 0 > i || i >= nBuffers ) 
 		i = 0;
+		
+	// Ensure it's not too much data
+	int nCopy = nImgSize;
+	if ( m_buf.getUsed() < nCopy )
+		nCopy = m_buf.getUsed();
 	
 	// Copy the image data into the shared buffer
-	m_buf.MemCpyAt( frame, i * nImgSize );
+	m_buf.MemCpyNumAt( frame, i * nImgSize, nCopy );
+//	m_buf.MemCpyAt( frame, i * nImgSize );
 
 	// Count a frame written
 	m_cb.setUINT( 8, m_cb.getUINT( 8 ) + 1 );
