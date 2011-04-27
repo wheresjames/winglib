@@ -18,12 +18,6 @@ public:
 	/// Patches broken formats
 	static int FmtEquiv( int fmt );
 
-	/// Fills in frame data for specified format
-	static int FillAVFrame( AVFrame *pAv, int fmt, int width, int height, void *buf );
-
-	/// Fills in the picture structure for the specified format
-	static int FillAVPicture( AVPicture *pPic, int fmt, int width, int height, void *buf );
-
 	/// Calculate image buffer size for specified format
 	static int CalcImageSize( int fmt, int width, int height );
 
@@ -39,12 +33,6 @@ public:
 	/// Converts image colorspace
 	static int ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip );
 
-	/// Convert AVFrame to image
-	static int ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip );
-
-	/// Convert AVFrame
-	static int ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height, int dst_fmt, sqbind::CSqBinary *dst, int alg, int flip );
-
 	/// Rotates an image
 	static int Rotate( int deg, sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqBinary *dst, int dst_fmt );
 
@@ -53,6 +41,23 @@ public:
 
 	/** @} */
 
+public:
+
+	// Flips the information in an AVPicture structure
+	static int Flip( int fmt, int h, AVPicture *p );
+	
+	/// Fills in frame data for specified format
+	static int FillAVFrame( AVFrame *pAv, int fmt, int width, int height, void *buf );
+
+	/// Fills in the picture structure for the specified format
+	static int FillAVPicture( AVPicture *pPic, int fmt, int width, int height, void *buf );
+	
+	/// Convert AVFrame to image
+	static int ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip );
+
+	/// Convert AVFrame
+	static int ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height, int dst_fmt, sqbind::CSqBinary *dst, int alg, int flip );
+	
 	/// Convert raw buffer to image
 	static int ConvertColorRI( void *buf, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip );
 

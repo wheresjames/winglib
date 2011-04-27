@@ -44,6 +44,7 @@ namespace sqbind
 #		define SQSVS_PREFIX		oexT( "oex_video_share_" )
 #		define SQSVS_CBID		0xBEBADDBA
 #		define SQSVS_PADDING	64
+#		define SQSVS_HEADERSIZE	( 18 * 4 )
 	
 	public:
 
@@ -80,6 +81,7 @@ namespace sqbind
 		/// Creates a writable share
 		/**
 			@param [in] sName		-	Share name
+			@param [in] sBufName	-	Share name for the image buffer.  Leave blank if same as sName.
 			@param [in] nBuffers	-	Number of video buffers to allocate
 			@param [in] nImgSize	-	Size of a single image frame
 			@param [in] nWidth		-	Width of a video frame
@@ -92,7 +94,7 @@ namespace sqbind
 			@return Non-zero if success
 		
 		*/
-		int Create( const sqbind::stdString &sName, int nBuffers, int nImgSize, int nWidth, int nHeight, int nFps, int nFmt );
+		int Create( const sqbind::stdString &sName, const sqbind::stdString &sBufName, int nBuffers, int nImgSize, int nWidth, int nHeight, int nFps, int nFmt );
 
 		/// Opens an existing share
 		/**
@@ -186,6 +188,77 @@ namespace sqbind
 			return m_cb.getINT( 7 );
 		}
 		
+		/// Returns the image format from the control block
+		int getTs()
+		{	if ( !m_cb.getUsed() ) 
+				return 0;
+			return m_cb.getINT( 11 );
+		}
+		
+		/// Returns the header size from the control block
+		int getHeaderSize()
+		{	if ( !m_cb.getUsed() ) 
+				return 0;
+			return m_cb.getINT( 12 );
+		}
+		
+		/// Returns the header size from the control block
+		int getBufferGuid( sqbind::CSqBinary *p )
+		{
+			if ( !m_cb.getUsed() ) 
+				return 0;
+			
+			if ( 16 != sizeof( oex::oexGUID ) )
+				return 0;
+			
+			// Ensure there is space for the guid
+			if ( p->Size() < sizeof( oex::oexGUID ) && !p->Allocate( sizeof( oex::oexGUID ) ) )
+				return 0;
+
+			// Copy guid
+			p->setUINT( 0, m_cb.getUINT( 14 ) );
+			p->setUINT( 1, m_cb.getUINT( 15 ) );
+			p->setUINT( 2, m_cb.getUINT( 16 ) );
+			p->setUINT( 3, m_cb.getUINT( 17 ) );
+			p->setUsed( sizeof( oex::oexGUID ) );
+			
+			return sizeof( oex::oexGUID );
+		}
+		
+		/// Copy's the guid from the control block
+		sqbind::stdString getBufferGuidStr()
+		{
+			if ( !m_cb.getUsed() ) 
+				return oexT( "" );
+			
+			if ( 16 != sizeof( oex::oexGUID ) )
+				return oexT( "" );
+
+			// Copy guid
+			oex::oexGUID guid;
+			guid.u1 = m_cb.getUINT( 14 );
+			guid.u2 = m_cb.getUINT( 15 );
+			guid.u3 = m_cb.getUINT( 16 );
+			guid.u4 = m_cb.getUINT( 17 );
+
+			return sqbind::oex2std( oex::CStr( guid ) );
+		}
+		
+		
+		/// Set to non-zero to tell the writer to reset
+		void setReset( int b )
+		{	if ( !m_cb.getUsed() ) 
+				return;
+			m_cb.setINT( 13, b );
+		}
+		
+		/// Returns the current reset value
+		int getReset()
+		{	if ( !m_cb.getUsed() ) 
+				return 0;
+			return m_cb.getINT( 13 );
+		}
+		
 		/// Set to non-zero to allow frame skipping
 		void setAllowFrameSkipping( int b ) { m_bAllowFrameSkipping = b; }
 		
@@ -233,26 +306,49 @@ namespace sqbind
 
 		/** @} */
 	
+protected:
+
+		/// Copy's the guid from the control block
+		oex::oexGUID* CopyGuid( oex::oexGUID *p )
+		{
+			if ( !m_cb.getUsed() || !p ) 
+				return 0;
+			
+			if ( 16 != sizeof( oex::oexGUID ) )
+				return 0;
+
+			// Copy guid
+			p->u1 = m_cb.getUINT( 14 );
+			p->u2 = m_cb.getUINT( 15 );
+			p->u3 = m_cb.getUINT( 16 );
+			p->u4 = m_cb.getUINT( 17 );
+
+			return p;
+		}
+
 	private:
-	
+
 		/// Non-zero for global share
 		int						m_bGlobal;
 
 		/// Non-zero if the share is open for writing
 		int						m_bWrite;
-		
+
 		/// Non-zero to allow frame skipping
 		int						m_bAllowFrameSkipping;
-		
+
 		/// Padding added to the end of the allocated buffer
 		int						m_nPadding;
-		
+
+		/// Time the stream was opened
+		oex::oexUINT			m_uTs;
+
 		/// Control block id
 		oex::oexUINT			m_uCbId;
-	
+
 		/// The share name
 		sqbind::stdString		m_sName;
-	
+
 		/// Share prefix
 		sqbind::stdString		m_sPrefix;
 
@@ -261,13 +357,12 @@ namespace sqbind
 
 		/// The shared buffer
 		CSqBinary				m_buf;
-		
+
 		/// String describing the last error
 		sqbind::stdString		m_sLastErr;
-		
+
 		/// Current read index
 		int						m_iRead;
-
 	};
 
 }; // end namespace

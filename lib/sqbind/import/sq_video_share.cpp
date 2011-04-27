@@ -52,6 +52,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqVideoShare, CSqVideoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getHeight )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getFps )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getFmt )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getTs )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getImageSize )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getNextImg )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getLastImg )
@@ -65,7 +66,11 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqVideoShare, CSqVideoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, isOpen )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, setPadding )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getPadding )
-//	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare,  )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getHeaderSize )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getBufferGuid )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getBufferGuidStr )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getReset )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, setReset )
 //	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare,  )
 
 SQBIND_REGISTER_CLASS_END()
@@ -84,6 +89,7 @@ CSqVideoShare::CSqVideoShare()
 	m_bWrite = 0;
 	m_nPadding = SQSVS_PADDING;
 	m_bAllowFrameSkipping = 0;
+	m_uTs = 0;
 }
 
 CSqVideoShare::CSqVideoShare( const sqbind::stdString &sPrefix, SQInteger nId, SQInteger nGlobal )
@@ -95,6 +101,7 @@ CSqVideoShare::CSqVideoShare( const sqbind::stdString &sPrefix, SQInteger nId, S
 	m_bWrite = 0;
 	m_nPadding = SQSVS_PADDING;
 	m_bAllowFrameSkipping = 0;
+	m_uTs = 0;
 }
 
 
@@ -107,23 +114,32 @@ CSqVideoShare::CSqVideoShare( const CSqVideoShare &r )
 	m_bWrite = 0;
 	m_nPadding = SQSVS_PADDING;
 	m_bAllowFrameSkipping = 0;
+	m_uTs = 0;
 }
 
 
 void CSqVideoShare::Destroy()
 {_STT();
 
+	// Indicate that we have detached
+	if ( m_bWrite )
+	{	m_cb.setUINT( 0, 0 );
+		m_cb.setUINT( 11, 0 );
+	} // end if
+
 	m_sName = oexT( "" );
+
 	m_cb.Free();
 	m_buf.Free();
 
 	m_bWrite = 0;
 	m_bAllowFrameSkipping = 0;
+	m_uTs = 0;
 
 	m_iRead = 0;
 }
 
-int CSqVideoShare::Create( const sqbind::stdString &sName, int nBuffers, int nImgSize, int nWidth, int nHeight, int nFps, int nFmt )
+int CSqVideoShare::Create( const sqbind::stdString &sName, const sqbind::stdString &sBufName, int nBuffers, int nImgSize, int nWidth, int nHeight, int nFps, int nFmt )
 {_STT();
 
 	// Lose the old share
@@ -135,35 +151,74 @@ int CSqVideoShare::Create( const sqbind::stdString &sName, int nBuffers, int nIm
 	else
 		m_sName = oex2std( oexUnique() );
 
-	// Structure size
-	int struct_size = 4 * 11;
+	// Are we sharing an image buffer?
+	int bShareBuffer = 0;
+	if ( sBufName.length() && sName != sBufName )
+		bShareBuffer = 1;
 
-	// Share name
-	sqbind::stdString sid = m_bGlobal ? oexT( "Global\\" ) : oexT( "" ); 
-	sid += oex2std( oexGuid( std2oex( sqbind::stdString( m_sPrefix ) + m_sName ) ) );
+	// Structure size
+	int struct_size = SQSVS_HEADERSIZE;
+
+	// Control block share name
+	oex::oexGUID guidName;
+	oex::CStr sgName = oexGuid( std2oex( sqbind::stdString( m_sPrefix ) + m_sName ) );
+	sqbind::stdString sidName = ( m_bGlobal ? oexT( "Global\\" ) : oexT( "" ) ) + oex2std( sgName ); 
+	sgName.StringToGuid( guidName );
+
+	// Image buffer share name
+	oex::oexGUID guidBuffer;
+	oex::CStr sgBuffer = oexGuid( std2oex( sqbind::stdString( m_sPrefix ) + oexT( "buffer_" ) + ( bShareBuffer ? sBufName : m_sName ) ) );
+	sqbind::stdString sidBuffer = ( m_bGlobal ? oexT( "Global\\" ) : oexT( "" ) ) + oex2std( sgBuffer ); 
+	sgBuffer.StringToGuid( guidBuffer );
 
 	// Set share info
-	m_cb.SetName( sid ); 
+	m_cb.SetName( sidName ); 
 	m_cb.PlainShare( 1 );
 	
 	// Attempt to allocate
 	if ( !m_cb.Allocate( struct_size ) )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate control block " ), struct_size, oexT( " bytes : " ), std2oex( m_sName ) ) );
+	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate control block " ), struct_size, oexT( " bytes : " ), std2oex( m_sName ), oexT( " : " ), std2oex( sidName ) ) );
 		return 0;
 	} // end if
 
-	// Ensure it doesn't already exist
+	// Does it already exist
 	if ( m_cb.Existing() )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Share control block already exists : " ), std2oex( m_sName ) ) );
-		Destroy();
-		return 0;
+	{
+		// Is it still in use?
+		if ( m_cb.getUINT( 0 ) )
+		{	m_sLastErr = oex2std( oexMks( oexT( "Share control block already exists and is in use : " ), std2oex( m_sName ), oexT( " : " ), std2oex( sidName ) ) );
+			Destroy();
+			return 0;
+		} // end if
+		
+		// We can only reuse it if the params haven't changed or are not initialized
+		if ( ( m_cb.getINT( 2 ) && m_cb.getINT( 2 ) != nBuffers )
+		     || ( m_cb.getINT( 3 ) && m_cb.getINT( 3 ) != nWidth )
+		     || ( m_cb.getINT( 4 ) && m_cb.getINT( 4 ) != nHeight )
+		     || ( m_cb.getINT( 5 ) && m_cb.getINT( 5 ) != nFps )
+		     || ( m_cb.getINT( 6 ) && m_cb.getINT( 6 ) != nFmt )
+		     || ( m_cb.getINT( 7 ) && m_cb.getINT( 7 ) != nImgSize ) 
+			)
+		{
+
+oexSHOW( m_cb.getINT( 2 ) );
+oexSHOW( m_cb.getINT( 3 ) );
+oexSHOW( m_cb.getINT( 4 ) );
+oexSHOW( m_cb.getINT( 5 ) );
+oexSHOW( m_cb.getINT( 6 ) );
+oexSHOW( m_cb.getINT( 7 ) );
+
+			m_sLastErr = oex2std( oexMks( oexT( "Share control block already exists, and has changed : " ), std2oex( m_sName ), oexT( " : " ), std2oex( sidName ) ) );
+			Destroy();
+			return 0;
+		} // end if
+
 	} // end if
 
 	// Set control block size
 	m_cb.setUsed( struct_size );
 
 	// Initialize control block
-	m_cb.setUINT(	0, m_uCbId );
 	m_cb.setINT(	1, -1 );
 	m_cb.setINT(	2, nBuffers );
 	m_cb.setINT(	3, nWidth );
@@ -174,26 +229,29 @@ int CSqVideoShare::Create( const sqbind::stdString &sName, int nBuffers, int nIm
 	m_cb.setINT(	8, 0 );
 	m_cb.setINT(	9, 0 );
 	m_cb.setUINT(	10, oexPtrToInt( oex::os::CSys::GetInstanceHandle() ) );
+	m_cb.setUINT(	11, ( m_uTs = oexGetUnixTime() ) );
+	m_cb.setUINT(	12, SQSVS_HEADERSIZE );
+	m_cb.setUINT(	13, 0 );
+	m_cb.setUINT(	14, guidBuffer.u1 );
+	m_cb.setUINT(	15, guidBuffer.u2 );
+	m_cb.setUINT(	16, guidBuffer.u3 );
+	m_cb.setUINT(	17, guidBuffer.u4 );
 
-	// Image buffer share name
-	sid = m_bGlobal ? oexT( "Global\\" ) : oexT( "" ); 
-	sid += oex2std( oexGuid( std2oex( sqbind::stdString( m_sPrefix ) + oexT( "buffer_" ) + m_sName ) ) );
-	
 	// Set image buffer info
-	m_buf.SetName( sid );
+	m_buf.SetName( sidBuffer );
 	m_buf.PlainShare( 1 );
 	
 	// Attempt to allocate the image buffer
 	int size = nBuffers * nImgSize + m_nPadding;
 	if ( !m_buf.Allocate( size ) )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate image buffer of " ), size, oexT( " bytes : " ), std2oex( m_sName ) ) );
+	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate image buffer of " ), size, oexT( " bytes : " ), std2oex( ( bShareBuffer ? sBufName : sName ) ), oexT( " : " ), std2oex( sidBuffer ) ) );
 		Destroy();
 		return 0;
 	} // end if
 
-	// Ensure it doesn't already exist
-	if ( m_buf.Existing() )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Share image buffer already exists : " ), std2oex( m_sName ) ) );
+	// If it is shared, it must exist
+	if ( bShareBuffer && !m_buf.Existing() )
+	{	m_sLastErr = oex2std( oexMks( oexT( "Share image buffer doesn't exist : " ), std2oex( sBufName ), oexT( " : " ), std2oex( sidBuffer ) ) );
 		Destroy();
 		return 0;
 	} // end if
@@ -201,8 +259,11 @@ int CSqVideoShare::Create( const sqbind::stdString &sName, int nBuffers, int nIm
 	// Set size of image buffer
 	m_buf.setUsed( nBuffers * nImgSize );
 	
+	// Ok for others to read now
+	m_cb.setUINT( 0, m_uCbId );
+
 	// Share is writable
-	m_bWrite = 1;
+	m_bWrite = 1;	
 
 	return 1;
 }
@@ -213,16 +274,18 @@ int CSqVideoShare::Open( const sqbind::stdString &sName, int bAllowFrameSkipping
 	// Must have a valid name
 	if ( !sName.length() )
 		return 0;
-	
+
 	// Structure size
-	int struct_size = 4 * 11;
-	
-	// Share name
-	sqbind::stdString sid = m_bGlobal ? oexT( "Global\\" ) : oexT( "" ); 
-	sid += oex2std( oexGuid( std2oex( sqbind::stdString( m_sPrefix ) + sName ) ) );
-	
+	int struct_size = SQSVS_HEADERSIZE;
+
+	// Control block share name
+	oex::oexGUID guidName;
+	oex::CStr sgName = oexGuid( std2oex( sqbind::stdString( m_sPrefix ) + sName ) );
+	sqbind::stdString sidName = ( m_bGlobal ? oexT( "Global\\" ) : oexT( "" ) ) + oex2std( sgName ); 
+	sgName.StringToGuid( guidName );
+
 	// Set share info
-	m_cb.SetName( sid ); 
+	m_cb.SetName( sidName ); 
 	m_cb.PlainShare( 1 );
 
 	// Attempt to open existing share
@@ -261,24 +324,30 @@ int CSqVideoShare::Open( const sqbind::stdString &sName, int bAllowFrameSkipping
 	} // end if
 
 	// Image buffer share name
-	sid = m_bGlobal ? oexT( "Global\\" ) : oexT( "" ); 
-	sid += oex2std( oexGuid( std2oex( sqbind::stdString( m_sPrefix ) + oexT( "buffer_" ) + sName ) ) );
+	oex::oexGUID guidBuffer;
+	oex::CStr sgBuffer;
+	if ( getHeaderSize() >= SQSVS_HEADERSIZE )
+		sgBuffer = std2oex( getBufferGuidStr() );
+	else
+		sgBuffer = oexGuid( std2oex( sqbind::stdString( m_sPrefix ) + oexT( "buffer_" ) + sName ) );
+	sqbind::stdString sidBuffer = ( m_bGlobal ? oexT( "Global\\" ) : oexT( "" ) ) + oex2std( sgBuffer ); 
+	sgBuffer.StringToGuid( guidBuffer );
 	
 	// Set image buffer info
-	m_buf.SetName( sid );
+	m_buf.SetName( sidBuffer );
 	m_buf.PlainShare( 1 );
 	
 	// Attempt to allocate the image buffer
 	int size = nBuffers * nImgSize + m_nPadding;
 	if ( !m_buf.Allocate( size ) )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate image buffer of " ), size, oexT( " bytes : " ), std2oex( sName ) ) );
+	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate image buffer of " ), size, oexT( " bytes : " ), std2oex( sName ), oexT( " : " ), std2oex( sidBuffer ) ) );
 		Destroy();
 		return 0;
 	} // end if
 
 	// Punt if it doesn't exist
 	if ( !m_buf.Existing() )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Share image buffer does not exist : " ), std2oex( sName ), oexT( " : " ), std2oex( sid ) ) );
+	{	m_sLastErr = oex2std( oexMks( oexT( "Share image buffer does not exist : " ), std2oex( sName ), oexT( " : " ), std2oex( sidBuffer ) ) );
 		Destroy();
 		return 0;
 	} // end if
@@ -289,19 +358,21 @@ int CSqVideoShare::Open( const sqbind::stdString &sName, int bAllowFrameSkipping
 	// Save share information
 	m_sName = sName;
 	m_bAllowFrameSkipping = bAllowFrameSkipping;
+	m_uTs = getTs();
 
 	return 1;
 }
 
 sqbind::CSqBinary CSqVideoShare::getNextImg()
 {_STT();
+
 	if ( !m_cb.getUsed() || !m_buf.getUsed() )
 	{	m_sLastErr = oexT( "No open share" );
 		return sqbind::CSqBinary();
 	} // end if
 
 	// Verify that writer is still connected
-	if ( m_cb.getUINT( 0 ) != m_uCbId )
+	if ( m_cb.getUINT( 0 ) != m_uCbId || m_cb.getUINT( 11 ) != m_uTs )
 	{	m_sLastErr = oex2std( oexMks( oexT( "Writer has disconnected : " ), std2oex( m_sName ) ) );
 		Destroy(); 
 		return sqbind::CSqBinary(); 
@@ -339,7 +410,7 @@ sqbind::CSqBinary CSqVideoShare::getLastImg()
 	} // end if
 
 	// Verify that writer is still connected
-	if ( m_cb.getUINT( 0 ) != m_uCbId )
+	if ( m_cb.getUINT( 0 ) != m_uCbId || m_cb.getUINT( 11 ) != m_uTs )
 	{	m_sLastErr = oex2std( oexMks( oexT( "Writer has disconnected : " ), std2oex( m_sName ) ) );
 		Destroy(); 
 		return sqbind::CSqBinary(); 
@@ -412,6 +483,7 @@ int CSqVideoShare::incWritePtr()
 
 int CSqVideoShare::WriteFrame( sqbind::CSqBinary *frame )
 {_STT();
+
 	if ( !frame || !frame->getUsed() )
 	{	m_sLastErr = oexT( "Invalid frame" );
 		return 0;
@@ -441,7 +513,6 @@ int CSqVideoShare::WriteFrame( sqbind::CSqBinary *frame )
 	
 	// Copy the image data into the shared buffer
 	m_buf.MemCpyNumAt( frame, i * nImgSize, nCopy );
-//	m_buf.MemCpyAt( frame, i * nImgSize );
 
 	// Count a frame written
 	m_cb.setUINT( 8, m_cb.getUINT( 8 ) + 1 );
