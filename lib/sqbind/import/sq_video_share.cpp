@@ -79,6 +79,12 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqVideoShare, CSqVideoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getBufferGuidStr )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getReset )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, setReset )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, setFpsDivider )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getFpsDivider )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, setFpsDividerCount )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getFpsDividerCount )
+//	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare,  )
+//	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare,  )
 //	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare,  )
 
 SQBIND_REGISTER_CLASS_END()
@@ -98,6 +104,7 @@ CSqVideoShare::CSqVideoShare()
 	m_nPadding = SQSVS_PADDING;
 	m_bAllowFrameSkipping = 0;
 	m_uTs = 0;
+	m_nFpsDivider = 1;
 }
 
 CSqVideoShare::CSqVideoShare( const sqbind::stdString &sPrefix, SQInteger nId, SQInteger nGlobal )
@@ -110,6 +117,8 @@ CSqVideoShare::CSqVideoShare( const sqbind::stdString &sPrefix, SQInteger nId, S
 	m_nPadding = SQSVS_PADDING;
 	m_bAllowFrameSkipping = 0;
 	m_uTs = 0;
+	m_nFpsDivider = 1;
+	m_nFpsDividerCount = 0;
 }
 
 
@@ -123,6 +132,8 @@ CSqVideoShare::CSqVideoShare( const CSqVideoShare &r )
 	m_nPadding = SQSVS_PADDING;
 	m_bAllowFrameSkipping = 0;
 	m_uTs = 0;
+	m_nFpsDivider = 1;
+	m_nFpsDividerCount = 0;
 }
 
 
@@ -145,6 +156,7 @@ void CSqVideoShare::Destroy()
 	m_uTs = 0;
 
 	m_iRead = 0;
+	m_nFpsDividerCount = 0;
 }
 
 int CSqVideoShare::Create( const sqbind::stdString &sName, const sqbind::stdString &sBufName, int nBuffers, int nImgSize, int nWidth, int nHeight, int nFps, int nFmt )
@@ -159,6 +171,16 @@ int CSqVideoShare::Create( const sqbind::stdString &sName, const sqbind::stdStri
 	else
 		m_sName = oex2std( oexUnique() );
 
+	// Are we using a frame rate divider?
+	if ( 1 < m_nFpsDivider )
+	{	nFps = nFps / m_nFpsDivider;
+		m_nFpsDividerCount = 0;
+	} // end if
+
+	// At least on fps
+	if ( nFps < 1 ) 
+		nFps = 1;
+		
 	// Are we sharing an image buffer?
 	int bShareBuffer = 0;
 	if ( sBufName.length() && sName != sBufName )
@@ -434,10 +456,15 @@ sqbind::CSqBinary CSqVideoShare::getWriteImg()
 		return sqbind::CSqBinary();
 	} // end if
 
+	// Must be in write mode
 	if ( !m_bWrite )
 	{	m_sLastErr = oexT( "Shared buffer is not open for writing" );
-		return 0;
+		return sqbind::CSqBinary();
 	} // end if		
+
+	// Don't return a buffer if it would be ignored
+	if ( 1 < m_nFpsDivider && m_nFpsDividerCount )
+		return sqbind::CSqBinary();
 
 	// Get the next image index
 	int i = m_cb.getINT( 1 ) + 1;
@@ -462,6 +489,12 @@ int CSqVideoShare::incWritePtr()
 	{	m_sLastErr = oexT( "Shared buffer is not open for writing" );
 		return 0;
 	} // end if		
+
+	// Implement frame divider
+	if ( 1 < m_nFpsDivider && m_nFpsDividerCount++ )
+	{	if ( m_nFpsDividerCount >= m_nFpsDivider ) m_nFpsDividerCount = 0;
+		return 1;
+	} // end if
 
 	// Get the next image index
 	int i = m_cb.getINT( 1 ) + 1;
@@ -496,6 +529,12 @@ int CSqVideoShare::WriteFrame( sqbind::CSqBinary *frame )
 	if ( !m_cb.getUsed() || !m_buf.getUsed() )
 	{	m_sLastErr = oexT( "No open share" );
 		return 0;
+	} // end if
+
+	// Implement frame divider
+	if ( 1 < m_nFpsDivider && m_nFpsDividerCount++ )
+	{	if ( m_nFpsDividerCount >= m_nFpsDivider ) m_nFpsDividerCount = 0;
+		return 1;
 	} // end if
 
 	// Get info from control block

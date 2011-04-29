@@ -270,6 +270,18 @@ namespace sqbind
 		
 		/// Returns non-zero if frame skipping is enabled
 		int getAllowFrameSkipping() { return m_bAllowFrameSkipping; }
+
+		/// Sets the frame rate divider
+		void setFpsDivider( int n ) { m_nFpsDivider = n; }
+		
+		/// Gets the frame rate divider
+		int getFpsDivider() { return m_nFpsDivider; }
+		
+		/// Sets the frame rate divider count
+		void setFpsDividerCount( int n ) { m_nFpsDividerCount = n; }
+
+		/// Gets the frame rate divider count
+		int getFpsDividerCount() { return m_nFpsDividerCount; }
 		
 		/// Returns a string describing the last error
 		sqbind::stdString getLastErrorStr() { return m_sLastErr; }
@@ -346,6 +358,12 @@ protected:
 		/// Padding added to the end of the allocated buffer
 		int						m_nPadding;
 
+		/// Frame rate divider
+		int						m_nFpsDivider;
+
+		/// Frame rate divider count
+		int						m_nFpsDividerCount;
+		
 		/// Time the stream was opened
 		oex::oexUINT			m_uTs;
 
