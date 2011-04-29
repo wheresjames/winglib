@@ -36,6 +36,12 @@
 
 using namespace sqbind;
 
+// Key values
+#define SQSVS_PREFIX		oexT( "oex_video_share_" )
+#define SQSVS_CBID			0xBEBADDBA
+#define SQSVS_PADDING		64
+#define SQSVS_HEADERSIZE	( 18 * 4 )
+
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqVideoShare, CSqVideoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, Destroy )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, Create )
@@ -52,6 +58,8 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqVideoShare, CSqVideoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getHeight )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getFps )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getFmt )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getReads )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getWrites )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getTs )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getImageSize )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getNextImg )
@@ -199,16 +207,7 @@ int CSqVideoShare::Create( const sqbind::stdString &sName, const sqbind::stdStri
 		     || ( m_cb.getINT( 6 ) && m_cb.getINT( 6 ) != nFmt )
 		     || ( m_cb.getINT( 7 ) && m_cb.getINT( 7 ) != nImgSize ) 
 			)
-		{
-
-oexSHOW( m_cb.getINT( 2 ) );
-oexSHOW( m_cb.getINT( 3 ) );
-oexSHOW( m_cb.getINT( 4 ) );
-oexSHOW( m_cb.getINT( 5 ) );
-oexSHOW( m_cb.getINT( 6 ) );
-oexSHOW( m_cb.getINT( 7 ) );
-
-			m_sLastErr = oex2std( oexMks( oexT( "Share control block already exists, and has changed : " ), std2oex( m_sName ), oexT( " : " ), std2oex( sidName ) ) );
+		{	m_sLastErr = oex2std( oexMks( oexT( "Share control block already exists, and has changed : " ), std2oex( m_sName ), oexT( " : " ), std2oex( sidName ) ) );
 			Destroy();
 			return 0;
 		} // end if

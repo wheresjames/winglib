@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// sq_video_share.h
+// sq_binary_share.h
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -36,34 +36,34 @@
 
 namespace sqbind
 {
-    class CSqVideoShare
+    class CSqBinaryShare
     {
 	public:
 
 		/// Export constructors
-		SQBIND_CLASS_CTOR_BEGIN( CSqVideoShare )
-			_SQBIND_CLASS_CTOR2( CSqVideoShare, OT_STRING, OT_INTEGER ) 
+		SQBIND_CLASS_CTOR_BEGIN( CSqBinaryShare )
+			_SQBIND_CLASS_CTOR2( CSqBinaryShare, OT_STRING, OT_INTEGER ) 
 				( stdString( sa.GetString( 2 ), sq_getsize( x_v, 2 ) ), sa.GetInt( 3 ), 1 )
-			_SQBIND_CLASS_CTOR3( CSqVideoShare, OT_STRING, OT_INTEGER, OT_INTEGER ) 
+			_SQBIND_CLASS_CTOR3( CSqBinaryShare, OT_STRING, OT_INTEGER, OT_INTEGER ) 
 				( stdString( sa.GetString( 2 ), sq_getsize( x_v, 2 ) ), sa.GetInt( 3 ), sa.GetInt( 4 ) )
-		SQBIND_CLASS_CTOR_END( CSqVideoShare )
+		SQBIND_CLASS_CTOR_END( CSqBinaryShare )
 
 		/// Default constructor
-		CSqVideoShare();
+		CSqBinaryShare();
 
 		/// Init constructor
-		CSqVideoShare( const sqbind::stdString &sPrefix, SQInteger nId, SQInteger nGlobal );
+		CSqBinaryShare( const sqbind::stdString &sPrefix, SQInteger nId, SQInteger nGlobal );
 
 		/// Copy constructor
-		CSqVideoShare( const CSqVideoShare &r );
+		CSqBinaryShare( const CSqBinaryShare &r );
 
 		/// Assignment operator
-		CSqVideoShare& operator = ( const CSqVideoShare &r ) { return *this; }
+		CSqBinaryShare& operator = ( const CSqBinaryShare &r ) { return *this; }
 
 		/// Registers the class
 		static void Register( sqbind::VM vm );
 
-		/** \addtogroup CSqVideoShare
+		/** \addtogroup CSqBinaryShare
 			@{
 		*/
 		
@@ -74,10 +74,9 @@ namespace sqbind
 		/**
 			@param [in] sName		-	Share name
 			@param [in] sBufName	-	Share name for the image buffer.  Leave blank if same as sName.
-			@param [in] nBuffers	-	Number of video buffers to allocate
-			@param [in] nImgSize	-	Size of a single image frame
-			@param [in] nWidth		-	Width of a video frame
-			@param [in] nHeight		-	Height of a video frame
+			@param [in] nBufSize	-	Size of buffer
+			@param [in] nChannels	-	Number of data channels
+			@param [in] nDataWidth	-	Data width
 			@param [in] nFps		-	Frames per second
 			@param [in] nFmt		-	User defined video format id
 			
@@ -86,25 +85,33 @@ namespace sqbind
 			@return Non-zero if success
 		
 		*/
-		int Create( const sqbind::stdString &sName, const sqbind::stdString &sBufName, int nBuffers, int nImgSize, int nWidth, int nHeight, int nFps, int nFmt );
+		int Create( const sqbind::stdString &sName, const sqbind::stdString &sBufName, int nBufSize, int nChannels, int nDataWidth, int nFps, int nFmt );
 
 		/// Opens an existing share
 		/**
-			@param [in] sName					-	Share name
-			@param [in] bAllowFrameSkipping		-	Non-zero to allow frame skipping
+			@param [in] sName	-	Share name
 			
-			Opens an existing video share.  The share must exist.
-			
-			If you want to process each frame, such as if you are saving to an avi,
-			then set bAllowFrameSkipping to zero.
-			
-			If you just want to receive the latest frame, such as in a preview window,
-			set bAllowFrameSkipping to a non-zero value.
+			Opens an existing share.  The share must exist.
 			
 			@return Non-zero if success
 		*/
-		int Open( const sqbind::stdString &sName, int bAllowFrameSkipping );
+		int Open( const sqbind::stdString &sName );
 
+		/// Reads data from the share buffer
+		sqbind::CSqBinary Read();
+		
+		/// Returns the number of bytes waiting to be read
+		int getMaxRead();
+		
+		/// Writes data into the share buffer
+		/**
+			@param [in] pData	-	Pointer to CSqBinary object containing the data to write
+		*/
+		int Write( sqbind::CSqBinary *pData );
+		
+		/// Resets buffer pointers
+		int Reset();
+		
 		/// Return the share name
 		sqbind::stdString getName() { return m_sName; }
 		
@@ -126,39 +133,39 @@ namespace sqbind
 		/// Returns non-zero if global access to share is enabled
 		int getGlobal() { return m_bGlobal; }
 
-		/// Sets the amount of padding to add to the end of the image buffer
+		/// Sets the amount of padding to add to the end of the buffer
 		/**
 			Many codecs read over the end of the buffer, and so padding is required.
 		*/
 		void setPadding( int n ) { m_nPadding = n; }
 		
-		/// Returns the amount of padding added to the end of the image buffer
+		/// Returns the amount of padding added to the end of the buffer
 		/**
 			Many codecs read over the end of the buffer, and so padding is required.
 		*/
 		int getPadding() { return m_nPadding; }
 		
-		/// Returns the number of image buffers from the control block
-		int getBuffers()
+		/// Returns the total size of the buffer from the control block
+		int getBufSize()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 2 );
 		}
-
-		/// Returns the image width from the control block
-		int getWidth()
+		
+		/// Returns the number of channels from the control block
+		int getChannels()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 3 );
 		}
-		
-		/// Returns the image height from the control block
-		int getHeight()
+
+		/// Returns the number of channels from the control block
+		int getDataWidth()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 4 );
 		}
-		
+
 		/// Returns the frames per second value from the control block
 		int getFps()
 		{	if ( !m_cb.getUsed() ) 
@@ -166,20 +173,13 @@ namespace sqbind
 			return m_cb.getINT( 5 );
 		}
 
-		/// Returns the image format from the control block
+		/// Returns the data format from the control block
 		int getFmt()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 6 );
 		}
 
-		/// Returns the image size from the control block
-		int getImageSize()
-		{	if ( !m_cb.getUsed() ) 
-				return 0;
-			return m_cb.getINT( 7 );
-		}
-		
 		/// Returns the number of writes from the control block
 		int getWrites()
 		{	if ( !m_cb.getUsed() ) 
@@ -249,68 +249,58 @@ namespace sqbind
 
 			return sqbind::oex2std( oex::CStr( guid ) );
 		}
-		
-		
+
 		/// Set to non-zero to tell the writer to reset
 		void setReset( int b )
 		{	if ( !m_cb.getUsed() ) 
 				return;
 			m_cb.setINT( 13, b );
 		}
-		
+
 		/// Returns the current reset value
 		int getReset()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 13 );
 		}
-		
-		/// Set to non-zero to allow frame skipping
-		void setAllowFrameSkipping( int b ) { m_bAllowFrameSkipping = b; }
-		
-		/// Returns non-zero if frame skipping is enabled
-		int getAllowFrameSkipping() { return m_bAllowFrameSkipping; }
-		
+
 		/// Returns a string describing the last error
 		sqbind::stdString getLastErrorStr() { return m_sLastErr; }
 		
 		/// Sets the last error string
 		void setLastErrorStr( const sqbind::stdString &sErr ) { m_sLastErr = sErr; }
-
-		/// Reads the next available image from the video share
-		/**
-			A shared buffer must be open.  Returns an empty CSqBinary
-			object if no new frame is available.
-			
-			There can be multiple readers on a single shared buffer, 
-			but only one per CSqVideoShare class instance.
-		*/
-		sqbind::CSqBinary getNextImg();
-		
-		/// Reads the last available image from the video share
-		sqbind::CSqBinary getLastImg();
-
-		/// Returns the buffer for the next write
-		sqbind::CSqBinary getWriteImg();
-		
-		/// Increments the write pointer
-		int incWritePtr();
-		
-		/// Writes a frame to the shared buffer
-		/**
-			@param [in] frame	-	Frame of video data to write
-			
-			Writes the frame and increments the index pointer to alert the reader(s)
-			
-			@return Non zero if success
-		
-		*/
-		int WriteFrame( sqbind::CSqBinary *frame );
 		
 		/// Returns non-zero if a share is open
 		int isOpen() { return ( m_cb.getUsed() && m_buf.getUsed() ); }
+		
+		/// Writes a float to the buffer
+		int WriteFloat( float f ) { return WritePtr( &f, sizeof( f ) ); }
 
+		/// Writes a float to the buffer
+		int WriteDouble( float d ) { return WritePtr( &d, sizeof( d ) ); }
+		
+		/// Writes a character to the buffer
+		int WriteChar( char n ) { return WritePtr( &n, sizeof( n ) ); }
+		
+		/// Writes a integer to the buffer
+		int WriteInt( int n ) { return WritePtr( &n, sizeof( n ) ); }
+		
+		/// Writes a integer to the buffer
+		int WriteShort( short int n ) { return WritePtr( &n, sizeof( n ) ); }
+		
+		/// Writes a 64 bit integer to the buffer
+		int WriteInt64( oex::oexINT64 n ) { return WritePtr( &n, sizeof( n ) ); }
+		
 		/** @} */
+		
+public:
+	
+		/// Writes raw data into the buffer
+		/**
+			@param [in] pData	-	Pointer to buffer
+			@param [in] nSize	-	Number of bytes to be written
+		*/
+		int WritePtr( const void *pData, int nSize );
 	
 protected:
 
@@ -374,4 +364,4 @@ protected:
 }; // end namespace
 
 // Declare type for use as squirrel parameters
-SQBIND_DECLARE_INSTANCE( sqbind::CSqVideoShare, CSqVideoShare )
+SQBIND_DECLARE_INSTANCE( sqbind::CSqBinaryShare, CSqBinaryShare )
