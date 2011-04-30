@@ -43,15 +43,31 @@ CStr8 CUtil::md5( CStr8 s )
 
 }
 
+#if !defined( OEX_NOWCHAR )
 CStrW CUtil::md5( CStrW s )
 {_STT();
-#if !defined( OEX_NOWCHAR )
 	oexGUID hash;
 	CStr8 sMb = oexStrWToMb( s );
-	CStrW _s = oexMbToStrW( CBase16::Encode( OEX_NAMESPACE::oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) );
+	CStrW _s = oexMbToStrW( CBase16::Encode( oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) );
   	return _s;
-#endif
 }
+#endif
+
+CStr8 CUtil::guid( CStr8 s )
+{_STT();
+	oexGUID hash;
+	return *oss::CMd5::Transform( &hash, s.Ptr(), s.Length() );
+
+}
+
+#if !defined( OEX_NOWCHAR )
+CStrW CUtil::guid( CStrW s )
+{_STT();
+	oexGUID hash;
+	CStr8 sMb = oexStrWToMb( s );
+	return *oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() );
+}
+#endif
 
 // +++ This isn't really thread safe, it's ok if we assume that
 //     Output capture will only be turned off after all other threads

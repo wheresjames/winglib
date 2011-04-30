@@ -36,3 +36,91 @@
 
 using namespace sqbind;
 
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqTime, CSqTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetLocalTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetLocalTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetSystemTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetSystemTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetTime )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetYear )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMonth )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetDay )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetDayOfWeek )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetHour )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, Get12Hour )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMinute )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetSecond )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMilliSecond )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMicroSecond )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetNanoSecond )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetYear )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMonth )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetDay )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetDayOfWeek )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetHour )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, Set12Hour )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMinute )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetSecond )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMilliSecond )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMicroSecond )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetNanoSecond )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, IsPM )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetTzBias )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetTzBias )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetTzUnixTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetUnixTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetUnixTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetDosTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetDosTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetNetTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetNetTime )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, FormatTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, ParseTime )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, setEscapeChar )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, getEscapeChar )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, getAbrMonthName )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, getMonthName )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, getAbrDayName )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, getDayName )
+
+SQBIND_REGISTER_CLASS_END()
+
+
+void CSqTime::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CSqTime );
+}
+
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqTimeRange, CSqTimeRange )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getStart )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setStart )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getStartMs )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setStartMs )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setStartStr )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getStartStr )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getEnd )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setEnd )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getEndMs )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setEndMs )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setEndStr )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getEndStr )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, CalculateTime )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, CompareStart )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, CompareEnd )
+
+SQBIND_REGISTER_CLASS_END()
+
+void CSqTimeRange::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CSqTimeRange );
+}

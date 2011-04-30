@@ -62,8 +62,16 @@ public:
 	/// Creates md5 of char8 string
 	static CStr8 md5( CStr8 s );
 
-	/// Creaets md5 of wchar string
+#if !defined( OEX_NOWCHAR )
+	/// Creates md5 of wchar string
 	static CStrW md5( CStrW s );
+#endif
+
+	/// Creates a guid from the md5 of char8 string
+	static CStr8 guid( CStr8 s );
+
+	/// Creates a guid from the md5 of wchar string
+	static CStrW guid( CStrW s );
 
 	/// Enable / disable output capture
 	static oexBOOL EnableOutputCapture( oexUINT x_uBuffers, oexUINT x_uSize );

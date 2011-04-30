@@ -36,6 +36,105 @@
 
 using namespace sqbind;
 
+#define REGISTER_TYPE_ACCESS( t )	\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, set##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, get##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setAbs##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getAbs##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, LE_set##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, LE_get##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, LE_setAbs##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, LE_getAbs##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_set##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_get##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_setAbs##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_getAbs##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, find##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, size##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Allocate##t )
+
+SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Allocate )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Free )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Existing )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Resize )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Zero )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Copy )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Append )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, LShift )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Insert )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, InsertBin )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, MemCpyAt )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, MemCpyNumAt )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Share )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Size )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, RawSize )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, PlainShare )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, IsPlainShare )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, AsciiHexStr )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Fingerprint )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FingerprintBin )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FingerprintImage )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, GroupAvg )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, GraphFloat )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Graph )		
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Scale )		
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Threshold )		
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, get )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, set )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getOffset )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setOffset )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, SetName )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, GetName )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setUsed )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getUsed )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setString )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getString )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, appendString )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setSubString )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getSubString )	
+	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FindBin )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Sub )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getSub )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, failed )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base64_encode )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base64_decode )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base16_encode )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base16_decode )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, compress )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, uncompress )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base64_encode_str )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base64_decode_str )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base16_encode_str )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base16_decode_str )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, compress_str )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, uncompress_str )
+
+	REGISTER_TYPE_ACCESS( CHAR )
+	REGISTER_TYPE_ACCESS( UCHAR )
+	REGISTER_TYPE_ACCESS( SHORT )
+	REGISTER_TYPE_ACCESS( USHORT )
+	REGISTER_TYPE_ACCESS( INT )
+	REGISTER_TYPE_ACCESS( UINT )
+	REGISTER_TYPE_ACCESS( LONG )
+	REGISTER_TYPE_ACCESS( ULONG )
+	REGISTER_TYPE_ACCESS( FLOAT )
+	REGISTER_TYPE_ACCESS( DOUBLE )
+
+	SQBIND_ENUM( oex::CUtil::eGtHorz,		eGtHorz )
+	SQBIND_ENUM( oex::CUtil::eGtVert,		eGtVert )
+	SQBIND_ENUM( oex::CUtil::eGtHorzFft,	eGtHorzFft )
+	SQBIND_ENUM( oex::CUtil::eGtVertFft,	eGtVertFft )
+
+SQBIND_REGISTER_CLASS_END()
+
+void CSqBinary::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CSqBinary );
+}
+
 int CSqBinary::FingerprintImage( CSqImage *img, CSqBinary *col, int scale )
 {	if ( !img || !col ) return 0;
 	CSqBinary buf; if ( !img->refPixels( &buf ) ) return 0;

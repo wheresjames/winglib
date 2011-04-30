@@ -47,6 +47,8 @@ namespace sqbind
 		CSq3dVectord::Register( x_vm );
 		CSqColor::Register( x_vm );
 		CSqBinary::Register( x_vm );
+		CSqBinaryShare::Register( x_vm );
+		CSqVideoShare::Register( x_vm );
 		CSqDataLog::Register( x_vm );
 		CSqString::Register( x_vm );
 		CSqMulti::Register( x_vm );
@@ -161,96 +163,6 @@ void CSqSerialPort::Register( sqbind::VM vm )
 	SQBIND_EXPORT( vm, CSqSerialPort );
 }
 
-SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqTimeRange, CSqTimeRange )
-
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getStart )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setStart )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getStartMs )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setStartMs )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setStartStr )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getStartStr )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getEnd )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setEnd )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getEndMs )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setEndMs )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, setEndStr )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, getEndStr )
-
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, CalculateTime )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, CompareStart )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTimeRange, CompareEnd )
-
-SQBIND_REGISTER_CLASS_END()
-
-void CSqTimeRange::Register( sqbind::VM vm )
-{_STT();
-	SQBIND_EXPORT( vm, CSqTimeRange );
-}
-
-
-SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqTime, CSqTime )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetLocalTime )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetLocalTime )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetSystemTime )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetSystemTime )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetTime )
-
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetYear )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMonth )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetDay )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetDayOfWeek )	
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetHour )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, Get12Hour )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMinute )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetSecond )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMilliSecond )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetMicroSecond )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetNanoSecond )
-
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetYear )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMonth )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetDay )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetDayOfWeek )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetHour )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, Set12Hour )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMinute )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetSecond )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMilliSecond )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetMicroSecond )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetNanoSecond )
-
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, IsPM )
-
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetTzBias )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetTzBias )
-
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetTzUnixTime )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetUnixTime )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetUnixTime )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetDosTime )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetDosTime )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, GetNetTime )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, SetNetTime )
-
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, FormatTime )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, ParseTime )
-
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, setEscapeChar )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, getEscapeChar )
-
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, getAbrMonthName )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, getMonthName )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, getAbrDayName )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqTime, getDayName )
-
-SQBIND_REGISTER_CLASS_END()
-
-
-void CSqTime::Register( sqbind::VM vm )
-{_STT();
-	SQBIND_EXPORT( vm, CSqTime );
-}
-
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqColor, CSqColor )
 
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqColor, r )
@@ -318,105 +230,6 @@ void CSqImage::Register( sqbind::VM vm )
 	SQBIND_EXPORT( vm, CSqImage );
 }
 
-#define REGISTER_TYPE_ACCESS( t )	\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, set##t )			\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, get##t )			\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setAbs##t )			\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getAbs##t )			\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, LE_set##t )			\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, LE_get##t )			\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, LE_setAbs##t )		\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, LE_getAbs##t )		\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_set##t )			\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_get##t )			\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_setAbs##t )		\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_getAbs##t )		\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, find##t )			\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, size##t )			\
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Allocate##t )
-
-SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Allocate )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Free )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Existing )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Resize )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Zero )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Copy )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Append )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, LShift )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Insert )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, InsertBin )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, MemCpyAt )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Share )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Size )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, RawSize )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, PlainShare )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, IsPlainShare )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, AsciiHexStr )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Fingerprint )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FingerprintBin )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FingerprintImage )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, GroupAvg )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, GraphFloat )	
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Graph )		
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Scale )		
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Threshold )		
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, get )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, set )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getOffset )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setOffset )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, SetName )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, GetName )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setUsed )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getUsed )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setString )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getString )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, appendString )	
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setSubString )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getSubString )	
-	
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FindBin )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Sub )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getSub )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, failed )
-
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base64_encode )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base64_decode )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base16_encode )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base16_decode )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, compress )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, uncompress )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base64_encode_str )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base64_decode_str )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base16_encode_str )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, base16_decode_str )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, compress_str )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, uncompress_str )
-
-	REGISTER_TYPE_ACCESS( CHAR )
-	REGISTER_TYPE_ACCESS( UCHAR )
-	REGISTER_TYPE_ACCESS( SHORT )
-	REGISTER_TYPE_ACCESS( USHORT )
-	REGISTER_TYPE_ACCESS( INT )
-	REGISTER_TYPE_ACCESS( UINT )
-	REGISTER_TYPE_ACCESS( LONG )
-	REGISTER_TYPE_ACCESS( ULONG )
-	REGISTER_TYPE_ACCESS( FLOAT )
-	REGISTER_TYPE_ACCESS( DOUBLE )
-
-	SQBIND_ENUM( oex::CUtil::eGtHorz,		eGtHorz )
-	SQBIND_ENUM( oex::CUtil::eGtVert,		eGtVert )
-	SQBIND_ENUM( oex::CUtil::eGtHorzFft,	eGtHorzFft )
-	SQBIND_ENUM( oex::CUtil::eGtVertFft,	eGtVertFft )
-
-SQBIND_REGISTER_CLASS_END()
-
-void CSqBinary::Register( sqbind::VM vm )
-{_STT();
-	SQBIND_EXPORT( vm, CSqBinary );
-}
-
-
 SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSize, CSqSize )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSize, set )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSize, setX )
@@ -471,41 +284,6 @@ SQBIND_REGISTER_CLASS_END()
 void CSq3dVectord::Register( sqbind::VM vm )
 {_STT();
 	SQBIND_EXPORT( vm, CSq3dVectord );
-}
-
-SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqDataLog, CSqDataLog )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, Destroy )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, setRoot )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getRoot )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, AddKey )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, RemoveKey )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, FindKey )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, Log )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, Flush )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getKeyList )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getLog )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getLogBin )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getBufferSize )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, setLogParams )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getBase )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getStep )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, getLimit )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, setLimit )
-	
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itStart )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itNext )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itPrev )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itRead )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itClose )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itTime )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itTimeMs )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqDataLog, itSize )
-	
-SQBIND_REGISTER_CLASS_END()
-
-void CSqDataLog::Register( sqbind::VM vm )
-{_STT();
-	SQBIND_EXPORT( vm, CSqDataLog );
 }
 
 

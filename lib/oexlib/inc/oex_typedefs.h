@@ -161,6 +161,14 @@ struct oexGUID
             oexUINT16   Data3;
             oexUCHAR    Data4[ 8 ];
         };
+		
+		struct
+		{
+			oexUINT32	u1;
+			oexUINT32	u2;
+			oexUINT32	u3;
+			oexUINT32	u4;
+		};
 
         oexUCHAR        ucBuf[ 16 ];
     };

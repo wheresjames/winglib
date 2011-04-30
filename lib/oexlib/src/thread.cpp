@@ -94,7 +94,7 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 		if ( pThread->m_evStop.Wait( 0 ) )
 			while ( pThread->DoThread( pData ) &&
 					pThread->m_evStop.Wait( uSleep ) )
-				os::CSys::PumpThreadMessages();
+				oexPumpThreadMessages();
 
 		// Kill the thread
 		nRet = pThread->EndThread( pData );

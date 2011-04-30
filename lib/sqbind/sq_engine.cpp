@@ -595,17 +595,12 @@ stdString CSqEngineExport::base16_decode( const stdString &sStr )
 
 stdString CSqEngineExport::md5( const stdString &sStr )
 {_STT();
-	oex::oexGUID hash;
-	oex::CStr8 sMb = oexStrToMb( std2oex( sStr ) );
-	return oex2std( oexMbToStr( oex::CBase16::Encode( oex::oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() ), sizeof( hash ) ) ) );
+	return oex2std( oexMd5( std2oex( sStr ) ) );
 }
 
 stdString CSqEngineExport::guid( const stdString &sStr )
 {_STT();
-	oex::oexGUID hash;
-	oex::CStr8 sMb = oexStrToMb( std2oex( sStr ) );
-	oex::oss::CMd5::Transform( &hash, sMb.Ptr(), sMb.Length() );
-	return oex2std( oexMbToStr( oex::CStr8( hash ) ) );
+	return oex2std( oexGuid( std2oex( sStr ) ) );
 }
 
 // mandelbrot( 64, 16, 0, -15, 40, 15 );

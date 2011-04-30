@@ -59,6 +59,42 @@ int CFfConvert::FmtEquiv( int fmt )
 	} // end switch
 }
 
+#define FLIP_AVLINE( p, i, h ) \
+	if ( i < oexSizeOfArray( p->linesize ) && p->data[ i ] && p->linesize[ i ] ) \
+		p->data[ i ] = p->data[ i ] + ( ( h ) - 1 ) * p->linesize[ i ], \
+		p->linesize[ i ] = -p->linesize[ i ];
+
+int CFfConvert::Flip( int fmt, int h, AVPicture *p )
+{_STT();
+
+	if ( !p )
+		return 0;
+
+	// For all formats
+	FLIP_AVLINE( p, 0, h );
+
+	switch( fmt )
+	{
+		case PIX_FMT_YUV410P :
+		case PIX_FMT_YUV411P :
+		case PIX_FMT_YUV420P :
+		case PIX_FMT_YUV422P :
+		case PIX_FMT_YUV440P :
+		case PIX_FMT_YUV444P :
+		case PIX_FMT_YUYV422 :
+		case PIX_FMT_YUVJ420P :
+		case PIX_FMT_YUVJ422P :
+		case PIX_FMT_YUVJ444P :
+		case PIX_FMT_YUVJ440P :
+		case PIX_FMT_YUVA420P :
+			FLIP_AVLINE( p, 1, h / 2 );
+			FLIP_AVLINE( p, 2, h / 2 );
+			break;
+
+	} // end for
+
+	return 1;
+}
 
 int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, int src_fmt, sqbind::CSqBinary *dst, int dst_fmt, int alg )
 {_STT();
@@ -71,7 +107,10 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 		return 0;
 
 	int flip = 0;
-	if ( 0 > height ) { flip = 1; height = -height; }
+	if ( 0 > height ) 
+	{ 	flip = 1; 
+		height = -height; 
+	} // end if
 
 	if ( 0 >= width || 0 >= height || ( width % 4 ) )
 		return 0;
@@ -99,14 +138,8 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	     || !FillAVPicture( &apDst, dst_fmt, width, height, dst->_Ptr() ) )
 		return 0;
 
-	// Flip?
 	if ( flip )
-		for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
-		{	if ( apSrc.data[ z ] )
-				apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
-			if ( apSrc.linesize[ z ] )
-				apSrc.linesize[ z ] = -apSrc.linesize[ z ];
-		} // end for
+		Flip( src_fmt, height, &apSrc );
 
 	// Create conversion
 	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
@@ -169,12 +202,7 @@ int CFfConvert::ConvertColorBB2( int width, int height, sqbind::CSqBinary *src, 
 
 	// Flip?
 	if ( flip )
-		for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
-		{	if ( apSrc.data[ z ] )
-				apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
-			if ( apSrc.linesize[ z ] )
-				apSrc.linesize[ z ] = -apSrc.linesize[ z ];
-		} // end for
+		Flip( src_fmt, height, &apSrc );
 
 	// Create conversion
 	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
@@ -231,22 +259,7 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 
 	// Flip?
 	if ( flip )
-	{	if ( src_fmt )
-			for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
-			{	if ( apSrc.data[ z ] )
-					apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
-				if ( apSrc.linesize[ z ] )
-					apSrc.linesize[ z ] = -apSrc.linesize[ z ];
-			} // end for
-
-		else
-			for ( int z = 0; z < (int)oexSizeOfArray( apDst.linesize ); z++ )
-			{	if ( apDst.data[ z ] )
-					apDst.data[ z ] = apDst.data[ z ] + ( height - 1 ) * apDst.linesize[ z ];
-				if ( apDst.linesize[ z ] )
-					apDst.linesize[ z ] = -apDst.linesize[ z ];
-			} // end for
-	} // end if
+		Flip( src_fmt, height, &apSrc );
 
 /*	More overhead has been added to colorspace conversion
 
@@ -310,22 +323,7 @@ int CFfConvert::ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, 
 
 	// Flip?
 	if ( flip )
-	{	if ( src_fmt )
-			for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
-			{	if ( apSrc.data[ z ] )
-					apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
-				if ( apSrc.linesize[ z ] )
-					apSrc.linesize[ z ] = -apSrc.linesize[ z ];
-			} // end for
-
-		else
-			for ( int z = 0; z < (int)oexSizeOfArray( apDst.linesize ); z++ )
-			{	if ( apDst.data[ z ] )
-					apDst.data[ z ] = apDst.data[ z ] + ( height - 1 ) * apDst.linesize[ z ];
-				if ( apDst.linesize[ z ] )
-					apDst.linesize[ z ] = -apDst.linesize[ z ];
-			} // end for
-	} // end if
+		Flip( src_fmt, height, &apSrc );
 
 	// Create conversion
 	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
@@ -374,22 +372,7 @@ int CFfConvert::ConvertColorRI( void *buf, int src_fmt, int width, int height, s
 
 	// Flip?
 	if ( flip )
-	{	if ( src_fmt )
-			for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
-			{	if ( apSrc.data[ z ] )
-					apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
-				if ( apSrc.linesize[ z ] )
-					apSrc.linesize[ z ] = -apSrc.linesize[ z ];
-			} // end for
-
-		else
-			for ( int z = 0; z < (int)oexSizeOfArray( apDst.linesize ); z++ )
-			{	if ( apDst.data[ z ] )
-					apDst.data[ z ] = apDst.data[ z ] + ( height - 1 ) * apDst.linesize[ z ];
-				if ( apDst.linesize[ z ] )
-					apDst.linesize[ z ] = -apDst.linesize[ z ];
-			} // end for
-	} // end if
+		Flip( src_fmt, height, &apSrc );
 
 	// Create conversion
 	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
@@ -443,23 +426,8 @@ int CFfConvert::ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height
 
 	// Flip?
 	if ( flip )
-	{	if ( src_fmt )
-			for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
-			{	if ( apSrc.data[ z ] )
-					apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
-				if ( apSrc.linesize[ z ] )
-					apSrc.linesize[ z ] = -apSrc.linesize[ z ];
-			} // end for
-
-		else
-			for ( int z = 0; z < (int)oexSizeOfArray( apDst.linesize ); z++ )
-			{	if ( apDst.data[ z ] )
-					apDst.data[ z ] = apDst.data[ z ] + ( height - 1 ) * apDst.linesize[ z ];
-				if ( apDst.linesize[ z ] )
-					apDst.linesize[ z ] = -apDst.linesize[ z ];
-			} // end for
-	} // end if
-
+		Flip( src_fmt, height, &apSrc );
+		
 	// Create conversion
 	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
 										width, height, dst_fmt,
@@ -514,22 +482,7 @@ int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height
 
 	// Flip?
 	if ( flip )
-	{	if ( src_fmt )
-			for ( int z = 0; z < (int)oexSizeOfArray( apSrc.linesize ); z++ )
-			{	if ( apSrc.data[ z ] )
-					apSrc.data[ z ] = apSrc.data[ z ] + ( height - 1 ) * apSrc.linesize[ z ];
-				if ( apSrc.linesize[ z ] )
-					apSrc.linesize[ z ] = -apSrc.linesize[ z ];
-			} // end for
-
-		else
-			for ( int z = 0; z < (int)oexSizeOfArray( apDst.linesize ); z++ )
-			{	if ( apDst.data[ z ] )
-					apDst.data[ z ] = apDst.data[ z ] + ( height - 1 ) * apDst.linesize[ z ];
-				if ( apDst.linesize[ z ] )
-					apDst.linesize[ z ] = -apDst.linesize[ z ];
-			} // end for
-	} // end if
+		Flip( src_fmt, height, &apSrc );
 
 	// Create conversion
 	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,

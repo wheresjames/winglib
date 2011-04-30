@@ -256,6 +256,16 @@ namespace sqbind
 			return getUsed();
 		}
 
+		/// Copys specified number of bytes at the specified position
+		t_size MemCpyNumAt( CSqBinary *x_p, t_size x_nOffset, t_size x_nSize )
+		{	if ( x_p && x_p->getUsed() )
+			{	if ( x_nSize > x_p->getUsed() )
+					x_nSize = x_p->getUsed();
+				m_bin.MemCpyAt( x_p->Ptr(), x_nOffset, x_nSize );
+			} // end if
+			return getUsed();
+		}
+		
 		/// Returns a ascii / hex string
 		sqbind::stdString AsciiHexStr( int nLineLen, int nMaxLines )
 		{	oex::CStr s = oexBinToAsciiHexStr( &m_bin, 0, nLineLen, nMaxLines );
@@ -393,3 +403,4 @@ namespace sqbind
 
 // Declare type for use as squirrel parameters
 SQBIND_DECLARE_INSTANCE( sqbind::CSqBinary, CSqBinary )
+

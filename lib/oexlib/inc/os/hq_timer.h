@@ -231,6 +231,12 @@ public:
 	CTimeout( double x_dTimeout )
 	{	Set( x_dTimeout ); }
 
+	/// Sets the timeout value in milliseconds
+	CTimeout( oexINT x_nTimeout ) { SetMs( (oexUINT)x_nTimeout ); }
+	CTimeout( oexUINT x_nTimeout ) { SetMs( (oexUINT)x_nTimeout ); }
+	CTimeout( oexINT64 x_nTimeout ) { SetMs( (oexUINT)x_nTimeout ); }
+	CTimeout( oexUINT64 x_nTimeout ) { SetMs( (oexUINT)x_nTimeout ); }
+
 	/// Destructor
 	~CTimeout() { }
 
