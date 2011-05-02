@@ -52,7 +52,7 @@ class CRtspStream
 		if ( adec )
 			adec.Destroy(), dec = 0;
 
-		araw = 0;			
+		araw = 0;
 		aframe = 0;
 		afail = 0;
 		
@@ -214,13 +214,10 @@ class CRtspStream
 		if ( rtsp.LockVideo( frame, 0 ) )
 		{	dec.BufferData( frame, CSqMulti() );
 			rtsp.UnlockVideo();
-			::_self.echo( "lv" );
 		} // end if
 
 		if ( 0 >= dec.getBufferSize() )
 			return 0;
-
-		::_self.echo( "sz = " + dec.getBufferSize() );
 
 		return dec.Decode( CSqBinary(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
 	}
@@ -262,7 +259,7 @@ function _init() : ( _g )
 
 //	_g.irr.SetStereo( 1 );
 	_self.echo( "...Initializing...\n" );
-	_g.irr.Init( "Irr Test", 640, 480, 1 );
+	_g.irr.Init( "RTSP Test", 640, 480, 1 );
 
 	_self.echo( "...setting ambient light...\n" );
 	_g.irr.SetAmbientLight( CSqirrColorf( 0.5, 0.5, 0.5 ) );
@@ -275,15 +272,19 @@ function _init() : ( _g )
 //	_g.irr.AddSkyDome( _self.path( "../imgs/sky.png" ), 16, 16, 100., 100. );
 
 	_self.echo( "...adding camera...\n" );
-	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 10, -15 ), CSqirrVector3d( 0, 0, 0 ) );
+//	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 10, -15 ), CSqirrVector3d( 0, 0, 0 ) );
+	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 0, -15 ), CSqirrVector3d( 0, 0, 0 ) );
 //	cam.SetLens( 1., 2.4, 3.2 );
 
-	_self.echo( "...adding cube...\n" );
-	_g.cube = _g.irr.AddCube( 10. );
+    _g.cube = _g.irr.AddGrid( 50., 50., 1, 1, 0., 2, CSqirrColor( 255, 255, 255 ), 2 );
+	_g.cube.SetPosition( CSqirrVector3d( -25, -25, 25 ) );
 
-	_self.echo( "...adding animator...\n" );
-	local ani = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.4, 0 ) );
-	_g.cube.AddAnimator( ani );
+//	_self.echo( "...adding cube...\n" );
+//	_g.cube = _g.irr.AddCube( 10. );
+
+//	_self.echo( "...adding animator...\n" );
+//	local ani = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.4, 0 ) );
+//	_g.cube.AddAnimator( ani );
 
 	// Set draw function
 	_self.set_timer( ".", 30, "OnDraw" )

@@ -47,23 +47,6 @@
 #include "std_os.h"
 #include <termios.h>
 
-/*
-#include <stdlib.h>
-#include <tchar.h>
-
-#if ( _MSC_VER >= 1300 )
-#	include <strsafe.h>
-#else
-#	include <stdio.h>
-#	include <wchar.h>
-#	include <stdarg.h>
-#endif
-
-#include <ObjBase.h>
-
-#include <WinSock2.h>
-#pragma comment( lib, "WS2_32.lib" )
-*/
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 

@@ -35,9 +35,6 @@
 #include "oexlib.h"
 #include "std_os.h"
 
-//#include <winsock2.h>
-//#pragma comment( lib, "ws2_32.lib" )
-
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
@@ -49,7 +46,7 @@ oexSTATIC_ASSERT( sizeof( CIpSocket::t_SOCKETEVENT ) == sizeof( WSAEVENT ) );
 #endif
 
 // Socket version we will use
-oexCONST WORD c_MinSocketVersion = MAKEWORD( 1, 1 );
+oexCONST WORD c_MinSocketVersion = MAKEWORD( 2, 2 );
 
 //////////////////////////////////////////////////////////////////////
 // Helper functions

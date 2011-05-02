@@ -418,7 +418,7 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 	} // end if
 
 	// Create receiver for stream
-	if ( !pss->initiate( -1 ) )
+	if ( !pss->initiate() )
 	{	oexERROR( 0, oexMks( oexT( "initiate() video stream failed : " ), m_pEnv->getResultMsg() ) );
 		return 0;
 	} // end if
@@ -478,10 +478,11 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 	if ( !m_fps )
 		m_fps = m_mSdp[ oexT( "a=maxprate" ) ].toint();
 
-	pss->rtpSource()->setPacketReorderingThresholdTime( 1000000 );
-
 	int sn = pss->rtpSource()->RTPgs()->socketNum();
-	setReceiveBufferTo( *m_pEnv, sn, 2000000 );
+	// setReceiveBufferTo( *m_pEnv, sn, 2000000 );
+	increaseReceiveBufferTo( *m_pEnv, sn, 2000000 );
+
+	pss->rtpSource()->setPacketReorderingThresholdTime( 1000000 );
 
 	if ( pss->codecName() )
 		m_sVideoCodec = oexMbToStrPtr( pss->codecName() );
@@ -516,7 +517,7 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 	} // end if
 
 	// Create receiver for stream
-	if ( !pss->initiate( -1 ) )
+	if ( !pss->initiate() )
 	{	oexERROR( 0, oexMks( oexT( "initiate() video stream failed : " ), oexT( " : " ), m_pEnv->getResultMsg() ) );
 		return 0;
 	} // end if
@@ -536,10 +537,11 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
         } // end for
     } // end if
 
-	pss->rtpSource()->setPacketReorderingThresholdTime( 2000000 );
-
 	int sn = pss->rtpSource()->RTPgs()->socketNum();
-	setReceiveBufferTo( *m_pEnv, sn, 2000000 );
+//	setReceiveBufferTo( *m_pEnv, sn, 2000000 );
+	increaseReceiveBufferTo( *m_pEnv, sn, 100000 );
+
+	pss->rtpSource()->setPacketReorderingThresholdTime( 1000000 );
 
 	if ( pss->codecName() )
 		m_sAudioCodec = oexMbToStrPtr( pss->codecName() );
@@ -554,6 +556,9 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 	{	oexERROR( 0, oexMks( oexT( "CAudioSink::createNew() failed : " ), oexT( " : " ), m_pEnv->getResultMsg() ) );
 		return 0;
 	} // end if
+
+//	if( !strcmp( pss->codecName(), oexT( "MP4A-LATM" ) ) )
+//		((MPEG4LATMAudioRTPSource*)pss->rtpSource())->omitLATMDataLengthField();
 
 	m_pAsPss = pss;
 
@@ -634,7 +639,7 @@ oex::oexBOOL CLvRtspClient::DoThread( oex::oexPVOID x_pData )
 	m_pRtspClient->playMediaSession( *m_pSession, 0.f, -1.f, 1.f );
 
 	// Schedule idle processing
-	m_pEnv->taskScheduler().scheduleDelayedTask( 15, (TaskFunc*)CLvRtspClient::_OnIdle, this );
+	m_pEnv->taskScheduler().scheduleDelayedTask( 15000, (TaskFunc*)CLvRtspClient::_OnIdle, this );
 
 	// Run the event loop
 	m_pEnv->taskScheduler().doEventLoop( &m_nEnd );
@@ -644,6 +649,7 @@ oex::oexBOOL CLvRtspClient::DoThread( oex::oexPVOID x_pData )
 
 oex::oexINT CLvRtspClient::EndThread( oex::oexPVOID x_pData )
 {_STT();
+
 	ThreadDestroy();
 
 	return 0;
@@ -660,7 +666,7 @@ void CLvRtspClient::OnIdle()
 
 	if ( !m_pEnv )
 		return;
-
+	
 	// Request new video frame if needed
 	if ( m_pVs && m_pVs->needFrame() )
 		m_pVs->continuePlaying();
@@ -671,6 +677,6 @@ void CLvRtspClient::OnIdle()
 
 	// Schedule us to run again
 	if ( !m_nEnd )
-		m_pEnv->taskScheduler().scheduleDelayedTask( 15, (TaskFunc*)CLvRtspClient::_OnIdle, this );
+		m_pEnv->taskScheduler().scheduleDelayedTask( 15000, (TaskFunc*)CLvRtspClient::_OnIdle, this );
 }
 
