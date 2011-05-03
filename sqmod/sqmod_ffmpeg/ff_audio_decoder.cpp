@@ -150,7 +150,6 @@ static AVCodecTag g_ff_audio_codec_map[] =
     { CODEC_ID_AAC,				MKTAG('A', 'M', 'R', ' ') },
     { CODEC_ID_AMR_NB,			MKTAG('A', 'M', 'R', ' ') },
     { CODEC_ID_AMR_WB,			MKTAG('A', 'M', 'R', ' ') },
-    { CODEC_ID_AAC_LATM,		MKTAG('M', 'P', '4', 'A') },
     { CODEC_ID_AAC_LATM,		MKTAG('L', 'A', 'T', 'M') },
 
     { CODEC_ID_MP2,				MKTAG('M', 'P', '2', '_') },
@@ -161,6 +160,21 @@ static AVCodecTag g_ff_audio_codec_map[] =
     
 	{ CODEC_ID_NONE,			0 }
 };
+
+struct SFfAudioCodecInfo
+{
+	int			id;
+	const char 	*tag;
+};
+
+static SFfAudioCodecInfo g_ff_audio_codec_info[] =
+{
+	{ CODEC_ID_AAC_LATM,		oexT( "MP4A-LATM" ) },
+	{ CODEC_ID_AAC_LATM,		oexT( "AAC-LATM" ) },
+
+	{ CODEC_ID_NONE,			0 }
+};
+
 
 int CFfAudioDecoder::LookupCodecId( const sqbind::stdString &sCodec )
 {_STT();
@@ -178,11 +192,19 @@ int CFfAudioDecoder::LookupCodecId( const sqbind::stdString &sCodec )
 		if ( *(oex::oexUINT32*)c == g_ff_audio_codec_map[ i ].tag )
 			return g_ff_audio_codec_map[ i ].id;
 
-	return 0;
+	// Extras by name
+	oex::CStr8 s = oexStrToStr8( sqbind::std2oex( sCodec ) );
+	const char *p = s.Ptr();
+	for ( int i = 0; CODEC_ID_NONE != g_ff_audio_codec_info[ i ].id; i++ )
+		if ( !strcmpi( p, g_ff_audio_codec_info[ i ].tag ) )
+			return g_ff_audio_codec_info[ i ].id;
+
+			return 0;
 }
 
 sqbind::stdString CFfAudioDecoder::LookupCodecName( int nId )
 {_STT();
+
 	// Find a codec with that id
 	for ( int i = 0; CODEC_ID_NONE != ff_codec_wav_tags[ i ].id; i++ )
 		if ( ff_codec_wav_tags[ i ].id == (CodecID)nId )
@@ -191,6 +213,19 @@ sqbind::stdString CFfAudioDecoder::LookupCodecName( int nId )
 			return oexMbToStrPtr( b );
 		} // end if
 
+	// Find a codec with that id
+	for ( int i = 0; CODEC_ID_NONE != g_ff_audio_codec_map[ i ].id; i++ )
+		if ( g_ff_audio_codec_map[ i ].id == (CodecID)nId )
+		{	char b[ 5 ] = { 0, 0, 0, 0, 0 };
+			*(oex::oexUINT32*)b = g_ff_audio_codec_map[ i ].tag;
+			return oexMbToStrPtr( b );
+		} // end if
+		
+	// Find a codec with that id
+	for ( int i = 0; CODEC_ID_NONE != g_ff_audio_codec_info[ i ].id; i++ )
+		if ( g_ff_audio_codec_info[ i ].id == (CodecID)nId )
+			return oexMbToStrPtr( g_ff_audio_codec_info[ i ].tag );
+		
 	return oexT( "" );
 }
 

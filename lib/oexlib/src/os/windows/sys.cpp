@@ -135,6 +135,16 @@ oexCPVOID CSys::GetInstanceHandle()
 #endif
 }
 
+oexBOOL CSys::SetThreadPriority( oexINT x_nPriority )
+{
+	return ::SetThreadPriority( ::GetCurrentThread(), x_nPriority );
+}
+
+oexUINT CSys::SetThreadAffinity( oexUINT x_nAffinity )
+{
+	return ::SetThreadAffinityMask( ::GetCurrentThread(), x_nAffinity );
+}
+
 oexINT CSys::ShowMessageBox( oexCSTR x_pTitle, oexCSTR x_pStr )
 {//_STT();
 	if ( !oexCHECK_PTR( x_pTitle ) )

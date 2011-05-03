@@ -7,7 +7,7 @@ _self.load_module( "portaudio", "" );
 class CRtspStream
 {
 	bDecodeVideo = 1;
-	bDecodeAudio = 0;
+	bDecodeAudio = 1;
 	bPlayAudio = 0;
 
 	rtsp = 0;
@@ -20,7 +20,7 @@ class CRtspStream
 	araw = 0;
 	aframe = 0;	
 	afail = 0;
-	
+
 	pa = 0;
 
 	function getWidth() 
@@ -55,7 +55,7 @@ class CRtspStream
 		araw = 0;
 		aframe = 0;
 		afail = 0;
-		
+
 		pa = 0;
 	}
 
@@ -67,10 +67,10 @@ class CRtspStream
 		::_self.echo( "\nConnecting to : " + link + "\n" );
 
 		rtsp = CLvRtspClient();
-		
+
 //		rtsp.setStreamOverTCP( 0 );
 //		rtsp.setTunnelOverHTTPPort( 0 );
-		
+
 		if ( !rtsp.Open( link, bDecodeVideo, bDecodeAudio, CSqMulti() ) )
 		{	::_self.echo( "Failed to open RTSP stream : " + link );
 			return 0;
@@ -83,11 +83,11 @@ class CRtspStream
 		if ( !rtsp.isVideo() )
 			::_self.echo( "iii no video" );
 		else
-		{		
+		{
 			// Insert H264 Header if needed
 			if ( "H264" == rtsp.getVideoCodecName() )
 				rtsp.setVideoHeader( "\x00\x00\x01" );
-				
+
 			::_self.echo( "iii Creating video decoder for " + rtsp.getVideoCodecName() );
 
 			dec = CFfDecoder();
@@ -104,7 +104,7 @@ class CRtspStream
 
 			else
 				frame = CSqBinary();
-			
+
 		} // end else
 
 		if ( !rtsp.isAudio() )
@@ -114,20 +114,19 @@ class CRtspStream
 			::_self.echo( "iii Creating audio decoder for " + rtsp.getAudioCodecName() );
 			
 			adec = CFfAudioDecoder();
-			// if ( !adec.Create( CFfAudioDecoder().LookupCodecId( rtsp.getAudioCodecName() ) ) )
-			if ( !adec.Create( CFfAudioDecoder().LookupCodecId( "LATM" ) ) )
+			if ( !adec.Create( CFfAudioDecoder().LookupCodecId( rtsp.getAudioCodecName() ) ) )
 			{	::_self.echo( "!!! Failed to create decoder for " + rtsp.getAudioCodecName() );
 				adec = 0;
 				afail = 1;
 //				return 0;
 			} // end if
-			
+
 			else
 			{
 				araw = CSqBinary(), aframe = CSqBinary();
-				
+
 				if ( bPlayAudio )
-				{				
+				{
 					pa = CPaOutput();
 					local fmt;
 					switch( 8 )
@@ -135,21 +134,21 @@ class CRtspStream
 						default : fmt = CPaOutput().paInt16; break;
 					} // end switch
 					local fsize = 2;
-				
+
 					if ( !pa.Open( 0, pa.getDefaultOutputDevice(), 1, fmt, 0.2, 8000., fsize ) )
 					{   _self.echo( "!!! Failed to open output stream : " + pa.getLastError() );
 						pa = 0;
 					} // end if
-				
+
 					else if ( !pa.Start() )
 					{   _self.echo( "!!! Failed to start output stream : " + pa.getLastError() );
 						pa = 0;
 					} // end if
-					
+
 				} // end if
-								
+
 			} // end else
-			
+
 		} // end else
 
 		::_self.echo( " !!! STARTING RTSP STREAM !!!" );
@@ -158,7 +157,7 @@ class CRtspStream
 
 		return 1;
 	}
-	
+
 	function PlayAudio()
 	{
 		if ( afail || !isReady() || !rtsp.isAudio() )
@@ -169,32 +168,32 @@ class CRtspStream
 			if ( afail )
 				return 0;
 		} // end if
-			
+
 		if ( !rtsp.LockAudio( aframe, 0 ) )
 			return 0;
-			
+
 		if ( aframe.getUsed() )
 		{
 			::_self.echo( "asz = " + aframe.getUsed() );
 //			if ( !pa.Write( aframe, aframe.getUsed() / pa.getFrameBytes() ) );
-			
+
 //			::_self.echo( aframe.AsciiHexStr( 16, 16 ) );
-			
+
 			if ( 0 < adec.Decode( aframe, araw, CSqMulti() ) )
 			{
 				::_self.echo( " ++++++++++++++++++ AUDIO PACKET : " + araw.getUsed() );		
-				
+
 				if ( pa )
 					if ( !pa.Write( araw, araw.getUsed() / pa.getFrameBytes() ) )
 					{	_self.echo( "Failed to write audio data" );
 						return -1;
 					} // end if
-				
+
 			} // end if
-			
+
 		} // end if
-		
-			
+
+
 		rtsp.UnlockAudio();
 
 		return 0;

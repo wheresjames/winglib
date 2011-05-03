@@ -137,6 +137,17 @@ oexCPVOID CSys::GetInstanceHandle()
 	return (oexCPVOID)getpid();
 }
 
+oexBOOL CSys::SetThreadPriority( oexINT x_nPriority )
+{
+	return 0;
+//	return nice( x_nPriority );
+}
+
+oexUINT CSys::SetThreadAffinity( oexUINT x_nAffinity )
+{
+	return 0;
+}
+
 oexINT CSys::Quit( oexINT x_nReturnCode )
 {	return -1;
 }
