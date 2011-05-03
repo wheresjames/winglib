@@ -152,7 +152,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfConvert, CFfConvert )
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CFfConvert );
 
-#define FFF_KEY_FRAME	PKT_FLAG_KEY
+#define FFF_KEY_FRAME	AV_PKT_FLAG_KEY
 
 // Export Functions
 SQBIND_REGISTER_CLASS_BEGIN( CFfAudioDecoder, CFfAudioDecoder )
@@ -161,6 +161,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfAudioDecoder, CFfAudioDecoder )
 	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, Create )
 	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, FindStreamInfo )
 	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, Decode )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getBufferSize )
 
 	SQBIND_STATIC_FUNCTION( CFfAudioDecoder, LookupCodecId )
 	SQBIND_STATIC_FUNCTION( CFfAudioDecoder, LookupCodecName )

@@ -75,7 +75,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	avcodec_get_context_defaults( m_pCodecContext );
 
 	m_pCodecContext->codec_id = (CodecID)x_nCodec;
-	m_pCodecContext->codec_type = CODEC_TYPE_VIDEO;
+	m_pCodecContext->codec_type = AVMEDIA_TYPE_VIDEO;
 	m_pCodecContext->bit_rate = brate;
 	m_pCodecContext->bit_rate_tolerance = brate / 5;
 	m_pCodecContext->width = width;
@@ -283,8 +283,8 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 		int flags = (*m)[ oexT( "flags" ) ].toint();
 		(*m)[ oexT( "flags" ) ]
 			.set( sqbind::oex2std( oexMks( ( m_pCodecContext->coded_frame->key_frame ) 
-										  ? ( flags | PKT_FLAG_KEY )
-										  : ( flags & ~PKT_FLAG_KEY ) ) ) );
+										  ? ( flags | AV_PKT_FLAG_KEY )
+										  : ( flags & ~AV_PKT_FLAG_KEY ) ) ) );
 		(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pts ) ) );
 
 	} // end if

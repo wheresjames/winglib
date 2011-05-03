@@ -133,20 +133,20 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 	{
 		(*m)[ oexT( "filename" ) ].set( oexMbToStrPtr( m_pFormatContext->filename ) );
 		(*m)[ oexT( "timestamp" ) ].set( oexMks( m_pFormatContext->timestamp ).Ptr() );
-		(*m)[ oexT( "title" ) ].set( oexMbToStrPtr( m_pFormatContext->title ) );
-		(*m)[ oexT( "author" ) ].set( oexMbToStrPtr( m_pFormatContext->author ) );
-		(*m)[ oexT( "copyright" ) ].set( oexMbToStrPtr( m_pFormatContext->copyright ) );
-		(*m)[ oexT( "comment" ) ].set( oexMbToStrPtr( m_pFormatContext->comment ) );
-		(*m)[ oexT( "album" ) ].set( oexMbToStrPtr( m_pFormatContext->album ) );
-		(*m)[ oexT( "year" ) ].set( oexMks( m_pFormatContext->year ).Ptr() );
-		(*m)[ oexT( "track" ) ].set( oexMks( m_pFormatContext->track ).Ptr() );
-		(*m)[ oexT( "genre" ) ].set( oexMbToStrPtr( m_pFormatContext->genre ) );
+//		(*m)[ oexT( "title" ) ].set( oexMbToStrPtr( m_pFormatContext->title ) );
+//		(*m)[ oexT( "author" ) ].set( oexMbToStrPtr( m_pFormatContext->author ) );
+//		(*m)[ oexT( "copyright" ) ].set( oexMbToStrPtr( m_pFormatContext->copyright ) );
+//		(*m)[ oexT( "comment" ) ].set( oexMbToStrPtr( m_pFormatContext->comment ) );
+//		(*m)[ oexT( "album" ) ].set( oexMbToStrPtr( m_pFormatContext->album ) );
+//		(*m)[ oexT( "year" ) ].set( oexMks( m_pFormatContext->year ).Ptr() );
+//		(*m)[ oexT( "track" ) ].set( oexMks( m_pFormatContext->track ).Ptr() );
+//		(*m)[ oexT( "genre" ) ].set( oexMbToStrPtr( m_pFormatContext->genre ) );
 		(*m)[ oexT( "ctx_flags" ) ].set( oexMks( m_pFormatContext->ctx_flags ).Ptr() );
 		(*m)[ oexT( "start_time" ) ].set( oexMks( m_pFormatContext->start_time ).Ptr() );
 		(*m)[ oexT( "duration" ) ].set( oexMks( m_pFormatContext->duration ).Ptr() );
 		(*m)[ oexT( "file_size" ) ].set( oexMks( m_pFormatContext->file_size ).Ptr() );
 		(*m)[ oexT( "bit_rate" ) ].set( oexMks( m_pFormatContext->bit_rate ).Ptr() );
-		(*m)[ oexT( "index_built" ) ].set( oexMks( m_pFormatContext->index_built ).Ptr() );
+//		(*m)[ oexT( "index_built" ) ].set( oexMks( m_pFormatContext->index_built ).Ptr() );
 		(*m)[ oexT( "mux_rate" ) ].set( oexMks( m_pFormatContext->mux_rate ).Ptr() );
 		(*m)[ oexT( "packet_size" ) ].set( oexMks( m_pFormatContext->packet_size ).Ptr() );
 		(*m)[ oexT( "preload" ) ].set( oexMks( m_pFormatContext->preload ).Ptr() );
@@ -161,9 +161,9 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 
 	// Find audio and video stream indices
 	for ( unsigned int i = 0; i < m_pFormatContext->nb_streams; i++ )
-		if ( CODEC_TYPE_VIDEO == m_pFormatContext->streams[ i ]->codec->codec_type )
+		if ( AVMEDIA_TYPE_VIDEO == m_pFormatContext->streams[ i ]->codec->codec_type )
 			m_nVideoStream = i;
-		else if ( CODEC_TYPE_AUDIO == m_pFormatContext->streams[ i ]->codec->codec_type )
+		else if ( AVMEDIA_TYPE_AUDIO == m_pFormatContext->streams[ i ]->codec->codec_type )
 			m_nAudioStream = i;
 
 	// Did we find a stream?
@@ -295,7 +295,7 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 
 	// Waiting key frame?
 	if ( !m_bKeyRxd )
-	{	if ( 0 == ( m_pkt.flags & PKT_FLAG_KEY ) )
+	{	if ( 0 == ( m_pkt.flags & AV_PKT_FLAG_KEY ) )
 			return -1;
 		m_bKeyRxd = 1;
 	} // end if
@@ -449,13 +449,13 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 
 int CFfContainer::DecodeAudioFrameBin( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
 {_STT();
-
+/*
 	if ( !in || !out )
 		return 0;
 
 	int in_size = in->getUsed();
 	const uint8_t* in_ptr = (const uint8_t*)in->Ptr();
-/*
+/ *
 	m_audio_buf.setUsed( 0 );
 
 	// Ensure buffer size
@@ -480,7 +480,7 @@ int CFfContainer::DecodeAudioFrameBin( sqbind::CSqBinary *in, sqbind::CSqBinary 
 
 	} // end if
 */
-
+/*
 	int out_size = oex::cmn::Max( (int)(in->getUsed() * 2), (int)AVCODEC_MAX_AUDIO_FRAME_SIZE );
 	if ( (int)out->Size() < out_size )
 		out->Allocate( out_size );
@@ -499,7 +499,7 @@ int CFfContainer::DecodeAudioFrameBin( sqbind::CSqBinary *in, sqbind::CSqBinary 
 //	if ( used != in->getUsed() )
 //		oexSHOW( "!!! Left over data !!!" );
 
-/*
+/ *
 	// Left over data?
 	if ( used < m_pkt.size )
 	{
@@ -512,6 +512,8 @@ int CFfContainer::DecodeAudioFrameBin( sqbind::CSqBinary *in, sqbind::CSqBinary 
 	else
 		m_buf.setUsed( 0 );
 */
+
+	return 0;
 
 	// Frame
 	m_nAudioFrames++;
@@ -531,9 +533,9 @@ int CFfContainer::Create( const sqbind::stdString &sUrl, const sqbind::stdString
 	AVOutputFormat *pOut = 0;
 
 	if ( sType.length() )
-		pOut = guess_format( oexStrToMbPtr( sType.c_str() ), 0, 0 );
+		pOut = av_guess_format( oexStrToMbPtr( sType.c_str() ), 0, 0 );
 	else
-		pOut = guess_format( 0, oexStrToMbPtr( sUrl.c_str() ), 0 );
+		pOut = av_guess_format( 0, oexStrToMbPtr( sUrl.c_str() ), 0 );
 
 	if ( !pOut )
 	{	oexERROR( 0, oexT( "guess_format() failed" ) );
@@ -607,7 +609,7 @@ int CFfContainer::InitWrite()
 	// +++ Below Seems to memleak when url_fopen fails
 
 	if ( !( m_pFormatContext->oformat->flags & AVFMT_NOFILE ) )
-		if ( 0 > ( res = url_fopen( &m_pFormatContext->pb, m_pFormatContext->filename, URL_WRONLY ) ) )
+		if ( 0 > ( res = avio_open( &m_pFormatContext->pb, m_pFormatContext->filename, URL_WRONLY ) ) )
 		{	oexERROR( res, oexT( "url_fopen() failed" ) );
 			Destroy();
 			return 0;
@@ -648,7 +650,7 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 
 	// Fill in codec info
 	pcc->codec_id = (CodecID)codec_id;
-	pcc->codec_type = CODEC_TYPE_VIDEO;
+	pcc->codec_type = AVMEDIA_TYPE_VIDEO;
 	pcc->bit_rate = 2000000;
 	pcc->width = width;
 	pcc->height = height;

@@ -264,6 +264,12 @@ public:
 		/// Sends the terminate mesage to the specified thread
 		int terminate_thread( const stdString &sPath );
 
+		/// Sets the current threads priority
+		int set_thread_priority( int nPriority );
+		
+		/// Sets the current threads affinity
+		int set_thread_affinity( int nAffinity );
+		
 		/// Returns the size of the specified type
 		int type_size( int type );
 

@@ -7,8 +7,8 @@ _self.load_module( "portaudio", "" );
 class CRtspStream
 {
 	bDecodeVideo = 1;
-	bDecodeAudio = 0;
-	bPlayAudio = 0;
+	bDecodeAudio = 1;
+	bPlayAudio = 1;
 
 	rtsp = 0;
 
@@ -20,7 +20,7 @@ class CRtspStream
 	araw = 0;
 	aframe = 0;	
 	afail = 0;
-	
+
 	pa = 0;
 
 	function getWidth() 
@@ -52,10 +52,10 @@ class CRtspStream
 		if ( adec )
 			adec.Destroy(), dec = 0;
 
-		araw = 0;			
+		araw = 0;
 		aframe = 0;
 		afail = 0;
-		
+
 		pa = 0;
 	}
 
@@ -67,10 +67,10 @@ class CRtspStream
 		::_self.echo( "\nConnecting to : " + link + "\n" );
 
 		rtsp = CLvRtspClient();
-		
+
 //		rtsp.setStreamOverTCP( 0 );
 //		rtsp.setTunnelOverHTTPPort( 0 );
-		
+
 		if ( !rtsp.Open( link, bDecodeVideo, bDecodeAudio, CSqMulti() ) )
 		{	::_self.echo( "Failed to open RTSP stream : " + link );
 			return 0;
@@ -83,11 +83,11 @@ class CRtspStream
 		if ( !rtsp.isVideo() )
 			::_self.echo( "iii no video" );
 		else
-		{		
+		{
 			// Insert H264 Header if needed
 			if ( "H264" == rtsp.getVideoCodecName() )
 				rtsp.setVideoHeader( "\x00\x00\x01" );
-				
+
 			::_self.echo( "iii Creating video decoder for " + rtsp.getVideoCodecName() );
 
 			dec = CFfDecoder();
@@ -104,7 +104,7 @@ class CRtspStream
 
 			else
 				frame = CSqBinary();
-			
+
 		} // end else
 
 		if ( !rtsp.isAudio() )
@@ -114,20 +114,19 @@ class CRtspStream
 			::_self.echo( "iii Creating audio decoder for " + rtsp.getAudioCodecName() );
 			
 			adec = CFfAudioDecoder();
-			// if ( !adec.Create( CFfAudioDecoder().LookupCodecId( rtsp.getAudioCodecName() ) ) )
-			if ( !adec.Create( CFfAudioDecoder().LookupCodecId( "LATM" ) ) )
+			if ( !adec.Create( CFfAudioDecoder().LookupCodecId( rtsp.getAudioCodecName() ) ) )
 			{	::_self.echo( "!!! Failed to create decoder for " + rtsp.getAudioCodecName() );
 				adec = 0;
 				afail = 1;
 //				return 0;
 			} // end if
-			
+
 			else
 			{
 				araw = CSqBinary(), aframe = CSqBinary();
-				
+
 				if ( bPlayAudio )
-				{				
+				{
 					pa = CPaOutput();
 					local fmt;
 					switch( 8 )
@@ -135,21 +134,21 @@ class CRtspStream
 						default : fmt = CPaOutput().paInt16; break;
 					} // end switch
 					local fsize = 2;
-				
+
 					if ( !pa.Open( 0, pa.getDefaultOutputDevice(), 1, fmt, 0.2, 8000., fsize ) )
 					{   _self.echo( "!!! Failed to open output stream : " + pa.getLastError() );
 						pa = 0;
 					} // end if
-				
+
 					else if ( !pa.Start() )
 					{   _self.echo( "!!! Failed to start output stream : " + pa.getLastError() );
 						pa = 0;
 					} // end if
-					
+
 				} // end if
-								
+
 			} // end else
-			
+
 		} // end else
 
 		::_self.echo( " !!! STARTING RTSP STREAM !!!" );
@@ -158,7 +157,7 @@ class CRtspStream
 
 		return 1;
 	}
-	
+
 	function PlayAudio()
 	{
 		if ( afail || !isReady() || !rtsp.isAudio() )
@@ -169,32 +168,37 @@ class CRtspStream
 			if ( afail )
 				return 0;
 		} // end if
-			
+
 		if ( !rtsp.LockAudio( aframe, 0 ) )
 			return 0;
-			
+
 		if ( aframe.getUsed() )
 		{
 			::_self.echo( "asz = " + aframe.getUsed() );
 //			if ( !pa.Write( aframe, aframe.getUsed() / pa.getFrameBytes() ) );
-			
+
 //			::_self.echo( aframe.AsciiHexStr( 16, 16 ) );
-			
+
 			if ( 0 < adec.Decode( aframe, araw, CSqMulti() ) )
 			{
 				::_self.echo( " ++++++++++++++++++ AUDIO PACKET : " + araw.getUsed() );		
-				
+
+				if ( !pa )
+					::_self.echo( "Invalid audio device" );
+				else
+					::_self.echo( araw.AsciiHexStr( 16, 16 ) );
+
 				if ( pa )
 					if ( !pa.Write( araw, araw.getUsed() / pa.getFrameBytes() ) )
 					{	_self.echo( "Failed to write audio data" );
 						return -1;
 					} // end if
-				
+
 			} // end if
-			
+
 		} // end if
-		
-			
+
+
 		rtsp.UnlockAudio();
 
 		return 0;
@@ -214,13 +218,10 @@ class CRtspStream
 		if ( rtsp.LockVideo( frame, 0 ) )
 		{	dec.BufferData( frame, CSqMulti() );
 			rtsp.UnlockVideo();
-			::_self.echo( "lv" );
 		} // end if
 
 		if ( 0 >= dec.getBufferSize() )
 			return 0;
-
-		::_self.echo( "sz = " + dec.getBufferSize() );
 
 		return dec.Decode( CSqBinary(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
 	}
@@ -262,7 +263,7 @@ function _init() : ( _g )
 
 //	_g.irr.SetStereo( 1 );
 	_self.echo( "...Initializing...\n" );
-	_g.irr.Init( "Irr Test", 640, 480, 1 );
+	_g.irr.Init( "RTSP Test", 640, 480, 1 );
 
 	_self.echo( "...setting ambient light...\n" );
 	_g.irr.SetAmbientLight( CSqirrColorf( 0.5, 0.5, 0.5 ) );
@@ -275,15 +276,19 @@ function _init() : ( _g )
 //	_g.irr.AddSkyDome( _self.path( "../imgs/sky.png" ), 16, 16, 100., 100. );
 
 	_self.echo( "...adding camera...\n" );
-	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 10, -15 ), CSqirrVector3d( 0, 0, 0 ) );
+//	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 10, -15 ), CSqirrVector3d( 0, 0, 0 ) );
+	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 0, -15 ), CSqirrVector3d( 0, 0, 0 ) );
 //	cam.SetLens( 1., 2.4, 3.2 );
 
-	_self.echo( "...adding cube...\n" );
-	_g.cube = _g.irr.AddCube( 10. );
+    _g.cube = _g.irr.AddGrid( 50., 50., 1, 1, 0., 2, CSqirrColor( 255, 255, 255 ), 2 );
+	_g.cube.SetPosition( CSqirrVector3d( -25, -25, 25 ) );
 
-	_self.echo( "...adding animator...\n" );
-	local ani = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.4, 0 ) );
-	_g.cube.AddAnimator( ani );
+//	_self.echo( "...adding cube...\n" );
+//	_g.cube = _g.irr.AddCube( 10. );
+
+//	_self.echo( "...adding animator...\n" );
+//	local ani = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.4, 0 ) );
+//	_g.cube.AddAnimator( ani );
 
 	// Set draw function
 	_self.set_timer( ".", 30, "OnDraw" )

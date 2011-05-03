@@ -242,6 +242,17 @@ int CSqEngineExport::load_module( const stdString &sModule, const stdString &sPa
 	return OnLoadModule( sModule, sPath );
 }
 
+int CSqEngineExport::set_thread_priority( int nPriority )
+{_STT();
+	return oex::os::CSys::SetThreadPriority( nPriority );
+}
+
+int CSqEngineExport::set_thread_affinity( int nAffinity )
+{_STT();
+	return oex::os::CSys::SetThreadAffinity( nAffinity );
+}
+
+
 int CSqEngineExport::kill( const stdString &sPath )
 {_STT();
 	CSqMsgQueue *q = queue();
@@ -1574,6 +1585,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill_wait )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, terminate_thread )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_thread_priority )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_thread_affinity )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, module_name )

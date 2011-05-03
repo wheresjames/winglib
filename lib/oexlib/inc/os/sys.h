@@ -354,6 +354,17 @@ public:
 	*/
 	static oexUINT GetCurThreadId();
 
+    /// Sets the thread priority level
+	/**
+
+	*/
+	static oexBOOL SetThreadPriority( oexINT x_nPriority );
+	
+    /// Sets the thread affinity
+	/**
+
+	*/
+	static oexUINT SetThreadAffinity( oexUINT x_nAffinity );
 
 private:
 

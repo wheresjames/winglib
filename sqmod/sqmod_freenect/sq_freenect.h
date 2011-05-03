@@ -6,7 +6,12 @@ public:
 		
 	enum
 	{
-		eMaxBuffers = 8
+		eMaxBuffers = 8,
+		
+		eMaxWidth = 1280,
+		
+		eMaxHeight = 1024		
+		
 	};
 
 public:
@@ -106,16 +111,16 @@ public:
 	int getDepthFrameIdx() { return m_nDepthIdx; }
 
 	/// Returns the width of a video frame
-	int getVideoWidth() { return FREENECT_FRAME_W; }
+	int getVideoWidth() { return m_nVideoWidth; }
 
 	/// Returns the height of a video frame
-	int getVideoHeight() { return FREENECT_FRAME_H; }
+	int getVideoHeight() { return m_nVideoHeight; }
 
 	/// Returns the width of a depth frame
-	int getDepthWidth() { return FREENECT_IR_FRAME_W; }
+	int getDepthWidth() { return m_nDepthWidth; }
 
 	/// Returns the height of a depth frame
-	int getDepthHeight() { return FREENECT_IR_FRAME_H; }
+	int getDepthHeight() { return m_nDepthHeight; }
 
 	/** @} */
 
@@ -221,5 +226,29 @@ private:
 
 	/// Tilt state
 	double					m_dTiltState[ 2 ];
+	
+	/// Video width
+	int						m_nVideoWidth;
+	
+	/// Video height
+	int 					m_nVideoHeight;
+	
+	/// Video bits per pixel
+	int						m_nVideoBps;
 
+	/// Video frame size
+	int						m_nVideoSize;
+
+	/// Depth width
+	int						m_nDepthWidth;
+	
+	/// Depth height
+	int 					m_nDepthHeight;
+	
+	/// Depth bits per pixel
+	int						m_nDepthBps;
+	
+	/// Depth frame size
+	int						m_nDepthSize;
+	
 };

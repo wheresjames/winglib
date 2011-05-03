@@ -36,6 +36,15 @@ public:
 	/// Lookup a codec based on id
 	static sqbind::stdString LookupCodecName( int nId );
 
+	/// Appends data to temporary buffer and initializes padding
+	int BufferData( sqbind::CSqBinary *in, sqbind::CSqMulti *m );
+
+	/// Dequeues data from buffer
+	int UnBufferData( int uUsed );
+
+	/// Returns the amount of data buffered
+	int getBufferSize();
+
 	/** @} */
 
 private:
