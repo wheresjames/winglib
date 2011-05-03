@@ -8,7 +8,7 @@ class CRtspStream
 {
 	bDecodeVideo = 1;
 	bDecodeAudio = 1;
-	bPlayAudio = 0;
+	bPlayAudio = 1;
 
 	rtsp = 0;
 
@@ -182,6 +182,11 @@ class CRtspStream
 			if ( 0 < adec.Decode( aframe, araw, CSqMulti() ) )
 			{
 				::_self.echo( " ++++++++++++++++++ AUDIO PACKET : " + araw.getUsed() );		
+
+				if ( !pa )
+					::_self.echo( "Invalid audio device" );
+				else
+					::_self.echo( araw.AsciiHexStr( 16, 16 ) );
 
 				if ( pa )
 					if ( !pa.Write( araw, araw.getUsed() / pa.getFrameBytes() ) )

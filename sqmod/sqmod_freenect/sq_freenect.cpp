@@ -26,6 +26,10 @@ CSqFreenect::CSqFreenect()
 	// Initialize states
 	m_nLEDState[ 0 ] = m_nLEDState[ 1 ] = 0;
 	m_dTiltState[ 0 ] = m_dTiltState[ 1 ] = 0;
+	
+	// Init width / height
+	m_nVideoWidth = m_nVideoHeight = m_nVideoBps = m_nVideoSize = 0;
+	m_nDepthWidth = m_nDepthHeight = m_nDepthBps = m_nDepthSize = 0;
 
 }
 
@@ -53,6 +57,9 @@ void CSqFreenect::Destroy()
 
 	m_nVideoFmt[ 0 ] = m_nVideoFmt[ 1 ] = -1;
 	m_nDepthFmt[ 0 ] = m_nDepthFmt[ 1 ] = -1;
+	
+	m_nVideoWidth = m_nVideoHeight = m_nVideoBps = m_nVideoSize = 0;
+	m_nDepthWidth = m_nDepthHeight = m_nDepthBps = m_nDepthSize = 0;
 }
 
 int CSqFreenect::Init()
@@ -64,7 +71,7 @@ int CSqFreenect::Init()
 	//==============================================================
 	// Create video buffers
 
-	sqbind::CSqBinary::t_size lSize = getVideoWidth() * getVideoHeight() * 4;
+	sqbind::CSqBinary::t_size lSize = eMaxWidth * eMaxHeight * 4;
 	if ( !lSize )
 		return 0;
 
@@ -78,7 +85,7 @@ int CSqFreenect::Init()
 	//==============================================================
 	// Create depth buffers
 
-	lSize = getDepthWidth() * getDepthHeight() * 4;
+	lSize = eMaxWidth * eMaxHeight * 4;
 	if ( !lSize )
 		return 0;
 
@@ -127,6 +134,9 @@ void CSqFreenect::_OnDepth( freenect_device *dev, void *depth, uint32_t timestam
 void CSqFreenect::OnDepth( void *depth, uint32_t timestamp )
 {_STT();
 
+	// Save the size
+	m_binDepth[ m_nDepthIdx ].setUsed( m_nDepthSize );
+
 	// We got a buffer
 	if ( ++m_nDepthIdx >= eMaxBuffers )
 		m_nDepthIdx = 0;
@@ -150,6 +160,9 @@ void CSqFreenect::_OnVideo( freenect_device *dev, void *rgb, uint32_t timestamp 
 
 void CSqFreenect::OnVideo( void *rgb, uint32_t timestamp )
 {_STT();
+
+	// Save the size
+	m_binVideo[ m_nVideoIdx ].setUsed( m_nVideoSize );
 
 	// We got a buffer
 	if ( ++m_nVideoIdx >= eMaxBuffers )
@@ -193,6 +206,13 @@ int CSqFreenect::ThreadInitVideo()
 	if ( !m_pfd )
 		return 0;
 
+	// Get video buffer size
+	freenect_frame_mode ffm = freenect_get_current_video_mode( m_pfd );
+	m_nVideoWidth = ffm.width;
+	m_nVideoHeight = ffm.height;
+	m_nVideoBps = ffm.data_bits_per_pixel;
+	m_nVideoSize = ffm.bytes;
+
 	// Set the video buffer
 	m_nVideoIdx = 0;
 	freenect_set_video_buffer( m_pfd, m_binVideo[ 1 ]._Ptr() );
@@ -208,6 +228,13 @@ int CSqFreenect::ThreadInitDepth()
 
 	if ( !m_pfd )
 		return 0;
+
+	// Get depth buffer size
+	freenect_frame_mode ffm = freenect_get_current_depth_mode( m_pfd );
+	m_nDepthWidth = ffm.width;
+	m_nDepthHeight = ffm.height;
+	m_nDepthBps = ffm.data_bits_per_pixel;
+	m_nDepthSize = ffm.bytes;
 
 	// Set the video buffer
 	m_nDepthIdx = 0;
@@ -329,18 +356,27 @@ oex::oexBOOL CSqFreenect::DoThread( oex::oexPVOID x_pData )
 		if ( 0 > m_nDev[ 1 ] )
 			return oex::oexTRUE;
 
+		// +++ Changing this requires changing the video size
+		freenect_resolution res = FREENECT_RESOLUTION_MEDIUM;
+
 		// Start / stop video
 		if ( 0 <= m_nVideoFmt[ 0 ] && m_nVideoFmt[ 0 ] != m_nVideoFmt[ 1 ] )
-			freenect_set_video_format( m_pfd, (freenect_video_format)m_nVideoFmt[ 0 ] ),
+		{	freenect_frame_mode ffm = freenect_find_video_mode( res, (freenect_video_format)m_nVideoFmt[ 0 ]);
+			freenect_set_video_mode( m_pfd, ffm );
+//			freenect_set_video_format( m_pfd, (freenect_video_format)m_nVideoFmt[ 0 ] ),
 			freenect_start_video( m_pfd );
+		} // end if
 		else if ( 0 > m_nVideoFmt[ 0 ] )
 			freenect_stop_video( m_pfd );
 		m_nVideoFmt[ 1 ] = m_nVideoFmt[ 0 ];
 
 		// Start /  stop depth
 		if ( 0 <= m_nDepthFmt[ 0 ] && m_nDepthFmt[ 0 ] != m_nDepthFmt[ 1 ] )
-			freenect_set_depth_format( m_pfd, (freenect_depth_format)m_nDepthFmt[ 0 ] ),
+		{	freenect_frame_mode ffm = freenect_find_depth_mode( res, (freenect_depth_format)m_nDepthFmt[ 0 ]);
+			freenect_set_depth_mode( m_pfd, ffm );
+//			freenect_set_depth_format( m_pfd, (freenect_depth_format)m_nDepthFmt[ 0 ] ),
 			freenect_start_depth( m_pfd );
+		} // end if
 		else if ( 0 > m_nDepthFmt[ 0 ] )
 			freenect_stop_depth( m_pfd );
 		m_nDepthFmt[ 1 ] = m_nDepthFmt[ 0 ];

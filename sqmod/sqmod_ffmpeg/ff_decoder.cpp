@@ -87,10 +87,10 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	} // end if
 
 //	avcodec_get_context_defaults( m_pCodecContext );
-	avcodec_get_context_defaults2( m_pCodecContext, CODEC_TYPE_VIDEO );
+	avcodec_get_context_defaults2( m_pCodecContext, AVMEDIA_TYPE_VIDEO );
 
     m_pCodecContext->codec_id = (CodecID)x_nCodec;
-    m_pCodecContext->codec_type = CODEC_TYPE_VIDEO;
+    m_pCodecContext->codec_type = AVMEDIA_TYPE_VIDEO;
     m_pCodecContext->bit_rate = brate;
     m_pCodecContext->width = width ? width : 320;
     m_pCodecContext->height = height ? height : 240;

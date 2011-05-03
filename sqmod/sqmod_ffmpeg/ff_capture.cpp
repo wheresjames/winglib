@@ -92,20 +92,20 @@ int CFfCapture::Open( const sqbind::stdString &sFormat, const sqbind::stdString 
 	{
 		(*m)[ oexT( "filename" ) ].set( oexMbToStrPtr( m_pFormatContext->filename ) );
 		(*m)[ oexT( "timestamp" ) ].set( oexMks( m_pFormatContext->timestamp ).Ptr() );
-		(*m)[ oexT( "title" ) ].set( oexMbToStrPtr( m_pFormatContext->title ) );
-		(*m)[ oexT( "author" ) ].set( oexMbToStrPtr( m_pFormatContext->author ) );
-		(*m)[ oexT( "copyright" ) ].set( oexMbToStrPtr( m_pFormatContext->copyright ) );
-		(*m)[ oexT( "comment" ) ].set( oexMbToStrPtr( m_pFormatContext->comment ) );
-		(*m)[ oexT( "album" ) ].set( oexMbToStrPtr( m_pFormatContext->album ) );
-		(*m)[ oexT( "year" ) ].set( oexMks( m_pFormatContext->year ).Ptr() );
-		(*m)[ oexT( "track" ) ].set( oexMks( m_pFormatContext->track ).Ptr() );
-		(*m)[ oexT( "genre" ) ].set( oexMbToStrPtr( m_pFormatContext->genre ) );
+//		(*m)[ oexT( "title" ) ].set( oexMbToStrPtr( m_pFormatContext->title ) );
+//		(*m)[ oexT( "author" ) ].set( oexMbToStrPtr( m_pFormatContext->author ) );
+//		(*m)[ oexT( "copyright" ) ].set( oexMbToStrPtr( m_pFormatContext->copyright ) );
+//		(*m)[ oexT( "comment" ) ].set( oexMbToStrPtr( m_pFormatContext->comment ) );
+//		(*m)[ oexT( "album" ) ].set( oexMbToStrPtr( m_pFormatContext->album ) );
+//		(*m)[ oexT( "year" ) ].set( oexMks( m_pFormatContext->year ).Ptr() );
+//		(*m)[ oexT( "track" ) ].set( oexMks( m_pFormatContext->track ).Ptr() );
+//		(*m)[ oexT( "genre" ) ].set( oexMbToStrPtr( m_pFormatContext->genre ) );
 		(*m)[ oexT( "ctx_flags" ) ].set( oexMks( m_pFormatContext->ctx_flags ).Ptr() );
 		(*m)[ oexT( "start_time" ) ].set( oexMks( m_pFormatContext->start_time ).Ptr() );
 		(*m)[ oexT( "duration" ) ].set( oexMks( m_pFormatContext->duration ).Ptr() );
 		(*m)[ oexT( "file_size" ) ].set( oexMks( m_pFormatContext->file_size ).Ptr() );
 		(*m)[ oexT( "bit_rate" ) ].set( oexMks( m_pFormatContext->bit_rate ).Ptr() );
-		(*m)[ oexT( "index_built" ) ].set( oexMks( m_pFormatContext->index_built ).Ptr() );
+//		(*m)[ oexT( "index_built" ) ].set( oexMks( m_pFormatContext->index_built ).Ptr() );
 		(*m)[ oexT( "mux_rate" ) ].set( oexMks( m_pFormatContext->mux_rate ).Ptr() );
 		(*m)[ oexT( "packet_size" ) ].set( oexMks( m_pFormatContext->packet_size ).Ptr() );
 		(*m)[ oexT( "preload" ) ].set( oexMks( m_pFormatContext->preload ).Ptr() );
@@ -120,7 +120,7 @@ int CFfCapture::Open( const sqbind::stdString &sFormat, const sqbind::stdString 
 
 	// Find audio and video stream indices
 	for ( unsigned int i = 0; i < m_pFormatContext->nb_streams; i++ )
-		if ( CODEC_TYPE_VIDEO == m_pFormatContext->streams[ i ]->codec->codec_type )
+		if ( AVMEDIA_TYPE_VIDEO == m_pFormatContext->streams[ i ]->codec->codec_type )
 			m_nVideoStream = i;
 //		else if ( CODEC_TYPE_AUDIO == m_pFormatContext->streams[ i ]->codec->codec_type )
 //			m_nAudioStream = i;
@@ -179,7 +179,7 @@ int CFfCapture::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 
 	// Waiting key frame?
 	if ( !m_bKeyRxd )
-	{	if ( 0 == ( m_pkt.flags & PKT_FLAG_KEY ) )
+	{	if ( 0 == ( m_pkt.flags & AV_PKT_FLAG_KEY ) )
 			return -1;
 		m_bKeyRxd = 1;
 	} // end if
