@@ -144,6 +144,9 @@ namespace sqbind
 		/// Copies memory object
 		t_size Copy( CSqBinary *x_p ) { if ( !x_p ) return 0; return m_bin.Copy( &x_p->m_bin ); }
 
+		/// Special copy that will copy to the dst buffer unconditionally
+		t_size CopyBytes( CSqBinary *x_p, t_size x_uBytes );
+		
 		/// Shares memory object
 		t_size Share( CSqBinary *x_p ) { if ( !x_p ) return 0; return m_bin.Share( &x_p->m_bin ); }
 

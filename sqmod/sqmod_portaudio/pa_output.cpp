@@ -11,6 +11,10 @@ CPaOutput::CPaOutput()
 	m_stream = oexNULL;
 	m_errLast = paNoError;
 	m_bBlocking = 0;
+	m_iWTs = 0;
+	m_iRTs = 0;
+	m_nTsBytes = 0;
+	m_nBlockSize = 0;
 
 	// Initialize portaudio
 	Init();
@@ -39,6 +43,14 @@ void CPaOutput::Destroy()
 	m_pdi = oexNULL;
 	m_stream = oexNULL;
 	m_bBlocking = 0;
+	m_iWTs = 0;
+	m_iRTs = 0;
+	m_nTsBytes = 0;
+	m_nBlockSize = 0;
+	
+	// Lose timestamps
+	for( unsigned int i = 0; i < oexSizeOfArray( m_ts ); i++ )
+		m_ts[ i ].uBytes = 0;
 }
 
 int CPaOutput::Init()
@@ -114,7 +126,7 @@ int CPaOutput::PaStreamCallback( const void *input, void *output, unsigned long 
 
 	// Copy data from the ring buffer
 	m_buf.Read( output, bytes );
-
+	
 	return paContinue; // paComplete paAbort
 }
 
@@ -195,6 +207,58 @@ int CPaOutput::Stop()
 		return 0;
 
 	return 1;
+}
+
+SQInteger CPaOutput::getTs()
+{_STT();
+
+	int fb = getFrameBytes();
+	if ( 0 >= fb ) fb = 1;
+	int i = m_iRTs, t = 0, b = getBufferedBytes() / fb;
+	
+	// How many total bytes in the ts buffers
+	oex::oexINT64 max = m_ts[ i ].ts;
+	while ( i != m_iWTs )
+	{	max = m_ts[ i ].ts;
+		t += m_ts[ i ].uBytes;
+		if ( ++i >= eMaxTimestamps )
+			i = 0;
+	} // end while
+		
+	// Pick off used buffers
+	while ( m_iRTs != m_iWTs && ( t - m_ts[ m_iRTs ].uBytes ) > b )
+	{	t -= m_ts[ m_iRTs ].uBytes;
+		m_ts[ m_iRTs ].uBytes = 0;
+		if ( ++m_iRTs >= eMaxTimestamps )
+			m_iRTs = 0;
+	} // end while	
+	
+	// Use the last timestamp if buffer is empty
+	i = m_iRTs;
+	if ( i == m_iWTs )
+		i--;
+	if ( 0 > i )
+		i = eMaxTimestamps - 1;
+
+	oex::oexINT64 min = m_ts[ i ].ts, ts = min;
+	if ( b && b > t )
+		ts = min + ( ( max - min ) * ( b - t ) / b );
+
+	// This should be our timestamp
+	return ts;
+}
+
+
+int CPaOutput::WriteTs( sqbind::CSqBinary *data, int frames, SQInteger ts )
+{_STT();
+
+	// Save timestamps
+	m_ts[ m_iWTs ].uBytes = frames;
+	m_ts[ m_iWTs ].ts = ts;
+	if ( ++m_iWTs >= eMaxTimestamps )
+		m_iWTs = 0;		
+
+	return Write( data, frames );
 }
 
 int CPaOutput::Write( sqbind::CSqBinary *data, int frames )

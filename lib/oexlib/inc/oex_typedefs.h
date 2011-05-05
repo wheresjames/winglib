@@ -123,33 +123,43 @@ typedef unsigned char				oexBYTE;
 typedef oexBYTE*					oexPBYTE;
 
 typedef void*						oexTYPEOF_PTR;
-/*
-class __oexCPtrCnv
+
+struct oexTime
 {
-public:
-	__oexCPtrCnv()	{ Zero(); }
-	__oexCPtrCnv( oexTYPEOF_PTR x_ptr ) { Zero(); ptr = x_ptr; }
-	__oexCPtrCnv( oexINT x_val ) { Zero(); nInt = x_val; }
-	__oexCPtrCnv( oexUINT x_val ) { Zero(); uInt = x_val; }
-	__oexCPtrCnv( oexLONG x_val ) { Zero(); lInt = x_val; }
-	__oexCPtrCnv( oexULONG x_val ) { Zero(); ulInt = x_val; }
-	__oexCPtrCnv( oexINT64 x_val ) { Zero(); llInt = x_val; }
-	__oexCPtrCnv( oexUINT64 x_val ) { Zero(); ullInt = x_val; }
-
-	void Zero() { ptr = 0; ullInt = 0; }
-
-	union
-	{
-		oexTYPEOF_PTR		ptr;
-		oexINT				nInt;
-		oexUINT				uInt;
-		oexLONG				lInt;
-		oexULONG			ulInt;
-		oexINT64			llInt;
-		oexUINT64			ullInt;
-	};
+	/// Seconds
+	oexUINT32		tv_sec;
+	
+	/// Micro seconds
+	oexUINT32		tv_usec;	
 };
-*/
+
+#define OEXTIME_USECS_PER_SEC	1000000
+
+template < typename T >
+	oexUINT64 oexGetUSecs( const T &t )
+	{	return oexUINT64( t.tv_sec ) * oexUINT64( OEXTIME_USECS_PER_SEC ) + oexUINT64( t.tv_usec ); }
+
+template < typename T1, typename T2 >
+	T1& oexSetTime( T1 &dst, const T2 &t )
+	{	dst.tv_usec = oexUINT32( t % OEXTIME_USECS_PER_SEC );
+		dst.tv_sec = oexUINT32( t / OEXTIME_USECS_PER_SEC );
+		return dst; 
+	}
+
+template < typename T1, typename T2, typename T3 >
+	T1& oexSetTime( T1 &dst, const T2 sec, const T3 usec )
+	{	dst.tv_sec = sec;
+		dst.tv_usec = usec;
+		return dst;
+	}
+
+template < typename T1, typename T2 >
+	T1& oexCopyTime( T1 &dst, const T2 &src )
+	{	dst.tv_sec = src.tv_sec;
+		dst.tv_usec = src.tv_usec;
+		return dst;
+	}
+
 struct oexGUID
 {
     union

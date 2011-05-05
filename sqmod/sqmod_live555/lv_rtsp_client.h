@@ -34,6 +34,12 @@ public:
 		/// Grabs next frame
 		virtual Boolean continuePlaying();
 
+		/// Returns the presentation time
+		oex::oexTime& getPresentationTime() { return m_ts; }
+
+		/// Returns the duration time
+		oex::oexTime& getDurationTime() { return m_ds; }
+
 	private:
 
 		/// Destructor
@@ -64,10 +70,17 @@ public:
 
 		/// Data lock
 		oexLock					m_lock;
+		
+		/// Timestamp
+		oex::oexTime			m_ts;
+		
+		/// Duration
+		oex::oexTime			m_ds;
 
 	};
 
-	class CAudioSink : public MediaSink // public MPEG4LATMAudioRTPSink 
+//	class CAudioSink : public MPEG4LATMAudioRTPSink 
+	class CAudioSink : public MediaSink
 	{
 	public:
 
@@ -82,8 +95,6 @@ public:
 		CAudioSink( UsageEnvironment &rEnv );
 		virtual ~CAudioSink();
 
-        /// Reads frame infofile:///home/landshark/code/lib2/winglib/sqmod/sqmod_live555/lv_rtsp_server.cpp
-
 		/// Returns non-zero if new frame is needed
 		int needFrame();
 
@@ -94,6 +105,12 @@ public:
 
 		/// Grabs next frame
 		virtual Boolean continuePlaying();
+
+		/// Returns the presentation time
+		oex::oexTime& getPresentationTime() { return m_ts; }
+
+		/// Returns the duration time
+		oex::oexTime& getDurationTime() { return m_ds; }
 
 	private:
 
@@ -119,6 +136,12 @@ public:
 
 		/// Non-zero when a new frame is being captured
 		int						m_nFrameGrabbing;
+
+		/// Timestamp
+		oex::oexTime			m_ts;
+		
+		/// Duration
+		oex::oexTime			m_ds;
 
 	};
 
@@ -245,6 +268,33 @@ public:
 	/// Returns the port used for HTTP tunneling
 	int getTunnelOverHTTPPort() { return m_nTunnelOverHTTPPort; }
 
+	/// Returns the number of audio channels
+	int getNumAudioChannels() { return m_nAudioNumChannels; }
+	
+	/// Returns the audio sample rate
+	int getAudioSampleRate() { return m_nAudioRate; }
+
+	/// Returns the audio bits per sample
+	int getAudioBps() { return m_nAudioBps; }
+
+	/// Returns the video presentation time seconds	
+	int getVideoPresentationTimeSec() { return m_pVs ? m_pVs->getPresentationTime().tv_sec : 0; }
+
+	/// Returns the video presentation time useconds	
+	int getVideoPresentationTimeUSec() { return m_pVs ? m_pVs->getPresentationTime().tv_usec : 0; }
+
+	/// Returns the video presentation time in seconds	
+	SQInteger getVideoPresentationTime() { return m_pVs ? oex::oexGetUSecs( m_pVs->getPresentationTime() ) : 0; }
+	
+	/// Returns the audio presentation time seconds	
+	int getAudioPresentationTimeSec() { return m_pAs ? m_pAs->getPresentationTime().tv_sec : 0; }
+
+	/// Returns the audio presentation time useconds	
+	int getAudioPresentationTimeUSec() { return m_pAs ? m_pAs->getPresentationTime().tv_usec : 0; }
+
+	/// Returns the audio presentation time in seconds	
+	SQInteger getAudioPresentationTime() { return m_pAs ? oex::oexGetUSecs( m_pAs->getPresentationTime() ) : 0; }
+	
 	/** @} */
 
 	/// Idle processing static function
@@ -337,6 +387,15 @@ private:
 
 	/// Video frame height
 	int						m_fps;
+	
+	/// Number of audio channels
+	int						m_nAudioNumChannels;
+	
+	/// Audio sample rate
+	int						m_nAudioRate;
+	
+	/// Bits per sample
+	int						m_nAudioBps;
 
 	/// Signal to start RTSP stream
 	oexEvent				m_evtPlay;

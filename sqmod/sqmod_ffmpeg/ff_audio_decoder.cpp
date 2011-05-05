@@ -44,7 +44,7 @@ void CFfAudioDecoder::Destroy()
 	m_lFrames = 0;
 }
 
-int CFfAudioDecoder::Create( int x_nCodec )
+int CFfAudioDecoder::Create( int x_nCodec, int x_nChannels, int x_nSampleRate, int x_nBps )
 {_STT();
 
 	oexAutoLock ll( _g_ffmpeg_lock );
@@ -73,11 +73,24 @@ int CFfAudioDecoder::Create( int x_nCodec )
 
     m_pCodecContext->codec_id = (CodecID)x_nCodec;
     m_pCodecContext->codec_type = AVMEDIA_TYPE_AUDIO;
-//	m_pCodecContext->strict_std_compliance = cmp;
-//	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
+    
+    m_pCodecContext->channels = x_nChannels;
+	m_pCodecContext->sample_rate = x_nSampleRate;
+    m_pCodecContext->bits_per_coded_sample = x_nBps;
+    m_pCodecContext->bit_rate = m_pCodecContext->sample_rate * m_pCodecContext->channels * 8;
+    m_pCodecContext->block_align = 0;
+
+//    m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
 
 	if( 0 != ( m_pCodec->capabilities & CODEC_CAP_TRUNCATED ) )
 		m_pCodecContext->flags |= CODEC_FLAG_TRUNCATED;
+
+	// Codec context
+	if ( m_extra.getUsed() )
+	{	m_pCodecContext->extradata_size = m_extra.getUsed();
+		m_pCodecContext->extradata = (uint8_t*)m_extra._Ptr();
+		m_pCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
+	} // end if
 
 	int res = avcodec_open( m_pCodecContext, m_pCodec );
 	if ( 0 > res )
@@ -117,6 +130,7 @@ int CFfAudioDecoder::BufferData( sqbind::CSqBinary *in, sqbind::CSqMulti *m )
 {
 	// Init packet
 	oexZero( m_pkt );
+//	av_init_packet( &m_pkt );
 
 	// Init other packet data
 	if ( m )
@@ -143,11 +157,39 @@ int CFfAudioDecoder::BufferData( sqbind::CSqBinary *in, sqbind::CSqMulti *m )
 	{
 		// Ensure buffer size
 		if ( ( m_tmp.Size() - m_tmp.getUsed() ) < (sqbind::CSqBinary::t_size)( in->getUsed() + FF_INPUT_BUFFER_PADDING_SIZE ) )
-			m_tmp.Allocate( 2 * ( m_tmp.Size() + in->getUsed() + FF_INPUT_BUFFER_PADDING_SIZE ) );
+		{	oex::oexUINT uMin = 2 * ( m_tmp.Size() + in->getUsed() + FF_INPUT_BUFFER_PADDING_SIZE );
+			if ( 32000 > uMin )
+				uMin = 32000;
+	        m_tmp.Allocate( uMin );
+		} // end if
 
 		// Add new data to buffer
 		m_tmp.Append( in );
 
+	} // end if
+
+	// Is there a sync sequence?
+	if ( m_sync.getUsed() )
+	{
+		oexSHOW( m_sync.getUsed() );
+	
+		const char *s = m_sync.Ptr();
+		sqbind::CSqBinary::t_size ls = m_sync.getUsed();
+
+		const char *p = m_tmp.Ptr();
+		sqbind::CSqBinary::t_size lp = m_tmp.getUsed();
+		
+		// Look for the sync
+		while ( lp > ls && oexMemCmp( p, s, ls ) )
+			p++, lp--;
+
+		// Shift out unsynced data			
+		if ( lp < m_tmp.getUsed() )
+		{	oexSHOW( lp );
+			oexSHOW( m_tmp.getUsed() );
+			m_tmp.LShift( m_tmp.getUsed() - lp );
+		} // end if
+	
 	} // end if
 
 	// Get buffer pointers
@@ -198,7 +240,7 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 	if ( !m_pCodecContext )
 		return 0;
 
-	// Get data packet
+	// Add data to buffer
 	if ( !in || !out || !BufferData( in, m ) )
 		return 0;
 
@@ -206,26 +248,25 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 	if ( (int)out->Size() < out_size )
 		out->Allocate( out_size );
 
-// (const uint8_t*)in_ptr, in_size
-
-	oexSHOW( m_pkt.size );
-	oexSHOW( out_size );
-
+	// Attempt to decode packet
 	int used = avcodec_decode_audio3( m_pCodecContext, 
 									  (int16_t*)out->_Ptr(), &out_size,
 									  &m_pkt );
-/*
-	int used = avcodec_decode_audio2( m_pCodecContext,
-									  (int16_t*)out->_Ptr(), &out_size,
-									  (const uint8_t*)in_ptr, in_size );
-*/
-
-//	if ( 0 >= used )
+									 
+	
+//	if ( AVERROR_INVALIDDATA == used )
 //		return 0;
+	
+	if ( AVERROR( EAGAIN ) == used )
+		return 0;
 
-	oexSHOW( used );
+	if ( 0 > used )
+	{	UnBufferData( -1 );
+		return 0;
+	} // end if
 
-	UnBufferData( used );
+	if ( 0 < used )
+		UnBufferData( used );
 
 	if ( 0 >= out_size )
 	{	out->setUsed( 0 );
@@ -238,34 +279,6 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 	m_lFrames++;
 
 	return out_size;
-
-/*
-	int in_size = in->getUsed();
-	const uint8_t* in_ptr = (const uint8_t*)in->Ptr();
-
-	int out_size = oex::cmn::Max( (int)(in->getUsed() * 2), (int)AVCODEC_MAX_AUDIO_FRAME_SIZE );
-	if ( (int)out->Size() < out_size )
-		out->Allocate( out_size );
-
-	int used = avcodec_decode_audio2( m_pCodecContext,
-									  (int16_t*)out->_Ptr(), &out_size,
-									  (const uint8_t*)in_ptr, in_size );
-
-	out->setUsed( out_size );
-
-	if ( 0 >= used )
-//	{	oexSHOW( used );
-		return -1;
-//	} // end if
-
-	if ( 0 >= out_size )
-		return 0;
-
-	// Frame count
-	m_lFrames++;
-
-	return 1;
-*/
 }
 
 static AVCodecTag g_ff_audio_codec_map[] =
@@ -292,8 +305,8 @@ struct SFfAudioCodecInfo
 
 static SFfAudioCodecInfo g_ff_audio_codec_info[] =
 {
-	{ CODEC_ID_AAC_LATM,		oexT( "MP4A-LATM" ) },
-	{ CODEC_ID_AAC_LATM,		oexT( "AAC-LATM" ) },
+	{ CODEC_ID_AAC,				oexT( "MP4A-LATM" ) },
+	{ CODEC_ID_AAC,				oexT( "MPEG4-GENERIC" ) },
 
 	{ CODEC_ID_NONE,			0 }
 };
