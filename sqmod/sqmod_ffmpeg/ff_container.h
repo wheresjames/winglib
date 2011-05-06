@@ -51,6 +51,15 @@ public:
 	/// Writes the specified image to the file
 	int WriteFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m );
 
+	/// Writes the specified image to the file
+	int WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInteger nDts, sqbind::CSqMulti *m );
+	
+	/// Adds an audio stream to the avi
+	int AddAudioStream( int codec_id, int channels, int sample_rate, int bps );
+	
+	/// Writes the specified audio to the file
+	int WriteAudioFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInteger nDts, sqbind::CSqMulti *m );
+	
 	/// Returns video width
 	double getFps()
 	{	if ( !m_pFormatContext || 0 > m_nVideoStream

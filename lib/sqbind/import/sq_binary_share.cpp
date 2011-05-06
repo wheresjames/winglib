@@ -92,9 +92,9 @@ void CSqBinaryShare::Register( sqbind::VM vm )
 }
 
 CSqBinaryShare::CSqBinaryShare()
-	:	m_sPrefix( SQSBS_PREFIX ), 
-		m_uCbId( SQSBS_CBID )
 {
+	m_sPrefix = SQSBS_PREFIX;
+	m_uCbId = SQSBS_CBID;
 	m_iRead = -1;
 	m_bGlobal = 1;
 	m_bWrite = 0;
@@ -103,10 +103,10 @@ CSqBinaryShare::CSqBinaryShare()
 }
 
 CSqBinaryShare::CSqBinaryShare( const sqbind::stdString &sPrefix, SQInteger nId, SQInteger nGlobal )
-	:	m_sPrefix( sPrefix ), 
-		m_uCbId( (oex::oexUINT)nId ),
-		m_bGlobal( nGlobal )
 {
+	m_sPrefix = sPrefix;
+	m_uCbId = (oex::oexUINT)nId;
+	m_bGlobal = nGlobal;
 	m_iRead = -1;
 	m_bWrite = 0;
 	m_nPadding = SQSBS_PADDING;
@@ -115,11 +115,11 @@ CSqBinaryShare::CSqBinaryShare( const sqbind::stdString &sPrefix, SQInteger nId,
 
 
 CSqBinaryShare::CSqBinaryShare( const CSqBinaryShare &r ) 
-	: 	m_sPrefix( r.m_sPrefix ), 
-		m_uCbId( r.m_uCbId ),
-		m_bGlobal( r.m_bGlobal )
 {
-	m_iRead = 1;
+	m_sPrefix = r.m_sPrefix;
+	m_uCbId = r.m_uCbId;
+	m_bGlobal = r.m_bGlobal;
+	m_iRead = -1;
 	m_bWrite = 0;
 	m_nPadding = SQSBS_PADDING;
 	m_uTs = 0;

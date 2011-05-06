@@ -531,11 +531,11 @@ sqbind::CSqBinary CSqVideoShare::getExtraIdx( int i )
 	int nExtra = getExtraSize();
 	
 	// Use zero if it's invalid
-	if ( 0 > i || i >= nBuffers )
+	if ( 0 >= nExtra || 0 > i || i >= nBuffers )
 		return sqbind::CSqBinary();
 		
 	// Return a wrapper to the image that's ready
-	return m_buf.getSub( i * ( nImgSize + nExtra ), nImgSize );
+	return m_buf.getSub( i * ( nImgSize + nExtra ), nExtra );
 }
 
 sqbind::CSqBinary CSqVideoShare::getLastImg()

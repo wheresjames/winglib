@@ -35,10 +35,10 @@ public:
 		virtual Boolean continuePlaying();
 
 		/// Returns the presentation time
-		oex::oexTime& getPresentationTime() { return m_ts; }
+		oex::oexTime& getPts() { return m_ts; }
 
-		/// Returns the duration time
-		oex::oexTime& getDurationTime() { return m_ds; }
+		/// Returns the Dts time
+		oex::oexTime& getDts() { return m_ds; }
 
 	private:
 
@@ -48,11 +48,11 @@ public:
 	private:
 
 		static void _afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
-										struct timeval presentationTime, unsigned durationInMicroseconds );
+										struct timeval Pts, unsigned DtsInMicroseconds );
 
 		/// Processes new frames
 		void afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
-								struct timeval presentationTime, unsigned durationInMicroseconds );
+								struct timeval Pts, unsigned DtsInMicroseconds );
 
 	private:
 
@@ -74,7 +74,7 @@ public:
 		/// Timestamp
 		oex::oexTime			m_ts;
 		
-		/// Duration
+		/// Dts
 		oex::oexTime			m_ds;
 
 	};
@@ -107,10 +107,10 @@ public:
 		virtual Boolean continuePlaying();
 
 		/// Returns the presentation time
-		oex::oexTime& getPresentationTime() { return m_ts; }
+		oex::oexTime& getPts() { return m_ts; }
 
-		/// Returns the duration time
-		oex::oexTime& getDurationTime() { return m_ds; }
+		/// Returns the Dts time
+		oex::oexTime& getDts() { return m_ds; }
 
 	private:
 
@@ -120,11 +120,11 @@ public:
 	private:
 
 		static void _afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
-										struct timeval presentationTime, unsigned durationInMicroseconds );
+										struct timeval Pts, unsigned DtsInMicroseconds );
 
 		/// Processes new frames
 		void afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
-								struct timeval presentationTime, unsigned durationInMicroseconds );
+								struct timeval Pts, unsigned DtsInMicroseconds );
 
 	private:
 
@@ -140,7 +140,7 @@ public:
 		/// Timestamp
 		oex::oexTime			m_ts;
 		
-		/// Duration
+		/// Dts
 		oex::oexTime			m_ds;
 
 	};
@@ -278,22 +278,28 @@ public:
 	int getAudioBps() { return m_nAudioBps; }
 
 	/// Returns the video presentation time seconds	
-	int getVideoPresentationTimeSec() { return m_pVs ? m_pVs->getPresentationTime().tv_sec : 0; }
+	int getVideoPtsSec() { return m_pVs ? m_pVs->getPts().tv_sec : 0; }
 
 	/// Returns the video presentation time useconds	
-	int getVideoPresentationTimeUSec() { return m_pVs ? m_pVs->getPresentationTime().tv_usec : 0; }
+	int getVideoPtsUSec() { return m_pVs ? m_pVs->getPts().tv_usec : 0; }
 
-	/// Returns the video presentation time in seconds	
-	SQInteger getVideoPresentationTime() { return m_pVs ? oex::oexGetUSecs( m_pVs->getPresentationTime() ) : 0; }
+	/// Returns the video presentation time in useconds	
+	SQInteger getVideoPts() { return m_pVs ? oex::oexGetUSecs( m_pVs->getPts() ) : 0; }
 	
 	/// Returns the audio presentation time seconds	
-	int getAudioPresentationTimeSec() { return m_pAs ? m_pAs->getPresentationTime().tv_sec : 0; }
+	int getAudioPtsSec() { return m_pAs ? m_pAs->getPts().tv_sec : 0; }
 
 	/// Returns the audio presentation time useconds	
-	int getAudioPresentationTimeUSec() { return m_pAs ? m_pAs->getPresentationTime().tv_usec : 0; }
+	int getAudioPtsUSec() { return m_pAs ? m_pAs->getPts().tv_usec : 0; }
 
-	/// Returns the audio presentation time in seconds	
-	SQInteger getAudioPresentationTime() { return m_pAs ? oex::oexGetUSecs( m_pAs->getPresentationTime() ) : 0; }
+	/// Returns the audio presentation time in useconds	
+	SQInteger getAudioPts() { return m_pAs ? oex::oexGetUSecs( m_pAs->getPts() ) : 0; }
+	
+	/// Returns the video Dts time in useconds	
+	SQInteger getVideoDts() { return m_pVs ? oex::oexGetUSecs( m_pVs->getDts() ) : 0; }
+	
+	/// Returns the audio Dts time in useconds	
+	SQInteger getAudioDts() { return m_pAs ? oex::oexGetUSecs( m_pAs->getDts() ) : 0; }
 	
 	/** @} */
 

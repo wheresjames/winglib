@@ -230,17 +230,6 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 
 	return 1;
 }
-/*
-	pfp.device = sFile;
-	pfp.channel = 0;
-	pfp.standard = "ntsc";
-	pfp.width = 320;
-	pfp.height = 240;
-	pfp.time_base.den = 25;
-	pfp.time_base.num = 1;
-	pfp.pix_fmt = PIX_FMT_NONE;
-	pfp = av_find_input_format( "video4linux" );
-*/
 
 int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 {_STT();
@@ -642,11 +631,14 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	if ( !pst )
 		return -1;
 
-	m_nVideoStream = 0;
+	m_nVideoStream = pst->index;
 
     AVCodecContext *pcc = pst->codec;
 	if ( !pcc )
 		return -1;
+
+	// Get defaults
+	avcodec_get_context_defaults2( pcc, AVMEDIA_TYPE_VIDEO );
 
 	// Fill in codec info
 	pcc->codec_id = (CodecID)codec_id;
@@ -665,7 +657,7 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	return m_nVideoStream;
 }
 
-int CFfContainer::WriteFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
+int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInteger nDts, sqbind::CSqMulti *m )
 {_STT();
 	if ( !m_pFormatContext )
 		return 0;
@@ -680,42 +672,17 @@ int CFfContainer::WriteFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 	if ( !pStream )
 		return 0;
 
-	AVCodecContext *pCodec = pStream->codec;
-	if ( !pCodec )
-		return 0;
-
 	AVPacket pkt;
 	oexZero( pkt );
 	av_init_packet( &pkt );
 
-	if ( pCodec->coded_frame )
-		pkt.pts = pCodec->coded_frame->pts;
-//	pkt.flags |= PKT_FLAG_KEY;
-
 	if ( m )
-	{
-		if ( m->isset( oexT( "flags" ) ) )
+	{	if ( m->isset( oexT( "flags" ) ) )
 			pkt.flags = (*m)[ oexT( "flags" ) ].toint();
-
-/*
-		if ( m->isset( oexT( "dts" ) ) )
-			pkt.dts = (*m)[ oexT( "dts" ) ].toint();
-
-		if ( m->isset( oexT( "pts" ) ) )
-			pkt.dts = (*m)[ oexT( "pts" ) ].toint();
-
-		if ( m->isset( oexT( "duration" ) ) )
-			pkt.flags = (*m)[ oexT( "duration" ) ].toint();
-*/
-//		pkt.pts = 0; //AV_NOPTS_VALUE;
-//		pkt.dts = 0; //AV_NOPTS_VALUE;
-//		pkt.duration = 0;
-//		pkt.pos = -1;
-//		pkt.convergence_duration = 0; //AV_NOPTS_VALUE;
-
-
 	} // end if
 
+	pkt.pts = nPts;
+	pkt.dts = nDts;
 	pkt.stream_index = pStream->index;
 	pkt.data = (uint8_t*)dat->_Ptr();
 	pkt.size = dat->getUsed();
@@ -724,6 +691,96 @@ int CFfContainer::WriteFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 		return 0;
 
 	return 1;
+}
+
+
+int CFfContainer::AddAudioStream( int codec_id, int channels, int sample_rate, int bps )
+{_STT();
+	if ( !m_pFormatContext )
+		return -1;
+
+	if ( !m_nWrite )
+		return -1;
+
+	if ( 0 <= m_nAudioStream )
+		return m_nAudioStream;
+
+	AVStream *pst = av_new_stream( m_pFormatContext, 0 );
+	if ( !pst )
+		return -1;
+
+	m_nAudioStream = pst->index;
+	
+    AVCodecContext *pcc = pst->codec;
+	if ( !pcc )
+		return -1;
+	
+	avcodec_get_context_defaults2( pcc, AVMEDIA_TYPE_AUDIO );
+		
+	// Fill in codec info
+	pcc->codec_id = (CodecID)codec_id;
+	pcc->codec_type = AVMEDIA_TYPE_AUDIO;
+	//pcc->codec_tag
+	
+	pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
+
+    pcc->channels = channels;
+	pcc->sample_rate = sample_rate;
+//    pcc->bits_per_coded_sample = bps;
+	pcc->bits_per_coded_sample = av_get_bits_per_sample( pcc->codec_id );
+    pcc->bit_rate = pcc->sample_rate * pcc->channels * 8;
+    pcc->block_align = pcc->bits_per_coded_sample * pcc->channels / 8;
+//    pcc->time_base.num = 1;
+//   pcc->time_base.den = sample_rate;
+//	pcc->gop_size = 12;
+
+	// PST info
+	pst->need_parsing = AVSTREAM_PARSE_FULL;
+	av_set_pts_info( pst, 64, 1, pcc->sample_rate );
+
+	return m_nAudioStream;
+}
+
+int CFfContainer::WriteAudioFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInteger nDts, sqbind::CSqMulti *m )
+{_STT();
+	if ( !m_pFormatContext )
+		return 0;
+
+	if ( !m_nWrite )
+		return 0;
+
+	if ( 0 > m_nAudioStream )
+		return 0;
+
+	AVStream *pStream = m_pFormatContext->streams[ m_nAudioStream ];
+	if ( !pStream )
+		return 0;
+
+	AVPacket pkt;
+	oexZero( pkt );
+	av_init_packet( &pkt );
+
+	if ( m )
+	{	if ( m->isset( oexT( "flags" ) ) )
+			pkt.flags = (*m)[ oexT( "flags" ) ].toint();
+	} // end if
+
+	pkt.pts = nPts;
+	pkt.dts = nDts;
+	pkt.stream_index = pStream->index;
+	pkt.data = (uint8_t*)dat->_Ptr();
+	pkt.size = dat->getUsed();
+
+	if ( av_write_frame( m_pFormatContext, &pkt ) )
+		return 0;
+
+	return 1;
+}
+
+
+int CFfContainer::WriteFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
+{_STT();
+	return WriteVideoFrame( dat, 0, 0, m );
 }
 
 // http://dranger.com/ffmpeg/tutorial07.html

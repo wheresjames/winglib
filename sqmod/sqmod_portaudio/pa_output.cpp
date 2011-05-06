@@ -50,7 +50,7 @@ void CPaOutput::Destroy()
 	
 	// Lose timestamps
 	for( unsigned int i = 0; i < oexSizeOfArray( m_ts ); i++ )
-		m_ts[ i ].uBytes = 0;
+		m_ts[ i ].nFrames = 0;
 }
 
 int CPaOutput::Init()
@@ -126,6 +126,9 @@ int CPaOutput::PaStreamCallback( const void *input, void *output, unsigned long 
 
 	// Copy data from the ring buffer
 	m_buf.Read( output, bytes );
+
+	if ( m_nBlockSize < bytes )	
+		m_nBlockSize = bytes;
 	
 	return paContinue; // paComplete paAbort
 }
@@ -220,28 +223,23 @@ SQInteger CPaOutput::getTs()
 	oex::oexINT64 max = m_ts[ i ].ts;
 	while ( i != m_iWTs )
 	{	max = m_ts[ i ].ts;
-		t += m_ts[ i ].uBytes;
+		t += m_ts[ i ].nFrames;
 		if ( ++i >= eMaxTimestamps )
 			i = 0;
 	} // end while
 		
 	// Pick off used buffers
-	while ( m_iRTs != m_iWTs && ( t - m_ts[ m_iRTs ].uBytes ) > b )
-	{	t -= m_ts[ m_iRTs ].uBytes;
-		m_ts[ m_iRTs ].uBytes = 0;
+	while ( m_iRTs != m_iWTs && t > b )
+	{	t -= m_ts[ m_iRTs ].nFrames;
+		m_ts[ m_iRTs ].ts = 0;
+		m_ts[ m_iRTs ].nFrames = 0;
 		if ( ++m_iRTs >= eMaxTimestamps )
 			m_iRTs = 0;
 	} // end while	
 	
-	// Use the last timestamp if buffer is empty
-	i = m_iRTs;
-	if ( i == m_iWTs )
-		i--;
-	if ( 0 > i )
-		i = eMaxTimestamps - 1;
-
-	oex::oexINT64 min = m_ts[ i ].ts, ts = min;
-	if ( b && b > t )
+	// Calculate timestamp
+	oex::oexINT64 min = m_ts[ m_iRTs ].ts, ts = min;
+	if ( min && b && b > t )
 		ts = min + ( ( max - min ) * ( b - t ) / b );
 
 	// This should be our timestamp
@@ -253,7 +251,7 @@ int CPaOutput::WriteTs( sqbind::CSqBinary *data, int frames, SQInteger ts )
 {_STT();
 
 	// Save timestamps
-	m_ts[ m_iWTs ].uBytes = frames;
+	m_ts[ m_iWTs ].nFrames = frames;
 	m_ts[ m_iWTs ].ts = ts;
 	if ( ++m_iWTs >= eMaxTimestamps )
 		m_iWTs = 0;		

@@ -553,9 +553,6 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 			if ( pExtra && elen )
 				m_extraAudio.AppendBuffer( (const char*)pExtra, elen );
 	
-			oexSHOW( elen );
-			oexSHOW( pCfg );
-	
 		} // end if
 		
 	} // end if
@@ -568,9 +565,6 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 			unsigned char *pExtra = parseGeneralConfigStr( pCfg, elen );
 			if ( pExtra && elen )
 				m_extraAudio.AppendBuffer( (const char*)pExtra, elen );
-	
-			oexSHOW( elen );
-			oexSHOW( pCfg );
 	
 		} // end if
 		

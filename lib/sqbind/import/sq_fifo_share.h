@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// sq_binary_share.h
+// sq_fifo_share.h
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -36,34 +36,56 @@
 
 namespace sqbind
 {
-    class CSqBinaryShare
+    class CSqFifoShare
     {
+    
+    public:
+    
+    	/// Buffer pointer information
+    	struct SPtrInfo
+    	{
+    		/// Offset to start of data
+    		oex::oexUINT32		uPtr;
+    		
+    		/// Header size
+    		oex::oexUINT32		uHeader;
+    		
+    		/// Data size
+    		oex::oexUINT32		uData;
+    		
+    		/// User value
+    		oex::oexUINT32		uUser;
+    		
+    		/// Timestamp
+    		oex::oexUINT64		uTs;
+    	};
+    
 	public:
 
 		/// Export constructors
-		SQBIND_CLASS_CTOR_BEGIN( CSqBinaryShare )
-			_SQBIND_CLASS_CTOR2( CSqBinaryShare, OT_STRING, OT_INTEGER ) 
+		SQBIND_CLASS_CTOR_BEGIN( CSqFifoShare )
+			_SQBIND_CLASS_CTOR2( CSqFifoShare, OT_STRING, OT_INTEGER ) 
 				( stdString( sa.GetString( 2 ), sq_getsize( x_v, 2 ) ), sa.GetInt( 3 ), 1 )
-			_SQBIND_CLASS_CTOR3( CSqBinaryShare, OT_STRING, OT_INTEGER, OT_INTEGER ) 
+			_SQBIND_CLASS_CTOR3( CSqFifoShare, OT_STRING, OT_INTEGER, OT_INTEGER ) 
 				( stdString( sa.GetString( 2 ), sq_getsize( x_v, 2 ) ), sa.GetInt( 3 ), sa.GetInt( 4 ) )
-		SQBIND_CLASS_CTOR_END( CSqBinaryShare )
+		SQBIND_CLASS_CTOR_END( CSqFifoShare )
 
 		/// Default constructor
-		CSqBinaryShare();
+		CSqFifoShare();
 
 		/// Init constructor
-		CSqBinaryShare( const sqbind::stdString &sPrefix, SQInteger nId, SQInteger nGlobal );
+		CSqFifoShare( const sqbind::stdString &sPrefix, SQInteger nId, SQInteger nGlobal );
 
 		/// Copy constructor
-		CSqBinaryShare( const CSqBinaryShare &r );
+		CSqFifoShare( const CSqFifoShare &r );
 
 		/// Assignment operator
-		CSqBinaryShare& operator = ( const CSqBinaryShare &r ) { return *this; }
+		CSqFifoShare& operator = ( const CSqFifoShare &r ) { return *this; }
 
 		/// Registers the class
 		static void Register( sqbind::VM vm );
 
-		/** \addtogroup CSqBinaryShare
+		/** \addtogroup CSqFifoShare
 			@{
 		*/
 		
@@ -75,17 +97,15 @@ namespace sqbind
 			@param [in] sName		-	Share name
 			@param [in] sBufName	-	Share name for the image buffer.  Leave blank if same as sName.
 			@param [in] nBufSize	-	Size of buffer
-			@param [in] nChannels	-	Number of data channels
-			@param [in] nDataWidth	-	Data width
-			@param [in] nFps		-	Frames per second
-			@param [in] nFmt		-	User defined format id
+			@param [in] nBlocks		-	Number of blocks
+			@param [in] sHeader		-	User information
 			
 			Opens a new writable share.  This function fails if the share already exists.
 			
 			@return Non-zero if success
 		
 		*/
-		int Create( const sqbind::stdString &sName, const sqbind::stdString &sBufName, int nBufSize, int nChannels, int nDataWidth, int nFps, int nFmt );
+		int Create( const sqbind::stdString &sName, const sqbind::stdString &sBufName, int nBufSize, int nBlocks, const sqbind::stdString &sHeader );
 
 		/// Opens an existing share
 		/**
@@ -97,17 +117,32 @@ namespace sqbind
 		*/
 		int Open( const sqbind::stdString &sName );
 
-		/// Reads data from the share buffer
-		sqbind::CSqBinary Read();
+		/// Returns non zero if there is data to be read
+		int isRead();
+
+		/// Reads the current block header
+		sqbind::stdString ReadHeader();
+
+		/// Reads next data block
+		sqbind::CSqBinary ReadData();
 		
-		/// Returns the number of bytes waiting to be read
-		int getMaxRead();
+		/// Reads next user data
+		int ReadUser();
+		
+		/// Reads next timestamp
+		SQInteger ReadTs();
+		
+		/// Increments the read pointer
+		int incReadPtr();
 		
 		/// Writes data into the share buffer
 		/**
 			@param [in] pData	-	Pointer to CSqBinary object containing the data to write
+			@param [in] sHeader	-	Header data
+			@param [in] nUser	-	User integer
+			@param [in] ts		-	Timestamp
 		*/
-		int Write( sqbind::CSqBinary *pData );
+		int Write( sqbind::CSqBinary *pData, const sqbind::stdString &sHeader, int nUser, SQInteger ts );
 		
 		/// Resets buffer pointers
 		int Reset();
@@ -145,41 +180,58 @@ namespace sqbind
 		*/
 		int getPadding() { return m_nPadding; }
 		
-		/// Returns the total size of the buffer from the control block
-		int getBufSize()
+		/// Returns the global header string
+		sqbind::stdString getHeader();		
+		
+		/// Returns the control block size of the buffer from the control block
+		int getWritePtr()
+		{	if ( !m_cb.getUsed() ) 
+				return 0;
+			return m_cb.getINT( 1 );
+		}
+		
+		/// Returns the control block size of the buffer from the control block
+		int getCbSize()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 2 );
 		}
 		
-		/// Returns the number of channels from the control block
-		int getChannels()
+		/// Returns the timestamp from the control block
+		int getTs()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 3 );
 		}
-
-		/// Returns the number of channels from the control block
-		int getDataWidth()
+		
+		/// Returns the process id from the control block
+		int getProcId()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 4 );
 		}
-
-		/// Returns the frames per second value from the control block
-		int getFps()
+		
+		/// Returns the total size of the buffer from the control block
+		int getBufSize()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 5 );
 		}
-
-		/// Returns the data format from the control block
-		int getFmt()
+		
+		/// Returns the number of blocks from the control block
+		int getBlocks()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 6 );
 		}
 
+		/// Returns the header size from the control block
+		int getHeaderSize()
+		{	if ( !m_cb.getUsed() ) 
+				return 0;
+			return m_cb.getINT( 7 );
+		}
+		
 		/// Returns the number of writes from the control block
 		int getWrites()
 		{	if ( !m_cb.getUsed() ) 
@@ -194,20 +246,20 @@ namespace sqbind
 			return m_cb.getINT( 9 );
 		}
 		
-		/// Returns the timestamp from the control block
-		int getTs()
+		/// Set to non-zero to tell the writer to reset
+		void setReset( int b )
+		{	if ( !m_cb.getUsed() ) 
+				return;
+			m_cb.setINT( 10, b );
+		}
+
+		/// Returns the current reset value
+		int getReset()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
-			return m_cb.getINT( 11 );
+			return m_cb.getINT( 10 );
 		}
-		
-		/// Returns the header size from the control block
-		int getHeaderSize()
-		{	if ( !m_cb.getUsed() ) 
-				return 0;
-			return m_cb.getINT( 12 );
-		}
-		
+
 		/// Returns the header size from the control block
 		int getBufferGuid( sqbind::CSqBinary *p )
 		{
@@ -222,10 +274,10 @@ namespace sqbind
 				return 0;
 
 			// Copy guid
-			p->setUINT( 0, m_cb.getUINT( 14 ) );
-			p->setUINT( 1, m_cb.getUINT( 15 ) );
-			p->setUINT( 2, m_cb.getUINT( 16 ) );
-			p->setUINT( 3, m_cb.getUINT( 17 ) );
+			p->setUINT( 0, m_cb.getUINT( 12 ) );
+			p->setUINT( 1, m_cb.getUINT( 13 ) );
+			p->setUINT( 2, m_cb.getUINT( 14 ) );
+			p->setUINT( 3, m_cb.getUINT( 15 ) );
 			p->setUsed( sizeof( oex::oexGUID ) );
 			
 			return sizeof( oex::oexGUID );
@@ -242,26 +294,12 @@ namespace sqbind
 
 			// Copy guid
 			oex::oexGUID guid;
-			guid.u1 = m_cb.getUINT( 14 );
-			guid.u2 = m_cb.getUINT( 15 );
-			guid.u3 = m_cb.getUINT( 16 );
-			guid.u4 = m_cb.getUINT( 17 );
+			guid.u1 = m_cb.getUINT( 12 );
+			guid.u2 = m_cb.getUINT( 13 );
+			guid.u3 = m_cb.getUINT( 14 );
+			guid.u4 = m_cb.getUINT( 15 );
 
 			return sqbind::oex2std( oex::CStr( guid ) );
-		}
-
-		/// Set to non-zero to tell the writer to reset
-		void setReset( int b )
-		{	if ( !m_cb.getUsed() ) 
-				return;
-			m_cb.setINT( 13, b );
-		}
-
-		/// Returns the current reset value
-		int getReset()
-		{	if ( !m_cb.getUsed() ) 
-				return 0;
-			return m_cb.getINT( 13 );
 		}
 
 		/// Returns a string describing the last error
@@ -273,23 +311,8 @@ namespace sqbind
 		/// Returns non-zero if a share is open
 		int isOpen() { return ( m_cb.getUsed() && m_buf.getUsed() ); }
 		
-		/// Writes a float to the buffer
-		int WriteFloat( float f ) { return WritePtr( &f, sizeof( f ) ); }
-
-		/// Writes a float to the buffer
-		int WriteDouble( float d ) { return WritePtr( &d, sizeof( d ) ); }
-		
-		/// Writes a character to the buffer
-		int WriteChar( char n ) { return WritePtr( &n, sizeof( n ) ); }
-		
-		/// Writes a integer to the buffer
-		int WriteInt( int n ) { return WritePtr( &n, sizeof( n ) ); }
-		
-		/// Writes a integer to the buffer
-		int WriteShort( short int n ) { return WritePtr( &n, sizeof( n ) ); }
-		
-		/// Writes a 64 bit integer to the buffer
-		int WriteInt64( oex::oexINT64 n ) { return WritePtr( &n, sizeof( n ) ); }
+		/// Returns non-zero if a valid share is open
+		int isValid();
 		
 		/** @} */
 		
@@ -299,9 +322,15 @@ public:
 		/**
 			@param [in] pData	-	Pointer to buffer
 			@param [in] nSize	-	Number of bytes to be written
+			@param [in] sHeader	-	Header data
+			@param [in] nUser	-	User integer
+			@param [in] ts		-	Timestamp
 		*/
-		int WritePtr( const void *pData, int nSize );
+		int WritePtr( const void *pData, int nSize, const sqbind::stdString &sHeader, int nUser, SQInteger ts );
 	
+		/// Returns the current read pointer structure, or NULL if none
+		SPtrInfo* ReadPtr( char **ph = oexNULL, char **pb = oexNULL );
+		
 protected:
 
 		/// Copy's the guid from the control block
@@ -359,9 +388,12 @@ protected:
 
 		/// Current read index
 		int						m_iRead;
+		
+		/// Current write index
+		int						m_iWrite;
 	};
 
 }; // end namespace
 
 // Declare type for use as squirrel parameters
-SQBIND_DECLARE_INSTANCE( sqbind::CSqBinaryShare, CSqBinaryShare )
+SQBIND_DECLARE_INSTANCE( sqbind::CSqFifoShare, CSqFifoShare )

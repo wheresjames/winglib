@@ -13,8 +13,8 @@ public:
 	/// Relates timestamps to bytes
 	struct STsInfo
 	{
-		/// Number of bytes
-		oex::oexUINT		uBytes;
+		/// Number of frames
+		oex::oexINT			nFrames;
 	
 		/// Timestamp
 		oex::oexINT64		ts;
