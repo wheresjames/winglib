@@ -291,9 +291,9 @@ class CRtspStream
 
 		if ( !rec_avi.Create( file, "", CSqMulti() ) )
 			::_self.echo( "Failed to create avi" );
-		else if ( 0 > rec_avi.AddVideoStream( CFfDecoder().LookupCodecId( vfmt ), w, h, fps ) )
+		else if ( vfmt.len() && 0 > rec_avi.AddVideoStream( CFfDecoder().LookupCodecId( vfmt ), w, h, fps ) )
 			::_self.echo( "Failed to add video stream" );
-		else if ( 0 > rec_avi.AddAudioStream( CFfAudioDecoder().LookupCodecId( afmt ), ch, sr, bps ) )
+		else if ( afmt.len() && 0 > rec_avi.AddAudioStream( CFfAudioDecoder().LookupCodecId( afmt ), ch, sr, bps ) )
 			::_self.echo( "Failed to add audio stream" );
 		else if ( !rec_avi.InitWrite() )
 			::_self.echo( "Failed to initiailze avi" );
