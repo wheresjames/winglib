@@ -34,6 +34,12 @@ public:
 		/// Grabs next frame
 		virtual Boolean continuePlaying();
 
+		/// Returns the presentation time
+		oex::oexTime& getPts() { return m_ts; }
+
+		/// Returns the Dts time
+		oex::oexTime& getDts() { return m_ds; }
+
 	private:
 
 		/// Destructor
@@ -42,11 +48,11 @@ public:
 	private:
 
 		static void _afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
-										struct timeval presentationTime, unsigned durationInMicroseconds );
+										struct timeval Pts, unsigned DtsInMicroseconds );
 
 		/// Processes new frames
 		void afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
-								struct timeval presentationTime, unsigned durationInMicroseconds );
+								struct timeval Pts, unsigned DtsInMicroseconds );
 
 	private:
 
@@ -64,10 +70,17 @@ public:
 
 		/// Data lock
 		oexLock					m_lock;
+		
+		/// Timestamp
+		oex::oexTime			m_ts;
+		
+		/// Dts
+		oex::oexTime			m_ds;
 
 	};
 
-	class CAudioSink : public MediaSink // public MPEG4LATMAudioRTPSink 
+//	class CAudioSink : public MPEG4LATMAudioRTPSink 
+	class CAudioSink : public MediaSink
 	{
 	public:
 
@@ -82,8 +95,6 @@ public:
 		CAudioSink( UsageEnvironment &rEnv );
 		virtual ~CAudioSink();
 
-        /// Reads frame infofile:///home/landshark/code/lib2/winglib/sqmod/sqmod_live555/lv_rtsp_server.cpp
-
 		/// Returns non-zero if new frame is needed
 		int needFrame();
 
@@ -95,6 +106,12 @@ public:
 		/// Grabs next frame
 		virtual Boolean continuePlaying();
 
+		/// Returns the presentation time
+		oex::oexTime& getPts() { return m_ts; }
+
+		/// Returns the Dts time
+		oex::oexTime& getDts() { return m_ds; }
+
 	private:
 
 		/// Destructor
@@ -103,11 +120,11 @@ public:
 	private:
 
 		static void _afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
-										struct timeval presentationTime, unsigned durationInMicroseconds );
+										struct timeval Pts, unsigned DtsInMicroseconds );
 
 		/// Processes new frames
 		void afterGettingFrame( void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
-								struct timeval presentationTime, unsigned durationInMicroseconds );
+								struct timeval Pts, unsigned DtsInMicroseconds );
 
 	private:
 
@@ -119,6 +136,12 @@ public:
 
 		/// Non-zero when a new frame is being captured
 		int						m_nFrameGrabbing;
+
+		/// Timestamp
+		oex::oexTime			m_ts;
+		
+		/// Dts
+		oex::oexTime			m_ds;
 
 	};
 
@@ -245,6 +268,39 @@ public:
 	/// Returns the port used for HTTP tunneling
 	int getTunnelOverHTTPPort() { return m_nTunnelOverHTTPPort; }
 
+	/// Returns the number of audio channels
+	int getNumAudioChannels() { return m_nAudioNumChannels; }
+	
+	/// Returns the audio sample rate
+	int getAudioSampleRate() { return m_nAudioRate; }
+
+	/// Returns the audio bits per sample
+	int getAudioBps() { return m_nAudioBps; }
+
+	/// Returns the video presentation time seconds	
+	int getVideoPtsSec() { return m_pVs ? m_pVs->getPts().tv_sec : 0; }
+
+	/// Returns the video presentation time useconds	
+	int getVideoPtsUSec() { return m_pVs ? m_pVs->getPts().tv_usec : 0; }
+
+	/// Returns the video presentation time in useconds	
+	SQInteger getVideoPts() { return m_pVs ? oex::oexGetUSecs( m_pVs->getPts() ) : 0; }
+	
+	/// Returns the audio presentation time seconds	
+	int getAudioPtsSec() { return m_pAs ? m_pAs->getPts().tv_sec : 0; }
+
+	/// Returns the audio presentation time useconds	
+	int getAudioPtsUSec() { return m_pAs ? m_pAs->getPts().tv_usec : 0; }
+
+	/// Returns the audio presentation time in useconds	
+	SQInteger getAudioPts() { return m_pAs ? oex::oexGetUSecs( m_pAs->getPts() ) : 0; }
+	
+	/// Returns the video Dts time in useconds	
+	SQInteger getVideoDts() { return m_pVs ? oex::oexGetUSecs( m_pVs->getDts() ) : 0; }
+	
+	/// Returns the audio Dts time in useconds	
+	SQInteger getAudioDts() { return m_pAs ? oex::oexGetUSecs( m_pAs->getDts() ) : 0; }
+	
 	/** @} */
 
 	/// Idle processing static function
@@ -337,6 +393,15 @@ private:
 
 	/// Video frame height
 	int						m_fps;
+	
+	/// Number of audio channels
+	int						m_nAudioNumChannels;
+	
+	/// Audio sample rate
+	int						m_nAudioRate;
+	
+	/// Bits per sample
+	int						m_nAudioBps;
 
 	/// Signal to start RTSP stream
 	oexEvent				m_evtPlay;

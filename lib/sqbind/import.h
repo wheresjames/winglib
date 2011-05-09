@@ -39,6 +39,7 @@
 #include "import/sq_generic.h"
 #include "import/sq_binary.h"
 #include "import/sq_binary_share.h"
+#include "import/sq_fifo_share.h"
 #include "import/sq_video_share.h"
 #include "import/sq_multi.h"
 #include "import/sq_file.h"

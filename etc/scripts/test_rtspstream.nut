@@ -10,6 +10,10 @@ class CRtspStream
 	bDecodeAudio = 1;
 	bPlayAudio = 1;
 
+//	file = "";
+	file = "rtsptest.avi";
+	rec_avi = 0;
+
 	rtsp = 0;
 
 	dec = 0;
@@ -22,6 +26,11 @@ class CRtspStream
 	afail = 0;
 
 	pa = 0;
+	vb = 0;
+	
+	max_audio_buffer = 1000000;
+	max_video_buffer = 2000000;
+	video_offset = 300000;
 
 	function getWidth() 
 	{
@@ -48,6 +57,9 @@ class CRtspStream
 
 		frame = 0;
 		vfail = 0;
+
+		if ( rec_avi )
+			rec_avi.Destroy(), rec_avi = 0;
 
 		if ( adec )
 			adec.Destroy(), dec = 0;
@@ -111,10 +123,16 @@ class CRtspStream
 			::_self.echo( "iii no audio" );
 		else
 		{		
-			::_self.echo( "iii Creating audio decoder for " + rtsp.getAudioCodecName() );
+			::_self.echo( "iii Creating audio decoder for " + rtsp.getAudioCodecName() 
+						  + " : channels = " + rtsp.getNumAudioChannels()
+						  + " : rate = " + rtsp.getAudioSampleRate()
+						  + " : bps = " + rtsp.getAudioBps() );
 			
 			adec = CFfAudioDecoder();
-			if ( !adec.Create( CFfAudioDecoder().LookupCodecId( rtsp.getAudioCodecName() ) ) )
+			//::_self.echo( rtsp.getExtraAudioData().AsciiHexStr( 16, 16 ) );
+			adec.setExtraData( rtsp.getExtraAudioData() );
+			if ( !adec.Create( CFfAudioDecoder().LookupCodecId( rtsp.getAudioCodecName() ),
+							   0, 0, 0 ) )
 			{	::_self.echo( "!!! Failed to create decoder for " + rtsp.getAudioCodecName() );
 				adec = 0;
 				afail = 1;
@@ -129,27 +147,38 @@ class CRtspStream
 				{
 					pa = CPaOutput();
 					local fmt;
-					switch( 8 )
+					switch( 16 )
 					{	case 8 : fmt = CPaOutput().paUInt8; break;
 						default : fmt = CPaOutput().paInt16; break;
 					} // end switch
 					local fsize = 2;
 
-					if ( !pa.Open( 0, pa.getDefaultOutputDevice(), 1, fmt, 0.2, 8000., fsize ) )
-					{   _self.echo( "!!! Failed to open output stream : " + pa.getLastError() );
+					if ( !pa.Open( 0, pa.getDefaultOutputDevice(), 
+									  rtsp.getNumAudioChannels(), 
+									  fmt, 0.2, rtsp.getAudioSampleRate().tofloat(), fsize ) )
+					{   ::_self.echo( "!!! Failed to open output stream : " + pa.getLastError() );
 						pa = 0;
 					} // end if
 
 					else if ( !pa.Start() )
-					{   _self.echo( "!!! Failed to start output stream : " + pa.getLastError() );
+					{   ::_self.echo( "!!! Failed to start output stream : " + pa.getLastError() );
 						pa = 0;
 					} // end if
+					
+					else
+						::_self.echo( "Started audio device" );
 
 				} // end if
 
 			} // end else
 
 		} // end else
+
+		// Do we want to record the stream?
+		if ( file.len() && !rec_avi )
+			RecordToFile( file, 
+						  rtsp.getVideoCodecName(), rtsp.getWidth(), rtsp.getHeight(), rtsp.getFps(),
+						  rtsp.getAudioCodecName(), rtsp.getNumAudioChannels(), rtsp.getAudioSampleRate(), 0 );
 
 		::_self.echo( " !!! STARTING RTSP STREAM !!!" );
 
@@ -171,33 +200,30 @@ class CRtspStream
 
 		if ( !rtsp.LockAudio( aframe, 0 ) )
 			return 0;
+	
+//		::_self.echo( "at = " + rtsp.getAudioPtsSec() + "." + rtsp.getAudioPtsUSec() + " = " + rtsp.getAudioPts() );
 
 		if ( aframe.getUsed() )
 		{
-			::_self.echo( "asz = " + aframe.getUsed() );
-//			if ( !pa.Write( aframe, aframe.getUsed() / pa.getFrameBytes() ) );
+			// Are we recording?
+			if ( rec_avi )
+				rec_avi.WriteAudioFrame( aframe, rtsp.getAudioPts(), rtsp.getAudioDts(), CSqMulti() );
+		
+			while ( 0 < adec.Decode( aframe, araw, CSqMulti() ) )
+				if ( pa && araw.getUsed() )
+				{
+					if ( pa.getBufferedBytes() > max_audio_buffer )
+						::_self.echo( "dropping audio : " + pa.getBufferedBytes() );
+						
+					else if ( !pa.WriteTs( araw, araw.getUsed() / pa.getFrameBytes(), 
+										   rtsp.getAudioPts() ) )
+						::_self.echo( "Failed to write audio data" );
+					
+					aframe.setUsed( 0 );
 
-//			::_self.echo( aframe.AsciiHexStr( 16, 16 ) );
-
-			if ( 0 < adec.Decode( aframe, araw, CSqMulti() ) )
-			{
-				::_self.echo( " ++++++++++++++++++ AUDIO PACKET : " + araw.getUsed() );		
-
-				if ( !pa )
-					::_self.echo( "Invalid audio device" );
-				else
-					::_self.echo( araw.AsciiHexStr( 16, 16 ) );
-
-				if ( pa )
-					if ( !pa.Write( araw, araw.getUsed() / pa.getFrameBytes() ) )
-					{	_self.echo( "Failed to write audio data" );
-						return -1;
-					} // end if
-
-			} // end if
-
+				} // end if
+				
 		} // end if
-
 
 		rtsp.UnlockAudio();
 
@@ -215,16 +241,68 @@ class CRtspStream
 				return 0;
 		} // end if
 
-		if ( rtsp.LockVideo( frame, 0 ) )
-		{	dec.BufferData( frame, CSqMulti() );
-			rtsp.UnlockVideo();
+//		::_self.echo( " vt = " + rtsp.getVideoPtsSec() + "." + rtsp.getVideoPtsUSec() + " = " + rtsp.getVideoPts() );
+
+		// Create video buffer if needed
+		if ( pa && !vb )
+		{	vb = CSqFifoShare();
+			local fps = rtsp.getFps(); if ( 0 >= fps ) fps = 30;
+			if ( !vb.Create( "", "", max_video_buffer, 60 * fps, "" ) ) 
+			{	::_self.echo( "!!! " + vb.getLastErrorStr() ); vb = 0; }
 		} // end if
 
-		if ( 0 >= dec.getBufferSize() )
-			return 0;
+		// Buffer frames
+		// Note, we're buffering the compressed frames to save memory ;)
+		while ( rtsp.LockVideo( frame, 0 ) )
+		{	
+			// Are we recording?
+			if ( rec_avi )
+				rec_avi.WriteVideoFrame( frame, rtsp.getVideoPts(), rtsp.getVideoDts(), CSqMulti() );
+		
+			// Buffer for later if syncing to audio
+			if ( vb ) vb.Write( frame, "", 0, rtsp.getVideoPts() );
+			
+			// Otherwise, just send it straight to the decoder
+			else dec.BufferData( frame, CSqMulti() );
+			
+			rtsp.UnlockVideo();			
+			
+		} // end if
+		
+		// Just draw it if we're not syncing to audio
+		if ( !vb )
+		{	if ( 0 >= dec.getBufferSize() ) return 0;
+			return dec.Decode( CSqBinary(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
+		} // end if
 
-		return dec.Decode( CSqBinary(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
+		// Decode up to the audio position
+		if ( vb.isRead() && vb.ReadTs() < ( pa.getTs() - video_offset ) )
+			dec.Decode( vb.ReadData(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 ), vb.incReadPtr();
+
+		return 1;
 	}
+	
+	function RecordToFile( file, vfmt, w, h, fps, afmt, ch, sr, bps )
+	{
+		rec_avi = CFfContainer();
+
+		if ( 0 >= fps )
+			fps = 15;
+			
+		rec_avi.setAudioExtraData( rtsp.getExtraAudioData() );
+
+		if ( !rec_avi.Create( file, "", CSqMulti() ) )
+			::_self.echo( "Failed to create avi" );
+		else if ( vfmt.len() && 0 > rec_avi.AddVideoStream( CFfDecoder().LookupCodecId( vfmt ), w, h, fps ) )
+			::_self.echo( "Failed to add video stream" );
+		else if ( afmt.len() && 0 > rec_avi.AddAudioStream( CFfAudioDecoder().LookupCodecId( afmt ), ch, sr, bps ) )
+			::_self.echo( "Failed to add audio stream" );
+		else if ( !rec_avi.InitWrite() )
+			::_self.echo( "Failed to initiailze avi" );
+		else
+			::_self.echo( "iii Saving to file : " + file );	
+		
+	}	
 
 }
 
@@ -245,6 +323,10 @@ class CGlobal
 		scifi		= [ "SciFi", 		"rtsp://video2.multicasttech.com/AFTVSciFi3GPP296.sdp" ],
 		western		= [ "Westerns", 	"rtsp://video2.multicasttech.com/AFTVWesterns3GPP296.sdp" ],
 		espana		= [ "Espana", 		"rtsp://video3.multicasttech.com/EspanaFree3GPP296.sdp" ],
+		
+		yt1			= [ "yt1",	"rtsp://v8.cache1.c.youtube.com/CjgLENy73wIaLwlnoDu0pt7zDRMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNgnLTe56Djt-FNDA==/0/0/0/video.3gp" ],
+		yt2			= [ "yt2",	"rtsp://v4.cache8.c.youtube.com/CjgLENy73wIaLwkU67OEyLSkyBMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNgzoOa_IDtxOFNDA==/0/0/0/video.3gp" ],
+		
 	};
 
 	quit = 0;
@@ -276,17 +358,17 @@ function _init() : ( _g )
 //	_g.irr.AddSkyDome( _self.path( "../imgs/sky.png" ), 16, 16, 100., 100. );
 
 	_self.echo( "...adding camera...\n" );
-//	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 10, -15 ), CSqirrVector3d( 0, 0, 0 ) );
-	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 0, -15 ), CSqirrVector3d( 0, 0, 0 ) );
+//	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 10, 15 ), CSqirrVector3d( 0, 0, 0 ) );
+	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 0, 15 ), CSqirrVector3d( 0, 0, 0 ) );
 //	cam.SetLens( 1., 2.4, 3.2 );
 
     _g.cube = _g.irr.AddGrid( 50., 50., 1, 1, 0., 2, CSqirrColor( 255, 255, 255 ), 2 );
-	_g.cube.SetPosition( CSqirrVector3d( -25, -25, 25 ) );
+	_g.cube.SetPosition( CSqirrVector3d( -25, -25, -25 ) );
 
-//	_self.echo( "...adding cube...\n" );
+	_self.echo( "...adding cube...\n" );
 //	_g.cube = _g.irr.AddCube( 10. );
 
-//	_self.echo( "...adding animator...\n" );
+	_self.echo( "...adding animator...\n" );
 //	local ani = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.4, 0 ) );
 //	_g.cube.AddAnimator( ani );
 
@@ -295,7 +377,9 @@ function _init() : ( _g )
 
 	// Start the video stream
 	_g.stream = CRtspStream();
-	_g.stream.Play( _g.rtsp_sources[ "adventure" ][ 1 ] );
+//	_g.stream.Play( _g.rtsp_sources[ "yt2" ][ 1 ] );
+//	_g.stream.Play( _g.rtsp_sources[ "adventure" ][ 1 ] );
+	_g.stream.Play( _g.rtsp_sources[ "comedy" ][ 1 ] );
 
 	return 0;
 }

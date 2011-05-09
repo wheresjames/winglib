@@ -60,6 +60,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Resize )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Zero )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Copy )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, CopyBytes )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Append )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, LShift )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Insert )
@@ -118,6 +119,8 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	REGISTER_TYPE_ACCESS( USHORT )
 	REGISTER_TYPE_ACCESS( INT )
 	REGISTER_TYPE_ACCESS( UINT )
+	REGISTER_TYPE_ACCESS( INT64 )
+	REGISTER_TYPE_ACCESS( UINT64 )
 	REGISTER_TYPE_ACCESS( LONG )
 	REGISTER_TYPE_ACCESS( ULONG )
 	REGISTER_TYPE_ACCESS( FLOAT )
@@ -134,6 +137,24 @@ void CSqBinary::Register( sqbind::VM vm )
 {_STT();
 	SQBIND_EXPORT( vm, CSqBinary );
 }
+
+CSqBinary::t_size CSqBinary::CopyBytes( CSqBinary *x_p, CSqBinary::t_size x_uBytes )
+{_STT();
+
+	if ( !x_p )
+		return 0;
+	
+	if ( 0 >= x_uBytes || x_uBytes > x_p->getUsed() )
+		x_uBytes = x_p->getUsed();		
+
+	if ( x_uBytes > getUsed() )
+		x_uBytes = getUsed();
+		
+	oexMemCpy( _Ptr(), x_p->Ptr(), x_uBytes );
+	
+	return x_uBytes;
+}
+
 
 int CSqBinary::FingerprintImage( CSqImage *img, CSqBinary *col, int scale )
 {	if ( !img || !col ) return 0;

@@ -4,6 +4,25 @@ class CPaOutput
 {
 public:
 
+	enum 
+	{
+		/// Maximum number of timestamps to hold
+		eMaxTimestamps = 1024
+	};
+
+	/// Relates timestamps to bytes
+	struct STsInfo
+	{
+		/// Number of frames
+		oex::oexINT			nFrames;
+	
+		/// Timestamp
+		oex::oexINT64		ts;
+	};
+
+
+public:
+
 	_SQBIND_CLASS_CTOR_BEGIN( CPaOutput )
 	_SQBIND_CLASS_CTOR_END( CPaOutput )
 
@@ -53,6 +72,12 @@ public:
 	/// Writes data to the device
 	int Write( sqbind::CSqBinary *data, int frames );
 
+	/// Writes data to the device
+	int WriteTs( sqbind::CSqBinary *data, int frames, SQInteger ts );
+	
+	/// Calculates the current timestamp
+	SQInteger getTs();
+	
 	/// Returns number of bytes currently waiting in the buffer
 	int getBufferedBytes() { return m_buf.GetMaxRead(); }
 
@@ -75,29 +100,39 @@ protected:
 private:
 
 	/// Non-zero if blocking mode is enabled
-	int						m_bBlocking;
+	int							m_bBlocking;
 
 	/// Number of bytes in a frame
-	int						m_nFrameBytes;
+	int							m_nFrameBytes;
+	
+	/// Size of a audio block
+	int							m_nBlockSize;
 
 	/// Initialize result
-	PaError					m_errInit;	
+	PaError						m_errInit;	
 
 	/// Last error code
-	PaError					m_errLast;	
+	PaError						m_errLast;	
 
 	/// Output device info
-	const PaDeviceInfo		*m_pdi;
+	const PaDeviceInfo			*m_pdi;
 
 	/// Stream
-	PaStream				*m_stream;
-
-	/// Thread lock for non-blocking output
-//	oexLock					m_lock;
+	PaStream					*m_stream;
 
 	/// Ring buffer
-//	sqbind::CSqBinary		m_buf;
-
-	oex::CCircBuf			m_buf;
+	oex::CCircBuf				m_buf;
+	
+	/// Current timestamp write
+	int							m_iWTs;
+	
+	/// Current timestamp read
+	int							m_iRTs;
+	
+	/// Timestamp bytes
+	int							m_nTsBytes;
+	
+	/// Timestamp relation
+	STsInfo						m_ts[ eMaxTimestamps ];
 
 };

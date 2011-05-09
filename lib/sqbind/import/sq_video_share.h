@@ -80,13 +80,14 @@ namespace sqbind
 			@param [in] nHeight		-	Height of a video frame
 			@param [in] nFps		-	Frames per second
 			@param [in] nFmt		-	User defined video format id
+			@param [in] nExtra		-	Amount of extra data to allocate per buffered frame
 			
 			Opens a new writable share.  This function fails if the share already exists.
 			
 			@return Non-zero if success
 		
 		*/
-		int Create( const sqbind::stdString &sName, const sqbind::stdString &sBufName, int nBuffers, int nImgSize, int nWidth, int nHeight, int nFps, int nFmt );
+		int Create( const sqbind::stdString &sName, const sqbind::stdString &sBufName, int nBuffers, int nImgSize, int nWidth, int nHeight, int nFps, int nFmt, int nExtra );
 
 		/// Opens an existing share
 		/**
@@ -138,6 +139,13 @@ namespace sqbind
 		*/
 		int getPadding() { return m_nPadding; }
 		
+		/// Returns the write pointer from the control block
+		int getWritePtr()
+		{	if ( !m_cb.getUsed() ) 
+				return 0;
+			return m_cb.getINT( 1 );
+		}
+
 		/// Returns the number of image buffers from the control block
 		int getBuffers()
 		{	if ( !m_cb.getUsed() ) 
@@ -206,6 +214,13 @@ namespace sqbind
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 12 );
+		}
+		
+		/// Returns the header size from the control block
+		int getExtraSize()
+		{	if ( !m_cb.getUsed() ) 
+				return 0;
+			return m_cb.getINT( 18 );
 		}
 		
 		/// Returns the header size from the control block
@@ -289,7 +304,7 @@ namespace sqbind
 		/// Sets the last error string
 		void setLastErrorStr( const sqbind::stdString &sErr ) { m_sLastErr = sErr; }
 
-		/// Reads the next available image from the video share
+		/// Reads the next available image from the video share and increments the read pointer
 		/**
 			A shared buffer must be open.  Returns an empty CSqBinary
 			object if no new frame is available.
@@ -299,6 +314,12 @@ namespace sqbind
 		*/
 		sqbind::CSqBinary getNextImg();
 		
+		/// Reads the current image at the read pointer
+		sqbind::CSqBinary getImg();
+		
+		/// Increments the Read pointer
+		int incReadPtr();
+
 		/// Reads the last available image from the video share
 		sqbind::CSqBinary getLastImg();
 
@@ -318,6 +339,15 @@ namespace sqbind
 		
 		*/
 		int WriteFrame( sqbind::CSqBinary *frame );
+		
+		/// Returns the specified extra buffer
+		sqbind::CSqBinary getExtraIdx( int i );
+
+		/// Returns the current extra buffer for the read buffer
+		sqbind::CSqBinary getReadExtra();
+		
+		/// Returns the current extra buffer for the read buffer
+		sqbind::CSqBinary getWriteExtra();
 		
 		/// Returns non-zero if a share is open
 		int isOpen() { return ( m_cb.getUsed() && m_buf.getUsed() ); }

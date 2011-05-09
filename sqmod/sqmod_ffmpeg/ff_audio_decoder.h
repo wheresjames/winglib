@@ -22,7 +22,7 @@ public:
 	void Destroy();
 
 	/// Creates a decoder
-	int Create( int x_nCodec );
+	int Create( int x_nCodec, int x_nChannels, int x_nSampleRate, int x_nBps );
 
 	/// Reads info from a stream
 	int FindStreamInfo( sqbind::CSqBinary *in );
@@ -36,6 +36,18 @@ public:
 	/// Lookup a codec based on id
 	static sqbind::stdString LookupCodecName( int nId );
 
+	/// Returns extra codec data
+	sqbind::CSqBinary getExtraData() { return m_extra; }
+
+	/// Sets extra codec data
+	void setExtraData( sqbind::CSqBinary *p ) { if ( p ) m_extra = *p; }
+
+	/// Returns sync
+	sqbind::CSqBinary getSync() { return m_sync; }
+
+	/// Sets sync
+	void setSync( sqbind::CSqBinary *p ) { if ( p ) m_sync = *p; }
+
 	/// Appends data to temporary buffer and initializes padding
 	int BufferData( sqbind::CSqBinary *in, sqbind::CSqMulti *m );
 
@@ -44,6 +56,15 @@ public:
 
 	/// Returns the amount of data buffered
 	int getBufferSize();
+
+	/// Returns the number of audio channels
+	int getChannels() { return m_pCodecContext ? m_pCodecContext->channels : 0; }
+	
+	/// Returns the sample rate
+	int getSampleRate() { return m_pCodecContext ? m_pCodecContext->sample_rate : 0; }
+
+	/// Returns the bits per sample
+	int getBps() { return m_pCodecContext ? m_pCodecContext->bits_per_coded_sample : 0; }
 
 	/** @} */
 
@@ -70,4 +91,10 @@ private:
 	/// Temp buffer
 	sqbind::CSqBinary		m_tmp;
 
+	/// Extra codec data
+	sqbind::CSqBinary		m_extra;
+	
+	/// Sync header
+	sqbind::CSqBinary		m_sync;
+	
 };

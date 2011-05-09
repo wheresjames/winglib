@@ -84,6 +84,10 @@ void CLvRtspClient::CVideoSink::afterGettingFrame( void* clientData, unsigned fr
 	// How much data was used this time
 	m_buf.setUsed( m_header.getUsed() + frameSize );
 
+	// Copy time stamps
+	oex::oexCopyTime( m_ts, presentationTime );
+	oex::oexSetTime( m_ds, 0, durationInMicroseconds );
+
 	// Signal that a frame is ready
 	m_nFrameReady = 1;
 	m_nFrameGrabbing = 0;
@@ -124,7 +128,8 @@ int CLvRtspClient::CVideoSink::UnlockFrame()
 
 
 CLvRtspClient::CAudioSink::CAudioSink( UsageEnvironment& rEnv ) :
-	MediaSink( rEnv ) // MPEG4LATMAudioRTPSink( rEnv )
+	MediaSink( rEnv ) 
+	// MPEG4LATMAudioRTPSink( rEnv )
 {_STT();
 	m_nFrameReady = 0;
 	m_nFrameGrabbing = 0;
@@ -172,6 +177,10 @@ void CLvRtspClient::CAudioSink::afterGettingFrame( void* clientData, unsigned fr
 
 	// How much data was used this time
 	m_buf.setUsed( frameSize );
+
+	// Copy time stamps
+	oex::oexCopyTime( m_ts, presentationTime );
+	oex::oexSetTime( m_ds, 0, durationInMicroseconds );
 
 	// Signal that a frame is ready
 	m_nFrameReady = 1;
@@ -231,6 +240,9 @@ CLvRtspClient::CLvRtspClient()
 	m_pAsPss = oexNULL;
 	m_bStreamOverTCP = 0;
 	m_nTunnelOverHTTPPort = 0;
+	m_nAudioNumChannels = 0;
+	m_nAudioRate = 0;
+	m_nAudioBps = 0;
 }
 
 void CLvRtspClient::Destroy()
@@ -278,6 +290,9 @@ void CLvRtspClient::ThreadDestroy()
 	m_width = 0;
 	m_height = 0;
 	m_fps = 0;
+	m_nAudioNumChannels = 0;
+	m_nAudioRate = 0;
+	m_nAudioBps = 0;
 	m_pVsPss = oexNULL;
 	m_pAsPss = oexNULL;
 	m_mSdp.clear();
@@ -527,6 +542,34 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 		return 0;
 	} // end if
 
+	if ( oex::CStr8( "MP4A-LATM" ) == pss->codecName() )
+	{
+		((MPEG4LATMAudioRTPSource*)pss->rtpSource())->omitLATMDataLengthField();
+		
+		const char *pCfg = pss->fmtp_config();
+		if ( pCfg )
+		{	unsigned elen = 0;
+			unsigned char *pExtra = parseStreamMuxConfigStr( pCfg, elen );
+			if ( pExtra && elen )
+				m_extraAudio.AppendBuffer( (const char*)pExtra, elen );
+	
+		} // end if
+		
+	} // end if
+
+	else if ( oex::CStr8( "MPEG4-GENERIC" ) == pss->codecName() )
+	{
+		const char *pCfg = pss->fmtp_config();
+		if ( pCfg )
+		{	unsigned elen = 0;
+			unsigned char *pExtra = parseGeneralConfigStr( pCfg, elen );
+			if ( pExtra && elen )
+				m_extraAudio.AppendBuffer( (const char*)pExtra, elen );
+	
+		} // end if
+		
+	} // end if
+	
 	// Read extradata
     const char *props = pss->fmtp_spropparametersets();
     if ( props )
@@ -551,14 +594,16 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 		return 0;
 	} // end if
 
+	// Save away important audio parameters
+	m_nAudioNumChannels = pss->numChannels();
+	m_nAudioRate = pss->rtpTimestampFrequency();
+	m_nAudioBps = 0;
+
 	m_pAs = new CAudioSink( *m_pEnv );
 	if ( !m_pAs )
 	{	oexERROR( 0, oexMks( oexT( "CAudioSink::createNew() failed : " ), oexT( " : " ), m_pEnv->getResultMsg() ) );
 		return 0;
 	} // end if
-
-//	if( !strcmp( pss->codecName(), oexT( "MP4A-LATM" ) ) )
-//		((MPEG4LATMAudioRTPSource*)pss->rtpSource())->omitLATMDataLengthField();
 
 	m_pAsPss = pss;
 
