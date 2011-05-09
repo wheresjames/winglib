@@ -733,7 +733,6 @@ int CFfContainer::AddAudioStream( int codec_id, int channels, int sample_rate, i
 		return -1;
 
 	m_nAudioStream = pst->index;
-//	pst->stream_copy = 1;
 	
     AVCodecContext *pcc = pst->codec;
 	if ( !pcc )
@@ -745,13 +744,12 @@ int CFfContainer::AddAudioStream( int codec_id, int channels, int sample_rate, i
 	pcc->codec_id = (CodecID)codec_id;
 	pcc->codec_type = AVMEDIA_TYPE_AUDIO;
 	
-//	pcc->sample_fmt = AV_SAMPLE_FMT_S16;	
-	
     pcc->channels = channels;
 	pcc->sample_rate = sample_rate;
-//	pcc->bits_per_coded_sample = bps ? bps : av_get_bits_per_sample( pcc->codec_id );
+	pcc->bits_per_coded_sample = bps ? bps : av_get_bits_per_sample( pcc->codec_id );
     pcc->bit_rate = pcc->sample_rate * pcc->channels * 8;
-//    pcc->block_align = pcc->bits_per_coded_sample * pcc->channels / 8;
+//	pcc->sample_fmt = AV_SAMPLE_FMT_S16;	
+//	pcc->block_align = pcc->bits_per_coded_sample * pcc->channels / 8;
 //	pcc->frame_size = 4096;
 //	pcc->time_base.num = 1;
 //	pcc->time_base.den = sample_rate;
