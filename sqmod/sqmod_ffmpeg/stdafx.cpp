@@ -209,6 +209,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, isAudioCodec )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, isVideoCodec )
 
+	SQBIND_MEMBER_FUNCTION( CFfContainer, setAudioExtraData )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioExtraData )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioSampleRate )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioBitRate )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioBitsPerSample )

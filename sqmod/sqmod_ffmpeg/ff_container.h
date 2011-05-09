@@ -193,6 +193,12 @@ public:
 	*/
 	int Seek( int nStreamId, int nOffset, int nFlags );
 
+	/// Returns extra audio codec data
+	sqbind::CSqBinary getAudioExtraData() { return m_audio_extra; }
+
+	/// Sets extra audio codec data
+	void setAudioExtraData( sqbind::CSqBinary *p ) { if ( p ) m_audio_extra = *p; }
+
 	/** @} */
 
 private:
@@ -238,5 +244,8 @@ private:
 
 	/// Left over packet data
 	sqbind::CSqBinary		m_audio_buf;
+	
+	/// Extra codec data
+	sqbind::CSqBinary		m_audio_extra;
 
 };

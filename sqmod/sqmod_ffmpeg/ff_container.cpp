@@ -65,7 +65,7 @@ int CFfContainer::CloseStream()
 	if ( !m_pFormatContext )
 		return 0;
 
-	if ( m_nRead )
+		if ( m_nRead )
 		av_close_input_file( m_pFormatContext );
 
 	else if ( 1 < m_nWrite )
@@ -73,17 +73,24 @@ int CFfContainer::CloseStream()
 		// Write the rest of the file
 		av_write_trailer( m_pFormatContext );
 
+//	av_write_trailer() does this now
+/*
 		// Free streams
 		for ( unsigned int i = 0; i < m_pFormatContext->nb_streams; i++ )
-			if (  m_pFormatContext->streams[ i ] )
+			if ( m_pFormatContext->streams[ i ] )
+			{	if ( m_pFormatContext->streams[ i ]->codec )
+					av_freep( m_pFormatContext->streams[ i ]->codec );
 				av_freep( m_pFormatContext->streams[ i ] );
+				m_pFormatContext->streams[ i ] = 0;
+			} // end if
+*/
 
 		// Close file / socket resources
 		if ( m_pFormatContext->oformat
 			 && !( m_pFormatContext->oformat->flags & AVFMT_NOFILE )
 			 && m_pFormatContext->pb )
-			url_fclose( m_pFormatContext->pb );
-
+			avio_close( m_pFormatContext->pb );
+			
 		// Free the stream
 		av_free( m_pFormatContext );
 
@@ -595,11 +602,11 @@ int CFfContainer::InitWrite()
 		return 0;
 	} // end if
 
-	// +++ Below Seems to memleak when url_fopen fails
+	// +++ Below Seems to memleak when avio_open fails
 
 	if ( !( m_pFormatContext->oformat->flags & AVFMT_NOFILE ) )
 		if ( 0 > ( res = avio_open( &m_pFormatContext->pb, m_pFormatContext->filename, URL_WRONLY ) ) )
-		{	oexERROR( res, oexT( "url_fopen() failed" ) );
+		{	oexERROR( res, oexT( "avio_open() failed" ) );
 			Destroy();
 			return 0;
 		} // end if
@@ -613,6 +620,8 @@ int CFfContainer::InitWrite()
 	// Writing
 	m_nWrite = 2;
 
+	dump_format( m_pFormatContext, 0, 0, 1 );
+	
 	return 1;
 }
 
@@ -650,9 +659,9 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
     pcc->time_base.den = fps;
 	pcc->gop_size = 12;
 
-//	oex::CStr sFName( m_pFormatContext->oformat->name );
-//	if (  sFName == oexT( "3gp" ) || sFName == oexT( "mov" ) || sFName == oexT( "mp4" ) )
-//		pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
+	oex::CStr sFName( m_pFormatContext->oformat->name );
+	if (  sFName == oexT( "3gp" ) || sFName == oexT( "mov" ) || sFName == oexT( "mp4" ) )
+		pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
 
 	return m_nVideoStream;
 }
@@ -679,15 +688,29 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	if ( m )
 	{	if ( m->isset( oexT( "flags" ) ) )
 			pkt.flags = (*m)[ oexT( "flags" ) ].toint();
+		else
+			pkt.flags |= AV_PKT_FLAG_KEY;
 	} // end if
+	else
+		pkt.flags |= AV_PKT_FLAG_KEY;
 
 	pkt.pts = nPts;
 	pkt.dts = nDts;
+	
+    AVCodecContext *pcc = pStream->codec;
+    if ( pcc && pcc->coded_frame && pcc->coded_frame->pts != AV_NOPTS_VALUE )
+        pkt.pts = av_rescale_q( pcc->coded_frame->pts, pcc->time_base, pStream->time_base );
+	
 	pkt.stream_index = pStream->index;
 	pkt.data = (uint8_t*)dat->_Ptr();
 	pkt.size = dat->getUsed();
 
-	if ( av_write_frame( m_pFormatContext, &pkt ) )
+	if ( 0 > m_nAudioStream )
+	{	if ( av_write_frame( m_pFormatContext, &pkt ) )
+			return 0;
+	} // end if
+	
+	else if ( av_interleaved_write_frame( m_pFormatContext, &pkt ) )
 		return 0;
 
 	return 1;
@@ -705,11 +728,12 @@ int CFfContainer::AddAudioStream( int codec_id, int channels, int sample_rate, i
 	if ( 0 <= m_nAudioStream )
 		return m_nAudioStream;
 
-	AVStream *pst = av_new_stream( m_pFormatContext, 0 );
+	AVStream *pst = av_new_stream( m_pFormatContext, 1 );
 	if ( !pst )
 		return -1;
 
 	m_nAudioStream = pst->index;
+//	pst->stream_copy = 1;
 	
     AVCodecContext *pcc = pst->codec;
 	if ( !pcc )
@@ -720,23 +744,27 @@ int CFfContainer::AddAudioStream( int codec_id, int channels, int sample_rate, i
 	// Fill in codec info
 	pcc->codec_id = (CodecID)codec_id;
 	pcc->codec_type = AVMEDIA_TYPE_AUDIO;
-	//pcc->codec_tag
 	
-	pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
-
+//	pcc->sample_fmt = AV_SAMPLE_FMT_S16;	
+	
     pcc->channels = channels;
 	pcc->sample_rate = sample_rate;
-//    pcc->bits_per_coded_sample = bps;
-	pcc->bits_per_coded_sample = av_get_bits_per_sample( pcc->codec_id );
+//	pcc->bits_per_coded_sample = bps ? bps : av_get_bits_per_sample( pcc->codec_id );
     pcc->bit_rate = pcc->sample_rate * pcc->channels * 8;
-    pcc->block_align = pcc->bits_per_coded_sample * pcc->channels / 8;
-//    pcc->time_base.num = 1;
-//   pcc->time_base.den = sample_rate;
-//	pcc->gop_size = 12;
-
-	// PST info
-	pst->need_parsing = AVSTREAM_PARSE_FULL;
-	av_set_pts_info( pst, 64, 1, pcc->sample_rate );
+//    pcc->block_align = pcc->bits_per_coded_sample * pcc->channels / 8;
+//	pcc->frame_size = 4096;
+//	pcc->time_base.num = 1;
+//	pcc->time_base.den = sample_rate;
+	
+	// Set extra codec data
+	if ( m_audio_extra.getUsed() )
+	{	pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
+		pcc->extradata = (uint8_t*)m_audio_extra._Ptr();
+		pcc->extradata_size = m_audio_extra.getUsed();
+	} // end if
+	
+    else if ( m_pFormatContext->oformat->flags & AVFMT_GLOBALHEADER )
+        pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
 
 	return m_nAudioStream;
 }
@@ -763,15 +791,26 @@ int CFfContainer::WriteAudioFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	if ( m )
 	{	if ( m->isset( oexT( "flags" ) ) )
 			pkt.flags = (*m)[ oexT( "flags" ) ].toint();
+		else
+			pkt.flags |= AV_PKT_FLAG_KEY;
 	} // end if
+	else
+		pkt.flags |= AV_PKT_FLAG_KEY;
 
+	// av_rescale_q
+	
 	pkt.pts = nPts;
 	pkt.dts = nDts;
 	pkt.stream_index = pStream->index;
 	pkt.data = (uint8_t*)dat->_Ptr();
 	pkt.size = dat->getUsed();
 
-	if ( av_write_frame( m_pFormatContext, &pkt ) )
+	if ( 0 > m_nVideoStream )
+	{	if ( av_write_frame( m_pFormatContext, &pkt ) )
+			return 0;
+	} // end if
+	
+	else if ( av_interleaved_write_frame( m_pFormatContext, &pkt ) )
 		return 0;
 
 	return 1;

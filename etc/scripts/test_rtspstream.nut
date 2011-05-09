@@ -10,8 +10,8 @@ class CRtspStream
 	bDecodeAudio = 1;
 	bPlayAudio = 1;
 
-	file = "";
-//	file = "rtsptest.avi";
+//	file = "";
+	file = "rtsptest.avi";
 	rec_avi = 0;
 
 	rtsp = 0;
@@ -178,7 +178,7 @@ class CRtspStream
 		if ( file.len() && !rec_avi )
 			RecordToFile( file, 
 						  rtsp.getVideoCodecName(), rtsp.getWidth(), rtsp.getHeight(), rtsp.getFps(),
-						  rtsp.getAudioCodecName(), rtsp.getNumAudioChannels(), rtsp.getAudioSampleRate(), 16 );
+						  rtsp.getAudioCodecName(), rtsp.getNumAudioChannels(), rtsp.getAudioSampleRate(), 0 );
 
 		::_self.echo( " !!! STARTING RTSP STREAM !!!" );
 
@@ -207,7 +207,7 @@ class CRtspStream
 		{
 			// Are we recording?
 			if ( rec_avi )
-				rec_avi.WriteAudioFrame( aframe, rtsp.getAudioPts(), rtsp.getAudioDts(), CSqMulti( "flags=1" ) );
+				rec_avi.WriteAudioFrame( aframe, rtsp.getAudioPts(), rtsp.getAudioDts(), CSqMulti() );
 		
 			while ( 0 < adec.Decode( aframe, araw, CSqMulti() ) )
 				if ( pa && araw.getUsed() )
@@ -257,7 +257,7 @@ class CRtspStream
 		{	
 			// Are we recording?
 			if ( rec_avi )
-				rec_avi.WriteVideoFrame( frame, rtsp.getVideoPts(), rtsp.getVideoDts(), CSqMulti( "flags=1" ) );
+				rec_avi.WriteVideoFrame( frame, rtsp.getVideoPts(), rtsp.getVideoDts(), CSqMulti() );
 		
 			// Buffer for later if syncing to audio
 			if ( vb ) vb.Write( frame, "", 0, rtsp.getVideoPts() );
@@ -288,6 +288,8 @@ class CRtspStream
 
 		if ( 0 >= fps )
 			fps = 15;
+			
+		rec_avi.setAudioExtraData( rtsp.getExtraAudioData() );
 
 		if ( !rec_avi.Create( file, "", CSqMulti() ) )
 			::_self.echo( "Failed to create avi" );
@@ -356,28 +358,28 @@ function _init() : ( _g )
 //	_g.irr.AddSkyDome( _self.path( "../imgs/sky.png" ), 16, 16, 100., 100. );
 
 	_self.echo( "...adding camera...\n" );
-	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 10, 15 ), CSqirrVector3d( 0, 0, 0 ) );
-//	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 0, 15 ), CSqirrVector3d( 0, 0, 0 ) );
+//	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 10, 15 ), CSqirrVector3d( 0, 0, 0 ) );
+	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 0, 15 ), CSqirrVector3d( 0, 0, 0 ) );
 //	cam.SetLens( 1., 2.4, 3.2 );
 
-//    _g.cube = _g.irr.AddGrid( 50., 50., 1, 1, 0., 2, CSqirrColor( 255, 255, 255 ), 2 );
-//	_g.cube.SetPosition( CSqirrVector3d( -25, -25, -25 ) );
+    _g.cube = _g.irr.AddGrid( 50., 50., 1, 1, 0., 2, CSqirrColor( 255, 255, 255 ), 2 );
+	_g.cube.SetPosition( CSqirrVector3d( -25, -25, -25 ) );
 
 	_self.echo( "...adding cube...\n" );
-	_g.cube = _g.irr.AddCube( 10. );
+//	_g.cube = _g.irr.AddCube( 10. );
 
 	_self.echo( "...adding animator...\n" );
-	local ani = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.4, 0 ) );
-	_g.cube.AddAnimator( ani );
+//	local ani = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.4, 0 ) );
+//	_g.cube.AddAnimator( ani );
 
 	// Set draw function
 	_self.set_timer( ".", 30, "OnDraw" )
 
 	// Start the video stream
 	_g.stream = CRtspStream();
-	_g.stream.Play( _g.rtsp_sources[ "yt2" ][ 1 ] );
+//	_g.stream.Play( _g.rtsp_sources[ "yt2" ][ 1 ] );
 //	_g.stream.Play( _g.rtsp_sources[ "adventure" ][ 1 ] );
-//	_g.stream.Play( _g.rtsp_sources[ "comedy" ][ 1 ] );
+	_g.stream.Play( _g.rtsp_sources[ "comedy" ][ 1 ] );
 
 	return 0;
 }
