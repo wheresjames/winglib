@@ -116,7 +116,7 @@ template < const int T > class oex_static_assert{};
 #	define oexVERIFYZERO( s )	            ({ OEX_NAMESPACE::oexRESULT r = s; ( !r ) ? OEX_NAMESPACE::oexTRUE : ( OEX_NAMESPACE::os::CDebug::Break( 0, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, oexT( #s ), r ), OEX_NAMESPACE::oexFALSE ); })
 
 // +++ mingw-w64 is broken atm
-#if defined( __MINGW64__ )
+#if defined( __MINGW64__ ) || defined( __MINGW32__ )
 #	define oexCHECK_PTR_NULL_OK( ptr )      ( 1 )
 #	define oexCHECK_PTR( ptr )              ( ( ptr ) ? OEX_NAMESPACE::oexTRUE :  OEX_NAMESPACE::oexFALSE )
 #	define oexCHECK( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE :  OEX_NAMESPACE::oexFALSE )
