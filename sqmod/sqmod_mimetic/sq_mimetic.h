@@ -39,25 +39,25 @@ public:
 	void setFrom( const sqbind::stdString &s );
 
 	/// Gets the from field
-	sqbind::stdString CSqMimetic::getFrom();
+	sqbind::stdString getFrom();
 
 	/// Sets to field
 	void setTo( const sqbind::stdString &s );
 
 	/// Gets the to field
-	sqbind::stdString CSqMimetic::getTo();
+	sqbind::stdString getTo();
 
 	/// Sets subject field
 	void setSubject( const sqbind::stdString &s );
 
 	/// Gets the subject field
-	sqbind::stdString CSqMimetic::getSubject();
+	sqbind::stdString getSubject();
 
 	/// Sets body field
 	void setBody( const sqbind::stdString &s );
 
 	/// Gets the body field
-	sqbind::stdString CSqMimetic::getBody();
+	sqbind::stdString getBody();
 
 	/// Adds / updates / deletes an attachment
 	int setAttachment( const sqbind::stdString &sName, const sqbind::stdString &sType, sqbind::CSqBinary *pData );
