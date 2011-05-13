@@ -719,6 +719,7 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 
 int CFfContainer::AddAudioStream( int codec_id, int channels, int sample_rate, int bps )
 {_STT();
+
 	if ( !m_pFormatContext )
 		return -1;
 
