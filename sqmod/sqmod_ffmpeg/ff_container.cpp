@@ -666,6 +666,94 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	return m_nVideoStream;
 }
 
+// http://www.rfc-editor.org/rfc/rfc3984.txt
+// http://www.ietf.org/rfc/rfc1889.txt
+// http://www.siptutorial.net/RTP/header.html
+
+int getNalHeader( const void *p, int len )
+{	
+	if ( 4 > len )
+		return 0;
+
+	unsigned char *b = (unsigned char*)p;
+	
+	// Verify NAL marker
+	if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
+		return 0;
+
+	b += 3;
+
+	int f					= ( *b & 0x80 ) >> 7;
+	int nri					= ( *b & 0x60 ) >> 5;
+	int ntype				= *b & 0x1f;
+
+oexSHOW( f );
+oexSHOW( nri );
+oexSHOW( ntype );
+	
+	return 1;
+}
+
+
+int getRtpHeader( const void *p, int len )
+{	
+	if ( 4 > len )
+		return 0;
+
+	unsigned char *b = (unsigned char*)p;
+	
+	int version				= ( *b & 0xc0 ) >> 6;
+	int padding 			= ( *b & 0x20 ) >> 5;
+	int extension			= ( *b & 0x10 ) >> 4;
+	int cc					= *b & 0x0f;
+	
+oexSHOW( version );
+oexSHOW( padding );
+oexSHOW( extension );
+oexSHOW( cc );
+	
+	if ( 2 != version )
+		return 0;
+	
+	b++;
+	int marker				= *b & 0x01;
+	int type				= ( *b & 0xfe ) >> 1;
+
+oexSHOW( marker );
+oexSHOW( type );
+	
+	return 1;
+}
+
+// 0 = I-Frame
+// 1 = P-Frame
+// 2 = B-Frame
+// 3 = S-Frame
+int getVopType( const void *p, int len )
+{	
+	if ( 4 > len )
+		return 0;
+
+	unsigned char *b = (unsigned char*)p;
+	
+	// Verify NAL marker
+	if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
+		return 0;
+
+	b += 3;
+
+	// Verify VOP id
+	if ( 0xb6 != *b )
+		return 0;
+	
+	b++;
+	int vop_coding_type = ( *b & 0xc0 ) >> 6;
+
+// oexSHOW( vop_coding_type );
+
+	return vop_coding_type;
+}
+
 int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInteger nDts, sqbind::CSqMulti *m )
 {_STT();
 	if ( !m_pFormatContext )
@@ -685,18 +773,31 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	oexZero( pkt );
 	av_init_packet( &pkt );
 
-	if ( m )
-	{	if ( m->isset( oexT( "flags" ) ) )
-			pkt.flags = (*m)[ oexT( "flags" ) ].toint();
-		else
-			pkt.flags |= AV_PKT_FLAG_KEY;
-	} // end if
+	if ( m && m->isset( oexT( "flags" ) ) )
+		pkt.flags = (*m)[ oexT( "flags" ) ].toint();
+	
+//	else if ( pStream && pStream->codec && CODEC_ID_H264 == pStream->codec->codec_id )
 	else
-		pkt.flags |= AV_PKT_FLAG_KEY;
+		pkt.flags |= ( !getVopType( dat->Ptr(), dat->getUsed() ) ? AV_PKT_FLAG_KEY : 0 );
+		
+//	else
+//		pkt.flags |= AV_PKT_FLAG_KEY;
 
+	// !!! Uncommenting the following block, will create a file that will crash the entire Windows Shell
+	//     if you attempt to browse the folder containing it with Windows Explorer.  How cool is that?
+	
+	// Waiting for key frame?
+	if ( !m_bKeyRxd )
+	{	if ( 0 == ( pkt.flags & AV_PKT_FLAG_KEY ) )
+			return 0;
+		m_bKeyRxd = 1;
+	} // end if
+
+	// Save time
 	pkt.pts = nPts;
 	pkt.dts = nDts;
 	
+	// +++ is this causing the audio issue???
     AVCodecContext *pcc = pStream->codec;
     if ( pcc && pcc->coded_frame && pcc->coded_frame->pts != AV_NOPTS_VALUE )
         pkt.pts = av_rescale_q( pcc->coded_frame->pts, pcc->time_base, pStream->time_base );

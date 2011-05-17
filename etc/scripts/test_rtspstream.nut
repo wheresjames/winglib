@@ -207,7 +207,8 @@ class CRtspStream
 		{
 			// Are we recording?
 			if ( rec_avi )
-				rec_avi.WriteAudioFrame( aframe, rtsp.getAudioPts(), rtsp.getAudioDts(), CSqMulti() );
+//				rec_avi.WriteAudioFrame( aframe, rtsp.getAudioPts(), rtsp.getAudioDts(), CSqMulti() );
+				rec_avi.WriteAudioFrame( aframe, 0, 0, CSqMulti() );
 		
 			while ( 0 < adec.Decode( aframe, araw, CSqMulti() ) )
 				if ( pa && araw.getUsed() )
@@ -255,9 +256,12 @@ class CRtspStream
 		// Note, we're buffering the compressed frames to save memory ;)
 		while ( rtsp.LockVideo( frame, 0 ) )
 		{	
+//			::_self.echo( frame.AsciiHexStr( 16, 4 ) );
+		
 			// Are we recording?
 			if ( rec_avi )
-				rec_avi.WriteVideoFrame( frame, rtsp.getVideoPts(), rtsp.getVideoDts(), CSqMulti() );
+				rec_avi.WriteVideoFrame( frame, 0, 0, CSqMulti() );
+//				rec_avi.WriteVideoFrame( frame, rtsp.getVideoPts(), rtsp.getVideoDts(), CSqMulti() );
 		
 			// Buffer for later if syncing to audio
 			if ( vb ) vb.Write( frame, "", 0, rtsp.getVideoPts() );

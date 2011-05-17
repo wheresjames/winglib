@@ -362,7 +362,7 @@ void CLvRtspServer::ProcessMsgs()
 
 	// Schedule us to run again
 	if ( !m_nEnd )
-		m_pEnv->taskScheduler().scheduleDelayedTask( 15, (TaskFunc*)CLvRtspServer::_ProcessMsgs, this );
+		m_pEnv->taskScheduler().scheduleDelayedTask( 15000, (TaskFunc*)CLvRtspServer::_ProcessMsgs, this );
 
 }
 
