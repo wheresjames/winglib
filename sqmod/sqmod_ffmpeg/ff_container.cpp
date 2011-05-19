@@ -65,7 +65,7 @@ int CFfContainer::CloseStream()
 	if ( !m_pFormatContext )
 		return 0;
 
-		if ( m_nRead )
+	if ( m_nRead )
 		av_close_input_file( m_pFormatContext );
 
 	else if ( 1 < m_nWrite )
@@ -620,7 +620,7 @@ int CFfContainer::InitWrite()
 	// Writing
 	m_nWrite = 2;
 
-	dump_format( m_pFormatContext, 0, 0, 1 );
+//	dump_format( m_pFormatContext, 0, 0, 1 );
 	
 	return 1;
 }
@@ -657,7 +657,7 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	pcc->height = height;
     pcc->time_base.num = 1;
     pcc->time_base.den = fps;
-	pcc->gop_size = 12;
+//	pcc->gop_size = 12;
 
 	oex::CStr sFName( m_pFormatContext->oformat->name );
 	if (  sFName == oexT( "3gp" ) || sFName == oexT( "mov" ) || sFName == oexT( "mp4" ) )
@@ -725,6 +725,7 @@ oexSHOW( type );
 	return 1;
 }
 
+// - = Error
 // 0 = I-Frame
 // 1 = P-Frame
 // 2 = B-Frame
@@ -732,19 +733,19 @@ oexSHOW( type );
 int getVopType( const void *p, int len )
 {	
 	if ( 4 > len )
-		return 0;
+		return -1;
 
 	unsigned char *b = (unsigned char*)p;
 	
 	// Verify NAL marker
 	if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
-		return 0;
+		return -1;
 
 	b += 3;
 
 	// Verify VOP id
 	if ( 0xb6 != *b )
-		return 0;
+		return -1;
 	
 	b++;
 	int vop_coding_type = ( *b & 0xc0 ) >> 6;
@@ -778,14 +779,11 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	
 //	else if ( pStream && pStream->codec && CODEC_ID_H264 == pStream->codec->codec_id )
 	else
-		pkt.flags |= ( !getVopType( dat->Ptr(), dat->getUsed() ) ? AV_PKT_FLAG_KEY : 0 );
+		pkt.flags |= ( 0 >= getVopType( dat->Ptr(), dat->getUsed() ) ? AV_PKT_FLAG_KEY : 0 );
 		
 //	else
 //		pkt.flags |= AV_PKT_FLAG_KEY;
 
-	// !!! Uncommenting the following block, will create a file that will crash the entire Windows Shell
-	//     if you attempt to browse the folder containing it with Windows Explorer.  How cool is that?
-	
 	// Waiting for key frame?
 	if ( !m_bKeyRxd )
 	{	if ( 0 == ( pkt.flags & AV_PKT_FLAG_KEY ) )
@@ -805,7 +803,7 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	pkt.stream_index = pStream->index;
 	pkt.data = (uint8_t*)dat->_Ptr();
 	pkt.size = dat->getUsed();
-
+	
 	if ( 0 > m_nAudioStream )
 	{	if ( av_write_frame( m_pFormatContext, &pkt ) )
 			return 0;

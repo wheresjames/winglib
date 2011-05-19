@@ -7,8 +7,11 @@ _self.load_module( "portaudio", "" );
 class CRtspStream
 {
 	bDecodeVideo = 1;
-	bDecodeAudio = 1;
-	bPlayAudio = 1;
+	bDecodeAudio = 0;
+	bPlayAudio = 0;
+
+//	szDumpVideo = "";
+	szDumpVideo = "rawvideo";
 
 //	file = "";
 	file = "rtsptest.avi";
@@ -31,6 +34,8 @@ class CRtspStream
 	max_audio_buffer = 1000000;
 	max_video_buffer = 2000000;
 	video_offset = 300000;
+	
+	vix = 0;
 
 	function getWidth() 
 	{
@@ -69,6 +74,8 @@ class CRtspStream
 		afail = 0;
 
 		pa = 0;
+
+		vix = 0;
 	}
 
 	function Play( link )
@@ -83,10 +90,14 @@ class CRtspStream
 //		rtsp.setStreamOverTCP( 0 );
 //		rtsp.setTunnelOverHTTPPort( 0 );
 
+		if ( szDumpVideo.len() )
+			CSqFile().mkdir( szDumpVideo );
+
 		if ( !rtsp.Open( link, bDecodeVideo, bDecodeAudio, CSqMulti() ) )
 		{	::_self.echo( "Failed to open RTSP stream : " + link );
 			return 0;
 		} // end if
+		
 		return 1;
 	}
 
@@ -257,6 +268,10 @@ class CRtspStream
 		while ( rtsp.LockVideo( frame, 0 ) )
 		{	
 //			::_self.echo( frame.AsciiHexStr( 16, 4 ) );
+
+			// Dump raw frames
+			if ( szDumpVideo.len() )
+				CSqFile().put_contents_bin( ::_self.build_path( szDumpVideo, "v" + vix++ + ".raw" ), frame );
 		
 			// Are we recording?
 			if ( rec_avi )
@@ -292,8 +307,9 @@ class CRtspStream
 
 		if ( 0 >= fps )
 			fps = 15;
-			
-		rec_avi.setAudioExtraData( rtsp.getExtraAudioData() );
+		
+		if ( afmt.len() )
+			rec_avi.setAudioExtraData( rtsp.getExtraAudioData() );
 
 		if ( !rec_avi.Create( file, "", CSqMulti() ) )
 			::_self.echo( "Failed to create avi" );
