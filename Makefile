@@ -15,7 +15,7 @@ BUILDDIRS := app/hello lib/oexlib \
 #-------------------------------------------------------------------
 BUILDDIRS := $(BUILDDIRS) lib/sqbind tools/sqrbld \
 						  app/sqrl app/sqrl-cgi app/sqengine \
-						  sq/wlink
+						  sq/wlink sq/sntpsync
 
 
 #-------------------------------------------------------------------
@@ -55,7 +55,7 @@ BUILDDIRS := $(BUILDDIRS) app/vidcap app/avi_scan \
 #-------------------------------------------------------------------
 # Installers
 #-------------------------------------------------------------------
-# BUILDDIRS := $(BUILDDIRS) install/axtest
+BUILDDIRS := $(BUILDDIRS) install/sntpsync
 
 #-------------------------------------------------------------------
 # doxygen
