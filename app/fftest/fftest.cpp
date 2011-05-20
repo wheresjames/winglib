@@ -1,4 +1,4 @@
-
+    
     #include <string>
     
     #ifndef INT64_C
@@ -15,6 +15,7 @@
     	#include "libavformat/avformat.h"
     };
     
+    
     AVFormatContext *fc = 0;
     int vi = -1, waitkey = 1;
     
@@ -25,25 +26,33 @@
     // 3 = S-Frame
     int getVopType( const void *p, int len )
     {	
-    	if ( 5 > len )
+    	if ( !p || 6 >= len )
     		return -1;
     
     	unsigned char *b = (unsigned char*)p;
     	
     	// Verify NAL marker
     	if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
-    		return -1;
+    	{	b++;
+    		if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
+    			return -1;
+    	} // end if
     
     	b += 3;
     
     	// Verify VOP id
-    	if ( 0xb6 != *b )
-    		return -1;
-    	
-    	b++;
-    	int vop_coding_type = ( *b & 0xc0 ) >> 6;
+    	if ( 0xb6 == *b )
+    	{	b++;
+    		return ( *b & 0xc0 ) >> 6;
+    	} // end if
     
-    	return vop_coding_type;
+    	switch( *b )
+    	{	case 0x65 : return 0;
+    		case 0x61 : return 1;
+    		case 0x01 : return 2;
+    	} // end switch
+    
+    	return -1;
     }
     
     void write_frame( const void* p, int len )
@@ -67,8 +76,7 @@
     			return;
     		else
     			waitkey = 0;
-    	
-		// OK
+
     	pkt.dts = AV_NOPTS_VALUE;
     	pkt.pts = AV_NOPTS_VALUE;
     
@@ -96,16 +104,38 @@
     _M;	
     }
     
-    void create()
+    int get_nal_type( void *p, int len )
     {
+    	if ( !p || 5 >= len )
+    		return -1;
+    		
+    	unsigned char *b = (unsigned char*)p;
+    	
+    	// Verify NAL marker
+    	if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
+    	{	b++;
+    		if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
+    			return -1;
+    	} // end if
+    
+    	b += 3;
+
+		return *b;
+    }
+    
+    int create( void *p, int len )
+    {
+    	if ( 0x67 != get_nal_type( p, len ) )
+    		return -1;
+
     	destroy();
     
     	const char *file = "test.avi";
     	CodecID codec_id = CODEC_ID_H264;
     //	CodecID codec_id = CODEC_ID_MPEG4;
     	int br = 1000000;
-    	int w = 176;
-    	int h = 144;
+    	int w = 480;
+    	int h = 354;
     	int fps = 15;
     
     	// Create container
@@ -120,15 +150,15 @@
     
     	AVCodecContext *pcc = pst->codec;
     _M;	avcodec_get_context_defaults2( pcc, AVMEDIA_TYPE_VIDEO );
-    	pcc->codec_id = codec_id;
     	pcc->codec_type = AVMEDIA_TYPE_VIDEO;
+
+    	pcc->codec_id = codec_id;
     	pcc->bit_rate = br;
     	pcc->width = w;
     	pcc->height = h;
-        pcc->time_base.num = 1;
-        pcc->time_base.den = fps;
-    //	pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
-    
+    	pcc->time_base.num = 1;
+    	pcc->time_base.den = fps;
+
     	// Init container
     _M;	av_set_parameters( fc, 0 );
     	
@@ -137,24 +167,23 @@
     
     _M;	av_write_header( fc );
     
-    _M;
+    _M;	return 1;
     }
     
     int main( int argc, char** argv )
     {
     	int f = 0, sz = 0;
     	char fname[ 256 ] = { 0 };
-    	char buf[ 16 * 1024 ];
+    	char buf[ 128 * 1024 ];
 
     	av_log_set_level( AV_LOG_ERROR );
     	av_register_all();
     
-    	create();
-    	
     	do
     	{
     		// Raw frames in v0.raw, v1.raw, v2.raw, ...
-    		sprintf( fname, "rawvideo/v%lu.raw", f++ );
+    //		sprintf( fname, "rawvideo/v%lu.raw", f++ );
+    		sprintf( fname, "frames/frame%lu.bin", f++ );
     		printf( "%s\n", fname );
     		
     		FILE *fd = fopen( fname, "rb" );
@@ -164,8 +193,15 @@
     		{
     			sz = fread( buf, 1, sizeof( buf ) - FF_INPUT_BUFFER_PADDING_SIZE, fd );
     			if ( 0 < sz )
-    			{	memset( &buf[ sz ], 0, FF_INPUT_BUFFER_PADDING_SIZE );			
-    				write_frame( buf, sz );		
+    			{
+    				memset( &buf[ sz ], 0, FF_INPUT_BUFFER_PADDING_SIZE );			
+
+    				if ( !fc )
+    					create( buf, sz );
+
+    				if ( fc )
+    					write_frame( buf, sz );
+    				
     			} // end if
     			
     			fclose( fd );
