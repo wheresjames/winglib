@@ -68,6 +68,15 @@ public:
 	/// Returns the overall transaction timeout
 	SQInteger getTimeout() { return m_nTimeout; }
 	
+	/// Returns the session cookies
+	sqbind::stdString getCookies() { return m_sCookies; }
+	
+	/// Returns the session cookies
+	void setCookies( const sqbind::stdString &s ) { m_sCookies = s; }
+
+	/// Set to non-zero to enable cookies
+	void enableCookies( int b ) { m_bEnableCookies = b; }
+	
 	/** @} */
 
 private:
@@ -97,6 +106,12 @@ private:
 
 	/// Sets output file
 	sqbind::stdString			m_sFile;
+	
+	/// Session cookies
+	sqbind::stdString			m_sCookies;
+	
+	/// Non-zero if cookies are enabled
+	int							m_bEnableCookies;
 	
 	/// Sets the connect timeout CURLOPT_CONNECTTIMEOUT
 	SQInteger					m_nConnectTimeout;
