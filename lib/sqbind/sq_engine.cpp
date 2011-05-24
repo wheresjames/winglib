@@ -122,6 +122,36 @@ stdString CSqEngineExport::getCpuType()
 
 }
 
+int CSqEngineExport::ctrl_computer( int nCmd, int nForce, const sqbind::stdString &sMsg )
+{_STT();
+	return oexCtrlComputer( nCmd, nForce, sMsg.c_str() );
+}
+
+int CSqEngineExport::reboot( int nForce, const sqbind::stdString &sMsg )
+{_STT();
+	return oexCtrlComputer( 1, nForce, sMsg.c_str() );
+}
+
+int CSqEngineExport::shutdown( int nForce, const sqbind::stdString &sMsg )
+{_STT();
+	return oexCtrlComputer( 2, nForce, sMsg.c_str() );
+}
+
+int CSqEngineExport::logoff( int nForce, const sqbind::stdString &sMsg )
+{_STT();
+	return oexCtrlComputer( 4, nForce, sMsg.c_str() );
+}
+
+int CSqEngineExport::set_root()
+{_STT();
+	return oexSetRoot();
+}
+
+int CSqEngineExport::is_root()
+{_STT();
+	return oexIsRoot();
+}
+
 int CSqEngineExport::alert( const stdString &sMsg )
 {_STT();
 	return oex::os::CSys::ShowMessageBox( oexT( "Script Message" ), sMsg.c_str() );
@@ -1559,6 +1589,12 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, prepare_inline )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, exec )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reboot )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shutdown )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, logoff )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ctrl_computer )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_root )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, process_system_messages )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sqexe )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sqexe_script )

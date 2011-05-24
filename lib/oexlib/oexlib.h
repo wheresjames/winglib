@@ -429,6 +429,7 @@ OEX_START_NAMESPACE
 // Typedefs, defines, Macros, etc...
 //------------------------------------------------------------------
 #include "inc/oex_defines.h"
+#include "inc/oex_defines_gui.h"
 #include "inc/oex_typedefs.h"
 #include "inc/oex_const.h"
 #include "inc/oex_exceptions.h"
@@ -458,6 +459,7 @@ namespace os
 #   include "inc/os/fmap.h"
 #   include "inc/os/tls.h"
 #   include "inc/os/hq_timer.h"
+#   include "inc/os/gui.h"
 };
 
 //------------------------------------------------------------------

@@ -92,6 +92,8 @@ namespace sqbind
 		CSqPos( int n ) { m_x = m_y = n; }
 
 		CSqPos( int x, int y ) { m_x = x; m_y = y; }
+		
+		CSqPos( const oexPoint &pt ) { m_x = pt.x; m_y = pt.y; }
 
 		// Copy semantics
 		CSqPos( const CSqPos &r ) { m_x = r.m_x; m_y = r.m_y; }

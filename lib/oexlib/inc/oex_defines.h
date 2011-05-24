@@ -343,6 +343,9 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexGetLastErrorStr					OEX_NAMESPACE::os::CTrace::GetErrorMsg( oexGetLastError() )
 #define oexGetKey							OEX_NAMESPACE::os::CSys::GetKey
 #define oexIsKey							OEX_NAMESPACE::os::CSys::IsKey
+#define oexCtrlComputer						OEX_NAMESPACE::os::CSys::CtrlComputer
+#define oexIsRoot							OEX_NAMESPACE::os::CSys::IsRoot
+#define oexSetRoot							OEX_NAMESPACE::os::CSys::SetRoot
 
 #define oexMd5								OEX_NAMESPACE::CUtil::md5
 #define oexGuid								OEX_NAMESPACE::CUtil::guid
@@ -656,3 +659,4 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexBE_FLOAT( v )		OEX_BE_INT32( v )
 #define oexBE_DOUBLE( v )		OEX_BE_INT64( v )
 #define oexBE_PVOID( v )		OEX_BE_PVOID( v )
+

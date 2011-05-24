@@ -72,6 +72,74 @@ public:
 		/// Returns the platform name
 		stdString getPlatform();
 
+		/// Reboot or restart computer
+		/**
+			@param [in] nCmd	-	1 = Reboot
+									2 = Power Off
+									3 = Shutdown
+									4 = Log Off
+									5 = Restart
+									
+			@param [in] nForce	-	0 = No force
+									1 = Force
+									2 = Force if hung
+									
+			@param [in] sMsg	-	Optional message to display to user.
+									
+			Executes the specified command
+			
+			@return Non-zero if success
+		*/
+		int ctrl_computer( int nCmd, int nForce, const sqbind::stdString &sMsg );
+
+		/// Reboot computer
+		/**
+			@param [in] nForce	-	0 = No force
+									1 = Force
+									2 = Force if hung
+									
+			@param [in] sMsg	-	Optional message to display to user.
+									
+			Executes the specified command
+			
+			@return Non-zero if success
+		*/
+		int reboot( int nForce, const sqbind::stdString &sMsg );
+		
+		/// Shutdown computer
+		/**
+			@param [in] nForce	-	0 = No force
+									1 = Force
+									2 = Force if hung
+									
+			@param [in] sMsg	-	Optional message to display to user.
+									
+			Executes the specified command
+			
+			@return Non-zero if success
+		*/
+		int shutdown( int nForce, const sqbind::stdString &sMsg );
+		
+		/// Logoff user
+		/**
+			@param [in] nForce	-	0 = No force
+									1 = Force
+									2 = Force if hung
+									
+			@param [in] sMsg	-	Optional message to display to user.
+									
+			Executes the specified command
+			
+			@return Non-zero if success
+		*/
+		int logoff( int nForce, const sqbind::stdString &sMsg );
+		
+		/// Elevates the program to root priviledges
+		int set_root();
+		
+		/// Returns non-zero if application is running as root
+		int is_root();
+		
 		/// Returns the buffer for a binary share
 		/**
 			@param [in] sName	- The share name

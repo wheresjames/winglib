@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// import.h
+// sq_gui.cpp
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -32,25 +32,35 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#pragma once
+#include "../stdafx.h"
 
-// stl classes we will import to squirrel
-#include "import/sq_factory.h"
-#include "import/sq_generic.h"
-#include "import/sq_binary.h"
-#include "import/sq_binary_share.h"
-#include "import/sq_fifo_share.h"
-#include "import/sq_video_share.h"
-#include "import/sq_multi.h"
-#include "import/sq_file.h"
-#include "import/sq_time.h"
-#include "import/sq_socket.h"
-#include "import/sq_serial_port.h"
-#include "import/sq_image.h"
-#include "import/sq_capture.h"
-#include "import/sq_http_server.h"
-#include "import/sq_data_log.h"
-#include "import/sq_gui.h"
+using namespace sqbind;
 
-#include "import/sq_sqlite.h"
 
+_SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqGui, CSqGui )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqGui, get_cursor_pos )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqGui, set_cursor_pos )
+//	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqGui,  )
+//	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqGui,  )
+//	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqGui,  )
+//	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqGui,  )
+//	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqGui,  )
+//	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqGui,  )
+_SQBIND_REGISTER_CLASS_END()
+
+void CSqGui::Register( sqbind::VM vm )
+{_STT();
+	_SQBIND_EXPORT( vm, CSqGui );
+}
+
+sqbind::CSqPos CSqGui::get_cursor_pos()
+{_STT();
+	return oexGui_GetCursorPos();
+}
+
+int CSqGui::set_cursor_pos( sqbind::CSqPos *p )
+{_STT();
+	if ( !p ) 
+		return 0;
+	return oexGui_SetCursorPos( oexPoint( p->getX(), p->getY() ) );
+}

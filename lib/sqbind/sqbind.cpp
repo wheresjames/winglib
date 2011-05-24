@@ -62,6 +62,7 @@ namespace sqbind
 		CSqSerialPort::Register( x_vm );
 		CSqSockAddress::Register( x_vm );
 		CSqHttpServer::Register( x_vm );
+		CSqGui::Register( x_vm );
 
 #if defined( OEX_ENABLE_SQLITE )
 		CSqSQLite::Register( x_vm );

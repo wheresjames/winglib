@@ -179,6 +179,129 @@ int CSys::IsKey()
 	return _kbhit();
 }
 
+oexINT CSys::SetRoot()
+{
+	// Get operating system info
+	OSVERSIONINFO  osVersion ;
+	osVersion.dwOSVersionInfoSize = sizeof(OSVERSIONINFO) ;
+	if ( !::GetVersionEx( &osVersion ) )
+		osVersion.dwPlatformId = VER_PLATFORM_WIN32_WINDOWS;
+	
+	// If no UAC
+	if ( osVersion.dwMajorVersion < 6 )
+		return 1;
+		
+	HANDLE hToken;
+	if ( !OpenProcessToken( GetCurrentProcess(), TOKEN_WRITE | TOKEN_WRITE, &hToken ) )
+		return 0;
+
+	DWORD len = 0;
+	TOKEN_ELEVATION_TYPE tet = TokenElevationTypeDefault;
+	if ( !GetTokenInformation( hToken, TokenElevationType, &tet, sizeof( tet ), &len ) || tet != TokenElevationTypeFull )
+	{	tet = TokenElevationTypeFull;
+		if ( !SetTokenInformation( hToken, TokenElevationType, &tet, sizeof( tet ) ) )
+			tet = TokenElevationTypeDefault;
+	} // end if
+	
+	CloseHandle( hToken );
+	
+	return ( tet == TokenElevationTypeFull ) ? 1 : 0;	
+}
+
+oexINT CSys::IsRoot()
+{
+	// Get operating system info
+	OSVERSIONINFO  osVersion ;
+	osVersion.dwOSVersionInfoSize = sizeof(OSVERSIONINFO) ;
+	if ( !::GetVersionEx( &osVersion ) )
+		osVersion.dwPlatformId = VER_PLATFORM_WIN32_WINDOWS;
+	
+	// If no UAC
+	if ( osVersion.dwMajorVersion < 6 )
+		return 1;
+		
+	HANDLE hToken;
+	if ( !OpenProcessToken( GetCurrentProcess(), TOKEN_READ, &hToken ) )
+		return 0;
+
+	DWORD len = 0;
+	TOKEN_ELEVATION_TYPE tet = TokenElevationTypeDefault;
+	if ( !GetTokenInformation( hToken, TokenElevationType, &tet, sizeof( tet ), &len ) )
+		tet = TokenElevationTypeDefault;
+	
+	CloseHandle( hToken );
+	
+	return ( tet == TokenElevationTypeFull ) ? 1 : 0;	
+}
+
+oexINT CSys::CtrlComputer( int nCmd, int nForce, oexCSTR pMsg )
+{
+	if ( !pMsg || !*pMsg )
+		pMsg = 0;
+
+		// Get operating system info
+//	OSVERSIONINFO  osVersion ;
+//	osVersion.dwOSVersionInfoSize = sizeof(OSVERSIONINFO) ;
+//	if ( !::GetVersionEx( &osVersion ) )
+//		osVersion.dwPlatformId = VER_PLATFORM_WIN32_WINDOWS;
+	
+	// NT doesn't just let us reboot the computer
+//	if ( osVersion.dwPlatformId == VER_PLATFORM_WIN32_NT ) 
+	{
+		HANDLE				hToken;
+		TOKEN_PRIVILEGES	tp;
+
+		// Get our token information
+		if ( OpenProcessToken(	GetCurrentProcess(), 
+								TOKEN_ADJUST_PRIVILEGES |
+								TOKEN_QUERY,
+								&hToken ) )
+		{
+			// Get 
+			if ( LookupPrivilegeValue(	NULL,
+										SE_SHUTDOWN_NAME,
+										&tp.Privileges[ 0 ].Luid ) )
+			{
+				// Set up structure
+				tp.PrivilegeCount = 1;
+				tp.Privileges[ 0 ].Attributes = SE_PRIVILEGE_ENABLED;
+
+				// Attempt to adjust security token
+				AdjustTokenPrivileges( hToken, FALSE, &tp, 0, NULL, 0 );
+				
+			} // end if
+
+		} // end if
+
+	} // end NT
+	
+	UINT uFlags = 0;
+	
+	// What to do?
+	switch( nCmd )
+	{	case eReboot : uFlags |= EWX_REBOOT; break;
+		case eRestart : uFlags |= EWX_REBOOT; break; // EWX_RESTARTAPPS; break;
+		case ePowerOff : uFlags |= EWX_POWEROFF; break;
+		case eLogOff : uFlags |= EWX_LOGOFF; break;
+		case eShutdown : uFlags |= EWX_SHUTDOWN; break;
+	} // end switch
+
+	// Force
+	switch( nForce )
+	{	case 1 : uFlags |= EWX_FORCE; break;
+		case 2 : uFlags |= EWX_FORCEIFHUNG; break;
+	} // end switch
+	
+	// User mode command
+	ExitWindowsEx( uFlags, 1 );
+
+	// In case we're a service
+	if ( nCmd != eLogOff && nCmd != eShutdown )
+		InitiateSystemShutdown( NULL, (oexSTR)pMsg, ( pMsg && *pMsg ) ? 8 : 0, nForce, 
+								( nCmd == eReboot || nCmd == eRestart ) ? TRUE : FALSE );
+	
+	return 1;
+}
 
 // **** Multi-byte
 

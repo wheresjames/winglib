@@ -467,6 +467,54 @@ public:
 	*/
 	static oexUINT StartProcess( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory );
 
+	enum
+	{
+		/// Reboots the computer
+		eReboot = 1,
+		
+		/// Powers off the computer
+		ePowerOff,
+		
+		/// Shuts down the OS, but does not power off
+		eShutdown,
+		
+		/// Logs off the current user
+		eLogOff,
+		
+		/// Restarts the os
+		eRestart
+		
+	};
+	
+	//==============================================================
+	// CtrlComputer()
+	//==============================================================
+	/// Reboot, Restart, Logoff computer
+	/**
+		@param [in] nCmd	-	eReboot, ePowerOff, eShutdown, 
+								eLogOff, eRestart
+		@param [in] nForce	-	0 = Do not force
+								1 = Force apps to shutdown
+								2 = Force apps that are hung
+		@param [in] pMsg	-	If not null, message to display to
+								user before shutdown starts.
+								
+		@return Non-zero if success
+	*/
+	static oexINT CtrlComputer( int nCmd, int nForce, oexCSTR pMsg );
+	
+	//==============================================================
+	// SetRoot()
+	//==============================================================
+	/// Switch to root or administrator
+	static oexINT SetRoot();
+
+	//==============================================================
+	// IsRoot()
+	//==============================================================
+	/// Switch to root or administrator
+	static oexINT IsRoot();
+	
 	//==============================================================
 	// GetCpuLoad()
 	//==============================================================

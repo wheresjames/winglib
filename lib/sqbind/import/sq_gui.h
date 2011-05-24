@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// import.h
+// sq_gui.h
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -34,23 +34,41 @@
 
 #pragma once
 
-// stl classes we will import to squirrel
-#include "import/sq_factory.h"
-#include "import/sq_generic.h"
-#include "import/sq_binary.h"
-#include "import/sq_binary_share.h"
-#include "import/sq_fifo_share.h"
-#include "import/sq_video_share.h"
-#include "import/sq_multi.h"
-#include "import/sq_file.h"
-#include "import/sq_time.h"
-#include "import/sq_socket.h"
-#include "import/sq_serial_port.h"
-#include "import/sq_image.h"
-#include "import/sq_capture.h"
-#include "import/sq_http_server.h"
-#include "import/sq_data_log.h"
-#include "import/sq_gui.h"
+// namespace
+namespace sqbind
+{
+	/// Squirrel map adaptor class
+	class CSqGui
+	{
 
-#include "import/sq_sqlite.h"
+	public:
 
+		SQBIND_CLASS_CTOR_BEGIN( CSqGui )
+		SQBIND_CLASS_CTOR_END( CSqGui )
+
+		/// Destructor
+		virtual ~CSqGui() {}
+
+		/// Default constructor
+		CSqGui() {}
+
+		/// Copy constructor
+		CSqGui( const CSqGui &r ) {}
+		
+		/// Register interface to VM
+		static void Register( sqbind::VM vm );
+
+	public:
+	
+		/// Returns the position of the cursor
+		sqbind::CSqPos get_cursor_pos();
+		
+		/// Sets the position of the cursor
+		int set_cursor_pos( sqbind::CSqPos *p );
+		
+	};
+
+}; // end namespace
+
+// Declare type for use as squirrel parameters
+SQBIND_DECLARE_INSTANCE( sqbind::CSqGui, CSqGui )

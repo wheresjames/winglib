@@ -46,6 +46,7 @@
 
 #include "std_os.h"
 #include <termios.h>
+#include <sys/reboot.h>
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
@@ -195,6 +196,32 @@ int CSys::GetKey()
 	return ch;
 }
 
+oexINT CSys::SetRoot()
+{
+	return setuid( 0 );
+}
+
+oexINT CSys::IsRoot()
+{
+	return getuid() ? 0 : 1;
+}
+
+oexINT CSys::CtrlComputer( int nCmd, int nForce, oexCSTR pMsg )
+{
+	if ( !pMsg || !*pMsg )
+		pMsg = 0;
+
+	sync();
+	switch( nCmd )
+	{	case eReboot : return reboot( 0xfee1dead, 369367448, 0x1234567, pMsg ); break;
+		case eRestart : return reboot( 0xfee1dead, 369367448, 0xa1b2c3d4, pMsg ); break;
+		case ePowerOff : return reboot( 0xfee1dead, 369367448, 0x4321fedc, pMsg ); break;
+		case eLogOff : break;
+		case eShutdown : return reboot( 0xfee1dead, 369367448, 0xcdef0123, pMsg ); break;
+	} // end switch
+
+	return 0;
+}
 
 // **** Multi-byte
 

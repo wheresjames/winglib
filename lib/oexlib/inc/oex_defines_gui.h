@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// import.h
+// oex_defines_gui.h
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -34,23 +34,13 @@
 
 #pragma once
 
-// stl classes we will import to squirrel
-#include "import/sq_factory.h"
-#include "import/sq_generic.h"
-#include "import/sq_binary.h"
-#include "import/sq_binary_share.h"
-#include "import/sq_fifo_share.h"
-#include "import/sq_video_share.h"
-#include "import/sq_multi.h"
-#include "import/sq_file.h"
-#include "import/sq_time.h"
-#include "import/sq_socket.h"
-#include "import/sq_serial_port.h"
-#include "import/sq_image.h"
-#include "import/sq_capture.h"
-#include "import/sq_http_server.h"
-#include "import/sq_data_log.h"
-#include "import/sq_gui.h"
+// GUI
+#define oexPoint					OEX_NAMESPACE::os::gui::SPoint
+#define oexLine						OEX_NAMESPACE::os::gui::SLine
+#define oexRect						OEX_NAMESPACE::os::gui::SRect
+#define oexRange2d					OEX_NAMESPACE::os::gui::SRange2d
 
-#include "import/sq_sqlite.h"
+#define oexGui_GetCursorPos			OEX_NAMESPACE::os::gui::GetCursorPosition
+#define oexGui_SetCursorPos			OEX_NAMESPACE::os::gui::SetCursorPosition
+
 

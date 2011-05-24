@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-// import.h
+// gui.cpp
 //
 // Copyright (c) 1997
 // Robert Umbehant
@@ -32,25 +32,22 @@
 //   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------*/
 
-#pragma once
+#include "oexlib.h"
 
-// stl classes we will import to squirrel
-#include "import/sq_factory.h"
-#include "import/sq_generic.h"
-#include "import/sq_binary.h"
-#include "import/sq_binary_share.h"
-#include "import/sq_fifo_share.h"
-#include "import/sq_video_share.h"
-#include "import/sq_multi.h"
-#include "import/sq_file.h"
-#include "import/sq_time.h"
-#include "import/sq_socket.h"
-#include "import/sq_serial_port.h"
-#include "import/sq_image.h"
-#include "import/sq_capture.h"
-#include "import/sq_http_server.h"
-#include "import/sq_data_log.h"
-#include "import/sq_gui.h"
+#include "std_os.h"
 
-#include "import/sq_sqlite.h"
+OEX_USING_NAMESPACE
+using namespace OEX_NAMESPACE::os;
+
+oexPoint gui::GetCursorPosition()
+{
+	POINT pt = { 0, 0 };
+	GetCursorPos( &pt );
+	return SPoint( pt.x, pt.y );
+}
+
+int gui::SetCursorPosition( const oexPoint &p )
+{
+	return SetCursorPos( p.x, p.y );
+}
 
