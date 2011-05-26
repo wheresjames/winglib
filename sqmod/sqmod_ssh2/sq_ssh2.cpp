@@ -2,6 +2,11 @@
 
 #include "stdafx.h"
 
+#if !defined( OEX_WINDOWS )
+#	include <unistd.h>
+#	include <sys/socket.h>
+#endif
+
 #define SQSSH2_RETRY( e, f )																	\
 	{	unsigned int nTo = oexGetUnixTime() + ( oexDEFAULT_WAIT_TIMEOUT / 1000 );				\
 		do { e = f; if ( e == LIBSSH2_ERROR_EAGAIN && nTo > oexGetUnixTime() ) oexSleep( 15 );	\

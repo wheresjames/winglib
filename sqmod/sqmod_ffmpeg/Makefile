@@ -25,6 +25,11 @@ PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifeq ($(PROC),arm)
+UNSUPPORTED := PROC=$(PROC) is not supported
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 ifeq ($(BUILD)$(PROC),vsx64)
 	UNSUPPORTED := PROC=$(PROC) + BUILD=$(BUILD) is not supported
 	include $(PRJ_LIBROOT)/unsupported.mk
@@ -60,5 +65,7 @@ include $(PRJ_LIBROOT)/build.mk
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
+
+endif
 
 endif

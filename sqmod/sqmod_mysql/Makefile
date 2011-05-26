@@ -22,6 +22,11 @@ PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifeq ($(PROC),arm)
+UNSUPPORTED := PROC=$(PROC) is not supported
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),gcc)
 		ifeq ($(PROC),x86)
@@ -72,3 +77,4 @@ include $(PRJ_LIBROOT)/go.mk
 
 endif
 
+endif

@@ -27,6 +27,11 @@ PRJ_SUBROOT := _sqmod
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifeq ($(PROC),arm)
+UNSUPPORTED := PROC=$(PROC) is not supported
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 ifeq ($(PLATFORM),windows)
 	ifneq ($(UNICODE),)
 		PRJ_DEFS := $(PRJ_DEFS) POCO_WIN32_UTF8
@@ -46,4 +51,4 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-
+endif
