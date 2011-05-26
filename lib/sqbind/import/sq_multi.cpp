@@ -314,6 +314,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, clear )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_key )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_value )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_obj )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, filter )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, extract )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, _get )
@@ -538,7 +539,7 @@ CSqMulti* CSqMulti::get( const CSqMulti::t_Obj &k )
 	return &m_lst[ k ];
 }
 
-CSqMulti* CSqMulti::at( const stdString &path )
+CSqMulti* CSqMulti::at( const CSqMulti::t_Obj &path )
 {
 	if ( !path.length() )
 	{	if ( !m_def )
@@ -590,7 +591,6 @@ void CSqMulti::move_down( const t_Obj &k )
 }
 
 
-/// Adds an element to the vector
 CSqMulti::t_Obj CSqMulti::find_key( const CSqMulti::t_Obj &k )
 {_STT();
 
@@ -606,7 +606,6 @@ CSqMulti::t_Obj CSqMulti::find_key( const CSqMulti::t_Obj &k )
     return oexT( "" );
 }
 
-/// Adds an element to the vector
 CSqMulti::t_Obj CSqMulti::find_value( const CSqMulti::t_Obj &v )
 {_STT();
 
@@ -620,6 +619,26 @@ CSqMulti::t_Obj CSqMulti::find_value( const CSqMulti::t_Obj &v )
             return it->first;
 
     return oexT( "" );
+}
+
+CSqMulti* CSqMulti::find_obj( const CSqMulti::t_Obj &k, const CSqMulti::t_Obj &v )
+{_STT();
+
+    // For each item
+    for ( t_List::iterator it = m_lst.begin();
+          m_lst.end() != it;
+          it++ )
+
+        // Is the sub string in the value at the specified key?
+        if ( match_pattern( it->second.at( k )->str().c_str(), v.c_str() ) )
+            return &it->second;
+			
+	// Ensure default object
+	if ( !m_def )
+		m_def = OexAllocConstruct< CSqMulti >();
+		
+	// Return the default object
+	return m_def;
 }
 
 SquirrelObject CSqMulti::_newslot( HSQUIRRELVM v )
