@@ -91,6 +91,9 @@
 #elif defined( WIN32 ) || defined( _WIN32 )
 #	define OEX_WIN32
 #	define OEX_WINDOWS
+#elif defined( __ANDROID__ )
+#	define OEX_ANDROID	
+#	define OEX_LINUX
 #else
 #	define OEX_LINUX
 #endif
@@ -201,7 +204,7 @@
 
 #	define oexTLS _declspec( thread )
 
-#else
+#elif !defined( OEX_NOTLS )
 
 #	define OEXLIB_USING_TLS
 

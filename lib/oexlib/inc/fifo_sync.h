@@ -56,7 +56,9 @@ public:
 	/// Size type
 	typedef CCircBuf::t_size	t_size;
 
-#pragma pack( push, 1 )
+#ifndef OEX_NOPACK
+#	pragma pack( push, 1 )
+#endif
 
     struct SBufferInfo
     {
@@ -67,7 +69,9 @@ public:
 	    t_size				        uTailPtr;
     };
 
-#pragma pack( pop )
+#ifndef OEX_NOPACK
+#	pragma pack( pop )
+#endif
 
 public:
 

@@ -46,7 +46,9 @@ class CDib
 {
 public:
 
-#pragma pack( push, 1 )
+#ifndef OEX_NOPACK
+#	pragma pack( push, 1 )
+#endif
 
 	/// Header for a standard dib file (.bmp)
 	struct SDIBFileHeader
@@ -146,7 +148,9 @@ public:
 		oexCHAR					aImage[1];
 	};
 
-#pragma pack( pop )
+#ifndef OEX_NOPACK
+#	pragma pack( pop )
+#endif
 
 public:
 

@@ -25,6 +25,11 @@ UNSUPPORTED := TOOLS=$(TOOLS) not supported
 include $(PRJ_LIBROOT)/unsupported.mk
 else
 
+ifeq ($(TOOLS),android)
+UNSUPPORTED := TOOLS=$(TOOLS) not supported
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 ifeq ($(PROC),arm)
 	PRJ_INCS := $(PRJ_INCS) irrlicht-es/include
 	PRJ_LIBS := $(PRJ_LIBS) irrlicht-es jpeg png tiff zlib bzip2
@@ -67,5 +72,4 @@ include $(PRJ_LIBROOT)/go.mk
 
 endif
 
-
-
+endif

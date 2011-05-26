@@ -30,7 +30,7 @@ function _idle() : ( _g )
 	if ( gmt > _g.to )
 	{	::_self.echo( " !!! LOGGING OFF !!!" );
 		_g.to = gmt + _g.max_idle;
-		::_self.logoff();		
+		::_self.logoff( 0, "Logging off" );		
 	} // end if
 
 	return 0;

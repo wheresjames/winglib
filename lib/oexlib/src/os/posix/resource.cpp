@@ -152,7 +152,9 @@ static oexINT FreeRi( SResourceInfo* x_pRi, oexINT x_eType, oexUINT x_uTimeout, 
 
 			// Wait for thread to exit
 			if ( x_pRi->cSync.Wait( x_uTimeout )
+#ifndef OEX_NOPTHREADCANCEL
 				 && pthread_cancel( x_pRi->hThread )
+#endif
 				 && x_pRi->cSync.Wait( x_uTimeout ) )
 			{
 				// iii  This should not happen, don't ignore the problem,
@@ -300,9 +302,13 @@ oexRESULT CResource::NewThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData )
 
 oexPVOID CResource::ThreadProc( oexPVOID x_pData )
 {
+#ifndef OEX_NOPTHREADCANCEL
+
 	// Allow thread to be canceled
 	pthread_setcancelstate( PTHREAD_CANCEL_ENABLE, 0 );
 	pthread_setcanceltype( PTHREAD_CANCEL_ASYNCHRONOUS, 0 );
+
+#endif
 
 	// Get pointer to resource information
 	SResourceInfo *pRi = (SResourceInfo*)x_pData;

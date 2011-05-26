@@ -18,6 +18,11 @@ PRJ_OSLB :=
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifeq ($(PROC),arm)
+UNSUPPORTED := PROC=$(PROC) not supported
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 ifeq ($(BUILD)$(PROC),vsx64)
 	UNSUPPORTED := PROC=$(PROC) + BUILD=$(BUILD) is not supported
 	include $(PRJ_LIBROOT)/unsupported.mk
@@ -53,5 +58,7 @@ include $(PRJ_LIBROOT)/build.mk
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
+
+endif
 
 endif

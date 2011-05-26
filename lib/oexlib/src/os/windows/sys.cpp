@@ -179,6 +179,16 @@ int CSys::IsKey()
 	return _kbhit();
 }
 
+// Not declared in MINGW, so...
+typedef enum  
+{	_win_TokenElevationTypeDefault   = 1,
+	_win_TokenElevationTypeFull,
+	_win_TokenElevationTypeLimited 
+} _win_TOKEN_ELEVATION_TYPE, *_win_PTOKEN_ELEVATION_TYPE;
+typedef enum 
+{	_win_TokenElevationType = 18
+} _win_TOKEN_INFORMATION_CLASS, *_win_PTOKEN_INFORMATION_CLASS;
+
 oexINT CSys::SetRoot()
 {
 	// Get operating system info
@@ -196,16 +206,16 @@ oexINT CSys::SetRoot()
 		return 0;
 
 	DWORD len = 0;
-	TOKEN_ELEVATION_TYPE tet = TokenElevationTypeDefault;
-	if ( !GetTokenInformation( hToken, TokenElevationType, &tet, sizeof( tet ), &len ) || tet != TokenElevationTypeFull )
-	{	tet = TokenElevationTypeFull;
-		if ( !SetTokenInformation( hToken, TokenElevationType, &tet, sizeof( tet ) ) )
-			tet = TokenElevationTypeDefault;
+	_win_TOKEN_ELEVATION_TYPE tet = _win_TokenElevationTypeDefault;
+	if ( !GetTokenInformation( hToken, (TOKEN_INFORMATION_CLASS)_win_TokenElevationType, &tet, sizeof( tet ), &len ) || tet != _win_TokenElevationTypeFull )
+	{	tet = _win_TokenElevationTypeFull;
+		if ( !SetTokenInformation( hToken, (TOKEN_INFORMATION_CLASS)_win_TokenElevationType, &tet, sizeof( tet ) ) )
+			tet = _win_TokenElevationTypeDefault;
 	} // end if
 	
 	CloseHandle( hToken );
 	
-	return ( tet == TokenElevationTypeFull ) ? 1 : 0;	
+	return ( tet == _win_TokenElevationTypeFull ) ? 1 : 0;	
 }
 
 oexINT CSys::IsRoot()
@@ -225,13 +235,13 @@ oexINT CSys::IsRoot()
 		return 0;
 
 	DWORD len = 0;
-	TOKEN_ELEVATION_TYPE tet = TokenElevationTypeDefault;
-	if ( !GetTokenInformation( hToken, TokenElevationType, &tet, sizeof( tet ), &len ) )
-		tet = TokenElevationTypeDefault;
+	_win_TOKEN_ELEVATION_TYPE tet = _win_TokenElevationTypeDefault;
+	if ( !GetTokenInformation( hToken, (TOKEN_INFORMATION_CLASS)_win_TokenElevationType, &tet, sizeof( tet ), &len ) )
+		tet = _win_TokenElevationTypeDefault;
 	
 	CloseHandle( hToken );
 	
-	return ( tet == TokenElevationTypeFull ) ? 1 : 0;	
+	return ( tet == _win_TokenElevationTypeFull ) ? 1 : 0;	
 }
 
 oexINT CSys::CtrlComputer( int nCmd, int nForce, oexCSTR pMsg )
@@ -983,7 +993,6 @@ oexLONG CSys::Read_stdin( oexSTR8 x_pBuf, oexLONG x_lMax )
 	if ( !x_pBuf || 0 >= x_lMax )
 		return 0;
 
-	char  c;
 	DWORD dwRead = 0;
     HANDLE h = GetStdHandle( STD_INPUT_HANDLE );
 	if ( INVALID_HANDLE_VALUE == h )

@@ -206,6 +206,12 @@ oexINT CSys::IsRoot()
 	return getuid() ? 0 : 1;
 }
 
+#if defined( OEX_ANDROID )
+#	define REBOOT( n )	reboot( n )
+#else
+#	define REBOOT( n )	reboot( 0xfee1dead, 369367448, n, pMsg )
+#endif
+
 oexINT CSys::CtrlComputer( int nCmd, int nForce, oexCSTR pMsg )
 {
 	if ( !pMsg || !*pMsg )
@@ -213,11 +219,11 @@ oexINT CSys::CtrlComputer( int nCmd, int nForce, oexCSTR pMsg )
 
 	sync();
 	switch( nCmd )
-	{	case eReboot : return reboot( 0xfee1dead, 369367448, 0x1234567, pMsg ); break;
-		case eRestart : return reboot( 0xfee1dead, 369367448, 0xa1b2c3d4, pMsg ); break;
-		case ePowerOff : return reboot( 0xfee1dead, 369367448, 0x4321fedc, pMsg ); break;
+	{	case eReboot : return REBOOT( 0x1234567 ); break;
+		case eRestart : return REBOOT( 0xa1b2c3d4 ); break;
+		case ePowerOff : return REBOOT( 0x4321fedc ); break;
 		case eLogOff : break;
-		case eShutdown : return reboot( 0xfee1dead, 369367448, 0xcdef0123, pMsg ); break;
+		case eShutdown : return REBOOT( 0xcdef0123 ); break;
 	} // end switch
 
 	return 0;
