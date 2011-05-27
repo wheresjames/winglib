@@ -310,6 +310,9 @@ namespace sqbind
 			return m_bin.GroupAvg( nType, nOffset, nInterval, nGroups, in->Mem(), nFlags );
 		}
 
+		/// Average data in buffer
+		double Average( int x_nInterval, int fmt );
+		
 		/// Locates the specified string in the buffer
 		t_size FindBin( CSqBinary *p, int x_nStart, int x_nMax )
 		{	return m_bin.Find( p->m_bin, x_nStart, x_nMax ); }

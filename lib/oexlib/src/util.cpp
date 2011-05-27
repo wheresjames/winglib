@@ -546,6 +546,87 @@ oexBOOL CUtil::DrawLine( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, o
 	return oexTRUE;
 }
 
+double CUtil::BinAverage( CBin *x_pBin, oexSIZE_T x_uInterval, oexINT fmt )
+{
+	if ( !x_pBin || !x_pBin->getUsed() )
+		return 0;
+
+	// Ensure interval
+	if ( 0 >= x_uInterval )
+		x_uInterval = 1;
+		
+	double acc = 0, qty = 0;
+	
+	switch( fmt )
+	{
+		default :
+			break;
+			
+		case obj::tInt8 :
+		{	oexLONG sz = x_pBin->getUsed();
+			const char *p = (const char*)x_pBin->Ptr();				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+			
+		case obj::tUInt8 :
+		{	oexLONG sz = x_pBin->getUsed();
+			const unsigned char *p = (const unsigned char*)x_pBin->Ptr();				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+
+		case obj::tInt16 :
+		{	oexLONG sz = x_pBin->getUsed() / sizeof( short );
+			const short *p = (const short*)x_pBin->Ptr();				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+			
+		case obj::tUInt16 :
+		{	oexLONG sz = x_pBin->getUsed() / sizeof( unsigned short );
+			const unsigned short *p = (const unsigned short*)x_pBin->Ptr();				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+
+		case obj::tInt32 :
+		{	oexLONG sz = x_pBin->getUsed() / sizeof( int );
+			const int *p = (const int*)x_pBin->Ptr();				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+			
+		case obj::tUInt32 :
+		{	oexLONG sz = x_pBin->getUsed() / sizeof( unsigned int );
+			const unsigned int *p = (const unsigned int*)x_pBin->Ptr();				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+		
+		case obj::tFloat :
+		{	oexLONG sz = x_pBin->getUsed() / sizeof( float );
+			const float *p = (const float*)x_pBin->Ptr();				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+		
+		case obj::tDouble :
+		{	oexLONG sz = x_pBin->getUsed() / sizeof( double );
+			const double *p = (const double*)x_pBin->Ptr();				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+		
+	} // end switch
+
+	if ( !qty )
+		return 0;
+	
+	return acc / qty;
+}
+
+
 #define CUTIL_YMARGIN 8
 oexBOOL CUtil::GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *pc, oexFLOAT *pf, oexINT n, oexFLOAT scale, oexFLOAT min, oexFLOAT max )
 {
