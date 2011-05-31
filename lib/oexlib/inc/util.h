@@ -91,7 +91,7 @@ public:
 	{	return BinToAsciiHexStr( &x_rBin, x_uLen, x_nLineLen, x_nMaxLines ); }
 
 	/// Calculates a byte average
-	static double BinAverage( CBin *x_pBin, oexSIZE_T x_uInterval, oexINT fmt );
+	static double BinAverage( CBin *x_pBin, oexSIZE_T x_uOffset, oexSIZE_T x_uInterval, oexINT fmt );
 	
 	/// Creates a ascii view of a binary buffer
 	static CStr BinToAsciiHexStr( oexCPVOID x_pBuf, oexSIZE_T x_uLen, oexSIZE_T x_nLineLen, oexSIZE_T x_nMaxLines );

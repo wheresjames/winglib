@@ -311,7 +311,7 @@ namespace sqbind
 		}
 
 		/// Average data in buffer
-		double Average( int x_nInterval, int fmt );
+		double Average( int x_nOffset, int x_nInterval, int fmt );
 		
 		/// Locates the specified string in the buffer
 		t_size FindBin( CSqBinary *p, int x_nStart, int x_nMax )

@@ -156,9 +156,9 @@ CSqBinary::t_size CSqBinary::CopyBytes( CSqBinary *x_p, CSqBinary::t_size x_uByt
 	return x_uBytes;
 }
 
-double CSqBinary::Average( int x_nInterval, int fmt )
+double CSqBinary::Average( int x_nOffset, int x_nInterval, int fmt )
 {	if ( !getUsed() ) return 0;
-	return oex::CUtil::BinAverage( &m_bin, x_nInterval, fmt );
+	return oex::CUtil::BinAverage( &m_bin, x_nOffset, x_nInterval, fmt );
 }
 
 int CSqBinary::FingerprintImage( CSqImage *img, CSqBinary *col, int scale )
