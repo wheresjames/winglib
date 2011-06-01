@@ -200,7 +200,7 @@ namespace sqbind
 			@param [in] sSuffix	- Optional comma sperated suffix array
 								  If empty string, defaults are "Bytes,KB,MB,GB,TB,PB,EB,ZB,YB,BB"
 		*/
-		stdString CSqMulti::str_size( double dDiv, int nDigits, const stdString &sSuffix );
+		stdString str_size( double dDiv, int nDigits, const stdString &sSuffix );
 		
 		/// Returns url encoded string
 		CSqBinary bin_urlenc();
