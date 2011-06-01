@@ -157,6 +157,9 @@ namespace sqbind
 		/// Returns a float representation of the value
 		float tofloat();
 
+		/// Returns a double representation of the value
+		double todouble();
+
 		/// Returns the length of the string value
 		int len();
 
@@ -190,6 +193,15 @@ namespace sqbind
 		/// Returns base64 decoded string
 		stdString str_base64_decode();
 
+		/// Creates a size string like 1.3MB, 44.5GB, etc...
+		/**
+			@param [in] dDiv	- Divisor, default is 1024
+			@param [in] nDigits	- Number of digits trailing the decimal
+			@param [in] sSuffix	- Optional comma sperated suffix array
+								  If empty string, defaults are "Bytes,KB,MB,GB,TB,PB,EB,ZB,YB,BB"
+		*/
+		stdString CSqMulti::str_size( double dDiv, int nDigits, const stdString &sSuffix );
+		
 		/// Returns url encoded string
 		CSqBinary bin_urlenc();
 

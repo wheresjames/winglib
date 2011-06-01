@@ -2136,6 +2136,60 @@ public:
 	oexINT Match( oexCONST T* pSub )
     {   return str::FindSubStr( Ptr(), Length(), pSub, zstr::Length( pSub ) ); }
 
+	/// Appends a size formatted string ( 1.3KB, 44.75GB, etc...)
+	TStr& AppendSizeString( oexDOUBLE dSize, oexDOUBLE dDiv, oexINT nDigits, oexCONST T ** pSuffix = oexNULL )
+	{	
+		oexINT i = 0;
+		static oexCONST T *sizes[] = 
+		{	oexTT( T, "" ), 			//
+			oexTT( T, "K" ), 			// Kilo				
+			oexTT( T, "M" ), 			// Mega			
+			oexTT( T, "G" ), 			// Giga
+			oexTT( T, "T" ), 			// Tera
+			oexTT( T, "P" ),			// Peta
+			oexTT( T, "E" ),			// Exa
+			oexTT( T, "Z" ),			// Zetta
+			oexTT( T, "Y" ),			// Yotta
+			oexTT( T, "B" ),			// Bronto
+			0 							// Geop, but G already taken?
+										// Segan, ...
+		};
+
+		// Use 1024 as the default divider
+		if ( 0 >= dDiv )
+			dDiv = double( 1024 );
+		
+		oexBOOL bNeg = 0 > dSize;
+		if ( bNeg ) 
+			dSize = -dSize;
+		
+		// Use default suffixes if non provided
+		if ( !pSuffix || !*pSuffix || !**pSuffix )
+			pSuffix = sizes;
+		
+		// Which size to use?
+		while ( dSize > dDiv && pSuffix[ i + 1 ] )
+			i++, dSize /= dDiv;
+
+		// Is the number negative?
+		if ( bNeg )
+			Append( oexTT( T, "-" ) );
+			
+		// Special formating?
+		if ( 0 > nDigits )
+			Append( dSize );
+		else if ( !nDigits )
+			Append( (oexLONG)dSize );
+		else
+			AppendNum( ( TStr( oexTT( T, "%." ) ) << nDigits << oexT( "f" ) ).Ptr(), dSize );
+			
+		// Build the string
+		Append( pSuffix[ i ] );
+
+		return *this;
+	}
+	
+	
 public:
 
 	/// Replaces single characters in a string

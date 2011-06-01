@@ -155,6 +155,11 @@ float CSqMulti::tofloat()
 	return oexStrToFloat( m_val.str().c_str() );
 }
 
+double CSqMulti::todouble()
+{_STT();
+	return oexStrToDouble( m_val.str().c_str() );
+}
+
 int CSqMulti::len()
 {_STT();
 	return m_val.str().length();
@@ -208,6 +213,14 @@ stdString CSqMulti::str_base64_encode()
 stdString CSqMulti::str_base64_decode()
 {_STT();
 	return oex2std( oexBase64Decode( std2oex( m_val.str() ) ) );
+}
+
+stdString CSqMulti::str_size( double dDiv, int nDigits, const stdString &sSuffix )
+{_STT();
+	oex::CStr s = std2oex( sSuffix );	
+	oexCONST oex::CStr::t_char *suf[ 128 ], sep[] = { oexT( ',' ) };
+	suf[ oex::str::InplaceSplit( s._Ptr(), s.Length(), suf, oexSizeOfArray( suf ), sep, sizeof( sep ) ) ] = 0;
+	return oex2std( oex::CStr().AppendSizeString( todouble(), dDiv, nDigits, suf ) );
 }
 
 CSqBinary CSqMulti::bin_urlenc()
@@ -289,6 +302,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, toint )
 //	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, toint64 ) // +++ Hmmm
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, tofloat )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, todouble )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, len )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_urlenc )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_urldec )
@@ -300,6 +314,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base16_decode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base64_encode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base64_decode )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_size )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_urlenc )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_urldec )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_htmlenc )

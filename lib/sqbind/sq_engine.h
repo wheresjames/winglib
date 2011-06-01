@@ -455,6 +455,16 @@ public:
 		/// Finds sub string sSub in sS, returns offset or less than zero if not found
 		int find( const stdString &sS, const stdString &sSub );
 
+		/// Creates a size string like 1.3MB, 44.5GB, etc...
+		/**
+			@param [in] d		- Value
+			@param [in] dDiv	- Divisor, default is 1024
+			@param [in] nDigits	- Number of digits trailing the decimal
+			@param [in] sSuffix	- Optional comma sperated suffix array
+								  If empty string, defaults are "Bytes,KB,MB,GB,TB,PB,EB,ZB,YB,BB"
+		*/
+		stdString create_size_string( double d, double dDiv, int nDigits, const stdString &sSuffix );
+		
 		/// Replaces the occurences of the specified string
 		stdString replace( const stdString &sS, const stdString &sFind, const stdString &sReplace );
 

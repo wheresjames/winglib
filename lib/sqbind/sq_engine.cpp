@@ -724,6 +724,14 @@ int CSqEngineExport::find( const stdString &sS, const stdString &sSub )
 	return std2oex( sS ).Match( sSub.c_str() );
 }
 
+stdString CSqEngineExport::create_size_string( double d, double dDiv, int nDigits, const stdString &sSuffix )
+{_STT();
+	oex::CStr s = std2oex( sSuffix );	
+	oexCONST oex::CStr::t_char *suf[ 128 ], sep[] = { oexT( ',' ) };
+	suf[ oex::str::InplaceSplit( s._Ptr(), s.Length(), suf, oexSizeOfArray( suf ), sep, sizeof( sep ) ) ] = 0;
+	return oex2std( oex::CStr().AppendSizeString( d, dDiv, nDigits, suf ) );
+}
+
 stdString CSqEngineExport::replace( const stdString &sS, const stdString &sFind, const stdString &sReplace )
 {_STT();
 	return oex2std( std2oex( sS ).Replace( std2oex( sFind ), std2oex( sReplace ) ) );
@@ -1664,6 +1672,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, trimws )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, find )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, replace )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, create_size_string )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, drop )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, drop_range )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, urlencode )
