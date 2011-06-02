@@ -1,6 +1,4 @@
 
-_self.load_module( "http", "" );
-
 class CGlobal
 {
 	server = 0;
