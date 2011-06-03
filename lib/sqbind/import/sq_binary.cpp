@@ -50,6 +50,13 @@ using namespace sqbind;
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_setAbs##t )		\
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_getAbs##t )		\
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, find##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findMin##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findMax##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findRange##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, skip##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, skipMin##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, skipMax##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, skipRange##t )		\
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, size##t )			\
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Allocate##t )
 

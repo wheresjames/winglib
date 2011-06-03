@@ -67,6 +67,106 @@
 			else x_nStart++;														\
 		return failed();															\
 	}																				\
+	t_size findMin##t( oex##t val, t_size x_nStart, t_size x_nMax )					\
+	{	if ( !x_nMax ) x_nMax = getUsed();											\
+		else																		\
+		{	x_nMax += x_nStart;														\
+			if ( x_nMax > getUsed() ) x_nMax = getUsed();							\
+		}																			\
+		if ( x_nMax < sizeof( oex##t ) ) return failed();							\
+		x_nMax -= sizeof( oex##t );													\
+		while( x_nStart <= x_nMax )													\
+			if ( *( (oex##t*)Ptr( x_nStart ) ) < val )								\
+				return x_nStart;													\
+			else x_nStart++;														\
+		return failed();															\
+	}																				\
+	t_size findMax##t( oex##t val, t_size x_nStart, t_size x_nMax )					\
+	{	if ( !x_nMax ) x_nMax = getUsed();											\
+		else																		\
+		{	x_nMax += x_nStart;														\
+			if ( x_nMax > getUsed() ) x_nMax = getUsed();							\
+		}																			\
+		if ( x_nMax < sizeof( oex##t ) ) return failed();							\
+		x_nMax -= sizeof( oex##t );													\
+		while( x_nStart <= x_nMax )													\
+			if ( *( (oex##t*)Ptr( x_nStart ) ) > val )								\
+				return x_nStart;													\
+			else x_nStart++;														\
+		return failed();															\
+	}																				\
+	t_size findRange##t( oex##t min, oex##t max, t_size x_nStart, t_size x_nMax )	\
+	{	if ( !x_nMax ) x_nMax = getUsed();											\
+		else																		\
+		{	x_nMax += x_nStart;														\
+			if ( x_nMax > getUsed() ) x_nMax = getUsed();							\
+		}																			\
+		if ( x_nMax < sizeof( oex##t ) ) return failed();							\
+		x_nMax -= sizeof( oex##t );													\
+		while( x_nStart <= x_nMax )													\
+			if ( *( (oex##t*)Ptr( x_nStart ) ) >= min								\
+				 && *( (oex##t*)Ptr( x_nStart ) ) <= max )							\
+				return x_nStart;													\
+			else x_nStart++;														\
+		return failed();															\
+	}																				\
+	t_size skip##t( oex##t val, t_size x_nStart, t_size x_nMax )					\
+	{	if ( !x_nMax ) x_nMax = getUsed();											\
+		else																		\
+		{	x_nMax += x_nStart;														\
+			if ( x_nMax > getUsed() ) x_nMax = getUsed();							\
+		}																			\
+		if ( x_nMax < sizeof( oex##t ) ) return failed();							\
+		x_nMax -= sizeof( oex##t );													\
+		while( x_nStart <= x_nMax )													\
+			if ( *( (oex##t*)Ptr( x_nStart ) ) != val )								\
+				return x_nStart;													\
+			else x_nStart++;														\
+		return failed();															\
+	}																				\
+	t_size skipMin##t( oex##t val, t_size x_nStart, t_size x_nMax )					\
+	{	if ( !x_nMax ) x_nMax = getUsed();											\
+		else																		\
+		{	x_nMax += x_nStart;														\
+			if ( x_nMax > getUsed() ) x_nMax = getUsed();							\
+		}																			\
+		if ( x_nMax < sizeof( oex##t ) ) return failed();							\
+		x_nMax -= sizeof( oex##t );													\
+		while( x_nStart <= x_nMax )													\
+			if ( *( (oex##t*)Ptr( x_nStart ) ) >= val )								\
+				return x_nStart;													\
+			else x_nStart++;														\
+		return failed();															\
+	}																				\
+	t_size skipMax##t( oex##t val, t_size x_nStart, t_size x_nMax )					\
+	{	if ( !x_nMax ) x_nMax = getUsed();											\
+		else																		\
+		{	x_nMax += x_nStart;														\
+			if ( x_nMax > getUsed() ) x_nMax = getUsed();							\
+		}																			\
+		if ( x_nMax < sizeof( oex##t ) ) return failed();							\
+		x_nMax -= sizeof( oex##t );													\
+		while( x_nStart <= x_nMax )													\
+			if ( *( (oex##t*)Ptr( x_nStart ) ) <= val )								\
+				return x_nStart;													\
+			else x_nStart++;														\
+		return failed();															\
+	}																				\
+	t_size skipRange##t( oex##t min, oex##t max, t_size x_nStart, t_size x_nMax )	\
+	{	if ( !x_nMax ) x_nMax = getUsed();											\
+		else																		\
+		{	x_nMax += x_nStart;														\
+			if ( x_nMax > getUsed() ) x_nMax = getUsed();							\
+		}																			\
+		if ( x_nMax < sizeof( oex##t ) ) return failed();							\
+		x_nMax -= sizeof( oex##t );													\
+		while( x_nStart <= x_nMax )													\
+			if ( *( (oex##t*)Ptr( x_nStart ) ) < min								\
+				 || *( (oex##t*)Ptr( x_nStart ) ) > max )							\
+				return x_nStart;													\
+			else x_nStart++;														\
+		return failed();															\
+	}																				\
 	oex##t LE_get##t( t_size x_nOffset )											\
 	{	oex##t v = get##t( x_nOffset ); return oexLE_##t( v ); }					\
 	void LE_set##t( t_size x_nOffset, oex##t val )									\
