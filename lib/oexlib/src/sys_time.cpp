@@ -56,6 +56,8 @@ static oexCSTR s_fmonths[] = { oexT( "Invalid" ), oexT( "January" ), oexT( "Febr
 #define FTOFF_1970		11644473600LL
 #define FTOFF_1980		11960010000LL
 
+#define FT_YEARBASE		2000
+
 oexUINT CSysTime::DivideSeconds(oexUINT totalseconds, oexUINT *days, oexUINT *hours, oexUINT *mins, oexUINT *secs)
 {_STT();
 	oexUINT s = 0, m = 0, h = 0, d = 0;
@@ -281,6 +283,7 @@ CStr CSysTime::FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors )
 
 			case oexT( 'I' ) : str.AppendNum( oexT( "%u" ), (oexUINT)m_time.uDayOfWeek + 1 ); break;
 
+			case oexT( 'k' ) : x += 2;
 			case oexT( 'y' ) : str.AppendNum( oexT( "%0.2u" ), (oexUINT)( m_time.uYear % 100 ) ); break;
 
 			case oexT( 'Y' ) : str.AppendNum( oexT( "%u" ), (oexUINT)m_time.uYear ); break;
@@ -344,7 +347,9 @@ CStr CSysTime::FormatTime( oexCSTR x_sTmpl, oexBOOL *x_bErrors )
 	return str;
 }
 
-oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
+// #define OEX_CSYSTIME_DEBUG_PARSER
+
+oexLONG CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 {_STT();
     oexUINT x = 0;
 	oexUINT uYear = eInvalid;
@@ -358,15 +363,20 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 	oexUINT uNanosecond = eInvalid;
 	oexUINT uDayOfWeek = eInvalid;
 
+	oexBOOL bPM = oexFALSE;
 	oexBOOL bTzNeg = oexFALSE;
 	oexINT  nHBias = eInvalid;
 	oexINT  nMBias = eInvalid;
 
     oexBOOL bErrors = oexFALSE;
-    CStr::t_size nEnd = 0;
+    CStr::t_size nEnd = 0, nLen = x_sStr.Length();
+
+#ifdef OEX_CSYSTIME_DEBUG_PARSER
+	oexSHOW( x_sStr );
+#endif
 
 	// Process the template
-	while ( x_sTmpl[ x ] && *x_sStr )
+	while ( x_sTmpl[ x ] && x_sStr.Length() )
     {
 		// If not the escape character
 		if ( m_tEscape != x_sTmpl[ x ]  )
@@ -384,7 +394,7 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 
 			else
 			{
-				// Erros?
+				// Errors?
 				if ( oexT( '?' ) != x_sTmpl[ x ] && *x_sStr != x_sTmpl[ x ] )
 					bErrors = oexTRUE;
 
@@ -495,8 +505,14 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
                 if ( 1 != nEnd || 7 < uDayOfWeek ) bErrors = oexTRUE;
                 break;
 
-            case oexT( 'y' ) :
-                uYear = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE );
+            case oexT( 'k' ) :
+			{	oexUINT uBase = str::StrToNum( &x_sTmpl[ x + 1 ], 2, 10, oexNULL ) * 100; x += 2;
+                uYear = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE ) + uBase;
+                if ( 2 != nEnd ) bErrors = oexTRUE;
+			} break;
+
+			case oexT( 'y' ) :
+                uYear = (oexUINT)x_sStr.ToNum( 2, 10, &nEnd, oexTRUE ) + FT_YEARBASE;
                 if ( 2 != nEnd ) bErrors = oexTRUE;
                 break;
 
@@ -509,10 +525,13 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 			case oexT( 'A' ) :
             {   oexBOOL bInvalid = oexFALSE;
                 if ( x_sStr.ICmpLen( oexT( "pm" ), 2 ) )
-                    uHour = ( uHour + 12 ) % 24;
-                else if ( !x_sStr.ICmpLen( oexT( "am" ), 2 ) )
+					bPM = oexTRUE;
+                else if ( x_sStr.ICmpLen( oexT( "am" ), 2 ) )
+					bPM = oexFALSE;
+				else
                     bInvalid = bErrors = oexTRUE;
-                if ( !bInvalid ) x_sStr.LTrim( 2 );
+                if ( !bInvalid ) 
+					x_sStr.LTrim( 2 );
             } break;
 
 			case oexT( 'w' ) :
@@ -600,6 +619,10 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
     // the template passed to CSysTime::ParseTime()
 //    oexASSERT( !bErrors );
 
+	// AM/PM
+	if ( bPM )
+		uHour = ( uHour + 12 ) % 24;
+
 	// Calculate bias
 	oexINT nTzBias = eInvalid;
 	if ( nHBias != eInvalid ) nTzBias = nHBias * 60;
@@ -609,7 +632,22 @@ oexBOOL CSysTime::ParseTime( oexCSTR x_sTmpl, CStr x_sStr )
 	// Set valid parts of the time
 	SetTime( uYear, uMonth, uDay, uHour, uMinute, uSecond, uMillisecond, uMicrosecond, uNanosecond, uDayOfWeek, nTzBias );
 
-    return !bErrors;
+#ifdef OEX_CSYSTIME_DEBUG_PARSER
+	CStr sParsed;
+	sParsed << uYear << oexT( "/" ) << uMonth << oexT( "/" ) << uDay
+			<< oexT( " - " ) << uHour << oexT( ":" ) << uMinute << oexT( ":" ) << uSecond
+			<< oexT( "." ) << uMillisecond << oexT( "." ) << uMicrosecond << oexT( "." ) << uNanosecond
+			<< oexT( " " ) << uDayOfWeek << oexT( " " ) << nTzBias;
+	oexSHOW( sParsed );
+#endif
+
+
+	// Were there errors?
+	if ( bErrors )
+		return 0;
+
+	// How much did we process?
+	return nLen - x_sStr.Length();
 }
 
 CSysTime& CSysTime::SetTime( oexUINT uYear, oexUINT uMonth, oexUINT uDay,

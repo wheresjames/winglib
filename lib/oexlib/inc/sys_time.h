@@ -410,6 +410,7 @@ public:
 		-	\%I = Day of the week [1-7]
 		-	\%y = 2 digit year
 		-	\%Y = 4 digit year
+		-	\%k = 2 digit year with base "%k20", "%k19"
 		-	\%a = am/pm
 		-	\%A = AM/PM
 		-	\%w = Abbreviated day of week [Sun,Mon,Tue,Wed,Thu,Fri,Sat]
@@ -496,7 +497,7 @@ public:
 
 		\see FormatTime()
 	*/
-	oexBOOL ParseTime( oexCSTR x_sTmpl, CStr x_sStr );
+	oexLONG ParseTime( oexCSTR x_sTmpl, CStr x_sStr );
 
 	/// Copy operator
 	CSysTime& operator = ( oexCONST CSysTime &x_st )

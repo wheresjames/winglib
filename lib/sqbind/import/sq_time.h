@@ -256,6 +256,7 @@ namespace sqbind
 			-	\%I = Day of the week [1-7]
 			-	\%y = 2 digit year
 			-	\%Y = 4 digit year
+			-	\%k = 2 digit year with base "%k20", "%k19"
 			-	\%a = am/pm
 			-	\%A = AM/PM
 			-	\%w = Abbreviated day of week [Sun,Mon,Tue,Wed,Thu,Fri,Sat]
@@ -286,6 +287,12 @@ namespace sqbind
 		stdString FormatTime( const stdString &sTmpl )
 		{	return m_t.FormatTime( sTmpl.c_str() ).Ptr(); }
 
+		/// Parses string based on template
+		/**
+			@return Number of bytes processed
+			
+			@see FormatTime()
+		*/
 		SQINT ParseTime( const stdString &sTmpl, const stdString &sTime )
 		{	return m_t.ParseTime( sTmpl.c_str(), sTime.c_str() ); }
 
