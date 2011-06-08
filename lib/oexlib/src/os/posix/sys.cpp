@@ -206,11 +206,11 @@ oexINT CSys::IsRoot()
 	return getuid() ? 0 : 1;
 }
 
-#if defined( OEX_ANDROID )
+//#if defined( OEX_ANDROID )
 #	define REBOOT( n )	reboot( n )
-#else
-#	define REBOOT( n )	reboot( 0xfee1dead, 369367448, n, pMsg )
-#endif
+//#else
+//#	define REBOOT( n )	__reboot( 0xfee1dead, 369367448, n, pMsg )
+//#endif
 
 oexINT CSys::CtrlComputer( int nCmd, int nForce, oexCSTR pMsg )
 {
