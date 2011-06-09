@@ -42,7 +42,13 @@ using namespace OEX_NAMESPACE::os;
 // Helper functions
 //////////////////////////////////////////////////////////////////////
 
-
+#if defined( OEX_ANDROID )
+#	if defined( __get_h_errno )
+#		undef __get_h_errno
+#	endif
+static int g_oex_errno = 0;
+int* __get_h_errno(void) { return (int*)&g_oex_errno; }
+#endif
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
