@@ -294,6 +294,8 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, set )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, get )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, at )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, first )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, last )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, copy )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_up )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_down )
@@ -543,6 +545,39 @@ int CSqMulti::isset( const CSqMulti::t_Obj &k )
 {_STT();
 	return ( m_lst.end() != m_lst.find( k ) ) ? 1 : 0;
 }
+
+CSqMulti* CSqMulti::first( int skip )
+{_STT();
+
+	t_List::iterator it = m_lst.begin();
+	while ( 0 < skip && it != m_lst.end() ) 
+		skip--, it++;
+	
+	if ( it == m_lst.end() )
+	{	if ( !m_def )
+			m_def = OexAllocConstruct< CSqMulti >();
+		return m_def;
+	} // end if
+
+	return &it->second;
+}
+
+CSqMulti* CSqMulti::last( int skip )
+{_STT();
+
+	t_List::reverse_iterator it = m_lst.rbegin();
+	while ( 0 < skip && it != m_lst.rend() ) 
+		skip--, it++;
+
+	if ( it == m_lst.rend() )
+	{	if ( !m_def )
+			m_def = OexAllocConstruct< CSqMulti >();
+		return m_def;
+	} // end if
+
+	return &it->second;
+}
+
 
 CSqMulti* CSqMulti::get( const CSqMulti::t_Obj &k )
 {_STT();
