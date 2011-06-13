@@ -280,6 +280,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, deserialize_filter )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, setJSON )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, getJSON )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mergeJSON )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, merge )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mmerge )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, join )
@@ -362,15 +363,25 @@ CSqParam::t_SqStr CSqMulti::getJSON()
 	return oex::CParser::EncodeJSON( pb ).Ptr();
 }
 
-void CSqMulti::setJSON( const CSqParam::t_SqStr &s )
+CSqMulti* CSqMulti::setJSON( const CSqParam::t_SqStr &s )
 {_STT();
 	// Lose old data
 	m_lst.clear();
+	mergeJSON( s );
+	return this;
+}
+
+CSqMulti* CSqMulti::mergeJSON( const CSqParam::t_SqStr &s )
+{_STT();
+
+	if ( !s.length() )
+		return this;
 
 	// Deserialize data
 	oex::CStr sData( s.c_str(), s.length() );
 	oex::CPropertyBag pb = oex::CParser::DecodeJSON( sData );
 	SQBIND_PropertyBagToMulti( pb, m_lst );
+	return this;
 }
 
 void CSqMulti::fromPb( oex::CPropertyBag &pb )
@@ -408,7 +419,7 @@ CSqParam::t_SqStr CSqMulti::serialize_filter( const t_SqStr &sFilter, int x_bInc
 	return oex::CParser::SerializeFilter( pb, sFilter.c_str(), x_bInclude, x_bIgnoreCase ).Ptr();
 }
 
-void CSqMulti::deserialize_filter( const CSqParam::t_SqStr &s, const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase )
+CSqMulti* CSqMulti::deserialize_filter( const CSqParam::t_SqStr &s, const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase )
 {_STT();
 	// Lose old data
 	m_lst.clear();
@@ -417,6 +428,7 @@ void CSqMulti::deserialize_filter( const CSqParam::t_SqStr &s, const t_SqStr &sF
 	oex::CStr sData( s.c_str(), s.length() );
 	oex::CPropertyBag pb = oex::CParser::DeserializeFilter( sData, sFilter.c_str(), x_bInclude, x_bIgnoreCase );
 	SQBIND_PropertyBagToMulti( pb, m_lst );
+	return this;
 }
 
 CSqMulti& CSqMulti::add( CSqMulti &m )
@@ -442,19 +454,20 @@ void CSqMulti::merge( const CSqParam::t_SqStr &s )
 	SQBIND_PropertyBagToMulti( pb, m_lst );
 }
 
-void CSqMulti::mset( CSqMulti *m )
+CSqMulti* CSqMulti::mset( CSqMulti *m )
 {_STT();
 	if ( m ) m_lst = m->m_lst;
+	return this;
 }
 
-void CSqMulti::mmerge( CSqMulti *m )
+CSqMulti* CSqMulti::mmerge( CSqMulti *m )
 {_STT();
 
-	if ( !m )
-		return;
-
-	for ( CSqMulti::iterator it = m->begin(); it != m->end(); it++ )
-		m_lst[ it->first ] = it->second.str();
+	if ( m )
+		for ( CSqMulti::iterator it = m->begin(); it != m->end(); it++ )
+			m_lst[ it->first ] = it->second.str();
+		
+	return this;
 }
 
 CSqMulti::t_Obj CSqMulti::tmpl( const t_Obj &tmpl )

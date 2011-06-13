@@ -58,14 +58,15 @@ namespace sqbind
 		virtual void deserialize( const t_SqStr &s );
 		virtual void merge( const t_SqStr &s );
 
-		void mset( CSqMulti *m );
-		void mmerge( CSqMulti *m );
+		CSqMulti* mset( CSqMulti *m );
+		CSqMulti* mmerge( CSqMulti *m );
 
 		t_SqStr serialize_filter( const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase );
-		void deserialize_filter( const t_SqStr &s, const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase );
+		CSqMulti* deserialize_filter( const t_SqStr &s, const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase );
 
 		t_SqStr getJSON();
-		void setJSON( const t_SqStr &s );
+		CSqMulti* setJSON( const t_SqStr &s );
+		CSqMulti* mergeJSON( const t_SqStr &s );
 
 	private:
 
@@ -336,7 +337,6 @@ namespace sqbind
 
 		/// Converts to oex property bag
 		void toPb( oex::CPropertyBag &pb );
-
 
 	private:
 
