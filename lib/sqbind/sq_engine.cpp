@@ -2082,10 +2082,8 @@ int CSqEngine::OnInclude( const stdString &sScript )
 	// Push script name
 	int nRet = 0;
 	stdString sScriptName = m_sScriptName;
-
 	oex::oexBOOL bFile = oex::oexTRUE;
-	stdString sData;
-	stdString sUseScript = sScript;
+	stdString sData, sUseScript = sScript;
 
 	_oexTRY
 	{
@@ -2107,10 +2105,20 @@ int CSqEngine::OnInclude( const stdString &sScript )
 		} // end if
 
 		else
+		{
+			// Don't return an error if the file simply doesn't exist
+			oex::CStr sFile;
+			if ( bFile )
+			{	sFile = std2oex( m_sRoot ).BuildPath( std2oex( sUseScript ) );
+				if ( !oexExists( sFile.Ptr() ) )
+					return -1;
+			} // end if
 
 			// Load the script
-			m_script = bFile ? m_vm.CompileScript( std2oex( m_sRoot ).BuildPath( std2oex( sUseScript ) ).Ptr() )
+			m_script = bFile ? m_vm.CompileScript( sFile.Ptr() )
 							 : m_vm.CompileBuffer( sUseScript.c_str() );
+							 
+		} // end else
 
 		// Run the script
 		m_sReturnData = obj2str( m_vm.RunScript( m_script ) );
