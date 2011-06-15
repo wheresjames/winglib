@@ -88,7 +88,7 @@ public:
 	/// Creates a ascii view of a binary buffer
 	static CStr BinToAsciiHexStr( CBin *x_pBin, oexSIZE_T x_uLen, oexSIZE_T x_nLineLen, oexSIZE_T x_nMaxLines );
 	static CStr BinToAsciiHexStr( const CBin &x_rBin, oexSIZE_T x_uLen, oexSIZE_T x_nLineLen, oexSIZE_T x_nMaxLines )
-	{	return BinToAsciiHexStr( &x_rBin, x_uLen, x_nLineLen, x_nMaxLines ); }
+	{	return BinToAsciiHexStr( (CBin*)&x_rBin, x_uLen, x_nLineLen, x_nMaxLines ); }
 
 	/// Calculates a byte average
 	static double BinAverage( CBin *x_pBin, oexSIZE_T x_uOffset, oexSIZE_T x_uInterval, oexINT fmt );

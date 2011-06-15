@@ -163,17 +163,17 @@ CStr CUtil::BinToAsciiHexStr( CBin *x_pBin, oexSIZE_T x_uLen, oexSIZE_T x_nLineL
 	if ( !x_pBin || !x_pBin->getUsed() )
 		return oexT( "" );
 
-	if ( !x_uLen || x_pBin->getUsed() < x_uLen )
+	if ( 0 >= x_uLen || x_pBin->getUsed() < x_uLen )
 		x_uLen = x_pBin->getUsed();
 
-	return BinToAsciiHexStr( x_pBin->Ptr(), x_pBin->getUsed(), x_nLineLen, x_nMaxLines );
+	return BinToAsciiHexStr( x_pBin->Ptr(), x_uLen, x_nLineLen, x_nMaxLines );
 }
 
 CStr CUtil::BinToAsciiHexStr( oexCPVOID x_pBuf, oexSIZE_T x_uLen, oexSIZE_T x_nLineLen, oexSIZE_T x_nMaxLines )
 {_STT();
 
 	// Sanity checks
-	if ( !x_pBuf || !x_uLen || !x_nLineLen || !x_nMaxLines )
+	if ( !x_pBuf || 0 >= x_uLen || 0 >= x_nLineLen || 0 >= x_nMaxLines )
 		return oexT( "" );
 
 	// Allocate buffer for string

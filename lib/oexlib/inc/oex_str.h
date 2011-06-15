@@ -1014,7 +1014,7 @@ namespace str
             else if ( oexT( 'a' ) <= ch && oexT( 'z' ) >= ch )
                 ch -= oexT( 'a' ) - 10;
 
-            else if ( oexT( 'A' ) <= ch && oexT( 'A' ) >= ch )
+            else if ( oexT( 'A' ) <= ch && oexT( 'Z' ) >= ch )
                 ch -= oexT( 'A' ) - 10;
 
             else bErr = oexTRUE;

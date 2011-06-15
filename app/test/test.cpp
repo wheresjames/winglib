@@ -1321,6 +1321,34 @@ oex::oexRESULT TestLists()
 	if ( !oexVERIFY( pb[ oexT( "group1" ) ][ oexT( "val1" ) ].ToString() == oexT( "yup" ) ) )
 		return -24;
 
+	// Create a string with chars 0 - 255
+	oex::CStr8 s1; s1.OexAllocate( 256 ); s1.SetLength( 256 );
+	for( oex::oexINT i = 0; i < 256; i++ ) s1._Ptr()[ i ] = (char)i;
+//	oexEcho( oexBinToAsciiHexStr( oex::CBin( s1 ), 0, 16, 64 ).Ptr() );
+	
+	// Make sure it encodes / decodes
+//	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::UrlEncode( s1 ) ), 0, 16, 64 ).Ptr() );
+//	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::UrlDecode( oex::CParser::UrlEncode( s1 ) ) ), 0, 16, 64 ).Ptr() );
+	if ( !oexVERIFY( s1 == oex::CParser::UrlDecode( oex::CParser::UrlEncode( s1 ) ) ) )
+		return -25;
+
+	// Make sure it encodes / decodes
+//	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::JsonEncode( s1 ) ), 0, 16, 64 ).Ptr() );
+//	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::JsonDecode( oex::CParser::JsonEncode( s1 ) ) ), 0, 16, 64 ).Ptr() );
+	if ( !oexVERIFY( s1 == oex::CParser::JsonDecode( oex::CParser::JsonEncode( s1 ) ) ) )
+		return -26;
+
+	// Test JSON Encode / Decode
+	oex::CPropertyBag pb2 = oex::CParser::DecodeJSON( oex::CParser::EncodeJSON( pb ) );
+	if ( !oexVERIFY(  pb2[ oexT( "val1" ) ].ToString() == oexT( "Hello" ) ) )
+		return -27;
+
+	if ( !oexVERIFY(  pb2[ oexT( "group1" ) ][ oexT( "val1" ) ].ToString() == oexT( "yup" ) ) )
+		return -28;
+
+	if ( !oexVERIFY(  pb2[ oexT( "group1" ) ][ oexT( "val2" ) ].ToString() == oexT( "noreturn" ) ) )
+		return -29;
+
 	return oex::oexRES_OK;
 }
 
@@ -1548,7 +1576,8 @@ oex::oexRESULT TestParser()
 	if ( !oexVERIFY( oex::CParser::EncodeUrlParams( oex::CParser::DecodeUrlParams( pStr ) ) == pStr ) )
 		return -21;
 
-	pStr = oexT( "a=b&c=d&e=hello%20world" );
+//	pStr = oexT( "a=b&c=d&e=hello%20world" );
+	pStr = oexT( "a=b&c=d&e=hello+world" );
 	if ( !oexVERIFY( oex::CParser::EncodeUrlParams( oex::CParser::DecodeUrlParams( pStr ) ) == pStr ) )
 		return -22;
 

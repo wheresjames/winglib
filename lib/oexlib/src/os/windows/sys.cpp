@@ -373,6 +373,9 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 
 	} // end if
 
+	else
+		x_pDst[ nRet ] = 0;
+	
 #endif
 
 	// What to do with the result
