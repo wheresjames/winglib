@@ -1549,11 +1549,10 @@ public:
 						case oexTC( T, 't' ) : ret << oexTC( T, '\t' ); break;
 						case oexTC( T, 'v' ) : ret << oexTC( T, '\v' ); break;
 						case oexTC( T, 'u' ) : 
-							if ( 4 <= nLen ) 
+							if ( 4 < nLen ) 
 							{	x_str++;
-								T ch = (T)x_str.ToNum( 4, 16 );
+								ret << (T)x_str.ToNum( 4, 16 );
 								x_str.LTrim( 3 ); nLen -= 4;
-								ret.Append( &ch, 1 ); 
 							} // end if
 							break;
 						default: break;
