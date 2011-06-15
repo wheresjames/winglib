@@ -212,7 +212,7 @@ namespace str
     template< typename T >
     	T* Replace( T *dst, oexINT ln_dst, oexCONST T x_tFind, oexCONST T x_tReplace )
 	{
-		if ( !ln_dst )
+		if ( !ln_dst || !dst )
 			return dst;
 
 		while( ln_dst-- )
@@ -226,6 +226,37 @@ namespace str
 
 		return dst;
 	}
+
+    template< class T >
+        oexINT IReplace( T *dst, oexINT ln_dst, oexCONST T x_tFind, oexCONST T x_tReplace,
+                         T tSLow = oexT( 'a' ), T tELow = oexT( 'z' ),
+                         T tSHi = oexT( 'A' ), T tEHi = oexT( 'Z' ) )
+	{
+		if ( !ln_dst || !dst )
+			return dst;
+
+		// Convert case
+		T tOff = tSHi - tSLow, ch;
+		if ( x_tFind >= tSHi && x_tFind <= tEHi )
+			x_tFind -= tOff;
+	
+		while( ln_dst-- )
+		{
+			ch = *dst;
+			if ( ch >= tSHi && ch <= tEHi )
+				ch -= tOff;
+
+			if ( ch == x_tFind )
+				*dst = x_tReplace;
+
+			dst++;
+
+		} // end while
+
+		return dst;
+
+	}
+
 
 
     /// Returns the offset of the first character in s1 not in s2

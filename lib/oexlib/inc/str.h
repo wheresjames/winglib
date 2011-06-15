@@ -2136,6 +2136,11 @@ public:
 	oexINT Match( oexCONST T* pSub )
     {   return str::FindSubStr( Ptr(), Length(), pSub, zstr::Length( pSub ) ); }
 
+	/// Returns the offset of pSub in the string, or
+    /// -1 if a pStr is not found.
+	oexINT IMatch( oexCONST T* pSub )
+    {   return str::IFindSubStr( Ptr(), Length(), pSub, zstr::Length( pSub ) ); }
+
 	/// Appends a size formatted string ( 1.3KB, 44.75GB, etc...)
 	TStr& AppendSizeString( oexDOUBLE dSize, oexDOUBLE dDiv, oexINT nDigits, oexCONST T ** pSuffix = oexNULL )
 	{	
@@ -2209,6 +2214,53 @@ public:
 		{
 			// See if we can find the string
 			m = str::FindSubStr( Ptr( s ), e - s, x_sFind.Ptr(), lf );
+
+			// Punt if we got nothing
+			if ( 0 > m )
+			{
+				// Sub string never found?
+				if ( !s )
+					return *this;
+
+				// Return final string
+				str += SubStr( s, e - s );
+				return str;
+
+			} // end if
+
+			// Append non-matching stuff
+			if ( m )
+				str += SubStr( s, m );
+
+			// Replace with other string if needed
+			if ( lr )
+				str += x_sReplace;
+
+			// Next point
+			s += m + lf;
+
+		} while ( s < e );
+
+		return str;
+	}
+
+	/// Replaces single characters in a string
+	TStr& IReplace( oexCONST T x_tFind, oexCONST T x_tReplace )
+    {   str::IReplace( _Ptr(), Length(), x_tFind, x_tReplace ); return *this; }
+
+	/// Replaces sub strings with another
+	TStr IReplace( oexCONST TStr &x_sFind, oexCONST TStr &x_sReplace ) oexCONST
+	{
+		TStr str;
+		oexINT lf = x_sFind.Length();
+		if ( !lf )
+			return *this;
+
+		oexINT s = 0, e = Length(), lr = x_sReplace.Length(), m;
+		do
+		{
+			// See if we can find the string
+			m = str::IFindSubStr( Ptr( s ), e - s, x_sFind.Ptr(), lf );
 
 			// Punt if we got nothing
 			if ( 0 > m )

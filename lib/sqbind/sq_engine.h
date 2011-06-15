@@ -455,6 +455,9 @@ public:
 		/// Finds sub string sSub in sS, returns offset or less than zero if not found
 		int find( const stdString &sS, const stdString &sSub );
 
+		/// Finds sub string sSub in sS, returns offset or less than zero if not found
+		int ifind( const stdString &sS, const stdString &sSub );
+
 		/// Creates a size string like 1.3MB, 44.5GB, etc...
 		/**
 			@param [in] d		- Value
@@ -467,6 +470,9 @@ public:
 		
 		/// Replaces the occurences of the specified string
 		stdString replace( const stdString &sS, const stdString &sFind, const stdString &sReplace );
+
+		/// Replaces the case insensitive occurences of the specified string
+		stdString ireplace( const stdString &sS, const stdString &sFind, const stdString &sReplace );
 
 		/// Drop specified characters from a string or all but
 		stdString drop( const stdString &sS, const stdString &sDrop, int bInclusive );

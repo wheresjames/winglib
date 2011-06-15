@@ -724,6 +724,11 @@ int CSqEngineExport::find( const stdString &sS, const stdString &sSub )
 	return std2oex( sS ).Match( sSub.c_str() );
 }
 
+int CSqEngineExport::ifind( const stdString &sS, const stdString &sSub )
+{_STT();
+	return std2oex( sS ).IMatch( sSub.c_str() );
+}
+
 stdString CSqEngineExport::create_size_string( double d, double dDiv, int nDigits, const stdString &sSuffix )
 {_STT();
 	oex::CStr s = std2oex( sSuffix );	
@@ -733,6 +738,11 @@ stdString CSqEngineExport::create_size_string( double d, double dDiv, int nDigit
 }
 
 stdString CSqEngineExport::replace( const stdString &sS, const stdString &sFind, const stdString &sReplace )
+{_STT();
+	return oex2std( std2oex( sS ).Replace( std2oex( sFind ), std2oex( sReplace ) ) );
+}
+
+stdString CSqEngineExport::ireplace( const stdString &sS, const stdString &sFind, const stdString &sReplace )
 {_STT();
 	return oex2std( std2oex( sS ).Replace( std2oex( sFind ), std2oex( sReplace ) ) );
 }
@@ -1671,7 +1681,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, rtrim )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, trimws )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, find )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ifind )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, replace )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ireplace )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, create_size_string )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, drop )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, drop_range )
