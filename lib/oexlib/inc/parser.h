@@ -430,6 +430,9 @@ public:
 				case oexTC( T, '"' ) :
 					return oexTT( T, "&quot;" );
 
+				case oexTC( T, '\'' ) :
+					return oexTT( T, "&#39;" );
+					
 				case oexTC( T, '&' ) :
 					return oexTT( T, "&amp;" );
 
@@ -451,7 +454,7 @@ public:
 			} // end switch
 
 			// Generic encode
-			return oexMks( oexTT( T, "&#" ), (oexULONG)x_ch, oexTT( T, ";" ) );
+			return oexMks( oexTT( T, "&#" ), (oexULONG)(oexUCHAR)x_ch, oexTT( T, ";" ) );
 		}
 
 	/// Encoded a string "<b>Hello World</b>" -> "&lt;b&gt;Hello&nbsp;World&lt;/b&gt;"
@@ -502,8 +505,10 @@ public:
 		{
 			static const SHtmlItem< T > c_cnv[] =
 			{
+				{ oexTC( T, '\t' ), oexTT( T, "&nbsp;&nbsp;&nbsp;&nbsp;" ), 4 * 6 },
 				{ oexTC( T, ' ' ), oexTT( T, "&nbsp;" ), 6 },
 				{ oexTC( T, '"' ), oexTT( T, "&quot;" ), 6 },
+				{ oexTC( T, '\'' ), oexTT( T, "&#39;" ), 5 },
 				{ oexTC( T, '&' ), oexTT( T, "&amp;" ), 5 },
 				{ oexTC( T, '<' ), oexTT( T, "&lt;" ), 4 },
 				{ oexTC( T, '>' ), oexTT( T, "&gt;" ), 4 },
@@ -533,10 +538,11 @@ public:
 				return (T)x_str.Slice( i ).LTrim( 2 ).ToLong();
 
 			// Scan for known sequence
-			TStr< T > sub = x_str.SubStr( 0, i );
+//			TStr< T > sub = x_str.SubStr( 0, i );
 			for ( oexUINT c = 0; c < oexSizeOfArray( c_cnv ) && c_cnv[ c ].s; c++ )
-				if ( sub == c_cnv[ c ].s )
-				{	x_str.LTrim( i );
+//				if ( sub == c_cnv[ c ].s )
+				if ( x_str.SubStr( 0, c_cnv[ c ].l ) == c_cnv[ c ].s )
+				{	x_str.LTrim( c_cnv[ c ].l );
 					return c_cnv[ c ].ch;
 				} // end if
 
@@ -1549,7 +1555,7 @@ public:
 						case oexTC( T, 't' ) : ret << oexTC( T, '\t' ); break;
 						case oexTC( T, 'v' ) : ret << oexTC( T, '\v' ); break;
 						case oexTC( T, 'u' ) : 
-							if ( 4 < nLen ) 
+							if ( 4 <= nLen ) 
 							{	x_str++;
 								ret << (T)x_str.ToNum( 4, 16 );
 								x_str.LTrim( 3 ); nLen -= 4;

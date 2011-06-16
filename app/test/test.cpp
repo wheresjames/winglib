@@ -1327,16 +1327,18 @@ oex::oexRESULT TestLists()
 //	oexEcho( oexBinToAsciiHexStr( oex::CBin( s1 ), 0, 16, 64 ).Ptr() );
 	
 	// Make sure it encodes / decodes
-//	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::UrlEncode( s1 ) ), 0, 16, 64 ).Ptr() );
-//	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::UrlDecode( oex::CParser::UrlEncode( s1 ) ) ), 0, 16, 64 ).Ptr() );
 	if ( !oexVERIFY( s1 == oex::CParser::UrlDecode( oex::CParser::UrlEncode( s1 ) ) ) )
+	{	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::UrlEncode( s1 ) ), 0, 16, 128 ).Ptr() );
+		oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::UrlDecode( oex::CParser::UrlEncode( s1 ) ) ), 0, 16, 128 ).Ptr() );
 		return -25;
+	} // end if
 
 	// Make sure it encodes / decodes
-//	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::JsonEncode( s1 ) ), 0, 16, 64 ).Ptr() );
-//	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::JsonDecode( oex::CParser::JsonEncode( s1 ) ) ), 0, 16, 64 ).Ptr() );
 	if ( !oexVERIFY( s1 == oex::CParser::JsonDecode( oex::CParser::JsonEncode( s1 ) ) ) )
+	{	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::JsonEncode( s1 ) ), 0, 16, 128 ).Ptr() );
+		oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::JsonDecode( oex::CParser::JsonEncode( s1 ) ) ), 0, 16, 128 ).Ptr() );
 		return -26;
+	} // end if
 
 	// Test JSON Encode / Decode
 	oex::CPropertyBag pb2 = oex::CParser::DecodeJSON( oex::CParser::EncodeJSON( pb ) );
@@ -1349,6 +1351,15 @@ oex::oexRESULT TestLists()
 	if ( !oexVERIFY(  pb2[ oexT( "group1" ) ][ oexT( "val2" ) ].ToString() == oexT( "noreturn" ) ) )
 		return -29;
 
+	// Make sure it encodes / decodes
+	if ( !oexVERIFY( s1 == oex::CParser::HtmlDecode( oex::CParser::HtmlEncode( s1 ) ) ) )
+	{	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::HtmlEncode( s1 ) ), 0, 16, 128 ).Ptr() );
+		oexEcho( oex::CParser::HtmlEncode( s1 ).Ptr() );
+		oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::HtmlDecode( oex::CParser::HtmlEncode( s1 ) ) ), 0, 16, 128 ).Ptr() );
+		return -30;
+	} // end if
+
+		
 	return oex::oexRES_OK;
 }
 
