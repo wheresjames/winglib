@@ -28,6 +28,11 @@ ifeq ($(BUILD)$(PROC),vsx64)
 	include $(PRJ_LIBROOT)/unsupported.mk
 else
 
+ifneq ($(BUILD),vs)
+	UNSUPPORTED := BUILD=$(BUILD) is not supported
+	include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),vs)
 		PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/windows/vs xlibs $(PRJ_INCS)
@@ -58,6 +63,8 @@ include $(PRJ_LIBROOT)/build.mk
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
+
+endif
 
 endif
 
