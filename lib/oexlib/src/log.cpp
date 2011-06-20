@@ -261,7 +261,7 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT 
 #endif
 
 		}
-		_oexCATCH( ... )
+		_oexCATCH_ALL()
 		{
 		} // end catch
 

@@ -51,6 +51,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfDecoder, CFfDecoder )
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, BufferData )
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, UnBufferData )
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, getBufferSize )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, getH264FrameType )
 
 	SQBIND_STATIC_FUNCTION( CFfDecoder, LookupCodecId )
 	SQBIND_STATIC_FUNCTION( CFfDecoder, LookupCodecName )

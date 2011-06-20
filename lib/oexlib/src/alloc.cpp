@@ -118,7 +118,7 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
 
     // Could get an exception if it's not our memory block
     // But we can't force people to use our allocation routines ;)
-    try
+    _oexTRY
     {
         if ( !oexVERIFY_PTR( x_pMem ) )
             return oexFALSE;
@@ -196,7 +196,7 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
 
     } // end try
 
-    catch( ... )
+    _oexCATCH_ALL()
     {
 
     } // end catch

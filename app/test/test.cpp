@@ -4,6 +4,12 @@
 
 #define TEST_TCP_PORT	21216
 
+#if defined( OEX_TEST_TRACE )
+#	define _TR()	oexM()
+#else
+#	define _TR()
+#endif
+
 #include "stdafx.h"
 #include "stdio.h"
 
@@ -3462,11 +3468,17 @@ oex::oexRESULT Test_CrashReporting()
 int main(int argc, char* argv[])
 {_STT();
 
+_TR();
+
 	// Initialize the oex library
 	oexINIT();
 
+_TR();
+
 	// Parse the command line
 	oex::CPropertyBag pbCmdLine = oex::CParser::ParseCommandLine( argc, (const char**)argv );
+
+_TR();
 
 	// Check for version request
 	if ( pbCmdLine.IsKey( oexT( "version" ) ) )
@@ -3483,12 +3495,18 @@ int main(int argc, char* argv[])
 		return 0;
 	} // end if
 
+_TR();
+
 	// Enable crash reporting
 	_STT_SET_NAME( oexT( "Main Thread" ) );
 	oexEnableCrashReporting( oexNULL, oexT( "logs" ) );
 
+_TR();
+
 	// Initialize resources
 	oexInitResources();
+
+_TR();
 
 	if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
 		return -1;
@@ -3496,7 +3514,11 @@ int main(int argc, char* argv[])
 	oexEcho( oexT( "-------- Starting tests --------" ) );
 	oexNOTICE( 0, oexT( "Tests started" ) );
 
+_TR();
+
 	TestCommon();
+
+_TR();
 
 	TestAllocator();
 

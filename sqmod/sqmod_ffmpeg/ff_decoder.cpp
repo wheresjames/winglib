@@ -31,6 +31,7 @@ CFfDecoder::CFfDecoder()
 	m_pFormatContext = oexNULL;
 	m_pFrame = oexNULL;
 	m_nFmt = 0;
+	m_nWaitKeyFrame = 0;
 	oexZero( m_pkt );
 }
 
@@ -57,6 +58,7 @@ void CFfDecoder::Destroy()
 
 	m_nFmt = 0;
 	m_pCodec = oexNULL;
+	m_nWaitKeyFrame = 0;
 	oexZero( m_pkt );
 }
 
@@ -86,6 +88,9 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 		return 0;
 	} // end if
 
+//	ff_p->fmt = avformat_alloc_context();
+//	ff_p->fmt->max_delay = 100000;
+	
 //	avcodec_get_context_defaults( m_pCodecContext );
 	avcodec_get_context_defaults2( m_pCodecContext, AVMEDIA_TYPE_VIDEO );
 
@@ -98,6 +103,7 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
     m_pCodecContext->time_base.num = 1;
     m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
 	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
+//	m_pCodecContext->max_delay = 1000000;
 
 	// Truncated data
 	if( 0 != ( m_pCodec->capabilities & CODEC_CAP_TRUNCATED ) )
@@ -119,6 +125,10 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	} // end if
 
 	m_nFmt = fmt;
+
+	// +++ H264 crashes sometimes if you don't lead out with a key frame
+	if ( CODEC_ID_H264 == x_nCodec )
+		m_nWaitKeyFrame = 1;
 
 	return 1;
 }
@@ -237,6 +247,19 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 	if ( !m_pFrame )
 		m_pFrame = avcodec_alloc_frame();
 
+	// I just want to know
+//	oexSHOW( m_pkt.size );
+//	oexSHOW( GetH264FrameType( m_pkt.data, m_pkt.size ) );
+
+	// Waiting for key frame?
+//	if ( m_nWaitKeyFrame )
+//	{	if ( CODEC_ID_H264 != m_pCodecContext->codec_id 
+//			 || 0 == GetH264FrameType( in->Ptr(), in->getUsed() ) )
+//			m_nWaitKeyFrame = 0;
+//		else
+//			return 0;
+//	} // end if
+
 	if ( !m_pFrame )
 		return 0;
 
@@ -248,11 +271,20 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 		used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (uint8_t*)m_pkt.data, m_pkt.size );
 #endif
 
+	if ( 0 > used )
+		return 0;
+
+	// Dequeue used data
 	UnBufferData( used );
 
+	// Did we get a frame
 	if ( 0 >= gpp )
 		return 0;
 
+	// Validate image size
+	if ( 0 >= m_pCodecContext->width || 0 >= m_pCodecContext->height )
+		return 0;
+		
 	// Convert
 	int res = CFfConvert::ConvertColorFB( m_pFrame, m_nFmt, m_pCodecContext->width, m_pCodecContext->height, fmt, out, SWS_FAST_BILINEAR, flip );
 
@@ -345,3 +377,35 @@ sqbind::stdString CFfDecoder::LookupCodecName( int nId )
 
 	return oexT( "" );
 }
+
+int CFfDecoder::GetH264FrameType( const void *p, int len )
+{	
+	if ( !p || 6 >= len )
+		return -1;
+
+	unsigned char *b = (unsigned char*)p;
+	
+	// Verify NAL marker
+	if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
+	{	b++;
+		if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
+			return -1;
+	} // end if
+
+	b += 3;
+
+	// Verify VOP id
+	if ( 0xb6 == *b )
+	{	b++;
+		return ( *b & 0xc0 ) >> 6;
+	} // end if
+
+	switch( *b )
+	{	case 0x65 : return 0;
+		case 0x61 : return 1;
+		case 0x01 : return 2;
+	} // end switch
+
+	return -1;
+}
+

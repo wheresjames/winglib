@@ -352,7 +352,14 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 		return 0;
 	} // end if
 
-	char *pOptions = m_pRtspClient->sendOptionsCmd( oexStrToMbPtr( sUrl.c_str() ), 0, 0 );
+	char *pOptions = oexNULL; 
+	if ( m && m->isset( oexT( "username" ) ) )
+		pOptions = m_pRtspClient->sendOptionsCmd( oexStrToMbPtr( sUrl.c_str() ), 
+												  (char*)oexStrToMbPtr( (*m)[ oexT( "username" ) ].str().c_str() ),
+												  (char*)oexStrToMbPtr( (*m)[ oexT( "password" ) ].str().c_str() ) );
+	else
+		pOptions = m_pRtspClient->sendOptionsCmd( oexStrToMbPtr( sUrl.c_str() ), 0, 0 );
+		
 	if ( !pOptions )
 	{//	oexERROR( 0, oexMks( oexT( "sendOptionsCmd() failed : " ), m_pEnv->getResultMsg() ) );
 		return 0;
@@ -361,7 +368,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	// Ditch the options
 	delete [] pOptions;
 	pOptions = oexNULL;
-
+	
 	char *pSdp = oexNULL;
 	if ( m && m->isset( oexT( "username" ) ) )
 		pSdp = m_pRtspClient->describeWithPassword( oexStrToMbPtr( sUrl.c_str() ),
@@ -369,6 +376,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 													oexStrToMbPtr( (*m)[ oexT( "password" ) ].str().c_str() ) );
 	else
 		pSdp = m_pRtspClient->describeURL( oexStrToMbPtr( sUrl.c_str() ) );
+		
 	if ( !pSdp )
 	{	oexERROR( 0, oexMks( oexT( "describeURL() failed : " ), m_pEnv->getResultMsg() ) );
 		return 0;
@@ -497,7 +505,7 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 	// setReceiveBufferTo( *m_pEnv, sn, 2000000 );
 	increaseReceiveBufferTo( *m_pEnv, sn, 2000000 );
 
-	pss->rtpSource()->setPacketReorderingThresholdTime( 1000000 );
+	pss->rtpSource()->setPacketReorderingThresholdTime( 2000000 );
 
 	if ( pss->codecName() )
 		m_sVideoCodec = oexMbToStrPtr( pss->codecName() );
@@ -582,9 +590,9 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 
 	int sn = pss->rtpSource()->RTPgs()->socketNum();
 //	setReceiveBufferTo( *m_pEnv, sn, 2000000 );
-	increaseReceiveBufferTo( *m_pEnv, sn, 100000 );
+	increaseReceiveBufferTo( *m_pEnv, sn, 200000 );
 
-	pss->rtpSource()->setPacketReorderingThresholdTime( 1000000 );
+	pss->rtpSource()->setPacketReorderingThresholdTime( 2000000 );
 
 	if ( pss->codecName() )
 		m_sAudioCodec = oexMbToStrPtr( pss->codecName() );
