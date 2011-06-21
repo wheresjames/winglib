@@ -243,6 +243,8 @@ CLvRtspClient::CLvRtspClient()
 	m_nAudioNumChannels = 0;
 	m_nAudioRate = 0;
 	m_nAudioBps = 0;
+	m_bBlindLogin = 1;
+	m_nLastError = 0;
 }
 
 void CLvRtspClient::Destroy()
@@ -255,12 +257,27 @@ void CLvRtspClient::Destroy()
 
 	// Verify things shutdown smoothly
 	if ( m_pRtspClient || m_pSession || m_pVs || m_pAs || m_pEnv )
-	{	oexERROR( 0, oexT( "RTSP Client failed to shutdown correctly" ) );
+	{	setLastError( -999, oexT( "RTSP Client failed to shutdown correctly" ) );
 	} // end if			
 
 	m_sUrl = oexT( "" );
 	m_mParams.clear();
+	
+	m_nLastError = 0;
+	m_sLastError = oexT( "" );
 }
+
+int CLvRtspClient::setLastError( int e, sqbind::stdString s )
+{
+	if ( m_nLastError || !e )
+		return m_nLastError;
+		
+	m_sLastError = s;
+	m_nLastError = e;
+	
+	return e;
+}
+
 
 void CLvRtspClient::ThreadDestroy()
 {_STT();
@@ -329,13 +346,13 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	// Setup usage environment
 	TaskScheduler* scheduler = BasicTaskScheduler::createNew();
 	if ( !scheduler )
-	{	oexERROR( 0, oexMks( oexT( "BasicTaskScheduler::createNew() failed : " ), m_pEnv->getResultMsg() ) );
+	{	setLastError( -1, sqbind::oex2std( oexMks( oexT( "BasicTaskScheduler::createNew() failed : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
 	} // end if
 
 	m_pEnv = BasicUsageEnvironment::createNew( *scheduler );
 	if ( !m_pEnv )
-	{	oexERROR( 0, oexMks( oexT( "BasicUsageEnvironment::createNew() failed : " ), m_pEnv->getResultMsg() ) );
+	{	setLastError( -2, sqbind::oex2std( oexMks( oexT( "BasicUsageEnvironment::createNew() failed : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
 	} // end if
 
@@ -348,12 +365,12 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	// Create rtsp client
 	m_pRtspClient = RTSPClient::createNew( *m_pEnv, nVerbosity, "CLvRtspClient", m_nTunnelOverHTTPPort );
 	if ( !m_pRtspClient )
-	{	oexERROR( 0, oexMks( oexT( "RTSPClient::createNew() failed : " ), m_pEnv->getResultMsg() ) );
+	{	setLastError( -3, sqbind::oex2std( oexMks( oexT( "RTSPClient::createNew() failed : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
 	} // end if
 
 	char *pOptions = oexNULL; 
-	if ( m && m->isset( oexT( "username" ) ) )
+	if ( m_bBlindLogin && m && m->isset( oexT( "username" ) ) )
 		pOptions = m_pRtspClient->sendOptionsCmd( oexStrToMbPtr( sUrl.c_str() ), 
 												  (char*)oexStrToMbPtr( (*m)[ oexT( "username" ) ].str().c_str() ),
 												  (char*)oexStrToMbPtr( (*m)[ oexT( "password" ) ].str().c_str() ) );
@@ -361,7 +378,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 		pOptions = m_pRtspClient->sendOptionsCmd( oexStrToMbPtr( sUrl.c_str() ), 0, 0 );
 		
 	if ( !pOptions )
-	{//	oexERROR( 0, oexMks( oexT( "sendOptionsCmd() failed : " ), m_pEnv->getResultMsg() ) );
+	{	setLastError( -4, sqbind::oex2std( oexMks( oexT( "sendOptionsCmd() failed : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
 	} // end if
 
@@ -378,7 +395,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 		pSdp = m_pRtspClient->describeURL( oexStrToMbPtr( sUrl.c_str() ) );
 		
 	if ( !pSdp )
-	{	oexERROR( 0, oexMks( oexT( "describeURL() failed : " ), m_pEnv->getResultMsg() ) );
+	{	setLastError( -5, sqbind::oex2std( oexMks( oexT( "describeURL() failed : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
 	} // end if
 
@@ -393,7 +410,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	pSdp = oexNULL;
 
 	if ( !m_pSession )
-	{	oexERROR( 0, oexMks( oexT( "MediaSession::createNew() failed : " ), m_pEnv->getResultMsg() ) );
+	{	setLastError( -6, sqbind::oex2std( oexMks( oexT( "MediaSession::createNew() failed : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
 	} // end if
 
@@ -417,7 +434,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	m_bAudio = bFoundAudio;
 
 	if ( !m_bVideo && !m_bAudio )
-	{	oexERROR( 0, oexMks( oexT( "No Video or audio : " ), m_pEnv->getResultMsg() ) );
+	{	setLastError( -7, sqbind::oex2std( oexMks( oexT( "No Video or audio : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
 	} // end if
 
@@ -431,23 +448,23 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 {_STT();
 
 	if ( !m_pRtspClient )
-	{	oexERROR( 0, oexT( "Invalid rtsp client object" ) );
+	{	setLastError( -100, oexT( "Invalid rtsp client object" ) );
 		return 0;
 	} // end if
 
 	if ( !pss )
-	{	oexERROR( 0, oexT( "Invalid video object" ) );
+	{	setLastError( -101, oexT( "Invalid video object" ) );
 		return 0;
 	} // end if
 
 	// Create receiver for stream
 	if ( !pss->initiate() )
-	{	oexERROR( 0, oexMks( oexT( "initiate() video stream failed : " ), m_pEnv->getResultMsg() ) );
+	{	setLastError( -102, sqbind::oex2std( oexMks( oexT( "initiate() video stream failed : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
 	} // end if
 
 	if ( !pss->rtpSource() )
-	{	oexERROR( 0, oexMks( oexT( "RTP source is null : " ), m_pEnv->getResultMsg() ) );
+	{	setLastError( -103, sqbind::oex2std( oexMks( oexT( "RTP source is null : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
 	} // end if
 
@@ -511,13 +528,13 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 		m_sVideoCodec = oexMbToStrPtr( pss->codecName() );
 
 	if ( !m_pRtspClient->setupMediaSubsession( *pss, m_bStreamOverTCP, False ) )
-	{	oexERROR( 0, oexMks( oexT( "setupMediaSubsession() failed, Codec : " ), m_sVideoCodec.c_str(), oexT( " : " ), m_pEnv->getResultMsg() ).Ptr() );
+	{	setLastError( -103, sqbind::oex2std( oexMks( oexT( "setupMediaSubsession() failed, Codec : " ), m_sVideoCodec.c_str(), oexT( " : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
 	} // end if
 
 	m_pVs = new CVideoSink( *m_pEnv );
 	if ( !m_pVs )
-	{	oexERROR( 0, oexMks( oexT( "CVideoSink::createNew() failed" ), oexT( " : " ), m_pEnv->getResultMsg() ) );
+	{	setLastError( -104, sqbind::oex2std( oexMks( oexT( "CVideoSink::createNew() failed" ), oexT( " : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
 	} // end if
 
@@ -530,23 +547,23 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 {_STT();
 	
 	if ( !m_pRtspClient )
-	{	oexERROR( 0, oexT( "Invalid rtsp client object" ) );
+	{	setLastError( -200, oexT( "Invalid rtsp client object" ) );
 		return 0;
 	} // end if
 
 	if ( !pss )
-	{	oexERROR( 0, oexT( "Invalid video object" ) );
+	{	setLastError( -201, oexT( "Invalid video object" ) );
 		return 0;
 	} // end if
 
 	// Create receiver for stream
 	if ( !pss->initiate() )
-	{	oexERROR( 0, oexMks( oexT( "initiate() video stream failed : " ), oexT( " : " ), m_pEnv->getResultMsg() ) );
+	{	setLastError( -203, sqbind::oex2std( oexMks( oexT( "initiate() video stream failed : " ), oexT( " : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
 	} // end if
 
 	if ( !pss->rtpSource() )
-	{	oexERROR( 0, oexMks( oexT( "RTP source is null : " ), oexT( " : " ), m_pEnv->getResultMsg() ) );
+	{	setLastError( -204, sqbind::oex2std( oexMks( oexT( "RTP source is null : " ), oexT( " : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
 	} // end if
 
@@ -598,7 +615,7 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 		m_sAudioCodec = oexMbToStrPtr( pss->codecName() );
 
 	if ( !m_pRtspClient->setupMediaSubsession( *pss, False, False ) )
-	{	oexERROR( 0, oexMks( oexT( "setupMediaSubsession() failed : " ), oexT( " : " ), m_pEnv->getResultMsg() ) );
+	{	setLastError( -205, sqbind::oex2std( oexMks( oexT( "setupMediaSubsession() failed : " ), oexT( " : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
 	} // end if
 
@@ -609,7 +626,7 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 
 	m_pAs = new CAudioSink( *m_pEnv );
 	if ( !m_pAs )
-	{	oexERROR( 0, oexMks( oexT( "CAudioSink::createNew() failed : " ), oexT( " : " ), m_pEnv->getResultMsg() ) );
+	{	setLastError( -206, sqbind::oex2std( oexMks( oexT( "CAudioSink::createNew() failed : " ), oexT( " : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
 	} // end if
 
@@ -678,13 +695,13 @@ oex::oexBOOL CLvRtspClient::DoThread( oex::oexPVOID x_pData )
 
 	if ( m_pVs && m_pVsPss )
 		if ( !m_pVs->startPlaying( *m_pVsPss->rtpSource(), 0, 0 ) )
-		{	oexERROR( 0, oexMks( oexT( "CVideoSink::startPlaying() failed : " ), oexT( " : " ), m_pEnv->getResultMsg() ) );
+		{	setLastError( -500, sqbind::oex2std( oexMks( oexT( "CVideoSink::startPlaying() failed : " ), oexT( " : " ), m_pEnv->getResultMsg() ) ) );
 			return 0;
 		} // end if
 
 	if ( m_pAs && m_pAsPss )
 		if ( !m_pAs->startPlaying( *m_pAsPss->rtpSource(), 0, 0 ) )
-		{	oexERROR( 0, oexMks( oexT( "CAudioSink::startPlaying() failed : " ), oexT( " : " ), m_pEnv->getResultMsg() ) );
+		{	setLastError( -501, sqbind::oex2std( oexMks( oexT( "CAudioSink::startPlaying() failed : " ), oexT( " : " ), m_pEnv->getResultMsg() ) ) );
 			return 0;
 		} // end if
 

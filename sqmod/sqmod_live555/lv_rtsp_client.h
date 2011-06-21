@@ -202,6 +202,10 @@ public:
 	{	return m_fps;
 	}
 
+	/// Returns the url
+	sqbind::stdString getUrl()
+	{	return m_sUrl; }
+	
 	/// Returns the sdp object
 	sqbind::CSqMulti getSDP()
 	{	return m_mSdp;
@@ -301,6 +305,18 @@ public:
 	/// Returns the audio Dts time in useconds	
 	SQInteger getAudioDts() { return m_pAs ? oex::oexGetUSecs( m_pAs->getDts() ) : 0; }
 	
+	/// Enable / disable blind login
+	void setBlindLogin( int b ) { m_bBlindLogin = b; }
+	
+	/// Returns blind login status
+	int getBlindLogin() { return m_bBlindLogin; }
+	
+	/// Returns a string describing the last error
+	sqbind::stdString getLastError() { if ( !m_nLastError ) return sqbind::stdString(); return m_sLastError; }
+
+	/// Returns the last error code
+	int getError() { return m_nLastError; }
+
 	/** @} */
 
 	/// Idle processing static function
@@ -329,6 +345,11 @@ protected:
 	/// Initializes video stream
 	int InitAudio( MediaSubsession *pss );
 
+protected:
+
+	/// Sets the last error
+	int setLastError( int e, sqbind::stdString s );
+
 private:
 
 	/// Flag to end loop
@@ -337,6 +358,15 @@ private:
 	/// Url to open
 	sqbind::stdString		m_sUrl;
 
+	/// Integer indicating error state
+	int 					m_nLastError;
+
+	/// Last error
+	sqbind::stdString		m_sLastError;
+	
+	/// Non-zero to enable blind login
+	int						m_bBlindLogin;
+	
 	/// Non-zero if video should be processed
 	int						m_bVideo;
 
