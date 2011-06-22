@@ -42,9 +42,9 @@ else
 ifeq ($(PLATFORM),windows)
 
 	ifeq ($(BUILD),vs)
-		PRJ_WINL := libmysql
+		PRJ_WINL := $(PRJ_WINL) libmysql
 	else
-		PRJ_WINL := mysql
+		PRJ_WINL := $(PRJ_WINL) mysql
 	endif
 
 	PRJ_INCS := $(PRJ_INCS) mysql/include
