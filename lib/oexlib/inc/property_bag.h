@@ -149,7 +149,8 @@ public:
             *m_t.Ptr() = x_t;
 
         return *this;
-    }
+	}
+
 /*
 #if defined( oexUNICODE )
 

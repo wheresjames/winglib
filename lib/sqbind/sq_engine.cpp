@@ -1071,8 +1071,15 @@ int CSqEngineExport::service_restart( const stdString &sName )
 CSqMulti CSqEngineExport::get_system_drive_info( const stdString &sDrive )
 {_STT();
 	CSqMulti m;
-	oex::CPropertyBag pb = oex::os::CSysUtil::GetDiskInfo( std2oex( sDrive ) );
+	oex::CPropertyBag pb;
+	
+	if ( sDrive.length() )
+		pb[ sqbind::std2oex( sDrive ) ] = oex::os::CSysUtil::GetDiskInfo( std2oex( sDrive ) );
+	else
+		pb = oex::os::CSysUtil::GetDisksInfo( oex::oexTRUE );
+		
 	SQBIND_PropertyBagToMulti( pb, m );
+	
 	return m;
 }
 

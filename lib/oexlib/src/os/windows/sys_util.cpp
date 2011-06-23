@@ -329,14 +329,61 @@ CPropertyBag CSysUtil::GetRegKeys( const CStr &x_sKey, const CStr &x_sPath, oexB
 	return pb;
 }
 
+CPropertyBag CSysUtil::GetDisksInfo( oexBOOL bInfo )
+{_STT();
+
+	CPropertyBag pb;
+	oexTCHAR szDrive[ 16 ] = oexT( "A:" );
+	DWORD dwDrives = GetLogicalDrives(), dw = 1;
+
+	// Build a list of drives
+	while ( dwDrives && dw && szDrive[ 0 ] <= oexT( 'Z' ) )
+	{
+		// Get info on this drive if it exists
+		if ( dwDrives & dw )
+		{
+			if ( bInfo )
+				pb[ szDrive ] = GetDiskInfo( szDrive );
+			else
+				pb[ szDrive ] = GetDriveTypeStr( szDrive );
+		} // end if
+
+		// Next drive position
+		dwDrives &= ~dw; 
+		dw <<= 1;
+		szDrive[ 0 ]++;
+
+	} // end while
+	
+	return pb;
+}
+
+CStr CSysUtil::GetDriveTypeStr(const CStr &x_sDrive)
+{_STT();
+
+	switch( GetDriveType( x_sDrive.Ptr() ) )
+	{	case DRIVE_NO_ROOT_DIR : 	return oexT( "noroot" ); break;
+		case DRIVE_REMOVABLE : 		return oexT( "removable" ); break;
+		case DRIVE_FIXED : 			return oexT( "fixed" ); break;
+		case DRIVE_REMOTE :			return oexT( "remote" ); break;
+		case DRIVE_CDROM :			return oexT( "cdrom" ); break;
+		case DRIVE_RAMDISK :		return oexT( "ramdisk" ); break;
+		default : break;	
+	} // end switch
+
+	return oexT( "unknown" );
+}
+
 CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 {_STT();
+
 	// Sanity check
 	if ( !x_sDrive.Length() ) 
 		return CPropertyBag();
 
 	CPropertyBag pb;
 	pb[ "drive" ] = x_sDrive;
+	pb[ oexT( "drive_type" ) ] = GetDriveTypeStr( x_sDrive.Ptr() );
 	
 	// Get volume information
 	DWORD dwSn = 0, dwMax = 0, dwFlags = 0;
@@ -370,19 +417,6 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 		pb[ oexT( "bytes_unavailable" ) ] = liTotalNumberOfBytes.QuadPart - liFreeBytesAvailable.QuadPart;
 	} // end if
 	
-	// Get the drive type
-	oexCSTR p = oexT( "unknown" );
-	switch( GetDriveType( x_sDrive.Ptr() ) )
-	{	case DRIVE_NO_ROOT_DIR : 	p = oexT( "noroot" ); break;
-		case DRIVE_REMOVABLE : 		p = oexT( "removable" ); break;
-		case DRIVE_FIXED : 			p = oexT( "fixed" ); break;
-		case DRIVE_REMOTE :			p = oexT( "remote" ); break;
-		case DRIVE_CDROM :			p = oexT( "cdrom" ); break;
-		case DRIVE_RAMDISK :		p = oexT( "ramdisk" ); break;
-		default :					p = oexT( "unknown" ); break;	
-	} // end switch
-	pb[ oexT( "drive_type" ) ] = p;
-
 	// Get the dos name
 	TCHAR buf[ MAX_PATH ] = { 0 };
 	DWORD dw = QueryDosDevice( x_sDrive.Ptr(), buf, sizeof( buf ) );

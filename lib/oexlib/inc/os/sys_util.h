@@ -159,9 +159,34 @@ public:
 	//==============================================================
 	/// Returns information about the specified drive
 	/**
-		\param [in] x_sDrive	-	System drive path
+		@param [in] x_sDrive	-	System drive path
 	*/
 	static CPropertyBag GetDiskInfo( const CStr &x_sDrive );
 
-};
+	//==============================================================
+	// GetDisksInfo()
+	//==============================================================
+	/// Returns a list of all drives
+	/**
+		@param [in] bInfo	-	Non-zero to return info on each drive
+	*/
+	static CPropertyBag GetDisksInfo( oexBOOL bInfo );
 
+	//==============================================================
+	// GetDriveType()
+	//==============================================================
+	/// Returns a string describing the drive type
+	/**
+		@param [in] x_sDrive	-	System drive path
+		
+		@return String describing drive type
+					noroot		-	Invalid drive
+					removable	-	Removable drive
+					fixed		-	Fixed drive
+					remote		-	Remote or Network drive
+					cdrom		-	CD / DVD drive
+					ramdisk		-	RAM disk
+	*/
+	static CStr GetDriveTypeStr( const CStr &x_sDrive );
+
+};

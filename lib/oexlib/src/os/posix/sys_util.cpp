@@ -122,3 +122,15 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 */
 }
 
+CPropertyBag CSysUtil::GetDisksInfo( oexBOOL bInfo )
+{_STT();
+
+	return CPropertyBag();
+}
+
+CStr CSysUtil::GetDriveTypeStr(const CStr &x_sDrive)
+{_STT();
+
+	return oexT( "unknown" );
+}
+
