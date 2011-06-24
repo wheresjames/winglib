@@ -1287,6 +1287,13 @@ oexNORETURN void CSys::ThrowException()
 	Exit( s_last_error );
 }
 
+void CSys::InitException()
+{
+	volatile int i = 0;
+	if ( i )
+		_oexTHROW( oexEXCEPTION() );
+}
+
 oexUINT CSys::InjectException( oexPVOID hThread, oexINT nError )
 {
 	s_last_error = nError;
