@@ -1185,6 +1185,9 @@ oexNORETURN void CSys::ThrowException()
 	
 	// Just in case
 	ExitThread( s_last_error );
+
+	// Forever
+	for(;;) Sleep( 1000 );
 }
 
 void CSys::InitException()

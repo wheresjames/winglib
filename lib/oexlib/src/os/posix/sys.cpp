@@ -1284,7 +1284,14 @@ volatile oexINT CSys::s_last_error = 0;
 
 oexNORETURN void CSys::ThrowException()
 {
+	// Throw exception
+	_oexTHROW( oexEXCEPTION( s_last_error ) );
+
+	// Just in case
 	Exit( s_last_error );
+
+	// Forever
+	for(;;) Sleep( 1000 );
 }
 
 void CSys::InitException()
