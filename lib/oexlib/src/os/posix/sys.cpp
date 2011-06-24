@@ -1280,7 +1280,7 @@ oexBOOL CSys::Uninit()
 	return oexTRUE;
 }
 
-oexINT CSys::s_last_error = 0;
+volatile oexINT CSys::s_last_error = 0;
 
 oexNORETURN void CSys::ThrowException()
 {
