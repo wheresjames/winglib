@@ -476,6 +476,9 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 
 #define oexFOURCC_STR( cc ) oexMbToStr( OEX_NAMESPACE::CStr8( (char*)&( cc ), 4 ) )
 
+#define oexEXCEPTION			OEX_NAMESPACE::os::CSys::CException
+#define oexINJECT_EXCEPTION		OEX_NAMESPACE::os::CSys::InjectException
+#define oexInitException		OEX_NAMESPACE::os::CSys::InitException
 #if defined( oexUSE_EXCEPTIONS ) && !defined( OEX_NOEXCEPTIONS )
 #	define oexTRY				try
 #	define oexCATCH( s )		catch( s )
@@ -506,11 +509,11 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #if defined( OEXLIB_STACK_TRACING )
 #	define _STT()					OEX_NAMESPACE::CLocalStackTrace _l_lst( oexSTTFUNCTION );
 #	define _STT_SET_NAME( v )		{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->SetName( v ) : 0 ); }
-#	define _STT_GET_NAME()			{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->GetName() : CStr() ); }
+#	define _STT_GET_NAME()			( oexSt().GetStack()->GetName() )
 #	define _STT_SET_TAG( v )		{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->SetTag( v ) : 0 ); }
-#	define _STT_GET_TAG()			{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->GetTag() : CStr() ); }
+#	define _STT_GET_TAG()			( oexSt().GetStack()->GetTag() )
 #	define _STT_SET_CHECKPOINT( v )	{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->SetCheckpoint( v ) : 0 ); }
-#	define _STT_GET_CHECKPOINT()	{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->GetCheckpoint() : CStr() ); }
+#	define _STT_GET_CHECKPOINT()	( oexSt().GetStack()->GetCheckpoint() )
 #else
 #	define _STT()
 #	define _STT_SET_NAME( v )

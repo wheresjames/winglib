@@ -384,11 +384,11 @@ LONG WINAPI OexExceptionHandler( struct _EXCEPTION_POINTERS *pEp )
 	oexEcho( oexFmt( oexT( "exception( 0x%08x )" oexNL8 ), pEp->ExceptionRecord->ExceptionCode ).Ptr() );
 
 	// Don't recurse crash reporting
-	static BOOL bCrashInProgress = FALSE;
+	volatile static oexBOOL bCrashInProgress = oexFALSE;
 	if ( !bCrashInProgress )
 	{
 		// Crash reporting
-		bCrashInProgress = TRUE;
+		bCrashInProgress = oexTRUE;
 
 		// Create the report
 		CStr s;
@@ -405,7 +405,7 @@ LONG WINAPI OexExceptionHandler( struct _EXCEPTION_POINTERS *pEp )
 		CDebug::CreateCrashReport( g_szUrl, g_szSub, s.Ptr() );
 
 		// Crash Complete
-		bCrashInProgress = FALSE;
+		bCrashInProgress = oexFALSE;
 
 	} // end if
 

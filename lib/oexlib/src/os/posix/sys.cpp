@@ -1280,3 +1280,17 @@ oexBOOL CSys::Uninit()
 	return oexTRUE;
 }
 
+oexINT CSys::s_last_error = 0;
+
+oexNORETURN void CSys::ThrowException()
+{
+	Exit( s_last_error );
+}
+
+oexUINT CSys::InjectException( oexPVOID hThread, oexINT nError )
+{
+	s_last_error = nError;
+
+	return -1;
+}
+

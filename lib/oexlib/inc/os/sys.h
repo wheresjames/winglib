@@ -35,6 +35,39 @@
 
 class CSys
 {
+public:
+
+	/// Exception class
+	class CException
+	{
+	public:
+
+		// Default constructor
+		CException() { m_error = 0; }
+
+		// Initializing constructor
+		CException( oexINT e ) { m_error = 0; }
+
+		// Error code
+		oexINT getError() { return m_error; }
+		
+		// Error code
+		oexINT		m_error;
+	};
+
+	// Last error code
+	volatile static oexINT s_last_error;
+	
+	/// Throws an exception of type CSys::CException
+	oexNORETURN static void ThrowException();
+	
+	/// Injects an exception into the specified thread
+	static oexUINT InjectException( oexPVOID hThread, oexINT nError );
+
+	/// Must be called to catch exception
+	static void InitException() throw (...);
+
+
 private:
 
     /// Constructor

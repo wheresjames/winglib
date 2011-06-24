@@ -1175,3 +1175,56 @@ oexDOUBLE CSys::GetCpuLoad( oexCSTR x_pProcessName )
 }
 
 #endif
+
+volatile oexINT CSys::s_last_error = 0;
+
+oexNORETURN void CSys::ThrowException()
+{
+	// Throw exception
+	_oexTHROW( oexEXCEPTION( s_last_error ) );
+	
+	// Just in case
+	ExitThread( s_last_error );
+}
+
+void CSys::InitException() throw (...)
+{
+	volatile int i = 0;
+	if ( i )
+		_oexTHROW( oexEXCEPTION() );
+}
+
+
+oexUINT CSys::InjectException( oexPVOID hThread, oexINT nError )
+{
+	oexUINT nRet = -1;
+
+	// Save error code
+	s_last_error = nError;
+
+	// Get handle
+	HANDLE h = (HANDLE)hThread;	
+	if ( INVALID_HANDLE_VALUE == h )
+		return -1;
+	
+	// Attemp to suspend the thread
+	if ( INFINITE == SuspendThread( h ) )
+		return -2;
+		
+	CONTEXT ctx;
+	ctx.ContextFlags = CONTEXT_CONTROL;
+	if ( GetThreadContext( h, &ctx ) )
+	{
+		// Jump into our Throw() function
+		ctx.Eip = (DWORD) (DWORD_PTR) CSys::ThrowException;
+
+		if ( SetThreadContext( h, &ctx ) )
+			nRet = 0;
+
+		ResumeThread( h );
+
+	} // end if
+
+	return nRet;
+}
+

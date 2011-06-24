@@ -502,6 +502,9 @@ public:
 	/// Return value of InitThread()
 	/// call GetInitEvent().Wait() to ensure it's valid
 	oexBOOL GetInitStatus() { return m_bInitStatus; }
+	
+	/// Force an exception in the thread
+	oexUINT InjectException( oexINT nCode );
 
 private:
 

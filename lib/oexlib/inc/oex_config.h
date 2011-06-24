@@ -131,6 +131,15 @@
 #define oexDEFAULT_WAIT_TIMEOUT         60000
 //#define oexDEFAULT_WAIT_TIMEOUT       3000
 
+#if defined ( OEX_GCC )
+#	define oexNORETURN 		__attribute__((noreturn))
+#elif defined( OEX_MSC )
+#	define oexNORETURN		__declspec(noreturn)
+#else
+#	error Please defien oexNORETURN for this compiler
+#endif
+
+
 #if defined( OEX_WINDOWS )
 
 // Just informative under Windows.

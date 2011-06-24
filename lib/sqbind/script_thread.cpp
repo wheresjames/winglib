@@ -133,7 +133,12 @@ oex::oexBOOL CScriptThread::InitEngine()
 	m_cSqEngine.SetMessageQueue( this );
 
 	// Set script name for debugging
-	_STT_SET_NAME( oex::CStr() << std2oex( m_cSqEngine.GetScriptName() ) << oexT( " : " ) <<  std2oex( m_sName ) );
+	if ( m_cSqEngine.GetScriptName().length() && m_sName.length() && m_cSqEngine.GetScriptName() != m_sName )
+	{	_STT_SET_NAME( oex::CStr() << std2oex( m_cSqEngine.GetScriptName() ) << oexT( " : " ) <<  std2oex( m_sName ) ); }
+	else if ( m_sName.length() ) 
+	{	_STT_SET_NAME( oex::CStr() << std2oex( m_sName ) ); }
+	else 
+	{	_STT_SET_NAME( oex::CStr() << std2oex( m_cSqEngine.GetScriptName() ) ); }
 
 	return oex::oexTRUE;
 }
