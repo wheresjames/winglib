@@ -65,7 +65,7 @@ public:
 	static oexUINT InjectException( oexPVOID hThread, oexINT nError );
 
 	/// Must be called to catch exception
-	static void InitException() throw (...);
+	static void InitException();
 
 
 private:

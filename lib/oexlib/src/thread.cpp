@@ -69,7 +69,6 @@ oexUINT CThread::InjectException( oexINT nCode )
 	return oexINJECT_EXCEPTION( GetHandle(), nCode );
 }
 
-
 oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 {_STT();
     // Get pointer

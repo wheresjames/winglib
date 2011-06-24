@@ -1187,7 +1187,7 @@ oexNORETURN void CSys::ThrowException()
 	ExitThread( s_last_error );
 }
 
-void CSys::InitException() throw (...)
+void CSys::InitException()
 {
 	volatile int i = 0;
 	if ( i )
