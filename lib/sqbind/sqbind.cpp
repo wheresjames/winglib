@@ -155,7 +155,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSerialPort, CSqSerialPort )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getParity )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, setRtsCtrl )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getRtsCtrl )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getDtrCtrl )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, setDtrCtrl )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getDtrCtrl )
 
 SQBIND_REGISTER_CLASS_END()

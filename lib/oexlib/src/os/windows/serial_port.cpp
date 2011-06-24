@@ -239,6 +239,7 @@ oexBOOL CSerialPort::Purge()
 
 oexBOOL CSerialPort::SetDefaults()
 {_STT();
+
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
 	if ( !pS )
 		return oexFALSE;
