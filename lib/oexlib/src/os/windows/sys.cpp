@@ -1205,7 +1205,7 @@ oexUINT CSys::InjectException( oexPVOID hThread, oexINT nError )
 	// Save error code
 	s_last_error = nError;
 
-#if !defined( OEX_CPU_64 ) && !defined( OEX_CPU_ARM )
+#if !defined( OEX_CPU_ARM )
 
 	// Get handle
 	HANDLE h = (HANDLE)hThread;	
@@ -1221,7 +1221,11 @@ oexUINT CSys::InjectException( oexPVOID hThread, oexINT nError )
 	if ( GetThreadContext( h, &ctx ) )
 	{
 		// Jump into our Throw() function
+#if !defined( OEX_CPU_64 )
 		ctx.Eip = (DWORD) (DWORD_PTR) CSys::ThrowException;
+#else
+		ctx.Rip = (DWORD) (DWORD_PTR) CSys::ThrowException;
+#endif
 
 		if ( SetThreadContext( h, &ctx ) )
 			nRet = 0;
