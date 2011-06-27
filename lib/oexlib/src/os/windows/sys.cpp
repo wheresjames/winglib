@@ -1205,6 +1205,8 @@ oexUINT CSys::InjectException( oexPVOID hThread, oexINT nError )
 	// Save error code
 	s_last_error = nError;
 
+#if !defined( OEX_CPU_64 ) && !defined( OEX_CPU_ARM )
+
 	// Get handle
 	HANDLE h = (HANDLE)hThread;	
 	if ( INVALID_HANDLE_VALUE == h )
@@ -1227,6 +1229,8 @@ oexUINT CSys::InjectException( oexPVOID hThread, oexINT nError )
 		ResumeThread( h );
 
 	} // end if
+
+#endif
 
 	return nRet;
 }

@@ -153,12 +153,17 @@ static oexINT FreeRi( SResourceInfo* x_pRi, oexINT x_eType, oexUINT x_uTimeout, 
 				{
 					oexERROR( 0, oexT( "!!! Thread failed to exit gracefully, attempting to force an exception" ) );
 
-					// Let's do it
-					if ( !os::CSys::InjectException( x_pRi->hHandle, -199 ) )
-						if ( WAIT_OBJECT_0 != WaitForSingleObject( x_pRi->hHandle, x_uTimeout ) )
-						{	oexERROR( GetLastError(), oexT( "!!! Forced exception failed, Calling TerminateThread() !!!" ) );
+					// Attempt exception injection
+					if ( os::CSys::InjectException( x_pRi->hHandle, -199 ) 
+						 || WAIT_OBJECT_0 != WaitForSingleObject( x_pRi->hHandle, x_uTimeout ) )
+						{
+							oexERROR( GetLastError(), oexT( "!!! Forced exception failed, Calling TerminateThread() !!!" ) );
+							
+							// Fine, do things the hard way
 							TerminateThread( x_pRi->hHandle, oexFALSE );
+							
 						} // end if
+						
 				} // end if
 
 				else
