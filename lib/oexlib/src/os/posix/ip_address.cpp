@@ -46,8 +46,8 @@ using namespace OEX_NAMESPACE::os;
 #	if defined( __get_h_errno )
 #		undef __get_h_errno
 #	endif
-static int g_oex_errno = 0;
-int* __get_h_errno(void) { return (int*)&g_oex_errno; }
+//static int g_oex_errno = 0;
+//int* __get_h_errno(void) { return (int*)&g_oex_errno; }
 #endif
 
 //////////////////////////////////////////////////////////////////////

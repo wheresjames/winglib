@@ -101,6 +101,8 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 
 	} // end try
 
+#if !defined( OEX_NOEXCEPTIONS )
+
 	_oexCATCH( oexEXCEPTION& e )
 	{
 		pThread->m_bInitStatus = 0;
@@ -114,6 +116,8 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 		oexERROR( 0, oexT( "!!! UNHANDLED EXCEPTION DURING InitThread() !!!" ) );
 		
 	} // end catch
+
+#endif
 
 	// Signal that we're initialized
 	pThread->m_evInit.Signal();
@@ -138,6 +142,8 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 					
 				} // end try
 				
+#if !defined( OEX_NOEXCEPTIONS )
+
 				_oexCATCH( oexEXCEPTION& e )
 				{
 					// +++ Hmm, should we quit here?
@@ -153,6 +159,7 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 					oexERROR( 0, oexT( "!!! UNHANDLED EXCEPTION DURING DoThread() !!!" ) );
 					
 				} // end catch
+#endif
 
 				// Check for stop signal
 				if ( !pThread->m_evStop.Wait( uSleep ) )
@@ -176,6 +183,8 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 
 		} // end try
 
+#if !defined( OEX_NOEXCEPTIONS )
+
 		_oexCATCH( oexEXCEPTION& e )
 		{
 			pThread->m_bInitStatus = 0;
@@ -189,6 +198,7 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 			oexERROR( 0, oexT( "!!! UNHANDLED EXCEPTION DURING EndThread() !!!" ) );
 			
 		} // end catch
+#endif
 
 	} // end if
 

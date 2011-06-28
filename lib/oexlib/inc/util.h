@@ -84,6 +84,9 @@ public:
 
 	/// Returns the output circular buffer or 0 if there is none
 	static CFifoSync* getOutputBuffer();
+	
+	/// Returns non-zero if output buffering is on
+	static oexBOOL isOutputBuffer();
 
 	/// Creates a ascii view of a binary buffer
 	static CStr BinToAsciiHexStr( CBin *x_pBin, oexSIZE_T x_uLen, oexSIZE_T x_nLineLen, oexSIZE_T x_nMaxLines );

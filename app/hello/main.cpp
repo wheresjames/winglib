@@ -3,10 +3,18 @@
 
 #include "stdio.h"
 
+#	if defined( ANDROID )
+#		include "stdlib.h"
+#	endif
+
 int main(int argc, char* argv[])
 {
 	printf( "Hello World!\n" );
 
+#	if defined( ANDROID )
+	exit( 0 );
+#	endif
+	
 	return 0;
 }
 

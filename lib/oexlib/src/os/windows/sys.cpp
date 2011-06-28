@@ -928,7 +928,11 @@ oexUINT CSys::WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen 
 	// +++ Ensure source is NULL terminated
 //	pSrc[ uLen - 1 ] = 0;
 
+#if defined( OEX_NOWCHAR )
+	return 0;
+#else
 	return wcstombs( pDst, pSrc, uMax );
+#endif
 }
 
 oexUINT CSys::MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen )
@@ -939,7 +943,11 @@ oexUINT CSys::MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen 
 	// +++ Ensure source is NULL terminated
 //	pSrc[ uLen - 1 ] = 0;
 
+#if defined( OEX_NOWCHAR )
+	return 0;
+#else
 	return mbstowcs( pDst, pSrc, uMax );
+#endif
 }
 
 oexCSTR CSys::SetLocale( oexINT nCategory, oexCSTR pLocal )
@@ -966,27 +974,39 @@ int CSys::vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs )
 
 int CSys::Echo( oexCSTR8 x_pFmt )
 {//_STT();
+
 	if ( !x_pFmt )
 		return 0;
+
+	if ( CUtil::isOutputBuffer() )
+	{
 #if defined( oexUNICODE )
-	CStr s = oexMbToStr( x_pFmt );
-	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
+		CStr s = oexMbToStr( x_pFmt );
+		CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
 #else
-	CUtil::AddOutput( x_pFmt, 0, oexTRUE );
+		CUtil::AddOutput( x_pFmt, 0, oexTRUE );
 #endif
+	} // end if
+	
 	return ::puts( x_pFmt );
 }
 
 int CSys::Echo( oexCSTR8 x_pFmt, oexLONG x_lLen )
 {//_STT();
+
 	if ( !x_pFmt || 0 >= x_lLen )
 		return 0;
+		
+	if ( CUtil::isOutputBuffer() )
+	{
 #if !defined( oexUNICODE )
-	CUtil::AddOutput( x_pFmt, x_lLen, oexTRUE );
+		CUtil::AddOutput( x_pFmt, x_lLen, oexTRUE );
 #else
-	CStr s = oexStrToStrW( CStr8( x_pFmt, x_lLen ) );
-	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
+		CStr s = oexStrToStrW( CStr8( x_pFmt, x_lLen ) );
+		CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
 #endif
+	} // end if
+	
 	return ::fwrite( x_pFmt, 1, x_lLen, stdout );
 }
 

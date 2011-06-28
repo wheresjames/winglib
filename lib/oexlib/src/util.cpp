@@ -104,6 +104,10 @@ oexBOOL CUtil::EnableOutputFileCapture( oexCSTR x_pFile, oexUINT x_uTimestampFre
 	return *g_szFile;
 }
 
+oexBOOL CUtil::isOutputBuffer()
+{
+	return ( g_pFifoSync || *g_szFile ) ? oexTRUE : oexFALSE;
+}
 
 //CCircBuf* CUtil::getOutputBuffer()
 CFifoSync* CUtil::getOutputBuffer()
@@ -114,7 +118,7 @@ CFifoSync* CUtil::getOutputBuffer()
 oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 {
 	// Sanity checks
-	if ( ( !g_pFifoSync && !*g_szFile ) || !x_pStr || !*x_pStr )
+	if ( !isOutputBuffer || !x_pStr || !*x_pStr )
 		return oexFALSE;
 
 	if ( !x_uSize )

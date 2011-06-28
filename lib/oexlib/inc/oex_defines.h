@@ -106,10 +106,17 @@
 #define oexCleanupBin				OEX_NAMESPACE::COex::GetBinShare().Cleanup
 
 #if defined( OEX_GCC )
-#	define oexVaList				        __builtin_va_list
-#	define oexVaStart				        __builtin_va_start
-#	define oexVaEnd					        __builtin_va_end
-#	define oexVaArg					        __builtin_va_arg
+#	if defined( OEX_ANDROID )
+#		define oexVaList			        __builtin_va_list
+#		define oexVaStart			        __builtin_va_start
+#		define oexVaEnd				        __builtin_va_end
+#		define oexVaArg				        __builtin_va_arg
+#	else
+#		define oexVaList			        __builtin_va_list
+#		define oexVaStart			        __builtin_va_start
+#		define oexVaEnd				        __builtin_va_end
+#		define oexVaArg				        __builtin_va_arg
+#	endif
 #elif defined( OEX_WIN32 )
 #	define oexVaList				        OEX_NAMESPACE::oexPVOID
 #	define oexVaStart( v, p )		        ( v = ( ( (OEX_NAMESPACE::oexPVOID*)&p ) + 1 ) )

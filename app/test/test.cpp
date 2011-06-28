@@ -4,8 +4,10 @@
 
 #define TEST_TCP_PORT	21216
 
+#define OEX_TEST_TRACE
+
 #if defined( OEX_TEST_TRACE )
-#	define _TR()	oexM()
+#	define _TR()	oexPrintf( "%s(%d) : MARKER\n", __FILE__, __LINE__ )
 #else
 #	define _TR()
 #endif
@@ -100,7 +102,8 @@ oex::oexRESULT TestCommon()
 }
 
 oex::oexRESULT TestAllocator()
-{_STT();
+{// _STT();
+
 	oexEcho( oexT( "======== Memory allocator..." ) );
 
 	// Veriry over-run / under-run protection
@@ -108,148 +111,195 @@ oex::oexRESULT TestAllocator()
 
 	char* pChar = OexAllocNew< char >( 100 );
 
+_TR();
 	if ( !oexVERIFY( !oex::os::CSys::MemCmp( &pChar[ 100 ],
 						oex::CAlloc::m_ucOverrunPadding,
 						sizeof( oex::CAlloc::m_ucOverrunPadding ) ) ) )
 		return -1;
 
+_TR();
 	if ( !oexVERIFY( !oex::os::CSys::MemCmp( &pChar[ -(int)sizeof( oex::CAlloc::m_ucUnderrunPadding ) ],
 						oex::CAlloc::m_ucUnderrunPadding,
 						sizeof( oex::CAlloc::m_ucUnderrunPadding ) ) ) )
 		return -2;
 
+_TR();
 	OexAllocDelete( pChar );
 
 #endif
 
 	// Allocate generic array
+_TR();
 	int * buf = OexAllocNew< int >( 100 );
 	if ( !buf )
 		return -1;
 
 	int i;
+_TR();
 	for ( i = 0; i < 100; i++ )
 		buf[ 0 ] = i;
 
+_TR();
 	if ( !oexVERIFY( oex::CAlloc::ArraySize( buf ) == 100 ) )
 		return -2;
 
+_TR();
 	if ( !oexVERIFY( oex::CAlloc::UsableSize( buf ) == sizeof( int ) * 100 ) )
 		return -3;
 
+_TR();
 	buf = OexAllocResize( buf, 50 );
 	if ( !buf )
 		return -4;
 
+_TR();
 	if ( !oexVERIFY( oex::CAlloc::ArraySize( buf ) == 50 ) )
 		return -5;
 
+_TR();
 	if ( !oexVERIFY( oex::CAlloc::UsableSize( buf ) == sizeof( int ) * 50 ) )
 		return -6;
 
+_TR();
 	for ( i = 0; i < 50; i++ )
 		buf[ 0 ] = i;
 
+_TR();
 	OexAllocDelete( buf );
 
 	// Test reference counting
+_TR();
 	buf = OexAllocNew< int >( 100 );
 	if ( !buf )
 		return -1;
 
+_TR();
 	if ( !oexVERIFY( 1 == oex::CAlloc::GetRefCount( buf ) ) )
 		return -2;
 
 	// Add a reference
+_TR();
 	if ( !oexVERIFY( 2 == oex::CAlloc::AddRef( buf ) ) )
 		return -3;
 
+_TR();
 	if ( !oexVERIFY( 2 == oex::CAlloc::GetRefCount( buf ) ) )
 		return -4;
 
 	// Delete once
+_TR();
 	if ( !oexVERIFY( 1 == OexAllocDelete( buf ) ) )
 		return -5;
 
+_TR();
 	if ( !oexVERIFY( 1 == oex::CAlloc::GetRefCount( buf ) ) )
 		return -6;
 
 	// Delete twice
+_TR();
 	if ( !oexVERIFY( 0 == OexAllocDelete( buf ) ) )
 		return -7;
 
 	// Allocate single object
+_TR();
 	CTestMonitor tm;
 	CBaseTestObject *p = OexAllocConstruct< CBaseTestObject >( &tm );
 
+_TR();
 	if ( !oexVERIFY_PTR( p ) )
 		return -7;
 
+_TR();
 	if ( !oexVERIFY( 1 == tm.m_uConstructed ) )
 		return -8;
 
+_TR();
 	OexAllocDestruct( p );
 
+_TR();
 	if ( !oexVERIFY( 1 == tm.m_uDestructed ) )
 		return -9;
 
 	// Allocate array
+_TR();
 	tm.Reset();
+
+_TR();
 	p = OexAllocConstructArray< CBaseTestObject >( 3, &tm );
 
+_TR();
 	if ( !oexVERIFY( p ) )
 		return -9;
 
+_TR();
 	if ( !oexVERIFY( 3 == tm.m_uConstructed ) )
 		return -8;
 
+_TR();
 	OexAllocDestruct( p );
 
+_TR();
 	if ( !oexVERIFY( 3 == tm.m_uDestructed ) )
 		return -9;
 
 	{ // Scope
 
+_TR();
 		oex::TMem< char > mem;
 
+_TR();
 		if ( !oexVERIFY_PTR( mem.OexNew( 13 ).c_Ptr() ) )
 			return -10;
 
 		// Check overrun protection
 //        mem.OexResize( 12 );
 
+_TR();
 		oex::zstr::Copy( mem.Ptr(), "Hello World!" );
 
 	} // end scope
 
 	{ // Scope
 
+_TR();
 		CTestMonitor tm;
 		oex::TMem< CBaseTestObject > mem;
 
+_TR();
 		if ( !oexVERIFY_PTR( mem.OexConstruct( &tm ).c_Ptr() ) )
 			return -11;
 
+_TR();
 		if ( !oexVERIFY( 1 == tm.m_uConstructed ) )
 			return -12;
 
+_TR();
 		tm.Reset();
+
+_TR();
 		if ( !oexVERIFY_PTR( mem.OexConstruct( &tm ).c_Ptr() ) )
 			return -13;
 
+_TR();
 		if ( !oexVERIFY( 1 == tm.m_uConstructed ) )
 			return -14;
 
+_TR();
 		tm.Reset();
+		
+_TR();
 		if ( !oexVERIFY_PTR( mem.OexConstructArray( 2, &tm ).c_Ptr() ) )
 			return -15;
 
+_TR();
 		if ( !oexVERIFY( 2 == tm.m_uConstructed ) )
 			return -16;
 
 		// Strange allocation method
+_TR();
 		CBaseTestObject *pBto = oex::TMem< CBaseTestObject >().OexConstruct().Detach();
 
+_TR();
 		oex::TMem< CBaseTestObject >( pBto ).Delete();
 
 		// Check overrun protection
@@ -264,15 +314,19 @@ oex::oexRESULT TestAllocator()
 		CTestMonitor tm;
 		oex::TMem< CBaseTestObject > mem;
 
+_TR();
 		if ( !oexVERIFY_PTR( mem.OexConstructArray( 4, &tm ).c_Ptr() ) )
 			return -17;
 
+_TR();
 		if ( !oexVERIFY( 2 == mem.Resize( 2 ).Size() ) )
 			return -18;
 
+_TR();
 		if ( !oexVERIFY( 4 == tm.m_uConstructed ) )
 			return -12;
 
+_TR();
 		if ( !oexVERIFY( 2 == tm.m_uDestructed ) )
 			return -12;
 
@@ -280,9 +334,11 @@ oex::oexRESULT TestAllocator()
 
 	{ // Scope
 
+_TR();
 		oex::TMem< char > mem;
 
 		// Work out the resize function
+_TR();
 		const oexSIZE_T uTestSize = 1000;
 		for ( oexSIZE_T i = 0; i < uTestSize; i++ )
 		{
@@ -294,6 +350,7 @@ oex::oexRESULT TestAllocator()
 		} // end for
 
 		// Verify the memory data
+_TR();
 		for ( oexSIZE_T i = 0; i < uTestSize; i++ )
 			if ( !oexVERIFY( *mem.Ptr( i ) == (char)i ) )
 				return -21;
@@ -301,6 +358,7 @@ oex::oexRESULT TestAllocator()
 	} // end scope
 
 	// Test alignment functions
+_TR();
 	for ( oexSIZE_T i = 0; i < 100; i++ )
 		if ( !oexVERIFY( 0 == ( oex::cmn::Align2( i ) & 1 ) )
 			 || !oexVERIFY( 0 == ( oex::cmn::Align4( i ) & 3 ) )
@@ -309,6 +367,7 @@ oex::oexRESULT TestAllocator()
 			return -22;
 
 	// Test alignment functions
+_TR();
 	for ( oexSIZE_T i = 0; i < 100; i++ )
 		if ( !oexVERIFY( oex::cmn::IsAligned2( oex::cmn::Align2( i ) ) )
 			 || !oexVERIFY( oex::cmn::IsAligned4( oex::cmn::Align4( i ) ) )
@@ -320,232 +379,37 @@ oex::oexRESULT TestAllocator()
 #if !defined( OEX_WINCE )
 
 	// Declare aligned buffers
+_TR();
 	oexAligned( oexCHAR, bufp[ 2 ] ) = { 0 };
+_TR();
 	oexAligned2( oexCHAR, buf2[ 2 ] ) = { 0 };
+_TR();
 	oexAligned4( oexCHAR, buf4[ 2 ] ) = { 0 };
+_TR();
 	oexAligned8( oexCHAR, buf8[ 2 ] ) = { 0 };
+_TR();
 	oexAligned16( oexCHAR, buf16[ 2 ] ) = { 0 };
 
 	// Verify buffer alignments
+_TR();
 	if ( !oexVERIFY( oexIsAligned( oexPtrToInt( bufp ) ) )
 		 || !oexVERIFY( oexIsAligned2( oexPtrToInt( buf2 ) ) )
 		 || !oexVERIFY( oexIsAligned4( oexPtrToInt( buf4 ) ) )
 		 || !oexVERIFY( oexIsAligned8( oexPtrToInt( buf8 ) ) )
+#if !defined( OEX_ARM )
 		 || !oexVERIFY( oexIsAligned16( oexPtrToInt( buf16 ) ) )
+#endif
 	   )
 		return -23;
 #endif
 
-	return oex::oexRES_OK;
-}
-
-oex::oexRESULT TestBinary()
-{_STT();
-	oexEcho( oexT( "======== Binary buffers..." ) );
-
-	oex::CBin b1;
-
-	if ( !oexVERIFY( b1.Allocate( 128 ) ) )
-		return -1;
-
-	if ( !oexVERIFY( 128 == b1.Size() ) )
-		return -2;
-
-	if ( !oexVERIFY( 0 == b1.getUsed() ) )
-		return -3;
-
-	if ( !oexVERIFY( b1.MemCpy( "Hello", 5 ) ) )
-		return -4;
-
-	if ( !oexVERIFY( 5 == b1.getUsed() ) )
-		return -5;
-
-	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "Hello", b1.getUsed() ) ) )
-		return -6;
-
-	// !!! Careful, this string may *not* null terminated
-	//     It's ok here, operator == is binary compatible
-	//     but if you use TStr::Ptr(), you may have issues
-	if ( !oexVERIFY( b1.getString() == "Hello" ) )
-		return -7;
-
-	if ( !oexVERIFY( b1.getSafeString() == "Hello" ) )
-		return -7;
-
-	if ( !oexVERIFY( 5 == b1.setString( "olleH" ) ) )
-		return -8;
-
-	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "olleH", b1.getUsed() ) ) )
-		return -9;
-
-	if ( !oexVERIFY( 10 == b1.AppendBuffer( "Hello", 5 ) ) )
-		return 10;
-
-	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "olleHHello", b1.getUsed() ) ) )
-		return -11;
-
-	if ( !oexVERIFY( 1 == oexGetRefCount( b1.Ptr() ) ) )
-		return -12;
-
-	oex::CBin b2( b1 );
-
-	if ( !oexVERIFY( b1.Ptr() == b2.Ptr() ) )
-		return -13;
-
-	if ( !oexVERIFY( 2 == oexGetRefCount( b1.Ptr() ) ) )
-		return -14;
-
-	b2.Destroy();
-
-	if ( !oexVERIFY( 1 == oexGetRefCount( b1.Ptr() ) ) )
-		return -15;
-
-	b2 = b1;
-
-	if ( !oexVERIFY( b1.Ptr() == b2.Ptr() ) )
-		return -16;
-
-	if ( !oexVERIFY( 2 == oexGetRefCount( b1.Ptr() ) ) )
-		return -17;
-
-	b2.Copy();
-
-	if ( !oexVERIFY( 1 == oexGetRefCount( b1.Ptr() ) ) )
-		return -18;
-
-	b1.Destroy();
-
-	oex::CBin::t_byte* pChar = OexAllocNew< oex::CBin::t_byte >( 100 );
-
-	if ( !oexVERIFY( 1 == oexGetRefCount( pChar ) ) )
-		return -19;
-
-	b2.setBuffer( pChar, 100, 0, oex::oexTRUE );
-
-	if ( !oexVERIFY( pChar == b2.Ptr() ) )
-		return -20;
-
-	if ( !oexVERIFY( 100 == b2.getUsed() ) )
-		return -21;
-
-	if ( !oexVERIFY( 2 == oexGetRefCount( pChar ) ) )
-		return -22;
-
-	OexAllocDelete< oex::CBin::t_byte >( pChar );
-
-	if ( !oexVERIFY( 1 == oexGetRefCount( pChar ) ) )
-		return -23;
-
-	b2.Destroy();
-
-
-	if ( !oexVERIFY( 5 == b1.setString( "Hello" ) ) )
-		return -24;
-
-	if ( !oexVERIFY( oexSetBin( oexT( "TestBuffer" ), &b1 ) ) )
-		return -25;
-
-	if ( !oexVERIFY( oexIsBin( oexT( "TestBuffer" ) ) ) )
-		return -26;
-
-	if ( !oexVERIFY( !oexIsBin( oexT( "WrongBuffer" ) ) ) )
-		return -27;
-
-	b2 = oexGetBin( oexT( "WrongBuffer" ) );
-
-	if ( !oexVERIFY( !b2.Ptr() && !b2.getUsed() ) )
-		return -28;
-
-	b2 = oexGetBin( oexT( "TestBuffer" ) );
-
-	if ( !oexVERIFY( b1.Ptr() == b2.Ptr() ) )
-		return -29;
-
-	if ( !oexVERIFY( 5 == b2.getUsed() ) )
-		return -30;
-
-	CStr8 s = b2.getString();
-
-	if ( !oexVERIFY( s.Ptr() == b2.Ptr() ) )
-		return -31;
-
-	if ( !oexVERIFY( s == "Hello" ) )
-		return -32;
-
-	oexCPVOID ptr = b1.Ptr();
-
-	if ( !oexVERIFY( 4 == oexGetRefCount( ptr ) ) )
-		return -33;
-
-	s.Destroy();
-
-	if ( !oexVERIFY( 3 == oexGetRefCount( ptr ) ) )
-		return -34;
-
-	b2.Destroy();
-
-	if ( !oexVERIFY( 2 == oexGetRefCount( ptr ) ) )
-		return -35;
-
-	oexSetBin( oexT( "TestBuffer" ), 0 );
-
-	if ( !oexVERIFY( 1 == oexGetRefCount( ptr ) ) )
-		return -36;
-
-	b1.Destroy();
-
-	b1.setString( oexT( "Hello World!" ) );
-
-	b1.setOffset( 6 );
-
-	if ( !oexVERIFY( 6 == b1.getOffset() ) )
-		return -37;
-
-	if ( !oexVERIFY( 6 == b1.getUsed() ) )
-		return -37;
-
-	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "World!", b1.getUsed() ) ) )
-		return -38;
-
-	if ( !oexVERIFY( b1.getString() == "World!" ) )
-		return -39;
-
-	if ( !oexVERIFY( 2 == b1.findCHAR( 'r', 0, 0 ) ) )
-		return -40;
-
-	b2 = b1.Sub( 0, 5 );
-
-	if ( !oexVERIFY( b2.getUsed() == 5 ) )
-		return -41;
-
-	if ( !oexVERIFY( b2.getString() == "World" ) )
-		return -42;
-
-	b1.Destroy();
-
-	b1.setString( oexT( "Hello World!" ) );
-
-	if ( !oexVERIFY( ( 13 + 3 ) != b1.Insert( 3, 0 ) ) )
-		return -43;
-
-	oexMemCpy( b1._Ptr(), "***", 3 );
-
-	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "***Hello World!", b1.getUsed() ) ) )
-		return -44;
-
-	if ( !oexVERIFY( ( 13 + 3 + 3 ) != b1.Insert( 3, 8 ) ) )
-		return -45;
-
-	oexMemCpy( b1._Ptr( 8 ), "---", 3 );
-
-	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "***Hello--- World!", b1.getUsed() ) ) )
-		return -46;
-
+_TR();
 	return oex::oexRES_OK;
 }
 
 oex::oexRESULT TestStrings()
-{_STT();
+{// _STT();
+
 	oexEcho( oexT( "======== String functions..." ) );
 
 	oex::CStr str1, str2;
@@ -560,73 +424,126 @@ oex::oexRESULT TestStrings()
 //        oex::oexSTR pUnPtr = str1.Allocate( 4 );
 //        pUnPtr--; *pUnPtr = 1;
 
+_TR();
 	pStr = str1.OexAllocate( 12 );
 	if ( !oexVERIFY_PTR( pStr ) )
 		return -1;
+		
+_TR();
 
 	oex::zstr::Copy( pStr, oexT( "Hello World!" ) );
 
+_TR();
 	if ( !oexVERIFY( !oex::os::CSys::MemCmp( str1.Ptr(), oexT( "Hello World!" ), str1.Length() ) ) )
 		return -2;
 
+_TR();
 	str1.Destroy();
 
+_TR();
 	if ( !oexVERIFY( 0 == str1.Length() ) )
 		return -3;
 
+_TR();
 	str1 = oexT( "Hello World!" );
 	if ( !oexVERIFY( 12 == str1.Length() ) )
 		return -4;
 
+_TR();
 	str1 += oexT( " - Goodbye Bugs!" );
 	if ( !oexVERIFY( 28 == str1.Length() ) )
 		return -5;
 
+_TR();
 	if ( !oexVERIFY( str1 == oexT( "Hello World! - Goodbye Bugs!" ) ) )
 		return -6;
 
+_TR();
 	pStr = str1.OexAllocate( 4 );
 	oex::zstr::Copy( pStr, oexT( "wxyz" ) );
 	if ( !oexVERIFY( str1.Length() == 4 ) )
 		return -7;
 
+_TR();
 	// Test replace and binary compare
 	if (	!oexVERIFY_PTR( str1.Replace( 'w', '*' ).Ptr() ) || !oexVERIFY( str1 == oexT( "*xyz" ) )
 		 || !oexVERIFY_PTR( str1.Replace( 'y', '\x0' ).Ptr() ) || !oexVERIFY( !str1.Compare( oexT( "*x\x0z" ), 4 ) )
 		 || !oexVERIFY_PTR( str1.Replace( 'z', '*' ).Ptr() ) || !oexVERIFY( !str1.Compare( oexT( "*x\x0*" ), 4 ) ) )
 		return -8;
 
+_TR();
 	str1.Fmt( oexT( "d = %d" ), (oex::oexINT)9 );
 	if ( !oexVERIFY( str1 == oexT( "d = 9" ) ) )
 		return -9;
 
+_TR();
 	str1.Fmt( oexT( "u = %u" ), (oex::oexULONG)11 );
 	if ( !oexVERIFY( str1 == oexT( "u = 11" ) ) )
 		return -9;
 
+_TR();
 	str1.Fmt( oexT( "s = %s" ), oexT( "String" ) );
 	if ( !oexVERIFY( str1 == oexT( "s = String" ) ) )
 		return -9;
 
+_TR();
 	str1.Fmt( oexT( "f = %f" ), (oex::oexDOUBLE)3.14f );
 	if ( !oexVERIFY( str1 == oexT( "f = 3.140000" ) ) )
 		return -9;
 
+_TR();
 	str1.Fmt( oexT( "u = %u, s = %s, f = %f" ), (oex::oexULONG)11, oexT( "String" ), (oex::oexDOUBLE)3.14f );
 	if ( !oexVERIFY( str1 == oexT( "u = 11, s = String, f = 3.140000" ) ) )
 		return -9;
 
-	oex::oexGUID guid;
+_TR();
+	str1.Fmt( oexT( "%0.8X %0.4X %0.2X" ), (oexINT)0x0123ABCD, (oexINT)0x0ABC, (oexINT)0x0A );
+	if ( !oexVERIFY( str1 == oexT( "0123ABCD 0ABC 0A" ) ) )
+	{	oexEcho( str1.Ptr() );
+		return -9;
+	} // end if
+
+_TR();
+	CSysTime st( CSysTime::eGmtTime );
+	
+_TR();
+//	oexEcho( oexMks( oexT( "Current UNIX timestamp: " ), st.GetUnixTime() ).Ptr() );
+
+_TR();
+	oex::oexGUID guid, guid2;
 	oexZeroMemory( &guid, sizeof( guid ) );
 	oexCSTR pTest = oexT( "01234567-8901-2345-6789-012345678901" );
 
+_TR();
 	static const oexGUID guidTest =
 //		{ 0x01234567, 0x8901, 0x2345, { 0x67, 0x89, 0x01, 0x23, 0x45, 0x67, 0x89, 0x01 } };
 		oexINITGUID( 0x01234567, 0x8901, 0x2345, 0x67, 0x89, 0x01, 0x23, 0x45, 0x67, 0x89, 0x01 );
 
+_TR();
+	oex::oexTCHAR szGuid[ 256 ] = { 0 };
+	os::CSys::StrFmt( szGuid, 37,
+			 oexT( "%0.8X-%0.4X-%0.4X-%0.2X%0.2X-%0.2X%0.2X%0.2X%0.2X%0.2X%0.2X" ),
+			 (oexINT) guidTest.Data1,
+			 (oexINT) guidTest.Data2,
+			 (oexINT) guidTest.Data3,
+			 (oexINT) guidTest.Data4[ 0 ],
+			 (oexINT) guidTest.Data4[ 1 ],
+			 (oexINT) guidTest.Data4[ 2 ],
+			 (oexINT) guidTest.Data4[ 3 ],
+			 (oexINT) guidTest.Data4[ 4 ],
+			 (oexINT) guidTest.Data4[ 5 ],
+			 (oexINT) guidTest.Data4[ 6 ],
+			 (oexINT) guidTest.Data4[ 7 ] );
+			 
+_TR();
+	if ( !oexVERIFY( oex::CStr( pTest ) == szGuid ) )
+		return -10;		
+		
+_TR();
 	if ( !oexVERIFY( guid::CmpGuid( guid::StringToGuid( &guid, pTest, 36 ), &guidTest ) ) )
 		return -10;
 
+_TR();
 	if ( !oexVERIFY( oex::CStr( pTest ).GuidToString( &guidTest ) == pTest ) )
 		return -10;
 
@@ -634,166 +551,223 @@ oex::oexRESULT TestStrings()
 	if ( !oexVERIFY( str2.GuidToString( str1.StringToGuid( &guid ) ) == str1 ) )
 		return -10;
 
+_TR();
+	oexZeroMemory( &guid, sizeof( guid ) );
+
+_TR();
+	os::CSys::CreateGuid( &guid );
+
+_TR();
+	if ( !oexVERIFY( str2.GuidToString( &guid ).Length() == str1.Length() ) )
+		return -10;
+
+_TR();
 	if ( !oexVERIFY( oex::CStr( oexT( "TaBlE" ) ).ToLower() == oexT( "table" ) )
 		 || !oexVERIFY( oex::CStr( oexT( "cHaIr" ) ).ToUpper() == oexT( "CHAIR" ) ) )
 		return -11;
 
+_TR();
 	if ( !oexVERIFY( oex::CStr( oexT( "Hello" ) ).Reverse() == oexT( "olleH" ) ) )
 		return -12;
 
+_TR();
 	str1 = oexT( "Test String" );
 	str2 = ReturnTest( str1 );
 	if ( !oexVERIFY( str1.Ptr() == str2.Ptr() ) )
 		return -13;
 
+_TR();
 	str1 += oexT( " - Make copy" );
 	if ( !oexVERIFY( str1.Ptr() != str2.Ptr() ) ||
 		 !oexVERIFY( str1 == oexT( "Test String - Make copy" ) ) ||
 		 !oexVERIFY( str2 == oexT( "Test String" ) ) )
 		return -14;
 
+_TR();
 	// Shared version ( should break the share )
 	str2 = str1.SubStr( 5, 6 );
 	if ( !oexVERIFY( str2 == oexT( "String" ) ) )
 		return -15;
 
+_TR();
 	// Non-Shared version
 	str2 = oexT( "Hello World!" );
 	str2.Sub( 6, 5 );
 	if ( !oexVERIFY( str2 == oexT( "World" ) ) )
 		return -16;
 
+_TR();
 	str1 = oexT( "Hello World!" );
 	str1++; str1++;
 	if ( !oexVERIFY( str1 == oexT( "llo World!" ) ) )
 		return -16;
 
+_TR();
 	str1.Append( oexT( "123" ) );
 	if ( !oexVERIFY( str1 == oexT( "llo World!123" ) ) )
 		return -16;
 
+_TR();
 	if ( !oexVERIFY( ( oex::CStr( oexT( "abcdef" ) ).LTrim( 2 ) << oexT( "ghi" ) ) == oexT( "cdefghi" ) ) )
 		return -16;
 
+_TR();
 	str2 = oexT( "  hello  " );
 	str2.TrimWhiteSpace();
 	if ( !oexVERIFY( str2 == oexT( "hello" ) ) )
 		return -17;
 
+_TR();
 	str2 = str2;
 	if ( !oexVERIFY( str2 == oexT( "hello" ) ) )
 		return -18;
 
+_TR();
 	str1 = oexT( "123456789012345678901234567890" );
 	if ( !oexVERIFY( str1.Drop( oexT( "15" ), oex::oexTRUE ) == oexT( "234678902346789023467890" ) ) )
 		return -20;
 
+_TR();
 	str1 = oexT( "123456789012345678901234567890" );
 	if ( !oexVERIFY( str1.Drop( oexT( "15" ), oex::oexFALSE ) == oexT( "151515" ) ) )
 		return -21;
 
+_TR();
 	str1 = oexT( "123456789012345678901234567890" );
 	if ( !oexVERIFY( str1.DropRange( '4', '6', oex::oexTRUE ) == oexT( "123789012378901237890" ) ) )
 		return -22;
 
+_TR();
 	str1 = oexT( "123456789012345678901234567890" );
 	if ( !oexVERIFY( str1.DropRange( '4', '6', oex::oexFALSE ) == oexT( "456456456" ) ) )
 		return -23;
 
+_TR();
 	str1 = oexT( "-+-ABC-+-DEF-+-" );
 
+_TR();
 	str1.RTrim( oexT( "-+" ) );
 	if ( !oexVERIFY( str1 == oexT( "-+-ABC-+-DEF" ) ) )
 		return -24;
 
+_TR();
 	str1.LTrim( oexT( "-+" ) );
 	if ( !oexVERIFY( str1 == oexT( "ABC-+-DEF" ) ) )
 		return -25;
 
+_TR();
 	str1.RTrim( oexT( "DEF" ) );
 	if ( !oexVERIFY( str1 == oexT( "ABC-+-" ) ) )
 		return -26;
 
+_TR();
 	if ( !oexVERIFY( 12345 == oex::CStr( oexT( "12345" ) ).ToNum() ) )
 		return -27;
 
+_TR();
 	if ( !oexVERIFY( -12345 == oex::CStr( oexT( "-12345" ) ).ToNum() ) )
 		return -28;
 
+_TR();
 	if ( !oexVERIFY( 0x1234abcd == oex::CStr( oexT( "1234abcd" ) ).ToNum( 0, 16 ) ) )
 		return -29;
 
+_TR();
 	if ( !oexVERIFY( 0x1234abcd == oex::CStr( oexT( "0x1234abcd" ) ).ToNum( 0, 16 ) ) )
 		return -30;
 
+_TR();
 	if ( !oexVERIFY( -0x1234abcd == oex::CStr( oexT( "-0x1234abcd" ) ).ToNum( 0, 16 ) ) )
 		return -31;
 
+_TR();
 	str1 = oexT( "1234abc" );
 	oexSIZE_T nEnd = 0;
+	
+_TR();
 	if ( !oexVERIFY( 1234 == str1.ToNum( 0, 10, &nEnd, oex::oexTRUE ) ) )
 		return -32;
 
+_TR();
 	if ( !oexVERIFY( 4 == nEnd ) )
 		return -33;
 
+_TR();
 	if ( !oexVERIFY( str1 == oexT( "abc" ) ) )
 		return -34;
 
+_TR();
 	str1 = oexT( '1' );
 	if ( !oexVERIFY( str1.Length() == 1 ) || !oexVERIFY( str1 == oexT( "1" ) ) )
 		return -35;
 
+_TR();
 	str1.Allocate( 0 );
 	str1 = 1; str1 += oexT( ") PI = " ); str1 += 3.14159;
 	if ( !oexVERIFY( str1 == oexT( "1) PI = 3.14159" ) ) )
 		return -36;
 
+_TR();
 	str1.Allocate( 0 );
 	str1 << 2 << oexT( ") E = " ) << 2.71f;
 	if ( !oexVERIFY( str1 == oexT( "2) E = 2.71" ) ) )
 		return -37;
 
+_TR();
 	str1 = oexT( "c:/temp/myfile.txt" );
 
+_TR();
 	if ( !oexVERIFY( str1.GetPath() == oexT( "c:/temp" ) ) )
 		return -38;
 
+_TR();
 	if ( !oexVERIFY( str1.GetFileName() == oexT( "myfile.txt" ) ) )
 		return -39;
 
+_TR();
 	str1 = oexT( "c:/temp//\\/myfile.txt" );
 
+_TR();
 	if ( !oexVERIFY( str1.GetPath() == oexT( "c:/temp" ) ) )
 		return -40;
 
+_TR();
 	if ( !oexVERIFY( str1.GetFileName() == oexT( "myfile.txt" ) ) )
 		return -41;
 
 	// Test string conversions
+_TR();
 	str2 = str1.GuidToString();
+	
+_TR();
 	if ( !oexVERIFY( str2 == oexMbToStr( oexStrToMb( str1 ) ) ) )
 		return -42;
 
+_TR();
 	if ( !oexVERIFY( !oex::zstr::Compare( str2.Ptr(), oexMbToStrPtr( oexStrToMbPtr( str1.Ptr() ) ) ) ) )
 		return -43;
 
+_TR();
 	str2 = str1.GuidToString();
 	if ( !oexVERIFY( str2 == oexStr8ToStr( oexStrToStr8( str1 ) ) ) )
 		return -44;
 
+_TR();
 	if ( !oexVERIFY( !oex::zstr::Compare( str2.Ptr(), oexStr8ToStrPtr( oexStrToStr8Ptr( str1.Ptr() ) ) ) ) )
 		return -45;
 
 #if !defined( OEX_NOWCHAR )
+_TR();
 	str2 = str1.GuidToString();
 	if ( !oexVERIFY( str2 == oexStrWToStr( oexStrToStrW( str1 ) ) ) )
 		return -46;
 
+_TR();
 	if ( !oexVERIFY( !oex::zstr::Compare( str2.Ptr(), oexStrWToStrPtr( oexStrToStrWPtr( str1.Ptr() ) ) ) ) )
 		return -47;
 #endif
 
+_TR();
 	str2 = str1.GuidToString();
 	if ( !oexVERIFY( str2 == oexBinToStr( oexStrToBin( str1 ) ) ) )
 		return -48;
@@ -802,6 +776,7 @@ oex::oexRESULT TestStrings()
 //	if ( !oexVERIFY( !oex::zstr::Compare( str2.Ptr(), oexBinToStrPtr( oexStrToBinPtr( str1.Ptr() ) ) ) ) )
 //		return -49;
 
+_TR();
 	str1 = oexT( "ABCDEFGHIJKLMNOPQRSTUVWXYZ" );
 	if ( !oexVERIFY( str1.Replace( oexT( "ABC" ), oexT( "123" ) ) == oexT( "123DEFGHIJKLMNOPQRSTUVWXYZ" ) )
 		 || !oexVERIFY( str1.Replace( oexT( "LMNO" ), oexT( "1234" ) ) == oexT( "ABCDEFGHIJK1234PQRSTUVWXYZ" ) )
@@ -811,108 +786,419 @@ oex::oexRESULT TestStrings()
 		 )
 		return -49;
 
+_TR();
 	if ( !oexVERIFY( !oex::CStr( oexT( "/" ) ).LTrim( oexT( "/" ) ).Length() )
 		 || !oexVERIFY( !oex::CStr( oexT( "/\\\\" ) ).LTrim( oexT( "/\\" ) ).Length() )
 		 || !oexVERIFY( !oex::CStr( oexT( "/" ) ).RTrim( oexT( "/" ) ).Length() )
 		 || !oexVERIFY( !oex::CStr( oexT( "/\\\\" ) ).RTrim( oexT( "/\\" ) ).Length() ) )
 		return -50;
 
+_TR();
 	if ( !oexVERIFY( ( oex::CStr( oexT( "123" ) ) << oexT( "456" ) ) == oexT( "123456" ) ) )
 		return -51;
 
+_TR();
 	if ( !oexVERIFY( ( oex::CStr( oexT( "abc/def" ) ).GetFileName() << oexT( "ghi" ) ) == oexT( "defghi" ) ) )
 		return -52;
 
+_TR();
 	str1 = oexT( "ABCDEFGHIJKLMNOPQRSTUVWXYZ" );
 	if ( !oexVERIFY( 0 <= str1.FindSubStr( oexT(  "DEFG" ) ) ) )
 		return -53;
 
+_TR();
 	if ( !oexVERIFY( 0 <= oexGetModuleFileName().GetFileName().FindSubStr( oexT( "test" ) ) ) )
 		return -54;
 
+_TR();
 	if ( !oexVERIFY( oex::CStr( oexT( "path" ) ).GetPath() == oexT( "" ) ) )
 		return -55;
 
+_TR();
 	if ( !oexVERIFY( oex::CStr( oexT( "test.png" ) ).GetFileName() == oexT( "test.png" ) ) )
 		return -56;
 
+_TR();
 	if ( !oexVERIFY( oex::CStr( oexT( "test.png" ) ).GetFileExtension() == oexT( "png" ) ) )
 		return -57;
 
+_TR();
 	if ( !oexVERIFY( oex::CStr( oexT( "somedirectory.hi/test.png" ) ).GetFileExtension() == oexT( "png" ) ) )
 		return -58;
 
+_TR();
 	if ( !oexVERIFY( oex::CStr( oexT( "somedirectory.hi/test.not.png" ) ).GetFileExtension() == oexT( "png" ) ) )
 		return -59;
 
+_TR();
 	if ( !oexVERIFY( oex::CBase16::Decode( oex::CBase16::Encode( "Hello World!" ) ) == "Hello World!" ) )
 		return -60;
 
+_TR();
 	if ( !oexVERIFY( oex::CBase64::Decode( oex::CBase64::Encode( "Hello World!" ) ) == "Hello World!" ) )
 		return -60;
 
+_TR();
 	str1 = oexT( "1.2.3" );
 
+_TR();
 	if ( !oexVERIFY( str1.Parse( oexT( "." ) ) == oexT( "1" ) ) )
 		return -61;
 
+_TR();
 	if ( !oexVERIFY( str1 == oexT( ".2.3" ) ) )
 		return -62;
 
+_TR();
 	if ( !oexVERIFY( str1.Length() == 4 ) )
 		return -63;
 
+_TR();
 	str1.Skip( oexT( "." ) );
 
+_TR();
 	if ( !oexVERIFY( str1 == oexT( "2.3" ) ) )
 		return -64;
 
+_TR();
 	if ( !oexVERIFY( str1.Length() == 3 ) )
 		return -65;
 
-
+_TR();
 	str1 = oexT( "HTTP/1.1" );
 
+_TR();
 	if ( !oexVERIFY( CParser::ParseToken( str1.SkipWhiteSpace(), CStrList() << oexT( "HTTP" ), oexFALSE ) == oexT( "HTTP" ) ) )
 		return -66;
 
+_TR();
 	if ( !oexVERIFY( *str1 == oexT( '/' ) ) )
 		return 67;
 
+_TR();
 	str1++;
 
+_TR();
 	if ( !oexVERIFY( str1.ParseNextToken() == oexT( "1.1" ) ) )
 		return 68;
 
+_TR();
 	str1 = oexT( "0123456789" );
 	if ( !oexVERIFY( str1.Escape( oexT( "456" ), oexT( '^' ) ) == oexT( "0123^4^5^6789" ) ) )
 		return -69;
 
+_TR();
 	if ( !oexVERIFY( str1.Escape( oexT( "059" ), oexT( '^' ) ) == oexT( "^01234^5678^9" ) ) )
 		return -70;
 
 //	if ( !oexVERIFY( str1.EscapeRange( oexT( '4' ), oexT( '6' ), oexTRUE, oexT( '^' ) ) == oexT( "0123^4^5^6789" ) ) )
 //		return -71;
 
+_TR();
 	str1 = oexT( "\"hello\"\"world\"" );
 
+_TR();
 	if ( !oexVERIFY( str1.ParseQuoted( oexT( "\"" ), oexT( "\"" ), oexNULL ) == oexT( "hello" ) ) )
 		return -72;
 
+_TR();
 	if ( !oexVERIFY( str1.ParseQuoted( oexT( "\"" ), oexT( "\"" ), oexNULL ) == oexT( "world" ) ) )
 		return -73;
 
+_TR();
 	str1 = oexT( "\"\"\"world\"" );
 
+_TR();
 	if ( !oexVERIFY( str1.ParseQuoted( oexT( "\"" ), oexT( "\"" ), oexNULL ) == oexT( "" ) ) )
 		return -74;
 
+_TR();
 	if ( !oexVERIFY( str1.ParseQuoted( oexT( "\"" ), oexT( "\"" ), oexNULL ) == oexT( "world" ) ) )
 		return -75;
 
 	// +++ This caused a crash somehow, note sSub passed as parameter
 	// oex::CStr sSub = oexBuildPath( sRoot, oexBuildPath( sSub, sScript.c_str() ) );
 
+_TR();
+	return oex::oexRES_OK;
+}
+
+oex::oexRESULT TestBinary()
+{// _STT();
+
+	oexEcho( oexT( "======== Binary buffers..." ) );
+
+	oex::CBin b1;
+
+_TR();
+	if ( !oexVERIFY( b1.Allocate( 128 ) ) )
+		return -1;
+
+_TR();
+	if ( !oexVERIFY( 128 == b1.Size() ) )
+		return -2;
+
+_TR();
+	if ( !oexVERIFY( 0 == b1.getUsed() ) )
+		return -3;
+
+_TR();
+	if ( !oexVERIFY( b1.MemCpy( "Hello", 5 ) ) )
+		return -4;
+
+_TR();
+	if ( !oexVERIFY( 5 == b1.getUsed() ) )
+		return -5;
+
+_TR();
+	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "Hello", b1.getUsed() ) ) )
+		return -6;
+
+	// !!! Careful, this string may *not* null terminated
+	//     It's ok here, operator == is binary compatible
+	//     but if you use TStr::Ptr(), you may have issues
+_TR();
+	if ( !oexVERIFY( b1.getString() == "Hello" ) )
+		return -7;
+
+_TR();
+	if ( !oexVERIFY( b1.getSafeString() == "Hello" ) )
+		return -7;
+
+_TR();
+	if ( !oexVERIFY( 5 == b1.setString( "olleH" ) ) )
+		return -8;
+
+_TR();
+	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "olleH", b1.getUsed() ) ) )
+		return -9;
+
+_TR();
+	if ( !oexVERIFY( 10 == b1.AppendBuffer( "Hello", 5 ) ) )
+		return 10;
+
+_TR();
+	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "olleHHello", b1.getUsed() ) ) )
+		return -11;
+
+_TR();
+	if ( !oexVERIFY( 1 == oexGetRefCount( b1.Ptr() ) ) )
+		return -12;
+
+_TR();
+	oex::CBin b2( b1 );
+
+_TR();
+	if ( !oexVERIFY( b1.Ptr() == b2.Ptr() ) )
+		return -13;
+
+_TR();
+	if ( !oexVERIFY( 2 == oexGetRefCount( b1.Ptr() ) ) )
+		return -14;
+
+_TR();
+	b2.Destroy();
+
+_TR();
+	if ( !oexVERIFY( 1 == oexGetRefCount( b1.Ptr() ) ) )
+		return -15;
+
+_TR();
+	b2 = b1;
+
+_TR();
+	if ( !oexVERIFY( b1.Ptr() == b2.Ptr() ) )
+		return -16;
+
+_TR();
+	if ( !oexVERIFY( 2 == oexGetRefCount( b1.Ptr() ) ) )
+		return -17;
+
+_TR();
+	b2.Copy();
+
+_TR();
+	if ( !oexVERIFY( 1 == oexGetRefCount( b1.Ptr() ) ) )
+		return -18;
+
+_TR();
+	b1.Destroy();
+
+_TR();
+	oex::CBin::t_byte* pChar = OexAllocNew< oex::CBin::t_byte >( 100 );
+
+_TR();
+	if ( !oexVERIFY( 1 == oexGetRefCount( pChar ) ) )
+		return -19;
+
+_TR();
+	b2.setBuffer( pChar, 100, 0, oex::oexTRUE );
+
+_TR();
+	if ( !oexVERIFY( pChar == b2.Ptr() ) )
+		return -20;
+
+_TR();
+	if ( !oexVERIFY( 100 == b2.getUsed() ) )
+		return -21;
+
+_TR();
+	if ( !oexVERIFY( 2 == oexGetRefCount( pChar ) ) )
+		return -22;
+
+_TR();
+	OexAllocDelete< oex::CBin::t_byte >( pChar );
+
+_TR();
+	if ( !oexVERIFY( 1 == oexGetRefCount( pChar ) ) )
+		return -23;
+
+_TR();
+	b2.Destroy();
+
+
+_TR();
+	if ( !oexVERIFY( 5 == b1.setString( "Hello" ) ) )
+		return -24;
+
+_TR();
+	if ( !oexVERIFY( oexSetBin( oexT( "TestBuffer" ), &b1 ) ) )
+		return -25;
+
+_TR();
+	if ( !oexVERIFY( oexIsBin( oexT( "TestBuffer" ) ) ) )
+		return -26;
+
+_TR();
+	if ( !oexVERIFY( !oexIsBin( oexT( "WrongBuffer" ) ) ) )
+		return -27;
+
+_TR();
+	b2 = oexGetBin( oexT( "WrongBuffer" ) );
+
+_TR();
+	if ( !oexVERIFY( !b2.Ptr() && !b2.getUsed() ) )
+		return -28;
+
+_TR();
+	b2 = oexGetBin( oexT( "TestBuffer" ) );
+
+_TR();
+	if ( !oexVERIFY( b1.Ptr() == b2.Ptr() ) )
+		return -29;
+
+_TR();
+	if ( !oexVERIFY( 5 == b2.getUsed() ) )
+		return -30;
+
+_TR();
+	CStr8 s = b2.getString();
+
+_TR();
+	if ( !oexVERIFY( s.Ptr() == b2.Ptr() ) )
+		return -31;
+
+_TR();
+	if ( !oexVERIFY( s == "Hello" ) )
+		return -32;
+
+_TR();
+	oexCPVOID ptr = b1.Ptr();
+
+_TR();
+	if ( !oexVERIFY( 4 == oexGetRefCount( ptr ) ) )
+		return -33;
+
+_TR();
+	s.Destroy();
+
+_TR();
+	if ( !oexVERIFY( 3 == oexGetRefCount( ptr ) ) )
+		return -34;
+
+_TR();
+	b2.Destroy();
+
+_TR();
+	if ( !oexVERIFY( 2 == oexGetRefCount( ptr ) ) )
+		return -35;
+
+_TR();
+	oexSetBin( oexT( "TestBuffer" ), 0 );
+
+_TR();
+	if ( !oexVERIFY( 1 == oexGetRefCount( ptr ) ) )
+		return -36;
+
+_TR();
+	b1.Destroy();
+
+_TR();
+	b1.setString( oexT( "Hello World!" ) );
+
+_TR();
+	b1.setOffset( 6 );
+
+_TR();
+	if ( !oexVERIFY( 6 == b1.getOffset() ) )
+		return -37;
+
+_TR();
+	if ( !oexVERIFY( 6 == b1.getUsed() ) )
+		return -37;
+
+_TR();
+	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "World!", b1.getUsed() ) ) )
+		return -38;
+
+_TR();
+	if ( !oexVERIFY( b1.getString() == "World!" ) )
+		return -39;
+
+_TR();
+	if ( !oexVERIFY( 2 == b1.findCHAR( 'r', 0, 0 ) ) )
+		return -40;
+
+_TR();
+	b2 = b1.Sub( 0, 5 );
+
+_TR();
+	if ( !oexVERIFY( b2.getUsed() == 5 ) )
+		return -41;
+
+_TR();
+	if ( !oexVERIFY( b2.getString() == "World" ) )
+		return -42;
+
+_TR();
+	b1.Destroy();
+
+_TR();
+	b1.setString( oexT( "Hello World!" ) );
+
+_TR();
+	if ( !oexVERIFY( ( 13 + 3 ) != b1.Insert( 3, 0 ) ) )
+		return -43;
+
+_TR();
+	oexMemCpy( b1._Ptr(), "***", 3 );
+
+_TR();
+	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "***Hello World!", b1.getUsed() ) ) )
+		return -44;
+
+_TR();
+	if ( !oexVERIFY( ( 13 + 3 + 3 ) != b1.Insert( 3, 8 ) ) )
+		return -45;
+
+_TR();
+	oexMemCpy( b1._Ptr( 8 ), "---", 3 );
+
+_TR();
+	if ( !oexVERIFY( !oex::os::CSys::MemCmp( b1.Ptr(), "***Hello--- World!", b1.getUsed() ) ) )
+		return -46;
+
+_TR();
 	return oex::oexRES_OK;
 }
 
@@ -3466,58 +3752,42 @@ oex::oexRESULT Test_CrashReporting()
 //int wmain( int argc, wchar_t *argv[], wchar_t *envp[] )
 
 int main(int argc, char* argv[])
-{_STT();
+{
+	// We can more or less guarantee this message
+	oexEcho( oexT( "*** STARTING UNIT TESTS ***\n" ) );	
 
 _TR();
 
 	// Initialize the oex library
 	oexINIT();
-
+/*
 _TR();
 
-	// Parse the command line
-	oex::CPropertyBag pbCmdLine = oex::CParser::ParseCommandLine( argc, (const char**)argv );
-
+//	oexEcho( oexMks( oexT( " Version: " ), oexVersion() ).Ptr() );
+	
 _TR();
 
-	// Check for version request
-	if ( pbCmdLine.IsKey( oexT( "version" ) ) )
-	{	oexEcho( oexVersion().Ptr() );
-		pbCmdLine.Destroy();
-		oexUNINIT();
-		return 0;
-	} // end if
-
-	else if ( pbCmdLine.IsKey( oexT( "build" ) ) )
-	{	oexEcho( oexBuild().Ptr() );
-		pbCmdLine.Destroy();
-		oexUNINIT();
-		return 0;
-	} // end if
-
+//	oexEcho( oexMks( oexT( " Build: " ), oexBuild() ).Ptr() );
+	
 _TR();
 
 	// Enable crash reporting
 	_STT_SET_NAME( oexT( "Main Thread" ) );
+	
+_TR();
+
 	oexEnableCrashReporting( oexNULL, oexT( "logs" ) );
 
 _TR();
 
-	// Initialize resources
-	oexInitResources();
-
-_TR();
-
-	if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
-		return -1;
-
-	oexEcho( oexT( "-------- Starting tests --------" ) );
 	oexNOTICE( 0, oexT( "Tests started" ) );
 
+*/
+
 _TR();
 
-	TestCommon();
-
+	oexEcho( oexT( "-------- Starting tests --------" ) );
+	
 _TR();
 
 	TestAllocator();
@@ -3526,6 +3796,8 @@ _TR();
 
 	TestBinary();
 
+	TestCommon();
+	
 	TestFileMapping();
 
 	TestGuids();
@@ -3542,12 +3814,18 @@ _TR();
 
 	TestZip();
 
+	// Initialize resources
+	oexInitResources();
+
 	TestResources();
 
 	Test_CSysTime();
 
-	Test_Threads();
+	// Threads initialize sockets ;)
+	if ( !oexVERIFY( oex::os::CIpSocket::InitSockets() ) )
+		return -1;
 
+	Test_Threads();
 
 #ifndef OEX_LOWRAM
 
