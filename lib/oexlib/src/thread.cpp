@@ -161,10 +161,12 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 				} // end catch
 #endif
 
+
 				// Check for stop signal
 				if ( !pThread->m_evStop.Wait( uSleep ) )
 					nDone = 1;
-					
+
+
 				// Pump messages if not done
 				if ( !nDone )
 					oexPumpThreadMessages();
@@ -172,6 +174,7 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 			} // end while
 
 		} // end if
+
 
 		_oexTRY
 		{

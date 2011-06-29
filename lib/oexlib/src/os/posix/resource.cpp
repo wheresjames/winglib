@@ -38,7 +38,15 @@
 #if !defined( OEX_NOTHREADTIMEOUTS )
 #	define OEX_THREAD_TIMEOUTS
 #endif
-#define OEX_THREAD_FORCEFAIRNESS
+
+#if !defined( OEX_NOTHREADFORCEFAIRNESS )
+#	define OEX_THREAD_FORCEFAIRNESS
+#endif
+
+// #define OEX_PSEUDOLOCKS
+#if defined( OEX_PSEUDOLOCKS )
+#endif
+
 //#define OEX_THREAD_USE_GETTIMEOFDAY
 
 OEX_USING_NAMESPACE
@@ -481,11 +489,9 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 
 #endif
 
-#if defined( OEX_THREAD_TIMEOUTS )
+		struct timespec to;
 
-			struct timespec to;
-
-			// Get time
+		// Get time
 
 #	if !defined( OEX_THREAD_USE_GETTIMEOFDAY )
 			clock_gettime( CLOCK_REALTIME, &to );
@@ -502,6 +508,8 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 				to.tv_sec += to.tv_nsec / 1000000000,
 				to.tv_nsec %= 1000000000;
 
+#if defined( OEX_THREAD_TIMEOUTS )
+
 			// Wait for the lock
 			if ( !pthread_mutex_timedlock( &pRi->hMutex, &to ) )
 			{	pRi->nCount++;
@@ -512,13 +520,32 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 
 #else
 
-			// Wait for the lock
-			if ( !pthread_mutex_lock( &pRi->hMutex ) )
-			{	pRi->nCount++;
-				if ( pRi->nWaiting ) pRi->nWaiting--;
-				pRi->uOwner = oexGetCurThreadId();
-				return waitSuccess;
-			} // end if
+			struct timespec toNow;
+
+			do
+			{
+				// Wait for the lock
+				if ( !pthread_mutex_trylock( &pRi->hMutex ) )
+				{	pRi->nCount++;
+					if ( pRi->nWaiting ) pRi->nWaiting--;
+					pRi->uOwner = oexGetCurThreadId();
+					return waitSuccess;
+				} // end if
+
+				oexMicroSleep( oexWAIT_RESOLUTION );
+
+#	if !defined( OEX_THREAD_USE_GETTIMEOFDAY )
+				clock_gettime( CLOCK_REALTIME, &toNow );
+#	else
+				struct timeval tp;
+				gettimeofday( &tp, 0 );
+				toNow.tv_sec = tp.tv_sec; toNow.tv_nsec = tp.tv_sec
+#	endif
+				if ( toNow.tv_nsec > 1000000000 )
+					toNow.tv_sec += toNow.tv_nsec / 1000000000,
+					toNow.tv_nsec %= 1000000000;
+
+			} while ( toNow.tv_sec < to.tv_sec || toNow.tv_nsec < to.tv_nsec );
 
 #endif
 			if ( pRi->nWaiting ) pRi->nWaiting--;
@@ -533,20 +560,21 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 			if ( pRi->bSignaled )
 				return waitSuccess;
 
-			// Does user want to wait?
+				// Does user want to wait?
 			if ( !x_uTimeout && pRi->bManualReset )
 				return waitTimeout;
+
 
 			// Lock the mutex
 			oexAutoLock al( pRi->cSync, x_uTimeout );
 			if ( !al.IsLocked() )
 				return waitFailed;
 
+
 			// Ensure it wasn't signaled while we were waiting
 			if ( pRi->bSignaled )
 				return waitSuccess;
 
-#if defined( OEX_THREAD_TIMEOUTS )
 
 			struct timespec to;
 
@@ -560,6 +588,7 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 			to.tv_sec = tp.tv_sec; to.tv_nsec = tp.tv_sec
 #	endif
 
+
 			// Add our time
 			to.tv_sec += x_uTimeout / 1000;
 			to.tv_nsec += ( x_uTimeout % 1000 ) * 1000000;
@@ -567,8 +596,11 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 				to.tv_sec += to.tv_nsec / 1000000000,
 				to.tv_nsec %= 1000000000;
 
+
 			// Get mutex handle
 			SResourceInfo *pRiMutex = (SResourceInfo*)pRi->cSync.m_hHandle;
+
+#if !defined( OEX_NOCONDTIMEDWAIT )
 
 			// Wait for the lock
 			if ( !pthread_cond_timedwait( &pRi->hCond, &pRiMutex->hMutex, &to ) )
@@ -576,12 +608,31 @@ oexRESULT CResource::Wait( oexUINT x_uTimeout )
 
 #else
 
-			// Get mutex handle
-			SResourceInfo *pRiMutex = (SResourceInfo*)pRi->cSync.m_hHandle;
+			struct timespec toNow;
+			
+			do
+			{
+			
+#error +++ Need a solution here ;)
 
-			// Wait for the lock
-			if ( !pthread_cond_wait( &pRi->hCond, &pRiMutex->hMutex ) )
-				return pRi->bSignaled ? waitSuccess : waitTimeout;
+				// Wait for the lock
+//				if ( !pthread_cond_wait( &pRi->hCond, &pRiMutex->hMutex ) )
+					return pRi->bSignaled ? waitSuccess : waitTimeout;
+
+				oexMicroSleep( oexWAIT_RESOLUTION );
+				
+#	if !defined( OEX_THREAD_USE_GETTIMEOFDAY )
+				clock_gettime( CLOCK_REALTIME, &toNow );
+#	else
+				struct timeval tp;
+				gettimeofday( &tp, 0 );
+				toNow.tv_sec = tp.tv_sec; toNow.tv_nsec = tp.tv_sec
+#	endif
+				if ( toNow.tv_nsec > 1000000000 )
+					toNow.tv_sec += toNow.tv_nsec / 1000000000,
+					toNow.tv_nsec %= 1000000000;
+
+			} while ( toNow.tv_sec < to.tv_sec || toNow.tv_nsec < to.tv_nsec );
 
 #endif
 

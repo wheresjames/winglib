@@ -2,10 +2,9 @@
 //
 
 
-#define TEST_TCP_PORT	21216
+#define TEST_TCP_PORT	21212
 
-#define OEX_TEST_TRACE
-
+//#define OEX_TEST_TRACE
 #if defined( OEX_TEST_TRACE )
 #	define _TR()	oexPrintf( "%s(%d) : MARKER\n", __FILE__, __LINE__ )
 #else
@@ -502,12 +501,6 @@ _TR();
 	{	oexEcho( str1.Ptr() );
 		return -9;
 	} // end if
-
-_TR();
-	CSysTime st( CSysTime::eGmtTime );
-	
-_TR();
-//	oexEcho( oexMks( oexT( "Current UNIX timestamp: " ), st.GetUnixTime() ).Ptr() );
 
 _TR();
 	oex::oexGUID guid;
@@ -2699,22 +2692,26 @@ public:
 
 	virtual oex::oexBOOL InitThread( oex::oexPVOID x_pData )
 	{	m_val++; // 1
+_TR();
 		return oex::oexTRUE;
 	}
 
 	virtual oex::oexBOOL DoThread( oex::oexPVOID x_pData )
 	{	m_val++; // 2
+_TR();
 		return oex::oexFALSE;
 	}
 
 	virtual oex::oexINT EndThread( oex::oexPVOID x_pData )
 	{
 		m_val++; // 3
+_TR();
 
 		m_evDone.Signal();
 		GetStopEvent().Wait();
 
 		m_val++; // 4
+_TR();
 
 		return oex::oexFALSE;
 	}
@@ -2831,21 +2828,27 @@ oex::oexRESULT Test_Threads()
 
 	CMyThread t;
 
+_TR();
 	if ( !oexVERIFY( 0 == t.Start() ) )
 		return -1;
 
+_TR();
 	if ( !oexVERIFY( t.IsRunning() ) )
 		return -2;
 
+_TR();
 	if ( !oexVERIFY( 0 == t.m_evDone.Wait() ) )
 		return -3;
 
+_TR();
 	if ( !oexVERIFY( 3 == t.m_val ) )
 		return -4;
 
+_TR();
 	if ( !oexVERIFY( 0 == t.Stop() ) )
 		return -5;
 
+_TR();
 	if ( !oexVERIFY( 4 == t.m_val ) )
 		return -6;
 
@@ -2853,9 +2856,11 @@ oex::oexRESULT Test_Threads()
 
 	CMyThread2 t2;
 
+_TR();
 	if ( !oexVERIFY( 0 == t2.Start( 0, 0 ) ) )
 		return -10;
 
+_TR();
 	oex::CStr str;
 	while ( 10 > t2.m_val )
 	{
@@ -2874,9 +2879,11 @@ oex::oexRESULT Test_Threads()
 
 	} // end while
 
+_TR();
 	if ( !oexVERIFY( 0 == t2.Stop( 10000 ) ) )
 		return -15;
 
+_TR();
 	if ( !oexVERIFY( str == oexT( "1,2,3,4,5,6,7,8,9,10," ) ) )
 		return -16;
 
@@ -2884,24 +2891,29 @@ oex::oexRESULT Test_Threads()
 
 	CMyThread4 t4;
 
+_TR();
 	if ( !oexVERIFY( !t4.m_lock.Wait( 0 ) ) )
 		return 23;
 
+_TR();
 	if ( !oexVERIFY( 0 == t4.Start() ) )
 		return -24;
 
+_TR();
 	if ( !oexVERIFY( t4.WaitThreadExit() ) )
 		return -25;
 
+_TR();
 	t4.m_lock.Reset();
 
+_TR();
 	if ( 3 != t4.m_uElapsed )
 		oexEcho( oexMks( oexT( "Lock timeout set to 3 seconds, actual delay =  " ), t4.m_uElapsed ).Ptr() );
 
 	// *** Lock test
 
 	oexLock lock;
-	oex::oexINT val = 0;
+	oex::oexINT val = 0, min = 0, max = 0;
 	oex::oexINT count[ 4 ] = { 0, 0, 0, 0 };
 
 	CMyThread3 tl1( &lock, &val, count, 0 ),
@@ -2923,23 +2935,18 @@ oex::oexRESULT Test_Threads()
 					 && 0 == tl4.Stop() ) )
 		return -21;
 
+	if ( !oexVERIFY( 0 == val ) )
+	{	oexSHOW( val );
+		return -22;
+	} // end if
+
 	oexPrintf( oexT( "Unthrottled Thread counts are : %d, %d, %d, %d\n" ),
 			   count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
 
-	if ( !oexVERIFY( 0 == val ) )
-	{	oexSHOW( val );
-		return -22;
-	} // end if
-
-	oex::oexINT min = oex::cmn::Min( count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
-	oex::oexINT max = oex::cmn::Max( count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
+	min = oex::cmn::Min( count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
+	max = oex::cmn::Max( count[ 0 ], count[ 1 ], count[ 2 ], count[ 3 ] );
 	if ( max > ( min * 4 ) )
 		oexEcho( oexT( " Hmmmm.... Unthrottled thread counts are not fair" ) );
-
-	if ( !oexVERIFY( 0 == val ) )
-	{	oexSHOW( val );
-		return -22;
-	} // end if
 
 	oexZero( count );
 	tl1.m_bThrottle = 1;
@@ -3771,14 +3778,11 @@ _TR();
 
 	// Initialize the oex library
 	oexINIT();
-/*
+
 _TR();
 
-//	oexEcho( oexMks( oexT( " Version: " ), oexVersion() ).Ptr() );
-	
-_TR();
-
-//	oexEcho( oexMks( oexT( " Build: " ), oexBuild() ).Ptr() );
+	oexEcho( oexMks( oexT( " Version: " ), oexVersion() ).Ptr() );
+	oexEcho( oexMks( oexT( " Build: " ), oexBuild() ).Ptr() );
 	
 _TR();
 
@@ -3791,9 +3795,7 @@ _TR();
 
 _TR();
 
-	oexNOTICE( 0, oexT( "Tests started" ) );
-
-*/
+//	oexNOTICE( 0, oexT( "Starting Tests" ) );
 
 _TR();
 
@@ -3870,7 +3872,7 @@ _TR();
 
 //    Test_CVfsSession();
 
-#if defined( OEX_ENABLE_SQLITE )
+#if defined( OEX_ENABLE_SQLITE ) && !defined( OEX_ANDROID )
 	Test_CSQLite();
 #endif
 

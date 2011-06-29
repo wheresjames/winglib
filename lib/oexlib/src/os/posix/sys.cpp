@@ -739,12 +739,7 @@ oexBOOL CSys::GetLocalTime( STime &t )
 	_oexTRY
 	{
 #if !defined( OEX_NOLOCALTIME_R )
-
-// +++ Call to localtime_r() crashes in android, must come up with something...
-#	if !defined( OEX_ANDROID )
 		localtime_r( &current_time, &tinfo );
-#	endif
-
 #else
 		ptinfo = localtime( &current_time );
 		if ( !ptinfo )
@@ -831,12 +826,7 @@ oexBOOL CSys::GetSystemTime( STime &t )
 	_oexTRY
 	{
 #if !defined( OEX_NOGMTTIME_R )
-
-// +++ Call to gmttime_r() crashes in android, must come up with something...
-#	if !defined( OEX_ANDROID )
 		gmtime_r( &current_time, &tinfo );
-#	endif
-
 #else
 		ptinfo = gmttime( &current_time );
 		if ( !ptinfo )
@@ -937,12 +927,7 @@ void CSys::FileTimeToSystemTime( STime &x_st, oexINT64 x_ft )
 	_oexTRY
 	{
 #if !defined( OEX_NOGMTTIME_R )
-
-// +++ Call to gmttime_r() crashes in android, must come up with something...
-#	if !defined( OEX_ANDROID )
 		gmtime_r( &tTime, &tinfo );
-#	endif
-
 #else
 		ptinfo = gmttime( &tTime );
 		if ( !ptinfo )

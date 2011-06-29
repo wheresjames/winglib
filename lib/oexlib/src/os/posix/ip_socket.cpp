@@ -506,14 +506,17 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 
 oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
 {
+oexM();
 	// Punt if not initialized
 	if ( !IsInitialized() )
 		return oexFALSE;
 
+oexM();
 	// Ensure we were passed a valid address
 	if ( !x_rIpAddress.ValidateAddress() )
 	{	Destroy(); return oexFALSE; }
 
+oexM();
 	// Create socket if there is none
 	if ( !IsSocket() && !Create() )
 	{	m_uConnectState |= eCsError;
@@ -521,19 +524,24 @@ oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
 		return oexFALSE;
 	} // end if
 
+oexM();
 	// Save the address
 	m_addrPeer = x_rIpAddress;
 
+oexM();
     sockaddr_in si;
     oexZeroMemory( &si, sizeof( si ) );
     si.sin_family = m_uSocketFamily;
     CIpSocket_SetAddressInfo( &m_addrPeer, &si );
 
+oexM();
     // Attempt to connect
     int nRet = connect( oexPtrToInt( m_hSocket ), (sockaddr*)&si, sizeof( si ) );
 
+oexM();
 	m_uLastError = errno;
 
+oexM();
 	// Check result
 	if ( -1 == nRet && EINPROGRESS != m_uLastError )
 	{	m_uConnectState |= eCsError;
@@ -542,6 +550,7 @@ oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
 		return oexFALSE;
 	} // end if
 
+oexM();
 	m_uLastError = 0;
 
 	// We're trying to connect

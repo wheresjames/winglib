@@ -247,49 +247,30 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 {
 	// Does user want crash reports?
+#if !defined( OEX_CRASHDUMPSTDOUT )
 	if ( ( !pUrl || !*pUrl ) && ( !pSub || !*pSub ) )
 		return;
-
-	// Ensure stack trace object
-	CStackTrace* pSt = &oexSt();
-	if ( !pSt )
-		return;
+#endif
 
 	oexUINT uCurrentThreadId = oexGetCurThreadId();
 	CSysTime st; st.GetSystemTime();
 
-	// Stack trace header
+	// Some basic info
 	CStr sSt = oexNL;
 	sSt <<                oexT( "Module            : " ) << oexGetModuleFileName() << oexNL;
 	sSt <<                oexT( "Version           : " ) << oexVersion() << oexNL;
 	sSt <<                oexT( "Build             : " ) << oexBuild() << oexNL;
 	sSt <<		  oexFmt( oexT( "Current Thread    : %d (0x%x)" oexNL8 ), uCurrentThreadId, uCurrentThreadId );
 	sSt << st.FormatTime( oexT( "Current Time      : %Y/%c/%d  %g:%m:%s GMT" oexNL8 ) );
-	sSt <<        oexFmt( oexT( "Stack Trace Slots : Using %d of %d" oexNL8 ), pSt->getUsedSlots(), pSt->getTotalSlots() );
 	sSt <<                oexNL << ( pEInfo ? pEInfo : oexT( "(No other information available)" ) ) << oexNL;
 
-	// Create a stack report for the current stack
-	sSt << CreateStackReport( uCurrentThreadId, pSt, oexGetFileName( oexGetModuleFileName() ).Ptr(), oexGetInstanceHandle(), oexTRUE );
-/*
-	oexUINT i = 0;
-	while ( CStackTrace::SModuleInfo *pSi = pSt->NextModule( &i ) )
-		if ( pSi->pSt )
-		{
-			_oexTRY
-			{
-				// Create stack report for this module
-				sSt << CreateStackReport( uCurrentThreadId, pSi->pSt, pSi->szName, pSi->pAddress, oexFALSE );
-
-			} // end try
-			_oexCATCH_ALL()
-			{
-				sSt << oexT( oexNL8 "!!! Assert in module !!!" oexNL8 );
-
-			} // end catch
-
-		} // end while
-*/
-	sSt << oexNL;
+	// Show stack trace if available
+	CStackTrace* pSt = &oexSt();
+	if ( pSt )
+	{	sSt << oexFmt( oexT( "Stack Trace Slots : Using %d of %d" oexNL8 ), pSt->getUsedSlots(), pSt->getTotalSlots() );
+		sSt << CreateStackReport( uCurrentThreadId, pSt, oexGetFileName( oexGetModuleFileName() ).Ptr(), oexGetInstanceHandle(), oexTRUE );
+		sSt << oexNL;
+	} // end if
 
 	// Save to file?
 	if ( pSub && *pSub )
@@ -306,6 +287,10 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 
 	} // end if
 
+#if defined( OEX_CRASHDUMPSTDOUT )
+	oexEcho( sSt.Ptr() );
+#endif
+	
 }
 
 oexTCHAR g_szUrl[ oexSTRSIZE ] = { 0 };
@@ -332,6 +317,10 @@ void sig_callback( int signal_number )
 			  << CDebug::GetExceptionCodeDesc( signal_number )
 			  << oexNL;
 
+		// Show the user
+		oexEcho( s.Ptr() );
+			  
+		// Create crash log
 		CDebug::CreateCrashReport( g_szUrl, g_szSub, s.Ptr() );
 
 		// Crash Complete
