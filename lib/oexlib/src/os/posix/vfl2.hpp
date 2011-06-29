@@ -750,9 +750,6 @@ private:
 	/// Device capabilities
 	v4l2_capability		m_cap2;
 
-	/// Video buffer 1 format
-	video_mbuf			m_buf1;
-
 	/// Image memory
 	TMem< oexCHAR >		m_image[ eMaxBuffers ];
 

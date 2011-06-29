@@ -7,8 +7,8 @@ _self.load_module( "portaudio", "" );
 class CRtspStream
 {
 	bDecodeVideo = 1;
-	bDecodeAudio = 0;
-	bPlayAudio = 0;
+	bDecodeAudio = 1;
+	bPlayAudio = 1;
 
 //	szDumpVideo = "";
 	szDumpVideo = "rawvideo";
@@ -404,9 +404,9 @@ function _init() : ( _g )
 
 	// Start the video stream
 	_g.stream = CRtspStream();
-//	_g.stream.Play( _g.rtsp_sources[ "yt2" ][ 1 ] );
+	_g.stream.Play( _g.rtsp_sources[ "yt2" ][ 1 ] );
 //	_g.stream.Play( _g.rtsp_sources[ "adventure" ][ 1 ] );
-	_g.stream.Play( _g.rtsp_sources[ "comedy" ][ 1 ] );
+//	_g.stream.Play( _g.rtsp_sources[ "comedy" ][ 1 ] );
 
 	return 0;
 }

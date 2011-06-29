@@ -510,7 +510,7 @@ _TR();
 //	oexEcho( oexMks( oexT( "Current UNIX timestamp: " ), st.GetUnixTime() ).Ptr() );
 
 _TR();
-	oex::oexGUID guid, guid2;
+	oex::oexGUID guid;
 	oexZeroMemory( &guid, sizeof( guid ) );
 	oexCSTR pTest = oexT( "01234567-8901-2345-6789-012345678901" );
 
@@ -1056,6 +1056,17 @@ _TR();
 _TR();
 	b2.Destroy();
 
+_TR();
+	oexLock lock;
+	if ( !oexVERIFY( lock.IsValid() ) )
+		return -24;
+
+_TR();
+	oexAutoLock ll( lock );
+
+_TR();
+	if ( !oexVERIFY( ll.IsLocked() ) )
+		return -24;
 
 _TR();
 	if ( !oexVERIFY( 5 == b1.setString( "Hello" ) ) )

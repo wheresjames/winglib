@@ -757,7 +757,7 @@ oexBOOL CSys::GetLocalTime( STime &t )
 		return oexFALSE;
 	}
 
-	CSys_SystemTimeToSTime( &tinfo, t );
+	CSys_SystemTimeToSTime( ptinfo, t );
 
 #ifdef OEX_NANOSECONDS
 	struct timespec	ts;
@@ -940,11 +940,11 @@ void CSys::FileTimeToSystemTime( STime &x_st, oexINT64 x_ft )
 
 // +++ Call to gmttime_r() crashes in android, must come up with something...
 #	if !defined( OEX_ANDROID )
-		gmtime_r( &current_time, &tinfo );
+		gmtime_r( &tTime, &tinfo );
 #	endif
 
 #else
-		ptinfo = gmttime( &current_time );
+		ptinfo = gmttime( &tTime );
 		if ( !ptinfo )
 			return;
 #endif

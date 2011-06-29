@@ -35,13 +35,18 @@
 #include "oexlib.h"
 #include "std_os.h"
 
+// +++ Apparently VFL1 is history
+#define OEX_NOVFL1
+
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 using namespace OEX_NAMESPACE::vid;
 
 #ifndef OEX_NOVIDEO
 // Include capture classes
-#	include "vfl1.hpp"
+#	ifndef OEX_NOVFL1
+#		include "vfl1.hpp"
+#	endif
 #	include "vfl2.hpp"
 #endif
 
@@ -68,9 +73,11 @@ oexBOOL CCapture::Destroy()
 	{
 		switch( m_uType )
 		{
+#ifndef OEX_NOVFL1
 			case oexVIDSUB_VFL1 :
 				OexAllocDestruct( (CV4l1*)m_pDevice );
 				break;
+#endif
 
 			case oexVIDSUB_VFL2 :
 			case oexVIDSUB_DAVINCI :
@@ -146,10 +153,12 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 			OexAllocDelete< CV4l2 >( (CV4l2*)m_pDevice );
 			m_pDevice = oexNULL;
 
+#ifndef OEX_NOVFL1
 		case oexVIDSUB_VFL1 :
 			m_uType = oexVIDSUB_VFL1;
 			m_pDevice = OexAllocConstruct< CV4l1 >();
 			break;
+#endif
 
 		case oexVIDSUB_VFL2 :
 		case oexVIDSUB_DAVINCI :

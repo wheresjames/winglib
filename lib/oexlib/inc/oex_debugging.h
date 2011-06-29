@@ -121,8 +121,10 @@ template < const int T > class oex_static_assert{};
 #	define oexCHECK_PTR( ptr )              ( ( ptr ) ? OEX_NAMESPACE::oexTRUE :  OEX_NAMESPACE::oexFALSE )
 #	define oexCHECK( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE :  OEX_NAMESPACE::oexFALSE )
 #else
-#	define oexCHECK_PTR_NULL_OK( ptr )      oexCHECK( oexVerifyPtrNullOk( (OEX_NAMESPACE::oexCPVOID)ptr ) )
-#	define oexCHECK_PTR( ptr )              oexCHECK( oexVerifyPtr( (OEX_NAMESPACE::oexCPVOID)ptr ) )
+#	define oexCHECK_PTR_NULL_OK( ptr )      ( 1 )
+#	define oexCHECK_PTR( ptr )              ( ( ptr ) ? OEX_NAMESPACE::oexTRUE :  OEX_NAMESPACE::oexFALSE )
+//#	define oexCHECK_PTR_NULL_OK( ptr )      oexCHECK( oexVerifyPtrNullOk( (OEX_NAMESPACE::oexCPVOID)ptr ) )
+//#	define oexCHECK_PTR( ptr )              oexCHECK( oexVerifyPtr( (OEX_NAMESPACE::oexCPVOID)ptr ) )
 #	define oexCHECK( s )		            ( ( s ) ? OEX_NAMESPACE::oexTRUE :  OEX_NAMESPACE::oexFALSE )
 #endif
 

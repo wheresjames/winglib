@@ -89,7 +89,7 @@ extern int daylight;
 #endif
 
 #ifndef OEX_NOVIDEO
-#	include <linux/videodev.h>
+//#	include <linux/videodev.h>
 #	ifndef OEX_VFL1
 #		include <linux/videodev2.h>
 #	endif
