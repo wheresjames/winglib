@@ -104,6 +104,10 @@ oexBOOL CUtil::EnableOutputFileCapture( oexCSTR x_pFile, oexUINT x_uTimestampFre
 	return *g_szFile;
 }
 
+oexBOOL CUtil::isOutputBuffer()
+{
+	return ( g_pFifoSync || *g_szFile ) ? oexTRUE : oexFALSE;
+}
 
 //CCircBuf* CUtil::getOutputBuffer()
 CFifoSync* CUtil::getOutputBuffer()
@@ -114,7 +118,7 @@ CFifoSync* CUtil::getOutputBuffer()
 oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 {
 	// Sanity checks
-	if ( ( !g_pFifoSync && !*g_szFile ) || !x_pStr || !*x_pStr )
+	if ( !isOutputBuffer || !x_pStr || !*x_pStr )
 		return oexFALSE;
 
 	if ( !x_uSize )
@@ -163,17 +167,17 @@ CStr CUtil::BinToAsciiHexStr( CBin *x_pBin, oexSIZE_T x_uLen, oexSIZE_T x_nLineL
 	if ( !x_pBin || !x_pBin->getUsed() )
 		return oexT( "" );
 
-	if ( !x_uLen || x_pBin->getUsed() < x_uLen )
+	if ( 0 >= x_uLen || x_pBin->getUsed() < x_uLen )
 		x_uLen = x_pBin->getUsed();
 
-	return BinToAsciiHexStr( x_pBin->Ptr(), x_pBin->getUsed(), x_nLineLen, x_nMaxLines );
+	return BinToAsciiHexStr( x_pBin->Ptr(), x_uLen, x_nLineLen, x_nMaxLines );
 }
 
 CStr CUtil::BinToAsciiHexStr( oexCPVOID x_pBuf, oexSIZE_T x_uLen, oexSIZE_T x_nLineLen, oexSIZE_T x_nMaxLines )
 {_STT();
 
 	// Sanity checks
-	if ( !x_pBuf || !x_uLen || !x_nLineLen || !x_nMaxLines )
+	if ( !x_pBuf || 0 >= x_uLen || 0 >= x_nLineLen || 0 >= x_nMaxLines )
 		return oexT( "" );
 
 	// Allocate buffer for string
@@ -546,7 +550,107 @@ oexBOOL CUtil::DrawLine( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, o
 	return oexTRUE;
 }
 
-#define CUTIL_YMARGIN 8
+double CUtil::BinAverage( CBin *x_pBin, oexSIZE_T x_uOffset, oexSIZE_T x_uInterval, oexINT fmt )
+{
+	if ( !x_pBin || !x_pBin->getUsed() )
+		return 0;
+
+	// Ensure interval
+	if ( 0 >= x_uInterval )
+		x_uInterval = 1;
+
+	double acc = 0, qty = 0;	
+	oexLONG used = x_pBin->getUsed();
+	const void *ptr = x_pBin->Ptr();
+	
+	// Sanity check
+	if ( 0 >= used || !ptr )
+		return 0;
+
+	// Did the user supply an offset?
+	if ( 0 < x_uOffset )
+	{
+		// Do we have enough?
+		if ( used <= x_uOffset )
+			return 0;
+			
+		// Add byte offset
+		ptr = (char*)ptr + x_uOffset;
+		used -= x_uOffset;
+	
+	} // end if
+	 
+	switch( fmt )
+	{
+		default :
+			break;
+			
+		case obj::tInt8 :
+		{	oexLONG sz = used;
+			const char *p = (const char*)ptr;				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+			
+		case obj::tUInt8 :
+		{	oexLONG sz = used;
+			const unsigned char *p = (const unsigned char*)ptr;				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+
+		case obj::tInt16 :
+		{	oexLONG sz = used / sizeof( short );
+			const short *p = (const short*)ptr;				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+			
+		case obj::tUInt16 :
+		{	oexLONG sz = used / sizeof( unsigned short );
+			const unsigned short *p = (const unsigned short*)ptr;				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+
+		case obj::tInt32 :
+		{	oexLONG sz = used / sizeof( int );
+			const int *p = (const int*)ptr;				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+			
+		case obj::tUInt32 :
+		{	oexLONG sz = used / sizeof( unsigned int );
+			const unsigned int *p = (const unsigned int*)ptr;				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+		
+		case obj::tFloat :
+		{	oexLONG sz = used / sizeof( float );
+			const float *p = (const float*)ptr;				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+		
+		case obj::tDouble :
+		{	oexLONG sz = used / sizeof( double );
+			const double *p = (const double*)ptr;				
+			for ( oexLONG i = 0; i < sz; i += x_uInterval )
+				acc += p[ i ], qty++;
+		} break;
+		
+	} // end switch
+
+	if ( !qty )
+		return 0;
+	
+	return acc / qty;
+}
+
+
+#define CUTIL_YMARGIN 2
 oexBOOL CUtil::GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *pc, oexFLOAT *pf, oexINT n, oexFLOAT scale, oexFLOAT min, oexFLOAT max )
 {
 	if ( 0 >= w || 0 >= h || 1 >= n )

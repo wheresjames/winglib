@@ -34,36 +34,50 @@
 
 #pragma once
 
-#define SQBIND_SQBINARY_DECLARE_TYPE( t )								\
-	oex::oex##t get##t( t_size x_nOffset )								\
-	{ return m_bin.get##t( x_nOffset ); }								\
-	void set##t( t_size x_nOffset, oex::oex##t val )					\
-	{ m_bin.set##t( x_nOffset, val ); }									\
-	oex::oex##t getAbs##t( t_size x_nOffset )							\
-	{ return m_bin.getAbs##t( x_nOffset ); }							\
-	void setAbs##t( t_size x_nOffset, oex::oex##t val )					\
-	{ m_bin.setAbs##t( x_nOffset, val ); }								\
-	t_size find##t( oex::oex##t val, t_size x_nStart, t_size x_nMax )	\
-	{ return m_bin.find##t( val, x_nStart, x_nMax ); }					\
-	oex::oex##t LE_get##t( t_size x_nOffset )							\
-	{ return m_bin.LE_get##t( x_nOffset ); }							\
-	void LE_set##t( t_size x_nOffset, oex::oex##t val )					\
-	{ m_bin.LE_set##t( x_nOffset, val ); }								\
-	oex::oex##t LE_getAbs##t( t_size x_nOffset )						\
-	{ return m_bin.LE_getAbs##t( x_nOffset ); }							\
-	void LE_setAbs##t( t_size x_nOffset, oex::oex##t val )				\
-	{ m_bin.LE_setAbs##t( x_nOffset, val ); }							\
-	oex::oex##t BE_get##t( t_size x_nOffset )							\
-	{ return m_bin.BE_get##t( x_nOffset ); }							\
-	void BE_set##t( t_size x_nOffset, oex::oex##t val )					\
-	{ m_bin.BE_set##t( x_nOffset, val ); }								\
-	oex::oex##t BE_getAbs##t( t_size x_nOffset )						\
-	{ return m_bin.BE_getAbs##t( x_nOffset ); }							\
-	void BE_setAbs##t( t_size x_nOffset, oex::oex##t val )				\
-	{ m_bin.BE_setAbs##t( x_nOffset, val ); }							\
-	t_size size##t()													\
-	{ return sizeof( oex::oex##t ); }									\
-	int Allocate##t( t_size x_nSize )									\
+#define SQBIND_SQBINARY_DECLARE_TYPE( t )									\
+	oex::oex##t get##t( t_size x_nOffset )									\
+	{ return m_bin.get##t( x_nOffset ); }									\
+	void set##t( t_size x_nOffset, oex::oex##t val )						\
+	{ m_bin.set##t( x_nOffset, val ); }										\
+	oex::oex##t getAbs##t( t_size x_nOffset )								\
+	{ return m_bin.getAbs##t( x_nOffset ); }								\
+	void setAbs##t( t_size x_nOffset, oex::oex##t val )						\
+	{ m_bin.setAbs##t( x_nOffset, val ); }									\
+	t_size find##t( oex::oex##t val, t_size x_nStart, t_size x_nMax )		\
+	{ return m_bin.find##t( val, x_nStart, x_nMax ); }						\
+	t_size findMin##t( oex::oex##t val, t_size x_nStart, t_size x_nMax )	\
+	{ return m_bin.findMin##t( val, x_nStart, x_nMax ); }					\
+	t_size findMax##t( oex::oex##t val, t_size x_nStart, t_size x_nMax )	\
+	{ return m_bin.findMax##t( val, x_nStart, x_nMax ); }					\
+	t_size findRange##t( oex::oex##t min, oex::oex##t max, t_size x_nStart, t_size x_nMax )	\
+	{ return m_bin.findRange##t( min, max, x_nStart, x_nMax ); }					\
+	t_size skip##t( oex::oex##t val, t_size x_nStart, t_size x_nMax )		\
+	{ return m_bin.skip##t( val, x_nStart, x_nMax ); }						\
+	t_size skipMin##t( oex::oex##t val, t_size x_nStart, t_size x_nMax )	\
+	{ return m_bin.skipMin##t( val, x_nStart, x_nMax ); }					\
+	t_size skipMax##t( oex::oex##t val, t_size x_nStart, t_size x_nMax )	\
+	{ return m_bin.skipMax##t( val, x_nStart, x_nMax ); }					\
+	t_size skipRange##t( oex::oex##t min, oex::oex##t max, t_size x_nStart, t_size x_nMax )	\
+	{ return m_bin.skipRange##t( min, max, x_nStart, x_nMax ); }					\
+	oex::oex##t LE_get##t( t_size x_nOffset )								\
+	{ return m_bin.LE_get##t( x_nOffset ); }								\
+	void LE_set##t( t_size x_nOffset, oex::oex##t val )						\
+	{ m_bin.LE_set##t( x_nOffset, val ); }									\
+	oex::oex##t LE_getAbs##t( t_size x_nOffset )							\
+	{ return m_bin.LE_getAbs##t( x_nOffset ); }								\
+	void LE_setAbs##t( t_size x_nOffset, oex::oex##t val )					\
+	{ m_bin.LE_setAbs##t( x_nOffset, val ); }								\
+	oex::oex##t BE_get##t( t_size x_nOffset )								\
+	{ return m_bin.BE_get##t( x_nOffset ); }								\
+	void BE_set##t( t_size x_nOffset, oex::oex##t val )						\
+	{ m_bin.BE_set##t( x_nOffset, val ); }									\
+	oex::oex##t BE_getAbs##t( t_size x_nOffset )							\
+	{ return m_bin.BE_getAbs##t( x_nOffset ); }								\
+	void BE_setAbs##t( t_size x_nOffset, oex::oex##t val )					\
+	{ m_bin.BE_setAbs##t( x_nOffset, val ); }								\
+	t_size size##t()														\
+	{ return sizeof( oex::oex##t ); }										\
+	int Allocate##t( t_size x_nSize )										\
 	{	return Allocate( sizeof( oex::oex##t ) * x_nSize ); }
 
 // namespace
@@ -206,8 +220,8 @@ namespace sqbind
 		stdString getSubString( int start, int len )
 		{	if ( start >= (int)m_bin.getUsed() ) return oexT( "" );
 			int max = m_bin.getUsed() - start;
-			if ( !len || len > max ) len = max;
-			return oex2std( oexStrToMb( oex::CStr8( m_bin.Ptr(), start, len ) ) );
+			if ( 0 >= len || len > max ) len = max;
+			return oex2std( oexStrToMb( oex::CStr8( m_bin.Ptr(), m_bin.getUsed(), start, len ) ) );
 		}
 
 		/// Appends the string data to the buffer
@@ -310,6 +324,9 @@ namespace sqbind
 			return m_bin.GroupAvg( nType, nOffset, nInterval, nGroups, in->Mem(), nFlags );
 		}
 
+		/// Average data in buffer
+		double Average( int x_nOffset, int x_nInterval, int fmt );
+		
 		/// Locates the specified string in the buffer
 		t_size FindBin( CSqBinary *p, int x_nStart, int x_nMax )
 		{	return m_bin.Find( p->m_bin, x_nStart, x_nMax ); }

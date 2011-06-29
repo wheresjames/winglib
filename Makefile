@@ -6,14 +6,16 @@ BUILDDIRS := app/hello lib/oexlib \
 			 tools/resbld tools/join \
 			 app/test app/iptest app/srvrund app/srvmod app/modrun \
 			 app/gstest app/irr_test \
-			 app/axtest
+			 app/axtest \
+			 app/fftest
+			 
 
 #-------------------------------------------------------------------
 # Squirrel engine
 #-------------------------------------------------------------------
 BUILDDIRS := $(BUILDDIRS) lib/sqbind tools/sqrbld \
 						  app/sqrl app/sqrl-cgi app/sqengine \
-						  sq/wlink
+						  sq/wlink sq/sntpsync
 
 
 #-------------------------------------------------------------------
@@ -53,7 +55,7 @@ BUILDDIRS := $(BUILDDIRS) app/vidcap app/avi_scan \
 #-------------------------------------------------------------------
 # Installers
 #-------------------------------------------------------------------
-# BUILDDIRS := $(BUILDDIRS) install/axtest
+BUILDDIRS := $(BUILDDIRS) install/sntpsync
 
 #-------------------------------------------------------------------
 # doxygen

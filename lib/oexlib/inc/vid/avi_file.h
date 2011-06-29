@@ -97,7 +97,9 @@ public:
 	};
 
 // AVI structures are packed on word bounderies
-#pragma pack( push, 2 )
+#ifndef OEX_NOPACK
+#	pragma pack( push, 2 )
+#endif
 
 	/// Riff file header
 	struct SRiffFileHeader
@@ -307,7 +309,9 @@ public:
 		unsigned long			dwSize;
 	};
 
-#pragma pack( pop )
+#ifndef OEX_NOPACK
+#	pragma pack( pop )
+#endif
 
 public:
 

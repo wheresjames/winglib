@@ -87,12 +87,45 @@ public:
 	/// Returns the amount of data buffered
 	int getBufferSize();
 
+	/// Returns the frame type
+	/**
+		@param [in] p	-	Pointer to frame buffer
+		@param [in] len	-	Length of buffer in p
+		
+		@return		< 0 = error
+					0 = I-Frame
+					1 = P-Frame
+					2 = B-Frame
+					3 = S-Frame
+	*/
+	int GetH264FrameType( const void *p, int len );
+	
+	/// Returns the frame type
+	/**
+		@param [in] p	-	Pointer to frame buffer
+		@param [in] len	-	Length of buffer in p
+		
+		@return		< 0 = error
+					0 = I-Frame
+					1 = P-Frame
+					2 = B-Frame
+					3 = S-Frame
+	*/
+	int getH264FrameType( sqbind::CSqBinary *in )
+	{	if ( !in )
+			return -1;
+		return GetH264FrameType( in->Ptr(), in->getUsed() );
+	}
+	
 	/** @} */
 
 private:
 
 	/// Image format
 	int						m_nFmt;
+	
+	/// Non-zero if we're waiting for a key frame
+	int						m_nWaitKeyFrame;
 
 	/// Pointer to codec object
     AVCodec 				*m_pCodec;

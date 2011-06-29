@@ -155,6 +155,11 @@ float CSqMulti::tofloat()
 	return oexStrToFloat( m_val.str().c_str() );
 }
 
+double CSqMulti::todouble()
+{_STT();
+	return oexStrToDouble( m_val.str().c_str() );
+}
+
 int CSqMulti::len()
 {_STT();
 	return m_val.str().length();
@@ -208,6 +213,14 @@ stdString CSqMulti::str_base64_encode()
 stdString CSqMulti::str_base64_decode()
 {_STT();
 	return oex2std( oexBase64Decode( std2oex( m_val.str() ) ) );
+}
+
+stdString CSqMulti::str_size( double dDiv, int nDigits, const stdString &sSuffix )
+{_STT();
+	oex::CStr s = std2oex( sSuffix );	
+	oexCONST oex::CStr::t_char *suf[ 128 ], sep[] = { oexT( ',' ) };
+	suf[ oex::str::InplaceSplit( s._Ptr(), s.Length(), suf, oexSizeOfArray( suf ), sep, sizeof( sep ) ) ] = 0;
+	return oex2std( oex::CStr().AppendSizeString( todouble(), dDiv, nDigits, suf ) );
 }
 
 CSqBinary CSqMulti::bin_urlenc()
@@ -267,6 +280,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, deserialize_filter )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, setJSON )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, getJSON )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mergeJSON )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, merge )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mmerge )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, join )
@@ -281,6 +295,8 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, set )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, get )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, at )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, first )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, last )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, copy )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_up )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_down )
@@ -289,6 +305,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, toint )
 //	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, toint64 ) // +++ Hmmm
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, tofloat )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, todouble )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, len )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_urlenc )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_urldec )
@@ -300,6 +317,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base16_decode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base64_encode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base64_decode )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_size )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_urlenc )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_urldec )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_htmlenc )
@@ -314,6 +332,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, clear )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_key )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_value )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_obj )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, filter )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, extract )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, _get )
@@ -344,15 +363,25 @@ CSqParam::t_SqStr CSqMulti::getJSON()
 	return oex::CParser::EncodeJSON( pb ).Ptr();
 }
 
-void CSqMulti::setJSON( const CSqParam::t_SqStr &s )
+CSqMulti* CSqMulti::setJSON( const CSqParam::t_SqStr &s )
 {_STT();
 	// Lose old data
 	m_lst.clear();
+	mergeJSON( s );
+	return this;
+}
+
+CSqMulti* CSqMulti::mergeJSON( const CSqParam::t_SqStr &s )
+{_STT();
+
+	if ( !s.length() )
+		return this;
 
 	// Deserialize data
 	oex::CStr sData( s.c_str(), s.length() );
 	oex::CPropertyBag pb = oex::CParser::DecodeJSON( sData );
 	SQBIND_PropertyBagToMulti( pb, m_lst );
+	return this;
 }
 
 void CSqMulti::fromPb( oex::CPropertyBag &pb )
@@ -390,7 +419,7 @@ CSqParam::t_SqStr CSqMulti::serialize_filter( const t_SqStr &sFilter, int x_bInc
 	return oex::CParser::SerializeFilter( pb, sFilter.c_str(), x_bInclude, x_bIgnoreCase ).Ptr();
 }
 
-void CSqMulti::deserialize_filter( const CSqParam::t_SqStr &s, const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase )
+CSqMulti* CSqMulti::deserialize_filter( const CSqParam::t_SqStr &s, const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase )
 {_STT();
 	// Lose old data
 	m_lst.clear();
@@ -399,6 +428,7 @@ void CSqMulti::deserialize_filter( const CSqParam::t_SqStr &s, const t_SqStr &sF
 	oex::CStr sData( s.c_str(), s.length() );
 	oex::CPropertyBag pb = oex::CParser::DeserializeFilter( sData, sFilter.c_str(), x_bInclude, x_bIgnoreCase );
 	SQBIND_PropertyBagToMulti( pb, m_lst );
+	return this;
 }
 
 CSqMulti& CSqMulti::add( CSqMulti &m )
@@ -424,19 +454,20 @@ void CSqMulti::merge( const CSqParam::t_SqStr &s )
 	SQBIND_PropertyBagToMulti( pb, m_lst );
 }
 
-void CSqMulti::mset( CSqMulti *m )
+CSqMulti* CSqMulti::mset( CSqMulti *m )
 {_STT();
 	if ( m ) m_lst = m->m_lst;
+	return this;
 }
 
-void CSqMulti::mmerge( CSqMulti *m )
+CSqMulti* CSqMulti::mmerge( CSqMulti *m )
 {_STT();
 
-	if ( !m )
-		return;
-
-	for ( CSqMulti::iterator it = m->begin(); it != m->end(); it++ )
-		m_lst[ it->first ] = it->second.str();
+	if ( m )
+		for ( CSqMulti::iterator it = m->begin(); it != m->end(); it++ )
+			m_lst[ it->first ] = it->second.str();
+		
+	return this;
 }
 
 CSqMulti::t_Obj CSqMulti::tmpl( const t_Obj &tmpl )
@@ -528,6 +559,39 @@ int CSqMulti::isset( const CSqMulti::t_Obj &k )
 	return ( m_lst.end() != m_lst.find( k ) ) ? 1 : 0;
 }
 
+CSqMulti* CSqMulti::first( int skip )
+{_STT();
+
+	t_List::iterator it = m_lst.begin();
+	while ( 0 < skip && it != m_lst.end() ) 
+		skip--, it++;
+	
+	if ( it == m_lst.end() )
+	{	if ( !m_def )
+			m_def = OexAllocConstruct< CSqMulti >();
+		return m_def;
+	} // end if
+
+	return &it->second;
+}
+
+CSqMulti* CSqMulti::last( int skip )
+{_STT();
+
+	t_List::reverse_iterator it = m_lst.rbegin();
+	while ( 0 < skip && it != m_lst.rend() ) 
+		skip--, it++;
+
+	if ( it == m_lst.rend() )
+	{	if ( !m_def )
+			m_def = OexAllocConstruct< CSqMulti >();
+		return m_def;
+	} // end if
+
+	return &it->second;
+}
+
+
 CSqMulti* CSqMulti::get( const CSqMulti::t_Obj &k )
 {_STT();
 	if ( !k.length() )
@@ -538,7 +602,7 @@ CSqMulti* CSqMulti::get( const CSqMulti::t_Obj &k )
 	return &m_lst[ k ];
 }
 
-CSqMulti* CSqMulti::at( const stdString &path )
+CSqMulti* CSqMulti::at( const CSqMulti::t_Obj &path )
 {
 	if ( !path.length() )
 	{	if ( !m_def )
@@ -590,7 +654,6 @@ void CSqMulti::move_down( const t_Obj &k )
 }
 
 
-/// Adds an element to the vector
 CSqMulti::t_Obj CSqMulti::find_key( const CSqMulti::t_Obj &k )
 {_STT();
 
@@ -606,7 +669,6 @@ CSqMulti::t_Obj CSqMulti::find_key( const CSqMulti::t_Obj &k )
     return oexT( "" );
 }
 
-/// Adds an element to the vector
 CSqMulti::t_Obj CSqMulti::find_value( const CSqMulti::t_Obj &v )
 {_STT();
 
@@ -620,6 +682,26 @@ CSqMulti::t_Obj CSqMulti::find_value( const CSqMulti::t_Obj &v )
             return it->first;
 
     return oexT( "" );
+}
+
+CSqMulti* CSqMulti::find_obj( const CSqMulti::t_Obj &k, const CSqMulti::t_Obj &v )
+{_STT();
+
+    // For each item
+    for ( t_List::iterator it = m_lst.begin();
+          m_lst.end() != it;
+          it++ )
+
+        // Is the sub string in the value at the specified key?
+        if ( match_pattern( it->second.at( k )->str().c_str(), v.c_str() ) )
+            return &it->second;
+			
+	// Ensure default object
+	if ( !m_def )
+		m_def = OexAllocConstruct< CSqMulti >();
+		
+	// Return the default object
+	return m_def;
 }
 
 SquirrelObject CSqMulti::_newslot( HSQUIRRELVM v )

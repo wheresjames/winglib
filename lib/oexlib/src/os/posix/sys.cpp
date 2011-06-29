@@ -46,6 +46,7 @@
 
 #include "std_os.h"
 #include <termios.h>
+#include <sys/reboot.h>
 
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
@@ -195,6 +196,38 @@ int CSys::GetKey()
 	return ch;
 }
 
+oexINT CSys::SetRoot()
+{
+	return setuid( 0 );
+}
+
+oexINT CSys::IsRoot()
+{
+	return getuid() ? 0 : 1;
+}
+
+//#if defined( OEX_ANDROID )
+#	define REBOOT( n )	reboot( n )
+//#else
+//#	define REBOOT( n )	__reboot( 0xfee1dead, 369367448, n, pMsg )
+//#endif
+
+oexINT CSys::CtrlComputer( int nCmd, int nForce, oexCSTR pMsg )
+{
+	if ( !pMsg || !*pMsg )
+		pMsg = 0;
+
+	sync();
+	switch( nCmd )
+	{	case eReboot : return REBOOT( 0x1234567 ); break;
+		case eRestart : return REBOOT( 0xa1b2c3d4 ); break;
+		case ePowerOff : return REBOOT( 0x4321fedc ); break;
+		case eLogOff : break;
+		case eShutdown : return REBOOT( 0xcdef0123 ); break;
+	} // end switch
+
+	return 0;
+}
 
 // **** Multi-byte
 
@@ -406,7 +439,7 @@ oexDOUBLE CSys::StrToDouble( oexCSTRW x_pStr )
 }
 
 #if defined( OEX_NOWCSTO )
-size_t wcstombs( char* mbstr, const wchar_t* wcstr, size_t max )
+size_t oex_wcstombs( char* mbstr, const wchar_t* wcstr, size_t max )
 {
 	return wcsrtombs( mbstr, (const wchar_t**)&wcstr, max, oexNULL );
 }
@@ -420,11 +453,15 @@ oexUINT CSys::WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen 
 	// +++ Ensure source is NULL terminated
 //	pSrc[ uLen - 1 ] = 0;
 
+#if defined( OEX_NOWCSTO )
+	return oex_wcstombs( pDst, pSrc, uMax );
+#else
 	return wcstombs( pDst, pSrc, uMax );
+#endif
 }
 
 #if defined( OEX_NOWCSTO )
-size_t mbstowcs(wchar_t* wcstr, const char* mbstr, size_t max)
+size_t oex_mbstowcs(wchar_t* wcstr, const char* mbstr, size_t max)
 {
 	return mbsrtowcs(wcstr, (const char**)&mbstr, max, oexNULL );
 }
@@ -438,7 +475,11 @@ oexUINT CSys::MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen 
 	// +++ Ensure source is NULL terminated
 //	pSrc[ uLen - 1 ] = 0;
 
+#if defined( OEX_NOWCSTO )
+	return oex_mbstowcs( pDst, pSrc, uMax );
+#else
 	return mbstowcs( pDst, pSrc, uMax );
+#endif
 }
 
 /// vprintf
@@ -525,6 +566,7 @@ oexGUID * CSys::CreateGuid( oexGUID *pGuid )
 		CMem::GetRawAllocator().fMalloc( 4 ),
 		g_int++
 	};
+	
 	oss::CMd5::Transform( &guid, &rs, sizeof( rs ) );
 	CMem::GetRawAllocator().fFree( rs.pHeap );
 
@@ -692,8 +734,28 @@ oexBOOL CSys::GetLocalTime( STime &t )
 
 	time_t current_time;
 	time( &current_time );
-	struct tm tinfo;
-	localtime_r( &current_time, &tinfo );
+	struct tm tinfo, *ptinfo = &tinfo;
+	
+	_oexTRY
+	{
+#if !defined( OEX_NOLOCALTIME_R )
+
+// +++ Call to localtime_r() crashes in android, must come up with something...
+#	if !defined( OEX_ANDROID )
+		localtime_r( &current_time, &tinfo );
+#	endif
+
+#else
+		ptinfo = localtime( &current_time );
+		if ( !ptinfo )
+			return oexFALSE;
+#endif
+	} // end try
+	
+	_oexCATCH_ALL()
+	{
+		return oexFALSE;
+	}
 
 	CSys_SystemTimeToSTime( &tinfo, t );
 
@@ -743,17 +805,51 @@ oexINT CSys::GetLocalTzBias()
 	return 0;
 }
 
+/*
+struct tm 
+  {
+     int   tm_sec; 
+     int   tm_min; 
+     int   tm_hour; 
+     int   tm_mday; 
+     int   tm_mon; 
+     int   tm_year; 
+     int   tm_wday; 
+     int   tm_yday; 
+     int   tm_isdst; 
+};
+*/
 
 oexBOOL CSys::GetSystemTime( STime &t )
 {
-	oexZeroMemory( &t, sizeof( t ) );
+	oexZero( t );
 
 	time_t current_time;
 	time( &current_time );
-	struct tm tinfo;
-	gmtime_r( &current_time, &tinfo );
+	struct tm tinfo, *ptinfo = &tinfo;
 
-	CSys_SystemTimeToSTime( &tinfo, t );
+	_oexTRY
+	{
+#if !defined( OEX_NOGMTTIME_R )
+
+// +++ Call to gmttime_r() crashes in android, must come up with something...
+#	if !defined( OEX_ANDROID )
+		gmtime_r( &current_time, &tinfo );
+#	endif
+
+#else
+		ptinfo = gmttime( &current_time );
+		if ( !ptinfo )
+			return oexFALSE;
+#endif
+	} // end try
+	
+	_oexCATCH_ALL()
+	{
+		return oexFALSE;
+	}
+
+	CSys_SystemTimeToSTime( ptinfo, t );
 
 #ifdef OEX_NANOSECONDS
 	struct timespec	ts;
@@ -836,10 +932,30 @@ void CSys::FileTimeToSystemTime( STime &x_st, oexINT64 x_ft )
 	x_st.uMillisecond = ( x_ft / 10000000LL ) % 1000LL;
 
 	time_t tTime = ( x_ft / 10000000LL ) - FTOFF_1970;
-	struct tm tinfo;
-	gmtime_r( &tTime, &tinfo );
+	struct tm tinfo, *ptinfo = &tinfo;
+	
+	_oexTRY
+	{
+#if !defined( OEX_NOGMTTIME_R )
 
-	CSys_SystemTimeToSTime( &tinfo, x_st );
+// +++ Call to gmttime_r() crashes in android, must come up with something...
+#	if !defined( OEX_ANDROID )
+		gmtime_r( &current_time, &tinfo );
+#	endif
+
+#else
+		ptinfo = gmttime( &current_time );
+		if ( !ptinfo )
+			return;
+#endif
+	} // end try
+	
+	_oexCATCH_ALL()
+	{
+		return;
+	}
+
+	CSys_SystemTimeToSTime( ptinfo, x_st );
 }
 
 
@@ -870,27 +986,39 @@ int CSys::vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs )
 }
 
 int CSys::Echo( oexCSTR8 x_pFmt )
-{	if ( !oexCHECK_PTR( x_pFmt ) )
+{
+	if ( !oexCHECK_PTR( x_pFmt ) )
 		return 0;
+		
+	if ( CUtil::isOutputBuffer() )
+	{
 #if defined( oexUNICODE )
-	CStr s = oexMbToStr( x_pFmt );
-	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
+		CStr s = oexMbToStr( x_pFmt );
+		CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
 #else
-	CUtil::AddOutput( x_pFmt, 0, oexTRUE );
+		CUtil::AddOutput( x_pFmt, 0, oexTRUE );
 #endif
+	} // end if
+	
 	return ::puts( x_pFmt );
 }
 
 int CSys::Echo( oexCSTR8 x_pFmt, oexLONG x_lLen )
 {//_STT();
+
 	if ( !x_pFmt || 0 >= x_lLen )
 		return 0;
+		
+	if ( CUtil::isOutputBuffer() )
+	{
 #if !defined( oexUNICODE )
-	CUtil::AddOutput( x_pFmt, x_lLen, oexTRUE );
+		CUtil::AddOutput( x_pFmt, x_lLen, oexTRUE );
 #else
-	CStr s = oexStrToStrW( CStr8( x_pFmt, x_lLen ) );
-	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
+		CStr s = oexStrToStrW( CStr8( x_pFmt, x_lLen ) );
+		CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
 #endif
+	} // end if
+	
 	return ::fwrite( x_pFmt, 1, x_lLen, stdout );
 }
 
@@ -1245,5 +1373,33 @@ oexBOOL CSys::Uninit()
 	ReleaseProcStat( &g_psi );
 
 	return oexTRUE;
+}
+
+volatile oexINT CSys::s_last_error = 0;
+
+oexNORETURN void CSys::ThrowException()
+{
+	// Throw exception
+	_oexTHROW( oexEXCEPTION( s_last_error ) );
+
+	// Just in case
+	Exit( s_last_error );
+
+	// Forever
+	for(;;) Sleep( 1000 );
+}
+
+void CSys::InitException()
+{
+	volatile int i = 0;
+	if ( i )
+		_oexTHROW( oexEXCEPTION() );
+}
+
+oexUINT CSys::InjectException( oexPVOID hThread, oexINT nError )
+{
+	s_last_error = nError;
+
+	return -1;
 }
 

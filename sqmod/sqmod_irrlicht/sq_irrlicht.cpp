@@ -3,8 +3,10 @@
 #include "stdafx.h"
 
 #if defined( _MSC_VER ) || defined( _IRR_COMPILE_WITH_OPENGL_ ) || defined( _IRR_LINUX_X11_VIDMODE_ )
-#	include <GL/gl.h>
-#	define SQ_USE_OPENGL
+#	if !defined( OEX_ARM )
+#		include <GL/gl.h>
+#		define SQ_USE_OPENGL
+#	endif
 #endif
 
 #if defined( _WIN32_WCE ) || defined( OEX_IPHONE )

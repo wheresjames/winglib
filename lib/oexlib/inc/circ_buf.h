@@ -106,7 +106,9 @@ public:
 	/// Size type
 	typedef oexUINT				t_size;
 
-#pragma pack( push, 1 )
+#ifndef OEX_NOPACK
+#	pragma pack( push, 1 )
+#endif
 
     /// Contains information about the buffer
     struct SBufferInfo
@@ -118,7 +120,9 @@ public:
 	    t_size					uWritePtr;
     };
 
-#pragma pack( pop )
+#ifndef OEX_NOPACK
+#	pragma pack( pop )
+#endif
 
 protected:
 

@@ -50,6 +50,13 @@ using namespace sqbind;
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_setAbs##t )		\
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, BE_getAbs##t )		\
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, find##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findMin##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findMax##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findRange##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, skip##t )			\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, skipMin##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, skipMax##t )		\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, skipRange##t )		\
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, size##t )			\
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Allocate##t )
 
@@ -76,6 +83,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Fingerprint )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FingerprintBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FingerprintImage )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Average )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, GroupAvg )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, GraphFloat )	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Graph )		
@@ -155,6 +163,10 @@ CSqBinary::t_size CSqBinary::CopyBytes( CSqBinary *x_p, CSqBinary::t_size x_uByt
 	return x_uBytes;
 }
 
+double CSqBinary::Average( int x_nOffset, int x_nInterval, int fmt )
+{	if ( !getUsed() ) return 0;
+	return oex::CUtil::BinAverage( &m_bin, x_nOffset, x_nInterval, fmt );
+}
 
 int CSqBinary::FingerprintImage( CSqImage *img, CSqBinary *col, int scale )
 {	if ( !img || !col ) return 0;

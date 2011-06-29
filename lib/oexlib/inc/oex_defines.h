@@ -106,10 +106,17 @@
 #define oexCleanupBin				OEX_NAMESPACE::COex::GetBinShare().Cleanup
 
 #if defined( OEX_GCC )
-#	define oexVaList				        __builtin_va_list
-#	define oexVaStart				        __builtin_va_start
-#	define oexVaEnd					        __builtin_va_end
-#	define oexVaArg					        __builtin_va_arg
+#	if defined( OEX_ANDROID )
+#		define oexVaList			        __builtin_va_list
+#		define oexVaStart			        __builtin_va_start
+#		define oexVaEnd				        __builtin_va_end
+#		define oexVaArg				        __builtin_va_arg
+#	else
+#		define oexVaList			        __builtin_va_list
+#		define oexVaStart			        __builtin_va_start
+#		define oexVaEnd				        __builtin_va_end
+#		define oexVaArg				        __builtin_va_arg
+#	endif
 #elif defined( OEX_WIN32 )
 #	define oexVaList				        OEX_NAMESPACE::oexPVOID
 #	define oexVaStart( v, p )		        ( v = ( ( (OEX_NAMESPACE::oexPVOID*)&p ) + 1 ) )
@@ -343,6 +350,9 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexGetLastErrorStr					OEX_NAMESPACE::os::CTrace::GetErrorMsg( oexGetLastError() )
 #define oexGetKey							OEX_NAMESPACE::os::CSys::GetKey
 #define oexIsKey							OEX_NAMESPACE::os::CSys::IsKey
+#define oexCtrlComputer						OEX_NAMESPACE::os::CSys::CtrlComputer
+#define oexIsRoot							OEX_NAMESPACE::os::CSys::IsRoot
+#define oexSetRoot							OEX_NAMESPACE::os::CSys::SetRoot
 
 #define oexMd5								OEX_NAMESPACE::CUtil::md5
 #define oexGuid								OEX_NAMESPACE::CUtil::guid
@@ -473,6 +483,9 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 
 #define oexFOURCC_STR( cc ) oexMbToStr( OEX_NAMESPACE::CStr8( (char*)&( cc ), 4 ) )
 
+#define oexEXCEPTION			OEX_NAMESPACE::os::CSys::CException
+#define oexINJECT_EXCEPTION		OEX_NAMESPACE::os::CSys::InjectException
+#define oexInitException		OEX_NAMESPACE::os::CSys::InitException
 #if defined( oexUSE_EXCEPTIONS ) && !defined( OEX_NOEXCEPTIONS )
 #	define oexTRY				try
 #	define oexCATCH( s )		catch( s )
@@ -503,11 +516,11 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #if defined( OEXLIB_STACK_TRACING )
 #	define _STT()					OEX_NAMESPACE::CLocalStackTrace _l_lst( oexSTTFUNCTION );
 #	define _STT_SET_NAME( v )		{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->SetName( v ) : 0 ); }
-#	define _STT_GET_NAME()			{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->GetName() : CStr() ); }
+#	define _STT_GET_NAME()			( oexSt().GetStack()->GetName() )
 #	define _STT_SET_TAG( v )		{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->SetTag( v ) : 0 ); }
-#	define _STT_GET_TAG()			{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->GetTag() : CStr() ); }
+#	define _STT_GET_TAG()			( oexSt().GetStack()->GetTag() )
 #	define _STT_SET_CHECKPOINT( v )	{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->SetCheckpoint( v ) : 0 ); }
-#	define _STT_GET_CHECKPOINT()	{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->GetCheckpoint() : CStr() ); }
+#	define _STT_GET_CHECKPOINT()	( oexSt().GetStack()->GetCheckpoint() )
 #else
 #	define _STT()
 #	define _STT_SET_NAME( v )
@@ -554,36 +567,36 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define OEX_LE_INT64( v )	v
 #define OEX_LE_PVOID( v )	v
 
-#define OEX_BE_INT16( v )	( ( ( (oexUSHORT)v & 0x00ff ) << 8 )			\
-							| ( ( (oexUSHORT)v & 0xff00 ) >> 8 ) )
-#define OEX_BE_INT32( v )	( ( ( (oexUINT)v & 0x000000ff ) << 24 ) 		\
-							| ( ( (oexUINT)v & 0x0000ff00 ) << 8 )			\
-							| ( ( (oexUINT)v & 0x00ff0000 ) >> 8 )			\
-							| ( ( (oexUINT)v & 0xff000000 ) >> 24 ) )
-#define OEX_BE_INT64( v )	( ( ( (oexUINT64)v & 0x00000000000000ffll ) << 56 ) 	\
-							| ( ( (oexUINT64)v & 0x000000000000ff00ll ) << 40 )		\
-							| ( ( (oexUINT64)v & 0x0000000000ff0000ll ) << 24 )		\
-							| ( ( (oexUINT64)v & 0x00000000ff000000ll ) << 8 )		\
-							| ( ( (oexUINT64)v & 0x000000ff00000000ll ) >> 8 ) 		\
-							| ( ( (oexUINT64)v & 0x0000ff0000000000ll ) >> 24 ) 	\
-							| ( ( (oexUINT64)v & 0x00ff000000000000ll ) >> 40 ) 	\
-							| ( ( (oexUINT64)v & 0xff00000000000000ll ) >> 56 ) )
+#define OEX_BE_INT16( v )	( ( ( (OEX_NAMESPACE::oexUSHORT)v & 0x00ff ) << 8 )						\
+							| ( ( (OEX_NAMESPACE::oexUSHORT)v & 0xff00 ) >> 8 ) )
+#define OEX_BE_INT32( v )	( ( ( (OEX_NAMESPACE::oexUINT)v & 0x000000ff ) << 24 ) 					\
+							| ( ( (OEX_NAMESPACE::oexUINT)v & 0x0000ff00 ) << 8 )					\
+							| ( ( (OEX_NAMESPACE::oexUINT)v & 0x00ff0000 ) >> 8 )					\
+							| ( ( (OEX_NAMESPACE::oexUINT)v & 0xff000000 ) >> 24 ) )
+#define OEX_BE_INT64( v )	( ( ( (OEX_NAMESPACE::oexUINT64)v & 0x00000000000000ffll ) << 56 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x000000000000ff00ll ) << 40 )		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x0000000000ff0000ll ) << 24 )		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x00000000ff000000ll ) << 8 )		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x000000ff00000000ll ) >> 8 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x0000ff0000000000ll ) >> 24 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x00ff000000000000ll ) >> 40 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0xff00000000000000ll ) >> 56 ) )
 #	if defined( OEX_CPU_64 )
-#define OEX_BE_PVOID( v )	( (oexPVOID)(											\
-							( ( ( (oexUINT64)v & 0x00000000000000ffll ) << 56 ) 	\
-							| ( ( (oexUINT64)v & 0x000000000000ff00ll ) << 40 )		\
-							| ( ( (oexUINT64)v & 0x0000000000ff0000ll ) << 24 )		\
-							| ( ( (oexUINT64)v & 0x00000000ff000000ll ) << 8 )		\
-							| ( ( (oexUINT64)v & 0x000000ff00000000ll ) >> 8 ) 		\
-							| ( ( (oexUINT64)v & 0x0000ff0000000000ll ) >> 24 ) 	\
-							| ( ( (oexUINT64)v & 0x00ff000000000000ll ) >> 40 ) 	\
-							| ( ( (oexUINT64)v & 0xff00000000000000ll ) >> 56 ) ) ) )
+#define OEX_BE_PVOID( v )	( (oexPVOID)(															\
+							( ( ( (OEX_NAMESPACE::oexUINT64)v & 0x00000000000000ffll ) << 56 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x000000000000ff00ll ) << 40 )		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x0000000000ff0000ll ) << 24 )		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x00000000ff000000ll ) << 8 )		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x000000ff00000000ll ) >> 8 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x0000ff0000000000ll ) >> 24 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x00ff000000000000ll ) >> 40 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0xff00000000000000ll ) >> 56 ) ) ) )
 #	else
-#define OEX_BE_PVOID( v )	( (oexPVOID)(									\
-							( ( ( (oexUINT)v & 0x000000ff ) << 24 ) 		\
-							| ( ( (oexUINT)v & 0x0000ff00 ) << 8 )			\
-							| ( ( (oexUINT)v & 0x00ff0000 ) >> 8 )			\
-							| ( ( (oexUINT)v & 0xff000000 ) >> 24 ) ) ) )
+#define OEX_BE_PVOID( v )	( (oexPVOID)(													\
+							( ( ( (OEX_NAMESPACE::oexUINT)v & 0x000000ff ) << 24 ) 			\
+							| ( ( (OEX_NAMESPACE::oexUINT)v & 0x0000ff00 ) << 8 )			\
+							| ( ( (OEX_NAMESPACE::oexUINT)v & 0x00ff0000 ) >> 8 )			\
+							| ( ( (OEX_NAMESPACE::oexUINT)v & 0xff000000 ) >> 24 ) ) ) )
 #	endif
 
 #endif
@@ -595,36 +608,36 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define OEX_BE_INT64( v )	v
 #define OEX_BE_PVOID( v )	v
 
-#define OEX_LE_INT16( v )	( ( ( (oexUSHORT)v & 0x00ff ) << 8 )			\
-							| ( ( (oexUSHORT)v & 0xff00 ) >> 8 ) )
-#define OEX_LE_INT32( v )	( ( ( (oexUINT)v & 0x000000ff ) << 24 ) 		\
-							| ( ( (oexUINT)v & 0x0000ff00 ) << 8 )			\
-							| ( ( (oexUINT)v & 0x00ff0000 ) >> 8 ) 			\
-							| ( ( (oexUINT)v & 0xff000000 ) >> 24 ) )
-#define OEX_LE_INT64( v )	( ( ( (oexUINT64)v & 0x00000000000000ffll ) << 56 ) 	\
-							| ( ( (oexUINT64)v & 0x000000000000ff00ll ) << 40 ) 	\
-							| ( ( (oexUINT64)v & 0x0000000000ff0000ll ) << 24 ) 	\
-							| ( ( (oexUINT64)v & 0x00000000ff000000ll ) << 8 ) 		\
-							| ( ( (oexUINT64)v & 0x000000ff00000000ll ) >> 8 ) 		\
-							| ( ( (oexUINT64)v & 0x0000ff0000000000ll ) >> 24 ) 	\
-							| ( ( (oexUINT64)v & 0x00ff000000000000ll ) >> 40 ) 	\
-							| ( ( (oexUINT64)v & 0xff00000000000000ll ) >> 56 ) )
+#define OEX_LE_INT16( v )	( ( ( (OEX_NAMESPACE::oexUSHORT)v & 0x00ff ) << 8 )						\
+							| ( ( (OEX_NAMESPACE::oexUSHORT)v & 0xff00 ) >> 8 ) )
+#define OEX_LE_INT32( v )	( ( ( (OEX_NAMESPACE::oexUINT)v & 0x000000ff ) << 24 ) 					\
+							| ( ( (OEX_NAMESPACE::oexUINT)v & 0x0000ff00 ) << 8 )					\
+							| ( ( (OEX_NAMESPACE::oexUINT)v & 0x00ff0000 ) >> 8 ) 					\
+							| ( ( (OEX_NAMESPACE::oexUINT)v & 0xff000000 ) >> 24 ) )
+#define OEX_LE_INT64( v )	( ( ( (OEX_NAMESPACE::oexUINT64)v & 0x00000000000000ffll ) << 56 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x000000000000ff00ll ) << 40 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x0000000000ff0000ll ) << 24 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x00000000ff000000ll ) << 8 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x000000ff00000000ll ) >> 8 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x0000ff0000000000ll ) >> 24 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x00ff000000000000ll ) >> 40 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0xff00000000000000ll ) >> 56 ) )
 #	if defined( OEX_CPU_64 )
-#define OEX_LE_PVOID( v )	( (oexPVOID)(											\
-							( ( ( (oexUINT64)v & 0x00000000000000ffll ) << 56 ) 	\
-							| ( ( (oexUINT64)v & 0x000000000000ff00ll ) << 40 )		\
-							| ( ( (oexUINT64)v & 0x0000000000ff0000ll ) << 24 )		\
-							| ( ( (oexUINT64)v & 0x00000000ff000000ll ) << 8 )		\
-							| ( ( (oexUINT64)v & 0x000000ff00000000ll ) >> 8 ) 		\
-							| ( ( (oexUINT64)v & 0x0000ff0000000000ll ) >> 24 ) 	\
-							| ( ( (oexUINT64)v & 0x00ff000000000000ll ) >> 40 ) 	\
-							| ( ( (oexUINT64)v & 0xff00000000000000ll ) >> 56 ) ) ) )
+#define OEX_LE_PVOID( v )	( (OEX_NAMESPACE::oexPVOID)(											\
+							( ( ( (OEX_NAMESPACE::oexUINT64)v & 0x00000000000000ffll ) << 56 )	 	\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x000000000000ff00ll ) << 40 )		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x0000000000ff0000ll ) << 24 )		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x00000000ff000000ll ) << 8 )		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x000000ff00000000ll ) >> 8 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x0000ff0000000000ll ) >> 24 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0x00ff000000000000ll ) >> 40 ) 		\
+							| ( ( (OEX_NAMESPACE::oexUINT64)v & 0xff00000000000000ll ) >> 56 ) ) ) )
 #	else
-#define OEX_LE_PVOID( v )	( (oexPVOID)(									\
-							( ( ( (oexUINT)v & 0x000000ff ) << 24 ) 		\
-							| ( ( (oexUINT)v & 0x0000ff00 ) << 8 )			\
-							| ( ( (oexUINT)v & 0x00ff0000 ) >> 8 )			\
-							| ( ( (oexUINT)v & 0xff000000 ) >> 24 ) ) ) )
+#define OEX_LE_PVOID( v )	( (OEX_NAMESPACE::oexPVOID)(									\
+							( ( ( (OEX_NAMESPACE::oexUINT)v & 0x000000ff ) << 24 ) 			\
+							| ( ( (OEX_NAMESPACE::oexUINT)v & 0x0000ff00 ) << 8 )			\
+							| ( ( (OEX_NAMESPACE::oexUINT)v & 0x00ff0000 ) >> 8 )			\
+							| ( ( (OEX_NAMESPACE::oexUINT)v & 0xff000000 ) >> 24 ) ) ) )
 #	endif
 
 #endif
@@ -656,3 +669,4 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexBE_FLOAT( v )		OEX_BE_INT32( v )
 #define oexBE_DOUBLE( v )		OEX_BE_INT64( v )
 #define oexBE_PVOID( v )		OEX_BE_PVOID( v )
+

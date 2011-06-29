@@ -124,6 +124,12 @@ typedef oexBYTE*					oexPBYTE;
 
 typedef void*						oexTYPEOF_PTR;
 
+/// Position type
+typedef oexLONG		oexPos;
+
+/// Size type
+typedef oexULONG	oexSize;
+
 struct oexTime
 {
 	/// Seconds

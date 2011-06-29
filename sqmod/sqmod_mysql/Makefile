@@ -22,6 +22,11 @@ PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifeq ($(PROC),arm)
+UNSUPPORTED := PROC=$(PROC) is not supported
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),gcc)
 		ifeq ($(PROC),x86)
@@ -37,9 +42,9 @@ else
 ifeq ($(PLATFORM),windows)
 
 	ifeq ($(BUILD),vs)
-		PRJ_WINL := libmysql
+		PRJ_WINL := $(PRJ_WINL) libmysql
 	else
-		PRJ_WINL := mysql
+		PRJ_WINL := $(PRJ_WINL) mysql
 	endif
 
 	PRJ_INCS := $(PRJ_INCS) mysql/include
@@ -72,3 +77,4 @@ include $(PRJ_LIBROOT)/go.mk
 
 endif
 
+endif

@@ -328,15 +328,16 @@ public:
 	template< typename T >
 		static TStr< T > UrlEncode( TStr< T > x_str )
 	{
-		TStr< T > ret, num;
+		TStr< T > ret;
 		oexINT nLen = x_str.Length();
-
 		while ( 0 < nLen-- )
 		{
 			if ( IsUrlChar( *x_str ) )
 				ret << *x_str;
+			else if ( oexTC( T, ' ' ) == *x_str )
+				ret << oexTC( T, '+' );
 			else
-				ret << num.Fmt( oexTT( T, "%%%02X" ), (oexUCHAR)*x_str );
+				ret.AppendNum( oexTT( T, "%%%02X" ), (oexUINT)(oexUCHAR)(*x_str) );
 
 			x_str++;
 
@@ -429,6 +430,9 @@ public:
 				case oexTC( T, '"' ) :
 					return oexTT( T, "&quot;" );
 
+				case oexTC( T, '\'' ) :
+					return oexTT( T, "&#39;" );
+					
 				case oexTC( T, '&' ) :
 					return oexTT( T, "&amp;" );
 
@@ -450,7 +454,7 @@ public:
 			} // end switch
 
 			// Generic encode
-			return oexMks( oexTT( T, "&#" ), (oexULONG)x_ch, oexTT( T, ";" ) );
+			return oexMks( oexTT( T, "&#" ), (oexULONG)(oexUCHAR)x_ch, oexTT( T, ";" ) );
 		}
 
 	/// Encoded a string "<b>Hello World</b>" -> "&lt;b&gt;Hello&nbsp;World&lt;/b&gt;"
@@ -501,8 +505,10 @@ public:
 		{
 			static const SHtmlItem< T > c_cnv[] =
 			{
+				{ oexTC( T, '\t' ), oexTT( T, "&nbsp;&nbsp;&nbsp;&nbsp;" ), 4 * 6 },
 				{ oexTC( T, ' ' ), oexTT( T, "&nbsp;" ), 6 },
 				{ oexTC( T, '"' ), oexTT( T, "&quot;" ), 6 },
+				{ oexTC( T, '\'' ), oexTT( T, "&#39;" ), 5 },
 				{ oexTC( T, '&' ), oexTT( T, "&amp;" ), 5 },
 				{ oexTC( T, '<' ), oexTT( T, "&lt;" ), 4 },
 				{ oexTC( T, '>' ), oexTT( T, "&gt;" ), 4 },
@@ -532,10 +538,11 @@ public:
 				return (T)x_str.Slice( i ).LTrim( 2 ).ToLong();
 
 			// Scan for known sequence
-			TStr< T > sub = x_str.SubStr( 0, i );
+//			TStr< T > sub = x_str.SubStr( 0, i );
 			for ( oexUINT c = 0; c < oexSizeOfArray( c_cnv ) && c_cnv[ c ].s; c++ )
-				if ( sub == c_cnv[ c ].s )
-				{	x_str.LTrim( i );
+//				if ( sub == c_cnv[ c ].s )
+				if ( x_str.SubStr( 0, c_cnv[ c ].l ) == c_cnv[ c ].s )
+				{	x_str.LTrim( c_cnv[ c ].l );
 					return c_cnv[ c ].ch;
 				} // end if
 
@@ -1472,6 +1479,106 @@ public:
 	}
 */
 
+	/// Encoded a json string
+	template< typename T >
+		static TStr< T > JsonEncode( oexCONST T *x_pStr )
+		{	oexASSERT_PTR( x_pStr );
+			return JsonEncode( TStr< T >( x_pStr ) );
+		}
+
+	template< typename T >
+		static TStr< T > JsonEncode( TStr< T > x_str )
+	{
+		TStr< T > ret;
+		oexINT nLen = x_str.Length();
+
+		// Need at least this much space
+		if ( !ret.OexAllocate( nLen ) )
+			return ret;
+		
+		while ( 0 < nLen-- )
+		{
+			switch( *x_str )
+			{
+				case oexTC( T, '\"' ) : ret << oexTT( T, "\\\"" ); break;
+				case oexTC( T, '\\' ) : ret << oexTT( T, "\\\\" ); break;
+				case oexTC( T, '\b' ) : ret << oexTT( T, "\\b" ); break;
+				case oexTC( T, '\f' ) : ret << oexTT( T, "\\f" ); break;
+				case oexTC( T, '\n' ) : ret << oexTT( T, "\\n" ); break;
+				case oexTC( T, '\r' ) : ret << oexTT( T, "\\r" ); break;
+				case oexTC( T, '\t' ) : ret << oexTT( T, "\\t" ); break;
+				default :
+					if ( *x_str < oexTC( T, ' ' ) || *x_str > oexTC( T, '~' ) )
+						ret.AppendNum( oexTT( T, "\\u%04X" ), (oexUINT)(oexUCHAR)(*x_str) );
+					else
+						ret << *x_str;
+					break;
+			
+			} // end switch
+
+			x_str++;
+
+		} // end while
+
+		return ret;
+	}
+
+	/// Decodes a json
+	template< typename T >
+		static TStr< T > JsonDecode( oexCONST T *x_pStr )
+		{   oexASSERT_PTR( x_pStr );
+			return JsonDecode( TStr< T >( x_pStr ) );
+		}
+
+	template< typename T >
+		static TStr< T > JsonDecode( TStr< T > x_str )
+	{
+		TStr< T > ret, num;
+		oexINT nLen = x_str.Length();
+
+		while ( 0 < nLen-- )
+		{
+			if ( oexTC( T, '\\' ) == *x_str )
+			{
+				x_str++, nLen--;
+				if ( 0 < nLen )
+				{	switch( *x_str )
+					{
+						case oexTC( T, '"' ) : ret << oexTC( T, '"' ); break;
+						case oexTC( T, '\'' ) : ret << oexTC( T, '\'' ); break;
+						case oexTC( T, '\\' ) : ret << oexTC( T, '\\' ); break;
+						case oexTC( T, '/' ) : ret << oexTC( T, '/' ); break;
+						case oexTC( T, 'b' ) : ret << oexTC( T, '\b' ); break;
+						case oexTC( T, 'f' ) : ret << oexTC( T, '\f' ); break;
+						case oexTC( T, 'n' ) : ret << oexTC( T, '\n' ); break;
+						case oexTC( T, 'r' ) : ret << oexTC( T, '\r' ); break;
+						case oexTC( T, 't' ) : ret << oexTC( T, '\t' ); break;
+						case oexTC( T, 'v' ) : ret << oexTC( T, '\v' ); break;
+						case oexTC( T, 'u' ) : 
+							if ( 4 <= nLen ) 
+							{	x_str++;
+								ret << (T)x_str.ToNum( 4, 16 );
+								x_str.LTrim( 3 ); nLen -= 4;
+							} // end if
+							break;
+						default: break;
+					} // end switch
+					
+					x_str++;
+					
+				} // end if
+
+			} // end if
+
+			else 
+				ret << *x_str, x_str++;
+
+		} // end while
+
+		return ret;
+	}
+
+
 	template< typename T >
 		static TStr< T > EncodeJSON( TPropertyBag< TStr< T > > &x_pb, oexLONG x_depth = 0 )
 	{
@@ -1491,11 +1598,12 @@ public:
 				sStr << oexTT( T, "," ) << oexTTEXT( T, oexNL8 );
 
 			// Add key
-			sStr << sTab1 << oexTC( T, '\"' ) << it.Node()->key.Escape( oexTT( T, "\"" ), oexTC( T, '\\' ) ).EscapeWs( oexTC( T, '\\' ) ) << oexTT( T, "\": " );
+//			sStr << sTab1 << oexTC( T, '\"' ) << it.Node()->key.Escape( oexTT( T, "\\\"" ), oexTC( T, '\\' ) ).EscapeWs( oexTC( T, '\\' ) ) << oexTT( T, "\": " );
+			sStr << sTab1 << oexTC( T, '\"' ) << JsonEncode( it.Node()->key ) << oexTT( T, "\": " );
 
 			// Single value
 			if ( it->IsDefaultValue() )
-				sStr << oexTC( T, '\"' ) << it->ToString().Escape( oexTT( T, "\"" ), oexTC( T, '\\' ) ).EscapeWs( oexTC( T, '\\' ) ) << oexTC( T, '\"' );
+				sStr << oexTC( T, '\"' ) << JsonEncode( it->ToString() ) << oexTC( T, '\"' );
 
 			// Recurse for array
 			else if ( it->IsArray() )
@@ -1605,11 +1713,11 @@ public:
 			{
 				if ( !lMode )
 					lMode = 1,
-					sKey = x_sStr.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) ).UnescapeWs( oexTC( T, '\\' ) );
+					sKey = JsonDecode( x_sStr.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) ) );
 
 				else if ( lMode )
 					lMode = ( 1 == lMode ) ? 0 : lMode,
-					x_pb[ sKey ] = x_sStr.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) ).UnescapeWs( oexTC( T, '\\' ) );
+					x_pb[ sKey ] = JsonDecode( x_sStr.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) ) );
 
 				lItems++;
 

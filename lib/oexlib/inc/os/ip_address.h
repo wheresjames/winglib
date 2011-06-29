@@ -199,7 +199,9 @@ public:
 private:
 
 // No padding
-#pragma pack( push, 1 )
+#ifndef OEX_NOPACK
+#	pragma pack( push, 1 )
+#endif
 
     union
     {
@@ -235,7 +237,9 @@ private:
         oexGUID                 m_guid;
     };
 
-#pragma pack( pop )
+#ifndef OEX_NOPACK
+#	pragma pack( pop )
+#endif
 
 };
 

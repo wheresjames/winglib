@@ -212,7 +212,7 @@ namespace str
     template< typename T >
     	T* Replace( T *dst, oexINT ln_dst, oexCONST T x_tFind, oexCONST T x_tReplace )
 	{
-		if ( !ln_dst )
+		if ( !ln_dst || !dst )
 			return dst;
 
 		while( ln_dst-- )
@@ -226,6 +226,37 @@ namespace str
 
 		return dst;
 	}
+
+    template< class T >
+        oexINT IReplace( T *dst, oexINT ln_dst, oexCONST T x_tFind, oexCONST T x_tReplace,
+                         T tSLow = oexT( 'a' ), T tELow = oexT( 'z' ),
+                         T tSHi = oexT( 'A' ), T tEHi = oexT( 'Z' ) )
+	{
+		if ( !ln_dst || !dst )
+			return dst;
+
+		// Convert case
+		T tOff = tSHi - tSLow, ch;
+		if ( x_tFind >= tSHi && x_tFind <= tEHi )
+			x_tFind -= tOff;
+	
+		while( ln_dst-- )
+		{
+			ch = *dst;
+			if ( ch >= tSHi && ch <= tEHi )
+				ch -= tOff;
+
+			if ( ch == x_tFind )
+				*dst = x_tReplace;
+
+			dst++;
+
+		} // end while
+
+		return dst;
+
+	}
+
 
 
     /// Returns the offset of the first character in s1 not in s2
@@ -887,6 +918,55 @@ namespace str
             return ln;
         }
 
+	/// Splits a string into tokens in place, i.e. destroys the string in x_pStr
+	/**
+		@warning +++ This function returns NULL terminated strings in x_pTokens,
+					 Create a function that takes an array of sizes
+	
+		@return The number of tokens.
+	*/
+    template < typename T >
+		oexINT InplaceSplit( T *x_pStr, oexSIZE_T x_uSize, oexCONST T **x_pTokens, oexSIZE_T x_uTokens, oexCONST T *x_pSep, oexSIZE_T x_uSep )
+		{
+			// Sanity check
+			if ( !x_pStr || 0 >= x_uSize || !x_pTokens || 1 >= x_uTokens )
+				return 0;
+				
+			// Any separators?
+			if ( !x_pSep || 0 >= x_uSep )
+			{	*x_pTokens = x_pStr;
+				return 1;
+			} // end if
+
+			// Null terminate
+			oexSIZE_T n = 0, intoken = 0;
+			for ( oexSIZE_T i = 0; i < x_uSize && n < x_uTokens; i++ )
+
+				// Is this character a separator?
+				if ( 0 <= FindCharacter( x_pSep, x_uSep, x_pStr[ i ] ) )
+				{
+					// Not in token
+					intoken = 0;
+
+					// NULL terminate the token
+					x_pStr[ i ] = 0;					
+
+				} // end if
+
+				// Do we need to record this token?
+				else if ( !intoken )
+				{
+					// In token
+					intoken = 1;
+					
+					// Save the start of the token
+					x_pTokens[ n++ ] = &x_pStr[ i ];
+					
+				} // end else if
+
+			return n;
+		}
+
     /// Converts a string to a number
 	template< class T >
         oexINT64 StrToNum( oexCONST T *x_pStr, oexSIZE_T x_uSize = 0, oexUINT x_uRadix = 10, oexSIZE_T *x_pnEnd = oexNULL )
@@ -934,7 +1014,7 @@ namespace str
             else if ( oexT( 'a' ) <= ch && oexT( 'z' ) >= ch )
                 ch -= oexT( 'a' ) - 10;
 
-            else if ( oexT( 'A' ) <= ch && oexT( 'A' ) >= ch )
+            else if ( oexT( 'A' ) <= ch && oexT( 'Z' ) >= ch )
                 ch -= oexT( 'A' ) - 10;
 
             else bErr = oexTRUE;

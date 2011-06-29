@@ -209,7 +209,7 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 	if ( bStacks )
 		while ( CStackTrace::CStack *p = pSt->Next( &i ) )
 		{
-			try
+			_oexTRY
 			{
 				// Set the unix time stamp
 				st.SetUnixTime( p->GetCreatedTime() );
@@ -233,7 +233,7 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 						sSt << oexMbToStr( p->GetStack()[ sp ] ) << oexNL;
 
 			} // end try
-			catch( ... )
+			_oexCATCH_ALL()
 			{
                                 sSt << oexT( "!!! ASSERT at on address : " ) << oexPtrToInt( p ) << oexNL;
 
@@ -275,13 +275,13 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 	while ( CStackTrace::SModuleInfo *pSi = pSt->NextModule( &i ) )
 		if ( pSi->pSt )
 		{
-			try
+			_oexTRY
 			{
 				// Create stack report for this module
 				sSt << CreateStackReport( uCurrentThreadId, pSi->pSt, pSi->szName, pSi->pAddress, oexFALSE );
 
 			} // end try
-			catch( ... )
+			_oexCATCH_ALL()
 			{
 				sSt << oexT( oexNL8 "!!! Assert in module !!!" oexNL8 );
 

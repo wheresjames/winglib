@@ -456,7 +456,7 @@ oexBOOL CPolygon::ApxConvexHull()
 	oexASSERT( ( (t_double)xmax * (t_double)HULL_SECTIONS ) < (t_double)oexMAXLONG );
 
 	// Allocate bins and mark invalid
-	SRange	bin[ HULL_SECTIONS ];
+	oexRange2d	bin[ HULL_SECTIONS ];
 	for ( i = 0; i < HULL_SECTIONS; i++ )
 		bin[ i ].min.x = bin[ i ].max.x = oexMAXLONG;
 
@@ -629,7 +629,7 @@ void CPolygon::rScanSort(t_point *x_pPts, t_size x_left, t_size x_right)
 		rScanSort( x_pPts, l + 1, x_right );
 }
 
-CPolygon::SPoint CPolygon::CalculateCenter()
+CPolygon::t_point CPolygon::CalculateCenter()
 {_STT();
 	t_point pt;
 	t_point *pPts = m_pts.Ptr(); 	

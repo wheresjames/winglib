@@ -218,16 +218,29 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT 
 
 			// Write out the time
 #if defined( OEX_NANOSECONDS )
-			sLog << oexLocalTimeStr( oexT( " -> Local Time: %Y/%c/%d - %g:%m:%s.%l.%u.%n" oexNL8 ) );
+			sLog << oexLocalTimeStr( oexT( " -> Local: %Y/%c/%d - %g:%m:%s.%l.%u.%n" oexNL8 ) );
 #else
-			sLog << oexLocalTimeStr( oexT( " -> Local Time: %Y/%c/%d - %g:%m:%s.%l.%u" oexNL8 ) );
+			sLog << oexLocalTimeStr( oexT( " -> Local Time  : %Y/%c/%d - %g:%m:%s.%l.%u" oexNL8 ) );
+#endif
+
+#if defined( OEXLIB_STACK_TRACING )
+			CStackTrace::CStack *p = oexSt().GetStack();
+			if ( p )
+			{
+				sLog << oexT(         " -> Thread Name : " ) << p->GetName() << oexNL;
+			
+				// +++ This really doesn't make a lot of sense in the log file, more for stack tracing
+//				sLog << oexT(         " -> Tag         : " ) << p->GetTag() << oexNL;
+//				sLog << oexFmt( oexT( " -> CheckPoint  : %d (0x%x)" oexNL8 ), p->GetCheckpoint(), p->GetCheckpoint() );
+
+			} // end if
 #endif
 			// Add function name if available
 			if ( x_pFunction && *x_pFunction )
-				sLog << oexT( " -> " ) << oexMbToStrPtr( x_pFunction ) << oexT( "()" oexNL8 );
+				sLog << oexT(         " -> Function    : " ) << oexMbToStrPtr( x_pFunction ) << oexT( "()" oexNL8 );
 
 			// Add error level
-			sLog << oexT( " -> " ) << pLevel;
+			sLog << oexT(             " -> Level       : " ) << pLevel;
 
 			// Add system error info
 			if ( x_nErr )
@@ -238,7 +251,7 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT 
 
 			// Write out the user error string if available
 			if ( oexCHECK_PTR( x_pErr ) )
-				sLog << oexT( " -> " ) << CStr( x_pErr ).Replace( oexNL, oexT( "" oexNL8 " -> " ) ) << oexNL;
+				sLog << oexT( " -> " oexNL8 " -> " ) << CStr( x_pErr ).Replace( oexNL, oexT( "" oexNL8 " -> " ) ) << oexNL;
 
 #if defined( oexBACKTRACE_IN_LOG )
 			// Write out the backtrace
@@ -261,7 +274,7 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT 
 #endif
 
 		}
-		_oexCATCH( ... )
+		_oexCATCH_ALL()
 		{
 		} // end catch
 

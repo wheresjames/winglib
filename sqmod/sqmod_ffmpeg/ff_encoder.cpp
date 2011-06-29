@@ -80,7 +80,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	m_pCodecContext->bit_rate_tolerance = brate / 5;
 	m_pCodecContext->width = width;
 	m_pCodecContext->height = height;
-	m_pCodecContext->gop_size = 12;
+	m_pCodecContext->gop_size = ( 0 < fps ) ? fps : 12;
 	m_pCodecContext->time_base.den = fps;
 	m_pCodecContext->time_base.num = 1;
 	m_pCodecContext->me_method = 1;
@@ -187,9 +187,15 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 	if ( m && m->isset( oexT( "quality" ) ) )
 	{
-		int q = (*m)[ oexT( "quality" ) ].toint();
-		if ( !q ) 
+		float q = (*m)[ oexT( "quality" ) ].tofloat();
+		if ( .1 > q ) 
 			q = 5;
+		else if ( 30 < q )
+			q = 20;
+
+		// Can't have quality and bitrate
+		m_pCodecContext->bit_rate = 0;
+		m_pCodecContext->bit_rate_tolerance = 0;
 
 		m_pCodecContext->qmin = m_pCodecContext->qmax = q;
 

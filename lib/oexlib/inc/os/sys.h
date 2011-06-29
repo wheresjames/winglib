@@ -35,6 +35,39 @@
 
 class CSys
 {
+public:
+
+	/// Exception class
+	class CException
+	{
+	public:
+
+		// Default constructor
+		CException() { m_error = 0; }
+
+		// Initializing constructor
+		CException( oexINT e ) { m_error = 0; }
+
+		// Error code
+		oexINT getError() { return m_error; }
+		
+		// Error code
+		oexINT		m_error;
+	};
+
+	// Last error code
+	volatile static oexINT s_last_error;
+	
+	/// Throws an exception of type CSys::CException
+	oexNORETURN static void ThrowException();
+	
+	/// Injects an exception into the specified thread
+	static oexUINT InjectException( oexPVOID hThread, oexINT nError );
+
+	/// Must be called to catch exception
+	static void InitException();
+
+
 private:
 
     /// Constructor
@@ -467,6 +500,54 @@ public:
 	*/
 	static oexUINT StartProcess( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory );
 
+	enum
+	{
+		/// Reboots the computer
+		eReboot = 1,
+		
+		/// Powers off the computer
+		ePowerOff,
+		
+		/// Shuts down the OS, but does not power off
+		eShutdown,
+		
+		/// Logs off the current user
+		eLogOff,
+		
+		/// Restarts the os
+		eRestart
+		
+	};
+	
+	//==============================================================
+	// CtrlComputer()
+	//==============================================================
+	/// Reboot, Restart, Logoff computer
+	/**
+		@param [in] nCmd	-	eReboot, ePowerOff, eShutdown, 
+								eLogOff, eRestart
+		@param [in] nForce	-	0 = Do not force
+								1 = Force apps to shutdown
+								2 = Force apps that are hung
+		@param [in] pMsg	-	If not null, message to display to
+								user before shutdown starts.
+								
+		@return Non-zero if success
+	*/
+	static oexINT CtrlComputer( int nCmd, int nForce, oexCSTR pMsg );
+	
+	//==============================================================
+	// SetRoot()
+	//==============================================================
+	/// Switch to root or administrator
+	static oexINT SetRoot();
+
+	//==============================================================
+	// IsRoot()
+	//==============================================================
+	/// Switch to root or administrator
+	static oexINT IsRoot();
+	
 	//==============================================================
 	// GetCpuLoad()
 	//==============================================================

@@ -329,31 +329,99 @@ CPropertyBag CSysUtil::GetRegKeys( const CStr &x_sKey, const CStr &x_sPath, oexB
 	return pb;
 }
 
+CPropertyBag CSysUtil::GetDisksInfo( oexBOOL bInfo )
+{_STT();
+
+	CPropertyBag pb;
+	oexTCHAR szDrive[ 16 ] = oexT( "A:" );
+	DWORD dwDrives = GetLogicalDrives(), dw = 1;
+
+	// Build a list of drives
+	while ( dwDrives && dw && szDrive[ 0 ] <= oexT( 'Z' ) )
+	{
+		// Get info on this drive if it exists
+		if ( dwDrives & dw )
+		{
+			if ( bInfo )
+				pb[ szDrive ] = GetDiskInfo( szDrive );
+			else
+				pb[ szDrive ] = GetDriveTypeStr( szDrive );
+		} // end if
+
+		// Next drive position
+		dwDrives &= ~dw; 
+		dw <<= 1;
+		szDrive[ 0 ]++;
+
+	} // end while
+	
+	return pb;
+}
+
+CStr CSysUtil::GetDriveTypeStr(const CStr &x_sDrive)
+{_STT();
+
+	switch( GetDriveType( x_sDrive.Ptr() ) )
+	{	case DRIVE_NO_ROOT_DIR : 	return oexT( "noroot" ); break;
+		case DRIVE_REMOVABLE : 		return oexT( "removable" ); break;
+		case DRIVE_FIXED : 			return oexT( "fixed" ); break;
+		case DRIVE_REMOTE :			return oexT( "remote" ); break;
+		case DRIVE_CDROM :			return oexT( "cdrom" ); break;
+		case DRIVE_RAMDISK :		return oexT( "ramdisk" ); break;
+		default : break;	
+	} // end switch
+
+	return oexT( "unknown" );
+}
+
 CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 {_STT();
+
 	// Sanity check
 	if ( !x_sDrive.Length() ) 
 		return CPropertyBag();
 
-	DWORD 	dwSn = 0;
-	DWORD	dwMax = 0;
-	DWORD	dwFlags = 0;
-	char	szVolume[ 1024 * 8 ] = { 0 };
-	char	szFileSystem[ 1024 * 8 ] = { 0 };
-	
-	// Get volume information
-	if ( !GetVolumeInformation(	x_sDrive.Ptr(), szVolume, sizeof( szVolume ),
-								&dwSn, &dwMax, &dwFlags,
-								szFileSystem, sizeof( szFileSystem ) ) )
-		return CPropertyBag();
-
 	CPropertyBag pb;
 	pb[ "drive" ] = x_sDrive;
-	pb[ "volume" ] = oexMbToStrPtr( szVolume );
-	pb[ "serial" ] = dwSn;
-	pb[ "max_filename" ] = dwMax;
-	pb[ "flags" ] = dwFlags;
-	pb[ "file_system" ] = oexMbToStrPtr( szFileSystem );
+	pb[ oexT( "drive_type" ) ] = GetDriveTypeStr( x_sDrive.Ptr() );
+	
+	// Get volume information
+	DWORD dwSn = 0, dwMax = 0, dwFlags = 0;
+	char szVolume[ 1024 * 8 ] = { 0 }, szFileSystem[ 1024 * 8 ] = { 0 };
+	if ( GetVolumeInformation(	x_sDrive.Ptr(), szVolume, sizeof( szVolume ),
+								&dwSn, &dwMax, &dwFlags,
+								szFileSystem, sizeof( szFileSystem ) ) )
+	{	pb[ oexT( "volume" ) ] = oexMbToStrPtr( szVolume );
+		pb[ oexT( "serial" ) ] = dwSn;
+		pb[ oexT( "max_filename" ) ] = dwMax;
+		pb[ oexT( "flags" ) ] = dwFlags;
+		pb[ oexT( "file_system" ) ] = oexMbToStrPtr( szFileSystem );
+	} // end if
 
+	// More disk info
+	DWORD dwSectorsPerCluster = 0, dwBytesPerSector = 0, dwFreeClusters = 0, dwClusters = 0;
+	if ( GetDiskFreeSpace( x_sDrive.Ptr(), &dwSectorsPerCluster, &dwBytesPerSector, &dwFreeClusters, &dwClusters ) )
+	{	pb[ oexT( "sectors_per_cluster" ) ] = dwSectorsPerCluster;
+		pb[ oexT( "bytes_per_sector" ) ] = dwBytesPerSector;
+		pb[ oexT( "clusters_free" ) ] = dwFreeClusters;
+		pb[ oexT( "clusters" ) ] = dwClusters;
+	} // end if
+	
+	// Get disk space
+	ULARGE_INTEGER liFreeBytesAvailable, liTotalNumberOfBytes, liTotalNumberOfBytesFree;
+	if ( GetDiskFreeSpaceEx( x_sDrive.Ptr(), &liFreeBytesAvailable, &liTotalNumberOfBytes, &liTotalNumberOfBytesFree ) )
+	{	pb[ oexT( "bytes" ) ] = liTotalNumberOfBytes.QuadPart;
+		pb[ oexT( "bytes_free" ) ] = liTotalNumberOfBytesFree.QuadPart;
+		pb[ oexT( "bytes_used" ) ] = liTotalNumberOfBytes.QuadPart - liTotalNumberOfBytesFree.QuadPart;
+		pb[ oexT( "bytes_available" ) ] = liFreeBytesAvailable.QuadPart;
+		pb[ oexT( "bytes_unavailable" ) ] = liTotalNumberOfBytes.QuadPart - liFreeBytesAvailable.QuadPart;
+	} // end if
+	
+	// Get the dos name
+	TCHAR buf[ MAX_PATH ] = { 0 };
+	DWORD dw = QueryDosDevice( x_sDrive.Ptr(), buf, sizeof( buf ) );
+	if ( dw && dw < sizeof( buf ) )
+		buf[ dw ] = 0, pb[ oexT( "dos_name" ) ] = buf;
+	
 	return pb;
 }

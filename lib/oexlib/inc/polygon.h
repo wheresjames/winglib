@@ -50,10 +50,10 @@ class CPolygon
 public:
 
 	/// Position type
-	typedef oexLONG		t_pos;
+	typedef oexPos	t_pos;
 
 	/// Size type
-	typedef oexULONG	t_size;
+	typedef oexSize	t_size;
 
 	/// Floating point type
 	typedef oexFLOAT	t_float;
@@ -61,58 +61,14 @@ public:
 	/// Floating point type
 	typedef oexDOUBLE	t_double;
 
-	/// Holds information defining a line
-	struct SPoint
-	{
-		t_pos		x;
-		t_pos		y;
-	};
-
-	/// Holds information defining a line
-	struct SLine
-	{
-		SPoint		a;
-		SPoint		b;
-
-		t_float getLength()
-		{	t_float dx = b.x - a.x, dy = b.y - a.y;
-			return (t_float)os::math::sqrt( dx * dx + dy * dy );
-		}
-
-	};
-
-	/// Holds information defining a rectangle
-	struct SRect
-	{
-		t_pos		left;
-		t_pos		top;
-		t_pos		right;
-		t_pos		bottom;
-
-		t_pos getWidth() { return right - left; }
-		t_pos getHeight() { return bottom - top; }
-	};
-
-	/// 2D range
-	struct SRange
-	{
-		SPoint		min;
-		SPoint		max;
-
-		t_float getRange()
-		{	t_float dx = max.x - min.x, dy = max.y - min.y;
-			return (t_float)os::math::sqrt( dx * dx + dy * dy );
-		}
-	};
-
 	/// Point type
-	typedef SPoint		t_point;
+	typedef oexPoint	t_point;
 
 	/// Line type
-	typedef SLine		t_line;
+	typedef oexLine		t_line;
 
 	/// Rect type
-	typedef SRect		t_rect;
+	typedef oexRect		t_rect;
 
 public:
 
@@ -872,7 +828,7 @@ public:
 private:
 
 	/// Contains the polygon point array
-	TMem< SPoint >				m_pts;
+	TMem< oexPoint >			m_pts;
 
 	/// Number of points in the polygon
 	t_size						m_uPts;

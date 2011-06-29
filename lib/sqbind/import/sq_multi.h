@@ -58,14 +58,15 @@ namespace sqbind
 		virtual void deserialize( const t_SqStr &s );
 		virtual void merge( const t_SqStr &s );
 
-		void mset( CSqMulti *m );
-		void mmerge( CSqMulti *m );
+		CSqMulti* mset( CSqMulti *m );
+		CSqMulti* mmerge( CSqMulti *m );
 
 		t_SqStr serialize_filter( const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase );
-		void deserialize_filter( const t_SqStr &s, const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase );
+		CSqMulti* deserialize_filter( const t_SqStr &s, const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase );
 
 		t_SqStr getJSON();
-		void setJSON( const t_SqStr &s );
+		CSqMulti* setJSON( const t_SqStr &s );
+		CSqMulti* mergeJSON( const t_SqStr &s );
 
 	private:
 
@@ -157,6 +158,9 @@ namespace sqbind
 		/// Returns a float representation of the value
 		float tofloat();
 
+		/// Returns a double representation of the value
+		double todouble();
+
 		/// Returns the length of the string value
 		int len();
 
@@ -190,6 +194,15 @@ namespace sqbind
 		/// Returns base64 decoded string
 		stdString str_base64_decode();
 
+		/// Creates a size string like 1.3MB, 44.5GB, etc...
+		/**
+			@param [in] dDiv	- Divisor, default is 1024
+			@param [in] nDigits	- Number of digits trailing the decimal
+			@param [in] sSuffix	- Optional comma sperated suffix array
+								  If empty string, defaults are "Bytes,KB,MB,GB,TB,PB,EB,ZB,YB,BB"
+		*/
+		stdString str_size( double dDiv, int nDigits, const stdString &sSuffix );
+		
 		/// Returns url encoded string
 		CSqBinary bin_urlenc();
 
@@ -270,13 +283,22 @@ namespace sqbind
 		CSqMulti* get( const t_Obj &k );
 
 		/// Gets an element using a path
-		CSqMulti* at( const stdString &path );
+		CSqMulti* at( const t_Obj &path );
 
+		/// Gets the first element after the skip count
+		CSqMulti* first( int skip );
+		
+		/// Gets last element after the skip count
+		CSqMulti* last( int skip );
+		
 		/// Finds an element
 		t_Obj find_key( const t_Obj &k );
 
 		/// Finds an element by value
 		t_Obj find_value( const t_Obj &v );
+
+		/// Returns the array element with the corrisponding key value matches
+		CSqMulti* find_obj( const CSqMulti::t_Obj &k, const CSqMulti::t_Obj &v );
 
 		/// Returns the first item in the list
 		iterator begin();
@@ -315,7 +337,6 @@ namespace sqbind
 
 		/// Converts to oex property bag
 		void toPb( oex::CPropertyBag &pb );
-
 
 	private:
 

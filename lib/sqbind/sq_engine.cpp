@@ -122,6 +122,36 @@ stdString CSqEngineExport::getCpuType()
 
 }
 
+int CSqEngineExport::ctrl_computer( int nCmd, int nForce, const sqbind::stdString &sMsg )
+{_STT();
+	return oexCtrlComputer( nCmd, nForce, sMsg.c_str() );
+}
+
+int CSqEngineExport::reboot( int nForce, const sqbind::stdString &sMsg )
+{_STT();
+	return oexCtrlComputer( 1, nForce, sMsg.c_str() );
+}
+
+int CSqEngineExport::shutdown( int nForce, const sqbind::stdString &sMsg )
+{_STT();
+	return oexCtrlComputer( 2, nForce, sMsg.c_str() );
+}
+
+int CSqEngineExport::logoff( int nForce, const sqbind::stdString &sMsg )
+{_STT();
+	return oexCtrlComputer( 4, nForce, sMsg.c_str() );
+}
+
+int CSqEngineExport::set_root()
+{_STT();
+	return oexSetRoot();
+}
+
+int CSqEngineExport::is_root()
+{_STT();
+	return oexIsRoot();
+}
+
 int CSqEngineExport::alert( const stdString &sMsg )
 {_STT();
 	return oex::os::CSys::ShowMessageBox( oexT( "Script Message" ), sMsg.c_str() );
@@ -694,7 +724,25 @@ int CSqEngineExport::find( const stdString &sS, const stdString &sSub )
 	return std2oex( sS ).Match( sSub.c_str() );
 }
 
+int CSqEngineExport::ifind( const stdString &sS, const stdString &sSub )
+{_STT();
+	return std2oex( sS ).IMatch( sSub.c_str() );
+}
+
+stdString CSqEngineExport::create_size_string( double d, double dDiv, int nDigits, const stdString &sSuffix )
+{_STT();
+	oex::CStr s = std2oex( sSuffix );	
+	oexCONST oex::CStr::t_char *suf[ 128 ], sep[] = { oexT( ',' ) };
+	suf[ oex::str::InplaceSplit( s._Ptr(), s.Length(), suf, oexSizeOfArray( suf ), sep, sizeof( sep ) ) ] = 0;
+	return oex2std( oex::CStr().AppendSizeString( d, dDiv, nDigits, suf ) );
+}
+
 stdString CSqEngineExport::replace( const stdString &sS, const stdString &sFind, const stdString &sReplace )
+{_STT();
+	return oex2std( std2oex( sS ).Replace( std2oex( sFind ), std2oex( sReplace ) ) );
+}
+
+stdString CSqEngineExport::ireplace( const stdString &sS, const stdString &sFind, const stdString &sReplace )
 {_STT();
 	return oex2std( std2oex( sS ).Replace( std2oex( sFind ), std2oex( sReplace ) ) );
 }
@@ -1023,8 +1071,15 @@ int CSqEngineExport::service_restart( const stdString &sName )
 CSqMulti CSqEngineExport::get_system_drive_info( const stdString &sDrive )
 {_STT();
 	CSqMulti m;
-	oex::CPropertyBag pb = oex::os::CSysUtil::GetDiskInfo( std2oex( sDrive ) );
+	oex::CPropertyBag pb;
+	
+	if ( sDrive.length() )
+		pb[ sqbind::std2oex( sDrive ) ] = oex::os::CSysUtil::GetDiskInfo( std2oex( sDrive ) );
+	else
+		pb = oex::os::CSysUtil::GetDisksInfo( oex::oexTRUE );
+		
 	SQBIND_PropertyBagToMulti( pb, m );
+	
 	return m;
 }
 
@@ -1559,6 +1614,12 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, prepare_inline )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, exec )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reboot )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shutdown )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, logoff )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ctrl_computer )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_root )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, process_system_messages )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sqexe )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sqexe_script )
@@ -1627,7 +1688,10 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, rtrim )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, trimws )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, find )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ifind )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, replace )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ireplace )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, create_size_string )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, drop )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, drop_range )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, urlencode )
@@ -2037,10 +2101,8 @@ int CSqEngine::OnInclude( const stdString &sScript )
 	// Push script name
 	int nRet = 0;
 	stdString sScriptName = m_sScriptName;
-
 	oex::oexBOOL bFile = oex::oexTRUE;
-	stdString sData;
-	stdString sUseScript = sScript;
+	stdString sData, sUseScript = sScript;
 
 	_oexTRY
 	{
@@ -2062,10 +2124,20 @@ int CSqEngine::OnInclude( const stdString &sScript )
 		} // end if
 
 		else
+		{
+			// Don't return an error if the file simply doesn't exist
+			oex::CStr sFile;
+			if ( bFile )
+			{	sFile = std2oex( m_sRoot ).BuildPath( std2oex( sUseScript ) );
+				if ( !oexExists( sFile.Ptr() ) )
+					return -1;
+			} // end if
 
 			// Load the script
-			m_script = bFile ? m_vm.CompileScript( std2oex( m_sRoot ).BuildPath( std2oex( sUseScript ) ).Ptr() )
+			m_script = bFile ? m_vm.CompileScript( sFile.Ptr() )
 							 : m_vm.CompileBuffer( sUseScript.c_str() );
+							 
+		} // end else
 
 		// Run the script
 		m_sReturnData = obj2str( m_vm.RunScript( m_script ) );

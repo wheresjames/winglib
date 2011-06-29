@@ -59,6 +59,16 @@ CThread::~CThread()
 	Stop();
 }
 
+oexUINT CThread::InjectException( oexINT nCode )
+{_STT();
+
+	// Ensure thread is running
+	if ( !IsRunning() )
+		return -1;
+
+	return oexINJECT_EXCEPTION( GetHandle(), nCode );
+}
+
 oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 {_STT();
     // Get pointer
@@ -81,8 +91,33 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
     if ( !oex::os::CIpSocket::InitSockets() )
     	oexERROR( 0, oexT( "Unable to initialize sockets" ) );
 
-	// Initialize thread
-	pThread->m_bInitStatus = pThread->InitThread( pData );
+	_oexTRY
+	{
+		// Init our exception injector
+		oexInitException();
+
+		// Initialize thread
+		pThread->m_bInitStatus = pThread->InitThread( pData );
+
+	} // end try
+
+#if !defined( OEX_NOEXCEPTIONS )
+
+	_oexCATCH( oexEXCEPTION& e )
+	{
+		pThread->m_bInitStatus = 0;
+		oexERROR( e.getError(), oexT( "!!! OEX EXCEPTION THROWN DURING InitThread() !!!" ) );
+		
+	} // end catch
+
+	_oexCATCH_ALL()
+	{
+		pThread->m_bInitStatus = 0;
+		oexERROR( 0, oexT( "!!! UNHANDLED EXCEPTION DURING InitThread() !!!" ) );
+		
+	} // end catch
+
+#endif
 
 	// Signal that we're initialized
 	pThread->m_evInit.Signal();
@@ -92,12 +127,78 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 	{
 		// Loop while we're not supposed to stop
 		if ( pThread->m_evStop.Wait( 0 ) )
-			while ( pThread->DoThread( pData ) &&
-					pThread->m_evStop.Wait( uSleep ) )
-				oexPumpThreadMessages();
+		{
+			oexINT nDone = 0;
+			while ( !nDone )
+			{
+				_oexTRY
+				{
+					// Init our exception injector
+					oexInitException();
+				
+					// Call do thread
+					if ( !pThread->DoThread( pData ) )
+						nDone = 1;
+					
+				} // end try
+				
+#if !defined( OEX_NOEXCEPTIONS )
 
-		// Kill the thread
-		nRet = pThread->EndThread( pData );
+				_oexCATCH( oexEXCEPTION& e )
+				{
+					// +++ Hmm, should we quit here?
+					// nDone = 1;
+					oexERROR( e.getError(), oexT( "!!! OEX EXCEPTION DURING DoThread() !!!" ) );
+					
+				} // end catch
+
+				_oexCATCH_ALL()
+				{
+					// +++ Hmm, should we quit here?
+					// nDone = 1;
+					oexERROR( 0, oexT( "!!! UNHANDLED EXCEPTION DURING DoThread() !!!" ) );
+					
+				} // end catch
+#endif
+
+				// Check for stop signal
+				if ( !pThread->m_evStop.Wait( uSleep ) )
+					nDone = 1;
+					
+				// Pump messages if not done
+				if ( !nDone )
+					oexPumpThreadMessages();
+
+			} // end while
+
+		} // end if
+
+		_oexTRY
+		{
+			// Init our exception injector
+			oexInitException();
+
+			// Kill the thread
+			nRet = pThread->EndThread( pData );
+
+		} // end try
+
+#if !defined( OEX_NOEXCEPTIONS )
+
+		_oexCATCH( oexEXCEPTION& e )
+		{
+			pThread->m_bInitStatus = 0;
+			oexERROR( e.getError(), oexT( "!!! OEX EXCEPTION THROWN DURING EndThread() !!!" ) );
+			
+		} // end catch
+
+		_oexCATCH_ALL()
+		{
+			pThread->m_bInitStatus = 0;
+			oexERROR( 0, oexT( "!!! UNHANDLED EXCEPTION DURING EndThread() !!!" ) );
+			
+		} // end catch
+#endif
 
 	} // end if
 
@@ -116,6 +217,7 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 
 oexRESULT CThread::Start( oexPVOID x_pData, oexUINT x_uSleep )
 {_STT();
+
     // Are we already running?
     if ( IsRunning() )
         return 0;
@@ -137,6 +239,7 @@ oexRESULT CThread::Start( oexPVOID x_pData, oexUINT x_uSleep )
 
 oexRESULT CThread::Stop( oexUINT x_uWait, oexBOOL x_bKill )
 {_STT();
+
 	// Signal that the thread should exit
 	m_evStop.Signal();
 

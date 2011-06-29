@@ -64,7 +64,9 @@ public:
 
 public:
 
-#pragma pack( push, 1 )
+#ifndef OEX_NOPACK
+#	pragma pack( push, 1 )
+#endif
 
     /// This structure defines a serial packet header.
 	struct SPacketHeader
@@ -95,7 +97,9 @@ public:
 
 	}; typedef SDataHeader* LPSDataHeader; 
 
-#pragma pack( pop )
+#ifndef OEX_NOPACK
+#	pragma pack( pop )
+#endif
 
 public:
 

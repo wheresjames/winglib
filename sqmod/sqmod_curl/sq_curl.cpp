@@ -8,6 +8,7 @@ CSqCurl::CSqCurl()
 	m_curl = oexNULL;
 	m_nTimeout = 0;
 	m_nConnectTimeout = 0;
+	m_bEnableCookies = 0;
 }
 
 CSqCurl::~CSqCurl()
@@ -138,6 +139,12 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSq
 	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYPEER, 0 );
 	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYHOST, 0 );
 	curl_easy_setopt( m_curl, CURLOPT_CERTINFO, 1 );
+	
+	if ( m_bEnableCookies )
+	{	curl_easy_setopt( m_curl, CURLOPT_COOKIEFILE, oexT( "" ) );
+//		curl_easy_setopt( m_curl, CURLOPT_COOKIE, m_sCookies.c_str() );	
+		curl_easy_setopt( m_curl, CURLOPT_COOKIELIST, m_sCookies.c_str() );	
+	} // end if
 
 	if ( m_sUsername.length() || m_sPassword.length() )
 	{	curl_easy_setopt( m_curl, CURLOPT_USERPWD, 
@@ -175,8 +182,29 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSq
 		return 0;
 	} // end if
 	
+	// Get cookies
+	if ( m_bEnableCookies )
+	{	struct curl_slist *cookies = 0;
+		res = curl_easy_getinfo( m_curl, CURLINFO_COOKIELIST, &cookies );
+		if ( !res && cookies )
+		{
+			m_sCookies = oexT( "" ); 
+			
+			struct curl_slist *i = cookies;
+			while ( i )
+			{	m_sCookies += i->data;
+				m_sCookies += oexT( "\r\n" );
+				i = i->next;
+			} // end while
+			
+			curl_slist_free_all( cookies );
+
+		} // end if
+			
+	} // end if
+	
 	// See if there are certs
-	struct curl_certinfo *ci = NULL;
+	struct curl_certinfo *ci = 0;
 	res = curl_easy_getinfo( m_curl, CURLINFO_CERTINFO, &ci );
 	if ( !res && ci )
 		for ( int i = 0; i < ci->num_of_certs; i++ )
@@ -241,6 +269,12 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, SQInteger lPort, const sqbi
 	curl_easy_setopt( m_curl, CURLOPT_CERTINFO, 1 );
 //	curl_easy_setopt( m_curl, CURLOPT_BINARYTRANSFER, 1 );
 
+	if ( m_bEnableCookies )
+	{	curl_easy_setopt( m_curl, CURLOPT_COOKIEFILE, oexT( "" ) );
+//		curl_easy_setopt( m_curl, CURLOPT_COOKIE, m_sCookies.c_str() );	
+		curl_easy_setopt( m_curl, CURLOPT_COOKIELIST, m_sCookies.c_str() );	
+	} // end if
+
 	if ( m_sUsername.length() || m_sPassword.length() )
 	{	curl_easy_setopt( m_curl, CURLOPT_USERPWD, 
 						  ( sqbind::stdString() + m_sUsername + oexT( ":" ) + m_sPassword ).c_str() );
@@ -274,6 +308,27 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, SQInteger lPort, const sqbi
 	if ( CURLE_OK != res )
 	{	m_sErr = oexMbToStrPtr( sErr );
 		return 0;
+	} // end if
+
+	// Get cookies
+	if ( m_bEnableCookies )
+	{	struct curl_slist *cookies = 0;
+		res = curl_easy_getinfo( m_curl, CURLINFO_COOKIELIST, &cookies );
+		if ( !res && cookies )
+		{
+			m_sCookies = oexT( "" ); 
+			
+			struct curl_slist *i = cookies;
+			while ( i )
+			{	m_sCookies += i->data;
+				m_sCookies += oexT( "\r\n" );
+				i = i->next;
+			} // end while
+
+			curl_slist_free_all( cookies );
+
+		} // end if
+
 	} // end if
 
 	// See if there are certs

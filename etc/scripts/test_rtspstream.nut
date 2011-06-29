@@ -7,8 +7,11 @@ _self.load_module( "portaudio", "" );
 class CRtspStream
 {
 	bDecodeVideo = 1;
-	bDecodeAudio = 1;
-	bPlayAudio = 1;
+	bDecodeAudio = 0;
+	bPlayAudio = 0;
+
+//	szDumpVideo = "";
+	szDumpVideo = "rawvideo";
 
 //	file = "";
 	file = "rtsptest.avi";
@@ -31,6 +34,8 @@ class CRtspStream
 	max_audio_buffer = 1000000;
 	max_video_buffer = 2000000;
 	video_offset = 300000;
+	
+	vix = 0;
 
 	function getWidth() 
 	{
@@ -69,6 +74,8 @@ class CRtspStream
 		afail = 0;
 
 		pa = 0;
+
+		vix = 0;
 	}
 
 	function Play( link )
@@ -83,10 +90,14 @@ class CRtspStream
 //		rtsp.setStreamOverTCP( 0 );
 //		rtsp.setTunnelOverHTTPPort( 0 );
 
+		if ( szDumpVideo.len() )
+			CSqFile().mkdir( szDumpVideo );
+
 		if ( !rtsp.Open( link, bDecodeVideo, bDecodeAudio, CSqMulti() ) )
 		{	::_self.echo( "Failed to open RTSP stream : " + link );
 			return 0;
 		} // end if
+		
 		return 1;
 	}
 
@@ -97,8 +108,8 @@ class CRtspStream
 		else
 		{
 			// Insert H264 Header if needed
-			if ( "H264" == rtsp.getVideoCodecName() )
-				rtsp.setVideoHeader( "\x00\x00\x01" );
+//			if ( "H264" == rtsp.getVideoCodecName() )
+//				rtsp.setVideoHeader( CSqBinary( "\x00\x00\x01" ) );
 
 			::_self.echo( "iii Creating video decoder for " + rtsp.getVideoCodecName() );
 
@@ -207,7 +218,8 @@ class CRtspStream
 		{
 			// Are we recording?
 			if ( rec_avi )
-				rec_avi.WriteAudioFrame( aframe, rtsp.getAudioPts(), rtsp.getAudioDts(), CSqMulti() );
+//				rec_avi.WriteAudioFrame( aframe, rtsp.getAudioPts(), rtsp.getAudioDts(), CSqMulti() );
+				rec_avi.WriteAudioFrame( aframe, 0, 0, CSqMulti() );
 		
 			while ( 0 < adec.Decode( aframe, araw, CSqMulti() ) )
 				if ( pa && araw.getUsed() )
@@ -255,9 +267,16 @@ class CRtspStream
 		// Note, we're buffering the compressed frames to save memory ;)
 		while ( rtsp.LockVideo( frame, 0 ) )
 		{	
+//			::_self.echo( frame.AsciiHexStr( 16, 4 ) );
+
+			// Dump raw frames
+			if ( szDumpVideo.len() )
+				CSqFile().put_contents_bin( ::_self.build_path( szDumpVideo, "v" + vix++ + ".raw" ), frame );
+		
 			// Are we recording?
 			if ( rec_avi )
-				rec_avi.WriteVideoFrame( frame, rtsp.getVideoPts(), rtsp.getVideoDts(), CSqMulti() );
+				rec_avi.WriteVideoFrame( frame, 0, 0, CSqMulti() );
+//				rec_avi.WriteVideoFrame( frame, rtsp.getVideoPts(), rtsp.getVideoDts(), CSqMulti() );
 		
 			// Buffer for later if syncing to audio
 			if ( vb ) vb.Write( frame, "", 0, rtsp.getVideoPts() );
@@ -288,8 +307,9 @@ class CRtspStream
 
 		if ( 0 >= fps )
 			fps = 15;
-			
-		rec_avi.setAudioExtraData( rtsp.getExtraAudioData() );
+		
+		if ( afmt.len() )
+			rec_avi.setAudioExtraData( rtsp.getExtraAudioData() );
 
 		if ( !rec_avi.Create( file, "", CSqMulti() ) )
 			::_self.echo( "Failed to create avi" );
@@ -308,8 +328,15 @@ class CRtspStream
 
 class CGlobal
 {
+	// http://www.americafree.tv/VLC/
 	rtsp_sources =
 	{
+		adventure	= [ "Adventure",	"rtsp://video3.americafree.tv/AFTVAdventureH2641000.sdp" ],
+		cartoons	= [ "Cartoons",		"rtsp://video3.americafree.tv/AFTVCartoonsH2641000.sdp" ],
+		classic 	= [ "Classic", 		"rtsp://video3.americafree.tv/AFTVClassicsH2641000.sdp" ],
+		comedy 		= [ "Comedy", 		"rtsp://video3.americafree.tv/AFTVComedyH2641000.sdp" ],
+	
+/*	
 		nasa 		= [ "NASA", 		"rtsp://a1352.l1857053128.c18570.g.lq.akamaistream.net/D/1352/18570/v0001/reflector:53128" ],
 		adventure 	= [ "Adventure", 	"rtsp://video3.multicasttech.com/AFTVAdventure3GPP296.sdp" ],
 		cartoons 	= [ "Cartoons", 	"rtsp://video2.multicasttech.com/AFTVCartoons3GPP296.sdp" ],
@@ -323,7 +350,7 @@ class CGlobal
 		scifi		= [ "SciFi", 		"rtsp://video2.multicasttech.com/AFTVSciFi3GPP296.sdp" ],
 		western		= [ "Westerns", 	"rtsp://video2.multicasttech.com/AFTVWesterns3GPP296.sdp" ],
 		espana		= [ "Espana", 		"rtsp://video3.multicasttech.com/EspanaFree3GPP296.sdp" ],
-		
+*/
 		yt1			= [ "yt1",	"rtsp://v8.cache1.c.youtube.com/CjgLENy73wIaLwlnoDu0pt7zDRMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNgnLTe56Djt-FNDA==/0/0/0/video.3gp" ],
 		yt2			= [ "yt2",	"rtsp://v4.cache8.c.youtube.com/CjgLENy73wIaLwkU67OEyLSkyBMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNgzoOa_IDtxOFNDA==/0/0/0/video.3gp" ],
 		

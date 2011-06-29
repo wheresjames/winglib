@@ -2136,6 +2136,65 @@ public:
 	oexINT Match( oexCONST T* pSub )
     {   return str::FindSubStr( Ptr(), Length(), pSub, zstr::Length( pSub ) ); }
 
+	/// Returns the offset of pSub in the string, or
+    /// -1 if a pStr is not found.
+	oexINT IMatch( oexCONST T* pSub )
+    {   return str::IFindSubStr( Ptr(), Length(), pSub, zstr::Length( pSub ) ); }
+
+	/// Appends a size formatted string ( 1.3KB, 44.75GB, etc...)
+	TStr& AppendSizeString( oexDOUBLE dSize, oexDOUBLE dDiv, oexINT nDigits, oexCONST T ** pSuffix = oexNULL )
+	{	
+		oexINT i = 0;
+		static oexCONST T *sizes[] = 
+		{	oexTT( T, "" ), 			//
+			oexTT( T, "K" ), 			// Kilo				
+			oexTT( T, "M" ), 			// Mega			
+			oexTT( T, "G" ), 			// Giga
+			oexTT( T, "T" ), 			// Tera
+			oexTT( T, "P" ),			// Peta
+			oexTT( T, "E" ),			// Exa
+			oexTT( T, "Z" ),			// Zetta
+			oexTT( T, "Y" ),			// Yotta
+			oexTT( T, "B" ),			// Bronto
+			0 							// Geop, but G already taken?
+										// Segan, ...
+		};
+
+		// Use 1024 as the default divider
+		if ( 0 >= dDiv )
+			dDiv = double( 1024 );
+		
+		oexBOOL bNeg = 0 > dSize;
+		if ( bNeg ) 
+			dSize = -dSize;
+		
+		// Use default suffixes if non provided
+		if ( !pSuffix || !*pSuffix || !**pSuffix )
+			pSuffix = sizes;
+		
+		// Which size to use?
+		while ( dSize > dDiv && pSuffix[ i + 1 ] )
+			i++, dSize /= dDiv;
+
+		// Is the number negative?
+		if ( bNeg )
+			Append( oexTT( T, "-" ) );
+			
+		// Special formating?
+		if ( 0 > nDigits )
+			Append( dSize );
+		else if ( !nDigits )
+			Append( (oexLONG)dSize );
+		else
+			AppendNum( ( TStr( oexTT( T, "%." ) ) << nDigits << oexT( "f" ) ).Ptr(), dSize );
+			
+		// Build the string
+		Append( pSuffix[ i ] );
+
+		return *this;
+	}
+	
+	
 public:
 
 	/// Replaces single characters in a string
@@ -2155,6 +2214,53 @@ public:
 		{
 			// See if we can find the string
 			m = str::FindSubStr( Ptr( s ), e - s, x_sFind.Ptr(), lf );
+
+			// Punt if we got nothing
+			if ( 0 > m )
+			{
+				// Sub string never found?
+				if ( !s )
+					return *this;
+
+				// Return final string
+				str += SubStr( s, e - s );
+				return str;
+
+			} // end if
+
+			// Append non-matching stuff
+			if ( m )
+				str += SubStr( s, m );
+
+			// Replace with other string if needed
+			if ( lr )
+				str += x_sReplace;
+
+			// Next point
+			s += m + lf;
+
+		} while ( s < e );
+
+		return str;
+	}
+
+	/// Replaces single characters in a string
+	TStr& IReplace( oexCONST T x_tFind, oexCONST T x_tReplace )
+    {   str::IReplace( _Ptr(), Length(), x_tFind, x_tReplace ); return *this; }
+
+	/// Replaces sub strings with another
+	TStr IReplace( oexCONST TStr &x_sFind, oexCONST TStr &x_sReplace ) oexCONST
+	{
+		TStr str;
+		oexINT lf = x_sFind.Length();
+		if ( !lf )
+			return *this;
+
+		oexINT s = 0, e = Length(), lr = x_sReplace.Length(), m;
+		do
+		{
+			// See if we can find the string
+			m = str::IFindSubStr( Ptr( s ), e - s, x_sFind.Ptr(), lf );
 
 			// Punt if we got nothing
 			if ( 0 > m )

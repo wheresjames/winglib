@@ -34,7 +34,7 @@
 
 #pragma once
 
-#ifdef OEX_USE_CPP_EXCEPTIONS
+#if defined( OEX_USE_CPP_EXCEPTIONS ) && !defined( OEX_NOEXCEPTIONS )
 
 #	ifdef OEX_VERBOSE_COMPILE
 #		pragma message( "OEX: Using C++ exceptions." )

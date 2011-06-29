@@ -256,6 +256,7 @@ namespace sqbind
 			-	\%I = Day of the week [1-7]
 			-	\%y = 2 digit year
 			-	\%Y = 4 digit year
+			-	\%k = 2 digit year with base "%k20", "%k19"
 			-	\%a = am/pm
 			-	\%A = AM/PM
 			-	\%w = Abbreviated day of week [Sun,Mon,Tue,Wed,Thu,Fri,Sat]
@@ -277,7 +278,6 @@ namespace sqbind
 			-   "%W, %B %D, %Y - %h:%m:%s %A"  = Thursday, December 25, 1997 - 04:15:30 PM
 			-   "%Y/%c/%d - %g:%m:%s.%l"    = 1997/12/25 - 16:15:30.500
 			-   "%w, %d %b %Y %g:%m:%s GMT" = Thu, 25 Dec 1997 16:15:30 GMT
-			-   "%w, %d-%b-%Y %g:%m:%s GMT" = Thu, 25-Dec-1997 16:15:30 GMT
 			-	"%Y-%c-%d %g:%m:%s" = 2009-05-06 00:00:00
 
 			\return Formated string
@@ -287,6 +287,12 @@ namespace sqbind
 		stdString FormatTime( const stdString &sTmpl )
 		{	return m_t.FormatTime( sTmpl.c_str() ).Ptr(); }
 
+		/// Parses string based on template
+		/**
+			@return Number of bytes processed
+			
+			@see FormatTime()
+		*/
 		SQINT ParseTime( const stdString &sTmpl, const stdString &sTime )
 		{	return m_t.ParseTime( sTmpl.c_str(), sTime.c_str() ); }
 
