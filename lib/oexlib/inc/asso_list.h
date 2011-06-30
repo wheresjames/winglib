@@ -80,6 +80,9 @@ public:
         eHashSize = sizeof( oexUINT )
     };
 
+	/// Returns a pointer to the internal crc table
+	static oexUINT* getCrcTable();
+
 private:
 
 	//==============================================================

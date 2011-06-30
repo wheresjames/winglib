@@ -71,7 +71,7 @@ oexBOOL CIpAddress::SetRawAddress( oexINT64 x_llIp, oexINT32 x_uPort, oexINT32 x
     m_uCrc = 0;
     oexUCHAR ucHash[ CCrcHash::eHashSize ];
     CCrcHash::Hash( &ucHash, &m_guid, sizeof( m_guid ) );
-    m_uCrc = *(oexUINT16*)&ucHash;
+	m_uCrc = ( (oexUINT16)ucHash[ 0 ] << 8 ) | (oexUINT16)ucHash[ 1 ];
 
     return oexTRUE;
 }
@@ -89,7 +89,8 @@ oexBOOL CIpAddress::ValidateAddress()
     CCrcHash::Hash( &ucHash, &m_guid, sizeof( m_guid ) );
 
     // Verify the hash value
-    if ( uCrc != *(oexUINT16*)&ucHash )
+	oexUINT16 uCalc = ( (oexUINT16)ucHash[ 0 ] << 8 ) | (oexUINT16)ucHash[ 1 ];
+    if ( uCrc != uCalc )
     {	oexASSERT( 0 );
     	Destroy();
     	return oexFALSE;

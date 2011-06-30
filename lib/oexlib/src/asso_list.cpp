@@ -98,6 +98,12 @@ oexUINT CCrcHash::m_crc_table[ 256 ] =
 };
 
 
+oexUINT* CCrcHash::getCrcTable()
+{
+	return m_crc_table;
+}
+
+
 oexUINT CCrcHash::CRC32( oexUINT x_crc, oexUCHAR *x_buf, oexUINT x_size )
 {
 	oexASSERT_PTR( x_buf );

@@ -1307,9 +1307,17 @@ oex::oexRESULT TestGuids()
 		return -4;
 
 	oex::guid::XorGuid( &guid1, &guid2 );
-	oex::guid::SetGuid( &guid2, 0, 0, sizeof( guid2 ) );
+
+	// +++ Hmmm, alignment issues on android?
+//	oex::guid::SetGuid( &guid2, 0, 0, sizeof( guid2 ) );
+	oex::guid::SetGuid( &guid2, (oex::oexUCHAR)0, 0, sizeof( guid2 ) );
+
 	if ( !oexVERIFY( oex::guid::CmpGuid( &guid1, &guid2 ) ) )
+	{	oexEcho( oexBinToAsciiHexStr( oex::CBin( (CBin::t_byte*)&guid1, sizeof( guid1 ), 0, oexFALSE ), 0, 16, 64 ).Ptr() );
+		oexEcho( oexBinToAsciiHexStr( oex::CBin( (CBin::t_byte*)&guid2, sizeof( guid2 ), 0, oexFALSE ), 0, 16, 64 ).Ptr() );
+		oexSHOW( oex::guid::CmpGuid( &guid1, &guid2 ) );
 		return -5;
+	} // end if
 
 	return oex::oexRES_OK;
 }
@@ -2414,6 +2422,12 @@ oex::oexRESULT Test_CIpAddress()
 
 	ia.LookupHost( oexT( "google.com" ), 80 );
 	oexPrintf( oexT( "google.com = %s = %s\n" ), oexStrToMbPtr( ia.GetDotAddress().Ptr() ), oexStrToMbPtr( ia.GetId().Ptr() ) );
+
+//	oexEcho( oexBinToAsciiHexStr( 
+//		oex::CBin( (CBin::t_byte*)CCrcHash::getCrcTable(), 64, 0, oexFALSE ), 0, 16, 64 ).Ptr() );
+
+	if ( !oexVERIFY( ia.ValidateAddress() ) )
+		return -5;
 
 	return oex::oexRES_OK;
 }
