@@ -50,11 +50,14 @@ public:
 
 	int Lock( const T_ID id )
 	{
+		// This can hide collisions, so leave out until it works
+		/*
 		// Fairness enforcing
 		if ( id == hAce )
 		{	hAce = 0;
 			tsleep( 10 );
 		} // end if
+		*/
 	
 		// Already the owned?
 		if ( hOwner )
