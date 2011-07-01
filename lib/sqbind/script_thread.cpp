@@ -528,7 +528,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, st
 
 		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
 		if ( mapParams[ oexT( "val" ) ].len() )
-			m_pb.at( std2oex( key ) ) = std2oex( mapParams[ oexT( "val" ) ] );
+			m_pb.at( std2oex( key ) ) = std2oex( mapParams[ oexT( "val" ) ].str() );
 
 		else
 			m_pb.erase_at( std2oex( key ) );
@@ -543,8 +543,8 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, st
 			return oex::oexFALSE;
 
 		// Set the key timeout value
-		m_lstKeyTimeouts[ mapParams[ oexT( "key" ) ] ]
-			= oexGmtTime().GetUnixTime() + std2oex( mapParams[ oexT( "to" ) ] ).ToUInt();
+		m_lstKeyTimeouts[ mapParams[ oexT( "key" ) ].str() ]
+			= oexGmtTime().GetUnixTime() + std2oex( mapParams[ oexT( "to" ) ].str() ).ToUInt();
 
 	} // end if
 
@@ -680,7 +680,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, st
 										 oexStrToULong( mapParams[ oexT( "type" ) ].c_str() ) );
 
 		if ( 0 <= nKey )
-			m_lstLog[ mapParams[ oexT( "key" ) ] ] = nKey;
+			m_lstLog[ mapParams[ oexT( "key" ) ].str() ] = nKey;
 
 		*pReply = oex2std( oexMks( nKey ) );
 

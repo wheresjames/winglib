@@ -15,6 +15,14 @@
 #define _MSG( m ) printf( "%s(%d) : " m "\n", __FILE__, __LINE__ )
 #define _TR() _MSG( "MARKER" )
 
+// Run time in ms
+const int runtime = 60 * 1000;
+//const int runtime = 10 * 60 * 1000;
+
+#define TRACE_LOCKS
+//#define TRACE_COLLISIONS
+//#define BREAK_ON_COLLISION
+
 typedef void* t_id;
 
 void tsleep( unsigned int u )
@@ -32,6 +40,7 @@ template < typename T_ID = unsigned long, typename T_COUNT = unsigned long >
 private:
 
 	volatile T_ID 			hGate;
+	volatile T_ID 			hDoor;
 	volatile T_ID			hAce;
 	volatile T_ID			hPending;
 	volatile T_ID			hOwner;
@@ -42,6 +51,7 @@ public:
 	TPseudoLock()
 	{
 		hGate = 0;
+		hDoor = 0;
 		hAce = 0;
 		hPending = 0;
 		hOwner = 0;
@@ -59,13 +69,20 @@ public:
 		} // end if
 		*/
 	
-		// Already the owned?
+		// Already owned?
 		if ( hOwner )
 		{
 			// Someone else owns it?
 			if ( id != hOwner )
 				return 0;
 
+			// This shouldn't happen in this application
+#if defined( BREAK_ON_COLLISION )
+			printf( "?: id = %lu, owner = %lu\n", id, hOwner );
+			tsleep( 1000 );
+			exit( 0 );
+#endif
+				
 			// Ref
 			nCount++;
 
@@ -77,36 +94,68 @@ public:
 		if ( hGate )
 			return 0;
 
-		// Register our id
-		hAce = id;	
-
-		// Is the gate still open?
-		if ( hGate )
-			return 0;
-
-		// Close the gate
+		// No one else get's past the gate, now we narrow down a winner
 		hGate = id;
 
-		// Punt if we're not the potential winner?
-		if ( id != hAce )
-		{
-			// Open the gate if we're the gate keeper
-			if ( id == hGate )
-				hGate = 0;
+retry:
+		// Register the winner's id
+		hAce = hGate;	
 
-			return 0;
-		
-		} // end if
-
-		// Are we the gate keeper?
+		// Punt if we have no shot at winning
 		if ( id != hGate )
 			return 0;
+
+		// Wait for the door to open
+		while ( hDoor && !hOwner )
+		{
+			// If we're the door holder, open it
+			if ( id == hDoor )
+				hDoor = hOwner;
+
+			else
+				tsleep( 0 );
+
+		} // end while
+
+		// Punt if someone won
+		if ( hOwner )
+			return 0;
+
+		// Close the door, the winner *may* now be on this side of the door
+		// hDoor = id;
+		hDoor = hGate;
+
+		// If we're not the winner
+		if ( id != hAce )
+		{
+			// Open the door if we're the door holder
+			if ( id == hDoor )
+				hDoor = hOwner;
+
+			// Punt if we can't win
+			if ( id != hGate )
+				return 0;
+
+			goto retry;
+
+		} // end if
+
+		// Are we the door holder?
+		if ( id != hDoor )
+			goto retry;
+
+		// Are we the choosen one?
+		if ( id != hGate )
+		{	hDoor = hOwner;
+			return 0;
+		} // end if
 
 		// Then the lock is ours
 		hOwner = id;
 		nCount = 1;
 
 		return 1;
+
 	}
 
 	int Unlock( const T_ID id )
@@ -126,9 +175,12 @@ public:
 		// Disown
 		hOwner = 0;
 		
+		// Open the door
+		hDoor = 0;
+
 		// Open the gate
 		hGate = 0;
-		
+
 		return 1;
 	}
 
@@ -168,6 +220,8 @@ struct SThreadInfo
 	volatile pthread_t					hThread;
 #endif
 
+	t_id								id;
+
 	CPseudoLock			 				*pLock;
 
 	volatile bool						bRun;
@@ -191,23 +245,29 @@ static void* ThreadProc( void* pData )
 	if ( !pTi )
 		return 0;
 
-	t_id id = getThreadId();
+	pTi->id = getThreadId();
 
 	while ( pTi->bRun )
 	{
 		(*pTi->pAttempts)++;
 
-		if ( pTi->pLock->Lock( id ) )
+		if ( pTi->pLock->Lock( pTi->id ) )
 		{
-			printf( "LOCKED : %lu\n", (unsigned long)id );
+#if defined( TRACE_LOCKS )
+			printf( "LOCKED : %lu\n", (unsigned long)pTi->id );
+#endif
 
 			// Double lock?
 			if ( (*pTi->pWaiting) )
 			{	(*pTi->pCollisions)++;
-				printf( "!!!! COLLISION : %lu -> %lu \n", (unsigned long)id, (unsigned long)(*pTi->pWaiting) );
+				printf( "!!!! COLLISION : %lu -> %lu \n", (unsigned long)pTi->id, (unsigned long)(*pTi->pWaiting) );
+#if defined( BREAK_ON_COLLISION )
+				tsleep( 1000 );
+				exit( 0 );
+#endif
 			} // end if
 
-			*pTi->pWaiting = (volatile unsigned long)id;
+			*pTi->pWaiting = (volatile unsigned long)pTi->id;
 
 			// Count one and hold the lock a bit
 			(*pTi->pSuccess)++;
@@ -216,9 +276,11 @@ static void* ThreadProc( void* pData )
 
 			(*pTi->pWaiting) = 0;
 
-			printf( "UNLOCKED : %lu\n", (unsigned long)id );
+#if defined( TRACE_LOCKS )
+			printf( "UNLOCKED : %lu\n", (unsigned long)pTi->id );
+#endif
 
-			pTi->pLock->Unlock( id );
+			pTi->pLock->Unlock( pTi->id );
 
 		} // end if
 		
@@ -333,13 +395,19 @@ int main(int argc, char* argv[])
 	printf( "Created %lu threads...\n", (unsigned long)nThreads );
 	
 	// Let it run a while
-	tsleep( 10 * 1000 );
+	tsleep( runtime );
 	
 	// Close threads
 	for( long i = 0; i < nThreads; i++ )
 		if ( !join_thread( &(ti[ i ]) ) )
 			printf( "join_thread() failed : %lu \n", (unsigned long)i );
 	
+	// Just verify that no two threads had the same id
+	for ( long i = 0; i < nThreads; i++ )
+		for ( long j = i + 1; j < nThreads; j++ )
+			if ( ti[ i ].id == ti[ j ].id )
+				printf( "\n\n???? WTf ???? : All bets are off, two threads (%lu and %lu) had the same id\n\n", i, j );
+
 	printf( "\n\n Total Attempts : %lu \n Total Locks : %lu \n Total Collisions : %lu \n\n", 
 			ulAttempts, ulSuccess, ulCollisions );
 	

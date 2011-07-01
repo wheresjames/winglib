@@ -37,9 +37,6 @@
 // 3rd party stuff
 #define OEX_ENABLE_SQLITE
 
-// Custom std allocator
-#define OEXLIB_CUSTOM_STD_ALLOCATOR
-
 // Compile messages
 #define OEX_VERBOSE_COMPILE
 
@@ -91,13 +88,12 @@
 #elif defined( WIN32 ) || defined( _WIN32 )
 #	define OEX_WIN32
 #	define OEX_WINDOWS
-#elif defined( __ANDROID__ )
+#elif defined( __ANDROID__ ) || defined( ANDROID )
 #	define OEX_ANDROID	
 #	define OEX_LINUX
 #else
 #	define OEX_LINUX
 #endif
-
 
 #if defined( CPU_ARM )
 #	define OEX_CPU_ARM
@@ -121,6 +117,11 @@
 //#if defined( OEX_WINDOWS )
 #	define OEX_ALIGNEDMEM 16
 //#endif
+
+// Custom std allocator
+#if !defined( OEX_ANDROID )
+#	define OEXLIB_CUSTOM_STD_ALLOCATOR
+#endif
 
 // By default, the thread locks time out and usually the function
 // will give up and treat it as an error, sixty seconds should be
@@ -202,8 +203,6 @@
 //#	define OEXLIB_STACK_HISTORY
 //#	define OEXLIB_STACK_KEEP_INACTIVE_TRACES
 #endif
-
-#define OEXLIB_CUSTOM_STD_ALLOCATOR
 
 #if defined ( OEX_WINDOWS )
 
@@ -318,7 +317,15 @@
 #	define oexSIZEOFINT 4
 #endif
 
-#if defined( OEX_WIN64 ) && !defined( OEX_GCC )
+#if defined( OEX_ANDROID )
+#	if defined ( __cplusplus )
+#		include <cstring>
+		typedef size_t				oexSIZE_T;
+#	else
+		typedef unsigned long		oexSIZE_T;
+#	endif
+	typedef oexSIZE_T				oexNEWSIZE_T;
+#elif defined( OEX_WIN64 ) && !defined( OEX_GCC )
 	typedef __int64					oexSIZE_T;
 	typedef size_t					oexNEWSIZE_T;
 #elif defined( OEX_WIN64 ) && defined( OEX_GCC )

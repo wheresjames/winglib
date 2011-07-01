@@ -25,7 +25,7 @@ UNSUPPORTED := TOOLS=$(TOOLS) not supported
 include $(PRJ_LIBROOT)/unsupported.mk
 else
 
-ifeq ($(TOOLS),android)
+ifeq ($(OS),android)
 UNSUPPORTED := TOOLS=$(TOOLS) not supported
 include $(PRJ_LIBROOT)/unsupported.mk
 else
