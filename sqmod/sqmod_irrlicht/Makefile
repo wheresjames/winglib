@@ -15,7 +15,9 @@ PRJ_INCS := winglib/lib/sqbind winglib/lib/oexlib \
 			freetype2/include ftgl/src
 #			bullet/src 
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel \
-			freetype2 ftgl
+			freetype2 
+#			ftgl
+
 #			bullet
 PRJ_DEFS := OEX_NOBULLET _STDCALL_SUPPORTED
 PRJ_WINL := strmiids winmm opengl32 glu32
@@ -30,18 +32,23 @@ PRJ_SUBROOT := _sqmod
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-ifeq ($(PROC),arm)
-UNSUPPORTED := PROC=$(PROC) is not supported
-include $(PRJ_LIBROOT)/unsupported.mk
-else
+#ifeq ($(PROC),arm)
+#UNSUPPORTED := PROC=$(PROC) is not supported
+#include $(PRJ_LIBROOT)/unsupported.mk
+#else
 
 ifeq ($(PLATFORM),windows)
 	PRJ_DEFS := $(PRJ_DEFS) FTGL_LIBRARY_STATIC
 endif
 
 ifeq ($(PROC),arm)
-	PRJ_INCS := $(PRJ_INCS) irrlicht-es/include
-	PRJ_LIBS := $(PRJ_LIBS) irrlicht-es cximage jpeg png tiff zlib bzip2
+	ifeq ($(OS),android)
+		PRJ_INCS := $(PRJ_INCS) irrlicht-android/project/include
+		PRJ_LIBS := $(PRJ_LIBS) irrlicht-android cximage jpeg png tiff zlib bzip2
+	else
+		PRJ_INCS := $(PRJ_INCS) irrlicht-es/include
+		PRJ_LIBS := $(PRJ_LIBS) irrlicht-es cximage jpeg png tiff zlib bzip2
+	endif
 else
 	PRJ_INCS := $(PRJ_INCS) irrlicht/include
 	PRJ_LIBS := $(PRJ_LIBS) irrlicht cximage jpeg png tiff zlib bzip2
@@ -49,7 +56,9 @@ endif
 
 #_IRR_USE_WINDOWS_CE_DEVICE_
 ifeq ($(PLATFORM),posix)
-	PRJ_OSLB := X11 GLU Xxf86vm
+	ifneq ($(PROC),arm)
+		PRJ_OSLB := X11 GLU Xxf86vm
+	endif
 #	PRJ_DEFS := $(PRJ_DEFS) _IRR_USE_LINUX_DEVICE_ _IRR_COMPILE_WITH_X11_
 else
 	PRJ_DEFS := $(PRJ_DEFS) _IRR_STATIC_LIB_ _IRR_MULTI_ZLIB_
@@ -77,4 +86,4 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-endif
+#endif

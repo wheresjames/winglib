@@ -119,8 +119,13 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height, in
 		m_er.SetDevice( this, &m_bQuit );
 		m_pDevice->setEventReceiver( &m_er );
 
+#if !defined( OEX_ANDROID )
 		if ( sName.length() )
-			m_pDevice->setWindowCaption( oexStrToStrWPtr( sName.c_str() ) );
+			m_pDevice->setWindowCaption( oexStrToStrWPtr( sName.c_str() ) );\
+#else
+		if ( sName.length() )
+			m_pDevice->setWindowCaption( sName.c_str() );
+#endif
 
 		// Grab components
 		m_pSmgr = m_pDevice->getSceneManager();
@@ -227,8 +232,13 @@ int CSqIrrlicht::Draw( CSqirrColor &bg )
 	float fElapsed = m_fLastTime ? fBootSeconds - m_fLastTime : 0;
 
 	// Update fps
+#if !defined( OEX_ANDROID )
 	if ( m_txtFps && !( m_llFrames % 10 ) )
 		m_txtFps->setText ( oexMksW( m_pDriver->getFPS() ).Ptr() );
+#else
+//	if ( m_txtFps && !( m_llFrames % 10 ) )
+//		m_txtFps->setText ( oexMks( m_pDriver->getFPS() ).Ptr() );
+#endif
 
 	// Animate meshes
 	AnimateMeshes();
