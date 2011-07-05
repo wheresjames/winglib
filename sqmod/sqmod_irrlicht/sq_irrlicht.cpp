@@ -121,7 +121,7 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height, in
 
 #if !defined( OEX_ANDROID )
 		if ( sName.length() )
-			m_pDevice->setWindowCaption( oexStrToStrWPtr( sName.c_str() ) );\
+			m_pDevice->setWindowCaption( oexStrToStrWPtr( sName.c_str() ) );
 #else
 		if ( sName.length() )
 			m_pDevice->setWindowCaption( sName.c_str() );
