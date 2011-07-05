@@ -15,11 +15,13 @@
 #define _MSG( m ) printf( "%s(%d) : " m "\n", __FILE__, __LINE__ )
 #define _TR() _MSG( "MARKER" )
 
+#define _PTR2INT( n ) ((unsigned long)(unsigned long long)n)
+
 // Run time in ms
 const int runtime = 60 * 1000;
 //const int runtime = 10 * 60 * 1000;
 
-#define TRACE_LOCKS
+//#define TRACE_LOCKS
 //#define TRACE_COLLISIONS
 //#define BREAK_ON_COLLISION
 
@@ -78,7 +80,7 @@ public:
 
 			// This shouldn't happen in this application
 #if defined( BREAK_ON_COLLISION )
-			printf( "?: id = %lu, owner = %lu\n", id, hOwner );
+			printf( "?: id = %lu, owner = %lu\n", _PTR2INT( id ), _PTR2INT( hOwner ) );
 			tsleep( 1000 );
 			exit( 0 );
 #endif
@@ -254,20 +256,20 @@ static void* ThreadProc( void* pData )
 		if ( pTi->pLock->Lock( pTi->id ) )
 		{
 #if defined( TRACE_LOCKS )
-			printf( "LOCKED : %lu\n", (unsigned long)pTi->id );
+			printf( "LOCKED : %lu\n", _PTR2INT( pTi->id ) );
 #endif
 
 			// Double lock?
 			if ( (*pTi->pWaiting) )
 			{	(*pTi->pCollisions)++;
-				printf( "!!!! COLLISION : %lu -> %lu \n", (unsigned long)pTi->id, (unsigned long)(*pTi->pWaiting) );
+				printf( "!!!! COLLISION : %lu -> %lu \n", _PTR2INT( pTi->id ), _PTR2INT( *pTi->pWaiting ) );
 #if defined( BREAK_ON_COLLISION )
 				tsleep( 1000 );
 				exit( 0 );
 #endif
 			} // end if
 
-			*pTi->pWaiting = (volatile unsigned long)pTi->id;
+			*pTi->pWaiting = _PTR2INT( pTi->id );
 
 			// Count one and hold the lock a bit
 			(*pTi->pSuccess)++;
@@ -277,7 +279,7 @@ static void* ThreadProc( void* pData )
 			(*pTi->pWaiting) = 0;
 
 #if defined( TRACE_LOCKS )
-			printf( "UNLOCKED : %lu\n", (unsigned long)pTi->id );
+			printf( "UNLOCKED : %lu\n", _PTR2INT( pTi->id ) );
 #endif
 
 			pTi->pLock->Unlock( pTi->id );
