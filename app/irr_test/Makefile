@@ -25,14 +25,15 @@ UNSUPPORTED := TOOLS=$(TOOLS) not supported
 include $(PRJ_LIBROOT)/unsupported.mk
 else
 
-ifeq ($(OS),android)
-UNSUPPORTED := TOOLS=$(TOOLS) not supported
-include $(PRJ_LIBROOT)/unsupported.mk
-else
-
 ifeq ($(PROC),arm)
-	PRJ_INCS := $(PRJ_INCS) irrlicht-es/include
-	PRJ_LIBS := $(PRJ_LIBS) irrlicht-es jpeg png tiff zlib bzip2
+	ifeq ($(OS),android)
+		PRJ_INCS := $(PRJ_INCS) irrlicht-android/project/include
+		PRJ_LIBS := $(PRJ_LIBS) irrlicht-android cximage jpeg png tiff zlib bzip2
+		PRJ_OSLB := $(PRJ_OSLB) 
+	else
+		PRJ_INCS := $(PRJ_INCS) irrlicht-es/include
+		PRJ_LIBS := $(PRJ_LIBS) irrlicht-es jpeg png tiff zlib bzip2
+	endif
 else
 	PRJ_INCS := $(PRJ_INCS) irrlicht/include
 	PRJ_LIBS := $(PRJ_LIBS) irrlicht jpeg png tiff zlib bzip2
@@ -40,8 +41,7 @@ endif
 
 #_IRR_USE_WINDOWS_CE_DEVICE_
 ifeq ($(PLATFORM),posix)
-
-	ifneq ($(TOOLS),iphone)
+	ifneq ($(PROC),arm)
 		PRJ_OSLB := X11 GLU Xxf86vm
 		PRJ_DEFS := $(PRJ_DEFS) _IRR_USE_LINUX_DEVICE_
 	endif
@@ -69,7 +69,5 @@ include $(PRJ_LIBROOT)/build.mk
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
-
-endif
 
 endif
