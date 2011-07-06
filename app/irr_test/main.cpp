@@ -55,9 +55,15 @@ void Close()
 int Init( int width, int height )
 {_STT();
 
-#if defined( _WIN32_WCE )
+#if defined( _WIN32_WCE ) || defined( __ANDROID__ )
 
-#if defined( _IRR_COMPILE_WITH_OGLES1_ )
+#if defined( _IRR_COMPILE_WITH_OGLES2_ )
+
+	g_pDevice = irr::createDevice( irr::video::EDT_OGLES2,
+								   irr::core::dimension2d< irr::u32 >( 320, 240 ),
+								   16, true );
+
+#elif defined( _IRR_COMPILE_WITH_OGLES1_ )
 
 	g_pDevice = irr::createDevice( irr::video::EDT_OGLES1,
 								   irr::core::dimension2d< irr::u32 >( 320, 240 ),
