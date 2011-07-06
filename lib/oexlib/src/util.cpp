@@ -118,7 +118,7 @@ CFifoSync* CUtil::getOutputBuffer()
 oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 {
 	// Sanity checks
-	if ( !isOutputBuffer || !x_pStr || !*x_pStr )
+	if ( !isOutputBuffer() || !x_pStr || !*x_pStr )
 		return oexFALSE;
 
 	if ( !x_uSize )
