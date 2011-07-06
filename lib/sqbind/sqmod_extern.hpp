@@ -37,7 +37,7 @@
 // Include engine requirements
 #include "sqeng_extern.hpp"
 
-#if defined ( OEX_WINDOWS )
+#if defined( OEX_WINDOWS ) && !defined( _WINDLL )
 #include <windows.h>
 BOOL WINAPI DllMain( HANDLE hinstDLL, DWORD dwReason, LPVOID lpvReserved ) { return true; }
 #endif
