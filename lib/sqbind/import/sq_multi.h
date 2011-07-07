@@ -150,7 +150,10 @@ namespace sqbind
 		CSqBinary bin();
 
 		/// Returns a integer representation of the value
-		int toint();
+		sqbind::SQINT toint();
+
+		/// Returns a integer representation of the value
+		int toint32();
 
 		/// Returns a integer representation of the value
 		oex::oexINT64 toint64();

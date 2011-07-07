@@ -1094,10 +1094,12 @@ template< typename T_RET >
 		{	return LogError( oex::oexFALSE, e ); }
 		_oexCATCH( SquirrelError &e )
 		{
+#if defined( _DEBUG )
 			// +++ Startup code needs to check for function existance first
-			/*return LogErrorM( oex::oexFALSE, e.desc );*/
-
+			return LogErrorM( oex::oexFALSE, e.desc );
+#else
 			return oex::oexFALSE;
+#endif
 		}
 
 		return oex::oexTRUE;
