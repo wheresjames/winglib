@@ -45,6 +45,10 @@ ifeq ($(PROC),arm)
 	ifeq ($(OS),android)
 		PRJ_INCS := $(PRJ_INCS) irrlicht-android/project/include
 		PRJ_LIBS := $(PRJ_LIBS) irrlicht-android cximage jpeg png tiff zlib bzip2
+		ifneq ($(LIBLINK),static)
+			PRJ_OSLB := $(PRJ_OSLB) GLESv2
+		endif
+		CFG_LFLAGS := $(CFG_LFLAGS) -Wl,-allow-shlib-undefined
 	else
 		PRJ_INCS := $(PRJ_INCS) irrlicht-es/include
 		PRJ_LIBS := $(PRJ_LIBS) irrlicht-es cximage jpeg png tiff zlib bzip2

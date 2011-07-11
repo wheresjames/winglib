@@ -123,8 +123,8 @@ int CSqIrrlicht::Init( const sqbind::stdString &sName, int width, int height, in
 		if ( sName.length() )
 			m_pDevice->setWindowCaption( oexStrToStrWPtr( sName.c_str() ) );
 #else
-		if ( sName.length() )
-			m_pDevice->setWindowCaption( sName.c_str() );
+//		if ( sName.length() )
+//			m_pDevice->setWindowCaption( sName.c_str() );
 #endif
 
 		// Grab components

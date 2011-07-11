@@ -5,6 +5,12 @@
 #	include <windows.h>
 #endif
 
+#if defined( __ANDROID__ )
+#	include <EGL/egl.h>
+#	include <GLES2/gl2.h>
+#	include <android/log.h>
+#endif
+
 class MyEventReceiver : public irr::IEventReceiver
 {
 private:
@@ -56,20 +62,33 @@ int Init( int width, int height )
 {_STT();
 
 #if defined( _WIN32_WCE ) || defined( __ANDROID__ )
+printf( "%s(%lu)\n", __FILE__, __LINE__ );
 
 #if defined( _IRR_COMPILE_WITH_OGLES2_ )
+printf( "%s(%lu)\n", __FILE__, __LINE__ );
+
+
+#if defined( __ANDROID__ )
+
+	printf( "%s(%lu) OpenGL Version : %s\n", __FILE__, __LINE__, glGetString( GL_VERSION ) );
+	
+	__android_log_print( ANDROID_LOG_INFO, "irr_test", "OpenGLES2" );
+	
+#endif
 
 	g_pDevice = irr::createDevice( irr::video::EDT_OGLES2,
 								   irr::core::dimension2d< irr::u32 >( 320, 240 ),
 								   16, true );
 
 #elif defined( _IRR_COMPILE_WITH_OGLES1_ )
+printf( "%s(%lu)\n", __FILE__, __LINE__ );
 
 	g_pDevice = irr::createDevice( irr::video::EDT_OGLES1,
 								   irr::core::dimension2d< irr::u32 >( 320, 240 ),
 								   16, true );
 
 #else
+printf( "%s(%lu)\n", __FILE__, __LINE__ );
 
 	g_pDevice = irr::createDevice( irr::video::EDT_BURNINGSVIDEO,
 								   irr::core::dimension2d< irr::u32 >( 320, 240 ),
@@ -90,6 +109,7 @@ int Init( int width, int height )
 //	g_pDevice = irr::createDeviceEx( param );
 
 #elif defined( OEX_IPHONE )
+printf( "%s(%lu)\n", __FILE__, __LINE__ );
 
 	irr::SIrrlichtCreationParameters param;
 	param.Bits = 16;
@@ -99,6 +119,7 @@ int Init( int width, int height )
 	g_pDevice = irr::createDeviceEx( param );
 
 #else
+printf( "%s(%lu)\n", __FILE__, __LINE__ );
 
 	irr::SIrrlichtCreationParameters param;
 	param.Bits = 16;
@@ -114,6 +135,7 @@ int Init( int width, int height )
 //	m_pDevice = irr::createDevice( irr::video::EDT_OPENGL, irr::core::dimension2d<irr::s32>( 640, 480 ), 16,
 //				   			  false, false, false, 0 );
 
+printf( "%s(%lu)\n", __FILE__, __LINE__ );
 	if ( !g_pDevice )
 		oexERROR( 0, oexT( "Failed to create irrlicht device" ) );
 
