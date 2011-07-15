@@ -90,13 +90,13 @@ namespace obj
 
         tUInt64         = ( 8 ),
 
-        tChar           = ( eTypeSigned | eTypeElement | 8 ),
+        tChar           = ( eTypeSigned | eTypeElement | sizeof( oexCHAR ) ),
 
-        tUChar          = ( eTypeElement | 8 ),
+        tUChar          = ( eTypeElement | sizeof( oexUCHAR ) ),
 
-        tChar8          = ( eTypeSigned | eTypeElement | sizeof( oexCHAR ) ),
+        tChar8          = ( eTypeSigned | eTypeElement | 1 ),
 
-        tUChar8         = ( eTypeElement | sizeof( oexUCHAR ) ),
+        tUChar8         = ( eTypeElement | 1 ),
 
         tChar16         = ( eTypeSigned | eTypeElement | 2 ),
 

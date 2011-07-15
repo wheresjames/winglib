@@ -2,7 +2,7 @@
 #-------------------------------------------------------------------
 # Apps
 #-------------------------------------------------------------------
-BUILDDIRS := app/hello app/plock lib/oexlib \
+BUILDDIRS := app/hello app/basic app/plock lib/oexlib \
 			 tools/resbld tools/join \
 			 app/test app/iptest app/srvrund app/srvmod app/modrun \
 			 app/gstest app/irr_test \
