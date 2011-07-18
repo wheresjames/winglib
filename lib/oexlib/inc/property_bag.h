@@ -354,6 +354,59 @@ public:
 			return iterator();
 		}
 
+	//==============================================================
+	// Returns the number of differences between two property bags
+	//==============================================================
+	oexLONG diff_count( TPropertyBag &x_rPb, oexLONG *added, oexLONG *removed, oexLONG *modified )
+	{	return diff_count( *this, x_rPb, added, removed, modified ); }
+
+	oexLONG diff_count( TPropertyBag &a, TPropertyBag &b, oexLONG *added, oexLONG *removed, oexLONG *modified )
+	{
+		oexLONG lRet = 0;
+
+		// Check for added or modified keys
+		for ( oex::CPropertyBag::iterator it; a.List().Next( it ); )
+			if ( it->IsArray() )
+			{
+				if ( !b.IsKey( it.Node()->key ) )
+					lRet++, added ? (*added)++ : 0;
+					
+				else if ( !b[ it.Node()->key ].IsArray() )
+					lRet++, modified ? (*modified)++ : 0;
+					
+				else
+					lRet += diff_count( *it, b[ it.Node()->key ], added, removed, modified );
+
+			} // end if
+
+			else if ( !b.IsKey( it.Node()->key ) )
+				lRet++, added ? (*added)++ : 0;
+
+			else if ( b[ it.Node()->key ].IsArray() 
+					  || it->ToString() != b[ it.Node()->key ].ToString() )
+				lRet++, modified ? (*modified)++ : 0;
+
+		// Check for removed keys
+		for ( oex::CPropertyBag::iterator it; b.List().Next( it ); )
+			if ( it->IsArray() )
+			{
+				if ( !a.IsKey( it.Node()->key ) )
+					lRet++, removed ? (*removed)++ : 0;
+
+			} // end if
+			
+			else if ( !b.IsKey( it.Node()->key ) )
+				lRet++, removed ? (*removed)++ : 0;
+
+		return lRet;
+
+	}
+
+	//==============================================================
+	// Returns the differences between two property bags
+	//==============================================================
+//	oexLONG diff( oexCONST TPropertyBag &x_rPb, TPropertyBag &x_rDiff );
+
 
 	//==============================================================
 	// operator =

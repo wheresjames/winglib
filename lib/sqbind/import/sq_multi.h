@@ -320,6 +320,9 @@ namespace sqbind
 
 		/// Displays the array in a human readable form
 		t_Obj print_r( int nShowVals );
+		
+		/// Get the number of differences between two arrays
+		CSqMulti diff_count( CSqMulti *p );
 
 		/// Recursive
 		static t_Obj _print_r( int nShowVals, t_List &rLst, int nDepth = 0 );

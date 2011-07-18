@@ -345,6 +345,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, _nexti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, _newslot )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, print_r )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, diff_count )
 _SQBIND_REGISTER_CLASS_END()
 
 void CSqMulti::Register( sqbind::VM vm )
@@ -360,6 +361,25 @@ int CSqMulti::size()
 void CSqMulti::clear()
 {_STT();
 	m_lst.clear();
+}
+
+CSqMulti CSqMulti::diff_count( CSqMulti *p )
+{_STT();
+
+	if ( !p )
+		return CSqMulti();
+	
+	oex::CPropertyBag a, b; toPb( a ), p->toPb( b );
+	oex::oexLONG added = 0, removed = 0, modified = 0;
+	oex::oexLONG total = a.diff_count( b, &added, &removed, &modified );
+	
+	CSqMulti ret;
+	ret[ oexT( "total" ) ] = sqbind::oex2std( oexMks( total ) );
+	ret[ oexT( "added" ) ] = sqbind::oex2std( oexMks( added ) );
+	ret[ oexT( "removed" ) ] = sqbind::oex2std( oexMks( removed ) );
+	ret[ oexT( "modified" ) ] = sqbind::oex2std( oexMks( modified ) );
+	
+	return ret;
 }
 
 CSqParam::t_SqStr CSqMulti::getJSON()
