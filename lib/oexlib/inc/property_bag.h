@@ -357,10 +357,16 @@ public:
 	//==============================================================
 	// Returns the number of differences between two property bags
 	//==============================================================
+	/**
+		@param [in] x_rPb		-	Pointer to property bag to use with comparison.
+		@param [in] added		-	Pointer to variable that keeps the added values count
+		@param [in] removed		-	Pointer to variable that keeps the removed values count
+		@param [in] modified	-	Pointer to variable that keeps the modified values count
+	*/
 	oexLONG diff_count( TPropertyBag &x_rPb, oexLONG *added, oexLONG *removed, oexLONG *modified )
 	{	return diff_count( *this, x_rPb, added, removed, modified ); }
 
-	oexLONG diff_count( TPropertyBag &a, TPropertyBag &b, oexLONG *added, oexLONG *removed, oexLONG *modified )
+	static oexLONG diff_count( TPropertyBag &a, TPropertyBag &b, oexLONG *added, oexLONG *removed, oexLONG *modified )
 	{
 		oexLONG lRet = 0;
 
