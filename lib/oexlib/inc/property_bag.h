@@ -388,14 +388,7 @@ public:
 
 		// Check for removed keys
 		for ( oex::CPropertyBag::iterator it; b.List().Next( it ); )
-			if ( it->IsArray() )
-			{
-				if ( !a.IsKey( it.Node()->key ) )
-					lRet++, removed ? (*removed)++ : 0;
-
-			} // end if
-			
-			else if ( !b.IsKey( it.Node()->key ) )
+			if ( !a.IsKey( it.Node()->key ) )
 				lRet++, removed ? (*removed)++ : 0;
 
 		return lRet;
