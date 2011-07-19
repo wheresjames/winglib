@@ -371,7 +371,7 @@ public:
 		oexLONG lRet = 0;
 
 		// Check for added or modified keys
-		for ( oex::CPropertyBag::iterator it; a.List().Next( it ); )
+		for ( oex::TPropertyBag::iterator it; a.List().Next( it ); )
 			if ( it->IsArray() )
 			{
 				if ( !b.IsKey( it.Node()->key ) )
@@ -393,7 +393,7 @@ public:
 				lRet++, modified ? (*modified)++ : 0;
 
 		// Check for removed keys
-		for ( oex::CPropertyBag::iterator it; b.List().Next( it ); )
+		for ( oex::TPropertyBag::iterator it; b.List().Next( it ); )
 			if ( !a.IsKey( it.Node()->key ) )
 				lRet++, removed ? (*removed)++ : 0;
 
