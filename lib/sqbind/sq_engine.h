@@ -933,7 +933,7 @@ public:
 		_oexCATCH( SScriptErrorInfo &e )
 		{	return LogError( oex::oexFALSE, e ); }
 		_oexCATCH( SquirrelError &e )
-		{	return LogErrorM( oex::oexFALSE, e.desc ); }
+		{	return LogErrorM( oex::oexFALSE, oexMks( x_pFunction, oexT( "() : " ), e.desc ).Ptr() ); }
 
 		return oex::oexTRUE;
 	}
@@ -964,7 +964,7 @@ template< typename T_P1 >
 		_oexCATCH( SScriptErrorInfo &e )
 		{	return LogError( oex::oexFALSE, e ); }
 		_oexCATCH( SquirrelError &e )
-		{	return LogErrorM( oex::oexFALSE, e.desc ); }
+		{	return LogErrorM( oex::oexFALSE, oexMks( x_pFunction, oexT( "() : " ), e.desc ).Ptr() ); }
 
 		return oex::oexTRUE;
 	}
@@ -996,7 +996,7 @@ template< typename T_P1, typename T_P2 >
 		_oexCATCH( SScriptErrorInfo &e )
 		{	return LogError( oex::oexFALSE, e ); }
 		_oexCATCH( SquirrelError &e )
-		{	return LogErrorM( oex::oexFALSE, oexMks( x_pFunction, oexT( " : " ), e.desc ).Ptr() ); }
+		{	return LogErrorM( oex::oexFALSE, oexMks( x_pFunction, oexT( "() : " ), e.desc ).Ptr() ); }
 
 		return oex::oexTRUE;
 	}
@@ -1027,7 +1027,7 @@ template< typename T_P1, typename T_P2, typename T_P3 >
 		_oexCATCH( SScriptErrorInfo &e )
 		{	return LogError( oex::oexFALSE, e ); }
 		_oexCATCH( SquirrelError &e )
-		{	return LogErrorM( oex::oexFALSE, e.desc ); }
+		{	return LogErrorM( oex::oexFALSE, oexMks( x_pFunction, oexT( "() : " ), e.desc ).Ptr() ); }
 
 		return oex::oexTRUE;
 	}
@@ -1058,7 +1058,7 @@ template< typename T_P1, typename T_P2, typename T_P3, typename T_P4 >
 		_oexCATCH( SScriptErrorInfo &e )
 		{	return LogError( oex::oexFALSE, e ); }
 		_oexCATCH( SquirrelError &e )
-		{	return LogErrorM( oex::oexFALSE, e.desc ); }
+		{	return LogErrorM( oex::oexFALSE, oexMks( x_pFunction, oexT( "() : " ), e.desc ).Ptr() ); }
 
 		return oex::oexTRUE;
 	}
@@ -1096,7 +1096,7 @@ template< typename T_RET >
 		{
 #if defined( _DEBUG )
 			// +++ Startup code needs to check for function existance first
-			return LogErrorM( oex::oexFALSE, e.desc );
+			return LogErrorM( oex::oexFALSE, oexMks( x_pFunction, oexT( "() : " ), e.desc ).Ptr() );
 #else
 			return oex::oexFALSE;
 #endif
@@ -1131,7 +1131,7 @@ template< typename T_RET >
 		_oexCATCH( SScriptErrorInfo &e )
 		{	return LogError( oex::oexFALSE, e ); }
 		_oexCATCH( SquirrelError &e )
-		{	return LogErrorM( oex::oexFALSE, e.desc ); }
+		{	return LogErrorM( oex::oexFALSE, oexMks( x_pFunction, oexT( "() : " ), e.desc ).Ptr() ); }
 
 		return oex::oexTRUE;
 	}
@@ -1162,7 +1162,7 @@ template< typename T_RET, typename T_P1 >
 		_oexCATCH( SScriptErrorInfo &e )
 		{	return LogError( oex::oexFALSE, e ); }
 		_oexCATCH( SquirrelError &e )
-		{	return LogErrorM( oex::oexFALSE, e.desc ); }
+		{	return LogErrorM( oex::oexFALSE, oexMks( x_pFunction, oexT( "() : " ), e.desc ).Ptr() ); }
 
 		return oex::oexTRUE;
 	}
@@ -1193,7 +1193,7 @@ template< typename T_RET, typename T_P1, typename T_P2 >
 		_oexCATCH( SScriptErrorInfo &e )
 		{	return LogError( oex::oexFALSE, e ); }
 		_oexCATCH( SquirrelError &e )
-		{	return LogErrorM( oex::oexFALSE, e.desc ); }
+		{	return LogErrorM( oex::oexFALSE, oexMks( x_pFunction, oexT( "() : " ), e.desc ).Ptr() ); }
 
 		return oex::oexTRUE;
 	}
@@ -1224,7 +1224,7 @@ template< typename T_RET, typename T_P1, typename T_P2, typename T_P3 >
 		_oexCATCH( SScriptErrorInfo &e )
 		{	return LogError( oex::oexFALSE, e ); }
 		_oexCATCH( SquirrelError &e )
-		{	return LogErrorM( oex::oexFALSE, e.desc ); }
+		{	return LogErrorM( oex::oexFALSE, oexMks( x_pFunction, oexT( "() : " ), e.desc ).Ptr() ); }
 
 		return oex::oexTRUE;
 	}
@@ -1255,7 +1255,7 @@ template< typename T_RET, typename T_P1, typename T_P2, typename T_P3, typename 
 		_oexCATCH( SScriptErrorInfo &e )
 		{	return LogError( oex::oexFALSE, e ); }
 		_oexCATCH( SquirrelError &e )
-		{	return LogErrorM( oex::oexFALSE, e.desc ); }
+		{	return LogErrorM( oex::oexFALSE, oexMks( x_pFunction, oexT( "() : " ), e.desc ).Ptr() ); }
 
 		return oex::oexTRUE;
 	}
