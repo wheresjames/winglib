@@ -63,7 +63,7 @@ NSIS_INSTALLERS := $(foreach f,$(NSIS_SCRIPTS),$(CFG_OUTROOT)/Install$(subst .ns
 NSIS_DEL_INSTALLERS := $(foreach f,$(NSIS_INSTALLERS),$(shell $(CFG_DEL) $(f)))
 
 # Make the installers
-include $(PRJ_LIBROOT)/sign.mk
+include $(PRJ_LIBROOT)/go/sign.mk
 ifneq ($(GO_SIGN_ENABLED),)
 $(CFG_OUTROOT)/Install%$(CFG_DPOSTFIX)_$(CFG_FVER)_$(PROC).exe : %.nsi
 	$(CFG_NSIS) /DOUTROOT="$(CFG_OUTROOT)" /DPOSTFIX="$(CFG_DPOSTFIX)" /DLIBROOT="$(CFG_LIBROOT)" $(NSIS_VER_STR) $(NSIS_PROC_STR) $(NSIS_BUILD_STR) $<

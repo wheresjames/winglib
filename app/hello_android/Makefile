@@ -8,7 +8,8 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := hello_android
-PRJ_TYPE := apk
+PRJ_TYPE := dll
+PRJ_PACK := apk
 PRJ_RESD :=
 PRJ_INCS :=  
 PRJ_LIBS := 
@@ -16,6 +17,7 @@ PRJ_OSLB :=
 
 PRJ_RESOURCE := res
 PRJ_MANIFEST := AndroidManifest.xml
+PRJ_PKG_NAME := winglib.app.hello_world
 
 PRJ_COMPANY 	:= Company
 PRJ_URL 		:= http://www.example.com
@@ -39,7 +41,6 @@ else
 #-------------------------------------------------------------------
 export LOC_TAG := def
 LOC_CXX_def := java
-LOC_PKG_def := winglib/app/hello_world
 LOC_EXT_def := class
 include $(PRJ_LIBROOT)/build.mk
 
