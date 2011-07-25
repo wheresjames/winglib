@@ -17,7 +17,7 @@ PRJ_OSLB :=
 
 PRJ_RESOURCE := res
 PRJ_MANIFEST := AndroidManifest.xml
-PRJ_PKG_NAME := winglib.app.hello_world
+PRJ_PKG_NAME := winglib.app.helloworld
 
 PRJ_COMPANY 	:= Company
 PRJ_URL 		:= http://www.example.com

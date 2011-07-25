@@ -1,5 +1,5 @@
 
-package winglib.app.hello_world;
+package winglib.app.helloworld;
 
 import android.app.Activity;
 import android.widget.TextView;
@@ -16,7 +16,7 @@ public class HelloWorld extends Activity
 
         TextView  tv = new TextView( this );
         tv.setText( getString() );
-		tv.setText( "Hello World!" );
+		// tv.setText( "Hello World! - Love java" );
         setContentView( tv );
 
     }
@@ -26,6 +26,6 @@ public class HelloWorld extends Activity
 
     static 
 	{
-        System.loadLibrary( "hello-world" );
+        System.loadLibrary( "hello_android" );
     }
 }
