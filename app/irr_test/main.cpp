@@ -9,6 +9,12 @@
 #	include <EGL/egl.h>
 #	include <GLES2/gl2.h>
 #	include <android/log.h>
+#	include "importgl.h"
+//extern "C" int importGLInit();
+#	define _MSG( s ) __android_log_print( ANDROID_LOG_INFO, OEX_PROJECT_NAME, "%s(%lu): %s\n", __FILE__, __LINE__, s ), \
+					 printf( "%s(%lu): %s\n", __FILE__, __LINE__, s )
+#else
+#	define _MSG( s ) printf( "%s(%lu): %s\n", __FILE__, __LINE__, s )
 #endif
 
 class MyEventReceiver : public irr::IEventReceiver
@@ -70,19 +76,29 @@ printf( "%s(%lu)\n", __FILE__, __LINE__ );
 
 #if defined( __ANDROID__ )
 
-	printf( "%s(%lu) OpenGL Version : %s\n", __FILE__, __LINE__, glGetString( GL_VERSION ) );
-	
-	__android_log_print( ANDROID_LOG_INFO, "irr_test", "OpenGLES2" );
-	
+#	if !defined( DISABLE_IMPORTGL )
+		importGLInit();
+#	endif
+
+	_MSG( glGetString( GL_VERSION ) );
+
 #endif
 
-	g_pDevice = irr::createDevice( irr::video::EDT_OGLES2,
-								   irr::core::dimension2d< irr::u32 >( 320, 240 ),
-								   16, true );
+	_MSG( "Using: EDT_OGLES2" );
+    g_pDevice = irr::createDevice( irr::video::EDT_OGLES2, 
+								   irr::core::dimension2d< irr::u32 >( 320, 480 ), 
+								   16, false, false, false, 0 );
+	
+//	g_pDevice = irr::createDevice( irr::video::EDT_OGLES2,
+//								   irr::core::dimension2d< irr::u32 >( 320, 240 ),
+//								   16, true );
 
+	_MSG( "irr::createDevice() succeeded" );
+								   
 #elif defined( _IRR_COMPILE_WITH_OGLES1_ )
 printf( "%s(%lu)\n", __FILE__, __LINE__ );
 
+	_MSG( "Using: EDT_OGLES1" );
 	g_pDevice = irr::createDevice( irr::video::EDT_OGLES1,
 								   irr::core::dimension2d< irr::u32 >( 320, 240 ),
 								   16, true );
@@ -90,6 +106,7 @@ printf( "%s(%lu)\n", __FILE__, __LINE__ );
 #else
 printf( "%s(%lu)\n", __FILE__, __LINE__ );
 
+	_MSG( "Using: EDT_BURNINGSVIDEO" );
 	g_pDevice = irr::createDevice( irr::video::EDT_BURNINGSVIDEO,
 								   irr::core::dimension2d< irr::u32 >( 320, 240 ),
 								   16, true );
@@ -109,7 +126,7 @@ printf( "%s(%lu)\n", __FILE__, __LINE__ );
 //	g_pDevice = irr::createDeviceEx( param );
 
 #elif defined( OEX_IPHONE )
-printf( "%s(%lu)\n", __FILE__, __LINE__ );
+	_MSG( "OEX_IPHONE" );
 
 	irr::SIrrlichtCreationParameters param;
 	param.Bits = 16;
@@ -119,7 +136,7 @@ printf( "%s(%lu)\n", __FILE__, __LINE__ );
 	g_pDevice = irr::createDeviceEx( param );
 
 #else
-printf( "%s(%lu)\n", __FILE__, __LINE__ );
+	_MSG( "Initializing Irrlicht" );
 
 	irr::SIrrlichtCreationParameters param;
 	param.Bits = 16;
@@ -129,8 +146,6 @@ printf( "%s(%lu)\n", __FILE__, __LINE__ );
 	g_pDevice = irr::createDeviceEx( param );
 
 #endif
-
-
 
 //	m_pDevice = irr::createDevice( irr::video::EDT_OPENGL, irr::core::dimension2d<irr::s32>( 640, 480 ), 16,
 //				   			  false, false, false, 0 );
@@ -145,27 +160,33 @@ printf( "%s(%lu)\n", __FILE__, __LINE__ );
 		irr::video::IVideoDriver *driver = g_pDevice->getVideoDriver();
 		irr::gui::IGUIEnvironment* guienv = g_pDevice->getGUIEnvironment();
 
+		_MSG( "Creating event receiver" );
+		
 		g_receiver = new MyEventReceiver(g_pDevice);
 		g_pDevice->setEventReceiver(g_receiver);
 		g_pDevice->setWindowCaption(L"Irrlicht Demo");
 
+		_MSG( "Creating GUI button and FPS display" );
 
 		g_text = guienv->addStaticText(L"FPS: xx",irr::core::rect<irr::s32>(60,5,200,20), false );
 		guienv->addButton(irr::core::rect<int>(10,5,50,20), 0, 2, L"Quit");
 
-
 		{ // Create scene
 
+			_MSG( "Creating Scene" );
+			
 			driver->setAmbientLight( irr::video::SColorf( .5f, .5f, .5f ) );
 			smgr->addLightSceneNode( 0, irr::core::vector3df( 0, 100, 0 ),
 									 irr::video::SColorf( 0.5f, 0.5f, 0.5f ), 100 );
 			smgr->addLightSceneNode( 0, irr::core::vector3df( 0, 100, -50 ),
 									 irr::video::SColorf( 0.5f, 0.5f, 0.5f ), 100 );
 
+			_MSG( "Adding camera" );
 //			irr::scene::ICameraSceneNode *camera =
 				smgr->addCameraSceneNode( 0, irr::core::vector3df( 0, 30, -40 ),
 										  irr::core::vector3df( 0, 5, 0 ) );
 
+			_MSG( "Adding cube" );
 			irr::scene::ISceneNode *node = smgr->addCubeSceneNode( 10.f );
 			if ( node )
 			{
@@ -182,6 +203,8 @@ printf( "%s(%lu)\n", __FILE__, __LINE__ );
 
 	} // end else
 
+	_MSG( "Initialization success" );
+	
 	return 1;
 }
 

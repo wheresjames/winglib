@@ -13,8 +13,9 @@ BUILDDIRS := app/hello \
 			 app/srvmod \
 			 app/modrun \
 			 app/gstest \
-			 app/irr_test \
 			 app/hello_android \
+			 app/irr_test \
+			 app/irr_android \
 			 app/axtest \
 			 app/fftest
 			 

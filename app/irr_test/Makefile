@@ -28,7 +28,8 @@ else
 ifeq ($(PROC),arm)
 	ifeq ($(OS),android)
 		# -Wl,-rpath=/system/lib/egl GLESv1_CM
-		PRJ_INCS := $(PRJ_INCS) irrlicht-android/project/include
+		PRJ_DEFS := ANDROID_NDK DISABLE_IMPORTGL
+		PRJ_INCS := $(PRJ_INCS) irrlicht-android/project/include irrlicht-android/project/jni
 		PRJ_LIBS := $(PRJ_LIBS) irrlicht-android cximage jpeg png tiff zlib bzip2
 		ifneq ($(LIBLINK),static)
 			PRJ_OSLB := $(PRJ_OSLB) GLESv2
