@@ -37,14 +37,14 @@ include $(PRJ_LIBROOT)/unsupported.mk
 else
 
 # -Wl,-rpath=/system/lib/egl GLESv1_CM
-PRJ_DEFS := ANDROID_NDK DISABLE_IMPORTGL
+PRJ_DEFS := ANDROID_NDK
 PRJ_INCS := $(PRJ_INCS) irrlicht-android/project/include irrlicht-android/project/jni
 PRJ_LIBS := $(PRJ_LIBS) irrlicht-android cximage jpeg png tiff zlib bzip2
 PRJ_OSLB := log
 ifneq ($(LIBLINK),static)
 	PRJ_OSLB := $(PRJ_OSLB) GLESv2
 endif
-CFG_LFLAGS := $(CFG_LFLAGS) -Wl,-allow-shlib-undefined
+CFG_LFLAGS := $(CFG_LFLAGS) -Wl,-allow-shlib-undefined -Wl,-rpath=/system/lib/egl
 
 #-------------------------------------------------------------------
 # File locations

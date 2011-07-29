@@ -223,7 +223,7 @@ namespace sqbind
 			return m_cb.getINT( 18 );
 		}
 		
-		/// Returns the header size from the control block
+		/// Returns the guid from the control block
 		int getBufferGuid( sqbind::CSqBinary *p )
 		{
 			if ( !m_cb.getUsed() ) 
