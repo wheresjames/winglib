@@ -143,6 +143,17 @@ template < typename T_SL, typename T_STD, typename T_DEF >
 			m[ oex2std( *it ) ] = ch;
 	}
 
+template < typename T_M, typename T_CREG  >
+	void SQBIND_CRegToPropertyBag( T_M &m, T_CREG &r )
+	{	for ( CSqMulti::iterator it = m.begin(); it != m.end(); it++ )
+			if ( it->first.length() && it->second.size() )
+			{	CRKey *prk = r.GetKey( it->first.c_str() );
+				if ( prk )
+					for ( CSqMulti::iterator itk = it->second.begin(); itk != it->second.end(); itk++ )
+						if ( itk->first.length() )
+							prk->Add( REG_SZ, it->first.c_str(), itk->first.c_str(), 0 );
+			} // end if
+	}
 
 template < typename T >
 	T SQBIND_StrReplace( T str, const T &fstr, const T &rstr )

@@ -139,6 +139,8 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSerialPort, CSqSerialPort )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, Destroy )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getName )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getIndex )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, isOpen )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, isPort )
 
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, WriteBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, ReadBin )

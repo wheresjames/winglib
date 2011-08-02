@@ -59,7 +59,15 @@ namespace sqbind
 		/// Opens the specified serial port
 		int Open( int nPort )
 		{	return m_port.Open( nPort ); }
+		
+		/// Returns non-zero if a valid port is open
+		int isPort()
+		{	return m_port.IsPort(); }
 
+		/// Returns non-zero if a valid port is open
+		int isOpen()
+		{	return m_port.IsPort(); }
+		
 		/// Opens the named serial port
 		int OpenNamed( const stdString &sName )
 		{	return m_port.Open( sName.c_str() ); }
