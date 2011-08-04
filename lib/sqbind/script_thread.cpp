@@ -1228,8 +1228,8 @@ CSqMsgQueue* CScriptThread::GetQueue( const stdString &x_sPath )
 		return this;
 
 	// Can't get remote objects
-	int pos = sPath.find_first_of( oexT( ":" ), (size_t)-1 );
-	if ( 0 <= pos )
+	stdString::size_type pos = sPath.find_first_of( oexT( ":" ) );
+	if ( stdString::npos != pos )
 		return oexNULL;
 
 	// All the way to the top?
