@@ -232,7 +232,6 @@ int CFfAudioDecoder::getBufferSize()
 	return m_pkt.size;
 }
 
-
 int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
 {_STT();
 

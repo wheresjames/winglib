@@ -63,10 +63,46 @@ public:
 	/// Returns the sample rate
 	int getSampleRate() { return m_pCodecContext ? m_pCodecContext->sample_rate : 0; }
 
+	/// Returns the bit rate
+	int getBitRate() { return m_pCodecContext ? m_pCodecContext->bit_rate : 0; }
+	
 	/// Returns the bits per sample
 	int getBps() { return m_pCodecContext ? m_pCodecContext->bits_per_coded_sample : 0; }
 
+	/// Returns the frame size
+	int getFrameSize() { return m_pCodecContext ? m_pCodecContext->frame_size : 0; }
+	
+	/// Returns the codec id
+	int getCodecId() { return m_pCodecContext ? m_pCodecContext->codec_id : 0; }
+	
+	/// Returns the codec type
+	sqbind::stdString getCodecType()
+	{	if ( !m_pCodecContext || !m_pCodecContext->codec )
+			return oexT( "" );
+		return oexMbToStrPtr( m_pCodecContext->codec->name );
+	}
+
+	/// Returns the codec name
+	sqbind::stdString getCodecName()
+	{	if ( !m_pCodecContext || !m_pCodecContext->codec )
+			return oexT( "" );
+		return oexMbToStrPtr( m_pCodecContext->codec->long_name );
+	}
+
+	/// Returns non zero if valid codec pointer
+	int isValid() { return ( m_pCodecContext || m_pFormatContext ); }
+	
+	/// Returns the number of frames decoded
+	long getFrameCount() { return m_lFrames; }
+	
 	/** @} */
+
+	/// Attaches to the specified context
+	int Attach( AVCodecContext *pcc, AVFormatContext *pfc )
+	{	Destroy(); m_pCodecContext = pcc; m_pFormatContext = pfc; return isValid(); }
+	
+	/// Detaches from codec objects without releasing them
+	void Detach() { m_pCodecContext = 0; m_pFormatContext = 0; Destroy(); }
 
 private:
 

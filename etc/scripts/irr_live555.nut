@@ -72,7 +72,7 @@ function _init() : ( _g )
 
 	local channel = _self.get( "/", "cmdline.channel" );
 	if ( !channel.len() )
-	{	channel = "scifi";
+	{	channel = "utube1";
 		local link = _self.get( "/", "cmdline.rtsp" );
 		if ( link.len() )
 		{	channel = "user";
@@ -84,7 +84,8 @@ function _init() : ( _g )
 	StartStream( rtsp_video[ channel ], 0, 0 );
 
 	_self.set_timer( ".", 15, "OnTimer" );
-
+	
+	return 0;
 }
 
 function StartStream( inf, w, h ) : ( _g )

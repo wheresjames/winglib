@@ -18,11 +18,11 @@ local _g = CGlobal();
 function _init() : ( _g )
 {
 	local file = _self.path( "../media/440hz.ogg" );
-//	local file = _self.path( "../../../../vhe.avi" );
-//	local file = _self.path( "../../../../vhe.mp3" );
-//	local file = _self.path( "../../../../vhe.mpg" );
-//	local file = _self.path( "../../../../vhe.ogg" );
-//	local file = _self.path( "../../../../vhe.wav" );
+//	local file = _self.path( "../../../../media/vhe.avi" );
+//	local file = _self.path( "../../../../media/vhe.mp3" );
+//	local file = _self.path( "../../../../media/vhe.mpg" );
+//	local file = _self.path( "../../../../media/vhe.ogg" );
+//	local file = _self.path( "../../../../media/vhe.wav" );
 
 	_self.echo( "=====================================================" );
 	_self.echo( " Playing  : " + file );
@@ -44,25 +44,25 @@ function _init() : ( _g )
 		return;
 	} // end if
 
-	_self.echo( "Codec ID       : " + _g.f.getAudioCodecID() );
-	_self.echo( "Codec Type     : " + _g.f.getAudioType() );
-	_self.echo( "Codec Name     : " + _g.f.getAudioName() );
-	_self.echo( "Channels       : " + _g.f.getAudioChannels() );
-	_self.echo( "Sample Rate    : " + _g.f.getAudioSampleRate() );
-	_self.echo( "Bit Rate       : " + _g.f.getAudioBitRate() );
-	_self.echo( "Frame Size     : " + _g.f.getAudioFrameSize() );
+	_self.echo( "Codec ID       : " + _g.f.getAudioDec().getCodecId() );
+	_self.echo( "Codec Type     : " + _g.f.getAudioDec().getCodecType() );
+	_self.echo( "Codec Name     : " + _g.f.getAudioDec().getCodecName() );
+	_self.echo( "Channels       : " + _g.f.getAudioDec().getChannels() );
+	_self.echo( "Sample Rate    : " + _g.f.getAudioDec().getSampleRate() );
+	_self.echo( "Bit Rate       : " + _g.f.getAudioDec().getBitRate() );
+	_self.echo( "Frame Size     : " + _g.f.getAudioDec().getFrameSize() );
 	_self.echo( "=====================================================" );
 
 	local fmt;
-	switch( _g.f.getAudioBitsPerSample() )
+	switch( _g.f.getAudioDec().getBps() )
 	{	case 8 : fmt = CPaOutput().paUInt8; break;
 		default : fmt = CPaOutput().paInt16; break;
 	} // end switch
 
-	local fsize = _g.f.getAudioFrameSize();
+	local fsize = _g.f.getAudioDec().getFrameSize();
 	if ( !_g.pa.Open( _g.blocking, _g.pa.getDefaultOutputDevice(),
-					  _g.f.getAudioChannels(), fmt, 0.2,
-				      _g.f.getAudioSampleRate().tofloat(), fsize ) )
+					  _g.f.getAudioDec().getChannels(), fmt, 0.2,
+				      _g.f.getAudioDec().getSampleRate().tofloat(), fsize ) )
 	{   _self.echo( "!!! Failed to open output stream : " + _g.pa.getLastError() );
 		return 0;
 	} // end if
@@ -71,6 +71,8 @@ function _init() : ( _g )
 	{   _self.echo( "!!! Failed to start output stream : " + pa.getLastError() );
 		return 0;
 	} // end if
+	
+	return 0;
 }
 
 function _idle() : ( _g )
@@ -108,18 +110,19 @@ function _idle() : ( _g )
 			{
 				_self.echo( "Read : " + _g.frame.getUsed() );
 
-				// Decode freme
-				if ( !_g.f.DecodeAudioFrameBin( _g.frame, _g.dec, frame_info ) )
-				{	_self.echo( "Failed to decode audio frame" );
-					return -1;
-				} // end if
+				// Decode freme				
+//				if ( !_g.f.DecodeAudioFrameBin( _g.frame, _g.dec, frame_info ) )
+//				{	_self.echo( "Failed to decode audio frame" );
+//					return -1;
+//				} // end if
 
 				// Add to buffer
-				if ( _g.dec.getUsed() )
-					if ( !_g.pa.Write( _g.dec, _g.dec.getUsed() / _g.pa.getFrameBytes() ) )
-					{	_self.echo( "Failed to write audio data" );
-						return -1;
-					} // end if
+				if ( _g.f.DecodeAudioFrameBin( _g.frame, _g.dec, frame_info ) )
+					if ( _g.dec.getUsed() )
+						if ( !_g.pa.Write( _g.dec, _g.dec.getUsed() / _g.pa.getFrameBytes() ) )
+						{	_self.echo( "Failed to write audio data" );
+							return -1;
+						} // end if
 
 			} // end if
 

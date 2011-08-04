@@ -12,14 +12,12 @@ CFfContainer::CFfContainer()
 	m_pFrame = oexNULL;
 	m_nVideoStream = -1;
 
-	m_pAudioCodecContext = oexNULL;
 	m_nAudioStream = -1;
 
 	m_nWrite = 0;
 	m_nRead = 0;
 	m_bKeyRxd = 0;
 	m_nFrames = 0;
-	m_nAudioFrames = 0;
 	oexZero( m_pkt );
 }
 
@@ -29,14 +27,14 @@ void CFfContainer::Destroy()
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) return;
 
+	
 	if ( m_pkt.data )
 		av_free_packet( &m_pkt );
 
 	if ( m_pCodecContext )
 		avcodec_close( m_pCodecContext );
 
-	if ( m_pAudioCodecContext )
-		avcodec_close( m_pAudioCodecContext );
+	m_audio_dec.Destroy();
 
 	CloseStream();
 
@@ -47,9 +45,9 @@ void CFfContainer::Destroy()
 	oexZero( m_pkt );
 	m_nFrames = 0;
 
-	m_pAudioCodecContext = oexNULL;
+//	m_pAudioCodecContext = oexNULL;
 	m_nAudioStream = -1;
-	m_nAudioFrames = 0;
+//	m_nAudioFrames = 0;
 
 	m_nWrite = 0;
 	m_nRead = 0;
@@ -210,23 +208,26 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 	     && m_pFormatContext->streams[ m_nAudioStream ]
 		 &&  m_pFormatContext->streams[ m_nAudioStream ]->codec )
 	{
-		m_pAudioCodecContext = m_pFormatContext->streams[ m_nAudioStream ]->codec;
-		AVCodec *pCodec = avcodec_find_decoder( m_pAudioCodecContext->codec_id );
+		AVCodecContext *pcc = m_pFormatContext->streams[ m_nAudioStream ]->codec;
+//		m_pAudioCodecContext = m_pFormatContext->streams[ m_nAudioStream ]->codec;
+		AVCodec *pCodec = avcodec_find_decoder( pcc->codec_id );
 		if ( !pCodec )
-			m_pAudioCodecContext = oexNULL;
+			pcc = oexNULL;
 
 		else
 		{
-			m_pAudioCodecContext->workaround_bugs |= FF_BUG_AUTODETECT;
-			m_pAudioCodecContext->error_concealment = FF_EC_GUESS_MVS;
-			m_pAudioCodecContext->error_recognition = FF_ER_CAREFUL;
+			pcc->workaround_bugs |= FF_BUG_AUTODETECT;
+			pcc->error_concealment = FF_EC_GUESS_MVS;
+			pcc->error_recognition = FF_ER_CAREFUL;
 			if( pCodec->capabilities & CODEC_CAP_TRUNCATED )
-				m_pAudioCodecContext->flags |= CODEC_FLAG_TRUNCATED;
+				pcc->flags |= CODEC_FLAG_TRUNCATED;
 
-			if ( 0 > avcodec_open( m_pAudioCodecContext, pCodec ) )
-				m_pAudioCodecContext = oexNULL;
+			if ( 0 > avcodec_open( pcc, pCodec ) )
+				pcc = oexNULL;
 
 		} // end if
+
+		m_audio_dec.Attach( pcc, oexNULL );
 
 	} // end if
 
@@ -445,13 +446,15 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 
 int CFfContainer::DecodeAudioFrameBin( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
 {_STT();
+	return m_audio_dec.Decode( in, out, m );
+
 /*
 	if ( !in || !out )
 		return 0;
 
 	int in_size = in->getUsed();
 	const uint8_t* in_ptr = (const uint8_t*)in->Ptr();
-/ *
+/*
 	m_audio_buf.setUsed( 0 );
 
 	// Ensure buffer size
@@ -475,12 +478,13 @@ int CFfContainer::DecodeAudioFrameBin( sqbind::CSqBinary *in, sqbind::CSqBinary 
 		oexZeroMemory( &m_audio_buf._Ptr()[ m_audio_buf.getUsed() ], nPadding );
 
 	} // end if
-*/
-/*
+* /
+
 	int out_size = oex::cmn::Max( (int)(in->getUsed() * 2), (int)AVCODEC_MAX_AUDIO_FRAME_SIZE );
 	if ( (int)out->Size() < out_size )
 		out->Allocate( out_size );
 
+//	m_audio_pkt.
 	int used = avcodec_decode_audio2( m_pAudioCodecContext,
 									  (int16_t*)out->_Ptr(), &out_size,
 									  (const uint8_t*)in_ptr, in_size );
@@ -495,7 +499,7 @@ int CFfContainer::DecodeAudioFrameBin( sqbind::CSqBinary *in, sqbind::CSqBinary 
 //	if ( used != in->getUsed() )
 //		oexSHOW( "!!! Left over data !!!" );
 
-/ *
+/*
 	// Left over data?
 	if ( used < m_pkt.size )
 	{
@@ -507,14 +511,13 @@ int CFfContainer::DecodeAudioFrameBin( sqbind::CSqBinary *in, sqbind::CSqBinary 
 	} // end if
 	else
 		m_buf.setUsed( 0 );
-*/
-
-	return 0;
+* /
 
 	// Frame
 	m_nAudioFrames++;
 
 	return 1;
+*/
 }
 
 

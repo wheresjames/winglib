@@ -216,10 +216,13 @@ class CRtspStream
 
 		if ( aframe.getUsed() )
 		{
+//			::_self.echo( "IN_ATS = " + rtsp.getAudioPts() );
+		
 			// Are we recording?
 			if ( rec_avi )
-//				rec_avi.WriteAudioFrame( aframe, rtsp.getAudioPts(), rtsp.getAudioDts(), CSqMulti() );
-				rec_avi.WriteAudioFrame( aframe, 0, 0, CSqMulti() );
+//				if ( !rec_avi.WriteAudioFrame( aframe, rtsp.getAudioPts(), rtsp.getAudioDts(), CSqMulti() ) )
+				if ( !rec_avi.WriteAudioFrame( aframe, 0, 0, CSqMulti() ) )
+					::_self.echo( "!!! Failed to write audio frame" );
 		
 			while ( 0 < adec.Decode( aframe, araw, CSqMulti() ) )
 				if ( pa && araw.getUsed() )
@@ -294,6 +297,8 @@ class CRtspStream
 			return dec.Decode( CSqBinary(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
 		} // end if
 
+//		::_self.echo( "ATS = " + vb.ReadTs() );
+		
 		// Decode up to the audio position
 		if ( vb.isRead() && vb.ReadTs() < ( pa.getTs() - video_offset ) )
 			dec.Decode( vb.ReadData(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 ), vb.incReadPtr();
@@ -353,7 +358,8 @@ class CGlobal
 */
 		yt1			= [ "yt1",	"rtsp://v8.cache1.c.youtube.com/CjgLENy73wIaLwlnoDu0pt7zDRMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNgnLTe56Djt-FNDA==/0/0/0/video.3gp" ],
 		yt2			= [ "yt2",	"rtsp://v4.cache8.c.youtube.com/CjgLENy73wIaLwkU67OEyLSkyBMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNgzoOa_IDtxOFNDA==/0/0/0/video.3gp" ],
-		
+		yt3			= [ "yt3",	"rtsp://v1.cache7.c.youtube.com/CjgLENy73wIaLwmY52udh9o1TRMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNghbzo27OzxJ1ODA==/0/0/0/video.3gp" ],
+
 	};
 
 	quit = 0;
@@ -404,7 +410,7 @@ function _init() : ( _g )
 
 	// Start the video stream
 	_g.stream = CRtspStream();
-	_g.stream.Play( _g.rtsp_sources[ "yt2" ][ 1 ] );
+	_g.stream.Play( _g.rtsp_sources[ "yt3" ][ 1 ] );
 //	_g.stream.Play( _g.rtsp_sources[ "adventure" ][ 1 ] );
 //	_g.stream.Play( _g.rtsp_sources[ "comedy" ][ 1 ] );
 

@@ -91,13 +91,15 @@ function _init() : ( _g )
 
 	// Check TCP Port 554 and UDP ports 6970-9999
 
+	StartStream( rtsp_video[ "utube1" ], 0, 0 );
 //	StartStream( rtsp_video[ "panasonic" ], 0, 0 );
-	StartStream( rtsp_video[ "arecont" ], 384, 288 );
+//	StartStream( rtsp_video[ "arecont" ], 384, 288 );
 //	StartStream( rtsp_video[ "bosch" ], 0, 0 );
 //	StartStream( rtsp_video[ "nasa" ], 0, 0 );
 
 	_self.set_timer( ".", 15, "OnTimer" );
 
+	return 0;
 }
 
 function StartStream( inf, w, h ) : ( _g )
@@ -181,7 +183,7 @@ function UpdateVideo() : ( _g )
 	local frame = CSqBinary();
 
 	// Are we doing video?
-	if ( _g.rtsp.LockVideo( frame, CSqMulti() ) )
+	if ( _g.rtsp.LockVideo( frame, 1000 ) )
 	{
 		_self.echo( "Video data : " + frame.getUsed() );
 /*
@@ -257,7 +259,7 @@ function UpdateVideo() : ( _g )
 function OnTimer() : ( _g )
 {
 	if ( _g.quit )
-		return;
+		return 0;
 
 	UpdateVideo();
 	_g.quit = _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
@@ -265,6 +267,7 @@ function OnTimer() : ( _g )
 //	if ( UpdateVideo() )
 //		_g.quit = _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
 
+	return 0;
 }
 
 

@@ -64,7 +64,7 @@ function _init() : ( _g )
 
 		};
 
-	StartStream( rtsp_video[ "nasa" ] );
+	StartStream( rtsp_video[ "utube1" ] );
 
 	_self.set_timer( ".", 60, "OnTimer" );
 
@@ -89,7 +89,7 @@ function StartStream( inf ) : ( _g )
 function UpdateVideo() : ( _g )
 {
 	if ( !_g.ffmpeg.isOpen() )
-		return;
+		return 0;
 
 	_g.frames++;
 
@@ -122,16 +122,20 @@ function UpdateVideo() : ( _g )
 		_g.tex.Unlock();
 
 	} // end if
+	
+	return 0;
 }
 
 function OnTimer() : ( _g )
 {
 	if ( _g.quit )
-		return;
+		return 0;
 
 	UpdateVideo();
 
 	_g.quit = _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
+	
+	return 0;
 }
 
 

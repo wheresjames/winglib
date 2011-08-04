@@ -222,7 +222,8 @@ SQInteger CPaOutput::getTs()
 	// How many total bytes in the ts buffers
 	oex::oexINT64 max = m_ts[ i ].ts;
 	while ( i != m_iWTs )
-	{	max = m_ts[ i ].ts;
+	{	if ( max < m_ts[ i ].ts ) 
+			max = m_ts[ i ].ts;
 		t += m_ts[ i ].nFrames;
 		if ( ++i >= eMaxTimestamps )
 			i = 0;
