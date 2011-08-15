@@ -88,10 +88,10 @@ namespace sqbind
 		/** \addtogroup CSqFifoShare
 			@{
 		*/
-		
+
 		/// Releases the share and all associated resources
 		void Destroy();
-		
+
 		/// Creates a writable share
 		/**
 			@param [in] sName		-	Share name
@@ -99,20 +99,20 @@ namespace sqbind
 			@param [in] nBufSize	-	Size of buffer
 			@param [in] nBlocks		-	Number of blocks
 			@param [in] sHeader		-	User information
-			
+
 			Opens a new writable share.  This function fails if the share already exists.
-			
+
 			@return Non-zero if success
-		
+
 		*/
 		int Create( const sqbind::stdString &sName, const sqbind::stdString &sBufName, int nBufSize, int nBlocks, const sqbind::stdString &sHeader );
 
 		/// Opens an existing share
 		/**
 			@param [in] sName	-	Share name
-			
+
 			Opens an existing share.  The share must exist.
-			
+
 			@return Non-zero if success
 		*/
 		int Open( const sqbind::stdString &sName );
@@ -125,16 +125,16 @@ namespace sqbind
 
 		/// Reads next data block
 		sqbind::CSqBinary ReadData();
-		
+
 		/// Reads next user data
 		int ReadUser();
-		
+
 		/// Reads next timestamp
 		SQInteger ReadTs();
-		
+
 		/// Increments the read pointer
 		int incReadPtr();
-		
+
 		/// Writes data into the share buffer
 		/**
 			@param [in] pData	-	Pointer to CSqBinary object containing the data to write
@@ -173,44 +173,44 @@ namespace sqbind
 			Many codecs read over the end of the buffer, and so padding is required.
 		*/
 		void setPadding( int n ) { m_nPadding = n; }
-		
+
 		/// Returns the amount of padding added to the end of the buffer
 		/**
 			Many codecs read over the end of the buffer, and so padding is required.
 		*/
 		int getPadding() { return m_nPadding; }
-		
+
 		/// Returns the global header string
 		sqbind::stdString getHeader();		
-		
+
 		/// Returns the control block size of the buffer from the control block
 		int getWritePtr()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 1 );
 		}
-		
+
 		/// Returns the control block size of the buffer from the control block
 		int getCbSize()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 2 );
 		}
-		
+
 		/// Returns the timestamp from the control block
 		int getTs()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 3 );
 		}
-		
+
 		/// Returns the process id from the control block
 		int getProcId()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 4 );
 		}
-		
+
 		/// Returns the total size of the buffer from the control block
 		int getBufSize()
 		{	if ( !m_cb.getUsed() ) 
@@ -231,7 +231,7 @@ namespace sqbind
 				return 0;
 			return m_cb.getINT( 7 );
 		}
-		
+
 		/// Returns the number of writes from the control block
 		int getWrites()
 		{	if ( !m_cb.getUsed() ) 
@@ -245,7 +245,7 @@ namespace sqbind
 				return 0;
 			return m_cb.getINT( 9 );
 		}
-		
+
 		/// Set to non-zero to tell the writer to reset
 		void setReset( int b )
 		{	if ( !m_cb.getUsed() ) 
@@ -304,20 +304,20 @@ namespace sqbind
 
 		/// Returns a string describing the last error
 		sqbind::stdString getLastErrorStr() { return m_sLastErr; }
-		
+
 		/// Sets the last error string
 		void setLastErrorStr( const sqbind::stdString &sErr ) { m_sLastErr = sErr; }
-		
+
 		/// Returns non-zero if a share is open
 		int isOpen() { return ( m_cb.getUsed() && m_buf.getUsed() ); }
-		
+
 		/// Returns non-zero if a valid share is open
 		int isValid();
-		
+
 		/** @} */
-		
+
 public:
-	
+
 		/// Writes raw data into the buffer
 		/**
 			@param [in] pData	-	Pointer to buffer

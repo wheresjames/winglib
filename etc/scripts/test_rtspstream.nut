@@ -31,6 +31,9 @@ class CRtspStream
 	pa = 0;
 	vb = 0;
 	
+	frame_count = 0;
+	last_frame = 0;
+	
 	max_audio_buffer = 1000000;
 	max_video_buffer = 2000000;
 	video_offset = 300000;
@@ -209,40 +212,45 @@ class CRtspStream
 				return 0;
 		} // end if
 
-		if ( !rtsp.LockAudio( aframe, 0 ) )
-			return 0;
-	
-//		::_self.echo( "at = " + rtsp.getAudioPtsSec() + "." + rtsp.getAudioPtsUSec() + " = " + rtsp.getAudioPts() );
-
-		if ( aframe.getUsed() )
+		local frames_rx = 0;
+		while ( rtsp.LockAudio( aframe, 0 ) )
 		{
-//			::_self.echo( "IN_ATS = " + rtsp.getAudioPts() );
-		
-			// Are we recording?
-			if ( rec_avi )
-//				if ( !rec_avi.WriteAudioFrame( aframe, rtsp.getAudioPts(), rtsp.getAudioDts(), CSqMulti() ) )
-				if ( !rec_avi.WriteAudioFrame( aframe, 0, 0, CSqMulti() ) )
-					::_self.echo( "!!! Failed to write audio frame" );
-		
-			while ( 0 < adec.Decode( aframe, araw, CSqMulti() ) )
-				if ( pa && araw.getUsed() )
-				{
-					if ( pa.getBufferedBytes() > max_audio_buffer )
-						::_self.echo( "dropping audio : " + pa.getBufferedBytes() );
-						
-					else if ( !pa.WriteTs( araw, araw.getUsed() / pa.getFrameBytes(), 
-										   rtsp.getAudioPts() ) )
-						::_self.echo( "Failed to write audio data" );
-					
-					aframe.setUsed( 0 );
+			frames_rx++;
+	
+			if ( aframe.getUsed() )
+			{
+//				::_self.echo( "IN_ATS = " + rtsp.getAudioPts() );
+			
+//				::_self.echo( "audio : " + rtsp.getAudioPts() + ", " + rtsp.getAudioDts() );
+//				::_self.echo( "at = " + rtsp.getAudioPtsSec() + "." + rtsp.getAudioPtsUSec() + " = " + rtsp.getAudioPts() );
 
-				} // end if
-				
+				// Are we recording?
+				if ( rec_avi )
+					if ( !rec_avi.WriteAudioFrame( aframe, rtsp.getAudioPts(), rtsp.getAudioDts(), CSqMulti() ) )
+//					if ( !rec_avi.WriteAudioFrame( aframe, 0, 0, CSqMulti() ) )
+						::_self.echo( "!!! Failed to write audio frame" );
+
+				while ( 0 < adec.Decode( aframe, araw, CSqMulti() ) )
+					if ( pa && araw.getUsed() )
+					{
+						if ( pa.getBufferedBytes() > max_audio_buffer )
+							::_self.echo( "dropping audio : " + pa.getBufferedBytes() );
+
+						else if ( !pa.WriteTs( araw, araw.getUsed() / pa.getFrameBytes(), 
+											   rtsp.getAudioPts() ) )
+							::_self.echo( "Failed to write audio data" );
+						
+						aframe.setUsed( 0 );
+
+					} // end if
+					
+			} // end if
+
+			rtsp.UnlockAudio();
+		
 		} // end if
 
-		rtsp.UnlockAudio();
-
-		return 0;
+		return frames_rx;
 	}
 
 	function Draw( buffer )
@@ -255,8 +263,6 @@ class CRtspStream
 			if ( vfail )
 				return 0;
 		} // end if
-
-//		::_self.echo( " vt = " + rtsp.getVideoPtsSec() + "." + rtsp.getVideoPtsUSec() + " = " + rtsp.getVideoPts() );
 
 		// Create video buffer if needed
 		if ( pa && !vb )
@@ -272,14 +278,22 @@ class CRtspStream
 		{	
 //			::_self.echo( frame.AsciiHexStr( 16, 4 ) );
 
+			frame_count++;
+			if ( last_frame > rtsp.getVideoPts() )
+				::_self.echo( "!!!!!!!!!!!!!!!! BACKWARD AT " + frame_count );
+			last_frame = rtsp.getVideoPts();
+
+			::_self.echo( " vt = " + rtsp.getVideoPtsSec() + "." + rtsp.getVideoPtsUSec() + " = " + rtsp.getVideoPts() );
+//			::_self.echo( "video : " + rtsp.getVideoPts() + ", " + rtsp.getVideoDts() );
+
 			// Dump raw frames
 			if ( szDumpVideo.len() )
 				CSqFile().put_contents_bin( ::_self.build_path( szDumpVideo, "v" + vix++ + ".raw" ), frame );
 		
 			// Are we recording?
 			if ( rec_avi )
-				rec_avi.WriteVideoFrame( frame, 0, 0, CSqMulti() );
-//				rec_avi.WriteVideoFrame( frame, rtsp.getVideoPts(), rtsp.getVideoDts(), CSqMulti() );
+				rec_avi.WriteVideoFrame( frame, rtsp.getVideoPts(), rtsp.getVideoDts(), CSqMulti() );
+//				rec_avi.WriteVideoFrame( frame, 0, 0, CSqMulti() );
 		
 			// Buffer for later if syncing to audio
 			if ( vb ) vb.Write( frame, "", 0, rtsp.getVideoPts() );
@@ -297,7 +311,7 @@ class CRtspStream
 			return dec.Decode( CSqBinary(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
 		} // end if
 
-//		::_self.echo( "ATS = " + vb.ReadTs() );
+		::_self.echo( "ATS = " + vb.ReadTs() );
 		
 		// Decode up to the audio position
 		if ( vb.isRead() && vb.ReadTs() < ( pa.getTs() - video_offset ) )
@@ -410,7 +424,8 @@ function _init() : ( _g )
 
 	// Start the video stream
 	_g.stream = CRtspStream();
-	_g.stream.Play( _g.rtsp_sources[ "yt3" ][ 1 ] );
+	_g.stream.Play( _g.rtsp_sources[ "yt2" ][ 1 ] );
+//	_g.stream.Play( _g.rtsp_sources[ "yt3" ][ 1 ] );
 //	_g.stream.Play( _g.rtsp_sources[ "adventure" ][ 1 ] );
 //	_g.stream.Play( _g.rtsp_sources[ "comedy" ][ 1 ] );
 
@@ -424,6 +439,8 @@ function _idle() : ( _g )
 
 function OnDraw() : ( _g )
 {
+//	::_self.echo( "." );
+
 	// Keep audio playing
 	_g.stream.PlayAudio();
 

@@ -799,9 +799,9 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	pkt.dts = nDts;
 	
 	// +++ is this causing the audio issue???
-    AVCodecContext *pcc = pStream->codec;
-    if ( pcc && pcc->coded_frame && pcc->coded_frame->pts != AV_NOPTS_VALUE )
-        pkt.pts = av_rescale_q( pcc->coded_frame->pts, pcc->time_base, pStream->time_base );
+//    AVCodecContext *pcc = pStream->codec;
+ //   if ( pcc && pcc->coded_frame && pcc->coded_frame->pts != AV_NOPTS_VALUE )
+  //      pkt.pts = av_rescale_q( pcc->coded_frame->pts, pcc->time_base, pStream->time_base );
 	
 	pkt.stream_index = pStream->index;
 	pkt.data = (uint8_t*)dat->_Ptr();

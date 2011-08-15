@@ -99,7 +99,7 @@ CSqFifoShare::CSqFifoShare()
 {
 	m_sPrefix = SQSFS_PREFIX; 
 	m_uCbId = SQSFS_CBID;
-	m_iRead = 0;
+	m_iRead = -1;
 	m_iWrite = 0;
 	m_bGlobal = 1;
 	m_bWrite = 0;
@@ -112,7 +112,7 @@ CSqFifoShare::CSqFifoShare( const sqbind::stdString &sPrefix, SQInteger nId, SQI
 	m_sPrefix = sPrefix; 
 	m_uCbId = (oex::oexUINT)nId;
 	m_bGlobal = nGlobal;
-	m_iRead = 0;
+	m_iRead = -1;
 	m_iWrite = 0;
 	m_bWrite = 0;
 	m_nPadding = SQSFS_PADDING;
@@ -125,7 +125,7 @@ CSqFifoShare::CSqFifoShare( const CSqFifoShare &r )
  	m_sPrefix = r.m_sPrefix;
 	m_uCbId = r.m_uCbId;
 	m_bGlobal = r.m_bGlobal;
-	m_iRead = 0;
+	m_iRead = -1;
 	m_iWrite = 0;
 	m_bWrite = 0;
 	m_nPadding = SQSFS_PADDING;
@@ -150,7 +150,7 @@ void CSqFifoShare::Destroy()
 	m_bWrite = 0;
 	m_uTs = 0;
 
-	m_iRead = 0;
+	m_iRead = -1;
 	m_iWrite = 0;
 }
 

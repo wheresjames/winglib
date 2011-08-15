@@ -2,7 +2,9 @@
 #include <string.h>
 #include <jni.h>
 
-jstring Java_winglib_app_helloworld_HelloWorld_getString( JNIEnv* env, jobject thiz )
+#define JFN( c, f ) Java_winglib_app_helloworld_##c_##f
+
+jstring JFN( HelloWorld, getString )( JNIEnv* env, jobject thiz )
 {
     return (*env)->NewStringUTF(env, "Hello World! - Love C");
 }
