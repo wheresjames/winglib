@@ -132,6 +132,17 @@ namespace sqbind
 		/// Reads next timestamp
 		SQInteger ReadTs();
 
+		/// Returns the minimum timestamp in the buffer
+		SQInteger ReadTsMin()
+		{	SQInteger t = 0; CalculateTsRange( &t, 0 ); return t; }
+
+		/// Returns the minimum timestamp in the buffer
+		SQInteger ReadTsMax()
+		{	SQInteger t = 0; CalculateTsRange( 0, &t ); return t; }
+
+		/// Calculates the timestamp range
+		SQInteger CalculateTsRange( SQInteger *pMin, SQInteger *pMax );
+
 		/// Increments the read pointer
 		int incReadPtr();
 
@@ -329,7 +340,7 @@ public:
 		int WritePtr( const void *pData, int nSize, const sqbind::stdString &sHeader, int nUser, SQInteger ts );
 	
 		/// Returns the current read pointer structure, or NULL if none
-		SPtrInfo* ReadPtr( char **ph = oexNULL, char **pb = oexNULL );
+		SPtrInfo* ReadPtr();
 		
 protected:
 

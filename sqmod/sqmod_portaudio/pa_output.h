@@ -87,6 +87,18 @@ public:
 	/// Returns the number of bytes required for one frame in a particular format
 	int getFormatBytes( int nFmt );
 
+	/// Returns non-zero if glitch detection is enabled
+	int getGlitchDetection() { return m_bGlitchDetection; }
+
+	/// Enable / disable glitch detection
+	void setGlitchDetection( int b ) { m_bGlitchDetection = b; m_tsGlitch = 0; }
+
+	/// Returns the current glitch size
+	SQInteger getGlitchSize() { return m_tsGlitch; }
+	
+	/// Returns the last sample timestamp added to the buffer
+	SQInteger getLastTs() { return m_tsLast; }
+
 	/** @} */
 
 protected:
@@ -134,5 +146,14 @@ private:
 	
 	/// Timestamp relation
 	STsInfo						m_ts[ eMaxTimestamps ];
+	
+	/// Glitch detection
+	int							m_bGlitchDetection;
+	
+	/// Glitch correction
+	oex::oexINT64				m_tsGlitch;
 
+	/// Last timestamp
+	oex::oexINT64				m_tsLast;
+	
 };

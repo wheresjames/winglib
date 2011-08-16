@@ -33,6 +33,9 @@ class CRtspStream
 	
 	frame_count = 0;
 	last_frame = 0;
+
+	aframe_count = 0;
+	last_aframe = 0;
 	
 	max_audio_buffer = 1000000;
 	max_video_buffer = 2000000;
@@ -89,7 +92,6 @@ class CRtspStream
 		::_self.echo( "\nConnecting to : " + link + "\n" );
 
 		rtsp = CLvRtspClient();
-
 //		rtsp.setStreamOverTCP( 0 );
 //		rtsp.setTunnelOverHTTPPort( 0 );
 
@@ -108,11 +110,12 @@ class CRtspStream
 	{
 		if ( !rtsp.isVideo() )
 			::_self.echo( "iii no video" );
+
 		else
 		{
 			// Insert H264 Header if needed
-//			if ( "H264" == rtsp.getVideoCodecName() )
-//				rtsp.setVideoHeader( CSqBinary( "\x00\x00\x01" ) );
+			if ( "H264" == rtsp.getVideoCodecName() )
+				rtsp.setVideoHeader( CSqBinary( "\x00\x00\x01" ) );
 
 			::_self.echo( "iii Creating video decoder for " + rtsp.getVideoCodecName() );
 
@@ -135,13 +138,14 @@ class CRtspStream
 
 		if ( !rtsp.isAudio() )
 			::_self.echo( "iii no audio" );
+
 		else
-		{		
+		{
 			::_self.echo( "iii Creating audio decoder for " + rtsp.getAudioCodecName() 
 						  + " : channels = " + rtsp.getNumAudioChannels()
 						  + " : rate = " + rtsp.getAudioSampleRate()
 						  + " : bps = " + rtsp.getAudioBps() );
-			
+
 			adec = CFfAudioDecoder();
 			//::_self.echo( rtsp.getExtraAudioData().AsciiHexStr( 16, 16 ) );
 			adec.setExtraData( rtsp.getExtraAudioData() );
@@ -160,6 +164,7 @@ class CRtspStream
 				if ( bPlayAudio )
 				{
 					pa = CPaOutput();
+					pa.setGlitchDetection( 0 );
 					local fmt;
 					switch( 16 )
 					{	case 8 : fmt = CPaOutput().paUInt8; break;
@@ -219,15 +224,17 @@ class CRtspStream
 	
 			if ( aframe.getUsed() )
 			{
-//				::_self.echo( "IN_ATS = " + rtsp.getAudioPts() );
-			
-//				::_self.echo( "audio : " + rtsp.getAudioPts() + ", " + rtsp.getAudioDts() );
-//				::_self.echo( "at = " + rtsp.getAudioPtsSec() + "." + rtsp.getAudioPtsUSec() + " = " + rtsp.getAudioPts() );
+				// Debugging
+				aframe_count++;
+				if ( last_aframe > rtsp.getAudioPts() )
+				{	::_self.echo( "\r\n\r\n!!!!!!!!!!!!!!!! AUDIO BACKWARD AT frame " + aframe_count );
+					::_self.echo( "at = " + last_aframe + " -> " + rtsp.getAudioPtsSec() + "." + rtsp.getAudioPtsUSec() + " = " + rtsp.getAudioPts() + "\r\n" );
+				} // end if
+				last_aframe = rtsp.getAudioPts();
 
 				// Are we recording?
 				if ( rec_avi )
 					if ( !rec_avi.WriteAudioFrame( aframe, rtsp.getAudioPts(), rtsp.getAudioDts(), CSqMulti() ) )
-//					if ( !rec_avi.WriteAudioFrame( aframe, 0, 0, CSqMulti() ) )
 						::_self.echo( "!!! Failed to write audio frame" );
 
 				while ( 0 < adec.Decode( aframe, araw, CSqMulti() ) )
@@ -275,58 +282,69 @@ class CRtspStream
 		// Buffer frames
 		// Note, we're buffering the compressed frames to save memory ;)
 		while ( rtsp.LockVideo( frame, 0 ) )
-		{	
+		{
 //			::_self.echo( frame.AsciiHexStr( 16, 4 ) );
 
 			frame_count++;
 			if ( last_frame > rtsp.getVideoPts() )
-				::_self.echo( "!!!!!!!!!!!!!!!! BACKWARD AT " + frame_count );
+			{	::_self.echo( "\r\n\r\n!!!!!!!!!!!!!!!! VIDEO BACKWARD AT frame " + frame_count );
+				::_self.echo( " vt = " + last_frame + " -> " + rtsp.getVideoPtsSec() + "." + rtsp.getVideoPtsUSec() + " = " + rtsp.getVideoPts() + "\r\n" );
+			} // end if
 			last_frame = rtsp.getVideoPts();
-
-			::_self.echo( " vt = " + rtsp.getVideoPtsSec() + "." + rtsp.getVideoPtsUSec() + " = " + rtsp.getVideoPts() );
-//			::_self.echo( "video : " + rtsp.getVideoPts() + ", " + rtsp.getVideoDts() );
 
 			// Dump raw frames
 			if ( szDumpVideo.len() )
 				CSqFile().put_contents_bin( ::_self.build_path( szDumpVideo, "v" + vix++ + ".raw" ), frame );
-		
+
 			// Are we recording?
 			if ( rec_avi )
 				rec_avi.WriteVideoFrame( frame, rtsp.getVideoPts(), rtsp.getVideoDts(), CSqMulti() );
-//				rec_avi.WriteVideoFrame( frame, 0, 0, CSqMulti() );
-		
+
 			// Buffer for later if syncing to audio
 			if ( vb ) vb.Write( frame, "", 0, rtsp.getVideoPts() );
-			
+
 			// Otherwise, just send it straight to the decoder
 			else dec.BufferData( frame, CSqMulti() );
-			
+
 			rtsp.UnlockVideo();			
-			
+
 		} // end if
-		
+
 		// Just draw it if we're not syncing to audio
 		if ( !vb )
 		{	if ( 0 >= dec.getBufferSize() ) return 0;
 			return dec.Decode( CSqBinary(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
 		} // end if
 
-		::_self.echo( "ATS = " + vb.ReadTs() );
-		
+		// Show error if more than a second off
+		local diff = vb.ReadTs() - pa.getTs();
+		if ( 1000000 < diff || -1000000 > diff )
+		{	::_self.echo( "\r\n\r\n!!!!!!!!!!!!!!!! SYNC ERROR" );
+			::_self.echo( "D = " + diff + ", V = " + vb.ReadTs() + ", A = " + pa.getTs() + "\r\n" );
+		} // end if
+
 		// Decode up to the audio position
-		if ( vb.isRead() && vb.ReadTs() < ( pa.getTs() - video_offset ) )
+		// +++ using 'while' here causes instant recovery from a glitch, 
+		//     but 'if' seems to actually be smoother in some real world conditions
+//		if
+		while
+		 ( vb.isRead() && vb.ReadTsMin() < ( pa.getTs() - video_offset ) ) 
 			dec.Decode( vb.ReadData(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 ), vb.incReadPtr();
+
+		// Catchup and show, haha, can't do this, must decode every frame, duh
+//		while ( vb.isRead() && vb.ReadTs() < ( pa.getTs() - video_offset ) ) vb.incReadPtr()
+//		if ( vb.isRead() ) dec.Decode( vb.ReadData(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
 
 		return 1;
 	}
-	
+
 	function RecordToFile( file, vfmt, w, h, fps, afmt, ch, sr, bps )
 	{
 		rec_avi = CFfContainer();
 
 		if ( 0 >= fps )
 			fps = 15;
-		
+
 		if ( afmt.len() )
 			rec_avi.setAudioExtraData( rtsp.getExtraAudioData() );
 
@@ -347,33 +365,11 @@ class CRtspStream
 
 class CGlobal
 {
-	// http://www.americafree.tv/VLC/
 	rtsp_sources =
 	{
-		adventure	= [ "Adventure",	"rtsp://video3.americafree.tv/AFTVAdventureH2641000.sdp" ],
-		cartoons	= [ "Cartoons",		"rtsp://video3.americafree.tv/AFTVCartoonsH2641000.sdp" ],
-		classic 	= [ "Classic", 		"rtsp://video3.americafree.tv/AFTVClassicsH2641000.sdp" ],
-		comedy 		= [ "Comedy", 		"rtsp://video3.americafree.tv/AFTVComedyH2641000.sdp" ],
-	
-/*	
-		nasa 		= [ "NASA", 		"rtsp://a1352.l1857053128.c18570.g.lq.akamaistream.net/D/1352/18570/v0001/reflector:53128" ],
-		adventure 	= [ "Adventure", 	"rtsp://video3.multicasttech.com/AFTVAdventure3GPP296.sdp" ],
-		cartoons 	= [ "Cartoons", 	"rtsp://video2.multicasttech.com/AFTVCartoons3GPP296.sdp" ],
-		classic 	= [ "Classic", 		"rtsp://video3.multicasttech.com/AFTVClassics3GPP296.sdp" ],
-		comedy 		= [ "Comedy", 		"rtsp://video3.multicasttech.com/AFTVComedy3GPP296.sdp" ],
-		crime 		= [ "Crime", 		"rtsp://video2.multicasttech.com/AFTVCrime3GPP296.sdp" ],
-		halloween	= [ "Halloween", 	"rtsp://video3.multicasttech.com/AFTVHalloween3GPP296.sdp" ],
-		horror		= [ "Horror", 		"rtsp://video2.multicasttech.com/AFTVHorror3GPP296.sdp" ],
-		indy		= [ "Indy Movies", 	"rtsp://video2.multicasttech.com/AFTVIndyMovies3GPP296.sdp" ],
-		mystery		= [ "Mystery", 		"rtsp://video2.multicasttech.com/AFTVMystery3GPP296.sdp" ],
-		scifi		= [ "SciFi", 		"rtsp://video2.multicasttech.com/AFTVSciFi3GPP296.sdp" ],
-		western		= [ "Westerns", 	"rtsp://video2.multicasttech.com/AFTVWesterns3GPP296.sdp" ],
-		espana		= [ "Espana", 		"rtsp://video3.multicasttech.com/EspanaFree3GPP296.sdp" ],
-*/
 		yt1			= [ "yt1",	"rtsp://v8.cache1.c.youtube.com/CjgLENy73wIaLwlnoDu0pt7zDRMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNgnLTe56Djt-FNDA==/0/0/0/video.3gp" ],
 		yt2			= [ "yt2",	"rtsp://v4.cache8.c.youtube.com/CjgLENy73wIaLwkU67OEyLSkyBMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNgzoOa_IDtxOFNDA==/0/0/0/video.3gp" ],
 		yt3			= [ "yt3",	"rtsp://v1.cache7.c.youtube.com/CjgLENy73wIaLwmY52udh9o1TRMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNghbzo27OzxJ1ODA==/0/0/0/video.3gp" ],
-
 	};
 
 	quit = 0;
@@ -422,12 +418,17 @@ function _init() : ( _g )
 	// Set draw function
 	_self.set_timer( ".", 30, "OnDraw" )
 
+	// Which stream to use
+	local link = ::_self.get( "/", "cmdline.1" );
+	if ( !link.len() )
+	{	local stream = ::_self.get( "/", "cmdline.s" );
+		if ( !stream.len() || !( stream in _g.rtsp_sources ) ) stream = "yt3";
+		link = _g.rtsp_sources[ stream ][ 1 ];
+	} // end if
+	
 	// Start the video stream
 	_g.stream = CRtspStream();
-	_g.stream.Play( _g.rtsp_sources[ "yt2" ][ 1 ] );
-//	_g.stream.Play( _g.rtsp_sources[ "yt3" ][ 1 ] );
-//	_g.stream.Play( _g.rtsp_sources[ "adventure" ][ 1 ] );
-//	_g.stream.Play( _g.rtsp_sources[ "comedy" ][ 1 ] );
+	_g.stream.Play( link );
 
 	return 0;
 }

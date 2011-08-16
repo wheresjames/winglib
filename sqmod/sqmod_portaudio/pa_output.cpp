@@ -16,6 +16,11 @@ CPaOutput::CPaOutput()
 	m_nTsBytes = 0;
 	m_nBlockSize = 0;
 
+	// Enable glitch detection by default
+	m_bGlitchDetection = 1;
+	m_tsGlitch = 0;
+	m_tsLast = 0;
+	
 	// Initialize portaudio
 	Init();
 }
@@ -47,10 +52,13 @@ void CPaOutput::Destroy()
 	m_iRTs = 0;
 	m_nTsBytes = 0;
 	m_nBlockSize = 0;
-	
+
 	// Lose timestamps
 	for( unsigned int i = 0; i < oexSizeOfArray( m_ts ); i++ )
 		m_ts[ i ].nFrames = 0;
+
+	m_tsGlitch = 0;
+	m_tsLast = 0;
 }
 
 int CPaOutput::Init()
@@ -172,14 +180,16 @@ int CPaOutput::Open( int bBlocking, int nDev, int nChannels, int nFormat, double
 	m_nFrameBytes = getFormatBytes( nFormat ) * nChannels;
 
 	// Attempt to open output stream
-
 	if ( bBlocking )
 		m_errLast = Pa_OpenStream( &m_stream, 0, &psp, dSRate, fpb, 0, 0, this );
 	else
 		m_errLast = Pa_OpenStream( &m_stream, 0, &psp, dSRate, fpb, 0, &_PaStreamCallback, this );
 
+	// How did it go?
 	if ( paNoError != m_errLast )
+	{	m_stream = 0;
 		return 0;
+	} // end if
 
 	return 1;
 }
@@ -215,10 +225,17 @@ int CPaOutput::Stop()
 SQInteger CPaOutput::getTs()
 {_STT();
 
+	if ( !m_stream )
+		return 0;
+
+	// Just use last timestamp if buffer is empty
+	if ( m_iRTs == m_iWTs )
+		return m_tsLast;
+
 	int fb = getFrameBytes();
 	if ( 0 >= fb ) fb = 1;
 	int i = m_iRTs, t = 0, b = getBufferedBytes() / fb;
-	
+
 	// How many total bytes in the ts buffers
 	oex::oexINT64 max = m_ts[ i ].ts;
 	while ( i != m_iWTs )
@@ -228,7 +245,7 @@ SQInteger CPaOutput::getTs()
 		if ( ++i >= eMaxTimestamps )
 			i = 0;
 	} // end while
-		
+
 	// Pick off used buffers
 	while ( m_iRTs != m_iWTs && t > b )
 	{	t -= m_ts[ m_iRTs ].nFrames;
@@ -237,7 +254,7 @@ SQInteger CPaOutput::getTs()
 		if ( ++m_iRTs >= eMaxTimestamps )
 			m_iRTs = 0;
 	} // end while	
-	
+
 	// Calculate timestamp
 	oex::oexINT64 min = m_ts[ m_iRTs ].ts, ts = min;
 	if ( min && b && b > t )
@@ -247,13 +264,20 @@ SQInteger CPaOutput::getTs()
 	return ts;
 }
 
-
 int CPaOutput::WriteTs( sqbind::CSqBinary *data, int frames, SQInteger ts )
 {_STT();
 
+	// Compensate for reverse timestamp glitches
+	if ( m_bGlitchDetection )
+		if ( m_tsLast > ts )
+			m_tsGlitch += ( m_tsLast - ts );
+
+	// Remember the last timestamp
+	m_tsLast = ts;
+
 	// Save timestamps
 	m_ts[ m_iWTs ].nFrames = frames;
-	m_ts[ m_iWTs ].ts = ts;
+	m_ts[ m_iWTs ].ts = ts + m_tsGlitch;
 	if ( ++m_iWTs >= eMaxTimestamps )
 		m_iWTs = 0;		
 

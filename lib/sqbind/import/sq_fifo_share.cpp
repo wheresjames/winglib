@@ -79,6 +79,8 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqFifoShare, CSqFifoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, ReadData )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, ReadUser )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, ReadTs )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, ReadTsMin )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, ReadTsMax )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, incReadPtr )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, isRead )
 	
@@ -406,7 +408,7 @@ int CSqFifoShare::isRead()
 	return ReadPtr() ? 1 : 0;
 }
 
-CSqFifoShare::SPtrInfo* CSqFifoShare::ReadPtr( char **ph, char **pb )
+CSqFifoShare::SPtrInfo* CSqFifoShare::ReadPtr()
 {_STT();
 
 	// Ensure valid share
@@ -475,6 +477,61 @@ SQInteger CSqFifoShare::ReadTs()
 	// Return data portion
 	return pi->uTs;
 }
+
+SQInteger CSqFifoShare::CalculateTsRange( SQInteger *pMin, SQInteger *pMax )
+{_STT();
+
+	SQInteger min, max;
+	if ( !pMin )
+		pMin = &min;
+	if ( !pMax )
+		pMax = &max;
+
+	*pMin = 0;
+	*pMax = 0;
+
+	// Ensure valid share
+	if ( !isValid() )
+		return oexNULL; 
+	
+	// Get the current buffer pointer, and make sure it's valid
+	int w = getWritePtr(), r = m_iRead;
+	int nBlocks = getBlocks();
+
+	// Initialize our read pointer
+	if ( 0 > r || r >= nBlocks ) 
+		r = w;
+
+	// Any data?
+	if ( 0 > w || w == r || w >= nBlocks )
+		return 0; 
+
+	/// Pointer information	
+	SPtrInfo *pi = (SPtrInfo*)m_buf.Ptr();
+
+	// Initialize minimum / maximum
+	*pMin = pi[ r ].uTs;
+	*pMax = pi[ r ].uTs;
+	
+	while ( w != r )
+	{
+		// Track the minimum
+		if ( *pMin > pi[ r ].uTs )
+			*pMin = pi[ r ].uTs;
+
+		// Track the maximum
+		if ( *pMax < pi[ r ].uTs )
+			*pMax = pi[ r ].uTs;
+
+		if ( ++r >= nBlocks )
+			r = 0;
+
+	} // end while
+
+	// Return data portion
+	return *pMax - *pMin;
+}
+
 
 int CSqFifoShare::incReadPtr()
 {
