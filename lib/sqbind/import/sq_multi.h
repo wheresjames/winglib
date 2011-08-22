@@ -146,11 +146,19 @@ namespace sqbind
 		/// Returns a string representation of the value
 		stdString& str();
 
+		/// Returns a string representation of the value, if empty, returns def
+		stdString str_def( const sqbind::stdString &def )
+		{	sqbind::stdString v = str(); if ( !v.length() ) return def; }
+		
 		/// Returns a binary representation of the value
 		CSqBinary bin();
 
 		/// Returns a integer representation of the value
-		sqbind::SQINT toint();
+		SQInteger toint();
+		
+		/// Returns a integer representation of the value within the specified range
+		SQInteger toint_range( SQInteger min, SQInteger max )
+		{	return oex::cmn::Range( toint(), min, max ); }
 
 		/// Returns a integer representation of the value
 		int toint32();
@@ -161,8 +169,16 @@ namespace sqbind
 		/// Returns a float representation of the value
 		float tofloat();
 
+		/// Returns a float representation of the value
+		float tofloat_range( float min, float max )
+		{	return oex::cmn::Range( tofloat(), min, max ); }
+
 		/// Returns a double representation of the value
 		double todouble();
+
+		/// Returns a double representation of the value
+		double todouble_range( double min, double max )
+		{	return oex::cmn::Range( todouble(), min, max ); }
 
 		/// Returns the length of the string value
 		int len();
