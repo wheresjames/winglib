@@ -119,6 +119,21 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_l
 	
 	// Get a pointer to the file data
 	oexPVOID pMem = (oexPVOID)MapViewOfFile( hFile, dwMemAccess, 0, 0, 0 );
+	if ( !pMem )
+	{	CloseHandle( hFile );
+		return c_Failed;
+	} // end if
+
+	// Verify memory size
+	MEMORY_BASIC_INFORMATION mbi;
+	if ( VirtualQuery( pMem, &mbi, sizeof( mbi ) ) < sizeof( mbi )
+		 || MEM_COMMIT != mbi.State
+		 || mbi.BaseAddress != pMem
+		 || mbi.RegionSize < x_llSize )
+	{	UnmapViewOfFile( pMem );
+		CloseHandle( hFile );
+		return c_Failed;
+	} // end if
 
 	// Set memory pointer
 	if ( x_pMem ) *x_pMem = pMem;

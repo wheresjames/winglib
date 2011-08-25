@@ -49,13 +49,13 @@ public:
 	enum
 	{
 		// Pool size in bits ( 16 = 65536, 18 = 262144, 20 = 1048576 )
-		eDefaultPoolBits = 18
+		eDefaultPoolBits = 20
 	};
 
 	enum
 	{
 		// Slot mask
-		eDefaultSlotMask = 0x1f
+		eDefaultSlotMask = 0x3f
 	};
 
 	// Size type
