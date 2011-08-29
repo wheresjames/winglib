@@ -2,7 +2,7 @@
 // _self.echo( _self.get_system_drive_info( _self.get_sys_folder( 0, "default_drive" ) ).print_r( 1 ) );
 
 function row( a, b, c, d )
-{	_self.echo( format( "%-20s %7s %7s  %s", a, b, c, d ) );
+{	_self.echo( format( " %-20s %7s %7s  %s", a, b, c, d ) );
 }
 
 function show_folder( name, path )
