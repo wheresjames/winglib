@@ -524,7 +524,7 @@ CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nM
 		{
 			// Ask for the current working directory
 			CStr8 s;
-			const char *cwd = s.Allocate( oexSTRSIZE );
+			char *cwd = s.Allocate( oexSTRSIZE );
 			if ( !cwd || !getcwd( cwd, oexSTRSIZE ) || !*cwd )
 				return s.Destroy();
 
@@ -565,7 +565,7 @@ CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nM
 		case eFidPictures :
 			return oexBuildPath( CBaseFile_GetHome(), oexT( "Pictures" ) );
 
-		case eFidVideos :
+		case eFidVideo :
 			return oexBuildPath( CBaseFile_GetHome(), oexT( "Videos" ) );
 
 		default :
