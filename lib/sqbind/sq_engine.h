@@ -384,10 +384,10 @@ public:
 		stdString root( const stdString &sPath );
 
 		/// Returns the specified system folder
-		stdString get_sys_folder( const stdString &sId );
+		stdString get_sys_folder( int bShared, const stdString &sId );
 
 		/// Returns the specified system and path
-		stdString get_sys_path( const stdString &sId, const stdString &sPath );
+		stdString get_sys_path( int bShared, const stdString &sId, const stdString &sPath );
 
 		/// Returns the file path of the current executable
 		stdString module_path();

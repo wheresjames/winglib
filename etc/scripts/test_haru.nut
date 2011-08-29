@@ -16,7 +16,7 @@ function _init()
 {
 	_self.echo( "\n=== BEGIN ===\n" );
 
-	_self.echo( "Fonts folder : '" + _self.get_sys_folder( "fonts" ) + "'" );
+	_self.echo( "Fonts folder : '" + _self.get_sys_folder( 0, "fonts" ) + "'" );
 	
 	local pdf = CHaruPdf();
 	
@@ -35,7 +35,7 @@ function _init()
 	pdf.Stroke();
 	
 	// Set font
-//	if ( !pdf.SetTtfFont( _self.get_sys_path( "fonts", "arial.ttf" ), 24 ) )
+//	if ( !pdf.SetTtfFont( _self.get_sys_path( 0, "fonts", "arial.ttf" ), 24 ) )
 	if ( !pdf.SetFont( "Helvetica", 24 ) )
 	{	_self.echo( "Error setting font : " + pdf.getLastError() ); WaitKey(); return; }
 

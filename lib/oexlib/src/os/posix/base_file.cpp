@@ -472,7 +472,22 @@ oexBOOL CBaseFile::Copy( oexCSTR x_pOld, oexCSTR x_pNew )
 	return nTotal;
 }
 
-CStr CBaseFile::GetSysFolder( oexINT x_nFolderId, oexINT x_nMaxLength )
+static CStr CBaseFile_GetHome()
+{
+	// First attempt to user environment
+	const char *pHome = getenv( "HOME" );
+	if ( pHome && *pHome )
+		return oexMbToStr( pHome );
+		
+	// Attempt to read user home directory
+	struct passwd *pw = getpwuid( getuid() );
+	if ( pw && pw->pw_dir && *pw->pw_dir )
+		return oexMbToStr( pw->pw_dir );
+		
+	return oexT( "~/" );
+}
+
+CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nMaxLength )
 {
 	// Get the folder
 	switch( x_nFolderId )
@@ -481,29 +496,71 @@ CStr CBaseFile::GetSysFolder( oexINT x_nFolderId, oexINT x_nMaxLength )
 			break;
 
 		case eFidTemp :
-		{	const char *pTmp = getenv( "TMPDIR" );
-			if ( !pTmp ) pTmp = getenv( "TEMP" );
-			if ( !pTmp ) pTmp = getenv( "TMP" );
-			if ( !pTmp ) pTmp = "/tmp";
+		{
+			const char *pTmp;
+			if ( !( pTmp = getenv( "TMPDIR" ) ) 
+				 && !( pTmp = getenv( "TEMP" ) )
+				 && !( pTmp = getenv( "TMP" ) ) 
+			   )
+				return oexT( "/tmp" );
+
 			return oexMbToStr( pTmp );
-		} // end case
+
+		} break;
 
 		case eFidUserSystem :
-		{	const char *pHome = getenv( "HOME" );
-			return pHome ? oexMbToStr( pHome ) : oexT( "" );
-		} // end case
+			return CBaseFile_GetHome();
 
 		case eFidUserOs :
 			return oexT( "/sys" );
 
 		case eFidCurrent :
-			break;
+		{
+			// Ask for the current working directory
+			CStr8 s;
+			const char *cwd = s.Allocate( oexSTRSIZE );
+			if ( !cwd || !getcwd( cwd, oexSTRSIZE ) || !*cwd )
+				return s.Destroy();
 
-		case eFidDefRoot :
-			break;
+			return s;
+
+		} break;
+
+		case eFidRoot :
+		case eFidDefDrive :
+			return oexT( "/" );
 
 		case eFidFonts :
 			return oexT( "/usr/share/fonts/truetype/msttcorefonts" );
+
+		case eFidSettings :
+			if ( x_bShared )
+				return oexT( "/var/lib" );
+			return oexBuildPath( CBaseFile_GetHome(), oexT( ".config" ) );
+
+		case eFidDesktop :
+			return oexBuildPath( CBaseFile_GetHome(), oexT( "Desktop" ) );
+
+		case eFidDownloads :
+			return oexBuildPath( CBaseFile_GetHome(), oexT( "Downloads" ) );
+
+		case eFidTemplates :
+			return oexBuildPath( CBaseFile_GetHome(), oexT( "Templates" ) );
+
+		case eFidPublic :
+			return oexBuildPath( CBaseFile_GetHome(), oexT( "Public" ) );
+
+		case eFidDocuments :
+			return oexBuildPath( CBaseFile_GetHome(), oexT( "Documents" ) );
+
+		case eFidMusic :
+			return oexBuildPath( CBaseFile_GetHome(), oexT( "Music" ) );
+
+		case eFidPictures :
+			return oexBuildPath( CBaseFile_GetHome(), oexT( "Pictures" ) );
+
+		case eFidVideos :
+			return oexBuildPath( CBaseFile_GetHome(), oexT( "Videos" ) );
 
 		default :
 			break;

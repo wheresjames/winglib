@@ -108,8 +108,8 @@ public:
 	/// Creates an ascii mandelbrot image
 	static CStr Mandelbrot( int w, int h, int x1, int y1, int x2, int y2 );
 
-    /// Concatinates two strings into a path
-	static CStr BuildPath( oexINT x_nId, oexCONST CStr &x_sPath, oexTCHAR tSep = oexTCPathSep( oexTCHAR ) );
+    /// Creates a path using the specified system root
+	static CStr BuildPath( oexBOOL x_bShared, oexINT x_nId, oexCONST CStr &x_sPath, oexTCHAR tSep = oexTCPathSep( oexTCHAR ) );
 
 	/// Bresenham's line drawing
 	static oexBOOL DrawLine( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *pc, oexINT x1, oexINT y1, oexINT x2, oexINT y2 );
@@ -122,7 +122,7 @@ public:
 
 	/// Reads data from stdin
 	static CStr ReadStdin( oexLONG lMax = 0 );
-	
+
 };
 
 

@@ -48,6 +48,6 @@ int CFtLibrary::LoadFont( CFtFace *pFace, const sqbind::stdString &sFont, int nI
 	if ( !pFace )
 		return 0;
 
-	return LoadFile( pFace, sqbind::oex2std( oexBuildSysPath( oex::os::CBaseFile::eFidFonts, sFont.c_str() ) ), nIndex );
+	return LoadFile( pFace, sqbind::oex2std( oexBuildSysPath( 0, oex::os::CBaseFile::eFidFonts, sFont.c_str() ) ), nIndex );
 }
 

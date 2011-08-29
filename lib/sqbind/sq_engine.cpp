@@ -426,13 +426,13 @@ stdString CSqEngineExport::root( const stdString &sPath )
 	return oex2std( oexGetModulePath( sPath.c_str() ) );
 }
 
-stdString CSqEngineExport::get_sys_path( const stdString &sId, const stdString &sPath )
+stdString CSqEngineExport::get_sys_path( int bShared, const stdString &sId, const stdString &sPath )
 {_STT();
-	return build_path( get_sys_folder( sId ), sPath );
+	return build_path( get_sys_folder( bShared, sId ), sPath );
 }
 
 
-stdString CSqEngineExport::get_sys_folder( const stdString &sId )
+stdString CSqEngineExport::get_sys_folder( int bShared, const stdString &sId )
 {_STT();
 
 	oex::oexINT nId = oexStrToLong( sId.c_str() );
@@ -442,7 +442,7 @@ stdString CSqEngineExport::get_sys_folder( const stdString &sId )
 			nId = oex::os::CBaseFile::eFidTemp;
 
 		else if ( sId == oexT( "sys" ) )
-			nId = oex::os::CBaseFile::eFidUserSystem;
+			nId = oex::os::CBaseFile::eFidSystem;
 
 		else if ( sId == oexT( "os" ) )
 			nId = oex::os::CBaseFile::eFidUserOs;
@@ -451,14 +451,71 @@ stdString CSqEngineExport::get_sys_folder( const stdString &sId )
 			nId = oex::os::CBaseFile::eFidCurrent;
 
 		else if ( sId == oexT( "root" ) )
-			nId = oex::os::CBaseFile::eFidDefRoot;
+			nId = oex::os::CBaseFile::eFidRoot;
+
+		else if ( sId == oexT( "default_drive" ) )
+			nId = oex::os::CBaseFile::eFidDefDrive;
 
 		else if ( sId == oexT( "fonts" ) )
 			nId = oex::os::CBaseFile::eFidFonts;
 
+		else if ( sId == oexT( "desktop" ) )
+			nId = oex::os::CBaseFile::eFidDesktop;
+
+		else if ( sId == oexT( "downloads" ) )
+			nId = oex::os::CBaseFile::eFidDownloads;
+
+		else if ( sId == oexT( "settings" ) )
+			nId = oex::os::CBaseFile::eFidSettings;
+
+		else if ( sId == oexT( "recycle" ) )
+			nId = oex::os::CBaseFile::eFidRecycle;
+
+		else if ( sId == oexT( "templates" ) )
+			nId = oex::os::CBaseFile::eFidTemplates;
+
+		else if ( sId == oexT( "public" ) )
+			nId = oex::os::CBaseFile::eFidPublic;
+
+		else if ( sId == oexT( "documents" ) )
+			nId = oex::os::CBaseFile::eFidDocuments;
+
+		else if ( sId == oexT( "music" ) )
+			nId = oex::os::CBaseFile::eFidMusic;
+
+		else if ( sId == oexT( "pictures" ) )
+			nId = oex::os::CBaseFile::eFidPictures;
+
+		else if ( sId == oexT( "video" ) )
+			nId = oex::os::CBaseFile::eFidVideo;
+
+		else if ( sId == oexT( "favorites" ) )
+			nId = oex::os::CBaseFile::eFidFavorites;
+
+		else if ( sId == oexT( "start_menu" ) )
+			nId = oex::os::CBaseFile::eFidStartMenu;
+
+		else if ( sId == oexT( "startup" ) )
+			nId = oex::os::CBaseFile::eFidStartup;
+
+		else if ( sId == oexT( "cookies" ) )
+			nId = oex::os::CBaseFile::eFidCookies;
+
+		else if ( sId == oexT( "network" ) )
+			nId = oex::os::CBaseFile::eFidNetwork;
+
+		else if ( sId == oexT( "printers" ) )
+			nId = oex::os::CBaseFile::eFidPrinters;
+
+		else if ( sId == oexT( "recent" ) )
+			nId = oex::os::CBaseFile::eFidRecent;
+
+		else if ( sId == oexT( "history" ) )
+			nId = oex::os::CBaseFile::eFidHistory;
+
 	} // end if
 
-	return sqbind::oex2std( oexGetSysFolder( nId ) );
+	return sqbind::oex2std( oexGetSysFolder( bShared, nId ) );
 }
 
 stdString CSqEngineExport::module_name()

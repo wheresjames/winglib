@@ -712,8 +712,8 @@ oexBOOL CUtil::GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw,
 	return oexTRUE;
 }
 
-CStr CUtil::BuildPath( oexINT x_nId, oexCONST CStr &x_sPath, oexTCHAR tSep )
-{	return oexBuildPath( oexGetSysFolder( x_nId ), x_sPath ); }
+CStr CUtil::BuildPath( oexBOOL x_bShared, oexINT x_nId, oexCONST CStr &x_sPath, oexTCHAR tSep )
+{	return oexBuildPath( oexGetSysFolder( x_bShared, x_nId ), x_sPath, tSep ); }
 
 
 oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType,

@@ -22,7 +22,7 @@ function _init() : ( _g )
 		return 0;
 	} // end if
 
-	_self.echo( "Fonts folder : '" + _self.get_sys_folder( "fonts" ) + "'" );
+	_self.echo( "Fonts folder : '" + _self.get_sys_folder( 0, "fonts" ) + "'" );
 
 	local face = CFtFace();
 	if ( !ft.LoadFont( face, font_name, 0 ) )

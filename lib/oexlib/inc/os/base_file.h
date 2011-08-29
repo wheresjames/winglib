@@ -133,15 +133,54 @@ public:
 
 		eFidTemp,
 
-		eFidUserSystem,
+		eFidSystem,
 
 		eFidUserOs,
 
 		eFidCurrent,
 
-		eFidDefRoot,
+		eFidRoot,
 
-		eFidFonts
+		eFidDefDrive,
+
+		eFidFonts,
+		
+		eFidSettings,
+
+		eFidRecycle,
+
+		eFidDesktop,
+
+		eFidDownloads,
+
+		eFidTemplates,
+
+		eFidPublic,
+
+		eFidDocuments,
+
+		eFidMusic,
+
+		eFidPictures,
+
+		eFidVideo,
+		
+		eFidFavorites,
+
+		eFidHistory,
+
+		eFidCookies,
+
+		eFidNetwork,
+
+		eFidPrinters,
+
+		eFidStartMenu,
+
+		eFidStartup,
+
+		eFidRecent
+
 	};
 
 private:
@@ -218,7 +257,7 @@ public:
 	static oexBOOL Flush( t_HFILE x_hFile );
 
 	/// Returns the path to the specified folder
-	static CStr GetSysFolder( oexINT x_nFolderId, oexINT x_nMaxLength = oexSTRSIZE );
+	static CStr GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nMaxLength = oexSTRSIZE );
 
 public:
 

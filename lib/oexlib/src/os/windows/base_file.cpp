@@ -40,6 +40,10 @@
 #	include <Shellapi.h>
 #endif
 
+#if defined( __MINGW32__ )
+#	define OEX_USE_DYNAMIC_SHELL32
+#endif
+
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
@@ -380,15 +384,41 @@ oexBOOL CBaseFile::Copy( oexCSTR x_pOld, oexCSTR x_pNew )
 	return CopyFile( x_pOld, x_pNew, FALSE );
 }
 
-CStr CBaseFile::GetSysFolder( oexINT x_nFolderId, oexINT x_nMaxLength )
+#if defined( OEX_USE_DYNAMIC_SHELL32 )
+	
+	// SH Types
+	typedef IMalloc* t_LPMALLOC;
+	typedef struct { USHORT cb; BYTE abID[ 1 ]; } t_SHITEMID;
+	typedef struct { SHITEMID mkid; } t_ITEMIDLIST, *t_LPITEMIDLIST;
+	
+	// SH Functions
+	typedef HRESULT (*pfn_SHGetMalloc)( t_LPMALLOC *ppMalloc );
+	typedef BOOL (*pfn_SHGetPathFromIDList)( t_LPITEMIDLIST pidl, LPTSTR pszPath );
+	typedef HRESULT (*pfn_SHGetSpecialFolderLocation)( HWND hwndOwner, int nFolder, t_LPITEMIDLIST *ppidl );
+
+#else
+
+#	define t_LPMALLOC LPMALLOC
+#	define t_LPITEMIDLIST LPITEMIDLIST
+#	define pSHGetMalloc SHGetMalloc
+#	define pSHGetPathFromIDList SHGetPathFromIDList
+#	define pSHGetSpecialFolderLocation SHGetSpecialFolderLocation
+
+#endif
+
+CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nMaxLength )
 {
 	// Ensure at least MAX_PATH bytes
 	if ( MAX_PATH > x_nMaxLength )
 		x_nMaxLength = MAX_PATH;
 
-	CStr s;
+	BOOL trim = FALSE;
+	CStr s, sub;
 	if ( !s.OexAllocate( x_nMaxLength ) )
 		return s;
+		
+	// NULL Terminate
+	*s._Ptr() = 0;
 
 	// Get the folder
 	switch( x_nFolderId )
@@ -400,7 +430,7 @@ CStr CBaseFile::GetSysFolder( oexINT x_nFolderId, oexINT x_nMaxLength )
 			s.SetLength( ::GetTempPath( x_nMaxLength, s._Ptr() ) );
 			return s;
 
-		case eFidUserSystem :
+		case eFidSystem :
 			s.SetLength( ::GetSystemDirectory( s._Ptr(), x_nMaxLength ) );
 			return s;
 
@@ -412,18 +442,95 @@ CStr CBaseFile::GetSysFolder( oexINT x_nFolderId, oexINT x_nMaxLength )
 			s.SetLength( ::GetCurrentDirectory( x_nMaxLength, s._Ptr() ) );
 			return s;
 
-		case eFidDefRoot :
+		case eFidDefDrive :
 			s.SetLength( cmn::Min( (UINT)3, ::GetWindowsDirectory( s._Ptr(), x_nMaxLength ) ) );
 			return s;
 
+		case eFidRoot :
+			x_nFolderId = CSIDL_DRIVES;
+			break;
+
+		case eFidSettings :
+			x_nFolderId = x_bShared ? CSIDL_COMMON_APPDATA : CSIDL_APPDATA;
+			break;
+
+		case eFidDesktop :
+			x_nFolderId = x_bShared ? CSIDL_COMMON_DESKTOPDIRECTORY : CSIDL_DESKTOPDIRECTORY;
+			break;
+
+		case eFidDownloads :
+			// +++ CSIDL_COMMON_DOCUMENTS is broken?
+			trim = x_bShared ? 1 : 0;
+			x_nFolderId = x_bShared ? CSIDL_COMMON_DESKTOPDIRECTORY : CSIDL_MYDOCUMENTS;
+			sub = oexT( "Downloads" );
+			break;
+
+		case eFidRecycle :
+			x_nFolderId = CSIDL_BITBUCKET;
+			break;
+
+		case eFidTemplates :
+			x_nFolderId = x_bShared ? CSIDL_COMMON_TEMPLATES : CSIDL_TEMPLATES;
+			break;
+
+		case eFidPublic :
+			// +++ CSIDL_COMMON_DOCUMENTS is broken?
+			trim = 1; sub = oexT( "Public" );
+			x_nFolderId = x_bShared ? CSIDL_COMMON_DESKTOPDIRECTORY : CSIDL_DESKTOPDIRECTORY;
+			break;
+
+		case eFidDocuments :
+			// +++ CSIDL_COMMON_DOCUMENTS is broken?
+			if ( x_bShared ) trim = 1, sub = oexT( "Documents" );
+			x_nFolderId = x_bShared ? CSIDL_COMMON_DESKTOPDIRECTORY : CSIDL_MYDOCUMENTS;
+			break;
+
+		case eFidMusic :
+			x_nFolderId = x_bShared ? CSIDL_COMMON_MUSIC : CSIDL_MYMUSIC;
+			break;
+
+		case eFidPictures :
+			x_nFolderId = x_bShared ? CSIDL_COMMON_PICTURES : CSIDL_MYPICTURES;
+			break;
+
+		case eFidVideo :
+			x_nFolderId = x_bShared ? CSIDL_COMMON_VIDEO : CSIDL_MYVIDEO;
+			break;
+
+		case eFidFavorites :
+			x_nFolderId = x_bShared ? CSIDL_COMMON_FAVORITES : CSIDL_FAVORITES;
+			break;
+
+		case eFidStartMenu :
+			x_nFolderId = x_bShared ? CSIDL_COMMON_STARTMENU : CSIDL_STARTMENU;
+			break;
+
+		case eFidStartup :
+			x_nFolderId = x_bShared ? CSIDL_COMMON_STARTUP : CSIDL_STARTUP;
+			break;
+
+		case eFidCookies :
+			x_nFolderId = CSIDL_COOKIES;
+			break;
+
+		case eFidNetwork :
+			x_nFolderId = CSIDL_NETWORK;
+			break;
+
+		case eFidPrinters :
+			x_nFolderId = CSIDL_PRINTERS;
+			break;
+
+		case eFidRecent :
+			x_nFolderId = CSIDL_RECENT;
+			break;
+
+		case eFidHistory :
+			x_nFolderId = CSIDL_HISTORY;
+			break;
+
 		case eFidFonts :
-#if !defined( __MINGW32__ )
 			x_nFolderId = CSIDL_FONTS;
-#else
-			s.SetLength( ::GetWindowsDirectory( s._Ptr(), x_nMaxLength ) );
-			if ( !s.Length() ) s = oexT( "c:\\windows" );
-			return s.BuildPath( oexT( "fonts" ) );
-#endif
 			break;
 
 		default :
@@ -431,26 +538,65 @@ CStr CBaseFile::GetSysFolder( oexINT x_nFolderId, oexINT x_nMaxLength )
 
 	} // end switch
 
-#if !defined( __MINGW32__ )
+#if defined( OEX_USE_DYNAMIC_SHELL32 )
 
-	LPITEMIDLIST pidl;
-	if ( SHGetSpecialFolderLocation( NULL, x_nFolderId, &pidl ) != NOERROR || !pidl )
+	// Functions
+	pfn_SHGetMalloc pSHGetMalloc = NULL;
+	pfn_SHGetPathFromIDList pSHGetPathFromIDList = NULL;
+	pfn_SHGetSpecialFolderLocation pSHGetSpecialFolderLocation = NULL;
+
+	// Load shell32.dll
+	HMODULE hShell32 = LoadLibrary( oexT( "shell32.dll" ) );
+	if ( !hShell32 )
 		return CStr();
 
-	// Get the path name
-	BOOL ret = SHGetPathFromIDList( pidl, s._Ptr() );
+	// Load functions
+	pSHGetMalloc = (pfn_SHGetMalloc)GetProcAddress( hShell32, oexT( "SHGetMalloc" ) );
+	pSHGetPathFromIDList = (pfn_SHGetPathFromIDList)GetProcAddress( hShell32, oexT( "SHGetPathFromIDList" ) );
+	pSHGetSpecialFolderLocation = (pfn_SHGetSpecialFolderLocation)GetProcAddress( hShell32, oexT( "SHGetSpecialFolderLocation" ) );
 
-	// Free the memory
-	LPMALLOC pMalloc;
-	if ( SHGetMalloc( &pMalloc ) == NOERROR )
-		pMalloc->Free( pidl );
-
-	if ( !ret )
+	// Did we get the functions?
+	if ( !pSHGetMalloc || !pSHGetPathFromIDList || !pSHGetSpecialFolderLocation )
+	{	FreeLibrary( hShell32 );
 		return CStr();
+	} // end if
 
 #endif
 
+	// +++ Add support for SHGetKnownFolderPath()
+
+	t_LPITEMIDLIST pidl = NULL;
+	if ( pSHGetSpecialFolderLocation( NULL, x_nFolderId, &pidl ) == NOERROR && pidl )
+	{
+		// Get the path name
+		if ( !pSHGetPathFromIDList( pidl, s._Ptr() ) )
+			s.Destroy();
+
+		// Free the memory
+		t_LPMALLOC pMalloc;
+		if ( pSHGetMalloc( &pMalloc ) == NOERROR )
+			pMalloc->Free( pidl );
+
+	} // end if
+
+
+#if defined( OEX_USE_DYNAMIC_SHELL32 )
+
+	// Unload shell lib
+	FreeLibrary( hShell32 );
+
+#endif
+
+	// Ensure length is valid
+	s.Length();
+
+	while ( trim )
+		s = s.GetPath(), trim--;
+
+	// Is there a sub directory?
+	if ( sub.Length() )
+		return oexBuildPath( s, sub, oexT( '\\' ) );
+
 	return s;
 }
-
 
