@@ -35,6 +35,10 @@
 #include "oexlib.h"
 #include "std_os.h"
 
+#if !defined( OEX_NOPWD )
+#	include "pwd.h"
+#endif
+
 // BinReloc library
 #include "opc/breloc/binreloc.h"
 #include "opc/breloc/basic.cpp"
@@ -479,11 +483,13 @@ static CStr CBaseFile_GetHome()
 	if ( pHome && *pHome )
 		return oexMbToStr( pHome );
 		
+#if !defined( OEX_NOPWD )
 	// Attempt to read user home directory
 	struct passwd *pw = getpwuid( getuid() );
 	if ( pw && pw->pw_dir && *pw->pw_dir )
 		return oexMbToStr( pw->pw_dir );
-		
+#endif
+
 	return oexT( "~/" );
 }
 
@@ -508,7 +514,7 @@ CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nM
 
 		} break;
 
-		case eFidUserSystem :
+		case eFidSystem :
 			return CBaseFile_GetHome();
 
 		case eFidUserOs :
