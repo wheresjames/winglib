@@ -721,7 +721,7 @@ oexINT CUtil::CompareVersion( oexCONST CStr &x_sV1, oexCONST CStr &x_sV2, oexCON
 	oex::TList< oex::CStr > v2 = oex::CParser::Explode( x_sV2, x_sSep );
 
 	oexSIZE_T i = 0;
-	while ( i < v1.Size() )
+	while ( i < v1.Size() && i < v2.Size() )
 	{
 		oex::oexINT64 n1 = v1[ i ]->ToInt64();
 		oex::oexINT64 n2 = v2[ i ]->ToInt64();
@@ -736,12 +736,14 @@ oexINT CUtil::CompareVersion( oexCONST CStr &x_sV1, oexCONST CStr &x_sV2, oexCON
 
 	} // end while
 
+	// Assume extra stuff is a higher version?
+	if ( v1.Size() < v2.Size() )
+		return -1;
+	else if ( v1.Size() > v2.Size() )
+		return 1;
+
+	// Ok, equal
 	return 0;
-
-//	for ( oex::TList< oex::CStr >::iterator it; szStr[ i ] && lst.Next( it ); i++ )
-//		if ( !oexVERIFY( it->Cmp( szStr[ i ] ) ) )
-//			return -1;
-
 }
 
 oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType,
