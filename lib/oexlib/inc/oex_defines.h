@@ -263,6 +263,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexBinToAsciiHexStr					OEX_NAMESPACE::CUtil::BinToAsciiHexStr
 #define oexFingerprint						OEX_NAMESPACE::CUtil::Fingerprint
 #define oexMandelbrot						OEX_NAMESPACE::CUtil::Mandelbrot
+#define oexCompareVersion					OEX_NAMESPACE::CUtil::CompareVersion
 
 // Resource macros
 #define oexInitResources()					OEX_NAMESPACE::COex::GetResourceHelper().SetResourcePtr( (const OEX_NAMESPACE::_SOexResourceInfo*)_g_oexlib_resources )
@@ -431,6 +432,8 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexRgbToHtml						OEX_NAMESPACE::CParser::oexRgbToHtml
 #define oexUrlEncode						OEX_NAMESPACE::CParser::UrlEncode
 #define oexUrlDecode						OEX_NAMESPACE::CParser::UrlDecode
+#define oexJsonEncode						OEX_NAMESPACE::CParser::JsonEncode
+#define oexJsonDecode						OEX_NAMESPACE::CParser::JsonDecode
 #define oexSerialize						OEX_NAMESPACE::CParser::Serialize
 #define oexDeserialize						OEX_NAMESPACE::CParser::Deserialize
 #define oexHtmlEncode						OEX_NAMESPACE::CParser::HtmlEncode

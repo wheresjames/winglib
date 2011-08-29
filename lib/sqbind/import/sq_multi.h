@@ -201,6 +201,12 @@ namespace sqbind
 		/// Returns zlib decompressed string
 		stdString str_uncompress();
 
+		/// Returns json encoded string
+		stdString str_json_encode();
+
+		/// Returns json decoded string
+		stdString str_json_decode();
+
 		/// Returns base16 encoded string
 		stdString str_base16_encode();
 

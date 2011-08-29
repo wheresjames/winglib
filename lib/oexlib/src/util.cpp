@@ -715,6 +715,34 @@ oexBOOL CUtil::GraphFloat( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw,
 CStr CUtil::BuildPath( oexBOOL x_bShared, oexINT x_nId, oexCONST CStr &x_sPath, oexTCHAR tSep )
 {	return oexBuildPath( oexGetSysFolder( x_bShared, x_nId ), x_sPath, tSep ); }
 
+oexINT CUtil::CompareVersion( oexCONST CStr &x_sV1, oexCONST CStr &x_sV2, oexCONST CStr &x_sSep )
+{
+	oex::TList< oex::CStr > v1 = oex::CParser::Explode( x_sV1, x_sSep );
+	oex::TList< oex::CStr > v2 = oex::CParser::Explode( x_sV2, x_sSep );
+
+	oexSIZE_T i = 0;
+	while ( i < v1.Size() )
+	{
+		oex::oexINT64 n1 = v1[ i ]->ToInt64();
+		oex::oexINT64 n2 = v2[ i ]->ToInt64();
+
+		if ( n1 < n2 )
+			return -1;
+
+		else if ( n1 > n2 )
+			return 1;
+
+		i++;
+
+	} // end while
+
+	return 0;
+
+//	for ( oex::TList< oex::CStr >::iterator it; szStr[ i ] && lst.Next( it ); i++ )
+//		if ( !oexVERIFY( it->Cmp( szStr[ i ] ) ) )
+//			return -1;
+
+}
 
 oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType,
 					  CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw,

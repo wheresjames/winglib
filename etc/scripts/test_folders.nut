@@ -12,7 +12,6 @@ function show_folder( name, path )
 		 path );
 }
 
-_self.echo( "\n" );
 _self.echo( "\n------------------------------------------------------" );
 row( "Description", "Files", "Folders", "Path" );
 
@@ -62,5 +61,5 @@ foreach( k,v in special_folders )
 	show_folder( v, _self.get_sys_folder( 0, k ) );
 
 _self.echo( "\n...press any key...\n" );
-_self.get_key();
+_self.echo( "Thanks for pressing the '" + _self.json_encode( format( "%c", _self.get_key() ) ) + "' key!\n" );
 

@@ -353,6 +353,9 @@ public:
 		/// Returns the build
 		stdString get_build();
 
+		/// Compares two version numbers
+		int compare_version( const stdString &sV1, const stdString &sV2, const stdString &sSep );
+
 		/// Returns the application name
 		stdString get_app_name();
 
@@ -479,6 +482,12 @@ public:
 
 		/// Drop the specified range of characters from a string or all but
 		stdString drop_range( const stdString &sS, const stdString &sBegin, const stdString &sEnd, int bInclusive );
+
+		/// JSON decodes the string
+		stdString json_decode( const stdString &sS );
+
+		/// JSON encodes the string
+		stdString json_encode( const stdString &sS );
 
 		/// URL encodes the string
 		stdString urlencode( const stdString &sS );

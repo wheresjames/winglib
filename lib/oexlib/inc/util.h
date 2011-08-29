@@ -111,6 +111,9 @@ public:
     /// Creates a path using the specified system root
 	static CStr BuildPath( oexBOOL x_bShared, oexINT x_nId, oexCONST CStr &x_sPath, oexTCHAR tSep = oexTCPathSep( oexTCHAR ) );
 
+	/// Compares two version numbers
+	static oexINT CompareVersion( oexCONST CStr &x_sV1, oexCONST CStr &x_sV2, oexCONST CStr &x_sSep = oexT( "." ) );
+
 	/// Bresenham's line drawing
 	static oexBOOL DrawLine( CBin *img, oexINT fmt, oexINT w, oexINT h, oexINT sw, oexINT *pc, oexINT x1, oexINT y1, oexINT x2, oexINT y2 );
 

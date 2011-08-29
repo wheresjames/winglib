@@ -200,6 +200,16 @@ stdString CSqMulti::str_uncompress()
 	return oex2std( oexUncompress( std2oex( m_val.str() ) ) );
 }
 
+stdString CSqMulti::str_json_encode()
+{_STT();
+	return oex2std( oexJsonEncode( std2oex( m_val.str() ) ) );
+}
+
+stdString CSqMulti::str_json_decode()
+{_STT();
+	return oex2std( oexJsonDecode( std2oex( m_val.str() ) ) );
+}
+
 stdString CSqMulti::str_base16_encode()
 {_STT();
 	return oex2std( oexBase16Encode( std2oex( m_val.str() ) ) );
@@ -323,6 +333,8 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_htmldec )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_compress )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_uncompress )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_json_encode )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_json_decode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base16_encode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base16_decode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_base64_encode )

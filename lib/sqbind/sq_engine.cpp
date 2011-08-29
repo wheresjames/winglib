@@ -372,6 +372,11 @@ stdString CSqEngineExport::get_version()
 	return oex2std( oexVersion() );
 }
 
+int CSqEngineExport::compare_version( const stdString &sV1, const stdString &sV2, const stdString &sSep )
+{
+	return oexCompareVersion( std2oex( sV1 ), std2oex( sV2 ), std2oex( sSep ) );
+}
+
 stdString CSqEngineExport::get_app_name()
 {_STT();
 	oex::oexCSTR p = CScriptThread::getAppName();
@@ -822,6 +827,16 @@ stdString CSqEngineExport::urlencode( const stdString &sS )
 stdString CSqEngineExport::urldecode( const stdString &sS )
 {_STT();
 	return oex2std( oexUrlDecode( std2oex( sS ) ) );
+}
+
+stdString CSqEngineExport::json_encode( const stdString &sS )
+{_STT();
+	return oex2std( oexJsonEncode( std2oex( sS ) ) );
+}
+
+stdString CSqEngineExport::json_decode( const stdString &sS )
+{_STT();
+	return oex2std( oexJsonDecode( std2oex( sS ) ) );
 }
 
 stdString CSqEngineExport::htmlencode( const stdString &sS )
@@ -1623,6 +1638,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_key )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_build )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_version )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, compare_version )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, flush )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include )
@@ -1751,6 +1767,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, create_size_string )	
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, drop )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, drop_range )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, json_encode )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, json_decode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, urlencode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, urldecode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, htmlencode )
