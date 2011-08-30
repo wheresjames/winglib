@@ -48,11 +48,8 @@ int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData, s
 	return 0;
 }
 
-int main(int argc, char* argv[])
+int run( int argc, char* argv[] )
 {
-    // Initialize the oex library
-	oexINIT();
-
 	// Parse the command line
 	oex::CPropertyBag pbCmdLine = oex::CParser::ParseCommandLine( argc, (const char**)argv );
 
@@ -108,7 +105,7 @@ int main(int argc, char* argv[])
 
 	g_psqScriptThread->SetModuleManager( g_psqModuleManager );
 
-	g_psqScriptThread->SetScript( sqbind::stdString( sScript.Ptr(), sScript.Length() ), oex::oexFALSE );
+	g_psqScriptThread->SetScript( sScript, oex::oexFALSE );
 
 	g_psqScriptThread->SetExportFunction( SQBIND_Export_Symbols, oexNULL );
 
@@ -143,6 +140,17 @@ int main(int argc, char* argv[])
 		OexAllocDelete( g_psqModuleManager );
 	} // end if
 
+	return 0;
+}
+
+int main( int argc, char* argv[] )
+{
+    // Initialize the oex library
+	oexINIT();
+
+	// Run the application
+	int res = run( argc, argv );
+
 	oexNOTICE( 0, oexT( "Shutting down..." ) );
 
 	// Uninitialize sockets
@@ -151,6 +159,5 @@ int main(int argc, char* argv[])
 	// Uninitialize the oex library
     oexUNINIT();
 
-	return 0;
+	return res;
 }
-

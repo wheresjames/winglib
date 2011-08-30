@@ -174,10 +174,87 @@ oexBOOL CBaseFile::Flush( t_HFILE x_hFile )
 	return ::FlushFileBuffers( x_hFile );
 }
 
+#define CBaseFile_FT2INT64( ft ) ( (oexINT64)ft.dwLowDateTime | ( (oexINT64)ft.dwHighDateTime << 32 ) )
+typedef struct { LPCTSTR pName; DWORD dwFlag; } CBaseFile_ATTDESC;
+
+CPropertyBag CBaseFile::GetFileInfo( oexCSTR x_pFile )
+{_STT();
+
+	CPropertyBag pb;
+	if ( !x_pFile || !*x_pFile )
+		return pb;
+
+	// Save path
+	pb[ "full" ] = x_pFile;
+
+	// Get file info
+    WIN32_FILE_ATTRIBUTE_DATA   wfad; oexZero( wfad );	
+	if ( !GetFileAttributesEx( x_pFile, GetFileExInfoStandard, (LPVOID)&wfad ) )
+		return pb;
+
+	// Save file info into structure
+	pb[ "os_flags" ] = wfad.dwFileAttributes;
+	
+	static CBaseFile_ATTDESC ad[] = 
+	{
+		{ "archive",		FILE_ATTRIBUTE_ARCHIVE },
+		{ "compressed",		FILE_ATTRIBUTE_COMPRESSED },
+		{ "device",			FILE_ATTRIBUTE_DEVICE },
+		{ "directory",		FILE_ATTRIBUTE_DIRECTORY },
+		{ "encrypted",		FILE_ATTRIBUTE_ENCRYPTED },
+		{ "hidden",			FILE_ATTRIBUTE_HIDDEN },
+		{ "normal",			FILE_ATTRIBUTE_NORMAL },
+		{ "not_indexed",	FILE_ATTRIBUTE_NOT_CONTENT_INDEXED },
+		{ "offline",		FILE_ATTRIBUTE_OFFLINE },
+		{ "readonly",		FILE_ATTRIBUTE_READONLY },
+		{ "reparse_point",	FILE_ATTRIBUTE_REPARSE_POINT },
+		{ "sparse_file",	FILE_ATTRIBUTE_SPARSE_FILE },
+		{ "system",			FILE_ATTRIBUTE_SYSTEM },
+		{ "temporary",		FILE_ATTRIBUTE_TEMPORARY },
+		{ "virtual",		FILE_ATTRIBUTE_VIRTUAL },
+		{ 0, 0 }
+	};
+
+	for ( oexINT i = 0; ad[ i ].pName; i++ )
+		if ( 0 != ( ad[ i ].dwFlag & wfad.dwFileAttributes ) )		 
+			pb[ ad[ i ].pName ] = oexT( "1" );
+
+	pb[ "ft_created" ] = CBaseFile_FT2INT64( wfad.ftCreationTime );
+	pb[ "ft_last_access" ] = CBaseFile_FT2INT64( wfad.ftLastAccessTime );
+	pb[ "ft_last_modified" ] = CBaseFile_FT2INT64( wfad.ftLastWriteTime );
+	pb[ "size" ] = (oexINT64)wfad.nFileSizeLow | ( (oexINT64)wfad.nFileSizeHigh << 32 );
+
+	return pb;
+}
+
+oexINT64 CBaseFile::GetFileSize( oexCSTR x_pFile )
+{
+	if ( !x_pFile || !*x_pFile )
+		return 0;
+
+	// Get file info
+    WIN32_FILE_ATTRIBUTE_DATA   wfad; oexZero( wfad );	
+	if ( !GetFileAttributesEx( x_pFile, GetFileExInfoStandard, (LPVOID)&wfad ) )
+		return 0;
+
+	// Return the size
+	return (oexINT64)wfad.nFileSizeLow | ( (oexINT64)wfad.nFileSizeHigh << 32 );
+}
+
 oexINT64 CBaseFile::Size( t_HFILE hFile )
 {_STT();
-   if ( c_Invalid == hFile ) return 0;
+
+	// Ensure valid handle
+	if ( c_Invalid == hFile ) 
+		return 0;
+	// Read the file size
 	DWORD dwHi = 0, dwLo = ::GetFileSize( hFile, &dwHi );
+
+	// Check for error
+	if ( INVALID_FILE_SIZE == dwLo && GetLastError() )
+		return 0;
+	
+	// Return the file size
 	return (oexINT64)dwLo | ( (oexINT64)dwHi << 32 );
 }
 

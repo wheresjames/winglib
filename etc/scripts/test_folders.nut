@@ -2,13 +2,13 @@
 // _self.echo( _self.get_system_drive_info( _self.get_sys_folder( 0, "default_drive" ) ).print_r( 1 ) );
 
 function row( a, b, c, d )
-{	_self.echo( format( " %-20s %7s %7s  %s", a, b, c, d ) );
+{	_self.echo( format( " %-18s %7s %7s  %s", a, b, c, d ) );
 }
 
 function show_folder( name, path )
 {	row( name, 
-		 CSqFile().get_dirlist( path, "*", 1, 0 ).size().tostring(), 
-		 CSqFile().get_dirlist( path, "*", 0, 1 ).size().tostring(), 
+		 path.len() ? CSqFile().get_dirlist( path, "*", 1, 0 ).size().tostring() : "", 
+		 path.len() ? CSqFile().get_dirlist( path, "*", 0, 1 ).size().tostring() : "", 
 		 path );
 }
 

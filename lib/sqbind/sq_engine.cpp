@@ -1155,6 +1155,19 @@ CSqMulti CSqEngineExport::get_system_drive_info( const stdString &sDrive )
 	return m;
 }
 
+SQInteger CSqEngineExport::get_file_size( const stdString &sFile )
+{
+	return oexGetFileSize( sFile.c_str() );
+}
+
+CSqMulti CSqEngineExport::get_file_info( const stdString &sFile )
+{_STT();
+	CSqMulti m;
+	oex::CPropertyBag pb = oexGetFileInfo( sFile.c_str() );
+	SQBIND_PropertyBagToMulti( pb, m );
+	return m;
+}
+
 int CSqEngineExport::reg_is_key( const stdString &sKey, const stdString &sPath, const stdString &sName )
 {_STT();
 	return oex::os::CSysUtil::IsRegValue( std2oex( sKey ), std2oex( sPath ), std2oex( sName ) );
@@ -1702,6 +1715,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_stop )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_restart )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_system_drive_info )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_file_size )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_file_info )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_cpu_load )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_instance_handle )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, boot_time )

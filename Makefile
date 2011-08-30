@@ -18,14 +18,24 @@ BUILDDIRS := app/hello \
 			 app/irr_android \
 			 app/axtest \
 			 app/fftest
-			 
+
 
 #-------------------------------------------------------------------
 # Squirrel engine
 #-------------------------------------------------------------------
-BUILDDIRS := $(BUILDDIRS) lib/sqbind tools/sqrbld \
-						  app/sqrl app/sqrl-cgi app/sqengine \
-						  sq/wlink sq/sntpsync
+BUILDDIRS := $(BUILDDIRS) lib/sqbind \
+						  tools/sqrbld \
+						  app/sqrl \
+						  app/sqrl-cgi \
+						  app/sqengine
+
+
+#-------------------------------------------------------------------
+# Squirrel Apps
+#-------------------------------------------------------------------
+BUILDDIRS := $(BUILDDIRS) sq/sntpsync \
+						  sq/topsize \
+						  sq/wlink
 
 
 #-------------------------------------------------------------------

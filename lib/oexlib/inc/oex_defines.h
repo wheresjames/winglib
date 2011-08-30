@@ -317,6 +317,8 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexGetModuleFileName				OEX_NAMESPACE::os::CBaseFile::GetModFileName
 #define oexGetModulePath					OEX_NAMESPACE::os::CBaseFile::GetModPath
 #define oexGetSysFolder						OEX_NAMESPACE::os::CBaseFile::GetSysFolder
+#define oexGetFileSize						OEX_NAMESPACE::os::CBaseFile::GetFileSize
+#define oexGetFileInfo						OEX_NAMESPACE::os::CBaseFile::GetFileInfo
 #define oexGetInstanceHandle				OEX_NAMESPACE::os::CSys::GetInstanceHandle
 #define oexFileGetContents( f )				OEX_NAMESPACE::CFile().OpenExisting( f ).Read()
 #define oexFilePutContents( f, c )			OEX_NAMESPACE::CFile().CreateAlways( f ).Write( c )

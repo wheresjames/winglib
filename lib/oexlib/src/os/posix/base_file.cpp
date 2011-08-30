@@ -225,6 +225,115 @@ oexBOOL CBaseFile::Flush( t_HFILE x_hFile )
 	return !fsync( oexPtrToInt( x_hFile ) );
 }
 
+typedef struct { const char *pName; int dwFlag; } CBaseFile_ATTDESC;
+
+CPropertyBag CBaseFile::GetFileInfo( oexCSTR x_pFile )
+{_STT();
+
+	CPropertyBag pb;
+	if ( !x_pFile || !*x_pFile )
+		return pb;
+
+	// Save path
+	pb[ "full" ] = x_pFile;
+
+#if defined( OEX_NOSTAT64 )
+
+	struct stat s;
+	if ( stat( x_pFile, &s ) )
+		return pb;
+
+#else
+
+	// +++ Ensure this works correctly
+	struct stat64 s;
+	if ( stat64( x_pFile, &s ) )
+		return pb;
+
+#endif
+
+	// Save file info into structure
+	pb[ "os_flags" ] = s.st_mode;
+
+	static CBaseFile_ATTDESC ad[] = 
+	{
+		// Flags
+		{ "socket",		S_IFSOCK },
+		{ "link",		S_IFLNK },
+		{ "normal",		S_IFREG },
+		{ "blockdev",	S_IFBLK },
+		{ "directory",	S_IFDIR },
+		{ "chardev",	S_IFCHR },
+		{ "fifo",		S_IFIFO },
+		{ "is_uid",		S_ISUID },
+		{ "is_gid",		S_ISGID },
+		{ "is_vtx",		S_ISVTX },
+		
+		// Permissions
+		{ "p_ur",		S_IRUSR },
+		{ "p_uw",		S_IWUSR },
+		{ "p_ux",		S_IXUSR },
+		{ "p_gr",		S_IRGRP },
+		{ "p_gw",		S_IWGRP },
+		{ "p_gx",		S_IXGRP },
+		{ "p_or",		S_IROTH },
+		{ "p_ow",		S_IWOTH },
+		{ "p_ox",		S_IXOTH },
+
+		{ 0, 0 }
+	};
+
+	// Add flags
+	for ( oexINT i = 0; ad[ i ].pName; i++ )
+		if ( ( ad[ i ].dwFlag & s.st_mode ) == ad[ i ].dwFlag )
+			pb[ ad[ i ].pName ] = oexT( "1" );
+
+	// Linux info
+	pb[ "device" ] = s.st_dev;
+	pb[ "inode" ] = s.st_ino;
+	pb[ "mode" ] = s.st_mode;
+	pb[ "permissions" ] = ( S_IRWXU | S_IRWXG | S_IRWXO ) & s.st_mode;
+	pb[ "nlink" ] = s.st_nlink;
+	pb[ "uid" ] = s.st_uid;
+	pb[ "gid" ] = s.st_gid;
+	pb[ "rdev" ] = s.st_rdev;
+	pb[ "blksize" ] = s.st_blksize;
+	pb[ "blocks" ] = s.st_blocks;
+	
+	//pb[ "ft_created" ] = ;
+	pb[ "ft_last_access" ] = s.st_atime;
+	pb[ "ft_last_modified" ] = s.st_mtime;
+	pb[ "ft_last_status_change" ] = s.st_ctime;
+	pb[ "size" ] = s.st_size;
+
+	return pb;
+}
+
+oexINT64 CBaseFile::GetFileSize( oexCSTR x_pFile )
+{
+	if ( !x_pFile || !*x_pFile )
+		return 0;
+
+#if defined( OEX_NOSTAT64 )
+
+	struct stat s;
+	if ( stat( x_pFile, &s ) )
+		return 0;
+
+	return s.st_size;
+
+#else
+
+	// +++ Ensure this works correctly
+	struct stat64 s64;
+	if ( stat64( x_pFile, &s64 ) )
+		return 0;
+
+	return s64.st_size;
+
+#endif
+
+}
 
 CBaseFile::t_size CBaseFile::Size( t_HFILE x_hFile )
 {

@@ -594,6 +594,12 @@ public:
 		/// Returns information about the specified system drive
 		CSqMulti get_system_drive_info( const stdString &sDrive );
 
+		/// Returns the size of the specified file
+		SQInteger get_file_size( const stdString &sFile );
+		
+		/// Returns information about the specified file
+		CSqMulti get_file_info( const stdString &sFile );
+		
 		/// Returns non-zero if registry key exists
 		int reg_is_key( const stdString &sKey, const stdString &sPath, const stdString &sName );
 
