@@ -526,7 +526,7 @@ CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nM
 			CStr8 s;
 			char *cwd = s.Allocate( oexSTRSIZE );
 			if ( !cwd || !getcwd( cwd, oexSTRSIZE ) || !*cwd )
-				return s.Destroy();
+				s.Destroy();
 
 			return s;
 
