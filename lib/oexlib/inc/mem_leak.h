@@ -52,12 +52,6 @@ public:
 		eDefaultPoolBits = 20
 	};
 
-	enum
-	{
-		// Slot mask
-		eDefaultSlotMask = 0x3f
-	};
-
 	// Size type
 	typedef oexSIZE_T		t_size;
 
@@ -73,7 +67,7 @@ public:
 	void Destroy();
 
 	/// Creates the leak detection pool
-	oexBOOL Create( t_size x_nPoolBits = eDefaultPoolBits, t_size x_nSlotMask = eDefaultSlotMask );
+	oexBOOL Create( t_size x_nPoolBits = eDefaultPoolBits ); //, t_size x_nSlotMask = eDefaultSlotMask );
 
 	/// Adds a pointer to the tracking pool
 	oexINT Add( oexCPVOID p );
@@ -95,11 +89,11 @@ public:
 
 private:
 
+	/// The pointer pool
+	oexCPVOID * volatile	m_pPool;
+
 	/// Non-zero to freeze memory tracking
 	oexBOOL					m_bFreeze;
-
-	/// The pointer pool
-	oexCPVOID				*m_pPool;
 
 	/// Pool size
 	t_size					m_nPoolSize;
@@ -110,19 +104,13 @@ private:
 	/// Pool mask
 	t_size					m_nPoolMask;
 
-	/// Slot mask
-	t_size					m_nSlotMask;
-
-	/// Slot size
-	t_size					m_nSlotSize;
-
 	/// Total number of allocations
 	t_size					m_nAllocations;
 
 #if defined( OEX_MEMLEAK_DEBUG )
 
-	/// Tracks the number of slot overflows
-	t_size					m_nSlotOverflows;
+	/// Count of duplicate pointer additions
+	t_size					m_nDuplicateAdds;
 
 #endif
 

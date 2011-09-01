@@ -126,39 +126,42 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
         oexUCHAR *pBuf = (oexUCHAR*)x_pMem;
 
         oexUINT uBlockSize = *(oexUINT*)pBuf;
-        pBuf += OEX_SIZE_VAR;
+		if ( !uBlockSize )
+			return oexFALSE;
 
-        SBlockHeader *pBh = (SBlockHeader*)pBuf;
-        pBuf += sizeof( SBlockHeader );
+		pBuf += OEX_SIZE_VAR;
+
+		SBlockHeader *pBh = (SBlockHeader*)pBuf;
+		pBuf += sizeof( SBlockHeader );
 
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-        pBuf += sizeof( m_ucUnderrunPadding );
+		pBuf += sizeof( m_ucUnderrunPadding );
 #endif
 
 		if( uSize )
 			os::CSys::StrFmt( pMsg, uBuf, oexT( "Total: %u, Block: %u, Protected: %u, Refs: %u, Flags: %u" oexNL8 ),
-		                                              uSize, uBlockSize, pBh->uSize, pBh->uRef, pBh->uFlags );
+													  uSize, uBlockSize, pBh->uSize, pBh->uRef, pBh->uFlags );
 		else
 			os::CSys::StrFmt( pMsg, uBuf, oexT( "Block: %u, Protected: %u, Refs: %u, Flags: %u" oexNL8 ),
-													  uBlockSize, pBh->uSize, pBh->uRef, pBh->uFlags );
-/*
-	+++ This code crashes if pBh->ai[ xxx ].pFile was allocated from the heap of another module
+												  uBlockSize, pBh->uSize, pBh->uRef, pBh->uFlags );
+// *
+// +++ This code crashes if pBh->ai[ xxx ].pFile was allocated from the heap of another module
 
-        if ( pBh->ai[ 0 ].pFile )
-            os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
-                              oexT( "%s(%u) : Allocated" oexNL8 ), pBh->ai[ 0 ].pFile, pBh->ai[ 0 ].uLine );
+		if ( pBh->ai[ 0 ].pFile )
+			os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
+							  oexT( "%s(%u) : Allocated" oexNL8 ), pBh->ai[ 0 ].pFile, pBh->ai[ 0 ].uLine );
 
-        if ( pBh->ai[ 1 ].pFile )
-            os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
-                              oexT( "%s(%u) : Resized" oexNL8 ), pBh->ai[ 1 ].pFile, pBh->ai[ 1 ].uLine );
+		if ( pBh->ai[ 1 ].pFile )
+			os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
+							  oexT( "%s(%u) : Resized" oexNL8 ), pBh->ai[ 1 ].pFile, pBh->ai[ 1 ].uLine );
 
-        if ( pBh->ai[ 2 ].pFile )
-            os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
-                              oexT( "%s(%u) : Freed" oexNL8 ), pBh->ai[ 2 ].pFile, pBh->ai[ 2 ].uLine );
-*/
+		if ( pBh->ai[ 2 ].pFile )
+			os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
+							  oexT( "%s(%u) : Freed" oexNL8 ), pBh->ai[ 2 ].pFile, pBh->ai[ 2 ].uLine );
+// * /
+
 // +++ Replace with oexBinToAsciiStr()
-
-#if defined( OEX_MAX_LINES_IN_MEMDUMP )
+//#if defined( OEX_MAX_LINES_IN_MEMDUMP )
 
 		oexSIZE_T i = 0;
 		oexSIZE_T b, sz = uBuf - zstr::Length( pMsg );
@@ -190,7 +193,7 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
 
 		} // end for
 
-#endif
+//#endif
 
 		return oexTRUE;
 

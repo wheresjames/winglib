@@ -39,9 +39,7 @@ OEX_USING_NAMESPACE
 CMemLeak::CMemLeak()
 {
 #if defined( OEX_MEMLEAK_DEBUG )
-
-	m_nSlotOverflows = 0;
-
+	m_nDuplicateAdds = 0;
 #endif
 
 	m_nPoolOverflows = 0;
@@ -49,8 +47,6 @@ CMemLeak::CMemLeak()
 	m_uCurrentAllocations = 0;
 	m_uPeakAllocations = 0;
 	m_nPoolBits = 0;
-	m_nSlotMask = 0;
-	m_nSlotSize = 0;
 	m_nPoolMask = 0;
 	m_nPoolSize = 0;
 	m_pPool = oexNULL;
@@ -65,8 +61,6 @@ CMemLeak::~CMemLeak()
 void CMemLeak::Destroy()
 {
 	m_nPoolBits = 0;
-	m_nSlotMask = 0;
-	m_nSlotSize = 0;
 	m_nPoolMask = 0;
 	m_nPoolSize = 0;
 
@@ -79,9 +73,7 @@ void CMemLeak::Destroy()
 	} // end if
 
 #if defined( OEX_MEMLEAK_DEBUG )
-
-	m_nSlotOverflows = 0;
-
+	m_nDuplicateAdds = 0;
 #endif
 
 	m_nPoolOverflows = 0;
@@ -93,26 +85,16 @@ void CMemLeak::Destroy()
 
 }
 
-oexBOOL CMemLeak::Create( t_size x_nPoolBits, t_size x_nSlotMask )
+oexBOOL CMemLeak::Create( t_size x_nPoolBits )
 {
 	Destroy();
 
 	// Ensure valid pool bits value
-	if ( x_nPoolBits < eDefaultPoolBits || !cmn::IsPowerOf2( x_nPoolBits ) )
+	if ( x_nPoolBits < eDefaultPoolBits )
 		x_nPoolBits = eDefaultPoolBits;
-
-	// Ensure valid slot mask
-	if ( x_nSlotMask < eDefaultSlotMask || !cmn::IsPowerOf2( x_nSlotMask + 1 ) )
-		x_nSlotMask = eDefaultSlotMask;
 
 	// Number of bits in the pool
 	m_nPoolBits = x_nPoolBits;
-
-	// Save the slot mask
-	m_nSlotMask = x_nSlotMask;
-
-	// How big is a slot?
-	m_nSlotSize = cmn::BitsToValue( cmn::CountBits( m_nSlotMask ) );
 
 	// Get the pool mask
 	m_nPoolMask = cmn::BitsToMask( m_nPoolBits );
@@ -145,35 +127,51 @@ oexINT CMemLeak::Add( oexCPVOID p )
 	if ( !m_pPool || !p || m_bFreeze )
 		return -1;
 
-	// Track numbers
-	m_uTotalAllocations++;
-	m_uCurrentAllocations++;
-	if ( m_uCurrentAllocations > m_uPeakAllocations )
-		m_uPeakAllocations = m_uCurrentAllocations;
-
 	// Calculate starting offset
 	t_size uOffset = ( oexPtrToInt( p ) >> 4 ) & m_nPoolMask;
-
 	t_size uStart = uOffset;
+
 	do
 	{
+		// +++ There's actually a threading problems here that could
+		//     cause a few random pointers to get annihilated, along
+		//     with other issues, it's not worth a lock, this is only 
+		//     for debugging.
+
 		// Can we save it here?
 		if ( !m_pPool[ uOffset ] )
 		{
 			// Save pointer
 			m_pPool[ uOffset ] = p;
 
-			return 0;
+			// Reduce impact from thread conflicts
+			if ( m_pPool[ uOffset ] == p )
+			{
+				// Track numbers
+				m_uTotalAllocations++;
+				m_uCurrentAllocations++;
+				if ( m_uCurrentAllocations > m_uPeakAllocations )
+					m_uPeakAllocations = m_uCurrentAllocations;
+
+				return 0;
+
+			} // end if
 
 		} // end if
 
 #if defined( OEX_MEMLEAK_DEBUG )
 
-		// This isn't so bad, just less efficient
-		t_size u = ( uStart <= uOffset ) ? uOffset - uStart : m_nPoolSize - uOffset;
-		if ( u > m_nSlotSize )
-			m_nSlotOverflows++,
-			oexEcho( "CMemLeak : Slot overflow" );
+		// Check for duplicate
+		else if ( m_pPool[ uOffset ] == p )
+		{
+			// Count a duplicate attempt
+			m_nDuplicateAdds++;
+
+			oexEcho( oexT( "CMemLeak : Duplicate pointer added" ) );
+
+			return -1;
+
+		} // end else if
 
 #endif
 
@@ -224,14 +222,6 @@ oexINT CMemLeak::Remove( oexCPVOID p )
 	if ( !m_pPool || !p || m_bFreeze )
 		return -1;
 
-	// Track allocations
-	if ( m_uCurrentAllocations )
-		m_uCurrentAllocations--;
-#if defined( OEX_MEMLEAK_DEBUG )
-	else
-		oexEcho( oexT( "CMemLeak : m_uCurrentAllocations wants to go negative?" ) );
-#endif
-
 	// Calculate starting offset
 	t_size uOffset = ( oexPtrToInt( p ) >> 4 ) & m_nPoolMask;
 
@@ -243,6 +233,14 @@ oexINT CMemLeak::Remove( oexCPVOID p )
 		{
 			// Remove from pool
 			m_pPool[ uOffset ] = 0;
+
+			// Track allocations
+			if ( m_uCurrentAllocations )
+				m_uCurrentAllocations--;
+#if defined( OEX_MEMLEAK_DEBUG )
+			else
+				oexEcho( oexT( "CMemLeak : m_uCurrentAllocations wants to go negative?" ) );
+#endif
 
 			return (oexINT)uOffset;
 
@@ -267,12 +265,12 @@ CStr CMemLeak::Report( t_size *pLeaks )
 		return oexT( "No Pool" );
 
 	CStr s = oexMks( oexNL, oexT( "------------------ Memory Report --------------------" ), oexNL, oexNL,
-					 oexT( "Total Allocations : " ), m_uTotalAllocations, oexNL,
-					 oexT( "Peak Allocations : " ), m_uPeakAllocations, oexNL,
+					 oexT( "Total Allocations   : " ), m_uTotalAllocations, oexNL,
+					 oexT( "Peak Allocations    : " ), m_uPeakAllocations, oexNL,
 					 oexT( "Current Allocations : " ), m_uCurrentAllocations, oexNL,
-					 oexT( "Pool Overflows : " ), m_nPoolOverflows, oexNL,
+					 oexT( "Pool Overflows      : " ), m_nPoolOverflows, oexNL,
 #if defined( OEX_MEMLEAK_DEBUG )
-					 oexT( "Slot Overflows : " ), m_nSlotOverflows, oexNL,
+					 oexT( "Duplicate Adds      : " ), m_nDuplicateAdds, oexNL,
 #endif
 					 oexNL
 					 );
@@ -285,11 +283,16 @@ CStr CMemLeak::Report( t_size *pLeaks )
 		// Memory here?
 		if ( m_pPool[ uOffset ] )
 		{
+			// New message
+			*szMsg = 0;
+
 			// Get the block report
-			CAlloc::GetBlockReport( m_pPool[ uOffset ], 0, szMsg, sizeof( szMsg ) );
+			if ( !CAlloc::GetBlockReport( m_pPool[ uOffset ], 0, szMsg, sizeof( szMsg ) ) )
+				s << oexFmt( oexT( "0x%x : <unrecognized block>" ), oexPtrToInt( m_pPool[ uOffset ] ) );
 
 			// Append to string
-			s << oexFmt( oexT( "0x%x : " ), oexPtrToInt( m_pPool[ uOffset ] ) ) << szMsg << oexNL;
+			else
+				s << oexFmt( oexT( "0x%x : " ), oexPtrToInt( m_pPool[ uOffset ] ) ) << szMsg << oexNL;
 
 			// Track number of leaks
 			if ( pLeaks )
@@ -300,7 +303,7 @@ CStr CMemLeak::Report( t_size *pLeaks )
 		// Calculate next offset
 		uOffset = ( uOffset + 1 ) & m_nPoolMask;
 
-	// For each valid slot
+	// For each valid
 	} while ( uOffset );
 
 	s << oexNL << oexT( "---------------- End Memory Report ------------------" ) << oexNL;

@@ -87,12 +87,15 @@ oexSTATIC_ASSERT( 0 == ( OEX_ALIGNEDMEM & ( OEX_ALIGNEDMEM - 1 ) ) );
 oexPVOID oex_malloc( oexNEWSIZE_T x_nSize )
 {
 	// Allocate memory
-	void *ptr = malloc( (size_t)x_nSize + OEX_ALIGNEDMEM + sizeof( void* ) );
+	void *ptr = malloc( (size_t)x_nSize + OEX_ALIGNEDMEM + sizeof( void* ) + sizeof( oexNEWSIZE_T ) );
 	if ( !ptr )
 		return oexNULL;
 
+	// Save original size
+	*(oexNEWSIZE_T*)ptr = x_nSize;
+
 	// Align pointer
-	oexBYTE *ptr2 = (oexBYTE*)ptr + sizeof( void* );
+	oexBYTE *ptr2 = (oexBYTE*)ptr + sizeof( void* ) + sizeof( oexNEWSIZE_T );
 	ptr2 = (oexBYTE*)cmn::AlignN( (oexPtrType)ptr2, (oexPtrType)OEX_ALIGNEDMEM );
 
 	// Save original pointer
@@ -107,19 +110,47 @@ oexPVOID oex_malloc( oexNEWSIZE_T x_nSize )
 
 oexPVOID oex_realloc( oexPVOID x_ptr, oexNEWSIZE_T x_nSize )
 {
+	// Just use malloc if no previous pointer
 	if ( !x_ptr )
 		return oex_malloc( x_nSize );
+
+	// Consider allocate zero size to be freeing the memory
+	if ( 0 >= x_nSize )
+	{	oex_free( x_ptr ); 
+		return oexNULL; 
+	} // end if
 
 	// Get original pointer
 	void *ptr = *( (void**)x_ptr - 1 );
 
 	// Ensure it's sane
-	oexASSERT( cmn::Dif( (oexULONG)ptr, (oexULONG)x_ptr ) <= OEX_ALIGNEDMEM + sizeof( void* ) );
+	oexASSERT( cmn::Dif( (oexULONG)ptr, (oexULONG)x_ptr ) <= OEX_ALIGNEDMEM + sizeof( void* ) + sizeof( oexNEWSIZE_T ) );
+
+	// Get original size
+	oexNEWSIZE_T osize = *(oexNEWSIZE_T*)ptr;
+
+	// Just ignore request if buffer size isn't changing
+	if ( x_nSize == osize )
+	{	*(oexNEWSIZE_T*)ptr = x_nSize;
+		return x_ptr;
+	} // end if
 
 	// Attempt realloc
-	void *ptr2 = realloc( ptr, x_nSize + OEX_ALIGNEDMEM + sizeof( void* ) );
+	void *ptr2 = realloc( ptr, x_nSize + OEX_ALIGNEDMEM + sizeof( void* ) + sizeof( oexNEWSIZE_T ) );
+	if ( !ptr2 )
+	{	COex::GetMemLeak().Remove( x_ptr );
+		return oexNULL;
+	} // end if
+
+	// If it didn't move we get off easy
 	if ( ptr2 == ptr )
+	{
+		// Record new size
+		*(oexNEWSIZE_T*)ptr = x_nSize;
+
 		return x_ptr;
+
+	} // end if
 
 #if defined( oexDEBUG )
 	COex::GetMemLeak().Remove( x_ptr );
@@ -127,15 +158,21 @@ oexPVOID oex_realloc( oexPVOID x_ptr, oexNEWSIZE_T x_nSize )
 
 	// Great, the os moved the block
 	void *ptr3 = (oexBYTE*)ptr2 + ( (oexPtrType)x_ptr - (oexPtrType)ptr );
-	*( (void**)ptr3 - 1 ) = ptr2;
 
 	// Is it still aligned?
 	if ( 0 == ( (oexPtrType)ptr3 & ( OEX_ALIGNEDMEM - 1 ) ) )
 	{
+		// Save new size
+		*(oexNEWSIZE_T*)ptr2 = x_nSize;
+
+		// Save new pointer
+		*( (void**)ptr3 - 1 ) = ptr2;
+
 #if defined( oexDEBUG )
 		COex::GetMemLeak().Add( ptr3 );
 #endif
 		return ptr3;
+
 	} // end if
 
 //	oexEcho( "+++ inefficient realloc()" );
@@ -143,6 +180,12 @@ oexPVOID oex_realloc( oexPVOID x_ptr, oexNEWSIZE_T x_nSize )
 	// Well, now life sux
 	// I don't know what to do except allocate another aligned block and copy
 	void *ptr4 = oex_malloc( x_nSize );
+
+	// Don't read past the previous buffer size
+	if ( x_nSize > osize )
+		x_nSize = osize;
+
+	// Copy previous data
 	oexMemCpy( ptr4, ptr3, x_nSize );
 
 	// Free the realloc() pointer
@@ -165,7 +208,7 @@ void oex_free( oexPVOID x_ptr )
 	void *ptr = *( (void**)x_ptr - 1 );
 
 	// Ensure it's sane
-	oexASSERT( cmn::Dif( (oexULONG)ptr, (oexULONG)x_ptr ) <= OEX_ALIGNEDMEM + sizeof( void* ) );
+	oexASSERT( cmn::Dif( (oexULONG)ptr, (oexULONG)x_ptr ) <= OEX_ALIGNEDMEM + sizeof( void* ) + sizeof( oexNEWSIZE_T ) );
 
 	return free( ptr );
 }
