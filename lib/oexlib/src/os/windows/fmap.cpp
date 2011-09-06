@@ -129,7 +129,7 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexINT64 x_l
 	if ( VirtualQuery( pMem, &mbi, sizeof( mbi ) ) < sizeof( mbi )
 		 || MEM_COMMIT != mbi.State
 		 || mbi.BaseAddress != pMem
-		 || mbi.RegionSize < x_llSize )
+		 || mbi.RegionSize < (SIZE_T)x_llSize )
 	{	UnmapViewOfFile( pMem );
 		CloseHandle( hFile );
 		return c_Failed;

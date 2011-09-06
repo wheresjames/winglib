@@ -11,10 +11,10 @@
 #	include <android/log.h>
 #	include "importgl.h"
 //extern "C" int importGLInit();
-#	define _MSG( s ) __android_log_print( ANDROID_LOG_INFO, OEX_PROJECT_NAME, "%s(%lu): %s\n", __FILE__, __LINE__, s ), \
-					 printf( "%s(%lu): %s\n", __FILE__, __LINE__, s )
+#	define _MSG( s ) __android_log_print( ANDROID_LOG_INFO, OEX_PROJECT_NAME, "%s(%d): %s\n", __FILE__, __LINE__, s ), \
+					 printf( "%s(%d): %s\n", __FILE__, __LINE__, s )
 #else
-#	define _MSG( s ) printf( "%s(%lu): %s\n", __FILE__, __LINE__, s )
+#	define _MSG( s ) printf( "%s(%d): %s\n", __FILE__, __LINE__, s )
 #endif
 
 class MyEventReceiver : public irr::IEventReceiver
@@ -68,10 +68,10 @@ int Init( int width, int height )
 {_STT();
 
 #if defined( _WIN32_WCE ) || defined( __ANDROID__ )
-printf( "%s(%lu)\n", __FILE__, __LINE__ );
+printf( "%s(%d)\n", __FILE__, __LINE__ );
 
 #if defined( _IRR_COMPILE_WITH_OGLES2_ )
-printf( "%s(%lu)\n", __FILE__, __LINE__ );
+printf( "%s(%d)\n", __FILE__, __LINE__ );
 
 
 #if defined( __ANDROID__ )
@@ -96,7 +96,7 @@ printf( "%s(%lu)\n", __FILE__, __LINE__ );
 	_MSG( "irr::createDevice() succeeded" );
 								   
 #elif defined( _IRR_COMPILE_WITH_OGLES1_ )
-printf( "%s(%lu)\n", __FILE__, __LINE__ );
+printf( "%s(%d)\n", __FILE__, __LINE__ );
 
 	_MSG( "Using: EDT_OGLES1" );
 	g_pDevice = irr::createDevice( irr::video::EDT_OGLES1,
@@ -104,7 +104,7 @@ printf( "%s(%lu)\n", __FILE__, __LINE__ );
 								   16, true );
 
 #else
-printf( "%s(%lu)\n", __FILE__, __LINE__ );
+printf( "%s(%d)\n", __FILE__, __LINE__ );
 
 	_MSG( "Using: EDT_BURNINGSVIDEO" );
 	g_pDevice = irr::createDevice( irr::video::EDT_BURNINGSVIDEO,
@@ -150,7 +150,7 @@ printf( "%s(%lu)\n", __FILE__, __LINE__ );
 //	m_pDevice = irr::createDevice( irr::video::EDT_OPENGL, irr::core::dimension2d<irr::s32>( 640, 480 ), 16,
 //				   			  false, false, false, 0 );
 
-printf( "%s(%lu)\n", __FILE__, __LINE__ );
+printf( "%s(%d)\n", __FILE__, __LINE__ );
 	if ( !g_pDevice )
 		oexERROR( 0, oexT( "Failed to create irrlicht device" ) );
 

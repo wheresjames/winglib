@@ -135,17 +135,14 @@ oexPVOID oex_realloc( oexPVOID x_ptr, oexNEWSIZE_T x_nSize )
 		return x_ptr;
 	} // end if
 
-	// Attempt realloc
-	void *ptr2 = realloc( ptr, x_nSize + OEX_ALIGNEDMEM + sizeof( void* ) + sizeof( oexNEWSIZE_T ) );
-	if ( !ptr2 )
-	{
-	
 #if defined( oexDEBUG )
 		COex::GetMemLeak().Remove( x_ptr );
 #endif
+
+	// Attempt realloc
+	void *ptr2 = realloc( ptr, x_nSize + OEX_ALIGNEDMEM + sizeof( void* ) + sizeof( oexNEWSIZE_T ) );
+	if ( !ptr2 )
 		return oexNULL;
-		
-	} // end if
 
 	// If it didn't move we get off easy
 	if ( ptr2 == ptr )
@@ -153,13 +150,13 @@ oexPVOID oex_realloc( oexPVOID x_ptr, oexNEWSIZE_T x_nSize )
 		// Record new size
 		*(oexNEWSIZE_T*)ptr = x_nSize;
 
+#if defined( oexDEBUG )
+		COex::GetMemLeak().Add( x_ptr );
+#endif
+
 		return x_ptr;
 
 	} // end if
-
-#if defined( oexDEBUG )
-	COex::GetMemLeak().Remove( x_ptr );
-#endif
 
 	// Great, the os moved the block
 	void *ptr3 = (oexBYTE*)ptr2 + ( (oexPtrType)x_ptr - (oexPtrType)ptr );

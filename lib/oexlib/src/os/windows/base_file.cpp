@@ -38,10 +38,59 @@
 #if !defined( __MINGW32__ )
 #	include <ShlObj.h>
 #	include <Shellapi.h>
-#endif
-
-#if defined( __MINGW32__ )
+#else
 #	define OEX_USE_DYNAMIC_SHELL32
+
+#define CSIDL_ALTSTARTUP              29
+#define CSIDL_APPDATA                 26
+#define CSIDL_BITBUCKET               10
+#define CSIDL_CDBURN_AREA             59
+#define CSIDL_COMMON_ADMINTOOLS       47
+#define CSIDL_COMMON_ALTSTARTUP       30
+#define CSIDL_COMMON_APPDATA          35
+#define CSIDL_COMMON_DESKTOPDIRECTORY 25
+#define CSIDL_COMMON_DOCUMENTS        46
+#define CSIDL_COMMON_FAVORITES        31
+#define CSIDL_COMMON_MUSIC            53
+#define CSIDL_COMMON_PICTURES         54
+#define CSIDL_COMMON_PROGRAMS         23
+#define CSIDL_COMMON_STARTMENU        22
+#define CSIDL_COMMON_STARTUP          24
+#define CSIDL_COMMON_TEMPLATES        45
+#define CSIDL_COMMON_VIDEO            55
+#define CSIDL_CONTROLS                 3
+#define CSIDL_COOKIES                 33
+#define CSIDL_DESKTOP                  0
+#define CSIDL_DESKTOPDIRECTORY        16
+#define CSIDL_DRIVES                  17
+#define CSIDL_FAVORITES                6
+#define CSIDL_FONTS                   20
+#define CSIDL_HISTORY                 34
+#define CSIDL_INTERNET                 1
+#define CSIDL_INTERNET_CACHE          32
+#define CSIDL_LOCAL_APPDATA           28
+#define CSIDL_MYDOCUMENTS             12
+#define CSIDL_MYMUSIC                 13
+#define CSIDL_MYPICTURES              39
+#define CSIDL_MYVIDEO                 14
+#define CSIDL_NETHOOD                 19
+#define CSIDL_NETWORK                 18
+#define CSIDL_PERSONAL                 5
+#define CSIDL_PRINTERS                 4
+#define CSIDL_PRINTHOOD               27
+#define CSIDL_PROFILE                 40
+#define CSIDL_PROFILES                62
+#define CSIDL_PROGRAM_FILES           38
+#define CSIDL_PROGRAM_FILES_COMMON    43
+#define CSIDL_PROGRAMS                 2
+#define CSIDL_RECENT                   8
+#define CSIDL_SENDTO                   9
+#define CSIDL_STARTMENU               11
+#define CSIDL_STARTUP                  7
+#define CSIDL_SYSTEM                  37
+#define CSIDL_TEMPLATES               21
+#define CSIDL_WINDOWS                 36
+
 #endif
 
 OEX_USING_NAMESPACE
@@ -211,7 +260,7 @@ CPropertyBag CBaseFile::GetFileInfo( oexCSTR x_pFile )
 		{ "sparse_file",	FILE_ATTRIBUTE_SPARSE_FILE },
 		{ "system",			FILE_ATTRIBUTE_SYSTEM },
 		{ "temporary",		FILE_ATTRIBUTE_TEMPORARY },
-		{ "virtual",		FILE_ATTRIBUTE_VIRTUAL },
+//		{ "virtual",		FILE_ATTRIBUTE_VIRTUAL },
 		{ 0, 0 }
 	};
 
@@ -466,7 +515,7 @@ oexBOOL CBaseFile::Copy( oexCSTR x_pOld, oexCSTR x_pNew )
 	// SH Types
 	typedef IMalloc* t_LPMALLOC;
 	typedef struct { USHORT cb; BYTE abID[ 1 ]; } t_SHITEMID;
-	typedef struct { SHITEMID mkid; } t_ITEMIDLIST, *t_LPITEMIDLIST;
+	typedef struct { t_SHITEMID mkid; } t_ITEMIDLIST, *t_LPITEMIDLIST;
 	
 	// SH Functions
 	typedef HRESULT (*pfn_SHGetMalloc)( t_LPMALLOC *ppMalloc );
