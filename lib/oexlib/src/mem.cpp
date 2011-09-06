@@ -138,8 +138,13 @@ oexPVOID oex_realloc( oexPVOID x_ptr, oexNEWSIZE_T x_nSize )
 	// Attempt realloc
 	void *ptr2 = realloc( ptr, x_nSize + OEX_ALIGNEDMEM + sizeof( void* ) + sizeof( oexNEWSIZE_T ) );
 	if ( !ptr2 )
-	{	COex::GetMemLeak().Remove( x_ptr );
+	{
+	
+#if defined( oexDEBUG )
+		COex::GetMemLeak().Remove( x_ptr );
+#endif
 		return oexNULL;
+		
 	} // end if
 
 	// If it didn't move we get off easy
