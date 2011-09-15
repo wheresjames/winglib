@@ -35,7 +35,7 @@
 #include "oexlib.h"
 #include "std_os.h"
 
-#if !defined( __MINGW32__ )
+#if defined( OEX_MSC )
 #	include <ShlObj.h>
 #	include <Shellapi.h>
 #else
