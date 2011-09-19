@@ -7,7 +7,7 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := hello_android
+PRJ_NAME := alink
 PRJ_TYPE := dll
 PRJ_PACK := apk
 PRJ_RESD :=
@@ -17,11 +17,11 @@ PRJ_OSLB :=
 
 PRJ_RESOURCE := res
 PRJ_MANIFEST := AndroidManifest.xml
-PRJ_PKG_NAME := winglib.app.helloworld
+PRJ_PKG_NAME := winglib.app.alink
 
 PRJ_COMPANY 	:= Company
 PRJ_URL 		:= http://www.example.com
-PRJ_EMAIL 		:= email@example.com
+PRJ_EMAIL 		:= email@exemple.com
 PRJ_COPYRIGHT 	:= Copyright 2011
 PRJ_SIGN 		:= ss/ss
 PRJ_SIGNALIAS 	:= ss

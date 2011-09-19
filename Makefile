@@ -16,6 +16,7 @@ BUILDDIRS := app/hello \
 			 app/hello_android \
 			 app/irr_test \
 			 app/irr_android \
+			 app/alink \
 			 app/axtest \
 			 app/fftest
 
