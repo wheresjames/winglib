@@ -57,10 +57,12 @@ class IrrRenderer implements GLSurfaceView.Renderer
 
     public void onDrawFrame( GL10 gl )
 	{
-        gl.glClear( GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT );
+//        gl.glClear( GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT );
+		nativeDraw();
     }
 
 	/// Native function
     public native String nativeInit();
+    public native String nativeDraw();
 
 }

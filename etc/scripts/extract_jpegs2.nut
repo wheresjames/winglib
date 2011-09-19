@@ -1,7 +1,7 @@
 
 _self.load_module( "ffmpeg", "" );
 
-function StripJpegs( in_file, out_file, fps )
+function StripJpegs( in_file, out_file, fps, jpg )
 {
 	local rec_avi = 0;
 	local rec_enc = 0;
@@ -13,6 +13,11 @@ function StripJpegs( in_file, out_file, fps )
 
 	local data = CSqFile().get_contents_bin( in_file, 0 );
 	_self.echo( "fsize  : " + data.getUsed() );
+	
+	if ( jpg.len() )
+	{	_self.echo( "jpg    " + jpg );
+		CSqFile().mkdir( jpg );
+	} // end if
 
 	local frame = CSqBinary(), inf = CSqMulti();
 	local i = 0, start = 0, end = 0, max = data.getUsed();
@@ -36,7 +41,11 @@ function StripJpegs( in_file, out_file, fps )
 
 		if ( data.Sub( frame, start, end - start ) )
 		{
-			if ( img.Decode( "jpg", frame ) )
+			// Export jpeg?
+			if ( jpg.len() )
+				CSqFile().put_contents_bin( _self.build_path( jpg, i.tostring() + ".jpg" ), frame );
+
+			else if ( img.Decode( "jpg", frame ) )
 			{
 				if ( !rec_enc )
 				{
@@ -71,6 +80,7 @@ function StripJpegs( in_file, out_file, fps )
 				} // end if
 
 			} // end if
+
 		} // end if
 
 		i++;
@@ -90,9 +100,9 @@ if ( !files.size() )
 } // end if
 
 foreach( k,v in files )
-	if ( v == "f" )
+	if ( v.str() == "f" )
 	{	local f = _self.build_path( in_dir, k );
-		StripJpegs( f, f + ".avi", fps );
+		StripJpegs( f, f + ".avi", fps, _self.build_path( in_dir, k + ".jpg" ) );
 	} // end if
 
 return;
