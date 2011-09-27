@@ -496,6 +496,66 @@ namespace cmn
 	template< typename T > T setBE( oexPVOID p, T v ) { if ( p ) *(T*)p = v; return v; }
 #endif
 
+	/// Realigns the specified image buffer
+	/*
+		@param [in]		sp		- Source image data buffer
+		@param [out]	dp		- Destination image data buffer
+		@param [in]		sa		- Source alignment in bytes
+		@param [in]		da		- Destination alignment in bytes
+		@param [in]		w		- Image width
+		@param [in]		h		- Image height, negative to invert image
+		@param [in]		bpp		- Bits per pixel
+
+		@warning Source and destination pointers should not overlap
+		
+		@code
+
+			// Change DWORD aligned image to WORD aligned and invert
+			ReAlignImage( src, dst, 4, 2, w, -h, bbp );
+
+		@endcode
+
+		@return Returns the pointer to the destination buffer if success, or 0 if failure.
+	*/
+	template < typename T_PTR >
+		T_PTR ReAlignImage( const T_PTR sp, T_PTR dp, const long sa, const long da, long w, long h, long bbp )
+		{
+			if ( !sp || !dp || 0 >= sa || 0 >= da )
+				return 0;
+
+			if ( 0 >= w || 0 == h || 0 >= bbp )
+				return 0;
+
+			// Are we inverting the image?
+			bool bInvert = ( 0 > h ) ? true : false;
+			if ( bInvert ) h = -h;
+
+			// Source and destination byte pointers
+			const unsigned char *pSrc = (const unsigned char *)sp;
+			unsigned char *pDst = (unsigned char *)dp;
+
+			// Bits per line
+			long bpl = w * bbp;
+
+			// Line width in bytes
+			long lw = bpl / 8 + ( ( bpl & 7 ) ? 1 : 0 );
+
+			// Source and destination scan widths
+			long ws = ( lw + ( sa - 1 ) ) & ~( sa - 1 );
+			long wd = ( lw + ( da - 1 ) ) & ~( da - 1 );
+			long s = 0, d = 0;
+
+			// Are we inverting?
+			if ( bInvert )
+				s = ( ws * ( h - 1 ) ), ws = -ws;
+
+			// Copy the image
+			for ( int y = 0; y < h; y++, s += ws, d += wd )
+				for ( int x = 0; x < lw; x++ )
+					pDst[ d + x ] = pSrc[ s + x ];
+
+			return dp;
+		}
 
 };
 
