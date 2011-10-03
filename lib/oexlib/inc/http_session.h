@@ -284,7 +284,7 @@ public:
 		} // end if
 
 		// Do we have all the data?
-		oexUINT uContentLength = m_pbRxHeaders[ "Content-Length" ].ToLong();
+		oexUINT uContentLength = m_pbRxHeaders[ "content-length" ].ToLong();
 		if ( uContentLength && uContentLength > Rx().GetMaxRead() )
 			return 0;
 
@@ -436,7 +436,7 @@ public:
 	}
 
 	CStr8 DecodeCookie( CStr8 cookie )
-	{	CStrList8 items = CParser::Split( m_pbRxHeaders[ "Cookie" ].ToString(), "; " );
+	{	CStrList8 items = CParser::Split( m_pbRxHeaders[ "cookie" ].ToString(), "; " );
 		for ( CStrList8::iterator it; items.Next( it ); )
 		{	CPropertyBag8 data = CParser::Deserialize( it.Obj() );
 			if ( data.IsKey( m_sCookieId ) && data[ m_sCookieId ].ToString().Length() )
@@ -459,10 +459,10 @@ public:
 		CStr8 id;
 
 		// Is there a cookie?
-		if ( m_pbRxHeaders.IsKey( "Cookie" ) )
+		if ( m_pbRxHeaders.IsKey( "cookie" ) )
 		{
 			// Get our session id
-			id = DecodeCookie( m_pbRxHeaders[ "Cookie" ].ToString() );
+			id = DecodeCookie( m_pbRxHeaders[ "cookie" ].ToString() );
 
 			// Attempt to recover our data
 			if ( id.Length() && m_ppbSession->IsKey( id ) )
@@ -610,7 +610,7 @@ public:
 		if ( sRx.Length() )
 
 			// Read in the headers
-			m_pbRxHeaders = CParser::DecodeMIME( sRx );
+			m_pbRxHeaders = CParser::DecodeMIME( sRx, oexFALSE );
 
 		// Reconstruct the request
 		m_pbRequest[ "REQUEST_STRING" ].ToString()
@@ -753,7 +753,7 @@ public:
 		sReply << GetErrorString( m_nErrorCode );
 
 		// Send the headers
-		sReply << oexMbToStr( CParser::EncodeMime( m_pbTxHeaders ) ) << oexT( "\r\n" );
+		sReply << oexMbToStr( CParser::EncodeMime( m_pbTxHeaders, oexTRUE ) ) << oexT( "\r\n" );
 
 		// Send the content
 		sReply << oexMbToStr( m_sContent );
@@ -792,8 +792,8 @@ public:
 		if (m_bEnableCompression )
 		{
 			// Currently only supporting zlib/deflate
-			if ( 0 <= m_pbRxHeaders[ "Accept-Encoding" ].ToString().Match( "deflate" ) )
-			{	m_pbTxHeaders[ "Content-Encoding" ] = "deflate";
+			if ( 0 <= m_pbRxHeaders[ "accept-encoding" ].ToString().Match( "deflate" ) )
+			{	m_pbTxHeaders[ "content-encoding" ] = "deflate";
 				sCompressed = oexCompress( m_sContent );
 				pSend = &sCompressed;
 			} // end if
@@ -809,7 +809,7 @@ public:
 		WritePort( GetErrorString( m_nErrorCode ) );
 
 		// Send the headers
-		WritePort( CParser::EncodeMime( m_pbTxHeaders ) << "\r\n" );
+		WritePort( CParser::EncodeMime( m_pbTxHeaders, oexTRUE ) << "\r\n" );
 
 		// Send the content
 		WritePort( *pSend );
@@ -869,7 +869,7 @@ public:
 		WritePort( GetErrorString( m_nErrorCode ) );
 
 		// Send the headers
-		WritePort( CParser::EncodeMime( m_pbTxHeaders ) << "\r\n" );
+		WritePort( CParser::EncodeMime( m_pbTxHeaders, oexTRUE ) << "\r\n" );
 
 		return WritePort( x_pBuffer->Ptr(), x_pBuffer->getUsed() );
 /*
@@ -920,7 +920,7 @@ public:
 		WritePort( GetErrorString( m_nErrorCode ) );
 
 		// Send the headers
-		WritePort( CParser::EncodeMime( m_pbTxHeaders ) << "\r\n" );
+		WritePort( CParser::EncodeMime( m_pbTxHeaders, oexTRUE ) << "\r\n" );
 
 		// Write out the file
 		// Do this in chunks in case the file is huge
@@ -1126,8 +1126,8 @@ public:
 			s << " -";
 
 		// Add user agent if specified
-		if ( m_pbRxHeaders[ "User-Agent" ].ToString().Length() )
-			s << " \"" << m_pbRxHeaders[ "User-Agent" ].ToString() << "\"";
+		if ( m_pbRxHeaders[ "user-agent" ].ToString().Length() )
+			s << " \"" << m_pbRxHeaders[ "user-agent" ].ToString() << "\"";
 		else
 			s << " -";
 

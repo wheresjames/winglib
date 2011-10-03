@@ -975,14 +975,20 @@ public:
 
 	/// Decode MIME
 	template< typename T >
-		static TPropertyBag< TStr< T > > DecodeMIME( TStr< T > x_sStr )
+		static TPropertyBag< TStr< T > > DecodeMIME( TStr< T > x_sStr, oexBOOL x_bCaseSensitive )
 	{
 		TPropertyBag< TStr< T > > pb;
 
 		while ( x_sStr.Length() )
 		{
 			TStr< T > sKey = x_sStr.Parse( oexTT( T, ":\r\n" ) ), sVal;
-			if ( *x_sStr == oexTC( T, ':' ) ) x_sStr++;
+
+			// Force lower case if not case sensitive
+			if ( !x_bCaseSensitive )
+				sKey.ToLower();
+
+			if ( *x_sStr == oexTC( T, ':' ) ) 
+				x_sStr++;
 
 			// Read value string
 			do
@@ -1021,16 +1027,22 @@ public:
 
 	/// Encode MIME
 	template< typename T >
-		static TStr< T > EncodeMime( TPropertyBag< TStr< T > > &x_pb )
+		static TStr< T > EncodeMime( TPropertyBag< TStr< T > > &x_pb, oexBOOL x_bCaseSensitive )
 	{
 		TStr< T > str;
 
 		// Write out each value
-		for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
-
-			if ( it.Node()->key.Length() && it->ToString().Length() )
-
-				str << it.Node()->key << oexTT( T, ": " ) << it->ToString() << oexTT( T, "\r\n" );
+		if ( x_bCaseSensitive )
+		{	for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+				if ( it.Node()->key.Length() && it->ToString().Length() )
+					str << it.Node()->key << oexTT( T, ": " ) << it->ToString() << oexTT( T, "\r\n" );
+		} // end if
+		
+		else
+		{	for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+				if ( it.Node()->key.Length() && it->ToString().Length() )
+					str << it.Node()->key.ToLower() << oexTT( T, ": " ) << it->ToString() << oexTT( T, "\r\n" );
+		} // end else
 
 		return str;
 	}

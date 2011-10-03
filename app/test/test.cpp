@@ -2079,7 +2079,7 @@ oex::oexRESULT TestParser()
 								  << oexT( "e: f\r\n" )
 								  << oexT( "\r\n" );
 
-	pb = oex::CParser::DecodeMIME( sMime );
+	pb = oex::CParser::DecodeMIME( sMime, oexFALSE );
 
 	if ( !oexVERIFY( pb[ oexT( "a" ) ].ToString() == oexT( "b" ) ) )
 		return -40;
@@ -2095,7 +2095,7 @@ oex::oexRESULT TestParser()
 		  << oexT( "c: d\r\n" )
 		  << oexT( "e: f" );
 
-	pb = oex::CParser::DecodeMIME( sMime );
+	pb = oex::CParser::DecodeMIME( sMime, oexFALSE );
 
 	if ( !oexVERIFY( pb[ oexT( "a" ) ].ToString() == oexT( "b" ) ) )
 		return -43;
@@ -2111,7 +2111,7 @@ oex::oexRESULT TestParser()
 		  << oexT( "c:\r\n" )
 		  << oexT( "e: f" );
 
-	pb = oex::CParser::DecodeMIME( sMime );
+	pb = oex::CParser::DecodeMIME( sMime, oexFALSE );
 
 	if ( !oexVERIFY( pb[ oexT( "a" ) ].ToString() == oexT( "b" ) ) )
 		return -46;
