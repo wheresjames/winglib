@@ -2,6 +2,7 @@
 package winglib.app.irrandroid;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.widget.TextView;
 import android.os.Bundle;
 import android.opengl.GLSurfaceView;
@@ -47,7 +48,9 @@ class IrrRenderer implements GLSurfaceView.Renderer
 {
     public void onSurfaceCreated( GL10 gl, EGLConfig config )
 	{
-		nativeInit();
+		String s = nativeInit();
+		if ( !s.isEmpty() )
+			throw new Error( s );
     }
 
     public void onSurfaceChanged( GL10 gl, int w, int h )
@@ -64,5 +67,6 @@ class IrrRenderer implements GLSurfaceView.Renderer
 	/// Native function
     public native String nativeInit();
     public native String nativeDraw();
-
+    
 }
+

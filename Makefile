@@ -13,13 +13,13 @@ BUILDDIRS := app/hello \
 			 app/srvmod \
 			 app/modrun \
 			 app/gstest \
-			 app/hello_android \
 			 app/irr_test \
 			 app/irr_android \
 			 app/alink \
 			 app/axtest \
 			 app/fftest
 
+#			 app/hello_android \
 
 #-------------------------------------------------------------------
 # Squirrel engine

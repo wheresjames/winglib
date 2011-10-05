@@ -21,7 +21,7 @@ PRJ_PKG_NAME := winglib.app.irrandroid
 
 PRJ_COMPANY 	:= Company
 PRJ_URL 		:= http://www.example.com
-PRJ_EMAIL 		:= email@exemple.com
+PRJ_EMAIL 		:= email@example.com
 PRJ_COPYRIGHT 	:= Copyright 2011
 PRJ_SIGN 		:= ss/ss
 PRJ_SIGNALIAS 	:= ss
@@ -42,9 +42,15 @@ PRJ_INCS := $(PRJ_INCS) irrlicht-android/project/include irrlicht-android/projec
 PRJ_LIBS := $(PRJ_LIBS) irrlicht-android cximage jpeg png tiff zlib bzip2
 PRJ_OSLB := log
 ifneq ($(LIBLINK),static)
-	PRJ_OSLB := $(PRJ_OSLB) GLESv2
+	PRJ_OSLB := $(PRJ_OSLB) EGL GLESv1_CM
+#	PRJ_OSLB := $(PRJ_OSLB) EGL GLESv2
+#	PRJ_OSLB := $(PRJ_OSLB) GLESv2
+#	PRJ_OSLB := $(PRJ_OSLB) EGL_adreno200
+#	PRJ_OSLB := $(PRJ_OSLB) GLESv2_adreno200
+#	PRJ_OSLB := $(PRJ_OSLB) EGL_adreno200 GLESv2_adreno200
+#	PRJ_OSLB := $(PRJ_OSLB) EGL_adreno200 GLESv1_CM_adreno200
 endif
-CFG_LFLAGS := $(CFG_LFLAGS) -Wl,-allow-shlib-undefined -Wl,-rpath=/system/lib/egl
+CFG_LFLAGS := $(CFG_LFLAGS) -Wl,-allow-shlib-undefined -Wl,-rpath=/system/egl -Wl,-rpath=/system/lib/egl
 
 #-------------------------------------------------------------------
 # File locations
@@ -64,3 +70,4 @@ include $(PRJ_LIBROOT)/build.mk
 include $(PRJ_LIBROOT)/go.mk
 
 endif
+

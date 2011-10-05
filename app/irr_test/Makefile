@@ -20,7 +20,12 @@ PRJ_DEFS := _STDCALL_SUPPORTED
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-ifeq ($(TOOLS),iphone)
+ifeq ($(OS),iphone)
+UNSUPPORTED := TOOLS=$(TOOLS) not supported
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
+ifeq ($(OS),android)
 UNSUPPORTED := TOOLS=$(TOOLS) not supported
 include $(PRJ_LIBROOT)/unsupported.mk
 else
@@ -76,3 +81,6 @@ include $(PRJ_LIBROOT)/build.mk
 include $(PRJ_LIBROOT)/go.mk
 
 endif
+
+endif
+
