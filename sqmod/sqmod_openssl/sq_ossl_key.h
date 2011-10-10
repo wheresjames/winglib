@@ -97,7 +97,7 @@ public:
 	void setPassword( const sqbind::stdString &s ) { m_sPassword = oexStrToMb( sqbind::std2oex( s ) ); }
 
 	/// Returns a pointer to the password phrase or null if none
-	char* getPasswordPtr() { return m_sPassword.Length() ? (char*)m_sPassword.Ptr() : NULL; }
+	const char* getPasswordPtr() { return m_sPassword.Length() ? (const char*)m_sPassword.Ptr() : NULL; }
 
 	/** @} */
 

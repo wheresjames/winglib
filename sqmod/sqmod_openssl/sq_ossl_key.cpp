@@ -51,7 +51,7 @@ int COsslKey::CreateRsa( int nSize )
 		Destroy();
 		return 0;
 	} // end if
-	rsa = NULL;
+	rsa = oexNULL;
 
 	return GenPublicKey();
 }
@@ -100,7 +100,7 @@ int COsslKey::SaveKeys( const sqbind::stdString &sPrivate, const sqbind::stdStri
 		else
 		{
 
-			PEM_write_RSAPrivateKey( fp, m_pkey->pkey.rsa, NULL, NULL, 0, NULL, NULL );
+			PEM_write_RSAPrivateKey( fp, m_pkey->pkey.rsa, oexNULL, oexNULL, 0, oexNULL, oexNULL );
 
 			fclose( fp );
 
@@ -124,7 +124,7 @@ int COsslKey::SavePrivateKey( const sqbind::stdString &sPrivate )
 	else
 	{
 
-		PEM_write_RSAPrivateKey( fp, m_pkey->pkey.rsa, NULL, NULL, 0, NULL, NULL );
+		PEM_write_RSAPrivateKey( fp, m_pkey->pkey.rsa, oexNULL, oexNULL, 0, oexNULL, oexNULL );
 
 		fclose( fp );
 
@@ -177,7 +177,7 @@ int COsslKey::setPrivateKey( sqbind::CSqBinary *pBin )
 	} // end if
 
 	RSA *rsa = 0;
-	if ( !PEM_read_bio_RSAPrivateKey( pBio, &rsa, NULL, NULL ) )
+	if ( !PEM_read_bio_RSAPrivateKey( pBio, &rsa, oexNULL, oexNULL ) )
 	{	oexERROR( 0, oexT( "PEM_read_bio_RSA_PUBKEY() failed" ) );
 		Destroy();
 		return 0;
@@ -189,7 +189,7 @@ int COsslKey::setPrivateKey( sqbind::CSqBinary *pBin )
 		Destroy();
 		return 0;
 	} // end if
-	rsa = NULL;
+	rsa = oexNULL;
 
 	BIO_free( pBio );
 
@@ -209,7 +209,7 @@ sqbind::CSqBinary COsslKey::getPrivateKey()
 		return sqbind::CSqBinary();
 	} // end if
 
-	if ( !PEM_write_bio_RSAPrivateKey( pBio, m_pkey->pkey.rsa, NULL, NULL, 0, NULL, NULL ) )
+	if ( !PEM_write_bio_RSAPrivateKey( pBio, m_pkey->pkey.rsa, oexNULL, oexNULL, 0, oexNULL, oexNULL ) )
 	{	oexERROR( 0, oexT( "PEM_read_bio_RSA_PUBKEY() failed" ) );
 		Destroy();
 		return sqbind::CSqBinary();
@@ -242,7 +242,7 @@ int COsslKey::setPrivateKeyRaw( sqbind::CSqBinary *pBin )
 	} // end if
 
 	const unsigned char *p = (const unsigned char*)pBin->Ptr();
-	RSA *rsa = d2i_RSAPrivateKey( NULL, &p, pBin->getUsed() );
+	RSA *rsa = d2i_RSAPrivateKey( oexNULL, &p, pBin->getUsed() );
 	if ( !rsa )
 	{	oexERROR( 0, oexT( "d2i_RSAPrivateKey() failed" ) );
 		Destroy();
@@ -255,7 +255,7 @@ int COsslKey::setPrivateKeyRaw( sqbind::CSqBinary *pBin )
 		Destroy();
 		return 0;
 	} // end if
-	rsa = NULL;
+	rsa = oexNULL;
 
 	return GenPublicKey();
 }
@@ -267,7 +267,7 @@ sqbind::CSqBinary COsslKey::getPrivateKeyRaw()
 		return sqbind::CSqBinary();
 		
 	// How big is the key?
-	int nSize = i2d_RSAPrivateKey( m_pkey->pkey.rsa, NULL );
+	int nSize = i2d_RSAPrivateKey( m_pkey->pkey.rsa, oexNULL );
 	if ( 0 >= nSize )
 		return sqbind::CSqBinary();
 
@@ -304,7 +304,7 @@ int COsslKey::LoadPrivateKey( const sqbind::stdString &sFile )
 		return 0;
 	} // end if
 
-	RSA *rsa = PEM_read_RSAPrivateKey( fp, NULL, NULL, NULL );
+	RSA *rsa = PEM_read_RSAPrivateKey( fp, oexNULL, oexNULL, oexNULL );
 	if ( !rsa )
 	{	oexERROR( 0, oexT( "PEM_read_RSAPrivateKey() failed" ) );
 		fclose( fp );
@@ -320,7 +320,7 @@ int COsslKey::LoadPrivateKey( const sqbind::stdString &sFile )
 		Destroy();
 		return 0;
 	} // end if
-	rsa = NULL;
+	rsa = oexNULL;
 
 	return GenPublicKey();
 }
@@ -347,9 +347,13 @@ int COsslKey::setPublicKey( sqbind::CSqBinary *pBin )
 		return 0;
 	} // end if
 
-	RSA *rsa = 0;
-	if ( !PEM_read_bio_RSAPublicKey( pBio, &rsa, NULL, NULL ) )
-	{	oexERROR( 0, oexT( "PEM_read_bio_RSA_PUBKEY() failed" ) );
+	RSA *rsa = PEM_read_bio_RSAPublicKey( pBio, oexNULL, oexNULL, (void*)getPasswordPtr() );
+	if ( !rsa )
+		rsa = PEM_read_bio_RSA_PUBKEY( pBio, oexNULL, oexNULL, (void*)getPasswordPtr() );
+	if ( !rsa )
+	{	const char *pErr = ERR_reason_error_string( ERR_get_error() );
+		oexERROR( 0, oexMks( oexT( "PEM_read_bio_RSAPublicKey(), PEM_read_bio_RSA_PUBKEY() failed : " ), 
+							 pErr ? oexMbToStr( pErr ) : oexT( "Unknown" ) ) );
 		Destroy();
 		return 0;
 	} // end if
@@ -360,7 +364,7 @@ int COsslKey::setPublicKey( sqbind::CSqBinary *pBin )
 		Destroy();
 		return 0;
 	} // end if
-	rsa = NULL;
+	rsa = oexNULL;
 
 	BIO_free( pBio );
 
@@ -413,7 +417,7 @@ int COsslKey::setPublicKeyRaw( sqbind::CSqBinary *pBin )
 	} // end if
 
 	const unsigned char *p = (const unsigned char*)pBin->Ptr();
-	RSA *rsa = d2i_RSAPublicKey( NULL, &p, pBin->getUsed() );
+	RSA *rsa = d2i_RSAPublicKey( oexNULL, &p, pBin->getUsed() );
 	if ( !rsa )
 	{	oexERROR( 0, oexT( "d2i_RSAPrivateKey() failed" ) );
 		Destroy();
@@ -426,7 +430,7 @@ int COsslKey::setPublicKeyRaw( sqbind::CSqBinary *pBin )
 		Destroy();
 		return 0;
 	} // end if
-	rsa = NULL;
+	rsa = oexNULL;
 
 	return 1;
 }
@@ -438,7 +442,7 @@ sqbind::CSqBinary COsslKey::getPublicKeyRaw()
 		return sqbind::CSqBinary();
 		
 	// How big is the key?
-	int nSize = i2d_RSAPublicKey( m_pkey->pkey.rsa, NULL );
+	int nSize = i2d_RSAPublicKey( m_pkey->pkey.rsa, oexNULL );
 	if ( 0 >= nSize )
 		return sqbind::CSqBinary();
 
@@ -475,7 +479,9 @@ int COsslKey::LoadPublicKey( const sqbind::stdString &sFile )
 		return 0;
 	} // end if
 
-	RSA *rsa = PEM_read_RSAPublicKey( fp, NULL, NULL, NULL );
+	RSA *rsa = PEM_read_RSAPublicKey( fp, oexNULL, oexNULL, (void*)getPasswordPtr() );
+	if ( !rsa )
+		rsa = PEM_read_RSA_PUBKEY( fp, oexNULL, oexNULL, (void*)getPasswordPtr() );
 	if ( !rsa )
 	{	oexERROR( 0, oexT( "PEM_read_RSAPublicKey() failed" ) );
 		fclose( fp );
@@ -491,7 +497,7 @@ int COsslKey::LoadPublicKey( const sqbind::stdString &sFile )
 		Destroy();
 		return 0;
 	} // end if
-	rsa = NULL;
+	rsa = oexNULL;
 
 	return 1;
 }

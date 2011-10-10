@@ -342,26 +342,50 @@ namespace sqbind
 		stdString base64_encode()
 		{	return oex2std( oexMbToStr( m_bin.base64_encode() ) ); }
 
+		/// Base64 encodes data
+		CSqBinary base64_encode_bin()
+		{	return m_bin.base64_encode(); }
+
 		/// Base64 decodes data
 		stdString base64_decode()
 		{	return oex2std( oexMbToStr( m_bin.base64_decode() ) ); }
+
+		/// Base64 decodes data
+		CSqBinary base64_decode_bin()
+		{	return m_bin.base64_decode(); }
 
 		/// Base16 encodes data
 		stdString base16_encode()
 		{	return oex2std( oexMbToStr( m_bin.base16_encode() ) ); }
 
+		/// Base16 encodes data
+		CSqBinary base16_encode_bin()
+		{	return m_bin.base16_encode(); }
+
 		/// Base16 decodes data
 		stdString base16_decode()
 		{	return oex2std( oexMbToStr( m_bin.base16_decode() ) ); }
 
+		/// Base16 decodes data
+		CSqBinary base16_decode_bin()
+		{	return m_bin.base16_decode(); }
+		
 		/// Compress data
 		stdString compress()
 		{	return oex2std( oexMbToStr( m_bin.compress() ) ); }
 
+		/// Compress data
+		CSqBinary compress_bin()
+		{	return m_bin.compress(); }
+		
 		/// Uncompresses data
 		stdString uncompress()
 		{	return oex2std( oexMbToStr( m_bin.uncompress() ) ); }
 
+		/// Uncompresses data
+		CSqBinary uncompress_bin()
+		{	return m_bin.uncompress(); }
+		
 		/// Base64 encodes data
 		void base64_encode_str( const stdString &s )
 		{	m_bin.base64_encode( oexStrToMb( std2oex( s ) ) ); }
