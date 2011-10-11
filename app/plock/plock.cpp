@@ -84,7 +84,7 @@ public:
 			tsleep( 1000 );
 			exit( 0 );
 #endif
-				
+
 			// Ref
 			nCount++;
 
@@ -408,7 +408,7 @@ int main(int argc, char* argv[])
 	for ( long i = 0; i < nThreads; i++ )
 		for ( long j = i + 1; j < nThreads; j++ )
 			if ( ti[ i ].id == ti[ j ].id )
-				printf( "\n\n???? WTf ???? : All bets are off, two threads (%lu and %lu) had the same id\n\n", i, j );
+				printf( "\n\n???? WTF ???? : All bets are off, two threads (%lu and %lu) had the same id\n\n", i, j );
 
 	printf( "\n\n Total Attempts : %lu \n Total Locks : %lu \n Total Collisions : %lu \n\n", 
 			ulAttempts, ulSuccess, ulCollisions );
