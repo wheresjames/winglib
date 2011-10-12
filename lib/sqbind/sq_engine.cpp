@@ -565,6 +565,7 @@ CSqMulti CSqEngineExport::find_resource( const stdString &sName, int bIgnoreCase
 
 stdString CSqEngineExport::get_resource( const stdString &sRes, int bFileOverrideOk )
 {_STT();
+/*
 	// Data container
 	oex::CStr s;
 
@@ -596,8 +597,40 @@ stdString CSqEngineExport::get_resource( const stdString &sRes, int bFileOverrid
 	// Punt if no data
 	if ( !s.Length() )
 		return stdString();
+*/
+	return get_resource_bin( sRes, bFileOverrideOk ).getString();
+}
 
-	return oex2std( s );
+CSqBinary CSqEngineExport::get_resource_bin( const stdString &sRes, int bFileOverrideOk )
+{_STT();
+	// Data container
+	oex::CBin b;
+
+	if ( bFileOverrideOk )
+	{
+		// +++ This really isn't the way to handle the paths.
+		//     I can't think of a good approach atm, so will
+		//     think this through later.
+
+		// Look in script path
+		stdString sSub = path( build_path( oexT( ".." ), sRes ) );
+		if ( oexExists( sSub.c_str() ) )
+			b = oexFileGetContents( sSub.c_str() );
+
+		// Look in binary path
+		else
+		{	sSub = root( sRes );
+			if ( oexExists( sSub.c_str() ) )
+				b = oexFileGetContents( sSub.c_str() );
+		} // end else
+
+	} // end if
+
+	// Check for resource
+	if ( !b.getUsed() )
+		b = oexGetResource( sRes.c_str() );
+
+	return b;
 }
 
 /// Returns the buffer for a binary share
@@ -1792,6 +1825,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, uncompress )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, find_resource )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_resource )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_resource_bin )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_name )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_app_name )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_service_name )

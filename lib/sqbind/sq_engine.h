@@ -588,6 +588,9 @@ public:
 		/// Returns a linked in resource
 		stdString get_resource( const stdString &sRes, int bFileOverrideOk );
 
+		/// Returns a linked in resource
+		CSqBinary get_resource_bin( const stdString &sRes, int bFileOverrideOk );
+
 		/// Finds resources matching the pattern in sName
 		CSqMulti find_resource( const stdString &sName, int bIgnoreCase, int bFileOverrideOk );
 		
