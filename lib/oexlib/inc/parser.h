@@ -397,9 +397,8 @@ public:
 		switch( x_ch )
 		{
 			// case oexTC( T, ' ' ) :
-			case oexTC( T, '!' ) :
-			case oexTC( T, '#' ) : case oexTC( T, '$' ) :
-			case oexTC( T, '%' ) : case oexTC( T, '\'' ) :
+			case oexTC( T, '!' ) : case oexTC( T, '#' ) : 
+			case oexTC( T, '$' ) : case oexTC( T, '%' ) :
 			case oexTC( T, '(' ) : case oexTC( T, ')' ) :
 			case oexTC( T, '*' ) : case oexTC( T, '+' ) :
 			case oexTC( T, ',' ) : case oexTC( T, '-' ) :
