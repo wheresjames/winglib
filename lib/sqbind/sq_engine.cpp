@@ -565,39 +565,6 @@ CSqMulti CSqEngineExport::find_resource( const stdString &sName, int bIgnoreCase
 
 stdString CSqEngineExport::get_resource( const stdString &sRes, int bFileOverrideOk )
 {_STT();
-/*
-	// Data container
-	oex::CStr s;
-
-	if ( bFileOverrideOk )
-	{
-		// +++ This really isn't the way to handle the paths.
-		//     I can't think of a good approach atm, so will
-		//     think this through later.
-
-		// Look in script path
-		stdString sSub = path( build_path( oexT( ".." ), sRes ) );
-//		oexSHOW( sSub.c_str() );
-		if ( oexExists( sSub.c_str() ) )
-			s = oexMbToStr( oexFileGetContents( sSub.c_str() ) );
-
-		// Look in binary path
-		else
-		{	sSub = root( sRes );
-			if ( oexExists( sSub.c_str() ) )
-				s = oexMbToStr( oexFileGetContents( sSub.c_str() ) );
-		} // end else
-
-	} // end if
-
-	// Check for resource
-	if ( !s.Length() )
-		s = oexGetResource( sRes.c_str() );
-
-	// Punt if no data
-	if ( !s.Length() )
-		return stdString();
-*/
 	return get_resource_bin( sRes, bFileOverrideOk ).getString();
 }
 
