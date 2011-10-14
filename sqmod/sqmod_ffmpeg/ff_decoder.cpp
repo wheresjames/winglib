@@ -97,9 +97,9 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
     m_pCodecContext->codec_id = (CodecID)x_nCodec;
     m_pCodecContext->codec_type = AVMEDIA_TYPE_VIDEO;
     m_pCodecContext->bit_rate = brate;
-    m_pCodecContext->width = width ? width : 320;
-    m_pCodecContext->height = height ? height : 240;
-    m_pCodecContext->time_base.den = fps;
+    m_pCodecContext->width = ( 0 < width ) ? width : 320;
+    m_pCodecContext->height = ( 0 < height ) ? height : 240;
+    m_pCodecContext->time_base.den = ( 0 < fps ) ? fps : 30;
     m_pCodecContext->time_base.num = 1;
     m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
 	m_pCodecContext->pix_fmt = (PixelFormat)fmt;

@@ -89,7 +89,7 @@ BUILDDIRS := $(BUILDDIRS) install/sntpsync
 ifdef DOX
 BUILDDIRS := $(BUILDDIRS) dox
 endif
-			
+
 #-------------------------------------------------------------------
 # multithreading
 #-------------------------------------------------------------------

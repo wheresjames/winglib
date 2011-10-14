@@ -66,10 +66,10 @@ namespace sqbind
 		/** \addtogroup CSqBinaryShare
 			@{
 		*/
-		
+
 		/// Releases the share and all associated resources
 		void Destroy();
-		
+
 		/// Creates a writable share
 		/**
 			@param [in] sName		-	Share name
