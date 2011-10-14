@@ -45,7 +45,7 @@ LOC_EXT_def := class
 include $(PRJ_LIBROOT)/build.mk
 
 export LOC_TAG := c
-LOC_CXX_c := c
+#LOC_CXX_c := c
 include $(PRJ_LIBROOT)/build.mk
 
 #-------------------------------------------------------------------
