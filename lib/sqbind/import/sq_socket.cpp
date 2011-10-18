@@ -48,11 +48,36 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSockAddress, CSqSockAddress )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, getPort )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, getDotAddress )
 
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, getHostName )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, getDomainName )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, getFullHostName )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, getHostByName )
+
 SQBIND_REGISTER_CLASS_END()
 
 void CSqSockAddress::Register( sqbind::VM vm )
 {_STT();
 	SQBIND_EXPORT( vm, CSqSockAddress );
+}
+
+sqbind::stdString CSqSockAddress::getHostName()
+{_STT();
+	return oex2std( m_address.GetHostName() );
+}
+
+sqbind::stdString CSqSockAddress::getDomainName()
+{_STT();
+	return oex2std( m_address.GetDomainName() );
+}
+
+sqbind::stdString CSqSockAddress::getFullHostName()
+{_STT();
+	return oex2std( m_address.GetFullHostName() );
+}
+
+int CSqSockAddress::getHostByName( const sqbind::stdString &sHost )
+{_STT();
+	return m_address.GetHostByName( sHost.c_str() );
 }
 
 sqbind::stdString CSqSockAddress::GetId()

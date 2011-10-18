@@ -90,6 +90,72 @@ oexBOOL CIpAddress::ValidateAddress()
     return oexTRUE;
 }
 
+CStr CIpAddress::GetHostName()
+{_STT();
+	
+	// Look up the host name
+	char szHostName[ MAX_PATH ] = { 0 };
+	if( ::gethostname( szHostName, sizeof( szHostName ) ) )
+		return CStr();
+	
+	return CStr( oexMbToStr( szHostName ) );
+}
+
+CStr CIpAddress::GetFullHostName()
+{_STT();
+	CStr sDomain = GetDomainName();
+	if ( sDomain.Length() )
+		return sDomain << oexT( "\\" ) << GetHostName();
+//		return GetHostName() << oexT( "." ) << sDomain;
+	return GetHostName();
+}
+
+#define NET_API_FUNCTION __stdcall
+typedef WCHAR* LMSTR;
+typedef DWORD NET_API_STATUS;
+typedef struct _WKSTA_INFO_100 
+{	DWORD wki100_platform_id;
+	LMSTR wki100_computername;
+	LMSTR wki100_langroup;
+	DWORD wki100_ver_major;
+	DWORD wki100_ver_minor;
+} WKSTA_INFO_100, *PWKSTA_INFO_100, *LPWKSTA_INFO_100;
+
+typedef NET_API_STATUS (NET_API_FUNCTION *pfn_NetWkstaGetInfo)( LPWSTR servername, DWORD level, LPBYTE *bufptr );
+typedef NET_API_STATUS (NET_API_FUNCTION *pfn_NetApiBufferFree)( LPVOID Buffer );
+
+CStr CIpAddress::GetDomainName( oexCSTR x_pServer )
+{_STT();
+
+	CStr sRet;
+
+	// Load netapi32.dll
+	HMODULE hLib = LoadLibrary( oexT( "netapi32.dll" ) );
+	if ( !hLib )
+		return sRet;
+
+	// Get function pointers
+	pfn_NetApiBufferFree pNetApiBufferFree = (pfn_NetApiBufferFree)GetProcAddress( hLib, oexT( "NetApiBufferFree" ) );
+	pfn_NetWkstaGetInfo pNetWkstaGetInfo = (pfn_NetWkstaGetInfo)GetProcAddress( hLib, oexT( "NetWkstaGetInfo" ) );
+
+	// Attempt to read the domain name
+	WKSTA_INFO_100 *pwi100 = oexNULL;
+	if ( pNetWkstaGetInfo 
+		 && !pNetWkstaGetInfo( ( x_pServer && *x_pServer ) ? (LPWSTR)oexStrToStrWPtr( x_pServer ) : oexNULL, 100, (LPBYTE*)&pwi100 ) )
+		if ( pwi100 && pwi100->wki100_langroup )
+			sRet = oexStrWToStr( pwi100->wki100_langroup );
+
+	// Free buffer
+	if ( pNetApiBufferFree && pwi100 )
+		pNetApiBufferFree( pwi100 );
+
+	// Free library
+	FreeLibrary( hLib );
+
+	// Send the domain name along
+	return sRet;
+}
+
 oexBOOL CIpAddress::SetDotAddress( oexCSTR x_pDotAddress, oexINT32 x_uPort, oexINT32 x_uType )
 {_STT();
 #if defined( OEX_NOSOCKET2 )

@@ -66,6 +66,18 @@ namespace sqbind
 		/// Sets the raw address values
 		int SetRawAddress( int nAddr, int nPort );
 
+		/// Returns the current host name
+		sqbind::stdString getHostName();
+
+		/// Returns the current host name
+		sqbind::stdString getDomainName();
+
+		/// Returns the current host name
+		sqbind::stdString getFullHostName();
+
+		/// Lookup host by name
+		int getHostByName( const sqbind::stdString &sHost );
+
 		/// Validates the address check sum
 		int ValidateAddress();
 

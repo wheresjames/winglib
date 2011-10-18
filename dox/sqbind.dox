@@ -2,4 +2,3 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 INPUT					= ../lib/sqbind
-EXCLUDE_SYMBOLS			= *

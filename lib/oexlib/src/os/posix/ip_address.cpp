@@ -102,6 +102,36 @@ oexBOOL CIpAddress::ValidateAddress()
     return oexTRUE;
 }
 
+CStr CIpAddress::GetHostName()
+{_STT();
+	
+	// Look up the host name
+	char szHostName[ MAX_PATH ] = { 0 };
+	if( ::gethostname( szHostName, sizeof( szHostName ) ) )
+		return CStr();
+	
+	return CStr( oexMbToStr( szHostName ) );
+}
+
+CStr CIpAddress::GetFullHostName()
+{_STT();
+	CStr sDomain = GetDomainName();
+	if ( sDomain.Length() )
+		return GetHostName() << oexT( "." ) << sDomain;
+	return GetHostName();
+}
+
+
+CStr CIpAddress::GetDomainName( oexCSTR x_pServer )
+{_STT();
+	// Look up the domain name
+	struct utsname; oexZero( utsname );
+	if( 0 > ::uname( &utsname ) || !utsname.domainname )
+		return CStr();
+	
+	return CStr( oexMbToStr( utsname.domainname ) );
+}
+
 // +++ Make IPv6 safe
 oexBOOL CIpAddress::SetDotAddress( oexCSTR x_pDotAddress, oexINT32 x_uPort, oexINT32 x_uType )
 {

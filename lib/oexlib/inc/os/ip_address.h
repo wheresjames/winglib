@@ -110,6 +110,21 @@ public:
     /// Parses a url into components
     static CPropertyBag ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize = 0 );
 
+	/// Returns the current host name
+	static CStr GetHostName();
+
+	/// Returns the current host name
+	static CStr GetFullHostName();
+
+	/// Returns the current computers domain name
+	static CStr GetDomainName( oexCSTR x_pServer = oexNULL );
+
+	/// Gets address by host name
+	oexBOOL GetHostByName( oexCSTR x_pHost )
+	{
+		return LookupHost( x_pHost, 0 ); 
+	}
+
     /// Returns the dot address
     CStr GetDotAddress();
 
