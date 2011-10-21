@@ -35,6 +35,10 @@
 #include "oexlib.h"
 #include "std_os.h"
 
+#if !defined( OEX_NOUNAME )
+#	include <sys/utsname.h>
+#endif
+
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
@@ -104,12 +108,12 @@ oexBOOL CIpAddress::ValidateAddress()
 
 CStr CIpAddress::GetHostName()
 {_STT();
-	
+
 	// Look up the host name
-	char szHostName[ MAX_PATH ] = { 0 };
+	char szHostName[ oexSTRSIZE ] = { 0 };
 	if( ::gethostname( szHostName, sizeof( szHostName ) ) )
 		return CStr();
-	
+
 	return CStr( oexMbToStr( szHostName ) );
 }
 
@@ -124,12 +128,16 @@ CStr CIpAddress::GetFullHostName()
 
 CStr CIpAddress::GetDomainName( oexCSTR x_pServer )
 {_STT();
+#if defined( OEX_NOUNAME )
+	return CStr();
+#else
 	// Look up the domain name
-	struct utsname; oexZero( utsname );
-	if( 0 > ::uname( &utsname ) || !utsname.domainname )
+	struct utsname un; oexZero( un );
+	if( 0 > ::uname( &un ) || !un.domainname )
 		return CStr();
-	
-	return CStr( oexMbToStr( utsname.domainname ) );
+
+	return CStr( oexMbToStr( un.domainname ) );
+#endif
 }
 
 // +++ Make IPv6 safe
@@ -285,7 +293,7 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
 		} // end if
 
 		else
-			pb[ oexT( "path" ) ].ToString() += str; 
+			pb[ oexT( "path" ) ].ToString() += str;
 
 	} // end if
 
