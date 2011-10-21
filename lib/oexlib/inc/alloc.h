@@ -112,11 +112,11 @@ public:
 
 // Alignment params
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
-#	if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+//#	if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 #		define OEX_MEMBLOCKPADDING 	( sizeof( OEX_NAMESPACE::CAlloc::SBlockHeader ) + sizeof( OEX_NAMESPACE::CAlloc::m_ucUnderrunPadding ) )
-#	else
-#		define OEX_MEMBLOCKPADDING 	( sizeof( OEX_NAMESPACE::CAlloc::SBlockHeader ) )
-#	endif
+//#	else
+//#		define OEX_MEMBLOCKPADDING 	( sizeof( OEX_NAMESPACE::CAlloc::SBlockHeader ) )
+//#	endif
 #	define OEX_MEMBLOCKOVERHEAD 	( OEX_MEMBLOCKPADDING + sizeof( OEX_NAMESPACE::CAlloc::m_ucOverrunPadding ) )
 #else
 #	define OEX_MEMBLOCKPADDING 		0

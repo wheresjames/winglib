@@ -39,10 +39,13 @@ OEX_USING_NAMESPACE
 #if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
 
 // Ensure alignement
-#	if defined( OEX_ALIGNEDMEM ) && 0 != OEX_ALIGNEDMEM
-		oexSTATIC_ASSERT( 0 == ( OEX_MEMBLOCKPADDING & ( OEX_ALIGNEDMEM - 1 ) ) );
-		oexSTATIC_ASSERT( OEX_MEMBLOCKPADDING >= sizeof( oexUINT ) );
-		oexSTATIC_ASSERT( OEX_SIZE_VAR >= sizeof( oexUINT ) );
+#	if defined( OEX_ALIGNEDMEM ) && ( 0 != OEX_ALIGNEDMEM )
+			oexSTATIC_ASSERT( 0 == ( OEX_ALIGNEDMEM & ( OEX_ALIGNEDMEM - 1 ) ) );
+#		if defined( OEX_MEMBLOCKPADDING )
+// +++ ???	oexSTATIC_ASSERT( 0 == ( OEX_MEMBLOCKPADDING & ( OEX_ALIGNEDMEM - 1 ) ) );
+			oexSTATIC_ASSERT( OEX_MEMBLOCKPADDING >= sizeof( oexUINT ) );
+#		endif
+			oexSTATIC_ASSERT( OEX_SIZE_VAR >= sizeof( oexUINT ) );
 #	endif
 
 /// Underrun padding
