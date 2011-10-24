@@ -280,6 +280,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexMemSet							OEX_NAMESPACE::os::CSys::MemSet
 #define oexStrCpy							OEX_NAMESPACE::zstr::Copy
 #define oexStrCpySz( d, s )					OEX_NAMESPACE::zstr::Copy( d, sizeof( d ), s )
+#define oexStrCpyMax( d, s, m )				OEX_NAMESPACE::zstr::Copy( d, m, s )
 
 #define oexINIT()                   		OEX_NAMESPACE::COex::Init()
 #define oexUNINIT()                 		OEX_NAMESPACE::COex::Uninit()
