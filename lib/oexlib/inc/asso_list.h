@@ -593,7 +593,7 @@ public:
 	template< class T_CMPOBJ, class T_CMPFUNC >
 		iterator SearchKey( oexCONST T_CMPOBJ x_tObj, T_CMPFUNC x_fCmp )
 		{
-            for ( iterator it; Next( it ); )
+            for ( iterator it; TList< T_OBJ, T_NODE >::Next( it ); )
     			if ( 0 <= x_fCmp( it.Node()->key, x_tObj ) )
 					return it;
 
@@ -812,7 +812,7 @@ public:
 	*/
 	TAssoList Copy()
 	{	TAssoList lst;
-		for ( iterator it; Next( it ); )
+		for ( iterator it; TList< T_OBJ, T_NODE >::Next( it ); )
 			lst[ it.Node()->key ] = *it;
 		return lst;
 	}
