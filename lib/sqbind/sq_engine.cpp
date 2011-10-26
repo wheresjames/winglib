@@ -2433,6 +2433,17 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 		// Check Install directory
 		if ( !sFull.Length() )
 		{
+		
+// Build type
+#	if defined( OEX_GCC )
+#		define SQBUILD "gcc"
+#	elif defined( OEX_MSC )
+#		define SQBUILD "vs"
+#	else
+#		define SQBUILD "unk"
+#	endif
+
+// Engine name
 #	if defined( OEX_SQENGINE )
 #		define SQKEYNAME OEX_SQENGINE
 #	elif defined( OEX_GCC )
@@ -2440,17 +2451,24 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 #	else
 #		define SQKEYNAME "SquirrelScript"
 #	endif
+
+// CPU type
 #	if defined( OEX_CPU_64 )
 #		define SQKEYCPU "x64"
 #	else
 #		define SQKEYCPU "x86"
 #	endif
 
-			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "SOFTWARE\\" SQKEYNAME "_" SQKEYCPU ), oexT( "Install_Dir" ) );
+			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "SOFTWARE\\" SQKEYNAME "_" SQKEYCPU "_" SQBUILD ), oexT( "Install_Dir" ) );
 			if ( sInstallRoot.Length() )
 				sFull = FindFile( sInstallRoot, lstSubs, sFile );
 			else
-				oexNOTICE( 0, oexT( "!!! Script Engine is Not Installed !!!" ) );
+			{	sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "SOFTWARE\\" SQKEYNAME "_" SQKEYCPU ), oexT( "Install_Dir" ) );
+				if ( sInstallRoot.Length() )
+					sFull = FindFile( sInstallRoot, lstSubs, sFile );
+				else
+					oexNOTICE( 0, oexT( "!!! Script Engine is Not Installed !!!" ) );
+			} // end else
 		} // end if
 #endif
 
