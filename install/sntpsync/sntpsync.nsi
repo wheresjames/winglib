@@ -6,7 +6,7 @@
 
 !define FILENAME "SntpSync"
 
-!define APPKEY "${FILENAME}_${PROC}"
+!define APPKEY "${FILENAME}_${PROC}_${BUILD}"
 
 ; The name of the installer
 
@@ -20,9 +20,9 @@
 Name "${APPVNAME}"
 
 !ifdef FVER
-	OutFile "${OUTROOT}\Install${FILENAME}${POSTFIX}_${FVER}_${PROC}.exe"
+	OutFile "${OUTROOT}\Install${FILENAME}${POSTFIX}_${FVER}_${PROC}_${BUILD}.exe"
 !else
-	OutFile "${OUTROOT}\Install${FILENAME}${POSTFIX}_${PROC}.exe"
+	OutFile "${OUTROOT}\Install${FILENAME}${POSTFIX}_${PROC}_${BUILD}.exe"
 !endif
 
 ; The default installation director
