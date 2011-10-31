@@ -275,7 +275,7 @@
 #	endif
 #endif
 
-#define oexAppNameProcPtr()			oexAppNameSPtr( " " OEX_PROC_STR )
+#define oexAppNameProcPtr()			oexAppNameSPtr( OEX_PROC_STR )
 
 #if defined( OEX_PROJECT_DESC )
 #	define oexAppDescPtr()			oexTEXT( OEX_PROJECT_DESC )
