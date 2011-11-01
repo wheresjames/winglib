@@ -1324,6 +1324,7 @@ int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )
 
 	if ( oexExists( path( sExeName ).c_str() ) )
 		sFull = path( sExeName );
+
 	else if ( oexExists( root( sExeName ).c_str() ) )
 		sFull = root( sExeName );
 
@@ -1331,6 +1332,14 @@ int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )
 
 	else
 	{
+		#	if defined( OEX_GCC )
+		#		define SQBUILD "gcc"
+		#	elif defined( OEX_MSC )
+		#		define SQBUILD "vs"
+		#	else
+		#		define SQBUILD "unk"
+		#	endif
+
 		#	if defined( OEX_SQENGINE )
 		#		define SQKEYNAME OEX_SQENGINE
 		#	elif defined( OEX_GCC )
@@ -1346,12 +1355,24 @@ int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )
 
 		// Posible squirrel engines
 		oex::oexCSTR sKeys[] = 
-		{	
-			oexT( "SOFTWARE\\" SQKEYNAME "_" SQKEYCPU ),
+		{
+			// Check for an engine like us
+			oexT( "SOFTWARE\\" SQKEYNAME "_" SQKEYCPU "_" SQBUILD ),
+			
+			// +++ Really? wtf?
+			// Any engine will probably do...
 			oexT( "SOFTWARE\\SquirrelScript_x86" ),
+			oexT( "SOFTWARE\\SquirrelScript_x86_gcc" ),
+			oexT( "SOFTWARE\\SquirrelScript_x86_vs" ),
 			oexT( "SOFTWARE\\SquirrelScript_x64" ),
+			oexT( "SOFTWARE\\SquirrelScript_x64_gcc" ),
+			oexT( "SOFTWARE\\SquirrelScript_x64_vs" ),
 			oexT( "SOFTWARE\\WinglibScriptEngine_x86" ),
+			oexT( "SOFTWARE\\WinglibScriptEngine_x86_gcc" ),
+			oexT( "SOFTWARE\\WinglibScriptEngine_x86_vs" ),
 			oexT( "SOFTWARE\\WinglibScriptEngine_x64" ),
+			oexT( "SOFTWARE\\WinglibScriptEngine_x64_gcc" ),
+			oexT( "SOFTWARE\\WinglibScriptEngine_x64_vs" ),
 			0
 		};
 
