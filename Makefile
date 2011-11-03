@@ -71,6 +71,7 @@ BUILDDIRS := $(BUILDDIRS) sqmod/sqmod_cell \
 #-------------------------------------------------------------------
 BUILDDIRS := $(BUILDDIRS) app/vidcap app/avi_scan \
 						  app/irr_wxtest \
+						  app/qt_webkit \
 						  app/wx_webkit
 
 #-------------------------------------------------------------------
