@@ -7,18 +7,19 @@ BUILDDIRS := app/hello \
 			 lib/oexlib \
 			 tools/resbld \
 			 tools/join \
+			 tools/cii \
 			 app/test \
 			 app/iptest \
 			 app/srvrund \
 			 app/srvmod \
 			 app/modrun \
 			 app/gstest \
-			 app/irr_test \
 			 app/irr_android \
 			 app/alink \
 			 app/axtest \
 			 app/fftest
 
+#			 app/irr_test \
 #			 app/hello_android \
 
 #-------------------------------------------------------------------

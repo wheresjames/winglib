@@ -1655,7 +1655,7 @@ oex::oexRESULT TestLists()
 	if ( !oexVERIFY(  pb2[ oexT( "group1" ) ][ oexT( "val2" ) ].ToString() == oexT( "noreturn" ) ) )
 		return -29;
 
-	// Make sure it encodes / decodes
+	// Test HTML encode / decode
 	if ( !oexVERIFY( s1 == oex::CParser::HtmlDecode( oex::CParser::HtmlEncode( s1 ) ) ) )
 	{	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::HtmlEncode( s1 ) ), 0, 16, 128 ).Ptr() );
 		oexEcho( oex::CParser::HtmlEncode( s1 ).Ptr() );
@@ -1663,7 +1663,14 @@ oex::oexRESULT TestLists()
 		return -30;
 	} // end if
 
-		
+	// Test c++ encode / decode
+	if ( !oexVERIFY( s1 == oex::CParser::CppDecode( oex::CParser::CppEncode( s1 ) ) ) )
+	{	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::CppEncode( s1 ) ), 0, 16, 128 ).Ptr() );
+		oexEcho( oex::CParser::CppEncode( s1 ).Ptr() );
+		oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::CppDecode( oex::CParser::CppEncode( s1 ) ) ), 0, 16, 128 ).Ptr() );
+		return -31;
+	} // end if
+
 	return oex::oexRES_OK;
 }
 

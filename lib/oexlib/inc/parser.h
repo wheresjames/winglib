@@ -581,6 +581,169 @@ public:
 		return ret;
 	}
 
+//------------------------------------------------------------------
+// C++ encode / decode
+//------------------------------------------------------------------
+
+		/// Returns non-zero if the character is a valid html character
+		template< typename T >
+			static oexBOOL IsCppChar( T x_ch )
+		{
+			return ( 0 > x_ch || oexTC( T, ' ' ) <= x_ch ) ? oexTRUE : oexFALSE;
+		}
+
+		template< typename T >
+			static TStr< T > CppEncodeChar( T x_ch )
+			{
+				switch( x_ch )
+				{
+					case oexTC( T, '"' ) :
+						return oexTT( T, "\\\"" );
+
+					case oexTC( T, '\'' ) :
+						return oexTT( T, "\\\\" );
+
+					case oexTC( T, '\t' ) :
+						return oexTT( T, "\\t" );
+
+					case oexTC( T, '\r' ) :
+						return oexTT( T, "\\r" );
+
+					case oexTC( T, '\n' ) :
+						return oexTT( T, "\\n" );
+
+				} // end switch
+
+				// Generic encode
+				return oexFmt( oexTT( T, "\" \"\\x%x\" \"" ), (unsigned long)( 0xff & x_ch ) );
+			}
+
+		template< typename T >
+			static TStr< T > CppEncode( oexCONST T *x_pStr, oexLONG x_lSize = 0 )
+			{	oexASSERT_PTR( x_pStr );
+				if ( 0 >= x_lSize ) return CppEncode( TStr< T >( x_pStr ) );
+				return CppEncode( TStr< T >( x_pStr, x_lSize ) );
+			}
+
+		template< typename T >
+			static TStr< T > CppEncode( TStr< T > x_str )
+		{
+			TStr< T > ret;
+			oexINT nLen = x_str.Length();
+
+			while ( 0 < nLen-- )
+			{
+				if ( IsCppChar( *x_str ) )
+					ret << *x_str;
+				else
+					ret << CppEncodeChar( *x_str );
+
+				x_str++;
+
+			} // end while
+
+			return ret;
+		}
+
+		template< typename T >
+			static TStr< T > CppDecodeChar( oexCONST T *x_pStr )
+			{	oexASSERT_PTR( x_pStr );
+				return CppDecodeChar( TStr< T >( x_pStr ) );
+			}
+
+
+		template< typename T >
+			struct SCppItem
+			{
+				oexCONST T		ch;
+				oexCONST T		*s;
+				oexINT			l;
+			};
+
+
+		template< typename T >
+			static T CppDecodeChar( TStr< T > &x_str )
+			{
+				static const SCppItem< T > c_cnv[] =
+				{
+					{ oexTC( T, '\t' ), oexTT( T, "\t" ), 4 * 6 },
+					{ oexTC( T, '"' ), oexTT( T, "\"" ), 6 },
+					{ oexTC( T, '\'' ), oexTT( T, "\\" ), 5 },
+					{ oexTC( T, '\r' ), oexTT( T, "\r" ), 4 },
+					{ oexTC( T, '\n' ), oexTT( T, "\n" ), 4 },
+					{ 0, oexNULL }
+				};
+
+				// Ensure it starts off looking like an escape sequence
+				if ( oexTC( T, '"' ) != *x_str && oexTC( T, '\\' ) != *x_str )
+					return *( x_str.Slice( 1 ) );
+
+				// Check for hex encode string
+				if ( x_str.Sub( 0, 5 ) == oexT( "\" \"\\x" ) )
+				{	T ch = oexTC( T, ' ' );
+					TStr< T > sNum = x_str.ParseToken( "0123456789abcdefABCDEF" );
+					if ( sNum.Length() )
+						ch = sNum.ToLong();
+					if ( x_str.Sub( 0, 5 ) == oexT( "\" \"" ) )
+						x_str.Slice( 3 );
+					return ch;
+
+				} // end if
+
+				// Embedded version, we don't create this kind because it's unreliable ;)
+				else if ( x_str.Sub( 0, 2 ) == oexT( "\\x" ) )
+				{	T ch = oexTC( T, ' ' );
+					TStr< T > sNum = x_str.ParseToken( "0123456789abcdefABCDEF" );
+					if ( sNum.Length() )
+						ch = sNum.ToLong();
+					return ch;
+				} // end if
+
+				// Scan for known sequence
+				for ( oexUINT c = 0; c < oexSizeOfArray( c_cnv ) && c_cnv[ c ].s; c++ )
+					if ( x_str.SubStr( 0, c_cnv[ c ].l ) == c_cnv[ c ].s )
+					{	x_str.LTrim( c_cnv[ c ].l );
+						return c_cnv[ c ].ch;
+					} // end if
+
+				// Eh, what can you do?
+				return *( x_str.Slice( 1 ) );
+			}
+
+
+		/// Decodes an html string "&lt;b&gt;Hello&nbsp;World&lt;/b&gt;" -> "<b>Hello World</b>"
+		template< typename T >
+			static TStr< T > CppDecode( oexCONST T *x_pStr )
+			{   return CppDecode( TStr< T >( x_pStr ) ); }
+
+		template< typename T >
+			static TStr< T > CppDecode( TStr< T > x_str )
+		{
+			TStr< T > ret;
+
+			do
+			{
+				// Find escape sequence
+				oexINT o = x_str.FindChars( oexTT( T, "\\\"" ) );
+
+				// Found &
+				if ( 0 <= o )
+				{	if ( o )
+						ret << x_str.Slice( o );
+					ret << CppDecodeChar( x_str );
+				} // end if
+
+				// Just append the rest of the string
+				else
+					ret << x_str, x_str.Destroy();
+
+			} while ( x_str.Length() );
+
+			return ret;
+		}
+
+// --------------------------------------------------------------------------
+
 	/// Generic property bag deserializing
 	template< typename T >
 		static TPropertyBag< TStr< T > > Deserialize( oexCONST T *x_pStr, oexBOOL x_bMerge = oexFALSE )

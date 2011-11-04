@@ -2693,7 +2693,7 @@ public:
 
 	/// Splits off a token and returns it
 	TStr ParseToken( oexCONST T* pValid )
-	{	oexVALIDATE_PTR( pValid );
+	{	oexASSERT_PTR( pValid );
 		oexINT i = 0;
 		TStr str = Token( pValid, &i );
 		if ( i ) LTrim( i );
@@ -2702,7 +2702,7 @@ public:
 
 	/// Splits off a token and returns it
 	TStr ParseNextToken( oexCONST T* pValid )
-	{	oexVALIDATE_PTR( pValid );
+	{	oexASSERT_PTR( pValid );
 		oexINT i = 0;
 		TStr str = NextToken( pValid, &i );
 		if ( i ) LTrim( i );
