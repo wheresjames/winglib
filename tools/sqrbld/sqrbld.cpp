@@ -76,9 +76,9 @@ template < typename T >
 	{_STT();
 
 		// Code header / footer
-		static oex::oexTCHAR szHeader1[] = oexT( "CBin " );
-		static oex::oexTCHAR szHeader2[] = oexT( "()" ) oexNL oexT( "{" ) oexNL;
-		static oex::oexTCHAR szFooter[] = oexNL oexT( "return out; " ) oexNL oexT( "}" oexNL oexT( "};" ) );
+		static oex::oexTCHAR szHeader1[] = oexNL oexNL oexT( "static int f_" );
+		static oex::oexTCHAR szHeader2[] = oexT( "( oex::CPropertyBag &in, oex::CStr &out )" ) oexNL oexT( "{" ) oexNL;
+		static oex::oexTCHAR szFooter[] = oexNL oexT( "return 0; " ) oexNL oexT( "}" ) oexNL oexT( "};" );
 		static oex::oexTCHAR szOpenStr[] = oexNL oexT( "out << \"" );
 		static oex::oexTCHAR szCloseStr[] = oexT( "\";" ) oexNL;
 		static oex::CStr::t_size nOverhead = (oex::CStr::t_size)
@@ -87,8 +87,12 @@ template < typename T >
 												 + sizeof( szOpenStr ) + sizeof( szCloseStr );
 
 		// Global name space
-		T sGlobal;
-		sGlobal << oexT( "namespace " ) << sName << oexT( " {" ) << oexNL << oexT( "CBin out;" ) << oexNL;
+		T sInc, sGlobal, sEnd;
+		sGlobal << oexNL << oexT( "#include \"oexres.h\"" ) << oexNL
+				<< oexT( "#include \"oexlib.h\"" ) << oexNL
+				<< oexT( "namespace ns_" ) << sName << oexT( " {" ) << oexNL;
+		sEnd << oexNL << oexT( "void* fn_") << sName <<
+						 oexNL << oexT( "\t = (void*)&ns_" ) << sName << oexT( "::f_" ) << sName << oexT( ";" ) << oexNL;
 
 		// Get the source data
 		oex::CStr sSrc;
@@ -123,7 +127,7 @@ template < typename T >
 		nDst += sizeof( szHeader2 ) - sizeof( oex::oexTCHAR );
 
 		// Open close positions
-		oex::CStr::t_size nOpen = 0, nClose = 0;
+		oex::CStr::t_size nOpen = 0, nClose = 0, nSkip = 0;
 
 		// Block type
 		oex::oexINT nType = 0;
@@ -131,6 +135,10 @@ template < typename T >
 		// Open tag for locals
 		oex::oexTCHAR tcOpen[] = oexT( "<?c" );
 		oex::CStr::t_size szOpen = (oex::CStr::t_size)oex::zstr::Length( tcOpen );
+
+		// Open tag for locals
+		oex::oexTCHAR tcOpenI[] = oexT( "<?inc" );
+		oex::CStr::t_size szOpenI = (oex::CStr::t_size)oex::zstr::Length( tcOpenI );
 
 		// Open tag for globals
 		oex::oexTCHAR tcOpenG[] = oexT( "<?global" );
@@ -140,7 +148,51 @@ template < typename T >
 		oex::oexTCHAR tcClose[] = oexT( "?>" );
 		oex::CStr::t_size szClose = (oex::CStr::t_size)oex::zstr::Length( tcClose );
 
-		// First let's strip the global code and put it at the top
+		// Inc section goes outside the namespace
+		while ( ( nPos + szOpenG + szClose ) < szSrc )
+		{
+			// Ensure we have space
+			if ( ( sDst.Size() - nDst ) < ( ( szSrc - nPos ) * 3 ) + nOverhead )
+				pDst = sDst.OexAllocate( sDst.Size() * 3 );
+
+			// Initialize
+			nStart = nPos;
+			nOpen = nClose = szSrc;
+
+			// Attempt to find an open bracket
+			while ( nOpen == szSrc && ( nPos + szOpen + szClose ) < szSrc )
+				if ( !oexMemCmp( &pSrc[ nPos ], tcOpenI, szOpenI ) )
+					nOpen = nPos;
+				else
+					nPos++;
+
+			// Find a closing bracket
+			while ( nClose == szSrc && ( nPos + szClose ) < szSrc )
+				if ( !oexMemCmp( &pSrc[ nPos ], tcClose, szClose ) )
+					nClose = nPos;
+				else
+					nPos++;
+
+			// Did we find embedded code?
+			if ( nOpen < szSrc && nClose < szSrc )
+			{
+				// Skip the open bracket
+				nOpen += szOpenI;
+
+				// Save any code?
+				if ( nOpen < nClose )
+					sInc.Append( &pSrc[ nOpen ], nClose - nOpen );
+
+				// Point to data after code
+				nPos += szClose;
+				nStart = nPos;
+
+			} // end if
+
+		} // end while
+
+		// Global section is inside the namespace
+		nPos = 0; nStart = 0;
 		while ( ( nPos + szOpenG + szClose ) < szSrc )
 		{
 			// Ensure we have space
@@ -177,6 +229,7 @@ template < typename T >
 
 				// Point to data after code
 				nPos += szClose;
+				nStart = nPos;
 
 			} // end if
 
@@ -184,7 +237,7 @@ template < typename T >
 
 		// Now let's process the rest of the script
 		nPos = 0; nStart = 0;
-		while ( ( nPos + szOpenG + szClose ) < szSrc )
+		while ( ( nPos + szOpen + szClose ) < szSrc )
 		{
 			// Ensure we have space
 			if ( ( sDst.Size() - nDst ) < ( ( szSrc - nPos ) * 2 ) + nOverhead )
@@ -197,9 +250,11 @@ template < typename T >
 			// Attempt to find an open bracket
 			while ( nOpen == szSrc && ( nPos + szOpen + szClose ) < szSrc )
 				if ( !oexMemCmp( &pSrc[ nPos ], tcOpen, szOpen ) )
-					nOpen = nPos, nType = 0;
+					nOpen = nPos, nType = 0, nSkip = szOpen;
+				else if ( !oexMemCmp( &pSrc[ nPos ], tcOpenI, szOpenI ) )
+					nOpen = nPos, nType = 1, nSkip = szOpenI;
 				else if ( !oexMemCmp( &pSrc[ nPos ], tcOpenG, szOpenG ) )
-					nOpen = nPos, nType = 1;
+					nOpen = nPos, nType = 2, nSkip = szOpenG;
 				else
 					nPos++;
 
@@ -228,7 +283,7 @@ template < typename T >
 				} // end if
 
 				// Any code to copy?
-				nOpen += szOpen;
+				nOpen += nSkip;
 				if ( !nType && nOpen < nClose )
 				{
 					// Add new line
@@ -246,6 +301,7 @@ template < typename T >
 
 				// Point to data after code
 				nPos += szClose;
+				nStart = nPos;
 
 			} // end if
 
@@ -255,9 +311,9 @@ template < typename T >
 		if ( nStart < szSrc )
 		{	oexMemCpy( &pDst[ nDst ], szOpenStr, sizeof( szOpenStr ) - sizeof( oex::oexTCHAR ) );
 			nDst += sizeof( szOpenStr ) - sizeof( oex::oexTCHAR );
-			T s = oexCppEncode( T( &pSrc[ nStart ], nOpen - nStart ) );
+			T s = oexCppEncode( T( &pSrc[ nStart ], szSrc - nStart ) );
 			oexMemCpy( &pDst[ nDst ], s.Ptr(), s.Length() );
-			nDst += s.Length(); nStart += nOpen - nStart;
+			nDst += s.Length(); nStart += szSrc - nStart;
 			oexMemCpy( &pDst[ nDst ], szCloseStr, sizeof( szCloseStr ) - sizeof( oex::oexTCHAR ) );
 			nDst += sizeof( szCloseStr ) - sizeof( oex::oexTCHAR );
 		} // end if
@@ -270,8 +326,53 @@ template < typename T >
 		sDst.SetLength( nDst );
 
 		// Build the full thing and return
-		return sGlobal << sDst;
+		return sInc << sGlobal << sDst << sEnd;
 	}
+
+
+int to_binary( oex::CFile &f, oex::CStr8 &sData, oex::CStr &sVar, oex::CStr &sPre, oex::CStr &sSuf )
+{_STT();
+
+	oexCONST oexUCHAR *p = (oexCONST oexUCHAR*)sData.Ptr();
+	oexULONG u = sData.Length();
+
+	// Write out the data length
+	f.Write( ( CStr8() << oexNL8 "unsigned long " << oexStrToMb( sVar ) << "_len = " << u << ";" oexNL8 ) );
+
+	// Write out the data
+	f.Write( sPre );
+
+	CStr8 buf;
+	oexUCHAR *t = (oexUCHAR*)"0x.., ";
+	oexINT tl = oex::zstr::Length( t );
+	oexUCHAR *r = (oexUCHAR*)"0x..," oexNL8 "\t ";
+	oexINT rl = oex::zstr::Length( r );
+	oexUCHAR *b = (oexUCHAR*)buf.OexAllocate( 1024 ), *s;
+	oexINT bl = 0;
+	for ( oexULONG i = 0; i < u; i++ )
+	{
+		s = &b[ bl ];
+
+		if ( !( ( i + 1 ) & 0xf ) )
+			oexMemCpy( s, r, rl ), bl += rl;
+		else
+			oexMemCpy( s, t, tl ), bl += tl;
+
+		chtoa( &s[ 2 ], (oexUCHAR)p[ i ] );
+
+		if ( 1000 < bl )
+			f.Write( b, bl ), bl = 0;
+
+	} // end for
+
+	if ( bl )
+		f.Write( b, bl );
+
+	f.Write( sSuf );
+
+	return 1;
+
+}
 
 
 int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, oex::CStr sSuf, oex::CStr sInc, oex::CStrList &lstSq, oex::CStrList &lstCii )
@@ -314,9 +415,10 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 	// Inline c++ file?
 	else if ( oex::CParser::MatchPatterns( sIn, lstCii, oex::oexTRUE ) )
 	{	nType = 2;
-		sData = prepare_cpp( sIn, CStr( "rid_" ) << sVar, 1 );
+		sData = prepare_cpp( sVar, sIn, 1 );
 	} // end if
 
+	// Just serialize
 	else
 		sData = oex::zip::CCompress::Compress( CFile().OpenExisting( sIn.Ptr() ).Read() );
 
@@ -340,9 +442,11 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 
 		i.SetPtrPosEnd( 0 );
 
-		// Add to include
-		i.Write( CStr8() << oexNL8 "extern unsigned long " << oexStrToMb( sVar ) << "_len;"
-				 	     << oexNL8 "extern char " << oexStrToMb( sVar ) << "[];" oexNL8 );
+		if ( 2 == nType )
+			i.Write( CStr8() << oexNL8 "extern void* fn_" << oexStrToMb( sVar ) << ";" oexNL8 );
+		else
+			i.Write( CStr8() << oexNL8 "extern unsigned long " << oexStrToMb( sVar ) << "_len;"
+							 << oexNL8 "extern char " << oexStrToMb( sVar ) << "[];" oexNL8 );
 
 	} // end if
 
@@ -352,59 +456,12 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 		return -22;
 	} // end if
 
-	switch( nType )
-	{
-		case 2:
-			f.Write( sData );
-			break;
+	if ( 2 == nType )
+		f.Write( sData );
+	else
+		to_binary( f, sData, sVar, sPre, sSuf );
 
-		default:
-		{
-			oexCONST oexUCHAR *p = (oexCONST oexUCHAR*)sData.Ptr();
-			oexULONG u = sData.Length();
-
-			// Write out a comment
-			f.Write( ( CStr8() << oexNL8 "// " << oexStrToMb( sIn.GetFileName() ) << oexNL8 ) );
-
-			// Write out the data length
-			f.Write( ( CStr8() << oexNL8 "unsigned long " << oexStrToMb( sVar ) << "_len = " << u << ";" oexNL8 ) );
-
-			// Write out the data
-			f.Write( sPre );
-
-			CStr8 buf;
-			oexUCHAR *t = (oexUCHAR*)"0x.., ";
-			oexINT tl = oex::zstr::Length( t );
-			oexUCHAR *r = (oexUCHAR*)"0x..," oexNL8 "\t ";
-			oexINT rl = oex::zstr::Length( r );
-			oexUCHAR *b = (oexUCHAR*)buf.OexAllocate( 4 * 1024 ), *s;
-			oexINT bl = 0;
-			for ( oexULONG i = 0; i < u; i++ )
-			{
-				s = &b[ bl ];
-
-				if ( !( ( i + 1 ) & 0xf ) )
-					oexMemCpy( s, r, rl ), bl += rl;
-				else
-					oexMemCpy( s, t, tl ), bl += tl;
-
-				chtoa( &s[ 2 ], (oexUCHAR)p[ i ] );
-
-				if ( 4000 < bl )
-					f.Write( b, bl ), bl = 0;
-
-			} // end for
-
-			if ( bl )
-				f.Write( b, bl );
-
-			f.Write( sSuf );
-
-		} break;
-
-	} // end switch
-
-	return 0;
+	return nType;
 }
 
 int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
@@ -440,22 +497,39 @@ int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 //				oexSHOW( sOut );
 
 				// Create file
-				int res = create_res( ff.GetFullPath(), sOut, sVar,
-									  oexT( "" ), oexT( "" ), oexT( "" ),
-									  lstSq, lstCii );
-				if ( 0 <= res )
+				oexINT nType = create_res( ff.GetFullPath(), sOut, sVar,
+									       oexT( "" ), oexT( "" ), oexT( "" ),
+									       lstSq, lstCii );
+				if ( 0 <= nType )
 				{
 					if ( pSym )
-						pSym->Write( CStr8() << oexNL8 "extern unsigned long " << oexStrToMb( sVar ) << "_len;"
-				 							 << oexNL8 "extern char " << oexStrToMb( sVar ) << "[];" oexNL8 );
+					{
+						if ( 2 == nType )
+							pSym->Write( CStr8() << oexNL8 "extern void* fn_" << oexStrToMb( sVar ) << ";" oexNL8 );
+						else
+							pSym->Write( CStr8() << oexNL8 "extern unsigned long " << oexStrToMb( sVar ) << "_len;"
+												 << oexNL8 "extern char " << oexStrToMb( sVar ) << "[];" oexNL8 );
+					} // end if
 
 					if ( pCmp )
-						pCmp->Write( CStr8() << oexNL8
-												"\t{" oexNL8
-												"\t\t\"" << oexStrToMb( sRel ) << "\"," oexNL8
-												"\t\t" << oexStrToMb( sVar ) << "," oexNL8
-												"\t\t" << oexStrToMb( sVar ) << "_len" oexNL8
-												"\t}," oexNL8 );
+					{
+						if ( 2 == nType )
+							pCmp->Write( CStr8() << oexNL8
+													"\t{" oexNL8
+													"\t\t\"" << oexStrToMb( sRel ) << "\"," oexNL8
+													"\t\t0," oexNL8
+													"\t\t0," oexNL8
+													"\t\tfn_" << oexStrToMb( sVar ) << oexNL8
+													"\t}," oexNL8 );
+						else
+							pCmp->Write( CStr8() << oexNL8
+													"\t{" oexNL8
+													"\t\t\"" << oexStrToMb( sRel ) << "\"," oexNL8
+													"\t\t" << oexStrToMb( sVar ) << "," oexNL8
+													"\t\t" << oexStrToMb( sVar ) << "_len," oexNL8
+													"\t\t0" oexNL8
+													"\t}," oexNL8 );
+					} // end if
 
 					if ( pRes )
 						pRes->Write( CStr8() << " \\" oexNL8 "\t" << oexStrToMb( sOut ) );
@@ -533,14 +607,12 @@ int process(int argc, char* argv[])
 				"#\terror 'oexres.h' MUST be included BEFORE 'oexlib.h'" oexNL8
 				"#endif" oexNL8
 				oexNL8
-				"typedef void* (*PFN_OexResource)( void* );"
-				oexNL8
 				"struct SOexResourceInfo" oexNL8
 				"{" oexNL8
 				"\tconst char *    name;" oexNL8
 				"\tconst char *    data;" oexNL8
 				"\tunsigned long   size;" oexNL8
-				"\tPFN_OexResource func;" oexNL8
+				"\tconst void *    func;" oexNL8
 				"};" oexNL8
 				oexNL8
 				"extern const SOexResourceInfo _g_oexlib_resources[];" oexNL8

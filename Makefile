@@ -70,10 +70,9 @@ BUILDDIRS := $(BUILDDIRS) sqmod/sqmod_cell \
 #-------------------------------------------------------------------
 # WxWidgets
 #-------------------------------------------------------------------
-BUILDDIRS := $(BUILDDIRS) app/vidcap app/avi_scan \
-						  app/irr_wxtest \
-						  app/qt_webkit \
-						  app/wx_webkit
+#BUILDDIRS := $(BUILDDIRS) app/vidcap app/avi_scan \
+#						  app/irr_wxtest \
+#						  app/wx_webkit
 
 #-------------------------------------------------------------------
 # Installers

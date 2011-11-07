@@ -88,7 +88,7 @@ template < typename T >
 
 		// Global name space
 		T sInc, sGlobal, sEnd;
-		sGlobal << oexT( "#include \"oexres.h\"" ) << oexNL
+		sGlobal << oexNL << oexT( "#include \"oexres.h\"" ) << oexNL
 				<< oexT( "#include \"oexlib.h\"" ) << oexNL
 				<< oexT( "namespace ns_" ) << sName << oexT( " {" ) << oexNL;
 		sEnd << oexNL << oexT( "void* fn_") << sName <<
@@ -192,6 +192,7 @@ template < typename T >
 		} // end while
 
 		// Global section is inside the namespace
+		nPos = 0; nStart = 0;
 		while ( ( nPos + szOpenG + szClose ) < szSrc )
 		{
 			// Ensure we have space
@@ -328,6 +329,7 @@ template < typename T >
 		return sInc << sGlobal << sDst << sEnd;
 	}
 
+
 int to_binary( oex::CFile &f, oex::CStr8 &sData, oex::CStr &sVar, oex::CStr &sPre, oex::CStr &sSuf )
 {_STT();
 
@@ -374,11 +376,12 @@ int to_binary( oex::CFile &f, oex::CStr8 &sData, oex::CStr &sVar, oex::CStr &sPr
 
 int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, oex::CStr sSuf, oex::CStr sInc, oex::CStrList &lstCii )
 {_STT();
+
 //	oexCHAR8 *_p = ;
 //	oexINT _l = ;
 //	oexEcho( oexMbToStr( oex::zip::CUncompress::Uncompress( oex::CStr8( _p, _l ) ) ).Ptr() );
 
-	int nType = 0;
+	oexINT nType = 0;
 
 	if ( !oexExists( sIn.Ptr() ) )
 	{	oexEcho( oexMks( oexT( "No such file : " ), sIn ).Ptr() );
@@ -580,6 +583,7 @@ int process(int argc, char* argv[])
 			fInc.Write( CStr8() << oexNL8
 				"#define OEX_RESOURCES 1" oexNL8
 				"#define OEX_RES_VERSION \"" << oexStrToMb( oexVersion() ) << "\"" oexNL8
+				"#define OEX_RES_BUILD \"" << oexStrToMb( oexBuild() ) << "\"" oexNL8
 				"#if defined( OEX_NO_RESOURCES )" oexNL8
 				"#\terror 'oexres.h' MUST be included BEFORE 'oexlib.h'" oexNL8
 				"#endif" oexNL8
