@@ -34,6 +34,8 @@
 
 #pragma once
 
+// +++ Fix string conversions to be binary safe
+
 template < typename T_PB, typename T_STD  >
 	void SQBIND_PropertyBagToStd( T_PB &pb, T_STD &m )
 	{

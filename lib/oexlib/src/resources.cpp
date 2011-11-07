@@ -149,6 +149,32 @@ oexCPVOID COexResourceHelper::GetResourcePtr( oexLONG i )
 	return m_oexlib_resources_ptr[ i ].data;
 }
 
+COexResourceHelper::t_resource_fn COexResourceHelper::GetResourceFn( oexLONG i )
+{_STT();
+	if ( !m_oexlib_resources_ptr )
+		return 0;
+
+	if ( 0 > i || GetResourceCount() <= i )
+		return 0;
+
+	return (t_resource_fn)m_oexlib_resources_ptr[ i ].func;
+}
+
+COexResourceHelper::t_resource_fn COexResourceHelper::GetResourceFn( CStr sName )
+{_STT();
+	if ( !m_oexlib_resources_ptr )
+		return 0;
+
+	// Search for the item
+	CStr8 sName8 = oexStrToMb( sName );
+	for ( int i = 0; m_oexlib_resources_ptr[ i ].name; i++ )
+		if ( sName8 == m_oexlib_resources_ptr[ i ].name )
+			return  (t_resource_fn)m_oexlib_resources_ptr[ i ].func;
+
+	return 0;
+}
+
+
 CStr COexResourceHelper::GetResourceName( oexLONG i )
 {_STT();
 	if ( !m_oexlib_resources_ptr )

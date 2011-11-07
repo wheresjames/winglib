@@ -10,14 +10,18 @@ template < typename T >
 
 		// Code header / footer
 		static oex::oexTCHAR szHeader1[] = oexT( "CBin " );
-		static oex::oexTCHAR szHeader2[] = oexT( "()" ) oexNL oexT( "{" ) oexNL oexT( "CBin out;" );
-		static oex::oexTCHAR szFooter[] = oexNL oexT( "return doc; " ) oexNL oexT( "}" );
+		static oex::oexTCHAR szHeader2[] = oexT( "()" ) oexNL oexT( "{" ) oexNL;
+		static oex::oexTCHAR szFooter[] = oexNL oexT( "return out; " ) oexNL oexT( "}" oexNL oexT( "};" ) );
 		static oex::oexTCHAR szOpenStr[] = oexNL oexT( "out << \"" );
 		static oex::oexTCHAR szCloseStr[] = oexT( "\";" ) oexNL;
 		static oex::CStr::t_size nOverhead = (oex::CStr::t_size)
 												 sizeof( szHeader1 ) + sizeof( szHeader2 )
 												 + sName.Length() + sizeof( szFooter )
 												 + sizeof( szOpenStr ) + sizeof( szCloseStr );
+
+		// Global name space
+		T sGlobal;
+		sGlobal << oexT( "namespace " ) << sName << oexT( " {" ) << oexNL << oexT( "CBin out;" ) << oexNL;
 
 		// Get the source data
 		oex::CStr sSrc;
@@ -35,7 +39,7 @@ template < typename T >
 		// Allocate space for output
 		oex::CStr sDst;
 		oex::CStr::t_size nDst = 0;
-		oex::oexSTR pDst = sDst.OexAllocate( ( szSrc * 5 ) + nOverhead );
+		oex::oexSTR pDst = sDst.OexAllocate( ( szSrc * 3 ) + nOverhead );
 		if ( !pDst )
 			return oexT( "" );
 
@@ -51,18 +55,69 @@ template < typename T >
 		oexMemCpy( &pDst[ nDst ], szHeader2, sizeof( szHeader2 ) - sizeof( oex::oexTCHAR ) );
 		nDst += sizeof( szHeader2 ) - sizeof( oex::oexTCHAR );
 
-		// Open tag
+		// Open close positions
+		oex::CStr::t_size nOpen = 0, nClose = 0;
+
+		// Block type
+		oex::oexINT nType = 0;
+
+		// Open tag for locals
 		oex::oexTCHAR tcOpen[] = oexT( "<?c" );
-		oex::CStr::t_size nOpen = 0, szOpen = (oex::CStr::t_size)oex::zstr::Length( tcOpen );
+		oex::CStr::t_size szOpen = (oex::CStr::t_size)oex::zstr::Length( tcOpen );
+
+		// Open tag for globals
+		oex::oexTCHAR tcOpenG[] = oexT( "<?global" );
+		oex::CStr::t_size szOpenG = (oex::CStr::t_size)oex::zstr::Length( tcOpenG );
 
 		// Close tag
 		oex::oexTCHAR tcClose[] = oexT( "?>" );
-		oex::CStr::t_size nClose = 0, szClose = (oex::CStr::t_size)oex::zstr::Length( tcClose );
+		oex::CStr::t_size szClose = (oex::CStr::t_size)oex::zstr::Length( tcClose );
 
-		// iii Not using standard search and replace because we need speed here
+		// First let's strip the global code and put it at the top
+		while ( ( nPos + szOpenG + szClose ) < szSrc )
+		{
+			// Ensure we have space
+			if ( ( sDst.Size() - nDst ) < ( ( szSrc - nPos ) * 3 ) + nOverhead )
+				pDst = sDst.OexAllocate( sDst.Size() * 3 );
 
-		// We must have at least six characters for a complete tag
-		while ( ( nPos + szOpen + szClose ) < szSrc )
+			// Initialize
+			nStart = nPos;
+			nOpen = nClose = szSrc;
+
+			// Attempt to find an open bracket
+			while ( nOpen == szSrc && ( nPos + szOpen + szClose ) < szSrc )
+				if ( !oexMemCmp( &pSrc[ nPos ], tcOpenG, szOpenG ) )
+					nOpen = nPos;
+				else
+					nPos++;
+
+			// Find a closing bracket
+			while ( nClose == szSrc && ( nPos + szClose ) < szSrc )
+				if ( !oexMemCmp( &pSrc[ nPos ], tcClose, szClose ) )
+					nClose = nPos;
+				else
+					nPos++;
+
+			// Did we find embedded code?
+			if ( nOpen < szSrc && nClose < szSrc )
+			{
+				// Skip the open bracket
+				nOpen += szOpenG;
+
+				// Save any code?
+				if ( nOpen < nClose )
+					sGlobal.Append( &pSrc[ nOpen ], nClose - nOpen );
+
+				// Point to data after code
+				nPos += szClose;
+
+			} // end if
+
+		} // end while
+
+		// Now let's process the rest of the script
+		nPos = 0; nStart = 0;
+		while ( ( nPos + szOpenG + szClose ) < szSrc )
 		{
 			// Ensure we have space
 			if ( ( sDst.Size() - nDst ) < ( ( szSrc - nPos ) * 2 ) + nOverhead )
@@ -75,7 +130,9 @@ template < typename T >
 			// Attempt to find an open bracket
 			while ( nOpen == szSrc && ( nPos + szOpen + szClose ) < szSrc )
 				if ( !oexMemCmp( &pSrc[ nPos ], tcOpen, szOpen ) )
-					nOpen = nPos;
+					nOpen = nPos, nType = 0;
+				else if ( !oexMemCmp( &pSrc[ nPos ], tcOpenG, szOpenG ) )
+					nOpen = nPos, nType = 1;
 				else
 					nPos++;
 
@@ -97,11 +154,6 @@ template < typename T >
 					T s = oexCppEncode( T( &pSrc[ nStart ], nOpen - nStart ) );
 					oexMemCpy( &pDst[ nDst ], s.Ptr(), s.Length() );
 					nDst += s.Length(); nStart += nOpen - nStart;
-//					while ( nStart < nOpen )
-//					{	if ( oexT( '"' ) == pSrc[ nStart ] )
-//							pDst[ nDst++ ] = oexT( '"' );
-//						pDst[ nDst++ ] = pSrc[ nStart++ ];
-//					} // end while
 
 					oexMemCpy( &pDst[ nDst ], szCloseStr, sizeof( szCloseStr ) - sizeof( oex::oexTCHAR ) );
 					nDst += sizeof( szCloseStr ) - sizeof( oex::oexTCHAR );
@@ -110,7 +162,7 @@ template < typename T >
 
 				// Any code to copy?
 				nOpen += szOpen;
-				if ( nOpen < nClose )
+				if ( !nType && nOpen < nClose )
 				{
 					// Add new line
 					oexMemCpy( &pDst[ nDst ], oexNL, sizeof( oexNL ) - sizeof( oex::oexTCHAR ) );
@@ -139,11 +191,6 @@ template < typename T >
 			T s = oexCppEncode( T( &pSrc[ nStart ], nOpen - nStart ) );
 			oexMemCpy( &pDst[ nDst ], s.Ptr(), s.Length() );
 			nDst += s.Length(); nStart += nOpen - nStart;
-//			while ( nStart < szSrc )
-//			{	if ( oexT( '"' ) == pSrc[ nStart ] )
-//					pDst[ nDst++ ] = oexT( '"' );
-//				pDst[ nDst++ ] = pSrc[ nStart++ ];
-//			} // end while
 			oexMemCpy( &pDst[ nDst ], szCloseStr, sizeof( szCloseStr ) - sizeof( oex::oexTCHAR ) );
 			nDst += sizeof( szCloseStr ) - sizeof( oex::oexTCHAR );
 		} // end if
@@ -155,7 +202,8 @@ template < typename T >
 		// Set the number of bytes in the string
 		sDst.SetLength( nDst );
 
-		return sDst;
+		// Build the full thing and return
+		return sGlobal << sDst;
 	}
 
 
@@ -185,10 +233,9 @@ int process(int argc, char* argv[])
 		return -3;
 	} // end if
 
-	//
+	// Process each input directory
 	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
 	{
-
 		TRecursiveFindFiles< 16 > rff;
 		if ( rff.FindFirst( it->ToString().Ptr(), "*" ) )
 			do
@@ -196,41 +243,16 @@ int process(int argc, char* argv[])
 				if ( !rff.IsDirectory() )
 				{
 					if ( rff.GetFileName().GetFileExtension() == oexT( "htm" ) )
-					{
-						CStr s = prepare_inline( sOut.GetFileName() << oexT( "_" ) << rff.GetFileName().RemoveFileExtension(), rff.GetFullPath(), 1 );
+					{	CStr s = prepare_inline( sOut.GetFileName() << oexT( "_" ) << rff.GetFileName().RemoveFileExtension(), rff.GetFullPath(), 1 );
 						oexFilePutContents( oexBuildPath( sOut, rff.GetFileName().RemoveFileExtension() << oexT( ".cpp" ) ).Ptr(), s );
-
 					} // end if
-
-					//rff.GetFullPath();
-					//rff.GetFileName();
 
 				} // end if
 
 			} while ( rff.FindNext() );
 
-
 	} // end for
 
-
-/*
-	CFile f;
-	if ( !f.CreateAlways( sOut.Ptr() ).IsOpen() )
-	{	oexEcho( oexMks( oexT( "Could not open file for writing : " ), sOut ).Ptr() );
-		return -2;
-	} // end if
-
-	// Join the rest of the files together
-	for ( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
-	{
-		CFile i;
-		if ( !i.OpenExisting( it->ToString().Ptr() ).IsOpen() )
-			oexEcho( oexMks( oexT( "Could not open file for reading : " ), it->ToString() ).Ptr() );
-		else
-			f.Write( i.Read() );
-
-	} // end for
-*/
 	return 0;
 }
 

@@ -80,8 +80,14 @@ template < class T_L, class T_R = T_L > class TPropertyBag
 {
 public:
 
+	/// Key type
+	typedef T_L t_key;
+
+	/// Value type
+	typedef T_R t_val;
+
 	/// Our multi-dimensional string array type
-	typedef TAssoList< T_L, TPropertyBag< T_L, T_R > > t_PbArray;
+	typedef TAssoList< t_key, TPropertyBag< t_key, t_val > > t_PbArray;
 
 	/// Iterator type
 	typedef typename t_PbArray::iterator iterator;
@@ -127,7 +133,7 @@ public:
 
 		\see
 	*/
-	TPropertyBag& operator []( T_L x_key ) { return m_lstPb[ x_key ]; }
+	TPropertyBag& operator []( t_key x_key ) { return m_lstPb[ x_key ]; }
 
 	//==============================================================
 	// operator =
@@ -140,7 +146,7 @@ public:
 
 		\see
 	*/
-	TPropertyBag& operator = ( T_R x_t )
+	TPropertyBag& operator = ( t_val x_t )
     {
         if ( !m_t.Ptr() )
             m_t.OexConstruct().Ptr();
@@ -197,7 +203,7 @@ public:
 	template < typename T_CHAR >
 		TPropertyBag& at( TStr< T_CHAR > x_key, TStr< T_CHAR > x_sep = oexTT( T_CHAR, "." ) )
 		{
-			T_L p = x_key.Parse( x_sep.Ptr() );
+			t_key p = x_key.Parse( x_sep.Ptr() );
 			x_key.Skip( x_sep.Ptr() );
 
 			if ( p.Length() && x_key.Length() )
@@ -218,12 +224,12 @@ public:
 			// If valid data
 			if ( oexCHECK_PTR( x_key ) && oexCHECK_PTR( x_sep ) )
 			{
-				T_L key = x_key;
-				T_L p = key.Parse( x_sep );
+				t_key key = x_key;
+				t_key p = key.Parse( x_sep );
 				key.Skip( x_sep );
 
 				if ( p.Length() && key.Length() )
-					return m_lstPb[ p ].at( key, T_L( x_sep ) );
+					return m_lstPb[ p ].at( key, t_key( x_sep ) );
 
 				else if ( p.Length() )
 					return m_lstPb[ p ];
@@ -256,7 +262,7 @@ public:
 	template < typename T_CHAR >
 		iterator find_at( TStr< T_CHAR > x_key, TStr< T_CHAR > x_sep = oexTT( T_CHAR, "." ) )
 		{
-			T_L p = x_key.Parse( x_sep.Ptr() );
+			t_key p = x_key.Parse( x_sep.Ptr() );
 			x_key.Skip( x_sep.Ptr() );
 
 			if ( p.Length() && x_key.Length() )
@@ -277,12 +283,12 @@ public:
 			// If valid data
 			if ( oexCHECK_PTR( x_key ) && oexCHECK_PTR( x_sep ) )
 			{
-				T_L key = x_key;
-				T_L p = key.Parse( x_sep );
+				t_key key = x_key;
+				t_key p = key.Parse( x_sep );
 				key.Skip( x_sep );
 
 				if ( p.Length() && key.Length() )
-					return m_lstPb[ p ].find_at( key, T_L( x_sep ) );
+					return m_lstPb[ p ].find_at( key, t_key( x_sep ) );
 
 				else if ( p.Length() )
 					return m_lstPb.Find( p );
@@ -315,7 +321,7 @@ public:
 	template < typename T_CHAR >
 		iterator erase_at( TStr< T_CHAR > x_key, TStr< T_CHAR > x_sep = oexTT( T_CHAR, "." ) )
 		{
-			T_L p = x_key.Parse( x_sep.Ptr() );
+			t_key p = x_key.Parse( x_sep.Ptr() );
 			x_key.Skip( x_sep.Ptr() );
 
 			if ( p.Length() && x_key.Length() )
@@ -336,12 +342,12 @@ public:
 			// If valid data
 			if ( oexCHECK_PTR( x_key ) && oexCHECK_PTR( x_sep ) )
 			{
-				T_L key = x_key;
-				T_L p = key.Parse( x_sep );
+				t_key key = x_key;
+				t_key p = key.Parse( x_sep );
 				key.Skip( x_sep );
 
 				if ( p.Length() && key.Length() )
-					return m_lstPb[ p ].erase_at( key, T_L( x_sep ) );
+					return m_lstPb[ p ].erase_at( key, t_key( x_sep ) );
 
 				else if ( p.Length() )
 					return m_lstPb.Unset( p );
@@ -415,7 +421,7 @@ public:
     {   return Assume( x_rPb ); }
 
 	//==============================================================
-	// operator T_R&
+	// operator t_val&
 	//==============================================================
 	/// Returns our encapsulated object
     /**
@@ -424,10 +430,10 @@ public:
         function parameters and return values.  Also a nice way
         to move a property bag inside of another.
     */
-//	operator T_R&() { return m_t.Obj(); }
+//	operator t_val&() { return m_t.Obj(); }
 
 	/// Returns our encapsulated thing-a-ma-jig reference
-	T_R& Value() { return m_t; }
+	t_val& Value() { return m_t; }
 
 	//==============================================================
 	// operator ->
@@ -438,13 +444,13 @@ public:
 
 		\see
 	*/
-//	T_R* operator -> () { return &m_t.Obj(); }
+//	t_val* operator -> () { return &m_t.Obj(); }
 
 	//==============================================================
 	// operator ==
 	//==============================================================
 	/// Equality operator
-	oexBOOL operator == ( T_R x_t )
+	oexBOOL operator == ( t_val x_t )
     {
         if ( !m_t.Ptr() )
             return oexFALSE;
@@ -455,7 +461,7 @@ public:
 	// operator !=
 	//==============================================================
 	/// NEQ operator
-	oexBOOL operator != ( T_R x_t )
+	oexBOOL operator != ( t_val x_t )
     {
         if ( !m_t.Ptr() )
             return oexTRUE;
@@ -492,7 +498,7 @@ public:
 
 		\see
 	*/
-	oexBOOL IsKey( T_L x_key ) { return m_lstPb.IsKey( x_key ); }
+	oexBOOL IsKey( t_key x_key ) { return m_lstPb.IsKey( x_key ); }
 
 	/// Converts to long
 	oexLONG ToLong()
@@ -562,7 +568,7 @@ public:
     }
 
 	/// Converts to a string
-	T_L& ToString()
+	t_key& ToString()
     {
         // Create an object if we don't have one
         if ( !m_t.Ptr() )
@@ -598,7 +604,7 @@ public:
 	/**
 		\return Human readable representation of the contents
 	*/
-	T_L PrintR() { return PrintR( *this, T_L() ); }
+	t_key PrintR() { return PrintR( *this, t_key() ); }
 
 	//==============================================================
 	// PrintR()
@@ -614,16 +620,16 @@ public:
 		\see
 	*/
 	template < typename T_CH >
-		T_L PrintR( TPropertyBag< TStr< T_CH >, T_R > &pb, oexCONST TStr< T_CH > &key, oexUINT uDepth = 0 )
+		t_key PrintR( TPropertyBag< TStr< T_CH >, t_val > &pb, oexCONST TStr< T_CH > &key, oexUINT uDepth = 0 )
 	{
-		typedef TStr< T_CH > T_L;
+		typedef TStr< T_CH > t_key;
 
-		T_L tabs;
+		t_key tabs;
 		for ( oexUINT t = 0; t < uDepth; t++ )
 			tabs << oexTT( T_CH, "  " );
 		uDepth++;
 
-		T_L str;
+		t_key str;
 		if ( pb.IsArray() )
 		{
 			if ( key.Length() )
@@ -656,13 +662,13 @@ public:
 //#endif
 
     /// Erases the specified key
-    iterator Unset( T_L key )
+	iterator Unset( t_key key )
     {   return m_lstPb.Unset( key ); }
 
 private:
 
 	/// Our value
-	TMem< T_R >					    m_t;
+	TMem< t_val >				    m_t;
 
 	/// Array of strings
 	t_PbArray						m_lstPb;

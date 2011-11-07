@@ -13,13 +13,16 @@ PRJ_TYPE := exe
 PRJ_INCS := winglib/lib/oexlib
 PRJ_LIBS := oexlib
 PRJ_FWRK := Qt
+PRJ_RESD := res
+PRJ_CIIX := *.htm
 
 #-------------------------------------------------------------------
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
-ifeq ($(OS),windows)
+#ifeq ($(OS),windows)
+ifneq ($(findstring windows,$(TGT)),)
 	PRJ_OSLB := QtWebKit4 QtGui4 QtNetwork4 QtCore4
 else
 	PRJ_OSLB := QtWebKit QtGui QtNetwork QtCore

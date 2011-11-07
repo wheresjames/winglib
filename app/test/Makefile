@@ -14,6 +14,7 @@ PRJ_LIBS := oexlib
 PRJ_WINL := winmm strmiids
 PRJ_VSLB := dshowbase
 PRJ_RESD := res res2
+PRJ_CIIX := *.htm
 
 #-------------------------------------------------------------------
 # Configure build

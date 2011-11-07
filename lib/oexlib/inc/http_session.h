@@ -661,28 +661,11 @@ public:
     /// Returns the content object
     CStr8& Content() { return m_sContent; }
 
-	CStr8 GetMimeType( CStr8 x_sFile )
-	{
-		CStr8 sExt = x_sFile.GetFileExtension();
-		if ( !sExt )
-			sExt = x_sFile;
-
-		// +++ Add MIME types
-		if ( sExt == "jpg" ) return "image/jpeg";
-		else if ( sExt == "png" ) return "image/png";
-		else if ( sExt == "gif" ) return "image/gif";
-		else if ( sExt == "htm" ) return "text/html";
-		else if ( sExt == "html" ) return "text/html";
-		else if ( sExt == "css" ) return "text/css";
-		else if ( sExt == "txt" ) return "text/plain";
-		else return "application/octet-stream";
-	}
-
     /// Sets the content type
     oexBOOL SetContentType( CStr8 x_sFile )
 	{
 		// Set content type from extension / file
-		m_pbTxHeaders[ "Content-type" ] = GetMimeType( x_sFile );
+		m_pbTxHeaders[ "Content-type" ] = x_sFile.GetMimeType();
 
 		return oexTRUE;
 	}

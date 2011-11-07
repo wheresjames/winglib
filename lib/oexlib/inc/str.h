@@ -2989,6 +2989,24 @@ public:
 		return TStr().BuildPath( sPath, sFilename.RTrim( sFilename.Length() - nOffset ) );
     }
 
+	TStr GetMimeType()
+	{
+		TStr sExt = GetFileExtension().ToLower();
+		if ( !sExt.Length() )
+			sExt = ToLower();
+
+		// +++ Add MIME types
+		if ( sExt == oexTT( T, "jpg" ) ) return oexTT( T, "image/jpeg" );
+		else if ( sExt == oexTT( T, "png" ) ) return oexTT( T, "image/png" );
+		else if ( sExt == oexTT( T, "gif" ) ) return oexTT( T, "image/gif" );
+		else if ( sExt == oexTT( T, "htm" ) ) return oexTT( T, "text/html" );
+		else if ( sExt == oexTT( T, "html" ) ) return oexTT( T, "text/html" );
+		else if ( sExt == oexTT( T, "css" ) ) return oexTT( T, "text/css" );
+		else if ( sExt == oexTT( T, "txt" ) ) return oexTT( T, "text/plain" );
+		else return oexTT( T, "application/octet-stream" );
+	}
+
+
 	TStr& DecorateName( oexBOOL bExe, oexBOOL bLib )
 	{
 		return DecorateName( *this, bExe, bLib );

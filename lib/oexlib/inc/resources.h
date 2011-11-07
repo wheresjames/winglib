@@ -43,11 +43,15 @@ struct _SOexResourceInfo
 	const char *   name;
 	const char *   data;
 	unsigned long  size;
+	const void *   func;
 };
 
 class COexResourceHelper
 {
 public:
+
+	typedef oexResourceFn( t_resource_fn );
+
 
 	/// Initializes resource engine
 	static oexBOOL InitResources();
@@ -89,6 +93,12 @@ public:
 
 	/// Returns specified resource pointer
 	oexCPVOID GetResourcePtr( oexLONG i );
+
+	/// Returns specified resource function pointer
+	t_resource_fn GetResourceFn( oexLONG i );
+
+	/// Returns specified resource function pointer
+	t_resource_fn GetResourceFn( CStr sName );
 
 	/// Returns the resource name for the specified index
 	CStr GetResourceName( oexLONG i );

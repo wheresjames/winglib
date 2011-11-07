@@ -288,8 +288,23 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
 			str.LTrim( 1 );
 
 			// Anything left over?
-			if ( str.Length() )
-				pb[ oexT( "extra" ) ].ToString() = str;
+			if ( str.Length() )				
+				pb[ oexT( "extra" ) ].ToString() = str.Parse( oexT( "#" ) );
+
+			// Check for fragment
+			if ( oexT( '#' ) == *str.Ptr() )
+			{
+				str.LTrim( 1 );
+
+				// Check for fragment
+				if ( str.Length() )
+					pb[ oexT( "fragment" ) ].ToString() = str;
+
+			} // end if
+
+			else
+				pb[ oexT( "extra" ) ].ToString() += str;
+
 		} // end if
 
 		else

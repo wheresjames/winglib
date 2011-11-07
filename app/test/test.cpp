@@ -2285,7 +2285,7 @@ oex::oexRESULT TestResources()
 	// oexCHAR8 *_p = oexGetResourcePtr( "hello.txt" );
 	// oexINT _l = oexGetResourceLen( "hello.txt" );
 
-	if ( !oexVERIFY( oexGetResourceCount() == 4 ) )
+	if ( !oexVERIFY( oexGetResourceCount() == 5 ) )
 		return -1;
 
 	int i = 0;
@@ -2301,8 +2301,8 @@ oex::oexRESULT TestResources()
 	if ( !oexVERIFY_PTR( oexGetResourcePtr( i ) ) )
 		return -4;
 
-	if ( !oexVERIFY( !oexGetResourcePtr( 4 ) ) )
-		return -5;
+//	if ( !oexVERIFY( !oexGetResourcePtr( 2 ) ) )
+//		return -5;
 
 	const void *_p = 0; long _l = 0;
 	if ( !oexVERIFY( !oexGetResource( i, &_p, &_l ) ) )
@@ -2323,6 +2323,17 @@ oex::oexRESULT TestResources()
 	if ( !oexVERIFY( 4437 == sImg.Length() ) )
 	{	oexSHOW( sImg.Length() );
 		return -10;
+	} // end if
+
+	oexResourceFn( testfn ) = oexGetResourceFn( "res/cii_test.htm" );
+	if ( !oexVERIFY( testfn ) )
+		return -11;
+
+	oex::CPropertyBag in; oex::CStr out;
+	testfn( in, out );
+	if ( !oexVERIFY( out == "abcdefghijklmnopqrstuvwxyz") )
+	{	oexSHOW( out );
+		return -12;
 	} // end if
 
 	return oex::oexRES_OK;
@@ -2600,7 +2611,7 @@ oex::oexRESULT Test_CFifoSync()
 	} // end for
 
 	oexSIZE_T uUsed = fs.GetUsedBuffers();
-	if ( !oexVERIFY( fs.GetUsedBuffers() == uBufferedData ) )
+	if ( !oexVERIFY( uUsed == uBufferedData ) )
 		return -2;
 
 	// Shared memory buffer test

@@ -589,6 +589,12 @@ public:
 		template< typename T >
 			static oexBOOL IsCppChar( T x_ch )
 		{
+			switch( x_ch )
+			{	case oexTC( T, '"' ) :
+				case oexTC( T, '\\' ) :
+					return oexFALSE;
+			} // end switch
+
 			return ( 0 > x_ch || oexTC( T, ' ' ) <= x_ch ) ? oexTRUE : oexFALSE;
 		}
 

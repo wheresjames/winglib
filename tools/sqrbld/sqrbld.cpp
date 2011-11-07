@@ -20,12 +20,268 @@ void chtoa( oexUCHAR *b, oexUCHAR ch )
 		b[ 0 ] = 'a' + ( c - 10 );
 }
 
-int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, oex::CStr sSuf, oex::CStr sInc, oex::CStrList &lstCmp  )
+// +++ Someone please come back later and make prepare_cpp() more efficient
+
+/// This function turns html with embedded c++ code inside out
+/**
+
+  @param[in] sName		- Namespace / function name
+  @param[in] sScript	- File or script data
+  @param[in] bFile		- Non-zero if sScript is a file name
+
+  This is an example of what an input script to this function might look like
+  @code
+	<html>
+		<head>
+
+			<?global
+
+				// This will be a global c++ function
+				int add( a, b )
+				{
+					return a + b;
+				}
+			?>
+
+		</head>
+		<body>
+
+			<b><big>Plain old HTML stuff</big></b>
+
+			<?c
+				out << "This will be inline c++ code";
+
+				out << "1 + 7 = " << add( 1, 7 );
+
+				// The globals are available no matter where declared
+				out << say_something();
+			?>
+
+		   <?global
+
+			   // The global tag can be anywhere
+			   char* say_something()
+			   {
+				   return "Something";
+			   }
+		   ?>
+
+		</body>
+	</html>
+  @endcode
+
+*/
+template < typename T >
+	CStr prepare_cpp( const T &sName, const T &sScript, int bFile )
+	{_STT();
+
+		// Code header / footer
+		static oex::oexTCHAR szHeader1[] = oexT( "CBin " );
+		static oex::oexTCHAR szHeader2[] = oexT( "()" ) oexNL oexT( "{" ) oexNL;
+		static oex::oexTCHAR szFooter[] = oexNL oexT( "return out; " ) oexNL oexT( "}" oexNL oexT( "};" ) );
+		static oex::oexTCHAR szOpenStr[] = oexNL oexT( "out << \"" );
+		static oex::oexTCHAR szCloseStr[] = oexT( "\";" ) oexNL;
+		static oex::CStr::t_size nOverhead = (oex::CStr::t_size)
+												 sizeof( szHeader1 ) + sizeof( szHeader2 )
+												 + sName.Length() + sizeof( szFooter )
+												 + sizeof( szOpenStr ) + sizeof( szCloseStr );
+
+		// Global name space
+		T sGlobal;
+		sGlobal << oexT( "namespace " ) << sName << oexT( " {" ) << oexNL << oexT( "CBin out;" ) << oexNL;
+
+		// Get the source data
+		oex::CStr sSrc;
+		if ( bFile )
+			sSrc = oexFileGetContents( sScript.Ptr() );
+		else
+			sSrc = sScript;
+
+		// Did we get anything
+		oex::oexCSTR pSrc = sSrc.Ptr();
+		oex::CStr::t_size szSrc = sSrc.Length(), nPos = 0, nStart = 0;
+		if ( !szSrc )
+			return oexT( "" );
+
+		// Allocate space for output
+		oex::CStr sDst;
+		oex::CStr::t_size nDst = 0;
+		oex::oexSTR pDst = sDst.OexAllocate( ( szSrc * 3 ) + nOverhead );
+		if ( !pDst )
+			return oexT( "" );
+
+		// Copy header into buffer
+		oexMemCpy( &pDst[ nDst ], szHeader1, sizeof( szHeader1 ) - sizeof( oex::oexTCHAR ) );
+		nDst += sizeof( szHeader1 ) - sizeof( oex::oexTCHAR );
+
+		// Copy function name
+		oexMemCpy( &pDst[ nDst ], sName.Ptr(), sName.Length() );
+		nDst += sName.Length();
+
+		// Copy header into buffer
+		oexMemCpy( &pDst[ nDst ], szHeader2, sizeof( szHeader2 ) - sizeof( oex::oexTCHAR ) );
+		nDst += sizeof( szHeader2 ) - sizeof( oex::oexTCHAR );
+
+		// Open close positions
+		oex::CStr::t_size nOpen = 0, nClose = 0;
+
+		// Block type
+		oex::oexINT nType = 0;
+
+		// Open tag for locals
+		oex::oexTCHAR tcOpen[] = oexT( "<?c" );
+		oex::CStr::t_size szOpen = (oex::CStr::t_size)oex::zstr::Length( tcOpen );
+
+		// Open tag for globals
+		oex::oexTCHAR tcOpenG[] = oexT( "<?global" );
+		oex::CStr::t_size szOpenG = (oex::CStr::t_size)oex::zstr::Length( tcOpenG );
+
+		// Close tag
+		oex::oexTCHAR tcClose[] = oexT( "?>" );
+		oex::CStr::t_size szClose = (oex::CStr::t_size)oex::zstr::Length( tcClose );
+
+		// First let's strip the global code and put it at the top
+		while ( ( nPos + szOpenG + szClose ) < szSrc )
+		{
+			// Ensure we have space
+			if ( ( sDst.Size() - nDst ) < ( ( szSrc - nPos ) * 3 ) + nOverhead )
+				pDst = sDst.OexAllocate( sDst.Size() * 3 );
+
+			// Initialize
+			nStart = nPos;
+			nOpen = nClose = szSrc;
+
+			// Attempt to find an open bracket
+			while ( nOpen == szSrc && ( nPos + szOpen + szClose ) < szSrc )
+				if ( !oexMemCmp( &pSrc[ nPos ], tcOpenG, szOpenG ) )
+					nOpen = nPos;
+				else
+					nPos++;
+
+			// Find a closing bracket
+			while ( nClose == szSrc && ( nPos + szClose ) < szSrc )
+				if ( !oexMemCmp( &pSrc[ nPos ], tcClose, szClose ) )
+					nClose = nPos;
+				else
+					nPos++;
+
+			// Did we find embedded code?
+			if ( nOpen < szSrc && nClose < szSrc )
+			{
+				// Skip the open bracket
+				nOpen += szOpenG;
+
+				// Save any code?
+				if ( nOpen < nClose )
+					sGlobal.Append( &pSrc[ nOpen ], nClose - nOpen );
+
+				// Point to data after code
+				nPos += szClose;
+
+			} // end if
+
+		} // end while
+
+		// Now let's process the rest of the script
+		nPos = 0; nStart = 0;
+		while ( ( nPos + szOpenG + szClose ) < szSrc )
+		{
+			// Ensure we have space
+			if ( ( sDst.Size() - nDst ) < ( ( szSrc - nPos ) * 2 ) + nOverhead )
+				pDst = sDst.OexAllocate( sDst.Size() * 2 );
+
+			// Initialize
+			nStart = nPos;
+			nOpen = nClose = szSrc;
+
+			// Attempt to find an open bracket
+			while ( nOpen == szSrc && ( nPos + szOpen + szClose ) < szSrc )
+				if ( !oexMemCmp( &pSrc[ nPos ], tcOpen, szOpen ) )
+					nOpen = nPos, nType = 0;
+				else if ( !oexMemCmp( &pSrc[ nPos ], tcOpenG, szOpenG ) )
+					nOpen = nPos, nType = 1;
+				else
+					nPos++;
+
+			// Find a closing bracket
+			while ( nClose == szSrc && ( nPos + szClose ) < szSrc )
+				if ( !oexMemCmp( &pSrc[ nPos ], tcClose, szClose ) )
+					nClose = nPos;
+				else
+					nPos++;
+
+			// Did we find embedded code?
+			if ( nOpen < szSrc && nClose < szSrc )
+			{
+				// Text data to be copied?
+				if ( nStart < nOpen )
+				{	oexMemCpy( &pDst[ nDst ], szOpenStr, sizeof( szOpenStr ) - sizeof( oex::oexTCHAR ) );
+					nDst += sizeof( szOpenStr ) - sizeof( oex::oexTCHAR );
+
+					T s = oexCppEncode( T( &pSrc[ nStart ], nOpen - nStart ) );
+					oexMemCpy( &pDst[ nDst ], s.Ptr(), s.Length() );
+					nDst += s.Length(); nStart += nOpen - nStart;
+
+					oexMemCpy( &pDst[ nDst ], szCloseStr, sizeof( szCloseStr ) - sizeof( oex::oexTCHAR ) );
+					nDst += sizeof( szCloseStr ) - sizeof( oex::oexTCHAR );
+
+				} // end if
+
+				// Any code to copy?
+				nOpen += szOpen;
+				if ( !nType && nOpen < nClose )
+				{
+					// Add new line
+					oexMemCpy( &pDst[ nDst ], oexNL, sizeof( oexNL ) - sizeof( oex::oexTCHAR ) );
+					nDst += sizeof( oexNL ) - sizeof( oex::oexTCHAR );
+
+					// Copy the code
+					oexMemCpy( &pDst[ nDst ], &pSrc[ nOpen ], nClose - nOpen );
+					nDst += nClose - nOpen;
+
+					// Close statement, just in case
+					pDst[ nDst++ ] = oexT( ';' );
+
+				} // endif
+
+				// Point to data after code
+				nPos += szClose;
+
+			} // end if
+
+		} // end while
+
+		// Copy whatever remains
+		if ( nStart < szSrc )
+		{	oexMemCpy( &pDst[ nDst ], szOpenStr, sizeof( szOpenStr ) - sizeof( oex::oexTCHAR ) );
+			nDst += sizeof( szOpenStr ) - sizeof( oex::oexTCHAR );
+			T s = oexCppEncode( T( &pSrc[ nStart ], nOpen - nStart ) );
+			oexMemCpy( &pDst[ nDst ], s.Ptr(), s.Length() );
+			nDst += s.Length(); nStart += nOpen - nStart;
+			oexMemCpy( &pDst[ nDst ], szCloseStr, sizeof( szCloseStr ) - sizeof( oex::oexTCHAR ) );
+			nDst += sizeof( szCloseStr ) - sizeof( oex::oexTCHAR );
+		} // end if
+
+		// Copy footer into buffer
+		oexMemCpy( &pDst[ nDst ], szFooter, sizeof( szFooter ) - sizeof( oex::oexTCHAR ) );
+		nDst += sizeof( szFooter ) - sizeof( oex::oexTCHAR );
+
+		// Set the number of bytes in the string
+		sDst.SetLength( nDst );
+
+		// Build the full thing and return
+		return sGlobal << sDst;
+	}
+
+
+int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, oex::CStr sSuf, oex::CStr sInc, oex::CStrList &lstSq, oex::CStrList &lstCii )
 {_STT();
 
 //	oexCHAR8 *_p = ;
 //	oexINT _l = ;
 //	oexEcho( oexMbToStr( oex::zip::CUncompress::Uncompress( oex::CStr8( _p, _l ) ) ).Ptr() );
+
+	oexINT nType = 0;
 
 	if ( !oexExists( sIn.Ptr() ) )
 	{	oexEcho( oexMks( oexT( "No such file : " ), sIn ).Ptr() );
@@ -41,11 +297,11 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 	// Read in and compress the file
 	oex::CStr8 sData;
 	
-	// Does it need compiling?
-	if ( !oex::CParser::MatchPatterns( sIn, lstCmp, oex::oexTRUE ) )
-		sData = oex::zip::CCompress::Compress( CFile().OpenExisting( sIn.Ptr() ).Read() );
-	else
-	{	
+	// Squirrel script?
+	if ( oex::CParser::MatchPatterns( sIn, lstSq, oex::oexTRUE ) )
+	{
+		nType = 1;
+
 		// Check for inline extension
 		oex::oexBOOL bInline = sIn.GetFileExtension() == oexT( "squ" );
 
@@ -53,7 +309,16 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 		if ( se.Load( sIn.Ptr(), oexNULL, oex::oexTRUE, oex::oexFALSE, oex::oexFALSE, bInline ) )
 			sData = oex::zip::CCompress::Compress( se.GetCompiledScript() );
 
-	} // end else
+	} // end if
+
+	// Inline c++ file?
+	else if ( oex::CParser::MatchPatterns( sIn, lstCii, oex::oexTRUE ) )
+	{	nType = 2;
+		sData = prepare_cpp( sIn, CStr( "rid_" ) << sVar, 1 );
+	} // end if
+
+	else
+		sData = oex::zip::CCompress::Compress( CFile().OpenExisting( sIn.Ptr() ).Read() );
 
 	// Create a variable name based on the md5 hash
 	if ( !sVar.Length() )
@@ -87,45 +352,57 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 		return -22;
 	} // end if
 
-	oexCONST oexUCHAR *p = (oexCONST oexUCHAR*)sData.Ptr();
-	oexULONG u = sData.Length();
-
-	// Write out a comment
-	f.Write( ( CStr8() << oexNL8 "// " << oexStrToMb( sIn.GetFileName() ) << oexNL8 ) );
-
-	// Write out the data length
-	f.Write( ( CStr8() << oexNL8 "unsigned long " << oexStrToMb( sVar ) << "_len = " << u << ";" oexNL8 ) );
-
-	// Write out the data
-	f.Write( sPre );
-
-	CStr8 buf;
-	oexUCHAR *t = (oexUCHAR*)"0x.., ";
-	oexINT tl = oex::zstr::Length( t );
-	oexUCHAR *r = (oexUCHAR*)"0x..," oexNL8 "\t ";
-	oexINT rl = oex::zstr::Length( r );
-	oexUCHAR *b = (oexUCHAR*)buf.OexAllocate( 4 * 1024 ), *s;
-	oexINT bl = 0;
-	for ( oexULONG i = 0; i < u; i++ )
+	switch( nType )
 	{
-		s = &b[ bl ];
+		case 2:
+			f.Write( sData );
+			break;
 
-		if ( !( ( i + 1 ) & 0xf ) )
-			oexMemCpy( s, r, rl ), bl += rl;
-		else
-			oexMemCpy( s, t, tl ), bl += tl;
+		default:
+		{
+			oexCONST oexUCHAR *p = (oexCONST oexUCHAR*)sData.Ptr();
+			oexULONG u = sData.Length();
 
-		chtoa( &s[ 2 ], (oexUCHAR)p[ i ] );
+			// Write out a comment
+			f.Write( ( CStr8() << oexNL8 "// " << oexStrToMb( sIn.GetFileName() ) << oexNL8 ) );
 
-		if ( 4000 < bl )
-			f.Write( b, bl ), bl = 0;
+			// Write out the data length
+			f.Write( ( CStr8() << oexNL8 "unsigned long " << oexStrToMb( sVar ) << "_len = " << u << ";" oexNL8 ) );
 
-	} // end for
+			// Write out the data
+			f.Write( sPre );
 
-	if ( bl )
-		f.Write( b, bl );
+			CStr8 buf;
+			oexUCHAR *t = (oexUCHAR*)"0x.., ";
+			oexINT tl = oex::zstr::Length( t );
+			oexUCHAR *r = (oexUCHAR*)"0x..," oexNL8 "\t ";
+			oexINT rl = oex::zstr::Length( r );
+			oexUCHAR *b = (oexUCHAR*)buf.OexAllocate( 4 * 1024 ), *s;
+			oexINT bl = 0;
+			for ( oexULONG i = 0; i < u; i++ )
+			{
+				s = &b[ bl ];
 
-	f.Write( sSuf );
+				if ( !( ( i + 1 ) & 0xf ) )
+					oexMemCpy( s, r, rl ), bl += rl;
+				else
+					oexMemCpy( s, t, tl ), bl += tl;
+
+				chtoa( &s[ 2 ], (oexUCHAR)p[ i ] );
+
+				if ( 4000 < bl )
+					f.Write( b, bl ), bl = 0;
+
+			} // end for
+
+			if ( bl )
+				f.Write( b, bl );
+
+			f.Write( sSuf );
+
+		} break;
+
+	} // end switch
 
 	return 0;
 }
@@ -133,7 +410,7 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 			  oex::CStr sPath, oex::CFile *pInc, oex::CFile *pCmp,
 			  oex::CFile *pRes, oex::CFile *pDep, oex::CFile *pSym,
-			  oex::CStrList &lstCmp )
+			  oex::CStrList &lstSq, oex::CStrList &lstCii )
 {_STT();
 	// Ensure directory exists
 	if ( !oexExists( dir.Ptr() ) )
@@ -149,7 +426,7 @@ int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 
 			// Recurse into directory
 			if ( ff.IsDirectory() )
-				from_dir( ff.GetFullPath(), sOutDir, pb, sRel, pInc, pCmp, pRes, pDep, pSym, lstCmp );
+				from_dir( ff.GetFullPath(), sOutDir, pb, sRel, pInc, pCmp, pRes, pDep, pSym, lstSq, lstCii );
 
 			else
 			{
@@ -163,8 +440,10 @@ int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 //				oexSHOW( sOut );
 
 				// Create file
-				if ( 0 == create_res( ff.GetFullPath(), sOut, sVar,
-									  oexT( "" ), oexT( "" ), oexT( "" ), lstCmp ) )
+				int res = create_res( ff.GetFullPath(), sOut, sVar,
+									  oexT( "" ), oexT( "" ), oexT( "" ),
+									  lstSq, lstCii );
+				if ( 0 <= res )
 				{
 					if ( pSym )
 						pSym->Write( CStr8() << oexNL8 "extern unsigned long " << oexStrToMb( sVar ) << "_len;"
@@ -196,12 +475,12 @@ int from_dir( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 int from_dirs( oex::CStr dir, oex::CStr &sOutDir, oex::CPropertyBag &pb,
 			   oex::CStr sPath, oex::CFile *pInc, oex::CFile *pCmp,
 			   oex::CFile *pRes, oex::CFile *pDep, oex::CFile *pSym,
-			   oex::CStrList &lstCmp )
+			   oex::CStrList &lstSq, oex::CStrList &lstCii )
 {_STT();
 	int ret = -1;
 	oex::CStrList lst = oex::CParser::Split( dir.Ptr(), oexT( " \r\n\t" ) );
 	for ( oex::CStrList::iterator it; lst.Next( it ); )
-		ret = from_dir( *it, sOutDir, pb, *it, pInc, pCmp, pRes, pDep, pSym, lstCmp );
+		ret = from_dir( *it, sOutDir, pb, *it, pInc, pCmp, pRes, pDep, pSym, lstSq, lstCii );
 	return ret;
 }
 
@@ -229,7 +508,8 @@ int process(int argc, char* argv[])
 	} // end if
 
 	// File extensions to compile
-	oex::CStrList lstCmp = oex::CParser::Split( pb[ oexT( "c" ) ].ToString(), oexT( ";" ) );
+	oex::CStrList lstSq = oex::CParser::Split( pb[ oexT( "c" ) ].ToString(), oexT( ";" ) );
+	oex::CStrList lstCii = oex::CParser::Split( pb[ oexT( "i" ) ].ToString(), oexT( ";" ) );
 
 	// Was an entire directory specified?
 	if ( pb.IsKey( oexT( "d" ) ) )
@@ -253,11 +533,14 @@ int process(int argc, char* argv[])
 				"#\terror 'oexres.h' MUST be included BEFORE 'oexlib.h'" oexNL8
 				"#endif" oexNL8
 				oexNL8
+				"typedef void* (*PFN_OexResource)( void* );"
+				oexNL8
 				"struct SOexResourceInfo" oexNL8
 				"{" oexNL8
-				"\tconst char *   name;" oexNL8
-				"\tconst char *   data;" oexNL8
-				"\tunsigned long  size;" oexNL8
+				"\tconst char *    name;" oexNL8
+				"\tconst char *    data;" oexNL8
+				"\tunsigned long   size;" oexNL8
+				"\tPFN_OexResource func;" oexNL8
 				"};" oexNL8
 				oexNL8
 				"extern const SOexResourceInfo _g_oexlib_resources[];" oexNL8
@@ -292,7 +575,7 @@ int process(int argc, char* argv[])
 
 		// Create resources from directory
 		int ret = from_dirs( pb[ oexT( "d" ) ].ToString(), sOutDir, pb, oexT( "" ), 
-							 &fInc, &fCmp, &fRes, &fDep, &fSym, lstCmp );
+							 &fInc, &fCmp, &fRes, &fDep, &fSym, lstSq, lstCii );
 
 		if ( fRes.IsOpen() )
 			fRes.Write( oexNL );
@@ -316,7 +599,7 @@ int process(int argc, char* argv[])
 					   pb[ oexT( "p" ) ].ToString(),
 					   pb[ oexT( "s" ) ].ToString(),
 					   pb[ oexT( "i" ) ].ToString(),
-					   lstCmp );
+					   lstSq, lstCii );
 }
 
 
