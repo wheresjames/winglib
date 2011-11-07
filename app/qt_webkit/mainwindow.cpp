@@ -16,7 +16,7 @@ CMainWindow::CMainWindow()
 		throw;
 
 	// Set window title
-	setWindowTitle( "Malwarebytes WizzBang Removal Tool using Qt / C++" );
+	setWindowTitle( OEX_PROJECT_DESC );
 
 	// Set our custom network manager
 	m_pView->page()->setNetworkAccessManager( m_pNet );
