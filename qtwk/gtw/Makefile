@@ -12,6 +12,7 @@ PRJ_DEFS :=
 PRJ_WINL := winmm strmiids
 PRJ_VSLB := dshowbase
 PRJ_CIIX := *.htm
+PRJ_GUIT := gui
 #PRJ_RESD := res
 
 SQMOD_STATIC :=
