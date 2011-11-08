@@ -23,6 +23,13 @@ BUILDDIRS := app/hello \
 #			 app/hello_android \
 
 #-------------------------------------------------------------------
+# Qt WebKit apps
+#-------------------------------------------------------------------
+ifdef QTWK
+BUILDDIRS := $(BUILDDIRS) qtwk/gtw
+endif
+
+#-------------------------------------------------------------------
 # Squirrel engine
 #-------------------------------------------------------------------
 BUILDDIRS := $(BUILDDIRS) lib/sqbind \
@@ -31,14 +38,12 @@ BUILDDIRS := $(BUILDDIRS) lib/sqbind \
 						  app/sqrl-cgi \
 						  app/sqengine
 
-
 #-------------------------------------------------------------------
 # Squirrel Apps
 #-------------------------------------------------------------------
 BUILDDIRS := $(BUILDDIRS) sq/sntpsync \
 						  sq/topsize \
 						  sq/wlink
-
 
 #-------------------------------------------------------------------
 # Squirrel modules

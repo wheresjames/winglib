@@ -24,7 +24,7 @@ CNetworkReply::CNetworkReply( QObject *parent, const QNetworkRequest &req, const
 
 	// Get the path to the file
 	QByteArray path = req.url().path().toUtf8();
-	oex::CStr full = oexBuildPath( "res/", oex::CStr( path.data(), path.length() ) );
+	oex::CStr full = oexBuildPath( "qtwk/", oex::CStr( path.data(), path.length() ) );
 
 #if defined( _DEBUG )
 	oexSHOW( full );
