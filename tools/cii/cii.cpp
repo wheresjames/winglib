@@ -1,9 +1,33 @@
-// cppweb.cpp
+// cii.cpp
 
-#include "stdafx.h"
+#if defined( _WIN32 )
+#	include <windows.h>
+#endif
 
-using namespace oex;
+#include "cmd_line.h"
+#include "find_files.h"
 
+int main( int argc, char* argv[] )
+{
+	// Parse the command line
+    TCmdLine< char > cl( argc, argv );
+
+	// Dump the command line
+//	for ( TCmdLine< char >::iterator it = cl.begin(); cl.end() != it; it++ )
+//		printf( ": %s = %s\n", it->first.c_str(), it->second->c_str() );
+
+	ff::SFindData fd;
+	ff::HFIND hFind = ff::FindFirst( cl.pb()[ "f" ].c_str(), "*", &fd );
+	if ( ff::c_invalid_hfind == hFind )
+	{	printf( "No files found" );
+		return 0;
+	} // end if
+
+
+	return 0;
+}
+
+/*
 template < typename T >
 	CStr prepare_inline( const T &sName, const T &sScript, int bFile )
 	{_STT();
@@ -270,3 +294,4 @@ int main(int argc, char* argv[])
 	return ret;
 }
 
+*/

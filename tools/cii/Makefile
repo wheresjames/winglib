@@ -8,16 +8,24 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := cii
+PRJ_DEPS := qt-win
 PRJ_TYPE := exe
-PRJ_INCS := winglib/lib/oexlib
-PRJ_LIBS := oexlib
+PRJ_INCS := 
+PRJ_LIBS := 
 PRJ_OSLB := 
 PRJ_TOOL := 1
+PRJ_FWRK := Qt
 
 #-------------------------------------------------------------------
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
+
+ifeq ($(PLATFORM),windows)
+	PRJ_OSLB := $(PRJ_OSLB) QtCore4
+else
+	PRJ_OSLB := $(PRJ_OSLB) QtCore
+endif
 
 #-------------------------------------------------------------------
 # File locations
