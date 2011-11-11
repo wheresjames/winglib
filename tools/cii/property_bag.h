@@ -15,23 +15,27 @@
 
     Typical use
 
-    TPropertyBag< char > pb;
+	@code
 
-    pb[ "A" ][ "AA" ] = "Hello World!";
-    pb[ "A" ][ "AB" ] = (long)1;
-    pb[ "B" ][ "BA" ] = (double)3.14159;
-    
-    for ( long i = 0; i < 4; i++ )
-        pb[ "list" ][ i ] = i * 2;
+		TPropertyBag< char > pb;
 
-    // Get long value
-    long lVal = pb[ "A" ][ "AB" ].ToLong();
+		pb[ "A" ][ "AA" ] = "Hello World!";
+		pb[ "A" ][ "AB" ] = (long)1;
+		pb[ "B" ][ "BA" ] = (double)3.14159;
+		
+		for ( long i = 0; i < 4; i++ )
+			pb[ "list" ][ i ] = i * 2;
 
-    // Get double
-    double dVal = pb[ "B" ][ "BA" ].ToDouble();
+		// Get long value
+		long lVal = pb[ "A" ][ "AB" ].ToLong();
 
-    // Get string value
-    const char *pString = pb[ "list" ][ 0 ];
+		// Get double
+		double dVal = pb[ "B" ][ "BA" ].ToDouble();
+
+		// Get string value
+		const char *pString = pb[ "list" ][ 0 ].c_str();
+
+	@endcode
 
 */
 //==================================================================
@@ -65,6 +69,13 @@ public:
             /// Returns a pointer to encapsulated object
             T& Obj() { if ( !m_p ) m_p = new T; return *m_p; }
 
+            /// Returns a pointer to encapsulated object
+            T& operator *() { return Obj(); }
+            const T& operator *() const { return ((CAutoMem*)(this))->Obj(); }
+
+			/// Assignment operator
+			T& operator = ( const T& r ) { return Obj() = r; }
+
             /// Returns a pointer to the encapsulated object
             operator T&() { return Obj(); }
 
@@ -87,12 +98,15 @@ public:
 
 	/// Pass on iterator type
 	typedef typename t_map::iterator iterator;
+	typedef typename t_map::const_iterator const_iterator;
 
 	/// First item
 	iterator begin() { return m_lstSub.begin(); }
+	const_iterator begin() const { return m_lstSub.begin(); }
 
 	/// Item beyond the last item, yeah, that's what it is
 	iterator end() { return m_lstSub.end(); }
+	const_iterator end() const { return m_lstSub.end(); }
     
 public:
 
@@ -110,192 +124,47 @@ public:
     {   deserialize( sStr );
     }
 
-    /// Releases all memory resources and prepares class for reuse.
-    void destroy() { m_lstSub.clear(); m_str.release(); }
+    //==============================================================
+    // TPropertyBag()
+    //==============================================================
+    /// Constructs object from another property bag
+    /**
+        \param [in] r    - Reference to property bag to be copied
+    */
+    TPropertyBag( const TPropertyBag &r )
+    {	merge( r ); }
+
+    //==============================================================
+    // operator = ()
+    //==============================================================
+    /// Copies the contents of another property bag
+    /**
+        \param [in] r    - Reference to property bag to be copied
+    */
+    TPropertyBag& operator = ( const TPropertyBag &r ) { clear(); merge( r ); return *this; }
+
+    //==============================================================
+    // merge
+    //==============================================================
+    /// Merges the properties of the specified property bag
+    /**
+        \param [in] r    - Reference to property bag to be merged
+    */
+	void merge( const TPropertyBag &r )
+	{
+		// Copy string value
+		m_str = r.m_str;
+
+		// Copy array
+		stdForeach( const_iterator, it, r )
+			m_lstSub[ it->first ]->merge( *it->second );
+	}
 
     /// Releases all memory resources and prepares class for reuse.
-    void clear() { destroy(); }
+    void clear() { m_lstSub.clear(); m_str.clear(); }
 
 	/// Returns the number of items in the property bag
 	long size() { return m_lstSub.size(); }
-	
-    //==============================================================
-    // serialize()
-    //==============================================================
-    /// Serializes the array
-    /**
-        \return Serialized array.
-    
-        \see 
-    */
-/*	
-    t_String serialize()
-    {
-        t_String sRes;
-        
-        // Just return our value if we're not an array
-        if ( !IsArray() ) return m_str.Obj();
-
-        // Iterator
-        t_map::iterator pos = m_lstSub.begin();
-
-        // For each array element
-        while ( pos != m_lstSub.end() )
-        {
-            // Add separator if needed
-            if ( sRes.length() ) sRes += _T( ',' );
-
-            sRes += pos->first;
-
-            // Is it an array?
-            if ( pos->second.Obj().IsArray() )
-            { 
-                sRes += _T( '{' ); 
-                sRes += pos->second.Obj().serialize(); 
-                sRes += _T( '}' ); 
-            }
-                
-            // Serialize the value
-            else sRes += _T( '=' ), sRes += urlencode( (LPCTSTR)pos->second.Obj() );
-
-            // Next array element
-            pos++;
-
-        } // end while
-
-        return sRes;
-    }
-*/
-
-    //==============================================================
-    // deserialize()
-    //==============================================================
-
-    /// Deserializes an array from string
-    /**
-        \param [in] sStr    -   Serialized array string.
-        \param [in] bMerge  -   Non-zero if array should be merged
-                                into current data. Set to zero to
-                                replace current array.
-        \param [in] pLast   -   Receives the number of bytes decoded.
-        \param [in] pPs     -   Property bag that receives any decoded
-                                characters. We could also have just
-                                called this function on the object,
-                                but this way provides a little extra
-                                flexibility for later.
-        
-        \return Number of items deserialized.
-    
-        \see 
-    */
-/*
-    LONG deserialize(   t_String sStr, BOOL bMerge = FALSE, 
-                        LONG *pLast = NULL, TPropertyBag *pPs = NULL )
-    {
-        // Ensure object
-        if ( !pPs ) pPs = this;
-
-        // Do we want to merge?
-
-        if ( !bMerge ) pPs->destroy();
-
-        LONG lItems = 0;
-        long lLen = sStr.length(), s = 0, e = 0;
-
-        while ( e < lLen )
-        {
-            switch( sStr[ e ] )
-            {
-                case ',' : case '}' :
-                {
-                    if ( 1 < e - s )
-                    {
-                       // Find '='
-
-                       long a = s; while ( a < e && '=' != sStr[ a ] ) a++;
-
-                       t_String sKey, sVal;
-
-                       // First character is separator
-
-                       if ( a == s ) 
-                        sKey = urldecode( t_String( &sStr.c_str()[ s + 1 ], e - s - 1 ) );
-
-                       else sKey = urldecode( t_String( &sStr.c_str()[ s ], a - s ) );
-     
-                       // Single token
-
-                       if ( 1 >= e - a ) (*pPs)[ sKey ] = _T( "" );
-
-                       // Both tokens present
-
-                       else (*pPs)[ sKey ] = 
-                        urldecode( t_String( &sStr.c_str()[ a + 1 ], e - a - 1 ) );
-
-                       // Count one item
-
-                       lItems++;
-
-                    } // end if
-
-
-                    // Next element
-
-                    s = e + 1;
-
-                    // Time to exit?
-
-                    if ( '}' == sStr[ e ] )
-                    {   if ( pLast ) *pLast = e + 1; return lItems; }
-
-                } break;
-
-                case '{' :
-                {              
-                    // Get key
-
-                    t_String sKey = 
-                        urldecode( t_String( &sStr.c_str()[ s ], e - s ) );
-
-                    // Do we have a key?
-
-                    if ( sKey.length() )
-                    {
-                        // This will point to the end of the array we're about to decode
-
-                        LONG lEnd = 0;
-
-                        // Get the sub array
-
-                        lItems += deserialize(  t_String( &sStr.c_str()[ e + 1 ] ), 
-                                                TRUE, &lEnd, &(*pPs)[ sKey ] );
-
-                        // Skip the array we just decoded
-
-                        e += lEnd;
-
-                    } // end if
-
-
-                    // Skip this token
-
-                    s = e + 1; 
-
-                } break;
-
-            } // end switch
-
-
-            // Next i
-
-            e++;
-
-        } // end while
-
-
-        return lItems;
-    }
-*/
 
     //==============================================================
     // operator []()
@@ -412,14 +281,14 @@ public:
     //==============================================================
     /// Conversion from string object
     t_String operator = ( t_String sStr ) 
-    {   m_str.Obj() = sStr; return m_str.Obj(); }
+    {   m_str = sStr; return m_str; }
 
     //==============================================================
     // operator = ()
     //==============================================================
     /// Conversion from string
     t_String operator = ( const T* pStr ) 
-    {   if ( pStr ) m_str.Obj() = *pStr; return m_str.Obj(); }
+    {   return m_str = pStr; }
 
 
     //==============================================================
@@ -427,56 +296,56 @@ public:
     //==============================================================
     /// Conversion from int
     t_String operator = ( int n )
-    {   return m_str.Obj() = tcnv::ToString< T, t_String >( n ); }
+    {   return m_str = tcnv::ToString< T, t_String >( n ); }
 
     //==============================================================
     // operator = ()
     //==============================================================
     /// Conversion from unsigned int
     t_String operator = ( unsigned int n )
-    {   return m_str.Obj() = tcnv::ToString< T, t_String >( n ); }
+    {   return m_str = tcnv::ToString< T, t_String >( n ); }
 
     //==============================================================
     // operator = ()
     //==============================================================
     /// Conversion from long
     t_String operator = ( long n )
-    {   return m_str.Obj() = tcnv::ToString< T, t_String >( n ); }
+    {   return m_str = tcnv::ToString< T, t_String >( n ); }
 
     //==============================================================
     // operator = ()
     //==============================================================
     /// Conversion from unsigned long
     t_String operator = ( unsigned long n )
-    {   return m_str.Obj() = tcnv::ToString< T, t_String >( n ); }
+    {   return m_str = tcnv::ToString< T, t_String >( n ); }
 
     //==============================================================
     // operator = ()
     //==============================================================
     /// Conversion from long
     t_String operator = ( tcnv::tc_int64 n )
-    {   return m_str.Obj() = tcnv::ToString< T, t_String >( n ); }
+    {   return m_str = tcnv::ToString< T, t_String >( n ); }
 
     //==============================================================
     // operator = ()
     //==============================================================
     /// Conversion from unsigned long
     t_String operator = ( tcnv::tc_uint64 n )
-    {   return m_str.Obj() = tcnv::ToString< T, t_String >( n ); }
+    {   return m_str = tcnv::ToString< T, t_String >( n ); }
 
     //==============================================================
     // operator = ()
     //==============================================================
     /// Conversion from double
     t_String operator = ( float n )
-    {   return m_str.Obj() = tcnv::ToString< T, t_String >( n ); }
+    {   return m_str = tcnv::ToString< T, t_String >( n ); }
 
     //==============================================================
     // operator = ()
     //==============================================================
     /// Conversion from double
     t_String operator = ( double n )
-    {   return m_str.Obj() = tcnv::ToString< T, t_String >( n ); }
+    {   return m_str = tcnv::ToString< T, t_String >( n ); }
 
     //==============================================================
     // T*()
@@ -487,20 +356,32 @@ public:
     //==============================================================
     // c_str()
     //==============================================================
-    /// Returns local string object
-    const T* c_str() { return m_str.Obj().c_str(); }
+    /// Returns NULL terminated const pointer to string buffer
+    const T* c_str() { return m_str.c_str(); }
 
+    //==============================================================
+    // data()
+    //==============================================================
+    /// Returns pointer to string buffer (may not be NULL terminated)
+    const T* data() { return m_str.c_str(); }
+	
     //==============================================================
     // length()
     //==============================================================
-    /// Returns local string object
-    long length() { return m_str.Obj().length(); }
+    /// Returns length of string
+    long length() { return m_str.length(); }
 
     //==============================================================
     // ToString()
     //==============================================================
-    /// Returns local string object
-    t_String ToString() { return m_str.Obj(); }
+    /// Returns reference to string object
+    t_String& str() { return m_str; }
+
+    //==============================================================
+    // ToString()
+    //==============================================================
+    /// Returns copy of the string object
+    t_String ToString() { return m_str; }
 
     //==============================================================
     // ToInt64()
@@ -542,13 +423,21 @@ public:
     // IsArray()
     //==============================================================
     /// Returns non-zero if array elements are present
-
     bool IsArray() { return 0 < m_lstSub.size(); }
+
+    //==============================================================
+    // IsSet()
+    //==============================================================
+    /// Returns non-zero if the specified key exists
+    bool IsSet( const t_String &k ) 
+	{	t_map::iterator it = m_lstSub.find( k );
+		return ( m_lstSub.end() == it ) ? false : true;
+	}
 
 private:
 
     /// Our value
-    CAutoMem< t_String >			m_str;
+    t_String						m_str;
 
     /// Array of string maps
     t_map							m_lstSub; 

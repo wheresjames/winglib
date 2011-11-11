@@ -371,7 +371,6 @@ int to_binary( oex::CFile &f, oex::CStr8 &sData, oex::CStr &sVar, oex::CStr &sPr
 	f.Write( sSuf );
 
 	return 1;
-
 }
 
 

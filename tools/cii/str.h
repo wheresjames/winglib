@@ -1,5 +1,7 @@
 // str.h
 
+#pragma once
+
 #include "typecnv.h"
 
 namespace str
@@ -9,6 +11,9 @@ namespace str
 
 }; // namespace str
 
+/**
+	@warning Functions in the zstr namespace depend on strings being null terminated.
+*/
 namespace zstr
 {
     /// Returns the length of the null terminated string in s
@@ -54,11 +59,37 @@ namespace zstr
             return ln_src;
         }
 
-
 }; // namespace zstr
 
 namespace str
 {
+
+	/// 'Fast' number to ascii conversion
+    /**
+        \param [out] b	-   Destination buffer
+        \param [in] ch	-   Character to serialize
+    */
+	template< typename T, typename N >
+		void ntoa( T *b, N ch )
+		{
+			T c;
+			long sz = sizeof( N ) * 2, i = 0;
+
+			// For each nibble
+			for ( long i = 0; i < sz; i++ )
+			{
+				// Grab a nibble
+				c = (T)( ch & 0x0f ); 
+				ch >>= 4;
+
+				if ( 9 >= c )
+					b[ sz - i - 1 ] = tcTC( T, '0' ) + c;
+				else
+					b[ sz - i - 1 ] = tcTC( T, 'a' ) + ( c - 10 );
+
+			} // end for
+
+		}
 
 	/// Retuns the offset of ch
     /**
@@ -66,7 +97,7 @@ namespace str
         \param [in] ln  -   Length of string in s
         \param [in] ch  -   Character to search for
     */
-	template< class T >
+	template< typename T >
 		t_size FindCharacter( const T *s, t_size ln, T ch )
 		{
 			if ( !s )
@@ -92,7 +123,7 @@ namespace str
         \param [in] s2  -   Character list
         \param [in] ln2 -   Number of characters in s2
     */
-	template< class T >
+	template< typename T >
 		t_size FindCharacters( const T *s1, t_size ln1, const T *s2, t_size ln2 )
 	    {
 			if ( !s1 || !s2 )
@@ -125,7 +156,7 @@ namespace str
         \param [in] esc     -   Escape characters
         \param [in] ln_esc  -   Length of string in esc
     */
-	template< class T >
+	template< typename T >
 		t_size FindTerm( const T *s, t_size ln, const T *term, t_size ln_term, const T *esc = 0, t_size ln_esc = 0 )
 	    {
 			if ( !s || !term )
@@ -173,7 +204,7 @@ namespace str
 		@return The size of the new string
 
     */
-	template< class T >
+	template< typename T >
 		t_size UnquoteInplace( T* s, t_size ln, const T* open, t_size ln_open, const T *close, t_size ln_close, const T *esc = 0, t_size ln_esc = 0 )
 	    {
 			if ( !s )
@@ -227,7 +258,7 @@ namespace str
         \param [in] ln2 -   Number of characters in s2
     */
 	template < typename T >
-		static t_size SkipCharacters( T *s1, t_size ln1, T *s2, t_size ln2 )
+		static t_size SkipCharacters( T *s1, t_size ln1, const T *s2, t_size ln2 )
 	{
 		if ( !s1 || !ln1 || !s2 || !ln2 )
 			return -1;
@@ -235,7 +266,7 @@ namespace str
 		t_size i = 0;
 		while ( ln1 )
 		{
-			T *start = s2;
+			const T *start = s2;
 			t_size ln_start = ln2;
 			while ( start && ln_start-- )
 				if ( *s1 == *start )
@@ -270,7 +301,7 @@ namespace str
         close   = ">}])";
 
     */
-	template< class T >
+	template< typename T >
 		t_size ParseWithQuoted( const T* s, t_size ln, 
 								const T *term, t_size ln_term, 
 							    const T* open, t_size ln_open, 
@@ -332,13 +363,33 @@ namespace str
 	}
 
 	/// Splits a string into an array by cutting on any character in m_pSep, while respecting quotes
+	/**
+		@param[in,out] 	x_pStr		- String to be split
+		@param[in]		x_nSize		- Size of the buffer at x_pStr
+		@param[in]		x_pSep		- NULL terminated list of separators
+		@param[in]		x_pOpen		- NULL terminated list of open quotes
+		@param[in]		x_pClose 	- NULL terminated list of close quotes
+		@param[in]		x_pEsc		- NULL terminated list of escape characters
+		@param[in]		x_bInPlace	- If not-zero, the buffer is unquoted in place.
+									  This destroys the content of x_pStr.
+
+        The opening and closing quote characters must correspond within the string.
+
+        open    = "<{[(";
+        close   = ">}])";
+
+		@warning If x_bInPlace is non-zero, this function destroys the contents of x_pStr while parsing.
+
+		+++ Remove the dependency on null terminated strings
+	*/
 	template < typename T, typename T_STR, typename T_LST >
-		static T_LST SplitQuoted( const T *x_pStr, t_size x_nSize,
+		static T_LST SplitQuoted( T *x_pStr, t_size x_nSize,
 								  const T *x_pSep, const T *x_pOpen,
-								  const T *x_pClose, const T *x_pEsc )
+								  const T *x_pClose, const T *x_pEsc,
+								  bool x_bInPlace )
 	{
 		T_LST lst;
-		
+
 		// Sanity check
 		if ( !x_pStr || 0 >= x_nSize )
 			return lst;
@@ -381,8 +432,8 @@ namespace str
 
 			else if ( nPos )
 			{
-				// Add quoted string
-				lst.push_back( T_STR( x_pStr, nPos ) );
+				// Unquote the string and add it
+				lst.push_back( T_STR( x_pStr, UnquoteInplace< T >( x_pStr, nPos, x_pOpen, nOpen, x_pClose, nClose, x_pEsc, nEsc ) ) );
 
 				// Skip
 				x_nSize -= nPos; x_pStr += nPos;
