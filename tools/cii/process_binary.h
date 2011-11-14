@@ -9,25 +9,19 @@ template< typename T, typename T_STR >
 	{
 		std::basic_string< char > sInData;
 
-#if defined( _WIN32 )
-		typedef FILE* t_hfile;
-#else
-		typedef int t_hfile;
-#endif
-
-		t_hfile hIn = fopen( sIn.c_str(), "rb" );
+		disk::HFILE hIn = disk::Open( sIn.c_str(), "rb" );
 		if ( !hIn )
 			return -1;
 
-		t_hfile hOut = fopen( sOut.c_str(), "wb" );
+		disk::HFILE hOut = disk::Open( sOut.c_str(), "wb" );
 		if ( !hOut )
-		{	fclose( hIn );
+		{	disk::Close( hIn );
 			return -1;
 		} // end if
 
 		// Write out the prefix
 		if ( sPre.length() )
-			fwrite( sPre.data(), sizeof( T ), sPre.length(), hOut );
+			disk::Write( sPre.data(), sizeof( T ), sPre.length(), hOut );
 
 		// Char markers
 		T *t = (T*)"0x.., ";
@@ -36,17 +30,17 @@ template< typename T, typename T_STR >
 		long rl = zstr::Length( r );
 
 		// Buffers
-		long bl = 0, lRead = 0, lTotal = 0;
+		unsigned long bl = 0, lRead = 0, lTotal = 0;
 		T in[ sizeof( T ) * 64 * 1024 ], out[ sizeof( in ) ], *s;
 		
 		// Read in data in chunks
-		while ( 0 < ( lRead = fread( in, sizeof( T ), sizeof( in ), hIn ) ) )
+		while ( 0 < ( lRead = disk::Read( in, sizeof( T ), sizeof( in ), hIn ) ) )
 		{
 			// Track the total bytes
 			lTotal += lRead;
 
 			// Convert each byte and write it out
-			for ( long i = 0; i < lRead; i++ )
+			for ( unsigned long i = 0; i < lRead; i++ )
 			{
 				// Get a pointer to our spot in the buffer
 				s = &out[ bl ];
@@ -62,28 +56,28 @@ template< typename T, typename T_STR >
 
 				// Write data out if the buffer is getting full
 				if ( ( sizeof( out ) - 128 ) < bl )
-					fwrite( out, sizeof( T ), bl, hOut ), bl = 0;
+					disk::Write( out, sizeof( T ), bl, hOut ), bl = 0;
 
 			} // end for
 
 			// Write whatever is left
 			if ( bl )
-				fwrite( out, sizeof( T ), bl, hOut ), bl = 0;
+				disk::Write( out, sizeof( T ), bl, hOut ), bl = 0;
 
 		} // end while
 
 		if ( sLen.length() )
-		{	T_STR w = sLen + tcnv::ToString< T, T_STR >( lTotal );
-			fwrite( w.data(), sizeof( T ), w.length(), hOut );
+		{	T_STR w = sLen + str::ToString< T, T_STR >( lTotal );
+			disk::Write( w.data(), sizeof( T ), w.length(), hOut );
 		} // end if
 
 		// Write out the prefix
 		if ( sEnd.length() )
-			fwrite( sEnd.data(), sizeof( T ), sEnd.length(), hOut );
+			disk::Write( sEnd.data(), sizeof( T ), sEnd.length(), hOut );
 
 		// Close the file handles
-		fclose( hIn );
-		fclose( hOut );
+		disk::Close( hIn );
+		disk::Close( hOut );
 
 		// Return total bytes
 		return lTotal;

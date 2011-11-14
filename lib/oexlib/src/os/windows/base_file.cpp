@@ -341,7 +341,6 @@ oexBOOL CBaseFile::RemoveFolder( oexCSTR x_pDir )
 	return ::RemoveDirectory( x_pDir ) ? oexTRUE : oexFALSE;
 }
 
-
 static oexUINT g_ConvBaseFileAttribToWinAttrib[] =
 {
 	CBaseFile::eFileAttribReadOnly,             FILE_ATTRIBUTE_READONLY,

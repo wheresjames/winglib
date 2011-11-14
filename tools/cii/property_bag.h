@@ -4,7 +4,7 @@
 
 #include <map>
 #include <string>
-#include "typecnv.h"
+#include "str.h"
 
 //==================================================================
 /// Implements a multi-dimensional property bag
@@ -39,7 +39,7 @@
 
 */
 //==================================================================
-template < class T > class TPropertyBag
+template < typename T > class TPropertyBag
 {
 public:
 
@@ -53,7 +53,7 @@ public:
         own when boost comes with VC... 
     */
     //==================================================================
-    template < class T > class CAutoMem
+    template < typename T_OBJ > class CAutoMem
     {
         public:
 
@@ -67,32 +67,32 @@ public:
             void release() { if ( m_p ) { delete m_p; m_p = 0; } }
 
             /// Returns a pointer to encapsulated object
-            T& Obj() { if ( !m_p ) m_p = new T; return *m_p; }
+            T_OBJ& Obj() { if ( !m_p ) m_p = new T_OBJ; return *m_p; }
 
             /// Returns a pointer to encapsulated object
-            T& operator *() { return Obj(); }
-            const T& operator *() const { return ((CAutoMem*)(this))->Obj(); }
+            T_OBJ& operator *() { return Obj(); }
+            const T_OBJ& operator *() const { return ((CAutoMem*)(this))->Obj(); }
 
 			/// Assignment operator
-			T& operator = ( const T& r ) { return Obj() = r; }
+			T_OBJ& operator = ( const T_OBJ& r ) { return Obj() = r; }
 
             /// Returns a pointer to the encapsulated object
-            operator T&() { return Obj(); }
+            operator T_OBJ&() { return Obj(); }
 
             /// Returns a pointer to the encapsulated object
-            T* operator ->() { Obj(); return m_p; }
+            T_OBJ* operator ->() { Obj(); return m_p; }
 			
         private:
 
             /// Contains a pointer to the controlled object
-            T       *m_p;
+            T_OBJ       *m_p;
     };
 
     /// Unicode friendly string
-    typedef std::basic_string< T > t_String;
+    typedef typename std::basic_string< T > t_String;
 
     /// Our multi-dimensional string array type
-    typedef std::map< t_String, CAutoMem< TPropertyBag< T > > > t_map;
+    typedef typename std::map< t_String, CAutoMem< TPropertyBag< T > > > t_map;
 
 public:
 
@@ -202,7 +202,7 @@ public:
         \return Reference to sub class.
     */
     TPropertyBag& operator []( int n ) 
-    {	return m_lstSub[ tcnv::ToString< T, t_String >( n ) ]; }
+    {	return m_lstSub[ str::ToString< T, t_String >( n ) ]; }
 
     //==============================================================
     // operator []()
@@ -214,7 +214,7 @@ public:
         \return Reference to sub class.
     */
     TPropertyBag& operator []( unsigned int n ) 
-    {	return m_lstSub[ tcnv::ToString< T, t_String >( n ) ]; }
+    {	return m_lstSub[ str::ToString< T, t_String >( n ) ]; }
 
     //==============================================================
     // operator []()
@@ -226,7 +226,7 @@ public:
         \return Reference to sub class.
     */
     TPropertyBag& operator []( long n ) 
-    {	return m_lstSub[ tcnv::ToString< T, t_String >( n ) ]; }
+    {	return m_lstSub[ str::ToString< T, t_String >( n ) ]; }
 
     //==============================================================
     // operator []()
@@ -238,7 +238,7 @@ public:
         \return Reference to sub class.
     */
     TPropertyBag& operator []( unsigned long n ) 
-    {	return m_lstSub[ tcnv::ToString< T, t_String >( n ) ]; }
+    {	return m_lstSub[ str::ToString< T, t_String >( n ) ]; }
 
     //==============================================================
     // operator []()
@@ -249,8 +249,8 @@ public:
         
         \return Reference to sub class.
     */
-    TPropertyBag& operator []( tcnv::tc_int64 n ) 
-    {	return m_lstSub[ tcnv::ToString< T, t_String >( n ) ]; }
+    TPropertyBag& operator []( str::tc_int64 n ) 
+    {	return m_lstSub[ str::ToString< T, t_String >( n ) ]; }
 
     //==============================================================
     // operator []()
@@ -261,8 +261,8 @@ public:
     
         \return Reference to sub class.
     */
-    TPropertyBag& operator []( tcnv::tc_uint64 n ) 
-    {	return m_lstSub[ tcnv::ToString< T, t_String >( n ) ]; }
+    TPropertyBag& operator []( str::tc_uint64 n ) 
+    {	return m_lstSub[ str::ToString< T, t_String >( n ) ]; }
 
     //==============================================================
     // operator []()
@@ -274,7 +274,7 @@ public:
         \return Reference to sub class.
     */
     TPropertyBag& operator []( double n ) 
-    {	return m_lstSub[ tcnv::ToString< T, t_String >( n ) ]; }
+    {	return m_lstSub[ str::ToString< T, t_String >( n ) ]; }
 
     //==============================================================
     // operator = ()
@@ -296,56 +296,56 @@ public:
     //==============================================================
     /// Conversion from int
     t_String operator = ( int n )
-    {   return m_str = tcnv::ToString< T, t_String >( n ); }
+    {   return m_str = str::ToString< T, t_String >( n ); }
 
     //==============================================================
     // operator = ()
     //==============================================================
     /// Conversion from unsigned int
     t_String operator = ( unsigned int n )
-    {   return m_str = tcnv::ToString< T, t_String >( n ); }
+    {   return m_str = str::ToString< T, t_String >( n ); }
 
     //==============================================================
     // operator = ()
     //==============================================================
     /// Conversion from long
     t_String operator = ( long n )
-    {   return m_str = tcnv::ToString< T, t_String >( n ); }
+    {   return m_str = str::ToString< T, t_String >( n ); }
 
     //==============================================================
     // operator = ()
     //==============================================================
     /// Conversion from unsigned long
     t_String operator = ( unsigned long n )
-    {   return m_str = tcnv::ToString< T, t_String >( n ); }
+    {   return m_str = str::ToString< T, t_String >( n ); }
 
     //==============================================================
     // operator = ()
     //==============================================================
     /// Conversion from long
-    t_String operator = ( tcnv::tc_int64 n )
-    {   return m_str = tcnv::ToString< T, t_String >( n ); }
+    t_String operator = ( str::tc_int64 n )
+    {   return m_str = str::ToString< T, t_String >( n ); }
 
     //==============================================================
     // operator = ()
     //==============================================================
     /// Conversion from unsigned long
-    t_String operator = ( tcnv::tc_uint64 n )
-    {   return m_str = tcnv::ToString< T, t_String >( n ); }
+    t_String operator = ( str::tc_uint64 n )
+    {   return m_str = str::ToString< T, t_String >( n ); }
 
     //==============================================================
     // operator = ()
     //==============================================================
     /// Conversion from double
     t_String operator = ( float n )
-    {   return m_str = tcnv::ToString< T, t_String >( n ); }
+    {   return m_str = str::ToString< T, t_String >( n ); }
 
     //==============================================================
     // operator = ()
     //==============================================================
     /// Conversion from double
     t_String operator = ( double n )
-    {   return m_str = tcnv::ToString< T, t_String >( n ); }
+    {   return m_str = str::ToString< T, t_String >( n ); }
 
     //==============================================================
     // T*()
@@ -387,37 +387,37 @@ public:
     // ToInt64()
     //==============================================================
     /// Converts to long
-    tcnv::tc_int64 ToInt64() { return tcnv::StrToInt64( c_str() ); }
+    str::tc_int64 ToInt64() { return str::StrToInt64( c_str() ); }
 
     //==============================================================
     // ToUInt64()
     //==============================================================
     /// Converts to long
-    tcnv::tc_uint64 ToUInt64() { return tcnv::StrToUInt64( c_str() ); }
+    str::tc_uint64 ToUInt64() { return str::StrToUInt64( c_str() ); }
 
     //==============================================================
     // ToLong()
     //==============================================================
     /// Converts to long
-    long ToLong() { return tcnv::StrToLong( c_str() ); }
+    long ToLong() { return str::StrToLong( c_str() ); }
 
     //==============================================================
     // ToULong()
     //==============================================================
     /// Converts to unsigned long
-    unsigned long ToULong() { return tcnv::StrToULong( c_str() ); }
+    unsigned long ToULong() { return str::StrToULong( c_str() ); }
 
     //==============================================================
     // ToDouble()
     //==============================================================
     /// Converts to double
-    double ToDouble() { return tcnv::StrToDouble( c_str() ); }
+    double ToDouble() { return str::StrToDouble( c_str() ); }
 
     //==============================================================
     // ToFloat()
     //==============================================================
     /// Converts to double
-    double ToFloat() { return tcnv::StrToFloat( c_str() ); }
+    double ToFloat() { return str::StrToFloat( c_str() ); }
 
     //==============================================================
     // IsArray()
@@ -430,9 +430,7 @@ public:
     //==============================================================
     /// Returns non-zero if the specified key exists
     bool IsSet( const t_String &k ) 
-	{	t_map::iterator it = m_lstSub.find( k );
-		return ( m_lstSub.end() == it ) ? false : true;
-	}
+	{	return ( m_lstSub.end() == m_lstSub.find( k ) ) ? false : true; }
 
 private:
 

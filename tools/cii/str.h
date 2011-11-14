@@ -2,12 +2,155 @@
 
 #pragma once
 
-#include "typecnv.h"
+#ifndef stdForeach
+#	define stdForeach( t, i, o ) for ( t i = o.begin(); o.end() != i; i++ )
+#endif
+
+// Anyone know a better way?
+#define tcTT( c, s )		( 1 == sizeof( c ) ? ( ( c* )( s ) ) : ( ( c* )( L##s ) ) )
+#define tcTC( c, s )		( 1 == sizeof( c ) ? ( ( c )( s ) ) : ( ( c )( L##s ) ) )
+#define tcTTEXT( c, s )		pbTT( c, s )
+
+#if defined( __GNUC__ )
+#	define tcVaList				__builtin_va_list
+#	define tcVaStart			__builtin_va_start
+#	define tcVaEnd				__builtin_va_end
+#	define tcVaArg				__builtin_va_arg
+#elif defined( _WIN32 )
+#	define tcVaList				void*
+#	define tcVaStart( v, p )	( v = ( ( (void**)&p ) + 1 ) )
+#	define tcVaEnd( v )
+#	define tcVaArg( v, t )		( (t)( v++ ) )
+#else
+#	if defined( _WIN32_WCE )
+#		include <windows.h>
+#	endif
+#	include <stdarg.h>
+#	define tcVaList				va_list
+#	define tcVaStart			va_start
+#	define tcVaEnd				va_end
+#	define tcVaArg				va_arg
+#endif
 
 namespace str
 {
 	// Size type
 	typedef long t_size;
+	
+	typedef signed long long int tc_int64;
+	typedef unsigned long long int tc_uint64;
+
+	/// String format
+	long vPrint( const char *x_pFmt, tcVaList x_pArgs );
+
+	/// String format
+	long Print( const char *x_pFmt, ... );
+
+	/// String format
+	long vStrFmt( char *x_pDst, unsigned long x_uMax, const char *x_pFmt, tcVaList x_pArgs );
+
+	/// String format
+	long StrFmt( char *x_pDst, unsigned long x_uMax, const char *x_pFmt, ... );
+
+	/// Converts to int64
+	tc_int64 StrToInt64( const char *x_pStr, long x_lRadix = 10 );
+
+	/// Converts to uint64
+	tc_uint64 StrToUInt64( const char *x_pStr, long x_lRadix = 10 );
+
+	/// Converts to long
+	long StrToLong( const char *x_pStr, long x_lRadix = 10 );
+
+	/// Converts to unsigned long
+	unsigned long StrToULong( const char *x_pStr, long x_lRadix = 10 );
+
+	/// Converts to double
+	float StrToFloat( const char *x_pStr );
+
+	/// Converts to double
+	double StrToDouble( const char *x_pStr );
+
+#ifndef CII_NO_WCHAR
+
+	/// String format
+	long vPrint( const wchar_t *x_pFmt, tcVaList x_pArgs );
+
+	/// String format
+	long Print( const wchar_t *x_pFmt, ... );
+
+	/// String format
+	long vStrFmt( wchar_t *x_pDst, unsigned long x_uMax, const wchar_t *x_pFmt, tcVaList x_pArgs );
+
+	/// String format
+	long StrFmt( wchar_t *x_pDst, unsigned long x_uMax, const wchar_t *x_pFmt, ... );
+
+	/// Converts to int64
+	tc_int64 StrToInt64( const wchar_t *x_pStr, long x_lRadix = 10 );
+
+	/// Converts to uint64
+	tc_uint64 StrToUInt64( const wchar_t *x_pStr, long x_lRadix = 10 );
+
+	/// Converts to long
+	long StrToLong( const wchar_t *x_pStr, long x_lRadix = 10 );
+
+	/// Converts to unsigned long
+	unsigned long StrToULong( const wchar_t *x_pStr, long x_lRadix = 10 );
+
+	/// Converts to double
+	float StrToFloat( const wchar_t *x_pStr );
+
+	/// Converts to double
+	double StrToDouble( const wchar_t *x_pStr );
+
+#endif
+
+	template< typename T, typename T_STR >
+		T_STR ToString( int n ) 
+		{   T szNum[ 256 ] = { 0 }; 
+			return T_STR( szNum, StrFmt( szNum, sizeof( szNum ), tcTT( T, "%d" ), n ) );
+		}
+
+	template< typename T, typename T_STR >
+		T_STR ToString( unsigned int n ) 
+		{   T szNum[ 256 ] = { 0 }; 
+			return T_STR( szNum, StrFmt( szNum, sizeof( szNum ), tcTT( T, "%u" ), n ) );
+		}
+
+	template< typename T, typename T_STR >
+		T_STR ToString( long n ) 
+		{   T szNum[ 256 ] = { 0 }; 
+			return T_STR( szNum, StrFmt( szNum, sizeof( szNum ), tcTT( T, "%li" ), n ) );
+		}
+
+	template< typename T, typename T_STR >
+		T_STR ToString( unsigned long n ) 
+		{   T szNum[ 256 ] = { 0 }; 
+			return T_STR( szNum, StrFmt( szNum, sizeof( szNum ), tcTT( T, "%lu" ), n ) );
+		}
+
+	template< typename T, typename T_STR >
+		T_STR ToString( tc_int64 n ) 
+		{   T szNum[ 256 ] = { 0 }; 
+			return T_STR( szNum, StrFmt( szNum, sizeof( szNum ), tcTT( T, "%lld" ), n ) );
+		}
+
+	template< typename T, typename T_STR >
+		T_STR ToString( tc_uint64 n ) 
+		{   T szNum[ 256 ] = { 0 }; 
+			return T_STR( szNum, StrFmt( szNum, sizeof( szNum ), tcTT( T, "%llu" ), n ) );
+		}
+
+	template< typename T, typename T_STR >
+		T_STR ToString( float n ) 
+		{   T szNum[ 256 ] = { 0 }; 
+			return T_STR( szNum, StrFmt( szNum, sizeof( szNum ), tcTT( T, "%f" ), (double)n ) );
+		}
+
+	template< typename T, typename T_STR >
+		T_STR ToString( double n ) 
+		{   T szNum[ 256 ] = { 0 }; 
+			return T_STR( szNum, StrFmt( szNum, sizeof( szNum ), tcTT( T, "%f" ), n ) );
+		}
 
 }; // namespace str
 
@@ -73,7 +216,7 @@ namespace str
 		void ntoa( T *b, N ch )
 		{
 			T c;
-			long sz = sizeof( N ) * 2, i = 0;
+			const long sz = sizeof( N ) * 2;
 
 			// For each nibble
 			for ( long i = 0; i < sz; i++ )
@@ -444,6 +587,119 @@ namespace str
 
 		return lst;
 
+	}
+
+	template< class T >
+		t_size MatchPattern( const T *s, t_size ln_s, const T* pat, t_size ln_pat, bool ignore_case )
+	{
+		if ( !s || !pat )
+			return -1;
+
+		// Match empty pattern
+		if ( !ln_pat )
+			return 0;
+
+		t_size i = 0, p = 0;
+
+		// Skip multiple '*'
+		while ( p < ( ln_pat + 1 ) && pat[ p ] == tcTC( T, '*' ) && pat[ p + 1 ] == tcTC( T, '*' ) )
+			p++;
+
+		// Check for the 'any' pattern
+		if ( pat[ p ] == tcTC( T, '*' ) && p + 1 >= ln_pat )
+			return 0;
+
+		// While we're not at the end
+		while ( i < ln_s )
+		{
+			// Are we on a wildcard?
+			if ( pat[ p ] == tcTC( T, '*' ) )
+			{
+				// Are we matching everything?
+				if ( p + 1 >= ln_pat )
+					return 0;
+
+				// Check for pattern advance
+				if ( s[ i ] == pat[ p + 1 ] ||
+						( ignore_case &&
+							(
+								(
+									s[ i ] >= tcTC( T, 'a' ) && s[ i ] <= tcTC( T, 'z' ) &&
+									( s[ i ] - ( tcTC( T, 'a' ) - tcTC( T, 'A' ) ) ) == pat[ p + 1 ]
+								) ||
+
+								(
+									s[ i ] >= tcTC( T, 'A' ) && s[ i ] <= tcTC( T, 'Z' ) &&
+									( s[ i ] + ( tcTC( T, 'a' ) - tcTC( T, 'A' ) ) ) == pat[ p + 1 ]
+								)
+							)
+						)
+					) p += 2;
+
+			} // end if
+
+			// Just accept this character
+			else if ( pat[ p ] == tcTC( T, '?' ) )
+				p++;
+
+			// Otherwise advance if equal
+			else if ( s[ i ] == pat[ p ] )
+				p++;
+
+			// Case insensitive
+			else if ( ignore_case &&
+						(
+							(
+								s[ i ] >= tcTC( T, 'a' ) && s[ i ] <= tcTC( T, 'z' ) &&
+								( s[ i ] - ( tcTC( T, 'a' ) - tcTC( T, 'A' ) ) ) == pat[ p ]
+							) ||
+							(
+								s[ i ] >= tcTC( T, 'A' ) && s[ i ] <= tcTC( T, 'Z' ) &&
+								( s[ i ] + ( tcTC( T, 'a' ) - tcTC( T, 'A' ) ) ) == pat[ p ]
+							)
+						)
+					) p++;
+
+			else
+			{
+				// Attempt to back up in the pattern
+				while ( p && pat[ p ] != tcTC( T, '*' ) )
+					p--;
+
+				// Did we find the 'any' pattern?
+				if ( pat[ p ] != tcTC( T, '*' ) )
+					return -1;
+
+			} // end else
+
+			// Next char
+			i++;
+
+			// Are we at the end of the pattern?
+			if ( p >= ln_pat  )
+			{
+				// Quit if at the end of the string too
+				if ( i >= ln_s )
+					return 0;
+
+				// Attempt to back up in the pattern
+				while ( p && pat[ p ] != tcTC( T, '*' ) )
+					p--;
+
+				// Did we find the 'any' pattern?
+				if ( pat[ p ] != tcTC( T, '*' ) )
+					return -1;
+
+			} // end if
+
+		} // end while
+
+		// Skip wild cards
+		while ( p < ln_pat && pat[ p ] == tcTC( T, '*' ) )
+			p++;
+
+		// Did we match?
+		return ( p >= ln_pat ) ? 0 : -1;
 	}
 
 }; // namespace str

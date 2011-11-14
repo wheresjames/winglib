@@ -89,8 +89,8 @@ public:
 	t_size Parse( int argc, t_char **argv )
 	{
 		// Hope the OS parsed this as we expect
-		t_size i = 0; t_pstrlist last;
-		for ( int n = 0; n < argc; n++ )
+		t_pstrlist last;
+		for ( t_size n = 0, i = 0; n < argc; n++ )
 			if ( argv[ n ] )
 				i = ParseCommandLineItem( i, argv[ n ], zstr::Length( argv[ n ] ), m_pb, &last );
 
@@ -116,11 +116,11 @@ public:
 		{
 			// Save the naked value into the array by it's position
 			t_String sVal( x_p, x_l );
-			x_pb[ t_String( tcTT( t_char, "#" ) ) + tcnv::ToString< T, t_String >( i ) ] = sVal;
+			x_pb[ t_String( tcTT( t_char, "#" ) ) + str::ToString< T, t_String >( i ) ] = sVal;
 			
 			// Update previous switch(s) with it's value
 			if ( last && last->size() )
-			{	stdForeach( t_pstrlist::iterator, it, (*last) )
+			{	stdForeach( typename t_pstrlist::iterator, it, (*last) )
 					if ( *it )
 						**it = sVal;
 				last->clear();
@@ -145,7 +145,7 @@ public:
 			t_size sep = str::FindCharacter( &x_p[ n ], x_l - n, tcTC( t_char, ':' ) );
 			t_String sVal = ( 0 < sep ) 
 							? t_String( &x_p[ n + sep + 1 ], x_l - n - sep ) 
-							: ( t_String( tcTT( t_char, "#" ) ) + tcnv::ToString< T, t_String >( i ) );
+							: ( t_String( tcTT( t_char, "#" ) ) + str::ToString< T, t_String >( i ) );
 
 			// Set all switches
 			while( n < x_l && tcTC( t_char, ':' ) != x_p[ n ] )
@@ -171,10 +171,12 @@ public:
 		t_String sKey;
 		t_size sep = str::FindCharacter( &x_p[ n ], x_l - n, tcTC( t_char, ':' ) );
 		if ( 0 < sep )
-			x_pb[ sKey = t_String( &x_p[ n ], sep ) ] = t_String( &x_p[ n + sep + 1 ], x_l - n - sep );
+			x_pb[ sKey = t_String( &x_p[ n ], sep ) ] 
+				= t_String( &x_p[ n + sep + 1 ], x_l - n - sep );
 		else
 		{
-			x_pb[ sKey = t_String( &x_p[ n ], x_l - n ) ] = t_String( tcTT( t_char, "#" ) ) + tcnv::ToString< T, t_String >( i );
+			x_pb[ sKey = t_String( &x_p[ n ], x_l - n ) ] 
+				= t_String( tcTT( t_char, "#" ) ) + str::ToString< T, t_String >( i );
 			if ( last )
 				last->push_back( &x_pb[ sKey ].str() );
 		} // end else
@@ -199,9 +201,10 @@ public:
 			return 0;
 
 		// Break the command line into chunks
-		t_strlist sl = str::SplitQuoted< T, t_String, t_strlist >( x_pStr, x_lSize, 
-																   tcTT( t_char, " \t" ), tcTT( t_char, "\"'" ), 
-																   tcTT( t_char, "\"'" ), tcTT( t_char, "\\" ) );
+		t_strlist sl = str::SplitQuoted< T, t_String, t_strlist >
+								( x_pStr, x_lSize, 
+								  tcTT( t_char, " \t" ), tcTT( t_char, "\"'" ), 
+								  tcTT( t_char, "\"'" ), tcTT( t_char, "\\" ) );
 
 		// We get anything?
 		if ( !sl.size() )
@@ -209,7 +212,7 @@ public:
 
 		// Parse each item
 		t_size i = 0; t_pstrlist last;
-		stdForeach( t_strlist::iterator, it, sl )
+		stdForeach( typename t_strlist::iterator, it, sl )
 			i = ParseCommandLineItem( i, it->data(), it->length(), m_pb, &last );
 
 		// Set switch data values
@@ -224,7 +227,7 @@ public:
 		// @warning Don't use substr(), it has bugs ;)
 
 		// Set switch values to corrisponding data
-		stdForeach( t_pb::iterator, it, m_pb )
+		stdForeach( typename t_pb::iterator, it, m_pb )
 			if ( t_String( it->second->str().c_str(), 0, 2 ) == tcTT( t_char, "##" ) )
 			{	t_String sKey = t_String( it->second->str().c_str(), 1, t_String::npos );
 				if ( m_pb.IsSet( sKey ) )

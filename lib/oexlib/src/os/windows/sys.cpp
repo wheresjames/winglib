@@ -42,7 +42,7 @@
 //#	include <wtypes.h>
 #	define VSNPRINTF	vsnprintf
 #	define STRTOLL		strtoll
-#	define VSNWPRINTF	vswprintf
+#	define VSNWPRINTF	vsnwprintf
 #	define WCSTOLL		wcstoll
 #else
 #	include <tchar.h>
@@ -478,22 +478,6 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 
 #else
 
-#if defined( OEX_WINCE ) || defined( __MINGW32__ )
-
-	// Create format string
-	oexINT nRet = VSNWPRINTF( x_pDst, x_pFmt, (va_list)x_pArgs );
-	if ( 0 > nRet || x_uMax < (oexUINT)nRet )
-	{
-		// Null terminate buffer
-		x_pDst[ x_uMax - 1 ] = 0;
-
-		// Let the user know what went wrong
-		res = c_StrErr_INSUFFICIENT_BUFFER;
-
-	} // end if
-
-#else
-
 	// Create format string
 	oexINT nRet = VSNWPRINTF( x_pDst, x_uMax, x_pFmt, (va_list)x_pArgs );
 	if ( 0 > nRet || x_uMax < nRet )
@@ -506,7 +490,6 @@ oexCSTRW CSys::vStrFmt( oexRESULT *x_pRes, oexSTRW x_pDst, oexUINT x_uMax, oexCS
 
 	} // end if
 
-#endif
 #endif
 
 	// What to do with the result

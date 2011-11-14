@@ -657,7 +657,6 @@ public:
 				return CppDecodeChar( TStr< T >( x_pStr ) );
 			}
 
-
 		template< typename T >
 			struct SCppItem
 			{

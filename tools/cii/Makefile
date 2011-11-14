@@ -15,17 +15,12 @@ PRJ_LIBS :=
 PRJ_OSLB := 
 PRJ_TOOL := 1
 PRJ_FWRK := Qt
+PRJ_DEFS := 
 
 #-------------------------------------------------------------------
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
-
-ifeq ($(PLATFORM),windows)
-	PRJ_OSLB := $(PRJ_OSLB) QtCore4
-else
-	PRJ_OSLB := $(PRJ_OSLB) QtCore
-endif
 
 #-------------------------------------------------------------------
 # File locations
