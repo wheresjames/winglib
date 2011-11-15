@@ -3,11 +3,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if defined( _WIN32_WCE ) || defined( __MINGW32__ )
+#if !defined( _WIN32 ) || defined( _WIN32_WCE ) || defined( __MINGW32__ )
+#	include <stdarg.h>
 #	include <wchar.h>
 #	define VSNPRINTF		vsnprintf
 #	define STRTOLL			strtoll
+#if defined( __MINGW32__ )
 #	define VSNWPRINTF		vsnwprintf
+#else
+#	define VSNWPRINTF		vswprintf
+#endif
 #	define WCSTOLL			wcstoll
 #	define CAST_VL			tcVaList
 #else
@@ -153,7 +158,11 @@ long vStrFmt( wchar_t *x_pDst, unsigned long x_uMax, const wchar_t *x_pFmt, tcVa
 		return -1;
 
 	// Create format string
+#if !defined( _WIN32 )
 	long nRet = (long)VSNWPRINTF( x_pDst, x_uMax, x_pFmt, (CAST_VL)x_pArgs );
+#else
+	long nRet = (long)VSNWPRINTF( x_pDst, x_pFmt, (CAST_VL)x_pArgs );
+#endif
 	if ( 0 > nRet || x_uMax < (unsigned long)nRet )
 	{
 		// Null terminate buffer

@@ -437,7 +437,7 @@ CBaseFile::t_HFIND CBaseFile::FindFirst( oexCSTR x_pPath, oexCSTR x_pMask, CBase
         return CBaseFile::c_InvalidFindHandle;
 
 	DIR *hDir = opendir( oexStrToMbPtr( x_pPath ) );
-	if ( CBaseFile::c_InvalidFindHandle == hDir )
+	if ( !hDir )
 		return CBaseFile::c_InvalidFindHandle;
 
 	errno = 0;

@@ -8,7 +8,7 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := cii
-PRJ_DEPS := qt-win
+#PRJ_DEPS := qt-win
 PRJ_TYPE := exe
 PRJ_INCS := 
 PRJ_LIBS := 

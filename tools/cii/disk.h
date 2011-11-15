@@ -116,7 +116,7 @@ namespace disk
 				   + sep
 				   + LTrim( LTrim( s2, tcTC( T, '\\' ) ), tcTC( T, '/' ) );
 #else
-			return WebPath( s1, s2 );
+			return WebPath< T, T_STR >( s1, s2 );
 #endif
 		}
 

@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <string.h>
 #include "str.h"
 
 /// Returns non-zero if the character is a valid html character
@@ -52,7 +53,7 @@ template< typename T, typename T_STR >
 			return T_STR();
 		
 		T_STR ret;
-		T_STR::size_type nStart = 0, nPos = 0;
+		typename T_STR::size_type nStart = 0, nPos = 0;
 
 		while ( nPos < x_lSize )
 		{

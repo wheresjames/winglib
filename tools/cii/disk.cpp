@@ -2,22 +2,29 @@
 
 #if defined( _WIN32 )
 #	include <Windows.h>
-#	include <stdio.h>
 #else
+#	include <errno.h>
+#	include <sys/stat.h>
+#	include <sys/types.h>
+#	if !defined( CII_NODIRENT )
+#		include <dirent.h>
+#	endif
 #endif
 
+#include <stdio.h>
 #include <string>
+#include <string.h>
 #include "str.h"
 #include "disk.h"
 
 namespace disk
 {
 
-#if defined( _WIN32 )
+//#if defined( _WIN32 )
 		typedef FILE* tHFILE;
-#else
-		typedef int tHFILE;
-#endif
+//#else
+//		typedef int tHFILE;
+//#endif
 
 HFILE Open( const char *x_pFile, const char *x_pMode )
 {
@@ -157,6 +164,182 @@ bool FindClose( HFIND x_hFind )
 }
 
 #else
+
+bool mkdir( const char *x_pPath )
+{
+	if ( !x_pPath || !*x_pPath )
+		return false;
+
+	bool bRet = !::mkdir( x_pPath, 0755 ) ? true : false;
+	if ( bRet )
+	{	::chmod( x_pPath, 0755 );
+		return true;
+	} // end if
+
+	return false;
+}
+
+bool exists( const char *x_pPath )
+{
+#if defined( CII_NOSTAT64 )
+	struct stat s;
+	return ::stat( x_pPath, &s ) ? false : true;
+#else
+	struct stat64 s64;
+	return	::stat64( x_pPath, &s64 ) ? false : true;
+#endif
+}
+
+bool unlink( const char *x_pFile )
+{
+	if ( !x_pFile )
+		return false;
+
+	::chmod( x_pFile, 0xffff );
+	return ::unlink( x_pFile ) ? false : true;
+}
+
+bool rmdir( const char *x_pPath )
+{
+	if ( !x_pPath )
+		return false;
+
+	::chmod( x_pPath, 0xffff );
+	return ::rmdir( x_pPath ) ? false : true;
+}
+
+str::tc_int64 Size( const char *x_pFile )
+{
+	if ( !x_pFile || !*x_pFile )
+		return 0;
+
+#if defined( CII_NOSTAT64 )
+
+	struct stat s;
+	if ( stat( x_pFile, &s ) )
+		return 0;
+
+	return s.st_size;
+
+#else
+
+	// +++ Ensure this works correctly
+	struct stat64 s64;
+	if ( stat64( x_pFile, &s64 ) )
+		return 0;
+
+	return s64.st_size;
+
+#endif
+}
+
+str::tc_int64 Size( HFILE x_hFile )
+{
+	// Ensure valid handle
+	if ( c_invalid_hfile == x_hFile ) 
+		return 0;
+
+#if defined( CII_NOSTAT64 )
+
+	struct stat s;
+	if ( fstat( x_hFile, &s ) )
+		return 0;
+
+	return s.st_size;
+
+#else
+
+	struct stat64 s64;
+
+	// +++ Ensure this works correctly
+	if ( fstat64( x_hFile, &s64 ) )
+		return 0;
+
+	return s64.st_size;
+
+#endif
+}
+
+
+static void disk_InitFindData( SFindData *x_pFd )
+{   x_pFd->llSize = 0;
+    *x_pFd->szName = 0;
+    x_pFd->uFileAttributes = 0;
+    x_pFd->ftCreated = 0;
+    x_pFd->ftLastAccess = 0;
+    x_pFd->ftLastModified = 0;
+}
+
+static void disk_SetFindData( SFindData *x_pFd, const dirent *x_pD )
+{
+	if ( ! x_pFd || !x_pD )
+		return;
+
+	// Init structure
+	disk_InitFindData( x_pFd );
+
+	// Save file name
+	zstr::Copy( x_pFd->szName, sizeof( x_pFd->szName ), x_pD->d_name );
+
+	// Is it a directory?
+	if ( DT_DIR & x_pD->d_type )
+		x_pFd->uFileAttributes |= disk::eFileAttribDirectory;
+}
+
+HFIND FindFirst( const char *x_pPath, const char *x_pMask, SFindData *x_pFd )
+{
+#if defined( CII_NODIRENT )
+	return c_invalid_hfind;
+#else
+
+    // Sanity checks
+    if ( !x_pPath || ! x_pMask || ! x_pFd )
+        return c_invalid_hfind;
+
+	DIR *hDir = opendir( x_pPath );
+	if ( !hDir )
+		return c_invalid_hfind;
+
+	errno = 0;
+	struct dirent *pD = readdir( hDir );
+	if ( !pD || errno )
+	{	closedir( hDir );
+		return c_invalid_hfind;
+	} // end if
+
+	// Set file data
+	disk_SetFindData( x_pFd, pD );
+
+    return (HFIND)hDir;
+#endif
+}
+
+bool FindNext( HFIND x_hFind, SFindData *x_pFd )
+{
+#if defined( CII_NODIRENT )
+	return false;
+#else
+	DIR *hDir = (DIR*)x_hFind;
+
+	errno = 0;
+	struct dirent *pD = readdir( hDir );
+	if ( !pD || errno )
+		return false;
+
+	disk_SetFindData( x_pFd, pD );
+
+    return true;
+#endif
+}
+
+bool FindClose( HFIND x_hFind )
+{
+#if defined( CII_NODIRENT )
+	return false;
+#else
+	return closedir( (DIR*)x_hFind ) ? false : true;
+#endif
+}
 
 #endif
 
