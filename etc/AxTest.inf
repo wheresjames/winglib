@@ -1,0 +1,21 @@
+
+; Version @VER
+
+[version]
+  signature="$CHICAGO$"
+  AdvancedINF=2.0
+  
+[Add.code]
+  AxTest.dll=AxTest.dll
+  License.txt=License.txt
+  
+[AxTest.dll]
+  file-@OS-@PROC=thiscab
+  clsid={50B3ED5F-DF15-4d26-BA57-94EA8F53D145}
+  FileVersion=@CVER
+  RegisterServer=yes
+
+[License.txt]
+  file-@OS-@PROC=thiscab
+
+  
