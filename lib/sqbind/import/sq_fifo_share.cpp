@@ -82,6 +82,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqFifoShare, CSqFifoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, ReadTsMin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, ReadTsMax )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, incReadPtr )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, decReadPtr )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, isRead )
 	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, Write )
@@ -286,7 +287,9 @@ int CSqFifoShare::Open( const sqbind::stdString &sName )
 
 	// Must have a valid name
 	if ( !sName.length() )
+	{	m_sLastErr = oex2std( oexMks( oexT( "Invalid name : " ), std2oex( sName ) ) );
 		return 0;
+	} // end if
 
 	// Structure size
 	int struct_size = SQSFS_CBSIZE;
@@ -319,7 +322,8 @@ int CSqFifoShare::Open( const sqbind::stdString &sName )
 
 	// Verify control block id
 	if ( m_cb.getUINT( 0 ) != m_uCbId )
-	{	Destroy();
+	{	m_sLastErr = oex2std( oexMks( oexT( "Invalid control block id : " ), m_cb.getUINT( 0 ), oexT( " != " ), m_uCbId ) );
+		Destroy();
 		return 0;
 	} // end if
 
@@ -329,8 +333,13 @@ int CSqFifoShare::Open( const sqbind::stdString &sName )
 	int nHeaderSize = getHeaderSize();
 	
 	// Validate parameters
-	if ( 0 >= nBufSize || 0 >= nBlocks || 0 >= nHeaderSize )
-	{	Destroy();
+	if ( 0 >= nBufSize || 0 >= nBlocks || 0 > nHeaderSize )
+	{	m_sLastErr = oex2std( oexMks( oexT( "Invalid control block values : " ), 
+									  oexT( "nBufSize = " ), nBufSize,
+									  oexT( ", nBlocks = " ), nBlocks,
+									  oexT( ", nHeaderSize = " ), nHeaderSize
+									  ) );
+		Destroy();
 		return 0;
 	} // end if
 
@@ -340,7 +349,7 @@ int CSqFifoShare::Open( const sqbind::stdString &sName )
 	sgBuffer = std2oex( getBufferGuidStr() );
 	sqbind::stdString sidBuffer = ( m_bGlobal ? oexT( "Global\\" ) : oexT( "" ) ) + oex2std( sgBuffer ); 
 	sgBuffer.StringToGuid( guidBuffer );
-	
+
 	// Set buffer info
 	m_buf.SetName( sidBuffer );
 	m_buf.PlainShare( 1 );
@@ -557,6 +566,30 @@ int CSqFifoShare::incReadPtr()
 
 	// Count a read
 	m_cb.setUINT( 9, m_cb.getUINT( 9 ) + 1 );
+
+	return 1;
+}
+
+int CSqFifoShare::decReadPtr()
+{
+	// Ensure valid share
+	if ( !isValid() )
+		return 0; 
+	
+	// Get the current buffer pointer, and make sure it's valid
+	int i = getWritePtr();
+	int nBlocks = getBlocks();
+
+	// Initialize our read pointer
+	if ( 0 > m_iRead || m_iRead >= nBlocks ) 
+		m_iRead = i;
+
+	if ( 0 >= nBlocks )
+		return 0;
+
+	// Prev block
+	if ( --m_iRead < 0 )
+		m_iRead = nBlocks - 1;
 
 	return 1;
 }

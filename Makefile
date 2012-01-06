@@ -2,7 +2,16 @@
 #-------------------------------------------------------------------
 # Apps
 #-------------------------------------------------------------------
-BUILDDIRS := app/hello \
+BUILDDIRS := $(BUILDDIRS) \
+			 app/hello \
+			 lib/oexlib \
+			 tools/resbld \
+			 tools/join \
+			 app/test \
+
+ifdef PETS
+BUILDDIRS := $(BUILDDIRS) \
+			 app/hello \
 			 app/plock \
 			 lib/oexlib \
 			 tools/resbld \
@@ -17,6 +26,7 @@ BUILDDIRS := app/hello \
 			 app/alink \
 			 app/axtest \
 			 app/fftest
+endif
 
 #			 tools/cii \
 #			 app/irr_test \
@@ -26,52 +36,64 @@ BUILDDIRS := app/hello \
 # Qt WebKit apps
 #-------------------------------------------------------------------
 ifdef QTWK
-BUILDDIRS := $(BUILDDIRS) qtwk/gtw
+BUILDDIRS := $(BUILDDIRS) \
+			 qtwk/gtw
 endif
 
 #-------------------------------------------------------------------
 # Squirrel engine
 #-------------------------------------------------------------------
-BUILDDIRS := $(BUILDDIRS) lib/sqbind \
-						  tools/sqrbld \
-						  app/sqrl \
-						  app/sqrl-cgi \
-						  app/sqengine
+BUILDDIRS := $(BUILDDIRS) \
+			 lib/sqbind \
+			 tools/sqrbld \
+			 app/sqrl \
+			 app/sqrl-cgi
+
+#			 app/sqengine
 
 #-------------------------------------------------------------------
 # Squirrel Apps
 #-------------------------------------------------------------------
-BUILDDIRS := $(BUILDDIRS) sq/sntpsync \
-						  sq/topsize \
-						  sq/wlink
+BUILDDIRS := $(BUILDDIRS) \
+			 sq/sntpsync
+
+ifdef PETS
+BUILDDIRS := $(BUILDDIRS) \
+			 sq/topsize \
+			 sq/wlink
+endif
 
 #-------------------------------------------------------------------
 # Squirrel modules
 #-------------------------------------------------------------------
-BUILDDIRS := $(BUILDDIRS) sqmod/sqmod_cell \
-                          sqmod/sqmod_curl \
-						  sqmod/sqmod_fftw \
-						  sqmod/sqmod_ffmpeg \
-						  sqmod/sqmod_freenect \
-						  sqmod/sqmod_freetype2 \
-                          sqmod/sqmod_gdchart \
-						  sqmod/sqmod_gstreamer \
-						  sqmod/sqmod_haru \
-						  sqmod/sqmod_irrlicht \
-                          sqmod/sqmod_live555 \
-                          sqmod/sqmod_mimetic \
-                          sqmod/sqmod_mysql \
-                          sqmod/sqmod_openssl \
-                          sqmod/sqmod_poco \
-                          sqmod/sqmod_portaudio \
-                          sqmod/sqmod_quickfix \
-                          sqmod/sqmod_ssh2 \
-						  sqmod/sqmod_test \
-						  sqmod/sqmod_tinyxml \
-                          sqmod/sqmod_usb \
-                          sqmod/sqmod_vmime \
-                          sqmod/sqmod_webkit
+BUILDDIRS := $(BUILDDIRS) \
+			 sqmod/sqmod_cell \
+             sqmod/sqmod_curl \
+			 sqmod/sqmod_fftw \
+			 sqmod/sqmod_ffmpeg \
+			 sqmod/sqmod_freetype2 \
+             sqmod/sqmod_gdchart \
+             sqmod/sqmod_live555 \
+             sqmod/sqmod_mysql \
+             sqmod/sqmod_openssl \
+             sqmod/sqmod_poco \
+             sqmod/sqmod_portaudio \
+             sqmod/sqmod_ssh2 \
+			 sqmod/sqmod_tinyxml
 
+ifdef PETS
+BUILDDIRS := $(BUILDDIRS) \
+			 sqmod/sqmod_freenect \
+			 sqmod/sqmod_gstreamer \
+			 sqmod/sqmod_haru \
+			 sqmod/sqmod_irrlicht \
+             sqmod/sqmod_mimetic \
+             sqmod/sqmod_quickfix \
+			 sqmod/sqmod_test \
+             sqmod/sqmod_usb \
+             sqmod/sqmod_vmime \
+             sqmod/sqmod_webkit
+endif
 #-------------------------------------------------------------------
 # WxWidgets
 #-------------------------------------------------------------------
