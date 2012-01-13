@@ -16,12 +16,18 @@ public:
 	/// Destructor
 	~CSqCurl();
 
+	/// Registers the class
+	static void Register( sqbind::VM vm );
+
 	/** \addtogroup CSqCurl
 		@{
 	*/
 
 	/// Releases resources
 	void Destroy();
+
+	/// Initialize connection
+	int Init();
 
 	/// Grab url
 	int GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSqBinary *sData );
@@ -76,7 +82,10 @@ public:
 
 	/// Set to non-zero to enable cookies
 	void enableCookies( int b ) { m_bEnableCookies = b; }
-	
+
+	/// Adds the specified HTTP header to the output
+	void setHeader( const sqbind::stdString &sHeader );
+
 	/** @} */
 
 private:
@@ -92,6 +101,9 @@ private:
 	/// Curl handle
 	CURL						*m_curl;
 
+	/// Custom headers
+	struct curl_slist 			*m_headers;
+	
 	/// String describing the last error
 	sqbind::stdString			m_sErr;
 

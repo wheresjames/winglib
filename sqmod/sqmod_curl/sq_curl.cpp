@@ -3,9 +3,45 @@
 
 #include "stdafx.h"
 
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CSqCurl, CSqCurl )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, GetLastError )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, Destroy )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, GetUrl )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, PostUrl )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, SetBasicAuth )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, getCerts )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, setFile )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, getFile )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, setConnectTimeout )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, getConnectTimeout )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, setTimeout )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, getTimeout )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, urlInclude )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, urlInline )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, urlSpawn )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, urlSqExe )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, setCookies )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, getCookies )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, enableCookies )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, setHeader )
+//	SQBIND_MEMBER_FUNCTION( CSqCurl,  )
+//	SQBIND_MEMBER_FUNCTION( CSqCurl,  )
+//	SQBIND_MEMBER_FUNCTION( CSqCurl,  )
+//	SQBIND_MEMBER_FUNCTION( CSqCurl,  )
+//	SQBIND_MEMBER_FUNCTION( CSqCurl,  )
+	
+SQBIND_REGISTER_CLASS_END()
+
+void CSqCurl::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CSqCurl );
+}
+
 CSqCurl::CSqCurl()
 {_STT();
 	m_curl = oexNULL;
+	m_headers = oexNULL;
 	m_nTimeout = 0;
 	m_nConnectTimeout = 0;
 	m_bEnableCookies = 0;
@@ -28,6 +64,11 @@ void CSqCurl::Destroy()
 	if ( m_curl )
 	{	curl_easy_cleanup( m_curl );
 		m_curl = oexNULL;
+	} // end if
+	
+	if ( m_headers )
+	{	curl_slist_free_all( m_headers );
+		m_headers = oexNULL;
 	} // end if
 }
 
@@ -108,17 +149,19 @@ int CSqCurl::urlSqExe( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, 
 	return pQ->sqexe_script( oexNULL, sPath, sqbind::stdString(), dat.getString(), sDir );
 }
 
-int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSqBinary *sData )
+void CSqCurl::setHeader( const sqbind::stdString &sHeader )
 {_STT();
 
-	if ( !sData && !m_sFile.length() )
-		return 0;
+	// Ensure non-zero length string
+	if ( !sHeader.length() )
+		return;
 
-	if ( sData )
-		sData->setUsed( 0 );
+	// Add the header to the linked list
+	m_headers = curl_slist_append( m_headers, oexStrToMb( sqbind::std2oex( sHeader ) ).Ptr() );
+}
 
-	if ( !sUrl.length() )
-		return 0;
+int CSqCurl::Init()
+{_STT();
 
 	// Lose old thing
 	Destroy();
@@ -145,6 +188,26 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSq
 //		curl_easy_setopt( m_curl, CURLOPT_COOKIE, m_sCookies.c_str() );	
 		curl_easy_setopt( m_curl, CURLOPT_COOKIELIST, m_sCookies.c_str() );	
 	} // end if
+
+	return 1;
+}
+
+int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSqBinary *sData )
+{_STT();
+
+	if ( !sData && !m_sFile.length() )
+		return 0;
+
+	if ( sData )
+		sData->setUsed( 0 );
+
+	if ( !sUrl.length() )
+		return 0;
+
+	// Initialize
+	if ( !m_curl )
+		if ( !Init() )
+			return 0;
 
 	if ( m_sUsername.length() || m_sPassword.length() )
 	{	curl_easy_setopt( m_curl, CURLOPT_USERPWD, 
@@ -173,6 +236,9 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSq
 	{	curl_easy_setopt( m_curl, CURLOPT_WRITEDATA, sData );
 		curl_easy_setopt( m_curl, CURLOPT_WRITEFUNCTION, StdWriter );
 	} // end else
+
+	if ( m_headers )
+		curl_easy_setopt( m_curl, CURLOPT_HTTPHEADER, m_headers );
 
 	// Do the thing
 	CURLcode res = curl_easy_perform( m_curl );
@@ -244,36 +310,15 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, SQInteger lPort, const sqbi
 	if ( !sUrl.length() )
 		return 0;
 
-	// Lose old thing
-	Destroy();
-
-	// Initialize Curl
-	m_curl = curl_easy_init();
+	// Initialize
 	if ( !m_curl )
-		return 0;
-	
-	if ( 0 <= m_nConnectTimeout )
-		curl_easy_setopt( m_curl, CURLOPT_CONNECTTIMEOUT_MS, m_nConnectTimeout );
-		
-	if ( 0 <= m_nTimeout )
-		curl_easy_setopt( m_curl, CURLOPT_TIMEOUT_MS, m_nTimeout );
+		if ( !Init() )
+			return 0;
 
 	curl_easy_setopt( m_curl, CURLOPT_POST, 1 );
 	curl_easy_setopt( m_curl, CURLOPT_POSTFIELDS, sPost.c_str() );
 	curl_easy_setopt( m_curl, CURLOPT_POSTFIELDSIZE, sPost.length() );
 
-	curl_easy_setopt( m_curl, CURLOPT_HEADER, 0 );
-	curl_easy_setopt( m_curl, CURLOPT_FOLLOWLOCATION, 1 );
-	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYPEER, 0 );
-	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYHOST, 0 );
-	curl_easy_setopt( m_curl, CURLOPT_CERTINFO, 1 );
-//	curl_easy_setopt( m_curl, CURLOPT_BINARYTRANSFER, 1 );
-
-	if ( m_bEnableCookies )
-	{	curl_easy_setopt( m_curl, CURLOPT_COOKIEFILE, oexT( "" ) );
-//		curl_easy_setopt( m_curl, CURLOPT_COOKIE, m_sCookies.c_str() );	
-		curl_easy_setopt( m_curl, CURLOPT_COOKIELIST, m_sCookies.c_str() );	
-	} // end if
 
 	if ( m_sUsername.length() || m_sPassword.length() )
 	{	curl_easy_setopt( m_curl, CURLOPT_USERPWD, 
@@ -301,6 +346,9 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, SQInteger lPort, const sqbi
 	{	curl_easy_setopt( m_curl, CURLOPT_WRITEDATA, sData );
 		curl_easy_setopt( m_curl, CURLOPT_WRITEFUNCTION, StdWriter );
 	} // end else
+
+	if ( m_headers )
+		curl_easy_setopt( m_curl, CURLOPT_HTTPHEADER, m_headers );
 
 	// Do the thing
 	CURLcode res = curl_easy_perform( m_curl );

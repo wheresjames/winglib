@@ -221,7 +221,7 @@ class CRtspStream
 		while ( rtsp.LockAudio( aframe, 0 ) )
 		{
 			frames_rx++;
-	
+
 			if ( aframe.getUsed() )
 			{
 				// Debugging
@@ -246,15 +246,15 @@ class CRtspStream
 						else if ( !pa.WriteTs( araw, araw.getUsed() / pa.getFrameBytes(), 
 											   rtsp.getAudioPts() ) )
 							::_self.echo( "Failed to write audio data" );
-						
+
 						aframe.setUsed( 0 );
 
 					} // end if
-					
+
 			} // end if
 
 			rtsp.UnlockAudio();
-		
+
 		} // end if
 
 		return frames_rx;

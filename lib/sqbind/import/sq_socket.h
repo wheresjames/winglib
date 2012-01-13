@@ -41,6 +41,8 @@ namespace sqbind
     {
 	public:
 		SQBIND_CLASS_CTOR_BEGIN( CSqSockAddress )
+			_SQBIND_CLASS_CTOR1( CSqSockAddress, OT_STRING ) ( sqbind::stdString( sa.GetString( 2 ), sq_getsize( x_v, 2 ) ) )
+			_SQBIND_CLASS_CTOR2( CSqSockAddress, OT_STRING, OT_INTEGER ) ( sqbind::stdString( sa.GetString( 2 ), sq_getsize( x_v, 2 ) ), sa.GetInt( 3 ) )
 		SQBIND_CLASS_CTOR_END( CSqSockAddress )
 
 		/// Register class for squirrel
@@ -53,6 +55,14 @@ namespace sqbind
 		CSqSockAddress( oexCONST oex::os::CIpAddress &r )
 			: m_address( r )
 		{}
+
+		/// Contstruct from url
+		CSqSockAddress( const sqbind::stdString &sUrl )
+		{	LookupUrl( sUrl, 0 ); }
+
+		/// Contstruct from url and port
+		CSqSockAddress( const sqbind::stdString &sUrl, int nPort )
+		{	LookupUrl( sUrl, nPort ); }
 
 		/// Returns the address id string
 		sqbind::stdString GetId();
@@ -108,6 +118,8 @@ namespace sqbind
 	public:
 
 		SQBIND_CLASS_CTOR_BEGIN( CSqSocket )
+			_SQBIND_CLASS_CTOR1( CSqSocket, OT_STRING ) ( sqbind::stdString( sa.GetString( 2 ), sq_getsize( x_v, 2 ) ) )
+			_SQBIND_CLASS_CTOR2( CSqSocket, OT_STRING, OT_INTEGER ) ( sqbind::stdString( sa.GetString( 2 ), sq_getsize( x_v, 2 ) ), sa.GetInt( 3 ) )
 		SQBIND_CLASS_CTOR_END( CSqSocket )
 
 		/// Register class for squirrel
@@ -119,6 +131,14 @@ namespace sqbind
 		// Copy semantics
 		CSqSocket( const CSqSocket &r ) { m_socket = r.m_socket; }
 		CSqSocket& operator=( const CSqSocket &r ) { m_socket = r.m_socket; return *this; }
+
+		/// Contstruct from url
+		CSqSocket( const sqbind::stdString &sUrl )
+		{	Connect( sUrl, 0 ); }
+
+		/// Contstruct from url and port
+		CSqSocket( const sqbind::stdString &sUrl, int nPort )
+		{	Connect( sUrl, nPort ); }
 
 		/// Close previous device
 		void Destroy();

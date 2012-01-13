@@ -2,38 +2,13 @@
 
 #include "stdafx.h"
 
-// Export Functions
-SQBIND_REGISTER_CLASS_BEGIN( CSqCurl, CSqCurl )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, GetLastError )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, Destroy )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, GetUrl )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, PostUrl )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, SetBasicAuth )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, getCerts )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, setFile )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, getFile )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, setConnectTimeout )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, getConnectTimeout )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, setTimeout )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, getTimeout )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, urlInclude )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, urlInline )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, urlSpawn )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, urlSqExe )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, setCookies )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, getCookies )
-	SQBIND_MEMBER_FUNCTION( CSqCurl, enableCookies )
-//	SQBIND_MEMBER_FUNCTION( CSqCurl,  )
-	
-SQBIND_REGISTER_CLASS_END()
-
 // Export classes
 static void SQBIND_Export_curl( sqbind::VM x_vm )
 {_STT();
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
 
-    SQBIND_EXPORT( x_vm, CSqCurl );
+	CSqCurl::Register( x_vm );
 }
 
 #if defined( SQBIND_STATIC )
