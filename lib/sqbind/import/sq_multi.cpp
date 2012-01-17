@@ -296,6 +296,9 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, setJSON )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, getJSON )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mergeJSON )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, setMIME )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, getMIME )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mergeMIME )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, merge )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mmerge )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, join )
@@ -402,7 +405,7 @@ CSqParam::t_SqStr CSqMulti::getJSON()
 {_STT();
 	oex::CPropertyBag pb;
 	SQBIND_MultiToPropertyBag( m_lst, pb );
-	return oex::CParser::EncodeJSON( pb ).Ptr();
+	return oex2std( oex::CParser::EncodeJSON( pb ) );
 }
 
 CSqMulti* CSqMulti::setJSON( const CSqParam::t_SqStr &s )
@@ -420,8 +423,34 @@ CSqMulti* CSqMulti::mergeJSON( const CSqParam::t_SqStr &s )
 		return this;
 
 	// Deserialize data
-	oex::CStr sData( s.c_str(), s.length() );
-	oex::CPropertyBag pb = oex::CParser::DecodeJSON( sData );
+	oex::CPropertyBag pb = oex::CParser::DecodeJSON( std2oex( s ) );
+	SQBIND_PropertyBagToMulti( pb, m_lst );
+	return this;
+}
+
+CSqParam::t_SqStr CSqMulti::getMIME( int bCaseSensitive )
+{_STT();
+	oex::CPropertyBag pb;
+	SQBIND_MultiToPropertyBag( m_lst, pb );
+	return oex2std( oex::CParser::EncodeMIME( pb, bCaseSensitive ) );
+}
+
+CSqMulti* CSqMulti::setMIME( const CSqParam::t_SqStr &s, int bCaseSensitive )
+{_STT();
+	// Lose old data
+	m_lst.clear();
+	mergeMIME( s, bCaseSensitive );
+	return this;
+}
+
+CSqMulti* CSqMulti::mergeMIME( const CSqParam::t_SqStr &s, int bCaseSensitive )
+{_STT();
+
+	if ( !s.length() )
+		return this;
+
+	// Deserialize data
+	oex::CPropertyBag pb = oex::CParser::DecodeMIME( std2oex( s ), bCaseSensitive );
 	SQBIND_PropertyBagToMulti( pb, m_lst );
 	return this;
 }
@@ -440,7 +469,7 @@ CSqParam::t_SqStr CSqMulti::serialize()
 {_STT();
 	oex::CPropertyBag pb;
 	SQBIND_MultiToPropertyBag( m_lst, pb );
-	return oex::CParser::Serialize( pb ).Ptr();
+	return oex2std( oex::CParser::Serialize( pb ) );
 }
 
 void CSqMulti::deserialize( const CSqParam::t_SqStr &s )
@@ -449,8 +478,7 @@ void CSqMulti::deserialize( const CSqParam::t_SqStr &s )
 	m_lst.clear();
 
 	// Deserialize data
-	oex::CStr sData( s.c_str(), s.length() );
-	oex::CPropertyBag pb = oex::CParser::Deserialize( sData );
+	oex::CPropertyBag pb = oex::CParser::Deserialize( std2oex( s ) );
 	SQBIND_PropertyBagToMulti( pb, m_lst );
 }
 
@@ -458,7 +486,7 @@ CSqParam::t_SqStr CSqMulti::serialize_filter( const t_SqStr &sFilter, int x_bInc
 {_STT();
 	oex::CPropertyBag pb;
 	SQBIND_MultiToPropertyBag( m_lst, pb );
-	return oex::CParser::SerializeFilter( pb, sFilter.c_str(), x_bInclude, x_bIgnoreCase ).Ptr();
+	return oex2std( oex::CParser::SerializeFilter( pb, sFilter.c_str(), x_bInclude, x_bIgnoreCase ) );
 }
 
 CSqMulti* CSqMulti::deserialize_filter( const CSqParam::t_SqStr &s, const t_SqStr &sFilter, int x_bInclude, int x_bIgnoreCase )

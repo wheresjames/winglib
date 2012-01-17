@@ -729,6 +729,22 @@ int CSqEngineExport::gmt_time()
 	return oexGmtTime().GetUnixTime();
 }
 
+SQInteger CSqEngineExport::local_time_useconds()
+{_STT();
+	oex::oexINT64 nVal = 0;
+	if ( !oex::os::CHqTimer::osGetCounts( oexNULL, &nVal ) )
+		return 0;
+	return (oex::oexINT64)oexLocalTime().GetUnixTime() * (oex::oexINT64)1000000 + nVal;
+}
+
+SQInteger CSqEngineExport::gmt_time_useconds()
+{_STT();
+	oex::oexINT64 nVal = 0;
+	if ( !oex::os::CHqTimer::osGetCounts( oexNULL, &nVal ) )
+		return 0;
+	return (oex::oexINT64)oexGmtTime().GetUnixTime() * (oex::oexINT64)1000000 + nVal;
+}
+
 stdString CSqEngineExport::local_timestr( const stdString &fmt )
 {_STT();
 	return oex2std( oexLocalTimeStr( fmt.c_str() ) );
@@ -1778,6 +1794,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, mandelbrot )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, local_time )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, gmt_time )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, local_time_useconds )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, gmt_time_useconds )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_timer_seconds )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_timer_useconds )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_total_useconds )

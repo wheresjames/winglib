@@ -68,6 +68,10 @@ namespace sqbind
 		CSqMulti* setJSON( const t_SqStr &s );
 		CSqMulti* mergeJSON( const t_SqStr &s );
 
+		t_SqStr getMIME( int bCaseSensitive );
+		CSqMulti* setMIME( const t_SqStr &s, int bCaseSensitive );
+		CSqMulti* mergeMIME( const t_SqStr &s, int bCaseSensitive );
+
 	private:
 
 		/// List

@@ -1194,7 +1194,7 @@ public:
 
 	/// Encode MIME
 	template< typename T >
-		static TStr< T > EncodeMime( TPropertyBag< TStr< T > > &x_pb, oexBOOL x_bCaseSensitive )
+		static TStr< T > EncodeMIME( TPropertyBag< TStr< T > > &x_pb, oexBOOL x_bCaseSensitive )
 	{
 		TStr< T > str;
 
@@ -1204,7 +1204,7 @@ public:
 				if ( it.Node()->key.Length() && it->ToString().Length() )
 					str << it.Node()->key << oexTT( T, ": " ) << it->ToString() << oexTT( T, "\r\n" );
 		} // end if
-		
+
 		else
 		{	for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
 				if ( it.Node()->key.Length() && it->ToString().Length() )

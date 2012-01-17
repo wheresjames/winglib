@@ -319,7 +319,6 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, SQInteger lPort, const sqbi
 	curl_easy_setopt( m_curl, CURLOPT_POSTFIELDS, sPost.c_str() );
 	curl_easy_setopt( m_curl, CURLOPT_POSTFIELDSIZE, sPost.length() );
 
-
 	if ( m_sUsername.length() || m_sPassword.length() )
 	{	curl_easy_setopt( m_curl, CURLOPT_USERPWD, 
 						  ( sqbind::stdString() + m_sUsername + oexT( ":" ) + m_sPassword ).c_str() );

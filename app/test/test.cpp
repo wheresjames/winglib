@@ -1663,12 +1663,28 @@ oex::oexRESULT TestLists()
 		return -30;
 	} // end if
 
+	pb2.Destroy();
+	pb2[ oexT( "val1" ) ] = oexT( "Hello" );
+	pb2[ oexT( "val2" ) ] = oexT( "yup" );
+	pb2[ oexT( "val3" ) ] = oexT( "noreturn" );
+
+	// Test MIME encode / decode
+	pb2 = oex::CParser::DecodeMIME( oex::CParser::EncodeMIME( pb2, oexTRUE ), oexTRUE );
+	if ( !oexVERIFY(  pb2[ oexT( "val1" ) ].ToString() == oexT( "Hello" ) )
+		 || !oexVERIFY(  pb2[ oexT( "val2" ) ].ToString() == oexT( "yup" ) )
+		 || !oexVERIFY(  pb2[ oexT( "val3" ) ].ToString() == oexT( "noreturn" ) ) )
+	{	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::EncodeMIME( pb2, oexTRUE ) ), 0, 16, 128 ).Ptr() );
+		oexEcho( oex::CParser::EncodeMIME( pb2, oexTRUE ).Ptr() );
+//		oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::DecodeMIME( oex::CParser::EncodeMIME( pb2, oexTRUE ), oexTRUE ) ), 0, 16, 128 ).Ptr() );
+		return -31;
+	} // end if
+
 	// Test c++ encode / decode
 	if ( !oexVERIFY( s1 == oex::CParser::CppDecode( oex::CParser::CppEncode( s1 ) ) ) )
 	{	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::CppEncode( s1 ) ), 0, 16, 128 ).Ptr() );
 		oexEcho( oex::CParser::CppEncode( s1 ).Ptr() );
 		oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::CppDecode( oex::CParser::CppEncode( s1 ) ) ), 0, 16, 128 ).Ptr() );
-		return -31;
+		return -32;
 	} // end if
 
 	return oex::oexRES_OK;

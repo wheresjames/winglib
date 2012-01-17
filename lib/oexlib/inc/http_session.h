@@ -792,7 +792,7 @@ public:
 		WritePort( GetErrorString( m_nErrorCode ) );
 
 		// Send the headers
-		WritePort( CParser::EncodeMime( m_pbTxHeaders, oexTRUE ) << "\r\n" );
+		WritePort( CParser::EncodeMIME( m_pbTxHeaders, oexTRUE ) << "\r\n" );
 
 		// Send the content
 		WritePort( *pSend );
@@ -852,7 +852,7 @@ public:
 		WritePort( GetErrorString( m_nErrorCode ) );
 
 		// Send the headers
-		WritePort( CParser::EncodeMime( m_pbTxHeaders, oexTRUE ) << "\r\n" );
+		WritePort( CParser::EncodeMIME( m_pbTxHeaders, oexTRUE ) << "\r\n" );
 
 		return WritePort( x_pBuffer->Ptr(), x_pBuffer->getUsed() );
 /*
@@ -903,7 +903,7 @@ public:
 		WritePort( GetErrorString( m_nErrorCode ) );
 
 		// Send the headers
-		WritePort( CParser::EncodeMime( m_pbTxHeaders, oexTRUE ) << "\r\n" );
+		WritePort( CParser::EncodeMIME( m_pbTxHeaders, oexTRUE ) << "\r\n" );
 
 		// Write out the file
 		// Do this in chunks in case the file is huge

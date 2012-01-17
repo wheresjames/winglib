@@ -516,6 +516,12 @@ public:
 		/// Returns gmt time stamp
 		int gmt_time();
 
+		/// Local timestamp in microseconds
+		SQInteger local_time_useconds();
+
+		/// GMT timestamp in microseconds
+		SQInteger gmt_time_useconds();
+		
 		/// Returns a formated time string
 		stdString local_timestr( const stdString &fmt );
 

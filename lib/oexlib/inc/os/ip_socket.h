@@ -361,9 +361,13 @@ public:
 	//==============================================================
 	/// Returns non-zero if th socket is connected
 	oexBOOL IsConnected()
-	{	if ( m_uConnectState & ( eCsActivity | eCsConnected ) )
+	{	if ( m_uLastError )
+			return oexFALSE;
+		if ( m_uConnectState & ( eCsActivity | eCsConnected ) )
 			return oexTRUE;
-		return WaitEvent( eConnectEvent, 0 );
+		if ( !WaitEvent( eConnectEvent, 0 ) )
+			return oexFALSE;
+		return m_uLastError ? oexFALSE : oexTRUE;
 	}
 
 	//==============================================================
@@ -371,7 +375,8 @@ public:
 	//==============================================================
 	/// Returns non-zero if the socket is in the process of connecting
 	oexBOOL IsConnecting()
-	{	return ( m_uConnectState & eCsConnecting )
+	{	WaitEvent( eConnectEvent, 0 );
+		return ( m_uConnectState & eCsConnecting )
 				? oexTRUE : oexFALSE;
 	}
 
