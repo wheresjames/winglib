@@ -406,6 +406,9 @@ protected:
 
 	oexBOOL InformSession( T_SESSION &session, T_CPORT &port )
 	{
+		// Initialize the session
+		session.Init();
+
 		// Count a transaction
 		session.SetTransactionId( m_nTransactions++ );
 

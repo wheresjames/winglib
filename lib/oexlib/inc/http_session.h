@@ -208,6 +208,13 @@ public:
     {	m_pPort = oexNULL;
     }
 
+	/// Initialize connection
+	void Init()
+	{
+		// Initialize the keep alive timeout
+		m_uKeepAlive = oexGetUnixTime() + eDefaultKeepAlive;
+	}
+
     void SetPort( T_PORT *x_pPort )
     {	m_pPort = x_pPort;
     }
@@ -238,7 +245,8 @@ public:
 	//==============================================================
 	/// Returns zero if connection should be terminated
     oexBOOL KeepAlive()
-	{	return !GetTransactions(); // || m_uKeepAlive > oexGetUnixTime();
+	{	// return !GetTransactions(); 
+		return m_uKeepAlive > oexGetUnixTime();
 	}
 
 	//==============================================================
@@ -252,7 +260,7 @@ public:
 
 		\see
 	*/
-    oexRESULT OnRead( oexINT x_nErr )
+	oexRESULT OnRead( oexINT x_nErr )
 	{
 		if ( !oexCHECK_PTR( m_pPort ) )
 			return -1;
@@ -654,6 +662,12 @@ public:
 
 		// Last modified
 		m_pbTxHeaders[ "Last-modified" ] = "";
+
+		// Let the client know we're supporting persistent connections
+		m_pbTxHeaders[ "Connection" ] = "Keep-Alive";
+
+		// Let the client know we're supporting persistent connections
+		m_pbTxHeaders[ "X-Transaction" ] = m_nTransactions;
 
 		return oexTRUE;
 	}

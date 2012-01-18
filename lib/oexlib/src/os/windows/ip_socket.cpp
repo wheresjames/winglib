@@ -729,6 +729,10 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 
 					} // end if
 
+					// Check for socket close
+					if ( 0 != ( FD_CLOSE & wne.lNetworkEvents ) )
+						m_uConnectState &= ~( eCsConnected | eCsActivity | eCsConnecting );
+
 				} // end if
 
 			// !!!  Kludge around missing connect message
