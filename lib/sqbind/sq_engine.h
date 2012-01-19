@@ -630,6 +630,12 @@ public:
 		int toulong( const stdString &s )
 		{	return oexStrToULong( s.c_str() ); }
 
+		SQInteger toint64( const stdString &s )
+		{	return (SQInteger)oexStrToInt64( s.c_str() ); }
+
+		SQInteger touint64( const stdString &s )
+		{	return (SQInteger)oexStrToUInt64( s.c_str() ); }
+
 		int strtol( const stdString &s, int nRadix )
 		{	return oexStrToLong( s.c_str(), nRadix ); }
 
