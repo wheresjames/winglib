@@ -250,6 +250,25 @@ public:
 	}
 
 	//==============================================================
+	// ResetConnection()
+	//==============================================================
+	/// Readys for a new transaction
+	void Reset()
+	{
+		// Get ready for more requests
+		m_bHeaderReceived = oexFALSE;
+
+		// Reset transaction classes
+		m_pbRequest.Destroy();
+		m_pbGet.Destroy();
+		m_pbPost.Destroy();
+		m_pbSession.Destroy();
+		m_sContent.Destroy();
+		m_pbTxHeaders.Destroy();
+		m_pbRxHeaders.Destroy();
+	}
+
+	//==============================================================
 	// OnRead()
 	//==============================================================
 	/// Called when new data arrives
@@ -299,6 +318,22 @@ public:
 		// Set default headers
 		DefaultHeaders();
 
+		// Are there any post variables?
+		if ( !m_pbPost.Size() && m_pbRequest[ "type" ] == "POST" )
+		{
+			// IE and Netscape append CRLF, so be sure and use
+			// the content length if available
+			if ( uContentLength )
+				m_pbPost = CParser::DecodeUrlParams( Rx().Read( uContentLength ) );
+
+			else
+				m_pbPost = CParser::DecodeUrlParams( Rx().Read() );
+
+		} // end if
+
+		// Dump whatever remains in the rx buffer
+		Rx().Empty();
+
 		// Check for mapped foders first
 		if ( !ProcessMappedFolders() )
 		{
@@ -306,19 +341,6 @@ public:
 			if ( m_fnAuthenticate )
 				if ( 0 > m_fnAuthenticate( m_pAuthData, this, eAuthRequest, oexMbToStr( m_pbRequest[ "path" ].ToString() ).Ptr() ) )
 					return SendErrorMsg( HTTP_FORBIDDEN, "Access denied" );
-
-			// Are there any post variables?
-			if ( !m_pbPost.Size() && m_pbRequest[ "type" ] == "POST" )
-			{
-				// IE and Netscape append CRLF, so be sure and use
-				// the content length if available
-				if ( uContentLength )
-					m_pbPost = CParser::DecodeUrlParams( Rx().Read( uContentLength ) );
-
-				else
-					m_pbPost = CParser::DecodeUrlParams( Rx().Read() );
-
-			} // end if
 
 			// Do the processing
 			if ( OnProcessRequest() )
@@ -333,8 +355,8 @@ public:
 		// Count a transaction
         m_nTransactions++;
 
-		// Get ready for more requests
-		m_bHeaderReceived = oexFALSE;
+		// Reset the connection
+		Reset();
 
 		return 1;
 	}
@@ -705,38 +727,38 @@ public:
 		switch( x_nErr )
 		{
 			case HTTP_OK :
-				return "HTTP/1.0 200 OK\r\n";
+				return "HTTP/1.1 200 OK\r\n";
 
 			case HTTP_NO_CONTENT :
-				return "HTTP/1.0 204 No Content\r\n";
+				return "HTTP/1.1 204 No Content\r\n";
 
 			case HTTP_PARTIAL_CONTENT :
-				return "HTTP/1.0 206 Partial Content\r\n";
+				return "HTTP/1.1 206 Partial Content\r\n";
 
 			case HTTP_BAD_REQUEST :
-				return "HTTP/1.0 400 Bad Request\r\n";
+				return "HTTP/1.1 400 Bad Request\r\n";
 
 			case HTTP_AUTHORIZATION_REQUIRED :
-				return "HTTP/1.0 401 Authorization Required\r\n";
+				return "HTTP/1.1 401 Authorization Required\r\n";
 
 			case HTTP_FORBIDDEN :
-				return "HTTP/1.0 403 Forbidden\r\n";
+				return "HTTP/1.1 403 Forbidden\r\n";
 
 			case HTTP_NOT_FOUND :
-				return "HTTP/1.0 404 Document Not Found\r\n";
+				return "HTTP/1.1 404 Document Not Found\r\n";
 
 			case HTTP_REQUEST_TIMEOUT :
-				return "HTTP/1.0 408 Request timed out\r\n";
+				return "HTTP/1.1 408 Request timed out\r\n";
 
 			case HTTP_NOT_IMPLEMENTED :
-				return "HTTP/1.0 501 Not Implemented\r\n";
+				return "HTTP/1.1 501 Not Implemented\r\n";
 
 			case HTTP_SERVER_ERROR :
 			default :
-				return "HTTP/1.0 500 Server Error\r\n";
+				return "HTTP/1.1 500 Server Error\r\n";
 		}
 
-		return "HTTP/1.0 500 Server Error\r\n";
+		return "HTTP/1.1 500 Server Error\r\n";
 	}
 
 	CStr GetReply()
@@ -1202,7 +1224,7 @@ private:
     /// Post variables
     CPropertyBag8     		  	m_pbPost;
 
-    /// Post variables
+    /// Session variables
     CPropertyBag8     		  	m_pbSession;
 
     /// Non-zero if the complete HTTP headers have been received.

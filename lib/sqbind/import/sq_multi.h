@@ -152,7 +152,7 @@ namespace sqbind
 
 		/// Returns a string representation of the value, if empty, returns def
 		stdString str_def( const sqbind::stdString &def )
-		{	sqbind::stdString v = str(); if ( !v.length() ) return def; }
+		{	sqbind::stdString v = str(); if ( !v.length() ) return def; return v; }
 		
 		/// Returns a binary representation of the value
 		CSqBinary bin();
