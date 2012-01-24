@@ -772,7 +772,7 @@ public:
 		sReply << GetErrorString( m_nErrorCode );
 
 		// Send the headers
-		sReply << oexMbToStr( CParser::EncodeMime( m_pbTxHeaders, oexTRUE ) ) << oexT( "\r\n" );
+		sReply << oexMbToStr( CParser::EncodeMIME( m_pbTxHeaders, oexTRUE ) ) << oexT( "\r\n" );
 
 		// Send the content
 		sReply << oexMbToStr( m_sContent );
