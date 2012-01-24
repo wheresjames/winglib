@@ -808,7 +808,7 @@ public:
 		CStr8 sCompressed;
 
 		// Is compression enabled, and does the client support it?
-		if (m_bEnableCompression )
+		if ( m_bEnableCompression )
 		{
 			// Currently only supporting zlib/deflate
 			if ( 0 <= m_pbRxHeaders[ "accept-encoding" ].ToString().Match( "deflate" ) )

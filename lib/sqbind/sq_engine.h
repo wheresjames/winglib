@@ -1126,7 +1126,7 @@ template< typename T_RET >
 		{
 #if defined( _DEBUG )
 			// +++ Startup code needs to check for function existance first
-			return LogErrorM( oex::oexFALSE, oexMks( x_pFunction, oexT( "() : " ), e.desc ).Ptr() );
+//			return LogErrorM( oex::oexFALSE, oexMks( x_pFunction, oexT( "() : " ), e.desc ).Ptr() );
 #else
 			return oex::oexFALSE;
 #endif
