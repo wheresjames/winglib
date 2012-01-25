@@ -13,8 +13,8 @@ class CRtspStream
 //	szDumpVideo = "";
 	szDumpVideo = "rawvideo";
 
-//	file = "";
-	file = "rtsptest.avi";
+	file = "";
+//	file = "rtsptest.avi";
 	rec_avi = 0;
 
 	rtsp = 0;
@@ -84,7 +84,7 @@ class CRtspStream
 		vix = 0;
 	}
 
-	function Play( link )
+	function Play( link, user = "", pass = "" )
 	{
 	
 		Close();
@@ -98,11 +98,20 @@ class CRtspStream
 		if ( szDumpVideo.len() )
 			CSqFile().mkdir( szDumpVideo );
 
-		if ( !rtsp.Open( link, bDecodeVideo, bDecodeAudio, CSqMulti() ) )
+		local params = CSqMulti();
+
+		// Username / Password
+		if ( user.len() )
+			params[ "username" ] <- user,
+			params[ "password" ] <- pass;
+
+		rtsp.setBlindLogin( 1 );
+
+		if ( !rtsp.Open( link, bDecodeVideo, bDecodeAudio, params ) )
 		{	::_self.echo( "Failed to open RTSP stream : " + link );
 			return 0;
 		} // end if
-		
+
 		return 1;
 	}
 
@@ -117,13 +126,16 @@ class CRtspStream
 			if ( "H264" == rtsp.getVideoCodecName() )
 				rtsp.setVideoHeader( CSqBinary( "\x00\x00\x01" ) );
 
-			::_self.echo( "iii Creating video decoder for " + rtsp.getVideoCodecName() );
+//			local w = rtsp.getWidth(), h = rtsp.getHeight(), fps = rtsp.getFps();
+			local w = 1922, h = 1080, fps = rtsp.getFps();
+			::_self.echo( "iii Creating video decoder for " + rtsp.getVideoCodecName() 
+						   + " / " + w + " x " + h + " x " + fps );
 
 			dec = CFfDecoder();
 			dec.setExtraData( rtsp.getExtraVideoData() );
 			if ( !dec.Create( CFfDecoder().LookupCodecId( rtsp.getVideoCodecName() ), 
 							  CFfConvert().PIX_FMT_YUV420P,
-							  rtsp.getWidth(), rtsp.getHeight(), rtsp.getFps(),
+							  w, h, fps,
 							  2000000, CSqMulti( "cmp=-2" ) ) )
 			{	::_self.echo( "!!! Failed to create decoder for " + rtsp.getVideoCodecName() );
 				dec = 0;
@@ -425,10 +437,10 @@ function _init() : ( _g )
 		if ( !stream.len() || !( stream in _g.rtsp_sources ) ) stream = "yt3";
 		link = _g.rtsp_sources[ stream ][ 1 ];
 	} // end if
-	
+
 	// Start the video stream
 	_g.stream = CRtspStream();
-	_g.stream.Play( link );
+	_g.stream.Play( link, _self.get( "/", "cmdline.u" ), _self.get( "/", "cmdline.p" ) );
 
 	return 0;
 }
@@ -447,8 +459,12 @@ function OnDraw() : ( _g )
 
 	if ( !_g.tex )
 	{
+		// Null draw to get size
+		if ( 0 >= _g.stream.getWidth() || 0 >= _g.stream.getHeight() )
+			_g.stream.Draw( CSqBinary() );
+	
 		// Decode a frame to get the width / height
-		if ( 0 < _g.stream.getWidth() && 0 < _g.stream.getHeight() )
+		else if ( 0 < _g.stream.getWidth() && 0 < _g.stream.getHeight() )
 		{	_g.tex = _g.irr.CreateTexture( _g.stream.getWidth(), _g.stream.getHeight(), 0 );
 			if ( _g.tex )
 			{	_g.cube.SetTexture( 0, _g.tex );
@@ -469,6 +485,7 @@ function OnDraw() : ( _g )
 	} // end else
 
 	_g.quit = _g.irr.Draw( CSqirrColor( 100, 100, 100 ) );
+
 	return 0;
 }
 
