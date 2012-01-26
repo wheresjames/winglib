@@ -30,7 +30,7 @@ else
 ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),gcc)
 		ifeq ($(PROC),x86)
-			UNSUPPORTED := x86-gcc-windows does not link for whatever reason
+#			UNSUPPORTED := x86-gcc-windows does not link for whatever reason
 		endif
 	endif
 endif
