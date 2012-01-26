@@ -10,6 +10,67 @@
 #include <iterator>
 
 
+// CLvRtspClient
+SQBIND_REGISTER_CLASS_BEGIN( CLvRtspClient, CLvRtspClient )
+
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, Destroy )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, Open )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, Play )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, waitInit )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, LockVideo )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, UnlockVideo )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, LockAudio )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, UnlockAudio )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, isOpen )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getWidth )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getHeight )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getFps )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, setWidth )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, setHeight )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, setFps )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getFrameCount )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getVideoCodecName )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getAudioCodecName )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, isVideo )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, isAudio )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getExtraVideoData )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getExtraAudioData )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, setVideoHeader )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getSDP )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getSDPValue )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, setStreamOverTCP )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getStreamOverTCP )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, setTunnelOverHTTPPort )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getTunnelOverHTTPPort )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getNumAudioChannels )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getAudioSampleRate )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getAudioBps )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getVideoPts )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getVideoPtsSec )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getVideoPtsUSec )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getVideoDts )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getAudioPts )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getAudioPtsSec )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getAudioPtsUSec )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getAudioDts )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, setBlindLogin )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getBlindLogin )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getError )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getLastError )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getUrl )
+//	SQBIND_MEMBER_FUNCTION( CLvRtspClient,  )
+//	SQBIND_MEMBER_FUNCTION( CLvRtspClient,  )
+//	SQBIND_MEMBER_FUNCTION( CLvRtspClient,  )
+//	SQBIND_MEMBER_FUNCTION( CLvRtspClient,  )
+
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CLvRtspClient );
+
+void CLvRtspClient::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CLvRtspClient );
+}
+
 CLvRtspClient::CVideoSink::CVideoSink( UsageEnvironment& rEnv ) :
 	MediaSink( rEnv )
 {_STT();
@@ -479,6 +540,7 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 			m_extraVideo.Mem().appendString( oex::CBase64::Decode( *it ) );
 		} // end for
 	} // end if
+//	oexEcho( oexBinToAsciiHexStr( m_extraVideo.Mem(), 0, 16, 16 ).Ptr() );
 
 	// Try to get the image width / height
 	m_width = pss->videoWidth();

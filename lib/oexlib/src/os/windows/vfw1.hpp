@@ -408,7 +408,7 @@ public:
 		Close();
 
 		// Attempt to create a capture window
-//#if defined( OEX_DEBUG )
+//#if defined( oexDEBUG )
 //		m_hWnd = capCreateCaptureWindow( pTitle, dwStyle, 0, 0, 320, 240, hwndParent, nID );
 //#else
 		m_hWnd = capCreateCaptureWindow( pTitle, 0, 0, 0, 1, 1, hwndParent, nID );

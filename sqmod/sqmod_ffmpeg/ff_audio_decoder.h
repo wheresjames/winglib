@@ -14,6 +14,9 @@ public:
 	/// Destructor
 	virtual ~CFfAudioDecoder() { Destroy(); }
 
+	/// Registers the class
+	static void Register( sqbind::VM vm );
+
 	/** \addtogroup CFfAudioDecoder
 		@{
 	*/

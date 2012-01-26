@@ -24,6 +24,38 @@ extern "C"
 #	include "libavformat/riff.h"
 };
 
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CFfDecoder, CFfDecoder )
+
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, Destroy )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, Create )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, isValid )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, FindStreamInfo )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, Decode )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, DecodeImage )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, getWidth )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, getHeight )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, getFps )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, getBitRate )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, setExtraData )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, getExtraData )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, BufferData )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, UnBufferData )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, getBufferSize )
+	SQBIND_MEMBER_FUNCTION( CFfDecoder, getH264FrameType )
+
+	SQBIND_STATIC_FUNCTION( CFfDecoder, LookupCodecId )
+	SQBIND_STATIC_FUNCTION( CFfDecoder, LookupCodecName )
+
+
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CFfDecoder );
+
+void CFfDecoder::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CFfDecoder );
+}
+
 CFfDecoder::CFfDecoder()
 {_STT();
 	m_pCodec = oexNULL;
@@ -97,9 +129,9 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
     m_pCodecContext->codec_id = (CodecID)x_nCodec;
     m_pCodecContext->codec_type = AVMEDIA_TYPE_VIDEO;
     m_pCodecContext->bit_rate = brate;
-    m_pCodecContext->width = ( 0 < width ) ? width : 320;
-    m_pCodecContext->height = ( 0 < height ) ? height : 240;
-    m_pCodecContext->time_base.den = ( 0 < fps ) ? fps : 30;
+    m_pCodecContext->width = width; // ( 0 < width ) ? width : 320;
+    m_pCodecContext->height = height; // ( 0 < height ) ? height : 240;
+    m_pCodecContext->time_base.den = fps; // ( 0 < fps ) ? fps : 30;
     m_pCodecContext->time_base.num = 1;
     m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
 	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
@@ -321,6 +353,10 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 		UnBufferData( used );
 
 	if ( 0 >= gpp )
+		return 0;
+
+	// Validate image size
+	if ( 0 >= m_pCodecContext->width || 0 >= m_pCodecContext->height )
 		return 0;
 
 	// Convert

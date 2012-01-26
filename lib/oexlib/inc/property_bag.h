@@ -595,7 +595,7 @@ public:
     }
 
 //#if defined( OEX_WINDOWS ) && !defined( OEX_ARM )
-//#if defined( OEX_DEBUG )
+//#if defined( oexDEBUG )
 
 	//==============================================================
 	// PrintR()

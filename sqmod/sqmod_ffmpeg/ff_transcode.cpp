@@ -2,6 +2,30 @@
 
 #include "stdafx.h"
 
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CFfTranscode, CFfTranscode )
+
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, Init )
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, Destroy )
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, Transcode )
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, GetRaw )
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, GetImage )
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, getDecoderCodecId )
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, getEncoderCodecId )
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, getWidth )
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, getHeight )
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, getFps )
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, getBitRate )
+	SQBIND_MEMBER_FUNCTION( CFfTranscode, isValid )
+
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CFfTranscode );
+
+void CFfTranscode::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CFfTranscode );
+}
+
 CFfTranscode::CFfTranscode()
 {_STT();
 	m_dec_id = 0;

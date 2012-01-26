@@ -162,6 +162,9 @@ public:
 	CLvRtspClient( const CLvRtspClient &r ) { }
 	CLvRtspClient& operator = ( const CLvRtspClient &r ) { return *this; }
 
+	/// Registers the class
+	static void Register( sqbind::VM vm );
+
 	/** \addtogroup CLvRtspClient
 		@{
 	*/
@@ -200,6 +203,21 @@ public:
 	/// Returns video width
 	int getFps()
 	{	return m_fps;
+	}
+
+	/// Sets video width
+	void setWidth( int v )
+	{	m_width = v;
+	}
+
+	/// Sets video width
+	void setHeight( int v )
+	{	m_height = v;
+	}
+
+	/// Sets video width
+	void setFps( int v )
+	{	m_fps = v;
 	}
 
 	/// Returns the url

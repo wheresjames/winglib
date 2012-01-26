@@ -168,6 +168,9 @@ public:
 	CLvRtspServer( const CLvRtspServer &r ) { }
 	CLvRtspServer& operator = ( const CLvRtspServer &r ) { return *this; }
 
+	/// Registers the class
+	static void Register( sqbind::VM vm );
+
 	/** \addtogroup CLvRtspServer
 		@{
 	*/

@@ -2,6 +2,28 @@
 
 #include "stdafx.h"
 
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CFfCapture, CFfCapture )
+
+	SQBIND_MEMBER_FUNCTION( CFfCapture, Open )
+	SQBIND_MEMBER_FUNCTION( CFfCapture, isOpen )
+	SQBIND_MEMBER_FUNCTION( CFfCapture, ReadFrame )
+
+	SQBIND_MEMBER_FUNCTION( CFfCapture, Destroy )
+	SQBIND_MEMBER_FUNCTION( CFfCapture, getWidth )
+	SQBIND_MEMBER_FUNCTION( CFfCapture, getHeight )
+	SQBIND_MEMBER_FUNCTION( CFfCapture, getVideoFormat )
+	SQBIND_MEMBER_FUNCTION( CFfCapture, getVideoCodecId )
+	SQBIND_MEMBER_FUNCTION( CFfCapture, getFrameCount )
+
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CFfCapture );
+
+void CFfCapture::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CFfCapture );
+}
+
 CFfCapture::CFfCapture()
 {_STT();
 	m_pFormatContext = oexNULL;

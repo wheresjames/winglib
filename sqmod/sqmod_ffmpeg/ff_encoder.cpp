@@ -2,6 +2,26 @@
 
 #include "stdafx.h"
 
+SQBIND_REGISTER_CLASS_BEGIN( CFfEncoder, CFfEncoder )
+
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, Destroy )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, Create )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, isValid )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, Encode )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, EncodeImage )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, getWidth )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, getHeight )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, getFps )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, getBitRate )
+
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CFfEncoder );
+
+void CFfEncoder::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CFfEncoder );
+}
+
 CFfEncoder::CFfEncoder()
 {_STT();
 

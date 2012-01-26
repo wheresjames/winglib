@@ -4,6 +4,24 @@
 
 #include "GroupsockHelper.hh"
 
+// CLvRtspServer
+SQBIND_REGISTER_CLASS_BEGIN( CLvRtspServer, CLvRtspServer )
+
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, Destroy )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, StartServer )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, isThread )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, getUrl )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, needFrame )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, Msg )
+
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CLvRtspServer );
+
+void CLvRtspServer::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CLvRtspServer );
+}
+
 // CLiveMediaSubsession::createNew
 CLvRtspServer::CLiveMediaSubsession* CLvRtspServer::CLiveMediaSubsession::createNew( UsageEnvironment& env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer, ServerMediaSession *pSms, sqbind::CSqMulti *mParams )
 {_STT();

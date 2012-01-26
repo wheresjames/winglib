@@ -4,6 +4,63 @@
 
 #include "stdafx.h"
 
+#define FFF_KEY_FRAME	AV_PKT_FLAG_KEY
+
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
+
+	SQBIND_MEMBER_FUNCTION( CFfContainer, Open )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, isOpen )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, ReadFrame )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, DecodeFrame )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, DecodeFrameBin )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, DecodeAudioFrameBin )
+
+	SQBIND_MEMBER_FUNCTION( CFfContainer, Create )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, InitWrite )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, AddVideoStream )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, WriteFrame )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, WriteVideoFrame )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, AddAudioStream )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, WriteAudioFrame )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, Seek )
+
+	SQBIND_MEMBER_FUNCTION( CFfContainer, Destroy )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, CloseStream )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getFps )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getWidth )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getHeight )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoFormat )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoCodecId )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoStream )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioStream )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getFrameCount )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, isVideoCodec )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoExtraData )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoExtraData )
+
+	SQBIND_MEMBER_FUNCTION( CFfContainer, setAudioExtraData )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioExtraData )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioDec )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, isAudioCodec )
+//	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioBitRate )
+//	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioBitsPerSample )
+//	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioChannels )
+//	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioFrameSize )
+//	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioCodecID )
+//	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioType )
+//	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioName )
+
+	SQBIND_GLOBALCONST( FFF_KEY_FRAME )
+
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CFfContainer );
+
+void CFfContainer::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CFfContainer );
+}
+
 CFfContainer::CFfContainer()
 {_STT();
 
@@ -26,7 +83,6 @@ void CFfContainer::Destroy()
 
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) return;
-
 	
 	if ( m_pkt.data )
 		av_free_packet( &m_pkt );
@@ -622,7 +678,7 @@ int CFfContainer::InitWrite()
 
 	// Writing
 	m_nWrite = 2;
-
+	
 //	dump_format( m_pFormatContext, 0, 0, 1 );
 	
 	return 1;
@@ -660,11 +716,20 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	pcc->height = height;
     pcc->time_base.num = 1;
     pcc->time_base.den = fps;
-//	pcc->gop_size = 12;
+	pcc->gop_size = fps;
 
-	oex::CStr sFName( m_pFormatContext->oformat->name );
-	if (  sFName == oexT( "3gp" ) || sFName == oexT( "mov" ) || sFName == oexT( "mp4" ) )
-		pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
+	// Set extra codec data
+	if ( m_video_extra.getUsed() )
+	{	pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
+		pcc->extradata = (uint8_t*)m_video_extra._Ptr();
+		pcc->extradata_size = m_video_extra.getUsed();
+	} // end if
+	
+	else
+	{	oex::CStr sFName( m_pFormatContext->oformat->name );
+		if (  sFName == oexT( "3gp" ) || sFName == oexT( "mov" ) || sFName == oexT( "mp4" ) )
+			pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
+	} // end else
 
 	return m_nVideoStream;
 }
@@ -690,10 +755,6 @@ int getNalHeader( const void *p, int len )
 	int nri					= ( *b & 0x60 ) >> 5;
 	int ntype				= *b & 0x1f;
 
-oexSHOW( f );
-oexSHOW( nri );
-oexSHOW( ntype );
-	
 	return 1;
 }
 
@@ -710,10 +771,10 @@ int getRtpHeader( const void *p, int len )
 	int extension			= ( *b & 0x10 ) >> 4;
 	int cc					= *b & 0x0f;
 	
-oexSHOW( version );
-oexSHOW( padding );
-oexSHOW( extension );
-oexSHOW( cc );
+//oexSHOW( version );
+//oexSHOW( padding );
+//oexSHOW( extension );
+//oexSHOW( cc );
 	
 	if ( 2 != version )
 		return 0;
@@ -722,8 +783,8 @@ oexSHOW( cc );
 	int marker				= *b & 0x01;
 	int type				= ( *b & 0xfe ) >> 1;
 
-oexSHOW( marker );
-oexSHOW( type );
+//oexSHOW( marker );
+//oexSHOW( type );
 	
 	return 1;
 }
@@ -735,31 +796,38 @@ oexSHOW( type );
 // 3 = S-Frame
 int getVopType( const void *p, int len )
 {	
-	if ( 4 > len )
-		return -1;
+    if ( !p || 6 >= len )
+        return -1;
 
-	unsigned char *b = (unsigned char*)p;
-	
-	// Verify NAL marker
-	if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
-		return -1;
+    unsigned char *b = (unsigned char*)p;
 
-	b += 3;
+    // Verify NAL marker
+    if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
+    {   b++;
+        if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
+            return -1;
+    } // end if
 
-	// Verify VOP id
-	if ( 0xb6 != *b )
-		return -1;
-	
-	b++;
-	int vop_coding_type = ( *b & 0xc0 ) >> 6;
+    b += 3;
 
-// oexSHOW( vop_coding_type );
+    // Verify VOP id
+    if ( 0xb6 == *b )
+    {   b++;
+        return ( *b & 0xc0 ) >> 6;
+    } // end if
 
-	return vop_coding_type;
+    switch( *b )
+    {   case 0x65 : return 0;
+        case 0x61 : return 1;
+        case 0x01 : return 2;
+    } // end switch
+
+    return -1;
 }
 
 int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInteger nDts, sqbind::CSqMulti *m )
 {_STT();
+
 	if ( !m_pFormatContext )
 		return 0;
 
@@ -780,9 +848,8 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	if ( m && m->isset( oexT( "flags" ) ) )
 		pkt.flags = (*m)[ oexT( "flags" ) ].toint();
 	
-//	else if ( pStream && pStream->codec && CODEC_ID_H264 == pStream->codec->codec_id )
-	else
-		pkt.flags |= ( 0 >= getVopType( dat->Ptr(), dat->getUsed() ) ? AV_PKT_FLAG_KEY : 0 );
+	else if ( pStream && pStream->codec && CODEC_ID_H264 == pStream->codec->codec_id )
+		pkt.flags |= ( !getVopType( dat->Ptr(), dat->getUsed() ) ? AV_PKT_FLAG_KEY : 0 );
 		
 //	else
 //		pkt.flags |= AV_PKT_FLAG_KEY;
@@ -807,12 +874,13 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	pkt.data = (uint8_t*)dat->_Ptr();
 	pkt.size = dat->getUsed();
 	
-	if ( 0 > m_nAudioStream )
-	{	if ( av_write_frame( m_pFormatContext, &pkt ) )
-			return 0;
-	} // end if
+//	if ( 0 > m_nAudioStream )
+//	{	if ( av_write_frame( m_pFormatContext, &pkt ) )
+//			return 0;
+//	} // end if
 	
-	else if ( av_interleaved_write_frame( m_pFormatContext, &pkt ) )
+//	else 
+	if ( av_interleaved_write_frame( m_pFormatContext, &pkt ) )
 		return 0;
 
 	return 1;
@@ -948,3 +1016,5 @@ int CFfContainer::Seek( int nStreamId, int nOffset, int nFlags )
 
 	return 0 <= res ? 1 : 0;
 }
+
+

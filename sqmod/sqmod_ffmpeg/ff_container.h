@@ -13,6 +13,9 @@ public:
 
 	/// Destructor
 	virtual ~CFfContainer() { Destroy(); }
+	
+	/// Registers the class
+	static void Register( sqbind::VM vm );
 
 	/** \addtogroup CFfContainer
 		@{
@@ -202,6 +205,12 @@ public:
 	*/
 	int Seek( int nStreamId, int nOffset, int nFlags );
 
+	/// Returns extra video codec data
+	sqbind::CSqBinary getVideoExtraData() { return m_video_extra; }
+
+	/// Sets extra video codec data
+	void setVideoExtraData( sqbind::CSqBinary *p ) { if ( p ) m_video_extra = *p; }
+
 	/// Returns extra audio codec data
 	sqbind::CSqBinary getAudioExtraData() { return m_audio_extra; }
 
@@ -251,6 +260,8 @@ private:
 	/// Extra codec data
 	sqbind::CSqBinary		m_audio_extra;
 	
+	/// Extra codec data
+	sqbind::CSqBinary		m_video_extra;
 /*
 	/// Number of frames that have been processed
 	int						m_nAudioFrames;

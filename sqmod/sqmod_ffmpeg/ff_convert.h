@@ -11,6 +11,9 @@ public:
 	/// Default constructor
 	CFfConvert();
 
+	/// Registers the class
+	static void Register( sqbind::VM vm );
+
 	/** \addtogroup CFfConvert
 		@{
 	*/

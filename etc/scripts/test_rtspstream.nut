@@ -13,8 +13,8 @@ class CRtspStream
 //	szDumpVideo = "";
 	szDumpVideo = "rawvideo";
 
-	file = "";
-//	file = "rtsptest.avi";
+//	file = "";
+	file = "rtsptest.avi";
 	rec_avi = 0;
 
 	rtsp = 0;
@@ -122,15 +122,18 @@ class CRtspStream
 
 		else
 		{
+			// Video stream info
+			local w = rtsp.getWidth(), h = rtsp.getHeight(), fps = rtsp.getFps();
+			::_self.echo( "iii RTSP Indicates video format as " + rtsp.getVideoCodecName() 
+						   + " / " + w + "x" + h + "x" + fps );
+			::_self.echo( "--- SDP ---" );
+			::_self.echo( rtsp.getExtraVideoData().AsciiHexStr( 16, 16 ) );
+
 			// Insert H264 Header if needed
 			if ( "H264" == rtsp.getVideoCodecName() )
 				rtsp.setVideoHeader( CSqBinary( "\x00\x00\x01" ) );
 
-//			local w = rtsp.getWidth(), h = rtsp.getHeight(), fps = rtsp.getFps();
-			local w = 1922, h = 1080, fps = rtsp.getFps();
-			::_self.echo( "iii Creating video decoder for " + rtsp.getVideoCodecName() 
-						   + " / " + w + " x " + h + " x " + fps );
-
+			// Attempt to create a decoder
 			dec = CFfDecoder();
 			dec.setExtraData( rtsp.getExtraVideoData() );
 			if ( !dec.Create( CFfDecoder().LookupCodecId( rtsp.getVideoCodecName() ), 
@@ -153,13 +156,14 @@ class CRtspStream
 
 		else
 		{
-			::_self.echo( "iii Creating audio decoder for " + rtsp.getAudioCodecName() 
+			::_self.echo( "iii RTSP indicates audio stream as " + rtsp.getAudioCodecName() 
 						  + " : channels = " + rtsp.getNumAudioChannels()
 						  + " : rate = " + rtsp.getAudioSampleRate()
 						  + " : bps = " + rtsp.getAudioBps() );
 
-			adec = CFfAudioDecoder();
 			//::_self.echo( rtsp.getExtraAudioData().AsciiHexStr( 16, 16 ) );
+
+			adec = CFfAudioDecoder();
 			adec.setExtraData( rtsp.getExtraAudioData() );
 			if ( !adec.Create( CFfAudioDecoder().LookupCodecId( rtsp.getAudioCodecName() ),
 							   0, 0, 0 ) )
@@ -204,12 +208,6 @@ class CRtspStream
 			} // end else
 
 		} // end else
-
-		// Do we want to record the stream?
-		if ( file.len() && !rec_avi )
-			RecordToFile( file, 
-						  rtsp.getVideoCodecName(), rtsp.getWidth(), rtsp.getHeight(), rtsp.getFps(),
-						  rtsp.getAudioCodecName(), rtsp.getNumAudioChannels(), rtsp.getAudioSampleRate(), 0 );
 
 		::_self.echo( " !!! STARTING RTSP STREAM !!!" );
 
@@ -282,7 +280,14 @@ class CRtspStream
 			if ( vfail )
 				return 0;
 		} // end if
-
+		
+		// Use decoder width / height if not specified in the rtsp stream
+		if ( ( 0 >= rtsp.getWidth() || 0 >= rtsp.getHeight() )
+			 && ( 0 < dec.getWidth() && 0 < dec.getHeight() ) )
+		{	::_self.echo( "dec : " + dec.getWidth() + "x" + dec.getHeight() );		
+			rtsp.setWidth( dec.getWidth() ), rtsp.setHeight( dec.getHeight() );
+		} // end if
+		
 		// Create video buffer if needed
 		if ( pa && !vb )
 		{	vb = CSqFifoShare();
@@ -308,15 +313,26 @@ class CRtspStream
 			if ( szDumpVideo.len() )
 				CSqFile().put_contents_bin( ::_self.build_path( szDumpVideo, "v" + vix++ + ".raw" ), frame );
 
+			// Do we want to record the stream?
+			if ( file.len() && !rec_avi && 0 < rtsp.getWidth() && 0 < rtsp.getHeight() )
+			{	RecordToFile( file, 
+							  rtsp.getVideoCodecName(), rtsp.getWidth(), rtsp.getHeight(), rtsp.getFps(),
+							  rtsp.getAudioCodecName(), rtsp.getNumAudioChannels(), rtsp.getAudioSampleRate(), 0 );
+
+				::_self.echo( "rec : " + dec.getWidth() + "x" + dec.getHeight() );
+			} // end if
+
 			// Are we recording?
 			if ( rec_avi )
 				rec_avi.WriteVideoFrame( frame, rtsp.getVideoPts(), rtsp.getVideoDts(), CSqMulti() );
 
 			// Buffer for later if syncing to audio
-			if ( vb ) vb.Write( frame, "", 0, rtsp.getVideoPts() );
+			if ( vb ) 
+				vb.Write( frame, "", 0, rtsp.getVideoPts() );
 
 			// Otherwise, just send it straight to the decoder
-			else dec.BufferData( frame, CSqMulti() );
+			else 
+				dec.BufferData( frame, CSqMulti() );
 
 			rtsp.UnlockVideo();			
 
@@ -357,6 +373,9 @@ class CRtspStream
 		if ( 0 >= fps )
 			fps = 15;
 
+		if ( vfmt.len() )
+			rec_avi.setVideoExtraData( rtsp.getExtraVideoData() );
+
 		if ( afmt.len() )
 			rec_avi.setAudioExtraData( rtsp.getExtraAudioData() );
 
@@ -369,10 +388,9 @@ class CRtspStream
 		else if ( !rec_avi.InitWrite() )
 			::_self.echo( "Failed to initiailze avi" );
 		else
-			::_self.echo( "iii Saving to file : " + file );	
-		
+			::_self.echo( "iii Saving to file : " + file + " - " + w + "x" + h + "x" + fps );	
+			
 	}	
-
 }
 
 class CGlobal
@@ -427,9 +445,6 @@ function _init() : ( _g )
 //	local ani = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.4, 0 ) );
 //	_g.cube.AddAnimator( ani );
 
-	// Set draw function
-	_self.set_timer( ".", 30, "OnDraw" )
-
 	// Which stream to use
 	local link = ::_self.get( "/", "cmdline.1" );
 	if ( !link.len() )
@@ -441,6 +456,9 @@ function _init() : ( _g )
 	// Start the video stream
 	_g.stream = CRtspStream();
 	_g.stream.Play( link, _self.get( "/", "cmdline.u" ), _self.get( "/", "cmdline.p" ) );
+
+	// Set draw function
+	_self.set_timer( ".", 30, "OnDraw" )
 
 	return 0;
 }

@@ -7,6 +7,44 @@ extern "C"
 #	include "libavformat/riff.h"
 };
 
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CFfAudioDecoder, CFfAudioDecoder )
+
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, Destroy )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, Create )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, FindStreamInfo )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, Decode )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getBufferSize )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, setExtraData )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getExtraData )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, setSync )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getSync )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getChannels )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getSampleRate )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getBps )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getBitRate )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getFrameSize )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getCodecId )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getCodecType )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getCodecName )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, isValid )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getFrameCount )
+//	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder,  )
+//	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder,  )
+//	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder,  )
+//	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder,  )
+
+	SQBIND_STATIC_FUNCTION( CFfAudioDecoder, LookupCodecId )
+	SQBIND_STATIC_FUNCTION( CFfAudioDecoder, LookupCodecName )
+
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CFfAudioDecoder );
+
+void CFfAudioDecoder::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CFfAudioDecoder );
+}
+
 CFfAudioDecoder::CFfAudioDecoder()
 {_STT();
 
