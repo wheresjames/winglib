@@ -75,12 +75,14 @@ CLvRtspClient::CVideoSink::CVideoSink( UsageEnvironment& rEnv ) :
 	MediaSink( rEnv )
 {_STT();
 
+	m_pevtData = 0;
 	m_nFrameReady = 0;
 	m_nFrameGrabbing = 0;
 }
 
 CLvRtspClient::CVideoSink::~CVideoSink()
 {_STT();
+	m_pevtData = 0;
 	m_nFrameReady = 0;
 	m_nFrameGrabbing = 0;
 	m_buf.Free();
@@ -152,6 +154,8 @@ void CLvRtspClient::CVideoSink::afterGettingFrame( void* clientData, unsigned fr
 	// Signal that a frame is ready
 	m_nFrameReady = 1;
 	m_nFrameGrabbing = 0;
+	if ( m_pevtData )
+		m_pevtData->Signal();
 
 }
 
@@ -192,12 +196,14 @@ CLvRtspClient::CAudioSink::CAudioSink( UsageEnvironment& rEnv ) :
 	MediaSink( rEnv ) 
 	// MPEG4LATMAudioRTPSink( rEnv )
 {_STT();
+	m_pevtData = 0;
 	m_nFrameReady = 0;
 	m_nFrameGrabbing = 0;
 }
 
 CLvRtspClient::CAudioSink::~CAudioSink()
 {_STT();
+	m_pevtData = 0;
 	m_nFrameReady = 0;
 	m_nFrameGrabbing = 0;
 	m_buf.Free();
@@ -246,6 +252,8 @@ void CLvRtspClient::CAudioSink::afterGettingFrame( void* clientData, unsigned fr
 	// Signal that a frame is ready
 	m_nFrameReady = 1;
 	m_nFrameGrabbing = 0;
+	if ( m_pevtData )
+		m_pevtData->Signal();
 }
 
 int CLvRtspClient::CAudioSink::needFrame()
@@ -600,6 +608,7 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 		return 0;
 	} // end if
 
+	m_pVs->setDataEvent( &m_evtData );
 	m_pVsPss = pss;
 
 	return 1;
@@ -692,6 +701,7 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 		return 0;
 	} // end if
 
+	m_pAs->setDataEvent( &m_evtData );
 	m_pAsPss = pss;
 
 	return 1;
@@ -699,9 +709,15 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 
 int CLvRtspClient::LockVideo( sqbind::CSqBinary *dat, int to )
 {_STT();
+
 	if ( !m_bVideo || !m_pVs )
 		return 0;
 
+	// Wait for data?
+	if ( to )
+		m_evtData.Wait( to );
+
+	// Attempt to lock a frame
 	return m_pVs->LockFrame( dat, to );
 }
 
@@ -709,6 +725,9 @@ int CLvRtspClient::UnlockVideo()
 {_STT();
 	if ( !m_pVs )
 		return 0;
+
+	// Reset data signal
+	m_evtData.Reset();
 
 	return m_pVs->UnlockFrame();
 }
@@ -718,6 +737,10 @@ int CLvRtspClient::LockAudio( sqbind::CSqBinary *dat, int to )
 	if ( !m_bAudio || !m_pAs )
 		return 0;
 
+	// Wait for data?
+	if ( to )
+		m_evtData.Wait( to );
+
 	return m_pAs->LockFrame( dat, to );
 }
 
@@ -725,6 +748,9 @@ int CLvRtspClient::UnlockAudio()
 {_STT();
 	if ( !m_pAs )
 		return 0;
+
+	// Reset data signal
+	m_evtData.Reset();
 
 	return m_pAs->UnlockFrame();
 }
@@ -771,7 +797,7 @@ oex::oexBOOL CLvRtspClient::DoThread( oex::oexPVOID x_pData )
 	m_pRtspClient->playMediaSession( *m_pSession, 0.f, -1.f, 1.f );
 
 	// Schedule idle processing
-	m_pEnv->taskScheduler().scheduleDelayedTask( 15000, (TaskFunc*)CLvRtspClient::_OnIdle, this );
+	m_pEnv->taskScheduler().scheduleDelayedTask( 1000, (TaskFunc*)CLvRtspClient::_OnIdle, this );
 
 	// Run the event loop
 	m_pEnv->taskScheduler().doEventLoop( &m_nEnd );
@@ -809,6 +835,6 @@ void CLvRtspClient::OnIdle()
 
 	// Schedule us to run again
 	if ( !m_nEnd )
-		m_pEnv->taskScheduler().scheduleDelayedTask( 15000, (TaskFunc*)CLvRtspClient::_OnIdle, this );
+		m_pEnv->taskScheduler().scheduleDelayedTask( 1000, (TaskFunc*)CLvRtspClient::_OnIdle, this );
 }
 

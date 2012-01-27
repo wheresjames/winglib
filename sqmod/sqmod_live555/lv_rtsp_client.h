@@ -40,6 +40,9 @@ public:
 		/// Returns the Dts time
 		oex::oexTime& getDts() { return m_ds; }
 
+		/// Sets data event pointer
+		void setDataEvent( oexEvent *p ) { m_pevtData = p; }
+
 	private:
 
 		/// Destructor
@@ -76,6 +79,9 @@ public:
 		
 		/// Dts
 		oex::oexTime			m_ds;
+		
+		/// Pointer to event signal
+		oexEvent				*m_pevtData;
 
 	};
 
@@ -112,6 +118,9 @@ public:
 		/// Returns the Dts time
 		oex::oexTime& getDts() { return m_ds; }
 
+		/// Sets data event pointer
+		void setDataEvent( oexEvent *p ) { m_pevtData = p; }
+
 	private:
 
 		/// Destructor
@@ -143,6 +152,8 @@ public:
 		/// Dts
 		oex::oexTime			m_ds;
 
+		/// Pointer to event signal
+		oexEvent				*m_pevtData;
 	};
 
 
@@ -453,6 +464,9 @@ private:
 
 	/// Signal to start RTSP stream
 	oexEvent				m_evtPlay;
+
+	/// Signals when data is available
+	oexEvent				m_evtData;
 
 	/// SDP string
 	sqbind::CSqMulti		m_mSdp;

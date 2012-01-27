@@ -338,6 +338,7 @@ oex::oexBOOL CScriptThread::LogVariables()
 
 oex::oexINT CScriptThread::RunTimers()
 {
+	oex::oexUINT uGmt = 0;
 	oex::oexDOUBLE dTm = oex::os::CHqTimer::GetTimerSeconds();
 
 	if ( !m_dToValue )
@@ -356,7 +357,9 @@ oex::oexINT CScriptThread::RunTimers()
 		// Timeout?
 		if ( it->second.uTimeout )
 		{	int nRet = 0;
-			if ( it->second.uTimeout < oexGetUnixTime() )
+			if ( !uGmt ) 
+				uGmt = oexGetUnixTime();
+			if ( it->second.uTimeout < uGmt )
 			{	n++, m_cSqEngine.Execute( &nRet, it->second.sCallback.c_str() );
 				bErase = oex::oexTRUE;
 			} // end if
@@ -414,6 +417,8 @@ oex::oexUINT CScriptThread::SetTimer( oex::oexUINT x_uTo, const stdString &x_sCa
 	ti.sCallback = x_sCallback;
 	m_to[ ++m_tid ] = ti;
 
+	// Sir Nyquist
+	x_uTo /= 2;
 	if ( m_uToFreq > x_uTo )
 		m_uToFreq = oex::cmn::Range( x_uTo, (oex::oexUINT)1, (oex::oexUINT)100 );
 
