@@ -418,7 +418,7 @@ function _init() : ( _g )
 
 //	_g.irr.SetStereo( 1 );
 	_self.echo( "...Initializing...\n" );
-	_g.irr.Init( "RTSP Test", 640, 480, 1 );
+	_g.irr.Init( "RTSP Test", 800, 600, 1 );
 
 	_self.echo( "...setting ambient light...\n" );
 	_g.irr.SetAmbientLight( CSqirrColorf( 0.5, 0.5, 0.5 ) );
@@ -435,8 +435,8 @@ function _init() : ( _g )
 	local cam = _g.irr.AddCamera( CSqirrVector3d( 0, 0, 15 ), CSqirrVector3d( 0, 0, 0 ) );
 //	cam.SetLens( 1., 2.4, 3.2 );
 
-    _g.cube = _g.irr.AddGrid( 50., 50., 1, 1, 0., 2, CSqirrColor( 255, 255, 255 ), 2 );
-	_g.cube.SetPosition( CSqirrVector3d( -25, -25, -25 ) );
+    _g.cube = _g.irr.AddGrid( 40., 30., 1, 1, 0., 2, CSqirrColor( 255, 255, 255 ), 2 );
+	_g.cube.SetPosition( CSqirrVector3d( -20, -15, -10 ) );
 
 	_self.echo( "...adding cube...\n" );
 //	_g.cube = _g.irr.AddCube( 10. );
