@@ -36,6 +36,17 @@
 
 #include "std_os.h"
 
+#if !defined( OEX_NOSTATFS )
+#	include <sys/statfs.h>
+#elif !defined( OEX_NOSTATVFS )
+#	include <sys/statvfs.h>
+#endif
+
+#if !defined( OEX_NOMNTENT )
+#	include <mntent.h>
+#endif
+
+
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
@@ -74,62 +85,189 @@ CPropertyBag CSysUtil::GetRegKeys( const CStr &x_sKey, const CStr &x_sPath, oexB
 	return CPropertyBag();
 }
 
+oexCSTR GetFsTypeStr( unsigned long type )
+{
+	switch( type )
+	{
+		case 0x0000ADF5	: return oexT( "ADFS" );
+		case 0x0000ADFF	: return oexT( "AFFS" );
+		case 0x42465331	: return oexT( "BEFS" );
+		case 0x1badface : return oexT( "BFS" );
+		case 0xFF534D42	: return oexT( "CIFS" );
+		case 0x73757245	: return oexT( "CODA" );
+		case 0x012FF7B7 : return oexT( "COH" );
+		case 0x00001373 : return oexT( "DEVFS" );
+		case 0x00414A53 : return oexT( "EFS" );
+		case 0x0000137D : return oexT( "EXT" );
+		case 0x0000EF51 : return oexT( "EXT2 old" );
+		case 0x0000EF52 : return oexT( "EXT2" );
+		case 0x0000EF53 : return oexT( "EXT3" );
+		case 0x00004244 : return oexT( "HFS" );
+		case 0xF995E849 : return oexT( "HPFS" );
+		case 0x958458f6 : return oexT( "HUGETLBFS" );
+		case 0x00009660 : return oexT( "ISOFS" );
+		case 0x000072b6 : return oexT( "JFFS2" );
+		case 0x3153464a : return oexT( "JFS" );
+		case 0x0000137F : return oexT( "MINIX" );
+		case 0x0000138F : return oexT( "MINIX-30" );
+		case 0x00002468 : return oexT( "MINIX2" );
+		case 0x00002478 : return oexT( "MINIX2-30" );
+		case 0x00004d44 : return oexT( "MSDOS" );
+		case 0x0000564c : return oexT( "NCP" );
+		case 0x00006969 : return oexT( "NFS" );
+		case 0x5346544e : return oexT( "NTFS" );
+		case 0x00009fa1 : return oexT( "OPENPROM" );
+		case 0x00009fa0 : return oexT( "PROC" );
+		case 0x0000002f : return oexT( "QNX4" );
+		case 0x52654973 : return oexT( "REISERFS" );
+		case 0x00007275 : return oexT( "ROMFS" );
+		case 0x0000517B : return oexT( "SMB" );
+		case 0x012FF7B6 : return oexT( "SYSV2" );
+		case 0x012FF7B5 : return oexT( "SYSV4" );
+		case 0x01021994 : return oexT( "TMPFS" );
+		case 0x15013346 : return oexT( "UDF" );
+		case 0x00011954 : return oexT( "UFS" );
+		case 0x00009fa2 : return oexT( "USBDEV" );
+		case 0xa501FCF5 : return oexT( "VXFS" );
+		case 0x012FF7B4 : return oexT( "XENIX" );
+		case 0x58465342 : return oexT( "XFS" );
+		case 0x012FD16D : return oexT( "XIAFS" );
+
+	} // end switch	
+
+	return oexT( "unknown" );
+}
+
+
 CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 {_STT();
 
-	return CPropertyBag();
-/*
 	// Sanity check
 	if ( !x_sDrive.Length() )
 		return CPropertyBag();
 
-	// Must be root
-//    if ( geteuid() )
-//    {	oexERROR( 0, oexT( "Only root can call GetDiskInfo()" ) );
-//    	return CPropertyBag();
-//    } // end if
-/*
-	static struct hd_driveid hd;
-    int fd;
-
-	// Open the drive
-	if ( 0 > ( fd = open( oexStrToMb( x_sDrive ).Ptr(), O_RDONLY | O_NONBLOCK ) ) )
-    	return CPropertyBag();
-
-	if ( ioctl( fd, HDIO_GET_IDENTITY, &hd ) )
-		return CPropertyBag();
-
-//        printf("Hard Disk Model: %.40s\n", hd.model);
- //       printf("  Serial Number: %.20s\n", hd.serial_no);
-
-
-
-	// Get volume information
-//	if ( !GetVolumeInformation(	x_sDrive.Ptr(), szVolume, sizeof( szVolume ),
-//								&dwSn, &dwMax, &dwFlags,
-//								szFileSystem, sizeof( szFileSystem ) ) )
-//		return CPropertyBag();
-
 	CPropertyBag pb;
-	pb[ "drive" ] = x_sDrive;
-	pb[ "volume" ] = oexMbToStrPtr( szVolume );
-	pb[ "serial" ] = dwSn;
-	pb[ "max_filename" ] = dwMax;
-	pb[ "flags" ] = dwFlags;
-	pb[ "file_system" ] = oexMbToStrPtr( szFileSystem );
+	pb[ oexT( "drive" ) ] = x_sDrive;
+//	pb[ oexT( "drive_type" ) ] = GetDriveTypeStr( x_sDrive.c_str() );
+
+#if !defined( OEX_NOSTATFS )
+
+	struct statfs di;
+    if ( 0 > statfs( oexStrToMb( x_sDrive ).Ptr(), &di ) )
+    	return CPropertyBag();
+	pb[ oexT( "file_system_type" ) ] = (unsigned int)di.f_type;
+	pb[ oexT( "file_system_str" ) ] = GetFsTypeStr( di.f_type );
+	pb[ oexT( "file_system_id32" ) ] = (unsigned int)di.f_fsid.__val[ 0 ];
+	pb[ oexT( "file_system_id64" ) ] = *(oexUINT64*)&di.f_fsid;
+	
+#elif !defined( OEX_NOSTATVFS )
+
+	struct statvfs di;
+    if ( 0 > statvfs( x_sDrive.c_str(), &di ) )
+    	return CPropertyBag();
+	
+	pb[ oexT( "flags" ) ] = di.f_flag;
+	pb[ oexT( "max_filename" ) ] = di.f_namemax;
+//	pb[ oexT( "file_system_type" ) ] = di.f_type;
+//	pb[ oexT( "file_system_str" ) ] = GetFsTypeStr( di.f_type );
+	pb[ oexT( "file_system_id32" ) ] = (unsigned int)di.f_fsid;
+//	pb[ oexT( "file_system_id64" ) ] = (oexUINT64)di.f_fsid64;
+	
+#endif
+   	
+    // Space info
+	pb[ oexT( "bytes" ) ] = (oexUINT64)di.f_blocks * (oexUINT64)di.f_bsize;
+	pb[ oexT( "bytes_free" ) ] = (oexUINT64)di.f_bfree * (oexUINT64)di.f_bsize;
+	pb[ oexT( "bytes_used" ) ] = (oexUINT64)( di.f_blocks - di.f_bfree ) * (oexUINT64)di.f_bsize;
+	pb[ oexT( "bytes_available" ) ] = (oexUINT64)di.f_bavail * (oexUINT64)di.f_bsize;
+	pb[ oexT( "bytes_unavailable" ) ] = (oexUINT64)( di.f_blocks - di.f_bavail ) * (oexUINT64)di.f_bsize;
+	
+	pb[ oexT( "inodes" ) ] = di.f_files;	
+	pb[ oexT( "block_size" ) ] = di.f_bsize;	
+	pb[ oexT( "fragment_size" ) ] = di.f_frsize;	
 
 	return pb;
-*/
 }
 
 CPropertyBag CSysUtil::GetDisksInfo( oexBOOL bInfo )
 {_STT();
 
-	return CPropertyBag();
+	long lTotal = 0;
+	CPropertyBag pb;
+	
+#if !defined( OEX_NOMNTENT )
+
+	struct mntent *m;
+	FILE *f = setmntent( "/proc/mounts", "r" );
+	while ( ( m = getmntent( f ) ) )
+		if ( m )
+		{
+			CStr sPath = m->mnt_dir 
+						  ? oexMbToStr( m->mnt_dir ) 
+						  : CStr( lTotal );
+			
+			
+			if ( bInfo )
+			{
+				CPropertyBag &r = pb[ sPath ];
+				r = GetDiskInfo( sPath );
+				r[ oexT( "volume" ) ] = oexMbToStr( m->mnt_fsname ? m->mnt_fsname : "" );
+				r[ oexT( "drive_type_os" ) ] = oexMbToStr( m->mnt_type ? m->mnt_type : "" );
+				r[ oexT( "drive_path" ) ] = oexMbToStr( m->mnt_dir ? m->mnt_dir : "" );
+				r[ oexT( "drive_fs" ) ] = oexMbToStr( m->mnt_fsname ? m->mnt_fsname : "" );
+				r[ oexT( "drive_opts" ) ] = oexMbToStr( m->mnt_opts ? m->mnt_opts : "" );
+				r[ oexT( "drive_freq" ) ] = m->mnt_freq;
+				r[ oexT( "drive_passno" ) ] = m->mnt_passno;
+				r[ oexT( "drive_type" ) ] = GetDriveTypeStr( oexMbToStr( m->mnt_type ? m->mnt_type : "" ) );
+				
+				// +++ Hmmmm
+				if ( pb[ oexT( "bytes" ) ].ToLong()
+					 && r[ oexT( "drive_type" ) ].ToString() == "unknown" 
+					 && r[ oexT( "file_system_str" ) ].ToString() != "TMPFS" )
+					pb[ oexT( "drive_type" ) ] = oexT( "fixed" );
+
+			} // end if
+			
+			else
+				pb[ sPath ] = GetDriveTypeStr( oexMbToStr( m->mnt_type ? m->mnt_type : "" ) );
+
+			lTotal++;
+		
+		} // end while
+	
+	endmntent( f );
+
+#endif
+
+	return pb;
 }
 
 CStr CSysUtil::GetDriveTypeStr(const CStr &x_sDrive)
 {_STT();
+
+	if ( !x_sDrive.Length() )	 	return oexT( "noroot" );
+	
+	CStr s = x_sDrive;
+	if ( s == oexT( "fd" ) ) 		return oexT( "removable" );
+	
+	if ( s == oexT( "hd" ) ) 		return oexT( "fixed" );
+	if ( s == oexT( "ext" ) ) 		return oexT( "fixed" );
+	if ( s == oexT( "ext2" ) ) 		return oexT( "fixed" );
+	if ( s == oexT( "ext3" ) ) 		return oexT( "fixed" );
+	if ( s == oexT( "fuseblk" ) ) 	return oexT( "fixed" );
+	if ( s == oexT( "ecryptfs" ) ) 	return oexT( "fixed" );	
+	
+	if ( s == oexT( "cdrom" ) ) 	return oexT( "cdrom" );
+	
+	if ( s == oexT( "ram" ) ) 		return oexT( "ramdisk" );
+	if ( s == oexT( "tmpfs" ) ) 	return oexT( "ramdisk" );
+	if ( s == oexT( "tempfs" ) ) 	return oexT( "ramdisk" );
+	if ( s == oexT( "devtmpfs" ) ) 	return oexT( "ramdisk" );
+	
+	if ( s == oexT( "devpts" ) ) 	return oexT( "remote" );
+	if ( s == oexT( "subst" ) ) 	return oexT( "remote" );
+	if ( s == oexT( "join" ) ) 		return oexT( "remote" );
+	if ( s == oexT( "net" ) ) 		return oexT( "remote" );
 
 	return oexT( "unknown" );
 }
