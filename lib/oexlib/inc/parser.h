@@ -1767,7 +1767,8 @@ public:
 			sTab << oexTC( T, '\t' );
 		sTab1 << oexTC( T, '\t' ) << sTab;
 
-		TStr< T > sStr; sStr << oexTT( T, "{" ) << oexTTEXT( T, oexNL8 );
+		oexBOOL bList = x_pb.is_list();
+		TStr< T > sStr; sStr << ( bList ? oexTT( T, "[" ) : oexTT( T, "{" ) ) << oexTTEXT( T, oexNL8 );
 		for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
 		{
 			// Add comma if needed
@@ -1776,9 +1777,12 @@ public:
 			else
 				sStr << oexTT( T, "," ) << oexTTEXT( T, oexNL8 );
 
+			// Want tab
+			sStr << sTab1;
+
 			// Add key
-//			sStr << sTab1 << oexTC( T, '\"' ) << it.Node()->key.Escape( oexTT( T, "\\\"" ), oexTC( T, '\\' ) ).EscapeWs( oexTC( T, '\\' ) ) << oexTT( T, "\": " );
-			sStr << sTab1 << oexTC( T, '\"' ) << JsonEncode( it.Node()->key ) << oexTT( T, "\": " );
+			if ( !bList )
+				sStr << oexTC( T, '\"' ) << JsonEncode( it.Node()->key ) << oexTT( T, "\": " );
 
 			// Single value
 			if ( it->IsDefaultValue() )
@@ -1794,7 +1798,7 @@ public:
 
 		} // end for
 
-		sStr << oexNL << sTab << oexTC( T, '}' );
+		sStr << oexNL << sTab << ( bList ? oexTC( T, ']' ) : oexTC( T, '}' ) );
 
 		return sStr;
 	}
@@ -1838,6 +1842,10 @@ public:
 		oexLONG lItems = 0;
 		oexLONG lMode = 0;
 		TStr< T > sKey;
+
+		// Mark list
+		if ( 2 == x_lArrayType )
+			x_pb.is_list( 1 );
 
 		while ( x_sStr.Length() )
 		{

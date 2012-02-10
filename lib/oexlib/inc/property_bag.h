@@ -80,6 +80,14 @@ template < class T_L, class T_R = T_L > class TPropertyBag
 {
 public:
 
+	/// Property bag flags
+	enum eFlags
+	{
+		efList = 0x00000001
+	};
+
+public:
+
 	/// Key type
 	typedef T_L t_key;
 
@@ -95,11 +103,11 @@ public:
 public:
 
 	/// Default constructor
-	TPropertyBag() {}
+	TPropertyBag() { m_flags = 0; }
 
     /// Assignment constructor
     TPropertyBag( oexCONST TPropertyBag &x_rPb )
-    {   Assume( x_rPb ); }
+    {	m_flags = 0; Assume( x_rPb ); }
 
 	/// Destructor
 	virtual ~TPropertyBag() { Destroy(); }
@@ -360,6 +368,36 @@ public:
 			return iterator();
 		}
 
+    //==============================================================
+    // setFlags()
+    //==============================================================
+    /// Sets the flags
+    void setFlags( long f ) { m_flags = f; }    
+
+    //==============================================================
+    // getFlags()
+    //==============================================================
+    /// Returns the flags
+    long getFlags() const { return m_flags; }    
+
+    //==============================================================
+    // is_list()
+    //==============================================================
+    /// Returns non-zero if this is the list flag is set
+    oexBOOL is_list() const { return 0 != ( m_flags & efList ); }    
+
+    //==============================================================
+    // is_list()
+    //==============================================================
+    /// Sets the list flag
+	void is_list( oexBOOL b ) 
+	{
+		if ( b ) 
+			m_flags |= efList;
+		else
+			m_flags &= ~efList;
+	}		
+
 	//==============================================================
 	// Returns the number of differences between two property bags
 	//==============================================================
@@ -582,6 +620,7 @@ public:
         // Swip values
         m_t.Assume( ( (TPropertyBag&)x_pb ).m_t );
         m_lstPb = ( (TPropertyBag&)x_pb ).m_lstPb;
+		m_flags = ( (TPropertyBag&)x_pb ).m_flags;
         return *this;
     }
 
@@ -591,6 +630,7 @@ public:
         pb.m_t.Copy( m_t );
 		for ( iterator it; m_lstPb.Next( it ); )
 			pb[ it.Node()->key ] = it->Copy();
+		pb.m_flags = m_flags;
         return pb;
     }
 
@@ -672,6 +712,9 @@ private:
 
 	/// Array of strings
 	t_PbArray						m_lstPb;
+
+	/// Propety bag flags
+	oexUINT							m_flags;
 
 };
 

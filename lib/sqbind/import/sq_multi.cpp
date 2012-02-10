@@ -38,6 +38,7 @@ using namespace sqbind;
 
 CSqMulti::~CSqMulti()
 {_STT();
+	m_flags = 0;
 	if ( m_def )
 	{	OexAllocDestruct( m_def );
 		m_def = oexNULL;
@@ -46,24 +47,28 @@ CSqMulti::~CSqMulti()
 
 CSqMulti::CSqMulti()
 {_STT();
+	m_flags = 0;
 	m_def = oexNULL;
 }
 
 CSqMulti::CSqMulti( const CSqMulti &m )
 {_STT();
 	m_def = oexNULL;
+	m_flags = m.m_flags;
 	m_lst = m.m_lst;
 	m_val = m.m_val;
 }
 
 CSqMulti::CSqMulti( const CSqMulti::t_Obj &s )
 {_STT();
+	m_flags = 0;
 	m_def = oexNULL;
 	deserialize( s );
 }
 
 CSqMulti::CSqMulti( const oex::oexTCHAR *s, SQINT sz )
 {_STT();
+	m_flags = 0;
 	m_def = oexNULL;
 	if ( s )
 		deserialize( t_Obj( s, sz ) );
@@ -71,6 +76,7 @@ CSqMulti::CSqMulti( const oex::oexTCHAR *s, SQINT sz )
 
 CSqMulti::CSqMulti( const oex::CStrList &l )
 {_STT();
+	m_flags = 0;
 	m_def = oexNULL;
 	SQBIND_StrListToStd( l, m_lst, oexT( "1" ) );
 }
@@ -87,6 +93,7 @@ CSqMulti& CSqMulti::operator = ( const oex::CStrList &l )
 CSqMulti& CSqMulti::operator = ( const CSqMulti &m )
 {_STT();
 	m_def = oexNULL;
+	m_flags = m.m_flags;
 	m_lst = m.m_lst;
 	m_val = m.m_val;
 	return *this;
@@ -365,6 +372,10 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, _newslot )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, print_r )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, diff_count )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, setList )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, getList )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, setFlags )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, getFlags )
 _SQBIND_REGISTER_CLASS_END()
 
 void CSqMulti::Register( sqbind::VM vm )
@@ -404,6 +415,7 @@ CSqMulti CSqMulti::diff_count( CSqMulti *p )
 CSqParam::t_SqStr CSqMulti::getJSON()
 {_STT();
 	oex::CPropertyBag pb;
+	pb.setFlags( getFlags() );
 	SQBIND_MultiToPropertyBag( m_lst, pb );
 	return oex2std( oex::CParser::EncodeJSON( pb ) );
 }

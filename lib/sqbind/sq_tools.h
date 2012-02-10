@@ -38,8 +38,7 @@
 
 template < typename T_PB, typename T_STD  >
 	void SQBIND_PropertyBagToStd( T_PB &pb, T_STD &m )
-	{
-		for( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
+	{	for( oex::CPropertyBag::iterator it; pb.List().Next( it ); )
 			m[ it.Node()->key.Ptr() ] = it->ToString().Ptr();
 	}
 
@@ -71,6 +70,8 @@ template < typename T_PB, typename T_STD  >
 			if ( !sKey.length() )
 				sKey = oexT( "*" );
 
+			m[ sKey ].setFlags( it->getFlags() );
+
 			if ( !it->Size() )
 				m[ sKey ].str().assign( it->ToString().Ptr(), (stdString::size_type)it->ToString().Length() );
 
@@ -89,6 +90,8 @@ template < typename T_PB, typename T_STD  >
 
 			if ( !sKey.length() )
 				sKey = oexT( "*" );
+
+			m[ sKey ].setFlags( it->getFlags() );
 
 			if ( !it->Size() )
 			{	oex::CStr s = oexMbToStr( it->ToString() );
@@ -110,6 +113,8 @@ template < typename T_STD, typename T_PB  >
 			if ( !sKey.length() )
 				sKey = oexT( "*" );
 
+			pb[ sKey.c_str() ].setFlags( it->second.getFlags() );
+
 			if ( !it->second.size() )
 				pb[ sKey.c_str() ].ToString().Set( it->second.str().c_str(), it->second.str().length() );
 
@@ -127,6 +132,8 @@ template < typename T_STD, typename T_PB  >
 			stdString sKey = it->first;
 			if ( !sKey.length() )
 				sKey = oexT( "*" );
+
+			pb[ oexStrToMbPtr( sKey.c_str() ) ].setFlags( it->second.getFlags() );
 
 			if ( !it->second.size() )
 			{	oex::CStr s( it->second.m_val.c_str(), it->second.str().length() );

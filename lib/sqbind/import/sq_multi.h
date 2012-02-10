@@ -41,6 +41,11 @@ namespace sqbind
 	class CSqMulti : CSqParam
 	{
 	public:
+		enum eFlags
+		{
+			efList = 0x00000001
+		};
+	public:
 
 		/// List object type
 		typedef stdString						t_Obj;
@@ -83,6 +88,9 @@ namespace sqbind
 		/// Default object
 		CSqMulti				*m_def;
 
+		/// Property bag flags
+		long					m_flags;
+
 	public:
 
 		SQBIND_CLASS_CTOR_BEGIN( CSqMulti )
@@ -97,7 +105,7 @@ namespace sqbind
 
 		/// Copy from pointer
 		CSqMulti( const CSqMulti *m )
-		{	if ( m ) *this = *m; }
+		{	m_flags = 0; if ( m ) *this = *m; }
 
 		/// Copy constructor
 		CSqMulti( const CSqMulti &m );
@@ -116,7 +124,7 @@ namespace sqbind
 
 		/// Assignment operator
 		CSqMulti& operator = ( const oex::CStrList &l );
-		
+
 		/// Returns a reference to the underlying vector
 		t_List& list();
 
@@ -134,6 +142,24 @@ namespace sqbind
 
 		/// Assignment operator
 		CSqMulti& operator = ( const oex::oexTCHAR *p );
+
+		/// Returns non-zero if this is the list flag is set
+		int getList() { return 0 != ( m_flags & efList ); }    
+
+		/// Sets the list flag
+		void setList( int b ) 
+		{
+			if ( b ) 
+				m_flags |= efList;
+			else
+				m_flags &= ~efList;
+		}
+
+		/// Returns the flags
+		long getFlags() { return m_flags; }
+
+		/// Sets the flags
+		void setFlags( long f ) { m_flags = f; }
 
 		/// Returns a reference to the string object
 		operator stdString&() { return str(); }
@@ -153,13 +179,13 @@ namespace sqbind
 		/// Returns a string representation of the value, if empty, returns def
 		stdString str_def( const sqbind::stdString &def )
 		{	sqbind::stdString v = str(); if ( !v.length() ) return def; return v; }
-		
+
 		/// Returns a binary representation of the value
 		CSqBinary bin();
 
 		/// Returns a integer representation of the value
 		SQInteger toint();
-		
+
 		/// Returns a integer representation of the value within the specified range
 		SQInteger toint_range( SQInteger min, SQInteger max )
 		{	return oex::cmn::Range( toint(), min, max ); }

@@ -714,7 +714,7 @@ public:
 	{
 		m_nErrorCode = nErrorCode;
 
-		Content() << "<HTML> <BODY><p><big><big>" << sMsg << "</big></big></p> </BODY></HTML>";
+		Content() << "<html><body><p><big><b>" << sMsg << "</b></big></p></body></html>";
 
 		// Send it
 		SendReply();
