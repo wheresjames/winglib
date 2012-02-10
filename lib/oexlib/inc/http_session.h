@@ -438,7 +438,8 @@ public:
 
 		} // end for
 
-		SendErrorMsg( HTTP_NOT_FOUND, "File not found" );
+		// Not found
+		SendErrorMsg( HTTP_NOT_FOUND, CStr8( "File not found : " ) << m_pbRequest[ "path" ].ToString() );
 
 		return oexTRUE;
 	}
@@ -614,14 +615,14 @@ public:
 
 		// Grab the url
 		CStr8 sPath = sRx.ParseNextToken();
-		m_pbRequest[ "path" ] = sPath.Parse( "?" );
+		m_pbRequest[ "path" ] = CParser::UrlDecode( sPath.Parse( "?" ) );
 		if ( m_pbRequest[ "path" ].ToString().Length() )
 		{   if ( *sPath == '?' )
 				sPath++;
 			m_pbRequest[ "params" ] = sPath;
 			m_pbGet = CParser::DecodeUrlParams( sPath );
 		} // end if
-		else m_pbRequest[ "path" ].ToString() = sPath;
+		else m_pbRequest[ "path" ].ToString() = CParser::UrlDecode( sPath );
 
 		// Grab the protocol / must be HTTP
 		m_pbRequest[ "proto" ] = CParser::ParseToken( sRx.SkipWhiteSpace(), CStrList8() << "HTTP", oexFALSE );
