@@ -84,6 +84,9 @@ void CFfContainer::Destroy()
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) return;
 	
+	m_video_extra.Free();
+	m_audio_extra.Free();
+
 	if ( m_pkt.data )
 		av_free_packet( &m_pkt );
 
@@ -255,6 +258,10 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 			if ( 0 > avcodec_open( m_pCodecContext, pCodec ) )
 				m_pCodecContext = oexNULL;
 
+			if ( m_pCodecContext->extradata && m_pCodecContext->extradata_size )
+				m_video_extra.setBuffer( (sqbind::CSqBinary::t_byte*)m_pCodecContext->extradata, 
+										 m_pCodecContext->extradata_size, 0, oex::oexFALSE );
+
 		} // end else
 
 	} // end if
@@ -280,6 +287,10 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 
 			if ( 0 > avcodec_open( pcc, pCodec ) )
 				pcc = oexNULL;
+
+			if ( pcc->extradata && pcc->extradata_size )
+				m_audio_extra.setBuffer( (sqbind::CSqBinary::t_byte*)pcc->extradata, 
+										 pcc->extradata_size, 0, oex::oexFALSE );
 
 		} // end if
 
@@ -795,7 +806,7 @@ int getRtpHeader( const void *p, int len )
 // 2 = B-Frame
 // 3 = S-Frame
 int getVopType( const void *p, int len )
-{	
+{
     if ( !p || 6 >= len )
         return -1;
 
@@ -811,7 +822,7 @@ int getVopType( const void *p, int len )
     b += 3;
 
     // Verify VOP id
-    if ( 0xb6 == *b )
+    if ( 0xa0 == ( *b & 0xe0 ) )
     {   b++;
         return ( *b & 0xc0 ) >> 6;
     } // end if
@@ -847,12 +858,17 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 
 	if ( m && m->isset( oexT( "flags" ) ) )
 		pkt.flags = (*m)[ oexT( "flags" ) ].toint();
-	
-	else if ( pStream && pStream->codec && CODEC_ID_H264 == pStream->codec->codec_id )
+
+	else if ( pStream && pStream->codec 
+			  && 
+				( CODEC_ID_H264 == pStream->codec->codec_id
+				  || CODEC_ID_MPEG4 == pStream->codec->codec_id
+				) 
+			)
 		pkt.flags |= ( !getVopType( dat->Ptr(), dat->getUsed() ) ? AV_PKT_FLAG_KEY : 0 );
-		
-//	else
-//		pkt.flags |= AV_PKT_FLAG_KEY;
+
+	else
+		pkt.flags |= AV_PKT_FLAG_KEY;
 
 	// Waiting for key frame?
 	if ( !m_bKeyRxd )
@@ -864,22 +880,24 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	// Save time
 	pkt.pts = nPts;
 	pkt.dts = nDts;
-	
+
 	// +++ is this causing the audio issue???
-//    AVCodecContext *pcc = pStream->codec;
- //   if ( pcc && pcc->coded_frame && pcc->coded_frame->pts != AV_NOPTS_VALUE )
-  //      pkt.pts = av_rescale_q( pcc->coded_frame->pts, pcc->time_base, pStream->time_base );
-	
+//	AVCodecContext *pcc = pStream->codec;
+//	if ( pcc && pcc->coded_frame && pcc->coded_frame->pts != AV_NOPTS_VALUE )
+//		pkt.pts = av_rescale_q( pcc->coded_frame->pts, pcc->time_base, pStream->time_base );
+
 	pkt.stream_index = pStream->index;
 	pkt.data = (uint8_t*)dat->_Ptr();
 	pkt.size = dat->getUsed();
-	
-//	if ( 0 > m_nAudioStream )
-//	{	if ( av_write_frame( m_pFormatContext, &pkt ) )
-//			return 0;
-//	} // end if
-	
-//	else 
+
+/*
+	if ( 0 > m_nAudioStream )
+	{	if ( av_write_frame( m_pFormatContext, &pkt ) )
+			return 0;
+	} // end if
+
+	else 
+*/
 	if ( av_interleaved_write_frame( m_pFormatContext, &pkt ) )
 		return 0;
 
@@ -967,19 +985,26 @@ int CFfContainer::WriteAudioFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 		pkt.flags |= AV_PKT_FLAG_KEY;
 
 	// av_rescale_q
-	
+
 	pkt.pts = nPts;
 	pkt.dts = nDts;
 	pkt.stream_index = pStream->index;
 	pkt.data = (uint8_t*)dat->_Ptr();
 	pkt.size = dat->getUsed();
 
+	// +++ is this causing the audio issue???
+//	AVCodecContext *pcc = pStream->codec;
+//	if ( pcc && pcc->coded_frame && pcc->coded_frame->pts != AV_NOPTS_VALUE )
+//		pkt.pts = av_rescale_q( pcc->coded_frame->pts, pcc->time_base, pStream->time_base );
+
+/*
 	if ( 0 > m_nVideoStream )
 	{	if ( av_write_frame( m_pFormatContext, &pkt ) )
 			return 0;
 	} // end if
 	
-	else if ( av_interleaved_write_frame( m_pFormatContext, &pkt ) )
+	else 
+*/	if ( av_interleaved_write_frame( m_pFormatContext, &pkt ) )
 		return 0;
 
 	return 1;

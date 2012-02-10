@@ -280,14 +280,14 @@ class CRtspStream
 			if ( vfail )
 				return 0;
 		} // end if
-		
+
 		// Use decoder width / height if not specified in the rtsp stream
 		if ( ( 0 >= rtsp.getWidth() || 0 >= rtsp.getHeight() )
 			 && ( 0 < dec.getWidth() && 0 < dec.getHeight() ) )
 		{	::_self.echo( "dec : " + dec.getWidth() + "x" + dec.getHeight() );		
 			rtsp.setWidth( dec.getWidth() ), rtsp.setHeight( dec.getHeight() );
 		} // end if
-		
+
 		// Create video buffer if needed
 		if ( pa && !vb )
 		{	vb = CSqFifoShare();
@@ -314,7 +314,7 @@ class CRtspStream
 				CSqFile().put_contents_bin( ::_self.build_path( szDumpVideo, "v" + vix++ + ".raw" ), frame );
 
 			// Do we want to record the stream?
-			if ( file.len() && !rec_avi && 0 < rtsp.getWidth() && 0 < rtsp.getHeight() )
+			if ( !rec_avi && file.len() && 0 < rtsp.getWidth() && 0 < rtsp.getHeight() )
 			{	RecordToFile( file, 
 							  rtsp.getVideoCodecName(), rtsp.getWidth(), rtsp.getHeight(), rtsp.getFps(),
 							  rtsp.getAudioCodecName(), rtsp.getNumAudioChannels(), rtsp.getAudioSampleRate(), 0 );
@@ -347,7 +347,7 @@ class CRtspStream
 		// Show error if more than a second off
 		local diff = vb.ReadTs() - pa.getTs();
 		if ( 1000000 < diff || -1000000 > diff )
-		{	::_self.echo( "\r\n\r\n!!!!!!!!!!!!!!!! SYNC ERROR" );
+		{	::_self.echo( "\r\n!!!!!!!!!!!!!!!! SYNC ERROR" );
 			::_self.echo( "D = " + diff + ", V = " + vb.ReadTs() + ", A = " + pa.getTs() + "\r\n" );
 		} // end if
 
@@ -388,9 +388,10 @@ class CRtspStream
 		else if ( !rec_avi.InitWrite() )
 			::_self.echo( "Failed to initiailze avi" );
 		else
-			::_self.echo( "iii Saving to file : " + file + " - " + w + "x" + h + "x" + fps );	
-			
-	}	
+			::_self.echo( "iii Saving to file : " + file 
+							+ " - " + vfmt + " / " + afmt
+							+ " - " + w + "x" + h + "x" + fps );
+	}
 }
 
 class CGlobal
@@ -424,8 +425,8 @@ function _init() : ( _g )
 	_g.irr.SetAmbientLight( CSqirrColorf( 0.5, 0.5, 0.5 ) );
 
 	_self.echo( "...adding lights...\n" );
-	_g.irr.AddLight( CSqirrVector3d( 0., 100., 0. ), CSqirrColorf( 1., 1., 1. ), 100. );
-	_g.irr.AddLight( CSqirrVector3d( 0., 100., 50. ), CSqirrColorf( 1., 1., 1. ), 100. );
+	_g.irr.AddLight( CSqirrVector3d( 0., 50., 0. ), CSqirrColorf( 1., 1., 1. ), 100. );
+	_g.irr.AddLight( CSqirrVector3d( 0., 50., 25. ), CSqirrColorf( 1., 1., 1. ), 100. );
 
 //	_self.echo( "adding sky...\n" );
 //	_g.irr.AddSkyDome( _self.path( "../imgs/sky.png" ), 16, 16, 100., 100. );

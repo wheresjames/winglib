@@ -256,9 +256,10 @@ public:
 	void Reset()
 	{
 		// Get ready for more requests
+        m_nErrorCode = HTTP_OK;
 		m_bHeaderReceived = oexFALSE;
 
-		// Reset transaction classes
+		// Reset transaction data
 		m_pbRequest.Destroy();
 		m_pbGet.Destroy();
 		m_pbPost.Destroy();
