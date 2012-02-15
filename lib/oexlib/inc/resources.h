@@ -40,10 +40,10 @@
 
 struct _SOexResourceInfo
 {
-	const char *   name;
-	const char *   data;
-	unsigned long  size;
-	const void *   func;
+	const char*   name;
+	const void*   data;
+	unsigned long size;
+	const void*   func;
 };
 
 class COexResourceHelper
