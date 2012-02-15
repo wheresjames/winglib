@@ -218,7 +218,7 @@ template < typename T >
 
 		// iii Not using standard search and replace because we need speed here
 
-		// We must have at least six characters for a complete tag
+		// We must have enough characters for a complete tag
 		while ( ( nPos + szOpen + szClose ) < szSrc )
 		{
 			// Ensure we have space
@@ -226,25 +226,26 @@ template < typename T >
 				pDst = sDst.OexAllocate( sDst.Size() * 2 );
 
 			// Initialize
-			nStart = nPos;
-			nOpen = nClose = szSrc;
+			nOpen = nClose = szSrc + 1;
 
 			// Attempt to find an open bracket
-			while ( nOpen == szSrc && ( nPos + szOpen + szClose ) < szSrc )
-				if ( !oexMemCmp( &pSrc[ nPos ], tcOpen, szOpen ) )
-					nOpen = nPos;
+			while ( nOpen > szSrc && ( nPos + szOpen + szClose ) < szSrc )
+				if ( pSrc[ nPos ] == tcOpen[ 0 ]
+					 && !oexMemCmp( &pSrc[ nPos ], tcOpen, szOpen ) )
+					nOpen = nPos, nPos += szOpen;
 				else
 					nPos++;
 
 			// Find a closing bracket
-			while ( nClose == szSrc && ( nPos + szClose ) < szSrc )
-				if ( !oexMemCmp( &pSrc[ nPos ], tcClose, szClose ) )
-					nClose = nPos;
+			while ( nClose > szSrc && ( nPos + szClose ) <= szSrc )
+				if ( pSrc[ nPos ] == tcClose[ 0 ]
+					 && !oexMemCmp( &pSrc[ nPos ], tcClose, szClose ) )
+					nClose = nPos, nPos += szClose;
 				else
 					nPos++;
 
 			// Did we find embedded code?
-			if ( nOpen < szSrc && nClose < szSrc )
+			if ( nOpen < szSrc && nClose <= szSrc )
 			{
 				// Text data to be copied?
 				if ( nStart < nOpen )
@@ -276,10 +277,14 @@ template < typename T >
 
 				} // endif
 
-				// Point to data after code
-				nPos += szClose;
+				// Start of new data
+				nStart = nPos;
 
 			} // end if
+
+			// Done if we didn't find any embedded tags
+			else
+				nPos = szSrc;
 
 		} // end while
 
