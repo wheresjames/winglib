@@ -13,6 +13,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfEncoder, CFfEncoder )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, getHeight )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, getFps )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, getBitRate )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, getPktDts )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, getPktPts )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, getPts )
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CFfEncoder );
@@ -311,7 +314,8 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 			.set( sqbind::oex2std( oexMks( ( m_pCodecContext->coded_frame->key_frame ) 
 										  ? ( flags | AV_PKT_FLAG_KEY )
 										  : ( flags & ~AV_PKT_FLAG_KEY ) ) ) );
-		(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pts ) ) );
+		(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_pts ) ) );
+		(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_dts ) ) );
 
 	} // end if
 

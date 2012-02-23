@@ -69,6 +69,27 @@ public:
 		return m_pCodecContext->bit_rate;
 	}
 
+	/// Returns the Decode Time Stamp
+	SQInteger getPktDts()
+	{	if ( !m_pCodecContext && m_pCodecContext->coded_frame )
+			return 0;
+		return m_pCodecContext->coded_frame->pkt_dts;
+	}
+
+	/// Returns the Presentation Time Stamp
+	SQInteger getPktPts()
+	{	if ( !m_pCodecContext && m_pCodecContext->coded_frame )
+			return 0;
+		return m_pCodecContext->coded_frame->pkt_pts;
+	}
+
+	/// Returns the Presentation Time Stamp
+	SQInteger getPts()
+	{	if ( !m_pCodecContext && m_pCodecContext->coded_frame )
+			return 0;
+		return m_pCodecContext->coded_frame->pts;
+	}
+
 	/** @} */
 
 private:

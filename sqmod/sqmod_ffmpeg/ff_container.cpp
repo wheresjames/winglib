@@ -24,6 +24,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, AddAudioStream )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, WriteAudioFrame )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, Seek )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getBytePos )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, setBytePos )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, FlushBuffers )
 
 	SQBIND_MEMBER_FUNCTION( CFfContainer, Destroy )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, CloseStream )
@@ -52,6 +55,18 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioName )
 
 	SQBIND_GLOBALCONST( FFF_KEY_FRAME )
+
+	/// Seek backward
+	SQBIND_GLOBALCONST( AVSEEK_FLAG_BACKWARD )
+
+	/// Seek to byte position
+	SQBIND_GLOBALCONST( AVSEEK_FLAG_BYTE )
+
+	/// Seek to any frame, i.e. non-keyframes
+	SQBIND_GLOBALCONST( AVSEEK_FLAG_ANY )
+
+	/// Seek based on frame number
+	SQBIND_GLOBALCONST( AVSEEK_FLAG_FRAME )
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CFfContainer );
@@ -1019,27 +1034,66 @@ int CFfContainer::WriteFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 // http://dranger.com/ffmpeg/tutorial07.html
 
 /// Seeks to the specified time
-int CFfContainer::Seek( int nStreamId, int nOffset, int nFlags )
+int CFfContainer::Seek( int nStreamId, int nOffset, int nFlags, int nType )
 {
 	if ( !m_pFormatContext )
 		return 0;
 
-	// Convert to uS offset
-	oex::oexINT64 t;
+	// Default to video stream
 	if ( 0 > nStreamId )
-		t = nOffset * AV_TIME_BASE / 1000;
+		nStreamId = m_nVideoStream;
 
-	else if ( !m_pFormatContext->streams[ nStreamId ] )
+	// Do we have a valid stream?
+	if ( 0 > nStreamId || !m_pFormatContext->streams[ nStreamId ] )
 		return 0;
 
-	else
-	{	AVRational q = { 1, AV_TIME_BASE };
-		t = av_rescale_q( nOffset * 1000, q, m_pFormatContext->streams[ m_nVideoStream ]->time_base );
-	} // end else
+	// Calculate time offset if needed
+	oex::oexINT64 t = nOffset;
+	if ( 1 == nType )
+		t = av_rescale( nOffset, 
+						m_pFormatContext->streams[ nStreamId ]->time_base.den,
+						m_pFormatContext->streams[ nStreamId ]->time_base.num ) / 1000;
 
-	int res = av_seek_frame( m_pFormatContext, nStreamId, t, nFlags );
+	// Let's try and seek to that position
+	if ( 0 > avformat_seek_file( m_pFormatContext, nStreamId, 0, t, t, nFlags ) )
+		return -1;
 
-	return 0 <= res ? 1 : 0;
+	return 0;
 }
 
+SQInteger CFfContainer::getBytePos()
+{
+	if ( !m_pFormatContext || !m_pFormatContext->pb )
+		return -1;
+
+	return m_pFormatContext->pb->pos;
+
+}
+
+SQInteger CFfContainer::setBytePos( SQInteger pos )
+{
+	if ( !m_pFormatContext || !m_pFormatContext->pb )
+		return -1;
+
+	// Seek to the position
+	if ( 0 > avio_seek( m_pFormatContext->pb, pos, SEEK_SET ) )
+		return -1;
+
+	// Return the byte position
+	return m_pFormatContext->pb->pos;
+}
+
+int CFfContainer::FlushBuffers()
+{
+	if ( !m_pFormatContext )
+		return 0;
+
+	// Flush buffers
+	int n = 0;
+	for ( unsigned int i = 0; i < m_pFormatContext->nb_streams; i++ )
+		if ( m_pFormatContext->streams[ i ]->codec )
+			avcodec_flush_buffers( m_pFormatContext->streams[ i ]->codec ), n++;
+
+	return n;
+}
 

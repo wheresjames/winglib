@@ -39,7 +39,6 @@ public:
 	/// Decodes a frame from the specified buffer
 	/**
 		!!! DEPRECATED !!!
-		
 		use getAudioDec().Decode() instead
 	*/
 	int DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m, int flip );
@@ -67,7 +66,13 @@ public:
 	
 	/// Writes the specified audio to the file
 	int WriteAudioFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInteger nDts, sqbind::CSqMulti *m );
-	
+
+	/// Returns the current byte offset into the file
+	SQInteger getBytePos();
+
+	/// Sets the current byte offset into the file, returns the final position
+	SQInteger setBytePos( SQInteger pos );
+
 	/// Returns video width
 	double getFps()
 	{	if ( !m_pFormatContext || 0 > m_nVideoStream
@@ -202,8 +207,10 @@ public:
 										2 = Seek in bytes
 										4 = Seek to any frame (not just key frames)
 										8 = Seek based on frame number
+		\param [in] nType			-	0 = Leave nOffset as is
+										1 = Convert nOffset from time to frame number
 	*/
-	int Seek( int nStreamId, int nOffset, int nFlags );
+	int Seek( int nStreamId, int nOffset, int nFlags, int nType );
 
 	/// Returns extra video codec data
 	sqbind::CSqBinary getVideoExtraData() { return m_video_extra; }
@@ -217,6 +224,9 @@ public:
 	/// Sets extra audio codec data
 	void setAudioExtraData( sqbind::CSqBinary *p ) { if ( p ) m_audio_extra = *p; }
 
+	/// Flushes all decoder buffers
+	int FlushBuffers();
+	
 	/** @} */
 
 private:
