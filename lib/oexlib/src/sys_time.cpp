@@ -103,6 +103,12 @@ oexUINT CSysTime::GetUnixTime()
 	return (oexUINT)ll;
 }
 
+oexINT64 CSysTime::GetUnixTimeUs()
+{
+    oexINT64 ll = os::CSys::SystemTimeToFileTime( m_time );
+	return ( ll - ( (oexINT64)FTOFF_1970 * (oexINT64)10000000LL ) / 10 );
+}
+
 oexUINT CSysTime::GetTzUnixTime()
 {_STT();
 

@@ -731,18 +731,12 @@ int CSqEngineExport::gmt_time()
 
 SQInteger CSqEngineExport::local_time_useconds()
 {_STT();
-	oex::oexINT64 nVal = 0;
-	if ( !oex::os::CHqTimer::osGetCounts( oexNULL, &nVal ) )
-		return 0;
-	return (oex::oexINT64)oexLocalTime().GetUnixTime() * (oex::oexINT64)1000000 + nVal;
+	return oexLocalTime().GetUnixTimeUs();
 }
 
 SQInteger CSqEngineExport::gmt_time_useconds()
 {_STT();
-	oex::oexINT64 nVal = 0;
-	if ( !oex::os::CHqTimer::osGetCounts( oexNULL, &nVal ) )
-		return 0;
-	return (oex::oexINT64)oexGmtTime().GetUnixTime() * (oex::oexINT64)1000000 + nVal;
+	return oexGmtTime().GetUnixTimeUs();
 }
 
 stdString CSqEngineExport::local_timestr( const stdString &fmt )

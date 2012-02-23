@@ -501,7 +501,7 @@ SQInteger CSqFifoShare::CalculateTsRange( SQInteger *pMin, SQInteger *pMax )
 
 	// Ensure valid share
 	if ( !isValid() )
-		return oexNULL; 
+		return 0; 
 	
 	// Get the current buffer pointer, and make sure it's valid
 	int w = getWritePtr(), r = m_iRead;

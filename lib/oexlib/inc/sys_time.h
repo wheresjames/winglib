@@ -333,6 +333,9 @@ public:
 	/// Returns the unix time stamp
 	oexUINT GetUnixTime();
 
+	/// Returns the unix time stamp in micro seconds
+	oexINT64 GetUnixTimeUs();
+
 	/// Returns the unix time stamp with time zone bias
 	oexUINT GetTzUnixTime();
 

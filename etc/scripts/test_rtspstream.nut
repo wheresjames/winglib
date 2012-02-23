@@ -188,8 +188,7 @@ class CRtspStream
 					} // end switch
 					local fsize = 2;
 
-					if ( !pa.Open( 0, pa.getDefaultOutputDevice(), 
-									  rtsp.getNumAudioChannels(), 
+					if ( !pa.Open( 0, pa.getDefaultOutputDevice(), rtsp.getNumAudioChannels(), 
 									  fmt, 0.2, rtsp.getAudioSampleRate().tofloat(), fsize ) )
 					{   ::_self.echo( "!!! Failed to open output stream : " + pa.getLastError() );
 						pa = 0;
@@ -354,9 +353,9 @@ class CRtspStream
 		// Decode up to the audio position
 		// +++ using 'while' here causes instant recovery from a glitch, 
 		//     but 'if' seems to actually be smoother in some real world conditions
-//		if
-		while
-		 ( vb.isRead() && vb.ReadTsMin() < ( pa.getTs() - video_offset ) ) 
+		if
+//		while
+		 ( vb.isRead() && vb.ReadTsMin() < ( pa.getTs() - video_offset ) )
 			dec.Decode( vb.ReadData(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 ), vb.incReadPtr();
 
 		// Catchup and show, haha, can't do this, must decode every frame, duh
@@ -419,7 +418,7 @@ function _init() : ( _g )
 
 //	_g.irr.SetStereo( 1 );
 	_self.echo( "...Initializing...\n" );
-	_g.irr.Init( "RTSP Test", 800, 600, 1 );
+	_g.irr.Init( "RTSP Test", 640, 480, 1 );
 
 	_self.echo( "...setting ambient light...\n" );
 	_g.irr.SetAmbientLight( CSqirrColorf( 0.5, 0.5, 0.5 ) );
