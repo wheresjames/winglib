@@ -264,6 +264,8 @@ public:
 		m_pbGet.Destroy();
 		m_pbPost.Destroy();
 		m_pbSession.Destroy();
+		m_buf.Destroy();
+		m_sFile.Destroy();
 		m_sContent.Destroy();
 		m_pbTxHeaders.Destroy();
 		m_pbRxHeaders.Destroy();

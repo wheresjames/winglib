@@ -117,56 +117,6 @@ public:
 		return m_pFormatContext->streams[ m_nVideoStream ]->codec->pix_fmt;
 	}
 
-	/// Returns the audio sample rate
-//	int getAudioSampleRate()
-//	{	if ( !m_pAudioCodecContext ) return 0;
-//		return m_pAudioCodecContext->sample_rate;
-//	}
-
-	/// Returns the audio bit rate
-//	int getAudioBitRate()
-//	{	if ( !m_pAudioCodecContext ) return 0;
-//		return m_pAudioCodecContext->bit_rate;
-//	}
-
-	/// Returns the audio bit rate
-//	int getAudioBitsPerSample()
-//	{	if ( !m_pAudioCodecContext ) return 0;
-//		return m_pAudioCodecContext->bits_per_coded_sample;
-//	}
-
-	/// Returns the audio channels
-//	int getAudioChannels()
-//	{	if ( !m_pAudioCodecContext ) return 0;
-//		return m_pAudioCodecContext->channels;
-//	}
-
-	/// Returns the audio frame size
-//	int getAudioFrameSize()
-//	{	if ( !m_pAudioCodecContext ) return 0;
-//		return m_pAudioCodecContext->frame_size;
-//	}
-
-	/// Returns the audio codec id
-//	int getAudioCodecID()
-//	{	if ( !m_pAudioCodecContext ) return 0;
-//		return m_pAudioCodecContext->codec_id;
-//	}
-
-	/// Returns the codec type
-//	sqbind::stdString getAudioType()
-//	{	if ( !m_pAudioCodecContext || !m_pAudioCodecContext->codec )
-//			return oexT( "" );
-//		return oexMbToStrPtr( m_pAudioCodecContext->codec->name );
-//	}
-
-	/// Returns the codec name
-//	sqbind::stdString getAudioName()
-//	{	if ( !m_pAudioCodecContext || !m_pAudioCodecContext->codec )
-//			return oexT( "" );
-//		return oexMbToStrPtr( m_pAudioCodecContext->codec->long_name );
-//	}
-
 	/// Returns a pointer to the audio decoder
 	CFfAudioDecoder* getAudioDec() { return &m_audio_dec; }
 
@@ -272,18 +222,5 @@ private:
 	
 	/// Extra codec data
 	sqbind::CSqBinary		m_video_extra;
-/*
-	/// Number of frames that have been processed
-	int						m_nAudioFrames;
-
-	/// Codec context
-	AVCodecContext			*m_pAudioCodecContext;
-
-	/// Left over packet data
-	sqbind::CSqBinary		m_audio_buf;
-	
-	/// AV Packet
-	AVPacket				m_audio_pkt;
-*/
 
 };

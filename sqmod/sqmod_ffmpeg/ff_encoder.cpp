@@ -84,7 +84,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 	m_pCodec = avcodec_find_encoder( (CodecID)x_nCodec );
 	if ( !m_pCodec )
-	{	oexERROR( 0, oexMks( oexT( "avcodec_find_encoder() failed to find codec for id : " ), (int)x_nCodec ) );
+	{	// oexERROR( 0, oexMks( oexT( "avcodec_find_encoder() failed to find codec for id : " ), (int)x_nCodec ) );
 		return 0;
 	} // end if
 
