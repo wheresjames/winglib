@@ -88,7 +88,16 @@ namespace sqbind
 		void setStartStr( const stdString &s )
 		{	m_nStart = oexStrToLong( s.c_str() );
 			stdString::size_type pos = s.find_first_of( oexT( '.' ) );
-			m_nStartMs = ( stdString::npos != pos ) ? oexStrToLong( s.substr( pos + 1, 3 ).c_str() ) : 0;
+			if ( stdString::npos == pos ) 
+				m_nStartMs = 0;
+			else
+			{	stdString ms = s.substr( pos + 1, 3 );
+				m_nStartMs = oexStrToLong( ms.c_str() );
+				switch( ms.length() )
+				{	case 1 : m_nStartMs *= 100; break;
+					case 2 : m_nStartMs *= 10; break;
+				} // end switch
+			} // end else
 		}
 
 		/// Returns start time as "t.ms"
@@ -99,7 +108,16 @@ namespace sqbind
 		void setEndStr( const stdString &s )
 		{	m_nEnd = oexStrToLong( s.c_str() );
 			stdString::size_type pos = s.find_first_of( oexT( '.' ) );
-			m_nEndMs = ( stdString::npos != pos ) ? oexStrToLong( s.substr( pos + 1, 3 ).c_str() ) : 0;
+			if ( stdString::npos == pos ) 
+				m_nEndMs = 0;
+			else
+			{	stdString ms = s.substr( pos + 1, 3 );
+				m_nEndMs = oexStrToLong( ms.c_str() );
+				switch( ms.length() )
+				{	case 1 : m_nEndMs *= 100; break;
+					case 2 : m_nEndMs *= 10; break;
+				} // end switch
+			} // end else
 		}
 
 		/// Returns end time as "t.ms"

@@ -154,7 +154,7 @@ if ( !te.len() ) te = "-%g%m%s-" + ( fps * inv ) + ".avi";
 
 // Time frame
 local t = _self.tolong( _self.get( "/", "cmdline.t" ) );
-if ( 0 >= t ) t = -3600;
+if ( !t ) t = -3600;
 
 // Initialize free type library
 local ft = CFtLibrary();

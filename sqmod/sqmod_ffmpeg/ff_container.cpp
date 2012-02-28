@@ -24,6 +24,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, AddAudioStream )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, WriteAudioFrame )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, Seek )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, SeekFrame )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getBytePos )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, setBytePos )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, FlushBuffers )
@@ -1037,7 +1038,7 @@ int CFfContainer::WriteFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 int CFfContainer::Seek( int nStreamId, int nOffset, int nFlags, int nType )
 {
 	if ( !m_pFormatContext )
-		return 0;
+		return -1;
 
 	// Default to video stream
 	if ( 0 > nStreamId )
@@ -1045,11 +1046,11 @@ int CFfContainer::Seek( int nStreamId, int nOffset, int nFlags, int nType )
 
 	// Do we have a valid stream?
 	if ( 0 > nStreamId || !m_pFormatContext->streams[ nStreamId ] )
-		return 0;
+		return -1;
 
 	// Calculate time offset if needed
 	oex::oexINT64 t = nOffset;
-	if ( 1 == nType )
+	if ( 0 != ( 0x01 & nType ) )
 		t = av_rescale( nOffset, 
 						m_pFormatContext->streams[ nStreamId ]->time_base.den,
 						m_pFormatContext->streams[ nStreamId ]->time_base.num ) / 1000;
@@ -1057,6 +1058,34 @@ int CFfContainer::Seek( int nStreamId, int nOffset, int nFlags, int nType )
 	// Let's try and seek to that position
 	if ( 0 > avformat_seek_file( m_pFormatContext, nStreamId, 0, t, t, nFlags ) )
 		return -1;
+
+	return 0;
+}
+
+int CFfContainer::SeekFrame( int nStreamId, int nOffset, int nFlags, int nType, 
+							 int fmt, sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m, int flip )
+{
+	// See if we can seek this frame
+	if ( 0 > Seek( nStreamId, nOffset, nFlags, nType ) )
+		return -1;
+
+	// See if we have a valid frame rate
+	long fps = (long)getFps();
+	if ( 0 >= fps )
+		return -1;
+
+	// +++ Check key frame interval
+	long kinv = 1000;
+
+	// How many frames to skip?
+	long togo = ( nOffset % kinv ) * fps / 1000, si = 0;
+	if ( 0 >= togo )
+		togo = 1;
+
+	// Read them off
+	while ( 0 <= ( si = ReadFrame( in, m ) ) && 0 < togo )
+		if ( si == m_nVideoStream )
+			togo--, DecodeFrameBin( in, fmt, out, m, flip ); 
 
 	return 0;
 }

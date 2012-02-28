@@ -37,10 +37,6 @@ public:
 	int DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbind::CSqMulti *m, int flip );
 
 	/// Decodes a frame from the specified buffer
-	/**
-		!!! DEPRECATED !!!
-		use getAudioDec().Decode() instead
-	*/
 	int DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, sqbind::CSqMulti *m, int flip );
 
 	/// Decodes an audio frame from the specified buffer
@@ -161,6 +157,9 @@ public:
 										1 = Convert nOffset from time to frame number
 	*/
 	int Seek( int nStreamId, int nOffset, int nFlags, int nType );
+
+	/// Seeks and decodes the specified frame
+	int SeekFrame( int nStreamId, int nOffset, int nFlags, int nType, int fmt, sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m, int flip );
 
 	/// Returns extra video codec data
 	sqbind::CSqBinary getVideoExtraData() { return m_video_extra; }
