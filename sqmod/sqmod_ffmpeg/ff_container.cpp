@@ -1065,6 +1065,18 @@ int CFfContainer::Seek( int nStreamId, int nOffset, int nFlags, int nType )
 int CFfContainer::SeekFrame( int nStreamId, int nOffset, int nFlags, int nType, 
 							 int fmt, sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m, int flip )
 {
+	// Ensure we have a container open
+	if ( !m_pFormatContext )
+		return -1;
+
+	// Default to video stream
+	if ( 0 > nStreamId )
+		nStreamId = m_nVideoStream;
+
+	// Do we have a valid stream?
+	if ( 0 > nStreamId || !m_pFormatContext->streams[ nStreamId ] )
+		return -1;
+
 	// See if we can seek this frame
 	if ( 0 > Seek( nStreamId, nOffset, nFlags, nType ) )
 		return -1;
@@ -1074,17 +1086,22 @@ int CFfContainer::SeekFrame( int nStreamId, int nOffset, int nFlags, int nType,
 	if ( 0 >= fps )
 		return -1;
 
-	// +++ Check key frame interval
+	// +++ Get real key frame interval
 	long kinv = 1000;
+	long maxskip = fps * kinv / 1000;
 
 	// How many frames to skip?
 	long togo = ( nOffset % kinv ) * fps / 1000, si = 0;
 	if ( 0 >= togo )
 		togo = 1;
+	else if ( maxskip < togo )
+		togo = maxskip;
+	else
+		togo++;
 
 	// Read them off
 	while ( 0 <= ( si = ReadFrame( in, m ) ) && 0 < togo )
-		if ( si == m_nVideoStream )
+		if ( si == nStreamId )
 			togo--, DecodeFrameBin( in, fmt, out, m, flip ); 
 
 	return 0;
