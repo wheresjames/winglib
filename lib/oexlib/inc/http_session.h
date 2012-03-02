@@ -805,7 +805,7 @@ public:
 			lErrorCode = m_nErrorCode;
 
 		// How big is the data?
-		if ( 0 > lLength )
+		if ( 0 < lLength )
 			m_pbTxHeaders[ "Content-length" ] = lLength;
 
 		// Send response string

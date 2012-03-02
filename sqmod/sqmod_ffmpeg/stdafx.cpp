@@ -41,7 +41,7 @@ int memshare_open( URLContext *h, const char *filename, int flags )
 		return AVERROR( EINVAL );
 
 	// Verify that the protocol is as we expect
-	if ( !oex::zstr::Compare( filename, "memshare://" ) )
+	if ( oex::zstr::CompareLen( "memshare://", 11, filename, 11 ) )
 		return AVERROR( EINVAL );
 
 	// Get the real share name
@@ -59,6 +59,8 @@ int memshare_open( URLContext *h, const char *filename, int flags )
 	{	OexAllocDelete( pFs );
 		return AVERROR( ENOMEM );
 	} // end if
+
+	// +++ Do this correctly sometime
 
 	// Only write supported at the moment
 	if ( URL_RDONLY == flags )
@@ -107,7 +109,7 @@ int64_t memshare_seek( URLContext *h, int64_t pos, int whence )
 		return AVERROR( EINVAL );
 
 	return -1;
-
+/*
 	switch ( whence )
 	{
 		case SEEK_SET:
@@ -120,9 +122,7 @@ int64_t memshare_seek( URLContext *h, int64_t pos, int whence )
 			break;
 
 	} // end switch
-
-	return pos;
-//	return -1;
+*/
 }
 
 int memshare_close( URLContext *h )

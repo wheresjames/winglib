@@ -1210,7 +1210,47 @@ namespace zstr
         {	return str::Compare( s1, Length( s1 ), s2, Length( s2 ) );
 		}
 
-    /// Compares two strings, case insensitive
+    /// Compares two strings
+    /**
+        \param [in] s1  -   First string
+		\param [in] l1	-	Length of the first string
+        \param [in] s2  -   Second string
+
+        Returns zero if the two strings match
+    */
+    template< class T >
+        oexINT Compare( T *s1, oexINT l1, T *s2 )
+        {	return str::Compare( s1, l1, s2, Length( s2 ) );
+		}
+
+    /// Compares n characters of two strings
+    /**
+        \param [in] s1  -   First string
+        \param [in] s2  -   Second string
+		\param [in] cmp -	Maximum number of bytes to compare
+
+        Returns zero if the two strings match
+    */
+    template< class T >
+        oexINT CompareLen( T *s1, T *s2, oexINT cmp )
+        {	return str::CompareLen( s1, Length( s1 ), s2, Length( s2 ), cmp );
+		}
+
+    /// Compares n characters of two strings
+    /**
+        \param [in] s1  -   First string
+		\param [in] l1	-	Length of the first string
+        \param [in] s2  -   Second string
+		\param [in] cmp -	Maximum number of bytes to compare
+
+        Returns zero if the two strings match
+    */
+    template< class T >
+        oexINT CompareLen( T *s1, oexINT l1, T *s2, oexINT cmp )
+        {	return str::CompareLen( s1, l1, s2, Length( s2 ), cmp );
+		}
+
+	/// Compares two strings, case insensitive
     /**
         \param [in] s1  -   First string
         \param [in] s2  -   Second string
@@ -1222,6 +1262,45 @@ namespace zstr
         {	return str::ICompare( s1, Length( s1 ), s2, Length( s2 ) );
 		}
 
+    /// Compares two strings, case insensitive
+    /**
+        \param [in] s1  -   First string
+		\param [in] l1	-	Length of the first string
+        \param [in] s2  -   Second string
+
+        Returns zero if the two strings match
+    */
+    template< class T >
+        oexINT ICompare( T *s1, oexINT l1, T *s2 )
+        {	return str::ICompare( s1, l1, s2, Length( s2 ) );
+		}
+
+    /// Compares n characters of two strings
+    /**
+        \param [in] s1  -   First string
+        \param [in] s2  -   Second string
+		\param [in] cmp -	Maximum number of bytes to compare
+
+        Returns zero if the two strings match
+    */
+    template< class T >
+        oexINT ICompareLen( T *s1, T *s2, oexINT cmp )
+        {	return str::ICompareLen( s1, Length( s1 ), s2, Length( s2 ), cmp );
+		}
+
+    /// Compares n characters of two strings
+    /**
+        \param [in] s1  -   First string
+		\param [in] l1	-	Length of the first string
+        \param [in] s2  -   Second string
+		\param [in] cmp -	Maximum number of bytes to compare
+
+        Returns zero if the two strings match
+    */
+    template< class T >
+        oexINT ICompareLen( T *s1, oexINT l1, T *s2, oexINT cmp )
+        {	return str::ICompareLen( s1, l1, s2, Length( s2 ), cmp );
+		}
 };
 
 

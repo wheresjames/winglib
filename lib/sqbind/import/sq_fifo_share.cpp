@@ -673,7 +673,7 @@ int CSqFifoShare::WritePtr( const void *pData, int nSize, const sqbind::stdStrin
 	// Update write block pointer
 	if ( 0 > i || i >= nBlocks )
 		i = 0;
-		
+
 	// Save write info
 	pi[ i ].uPtr = nBuffer + m_iWrite;
 	pi[ i ].uHeader = hsz;
