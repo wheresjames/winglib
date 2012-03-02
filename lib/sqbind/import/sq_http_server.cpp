@@ -214,10 +214,6 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 	// Execute the thing
 	q->execute( &sReply, oexT( "." ), m_sSession.c_str(), mParams.serialize() );
 
-	// Kill thread if we created it
-	if ( !m_bScriptsLinger && m_sScript.length() )
-		q->kill( oexNULL, oexT( "." ) );
-
 /*
 	{ // Scope
 
@@ -262,6 +258,101 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 
 	} // end else if
 
+	// Do we have a share buffer?
+	else if ( mReply[ oexT( "share" ) ].length() )
+	{
+		sqbind::CSqFifoShare fs;
+		sqbind::CSqBinary buf;
+		oex::oexULONG uTimeout = oexGetUnixTime() + 8;
+
+		// Multi part?
+		oex::CStr8 sBoundry, sMulti;
+		oex::oexCSTR pMulti = mReply[ oexT( "multi" ) ].c_str(), pBoundry = 0;		
+		if ( !pMulti || !*pMulti )
+			pMulti = 0;
+		else
+		{
+			// Generate multipart headers
+			oex::CPropertyBag8 pb;
+			pb[ "Content-type" ] = pMulti;
+			sMulti = oex::CParser::EncodeMIME( pb, oex::oexTRUE );
+
+			// What will the boundry string be?
+			sBoundry = std2oex( mReply[ oexT( "boundry" ) ].str() );
+			if ( !sBoundry.Length() )
+				sBoundry = oex::CStr( "--" ) << oexUnique();
+
+		} // end else
+
+		// Get MIME type
+		oex::CStr sType = mReply[ oexT( "mime" ) ].c_str();
+		if ( !sType.Length() ) 
+		{
+			// Multipart?
+			if ( pMulti )
+				sType = oex::CStr( "multipart/x-mixed-replace; boundary=" ) << sBoundry;
+			else
+				sType = oexT( "application/octet-stream" );
+
+		} // end if
+
+		// Set content type
+		x_pSession->SetContentMimeType( oexStrToMb( sType ) );
+
+		// Send the headers
+		x_pSession->SendHeaders( 0 );
+
+		// While we're not timed out and connected
+		while ( uTimeout > oexGetUnixTime() && x_pSession->IsConnected() )
+		{
+			// Attempt to connected to the alledged share
+			if ( !fs.isOpen() )
+				fs.Open( mReply[ oexT( "share" ) ].str() );
+
+			else do
+			{
+				// Reset timeout
+				uTimeout = oexGetUnixTime() + 60;
+
+				// Attempt to read a data packet
+				buf = fs.ReadData();
+				if ( buf.getUsed() )
+				{
+					// Next frame
+					fs.incReadPtr();
+
+					// Handle multipart if needed
+					if ( pMulti && *pMulti )
+					{
+						// Build multipart boundry and headers
+						oex::CStr8 mpb;
+						mpb << sBoundry << sMulti 
+							<< "Content-Length: " << buf.getUsed()
+							<< "\r\n\r\n";
+
+						// Write multpart boundry and headers
+						x_pSession->WritePort( mpb.Ptr(), mpb.Length() );
+
+					} // end if
+
+					// Write the new data
+					x_pSession->WritePort( buf.Ptr(), buf.getUsed() );
+
+				} // end if
+
+			} while ( x_pSession->IsConnected() && buf.getUsed() );
+
+			// Take a break
+			oexSleep( 15 );
+
+		} // end while
+
+		// Signal to the writer that we're done
+		if ( mReply[ oexT( "cancel_share" ) ].length() )
+			fs.Cancel();
+
+	} // end else if
+
 	// Update new session data
 	if ( mReply.isset( oexT( "session" ) ) )
 	{
@@ -283,6 +374,10 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 		if ( code )
 			x_pSession->SetHTTPReplyCode( code );
 	} // end if
+
+	// Kill thread if we created it
+	if ( !m_bScriptsLinger && m_sScript.length() )
+		q->kill( oexNULL, oexT( "." ) );
 
 	return 0;
 }

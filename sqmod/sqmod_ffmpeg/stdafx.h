@@ -23,6 +23,17 @@ extern "C"
 // FFMPEG is not quite thread safe
 extern "C" oexLock _g_ffmpeg_lock;
 
+// Custom read write protocol
+int memshare_open( URLContext *h, const char *filename, int flags );
+int memshare_read( URLContext *h, unsigned char *buf, int size );
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(52, 68, 0)
+int memshare_write( URLContext *h, unsigned char *buf, int size );
+#else
+int memshare_write( URLContext *h, const unsigned char *buf, int size );
+#endif
+int64_t memshare_seek( URLContext *h, int64_t pos, int whence );
+int memshare_close( URLContext *h );
+
 #include "ff_decoder.h"
 #include "ff_encoder.h"
 #include "ff_audio_decoder.h"

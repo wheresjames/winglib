@@ -157,10 +157,13 @@ namespace sqbind
 			@param [in] ts		-	Timestamp
 		*/
 		int Write( sqbind::CSqBinary *pData, const sqbind::stdString &sHeader, int nUser, SQInteger ts );
-		
+
 		/// Resets buffer pointers
 		int Reset();
-		
+
+		/// Cancels the buffer, i.e. signals everyone to disconnect
+		int Cancel();
+
 		/// Return the share name
 		sqbind::stdString getName() { return m_sName; }
 		

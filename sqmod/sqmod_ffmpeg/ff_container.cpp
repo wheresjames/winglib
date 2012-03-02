@@ -620,7 +620,7 @@ int CFfContainer::Create( const sqbind::stdString &sUrl, const sqbind::stdString
 		pOut = av_guess_format( 0, oexStrToMbPtr( sUrl.c_str() ), 0 );
 
 	if ( !pOut )
-	{	oexERROR( 0, oexT( "guess_format() failed" ) );
+	{	oexERROR( 0, oexMks( oexT( "guess_format() failed : " ), sUrl.c_str(), oexT( " : " ), sType.c_str() ) );
 		Destroy();
 		return 0;
 	} // end if
@@ -628,7 +628,7 @@ int CFfContainer::Create( const sqbind::stdString &sUrl, const sqbind::stdString
 	// Allocate format context
 	m_pFormatContext = avformat_alloc_context();
 	if ( !m_pFormatContext )
-	{	oexERROR( 0, oexT( "avformat_alloc_context() failed" ) );
+	{	oexERROR( 0, oexMks( oexT( "avformat_alloc_context() failed : " ), sUrl.c_str(), oexT( " : " ), sType.c_str() ) );
 		Destroy();
 		return 0;
 	} // end if
@@ -745,13 +745,17 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
     pcc->time_base.den = fps;
 	pcc->gop_size = fps;
 
+	// Signal global headers if needed
+	if ( 0 != ( m_pFormatContext->oformat->flags & AVFMT_GLOBALHEADER ) )
+		pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
+
 	// Set extra codec data
 	if ( m_video_extra.getUsed() )
 	{	pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
 		pcc->extradata = (uint8_t*)m_video_extra._Ptr();
 		pcc->extradata_size = m_video_extra.getUsed();
 	} // end if
-	
+
 	else
 	{	oex::CStr sFName( m_pFormatContext->oformat->name );
 		if (  sFName == oexT( "3gp" ) || sFName == oexT( "mov" ) || sFName == oexT( "mp4" ) )

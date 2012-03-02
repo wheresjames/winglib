@@ -710,6 +710,14 @@ public:
 		return oexTRUE;
 	}
 
+    /// Sets the content type
+    oexBOOL SetContentMimeType( CStr8 x_sMime )
+	{
+		// Set content type from extension / file
+		m_pbTxHeaders[ "Content-type" ] = x_sMime;
+
+		return oexTRUE;
+	}
 
     /// Sends the specified error message back to the client
     oexBOOL SendErrorMsg( oexINT nErrorCode, CStr8 sMsg )
@@ -784,17 +792,36 @@ public:
 		return sReply;
 	}
 
-    /// Sends a reply to the client
-    oexBOOL SendReply()
+	oexBOOL SendHeaders( oexLONG lLength = -1, oexLONG lErrorCode = -1 )
 	{
-		if ( !oexCHECK_PTR( m_pPort ) )
-			return oexFALSE;
-
 		// Log the request
 		Log();
 
 		// Save session data
 		SaveSession();
+
+		// Correct error code
+		if ( 0 > lErrorCode )
+			lErrorCode = m_nErrorCode;
+
+		// How big is the data?
+		if ( 0 > lLength )
+			m_pbTxHeaders[ "Content-length" ] = lLength;
+
+		// Send response string
+		WritePort( GetErrorString( lErrorCode ) );
+
+		// Send the headers
+		WritePort( CParser::EncodeMIME( m_pbTxHeaders, oexTRUE ) << "\r\n" );
+
+		return oexTRUE;
+	}
+
+    /// Sends a reply to the client
+    oexBOOL SendReply()
+	{
+		if ( !oexCHECK_PTR( m_pPort ) )
+			return oexFALSE;
 
 		// Do we need to send a file?
 		if ( !m_sContent.Length() && m_sFile.Length() )
@@ -825,14 +852,8 @@ public:
 
 #endif
 
-		// How big is the data?
-		m_pbTxHeaders[ "Content-length" ] = pSend->Length();
-
-		// Send the header
-		WritePort( GetErrorString( m_nErrorCode ) );
-
 		// Send the headers
-		WritePort( CParser::EncodeMIME( m_pbTxHeaders, oexTRUE ) << "\r\n" );
+		SendHeaders( pSend->Length() );
 
 		// Send the content
 		WritePort( *pSend );
@@ -845,10 +866,10 @@ public:
 	{	return WritePort( sStr._Ptr(), sStr.Length() );
 	}
 
-	oexBOOL WritePort( const t_byte *pBuf, oexSIZE_T uSize = 0 )
+	oexBOOL WritePort( const void *pBuf, oexSIZE_T uSize = 0 )
 	{
 		if ( !uSize )
-			uSize = zstr::Length( pBuf );
+			uSize = zstr::Length( (const t_byte*)pBuf );
 
 		if ( !uSize )
 			return oexFALSE;
@@ -858,7 +879,7 @@ public:
 		while ( uSent < uSize )
 		{
 			// Send out as much data as we can
-			oexUINT uRet = m_pPort->Send( &pBuf[ uSent ], uSize - uSent );
+			oexUINT uRet = m_pPort->Send( &((const t_byte*)pBuf)[ uSent ], uSize - uSent );
 			if ( !uRet && m_pPort->IsError() )
 				return oexFALSE;
 
@@ -885,39 +906,13 @@ public:
 		else
 			SetContentType( "" );
 
-		// How big is the data
-		m_pbTxHeaders[ "Content-length" ] = x_pBuffer->getUsed();
-
-		// Send the header
-		WritePort( GetErrorString( m_nErrorCode ) );
-
 		// Send the headers
-		WritePort( CParser::EncodeMIME( m_pbTxHeaders, oexTRUE ) << "\r\n" );
+		SendHeaders( x_pBuffer->getUsed() );
 
+		// Write the data
 		return WritePort( x_pBuffer->Ptr(), x_pBuffer->getUsed() );
-/*
-		// Send the data
-		oexSIZE_T uSent = 0;
-		oexSIZE_T uSize = x_pBuffer->getUsed();
-		while ( uSent < uSize )
-		{
-			// Send out as much data as we can
-			oexUINT uRet = m_pPort->Send( x_pBuffer->Ptr( uSent ), uSize - uSent );
-			if ( !uRet && m_pPort->IsError() )
-				return oexFALSE;
 
-			// Track bytes sent
-			uSent += uRet;
-
-			// Wait if buffer is full
-			if ( uSent < uSize )
-				if ( !m_pPort->WaitEvent( os::CIpSocket::eWriteEvent ) )
-					return oexFALSE;
-
-		} // end while
-
-		return oexTRUE;
-*/	}
+	}
 
     oexBOOL SendFile( oexCSTR x_pFile, oexCSTR x_pType = oexNULL )
 	{
@@ -935,43 +930,16 @@ public:
 			return oexFALSE;
 		} // end if
 
-		// How big is the data?
-		// +++ Add support for int64 to CStr
-		m_pbTxHeaders[ "Content-length" ] = (oexUINT)f.Size();
-
-		// Send the header
-		WritePort( GetErrorString( m_nErrorCode ) );
-
 		// Send the headers
-		WritePort( CParser::EncodeMIME( m_pbTxHeaders, oexTRUE ) << "\r\n" );
+		SendHeaders( f.Size() );
 
 		// Write out the file
 		// Do this in chunks in case the file is huge
 		oexINT64 read = 0;
 		unsigned char buf[ oexSTRSIZE ];
 		while ( f.Read( buf, sizeof( buf ), &read ) && read )
-		{
-			// Send what we can
-			oexUINT uSent = 0;
-
-			while ( uSent < read )
-			{
-				// Send what we can
-				oexUINT uRet = m_pPort->Send( &buf[ uSent ], read - uSent );
-				if ( !uRet && m_pPort->IsError() )
-					return oexFALSE;
-
-				// Add bytes sent
-				uSent += uRet;
-
-				// Wait if buffer is full
-				if ( uSent < read )
-				    if ( !m_pPort->WaitEvent( os::CIpSocket::eWriteEvent ) )
-						return oexFALSE;
-
-			} // end while
-
-		} // end while
+			if ( !WritePort( buf, read ) )
+				return oexFALSE;
 
 		return oexTRUE;
 	}
@@ -1207,6 +1175,13 @@ public:
 	/// Sets the mapped folders list
 	void SetMappedFoldersList( CPropertyBag *pList, oexLock *pLock )
 	{	m_pMappedFolders = pList; m_pMappedFoldersLock = pLock; }
+
+	/// Returns non-zero if the port is still connected
+	oexBOOL IsConnected()
+	{	if ( !m_pPort )
+			return oexFALSE;
+		return m_pPort->IsConnected();
+	}
 
 private:
 

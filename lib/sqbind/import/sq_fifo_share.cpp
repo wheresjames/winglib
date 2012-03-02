@@ -88,7 +88,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqFifoShare, CSqFifoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, Write )
 	
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, Reset )
-//	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare,  )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, Cancel )
 //	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare,  )
 
 SQBIND_REGISTER_CLASS_END()
@@ -135,6 +135,20 @@ CSqFifoShare::CSqFifoShare( const CSqFifoShare &r )
 	m_uTs = 0;
 }
 
+int CSqFifoShare::Cancel()
+{
+	// Is the share open?
+	if ( !m_cb.getUsed() || !m_buf.getUsed() )
+	{	m_sLastErr = oexT( "No open share" );
+		return 0;
+	} // end if
+
+	// Destroy the id
+	m_cb.setUINT( 0, 0 );
+
+	return 1;
+}
+
 
 void CSqFifoShare::Destroy()
 {_STT();
@@ -176,7 +190,7 @@ int CSqFifoShare::Create( const sqbind::stdString &sName, const sqbind::stdStrin
 
 	// Structure size
 	int struct_size = SQSFS_CBSIZE;
-	
+
 	// Convert header to multi-byte string if needed
 	oex::CStr8 sMbHeader = oexStrToMb( sqbind::std2oex( sHeader ) );
 	int nHeaderSize = sMbHeader.Length();
@@ -214,9 +228,10 @@ int CSqFifoShare::Create( const sqbind::stdString &sName, const sqbind::stdStrin
 		} // end if
 		
 		// We can only reuse it if the params haven't changed or are not initialized
-		if ( ( m_cb.getINT( 2 ) && m_cb.getINT( 2 ) != nBufSize ) 
-		     || ( m_cb.getINT( 3 ) && m_cb.getINT( 3 ) != nBlocks ) 
-		     || ( m_cb.getINT( 4 ) && m_cb.getINT( 4 ) != nHeaderSize )
+		if ( ( m_cb.getINT( 2 ) && m_cb.getINT( 2 ) != SQSFS_CBSIZE ) 
+		     || ( m_cb.getINT( 5 ) && m_cb.getINT( 5 ) != nBufSize ) 
+		     || ( m_cb.getINT( 6 ) && m_cb.getINT( 6 ) != nBlocks ) 
+		     || ( m_cb.getINT( 7 ) && m_cb.getINT( 7 ) != nHeaderSize )
 		   )
 		{	m_sLastErr = oex2std( oexMks( oexT( "Share control block already exists, and has changed : " ), std2oex( m_sName ), oexT( " : " ), std2oex( sidName ) ) );
 			Destroy();
@@ -270,9 +285,9 @@ int CSqFifoShare::Create( const sqbind::stdString &sName, const sqbind::stdStrin
 
 	// Save the header data
 	char *ph = (char*)m_buf.Ptr( nBlocks * SQSFS_PTSIZE );
-	if ( ph && sMbHeader.Length() == (unsigned int)nHeaderSize )
+	if ( ph && nHeaderSize && sMbHeader.Length() == (unsigned int)nHeaderSize )
 		oexMemCpy( ph, sMbHeader.Ptr(), nHeaderSize );
-	
+
 	// Ok for others to read now
 	m_cb.setUINT( 0, m_uCbId );
 
