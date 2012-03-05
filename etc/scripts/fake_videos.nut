@@ -117,10 +117,13 @@ function create_clips( root, t, inv, ts, te, w, h, fps, fmt, sec, font )
 
 }
 
+// File maybe
+local file = _self.get( "/", "cmdline.f" );
+
 // Output folder
 local out = _self.get( "/", "cmdline.1" );
-if ( !out.len() )
-{	_self.echo( "Please specify a destination folder" );
+if ( !out.len() && !file.len() )
+{	_self.echo( "Please specify a destination folder or filename" );
 	return;
 } // end if
 
@@ -171,6 +174,13 @@ if ( !font )
 	return 0;
 } // end if
 
-// Create the clips
-create_clips( out, t, inv, ts, te, w, h, fps, fmt, 15 * 60, font );
+// Single file
+if ( file.len() )
+	create_clip( file, w, h, fps, fmt, inv, font,
+				 _self.tolong( _self.get( "/", "cmdline.hrs" ) ),
+				 _self.tolong( _self.get( "/", "cmdline.min" ) ) );
+
+// Clip folder structure
+else				 
+	create_clips( out, t, inv, ts, te, w, h, fps, fmt, 15 * 60, font );
 
