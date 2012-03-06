@@ -47,8 +47,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioExtraData )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioDec )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, isAudioCodec )
-//	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioBitRate )
-//	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioBitsPerSample )
+
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getFifoShare )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getFifoReads )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioChannels )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioFrameSize )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioCodecID )
@@ -1147,3 +1148,21 @@ int CFfContainer::FlushBuffers()
 	return n;
 }
 
+sqbind::CSqFifoShare* CFfContainer::getFifoShare()
+{
+	// Make sure we have a format context open
+	if ( !m_pFormatContext || !m_pFormatContext->pb )
+		return 0;
+
+	// Get url context
+	URLContext *uc = url_fileno( m_pFormatContext->pb );
+	if ( !uc || !uc->is_streamed || !uc->filename )
+		return 0;
+
+	// Verify that the protocol is as we expect
+	if ( oex::zstr::CompareLen( "memshare://", 11, uc->filename, 11 ) )
+		return 0;
+
+	// This should be a fifo share
+	return (sqbind::CSqFifoShare*)uc->priv_data;
+}

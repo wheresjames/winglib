@@ -1206,7 +1206,7 @@ namespace zstr
         Returns zero if the two strings match
     */
     template< class T >
-        oexINT Compare( T *s1, T *s2 )
+        oexINT Compare( const T *s1, const T *s2 )
         {	return str::Compare( s1, Length( s1 ), s2, Length( s2 ) );
 		}
 
@@ -1219,7 +1219,7 @@ namespace zstr
         Returns zero if the two strings match
     */
     template< class T >
-        oexINT Compare( T *s1, oexINT l1, T *s2 )
+        oexINT Compare( const T *s1, oexINT l1, const T *s2 )
         {	return str::Compare( s1, l1, s2, Length( s2 ) );
 		}
 
@@ -1232,7 +1232,7 @@ namespace zstr
         Returns zero if the two strings match
     */
     template< class T >
-        oexINT CompareLen( T *s1, T *s2, oexINT cmp )
+        oexINT CompareLen( const T *s1, const T *s2, oexINT cmp )
         {	return str::CompareLen( s1, Length( s1 ), s2, Length( s2 ), cmp );
 		}
 
@@ -1246,7 +1246,7 @@ namespace zstr
         Returns zero if the two strings match
     */
     template< class T >
-        oexINT CompareLen( T *s1, oexINT l1, T *s2, oexINT cmp )
+        oexINT CompareLen( const T *s1, oexINT l1, const T *s2, oexINT cmp )
         {	return str::CompareLen( s1, l1, s2, Length( s2 ), cmp );
 		}
 
@@ -1258,7 +1258,7 @@ namespace zstr
         Returns zero if the two strings match
     */
     template< class T >
-        oexINT ICompare( T *s1, T *s2 )
+        oexINT ICompare( const T *s1, const T *s2 )
         {	return str::ICompare( s1, Length( s1 ), s2, Length( s2 ) );
 		}
 
@@ -1271,7 +1271,7 @@ namespace zstr
         Returns zero if the two strings match
     */
     template< class T >
-        oexINT ICompare( T *s1, oexINT l1, T *s2 )
+        oexINT ICompare( const T *s1, oexINT l1, const T *s2 )
         {	return str::ICompare( s1, l1, s2, Length( s2 ) );
 		}
 
@@ -1284,7 +1284,7 @@ namespace zstr
         Returns zero if the two strings match
     */
     template< class T >
-        oexINT ICompareLen( T *s1, T *s2, oexINT cmp )
+        oexINT ICompareLen( const T *s1, const T *s2, oexINT cmp )
         {	return str::ICompareLen( s1, Length( s1 ), s2, Length( s2 ), cmp );
 		}
 
@@ -1298,7 +1298,7 @@ namespace zstr
         Returns zero if the two strings match
     */
     template< class T >
-        oexINT ICompareLen( T *s1, oexINT l1, T *s2, oexINT cmp )
+        oexINT ICompareLen( const T *s1, oexINT l1, const T *s2, oexINT cmp )
         {	return str::ICompareLen( s1, l1, s2, Length( s2 ), cmp );
 		}
 };

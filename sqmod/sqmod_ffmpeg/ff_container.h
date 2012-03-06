@@ -175,7 +175,14 @@ public:
 
 	/// Flushes all decoder buffers
 	int FlushBuffers();
-	
+
+	/// Returns the number of reads on the fifo share
+	int getFifoReads()
+	{	sqbind::CSqFifoShare *pFs = getFifoShare(); return pFs ? pFs->getReads() : 0; }
+
+	/// Returns a pointer to the fifo share if any
+	sqbind::CSqFifoShare* getFifoShare();
+
 	/** @} */
 
 private:
