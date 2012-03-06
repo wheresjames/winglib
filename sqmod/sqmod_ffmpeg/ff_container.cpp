@@ -742,8 +742,8 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	pcc->bit_rate = 2000000;
 	pcc->width = width;
 	pcc->height = height;
-    pcc->time_base.num = 1;
-    pcc->time_base.den = fps;
+	pcc->time_base.num = 1;
+	pcc->time_base.den = fps;
 	pcc->gop_size = fps;
 
 	// Signal global headers if needed
@@ -899,8 +899,8 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	} // end if
 
 	// Save time
-	pkt.pts = nPts;
-	pkt.dts = nDts;
+	pkt.pts = nPts ? nPts : ( ( m && m->isset( oexT( "pts" ) ) ) ? (*m)[ "pts" ].toint() : AV_NOPTS_VALUE );
+	pkt.dts = nDts ? nDts : ( ( m && m->isset( oexT( "dts" ) ) ) ? (*m)[ "dts" ].toint() : AV_NOPTS_VALUE );
 
 	// +++ is this causing the audio issue???
 //	AVCodecContext *pcc = pStream->codec;

@@ -314,8 +314,8 @@ public:
 		} // end if
 
 		// Do we have all the data?
-		oexUINT uContentLength = m_pbRxHeaders[ "content-length" ].ToLong();
-		if ( uContentLength && uContentLength > Rx().GetMaxRead() )
+		oexLONG lContentLength = m_pbRxHeaders[ "content-length" ].ToLong();
+		if ( 0 < lContentLength && lContentLength > Rx().GetMaxRead() )
 			return 0;
 
 		// Set default headers
@@ -326,8 +326,8 @@ public:
 		{
 			// IE and Netscape append CRLF, so be sure and use
 			// the content length if available
-			if ( uContentLength )
-				m_pbPost = CParser::DecodeUrlParams( Rx().Read( uContentLength ) );
+			if ( lContentLength )
+				m_pbPost = CParser::DecodeUrlParams( Rx().Read( lContentLength ) );
 
 			else
 				m_pbPost = CParser::DecodeUrlParams( Rx().Read() );
@@ -792,7 +792,7 @@ public:
 		return sReply;
 	}
 
-	oexBOOL SendHeaders( oexLONG lLength = -1, oexLONG lErrorCode = -1 )
+	oexBOOL SendHeaders( oexLONG lLength, oexLONG lErrorCode = -1 )
 	{
 		// Log the request
 		Log();
@@ -805,7 +805,7 @@ public:
 			lErrorCode = m_nErrorCode;
 
 		// How big is the data?
-		if ( 0 < lLength )
+		if ( 0 <= lLength )
 			m_pbTxHeaders[ "Content-length" ] = lLength;
 
 		// Send response string

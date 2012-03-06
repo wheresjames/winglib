@@ -300,7 +300,7 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 		x_pSession->SetContentMimeType( oexStrToMb( sType ) );
 
 		// Send the headers
-		x_pSession->SendHeaders( 0 );
+		x_pSession->SendHeaders( -1 );
 
 		// While we're not timed out and connected
 		while ( uTimeout > oexGetUnixTime() && x_pSession->IsConnected() )

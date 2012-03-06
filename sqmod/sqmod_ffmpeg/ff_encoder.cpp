@@ -97,7 +97,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 	// Can't have a bit rate of zero
 	if ( 0 >= brate )
-		brate = width * height * fps;
+		brate = width * height * fps / 3;
 
 	avcodec_get_context_defaults( m_pCodecContext );
 
@@ -366,6 +366,7 @@ int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, sqbi
 	if ( PIX_FMT_BGR24 == m_nFmt )
 		return EncodeRaw( PIX_FMT_BGR24, img->getWidth(), img->getHeight(), img->Obj().GetBits(), img->Obj().GetImageSize(), out, m );
 
+	// +++ ???
 	m_tmp.Allocate( 1000000 );
 
 	// Must convert to input format
