@@ -109,10 +109,13 @@ oexBOOL CModule::Load( oexCSTR x_pFile, oexINT x_nFlags )
 
 #endif
 
+	// LoadLibrary is sometimes stubborn about forward slashes
+	CStr sPath = CStr( x_pFile ).Replace( oexT( '/' ), oexT( '\\' ) );
+
 	// Load the module
-	m_hModule = ::LoadLibrary( x_pFile );
+	m_hModule = ::LoadLibrary( sPath.Ptr() );
 	if ( m_hModule == oexNULL )
-	{	oexERROR( GetLastError(), oexMks( oexT( "Failed to load module " ), x_pFile ) );
+	{	oexERROR( GetLastError(), oexMks( oexT( "Failed to load module " ), sPath.Ptr() ) );
 		return oexFALSE;
 	} // end if
 

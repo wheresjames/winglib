@@ -95,6 +95,10 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 		return 0;
 	} // end if
 
+	// Can't have a bit rate of zero
+	if ( 0 >= brate )
+		brate = width * height * fps;
+
 	avcodec_get_context_defaults( m_pCodecContext );
 
 	m_pCodecContext->codec_id = (CodecID)x_nCodec;
@@ -217,7 +221,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 			q = 20;
 
 		// Can't have quality and bitrate
-		m_pCodecContext->bit_rate = 0;
+		// m_pCodecContext->bit_rate = 0;
 		m_pCodecContext->bit_rate_tolerance = 0;
 
 		m_pCodecContext->qmin = m_pCodecContext->qmax = q;
