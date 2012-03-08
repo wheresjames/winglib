@@ -62,6 +62,9 @@ void CFfCapture::Destroy()
 int CFfCapture::Open( const sqbind::stdString &sFormat, const sqbind::stdString &sDevice, sqbind::CSqMulti *m )
 {_STT();
 
+	return 0;
+/*
+
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) return 0;
 
@@ -113,7 +116,7 @@ int CFfCapture::Open( const sqbind::stdString &sFormat, const sqbind::stdString 
 	if ( m )
 	{
 		(*m)[ oexT( "filename" ) ].set( oexMbToStrPtr( m_pFormatContext->filename ) );
-		(*m)[ oexT( "timestamp" ) ].set( oexMks( m_pFormatContext->timestamp ).Ptr() );
+//		(*m)[ oexT( "timestamp" ) ].set( oexMks( m_pFormatContext->timestamp ).Ptr() );
 //		(*m)[ oexT( "title" ) ].set( oexMbToStrPtr( m_pFormatContext->title ) );
 //		(*m)[ oexT( "author" ) ].set( oexMbToStrPtr( m_pFormatContext->author ) );
 //		(*m)[ oexT( "copyright" ) ].set( oexMbToStrPtr( m_pFormatContext->copyright ) );
@@ -125,15 +128,15 @@ int CFfCapture::Open( const sqbind::stdString &sFormat, const sqbind::stdString 
 		(*m)[ oexT( "ctx_flags" ) ].set( oexMks( m_pFormatContext->ctx_flags ).Ptr() );
 		(*m)[ oexT( "start_time" ) ].set( oexMks( m_pFormatContext->start_time ).Ptr() );
 		(*m)[ oexT( "duration" ) ].set( oexMks( m_pFormatContext->duration ).Ptr() );
-		(*m)[ oexT( "file_size" ) ].set( oexMks( m_pFormatContext->file_size ).Ptr() );
+//		(*m)[ oexT( "file_size" ) ].set( oexMks( m_pFormatContext->file_size ).Ptr() );
 		(*m)[ oexT( "bit_rate" ) ].set( oexMks( m_pFormatContext->bit_rate ).Ptr() );
 //		(*m)[ oexT( "index_built" ) ].set( oexMks( m_pFormatContext->index_built ).Ptr() );
-		(*m)[ oexT( "mux_rate" ) ].set( oexMks( m_pFormatContext->mux_rate ).Ptr() );
+//		(*m)[ oexT( "mux_rate" ) ].set( oexMks( m_pFormatContext->mux_rate ).Ptr() );
 		(*m)[ oexT( "packet_size" ) ].set( oexMks( m_pFormatContext->packet_size ).Ptr() );
-		(*m)[ oexT( "preload" ) ].set( oexMks( m_pFormatContext->preload ).Ptr() );
+//		(*m)[ oexT( "preload" ) ].set( oexMks( m_pFormatContext->preload ).Ptr() );
 		(*m)[ oexT( "max_delay" ) ].set( oexMks( m_pFormatContext->max_delay ).Ptr() );
-		(*m)[ oexT( "loop_output" ) ].set( oexMks( m_pFormatContext->loop_output ).Ptr() );
-		(*m)[ oexT( "loop_input" ) ].set( oexMks( m_pFormatContext->loop_input ).Ptr() );
+//		(*m)[ oexT( "loop_output" ) ].set( oexMks( m_pFormatContext->loop_output ).Ptr() );
+//e		(*m)[ oexT( "loop_input" ) ].set( oexMks( m_pFormatContext->loop_input ).Ptr() );
 		(*m)[ oexT( "probesize" ) ].set( oexMks( m_pFormatContext->probesize ).Ptr() );
 		(*m)[ oexT( "max_analyze_duration" ) ].set( oexMks( m_pFormatContext->max_analyze_duration ).Ptr() );
 		(*m)[ oexT( "keylen" ) ].set( oexMks( m_pFormatContext->keylen ).Ptr() );
@@ -148,7 +151,7 @@ int CFfCapture::Open( const sqbind::stdString &sFormat, const sqbind::stdString 
 //			m_nAudioStream = i;
 
 	// Did we find a stream?
-	if ( 0 > m_nVideoStream /*&& 0 > m_nAudioStream */ )
+	if ( 0 > m_nVideoStream  )
 	{	oexERROR( 0, oexT( "file contains no video or audio streams" ) );
 		Destroy();
 		return 0;
@@ -175,6 +178,7 @@ int CFfCapture::Open( const sqbind::stdString &sFormat, const sqbind::stdString 
 //	dump_format( m_pFormatContext, 0, 0, 0 );
 
 	return 1;
+*/
 }
 
 int CFfCapture::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )

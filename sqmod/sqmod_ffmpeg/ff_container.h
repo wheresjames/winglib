@@ -182,7 +182,7 @@ public:
 
 	/// Sets the number of reads on the fifo share
 	void setFifoReads( int n )
-	{	sqbind::CSqFifoShare *pFs = getFifoShare(); return pFs ? pFs->setReads( n ) : 0; }
+	{	sqbind::CSqFifoShare *pFs = getFifoShare(); pFs->setReads( n ); }
 
 	/// Returns the number of writes on the fifo share
 	int getFifoWrites()
@@ -190,14 +190,20 @@ public:
 
 	/// Sets the number of writes on the fifo share
 	void setFifoWrites( int n )
-	{	sqbind::CSqFifoShare *pFs = getFifoShare(); return pFs ? pFs->setWrites( n ) : 0; }
+	{	sqbind::CSqFifoShare *pFs = getFifoShare(); pFs->setWrites( n ); }
 	
 	/// Returns a pointer to the fifo share if any
 	sqbind::CSqFifoShare* getFifoShare();
+	
+	/// Returns the curent url
+	sqbind::stdString getUrl() { return m_sUrl; }
 
 	/** @} */
 
 private:
+
+	/// The current url
+	sqbind::stdString		m_sUrl;
 
 	/// Write ability?
 	int 					m_nWrite;

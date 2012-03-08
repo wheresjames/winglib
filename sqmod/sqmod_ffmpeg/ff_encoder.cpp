@@ -139,19 +139,19 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 		m_pCodecContext->level = -1; // if(avctx->level > 0) x4->params.i_level_idc = avctx->level;
 		m_pCodecContext->scenechange_threshold = 40; // i_scenecut_threshold
 		m_pCodecContext->b_frame_strategy = 1; // i_bframe_adaptive
-		m_pCodecContext->bframebias = 0; // i_bframe_bias
+//		m_pCodecContext->bframebias = 0; // i_bframe_bias
 //		m_pCodecContext->flags2 = m_pCodecContext->flags2 & ~CODEC_FLAG2_BPYRAMID; // clear param->b_bframe_pyramid
 //		m_pCodecContext->flags |= CODEC_FLAG_LOOP_FILTER; // set param->b_deblocking_filter
-		m_pCodecContext->deblockalpha = 0; // i_deblocking_filter_alphac0
-		m_pCodecContext->deblockbeta = 0; // i_deblocking_filter_beta
+//		m_pCodecContext->deblockalpha = 0; // i_deblocking_filter_alphac0
+//		m_pCodecContext->deblockbeta = 0; // i_deblocking_filter_beta
 		m_pCodecContext->coder_type = FF_CODER_TYPE_AC; // b_cabac
-		m_pCodecContext->crf = 23.0; // f_rf_constant
+//		m_pCodecContext->crf = 23.0; // f_rf_constant
 		m_pCodecContext->i_quant_factor = (float)(-1.0/1.4); // x4->params.rc.f_ip_factor
 		m_pCodecContext->b_quant_factor = (float)1.3; // x4->params.rc.f_pb_factor
 //		m_pCodecContext->flags = m_pCodecContext->flags & ~CODEC_FLAG_PASS1; // clear param->rc.b_stat_write
 //		m_pCodecContext->flags = m_pCodecContext->flags & ~CODEC_FLAG_PASS2; // clear param->rc.b_stat_read
 		m_pCodecContext->max_b_frames = 0;
-		m_pCodecContext->partitions = X264_PART_I4X4 | X264_PART_I8X8 | X264_PART_P8X8 | X264_PART_B8X8;
+//		m_pCodecContext->partitions = X264_PART_I4X4 | X264_PART_I8X8 | X264_PART_P8X8 | X264_PART_B8X8;
 //		m_pCodecContext->flags2 = m_pCodecContext->flags2 & ~CODEC_FLAG2_8X8DCT; // set b_transform_8x8 true
 		m_pCodecContext->me_subpel_quality = 7; // i_subpel_refine
 //		m_pCodecContext->flags2 = m_pCodecContext->flags2 | CODEC_FLAG2_MIXED_REFS; // set b_mixed_references
@@ -193,19 +193,19 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 		M_DEF( level,					toint );
 		M_DEF( scenechange_threshold,	toint );
 		M_DEF( b_frame_strategy,		toint );
-		M_DEF( bframebias,				toint );
-		M_DEF( deblockalpha,			toint );
-		M_DEF( deblockbeta,				toint );
+//		M_DEF( bframebias,				toint );
+//		M_DEF( deblockalpha,			toint );
+//		M_DEF( deblockbeta,				toint );
 		M_DEF( coder_type,				toint );
 		M_DEF( max_b_frames,			toint );
-		M_DEF( partitions,				toint );
+//		M_DEF( partitions,				toint );
 		M_DEF( me_subpel_quality,		toint );
 		M_DEF( trellis,					toint );
 		M_DEF( chromaoffset,			toint );
 		M_DEF( me_cmp,					toint );
 		M_DEF( me_method,				toint );
 
-		M_DEF( crf,						tofloat );
+//		M_DEF( crf,						tofloat );
 		M_DEF( i_quant_factor,			tofloat );
 		M_DEF( b_quant_factor,			tofloat );
 		M_DEF( qcompress,				tofloat );

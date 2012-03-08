@@ -20,9 +20,18 @@ extern "C"
 #define FFSQ_VIDEO2
 #undef printf
 
+#ifndef OEX_OLDFF
+#	define OEX_NEWFF
+#endif
+
 // FFMPEG is not quite thread safe
 extern "C" oexLock _g_ffmpeg_lock;
 
+#ifdef OEX_NEWFF
+	int memshare_open( AVIOContext **pAc, const char *filename, int flags );
+#endif
+
+/*
 // Custom read write protocol
 int memshare_open( URLContext *h, const char *filename, int flags );
 int memshare_read( URLContext *h, unsigned char *buf, int size );
@@ -33,6 +42,7 @@ int memshare_write( URLContext *h, const unsigned char *buf, int size );
 #endif
 int64_t memshare_seek( URLContext *h, int64_t pos, int whence );
 int memshare_close( URLContext *h );
+*/
 
 #include "ff_decoder.h"
 #include "ff_encoder.h"
