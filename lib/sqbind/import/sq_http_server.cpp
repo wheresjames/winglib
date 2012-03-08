@@ -316,6 +316,10 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 
 				// Attempt to read a data packet
 				buf = fs.ReadData();
+
+if ( buf.getUsed() )
+	oexSHOW( buf.getUsed() );
+
 				if ( buf.getUsed() )
 				{
 					// Next frame

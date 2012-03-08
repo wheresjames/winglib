@@ -232,18 +232,30 @@ CStr CIpAddress::BuildUrl( CPropertyBag &x_pbUi )
 //  http://user:password@www.somesite.com/directory/somefile.php?param=1&param=2
 CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
 {
-    CPropertyBag pb;
-
-    if ( !oexVERIFY( pUrl ) )
+	// Ensure a valid pointer
+    if ( !pUrl )
         return CPropertyBag();
 
-    CStr str = pUrl;
+	// NULL terminated string? tsk, tsk...
+	if ( 0 >= uMaxBufferSize )
+		uMaxBufferSize = zstr::Length( pUrl );
+
+	// Anything to parse?
+	if ( !uMaxBufferSize )
+		return CPropertyBag();
+
+	// Propety bag object
+    CPropertyBag pb;
+
+	// Read into a string object
+    CStr str( pUrl, uMaxBufferSize );
 
 	// Read in the scheme
 	pb[ oexT( "scheme" ) ].ToString() = str.Parse( oexT( ":" ) );
 
 	// Trim off leading forward slashes
-	str.LTrim( oexT( ":/" ) );
+	str.LTrim( oexT( ":" ) );
+	str.LTrim( oexT( "/" ) );
 
 	// Is there a username / password?
 	CStr tmp = str.Parse( oexT( "@" ) );
@@ -277,40 +289,57 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
 
 	} // end if
 
-	// Grab the path
-	pb[ oexT( "path" ) ].ToString() = str.Parse( oexT( "?" ) );
-
-	if ( str.Length() )
+	// Grab the next token
+	tmp = str.Parse( oexT( "?" ) );
+	if ( tmp.Length() )
 	{
-		// Trim separator if any
-	    if ( oexT( '?' ) == *str.Ptr() )
+		// Host or path?
+		if ( !pb.IsKey( oexT( "host" ) ) )
+			pb[ oexT( "host" ) ].ToString() = tmp;
+		else
+			pb[ oexT( "path" ) ].ToString() = tmp;
+
+		// Parse extra part
+		if ( str.Length() )
 		{
-			str.LTrim( 1 );
-
-			// Anything left over?
-			if ( str.Length() )				
-				pb[ oexT( "extra" ) ].ToString() = str.Parse( oexT( "#" ) );
-
-			// Check for fragment
-			if ( oexT( '#' ) == *str.Ptr() )
+			// Trim separator if any
+			if ( oexT( '?' ) == *str.Ptr() )
 			{
 				str.LTrim( 1 );
 
+				// Anything left over?
+				if ( str.Length() )				
+					pb[ oexT( "extra" ) ].ToString() = str.Parse( oexT( "#" ) );
+
 				// Check for fragment
-				if ( str.Length() )
-					pb[ oexT( "fragment" ) ].ToString() = str;
+				if ( oexT( '#' ) == *str.Ptr() )
+				{
+					// Strip off sep
+					str.LTrim( 1 );
+
+					// Check for fragment
+					if ( str.Length() )
+						pb[ oexT( "fragment" ) ].ToString() = str;
+
+				} // end if
+
+				// Then it's all the extra
+				else
+					pb[ oexT( "extra" ) ].ToString() += str;
 
 			} // end if
 
-			else
-				pb[ oexT( "extra" ) ].ToString() += str;
-
 		} // end if
-
-		else
-			pb[ oexT( "path" ) ].ToString() += str;
-
+		
 	} // end if
+
+	// Whatever is left is the host if not yet parsed
+	else if ( !pb.IsKey( oexT( "host" ) ) )
+		pb[ oexT( "host" ) ].ToString() = str;
+
+	// Then whatever is left is the path
+	else
+		pb[ oexT( "path" ) ].ToString() = str;
 
 	return pb;
 }

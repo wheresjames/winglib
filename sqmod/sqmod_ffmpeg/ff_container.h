@@ -180,6 +180,18 @@ public:
 	int getFifoReads()
 	{	sqbind::CSqFifoShare *pFs = getFifoShare(); return pFs ? pFs->getReads() : 0; }
 
+	/// Sets the number of reads on the fifo share
+	void setFifoReads( int n )
+	{	sqbind::CSqFifoShare *pFs = getFifoShare(); return pFs ? pFs->setReads( n ) : 0; }
+
+	/// Returns the number of writes on the fifo share
+	int getFifoWrites()
+	{	sqbind::CSqFifoShare *pFs = getFifoShare(); return pFs ? pFs->getWrites() : 0; }
+
+	/// Sets the number of writes on the fifo share
+	void setFifoWrites( int n )
+	{	sqbind::CSqFifoShare *pFs = getFifoShare(); return pFs ? pFs->setWrites( n ) : 0; }
+	
 	/// Returns a pointer to the fifo share if any
 	sqbind::CSqFifoShare* getFifoShare();
 

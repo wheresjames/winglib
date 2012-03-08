@@ -50,6 +50,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getFifoShare )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getFifoReads )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, setFifoReads )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getFifoWrites )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, setFifoWrites )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioChannels )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioFrameSize )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioCodecID )
@@ -1139,7 +1142,25 @@ int CFfContainer::FlushBuffers()
 	if ( !m_pFormatContext )
 		return 0;
 
-	// Flush buffers
+	// Flush write buffers
+	if ( m_nWrite )
+	{
+#if defined( AVFMT_ALLOW_FLUSH )
+
+		+++ Verify that this works
+		
+		// Flush muxer if possible
+		if ( 0 != ( AVFMT_ALLOW_FLUSH & m_pFormatContext->flags ) )
+			av_write_frame( m_pFormatContext, 0 );
+
+#endif
+
+		return 0;
+	} // end if
+	
+oexM();
+
+	// Flush codec buffers
 	int n = 0;
 	for ( unsigned int i = 0; i < m_pFormatContext->nb_streams; i++ )
 		if ( m_pFormatContext->streams[ i ]->codec )

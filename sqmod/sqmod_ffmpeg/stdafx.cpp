@@ -44,8 +44,13 @@ int memshare_open( URLContext *h, const char *filename, int flags )
 	if ( oex::zstr::CompareLen( "memshare://", 11, filename, 11 ) )
 		return AVERROR( EINVAL );
 
+	// Parse the url
+	oex::CPropertyBag pb = oex::os::CIpAddress::ParseUrl( filename );
+
 	// Get the real share name
-	const char *pShare = &filename[ 11 ];
+	long lSize = 1024 * 1024;
+	long lBuffers = 256;
+	const char *pShare = pb[ "host" ].ToString().Ptr();
 	if ( !*pShare )
 		return AVERROR( EINVAL );
 
@@ -54,8 +59,23 @@ int memshare_open( URLContext *h, const char *filename, int flags )
 	if ( !pFs )
 		return AVERROR( ENOMEM );
 
+	// Parse GET parameters if provided
+	if ( pb[ oexT( "extra" ) ].ToString().Length() )
+	{
+		oex::CPropertyBag pbGet = oex::CParser::DecodeUrlParams( pb[ oexT( "extra" ) ].ToString() );
+
+		// Get user size
+		if ( pbGet.IsKey( "size" ) )
+			lSize = oex::cmn::Max( pbGet[ oexT( "size" ) ].ToLong(), 1024l );
+
+		// Get user buffers
+		if ( pbGet.IsKey( "buffers" ) )
+			lBuffers = oex::cmn::Max( pbGet[ oexT( "buffers" ) ].ToLong(), 8l );
+
+	} // end if
+
 	// Create share buffer
-	if ( !pFs->Create( pShare, "", 1024 * 1024, 256, "" ) )
+	if ( !pFs->Create( pShare, "", lSize, lBuffers, "" ) )
 	{	OexAllocDelete( pFs );
 		return AVERROR( ENOMEM );
 	} // end if
@@ -66,8 +86,14 @@ int memshare_open( URLContext *h, const char *filename, int flags )
 	if ( URL_RDONLY == flags )
 		return AVERROR( ENOSYS );
 
+	// Allow flushing
+//	h->flags |= AVFMT_ALLOW_FLUSH;
+
 	// Can't be seeked
 	h->is_streamed = 1;
+
+	// No packetized writes
+	h->max_packet_size = 0;
 
 	// Save away pointer to fifo share
 	h->priv_data = (void*)pFs;
@@ -87,6 +113,7 @@ int memshare_write( URLContext *h, unsigned char *buf, int size )
 int memshare_write( URLContext *h, const unsigned char *buf, int size )
 #endif
 {
+oexM();
 	// Just ignore null writes
 	if ( 0 >= size )
 		return 0;
@@ -94,6 +121,8 @@ int memshare_write( URLContext *h, const unsigned char *buf, int size )
 	// Sanity check
 	if ( !h || !h->priv_data || !buf )
 		return AVERROR( EINVAL );
+
+oexSHOW( size );
 
 	// Write to the shared memory buffer
 	if ( !((sqbind::CSqFifoShare*)h->priv_data)->WritePtr( buf, size, "", 0, 0 ) )

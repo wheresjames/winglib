@@ -256,11 +256,25 @@ namespace sqbind
 			return m_cb.getINT( 8 );
 		}
 
+		/// Sets the number of writes
+		void setWrites( int n )
+		{	if ( !m_cb.getUsed() ) 
+				return;
+			return m_cb.setINT( 8, n );
+		}
+		
 		/// Returns the number of reads from the control block
 		int getReads()
 		{	if ( !m_cb.getUsed() ) 
 				return 0;
 			return m_cb.getINT( 9 );
+		}
+
+		/// Sets the number of reads
+		void setReads( int n )
+		{	if ( !m_cb.getUsed() ) 
+				return;
+			return m_cb.setINT( 9, n );
 		}
 
 		/// Set to non-zero to tell the writer to reset
