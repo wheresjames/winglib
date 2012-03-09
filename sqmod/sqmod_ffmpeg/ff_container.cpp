@@ -4,6 +4,15 @@
 
 #include "stdafx.h"
 
+#ifndef OEX_NEWFF
+
+extern "C"
+{
+	#include "libavformat/url.h"
+};
+
+#endif
+
 #define FFF_KEY_FRAME	AV_PKT_FLAG_KEY
 
 // Export Functions
@@ -50,11 +59,14 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getFifoShare )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getFifoReads )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, setFifoReads )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getFifoWrites )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, setFifoWrites )
 
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getUrl )
 
-//	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
-//	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getKeyFrameInterval )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, setKeyFrameInterval )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 
@@ -94,6 +106,7 @@ CFfContainer::CFfContainer()
 	m_nRead = 0;
 	m_bKeyRxd = 0;
 	m_nFrames = 0;
+	m_nKeyFrameInterval = 0;
 	oexZero( m_pkt );
 }
 
@@ -143,30 +156,13 @@ int CFfContainer::CloseStream()
 	if ( !m_pFormatContext )
 		return 0;
 
-#ifdef OEX_NEWFF
 	if ( m_nRead )
 		avformat_close_input( &m_pFormatContext );
-#else
-	if ( m_nRead )
-		av_close_input_file( m_pFormatContext );
-#endif
 
 	else if ( 1 < m_nWrite )
 	{
 		// Write the rest of the file
-		av_write_trailer( m_pFormatContext );
-
-//	av_write_trailer() does this now
-/*
-		// Free streams
-		for ( unsigned int i = 0; i < m_pFormatContext->nb_streams; i++ )
-			if ( m_pFormatContext->streams[ i ] )
-			{	if ( m_pFormatContext->streams[ i ]->codec )
-					av_freep( m_pFormatContext->streams[ i ]->codec );
-				av_freep( m_pFormatContext->streams[ i ] );
-				m_pFormatContext->streams[ i ] = 0;
-			} // end if
-*/
+        av_write_trailer( m_pFormatContext );
 
 		// Close file / socket resources
 		if ( m_pFormatContext->oformat
@@ -198,14 +194,6 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) return 0;
 
-//	AVFormatParameters	fp;
-//	oexZero( fp );
-//	fp.initial_pause = 1;
-
-#ifdef OEX_NEWFF
-
-//	int res = avio_open( &pb, oexStrToMbPtr( sUrl.c_str() ), AVIO_FLAG_READ);
-
 	m_pFormatContext = avformat_alloc_context();
 	int res = avformat_open_input( &m_pFormatContext, oexStrToMbPtr( sUrl.c_str() ), 0, 0 );
 	if ( res )
@@ -213,19 +201,6 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 		Destroy();
 		return 0;
 	} // end if
-
-#else
-
-	// Attempt to open it
-	int res = av_open_input_file( &m_pFormatContext, oexStrToMbPtr( sUrl.c_str() ),
-								  oexNULL, 0, oexNULL );
-	if ( res )
-	{	oexERROR( res, oexT( "av_open_input_file() failed" ) );
-		Destroy();
-		return 0;
-	} // end if
-
-#endif
 
     // +++ Holy crap this function can be slow
 	res = av_find_stream_info( m_pFormatContext );
@@ -238,27 +213,12 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 	if ( m )
 	{
 		(*m)[ oexT( "filename" ) ].set( oexMbToStrPtr( m_pFormatContext->filename ) );
-//		(*m)[ oexT( "timestamp" ) ].set( oexMks( m_pFormatContext->timestamp ).Ptr() );
-//		(*m)[ oexT( "title" ) ].set( oexMbToStrPtr( m_pFormatContext->title ) );
-//		(*m)[ oexT( "author" ) ].set( oexMbToStrPtr( m_pFormatContext->author ) );
-//		(*m)[ oexT( "copyright" ) ].set( oexMbToStrPtr( m_pFormatContext->copyright ) );
-//		(*m)[ oexT( "comment" ) ].set( oexMbToStrPtr( m_pFormatContext->comment ) );
-//		(*m)[ oexT( "album" ) ].set( oexMbToStrPtr( m_pFormatContext->album ) );
-//		(*m)[ oexT( "year" ) ].set( oexMks( m_pFormatContext->year ).Ptr() );
-//		(*m)[ oexT( "track" ) ].set( oexMks( m_pFormatContext->track ).Ptr() );
-//		(*m)[ oexT( "genre" ) ].set( oexMbToStrPtr( m_pFormatContext->genre ) );
 		(*m)[ oexT( "ctx_flags" ) ].set( oexMks( m_pFormatContext->ctx_flags ).Ptr() );
 		(*m)[ oexT( "start_time" ) ].set( oexMks( m_pFormatContext->start_time ).Ptr() );
 		(*m)[ oexT( "duration" ) ].set( oexMks( m_pFormatContext->duration ).Ptr() );
-//		(*m)[ oexT( "file_size" ) ].set( oexMks( m_pFormatContext->file_size ).Ptr() );
 		(*m)[ oexT( "bit_rate" ) ].set( oexMks( m_pFormatContext->bit_rate ).Ptr() );
-//		(*m)[ oexT( "index_built" ) ].set( oexMks( m_pFormatContext->index_built ).Ptr() );
-//		(*m)[ oexT( "mux_rate" ) ].set( oexMks( m_pFormatContext->mux_rate ).Ptr() );
 		(*m)[ oexT( "packet_size" ) ].set( oexMks( m_pFormatContext->packet_size ).Ptr() );
-//		(*m)[ oexT( "preload" ) ].set( oexMks( m_pFormatContext->preload ).Ptr() );
 		(*m)[ oexT( "max_delay" ) ].set( oexMks( m_pFormatContext->max_delay ).Ptr() );
-//		(*m)[ oexT( "loop_output" ) ].set( oexMks( m_pFormatContext->loop_output ).Ptr() );
-//		(*m)[ oexT( "loop_input" ) ].set( oexMks( m_pFormatContext->loop_input ).Ptr() );
 		(*m)[ oexT( "probesize" ) ].set( oexMks( m_pFormatContext->probesize ).Ptr() );
 		(*m)[ oexT( "max_analyze_duration" ) ].set( oexMks( m_pFormatContext->max_analyze_duration ).Ptr() );
 		(*m)[ oexT( "keylen" ) ].set( oexMks( m_pFormatContext->keylen ).Ptr() );
@@ -314,7 +274,6 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 		 &&  m_pFormatContext->streams[ m_nAudioStream ]->codec )
 	{
 		AVCodecContext *pcc = m_pFormatContext->streams[ m_nAudioStream ]->codec;
-//		m_pAudioCodecContext = m_pFormatContext->streams[ m_nAudioStream ]->codec;
 		AVCodec *pCodec = avcodec_find_decoder( pcc->codec_id );
 		if ( !pCodec )
 			pcc = oexNULL;
@@ -377,7 +336,6 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 		(*m)[ oexT( "dts" ) ].set( oexMks( m_pkt.dts ).Ptr() );
 		(*m)[ oexT( "pts" ) ].set( oexMks( m_pkt.pts ).Ptr() );
 		(*m)[ oexT( "duration" ) ].set( oexMks( m_pkt.duration ).Ptr() );
-//		(*m)[ oexT( "convergence_duration" ) ].set( oexMks( pkt.convergence_duration ).Ptr() );
 
 	} // end if
 
@@ -467,34 +425,6 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 	AVPacket pkt; oexZero( pkt );
 	pkt.data = (uint8_t*)in->Ptr();
 	pkt.size = in->getUsed();
-
-/*
-	m_buf.setUsed( 0 );
-
-	// Ensure buffer size
-	if ( ( m_buf.Size() - m_buf.getUsed() ) < (sqbind::CSqBinary::t_size)( pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) )
-		m_buf.Allocate( 2 * ( m_buf.Size() + pkt.size + FF_INPUT_BUFFER_PADDING_SIZE ) );
-
-	// Add new data
-	m_buf.AppendBuffer( (sqbind::CSqBinary::t_byte*)pkt.data, pkt.size );
-
-	// Create packet
-	pkt.data = (uint8_t*)m_buf._Ptr();
-	pkt.size = m_buf.getUsed();
-
-	// Zero padding
-	int nPadding = m_buf.Size() - m_buf.getUsed();
-	if ( 0 < nPadding )
-	{
-		// Don't zero more than twice the padding size
-		if ( nPadding > ( FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
-			nPadding = FF_INPUT_BUFFER_PADDING_SIZE * 2;
-
-		// Set end to zero to ensure no overreading on damaged blocks
-		oexZeroMemory( &m_buf._Ptr()[ m_buf.getUsed() ], nPadding );
-
-	} // end if
-*/
 
 	if ( !m_pFrame )
 		m_pFrame = avcodec_alloc_frame();
@@ -628,40 +558,20 @@ int CFfContainer::InitWrite()
 
 	int res = 0;
 	
-#ifndef OEX_NEWFF
-	if ( 0 > ( res = av_set_parameters( m_pFormatContext, oexNULL ) ) )
-	{	oexERROR( res, oexT( "av_set_parameters() failed" ) );
-		Destroy();
-		return 0;
-	} // end if
-#endif
-
-	// Custom io?
-	AVIOContext *ac = 0;
-	if ( 0 <= memshare_open( &ac, m_pFormatContext->filename, AVIO_FLAG_WRITE ) && ac )
-		m_pFormatContext->pb = ac;
-	
 	// +++ Below Seems to memleak when avio_open fails
 	if ( !( m_pFormatContext->oformat->flags & AVFMT_NOFILE ) )
-#ifdef OEX_NEWFF
 		if ( 0 > ( res = avio_open( &m_pFormatContext->pb, m_pFormatContext->filename, AVIO_FLAG_WRITE ) ) )
-#else
-		if ( 0 > ( res = avio_open( &m_pFormatContext->pb, m_pFormatContext->filename, URL_WRONLY ) ) )
-#endif
 		{	oexERROR( res, oexT( "avio_open() failed" ) );
 			Destroy();
 			return 0;
 		} // end if
 
-#ifndef OEX_NEWFF
-
-    if ( 0 > ( res = av_write_header( m_pFormatContext ) ) )
+	// Write out header
+    if ( 0 > ( res = avformat_write_header( m_pFormatContext, 0 ) ) )
 	{	oexERROR( res, oexT( "av_write_header() failed" ) );
 		Destroy();
 		return 0;
 	} // end if
-
-#endif
 
 	// Writing
 	m_nWrite = 2;
@@ -703,7 +613,7 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	pcc->height = height;
 	pcc->time_base.num = 1;
 	pcc->time_base.den = fps;
-	pcc->gop_size = fps;
+	pcc->gop_size = ( 0< m_nKeyFrameInterval ) ? m_nKeyFrameInterval : fps;
 
 	// Signal global headers if needed
 	if ( 0 != ( m_pFormatContext->oformat->flags & AVFMT_GLOBALHEADER ) )
@@ -983,7 +893,8 @@ int CFfContainer::WriteAudioFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	} // end if
 	
 	else 
-*/	if ( av_interleaved_write_frame( m_pFormatContext, &pkt ) )
+*/	
+	if ( av_interleaved_write_frame( m_pFormatContext, &pkt ) )
 		return 0;
 
 	return 1;
@@ -1100,20 +1011,21 @@ int CFfContainer::FlushBuffers()
 	// Flush write buffers
 	if ( m_nWrite )
 	{
-#ifdef OEX_NEWFF
 
-		// +++ Verify that this works
-		
+#if defined( AVFMT_ALLOW_FLUSH )
+
 		// Flush muxer if possible
 		if ( 0 != ( AVFMT_ALLOW_FLUSH & m_pFormatContext->flags ) )
 			av_write_frame( m_pFormatContext, 0 );
 
 #endif
 
+		// Flush io
+		avio_flush( m_pFormatContext->pb );
+
 		return 0;
+
 	} // end if
-	
-oexM();
 
 	// Flush codec buffers
 	int n = 0;
@@ -1129,12 +1041,10 @@ sqbind::CSqFifoShare* CFfContainer::getFifoShare()
 	// Make sure we have a format context open
 	if ( !m_pFormatContext || !m_pFormatContext->pb )
 		return 0;
-
-#ifdef OEX_NEWFF
-
+/*		
 	// Get url context
 	AVIOContext *ac = m_pFormatContext->pb;
-	if ( !ac || ac->seekable || 11 > m_sUrl.length() )
+	if ( !ac || !ac->is_streamed || 11 > m_sUrl.length() )
 		return 0;
 
 	// Verify that the protocol is as we expect
@@ -1143,11 +1053,14 @@ sqbind::CSqFifoShare* CFfContainer::getFifoShare()
 
 	// This should be a fifo share
 	return (sqbind::CSqFifoShare*)ac->opaque;
+*/
 
-#else
+	// Verify that the protocol is as we expect
+	if ( 11 > m_sUrl.length() || oex::zstr::CompareLen( "memshare://", 11, m_sUrl.c_str(), 11 ) )
+		return 0;
 
 	// Get url context
-	URLContext *uc = url_fileno( m_pFormatContext->pb );
+	URLContext *uc = (URLContext*)m_pFormatContext->pb->opaque;
 	if ( !uc || !uc->is_streamed || !uc->filename )
 		return 0;
 
@@ -1157,6 +1070,5 @@ sqbind::CSqFifoShare* CFfContainer::getFifoShare()
 
 	// This should be a fifo share
 	return (sqbind::CSqFifoShare*)uc->priv_data;
-	
-#endif
 }
+

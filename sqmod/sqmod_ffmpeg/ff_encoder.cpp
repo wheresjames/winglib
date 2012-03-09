@@ -301,15 +301,18 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 
 	} // end if
 
+	else
+		paf->quality = m_pCodecContext->global_quality;
+
 	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->_Ptr(), out->Size(), paf );
-	if ( !nBytes ) nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->Ptr(), out->Size(), paf );
+//	if ( !nBytes ) nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->Ptr(), out->Size(), paf );
 	if ( 0 > nBytes )
 	{	oexERROR( nBytes, oexT( "avcodec_encode_video() failed" ) );
 		out->setUsed( 0 );
 		av_free( paf );
 		return 0;
 	} // end if
-
+	
 	if ( m )
 	{
 		// Save key frame information
@@ -332,6 +335,7 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 
 int CFfEncoder::Encode( int fmt, int width, int height, sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
 {_STT();
+
 	// Sanity checks
 	if ( !in || !in->getUsed() )
 		return 0;
@@ -367,7 +371,7 @@ int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, sqbi
 		return EncodeRaw( PIX_FMT_BGR24, img->getWidth(), img->getHeight(), img->Obj().GetBits(), img->Obj().GetImageSize(), out, m );
 
 	// +++ ???
-	m_tmp.Allocate( 1000000 );
+//	m_tmp.Allocate( 1000000 );
 
 	// Must convert to input format
 	if ( !CFfConvert::ConvertColorIB( img, &m_tmp, m_nFmt, SWS_FAST_BILINEAR, 1 ) )

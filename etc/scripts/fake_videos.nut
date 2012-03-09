@@ -69,7 +69,7 @@ function create_clip( name, w, h, fps, fmt, sec, font, hrs, mins )
 
 		// Encode image
 		if ( !enc.EncodeImage( img, frame, inf ) )
-		{	_self.echo( "Failed to encode frame" ); return; }
+		{	/*_self.echo( "Failed to encode frame" ); return; */ }
 
 		// Write the frame to the file
 		if ( !avi.WriteFrame( frame, inf ) )

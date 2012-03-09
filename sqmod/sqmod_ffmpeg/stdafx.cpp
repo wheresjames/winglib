@@ -33,8 +33,6 @@ extern "C"
 
 }
 
-#ifndef OEX_NEWFF
-
 extern "C"
 {
 	#include "libavformat/url.h"
@@ -57,6 +55,7 @@ int memshare_open( URLContext *h, const char *filename, int flags )
 	// Get the real share name
 	long lSize = 1024 * 1024;
 	long lBuffers = 256;
+	long lMaxPacketSize = 0;
 	const char *pShare = pb[ "host" ].ToString().Ptr();
 	if ( !*pShare )
 		return AVERROR( EINVAL );
@@ -79,6 +78,10 @@ int memshare_open( URLContext *h, const char *filename, int flags )
 		if ( pbGet.IsKey( "buffers" ) )
 			lBuffers = oex::cmn::Max( pbGet[ oexT( "buffers" ) ].ToLong(), 8l );
 
+		// Get user max_packet
+		if ( pbGet.IsKey( "max_packet_size" ) )
+			lMaxPacketSize = pbGet[ oexT( "max_packet_size" ) ].ToLong();
+
 	} // end if
 
 	// Create share buffer
@@ -99,8 +102,8 @@ int memshare_open( URLContext *h, const char *filename, int flags )
 	// Can't be seeked
 	h->is_streamed = 1;
 
-	// No packetized writes
-	h->max_packet_size = 0;
+	// Decrease buffering
+//	h->max_packet_size = lMaxPacketSize;
 
 	// Save away pointer to fifo share
 	h->priv_data = (void*)pFs;
@@ -120,16 +123,15 @@ int memshare_write( URLContext *h, unsigned char *buf, int size )
 int memshare_write( URLContext *h, const unsigned char *buf, int size )
 #endif
 {
-oexM();
 	// Just ignore null writes
 	if ( 0 >= size )
 		return 0;
 
+oexSHOW( size );
+		
 	// Sanity check
 	if ( !h || !h->priv_data || !buf )
 		return AVERROR( EINVAL );
-
-oexSHOW( size );
 
 	// Write to the shared memory buffer
 	if ( !((sqbind::CSqFifoShare*)h->priv_data)->WritePtr( buf, size, "", 0, 0 ) )
@@ -179,121 +181,20 @@ int memshare_close( URLContext *h )
 URLProtocol memshare_protocol = {
     "memshare",
     memshare_open,
+	0,
     memshare_read,
     memshare_write,
     memshare_seek,
     memshare_close,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0
 };
-
-
-#else
-
-int memshare_write( void *opaque, uint8_t *buf, int buf_size )
-{
-	// Just ignore null writes
-	if ( 0 >= buf_size )
-		return 0;
-
-	// Sanity check
-	if ( !opaque || !buf )
-		return AVERROR( EINVAL );
-
-	// Write to the shared memory buffer
-	if ( !((sqbind::CSqFifoShare*)opaque)->WritePtr( buf, buf_size, "", 0, 0 ) )
-		return AVERROR( ENOMEM );
-
-	return buf_size;
-}
-
-int memshare_close( AVIOContext *h )
-{
-	// Sanity check
-	if ( !h || !h->opaque )
-		return AVERROR( EINVAL );
-
-	// Delete fifo object
-	OexAllocDelete( (sqbind::CSqFifoShare*)h->opaque );
-
-	// Drop pointer
-	h->opaque = 0;
-
-	return 0;
-}
-
-// Custom read write protocol
-int memshare_open( AVIOContext **pAc, const char *filename, int flags )
-{
-	// Sanity check
-	if ( !pAc || !filename || !*filename )
-		return AVERROR( EINVAL );
-
-	// Only write supported at the moment
-	if ( !flags )
-		return AVERROR( ENOSYS );
-		
-	// Verify that the protocol is as we expect
-	if ( oex::zstr::CompareLen( "memshare://", 11, filename, 11 ) )
-		return AVERROR( EINVAL );
-
-	// Parse the url
-	oex::CPropertyBag pb = oex::os::CIpAddress::ParseUrl( filename );
-
-	// Get the real share name
-	long lSize = 1024 * 1024;
-	long lBuffers = 256;
-	const char *pShare = pb[ "host" ].ToString().Ptr();
-	if ( !*pShare )
-		return AVERROR( EINVAL );
-
-	// Attemp to create a new fifo share object
-	sqbind::CSqFifoShare *pFs = OexAllocConstruct< sqbind::CSqFifoShare >();
-	if ( !pFs )
-		return AVERROR( ENOMEM );
-
-	// Parse GET parameters if provided
-	if ( pb[ oexT( "extra" ) ].ToString().Length() )
-	{
-		oex::CPropertyBag pbGet = oex::CParser::DecodeUrlParams( pb[ oexT( "extra" ) ].ToString() );
-
-		// Get user size
-		if ( pbGet.IsKey( "size" ) )
-			lSize = oex::cmn::Max( pbGet[ oexT( "size" ) ].ToLong(), 1024l );
-
-		// Get user buffers
-		if ( pbGet.IsKey( "buffers" ) )
-			lBuffers = oex::cmn::Max( pbGet[ oexT( "buffers" ) ].ToLong(), 8l );
-
-	} // end if
-
-	// Create share buffer
-	if ( !pFs->Create( pShare, "", lSize, lBuffers, "" ) )
-	{	OexAllocDelete( pFs );
-		return AVERROR( ENOMEM );
-	} // end if
-
-		
-	// Allocate context
-	*pAc = avio_alloc_context( 0, 0, 1, pFs, 0, memshare_write, 0 );
-	if ( !*pAc )
-	{	OexAllocDelete( pFs );
-		return AVERROR( ENOMEM );
-	} // end if
-
-	// Allow flushing
-//	h->flags |= AVFMT_ALLOW_FLUSH;
-
-	// Can't be seeked
-	(*pAc)->seekable = 0;
-
-//	(*pAc)->write_flag = 1;
-
-	// Save away pointer to fifo share
-	(*pAc)->opaque = (void*)pFs;
-
-	return 0;
-}
-
-#endif
 
 
 // Export classes
@@ -303,7 +204,8 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 		return;
 
 #if defined( oexDEBUG )
-	av_log_set_level( AV_LOG_INFO );
+//	av_log_set_level( AV_LOG_INFO );
+	av_log_set_level( AV_LOG_WARNING );
 //	av_log_set_level( AV_LOG_DEBUG );
 #else
 //	av_log_set_level( AV_LOG_WARNING );
@@ -313,14 +215,10 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 
 	// Register codecs
 	av_register_all();
-#if !defined( OEX_WINDOWS )
-//	avdevice_register_all();
-#endif
 
 	// Register the oexshare protocol
-#ifndef OEX_NEWFF
-	av_register_protocol2( &memshare_protocol, sizeof( memshare_protocol ) );
-#endif
+	ffurl_register_protocol( &memshare_protocol, sizeof( memshare_protocol ) );
+//	av_register_protocol2( &memshare_protocol, sizeof( memshare_protocol ) );
 
 	CFfDecoder::Register( x_vm );
 	CFfEncoder::Register( x_vm );

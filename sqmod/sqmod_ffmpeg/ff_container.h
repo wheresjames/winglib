@@ -198,6 +198,12 @@ public:
 	/// Returns the curent url
 	sqbind::stdString getUrl() { return m_sUrl; }
 
+	/// Returns the default key frame interval
+	int getKeyFrameInterval() { return m_nKeyFrameInterval; }
+	
+	/// Sets the default key frame interval
+	void setKeyFrameInterval( int n ) { m_nKeyFrameInterval = n; }
+	
 	/** @} */
 
 private:
@@ -226,6 +232,9 @@ private:
 	/// Non-zero if key frame has been received
 	int						m_bKeyRxd;
 
+	/// Default key frame interval in frames
+	int						m_nKeyFrameInterval;
+	
 	/// Video stream index
 	int						m_nVideoStream;
 
