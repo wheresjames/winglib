@@ -1,7 +1,4 @@
 
-_self.load_module( "http", "" );
-_self.load_module( "openssl", "" );
-
 class CGlobal
 {
 	quit = 0;

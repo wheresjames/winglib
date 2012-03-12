@@ -16,16 +16,19 @@ class CGlobal
 	
 	ft = 0;
 	font = 0;
-	
+
 	img = 0;
 	pix = 0;
-	
+
 	t = 0;
-	
+
 	fps = 0;
-	
+
+	frame_time = 0;
+
 	// Maximum number of seconds to buffer before dropping frames
 	maxbuf = 2;
+
 };
 
 local _g = CGlobal();
@@ -72,6 +75,9 @@ function StartStream( params ) : ( _g )
 {
 	local p = CSqMulti( params );
 	_self.echo( params );
+
+	// Initialize frame time
+	_g.frame_time = 0;
 
 	// Frame rate
 	_g.fps = p[ "fps" ].toint();
@@ -205,9 +211,17 @@ function Run() : ( _g )
 	// Write to container
 	if ( _g.vid )
 	{
+
 		// Attempt to write the frame
-		if ( !_g.vid.WriteVideoFrame( _g.frame, -1, -1, inf ) )
+		if ( !_g.vid.WriteVideoFrame( _g.frame, _g.frame_time + _g.fps, _g.frame_time, inf ) )
+//		if ( !_g.vid.WriteVideoFrame( _g.frame, 0, 0, inf ) )
 			_g.quit = 1;
+
+		// Update frame time
+		_g.frame_time += 1000 / _g.fps;
+//		_g.frame_time += 1000 / _g.fps * 2;
+//		_g.frame_time += 10000 / _g.fps;
+//		_g.frame_time++;
 
 //		_self.echo( "wr = " + _g.frame.getUsed() );
 			

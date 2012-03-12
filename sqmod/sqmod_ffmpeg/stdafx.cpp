@@ -31,6 +31,12 @@ extern "C"
 //	return 0;
 //}
 
+// Someone stuck this in ffmpeg/libavcodec/wmalosslessdec.c without a definition
+int my_log2(unsigned int i)
+{
+	return (int)log( (double)i ) / log( (double)2 );
+}
+
 }
 
 extern "C"
@@ -185,15 +191,7 @@ URLProtocol memshare_protocol = {
     memshare_read,
     memshare_write,
     memshare_seek,
-    memshare_close,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0
+    memshare_close
 };
 
 

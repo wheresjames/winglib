@@ -592,6 +592,10 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	if ( 0 <= m_nVideoStream )
 		return m_nVideoStream;
 
+	// Sanity check on video parameters
+	if ( 0 >= width || 0 >= height || 0 >= fps )
+		return -1;
+
 	AVStream *pst = av_new_stream( m_pFormatContext, 0 );
 	if ( !pst )
 		return -1;
@@ -608,7 +612,7 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	// Fill in codec info
 	pcc->codec_id = (CodecID)codec_id;
 	pcc->codec_type = AVMEDIA_TYPE_VIDEO;
-	pcc->bit_rate = 2000000;
+	pcc->bit_rate = width * height * fps / 3;
 	pcc->width = width;
 	pcc->height = height;
 	pcc->time_base.num = 1;

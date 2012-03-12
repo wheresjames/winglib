@@ -18,8 +18,13 @@ function create_font( name, ft )
 	return font;
 }
 
-function create_clip( name, w, h, fps, fmt, sec, font, hrs, mins )
+function create_clip( root, name, devs, w, h, fps, fmt, sec, font, hrs, mins )
 {
+	if ( devs.len() )
+	{	_self.echo( "+++ Havent' implemented this yet :(" );
+		return;
+	} // end if
+
 	::_self.echo( "Creating : " + name + " - " + w + "x" + h + "x" + fps + "x" + sec );
 
 	local avi = CFfContainer();
@@ -53,13 +58,13 @@ function create_clip( name, w, h, fps, fmt, sec, font, hrs, mins )
 	{
 		// Blank the image
 		pix.Zero();	
-		
+
 		// Draw text
 		local min = mins + ( i / fps / 60 ).tointeger();
 		local sec = ( ( i / fps ) % 60 ).tointeger();
 		local f = ( i % fps ).tointeger();
 		local str = format( "%0.2d:%0.2d:%0.2d.%0.2d", hrs, min, sec, f );
-		
+
 		::_self.print( str + "\r" );
 
 		font.setColor( 255, 0, 0 );
@@ -74,11 +79,12 @@ function create_clip( name, w, h, fps, fmt, sec, font, hrs, mins )
 		// Write the frame to the file
 		if ( !avi.WriteFrame( frame, inf ) )
 		{	_self.echo( "Failed to write to avi file" ); return; }
-	
+
 	} // end for
+
 }
 
-function create_clips( root, t, inv, ts, te, w, h, fps, fmt, sec, font )
+function create_clips( root, t, inv, ts, te, devs, empty, w, h, fps, fmt, sec, font )
 {
 	// Current time
 	local gmt = _self.gmt_time();
@@ -95,24 +101,43 @@ function create_clips( root, t, inv, ts, te, w, h, fps, fmt, sec, font )
 	{
 		// Start time
 		time.SetUnixTime( t );
-		local file = ::_self.build_path( root, time.FormatTime( ts ) );
-		
+//		local file = ::_self.build_path( root, time.FormatTime( ts ) );
+		local file = time.FormatTime( ts );
+
 		// End time
 		time.SetUnixTime( t + inv );
 		file += time.FormatTime( te );
-		
-		// Ensure folder
+
+		// Ensure folders exist
 		local path = CSqFile().get_path( file );
-		if ( !CSqFile().exists( path ) ) CSqFile().mkdir( path );
+		if ( devs.len() )
+			foreach( d in devs )
+				CSqFile().mkdir( ::_self.build_path( ::_self.build_path( root, d ), path ) );
+		else 
+			CSqFile().mkdir( ::_self.build_path( root, path ) );
+
+		// Empty files?
+		if ( empty )
+		{
+			if ( devs.len() )
+				foreach( d in devs )
+					CSqFile().put_contents( ::_self.build_path( ::_self.build_path( root, d ), file ), 
+											d + " : " + file );
+
+			else
+				CSqFile().put_contents( ::_self.build_path( root, file ), file );
+
+		} // end if
 
 		// Create this clip
-		create_clip( file, w, h, fps, fmt, inv, font, 
-					 ( t % ( 24 * 60 * 60 ) / ( 60 * 60 ) ).tointeger(),
-					 ( t % ( 60 * 60 ) / 60 ).tointeger() );
-		
+		else
+			create_clip( root, file, devs, w, h, fps, fmt, inv, font, 
+						 ( t % ( 24 * 60 * 60 ) / ( 60 * 60 ) ).tointeger(),
+						 ( t % ( 60 * 60 ) / 60 ).tointeger() );
+
 		// Next interval
 		t += inv;
-	
+
 	} // end while
 
 }
@@ -126,6 +151,13 @@ if ( !out.len() && !file.len() )
 {	_self.echo( "Please specify a destination folder or filename" );
 	return;
 } // end if
+
+// Non-zero for empty files
+local empty = _self.isset( "/", "cmdline.e" ) ? 1 : 0
+
+// Device list
+local d = _self.get( "/", "cmdline.d" ), devs = [];
+if ( d.len() ) devs = split( d, "," );
 
 // Image width
 local w = _self.tolong( _self.get( "/", "cmdline.w" ) );
@@ -182,5 +214,5 @@ if ( file.len() )
 
 // Clip folder structure
 else				 
-	create_clips( out, t, inv, ts, te, w, h, fps, fmt, 15 * 60, font );
+	create_clips( out, t, inv, ts, te, devs, empty, w, h, fps, fmt, 15 * 60, font );
 

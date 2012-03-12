@@ -8,12 +8,12 @@
     
     //#define _M
     #define _M printf( "%s(%d) : MARKER\n", __FILE__, __LINE__ )
-    
-    extern "C"
-    {
-    	#include "libavcodec/avcodec.h"
-    	#include "libavformat/avformat.h"
-    };
+
+	extern "C"
+	{
+		#include "libavcodec/avcodec.h"
+		#include "libavformat/avformat.h"
+	};
     
     
     AVFormatContext *fc = 0;
@@ -160,12 +160,12 @@
     	pcc->time_base.den = fps;
 
     	// Init container
-    _M;	av_set_parameters( fc, 0 );
+//    _M;	av_set_parameters( fc, 0 );
     	
     	if ( !( fc->oformat->flags & AVFMT_NOFILE ) )
-    		avio_open( &fc->pb, fc->filename, URL_WRONLY );
+    		avio_open( &fc->pb, fc->filename, AVIO_FLAG_WRITE );
     
-    _M;	av_write_header( fc );
+    _M;	avformat_write_header( fc, 0 );
     
     _M;	return 1;
     }
