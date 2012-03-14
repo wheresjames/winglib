@@ -1861,7 +1861,7 @@ public:
 				if ( !lMode )
 					sKey = lItems++;
 
-				_DecodeJSON( x_sStr, x_pb[ sKey ], oexTC( T, '{' ) == ch ? 1 : 2 );
+				_DecodeJSON( x_sStr, x_pb[ sKey ], ( oexTC( T, '{' ) == ch ) ? 1 : 2 );
 
 				lMode = 0;
 
@@ -1870,7 +1870,19 @@ public:
 			// End array
 			else if ( oexTC( T, '}' ) == ch || oexTC( T, ']' ) == ch )
 			{
+				if ( lMode )
+				{
+					if ( 1 == x_lArrayType )
+						x_pb[ sKey ] = oexTT( T, "" );
+					else
+						x_pb[ CStr( lItems++ ) ] = sKey;
+
+				} // end if
+
+				lMode = 0;
+
 				x_sStr++;
+
 				return lItems;
 
 			} // end of array?
@@ -1885,11 +1897,14 @@ public:
 			{
 				if ( lMode )
 				{
-					if ( !x_lArrayType )
-						x_pb[ sKey ] = "";
+					if ( 1 == x_lArrayType )
+						x_pb[ sKey ] = oexTT( T, "" );
 					else
 						x_pb[ CStr( lItems++ ) ] = sKey;
+
 				} // end if
+
+				lMode = 0;
 
 				x_sStr++;
 
@@ -1903,10 +1918,9 @@ public:
 					sKey = JsonDecode( x_sStr.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) ) );
 
 				else if ( lMode )
+					lItems++,
 					lMode = ( 1 == lMode ) ? 0 : lMode,
 					x_pb[ sKey ] = JsonDecode( x_sStr.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) ) );
-
-				lItems++;
 
 			} // end if
 
@@ -1915,13 +1929,13 @@ public:
 			{
 				if ( !lMode )
 					lMode = 1,
-					sKey = x_sStr.Parse( oexTT( T, ",:{}\r\n\t" ) ).TrimWhiteSpace();
+					sKey = x_sStr.Parse( oexTT( T, ",:{}[]\r\n\t" ) ).TrimWhiteSpace();
 				else if ( lMode )
+					lItems++,
 					lMode = ( 1 == lMode ) ? 0 : lMode,
-					x_pb[ sKey ] = x_sStr.Parse( oexTT( T, ",:{}\r\n\t" ) ).TrimWhiteSpace();
+					x_pb[ sKey ] = x_sStr.Parse( oexTT( T, ",:{}[]\r\n\t" ) ).TrimWhiteSpace();
 
 				x_sStr++;
-				lItems++;
 
 			} // end if
 
