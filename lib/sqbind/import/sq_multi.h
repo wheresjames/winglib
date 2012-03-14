@@ -176,6 +176,9 @@ namespace sqbind
 		/// Returns a string representation of the value
 		stdString& str();
 
+		/// Returns a string representation of the value
+		stdString str_limit( int maxchars, const stdString &sAppend );
+
 		/// Returns a string representation of the value, if empty, returns def
 		stdString str_def( const sqbind::stdString &def )
 		{	sqbind::stdString v = str(); if ( !v.length() ) return def; return v; }
@@ -221,6 +224,9 @@ namespace sqbind
 
 		/// Return html encoded string
 		stdString str_htmlenc();
+
+		/// Return html encoded string and limits the length
+		stdString str_htmlenc_limit( int maxchars, const stdString &sAppend );
 
 		/// Returns html decoded string
 		stdString str_htmldec();

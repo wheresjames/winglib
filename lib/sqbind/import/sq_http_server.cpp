@@ -214,29 +214,30 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 	// Execute the thing
 	q->execute( &sReply, oexT( "." ), m_sSession.c_str(), mParams.serialize() );
 
-/*
-	{ // Scope
-
-		// Call into child
-		oexAutoLock ll( q->GetLock() );
-		if ( !ll.IsLocked() )
-			return 0;
-
-		// Get a pointer to the engine
-		CSqEngine *pEngine = q->GetEngine();
-		if ( !pEngine )
-			return 0;
-
-		// Make the call
-		if ( !pEngine->Execute( &sReply, m_sSession.c_str(), mParams.serialize(), &binReturn ) )
-			return 0;
-
-	} // end scope
-*/
-
 	// Decode the reply
 	CSqMulti mReply;
 	mReply.deserialize( sReply );
+
+	// Update new session data
+	if ( mReply.isset( oexT( "session" ) ) )
+	{	if ( mReply[ oexT( "session" ) ].length() )
+			x_pSession->Session() 
+				= oex::CParser::Deserialize( oexStrToMb( mReply[ oexT( "session" ) ].c_str() ) );
+		else
+			x_pSession->Session().Destroy();
+	} // end if
+
+	// Set any headers that were returned
+	if ( mReply[ oexT( "headers" ) ].length() )
+	{	CSqMulti t( mReply[ oexT( "headers" ) ] );
+		SQBIND_StdToPropertyBag8( t, x_pSession->TxHeaders() );
+	} // end if
+
+	if ( mReply[ oexT( "reply-code" ) ].length() )
+	{	oex::oexLONG code = oexStrToLong( mReply[ oexT( "reply-code" ) ].c_str() );
+		if ( code )
+			x_pSession->SetHTTPReplyCode( code );
+	} // end if
 
 	// Set the content
 	if ( mReply[ oexT( "content" ) ].length() )
@@ -317,9 +318,6 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 				// Attempt to read a data packet
 				buf = fs.ReadData();
 
-//if ( buf.getUsed() )
-//	oexSHOW( buf.getUsed() );
-
 				if ( buf.getUsed() )
 				{
 					// Next frame
@@ -356,28 +354,6 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 			fs.Cancel();
 
 	} // end else if
-
-	// Update new session data
-	if ( mReply.isset( oexT( "session" ) ) )
-	{
-		if ( mReply[ oexT( "session" ) ].length() )
-			x_pSession->Session() = oex::CParser::Deserialize( oexStrToMb( mReply[ oexT( "session" ) ].c_str() ) );
-		else
-			x_pSession->Session().Destroy();
-
-	} // end if
-
-	// Set any headers that were returned
-	if ( mReply[ oexT( "headers" ) ].length() )
-	{	CSqMulti t( mReply[ oexT( "headers" ) ] );
-		SQBIND_StdToPropertyBag8( t, x_pSession->TxHeaders() );
-	} // end if
-
-	if ( mReply[ oexT( "reply-code" ) ].length() )
-	{	oex::oexLONG code = oexStrToLong( mReply[ oexT( "reply-code" ) ].c_str() );
-		if ( code )
-			x_pSession->SetHTTPReplyCode( code );
-	} // end if
 
 	// Kill thread if we created it
 	if ( !m_bScriptsLinger && m_sScript.length() )

@@ -471,6 +471,9 @@ public:
 		*/
 		stdString create_size_string( double d, double dDiv, int nDigits, const stdString &sSuffix );
 		
+		/// Returns a string clipped to the specified size
+		stdString str_limit( const stdString &sS, int maxchars, const stdString &sAppend );
+
 		/// Replaces the occurences of the specified string
 		stdString replace( const stdString &sS, const stdString &sFind, const stdString &sReplace );
 
@@ -497,6 +500,9 @@ public:
 
 		/// HTML encodes the string
 		stdString htmlencode( const stdString &sS );
+
+		/// HTML encodes the string and limits the length
+		stdString htmlencode_limit( const stdString &sS, int nMaxChars, const stdString &sAppend );
 
 		/// HTML decodes the string
 		stdString htmldecode( const stdString &sS );

@@ -814,6 +814,11 @@ stdString CSqEngineExport::replace( const stdString &sS, const stdString &sFind,
 	return oex2std( std2oex( sS ).Replace( std2oex( sFind ), std2oex( sReplace ) ) );
 }
 
+stdString CSqEngineExport::str_limit( const stdString &sS, int maxchars, const stdString &sAppend )
+{_STT();
+	return oex2std( std2oex( sS ).Clip( maxchars, std2oex( sAppend ) ) );
+}
+
 stdString CSqEngineExport::ireplace( const stdString &sS, const stdString &sFind, const stdString &sReplace )
 {_STT();
 	return oex2std( std2oex( sS ).Replace( std2oex( sFind ), std2oex( sReplace ) ) );
@@ -852,6 +857,11 @@ stdString CSqEngineExport::json_decode( const stdString &sS )
 stdString CSqEngineExport::htmlencode( const stdString &sS )
 {_STT();
 	return oex2std( oexHtmlEncode( std2oex( sS ) ) );
+}
+
+stdString CSqEngineExport::htmlencode_limit( const stdString &sS, int nMaxChars, const stdString &sAppend )
+{_STT();
+	return oex2std( oexHtmlEncode( std2oex( sS ) ).Clip( nMaxChars, std2oex( sAppend ) ) );
 }
 
 stdString CSqEngineExport::htmldecode( const stdString &sS )
@@ -1812,6 +1822,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, trimws )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, find )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ifind )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, str_limit )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, replace )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ireplace )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, create_size_string )	
@@ -1822,6 +1833,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, urlencode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, urldecode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, htmlencode )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, htmlencode_limit )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, htmldecode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, compress )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, uncompress )

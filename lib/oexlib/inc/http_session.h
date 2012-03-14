@@ -138,7 +138,7 @@ public:
 
 	enum
 	{
-		eDefaultKeepAlive = 30
+		eDefaultKeepAlive = 60
 	};
 
 	/// Server callback
@@ -520,7 +520,7 @@ public:
 		{
 			// Save new connection information
 			m_pbSession.Destroy();
-			m_pbSession[ "_id" ] = oexStrToMb( oexGuidToString() );
+			m_pbSession[ "_id" ] = id.Length() ? id : oexStrToMb( oexGuidToString() );
 			m_pbSession[ "_ip" ] = ip;
 
 		} // end if

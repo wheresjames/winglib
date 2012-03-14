@@ -480,6 +480,17 @@ public:
         return m_nLength;
     }
 
+    /// Clips the string at a particular size
+    TStr Clip( t_size x_nLength, const TStr &sAppend )
+    {
+		// Within range?
+		if ( Length() <= x_nLength )
+			return *this;
+
+		// Create clipped string
+		return SubStr( 0, x_nLength ) << sAppend;
+    }
+
 	/// Returns the size of the underlying memory buffer
 	t_size Size()
 	{

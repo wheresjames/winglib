@@ -141,6 +141,11 @@ sqbind::stdString& CSqMulti::str()
 	return m_val.str();
 }
 
+stdString CSqMulti::str_limit( int maxchars, const stdString &sAppend )
+{_STT();
+	return oex2std( std2oex( m_val.str() ).Clip( maxchars, std2oex( sAppend ) ) );
+}
+
 CSqBinary CSqMulti::bin()
 {_STT();
 	return std2bin( m_val.str() );
@@ -190,6 +195,11 @@ stdString CSqMulti::str_urldec()
 stdString CSqMulti::str_htmlenc()
 {_STT();
 	return oex2std( oexHtmlEncode( std2oex( m_val.str() ) ) );
+}
+
+stdString CSqMulti::str_htmlenc_limit( int maxchars, const stdString &sAppend )
+{_STT();
+	return oex2std( oexHtmlEncode( std2oex( m_val.str() ) ).Clip( maxchars, std2oex( sAppend ) ) );
 }
 
 stdString CSqMulti::str_htmldec()
@@ -328,6 +338,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, value )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_def )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_limit )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, toint )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, toint_range )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, toint32 )
@@ -340,6 +351,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_urlenc )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_urldec )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_htmlenc )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_htmlenc_limit )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_htmldec )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_compress )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_uncompress )
