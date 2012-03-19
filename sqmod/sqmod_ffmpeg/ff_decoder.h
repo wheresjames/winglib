@@ -103,6 +103,14 @@ public:
 	*/
 	int GetH264FrameType( const void *p, int len );
 	
+	/**
+		@param [in] p	-	Pointer to frame buffer
+		@param [in] len	-	Length of buffer in p
+		
+		@return		Frame ID
+	*/
+	int GetH264FrameId( const void *p, int len );
+
 	/// Returns the frame type
 	/**
 		@param [in] p	-	Pointer to frame buffer
@@ -119,6 +127,12 @@ public:
 			return -1;
 		return GetH264FrameType( in->Ptr(), in->getUsed() );
 	}
+
+	/// Picks the SEI data from the stream
+	/**
+		@param [in] in	-	Buffer containing single SEI frame
+	*/
+	int ReadSEI( sqbind::CSqBinary *in );
 	
 	/** @} */
 
@@ -150,5 +164,8 @@ private:
 
 	/// Extra codec data
 	sqbind::CSqBinary		m_extra;
+	
+	/// Custom codec flags
+	int						m_nFlags;
 
 };

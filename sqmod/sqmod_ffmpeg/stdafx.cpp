@@ -214,6 +214,9 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 	// Register codecs
 	av_register_all();
 
+	// Initialize network functions
+	avformat_network_init();
+	
 	// Register the oexshare protocol
 	ffurl_register_protocol( &memshare_protocol, sizeof( memshare_protocol ) );
 //	av_register_protocol2( &memshare_protocol, sizeof( memshare_protocol ) );

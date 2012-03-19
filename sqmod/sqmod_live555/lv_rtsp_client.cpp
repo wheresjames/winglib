@@ -147,6 +147,11 @@ void CLvRtspClient::CVideoSink::afterGettingFrame( void* clientData, unsigned fr
 	// How much data was used this time
 	m_buf.setUsed( m_header.getUsed() + frameSize );
 
+#if defined( oexDEBUG )
+//	oexSHOW( frameSize );
+//	oexEcho( oexBinToAsciiHexStr( m_buf.Mem(), 0, 16, 16 ).Ptr() );
+#endif		
+
 	// Copy time stamps
 	oex::oexCopyTime( m_ts, presentationTime );
 	oex::oexSetTime( m_ds, 0, durationInMicroseconds );
