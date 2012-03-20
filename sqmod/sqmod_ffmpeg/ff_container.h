@@ -203,7 +203,13 @@ public:
 	
 	/// Sets the default key frame interval
 	void setKeyFrameInterval( int n ) { m_nKeyFrameInterval = n; }
-	
+
+	/// Returns last frame flags
+	int getLastFrameFlags() { return m_nLastFrameFlags; }
+
+	/// Returns the last frames encoded size
+	int getLastFrameEncodedSize() { return m_nLastFrameEncodedSize; }
+
 	/** @} */
 
 private:
@@ -246,6 +252,12 @@ private:
 
 	/// Number of frames that have been processed
 	int						m_nFrames;
+
+	/// Last frame flags
+	int						m_nLastFrameFlags;
+
+	/// Last frames encoded size
+	int						m_nLastFrameEncodedSize;
 	
 	/// Audio decoder
 	CFfAudioDecoder			m_audio_dec;

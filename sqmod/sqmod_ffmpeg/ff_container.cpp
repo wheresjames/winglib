@@ -67,6 +67,13 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getKeyFrameInterval )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, setKeyFrameInterval )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getLastFrameFlags )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getLastFrameEncodedSize )
+//	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
+//	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
+//	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
+//	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
+//	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 
@@ -106,6 +113,8 @@ CFfContainer::CFfContainer()
 	m_nRead = 0;
 	m_bKeyRxd = 0;
 	m_nFrames = 0;
+	m_nLastFrameFlags = 0;
+	m_nLastFrameEncodedSize = 0;
 	m_nKeyFrameInterval = 0;
 	oexZero( m_pkt );
 }
@@ -135,6 +144,8 @@ void CFfContainer::Destroy()
 	m_buf.Free();
 	oexZero( m_pkt );
 	m_nFrames = 0;
+	m_nLastFrameFlags = 0;
+	m_nLastFrameEncodedSize = 0;
 
 //	m_pAudioCodecContext = oexNULL;
 	m_nAudioStream = -1;
@@ -339,6 +350,10 @@ int CFfContainer::ReadFrame( sqbind::CSqBinary *dat, sqbind::CSqMulti *m )
 
 	} // end if
 
+	// Save flags
+	m_nLastFrameFlags = m_pkt.flags;
+	m_nLastFrameEncodedSize = m_pkt.size;
+
 	if ( dat )
 		dat->setBuffer( (sqbind::CSqBinary::t_byte*)m_pkt.data, m_pkt.size, 0, 0 );
 
@@ -398,6 +413,10 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 
 	if ( !gpp )
 		return -1;
+
+	// Save flags
+	m_nLastFrameFlags = m_pkt.flags;
+	m_nLastFrameEncodedSize = m_pkt.size;
 
 	// Is it already the right format?
 	if ( fmt == (int)m_pCodecContext->pix_fmt )
@@ -465,6 +484,10 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 
 	if ( !gpp )
 		return -1;
+
+	// Save flags
+	m_nLastFrameFlags = m_pkt.flags;
+	m_nLastFrameEncodedSize = m_pkt.size;
 
 	// Is it already the right format?
 	if ( fmt == (int)m_pCodecContext->pix_fmt )
@@ -782,6 +805,10 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	pkt.stream_index = pStream->index;
 	pkt.data = (uint8_t*)dat->_Ptr();
 	pkt.size = dat->getUsed();
+
+	// Save flags
+	m_nLastFrameFlags = pkt.flags;
+	m_nLastFrameEncodedSize = pkt.size;
 
 /*
 	if ( 0 > m_nAudioStream )

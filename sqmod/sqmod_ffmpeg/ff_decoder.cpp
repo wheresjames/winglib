@@ -378,8 +378,7 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 			return 0;
 	} // end if
 
-	int gpp = 0;
-	int used = 0;
+	int gpp = 0, used = 0;
 #if defined( FFSQ_VIDEO2 )
 	used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
 #else
@@ -444,8 +443,7 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 			return 0;
 	} // end if
 
-	int gpp = 0;
-	int used = 0;
+	int gpp = 0, used = 0;
 #if defined( FFSQ_VIDEO2 )
 		used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
 #else
