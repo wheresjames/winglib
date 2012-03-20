@@ -152,7 +152,7 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 	// Codec context
 	if ( m_extra.getUsed() )
-	{	m_nFlags = 0xffffffff;
+	{	m_nFlags = 3;
 		m_pCodecContext->extradata_size = m_extra.getUsed();
 		m_pCodecContext->extradata = (uint8_t*)m_extra._Ptr();
 		m_pCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
@@ -171,6 +171,9 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 		} // end if
 
 	} // end if
+
+	else
+		oexEcho( "!!! Missing SEI Headers !!!" );
 
 	m_nFmt = fmt;
 
@@ -298,8 +301,8 @@ int CFfDecoder::ReadSEI( sqbind::CSqBinary *in )
 		return 1;
 
 #if defined( DEBUG )
-	oexEcho( "!!! Missing SEI Information !!!" );
-	oexEcho( oexBinToAsciiHexStr( in, 0, 16, 16 ).Ptr() );
+//	oexEcho( "!!! Missing SEI Information !!!" );
+//	oexEcho( oexBinToAsciiHexStr( in, 0, 16, 16 ).Ptr() );
 #endif		
 		
 	// Process frame type
@@ -358,32 +361,29 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 	// Get data packet
 	if ( !in || !out || !BufferData( in, m ) )
 		return 0;
-	
-	if ( !m_pFrame )
-		m_pFrame = avcodec_alloc_frame();
 
-	// I just want to know
-//	oexSHOW( m_pkt.size );
-//	oexSHOW( GetH264FrameType( m_pkt.data, m_pkt.size ) );
+	// Allocate frame
+	if ( !m_pFrame )
+	{	m_pFrame = avcodec_alloc_frame();
+		if ( !m_pFrame )
+			return 0;
+	} // end if
 
 	// Waiting for key frame?
-//	if ( m_nWaitKeyFrame )
-//	{	if ( CODEC_ID_H264 != m_pCodecContext->codec_id 
-//			 || 0 == GetH264FrameType( in->Ptr(), in->getUsed() ) )
-//			m_nWaitKeyFrame = 0;
-//		else
-//			return 0;
-//	} // end if
-
-	if ( !m_pFrame )
-		return 0;
+	if ( m_nWaitKeyFrame )
+	{	if ( CODEC_ID_H264 != m_pCodecContext->codec_id 
+			 || 0 == GetH264FrameType( m_pkt.data, m_pkt.size ) )
+			m_nWaitKeyFrame = 0;
+		else
+			return 0;
+	} // end if
 
 	int gpp = 0;
 	int used = 0;
 #if defined( FFSQ_VIDEO2 )
-		used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
+	used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );
 #else
-		used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (uint8_t*)m_pkt.data, m_pkt.size );
+	used = avcodec_decode_video( m_pCodecContext, m_pFrame, &gpp, (uint8_t*)m_pkt.data, m_pkt.size );
 #endif
 
 	// Dequeue used data
@@ -428,11 +428,21 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 	if ( !in || !img || !BufferData( in, m ) )
 		return 0;
 
+	// Allocate frame
 	if ( !m_pFrame )
-		m_pFrame = avcodec_alloc_frame();
+	{	m_pFrame = avcodec_alloc_frame();
+		if ( !m_pFrame )
+			return 0;
+	} // end if
 
-	if ( !m_pFrame )
-		return 0;
+	// Waiting for key frame?
+	if ( m_nWaitKeyFrame )
+	{	if ( CODEC_ID_H264 != m_pCodecContext->codec_id 
+			 || 0 == GetH264FrameType( m_pkt.data, m_pkt.size ) )
+			m_nWaitKeyFrame = 0;
+		else
+			return 0;
+	} // end if
 
 	int gpp = 0;
 	int used = 0;

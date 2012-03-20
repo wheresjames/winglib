@@ -132,8 +132,6 @@ int memshare_write( URLContext *h, const unsigned char *buf, int size )
 	// Just ignore null writes
 	if ( 0 >= size )
 		return 0;
-
-oexSHOW( size );
 		
 	// Sanity check
 	if ( !h || !h->priv_data || !buf )
