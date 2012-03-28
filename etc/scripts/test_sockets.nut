@@ -12,8 +12,12 @@ function WaitKey()
 
 function _init() : ( _g )
 {
-	local server = "google.com";
-	local port = 80;
+	local server = _self.get( "/", "cmdline.1" );
+	if ( !server.len() ) server = "google.com";
+	local port = _self.tolong( _self.get( "/", "cmdline.2" ) );
+	if ( !port ) port = 80;
+	local link = _self.get( "/", "cmdline.3" );
+	if ( !link.len() ) link = "/";
 
 	_self.echo( "\n" + server + ":" + port +"\n" );
 
@@ -31,12 +35,19 @@ function _init() : ( _g )
 		return;
 	} // end if
 
+	local tx = "GET " + link + " HTTP/1.1\r\nHost:\r\n\r\n";
+	_self.echo( " --- REQUEST --- \r\n\r\n" + tx );
+	
 	// Write data
-	if ( !socket.Write( "GET / HTTP/1.1\r\n\r\n", 0 ) )
+	if ( !socket.Write( "GET " + link + " HTTP/1.1\r\nHost:\r\n\r\n", 0 ) )
 	{	_self.echo( "Write() : " + socket.getLastError() );
 		WaitKey();
 		return;
 	} // end if
+
+	// Do we want sleep before read?
+	local sl = _self.tolong( _self.get( "/", "cmdline.sleep" ) )
+	if ( 0 < sl ) _self.sleep( sl );
 
 	// Wait for data
 	if ( !socket.WaitEvent( CSqSocket().EVT_READ, 3000 ) )
@@ -46,7 +57,7 @@ function _init() : ( _g )
 	} // end if
 
 	// Show the data that was read
-	_self.echo( " Data: " + socket.Read( 0 ) );
+	_self.echo( " --- RESPONSE --- \r\n\r\n" + socket.Read( 0 ) );
 
 	_self.echo( "\n...done...\n" );
 

@@ -267,8 +267,8 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 		oex::oexULONG uTimeout = oexGetUnixTime() + 8;
 
 		// Multi part?
-		oex::CStr8 sBoundry, sMulti;
-		oex::oexCSTR pMulti = mReply[ oexT( "multi" ) ].c_str(), pBoundry = 0;		
+		oex::CStr8 sBoundary, sMulti;
+		oex::oexCSTR pMulti = mReply[ oexT( "multi" ) ].c_str();		
 		if ( !pMulti || !*pMulti )
 			pMulti = 0;
 		else
@@ -278,10 +278,10 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 			pb[ "Content-type" ] = pMulti;
 			sMulti = oex::CParser::EncodeMIME( pb, oex::oexTRUE );
 
-			// What will the boundry string be?
-			sBoundry = std2oex( mReply[ oexT( "boundry" ) ].str() );
-			if ( !sBoundry.Length() )
-				sBoundry = oex::CStr( "--" ) << oexUnique();
+			// What will the boundary string be?
+			sBoundary = std2oex( mReply[ oexT( "boundary" ) ].str() );
+			if ( !sBoundary.Length() )
+				sBoundary = oex::CStr( "--" ) << oexUnique();
 
 		} // end else
 
@@ -291,7 +291,7 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 		{
 			// Multipart?
 			if ( pMulti )
-				sType = oex::CStr( "multipart/x-mixed-replace; boundary=" ) << sBoundry;
+				sType = oex::CStr( "multipart/x-mixed-replace; boundary=" ) << sBoundary;
 			else
 				sType = oexT( "application/octet-stream" );
 
@@ -302,6 +302,9 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 
 		// Send the headers
 		x_pSession->SendHeaders( -1 );
+
+		// Add CRLF after boundary
+		sBoundary += "\r\n";
 
 		// While we're not timed out and connected
 		while ( uTimeout > oexGetUnixTime() && x_pSession->IsConnected() )
@@ -326,13 +329,13 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 					// Handle multipart if needed
 					if ( pMulti && *pMulti )
 					{
-						// Build multipart boundry and headers
+						// Build multipart boundary and headers
 						oex::CStr8 mpb;
-						mpb << sBoundry << sMulti 
+						mpb << sBoundary << sMulti 
 							<< "Content-Length: " << buf.getUsed()
 							<< "\r\n\r\n";
 
-						// Write multpart boundry and headers
+						// Write multpart boundary and headers
 						x_pSession->WritePort( mpb.Ptr(), mpb.Length() );
 
 					} // end if
