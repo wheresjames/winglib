@@ -615,6 +615,33 @@ public:
 		/// Returns information about the specified file
 		CSqMulti get_file_info( const stdString &sFile );
 		
+		/// Initializes screen capture resources
+		int screen_init_capture( CSqBinary *x_pInf, int fmt, int w, int h );
+
+		/// Returns information about the screen capture
+		int screen_get_info( CSqBinary *x_pInf, CSqMulti *m );
+
+		/// Release screen capture resources
+		int screen_release_capture( CSqBinary *x_pInf );
+
+		/// Locks screen data
+		int screen_lock( CSqBinary *x_pInf, CSqBinary *x_pImg );
+
+		/// Unlocks screen data
+		int screen_unlock( CSqBinary *x_pInf, CSqBinary *x_pImg );
+
+		/// Returns information about the mouse
+		int get_mouse_info( CSqMulti *m );
+
+		/// Returns mouse position as ( ( short(y) << 16 ) | short(x) )
+		SQInteger get_mouse_pos();
+
+		/// Sets the mouse position
+		int set_mouse_pos( int x, int y );
+
+		/// Queues the specified input
+		int queue_input( CSqMulti *m );
+
 		/// Returns non-zero if registry key exists
 		int reg_is_key( const stdString &sKey, const stdString &sPath, const stdString &sName );
 

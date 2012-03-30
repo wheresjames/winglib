@@ -1188,6 +1188,77 @@ CSqMulti CSqEngineExport::get_file_info( const stdString &sFile )
 	return m;
 }
 
+int CSqEngineExport::screen_init_capture( CSqBinary *x_pInf, int fmt, int w, int h )
+{_STT();
+	if ( !x_pInf )
+		return 0;
+	return oex::os::CSysUtil::InitScreenCapture( &x_pInf->Mem(), fmt, w, h );
+}
+
+int CSqEngineExport::screen_get_info( CSqBinary *x_pInf, CSqMulti *m )
+{_STT();
+	if ( !x_pInf || !m )
+		return 0;
+
+	oex::CPropertyBag pb;
+	int ret = oex::os::CSysUtil::GetScreenInfo( &x_pInf->Mem(), &pb );
+	SQBIND_PropertyBagToMulti( pb, *m );
+	return ret;
+}
+
+int CSqEngineExport::screen_release_capture( CSqBinary *x_pInf )
+{_STT();
+	if ( !x_pInf )
+		return 0;
+	return oex::os::CSysUtil::ReleaseScreenCapture( &x_pInf->Mem() );
+}
+
+int CSqEngineExport::screen_lock( CSqBinary *x_pInf, CSqBinary *x_pImg )
+{_STT();
+	if ( !x_pInf || !x_pImg )
+		return 0;
+	return oex::os::CSysUtil::LockScreen( &x_pInf->Mem(), &x_pImg->Mem() );
+}
+
+int CSqEngineExport::screen_unlock( CSqBinary *x_pInf, CSqBinary *x_pImg )
+{_STT();
+	if ( !x_pInf || !x_pImg )
+		return 0;
+	return oex::os::CSysUtil::UnlockScreen( &x_pInf->Mem(), &x_pImg->Mem() );
+}
+
+int CSqEngineExport::get_mouse_info( CSqMulti *m )
+{_STT();
+	if ( !m )
+		return 0;
+
+	oex::CPropertyBag pb;
+	int ret = oex::os::CSysUtil::GetMouseInfo( &pb );
+	SQBIND_PropertyBagToMulti( pb, *m );
+	return ret;
+}
+
+SQInteger CSqEngineExport::get_mouse_pos()
+{_STT();
+	return oex::os::CSysUtil::GetMousePos();
+}
+
+int CSqEngineExport::set_mouse_pos( int x, int y )
+{_STT();
+	return oex::os::CSysUtil::SetMousePos( x, y );
+}
+
+int CSqEngineExport::queue_input( CSqMulti *m )
+{_STT();
+	if ( !m )
+		return 0;
+
+	oex::CPropertyBag pb;
+	int ret = oex::os::CSysUtil::QueueInput( &pb );
+	SQBIND_PropertyBagToMulti( pb, *m );
+	return ret;
+}
+
 int CSqEngineExport::reg_is_key( const stdString &sKey, const stdString &sPath, const stdString &sName )
 {_STT();
 	return oex::os::CSysUtil::IsRegValue( std2oex( sKey ), std2oex( sPath ), std2oex( sName ) );
@@ -1858,6 +1929,18 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_set_str )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_del_key )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_del_sub_keys )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, screen_init_capture )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, screen_release_capture )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, screen_lock )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, screen_unlock )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, screen_get_info )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_mouse_info )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_mouse_pos )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_mouse_pos )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue_input )
+//	SQBIND_MEMBER_FUNCTION(  CSqEngineExport,  )
+//	SQBIND_MEMBER_FUNCTION(  CSqEngineExport,  )
+
 
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, type_size )
 

@@ -535,7 +535,7 @@ public:
 	}
 
 	/// Sets a Ptr buffer pointer ( make sure it doesn't go away before this class! )
-    void setBuffer( t_byte *x_ptr, t_size x_size, t_size x_offset, oexBOOL x_bFree )
+    void setBuffer( void *x_ptr, t_size x_size, t_size x_offset, oexBOOL x_bFree )
 	{
 		Destroy();
 
@@ -545,7 +545,7 @@ public:
 		// Save Ptr buffer info
 		m_nUsed = x_size;
 		m_nOffset = x_offset;
-		m_ptr = x_ptr;
+		m_ptr = (t_byte*)x_ptr;
 		m_bFree = x_bFree;
 		if ( m_ptr && m_bFree )
 			oexAddRef( m_ptr );

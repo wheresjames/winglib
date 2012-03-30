@@ -59,8 +59,6 @@ function _init() : ( _g )
 	// Show the data that was read
 	_self.echo( " --- RESPONSE --- \r\n\r\n" + socket.Read( 0 ) );
 
-	_self.echo( "\n...done...\n" );
-
 	WaitKey();
 }
 

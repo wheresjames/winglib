@@ -348,7 +348,7 @@ int CFfEncoder::Encode( int fmt, int width, int height, sqbind::CSqBinary *in, s
 	if ( !flip && fmt == m_nFmt )
 		return EncodeRaw( fmt, width, height, in->Ptr(), in->getUsed(), out, m );
 
-	// Must convert to input format
+		// Must convert to input format
 	if ( !CFfConvert::ConvertColorBB( width, height, in, fmt, &m_tmp, m_nFmt, SWS_FAST_BILINEAR ) )
 		return 0;
 

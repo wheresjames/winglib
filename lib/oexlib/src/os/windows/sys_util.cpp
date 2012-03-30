@@ -425,3 +425,266 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 	
 	return pb;
 }
+
+struct _SSysUtilCapInfo
+{
+	BITMAPINFO	bmi;
+	HDC			hDC;
+	VOID 		*pImg;
+	HBITMAP 	hBmp;
+	HBITMAP 	hOldBmp;
+	oexLONG		lFmt;
+	oexLONG 	lScreenWidth;
+	oexLONG		lScreenHeight;
+};
+
+oexINT CSysUtil::ReleaseScreenCapture( CBin *x_pInf )
+{_STT();
+
+	// Ensure valid structure
+	if ( !x_pInf || sizeof( _SSysUtilCapInfo ) != x_pInf->getUsed() )
+		return 0;
+
+	_SSysUtilCapInfo *p = (_SSysUtilCapInfo*)x_pInf->Ptr();
+	if ( !p )
+		return 0;
+
+	if ( p->hDC && p->hOldBmp ) 
+		::SelectObject( p->hDC, p->hOldBmp );
+		
+	if ( p->hDC ) 
+		::DeleteDC( p->hDC );
+
+	if ( p->hBmp ) 
+		::DeleteObject( p->hBmp );
+
+	x_pInf->Destroy();
+
+	return 1;
+}
+
+oexINT CSysUtil::InitScreenCapture( CBin *x_pInf, oexLONG fmt, oexLONG w, oexLONG h )
+{_STT();
+
+	// Attempt to initialize the image structure
+	if ( !x_pInf || !x_pInf->Allocate( sizeof( _SSysUtilCapInfo ) ) )
+		return 0;
+
+	// Initialize and get a pointer to the new structure
+	x_pInf->Zero(); x_pInf->setUsed( sizeof( _SSysUtilCapInfo ) );
+	_SSysUtilCapInfo *p = (_SSysUtilCapInfo*)x_pInf->Ptr();
+	if ( !p )
+		return 0;
+
+	p->lFmt = fmt;
+	p->lScreenWidth = GetSystemMetrics( SM_CXFULLSCREEN );
+	p->lScreenHeight = GetSystemMetrics( SM_CYFULLSCREEN );
+		
+	// What is the capture size?
+	if ( 0 >= w )
+		w = p->lScreenWidth;
+	if ( 0 >= h )
+		h = p->lScreenHeight;
+
+	// Grab default dc
+	HDC hDC = ::GetDC( NULL );
+	if ( !hDC )
+		return 0;
+
+	p->hDC = ::CreateCompatibleDC( NULL );
+	if ( !p->hDC )
+	{	::ReleaseDC( NULL, hDC );
+		return 0;
+	} // end if
+
+	oexLONG bpp = 24;
+	p->bmi.bmiHeader.biSize = sizeof( BITMAPINFOHEADER );
+	p->bmi.bmiHeader.biWidth = w;
+	p->bmi.bmiHeader.biHeight = h;
+	p->bmi.bmiHeader.biPlanes = 1;
+	p->bmi.bmiHeader.biBitCount = bpp;
+	p->bmi.bmiHeader.biSizeImage = cmn::Align4( cmn::FitTo< oexLONG >( bpp, 8 ) * w ) * h;
+	p->bmi.bmiHeader.biCompression = BI_RGB;
+
+	// Create a bitmap compatible with the default dc
+	p->hBmp = CreateDIBSection( hDC, &p->bmi, DIB_RGB_COLORS, &p->pImg, 0, 0 );
+	if ( !p->hBmp || !p->pImg )
+	{	ReleaseScreenCapture( x_pInf );
+		::ReleaseDC( NULL, hDC );
+		return 0;
+	} // end if
+
+	// Select the new bitmap
+	p->hOldBmp = (HBITMAP)::SelectObject( p->hDC, p->hBmp );
+
+	// Pick a decent stretch mode
+	SetStretchBltMode( p->hDC, HALFTONE );
+
+	// Release default dc
+	::ReleaseDC( NULL, hDC );
+
+	return 1;
+}
+
+oexINT CSysUtil::GetScreenInfo( CBin *x_pInf, CPropertyBag *pb )
+{_STT();
+
+	// Ensure valid structure
+	if ( !x_pInf || sizeof( _SSysUtilCapInfo ) != x_pInf->getUsed() || !pb )
+		return 0;
+
+	_SSysUtilCapInfo *p = (_SSysUtilCapInfo*)x_pInf->Ptr();
+	if ( !p || !p->hDC )
+		return 0;
+
+	// Save important image information
+	(*pb)[ "w" ] = p->bmi.bmiHeader.biWidth;
+	(*pb)[ "h" ] = p->bmi.bmiHeader.biHeight;
+	(*pb)[ "bpp" ] = p->bmi.bmiHeader.biBitCount;
+	(*pb)[ "sz" ] = p->bmi.bmiHeader.biSizeImage;
+	(*pb)[ "cmp" ] = p->bmi.bmiHeader.biCompression;
+	
+	(*pb)[ "fmt" ] = p->lFmt;
+	(*pb)[ "sw" ] = p->lScreenWidth;
+	(*pb)[ "sh" ] = p->lScreenHeight;
+	
+
+	return pb->Size();
+}
+
+oexINT CSysUtil::LockScreen( CBin *x_pInf, CBin *x_pImg )
+{_STT();
+
+	// Ensure valid structure
+	if ( !x_pInf || sizeof( _SSysUtilCapInfo ) != x_pInf->getUsed() )
+		return 0;
+
+	_SSysUtilCapInfo *p = (_SSysUtilCapInfo*)x_pInf->Ptr();
+	if ( !p )
+		return 0;
+
+	// Grab default dc
+	HDC hDC = ::GetDC( NULL );
+	if ( !hDC )
+		return 0;
+
+	BOOL bRet = oexFALSE;
+
+	// Do we need to stretch?
+	if ( p->lScreenWidth == p->bmi.bmiHeader.biWidth
+	     && p->lScreenHeight == p->bmi.bmiHeader.biHeight )
+		bRet = ::BitBlt( p->hDC, 0, 0,
+						 p->bmi.bmiHeader.biWidth, 
+						 p->bmi.bmiHeader.biHeight, 
+						 hDC, 0, 0, SRCCOPY );
+
+	else
+		bRet = ::StretchBlt(	p->hDC,	0, 0,
+										p->bmi.bmiHeader.biWidth,
+										p->bmi.bmiHeader.biHeight,
+								hDC,	0, 0,
+										p->lScreenWidth,
+										p->lScreenHeight,
+								SRCCOPY );
+
+	// Release default dc
+	::ReleaseDC( NULL, hDC );
+
+	// Set the image buffer pointer
+	if ( bRet )
+		x_pImg->setBuffer( p->pImg, p->bmi.bmiHeader.biSizeImage, 0, oexFALSE );
+	else
+		x_pImg->Destroy();
+
+	return x_pImg->getUsed();
+}
+
+oexINT CSysUtil::UnlockScreen( CBin *x_pInf, CBin *x_pImg )
+{_STT();
+
+	return 1;
+}
+
+oexINT CSysUtil::GetMouseInfo( CPropertyBag *pb )
+{_STT();
+
+	if ( !pb )
+		return 0;
+
+	POINT pos;
+	if ( ::GetCursorPos( &pos ) )
+		(*pb)[ "x" ] = pos.x, (*pb)[ "y" ] = pos.y;
+
+	return pb->Size();
+}
+
+oexLONG CSysUtil::GetMousePos()
+{_STT();
+
+	POINT pos;
+	if ( !::GetCursorPos( &pos ) )
+		return 0;
+
+	return ( short( pos.y ) << 16 ) | short( pos.x );
+}
+
+oexINT CSysUtil::SetMousePos( oexLONG x, oexLONG y )
+{_STT();
+	return ::SetCursorPos( x, y );
+}
+
+oexINT CSysUtil::QueueInput( CPropertyBag *pb )
+{_STT();
+
+	if ( !pb )
+		return 0;
+
+	INPUT in;
+
+	// For each input item
+	for ( CPropertyBag::iterator it; pb->List().Next( it ); )
+		if ( pb->IsKey( oexT( "type" ) ) )
+		{
+			oexZero( in );
+
+			// Mouse input?
+			if ( (*pb)[ oexT( "type" ) ].ToString() == oexT( "mouse" ) )
+			{	in.type = INPUT_MOUSE;
+				in.mi.dx = (*pb)[ oexT( "x" ) ].ToLong();
+				in.mi.dy = (*pb)[ oexT( "y" ) ].ToLong();
+				in.mi.mouseData = (*pb)[ oexT( "data" ) ].ToLong();
+				in.mi.dwFlags = (*pb)[ oexT( "flags" ) ].ToLong();
+				in.mi.time = (*pb)[ oexT( "time" ) ].ToLong();
+				// in.mi.dwExtraInfo = (*pb)[ oexT( "" ) ].ToLong();
+			} // end if
+
+			// Keyboard input?
+			else if ( (*pb)[ oexT( "type" ) ].ToString() == oexT( "keyboard" ) )
+			{	in.type = INPUT_KEYBOARD;
+				in.ki.wVk = (*pb)[ oexT( "vk" ) ].ToLong();
+				in.ki.wScan = (*pb)[ oexT( "scan" ) ].ToLong();
+				in.ki.dwFlags = (*pb)[ oexT( "flags" ) ].ToLong();
+				in.ki.time = (*pb)[ oexT( "time" ) ].ToLong();
+				// in.ki.dwExtraInfo = (*pb)[ oexT( "" ) ].ToLong();
+			} // end else
+
+			// Hardware input?
+			else if ( (*pb)[ oexT( "type" ) ].ToString() == oexT( "hardware" ) )
+			{	in.type = INPUT_HARDWARE;
+				in.hi.uMsg = (*pb)[ oexT( "msg" ) ].ToLong();
+				in.hi.wParamL = (*pb)[ oexT( "low" ) ].ToLong();
+				in.hi.wParamH = (*pb)[ oexT( "hi" ) ].ToLong();
+			} // end else
+
+			// ???
+			else
+				continue;
+
+			// Send the input
+			SendInput( 1, &in, sizeof( in ) );
+
+		} // end if
+
+	return 1;
+}
+

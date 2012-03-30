@@ -228,6 +228,7 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
 										width, height, (PixelFormat)dst_fmt,
 										alg, NULL, NULL, NULL );
+
 	if ( !psc )
 		return 0;
 

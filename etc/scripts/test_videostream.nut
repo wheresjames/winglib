@@ -75,7 +75,7 @@ function OnProcessRequest( params )
 						<body>
 							<div class='vid'>
 								<h1>MJPEG</h1>
-								<img src='/video?type=mjpeg' />
+								<img src='/video?type=mjpeg&cap=1' />
 							</div>
 							<div class='vid'>
 								<h1>HTML5</h1>

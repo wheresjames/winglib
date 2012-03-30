@@ -1913,6 +1913,8 @@ public:
 			// Parse string
 			else if ( oexTC( T, '"' ) == ch )
 			{
+				oexLONG l = x_sStr.Length();
+
 				if ( !lMode )
 					lMode = 1,
 					sKey = JsonDecode( x_sStr.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) ) );
@@ -1921,6 +1923,10 @@ public:
 					lItems++,
 					lMode = ( 1 == lMode ) ? 0 : lMode,
 					x_pb[ sKey ] = JsonDecode( x_sStr.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) ) );
+
+				// Skip rouge characters
+				if ( x_sStr.Length() == l )
+					x_sStr++;
 
 			} // end if
 

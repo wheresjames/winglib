@@ -189,4 +189,30 @@ public:
 	*/
 	static CStr GetDriveTypeStr( const CStr &x_sDrive );
 
+	/// Returns information about the mouse
+	static oexINT GetMouseInfo( CPropertyBag *pb );
+
+	/// Returns the mouse position
+	static oexLONG GetMousePos();
+
+	/// Sets information about the mouse
+	static oexINT SetMousePos( oexLONG x, oexLONG y );
+
+	/// Queues the specified input
+	static oexINT QueueInput( CPropertyBag *pb );
+
+	/// Initializes screen capture resources
+	static oexINT InitScreenCapture( CBin *x_pInf, oexLONG fmt, oexLONG w, oexLONG h );
+
+	/// Returns information about the screen capture
+	static oexINT GetScreenInfo( CBin *x_pInf, CPropertyBag *pb );
+
+	/// Release screen capture resources
+	static oexINT ReleaseScreenCapture( CBin *x_pInf );
+
+	/// Locks screen data
+	static oexINT LockScreen( CBin *x_pInf, CBin *x_pImg );
+
+	/// Unlocks screen data
+	static oexINT UnlockScreen( CBin *x_pInf, CBin *x_pImg );
 };
