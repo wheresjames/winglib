@@ -566,7 +566,7 @@ public:
 
 		/// Attempts to find the squirrel interpreter and execute the specified script
 		int sqexe_script( const stdString &sScript, const stdString &sParams, const stdString &sDir );
-		
+
 		/// Installs a service
 		int service_install( const stdString &sName, const stdString &sDesc, const stdString &sExe, int bAutoRestart );
 
@@ -611,21 +611,27 @@ public:
 
 		/// Returns the size of the specified file
 		SQInteger get_file_size( const stdString &sFile );
-		
+
 		/// Returns information about the specified file
 		CSqMulti get_file_info( const stdString &sFile );
-		
+
+		/// Returns the number of screens attached to the system
+		int screen_get_num();
+
+		/// Returns information about the system displays
+		CSqMulti screen_get_info();
+
 		/// Initializes screen capture resources
-		int screen_init_capture( CSqBinary *x_pInf, int fmt, int w, int h );
+		int screen_init_capture( CSqBinary *x_pInf, int screen, int fmt, int w, int h );
 
 		/// Returns information about the screen capture
-		int screen_get_info( CSqBinary *x_pInf, CSqMulti *m );
+		CSqMulti screen_get_capture_info( CSqBinary *x_pInf );
 
 		/// Release screen capture resources
 		int screen_release_capture( CSqBinary *x_pInf );
 
 		/// Locks screen data
-		int screen_lock( CSqBinary *x_pInf, CSqBinary *x_pImg );
+		int screen_lock( CSqBinary *x_pInf, CSqBinary *x_pImg, int x_nScreen );
 
 		/// Unlocks screen data
 		int screen_unlock( CSqBinary *x_pInf, CSqBinary *x_pImg );
@@ -746,7 +752,7 @@ public:
 	void SetRoot( const stdString &s ) { m_sRoot = s; }
 
 	stdString& GetRoot() { return m_sRoot; }
-	
+
 	stdString& GetReturnData() { return m_sReturnData; }
 
 protected:

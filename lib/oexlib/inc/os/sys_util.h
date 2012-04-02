@@ -201,17 +201,23 @@ public:
 	/// Queues the specified input
 	static oexINT QueueInput( CPropertyBag *pb );
 
+	/// Returns the number of screens
+	static oexINT GetNumScreens();
+
+	/// Returns information about the system screens
+	static oexINT GetScreenInfo( CPropertyBag *pb );
+
 	/// Initializes screen capture resources
-	static oexINT InitScreenCapture( CBin *x_pInf, oexLONG fmt, oexLONG w, oexLONG h );
+	static oexINT InitScreenCapture( CBin *x_pInf, oexLONG x_nScreen, oexLONG fmt, oexLONG w, oexLONG h );
 
 	/// Returns information about the screen capture
-	static oexINT GetScreenInfo( CBin *x_pInf, CPropertyBag *pb );
+	static oexINT GetScreenCaptureInfo( CBin *x_pInf, CPropertyBag *pb );
 
 	/// Release screen capture resources
 	static oexINT ReleaseScreenCapture( CBin *x_pInf );
 
 	/// Locks screen data
-	static oexINT LockScreen( CBin *x_pInf, CBin *x_pImg );
+	static oexINT LockScreen( CBin *x_pInf, CBin *x_pImg, oexINT x_nScreen );
 
 	/// Unlocks screen data
 	static oexINT UnlockScreen( CBin *x_pInf, CBin *x_pImg );

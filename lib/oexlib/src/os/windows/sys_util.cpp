@@ -426,6 +426,40 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 	return pb;
 }
 
+struct CSysUtil_SScreenInfo
+{	oexINT 	nScreen;
+	LPRECT	pRect;
+};
+
+static BOOL CALLBACK CSysUtil_ScreenInfo( HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData )
+{_STT();
+
+	// Verify pointer
+	CSysUtil_SScreenInfo *pdi = (CSysUtil_SScreenInfo*)dwData;
+	if ( !pdi )
+		return FALSE;
+
+	// Just in case ;)
+	if ( 0 > pdi->nScreen )
+		return FALSE;
+
+	// Wait for our screen
+	if ( pdi->nScreen-- )
+		return TRUE;
+
+	// Ensure valid rect
+	if ( !lprcMonitor 
+		 || ( 0 >= ( lprcMonitor->right - lprcMonitor->left ) )
+		 || ( 0 >= ( lprcMonitor->bottom - lprcMonitor->top ) ) )
+		pdi->nScreen = -2;
+
+	// Copy the rect
+	else
+		::CopyRect( pdi->pRect, lprcMonitor );
+
+	return FALSE;
+}
+
 struct _SSysUtilCapInfo
 {
 	BITMAPINFO	bmi;
@@ -463,7 +497,7 @@ oexINT CSysUtil::ReleaseScreenCapture( CBin *x_pInf )
 	return 1;
 }
 
-oexINT CSysUtil::InitScreenCapture( CBin *x_pInf, oexLONG fmt, oexLONG w, oexLONG h )
+oexINT CSysUtil::InitScreenCapture( CBin *x_pInf, oexLONG x_nScreen, oexLONG fmt, oexLONG w, oexLONG h )
 {_STT();
 
 	// Attempt to initialize the image structure
@@ -476,10 +510,44 @@ oexINT CSysUtil::InitScreenCapture( CBin *x_pInf, oexLONG fmt, oexLONG w, oexLON
 	if ( !p )
 		return 0;
 
+	// Save the capture format
 	p->lFmt = fmt;
-	p->lScreenWidth = GetSystemMetrics( SM_CXFULLSCREEN );
-	p->lScreenHeight = GetSystemMetrics( SM_CYFULLSCREEN );
-		
+	p->lScreenWidth = 0;
+	p->lScreenHeight = 0;
+
+	// Get the desktop window
+	HWND hDt = GetDesktopWindow();
+
+	// Was a screen specified?
+	if ( 0 <= x_nScreen )
+	{
+		// Find the monitor region
+		RECT rc = { 0, 0, 0, 0 };
+		CSysUtil_SScreenInfo si = { x_nScreen, &rc };
+		EnumDisplayMonitors( NULL, NULL, &CSysUtil_ScreenInfo, (LPARAM)&si );
+		if ( -1 == si.nScreen )
+			p->lScreenWidth = rc.right - rc.left,
+			p->lScreenHeight = rc.bottom - rc.top;
+	} // end if
+
+	// Valid width / height?
+	if ( 0 >= p->lScreenWidth || 0 >= p->lScreenHeight )
+	{
+		// Do we have a valid window handle?
+		if ( hDt && ::IsWindow( hDt ) )
+		{	RECT rc;
+			::GetClientRect( hDt, &rc );
+			p->lScreenWidth = rc.right - rc.left;
+			p->lScreenHeight = rc.bottom - rc.top;
+		} // end if
+
+		else
+		{	p->lScreenWidth = GetSystemMetrics( SM_CXFULLSCREEN );
+			p->lScreenHeight = GetSystemMetrics( SM_CYFULLSCREEN );
+		} // end else
+
+	} // end if
+
 	// What is the capture size?
 	if ( 0 >= w )
 		w = p->lScreenWidth;
@@ -487,13 +555,13 @@ oexINT CSysUtil::InitScreenCapture( CBin *x_pInf, oexLONG fmt, oexLONG w, oexLON
 		h = p->lScreenHeight;
 
 	// Grab default dc
-	HDC hDC = ::GetDC( NULL );
+	HDC hDC = ::GetDC( hDt );
 	if ( !hDC )
 		return 0;
 
 	p->hDC = ::CreateCompatibleDC( NULL );
 	if ( !p->hDC )
-	{	::ReleaseDC( NULL, hDC );
+	{	::ReleaseDC( hDt, hDC );
 		return 0;
 	} // end if
 
@@ -510,7 +578,7 @@ oexINT CSysUtil::InitScreenCapture( CBin *x_pInf, oexLONG fmt, oexLONG w, oexLON
 	p->hBmp = CreateDIBSection( hDC, &p->bmi, DIB_RGB_COLORS, &p->pImg, 0, 0 );
 	if ( !p->hBmp || !p->pImg )
 	{	ReleaseScreenCapture( x_pInf );
-		::ReleaseDC( NULL, hDC );
+		::ReleaseDC( hDt, hDC );
 		return 0;
 	} // end if
 
@@ -521,12 +589,12 @@ oexINT CSysUtil::InitScreenCapture( CBin *x_pInf, oexLONG fmt, oexLONG w, oexLON
 	SetStretchBltMode( p->hDC, HALFTONE );
 
 	// Release default dc
-	::ReleaseDC( NULL, hDC );
+	::ReleaseDC( hDt, hDC );
 
 	return 1;
 }
 
-oexINT CSysUtil::GetScreenInfo( CBin *x_pInf, CPropertyBag *pb )
+oexINT CSysUtil::GetScreenCaptureInfo( CBin *x_pInf, CPropertyBag *pb )
 {_STT();
 
 	// Ensure valid structure
@@ -552,7 +620,93 @@ oexINT CSysUtil::GetScreenInfo( CBin *x_pInf, CPropertyBag *pb )
 	return pb->Size();
 }
 
-oexINT CSysUtil::LockScreen( CBin *x_pInf, CBin *x_pImg )
+static oexINT CSysUtil_CopyDC( HDC hDst, LPRECT pDst, HDC hSrc, LPRECT pSrc )
+{_STT();
+	if ( !pSrc || !pDst )
+		return 0;
+
+	// Work out the sizes
+	oexLONG dw = pDst->right - pDst->left;
+	oexLONG dh = pDst->bottom - pDst->top;
+	oexLONG sw = pSrc->right - pSrc->left;
+	oexLONG sh = pSrc->bottom - pSrc->top;
+
+	// Same size?
+	if ( dw == sw && dh == sh )
+		return ::BitBlt( hDst, pDst->left, pDst->top, dw, dh,
+						 hSrc, pSrc->left, pSrc->top, SRCCOPY );
+
+	// Stretch
+	return ::StretchBlt( hDst, pDst->left, pDst->top, dw, dh,
+						 hSrc, pSrc->left, pSrc->top, sw, sh, SRCCOPY );
+}
+
+oexINT CSysUtil::GetNumScreens()
+{_STT();
+	return GetSystemMetrics( SM_CMONITORS );
+}
+
+static BOOL CALLBACK CSysUtil_GetScreenInfo( HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData )
+{_STT();
+
+	// Verify pointer
+	CPropertyBag *pb = (CPropertyBag*)dwData;
+	if ( !pb )
+		return FALSE;
+
+	// Add an entry for this screen
+	oexINT nIdx = pb->Size();
+	CPropertyBag &r = (*pb)[ nIdx ];
+
+	if ( lprcMonitor )
+	{	r[ "draw" ][ "x" ] = lprcMonitor->left;
+		r[ "draw" ][ "y" ] = lprcMonitor->top;
+		r[ "draw" ][ "w" ] = lprcMonitor->right - lprcMonitor->left;
+		r[ "draw" ][ "h" ] = lprcMonitor->bottom - lprcMonitor->top;
+	} // end if
+
+	// Save information
+	MONITORINFOEX mi; oexZero( mi ); 
+	mi.cbSize = sizeof( mi );
+	if ( GetMonitorInfo( hMonitor, &mi ) )
+	{
+		// Total size
+		r[ "monitor" ][ "x" ] = mi.rcMonitor.left;
+		r[ "monitor" ][ "y" ] = mi.rcMonitor.top;
+		r[ "monitor" ][ "w" ] = mi.rcMonitor.right - mi.rcMonitor.left;
+		r[ "monitor" ][ "h" ] = mi.rcMonitor.bottom - mi.rcMonitor.top;
+
+		// Working size
+		r[ "work" ][ "x" ] = mi.rcWork.left;
+		r[ "work" ][ "y" ] = mi.rcWork.top;
+		r[ "work" ][ "w" ] = mi.rcWork.right - mi.rcWork.left;
+		r[ "work" ][ "h" ] = mi.rcWork.bottom - mi.rcWork.top;
+
+		r[ "flags" ] = mi.dwFlags;
+		r[ "name" ] = mi.szDevice;
+
+	} // end if
+
+	return TRUE;
+}
+
+oexINT CSysUtil::GetScreenInfo( CPropertyBag *pb )
+{_STT();
+
+	if ( !pb )
+		return 0;
+
+	// Out with the old
+	pb->Destroy();
+
+	// Enum displays
+	EnumDisplayMonitors( NULL, NULL, &CSysUtil_GetScreenInfo, (LPARAM)pb );
+
+	// How many did we get?
+	return pb->Size();
+}
+
+oexINT CSysUtil::LockScreen( CBin *x_pInf, CBin *x_pImg, oexINT x_nScreen )
 {_STT();
 
 	// Ensure valid structure
@@ -563,32 +717,45 @@ oexINT CSysUtil::LockScreen( CBin *x_pInf, CBin *x_pImg )
 	if ( !p )
 		return 0;
 
+	// Get the desktop window
+	HWND hDt = GetDesktopWindow();
+	if ( hDt && ::IsWindow( hDt ) )
+	{	RECT rc;
+		::GetClientRect( hDt, &rc );
+		p->lScreenWidth = rc.right - rc.left;
+		p->lScreenHeight = rc.bottom - rc.top;
+	} // end if
+	else
+	{	p->lScreenWidth = GetSystemMetrics( SM_CXFULLSCREEN );
+		p->lScreenHeight = GetSystemMetrics( SM_CYFULLSCREEN );
+	} // end else
+
 	// Grab default dc
-	HDC hDC = ::GetDC( NULL );
+	HDC hDC = ::GetDC( hDt );
 	if ( !hDC )
 		return 0;
 
 	BOOL bRet = oexFALSE;
+	RECT rcDst, rcSrc;
+	SetRect( &rcDst, 0, 0, p->bmi.bmiHeader.biWidth, p->bmi.bmiHeader.biHeight );
 
-	// Do we need to stretch?
-	if ( p->lScreenWidth == p->bmi.bmiHeader.biWidth
-	     && p->lScreenHeight == p->bmi.bmiHeader.biHeight )
-		bRet = ::BitBlt( p->hDC, 0, 0,
-						 p->bmi.bmiHeader.biWidth, 
-						 p->bmi.bmiHeader.biHeight, 
-						 hDC, 0, 0, SRCCOPY );
+	// Whole desktop?
+	if ( 0 > x_nScreen )
+		SetRect( &rcSrc, 0, 0, p->lScreenWidth, p->lScreenHeight ),
+		bRet = CSysUtil_CopyDC( p->hDC, &rcDst, hDC, &rcSrc );
 
 	else
-		bRet = ::StretchBlt(	p->hDC,	0, 0,
-										p->bmi.bmiHeader.biWidth,
-										p->bmi.bmiHeader.biHeight,
-								hDC,	0, 0,
-										p->lScreenWidth,
-										p->lScreenHeight,
-								SRCCOPY );
+	{
+		// Find the monitor region
+		CSysUtil_SScreenInfo si = { x_nScreen, &rcSrc };
+		EnumDisplayMonitors( NULL, NULL, &CSysUtil_ScreenInfo, (LPARAM)&si );
+		if ( -1 == si.nScreen )
+			bRet = CSysUtil_CopyDC( p->hDC, &rcDst, hDC, &rcSrc );
+
+	} // end else
 
 	// Release default dc
-	::ReleaseDC( NULL, hDC );
+	::ReleaseDC( hDt, hDC );
 
 	// Set the image buffer pointer
 	if ( bRet )
