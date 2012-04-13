@@ -155,6 +155,15 @@ public:
 
 
 	//==============================================================
+	// IsMounted()
+	//==============================================================
+	/// Returns non-zero if the specified device is mounted
+	/**
+		@param [in] x_sDrive	-	System drive path
+	*/
+	static oexBOOL IsMounted( const CStr &x_sDrive );
+
+	//==============================================================
 	// GetDiskInfo()
 	//==============================================================
 	/// Returns information about the specified drive

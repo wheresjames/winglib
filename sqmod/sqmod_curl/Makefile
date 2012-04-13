@@ -10,7 +10,8 @@ default_target: all
 PRJ_NAME := sqmod_curl
 PRJ_DEPS := curl
 PRJ_TYPE := dll
-PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus curl/include
+PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
+			curl/include openssl/include
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel curl cximage jpeg png tiff zlib \
 			openssl_a openssl_b openssl_a openssl_b
 PRJ_DEFS := HAVE_CONFIG_H CURL_STATICLIB CURL_DISABLE_LDAP I386_ONLY OPENSSL_NO_ASM

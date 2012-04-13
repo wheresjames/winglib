@@ -68,12 +68,30 @@ static void SQBIND_Export_openssl( sqbind::VM x_vm )
 
 	// Initialize SSL
 	SSL_library_init();
+	
+//	OPENSSL_config( 0 );
+//	OpenSSL_add_all_digests();
+//	ERR_load_crypto_strings();
 
     SQBIND_EXPORT( x_vm, CSqOpenSSL );
     SQBIND_EXPORT( x_vm, COsslKey );
     SQBIND_EXPORT( x_vm, COsslCert );
     SQBIND_EXPORT( x_vm, CSqSSLPortFactory );
 }
+
+static void SQBIND_module_cleanup()
+{
+	// SSL cleanup sequence
+	ERR_remove_state( 0 );
+//	ENGINE_cleanup();
+	CONF_modules_unload( 1 );
+	ERR_free_strings();
+	EVP_cleanup();
+	CRYPTO_cleanup_all_ex_data();
+}
+
+// Cleanup
+#define SQBIND_Exit SQBIND_module_cleanup();
 
 #if defined( SQBIND_STATIC )
 	#include "sq_openssl.cpp"

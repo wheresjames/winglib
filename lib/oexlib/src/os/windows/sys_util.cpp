@@ -329,6 +329,27 @@ CPropertyBag CSysUtil::GetRegKeys( const CStr &x_sKey, const CStr &x_sPath, oexB
 	return pb;
 }
 
+oexBOOL CSysUtil::IsMounted( const CStr &x_sDrive )
+{
+	CStr sDrive( oexT( "\\\\.\\" ) );
+	sDrive += x_sDrive;
+
+	// Attempt to open the drive
+	HANDLE hDrive = CreateFile( sDrive.Ptr(), GENERIC_READ, 
+								FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+								0, OPEN_EXISTING, 0, 0 );
+
+	if ( INVALID_HANDLE_VALUE == hDrive )
+		return ERROR_FILE_NOT_FOUND != GetLastError();
+
+	DWORD dwBytes;
+	BOOL bRet = DeviceIoControl( hDrive, FSCTL_IS_VOLUME_MOUNTED, 0, 0, 0, 0, &dwBytes, 0 );
+
+	CloseHandle( hDrive );
+
+	return bRet;
+}
+
 CPropertyBag CSysUtil::GetDisksInfo( oexBOOL bInfo )
 {_STT();
 
@@ -384,47 +405,110 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 	CPropertyBag pb;
 	pb[ "drive" ] = x_sDrive;
 	pb[ oexT( "drive_type" ) ] = GetDriveTypeStr( x_sDrive.Ptr() );
-	
-	// Get volume information
-	DWORD dwSn = 0, dwMax = 0, dwFlags = 0;
-	char szVolume[ 1024 * 8 ] = { 0 }, szFileSystem[ 1024 * 8 ] = { 0 };
-	if ( GetVolumeInformation(	x_sDrive.Ptr(), szVolume, sizeof( szVolume ),
-								&dwSn, &dwMax, &dwFlags,
-								szFileSystem, sizeof( szFileSystem ) ) )
-	{	pb[ oexT( "volume" ) ] = oexMbToStrPtr( szVolume );
-		pb[ oexT( "serial" ) ] = dwSn;
-		pb[ oexT( "max_filename" ) ] = dwMax;
-		pb[ oexT( "flags" ) ] = dwFlags;
-		pb[ oexT( "file_system" ) ] = oexMbToStrPtr( szFileSystem );
+
+	// See if a disk is loaded
+	oexBOOL bMounted = IsMounted( x_sDrive );
+	pb[ oexT( "drive_mounted" ) ] = bMounted ? 1 : 0;
+
+	// Only do this if the disk is mounted
+	if ( bMounted )
+	{
+		// Get volume information
+		DWORD dwSn = 0, dwMax = 0, dwFlags = 0;
+		char szVolume[ 1024 * 8 ] = { 0 }, szFileSystem[ 1024 * 8 ] = { 0 };
+		if ( GetVolumeInformation(	x_sDrive.Ptr(), szVolume, sizeof( szVolume ),
+									&dwSn, &dwMax, &dwFlags,
+									szFileSystem, sizeof( szFileSystem ) ) )
+		{	pb[ oexT( "volume" ) ] = oexMbToStrPtr( szVolume );
+			pb[ oexT( "serial" ) ] = dwSn;
+			pb[ oexT( "max_filename" ) ] = dwMax;
+			pb[ oexT( "flags" ) ] = dwFlags;
+			pb[ oexT( "file_system" ) ] = oexMbToStrPtr( szFileSystem );
+		} // end if
+
+		// More disk info
+		DWORD dwSectorsPerCluster = 0, dwBytesPerSector = 0, dwFreeClusters = 0, dwClusters = 0;
+		if ( GetDiskFreeSpace( x_sDrive.Ptr(), &dwSectorsPerCluster, &dwBytesPerSector, &dwFreeClusters, &dwClusters ) )
+		{	pb[ oexT( "sectors_per_cluster" ) ] = dwSectorsPerCluster;
+			pb[ oexT( "bytes_per_sector" ) ] = dwBytesPerSector;
+			pb[ oexT( "clusters_free" ) ] = dwFreeClusters;
+			pb[ oexT( "clusters" ) ] = dwClusters;
+		} // end if
+		
+		// Get disk space
+		ULARGE_INTEGER liFreeBytesAvailable, liTotalNumberOfBytes, liTotalNumberOfBytesFree;
+		if ( GetDiskFreeSpaceEx( x_sDrive.Ptr(), &liFreeBytesAvailable, &liTotalNumberOfBytes, &liTotalNumberOfBytesFree ) )
+		{
+			// Drive usage
+			pb[ oexT( "bytes" ) ] = liTotalNumberOfBytes.QuadPart;
+			pb[ oexT( "bytes_free" ) ] = liTotalNumberOfBytesFree.QuadPart;
+			pb[ oexT( "bytes_used" ) ] = liTotalNumberOfBytes.QuadPart - liTotalNumberOfBytesFree.QuadPart;
+			pb[ oexT( "bytes_available" ) ] = liFreeBytesAvailable.QuadPart;
+			pb[ oexT( "bytes_unavailable" ) ] = liTotalNumberOfBytes.QuadPart - liFreeBytesAvailable.QuadPart;
+
+			// If there is storage, calculate percentages
+			if( liTotalNumberOfBytes.QuadPart )
+			{
+				// Available percentages
+				pb[ oexT( "percent_available" ) ] 
+					= CStr().Fmt( "%.2f", (double)liFreeBytesAvailable.QuadPart / (double)liTotalNumberOfBytes.QuadPart * (double)100 );
+				if ( liTotalNumberOfBytes.QuadPart > liFreeBytesAvailable.QuadPart )
+					pb[ oexT( "percent_unavailable" ) ] 
+						= CStr().Fmt( "%.2f", (double)( liTotalNumberOfBytes.QuadPart - liFreeBytesAvailable.QuadPart )
+												/ (double)liTotalNumberOfBytes.QuadPart * (double)100 );
+
+				// Used percentages
+				pb[ oexT( "percent_free" ) ] 
+					= CStr().Fmt( "%.2f", (double)liTotalNumberOfBytesFree.QuadPart / (double)liTotalNumberOfBytes.QuadPart * (double)100 );
+				if ( liTotalNumberOfBytes.QuadPart > liTotalNumberOfBytesFree.QuadPart )
+					pb[ oexT( "percent_used" ) ] 
+						= CStr().Fmt( "%.2f", (double)( liTotalNumberOfBytes.QuadPart - liTotalNumberOfBytesFree.QuadPart )
+												/ (double)liTotalNumberOfBytes.QuadPart * (double)100 );
+			} // en dif
+
+		} // end if
+
 	} // end if
 
-	// More disk info
-	DWORD dwSectorsPerCluster = 0, dwBytesPerSector = 0, dwFreeClusters = 0, dwClusters = 0;
-	if ( GetDiskFreeSpace( x_sDrive.Ptr(), &dwSectorsPerCluster, &dwBytesPerSector, &dwFreeClusters, &dwClusters ) )
-	{	pb[ oexT( "sectors_per_cluster" ) ] = dwSectorsPerCluster;
-		pb[ oexT( "bytes_per_sector" ) ] = dwBytesPerSector;
-		pb[ oexT( "clusters_free" ) ] = dwFreeClusters;
-		pb[ oexT( "clusters" ) ] = dwClusters;
-	} // end if
-	
-	// Get disk space
-	ULARGE_INTEGER liFreeBytesAvailable, liTotalNumberOfBytes, liTotalNumberOfBytesFree;
-	if ( GetDiskFreeSpaceEx( x_sDrive.Ptr(), &liFreeBytesAvailable, &liTotalNumberOfBytes, &liTotalNumberOfBytesFree ) )
-	{	pb[ oexT( "bytes" ) ] = liTotalNumberOfBytes.QuadPart;
-		pb[ oexT( "bytes_free" ) ] = liTotalNumberOfBytesFree.QuadPart;
-		pb[ oexT( "bytes_used" ) ] = liTotalNumberOfBytes.QuadPart - liTotalNumberOfBytesFree.QuadPart;
-		pb[ oexT( "bytes_available" ) ] = liFreeBytesAvailable.QuadPart;
-		pb[ oexT( "bytes_unavailable" ) ] = liTotalNumberOfBytes.QuadPart - liFreeBytesAvailable.QuadPart;
-	} // end if
-	
 	// Get the dos name
 	TCHAR buf[ MAX_PATH ] = { 0 };
 	DWORD dw = QueryDosDevice( x_sDrive.Ptr(), buf, sizeof( buf ) );
 	if ( dw && dw < sizeof( buf ) )
 		buf[ dw ] = 0, pb[ oexT( "dos_name" ) ] = buf;
-	
+
 	return pb;
 }
+
+class CSysUtil_CSwitchDesktop
+{
+public:
+	CSysUtil_CSwitchDesktop( bool bSwitchCurrent )
+	{	m_hOld = NULL;
+		m_hDesk = NULL;
+		if ( bSwitchCurrent )
+			SwitchCurrent();
+	}
+	~CSysUtil_CSwitchDesktop()
+	{	RestoreDesktop(); 
+	}
+	void RestoreDesktop()
+	{	if ( m_hOld )
+			::SetThreadDesktop( m_hOld ), m_hOld = NULL;
+		if ( m_hDesk )
+			::CloseDesktop( m_hDesk ), m_hDesk = NULL;
+	}
+	bool SwitchCurrent()
+	{	m_hOld = ::GetThreadDesktop( GetCurrentThreadId() );
+		m_hDesk = ::OpenInputDesktop( 0, FALSE, READ_CONTROL );
+		if ( !m_hDesk || !::SetThreadDesktop( m_hDesk ) )
+			RestoreDesktop();
+		return m_hDesk ? true : false;
+	}
+
+private:
+	HDESK m_hDesk;
+	HDESK m_hOld;
+};
 
 struct CSysUtil_SScreenInfo
 {	oexINT 	nScreen;
@@ -470,6 +554,7 @@ struct _SSysUtilCapInfo
 	oexLONG		lFmt;
 	oexLONG 	lScreenWidth;
 	oexLONG		lScreenHeight;
+	DWORD		dwCpyFlags;
 };
 
 oexINT CSysUtil::ReleaseScreenCapture( CBin *x_pInf )
@@ -510,6 +595,15 @@ oexINT CSysUtil::InitScreenCapture( CBin *x_pInf, oexLONG x_nScreen, oexLONG fmt
 	if ( !p )
 		return 0;
 
+	// Switch to current desktop
+//	CSysUtil_CSwitchDesktop sd( true );
+
+	// Copy flags
+	p->dwCpyFlags = SRCCOPY;
+
+	// +++ CAPTUREBLT Makes the mouse flicker?
+//	p->dwCpyFlags = CAPTUREBLT | SRCCOPY;
+
 	// Save the capture format
 	p->lFmt = fmt;
 	p->lScreenWidth = 0;
@@ -517,6 +611,8 @@ oexINT CSysUtil::InitScreenCapture( CBin *x_pInf, oexLONG x_nScreen, oexLONG fmt
 
 	// Get the desktop window
 	HWND hDt = GetDesktopWindow();
+	if ( !hDt )
+		hDt = GetShellWindow();
 
 	// Was a screen specified?
 	if ( 0 <= x_nScreen )
@@ -615,12 +711,11 @@ oexINT CSysUtil::GetScreenCaptureInfo( CBin *x_pInf, CPropertyBag *pb )
 	(*pb)[ "fmt" ] = p->lFmt;
 	(*pb)[ "sw" ] = p->lScreenWidth;
 	(*pb)[ "sh" ] = p->lScreenHeight;
-	
 
 	return pb->Size();
 }
 
-static oexINT CSysUtil_CopyDC( HDC hDst, LPRECT pDst, HDC hSrc, LPRECT pSrc )
+static oexINT CSysUtil_CopyDC( HDC hDst, LPRECT pDst, HDC hSrc, LPRECT pSrc, DWORD dwFlags )
 {_STT();
 	if ( !pSrc || !pDst )
 		return 0;
@@ -634,11 +729,11 @@ static oexINT CSysUtil_CopyDC( HDC hDst, LPRECT pDst, HDC hSrc, LPRECT pSrc )
 	// Same size?
 	if ( dw == sw && dh == sh )
 		return ::BitBlt( hDst, pDst->left, pDst->top, dw, dh,
-						 hSrc, pSrc->left, pSrc->top, SRCCOPY );
+						 hSrc, pSrc->left, pSrc->top, dwFlags );
 
 	// Stretch
 	return ::StretchBlt( hDst, pDst->left, pDst->top, dw, dh,
-						 hSrc, pSrc->left, pSrc->top, sw, sh, SRCCOPY );
+						 hSrc, pSrc->left, pSrc->top, sw, sh, dwFlags );
 }
 
 oexINT CSysUtil::GetNumScreens()
@@ -699,6 +794,9 @@ oexINT CSysUtil::GetScreenInfo( CPropertyBag *pb )
 	// Out with the old
 	pb->Destroy();
 
+	// Switch to current desktop
+//	CSysUtil_CSwitchDesktop sd( true );
+
 	// Enum displays
 	EnumDisplayMonitors( NULL, NULL, &CSysUtil_GetScreenInfo, (LPARAM)pb );
 
@@ -717,8 +815,13 @@ oexINT CSysUtil::LockScreen( CBin *x_pInf, CBin *x_pImg, oexINT x_nScreen )
 	if ( !p )
 		return 0;
 
+	// Switch to current desktop
+//	CSysUtil_CSwitchDesktop sd( true );
+
 	// Get the desktop window
 	HWND hDt = GetDesktopWindow();
+	if ( !hDt )
+		hDt = GetShellWindow();
 	if ( hDt && ::IsWindow( hDt ) )
 	{	RECT rc;
 		::GetClientRect( hDt, &rc );
@@ -731,7 +834,14 @@ oexINT CSysUtil::LockScreen( CBin *x_pInf, CBin *x_pImg, oexINT x_nScreen )
 	} // end else
 
 	// Grab default dc
+	BOOL bDelete = FALSE;
 	HDC hDC = ::GetDC( hDt );
+
+	// Fall back
+	if ( !hDC )
+		hDt = NULL, bDelete = TRUE,
+		hDC = ::CreateDC( oexT( "DISPLAY" ), NULL, NULL, NULL );
+
 	if ( !hDC )
 		return 0;
 
@@ -742,7 +852,7 @@ oexINT CSysUtil::LockScreen( CBin *x_pInf, CBin *x_pImg, oexINT x_nScreen )
 	// Whole desktop?
 	if ( 0 > x_nScreen )
 		SetRect( &rcSrc, 0, 0, p->lScreenWidth, p->lScreenHeight ),
-		bRet = CSysUtil_CopyDC( p->hDC, &rcDst, hDC, &rcSrc );
+		bRet = CSysUtil_CopyDC( p->hDC, &rcDst, hDC, &rcSrc, p->dwCpyFlags );
 
 	else
 	{
@@ -750,12 +860,15 @@ oexINT CSysUtil::LockScreen( CBin *x_pInf, CBin *x_pImg, oexINT x_nScreen )
 		CSysUtil_SScreenInfo si = { x_nScreen, &rcSrc };
 		EnumDisplayMonitors( NULL, NULL, &CSysUtil_ScreenInfo, (LPARAM)&si );
 		if ( -1 == si.nScreen )
-			bRet = CSysUtil_CopyDC( p->hDC, &rcDst, hDC, &rcSrc );
+			bRet = CSysUtil_CopyDC( p->hDC, &rcDst, hDC, &rcSrc, p->dwCpyFlags );
 
 	} // end else
 
 	// Release default dc
-	::ReleaseDC( hDt, hDC );
+	if ( bDelete )
+		::DeleteDC( hDC );
+	else
+		::ReleaseDC( hDt, hDC );
 
 	// Set the image buffer pointer
 	if ( bRet )
@@ -778,6 +891,9 @@ oexINT CSysUtil::GetMouseInfo( CPropertyBag *pb )
 	if ( !pb )
 		return 0;
 
+	// Switch to current desktop
+//	CSysUtil_CSwitchDesktop sd( true );
+
 	POINT pos;
 	if ( ::GetCursorPos( &pos ) )
 		(*pb)[ "x" ] = pos.x, (*pb)[ "y" ] = pos.y;
@@ -788,6 +904,9 @@ oexINT CSysUtil::GetMouseInfo( CPropertyBag *pb )
 oexLONG CSysUtil::GetMousePos()
 {_STT();
 
+	// Switch to current desktop
+//	CSysUtil_CSwitchDesktop sd( true );
+
 	POINT pos;
 	if ( !::GetCursorPos( &pos ) )
 		return 0;
@@ -797,6 +916,9 @@ oexLONG CSysUtil::GetMousePos()
 
 oexINT CSysUtil::SetMousePos( oexLONG x, oexLONG y )
 {_STT();
+	// Switch to current desktop
+//	CSysUtil_CSwitchDesktop sd( true );
+
 	return ::SetCursorPos( x, y );
 }
 
@@ -805,6 +927,9 @@ oexINT CSysUtil::QueueInput( CPropertyBag *pb )
 
 	if ( !pb )
 		return 0;
+
+	// Switch to current desktop
+//	CSysUtil_CSwitchDesktop sd( true );
 
 	INPUT in;
 

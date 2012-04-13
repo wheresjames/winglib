@@ -10,7 +10,8 @@ default_target: all
 PRJ_NAME := sqmod_ffmpeg
 PRJ_DEPS := ffmpeg x264 vpx
 PRJ_TYPE := dll
-PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus ffmpeg
+PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
+			ffmpeg openssl/include
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib
 PRJ_DEFS := HAVE_AV_CONFIG_H=1 __STDC_CONSTANT_MACROS
 PRJ_LIBP :=

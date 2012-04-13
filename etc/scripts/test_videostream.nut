@@ -13,7 +13,7 @@ function StartVideoStream( mParams, mReply )
 	local p = mParams[ "GET" ];
 	if ( !p[ "type" ].len() )
 		return 0;
-	
+
 	switch( p[ "type" ].str().tolower() )
 	{
 		case "mjpg" :
@@ -22,20 +22,20 @@ function StartVideoStream( mParams, mReply )
 			p[ "codec" ] <- "MJPG";
 			mReply[ "multi" ] <- "image/jpeg";
 			break;
-		
+
 		default:
 			mReply[ "mime" ] <- "video/" + p[ "type" ].str();
 			break;
-		
-	} // end switch			
+
+	} // end switch
 
 	// Valid?
 	if ( !p.size() )
 		return 0;
-	
+
 	// Generate a stream id
 	local sid = _self.unique();
-	
+
 	// Start the streaming thread
 	p[ "sid" ] <- sid;
 	::_self.spawn( 1, ".", sid, "test_videostream.thread.nut", 1 );
@@ -44,7 +44,7 @@ function StartVideoStream( mParams, mReply )
 	// Stream shared buffer back to client
 	mReply[ "share" ] <- sid;
 	mReply[ "cancel_share" ] <- "1";
-	
+
 	return 1;
 }
 
@@ -59,7 +59,7 @@ function OnProcessRequest( params )
 	switch( mParams[ "REQUEST" ][ "path" ].str() )
 	{
 		case "/video" :
-		
+
 			// Start the video
 			StartVideoStream( mParams, mReply );
 

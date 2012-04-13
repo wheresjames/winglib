@@ -682,6 +682,13 @@ oexBOOL CSys::MicroSleep( oexUINT uMicroseconds, oexUINT uSeconds )
 
 oexBOOL CSys::Init()
 {//_STT();
+
+	// Disable system error messages
+	DWORD dwMask = SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS 
+				   | SEM_NOOPENFILEERRORBOX | SEM_NOALIGNMENTFAULTEXCEPT;
+	DWORD dwOld = SetErrorMode( dwMask );
+	SetErrorMode( dwOld | dwMask );
+
 #if defined( OEX_WINCE )
 	CoInitializeEx( NULL, COINIT_MULTITHREADED );
 #else

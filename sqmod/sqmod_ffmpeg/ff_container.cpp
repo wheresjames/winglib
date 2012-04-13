@@ -138,8 +138,10 @@ void CFfContainer::Destroy()
 
 	CloseStream();
 
+	if ( m_pFrame )
+		av_free( m_pFrame ), m_pFrame = oexNULL;
+
 	m_pCodecContext = oexNULL;
-	m_pFrame = oexNULL;
 	m_nVideoStream = -1;
 	m_buf.Free();
 	oexZero( m_pkt );
