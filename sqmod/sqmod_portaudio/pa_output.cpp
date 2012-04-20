@@ -3,6 +3,44 @@
 #include "stdafx.h"
 
 
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CPaOutput, CPaOutput )
+
+	SQBIND_MEMBER_FUNCTION( CPaOutput, Init )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, Destroy )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, Open )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, Start )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, Stop )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, Write )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, WriteTs )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, getTs )
+
+	SQBIND_MEMBER_FUNCTION( CPaOutput, getInitError )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, getLastError )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, getDefaultOutputDevice )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, getDeviceCount )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, getDeviceInfo )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, getBufferedBytes )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, getFrameBytes )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, isOpen )
+
+	SQBIND_MEMBER_FUNCTION( CPaOutput, getGlitchDetection )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, setGlitchDetection )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, getGlitchSize )
+	SQBIND_MEMBER_FUNCTION( CPaOutput, getLastTs )
+//	SQBIND_MEMBER_FUNCTION( CPaOutput,  )
+//	SQBIND_MEMBER_FUNCTION( CPaOutput,  )
+//	SQBIND_MEMBER_FUNCTION( CPaOutput,  )
+//	SQBIND_MEMBER_FUNCTION( CPaOutput,  )
+	
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CPaOutput );
+
+void CPaOutput::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CPaOutput );
+}
+
 CPaOutput::CPaOutput()
 {_STT();
 
@@ -143,19 +181,7 @@ int CPaOutput::PaStreamCallback( const void *input, void *output, unsigned long 
 
 int CPaOutput::getFormatBytes( int nFmt )
 {_STT();
-
-	switch( nFmt )
-	{
-		default : break;
-		case paFloat32 : return 4;
-		case paInt32 : return 4;
-		case paInt24 : return 3;
-		case paInt16 : return 2;
-		case paInt8 : return 1;
-
-	} // end switch
-
-	return 1;
+	return oex::obj::StaticSize( nFmt );
 }
 
 
@@ -173,12 +199,22 @@ int CPaOutput::Open( int bBlocking, int nDev, int nChannels, int nFormat, double
 
 	psp.device = nDev;
 	psp.channelCount = nChannels;
-	psp.sampleFormat = nFormat;
 	psp.suggestedLatency = dLatency;
+
+#	define CNVTYPE( t, v ) case oex::obj::t : psp.sampleFormat = v; break;
+	switch( nFormat )
+	{	CNVTYPE( tInt8, paInt8 );
+		CNVTYPE( tUInt8, paUInt8 );
+		CNVTYPE( tInt16, paInt16 );
+		CNVTYPE( tInt24, paInt24 );
+		CNVTYPE( tInt32, paInt32 );
+		CNVTYPE( tFloat, paFloat32 );
+		default : psp.sampleFormat = 0; break;
+	} // end switch
 
 	m_bBlocking = bBlocking;
 	m_nFrameBytes = getFormatBytes( nFormat ) * nChannels;
-
+	
 	// Attempt to open output stream
 	if ( bBlocking )
 		m_errLast = Pa_OpenStream( &m_stream, 0, &psp, dSRate, fpb, 0, 0, this );

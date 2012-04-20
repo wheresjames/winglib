@@ -37,29 +37,35 @@
 /// Special object functions
 namespace obj
 {
+	// For defining type sizes in bits
+#	define OSZBITS( b ) ( ( ( b & 0x7 ) << 8 ) | ( ( ( b & 0xff ) >> 3 ) + ( ( b & 0x7 ) ? 1 : 0 ) ) )
+
     // iii Unfortunately, Doxygen craps out on these next
     //     function templates.
 
 	// Data type masks
     enum
     {
-		// Data element size
+		// Data element size in bytes
 		eTypeSize			= 0x00ff,
 
+		// Extra for size in bits
+		eTypeSizeBits		= 0x0700,
+
 		// Elements are signed values
-		eTypeSigned			= 0x0100,
+		eTypeSigned			= 0x0800,
+
+		// Array element
+		eTypeElement		= 0x1000,
+
+		// Floating point
+		eTypeFloating		= 0x2000,
 
 		// Array
-		eTypeElement		= 0x0200,
-
-		// Array
-		eTypeFloating		= 0x0400,
-
-		// Array
-		eTypeArray			= 0x1000,
+		eTypeArray			= 0x4000,
 
 		// Null terminated
-		eTypeNullTerm		= 0x2000,
+		eTypeNullTerm		= 0x8000,
 
 	};
 
@@ -74,6 +80,26 @@ namespace obj
 
         tUInt           = ( sizeof( oexUINT ) ),
 
+        tLong           = ( eTypeSigned | sizeof( oexLONG ) ),
+
+        tULong          = ( sizeof( oexULONG ) ),
+
+        tLongLong       = ( eTypeSigned | sizeof( oexINT64 ) ),
+
+        tULongLong      = ( sizeof( oexUINT64 ) ),
+
+		tInt1           = ( eTypeSigned | OSZBITS( 1 ) ),
+
+        tUInt1          = ( OSZBITS( 1 ) ),
+
+		tInt2           = ( eTypeSigned | OSZBITS( 2 ) ),
+
+        tUInt2          = ( OSZBITS( 2 ) ),
+
+		tInt4           = ( eTypeSigned | OSZBITS( 4 ) ),
+
+        tUInt4          = ( OSZBITS( 4 ) ),
+
 		tInt8           = ( eTypeSigned | 1 ),
 
         tUInt8          = ( 1 ),
@@ -82,6 +108,10 @@ namespace obj
 
         tUInt16         = ( 2 ),
 
+        tInt24          = ( eTypeSigned | 3 ),
+
+        tUInt24         = ( 3 ),
+
         tInt32          = ( eTypeSigned | 4 ),
 
         tUInt32         = ( 4 ),
@@ -89,6 +119,10 @@ namespace obj
         tInt64          = ( eTypeSigned | 8 ),
 
         tUInt64         = ( 8 ),
+
+        tInt128         = ( eTypeSigned | 16 ),
+
+        tUInt128        = ( 16 ),
 
         tChar           = ( eTypeSigned | eTypeElement | sizeof( oexCHAR ) ),
 
@@ -102,6 +136,10 @@ namespace obj
 
         tUChar16        = ( eTypeElement | 2 ),
 
+        tChar24         = ( eTypeSigned | eTypeElement | 3 ),
+
+        tUChar24        = ( eTypeElement | 3 ),
+
         tChar32         = ( eTypeSigned | eTypeElement | 4 ),
 
         tUChar32        = ( eTypeElement | 4 ),
@@ -109,6 +147,18 @@ namespace obj
         tChar64         = ( eTypeSigned | eTypeElement | 8 ),
 
         tUChar64        = ( eTypeElement | 8 ),
+
+        tFloat8          = ( eTypeFloating | 1 ),
+
+        tFloat16          = ( eTypeFloating | 2 ),
+
+        tFloat24          = ( eTypeFloating | 3 ),
+
+        tFloat32          = ( eTypeFloating | 4 ),
+
+        tFloat64          = ( eTypeFloating | 8 ),
+
+        tFloat128         = ( eTypeFloating | 16 ),
 
         tFloat          = ( eTypeFloating | sizeof( oexFLOAT ) ),
 
@@ -124,9 +174,13 @@ namespace obj
 
         tStr16          = ( eTypeArray | eTypeNullTerm | 2 ),
 
+        tStr24          = ( eTypeArray | eTypeNullTerm | 3 ),
+
         tStr32          = ( eTypeArray | eTypeNullTerm | 4 ),
 
         tStr64          = ( eTypeArray | eTypeNullTerm | 8 ),
+
+        tStr128          = ( eTypeArray | eTypeNullTerm | 16 ),
 
         tGuid           = ( 16 )
     };
@@ -135,6 +189,13 @@ namespace obj
 		oexSIZE_T StaticSize( T t )
 	{
 		return ( t & eTypeSize );
+	}
+
+	template< typename T >
+		oexSIZE_T StaticSizeBits( T t )
+	{	return ( t & eTypeSizeBits )
+			   ? ( ( ( ( t & eTypeSize ) - 1 ) << 3 ) | ( ( t & eTypeSizeBits ) >> 8 ) )
+			   : ( ( t & eTypeSize ) << 3 );
 	}
 
 	//==============================================================

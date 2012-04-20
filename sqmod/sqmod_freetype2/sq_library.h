@@ -14,6 +14,9 @@ public:
 	/// Destructor
 	virtual ~CFtLibrary();
 
+	/// Registers the class
+	static void Register( sqbind::VM vm );
+
 	/** \addtogroup CFtLibrary
 		@{
 	*/

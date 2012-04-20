@@ -2,17 +2,6 @@
 
 #include "stdafx.h"
 
-// CFtLibrary
-SQBIND_REGISTER_CLASS_BEGIN( CFtLibrary, CFtLibrary )
-
-	SQBIND_MEMBER_FUNCTION( CFtLibrary, Destroy )
-	SQBIND_MEMBER_FUNCTION( CFtLibrary, getLastError )
-	SQBIND_MEMBER_FUNCTION( CFtLibrary, LoadFile )
-	SQBIND_MEMBER_FUNCTION( CFtLibrary, LoadFont )
-
-SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CFtLibrary );
-
 // CFtFace
 SQBIND_REGISTER_CLASS_BEGIN( CFtFace, CFtFace )
 
@@ -32,11 +21,36 @@ SQBIND_REGISTER_CLASS_BEGIN( CFtFace, CFtFace )
 	SQBIND_MEMBER_FUNCTION( CFtFace, CalcSize )
 	SQBIND_MEMBER_FUNCTION( CFtFace, Str2Ascii )
 	SQBIND_MEMBER_FUNCTION( CFtFace, setColor )
-//	SQBIND_MEMBER_FUNCTION( CFtFace, CalcSize )
-//	SQBIND_MEMBER_FUNCTION( CFtFace, CalcSize )
+//	SQBIND_MEMBER_FUNCTION( CFtFace,  )
+//	SQBIND_MEMBER_FUNCTION( CFtFace,  )
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CFtFace );
+
+
+void CFtFace::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CFtFace );
+}
+
+// CFtLibrary
+SQBIND_REGISTER_CLASS_BEGIN( CFtLibrary, CFtLibrary )
+
+	SQBIND_MEMBER_FUNCTION( CFtLibrary, Destroy )
+	SQBIND_MEMBER_FUNCTION( CFtLibrary, getLastError )
+	SQBIND_MEMBER_FUNCTION( CFtLibrary, LoadFile )
+	SQBIND_MEMBER_FUNCTION( CFtLibrary, LoadFont )
+//	SQBIND_MEMBER_FUNCTION( CFtLibrary,  )
+//	SQBIND_MEMBER_FUNCTION( CFtLibrary,  )
+
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CFtLibrary );
+
+
+void CFtLibrary::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CFtLibrary );
+}
 
 // Export classes
 static void SQBIND_Export_freetype2( sqbind::VM x_vm )
@@ -44,8 +58,8 @@ static void SQBIND_Export_freetype2( sqbind::VM x_vm )
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
 
-    SQBIND_EXPORT( x_vm, CFtLibrary );
-    SQBIND_EXPORT( x_vm, CFtFace );
+	CFtLibrary::Register( x_vm );
+	CFtFace::Register( x_vm );
 }
 
 #if defined( SQBIND_STATIC )

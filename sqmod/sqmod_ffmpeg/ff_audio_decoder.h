@@ -25,7 +25,7 @@ public:
 	void Destroy();
 
 	/// Creates a decoder
-	int Create( int x_nCodec, int x_nChannels, int x_nSampleRate, int x_nBps );
+	int Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nSampleRate, int x_nBps );
 
 	/// Reads info from a stream
 	int FindStreamInfo( sqbind::CSqBinary *in );

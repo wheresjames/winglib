@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 
+
 CFtLibrary::CFtLibrary()
 {_STT();
 

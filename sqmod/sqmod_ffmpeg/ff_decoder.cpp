@@ -244,7 +244,7 @@ int CFfDecoder::BufferData( sqbind::CSqBinary *in, sqbind::CSqMulti *m )
 	{
 		// Ensure buffer size
 		if ( ( m_tmp.Size() - m_tmp.getUsed() ) < (sqbind::CSqBinary::t_size)( in->getUsed() + FF_INPUT_BUFFER_PADDING_SIZE ) )
-			m_tmp.Allocate( 2 * ( m_tmp.Size() + in->getUsed() + FF_INPUT_BUFFER_PADDING_SIZE ) );
+			m_tmp.Resize( 2 * ( m_tmp.Size() + in->getUsed() + FF_INPUT_BUFFER_PADDING_SIZE ) );
 
 		// Add new data to buffer
 		m_tmp.Append( in );

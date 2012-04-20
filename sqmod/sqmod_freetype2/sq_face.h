@@ -19,6 +19,9 @@ public:
 	/// Destructor
 	virtual ~CFtFace();
 
+	/// Registers the class
+	static void Register( sqbind::VM vm );
+
 	/** \addtogroup CFtFace
 		@{
 	*/

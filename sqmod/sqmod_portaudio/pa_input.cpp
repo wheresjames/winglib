@@ -2,6 +2,39 @@
 
 #include "stdafx.h"
 
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CPaInput, CPaInput )
+
+	SQBIND_MEMBER_FUNCTION( CPaInput, Init )
+	SQBIND_MEMBER_FUNCTION( CPaInput, Destroy )
+	SQBIND_MEMBER_FUNCTION( CPaInput, Open )
+	SQBIND_MEMBER_FUNCTION( CPaInput, Start )
+	SQBIND_MEMBER_FUNCTION( CPaInput, Stop )
+	SQBIND_MEMBER_FUNCTION( CPaInput, Read )
+
+	SQBIND_MEMBER_FUNCTION( CPaInput, getInitError )
+	SQBIND_MEMBER_FUNCTION( CPaInput, getLastError )
+	SQBIND_MEMBER_FUNCTION( CPaInput, getDefaultInputDevice )
+	SQBIND_MEMBER_FUNCTION( CPaInput, getDeviceCount )
+	SQBIND_MEMBER_FUNCTION( CPaInput, getDeviceInfo )
+	SQBIND_MEMBER_FUNCTION( CPaInput, getBufferedBytes )
+	SQBIND_MEMBER_FUNCTION( CPaInput, getFrameBytes )
+	SQBIND_MEMBER_FUNCTION( CPaInput, isOpen )
+	
+//	SQBIND_GLOBALCONST( paFloat32 )
+//	SQBIND_GLOBALCONST( paInt16 )
+//	SQBIND_GLOBALCONST( paInt32 )
+//	SQBIND_GLOBALCONST( paInt24 )
+//	SQBIND_GLOBALCONST( paInt8 )
+//	SQBIND_GLOBALCONST( paUInt8 )
+
+SQBIND_REGISTER_CLASS_END()
+DECLARE_INSTANCE_TYPE( CPaInput );
+
+void CPaInput::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CPaInput );
+}
 
 CPaInput::CPaInput()
 {_STT();
@@ -135,8 +168,18 @@ int CPaInput::Open( int bBlocking, int nDev, int nChannels, int nFormat, double 
 
 	psp.device = nDev;
 	psp.channelCount = nChannels;
-	psp.sampleFormat = nFormat;
 	psp.suggestedLatency = dLatency;
+	
+#	define CNVTYPE( t, v ) case oex::obj::t : psp.sampleFormat = v; break;
+	switch( nFormat )
+	{	CNVTYPE( tInt8, paInt8 );
+		CNVTYPE( tUInt8, paUInt8 );
+		CNVTYPE( tInt16, paInt16 );
+		CNVTYPE( tInt24, paInt24 );
+		CNVTYPE( tInt32, paInt32 );
+		CNVTYPE( tFloat, paFloat32 );
+		default : psp.sampleFormat = 0; break;
+	} // end switch
 
 	m_bBlocking = bBlocking;
 	m_nFrameBlockSize = fpb;
@@ -195,12 +238,12 @@ int CPaInput::Read( sqbind::CSqBinary *data, int frames )
 		frames = Pa_GetStreamReadAvailable( m_stream );
 
 	// How many bytes to read?
-	int bytes = frames * getFrameBytes();
+	unsigned long bytes = frames * getFrameBytes();
 	if ( !m_bBlocking && 0 >= bytes )
 		bytes = m_buf.GetMaxRead();
 
 	// Ensure space
-	int total = bytes + data->getUsed();
+	unsigned long total = bytes + data->getUsed();
 	if ( data->Size() < total )
 		if ( !data->Resize( total ) )
 			return data->getUsed();

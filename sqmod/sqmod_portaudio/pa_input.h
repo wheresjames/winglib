@@ -12,6 +12,9 @@ public:
 
 	/// Destructor
 	virtual ~CPaInput();
+	
+	/// Registers the class
+	static void Register( sqbind::VM vm );
 
 	/** \addtogroup CPaInput
 		@{

@@ -26,6 +26,7 @@ extern "C" oexLock _g_ffmpeg_lock;
 #include "ff_decoder.h"
 #include "ff_encoder.h"
 #include "ff_audio_decoder.h"
+#include "ff_audio_encoder.h"
 #include "ff_convert.h"
 #include "ff_container.h"
 #include "ff_transcode.h"

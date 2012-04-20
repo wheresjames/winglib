@@ -21,7 +21,7 @@ function create_font( name, ft )
 function create_clip( root, name, devs, w, h, fps, fmt, sec, font, hrs, mins )
 {
 	if ( devs.len() )
-	{	_self.echo( "+++ Havent' implemented this yet :(" );
+	{	_self.echo( "+++ Haven't implemented this yet :(" );
 		return;
 	} // end if
 
@@ -194,7 +194,7 @@ if ( !t ) t = -3600;
 // Initialize free type library
 local ft = CFtLibrary();
 if ( ft.getLastError() )
-{	_self.echo( "freetype2 failed to initialize : " + ft.getLastError() );
+{	_self.echo( "freetype2 failed to initialize : " + ft.getLastErrorStr() );
 	return 0;
 } // end if
 

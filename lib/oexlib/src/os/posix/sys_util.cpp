@@ -301,3 +301,186 @@ CStr CSysUtil::GetDriveTypeStr(const CStr &x_sDrive)
 	return oexT( "unknown" );
 }
 
+struct _SSysUtilCapInfo
+{
+	oexPVOID	pImg;
+	oexLONG		lFmt;
+	oexLONG 	lScreenWidth;
+	oexLONG		lScreenHeight;
+};
+
+oexINT CSysUtil::GetNumScreens()
+{_STT();
+	return -1;
+}
+
+oexINT CSysUtil::GetScreenInfo( CPropertyBag *pb )
+{
+	return 0;
+}
+
+oexINT CSysUtil::ReleaseScreenCapture( CBin *x_pInf )
+{_STT();
+
+	// Ensure valid structure
+	if ( !x_pInf || sizeof( _SSysUtilCapInfo ) != x_pInf->getUsed() )
+		return 0;
+
+	_SSysUtilCapInfo *p = (_SSysUtilCapInfo*)x_pInf->Ptr();
+	if ( !p )
+		return 0;
+
+	// ...
+
+	x_pInf->Destroy();
+
+	return 1;
+}
+
+oexINT CSysUtil::InitScreenCapture( CBin *x_pInf, oexLONG x_nScreen, oexLONG fmt, oexLONG w, oexLONG h )
+{_STT();
+
+	// Attempt to initialize the image structure
+	if ( !x_pInf || !x_pInf->Allocate( sizeof( _SSysUtilCapInfo ) ) )
+		return 0;
+
+	// Initialize and get a pointer to the new structure
+	x_pInf->Zero(); x_pInf->setUsed( sizeof( _SSysUtilCapInfo ) );
+	_SSysUtilCapInfo *p = (_SSysUtilCapInfo*)x_pInf->Ptr();
+	if ( !p )
+		return 0;
+
+	//p->lFmt = fmt;
+	//p->lScreenWidth = GetSystemMetrics( SM_CXFULLSCREEN );
+	//p->lScreenHeight = GetSystemMetrics( SM_CYFULLSCREEN );
+		
+	// What is the capture size?
+//	if ( 0 >= w )
+//		w = p->lScreenWidth;
+//	if ( 0 >= h )
+//		h = p->lScreenHeight;
+
+	// ...
+
+	return 1;
+}
+
+oexINT CSysUtil::GetScreenCaptureInfo( CBin *x_pInf, CPropertyBag *pb )
+{_STT();
+
+	// Ensure valid structure
+	if ( !x_pInf || sizeof( _SSysUtilCapInfo ) != x_pInf->getUsed() || !pb )
+		return 0;
+
+	_SSysUtilCapInfo *p = (_SSysUtilCapInfo*)x_pInf->Ptr();
+	if ( !p )
+		return 0;
+
+/*
+	// Save important image information
+	(*pb)[ "w" ] = p->bmi.bmiHeader.biWidth;
+	(*pb)[ "h" ] = p->bmi.bmiHeader.biHeight;
+	(*pb)[ "bpp" ] = p->bmi.bmiHeader.biBitCount;
+	(*pb)[ "sz" ] = p->bmi.bmiHeader.biSizeImage;
+	(*pb)[ "cmp" ] = p->bmi.bmiHeader.biCompression;
+	
+	(*pb)[ "fmt" ] = p->lFmt;
+	(*pb)[ "sw" ] = p->lScreenWidth;
+	(*pb)[ "sh" ] = p->lScreenHeight;
+*/	
+	return pb->Size();
+}
+
+oexINT CSysUtil::LockScreen( CBin *x_pInf, CBin *x_pImg, oexINT x_nScreen )
+{_STT();
+
+	// Ensure valid structure
+	if ( !x_pInf || sizeof( _SSysUtilCapInfo ) != x_pInf->getUsed() )
+		return 0;
+
+	_SSysUtilCapInfo *p = (_SSysUtilCapInfo*)x_pInf->Ptr();
+	if ( !p )
+		return 0;
+
+	// ...
+
+	return x_pImg->getUsed();
+}
+
+oexINT CSysUtil::UnlockScreen( CBin *x_pInf, CBin *x_pImg )
+{_STT();
+
+	return 1;
+}
+
+oexINT CSysUtil::GetMouseInfo( CPropertyBag *pb )
+{_STT();
+
+	if ( !pb )
+		return 0;
+
+//	POINT pos;
+//	if ( ::GetCursorPos( &pos ) )
+//		(*pb)[ "x" ] = pos.x, (*pb)[ "y" ] = pos.y;
+
+	return pb->Size();
+}
+
+oexLONG CSysUtil::GetMousePos()
+{_STT();
+
+//	POINT pos;
+//	if ( !::GetCursorPos( &pos ) )
+//		return 0;
+//	return ( short( pos.y ) << 16 ) | short( pos.x );
+	
+	return 0;
+}
+
+oexINT CSysUtil::SetMousePos( oexLONG x, oexLONG y )
+{_STT();
+//	return ::SetCursorPos( x, y );
+	return 0;
+}
+
+oexINT CSysUtil::QueueInput( CPropertyBag *pb )
+{_STT();
+
+	if ( !pb )
+		return 0;
+
+/*
+			// Mouse input?
+			if ( (*pb)[ oexT( "type" ) ].ToString() == oexT( "mouse" ) )
+			{	in.type = INPUT_MOUSE;
+				in.mi.dx = (*pb)[ oexT( "x" ) ].ToLong();
+				in.mi.dy = (*pb)[ oexT( "y" ) ].ToLong();
+				in.mi.mouseData = (*pb)[ oexT( "data" ) ].ToLong();
+				in.mi.dwFlags = (*pb)[ oexT( "flags" ) ].ToLong();
+				in.mi.time = (*pb)[ oexT( "time" ) ].ToLong();
+				// in.mi.dwExtraInfo = (*pb)[ oexT( "" ) ].ToLong();
+			} // end if
+
+			// Keyboard input?
+			else if ( (*pb)[ oexT( "type" ) ].ToString() == oexT( "keyboard" ) )
+			{	in.type = INPUT_KEYBOARD;
+				in.ki.wVk = (*pb)[ oexT( "vk" ) ].ToLong();
+				in.ki.wScan = (*pb)[ oexT( "scan" ) ].ToLong();
+				in.ki.dwFlags = (*pb)[ oexT( "flags" ) ].ToLong();
+				in.ki.time = (*pb)[ oexT( "time" ) ].ToLong();
+				// in.ki.dwExtraInfo = (*pb)[ oexT( "" ) ].ToLong();
+			} // end else
+
+			// Hardware input?
+			else if ( (*pb)[ oexT( "type" ) ].ToString() == oexT( "hardware" ) )
+			{	in.type = INPUT_HARDWARE;
+				in.hi.uMsg = (*pb)[ oexT( "msg" ) ].ToLong();
+				in.hi.wParamL = (*pb)[ oexT( "low" ) ].ToLong();
+				in.hi.wParamH = (*pb)[ oexT( "hi" ) ].ToLong();
+			} // end else
+*/
+
+	return 0;
+}
+
+

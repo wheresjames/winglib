@@ -32,6 +32,9 @@ public:
 	/// Destructor
 	virtual ~CPaOutput();
 
+	/// Registers the class
+	static void Register( sqbind::VM vm );
+
 	/** \addtogroup CPaOutput
 		@{
 	*/

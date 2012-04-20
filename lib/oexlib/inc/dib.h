@@ -56,7 +56,7 @@ public:
 		// The magic number ASCII 'BM'
 		enum { eMagicNumber = 0x4d42 };
 
-		/// Magic number, must be 0x42 0xFD (BM)
+		/// Magic number, must be 0x42 0x4D (BM)
 		oexUSHORT 		uMagicNumber;
 
 		/// Size of the file in bytes

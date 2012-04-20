@@ -82,7 +82,7 @@ void CFfAudioDecoder::Destroy()
 	m_lFrames = 0;
 }
 
-int CFfAudioDecoder::Create( int x_nCodec, int x_nChannels, int x_nSampleRate, int x_nBps )
+int CFfAudioDecoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nSampleRate, int x_nBps )
 {_STT();
 
 	oexAutoLock ll( _g_ffmpeg_lock );
@@ -111,6 +111,16 @@ int CFfAudioDecoder::Create( int x_nCodec, int x_nChannels, int x_nSampleRate, i
 
     m_pCodecContext->codec_id = (CodecID)x_nCodec;
     m_pCodecContext->codec_type = AVMEDIA_TYPE_AUDIO;
+    
+#	define CNVTYPE( t, v ) case oex::obj::t : m_pCodecContext->sample_fmt = v; break;
+	switch( x_nFmt )
+	{	CNVTYPE( tUInt8, AV_SAMPLE_FMT_U8 );
+		CNVTYPE( tInt16, AV_SAMPLE_FMT_S16 );
+		CNVTYPE( tInt32, AV_SAMPLE_FMT_S32 );
+		CNVTYPE( tFloat, AV_SAMPLE_FMT_FLT );
+		CNVTYPE( tDouble, AV_SAMPLE_FMT_DBL );
+		default : m_pCodecContext->sample_fmt = AV_SAMPLE_FMT_NONE; break;
+	} // end switch
     
     m_pCodecContext->channels = x_nChannels;
 	m_pCodecContext->sample_rate = x_nSampleRate;
@@ -289,11 +299,10 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 	int used = avcodec_decode_audio3( m_pCodecContext, 
 									  (int16_t*)out->_Ptr(), &out_size,
 									  &m_pkt );
-									 
-	
+
 //	if ( AVERROR_INVALIDDATA == used )
 //		return 0;
-	
+
 	if ( AVERROR( EAGAIN ) == used )
 		return 0;
 

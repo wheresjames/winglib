@@ -56,6 +56,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioExtraData )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioDec )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, isAudioCodec )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioCodecId )
 
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getFifoShare )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getFifoReads )
@@ -69,7 +70,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, setKeyFrameInterval )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getLastFrameFlags )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getLastFrameEncodedSize )
-//	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
@@ -124,7 +124,7 @@ void CFfContainer::Destroy()
 
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) return;
-	
+
 	m_video_extra.Free();
 	m_audio_extra.Free();
 
@@ -138,10 +138,8 @@ void CFfContainer::Destroy()
 
 	CloseStream();
 
-	if ( m_pFrame )
-		av_free( m_pFrame ), m_pFrame = oexNULL;
-
 	m_pCodecContext = oexNULL;
+	m_pFrame = oexNULL;
 	m_nVideoStream = -1;
 	m_buf.Free();
 	oexZero( m_pkt );
@@ -156,7 +154,7 @@ void CFfContainer::Destroy()
 	m_nWrite = 0;
 	m_nRead = 0;
 	m_bKeyRxd = 0;
-	
+
 	m_sUrl.clear();
 }
 
@@ -182,7 +180,7 @@ int CFfContainer::CloseStream()
 			 && !( m_pFormatContext->oformat->flags & AVFMT_NOFILE )
 			 && m_pFormatContext->pb )
 			avio_close( m_pFormatContext->pb );
-			
+
 		// Free the stream
 		av_free( m_pFormatContext );
 
@@ -251,7 +249,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 		Destroy();
 		return 0;
 	} // end if
-	
+
 	// Video stream
 	if ( 0 <= m_nVideoStream
 	     && m_pFormatContext->streams[ m_nVideoStream ]
@@ -274,7 +272,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 				m_pCodecContext = oexNULL;
 
 			if ( m_pCodecContext->extradata && m_pCodecContext->extradata_size )
-				m_video_extra.setBuffer( (sqbind::CSqBinary::t_byte*)m_pCodecContext->extradata, 
+				m_video_extra.setBuffer( (sqbind::CSqBinary::t_byte*)m_pCodecContext->extradata,
 										 m_pCodecContext->extradata_size, 0, oex::oexFALSE );
 
 		} // end else
@@ -303,7 +301,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 				pcc = oexNULL;
 
 			if ( pcc->extradata && pcc->extradata_size )
-				m_audio_extra.setBuffer( (sqbind::CSqBinary::t_byte*)pcc->extradata, 
+				m_audio_extra.setBuffer( (sqbind::CSqBinary::t_byte*)pcc->extradata,
 										 pcc->extradata_size, 0, oex::oexFALSE );
 
 		} // end if
@@ -314,7 +312,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 
 	// Reading
 	m_nRead = 1;
-	
+
 	// Save url
 	m_sUrl = sUrl;
 
@@ -567,9 +565,9 @@ int CFfContainer::Create( const sqbind::stdString &sUrl, const sqbind::stdString
 	} // end if
 
 	m_nWrite = 1;
-	
+
 	m_sUrl = sUrl;
-	
+
 	return 1;
 }
 
@@ -582,7 +580,7 @@ int CFfContainer::InitWrite()
 		return 0;
 
 	int res = 0;
-	
+
 	// +++ Below Seems to memleak when avio_open fails
 	if ( !( m_pFormatContext->oformat->flags & AVFMT_NOFILE ) )
 		if ( 0 > ( res = avio_open( &m_pFormatContext->pb, m_pFormatContext->filename, AVIO_FLAG_WRITE ) ) )
@@ -600,9 +598,9 @@ int CFfContainer::InitWrite()
 
 	// Writing
 	m_nWrite = 2;
-	
+
 //	dump_format( m_pFormatContext, 0, 0, 1 );
-	
+
 	return 1;
 }
 
@@ -669,12 +667,12 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 // http://www.siptutorial.net/RTP/header.html
 
 int getNalHeader( const void *p, int len )
-{	
+{
 	if ( 4 > len )
 		return 0;
 
 	unsigned char *b = (unsigned char*)p;
-	
+
 	// Verify NAL marker
 	if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
 		return 0;
@@ -690,31 +688,31 @@ int getNalHeader( const void *p, int len )
 
 
 int getRtpHeader( const void *p, int len )
-{	
+{
 	if ( 4 > len )
 		return 0;
 
 	unsigned char *b = (unsigned char*)p;
-	
+
 	int version				= ( *b & 0xc0 ) >> 6;
 //	int padding 			= ( *b & 0x20 ) >> 5;
 //	int extension			= ( *b & 0x10 ) >> 4;
 //	int cc					= *b & 0x0f;
-	
+
 //oexSHOW( version );
 //oexSHOW( padding );
 //oexSHOW( extension );
 //oexSHOW( cc );
-	
+
 	if ( 2 != version )
 		return 0;
-	
+
 	b++;
 //	int marker				= *b & 0x01;
 //	int type				= ( *b & 0xfe ) >> 1;
 //oexSHOW( marker );
 //oexSHOW( type );
-	
+
 	return 1;
 }
 
@@ -777,11 +775,11 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	if ( m && m->isset( oexT( "flags" ) ) )
 		pkt.flags = (*m)[ oexT( "flags" ) ].toint();
 
-	else if ( pStream && pStream->codec 
-			  && 
+	else if ( pStream && pStream->codec
+			  &&
 				( CODEC_ID_H264 == pStream->codec->codec_id
 				  || CODEC_ID_MPEG4 == pStream->codec->codec_id
-				) 
+				)
 			)
 		pkt.flags |= ( !getVopType( dat->Ptr(), dat->getUsed() ) ? AV_PKT_FLAG_KEY : 0 );
 
@@ -818,7 +816,7 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 			return 0;
 	} // end if
 
-	else 
+	else
 */
 	if ( av_interleaved_write_frame( m_pFormatContext, &pkt ) )
 		return 0;
@@ -827,7 +825,7 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 }
 
 
-int CFfContainer::AddAudioStream( int codec_id, int channels, int sample_rate, int bps )
+int CFfContainer::AddAudioStream( int codec_id, int fmt, int channels, int sample_rate, int bps )
 {_STT();
 
 	if ( !m_pFormatContext )
@@ -844,34 +842,45 @@ int CFfContainer::AddAudioStream( int codec_id, int channels, int sample_rate, i
 		return -1;
 
 	m_nAudioStream = pst->index;
-	
+
     AVCodecContext *pcc = pst->codec;
 	if ( !pcc )
 		return -1;
-	
+
 	avcodec_get_context_defaults2( pcc, AVMEDIA_TYPE_AUDIO );
-		
+
 	// Fill in codec info
 	pcc->codec_id = (CodecID)codec_id;
 	pcc->codec_type = AVMEDIA_TYPE_AUDIO;
-	
+
     pcc->channels = channels;
 	pcc->sample_rate = sample_rate;
-	pcc->bits_per_coded_sample = bps ? bps : av_get_bits_per_sample( pcc->codec_id );
-    pcc->bit_rate = pcc->sample_rate * pcc->channels * 8;
-//	pcc->sample_fmt = AV_SAMPLE_FMT_S16;	
+    pcc->bit_rate = pcc->sample_rate * ( fmt & 0xf ) * pcc->channels * 8;
+
+#	define CNVTYPE( t, v ) case oex::obj::t : pcc->sample_fmt = v; break;
+	switch( fmt )
+	{	CNVTYPE( tUInt8, AV_SAMPLE_FMT_U8 );
+		CNVTYPE( tInt16, AV_SAMPLE_FMT_S16 );
+		CNVTYPE( tInt32, AV_SAMPLE_FMT_S32 );
+		CNVTYPE( tFloat, AV_SAMPLE_FMT_FLT );
+		CNVTYPE( tDouble, AV_SAMPLE_FMT_DBL );
+		default : pcc->sample_fmt = AV_SAMPLE_FMT_NONE; break;
+	} // end switch
+
+//	pcc->bits_per_coded_sample = bps ? bps : av_get_bits_per_sample( pcc->codec_id );
+//	pcc->frame_size = ( fmt & 0xf );// * channels * 2;
 //	pcc->block_align = pcc->bits_per_coded_sample * pcc->channels / 8;
 //	pcc->frame_size = 4096;
 //	pcc->time_base.num = 1;
 //	pcc->time_base.den = sample_rate;
-	
+
 	// Set extra codec data
 	if ( m_audio_extra.getUsed() )
 	{	pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
 		pcc->extradata = (uint8_t*)m_audio_extra._Ptr();
 		pcc->extradata_size = m_audio_extra.getUsed();
 	} // end if
-	
+
     else if ( m_pFormatContext->oformat->flags & AVFMT_GLOBALHEADER )
         pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
 
@@ -912,7 +921,10 @@ int CFfContainer::WriteAudioFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	pkt.dts = nDts;
 	pkt.stream_index = pStream->index;
 	pkt.data = (uint8_t*)dat->_Ptr();
-	pkt.size = dat->getUsed();
+
+	// Calculate frame size
+	long fsz = ( pStream->codec && 0 < pStream->codec->frame_size ) ? pStream->codec->frame_size : 1;
+	pkt.size = dat->getUsed() / fsz;
 
 	// +++ is this causing the audio issue???
 //	AVCodecContext *pcc = pStream->codec;
@@ -924,9 +936,9 @@ int CFfContainer::WriteAudioFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	{	if ( av_write_frame( m_pFormatContext, &pkt ) )
 			return 0;
 	} // end if
-	
-	else 
-*/	
+
+	else
+*/
 	if ( av_interleaved_write_frame( m_pFormatContext, &pkt ) )
 		return 0;
 
@@ -958,7 +970,7 @@ int CFfContainer::Seek( int nStreamId, int nOffset, int nFlags, int nType )
 	// Calculate time offset if needed
 	oex::oexINT64 t = nOffset;
 	if ( 0 != ( 0x01 & nType ) )
-		t = av_rescale( nOffset, 
+		t = av_rescale( nOffset,
 						m_pFormatContext->streams[ nStreamId ]->time_base.den,
 						m_pFormatContext->streams[ nStreamId ]->time_base.num ) / 1000;
 
@@ -969,7 +981,7 @@ int CFfContainer::Seek( int nStreamId, int nOffset, int nFlags, int nType )
 	return 0;
 }
 
-int CFfContainer::SeekFrame( int nStreamId, int nOffset, int nFlags, int nType, 
+int CFfContainer::SeekFrame( int nStreamId, int nOffset, int nFlags, int nType,
 							 int fmt, sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m, int flip )
 {
 	// Ensure we have a container open
@@ -1009,7 +1021,7 @@ int CFfContainer::SeekFrame( int nStreamId, int nOffset, int nFlags, int nType,
 	// Read them off
 	while ( 0 <= ( si = ReadFrame( in, m ) ) && 0 < togo )
 		if ( si == nStreamId )
-			togo--, DecodeFrameBin( in, fmt, out, m, flip ); 
+			togo--, DecodeFrameBin( in, fmt, out, m, flip );
 
 	return 0;
 }
@@ -1074,7 +1086,7 @@ sqbind::CSqFifoShare* CFfContainer::getFifoShare()
 	// Make sure we have a format context open
 	if ( !m_pFormatContext || !m_pFormatContext->pb )
 		return 0;
-/*		
+/*
 	// Get url context
 	AVIOContext *ac = m_pFormatContext->pb;
 	if ( !ac || !ac->is_streamed || 11 > m_sUrl.length() )

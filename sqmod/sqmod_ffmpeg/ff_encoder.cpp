@@ -323,6 +323,9 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 										  : ( flags & ~AV_PKT_FLAG_KEY ) ) ) );
 		(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_pts ) ) );
 		(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_dts ) ) );
+//		if ( m_pCodecContext->pkt )
+//			(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->pkt->pts ) ) ),
+//			(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->pkt->dts ) ) );
 
 	} // end if
 

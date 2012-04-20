@@ -58,7 +58,7 @@ public:
 	int WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInteger nDts, sqbind::CSqMulti *m );
 	
 	/// Adds an audio stream to the avi
-	int AddAudioStream( int codec_id, int channels, int sample_rate, int bps );
+	int AddAudioStream( int codec_id, int fmt, int channels, int sample_rate, int bps );
 	
 	/// Writes the specified audio to the file
 	int WriteAudioFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInteger nDts, sqbind::CSqMulti *m );
@@ -97,7 +97,7 @@ public:
 		return m_pFormatContext->streams[ m_nVideoStream ]->codec->height;
 	}
 
-	/// Returns video format
+	/// Returns video codec id
 	int getVideoCodecId()
 	{	if ( !m_pFormatContext || 0 > m_nVideoStream
 			 || !m_pFormatContext->streams[ m_nVideoStream ]->codec )
@@ -111,6 +111,14 @@ public:
 			 || !m_pFormatContext->streams[ m_nVideoStream ]->codec )
 			return 0;
 		return m_pFormatContext->streams[ m_nVideoStream ]->codec->pix_fmt;
+	}
+
+	/// Returns audio codec id
+	int getAudioCodecId()
+	{	if ( !m_pFormatContext || 0 > m_nAudioStream
+			 || !m_pFormatContext->streams[ m_nAudioStream ]->codec )
+			return 0;
+		return m_pFormatContext->streams[ m_nAudioStream ]->codec->codec_id;
 	}
 
 	/// Returns a pointer to the audio decoder

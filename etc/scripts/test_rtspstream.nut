@@ -166,7 +166,7 @@ class CRtspStream
 			adec = CFfAudioDecoder();
 			adec.setExtraData( rtsp.getExtraAudioData() );
 			if ( !adec.Create( CFfAudioDecoder().LookupCodecId( rtsp.getAudioCodecName() ),
-							   0, 0, 0 ) )
+							   ::_self.tFloat, 0, 0, 0 ) )
 			{	::_self.echo( "!!! Failed to create decoder for " + rtsp.getAudioCodecName() );
 				adec = 0;
 				afail = 1;
@@ -181,12 +181,8 @@ class CRtspStream
 				{
 					pa = CPaOutput();
 					pa.setGlitchDetection( 0 );
-					local fmt;
-					switch( 16 )
-					{	case 8 : fmt = CPaOutput().paUInt8; break;
-						default : fmt = CPaOutput().paInt16; break;
-					} // end switch
-					local fsize = 2;
+					local fmt = ::_self.tInt16;
+					local fsize = ::_self.type_size( fmt );
 
 					if ( !pa.Open( 0, pa.getDefaultOutputDevice(), rtsp.getNumAudioChannels(), 
 									  fmt, 0.2, rtsp.getAudioSampleRate().tofloat(), fsize ) )
@@ -317,7 +313,6 @@ class CRtspStream
 			{	RecordToFile( file, 
 							  rtsp.getVideoCodecName(), rtsp.getWidth(), rtsp.getHeight(), rtsp.getFps(),
 							  rtsp.getAudioCodecName(), rtsp.getNumAudioChannels(), rtsp.getAudioSampleRate(), 0 );
-
 				::_self.echo( "rec : " + dec.getWidth() + "x" + dec.getHeight() );
 			} // end if
 
@@ -380,12 +375,16 @@ class CRtspStream
 
 		if ( !rec_avi.Create( file, "", CSqMulti() ) )
 			::_self.echo( "Failed to create avi" );
+
 		else if ( vfmt.len() && 0 > rec_avi.AddVideoStream( CFfDecoder().LookupCodecId( vfmt ), w, h, fps ) )
 			::_self.echo( "Failed to add video stream" );
-		else if ( afmt.len() && 0 > rec_avi.AddAudioStream( CFfAudioDecoder().LookupCodecId( afmt ), ch, sr, bps ) )
+
+		else if ( afmt.len() && 0 > rec_avi.AddAudioStream( CFfAudioDecoder().LookupCodecId( afmt ), ::_self.tInt16, ch, sr, bps ) )
 			::_self.echo( "Failed to add audio stream" );
+
 		else if ( !rec_avi.InitWrite() )
 			::_self.echo( "Failed to initiailze avi" );
+
 		else
 			::_self.echo( "iii Saving to file : " + file 
 							+ " - " + vfmt + " / " + afmt
@@ -397,7 +396,8 @@ class CGlobal
 {
 	rtsp_sources =
 	{
-		yt1			= [ "yt1",	"rtsp://v8.cache1.c.youtube.com/CjgLENy73wIaLwlnoDu0pt7zDRMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNgnLTe56Djt-FNDA==/0/0/0/video.3gp" ],
+		yt1			= [ "yt1",	"rtsp://v1.cache7.c.youtube.com/CjgLENy73wIaLwmY52udh9o1TRMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNgyeWI3OSQoshPDA==/0/0/0/video.3gp" ],
+		//yt1			= [ "yt1",	"rtsp://v8.cache1.c.youtube.com/CjgLENy73wIaLwlnoDu0pt7zDRMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNgnLTe56Djt-FNDA==/0/0/0/video.3gp" ],
 		yt2			= [ "yt2",	"rtsp://v4.cache8.c.youtube.com/CjgLENy73wIaLwkU67OEyLSkyBMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNgzoOa_IDtxOFNDA==/0/0/0/video.3gp" ],
 		yt3			= [ "yt3",	"rtsp://v1.cache7.c.youtube.com/CjgLENy73wIaLwmY52udh9o1TRMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNghbzo27OzxJ1ODA==/0/0/0/video.3gp" ],
 	};
