@@ -43,6 +43,9 @@ public:
 	/// Returns the audio sample format
 	int getFormat() { return m_nFmt; }
 
+	/// Returns the audio codec id
+	int getCodecId() { return m_nCodecId; }
+
 	/// Returns the sample rate
 	int getSampleRate()
 	{	if ( !m_pCodecContext )
@@ -104,6 +107,9 @@ private:
 
 	/// Format type
 	int						m_nFmt;
+
+	/// Codec ID
+	int						m_nCodecId;
 
 	/// Audio data buffer
 	sqbind::CSqBinary		m_buf;

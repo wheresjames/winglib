@@ -36,7 +36,7 @@ function create_clip( fname, fmt, w, h, fps, hz, sps, secs, font )
 	if ( 0 > avi.AddVideoStream( CFfDecoder().LookupCodecId( fmt ), w, h, fps ) )
 	{	_self.echo( "Failed to add video stream" ); return; }
 
-	if ( 0 > avi.AddAudioStream( CFfAudioDecoder().LookupCodecId( "AC3_" ), afmt, 1, sps.tointeger(), 0 ) )
+	if ( 0 > avi.AddAudioStream( CFfAudioDecoder().LookupCodecId( "AC3" ), afmt, 1, sps.tointeger(), 0 ) )
 	{	_self.echo( "Failed to add audio stream" ); return; }
 
 	if ( !avi.InitWrite() )
@@ -72,7 +72,7 @@ function create_clip( fname, fmt, w, h, fps, hz, sps, secs, font )
 	} // end if
 
 	
-	_self.echo( "abuf_size = " + abuf_size );
+//	_self.echo( "abuf_size = " + abuf_size );
 	sw.setUsed( abuf_size * sw.sizeFLOAT() );
 
 /*
@@ -103,7 +103,6 @@ function create_clip( fname, fmt, w, h, fps, hz, sps, secs, font )
 		local sec = ( ( i / fps ) % 60 ).tointeger();
 		local f = ( i % fps ).tointeger();
 		local str = format( "%0.2d:%0.2d:%0.2d.%0.2d", hrs, min, sec, f );
-
 		::_self.print( str + "\r" );
 
 		font.setColor( 128, 0, 0 );
@@ -135,11 +134,11 @@ function create_clip( fname, fmt, w, h, fps, hz, sps, secs, font )
 				::_self.echo( "Failed to write audio data" );
 */
 
-		_self.echo( "\ni: " + sw.getUsed() );
+//		_self.echo( "\ni: " + sw.getUsed() );
 		aenc.BufferData( sw );
 		while ( aenc.Encode( CSqBinary(), frame, inf ) )
 		{
-			_self.echo( "o: " + frame.getUsed() );
+//			_self.echo( "o: " + frame.getUsed() );
 
 			// Write audio buffer
 			if ( frame.getUsed() )

@@ -55,7 +55,7 @@ public:
 	int BufferData( sqbind::CSqBinary *in, sqbind::CSqMulti *m );
 
 	/// Dequeues data from buffer
-	int UnBufferData( int uUsed );
+	int UnbufferData( int uUsed );
 
 	/// Returns the amount of data buffered
 	int getBufferSize();

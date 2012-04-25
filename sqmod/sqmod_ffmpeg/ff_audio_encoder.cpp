@@ -18,7 +18,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfAudioEncoder, CFfAudioEncoder )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getFrameSize )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, BufferData )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, UnbufferData )
-//	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder,  )
+	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getCodecId )
 //	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder,  )
 //	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder,  )
 
@@ -35,6 +35,7 @@ CFfAudioEncoder::CFfAudioEncoder()
 {_STT();
 
 	m_nFmt = 0;
+	m_nCodecId = 0;
 	m_pCodec = oexNULL;
 	m_pCodecContext = oexNULL;
 	m_pStream = oexNULL;
@@ -64,6 +65,7 @@ void CFfAudioEncoder::Destroy()
 	} // end if
 
 	m_nFmt = 0;
+	m_nCodecId = 0;
 	m_pCodec = oexNULL;
 	m_pOutput = oexNULL;
 	m_pCodecContext = oexNULL;
@@ -163,7 +165,9 @@ int CFfAudioEncoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 		return 0;
 	} // end if
 
+	// Save info
 	m_nFmt = x_nFmt;
+	m_nCodecId = x_nCodec;
 
 	return 1;
 }
@@ -232,7 +236,8 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 		return 0;
 
 	// Allocate space for output data
-	unsigned int nOutPtr = 0, nOut = FF_MIN_BUFFER_SIZE + nIn;
+	unsigned int nOutPtr = out->getUsed();
+	unsigned int nOut = oex::cmn::NextPower2( nOutPtr + FF_MIN_BUFFER_SIZE + nIn );
 	if ( out->Size() < nOut && !out->Allocate( nOut ) )
 		return 0;
 
@@ -240,17 +245,22 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 	uint8_t *pOut = (uint8_t*)out->_Ptr();
 
 	// While we have input data
-	while ( nIn >= bs )
+	while ( nIn >= bs && 0 < nOutFrame )
 	{
 		// Ensure a reasonable output buffer
 		while ( ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
 			nOut <<= 1, out->Resize( nOut );
 
+		// Check for memory issue
+		if ( out->Size() != nOut || nOut <= nOutPtr || ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
+		{	oexERROR( nOut, oexT( "Memory allocation failed" ) );
+			return 0;
+		} // end if
+
 		// Encode a frame
 		int nBytes = avcodec_encode_audio( m_pCodecContext, &pOut[ nOutPtr ], nOut - nOutPtr, (const short*)m_pkt.data );
 		if ( 0 > nBytes )
 		{	oexERROR( nBytes, oexT( "avcodec_encode_audio() failed" ) );
-			out->setUsed( 0 );
 			return 0;
 		} // end if
 

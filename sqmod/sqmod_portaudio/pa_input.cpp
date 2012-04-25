@@ -101,7 +101,7 @@ int CPaInput::getDeviceInfo( int nDev, sqbind::CSqMulti *pInf )
 {_STT();
 
 	// Read output device information
-    m_pdi = Pa_GetDeviceInfo( nDev );
+	m_pdi = Pa_GetDeviceInfo( nDev );
 	if ( !m_pdi )
 		return 0;
 
@@ -146,11 +146,7 @@ int CPaInput::PaStreamCallback( const void *input, void *output, unsigned long f
 
 int CPaInput::getFormatBytes( int nFmt )
 {_STT();
-
-	int nSize = Pa_GetSampleSize( nFmt );
-	if ( paSampleFormatNotSupported == nSize )
-		return 0;
-	return nSize;
+	return oex::obj::StaticSize( nFmt );
 }
 
 
@@ -185,7 +181,7 @@ int CPaInput::Open( int bBlocking, int nDev, int nChannels, int nFormat, double 
 	m_nFrameBlockSize = fpb;
 	m_nFrameBytes = getFormatBytes( nFormat ) * nChannels;
 
-	// Attempt to open output stream
+	// Attempt to open input stream
 
 	if ( bBlocking )
 		m_errLast = Pa_OpenStream( &m_stream, &psp, 0, dSRate, fpb, 0, 0, this );
@@ -237,6 +233,10 @@ int CPaInput::Read( sqbind::CSqBinary *data, int frames )
 	if ( m_bBlocking && 0 >= frames )
 		frames = Pa_GetStreamReadAvailable( m_stream );
 
+	// Anything new to read?
+	if ( !frames )
+		return data->getUsed();
+
 	// How many bytes to read?
 	unsigned long bytes = frames * getFrameBytes();
 	if ( !m_bBlocking && 0 >= bytes )
@@ -244,8 +244,9 @@ int CPaInput::Read( sqbind::CSqBinary *data, int frames )
 
 	// Ensure space
 	unsigned long total = bytes + data->getUsed();
-	if ( data->Size() < total )
-		if ( !data->Resize( total ) )
+	unsigned long reserve = oex::cmn::NextPower2( total );
+	if ( data->Size() < reserve )
+		if ( !data->Resize( reserve ) )
 			return data->getUsed();
 
 	if ( m_bBlocking )

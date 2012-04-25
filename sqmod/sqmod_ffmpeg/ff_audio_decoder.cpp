@@ -260,7 +260,7 @@ int CFfAudioDecoder::BufferData( sqbind::CSqBinary *in, sqbind::CSqMulti *m )
 	return m_pkt.size;
 }
 
-int CFfAudioDecoder::UnBufferData( int uUsed )
+int CFfAudioDecoder::UnbufferData( int uUsed )
 {
 	if ( 0 > uUsed )
 		m_tmp.setUsed( 0 );
@@ -283,64 +283,102 @@ int CFfAudioDecoder::getBufferSize()
 int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
 {_STT();
 
-	// Ensure codec
-	if ( !m_pCodecContext )
+	// Sanity check
+	if ( !m_pCodecContext || !out )
 		return 0;
 
-	// Add data to buffer
-	if ( !in || !out || !BufferData( in, m ) )
+	// We need at least one frame of data
+	unsigned int nIn = BufferData( in, m );
+	unsigned int fs = getFrameSize();
+	unsigned int bs = fs * ( getBps() / 8 );
+	if ( 0 >= nIn || bs > nIn )
 		return 0;
 
-	int out_size = oex::cmn::Max( (int)(in->getUsed() * 2), (int)AVCODEC_MAX_AUDIO_FRAME_SIZE );
-	if ( (int)out->Size() < out_size )
-		out->Allocate( out_size );
-
-	// Attempt to decode packet
-	int used = avcodec_decode_audio3( m_pCodecContext, 
-									  (int16_t*)out->_Ptr(), &out_size,
-									  &m_pkt );
-
-//	if ( AVERROR_INVALIDDATA == used )
-//		return 0;
-
-	if ( AVERROR( EAGAIN ) == used )
+	// Allocate space for output data
+	unsigned int nOutPtr = out->getUsed();
+	unsigned int nOut = oex::cmn::NextPower2( nOutPtr + FF_MIN_BUFFER_SIZE + nIn );
+	if ( out->Size() < nOut && !out->Allocate( nOut ) )
 		return 0;
 
-	if ( 0 > used )
-	{	UnBufferData( -1 );
-		return 0;
+	// Output buffer pointer
+	uint8_t *pOut = (uint8_t*)out->_Ptr();
+
+	// While we have input data
+	int nOutFrame = 1;
+	while ( nIn >= bs && 0 < nOutFrame )
+	{
+		// Ensure a reasonable output buffer
+		while ( ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
+			nOut <<= 1, out->Resize( nOut );
+
+		// Check for memory issue
+		if ( out->Size() != nOut || nOut <= nOutPtr || ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
+		{	oexERROR( nOut, oexT( "Memory allocation failed" ) );
+			return 0;
+		} // end if
+
+		// Decode a frame
+		nOutFrame = nOut - nOutPtr;
+		int nBytes = avcodec_decode_audio3( m_pCodecContext, (int16_t*)&pOut[ nOutPtr ], &nOutFrame, &m_pkt );
+		if ( 0 > nBytes )
+		{	oexERROR( nBytes, oexT( "avcodec_decode_audio3() failed" ) );
+			return 0;
+		} // end if
+
+		// Add bytes
+		if ( 0 < nOutFrame )
+			nOutPtr += nOutFrame;
+
+		// Unbuffer used data
+		nIn = UnbufferData( nBytes );
+
+	} // end while
+
+	// Set total bytes in the output queue
+	out->setUsed( nOutPtr );
+
+	if ( m )
+	{
+		// Save key frame information
+		int flags = (*m)[ oexT( "flags" ) ].toint();
+		(*m)[ oexT( "flags" ) ]
+			.set( sqbind::oex2std( oexMks( ( m_pCodecContext->coded_frame->key_frame )
+										  ? ( flags | AV_PKT_FLAG_KEY )
+										  : ( flags & ~AV_PKT_FLAG_KEY ) ) ) );
+		(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_pts ) ) );
+		(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_dts ) ) );
+
 	} // end if
 
-	if ( 0 < used )
-		UnBufferData( used );
-
-	if ( 0 >= out_size )
-	{	out->setUsed( 0 );
-		return 0;
-	} // end if
-
-	out->setUsed( out_size );
-
-	// Frame count
-	m_lFrames++;
-
-	return out_size;
+	return nOutPtr;
 }
 
 static AVCodecTag g_ff_audio_codec_map[] =
 {
-    { CODEC_ID_AAC,				MKTAG('A', 'M', 'R', ' ') },
-    { CODEC_ID_AMR_NB,			MKTAG('A', 'M', 'R', ' ') },
-    { CODEC_ID_AMR_WB,			MKTAG('A', 'M', 'R', ' ') },
-    { CODEC_ID_AAC_LATM,		MKTAG('L', 'A', 'T', 'M') },
+	{ CODEC_ID_AAC,			MKTAG('A', 'A', 'C', ' ') },
+	{ CODEC_ID_AAC,			MKTAG('A', 'M', 'R', ' ') },
+	{ CODEC_ID_AMR_NB,		MKTAG('A', 'M', 'R', ' ') },
+	{ CODEC_ID_AMR_WB,		MKTAG('A', 'M', 'R', ' ') },
+	{ CODEC_ID_MP2,			MKTAG('M', 'P', '2', ' ') },
+	{ CODEC_ID_MP3,			MKTAG('M', 'P', '3', ' ') },
+	{ CODEC_ID_AC3,			MKTAG('A', 'C', '3', ' ') },
 
-    { CODEC_ID_MP2,				MKTAG('M', 'P', '2', '_') },
-    { CODEC_ID_MP3,				MKTAG('M', 'P', '3', '_') },
-    { CODEC_ID_AAC,				MKTAG('A', 'A', 'C', '_') },
-    { CODEC_ID_AC3,				MKTAG('A', 'C', '3', '_') },
-
+	{ CODEC_ID_ADPCM_G722,	MKTAG('G', '7', '2', '2') },
+	{ CODEC_ID_AAC_LATM,	MKTAG('L', 'A', 'T', 'M') },
+	{ CODEC_ID_MP2,			MKTAG('M', 'P', '-', '2') },
+	{ CODEC_ID_MP3,			MKTAG('M', 'P', '-', '3') },
+	{ CODEC_ID_AC3,			MKTAG('A', 'C', '-', '3') },
     
-	{ CODEC_ID_NONE,			0 }
+	// +++ I'm not sure if anything is 'correct' for vorbis
+	{ CODEC_ID_VORBIS,		MKTAG('V', 'O', 'R', 'B') },
+/*	{ (CodecID)0x674f,		MKTAG('V', 'O', 'R', '1') },
+	{ (CodecID)0x6750,		MKTAG('V', 'O', 'R', '2') },
+	{ (CodecID)0x6751,		MKTAG('V', 'O', 'R', '3') },
+	{ (CodecID)0x676f,		MKTAG('V', 'O', '1', '+') },
+	{ (CodecID)0x6770,		MKTAG('V', 'O', '2', '+') },
+	{ (CodecID)0x6771,		MKTAG('V', 'O', '3', '+') },
+*/
+	{ CODEC_ID_NONE,		0 }
 };
 
 struct SFfAudioCodecInfo

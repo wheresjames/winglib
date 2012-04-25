@@ -44,8 +44,7 @@ function TestInput( pi )
 {
 	_self.echo( "*** Opening input device : " + pi.getDefaultInputDevice() );
 
-	if ( !pi.Open( 1, pi.getDefaultInputDevice(), 1, 
-				   CPaInput().paFloat32, 0.2, 44100., 0 ) )
+	if ( !pi.Open( 1, pi.getDefaultInputDevice(), 1, ::_self.tFloat, 0.2, 44100., 0 ) )
 	{   _self.echo( "!!! Failed to open input stream : " + pi.getLastError() );
 		return 0;
 	} // end if
@@ -53,7 +52,7 @@ function TestInput( pi )
 	_self.echo( "*** Starting the input device" );
 
 	if ( !pi.Start() )
-	{   _self.echo( "!!! Failed to start input stream : " + pi.getLastError() );
+	{	_self.echo( "!!! Failed to start input stream : " + pi.getLastError() );
 		return 0;
 	} // end if
 
@@ -94,8 +93,7 @@ function TestOutput( pa )
 
 	_self.echo( "*** Opening output device : " + pa.getDefaultOutputDevice() );
 
-	if ( !pa.Open( 1, pa.getDefaultOutputDevice(), 1, 
-				   CPaOutput().paFloat32, 0.2, sps, bsize ) )
+	if ( !pa.Open( 1, pa.getDefaultOutputDevice(), 1, ::_self.tFloat, 0.2, sps, bsize ) )
 	{   _self.echo( "!!! Failed to open output stream : " + pa.getLastError() );
 		return 0;
 	} // end if
