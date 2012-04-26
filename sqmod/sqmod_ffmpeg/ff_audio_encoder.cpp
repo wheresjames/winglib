@@ -245,7 +245,7 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 	uint8_t *pOut = (uint8_t*)out->_Ptr();
 
 	// While we have input data
-	while ( nIn >= bs && 0 < nOutFrame )
+	while ( nIn >= bs )
 	{
 		// Ensure a reasonable output buffer
 		while ( ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
