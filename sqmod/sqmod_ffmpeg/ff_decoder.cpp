@@ -470,7 +470,6 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 	return res ? 1 : 0;
 }
 
-
 static AVCodecTag g_ff_codec_map[] =
 {
     { CODEC_ID_MPEG4,			MKTAG('M', 'P', '4', 'V') },
@@ -478,9 +477,33 @@ static AVCodecTag g_ff_codec_map[] =
 	{ CODEC_ID_NONE,			0 }
 };
 
+struct SFfVideoCodecInfo
+{
+	int			id;
+	const char 	*tag;
+};
+
+/*
+static SFfVideoCodecInfo g_ff_video_codec_info[] =
+{
+	{ CODEC_ID_H263P,			oexT( "H263-2000" ) },
+	{ CODEC_ID_H263P,			oexT( "H263-1998" ) },
+
+	{ CODEC_ID_NONE,			0 }
+};
+*/
 
 int CFfDecoder::LookupCodecId( const sqbind::stdString &sCodec )
 {_STT();
+/*
+	// Extras by name
+	oex::CStr8 s = oexStrToStr8( sqbind::std2oex( sCodec ) );
+	for ( int i = 0; CODEC_ID_NONE != g_ff_video_codec_info[ i ].id; i++ )
+		if ( !oex::str::ICompare( s.Ptr(), s.Length(), 
+								  g_ff_video_codec_info[ i ].tag, 
+								  oex::zstr::Length( g_ff_video_codec_info[ i ].tag ) ) )
+			return g_ff_video_codec_info[ i ].id;
+*/
 	char c[ 5 ] = { ' ', ' ', ' ', ' ', 0 };
 	for ( oexSIZE_T i = 0; i < 4 && i < sCodec.length(); i++ )
 		c[ i ] = (char)sCodec[ i ];
@@ -500,6 +523,12 @@ int CFfDecoder::LookupCodecId( const sqbind::stdString &sCodec )
 
 sqbind::stdString CFfDecoder::LookupCodecName( int nId )
 {_STT();
+/*
+	// Find a codec with that id
+	for ( int i = 0; CODEC_ID_NONE != g_ff_video_codec_info[ i ].id; i++ )
+		if ( g_ff_video_codec_info[ i ].id == (CodecID)nId )
+			return oexMbToStrPtr( g_ff_video_codec_info[ i ].tag );
+*/
 	// Find a codec with that id
 	for ( int i = 0; CODEC_ID_NONE != ff_codec_bmp_tags[ i ].id; i++ )
 		if ( ff_codec_bmp_tags[ i ].id == (CodecID)nId )

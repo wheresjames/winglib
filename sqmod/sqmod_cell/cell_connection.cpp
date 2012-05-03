@@ -680,7 +680,7 @@ sqbind::CSqMulti CCellConnection::ReadTag( const sqbind::stdString &sTag )
 
 	} // end if
 
-	sqbind::CSqMulti		mRet;
+	sqbind::CSqMulti	mRet;
 	int					nLen = 0;
 	unsigned char *		pDat = oexNULL;
 

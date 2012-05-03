@@ -369,6 +369,8 @@ static AVCodecTag g_ff_audio_codec_map[] =
 	{ CODEC_ID_MP3,			MKTAG('M', 'P', '-', '3') },
 	{ CODEC_ID_AC3,			MKTAG('A', 'C', '-', '3') },
     
+	{ CODEC_ID_PCM_MULAW,	MKTAG('P', 'C', 'M', 'U') },
+
 	// +++ I'm not sure if anything is 'correct' for vorbis
 	{ CODEC_ID_VORBIS,		MKTAG('V', 'O', 'R', 'B') },
 /*	{ (CodecID)0x674f,		MKTAG('V', 'O', 'R', '1') },
