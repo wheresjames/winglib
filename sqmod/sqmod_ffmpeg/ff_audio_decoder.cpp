@@ -111,7 +111,7 @@ int CFfAudioDecoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 
     m_pCodecContext->codec_id = (CodecID)x_nCodec;
     m_pCodecContext->codec_type = AVMEDIA_TYPE_AUDIO;
-    
+
 #	define CNVTYPE( t, v ) case oex::obj::t : m_pCodecContext->sample_fmt = v; break;
 	switch( x_nFmt )
 	{	CNVTYPE( tUInt8, AV_SAMPLE_FMT_U8 );
@@ -121,7 +121,7 @@ int CFfAudioDecoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 		CNVTYPE( tDouble, AV_SAMPLE_FMT_DBL );
 		default : m_pCodecContext->sample_fmt = AV_SAMPLE_FMT_NONE; break;
 	} // end switch
-    
+
     m_pCodecContext->channels = x_nChannels;
 	m_pCodecContext->sample_rate = x_nSampleRate;
     m_pCodecContext->bits_per_coded_sample = x_nBps;
@@ -220,24 +220,24 @@ int CFfAudioDecoder::BufferData( sqbind::CSqBinary *in, sqbind::CSqMulti *m )
 	if ( m_sync.getUsed() )
 	{
 		oexSHOW( m_sync.getUsed() );
-	
+
 		const char *s = m_sync.Ptr();
 		sqbind::CSqBinary::t_size ls = m_sync.getUsed();
 
 		const char *p = m_tmp.Ptr();
 		sqbind::CSqBinary::t_size lp = m_tmp.getUsed();
-		
+
 		// Look for the sync
 		while ( lp > ls && oexMemCmp( p, s, ls ) )
 			p++, lp--;
 
-		// Shift out unsynced data			
+		// Shift out unsynced data
 		if ( lp < m_tmp.getUsed() )
 		{	oexSHOW( lp );
 			oexSHOW( m_tmp.getUsed() );
 			m_tmp.LShift( m_tmp.getUsed() - lp );
 		} // end if
-	
+
 	} // end if
 
 	// Get buffer pointers
@@ -368,8 +368,9 @@ static AVCodecTag g_ff_audio_codec_map[] =
 	{ CODEC_ID_MP2,			MKTAG('M', 'P', '-', '2') },
 	{ CODEC_ID_MP3,			MKTAG('M', 'P', '-', '3') },
 	{ CODEC_ID_AC3,			MKTAG('A', 'C', '-', '3') },
-    
+
 	{ CODEC_ID_PCM_MULAW,	MKTAG('P', 'C', 'M', 'U') },
+	{ CODEC_ID_PCM_ALAW,	MKTAG('P', 'C', 'M', 'A') },
 
 	// +++ I'm not sure if anything is 'correct' for vorbis
 	{ CODEC_ID_VORBIS,		MKTAG('V', 'O', 'R', 'B') },
@@ -417,8 +418,8 @@ int CFfAudioDecoder::LookupCodecId( const sqbind::stdString &sCodec )
 	// Extras by name
 	oex::CStr8 s = oexStrToStr8( sqbind::std2oex( sCodec ) );
 	for ( int i = 0; CODEC_ID_NONE != g_ff_audio_codec_info[ i ].id; i++ )
-		if ( !oex::str::ICompare( s.Ptr(), s.Length(), 
-								  g_ff_audio_codec_info[ i ].tag, 
+		if ( !oex::str::ICompare( s.Ptr(), s.Length(),
+								  g_ff_audio_codec_info[ i ].tag,
 								  oex::zstr::Length( g_ff_audio_codec_info[ i ].tag ) ) )
 			return g_ff_audio_codec_info[ i ].id;
 
@@ -443,12 +444,12 @@ sqbind::stdString CFfAudioDecoder::LookupCodecName( int nId )
 			*(oex::oexUINT32*)b = g_ff_audio_codec_map[ i ].tag;
 			return oexMbToStrPtr( b );
 		} // end if
-		
+
 	// Find a codec with that id
 	for ( int i = 0; CODEC_ID_NONE != g_ff_audio_codec_info[ i ].id; i++ )
 		if ( g_ff_audio_codec_info[ i ].id == (CodecID)nId )
 			return oexMbToStrPtr( g_ff_audio_codec_info[ i ].tag );
-		
+
 	return oexT( "" );
 }
 

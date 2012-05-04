@@ -70,6 +70,17 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, setKeyFrameInterval )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getLastFrameFlags )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getLastFrameEncodedSize )
+
+	SQBIND_MEMBER_FUNCTION( CFfContainer, setTimeScale )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getTimeBase )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoScale )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioScale )
+
+	SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoTsOffset )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoTsOffset )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, setAudioTsOffset )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioTsOffset )
+
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
@@ -117,6 +128,14 @@ CFfContainer::CFfContainer()
 	m_nLastFrameEncodedSize = 0;
 	m_nKeyFrameInterval = 0;
 	oexZero( m_pkt );
+
+	m_time_base = 0;
+	m_video_scale = 0;
+	m_audio_scale = 0;
+
+	m_vts_offset = 0;
+	m_ats_offset = 0;
+
 }
 
 void CFfContainer::Destroy()
@@ -154,6 +173,9 @@ void CFfContainer::Destroy()
 	m_nWrite = 0;
 	m_nRead = 0;
 	m_bKeyRxd = 0;
+
+	m_vts_offset = 0;
+	m_ats_offset = 0;
 
 	m_sUrl.clear();
 }
@@ -638,8 +660,10 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	pcc->bit_rate = width * height * fps / 3;
 	pcc->width = width;
 	pcc->height = height;
+
 	pcc->time_base.num = 1;
-	pcc->time_base.den = fps;
+	pcc->time_base.den = ( 0 < m_time_base ) ? m_time_base : fps;
+
 	pcc->gop_size = ( 0< m_nKeyFrameInterval ) ? m_nKeyFrameInterval : fps;
 
 	// Signal global headers if needed
@@ -797,6 +821,27 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	pkt.pts = nPts ? nPts : ( ( m && m->isset( oexT( "pts" ) ) ) ? (*m)[ "pts" ].toint() : AV_NOPTS_VALUE );
 	pkt.dts = nDts ? nDts : ( ( m && m->isset( oexT( "dts" ) ) ) ? (*m)[ "dts" ].toint() : AV_NOPTS_VALUE );
 
+	// Offset
+	if ( 0 < pkt.pts )
+	{
+		if ( !m_vts_offset )
+			m_vts_offset = pkt.pts;
+
+		if ( !m_ats_offset )
+			m_ats_offset = m_vts_offset;
+
+		if ( pkt.pts >= m_vts_offset )
+			pkt.pts -= m_vts_offset;
+		else
+			return 0;
+
+		if ( pkt.dts >= m_vts_offset )
+			pkt.dts -= m_vts_offset;
+		else if ( 0 < pkt.dts )
+			return 0;
+
+	} // end if
+
 	// +++ is this causing the audio issue???
 //	AVCodecContext *pcc = pStream->codec;
 //	if ( pcc && pcc->coded_frame && pcc->coded_frame->pts != AV_NOPTS_VALUE )
@@ -856,6 +901,10 @@ int CFfContainer::AddAudioStream( int codec_id, int fmt, int channels, int sampl
     pcc->channels = channels;
 	pcc->sample_rate = sample_rate;
     pcc->bit_rate = pcc->sample_rate * ( fmt & 0xf ) * pcc->channels * 8;
+
+	// Custom time base?
+	if ( 0 < m_time_base )
+		pcc->time_base.num = 1, pcc->time_base.den = m_time_base;
 
 #	define CNVTYPE( t, v ) case oex::obj::t : pcc->sample_fmt = v; break;
 	switch( fmt )
@@ -921,6 +970,27 @@ int CFfContainer::WriteAudioFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	pkt.dts = nDts;
 	pkt.stream_index = pStream->index;
 	pkt.data = (uint8_t*)dat->_Ptr();
+
+	// Offset
+	if ( 0 < pkt.pts )
+	{
+		if ( !m_ats_offset )
+			m_ats_offset = pkt.pts;
+
+		if ( !m_vts_offset )
+			m_vts_offset = m_ats_offset;
+
+		if ( pkt.pts >= m_ats_offset )
+			pkt.pts -= m_ats_offset;
+		else
+			return 0;
+
+		if ( pkt.dts >= m_ats_offset )
+			pkt.dts -= m_ats_offset;
+		else if ( 0 < pkt.dts )
+			return 0;
+
+	} // end if
 
 	// Calculate frame size
 	long fsz = ( pStream->codec && 0 < pStream->codec->frame_size ) ? pStream->codec->frame_size : 1;

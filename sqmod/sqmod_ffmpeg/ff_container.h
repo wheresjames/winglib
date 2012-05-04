@@ -13,7 +13,7 @@ public:
 
 	/// Destructor
 	virtual ~CFfContainer() { Destroy(); }
-	
+
 	/// Registers the class
 	static void Register( sqbind::VM vm );
 
@@ -56,10 +56,10 @@ public:
 
 	/// Writes the specified image to the file
 	int WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInteger nDts, sqbind::CSqMulti *m );
-	
+
 	/// Adds an audio stream to the avi
 	int AddAudioStream( int codec_id, int fmt, int channels, int sample_rate, int bps );
-	
+
 	/// Writes the specified audio to the file
 	int WriteAudioFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInteger nDts, sqbind::CSqMulti *m );
 
@@ -145,8 +145,8 @@ public:
 	}
 
 	/// Returns non zero if there is a valid audio codec
-	int isAudioCodec() 
-	{	return m_audio_dec.isValid(); 
+	int isAudioCodec()
+	{	return m_audio_dec.isValid();
 	}
 
 	/// Returns non zero if there is a valid video codec
@@ -199,16 +199,16 @@ public:
 	/// Sets the number of writes on the fifo share
 	void setFifoWrites( int n )
 	{	sqbind::CSqFifoShare *pFs = getFifoShare(); pFs->setWrites( n ); }
-	
+
 	/// Returns a pointer to the fifo share if any
 	sqbind::CSqFifoShare* getFifoShare();
-	
+
 	/// Returns the curent url
 	sqbind::stdString getUrl() { return m_sUrl; }
 
 	/// Returns the default key frame interval
 	int getKeyFrameInterval() { return m_nKeyFrameInterval; }
-	
+
 	/// Sets the default key frame interval
 	void setKeyFrameInterval( int n ) { m_nKeyFrameInterval = n; }
 
@@ -217,6 +217,31 @@ public:
 
 	/// Returns the last frames encoded size
 	int getLastFrameEncodedSize() { return m_nLastFrameEncodedSize; }
+
+	/// Sets the time scale parameters
+	void setTimeScale( SQInteger tb, SQInteger vs, SQInteger as )
+	{	m_time_base = tb; m_video_scale = vs; m_audio_scale = as; }
+
+	/// Returns the time base
+	SQInteger getTimeBase() { return m_time_base; }
+
+	/// Returns the video scale
+	SQInteger getVideoScale() { return m_video_scale; }
+
+	/// Returns the audio scale
+	SQInteger getAudioScale() { return m_audio_scale; }
+
+	/// Returns the video time stamp offset
+	void setVideoTsOffset( SQInteger ts ) { m_vts_offset = ts; }
+
+	/// Returns the video time stamp offset
+	SQInteger getVideoTsOffset() { return m_vts_offset; }
+	
+	/// Returns the audio time stamp offset
+	void setAudioTsOffset( SQInteger ts ) { m_ats_offset = ts; }
+
+	/// Returns the audio time stamp offset
+	SQInteger getAudioTsOffset() { return m_ats_offset; }
 
 	/** @} */
 
@@ -248,7 +273,7 @@ private:
 
 	/// Default key frame interval in frames
 	int						m_nKeyFrameInterval;
-	
+
 	/// Video stream index
 	int						m_nVideoStream;
 
@@ -266,14 +291,28 @@ private:
 
 	/// Last frames encoded size
 	int						m_nLastFrameEncodedSize;
-	
+
 	/// Audio decoder
 	CFfAudioDecoder			m_audio_dec;
 
 	/// Extra codec data
 	sqbind::CSqBinary		m_audio_extra;
-	
+
 	/// Extra codec data
 	sqbind::CSqBinary		m_video_extra;
 
+	/// Video timestamp offset
+	oex::oexINT64			m_vts_offset;
+
+	/// Audio timestamp offset
+	oex::oexINT64			m_ats_offset;
+
+	/// Custom time base
+	oex::oexINT64			m_time_base;
+
+	/// Video time base scale
+	oex::oexINT64			m_video_scale;
+
+	/// Audio time base scale
+	oex::oexINT64			m_audio_scale;
 };
