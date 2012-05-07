@@ -126,6 +126,9 @@ public:
 	/// Reads data from stdin
 	static CStr ReadStdin( oexLONG lMax = 0 );
 
+	/// Returns cpu information
+	static oexINT GetCpuInfo( CPropertyBag *pb );
+
 };
 
 

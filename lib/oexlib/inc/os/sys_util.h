@@ -230,4 +230,10 @@ public:
 
 	/// Unlocks screen data
 	static oexINT UnlockScreen( CBin *x_pInf, CBin *x_pImg );
+	
+public:
+
+	/// cpuid instruction
+	static oexINT i_cpuid( int *reg, oexINT i );
+
 };

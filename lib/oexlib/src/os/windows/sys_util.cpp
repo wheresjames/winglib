@@ -36,6 +36,10 @@
 
 #include "std_os.h"
 
+#if !defined( OEX_NO_CPUID )
+#	include <intrin.h>
+#endif
+
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
@@ -980,3 +984,16 @@ oexINT CSysUtil::QueueInput( CPropertyBag *pb )
 	return 1;
 }
 
+oexINT CSysUtil::i_cpuid( int *reg, oexINT i )
+{
+#if defined( OEX_NO_CPUID )
+	return 0;
+#else
+#if defined( __MINGW32__ )
+	return 0;
+#else
+	__cpuid( reg, i );
+	return 1;
+#endif
+#endif
+}

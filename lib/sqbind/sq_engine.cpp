@@ -908,6 +908,15 @@ double CSqEngineExport::get_cpu_load()
 	return oexGetCpuLoad();
 }
 
+CSqMulti CSqEngineExport::get_cpu_info()
+{_STT();
+	CSqMulti m;
+	oex::CPropertyBag pb;
+	pb = oex::CUtil::GetCpuInfo( &pb );
+	SQBIND_PropertyBagToMulti( pb, m );
+	return m;
+}
+
 double CSqEngineExport::boot_time()
 {_STT();
 //	oexSHOW( oex::os::CHqTimer::GetTimerSeconds() );
@@ -1845,6 +1854,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_file_size )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_file_info )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_cpu_load )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_cpu_info )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_instance_handle )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, boot_time )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, error )

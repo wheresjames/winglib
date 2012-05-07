@@ -250,7 +250,7 @@ public:
 		} // end if
 
 		// Do we have a shared file handle?
-        if ( IsShareHandle() )
+		if ( IsShareHandle() )
 			m_hFile = os::CFMap::Create( m_hShareHandle, (oexPVOID*)&m_pPtr, llSize, &llSize, x_uAccess, &m_bExisting, m_llOffset );
 
 		else
@@ -265,8 +265,8 @@ public:
 		} // end else
 
 		// Did we get the handle
-        if ( os::CFMap::vFailed() == m_hFile || !m_pPtr )
-            return oexNULL;
+		if ( os::CFMap::vFailed() == m_hFile || !m_pPtr )
+			return oexNULL;
 
 		// Save size used to create the mapping
 		m_llOpenSize = llSize;

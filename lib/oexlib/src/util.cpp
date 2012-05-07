@@ -559,10 +559,10 @@ double CUtil::BinAverage( CBin *x_pBin, oexSIZE_T x_uOffset, oexSIZE_T x_uInterv
 	if ( 0 >= x_uInterval )
 		x_uInterval = 1;
 
-	double acc = 0, qty = 0;	
+	double acc = 0, qty = 0;
 	oexLONG used = x_pBin->getUsed();
 	const void *ptr = x_pBin->Ptr();
-	
+
 	// Sanity check
 	if ( 0 >= used || !ptr )
 		return 0;
@@ -573,79 +573,79 @@ double CUtil::BinAverage( CBin *x_pBin, oexSIZE_T x_uOffset, oexSIZE_T x_uInterv
 		// Do we have enough?
 		if ( used <= x_uOffset )
 			return 0;
-			
+
 		// Add byte offset
 		ptr = (char*)ptr + x_uOffset;
 		used -= x_uOffset;
-	
+
 	} // end if
-	 
+
 	switch( fmt )
 	{
 		default :
 			break;
-			
+
 		case obj::tInt8 :
 		{	oexLONG sz = used;
-			const char *p = (const char*)ptr;				
+			const char *p = (const char*)ptr;
 			for ( oexLONG i = 0; i < sz; i += x_uInterval )
 				acc += p[ i ], qty++;
 		} break;
-			
+
 		case obj::tUInt8 :
 		{	oexLONG sz = used;
-			const unsigned char *p = (const unsigned char*)ptr;				
+			const unsigned char *p = (const unsigned char*)ptr;
 			for ( oexLONG i = 0; i < sz; i += x_uInterval )
 				acc += p[ i ], qty++;
 		} break;
 
 		case obj::tInt16 :
 		{	oexLONG sz = used / sizeof( short );
-			const short *p = (const short*)ptr;				
+			const short *p = (const short*)ptr;
 			for ( oexLONG i = 0; i < sz; i += x_uInterval )
 				acc += p[ i ], qty++;
 		} break;
-			
+
 		case obj::tUInt16 :
 		{	oexLONG sz = used / sizeof( unsigned short );
-			const unsigned short *p = (const unsigned short*)ptr;				
+			const unsigned short *p = (const unsigned short*)ptr;
 			for ( oexLONG i = 0; i < sz; i += x_uInterval )
 				acc += p[ i ], qty++;
 		} break;
 
 		case obj::tInt32 :
 		{	oexLONG sz = used / sizeof( int );
-			const int *p = (const int*)ptr;				
+			const int *p = (const int*)ptr;
 			for ( oexLONG i = 0; i < sz; i += x_uInterval )
 				acc += p[ i ], qty++;
 		} break;
-			
+
 		case obj::tUInt32 :
 		{	oexLONG sz = used / sizeof( unsigned int );
-			const unsigned int *p = (const unsigned int*)ptr;				
+			const unsigned int *p = (const unsigned int*)ptr;
 			for ( oexLONG i = 0; i < sz; i += x_uInterval )
 				acc += p[ i ], qty++;
 		} break;
-		
+
 		case obj::tFloat :
 		{	oexLONG sz = used / sizeof( float );
-			const float *p = (const float*)ptr;				
+			const float *p = (const float*)ptr;
 			for ( oexLONG i = 0; i < sz; i += x_uInterval )
 				acc += p[ i ], qty++;
 		} break;
-		
+
 		case obj::tDouble :
 		{	oexLONG sz = used / sizeof( double );
-			const double *p = (const double*)ptr;				
+			const double *p = (const double*)ptr;
 			for ( oexLONG i = 0; i < sz; i += x_uInterval )
 				acc += p[ i ], qty++;
 		} break;
-		
+
 	} // end switch
 
 	if ( !qty )
 		return 0;
-	
+
 	return acc / qty;
 }
 
@@ -858,16 +858,16 @@ CStr CUtil::ReadStdin( oexLONG lMax )
 	if ( 0 < lMax )
 		if ( !s.OexAllocate( lMax ) )
 			return s;
-	
+
 	char buf[ 1024 ];
 	oex::oexLONG lTotal = 0;
 	do
 	{
 		// How much to try and read?
 		oex::oexLONG lRead = sizeof( buf );
-		if ( 0 < lMax && lRead > lMax - lTotal ) 
+		if ( 0 < lMax && lRead > lMax - lTotal )
 			lRead = lMax - lTotal;
-		
+
 		// Read some data
 		lRead = oexRead_stdin( buf, lRead );
 		if ( 0 >= lRead )
@@ -876,8 +876,185 @@ CStr CUtil::ReadStdin( oexLONG lMax )
 		// Add to buffer
 		s.Append( buf, lRead );
 		lTotal += lRead;
-	
+
 	} while ( lTotal < lMax );
 
 	return s;
+}
+
+#define CPUVAL( name, i, b, m ) (*r)[ oexT( name ) ] = ( ( ci[ i ] & ( m << ( b ) ) ) >> ( b ) );
+
+oexINT CUtil::GetCpuInfo( CPropertyBag *pb )
+{_STT();
+
+	if ( !pb )
+		return 0;
+
+	char cs[ 256 ] = { 0 };
+	int *csi = (int*)cs;
+	int ci[ 4 ] = { -1 };
+
+	os::CSysUtil::i_cpuid( ci, 0 );
+	if ( 0 > ci[ 0 ] )
+		return 0;
+
+	int ids = ci[ 0 ];
+	if ( 0 >= ids )
+		return 0;
+
+	// CPU id's
+	(*pb)[ oexT( "ids" ) ] = ids;
+
+	// CPU string
+	csi[ 0 ] = ci[ 1 ]; csi[ 1 ] = ci[ 3 ];
+	csi[ 2 ] = ci[ 2 ]; csi[ 3 ] = 0;
+	(*pb)[ oexT( "cpu" ) ] = CStr( cs ).TrimWhiteSpace();
+
+	CPropertyBag *r;
+
+	os::CSysUtil::i_cpuid( ci, 1 );
+	r = &(*pb)[ oexT( "features" ) ];
+
+	CPUVAL( "stepping_id",     0,  0, 0x0f );
+	CPUVAL( "model",           0,  4, 0x0f );
+	CPUVAL( "family",          0,  8, 0x03 );
+	CPUVAL( "type",            0, 12, 0x0f );
+	CPUVAL( "exmodel",         0, 16, 0x0f );
+	CPUVAL( "exfamily",        0, 20, 0xff );
+
+	CPUVAL( "brand_idx",       1,  0, 0xff );
+	CPUVAL( "clflush_size",    1,  8, 0xff );
+	CPUVAL( "logical_cpus",    1, 16, 0xff );
+	CPUVAL( "apic_id",         1, 24, 0xff );
+
+	CPUVAL( "sse3",            2,  0, 1 );
+	CPUVAL( "monitor",         2,  3, 1 );
+	CPUVAL( "cplds",           2,  4, 1 );
+	CPUVAL( "vmex",            2,  5, 1 );
+	CPUVAL( "smx",             2,  6, 1 );
+	CPUVAL( "ess",             2,  7, 1 );
+	CPUVAL( "tmon2",           2,  8, 1 );
+	CPUVAL( "ssse3",           2,  9, 1 );
+	CPUVAL( "l1ctxid",         2, 10, 1 );
+	CPUVAL( "cmpxchg16b",      2, 13, 1 );
+	CPUVAL( "tpr_update",      2, 14, 1 );
+	CPUVAL( "perf_debug_msr",  2, 15, 1 );
+	CPUVAL( "mmdp",            2, 18, 1 );
+	CPUVAL( "sse41",           2, 19, 1 );
+	CPUVAL( "sse42",           2, 20, 1 );
+	CPUVAL( "x2apic",          2, 21, 1 );
+	CPUVAL( "movebe",          2, 22, 1 );
+	CPUVAL( "popcnt",          2, 23, 1 );
+	CPUVAL( "xsave",           2, 26, 1 );
+	CPUVAL( "xsetbv",          2, 27, 1 );
+	CPUVAL( "avx",             2, 28, 1 );
+
+	CPUVAL( "x86_fpu",         3,  0, 1 );
+	CPUVAL( "v86_mode",        3,  1, 1 );
+	CPUVAL( "dbgext",          3,  2, 1 );
+	CPUVAL( "pgszext",         3,  3, 1 );
+	CPUVAL( "ts_counter",      3,  4, 1 );
+	CPUVAL( "rdmsr",           3,  5, 1 );
+	CPUVAL( "page_addr_ext",   3,  6, 1 );
+	CPUVAL( "mce",             3,  7, 1 );
+	CPUVAL( "cmpxchg8b",       3,  8, 1 );
+	CPUVAL( "apic",            3,  9, 1 );
+	CPUVAL( "sysenter",        3, 11, 1 );
+	CPUVAL( "mtr_reg",         3, 12, 1 );
+	CPUVAL( "pte_global",      3, 13, 1 );
+	CPUVAL( "mca",             3, 14, 1 );
+	CPUVAL( "cmov",            3, 15, 1 );
+	CPUVAL( "page_attr_tbl",   3, 16, 1 );
+	CPUVAL( "pate_size_ext",   3, 17, 1 );
+	CPUVAL( "proc_serial_num", 3, 18, 1 );
+	CPUVAL( "cflush",          3, 19, 1 );
+	CPUVAL( "debug_store",     3, 21, 1 );
+	CPUVAL( "thclk",           3, 22, 1 );
+	CPUVAL( "mmx",             3, 23, 1 );
+	CPUVAL( "fxsave",          3, 24, 1 );
+	CPUVAL( "sse",             3, 25, 1 );
+	CPUVAL( "sse2",            3, 26, 1 );
+	CPUVAL( "self_snoop",      3, 27, 1 );
+	CPUVAL( "hyper_threading", 3, 28, 1 );
+	CPUVAL( "thermal_mon",     3, 29, 1 );
+	CPUVAL( "x64",             3, 30, 1 );
+	CPUVAL( "pending_brk_en",  3, 31, 1 );
+
+	os::CSysUtil::i_cpuid( ci, 0x80000000 );
+	ids = ci[ 0 ] - 0x80000000;
+	if ( 0 >= ids )
+		return 1;
+
+	(*pb)[ oexT( "exids" ) ] = ids;
+
+	os::CSysUtil::i_cpuid( ci, 0x80000001 );
+	r = &(*pb)[ oexT( "ext" ) ];
+
+	CPUVAL( "lahf",           2,  0, 1 );
+	CPUVAL( "cmp_legacy",     2,  1, 1 );
+	CPUVAL( "secure_vm",      2,  2, 1 );
+	CPUVAL( "ext_apic_reg",   2,  3, 1 );
+	CPUVAL( "movcr8",         2,  4, 1 );
+	CPUVAL( "lzcnt",          2,  5, 1 );
+	CPUVAL( "sse4a",          2,  6, 1 );
+	CPUVAL( "ma_sse",         2,  7, 1 );
+	CPUVAL( "3dnow_prefetch", 2,  8, 1 );
+	CPUVAL( "osvw",           2,  9, 1 );
+	CPUVAL( "ibs",            2, 10, 1 );
+	CPUVAL( "xop",            2, 11, 1 );
+	CPUVAL( "skinit",         2, 12, 1 );
+	CPUVAL( "wdt",            2, 13, 1 );
+	CPUVAL( "lwp",            2, 15, 1 );
+	CPUVAL( "fma4",           2, 16, 1 );
+	CPUVAL( "nodeid",         2, 19, 1 );
+	CPUVAL( "tbm",            2, 21, 1 );
+	CPUVAL( "topex",          2, 22, 1 );
+
+	CPUVAL( "x87_fpu",        3,  0, 1 );
+	CPUVAL( "vme",            3,  1, 1 );
+	CPUVAL( "debug_ext",      3,  2, 1 );
+	CPUVAL( "page_size_ext",  3,  3, 1 );
+	CPUVAL( "ts_counter",     3,  4, 1 );
+	CPUVAL( "msr",            3,  5, 1 );
+	CPUVAL( "pae",            3,  6, 1 );
+	CPUVAL( "mce",            3,  7, 1 );
+	CPUVAL( "cmpxchg8b",      3,  8, 1 );
+	CPUVAL( "apic",           3,  9, 1 );
+	CPUVAL( "syscall",        3, 11, 1 );
+	CPUVAL( "mtrr",           3, 12, 1 );
+	CPUVAL( "pge",            3, 13, 1 );
+	CPUVAL( "mca",            3, 14, 1 );
+	CPUVAL( "cmov",           3, 15, 1 );
+	CPUVAL( "page_attr_tbl",  3, 16, 1 );
+	CPUVAL( "pse36",          3, 17, 1 );
+	CPUVAL( "nx",             3, 20, 1 );
+	CPUVAL( "mmxext",         3, 22, 1 );
+	CPUVAL( "mmx",            3, 23, 1 );
+	CPUVAL( "fxsr",           3, 24, 1 );
+	CPUVAL( "ffxsr",          3, 25, 1 );
+	CPUVAL( "page_1gb",       3, 26, 1 );
+	CPUVAL( "rdtscp",         3, 27, 1 );
+	CPUVAL( "long_mode",      3, 29, 1 );
+	CPUVAL( "3dnow_ext",      3, 30, 1 );
+	CPUVAL( "3dnow",          3, 31, 1 );
+
+	os::CSysUtil::i_cpuid( ci, 0x80000002 );
+	csi[ 0 ] = ci[ 0 ]; csi[ 1 ] = ci[ 1 ];
+	csi[ 2 ] = ci[ 2 ]; csi[ 3 ] = ci[ 3 ];
+
+	os::CSysUtil::i_cpuid( ci, 0x80000003 );
+	csi[ 4 ] = ci[ 0 ]; csi[ 5 ] = ci[ 1 ];
+	csi[ 6 ] = ci[ 2 ]; csi[ 7 ] = ci[ 3 ];
+
+	os::CSysUtil::i_cpuid( ci, 0x80000004 );
+	csi[ 8 ] = ci[ 0 ]; csi[ 9 ] = ci[ 1 ];
+	csi[ 10 ] = ci[ 2 ]; csi[ 11 ] = ci[ 3 ];
+
+	csi[ 12 ] = 0;
+
+	(*pb)[ oexT( "brand" ) ] = oex::CStr( cs ).TrimWhiteSpace();
+
+	os::CSysUtil::i_cpuid( ci, 0x80000004 );
+
+	return 1;
 }

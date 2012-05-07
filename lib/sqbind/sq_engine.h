@@ -584,6 +584,9 @@ public:
 
 		/// Returns the current cpu load
 		double get_cpu_load();
+	
+		/// Returns information about the cpu
+		CSqMulti get_cpu_info();
 
 		/// Amount of time in seconds, since the computer started
 		double boot_time();

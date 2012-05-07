@@ -483,4 +483,11 @@ oexINT CSysUtil::QueueInput( CPropertyBag *pb )
 	return 0;
 }
 
-
+oexINT CSysUtil::i_cpuid( int *reg, oexINT i )
+{
+#if defined( OEX_NO_CPUID )
+	return 0;
+#else
+	return 1;
+#endif
+}
