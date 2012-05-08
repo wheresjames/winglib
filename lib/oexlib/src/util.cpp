@@ -882,7 +882,8 @@ CStr CUtil::ReadStdin( oexLONG lMax )
 	return s;
 }
 
-#define CPUVAL( name, i, b, m ) (*r)[ oexT( name ) ] = ( ( ci[ i ] & ( m << ( b ) ) ) >> ( b ) );
+#define CPUVAL( name, i, b, m ) \
+	(*r)[ oexT( name ) ] = ( ( ( (unsigned int)ci[ i ] ) & ( m << ( b ) ) ) >> ( b ) );
 
 oexINT CUtil::GetCpuInfo( CPropertyBag *pb )
 {_STT();
