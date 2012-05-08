@@ -333,6 +333,10 @@ CPropertyBag CSysUtil::GetRegKeys( const CStr &x_sKey, const CStr &x_sPath, oexB
 	return pb;
 }
 
+#if !defined( FSCTL_IS_VOLUME_MOUNTED )
+#define FSCTL_IS_VOLUME_MOUNTED 0x00090028
+#endif
+
 oexBOOL CSysUtil::IsMounted( const CStr &x_sDrive )
 {
 	CStr sDrive( oexT( "\\\\.\\" ) );
@@ -990,7 +994,11 @@ oexINT CSysUtil::i_cpuid( int *reg, oexINT i )
 	return 0;
 #else
 #if defined( __MINGW32__ )
-	return 0;
+	__asm__ __volatile__ 
+		(
+			"cpuid": "=a" (reg[0]), "=b" (reg[1]), "=c" (reg[2]), "=d" (reg[3]) : "a" (i)
+		);
+	return 1;
 #else
 	__cpuid( reg, i );
 	return 1;

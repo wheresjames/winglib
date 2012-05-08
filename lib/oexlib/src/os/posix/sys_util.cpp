@@ -202,7 +202,7 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 		// Available percentages
 		pb[ oexT( "percent_available" ) ] 
 			= CStr().Fmt( "%.2f", (double)di.f_bavail / (double)di.f_bsize * (double)100 );
-		if ( di.f_bsize > di.f_bavail )
+		if ( (fsblkcnt_t)di.f_bsize > di.f_bavail )
 			pb[ oexT( "percent_unavailable" ) ] 
 				= CStr().Fmt( "%.2f", (double)( di.f_bsize - di.f_bavail )
 										/ (double)di.f_bsize * (double)100 );
@@ -210,12 +210,12 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 		// Used percentages
 		pb[ oexT( "percent_free" ) ] 
 			= CStr().Fmt( "%.2f", (double)di.f_bfree / (double)di.f_bsize * (double)100 );
-		if ( di.f_bsize > di.f_bfree )
+		if ( (fsblkcnt_t)di.f_bsize > di.f_bfree )
 			pb[ oexT( "percent_used" ) ] 
 				= CStr().Fmt( "%.2f", (double)( di.f_bsize - di.f_bfree )
 										/ (double)di.f_bsize * (double)100 );
-	} // en dif
-
+	} // end if
+ 
 	return pb;
 }
 
@@ -488,6 +488,12 @@ oexINT CSysUtil::i_cpuid( int *reg, oexINT i )
 #if defined( OEX_NO_CPUID )
 	return 0;
 #else
+
+	__asm__ __volatile__ 
+		(
+			"cpuid": "=a" (reg[0]), "=b" (reg[1]), "=c" (reg[2]), "=d" (reg[3]) : "a" (i)
+		);
+
 	return 1;
 #endif
 }
