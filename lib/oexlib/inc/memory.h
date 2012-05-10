@@ -524,7 +524,7 @@ public:
 
         // Out of bounds
 #if defined( oexDEBUG )
-		if ( !IsPlainShare() )		
+		if ( !IsPlainShare() )
 			oexASSERT( ( Size() * sizeof( T_AS ) / sizeof( T ) ) > x_uOffset );
 #endif
 
@@ -559,7 +559,7 @@ public:
 
         // Out of bounds
 #if defined( oexDEBUG )
-		if ( !IsPlainShare() )		
+		if ( !IsPlainShare() )
 			oexASSERT( ( Size() * sizeof( T_AS ) / sizeof( T ) ) > x_uOffset );
 #endif
 
