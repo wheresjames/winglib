@@ -127,6 +127,12 @@ namespace sqbind
 		/// Sets the port factory on the server
 		CSqFactory getPortFactory();
 
+		/// Sets the maximum number of connections
+		void setMaxConn( int nMaxCon ) { m_server.setMaxConn( nMaxCon ); }
+
+		/// Returns the maximum number of connections
+		int getMaxConn() { return m_server.getMaxConn(); }
+
 	private:
 
 		// The server

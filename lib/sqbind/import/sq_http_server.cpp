@@ -56,6 +56,11 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqHttpServer, CSqHttpServer )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, getPortFactory )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, getServerId )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, setServerId )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, setMaxConn )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, getMaxConn )
+//	SQBIND_MEMBER_FUNCTION( CSqHttpServer,  )
+//	SQBIND_MEMBER_FUNCTION( CSqHttpServer,  )
+//	SQBIND_MEMBER_FUNCTION( CSqHttpServer,  )
 
 SQBIND_REGISTER_CLASS_END()
 

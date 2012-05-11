@@ -301,6 +301,7 @@ public:
 		m_uCleanup = 0;
 		m_bMultiThreaded = oexTRUE;
 		m_pPortFactory = oexNULL;
+		m_uMaxConnections = 0;
 	}
 
 	~THttpServer()
@@ -362,7 +363,7 @@ protected:
 		} // end if
 
 		// Listen
-		if ( !m_server.Listen( 0 ) )
+		if ( !m_server.Listen( m_uMaxConnections ) )
 		{	if ( m_fnOnServerEvent )
 				m_fnOnServerEvent( m_pData, eSeConnect, -2, this );
 			return oexFALSE;
@@ -472,8 +473,12 @@ protected:
 
 		else
 		{
+			// Erase session
+			if ( m_lstSessionThread.Size() > m_uMaxConnections )
+				m_lstSessionThread.Erase( it );
+
 			// Authenticate the connection
-			if ( !OnAuthenticate( *it->port ) )
+			else if ( !OnAuthenticate( *it->port ) )
 			{
 				m_lstSessionThread.Erase( it );
 
@@ -755,6 +760,12 @@ public:
 		return oexTRUE;
 	}
 
+	/// Sets the maximum number of connections
+	void setMaxConn( oexUINT m ) { m_uMaxConnections = m; }
+
+	/// Gets the maximum number of connections
+	oexUINT getMaxConn() { return m_uMaxConnections; }
+
 private:
 
 	/// The TCP port to listen
@@ -762,6 +773,9 @@ private:
 
 	/// Server port
 	T_SPORT						m_server;
+
+	/// Max connections
+	oexUINT						m_uMaxConnections;
 
 	/// Transactions
 	oexLONG						m_nTransactions;
