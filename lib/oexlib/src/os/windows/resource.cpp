@@ -147,7 +147,8 @@ static oexINT FreeRi( SResourceInfo* x_pRi, oexINT x_eType, oexUINT x_uTimeout, 
 		case CResource::eRtThread :
 
 			// Wait to see if the thread will shutdown on it's own
-			if ( WAIT_OBJECT_0 != WaitForSingleObject( x_pRi->hHandle, x_uTimeout ) )
+			if ( x_pRi->hHandle && INVALID_HANDLE_VALUE != x_pRi->hHandle
+				 && WAIT_OBJECT_0 != WaitForSingleObject( x_pRi->hHandle, x_uTimeout ) )
 			{
 				if ( x_bForce )
 				{
@@ -300,8 +301,14 @@ oexRESULT CResource::NewThread( PFN_ThreadProc x_fnCallback, oexPVOID x_pData )
 									(LPDWORD)&pRi->uThreadId );
 
 	// Seems to be confusion about what this function returns on error
-	if ( NULL == pRi->hHandle || INVALID_HANDLE_VALUE == pRi->hHandle )
-	{	Destroy(); return -1; }
+	if ( !pRi->hHandle || INVALID_HANDLE_VALUE == pRi->hHandle )
+	{
+		// Lose resources
+		Destroy(); 
+
+		return -1; 
+
+	} // end if
 
 	return 0;
 }

@@ -394,7 +394,7 @@ public:
 	//==============================================================
 	/// Returns
 	oexBOOL IsActivity()
-	{	return m_toActivity.IsValid();
+	{	return m_uActivityTimeout ? m_toActivity.IsValid() : oexTRUE;
 	}
 
 	//==============================================================
@@ -403,6 +403,14 @@ public:
 	/// Returns
 	oexINT GetActivityTimeout()
 	{	return (oexINT)m_toActivity.Remaining();
+	}
+
+	//==============================================================
+	// SetActivityTimeout()
+	//==============================================================
+	/// Sets the activity timeout
+	void SetActivityTimeout( oexINT to )
+	{	m_uActivityTimeout = to;
 	}
 
 	//==============================================================
@@ -1045,6 +1053,9 @@ private:
 
 	/// Activity timeout
 	CTimeout				m_toActivity;
+
+	/// Maximum idle time before timeout
+	oexULONG				m_uActivityTimeout;
 
 	/// Non-zero if events have been hooked
 	oexBOOL					m_bEventsHooked;

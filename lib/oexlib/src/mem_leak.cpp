@@ -252,7 +252,7 @@ oexINT CMemLeak::Remove( oexCPVOID p )
 	} while ( uStart != uOffset );
 
 #if defined( OEX_MEMLEAK_DEBUG )
-	oexEcho( oexT( "CMemLeak : Block not found" ) );
+//	oexEcho( oexT( "CMemLeak : Block not found" ) );
 //	oexASSERT( 0 );
 #endif
 

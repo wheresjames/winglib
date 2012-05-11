@@ -46,13 +46,13 @@ public:
 	enum
 	{
 		/// Pool size in bits ( 16 = 65536, 18 = 262144, 20 = 1048576 )
-		eDefaultPoolBits = 18
+		eDefaultPoolBits = 20
 	};
 
 	enum
 	{
 		/// Slot mask
-		eDefaultSlotMask = 0x1f
+		eDefaultSlotMask = 0x3f
 	};
 
 	/// Size type
@@ -190,7 +190,7 @@ public:
 			m_uPeakAllocations = m_uCurrentAllocations;
 
 		// Calculate starting offset
-		t_size uOffset = ( (t_size)key >> 4 ) & m_nPoolMask;
+		t_size uOffset = ( (t_size)key >> 8 ) & m_nPoolMask;
 
 		t_size uStart = uOffset;
 		do
@@ -199,7 +199,7 @@ public:
 			if ( m_pPool[ uOffset ].key == key || !m_pPool[ uOffset ].key )
 			{
 				// Save pointer
-				// !!! Subtle thing, set the value before the key 
+				// !!! Subtle thing, set the value before the key
 				m_pPool[ uOffset ].val = val;
 				m_pPool[ uOffset ].key = key;
 
@@ -212,8 +212,8 @@ public:
 			// This isn't so bad, just less efficient
 			t_size u = ( uStart <= uOffset ) ? uOffset - uStart : m_nPoolSize - uOffset;
 			if ( u > m_nSlotSize )
-				m_nSlotOverflows++,
-				oexEcho( "TMappedPool : Slot overflow" );
+				m_nSlotOverflows++;
+				// oexEcho( "TMappedPool : Slot overflow" ); +++ <-- Stack Overflow
 
 #endif
 
@@ -259,7 +259,7 @@ public:
 			return oexNULL;
 
 		// Calculate starting offset
-		t_size uOffset = ( (t_size)key >> 4 ) & m_nPoolMask;
+		t_size uOffset = ( (t_size)key >> 8 ) & m_nPoolMask;
 
 		t_size uStart = uOffset;
 		do
@@ -292,7 +292,7 @@ public:
 #endif
 
 		// Calculate starting offset
-		t_size uOffset = ( (t_size)key >> 4 ) & m_nPoolMask;
+		t_size uOffset = ( (t_size)key >> 8 ) & m_nPoolMask;
 
 		t_size uStart = uOffset;
 		do
@@ -301,7 +301,7 @@ public:
 			if ( m_pPool[ uOffset ].key == key )
 			{
 				// Remove from pool
-				// !!! Subtle thing, set the value before the key 
+				// !!! Subtle thing, set the value before the key
 				m_pPool[ uOffset ].val = 0;
 				m_pPool[ uOffset ].key = 0;
 

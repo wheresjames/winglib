@@ -149,6 +149,8 @@ CIpSocket::CIpSocket()
 	// Initialize socket library
 	InitSockets();
 
+	m_uActivityTimeout = eActivityTimeout;
+
 	m_hSocket = c_InvalidSocket;
 
 	m_hSocketEvent = c_InvalidEvent;
@@ -225,7 +227,7 @@ oexLONG CIpSocket::GetInitCount()
 }
 
 void CIpSocket::Detach()
-{   m_hSocket = c_InvalidSocket; 
+{   m_hSocket = c_InvalidSocket;
 	m_hSocketEvent = c_InvalidEvent;
 	Destroy();
 }
@@ -456,7 +458,7 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
 	} // end if
 
 	// We're trying to connect
-	m_toActivity.SetMs( eActivityTimeout );
+	m_toActivity.SetMs( m_uActivityTimeout );
 	m_uConnectState |= eCsConnecting;
 
 	// Return the result
@@ -503,7 +505,7 @@ oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
 	} // end if
 
 	// We're trying to connect
-	m_toActivity.SetMs( eActivityTimeout );
+	m_toActivity.SetMs( m_uActivityTimeout );
 	m_uConnectState |= eCsConnecting;
 
 	// Return the result
@@ -576,10 +578,10 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 	x_is.EventSelect();
 
 	m_uAccepts++;
-	m_toActivity.SetMs( eActivityTimeout );
+	m_toActivity.SetMs( m_uActivityTimeout );
 
 	// Child is connecting
-	x_is.m_toActivity.SetMs( eActivityTimeout );
+	x_is.m_toActivity.SetMs( m_uActivityTimeout );
 	x_is.m_uConnectState |= eCsConnecting;
 
 	return oexTRUE;
@@ -699,7 +701,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 			} // end if
 
 			// Save the status of all events
-			for ( oexUINT uMask = 1; uMask < eAllEvents; uMask <<= 1 )
+			for ( oexUINT uMask = 1; uMask && uMask <= eAllEvents; uMask <<= 1 )
 				if ( wne.lNetworkEvents & uMask )
 				{
 					// Get bit offset
@@ -762,7 +764,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 			m_uLastError = m_uEventStatus[ uBit ];
 
 			// Something is going on
-			m_toActivity.SetMs( eActivityTimeout );
+			m_toActivity.SetMs( m_uActivityTimeout );
 
 			// We received the event
 			return uMask;
@@ -1033,7 +1035,7 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 		m_uLastError = 0;
 
 	m_uReads++;
-	m_toActivity.SetMs( eActivityTimeout );
+	m_toActivity.SetMs( m_uActivityTimeout );
 
 	// Check for closed socket
 	if ( !nRet )
@@ -1135,7 +1137,7 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 		m_uLastError = 0;
 
 	m_uReads++;
-	m_toActivity.SetMs( eActivityTimeout );
+	m_toActivity.SetMs( m_uActivityTimeout );
 
 	// Check for closed socket
 	if ( !nRet )
@@ -1249,7 +1251,7 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
 		m_uLastError = 0;
 
 	m_uWrites++;
-	m_toActivity.SetMs( eActivityTimeout );
+	m_toActivity.SetMs( m_uActivityTimeout );
 
 	// Check for error
 	if ( SOCKET_ERROR == nRet )
@@ -1301,7 +1303,7 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 		m_uLastError = 0;
 
 	m_uWrites++;
-	m_toActivity.SetMs( eActivityTimeout );
+	m_toActivity.SetMs( m_uActivityTimeout );
 
 	// Check for error
 	if ( SOCKET_ERROR == nRet || 0 > nRet )
