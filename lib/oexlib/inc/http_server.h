@@ -70,8 +70,11 @@ public:
 		eCleanupInterval = 10,
 
 		/// Maximum number of sessions to keep
-		//  After this amount is reached, oldest sessions will be dropped
-		eMaxSessions = 32
+		///  After this amount is reached, oldest sessions will be dropped
+		eMaxSessions = 64,
+
+		/// Maximum socket queue size
+		eMaxQueue = 16
 
 	};
 
@@ -301,7 +304,8 @@ public:
 		m_uCleanup = 0;
 		m_bMultiThreaded = oexTRUE;
 		m_pPortFactory = oexNULL;
-		m_uMaxConnections = 0;
+		m_uMaxConnections = eMaxSessions;
+		m_uMaxQueue = eMaxQueue;
 	}
 
 	~THttpServer()
@@ -363,7 +367,7 @@ protected:
 		} // end if
 
 		// Listen
-		if ( !m_server.Listen( m_uMaxConnections ) )
+		if ( !m_server.Listen( m_uMaxQueue ) )
 		{	if ( m_fnOnServerEvent )
 				m_fnOnServerEvent( m_pData, eSeConnect, -2, this );
 			return oexFALSE;
@@ -474,7 +478,7 @@ protected:
 		else
 		{
 			// Erase session
-			if ( m_lstSessionThread.Size() > m_uMaxConnections )
+			if ( m_lstSessionThread.Size() >= m_uMaxConnections )
 				m_lstSessionThread.Erase( it );
 
 			// Authenticate the connection
@@ -543,8 +547,12 @@ protected:
 
 		else
 		{
+			// Erase session
+			if ( m_lstSessionInfo.Size() >= m_uMaxConnections )
+				m_lstSessionInfo.Erase( it );
+
 			// Authenticate the connection
-			if ( !OnAuthenticate( *it->port ) )
+			else if ( !OnAuthenticate( *it->port ) )
 			{
 				m_lstSessionInfo.Erase( it );
 
@@ -766,6 +774,12 @@ public:
 	/// Gets the maximum number of connections
 	oexUINT getMaxConn() { return m_uMaxConnections; }
 
+	/// Sets the maximum connection queue size
+	void setMaxQueue( oexUINT m ) { m_uMaxQueue = m; }
+
+	/// Gets the maximum connection queue size
+	oexUINT getMaxQueue() { return m_uMaxQueue; }
+
 private:
 
 	/// The TCP port to listen
@@ -776,6 +790,9 @@ private:
 
 	/// Max connections
 	oexUINT						m_uMaxConnections;
+
+	/// Max connection queue
+	oexUINT						m_uMaxQueue;
 
 	/// Transactions
 	oexLONG						m_nTransactions;

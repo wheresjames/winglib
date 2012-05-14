@@ -128,10 +128,16 @@ namespace sqbind
 		CSqFactory getPortFactory();
 
 		/// Sets the maximum number of connections
-		void setMaxConn( int nMaxCon ) { m_server.setMaxConn( nMaxCon ); }
+		void setMaxConn( int n ) { m_server.setMaxConn( n ); }
 
 		/// Returns the maximum number of connections
 		int getMaxConn() { return m_server.getMaxConn(); }
+
+		/// Sets the maximum number of connections that can be queued
+		void setMaxQueue( int n ) { m_server.setMaxQueue( n ); }
+
+		/// Returns the maximum number of connections that can be queued
+		int getMaxQueue() { return m_server.getMaxQueue(); }
 
 	private:
 

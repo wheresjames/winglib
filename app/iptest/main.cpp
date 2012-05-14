@@ -41,6 +41,7 @@ int show_use( int nRet, oexCSTR pErr, int bShowUse = 0 )
 						 "--- What the output symbols mean ---" oexNL8
 						 "  . = Successful read" oexNL8
 						 "  ! = Socket error" oexNL8
+						 "  X = Connect failed" oexNL8
 						 "  x = Port closed without reading data" oexNL8
 						 "  < = Read error" oexNL8
 						 "  > = Write error" oexNL8
@@ -170,7 +171,7 @@ int iptest(int argc, char* argv[])
 	// Seed random number generator
 	if( 0 > lTimeout )
 		srand( ( 0 < lRSeed ) ? lRSeed : time( 0 ) );
-	
+
 	if ( !sAddress.Length() )
 		return show_use( -3, oexT( "IP Address not specified" ), 1 );
 
@@ -203,14 +204,13 @@ int iptest(int argc, char* argv[])
 
 	if ( 0 < lConnect )
 		oexEcho( oexT( " --- CONNECT TEST ---" ) );
-		
+
 	oexEcho( oexMks( oexTEXT( oexNL8 "Connecting to : " ), addr.GetDotAddress(), oexT( ":" ), lPort,
 					 oexT( " - attempts = " ), lAttempts,
 					 oexT( ", sockets = " ), lSockets,
 					 oexT( ", to = " ), lTimeout,
 					 oexT( ", url = " ), sUrl,
 					 oexNL ).Ptr() );
-	
 
 	oexPrintf( oexFmt( oexTEXT( oexNL8 NUM_TEMPLATE ) , 0 ).Ptr() );
 
@@ -254,13 +254,14 @@ int iptest(int argc, char* argv[])
 			} // end if
 
 			// Ditch stalled sockets
-			if ( mSockets[ i ].IsSocket() && !mSockets[ i ].IsRunning( 1 ) )
+			else if ( mSockets[ i ].IsSocket() && !mSockets[ i ].IsRunning( 1 ) )
 			{
 				DBG_PRINT( "(" );
 
 				show_progress( oexT( "!" ), lShow );
 
-				DBG_PRINT( oexFmt( oexT( " writes=%d flags=%x to=%d " ),
+				DBG_PRINT( oexFmt( oexT( " timeout=%f writes=%d flags=%x to=%d " ),
+								   mSocketTimeouts[ i ],
 								   mSockets[ i ].getNumWrites(),
 								   mSockets[ i ].GetConnectState(),
 								   mSockets[ i ].GetActivityTimeout()
@@ -278,7 +279,7 @@ int iptest(int argc, char* argv[])
 			} // end if
 
 			// Connect if it's not doing anything
-			if ( ( lConnects < lAttempts || ( !lLimit && lShow < lAttempts ) ) && !mSockets[ i ].IsSocket() )
+			else if ( ( lConnects < lAttempts || ( !lLimit && lShow < lAttempts ) ) && !mSockets[ i ].IsSocket() )
 			{
 				DBG_PRINT( "(c" );
 
@@ -286,7 +287,7 @@ int iptest(int argc, char* argv[])
 				mSocketReads[ i ] = 0;
 				if ( !mSockets[ i ].Connect( addr ) )
 				{
-					show_progress( oexT( "x" ), lShow );
+					show_progress( oexT( "X" ), lShow );
 
 					if ( mSockets[ i ].GetLastError() )
 					{	if ( lLog ) oexERROR( mSockets[ i ].GetLastError(), mSockets[ i ].GetLastErrorMsg() );
@@ -298,7 +299,7 @@ int iptest(int argc, char* argv[])
 				} // end if
 
 				else if ( lTimeout )
-				{	oexDOUBLE dTo = ( 0 < lTimeout ) 
+				{	oexDOUBLE dTo = ( 0 < lTimeout )
 									? ( (oexDOUBLE)lTimeout )
 									: ( 1 + ( (oexDOUBLE)rand() * (oexDOUBLE)(-lTimeout) / (oexDOUBLE)RAND_MAX ) );
 					mSocketTimeouts[ i ] = dGmt + dTo;
@@ -358,69 +359,64 @@ int iptest(int argc, char* argv[])
 				{
 					DBG_PRINT( "(r" );
 
-					oexINT nRes;
-					do
+					oexINT nRes = mSockets[ i ].Read().Length();
+
+					if ( !lReadAll )
 					{
-						nRes = mSockets[ i ].Read().Length();
-
-						if ( !lReadAll )
-						{
-							if ( 0 < nRes )
-							{	g_uTotalRead += nRes;
-								mSocketReads[ i ] += nRes;
-								show_progress( oexT( "." ), lShow );
-								DBG_PRINT( oexFmt( oexT( " r=%d tr=%d " ), nRes, mSocketReads[ i ] ).Ptr() );
-							} // end if
-							else
-							{
-								show_progress( oexT( "<" ), lShow );
-
-								if ( mSockets[ i ].GetLastError() )
-								{	if ( lLog ) oexERROR( mSockets[ i ].GetLastError(), mSockets[ i ].GetLastErrorMsg() );
-									DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
-								} // end if
-
-							} // end else
-
-							// Close the socket
-							mSockets[ i ].Destroy();
-
+						if ( 0 < nRes )
+						{	g_uTotalRead += nRes;
+							mSocketReads[ i ] += nRes;
+							show_progress( oexT( "." ), lShow );
+							DBG_PRINT( oexFmt( oexT( " r=%d tr=%d " ), nRes, mSocketReads[ i ] ).Ptr() );
 						} // end if
-
 						else
 						{
-							if ( 0 < nRes )
-							{	g_uTotalRead += nRes;
-								mSocketReads[ i ] += nRes;
-								DBG_PRINT( oexFmt( oexT( " r=%d tr=%d " ), nRes, mSocketReads[ i ] ).Ptr() );
-							} // end if
+							show_progress( oexT( "<" ), lShow );
 
-							else
-							{
-								if ( mSockets[ i ].GetLastError() )
-								{
-									if ( !lDbg )
-										show_progress( oexT( "<" ), lShow );
-									else
-										show_progress( oexT( ":" ), lShow );
-
-									if ( lLog ) oexERROR( mSockets[ i ].GetLastError(), mSockets[ i ].GetLastErrorMsg() );
-									DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
-
-									// Close the socket
-									mSockets[ i ].Destroy();
-
-								} // end if
-
-								// +++ No error, but no data? Hmmm....
-								else if ( !mSocketReads[ i ] )
-									mSocketReads[ i ]++;
-
+							if ( mSockets[ i ].GetLastError() )
+							{	if ( lLog ) oexERROR( mSockets[ i ].GetLastError(), mSockets[ i ].GetLastErrorMsg() );
+								DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
 							} // end if
 
 						} // end else
 
-					} while ( 0 < nRes );
+						// Close the socket
+						mSockets[ i ].Destroy();
+
+					} // end if
+
+					else
+					{
+						if ( 0 < nRes )
+						{	g_uTotalRead += nRes;
+							mSocketReads[ i ] += nRes;
+							DBG_PRINT( oexFmt( oexT( " r=%d tr=%d " ), nRes, mSocketReads[ i ] ).Ptr() );
+						} // end if
+
+						else
+						{
+							if ( mSockets[ i ].GetLastError() )
+							{
+								if ( !lDbg )
+									show_progress( oexT( "<" ), lShow );
+								else
+									show_progress( oexT( ":" ), lShow );
+
+								if ( lLog ) oexERROR( mSockets[ i ].GetLastError(), mSockets[ i ].GetLastErrorMsg() );
+								DBG_PRINT( mSockets[ i ].GetLastErrorMsg().Ptr() );
+
+								// Close the socket
+								mSockets[ i ].Destroy();
+
+							} // end if
+
+							// +++ No error, but no data? Hmmm....
+							else if ( !mSocketReads[ i ] )
+								mSocketReads[ i ]++;
+
+						} // end if
+
+					} // end else
 
 					DBG_PRINT( ")" );
 
