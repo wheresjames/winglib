@@ -27,6 +27,8 @@ int show_use( int nRet, oexCSTR pErr, int bShowUse = 0 )
 						 " -d:<string>  = Data to send" oexNL8
 						 " -t:<timeout> = Maximum time in milliseconds to read socket" oexNL8
 						 "                if negative, random mumber up to t" oexNL8
+						 " -m:<minto>   = Minimum timeout interval in milliseconds" oexNL8
+						 "                default is 1000 milliseconds" oexNL8
 						 " -q:<seed>    = Random number generator seed" oexNL8
 						 " -x           = Drop immediatly after connect or timeout if -t" oexNL8
 						 " -f			= Flood test" oexNL8
@@ -157,6 +159,7 @@ int iptest(int argc, char* argv[])
 	oexLONG lAttempts	= pbCmdLine.IsKey( oexT( "a" ) ) ? pbCmdLine[ oexT( "a" ) ].ToLong() : 1000;
 	oexLONG lSockets	= pbCmdLine.IsKey( oexT( "s" ) ) ? pbCmdLine[ oexT( "s" ) ].ToLong() : 10;
 	oexLONG lTimeout	= pbCmdLine.IsKey( oexT( "t" ) ) ? pbCmdLine[ oexT( "t" ) ].ToLong() : 0;
+	oexLONG lMinTimeout	= pbCmdLine.IsKey( oexT( "m" ) ) ? pbCmdLine[ oexT( "m" ) ].ToLong() : 1000;
 	oexLONG lRSeed		= pbCmdLine.IsKey( oexT( "q" ) ) ? pbCmdLine[ oexT( "q" ) ].ToLong() : 0;
 	oexLONG lConnect	= pbCmdLine.IsKey( oexT( "x" ) ) ? 1 : 0;
 	oexLONG lFlood		= pbCmdLine.IsKey( oexT( "f" ) ) ? 1 : 0;
@@ -301,7 +304,7 @@ int iptest(int argc, char* argv[])
 				else if ( lTimeout )
 				{	oexDOUBLE dTo = ( 0 < lTimeout )
 									? ( (oexDOUBLE)lTimeout )
-									: ( 1 + ( (oexDOUBLE)rand() * (oexDOUBLE)(-lTimeout) / (oexDOUBLE)RAND_MAX ) );
+									: ( 1 + lMinTimeout + ( (oexDOUBLE)rand() * (oexDOUBLE)(-lTimeout) / (oexDOUBLE)RAND_MAX ) );
 					mSocketTimeouts[ i ] = dGmt + dTo;
 					DBG_PRINT( oexFmt( oexT( " to=%f " ), dTo ).Ptr() );
 				} // end else if
