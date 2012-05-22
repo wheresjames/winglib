@@ -226,7 +226,7 @@ oexINT CIpSocket::FlagNixToWin( oexINT x_nFlag )
 #endif
 }
 
-CIpSocket::CIpSocket()
+void CIpSocket::Construct()
 {
 	m_hSocket = c_InvalidSocket;
 
@@ -251,7 +251,26 @@ CIpSocket::CIpSocket()
 	m_uAccepts = 0;
 	m_uFlags = 0;
 
+	m_bFree = oexTRUE;
+
 	m_bEventsHooked = oexFALSE;
+}
+
+CIpSocket::CIpSocket()
+{
+
+	// Construct class
+	Construct();
+}
+
+CIpSocket::CIpSocket( t_SOCKET hSocket, oexBOOL x_bFree )
+{
+
+	// Construct class
+	Construct();
+
+	// Attach to specified socket
+	Attach( hSocket, x_bFree );
 }
 
 CIpSocket::~CIpSocket()
@@ -298,10 +317,22 @@ void CIpSocket::UninitSockets()
 	m_lInit	= -1;
 }
 
-void CIpSocket::Detach()
-{   m_hSocket = c_InvalidSocket;
-	m_hSocketEvent = c_InvalidEvent;
+CIpSocket::t_SOCKET CIpSocket::Detach()
+{   
+	// Save away the socket handle
+	t_SOCKET hSocket = m_hSocket;
+
+	// Ditch the event handle
+	CloseEventHandle();
+
+	// We won't be freeing the socket
+	m_hSocket = c_InvalidSocket;
+	
+	// Free whatever else is left
 	Destroy();
+
+	// It's the callers problem now
+	return hSocket;
 }
 
 void CIpSocket::Destroy()
@@ -314,7 +345,7 @@ void CIpSocket::Destroy()
 	CloseEventHandle();
 
 	// Save socket pointer to socket
-	t_SOCKET hSocket = m_hSocket;
+	t_SOCKET hSocket = m_bFree ? m_hSocket : c_InvalidSocket;
 
 	// Ditch member variable
 	m_hSocket = c_InvalidSocket;
@@ -339,6 +370,8 @@ void CIpSocket::Destroy()
 	m_uAccepts = 0;
 	m_uFlags = 0;
 	m_toActivity.Clear();
+
+	m_bFree = oexTRUE;
 
 	// Ensure valid socket handle
 	if ( c_InvalidSocket == hSocket )
@@ -576,13 +609,16 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
     return Connect( addr );
 }
 
-oexBOOL CIpSocket::Attach( t_SOCKET x_hSocket )
+oexBOOL CIpSocket::Attach( t_SOCKET x_hSocket, oexBOOL x_bFree )
 {
 	// Lose the old socket
     Destroy();
 
 	// Save socket handle
     m_hSocket = x_hSocket;
+
+	// Should we free the socket?
+	m_bFree = x_bFree;
 
 	// Call on attach
 	if ( !OnAttach() )

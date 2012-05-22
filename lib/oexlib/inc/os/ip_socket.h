@@ -235,14 +235,23 @@ public:
 	/// Invalid socket event value
 	static oexCONST t_SOCKETEVENT c_InvalidEvent;
 
+protected:
+
+	/// Constructs the class
+	virtual void Construct();
 
 public:
 
 	/// Default Constructor
 	CIpSocket();
 
+	/// Construct from socket handle
+	CIpSocket( t_SOCKET hSocket, oexBOOL x_bFree = oexTRUE );
+
 	/// Destructor
 	virtual ~CIpSocket();
+
+public:
 
 	//==============================================================
 	// Destroy()
@@ -316,10 +325,11 @@ public:
 	/// Attaches to existing socket handle
 	/**
 		\param [in] x_hSocket		-	Existing socket handle
+		\param [in] x_bFree			-	Non-zero if this class should free the socket
 
 		\return Returns non-zero if success
 	*/
-	oexBOOL Attach( t_SOCKET x_hSocket );
+	oexBOOL Attach( t_SOCKET x_hSocket, oexBOOL x_bFree = oexTRUE );
 
 	//==============================================================
 	// OnAttach()
@@ -335,7 +345,7 @@ public:
 	// Detach()
 	//==============================================================
 	/// Detaches from existing socket handle without releasing it.
-	void Detach();
+	t_SOCKET Detach();
 
 	//==============================================================
 	// IsSocket()
@@ -1002,6 +1012,9 @@ private:
 
 	/// Socket handle
 	t_SOCKET				m_hSocket;
+
+	/// Non-zero if this class should free the socket on destruction
+	oexBOOL					m_bFree;
 
 	/// Last error code
 	oexUINT					m_uLastError;

@@ -143,9 +143,8 @@ oexCONST CIpSocket::t_SOCKETEVENT CIpSocket::c_InvalidEvent = (CIpSocket::t_SOCK
 oexCONST CIpSocket::t_SOCKET CIpSocket::c_SocketError = (CIpSocket::t_SOCKET)SOCKET_ERROR;
 
 
-CIpSocket::CIpSocket()
-{_STT();
-
+void CIpSocket::Construct()
+{
 	// Initialize socket library
 	InitSockets();
 
@@ -171,6 +170,25 @@ CIpSocket::CIpSocket()
 	m_uAccepts = 0;
 
 	m_uFlags = 0;
+
+	m_bFree = oexTRUE;
+}
+
+CIpSocket::CIpSocket()
+{_STT();
+
+	// Construct class
+	Construct();
+}
+
+CIpSocket::CIpSocket( t_SOCKET hSocket, oexBOOL x_bFree )
+{_STT();
+
+	// Construct class
+	Construct();
+
+	// Attach to specified socket
+	Attach( hSocket, x_bFree );
 }
 
 CIpSocket::~CIpSocket()
@@ -226,10 +244,22 @@ oexLONG CIpSocket::GetInitCount()
 	return 0;
 }
 
-void CIpSocket::Detach()
-{   m_hSocket = c_InvalidSocket;
-	m_hSocketEvent = c_InvalidEvent;
+CIpSocket::t_SOCKET CIpSocket::Detach()
+{   
+	// Save away the socket handle
+	t_SOCKET hSocket = m_hSocket;
+
+	// Ditch the event handle
+	CloseEventHandle();
+
+	// We won't be freeing the socket
+	m_hSocket = c_InvalidSocket;
+	
+	// Free whatever else is left
 	Destroy();
+
+	// It's the callers problem now
+	return hSocket;
 }
 
 
@@ -247,7 +277,7 @@ void CIpSocket::Destroy()
 	CloseEventHandle();
 
 	// Save socket pointer to socket
-	SOCKET hSocket = (SOCKET)m_hSocket;
+	SOCKET hSocket = m_bFree ? (SOCKET)m_hSocket : INVALID_SOCKET;
 
 	// Ditch member variable
 	m_hSocket = c_InvalidSocket;
@@ -269,6 +299,8 @@ void CIpSocket::Destroy()
 	m_uWrites = 0;
 	m_uAccepts = 0;
 	m_uFlags = 0;
+
+	m_bFree = oexTRUE;
 
 	// Reset activity timeout
 	m_toActivity.Clear();
@@ -535,13 +567,16 @@ oexBOOL CIpSocket::Connect( oexCSTR x_pAddress, oexUINT x_uPort)
 	return Connect( addr );
 }
 
-oexBOOL CIpSocket::Attach( t_SOCKET x_hSocket )
+oexBOOL CIpSocket::Attach( t_SOCKET x_hSocket, oexBOOL x_bFree )
 {_STT();
 	// Lose the old socket
     Destroy();
 
 	// Save socket handle
     m_hSocket = x_hSocket;
+
+	// Should we free the socket?
+	m_bFree = x_bFree;
 
 	// Call on attach
 	if ( !OnAttach() )

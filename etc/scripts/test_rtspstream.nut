@@ -25,30 +25,30 @@ class CRtspStream
 
 	adec = 0;
 	araw = 0;
-	aframe = 0;	
+	aframe = 0;
 	afail = 0;
 
 	pa = 0;
 	vb = 0;
-	
+
 	frame_count = 0;
 	last_frame = 0;
 
 	aframe_count = 0;
 	last_aframe = 0;
-	
+
 	max_audio_buffer = 1000000;
 	max_video_buffer = 2000000;
 	video_offset = 300000;
-	
+
 	vix = 0;
 
-	function getWidth() 
+	function getWidth()
 	{
 		return rtsp ? rtsp.getWidth() : 0;
 	}
 
-	function getHeight() 
+	function getHeight()
 	{
 		return rtsp ? rtsp.getHeight() : 0;
 	}
@@ -86,7 +86,6 @@ class CRtspStream
 
 	function Play( link, user = "", pass = "" )
 	{
-	
 		Close();
 
 		::_self.echo( "\nConnecting to : " + link + "\n" );
@@ -124,7 +123,7 @@ class CRtspStream
 		{
 			// Video stream info
 			local w = rtsp.getWidth(), h = rtsp.getHeight(), fps = rtsp.getFps();
-			::_self.echo( "iii RTSP Indicates video format as " + rtsp.getVideoCodecName() 
+			::_self.echo( "iii RTSP Indicates video format as " + rtsp.getVideoCodecName()
 						   + " / " + w + "x" + h + "x" + fps );
 			::_self.echo( "--- SDP ---" );
 			::_self.echo( rtsp.getExtraVideoData().AsciiHexStr( 16, 16 ) );
@@ -136,7 +135,7 @@ class CRtspStream
 			// Attempt to create a decoder
 			dec = CFfDecoder();
 			dec.setExtraData( rtsp.getExtraVideoData() );
-			if ( !dec.Create( CFfDecoder().LookupCodecId( rtsp.getVideoCodecName() ), 
+			if ( !dec.Create( CFfDecoder().LookupCodecId( rtsp.getVideoCodecName() ),
 							  CFfConvert().PIX_FMT_YUV420P,
 							  w, h, fps,
 							  2000000, CSqMulti( "cmp=-2" ) ) )
@@ -156,7 +155,7 @@ class CRtspStream
 
 		else
 		{
-			::_self.echo( "iii RTSP indicates audio stream as " + rtsp.getAudioCodecName() 
+			::_self.echo( "iii RTSP indicates audio stream as " + rtsp.getAudioCodecName()
 						  + " : channels = " + rtsp.getNumAudioChannels()
 						  + " : rate = " + rtsp.getAudioSampleRate()
 						  + " : bps = " + rtsp.getAudioBps() );
@@ -184,7 +183,7 @@ class CRtspStream
 					local fmt = ::_self.tInt16;
 					local fsize = ::_self.type_size( fmt );
 
-					if ( !pa.Open( 0, pa.getDefaultOutputDevice(), rtsp.getNumAudioChannels(), 
+					if ( !pa.Open( 0, pa.getDefaultOutputDevice(), rtsp.getNumAudioChannels(),
 									  fmt, 0.2, rtsp.getAudioSampleRate().tofloat(), fsize ) )
 					{   ::_self.echo( "!!! Failed to open output stream : " + pa.getLastError() );
 						pa = 0;
@@ -194,7 +193,7 @@ class CRtspStream
 					{   ::_self.echo( "!!! Failed to start output stream : " + pa.getLastError() );
 						pa = 0;
 					} // end if
-					
+
 					else
 						::_self.echo( "Started audio device" );
 
@@ -216,7 +215,7 @@ class CRtspStream
 		if ( afail || !isReady() || !rtsp.isAudio() )
 			return 0;
 
-		if ( !adec ) 
+		if ( !adec )
 		{	CreateDecoder()
 			if ( afail )
 				return 0;
@@ -248,7 +247,7 @@ class CRtspStream
 						if ( pa.getBufferedBytes() > max_audio_buffer )
 							::_self.echo( "dropping audio : " + pa.getBufferedBytes() );
 
-						else if ( !pa.WriteTs( araw, araw.getUsed() / pa.getFrameBytes(), 
+						else if ( !pa.WriteTs( araw, araw.getUsed() / pa.getFrameBytes(),
 											   rtsp.getAudioPts() ) )
 							::_self.echo( "Failed to write audio data" );
 
@@ -270,7 +269,7 @@ class CRtspStream
 		if ( vfail || !isReady() || !rtsp.isVideo() )
 			return 0;
 
-		if ( !dec ) 
+		if ( !dec )
 		{	CreateDecoder()
 			if ( vfail )
 				return 0;
@@ -279,7 +278,7 @@ class CRtspStream
 		// Use decoder width / height if not specified in the rtsp stream
 		if ( ( 0 >= rtsp.getWidth() || 0 >= rtsp.getHeight() )
 			 && ( 0 < dec.getWidth() && 0 < dec.getHeight() ) )
-		{	::_self.echo( "dec : " + dec.getWidth() + "x" + dec.getHeight() );		
+		{	::_self.echo( "dec : " + dec.getWidth() + "x" + dec.getHeight() );
 			rtsp.setWidth( dec.getWidth() ), rtsp.setHeight( dec.getHeight() );
 		} // end if
 
@@ -287,7 +286,7 @@ class CRtspStream
 		if ( pa && !vb )
 		{	vb = CSqFifoShare();
 			local fps = rtsp.getFps(); if ( 0 >= fps ) fps = 30;
-			if ( !vb.Create( "", "", max_video_buffer, 60 * fps, "" ) ) 
+			if ( !vb.Create( "", "", max_video_buffer, 60 * fps, "" ) )
 			{	::_self.echo( "!!! " + vb.getLastErrorStr() ); vb = 0; }
 		} // end if
 
@@ -310,7 +309,7 @@ class CRtspStream
 
 			// Do we want to record the stream?
 			if ( !rec_avi && file.len() && 0 < rtsp.getWidth() && 0 < rtsp.getHeight() )
-			{	RecordToFile( file, 
+			{	RecordToFile( file,
 							  rtsp.getVideoCodecName(), rtsp.getWidth(), rtsp.getHeight(), rtsp.getFps(),
 							  rtsp.getAudioCodecName(), rtsp.getNumAudioChannels(), rtsp.getAudioSampleRate(), 0 );
 				::_self.echo( "rec : " + dec.getWidth() + "x" + dec.getHeight() );
@@ -321,14 +320,14 @@ class CRtspStream
 				rec_avi.WriteVideoFrame( frame, rtsp.getVideoPts(), rtsp.getVideoDts(), CSqMulti() );
 
 			// Buffer for later if syncing to audio
-			if ( vb ) 
+			if ( vb )
 				vb.Write( frame, "", 0, rtsp.getVideoPts() );
 
 			// Otherwise, just send it straight to the decoder
-			else 
+			else
 				dec.BufferData( frame, CSqMulti() );
 
-			rtsp.UnlockVideo();			
+			rtsp.UnlockVideo();
 
 		} // end if
 
@@ -346,7 +345,7 @@ class CRtspStream
 		} // end if
 
 		// Decode up to the audio position
-		// +++ using 'while' here causes instant recovery from a glitch, 
+		// +++ using 'while' here causes instant recovery from a glitch,
 		//     but 'if' seems to actually be smoother in some real world conditions
 		if
 //		while
@@ -386,7 +385,7 @@ class CRtspStream
 			::_self.echo( "Failed to initiailze avi" );
 
 		else
-			::_self.echo( "iii Saving to file : " + file 
+			::_self.echo( "iii Saving to file : " + file
 							+ " - " + vfmt + " / " + afmt
 							+ " - " + w + "x" + h + "x" + fps );
 	}
@@ -480,7 +479,7 @@ function OnDraw() : ( _g )
 		// Null draw to get size
 		if ( 0 >= _g.stream.getWidth() || 0 >= _g.stream.getHeight() )
 			_g.stream.Draw( CSqBinary() );
-	
+
 		// Decode a frame to get the width / height
 		else if ( 0 < _g.stream.getWidth() && 0 < _g.stream.getHeight() )
 		{	_g.tex = _g.irr.CreateTexture( _g.stream.getWidth(), _g.stream.getHeight(), 0 );

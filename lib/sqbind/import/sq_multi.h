@@ -345,6 +345,9 @@ namespace sqbind
 
 		/// Gets an element using a path
 		CSqMulti* at( const t_Obj &path );
+		
+		/// Erases the element at the specified path
+		int erase_at( const t_Obj &path );
 
 		/// Gets the first element after the skip count
 		CSqMulti* first( int skip );

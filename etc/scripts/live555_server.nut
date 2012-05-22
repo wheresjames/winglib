@@ -4,100 +4,41 @@ _self.load_module( "ffmpeg", "" );
 
 class CGlobal
 {
-	file = _self.path( "../media/nurse_shark.avi" );
-
-	fps = 15;
-	brate = 2000000;
-
 	running = 0;
+
+	count = 0;
+
+	// Maximum number of seconds to stream video
+	max_count = 0;
+//	max_count = 30;
 
 	l555 = CLvRtspServer();
 
-	vid = CFfContainer();
-
-	tc = CFfTranscode();
-	frame = CSqBinary();
-	
 };
 
 local _g = CGlobal();
 
 function _init() : ( _g )
 {
-	if ( !StartServer() )
-		return 0;
+	local avail = CSqMulti();
+	avail[ "shark" ].deserialize( "fps=15,w=320,h=240" );
 
-	_self.echo( "Started RTSP Server" );
-		
-	return 1;
-}
-
-function StartServer() : ( _g )
-{
-	if ( !_g.vid.Open( _g.file, CSqMulti() ) )
-	{	_self.echo( "failed to open file" );
-		return;
-	} // end if
-
-	_self.echo( "Video File : " + _g.vid.getWidth() + "x" + _g.vid.getHeight() );
-
-	// Init transcoder
-	if ( !_g.tc.Init( _g.vid.getWidth(), _g.vid.getHeight(), _g.fps, _g.brate,
-				      _g.vid.getVideoCodecId(), CFfDecoder().LookupCodecId( "FMP4" ) ) )
-	{	_self.echo( "failed to create transcoder" );
-		return;
-	} // end if
+	// Set available streams
+	_g.l555.setParam( "sources", avail );
 
 	// Start the server
 	if ( !_g.l555.StartServer( 554 ) )
-	{	_self.echo( "Failed to open RTSP stream " + inf[ 1 ] );
+	{	_self.echo( "RTSP server failed : " + _g.l555.getLastErrorStr() );
 		return 0;
 	} // end if
 
-	// Create the stream
-	_g.l555.Msg( "cmd=CreateStream,id=shark,desc=shark,fps=" + _g.vid.getFps() );
+//	_self.set_timer( ".", 1000 / _g.vid.getFps().tointeger(), "DeliverFrame" );
 
-	_self.set_timer( ".", 1000 / _g.vid.getFps().tointeger(), "DeliverFrame" )
+	_self.set_timer( ".", 1000, "UpdateServer" );
+
+	_self.echo( "Started RTSP Server : " + _g.l555.getParamStr( "url" ) );
 
 	return 1;
-}
-
-function DeliverFrame() : ( _g )
-{
-	if ( !_g.running )
-	{	if ( !_g.l555.isThread() ) return; 
-		local url = _g.l555.getUrl( "shark" ); 
-		if ( !url.len() ) return; _g.running = 1;
-		_self.echo( "RTSP Server running : " + url );
-	} // end if
-	else if ( !_g.running ) return;
-
-	local frame_info = CSqMulti();
-	while ( 0 <= ( stream = _g.vid.ReadFrame( _g.frame, frame_info ) ) )
-	{
-		if ( _g.vid.getVideoStream() == stream )
-		{
-//			_self.echo( "input image = " + _g.frame.getUsed() );
-			local tframe = CSqBinary();
-			if ( !_g.tc.Transcode( _g.frame, tframe, frame_info, 0 ) )
-			{	_self.echo( "Transcode() failed" );
-				return;
-			} // end if		
-		
-			// Send encoded frame to rtsp server
-			local fid = _self.unique();
-			_self.set_binshare( fid, tframe );
-			_g.l555.Msg( "cmd=DeliverFrame,stream_id=shark,frame_id=" + fid );
-			
-			return;
-		
-		} // end if
-		
-	} // end while
-
-	// Reopen file
-	_g.vid.Open( _g.file, CSqMulti() );
-
 }
 
 function _idle() : ( _g )
@@ -105,6 +46,67 @@ function _idle() : ( _g )
 	if ( _g.running && !_g.l555.isThread() )
 	{	_self.echo( "Server thread has stopped" );
 		return 1;
+	} // end if
+
+	return 0;
+}
+
+function UpdateServer() : ( _g )
+{
+	local streams = _g.l555.getParam( "streams" );
+	if ( streams.size() )
+	{
+		_g.count++;
+
+//		_self.echo( " --- STREAMS --- " );
+//		_self.echo( streams.print_r( 1 ) );
+
+		foreach( k,v in streams )
+		{
+			if ( v[ "run" ].toint() && !v[ "quit" ].len() )
+				if ( !_self.is_path( k ) )
+				{
+					_self.echo( "Creating : " + k );
+
+					// Share name
+					local sid = v[ "share" ].str();
+					if ( !sid.len() ) share = k;
+
+					// Codec
+					local codec = v[ "params" ][ "codec" ].str();
+					if ( !codec.len() ) codec = "FMP4";
+
+					// Start the streaming thread
+					local p = CSqMulti();
+					p[ "sid" ] <- sid;
+					p[ "codec" ] <- codec;
+					::_self.spawn( 1, ".", sid, "test_videostream.thread.nut", 1 );
+					::_self.execute1( 0, sid, "StartStream", p.serialize() );
+
+				} // end if
+
+				else
+				{
+//					_self.echo( "Running : " + k );
+
+					// Quit stream after 10 seconds
+					if ( _g.max_count && _g.max_count < _g.count )
+					{	_g.count = 0;
+						_g.l555.setParamStr( "streams." + k + ".quit", "1" );
+						_self.echo( "Quitting : " + k );
+					} // end if
+
+				} // end else
+
+			else if ( v[ "run" ].toint() )
+				_g.l555.setParamStr( "streams." + k + ".run", "0" ),
+				_self.echo( "Stopped : " + k );
+
+//			else
+//				_self.echo( "Idle : " + k );
+
+		} // end foreach
+
 	} // end if
 
 	return 0;

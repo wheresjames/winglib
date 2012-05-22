@@ -408,6 +408,25 @@ public:
 		stdString build_url( CSqMulti *pUrl );
 
 		/// Parses a url into its components
+		/**
+			Parses a url into an associative array.
+
+			This example link...
+			
+				http://user:password@server:80/the/path?a=b&c=d#marker
+		
+			Parses to this
+
+				[ "scheme" ]	- http
+				[ "username" ]	- user
+				[ "password" ]	- password
+				[ "host" ]		- server
+				[ "port" ]		- 80
+				[ "path" ]		- /the/path
+				[ "extra" ]		- a=b&c=d
+				[ "fragment" ]	- marker
+			
+		*/
 		CSqMulti parse_url( const stdString &sUrl );
 
 		/// Base64 encodes a string

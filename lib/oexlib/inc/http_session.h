@@ -1105,7 +1105,7 @@ public:
 		s	<< m_pbRequest[ "REMOTE_ADDR" ].ToString()
 			<< " -" // rfc931
 			<< " -" // username
-			<< " " << oexStrToMb( oexLocalTimeStr( oexT( "[%c/%b/%Y:%g:%m:%s %Zs%Zh%Zm]" ) ) )
+			<< " " << oexStrToMb( oexLocalTimeStr( oexT( "[%d/%b/%Y:%g:%m:%s %Zs%Zh%Zm]" ) ) )
 			<< " \"" << m_pbRequest[ "REQUEST_STRING" ].ToString() << "\""
 			<< " " << m_nErrorCode
 			<< " " << m_sContent.Length();
