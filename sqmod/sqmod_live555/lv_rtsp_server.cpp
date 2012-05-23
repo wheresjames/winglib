@@ -348,21 +348,26 @@ int CMediaSource::Update()
 	// +++ anyway to get out of this???
 //	fTo = (unsigned char*)data._Ptr();
 
+	// Skip NAL header if needed
 	if ( m_bH264 && 4 < fFrameSize )
 	{
-		// Skip NAL header if needed
 		oex::oexINT nSkip = 0;
-		if ( 0x01 == *data.Ptr( 3 ) )
-			nSkip = 4;
-		else if ( 0x01 == *data.Ptr( 2 ) )
-			nSkip = 3;
+		unsigned char *p = (unsigned char*)data.Ptr();
+
+		// Look for NAL header
+		if ( 0 == p[ 0 ] && 0 == p[ 1 ] )
+		{	if ( 0x01 == p[ 2 ] )
+				nSkip = 3;
+			else if ( 0x01 == p[ 3 ] )
+				nSkip = 4;
+		} // end if
 
 		// Copy the data
 		fFrameSize -= nSkip;
-		oexMemCpy( fTo, data.Ptr( nSkip ), fFrameSize );
+		oexMemCpy( fTo, &p[ nSkip ], fFrameSize );
 
 	} // end if
-	
+
 	else
 		oexMemCpy( fTo, data.Ptr(), fFrameSize );
 

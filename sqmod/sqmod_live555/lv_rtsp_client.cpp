@@ -327,6 +327,7 @@ void CLvRtspClient::Destroy()
 	// Tell thread loop to exit
 	m_nEnd = 1;
 
+	// Stop the thread
 	Stop();
 
 	// Verify things shutdown smoothly
@@ -360,10 +361,10 @@ void CLvRtspClient::ThreadDestroy()
 		m_pRtspClient->teardownMediaSession( *m_pSession );
 
 	if ( m_pVs )
-		delete m_pVs;
+		delete m_pVs, m_pVs = oexNULL;
 
 	if ( m_pAs )
-		delete m_pAs;
+		delete m_pAs, m_pAs = oexNULL;
 
 	if ( m_pRtspClient )
 		m_pRtspClient->close( m_pSession );
@@ -375,8 +376,6 @@ void CLvRtspClient::ThreadDestroy()
 	m_pEnv = oexNULL;
 	m_pRtspClient = oexNULL;
 	m_pSession = oexNULL;
-	m_pVs = oexNULL;
-	m_pAs = oexNULL;
 	m_sVideoCodec = oexT( "" );
 	m_width = 0;
 	m_height = 0;
