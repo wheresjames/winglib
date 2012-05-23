@@ -8,6 +8,10 @@ static void SQBIND_Export_live555( sqbind::VM x_vm )
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
 
+	// Increase output buffer size
+	OutPacketBuffer::maxSize = 1000000;
+
+	// Register class instances
 	CLvRtspClient::Register( x_vm );
 	CLvRtspServer::Register( x_vm );
 }

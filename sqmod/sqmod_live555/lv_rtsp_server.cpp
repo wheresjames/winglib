@@ -82,7 +82,7 @@ void CClientSession::handleCmd_DESCRIBE( char const *cseq, char const *urlPreSuf
 		= oex::os::CIpAddress::ParseUrl( ( oex::CStr( m_pServer->Server()->rtspURLPrefix() ) << urlSuffix ).Ptr() );
 
 	// Stream Name
-	m_sName = sqbind::oex2std( pb[ oexT( "path" ) ].ToString().LTrim( oexT( "/" ) ) );
+	m_sName = sqbind::oex2std( oexUrlDecode( pb[ oexT( "path" ) ].ToString().LTrim( oexT( "/" ) ) ) );
 
 	// Read default source information
 	m_mParams = m_pServer->getParam( "sources." + m_sName );
