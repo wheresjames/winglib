@@ -11,12 +11,15 @@
 SQBIND_REGISTER_CLASS_BEGIN( CLvRtspServer, CLvRtspServer )
 
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, StartServer )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, Destroy )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, getLastErrorStr )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, setLastErrorStr )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, getParam )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, getParamStr )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, setParam )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, setParamStr )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, SetHttpTunnelingPort )
+//	SQBIND_MEMBER_FUNCTION( CLvRtspServer,  )
 //	SQBIND_MEMBER_FUNCTION( CLvRtspServer,  )
 //	SQBIND_MEMBER_FUNCTION( CLvRtspServer,  )
 //	SQBIND_MEMBER_FUNCTION( CLvRtspServer,  )
@@ -468,6 +471,7 @@ CLvRtspServer::CLvRtspServer()
 	m_pEnv = oexNULL;
 	m_pRtspServer = oexNULL;
 	m_pUserDb = oexNULL;
+	m_nHttpTunnelPort = -1;
 }
 
 void CLvRtspServer::Destroy()
@@ -610,7 +614,10 @@ void CLvRtspServer::ThreadDestroy()
 {_STT();
 
 	if ( m_pRtspServer )
-		m_pRtspServer->close( m_pRtspServer ), m_pRtspServer = oexNULL;
+	{	m_pRtspServer->close( m_pRtspServer );
+		delete m_pRtspServer;
+		m_pRtspServer = oexNULL;
+	} // end if
 
 	if ( m_pUserDb )
 		m_pUserDb = oexNULL;
@@ -650,8 +657,23 @@ int CLvRtspServer::ThreadOpen()
 		return 0;
 	} // end if
 
+	// Do we want to enable HTTP tunneling?
+	if ( 0 <= m_nHttpTunnelPort )
+	{
+		// Attempt to enable tunneling on the specified port
+		if ( !m_pRtspServer->setUpTunnelingOverHTTP( m_nHttpTunnelPort ? m_nHttpTunnelPort : ( m_nPort + 1 ) ) )
+		{	setLastErrorStr( oexT( "CRTSPServer::setUpTunnelingOverHTTP() failed" ) );
+			ThreadDestroy();
+			return 0;
+		} // end if
+
+	} // end if
+
 	// Save the url string
 	setParamStr( oexT( "url" ), m_pRtspServer->rtspURLPrefix() );
+
+	// Remember tunneling port
+	setParamStr( oexT( "http_tunneling" ), sqbind::oex2std< oex::CStr >( m_nHttpTunnelPort ? m_nHttpTunnelPort : ( m_nPort + 1 ) ) );
 
 	// Start idle loop
 	m_pEnv->taskScheduler().scheduleDelayedTask( 0, (TaskFunc*)CLvRtspServer::_OnIdle, this );

@@ -27,7 +27,7 @@ private:
 
 	/// Stream id
 	sqbind::stdString		m_sId;
-	
+
 	/// Strean name
 	sqbind::stdString		m_sName;
 
@@ -218,6 +218,19 @@ public:
 	*/
 	int StartServer( int x_nPort );
 
+	/// Enable HTTP tunneling
+	/**
+		@param [in] x_nPort		- TCP port to use for tunneling
+
+		IF
+			> 0		- TCP port to use
+			= 0		- Use RTSP port + 1
+			< 0		- Disable HTTP tunneling
+
+		@notice call before StartServer()
+	*/
+	void SetHttpTunnelingPort( int x_nPort ) { m_nHttpTunnelPort = x_nPort; }
+
 	/// Signals that thread loop should exit
 	void Quit() { m_nEnd = 1; }
 
@@ -227,7 +240,10 @@ public:
 		if ( !ll.IsLocked() )
 			return sqbind::CSqMulti();
 		sqbind::CSqMulti m;
-		m.copy( *m_params.at( sKey ) );
+		if ( !sKey.length() )
+			m.copy( m_params );
+		else
+			m.copy( *m_params.at( sKey ) );
 		return m;
 	}
 
@@ -346,6 +362,9 @@ private:
 
 	/// Server port
 	int										m_nPort;
+
+	/// HTTP tunnel port
+	int										m_nHttpTunnelPort;
 
 	/// Non-zero if thread should stop
 	char									m_nEnd;
