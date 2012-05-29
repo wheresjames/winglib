@@ -80,9 +80,11 @@ void CClientSession::handleCmd_DESCRIBE( char const *cseq, char const *urlPreSuf
 	if ( !m_pServer || !m_pServer->isServer() )
 		return;
 
+	oex::CStr sFull( oex::CStr( m_pServer->Server()->rtspURLPrefix() ) << urlSuffix );
+	_STT_SET_TAG( sFull );
+
 	// Parse the url
-	oex::CPropertyBag pb
-		= oex::os::CIpAddress::ParseUrl( ( oex::CStr( m_pServer->Server()->rtspURLPrefix() ) << urlSuffix ).Ptr() );
+	oex::CPropertyBag pb = oex::os::CIpAddress::ParseUrl( sFull.Ptr() );
 
 	// Stream Name
 	m_sName = sqbind::oex2std( oexUrlDecode( pb[ oexT( "path" ) ].ToString().LTrim( oexT( "/" ) ) ) );
@@ -485,6 +487,7 @@ void CLvRtspServer::Destroy()
 
 	// Reset stop flag
 	m_nEnd = 0;
+
 }
 
 int CLvRtspServer::StartServer( int x_nPort )
@@ -606,7 +609,6 @@ oex::oexBOOL CLvRtspServer::DoThread( oex::oexPVOID x_pData )
 
 oex::oexINT CLvRtspServer::EndThread( oex::oexPVOID x_pData )
 {_STT();
-
 	return oex::oexTRUE;
 }
 
@@ -671,6 +673,9 @@ int CLvRtspServer::ThreadOpen()
 
 	// Save the url string
 	setParamStr( oexT( "url" ), m_pRtspServer->rtspURLPrefix() );
+
+	// Set thread name
+	_STT_SET_NAME( m_pRtspServer->rtspURLPrefix() );
 
 	// Remember tunneling port
 	setParamStr( oexT( "http_tunneling" ), sqbind::oex2std< oex::CStr >( m_nHttpTunnelPort ? m_nHttpTunnelPort : ( m_nPort + 1 ) ) );

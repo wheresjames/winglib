@@ -206,7 +206,6 @@ public:
     /// Destructor
     virtual ~THttpSession()
     {	m_pPort = oexNULL;
-		_STT_SET_TAG( 0 );
     }
 
 	/// Initialize connection
@@ -256,9 +255,6 @@ public:
 	/// Readys for a new transaction
 	void Reset()
 	{
-		_STT_SET_TAG( 0 );
-		m_sThreadTag.Destroy();
-
 		// Get ready for more requests
         m_nErrorCode = HTTP_OK;
 		m_bHeaderReceived = oexFALSE;
@@ -670,10 +666,10 @@ public:
 		GrabConnectionInfo();
 
 		// Set thread tag for debugging
-		m_sThreadTag = m_pbRequest[ "REMOTE_ADDR" ].ToString()
+		CStr sName = m_pbRequest[ "REMOTE_ADDR" ].ToString()
 					   << oexT( " : " )
 					   << m_pbRequest[ "REQUEST_STRING" ].ToString();
-		_STT_SET_TAG( m_sThreadTag.Ptr() );
+		_STT_SET_TAG( sName );
 
 		// Attempt to restore session information
 		RestoreSession();
@@ -1291,7 +1287,4 @@ private:
 
 	/// Pointer to mapped folders lock
 	oexLock						*m_pMappedFoldersLock;
-
-	/// Thread tag
-	CStr						m_sThreadTag;
 };
