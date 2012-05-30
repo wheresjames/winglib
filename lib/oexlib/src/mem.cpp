@@ -283,7 +283,8 @@ oexPVOID CMem::New( oexUINT x_uSize, oexUINT x_uLine, oexCSTR x_pFile )
 
 		} // end else
 
-        if ( !oexVERIFY( pBuf ) )
+		oexASSERT( pBuf );
+        if ( !pBuf )
             return oexNULL;
 
     } // end try

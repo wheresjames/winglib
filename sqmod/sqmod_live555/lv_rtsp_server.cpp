@@ -216,11 +216,23 @@ CMediaSource::CMediaSource( UsageEnvironment& env, CLvRtspServer *pServer,
 	m_nFrames = 0;
 	m_nSync = 0;
 
-	// Must skip NAL header on H264 frames
-	if ( m && (*m)[ "codec" ].str() == oexT( "H264" ) )
-		m_bH264 = 1;
+	// Look for user preferences on nal headers
+	if ( m )
+	{
+		if ( m->isset( "no_nal_strip" ) )
+			m_bStripNal = 0;
+
+		else if ( m->isset( "force_nal_strip" ) )
+			m_bStripNal = 1;
+
+		else 
+			m_bStripNal = ( (*m)[ "codec" ].str() == oexT( "H264" ) ) ? 1 : 0;
+
+	} // end if
+
+	// No nal stripping
 	else
-		m_bH264 = 0;
+		m_bStripNal = 0;
 }
 
 
@@ -354,7 +366,7 @@ int CMediaSource::Update()
 //	fTo = (unsigned char*)data._Ptr();
 
 	// Skip NAL header if needed
-	if ( m_bH264 && 4 < fFrameSize )
+	if ( m_bStripNal && 4 < fFrameSize )
 	{
 		oex::oexINT nSkip = 0;
 		unsigned char *p = (unsigned char*)data.Ptr();

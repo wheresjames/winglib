@@ -666,10 +666,11 @@ public:
 		GrabConnectionInfo();
 
 		// Set thread tag for debugging
-		CStr sName = m_pbRequest[ "REMOTE_ADDR" ].ToString()
-					   << oexT( " : " )
-					   << m_pbRequest[ "REQUEST_STRING" ].ToString();
-		_STT_SET_TAG( sName );
+		_STT_SET_TAG( CStr() 
+					  << m_pbRequest[ "REMOTE_ADDR" ].ToString()
+					  << oexT( " : " )
+					  << m_pbRequest[ "REQUEST_STRING" ].ToString()
+					);
 
 		// Attempt to restore session information
 		RestoreSession();

@@ -56,7 +56,7 @@ private:
 	oex::oexINT64			m_nSync;
 
 	/// Skip NAL if needed
-	oex::oexINT				m_bH264;
+	oex::oexINT				m_bStripNal;
 
 };
 
