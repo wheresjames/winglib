@@ -182,6 +182,9 @@ namespace sqbind
 		/// Reads from the port
 		int ReadBin( sqbind::CSqBinary *pBin, int nMax );
 
+		/// Reads from the port and appends it to the specified buffer
+		int AppendBin( sqbind::CSqBinary *pBin, int nMax );
+
 		/// Writes to the port
 		int WriteBin( sqbind::CSqBinary *pBin, int nMax );
 

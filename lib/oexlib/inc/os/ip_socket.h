@@ -772,7 +772,7 @@ public:
 	//==============================================================
 	// ReadBin()
 	//==============================================================
-	/// Reads data from the socket and returns a CStr object
+	/// Reads data from the socket and returns a CBin object
 	/**
 		\param [in] x_uMax		-   Maximum amount of data to return
 		\param [in] x_uFlags	-	Socket receive flags
@@ -784,6 +784,25 @@ public:
     CBin ReadBin( oexUINT x_uMax = 0, oexUINT x_uFlags = 0 )
 	{	CStr8 s = Recv( x_uMax, x_uFlags );
 		return CBin( s.Mem(), s.Length() );
+	}
+
+	// +++ This could be made much more efficient
+	//==============================================================
+	// AppendBin()
+	//==============================================================
+	/// Reads data from the socket and returns a CBin object
+	/**
+		\param [in] x_uMax		-   Maximum amount of data to return
+		\param [in] x_uFlags	-	Socket receive flags
+
+		\return CStr containing data
+
+		\see
+	*/
+    oex::oexINT AppendBin( CBin *pBin, oexUINT x_uMax = 0, oexUINT x_uFlags = 0 )
+	{	CStr8 s = Recv( x_uMax, x_uFlags );
+		if ( pBin ) pBin->AppendBuffer( s.Ptr(), s.Length() );
+		return s.Length();
 	}
 
 	//==============================================================

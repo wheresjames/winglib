@@ -47,7 +47,7 @@ public:
 		eGtHorzFft	= 0x040000,
 		eGtVertFft	= 0x050000,
 
-		eDtMask		= 0x0000ff,
+		eDtMask		= 0x00ffff,
 		eGtMask		= 0xff0000
 	};
 

@@ -774,7 +774,7 @@ oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType,
 	oexBYTE *pi = (oexBYTE*)img->_Ptr();
 
 	CPropertyBag pb;
-	if ( pParams )
+	if ( pParams && *pParams )
 		pb = CParser::Deserialize( pParams );
 
 	// +++ Wow, this desperately needs improvement
@@ -788,7 +788,20 @@ oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType,
 		oexFLOAT fMin = 0, fMax = 0;
 		for( oexINT i = 0, c = 0; i < nSamples; i++ )
 		{	//oexFLOAT fV = ( (oexFLOAT*)p )[ i ];
-			oexFLOAT fV = oex::cmn::Abs( ( (oexFLOAT*)p )[ i ] );
+			oexFLOAT fV;
+			switch( oex::CUtil::eDtMask & nType )
+			{	case obj::tDouble : fV = oex::cmn::Abs( ( (oexDOUBLE*)p )[ i ] ); break;
+				case obj::tFloat : fV = oex::cmn::Abs( ( (oexFLOAT*)p )[ i ] ); break;
+				case obj::tInt8 : fV = oex::cmn::Abs( ( (oexCHAR*)p )[ i ] ); break;
+				case obj::tInt16 : fV = oex::cmn::Abs( ( (oexSHORT*)p )[ i ] ); break;
+				case obj::tInt32 : fV = oex::cmn::Abs( ( (oexINT*)p )[ i ] ); break;
+				case obj::tInt64 : fV = oex::cmn::Abs( ( (oexINT64*)p )[ i ] ); break;
+				case obj::tUInt8 : fV = oex::cmn::Abs( ( (oexUCHAR*)p )[ i ] ); break;
+				case obj::tUInt16 : fV = oex::cmn::Abs( ( (oexUSHORT*)p )[ i ] ); break;
+				case obj::tUInt32 : fV = oex::cmn::Abs( ( (oexUINT*)p )[ i ] ); break;
+				case obj::tUInt64 : fV = oex::cmn::Abs( ( (oexUINT64*)p )[ i ] ); break;
+				default : return oexFALSE;
+			} // end switch
 			if ( oex::cmn::Abs( fV ) < 1000000.f )
 			{	if ( !c )
 					fMin = fV, fMax = fV, c++;
@@ -826,8 +839,21 @@ oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType,
 							scale = -1;
 						else
 						{
-//							oexFLOAT f = ( (oexFLOAT*)p )[ _i ];
-							oexFLOAT f = oex::cmn::Abs( ( (oexFLOAT*)p )[ _i ] );
+							//oexFLOAT f = oex::cmn::Abs( ( (oexFLOAT*)p )[ _i ] );
+							oexFLOAT f;
+							switch( oex::CUtil::eDtMask & nType )
+							{	case obj::tDouble : f = oex::cmn::Abs( ( (oexDOUBLE*)p )[ _i ] ); break;
+								case obj::tFloat : f = oex::cmn::Abs( ( (oexFLOAT*)p )[ _i ] ); break;
+								case obj::tInt8 : f = oex::cmn::Abs( ( (oexCHAR*)p )[ _i ] ); break;
+								case obj::tInt16 : f = oex::cmn::Abs( ( (oexSHORT*)p )[ _i ] ); break;
+								case obj::tInt32 : f = oex::cmn::Abs( ( (oexINT*)p )[ _i ] ); break;
+								case obj::tInt64 : f = oex::cmn::Abs( ( (oexINT64*)p )[ _i ] ); break;
+								case obj::tUInt8 : f = oex::cmn::Abs( ( (oexUCHAR*)p )[ _i ] ); break;
+								case obj::tUInt16 : f = oex::cmn::Abs( ( (oexUSHORT*)p )[ _i ] ); break;
+								case obj::tUInt32 : f = oex::cmn::Abs( ( (oexUINT*)p )[ _i ] ); break;
+								case obj::tUInt64 : f = oex::cmn::Abs( ( (oexUINT64*)p )[ _i ] ); break;
+								default : return oexFALSE;
+							} // end switch
 							if ( f <= fMin ) scale = 0;
 							else if ( f >= fMax ) scale = 255;
 							else

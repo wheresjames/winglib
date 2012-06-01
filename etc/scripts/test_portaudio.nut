@@ -24,13 +24,13 @@ function _init()
 	} // end for
 
 	_self.echo( "=====================================================" );
-	
+
 	TestInput( pi );
 
 	_self.echo( "=====================================================" );
 	_self.echo( "" );
 	_self.echo( "=====================================================" );
-	
+
 	TestOutput( pa );
 
 	_self.echo( "=====================================================" );
@@ -113,7 +113,7 @@ function TestOutput( pa )
 		sw.setFLOAT( i, sin( i / div * pi2 ) );
 
 	_self.echo( "*** Sending audio" );
-	
+
 	if ( !pa.Start() )
 	{   _self.echo( "!!! Failed to start output stream : " + pa.getLastError() );
 		return 0;
