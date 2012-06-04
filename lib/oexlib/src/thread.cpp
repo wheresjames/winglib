@@ -107,14 +107,14 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 	{
 		pThread->m_bInitStatus = 0;
 		oexERROR( e.getError(), oexT( "!!! OEX EXCEPTION THROWN DURING InitThread() !!!" ) );
-		
+
 	} // end catch
 
 	_oexCATCH_ALL()
 	{
 		pThread->m_bInitStatus = 0;
 		oexERROR( 0, oexT( "!!! UNHANDLED EXCEPTION DURING InitThread() !!!" ) );
-		
+
 	} // end catch
 
 #endif
@@ -135,13 +135,13 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 				{
 					// Init our exception injector
 					oexInitException();
-				
+
 					// Call do thread
 					if ( !pThread->DoThread( pData ) )
 						nDone = 1;
-					
+
 				} // end try
-				
+
 #if !defined( OEX_NOEXCEPTIONS )
 
 				_oexCATCH( oexEXCEPTION& e )
@@ -149,7 +149,7 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 					// +++ Hmm, should we quit here?
 					// nDone = 1;
 					oexERROR( e.getError(), oexT( "!!! OEX EXCEPTION DURING DoThread() !!!" ) );
-					
+
 				} // end catch
 
 				_oexCATCH_ALL()
@@ -157,7 +157,7 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 					// +++ Hmm, should we quit here?
 					// nDone = 1;
 					oexERROR( 0, oexT( "!!! UNHANDLED EXCEPTION DURING DoThread() !!!" ) );
-					
+
 				} // end catch
 #endif
 
@@ -192,14 +192,14 @@ oexPVOID CThread::ThreadProc( oexPVOID x_pData )
 		{
 			pThread->m_bInitStatus = 0;
 			oexERROR( e.getError(), oexT( "!!! OEX EXCEPTION THROWN DURING EndThread() !!!" ) );
-			
+
 		} // end catch
 
 		_oexCATCH_ALL()
 		{
 			pThread->m_bInitStatus = 0;
 			oexERROR( 0, oexT( "!!! UNHANDLED EXCEPTION DURING EndThread() !!!" ) );
-			
+
 		} // end catch
 #endif
 

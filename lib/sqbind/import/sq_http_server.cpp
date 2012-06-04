@@ -205,14 +205,15 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 	if ( m_sScript.length() )
 	{
 		// Create a child process to handle this transaction
-		oex::CStr sChild = x_pSession->GetTransactionId();
+		oex::CStr sChild;
+		sChild << x_pSession->GetTransactionId() << oexT( "_" ) << x_pSession->GetTransactions();
 
 		q->spawn( &sReply, oexT( "." ), sChild.Ptr(), m_sScript, m_bFile );
 
 		q = m_pSessionMsgQueue->GetQueue( sChild.Ptr() );
 		if ( !q )
 		{	m_pSessionMsgQueue->kill( oexNULL, sChild.Ptr() );
-			oexERROR( 0, oexMks( oexT( "Failed to spawn " ), sChild ) );
+			oexERROR( 0, oexMks( oexT( "Failed to spawn CSqHttpServer::" ), sChild ) );
 			return 0;
 		} // end if
 

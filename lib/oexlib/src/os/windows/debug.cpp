@@ -329,32 +329,14 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 	sSt <<                oexT( "Module            : " ) << oexGetModuleFileName() << oexNL;
 	sSt <<                oexT( "Version           : " ) << oexVersion() << oexNL;
 	sSt <<                oexT( "Build             : " ) << oexBuild() << oexNL;
-	sSt <<		  oexFmt( oexT( "Current Thread    : %d (0x%x)" oexNL8 ), uCurrentThreadId, uCurrentThreadId );
+	sSt <<        oexFmt( oexT( "Current Thread    : %d (0x%x)" oexNL8 ), uCurrentThreadId, uCurrentThreadId );
 	sSt << st.FormatTime( oexT( "Current Time      : %Y/%c/%d  %g:%m:%s GMT" oexNL8 ) );
 	sSt <<        oexFmt( oexT( "Stack Trace Slots : Using %d of %d" oexNL8 ), pSt->getUsedSlots(), pSt->getTotalSlots() );
 	sSt <<                oexNL << ( pEInfo ? pEInfo : oexT( "(No other information available)" ) ) << oexNL;
 
 	// Create a stack report for the current stack
 	sSt << CreateStackReport( uCurrentThreadId, pSt, oexGetFileName( oexGetModuleFileName() ).Ptr(), oexGetInstanceHandle() );
-/*
-	oexUINT i = 0;
-	while ( CStackTrace::SModuleInfo *pSi = pSt->NextModule( &i ) )
-		if ( pSi->pSt )
-		{
-			try
-			{
-				// Create stack report for this module
-				sSt << CreateStackReport( uCurrentThreadId, pSi->pSt, pSi->szName, pSi->pAddress );
 
-			} // end try
-			catch( ... )
-			{
-				sSt << oexT( oexNL8 "!!! Assert in module !!!" oexNL8 );
-
-			} // end catch
-
-		} // end while
-*/
 	sSt << oexNL;
 
 	// Save to file?
