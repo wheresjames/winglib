@@ -183,6 +183,18 @@ public:
 		/// Returns the number of currently running threads
 		int get_running_thread_count();
 
+		/// Sets the thread checkpoint
+		int set_thread_checkpoint( int cp );
+
+		/// Gets the thread checkpoint
+		int get_thread_checkpoint();
+
+		/// Sets the thread tag
+		int set_thread_tag( const stdString &tag );
+
+		/// Gets the thread tag
+		stdString get_thread_tag();
+
 		/// Returns console output
 		stdString get_output( int max );
 

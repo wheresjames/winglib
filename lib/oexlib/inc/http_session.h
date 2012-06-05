@@ -592,6 +592,7 @@ public:
 		m_pbRequest[ "TRANSPORT_TYPE" ] = m_pPort->v_get_transport_type();
 		m_pbRequest[ "TRANSPORT_NAME" ] = m_pPort->v_get_transport_name();
 		m_pbRequest[ "TRANSACTION" ] = GetTransactions();
+		m_pbRequest[ "TRANSACTION_ID" ] = GetTransactionId();
 	}
 
     /// Reads in the http headers
