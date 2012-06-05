@@ -147,6 +147,9 @@ public:
 	/// Authentication callback
 	typedef oexINT (*PFN_Authenticate)( oexPVOID x_pData, THttpSession< T_PORT > *x_pSession, oexLONG lType, oexCSTR pData );
 
+	/// Server callback
+	typedef oexINT (*PFN_Close)( oexPVOID x_pData, THttpSession< T_PORT > *x_pSession );
+
 	/// Byte type
 	typedef CBin::t_byte	t_byte;
 
@@ -171,6 +174,8 @@ public:
 		m_pData = oexNULL;
 		m_fnAuthenticate = oexNULL;
 		m_pAuthData = oexNULL;
+		m_fnClose = oexNULL;
+		m_pCloseData = oexNULL;
 		m_bNewSession = oexTRUE;
 		m_uSessionTimeout = 60 * 60;
 		m_ppbSession = oexNULL;
@@ -195,6 +200,8 @@ public:
 		m_pData = oexNULL;
 		m_fnAuthenticate = oexNULL;
 		m_pAuthData = oexNULL;
+		m_fnClose = oexNULL;
+		m_pCloseData = oexNULL;
 		m_bNewSession = oexTRUE;
 		m_uSessionTimeout = 60 * 60;
 		m_ppbSession = oexNULL;
@@ -206,6 +213,8 @@ public:
     /// Destructor
     virtual ~THttpSession()
     {	m_pPort = oexNULL;
+		if ( m_fnClose )
+			m_fnClose( m_pCloseData, this );
     }
 
 	/// Initialize connection
@@ -997,6 +1006,14 @@ public:
 	void SetAuthCallback( oexPVOID x_fnAuthenticate, oexPVOID x_pData )
 	{	m_fnAuthenticate = (PFN_Authenticate)x_fnAuthenticate; m_pAuthData = x_pData; }
 
+	/// Sets a close function
+	void SetCloseCallback( PFN_Authenticate x_fnClose, oexPVOID x_pData )
+	{	m_fnClose = x_fnClose; m_pCloseData = x_pData; }
+
+	/// Sets a close function
+	void SetCloseCallback( oexPVOID x_fnClose, oexPVOID x_pData )
+	{	m_fnClose = (PFN_Close)x_fnClose; m_pCloseData = x_pData; }
+
 	/// Sets the log file name
 	oexBOOL SetLogFile( oexCSTR x_pLog )
 	{	m_sLog = x_pLog;
@@ -1249,6 +1266,12 @@ private:
 
 	/// Data passed to callback function
 	oexPVOID					m_pAuthData;
+
+	/// Pointer to close function
+	PFN_Close					m_fnClose;
+
+	/// Data passed to callback function
+	oexPVOID					m_pCloseData;
 
 	/// Non-zero to enable compression
 	oexBOOL						m_bEnableCompression;

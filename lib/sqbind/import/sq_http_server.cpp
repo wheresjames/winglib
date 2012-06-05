@@ -170,6 +170,40 @@ oex::oexINT CSqHttpServer::OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_n
 	return 0;
 }
 
+oex::oexINT CSqHttpServer::_OnCloseSession( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
+{_STT();
+
+	CSqHttpServer *pServer = (CSqHttpServer*)x_pData;
+	if ( !oexCHECK_PTR( pServer ) )
+		return -1;
+
+	if ( !oexCHECK_PTR( x_pSession ) )
+		return -2;
+
+	return pServer->OnCloseSession( x_pData, x_pSession );
+}
+
+oex::oexINT CSqHttpServer::OnCloseSession( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
+{_STT();
+
+	if ( !oexCHECK_PTR( x_pSession ) )
+		return -3;
+
+	// Get session queue
+	CSqMsgQueue *q = m_pSessionMsgQueue;
+	if ( !q )
+		return -4;
+
+	// Unique thread name
+	stdString sChild = oex2std( oex::CStr() << x_pSession->GetTransactionId() );
+
+	// Kill the thread if needed
+	if ( q->is_path( sChild ) )
+		q->kill( oexNULL, sChild );
+
+	return 0;
+}
+
 oex::oexINT CSqHttpServer::_OnSessionCallback( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
 {_STT();
 
@@ -204,18 +238,23 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 	// Are we executing a child script?
 	if ( m_sScript.length() )
 	{
-		// Create a child process to handle this transaction
-		oex::CStr sChild;
-		sChild << x_pSession->GetTransactionId() << oexT( "_" ) << x_pSession->GetTransactions();
+		// Unique thread name
+		stdString sChild = oex2std( oex::CStr() << x_pSession->GetTransactionId() );
 
-		q->spawn( &sReply, oexT( "." ), sChild.Ptr(), m_sScript, m_bFile );
+		// Spawn handler thread if needed
+		if ( !q->is_path( sChild ) )
+			q->spawn( &sReply, oexT( "." ), sChild, m_sScript, m_bFile );
 
-		q = m_pSessionMsgQueue->GetQueue( sChild.Ptr() );
+		// Get the handler queue
+		q = m_pSessionMsgQueue->GetQueue( sChild );
 		if ( !q )
-		{	m_pSessionMsgQueue->kill( oexNULL, sChild.Ptr() );
-			oexERROR( 0, oexMks( oexT( "Failed to spawn CSqHttpServer::" ), sChild ) );
+		{	m_pSessionMsgQueue->kill( oexNULL, sChild );
+			oexERROR( 0, oexMks( oexT( "Failed to acquire session handler CSqHttpServer::" ), sChild.c_str() ) );
 			return 0;
 		} // end if
+
+		// Set callback to get close message, we need this to kill the session thread
+		x_pSession->SetCloseCallback( &CSqHttpServer::_OnCloseSession, this );
 
 	} // end if
 
@@ -367,8 +406,8 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 	} // end else if
 
 	// Kill thread if we created it
-	if ( !m_bScriptsLinger && m_sScript.length() )
-		q->kill( oexNULL, oexT( "." ) );
+//	if ( !m_bScriptsLinger && m_sScript.length() )
+//		q->kill( oexNULL, oexT( "." ) );
 
 	return 0;
 }

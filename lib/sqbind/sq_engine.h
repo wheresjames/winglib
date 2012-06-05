@@ -79,15 +79,15 @@ public:
 									3 = Shutdown
 									4 = Log Off
 									5 = Restart
-									
+
 			@param [in] nForce	-	0 = No force
 									1 = Force
 									2 = Force if hung
-									
+
 			@param [in] sMsg	-	Optional message to display to user.
-									
+
 			Executes the specified command
-			
+
 			@return Non-zero if success
 		*/
 		int ctrl_computer( int nCmd, int nForce, const sqbind::stdString &sMsg );
@@ -97,53 +97,53 @@ public:
 			@param [in] nForce	-	0 = No force
 									1 = Force
 									2 = Force if hung
-									
+
 			@param [in] sMsg	-	Optional message to display to user.
-									
+
 			Executes the specified command
-			
+
 			@return Non-zero if success
 		*/
 		int reboot( int nForce, const sqbind::stdString &sMsg );
-		
+
 		/// Shutdown computer
 		/**
 			@param [in] nForce	-	0 = No force
 									1 = Force
 									2 = Force if hung
-									
+
 			@param [in] sMsg	-	Optional message to display to user.
-									
+
 			Executes the specified command
-			
+
 			@return Non-zero if success
 		*/
 		int shutdown( int nForce, const sqbind::stdString &sMsg );
-		
+
 		/// Logoff user
 		/**
 			@param [in] nForce	-	0 = No force
 									1 = Force
 									2 = Force if hung
-									
+
 			@param [in] sMsg	-	Optional message to display to user.
-									
+
 			Executes the specified command
-			
+
 			@return Non-zero if success
 		*/
 		int logoff( int nForce, const sqbind::stdString &sMsg );
-		
+
 		/// Elevates the program to root priviledges
 		int set_root();
-		
+
 		/// Returns non-zero if application is running as root
 		int is_root();
-		
+
 		/// Returns the buffer for a binary share
 		/**
 			@param [in] sName	- The share name
-			
+
 			@return A CSqBinary object wrapping the share buffer
 		*/
 		CSqBinary get_binshare( const stdString &sName );
@@ -152,7 +152,7 @@ public:
 		/**
 			@param [in] sName	- The share name
 			@param [in] pBin	- The binary buffe to share
-			
+
 			@return Non-zero on success
 		*/
 		int set_binshare( const stdString &sName, CSqBinary *pBin );
@@ -160,7 +160,7 @@ public:
 		/// Return non-zero if the specified share exists
 		/**
 			@param [in] sName	- The share name
-			
+
 			@return Non-zero if the share exists
 		*/
 		int is_binshare( const stdString &sName );
@@ -176,6 +176,12 @@ public:
 
 		/// Enables capturing console output to file
 		int enable_output_file_capture( const stdString &sFile, unsigned int uTimestampFreq );
+
+		/// Returns the total number of threads that have been created
+		int get_total_thread_count();
+
+		/// Returns the number of currently running threads
+		int get_running_thread_count();
 
 		/// Returns console output
 		stdString get_output( int max );
@@ -270,7 +276,7 @@ public:
 		/// Sends data to STDOUT
 		//  Same as print, but appends new line
 		int echo( const stdString &sMsg );
-		
+
 		/// Read data from stdin
 		stdString read_stdin( int nMax );
 
@@ -334,10 +340,10 @@ public:
 
 		/// Sets the current threads priority
 		int set_thread_priority( int nPriority );
-		
+
 		/// Sets the current threads affinity
 		int set_thread_affinity( int nAffinity );
-		
+
 		/// Returns the size of the specified type
 		int type_size( int type );
 
@@ -412,9 +418,9 @@ public:
 			Parses a url into an associative array.
 
 			This example link...
-			
+
 				http://user:password@server:80/the/path?a=b&c=d#marker
-		
+
 			Parses to this
 
 				[ "scheme" ]	- http
@@ -425,7 +431,7 @@ public:
 				[ "path" ]		- /the/path
 				[ "extra" ]		- a=b&c=d
 				[ "fragment" ]	- marker
-			
+
 		*/
 		CSqMulti parse_url( const stdString &sUrl );
 
@@ -489,7 +495,7 @@ public:
 								  If empty string, defaults are "Bytes,KB,MB,GB,TB,PB,EB,ZB,YB,BB"
 		*/
 		stdString create_size_string( double d, double dDiv, int nDigits, const stdString &sSuffix );
-		
+
 		/// Returns a string clipped to the specified size
 		stdString str_limit( const stdString &sS, int maxchars, const stdString &sAppend );
 
@@ -546,7 +552,7 @@ public:
 
 		/// GMT timestamp in microseconds
 		SQInteger gmt_time_useconds();
-		
+
 		/// Returns a formated time string
 		stdString local_timestr( const stdString &fmt );
 
@@ -603,7 +609,7 @@ public:
 
 		/// Returns the current cpu load
 		double get_cpu_load();
-	
+
 		/// Returns information about the cpu
 		CSqMulti get_cpu_info();
 
@@ -627,7 +633,7 @@ public:
 
 		/// Finds resources matching the pattern in sName
 		CSqMulti find_resource( const stdString &sName, int bIgnoreCase, int bFileOverrideOk );
-		
+
 		/// Returns information about the specified system drive
 		CSqMulti get_system_drive_info( const stdString &sDrive );
 
@@ -788,11 +794,11 @@ protected:
 	virtual int OnIncludeInline( const stdString &sScript );
 
 	virtual int OnRunInline( const stdString &sScript );
-	
+
 	virtual int OnLoadModule( const stdString &sModule, const stdString &sPath );
 
 	virtual stdString OnPath( stdString sPath );
-	
+
 	virtual SquirrelObject OnRun( const stdString &sName, const stdString &sScript );
 
 	virtual CSqMsgQueue* OnGetQueue();
@@ -964,10 +970,10 @@ public:
 
 	/// Executes the specified buffer
 	oex::oexBOOL Run( sqbind::stdString *pReply, oex::oexCSTR pName, oex::oexCSTR pScript );
-	
+
 	/// Executes the specified script within the current vm
 	virtual SquirrelObject OnRun( const stdString &sName, const stdString &sScript );
-	
+
 	oex::oexINT LogError( oex::oexINT x_nReturn, SScriptErrorInfo &x_e, oex::oexCSTR x_pExtra = oexNULL );
 
 	oex::oexINT LogError( oex::oexINT x_nReturn, oex::oexCSTR x_pErr, oex::oexCSTR x_pExtra, oex::oexCSTR x_pFile, oex::oexUINT x_uLine );

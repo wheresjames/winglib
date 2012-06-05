@@ -351,6 +351,16 @@ void CSqEngineExport::terminate( int nExitCode )
 	oex::os::CSys::Exit( nExitCode );
 }
 
+int CSqEngineExport::get_total_thread_count()
+{
+	return oex::CThread::GetThreadCount();
+}
+
+int CSqEngineExport::get_running_thread_count()
+{
+	return oex::CThread::GetRunningThreadCount();
+}
+
 int CSqEngineExport::get_key()
 {_STT();
 	return oexGetKey();
@@ -360,7 +370,6 @@ int CSqEngineExport::is_key()
 {_STT();
 	return oexIsKey();
 }
-
 
 stdString CSqEngineExport::get_build()
 {_STT();
@@ -1840,6 +1849,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shutdown )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, logoff )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ctrl_computer )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_total_thread_count )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_running_thread_count )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, process_system_messages )
