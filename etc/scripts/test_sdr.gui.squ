@@ -1,0 +1,39 @@
+<html>
+	<head>
+		<title>SDR</title>
+		<script src='/js/jquery.min.js' type='text/javascript'></script>
+	</head>
+	<body>
+
+		<img name='image' onload='onloadimg();' onabort='onerrorimg();' onerror='onerrorimg();'>
+
+		<script language='javascript'>
+
+			function onloadimg()
+			{	setTimeout( 'RefreshImage()', 100 ); }
+			function onerrorimg()
+			{	setTimeout( 'RefreshImage()', 1000 ); }
+			function RefreshImage()
+			{	var t = document.getElementsByName( 'image' )[ 0 ];
+				if ( t ) t.src = '/img?_random_=' + Math.random();
+			} RefreshImage();
+
+			function poll()
+			{	$.ajax( { url: '/cmd', data: 'cmds={0:"hi"}', type: 'GET', dataType: 'json', success: ajax_success, error: ajax_error, cache: false } );
+			} poll();
+
+			function ajax_success( data )
+			{	if ( !data || !data[ '0' ] ) return ajax_error();
+				if ( data[ '0' ][ 'rtsp.server.streams' ] )
+					$('#streams' ).html( format_array( data[ '0' ][ 'rtsp.server.streams' ] ) );
+				else 
+					$('#streams' ).html( '' );
+				setTimeout( poll, 500 );
+			}
+
+			function ajax_error() { setTimeout( poll, 1000 ); }
+
+		</script>
+
+	</body>
+</html>

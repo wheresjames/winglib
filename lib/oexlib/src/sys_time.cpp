@@ -183,7 +183,6 @@ CSysTime& CSysTime::SetNetTime(oexUINT x_uTime, oexINT x_lTzBias )
     return *this;
 }
 
-
 oexCSTR CSysTime::GetAbrMonthName( oexLONG x_m )
 {_STT();
 	if ( x_m < 0 || x_m > 12 ) return s_months[ 0 ];

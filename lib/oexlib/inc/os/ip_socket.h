@@ -235,14 +235,23 @@ public:
 	/// Invalid socket event value
 	static oexCONST t_SOCKETEVENT c_InvalidEvent;
 
+protected:
+
+	/// Constructs the class
+	virtual void Construct();
 
 public:
 
 	/// Default Constructor
 	CIpSocket();
 
+	/// Construct from socket handle
+	CIpSocket( t_SOCKET hSocket, oexBOOL x_bFree = oexTRUE );
+
 	/// Destructor
 	virtual ~CIpSocket();
+
+public:
 
 	//==============================================================
 	// Destroy()
@@ -316,10 +325,11 @@ public:
 	/// Attaches to existing socket handle
 	/**
 		\param [in] x_hSocket		-	Existing socket handle
+		\param [in] x_bFree			-	Non-zero if this class should free the socket
 
 		\return Returns non-zero if success
 	*/
-	oexBOOL Attach( t_SOCKET x_hSocket );
+	oexBOOL Attach( t_SOCKET x_hSocket, oexBOOL x_bFree = oexTRUE );
 
 	//==============================================================
 	// OnAttach()
@@ -335,7 +345,7 @@ public:
 	// Detach()
 	//==============================================================
 	/// Detaches from existing socket handle without releasing it.
-	void Detach();
+	t_SOCKET Detach();
 
 	//==============================================================
 	// IsSocket()
@@ -394,7 +404,7 @@ public:
 	//==============================================================
 	/// Returns
 	oexBOOL IsActivity()
-	{	return m_toActivity.IsValid();
+	{	return m_uActivityTimeout ? m_toActivity.IsValid() : oexTRUE;
 	}
 
 	//==============================================================
@@ -403,6 +413,14 @@ public:
 	/// Returns
 	oexINT GetActivityTimeout()
 	{	return (oexINT)m_toActivity.Remaining();
+	}
+
+	//==============================================================
+	// SetActivityTimeout()
+	//==============================================================
+	/// Sets the activity timeout
+	void SetActivityTimeout( oexINT to )
+	{	m_uActivityTimeout = to;
 	}
 
 	//==============================================================
@@ -754,7 +772,7 @@ public:
 	//==============================================================
 	// ReadBin()
 	//==============================================================
-	/// Reads data from the socket and returns a CStr object
+	/// Reads data from the socket and returns a CBin object
 	/**
 		\param [in] x_uMax		-   Maximum amount of data to return
 		\param [in] x_uFlags	-	Socket receive flags
@@ -766,6 +784,25 @@ public:
     CBin ReadBin( oexUINT x_uMax = 0, oexUINT x_uFlags = 0 )
 	{	CStr8 s = Recv( x_uMax, x_uFlags );
 		return CBin( s.Mem(), s.Length() );
+	}
+
+	// +++ This could be made much more efficient
+	//==============================================================
+	// AppendBin()
+	//==============================================================
+	/// Reads data from the socket and returns a CBin object
+	/**
+		\param [in] x_uMax		-   Maximum amount of data to return
+		\param [in] x_uFlags	-	Socket receive flags
+
+		\return CStr containing data
+
+		\see
+	*/
+    oex::oexINT AppendBin( CBin *pBin, oexUINT x_uMax = 0, oexUINT x_uFlags = 0 )
+	{	CStr8 s = Recv( x_uMax, x_uFlags );
+		if ( pBin ) pBin->AppendBuffer( s.Ptr(), s.Length() );
+		return s.Length();
 	}
 
 	//==============================================================
@@ -995,6 +1032,9 @@ private:
 	/// Socket handle
 	t_SOCKET				m_hSocket;
 
+	/// Non-zero if this class should free the socket on destruction
+	oexBOOL					m_bFree;
+
 	/// Last error code
 	oexUINT					m_uLastError;
 
@@ -1045,6 +1085,9 @@ private:
 
 	/// Activity timeout
 	CTimeout				m_toActivity;
+
+	/// Maximum idle time before timeout
+	oexULONG				m_uActivityTimeout;
 
 	/// Non-zero if events have been hooked
 	oexBOOL					m_bEventsHooked;

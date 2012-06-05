@@ -119,18 +119,23 @@ int CSqFftw::ReadInput( int nType, int nInterval, sqbind::CSqBinary *bin )
 	if ( nSamples > m_samples )
 		nSamples = m_samples;
 
+#define _FFTW_SET_TYPE( t, c ) \
+	case t : \
+		for ( int i = 0; i < nSamples; i++ ) \
+			setInput( i, *(c*)bin->Ptr( i * nInterval ), 0 ); \
+		break;
+
 	switch( nType )
-	{
-		case oex::obj::tFloat :
-			for ( int i = 0; i < nSamples; i++ )
-				setInput( i, *(oex::oexFLOAT*)bin->Ptr( i * nInterval ), 0 );
-			break;
-
-		case oex::obj::tDouble :
-			for ( int i = 0; i < nSamples; i++ )
-				setInput( i, *(oex::oexDOUBLE*)bin->Ptr( i * nInterval ), 0 );
-			break;
-
+	{	_FFTW_SET_TYPE( oex::obj::tInt8, oex::oexCHAR );
+		_FFTW_SET_TYPE( oex::obj::tUInt8, oex::oexUCHAR );
+		_FFTW_SET_TYPE( oex::obj::tInt16, oex::oexSHORT );
+		_FFTW_SET_TYPE( oex::obj::tUInt16, oex::oexUSHORT );
+		_FFTW_SET_TYPE( oex::obj::tInt32, oex::oexINT32 );
+		_FFTW_SET_TYPE( oex::obj::tUInt32, oex::oexUINT32 );
+		_FFTW_SET_TYPE( oex::obj::tInt64, oex::oexINT64 );
+		_FFTW_SET_TYPE( oex::obj::tUInt64, oex::oexUINT64 );
+		_FFTW_SET_TYPE( oex::obj::tFloat, oex::oexFLOAT );
+		_FFTW_SET_TYPE( oex::obj::tDouble, oex::oexDOUBLE );
 	} // end switch
 
 	return nSamples;
@@ -162,18 +167,23 @@ int CSqFftw::ReadOutputMagnitudes( int nMax, int nType, int nInterval, sqbind::C
 		if ( !bin->Allocate( nBytes ) )
 			return 0;
 
+#define _FFTW_GET_TYPE( t, c ) \
+	case t : \
+		for ( int i = 0; i < nMax; i++ ) \
+			*(c*)bin->Ptr( i * nInterval ) = getOutputMag( i ); \
+		break;
+
 	switch( nType )
-	{
-		case oex::obj::tFloat :
-			for ( int i = 0; i < nMax; i++ )
-				*(oex::oexFLOAT*)bin->Ptr( i * nInterval ) = getOutputMag( i );
-			break;
-
-		case oex::obj::tDouble :
-			for ( int i = 0; i < nMax; i++ )
-				*(oex::oexDOUBLE*)bin->Ptr( i * nInterval ) = getOutputMag( i );
-			break;
-
+	{	_FFTW_GET_TYPE( oex::obj::tInt8, oex::oexCHAR );
+		_FFTW_GET_TYPE( oex::obj::tUInt8, oex::oexUCHAR );
+		_FFTW_GET_TYPE( oex::obj::tInt16, oex::oexSHORT );
+		_FFTW_GET_TYPE( oex::obj::tUInt16, oex::oexUSHORT );
+		_FFTW_GET_TYPE( oex::obj::tInt32, oex::oexINT32 );
+		_FFTW_GET_TYPE( oex::obj::tUInt32, oex::oexUINT32 );
+		_FFTW_GET_TYPE( oex::obj::tInt64, oex::oexINT64 );
+		_FFTW_GET_TYPE( oex::obj::tUInt64, oex::oexUINT64 );
+		_FFTW_GET_TYPE( oex::obj::tFloat, oex::oexFLOAT );
+		_FFTW_GET_TYPE( oex::obj::tDouble, oex::oexDOUBLE );
 	} // end switch
 
 	// Set the number of bytes used

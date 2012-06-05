@@ -52,8 +52,18 @@ const CBin::t_byte* CBin::Resize( CBin::t_size x_nNewSize )
 			// Make a new buffer and copy data
 			if ( !m_buf.OexNew( x_nNewSize ).Ptr() )
 				return 0;
-			oexMemCpy( m_buf.Ptr(), m_ptr, m_nUsed );
+
+			// Remember how many are used
+			t_size nUsed = m_nUsed;
+
+			// Copy the data
+			oexMemCpy( m_buf.Ptr(), m_ptr, nUsed );
+
+			// Free the user pointer
 			FreePtr();
+
+			// Restore used amount
+			m_nUsed = nUsed;
 
 		} // end else
 
@@ -74,16 +84,32 @@ CBin::t_size CBin::Copy( CBin *x_p )
 	// Just ensuring our internal buffer is unshared?
 	if ( !x_p )
 	{
-		// Ptr buffer?
+		// Where's the buffer we're dealing with?
+		t_size nUsed = getUsed();
+		const CBin::t_byte* ptr = Ptr();
+
+		// Valid buffer?
+		if ( 0 >= nUsed || !ptr )
+		{	Destroy();
+			return 0;
+		} // end if
+
+		// User ptr buffer?
 		if ( m_ptr )
-			m_buf.MemCpy( m_ptr, m_nUsed ),
-			FreePtr();
+			m_buf.MemCpy( ptr, nUsed ), FreePtr();
 
-		// Just unshare the buffer
+		// Make a copy of shared pointer
 		else
-			m_buf.Unshare();
+		{	t_buffer buf;
+			buf.MemCpy( ptr, nUsed );
+			m_buf.Assume( buf );
+		} // end else if
 
-		return getUsed();
+		// Restore used count
+		m_nUsed = nUsed;
+		m_nOffset = 0;
+
+		return nUsed;
 
 	} // end if
 
@@ -137,16 +163,21 @@ CBin::t_size CBin::AppendBuffer( const CBin::t_byte *x_pBuf, CBin::t_size x_nByt
 	// Ptr pointer?
 	if ( m_ptr )
 	{
+		// Remember how many bytes are being used
+		t_size nUsed = m_nUsed;
+	
 		// Copy Ptr buffer
-		if ( m_nUsed )
-			m_buf.MemCpy( m_ptr, m_nUsed );
+		if ( nUsed )
+			m_buf.MemCpy( m_ptr, nUsed );
 
 		// Append new data
-		m_buf.MemCpyAt( (t_byte*)x_pBuf, m_nUsed, x_nBytes );
+		m_buf.MemCpyAt( (t_byte*)x_pBuf, nUsed, x_nBytes );
 
-		// Not Ptr buffer anymore
+		// No Ptr buffer anymore
 		FreePtr();
-		m_nUsed = m_nUsed + x_nBytes;
+
+		// New used amount
+		m_nUsed = nUsed + x_nBytes;
 
 		return m_nUsed;
 	}
@@ -212,8 +243,6 @@ CBin::t_size CBin::LShift( CBin::t_size x_nBytes )
 	// All of it?
 	if ( x_nBytes >= getUsed() )
 	{	FreePtr();
-		m_nUsed = 0;
-		m_nOffset = 0;
 		return 0;
 	} // end if
 
@@ -451,7 +480,7 @@ oexUINT CBin::GroupAvg( oexINT nType, oexUINT uOffset, oexUINT uInterval, oexUIN
 
 CStr8 CBin::base64_encode()
 {_STT();
-	return CBase64::Encode( m_buf.Ptr(), getUsed() ); 
+	return CBase64::Encode( m_buf.Ptr(), getUsed() );
 }
 
 CStr8 CBin::base64_decode()
@@ -461,57 +490,57 @@ CStr8 CBin::base64_decode()
 
 CStr8 CBin::base16_encode()
 {_STT();
-	return CBase16::Encode( m_buf.Ptr(), getUsed() ); 
+	return CBase16::Encode( m_buf.Ptr(), getUsed() );
 }
 
 CStr8 CBin::base16_decode()
 {_STT();
-	return CBase16::Decode( m_buf.Ptr(), getUsed() ); 
+	return CBase16::Decode( m_buf.Ptr(), getUsed() );
 }
 
 CStr8 CBin::compress()
 {_STT();
-	return oexCompress( CStr8( m_buf, getUsed() ) ); 
+	return oexCompress( CStr8( m_buf, getUsed() ) );
 }
 
 CStr8 CBin::uncompress()
 {_STT();
-	return oexUncompress( CStr8( m_buf.Ptr(), getUsed() ) ); 
+	return oexUncompress( CStr8( m_buf.Ptr(), getUsed() ) );
 }
 
 CBin& CBin::base64_encode( oexCONST CStr8 &s )
 {_STT();
-	setString( CBase64::Encode( s ) ); 
+	setString( CBase64::Encode( s ) );
 	return *this;
 }
 
 CBin& CBin::base64_decode( oexCONST CStr8 &s )
 {_STT();
-	setString( CBase64::Decode( s ) ); 
+	setString( CBase64::Decode( s ) );
 	return *this;
 }
 
 CBin& CBin::base16_encode( oexCONST CStr8 &s )
 {_STT();
-	setString( CBase16::Encode( s ) ); 
+	setString( CBase16::Encode( s ) );
 	return *this;
 }
 
 CBin& CBin::base16_decode( oexCONST CStr8 &s )
 {_STT();
-	setString( CBase16::Decode( s ) ); 
+	setString( CBase16::Decode( s ) );
 	return *this;
 }
 
 CBin& CBin::compress( oexCONST CStr8 &s )
 {_STT();
-	setString( oexCompress( s ) ); 
+	setString( oexCompress( s ) );
 	return *this;
 }
 
 CBin& CBin::uncompress( oexCONST CStr8 &s )
 {_STT();
-	setString( oexUncompress( s ) ); 
+	setString( oexUncompress( s ) );
 	return *this;
 }
 

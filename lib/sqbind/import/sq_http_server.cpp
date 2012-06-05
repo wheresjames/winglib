@@ -56,6 +56,13 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqHttpServer, CSqHttpServer )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, getPortFactory )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, getServerId )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, setServerId )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, setMaxConn )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, getMaxConn )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, setMaxQueue )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, getMaxQueue )
+//	SQBIND_MEMBER_FUNCTION( CSqHttpServer,  )
+//	SQBIND_MEMBER_FUNCTION( CSqHttpServer,  )
+//	SQBIND_MEMBER_FUNCTION( CSqHttpServer,  )
 
 SQBIND_REGISTER_CLASS_END()
 
@@ -140,7 +147,7 @@ int CSqHttpServer::Stop()
 }
 
 oex::oexINT CSqHttpServer::_OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
-										     oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
+										   oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
 {_STT();
 
 	CSqHttpServer *pServer = (CSqHttpServer*)x_pData;
@@ -154,11 +161,45 @@ oex::oexINT CSqHttpServer::_OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_
 }
 
 oex::oexINT CSqHttpServer::OnServerEvent( oex::oexPVOID x_pData, oex::oexINT x_nEvent, oex::oexINT x_nErr,
-										    oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
+										  oex::THttpServer< oex::os::CIpSocket, oex::THttpSession< oex::os::CIpSocket > > *x_pServer )
 {_STT();
 
 	if ( m_pServerMsgQueue )
 		m_pServerMsgQueue->execute( oexNULL, oexT( "." ), m_sServer );
+
+	return 0;
+}
+
+oex::oexINT CSqHttpServer::_OnCloseSession( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
+{_STT();
+
+	CSqHttpServer *pServer = (CSqHttpServer*)x_pData;
+	if ( !oexCHECK_PTR( pServer ) )
+		return -1;
+
+	if ( !oexCHECK_PTR( x_pSession ) )
+		return -2;
+
+	return pServer->OnCloseSession( x_pData, x_pSession );
+}
+
+oex::oexINT CSqHttpServer::OnCloseSession( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession )
+{_STT();
+
+	if ( !oexCHECK_PTR( x_pSession ) )
+		return -3;
+
+	// Get session queue
+	CSqMsgQueue *q = m_pSessionMsgQueue;
+	if ( !q )
+		return -4;
+
+	// Unique thread name
+	stdString sChild = oex2std( oex::CStr() << x_pSession->GetTransactionId() );
+
+	// Kill the thread if needed
+	if ( q->is_path( sChild ) )
+		q->kill( oexNULL, sChild );
 
 	return 0;
 }
@@ -197,17 +238,23 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 	// Are we executing a child script?
 	if ( m_sScript.length() )
 	{
-		// Create a child process to handle this transaction
-		oex::CStr sChild = x_pSession->GetTransactionId();
+		// Unique thread name
+		stdString sChild = oex2std( oex::CStr() << x_pSession->GetTransactionId() );
 
-		q->spawn( &sReply, oexT( "." ), sChild.Ptr(), m_sScript, m_bFile );
+		// Spawn handler thread if needed
+		if ( !q->is_path( sChild ) )
+			q->spawn( &sReply, oexT( "." ), sChild, m_sScript, m_bFile );
 
-		q = m_pSessionMsgQueue->GetQueue( sChild.Ptr() );
+		// Get the handler queue
+		q = m_pSessionMsgQueue->GetQueue( sChild );
 		if ( !q )
-		{	m_pSessionMsgQueue->kill( oexNULL, sChild.Ptr() );
-			oexERROR( 0, oexMks( oexT( "Failed to spawn " ), sChild ) );
+		{	m_pSessionMsgQueue->kill( oexNULL, sChild );
+			oexERROR( 0, oexMks( oexT( "Failed to acquire session handler CSqHttpServer::" ), sChild.c_str() ) );
 			return 0;
 		} // end if
+
+		// Set callback to get close message, we need this to kill the session thread
+		x_pSession->SetCloseCallback( &CSqHttpServer::_OnCloseSession, this );
 
 	} // end if
 
@@ -359,8 +406,8 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 	} // end else if
 
 	// Kill thread if we created it
-	if ( !m_bScriptsLinger && m_sScript.length() )
-		q->kill( oexNULL, oexT( "." ) );
+//	if ( !m_bScriptsLinger && m_sScript.length() )
+//		q->kill( oexNULL, oexT( "." ) );
 
 	return 0;
 }

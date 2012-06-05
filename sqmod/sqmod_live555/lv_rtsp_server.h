@@ -1,156 +1,190 @@
 // lv_rtsp_server.h
 
+class CLvRtspServer;
+class CMediaSource: public FramedSource
+{
+public:
+
+	/// Constructor
+	CMediaSource( UsageEnvironment& env, CLvRtspServer *pServer,
+				  const sqbind::stdString &sId, const sqbind::stdString &sName, sqbind::CSqMulti *m );
+
+	/// Destructor
+	virtual ~CMediaSource();
+
+	/// Call to do source processing
+	int Update();
+
+private:
+
+	/// Called when a frame needs delivering
+	virtual void doGetNextFrame();
+
+	/// Returns the stream id
+	sqbind::stdString getId() const { return m_sId; }
+
+private:
+
+	/// Stream id
+	sqbind::stdString		m_sId;
+
+	/// Strean name
+	sqbind::stdString		m_sName;
+
+	/// Stream params
+	sqbind::CSqMulti		m_mParams;
+
+	/// Root info key
+	sqbind::stdString		m_sRoot;
+
+	/// Pointer to server
+	CLvRtspServer			*m_pServer;
+
+	/// Video share
+	sqbind::CSqFifoShare	*m_pVs;
+
+	/// Non-zero when a frame of video is needed
+	int						m_nNeedFrame;
+
+	/// Frame count
+	oex::oexINT64			m_nFrames;
+
+	/// Bytes sent
+	oex::oexINT64			m_nBytes;
+
+	/// Last sync time
+	oex::oexINT64			m_nSync;
+
+	/// Skip NAL if needed
+	oex::oexINT				m_bStripNal;
+
+};
+
+
+class CMediaSubsession : public OnDemandServerMediaSubsession
+{
+public:
+
+	/// Constructor
+	CMediaSubsession( UsageEnvironment &env, Boolean reuseFirstSource, CLvRtspServer *pServer,
+					  const sqbind::stdString &sId, const sqbind::stdString &sName, sqbind::CSqMulti *m );
+
+	/// Destructor
+	virtual ~CMediaSubsession();
+
+	/// Returns the stream id
+	sqbind::stdString getId() const { return m_sId; }
+
+private:
+
+	/// Creates a new frame source instance
+	virtual FramedSource* createNewStreamSource( unsigned clientSessionId, unsigned& estBitrate );
+
+	/// Creates a new sink instance
+	virtual RTPSink* createNewRTPSink( Groupsock* rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic, FramedSource* inputSource );
+
+private:
+
+	/// Stream id
+	sqbind::stdString		m_sId;
+
+	/// Stream name
+	sqbind::stdString		m_sName;
+
+	/// Stream params
+	sqbind::CSqMulti		m_mParams;
+
+	/// Pointer to server
+	CLvRtspServer			*m_pServer;
+
+};
+
+class CClientSession : public RTSPServer::RTSPClientSession
+{
+public:
+
+	/// Constructor
+	CClientSession( CLvRtspServer *pServer, RTSPServer *pRtspServer,
+					unsigned sessionId, int clientSocket, struct sockaddr_in clientAddr );
+
+	/// Destructor
+	~CClientSession();
+
+	/// DESCRIBE
+	virtual void handleCmd_DESCRIBE( char const *cseq, char const *urlPreSuffix,
+									 char const *urlSuffix, char const *fullRequestStr );
+
+	/// SETUP
+	virtual void handleCmd_SETUP( char const* cseq, char const* urlPreSuffix,
+								  char const* urlSuffix, char const* fullRequestStr );
+
+	/// CMD
+	virtual void handleCmd_withinSession( char const* cmdName,
+										  char const* urlPreSuffix, char const* urlSuffix,
+										  char const* cseq, char const* fullRequestStr );
+
+	/// PLAY
+	virtual void handleCmd_PLAY( ServerMediaSubsession* subsession, char const* cseq,
+								 char const* fullRequestStr );
+
+private:
+
+	/// Pointer to server
+	CLvRtspServer			*m_pServer;
+
+	/// Stream name
+	sqbind::stdString		m_sName;
+
+	/// Session id
+	sqbind::stdString		m_sId;
+
+	/// Root info key
+	sqbind::stdString		m_sRoot;
+
+	/// Request parameters
+	sqbind::CSqMulti 		m_mParams;
+
+};
+
+class CLvRtspServer;
+class CRtspServer : public RTSPServerSupportingHTTPStreaming
+{
+
+public:
+
+	static CRtspServer* createNew( CLvRtspServer *pServer, UsageEnvironment& env, Port ourPort,
+								   UserAuthenticationDatabase* authDatabase, unsigned reclamationTestSeconds = 65 );
+
+	/// Constructor
+	CRtspServer( CLvRtspServer *pServer, UsageEnvironment& env, int ourSocket, Port ourPort,
+				 UserAuthenticationDatabase* authDatabase, unsigned reclamationTestSeconds = 65 );
+
+
+	/// Destructor
+	virtual ~CRtspServer();
+
+protected:
+
+	// Adds media session
+	virtual ServerMediaSession* lookupServerMediaSession( char const* streamName );
+
+	/// Creates a new client session
+	virtual RTSPClientSession*
+		createNewClientSession( unsigned sessionId, int clientSocket, struct sockaddr_in clientAddr );
+
+public:
+
+	/// Pointer to server
+	CLvRtspServer			*m_pServer;
+};
+
+
 class CLvRtspServer : oex::CThread
 {
 public:
 
-	/// Deliver frame function prototype
-	typedef void (*f_deliverFrame)( oex::oexPVOID pUserData, sqbind::CSqBinary *pFrame );
-
-	/// Parameter object type
-	typedef oexStdList( sqbind::stdString )	t_MsgList;
-
-public:
-
-	class CLiveMediaSource: public FramedSource
-	{
-	public:
-
-		static CLiveMediaSource* createNew( UsageEnvironment& env, CLvRtspServer *pRtspServer, sqbind::CSqMulti *mParams );
-
-		/// Queues a frame
-		int queueFrame( oex::CBin *pFrame, int fps );
-
-		/// Returns non-zero if the session needs a frame
-		int needFrame() { return !m_bFrameReady; } // { return !m_sigFrameReady.Wait( 0 ) ? 0 : 1; }
-
-	protected:
-
-		CLiveMediaSource( UsageEnvironment& env, CLvRtspServer *pRtspServer, sqbind::CSqMulti *mParams )
-			: FramedSource( env ), m_pRtspServer( pRtspServer ), m_p( mParams )
-		{
-			fTo = 0;
-			m_bFrameReady = 0;
-		}
-
-
-		virtual ~CLiveMediaSource()
-		{
-			m_pRtspServer = oexNULL;
-		}
-
-	private:
-
-		virtual void doGetNextFrame();
-
-//		static void _deliverFrame( oex::oexPVOID pUserData, sqbind::CSqBinary *pFrame );
-		void deliverFrame( oex::CBin *pFrame, int fps );
-
-	private:
-
-		/// Set when a frame is ready
-//		oexSignal					m_sigFrameReady;
-		int							m_bFrameReady;
-
-		/// Next frame
-		oex::CBin					m_frame;
-
-		/// Pointer to the video server
-		CLvRtspServer 				*m_pRtspServer;
-
-		/// Params
-		sqbind::CSqMulti			m_p;
-	};
-
-	class CLiveMediaSubsession : public OnDemandServerMediaSubsession
-	{
-	public:
-
-		/// Creates an instance of this class
-		static CLiveMediaSubsession* createNew( UsageEnvironment& env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer, ServerMediaSession *pSms, sqbind::CSqMulti *mParams );
-
-		/// Queues a frame
-		int queueFrame( oex::CBin *pFrame, int fps );
-
-		/// Returns the url string for this item
-		sqbind::stdString getUrl() { return m_sUrl; }
-
-		/// Returns non-zero if the session needs a frame
-		int needFrame() { if ( !m_pSource ) return 0; return m_pSource->needFrame(); }
-
-		/// Returns pointer to session object
-		ServerMediaSession* Session() { return m_pSms; }
-
-	private:
-
-		/// Creates a new frame source instance
-		virtual FramedSource* createNewStreamSource( unsigned clientSessionId, unsigned& estBitrate );
-
-		/// Creates a new sink instance
-		virtual RTPSink* createNewRTPSink( Groupsock* rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic, FramedSource* inputSource );
-
-		virtual char const* getAuxSDPLine(RTPSink* rtpSink, FramedSource* inputSource)
-		{
-//oexM();
-			return oexNULL;
-		}
-
-	protected:
-
-		/// Constructor
-		CLiveMediaSubsession( UsageEnvironment &env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer, ServerMediaSession *pSms, sqbind::CSqMulti *mParams )
-			: OnDemandServerMediaSubsession( env, reuseFirstSource ),
-			  m_pRtspServer( pRtspServer ),
-			  m_pSms( pSms ),
-			  m_p( mParams )
-		{
-			m_pSource = oexNULL;
-
-			// Save URL
-			if ( m_pRtspServer && m_pRtspServer->RtspServer() && m_pSms )
-			{	char* pUrl = m_pRtspServer->RtspServer()->rtspURL( m_pSms );
-				if ( pUrl )
-				{	m_sUrl = oexMbToStrPtr( pUrl );
-					delete [] pUrl;
-				} // end if
-			} // end if
-
-		}
-
-		/// Destructor
-		virtual ~CLiveMediaSubsession()
-		{
-			m_pSms = oexNULL;
-			m_pSource = oexNULL;
-			m_pRtspServer = oexNULL;
-		}
-
-
-	private:
-
-		/// Session pointer
-		CLiveMediaSource			*m_pSource;
-
-		/// Pointer to the video server
-		CLvRtspServer 				*m_pRtspServer;
-
-		/// Pointer to the ServerMediaSession object
-		ServerMediaSession			*m_pSms;
-
-		/// The url that can be used to access the stream
-		sqbind::stdString			m_sUrl;
-
-		/// Video codec
-		sqbind::stdString			m_sVideoCodec;
-
-		/// Params
-		sqbind::CSqMulti			m_p;
-
-	};
-
-
-	/// Parameter object type
-	typedef oexStdMap( sqbind::stdString, CLvRtspServer::CLiveMediaSubsession* )	t_SessionMap;
+	/// Maps session names to session objects
+	typedef std::map< sqbind::stdString, CMediaSource* > t_session_map;
 
 public:
 
@@ -179,47 +213,103 @@ public:
 	void Destroy();
 
 	/// Starts the server
+	/**
+		@param [in] x_nPort		- TCP port server should use to listen for connections
+	*/
 	int StartServer( int x_nPort );
 
-public:
+	/// Enable HTTP tunneling
+	/**
+		@param [in] x_nPort		- TCP port to use for tunneling
 
-	/// Returns non-zero if the server thread is running
-	int isThread()
-	{	return CThread::IsRunning(); }
+		IF
+			> 0		- TCP port to use
+			= 0		- Use RTSP port + 1
+			< 0		- Disable HTTP tunneling
 
-public:
+		@notice call before StartServer()
+	*/
+	void SetHttpTunnelingPort( int x_nPort ) { m_nHttpTunnelPort = x_nPort; }
 
-	/// Returns the url that can be used to access the string
-	sqbind::stdString getUrl( const sqbind::stdString &sId );
-
-	/// Returns non-zero if the specified device needs more video
-	int needFrame( const sqbind::stdString &sId );
-
-	/// Signals that message loop should exit
+	/// Signals that thread loop should exit
 	void Quit() { m_nEnd = 1; }
 
-	/// Sends a message to the thread
-	int Msg( const sqbind::stdString &sParams );
+	/// Returns the specified param value
+	sqbind::CSqMulti getParam( const sqbind::stdString &sKey )
+	{	oexAutoLock ll( m_lock );
+		if ( !ll.IsLocked() )
+			return sqbind::CSqMulti();
+		sqbind::CSqMulti m;
+		if ( !sKey.length() )
+			m.copy( m_params );
+		else
+			m.copy( *m_params.at( sKey ) );
+		return m;
+	}
 
-	/// Callback that processes messages
-	static void _ProcessMsgs( void* pData );
+	/// Returns the specified param value
+	sqbind::stdString getParamStr( const sqbind::stdString &sKey )
+	{	oexAutoLock ll( m_lock );
+		if ( !ll.IsLocked() )
+			return sqbind::CSqMulti();
+		sqbind::stdString s( m_params.at( sKey )->str() );
+		return s;
+	}
 
-	/// Processes messages in queue
-	void ProcessMsgs();
+	/// Sets the specified param value
+	void setParam( const sqbind::stdString &sKey, sqbind::CSqMulti *m )
+	{	oexAutoLock ll( m_lock );
+		if ( !ll.IsLocked() )
+			return;
+		if ( m )
+			m_params.at( sKey )->copy( *m );
+		else
+			m_params.erase_at( sKey );
+	}
 
-	/// Process single message
-	void ProcessMsg( const sqbind::stdString &sCmd, sqbind::CSqMulti *pParams );
+	/// Sets the specified param value
+	void setParamStr( const sqbind::stdString &sKey, const sqbind::stdString &s )
+	{	oexAutoLock ll( m_lock );
+		if ( !ll.IsLocked() )
+			return;
+		if ( s.length() )
+			m_params.at( sKey )->set( s );
+		else
+			m_params.erase_at( sKey );
+	}
 
-	/// Creates a stream on the server
-	int CreateStream( const sqbind::stdString &sId, sqbind::CSqMulti *pParams );
+	/// Returns the last error string
+	sqbind::stdString getLastErrorStr()
+	{	oexAutoLock ll( m_lock );
+		if ( !ll.IsLocked() )
+			return sqbind::stdString();
+		return m_sLastError;
+	}
 
-	/// Closes the specified stream
-	int CloseStream( const sqbind::stdString &sId );
-
-	/// Adds frame to the output stream queue
-	int DeliverFrame( const sqbind::stdString &sStreamId, const sqbind::stdString &sFrameId, int fps );
+	/// Sets the last error string
+	void setLastErrorStr( const sqbind::stdString &s )
+	{	oexAutoLock ll( m_lock );
+		if ( !ll.IsLocked() )
+			return;
+		m_sLastError = s;
+	}
 
 	/** @} */
+
+	/// Returns the useage environment object
+	UsageEnvironment* Env() { return m_pEnv; }
+
+	/// Adds the specified session to the update list
+	void AddSession( const sqbind::stdString &sId, CMediaSource *pMs );
+
+	/// Removes the specified session
+	void RemoveSession( const sqbind::stdString &sId );
+
+	/// Returns non-zero if valid server object
+	int isServer() { return m_pRtspServer ? 1 : 0; }
+
+	/// Returns a pointer to the live555 derived server object
+	CRtspServer* Server() { return m_pRtspServer; }
 
 protected:
 
@@ -238,47 +328,45 @@ protected:
 	/// Initializes the threaded environment
 	int ThreadOpen();
 
+	/// Update streaming sessions
+	void UpdateSessions();
 
-public:
+	/// Static message callback
+	static void _OnIdle( void *pData );
 
-	/// Access rtsp server variable
-	RTSPServer* RtspServer() { return m_pRtspServer; }
+	/// Idle processing
+	void OnIdle();
 
 private:
 
-	/// Message queue
-	t_MsgList				m_lstMsgs;
+	/// Thread lock
+	oexLock									m_lock;
 
-	/// Message list lock
-	oexLock					m_lockMsgs;
+	/// List of session objects
+	t_session_map							m_sessions;
 
-	/// Session callback queue
-	sqbind::CSqMsgQueue		*m_pMsgQueue;
+	/// Parameters
+	sqbind::CSqMulti						m_params;
 
-	/// Set when an event is waiting
-	oexEvent				m_evtMsgReady;
-
-	/// Next frame to be sent
-	sqbind::CSqBinary		m_binFrame;
-
-	/// Session map
-	t_SessionMap			m_mapSession;
-
-	/// User data passed to m_fDeliverFrame
-	oex::oexPVOID			m_pUserData;
+	/// A string describing the last error
+	sqbind::stdString						m_sLastError;
 
 	/// Usage environment
-	UsageEnvironment		*m_pEnv;
+	UsageEnvironment						*m_pEnv;
 
-	/// The RTSP server object
-	RTSPServer				*m_pRtspServer;
+	/// RTSP server
+	CRtspServer								*m_pRtspServer;
+
+	/// User authentication object
+	UserAuthenticationDatabase				*m_pUserDb;
 
 	/// Server port
-	int						m_nPort;
+	int										m_nPort;
 
-	/// Number of frames processed
-	int						m_nFrames;
+	/// HTTP tunnel port
+	int										m_nHttpTunnelPort;
 
 	/// Non-zero if thread should stop
-	char					m_nEnd;
+	char									m_nEnd;
 };
+

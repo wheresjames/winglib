@@ -133,7 +133,7 @@ public:
 		eAuthRequest = 0,
 
 		eAuthMappedFolder = 1
-		
+
 	};
 
 	enum
@@ -146,6 +146,9 @@ public:
 
 	/// Authentication callback
 	typedef oexINT (*PFN_Authenticate)( oexPVOID x_pData, THttpSession< T_PORT > *x_pSession, oexLONG lType, oexCSTR pData );
+
+	/// Server callback
+	typedef oexINT (*PFN_Close)( oexPVOID x_pData, THttpSession< T_PORT > *x_pSession );
 
 	/// Byte type
 	typedef CBin::t_byte	t_byte;
@@ -171,6 +174,8 @@ public:
 		m_pData = oexNULL;
 		m_fnAuthenticate = oexNULL;
 		m_pAuthData = oexNULL;
+		m_fnClose = oexNULL;
+		m_pCloseData = oexNULL;
 		m_bNewSession = oexTRUE;
 		m_uSessionTimeout = 60 * 60;
 		m_ppbSession = oexNULL;
@@ -195,6 +200,8 @@ public:
 		m_pData = oexNULL;
 		m_fnAuthenticate = oexNULL;
 		m_pAuthData = oexNULL;
+		m_fnClose = oexNULL;
+		m_pCloseData = oexNULL;
 		m_bNewSession = oexTRUE;
 		m_uSessionTimeout = 60 * 60;
 		m_ppbSession = oexNULL;
@@ -206,6 +213,8 @@ public:
     /// Destructor
     virtual ~THttpSession()
     {	m_pPort = oexNULL;
+		if ( m_fnClose )
+			m_fnClose( m_pCloseData, this );
     }
 
 	/// Initialize connection
@@ -245,7 +254,7 @@ public:
 	//==============================================================
 	/// Returns zero if connection should be terminated
     oexBOOL KeepAlive()
-	{	// return !GetTransactions(); 
+	{	// return !GetTransactions();
 		return m_uKeepAlive > oexGetUnixTime();
 	}
 
@@ -583,6 +592,7 @@ public:
 		m_pbRequest[ "TRANSPORT_TYPE" ] = m_pPort->v_get_transport_type();
 		m_pbRequest[ "TRANSPORT_NAME" ] = m_pPort->v_get_transport_name();
 		m_pbRequest[ "TRANSACTION" ] = GetTransactions();
+		m_pbRequest[ "TRANSACTION_ID" ] = GetTransactionId();
 	}
 
     /// Reads in the http headers
@@ -661,8 +671,16 @@ public:
 			<< " " << m_pbRequest[ "proto" ].ToString()
 			<< "/" << m_pbRequest[ "ver" ].ToString();
 
+
 		// Add connection information
 		GrabConnectionInfo();
+
+		// Set thread tag for debugging
+		_STT_SET_TAG( CStr() 
+					  << m_pbRequest[ "REMOTE_ADDR" ].ToString()
+					  << oexT( " : " )
+					  << m_pbRequest[ "REQUEST_STRING" ].ToString()
+					);
 
 		// Attempt to restore session information
 		RestoreSession();
@@ -989,6 +1007,14 @@ public:
 	void SetAuthCallback( oexPVOID x_fnAuthenticate, oexPVOID x_pData )
 	{	m_fnAuthenticate = (PFN_Authenticate)x_fnAuthenticate; m_pAuthData = x_pData; }
 
+	/// Sets a close function
+	void SetCloseCallback( PFN_Authenticate x_fnClose, oexPVOID x_pData )
+	{	m_fnClose = x_fnClose; m_pCloseData = x_pData; }
+
+	/// Sets a close function
+	void SetCloseCallback( oexPVOID x_fnClose, oexPVOID x_pData )
+	{	m_fnClose = (PFN_Close)x_fnClose; m_pCloseData = x_pData; }
+
 	/// Sets the log file name
 	oexBOOL SetLogFile( oexCSTR x_pLog )
 	{	m_sLog = x_pLog;
@@ -1105,7 +1131,7 @@ public:
 		s	<< m_pbRequest[ "REMOTE_ADDR" ].ToString()
 			<< " -" // rfc931
 			<< " -" // username
-			<< " " << oexStrToMb( oexLocalTimeStr( oexT( "[%c/%b/%Y:%g:%m:%s %Zs%Zh%Zm]" ) ) )
+			<< " " << oexStrToMb( oexLocalTimeStr( oexT( "[%d/%b/%Y:%g:%m:%s %Zs%Zh%Zm]" ) ) )
 			<< " \"" << m_pbRequest[ "REQUEST_STRING" ].ToString() << "\""
 			<< " " << m_nErrorCode
 			<< " " << m_sContent.Length();
@@ -1241,6 +1267,12 @@ private:
 
 	/// Data passed to callback function
 	oexPVOID					m_pAuthData;
+
+	/// Pointer to close function
+	PFN_Close					m_fnClose;
+
+	/// Data passed to callback function
+	oexPVOID					m_pCloseData;
 
 	/// Non-zero to enable compression
 	oexBOOL						m_bEnableCompression;

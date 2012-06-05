@@ -212,7 +212,13 @@ function Run() : ( _g )
 	local writes = _g.vid ? _g.vid.getFifoWrites() : _g.share.getWrites();
 	local diff = writes - reads;
 	if ( diff > _g.fps * _g.maxbuf )
-	{	_self.echo( "Reader quit caring :(" ); _g.quit = 1; return 0; }
+	{	//_self.print( " " + reads + "/" + writes );
+		_self.echo( "Reader quit caring :(" );
+		_g.quit = 1; 
+		return 0; 
+	} // end if
+
+//	_self.print( " " + reads + "/" + writes );
 
 	// Calculate frame timers
 	local gmt = _self.gmt_time_useconds() / 1000;

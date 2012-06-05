@@ -88,6 +88,10 @@ namespace sqbind
 		static oex::oexINT _OnAuthenticate( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession, oex::oexLONG lType, oex::oexCSTR pData );
 		oex::oexINT OnAuthenticate( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession, oex::oexLONG lType, oex::oexCSTR pData );
 
+		/// On Close session callback
+		static oex::oexINT _OnCloseSession( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession );
+		oex::oexINT OnCloseSession( oex::oexPVOID x_pData, oex::THttpSession< oex::os::CIpSocket > *x_pSession );
+
 		/// Starts web logging
 		int SetLogFile( const stdString &sFile );
 
@@ -127,6 +131,18 @@ namespace sqbind
 		/// Sets the port factory on the server
 		CSqFactory getPortFactory();
 
+		/// Sets the maximum number of connections
+		void setMaxConn( int n ) { m_server.setMaxConn( n ); }
+
+		/// Returns the maximum number of connections
+		int getMaxConn() { return m_server.getMaxConn(); }
+
+		/// Sets the maximum number of connections that can be queued
+		void setMaxQueue( int n ) { m_server.setMaxQueue( n ); }
+
+		/// Returns the maximum number of connections that can be queued
+		int getMaxQueue() { return m_server.getMaxQueue(); }
+
 	private:
 
 		// The server
@@ -154,10 +170,10 @@ namespace sqbind
 		stdString		m_sScript;
 
 		/// Non-zero if m_sScript holds a file name
-		oex::oexBOOL			m_bFile;
+		oex::oexBOOL	m_bFile;
 
 		/// Non-zero if scripts should not be killed after
-		oex::oexBOOL			m_bScriptsLinger;
+		oex::oexBOOL	m_bScriptsLinger;
 	};
 
 };

@@ -351,6 +351,38 @@ void CSqEngineExport::terminate( int nExitCode )
 	oex::os::CSys::Exit( nExitCode );
 }
 
+int CSqEngineExport::get_total_thread_count()
+{
+	return oex::CThread::GetThreadCount();
+}
+
+int CSqEngineExport::get_running_thread_count()
+{
+	return oex::CThread::GetRunningThreadCount();
+}
+
+int CSqEngineExport::set_thread_checkpoint( int cp )
+{
+	_STT_SET_CHECKPOINT( cp );
+	return 1;
+}
+
+int CSqEngineExport::get_thread_checkpoint()
+{
+	return _STT_GET_CHECKPOINT();
+}
+
+int CSqEngineExport::set_thread_tag( const stdString &tag )
+{
+	_STT_SET_TAG( std2oex( tag ) );
+	return 1;
+}
+
+stdString CSqEngineExport::get_thread_tag()
+{
+	return oex2std( _STT_GET_TAG() );
+}
+
 int CSqEngineExport::get_key()
 {_STT();
 	return oexGetKey();
@@ -360,7 +392,6 @@ int CSqEngineExport::is_key()
 {_STT();
 	return oexIsKey();
 }
-
 
 stdString CSqEngineExport::get_build()
 {_STT();
@@ -1735,9 +1766,16 @@ void CSqEngine::Exit()
 
 void CSqEngine::Destroy()
 {_STT();
+
+_STT_SET_CHECKPOINT( 1 );
+
 	Exit();
 
+_STT_SET_CHECKPOINT( 2 );
+
 	m_script.Reset();
+
+_STT_SET_CHECKPOINT( 3 );
 
 	// Only the smame thread can delete the vm
 //	if ( m_uThreadId == oexGetCurThreadId() )
@@ -1745,7 +1783,11 @@ void CSqEngine::Destroy()
 //	else
 //		m_vm.Detach();
 
+_STT_SET_CHECKPOINT( 4 );
+
 	m_mapIncludeScriptCache.clear();
+
+_STT_SET_CHECKPOINT( 5 );
 
 	m_uThreadId = 0;
 	m_sErr = oexT( "" );
@@ -1753,6 +1795,8 @@ void CSqEngine::Destroy()
 	m_sRoot = oexT( "" );
 
 	m_bLoaded = oex::oexFALSE;
+
+_STT_SET_CHECKPOINT( 6 );
 
 }
 
@@ -1840,6 +1884,12 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shutdown )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, logoff )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ctrl_computer )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_total_thread_count )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_running_thread_count )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_thread_checkpoint )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_thread_checkpoint )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_thread_tag )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_thread_tag )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, process_system_messages )

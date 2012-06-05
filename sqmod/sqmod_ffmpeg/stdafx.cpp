@@ -205,6 +205,10 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
 
+	oexAutoLock ll( _g_ffmpeg_lock );
+	if ( !ll.IsLocked() ) 
+		return;
+
 	// Initialize SSL
 	SSL_library_init();
 
@@ -240,6 +244,10 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 
 static void SQBIND_module_cleanup()
 {
+	oexAutoLock ll( _g_ffmpeg_lock );
+	if ( !ll.IsLocked() ) 
+		return;
+
 	// Free ffmpeg network resources
 	avformat_network_deinit();
 

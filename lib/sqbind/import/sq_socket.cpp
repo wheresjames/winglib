@@ -141,6 +141,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSocket, CSqSocket )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, ReadFrom )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, SendTo )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, ReadBin )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, AppendBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, WriteBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, ReadFromBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, SendToBin )
@@ -386,6 +387,13 @@ int CSqSocket::ReadBin( sqbind::CSqBinary *pBin, int nMax )
 		return 0;
 	*pBin = m_socket->ReadBin( nMax );
 	return pBin->getUsed();
+}
+
+int CSqSocket::AppendBin( sqbind::CSqBinary *pBin, int nMax )
+{_STT();
+	if ( !pBin )
+		return 0;
+	return m_socket->AppendBin( &pBin->Mem(), nMax );
 }
 
 int CSqSocket::WriteBin( sqbind::CSqBinary *pBin, int nMax )

@@ -487,12 +487,24 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 	return pb;
 }
 
+BOOL CALLBACK EnumDesktopProc( LPTSTR lpszDesktop,  LPARAM lParam )
+{
+//	oexSHOW( lpszDesktop );
+//	oexEcho( lpszDesktop );
+
+	return TRUE;
+}
+
+
 class CSysUtil_CSwitchDesktop
 {
 public:
 	CSysUtil_CSwitchDesktop( bool bSwitchCurrent )
 	{	m_hOld = NULL;
 		m_hDesk = NULL;
+		
+		EnumDesktops( NULL, &EnumDesktopProc, 0 );
+		
 		if ( bSwitchCurrent )
 			SwitchCurrent();
 	}
@@ -507,9 +519,12 @@ public:
 	}
 	bool SwitchCurrent()
 	{	m_hOld = ::GetThreadDesktop( GetCurrentThreadId() );
-		m_hDesk = ::OpenInputDesktop( 0, FALSE, READ_CONTROL );
+//		m_hDesk = ::OpenInputDesktop( 0, FALSE, READ_CONTROL );
+		m_hDesk = ::OpenDesktop( oexT( "WinSta0" ), 0, FALSE, READ_CONTROL );
 		if ( !m_hDesk || !::SetThreadDesktop( m_hDesk ) )
 			RestoreDesktop();
+		else
+			oexEcho( "hi" );
 		return m_hDesk ? true : false;
 	}
 

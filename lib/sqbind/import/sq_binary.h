@@ -164,6 +164,9 @@ namespace sqbind
 		/// Shares memory object
 		t_size Share( CSqBinary *x_p ) { if ( !x_p ) return 0; return m_bin.Share( &x_p->m_bin ); }
 
+		/// Ensures we have our own buffer
+		t_size Unshare() { return m_bin.Unshare(); }
+
 		/// Returns the raw size of the buffer
 		t_size Size() { return m_bin.Size(); }
 

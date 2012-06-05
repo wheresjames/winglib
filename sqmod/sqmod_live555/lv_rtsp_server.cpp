@@ -1,18 +1,28 @@
 // lv_rtsp_server.cpp
 
 #include "stdafx.h"
+//#include <stdio.h>
 
+#include "RTSPCommon.hh"
+#include "BasicUsageEnvironment.hh"
 #include "GroupsockHelper.hh"
 
 // CLvRtspServer
 SQBIND_REGISTER_CLASS_BEGIN( CLvRtspServer, CLvRtspServer )
 
-	SQBIND_MEMBER_FUNCTION( CLvRtspServer, Destroy )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, StartServer )
-	SQBIND_MEMBER_FUNCTION( CLvRtspServer, isThread )
-	SQBIND_MEMBER_FUNCTION( CLvRtspServer, getUrl )
-	SQBIND_MEMBER_FUNCTION( CLvRtspServer, needFrame )
-	SQBIND_MEMBER_FUNCTION( CLvRtspServer, Msg )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, Destroy )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, getLastErrorStr )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, setLastErrorStr )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, getParam )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, getParamStr )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, setParam )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, setParamStr )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, SetHttpTunnelingPort )
+//	SQBIND_MEMBER_FUNCTION( CLvRtspServer,  )
+//	SQBIND_MEMBER_FUNCTION( CLvRtspServer,  )
+//	SQBIND_MEMBER_FUNCTION( CLvRtspServer,  )
+//	SQBIND_MEMBER_FUNCTION( CLvRtspServer,  )
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CLvRtspServer );
@@ -22,142 +32,374 @@ void CLvRtspServer::Register( sqbind::VM vm )
 	SQBIND_EXPORT( vm, CLvRtspServer );
 }
 
-// CLiveMediaSubsession::createNew
-CLvRtspServer::CLiveMediaSubsession* CLvRtspServer::CLiveMediaSubsession::createNew( UsageEnvironment& env, Boolean reuseFirstSource, CLvRtspServer *pRtspServer, ServerMediaSession *pSms, sqbind::CSqMulti *mParams )
-{_STT();
-	if ( !pRtspServer )
-		return oexNULL;
 
-	return new CLvRtspServer::CLiveMediaSubsession( env, reuseFirstSource, pRtspServer, pSms, mParams );
-}
+//------------------------------------------------------------------
+// *** CClientSession
+//------------------------------------------------------------------
 
-// CLiveMediaSubsession::createNewStreamSource
-FramedSource* CLvRtspServer::CLiveMediaSubsession::createNewStreamSource( unsigned clientSessionId, unsigned& estBitrate )
-{_STT();
-	if ( !m_pRtspServer )
-		return oexNULL;
-
-	m_pSource = CLvRtspServer::CLiveMediaSource::createNew( envir(), m_pRtspServer, &m_p );
-
-	estBitrate = 500;
-
-	// Create a framer for the video stream
-//	if ( m_p[ oexT( "codec" ) ].str() == oexT( "H264" ) )
-//		return H264VideoStreamDiscreteFramer::createNew( envir(), m_pSource );
-//		return new H264VideoStreamFramer( envir(), m_pSource );
-//	else if ( m_p[ oexT( "codec" ) ].str() == oexT( "MPG1" ) || m_p[ oexT( "codec" ) ].str() == oexT( "MPG2" ) )
-//		return MPEG1or2VideoStreamDiscreteFramer::createNew( envir(), m_pSource );
-//	else
-		return MPEG4VideoStreamDiscreteFramer::createNew( envir(), m_pSource );
-}
-
-// CLiveMediaSubsession::createNewRTPSink
-RTPSink* CLvRtspServer::CLiveMediaSubsession::createNewRTPSink( Groupsock* rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic, FramedSource* inputSource )
+CClientSession::CClientSession( CLvRtspServer *pServer, RTSPServer *pRtspServer,
+								unsigned sessionId, int clientSocket, struct sockaddr_in clientAddr )
+	: m_pServer( pServer ),
+	  RTSPServer::RTSPClientSession( *pRtspServer, sessionId, clientSocket, clientAddr )
 {_STT();
 
-	// Get frame rate
-	long fps = m_p[ oexT( "fps" ) ].toint();
-	if ( 0 >= fps || 100 < fps ) fps = 15;
+	// Wrap socket handle
+	oex::os::CIpSocket socket( (oex::os::CIpSocket::t_SOCKET)clientSocket, oex::oexFALSE );
 
-	// Create proper video sink
-//	if ( m_p[ oexT( "codec" ) ].str() == oexT( "H264" ) )
-//		return H264VideoRTPSink::createNew( envir(), rtpGroupsock, rtpPayloadTypeIfDynamic, 1000000 / fps );
-//	else if ( m_p[ oexT( "codec" ) ].str() == oexT( "MPG1" ) || m_p[ oexT( "codec" ) ].str() == oexT( "MPG2" ) )
-//		return MPEG1or2VideoRTPSink::createNew( envir(), rtpGroupsock );
-//	else
-		return MPEG4ESVideoRTPSink::createNew( envir(), rtpGroupsock, rtpPayloadTypeIfDynamic, 1000000 / fps );
+	// Parse the url
+	m_sId = sqbind::oex2std( socket.PeerAddress().GetId() );
+
+	// Root key
+	m_sRoot = sqbind::stdString( "streams." ) + m_sId;
+
+	// We're connected
+	if ( m_sRoot.length() )
+		m_pServer->setParamStr( m_sRoot + ".connected", "1" ),
+		m_pServer->setParamStr( m_sRoot + ".remote", sqbind::oex2std( socket.PeerAddress().GetDotAddress() ) );
+
 }
 
-int CLvRtspServer::CLiveMediaSubsession::queueFrame( oex::CBin *pFrame, int fps )
-{
-	if ( m_pSource )
-		m_pSource->queueFrame( pFrame, fps );
-
-	return 1;
-}
-
-// CLiveMediaSource::createNew()
-CLvRtspServer::CLiveMediaSource* CLvRtspServer::CLiveMediaSource::createNew( UsageEnvironment& env, CLvRtspServer *pRtspServer, sqbind::CSqMulti *mParams )
+CClientSession::~CClientSession()
 {_STT();
 
-	if ( !pRtspServer )
-		return oexNULL;
+	// Clear stream information
+	if ( m_sRoot.length() )
+		m_pServer->setParam( m_sRoot, 0 ),
+		m_sRoot.clear();
 
-	return new CLvRtspServer::CLiveMediaSource( env, pRtspServer, mParams );
+	// Remove our media session
+	if ( m_sId.length() )
+		m_pServer->Server()->removeServerMediaSession( m_sId.c_str() );
 }
 
-
-// CLiveMediaSource::doGetNextFrame()
-void CLvRtspServer::CLiveMediaSource::doGetNextFrame()
+void CClientSession::handleCmd_DESCRIBE( char const *cseq, char const *urlPreSuffix,
+										 char const *urlSuffix, char const *fullRequestStr )
 {_STT();
 
-	// Need another frame
-	m_bFrameReady = 0;
-}
+	// Sanity checks, (I blame live555)
+	if ( !m_pServer || !m_pServer->isServer() )
+		return;
 
-int CLvRtspServer::CLiveMediaSource::queueFrame( oex::CBin *pFrame, int fps )
-{
-	// Terminate stream?
-	if ( !pFrame || !pFrame->getUsed() )
-	{	handleClosure( this );
-		return 0;
+	oex::CStr sFull( oex::CStr( m_pServer->Server()->rtspURLPrefix() ) << urlSuffix );
+	_STT_SET_TAG( sFull );
+
+	// Parse the url
+	oex::CPropertyBag pb = oex::os::CIpAddress::ParseUrl( sFull.Ptr() );
+
+	// Stream Name
+	m_sName = sqbind::oex2std( oexUrlDecode( pb[ oexT( "path" ) ].ToString().LTrim( oexT( "/" ) ) ) );
+
+	// Read default source information
+	m_mParams = m_pServer->getParam( "sources." + m_sName );
+
+	// Decode GET params
+	sqbind::CSqMulti m; m.urldecode( sqbind::oex2std( pb[ oexT( "extra" ) ].ToString() ) );
+	m_mParams.mmerge( &m );
+
+	// Use ffmpeg MPEG4 codec
+	sqbind::stdString sCodec = m_mParams[ "codec" ].str();
+	if ( sCodec == "MPG4" || sCodec == "MP42" || sCodec == "MPEG4" )
+		m_mParams[ "codec" ].set( "FMP4" );
+
+	// Add stream info
+	if ( m_sRoot.length() )
+		m_pServer->setParamStr( m_sRoot + ".name", m_sName ),
+		m_pServer->setParamStr( m_sRoot + ".share", m_sId ),
+		m_pServer->setParam( m_sRoot + ".params", &m_mParams );
+
+	// Stream description
+	sqbind::stdString sDesc = m_pServer->getParamStr( sqbind::stdString( m_sName ) + ".desc" );
+	if ( !sDesc.length() )
+		sDesc = m_sName;
+
+	// Create media session
+	ServerMediaSession* pSms = ServerMediaSession::createNew( *m_pServer->Env(), m_sId.c_str(), m_sName.c_str(), sDesc.c_str() );
+	if ( !pSms )
+	{	oexERROR( 0, oexMks( oexT( "ServerMediaSession::createNew() failed : " ), oexMbToStrPtr( m_pServer->Env()->getResultMsg() ) ) );
+		return;
 	} // end if
 
-	// Must use previous frame first
-	// +++ May need frame buffering
-	if ( m_bFrameReady )
+	// Add subsession
+	CMediaSubsession *pLms = new CMediaSubsession( *m_pServer->Env(), False, m_pServer, m_sId, m_sName, &m_mParams );
+	if ( !pLms || !pSms->addSubsession( pLms ) )
+	{	oexERROR( 0, oexMks( oexT( "ServerMediaSession::addSubsession() failed : " ), oexMbToStrPtr( m_pServer->Env()->getResultMsg() ) ) );
+		return;
+	} // end if
+
+	// Add session option to server
+	m_pServer->Server()->addServerMediaSession( pSms );
+
+	// Use id as name
+	urlSuffix = m_sId.c_str();
+
+	// Call the base class
+	RTSPServer::RTSPClientSession
+		::handleCmd_DESCRIBE( cseq, urlPreSuffix, urlSuffix, fullRequestStr );
+}
+
+void CClientSession::handleCmd_SETUP( char const* cseq, char const* urlPreSuffix,
+									  char const* urlSuffix, char const* fullRequestStr )
+{_STT();
+
+	RTSPServer::RTSPClientSession
+		::handleCmd_SETUP( cseq, urlPreSuffix, urlSuffix, fullRequestStr );
+
+}
+
+void CClientSession::handleCmd_withinSession( char const* cmdName,
+											  char const* urlPreSuffix, char const* urlSuffix,
+											  char const* cseq, char const* fullRequestStr )
+{_STT();
+
+	RTSPServer::RTSPClientSession
+		::handleCmd_withinSession( cmdName, urlPreSuffix, urlSuffix, cseq, fullRequestStr );
+
+}
+
+void CClientSession::handleCmd_PLAY( ServerMediaSubsession* subsession, char const* cseq,
+									 char const* fullRequestStr )
+{_STT();
+
+	RTSPServer::RTSPClientSession
+		::handleCmd_PLAY( subsession, cseq, fullRequestStr );
+}
+
+//------------------------------------------------------------------
+// *** CRtspServer
+//------------------------------------------------------------------
+
+CRtspServer* CRtspServer::createNew( CLvRtspServer *pServer, UsageEnvironment& env, Port ourPort,
+									 UserAuthenticationDatabase* authDatabase, unsigned reclamationTestSeconds )
+{
+	int ourSocket = setUpOurSocket( env, ourPort );
+	if ( ourSocket == -1 )
 		return 0;
 
-	// Queue frame
-	m_frame = *pFrame;
-	m_bFrameReady = 1;
+	return new CRtspServer( pServer, env, ourSocket, ourPort, authDatabase, reclamationTestSeconds );
+}
 
-	deliverFrame( &m_frame, fps );
+CRtspServer::CRtspServer( CLvRtspServer *pServer, UsageEnvironment& env, int ourSocket, Port ourPort,
+						  UserAuthenticationDatabase* authDatabase, unsigned reclamationTestSeconds )
+	: m_pServer( pServer ),
+	  RTSPServerSupportingHTTPStreaming( env, ourSocket, ourPort, authDatabase, reclamationTestSeconds )
+{
+}
 
-	return 1;
+CRtspServer::~CRtspServer()
+{
+}
+
+RTSPServer::RTSPClientSession*
+	CRtspServer::createNewClientSession( unsigned sessionId, int clientSocket, struct sockaddr_in clientAddr )
+{_STT();
+	return new CClientSession( m_pServer, this, sessionId, clientSocket, clientAddr );
 }
 
 
-// CLiveMediaSource::deliverFrame()
-void CLvRtspServer::CLiveMediaSource::deliverFrame( oex::CBin *pFrame, int fps )
+ServerMediaSession* CRtspServer::lookupServerMediaSession( char const* streamName )
+{_STT();
+	return RTSPServer::lookupServerMediaSession( streamName );
+}
+
+//------------------------------------------------------------------
+// *** CMediaSource
+//------------------------------------------------------------------
+
+CMediaSource::CMediaSource( UsageEnvironment& env, CLvRtspServer *pServer,
+							const sqbind::stdString &sId, const sqbind::stdString &sName, sqbind::CSqMulti *m )
+	: m_pVs( 0 ), m_pServer( pServer ), m_sId( sId ), m_sName( sName ), m_mParams( m ),
+	  m_nNeedFrame( 0 ),
+	  m_sRoot( sqbind::stdString( "streams." ) + sId ),
+	  FramedSource( env )
+{
+	m_nBytes = 0;
+	m_nFrames = 0;
+	m_nSync = 0;
+
+	// Look for user preferences on nal headers
+	if ( m )
+	{
+		if ( m->isset( "no_nal_strip" ) )
+			m_bStripNal = 0;
+
+		else if ( m->isset( "force_nal_strip" ) )
+			m_bStripNal = 1;
+
+		else 
+			m_bStripNal = ( (*m)[ "codec" ].str() == oexT( "H264" ) ) ? 1 : 0;
+
+	} // end if
+
+	// No nal stripping
+	else
+		m_bStripNal = 0;
+}
+
+
+CMediaSource::~CMediaSource()
+{
+	// Clear stream information
+	if ( m_sRoot.length() )
+	{
+		// Remove processing from server
+		if ( m_pServer )
+			m_pServer->RemoveSession( m_sRoot );
+
+		m_sRoot.clear();
+
+	} // end if
+
+	// Ditch any video share
+	if ( m_pVs )
+		delete m_pVs, m_pVs = 0;
+
+	// No more server
+	m_pServer = 0;
+}
+
+void CMediaSource::doGetNextFrame()
 {_STT();
 
-	// ???
-	if ( !fTo )
+	// We need a frame
+	m_nNeedFrame++;
+
+	// Do we have a share open?
+	if ( m_pVs )
 		return;
 
-	// End of stream?
-	if ( !pFrame || !pFrame->getUsed() )
-	{	fFrameSize = 0; fTo = 0;
-		if ( m_pRtspServer )
-			m_pRtspServer->Quit();
-//		else
-//			handleClosure(this);
-		fPresentationTime.tv_sec = 0;
-		fPresentationTime.tv_usec = 0;
+	// Must have a server pointer
+	if ( !m_pServer )
 		return;
+
+	// Add stream id
+	if ( m_sRoot.length() )
+		m_pServer->setParamStr( m_sRoot + ".run", "1" ),
+
+	// Create a new video share
+	m_pVs = new sqbind::CSqFifoShare();
+	if ( !m_pVs )
+	{	m_pServer->setParamStr( m_sRoot + ".error", "Failed to create share object" );
+		return;
+	} // end if
+
+	// Hook our update function
+	m_pServer->AddSession( m_sRoot, this );
+}
+
+int CMediaSource::Update()
+{_STT();
+
+	// We must have a server and video share object
+	if ( !m_pServer || !m_pVs )
+		return 0;
+
+	// Do we need a frame of video?
+	if ( 0 >= m_nNeedFrame )
+		return 1;
+
+	// Is the share open?
+	if ( !m_pVs->isOpen() )
+	{
+		// Grab the share name
+		sqbind::stdString sShare = m_pServer->getParamStr( m_sRoot + ".share" );
+
+		// Attempt to open share
+		if ( !m_pVs->Open( sShare ) )
+		{	m_pServer->setParamStr( m_sRoot + ".status", sqbind::stdString( "Waiting for memory share : " ) + sShare );
+			return m_pServer->getParamStr( m_sRoot + ".quit" ).length() ? 0 : 1;
+		} // end if
+
+	} // end if
+
+	// Data to read?
+	if ( !m_pVs->isRead() )
+		return 1;
+
+	// Attempt to read frame data
+	sqbind::CSqBinary data = m_pVs->ReadData();
+	m_pVs->incReadPtr();
+
+	// Punt if null frame
+	if ( !data.getUsed() )
+		return 1;
+
+	if ( !m_nFrames )
+		m_pServer->setParamStr( m_sRoot + ".status", "Running" );
+
+	// Accumulate totals
+	m_nFrames++;
+	m_nBytes += data.getUsed();
+
+	// Timer tick
+	oex::oexINT64 nTime = oexGetUnixTime();
+	if ( m_nSync != nTime )
+	{
+		// Updating once per second
+		m_nSync = nTime;
+
+		// Check for cancel
+		if ( m_pServer->getParamStr( m_sRoot + ".quit" ).length() )
+		{	fFrameSize = 0; fTo = 0;
+			fPresentationTime.tv_sec = 0;
+			fPresentationTime.tv_usec = 0;
+			afterGetting( this );
+			return 0;
+		} // end if
+
+		// Update status
+		m_pServer->setParamStr( m_sRoot + ".frames", sqbind::oex2std< oex::CStr >( m_nFrames ) );
+		m_pServer->setParamStr( m_sRoot + ".bytes", sqbind::oex2std< oex::CStr >( m_nBytes ) );
+
 	} // end if
 
 	// How much data to send?
-	fFrameSize = pFrame->getUsed();
+	fFrameSize = data.getUsed();
 	if ( fFrameSize > fMaxSize )
 	{	fNumTruncatedBytes = fFrameSize - fMaxSize;
 		fFrameSize = fMaxSize;
 	} // end if
 	else
 		fNumTruncatedBytes = 0;
-	
+
 	// Copy the data
 	// +++ anyway to get out of this???
-//	fTo = (unsigned char*)pFrame->_Ptr();
-	oexMemCpy( fTo, pFrame->Ptr(), fFrameSize );
+//	fTo = (unsigned char*)data._Ptr();
 
+	// Skip NAL header if needed
+	if ( m_bStripNal && 4 < fFrameSize )
+	{
+		oex::oexINT nSkip = 0;
+		unsigned char *p = (unsigned char*)data.Ptr();
+
+		// Look for NAL header
+		if ( 0 == p[ 0 ] && 0 == p[ 1 ] )
+		{	if ( 0x01 == p[ 2 ] )
+				nSkip = 3;
+			else if ( 0x01 == p[ 3 ] )
+				nSkip = 4;
+		} // end if
+
+		// Copy the data
+		fFrameSize -= nSkip;
+		oexMemCpy( fTo, &p[ nSkip ], fFrameSize );
+
+	} // end if
+
+	else
+		oexMemCpy( fTo, data.Ptr(), fFrameSize );
+
+#if defined( oexDEBUG )
+//			oexSHOW( fFrameSize );
+//			oexEcho( oexBinToAsciiHexStr( fTo, fFrameSize, 16, 16 ).Ptr() );
+#endif
+
+	double fps = 15;
 	double dFps = ( 0 < fps && 120 > fps ) ? (double)fps : 30;
 	fDurationInMicroseconds = (unsigned int)( double( 1000000 ) / dFps );
 
 	// Use current time on first frame
 	if ( fPresentationTime.tv_sec == 0 && fPresentationTime.tv_usec == 0 )
-		gettimeofday(&fPresentationTime, NULL);
+		gettimeofday( &fPresentationTime, NULL );
 
 	// Just add the duration
 	else
@@ -166,39 +408,98 @@ void CLvRtspServer::CLiveMediaSource::deliverFrame( oex::CBin *pFrame, int fps )
 		fPresentationTime.tv_usec %= 1000000;
 	} // end else
 
-	// Inform the reader that data is now available:
-
-	// +++ This one crashes, I don't quite get the threading issues here...
-//	envir().taskScheduler().scheduleDelayedTask( 0, (TaskFunc*)FramedSource::afterGetting, this );
+	// We sent a frame
+	m_nNeedFrame = 0;
 
 	afterGetting( this );
+
+	return 1;
 }
 
-CLvRtspServer::CLvRtspServer()
+
+//------------------------------------------------------------------
+// *** CMediaSubsession
+//------------------------------------------------------------------
+
+CMediaSubsession::CMediaSubsession( UsageEnvironment &env, Boolean reuseFirstSource, CLvRtspServer *pServer,
+									const sqbind::stdString &sId, const sqbind::stdString &sName, sqbind::CSqMulti *m )
+	: m_pServer( pServer ), m_sId( sId ), m_sName( sName ), m_mParams( m ),
+	  OnDemandServerMediaSubsession( env, reuseFirstSource )
+{
+}
+
+CMediaSubsession::~CMediaSubsession()
+{
+}
+
+/// Creates a new frame source instance
+FramedSource* CMediaSubsession::createNewStreamSource( unsigned clientSessionId, unsigned& estBitrate )
 {_STT();
+
+	CMediaSource *pMs = new CMediaSource( envir(), m_pServer, m_sId, m_sName, &m_mParams );
+	if ( !pMs )
+		return 0;
+
+	// What codec are we using?
+	sqbind::stdString sCodec = m_mParams[ "codec" ].str();
+
+	// Create a framer for the video stream
+	if ( sCodec == oexT( "H264" ) )
+		return H264VideoStreamDiscreteFramer::createNew( envir(), pMs );
+//		return new H264VideoStreamFramer( envir(), pMs );
+	else if ( sCodec == oexT( "MPG1" ) || sCodec == oexT( "MPG2" ) )
+		return MPEG1or2VideoStreamDiscreteFramer::createNew( envir(), pMs );
+	else
+		return MPEG4VideoStreamDiscreteFramer::createNew( envir(), pMs );
+}
+
+/// Creates a new sink instance
+RTPSink* CMediaSubsession::createNewRTPSink( Groupsock* rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic, FramedSource* inputSource )
+{_STT();
+
+	// Desired frame rate
+	int fps = m_mParams[ "fps" ].toint();
+	if ( 0 >= fps || 60 < fps ) fps = 15;
+
+	// What codec are we using?
+	sqbind::stdString sCodec = m_mParams[ "codec" ].str();
+
+	// Create proper video sink
+	if ( sCodec == oexT( "H264" ) )
+		return H264VideoRTPSink::createNew( envir(), rtpGroupsock, rtpPayloadTypeIfDynamic );
+	else if ( sCodec == oexT( "MPG1" ) || sCodec == oexT( "MPG2" ) )
+		return MPEG1or2VideoRTPSink::createNew( envir(), rtpGroupsock );
+	else
+		return MPEG4ESVideoRTPSink::createNew( envir(), rtpGroupsock, rtpPayloadTypeIfDynamic, 1000000 / fps );
+}
+
+
+//------------------------------------------------------------------
+// *** CLvRtspServer
+//------------------------------------------------------------------
+
+CLvRtspServer::CLvRtspServer()
+{
 	m_nEnd = 0;
-	m_nFrames = 0;
+	m_nPort = 0;
 	m_pEnv = oexNULL;
 	m_pRtspServer = oexNULL;
-	m_pMsgQueue = oexNULL;
-//	m_fDeliverFrame = oexNULL;
-	m_pUserData = oexNULL;
-	m_nPort = 0;
+	m_pUserDb = oexNULL;
+	m_nHttpTunnelPort = -1;
 }
 
 void CLvRtspServer::Destroy()
 {_STT();
-	// Tell thread loop to exit
+
+	// Signal the thread to stop
 	m_nEnd = 1;
 
 	// Stop the thread
 	Stop();
 
+	// Reset stop flag
 	m_nEnd = 0;
-	m_nFrames = 0;
-	m_pEnv = oexNULL;
-	m_pRtspServer = oexNULL;
-	m_nPort = 0;
+
 }
 
 int CLvRtspServer::StartServer( int x_nPort )
@@ -207,30 +508,91 @@ int CLvRtspServer::StartServer( int x_nPort )
 	// Lose the old server
 	Destroy();
 
-	// Must have a non-zero port number
-	if ( !x_nPort )
+	// Must have a valid port number
+	if ( 0 >= x_nPort )
+	{	setLastErrorStr( oexT( "Invalid port number" ) );
 		return 0;
+	} // end if
 
 	// Save port
 	m_nPort = x_nPort;
 
 	// Start the thread
 	if ( Start() )
+	{	setLastErrorStr( oexT( "RTSP Server thread failed to start" ) );
+		Destroy();
 		return 0;
+	} // end if
 
 	// Wait for the thing to init
 	if ( GetInitEvent().Wait( 3000 ) )
+	{	Destroy();
+		if ( !getLastErrorStr().length() )
+			setLastErrorStr( oexT( "RTSP Server thread failed to initialize in 3 seconds" ) );
 		return 0;
+	} // end if
+
+	// Ensure we have a valid server pointer
+	if ( !m_pRtspServer )
+	{	Destroy();
+		if ( !getLastErrorStr().length() )
+			setLastErrorStr( oexT( "Failed to create RTSP Server object" ) );
+		return 0;
+	} // end if
 
 	// Did we get a server?
-	return oexNULL != m_pRtspServer;
+	return 1;
+}
+
+void CLvRtspServer::AddSession( const sqbind::stdString &sId, CMediaSource *pMs )
+{_STT();
+
+	m_sessions[ sId ] = pMs;
+}
+
+void CLvRtspServer::RemoveSession( const sqbind::stdString &sId )
+{_STT();
+
+	t_session_map::iterator it = m_sessions.find( sId );
+	if ( m_sessions.end() != it )
+		m_sessions.erase( it );
+}
+
+void CLvRtspServer::UpdateSessions()
+{_STT();
+
+	// Update each session
+	t_session_map::iterator it = m_sessions.begin();
+	while ( m_sessions.end() != it )
+		if ( it->second && 0 < it->second->Update() )
+			it++;
+		else
+			m_sessions.erase( it++ );
+
+}
+
+void CLvRtspServer::_OnIdle( void *pData )
+{_STT();
+	CLvRtspServer *p = (CLvRtspServer*)pData;
+	if ( p )
+		p->OnIdle();
+}
+
+void CLvRtspServer::OnIdle()
+{_STT();
+
+	// Sends video to each session
+	UpdateSessions();
+
+	// Schedule us to run again
+	if ( !m_nEnd )
+		m_pEnv->taskScheduler().scheduleDelayedTask( 15000, (TaskFunc*)CLvRtspServer::_OnIdle, this );
 }
 
 oex::oexBOOL CLvRtspServer::InitThread( oex::oexPVOID x_pData )
 {_STT();
 
-	// Initialize the video server
-	if ( !ThreadOpen( ) )
+	if ( !ThreadOpen() )
 		return oex::oexFALSE;
 
 	return oex::oexTRUE;
@@ -238,6 +600,7 @@ oex::oexBOOL CLvRtspServer::InitThread( oex::oexPVOID x_pData )
 
 oex::oexBOOL CLvRtspServer::DoThread( oex::oexPVOID x_pData )
 {_STT();
+
 	// Run the thing
 	if ( !m_pEnv )
 		return oex::oexFALSE;
@@ -248,48 +611,46 @@ oex::oexBOOL CLvRtspServer::DoThread( oex::oexPVOID x_pData )
 		m_pEnv->taskScheduler().doEventLoop( &m_nEnd );
 
 	} // end try
+
 	catch( ... )
 	{
 	} // end catch
-
-	oexEcho( "doEventLoop() exited" );
 
 	return oex::oexFALSE;
 }
 
 oex::oexINT CLvRtspServer::EndThread( oex::oexPVOID x_pData )
 {_STT();
-
-	// Close everything
-	ThreadDestroy();
-
-	return 0;
+	return oex::oexTRUE;
 }
 
 void CLvRtspServer::ThreadDestroy()
 {_STT();
 
 	if ( m_pRtspServer )
-		m_pRtspServer->close( m_pRtspServer );
+	{	m_pRtspServer->close( m_pRtspServer );
+		delete m_pRtspServer;
+		m_pRtspServer = oexNULL;
+	} // end if
+
+	if ( m_pUserDb )
+		m_pUserDb = oexNULL;
 
 	if ( m_pEnv )
-		m_pEnv->reclaim();
-
-	m_nFrames = 0;
-	m_pEnv = oexNULL;
-	m_pRtspServer = oexNULL;
+		m_pEnv->reclaim(), m_pEnv = oexNULL;
 }
 
 int CLvRtspServer::ThreadOpen()
 {_STT();
 
-	// Lose old container
+	// Out with the old
 	ThreadDestroy();
+	setLastErrorStr( oexT( "" ) );
 
 	// Setup usage environment
 	TaskScheduler* scheduler = BasicTaskScheduler::createNew();
 	if ( !scheduler )
-	{	oexERROR( 0, oexT( "BasicTaskScheduler::createNew() failed" ) );
+	{	setLastErrorStr( oexT( "BasicTaskScheduler::createNew() failed" ) );
 		ThreadDestroy();
 		return 0;
 	} // end if
@@ -297,219 +658,43 @@ int CLvRtspServer::ThreadOpen()
 	// Create the environment
 	m_pEnv = BasicUsageEnvironment::createNew( *scheduler );
 	if ( !m_pEnv )
-	{	oexERROR( 0, oexT( "BasicUsageEnvironment::createNew() failed" ) );
+	{	setLastErrorStr( oexT( "BasicUsageEnvironment::createNew() failed" ) );
 		ThreadDestroy();
 		return 0;
 	} // end if
 
-	// Authentication module
-	UserAuthenticationDatabase* pUad = oexNULL;
-
-	// Buffer size
-//	OutPacketBuffer::maxSize = 2000000;
-
-		// Create the RTSP server:
-	m_pRtspServer = RTSPServer::createNew( *m_pEnv, m_nPort, pUad );
+	// Create the server
+	m_pRtspServer = CRtspServer::createNew( this, *m_pEnv, m_nPort, m_pUserDb );
 	if ( !m_pRtspServer )
-	{	oexERROR( 0, oexMks( oexT( "RTSPServer::createNew() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) );
+	{	setLastErrorStr( oexT( "CRTSPServer::createNew() failed" ) );
 		ThreadDestroy();
 		return 0;
 	} // end if
 
-	// Prevents race condition with queue
-	m_pEnv->taskScheduler().scheduleDelayedTask( 0, (TaskFunc*)CLvRtspServer::_ProcessMsgs, this );
-
-	return 1;
-}
-
-int CLvRtspServer::Msg( const sqbind::stdString &sParams )
-{_STT();
-
-	oexAutoLock ll( m_lockMsgs );
-	if ( !ll.IsLocked() )
-		return 0;
-
-	if ( !m_pEnv )
-		return 0;
-
-	m_lstMsgs.push_back( sParams );
-
-	m_evtMsgReady.Signal();
-
-	return 1;
-}
-
-void CLvRtspServer::_ProcessMsgs( void *pData )
-{_STT();
-	CLvRtspServer *p = (CLvRtspServer*)pData;
-	if ( p ) p->ProcessMsgs();
-}
-
-void CLvRtspServer::ProcessMsgs()
-{_STT();
-
-	// While there are messages in the queue
-	if ( !m_evtMsgReady.Wait( 0 ) )
-		while ( m_lstMsgs.begin() != m_lstMsgs.end() )
-		{
-			// Message holder
-			sqbind::CSqMulti msg;
-
-			{ // Scope
-
-				oexAutoLock ll( m_lockMsgs );
-				if ( !ll.IsLocked() )
-					return;
-
-				// Get first message
-				msg.deserialize( *m_lstMsgs.begin() );
-
-				// Remove this message from the queue
-				m_lstMsgs.erase( m_lstMsgs.begin() );
-
-			} // end scope lock
-			
-			// Process if valid command
-			if ( msg.isset( "cmd" ) )
-				ProcessMsg( msg[ "cmd" ].str(), &msg );
-
-		} // end while
-
-	// Reset the message signal
-	m_evtMsgReady.Reset();
-
-	// Schedule us to run again
-	if ( !m_nEnd )
-		m_pEnv->taskScheduler().scheduleDelayedTask( 15000, (TaskFunc*)CLvRtspServer::_ProcessMsgs, this );
-
-}
-
-void CLvRtspServer::ProcessMsg( const sqbind::stdString &sCmd, sqbind::CSqMulti *pParams )
-{_STT();
-
-	// Sanity check
-	if ( !sCmd.length() || !pParams )
-		return;
-
-	// CreateStream
-	if ( sCmd == oexT( "CreateStream" ) )
-		CreateStream( (*pParams)[ "id" ].str(), pParams );
-
-	else if ( sCmd == oexT( "CloseStream" ) )
-		CloseStream( (*pParams)[ "id" ].str() );
-
-	// DeliverFrame
-	else if ( sCmd == oexT( "DeliverFrame" ) )
-		DeliverFrame( (*pParams)[ "stream_id" ].str(), (*pParams)[ "frame_id" ].str(),
-					  (*pParams)[ "fps" ].toint() );
-
-}
-
-int CLvRtspServer::CloseStream( const sqbind::stdString &sId )
-{_STT();
-
-	if ( !m_pEnv || !m_pRtspServer || !sId.length() )
-		return 0;
-
-	// Do we have such a session?
-	t_SessionMap::iterator it = m_mapSession.find( sId );
-	if ( m_mapSession.end() == it || !it->second )
-		return 0;
-
-	// Remove from server
-	m_pRtspServer->removeServerMediaSession( it->second->Session() );
-
-	// Drop from the map
-	m_mapSession.erase( it );
-
-	return 1;
-}
-
-int CLvRtspServer::CreateStream( const sqbind::stdString &sId, sqbind::CSqMulti *pParams )
-{_STT();
-
-	if ( !m_pEnv || !m_pRtspServer || !sId.length() )
-		return 0;
-
-	// Create media session
-	sqbind::stdString sDesc = (*pParams)[ "desc" ].str();
-	ServerMediaSession* pSms = ServerMediaSession::createNew( *m_pEnv, sId.c_str(), sId.c_str(), 
-															  sDesc.length() ? sDesc.c_str() : sId.c_str() );
-	if ( !pSms )
-	{	oexERROR( 0, oexMks( oexT( "ServerMediaSession::createNew() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) );
-		ThreadDestroy();
-		return 0;
-	} // end if
-
-	// Add subsession
-	CLiveMediaSubsession *pLms = CLiveMediaSubsession::createNew( *m_pEnv, True, this, pSms, pParams );
-	if ( !pLms || !pSms->addSubsession( pLms ) )
-	{	oexERROR( 0, oexMks( oexT( "ServerMediaSession::addSubsession() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) );
-		ThreadDestroy();
-		return 0;
-	} // end if
-
-	// Add session option to server
-	m_pRtspServer->addServerMediaSession( pSms );
-
-	// Save session pointer
-	m_mapSession[ sId ] = pLms;
-
-	return 1;
-}
-
-int CLvRtspServer::DeliverFrame( const sqbind::stdString &sStreamId, const sqbind::stdString &sFrameId, int fps )
-{_STT();
-
-	// Sanity checks
-	if ( !sStreamId.length() )
-		return 0;
-
-	// Do we have such a session?
-	t_SessionMap::iterator it = m_mapSession.find( sStreamId );
-	if ( m_mapSession.end() == it || !it->second )
-		return 0;
-
-	// Check for a valid frame
-	oex::CBin binFrame;
-	
-	// Frame id?
-	if ( sFrameId.length() ) 
-	{	binFrame = oexGetBin( sFrameId.c_str() );
-		if ( !binFrame.getUsed() )
+	// Do we want to enable HTTP tunneling?
+	if ( 0 <= m_nHttpTunnelPort )
+	{
+		// Attempt to enable tunneling on the specified port
+		if ( !m_pRtspServer->setUpTunnelingOverHTTP( m_nHttpTunnelPort ? m_nHttpTunnelPort : ( m_nPort + 1 ) ) )
+		{	setLastErrorStr( oexT( "CRTSPServer::setUpTunnelingOverHTTP() failed" ) );
+			ThreadDestroy();
 			return 0;
+		} // end if
+
 	} // end if
 
-	// Deliver the frame to the session
-	it->second->queueFrame( &binFrame, fps );
+	// Save the url string
+	setParamStr( oexT( "url" ), m_pRtspServer->rtspURLPrefix() );
 
-	return 1;
+	// Set thread name
+	_STT_SET_NAME( m_pRtspServer->rtspURLPrefix() );
+
+	// Remember tunneling port
+	setParamStr( oexT( "http_tunneling" ), sqbind::oex2std< oex::CStr >( m_nHttpTunnelPort ? m_nHttpTunnelPort : ( m_nPort + 1 ) ) );
+
+	// Start idle loop
+	m_pEnv->taskScheduler().scheduleDelayedTask( 0, (TaskFunc*)CLvRtspServer::_OnIdle, this );
+
+	return oex::oexTRUE;
 }
 
-sqbind::stdString CLvRtspServer::getUrl( const sqbind::stdString &sId )
-{
-	// Sanity checks
-	if ( !sId.length() )
-		return "";
-
-	// Do we have such a session?
-	t_SessionMap::iterator it = m_mapSession.find( sId );
-	if ( m_mapSession.end() == it || !it->second )
-		return "";
-
-	return it->second->getUrl();
-}
-
-int CLvRtspServer::needFrame( const sqbind::stdString &sId )
-{
-	// Sanity checks
-	if ( !sId.length() )
-		return 0;
-
-	// Do we have such a session?
-	t_SessionMap::iterator it = m_mapSession.find( sId );
-	if ( m_mapSession.end() == it || !it->second )
-		return 0;
-
-	return it->second->needFrame();
-}

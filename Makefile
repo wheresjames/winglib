@@ -24,10 +24,10 @@ BUILDDIRS := $(BUILDDIRS) \
 			 app/gstest \
 			 app/irr_android \
 			 app/alink \
-			 app/axtest \
-			 app/fftest
+			 app/axtest
 endif
 
+#			 app/fftest
 #			 tools/cii \
 #			 app/irr_test \
 #			 app/hello_android \

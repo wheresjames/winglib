@@ -1,5 +1,4 @@
 
-_self.load_module( "http", "" );
 _self.load_module( "portaudio", "" );
 _self.load_module( "fftw", "" );
 
@@ -132,9 +131,9 @@ function _init() : ( _g )
 	} // end if
 
 	_g.pa = CPaInput();
-	if ( !_g.pa.Open( 0, _g.pa.getDefaultInputDevice(), 1, 
-//				   CPaInput().paFloat32, 0.2, 44100., 0 ) )
-				   CPaInput().paFloat32, 0.2, 11000., 0 ) )
+	if ( !_g.pa.Open( 1, _g.pa.getDefaultInputDevice(), 1, 
+//				   _self.tFloat, 0.2, 44100., 0 ) )
+				   _self.tFloat, 0.2, 11000., 0 ) )
 	{   _self.echo( "!!! Failed to open input stream : " + _g.pa.getLastError() );
 		WaitKey(); _g.quit = 1; return 0;
 	} // end if
@@ -162,6 +161,7 @@ function Update() : ( _g )
 {
 	// Read the latest data
 	_g.pa.Read( _g.buf, 0 );
+
 	if ( _g.buf.getUsed() )
 	{
 		local fft = CSqBinary();
