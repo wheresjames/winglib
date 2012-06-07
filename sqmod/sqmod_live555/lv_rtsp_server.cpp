@@ -19,7 +19,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CLvRtspServer, CLvRtspServer )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, setParam )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, setParamStr )
 	SQBIND_MEMBER_FUNCTION( CLvRtspServer, SetHttpTunnelingPort )
-//	SQBIND_MEMBER_FUNCTION( CLvRtspServer,  )
+	SQBIND_MEMBER_FUNCTION( CLvRtspServer, isRunning )
 //	SQBIND_MEMBER_FUNCTION( CLvRtspServer,  )
 //	SQBIND_MEMBER_FUNCTION( CLvRtspServer,  )
 //	SQBIND_MEMBER_FUNCTION( CLvRtspServer,  )
@@ -170,7 +170,7 @@ void CClientSession::handleCmd_PLAY( ServerMediaSubsession* subsession, char con
 
 CRtspServer* CRtspServer::createNew( CLvRtspServer *pServer, UsageEnvironment& env, Port ourPort,
 									 UserAuthenticationDatabase* authDatabase, unsigned reclamationTestSeconds )
-{
+{_STT();
 	int ourSocket = setUpOurSocket( env, ourPort );
 	if ( ourSocket == -1 )
 		return 0;
@@ -182,11 +182,11 @@ CRtspServer::CRtspServer( CLvRtspServer *pServer, UsageEnvironment& env, int our
 						  UserAuthenticationDatabase* authDatabase, unsigned reclamationTestSeconds )
 	: m_pServer( pServer ),
 	  RTSPServerSupportingHTTPStreaming( env, ourSocket, ourPort, authDatabase, reclamationTestSeconds )
-{
+{_STT();
 }
 
 CRtspServer::~CRtspServer()
-{
+{_STT();
 }
 
 RTSPServer::RTSPClientSession*
@@ -211,7 +211,7 @@ CMediaSource::CMediaSource( UsageEnvironment& env, CLvRtspServer *pServer,
 	  m_nNeedFrame( 0 ),
 	  m_sRoot( sqbind::stdString( "streams." ) + sId ),
 	  FramedSource( env )
-{
+{_STT();
 	m_nBytes = 0;
 	m_nFrames = 0;
 	m_nSync = 0;
@@ -237,7 +237,7 @@ CMediaSource::CMediaSource( UsageEnvironment& env, CLvRtspServer *pServer,
 
 
 CMediaSource::~CMediaSource()
-{
+{_STT();
 	// Clear stream information
 	if ( m_sRoot.length() )
 	{
@@ -425,11 +425,11 @@ CMediaSubsession::CMediaSubsession( UsageEnvironment &env, Boolean reuseFirstSou
 									const sqbind::stdString &sId, const sqbind::stdString &sName, sqbind::CSqMulti *m )
 	: m_pServer( pServer ), m_sId( sId ), m_sName( sName ), m_mParams( m ),
 	  OnDemandServerMediaSubsession( env, reuseFirstSource )
-{
+{_STT();
 }
 
 CMediaSubsession::~CMediaSubsession()
-{
+{_STT();
 }
 
 /// Creates a new frame source instance
@@ -479,7 +479,7 @@ RTPSink* CMediaSubsession::createNewRTPSink( Groupsock* rtpGroupsock, unsigned c
 //------------------------------------------------------------------
 
 CLvRtspServer::CLvRtspServer()
-{
+{_STT();
 	m_nEnd = 0;
 	m_nPort = 0;
 	m_pEnv = oexNULL;
@@ -605,16 +605,8 @@ oex::oexBOOL CLvRtspServer::DoThread( oex::oexPVOID x_pData )
 	if ( !m_pEnv )
 		return oex::oexFALSE;
 
-	try
-	{
-		// Do the stuff
-		m_pEnv->taskScheduler().doEventLoop( &m_nEnd );
-
-	} // end try
-
-	catch( ... )
-	{
-	} // end catch
+	// Do the stuff
+	m_pEnv->taskScheduler().doEventLoop( &m_nEnd );
 
 	return oex::oexFALSE;
 }
