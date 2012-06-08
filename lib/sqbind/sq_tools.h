@@ -36,6 +36,9 @@
 
 // +++ Fix string conversions to be binary safe
 
+template < typename T >
+	stdString ToStr( T n ) { return oex2std( oex::CStr( n ) ); }
+
 template < typename T_PB, typename T_STD  >
 	void SQBIND_PropertyBagToStd( T_PB &pb, T_STD &m )
 	{	for( oex::CPropertyBag::iterator it; pb.List().Next( it ); )

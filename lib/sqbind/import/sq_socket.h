@@ -37,8 +37,8 @@
 // namespace
 namespace sqbind
 {
-    class CSqSockAddress
-    {
+	class CSqSockAddress
+	{
 	public:
 		SQBIND_CLASS_CTOR_BEGIN( CSqSockAddress )
 			_SQBIND_CLASS_CTOR1( CSqSockAddress, OT_STRING ) ( sqbind::stdString( sa.GetString( 2 ), sq_getsize( x_v, 2 ) ) )
@@ -114,7 +114,7 @@ namespace sqbind
 
 
 	class CSqSocket
-    {
+	{
 	public:
 
 		SQBIND_CLASS_CTOR_BEGIN( CSqSocket )
@@ -148,6 +148,9 @@ namespace sqbind
 
 		/// Connects to the specified address
 		int Connect( const sqbind::stdString &sUrl, int nPort );
+
+		/// Detaches from the socket and returns the os socket handle
+		SQInteger Detach();
 
 		/// Binds the socket to a port
 		int Bind( int nPort );
@@ -256,7 +259,7 @@ namespace sqbind
 		/// Socket class
 		oex::TMem< oex::os::CIpSocket >	m_socket;
 
-    };
+	};
 
 }; // end namespace
 

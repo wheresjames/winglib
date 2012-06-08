@@ -140,6 +140,11 @@ namespace sqbind
 				m_bin.MemCpy( x_ptr, x_size );
 		}
 
+		/// Construct from raw buffer
+		CSqBinary( t_byte *x_ptr, t_size x_size, t_size x_offset, int x_bFree )
+		{	m_bin.setBuffer( x_ptr, x_size, x_offset, x_bFree );
+		}
+
 		/// Registers the class
 		static void Register( sqbind::VM vm );
 

@@ -129,6 +129,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSocket, CSqSocket )
 
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Destroy )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Connect )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Detach )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, CreateUDP )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, setBlockingMode )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Bind )
@@ -206,6 +207,11 @@ int CSqSocket::setBlockingMode( int nEnable )
 int CSqSocket::Connect( const sqbind::stdString &sUrl, int nPort )
 {_STT();
 	return m_socket->Connect( sUrl.c_str(), nPort ) ? 1 : 0;
+}
+
+SQInteger CSqSocket::Detach()
+{_STT();
+	return (SQInteger)m_socket->Detach();
 }
 
 int CSqSocket::Bind( int nPort )
