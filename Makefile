@@ -78,6 +78,7 @@ BUILDDIRS := $(BUILDDIRS) \
              sqmod/sqmod_openssl \
              sqmod/sqmod_poco \
              sqmod/sqmod_portaudio \
+             sqmod/sqmod_rtmpd \
              sqmod/sqmod_ssh2 \
 			 sqmod/sqmod_tinyxml
 

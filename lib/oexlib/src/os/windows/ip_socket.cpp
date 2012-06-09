@@ -654,7 +654,7 @@ void CIpSocket::CloseEventHandle()
 		{
 			WSAEventSelect( (SOCKET)m_hSocket, (WSAEVENT)m_hSocketEvent, 0 );
 			WSAEventSelect( (SOCKET)m_hSocket, (WSAEVENT)0, 0 );
-			ioctlsocket( (SOCKET)m_hSocket, FIONBIO, 0 );
+			unsigned long l = 0; ioctlsocket( (SOCKET)m_hSocket, FIONBIO, &l );
 
 			// Restore socket timeout defaults
 			struct timeval tv;

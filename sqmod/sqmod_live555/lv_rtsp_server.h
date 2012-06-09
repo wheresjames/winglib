@@ -294,6 +294,9 @@ public:
 		m_sLastError = s;
 	}
 
+	/// Returns non-zero if the server thread is running
+	int isRunning() { return CThread::IsRunning(); }
+
 	/** @} */
 
 	/// Returns the useage environment object

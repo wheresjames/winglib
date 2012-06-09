@@ -7,13 +7,13 @@ default_target: all
 #-------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------
-PRJ_NAME := sqmod_live555
-PRJ_DEPS := live555
+PRJ_NAME := sqmod_rtmpd
+PRJ_DEPS := rtmpd
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
-			live555/liveMedia/include live555/UsageEnvironment/include \
-			live555/BasicUsageEnvironment/include live555/groupsock/include
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib live555
+			rtmpd/librtmp
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff \
+			rtmpd openssl_a openssl_b zlib 
 PRJ_DEFS := 
 PRJ_LIBP :=
 PRJ_OSLB :=
@@ -26,6 +26,12 @@ PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 # Configure build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
+
+ifeq ($(PLATFORM),windows)
+	ifeq ($(BUILD),vs)
+		PRJ_INCS := $(PRJ_INCS) $(CFG_LIB2BLD)/dep/etc/vs/inc/c99
+	endif
+endif
 
 #-------------------------------------------------------------------
 # File locations
