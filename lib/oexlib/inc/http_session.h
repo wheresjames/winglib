@@ -1008,7 +1008,7 @@ public:
 	{	m_fnAuthenticate = (PFN_Authenticate)x_fnAuthenticate; m_pAuthData = x_pData; }
 
 	/// Sets a close function
-	void SetCloseCallback( PFN_Authenticate x_fnClose, oexPVOID x_pData )
+	void SetCloseCallback( PFN_Close x_fnClose, oexPVOID x_pData )
 	{	m_fnClose = x_fnClose; m_pCloseData = x_pData; }
 
 	/// +++ Sets a close function
