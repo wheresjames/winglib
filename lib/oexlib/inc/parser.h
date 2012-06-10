@@ -1913,7 +1913,7 @@ public:
 			// Parse string
 			else if ( oexTC( T, '"' ) == ch )
 			{
-				oexLONG l = x_sStr.Length();
+				oexULONG l = x_sStr.Length();
 
 				if ( !lMode )
 					lMode = 1,

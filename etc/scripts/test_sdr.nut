@@ -148,11 +148,10 @@ function OnProcessRequest( params ) : ( _g )
 
 function _init() : ( _g )
 {
-/*
 	local url = _self.get( "/", "cmdline.1" );
 	if ( !url.len() )
 	{	_self.echo( " You must specify the sdr server" );
-		return 0;
+		_g.quit = 1; return 0;
 	} // end if
 
 	// Parse the url
@@ -184,7 +183,7 @@ function _init() : ( _g )
 //	_g.remote.Write( "GET /~~waterstream0\r\n\r\n", 0 );
 //	_g.remote.Write( "GET /~~waterparam?slow=4\r\n\r\n", 0 );
 //	_g.remote.Write( "GET /~~waterparam?band=4&zoom=0&start=0\r\n\r\n", 0 );
-*/
+
 	// Start web server
 	_g.server = CSqHttpServer();
 	_g.server.SetSessionCallback( _self.queue(), "OnProcessRequest" );
@@ -203,7 +202,7 @@ function _init() : ( _g )
 
 	_self.set_timer( ".", 100, "Update" );
 
-/*
+
 	local sps = 9600.;
 	local bsize = ( sps / 10 ).tointeger();
 
@@ -217,7 +216,7 @@ function _init() : ( _g )
 	{   _self.echo( "!!! Failed to start output stream : " + _g.po.getLastError() ); return; }
 
 	_self.echo( "Audio is open" );
-*/
+
 
 	_g.quit = 0;
 

@@ -254,7 +254,7 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 		} // end if
 
 		// Set callback to get close message, we need this to kill the session thread
-		x_pSession->SetCloseCallback( &CSqHttpServer::_OnCloseSession, this );
+		x_pSession->SetCloseCallback( (oex::oexPVOID)CSqHttpServer::_OnCloseSession, this );
 
 	} // end if
 

@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#include <winsock2.h>
+//#include <winsock2.h>
 
 #if defined( _DEBUG )
 	extern "C"
@@ -132,7 +132,7 @@ int CRtmpdSession::Init( sqbind::CSqSocket *pSocket )
 	RTMP_Init( &m_session );
 
 	// Give the rtmpd object control of the socket handle
-	m_session.m_sb.sb_socket = (int)pSocket->Ptr()->Detach();
+	m_session.m_sb.sb_socket = oexPtrToInt( pSocket->Ptr()->Detach() );
 
 	// Attempt handshake
 	if ( !RTMP_Serve( &m_session ) )
@@ -176,7 +176,7 @@ sqbind::CSqBinary CRtmpdSession::getPacketData( int nOffset )
 
 	// Sanity checks
 	if ( !m_nPacketReady || !m_packet.m_body
-		 || 0 > nOffset || nOffset >= m_packet.m_nBodySize )
+		 || 0 > nOffset || (unsigned int)nOffset >= m_packet.m_nBodySize )
 		return sqbind::CSqBinary();
 
 	// Return buffer pointer
@@ -190,7 +190,7 @@ sqbind::CSqMulti CRtmpdSession::getPacket( int nMode )
 
 	// Sanity checks
 	if ( !m_nPacketReady || !m_packet.m_body
-		 || 0 > nOffset || nOffset >= m_packet.m_nBodySize 
+		 || 0 > nOffset || (unsigned int)nOffset >= m_packet.m_nBodySize 
 		 || ( nMode & 0xffff0000 ) )
 		return sqbind::CSqMulti();
 

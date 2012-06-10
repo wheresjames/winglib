@@ -13,7 +13,7 @@ PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 			rtmpd/librtmp
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff \
-			rtmpd openssl_a openssl_b zlib 
+			rtmpd openssl_a openssl_b openssl_a openssl_b zlib 
 PRJ_DEFS := 
 PRJ_LIBP :=
 PRJ_OSLB :=

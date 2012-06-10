@@ -1003,7 +1003,7 @@ public:
 	void SetAuthCallback( PFN_Authenticate x_fnAuthenticate, oexPVOID x_pData )
 	{	m_fnAuthenticate = x_fnAuthenticate; m_pAuthData = x_pData; }
 
-	/// Sets a authentication function
+	/// +++ Sets a authentication function
 	void SetAuthCallback( oexPVOID x_fnAuthenticate, oexPVOID x_pData )
 	{	m_fnAuthenticate = (PFN_Authenticate)x_fnAuthenticate; m_pAuthData = x_pData; }
 
@@ -1011,7 +1011,7 @@ public:
 	void SetCloseCallback( PFN_Authenticate x_fnClose, oexPVOID x_pData )
 	{	m_fnClose = x_fnClose; m_pCloseData = x_pData; }
 
-	/// Sets a close function
+	/// +++ Sets a close function
 	void SetCloseCallback( oexPVOID x_fnClose, oexPVOID x_pData )
 	{	m_fnClose = (PFN_Close)x_fnClose; m_pCloseData = x_pData; }
 
