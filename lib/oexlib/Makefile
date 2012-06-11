@@ -20,6 +20,13 @@ ifeq ($(OS),android)
 	PRJ_DEFS := $(PRJ_DEFS) SQLITE_NO_SYNC
 endif
 
+# +++ src/os/posix/sys_util.cpp:495:4: error: i_cpuid() inconsistent operand constraints in an ‘asm’
+ifneq ($(PLATFORM),windows)
+	ifeq ($(PROC),x64)
+		PRJ_DEFS := $(PRJ_DEFS) OEX_NO_CPUID
+	endif
+endif
+
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------

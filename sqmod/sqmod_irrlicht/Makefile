@@ -61,7 +61,7 @@ endif
 #_IRR_USE_WINDOWS_CE_DEVICE_
 ifeq ($(PLATFORM),posix)
 	ifneq ($(PROC),arm)
-		PRJ_OSLB := X11 GLU Xxf86vm
+		PRJ_OSLB := X11 GL GLU Xxf86vm
 	endif
 #	PRJ_DEFS := $(PRJ_DEFS) _IRR_USE_LINUX_DEVICE_ _IRR_COMPILE_WITH_X11_
 else

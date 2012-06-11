@@ -37,8 +37,8 @@ ifeq ($(BUILD)-$(PROC),vs-x64)
 else
 
 ifeq ($(PLATFORM)-$(PROC),posix-x64)
-UNSUPPORTED :=  $(PLATFORM)-$(PROC), for whatever stupid reason, this isn't working atm
-include $(PRJ_LIBROOT)/unsupported.mk
+	UNSUPPORTED :=  $(PLATFORM)-$(PROC), for whatever stupid reason, this isn't working atm
+	include $(PRJ_LIBROOT)/unsupported.mk
 else
 
 ifeq ($(PLATFORM),windows)
