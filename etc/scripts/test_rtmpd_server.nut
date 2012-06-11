@@ -18,7 +18,10 @@ function _init() : ( _g )
 	local ts = CSqTime(); ts.GetLocalTime();
 	local rtmp = CRtmpdSession();
 	local ver = rtmp.getLibVersion();
-	_self.echo( "... LIB VERSION : " + ( ( ver & 0xffff0000 ) >> 16 ) + "." + ( ver & 0xffff ) + "\n" );
+	_self.echo( "... LIB VERSION : " 
+					+ ( ( ver & 0xffff0000 ) >> 16 ) 
+					+ "." + ( ( ver & 0xff00 ) >> 8 ) 
+					+ "." + ( ver & 0xff ) + "\n" );
 	if ( !rtmp.StartDebugLog( _self.root( "rtmpd-" + ts.FormatTime( "%Y%c%d-%g%m%s" ) ) ) )
 	{	_self.echo( "StartDebugLog() : " + rtmp.getLastErrorStr() );
 		return 0;

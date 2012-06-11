@@ -84,11 +84,13 @@ function Run() : ( _g )
 
 	_self.echo( "... ReadPacket() : " + ret );
 
+	// Connection closed?
 	if ( 0 > ret )
 	{	_g.quit = 1;
 		return 0;
 	} // end if
 
+	// No packet
 	else if ( !ret )
 		return 0;
 
@@ -99,7 +101,6 @@ function Run() : ( _g )
 	_self.echo( data.AsciiHexStr( 16, 32 ) );
 
 	local pkt = _g.rtmp.getPacket( 0 );
-	_self.echo( "n = " + pkt.size() );
 	_self.echo( "\n --- PACKET ---\n" + pkt.print_r( 1 ) );
 
 	return 1;

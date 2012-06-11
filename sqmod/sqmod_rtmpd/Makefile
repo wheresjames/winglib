@@ -30,6 +30,8 @@ include $(PRJ_LIBROOT)/config.mk
 ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),vs)
 		PRJ_INCS := $(PRJ_INCS) $(CFG_LIB2BLD)/dep/etc/vs/inc/c99
+	else
+		PRJ_OSLB := $(PRJ_OSLB) winmm 
 	endif
 endif
 
