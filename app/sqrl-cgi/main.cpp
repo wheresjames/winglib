@@ -2,6 +2,12 @@
 #include "stdafx.h"
 #include "stdio.h"
 
+// Terminal comes up in text mode on windows
+#if defined( _WIN32 ) || defined( WIN32 )
+#	include <io.h>
+#	include <fcntl.h>
+#endif
+
 /*
 	you put your eyes in your pocket,
 	and your nose on the ground,
@@ -31,12 +37,12 @@ int run( oex::CPropertyBag &pbCmdLine )
 		// Raw script on the command line?
 		if ( pbCmdLine.IsKey( "s" ) )
 			bFile = oex::oexFALSE, sCmd = pbCmdLine[ "s" ].ToString();
-		
+
 		else if ( pbCmdLine.IsKey( "script" ) )
 			bFile = oex::oexFALSE, sCmd = pbCmdLine[ "script" ].ToString();
-			
+
 		else
-		{	
+		{
 			// Look for a .cfg file
 			oex::CStr sSettings = oexGetModuleFileName() << oexT( ".cfg" );
 			if ( oex::CFile::Exists( sSettings.Ptr() ) )
@@ -65,7 +71,7 @@ int run( oex::CPropertyBag &pbCmdLine )
 				} // end if
 
 			} // end else
-			
+
 		} // end else
 
 	} // end if
@@ -73,7 +79,7 @@ int run( oex::CPropertyBag &pbCmdLine )
 	// Stdin?
 	if ( !sCmd.Length() )
 		sCmd = oexReadStdin(), bFile = oex::oexFALSE;
-	
+
 	// Do we have a script
 	if ( !sCmd.Length() )
 		return oexERROR( -1, oexT( "Script not specified" ) );
@@ -123,7 +129,7 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 	// Process the script
 	if ( bInline )
-	{	
+	{
 		// Initialize the engine
 		if ( !g_psqScriptThread->InitEngine() || !g_psqScriptThread->GetEngine()->Init() )
 			return oexERROR( -5, oexT( "Engine failed to initialize" ) );
@@ -138,8 +144,8 @@ int run( oex::CPropertyBag &pbCmdLine )
 		oexEcho( sRet.c_str(), sRet.length() );
 
 	} // end if
-	
-	else 
+
+	else
 	{
 		// Start the thread
 		if ( g_psqScriptThread->Start() )
@@ -156,7 +162,7 @@ int run( oex::CPropertyBag &pbCmdLine )
 			oexSleep( 100 );
 
 		} // end while
-		
+
 	} // end else
 
 	oexNOTICE( 0, oexT( "Script thread has terminated" ) );
@@ -181,20 +187,20 @@ int run(int argc, char* argv[])
 
 	// Check for version request
 	if ( pbCmdLine.IsKey( oexT( "version" ) ) )
-	{	oexEcho( oexVersion().Ptr() );		
+	{	oexEcho( oexVersion().Ptr() );
 		pbCmdLine.Destroy();
 	    oexUNINIT();
-		return 0;					  
+		return 0;
 	} // end if
 
 	// Check for version request
 	else if ( pbCmdLine.IsKey( oexT( "build" ) ) )
-	{	oexEcho( oexBuild().Ptr() );		
+	{	oexEcho( oexBuild().Ptr() );
 		pbCmdLine.Destroy();
 	    oexUNINIT();
-		return 0;					  
+		return 0;
 	} // end if
-	
+
 	// Enable crash reporting
 	_STT_SET_NAME( oexT( "Main Thread" ) );
 	oexEnableCrashReporting( oexNULL, oexT( "logs" ) );
@@ -231,6 +237,13 @@ int run(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
+#if defined( _WIN32 ) || defined( WIN32 )
+
+	// Ensure stdout is in binary mode
+	_setmode( fileno( stdout ), O_BINARY );
+
+#endif
+
     // Initialize the oex library
 	oexINIT();
 
