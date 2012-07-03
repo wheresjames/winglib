@@ -15,6 +15,7 @@ extern "C"
 	#include "libavformat/avformat.h"
 	#include "libavdevice/avdevice.h"
 	#include "libswscale/swscale.h"
+	#include "libavutil/opt.h"
 };
 
 #define FFSQ_VIDEO2

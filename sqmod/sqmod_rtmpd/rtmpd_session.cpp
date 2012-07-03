@@ -342,7 +342,15 @@ int CRtmpdSession::SerializeValue( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, 
 
 		// Array?
 		if ( m->size() )
-			nType = AMF_OBJECT;
+		{
+			// +++ Just from what I have to go on atm
+			if ( _IN_OBJECT & nMode )
+//				nType = AMF_ECMA_ARRAY;
+				nType = AMF_STRICT_ARRAY;
+			else
+				nType = AMF_OBJECT;
+
+		} // end if
 
 		else
 		{
@@ -429,9 +437,12 @@ int CRtmpdSession::SerializeValue( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, 
 				return 0;
 
 			// Ensure space for string
+			bin->setUsed( i );
 			if ( ( i + 3 + l ) > bin->Size() )
-				if ( !bin->Allocate( i + 3 + l + _MIN_PACKET_SIZE ) )
+				if ( !bin->Resize( i + 3 + l + _MIN_PACKET_SIZE ) )
 					return 0;
+				else
+					p = bin->Mem()._Ptr();
 
 			// String length
 			*(unsigned short*)&p[ i ] = oex::os::CIpSocket::hton_s( pm->str().length() ); i += 2;
@@ -444,7 +455,15 @@ int CRtmpdSession::SerializeValue( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, 
 
 		} break;
 
-		// STRING
+		// ARRAY
+		case AMF_STRICT_ARRAY :
+		case AMF_ECMA_ARRAY :
+
+			// +++ Array length 0?
+			*(unsigned int*)&p[ i ] = oex::os::CIpSocket::hton_l( 1 ); i += 4;
+			p[ i++ ] = AMF_OBJECT;
+
+		// OBJECT
 		case AMF_OBJECT :
 
 			// Write data into string
@@ -456,9 +475,12 @@ int CRtmpdSession::SerializeValue( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, 
 					return 0;
 
 				// Ensure space for Key
+				bin->setUsed( i );
 				if ( ( i + 3 + l ) > bin->Size() )
 					if ( !bin->Allocate( i + 3 + l + _MIN_PACKET_SIZE ) )
 						return 0;
+					else
+						p = bin->Mem()._Ptr();
 
 				// Key length
 				*(unsigned short*)&p[ i ] = oex::os::CIpSocket::hton_s( it->first.length() ); i += 2;
@@ -515,7 +537,7 @@ int CRtmpdSession::SerializePacket( sqbind::CSqBinary *bin, sqbind::CSqMulti *m,
 
 int CRtmpdSession::SendPacket( sqbind::CSqMulti *m, int nQueue )
 {
-	// Sanityc checks
+	// Sanity checks
 	if ( !m || !m->size() || !m->isset( "pkt" ) )
 		return 0;
 
@@ -527,24 +549,28 @@ int CRtmpdSession::SendPacket( sqbind::CSqMulti *m, int nQueue )
 	oexZero( m_packet );
 
 	// Initialize packet headers
-	m_packet.m_nChannel = (*m)[ "pkt" ][ "channel" ].toint();
-	m_packet.m_headerType = (*m)[ "pkt" ][ "header_type" ].toint();
-	m_packet.m_packetType = (*m)[ "pkt" ][ "packet_type" ].toint();
+	m_packet.m_nChannel = (*m)[ "pkt" ][ "chunk_stream_id" ].toint();
+	m_packet.m_headerType = (*m)[ "pkt" ][ "format" ].toint();
+	m_packet.m_packetType = (*m)[ "pkt" ][ "type_id" ].toint();
 	m_packet.m_nTimeStamp = (*m)[ "pkt" ][ "timestamp" ].toint();
-	m_packet.m_nInfoField2 = (*m)[ "pkt" ][ "infofield2" ].toint();
+	m_packet.m_nInfoField2 = (*m)[ "pkt" ][ "info" ].toint();
 	m_packet.m_hasAbsTimestamp = (*m)[ "pkt" ][ "has_abs_timestamp" ].toint();
 
 	sqbind::CSqBinary body;
 	if ( !body.Allocate( RTMP_MAX_HEADER_SIZE + 1024 ) )
 		return 0;
-	
-	// Apparently, somewhere, RTMP_SendPacket() reaches backward 
+
+	// Apparently, somewhere, RTMP_SendPacket() reaches backward
 	// in the buffer, and apparently, it's by design.
 	// I'm not sure how to feel about that ...
 	body.setUsed( RTMP_MAX_HEADER_SIZE );
 
+	// Is it a raw buffer?
+	if ( m->isset( "body" ) )
+		body.appendString( (*m)[ "body" ].str() );
+
 	// Serialize our data
-	if ( !SerializePacket( &body, m, 0 ) )
+	else if ( !SerializePacket( &body, m, 0 ) )
 		return 0;
 
 	// Point the packet at the encoded variables

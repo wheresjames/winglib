@@ -1,7 +1,7 @@
 
 if ( _self.load_module( "ffmpeg", "" ) )
 	_self.echo( "FFMPEG Failed to load" );
-	
+
 if ( _self.load_module( "freetype2", "" ) )
 	_self.echo( "Freetype library failed to load" );
 
@@ -18,7 +18,7 @@ class CGlobal
 	enc = 0;
 	share = 0;
 	frame = 0;
-	
+
 	ft = 0;
 	font = 0;
 
@@ -60,7 +60,7 @@ function _init() : ( _g )
 
 	// Frame buffer
 	_g.frame = CSqBinary();
-	
+
 	return 0;
 }
 
@@ -135,15 +135,23 @@ function StartStream( params ) : ( _g )
 	local fmt = p[ "codec" ].str();
 	local pix = CFfConvert().PIX_FMT_YUV420P;
 	if ( fmt == "MJPG" ) pix = CFfConvert().PIX_FMT_YUVJ420P;
+	else if ( fmt == "MPG4" ) fmt = "FMP4";
 
 	// Create the encoder
 	_g.enc = CFfEncoder();
 	local q = p[ "q" ].toint(); if ( 0 >= q ) q = 5;
-	if ( !_g.enc.Create( CFfDecoder().LookupCodecId( fmt ), 
+	if ( !_g.enc.Create( CFfDecoder().LookupCodecId( fmt ),
 						 pix, _g.w, _g.h, _g.fps 0, CSqMulti( "quality=" + q ) ) )
 	{	::_self.echo( "Unable to create codec : " + fmt );
 		_g.quit = 1; return 0;
 	} // end if
+
+	// Packet header?
+	if ( p[ "header" ].len() )
+		_g.enc.setHeader( p[ "header" ].bin() );
+
+	// Set extra data into header
+	p[ "extra" ] <- _g.enc.getExtraData().getString();
 
 	// Choose reasonable buffer sizes
 	local bufsz = _g.w * _g.h * _g.fps * _g.maxbuf * 2;
@@ -154,10 +162,11 @@ function StartStream( params ) : ( _g )
 	{
 		// Video container
 		_g.vid = CFfContainer();
-		local url = "memshare://" + p[ "sid" ].str() 
-					+ "?size=" + bufsz 
+		local url = "memshare://" + p[ "sid" ].str()
+					+ "?size=" + bufsz
 					+ "&buffers=" + buffers
-					+ "&max_packet_size=1024";
+					+ "&max_packet_size=1024"
+					+ "&headers=" + _self.urlencode( p.getJSON() );
 		if ( !_g.vid.Create( url, p[ "type" ].str(), CSqMulti() ) )
 		{	::_self.echo( "Failed to create video container : " + p[ "type" ].str() );
 			_g.quit = 1; return 0;
@@ -165,7 +174,7 @@ function StartStream( params ) : ( _g )
 		} // end if
 
 		// Add video stream
-		if ( 0 > _g.vid.AddVideoStream( CFfDecoder().LookupCodecId( fmt ), 
+		if ( 0 > _g.vid.AddVideoStream( CFfDecoder().LookupCodecId( fmt ),
 										_g.img.getWidth(), _g.img.getHeight(), _g.fps ) )
 		{	::_self.echo( "Failed to add video stream : " + fmt );
 			_g.quit = 1; return 0;
@@ -186,12 +195,12 @@ function StartStream( params ) : ( _g )
 	{
 		// Memory share
 		_g.share = CSqFifoShare();
-		if ( !_g.share.Create( p[ "sid" ].str(), "", bufsz, buffers, params ) )
+		if ( !_g.share.Create( p[ "sid" ].str(), "", bufsz, buffers, p.getJSON() ) )
 		{	::_self.echo( "Failed to open output share : " + p[ "share" ].str() );
 			_g.quit = 1; return 0;
 		} // end if
 
-	} //end if	
+	} //end if
 
 	// Set frame timer
 	_self.set_timer( ".", 1000 / _g.fps, "Run" );
@@ -214,8 +223,8 @@ function Run() : ( _g )
 	if ( diff > _g.fps * _g.maxbuf )
 	{	//_self.print( " " + reads + "/" + writes );
 		_self.echo( "Reader quit caring :(" );
-		_g.quit = 1; 
-		return 0; 
+		_g.quit = 1;
+		return 0;
 	} // end if
 
 //	_self.print( " " + reads + "/" + writes );
@@ -247,16 +256,21 @@ function Run() : ( _g )
 
 	// Attempt to encode the frame
 	local inf = CSqMulti();
-	if ( 0 >= _g.enc.Encode( CFfConvert().PIX_FMT_BGR24, 
+	if ( 0 >= _g.enc.Encode( CFfConvert().PIX_FMT_BGR24,
 							 _g.w, -_g.h, _g.pix, _g.frame, inf ) )
-		return 0; 
+{
+_self.echo( "??? = " + inf[ "pts" ].toint() );
+		return 0;
+} // end if
 
+_self.echo( "pts = " + inf[ "pts" ].toint() + ", fsz = " + _g.frame.getUsed() );
+		
 	// Write to container
 	if ( _g.vid )
 	{
 		// Attempt to write the frame
-		if ( !_g.vid.WriteVideoFrame( _g.frame, _g.frame_time + _g.fps, _g.frame_time, inf ) )
-//		if ( !_g.vid.WriteVideoFrame( _g.frame, 0, 0, inf ) )
+//		if ( !_g.vid.WriteVideoFrame( _g.frame, _g.frame_time + _g.fps, _g.frame_time, inf ) )
+		if ( !_g.vid.WriteVideoFrame( _g.frame, inf[ "pts" ].toint(), inf[ "pts" ].toint(), inf ) )
 			_g.quit = 1;
 
 		// Update frame time

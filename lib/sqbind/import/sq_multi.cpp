@@ -337,6 +337,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_up )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_down )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, value )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_def )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_limit )
@@ -1070,9 +1071,19 @@ CSqMulti::t_Obj CSqMulti::_print_r( int nShowVals, t_List &rLst, int nDepth )
 		{
 			// Is default value present?
 			if ( it->second.m_val.str().length() )
-//				sRet += oexT( "[ " ),
-				sRet += ( nShowVals ? it->second.m_val.str() : oexT( "..." ) );
-//				sRet += oexT( " ]" );
+				switch( nShowVals )
+				{	default :
+						sRet += oexT( "..." );
+						break;
+					case 1 :
+						sRet += it->second.m_val.str();
+						break;
+					case 2 :
+						sRet += oexNL;
+						sRet += CSqBinary( it->second.m_val.str() ).AsciiHexStr( 16, 16 );
+						break;
+				} // end switch
+
 			sRet += oexNL;
 			if ( nDepth ) sRet += tab( nDepth );
 			sRet += oexT( " [ " );
@@ -1086,7 +1097,18 @@ CSqMulti::t_Obj CSqMulti::_print_r( int nShowVals, t_List &rLst, int nDepth )
 		} // end if
 		else
 		{
-			sRet += ( nShowVals ? it->second.m_val.str() : oexT( "..." ) );
+			switch( nShowVals )
+			{	default :
+					sRet += oexT( "..." );
+					break;
+				case 1 :
+					sRet += it->second.m_val.str();
+					break;
+				case 2 :
+					sRet += oexNL;
+					sRet += CSqBinary( it->second.m_val.str() ).AsciiHexStr( 16, 16 );
+					break;
+			} // end switch
 			sRet += oexNL;
 		} // end else
 

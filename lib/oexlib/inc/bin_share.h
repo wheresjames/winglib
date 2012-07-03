@@ -34,6 +34,22 @@
 
 #pragma once
 
+#define OEX_CBIN_DECLARE_INT_TYPE_ACCESS( t )										\
+	t_size findMasked##t( oex##t val, oex##t mask, t_size x_nStart, t_size x_nMax )	\
+	{	if ( !x_nMax ) x_nMax = getUsed();											\
+		else																		\
+		{	x_nMax += x_nStart;														\
+			if ( x_nMax > getUsed() ) x_nMax = getUsed();							\
+		}																			\
+		if ( x_nMax < sizeof( oex##t ) ) return failed();							\
+		x_nMax -= sizeof( oex##t );													\
+		while( x_nStart <= x_nMax )													\
+			if ( ( mask & *( (oex##t*)Ptr( x_nStart ) ) ) == val )					\
+				return x_nStart;													\
+			else x_nStart++;														\
+		return failed();															\
+	}
+
 #define OEX_CBIN_DECLARE_TYPE_ACCESS( t )											\
 	oex##t get##t( t_size x_nOffset )												\
 	{	x_nOffset = x_nOffset * sizeof( oex##t );									\
@@ -672,6 +688,9 @@ public:
 	/// Threshold values
 	oexUINT Threshold( oexINT nType, oexUINT uOffset, oexUINT uSamples, oexUINT uE, oexDOUBLE dUpper, oexDOUBLE dUpperDef, oexDOUBLE dLower, oexDOUBLE dLowerDef );
 
+	/// Randomizes the specified range
+	t_size Randomize( int nStart, int nEnd );
+
 	/// Declare access types
 	OEX_CBIN_DECLARE_TYPE_ACCESS( CHAR );
 	OEX_CBIN_DECLARE_TYPE_ACCESS( UCHAR );
@@ -686,6 +705,18 @@ public:
 	OEX_CBIN_DECLARE_TYPE_ACCESS( FLOAT );
 	OEX_CBIN_DECLARE_TYPE_ACCESS( DOUBLE );
 	OEX_CBIN_DECLARE_TYPE_ACCESS( PVOID );
+
+	// Int types only
+	OEX_CBIN_DECLARE_INT_TYPE_ACCESS( CHAR );
+	OEX_CBIN_DECLARE_INT_TYPE_ACCESS( UCHAR );
+	OEX_CBIN_DECLARE_INT_TYPE_ACCESS( SHORT );
+	OEX_CBIN_DECLARE_INT_TYPE_ACCESS( USHORT );
+	OEX_CBIN_DECLARE_INT_TYPE_ACCESS( INT );
+	OEX_CBIN_DECLARE_INT_TYPE_ACCESS( UINT );
+	OEX_CBIN_DECLARE_INT_TYPE_ACCESS( LONG );
+	OEX_CBIN_DECLARE_INT_TYPE_ACCESS( ULONG );
+	OEX_CBIN_DECLARE_INT_TYPE_ACCESS( INT64 );
+	OEX_CBIN_DECLARE_INT_TYPE_ACCESS( UINT64 );
 
 	/// Base64 encodes data
 	CStr8 base64_encode();

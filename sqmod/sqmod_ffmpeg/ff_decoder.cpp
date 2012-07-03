@@ -472,6 +472,7 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 
 static AVCodecTag g_ff_codec_map[] =
 {
+    { CODEC_ID_MPEG4,			MKTAG('M', 'P', 'G', '4') },
     { CODEC_ID_MPEG4,			MKTAG('M', 'P', '4', 'V') },
 
 	{ CODEC_ID_NONE,			0 }

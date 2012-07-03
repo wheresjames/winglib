@@ -16,6 +16,12 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfEncoder, CFfEncoder )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, getPktDts )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, getPktPts )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, getPts )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, getExtraData )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, setHeader )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, getHeader )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, calcPts )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, getFrame )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, setFrame )
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CFfEncoder );
@@ -29,6 +35,8 @@ CFfEncoder::CFfEncoder()
 {_STT();
 
 	m_nFmt = 0;
+	m_nFps = 0;
+	m_nFrame = 0;
 	m_pCodec = oexNULL;
 	m_pCodecContext = oexNULL;
 	m_pStream = oexNULL;
@@ -61,6 +69,7 @@ void CFfEncoder::Destroy()
 	} // end if
 
 	m_nFmt = 0;
+	m_nFrame = 0;
 	m_pCodec = oexNULL;
 	m_pOutput = oexNULL;
 	m_pCodecContext = oexNULL;
@@ -79,20 +88,24 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	// Lose previous codec
 	Destroy();
 
-	if ( 0 >= width || 0 >= height )
+	// Sanity checks
+	if ( 0 >= width || 0 >= height || 0 >= fps )
 		return 0;
 
+	// Find an encoder
 	m_pCodec = avcodec_find_encoder( (CodecID)x_nCodec );
 	if ( !m_pCodec )
 	{	// oexERROR( 0, oexMks( oexT( "avcodec_find_encoder() failed to find codec for id : " ), (int)x_nCodec ) );
 		return 0;
 	} // end if
 
+	// Initialize codec context
 	m_pCodecContext = avcodec_alloc_context();
 	if ( !m_pCodecContext )
 	{	oexERROR( 0, oexT( "avcodec_alloc_context() failed" ) );
 		Destroy();
-		return 0;
+		return
+		0;
 	} // end if
 
 	// Can't have a bit rate of zero
@@ -107,7 +120,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	m_pCodecContext->bit_rate_tolerance = brate / 5;
 	m_pCodecContext->width = width;
 	m_pCodecContext->height = height;
-	m_pCodecContext->gop_size = ( 0 < fps ) ? fps : 12;
+	m_pCodecContext->gop_size = fps;
 	m_pCodecContext->time_base.den = fps;
 	m_pCodecContext->time_base.num = 1;
 	m_pCodecContext->me_method = 1;
@@ -117,18 +130,28 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	// Special h264 defaults
 	if ( CODEC_ID_H264 == m_pCodecContext->codec_id )
 	{
-/*		m_pCodecContext->me_range = 16;
-		m_pCodecContext->max_b_frames = 1;
-		m_pCodecContext->max_qdiff = 4;
+		m_pCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
+/*
+		m_pCodecContext->coder_type = 0;
+		m_pCodecContext->max_b_frames = 0;
+		m_pCodecContext->slices = 8;
+
+		m_pCodecContext->me_cmp |= 1;
+		m_pCodecContext->me_method = ME_HEX;
+		m_pCodecContext->me_subpel_quality = 6;
+		m_pCodecContext->me_range = 16;
+		m_pCodecContext->keyint_min = 15;
 		m_pCodecContext->qmin = 10;
 		m_pCodecContext->qmax = 51;
 		m_pCodecContext->qcompress = 0.6f;
-		m_pCodecContext->me_method = 2;
-		m_pCodecContext->me_range = 16;
-*/
+//		m_pCodecContext->me_method = 2;
+
+		av_opt_set_int( m_pCodecContext, "rc-lookahead", 0, 0 );
+//		av_opt_set_int( m_pCodecContext, "slice-max-size", 1024, 0 );
+
 
 		// For x264 / Don't ask me, i haven't a clue
-
+/*
 		m_pCodecContext->refs = 3; // i_frame_reference
 		m_pCodecContext->me_range = 16; // i_me_range
 		m_pCodecContext->qmin = 10; // i_qp_min
@@ -151,6 +174,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 //		m_pCodecContext->flags = m_pCodecContext->flags & ~CODEC_FLAG_PASS1; // clear param->rc.b_stat_write
 //		m_pCodecContext->flags = m_pCodecContext->flags & ~CODEC_FLAG_PASS2; // clear param->rc.b_stat_read
 		m_pCodecContext->max_b_frames = 0;
+//		m_pCodecContext->rc_lookahead = 0;
 //		m_pCodecContext->partitions = X264_PART_I4X4 | X264_PART_I8X8 | X264_PART_P8X8 | X264_PART_B8X8;
 //		m_pCodecContext->flags2 = m_pCodecContext->flags2 & ~CODEC_FLAG2_8X8DCT; // set b_transform_8x8 true
 		m_pCodecContext->me_subpel_quality = 7; // i_subpel_refine
@@ -171,13 +195,33 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 		//m_pCodecContext->flags = m_pCodecContext->flags & ~CODEC_FLAG_GLOBAL_HEADER; // b_repeat_headers=1
 //		m_pCodecContext->flags = m_pCodecContext->flags | CODEC_FLAG_GLOBAL_HEADER; // b_repeat_headers=0
 
+		// Real-time
+/*
+            param->rc.i_lookahead = 0;
+            param->i_sync_lookahead = 0;
+            param->i_bframe = 0;
+            param->b_sliced_threads = 1;
+            param->b_vfr_input = 0;
+            param->rc.b_mb_tree = 0;
+*/
+
+		// [ffmpeg zerolatency]
+		m_pCodecContext->profile |= FF_PROFILE_H264_CONSTRAINED;
+		m_pCodecContext->level = 13;
+		av_opt_set( m_pCodecContext->priv_data, "profile", "baseline", 0 );
+		av_opt_set( m_pCodecContext->priv_data, "preset", "veryfast", 0 );
+		av_opt_set( m_pCodecContext->priv_data, "tune", "zerolatency", 0 );
+		av_opt_set( m_pCodecContext->priv_data, "x264opts", "no-mbtree:sliced-threads:sync-lookahead=0", 0 );
+
+//oexSHOW( m_pCodecContext->level );
+
 	} // end if
 
 #define M_DEF( k, f ) if ( m->isset( oexT( #k ) ) ) m_pCodecContext->k = (*m)[ oexT( #k ) ].f()
 
 	if ( m && m->size() )
 	{
-		if ( m->isset( oexT( "codec_type" ) ) ) 
+		if ( m->isset( oexT( "codec_type" ) ) )
 			m_pCodecContext->codec_type = (AVMediaType)(*m)[ oexT( "codec_type" ) ].toint();
 
 		M_DEF( bit_rate_tolerance,		toint );
@@ -215,7 +259,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	if ( m && m->isset( oexT( "quality" ) ) )
 	{
 		float q = (*m)[ oexT( "quality" ) ].tofloat();
-		if ( .1 > q ) 
+		if ( .1 > q )
 			q = 5;
 		else if ( 30 < q )
 			q = 20;
@@ -226,10 +270,10 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 		m_pCodecContext->qmin = m_pCodecContext->qmax = q;
 
-		m_pCodecContext->mb_lmin = m_pCodecContext->lmin = 
+		m_pCodecContext->mb_lmin = m_pCodecContext->lmin =
 			m_pCodecContext->qmin * FF_QP2LAMBDA;
 
-		m_pCodecContext->mb_lmax = m_pCodecContext->lmax = 
+		m_pCodecContext->mb_lmax = m_pCodecContext->lmax =
 			m_pCodecContext->qmax * FF_QP2LAMBDA;
 
 		m_pCodecContext->flags |= CODEC_FLAG_QSCALE;
@@ -246,6 +290,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	} // end if
 
 	m_nFmt = fmt;
+	m_nFps = fps;
 
 	return 1;
 }
@@ -272,7 +317,8 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 		return 0;
 
 	// How much room could we possibly need
-	if ( (int)out->Size() < ( nSize << 1 ) && !out->Allocate( ( nSize << 1 ) ) )
+	int nHeader = m_header.getUsed();
+	if ( (int)out->Size() < nHeader + ( nSize << 1 ) && !out->Allocate( nHeader + ( nSize << 1 ) ) )
 		return 0;
 
 	AVFrame *paf = avcodec_alloc_frame();
@@ -304,25 +350,31 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 	else
 		paf->quality = m_pCodecContext->global_quality;
 
-	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->_Ptr(), out->Size(), paf );
-//	if ( !nBytes ) nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->Ptr(), out->Size(), paf );
+	// Copy the header
+	if ( 0 < nHeader )
+		out->Copy( &m_header );
+
+	// Calculate pts
+	paf->pts = calcPts();
+
+	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->_Ptr( nHeader ), out->Size() - nHeader, paf );
 	if ( 0 > nBytes )
 	{	oexERROR( nBytes, oexT( "avcodec_encode_video() failed" ) );
 		out->setUsed( 0 );
 		av_free( paf );
 		return 0;
 	} // end if
-	
+
 	if ( m )
 	{
 		// Save key frame information
 		int flags = (*m)[ oexT( "flags" ) ].toint();
 		(*m)[ oexT( "flags" ) ]
-			.set( sqbind::oex2std( oexMks( ( m_pCodecContext->coded_frame->key_frame ) 
+			.set( sqbind::oex2std( oexMks( ( m_pCodecContext->coded_frame->key_frame )
 										  ? ( flags | AV_PKT_FLAG_KEY )
 										  : ( flags & ~AV_PKT_FLAG_KEY ) ) ) );
-		(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_pts ) ) );
-		(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_dts ) ) );
+		(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( paf->pts ) ) );
+//		(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_dts ) ) );
 //		if ( m_pCodecContext->pkt )
 //			(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->pkt->pts ) ) ),
 //			(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->pkt->dts ) ) );
@@ -332,6 +384,9 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 	av_free( paf );
 
 	out->setUsed( nBytes );
+
+	// Count a frame
+	m_nFrame++;
 
 	return nBytes;
 }
@@ -351,7 +406,7 @@ int CFfEncoder::Encode( int fmt, int width, int height, sqbind::CSqBinary *in, s
 	if ( !flip && fmt == m_nFmt )
 		return EncodeRaw( fmt, width, height, in->Ptr(), in->getUsed(), out, m );
 
-		// Must convert to input format
+	// Must convert to input format
 	if ( !CFfConvert::ConvertColorBB( width, height, in, fmt, &m_tmp, m_nFmt, SWS_FAST_BILINEAR ) )
 		return 0;
 
@@ -372,9 +427,6 @@ int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, sqbi
 	// Do we need to convert the colorspace?
 	if ( PIX_FMT_BGR24 == m_nFmt )
 		return EncodeRaw( PIX_FMT_BGR24, img->getWidth(), img->getHeight(), img->Obj().GetBits(), img->Obj().GetImageSize(), out, m );
-
-	// +++ ???
-//	m_tmp.Allocate( 1000000 );
 
 	// Must convert to input format
 	if ( !CFfConvert::ConvertColorIB( img, &m_tmp, m_nFmt, SWS_FAST_BILINEAR, 1 ) )

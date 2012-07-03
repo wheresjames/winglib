@@ -90,12 +90,49 @@ public:
 		return m_pCodecContext->coded_frame->pts;
 	}
 
+	/// Calculates the PTS based on the current frame index
+	SQInteger calcPts()
+	{
+		// Sanity checks
+		if ( !m_pCodecContext || 0 >= m_nFps )
+			return -1;
+
+		// Calculate pts
+		return m_nFrame * m_pCodecContext->time_base.den / ( m_pCodecContext->time_base.num * m_nFps );
+	}
+	
+	/// Returns extra codec data
+	sqbind::CSqBinary getExtraData() 
+	{ 	if ( !m_pCodecContext || !m_pCodecContext->extradata || 0 >= m_pCodecContext->extradata_size )
+			return sqbind::CSqBinary();
+		return sqbind::CSqBinary( (sqbind::CSqBinary::t_byte*)m_pCodecContext->extradata, 
+								  m_pCodecContext->extradata_size );
+	}
+
+	/// Sets the packet header
+	void setHeader( sqbind::CSqBinary *header ) { if ( header ) m_header = *header; }
+
+	/// Returns the packet header
+	sqbind::CSqBinary getHeader() { return m_header; }
+
+	/// Returns the current frame number
+	SQInteger getFrame() { return m_nFrame; }
+
+	/// Sets the current frame number
+	void setFrame( SQInteger n ) { m_nFrame = n; }
+
 	/** @} */
 
 private:
 
 	/// Format type
 	int						m_nFmt;
+
+	/// Frame rate
+	int						m_nFps;
+
+	/// Frame number
+	oex::oexINT64			m_nFrame;
 
 	/// Pointer to codec object
     AVCodec 				*m_pCodec;
@@ -114,5 +151,8 @@ private:
 
 	/// Temp buffers
 	sqbind::CSqBinary		m_tmp, m_tmp2;
+
+	/// Optional packet header
+	sqbind::CSqBinary		m_header;
 
 };
