@@ -96,7 +96,7 @@ function StartStream( params ) : ( _g )
 
 	if ( p[ "cap" ].toint() )
 	{
-		if ( !_self.screen_init_capture( _g.cap, 0, _g.w, _g.h ) )
+		if ( !_self.screen_init_capture( _g.cap, 0, 0, _g.w, _g.h ) )
 		{	_self.echo( "Failed to initialize screen capture" ); _g.quit = 1; return 0; }
 
 		local inf = CSqMulti();
@@ -140,8 +140,9 @@ function StartStream( params ) : ( _g )
 	// Create the encoder
 	_g.enc = CFfEncoder();
 	local q = p[ "q" ].toint(); if ( 0 >= q ) q = 5;
+	p[ "encoder_params" ][ "quality" ] <- q.tostring();
 	if ( !_g.enc.Create( CFfDecoder().LookupCodecId( fmt ),
-						 pix, _g.w, _g.h, _g.fps 0, CSqMulti( "quality=" + q ) ) )
+						 pix, _g.w, _g.h, _g.fps 0, p[ "encoder_params" ] ) )
 	{	::_self.echo( "Unable to create codec : " + fmt );
 		_g.quit = 1; return 0;
 	} // end if

@@ -301,8 +301,8 @@ int CFfDecoder::ReadSEI( sqbind::CSqBinary *in )
 		return 1;
 
 #if defined( DEBUG )
-//	oexEcho( "!!! Missing SEI Information !!!" );
-//	oexEcho( oexBinToAsciiHexStr( in, 0, 16, 16 ).Ptr() );
+	oexEcho( "!!! Missing SEI Information !!!" );
+	oexEcho( oexBinToAsciiHexStr( in, 0, 16, 16 ).Ptr() );
 #endif		
 		
 	// Process frame type

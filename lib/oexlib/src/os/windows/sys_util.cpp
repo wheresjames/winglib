@@ -36,7 +36,7 @@
 
 #include "std_os.h"
 
-#if !defined( OEX_NO_CPUID )
+#if !defined( OEX_NO_CPUID ) && !defined( __MINGW32__ )
 #	include <intrin.h>
 #endif
 

@@ -147,10 +147,13 @@ function Run() : ( _g )
 
 					if ( sei.len() )
 						h[ "1" ][ "trackinfo" ][ "sprop-parameter-sets" ] <- sei;
+					else
+						h[ "1" ][ "trackinfo" ][ "sprop-parameter-sets" ] <- "Z2QADay0Cg/QgAAAAwCAAAAPB4oVUA==,aM8yyLA=";
 
 					// http://tools.ietf.org/html/rfc3984
 					// http://en.wikipedia.org/wiki/H.264#Levels
 //					h[ "1" ][ "trackinfo" ][ "profile-level-id" ] <- "4d800d"; // 66 | 00 | 13
+
 
 //					h[ "1" ][ "trackinfo" ][ "description" ] <- "";
 //					h[ "1" ][ "rtpsessioninfo" ][ "name" ] <- "RTSP Server";
@@ -174,7 +177,7 @@ function Run() : ( _g )
 			{
 				data = _g.share.ReadData();
 //_self.echo( "*** data = " + data.getUsed() );
- 
+
 				if ( data.getUsed() )
 				{
 					local h = CSqMulti(), body = CSqBinary( 4, 4 );
@@ -517,7 +520,7 @@ function Run() : ( _g )
 				p[ "w" ] <- "320";
 				p[ "h" ] <- "240";
 				p[ "fps" ] <- "15";
-				// p[ "header" ] <- "\x17"; //\x0\x0"; //\x0\x0";
+				p[ "encoder_params" ][ "global_headers" ] <- "1";
 
 				// Generate a stream id
 				_g.sid = _self.unique();
