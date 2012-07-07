@@ -108,14 +108,17 @@ function Run() : ( _g )
 				p.setJSON( _g.share.getHeader() );
 
 				// Create SEI string
-				local sei = "";
+				local sei = "", pps = CSqBinary(), sps = CSqBinary();
 				if ( p[ "codec" ].str() == "H264" && p[ "extra" ].len() )
 				{	local extra = p[ "extra" ].bin(), s1 = extra.Find( "\x0\x0\x0\x1", 0, 0 );
 					if ( extra.failed() != s1 )
 					{	local s2 = extra.Find( "\x0\x0\x0\x1", s1 + 4, 0 );
 						if ( extra.failed() != s2 )
+						{	pps = extra.getSub( s1 + 4, s2 - s1 - 4 );
+							sps = extra.getSub( s2 + 4, 0 );
 							sei = extra.getSub( s1 + 4, s2 - s1 - 4 ).base64_encode()
 								  + "," + extra.getSub( s2 + 4, 0 ).base64_encode();
+						} // end if
 					} // end if
 				} // end if
 
@@ -134,8 +137,8 @@ function Run() : ( _g )
 					h[ "1" ][ "videoframerate" ] <- p[ "fps" ].str();
 					h[ "1" ][ "width" ] <- p[ "w" ].str(); 
 					h[ "1" ][ "height" ] <- p[ "h" ].str();
-					h[ "1" ][ "avcprofile" ] <- "66";
-					h[ "1" ][ "avclevel" ] <- "30";
+//					h[ "1" ][ "avcprofile" ] <- "66";
+//					h[ "1" ][ "avclevel" ] <- "30";
 //					h[ "1" ][ "frameWidth" ] <- "320";
 //					h[ "1" ][ "frameHeight" ] <- "240";
 //					h[ "1" ][ "displayWidth" ] <- "320";
@@ -152,7 +155,7 @@ function Run() : ( _g )
 
 					// http://tools.ietf.org/html/rfc3984
 					// http://en.wikipedia.org/wiki/H.264#Levels
-//					h[ "1" ][ "trackinfo" ][ "profile-level-id" ] <- "4d800d"; // 66 | 00 | 13
+					h[ "1" ][ "trackinfo" ][ "profile-level-id" ] <- "42000d"; // 66 | 00 | 13
 
 
 //					h[ "1" ][ "trackinfo" ][ "description" ] <- "";
@@ -166,6 +169,42 @@ function Run() : ( _g )
 
 				} // end
 
+				{ // Send video frame headers
+
+					local h = CSqMulti(), body = CSqBinary();
+					h[ "pkt" ][ "format" ] <- "0";
+					h[ "pkt" ][ "chunk_stream_id" ] <- "7";
+					h[ "pkt" ][ "type_id" ] <- "9";
+					h[ "pkt" ][ "timestamp" ] <- "0";
+					h[ "pkt" ][ "info" ] <- "1";
+					h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
+
+					body.Allocate( 1024 );
+					body.setString( "\x17\x00\x00\x00\x00" );
+					body.appendString( "\x01\x42\x80\x0d\xFF" );
+
+_self.echo( "pps = " + pps.getUsed() );
+					body.appendString( "\xE1" );
+					body.Resize( body.getUsed() + 2 );
+					body.setUsed( body.getUsed() + 2 );
+					body.BE_setAbsUSHORT( 11, pps.getUsed() );
+					body.Append( pps );
+
+_self.echo( "sps = " + sps.getUsed() );
+					body.appendString( "\x1" );
+					body.Resize( body.getUsed() + 2 );
+					body.setUsed( body.getUsed() + 2 );
+					body.BE_setAbsUSHORT( 11 + 2 + 1 + pps.getUsed(), sps.getUsed() );
+					body.Append( sps );
+					//body.Append( p[ "extra" ].bin() );
+
+					h[ "body" ] <- body.getString();
+
+					_self.echo( "Video Headers : " + _g.rtmp.SendPacket( h, 0 ) );
+
+				} // end
+				
+				
 			} // end if
 
 		} // end if
@@ -181,7 +220,7 @@ function Run() : ( _g )
 				if ( data.getUsed() )
 				{
 					local h = CSqMulti(), body = CSqBinary( 4, 4 );
-					h[ "pkt" ][ "format" ] <- "0";
+					h[ "pkt" ][ "format" ] <- "1";
 	//				h[ "pkt" ][ "chunk_stream_id" ] <- "2";
 					h[ "pkt" ][ "chunk_stream_id" ] <- "7";
 	//				h[ "pkt" ][ "type_id" ] <- "5";
@@ -201,7 +240,13 @@ function Run() : ( _g )
 
 					h[ "body" ] <- data.getString();
 
-					_self.echo( "*** Send Video : " + data.getUsed() + " : " + _g.rtmp.SendPacket( h, 0 ) );
+					if ( !_g.rtmp.SendPacket( h, 0 ) )
+					{	_g.quit = 1;
+						_self.echo( " *** CLIENT CLOSED SOCKET *** " );
+					} // end if
+
+					else
+						_self.echo( "*** Send Video frame : " + data.getUsed() );
 
 					_g.format = 1;
 

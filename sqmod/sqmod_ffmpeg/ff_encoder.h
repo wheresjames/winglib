@@ -100,7 +100,7 @@ public:
 		// Calculate pts
 		return m_nFrame * m_pCodecContext->time_base.den / ( m_pCodecContext->time_base.num * m_nFps );
 	}
-	
+
 	/// Returns extra codec data
 	sqbind::CSqBinary getExtraData() 
 	{ 	if ( !m_pCodecContext || !m_pCodecContext->extradata || 0 >= m_pCodecContext->extradata_size )

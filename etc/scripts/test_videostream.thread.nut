@@ -29,8 +29,6 @@ class CGlobal
 
 	fps = 0;
 
-	frame_time = 0;
-
 	// Maximum number of seconds to buffer before dropping frames
 	maxbuf = 2;
 
@@ -83,9 +81,6 @@ function StartStream( params ) : ( _g )
 {
 	local p = CSqMulti( params );
 	_self.echo( params );
-
-	// Initialize frame time
-	_g.frame_time = 0;
 
 	// Frame rate
 	_g.fps = p[ "fps" ].toint();
@@ -259,28 +254,18 @@ function Run() : ( _g )
 	local inf = CSqMulti();
 	if ( 0 >= _g.enc.Encode( CFfConvert().PIX_FMT_BGR24,
 							 _g.w, -_g.h, _g.pix, _g.frame, inf ) )
-{
-_self.echo( "??? = " + inf[ "pts" ].toint() );
+	{	_self.echo( "??? = " + inf[ "pts" ].toint() );
 		return 0;
-} // end if
+	} // end if
 
-_self.echo( "pts = " + inf[ "pts" ].toint() + ", fsz = " + _g.frame.getUsed() );
+//_self.echo( "pts = " + inf[ "pts" ].toint() + ", fsz = " + _g.frame.getUsed() );
 		
 	// Write to container
 	if ( _g.vid )
 	{
 		// Attempt to write the frame
-//		if ( !_g.vid.WriteVideoFrame( _g.frame, _g.frame_time + _g.fps, _g.frame_time, inf ) )
 		if ( !_g.vid.WriteVideoFrame( _g.frame, inf[ "pts" ].toint(), inf[ "pts" ].toint(), inf ) )
 			_g.quit = 1;
-
-		// Update frame time
-		_g.frame_time += 1000 / _g.fps;
-//		_g.frame_time += 1000 / _g.fps * 2;
-//		_g.frame_time += 10000 / _g.fps;
-//		_g.frame_time++;
-
-//		_self.echo( "wr = " + _g.frame.getUsed() );
 
 		// Flush data buffers
 		_g.vid.FlushBuffers();

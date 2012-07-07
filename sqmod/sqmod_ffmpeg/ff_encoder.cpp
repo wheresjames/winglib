@@ -134,14 +134,21 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	// Special h264 defaults
 	if ( CODEC_ID_H264 == m_pCodecContext->codec_id )
 	{
+		// 'Real time'
+		m_pCodecContext->max_b_frames = 0;
+		m_pCodecContext->thread_count = 0;
+		m_pCodecContext->b_frame_strategy = 1;
+		m_pCodecContext->level = 13;
+		m_pCodecContext->profile = FF_PROFILE_H264_BASELINE;
+
 		// Set H264 codec params
-		av_opt_set( m_pCodecContext->priv_data, "profile", 
+		av_opt_set( m_pCodecContext->priv_data, "profile",
 					( m && (*m)[ "profile" ].len() ) ? (*m)[ "profile" ].c_str() : "baseline", 0 );
-		av_opt_set( m_pCodecContext->priv_data, "preset", 
+		av_opt_set( m_pCodecContext->priv_data, "preset",
 					( m && (*m)[ "preset" ].len() ) ? (*m)[ "preset" ].c_str() : "ultrafast", 0 );
-		av_opt_set( m_pCodecContext->priv_data, "tune", 
+		av_opt_set( m_pCodecContext->priv_data, "tune",
 					( m && (*m)[ "tune" ].len() ) ? (*m)[ "tune" ].c_str() : "zerolatency", 0 );
-//		av_opt_set( m_pCodecContext->priv_data, "x264opts", 
+//		av_opt_set( m_pCodecContext->priv_data, "x264opts",
 //					( m && (*m)[ "x264opts" ].len() ) ? (*m)[ "x264opts" ].c_str() : "no-mbtree:sliced-threads:sync-lookahead=0", 0 );
 
 	} // end if

@@ -140,7 +140,7 @@ namespace sqbind
 		{	m_bin = r; return *this; }
 
 		/// Construct from raw buffer
-		CSqBinary( t_byte *x_ptr, t_size x_size, int x_bFree = 0 )
+		CSqBinary( const void *x_ptr, t_size x_size, int x_bFree = 0 )
 		{	if ( x_bFree )
 				m_bin.setBuffer( x_ptr, x_size, 0, oex::oexTRUE );
 			else
@@ -148,7 +148,7 @@ namespace sqbind
 		}
 
 		/// Construct from raw buffer
-		CSqBinary( t_byte *x_ptr, t_size x_size, t_size x_offset, int x_bFree )
+		CSqBinary( const void *x_ptr, t_size x_size, t_size x_offset, int x_bFree )
 		{	m_bin.setBuffer( x_ptr, x_size, x_offset, x_bFree );
 		}
 
@@ -250,7 +250,7 @@ namespace sqbind
 		t_byte* _Ptr( t_size o = 0 ) { return m_bin._Ptr( o ); }
 
 		/// Sets a raw buffer
-        void setBuffer( t_byte *x_ptr, t_size x_size, t_size x_offset, int x_bFree )
+        void setBuffer( const void *x_ptr, t_size x_size, t_size x_offset, int x_bFree )
         {	m_bin.setBuffer( x_ptr, x_size, x_offset, x_bFree ? oex::oexTRUE : oex::oexFALSE ); }
 
 		/// Copies data from a raw buffer
@@ -262,8 +262,8 @@ namespace sqbind
 		{	if ( !x_p ) return 0; return m_bin.Append( &x_p->m_bin ); }
 
 		/// Appends the specified raw buffer
-		t_size AppendBuffer( const t_byte *x_pBuf, t_size x_nBytes )
-		{	return m_bin.AppendBuffer( x_pBuf, x_nBytes ); }
+		t_size AppendBuffer( const void *x_pBuf, t_size x_nBytes )
+		{	return m_bin.AppendBuffer( (const t_byte*)x_pBuf, x_nBytes ); }
 
 		/// Shift data in buffer to the left
 		t_size LShift( t_size x_nBytes )
@@ -451,6 +451,9 @@ namespace sqbind
 
 		/// Returns reference to buffer object
 		t_buffer& Mem() { return m_bin; }
+
+		/// Returns reference to buffer object
+		operator t_buffer&() { return m_bin; }
 
 		// Accessor functions
 		SQBIND_SQBINARY_DECLARE_TYPE( CHAR );
