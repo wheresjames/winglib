@@ -73,19 +73,19 @@ public:
 
 		/// Data lock
 		oexLock					m_lock;
-		
+
 		/// Timestamp
 		oex::oexTime			m_ts;
-		
+
 		/// Dts
 		oex::oexTime			m_ds;
-		
+
 		/// Pointer to event signal
 		oexEvent				*m_pevtData;
 
 	};
 
-//	class CAudioSink : public MPEG4LATMAudioRTPSink 
+//	class CAudioSink : public MPEG4LATMAudioRTPSink
 	class CAudioSink : public MediaSink
 	{
 	public:
@@ -148,7 +148,7 @@ public:
 
 		/// Timestamp
 		oex::oexTime			m_ts;
-		
+
 		/// Dts
 		oex::oexTime			m_ds;
 
@@ -234,7 +234,7 @@ public:
 	/// Returns the url
 	sqbind::stdString getUrl()
 	{	return m_sUrl; }
-	
+
 	/// Returns the sdp object
 	sqbind::CSqMulti getSDP()
 	{	return m_mSdp;
@@ -303,48 +303,54 @@ public:
 
 	/// Returns the number of audio channels
 	int getNumAudioChannels() { return m_nAudioNumChannels; }
-	
+
 	/// Returns the audio sample rate
 	int getAudioSampleRate() { return m_nAudioRate; }
 
 	/// Returns the audio bits per sample
 	int getAudioBps() { return m_nAudioBps; }
 
-	/// Returns the video presentation time seconds	
+	/// Returns the video presentation time seconds
 	int getVideoPtsSec() { return m_pVs ? m_pVs->getPts().tv_sec : 0; }
 
-	/// Returns the video presentation time useconds	
+	/// Returns the video presentation time useconds
 	int getVideoPtsUSec() { return m_pVs ? m_pVs->getPts().tv_usec : 0; }
 
-	/// Returns the video presentation time in useconds	
+	/// Returns the video presentation time in useconds
 	SQInteger getVideoPts() { return m_pVs ? oex::oexGetUSecs( m_pVs->getPts() ) : 0; }
-	
-	/// Returns the audio presentation time seconds	
+
+	/// Returns the audio presentation time seconds
 	int getAudioPtsSec() { return m_pAs ? m_pAs->getPts().tv_sec : 0; }
 
-	/// Returns the audio presentation time useconds	
+	/// Returns the audio presentation time useconds
 	int getAudioPtsUSec() { return m_pAs ? m_pAs->getPts().tv_usec : 0; }
 
-	/// Returns the audio presentation time in useconds	
+	/// Returns the audio presentation time in useconds
 	SQInteger getAudioPts() { return m_pAs ? oex::oexGetUSecs( m_pAs->getPts() ) : 0; }
-	
-	/// Returns the video Dts time in useconds	
+
+	/// Returns the video Dts time in useconds
 	SQInteger getVideoDts() { return m_pVs ? oex::oexGetUSecs( m_pVs->getDts() ) : 0; }
-	
-	/// Returns the audio Dts time in useconds	
+
+	/// Returns the audio Dts time in useconds
 	SQInteger getAudioDts() { return m_pAs ? oex::oexGetUSecs( m_pAs->getDts() ) : 0; }
-	
+
 	/// Enable / disable blind login
 	void setBlindLogin( int b ) { m_bBlindLogin = b; }
-	
+
 	/// Returns blind login status
 	int getBlindLogin() { return m_bBlindLogin; }
-	
+
 	/// Returns a string describing the last error
 	sqbind::stdString getLastError() { if ( !m_nLastError ) return sqbind::stdString(); return m_sLastError; }
 
 	/// Returns the last error code
 	int getError() { return m_nLastError; }
+
+	/// Returns the rx buffer size
+	int getRxBufferSize() { return m_nRxBufferSize; }
+
+	/// Sets the rx buffer size
+	void setRxBufferSize( int n ) { m_nRxBufferSize = n; }
 
 	/** @} */
 
@@ -392,10 +398,10 @@ private:
 
 	/// Last error
 	sqbind::stdString		m_sLastError;
-	
+
 	/// Non-zero to enable blind login
 	int						m_bBlindLogin;
-	
+
 	/// Non-zero if video should be processed
 	int						m_bVideo;
 
@@ -452,13 +458,16 @@ private:
 
 	/// Video frame height
 	int						m_fps;
-	
+
+	/// Receive Buffer size
+	int						m_nRxBufferSize;
+
 	/// Number of audio channels
 	int						m_nAudioNumChannels;
-	
+
 	/// Audio sample rate
 	int						m_nAudioRate;
-	
+
 	/// Bits per sample
 	int						m_nAudioBps;
 
