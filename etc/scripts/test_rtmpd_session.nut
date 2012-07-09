@@ -3,13 +3,13 @@ class CGlobal
 {
 	quit = 0;
 	session = 0;
-	fps = 0;
+	fps = 30;
 	rtmp = 0;
 
 	sid = "";
 	share = 0;
-//	codec = "FLV1";
 	codec = "H264";
+//	codec = "VP80";
 //	codec = "MPG4";
 
 	count = 0;
@@ -76,6 +76,97 @@ function SetSocket( socket ) : ( _g )
 	return 1;
 }
 
+function sendVideoHeaders( data ) : ( _g )
+{
+	// Decode header
+	local p = CSqMulti();
+	p.setJSON( _g.share.getHeader() );
+
+	// Create SEI string
+	local sei = "", pps = CSqBinary(), sps = CSqBinary();
+	if ( p[ "codec" ].str() == "H264" && p[ "extra" ].len() )
+	{	local extra = p[ "extra" ].bin(), s1 = extra.Find( "\x0\x0\x0\x1", 0, 0 );
+		if ( extra.failed() != s1 )
+		{	local s2 = extra.Find( "\x0\x0\x0\x1", s1 + 4, 0 );
+			if ( extra.failed() != s2 )
+			{	pps = extra.getSub( s1 + 4, s2 - s1 - 4 );
+				sps = extra.getSub( s2 + 4, 0 );
+				sei = extra.getSub( s1 + 4, s2 - s1 - 4 ).base64_encode()
+					  + "," + extra.getSub( s2 + 4, 0 ).base64_encode();
+			} // end if
+		} // end if
+	} // end if
+
+	local e = data.Find( "onMetaData", 0, 0 ), eh = 0;
+	if ( data.failed() != e )
+	{
+		_self.echo( " ********************** HEADER AT : " + e );
+
+		eh = data.Find( "\x0\x0\x9\x0\x0", e, 0 );
+
+		if ( data.failed() != eh )
+		{
+			_self.echo( " ********************** END HEADER AT : " + eh );
+
+			local body = data.getSub( e - 3, eh - e + 3 + 3 );
+			body.Unshare();
+			_self.echo( body.AsciiHexStr( 16, 16 ) );
+
+			local h = CSqMulti();
+			h[ "pkt" ][ "format" ] <- "1";
+			h[ "pkt" ][ "chunk_stream_id" ] <- "5";
+			h[ "pkt" ][ "type_id" ] <- "18";
+			h[ "pkt" ][ "timestamp" ] <- "0";
+			h[ "pkt" ][ "info" ] <- "1";
+			h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
+
+			h[ "body" ] <- body.getString();
+
+			_self.echo( "onMetaData : " + _g.rtmp.SendPacket( h, 0 ) );
+
+		} // end if
+
+	} // end if
+
+	{ // Send video frame headers
+
+		local h = CSqMulti(), body = CSqBinary();
+		h[ "pkt" ][ "format" ] <- "0";
+		h[ "pkt" ][ "chunk_stream_id" ] <- "7";
+		h[ "pkt" ][ "type_id" ] <- "9";
+		h[ "pkt" ][ "timestamp" ] <- "0";
+		h[ "pkt" ][ "info" ] <- "1";
+		h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
+
+		body.Allocate( 1024 );
+		body.setString( "\x17\x00\x00\x00\x00" );
+		body.appendString( "\x01\x42\x80\x0d\xFF" );
+//					body.appendString( "\x01\x42\x80\x1f\xFF" );
+
+_self.echo( "pps = " + pps.getUsed() );
+		body.appendString( "\xE1" );
+		body.Resize( body.getUsed() + 2 );
+		body.setUsed( body.getUsed() + 2 );
+		body.BE_setAbsUSHORT( 11, pps.getUsed() );
+		body.Append( pps );
+
+_self.echo( "sps = " + sps.getUsed() );
+		body.appendString( "\x1" );
+		body.Resize( body.getUsed() + 2 );
+		body.setUsed( body.getUsed() + 2 );
+		body.BE_setAbsUSHORT( 11 + 2 + 1 + pps.getUsed(), sps.getUsed() );
+		body.Append( sps );
+		//body.Append( p[ "extra" ].bin() );
+
+		h[ "body" ] <- body.getString();
+
+		_self.echo( "Video Headers : " + _g.rtmp.SendPacket( h, 0 ) );
+
+	} // end
+
+	return eh;
+}
+
 function Run() : ( _g )
 {
 	if ( _g.quit || !_g.session )
@@ -100,114 +191,7 @@ function Run() : ( _g )
 	{
 		// Attempt to open share
 		if ( !_g.share.isOpen() )
-		{
-			if ( _g.share.Open( _g.sid ) )
-			{
-				// Decode header
-				local p = CSqMulti(); 
-				p.setJSON( _g.share.getHeader() );
-
-				// Create SEI string
-				local sei = "", pps = CSqBinary(), sps = CSqBinary();
-				if ( p[ "codec" ].str() == "H264" && p[ "extra" ].len() )
-				{	local extra = p[ "extra" ].bin(), s1 = extra.Find( "\x0\x0\x0\x1", 0, 0 );
-					if ( extra.failed() != s1 )
-					{	local s2 = extra.Find( "\x0\x0\x0\x1", s1 + 4, 0 );
-						if ( extra.failed() != s2 )
-						{	pps = extra.getSub( s1 + 4, s2 - s1 - 4 );
-							sps = extra.getSub( s2 + 4, 0 );
-							sei = extra.getSub( s1 + 4, s2 - s1 - 4 ).base64_encode()
-								  + "," + extra.getSub( s2 + 4, 0 ).base64_encode();
-						} // end if
-					} // end if
-				} // end if
-
-				{ // onMetaData
-
-					local h = CSqMulti();
-					h[ "pkt" ][ "format" ] <- "1";
-					h[ "pkt" ][ "chunk_stream_id" ] <- "5";
-					h[ "pkt" ][ "type_id" ] <- "18";
-					h[ "pkt" ][ "timestamp" ] <- "0";
-					h[ "pkt" ][ "info" ] <- "1";
-					h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
-
-					h[ "0" ] <- "onMetaData";
-					h[ "1" ][ "videocodecid" ] <- "avc1";
-					h[ "1" ][ "videoframerate" ] <- p[ "fps" ].str();
-					h[ "1" ][ "width" ] <- p[ "w" ].str(); 
-					h[ "1" ][ "height" ] <- p[ "h" ].str();
-//					h[ "1" ][ "avcprofile" ] <- "66";
-//					h[ "1" ][ "avclevel" ] <- "30";
-//					h[ "1" ][ "frameWidth" ] <- "320";
-//					h[ "1" ][ "frameHeight" ] <- "240";
-//					h[ "1" ][ "displayWidth" ] <- "320";
-//					h[ "1" ][ "displayHeight" ] <- "240";
-					h[ "1" ][ "trackinfo" ][ "timescale" ] <- "15";
-					h[ "1" ][ "trackinfo" ][ "language" ] <- "eng";
-					h[ "1" ][ "trackinfo" ][ "sampledescription" ][ "sampletype" ] <- _g.codec;
-					h[ "1" ][ "trackinfo" ][ "type" ] <- "video";
-
-					if ( sei.len() )
-						h[ "1" ][ "trackinfo" ][ "sprop-parameter-sets" ] <- sei;
-					else
-						h[ "1" ][ "trackinfo" ][ "sprop-parameter-sets" ] <- "Z2QADay0Cg/QgAAAAwCAAAAPB4oVUA==,aM8yyLA=";
-
-					// http://tools.ietf.org/html/rfc3984
-					// http://en.wikipedia.org/wiki/H.264#Levels
-					h[ "1" ][ "trackinfo" ][ "profile-level-id" ] <- "42000d"; // 66 | 00 | 13
-
-
-//					h[ "1" ][ "trackinfo" ][ "description" ] <- "";
-//					h[ "1" ][ "rtpsessioninfo" ][ "name" ] <- "RTSP Server";
-//					h[ "1" ][ "rtpsessioninfo" ][ "timing" ] <- "0 0";
-//					h[ "1" ][ "rtpsessioninfo" ][ "protocolversion" ] <- "0";
-//					h[ "1" ][ "rtpsessioninfo" ][ "attributes" ][ "range" ] <- "npt=now-";
-
-					_self.echo( "onMetaData " + h.print_r( 1 ) );
-					_self.echo( "onMetaData : " + _g.rtmp.SendPacket( h, 0 ) );
-
-				} // end
-
-				{ // Send video frame headers
-
-					local h = CSqMulti(), body = CSqBinary();
-					h[ "pkt" ][ "format" ] <- "0";
-					h[ "pkt" ][ "chunk_stream_id" ] <- "7";
-					h[ "pkt" ][ "type_id" ] <- "9";
-					h[ "pkt" ][ "timestamp" ] <- "0";
-					h[ "pkt" ][ "info" ] <- "1";
-					h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
-
-					body.Allocate( 1024 );
-					body.setString( "\x17\x00\x00\x00\x00" );
-					body.appendString( "\x01\x42\x80\x0d\xFF" );
-
-_self.echo( "pps = " + pps.getUsed() );
-					body.appendString( "\xE1" );
-					body.Resize( body.getUsed() + 2 );
-					body.setUsed( body.getUsed() + 2 );
-					body.BE_setAbsUSHORT( 11, pps.getUsed() );
-					body.Append( pps );
-
-_self.echo( "sps = " + sps.getUsed() );
-					body.appendString( "\x1" );
-					body.Resize( body.getUsed() + 2 );
-					body.setUsed( body.getUsed() + 2 );
-					body.BE_setAbsUSHORT( 11 + 2 + 1 + pps.getUsed(), sps.getUsed() );
-					body.Append( sps );
-					//body.Append( p[ "extra" ].bin() );
-
-					h[ "body" ] <- body.getString();
-
-					_self.echo( "Video Headers : " + _g.rtmp.SendPacket( h, 0 ) );
-
-				} // end
-				
-				
-			} // end if
-
-		} // end if
+			_g.share.Open( _g.sid );
 
 		else
 		{
@@ -215,40 +199,57 @@ _self.echo( "sps = " + sps.getUsed() );
 			do
 			{
 				data = _g.share.ReadData();
-//_self.echo( "*** data = " + data.getUsed() );
 
 				if ( data.getUsed() )
 				{
-					local h = CSqMulti(), body = CSqBinary( 4, 4 );
-					h[ "pkt" ][ "format" ] <- "1";
-	//				h[ "pkt" ][ "chunk_stream_id" ] <- "2";
-					h[ "pkt" ][ "chunk_stream_id" ] <- "7";
-	//				h[ "pkt" ][ "type_id" ] <- "5";
-					h[ "pkt" ][ "type_id" ] <- "9";
-					h[ "pkt" ][ "timestamp" ] <- "0";
-					h[ "pkt" ][ "info" ] <- "1";
-					h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
-
 					data.Unshare();
-					local e = data.failed();
+
+//					_self.echo( " --- FLV " + _g.count + " ---\n" + data.AsciiHexStr( 16, 16 ) );
+
+					// Skip file headers
+					local e = 0;
 					if ( !_g.count++ )
-						e = data.findUCHAR( 0x17, 0, 0 );
-					else if ( data.failed() == ( e = data.findUCHAR( 0x17, 0, 16 ) ) )
-						e = data.findUCHAR( 0x27, 0, 16 );
-					if ( data.failed() != e )
-						data.LShift( e );
+					{
+						// Send video headers
+						e = sendVideoHeaders( data );
 
-					h[ "body" ] <- data.getString();
+						// Skip to first key frame
+						e = data.findUSHORT( 0x0117, e, 0 );
 
-					if ( !_g.rtmp.SendPacket( h, 0 ) )
-					{	_g.quit = 1;
-						_self.echo( " *** CLIENT CLOSED SOCKET *** " );
 					} // end if
 
-					else
-						_self.echo( "*** Send Video frame : " + data.getUsed() );
+					// Brute force skip FLV header
+					else 
+						e = 11;
 
-					_g.format = 1;
+					// If we found what we wanted
+					if ( data.failed() != e )
+					{
+						data.LShift( e );
+						data.Resize( data.getUsed() - 4 );
+
+						data.BE_setAbsUINT( 5, data.getUsed() - 9 );
+
+						local h = CSqMulti(), body = CSqBinary();
+						h[ "pkt" ][ "format" ] <- "1";
+						h[ "pkt" ][ "chunk_stream_id" ] <- "7";
+						h[ "pkt" ][ "type_id" ] <- "9";
+						h[ "pkt" ][ "timestamp" ] <- "0";
+						h[ "pkt" ][ "info" ] <- "1";
+						h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
+
+//						_self.echo( " --- FRAME ---\n" + data.AsciiHexStr( 16, 16 ) );
+						h[ "body" ] <- data.getString();
+
+						if ( !_g.rtmp.SendPacket( h, 0 ) )
+						{	_g.quit = 1;
+							_self.echo( " *** CLIENT CLOSED SOCKET *** " );
+						} // end if
+
+						else
+							_self.echo( "*** Send Video frame : " + data.getUsed() );
+
+					} // end if
 
 					_g.share.incReadPtr();
 
@@ -311,7 +312,6 @@ _self.echo( "sps = " + sps.getUsed() );
 				h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
 
 				// Set window acknowledgement size
-//				body.BE_setUINT( 0, 0x140000 );
 				body.BE_setUINT( 0, 2500000 );
 
 				h[ "body" ] <- body.getString();
@@ -329,7 +329,7 @@ _self.echo( "sps = " + sps.getUsed() );
 				h[ "pkt" ][ "info" ] <- "0";
 				h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
 
-				// Window acknowledgement size 
+				// Window acknowledgement size
 				body.BE_setUINT( 0, 2500000 );
 
 				// Limit type : dynamic
@@ -340,27 +340,28 @@ _self.echo( "sps = " + sps.getUsed() );
 
 			} // end
 
-/*
-			{ // Set chunk size
+			{ // Begin stream
 
-				local h = CSqMulti(), body = CSqBinary( 4, 4 );
-				h[ "pkt" ][ "chunk_stream_id" ] <- "2";
+				local h = CSqMulti(), body = CSqBinary( 6, 6 );
 				h[ "pkt" ][ "format" ] <- "0";
-				h[ "pkt" ][ "type_id" ] <- "1";
+				h[ "pkt" ][ "chunk_stream_id" ] <- "2";
+				h[ "pkt" ][ "type_id" ] <- "4";
 				h[ "pkt" ][ "timestamp" ] <- "0";
 				h[ "pkt" ][ "info" ] <- "0";
 				h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
 
 				body.Zero();
 
-				// Window acknowledgement size 
-				body.BE_setUINT( 0, 0x1000 );
+				// Stream Begin
+				body.BE_setSHORT( 0, 0 );
+
+				// Stream ID
+				body.BE_setAbsUINT( 2, 0 );
 
 				h[ "body" ] <- body.getString();
-				_self.echo( "Begin stream : " + _g.rtmp.SendPacket( h, 0 ) );
+				_self.echo( "Begin stream 0 : " + _g.rtmp.SendPacket( h, 0 ) );
 
 			} // end
-*/
 
 			// Connect response
 			r[ "2" ][ "fmsVer" ] <- "FMS/3,5,5,2004";
@@ -388,6 +389,8 @@ _self.echo( "sps = " + sps.getUsed() );
 			break;
 
 		case "checkBandwidth" :
+			r[ "pkt" ][ "chunk_stream_id" ] <- "3";
+
 			r[ "0" ] <- "onBWDone";
 //			r[ "2" ] <- "";
 			r[ "1" ] <- "0."; // 8192.";
@@ -426,30 +429,10 @@ _self.echo( "sps = " + sps.getUsed() );
 				body.BE_setAbsUINT( 2, 1 );
 
 				h[ "body" ] <- body.getString();
-				_self.echo( "Begin stream : " + _g.rtmp.SendPacket( h, 0 ) );
+				_self.echo( "Begin stream 1 : " + _g.rtmp.SendPacket( h, 0 ) );
 
 			} // end
-/*
-			{ // Set chunk size
 
-				local h = CSqMulti(), body = CSqBinary( 4, 4 );
-				h[ "pkt" ][ "format" ] <- "0";
-				h[ "pkt" ][ "chunk_stream_id" ] <- "2";
-				h[ "pkt" ][ "type_id" ] <- "1";
-				h[ "pkt" ][ "timestamp" ] <- "0";
-				h[ "pkt" ][ "info" ] <- "0";
-				h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
-
-				body.Zero();
-
-				// Stream ID
-				body.BE_setUINT( 0, 4096 );
-
-				h[ "body" ] <- body.getString();
-				_self.echo( "Set chunk size : " + _g.rtmp.SendPacket( h, 0 ) );
-
-			} // end
-*/
 			{ // NetStream.Play.Reset
 
 				local h = CSqMulti();
@@ -564,7 +547,7 @@ _self.echo( "sps = " + sps.getUsed() );
 				//p[ "type" ] <- "mp4";
 				p[ "w" ] <- "320";
 				p[ "h" ] <- "240";
-				p[ "fps" ] <- "15";
+				p[ "fps" ] <- _g.fps.tostring();
 				p[ "encoder_params" ][ "global_headers" ] <- "1";
 
 				// Generate a stream id

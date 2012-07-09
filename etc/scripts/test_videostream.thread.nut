@@ -259,12 +259,13 @@ function Run() : ( _g )
 	} // end if
 
 //_self.echo( "pts = " + inf[ "pts" ].toint() + ", fsz = " + _g.frame.getUsed() );
-		
+
 	// Write to container
 	if ( _g.vid )
 	{
 		// Attempt to write the frame
-		if ( !_g.vid.WriteVideoFrame( _g.frame, inf[ "pts" ].toint(), inf[ "pts" ].toint(), inf ) )
+//		if ( !_g.vid.WriteVideoFrame( _g.frame, inf[ "pts" ].toint(), inf[ "pts" ].toint(), inf ) )
+		if ( !_g.vid.WriteVideoFrame( _g.frame, 0, 0, inf ) )
 			_g.quit = 1;
 
 		// Flush data buffers
