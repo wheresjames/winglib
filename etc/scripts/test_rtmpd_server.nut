@@ -61,7 +61,7 @@ function _idle() : ( _g )
 			_self.echo( "Connection from : " + addr.getDotAddress() );
 
 			// Set the script that will handle the session
-			session.setScript( _self.queue(), "session", "test_rtmpd_session.nut", "SetSocket" );
+			session.setScript( _self.queue(), _self.unique(), "test_rtmpd_session.nut", "SetSocket" );
 
 		} // end else
 

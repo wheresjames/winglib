@@ -73,6 +73,8 @@ int CRtmpdSession::StartDebugLog( const sqbind::stdString &sFile )
 {_STT();
 
 #if _DEBUG
+	oexAutoLock ll( _g_rtmpd_lock );
+	if ( !ll.IsLocked() ) return 0;
 
 	StopDebugLog();
 
@@ -102,6 +104,9 @@ int CRtmpdSession::StopDebugLog()
 {_STT();
 
 #if _DEBUG
+	oexAutoLock ll( _g_rtmpd_lock );
+	if ( !ll.IsLocked() ) return 0;
+
 	if ( netstackdump )
 		fclose( netstackdump );
 	if ( netstackdump_read )
@@ -115,6 +120,9 @@ int CRtmpdSession::StopDebugLog()
 
 int CRtmpdSession::Init( sqbind::CSqSocket *pSocket )
 {
+	oexAutoLock ll( _g_rtmpd_lock );
+	if ( !ll.IsLocked() ) return 0;
+
 	// Out with the old
 	Destroy();
 
