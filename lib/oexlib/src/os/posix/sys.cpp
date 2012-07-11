@@ -712,16 +712,12 @@ oexINT CSys::WaitForMultipleObjects( oexUINT x_uObjects, CSys::t_WAITABLE *x_pHa
 
 oexLONG CSys::increment( oexLONG *x_puVal )
 {
-	// +++ Need this functionality
-	//return ::InterlockedIncrement( x_puVal );
-	return ++(*x_puVal);
+	return __sync_add_and_fetch( x_puVal, 1 );
 }
 
 oexLONG CSys::decrement( oexLONG *x_puVal )
 {
-	// +++ Need this functionality
-//	return ::InterlockedDecrement( x_puVal );
-	return --(*x_puVal);
+	return __sync_sub_and_fetch( x_puVal, 1 );
 }
 
 void CSys_SystemTimeToSTime( struct tm* tinfo, CSys::STime &t )
