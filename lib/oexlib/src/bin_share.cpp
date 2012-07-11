@@ -477,35 +477,52 @@ oexUINT CBin::GroupAvg( oexINT nType, oexUINT uOffset, oexUINT uInterval, oexUIN
 	return uOffset;
 }
 
+CBin::t_size CBin::Randomize( int nStart, int nEnd )
+{
+	if ( nStart < 0 )
+		nStart = 0;
+
+	if ( nEnd <= 0 )
+		nEnd = getUsed();
+	else if  ( nEnd > getUsed() )
+		nEnd = getUsed();
+
+	if ( nStart >= nEnd )
+		return 0;
+
+	os::CSys::Rand( _Ptr( nStart ), nEnd - nStart );
+
+	return nEnd - nStart;
+}
 
 CStr8 CBin::base64_encode()
 {_STT();
-	return CBase64::Encode( m_buf.Ptr(), getUsed() );
+	return CBase64::Encode( Ptr(), getUsed() );
 }
 
 CStr8 CBin::base64_decode()
 {_STT();
-	return CBase64::Decode( m_buf.Ptr(), getUsed() );
+	return CBase64::Decode( Ptr(), getUsed() );
 }
 
 CStr8 CBin::base16_encode()
 {_STT();
-	return CBase16::Encode( m_buf.Ptr(), getUsed() );
+	return CBase16::Encode( Ptr(), getUsed() );
 }
 
 CStr8 CBin::base16_decode()
 {_STT();
-	return CBase16::Decode( m_buf.Ptr(), getUsed() );
+	return CBase16::Decode( Ptr(), getUsed() );
 }
 
 CStr8 CBin::compress()
 {_STT();
-	return oexCompress( CStr8( m_buf, getUsed() ) );
+	return oexCompress( CStr8( Ptr(), getUsed() ) );
 }
 
 CStr8 CBin::uncompress()
 {_STT();
-	return oexUncompress( CStr8( m_buf.Ptr(), getUsed() ) );
+	return oexUncompress( CStr8( Ptr(), getUsed() ) );
 }
 
 CBin& CBin::base64_encode( oexCONST CStr8 &s )

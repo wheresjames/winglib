@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 
+#include <windows.h>
 //#include <winsock2.h>
 
 #if defined( _DEBUG )
@@ -26,6 +27,11 @@ SQBIND_REGISTER_CLASS_BEGIN( CRtmpdSession, CRtmpdSession )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, getPacketData )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, getPacketSize )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, getPacket )
+	SQBIND_MEMBER_FUNCTION( CRtmpdSession, SerializePacket )
+	SQBIND_MEMBER_FUNCTION( CRtmpdSession, SerializeValue )
+	SQBIND_MEMBER_FUNCTION( CRtmpdSession, DeserializePacket )
+	SQBIND_MEMBER_FUNCTION( CRtmpdSession, SendPacket )
+//	SQBIND_MEMBER_FUNCTION( CRtmpdSession,  )
 //	SQBIND_MEMBER_FUNCTION( CRtmpdSession,  )
 //	SQBIND_MEMBER_FUNCTION( CRtmpdSession,  )
 
@@ -159,7 +165,9 @@ int CRtmpdSession::ReadPacket()
 
 	// Free previous packet if needed
 	if ( m_nPacketReady )
-		RTMPPacket_Free( &m_packet ), m_nPacketReady = 0;
+		oexZero( m_packet ),
+//		RTMPPacket_Free( &m_packet ), // No, don't do that
+		m_nPacketReady = 0;
 
 	// See if we can get a packet
 	if ( !RTMP_ReadPacket( &m_session, &m_packet ) || !RTMPPacket_IsReady( &m_packet ) )
@@ -190,15 +198,21 @@ sqbind::CSqMulti CRtmpdSession::getPacket( int nMode )
 
 	// Sanity checks
 	if ( !m_nPacketReady || !m_packet.m_body
-		 || 0 > nOffset || (unsigned int)nOffset >= m_packet.m_nBodySize 
+		 || 0 > nOffset || (unsigned int)nOffset >= m_packet.m_nBodySize
 		 || ( nMode & 0xffff0000 ) )
 		return sqbind::CSqMulti();
 
 	// Convert to array
 	sqbind::CSqMulti m;
-	ParsePacket( &m, &m_packet.m_body[ nOffset ], m_packet.m_nBodySize - nOffset, 0 );
+	ParsePacket( &m, &m_packet.m_body[ nOffset ], m_packet.m_nBodySize - nOffset, nMode );
 	return m;
 }
+
+int CRtmpdSession::DeserializePacket( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, int nMode )
+{_STT();
+	return ParsePacket( m, bin->Mem().Ptr(), bin->Mem().getUsed(), nMode );
+}
+
 
 #define _USER_ALLINFO	0x00000001
 #define _IN_OBJECT		0x00010000
@@ -232,7 +246,8 @@ int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength,
 		switch( *p++ )
 		{
 			case AMF_NUMBER :
-				if ( ( p + 4 ) > e )
+
+				if ( ( p + 8 ) > e )
 					return p - s;
 				else
 				{
@@ -296,12 +311,275 @@ int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength,
 
 			// Give up on unknown item
 			default :
-				return 0;
+				return p - s;
 
 		} // end switch
 
 	} // end while
 
 	return p - s;
+}
+
+#define _MIN_PACKET_SIZE	1024
+int CRtmpdSession::SerializeValue( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, int nMode )
+{
+	// Sanity checks
+	if ( !bin || !m )
+		return 0;
+
+	long nType = -1;
+	sqbind::CSqMulti *pm = 0;
+
+	// Did user specify types?
+	if ( _USER_ALLINFO & nMode )
+		return 0;
+
+	// Auto detect type
+	else
+	{
+		// Point to the data
+		pm = m;
+
+		// Array?
+		if ( m->size() )
+		{
+			// +++ Just from what I have to go on atm
+			if ( _IN_OBJECT & nMode )
+//				nType = AMF_ECMA_ARRAY;
+				nType = AMF_STRICT_ARRAY;
+			else
+				nType = AMF_OBJECT;
+
+		} // end if
+
+		else
+		{
+			long l = m->str().length();
+
+			// Must have data
+			if ( !l )
+				nType = AMF_NULL;
+
+			// If it's long, just assume string
+			else if ( 16 < l )
+				nType = AMF_STRING;
+
+			// Boolean, must be one character, '1' or '0'
+			else if ( 1 == l && ( '0' == m->str()[ 0 ] || '1' == m->str()[ 0 ] ) )
+				nType = AMF_BOOLEAN;
+
+			// Does it only contain numbers?
+			else if ( sqbind::stdString::npos == m->str().find_first_not_of( "-.0123456789" ) )
+				nType = AMF_NUMBER;
+
+			// It's a string
+			else
+				nType = AMF_STRING;
+
+		} // end else
+
+	} // end if
+
+	// Did we decide on anything?
+	if ( 0 > nType || !pm )
+		return 0;
+
+	// Allocate default space for data
+	long i = bin->getUsed();
+	if ( i + _MIN_PACKET_SIZE / 2 > bin->Size() )
+		if ( _MIN_PACKET_SIZE != bin->Resize( i + _MIN_PACKET_SIZE ) )
+			return 0;
+
+	// Get buffer offset
+	sqbind::CSqBinary::t_byte *p = bin->Mem()._Ptr();
+	if ( !p )
+		return 0;
+
+	// Save type into buffer
+	p[ i++ ] = nType;
+
+	// Encode type
+	switch( nType )
+	{
+		default :
+			return 0;
+
+		// NULL
+		case AMF_NULL :
+			break;
+
+		// NUMBER
+		case AMF_NUMBER :
+
+			// Write number and reverse the byte order
+			*(double*)&p[ i ] = oexStrToDouble( pm->str().c_str() );
+			oex::cmn::RevBytes( &p[ i ], 8 );
+
+			// add sizeof( double )
+			i += 8;
+
+			break;
+
+		// BOOLEAN
+		case AMF_BOOLEAN :
+
+			// Write boolean value
+			p[ i++ ] = ( '0' != pm->str()[ 0 ] ) ? 1 : 0;
+
+			break;
+
+		// STRING
+		case AMF_STRING :
+		{
+			// Get string length, and make sure it's valid
+			long l = pm->str().length();
+			if ( 0 >= l || 65536 <= l )
+				return 0;
+
+			// Ensure space for string
+			bin->setUsed( i );
+			if ( ( i + 3 + l ) > bin->Size() )
+				if ( !bin->Resize( i + 3 + l + _MIN_PACKET_SIZE ) )
+					return 0;
+				else
+					p = bin->Mem()._Ptr();
+
+			// String length
+			*(unsigned short*)&p[ i ] = oex::os::CIpSocket::hton_s( pm->str().length() ); i += 2;
+
+			// Copy the string data
+			memcpy( &p[ i ], pm->str().c_str(), l );
+
+			// Update binary buffer length
+			i += l;
+
+		} break;
+
+		// ARRAY
+		case AMF_STRICT_ARRAY :
+		case AMF_ECMA_ARRAY :
+
+			// +++ Array length 0?
+			*(unsigned int*)&p[ i ] = oex::os::CIpSocket::hton_l( 1 ); i += 4;
+			p[ i++ ] = AMF_OBJECT;
+
+		// OBJECT
+		case AMF_OBJECT :
+
+			// Write data into string
+			for ( sqbind::CSqMulti::iterator it = pm->begin(); it != pm->end(); it++ )
+			{
+				// Get key length, and make sure it's valid
+				long l = it->first.length();
+				if ( 0 >= l || 65536 <= l )
+					return 0;
+
+				// Ensure space for Key
+				bin->setUsed( i );
+				if ( ( i + 3 + l ) > bin->Size() )
+					if ( !bin->Allocate( i + 3 + l + _MIN_PACKET_SIZE ) )
+						return 0;
+					else
+						p = bin->Mem()._Ptr();
+
+				// Key length
+				*(unsigned short*)&p[ i ] = oex::os::CIpSocket::hton_s( it->first.length() ); i += 2;
+
+				// Copy the key data
+				memcpy( &p[ i ], it->first.c_str(), l );
+
+				// Update binary buffer size before setting the value
+				i += l; bin->setUsed( i );
+
+				// Write the value
+				SerializeValue( bin, &it->second, nMode | _IN_OBJECT );
+
+				// Get the new binary buffer size
+				i = bin->getUsed();
+
+			} // end for
+
+			// End object tag
+			*(unsigned short*)&p[ i ] = 0, i += 2;
+			p[ i++ ] = AMF_OBJECT_END;
+
+			break;
+
+	} // end switch
+
+	// Set new length
+	bin->setUsed( i );
+
+	return i;
+}
+
+int CRtmpdSession::SerializePacket( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, int nMode )
+{_STT();
+
+	// Sanity checks
+	if ( !m || !m->size() || !bin )
+		return 0;
+
+	long n = 0;
+	while ( 0 <= n )
+	{
+		sqbind::stdString k = sqbind::ToStr( n++ );
+		if ( !m->isset( k ) )
+			n = -1;
+
+		else
+			SerializeValue( bin, &(*m)[ k ], nMode );
+
+	} // end while
+
+	return n;
+}
+
+int CRtmpdSession::SendPacket( sqbind::CSqMulti *m, int nQueue )
+{
+	// Sanity checks
+	if ( !m || !m->size() || !m->isset( "pkt" ) )
+		return 0;
+
+	// Must have a session
+	if ( !m_session.m_sb.sb_socket )
+		return 0;
+
+	// Initialize packet
+	oexZero( m_packet );
+
+	// Initialize packet headers
+	m_packet.m_nChannel = (*m)[ "pkt" ][ "chunk_stream_id" ].toint();
+	m_packet.m_headerType = (*m)[ "pkt" ][ "format" ].toint();
+	m_packet.m_packetType = (*m)[ "pkt" ][ "type_id" ].toint();
+	m_packet.m_nTimeStamp = (*m)[ "pkt" ][ "timestamp" ].toint();
+	m_packet.m_nInfoField2 = (*m)[ "pkt" ][ "info" ].toint();
+	m_packet.m_hasAbsTimestamp = (*m)[ "pkt" ][ "has_abs_timestamp" ].toint();
+
+	sqbind::CSqBinary body;
+	if ( !body.Allocate( RTMP_MAX_HEADER_SIZE + 1024 ) )
+		return 0;
+
+	// Apparently, somewhere, RTMP_SendPacket() reaches backward
+	// in the buffer, and apparently, it's by design.
+	// I'm not sure how to feel about that ...
+	body.setUsed( RTMP_MAX_HEADER_SIZE );
+
+	// Is it a raw buffer?
+	if ( m->isset( "body" ) )
+		body.appendString( (*m)[ "body" ].str() );
+
+	// Serialize our data
+	else if ( !SerializePacket( &body, m, 0 ) )
+		return 0;
+
+	// Point the packet at the encoded variables
+	m_packet.m_body = (char*)body.Ptr( RTMP_MAX_HEADER_SIZE );
+
+	// Set body size
+	m_packet.m_nBodySize = body.getUsed() - RTMP_MAX_HEADER_SIZE;
+
+	// Send the packet
+	return RTMP_SendPacket( &m_session, &m_packet, nQueue );
 }
 

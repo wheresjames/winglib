@@ -163,7 +163,6 @@ oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 
 CStr CUtil::BinToAsciiHexStr( CBin *x_pBin, oexSIZE_T x_uLen, oexSIZE_T x_nLineLen, oexSIZE_T x_nMaxLines )
 {_STT();
-
 	if ( !x_pBin || !x_pBin->getUsed() )
 		return oexT( "" );
 

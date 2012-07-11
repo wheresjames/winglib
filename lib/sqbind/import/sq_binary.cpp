@@ -36,6 +36,9 @@
 
 using namespace sqbind;
 
+#define REGISTER_INT_TYPE_ACCESS( t )	\
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, findMasked##t )
+
 #define REGISTER_TYPE_ACCESS( t )	\
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, set##t )			\
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, get##t )			\
@@ -84,12 +87,13 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Fingerprint )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FingerprintBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FingerprintImage )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Randomize )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Average )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, GroupAvg )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, GraphFloat )	
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Graph )		
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Scale )		
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Threshold )		
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, GraphFloat )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Graph )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Scale )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Threshold )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, get )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, set )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getOffset )
@@ -100,11 +104,12 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getUsed )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setString )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getString )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, appendString )	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, appendString )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, setSubString )
-	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getSubString )	
-	
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getSubString )
+
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, FindBin )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Find )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, Sub )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, getSub )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqBinary, failed )
@@ -141,6 +146,17 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqBinary, CSqBinary )
 	REGISTER_TYPE_ACCESS( FLOAT )
 	REGISTER_TYPE_ACCESS( DOUBLE )
 
+	REGISTER_INT_TYPE_ACCESS( CHAR )
+	REGISTER_INT_TYPE_ACCESS( UCHAR )
+	REGISTER_INT_TYPE_ACCESS( SHORT )
+	REGISTER_INT_TYPE_ACCESS( USHORT )
+	REGISTER_INT_TYPE_ACCESS( INT )
+	REGISTER_INT_TYPE_ACCESS( UINT )
+	REGISTER_INT_TYPE_ACCESS( INT64 )
+	REGISTER_INT_TYPE_ACCESS( UINT64 )
+	REGISTER_INT_TYPE_ACCESS( LONG )
+	REGISTER_INT_TYPE_ACCESS( ULONG )
+
 	SQBIND_ENUM( oex::CUtil::eGtHorz,		eGtHorz )
 	SQBIND_ENUM( oex::CUtil::eGtVert,		eGtVert )
 	SQBIND_ENUM( oex::CUtil::eGtHorzFft,	eGtHorzFft )
@@ -158,15 +174,15 @@ CSqBinary::t_size CSqBinary::CopyBytes( CSqBinary *x_p, CSqBinary::t_size x_uByt
 
 	if ( !x_p )
 		return 0;
-	
+
 	if ( 0 >= x_uBytes || x_uBytes > x_p->getUsed() )
-		x_uBytes = x_p->getUsed();		
+		x_uBytes = x_p->getUsed();
 
 	if ( x_uBytes > getUsed() )
 		x_uBytes = getUsed();
-		
+
 	oexMemCpy( _Ptr(), x_p->Ptr(), x_uBytes );
-	
+
 	return x_uBytes;
 }
 
@@ -191,6 +207,7 @@ int CSqBinary::Graph( int nSamples, int nInterval, int nType, CSqImage *img, CSq
 {	if ( !img || !img->getUsed() || !getUsed() ) return 0;
 	CSqBinary buf; if ( !img->refPixels( &buf ) ) return 0;
 	return oex::CUtil::Graph( nSamples, nInterval, nType, &buf.Mem(), 0,
-							  img->getWidth(), img->getHeight(), img->getScanWidth(), 
+							  img->getWidth(), img->getHeight(), img->getScanWidth(),
 							  fg->Ptr(), bg->Ptr(), Ptr(), getUsed(), sParams.c_str() );
 }
+

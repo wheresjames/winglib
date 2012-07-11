@@ -118,6 +118,31 @@ const oexUINT       CSys::c_uMaximumWaitObjects = MAXIMUM_WAIT_OBJECTS;
 
 oexSTATIC_ASSERT( CSys::eMaximumWaitObjects == MAXIMUM_WAIT_OBJECTS );
 
+oexUINT CSys::Rand( oexPVOID p, oexUINT sz )
+{
+	if ( !p )
+		return 0;
+
+	// Randomize the buffer
+	unsigned char *buf = (unsigned char*)p;
+	while ( sz )
+		*(buf++) = (unsigned char)rand(), sz--;
+	
+	return sz;
+}
+
+oexUINT CSys::Rand( oexUINT uMax )
+{
+	oexUINT u;
+	Rand( &u, sizeof( oexUINT ) );
+	return uMax ? ( u % uMax ) : u;
+}
+
+void CSys::RandSeed( oexUINT uSeed )
+{
+	srand( uSeed );
+}
+
 oexCPVOID CSys::GetInstanceHandle()
 {
 #if defined( __ImageBase )

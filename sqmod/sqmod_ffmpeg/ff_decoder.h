@@ -54,13 +54,7 @@ public:
 	}
 
 	/// Returns the frame rate
-	int getFps()
-	{	if ( !m_pCodecContext )
-			return 0;
-		if ( m_pCodecContext->time_base.num )
-			return m_pCodecContext->time_base.den / m_pCodecContext->time_base.num;
-		return m_pCodecContext->time_base.den;
-	}
+	int getFps() { return m_nFps; }
 
 	/// Returns the bit rate
 	int getBitRate()
@@ -102,7 +96,17 @@ public:
 					3 = S-Frame
 	*/
 	int GetH264FrameType( const void *p, int len );
-	
+
+	/// Searches the data for an H264 frame marker
+	/**
+		@param [in] p	-	Pointer to frame buffer
+		@param [in] len	-	Length of buffer in p
+		
+		@return		Offset of frame marker or less than
+					zero if failure.
+	*/
+	int FindH264Nal( const void *p, int len );
+
 	/**
 		@param [in] p	-	Pointer to frame buffer
 		@param [in] len	-	Length of buffer in p
@@ -128,21 +132,39 @@ public:
 		return GetH264FrameType( in->Ptr(), in->getUsed() );
 	}
 
+	/// Calculates the PTS based on the current frame index
+	SQInteger calcPts()
+	{
+		// Sanity checks
+		if ( !m_pCodecContext || 0 >= m_nFps )
+			return -1;
+
+		// Calculate pts
+		return m_nFrame * m_pCodecContext->time_base.den / ( m_pCodecContext->time_base.num * m_nFps );
+	}
+
+	/** @} */
+
 	/// Picks the SEI data from the stream
 	/**
-		@param [in] in	-	Buffer containing single SEI frame
+		@param [in] p	-	Pointer to frame buffer
+		@param [in] len	-	Length of buffer in p
 	*/
-	int ReadSEI( sqbind::CSqBinary *in );
-	
-	/** @} */
+	int ReadSEI( const void *p, int len );
 
 private:
 
 	/// Image format
 	int						m_nFmt;
-	
+
+	/// Frame rate
+	int						m_nFps;
+
 	/// Non-zero if we're waiting for a key frame
 	int						m_nWaitKeyFrame;
+
+	/// Frame number
+	oex::oexINT64			m_nFrame;
 
 	/// Pointer to codec object
     AVCodec 				*m_pCodec;

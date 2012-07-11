@@ -105,6 +105,31 @@ void SResInfo::Release( SResInfo *x_pRi )
 	delete x_pRi;
 }
 
+oexUINT CSys::Rand( oexPVOID p, oexUINT sz )
+{
+	if ( !p )
+		return 0;
+
+	// Randomize the buffer
+	unsigned char *buf = (unsigned char*)p;
+	while ( sz )
+		*(buf++) = (unsigned char)rand(), sz--;
+	
+	return sz;
+}
+
+oexUINT CSys::Rand( oexUINT uMax )
+{
+	oexUINT u;
+	Rand( &u, sizeof( oexUINT ) );
+	return uMax ? ( u % uMax ) : u;
+}
+
+void CSys::RandSeed( oexUINT uSeed )
+{
+	srand( uSeed );
+}
+
 oexINT CSys::ShowMessageBox( oexCSTR x_pTitle, oexCSTR x_pStr )
 {
 #if !defined( OEX_NOMSGBOX )

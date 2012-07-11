@@ -58,8 +58,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CLvRtspClient, CLvRtspClient )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getError )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getLastError )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getUrl )
-//	SQBIND_MEMBER_FUNCTION( CLvRtspClient,  )
-//	SQBIND_MEMBER_FUNCTION( CLvRtspClient,  )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getRxBufferSize )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, setRxBufferSize )
 //	SQBIND_MEMBER_FUNCTION( CLvRtspClient,  )
 //	SQBIND_MEMBER_FUNCTION( CLvRtspClient,  )
 
@@ -121,7 +121,7 @@ Boolean CLvRtspClient::CVideoSink::continuePlaying()
 
 	} // end if
 
-	fSource->getNextFrame( (unsigned char*)m_buf._Ptr( m_header.getUsed() ), m_buf.Size(), 
+	fSource->getNextFrame( (unsigned char*)m_buf._Ptr( m_header.getUsed() ), m_buf.Size(),
 						   _afterGettingFrame, this, onSourceClosure, this );
 
 	return True;
@@ -150,7 +150,7 @@ void CLvRtspClient::CVideoSink::afterGettingFrame( void* clientData, unsigned fr
 #if defined( oexDEBUG )
 //	oexSHOW( frameSize );
 //	oexEcho( oexBinToAsciiHexStr( m_buf.Mem(), 0, 16, 16 ).Ptr() );
-#endif		
+#endif
 
 	// Copy time stamps
 	oex::oexCopyTime( m_ts, presentationTime );
@@ -198,7 +198,7 @@ int CLvRtspClient::CVideoSink::UnlockFrame()
 
 
 CLvRtspClient::CAudioSink::CAudioSink( UsageEnvironment& rEnv ) :
-	MediaSink( rEnv ) 
+	MediaSink( rEnv )
 	// MPEG4LATMAudioRTPSink( rEnv )
 {_STT();
 	m_pevtData = 0;
@@ -224,7 +224,7 @@ Boolean CLvRtspClient::CAudioSink::continuePlaying()
 	if ( !m_buf.Size() )
 		m_buf.Mem().Mem().OexNew( eDefaultBufferSize );
 
-	fSource->getNextFrame( (unsigned char*)m_buf._Ptr(), m_buf.Size(), 
+	fSource->getNextFrame( (unsigned char*)m_buf._Ptr(), m_buf.Size(),
 						   _afterGettingFrame, this, onSourceClosure, this );
 
 	return True;
@@ -319,6 +319,7 @@ CLvRtspClient::CLvRtspClient()
 	m_nAudioBps = 0;
 	m_bBlindLogin = 1;
 	m_nLastError = 0;
+	m_nRxBufferSize = 2000000;
 }
 
 void CLvRtspClient::Destroy()
@@ -333,11 +334,11 @@ void CLvRtspClient::Destroy()
 	// Verify things shutdown smoothly
 	if ( m_pRtspClient || m_pSession || m_pVs || m_pAs || m_pEnv )
 	{	setLastError( -999, oexT( "RTSP Client failed to shutdown correctly" ) );
-	} // end if			
+	} // end if
 
 	m_sUrl = oexT( "" );
 	m_mParams.clear();
-	
+
 	m_nLastError = 0;
 	m_sLastError = oexT( "" );
 }
@@ -346,10 +347,10 @@ int CLvRtspClient::setLastError( int e, sqbind::stdString s )
 {
 	if ( m_nLastError || !e )
 		return m_nLastError;
-		
+
 	m_sLastError = s;
 	m_nLastError = e;
-	
+
 	return e;
 }
 
@@ -442,14 +443,14 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 		return 0;
 	} // end if
 
-	char *pOptions = oexNULL; 
+	char *pOptions = oexNULL;
 	if ( m_bBlindLogin && m && m->isset( oexT( "username" ) ) )
-		pOptions = m_pRtspClient->sendOptionsCmd( oexStrToMbPtr( sUrl.c_str() ), 
+		pOptions = m_pRtspClient->sendOptionsCmd( oexStrToMbPtr( sUrl.c_str() ),
 												  (char*)oexStrToMbPtr( (*m)[ oexT( "username" ) ].str().c_str() ),
 												  (char*)oexStrToMbPtr( (*m)[ oexT( "password" ) ].str().c_str() ) );
 	else
 		pOptions = m_pRtspClient->sendOptionsCmd( oexStrToMbPtr( sUrl.c_str() ), 0, 0 );
-		
+
 	if ( !pOptions )
 	{	setLastError( -4, sqbind::oex2std( oexMks( oexT( "sendOptionsCmd() failed : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
@@ -458,7 +459,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	// Ditch the options
 	delete [] pOptions;
 	pOptions = oexNULL;
-	
+
 	char *pSdp = oexNULL;
 	if ( m && m->isset( oexT( "username" ) ) )
 		pSdp = m_pRtspClient->describeWithPassword( oexStrToMbPtr( sUrl.c_str() ),
@@ -466,7 +467,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 													oexStrToMbPtr( (*m)[ oexT( "password" ) ].str().c_str() ) );
 	else
 		pSdp = m_pRtspClient->describeURL( oexStrToMbPtr( sUrl.c_str() ) );
-		
+
 	if ( !pSdp )
 	{	setLastError( -5, sqbind::oex2std( oexMks( oexT( "describeURL() failed : " ), m_pEnv->getResultMsg() ) ) );
 		return 0;
@@ -592,9 +593,13 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 	if ( !m_fps )
 		m_fps = m_mSdp[ oexT( "a=maxprate" ) ].toint();
 
+	// Set minimum rx buffer size
+	if ( 2000000 > m_nRxBufferSize )
+		m_nRxBufferSize = 2000000;
+
+	// Set rx buffer size
 	int sn = pss->rtpSource()->RTPgs()->socketNum();
-	// setReceiveBufferTo( *m_pEnv, sn, 2000000 );
-	increaseReceiveBufferTo( *m_pEnv, sn, 2000000 );
+	increaseReceiveBufferTo( *m_pEnv, sn, m_nRxBufferSize );
 
 	pss->rtpSource()->setPacketReorderingThresholdTime( 2000000 );
 
@@ -620,7 +625,7 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 
 int CLvRtspClient::InitAudio( MediaSubsession *pss )
 {_STT();
-	
+
 	if ( !m_pRtspClient )
 	{	setLastError( -200, oexT( "Invalid rtsp client object" ) );
 		return 0;
@@ -645,16 +650,16 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 	if ( oex::CStr8( "MP4A-LATM" ) == pss->codecName() )
 	{
 		((MPEG4LATMAudioRTPSource*)pss->rtpSource())->omitLATMDataLengthField();
-		
+
 		const char *pCfg = pss->fmtp_config();
 		if ( pCfg )
 		{	unsigned elen = 0;
 			unsigned char *pExtra = parseStreamMuxConfigStr( pCfg, elen );
 			if ( pExtra && elen )
 				m_extraAudio.AppendBuffer( (const char*)pExtra, elen );
-	
+
 		} // end if
-		
+
 	} // end if
 
 	else if ( oex::CStr8( "MPEG4-GENERIC" ) == pss->codecName() )
@@ -665,11 +670,11 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 			unsigned char *pExtra = parseGeneralConfigStr( pCfg, elen );
 			if ( pExtra && elen )
 				m_extraAudio.AppendBuffer( (const char*)pExtra, elen );
-	
+
 		} // end if
-		
+
 	} // end if
-	
+
 	// Read extradata
     const char *props = pss->fmtp_spropparametersets();
     if ( props )
@@ -680,9 +685,13 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
         } // end for
     } // end if
 
+	// Set minimum rx buffer size
+	if ( 2000000 > m_nRxBufferSize )
+		m_nRxBufferSize = 2000000;
+
+	// Set rx buffer size
 	int sn = pss->rtpSource()->RTPgs()->socketNum();
-//	setReceiveBufferTo( *m_pEnv, sn, 2000000 );
-	increaseReceiveBufferTo( *m_pEnv, sn, 200000 );
+	increaseReceiveBufferTo( *m_pEnv, sn, m_nRxBufferSize );
 
 	pss->rtpSource()->setPacketReorderingThresholdTime( 2000000 );
 
@@ -828,7 +837,7 @@ void CLvRtspClient::OnIdle()
 
 	if ( !m_pEnv )
 		return;
-	
+
 	// Request new video frame if needed
 	if ( m_pVs && m_pVs->needFrame() )
 		m_pVs->continuePlaying();

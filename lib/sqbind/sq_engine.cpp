@@ -178,6 +178,11 @@ int CSqEngineExport::flush()
 	return oex::os::CSys::Flush_stdout();
 }
 
+void CSqEngineExport::srand( int nSeed )
+{_STT();
+	oex::os::CSys::RandSeed( nSeed );
+}
+
 int CSqEngineExport::import( const stdString &sClass )
 {_STT();
 	return OnImport( sClass );
@@ -1833,6 +1838,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_version )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, compare_version )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, flush )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, srand )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, import )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, include_once )

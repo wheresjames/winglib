@@ -79,7 +79,7 @@ oexBOOL CIpAddress::ValidateAddress()
 
     // Verify the hash value
     if ( uCrc != *(oexUINT16*)&ucHash )
-    {   oexASSERT( 0 ); 
+    {//   oexASSERT( 0 ); 
 		Destroy(); 
 		return oexFALSE; 
 	} // end if

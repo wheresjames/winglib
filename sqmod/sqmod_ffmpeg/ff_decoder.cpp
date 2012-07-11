@@ -43,14 +43,13 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfDecoder, CFfDecoder )
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, UnBufferData )
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, getBufferSize )
 	SQBIND_MEMBER_FUNCTION( CFfDecoder, getH264FrameType )
-	SQBIND_MEMBER_FUNCTION( CFfDecoder, ReadSEI	 )
 //	SQBIND_MEMBER_FUNCTION( CFfDecoder,  )
 //	SQBIND_MEMBER_FUNCTION( CFfDecoder,  )
 //	SQBIND_MEMBER_FUNCTION( CFfDecoder,  )
 //	SQBIND_MEMBER_FUNCTION( CFfDecoder,  )
 //	SQBIND_MEMBER_FUNCTION( CFfDecoder,  )
 
-	
+
 	SQBIND_STATIC_FUNCTION( CFfDecoder, LookupCodecId )
 	SQBIND_STATIC_FUNCTION( CFfDecoder, LookupCodecName )
 
@@ -70,6 +69,8 @@ CFfDecoder::CFfDecoder()
 	m_pFormatContext = oexNULL;
 	m_pFrame = oexNULL;
 	m_nFmt = 0;
+	m_nFps = 0;
+	m_nFrame = 0;
 	m_nFlags = 0;
 	m_nWaitKeyFrame = 0;
 	oexZero( m_pkt );
@@ -97,6 +98,8 @@ void CFfDecoder::Destroy()
 	} // end if
 
 	m_nFmt = 0;
+	m_nFps = 0;
+	m_nFrame = 0;
 	m_nFlags = 0;
 	m_pCodec = oexNULL;
 	m_nWaitKeyFrame = 0;
@@ -131,7 +134,7 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 //	ff_p->fmt = avformat_alloc_context();
 //	ff_p->fmt->max_delay = 100000;
-	
+
 //	avcodec_get_context_defaults( m_pCodecContext );
 	avcodec_get_context_defaults2( m_pCodecContext, AVMEDIA_TYPE_VIDEO );
 
@@ -152,14 +155,14 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 	// Codec context
 	if ( m_extra.getUsed() )
-	{	m_nFlags = 3;
+	{	m_nFlags |= 3;
 		m_pCodecContext->extradata_size = m_extra.getUsed();
 		m_pCodecContext->extradata = (uint8_t*)m_extra._Ptr();
 		m_pCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
 	} // end if
 
 	// Can we go ahead and open the codec?
-	if ( CODEC_ID_H264 != x_nCodec || 3 <= m_nFlags )
+	if ( CODEC_ID_H264 != x_nCodec || 3 == ( 3 & m_nFlags ) )
 	{
 		// Open the codec
 		int res = avcodec_open( m_pCodecContext, m_pCodec );
@@ -173,11 +176,12 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	} // end if
 
 	else
-		oexEcho( "!!! Missing SEI Headers !!!" );
+		oexEcho( "iii Missing SEI Headers, will search the input stream for them." );
 
 	m_nFmt = fmt;
+	m_nFps = fps;
 
-	// +++ H264 crashes sometimes if you don't lead out with a key frame
+	// +++ H264 crashes sometimes if you don't lead in with a key frame
 	if ( CODEC_ID_H264 == x_nCodec )
 		m_nWaitKeyFrame = 1;
 
@@ -209,13 +213,6 @@ int CFfDecoder::FindStreamInfo( sqbind::CSqBinary *in )
 
 int CFfDecoder::BufferData( sqbind::CSqBinary *in, sqbind::CSqMulti *m )
 {
-	// Ensure we have SEI headers
-	if ( CODEC_ID_H264 == m_pCodecContext->codec_id && 3 > m_nFlags )
-	{	if ( in && in->getUsed() )
-			ReadSEI( in );
-		return 0;
-	} // end if
-
 	// Init packet
 	oexZero( m_pkt );
 
@@ -248,6 +245,34 @@ int CFfDecoder::BufferData( sqbind::CSqBinary *in, sqbind::CSqMulti *m )
 
 		// Add new data to buffer
 		m_tmp.Append( in );
+
+	} // end if
+
+	// Ensure we have SEI headers if needed
+	if ( CODEC_ID_H264 == m_pCodecContext->codec_id && 3 > m_nFlags )
+	{
+		// While we need headers
+		while ( 3 != ( 3 & m_nFlags ) )
+		{
+			// Find a start nal header
+			int s = FindH264Nal( m_tmp.Ptr(), m_tmp.getUsed() );
+
+			// Do we have enough data?
+			if ( 0 > s || ( s + 3 ) >=  m_tmp.getUsed() )
+				return 0;
+
+			// Find an end nal header
+			int e = FindH264Nal( m_tmp.Ptr( s + 3 ), m_tmp.getUsed() - s + 3 );
+			if ( 0 > e )
+				return 0;
+
+			// Attempt to read headers
+			ReadSEI( m_tmp.Ptr( s ), e + 3 );
+
+			// Chunk this frame
+			UnBufferData( s + 3 + e );
+
+		} // end while
 
 	} // end if
 
@@ -291,31 +316,31 @@ int CFfDecoder::getBufferSize()
 	return m_pkt.size;
 }
 
-int CFfDecoder::ReadSEI( sqbind::CSqBinary *in )
+int CFfDecoder::ReadSEI( const void *p, int len )
 {
 	if ( !m_pCodecContext )
 		return 0;
 
 	// Currently, this only applies to H264
-	if ( CODEC_ID_H264 != m_pCodecContext->codec_id || 3 <= m_nFlags )
+	if ( CODEC_ID_H264 != m_pCodecContext->codec_id || 3 == ( 3 & m_nFlags ) )
 		return 1;
 
 #if defined( DEBUG )
 //	oexEcho( "!!! Missing SEI Information !!!" );
-//	oexEcho( oexBinToAsciiHexStr( in, 0, 16, 16 ).Ptr() );
-#endif		
-		
+//	oexEcho( oexBinToAsciiHexStr( sqbind::CSqBinary( p, len ), 0, 16, 16 ).Ptr() );
+#endif
+
 	// Process frame type
-	switch( GetH264FrameId( in->Ptr(), in->getUsed() ) )
+	switch( GetH264FrameId( p, len ) )
 	{
 		case 0x67 :
 			m_nFlags |= 1;
-			m_extra.Append( in );
+			m_extra.AppendBuffer( p, len );
 			break;
-			
+
 		case 0x68 :
 			m_nFlags |= 2;
-			m_extra.Append( in );
+			m_extra.AppendBuffer( p, len );
 			break;
 
 		default :
@@ -323,13 +348,17 @@ int CFfDecoder::ReadSEI( sqbind::CSqBinary *in )
 	}
 
 	// Did we get complete SEI information?
-	if ( 3 <= m_nFlags )
+	if ( 3 == ( 3 & m_nFlags ) )
 	{
-		// Fillin the missing SEI data
+		// Fill in the missing SEI data
 		m_pCodecContext->extradata_size = m_extra.getUsed();
 		m_pCodecContext->extradata = (uint8_t*)m_extra._Ptr();
 		m_pCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
-		
+
+		// Must lock ffmpeg
+		oexAutoLock ll( _g_ffmpeg_lock );
+		if ( !ll.IsLocked() ) return 0;
+
 		// Attempt to open the codec
 		int res = avcodec_open( m_pCodecContext, m_pCodec );
 		if ( 0 > res )
@@ -338,9 +367,11 @@ int CFfDecoder::ReadSEI( sqbind::CSqBinary *in )
 			Destroy();
 			return 0;
 		} // end if
-		
+
+		return 1;
+
 	} // end if
-	
+
 	return 0;
 }
 
@@ -350,13 +381,6 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 	// Ensure codec
 	if ( !m_pCodecContext )
 		return 0;
-
-	// Ensure we have SEI headers
-	if ( CODEC_ID_H264 == m_pCodecContext->codec_id && 3 > m_nFlags )
-	{	if ( in && in->getUsed() )
-			ReadSEI( in );
-		return 0;
-	} // end if
 
 	// Get data packet
 	if ( !in || !out || !BufferData( in, m ) )
@@ -371,7 +395,7 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 
 	// Waiting for key frame?
 	if ( m_nWaitKeyFrame )
-	{	if ( CODEC_ID_H264 != m_pCodecContext->codec_id 
+	{	if ( CODEC_ID_H264 != m_pCodecContext->codec_id
 			 || 0 == GetH264FrameType( m_pkt.data, m_pkt.size ) )
 			m_nWaitKeyFrame = 0;
 		else
@@ -399,11 +423,16 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 	// Validate image size
 	if ( 0 >= m_pCodecContext->width || 0 >= m_pCodecContext->height )
 		return 0;
-		
+
 	// Convert
 	int res = CFfConvert::ConvertColorFB( m_pFrame, m_nFmt, m_pCodecContext->width, m_pCodecContext->height, fmt, out, SWS_FAST_BILINEAR, flip );
+	if ( !res )
+		return 0;
 
-	return res ? 1 : 0;
+	// Count a frame
+	m_nFrame++;
+
+	return 1;
 }
 
 int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbind::CSqMulti *m, int flip )
@@ -415,13 +444,6 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 	// Ensure codec
 	if ( !m_pCodecContext )
 		return 0;
-
-	// Ensure we have SEI headers
-	if ( CODEC_ID_H264 == m_pCodecContext->codec_id && 3 > m_nFlags )
-	{	if ( in && in->getUsed() )
-			ReadSEI( in );
-		return 0;
-	} // end if
 
 	// Get data packet
 	if ( !in || !img || !BufferData( in, m ) )
@@ -436,7 +458,7 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 
 	// Waiting for key frame?
 	if ( m_nWaitKeyFrame )
-	{	if ( CODEC_ID_H264 != m_pCodecContext->codec_id 
+	{	if ( CODEC_ID_H264 != m_pCodecContext->codec_id
 			 || 0 == GetH264FrameType( m_pkt.data, m_pkt.size ) )
 			m_nWaitKeyFrame = 0;
 		else
@@ -466,12 +488,18 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 
 	// Convert
 	int res = CFfConvert::ConvertColorFI( m_pFrame, m_nFmt, m_pCodecContext->width, m_pCodecContext->height, img, SWS_FAST_BILINEAR, flip );
+	if ( !res )
+		return 0;
 
-	return res ? 1 : 0;
+	// Count a frame
+	m_nFrame++;
+
+	return 1;
 }
 
 static AVCodecTag g_ff_codec_map[] =
 {
+    { CODEC_ID_MPEG4,			MKTAG('M', 'P', 'G', '4') },
     { CODEC_ID_MPEG4,			MKTAG('M', 'P', '4', 'V') },
 
 	{ CODEC_ID_NONE,			0 }
@@ -499,8 +527,8 @@ int CFfDecoder::LookupCodecId( const sqbind::stdString &sCodec )
 	// Extras by name
 	oex::CStr8 s = oexStrToStr8( sqbind::std2oex( sCodec ) );
 	for ( int i = 0; CODEC_ID_NONE != g_ff_video_codec_info[ i ].id; i++ )
-		if ( !oex::str::ICompare( s.Ptr(), s.Length(), 
-								  g_ff_video_codec_info[ i ].tag, 
+		if ( !oex::str::ICompare( s.Ptr(), s.Length(),
+								  g_ff_video_codec_info[ i ].tag,
 								  oex::zstr::Length( g_ff_video_codec_info[ i ].tag ) ) )
 			return g_ff_video_codec_info[ i ].id;
 */
@@ -548,23 +576,35 @@ sqbind::stdString CFfDecoder::LookupCodecName( int nId )
 	return oexT( "" );
 }
 
-int CFfDecoder::GetH264FrameType( const void *p, int len )
-{	
-	if ( !p || 6 >= len )
+int CFfDecoder::FindH264Nal( const void *p, int len )
+{
+	// Sanity check
+	if ( !p || 0 >= len )
 		return -1;
 
+	// Find a NAL marker
 	unsigned char *b = (unsigned char*)p;
-	
-	// Verify NAL marker
-	if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
-	{	b++;
-		if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
-			return -1;
-	} // end if
+	for ( int i = 0; ( i + 3 ) < len; i++ )
+		if ( !b[ i + 0 ] && !b[ i + 1 ] && 0x01 == b[ i + 2 ] )
+			return i;
 
-	b += 3;
+	return -1;
+}
 
-	// Verify VOP id
+
+int CFfDecoder::GetH264FrameType( const void *p, int len )
+{
+	if ( !p )
+		return -1;
+
+	// Verify the nal marker
+	int i = FindH264Nal( p, 4 );
+	if ( 0 > i || ( i + 5 ) >= len )
+		return -1;
+
+	unsigned char *b = ( (unsigned char*)p ) + i + 3;
+
+	// Check for VOP id
 	if ( 0xb6 == *b )
 	{	b++;
 		return ( *b & 0xc0 ) >> 6;
@@ -580,20 +620,16 @@ int CFfDecoder::GetH264FrameType( const void *p, int len )
 }
 
 int CFfDecoder::GetH264FrameId( const void *p, int len )
-{	
-	if ( !p || 6 >= len )
+{
+	if ( !p )
 		return -1;
 
-	unsigned char *b = (unsigned char*)p;
-	
-	// Verify NAL marker
-	if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
-	{	b++;
-		if ( b[ 0 ] || b[ 1 ] || 0x01 != b[ 2 ] )
-			return -1;
-	} // end if
+	// Verify the nal marker
+	int i = FindH264Nal( p, 4 );
+	if ( 0 > i || ( i + 5 ) >= len )
+		return -1;
 
-	b += 3;
+	unsigned char *b = ( (unsigned char*)p ) + i + 3;
 
 	// Verify VOP id
 	if ( 0xb6 == *b )

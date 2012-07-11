@@ -77,6 +77,9 @@ int memshare_open( URLContext *h, const char *filename, int flags )
 	if ( !pFs )
 		return AVERROR( ENOMEM );
 
+	// String to hold share headers
+	sqbind::stdString sHeaders, sBufName;
+
 	// Parse GET parameters if provided
 	if ( pb[ oexT( "extra" ) ].ToString().Length() )
 	{
@@ -94,10 +97,18 @@ int memshare_open( URLContext *h, const char *filename, int flags )
 		if ( pbGet.IsKey( "max_packet_size" ) )
 			lMaxPacketSize = pbGet[ oexT( "max_packet_size" ) ].ToLong();
 
+		// Buffer name
+		if ( pbGet.IsKey( "buf_name" ) )
+			sBufName = sqbind::oex2std( pbGet[ oexT( "buf_name" ) ].ToString() );
+
+		// Share headers
+		if ( pbGet.IsKey( "headers" ) )
+			sHeaders = sqbind::oex2std( pbGet[ oexT( "headers" ) ].ToString() );
+
 	} // end if
 
 	// Create share buffer
-	if ( !pFs->Create( pShare, "", lSize, lBuffers, "" ) )
+	if ( !pFs->Create( pShare, sBufName, lSize, lBuffers, sHeaders ) )
 	{	OexAllocDelete( pFs );
 		return AVERROR( ENOMEM );
 	} // end if
@@ -138,7 +149,7 @@ int memshare_write( URLContext *h, const unsigned char *buf, int size )
 	// Just ignore null writes
 	if ( 0 >= size )
 		return 0;
-		
+
 	// Sanity check
 	if ( !h || !h->priv_data || !buf )
 		return AVERROR( EINVAL );

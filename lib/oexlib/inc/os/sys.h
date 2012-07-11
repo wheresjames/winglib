@@ -566,6 +566,34 @@ public:
 	*/
 	static oexDOUBLE GetCpuLoad( oexCSTR x_pProcessName );
 
+	//==============================================================
+	// Rand()
+	//==============================================================
+	/// Returns a random number between 0 and nMax
+	/**
+		\param [in] nMax	- Maximum number to return.  If nMax is
+							  zero, the entire int will be random
+							  bits.
+	*/
+	static oexUINT Rand( oexUINT uMax = 0 );
+
+	//==============================================================
+	// Rand()
+	//==============================================================
+	/// Randomizes the specified array
+	/**
+		\param [in] p	-	Pointer to the buffer to ramdomize
+		\param [in] sz	-	Size of the buffer in p
+		
+		\return Returns the number of bytes processed
+	*/
+	static oexUINT Rand( oexPVOID p, oexUINT sz );
+
+	//==============================================================
+	// RandSeed()
+	//==============================================================
+	/// Seeds the random number generator
+	static void RandSeed( oexUINT uSeed );
 };
 
 //==================================================================

@@ -22,10 +22,9 @@ function _init() : ( _g )
 					+ ( ( ver & 0xffff0000 ) >> 16 ) 
 					+ "." + ( ( ver & 0xff00 ) >> 8 ) 
 					+ "." + ( ver & 0xff ) + "\n" );
-	if ( !rtmp.StartDebugLog( _self.root( "rtmpd-" + ts.FormatTime( "%Y%c%d-%g%m%s" ) ) ) )
-	{	_self.echo( "StartDebugLog() : " + rtmp.getLastErrorStr() );
-		return 0;
-	} // end if
+
+	CSqFile().mkdir( _self.root( "rtmplogs" ) );
+	rtmp.StartDebugLog( _self.root( "rtmplogs/rtmp-" + ts.FormatTime( "%Y%c%d-%g%m%s" ) ) );
 
 	if ( !_g.server.Bind( 1935 ) )
 	{	_self.echo( "Bind() : " + _g.server.getLastError() );

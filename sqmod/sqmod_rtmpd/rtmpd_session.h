@@ -73,6 +73,18 @@ public:
 	/// Returns the parsed packet data
 	sqbind::CSqMulti getPacket( int nMode );
 
+	/// Deserializes the RTMP packet into array 'm'
+	int DeserializePacket( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, int nMode );
+
+	/// Serializes the array 'm' into an RTMP packet
+	int SerializePacket( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, int nMode );
+
+	/// Serializes the value 'm' into an RTMP packet
+	int SerializeValue( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, int nMode );
+
+	/// Send a packet back to the client
+	int SendPacket( sqbind::CSqMulti *m, int nQueue );
+
 	/** @} */
 
 	/// Parses the packet data

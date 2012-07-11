@@ -34,6 +34,10 @@
 
 #pragma once
 
+#define SQBIND_SQBINARY_DECLARE_INT_TYPE( t )													\
+	t_size findMasked##t( oex::oex##t val, oex::oex##t masked, t_size x_nStart, t_size x_nMax )	\
+	{ return m_bin.findMasked##t( val, masked, x_nStart, x_nMax ); }
+
 #define SQBIND_SQBINARY_DECLARE_TYPE( t )									\
 	oex::oex##t get##t( t_size x_nOffset )									\
 	{ return m_bin.get##t( x_nOffset ); }									\
@@ -116,6 +120,9 @@ namespace sqbind
 		/// Copy constructor
 		CSqBinary( const CSqBinary &r ) : m_bin( r.m_bin ) { }
 
+		/// Construct from string
+		CSqBinary( const stdString &s ) { m_bin.MemCpy( s.data(), s.length() ); }
+
 		/// Rvalue Copy constructor
 //#if defined( OEX_CPP0X )
 //		CSqBinary( CSqBinary &&r ) : m_bin( r.m_bin ) { }
@@ -133,7 +140,7 @@ namespace sqbind
 		{	m_bin = r; return *this; }
 
 		/// Construct from raw buffer
-		CSqBinary( t_byte *x_ptr, t_size x_size, int x_bFree = 0 )
+		CSqBinary( const void *x_ptr, t_size x_size, int x_bFree = 0 )
 		{	if ( x_bFree )
 				m_bin.setBuffer( x_ptr, x_size, 0, oex::oexTRUE );
 			else
@@ -141,7 +148,7 @@ namespace sqbind
 		}
 
 		/// Construct from raw buffer
-		CSqBinary( t_byte *x_ptr, t_size x_size, t_size x_offset, int x_bFree )
+		CSqBinary( const void *x_ptr, t_size x_size, t_size x_offset, int x_bFree )
 		{	m_bin.setBuffer( x_ptr, x_size, x_offset, x_bFree );
 		}
 
@@ -165,7 +172,7 @@ namespace sqbind
 
 		/// Special copy that will copy to the dst buffer unconditionally
 		t_size CopyBytes( CSqBinary *x_p, t_size x_uBytes );
-		
+
 		/// Shares memory object
 		t_size Share( CSqBinary *x_p ) { if ( !x_p ) return 0; return m_bin.Share( &x_p->m_bin ); }
 
@@ -243,7 +250,7 @@ namespace sqbind
 		t_byte* _Ptr( t_size o = 0 ) { return m_bin._Ptr( o ); }
 
 		/// Sets a raw buffer
-        void setBuffer( t_byte *x_ptr, t_size x_size, t_size x_offset, int x_bFree )
+        void setBuffer( const void *x_ptr, t_size x_size, t_size x_offset, int x_bFree )
         {	m_bin.setBuffer( x_ptr, x_size, x_offset, x_bFree ? oex::oexTRUE : oex::oexFALSE ); }
 
 		/// Copies data from a raw buffer
@@ -255,8 +262,8 @@ namespace sqbind
 		{	if ( !x_p ) return 0; return m_bin.Append( &x_p->m_bin ); }
 
 		/// Appends the specified raw buffer
-		t_size AppendBuffer( const t_byte *x_pBuf, t_size x_nBytes )
-		{	return m_bin.AppendBuffer( x_pBuf, x_nBytes ); }
+		t_size AppendBuffer( const void *x_pBuf, t_size x_nBytes )
+		{	return m_bin.AppendBuffer( (const t_byte*)x_pBuf, x_nBytes ); }
 
 		/// Shift data in buffer to the left
 		t_size LShift( t_size x_nBytes )
@@ -290,7 +297,7 @@ namespace sqbind
 			} // end if
 			return getUsed();
 		}
-		
+
 		/// Returns a ascii / hex string
 		sqbind::stdString AsciiHexStr( int nLineLen, int nMaxLines )
 		{	oex::CStr s = oexBinToAsciiHexStr( &m_bin, 0, nLineLen, nMaxLines );
@@ -334,7 +341,21 @@ namespace sqbind
 
 		/// Average data in buffer
 		double Average( int x_nOffset, int x_nInterval, int fmt );
-		
+
+		/// Randomizes the buffer
+		/**
+			\param [in] nStart	-	Offset to start randomizing
+			\param [in] nEnd	-	Offset to stop randomizing, if
+									zero, the entire buffer will be
+									randomized.
+		*/
+		int Randomize( int nStart, int nEnd )
+		{	return m_bin.Randomize( nStart, nEnd ); }
+
+		/// Locates the specified string in the buffer
+		t_size Find( const sqbind::stdString &s, int x_nStart, int x_nMax )
+		{	return m_bin.Find( s.data(), s.length(), x_nStart, x_nMax ); }
+
 		/// Locates the specified string in the buffer
 		t_size FindBin( CSqBinary *p, int x_nStart, int x_nMax )
 		{	return m_bin.Find( p->m_bin, x_nStart, x_nMax ); }
@@ -377,7 +398,7 @@ namespace sqbind
 		/// Base16 decodes data
 		CSqBinary base16_decode_bin()
 		{	return CSqBinary( m_bin.base16_decode() ); }
-		
+
 		/// Compress data
 		stdString compress()
 		{	return oex2std( oexMbToStr( m_bin.compress() ) ); }
@@ -385,7 +406,7 @@ namespace sqbind
 		/// Compress data
 		CSqBinary compress_bin()
 		{	return CSqBinary( m_bin.compress() ); }
-		
+
 		/// Uncompresses data
 		stdString uncompress()
 		{	return oex2std( oexMbToStr( m_bin.uncompress() ) ); }
@@ -393,7 +414,7 @@ namespace sqbind
 		/// Uncompresses data
 		CSqBinary uncompress_bin()
 		{	return CSqBinary( m_bin.uncompress() ); }
-		
+
 		/// Base64 encodes data
 		void base64_encode_str( const stdString &s )
 		{	m_bin.base64_encode( oexStrToMb( std2oex( s ) ) ); }
@@ -431,6 +452,9 @@ namespace sqbind
 		/// Returns reference to buffer object
 		t_buffer& Mem() { return m_bin; }
 
+		/// Returns reference to buffer object
+		operator t_buffer&() { return m_bin; }
+
 		// Accessor functions
 		SQBIND_SQBINARY_DECLARE_TYPE( CHAR );
 		SQBIND_SQBINARY_DECLARE_TYPE( UCHAR );
@@ -444,6 +468,17 @@ namespace sqbind
 		SQBIND_SQBINARY_DECLARE_TYPE( UINT64 );
 		SQBIND_SQBINARY_DECLARE_TYPE( FLOAT );
 		SQBIND_SQBINARY_DECLARE_TYPE( DOUBLE );
+
+		SQBIND_SQBINARY_DECLARE_INT_TYPE( CHAR );
+		SQBIND_SQBINARY_DECLARE_INT_TYPE( UCHAR );
+		SQBIND_SQBINARY_DECLARE_INT_TYPE( SHORT );
+		SQBIND_SQBINARY_DECLARE_INT_TYPE( USHORT );
+		SQBIND_SQBINARY_DECLARE_INT_TYPE( INT );
+		SQBIND_SQBINARY_DECLARE_INT_TYPE( UINT );
+		SQBIND_SQBINARY_DECLARE_INT_TYPE( LONG );
+		SQBIND_SQBINARY_DECLARE_INT_TYPE( ULONG );
+		SQBIND_SQBINARY_DECLARE_INT_TYPE( INT64 );
+		SQBIND_SQBINARY_DECLARE_INT_TYPE( UINT64 );
 
 	private:
 

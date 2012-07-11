@@ -34,39 +34,48 @@
 
 #pragma once
 
+#define CSqFifoShare_SPtrInof_uId ( 0xFF44494f464946FFLL )
+
 namespace sqbind
 {
     class CSqFifoShare
     {
-    
+
     public:
-    
+
+#pragma pack( push, 1 )
+
     	/// Buffer pointer information
     	struct SPtrInfo
     	{
+			/// ID
+			oex::oexUINT64		uId;
+
     		/// Offset to start of data
     		oex::oexUINT32		uPtr;
-    		
+
     		/// Header size
     		oex::oexUINT32		uHeader;
-    		
+
     		/// Data size
     		oex::oexUINT32		uData;
-    		
+
     		/// User value
     		oex::oexUINT32		uUser;
-    		
+
     		/// Timestamp
     		oex::oexUINT64		uTs;
     	};
-    
+
+#pragma pack( pop )
+
 	public:
 
 		/// Export constructors
 		SQBIND_CLASS_CTOR_BEGIN( CSqFifoShare )
-			_SQBIND_CLASS_CTOR2( CSqFifoShare, OT_STRING, OT_INTEGER ) 
+			_SQBIND_CLASS_CTOR2( CSqFifoShare, OT_STRING, OT_INTEGER )
 				( stdString( sa.GetString( 2 ), sq_getsize( x_v, 2 ) ), sa.GetInt( 3 ), 1 )
-			_SQBIND_CLASS_CTOR3( CSqFifoShare, OT_STRING, OT_INTEGER, OT_INTEGER ) 
+			_SQBIND_CLASS_CTOR3( CSqFifoShare, OT_STRING, OT_INTEGER, OT_INTEGER )
 				( stdString( sa.GetString( 2 ), sq_getsize( x_v, 2 ) ), sa.GetInt( 3 ), sa.GetInt( 4 ) )
 		SQBIND_CLASS_CTOR_END( CSqFifoShare )
 
@@ -166,22 +175,22 @@ namespace sqbind
 
 		/// Return the share name
 		sqbind::stdString getName() { return m_sName; }
-		
+
 		/// Sets the prefix string
 		void setPrefix( const sqbind::stdString &s ) { m_sPrefix = s; }
-		
+
 		/// Returns the current prefix string
 		sqbind::stdString getPrefix() { return m_sPrefix; }
-		
+
 		/// Sets the control block id
 		void setCbId( oex::oexUINT id ) { m_uCbId = id; }
-		
+
 		/// Gets the control block id
 		oex::oexUINT getCbId() { return m_uCbId; }
-				
+
 		/// Set to non-zero to enable global access to share
 		void setGlobal( int b ) { m_bGlobal = b; }
-		
+
 		/// Returns non-zero if global access to share is enabled
 		int getGlobal() { return m_bGlobal; }
 
@@ -198,95 +207,95 @@ namespace sqbind
 		int getPadding() { return m_nPadding; }
 
 		/// Returns the global header string
-		sqbind::stdString getHeader();		
+		sqbind::stdString getHeader();
 
 		/// Returns the control block size of the buffer from the control block
 		int getWritePtr()
-		{	if ( !m_cb.getUsed() ) 
+		{	if ( !m_cb.getUsed() )
 				return 0;
 			return m_cb.getINT( 1 );
 		}
 
 		/// Returns the control block size of the buffer from the control block
 		int getCbSize()
-		{	if ( !m_cb.getUsed() ) 
+		{	if ( !m_cb.getUsed() )
 				return 0;
 			return m_cb.getINT( 2 );
 		}
 
 		/// Returns the timestamp from the control block
 		int getTs()
-		{	if ( !m_cb.getUsed() ) 
+		{	if ( !m_cb.getUsed() )
 				return 0;
 			return m_cb.getINT( 3 );
 		}
 
 		/// Returns the process id from the control block
 		int getProcId()
-		{	if ( !m_cb.getUsed() ) 
+		{	if ( !m_cb.getUsed() )
 				return 0;
 			return m_cb.getINT( 4 );
 		}
 
 		/// Returns the total size of the buffer from the control block
 		int getBufSize()
-		{	if ( !m_cb.getUsed() ) 
+		{	if ( !m_cb.getUsed() )
 				return 0;
 			return m_cb.getINT( 5 );
 		}
-		
+
 		/// Returns the number of blocks from the control block
 		int getBlocks()
-		{	if ( !m_cb.getUsed() ) 
+		{	if ( !m_cb.getUsed() )
 				return 0;
 			return m_cb.getINT( 6 );
 		}
 
 		/// Returns the header size from the control block
 		int getHeaderSize()
-		{	if ( !m_cb.getUsed() ) 
+		{	if ( !m_cb.getUsed() )
 				return 0;
 			return m_cb.getINT( 7 );
 		}
 
 		/// Returns the number of writes from the control block
 		int getWrites()
-		{	if ( !m_cb.getUsed() ) 
+		{	if ( !m_cb.getUsed() )
 				return 0;
 			return m_cb.getINT( 8 );
 		}
 
 		/// Sets the number of writes
 		void setWrites( int n )
-		{	if ( !m_cb.getUsed() ) 
+		{	if ( !m_cb.getUsed() )
 				return;
 			return m_cb.setINT( 8, n );
 		}
-		
+
 		/// Returns the number of reads from the control block
 		int getReads()
-		{	if ( !m_cb.getUsed() ) 
+		{	if ( !m_cb.getUsed() )
 				return 0;
 			return m_cb.getINT( 9 );
 		}
 
 		/// Sets the number of reads
 		void setReads( int n )
-		{	if ( !m_cb.getUsed() ) 
+		{	if ( !m_cb.getUsed() )
 				return;
 			return m_cb.setINT( 9, n );
 		}
 
 		/// Set to non-zero to tell the writer to reset
 		void setReset( int b )
-		{	if ( !m_cb.getUsed() ) 
+		{	if ( !m_cb.getUsed() )
 				return;
 			m_cb.setINT( 10, b );
 		}
 
 		/// Returns the current reset value
 		int getReset()
-		{	if ( !m_cb.getUsed() ) 
+		{	if ( !m_cb.getUsed() )
 				return 0;
 			return m_cb.getINT( 10 );
 		}
@@ -294,12 +303,12 @@ namespace sqbind
 		/// Returns the header size from the control block
 		int getBufferGuid( sqbind::CSqBinary *p )
 		{
-			if ( !m_cb.getUsed() ) 
+			if ( !m_cb.getUsed() )
 				return 0;
-			
+
 			if ( 16 != sizeof( oex::oexGUID ) )
 				return 0;
-			
+
 			// Ensure there is space for the guid
 			if ( p->Size() < sizeof( oex::oexGUID ) && !p->Allocate( sizeof( oex::oexGUID ) ) )
 				return 0;
@@ -310,16 +319,16 @@ namespace sqbind
 			p->setUINT( 2, m_cb.getUINT( 14 ) );
 			p->setUINT( 3, m_cb.getUINT( 15 ) );
 			p->setUsed( sizeof( oex::oexGUID ) );
-			
+
 			return sizeof( oex::oexGUID );
 		}
-		
+
 		/// Copy's the guid from the control block
 		sqbind::stdString getBufferGuidStr()
 		{
-			if ( !m_cb.getUsed() ) 
+			if ( !m_cb.getUsed() )
 				return oexT( "" );
-			
+
 			if ( 16 != sizeof( oex::oexGUID ) )
 				return oexT( "" );
 
@@ -358,18 +367,18 @@ public:
 			@param [in] ts		-	Timestamp
 		*/
 		int WritePtr( const void *pData, int nSize, const sqbind::stdString &sHeader, int nUser, SQInteger ts );
-	
+
 		/// Returns the current read pointer structure, or NULL if none
 		SPtrInfo* ReadPtr();
-		
+
 protected:
 
 		/// Copy's the guid from the control block
 		oex::oexGUID* CopyGuid( oex::oexGUID *p )
 		{
-			if ( !m_cb.getUsed() || !p ) 
+			if ( !m_cb.getUsed() || !p )
 				return 0;
-			
+
 			if ( 16 != sizeof( oex::oexGUID ) )
 				return 0;
 
@@ -419,7 +428,7 @@ protected:
 
 		/// Current read index
 		int						m_iRead;
-		
+
 		/// Current write index
 		int						m_iWrite;
 	};

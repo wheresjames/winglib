@@ -295,6 +295,9 @@ public:
 		/// Flushes STDOUT
 		int flush();
 
+		/// Seeds the random number generator
+		void srand( int nSeed );
+
 		/// Imports the specified class
 		int import( const stdString &sClass );
 

@@ -50,6 +50,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqFifoShare, CSqFifoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, isOpen )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, isValid )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, getName )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, getHeader )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, setPrefix )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, getPrefix )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, setCbId )
@@ -60,7 +61,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqFifoShare, CSqFifoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, getPadding )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, getLastErrorStr )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, setLastErrorStr )
-	
+
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, getWritePtr )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, getCbSize )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, getTs )
@@ -86,9 +87,9 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqFifoShare, CSqFifoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, incReadPtr )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, decReadPtr )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, isRead )
-	
+
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, Write )
-	
+
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, Reset )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, Cancel )
 //	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare,  )
@@ -102,7 +103,7 @@ void CSqFifoShare::Register( sqbind::VM vm )
 
 CSqFifoShare::CSqFifoShare()
 {
-	m_sPrefix = SQSFS_PREFIX; 
+	m_sPrefix = SQSFS_PREFIX;
 	m_uCbId = SQSFS_CBID;
 	m_iRead = -1;
 	m_iWrite = 0;
@@ -114,7 +115,7 @@ CSqFifoShare::CSqFifoShare()
 
 CSqFifoShare::CSqFifoShare( const sqbind::stdString &sPrefix, SQInteger nId, SQInteger nGlobal )
 {
-	m_sPrefix = sPrefix; 
+	m_sPrefix = sPrefix;
 	m_uCbId = (oex::oexUINT)nId;
 	m_bGlobal = nGlobal;
 	m_iRead = -1;
@@ -125,7 +126,7 @@ CSqFifoShare::CSqFifoShare( const sqbind::stdString &sPrefix, SQInteger nId, SQI
 }
 
 
-CSqFifoShare::CSqFifoShare( const CSqFifoShare &r ) 
+CSqFifoShare::CSqFifoShare( const CSqFifoShare &r )
 {
  	m_sPrefix = r.m_sPrefix;
 	m_uCbId = r.m_uCbId;
@@ -200,19 +201,19 @@ int CSqFifoShare::Create( const sqbind::stdString &sName, const sqbind::stdStrin
 	// Control block share name
 	oex::oexGUID guidName;
 	oex::CStr sgName = oexGuid( std2oex( sqbind::stdString( m_sPrefix ) + m_sName ) );
-	sqbind::stdString sidName = ( m_bGlobal ? oexT( "Global\\" ) : oexT( "" ) ) + oex2std( sgName ); 
+	sqbind::stdString sidName = ( m_bGlobal ? oexT( "Global\\" ) : oexT( "" ) ) + oex2std( sgName );
 	sgName.StringToGuid( guidName );
 
 	// Buffer share name
 	oex::oexGUID guidBuffer;
 	oex::CStr sgBuffer = oexGuid( std2oex( sqbind::stdString( m_sPrefix ) + oexT( "buffer_" ) + ( bShareBuffer ? sBufName : m_sName ) ) );
-	sqbind::stdString sidBuffer = ( m_bGlobal ? oexT( "Global\\" ) : oexT( "" ) ) + oex2std( sgBuffer ); 
+	sqbind::stdString sidBuffer = ( m_bGlobal ? oexT( "Global\\" ) : oexT( "" ) ) + oex2std( sgBuffer );
 	sgBuffer.StringToGuid( guidBuffer );
 
 	// Set share info
-	m_cb.SetName( sidName ); 
+	m_cb.SetName( sidName );
 	m_cb.PlainShare( 1 );
-	
+
 	// Attempt to allocate
 	if ( !m_cb.Allocate( struct_size ) )
 	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate control block " ), struct_size, oexT( " bytes : " ), std2oex( m_sName ), oexT( " : " ), std2oex( sidName ) ) );
@@ -228,11 +229,11 @@ int CSqFifoShare::Create( const sqbind::stdString &sName, const sqbind::stdStrin
 			Destroy();
 			return 0;
 		} // end if
-		
+
 		// We can only reuse it if the params haven't changed or are not initialized
-		if ( ( m_cb.getINT( 2 ) && m_cb.getINT( 2 ) != SQSFS_CBSIZE ) 
-		     || ( m_cb.getINT( 5 ) && m_cb.getINT( 5 ) != nBufSize ) 
-		     || ( m_cb.getINT( 6 ) && m_cb.getINT( 6 ) != nBlocks ) 
+		if ( ( m_cb.getINT( 2 ) && m_cb.getINT( 2 ) != SQSFS_CBSIZE )
+		     || ( m_cb.getINT( 5 ) && m_cb.getINT( 5 ) != nBufSize )
+		     || ( m_cb.getINT( 6 ) && m_cb.getINT( 6 ) != nBlocks )
 		     || ( m_cb.getINT( 7 ) && m_cb.getINT( 7 ) != nHeaderSize )
 		   )
 		{	m_sLastErr = oex2std( oexMks( oexT( "Share control block already exists, and has changed : " ), std2oex( m_sName ), oexT( " : " ), std2oex( sidName ) ) );
@@ -266,7 +267,7 @@ int CSqFifoShare::Create( const sqbind::stdString &sName, const sqbind::stdStrin
 	// Set buffer info
 	m_buf.SetName( sidBuffer );
 	m_buf.PlainShare( 1 );
-	
+
 	// Attempt to allocate the buffer
 	int size = ( nBlocks * SQSFS_PTSIZE ) + nHeaderSize + nBufSize + m_nPadding;
 	if ( !m_buf.Allocate( size ) )
@@ -294,7 +295,7 @@ int CSqFifoShare::Create( const sqbind::stdString &sName, const sqbind::stdStrin
 	m_cb.setUINT( 0, m_uCbId );
 
 	// Share is writable
-	m_bWrite = 1;	
+	m_bWrite = 1;
 
 	return 1;
 }
@@ -314,11 +315,11 @@ int CSqFifoShare::Open( const sqbind::stdString &sName )
 	// Control block share name
 	oex::oexGUID guidName;
 	oex::CStr sgName = oexGuid( std2oex( sqbind::stdString( m_sPrefix ) + sName ) );
-	sqbind::stdString sidName = ( m_bGlobal ? oexT( "Global\\" ) : oexT( "" ) ) + oex2std( sgName ); 
+	sqbind::stdString sidName = ( m_bGlobal ? oexT( "Global\\" ) : oexT( "" ) ) + oex2std( sgName );
 	sgName.StringToGuid( guidName );
 
 	// Set share info
-	m_cb.SetName( sidName ); 
+	m_cb.SetName( sidName );
 	m_cb.PlainShare( 1 );
 
 	// Attempt to open existing share
@@ -327,13 +328,13 @@ int CSqFifoShare::Open( const sqbind::stdString &sName )
 		Destroy();
 		return 0;
 	} // end if
-	
+
 	if ( !m_cb.Existing() )
 	{	m_sLastErr = oex2std( oexMks( oexT( "Share control block does not exist : " ), std2oex( sName ) ) );
 		Destroy();
 		return 0;
 	} // end if
-	
+
 	// Yay!  Set the share size.
 	m_cb.setUsed( struct_size );
 
@@ -348,10 +349,10 @@ int CSqFifoShare::Open( const sqbind::stdString &sName )
 	int nBufSize = getBufSize();
 	int nBlocks = getBlocks();
 	int nHeaderSize = getHeaderSize();
-	
+
 	// Validate parameters
 	if ( 0 >= nBufSize || 0 >= nBlocks || 0 > nHeaderSize )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Invalid control block values : " ), 
+	{	m_sLastErr = oex2std( oexMks( oexT( "Invalid control block values : " ),
 									  oexT( "nBufSize = " ), nBufSize,
 									  oexT( ", nBlocks = " ), nBlocks,
 									  oexT( ", nHeaderSize = " ), nHeaderSize
@@ -364,13 +365,13 @@ int CSqFifoShare::Open( const sqbind::stdString &sName )
 	oex::oexGUID guidBuffer;
 	oex::CStr sgBuffer;
 	sgBuffer = std2oex( getBufferGuidStr() );
-	sqbind::stdString sidBuffer = ( m_bGlobal ? oexT( "Global\\" ) : oexT( "" ) ) + oex2std( sgBuffer ); 
+	sqbind::stdString sidBuffer = ( m_bGlobal ? oexT( "Global\\" ) : oexT( "" ) ) + oex2std( sgBuffer );
 	sgBuffer.StringToGuid( guidBuffer );
 
 	// Set buffer info
 	m_buf.SetName( sidBuffer );
 	m_buf.PlainShare( 1 );
-	
+
 	// Attempt to allocate the buffer
 	int size = ( nBlocks * SQSFS_PTSIZE ) + nHeaderSize + nBufSize + m_nPadding;
 	if ( !m_buf.Allocate( size ) )
@@ -408,11 +409,11 @@ int CSqFifoShare::isValid()
 	// Verify that writer is still connected
 	if ( m_cb.getUINT( 0 ) != m_uCbId || m_cb.getUINT( 3 ) != m_uTs )
 	{	m_sLastErr = oex2std( oexMks( oexT( "Writer has disconnected : " ), std2oex( m_sName ) ) );
-		Destroy(); 
-		return 0; 
+		Destroy();
+		return 0;
 	} // end if
 
-	return 1;	
+	return 1;
 }
 
 sqbind::stdString CSqFifoShare::getHeader()
@@ -439,22 +440,26 @@ CSqFifoShare::SPtrInfo* CSqFifoShare::ReadPtr()
 
 	// Ensure valid share
 	if ( !isValid() )
-		return oexNULL; 
-	
+		return oexNULL;
+
 	// Get the current buffer pointer, and make sure it's valid
 	int i = getWritePtr();
 	int nBlocks = getBlocks();
 
 	// Initialize our read pointer
-	if ( 0 > m_iRead || m_iRead >= nBlocks ) 
+	if ( 0 > m_iRead || m_iRead >= nBlocks )
 		m_iRead = i;
 
 	// Any data?
 	if ( 0 > i || i == m_iRead || i >= nBlocks )
-		return oexNULL; 
+		return oexNULL;
 
-	/// Pointer information	
+	/// Pointer information
 	SPtrInfo *pi = (SPtrInfo*)m_buf.Ptr();
+	if ( CSqFifoShare_SPtrInof_uId != pi[ m_iRead ].uId )
+	{	m_iRead = -1;
+		return oexNULL;
+	} // end if
 
 	// Return data portion
 	return &pi[ m_iRead ];
@@ -465,7 +470,7 @@ sqbind::stdString CSqFifoShare::ReadHeader()
 
 	SPtrInfo *pi = ReadPtr();
 	if ( !pi )
-		return oexT( "" ); 
+		return oexT( "" );
 
 	// Return data portion
 	return m_buf.getSub( pi->uPtr, pi->uHeader ).getString();
@@ -476,7 +481,7 @@ sqbind::CSqBinary CSqFifoShare::ReadData()
 
 	SPtrInfo *pi = ReadPtr();
 	if ( !pi )
-		return sqbind::CSqBinary(); 
+		return sqbind::CSqBinary();
 
 	// Return data portion
 	return m_buf.getSub( pi->uPtr + pi->uHeader, pi->uData );
@@ -487,7 +492,7 @@ int CSqFifoShare::ReadUser()
 
 	SPtrInfo *pi = ReadPtr();
 	if ( !pi )
-		return 0; 
+		return 0;
 
 	// Return data portion
 	return pi->uUser;
@@ -498,7 +503,7 @@ SQInteger CSqFifoShare::ReadTs()
 
 	SPtrInfo *pi = ReadPtr();
 	if ( !pi )
-		return 0; 
+		return 0;
 
 	// Return data portion
 	return pi->uTs;
@@ -518,27 +523,27 @@ SQInteger CSqFifoShare::CalculateTsRange( SQInteger *pMin, SQInteger *pMax )
 
 	// Ensure valid share
 	if ( !isValid() )
-		return 0; 
-	
+		return 0;
+
 	// Get the current buffer pointer, and make sure it's valid
 	int w = getWritePtr(), r = m_iRead;
 	int nBlocks = getBlocks();
 
 	// Initialize our read pointer
-	if ( 0 > r || r >= nBlocks ) 
+	if ( 0 > r || r >= nBlocks )
 		r = w;
 
 	// Any data?
 	if ( 0 > w || w == r || w >= nBlocks )
-		return 0; 
+		return 0;
 
-	/// Pointer information	
+	/// Pointer information
 	SPtrInfo *pi = (SPtrInfo*)m_buf.Ptr();
 
 	// Initialize minimum / maximum
 	*pMin = pi[ r ].uTs;
 	*pMax = pi[ r ].uTs;
-	
+
 	while ( w != r )
 	{
 		// Track the minimum
@@ -563,21 +568,21 @@ int CSqFifoShare::incReadPtr()
 {
 	// Ensure valid share
 	if ( !isValid() )
-		return 0; 
-	
+		return 0;
+
 	// Get the current buffer pointer, and make sure it's valid
 	int i = getWritePtr();
 	int nBlocks = getBlocks();
 
 	// Initialize our read pointer
-	if ( 0 > m_iRead || m_iRead >= nBlocks ) 
+	if ( 0 > m_iRead || m_iRead >= nBlocks )
 		m_iRead = i;
-		
+
 	// Any more data?
 	if ( 0 > i || i == m_iRead || i >= nBlocks )
-		return 0; 
+		return 0;
 
-	// Next block		
+	// Next block
 	if ( ++m_iRead >= nBlocks )
 		m_iRead = 0;
 
@@ -591,14 +596,14 @@ int CSqFifoShare::decReadPtr()
 {
 	// Ensure valid share
 	if ( !isValid() )
-		return 0; 
-	
+		return 0;
+
 	// Get the current buffer pointer, and make sure it's valid
 	int i = getWritePtr();
 	int nBlocks = getBlocks();
 
 	// Initialize our read pointer
-	if ( 0 > m_iRead || m_iRead >= nBlocks ) 
+	if ( 0 > m_iRead || m_iRead >= nBlocks )
 		m_iRead = i;
 
 	if ( 0 >= nBlocks )
@@ -630,13 +635,13 @@ int CSqFifoShare::WritePtr( const void *pData, int nSize, const sqbind::stdStrin
 
 	// Ensure valid share
 	if ( !isValid() )
-		return 0; 
+		return 0;
 
 	if ( !m_bWrite )
 	{	m_sLastErr = oexT( "Share is read only" );
 		return 0;
 	} // end if
-	
+
 	if ( 0 >= nSize )
 		return 0;
 
@@ -646,8 +651,8 @@ int CSqFifoShare::WritePtr( const void *pData, int nSize, const sqbind::stdStrin
 	int nBlocks = getBlocks();
 	int nHeaderSize = getHeaderSize();
 	int nBuffer = nBlocks * SQSFS_PTSIZE + nHeaderSize;
-	
-	/// Pointer information	
+
+	/// Pointer information
 	SPtrInfo *pi = (SPtrInfo*)m_buf.Ptr();
 
 	// How much do we want to write
@@ -667,7 +672,7 @@ int CSqFifoShare::WritePtr( const void *pData, int nSize, const sqbind::stdStrin
 	if ( w >= ( nBufSize - m_iWrite ) )
 		m_iWrite = 0;
 
-	// Get piece of the buffer we will write too		
+	// Get piece of the buffer we will write too
 	char *pDst = (char*)m_buf.Ptr( nBuffer + m_iWrite );
 	if ( !pDst )
 		return 0;
@@ -677,6 +682,7 @@ int CSqFifoShare::WritePtr( const void *pData, int nSize, const sqbind::stdStrin
 		i = 0;
 
 	// Save write info
+	pi[ i ].uId = CSqFifoShare_SPtrInof_uId;
 	pi[ i ].uPtr = nBuffer + m_iWrite;
 	pi[ i ].uHeader = hsz;
 	pi[ i ].uData = nSize;
@@ -701,11 +707,11 @@ int CSqFifoShare::WritePtr( const void *pData, int nSize, const sqbind::stdStrin
 
 	// Update write pointer
 	m_cb.setINT( 1, i );
-	
+
 	return 1;
 }
 
-int CSqFifoShare::Reset() 
+int CSqFifoShare::Reset()
 {
 	// Reset the read pointer
 	m_iRead = -1;
