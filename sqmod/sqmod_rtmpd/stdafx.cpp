@@ -9,6 +9,8 @@
 
 oexLock _g_rtmpd_lock;
 
+extern "C" void RTMP_TLS_Init();
+
 // Export classes
 static void SQBIND_Export_rtmpd( sqbind::VM x_vm )
 {_STT();
