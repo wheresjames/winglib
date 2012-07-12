@@ -121,6 +121,12 @@ public:
 	/// Sets the current frame number
 	void setFrame( SQInteger n ) { m_nFrame = n; }
 
+	/// Sets the time base, if zero, defaults to frame rate
+	void setTimeBase( SQInteger n ) { m_nTimeBase = n; }
+
+	/// Returns the current time base
+	SQInteger getTimeBase() { return m_nTimeBase; }
+
 	/** @} */
 
 private:
@@ -130,6 +136,9 @@ private:
 
 	/// Frame rate
 	int						m_nFps;
+
+	/// Time base, if zero, defaults to m_nFps
+	oex::oexINT64			m_nTimeBase;
 
 	/// Frame number
 	oex::oexINT64			m_nFrame;

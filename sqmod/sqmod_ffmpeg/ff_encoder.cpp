@@ -22,6 +22,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfEncoder, CFfEncoder )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, calcPts )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, getFrame )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, setFrame )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, setTimeBase )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, getTimeBase )
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CFfEncoder );
@@ -37,6 +39,7 @@ CFfEncoder::CFfEncoder()
 	m_nFmt = 0;
 	m_nFps = 0;
 	m_nFrame = 0;
+	m_nTimeBase = 0;
 	m_pCodec = oexNULL;
 	m_pCodecContext = oexNULL;
 	m_pStream = oexNULL;
@@ -114,6 +117,11 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 	avcodec_get_context_defaults( m_pCodecContext );
 
+	// Get time base
+	oex::oexINT64 nTimeBase = m_nTimeBase;
+	if ( 0 >= nTimeBase )
+		nTimeBase = fps;
+
 	m_pCodecContext->codec_id = (CodecID)x_nCodec;
 	m_pCodecContext->codec_type = AVMEDIA_TYPE_VIDEO;
 	m_pCodecContext->bit_rate = brate;
@@ -121,7 +129,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	m_pCodecContext->width = width;
 	m_pCodecContext->height = height;
 	m_pCodecContext->gop_size = fps;
-	m_pCodecContext->time_base.den = fps;
+	m_pCodecContext->time_base.den = nTimeBase;
 	m_pCodecContext->time_base.num = 1;
 	m_pCodecContext->me_method = 1;
 	m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
