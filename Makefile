@@ -67,6 +67,7 @@ endif
 # Squirrel modules
 #-------------------------------------------------------------------
 BUILDDIRS := $(BUILDDIRS) \
+			 sqmod/sqmod_asio \
 			 sqmod/sqmod_cell \
              sqmod/sqmod_curl \
 			 sqmod/sqmod_fftw \
