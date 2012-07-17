@@ -5,6 +5,17 @@ class CRtmpdSession
 {
 public:
 
+	enum
+	{
+		eFlagAllInfo 		= 0x0001,
+
+		eFlagEmcaArray		= 0x0002,
+
+		eFlagStrictArray	= 0x0004
+	};
+
+public:
+
 	// Declare constructors
 	_SQBIND_CLASS_CTOR_BEGIN( CRtmpdSession )
 	_SQBIND_CLASS_CTOR_END( CRtmpdSession )
@@ -84,6 +95,18 @@ public:
 
 	/// Send a packet back to the client
 	int SendPacket( sqbind::CSqMulti *m, int nQueue );
+
+	/// Send a packet back to the client
+	int SendPacket2( int format, int csi, int type, int ext, sqbind::CSqMulti *m, int nQueue );
+
+	/// Send binary blob to the client
+	int SendPacketBin( int format, int csi, int type, int ext, sqbind::CSqBinary *b, int nQueue );
+
+	/// Returns the default chunk size
+	int getDefaultChunkSize() { return RTMP_DEFAULT_CHUNKSIZE; }
+
+	/// Parses Flv chunks
+	int ParseFlv( sqbind::CSqBinary *b, sqbind::CSqMulti *m );
 
 	/** @} */
 

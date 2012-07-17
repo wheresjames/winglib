@@ -24,6 +24,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfEncoder, CFfEncoder )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, setFrame )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, setTimeBase )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, getTimeBase )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, getLevel )
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CFfEncoder );
@@ -131,7 +132,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	m_pCodecContext->gop_size = fps;
 	m_pCodecContext->time_base.den = nTimeBase;
 	m_pCodecContext->time_base.num = 1;
-	m_pCodecContext->me_method = 1;
+//	m_pCodecContext->me_method = 1;
 	m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
 	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
 
@@ -143,63 +144,42 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	if ( CODEC_ID_H264 == m_pCodecContext->codec_id )
 	{
 		// 'Real time'
-		m_pCodecContext->max_b_frames = 0;
-		m_pCodecContext->thread_count = 0;
-		m_pCodecContext->b_frame_strategy = 1;
-		m_pCodecContext->level = 13;
-		m_pCodecContext->profile = FF_PROFILE_H264_BASELINE;
+//		m_pCodecContext->max_b_frames = 0;
+//		m_pCodecContext->thread_count = 0;
+//		m_pCodecContext->b_frame_strategy = 1;
+
+		// Set approximate difficulti level
+		if ( 320 >= width )
+			m_pCodecContext->level = 20;
+		else if ( 720 >= width )
+			m_pCodecContext->level = 30;
+		else if ( 1280 >= width )
+			m_pCodecContext->level = 32;
+		else if ( 2048 >= width )
+			m_pCodecContext->level = 40;
+		else
+			m_pCodecContext->level = 50;
+
+//		m_pCodecContext->profile = FF_PROFILE_H264_BASELINE;
 
 		// Set H264 codec params
 		av_opt_set( m_pCodecContext->priv_data, "profile",
-					( m && (*m)[ "profile" ].len() ) ? (*m)[ "profile" ].c_str() : "baseline", 0 );
+					( m && (*m)[ "profile" ].len() ) ? (*m)[ "profile" ].c_str() : "baseline", AV_OPT_SEARCH_CHILDREN );
 		av_opt_set( m_pCodecContext->priv_data, "preset",
-					( m && (*m)[ "preset" ].len() ) ? (*m)[ "preset" ].c_str() : "ultrafast", 0 );
+					( m && (*m)[ "preset" ].len() ) ? (*m)[ "preset" ].c_str() : "ultrafast", AV_OPT_SEARCH_CHILDREN );
 		av_opt_set( m_pCodecContext->priv_data, "tune",
-					( m && (*m)[ "tune" ].len() ) ? (*m)[ "tune" ].c_str() : "zerolatency", 0 );
+					( m && (*m)[ "tune" ].len() ) ? (*m)[ "tune" ].c_str() : "zerolatency", AV_OPT_SEARCH_CHILDREN );
 //		av_opt_set( m_pCodecContext->priv_data, "x264opts",
 //					( m && (*m)[ "x264opts" ].len() ) ? (*m)[ "x264opts" ].c_str() : "no-mbtree:sliced-threads:sync-lookahead=0", 0 );
 
-	} // end if
-
-/*
-#define M_DEF( k, f ) if ( m->isset( oexT( #k ) ) ) m_pCodecContext->k = (*m)[ oexT( #k ) ].f()
-	if ( m && m->size() )
-	{
-		if ( m->isset( oexT( "codec_type" ) ) )
-			m_pCodecContext->codec_type = (AVMediaType)(*m)[ oexT( "codec_type" ) ].toint();
-
-		M_DEF( bit_rate_tolerance,		toint );
-		M_DEF( gop_size,				toint );
-		M_DEF( flags,					toint );
-		M_DEF( flags2,					toint );
-		M_DEF( refs,					toint );
-		M_DEF( me_range,				toint );
-		M_DEF( qmin,					toint );
-		M_DEF( qmax,					toint );
-		M_DEF( keyint_min,				toint );
-		M_DEF( max_qdiff,				toint );
-		M_DEF( level,					toint );
-		M_DEF( scenechange_threshold,	toint );
-		M_DEF( b_frame_strategy,		toint );
-//		M_DEF( bframebias,				toint );
-//		M_DEF( deblockalpha,			toint );
-//		M_DEF( deblockbeta,				toint );
-		M_DEF( coder_type,				toint );
-		M_DEF( max_b_frames,			toint );
-//		M_DEF( partitions,				toint );
-		M_DEF( me_subpel_quality,		toint );
-		M_DEF( trellis,					toint );
-		M_DEF( chromaoffset,			toint );
-		M_DEF( me_cmp,					toint );
-		M_DEF( me_method,				toint );
-
-//		M_DEF( crf,						tofloat );
-		M_DEF( i_quant_factor,			tofloat );
-		M_DEF( b_quant_factor,			tofloat );
-		M_DEF( qcompress,				tofloat );
+		if ( m )
+			if ( (*m)[ "level" ].toint() )
+				m_pCodecContext->level = (*m)[ "level" ].toint();
+			else
+				(*m)[ "level" ].set( sqbind::oex2std( oexMks( m_pCodecContext->level ) ) );
 
 	} // end if
-*/
+
 	if ( m && m->isset( oexT( "quality" ) ) )
 	{
 		float q = (*m)[ oexT( "quality" ) ].tofloat();
@@ -300,6 +280,7 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 
 	// Calculate pts
 	paf->pts = calcPts();
+//	paf->pts = m_nFrame * ( 90000 / m_nFps );
 
 	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->_Ptr( nHeader ), out->Size() - nHeader, paf );
 	if ( 0 > nBytes )

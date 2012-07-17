@@ -92,7 +92,10 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqFifoShare, CSqFifoShare )
 
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, Reset )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, Cancel )
-//	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare,  )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, setFlag )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, getFlag )
+
+	SQBIND_ENUM( CSqFifoShare::eFlagNoInitSync, eFlagNoInitSync )
 
 SQBIND_REGISTER_CLASS_END()
 
@@ -448,7 +451,7 @@ CSqFifoShare::SPtrInfo* CSqFifoShare::ReadPtr()
 
 	// Initialize our read pointer
 	if ( 0 > m_iRead || m_iRead >= nBlocks )
-		m_iRead = i;
+		m_iRead = getFlag( eFlagNoInitSync ) ? 0 : i;
 
 	// Any data?
 	if ( 0 > i || i == m_iRead || i >= nBlocks )
@@ -576,7 +579,7 @@ int CSqFifoShare::incReadPtr()
 
 	// Initialize our read pointer
 	if ( 0 > m_iRead || m_iRead >= nBlocks )
-		m_iRead = i;
+		m_iRead = getFlag( eFlagNoInitSync ) ? 0 : i;
 
 	// Any more data?
 	if ( 0 > i || i == m_iRead || i >= nBlocks )
@@ -604,7 +607,7 @@ int CSqFifoShare::decReadPtr()
 
 	// Initialize our read pointer
 	if ( 0 > m_iRead || m_iRead >= nBlocks )
-		m_iRead = i;
+		m_iRead = getFlag( eFlagNoInitSync ) ? 0 : i;
 
 	if ( 0 >= nBlocks )
 		return 0;

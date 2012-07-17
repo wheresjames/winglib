@@ -16,6 +16,17 @@ class CGlobal
 
 	format = 0;
 
+	frame = CSqBinary();
+	
+	pps = 0;
+	sps = 0;
+	sei = "";
+	level = 0;
+	sei_sent = 0;
+
+	name = "";
+	params = 0;
+
 	// RTMP streamid
 	nStreamId = 1;
 
@@ -76,7 +87,7 @@ function SetSocket( socket ) : ( _g )
 	return 1;
 }
 
-function sendVideoHeaders( data ) : ( _g )
+function createSeiHeaders() : ( _g )
 {
 	// Decode header
 	local p = CSqMulti();
@@ -84,87 +95,357 @@ function sendVideoHeaders( data ) : ( _g )
 
 	// Create SEI string
 	local sei = "", pps = CSqBinary(), sps = CSqBinary();
-	if ( p[ "codec" ].str() == "H264" && p[ "extra" ].len() )
-	{	local extra = p[ "extra" ].bin(), s1 = extra.Find( "\x0\x0\x0\x1", 0, 0 );
-		if ( extra.failed() != s1 )
-		{	local s2 = extra.Find( "\x0\x0\x0\x1", s1 + 4, 0 );
-			if ( extra.failed() != s2 )
-			{	pps = extra.getSub( s1 + 4, s2 - s1 - 4 );
-				sps = extra.getSub( s2 + 4, 0 );
-				sei = extra.getSub( s1 + 4, s2 - s1 - 4 ).base64_encode()
-					  + "," + extra.getSub( s2 + 4, 0 ).base64_encode();
-			} // end if
-		} // end if
-	} // end if
+	if ( p[ "codec" ].str() != "H264" || !p[ "extra" ].len() )
+		return 0;
 
-	local e = data.Find( "onMetaData", 0, 0 ), eh = 0;
-	if ( data.failed() != e )
+	local extra = p[ "extra" ].bin(), s1 = extra.Find( "\x0\x0\x0\x1", 0, 0 );
+	if ( extra.failed() == s1 )
+		return 0;
+
+	local s2 = extra.Find( "\x0\x0\x0\x1", s1 + 4, 0 );
+	if ( extra.failed() == s2 )
+		return 0;
+
+	// Get sei data
+	_g.pps = extra.getSub( s1 + 4, s2 - s1 - 4 );
+	_g.sps = extra.getSub( s2 + 4, 0 );
+	_g.sei = _g.pps.base64_encode() + "," +_g.sps.base64_encode();
+	_g.level = p[ "level" ].toint();
+
+	return 1;
+}
+
+function sendSeiHeaders() : ( _g )
+{
+	// Create headers if needed
+	if ( !_g.pps || !_g.sps )
+		if ( !createSeiHeaders() )
+			return 0;
+
+	_g.sei_sent = 1;
+
+	local body = CSqBinary( 128 );
+	body.setString( "\x17\x00\x00\x00\x00" );
+	body.appendString( "\x01\x42\x00\x0d\xFF" );
+	body.setUCHAR( 8, _g.level );
+
+	body.appendString( "\xE1" );
+	body.Resize( body.getUsed() + 2 );
+	body.setUsed( body.getUsed() + 2 );
+	body.BE_setAbsUSHORT( 11, _g.pps.getUsed() );
+	body.Append( _g.pps );
+
+	body.appendString( "\x1" );
+	body.Resize( body.getUsed() + 2 );
+	body.setUsed( body.getUsed() + 2 );
+	body.BE_setAbsUSHORT( 11 + 2 + 1 + _g.pps.getUsed(), _g.sps.getUsed() );
+	body.Append( _g.sps );
+
+	_g.rtmp.SendPacketBin( 0, 7, 9, 1, body, 0 );
+
+	return 1;
+}
+
+function SendVideo() : ( _g )
+{
+	if ( !_g.share )
+		return 0;
+
+	// Attempt to open share
+	if ( !_g.share.isOpen() )
+		return _g.share.Open( _g.sid );
+
+	local data;
+	do
 	{
-		_self.echo( " ********************** HEADER AT : " + e );
+		// Grab the input data
+		data = _g.share.ReadData();
+		if ( !data.getUsed() )
+			return 1;
 
-		eh = data.Find( "\x0\x0\x9\x0\x0", e, 0 );
+//if ( !_g.count++ )
+//	_self.echo( "--- VIDEO FRAME ---\n" + data.AsciiHexStr( 16, 32 ) );
 
-		if ( data.failed() != eh )
+		// Append packet fragment
+		_g.frame.Append( data );
+
+		// Parse FLV packet
+		local m = CSqMulti(), used = _g.rtmp.ParseFlv( _g.frame, m );
+		if ( 0 > used )
+			_self.echo( "--- VIDEO FRAME ---\n !!! err = " + _g.rtmp.getLastErrorStr() ),
+			_self.echo( _g.frame.AsciiHexStr( 16, 64 ) ),
+			_g.frame.setUsed( 0 );
+
+//_self.echo( "used = " + used );
+//_self.echo( "data.getUsed() = " + data.getUsed() );
+//_self.echo( m.print_r( 1 ) );
+
+		// Process each packet
+		for ( local i = 0; m.isset( i.tostring() ); i++ )
 		{
-			_self.echo( " ********************** END HEADER AT : " + eh );
+			local si = i.tostring();
 
-			local body = data.getSub( e - 3, eh - e + 3 + 3 );
-			body.Unshare();
-			_self.echo( body.AsciiHexStr( 16, 16 ) );
+//_self.echo( "m[ si ] = " + m[ si ].print_r( 1 ) );
 
-			local h = CSqMulti();
-			h[ "pkt" ][ "format" ] <- "1";
-			h[ "pkt" ][ "chunk_stream_id" ] <- "5";
-			h[ "pkt" ][ "type_id" ] <- "18";
-			h[ "pkt" ][ "timestamp" ] <- "0";
-			h[ "pkt" ][ "info" ] <- "1";
-			h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
+			local pkt = _g.frame.getSub( m[ si ][ "dat" ].toint(),
+										 m[ si ][ "dsz" ].toint() );
 
-			h[ "body" ] <- body.getString();
+//_self.echo( "--- PKT ---\n" + pkt.AsciiHexStr( 16, 64 ) );
+//_self.echo( "PKT TYPE = " + m[ si ][ "id" ].toint() );
 
-			_self.echo( "onMetaData : " + _g.rtmp.SendPacket( h, 0 ) );
+			switch( m[ si ][ "id" ].toint() )
+			{
+				case 0x12 :
+					local meta = CSqMulti();
+					if ( _g.rtmp.DeserializePacket( pkt, meta, 0 ) )
+						_self.echo( " === onMetaData ===\n" + meta.print_r( 1 ) );
+/*
+_self.echo( "--- onMetaData Packet ---\n" + pkt.AsciiHexStr( 16, 64 ) );
 
-		} // end if
+					local meta = CSqMulti();
+					if ( _g.rtmp.DeserializePacket( pkt, meta, 0 ) )
+					{
+//						meta[ "1" ].unset( "duration" );
+//						meta[ "1" ].unset( "filesize" );
 
+						meta[ "1" ][ "trackinfo" ][ "_arraytype" ] <- "strict";
+						meta[ "1" ][ "trackinfo" ][ "timescale" ] <- _g.fps.tostring();
+						meta[ "1" ][ "trackinfo" ][ "language" ] <- "eng";
+						meta[ "1" ][ "trackinfo" ][ "type" ] <- "video";
+						meta[ "1" ][ "trackinfo" ][ "profile-level-id" ] <- "42000d";
+
+						// Create sei headers
+						if ( !_g.pps || !_g.sps ) createSeiHeaders();
+						if ( _g.sei.len() ) meta[ "1" ][ "trackinfo" ][ "sprop-parameter-sets" ] <- _g.sei;
+
+						pkt.setUsed( 0 ); pkt.Unshare();
+						//_g.rtmp.SerializePacket( pkt, meta, _g.rtmp.eFlagEmcaArray );
+						_g.rtmp.SerializePacket( pkt, meta, 0 );
+
+_self.echo( " === onMetaData Parsed ===\n" + meta.print_r( 1 ) );
+
+_self.echo( "--- Seialized Packet ---\n" + pkt.AsciiHexStr( 16, 64 ) );
+
+					} // end if
+*/
+					if ( !_g.rtmp.SendPacketBin( 1, 5, 18, 1, pkt, 0 ) )
+						_g.quit = 1;
+					break;
+
+				case 0x09 :
+
+					if ( !_g.sei_sent )
+						sendSeiHeaders();
+
+					pkt.BE_setAbsUINT( 5, pkt.getUsed() - 9 );
+					if ( !_g.rtmp.SendPacketBin( 1, 7, 9, 1, pkt, 0 ) )
+						_g.quit = 1;
+
+					break;
+
+			} // end switch
+
+		} // end for
+
+		// Shift out used bytes
+		if ( 0 < used )
+			_g.frame.LShift( used );
+
+	} while ( _g.share.incReadPtr() );
+
+	return 1;
+}
+
+function ProcessCommands() : ( _g )
+{
+	// Attempt to read a packet
+	local ret = _g.rtmp.ReadPacket();
+
+	// Connection closed?
+	if ( 0 > ret )
+	{	_g.quit = 1;
+		return 0;
 	} // end if
 
-	{ // Send video frame headers
+	// No packet
+	else if ( !ret )
+		return 0;
 
-		local h = CSqMulti(), body = CSqBinary();
-		h[ "pkt" ][ "format" ] <- "0";
-		h[ "pkt" ][ "chunk_stream_id" ] <- "7";
-		h[ "pkt" ][ "type_id" ] <- "9";
-		h[ "pkt" ][ "timestamp" ] <- "0";
-		h[ "pkt" ][ "info" ] <- "1";
-		h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
+	_self.echo( "... Packet Type : " + ret + format( " : 0x%x", ret ) );
+	_self.echo( "... Packet Size : " + _g.rtmp.getPacketSize() );
 
-		body.Allocate( 1024 );
-		body.setString( "\x17\x00\x00\x00\x00" );
-		body.appendString( "\x01\x42\x80\x0d\xFF" );
-//					body.appendString( "\x01\x42\x80\x1f\xFF" );
+	local data = _g.rtmp.getPacketData( 0 );
+	_self.echo( "\n --- CMD BINARY ---\n" + data.AsciiHexStr( 16, 32 ) );
 
-_self.echo( "pps = " + pps.getUsed() );
-		body.appendString( "\xE1" );
-		body.Resize( body.getUsed() + 2 );
-		body.setUsed( body.getUsed() + 2 );
-		body.BE_setAbsUSHORT( 11, pps.getUsed() );
-		body.Append( pps );
+	local pkt = _g.rtmp.getPacket( 0 );
+	_self.echo( "\n --- CMD PACKET ---\n" + pkt.print_r( 1 ) );
 
-_self.echo( "sps = " + sps.getUsed() );
-		body.appendString( "\x1" );
-		body.Resize( body.getUsed() + 2 );
-		body.setUsed( body.getUsed() + 2 );
-		body.BE_setAbsUSHORT( 11 + 2 + 1 + pps.getUsed(), sps.getUsed() );
-		body.Append( sps );
-		//body.Append( p[ "extra" ].bin() );
+	switch( pkt[ "0" ].str() )
+	{
+		case "connect" :
 
-		h[ "body" ] <- body.getString();
+			local url = _self.parse_url( pkt[ "2" ][ "tcUrl" ].str() );
+			_g.params = CSqMulti( url[ "extra" ].str() );
 
-		_self.echo( "Video Headers : " + _g.rtmp.SendPacket( h, 0 ) );
+			// Get device name
+			_g.name = _g.params[ "id" ].str();
+			if ( !_g.name.len() && url[ "path" ].len() )
+				_g.name = url[ "path" ].str().slice( 1 );
 
-	} // end
+			// Did the user specify a valid device
+			if ( !_g.name.len() )
+			{	_self.echo( "!!! RTMP : Invalid device : " + pkt.getJSON() );
+				_g.quit = 1;
+				return 0;
+			} // end if
 
-	return eh;
+			_self.echo( "RTMP Client connected to device : " + _g.name );
+
+			local body = CSqBinary();
+
+			// WinAckSize
+			_g.rtmp.SendPacketBin( 0, 2, 5, 0, 
+								   body.Using( 4, 4 )
+								   .BE_setUINT( 0, 2500000 ), 0 );
+
+			// Set peer bandwidth
+			_g.rtmp.SendPacketBin( 0, 2, 6, 0, 
+								   body.Using( 5, 5 )
+								   .BE_setUINT( 0, 2500000 )
+								   .setCHAR( 4, 2 ), 0 );
+
+			// Sream Begin 0
+			_g.rtmp.SendPacketBin( 0, 2, 4, 0, 
+								   body.Using( 6, 6 )
+								   .BE_setSHORT( 0, 0 )
+								   .BE_setAbsUINT( 2, 0 ), 0 );
+
+			// Send chunk size
+			_g.rtmp.SendPacketBin( 0, 2, 1, 0, 
+								   body.Using( 4, 4 )
+								   .BE_setUINT( 0, _g.rtmp.getDefaultChunkSize() ), 0 );
+
+			// Send Connect reply
+			_g.rtmp.SendPacket2( 0, 3, 20, 0, CSqMulti(
+								 "0=_result"
+								 + ",1=" + pkt[ "1" ].str_urlenc()
+								 + ",2={fmsVer=FMS/3%2C5%2C5%2C2004,capabilities=31.0,mode=1.0}"
+								 + ",3={level=status,code=NetConnection.Connect.Success"
+									+ ",description=Connection Succeeded."
+									+ ",objectEncoding=" + pkt[ "2" ][ "objectEncoding" ].str_urlenc()
+									+ ",clientid=" + _self.urlencode( _g.sid )
+									+ ",data={version=" + _self.urlencode( "3,5,5,2004" ) + "}"
+									+ "}"
+								 ), 0 );
+
+			break;
+
+		case "createStream" :
+			return _g.rtmp.SendPacket2( 0, 3, 20, 0, CSqMulti(
+										"0=_result"
+										+ ",1=" + pkt[ "1" ].str()
+										+ ",2="
+										+ ",3=1."
+										), 0 );
+
+		case "checkBandwidth" :
+			return _g.rtmp.SendPacket2( 0, 3, 20, 0, CSqMulti(
+										"0=onBWDone"
+										+ ",1=0."
+										+ ",2="
+										), 0 );
+
+		case "getStreamLength" :
+			return _g.rtmp.SendPacket2( 0, 3, 20, 0, CSqMulti(
+										"0=_result"
+										+ ",1=" + pkt[ "1" ].str()
+										+ ",2="
+										+ ",3=0."
+										), 0 );
+
+		case "play" :
+
+			local body = CSqBinary();
+
+			// Sream Begin 1
+			_g.rtmp.SendPacketBin( 0, 2, 4, 0, 
+								   body.Using( 6, 6 )
+								   .BE_setSHORT( 0, 0 )
+								   .BE_setAbsUINT( 2, 1 ), 0 );
+
+  
+			// NetStream.Play.Reset
+			_g.rtmp.SendPacket2( 0, 5, 20, 1, CSqMulti(
+								 "0=onStatus"
+								 + ",1=0."
+								 + ",2="
+								 + ",3={level=status,code=NetStream.Play.Reset"
+									+ ",description=Connection Succeeded."
+									+ ",clientid=" + _self.urlencode( _g.sid )
+									+ "}"
+								), 0 );
+
+			// NetStream.Play.Start
+			_g.rtmp.SendPacket2( 0, 5, 20, 1, CSqMulti(
+								 "0=onStatus"
+								 + ",1=0."
+								 + ",2="
+								 + ",3={level=status,code=NetStream.Play.Start"
+									+ ",description=Started Playing " + _self.urlencode( pkt[ "3" ].str() )
+									+ ",clientid=" + _self.urlencode( _g.sid )
+									+ ",timecodeOffset=" + ( _self.gmt_time_useconds() / 1000 ) + "L"
+									+ "}"
+								), 0 );
+
+			// |RtmpSampleAccess
+			_g.rtmp.SendPacket2( 1, 5, 18, 0, CSqMulti(
+								 "0=|RtmpSampleAccess"
+								 + ",1=0"
+								 + ",2=0"
+								), 0 );
+
+			// NetStream.Data.Start
+			_g.rtmp.SendPacket2( 0, 5, 18, 1, CSqMulti(
+								 "0=onStatus,1={code=NetStream.Data.Start}"
+								), 0 );
+
+			// User control message
+			_g.rtmp.SendPacketBin( 0, 2, 4, 0, 
+								   body.Using( 6, 6 )
+								   .BE_setSHORT( 0, 0x20 )
+								   .BE_setAbsUINT( 2, 1 ), 0 );
+
+			{ // Start video stream
+
+				local p = CSqMulti();
+				p[ "codec" ] <- _g.codec;
+				p[ "type" ] <- "flv";
+				p[ "w" ] <- "320";
+				p[ "h" ] <- "240";
+				p[ "fps" ] <- _g.fps.tostring();
+				p[ "encoder_params" ][ "global_headers" ] <- "1";
+
+				// Generate a stream id
+				_g.sid = _self.unique();
+
+				// Start the streaming thread
+				p[ "sid" ] <- _g.sid;
+				::_self.spawn( 1, ".", _g.sid, "test_videostream.thread.nut", 1 );
+				::_self.execute1( 0, _g.sid, "StartStream", p.serialize() );
+
+				// Create fifo share object
+				_g.share = CSqFifoShare();
+
+				// Don't skip initial frames
+				_g.share.setFlag( _g.share.eFlagNoInitSync, 1 );
+
+			} // end start video stream
+
+			break;
+
+	} // end switch
+
+	return 1;
 }
 
 function Run() : ( _g )
@@ -188,405 +469,8 @@ function Run() : ( _g )
 
 	// Are we streaming video
 	if ( _g.share )
-	{
-		// Attempt to open share
-		if ( !_g.share.isOpen() )
-			_g.share.Open( _g.sid );
+		return SendVideo();
 
-		else
-		{
-			local data;
-			do
-			{
-				data = _g.share.ReadData();
-
-				if ( data.getUsed() )
-				{
-					data.Unshare();
-
-//					_self.echo( " --- FLV " + _g.count + " ---\n" + data.AsciiHexStr( 16, 16 ) );
-
-					// Skip file headers
-					local e = 0;
-					if ( !_g.count++ )
-					{
-						// Send video headers
-						e = sendVideoHeaders( data );
-
-						// Skip to first key frame
-						e = data.findUSHORT( 0x0117, e, 0 );
-
-					} // end if
-
-					// Brute force skip FLV header
-					else 
-						e = 11;
-
-					// If we found what we wanted
-					if ( data.failed() != e )
-					{
-						data.LShift( e );
-						data.Resize( data.getUsed() - 4 );
-
-						data.BE_setAbsUINT( 5, data.getUsed() - 9 );
-
-						local h = CSqMulti(), body = CSqBinary();
-						h[ "pkt" ][ "format" ] <- "1";
-						h[ "pkt" ][ "chunk_stream_id" ] <- "7";
-						h[ "pkt" ][ "type_id" ] <- "9";
-						h[ "pkt" ][ "timestamp" ] <- "0";
-						h[ "pkt" ][ "info" ] <- "1";
-						h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
-
-//						_self.echo( " --- FRAME ---\n" + data.AsciiHexStr( 16, 16 ) );
-						h[ "body" ] <- data.getString();
-
-						if ( !_g.rtmp.SendPacket( h, 0 ) )
-						{	_g.quit = 1;
-							_self.echo( " *** CLIENT CLOSED SOCKET *** " );
-						} // end if
-
-						else
-							_self.echo( "*** Send Video frame : " + data.getUsed() );
-
-					} // end if
-
-					_g.share.incReadPtr();
-
-				} // end if
-
-			} while ( data.getUsed() );
-
-		} // end else
-
-		return 0;
-
-	} // end if
-
-	local ret = _g.rtmp.ReadPacket();
-
-	_self.echo( "... ReadPacket() : " + ret );
-
-	// Connection closed?
-	if ( 0 > ret )
-	{	_g.quit = 1;
-		return 0;
-	} // end if
-
-	// No packet
-	else if ( !ret )
-		return 0;
-
-	_self.echo( "... Packet Type : " + ret + format( " : 0x%x", ret ) );
-	_self.echo( "... Packet Size : " + _g.rtmp.getPacketSize() );
-
-	local data = _g.rtmp.getPacketData( 0 );
-	_self.echo( "\n --- CMD BINARY ---\n" + data.AsciiHexStr( 16, 32 ) );
-
-	local pkt = _g.rtmp.getPacket( 0 );
-	_self.echo( "\n --- CMD PACKET ---\n" + pkt.print_r( 1 ) );
-
-	// Generic reply packet
-	local r = CSqMulti();
-	r[ "pkt" ][ "format" ] <- "0";
-	r[ "pkt" ][ "chunk_stream_id" ] <- "3";
-	r[ "pkt" ][ "type_id" ] <- "20";
-	r[ "pkt" ][ "timestamp" ] <- "0";
-	r[ "pkt" ][ "info" ] <- "0";
-	r[ "pkt" ][ "has_abs_timestamp" ] <- "0";
-	r[ "0" ] <- "_result";
-	r[ "1" ] <- pkt[ "1" ].str();
-
-	switch( pkt[ "0" ].str() )
-	{
-		case "connect" :
-
-			{ // WinAckSize
-
-				local h = CSqMulti(), body = CSqBinary( 4, 4 );
-				h[ "pkt" ][ "format" ] <- "0";
-				h[ "pkt" ][ "chunk_stream_id" ] <- "2";
-				h[ "pkt" ][ "type_id" ] <- "5";
-				h[ "pkt" ][ "timestamp" ] <- "0";
-				h[ "pkt" ][ "info" ] <- "0";
-				h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
-
-				// Set window acknowledgement size
-				body.BE_setUINT( 0, 2500000 );
-
-				h[ "body" ] <- body.getString();
-				_self.echo( "WinAck : " + _g.rtmp.SendPacket( h, 0 ) );
-
-			} // end
-
-			{ // Set peer bandwidth size
-
-				local h = CSqMulti(), body = CSqBinary( 5, 5 );
-				h[ "pkt" ][ "format" ] <- "0";
-				h[ "pkt" ][ "chunk_stream_id" ] <- "2";
-				h[ "pkt" ][ "type_id" ] <- "6";
-				h[ "pkt" ][ "timestamp" ] <- "0";
-				h[ "pkt" ][ "info" ] <- "0";
-				h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
-
-				// Window acknowledgement size
-				body.BE_setUINT( 0, 2500000 );
-
-				// Limit type : dynamic
-				body.setCHAR( 4, 2 );
-
-				h[ "body" ] <- body.getString();
-				_self.echo( "Peer bandwidth size : " + _g.rtmp.SendPacket( h, 0 ) );
-
-			} // end
-
-			{ // Begin stream
-
-				local h = CSqMulti(), body = CSqBinary( 6, 6 );
-				h[ "pkt" ][ "format" ] <- "0";
-				h[ "pkt" ][ "chunk_stream_id" ] <- "2";
-				h[ "pkt" ][ "type_id" ] <- "4";
-				h[ "pkt" ][ "timestamp" ] <- "0";
-				h[ "pkt" ][ "info" ] <- "0";
-				h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
-
-				body.Zero();
-
-				// Stream Begin
-				body.BE_setSHORT( 0, 0 );
-
-				// Stream ID
-				body.BE_setAbsUINT( 2, 0 );
-
-				h[ "body" ] <- body.getString();
-				_self.echo( "Begin stream 0 : " + _g.rtmp.SendPacket( h, 0 ) );
-
-			} // end
-
-			// Connect response
-			r[ "2" ][ "fmsVer" ] <- "FMS/3,5,5,2004";
-			r[ "2" ][ "capabilities" ] <- "31.0";
-			r[ "2" ][ "mode" ] <- "1.0";
-
-			r[ "3" ][ "level" ] <- "status";
-			r[ "3" ][ "code" ] <- "NetConnection.Connect.Success";
-			r[ "3" ][ "description" ] <- "Connection succeeded.";
-			r[ "3" ][ "objectEncoding" ] <- pkt[ "2" ][ "objectEncoding" ].str();
-			r[ "3" ][ "clientid" ] <- "1978006327";
-
-			r[ "3" ][ "data" ][ "version" ] <- "3,5,5,2004";
-
-			break;
-
-		case "createStream" :
-			r[ "2" ] <- "";
-			r[ "3" ] <- ( _g.nStreamId++ ).tostring() + ".";
-			break;
-
-		case "getStreamLength" :
-			r[ "2" ] <- "";
-			r[ "3" ] <- "0.";
-			break;
-
-		case "checkBandwidth" :
-			r[ "pkt" ][ "chunk_stream_id" ] <- "3";
-
-			r[ "0" ] <- "onBWDone";
-//			r[ "2" ] <- "";
-			r[ "1" ] <- "0."; // 8192.";
-			r[ "2" ] <- "";
-
-			// r[ "0" ] <- "onBWCheck";
-			// local bin = CSqBinary( 32767, 32767 );
-			// _self.srand( 41 );
-			// if ( bin.Randomize( 0, 0 ) )
-			// {	r[ "2" ] <- "";
-				// r[ "3" ] <- bin.getString();
-				// _g.nBandwidthTime = _self.gmt_time_useconds().tostring();
-			// } // end if
-			// else r.clear(), _g.nBandwidthTime = 0;
-
-			break;
-
-		case "play" :
-
-			{ // Begin stream
-
-				local h = CSqMulti(), body = CSqBinary( 6, 6 );
-				h[ "pkt" ][ "format" ] <- "0";
-				h[ "pkt" ][ "chunk_stream_id" ] <- "2";
-				h[ "pkt" ][ "type_id" ] <- "4";
-				h[ "pkt" ][ "timestamp" ] <- "0";
-				h[ "pkt" ][ "info" ] <- "0";
-				h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
-
-				body.Zero();
-
-				// Stream Begin
-				body.BE_setSHORT( 0, 0 );
-
-				// Stream ID
-				body.BE_setAbsUINT( 2, 1 );
-
-				h[ "body" ] <- body.getString();
-				_self.echo( "Begin stream 1 : " + _g.rtmp.SendPacket( h, 0 ) );
-
-			} // end
-
-			{ // NetStream.Play.Reset
-
-				local h = CSqMulti();
-				h[ "pkt" ][ "format" ] <- "0";
-				h[ "pkt" ][ "chunk_stream_id" ] <- "5";
-				h[ "pkt" ][ "type_id" ] <- "20";
-				h[ "pkt" ][ "timestamp" ] <- "0";
-				h[ "pkt" ][ "info" ] <- "1";
-				h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
-
-				h[ "0" ] <- "onStatus";
-				h[ "1" ] <- "0.";
-				h[ "2" ] <- "";
-				h[ "3" ][ "level" ] <- "status";
-				h[ "3" ][ "code" ] <- "NetStream.Play.Reset";
-				h[ "3" ][ "description" ] <- "Playing and resetting " + pkt[ "3" ].str();
-				h[ "3" ][ "clientid" ] <- "1978006327";
-
-				_self.echo( "NetStream.Play.Reset : " + _g.rtmp.SendPacket( h, 0 ) );
-
-			} // end
-
-			{ // NetStream.Play.Start
-
-				local h = CSqMulti();
-				h[ "pkt" ][ "format" ] <- "0";
-				h[ "pkt" ][ "chunk_stream_id" ] <- "5";
-				h[ "pkt" ][ "type_id" ] <- "20";
-				h[ "pkt" ][ "timestamp" ] <- "0";
-				h[ "pkt" ][ "info" ] <- "1";
-				h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
-
-				h[ "0" ] <- "onStatus";
-				h[ "1" ] <- "0.";
-				h[ "2" ] <- "";
-				h[ "3" ][ "level" ] <- "status";
-				h[ "3" ][ "code" ] <- "NetStream.Play.Start";
-				h[ "3" ][ "description" ] <- "Started Playing " + pkt[ "3" ].str();
-				h[ "3" ][ "clientid" ] <- "1978006327";
-				h[ "3" ][ "isFastPlay" ] <- "0";
-				h[ "3" ][ "timecodeOffset" ] <- ( _self.gmt_time_useconds() / 1000 ) + "L";
-
-				_self.echo( "NetStream.Play.Start : " + _g.rtmp.SendPacket( h, 0 ) );
-
-			} // end
-
-			{ // |RtmpSampleAccess
-
-				local h = CSqMulti();
-				h[ "pkt" ][ "format" ] <- "1";
-				h[ "pkt" ][ "chunk_stream_id" ] <- "5";
-				h[ "pkt" ][ "type_id" ] <- "18";
-				h[ "pkt" ][ "timestamp" ] <- "0";
-				h[ "pkt" ][ "info" ] <- "0";
-				h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
-
-				h[ "0" ] <- "|RtmpSampleAccess";
-				h[ "1" ] <- "0";
-				h[ "2" ] <- "0";
-
-				_self.echo( "|RtmpSampleAccess : " + _g.rtmp.SendPacket( h, 0 ) );
-
-			} // end
-
-			{ // NetStream.Data.Start
-
-				local h = CSqMulti();
-				h[ "pkt" ][ "format" ] <- "0";
-				h[ "pkt" ][ "chunk_stream_id" ] <- "5";
-				h[ "pkt" ][ "type_id" ] <- "18";
-				h[ "pkt" ][ "timestamp" ] <- "0";
-				h[ "pkt" ][ "info" ] <- "1";
-				h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
-
-				h[ "0" ] <- "onStatus";
-				h[ "1" ][ "code" ] <- "NetStream.Data.Start";
-
-				_self.echo( "NetStream.Data.Start : " + _g.rtmp.SendPacket( h, 0 ) );
-
-			} // end
-
-			{ // User control message
-
-				local h = CSqMulti(), body = CSqBinary( 6, 6 );
-				h[ "pkt" ][ "format" ] <- "0";
-				h[ "pkt" ][ "chunk_stream_id" ] <- "2";
-				h[ "pkt" ][ "type_id" ] <- "4";
-				h[ "pkt" ][ "timestamp" ] <- "0";
-				h[ "pkt" ][ "info" ] <- "0";
-				h[ "pkt" ][ "has_abs_timestamp" ] <- "0";
-
-				body.Zero();
-
-				// Stream Begin
-				body.BE_setSHORT( 0, 0x20 );
-
-				// Stream ID
-				body.BE_setAbsUINT( 2, 1 );
-
-				h[ "body" ] <- body.getString();
-				_self.echo( "User control message : " + _g.rtmp.SendPacket( h, 0 ) );
-
-			} // end
-
-			r.clear();
-
-			{ // Start video stream
-
-				local p = CSqMulti();
-				p[ "codec" ] <- _g.codec;
-				p[ "type" ] <- "flv";
-				//p[ "type" ] <- "mp4";
-				p[ "w" ] <- "320";
-				p[ "h" ] <- "240";
-				p[ "fps" ] <- _g.fps.tostring();
-				p[ "encoder_params" ][ "global_headers" ] <- "1";
-
-				// Generate a stream id
-				_g.sid = _self.unique();
-
-				// Start the streaming thread
-				p[ "sid" ] <- _g.sid;
-				::_self.spawn( 1, ".", _g.sid, "test_videostream.thread.nut", 1 );
-				::_self.execute1( 0, _g.sid, "StartStream", p.serialize() );
-
-				// Create fifo share object
-				_g.share = CSqFifoShare();
-
-			} // end start video stream
-
-			break;
-
-		default :
-			r.clear();
-			break;
-
-	} // end switch
-
-	// Do we have a reply packet to send?
-	if ( r.size() )
-	{
-		// Send the reply packet
-		_self.echo( "SendPacket() : " + _g.rtmp.SendPacket( r, 0 ) );
-
-		// Show reply packet
-		_self.echo( "\n --- REPLY PACKET ---\n" + r.print_r( 1 ) );
-
-		// Show packet encoding
-		local snd = CSqBinary();
-		if ( !_g.rtmp.SerializePacket( snd, r, 0 ) )
-			_self.echo( "!!! Failed to serialize packet" );
-		else _self.echo( "\n --- REPLY BINARY ---\n" + snd.AsciiHexStr( 16, 32 ) );
-
-	} // end if
-
-	return 1;
+	// Process commands
+	return ProcessCommands();
 }

@@ -40,6 +40,14 @@ namespace sqbind
 {
     class CSqFifoShare
     {
+	
+	public:
+	
+		// Flags
+		enum
+		{
+			eFlagNoInitSync = 0x0001
+		}; 
 
     public:
 
@@ -269,7 +277,7 @@ namespace sqbind
 		void setWrites( int n )
 		{	if ( !m_cb.getUsed() )
 				return;
-			return m_cb.setINT( 8, n );
+			m_cb.setINT( 8, n );
 		}
 
 		/// Returns the number of reads from the control block
@@ -283,7 +291,7 @@ namespace sqbind
 		void setReads( int n )
 		{	if ( !m_cb.getUsed() )
 				return;
-			return m_cb.setINT( 9, n );
+			m_cb.setINT( 9, n );
 		}
 
 		/// Set to non-zero to tell the writer to reset
@@ -353,6 +361,13 @@ namespace sqbind
 
 		/// Returns non-zero if a valid share is open
 		int isValid();
+		
+		/// Sets the specified flag
+		void setFlag( int nFlag, int val ) 
+		{	if ( val ) m_nFlags |= nFlag; else m_nFlags &= ~nFlag; }
+
+		/// Returns non-zero if flag is set
+		int getFlag( int nFlag ) { return m_nFlags & nFlag; }
 
 		/** @} */
 
@@ -404,6 +419,9 @@ protected:
 
 		/// Padding added to the end of the allocated buffer
 		int						m_nPadding;
+
+		/// Flags
+		int						m_nFlags;
 
 		/// Time the stream was opened
 		oex::oexUINT			m_uTs;

@@ -154,6 +154,9 @@ int memshare_write( URLContext *h, const unsigned char *buf, int size )
 	if ( !h || !h->priv_data || !buf )
 		return AVERROR( EINVAL );
 
+//oexSHOW( size );
+//oexSHOW( oexBinToAsciiHexStr( sqbind::CSqBinary( buf, size ), 0, 16, 16 ) );
+
 	// Write to the shared memory buffer
 	if ( !((sqbind::CSqFifoShare*)h->priv_data)->WritePtr( buf, size, "", 0, 0 ) )
 		return AVERROR( ENOMEM );

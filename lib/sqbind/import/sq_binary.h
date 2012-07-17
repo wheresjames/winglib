@@ -41,12 +41,12 @@
 #define SQBIND_SQBINARY_DECLARE_TYPE( t )									\
 	oex::oex##t get##t( t_size x_nOffset )									\
 	{ return m_bin.get##t( x_nOffset ); }									\
-	void set##t( t_size x_nOffset, oex::oex##t val )						\
-	{ m_bin.set##t( x_nOffset, val ); }										\
+	CSqBinary* set##t( t_size x_nOffset, oex::oex##t val )					\
+	{ m_bin.set##t( x_nOffset, val ); return this; }						\
 	oex::oex##t getAbs##t( t_size x_nOffset )								\
 	{ return m_bin.getAbs##t( x_nOffset ); }								\
-	void setAbs##t( t_size x_nOffset, oex::oex##t val )						\
-	{ m_bin.setAbs##t( x_nOffset, val ); }									\
+	CSqBinary* setAbs##t( t_size x_nOffset, oex::oex##t val )				\
+	{ m_bin.setAbs##t( x_nOffset, val ); return this; }						\
 	t_size find##t( oex::oex##t val, t_size x_nStart, t_size x_nMax )		\
 	{ return m_bin.find##t( val, x_nStart, x_nMax ); }						\
 	t_size findMin##t( oex::oex##t val, t_size x_nStart, t_size x_nMax )	\
@@ -65,20 +65,20 @@
 	{ return m_bin.skipRange##t( min, max, x_nStart, x_nMax ); }					\
 	oex::oex##t LE_get##t( t_size x_nOffset )								\
 	{ return m_bin.LE_get##t( x_nOffset ); }								\
-	void LE_set##t( t_size x_nOffset, oex::oex##t val )						\
-	{ m_bin.LE_set##t( x_nOffset, val ); }									\
+	CSqBinary* LE_set##t( t_size x_nOffset, oex::oex##t val )				\
+	{ m_bin.LE_set##t( x_nOffset, val ); return this; }						\
 	oex::oex##t LE_getAbs##t( t_size x_nOffset )							\
 	{ return m_bin.LE_getAbs##t( x_nOffset ); }								\
-	void LE_setAbs##t( t_size x_nOffset, oex::oex##t val )					\
-	{ m_bin.LE_setAbs##t( x_nOffset, val ); }								\
+	CSqBinary* LE_setAbs##t( t_size x_nOffset, oex::oex##t val )			\
+	{ m_bin.LE_setAbs##t( x_nOffset, val ); return this; }					\
 	oex::oex##t BE_get##t( t_size x_nOffset )								\
 	{ return m_bin.BE_get##t( x_nOffset ); }								\
-	void BE_set##t( t_size x_nOffset, oex::oex##t val )						\
-	{ m_bin.BE_set##t( x_nOffset, val ); }									\
+	CSqBinary* BE_set##t( t_size x_nOffset, oex::oex##t val )				\
+	{ m_bin.BE_set##t( x_nOffset, val ); return this; }						\
 	oex::oex##t BE_getAbs##t( t_size x_nOffset )							\
 	{ return m_bin.BE_getAbs##t( x_nOffset ); }								\
-	void BE_setAbs##t( t_size x_nOffset, oex::oex##t val )					\
-	{ m_bin.BE_setAbs##t( x_nOffset, val ); }								\
+	CSqBinary* BE_setAbs##t( t_size x_nOffset, oex::oex##t val )			\
+	{ m_bin.BE_setAbs##t( x_nOffset, val ); return this; }					\
 	t_size size##t()														\
 	{ return sizeof( oex::oex##t ); }										\
 	int Allocate##t( t_size x_nSize )										\
@@ -163,6 +163,10 @@ namespace sqbind
 
 		/// Resizes memory block
 		t_size Resize( t_size x_nNewSize ) { m_bin.Resize( x_nNewSize ); return m_bin.Size(); }
+
+		/// One step resize + used
+		CSqBinary* Using( t_size x_nSize, t_size x_nUsed )
+		{	m_bin.Resize( x_nSize ); m_bin.setUsed( x_nUsed ); return this; }
 
 		/// Initializes all byetes in the memory block to zero
 		void Zero() { m_bin.Zero(); }

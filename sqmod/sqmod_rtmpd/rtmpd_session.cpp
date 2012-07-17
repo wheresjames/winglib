@@ -31,9 +31,14 @@ SQBIND_REGISTER_CLASS_BEGIN( CRtmpdSession, CRtmpdSession )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, SerializeValue )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, DeserializePacket )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, SendPacket )
+	SQBIND_MEMBER_FUNCTION( CRtmpdSession, SendPacket2 )
+	SQBIND_MEMBER_FUNCTION( CRtmpdSession, SendPacketBin )
+	SQBIND_MEMBER_FUNCTION( CRtmpdSession, getDefaultChunkSize )
+	SQBIND_MEMBER_FUNCTION( CRtmpdSession, ParseFlv )
 //	SQBIND_MEMBER_FUNCTION( CRtmpdSession,  )
-//	SQBIND_MEMBER_FUNCTION( CRtmpdSession,  )
-//	SQBIND_MEMBER_FUNCTION( CRtmpdSession,  )
+
+	SQBIND_ENUM( CRtmpdSession::eFlagAllInfo, eFlagAllInfo )
+	SQBIND_ENUM( CRtmpdSession::eFlagEmcaArray, eFlagEmcaArray )
 
 SQBIND_REGISTER_CLASS_END()
 DECLARE_INSTANCE_TYPE( CRtmpdSession );
@@ -145,6 +150,9 @@ int CRtmpdSession::Init( sqbind::CSqSocket *pSocket )
 	// Initialize the session object
 	RTMP_Init( &m_session );
 
+	// Mark stream as live
+//	m_session.Link.lFlags |= RTMP_LF_LIVE;
+
 	// Give the rtmpd object control of the socket handle
 	m_session.m_sb.sb_socket = oexPtrToInt( pSocket->Ptr()->Detach() );
 
@@ -222,7 +230,6 @@ int CRtmpdSession::DeserializePacket( sqbind::CSqBinary *bin, sqbind::CSqMulti *
 }
 
 
-#define _USER_ALLINFO	0x00000001
 #define _IN_OBJECT		0x00010000
 int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength, int nMode )
 {_STT();
@@ -261,7 +268,7 @@ int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength,
 				{
 					oex::oexINT64 n = *(oex::oexINT64*)p; p += 8;
 					oex::cmn::RevBytes( &n, sizeof( oex::oexINT64 ) );
-					if ( _USER_ALLINFO & nMode )
+					if ( eFlagAllInfo & nMode )
 						(*m)[ k ][ "t" ].set( "double" ),
 						(*m)[ k ][ "v" ].set( sqbind::ToStr( *(double*)&n ) );
 					else
@@ -270,7 +277,7 @@ int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength,
 				break;
 
 			case AMF_BOOLEAN :
-				if ( _USER_ALLINFO & nMode )
+				if ( eFlagAllInfo & nMode )
 					(*m)[ k ][ "t" ].set( "bool" ),
 					(*m)[ k ][ "v" ].set( sqbind::ToStr( *p ? 1 : 0 ) );
 				else
@@ -284,7 +291,7 @@ int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength,
 					return p - s;
 				else
 				{
-					if ( _USER_ALLINFO & nMode )
+					if ( eFlagAllInfo & nMode )
 						(*m)[ k ][ "t" ].set( "string" ),
 						(*m)[ k ][ "v" ].set( sqbind::stdString( p, l ) );
 					else
@@ -293,10 +300,16 @@ int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength,
 				} // end else
 				break;
 
+			case AMF_ECMA_ARRAY :
+			case AMF_STRICT_ARRAY :
+
+				// Skip the size
+				p += 4;
+
 			case AMF_OBJECT :
 			{
 				int n = 0;
-				if ( _USER_ALLINFO & nMode )
+				if ( eFlagAllInfo & nMode )
 					(*m)[ k ][ "t" ].set( "obj" ),
 					n = ParsePacket( &(*m)[ k ][ "v" ], p, e - p, nMode | _IN_OBJECT );
 				else
@@ -339,7 +352,7 @@ int CRtmpdSession::SerializeValue( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, 
 	sqbind::CSqMulti *pm = 0;
 
 	// Did user specify types?
-	if ( _USER_ALLINFO & nMode )
+	if ( eFlagAllInfo & nMode )
 		return 0;
 
 	// Auto detect type
@@ -351,9 +364,21 @@ int CRtmpdSession::SerializeValue( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, 
 		// Array?
 		if ( m->size() )
 		{
-			// +++ Just from what I have to go on atm
-			if ( _IN_OBJECT & nMode )
-//				nType = AMF_ECMA_ARRAY;
+			// Get array type flags
+			int nArrayType = 0;
+			if ( m->isset( "_arraytype" ) )
+			{	if ( (*m)[ "_arraytype" ].str() == "ecma" )
+					nArrayType |= eFlagEmcaArray;
+				if ( (*m)[ "_arraytype" ].str() == "strict" )
+					nArrayType |= eFlagStrictArray;
+			} // end if
+			else
+				nArrayType = nMode;
+
+			// Set type flag
+			if ( eFlagEmcaArray & nArrayType )
+				nType = AMF_ECMA_ARRAY;
+			else if ( eFlagStrictArray & nArrayType )
 				nType = AMF_STRICT_ARRAY;
 			else
 				nType = AMF_OBJECT;
@@ -467,49 +492,59 @@ int CRtmpdSession::SerializeValue( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, 
 		case AMF_STRICT_ARRAY :
 		case AMF_ECMA_ARRAY :
 
-			// +++ Array length 0?
-			*(unsigned int*)&p[ i ] = oex::os::CIpSocket::hton_l( 1 ); i += 4;
-			p[ i++ ] = AMF_OBJECT;
+			if ( nType == AMF_STRICT_ARRAY )
+				*(unsigned int*)&p[ i ] = oex::os::CIpSocket::hton_l( 1 ), i += 4,
+				p[ i++ ] = AMF_OBJECT;
+
+			else
+				*(unsigned int*)&p[ i ] = oex::os::CIpSocket::hton_l( pm->size() ), i += 4;
 
 		// OBJECT
 		case AMF_OBJECT :
 
 			// Write data into string
 			for ( sqbind::CSqMulti::iterator it = pm->begin(); it != pm->end(); it++ )
-			{
-				// Get key length, and make sure it's valid
-				long l = it->first.length();
-				if ( 0 >= l || 65536 <= l )
-					return 0;
-
-				// Ensure space for Key
-				bin->setUsed( i );
-				if ( ( i + 3 + l ) > bin->Size() )
-					if ( !bin->Allocate( i + 3 + l + _MIN_PACKET_SIZE ) )
+				if ( 0 < it->first.length() && '_' != it->first[ 0 ] )
+				{
+					// Get key length, and make sure it's valid
+					long l = it->first.length();
+					if ( 0 >= l || 65536 <= l )
 						return 0;
-					else
-						p = bin->Mem()._Ptr();
 
-				// Key length
-				*(unsigned short*)&p[ i ] = oex::os::CIpSocket::hton_s( it->first.length() ); i += 2;
+					// Ensure space for Key
+					bin->setUsed( i );
+					if ( ( i + 3 + l ) > bin->Size() )
+						if ( !bin->Allocate( i + 3 + l + _MIN_PACKET_SIZE ) )
+							return 0;
+						else
+							p = bin->Mem()._Ptr();
 
-				// Copy the key data
-				memcpy( &p[ i ], it->first.c_str(), l );
+					// Key length
+					*(unsigned short*)&p[ i ] = oex::os::CIpSocket::hton_s( it->first.length() ); i += 2;
 
-				// Update binary buffer size before setting the value
-				i += l; bin->setUsed( i );
+					// Copy the key data
+					memcpy( &p[ i ], it->first.c_str(), l );
 
-				// Write the value
-				SerializeValue( bin, &it->second, nMode | _IN_OBJECT );
+					// Update binary buffer size before setting the value
+					i += l; bin->setUsed( i );
 
-				// Get the new binary buffer size
-				i = bin->getUsed();
+					// Write the value
+					SerializeValue( bin, &it->second, nMode | eFlagStrictArray );
 
-			} // end for
+					// Get the new binary buffer size
+					i = bin->getUsed();
+
+				} // end for
 
 			// End object tag
 			*(unsigned short*)&p[ i ] = 0, i += 2;
 			p[ i++ ] = AMF_OBJECT_END;
+
+			// End encapsulating object if needed
+//			if ( nType != AMF_OBJECT )
+//			{	*(unsigned short*)&p[ i ] = 0, i += 2;
+//				p[ i++ ] = AMF_OBJECT_END;
+//			} // end if
 
 			break;
 
@@ -553,16 +588,34 @@ int CRtmpdSession::SendPacket( sqbind::CSqMulti *m, int nQueue )
 	if ( !m_session.m_sb.sb_socket )
 		return 0;
 
+	// Go do the work
+	return SendPacket2( (*m)[ "pkt" ][ "format" ].toint(),
+						(*m)[ "pkt" ][ "chunk_stream_id" ].toint(),
+						(*m)[ "pkt" ][ "type_id" ].toint(),
+						(*m)[ "pkt" ][ "info" ].toint(),
+						m, nQueue );
+}
+
+int CRtmpdSession::SendPacket2( int format, int csi, int type, int ext, sqbind::CSqMulti *m, int nQueue )
+{
+	// Sanity checks
+	if ( !m || !m->size() )
+		return 0;
+
+	// Must have a session
+	if ( !m_session.m_sb.sb_socket )
+		return 0;
+
 	// Initialize packet
 	oexZero( m_packet );
 
 	// Initialize packet headers
-	m_packet.m_nChannel = (*m)[ "pkt" ][ "chunk_stream_id" ].toint();
-	m_packet.m_headerType = (*m)[ "pkt" ][ "format" ].toint();
-	m_packet.m_packetType = (*m)[ "pkt" ][ "type_id" ].toint();
-	m_packet.m_nTimeStamp = (*m)[ "pkt" ][ "timestamp" ].toint();
-	m_packet.m_nInfoField2 = (*m)[ "pkt" ][ "info" ].toint();
-	m_packet.m_hasAbsTimestamp = (*m)[ "pkt" ][ "has_abs_timestamp" ].toint();
+	m_packet.m_nChannel = csi;
+	m_packet.m_headerType = format;
+	m_packet.m_packetType = type;
+	m_packet.m_nTimeStamp = 0;
+	m_packet.m_nInfoField2 = ext;
+	m_packet.m_hasAbsTimestamp = 0;
 
 	sqbind::CSqBinary body;
 	if ( !body.Allocate( RTMP_MAX_HEADER_SIZE + 1024 ) )
@@ -589,5 +642,147 @@ int CRtmpdSession::SendPacket( sqbind::CSqMulti *m, int nQueue )
 
 	// Send the packet
 	return RTMP_SendPacket( &m_session, &m_packet, nQueue );
+}
+
+
+int CRtmpdSession::SendPacketBin( int format, int csi, int type, int ext, sqbind::CSqBinary *b, int nQueue )
+{
+	// Sanity checks
+	if ( !b )
+		return 0;
+
+	// Must have a session
+	if ( !m_session.m_sb.sb_socket )
+		return 0;
+
+	// Initialize packet
+	oexZero( m_packet );
+
+	// Initialize packet headers
+	m_packet.m_nChannel = csi;
+	m_packet.m_headerType = format;
+	m_packet.m_packetType = type;
+	m_packet.m_nTimeStamp = 0;
+	m_packet.m_nInfoField2 = ext;
+	m_packet.m_hasAbsTimestamp = 0;
+
+	sqbind::CSqBinary body;
+	if ( !body.Allocate( RTMP_MAX_HEADER_SIZE + b->getUsed() + 128 ) )
+		return 0;
+
+	// Allocate space for header
+	body.setUsed( RTMP_MAX_HEADER_SIZE );
+
+	// Append data
+	body.Append( b );
+
+	// Point the packet at the encoded variables
+	m_packet.m_body = (char*)body.Ptr( RTMP_MAX_HEADER_SIZE );
+
+	// Set body size
+	m_packet.m_nBodySize = body.getUsed() - RTMP_MAX_HEADER_SIZE;
+
+	// Send the packet
+	return RTMP_SendPacket( &m_session, &m_packet, nQueue );
+}
+
+#pragma pack( push, 1 )
+
+	// FLV header structure
+	typedef struct _SFlvHeader
+	{
+		char			sig[ 3 ];
+		unsigned char	ver;
+		unsigned char	flg;
+		unsigned char	off[ 4 ];
+		unsigned int	tsz;
+
+	} SFlvHeader;
+
+	// FLV tag structure
+	typedef struct _SFlvTag
+	{
+		unsigned char	id;
+		unsigned char	len[ 3 ];
+		unsigned char	ts[ 4 ];
+		unsigned char	sid[ 3 ];
+
+	} SFlvTag;
+
+#pragma pack( pop )
+
+int CRtmpdSession::ParseFlv( sqbind::CSqBinary *b, sqbind::CSqMulti *m )
+{_STT();
+
+	// Param check
+	if ( !b || !m )
+	{	setLastErrorStr( oexT( "Bad Params" ) );
+		return -1;
+	} // end if
+
+	// Get buffer pointers
+	const char *p = b->Ptr();
+	unsigned long l = b->getUsed(), t = b->getUsed();
+
+	// Buffer check
+	if ( !p || 0 >= l )
+	{	setLastErrorStr( oexT( "Invalid buffer" ) );
+		return -1;
+	} // end if
+
+	// Could it be a header?
+	if ( sizeof( SFlvHeader ) <= l )
+	{
+		// Verify header data
+		SFlvHeader *pH = (SFlvHeader*)p;
+		if ( 'F' == pH->sig[ 0 ] && 'L' == pH->sig[ 1 ] && 'V' == pH->sig[ 2 ] && 1 == pH->ver 
+			&& !pH->off[ 0 ] && !pH->off[ 1 ] && !pH->off[ 2 ] && 9 == pH->off[ 3 ] && !pH->tsz )
+			(*m)[ "header" ][ "flags" ].set( sqbind::ToStr( (int)pH->flg ) ), 
+			p += sizeof( SFlvHeader ), l -= sizeof( SFlvHeader );
+
+	} // end if
+
+	// Pointer to first tag
+	long i = 0;
+	SFlvTag *pTag = (SFlvTag*)p;
+	while ( sizeof( SFlvTag ) <= l )
+	{
+		// Verify tag id
+		switch ( pTag->id )
+		{	case 0x08 : case 0x09 : case 0x12 :
+				break;
+			default :
+				setLastErrorStr( sqbind::oex2std( oexMks( oexT( "Unknown flv tag : " ), (int)pTag->id ) ) );
+				return -1;
+		} // end switch
+
+		// How long is the data
+		int len = ( pTag->len[ 0 ] << 16 ) | ( pTag->len[ 1 ] << 8 ) | pTag->len[ 2 ];
+
+		// Do we have that much in the buffer?
+		if ( ( sizeof( SFlvTag ) + len + 4 ) > l )
+			return t - l;
+
+		// Time stamp
+		int ts = ( pTag->len[ 0 ] << 16 ) | ( pTag->len[ 1 ] << 8 ) | pTag->len[ 2 ] | ( pTag->len[ 3 ] << 24 );
+		int sid = ( pTag->sid[ 0 ] << 16 ) | ( pTag->sid[ 1 ] << 8 ) | pTag->sid[ 2 ];
+
+		// Save header information
+		sqbind::CSqMulti &r = (*m)[ sqbind::ToStr( i++ ) ];
+		r[ "id" ].set( sqbind::ToStr( pTag->id ) );
+		r[ "ts" ].set( sqbind::ToStr( ts ) );
+		r[ "sid" ].set( sqbind::ToStr( sid ) );
+		r[ "dsz" ].set( sqbind::ToStr( len ) );
+		r[ "dat" ].set( sqbind::ToStr( b->getUsed() - l + sizeof( SFlvTag ) ) );
+
+		// Skip to next tag
+		p += sizeof( SFlvTag ) + len + 4;
+		l -= sizeof( SFlvTag ) + len + 4;
+		pTag = (SFlvTag*)p;
+
+	} // end while
+
+	// Was anything decoded?
+	return t - l;
 }
 

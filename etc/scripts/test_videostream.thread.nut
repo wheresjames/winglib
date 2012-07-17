@@ -134,6 +134,7 @@ function StartStream( params ) : ( _g )
 
 	// Create the encoder
 	_g.enc = CFfEncoder();
+//	_g.enc.setTimeBase( 90000 );
 	local q = p[ "q" ].toint(); if ( 0 >= q ) q = 5;
 	p[ "encoder_params" ][ "quality" ] <- q.tostring();
 	if ( !_g.enc.Create( CFfDecoder().LookupCodecId( fmt ),
@@ -148,6 +149,9 @@ function StartStream( params ) : ( _g )
 
 	// Set extra data into header
 	p[ "extra" ] <- _g.enc.getExtraData().getString();
+
+	// Encoding level
+	p[ "level" ] <- _g.enc.getLevel().tostring();
 
 	// Choose reasonable buffer sizes
 	local bufsz = _g.w * _g.h * _g.fps * _g.maxbuf * 2;
@@ -259,13 +263,15 @@ function Run() : ( _g )
 	} // end if
 
 //_self.echo( "pts = " + inf[ "pts" ].toint() + ", fsz = " + _g.frame.getUsed() );
+//_self.echo( "pts = " + _g.enc.calcPts() + ", fsz = " + _g.frame.getUsed() );
 
 	// Write to container
 	if ( _g.vid )
 	{
 		// Attempt to write the frame
+		if ( !_g.vid.WriteVideoFrame( _g.frame, _g.enc.calcPts(), _g.enc.calcPts(), inf ) )
 //		if ( !_g.vid.WriteVideoFrame( _g.frame, inf[ "pts" ].toint(), inf[ "pts" ].toint(), inf ) )
-		if ( !_g.vid.WriteVideoFrame( _g.frame, 0, 0, inf ) )
+//		if ( !_g.vid.WriteVideoFrame( _g.frame, 0, 0, inf ) )
 			_g.quit = 1;
 
 		// Flush data buffers

@@ -90,6 +90,13 @@ public:
 		return m_pCodecContext->coded_frame->pts;
 	}
 
+	/// Returns codec level
+	SQInteger getLevel()
+	{	if ( !m_pCodecContext )
+			return 0;
+		return m_pCodecContext->level;
+	}
+
 	/// Calculates the PTS based on the current frame index
 	SQInteger calcPts()
 	{
