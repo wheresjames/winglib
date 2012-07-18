@@ -27,6 +27,11 @@ PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/config.mk
 
+ifneq ($(PLATFORM),windows)
+UNSUPPORTED := PLATFORM=$(PLATFORM) is invalid
+include $(PRJ_LIBROOT)/unsupported.mk
+else
+
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------
@@ -38,3 +43,4 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
+endif
