@@ -85,7 +85,7 @@ public:
 	sqbind::CSqMulti getPacket( int nMode );
 
 	/// Deserializes the RTMP packet into array 'm'
-	int DeserializePacket( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, int nMode );
+	int DeserializePacket( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, int i, int nMode );
 
 	/// Serializes the array 'm' into an RTMP packet
 	int SerializePacket( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, int nMode );
@@ -111,7 +111,7 @@ public:
 	/** @} */
 
 	/// Parses the packet data
-	int ParsePacket( sqbind::CSqMulti *m, const char *p, int nOffset, int nMode );
+	int ParsePacket( sqbind::CSqMulti *m, const char *p, int nOffset, int i, int nMode );
 
 private:
 

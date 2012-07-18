@@ -16,6 +16,12 @@ extern "C"  void assert(int expression)
 }
 #endif
 
+// +++ RTMPD
+#if defined( _DEBUG )
+	extern "C" FILE *netstackdump = 0;
+	extern "C" FILE *netstackdump_read = 0;
+#endif
+
 extern "C"
 {
 

@@ -182,7 +182,7 @@ int CRtmpdSession::ReadPacket()
 	// Free previous packet if needed
 	if ( m_nPacketReady )
 		oexZero( m_packet ),
-//		RTMPPacket_Free( &m_packet ), // No, don't do that
+//		RTMPPacket_Free( &m_packet ), // +++ No, don't do that
 		m_nPacketReady = 0;
 
 	// See if we can get a packet
@@ -219,19 +219,119 @@ sqbind::CSqMulti CRtmpdSession::getPacket( int nMode )
 		return sqbind::CSqMulti();
 
 	// Convert to array
+	int i = 0;
 	sqbind::CSqMulti m;
-	ParsePacket( &m, &m_packet.m_body[ nOffset ], m_packet.m_nBodySize - nOffset, nMode );
+
+	// Process command specific data
+	switch ( m_packet.m_packetType )
+	{
+		case 0x04 :
+		{	sqbind::CSqBinary b( &m_packet.m_body[ nOffset ], m_packet.m_nBodySize - nOffset, nOffset, 0 );
+			if ( 2 <= ( m_packet.m_nBodySize - nOffset ) )
+				m[ sqbind::ToStr( i++ ) ].set( sqbind::ToStr( b.BE_getUSHORT( 0 ) ) ), nOffset += 2;
+			while ( 4 <= ( m_packet.m_nBodySize - nOffset ) )
+				m[ sqbind::ToStr( i++ ) ].set( sqbind::ToStr( b.BE_getAbsUINT( nOffset ) ) ), nOffset += 4;
+			nOffset = m_packet.m_nBodySize;
+		} break;
+
+		case 0x05 :
+		case 0x06 :
+		{	sqbind::CSqBinary b( &m_packet.m_body[ nOffset ], m_packet.m_nBodySize - nOffset, nOffset, 0 );
+			if ( 4 <= ( m_packet.m_nBodySize - nOffset ) )
+				m[ sqbind::ToStr( i++ ) ].set( sqbind::ToStr( b.BE_getUINT( 0 ) ) ), nOffset += 4;
+			if ( 1 <= ( m_packet.m_nBodySize - nOffset ) )
+				m[ sqbind::ToStr( i++ ) ].set( sqbind::ToStr( b.BE_getUCHAR( 0 ) ) ), nOffset += 4;
+		} break;
+
+		case 0x08 :
+		case 0x09 :
+			nOffset = m_packet.m_nBodySize;
+			break;
+
+		// AMF3
+		case 0x11 :
+			if ( 1 <= ( m_packet.m_nBodySize - nOffset ) )
+				nOffset++;
+			break;
+
+		default:
+			break;
+
+	} // end switch
+
+	// Parse remaining packet data if any
+	if ( m_packet.m_nBodySize > nOffset )
+		ParsePacket( &m, &m_packet.m_body[ nOffset ], m_packet.m_nBodySize - nOffset, i, nMode );
+
+	// Set packet command and type info
+	switch ( m_packet.m_packetType )
+	{
+		case 0x01 :
+			m[ "type" ].set( oexT( "chunkSize" ) );
+			m[ "cmd" ].set( oexT( "chunkSize" ) );
+			break;
+
+		case 0x03 :
+			m[ "type" ].set( oexT( "readReport" ) );
+			m[ "cmd" ].set( oexT( "readReport" ) );
+			break;
+
+		case 0x04 :
+			m[ "type" ].set( oexT( "control" ) );
+			switch( m[ "0" ].toint() )
+			{	case 0 : m[ "cmd" ].set( oexT( "beginStream" ) ); break;
+				case 1 : m[ "cmd" ].set( oexT( "endStream" ) ); break;
+				case 3 : m[ "cmd" ].set( oexT( "setBufferLength" ) ); break;
+			} // end switch
+			break;
+
+		case 0x05 :
+			m[ "type" ].set( oexT( "setServerBandwidth" ) );
+			m[ "cmd" ].set( oexT( "setServerBandwidth" ) );
+			break;
+
+		case 0x06 :
+			m[ "type" ].set( oexT( "setClientBandwidth" ) );
+			m[ "cmd" ].set( oexT( "setClientBandwidth" ) );
+			break;
+
+		case 0x08 :
+			m[ "type" ].set( oexT( "audio" ) );
+			m[ "cmd" ].set( oexT( "audio" ) );
+			break;
+
+		case 0x09 :
+			m[ "type" ].set( oexT( "video" ) );
+			m[ "cmd" ].set( oexT( "video" ) );
+			break;
+
+		case 0x11 :
+			m[ "type" ].set( oexT( "AMF3" ) );
+			m[ "cmd" ].set( m[ "0" ].str() );
+			break;
+
+		case 0x14 :
+			m[ "type" ].set( oexT( "AMF0" ) );
+			m[ "cmd" ].set( m[ "0" ].str() );
+			break;
+			
+		default :
+			m[ "type" ].set( oexT( "unknown" ) );
+			break;
+
+	} // end swithc
+
 	return m;
 }
 
-int CRtmpdSession::DeserializePacket( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, int nMode )
+int CRtmpdSession::DeserializePacket( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, int i, int nMode )
 {_STT();
-	return ParsePacket( m, bin->Mem().Ptr(), bin->Mem().getUsed(), nMode );
+	return ParsePacket( m, bin->Mem().Ptr(), bin->Mem().getUsed(), i, nMode );
 }
 
 
 #define _IN_OBJECT		0x00010000
-int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength, int nMode )
+int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength, int i, int nMode )
 {_STT();
 
 	// Sanity checks
@@ -239,7 +339,7 @@ int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength,
 		return 0;
 
 	// Parse the packet data
-	unsigned long i = 0, l = 0;
+	unsigned long l = 0;
 	const char *s = p, *e = p + nLength;
 
 	// Parse values
@@ -311,9 +411,9 @@ int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength,
 				int n = 0;
 				if ( eFlagAllInfo & nMode )
 					(*m)[ k ][ "t" ].set( "obj" ),
-					n = ParsePacket( &(*m)[ k ][ "v" ], p, e - p, nMode | _IN_OBJECT );
+					n = ParsePacket( &(*m)[ k ][ "v" ], p, e - p, 0, nMode | _IN_OBJECT );
 				else
-					n = ParsePacket( &(*m)[ k ], p, e - p, nMode | _IN_OBJECT );
+					n = ParsePacket( &(*m)[ k ], p, e - p, 0, nMode | _IN_OBJECT );
 
 				if ( 0 >= n )
 					return p - s;
@@ -497,7 +597,17 @@ int CRtmpdSession::SerializeValue( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, 
 				p[ i++ ] = AMF_OBJECT;
 
 			else
-				*(unsigned int*)&p[ i ] = oex::os::CIpSocket::hton_l( pm->size() ), i += 4;
+			{
+				// +++ I believe this to be correct, however, I'm trying
+				// to mactch an implementation, which I believe is broken, but works.
+//				int nSize = pm->size();
+//				if ( 0 < nSize && pm->isset( "_arraytype" ) )
+//					nSize--;
+
+				int nSize = 0;
+				*(unsigned int*)&p[ i ] = oex::os::CIpSocket::hton_l( nSize ), i += 4;
+
+			} // end else
 
 		// OBJECT
 		case AMF_OBJECT :
@@ -539,12 +649,6 @@ int CRtmpdSession::SerializeValue( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, 
 			// End object tag
 			*(unsigned short*)&p[ i ] = 0, i += 2;
 			p[ i++ ] = AMF_OBJECT_END;
-
-			// End encapsulating object if needed
-//			if ( nType != AMF_OBJECT )
-//			{	*(unsigned short*)&p[ i ] = 0, i += 2;
-//				p[ i++ ] = AMF_OBJECT_END;
-//			} // end if
 
 			break;
 
@@ -624,7 +728,13 @@ int CRtmpdSession::SendPacket2( int format, int csi, int type, int ext, sqbind::
 	// Apparently, somewhere, RTMP_SendPacket() reaches backward
 	// in the buffer, and apparently, it's by design.
 	// I'm not sure how to feel about that ...
-	body.setUsed( RTMP_MAX_HEADER_SIZE );
+
+	// Add padding byte for AMF3
+	if ( 0x11 == type )
+		body.setUsed( RTMP_MAX_HEADER_SIZE + 1 ), 
+		body.setUCHAR( RTMP_MAX_HEADER_SIZE, 0 );
+	else
+		body.setUsed( RTMP_MAX_HEADER_SIZE );
 
 	// Is it a raw buffer?
 	if ( m->isset( "body" ) )
@@ -670,8 +780,12 @@ int CRtmpdSession::SendPacketBin( int format, int csi, int type, int ext, sqbind
 	if ( !body.Allocate( RTMP_MAX_HEADER_SIZE + b->getUsed() + 128 ) )
 		return 0;
 
-	// Allocate space for header
-	body.setUsed( RTMP_MAX_HEADER_SIZE );
+	// Add padding byte for AMF3
+	if ( 0x11 == type )
+		body.setUsed( RTMP_MAX_HEADER_SIZE + 1 ), 
+		body.setUCHAR( RTMP_MAX_HEADER_SIZE, 0 );
+	else
+		body.setUsed( RTMP_MAX_HEADER_SIZE );
 
 	// Append data
 	body.Append( b );
