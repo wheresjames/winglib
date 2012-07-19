@@ -457,6 +457,9 @@ function ProcessCommands() : ( _g )
 				// Don't skip initial frames
 				_g.share.setFlag( _g.share.eFlagNoInitSync, 1 );
 
+				// Set non-blocking read mode
+				_g.rtmp.setNonBlockingMode( 1 );
+
 			} // end start video stream
 
 			break;
@@ -487,7 +490,7 @@ function Run() : ( _g )
 
 	// Are we streaming video
 	if ( _g.share )
-		return SendVideo();
+		SendVideo();
 
 	// Process commands
 	return ProcessCommands();
