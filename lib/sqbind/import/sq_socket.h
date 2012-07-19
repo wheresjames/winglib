@@ -215,6 +215,12 @@ namespace sqbind
 		/// Returns the number of accepts on the socket
 		unsigned long getNumAccepts() { return m_socket->getNumAccepts(); }
 
+		/// Hook events by default
+		void setHookEvents( int b ) { m_socket->setHookEvents( b ); }
+
+		/// Hook events by default
+		int getHookEvents() { return m_socket->getHookEvents(); }
+
 		/// Returns non-zero if the socket is running
 		int isRunning( int nCheckActivity );
 

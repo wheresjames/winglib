@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
+#include <winsock2.h>
 #include <windows.h>
-//#include <winsock2.h>
 
 #if defined( _DEBUG )
 	extern "C"
@@ -35,6 +35,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CRtmpdSession, CRtmpdSession )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, SendPacketBin )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, getDefaultChunkSize )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, ParseFlv )
+	SQBIND_MEMBER_FUNCTION( CRtmpdSession, setNonBlockingMode )
 //	SQBIND_MEMBER_FUNCTION( CRtmpdSession,  )
 
 	SQBIND_ENUM( CRtmpdSession::eFlagAllInfo, eFlagAllInfo )
@@ -55,6 +56,7 @@ CRtmpdSession::CRtmpdSession()
 	oexZero( m_session );
 	oexZero( m_packet );
 	m_nPacketReady = 0;
+	m_nNonBlockingMode = 0;
 }
 
 void CRtmpdSession::Destroy()
@@ -67,6 +69,7 @@ void CRtmpdSession::Destroy()
 	oexZero( m_session );
 	oexZero( m_packet );
 	m_nPacketReady = 0;
+	m_nNonBlockingMode = 0;
 }
 
 SQInteger CRtmpdSession::getLibVersion()
@@ -153,6 +156,9 @@ int CRtmpdSession::Init( sqbind::CSqSocket *pSocket )
 	// Mark stream as live
 //	m_session.Link.lFlags |= RTMP_LF_LIVE;
 
+	// Set short timeout
+//	m_session.Link.timeout = 15;
+
 	// Give the rtmpd object control of the socket handle
 	m_session.m_sb.sb_socket = oexPtrToInt( pSocket->Ptr()->Detach() );
 
@@ -164,7 +170,6 @@ int CRtmpdSession::Init( sqbind::CSqSocket *pSocket )
 
 	return 1;
 }
-
 
 int CRtmpdSession::ReadPacket()
 {_STT();
@@ -184,6 +189,26 @@ int CRtmpdSession::ReadPacket()
 		oexZero( m_packet ),
 //		RTMPPacket_Free( &m_packet ), // +++ No, don't do that
 		m_nPacketReady = 0;
+
+	// Non-blocking?
+	if ( m_nNonBlockingMode )
+	{
+		fd_set rset;
+		FD_ZERO( &rset );
+		FD_SET( m_session.m_sb.sb_socket, &rset );
+
+		struct timeval tv;
+		tv.tv_sec = 0;
+		tv.tv_usec = 0;
+		 
+		int ret = select( m_session.m_sb.sb_socket + 1, &rset, NULL, NULL, &tv );
+		if ( 0 > ret )
+			return -3;
+
+		if ( !FD_ISSET( m_session.m_sb.sb_socket, &rset ) )
+			return 0;
+
+	} // end if
 
 	// See if we can get a packet
 	if ( !RTMP_ReadPacket( &m_session, &m_packet ) || !RTMPPacket_IsReady( &m_packet ) )

@@ -11,8 +11,7 @@ class CGlobal
 	sid = "";
 	share = 0;
 	codec = "H264";
-//	codec = "VP80";
-//	codec = "MPG4";
+//	codec = "VP60";
 
 	count = 0;
 
@@ -33,6 +32,8 @@ class CGlobal
 	nStreamId = 1;
 
 	nBandwidthTime = 0;
+
+	read_failed = -5;
 };
 
 local _g = CGlobal();
@@ -274,7 +275,9 @@ function ProcessCommands() : ( _g )
 
 	// No packet
 	else if ( !type )
+	{	_g.read_failed++;
 		return 0;
+	} // end if
 
 	_self.echo( "... Packet Type : " + type + format( " : 0x%x", type ) );
 	_self.echo( "... Packet Size : " + _g.rtmp.getPacketSize() );
@@ -440,6 +443,7 @@ function ProcessCommands() : ( _g )
 				p[ "w" ] <- "320";
 				p[ "h" ] <- "240";
 				p[ "fps" ] <- _g.fps.tostring();
+				p[ "delay" ] <- ( 1 * _g.fps ).tostring();
 				p[ "encoder_params" ][ "global_headers" ] <- "1";
 
 				// Start the streaming thread

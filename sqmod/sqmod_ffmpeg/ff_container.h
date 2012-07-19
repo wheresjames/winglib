@@ -222,6 +222,9 @@ public:
 	void setTimeScale( SQInteger tb, SQInteger vs, SQInteger as )
 	{	m_time_base = tb; m_video_scale = vs; m_audio_scale = as; }
 
+	/// Sets the time base
+	void setTimeBase( SQInteger tb ) { m_time_base = tb; }
+
 	/// Returns the time base
 	SQInteger getTimeBase() { return m_time_base; }
 

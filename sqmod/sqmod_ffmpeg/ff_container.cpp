@@ -72,6 +72,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getLastFrameEncodedSize )
 
 	SQBIND_MEMBER_FUNCTION( CFfContainer, setTimeScale )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, setTimeBase )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getTimeBase )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoScale )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioScale )
@@ -641,15 +642,17 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	if ( 0 >= width || 0 >= height || 0 >= fps )
 		return -1;
 
-	AVStream *pst = av_new_stream( m_pFormatContext, 0 );
+	AVStream *pst = avformat_new_stream( m_pFormatContext, avcodec_find_encoder( (CodecID)codec_id ) );
+//	AVStream *pst = av_new_stream( m_pFormatContext, 0 );
 	if ( !pst )
 		return -1;
 
-	m_nVideoStream = pst->index;
-
-    AVCodecContext *pcc = pst->codec;
+	AVCodecContext *pcc = pst->codec;
 	if ( !pcc )
 		return -1;
+
+	// Save stream index
+	m_nVideoStream = pst->index;
 
 	// Get defaults
 	avcodec_get_context_defaults2( pcc, AVMEDIA_TYPE_VIDEO );
@@ -660,11 +663,12 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	pcc->bit_rate = width * height * fps / 3;
 	pcc->width = width;
 	pcc->height = height;
+//	pcc->pix_fmt = PIX_FMT_YUV420P;
 
 	pcc->time_base.num = 1;
 	pcc->time_base.den = ( 0 < m_time_base ) ? m_time_base : fps;
 
-	pcc->gop_size = ( 0< m_nKeyFrameInterval ) ? m_nKeyFrameInterval : fps;
+	pcc->gop_size = ( 0 < m_nKeyFrameInterval ) ? m_nKeyFrameInterval : fps;
 
 	// Signal global headers if needed
 	if ( 0 != ( m_pFormatContext->oformat->flags & AVFMT_GLOBALHEADER ) )
@@ -672,7 +676,8 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 
 	// Set extra codec data
 	if ( m_video_extra.getUsed() )
-	{	pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
+	{	m_video_extra.Resize( m_video_extra.getUsed() + FF_INPUT_BUFFER_PADDING_SIZE * 2 );
+		pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
 		pcc->extradata = (uint8_t*)m_video_extra._Ptr();
 		pcc->extradata_size = m_video_extra.getUsed();
 	} // end if
@@ -818,9 +823,12 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	} // end if
 
 	// Save time
-	pkt.pts = nPts ? nPts : ( ( m && m->isset( oexT( "pts" ) ) ) ? (*m)[ "pts" ].toint() : AV_NOPTS_VALUE );
-	pkt.dts = nDts ? nDts : ( ( m && m->isset( oexT( "dts" ) ) ) ? (*m)[ "dts" ].toint() : AV_NOPTS_VALUE );
+	pkt.pts = ( 0 <= nPts ) ? nPts : AV_NOPTS_VALUE;
+	pkt.dts = ( 0 <= nDts ) ? nDts : AV_NOPTS_VALUE;
 
+//oexSHOW( pkt.pts );
+//oexSHOW( pkt.dts );
+/*
 	// Offset
 	if ( 0 < pkt.pts )
 	{
@@ -841,7 +849,7 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 			return 0;
 
 	} // end if
-
+*/
 	// +++ is this causing the audio issue???
 //	AVCodecContext *pcc = pStream->codec;
 //	if ( pcc && pcc->coded_frame && pcc->coded_frame->pts != AV_NOPTS_VALUE )

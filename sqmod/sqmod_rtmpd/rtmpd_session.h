@@ -108,6 +108,9 @@ public:
 	/// Parses Flv chunks
 	int ParseFlv( sqbind::CSqBinary *b, sqbind::CSqMulti *m );
 
+	/// Sets socket blocking mode
+	void setNonBlockingMode( int nEnable ) { m_nNonBlockingMode = nEnable; }
+
 	/** @} */
 
 	/// Parses the packet data
@@ -126,6 +129,9 @@ private:
 
 	/// String describing the last error
 	sqbind::stdString	m_sLastError;
+
+	/// Non-zero for non-blocking mode
+	int 				m_nNonBlockingMode;
 
 };
 
