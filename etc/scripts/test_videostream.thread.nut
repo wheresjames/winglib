@@ -29,6 +29,8 @@ class CGlobal
 
 	fps = 0;
 
+	delay = 0;
+
 	// Maximum number of seconds to buffer before dropping frames
 	maxbuf = 2;
 
@@ -88,6 +90,7 @@ function StartStream( params ) : ( _g )
 
 	_g.w = p[ "w" ].toint();
 	_g.h = p[ "h" ].toint();
+	_g.delay = p[ "delay" ].toint();
 
 	if ( p[ "cap" ].toint() )
 	{
@@ -174,6 +177,8 @@ function StartStream( params ) : ( _g )
 		} // end if
 
 		// Add video stream
+		_g.vid.setTimeBase( _g.enc.getTimeBase() );
+//		_g.vid.setVideoExtraData( _g.enc.getExtraData() );
 		if ( 0 > _g.vid.AddVideoStream( CFfDecoder().LookupCodecId( fmt ),
 										_g.img.getWidth(), _g.img.getHeight(), _g.fps ) )
 		{	::_self.echo( "Failed to add video stream : " + fmt );
@@ -215,6 +220,11 @@ function Run() : ( _g )
 {
 	if ( _g.quit )
 		return 0;
+
+	// Some protocols require this
+	if ( 0 < _g.delay )
+		if ( _g.delay-- % _g.fps )
+			return 0;
 
 	// Monitor read / writes
 	local reads = _g.vid ? _g.vid.getFifoReads() : _g.share.getReads();
@@ -265,13 +275,14 @@ function Run() : ( _g )
 //_self.echo( "pts = " + inf[ "pts" ].toint() + ", fsz = " + _g.frame.getUsed() );
 //_self.echo( "pts = " + _g.enc.calcPts() + ", fsz = " + _g.frame.getUsed() );
 
+//_self.echo( inf.print_r( 1 ) );
 	// Write to container
 	if ( _g.vid )
 	{
 		// Attempt to write the frame
-		if ( !_g.vid.WriteVideoFrame( _g.frame, _g.enc.calcPts(), _g.enc.calcPts(), inf ) )
-//		if ( !_g.vid.WriteVideoFrame( _g.frame, inf[ "pts" ].toint(), inf[ "pts" ].toint(), inf ) )
-//		if ( !_g.vid.WriteVideoFrame( _g.frame, 0, 0, inf ) )
+//		if ( !_g.vid.WriteVideoFrame( _g.frame, _g.enc.calcPts(), _g.enc.calcPts(), inf ) )
+		if ( !_g.vid.WriteVideoFrame( _g.frame, inf[ "pts" ].toint(), inf[ "pts" ].toint(), inf ) )
+//		if ( !_g.vid.WriteVideoFrame( _g.frame, -1, -1, inf ) )
 			_g.quit = 1;
 
 		// Flush data buffers

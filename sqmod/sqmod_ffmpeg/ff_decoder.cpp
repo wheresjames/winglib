@@ -156,6 +156,7 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	// Codec context
 	if ( m_extra.getUsed() )
 	{	m_nFlags |= 3;
+		m_extra.Resize( m_extra.getUsed() + FF_INPUT_BUFFER_PADDING_SIZE * 2 );
 		m_pCodecContext->extradata_size = m_extra.getUsed();
 		m_pCodecContext->extradata = (uint8_t*)m_extra._Ptr();
 		m_pCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
@@ -351,6 +352,7 @@ int CFfDecoder::ReadSEI( const void *p, int len )
 	if ( 3 == ( 3 & m_nFlags ) )
 	{
 		// Fill in the missing SEI data
+		m_extra.Resize( m_extra.getUsed() + FF_INPUT_BUFFER_PADDING_SIZE * 2 );
 		m_pCodecContext->extradata_size = m_extra.getUsed();
 		m_pCodecContext->extradata = (uint8_t*)m_extra._Ptr();
 		m_pCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;

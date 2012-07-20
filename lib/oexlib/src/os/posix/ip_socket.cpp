@@ -254,6 +254,9 @@ void CIpSocket::Construct()
 	m_bFree = oexTRUE;
 
 	m_bEventsHooked = oexFALSE;
+
+	m_bHookEvents = oexTRUE;
+
 }
 
 CIpSocket::CIpSocket()
@@ -265,7 +268,6 @@ CIpSocket::CIpSocket()
 
 CIpSocket::CIpSocket( t_SOCKET hSocket, oexBOOL x_bFree )
 {
-
 	// Construct class
 	Construct();
 
@@ -467,7 +469,8 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 		oexWARNING( errno, oexT( "socket interface does not support SO_REUSEADDR" ) );
 
 	// Capture all events
-	EventSelect();
+	if ( m_bHookEvents )
+		EventSelect();
 
 	return IsSocket();
 }
@@ -656,7 +659,8 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
     CIpSocket_GetAddressInfo( &m_addrPeer, &saAddr );
 
 	// Capture all events
-	x_is.EventSelect();
+	if ( x_is.m_bHookEvents )
+		x_is.EventSelect();
 
 	// Accepted
 	m_uAccepts++;

@@ -85,7 +85,7 @@ public:
 	sqbind::CSqMulti getPacket( int nMode );
 
 	/// Deserializes the RTMP packet into array 'm'
-	int DeserializePacket( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, int nMode );
+	int DeserializePacket( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, int i, int nMode );
 
 	/// Serializes the array 'm' into an RTMP packet
 	int SerializePacket( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, int nMode );
@@ -108,10 +108,13 @@ public:
 	/// Parses Flv chunks
 	int ParseFlv( sqbind::CSqBinary *b, sqbind::CSqMulti *m );
 
+	/// Sets socket blocking mode
+	void setNonBlockingMode( int nEnable ) { m_nNonBlockingMode = nEnable; }
+
 	/** @} */
 
 	/// Parses the packet data
-	int ParsePacket( sqbind::CSqMulti *m, const char *p, int nOffset, int nMode );
+	int ParsePacket( sqbind::CSqMulti *m, const char *p, int nOffset, int i, int nMode );
 
 private:
 
@@ -126,6 +129,9 @@ private:
 
 	/// String describing the last error
 	sqbind::stdString	m_sLastError;
+
+	/// Non-zero for non-blocking mode
+	int 				m_nNonBlockingMode;
 
 };
 

@@ -172,6 +172,8 @@ void CIpSocket::Construct()
 	m_uFlags = 0;
 
 	m_bFree = oexTRUE;
+
+	m_bHookEvents = oexTRUE;
 }
 
 CIpSocket::CIpSocket()
@@ -417,7 +419,8 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 	m_uSocketProtocol = x_protocol;
 
 	// Capture all events
-	EventSelect();
+	if ( m_bHookEvents )
+		EventSelect();
 
 	return IsSocket();
 }
@@ -588,6 +591,7 @@ oexBOOL CIpSocket::Attach( t_SOCKET x_hSocket, oexBOOL x_bFree )
 
 oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 {_STT();
+
 	// Punt if no socket
 	if ( !IsSocket() )
 		return FALSE;
@@ -611,7 +615,8 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 	CIpSocket_GetAddressInfo( &m_addrPeer, &saAddr );
 
 	// Capture all events
-	x_is.EventSelect();
+	if ( x_is.m_bHookEvents )
+		x_is.EventSelect();
 
 	m_uAccepts++;
 	m_toActivity.SetMs( m_uActivityTimeout );

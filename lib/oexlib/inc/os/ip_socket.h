@@ -1024,6 +1024,12 @@ public:
 	/// Returns the number of accepts on the socket
 	oexULONG getNumAccepts() { return m_uAccepts; }
 
+	/// Set event hook default
+	void setHookEvents( oexBOOL b ) { m_bHookEvents = b; }
+
+	/// Non-zero to hook events by default
+	oexBOOL getHookEvents() { return m_bHookEvents; }
+
 private:
 
 	/// Socket API initialization return code
@@ -1094,6 +1100,10 @@ private:
 
 	/// Flags
 	oexULONG				m_uFlags;
+
+	/// If non-zero, events will be hooked by default
+	oexBOOL					m_bHookEvents;
+
 };
 
 

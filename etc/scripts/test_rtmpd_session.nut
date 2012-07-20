@@ -6,18 +6,19 @@ class CGlobal
 	fps = 30;
 	rtmp = 0;
 
+	amf = 20;
+
 	sid = "";
 	share = 0;
 	codec = "H264";
-//	codec = "VP80";
-//	codec = "MPG4";
+//	codec = "VP60";
 
 	count = 0;
 
 	format = 0;
 
 	frame = CSqBinary();
-	
+
 	pps = 0;
 	sps = 0;
 	sei = "";
@@ -31,6 +32,8 @@ class CGlobal
 	nStreamId = 1;
 
 	nBandwidthTime = 0;
+
+	read_failed = -5;
 };
 
 local _g = CGlobal();
@@ -42,6 +45,9 @@ function _idle() : ( _g )
 
 function _init() : ( _g )
 {
+	// Generate a stream id
+	_g.sid = _self.unique();
+
 	// Start the update timer
 	if ( 0 >= _g.fps ) _g.fps = 30;
 	_self.set_timer( ".", 1000 / _g.fps, "Run" );
@@ -197,13 +203,13 @@ function SendVideo() : ( _g )
 			{
 				case 0x12 :
 					local meta = CSqMulti();
-					if ( _g.rtmp.DeserializePacket( pkt, meta, 0 ) )
+					if ( _g.rtmp.DeserializePacket( pkt, meta, 0, 0 ) )
 						_self.echo( " === onMetaData ===\n" + meta.print_r( 1 ) );
 /*
 _self.echo( "--- onMetaData Packet ---\n" + pkt.AsciiHexStr( 16, 64 ) );
 
 					local meta = CSqMulti();
-					if ( _g.rtmp.DeserializePacket( pkt, meta, 0 ) )
+					if ( _g.rtmp.DeserializePacket( pkt, meta, 0, 0 ) )
 					{
 //						meta[ "1" ].unset( "duration" );
 //						meta[ "1" ].unset( "filesize" );
@@ -259,28 +265,42 @@ _self.echo( "--- Seialized Packet ---\n" + pkt.AsciiHexStr( 16, 64 ) );
 function ProcessCommands() : ( _g )
 {
 	// Attempt to read a packet
-	local ret = _g.rtmp.ReadPacket();
+	local type = _g.rtmp.ReadPacket();
 
 	// Connection closed?
-	if ( 0 > ret )
+	if ( 0 > type )
 	{	_g.quit = 1;
 		return 0;
 	} // end if
 
 	// No packet
-	else if ( !ret )
+	else if ( !type )
+	{	_g.read_failed++;
 		return 0;
+	} // end if
 
-	_self.echo( "... Packet Type : " + ret + format( " : 0x%x", ret ) );
+	_self.echo( "... Packet Type : " + type + format( " : 0x%x", type ) );
 	_self.echo( "... Packet Size : " + _g.rtmp.getPacketSize() );
 
 	local data = _g.rtmp.getPacketData( 0 );
 	_self.echo( "\n --- CMD BINARY ---\n" + data.AsciiHexStr( 16, 32 ) );
 
 	local pkt = _g.rtmp.getPacket( 0 );
-	_self.echo( "\n --- CMD PACKET ---\n" + pkt.print_r( 1 ) );
+	_self.echo( "\n --- CMD PACKET  ---\n" + pkt.print_r( 1 ) );
 
-	switch( pkt[ "0" ].str() )
+	switch ( pkt[ "type" ].str() )
+	{
+		case "AMF0" :
+			_g.amf = 0x14;
+			break;
+
+		case "AMF3" :
+			_g.amf = 0x11;
+			break;
+
+	} // end switch
+
+	switch( pkt[ "cmd" ].str() )
 	{
 		case "connect" :
 
@@ -304,29 +324,29 @@ function ProcessCommands() : ( _g )
 			local body = CSqBinary();
 
 			// WinAckSize
-			_g.rtmp.SendPacketBin( 0, 2, 5, 0, 
+			_g.rtmp.SendPacketBin( 0, 2, 5, 0,
 								   body.Using( 4, 4 )
 								   .BE_setUINT( 0, 2500000 ), 0 );
 
 			// Set peer bandwidth
-			_g.rtmp.SendPacketBin( 0, 2, 6, 0, 
+			_g.rtmp.SendPacketBin( 0, 2, 6, 0,
 								   body.Using( 5, 5 )
 								   .BE_setUINT( 0, 2500000 )
 								   .setCHAR( 4, 2 ), 0 );
 
 			// Sream Begin 0
-			_g.rtmp.SendPacketBin( 0, 2, 4, 0, 
+			_g.rtmp.SendPacketBin( 0, 2, 4, 0,
 								   body.Using( 6, 6 )
 								   .BE_setSHORT( 0, 0 )
 								   .BE_setAbsUINT( 2, 0 ), 0 );
 
 			// Send chunk size
-			_g.rtmp.SendPacketBin( 0, 2, 1, 0, 
+			_g.rtmp.SendPacketBin( 0, 2, 1, 0,
 								   body.Using( 4, 4 )
 								   .BE_setUINT( 0, _g.rtmp.getDefaultChunkSize() ), 0 );
 
 			// Send Connect reply
-			_g.rtmp.SendPacket2( 0, 3, 20, 0, CSqMulti(
+			_g.rtmp.SendPacket2( 0, 3, _g.amf, 0, CSqMulti(
 								 "0=_result"
 								 + ",1=" + pkt[ "1" ].str_urlenc()
 								 + ",2={fmsVer=FMS/3%2C5%2C5%2C2004,capabilities=31.0,mode=1.0}"
@@ -334,14 +354,14 @@ function ProcessCommands() : ( _g )
 									+ ",description=Connection Succeeded."
 									+ ",objectEncoding=" + pkt[ "2" ][ "objectEncoding" ].str_urlenc()
 									+ ",clientid=" + _self.urlencode( _g.sid )
-									+ ",data={version=" + _self.urlencode( "3,5,5,2004" ) + "}"
+									+ ",data={_arraytype=ecma,version=" + _self.urlencode( "3,5,5,2004" ) + "}"
 									+ "}"
 								 ), 0 );
 
 			break;
 
 		case "createStream" :
-			return _g.rtmp.SendPacket2( 0, 3, 20, 0, CSqMulti(
+			return _g.rtmp.SendPacket2( 0, 3, _g.amf, 0, CSqMulti(
 										"0=_result"
 										+ ",1=" + pkt[ "1" ].str()
 										+ ",2="
@@ -349,14 +369,14 @@ function ProcessCommands() : ( _g )
 										), 0 );
 
 		case "checkBandwidth" :
-			return _g.rtmp.SendPacket2( 0, 3, 20, 0, CSqMulti(
+			return _g.rtmp.SendPacket2( 0, 3, _g.amf, 0, CSqMulti(
 										"0=onBWDone"
 										+ ",1=0."
 										+ ",2="
 										), 0 );
 
 		case "getStreamLength" :
-			return _g.rtmp.SendPacket2( 0, 3, 20, 0, CSqMulti(
+			return _g.rtmp.SendPacket2( 0, 3, _g.amf, 0, CSqMulti(
 										"0=_result"
 										+ ",1=" + pkt[ "1" ].str()
 										+ ",2="
@@ -368,14 +388,14 @@ function ProcessCommands() : ( _g )
 			local body = CSqBinary();
 
 			// Sream Begin 1
-			_g.rtmp.SendPacketBin( 0, 2, 4, 0, 
+			_g.rtmp.SendPacketBin( 0, 2, 4, 0,
 								   body.Using( 6, 6 )
 								   .BE_setSHORT( 0, 0 )
 								   .BE_setAbsUINT( 2, 1 ), 0 );
 
-  
+
 			// NetStream.Play.Reset
-			_g.rtmp.SendPacket2( 0, 5, 20, 1, CSqMulti(
+			_g.rtmp.SendPacket2( 0, 5, _g.amf, 1, CSqMulti(
 								 "0=onStatus"
 								 + ",1=0."
 								 + ",2="
@@ -386,7 +406,7 @@ function ProcessCommands() : ( _g )
 								), 0 );
 
 			// NetStream.Play.Start
-			_g.rtmp.SendPacket2( 0, 5, 20, 1, CSqMulti(
+			_g.rtmp.SendPacket2( 0, 5, _g.amf, 1, CSqMulti(
 								 "0=onStatus"
 								 + ",1=0."
 								 + ",2="
@@ -410,7 +430,7 @@ function ProcessCommands() : ( _g )
 								), 0 );
 
 			// User control message
-			_g.rtmp.SendPacketBin( 0, 2, 4, 0, 
+			_g.rtmp.SendPacketBin( 0, 2, 4, 0,
 								   body.Using( 6, 6 )
 								   .BE_setSHORT( 0, 0x20 )
 								   .BE_setAbsUINT( 2, 1 ), 0 );
@@ -423,10 +443,8 @@ function ProcessCommands() : ( _g )
 				p[ "w" ] <- "320";
 				p[ "h" ] <- "240";
 				p[ "fps" ] <- _g.fps.tostring();
+				p[ "delay" ] <- ( 1 * _g.fps ).tostring();
 				p[ "encoder_params" ][ "global_headers" ] <- "1";
-
-				// Generate a stream id
-				_g.sid = _self.unique();
 
 				// Start the streaming thread
 				p[ "sid" ] <- _g.sid;
@@ -438,6 +456,9 @@ function ProcessCommands() : ( _g )
 
 				// Don't skip initial frames
 				_g.share.setFlag( _g.share.eFlagNoInitSync, 1 );
+
+				// Set non-blocking read mode
+				_g.rtmp.setNonBlockingMode( 1 );
 
 			} // end start video stream
 
@@ -469,7 +490,7 @@ function Run() : ( _g )
 
 	// Are we streaming video
 	if ( _g.share )
-		return SendVideo();
+		SendVideo();
 
 	// Process commands
 	return ProcessCommands();

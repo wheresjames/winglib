@@ -278,9 +278,16 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 	if ( 0 < nHeader )
 		out->Copy( &m_header );
 
+//	if ( !m_nFrame )
+//		m_nFrame++;
+
 	// Calculate pts
+//	paf->pts = AV_NOPTS_VALUE;
 	paf->pts = calcPts();
+//	paf->pts = m_nFrame * ( AV_TIME_BASE / m_nFps );
 //	paf->pts = m_nFrame * ( 90000 / m_nFps );
+
+//oexSHOW( paf->pts );
 
 	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->_Ptr( nHeader ), out->Size() - nHeader, paf );
 	if ( 0 > nBytes )
@@ -298,7 +305,11 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 			.set( sqbind::oex2std( oexMks( ( m_pCodecContext->coded_frame->key_frame )
 										  ? ( flags | AV_PKT_FLAG_KEY )
 										  : ( flags & ~AV_PKT_FLAG_KEY ) ) ) );
-		(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( paf->pts ) ) );
+										  
+		if ( 0 < m_pCodecContext->coded_frame->pts )
+			(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pts ) ) );
+		else
+			(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( paf->pts ) ) );
 //		(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_dts ) ) );
 //		if ( m_pCodecContext->pkt )
 //			(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->pkt->pts ) ) ),
