@@ -381,7 +381,7 @@ void CIpSocket::Destroy()
 	{
 		// Turn off non-blocking
 //		int flags = fcntl( oexPtrToInt( hSocket ), F_GETFL, 0 );
-//		fcntl( oexPtrToInt( m_hSocket ), F_SETFL, flags & ~O_NONBLOCK );
+//		fcntl( oexPtrToInt( hSocket ), F_SETFL, flags & ~O_NONBLOCK );
 
 		struct linger lopt;
 		lopt.l_onoff = 1;
@@ -734,6 +734,17 @@ void CIpSocket::CloseEventHandle()
 
 			else
 				m_uLastError = 0;
+
+			// Make socket blocking again
+			int flags = fcntl( oexPtrToInt( m_hSocket ), F_GETFL, 0 );
+			fcntl( oexPtrToInt( m_hSocket ), F_SETFL, flags & ( ~O_NONBLOCK ) );
+
+			// Restore socket timeout defaults
+			struct timeval tv;
+			tv.tv_sec = ( oexDEFAULT_WAIT_TIMEOUT / 1000 );
+			tv.tv_usec = ( oexDEFAULT_WAIT_TIMEOUT % 1000 ) * 1000;
+			setsockopt( oexPtrToInt( m_hSocket ), SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof( tv ) );
+			setsockopt( oexPtrToInt( m_hSocket ), SOL_SOCKET, SO_SNDTIMEO, (const char *)&tv, sizeof( tv ) );
 
 		} // end if
 
