@@ -36,6 +36,9 @@ public:
 	/// Converts image colorspace
 	static int ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip );
 
+	/// Resizes image with colorspace conversion
+	static int ResizeBB( int sw, int sh, sqbind::CSqBinary *src, int src_fmt, int dw, int dh, sqbind::CSqBinary *dst, int dst_fmt, int alg );
+
 	/// Rotates an image
 	static int Rotate( int deg, sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqBinary *dst, int dst_fmt );
 

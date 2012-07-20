@@ -9,6 +9,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfConvert, CFfConvert )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorBB2 )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorIB )
 	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorBI )
+
+	SQBIND_STATIC_FUNCTION( CFfConvert, ResizeBB )
+
 	SQBIND_STATIC_FUNCTION( CFfConvert, Rotate )
 	SQBIND_STATIC_FUNCTION( CFfConvert, FlipVert )
 	SQBIND_STATIC_FUNCTION( CFfConvert, FmtEquiv )
@@ -233,6 +236,77 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 		return 0;
 
 	int nRet = sws_scale(	psc, apSrc.data, apSrc.linesize, 0, height,
+							apDst.data, apDst.linesize );
+
+	sws_freeContext( psc );
+
+	if ( 0 >= nRet )
+		return 0;
+
+	dst->setUsed( nDstSize );
+
+	return 1;
+}
+
+int CFfConvert::ResizeBB( int sw, int sh, sqbind::CSqBinary *src, int src_fmt, int dw, int dh, sqbind::CSqBinary *dst, int dst_fmt, int alg )
+{_STT();
+
+	// Fix broken formats
+	src_fmt = FmtEquiv( src_fmt );
+	dst_fmt = FmtEquiv( dst_fmt );
+
+	if ( !dst )
+		return 0;
+
+	int flip = 0;
+	if ( 0 > sh ) 
+	{ 	flip = 1; 
+		sh = -sh; 
+	} // end if
+
+	if ( 0 > dh ) 
+	{ 	flip = flip ? 0 : 1;
+		dh = -dh; 
+	} // end if
+
+	if ( 0 >= sw || 0 >= sh || 0 >= dw || 0 >= dh || ( sw % 4 ) || ( dw % 4 ) )
+		return 0;
+
+	if ( !src || !src->getUsed() )
+		return 0;
+
+	// How big is the destination image?
+	oexSIZE_T nDstSize = CalcImageSize( dst_fmt, dw, dh );
+	if ( !nDstSize )
+		return 0;
+
+	// Allocate memory for destination image
+	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize ) )
+		return 0;
+
+	// Ensure source buffer is large enough
+	oexSIZE_T nSrcSize = CalcImageSize( src_fmt, sw, sh );
+	if ( src->getUsed() < nSrcSize )
+		return 0;
+
+	// Fill in picture data
+	AVPicture apSrc, apDst;
+	if ( !FillAVPicture( &apSrc, src_fmt, sw, sh, src->_Ptr() )
+	     || !FillAVPicture( &apDst, dst_fmt, dw, dh, dst->_Ptr() ) )
+		return 0;
+
+	if ( flip )
+		Flip( src_fmt, sh, &apSrc );
+
+	// Create conversion
+	SwsContext *psc = sws_getContext(	sw, sh, (PixelFormat)src_fmt,
+										dw, dh, (PixelFormat)dst_fmt,
+										alg, NULL, NULL, NULL );
+
+	if ( !psc )
+		return 0;
+
+	int nRet = sws_scale(	psc, apSrc.data, apSrc.linesize, 0, sh,
 							apDst.data, apDst.linesize );
 
 	sws_freeContext( psc );
