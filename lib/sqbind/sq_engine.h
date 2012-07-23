@@ -967,7 +967,6 @@ public:
 		\param [in] bRelative	-	Non-zero if path is relative
 		\param [in] bStart		-	Non-zero if script should be initialized
 		\param [in] bInline		-	Non-zero if script is inline
-
 	*/
 	oex::oexBOOL Load( const stdString &sScript, oex::CStr8 *pbScript, oex::oexBOOL bFile,
 					   oex::oexBOOL bRelative = oex::oexFALSE, oex::oexBOOL bStart = oex::oexTRUE,

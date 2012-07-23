@@ -1,0 +1,5 @@
+
+#include "resource.h"
+
+// Default application icon
+IDI_DEFAULT_ICON		ICON					"logo.ico"

@@ -22,6 +22,15 @@ PRJ_LIBROOT := ../../../../deftbuild/v1
 include $(PRJ_LIBROOT)/config.mk
 
 #-------------------------------------------------------------------
+# Add resources
+#-------------------------------------------------------------------
+export LOC_TAG := rc
+LOC_CXX_rc := rc
+LOC_BLD_rc := rc
+LOC_SRC_rc := res
+include $(PRJ_LIBROOT)/build.mk
+
+#-------------------------------------------------------------------
 # Execute the build
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
