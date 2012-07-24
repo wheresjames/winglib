@@ -111,6 +111,9 @@ public:
 	/// Sets socket blocking mode
 	void setNonBlockingMode( int nEnable ) { m_nNonBlockingMode = nEnable; }
 
+	/// Sets the socket timeout in milliseconds
+	int setTimeout( int nMs );
+
 	/** @} */
 
 	/// Parses the packet data

@@ -36,7 +36,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CRtmpdSession, CRtmpdSession )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, getDefaultChunkSize )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, ParseFlv )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, setNonBlockingMode )
-//	SQBIND_MEMBER_FUNCTION( CRtmpdSession,  )
+	SQBIND_MEMBER_FUNCTION( CRtmpdSession, setTimeout )
 
 	SQBIND_ENUM( CRtmpdSession::eFlagAllInfo, eFlagAllInfo )
 	SQBIND_ENUM( CRtmpdSession::eFlagEmcaArray, eFlagEmcaArray )
@@ -124,6 +124,38 @@ int CRtmpdSession::StopDebugLog()
 	return 0;
 #endif
 
+}
+
+int CRtmpdSession::setTimeout( int nMs )
+{
+	// Is there a session?
+	if ( !isSession() )
+		return 0;
+
+	// Ensure valid socket handle and timeout
+	if ( 0 >= nMs || 0 > (long)m_session.m_sb.sb_socket )
+		return 0;
+
+
+#if defined( _WIN32 )
+
+	// Set the recv and send timeouts
+	return ( setsockopt( m_session.m_sb.sb_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&nMs, sizeof( nMs ) )
+			 | setsockopt( m_session.m_sb.sb_socket, SOL_SOCKET, SO_SNDTIMEO, (const char *)&nMs, sizeof( nMs ) )
+		   ) ? 0 : 1;
+
+#else
+
+	// Setup socket timeout defaults
+	struct timeval tv;
+	tv.tv_sec = ( nMs / 1000 );
+	tv.tv_usec = ( nMs % 1000 ) * 1000;
+
+	// Set the recv and send timeouts
+	return ( setsockopt( m_session.m_sb.sb_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof( tv ) )
+			 | setsockopt( m_session.m_sb.sb_socket, SOL_SOCKET, SO_SNDTIMEO, (const char *)&tv, sizeof( tv ) )
+		   ) ? 0 : 1;
+#endif
 }
 
 int CRtmpdSession::Init( sqbind::CSqSocket *pSocket )

@@ -486,6 +486,9 @@ function Run() : ( _g )
 			return 0;
 		} // end if
 
+		// Set connection timeout
+		_g.rtmp.setTimeout( 16000 );
+
 	} // end if
 
 	// Are we streaming video

@@ -401,11 +401,11 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 	} // end if
 
 	// Setup socket timeout defaults
-	struct timeval tv;
-	tv.tv_sec = ( oexDEFAULT_WAIT_TIMEOUT / 1000 );
-	tv.tv_usec = ( oexDEFAULT_WAIT_TIMEOUT % 1000 ) * 1000;
-	setsockopt( (SOCKET)m_hSocket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof( tv ) );
-	setsockopt( (SOCKET)m_hSocket, SOL_SOCKET, SO_SNDTIMEO, (const char *)&tv, sizeof( tv ) );
+
+	// Set the recv and send timeouts
+	int nMs = oexDEFAULT_WAIT_TIMEOUT;
+	setsockopt( (SOCKET)m_hSocket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&nMs, sizeof( nMs ) );
+	setsockopt( (SOCKET)m_hSocket, SOL_SOCKET, SO_SNDTIMEO, (const char *)&nMs, sizeof( nMs ) );
 
 	// Process socket creation
 	if ( !OnAttach() )
@@ -661,12 +661,10 @@ void CIpSocket::CloseEventHandle()
 			WSAEventSelect( (SOCKET)m_hSocket, (WSAEVENT)0, 0 );
 			unsigned long l = 0; ioctlsocket( (SOCKET)m_hSocket, FIONBIO, &l );
 
-			// Restore socket timeout defaults
-			struct timeval tv;
-			tv.tv_sec = ( oexDEFAULT_WAIT_TIMEOUT / 1000 );
-			tv.tv_usec = ( oexDEFAULT_WAIT_TIMEOUT % 1000 ) * 1000;
-			setsockopt( (SOCKET)m_hSocket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof( tv ) );
-			setsockopt( (SOCKET)m_hSocket, SOL_SOCKET, SO_SNDTIMEO, (const char *)&tv, sizeof( tv ) );
+			// Set the recv and send timeouts
+			int nMs = oexDEFAULT_WAIT_TIMEOUT;
+			setsockopt( (SOCKET)m_hSocket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&nMs, sizeof( nMs ) );
+			setsockopt( (SOCKET)m_hSocket, SOL_SOCKET, SO_SNDTIMEO, (const char *)&nMs, sizeof( nMs ) );
 
 		} // end if
 
