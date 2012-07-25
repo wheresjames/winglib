@@ -335,6 +335,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexGetUnixTime						OEX_NAMESPACE::os::CSys::GetUnixTime
 #define oexTimeout							OEX_NAMESPACE::os::CTimeout
 
+#define	oexThunk							OEX_NAMESPACE::os::CSys::CThunk
 #define oexSleep							OEX_NAMESPACE::os::CSys::Sleep
 #define oexGetBootCount						OEX_NAMESPACE::os::CHqTimer::GetBootCount
 #define oexGetBootSeconds					OEX_NAMESPACE::os::CHqTimer::GetTimerSeconds
@@ -359,6 +360,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexCtrlComputer						OEX_NAMESPACE::os::CSys::CtrlComputer
 #define oexIsRoot							OEX_NAMESPACE::os::CSys::IsRoot
 #define oexSetRoot							OEX_NAMESPACE::os::CSys::SetRoot
+
 
 #define oexMd5								OEX_NAMESPACE::CUtil::md5
 #define oexGuid								OEX_NAMESPACE::CUtil::guid

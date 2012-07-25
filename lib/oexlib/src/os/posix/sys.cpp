@@ -66,6 +66,45 @@ const oexUINT		CSys::c_StrErr_INSUFFICIENT_BUFFER = (oexUINT)-2;
 
 //oexSTATIC_ASSERT( CSys::eMaximumWaitObjects == MAXIMUM_WAIT_OBJECTS );
 
+#if !defined( OEX_CPU_64 )
+
+void* CSys::CThunk::Stdcall2This( const void *pThis, void *pFun  )
+{
+	return 0;
+/*
+	p = (SThunkDataStdcall*)malloc( 250 );
+	if ( !p )
+		return 0;
+
+	// Enable execute permissions
+	long pgsz = sysconf( _SC_PAGE_SIZE );
+	if ( 0 < pgsz && !( pgsz | ( pgsz - 1 ) ) )
+	{	long sz = pgsz, root = oexPtrToULong( p ) & ~pgsz;
+		while ( sz && ( oexPtrToULong( p ) - root ) + sz < sizeof( SThunkDataStdcall ) )
+			sz += pgsz;
+		if ( 0 < sz )
+			mprotect( (void*)root, sz + pgsz, PROT_READ | PROT_WRITE | PROT_EXEC )
+	} // end if
+
+	cacheflush( p, sizeof( SThunkDataStdcall ), ICACHE );
+
+	return p;
+*/
+}
+
+void* CSys::CThunk::CDecl2This( const void *pThis, void *pFun, long lCleanup )
+{
+	return 0;
+}
+
+void CSys::CThunk::Release()
+{
+	if ( p )
+		free( p ), p = 0;
+}
+
+#endif
+
 SResInfo* SResInfo::Create( oexCSTR x_pName )
 {
 	SResInfo *pRi = new SResInfo;
@@ -114,7 +153,7 @@ oexUINT CSys::Rand( oexPVOID p, oexUINT sz )
 	unsigned char *buf = (unsigned char*)p;
 	while ( sz )
 		*(buf++) = (unsigned char)rand(), sz--;
-	
+
 	return sz;
 }
 
@@ -591,7 +630,7 @@ oexGUID * CSys::CreateGuid( oexGUID *pGuid )
 		CMem::GetRawAllocator().fMalloc( 4 ),
 		g_int++
 	};
-	
+
 	oss::CMd5::Transform( &guid, &rs, sizeof( rs ) );
 	CMem::GetRawAllocator().fFree( rs.pHeap );
 
@@ -756,7 +795,7 @@ oexBOOL CSys::GetLocalTime( STime &t )
 	time_t current_time;
 	time( &current_time );
 	struct tm tinfo, *ptinfo = &tinfo;
-	
+
 	_oexTRY
 	{
 #if !defined( OEX_NOLOCALTIME_R )
@@ -767,7 +806,7 @@ oexBOOL CSys::GetLocalTime( STime &t )
 			return oexFALSE;
 #endif
 	} // end try
-	
+
 	_oexCATCH_ALL()
 	{
 		return oexFALSE;
@@ -822,17 +861,17 @@ oexINT CSys::GetLocalTzBias()
 }
 
 /*
-struct tm 
+struct tm
   {
-     int   tm_sec; 
-     int   tm_min; 
-     int   tm_hour; 
-     int   tm_mday; 
-     int   tm_mon; 
-     int   tm_year; 
-     int   tm_wday; 
-     int   tm_yday; 
-     int   tm_isdst; 
+     int   tm_sec;
+     int   tm_min;
+     int   tm_hour;
+     int   tm_mday;
+     int   tm_mon;
+     int   tm_year;
+     int   tm_wday;
+     int   tm_yday;
+     int   tm_isdst;
 };
 */
 
@@ -854,7 +893,7 @@ oexBOOL CSys::GetSystemTime( STime &t )
 			return oexFALSE;
 #endif
 	} // end try
-	
+
 	_oexCATCH_ALL()
 	{
 		return oexFALSE;
@@ -944,7 +983,7 @@ void CSys::FileTimeToSystemTime( STime &x_st, oexINT64 x_ft )
 
 	time_t tTime = ( x_ft / 10000000LL ) - FTOFF_1970;
 	struct tm tinfo, *ptinfo = &tinfo;
-	
+
 	_oexTRY
 	{
 #if !defined( OEX_NOGMTTIME_R )
@@ -955,7 +994,7 @@ void CSys::FileTimeToSystemTime( STime &x_st, oexINT64 x_ft )
 			return;
 #endif
 	} // end try
-	
+
 	_oexCATCH_ALL()
 	{
 		return;
@@ -995,7 +1034,7 @@ int CSys::Echo( oexCSTR8 x_pFmt )
 {
 	if ( !oexCHECK_PTR( x_pFmt ) )
 		return 0;
-		
+
 	if ( CUtil::isOutputBuffer() )
 	{
 #if defined( oexUNICODE )
@@ -1005,7 +1044,7 @@ int CSys::Echo( oexCSTR8 x_pFmt )
 		CUtil::AddOutput( x_pFmt, 0, oexTRUE );
 #endif
 	} // end if
-	
+
 	return ::puts( x_pFmt );
 }
 
@@ -1014,7 +1053,7 @@ int CSys::Echo( oexCSTR8 x_pFmt, oexLONG x_lLen )
 
 	if ( !x_pFmt || 0 >= x_lLen )
 		return 0;
-		
+
 	if ( CUtil::isOutputBuffer() )
 	{
 #if !defined( oexUNICODE )
@@ -1024,7 +1063,7 @@ int CSys::Echo( oexCSTR8 x_pFmt, oexLONG x_lLen )
 		CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
 #endif
 	} // end if
-	
+
 	return ::fwrite( x_pFmt, 1, x_lLen, stdout );
 }
 

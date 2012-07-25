@@ -7,13 +7,13 @@ public:
 	enum
 	{
 		eDriverMsgNone = 0,
-		
+
 		eDriverMsgReset = 0x0001,
-		
+
 		eDriverMsgResync = 0x0002,
-		
+
 		eDriverMsgLatenciesChanged = 0x0004,
-		
+
 	};
 
 public:
@@ -59,10 +59,10 @@ public:
 
 	/// Loads the specified driver
 	int LoadDriver( int nId );
-	
+
 	/// Get driver info
 	sqbind::CSqMulti getInfo();
-	
+
 	/// Set sample rate
 	void setSampleRate( double d );
 
@@ -71,10 +71,10 @@ public:
 
 	/// Open specified channels
 	int OpenChannels( sqbind::CSqMulti *m, const sqbind::stdString &sShare, int nFlags, int nFmt );
-	
+
 	/// Closes any open channels
 	int CloseChannels();
-	
+
 	/// Start the device
 	int Start();
 
@@ -83,19 +83,18 @@ public:
 
 	/// Returns Driver signal flags
 	int getDriverSignal() { int n = m_nSignal; m_nSignal &= ~n; return n; }
-	
-	/** @} */
 
+	/** @} */
 
 private:
 
-	static void onBufferSwitch(long doubleBufferIndex, ASIOBool directProcess);
+	void onBufferSwitch(long doubleBufferIndex, ASIOBool directProcess);
 
-	static void onSampleRateDidChange(ASIOSampleRate sRate);
+	void onSampleRateDidChange(ASIOSampleRate sRate);
 
-	static long onAsioMessage(long selector, long value, void* message, double* opt);
+	long onAsioMessage(long selector, long value, void* message, double* opt);
 
-	static ASIOTime* onBufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
+	ASIOTime* onBufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
 
 private:
 
@@ -119,11 +118,24 @@ private:
 
 	/// ASIO callbacks
 	ASIOCallbacks 					m_cb;
-	
+
 	/// Binary data share
 	sqbind::CSqBinaryShare			m_share;
-	
+
 	///  Non zero if driver wants quit
 	int								m_nSignal;
+
+	/// Callback OnBufferSwitch()
+	oexThunk						m_cbOnBufferSwitch;
+
+	/// Callback OnSampleRateDidChange()
+	oexThunk						m_cbOnSampleRateDidChange;
+
+	/// Callback OnAsioMessage()
+	oexThunk						m_cbOnAsioMessage;
+
+	/// Callback OnBufferSwitchTimeInfo()
+	oexThunk						m_cbOnBufferSwitchTimeInfo;
+
 };
 

@@ -33,6 +33,13 @@
 //----------------------------------------------------------------*/
 #pragma once
 
+#define asmOP1( p, i, o1 ) 				p[ i++ ] = o1
+#define asmOP2( p, i, o1, o2 ) 			p[ i++ ] = o1, p[ i++ ] = o2
+#define asmOP3( p, i, o1, o2, o3 )		p[ i++ ] = o1, p[ i++ ] = o2, p[ i++ ] = o3
+#define asmOP4( p, i, o1, o2, o3, o4 )	p[ i++ ] = o1, p[ i++ ] = o2, p[ i++ ] = o3, p[ i++ ] = o4
+#define asmOSHORT( p, i, n ) 			*((unsigned short*)&p[ i ]) = n, i += 2
+#define asmOINT( p, i, n ) 				*((unsigned int*)&p[ i ]) = n, i += 4
+
 class CSys
 {
 public:
@@ -50,23 +57,59 @@ public:
 
 		// Error code
 		oexINT getError() { return m_error; }
-		
+
 		// Error code
 		oexINT		m_error;
 	};
 
+#if !defined( OEX_CPU_64 )
+
+	class CThunk
+	{
+		/// Bruteforce cast
+		template< typename T > struct SCast { union { T o; void* p; }; };
+
+	public:
+
+		/// Constructor
+		CThunk() : m_p( 0 ) {}
+
+		/// Destructor
+		virtual ~CThunk() { Release(); }
+
+		/// Bind to __stdcall
+		template< typename TO, typename TI > TO Stdcall2This( const void *pThis, TI pFun )
+		{	SCast< TI > in; SCast< TO > out; in.o = pFun; out.p = Stdcall2This( pThis, in.p ); return out.o; }
+		void* Stdcall2This( const void *pThis, void *pFun );
+
+		/// Bind to __cdecl
+		template< typename TO, typename TI > TO CDecl2This( const void *pThis, TI pFun, long lCleanup )
+		{	SCast< TI > in; SCast< TO > out; in.o = pFun; out.p = CDecl2This( pThis, in.p, lCleanup ); return out.o; }
+		void* CDecl2This( const void *pThis, void *pFun, long lCleanup );
+
+		/// Release function memory
+		void Release();
+
+		/// Return function pointer
+		void* Ptr() { return m_p; }
+
+	private:
+		void *m_p;
+	};
+
+#endif
+
 	// Last error code
 	volatile static oexINT s_last_error;
-	
+
 	/// Throws an exception of type CSys::CException
 	oexNORETURN static void ThrowException();
-	
+
 	/// Injects an exception into the specified thread
 	static oexUINT InjectException( oexPVOID hThread, oexINT nError );
 
 	/// Must be called to catch exception
 	static void InitException();
-
 
 private:
 
@@ -161,7 +204,7 @@ public:
 
 	/// Writes data to stdout with length
 	static int Echo( oexCSTR8 x_pFmt, oexLONG x_lLen );
-	
+
 	/// Read data from stdin
 	static oexLONG Read_stdin( oexSTR8 x_pBuf, oexLONG x_lMax );
 
@@ -177,11 +220,11 @@ public:
 
 	static oexCSTRW vStrFmt( oexRESULT *pRes, oexSTRW pDst, oexUINT uMax, oexCSTRW pFmt, oexVaList pArgs );
 
-    /// Converts to int64
-    static oexINT64 StrToInt64( oexCSTRW x_pStr, oexUINT x_uRadix = 10 );
+	/// Converts to int64
+	static oexINT64 StrToInt64( oexCSTRW x_pStr, oexUINT x_uRadix = 10 );
 
-    /// Converts to uint64
-    static oexUINT64 StrToUInt64( oexCSTRW x_pStr, oexUINT x_uRadix = 10 );
+	/// Converts to uint64
+	static oexUINT64 StrToUInt64( oexCSTRW x_pStr, oexUINT x_uRadix = 10 );
 
 	/// Converts to long
 	static oexLONG StrToLong( oexCSTRW pStr, oexUINT uRadix = 10 );
@@ -208,7 +251,7 @@ public:
 
 	/// Writes data to stdout with length
 	static int Echo( oexCSTRW x_pFmt, oexLONG x_lLen );
-	
+
 	static oexUINT WcsToMbs( oexSTR8 pDst, oexUINT uMax, oexCSTRW pSrc, oexUINT uLen );
 
 	static oexUINT MbsToWcs( oexSTRW pDst, oexUINT uMax, oexCSTR8 pSrc, oexUINT uLen );
@@ -223,22 +266,22 @@ public:
 
 	static oexPVOID MemSet( oexPVOID pDst, oexINT nCh, oexUINT uSize );
 
-    static oexPVOID Zero( oexPVOID pDst, oexUINT uSize )
-    {   return MemSet( pDst, 0, uSize ); }
+	static oexPVOID Zero( oexPVOID pDst, oexUINT uSize )
+	{	return MemSet( pDst, 0, uSize ); }
 
-    /// Creates a guid
-    static oexGUID * CreateGuid( oexGUID *pGuid );
+	/// Creates a guid
+	static oexGUID * CreateGuid( oexGUID *pGuid );
 
 //------------------------------------------------------------------
 // Sleep functions
 //------------------------------------------------------------------
 public:
 
-    /// Sleep in milliseconds
-    static void Sleep( oexUINT uMilliseconds, oexUINT uSeconds = 0 );
+	/// Sleep in milliseconds
+	static void Sleep( oexUINT uMilliseconds, oexUINT uSeconds = 0 );
 
-    /// Sleep in microseconds
-    static oexBOOL MicroSleep( oexUINT uMicroseconds, oexUINT uSeconds = 0 );
+	/// Sleep in microseconds
+	static oexBOOL MicroSleep( oexUINT uMicroseconds, oexUINT uSeconds = 0 );
 
 	/// Strings constants
 	static const oexUINT		c_StrErr_OK;
@@ -262,14 +305,14 @@ public:
 		waitFailed = -2
 	};
 
-    enum
-    {
+	enum
+	{
         /// Maximum number of handles that can be passed to WaitForMultipleObjects()
         eMaximumWaitObjects = 64
-    };
+	};
 
-    /// Waitable handle type
-    typedef oexCPVOID t_WAITABLE;
+	/// Waitable handle type
+	typedef oexCPVOID t_WAITABLE;
 
 	//==============================================================
 	// CloseHandle()
@@ -392,7 +435,7 @@ public:
 
 	*/
 	static oexBOOL SetThreadPriority( oexINT x_nPriority );
-	
+
     /// Sets the thread affinity
 	/**
 
@@ -504,38 +547,38 @@ public:
 	{
 		/// Reboots the computer
 		eReboot = 1,
-		
+
 		/// Powers off the computer
 		ePowerOff,
-		
+
 		/// Shuts down the OS, but does not power off
 		eShutdown,
-		
+
 		/// Logs off the current user
 		eLogOff,
-		
+
 		/// Restarts the os
 		eRestart
-		
+
 	};
-	
+
 	//==============================================================
 	// CtrlComputer()
 	//==============================================================
 	/// Reboot, Restart, Logoff computer
 	/**
-		@param [in] nCmd	-	eReboot, ePowerOff, eShutdown, 
+		@param [in] nCmd	-	eReboot, ePowerOff, eShutdown,
 								eLogOff, eRestart
 		@param [in] nForce	-	0 = Do not force
 								1 = Force apps to shutdown
 								2 = Force apps that are hung
 		@param [in] pMsg	-	If not null, message to display to
 								user before shutdown starts.
-								
+
 		@return Non-zero if success
 	*/
 	static oexINT CtrlComputer( int nCmd, int nForce, oexCSTR pMsg );
-	
+
 	//==============================================================
 	// SetRoot()
 	//==============================================================
@@ -547,7 +590,7 @@ public:
 	//==============================================================
 	/// Switch to root or administrator
 	static oexINT IsRoot();
-	
+
 	//==============================================================
 	// GetCpuLoad()
 	//==============================================================
@@ -584,7 +627,7 @@ public:
 	/**
 		\param [in] p	-	Pointer to the buffer to ramdomize
 		\param [in] sz	-	Size of the buffer in p
-		
+
 		\return Returns the number of bytes processed
 	*/
 	static oexUINT Rand( oexPVOID p, oexUINT sz );

@@ -118,6 +118,64 @@ const oexUINT       CSys::c_uMaximumWaitObjects = MAXIMUM_WAIT_OBJECTS;
 
 oexSTATIC_ASSERT( CSys::eMaximumWaitObjects == MAXIMUM_WAIT_OBJECTS );
 
+#if !defined( OEX_CPU_64 )
+
+void* CSys::CThunk::Stdcall2This( const void *pThis, void *pFun )
+{
+	Release();
+
+	unsigned char *p = (unsigned char*)VirtualAlloc( 0, 32, MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+	if ( !p )
+		return 0;
+	m_p = p;
+
+	// x86 __stdcall
+	int i = 0;
+	asmOP2( p, i, '\x8d', '\x0d' ); 				//	lea ecx, pThis
+		asmOINT( p, i, oexPtrToUInt( pThis ) );
+	asmOP1( p, i, '\xb8' );							//	mov eax, pFun
+		asmOINT( p, i, oexPtrToUInt( pFun ) );
+	asmOP2( p, i, '\xff', '\xe0' );					//	jmp eax
+
+	// Flush instruction cache
+	FlushInstructionCache( GetCurrentProcess(), p, i );
+
+	return p;
+}
+
+void* CSys::CThunk::CDecl2This( const void *pThis, void *pFun, long lCleanup )
+{
+	Release();
+
+	unsigned char *p = (unsigned char*)VirtualAlloc( 0, 32, MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+	if ( !p )
+		return 0;
+	m_p = p;
+
+	int i = 0;
+	asmOP2( p, i, '\x8d', '\x0d' ); 				//	lea ecx, pThis
+		asmOINT( p, i, oexPtrToUInt( pThis ) );
+	asmOP1( p, i, '\xe8' ); 						//	call pFun
+		asmOINT( p, i, oexPtrToUInt( pFun )
+			  - ( oexPtrToUInt( p ) + i + 4 ) );
+	asmOP3( p, i, '\x83', '\xc4', lCleanup );		//	add esp, lCleanup
+	asmOP1( p, i, '\xc9' );							//	leave
+	asmOP1( p, i, '\xc3' );							//	ret
+
+	// Flush instruction cache
+	FlushInstructionCache( GetCurrentProcess(), p, i );
+
+	return p;
+}
+
+void CSys::CThunk::Release()
+{
+	if ( m_p )
+		VirtualFree( m_p, 0, MEM_RELEASE ), m_p = 0;
+}
+
+#endif
+
 oexUINT CSys::Rand( oexPVOID p, oexUINT sz )
 {
 	if ( !p )
@@ -127,7 +185,7 @@ oexUINT CSys::Rand( oexPVOID p, oexUINT sz )
 	unsigned char *buf = (unsigned char*)p;
 	while ( sz )
 		*(buf++) = (unsigned char)rand(), sz--;
-	
+
 	return sz;
 }
 
@@ -205,12 +263,12 @@ int CSys::IsKey()
 }
 
 // Not declared in MINGW, so...
-typedef enum  
+typedef enum
 {	_win_TokenElevationTypeDefault   = 1,
 	_win_TokenElevationTypeFull,
-	_win_TokenElevationTypeLimited 
+	_win_TokenElevationTypeLimited
 } _win_TOKEN_ELEVATION_TYPE, *_win_PTOKEN_ELEVATION_TYPE;
-typedef enum 
+typedef enum
 {	_win_TokenElevationType = 18
 } _win_TOKEN_INFORMATION_CLASS, *_win_PTOKEN_INFORMATION_CLASS;
 
@@ -221,11 +279,11 @@ oexINT CSys::SetRoot()
 	osVersion.dwOSVersionInfoSize = sizeof(OSVERSIONINFO) ;
 	if ( !::GetVersionEx( &osVersion ) )
 		osVersion.dwPlatformId = VER_PLATFORM_WIN32_WINDOWS;
-	
+
 	// If no UAC
 	if ( osVersion.dwMajorVersion < 6 )
 		return 1;
-		
+
 	HANDLE hToken;
 	if ( !OpenProcessToken( GetCurrentProcess(), TOKEN_WRITE | TOKEN_WRITE, &hToken ) )
 		return 0;
@@ -237,10 +295,10 @@ oexINT CSys::SetRoot()
 		if ( !SetTokenInformation( hToken, (TOKEN_INFORMATION_CLASS)_win_TokenElevationType, &tet, sizeof( tet ) ) )
 			tet = _win_TokenElevationTypeDefault;
 	} // end if
-	
+
 	CloseHandle( hToken );
-	
-	return ( tet == _win_TokenElevationTypeFull ) ? 1 : 0;	
+
+	return ( tet == _win_TokenElevationTypeFull ) ? 1 : 0;
 }
 
 oexINT CSys::IsRoot()
@@ -250,11 +308,11 @@ oexINT CSys::IsRoot()
 	osVersion.dwOSVersionInfoSize = sizeof(OSVERSIONINFO) ;
 	if ( !::GetVersionEx( &osVersion ) )
 		osVersion.dwPlatformId = VER_PLATFORM_WIN32_WINDOWS;
-	
+
 	// If no UAC
 	if ( osVersion.dwMajorVersion < 6 )
 		return 1;
-		
+
 	HANDLE hToken;
 	if ( !OpenProcessToken( GetCurrentProcess(), TOKEN_READ, &hToken ) )
 		return 0;
@@ -263,10 +321,10 @@ oexINT CSys::IsRoot()
 	_win_TOKEN_ELEVATION_TYPE tet = _win_TokenElevationTypeDefault;
 	if ( !GetTokenInformation( hToken, (TOKEN_INFORMATION_CLASS)_win_TokenElevationType, &tet, sizeof( tet ), &len ) )
 		tet = _win_TokenElevationTypeDefault;
-	
+
 	CloseHandle( hToken );
-	
-	return ( tet == _win_TokenElevationTypeFull ) ? 1 : 0;	
+
+	return ( tet == _win_TokenElevationTypeFull ) ? 1 : 0;
 }
 
 oexINT CSys::CtrlComputer( int nCmd, int nForce, oexCSTR pMsg )
@@ -279,20 +337,20 @@ oexINT CSys::CtrlComputer( int nCmd, int nForce, oexCSTR pMsg )
 //	osVersion.dwOSVersionInfoSize = sizeof(OSVERSIONINFO) ;
 //	if ( !::GetVersionEx( &osVersion ) )
 //		osVersion.dwPlatformId = VER_PLATFORM_WIN32_WINDOWS;
-	
+
 	// NT doesn't just let us reboot the computer
-//	if ( osVersion.dwPlatformId == VER_PLATFORM_WIN32_NT ) 
+//	if ( osVersion.dwPlatformId == VER_PLATFORM_WIN32_NT )
 	{
 		HANDLE				hToken;
 		TOKEN_PRIVILEGES	tp;
 
 		// Get our token information
-		if ( OpenProcessToken(	GetCurrentProcess(), 
+		if ( OpenProcessToken(	GetCurrentProcess(),
 								TOKEN_ADJUST_PRIVILEGES |
 								TOKEN_QUERY,
 								&hToken ) )
 		{
-			// Get 
+			// Get
 			if ( LookupPrivilegeValue(	NULL,
 										SE_SHUTDOWN_NAME,
 										&tp.Privileges[ 0 ].Luid ) )
@@ -303,15 +361,15 @@ oexINT CSys::CtrlComputer( int nCmd, int nForce, oexCSTR pMsg )
 
 				// Attempt to adjust security token
 				AdjustTokenPrivileges( hToken, FALSE, &tp, 0, NULL, 0 );
-				
+
 			} // end if
 
 		} // end if
 
 	} // end NT
-	
+
 	UINT uFlags = 0;
-	
+
 	// What to do?
 	switch( nCmd )
 	{	case eReboot : uFlags |= EWX_REBOOT; break;
@@ -326,15 +384,15 @@ oexINT CSys::CtrlComputer( int nCmd, int nForce, oexCSTR pMsg )
 	{	case 1 : uFlags |= EWX_FORCE; break;
 		case 2 : uFlags |= EWX_FORCEIFHUNG; break;
 	} // end switch
-	
+
 	// User mode command
 	ExitWindowsEx( uFlags, 1 );
 
 	// In case we're a service
 	if ( nCmd != eLogOff && nCmd != eShutdown )
-		InitiateSystemShutdown( NULL, (oexSTR)pMsg, ( pMsg && *pMsg ) ? 8 : 0, nForce, 
+		InitiateSystemShutdown( NULL, (oexSTR)pMsg, ( pMsg && *pMsg ) ? 8 : 0, nForce,
 								( nCmd == eReboot || nCmd == eRestart ) ? TRUE : FALSE );
-	
+
 	return 1;
 }
 
@@ -400,7 +458,7 @@ oexCSTR8 CSys::vStrFmt( oexRESULT *x_pRes, oexSTR8 x_pDst, oexUINT x_uMax, oexCS
 
 	else
 		x_pDst[ nRet ] = 0;
-	
+
 #endif
 
 	// What to do with the result
@@ -709,7 +767,7 @@ oexBOOL CSys::Init()
 {//_STT();
 
 	// Disable system error messages
-	DWORD dwMask = SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS 
+	DWORD dwMask = SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS
 				   | SEM_NOOPENFILEERRORBOX | SEM_NOALIGNMENTFAULTEXCEPT;
 	DWORD dwOld = SetErrorMode( dwMask );
 	SetErrorMode( dwOld | dwMask );
@@ -1002,7 +1060,7 @@ int CSys::Echo( oexCSTR8 x_pFmt )
 		CUtil::AddOutput( x_pFmt, 0, oexTRUE );
 #endif
 	} // end if
-	
+
 	return ::puts( x_pFmt );
 }
 
@@ -1011,7 +1069,7 @@ int CSys::Echo( oexCSTR8 x_pFmt, oexLONG x_lLen )
 
 	if ( !x_pFmt || 0 >= x_lLen )
 		return 0;
-		
+
 	if ( CUtil::isOutputBuffer() )
 	{
 #if !defined( oexUNICODE )
@@ -1021,7 +1079,7 @@ int CSys::Echo( oexCSTR8 x_pFmt, oexLONG x_lLen )
 		CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
 #endif
 	} // end if
-	
+
 	return ::fwrite( x_pFmt, 1, x_lLen, stdout );
 }
 
@@ -1035,16 +1093,16 @@ oexLONG CSys::Read_stdin( oexSTR8 x_pBuf, oexLONG x_lMax )
     HANDLE h = GetStdHandle( STD_INPUT_HANDLE );
 	if ( INVALID_HANDLE_VALUE == h )
 		return 0;
-		
+
 	DWORD dwEvents = 0;
 	if ( GetNumberOfConsoleInputEvents( h, &dwEvents ) && !dwEvents )
 		dwRead = 0;
-		
+
 	else if ( !PeekNamedPipe( h, x_pBuf, (DWORD)x_lMax, &dwRead, NULL, NULL ) )
 		dwRead = 0;
-		
+
 	CloseHandle( h );
-		
+
 	return (oexLONG)dwRead;
 }
 
@@ -1217,7 +1275,7 @@ oexNORETURN void CSys::ThrowException()
 {
 	// Throw exception
 	_oexTHROW( oexEXCEPTION( s_last_error ) );
-	
+
 	// Just in case
 	ExitThread( s_last_error );
 
@@ -1243,14 +1301,14 @@ oexUINT CSys::InjectException( oexPVOID hThread, oexINT nError )
 #if !defined( OEX_CPU_ARM )
 
 	// Get handle
-	HANDLE h = (HANDLE)hThread;	
+	HANDLE h = (HANDLE)hThread;
 	if ( INVALID_HANDLE_VALUE == h )
 		return -1;
-	
+
 	// Attemp to suspend the thread
 	if ( INFINITE == SuspendThread( h ) )
 		return -2;
-		
+
 	CONTEXT ctx;
 	ctx.ContextFlags = CONTEXT_CONTROL;
 	if ( GetThreadContext( h, &ctx ) )
