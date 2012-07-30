@@ -117,6 +117,7 @@ oexBOOL CSysUtil::IsRegKey( const CStr &x_sKey, const CStr &x_sPath )
 								0, NULL, 0, KEY_READ, NULL, &hKey, NULL );
 	if ( ERROR_SUCCESS != lRes || !hKey )
 		return oexFALSE;
+
 	RegCloseKey( hKey );
 
 	return oexTRUE;
@@ -187,6 +188,9 @@ CStr CSysUtil::GetRegString( const CStr &x_sKey, const CStr &x_sPath, const CStr
 		RegCloseKey( hKey );
 		return CStr();
 	} // end if
+
+	// Close the registry key
+	RegCloseKey( hKey );
 
 	// Return the value as a string
 	return RegValueToString( dwType, buf._Ptr(), dwSize );
