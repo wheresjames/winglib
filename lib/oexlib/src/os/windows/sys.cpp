@@ -131,11 +131,11 @@ void* CSys::CThunk::Stdcall2This( const void *pThis, void *pFun )
 
 	// x86 __stdcall
 	int i = 0;
-	asmOP2( p, i, '\x8d', '\x0d' ); 				//	lea ecx, pThis
+	asmOP2( p, i, 0x8d, 0x0d ); 					//	lea ecx, pThis
 		asmOINT( p, i, oexPtrToUInt( pThis ) );
-	asmOP1( p, i, '\xb8' );							//	mov eax, pFun
+	asmOP1( p, i, 0xb8 );							//	mov eax, pFun
 		asmOINT( p, i, oexPtrToUInt( pFun ) );
-	asmOP2( p, i, '\xff', '\xe0' );					//	jmp eax
+	asmOP2( p, i, 0xff, 0xe0 );						//	jmp eax
 
 	// Flush instruction cache
 	FlushInstructionCache( GetCurrentProcess(), p, i );
@@ -153,14 +153,14 @@ void* CSys::CThunk::CDecl2This( const void *pThis, void *pFun, long lCleanup )
 	m_p = p;
 
 	int i = 0;
-	asmOP2( p, i, '\x8d', '\x0d' ); 				//	lea ecx, pThis
+	asmOP2( p, i, 0x8d, 0x0d ); 					//	lea ecx, pThis
 		asmOINT( p, i, oexPtrToUInt( pThis ) );
-	asmOP1( p, i, '\xe8' ); 						//	call pFun
-		asmOINT( p, i, oexPtrToUInt( pFun )
-			  - ( oexPtrToUInt( p ) + i + 4 ) );
-	asmOP3( p, i, '\x83', '\xc4', lCleanup );		//	add esp, lCleanup
-	asmOP1( p, i, '\xc9' );							//	leave
-	asmOP1( p, i, '\xc3' );							//	ret
+	asmOP1( p, i, 0xb8 );							//	mov eax, pFun
+		asmOINT( p, i, oexPtrToUInt( pFun ) );
+	asmOP2( p, i, 0xff, 0xd0 );						//	call eax
+	asmOP3( p, i, 0x83, 0xc4, lCleanup );			//	add esp, lCleanup
+	asmOP1( p, i, 0xc9 );							//	leave
+	asmOP1( p, i, 0xc3 );							//	ret
 
 	// Flush instruction cache
 	FlushInstructionCache( GetCurrentProcess(), p, i );

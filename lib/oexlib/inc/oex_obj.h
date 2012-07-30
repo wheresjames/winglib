@@ -40,8 +40,7 @@ namespace obj
 	// For defining type sizes in bits
 #	define OSZBITS( b ) ( ( ( b & 0x7 ) << 8 ) | ( ( ( b & 0xff ) >> 3 ) + ( ( b & 0x7 ) ? 1 : 0 ) ) )
 
-    // iii Unfortunately, Doxygen craps out on these next
-    //     function templates.
+	// iii Unfortunately, Doxygen craps out on these next function templates.
 
 	// Data type masks
     enum
@@ -67,6 +66,15 @@ namespace obj
 		// Null terminated
 		eTypeNullTerm		= 0x8000,
 
+		// Big endian
+		eTypeBigEndian		= 0x00010000,
+
+		// Systems endian
+#if defined( OEX_BIG_ENDIAN )
+		eTypeSysEndian			= 0x00010000,
+#else
+		eTypeSysEndian			= 0x00000000,
+#endif
 	};
 
 	enum
@@ -76,53 +84,53 @@ namespace obj
 
         tBin            = ( eTypeArray | 1 ),
 
-        tInt            = ( eTypeSigned | sizeof( oexINT ) ),
+        tInt            = ( eTypeSigned | sizeof( oexINT ) ) | eTypeSysEndian,
 
-        tUInt           = ( sizeof( oexUINT ) ),
+        tUInt           = ( sizeof( oexUINT ) ) | eTypeSysEndian,
 
-        tLong           = ( eTypeSigned | sizeof( oexLONG ) ),
+        tLong           = ( eTypeSigned | sizeof( oexLONG ) ) | eTypeSysEndian,
 
-        tULong          = ( sizeof( oexULONG ) ),
+        tULong          = ( sizeof( oexULONG ) ) | eTypeSysEndian,
 
-        tLongLong       = ( eTypeSigned | sizeof( oexINT64 ) ),
+        tLongLong       = ( eTypeSigned | sizeof( oexINT64 ) ) | eTypeSysEndian,
 
-        tULongLong      = ( sizeof( oexUINT64 ) ),
+        tULongLong      = ( sizeof( oexUINT64 ) ) | eTypeSysEndian,
 
 		tInt1           = ( eTypeSigned | OSZBITS( 1 ) ),
 
         tUInt1          = ( OSZBITS( 1 ) ),
 
-		tInt2           = ( eTypeSigned | OSZBITS( 2 ) ),
+		tInt2           = ( eTypeSigned | OSZBITS( 2 ) ) | eTypeSysEndian,
 
-        tUInt2          = ( OSZBITS( 2 ) ),
+        tUInt2          = ( OSZBITS( 2 ) ) | eTypeSysEndian,
 
-		tInt4           = ( eTypeSigned | OSZBITS( 4 ) ),
+		tInt4           = ( eTypeSigned | OSZBITS( 4 ) ) | eTypeSysEndian,
 
-        tUInt4          = ( OSZBITS( 4 ) ),
+        tUInt4          = ( OSZBITS( 4 ) ) | eTypeSysEndian,
 
 		tInt8           = ( eTypeSigned | 1 ),
 
         tUInt8          = ( 1 ),
 
-        tInt16          = ( eTypeSigned | 2 ),
+        tInt16          = ( eTypeSigned | 2 ) | eTypeSysEndian,
 
-        tUInt16         = ( 2 ),
+        tUInt16         = ( 2 ) | eTypeSysEndian,
 
-        tInt24          = ( eTypeSigned | 3 ),
+        tInt24          = ( eTypeSigned | 3 ) | eTypeSysEndian,
 
-        tUInt24         = ( 3 ),
+        tUInt24         = ( 3 ) | eTypeSysEndian,
 
-        tInt32          = ( eTypeSigned | 4 ),
+        tInt32          = ( eTypeSigned | 4 ) | eTypeSysEndian,
 
-        tUInt32         = ( 4 ),
+        tUInt32         = ( 4 ) | eTypeSysEndian,
 
-        tInt64          = ( eTypeSigned | 8 ),
+        tInt64          = ( eTypeSigned | 8 ) | eTypeSysEndian,
 
-        tUInt64         = ( 8 ),
+        tUInt64         = ( 8 ) | eTypeSysEndian,
 
-        tInt128         = ( eTypeSigned | 16 ),
+        tInt128         = ( eTypeSigned | 16 ) | eTypeSysEndian,
 
-        tUInt128        = ( 16 ),
+        tUInt128        = ( 16 ) | eTypeSysEndian,
 
         tChar           = ( eTypeSigned | eTypeElement | sizeof( oexCHAR ) ),
 
@@ -132,39 +140,39 @@ namespace obj
 
         tUChar8         = ( eTypeElement | 1 ),
 
-        tChar16         = ( eTypeSigned | eTypeElement | 2 ),
+        tChar16         = ( eTypeSigned | eTypeElement | 2 ) | eTypeSysEndian,
 
-        tUChar16        = ( eTypeElement | 2 ),
+        tUChar16        = ( eTypeElement | 2 ) | eTypeSysEndian,
 
-        tChar24         = ( eTypeSigned | eTypeElement | 3 ),
+        tChar24         = ( eTypeSigned | eTypeElement | 3 ) | eTypeSysEndian,
 
-        tUChar24        = ( eTypeElement | 3 ),
+        tUChar24        = ( eTypeElement | 3 ) | eTypeSysEndian,
 
-        tChar32         = ( eTypeSigned | eTypeElement | 4 ),
+        tChar32         = ( eTypeSigned | eTypeElement | 4 ) | eTypeSysEndian,
 
-        tUChar32        = ( eTypeElement | 4 ),
+        tUChar32        = ( eTypeElement | 4 ) | eTypeSysEndian,
 
-        tChar64         = ( eTypeSigned | eTypeElement | 8 ),
+        tChar64         = ( eTypeSigned | eTypeElement | 8 ) | eTypeSysEndian,
 
-        tUChar64        = ( eTypeElement | 8 ),
+        tUChar64        = ( eTypeElement | 8 ) | eTypeSysEndian,
 
-        tFloat8          = ( eTypeFloating | 1 ),
+        tFloat8         = ( eTypeFloating | 1 ),
 
-        tFloat16          = ( eTypeFloating | 2 ),
+        tFloat16        = ( eTypeFloating | 2 ) | eTypeSysEndian,
 
-        tFloat24          = ( eTypeFloating | 3 ),
+        tFloat24        = ( eTypeFloating | 3 ) | eTypeSysEndian,
 
-        tFloat32          = ( eTypeFloating | 4 ),
+        tFloat32        = ( eTypeFloating | 4 ) | eTypeSysEndian,
 
-        tFloat64          = ( eTypeFloating | 8 ),
+        tFloat64        = ( eTypeFloating | 8 ) | eTypeSysEndian,
 
-        tFloat128         = ( eTypeFloating | 16 ),
+        tFloat128       = ( eTypeFloating | 16 ) | eTypeSysEndian,
 
-        tFloat          = ( eTypeFloating | sizeof( oexFLOAT ) ),
+        tFloat          = ( eTypeFloating | sizeof( oexFLOAT ) ) | eTypeSysEndian,
 
-        tDouble         = ( eTypeFloating | sizeof( oexDOUBLE ) ),
+        tDouble         = ( eTypeFloating | sizeof( oexDOUBLE ) ) | eTypeSysEndian,
 
-        tLongDouble     = ( eTypeFloating | sizeof( oexLONGDOUBLE ) ),
+        tLongDouble     = ( eTypeFloating | sizeof( oexLONGDOUBLE ) ) | eTypeSysEndian,
 
         tStr			= ( eTypeArray | eTypeNullTerm | sizeof( oexTCHAR ) ),
 
@@ -180,16 +188,14 @@ namespace obj
 
         tStr64          = ( eTypeArray | eTypeNullTerm | 8 ),
 
-        tStr128          = ( eTypeArray | eTypeNullTerm | 16 ),
+        tStr128         = ( eTypeArray | eTypeNullTerm | 16 ),
 
         tGuid           = ( 16 )
     };
 
 	template< typename T >
 		oexSIZE_T StaticSize( T t )
-	{
-		return ( t & eTypeSize );
-	}
+	{	return ( t & eTypeSize ); }
 
 	template< typename T >
 		oexSIZE_T StaticSizeBits( T t )
@@ -197,6 +203,10 @@ namespace obj
 			   ? ( ( ( ( t & eTypeSize ) - 1 ) << 3 ) | ( ( t & eTypeSizeBits ) >> 8 ) )
 			   : ( ( t & eTypeSize ) << 3 );
 	}
+
+	template< typename T >
+		oexBOOL IsBigEndian( T t )
+	{	return ( t & eTypeBigEndian ) ? oexTRUE : oexFALSE; }
 
 	//==============================================================
 	// Size()
@@ -227,6 +237,105 @@ namespace obj
 
     template<> oexITS oexSIZE_T Size< oexCHARW >( oexCONST oexCHARW **x_obj )
     {   return zstr::Length( *x_obj ) * sizeof( oexCHARW ); }
+
+	template< typename T >
+		oex::oexLONG Convert( void *pDst, oex::oexLONG lDst, T tDst,
+							  const void *pSrc, oex::oexLONG lSrc, T tSrc,
+							  double offset, double scale )
+	{
+		double v;
+		oex::oexLONG lRead = 0, lWrite = 0;
+		unsigned char *pR = (unsigned char*)pSrc;
+		unsigned char *pW = (unsigned char*)pDst;
+		while ( lRead < lSrc && lWrite < lDst )
+		{
+			switch( tSrc )
+			{
+				default : 
+					return 0;
+					break;
+
+				case oex::obj::tInt8 :
+					v = *((char*)&pR[ lRead ]), lRead++;
+					break;
+
+				case oex::obj::tUInt8 :
+					v = *((unsigned char*)&pR[ lRead ]), lRead++;
+					break;
+
+				case oex::obj::tInt16 :
+					v = *((short*)&pR[ lRead ]), lRead += 2;
+					break;
+
+				case oex::obj::tUInt16 :
+					v = *((unsigned short*)&pR[ lRead ]), lRead += 2;
+					break;
+
+				case oex::obj::tInt :
+					v = *((int*)&pR[ lRead ]), lRead += 4;
+					break;
+
+				case oex::obj::tUInt :
+					v = *((unsigned int*)&pR[ lRead ]), lRead += 4;
+					break;
+
+				case oex::obj::tFloat32 :
+					v = *((float*)&pR[ lRead ]), lRead += 4;
+					break;
+
+				case oex::obj::tFloat64 :
+					v = *((double*)&pR[ lRead ]), lRead += 8;
+					break;
+
+			} // end switch
+
+			// Scale
+			v = v * scale + offset;
+
+			switch( tDst )
+			{
+				default :
+					return 0;
+					break;
+
+				case oex::obj::tInt8 :
+					*((char*)&pW[ lWrite ]) = v, lWrite++;
+					break;
+
+				case oex::obj::tUInt8 :
+					*((unsigned char*)&pW[ lWrite ]) = v, lWrite++;
+					break;
+
+				case oex::obj::tInt16 :
+					*((short*)&pW[ lWrite ]) = v, lWrite += 2;
+					break;
+
+				case oex::obj::tUInt16 :
+					*((unsigned short*)&pW[ lWrite ]) = v, lWrite += 2;
+					break;
+
+				case oex::obj::tInt32 :
+					*((int*)&pW[ lWrite ]) = v, lWrite += 4;
+					break;
+
+				case oex::obj::tUInt32 :
+					*((unsigned int*)&pW[ lWrite ]) = v, lWrite += 4;
+					break;
+
+				case oex::obj::tFloat32 :
+					*((float*)&pW[ lWrite ]) = v, lWrite += 4;
+					break;
+
+				case oex::obj::tFloat64 :
+					*((double*)&pW[ lWrite ]) = v, lWrite += 8;
+					break;
+
+			} // end switch
+
+		} // end while
+
+		return lWrite;
+	}
 
 	//==============================================================
 	// Terminator()

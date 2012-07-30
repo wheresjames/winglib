@@ -33,12 +33,12 @@
 //----------------------------------------------------------------*/
 #pragma once
 
-#define asmOP1( p, i, o1 ) 				p[ i++ ] = o1
-#define asmOP2( p, i, o1, o2 ) 			p[ i++ ] = o1, p[ i++ ] = o2
-#define asmOP3( p, i, o1, o2, o3 )		p[ i++ ] = o1, p[ i++ ] = o2, p[ i++ ] = o3
-#define asmOP4( p, i, o1, o2, o3, o4 )	p[ i++ ] = o1, p[ i++ ] = o2, p[ i++ ] = o3, p[ i++ ] = o4
-#define asmOSHORT( p, i, n ) 			*((unsigned short*)&p[ i ]) = n, i += 2
-#define asmOINT( p, i, n ) 				*((unsigned int*)&p[ i ]) = n, i += 4
+#define asmOP1( p, i, o1 ) 				p[ i++ ] = (o1)
+#define asmOP2( p, i, o1, o2 ) 			p[ i++ ] = (o1), p[ i++ ] = (o2)
+#define asmOP3( p, i, o1, o2, o3 )		p[ i++ ] = (o1), p[ i++ ] = (o2), p[ i++ ] = (o3)
+#define asmOP4( p, i, o1, o2, o3, o4 )	p[ i++ ] = (o1), p[ i++ ] = (o2), p[ i++ ] = (o3), p[ i++ ] = (o4)
+#define asmOSHORT( p, i, n ) 			*((unsigned short*)&p[ i ]) = (n), i += 2
+#define asmOINT( p, i, n ) 				*((unsigned int*)&p[ i ]) = (n), i += 4
 
 class CSys
 {
@@ -63,6 +63,9 @@ public:
 	};
 
 #if !defined( OEX_CPU_64 )
+
+#	define OEX_CDECL_RETADDR void *_oex_ret_addr,
+#	define OEX_CDECL_CALL 0,
 
 	class CThunk
 	{

@@ -19,7 +19,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfAudioEncoder, CFfAudioEncoder )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, BufferData )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, UnbufferData )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getCodecId )
-//	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder,  )
+	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getFmtCnv )
+	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, setFmtCnv )
 //	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder,  )
 
 
@@ -179,11 +180,34 @@ int CFfAudioEncoder::BufferData( sqbind::CSqBinary *in )
 	if ( in && in->getUsed() )
 	{
 		// Ensure buffer size
-		if ( ( m_buf.Size() - m_buf.getUsed() ) < (sqbind::CSqBinary::t_size)( in->getUsed() + FF_INPUT_BUFFER_PADDING_SIZE ) )
-			m_buf.Resize( 2 * ( m_buf.Size() + in->getUsed() + FF_INPUT_BUFFER_PADDING_SIZE ) );
+		if ( ( m_buf.Size() - m_buf.getUsed() ) < (sqbind::CSqBinary::t_size)( 4 * in->getUsed() + FF_INPUT_BUFFER_PADDING_SIZE ) )
+			m_buf.Resize( 4 * ( m_buf.Size() + in->getUsed() + FF_INPUT_BUFFER_PADDING_SIZE ) );
 
 		// Add new data to buffer
-		m_buf.Append( in );
+		if ( m_nFmt == m_nCnv )
+			m_buf.Append( in );
+
+		// Data needs conversion
+		else
+		{	double dOffset = 0, dScale = 1;
+			if ( oex::obj::tFloat == m_nFmt )
+			{	if ( m_nCnv == oex::obj::tInt8 )
+					dScale = (double)1 / (double)0x7f;
+				else if ( m_nCnv == oex::obj::tInt16 )
+					dScale = (double)1 / (double)0x7fff;
+				else if ( m_nCnv == oex::obj::tInt32 )
+					dScale = (double)1 / (double)0x7fffffff;
+			} // end if
+
+			// Convert data types
+			long written = oex::obj::Convert( m_buf._Ptr( m_buf.getUsed() ), m_buf.Size() - m_buf.getUsed(), m_nFmt,
+											in->Ptr(), in->getUsed(), m_nCnv, dOffset, dScale );
+
+			// Number of new bytes
+			if ( 0 < written )
+				m_buf.setUsed( m_buf.getUsed() + written );
+
+		} // end else
 
 	} // end if
 
@@ -252,7 +276,7 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 			nOut <<= 1, out->Resize( nOut );
 
 		// Check for memory issue
-		if ( out->Size() != nOut || nOut <= nOutPtr || ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
+		if ( out->Size() < nOut || nOut <= nOutPtr || ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
 		{	oexERROR( nOut, oexT( "Memory allocation failed" ) );
 			return 0;
 		} // end if

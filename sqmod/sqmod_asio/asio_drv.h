@@ -4,6 +4,13 @@
 class CAsioDrv
 {
 public:
+
+	enum
+	{
+		/// The maximum number of channels per driver
+		eMaxChannels = 128
+	};
+
 	enum
 	{
 		eDriverMsgNone = 0,
@@ -14,6 +21,19 @@ public:
 
 		eDriverMsgLatenciesChanged = 0x0004,
 
+	};
+
+	/// Map shares to channels
+	struct SShareInfo
+	{
+		/// Memory share
+		sqbind::CSqBinaryShare	share;
+
+		/// Number of active channels
+		long					channels;
+
+		/// Channel map for share
+		oex::TMem< long >		chmap;
 	};
 
 public:
@@ -48,6 +68,9 @@ public:
 	/// Sets the last error string
 	void setLastErrorStr( const sqbind::stdString &s ) { m_sLastError = s; }
 
+	/// Returns the current driver error message
+	sqbind::stdString getDriverError();
+
 	/// Returns a list of available devices
 	sqbind::CSqMulti getDevices();
 
@@ -70,7 +93,7 @@ public:
 	double getSampleRate();
 
 	/// Open specified channels
-	int OpenChannels( sqbind::CSqMulti *m, const sqbind::stdString &sShare, int nFlags, int nFmt );
+	int OpenChannels( sqbind::CSqMulti *m, int nFlags, int nFmt );
 
 	/// Closes any open channels
 	int CloseChannels();
@@ -84,58 +107,122 @@ public:
 	/// Returns Driver signal flags
 	int getDriverSignal() { int n = m_nSignal; m_nSignal &= ~n; return n; }
 
+	/// Returns the number of samples per frame
+	long getSamples() { return m_nSamples; }
+
+	/// Returns the number of input channels
+	long getInputs() { return m_nInputs; }
+
+	/// Returns the number of input channels
+	long getOutputs() { return m_nOutputs; }
+
+	/// Returns the sample type
+	long getSampleType() { return m_nSampleType; }
+
+	/// Returns the number of open channels
+	long getOpenChannels() { return m_nOpenChannels; }
+
+	/// Returns the number of open shares
+	long getOpenShares() { return m_nOpenShares; }
+
+	/// Sets the prefix string
+	void setPrefix( const sqbind::stdString &s ) { m_sPrefix = s; }
+
+	/// Returns the current prefix string
+	sqbind::stdString getPrefix() { return m_sPrefix; }
+
+	/// Sets the control block id
+	void setCbId( oex::oexUINT id ) { m_uCbId = id; }
+
+	/// Gets the control block id
+	oex::oexUINT getCbId() { return m_uCbId; }
+
 	/** @} */
 
 private:
 
-	void onBufferSwitch(long doubleBufferIndex, ASIOBool directProcess);
+	static void _onBufferSwitch( long doubleBufferIndex, ASIOBool directProcess );
+	void onBufferSwitch( long doubleBufferIndex, ASIOBool directProcess );
 
-	void onSampleRateDidChange(ASIOSampleRate sRate);
+	static void _onSampleRateDidChange( ASIOSampleRate sRate );
+	void onSampleRateDidChange( ASIOSampleRate sRate );
 
-	long onAsioMessage(long selector, long value, void* message, double* opt);
+	static long _onAsioMessage( long selector, long value, void* message, double* opt );
+	long onAsioMessage( long selector, long value, void* message, double* opt );
 
-	ASIOTime* onBufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
+	static ASIOTime* _onBufferSwitchTimeInfo( ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess );
+	ASIOTime* onBufferSwitchTimeInfo( ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess );
+
+	/// Locks the singleton instance
+	static oexLock			m_lock;
+
+	/// +++ ASIO doesn't provide a way to pass a user pointer into the callback methods.
+	///     For now then, we'll use a single global pointer, limiting us to one running instance.
+	static CAsioDrv			*m_pInst;
+
+private:
+
+	/// Maps open channel numbers to objects
+	int CreateChannelMap( sqbind::CSqMulti *m );
 
 private:
 
 	/// String describing the last error
-	sqbind::stdString				m_sLastError;
+	sqbind::stdString					m_sLastError;
 
 	/// ASIO Driver class instance
-	AsioDriverList					m_adl;
+	AsioDriverList						m_adl;
 
 	/// Driver object
-	IASIO							*m_pDriver;
+	IASIO								*m_pDriver;
+
+	/// The numbers of samples per frame
+	long								m_nSamples;
+
+	/// Number of input channels
+	long								m_nInputs;
+
+	/// Number of output channels
+	long								m_nOutputs;
+
+	/// The sample type
+	long								m_nSampleType;
+
+	/// The number of channels that are open
+	long								m_nOpenChannels;
+
+	/// The number of shares that are open
+	long								m_nOpenShares;
+
+	/// Share prefix
+	sqbind::stdString					m_sPrefix;
+
+	/// Control block id
+	oex::oexUINT						m_uCbId;
 
 	/// Driver id
-	SQInteger						m_nId;
+	SQInteger							m_nId;
 
 	/// Driver info
-	ASIODriverInfo					m_adi;
-
-	/// ASIO driver buffer info
-	oex::TMem< ASIOBufferInfo >		m_bi;
+	ASIODriverInfo						m_adi;
 
 	/// ASIO callbacks
-	ASIOCallbacks 					m_cb;
+	ASIOCallbacks 						m_cb;
+
+	/// ASIO driver buffer info
+	oex::TMem< ASIOBufferInfo >			m_bi;
 
 	/// Binary data share
-	sqbind::CSqBinaryShare			m_share;
+	oex::TMem< SShareInfo >				m_share;
+
+	/// Channel map
+	oex::TMem< long >					m_chmap;
+
+	/// Interleave buffer
+	sqbind::CSqBinary					m_buf;
 
 	///  Non zero if driver wants quit
-	int								m_nSignal;
-
-	/// Callback OnBufferSwitch()
-	oexThunk						m_cbOnBufferSwitch;
-
-	/// Callback OnSampleRateDidChange()
-	oexThunk						m_cbOnSampleRateDidChange;
-
-	/// Callback OnAsioMessage()
-	oexThunk						m_cbOnAsioMessage;
-
-	/// Callback OnBufferSwitchTimeInfo()
-	oexThunk						m_cbOnBufferSwitchTimeInfo;
+	int									m_nSignal;
 
 };
 

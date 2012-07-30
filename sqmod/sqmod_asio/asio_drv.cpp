@@ -3,86 +3,6 @@
 
 #include "asiolist.h"
 
-/*
-struct SThunk32
-{
-	unsigned char	m_stk[ 10 ];
-	unsigned int	m_mov;
-	unsigned int	m_this;
-	unsigned char	m_jmp;
-	unsigned int	m_dst;
-
-	static void* Bind( void *pFun, void *pThis )
-	{
-		SThunk32 *p = (SThunk32*)malloc( sizeof( SThunk32 ) );
-		if ( !p )
-			return 0;
-
-		// Enable execute permissions
-		long pgsz = sysconf( _SC_PAGE_SIZE );
-		if ( 0 < pgsz && !( pgsz | ( pgsz - 1 ) ) )
-		{	long sz = pgsz;
-			while ( sz && sz < sizeof( SThunk32 ) )
-				sz++;
-			if ( 0 < sz )
-				mprotect( (void*)( p & ~pgsz), sz, PROT_READ | PROT_WRITE | PROT_EXEC )
-		} // end if
-
-		p->m_stk[ 0 ] = 0x83;	//	sub esp, 4
-		p->m_stk[ 1 ] = 0xec;
-		p->m_stk[ 2 ] = 0x04;
-		p->m_stk[ 3 ] = 0x8b;	//	mov eax,[esp + 4]
-		p->m_stk[ 4 ] = 0x44;
-		p->m_stk[ 5 ] = 0x24;
-		p->m_stk[ 6 ] = 0x04;
-		p->m_stk[ 7 ] = 0x89;	//	mov [esp], eax
-		p->m_stk[ 8 ] = 0x04;
-		p->m_stk[ 9 ] = 0x24;
-
-		p->m_mov = 0x042444C7;	//	mov   dword   ptr   [esp+0x4], 
-
-		p->m_this = oexPtrToUInt( pThis );
-
-		p->m_jmp = 0xe9;		//	jmp
-
-		p->m_dst = oexPtrToUInt( pFun ) - ( oexPtrToUInt( p ) + sizeof( SThunk32 ) );
-
-		cacheflush( p, sizeof( SThunk32 ), ICACHE );
-
-		return p;
-	}
-} __attribute__((packed));
-*/
-
-struct SThunk32
-{
-#pragma pack ( push, 1 )
-	unsigned short	m_lea;
-	unsigned int	m_this;
-	unsigned char	m_mov;
-	unsigned int	m_dst;
-	unsigned short	m_jmp;
-#pragma pack ( pop )
-
-	static void* Bind( void *pFun, void *pThis )
-	{
-		SThunk32 *p = (SThunk32*)VirtualAlloc( 0, sizeof( SThunk32 ), MEM_COMMIT, PAGE_EXECUTE_READWRITE );
-		if ( !p )
-			return 0;
-
-		p->m_lea = 0x0d8d;
-		p->m_this = oexPtrToUInt( p );
-		p->m_mov = 0xb8;
-		p->m_dst = oexPtrToUInt( pFun );
-		p->m_jmp = 0xe0ff;
-
-		FlushInstructionCache( GetCurrentProcess(), p, sizeof( SThunk32 ) );
-
-		return p;
-	}
-
-};
-
 // +++ ????
 // oexSTATIC_ASSERT( sizeof( ASIOSampleRate ) == sizeof( double ) );
 
@@ -92,6 +12,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CAsioDrv, CAsioDrv )
 	SQBIND_MEMBER_FUNCTION( CAsioDrv, Destroy )
 	SQBIND_MEMBER_FUNCTION( CAsioDrv, getLastErrorStr )
 	SQBIND_MEMBER_FUNCTION( CAsioDrv, setLastErrorStr )
+	SQBIND_MEMBER_FUNCTION( CAsioDrv, getDriverError )
 	SQBIND_MEMBER_FUNCTION( CAsioDrv, getDevices )
 	SQBIND_MEMBER_FUNCTION( CAsioDrv, isDriver )
 	SQBIND_MEMBER_FUNCTION( CAsioDrv, LoadDriver )
@@ -103,7 +24,14 @@ SQBIND_REGISTER_CLASS_BEGIN( CAsioDrv, CAsioDrv )
 	SQBIND_MEMBER_FUNCTION( CAsioDrv, Start )
 	SQBIND_MEMBER_FUNCTION( CAsioDrv, Stop )
 	SQBIND_MEMBER_FUNCTION( CAsioDrv, getDriverSignal )
-//	SQBIND_MEMBER_FUNCTION( CAsioDrv,  )
+	SQBIND_MEMBER_FUNCTION( CAsioDrv, getInputs )
+	SQBIND_MEMBER_FUNCTION( CAsioDrv, getOutputs )
+	SQBIND_MEMBER_FUNCTION( CAsioDrv, getSamples )
+	SQBIND_MEMBER_FUNCTION( CAsioDrv, getSampleType )
+	SQBIND_MEMBER_FUNCTION( CAsioDrv, setCbId )
+	SQBIND_MEMBER_FUNCTION( CAsioDrv, getCbId )
+	SQBIND_MEMBER_FUNCTION( CAsioDrv, setPrefix )
+	SQBIND_MEMBER_FUNCTION( CAsioDrv, getPrefix )
 //	SQBIND_MEMBER_FUNCTION( CAsioDrv,  )
 
 SQBIND_REGISTER_CLASS_END()
@@ -114,12 +42,22 @@ void CAsioDrv::Register( sqbind::VM vm )
 	SQBIND_EXPORT( vm, CAsioDrv );
 }
 
+// +++ Eliminate this one day
+oexLock		CAsioDrv::m_lock;
+CAsioDrv	*CAsioDrv::m_pInst = 0;
+
 CAsioDrv::CAsioDrv()
 {_STT();
 
 	m_nId = -1;
 	m_pDriver = 0;
 	m_nSignal = 0;
+	m_nSamples = 0;
+	m_nInputs = 0;
+	m_nOutputs = 0;
+	m_uCbId = 0;
+	m_nSampleType = 0;
+	m_nOpenChannels = 0;
 	*m_adi.errorMessage = 0;
 }
 
@@ -137,7 +75,12 @@ void CAsioDrv::Destroy()
 	m_nId = -1;
 	m_pDriver = 0;
 	m_nSignal = 0;
+	m_nInputs = 0;
+	m_nOutputs = 0;
+
+	*m_adi.name = 0;
 	*m_adi.errorMessage = 0;
+	m_adi.driverVersion = 0;
 }
 
 #define MAX_ASIO_DRIVERS 256
@@ -167,6 +110,15 @@ sqbind::CSqMulti CAsioDrv::getDevices()
 	return m;
 }
 
+sqbind::stdString CAsioDrv::getDriverError()
+{	if ( !m_pDriver )
+		return oexT( "Driver not loaded" );
+	char szMsg[ 256 ] = { 0 };
+	m_pDriver->getErrorMessage( szMsg );
+	return szMsg;
+}
+
+
 int CAsioDrv::LoadDriver( int nId )
 {_STT();
 
@@ -181,54 +133,36 @@ int CAsioDrv::LoadDriver( int nId )
 
 	// Open the driver
 	long err = m_adl.asioOpenDriver( nId, (void**)&m_pDriver );
-	if ( err || !m_pDriver )
+	if ( ASE_OK != err || !m_pDriver )
 	{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "asioOpenDriver() failed : " ),
-										  nId, oexT( " : " ), err ) ) );
+												  nId, oexT( " : " ), err,
+												  oexT( " : " ), getDriverError().c_str() ) ) );
 		return 0;
 	} // end if
 
-	*m_adi.name = 0;
-	*m_adi.errorMessage = 0;
-	m_adi.driverVersion = 0;
 	if ( !m_pDriver->init( m_adi.sysRef ) )
-	{	m_pDriver->getErrorMessage( m_adi.errorMessage );
-		setLastErrorStr( sqbind::oex2std( oexMks( oexT( "ASIOInit() failed : " ),
-										  nId, oexT( " : " ), err,
-										  oexT( " : " ), m_adi.errorMessage ) ) );
+	{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "ASIOInit() failed : " ),
+												  nId, oexT( " : " ), err,
+												  oexT( " : " ), getDriverError().c_str() ) ) );
 		Destroy();
 		return 0;
 	} // end if
 
-	// onBufferSwitch
-	typedef void (*pfn_bufferSwitch)( long doubleBufferIndex, ASIOBool directProcess );
-	m_cb.bufferSwitch 
-		= m_cbOnBufferSwitch
-			.CDecl2This< pfn_bufferSwitch >( this, &CAsioDrv::onBufferSwitch,
-											 sizeof( long ) + sizeof( ASIOBool ) );
+	// Save away the number of inputs / outputs
+	m_nInputs = 0; m_nOutputs = 0;
+	err = m_pDriver->getChannels( &m_nInputs, &m_nOutputs );
+	if ( ASE_OK != err )
+	{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "getChannels() failed : " ),
+												  nId, oexT( " : " ), err,
+												  oexT( " : " ), getDriverError().c_str() ) ) );
+		Destroy();
+		return 0;
+	} // end if
 
-	// onSampleRateDidChange
-	typedef void (*pfn_sampleRateDidChange)( ASIOSampleRate sRate );
-	m_cb.sampleRateDidChange 
-		= m_cbOnSampleRateDidChange
-				.CDecl2This< pfn_sampleRateDidChange >( this, &CAsioDrv::onSampleRateDidChange,
-														sizeof( long ) + sizeof( ASIOBool ) );
-
-
-	// onAsioMessage
-	typedef long (*pfn_asioMessage)( long selector, long value, void* message, double* opt );
-	m_cb.asioMessage 
-		= m_cbOnAsioMessage
-			.CDecl2This< pfn_asioMessage >( this, &CAsioDrv::onAsioMessage,
-											sizeof( long ) + sizeof( long ) 
-											+ sizeof( void*) + sizeof( double* ) );
-
-	// onBufferSwitchTimeInfo
-	typedef ASIOTime* (*pfn_bufferSwitchTimeInfo) (ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
-	m_cb.bufferSwitchTimeInfo 
-		= m_cbOnBufferSwitchTimeInfo
-				.CDecl2This< pfn_bufferSwitchTimeInfo >( this, &CAsioDrv::onBufferSwitchTimeInfo,
-														 sizeof( ASIOTime* ) + sizeof( long )
-														 + sizeof( ASIOBool ) );
+	m_cb.bufferSwitch = &CAsioDrv::_onBufferSwitch;
+	m_cb.sampleRateDidChange = &CAsioDrv::_onSampleRateDidChange;
+	m_cb.asioMessage = &CAsioDrv::_onAsioMessage;
+	m_cb.bufferSwitchTimeInfo = &CAsioDrv::_onBufferSwitchTimeInfo;
 
 	// Save driver id
 	m_nId = nId;
@@ -248,9 +182,7 @@ void CAsioDrv::setSampleRate( double d )
 	ASIOSampleRate sr;
 	*((double*)&sr) = d;
 	if ( ASE_OK != m_pDriver->setSampleRate( sr )  )
-	{	m_pDriver->getErrorMessage( m_adi.errorMessage );
-		setLastErrorStr( m_adi.errorMessage );
-	} // end if
+		setLastErrorStr( getDriverError().c_str() );
 }
 
 double CAsioDrv::getSampleRate()
@@ -264,8 +196,7 @@ double CAsioDrv::getSampleRate()
 
 	ASIOSampleRate sr;
 	if ( ASE_OK != m_pDriver->getSampleRate( &sr )  )
-	{	m_pDriver->getErrorMessage( m_adi.errorMessage );
-		setLastErrorStr( m_adi.errorMessage );
+	{	setLastErrorStr( getDriverError().c_str() );
 		return 0;
 	} // end if
 
@@ -303,22 +234,14 @@ sqbind::CSqMulti CAsioDrv::getInfo()
 	if ( ASE_OK == m_pDriver->getSampleRate( &sr )  )
 		m[ "driver" ][ "sample_rate" ].set( sqbind::ToStr( *((double*)&sr) ) );
 	else
-	{	m_pDriver->getErrorMessage( m_adi.errorMessage );
-		m[ "driver" ][ "err" ].set( m_adi.errorMessage );
-	} // end if
+		m[ "driver" ][ "err" ].set( getDriverError().c_str() );
 
-	// Get the number of available channels
-	long nInputs = 0, nOutputs = 0;
-	if ( ASE_OK == m_pDriver->getChannels( &nInputs, &nOutputs ) )
-		m[ "driver" ][ "input_channels" ].set( sqbind::ToStr( nInputs ) ),
-		m[ "driver" ][ "output_channels" ].set( sqbind::ToStr( nOutputs ) );
-	else
-	{	m_pDriver->getErrorMessage( m_adi.errorMessage );
-		m[ "driver" ][ "err" ].set( m_adi.errorMessage );
-	} // end if
+	// Save the number of available channels
+	m[ "driver" ][ "input_channels" ].set( sqbind::ToStr( m_nInputs ) ),
+	m[ "driver" ][ "output_channels" ].set( sqbind::ToStr( m_nOutputs ) );
 
 	ASIOChannelInfo	ci;
-	for ( long i = 0; i < nInputs; i++ )
+	for ( long i = 0; i < m_nInputs; i++ )
 	{
 		ci.channel = i; ci.isInput = ASIOTrue;
 		if ( ASE_OK == m_pDriver->getChannelInfo( &ci )  )
@@ -331,9 +254,24 @@ sqbind::CSqMulti CAsioDrv::getInfo()
 			r[ "name" ].set( sqbind::ToStr( ci.name ? ci.name : "" ) );
 		} // end if
 		else
-		{	m_pDriver->getErrorMessage( m_adi.errorMessage );
-			m[ "driver" ][ "err" ].set( m_adi.errorMessage );
+			m[ "driver" ][ "err" ].set( getDriverError().c_str() );
+
+	} // end for
+
+	for ( long i = 0; i < m_nOutputs; i++ )
+	{
+		ci.channel = i; ci.isInput = ASIOFalse;
+		if ( ASE_OK == m_pDriver->getChannelInfo( &ci )  )
+		{	sqbind::CSqMulti &r = m[ "output" ][ sqbind::ToStr( i ) ];
+			r[ "channel" ].set( sqbind::ToStr( ci.channel ) );
+			r[ "is_input" ].set( sqbind::ToStr( ci.isInput ) );
+			r[ "is_active" ].set( sqbind::ToStr( ci.isActive ) );
+			r[ "channelGroup" ].set( sqbind::ToStr( ci.channelGroup ) );
+			r[ "type" ].set( sqbind::ToStr( ci.type ) );
+			r[ "name" ].set( sqbind::ToStr( ci.name ? ci.name : "" ) );
 		} // end if
+		else
+			m[ "driver" ][ "err" ].set( getDriverError().c_str() );
 
 	} // end for
 
@@ -346,23 +284,18 @@ sqbind::CSqMulti CAsioDrv::getInfo()
 		m[ "buffer" ][ "granulatity" ].set( sqbind::ToStr( lGran ) );
 	} // end if
 	else
-	{	m_pDriver->getErrorMessage( m_adi.errorMessage );
-		m[ "buffer" ][ "err" ].set( m_adi.errorMessage );
-	} // end if
+		m[ "buffer" ][ "err" ].set( getDriverError().c_str() );
 
 	// Get the input and output latencies
 	// (input latency is the age of the first sample in the currently returned audio block)
 	// (output latency is the time the first sample in the currently returned audio block requires to get to the output)
 	long lInputLatency =0, lOutputLatency =0;
 	if ( ASE_OK == m_pDriver->getLatencies( &lInputLatency, &lOutputLatency) )
-	{
-		m[ "latency" ][ "input" ].set( sqbind::ToStr( lInputLatency ) );
+	{	m[ "latency" ][ "input" ].set( sqbind::ToStr( lInputLatency ) );
 		m[ "latency" ][ "output" ].set( sqbind::ToStr( lOutputLatency ) );
 	}
 	else
-	{	m_pDriver->getErrorMessage( m_adi.errorMessage );
-		m[ "buffer" ][ "err" ].set( m_adi.errorMessage );
-	} // end if
+		m[ "buffer" ][ "err" ].set( getDriverError().c_str() );
 
 	return m;
 }
@@ -375,25 +308,34 @@ static int CAsioDrv_AsioTypeToSqType( int t )
 			break;
 
 		case ASIOSTInt16LSB :
+			return oex::obj::tInt16 & ~oex::obj::eTypeBigEndian;
+
 		case ASIOSTInt16MSB :
-			return oex::obj::tInt16;
-			break;
+			return oex::obj::tInt16 | oex::obj::eTypeBigEndian;
 
 		case ASIOSTInt24LSB :
+			return oex::obj::tInt24 & ~oex::obj::eTypeBigEndian;
+
 		case ASIOSTInt24MSB :
-			return oex::obj::tInt24;
-			break;
+			return oex::obj::tInt24 | oex::obj::eTypeBigEndian;
 
 		case ASIOSTInt32LSB :
+			return oex::obj::tInt32 & ~oex::obj::eTypeBigEndian;
+
 		case ASIOSTInt32MSB :
-			return oex::obj::tInt32;
-			break;
+			return oex::obj::tInt32 | oex::obj::eTypeBigEndian;
+
+		case ASIOSTFloat32LSB :
+			return oex::obj::tFloat32 & ~oex::obj::eTypeBigEndian;
 
 		case ASIOSTFloat32MSB :
-			return oex::obj::tFloat32;
+			return oex::obj::tFloat32 | oex::obj::eTypeBigEndian;
+
+		case ASIOSTFloat64LSB :
+			return oex::obj::tFloat64 & ~oex::obj::eTypeBigEndian;
 
 		case ASIOSTFloat64MSB :
-			return oex::obj::tFloat64;
+			return oex::obj::tFloat64 | oex::obj::eTypeBigEndian;
 
 	} // end switch
 
@@ -405,25 +347,106 @@ int CAsioDrv::CloseChannels()
 
 	// Ensure we have a driver loaded
 	if ( !isDriver() )
-	{	setLastErrorStr( oexT( "Driver is not loaded" ) );
+	{//	setLastErrorStr( oexT( "Driver is not loaded" ) );
 		return 0;
 	} // end if
 
-	// Drop any open share
+	// Be sure it's stopped
+	Stop();
+
+		// Drop any open share
 	m_share.Destroy();
 
 	// Drop audio buffers
 	if ( ASE_OK != m_pDriver->disposeBuffers() )
-		m_pDriver->getErrorMessage( m_adi.errorMessage ),
-		setLastErrorStr( sqbind::oex2std( oexMks( oexT( "disposeBuffers() failed : " ), m_adi.errorMessage ) ) );
+		setLastErrorStr( sqbind::oex2std( oexMks( oexT( "disposeBuffers() failed : " ), getDriverError().c_str() ) ) );
 
 	// Lose buffer memory
 	m_bi.Destroy();
 
+	// Lose interleave buffer
+	m_buf.Free();
+
+	// Free the slot map
+	m_chmap.Destroy();
+
+	// Free instance pointer
+	oexAutoLock ll( m_lock );
+	if ( ll.IsLocked() && m_pInst == this )
+		m_pInst = 0;
+
+	// Reset samples per frame
+	m_nSamples = 0;
+	m_nSampleType = 0;
+	m_nOpenShares = 0;
+	m_nOpenChannels = 0;
+
 	return 1;
 }
 
-int CAsioDrv::OpenChannels( sqbind::CSqMulti *m, const sqbind::stdString &sShare, int nFlags, int nFmt )
+int CAsioDrv::CreateChannelMap( sqbind::CSqMulti *m )
+{
+	// Reset open channel values
+	m_nOpenShares = 0;
+	m_nOpenChannels = 0;
+
+	// Allocate channel map
+	if ( m_chmap.OexNew( eMaxChannels ).Size() != eMaxChannels )
+	{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "Failed to allocate channel map : " ), eMaxChannels ) ) );
+		return 0;
+	} // end if
+
+	// Initialize the channel map
+	for ( long i = 0; i < eMaxChannels; i++ )
+		m_chmap[ i ] = -1;
+
+	// For each share
+	for ( sqbind::CSqMulti::iterator it = m->begin(); m->end() != it; it++ )
+		if ( 0 < it->first.length() )
+		{
+			// Count a share
+			m_nOpenShares++;
+
+			// Is it an array?
+			if ( !it->second.size() )
+			{
+				// Get the channel number
+				int nCh = oexStrToULong( it->second.c_str(), 10 );
+
+				// If it's valid and the first time we've seen it
+				if ( 0 <= nCh && eMaxChannels > nCh && 0 > m_chmap[ nCh ] )
+					m_chmap[ nCh ] = 0, m_nOpenChannels++;
+
+			} // end if
+
+			// For each channel in this share
+			else for ( sqbind::CSqMulti::iterator ch = it->second.begin(); it->second.end() != ch; ch++ )
+			{
+				// Get the channel number
+				int nCh = oexStrToULong( ch->first.c_str(), 10 );
+
+				// If it's valid and the first time we've seen it
+				if ( 0 <= nCh && eMaxChannels > nCh && 0 > m_chmap[ nCh ] )
+					m_chmap[ nCh ] = 0, m_nOpenChannels++;
+
+			} // end for
+
+		} // end if
+
+	if ( 0 >= m_nOpenShares )
+	{	setLastErrorStr( oexT( "Invalid number of shares" ) );
+		return 0;
+	} // end if
+
+	if ( 0 >= m_nOpenChannels )
+	{	setLastErrorStr( oexT( "Invalid number of channels" ) );
+		return 0;
+	} // end if
+
+	return 1;
+}
+
+int CAsioDrv::OpenChannels( sqbind::CSqMulti *m, int nFlags, int nFmt )
 {_STT();
 
 	// Ensure we have a driver loaded
@@ -436,118 +459,257 @@ int CAsioDrv::OpenChannels( sqbind::CSqMulti *m, const sqbind::stdString &sShare
 	CloseChannels();
 
 	// Sanity checks
-	if ( !m || 0 >= sShare.length() )
+	if ( !m )
 	{	setLastErrorStr( oexT( "Invalid parameters" ) );
 		return 0;
 	} // end if
 
-	// How many channels
-	int nChannels = m->size();
-	if ( 0 >= nChannels )
-	{	setLastErrorStr( oexT( "Invalid number of channels" ) );
+	// Lock
+	oexAutoLock ll( m_lock );
+	if ( !ll.IsLocked() )
+	{	setLastErrorStr( oexT( "Failed to acquire thread lock" ) );
+		return 0;
+	} // end if
+
+	// Ensure someone else isn't running
+	if ( m_pInst && m_pInst != this )
+	{	setLastErrorStr( oexT( "Another instance is already running" ) );
+		return 0;
+	} // end if
+
+	// Save instance pointer
+	m_pInst = this;
+
+	// Create a channel map
+	if ( !CreateChannelMap( m ) )
+	{	CloseChannels();
 		return 0;
 	} // end if
 
 	// Allocate memory for buffers
-	if ( m_bi.OexNew( nChannels ).Size() != nChannels )
-	{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "Failed to allocate memory : " ), nChannels ) ) );
+	if ( m_bi.OexNew( m_nOpenChannels ).Size() != m_nOpenChannels )
+	{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "Failed to allocate channel buffers : " ), m_nOpenChannels ) ) );
+		CloseChannels();
 		return 0;
 	} // end if
 
 	// Get a pointer to the buffer data
 	ASIOBufferInfo *pAbi = m_bi.Ptr();
 	if ( !pAbi )
-	{	setLastErrorStr( oexT( "Bad pointer" ) );
+	{	setLastErrorStr( oexT( "Bad channel buffer pointer" ) );
+		CloseChannels();
 		return 0;
 	} // end if
 
-	int i = 0, nType = 0;
-	for ( sqbind::CSqMulti::iterator it = m->begin(); m->end() != it; it++ )
-	{
-		// Set channel number
-		pAbi[ i ].channelNum = oexStrToULong( it->first.c_str(), 10 );
+	// Open the channels
+	long nCh = 0, nType = 0, nSlot = 0;
+	for ( long i = 0; i < eMaxChannels; i++ )
+		if ( 0 <= m_chmap[ i ] )
+		{
+			// Reverse map
+			m_chmap[ i ] = nCh;
 
-		// Is this an input?
-		pAbi[ i ].isInput = ( nFlags & 1 ) ? ASIOFalse : ASIOTrue;
+			// Set channel number
+			pAbi[ nCh ].channelNum = i;
 
-		// Init buffer pointers
-		pAbi[ i ].buffers[ 0 ] = pAbi[ i ].buffers[ 1 ] = 0;
+			// Is this an input?
+			pAbi[ nCh ].isInput = ( nFlags & 1 ) ? ASIOFalse : ASIOTrue;
 
-		// Get channel info
-		ASIOChannelInfo	ci;
-		ci.channel = pAbi[ i ].channelNum; ci.isInput = pAbi[ i ].isInput;
-		if ( ASE_OK != m_pDriver->getChannelInfo( &ci )  )
-		{	m_pDriver->getErrorMessage( m_adi.errorMessage );
-			setLastErrorStr( sqbind::oex2std( oexMks( oexT( "getChannelInfo() failed : " ), m_adi.errorMessage ) ) );
-			return 0;
-		} // end if
+			// Init buffer pointers
+			pAbi[ nCh ].buffers[ 0 ] = pAbi[ nCh ].buffers[ 1 ] = 0;
 
-		// Save data type
-		if ( !nType )
-			nType = CAsioDrv_AsioTypeToSqType( ci.type );
-		else if ( nType != CAsioDrv_AsioTypeToSqType( ci.type ) )
-		{	setLastErrorStr( oexT( "Audio channels have different data types" ) );
-			return 0;
-		} // end if
+			// Get channel info
+			ASIOChannelInfo	ci;
+			ci.channel = pAbi[ nCh ].channelNum;
+			ci.isInput = pAbi[ nCh ].isInput;
+			if ( ASE_OK != m_pDriver->getChannelInfo( &ci )  )
+			{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "getChannelInfo() failed : " ), getDriverError().c_str() ) ) );
+				CloseChannels();
+				return 0;
+			} // end if
 
-		// Next slot
-		if ( ++i > nChannels )
-		{	setLastErrorStr( oexT( "Channel overflow" ) );
-			return 0;
-		} // end if
+			// Save data type
+			if ( !nType )
+			{	nType = CAsioDrv_AsioTypeToSqType( ci.type );
+				if ( !nType )
+				{	setLastErrorStr( oexT( "Invalid sample type" ) );
+					CloseChannels();
+					return 0;
+				} // end if
+			} // end if
 
-	} // end for
+			// All channels must have the same type
+			else if ( nType != CAsioDrv_AsioTypeToSqType( ci.type ) )
+			{	setLastErrorStr( oexT( "Audio channels have different data types" ) );
+				CloseChannels();
+				return 0;
+			} // end if
+
+			// Next slot
+			if ( ++nCh > m_nOpenChannels )
+			{	setLastErrorStr( oexT( "Channel overflow" ) );
+				CloseChannels();
+				return 0;
+			} // end if
+
+		} // end for / if
+
+	// Did we get a valid data type?
+	if ( 0 >= nType )
+	{	setLastErrorStr( oexT( "Invalid sample type" ) );
+		CloseChannels();
+		return 0;
+	} // end if
+
+	// Save sample type
+	m_nSampleType = nType;
 
 	// Ensure all channels were accounted for
-	if ( i < nChannels )
+	if ( nCh < m_nOpenChannels )
 	{	setLastErrorStr( oexT( "Failed to find all channel info" ) );
+		CloseChannels();
 		return 0;
 	} // end if
 
 	long lMin = 0, lMax = 0, lPref = 0, lGran = 0;
 	if ( ASE_OK != m_pDriver->getBufferSize( &lMin, &lMax, &lPref, &lGran ) )
-	{	m_pDriver->getErrorMessage( m_adi.errorMessage );
-		setLastErrorStr( sqbind::oex2std( oexMks( oexT( "getBufferSize() failed : " ), m_adi.errorMessage ) ) );
+	{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "getBufferSize() failed : " ), getDriverError().c_str() ) ) );
+		CloseChannels();
 		return 0;
 	} // end if
 
 	// Ensure semi-reasonable size
 	if ( 0 >= lPref )
 	{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "getBufferSize() returned invalid preferred size : " ), lPref ) ) );
+		CloseChannels();
 		return 0;
 	} // end if
 
+	// Save number of samples per frame
+	m_nSamples = lPref;
+
 	// Let's try and allocate buffers
-	if ( ASE_OK != m_pDriver->createBuffers( pAbi, nChannels, lPref, &m_cb ) )
-	{	m_pDriver->getErrorMessage( m_adi.errorMessage );
-		setLastErrorStr( sqbind::oex2std( oexMks( oexT( "createBuffers() failed : " ), m_adi.errorMessage ) ) );
+	if ( ASE_OK != m_pDriver->createBuffers( pAbi, m_nOpenChannels, lPref, &m_cb ) )
+	{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "createBuffers() failed : " ), getDriverError().c_str() ) ) );
+		CloseChannels();
 		return 0;
 	} // end if
 
 	ASIOSampleRate sr;
 	if ( ASE_OK != m_pDriver->getSampleRate( &sr )  )
-	{	m_pDriver->getErrorMessage( m_adi.errorMessage );
-		setLastErrorStr( sqbind::oex2std( oexMks( oexT( "getSampleRate() failed : " ), m_adi.errorMessage ) ) );
+	{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "getSampleRate() failed : " ), getDriverError().c_str() ) ) );
+		CloseChannels();
 		return 0;
 	} // end if
+
+	// Number of bytes per channel buffer
+	long lBytes = m_nSamples * oex::obj::StaticSize( m_nSampleType );
+
+	// +++ This should be more efficent, but for now interleave in extra buffer
+
+	// If we have more than one channel, we'll need to interleave the data
+	if ( 1 < m_nOpenChannels )
+		if ( !m_buf.Allocate( m_nOpenChannels * lBytes ) )
+		{	setLastErrorStr( oexT( "Failed to allocate interleave buffer" ) );
+			CloseChannels();
+			return 0;
+		} // end if
+
+	// We're using all of it
+	m_buf.setUsed( m_nOpenChannels * lBytes );
 
 	// Calculate the amount of space needed for three seconds
 	int nBufSize = 3 * oex::obj::StaticSize( nType ) * *((double*)&sr);
 
-	// Create memory share
-	if ( !m_share.Create( sShare, oexT( "" ), nBufSize, nChannels, nType, *((double*)&sr), nFmt ) )
-	{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "Failed to create memory share : nBufSize = " ), nBufSize,
-											oexT( " : nType = " ), nType,
-											oexT( " : nFmt = " ), nFmt
-											) ) );
+	// Allocate memory for buffers
+	if ( m_share.OexConstructArray( m_nOpenShares ).Size() != m_nOpenShares )
+	{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "Failed to allocate memory for share objects: " ), m_nOpenShares ) ) );
+		CloseChannels();
 		return 0;
 	} // end if
 
-	return nChannels;
+	// Create memory shares
+	long nS = 0;
+	for ( sqbind::CSqMulti::iterator it = m->begin(); m->end() != it; it++ )
+		if ( 0 < it->first.length() )
+		{
+			// Allocate a channel map
+			if ( m_share[ nS ].chmap.OexNew( eMaxChannels ).Size() != eMaxChannels )
+			{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "Failed to allocate memory for channel map: " ), eMaxChannels ) ) );
+				CloseChannels();
+				return 0;
+			} // end if
+
+			// Add each channel to this share
+			m_share[ nS ].channels = 0;
+			if ( !it->second.size() )
+			{
+				// Get the channel number
+				int nCh = oexStrToULong( it->second.c_str(), 10 );
+
+				// Add channel if it's valid
+				if ( 0 <= nCh && eMaxChannels > nCh && eMaxChannels > m_share[ nS ].channels )
+					m_share[ nS ].chmap[ m_share[ nS ].channels++ ] = nCh;
+
+			} // end for
+
+			// Add all channels
+			else for ( sqbind::CSqMulti::iterator ch = it->second.begin(); it->second.end() != ch; ch++ )
+			{
+				// Get the channel number
+				int nCh = oexStrToULong( ch->first.c_str(), 10 );
+
+				// Add channel if it's valid
+				if ( 0 <= nCh && eMaxChannels > nCh && eMaxChannels > m_share[ nS ].channels )
+					m_share[ nS ].chmap[ m_share[ nS ].channels++ ] = nCh;
+
+			} // end for
+
+			// Create memory share
+			sqbind::stdString sShare = it->first;
+			m_share[ nS ].share.setCbId( getCbId() );
+			m_share[ nS ].share.setPrefix( getPrefix() );
+			if ( !m_share[ nS ].share.Create( sShare, oexT( "" ), nBufSize, m_share[ nS ].channels, 
+											  oex::obj::StaticSize( nType ), *((double*)&sr), nFmt ? nFmt : nType ) )
+			{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "Failed to create memory share : nBufSize = " ), nBufSize,
+													oexT( " : nType = " ), nType,
+													oexT( " : data size = " ), oex::obj::StaticSize( nType ),
+													oexT( " : nFmt = " ), nFmt,
+													oexT( " : sShare = " ), sShare.c_str()
+													) ) );
+				CloseChannels();
+				return 0;
+			} // end if
+
+			// Count a share
+			nS++;
+
+		} // end if
+
+	// Ensure all shares were accounted for
+	if ( nS < m_nOpenShares )
+	{	setLastErrorStr( oexT( "Some audio shares failed to open" ) );
+		CloseChannels();
+		return 0;
+	} // end if
+
+	return m_nOpenChannels;
+}
+
+void CAsioDrv::_onBufferSwitch( long doubleBufferIndex, ASIOBool directProcess )
+{
+	if ( !CAsioDrv::m_pInst )
+		return;
+	m_pInst->onBufferSwitch( doubleBufferIndex, directProcess );
 }
 
 void CAsioDrv::onBufferSwitch( long doubleBufferIndex, ASIOBool directProcess )
 {_STT();
+
+oexSHOW( doubleBufferIndex );
+oexSHOW( directProcess );
+if ( 1 < doubleBufferIndex )
+	return;
 
 	// Get timestamp
 	ASIOTime ti; oexZero( ti );
@@ -558,21 +720,34 @@ void CAsioDrv::onBufferSwitch( long doubleBufferIndex, ASIOBool directProcess )
 	onBufferSwitchTimeInfo( &ti, doubleBufferIndex, directProcess );
 }
 
+void CAsioDrv::_onSampleRateDidChange( ASIOSampleRate sRate )
+{_STT();
+	if ( !CAsioDrv::m_pInst )
+		return;
+	m_pInst->onSampleRateDidChange( sRate );
+}
+
 void CAsioDrv::onSampleRateDidChange( ASIOSampleRate sRate )
 {_STT();
 oexM();
 }
 
+long CAsioDrv::_onAsioMessage( long selector, long value, void* message, double* opt )
+{_STT();
+	if ( !CAsioDrv::m_pInst )
+		return 0L;
+	return m_pInst->onAsioMessage( selector, value, message, opt );
+}
+
 long CAsioDrv::onAsioMessage( long selector, long value, void* message, double* opt )
-{//_STT();
-oexM();
+{_STT();
 
 	switch( selector )
 	{
 		default :
 			break;
 
-		case kAsioSelectorSupported:
+		case kAsioSelectorSupported :
 			return ( value == kAsioResetRequest
 					|| value == kAsioEngineVersion
 					|| value == kAsioResyncRequest
@@ -582,35 +757,146 @@ oexM();
 					|| value == kAsioSupportsInputMonitor
 					) ? 1L : 0L;
 
-		case kAsioResetRequest:
+		case kAsioResetRequest :
 			m_nSignal = eDriverMsgReset;
 			return 1L;
 
-		case kAsioResyncRequest:
+		case kAsioResyncRequest :
 			m_nSignal = eDriverMsgResync;
 			return 1L;
 
-		case kAsioLatenciesChanged:
+		case kAsioLatenciesChanged :
 			m_nSignal = eDriverMsgResync;
 			return 1L;
 
-		case kAsioEngineVersion:
+		case kAsioEngineVersion :
 			return 2L;
 
-		case kAsioSupportsTimeInfo:
+		case kAsioSupportsTimeInfo :
 			return 1L;
 
-		case kAsioSupportsTimeCode:
+		case kAsioSupportsTimeCode :
 			return 1L;
 	}
 
 	return 0L;
 }
 
+#if NATIVE_INT64
+	#define ASIO64toDouble(a)  (a)
+#else
+	const double twoRaisedTo32 = 4294967296.;
+	#define ASIO64toDouble(a)  ((a).lo + (a).hi * twoRaisedTo32)
+#endif
+
+ASIOTime* CAsioDrv::_onBufferSwitchTimeInfo( ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess )
+{	if ( !CAsioDrv::m_pInst )
+		return 0L;
+	return m_pInst->onBufferSwitchTimeInfo( params, doubleBufferIndex, directProcess );
+}
+
 ASIOTime* CAsioDrv::onBufferSwitchTimeInfo( ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess )
 {_STT();
-oexM();
-	return params;
+
+#if defined( oexDEBUG )
+//	if ( params->timeInfo.flags & kSystemTimeValid )
+//		oexSHOW( ASIO64toDouble( params->timeInfo.systemTime ) );
+//	if ( params->timeInfo.flags & kSamplePositionValid )
+//		oexSHOW( ASIO64toDouble( params->timeInfo.samplePosition ) );
+//	if ( params->timeCode.flags & kTcValid )
+//		oexSHOW( ASIO64toDouble( params->timeCode.timeCodeSamples ) );
+#endif
+
+	// Do we have a valid buffer?
+	ASIOBufferInfo *pAbi = m_bi.Ptr();
+	if ( !pAbi )
+		return 0;
+
+	// Number of bytes in each buffer
+	long lSampleSize = oex::obj::StaticSize( m_nSampleType );
+	long lBytes = m_nSamples * lSampleSize;
+	if ( 0 >= lBytes )
+		return 0;
+
+	// For each share
+	for( long nSh = 0; nSh < m_share.Size(); nSh++ )
+	{
+		// Number of channels in this share
+		long nChannels = m_share[ nSh ].channels;
+
+		// If it's one, we can just copy the data
+		if ( 1 == nChannels )
+		{	long nCh = m_share[ nSh ].chmap[ 0 ];
+			if ( 0 <= nCh && eMaxChannels > nCh )
+			{	long nIdx = m_chmap[ nCh ];
+				if ( 0 <= nIdx && nIdx < m_nOpenChannels )
+					m_share[ nSh ].share.WritePtr( pAbi[ nIdx ].buffers[ doubleBufferIndex ], lBytes );
+			} // end if
+		} // end if
+
+		// Channels have to be interleaved :(
+		else 
+		{
+			// For each channel
+			for ( long ch = 0; ch < nChannels; ch++ )
+			{
+				// Convert channel buffer index
+				long nCh = m_share[ nSh ].chmap[ ch ];
+				if ( 0 <= nCh && eMaxChannels > nCh )
+				{	long nIdx = m_chmap[ nCh ];
+					if ( 0 <= nIdx && nIdx < m_nOpenChannels )
+					{
+						switch( lSampleSize )
+						{
+							case 1 :
+							{	unsigned char *src = (unsigned char*)pAbi[ nIdx ].buffers[ doubleBufferIndex ];
+								unsigned char *dst = (unsigned char*)m_buf._Ptr(); dst += ch;
+								for ( long s = 0; s < m_nSamples; s++, dst += nChannels, src++ )
+									*dst = *src;
+							} break;
+
+							case 2 :
+							{	unsigned short *src = (unsigned short*)pAbi[ nIdx ].buffers[ doubleBufferIndex ];
+								unsigned short *dst = (unsigned short*)m_buf._Ptr(); dst += ch;
+								for ( long s = 0; s < m_nSamples; s++, dst += nChannels, src++ )
+									*dst = *src;
+							} break;
+
+							case 4 :
+							{	unsigned int *src = (unsigned int*)pAbi[ nIdx ].buffers[ doubleBufferIndex ];
+								unsigned int *dst = (unsigned int*)m_buf._Ptr(); dst += ch;
+								for ( long s = 0; s < m_nSamples; s++, dst += nChannels, src++ )
+									*dst = *src;
+							} break;
+
+							case 8 :
+							{	unsigned long long *src = (unsigned long long*)pAbi[ nIdx ].buffers[ doubleBufferIndex ];
+								unsigned long long *dst = (unsigned long long*)m_buf._Ptr(); dst += ch;
+								for ( long s = 0; s < m_nSamples; s++, dst += nChannels, src++ )
+									*dst = *src;
+							} break;
+
+						} // end switch
+
+					} // end if
+
+				} // end if
+
+			} // end for
+
+#if defined( oexDEBUG )
+//			oexSHOW( m_buf.getUsed() );
+//			oexEcho( oexBinToAsciiHexStr( m_buf, 0, 16, 16 ).Ptr() );
+#endif
+
+			// Write data to share
+			m_share[ nSh ].share.Write( &m_buf );
+
+		} // end else
+
+	} // end if
+
+	return 0;
 }
 
 int CAsioDrv::Start()
@@ -622,10 +908,14 @@ int CAsioDrv::Start()
 		return 0;
 	} // end if
 
+	if ( 0 >= getOpenChannels() )
+	{	setLastErrorStr( oexT( "There are no open channels to start" ) );
+		return 0;
+	} // end if
+
 	// Run the ASIO device
 	if ( ASE_OK != m_pDriver->start() )
-	{	m_pDriver->getErrorMessage( m_adi.errorMessage );
-		setLastErrorStr( sqbind::oex2std( oexMks( oexT( "Start() failed : " ), m_adi.errorMessage ) ) );
+	{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "Start() failed : " ), getDriverError().c_str() ) ) );
 		return 0;
 	} // end if
 
@@ -641,10 +931,14 @@ int CAsioDrv::Stop()
 		return 0;
 	} // end if
 
+	if ( 0 >= getOpenChannels() )
+	{//	setLastErrorStr( oexT( "There are no open channels to stop" ) );
+		return 0;
+	} // end if
+
 	// Stop the ASIO device
 	if ( ASE_OK != m_pDriver->stop() )
-	{	m_pDriver->getErrorMessage( m_adi.errorMessage );
-		setLastErrorStr( sqbind::oex2std( oexMks( oexT( "Stop() failed : " ), m_adi.errorMessage ) ) );
+	{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "Stop() failed : " ), getDriverError().c_str() ) ) );
 		return 0;
 	} // end if
 

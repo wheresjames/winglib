@@ -39,7 +39,7 @@ public:
 			return 0;
 		return m_pCodecContext->channels;
 	}
-	
+
 	/// Returns the audio sample format
 	int getFormat() { return m_nFmt; }
 
@@ -87,19 +87,25 @@ public:
 			return 0;
 		return m_pCodecContext->coded_frame->pts;
 	}
-	
+
 	/// Returns the Frame size
 	SQInteger getFrameSize()
 	{	if ( !m_pCodecContext && m_pCodecContext )
 			return 0;
 		return m_pCodecContext->frame_size;
 	}
-	
+
 	/// Buffers incomming data
 	int BufferData( sqbind::CSqBinary *in );
-	
+
 	/// Unbuffers the specified number of bytes
-	int UnbufferData( int uUsed );	
+	int UnbufferData( int uUsed );
+
+	/// Get input data format
+	int getFmtCnv() { return m_nCnv; }
+
+	/// Set input data format
+	void setFmtCnv( int n ) { m_nCnv = n; }
 
 	/** @} */
 
@@ -108,15 +114,18 @@ private:
 	/// Format type
 	int						m_nFmt;
 
+	/// Input data format
+	int						m_nCnv;
+
 	/// Codec ID
 	int						m_nCodecId;
 
 	/// Audio data buffer
 	sqbind::CSqBinary		m_buf;
-	
+
 	/// Packet structure
 	AVPacket 				m_pkt;
-	
+
 	/// Pointer to codec object
     AVCodec 				*m_pCodec;
 
