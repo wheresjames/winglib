@@ -184,7 +184,7 @@ int CFfAudioEncoder::BufferData( sqbind::CSqBinary *in )
 			m_buf.Resize( 4 * ( m_buf.Size() + in->getUsed() + FF_INPUT_BUFFER_PADDING_SIZE ) );
 
 		// Add new data to buffer
-		if ( m_nFmt == m_nCnv )
+		if ( 0 >= m_nCnv || m_nFmt == m_nCnv )
 			m_buf.Append( in );
 
 		// Data needs conversion

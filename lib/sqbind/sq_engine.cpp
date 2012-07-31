@@ -2059,6 +2059,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_ENUM( oex::obj::tChar64,		tChar64 )
 	SQBIND_ENUM( oex::obj::tUChar64,	tUChar64 )
 
+	SQBIND_ENUM( oex::obj::tFloat,		tFloat32 )
+	SQBIND_ENUM( oex::obj::tFloat,		tFloat64 )
+
 	SQBIND_ENUM( oex::obj::tFloat,		tFloat )
 	SQBIND_ENUM( oex::obj::tDouble,		tDouble )
 	SQBIND_ENUM( oex::obj::tLongDouble,	tLongDouble )
