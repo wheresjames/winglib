@@ -39,7 +39,7 @@ public:
 
 	/// Destroy connection
 	void Destroy();
-	
+
 	/// Initializes the RTMP session on the specified socket
 	int Init( sqbind::CSqSocket *pSocket );
 
@@ -63,12 +63,10 @@ public:
 
 	/// Read a packet message from the server
 	/**
-	
 		Returns
 			< 0		- Client session is closed
 			= 0		- No packet or incomplete packet, call again later
 			> 0		- Packet received
-		
 	*/
 	int ReadPacket();
 
@@ -135,6 +133,9 @@ private:
 
 	/// Non-zero for non-blocking mode
 	int 				m_nNonBlockingMode;
+
+	/// Timestamp
+	long				m_nTs;
 
 };
 

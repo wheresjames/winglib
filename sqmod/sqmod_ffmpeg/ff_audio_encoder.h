@@ -88,6 +88,22 @@ public:
 		return m_pCodecContext->coded_frame->pts;
 	}
 
+	/// Calculates the PTS based on the current frame index
+	SQInteger calcPts()
+	{
+		// Sanity checks
+		if ( !m_pCodecContext )
+			return -1;
+
+		// +++ So this is probably just 'return m_nFrame'
+		oex::oexINT64 nFps = m_pCodecContext->time_base.den;
+		if ( 0 >= nFps )
+			return -1;
+
+		// Calculate pts
+		return m_nFrame * m_pCodecContext->time_base.den / ( m_pCodecContext->time_base.num * nFps );
+	}
+
 	/// Returns the Frame size
 	SQInteger getFrameSize()
 	{	if ( !m_pCodecContext && m_pCodecContext )
@@ -107,6 +123,18 @@ public:
 	/// Set input data format
 	void setFmtCnv( int n ) { m_nCnv = n; }
 
+	/// Returns the current frame number
+	SQInteger getFrame() { return m_nFrame; }
+
+	/// Sets the current frame number
+	void setFrame( SQInteger n ) { m_nFrame = n; }
+
+	/// Sets the time base, if zero, defaults to frame rate
+	void setTimeBase( SQInteger n ) { m_nTimeBase = n; }
+
+	/// Returns the current time base
+	SQInteger getTimeBase() { return m_nTimeBase; }
+
 	/** @} */
 
 private:
@@ -119,6 +147,12 @@ private:
 
 	/// Codec ID
 	int						m_nCodecId;
+
+	/// Time base, if zero, defaults to m_nFps
+	oex::oexINT64			m_nTimeBase;
+
+	/// Frame number
+	oex::oexINT64			m_nFrame;
 
 	/// Audio data buffer
 	sqbind::CSqBinary		m_buf;

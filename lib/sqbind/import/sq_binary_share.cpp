@@ -405,7 +405,7 @@ sqbind::CSqBinary CSqBinaryShare::Read()
 		return sqbind::CSqBinary(); 
 
 	// Count a read
-	m_cb.setUINT( 5, m_cb.getUINT( 5 ) + 1 );
+	m_cb.setUINT( 9, m_cb.getUINT( 9 ) + 1 );
 
 	return m_buf.getSub( s, e - s );
 }
@@ -488,7 +488,7 @@ int CSqBinaryShare::WritePtr( const void *pData, int nSize )
 		m_buf.Mem().MemCpy( &((oex::CBin::t_byte*)pData)[ l ], w ), i += w;
 
 	// Count a frame written
-	m_cb.setUINT( 4, m_cb.getUINT( 4 ) + 1 );
+	m_cb.setUINT( 8, m_cb.getUINT( 8 ) + 1 );
 
 	// Loop pointer
 	if ( i >= nBufSize )

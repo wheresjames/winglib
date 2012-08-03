@@ -13,6 +13,8 @@ class CGlobal
 	codec = "H264";
 //	codec = "VP60";
 
+	acodec = "AAC";
+
 	count = 0;
 
 	format = 0;
@@ -169,8 +171,8 @@ function SendVideo() : ( _g )
 		if ( !data.getUsed() )
 			return 1;
 
-//if ( !_g.count++ )
-//	_self.echo( "--- VIDEO FRAME ---\n" + data.AsciiHexStr( 16, 32 ) );
+//	if ( !_g.count++ )
+//		_self.echo( "--- VIDEO FRAME ---\n" + data.AsciiHexStr( 16, 32 ) );
 
 		// Append packet fragment
 		_g.frame.Append( data );
@@ -439,6 +441,7 @@ function ProcessCommands() : ( _g )
 
 				local p = CSqMulti();
 				p[ "codec" ] <- _g.codec;
+				p[ "acodec" ] <- _g.acodec;
 				p[ "type" ] <- "flv";
 				p[ "w" ] <- "320";
 				p[ "h" ] <- "240";

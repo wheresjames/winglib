@@ -57,6 +57,7 @@ CRtmpdSession::CRtmpdSession()
 	oexZero( m_packet );
 	m_nPacketReady = 0;
 	m_nNonBlockingMode = 0;
+	m_nTs = 0;
 }
 
 void CRtmpdSession::Destroy()
@@ -70,6 +71,7 @@ void CRtmpdSession::Destroy()
 	oexZero( m_packet );
 	m_nPacketReady = 0;
 	m_nNonBlockingMode = 0;
+	m_nTs = 0;
 }
 
 SQInteger CRtmpdSession::getLibVersion()
@@ -193,6 +195,10 @@ int CRtmpdSession::Init( sqbind::CSqSocket *pSocket )
 
 	// Give the rtmpd object control of the socket handle
 	m_session.m_sb.sb_socket = oexPtrToInt( pSocket->Ptr()->Detach() );
+
+	// Disable Nagle's algorithm
+	int on = 1;
+	setsockopt( m_session.m_sb.sb_socket, IPPROTO_TCP, TCP_NODELAY, (char*)&on, sizeof( on ) );
 
 	// Attempt handshake
 	if ( !RTMP_Serve( &m_session ) )
@@ -774,9 +780,19 @@ int CRtmpdSession::SendPacket2( int format, int csi, int type, int ext, sqbind::
 	m_packet.m_nChannel = csi;
 	m_packet.m_headerType = format;
 	m_packet.m_packetType = type;
-	m_packet.m_nTimeStamp = 0;
 	m_packet.m_nInfoField2 = ext;
-	m_packet.m_hasAbsTimestamp = 0;
+/*
+	// Audio
+	if ( 8 == type )
+		m_packet.m_nTimeStamp = m_nTs++;
+	// Video
+	else if ( 9 == type )
+		m_packet.m_nTimeStamp = m_nTs;
+	else
+*/		m_packet.m_nTimeStamp = 0;
+
+	// Timestamps?
+	m_packet.m_hasAbsTimestamp = ( 0 < m_nTs ) ? 1 : 0;
 
 	sqbind::CSqBinary body;
 	if ( !body.Allocate( RTMP_MAX_HEADER_SIZE + 1024 ) )
@@ -829,9 +845,19 @@ int CRtmpdSession::SendPacketBin( int format, int csi, int type, int ext, sqbind
 	m_packet.m_nChannel = csi;
 	m_packet.m_headerType = format;
 	m_packet.m_packetType = type;
-	m_packet.m_nTimeStamp = 0;
 	m_packet.m_nInfoField2 = ext;
-	m_packet.m_hasAbsTimestamp = 0;
+/*
+	// Audio
+	if ( 8 == type )
+		m_packet.m_nTimeStamp = m_nTs++;
+	// Video
+	else if ( 9 == type )
+		m_packet.m_nTimeStamp = m_nTs;
+	else
+*/		m_packet.m_nTimeStamp = 0;
+
+	// Timestamps?
+	m_packet.m_hasAbsTimestamp = ( 0 < m_nTs ) ? 1 : 0;
 
 	sqbind::CSqBinary body;
 	if ( !body.Allocate( RTMP_MAX_HEADER_SIZE + b->getUsed() + 128 ) )
