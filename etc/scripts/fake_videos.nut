@@ -14,36 +14,88 @@ function create_font( name, ft )
 
 	// Set font size
 	font.setCharSize( 25 * 64, 15 * 64, 100, 0 );
-	
+
 	return font;
 }
 
-function create_clip( root, name, devs, w, h, fps, fmt, sec, font, hrs, mins )
+function create_clip( root, name, devs, w, h, fps, fmt, tone, afmt, sec, font, hrs, mins )
 {
+//	local asr = 44100;
+	local asr = 11025;
+	local ach = 2;
+
 	if ( devs.len() )
 	{	_self.echo( "+++ Haven't implemented this yet :(" );
 		return;
 	} // end if
 
-	::_self.echo( "Creating : " + name + " - " + w + "x" + h + "x" + fps + "x" + sec );
+	::_self.echo( "Creating : " + name + " - " + fmt + " - " + w + "x" + h + "x" + fps + "x" + sec + " / " + afmt + ":" + tone + "Hz" );
+
+	if ( root.len() )
+		name = ::_self.build_path( root, name )
 
 	local avi = CFfContainer();
 	local enc = CFfEncoder();
 	local frame = CSqBinary();
 
+	// Audio?
+	local aenc = 0, abuf, aframe = 0, aid = 0, aref = 0, aoff = 0;
+	if ( 0 < tone && afmt.len() )
+	{
+		aenc = CFfAudioEncoder();
+		aframe = CSqBinary();
+		abuf = CSqBinary();
+
+		// Create audio codec
+		aid = CFfAudioDecoder().LookupCodecId( afmt );
+		if ( !aid || !aenc.Create( aid, ::_self.tFloat, 2, asr, 0, CSqMulti( "cmp=-2") ) )
+		{	_self.echo( "Failed to create audio codec : " + afmt );
+			aenc = 0, aframe = 0; abuf = 0;
+		} // end if
+
+		// Create sine wave
+		else
+		{
+			// Calculate a buffer size and allocate
+			local bsize = asr;
+			if ( !abuf.Size() && !abuf.AllocateFLOAT( bsize * ach ) )
+				abuf = 0;
+
+			if ( abuf )
+			{
+				// Create sine wave
+				abuf.setUsed( bsize * ach * abuf.sizeFLOAT() );
+
+				// Create sine wave
+				local div = asr.tofloat() / tone.tofloat(), pi2 = 3.14159 * 2.;
+				local div2 = asr.tofloat() / tone.tofloat() * 1.5;
+				for( local i = 0; i < bsize; i++ )
+					for ( local ch = 0; ch < ach; ch++ )
+						abuf.setFLOAT( ( i * ach ) + ch, sin( aref / div * pi2 ) + sin( aref / div2 * pi2 ) ), aref++;
+
+			} // end if
+
+		} // end else
+
+	} // end if
+
 	if ( !avi.Create( name, "", CSqMulti() ) )
-	{	_self.echo( "Failed to create avi" ); return; }
-	
+	{	_self.echo( "Failed to create avi : " + name ); return; }
+
 	if ( 0 > avi.AddVideoStream( CFfDecoder().LookupCodecId( fmt ), w, h, fps ) )
 	{	_self.echo( "Failed to add video stream" ); return; }
-		
+
+	if ( aid )
+		if ( 0 > avi.AddAudioStream( aid, ::_self.tFloat, 2, asr, 0 ) )
+			_self.echo( "Failed to add audio stream : " + afmt + " : " + aid );
+
 	if ( !avi.InitWrite() )
 	{	_self.echo( "Failed to initiailze avi" ); return; }
 
 	if ( !enc.Create( avi.getVideoCodecId(), CFfConvert().PIX_FMT_YUV420P,
 					  w, h, fps, 1000000, CSqMulti() ) )
 		_self.echo( "Failed to create encoder" );
-		
+
 	local img = CSqImage();
 	if ( !img.Create( w, h ) )
 	{	_self.echo( "Failed to create image buffer" ); return; }
@@ -57,7 +109,7 @@ function create_clip( root, name, devs, w, h, fps, fmt, sec, font, hrs, mins )
 	for ( local i = 0; i < num_frames; i++ )
 	{
 		// Blank the image
-		pix.Zero();	
+		pix.Zero();
 
 		// Draw text
 		local min = mins + ( i / fps / 60 ).tointeger();
@@ -80,11 +132,44 @@ function create_clip( root, name, devs, w, h, fps, fmt, sec, font, hrs, mins )
 		if ( !avi.WriteFrame( frame, inf ) )
 		{	_self.echo( "Failed to write to avi file" ); return; }
 
+		// Audio?
+		if ( aid )
+		{
+			if ( abuf )
+			{
+				local bsize = abuf.getUsed() / fps * _self.type_size( _self.tFloat ) * ach;
+				local sub = abuf.getSub( bsize * aoff, bsize );
+				if ( fps <= ++aoff ) aoff = 0;
+
+				// Buffer the audio frame
+				aenc.BufferData( sub );
+
+				// Encode audio data
+				local inf = CSqMulti();
+				while ( aenc.Encode( CSqBinary(), aframe, inf ) )
+				{
+//					_self.echo( "AUDIO = " + aframe.getUsed() + ", pts = " + aenc.getPts() );
+
+					// Write audio data
+					if ( aframe.getUsed() )
+					{
+						if ( !avi.WriteAudioFrame( aframe, 0, 0, CSqMulti() ) )
+							_self.echo( "!!! Error writing audio frame to video stream" );
+						aframe.setUsed( 0 );
+
+					} // end if
+
+				} // end while
+
+			} // end else
+
+		} // end if
+
 	} // end for
 
 }
 
-function create_clips( root, t, inv, ts, te, devs, empty, w, h, fps, fmt, sec, font )
+function create_clips( root, t, inv, ts, te, devs, empty, w, h, fps, fmt, tone, afmt, sec, font )
 {
 	// Current time
 	local gmt = _self.gmt_time();
@@ -113,7 +198,7 @@ function create_clips( root, t, inv, ts, te, devs, empty, w, h, fps, fmt, sec, f
 		if ( devs.len() )
 			foreach( d in devs )
 				CSqFile().mkdir( ::_self.build_path( ::_self.build_path( root, d ), path ) );
-		else 
+		else
 			CSqFile().mkdir( ::_self.build_path( root, path ) );
 
 		// Empty files?
@@ -121,7 +206,7 @@ function create_clips( root, t, inv, ts, te, devs, empty, w, h, fps, fmt, sec, f
 		{
 			if ( devs.len() )
 				foreach( d in devs )
-					CSqFile().put_contents( ::_self.build_path( ::_self.build_path( root, d ), file ), 
+					CSqFile().put_contents( ::_self.build_path( ::_self.build_path( root, d ), file ),
 											d + " : " + file );
 
 			else
@@ -131,7 +216,7 @@ function create_clips( root, t, inv, ts, te, devs, empty, w, h, fps, fmt, sec, f
 
 		// Create this clip
 		else
-			create_clip( root, file, devs, w, h, fps, fmt, inv, font, 
+			create_clip( root, file, devs, w, h, fps, fmt, tone, afmt, inv, font,
 						 ( t % ( 24 * 60 * 60 ) / ( 60 * 60 ) ).tointeger(),
 						 ( t % ( 60 * 60 ) / 60 ).tointeger() );
 
@@ -191,6 +276,11 @@ if ( !te.len() ) te = "-%g%m%s-" + ( fps * inv ) + ".avi";
 local t = _self.tolong( _self.get( "/", "cmdline.t" ) );
 if ( !t ) t = -3600;
 
+// Audio tone?
+local tone = _self.tolong( _self.get( "/", "cmdline.tone" ) );
+local afmt = _self.get( "/", "cmdline.afmt" );
+if ( !afmt.len() ) afmt = "AC3";
+
 // Initialize free type library
 local ft = CFtLibrary();
 if ( ft.getLastError() )
@@ -208,11 +298,11 @@ if ( !font )
 
 // Single file
 if ( file.len() )
-	create_clip( file, w, h, fps, fmt, inv, font,
+	create_clip( "", file, w, h, fps, fmt, tone, afmt, inv, font,
 				 _self.tolong( _self.get( "/", "cmdline.hrs" ) ),
 				 _self.tolong( _self.get( "/", "cmdline.min" ) ) );
 
 // Clip folder structure
-else				 
-	create_clips( out, t, inv, ts, te, devs, empty, w, h, fps, fmt, 15 * 60, font );
+else
+	create_clips( out, t, inv, ts, te, devs, empty, w, h, fps, fmt, tone, afmt, 15 * 60, font );
 

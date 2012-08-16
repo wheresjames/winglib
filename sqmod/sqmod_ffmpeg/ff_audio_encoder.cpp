@@ -296,7 +296,8 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 			return 0;
 		} // end if
 
-#if defined( DEVEL_USE_AVCODEC_ENCODE_AUDIO2 )
+#if 0
+//#if defined( DEVEL_USE_AVCODEC_ENCODE_AUDIO2 )
 
 // ############### 2
 
@@ -339,6 +340,10 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 // ############### 2
 #else
 
+		// Set PTS
+		m_pCodecContext->coded_frame->pts = calcPts();
+
+		// Encode audio frame
 		int nBytes = avcodec_encode_audio( m_pCodecContext, &pOut[ nOutPtr ], nOut - nOutPtr, (const short*)m_pkt.data );
 		if ( 0 > nBytes )
 		{	oexERROR( nBytes, oexT( "avcodec_encode_audio() failed" ) );

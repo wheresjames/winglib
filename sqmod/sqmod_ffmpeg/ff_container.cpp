@@ -52,6 +52,12 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoExtraData )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoExtraData )
 
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioFrameSize )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioBps )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioBitRate )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioSampleRate )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioSampleFmt )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioChannels )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, setAudioExtraData )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioExtraData )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioDec )
@@ -179,6 +185,24 @@ void CFfContainer::Destroy()
 	m_ats_offset = 0;
 
 	m_sUrl.clear();
+}
+
+int CFfContainer::getAudioSampleFmt()
+{	
+	if ( !m_pFormatContext || 0 > m_nAudioStream
+		 || !m_pFormatContext->streams[ m_nAudioStream ]->codec )
+		return 0;
+
+#	define CNVFMT( t, v ) case v : return oex::obj::t;
+	switch( m_pFormatContext->streams[ m_nAudioStream ]->codec->sample_fmt )
+	{	CNVFMT( tUInt8, AV_SAMPLE_FMT_U8 );
+		CNVFMT( tInt16, AV_SAMPLE_FMT_S16 );
+		CNVFMT( tInt32, AV_SAMPLE_FMT_S32 );
+		CNVFMT( tFloat, AV_SAMPLE_FMT_FLT );
+		CNVFMT( tDouble, AV_SAMPLE_FMT_DBL );
+		default : return 0;
+	} // end switch
+	return 0;
 }
 
 int CFfContainer::CloseStream()

@@ -121,6 +121,49 @@ public:
 		return m_pFormatContext->streams[ m_nAudioStream ]->codec->codec_id;
 	}
 
+	/// Returns the number of audio channels
+	int getAudioChannels() 
+	{	if ( !m_pFormatContext || 0 > m_nAudioStream
+			 || !m_pFormatContext->streams[ m_nAudioStream ]->codec )
+			return 0;
+		return m_pFormatContext->streams[ m_nAudioStream ]->codec->channels;
+	}
+
+	/// Returns the sample rate
+	int getAudioSampleRate() 
+	{	if ( !m_pFormatContext || 0 > m_nAudioStream
+			 || !m_pFormatContext->streams[ m_nAudioStream ]->codec )
+			return 0;
+		return m_pFormatContext->streams[ m_nAudioStream ]->codec->sample_rate;
+	}
+
+	/// Returns the audio sample format
+	int getAudioSampleFmt();
+
+	/// Returns the bit rate
+	int getAudioBitRate() 
+	{	if ( !m_pFormatContext || 0 > m_nAudioStream
+			 || !m_pFormatContext->streams[ m_nAudioStream ]->codec )
+			return 0;
+		return m_pFormatContext->streams[ m_nAudioStream ]->codec->bit_rate;
+	}
+
+	/// Returns the bits per sample
+	int getAudioBps() 
+	{	if ( !m_pFormatContext || 0 > m_nAudioStream
+			 || !m_pFormatContext->streams[ m_nAudioStream ]->codec )
+			return 0;
+		return m_pFormatContext->streams[ m_nAudioStream ]->codec->bits_per_coded_sample;
+	}
+
+	/// Returns the frame size
+	int getAudioFrameSize() 
+	{	if ( !m_pFormatContext || 0 > m_nAudioStream
+			 || !m_pFormatContext->streams[ m_nAudioStream ]->codec )
+			return 0;
+		return m_pFormatContext->streams[ m_nAudioStream ]->codec->frame_size;
+	}
+
 	/// Returns a pointer to the audio decoder
 	CFfAudioDecoder* getAudioDec() { return &m_audio_dec; }
 

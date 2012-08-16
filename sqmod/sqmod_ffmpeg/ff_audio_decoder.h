@@ -66,6 +66,9 @@ public:
 	/// Returns the sample rate
 	int getSampleRate() { return m_pCodecContext ? m_pCodecContext->sample_rate : 0; }
 
+	/// Returns the sample format
+	int getSampleFmt();
+
 	/// Returns the bit rate
 	int getBitRate() { return m_pCodecContext ? m_pCodecContext->bit_rate : 0; }
 	

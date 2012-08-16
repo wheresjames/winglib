@@ -21,6 +21,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfAudioDecoder, CFfAudioDecoder )
 	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getSync )
 	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getChannels )
 	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getSampleRate )
+	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getSampleFmt )
 	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getBps )
 	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getBitRate )
 	SQBIND_MEMBER_FUNCTION( CFfAudioDecoder, getFrameSize )
@@ -81,6 +82,23 @@ void CFfAudioDecoder::Destroy()
 	oexZero( m_pkt );
 	m_lFrames = 0;
 }
+
+int CFfAudioDecoder::getSampleFmt()
+{ 
+	if ( !m_pCodecContext->sample_fmt )
+		return 0;
+#	define CNVFMT( t, v ) case v : return oex::obj::t;
+	switch( m_pCodecContext->sample_fmt )
+	{	CNVFMT( tUInt8, AV_SAMPLE_FMT_U8 );
+		CNVFMT( tInt16, AV_SAMPLE_FMT_S16 );
+		CNVFMT( tInt32, AV_SAMPLE_FMT_S32 );
+		CNVFMT( tFloat, AV_SAMPLE_FMT_FLT );
+		CNVFMT( tDouble, AV_SAMPLE_FMT_DBL );
+		default : return 0;
+	} // end switch
+	return 0;
+}
+
 
 int CFfAudioDecoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nSampleRate, int x_nBps )
 {_STT();
