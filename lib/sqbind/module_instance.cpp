@@ -43,7 +43,7 @@ CModuleInstance::CModuleInstance()
 
 CModuleInstance::~CModuleInstance()
 {_STT();
-	Destroy(); 
+	Destroy();
 }
 
 void CModuleInstance::Destroy()
@@ -133,7 +133,7 @@ oex::oexBOOL CModuleInstance::LoadFunctions()
 	} // end if
 
 	// Add module stack trace object
-//	oex::CStackTrace::AddModule( m_cModule.GetModuleBaseAddress(), 
+//	oex::CStackTrace::AddModule( m_cModule.GetModuleBaseAddress(),
 //								 si.pSt, m_cModule.GetPath().GetFileName().Ptr() );
 
 	// Load start function
@@ -164,7 +164,7 @@ oex::oexBOOL CModuleInstance::LoadFunctions()
 
 oex::oexBOOL CModuleInstance::IsLoaded()
 {_STT();
-	return m_cModule.IsLoaded(); 
+	return m_cModule.IsLoaded();
 }
 
 oex::oexBOOL CModuleInstance::Export( sqbind::VM vm )
@@ -174,6 +174,8 @@ oex::oexBOOL CModuleInstance::Export( sqbind::VM vm )
 	{	oexERROR( 0, oexMks( oexT( "Invalid export function " ), m_cModule.GetPath() ) );
 		return oex::oexFALSE;
 	} // end if
+
+	// +++ fCalloc ???
 
 	// Attempt to export the functionality
 	sqbind::SSqAllocator sa = { oex::CMem::GetRawAllocator().fMalloc,

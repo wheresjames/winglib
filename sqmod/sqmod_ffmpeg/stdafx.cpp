@@ -218,13 +218,24 @@ URLProtocol memshare_protocol = {
     memshare_close
 };
 
-
 // Export classes
 static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 {_STT();
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
 
+	CFfDecoder::Register( x_vm );
+	CFfEncoder::Register( x_vm );
+	CFfAudioDecoder::Register( x_vm );
+	CFfAudioEncoder::Register( x_vm );
+	CFfConvert::Register( x_vm );
+	CFfTranscode::Register( x_vm );
+	CFfCapture::Register( x_vm );
+	CFfContainer::Register( x_vm );
+}
+
+static void SQBIND_module_Init()
+{
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) 
 		return;
@@ -251,18 +262,9 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 	// Register the oexshare protocol
 	ffurl_register_protocol( &memshare_protocol, sizeof( memshare_protocol ) );
 //	av_register_protocol2( &memshare_protocol, sizeof( memshare_protocol ) );
-
-	CFfDecoder::Register( x_vm );
-	CFfEncoder::Register( x_vm );
-	CFfAudioDecoder::Register( x_vm );
-	CFfAudioEncoder::Register( x_vm );
-	CFfConvert::Register( x_vm );
-	CFfTranscode::Register( x_vm );
-	CFfCapture::Register( x_vm );
-	CFfContainer::Register( x_vm );
 }
 
-static void SQBIND_module_cleanup()
+static void SQBIND_module_Exit()
 {
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) 
@@ -270,6 +272,11 @@ static void SQBIND_module_cleanup()
 
 	// Free ffmpeg network resources
 	avformat_network_deinit();
+
+	// FFMPEG cleanup
+//	av_free_static();
+//	uninit_opts();
+//	avfilter_uninit();
 
 	// SSL cleanup sequence
 	ERR_remove_state( 0 );
@@ -281,7 +288,8 @@ static void SQBIND_module_cleanup()
 }
 
 // Cleanup
-#define SQBIND_Exit SQBIND_module_cleanup();
+#define SQBIND_Init SQBIND_module_Init();
+#define SQBIND_Exit SQBIND_module_Exit();
 
 #if defined( SQBIND_STATIC )
 	#include "ff_decoder.cpp"

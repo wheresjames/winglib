@@ -97,6 +97,14 @@ public:
 		return m_pFormatContext->streams[ m_nVideoStream ]->codec->height;
 	}
 
+	/// Returns the bit rate
+	int getVideoBitRate() 
+	{	if ( !m_pFormatContext || 0 > m_nVideoStream
+			 || !m_pFormatContext->streams[ m_nVideoStream ]->codec )
+			return 0;
+		return m_pFormatContext->streams[ m_nVideoStream ]->codec->bit_rate;
+	}
+
 	/// Returns video codec id
 	int getVideoCodecId()
 	{	if ( !m_pFormatContext || 0 > m_nVideoStream

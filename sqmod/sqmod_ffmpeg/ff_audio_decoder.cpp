@@ -99,7 +99,6 @@ int CFfAudioDecoder::getSampleFmt()
 	return 0;
 }
 
-
 int CFfAudioDecoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nSampleRate, int x_nBps )
 {_STT();
 

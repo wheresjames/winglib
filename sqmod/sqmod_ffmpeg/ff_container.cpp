@@ -45,6 +45,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getHeight )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoFormat )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoCodecId )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoBitRate )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getVideoStream )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioStream )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getFrameCount )
@@ -151,30 +152,30 @@ void CFfContainer::Destroy()
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) return;
 
+	CloseStream();
+
 	m_video_extra.Free();
 	m_audio_extra.Free();
 
 	if ( m_pkt.data )
 		av_free_packet( &m_pkt );
 
-	if ( m_pCodecContext )
-		avcodec_close( m_pCodecContext );
-
 	m_audio_dec.Destroy();
 
-	CloseStream();
+	if ( m_pFrame ) 
+		av_free( m_pFrame );
+	m_pFrame = oexNULL;
 
 	m_pCodecContext = oexNULL;
-	m_pFrame = oexNULL;
-	m_nVideoStream = -1;
 	m_buf.Free();
 	oexZero( m_pkt );
 	m_nFrames = 0;
 	m_nLastFrameFlags = 0;
 	m_nLastFrameEncodedSize = 0;
+	m_nVideoStream = -1;
+	m_nAudioStream = -1;
 
 //	m_pAudioCodecContext = oexNULL;
-	m_nAudioStream = -1;
 //	m_nAudioFrames = 0;
 
 	m_nWrite = 0;
@@ -214,8 +215,20 @@ int CFfContainer::CloseStream()
 	if ( !m_pFormatContext )
 		return 0;
 
+	// Close all open streams
+	for ( long i = 0; i < m_pFormatContext->nb_streams; i++ )
+		if ( m_pFormatContext->streams[ i ] && m_pFormatContext->streams[ i ]->codec )
+			avcodec_close( m_pFormatContext->streams[ i ]->codec );
+
+	// No more streams
+	m_nVideoStream = -1;
+	m_nAudioStream = -1;
+
 	if ( m_nRead )
+//		av_close_input_file( m_pFormatContext ),
 		avformat_close_input( &m_pFormatContext );
+//		avformat_free_context( m_pFormatContext );
+
 
 	else if ( 1 < m_nWrite )
 	{
@@ -1102,28 +1115,35 @@ int CFfContainer::SeekFrame( int nStreamId, int nOffset, int nFlags, int nType,
 	if ( 0 > Seek( nStreamId, nOffset, nFlags, nType ) )
 		return -1;
 
-	// See if we have a valid frame rate
+	// Calculate the pts for the frame we want
+	oex::oexINT64 pts = nOffset;
+	if ( 0 != ( 0x01 & nType ) )
+		pts = av_rescale( nOffset,
+						m_pFormatContext->streams[ nStreamId ]->time_base.den,
+						m_pFormatContext->streams[ nStreamId ]->time_base.num ) / 1000;
+
 	long fps = (long)getFps();
 	if ( 0 >= fps )
 		return -1;
 
-	// +++ Get real key frame interval
-	long kinv = 1000;
-	long maxskip = fps * kinv / 1000;
+	// Set reasonable search limits
+	long max = getFps();
+	if ( 30 > max )
+		max = 30;
+	else if ( 1000 < max )
+		max = 1000;
 
-	// How many frames to skip?
-	long togo = ( nOffset % kinv ) * fps / 1000, si = 0;
-	if ( 0 >= togo )
-		togo = 1;
-	else if ( maxskip < togo )
-		togo = maxskip;
-	else
-		togo++;
-
-	// Read them off
-	while ( 0 <= ( si = ReadFrame( in, m ) ) && 0 < togo )
+	// Seek forward until we find the frame we're looking for
+	long si = 0;
+	while ( max && 0 <= ( si = ReadFrame( in, m ) ) )
 		if ( si == nStreamId )
-			togo--, DecodeFrameBin( in, fmt, out, m, flip );
+
+			// Do we have the frame we want?
+			if ( 100 > max && (*m)[ "pts" ].toint() > pts )
+				return 1;
+
+			else
+				max--, DecodeFrameBin( in, fmt, out, m, flip );
 
 	return 0;
 }
