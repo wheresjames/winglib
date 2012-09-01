@@ -97,6 +97,20 @@ public:
 		return m_pCodecContext->level;
 	}
 
+	/// Sets the frame index based on a pts
+	void setPts( SQInteger r )
+	{
+		// Sanity checks
+		if ( !m_pCodecContext || 0 >= m_nFps )
+			return;
+
+		// Calculate divider
+		SQInteger d = m_pCodecContext->time_base.den / ( m_pCodecContext->time_base.num * m_nFps );
+
+		// Set frame index
+		m_nFrame = d ? ( r / d ) : 0;
+	}
+
 	/// Calculates the PTS based on the current frame index
 	SQInteger calcPts()
 	{

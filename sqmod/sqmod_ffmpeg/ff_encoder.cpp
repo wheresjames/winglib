@@ -16,6 +16,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfEncoder, CFfEncoder )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, getPktDts )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, getPktPts )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, getPts )
+	SQBIND_MEMBER_FUNCTION( CFfEncoder, setPts )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, getExtraData )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, setHeader )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, getHeader )
@@ -69,6 +70,7 @@ void CFfEncoder::Destroy()
 
 	if ( m_pCodecContext )
 	{	avcodec_close( m_pCodecContext );
+		av_free( m_pCodecContext );
 		m_pCodecContext = oexNULL;
 	} // end if
 
@@ -208,10 +210,15 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	int res = avcodec_open( m_pCodecContext, m_pCodec );
 	if ( 0 > res )
 	{	oexERROR( res, oexT( "avcodec_open() failed" ) );
+		av_free( m_pCodecContext );
 		m_pCodecContext = oexNULL;
 		Destroy();
 		return 0;
 	} // end if
+
+	// Start with invalid pts
+//	if ( m_pCodecContext->coded_frame )
+//		m_pCodecContext->coded_frame->pts = -1;
 
 	m_nFmt = fmt;
 	m_nFps = fps;
@@ -269,26 +276,26 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 		else
 			paf->quality = m_pCodecContext->global_quality;
 
+		// Set the PTS
+		if ( m->isset( oexT( "pts" ) ) )
+			paf->pts = (*m)[ oexT( "pts" ) ].toint();
+		else
+			paf->pts = calcPts();
+
 	} // end if
 
 	else
+		paf->pts = calcPts(),
 		paf->quality = m_pCodecContext->global_quality;
+
+	// Ensure PTS match
+	m_pCodecContext->coded_frame->pts = paf->pts;
 
 	// Copy the header
 	if ( 0 < nHeader )
 		out->Copy( &m_header );
 
-//	if ( !m_nFrame )
-//		m_nFrame++;
-
-	// Calculate pts
-//	paf->pts = AV_NOPTS_VALUE;
-	paf->pts = calcPts();
-//	paf->pts = m_nFrame * ( AV_TIME_BASE / m_nFps );
-//	paf->pts = m_nFrame * ( 90000 / m_nFps );
-
-//oexSHOW( paf->pts );
-
+	// Encode the video frame
 	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->_Ptr( nHeader ), out->Size() - nHeader, paf );
 	if ( 0 > nBytes )
 	{	oexERROR( nBytes, oexT( "avcodec_encode_video() failed" ) );

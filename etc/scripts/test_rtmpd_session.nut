@@ -204,17 +204,20 @@ function SendVideo() : ( _g )
 			switch( m[ si ][ "id" ].toint() )
 			{
 				case 0x12 :
-					local meta = CSqMulti();
+/*					local meta = CSqMulti();
 					if ( _g.rtmp.DeserializePacket( pkt, meta, 0, 0 ) )
 						_self.echo( " === onMetaData ===\n" + meta.print_r( 1 ) );
-/*
+
 _self.echo( "--- onMetaData Packet ---\n" + pkt.AsciiHexStr( 16, 64 ) );
 
 					local meta = CSqMulti();
 					if ( _g.rtmp.DeserializePacket( pkt, meta, 0, 0 ) )
 					{
-//						meta[ "1" ].unset( "duration" );
-//						meta[ "1" ].unset( "filesize" );
+						meta[ "1" ].unset( "duration" );
+						meta[ "1" ].unset( "filesize" );
+						
+						meta[ "1" ][ "audiocodecid" ] <- "mp4a";
+						meta[ "1" ][ "videocodecid" ] <- "avc1";
 
 						meta[ "1" ][ "trackinfo" ][ "_arraytype" ] <- "strict";
 						meta[ "1" ][ "trackinfo" ][ "timescale" ] <- _g.fps.tostring();
@@ -236,11 +239,13 @@ _self.echo( "--- Seialized Packet ---\n" + pkt.AsciiHexStr( 16, 64 ) );
 
 					} // end if
 */
-					if ( !_g.rtmp.SendPacketBin( 1, 5, 18, 1, pkt, 0 ) )
+					if ( !_g.rtmp.SendPacketBin( 0, 5, 18, 1, pkt, 0 ) )
 						_g.quit = 1;
 					break;
 
 				case 0x09 :
+
+//_self.echo( " !!! VIDEO FRAME --- " + pkt.getUsed() );
 
 					if ( !_g.sei_sent )
 						sendSeiHeaders();
@@ -251,7 +256,18 @@ _self.echo( "--- Seialized Packet ---\n" + pkt.AsciiHexStr( 16, 64 ) );
 
 					break;
 
+				case 0x08 :
+
+//_self.echo( " !!! AUDIO FRAME --- " + pkt.getUsed() );
+
+					if ( !_g.rtmp.SendPacketBin( 1, 6, 8, 1, pkt, 0 ) )
+						_g.quit = 1;
+
+					break;
+
 			} // end switch
+
+//_self.echo( pkt.AsciiHexStr( 16, 16 ) );
 
 		} // end for
 

@@ -24,7 +24,7 @@ class CGlobal
 	abuf = 0;
 	aframe = 0;
 	audio_ref = 0;
-	audio_channels = 1;
+	audio_channels = 2;
 	audio_samplerate = 44100;
 
 	ft = 0;
@@ -137,6 +137,32 @@ function StartStream( params ) : ( _g )
 
 //	_self.echo( "w = " + _g.w + ", h = " + _g.h );
 
+	// Do we need an audio codec?
+	local acodec = "", acid = 0;
+	if ( p[ "acodec" ].len() && p[ "type" ].len() )
+	{
+		// Do we need to include audio?
+		if ( p[ "acodec" ].len() )
+		{
+			// Create encoder
+			_g.aenc = CFfAudioEncoder();
+//			_g.aenc.setTimeBase( _g.fps );
+//			_g.aenc.setTimeBase( 90000 );
+			acodec = p[ "acodec" ].str();
+			acid = CFfAudioDecoder().LookupCodecId( acodec );
+			if ( !acid || !_g.aenc.Create( acid, ::_self.tFloat, _g.audio_channels,
+										   _g.audio_samplerate, 0, CSqMulti( "cmp=-2") ) )
+			{	_g.as = 0; _g.aenc = 0; acodec = ""; acid = 0;
+				_self.echo( "Failed to create audio encoder : " + acodec );
+			} // end if
+
+			else
+				_g.abuf = CSqBinary(), _g.aframe = CSqBinary();
+
+		} // end if
+
+	} // end if
+
 	// Codec
 	local fmt = p[ "codec" ].str();
 	local pix = CFfConvert().PIX_FMT_YUV420P;
@@ -145,7 +171,14 @@ function StartStream( params ) : ( _g )
 
 	// Create the encoder
 	_g.enc = CFfEncoder();
+
+	// Set video timebase, if there is audio, video needs to match
+//	if ( _g.aenc ) 
+//		_g.enc.setTimeBase( _g.aenc.getRealTimeBase() );
+//	else 
+//		_g.enc.setTimeBase( _g.fps );
 //	_g.enc.setTimeBase( 90000 );
+
 	local q = p[ "q" ].toint(); if ( 0 >= q ) q = 5;
 	p[ "encoder_params" ][ "quality" ] <- q.tostring();
 	if ( !_g.enc.Create( CFfDecoder().LookupCodecId( fmt ),
@@ -171,26 +204,6 @@ function StartStream( params ) : ( _g )
 	// Do we need a container?
 	if ( p[ "type" ].len() )
 	{
-		// Do we need to include audio?
-		local acodec = "", acid = 0;
-		if ( p[ "acodec" ].len() )
-		{
-			// Create encoder
-			_g.aenc = CFfAudioEncoder();
-			_g.aenc.setTimeBase( _g.fps );
-			acodec = p[ "acodec" ].str();
-			acid = CFfAudioDecoder().LookupCodecId( acodec );
-			if ( !acid || !_g.aenc.Create( acid, ::_self.tFloat, _g.audio_channels,
-										   _g.audio_samplerate, 0, CSqMulti( "cmp=-2") ) )
-			{	_g.as = 0; _g.aenc = 0;
-				_self.echo( "Failed to create audio encoder : " + acodec );
-			} // end if
-
-			else
-				_g.abuf = CSqBinary(), _g.aframe = CSqBinary();
-
-		} // end if
-
 		// Video container
 		_g.vid = CFfContainer();
 		local url = "memshare://" + p[ "sid" ].str()
@@ -297,13 +310,7 @@ function Run() : ( _g )
 
 	} // end else
 
-	// Attempt to encode the frame
 	local inf = CSqMulti();
-	if ( 0 >= _g.enc.Encode( CFfConvert().PIX_FMT_BGR24,
-							 _g.w, -_g.h, _g.pix, _g.frame, inf ) )
-	{	_self.echo( "??? = " + inf[ "pts" ].toint() );
-		return 0;
-	} // end if
 
 //_self.echo( "pts = " + inf[ "pts" ].toint() + ", fsz = " + _g.frame.getUsed() );
 //_self.echo( "pts = " + _g.enc.calcPts() + ", fsz = " + _g.frame.getUsed() );
@@ -312,55 +319,94 @@ function Run() : ( _g )
 	// Write to container
 	if ( _g.vid )
 	{
+//		local inf = CSqMulti();
+
 		// Audio?
 		if ( _g.aenc )
 		{
 			// Calculate a buffer size and allocate
 			local bsize = _g.audio_samplerate / ( _g.fps ? _g.fps : 15 );
-			if ( !_g.abuf.Size() && !_g.abuf.AllocateFLOAT( bsize ) )
+			if ( !_g.abuf.Size() && !_g.abuf.AllocateFLOAT( bsize * _g.audio_channels ) )
 				_g.aenc = 0;
 
 			if ( _g.abuf.Size() )
 			{
 				// Create sine wave
-				_g.abuf.setUsed( bsize * _g.abuf.sizeFLOAT() );
+				_g.abuf.setUsed( bsize * _g.audio_channels * _g.abuf.sizeFLOAT() );
 
 				// Create sine wave
 				local div = _g.audio_samplerate.tofloat() / 440., pi2 = 3.14159 * 2.;
 				for( local i = 0; i < bsize; i++ )
-					_g.abuf.setFLOAT( i, sin( _g.audio_ref++ / div * pi2 ) );
+					for( local c = 0; c < _g.audio_channels; c++ )
+						_g.abuf.setFLOAT( ( i * _g.audio_channels ) + c, sin( _g.audio_ref++ / div * pi2 ) );
 
 				// Buffer the audio frame
 				_g.aenc.BufferData( _g.abuf );
 
+//				_self.echo( "apts = " + _g.aenc.getPts() );
+
 				// Encode audio data
-				local inf = CSqMulti();
+//				inf[ "pts" ] <- "0";
 				while ( _g.aenc.Encode( CSqBinary(), _g.aframe, inf ) )
+					;
 				{
-//					_self.echo( "AUDIO = " + _g.aframe.getUsed() + ", pts = " + _g.aenc.getPts() );
+//					_self.echo( "AUDIO = " + _g.aframe.getUsed() + ", pts = " + inf[ "pts" ].str() );
+					_self.echo( "AUDIO = " + _g.aframe.getUsed() + ", pts = " + _g.aenc.getPts() );
 
 					// Write audio data
 					if ( _g.aframe.getUsed() )
 					{
+//						if ( !_g.vid.WriteAudioFrame( _g.aframe, inf[ "pts" ].toint(), 0, CSqMulti() ) )
 //						if ( !_g.vid.WriteAudioFrame( _g.aframe, _g.enc.calcPts(), _g.enc.calcPts(), CSqMulti() ) )
-//						if ( !_g.vid.WriteAudioFrame( _g.aframe, _g.aenc.getPts(), _g.aenc.getPts(), CSqMulti() ) )
-						if ( !_g.vid.WriteAudioFrame( _g.aframe, 0, 0, CSqMulti() ) )
+						if ( !_g.vid.WriteAudioFrame( _g.aframe, _g.aenc.getPts(), _g.aenc.getPts(), CSqMulti() ) )
+//						if ( !_g.vid.WriteAudioFrame( _g.aframe, 0, 0, CSqMulti() ) )
+//						if ( !_g.vid.WriteAudioFrame( _g.aframe, -1, -1, CSqMulti() ) )
 							_self.echo( "!!! Error writing audio frame to video stream" );
 						_g.aframe.setUsed( 0 );
 
 					} // end if
 
+//					inf[ "pts" ] <- "0";
+					inf.clear();
+
 				} // end while
 
 			} // end else
 
+			// We must wait for the audio to start
+//			if ( !_g.aenc.isPts() )
+//				return 0;
+
+			// Sync video
+//			if ( _g.enc && _g.aenc.isPts() )
+//				_g.enc.setPts( _g.aenc.getPts() );
+
 		} // end if
 
-		// Attempt to write the frame
-//		if ( !_g.vid.WriteVideoFrame( _g.frame, _g.enc.calcPts(), _g.enc.calcPts(), inf ) )
-//		if ( !_g.vid.WriteVideoFrame( _g.frame, inf[ "pts" ].toint(), inf[ "pts" ].toint(), inf ) )
-		if ( !_g.vid.WriteVideoFrame( _g.frame, 0, 0, inf ) )
-			_g.quit = 1;
+		if ( _g.enc )
+		{
+//			inf[ "pts" ] <- "0";
+//			inf[ "pts" ] <- _g.aenc.getPts().tostring();
+
+			// Attempt to encode the frame
+			if ( 0 >= _g.enc.Encode( CFfConvert().PIX_FMT_BGR24,
+									 _g.w, -_g.h, _g.pix, _g.frame, inf ) )
+			{	_self.echo( "??? = " + inf[ "pts" ].toint() );
+				return 0;
+			} // end if
+
+			_self.echo( "VIDEO = " + _g.frame.getUsed() + ", pts = " + inf[ "pts" ].toint() );
+//			_self.echo( "VIDEO = " + _g.frame.getUsed() + ", pts = " + _g.enc.getPts() );
+
+			// Attempt to write the frame
+//			if ( !_g.vid.WriteVideoFrame( _g.frame, _g.aenc.getPts(), 0, inf ) )
+//			if ( !_g.vid.WriteVideoFrame( _g.frame, _g.enc.getPts(), 0, inf ) )
+			if ( !_g.vid.WriteVideoFrame( _g.frame, inf[ "pts" ].toint(), inf[ "pts" ].toint(), inf ) )
+//			if ( !_g.vid.WriteVideoFrame( _g.frame, 0, 0, inf ) )
+//			if ( !_g.vid.WriteVideoFrame( _g.frame, -1, -1, inf ) )
+				_g.quit = 1;
+
+		} // end if
 
 		// Flush data buffers
 		_g.vid.FlushBuffers();
@@ -369,8 +415,18 @@ function Run() : ( _g )
 
 	// Write to shared memory
 	else if ( _g.share )
+	{
+		// Attempt to encode the video frame
+		if ( 0 >= _g.enc.Encode( CFfConvert().PIX_FMT_BGR24,
+								 _g.w, -_g.h, _g.pix, _g.frame, inf ) )
+		{	_self.echo( "??? = " + inf[ "pts" ].toint() );
+			return 0;
+		} // end if
+
 		if ( !_g.share.Write( _g.frame, "", 0, 0 ) )
 			_g.quit = 1;
+
+	} // end if
 
 	return 1;
 }

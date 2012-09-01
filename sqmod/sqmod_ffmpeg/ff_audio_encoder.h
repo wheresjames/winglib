@@ -82,26 +82,42 @@ public:
 	}
 
 	/// Returns the Presentation Time Stamp
+	int isPts()
+	{	if ( !m_pCodecContext && m_pCodecContext->coded_frame )
+			return 0;
+		return ( 0 > m_pCodecContext->coded_frame->pts ) ? 0 : 1;
+	}
+
+	/// Returns the Presentation Time Stamp
 	SQInteger getPts()
 	{	if ( !m_pCodecContext && m_pCodecContext->coded_frame )
 			return 0;
 		return m_pCodecContext->coded_frame->pts;
 	}
 
+	/// Sets the frame index based on a pts
+	void setPts( SQInteger r )
+	{
+		// Sanity checks
+		if ( !m_pCodecContext || 0 >= m_nFps )
+			return;
+
+		// Calculate divider
+		SQInteger d = m_pCodecContext->time_base.den / ( m_pCodecContext->time_base.num * m_nFps );
+
+		// Set frame index
+		m_nFrame = d ? ( r / d ) : 0;
+	}
+
 	/// Calculates the PTS based on the current frame index
 	SQInteger calcPts()
 	{
 		// Sanity checks
-		if ( !m_pCodecContext )
-			return -1;
-
-		// +++ So this is probably just 'return m_nFrame'
-		oex::oexINT64 nFps = m_pCodecContext->time_base.den;
-		if ( 0 >= nFps )
+		if ( !m_pCodecContext || 0 >= m_nFps )
 			return -1;
 
 		// Calculate pts
-		return m_nFrame * m_pCodecContext->time_base.den / ( m_pCodecContext->time_base.num * nFps );
+		return m_nFrame * m_pCodecContext->time_base.den / ( m_pCodecContext->time_base.num * m_nFps );
 	}
 
 	/// Returns the Frame size
@@ -129,11 +145,22 @@ public:
 	/// Sets the current frame number
 	void setFrame( SQInteger n ) { m_nFrame = n; }
 
-	/// Sets the time base, if zero, defaults to frame rate
+	/// Sets the default time base, if zero, defaults to frame rate
 	void setTimeBase( SQInteger n ) { m_nTimeBase = n; }
 
-	/// Returns the current time base
+	/// Returns the currently set time base
 	SQInteger getTimeBase() { return m_nTimeBase; }
+
+	/// Returns the actual timebase that's in use
+	SQInteger getRealTimeBase() 
+	{
+		if ( !m_pCodecContext )
+			return m_nTimeBase; 
+
+		return ( 0 < m_pCodecContext->time_base.num )
+			   ? ( m_pCodecContext->time_base.den / m_pCodecContext->time_base.num )
+			   : m_pCodecContext->time_base.den;
+	}
 
 	/** @} */
 
@@ -148,7 +175,10 @@ private:
 	/// Codec ID
 	int						m_nCodecId;
 
-	/// Time base, if zero, defaults to m_nFps
+	/// Frames per second
+	int						m_nFps;
+
+	/// Time base, if zero, defaults to samples per second
 	oex::oexINT64			m_nTimeBase;
 
 	/// Frame number

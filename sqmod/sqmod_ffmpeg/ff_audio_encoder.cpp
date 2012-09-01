@@ -14,7 +14,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfAudioEncoder, CFfAudioEncoder )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getBitRate )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getPktDts )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getPktPts )
+	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, isPts )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getPts )
+	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, setPts )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getFrameSize )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, BufferData )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, UnbufferData )
@@ -23,6 +25,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfAudioEncoder, CFfAudioEncoder )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, setFmtCnv )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getTimeBase )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, setTimeBase )
+	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getRealTimeBase )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getFrame )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, setFrame )
 //	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder,  )
@@ -39,6 +42,7 @@ CFfAudioEncoder::CFfAudioEncoder()
 {_STT();
 
 	m_nFmt = 0;
+	m_nFps = 0;
 	m_nFrame = 0;
 	m_nTimeBase = 0;
 	m_nCodecId = 0;
@@ -67,10 +71,12 @@ void CFfAudioEncoder::Destroy()
 
 	if ( m_pCodecContext )
 	{	avcodec_close( m_pCodecContext );
+		av_free( m_pCodecContext );
 		m_pCodecContext = oexNULL;
 	} // end if
 
 	m_nFmt = 0;
+	m_nFps = 0;
 	m_nFrame = 0;
 	m_nCodecId = 0;
 	m_pCodec = oexNULL;
@@ -126,11 +132,6 @@ int CFfAudioEncoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 			return 0;
 	} // end switch
 
-	// Get time base
-	oex::oexINT64 nTimeBase = m_nTimeBase;
-	if ( 0 >= nTimeBase )
-		nTimeBase = x_nSampleRate;
-
 	// Set codec parameters
     m_pCodecContext->channels = x_nChannels;
 	m_pCodecContext->sample_rate = x_nSampleRate;
@@ -138,9 +139,15 @@ int CFfAudioEncoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
     m_pCodecContext->block_align = 0;
     m_pCodecContext->bit_rate = m_pCodecContext->sample_rate * ( x_nFmt & 0xf ) * m_pCodecContext->channels * 8;
 	m_pCodecContext->channel_layout = ( 1 == x_nChannels ) ? AV_CH_LAYOUT_MONO : AV_CH_LAYOUT_STEREO;
+	m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
+
+	// Get time base
+	oex::oexINT64 nTimeBase = m_nTimeBase;
+	if ( 0 >= nTimeBase )
+		nTimeBase = x_nSampleRate;
+
 	m_pCodecContext->time_base.num = 1;
 	m_pCodecContext->time_base.den = nTimeBase;
-	m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
 
 	// Check profile for aac
 	if ( CODEC_ID_AAC == x_nCodec )
@@ -175,10 +182,44 @@ int CFfAudioEncoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 	int res = avcodec_open( m_pCodecContext, m_pCodec );
 	if ( 0 > res )
 	{	oexERROR( res, oexT( "avcodec_open() failed" ) );
+		av_free( m_pCodecContext );
 		m_pCodecContext = oexNULL;
 		Destroy();
 		return 0;
 	} // end if
+
+	// Sux, but it's the only way to get the correct frame size base
+	if ( 0 >= m_nTimeBase && 0 < getFrameSize() )
+	{
+		// Calculate timebase based on frame size
+		m_nFps = getSampleRate() / getFrameSize();
+
+		// Close the codec we just opened
+		avcodec_close( m_pCodecContext );
+
+		// Set proper timebase
+		m_pCodecContext->time_base.num = 1;
+		m_pCodecContext->time_base.den = m_nFps;
+
+		// Open it again
+		int res = avcodec_open( m_pCodecContext, m_pCodec );
+		if ( 0 > res )
+		{	oexERROR( res, oexT( "avcodec_open() failed" ) );
+			av_free( m_pCodecContext );
+			m_pCodecContext = oexNULL;
+			Destroy();
+			return 0;
+		} // end if
+
+	} // end if
+
+	// Frames per second
+	else if ( 0 < getFrameSize() )
+		m_nFps = getSampleRate() / getFrameSize();
+
+	// Start with invalid pts
+//	if ( m_pCodecContext->coded_frame )
+//		m_pCodecContext->coded_frame->pts = -1;
 
 	// Save info
 	m_nFmt = x_nFmt;
@@ -284,7 +325,9 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 
 	// While we have input data
 	//while ( nIn >= bs )
-	if ( nIn >= bs )
+	if ( nIn < bs )
+		return 0;
+
 	{
 		// Ensure a reasonable output buffer
 		while ( ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
@@ -341,7 +384,12 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 #else
 
 		// Set PTS
-		m_pCodecContext->coded_frame->pts = calcPts();
+		if ( m && m->isset( oexT( "pts" ) ) )
+			m_pCodecContext->coded_frame->pts = (*m)[ oexT( "pts" ) ].toint();
+//		else
+//			m_pCodecContext->coded_frame->pts = calcPts();
+
+//oexSHOW( m_pCodecContext->coded_frame->pts );
 
 		// Encode audio frame
 		int nBytes = avcodec_encode_audio( m_pCodecContext, &pOut[ nOutPtr ], nOut - nOutPtr, (const short*)m_pkt.data );
@@ -350,6 +398,8 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 			return 0;
 		} // end if
 
+//oexSHOW( nBytes );
+//oexSHOW( m_pCodecContext->coded_frame->pts );
 #endif
 
 		// Add bytes
@@ -358,6 +408,9 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 
 		// Unbuffer used data
 		nIn = UnbufferData( bs );
+
+		if ( !nBytes )
+			return 0;
 
 	} // end while
 
@@ -372,8 +425,9 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 			.set( sqbind::oex2std( oexMks( ( m_pCodecContext->coded_frame->key_frame )
 										  ? ( flags | AV_PKT_FLAG_KEY )
 										  : ( flags & ~AV_PKT_FLAG_KEY ) ) ) );
-		(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_pts ) ) );
-		(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_dts ) ) );
+		(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pts ) ) );
+		(*m)[ oexT( "pkt_pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_pts ) ) );
+		(*m)[ oexT( "pkt_dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_dts ) ) );
 
 	} // end if
 

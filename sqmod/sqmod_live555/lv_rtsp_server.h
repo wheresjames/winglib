@@ -43,6 +43,9 @@ private:
 	/// Video share
 	sqbind::CSqFifoShare	*m_pVs;
 
+	/// Audio share
+	sqbind::CSqFifoShare	*m_pAs;
+
 	/// Non-zero when a frame of video is needed
 	int						m_nNeedFrame;
 
