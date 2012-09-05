@@ -3,7 +3,7 @@ class CGlobal
 {
 	quit = 0;
 	session = 0;
-	fps = 30;
+	fps = 15;
 	rtmp = 0;
 
 	amf = 20;
@@ -13,7 +13,7 @@ class CGlobal
 	codec = "H264";
 //	codec = "VP60";
 
-	acodec = "AAC";
+	acodec = "MP3";
 
 	count = 0;
 
@@ -26,6 +26,7 @@ class CGlobal
 	sei = "";
 	level = 0;
 	sei_sent = 0;
+	aac_sent = 0;
 
 	name = "";
 	params = 0;
@@ -95,6 +96,28 @@ function SetSocket( socket ) : ( _g )
 	return 1;
 }
 
+function sendAacHeaders() : ( _g )
+{
+	_g.aac_sent = 1;
+
+	// Decode header
+	local p = CSqMulti();
+	p.setJSON( _g.share.getHeader() );
+
+	if ( 0 >= p[ "audio_extra" ].len() )
+		return 0;
+
+	local h = CSqBinary( 32, 2 );
+	h.setUCHAR( 0, 0xaf );
+	h.setUCHAR( 1, 0x00 );
+	h.Append( p[ "audio_extra" ].bin() );
+
+	_self.echo( "--- AUDIO HEADERS ---\n" + body.AsciiHexStr( 16, 32 ) );
+	_g.rtmp.SendPacketBin( 0, 5, 8, 1, h, 0 );
+
+	return 1;
+}
+
 function createSeiHeaders() : ( _g )
 {
 	// Decode header
@@ -149,6 +172,7 @@ function sendSeiHeaders() : ( _g )
 	body.BE_setAbsUSHORT( 11 + 2 + 1 + _g.pps.getUsed(), _g.sps.getUsed() );
 	body.Append( _g.sps );
 
+	_self.echo( "--- VIDEO HEADERS ---\n" + body.AsciiHexStr( 16, 32 ) );
 	_g.rtmp.SendPacketBin( 0, 7, 9, 1, body, 0 );
 
 	return 1;
@@ -241,26 +265,34 @@ _self.echo( "--- Seialized Packet ---\n" + pkt.AsciiHexStr( 16, 64 ) );
 */
 					if ( !_g.rtmp.SendPacketBin( 0, 5, 18, 1, pkt, 0 ) )
 						_g.quit = 1;
+
 					break;
 
 				case 0x09 :
 
-//_self.echo( " !!! VIDEO FRAME --- " + pkt.getUsed() );
+_self.echo( " --- RTMP VIDEO FRAME --- " + pkt.getUsed() );
 
 					if ( !_g.sei_sent )
 						sendSeiHeaders();
 
 					pkt.BE_setAbsUINT( 5, pkt.getUsed() - 9 );
-					if ( !_g.rtmp.SendPacketBin( 1, 7, 9, 1, pkt, 0 ) )
+					if ( !_g.rtmp.SendPacketBin( 1, 5, 9, 1, pkt, 0 ) )
 						_g.quit = 1;
 
 					break;
 
 				case 0x08 :
 
-//_self.echo( " !!! AUDIO FRAME --- " + pkt.getUsed() );
+_self.echo( " --- RTMP AUDIO FRAME --- " + pkt.getUsed() );
 
-					if ( !_g.rtmp.SendPacketBin( 1, 6, 8, 1, pkt, 0 ) )
+					if ( !_g.aac_sent )
+						sendAacHeaders();
+
+					// Check for borked packets
+//					if ( pkt.getUCHAR( 1 ) == 1 && pkt.getUCHAR( 2 ) == 1 )
+//						pkt.LShift( 1 ), pkt.setUCHAR( 0, 0xAF );
+
+					if ( !_g.rtmp.SendPacketBin( 1, 5, 8, 1, pkt, 0 ) )
 						_g.quit = 1;
 
 					break;
@@ -411,7 +443,6 @@ function ProcessCommands() : ( _g )
 								   .BE_setSHORT( 0, 0 )
 								   .BE_setAbsUINT( 2, 1 ), 0 );
 
-
 			// NetStream.Play.Reset
 			_g.rtmp.SendPacket2( 0, 5, _g.amf, 1, CSqMulti(
 								 "0=onStatus"
@@ -436,11 +467,14 @@ function ProcessCommands() : ( _g )
 								), 0 );
 
 			// |RtmpSampleAccess
-			_g.rtmp.SendPacket2( 1, 5, 18, 0, CSqMulti(
+			_g.rtmp.SendPacket2( 0, 5, 18, 1, CSqMulti(
 								 "0=|RtmpSampleAccess"
 								 + ",1=0"
 								 + ",2=0"
 								), 0 );
+
+			// If we have audio
+			_g.rtmp.SendPacketBin( 0, 5, 8, 1, CSqBinary(), 0 );
 
 			// NetStream.Data.Start
 			_g.rtmp.SendPacket2( 0, 5, 18, 1, CSqMulti(
@@ -459,7 +493,7 @@ function ProcessCommands() : ( _g )
 				p[ "codec" ] <- _g.codec;
 				p[ "acodec" ] <- _g.acodec;
 				p[ "type" ] <- "flv";
-				p[ "w" ] <- "320";
+				p[ "w" ] <- "352";
 				p[ "h" ] <- "240";
 				p[ "fps" ] <- _g.fps.tostring();
 				p[ "delay" ] <- ( 1 * _g.fps ).tostring();

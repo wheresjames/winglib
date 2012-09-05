@@ -28,6 +28,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfAudioEncoder, CFfAudioEncoder )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getRealTimeBase )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getFrame )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, setFrame )
+	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getExtraData )
 //	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder,  )
 
 SQBIND_REGISTER_CLASS_END()
@@ -42,7 +43,7 @@ CFfAudioEncoder::CFfAudioEncoder()
 {_STT();
 
 	m_nFmt = 0;
-	m_nFps = 0;
+	m_fFps = 0;
 	m_nFrame = 0;
 	m_nTimeBase = 0;
 	m_nCodecId = 0;
@@ -76,7 +77,7 @@ void CFfAudioEncoder::Destroy()
 	} // end if
 
 	m_nFmt = 0;
-	m_nFps = 0;
+	m_fFps = 0;
 	m_nFrame = 0;
 	m_nCodecId = 0;
 	m_pCodec = oexNULL;
@@ -192,14 +193,14 @@ int CFfAudioEncoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 	if ( 0 >= m_nTimeBase && 0 < getFrameSize() )
 	{
 		// Calculate timebase based on frame size
-		m_nFps = getSampleRate() / getFrameSize();
+		m_fFps = (float)getSampleRate() / (float)getFrameSize();
 
 		// Close the codec we just opened
 		avcodec_close( m_pCodecContext );
 
 		// Set proper timebase
-		m_pCodecContext->time_base.num = 1;
-		m_pCodecContext->time_base.den = m_nFps;
+		m_pCodecContext->time_base.num = getSampleRate();
+		m_pCodecContext->time_base.den = getFrameSize();
 
 		// Open it again
 		int res = avcodec_open( m_pCodecContext, m_pCodec );
@@ -215,7 +216,7 @@ int CFfAudioEncoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 
 	// Frames per second
 	else if ( 0 < getFrameSize() )
-		m_nFps = getSampleRate() / getFrameSize();
+		m_fFps = (float)getSampleRate() / (float)getFrameSize();
 
 	// Start with invalid pts
 //	if ( m_pCodecContext->coded_frame )
@@ -398,8 +399,6 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 			return 0;
 		} // end if
 
-//oexSHOW( nBytes );
-//oexSHOW( m_pCodecContext->coded_frame->pts );
 #endif
 
 		// Add bytes

@@ -99,25 +99,25 @@ public:
 	void setPts( SQInteger r )
 	{
 		// Sanity checks
-		if ( !m_pCodecContext || 0 >= m_nFps )
+		if ( !m_pCodecContext || 0 >= m_fFps )
 			return;
 
 		// Calculate divider
-		SQInteger d = m_pCodecContext->time_base.den / ( m_pCodecContext->time_base.num * m_nFps );
+		SQInteger d = (float)m_pCodecContext->time_base.den / ( (float)m_pCodecContext->time_base.num * (float)m_fFps );
 
 		// Set frame index
-		m_nFrame = d ? ( r / d ) : 0;
+		m_nFrame = (oex::oexINT64)( d ? ( (double)r / (double)d ) : 0 );
 	}
 
 	/// Calculates the PTS based on the current frame index
 	SQInteger calcPts()
 	{
 		// Sanity checks
-		if ( !m_pCodecContext || 0 >= m_nFps )
+		if ( !m_pCodecContext || 0 >= m_fFps )
 			return -1;
 
 		// Calculate pts
-		return m_nFrame * m_pCodecContext->time_base.den / ( m_pCodecContext->time_base.num * m_nFps );
+		return (float)m_nFrame * (float)m_pCodecContext->time_base.den / ( (float)m_pCodecContext->time_base.num * m_fFps );
 	}
 
 	/// Returns the Frame size
@@ -162,6 +162,14 @@ public:
 			   : m_pCodecContext->time_base.den;
 	}
 
+	/// Returns extra codec data
+	sqbind::CSqBinary getExtraData() 
+	{ 	if ( !m_pCodecContext || !m_pCodecContext->extradata || 0 >= m_pCodecContext->extradata_size )
+			return sqbind::CSqBinary();
+		return sqbind::CSqBinary( (sqbind::CSqBinary::t_byte*)m_pCodecContext->extradata, 
+								  m_pCodecContext->extradata_size );
+	}
+
 	/** @} */
 
 private:
@@ -176,7 +184,7 @@ private:
 	int						m_nCodecId;
 
 	/// Frames per second
-	int						m_nFps;
+	float					m_fFps;
 
 	/// Time base, if zero, defaults to samples per second
 	oex::oexINT64			m_nTimeBase;

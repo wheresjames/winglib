@@ -154,8 +154,8 @@ void CFfContainer::Destroy()
 
 	CloseStream();
 
-	m_video_extra.Free();
-	m_audio_extra.Free();
+//	m_video_extra.Free();
+//	m_audio_extra.Free();
 
 	if ( m_pkt.data )
 		av_free_packet( &m_pkt );

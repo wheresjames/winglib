@@ -8,7 +8,7 @@ default_target: all
 # Project
 #-------------------------------------------------------------------
 PRJ_NAME := sqmod_ffmpeg
-PRJ_DEPS := ffmpeg x264 vpx
+PRJ_DEPS := ffmpeg x264 vpx lame
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 			ffmpeg openssl/include
@@ -45,7 +45,7 @@ else
 ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),vs)
 		PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/windows/vs xlibs $(PRJ_INCS)
-		PRJ_PLIB := ffa ffb ffc ffd rtmpd x264 vpx openssl_a openssl_b
+		PRJ_PLIB := ffa ffb ffc ffd rtmpd x264 vpx lame openssl_a openssl_b
 		ifeq ($(OS),win64)
 			PRJ_LIBP := $(PRJ_LIBP) $(CFG_LIBROOT)/xlibs/x64
 		else
@@ -54,12 +54,12 @@ ifeq ($(PLATFORM),windows)
 		endif
 	else
 		PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/windows/gcc $(PRJ_INCS) zlib
-		PRJ_LIBS := $(PRJ_LIBS) ffa ffb ffc ffd ffa ffb ffc ffd rtmpd x264 vpx \
+		PRJ_LIBS := $(PRJ_LIBS) ffa ffb ffc ffd ffa ffb ffc ffd rtmpd x264 vpx lame \
 								openssl_a openssl_b openssl_a openssl_b zlib
 	endif
 else
 	PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/posix $(PRJ_INCS)
-	PRJ_LIBS := $(PRJ_LIBS) ffa ffb ffc ffd ffa ffb ffc ffd rtmpd x264 vpx \
+	PRJ_LIBS := $(PRJ_LIBS) ffa ffb ffc ffd ffa ffb ffc ffd rtmpd x264 vpx lame \
 							openssl_a openssl_b openssl_a openssl_b zlib
 	PRJ_OSLB := $(PRJ_OSLB)
 endif

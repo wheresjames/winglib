@@ -277,7 +277,9 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 			paf->quality = m_pCodecContext->global_quality;
 
 		// Set the PTS
-		if ( m->isset( oexT( "pts" ) ) )
+		if ( !m_nFrame )
+			paf->pts = 0;
+		else if ( m->isset( oexT( "pts" ) ) )
 			paf->pts = (*m)[ oexT( "pts" ) ].toint();
 		else
 			paf->pts = calcPts();
@@ -285,7 +287,7 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 	} // end if
 
 	else
-		paf->pts = calcPts(),
+		paf->pts = m_nFrame ? calcPts() : 0,
 		paf->quality = m_pCodecContext->global_quality;
 
 	// Ensure PTS match
