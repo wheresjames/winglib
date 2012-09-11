@@ -20,6 +20,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfAudioEncoder, CFfAudioEncoder )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getFrameSize )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, BufferData )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, UnbufferData )
+	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getBufferSize )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getCodecId )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getFmtCnv )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, setFmtCnv )
@@ -289,7 +290,7 @@ int CFfAudioEncoder::BufferData( sqbind::CSqBinary *in )
 
 int CFfAudioEncoder::UnbufferData( int uUsed )
 {
-	if ( 0 > uUsed )
+	if ( 0 > uUsed || m_buf.getUsed() <= uUsed )
 		m_buf.setUsed( 0 );
 	else if ( 0 < uUsed )
 		m_buf.LShift( uUsed );
@@ -324,11 +325,11 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 	// Output buffer pointer
 	uint8_t *pOut = (uint8_t*)out->_Ptr();
 
-	// While we have input data
-	//while ( nIn >= bs )
 	if ( nIn < bs )
 		return 0;
 
+	// While we have input data
+//	while ( nIn >= bs )
 	{
 		// Ensure a reasonable output buffer
 		while ( ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
@@ -408,6 +409,7 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 		// Unbuffer used data
 		nIn = UnbufferData( bs );
 
+//		if ( !nOutPtr )
 		if ( !nBytes )
 			return 0;
 

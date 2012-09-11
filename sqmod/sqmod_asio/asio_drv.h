@@ -27,7 +27,7 @@ public:
 	struct SShareInfo
 	{
 		/// Memory share
-		sqbind::CSqBinaryShare	share;
+		sqbind::CSqFifoShare	share;
 
 		/// Number of active channels
 		long					channels;

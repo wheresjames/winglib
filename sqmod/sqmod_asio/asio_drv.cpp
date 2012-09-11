@@ -669,8 +669,17 @@ int CAsioDrv::OpenChannels( sqbind::CSqMulti *m, int nFlags, int nFmt )
 			sqbind::stdString sShare = it->first;
 			m_share[ nS ].share.setCbId( getCbId() );
 			m_share[ nS ].share.setPrefix( getPrefix() );
-			if ( !m_share[ nS ].share.Create( sShare, oexT( "" ), nBufSize, m_share[ nS ].channels, 
-											  oex::obj::StaticSize( nType ), *((double*)&sr), nFmt ? nFmt : nType ) )
+			
+			sqbind::CSqMulti mHeaders;
+			mHeaders[ oexT( "channels" ) ].set( sqbind::ToStr( m_share[ nS ].channels ) );
+			mHeaders[ oexT( "type" ) ].set( sqbind::ToStr( nType ) );
+			mHeaders[ oexT( "type_size" ) ].set( sqbind::ToStr( oex::obj::StaticSize( nType ) ) );
+			mHeaders[ oexT( "sample_rate" ) ].set( sqbind::ToStr( *((double*)&sr) ) );
+			mHeaders[ oexT( "format" ) ].set( sqbind::ToStr( nFmt ? nFmt : nType ) );
+
+//			if ( !m_share[ nS ].share.Create( sShare, oexT( "" ), nBufSize, m_share[ nS ].channels, 
+//											  oex::obj::StaticSize( nType ), *((double*)&sr), nFmt ? nFmt : nType ) )
+			if ( !m_share[ nS ].share.Create( sShare, oexT( "" ), nBufSize, 1024, mHeaders.getJSON() ) )
 			{	setLastErrorStr( sqbind::oex2std( oexMks( oexT( "Failed to create memory share : nBufSize = " ), nBufSize,
 													oexT( " : nType = " ), nType,
 													oexT( " : data size = " ), oex::obj::StaticSize( nType ),
@@ -830,7 +839,7 @@ ASIOTime* CAsioDrv::onBufferSwitchTimeInfo( ASIOTime* params, long doubleBufferI
 			if ( 0 <= nCh && eMaxChannels > nCh )
 			{	long nIdx = m_chmap[ nCh ];
 				if ( 0 <= nIdx && nIdx < m_nOpenChannels )
-					m_share[ nSh ].share.WritePtr( pAbi[ nIdx ].buffers[ doubleBufferIndex ], lBytes );
+					m_share[ nSh ].share.WritePtr( pAbi[ nIdx ].buffers[ doubleBufferIndex ], lBytes, "", 0, 0 );
 			} // end if
 		} // end if
 
@@ -890,7 +899,7 @@ ASIOTime* CAsioDrv::onBufferSwitchTimeInfo( ASIOTime* params, long doubleBufferI
 #endif
 
 			// Write data to share
-			m_share[ nSh ].share.Write( &m_buf );
+			m_share[ nSh ].share.Write( &m_buf, "", 0, 0 );
 
 		} // end else
 

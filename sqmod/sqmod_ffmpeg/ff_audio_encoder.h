@@ -133,6 +133,9 @@ public:
 	/// Unbuffers the specified number of bytes
 	int UnbufferData( int uUsed );
 
+	/// Returns the number of bytes buffered
+	int getBufferSize() { return m_buf.getUsed(); }
+
 	/// Get input data format
 	int getFmtCnv() { return m_nCnv; }
 
