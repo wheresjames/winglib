@@ -208,6 +208,7 @@ int CFfContainer::getAudioSampleFmt()
 
 int CFfContainer::CloseStream()
 {_STT();
+    int i;
 
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) return 0;
@@ -216,7 +217,7 @@ int CFfContainer::CloseStream()
 		return 0;
 
 	// Close all open streams
-	for ( long i = 0; i < m_pFormatContext->nb_streams; i++ )
+	for ( i = 0; i < m_pFormatContext->nb_streams; i++ )
 		if ( m_pFormatContext->streams[ i ] && m_pFormatContext->streams[ i ]->codec )
 			avcodec_close( m_pFormatContext->streams[ i ]->codec );
 
@@ -226,24 +227,23 @@ int CFfContainer::CloseStream()
 
 	if ( m_nRead )
 //		av_close_input_file( m_pFormatContext ),
-		avformat_close_input( &m_pFormatContext );
+		avformat_close_input( &m_pFormatContext );          // calls avformat_free_context(), avio_close()
 //		avformat_free_context( m_pFormatContext );
 
 
-	else if ( 1 < m_nWrite )
+	else if ( m_nWrite )
 	{
-		// Write the rest of the file
-        av_write_trailer( m_pFormatContext );
+		if ( 1 < m_nWrite ) {
+			// Write the rest of the file
+			av_write_trailer( m_pFormatContext );
 
-		// Close file / socket resources
-		if ( m_pFormatContext->oformat
-			 && !( m_pFormatContext->oformat->flags & AVFMT_NOFILE )
-			 && m_pFormatContext->pb )
-			avio_close( m_pFormatContext->pb );
-
-		// Free the stream
-		av_free( m_pFormatContext );
-
+			// Close file / socket resources
+			if ( m_pFormatContext->oformat
+				 && !( m_pFormatContext->oformat->flags & AVFMT_NOFILE )
+				 && m_pFormatContext->pb )
+				avio_close( m_pFormatContext->pb );
+		}
+		avformat_free_context(m_pFormatContext);
 	} // end else if
 
 	m_pFormatContext = oexNULL;
