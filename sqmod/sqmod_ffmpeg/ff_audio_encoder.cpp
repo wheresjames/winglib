@@ -318,15 +318,12 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 
 	// Allocate space for output data
 	unsigned int nOutPtr = out->getUsed();
-	unsigned int nOut = oex::cmn::NextPower2( nOutPtr + FF_MIN_BUFFER_SIZE + nIn );
+	unsigned int nOut = oex::cmn::NextPower2( nOutPtr + bs + FF_MIN_BUFFER_SIZE );
 	if ( out->Size() < nOut && !out->Allocate( nOut ) )
 		return 0;
 
 	// Output buffer pointer
 	uint8_t *pOut = (uint8_t*)out->_Ptr();
-
-	if ( nIn < bs )
-		return 0;
 
 	// While we have input data
 //	while ( nIn >= bs )
