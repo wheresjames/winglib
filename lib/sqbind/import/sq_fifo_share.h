@@ -367,7 +367,7 @@ namespace sqbind
 		{	if ( val ) m_nFlags |= nFlag; else m_nFlags &= ~nFlag; }
 
 		/// Returns non-zero if flag is set
-		int getFlag( int nFlag ) { return m_nFlags & nFlag; }
+		int getFlag( int nFlag ) { return ( m_nFlags & nFlag ) ? 1 : 0; }
 
 		/** @} */
 

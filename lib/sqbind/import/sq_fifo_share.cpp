@@ -114,6 +114,7 @@ CSqFifoShare::CSqFifoShare()
 	m_bWrite = 0;
 	m_nPadding = SQSFS_PADDING;
 	m_uTs = 0;
+	m_nFlags = 0;
 }
 
 CSqFifoShare::CSqFifoShare( const sqbind::stdString &sPrefix, SQInteger nId, SQInteger nGlobal )
@@ -126,6 +127,7 @@ CSqFifoShare::CSqFifoShare( const sqbind::stdString &sPrefix, SQInteger nId, SQI
 	m_bWrite = 0;
 	m_nPadding = SQSFS_PADDING;
 	m_uTs = 0;
+	m_nFlags = 0;
 }
 
 
@@ -139,6 +141,7 @@ CSqFifoShare::CSqFifoShare( const CSqFifoShare &r )
 	m_bWrite = 0;
 	m_nPadding = SQSFS_PADDING;
 	m_uTs = 0;
+	m_nFlags = 0;
 }
 
 int CSqFifoShare::Cancel()
@@ -447,14 +450,20 @@ CSqFifoShare::SPtrInfo* CSqFifoShare::ReadPtr()
 
 	// Get the current buffer pointer, and make sure it's valid
 	int i = getWritePtr();
+	if ( 0 > i )
+		return oexNULL;
+
+	// Total blocks
 	int nBlocks = getBlocks();
+	if ( 0 >= nBlocks )
+		return oexNULL;
 
 	// Initialize our read pointer
 	if ( 0 > m_iRead || m_iRead >= nBlocks )
 		m_iRead = getFlag( eFlagNoInitSync ) ? 0 : i;
 
 	// Any data?
-	if ( 0 > i || i == m_iRead || i >= nBlocks )
+	if ( i == m_iRead || i >= nBlocks )
 		return oexNULL;
 
 	/// Pointer information
@@ -531,6 +540,8 @@ SQInteger CSqFifoShare::CalculateTsRange( SQInteger *pMin, SQInteger *pMax )
 	// Get the current buffer pointer, and make sure it's valid
 	int w = getWritePtr(), r = m_iRead;
 	int nBlocks = getBlocks();
+	if ( 0 >= nBlocks )
+		return 0;
 
 	// Initialize our read pointer
 	if ( 0 > r || r >= nBlocks )
@@ -575,14 +586,19 @@ int CSqFifoShare::incReadPtr()
 
 	// Get the current buffer pointer, and make sure it's valid
 	int i = getWritePtr();
+	if ( 0 > i )
+		return 0;
+
 	int nBlocks = getBlocks();
+	if ( 0 >= nBlocks )
+		return 0;
 
 	// Initialize our read pointer
 	if ( 0 > m_iRead || m_iRead >= nBlocks )
 		m_iRead = getFlag( eFlagNoInitSync ) ? 0 : i;
 
 	// Any more data?
-	if ( 0 > i || i == m_iRead || i >= nBlocks )
+	if ( i == m_iRead || i >= nBlocks )
 		return 0;
 
 	// Next block
@@ -603,14 +619,16 @@ int CSqFifoShare::decReadPtr()
 
 	// Get the current buffer pointer, and make sure it's valid
 	int i = getWritePtr();
-	int nBlocks = getBlocks();
+	if ( 0 > i )
+		return 0;
 
 	// Initialize our read pointer
-	if ( 0 > m_iRead || m_iRead >= nBlocks )
-		m_iRead = getFlag( eFlagNoInitSync ) ? 0 : i;
-
+	int nBlocks = getBlocks();
 	if ( 0 >= nBlocks )
 		return 0;
+
+	if ( 0 > m_iRead || m_iRead >= nBlocks )
+		m_iRead = getFlag( eFlagNoInitSync ) ? 0 : i;
 
 	// Prev block
 	if ( --m_iRead < 0 )
