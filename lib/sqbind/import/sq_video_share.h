@@ -106,6 +106,9 @@ namespace sqbind
 		*/
 		int Open( const sqbind::stdString &sName, int bAllowFrameSkipping );
 
+		/// Resets buffer pointers
+		int Reset();
+
 		/// Return the share name
 		sqbind::stdString getName() { return m_sName; }
 		

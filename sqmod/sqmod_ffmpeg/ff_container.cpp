@@ -152,6 +152,10 @@ void CFfContainer::Destroy()
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) return;
 
+	// Detach audio
+	m_audio_dec.Detach();
+
+	// Close stream
 	CloseStream();
 
 //	m_video_extra.Free();
@@ -159,8 +163,6 @@ void CFfContainer::Destroy()
 
 	if ( m_pkt.data )
 		av_free_packet( &m_pkt );
-
-	m_audio_dec.Destroy();
 
 	if ( m_pFrame ) 
 		av_free( m_pFrame );
@@ -225,7 +227,7 @@ int CFfContainer::CloseStream()
 	m_nAudioStream = -1;
 
 	if ( m_nRead )
-//		av_close_input_file( m_pFormatContext ),
+//		av_close_input_file( m_pFormatContext );
 		avformat_close_input( &m_pFormatContext );
 //		avformat_free_context( m_pFormatContext );
 
@@ -273,7 +275,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 		return 0;
 	} // end if
 
-    // +++ Holy crap this function can be slow
+	// +++ Holy crap this function can be slow
 	res = av_find_stream_info( m_pFormatContext );
 	if ( 0 > res )
 	{	oexERROR( res, oexT( "av_find_stream_info() failed" ) );
@@ -312,7 +314,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 
 	// Video stream
 	if ( 0 <= m_nVideoStream
-	     && m_pFormatContext->streams[ m_nVideoStream ]
+		 && m_pFormatContext->streams[ m_nVideoStream ]
 		 &&  m_pFormatContext->streams[ m_nVideoStream ]->codec )
 	{
 		m_pCodecContext = m_pFormatContext->streams[ m_nVideoStream ]->codec;
@@ -341,7 +343,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 
 	// Audio stream
 	if ( 0 <= m_nAudioStream
-	     && m_pFormatContext->streams[ m_nAudioStream ]
+		 && m_pFormatContext->streams[ m_nAudioStream ]
 		 &&  m_pFormatContext->streams[ m_nAudioStream ]->codec )
 	{
 		AVCodecContext *pcc = m_pFormatContext->streams[ m_nAudioStream ]->codec;
@@ -566,7 +568,7 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 	// Frame
 	m_nFrames++;
 
-	return 1;
+	return m_pkt.stream_index;
 }
 
 int CFfContainer::DecodeAudioFrameBin( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbind::CSqMulti *m )
@@ -1208,19 +1210,6 @@ sqbind::CSqFifoShare* CFfContainer::getFifoShare()
 	// Make sure we have a format context open
 	if ( !m_pFormatContext || !m_pFormatContext->pb )
 		return 0;
-/*
-	// Get url context
-	AVIOContext *ac = m_pFormatContext->pb;
-	if ( !ac || !ac->is_streamed || 11 > m_sUrl.length() )
-		return 0;
-
-	// Verify that the protocol is as we expect
-	if ( oex::zstr::CompareLen( "memshare://", 11, m_sUrl.c_str(), 11 ) )
-		return 0;
-
-	// This should be a fifo share
-	return (sqbind::CSqFifoShare*)ac->opaque;
-*/
 
 	// Verify that the protocol is as we expect
 	if ( 11 > m_sUrl.length() || oex::zstr::CompareLen( "memshare://", 11, m_sUrl.c_str(), 11 ) )

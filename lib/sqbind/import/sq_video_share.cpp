@@ -89,7 +89,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqVideoShare, CSqVideoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getReadExtra )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getWriteExtra )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getExtraIdx )
-//	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare,  )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, Reset )
 //	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare,  )
 
 SQBIND_REGISTER_CLASS_END()
@@ -389,6 +389,14 @@ int CSqVideoShare::Open( const sqbind::stdString &sName, int bAllowFrameSkipping
 	m_sName = sName;
 	m_bAllowFrameSkipping = bAllowFrameSkipping;
 	m_uTs = getTs();
+
+	return 1;
+}
+
+int CSqVideoShare::Reset()
+{
+	// Reset the read pointer
+	m_iRead = -1;
 
 	return 1;
 }

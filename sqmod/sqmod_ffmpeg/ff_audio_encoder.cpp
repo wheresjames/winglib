@@ -10,6 +10,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfAudioEncoder, CFfAudioEncoder )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, Encode )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getChannels )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getSampleRate )
+	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getFormat )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getBps )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getBitRate )
 	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder, getPktDts )
@@ -44,6 +45,7 @@ CFfAudioEncoder::CFfAudioEncoder()
 {_STT();
 
 	m_nFmt = 0;
+	m_nCnv = 0;
 	m_fFps = 0;
 	m_nFrame = 0;
 	m_nTimeBase = 0;

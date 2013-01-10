@@ -329,7 +329,7 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 			nOut <<= 1, out->Resize( nOut );
 
 		// Check for memory issue
-		if ( out->Size() != nOut || nOut <= nOutPtr || ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
+		if ( out->Size() < nOut || nOut <= nOutPtr || ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
 		{	oexERROR( nOut, oexT( "Memory allocation failed" ) );
 			return 0;
 		} // end if

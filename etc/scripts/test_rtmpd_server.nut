@@ -1,4 +1,34 @@
 
+/*
+<html>
+<body>
+	<script src='http://releases.flowplayer.org/js/flowplayer-3.2.11.min.js'></script>
+	<link rel='stylesheet' type='text/css' href='http://releases.flowplayer.org/5.2.1/skin/minimalist.css' />
+	<div id='rtmpplayer' style='width:320px;height:240px;margin:0 auto;text-align:center'>
+		<img src='default.jpg' width='320' height='240' />
+	</div>
+	<script type='text/javascript'>		
+		$f('rtmpplayer', 'http://releases.flowplayer.org/swf/flowplayer-3.2.15.swf', 
+		{	clip: 
+			{	url: 'livestream',
+				scaling: 'fit',
+				provider: 'test'
+			},
+			plugins: 
+			{	test: 
+				{	url: 'flowplayer.rtmp-3.2.11.swf',
+					netConnectionUrl: 'rtmp://localhost:1935/test'
+				}
+			},
+			canvas: 
+			{	backgroundGradient: 'none'
+			}
+		});
+	</script>
+</body>
+</html>
+*/
+
 class CGlobal
 {
 	server = CSqSocket();
