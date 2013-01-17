@@ -304,6 +304,32 @@ oexSIZE_T CSerialPort::Write( oexCPVOID x_pBuf, oexSIZE_T x_nSize )
 	return (oexSIZE_T)dwWritten;
 }
 
+oexSIZE_T CSerialPort::GetReadBytes()
+{
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+	if ( !pS || INVALID_HANDLE_VALUE == pS->hPort )
+		return 0;
+
+	DWORD dwErr = 0;
+	COMSTAT cs; oexZero( cs );
+	ClearCommError( pS->hPort, &dwErr, &cs );
+
+	return 0 < cs.cbInQue;
+}
+
+oexSIZE_T CSerialPort::GetWriteBytes()
+{
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+	if ( !pS || INVALID_HANDLE_VALUE == pS->hPort )
+		return 0;
+
+	DWORD dwErr = 0;
+	COMSTAT cs; oexZero( cs );
+	ClearCommError( pS->hPort, &dwErr, &cs );
+
+	return 0 < cs.cbOutQue;
+}
+
 /// Reads data from the port
 oexSIZE_T CSerialPort::Read( oexPVOID x_pBuf, oexSIZE_T x_nSize )
 {_STT();

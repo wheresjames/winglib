@@ -59,7 +59,7 @@ namespace sqbind
 		/// Opens the specified serial port
 		int Open( int nPort )
 		{	return m_port.Open( nPort ); }
-		
+
 		/// Returns non-zero if a valid port is open
 		int isPort()
 		{	return m_port.IsPort(); }
@@ -67,7 +67,7 @@ namespace sqbind
 		/// Returns non-zero if a valid port is open
 		int isOpen()
 		{	return m_port.IsPort(); }
-		
+
 		/// Opens the named serial port
 		int OpenNamed( const stdString &sName )
 		{	return m_port.Open( sName.c_str() ); }
@@ -77,6 +77,12 @@ namespace sqbind
 
 		/// Returns the port index
 		int getIndex() { return m_port.GetIndex(); }
+
+		/// Returns the number of bytes in the rx queue
+		int getReadBytes() { return m_port.GetReadBytes(); }
+
+		/// Returns the number of bytes in the tx queueS
+		int getWriteBytes() { return m_port.GetWriteBytes(); }
 
 		/// Writes data to the serial port
 		int Write( const stdString &sData )

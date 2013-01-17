@@ -146,7 +146,10 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSerialPort, CSqSerialPort )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, ReadBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, AppendBin )	
 
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getWriteBytes )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, Write )
+
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, getReadBytes )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, Read )
 
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSerialPort, setBaudRate )

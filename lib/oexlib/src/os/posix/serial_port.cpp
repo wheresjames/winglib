@@ -238,6 +238,24 @@ oexBOOL CSerialPort::ClearErrors()
 	return oexTRUE;
 }
 
+oexSIZE_T CSerialPort::GetReadBytes()
+{
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+	if ( !pS || INVALID_HANDLE_VALUE == pS->hPort )
+		return 0;
+
+	return 0;
+}
+
+oexSIZE_T CSerialPort::GetWriteBytes()
+{
+	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
+	if ( !pS || INVALID_HANDLE_VALUE == pS->hPort )
+		return 0;
+
+	return 0;
+}
+
 oexSIZE_T CSerialPort::Write( oexCPVOID x_pBuf, oexSIZE_T x_nSize )
 {_STT();
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;

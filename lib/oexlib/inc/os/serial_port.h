@@ -156,6 +156,12 @@ public:
 	/// Returns non-zero if there is a valid port open
 	oexBOOL IsPort();
 
+	/// Returns number of bytes in the rx queue
+	oexSIZE_T GetReadBytes();
+
+	/// Returns number of bytes in the tx queue
+	oexSIZE_T GetWriteBytes();
+
 	/// Writes data to the port
 	oexSIZE_T Write( oexCPVOID x_pBuf, oexSIZE_T x_nSize );
 
