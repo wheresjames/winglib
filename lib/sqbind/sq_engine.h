@@ -601,6 +601,12 @@ public:
 		/// Executes shell command
 		int exec( const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
 
+		/// Returns the squirrel executable name
+		stdString sqexe_name();
+
+		/// Returns the squirrel executable path
+		stdString sqexe_path();
+
 		/// Attempts to find the squirrel interpreter and execute the specified params
 		int sqexe( const stdString &sParams, const stdString &sDir );
 

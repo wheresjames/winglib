@@ -1486,15 +1486,15 @@ int CSqEngineExport::sqexe_script( const stdString &sScript, const stdString &sP
 	return sqexe( p, sDir );
 }
 
-int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )
-{_STT();
+stdString CSqEngineExport::sqexe_name()
+{
+	return oex2std( oex::CStr( oexT( "sqrl" ) ).DecorateName( oex::oexTRUE, oex::oexFALSE ) );
+}
 
-	// Ensure a valid script was supplied
-	if ( !sParams.length() )
-		return -1;
-
+stdString CSqEngineExport::sqexe_path()
+{
 	// What's the name of the squirrel exe?
-	stdString sFull, sExeName = oex2std( oex::CStr( oexT( "sqrl" ) ).DecorateName( oex::oexTRUE, oex::oexFALSE ) );
+	stdString sFull, sExeName = sqexe_name();
 
 	if ( oexExists( path( sExeName ).c_str() ) )
 		sFull = path( sExeName );
@@ -1563,7 +1563,18 @@ int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )
 
 #endif
 
-	// Did we find the file?
+	return sFull;
+}
+
+int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )
+{_STT();
+
+	// Ensure a valid script was supplied
+	if ( !sParams.length() )
+		return -1;
+
+	// What's the name of the squirrel exe?
+	stdString sFull = sqexe_path();
 	if ( !sFull.length() )
 		return -2;
 	
@@ -1922,6 +1933,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, process_system_messages )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sqexe_name )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sqexe_path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sqexe )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sqexe_script )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, service_install )

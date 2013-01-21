@@ -152,9 +152,9 @@ oexINT COex::Uninit()
     // You should have shutdown all threads by now!
     if ( CThread::GetRunningThreadCount() )
 	{
-		oexASSERT( !CThread::GetRunningThreadCount() );
+//		oexASSERT( !CThread::GetRunningThreadCount() );
 		oexERROR( 0, oexT( "Shutdown attempted while threads are still running" ) );
-
+/*
 		// Give threads a moment to shutdown
 		oexUINT uTimeout = oexDEFAULT_WAIT_TIMEOUT * 1000;
 		while ( uTimeout && CThread::GetRunningThreadCount() )
@@ -168,7 +168,7 @@ oexINT COex::Uninit()
 		// Log again to let them know it's going to blow up
 		if ( CThread::GetRunningThreadCount() )
 			oexERROR( 0, oexT( "Threads failed to exit before timeout" ) );
-
+*/
         m_nShutdownCode |= -1;
 
 	} // end if
@@ -203,7 +203,7 @@ oexINT COex::Uninit()
 	os::CBaseFile::FreeFileSystem();
 
 	// Free any binary shares
-	GetBinShare().Destroy();
+//	GetBinShare().Destroy();
 
     // Free all the test classes
 //	oexFREE_TESTS();
