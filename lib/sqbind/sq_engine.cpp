@@ -1319,6 +1319,29 @@ int CSqEngineExport::queue_input( CSqMulti *m )
 	return ret;
 }
 
+int CSqEngineExport::get_process_list( CSqMulti *m, int bProcessInfo )
+{_STT();
+	if ( !m )
+		return 0;
+
+	oex::CPropertyBag pb;
+	int ret = oex::os::CSysUtil::GetProcessList( &pb, bProcessInfo );
+	SQBIND_PropertyBagToMulti( pb, *m );
+	return ret;
+}
+
+int CSqEngineExport::get_process_info( SQInteger pid, CSqMulti *m )
+{_STT();
+	if ( !m )
+		return 0;
+
+	oex::CPropertyBag pb;
+	SQBIND_MultiToPropertyBag( *m, pb );
+	int ret = oex::os::CSysUtil::GetProcessInfo( pid, &pb );
+	SQBIND_PropertyBagToMulti( pb, *m );
+	return ret;
+}
+
 int CSqEngineExport::reg_is_key( const stdString &sKey, const stdString &sPath, const stdString &sName )
 {_STT();
 	return oex::os::CSysUtil::IsRegValue( std2oex( sKey ), std2oex( sPath ), std2oex( sName ) );
@@ -2021,8 +2044,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_mouse_pos )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set_mouse_pos )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue_input )
-//	SQBIND_MEMBER_FUNCTION(  CSqEngineExport,  )
-//	SQBIND_MEMBER_FUNCTION(  CSqEngineExport,  )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_process_list )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_process_info )
 //	SQBIND_MEMBER_FUNCTION(  CSqEngineExport,  )
 //	SQBIND_MEMBER_FUNCTION(  CSqEngineExport,  )
 //	SQBIND_MEMBER_FUNCTION(  CSqEngineExport,  )

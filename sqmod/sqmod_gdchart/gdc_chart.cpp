@@ -256,8 +256,8 @@ sqbind::CSqMulti CGdcChart::CreateChart( const sqbind::stdString &x_sType,
 	return mImg;
 }
 
-// iii GDChart doesn't handle big numbers very well
-#define GDCHART_RANGE 1000000.f
+// iii GDChart doesn't handle really big numbers very well
+#define GDCHART_RANGE 100000000000.f
 sqbind::CSqMulti CGdcChart::CreateChartBin( const sqbind::stdString &x_sType,
 									  		const sqbind::stdString &x_sParams,
 											sqbind::CSqMulti *x_mData,

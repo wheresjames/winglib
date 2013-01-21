@@ -230,7 +230,13 @@ public:
 
 	/// Unlocks screen data
 	static oexINT UnlockScreen( CBin *x_pInf, CBin *x_pImg );
-	
+
+	/// Returns information about a processes
+	static oexINT GetProcessInfo( oexLONG lPid, CPropertyBag *pb );
+
+	/// Returns a list of running processes
+	static oexINT GetProcessList( CPropertyBag *pb, bool bProcessInfo );
+
 public:
 
 	/// cpuid instruction

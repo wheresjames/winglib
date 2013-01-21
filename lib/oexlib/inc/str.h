@@ -2060,10 +2060,10 @@ public:
     }
 
 	/// Converts to long
-	oexINT ToInt64( oexUINT uRadix = 10 ) { return os::CSys::StrToInt64( Ptr(), uRadix ); }
+	oexINT64 ToInt64( oexUINT uRadix = 10 ) { return os::CSys::StrToInt64( Ptr(), uRadix ); }
 
 	/// Converts to unsigned long
-	oexUINT ToUInt64( oexUINT uRadix = 10 ) { return os::CSys::StrToUInt64( Ptr(), uRadix ); }
+	oexUINT64 ToUInt64( oexUINT uRadix = 10 ) { return os::CSys::StrToUInt64( Ptr(), uRadix ); }
 
 	/// Converts to long
 	oexINT ToInt( oexUINT uRadix = 10 ) { return (oexINT)os::CSys::StrToInt64( Ptr(), uRadix ); }

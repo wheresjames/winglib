@@ -691,6 +691,12 @@ public:
 		/// Queues the specified input
 		int queue_input( CSqMulti *m );
 
+		/// Retrieves a list of running processes
+		int get_process_list( CSqMulti *m, int bProcessInfo );
+
+		/// Retrieves info about a specific process
+		int get_process_info( SQInteger pid, CSqMulti *m );
+
 		/// Returns non-zero if registry key exists
 		int reg_is_key( const stdString &sKey, const stdString &sPath, const stdString &sName );
 

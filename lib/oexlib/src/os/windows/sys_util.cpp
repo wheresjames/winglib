@@ -96,7 +96,7 @@ static CStr RegValueToString( DWORD dwType, LPVOID pBuf, DWORD dwSize )
 				dwSize--;
 
 			return CStr( (oexCSTR)pBuf, dwSize );
-			
+
 		default :
 			oexWARNING( 0, oexMks( oexT( "Unknown Registry key Type : " ), dwType ) );
 			break;
@@ -154,8 +154,8 @@ CStr CSysUtil::GetRegString( const CStr &x_sKey, const CStr &x_sPath, const CStr
 								0, NULL, 0, KEY_READ | KEY_QUERY_VALUE, NULL, &hKey, NULL );
 	if ( ERROR_SUCCESS != lRes || !hKey )
 	{	// iii This is expected to fail if key doesn't exist
-//		oexNOTICE( lRes, oexMks( oexT( "RegCreateKeyEx() failed : " ), 
-//								x_sKey.Ptr(), oexT( " : " ), 
+//		oexNOTICE( lRes, oexMks( oexT( "RegCreateKeyEx() failed : " ),
+//								x_sKey.Ptr(), oexT( " : " ),
 //								x_sPath.Ptr() ) );
 		return CStr();
 	} // end if
@@ -166,8 +166,8 @@ CStr CSysUtil::GetRegString( const CStr &x_sKey, const CStr &x_sPath, const CStr
 	lRes = RegQueryValueEx( hKey, x_sName.Ptr(), 0, &dwType, 0, &dwSize );
 	if ( ERROR_SUCCESS != lRes )
 	{	// iii This is expected to fail if value doesn't exist
-//		oexNOTICE( lRes, oexMks( oexT( "RegQueryValueEx() failed : " ), 
-//								x_sKey.Ptr(), oexT( " : " ), 
+//		oexNOTICE( lRes, oexMks( oexT( "RegQueryValueEx() failed : " ),
+//								x_sKey.Ptr(), oexT( " : " ),
 //								x_sPath.Ptr(), oexT( " : " ),
 //								x_sName.Ptr() ) );
 		RegCloseKey( hKey );
@@ -181,8 +181,8 @@ CStr CSysUtil::GetRegString( const CStr &x_sKey, const CStr &x_sPath, const CStr
 
 	lRes = RegQueryValueEx( hKey, x_sName.Ptr(), 0, &dwType, (LPBYTE)buf._Ptr(), &dwSize );
 	if ( ERROR_SUCCESS != lRes )
-	{	oexERROR( lRes, oexMks( oexT( "RegQueryValueEx() failed : " ), 
-								x_sKey.Ptr(), oexT( " : " ), 
+	{	oexERROR( lRes, oexMks( oexT( "RegQueryValueEx() failed : " ),
+								x_sKey.Ptr(), oexT( " : " ),
 								x_sPath.Ptr(), oexT( " : " ),
 								x_sName.Ptr() ) );
 		RegCloseKey( hKey );
@@ -206,8 +206,8 @@ oexBOOL CSysUtil::SetRegString( const CStr &x_sKey, const CStr &x_sPath, const C
 	LONG lRes = RegCreateKeyEx( hRoot, x_sPath.Ptr(),
 								0, NULL, 0, KEY_WRITE | KEY_SET_VALUE, NULL, &hKey, NULL );
 	if ( ERROR_SUCCESS != lRes || !hKey )
-	{	oexERROR( lRes, oexMks( oexT( "RegCreateKeyEx() failed : " ), 
-								x_sKey.Ptr(), oexT( " : " ), 
+	{	oexERROR( lRes, oexMks( oexT( "RegCreateKeyEx() failed : " ),
+								x_sKey.Ptr(), oexT( " : " ),
 								x_sPath.Ptr() ) );
 		return oexFALSE;
 	} // end if
@@ -218,8 +218,8 @@ oexBOOL CSysUtil::SetRegString( const CStr &x_sKey, const CStr &x_sPath, const C
 	CStr8 val = oexStrToMb( x_sValue );
 	lRes = RegSetValueEx( hKey, x_sName.Ptr(), 0, REG_SZ, (const BYTE *)val.Ptr(), val.Length() );
 	if ( ERROR_SUCCESS != lRes )
-		oexERROR( lRes, oexMks( oexT( "RegSetValueEx() failed : " ), 
-								x_sKey.Ptr(), oexT( " : " ), 
+		oexERROR( lRes, oexMks( oexT( "RegSetValueEx() failed : " ),
+								x_sKey.Ptr(), oexT( " : " ),
 								x_sPath.Ptr(), oexT( " : " ),
 								x_sName.Ptr() ) );
 
@@ -236,7 +236,7 @@ oexBOOL CSysUtil::DeleteRegKey( const CStr &x_sKey, const CStr &x_sPath, oexBOOL
 		return oexFALSE;
 
 	// Delete sub keys if needed
-	if ( x_bSubKeys ) 
+	if ( x_bSubKeys )
 		DeleteRegSubKeys( x_sKey, x_sPath );
 
 	// Attempt to delete the key
@@ -255,7 +255,7 @@ oexBOOL _DeleteRegSubKeys( HKEY hRoot, const CStr &x_sPath )
 		return oexFALSE;
 
 	// For each sub key
-	while ( RegEnumKeyEx(	hKey, 0, szKey, &dwSize, 
+	while ( RegEnumKeyEx(	hKey, 0, szKey, &dwSize,
 							NULL, NULL, NULL, NULL ) == ERROR_SUCCESS )
 	{
 		// A little recursion
@@ -296,7 +296,7 @@ oexLONG _GetRegKeys( CPropertyBag &pb, HKEY hRoot, const CStr &x_sPath, oexBOOL 
 
 	// For each sub key
 	oexLONG lCount = 0;
-	while ( RegEnumKeyEx(	hKey, 0, szKey, &dwSize, 
+	while ( RegEnumKeyEx(	hKey, 0, szKey, &dwSize,
 							NULL, NULL, NULL, NULL ) == ERROR_SUCCESS )
 	{
 		lCount++;
@@ -347,7 +347,7 @@ oexBOOL CSysUtil::IsMounted( const CStr &x_sDrive )
 	sDrive += x_sDrive;
 
 	// Attempt to open the drive
-	HANDLE hDrive = CreateFile( sDrive.Ptr(), GENERIC_READ, 
+	HANDLE hDrive = CreateFile( sDrive.Ptr(), GENERIC_READ,
 								FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
 								0, OPEN_EXISTING, 0, 0 );
 
@@ -382,12 +382,12 @@ CPropertyBag CSysUtil::GetDisksInfo( oexBOOL bInfo )
 		} // end if
 
 		// Next drive position
-		dwDrives &= ~dw; 
+		dwDrives &= ~dw;
 		dw <<= 1;
 		szDrive[ 0 ]++;
 
 	} // end while
-	
+
 	return pb;
 }
 
@@ -401,7 +401,7 @@ CStr CSysUtil::GetDriveTypeStr(const CStr &x_sDrive)
 		case DRIVE_REMOTE :			return oexT( "remote" ); break;
 		case DRIVE_CDROM :			return oexT( "cdrom" ); break;
 		case DRIVE_RAMDISK :		return oexT( "ramdisk" ); break;
-		default : break;	
+		default : break;
 	} // end switch
 
 	return oexT( "unknown" );
@@ -411,7 +411,7 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 {_STT();
 
 	// Sanity check
-	if ( !x_sDrive.Length() ) 
+	if ( !x_sDrive.Length() )
 		return CPropertyBag();
 
 	CPropertyBag pb;
@@ -446,7 +446,7 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 			pb[ oexT( "clusters_free" ) ] = dwFreeClusters;
 			pb[ oexT( "clusters" ) ] = dwClusters;
 		} // end if
-		
+
 		// Get disk space
 		ULARGE_INTEGER liFreeBytesAvailable, liTotalNumberOfBytes, liTotalNumberOfBytesFree;
 		if ( GetDiskFreeSpaceEx( x_sDrive.Ptr(), &liFreeBytesAvailable, &liTotalNumberOfBytes, &liTotalNumberOfBytesFree ) )
@@ -462,18 +462,18 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 			if( liTotalNumberOfBytes.QuadPart )
 			{
 				// Available percentages
-				pb[ oexT( "percent_available" ) ] 
+				pb[ oexT( "percent_available" ) ]
 					= CStr().Fmt( "%.2f", (double)liFreeBytesAvailable.QuadPart / (double)liTotalNumberOfBytes.QuadPart * (double)100 );
 				if ( liTotalNumberOfBytes.QuadPart > liFreeBytesAvailable.QuadPart )
-					pb[ oexT( "percent_unavailable" ) ] 
+					pb[ oexT( "percent_unavailable" ) ]
 						= CStr().Fmt( "%.2f", (double)( liTotalNumberOfBytes.QuadPart - liFreeBytesAvailable.QuadPart )
 												/ (double)liTotalNumberOfBytes.QuadPart * (double)100 );
 
 				// Used percentages
-				pb[ oexT( "percent_free" ) ] 
+				pb[ oexT( "percent_free" ) ]
 					= CStr().Fmt( "%.2f", (double)liTotalNumberOfBytesFree.QuadPart / (double)liTotalNumberOfBytes.QuadPart * (double)100 );
 				if ( liTotalNumberOfBytes.QuadPart > liTotalNumberOfBytesFree.QuadPart )
-					pb[ oexT( "percent_used" ) ] 
+					pb[ oexT( "percent_used" ) ]
 						= CStr().Fmt( "%.2f", (double)( liTotalNumberOfBytes.QuadPart - liTotalNumberOfBytesFree.QuadPart )
 												/ (double)liTotalNumberOfBytes.QuadPart * (double)100 );
 			} // en dif
@@ -506,14 +506,14 @@ public:
 	CSysUtil_CSwitchDesktop( bool bSwitchCurrent )
 	{	m_hOld = NULL;
 		m_hDesk = NULL;
-		
+
 		EnumDesktops( NULL, &EnumDesktopProc, 0 );
-		
+
 		if ( bSwitchCurrent )
 			SwitchCurrent();
 	}
 	~CSysUtil_CSwitchDesktop()
-	{	RestoreDesktop(); 
+	{	RestoreDesktop();
 	}
 	void RestoreDesktop()
 	{	if ( m_hOld )
@@ -559,7 +559,7 @@ static BOOL CALLBACK CSysUtil_ScreenInfo( HMONITOR hMonitor, HDC hdcMonitor, LPR
 		return TRUE;
 
 	// Ensure valid rect
-	if ( !lprcMonitor 
+	if ( !lprcMonitor
 		 || ( 0 >= ( lprcMonitor->right - lprcMonitor->left ) )
 		 || ( 0 >= ( lprcMonitor->bottom - lprcMonitor->top ) ) )
 		pdi->nScreen = -2;
@@ -595,13 +595,13 @@ oexINT CSysUtil::ReleaseScreenCapture( CBin *x_pInf )
 	if ( !p )
 		return 0;
 
-	if ( p->hDC && p->hOldBmp ) 
+	if ( p->hDC && p->hOldBmp )
 		::SelectObject( p->hDC, p->hOldBmp );
-		
-	if ( p->hDC ) 
+
+	if ( p->hDC )
 		::DeleteDC( p->hDC );
 
-	if ( p->hBmp ) 
+	if ( p->hBmp )
 		::DeleteObject( p->hBmp );
 
 	x_pInf->Destroy();
@@ -734,7 +734,7 @@ oexINT CSysUtil::GetScreenCaptureInfo( CBin *x_pInf, CPropertyBag *pb )
 	(*pb)[ "bpp" ] = p->bmi.bmiHeader.biBitCount;
 	(*pb)[ "sz" ] = p->bmi.bmiHeader.biSizeImage;
 	(*pb)[ "cmp" ] = p->bmi.bmiHeader.biCompression;
-	
+
 	(*pb)[ "fmt" ] = p->lFmt;
 	(*pb)[ "sw" ] = p->lScreenWidth;
 	(*pb)[ "sh" ] = p->lScreenHeight;
@@ -788,7 +788,7 @@ static BOOL CALLBACK CSysUtil_GetScreenInfo( HMONITOR hMonitor, HDC hdcMonitor, 
 	} // end if
 
 	// Save information
-	MONITORINFOEX mi; oexZero( mi ); 
+	MONITORINFOEX mi; oexZero( mi );
 	mi.cbSize = sizeof( mi );
 	if ( GetMonitorInfo( hMonitor, &mi ) )
 	{
@@ -1013,7 +1013,7 @@ oexINT CSysUtil::i_cpuid( int *reg, oexINT i )
 	return 0;
 #else
 #if defined( __MINGW32__ )
-	__asm__ __volatile__ 
+	__asm__ __volatile__
 		(
 			"cpuid": "=a" (reg[0]), "=b" (reg[1]), "=c" (reg[2]), "=d" (reg[3]) : "a" (i)
 		);
@@ -1023,4 +1023,251 @@ oexINT CSysUtil::i_cpuid( int *reg, oexINT i )
 	return 1;
 #endif
 #endif
+}
+
+typedef struct tag_t_PROCESSENTRY32
+{	DWORD		dwSize;
+	DWORD		cntUsage;
+	DWORD		th32ProcessID;
+	ULONG_PTR	th32DefaultHeapID;
+	DWORD		th32ModuleID;
+	DWORD		cntThreads;
+	DWORD		th32ParentProcessID;
+	LONG		pcPriClassBase;
+	DWORD		dwFlags;
+	TCHAR		szExeFile[ MAX_PATH ];
+} t_PROCESSENTRY32, *t_PPROCESSENTRY32;
+
+typedef struct t_tagPROCESS_MEMORY_COUNTERS {
+		DWORD		cb;
+		DWORD		PageFaultCount;
+		SIZE_T		PeakWorkingSetSize;
+		SIZE_T		WorkingSetSize;
+		SIZE_T		QuotaPeakPagedPoolUsage;
+		SIZE_T		QuotaPagedPoolUsage;
+		SIZE_T		QuotaPeakNonPagedPoolUsage;
+		SIZE_T		QuotaNonPagedPoolUsage;
+		SIZE_T		PagefileUsage;
+		SIZE_T		PeakPagefileUsage;
+} t_PROCESS_MEMORY_COUNTERS, *t_PPROCESS_MEMORY_COUNTERS;
+
+#define def_TH32CS_SNAPPROCESS	0x00000002
+#define def_TH32CS_SNAPNOHEAPS	0x40000000
+
+typedef HANDLE (WINAPI *pfn_CreateToolhelp32Snapshot)( DWORD dwFlags, DWORD th32ProcessID );
+typedef BOOL (WINAPI *pfn_Process32First)( HANDLE hSnapshot, t_PPROCESSENTRY32 lppe );
+typedef BOOL (WINAPI *pfn_Process32Next)( HANDLE hSnapshot, t_PPROCESSENTRY32 lppe );
+typedef DWORD (WINAPI *pfn_GetProcessImageFileName)( HANDLE hProcess, LPTSTR lpImageFileName, DWORD nSize );
+typedef DWORD (WINAPI *pfn_GetModuleFileNameEx)( HANDLE hProcess, HMODULE hModule, LPTSTR lpFilename, DWORD nSize );
+typedef BOOL (WINAPI *pfn_GetProcessMemoryInfo)( HANDLE Process, t_PPROCESS_MEMORY_COUNTERS ppsmemCounters, DWORD cb );
+typedef BOOL (WINAPI *pfn_GetProcessTimes)( HANDLE hProcess, LPFILETIME lpCreationTime, LPFILETIME lpExitTime, LPFILETIME lpKernelTime, LPFILETIME lpUserTime );
+
+#define FT2LL(ft)	(((oexUINT64)ft.dwHighDateTime << 32)|(oexUINT64)ft.dwLowDateTime)
+
+#if defined( oexUNICODE )
+#	define fnGetProcessImageFileName	"GetProcessImageFileNameW"
+#	define fnGetModuleFileNameEx		"GetModuleFileNameExW"
+#	define fnK32GetModuleFileNameEx		"K32GetModuleFileNameExW"
+#else
+#	define fnGetProcessImageFileName	"GetProcessImageFileNameA"
+#	define fnGetModuleFileNameEx		"GetModuleFileNameExA"
+#	define fnK32GetModuleFileNameEx		"K32GetModuleFileNameExA"
+#endif
+
+oexINT CSysUtil::GetProcessList( CPropertyBag *pb, bool bProcessInfo )
+{
+	if ( !pb )
+		return -1;
+
+	// Functions
+	pfn_CreateToolhelp32Snapshot pCreateToolhelp32Snapshot = 0;
+	pfn_Process32First pProcess32First = 0;
+	pfn_Process32Next pProcess32Next = 0;
+
+	// Load kernel32.dll
+	HMODULE hKernel32 = LoadLibrary( oexT( "kernel32.dll" ) ), hPsapi = 0;
+	if ( !hKernel32 )
+		return -1;
+
+	// Load functions
+	pCreateToolhelp32Snapshot = (pfn_CreateToolhelp32Snapshot)GetProcAddress( hKernel32, oexT( "CreateToolhelp32Snapshot" ) );
+	pProcess32First = (pfn_Process32First)GetProcAddress( hKernel32, oexT( "Process32First" ) );
+	pProcess32Next = (pfn_Process32Next)GetProcAddress( hKernel32, oexT( "Process32Next" ) );
+
+	// Ensure we got these functions
+	if ( !pCreateToolhelp32Snapshot || !pProcess32First || !pProcess32Next )
+	{	FreeLibrary( hKernel32 );
+		return -1;
+	} // end if
+
+	// Create snapshot
+	t_PROCESSENTRY32 pe; oexZero( pe ); pe.dwSize = sizeof( t_PROCESSENTRY32 );
+	HANDLE hSs = pCreateToolhelp32Snapshot( def_TH32CS_SNAPPROCESS, 0 );
+	if ( INVALID_HANDLE_VALUE == hSs )
+	{	FreeLibrary( hKernel32 );
+		return -1;
+	} // end if
+
+	long i = 0;
+	if( pProcess32First( hSs, &pe ) )
+	{
+		do
+		{	// Did we get a valid process id?
+//			if ( pe.th32ProcessID )
+			{
+				CPropertyBag &r = (*pb)[ i++ ];
+				r[ "pid" ] = pe.th32ProcessID;
+				r[ "threads" ] = pe.cntThreads;
+				r[ "parent" ] = pe.th32ParentProcessID;
+				r[ "base_priority" ] = pe.pcPriClassBase;
+				if ( pe.szExeFile && *pe.szExeFile )
+					r[ "file" ] = pe.szExeFile;
+
+				if ( bProcessInfo )
+					GetProcessInfo( pe.th32ProcessID, &r[ "info" ] );
+
+				// Re init struct
+				oexZero( pe ); pe.dwSize = sizeof( t_PROCESSENTRY32 );
+
+			} // end if
+
+		} while( pProcess32Next( hSs, &pe ) );
+
+	} // end if
+
+	// Free the library
+	FreeLibrary( hKernel32 );
+
+	return i;
+}
+
+oexINT CSysUtil::GetProcessInfo( oexLONG lPid, CPropertyBag *pb )
+{
+	if ( !pb )
+		return -1;
+
+	// Functions
+	pfn_GetProcessImageFileName pGetProcessImageFileName = 0;
+	pfn_GetModuleFileNameEx pGetModuleFileNameEx = 0;
+	pfn_GetProcessMemoryInfo pGetProcessMemoryInfo = 0;
+	pfn_GetProcessTimes pGetProcessTimes = 0;
+
+	// Load kernel32.dll
+	HMODULE hKernel32 = LoadLibrary( oexT( "kernel32.dll" ) ), hPsapi = 0;
+	if ( !hKernel32 )
+		return -1;
+
+	// Load extra functions
+	pGetProcessImageFileName = (pfn_GetProcessImageFileName)GetProcAddress( hKernel32, oexT( fnGetProcessImageFileName ) );
+	pGetModuleFileNameEx = (pfn_GetModuleFileNameEx)GetProcAddress( hKernel32, oexT( fnK32GetModuleFileNameEx ) );
+	pGetProcessMemoryInfo = (pfn_GetProcessMemoryInfo)GetProcAddress( hKernel32, oexT( "GetProcessMemoryInfo" ) );
+	pGetProcessTimes = (pfn_GetProcessTimes)GetProcAddress( hKernel32, oexT( "GetProcessTimes" ) );
+
+	// Maybe they moved?
+	if ( !pGetProcessImageFileName || !pGetModuleFileNameEx || !pGetProcessMemoryInfo )
+	{	hPsapi = LoadLibrary( oexT( "psapi.dll" ) );
+		if ( hPsapi )
+		{	if ( !pGetProcessImageFileName )
+				pGetProcessImageFileName = (pfn_GetProcessImageFileName)GetProcAddress( hPsapi, oexT( fnGetProcessImageFileName ) );
+			if ( !pGetModuleFileNameEx )
+				pGetModuleFileNameEx = (pfn_GetModuleFileNameEx)GetProcAddress( hPsapi, oexT( fnGetModuleFileNameEx ) );
+			if ( !pGetProcessMemoryInfo )
+				pGetProcessMemoryInfo = (pfn_GetProcessMemoryInfo)GetProcAddress( hPsapi, oexT( "GetProcessMemoryInfo" ) );
+		} // end if
+	} // end if
+
+	// Get file name
+	HANDLE hProc = OpenProcess( PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, 0, lPid );
+	if ( INVALID_HANDLE_VALUE != hProc )
+	{
+		oex::oexUINT64 ts = (*pb)[ oexT( "ts" ) ].ToInt64(),
+					  now = oexGmtTime().GetUnixTimeUs() * 100;
+		oex::oexUINT64 diff = ( 0 < ts && ts < now ) ? ( now - ts ) : 0;
+
+		// Timestamp
+		(*pb)[ oexT( "ts" ) ] = now;
+		(*pb)[ oexT( "diff" ) ] = diff;
+
+		if ( pGetProcessTimes )
+		{	FILETIME tCreated, tExit, tKernel, tUser;
+			if ( pGetProcessTimes( hProc, &tCreated, &tExit, &tKernel, &tUser ) )
+			{
+				CPropertyBag &cpu = (*pb)[ oexT( "cpu" ) ];
+
+				if ( 0 < diff )
+				{
+					// Calculate kernel percent
+					oex::oexINT64 t = cpu[ "kernel" ].ToUInt64();
+					if ( 0 < t )
+						cpu[ oexT( "diff_kernel" ) ] = FT2LL(tKernel) - t,
+						cpu[ oexT( "percent_kernel" ) ] = (double)( FT2LL(tKernel) - t ) * (double)100 / (double)diff;
+
+					// Calculate user percent
+					t = cpu[ "user" ].ToUInt64();
+					if ( 0 < t )
+						cpu[ oexT( "diff_user" ) ] = FT2LL(tUser) - t,
+						cpu[ oexT( "percent_user" ) ] = (double)( FT2LL(tUser) - t ) * (double)100 / (double)diff;
+
+					// Calculate user percent
+					t = cpu[ "total" ].ToUInt64();
+					if ( 0 < t )
+						cpu[ oexT( "diff_total" ) ] = FT2LL(tKernel) + FT2LL(tUser) - t,
+						cpu[ oexT( "percent_total" ) ] = (double)( FT2LL(tKernel) + FT2LL(tUser) - t ) * (double)100 / (double)diff;
+
+				} // end if
+
+				cpu[ oexT( "created" ) ] = FT2LL(tCreated);
+				cpu[ oexT( "exit" ) ] = FT2LL(tExit);
+				cpu[ oexT( "kernel" ) ] = FT2LL(tKernel);
+				cpu[ oexT( "user" ) ] = FT2LL(tUser);
+				cpu[ oexT( "total" ) ] = FT2LL(tKernel) + FT2LL(tUser);
+
+			} // end if
+		} // end if
+
+		if ( pGetProcessImageFileName )
+		{	TCHAR szFile[ MAX_PATH * 4 ];
+			DWORD dwLen = pGetProcessImageFileName( hProc, szFile, sizeof( szFile ) );
+			if ( 0 < dwLen && sizeof( szFile ) > dwLen )
+			{	szFile[ dwLen ] = 0;
+				(*pb)[ oexT( "dos" ) ] = szFile;
+			} // end if
+		} // end if
+
+		if ( pGetModuleFileNameEx )
+		{	TCHAR szFile[ MAX_PATH * 4 ];
+			DWORD dwLen = pGetModuleFileNameEx( hProc, 0, szFile, sizeof( szFile ) );
+			if ( 0 < dwLen && sizeof( szFile ) > dwLen )
+			{	szFile[ dwLen ] = 0;
+				(*pb)[ oexT( "path" ) ] = szFile;
+			} // end if
+		} // end if
+
+		if ( pGetProcessMemoryInfo )
+		{	t_PROCESS_MEMORY_COUNTERS pmc; oexZero( pmc ); pmc.cb = sizeof( pmc );
+			if ( pGetProcessMemoryInfo( hProc, &pmc, sizeof( pmc ) ) )
+			{	CPropertyBag &inf = (*pb)[ oexT( "mem" ) ];
+				inf[ oexT( "page_faults" ) ] = pmc.PageFaultCount;
+				inf[ oexT( "peak_working_set" ) ] = pmc.PeakWorkingSetSize;
+				inf[ oexT( "working_set" ) ] = pmc.WorkingSetSize;
+				inf[ oexT( "peak_paged" ) ] = pmc.QuotaPeakPagedPoolUsage;
+				inf[ oexT( "paged" ) ] = pmc.QuotaPagedPoolUsage;
+				inf[ oexT( "peak_nonpaged" ) ] = pmc.QuotaPeakNonPagedPoolUsage;
+				inf[ oexT( "nonpaged" ) ] = pmc.QuotaNonPagedPoolUsage;
+				inf[ oexT( "page_files" ) ] = pmc.PagefileUsage;
+				inf[ oexT( "peak_page_files" ) ] = pmc.PeakPagefileUsage;
+			} // end if
+		} // end if
+
+		CloseHandle( hProc );
+
+	} // end if
+
+	if ( hPsapi )
+		FreeLibrary( hPsapi );
+
+	// Free the library
+	FreeLibrary( hKernel32 );
+
+	return 1;
 }

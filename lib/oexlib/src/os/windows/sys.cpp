@@ -42,14 +42,18 @@
 //#	include <wtypes.h>
 #	define VSNPRINTF	vsnprintf
 #	define STRTOLL		strtoll
+#	define STRTOULL		strtoull
 #	define VSNWPRINTF	vsnwprintf
 #	define WCSTOLL		wcstoll
+#	define WCSTOULL		wcstoull
 #else
 #	include <tchar.h>
 #	define VSNPRINTF	_vsnprintf
 #	define STRTOLL		_strtoi64
+#	define STRTOULL		_strtoui64
 #	define VSNWPRINTF	_vsnwprintf
 #	define WCSTOLL		_wcstoi64
+#	define WCSTOULL		_wcstoui64
 #endif
 #include <time.h>
 
@@ -482,7 +486,7 @@ oexUINT64 CSys::StrToUInt64( oexCSTR8 x_pStr, oexUINT x_uRadix )
 {//_STT();
 	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-    return STRTOLL( x_pStr, NULL, x_uRadix );
+    return STRTOULL( x_pStr, NULL, x_uRadix );
 }
 
 oexLONG CSys::StrToLong( oexCSTR8 x_pStr, oexUINT x_uRadix )
@@ -596,7 +600,7 @@ oexUINT64 CSys::StrToUInt64( oexCSTRW x_pStr, oexUINT x_uRadix )
 {//_STT();
 	if ( !oexVERIFY_PTR( x_pStr ) )
 		return 0;
-	return WCSTOLL( x_pStr, NULL, x_uRadix );
+	return WCSTOULL( x_pStr, NULL, x_uRadix );
 }
 
 oexLONG CSys::StrToLong( oexCSTRW x_pStr, oexUINT x_uRadix )
