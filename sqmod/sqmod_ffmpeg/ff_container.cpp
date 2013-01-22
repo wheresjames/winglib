@@ -143,7 +143,6 @@ CFfContainer::CFfContainer()
 
 	m_vts_offset = 0;
 	m_ats_offset = 0;
-
 }
 
 void CFfContainer::Destroy()
@@ -235,7 +234,8 @@ int CFfContainer::CloseStream()
 
 	else if ( m_nWrite )
 	{
-		if ( 1 < m_nWrite ) {
+		if ( 1 < m_nWrite ) 
+		{
 			// Write the rest of the file
 			av_write_trailer( m_pFormatContext );
 
@@ -244,8 +244,10 @@ int CFfContainer::CloseStream()
 				 && !( m_pFormatContext->oformat->flags & AVFMT_NOFILE )
 				 && m_pFormatContext->pb )
 				avio_close( m_pFormatContext->pb );
-		}
+		} // end if
+
 		avformat_free_context(m_pFormatContext);
+
 	} // end else if
 
 	m_pFormatContext = oexNULL;
@@ -902,17 +904,19 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 	m_nLastFrameFlags = pkt.flags;
 	m_nLastFrameEncodedSize = pkt.size;
 
-/*
-	if ( 0 > m_nAudioStream )
-	{	if ( av_write_frame( m_pFormatContext, &pkt ) )
+
+//	if ( 0 > m_nAudioStream )
+//	{
+		if ( av_write_frame( m_pFormatContext, &pkt ) )
 			return 0;
+/*
 	} // end if
 
 	else
-*/
-	if ( av_interleaved_write_frame( m_pFormatContext, &pkt ) )
-		return 0;
 
+		if ( av_interleaved_write_frame( m_pFormatContext, &pkt ) )
+			return 0;
+*/
 	return 1;
 }
 
@@ -1048,17 +1052,19 @@ int CFfContainer::WriteAudioFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 //	if ( pcc && pcc->coded_frame && pcc->coded_frame->pts != AV_NOPTS_VALUE )
 //		pkt.pts = av_rescale_q( pcc->coded_frame->pts, pcc->time_base, pStream->time_base );
 
-/*
-	if ( 0 > m_nVideoStream )
-	{	if ( av_write_frame( m_pFormatContext, &pkt ) )
+
+//	if ( 0 > m_nVideoStream )
+//	{	
+		if ( av_write_frame( m_pFormatContext, &pkt ) )
 			return 0;
+/*
 	} // end if
 
 	else
-*/
-	if ( av_interleaved_write_frame( m_pFormatContext, &pkt ) )
-		return 0;
 
+		if ( av_interleaved_write_frame( m_pFormatContext, &pkt ) )
+			return 0;
+*/
 	return 1;
 }
 

@@ -1155,7 +1155,7 @@ oexINT CSysUtil::GetProcessInfo( oexLONG lPid, CPropertyBag *pb )
 	// Load kernel32.dll
 	HMODULE hKernel32 = LoadLibrary( oexT( "kernel32.dll" ) ), hPsapi = 0;
 	if ( !hKernel32 )
-		return -1;
+		return -2;
 
 	// Load extra functions
 	pGetProcessImageFileName = (pfn_GetProcessImageFileName)GetProcAddress( hKernel32, oexT( fnGetProcessImageFileName ) );
@@ -1177,91 +1177,105 @@ oexINT CSysUtil::GetProcessInfo( oexLONG lPid, CPropertyBag *pb )
 	} // end if
 
 	// Get file name
+	oexINT ret = 0;
 	HANDLE hProc = OpenProcess( PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, 0, lPid );
-	if ( INVALID_HANDLE_VALUE != hProc )
+	if ( INVALID_HANDLE_VALUE == hProc )
+		ret = -3;
+	else
 	{
-		oex::oexUINT64 ts = (*pb)[ oexT( "ts" ) ].ToInt64(),
-					  now = oexGmtTime().GetUnixTimeUs() * 100;
-		oex::oexUINT64 diff = ( 0 < ts && ts < now ) ? ( now - ts ) : 0;
+		DWORD dwExitCode = 0;
+		if ( !GetExitCodeProcess( hProc, &dwExitCode ) || STILL_ACTIVE != dwExitCode )
+			ret = -4;
+		else
+		{
+			oex::oexUINT64 ts = (*pb)[ oexT( "ts" ) ].ToInt64(),
+						   now = oexGmtTime().GetUnixTimeUs() * 100;
+			oex::oexUINT64 diff = ( 0 < ts && ts < now ) ? ( now - ts ) : 0;
 
-		// Timestamp
-		(*pb)[ oexT( "ts" ) ] = now;
-		(*pb)[ oexT( "diff" ) ] = diff;
+			// Timestamp
+			(*pb)[ oexT( "ts" ) ] = now;
+			(*pb)[ oexT( "diff" ) ] = diff;
 
-		if ( pGetProcessTimes )
-		{	FILETIME tCreated, tExit, tKernel, tUser;
-			if ( pGetProcessTimes( hProc, &tCreated, &tExit, &tKernel, &tUser ) )
-			{
-				CPropertyBag &cpu = (*pb)[ oexT( "cpu" ) ];
+			if ( pGetProcessTimes )
+			{	FILETIME tCreated, tExit, tKernel, tUser;
+				if ( pGetProcessTimes( hProc, &tCreated, &tExit, &tKernel, &tUser ) )
+				{	ret++;
 
-				if ( 0 < diff )
-				{
-					// Calculate kernel percent
-					oex::oexINT64 t = cpu[ "kernel" ].ToUInt64();
-					if ( 0 < t )
-						cpu[ oexT( "diff_kernel" ) ] = FT2LL(tKernel) - t,
-						cpu[ oexT( "percent_kernel" ) ] = (double)( FT2LL(tKernel) - t ) * (double)100 / (double)diff;
+					CPropertyBag &cpu = (*pb)[ oexT( "cpu" ) ];
 
-					// Calculate user percent
-					t = cpu[ "user" ].ToUInt64();
-					if ( 0 < t )
-						cpu[ oexT( "diff_user" ) ] = FT2LL(tUser) - t,
-						cpu[ oexT( "percent_user" ) ] = (double)( FT2LL(tUser) - t ) * (double)100 / (double)diff;
+					if ( 0 < diff )
+					{
+						// Calculate kernel percent
+						oex::oexINT64 t = cpu[ "kernel" ].ToUInt64();
+						if ( 0 < t )
+							cpu[ oexT( "diff_kernel" ) ] = FT2LL(tKernel) - t,
+							cpu[ oexT( "percent_kernel" ) ] = (double)( FT2LL(tKernel) - t ) * (double)100 / (double)diff;
 
-					// Calculate user percent
-					t = cpu[ "total" ].ToUInt64();
-					if ( 0 < t )
-						cpu[ oexT( "diff_total" ) ] = FT2LL(tKernel) + FT2LL(tUser) - t,
-						cpu[ oexT( "percent_total" ) ] = (double)( FT2LL(tKernel) + FT2LL(tUser) - t ) * (double)100 / (double)diff;
+						// Calculate user percent
+						t = cpu[ "user" ].ToUInt64();
+						if ( 0 < t )
+							cpu[ oexT( "diff_user" ) ] = FT2LL(tUser) - t,
+							cpu[ oexT( "percent_user" ) ] = (double)( FT2LL(tUser) - t ) * (double)100 / (double)diff;
+
+						// Calculate user percent
+						t = cpu[ "total" ].ToUInt64();
+						if ( 0 < t )
+							cpu[ oexT( "diff_total" ) ] = FT2LL(tKernel) + FT2LL(tUser) - t,
+							cpu[ oexT( "percent_total" ) ] = (double)( FT2LL(tKernel) + FT2LL(tUser) - t ) * (double)100 / (double)diff;
+
+					} // end if
+
+					cpu[ oexT( "created" ) ] = FT2LL(tCreated);
+					cpu[ oexT( "exit" ) ] = FT2LL(tExit);
+					cpu[ oexT( "kernel" ) ] = FT2LL(tKernel);
+					cpu[ oexT( "user" ) ] = FT2LL(tUser);
+					cpu[ oexT( "total" ) ] = FT2LL(tKernel) + FT2LL(tUser);
 
 				} // end if
-
-				cpu[ oexT( "created" ) ] = FT2LL(tCreated);
-				cpu[ oexT( "exit" ) ] = FT2LL(tExit);
-				cpu[ oexT( "kernel" ) ] = FT2LL(tKernel);
-				cpu[ oexT( "user" ) ] = FT2LL(tUser);
-				cpu[ oexT( "total" ) ] = FT2LL(tKernel) + FT2LL(tUser);
-
 			} // end if
-		} // end if
 
-		if ( pGetProcessImageFileName )
-		{	TCHAR szFile[ MAX_PATH * 4 ];
-			DWORD dwLen = pGetProcessImageFileName( hProc, szFile, sizeof( szFile ) );
-			if ( 0 < dwLen && sizeof( szFile ) > dwLen )
-			{	szFile[ dwLen ] = 0;
-				(*pb)[ oexT( "dos" ) ] = szFile;
+			if ( pGetProcessImageFileName )
+			{	ret++;
+				TCHAR szFile[ MAX_PATH * 4 ];
+				DWORD dwLen = pGetProcessImageFileName( hProc, szFile, sizeof( szFile ) );
+				if ( 0 < dwLen && sizeof( szFile ) > dwLen )
+				{	szFile[ dwLen ] = 0;
+					(*pb)[ oexT( "dos" ) ] = szFile;
+				} // end if
 			} // end if
-		} // end if
 
-		if ( pGetModuleFileNameEx )
-		{	TCHAR szFile[ MAX_PATH * 4 ];
-			DWORD dwLen = pGetModuleFileNameEx( hProc, 0, szFile, sizeof( szFile ) );
-			if ( 0 < dwLen && sizeof( szFile ) > dwLen )
-			{	szFile[ dwLen ] = 0;
-				(*pb)[ oexT( "path" ) ] = szFile;
+			if ( pGetModuleFileNameEx )
+			{	ret++;
+				TCHAR szFile[ MAX_PATH * 4 ];
+				DWORD dwLen = pGetModuleFileNameEx( hProc, 0, szFile, sizeof( szFile ) );
+				if ( 0 < dwLen && sizeof( szFile ) > dwLen )
+				{	szFile[ dwLen ] = 0;
+					(*pb)[ oexT( "path" ) ] = szFile;
+				} // end if
 			} // end if
-		} // end if
 
-		if ( pGetProcessMemoryInfo )
-		{	t_PROCESS_MEMORY_COUNTERS pmc; oexZero( pmc ); pmc.cb = sizeof( pmc );
-			if ( pGetProcessMemoryInfo( hProc, &pmc, sizeof( pmc ) ) )
-			{	CPropertyBag &inf = (*pb)[ oexT( "mem" ) ];
-				inf[ oexT( "page_faults" ) ] = pmc.PageFaultCount;
-				inf[ oexT( "peak_working_set" ) ] = pmc.PeakWorkingSetSize;
-				inf[ oexT( "working_set" ) ] = pmc.WorkingSetSize;
-				inf[ oexT( "peak_paged" ) ] = pmc.QuotaPeakPagedPoolUsage;
-				inf[ oexT( "paged" ) ] = pmc.QuotaPagedPoolUsage;
-				inf[ oexT( "peak_nonpaged" ) ] = pmc.QuotaPeakNonPagedPoolUsage;
-				inf[ oexT( "nonpaged" ) ] = pmc.QuotaNonPagedPoolUsage;
-				inf[ oexT( "page_files" ) ] = pmc.PagefileUsage;
-				inf[ oexT( "peak_page_files" ) ] = pmc.PeakPagefileUsage;
+			if ( pGetProcessMemoryInfo )
+			{	ret++;
+				t_PROCESS_MEMORY_COUNTERS pmc; oexZero( pmc ); pmc.cb = sizeof( pmc );
+				if ( pGetProcessMemoryInfo( hProc, &pmc, sizeof( pmc ) ) )
+				{	CPropertyBag &inf = (*pb)[ oexT( "mem" ) ];
+					inf[ oexT( "page_faults" ) ] = pmc.PageFaultCount;
+					inf[ oexT( "peak_working_set" ) ] = pmc.PeakWorkingSetSize;
+					inf[ oexT( "working_set" ) ] = pmc.WorkingSetSize;
+					inf[ oexT( "peak_paged" ) ] = pmc.QuotaPeakPagedPoolUsage;
+					inf[ oexT( "paged" ) ] = pmc.QuotaPagedPoolUsage;
+					inf[ oexT( "peak_nonpaged" ) ] = pmc.QuotaPeakNonPagedPoolUsage;
+					inf[ oexT( "nonpaged" ) ] = pmc.QuotaNonPagedPoolUsage;
+					inf[ oexT( "page_files" ) ] = pmc.PagefileUsage;
+					inf[ oexT( "peak_page_files" ) ] = pmc.PeakPagefileUsage;
+				} // end if
 			} // end if
-		} // end if
+
+		} // end else
 
 		CloseHandle( hProc );
 
-	} // end if
+	} // end else
 
 	if ( hPsapi )
 		FreeLibrary( hPsapi );
@@ -1269,5 +1283,5 @@ oexINT CSysUtil::GetProcessInfo( oexLONG lPid, CPropertyBag *pb )
 	// Free the library
 	FreeLibrary( hKernel32 );
 
-	return 1;
+	return ret;
 }

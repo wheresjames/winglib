@@ -179,6 +179,9 @@ private:
 	/// Output container context
 	AVFormatContext			*m_pFormatContext;
 
+	/// Frame buffer
+	AVFrame 				*m_pFrame;
+
 	/// Temp buffers
 	sqbind::CSqBinary		m_tmp, m_tmp2;
 

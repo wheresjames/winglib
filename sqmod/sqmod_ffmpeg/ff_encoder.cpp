@@ -47,6 +47,7 @@ CFfEncoder::CFfEncoder()
 	m_pStream = oexNULL;
 	m_pOutput = oexNULL;
 	m_pFormatContext = oexNULL;
+	m_pFrame = oexNULL;
 
 	// Register codecs
 //	av_register_all();
@@ -58,6 +59,11 @@ void CFfEncoder::Destroy()
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) return;
 
+	if ( m_pFrame )
+	{	av_free( m_pFrame );
+		m_pFrame = oexNULL;
+	} // end if
+	
 	if ( m_pStream )
 	{	av_free( m_pStream );
 		m_pStream = oexNULL;
@@ -252,57 +258,57 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 	if ( (int)out->Size() < nHeader + ( nSize << 1 ) && !out->Allocate( nHeader + ( nSize << 1 ) ) )
 		return 0;
 
-	AVFrame *paf = avcodec_alloc_frame();
-	if ( !paf )
+	if ( !m_pFrame )
+		m_pFrame = avcodec_alloc_frame();
+	if ( !m_pFrame )
 		return 0;
 
-	if ( !CFfConvert::FillAVFrame( paf, fmt, width, height, (void*)in ) )
+	if ( !CFfConvert::FillAVFrame( m_pFrame, fmt, width, height, (void*)in ) )
 		return 0;
 
 	// Assume key frame
-	paf->key_frame = 1;
+	m_pFrame->key_frame = 1;
 
 	if ( m )
 	{
 		if ( m->isset( oexT( "flags" ) ) )
 		{	if ( (*m)[ oexT( "flags" ) ].toint() & 0x01 )
-				paf->key_frame = 1;
+				m_pFrame->key_frame = 1;
 			else
-				paf->key_frame = 0;
+				m_pFrame->key_frame = 0;
 		} // end if
 
 		if ( m->isset( oexT( "quality" ) ) && ( (*m)[ oexT( "quality" ) ].toint() ) )
-			paf->quality = (*m)[ oexT( "quality" ) ].toint();
+			m_pFrame->quality = (*m)[ oexT( "quality" ) ].toint();
 		else
-			paf->quality = m_pCodecContext->global_quality;
+			m_pFrame->quality = m_pCodecContext->global_quality;
 
 		// Set the PTS
 		if ( !m_nFrame )
-			paf->pts = 0;
+			m_pFrame->pts = 0;
 		else if ( m->isset( oexT( "pts" ) ) )
-			paf->pts = (*m)[ oexT( "pts" ) ].toint();
+			m_pFrame->pts = (*m)[ oexT( "pts" ) ].toint();
 		else
-			paf->pts = calcPts();
+			m_pFrame->pts = calcPts();
 
 	} // end if
 
 	else
-		paf->pts = m_nFrame ? calcPts() : 0,
-		paf->quality = m_pCodecContext->global_quality;
+		m_pFrame->pts = m_nFrame ? calcPts() : 0,
+		m_pFrame->quality = m_pCodecContext->global_quality;
 
 	// Ensure PTS match
-	m_pCodecContext->coded_frame->pts = paf->pts;
+	m_pCodecContext->coded_frame->pts = m_pFrame->pts;
 
 	// Copy the header
 	if ( 0 < nHeader )
 		out->Copy( &m_header );
 
 	// Encode the video frame
-	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->_Ptr( nHeader ), out->Size() - nHeader, paf );
+	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->_Ptr( nHeader ), out->Size() - nHeader, m_pFrame );
 	if ( 0 > nBytes )
 	{	oexERROR( nBytes, oexT( "avcodec_encode_video() failed" ) );
 		out->setUsed( 0 );
-		av_free( paf );
 		return 0;
 	} // end if
 
@@ -318,15 +324,13 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 		if ( 0 < m_pCodecContext->coded_frame->pts )
 			(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pts ) ) );
 		else
-			(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( paf->pts ) ) );
+			(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pFrame->pts ) ) );
 //		(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_dts ) ) );
 //		if ( m_pCodecContext->pkt )
 //			(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->pkt->pts ) ) ),
 //			(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->pkt->dts ) ) );
 
 	} // end if
-
-	av_free( paf );
 
 	out->setUsed( nBytes );
 
