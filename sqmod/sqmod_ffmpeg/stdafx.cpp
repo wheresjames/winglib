@@ -228,6 +228,7 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 	CFfEncoder::Register( x_vm );
 	CFfAudioDecoder::Register( x_vm );
 	CFfAudioEncoder::Register( x_vm );
+	CFfAudioResample::Register( x_vm );
 	CFfConvert::Register( x_vm );
 	CFfTranscode::Register( x_vm );
 	CFfCapture::Register( x_vm );
