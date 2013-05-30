@@ -1,0 +1,9 @@
+{
+  "name": "SqPlugin",
+  "version": "${FBSTRING_PLUGIN_VERSION}",
+  "description": "SqPlugin",
+
+	"plugins": [
+    { "path": "npSqPlugin.dll", "public": true }
+  ]
+}

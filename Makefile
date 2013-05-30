@@ -24,7 +24,8 @@ BUILDDIRS := $(BUILDDIRS) \
 			 app/gstest \
 			 app/irr_android \
 			 app/alink \
-			 app/axtest
+			 app/axtest \
+			 app/sqplugin
 endif
 
 #			 app/fftest
@@ -69,18 +70,19 @@ endif
 BUILDDIRS := $(BUILDDIRS) \
 			 sqmod/sqmod_asio \
 			 sqmod/sqmod_cell \
-             sqmod/sqmod_curl \
+			 sqmod/sqmod_crtmp \
+			 sqmod/sqmod_curl \
 			 sqmod/sqmod_fftw \
 			 sqmod/sqmod_ffmpeg \
 			 sqmod/sqmod_freetype2 \
-             sqmod/sqmod_gdchart \
-             sqmod/sqmod_live555 \
-             sqmod/sqmod_mysql \
-             sqmod/sqmod_openssl \
-             sqmod/sqmod_poco \
-             sqmod/sqmod_portaudio \
-             sqmod/sqmod_rtmpd \
-             sqmod/sqmod_ssh2 \
+			 sqmod/sqmod_gdchart \
+			 sqmod/sqmod_live555 \
+			 sqmod/sqmod_mysql \
+			 sqmod/sqmod_openssl \
+			 sqmod/sqmod_poco \
+			 sqmod/sqmod_portaudio \
+			 sqmod/sqmod_rtmpd \
+			 sqmod/sqmod_ssh2 \
 			 sqmod/sqmod_tinyxml
 
 ifdef PETS
@@ -89,12 +91,12 @@ BUILDDIRS := $(BUILDDIRS) \
 			 sqmod/sqmod_gstreamer \
 			 sqmod/sqmod_haru \
 			 sqmod/sqmod_irrlicht \
-             sqmod/sqmod_mimetic \
-             sqmod/sqmod_quickfix \
+			 sqmod/sqmod_mimetic \
+			 sqmod/sqmod_quickfix \
 			 sqmod/sqmod_test \
-             sqmod/sqmod_usb \
-             sqmod/sqmod_vmime \
-             sqmod/sqmod_webkit
+			 sqmod/sqmod_usb \
+			 sqmod/sqmod_vmime \
+			 sqmod/sqmod_webkit
 endif
 #-------------------------------------------------------------------
 # WxWidgets

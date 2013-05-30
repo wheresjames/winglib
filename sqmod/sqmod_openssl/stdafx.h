@@ -10,6 +10,9 @@
 #include "sqbind.h"
 
 #define NOCRYPT
+#ifndef OPENSSL_NO_ENGINE
+#	include <openssl/engine.h>
+#endif
 #include <openssl/asn1.h>
 #include <openssl/rsa.h>
 #include <openssl/evp.h>

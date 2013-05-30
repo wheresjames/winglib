@@ -39,6 +39,9 @@
 template < typename T >
 	stdString ToStr( T n ) { return oex2std( oex::CStr( n ) ); }
 
+template < typename T >
+	stdString StrCvt( const T &s ) { return stdString( s.c_str(), s.length() ); }
+
 template < typename T_PB, typename T_STD  >
 	void SQBIND_PropertyBagToStd( T_PB &pb, T_STD &m )
 	{	for( oex::CPropertyBag::iterator it; pb.List().Next( it ); )

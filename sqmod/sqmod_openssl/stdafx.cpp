@@ -83,11 +83,15 @@ static void SQBIND_module_cleanup()
 {
 	// SSL cleanup sequence
 	ERR_remove_state( 0 );
-//	ENGINE_cleanup();
+#ifndef OPENSSL_NO_ENGINE
+	ENGINE_cleanup();
+#endif
 	CONF_modules_unload( 1 );
-	ERR_free_strings();
-	EVP_cleanup();
+	
 	CRYPTO_cleanup_all_ex_data();
+	ERR_free_strings();
+	ERR_remove_thread_state(NULL);
+	EVP_cleanup();
 }
 
 // Cleanup

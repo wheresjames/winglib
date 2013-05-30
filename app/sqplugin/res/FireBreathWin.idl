@@ -1,0 +1,125 @@
+/**********************************************************\
+
+  Auto-generated FireBreathWin.idl
+
+\**********************************************************/
+
+// FireBreathWin.idl : IDL source for FireBreathWin
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (FireBreathWin.tlb) and marshalling code.
+
+#include "global/COM_config.h"
+#include "olectl.h"
+import "oaidl.idl";
+import "ocidl.idl";
+import "dispex.idl";
+
+/*
+[
+    uuid(FBTYPELIB_GUID),
+    version(1.0),
+    helpstring(FBTYPELIB_DESC)
+]
+library SqPluginLib
+{
+    [
+        object,
+        uuid(IFBControl_GUID),
+        dual,
+        nonextensible,
+        helpstring(IFBControl_DESC),
+        pointer_default(unique)
+    ]
+    interface IFBControl : IDispatchEx {
+    };
+    [
+        object,
+        uuid(IFBComJavascriptObject_GUID),
+        dual,
+        nonextensible,
+        helpstring(IFBComJavascriptObject_DESC),
+        pointer_default(unique)
+    ]
+    interface IFBComJavascriptObject : IDispatchEx {
+    };
+
+    importlib("stdole2.tlb");
+    [
+        uuid(IFBComEventSource_GUID),
+        helpstring(IFBComEventSource_DESC)
+    ]
+    dispinterface IFBComEventSource
+    {
+        properties:
+        methods:
+    };
+
+    [
+        uuid(f9c07bdf-25cc-5404-8bdc-77bea6109000),
+        control,
+        helpstring(FBControl_DESC)
+    ]
+    coclass FBControl0
+    {
+        [default] interface IFBControl;
+        [default, source] dispinterface IFBComEventSource;
+    };
+    [
+        uuid(FBComJavascriptObject_GUID),
+        control,
+        helpstring(FBComJavascriptObject_DESC)
+    ]
+    coclass FBComJavascriptObject
+    {
+        [default] interface IFBComJavascriptObject;
+        [default, source] dispinterface IFBComEventSource;
+    }
+};
+*/
+
+	[
+		object,
+		uuid(IFBComJavascriptObject_GUID),
+		dual,
+		helpstring(IFBComJavascriptObject_DESC),
+		pointer_default(unique)
+	]
+	interface IFBComJavascriptObject : IDispatch
+	{
+//		[id(1), helpstring("method Open")] HRESULT Open([in] BSTR bstrLink);
+    };
+
+[
+	uuid(FBTYPELIB_GUID),
+	version(1.0),
+	helpstring(FBTYPELIB_DESC)
+]
+library SqPluginLib
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	[
+		uuid(IFBComEventSource_GUID),
+		helpstring(IFBComEventSource_DESC)
+	]
+	dispinterface IFBComEventSource
+	{
+		properties:
+		methods:
+//		[id(1), helpstring("method OnEvent")] HRESULT OnEvent([in] BSTR bstrEvent, [in] LONG lErr, [in] BSTR bstrDescription);
+    };
+
+	[
+		uuid(FF3D204E-F6D2-4273-A54B-4A2F92ED887A),
+		helpstring("CtrlVideo Class")
+	]
+	coclass CtrlVideo
+	{
+		[default] interface IFBComJavascriptObject;
+		[default, source] dispinterface IFBComEventSource;
+	};
+};
+

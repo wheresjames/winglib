@@ -155,17 +155,16 @@ int CFfAudioEncoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 
 	// Check profile for aac
 	if ( CODEC_ID_AAC == x_nCodec )
-//		m_pCodecContext->profile = FF_PROFILE_AAC_MAIN;
-		m_pCodecContext->profile = FF_PROFILE_AAC_LOW,
+		m_pCodecContext->profile = FF_PROFILE_AAC_LOW, // _AAC_LOW _AAC_MAIN _AAC_SSR _AAC_LTP
 		m_pCodecContext->bit_rate = m_pCodecContext->sample_rate * ( x_nFmt & 0xf ) * m_pCodecContext->channels;
 
 	if ( m && m->isset( oexT( "quality" ) ) )
 	{
 		float q = (*m)[ oexT( "quality" ) ].tofloat();
 		if ( .1 > q )
-			q = 5;
-		else if ( 30 < q )
-			q = 20;
+			q = 5.;
+		else if ( 30. < q )
+			q = 30.;
 
 		m_pCodecContext->bit_rate_tolerance = 0;
 
