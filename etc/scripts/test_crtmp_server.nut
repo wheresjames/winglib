@@ -41,6 +41,10 @@ function _init() : ( _g )
 
 function _idle() : ( _g )
 {
+	_self.echo( "." );
+	if ( !_g.crtmp.Run() )
+		_g.quit = 1;
+
 	return _g.quit;
 }
 

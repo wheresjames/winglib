@@ -7,10 +7,10 @@ SQBIND_REGISTER_CLASS_BEGIN( CRtmpServer, CRtmpServer )
 	SQBIND_MEMBER_FUNCTION( CRtmpServer, Destroy )
 	SQBIND_MEMBER_FUNCTION( CRtmpServer, Init )
 	SQBIND_MEMBER_FUNCTION( CRtmpServer, Start )
+	SQBIND_MEMBER_FUNCTION( CRtmpServer, Run )
 	SQBIND_MEMBER_FUNCTION( CRtmpServer, getLastErrorStr )
 	SQBIND_MEMBER_FUNCTION( CRtmpServer, setLastErrorStr )
 	SQBIND_MEMBER_FUNCTION( CRtmpServer, getProtocolMap )
-//	SQBIND_MEMBER_FUNCTION( CRtmpServer,  )
 //	SQBIND_MEMBER_FUNCTION( CRtmpServer,  )
 //	SQBIND_MEMBER_FUNCTION( CRtmpServer,  )
 
@@ -106,6 +106,19 @@ oexEcho( "a" );
 		return 0;
 	} // end if
 
+	// Initialize application
+	if ( !m_pSa->Initialize() )
+	{	Destroy();
+		setLastErrorStr( "Unable to initialize app object" );
+		return 0;
+	} // end if
+
+	if ( !ClientApplicationManager::RegisterApplication(m_pSa) )
+	{	Destroy();
+		setLastErrorStr( "Unable to register app object" );
+		return 0;
+	} // end if
+
 oexEcho( "b" );
 
 	// Create protol handler
@@ -117,13 +130,13 @@ oexEcho( "b" );
 	} // end if
 
 	// Register RTMP protocol
-	m_pSa->RegisterAppProtocolHandler(PT_INBOUND_RTMP, m_pPh);
-	m_pSa->RegisterAppProtocolHandler(PT_INBOUND_RTMPS_DISC, m_pPh);
-	m_pSa->RegisterAppProtocolHandler(PT_OUTBOUND_RTMP, m_pPh);
+	m_pSa->RegisterAppProtocolHandler( PT_INBOUND_RTMP, m_pPh );
+	m_pSa->RegisterAppProtocolHandler( PT_INBOUND_RTMPS_DISC, m_pPh );
+	m_pSa->RegisterAppProtocolHandler( PT_OUTBOUND_RTMP, m_pPh );
 
 oexEcho( "c" );
 
-	// Create default protocol handler
+	// Create default protocol factory
 	m_pPf = new DefaultProtocolFactory();
 	if ( !m_pPf )
 	{	Destroy();
@@ -151,25 +164,34 @@ int CRtmpServer::Start( int x_nPort )
 	IOHandlerManager::Start();
 
 	vector<uint64_t> chain;
-	chain = ProtocolFactoryManager::ResolveProtocolChain("rtmp");
+//	chain = ProtocolFactoryManager::ResolveProtocolChain( "inboundRtmp" );
+	chain = ProtocolFactoryManager::ResolveProtocolChain( CONF_PROTOCOL_INBOUND_RTMP );
 	if (0 >= chain.size())
 	{	Destroy();
-		setLastErrorStr( "Unable to resolve protocol chain for : RTMP" );
+		setLastErrorStr( sqbind::oex2std( oex::CStr("Unable to resolve protocol chain for : " ) += CONF_PROTOCOL_INBOUND_RTMP ) );
 		return 0;
 	} // end if
-	
+
+	// Set config vars
+	m_cConfig[CONF_IP] = "0.0.0.0";
+	m_cConfig[CONF_PORT] = (uint16_t)x_nPort;
+	m_cConfig[CONF_PROTOCOL] = CONF_PROTOCOL_INBOUND_RTMP;
+
 	// Create TCP acceptor
-	m_pTcpAcceptor = new TCPAcceptor( 0, x_nPort, m_cConfig, chain);
+	m_pTcpAcceptor = new TCPAcceptor( "0.0.0.0", x_nPort, m_cConfig, chain);
 	if ( !m_pTcpAcceptor )
 	{	Destroy();
 		setLastErrorStr( "Unable to allcoate memory for server socket" );
 		return 0;
 	} // end if
 
+	// Set app pointer
+	m_pTcpAcceptor->SetApplication( m_pSa );
+
 	// Bind server socket
-	if ( !m_pTcpAcceptor->Bind() )
+	if ( !m_pTcpAcceptor->Bind() || !m_pTcpAcceptor->StartAccept() )
 	{	Destroy();
-		setLastErrorStr( sqbind::oex2std( oex::CStr("Failed to bind port : " ) += x_nPort ) );
+		setLastErrorStr( sqbind::oex2std( oex::CStr("Failed to start server on port : " ) += x_nPort ) );
 		return 0;
 	} // end if
 
@@ -178,9 +200,27 @@ oexEcho( "d" );
 	return 1;
 }
 
+int CRtmpServer::Run()
+{
+	// Run io
+	bool bRet = IOHandlerManager::Pulse();
+
+	// Maintenance
+	IOHandlerManager::DeleteDeadHandlers();
+	ProtocolManager::CleanupDeadProtocols();
+
+	return bRet ? 1 : 0;
+}
+
 sqbind::stdString CRtmpServer::getProtocolMap()
 {
 	return sqbind::StrCvt(ProtocolFactoryManager::Dump());
 }
 
+bool CRtmpServer::CRTMPAppProtocolHandler::OutboundConnectionEstablished( OutboundRTMPProtocol *pFrom )
+{
+	oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::OutboundConnectionEstablished()" );
+
+	return false;
+}
 

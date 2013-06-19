@@ -238,7 +238,7 @@ int CRtmpdSession::ReadPacket()
 		struct timeval tv;
 		tv.tv_sec = 0;
 		tv.tv_usec = 0;
-		 
+
 		int ret = select( m_session.m_sb.sb_socket + 1, &rset, NULL, NULL, &tv );
 		if ( 0 > ret )
 			return -3;
@@ -377,7 +377,7 @@ sqbind::CSqMulti CRtmpdSession::getPacket( int nMode )
 			m[ "type" ].set( oexT( "AMF0" ) );
 			m[ "cmd" ].set( m[ "0" ].str() );
 			break;
-			
+
 		default :
 			m[ "type" ].set( oexT( "unknown" ) );
 			break;
@@ -804,7 +804,7 @@ int CRtmpdSession::SendPacket2( int format, int csi, int type, int ext, sqbind::
 
 	// Add padding byte for AMF3
 	if ( 0x11 == type )
-		body.setUsed( RTMP_MAX_HEADER_SIZE + 1 ), 
+		body.setUsed( RTMP_MAX_HEADER_SIZE + 1 ),
 		body.setUCHAR( RTMP_MAX_HEADER_SIZE, 0 );
 	else
 		body.setUsed( RTMP_MAX_HEADER_SIZE );
@@ -865,7 +865,7 @@ int CRtmpdSession::SendPacketBin( int format, int csi, int type, int ext, sqbind
 
 	// Add padding byte for AMF3
 	if ( 0x11 == type )
-		body.setUsed( RTMP_MAX_HEADER_SIZE + 1 ), 
+		body.setUsed( RTMP_MAX_HEADER_SIZE + 1 ),
 		body.setUCHAR( RTMP_MAX_HEADER_SIZE, 0 );
 	else
 		body.setUsed( RTMP_MAX_HEADER_SIZE );
@@ -932,9 +932,9 @@ int CRtmpdSession::ParseFlv( sqbind::CSqBinary *b, sqbind::CSqMulti *m )
 	{
 		// Verify header data
 		SFlvHeader *pH = (SFlvHeader*)p;
-		if ( 'F' == pH->sig[ 0 ] && 'L' == pH->sig[ 1 ] && 'V' == pH->sig[ 2 ] && 1 == pH->ver 
+		if ( 'F' == pH->sig[ 0 ] && 'L' == pH->sig[ 1 ] && 'V' == pH->sig[ 2 ] && 1 == pH->ver
 			&& !pH->off[ 0 ] && !pH->off[ 1 ] && !pH->off[ 2 ] && 9 == pH->off[ 3 ] && !pH->tsz )
-			(*m)[ "header" ][ "flags" ].set( sqbind::ToStr( (int)pH->flg ) ), 
+			(*m)[ "header" ][ "flags" ].set( sqbind::ToStr( (int)pH->flg ) ),
 			p += sizeof( SFlvHeader ), l -= sizeof( SFlvHeader );
 
 	} // end if

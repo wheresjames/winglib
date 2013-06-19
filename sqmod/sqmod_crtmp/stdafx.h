@@ -15,6 +15,7 @@
 #include "protocols/defaultprotocolfactory.h"
 #include "protocols/rtmp/basertmpappprotocolhandler.h"
 #include "application/baseclientapplication.h"
+#include "application/clientapplicationmanager.h"
 
 #include "crtmp_server.h"
 

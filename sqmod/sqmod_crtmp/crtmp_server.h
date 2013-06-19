@@ -22,6 +22,11 @@ public:
 		{
 		}
 
+		virtual bool PullExternalStream(Variant streamConfig)
+		{
+			oexEcho( "CRtmpServer::CRtmpServerApp::PullExternalStream()" );
+			return PullExternalStream( streamConfig);
+		}
 
 //	private:
 //		MonitorRTMPProtocolHandler *_pRTMPHandler;
@@ -36,13 +41,53 @@ public:
 		CRTMPAppProtocolHandler(Variant &configuration)
 			: BaseRTMPAppProtocolHandler(configuration)
 		{
+			oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::CRTMPAppProtocolHandler()" );
 		}
 		virtual ~CRTMPAppProtocolHandler()
 		{
+			oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::~CRTMPAppProtocolHandler()" );
 		}
 
 //		bool ProcessInvokeConnect(BaseRTMPProtocol *pFrom, Variant &request);
-//		virtual bool OutboundConnectionEstablished(OutboundRTMPProtocol *pFrom);
+		virtual bool OutboundConnectionEstablished(OutboundRTMPProtocol *pFrom);
+
+//		+++ set breakpoint in the play function and see where it goes :)
+		
+		virtual bool PullExternalStream(URI uri, Variant streamConfig)
+		{
+			oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::PullExternalStream()" );
+			return BaseRTMPAppProtocolHandler::PullExternalStream( uri, streamConfig );
+		}
+
+		virtual bool AuthenticateInbound(BaseRTMPProtocol *pFrom, Variant &request, Variant &authState)
+		{
+			oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::AuthenticateInbound()" );
+			return BaseRTMPAppProtocolHandler::AuthenticateInbound( pFrom, request, authState );
+		}
+
+		virtual bool InboundMessageAvailable(BaseRTMPProtocol *pFrom, Header &header, IOBuffer &inputBuffer)
+		{
+			oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::InboundMessageAvailable1()" );
+			return BaseRTMPAppProtocolHandler::InboundMessageAvailable( pFrom, header, inputBuffer );
+		}
+
+		virtual bool InboundMessageAvailable(BaseRTMPProtocol *pFrom, Variant &request)
+		{
+			oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::InboundMessageAvailable2()" );
+			
+			string json;
+			request.SerializeToJSON(json);
+			oexEcho( json.c_str() );
+			
+			return BaseRTMPAppProtocolHandler::InboundMessageAvailable( pFrom, request );
+		}
+
+		virtual bool ProcessInvokePlay(BaseRTMPProtocol *pFrom, Variant &request)
+		{
+			oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::ProcessInvokePlay()" );
+			return BaseRTMPAppProtocolHandler::ProcessInvokePlay( pFrom, request );
+		}
+
 	};
 
 public:
@@ -76,6 +121,9 @@ public:
 
 	/// Start the server
 	int Start( int x_nPort );
+
+	/// Call continuously to run the socket maintenance
+	int CRtmpServer::Run();
 
 	/// Returns the last error string
 	sqbind::stdString getLastErrorStr() { return m_sLastError; }
