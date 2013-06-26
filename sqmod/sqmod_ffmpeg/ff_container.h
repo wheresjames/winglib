@@ -68,8 +68,11 @@ public:
 
 	/// Sets the current byte offset into the file, returns the final position
 	SQInteger setBytePos( SQInteger pos );
+   
+        /// based on passed time and frames, resets video stream frame rates
+        void fixVideoFrameRate( AVFormatContext* s, int nSeconds, int nFrames );
 
-	/// Returns video width
+	/// Returns video frame rate
 	double getFps()
 	{	if ( !m_pFormatContext || 0 > m_nVideoStream
 			 || !m_pFormatContext->streams[ m_nVideoStream ]->codec )
@@ -89,7 +92,7 @@ public:
 		return m_pFormatContext->streams[ m_nVideoStream ]->codec->width;
 	}
 
-	/// Returns video width
+	/// Returns video height
 	int getHeight()
 	{	if ( !m_pFormatContext || 0 > m_nVideoStream
 			 || !m_pFormatContext->streams[ m_nVideoStream ]->codec )
@@ -294,7 +297,13 @@ public:
 	/// Returns the audio time stamp offset
 	void setAudioTsOffset( SQInteger ts ) { m_ats_offset = ts; }
 
-	/// Returns the audio time stamp offset
+        /// Capture clock time when an .avi file is opened for recording
+        void setVideoStartTime( SQInteger t ) { m_videoStartTime = t; }
+
+        /// Capture clock time when an .avi recording file is closed
+        void setVideoEndTime( SQInteger t ) { m_videoEndTime = t; }
+
+        /// Returns the audio time stamp offset
 	SQInteger getAudioTsOffset() { return m_ats_offset; }
 
 	/** @} */
@@ -323,30 +332,36 @@ private:
 	AVFrame					*m_pFrame;
 
 	/// Non-zero if key frame has been received
-	int						m_bKeyRxd;
+        int m_bKeyRxd;
 
 	/// Default key frame interval in frames
-	int						m_nKeyFrameInterval;
+        int m_nKeyFrameInterval;
 
 	/// Video stream index
-	int						m_nVideoStream;
+        int m_nVideoStream;
 
 	/// Audio stream index
-	int						m_nAudioStream;
+        int m_nAudioStream;
 
 	/// Left over packet data
 	sqbind::CSqBinary		m_buf;
 
 	/// Number of frames that have been processed
-	int						m_nFrames;
+        int m_nFrames;
 
 	/// Last frame flags
-	int						m_nLastFrameFlags;
+        int m_nLastFrameFlags;
 
 	/// Last frames encoded size
-	int						m_nLastFrameEncodedSize;
+        int m_nLastFrameEncodedSize;
 
-	/// Audio decoder
+        /// Time when the video file is opened, used to correct frame rate upon close
+        int m_videoStartTime;
+
+        /// Time when the video file is closed, used to correct frame rate
+        int m_videoEndTime;
+
+        /// Audio decoder
 	CFfAudioDecoder			m_audio_dec;
 
 	/// Extra codec data

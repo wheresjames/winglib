@@ -13,6 +13,35 @@ extern "C"
 
 #endif
 
+// typedefs from avienc.c http://ffmpeg.org/doxygen/1.2/avienc_8c_source.html#l00039
+// note that AVIStream is defined completely differently in avidec.c
+typedef struct AVIIentry {
+  unsigned int flags, pos, len;
+} AVIIentry;
+
+typedef struct AVIIndex {
+  int64_t     indx_start;
+  int         entry;
+  int         ents_allocated;
+  AVIIentry** cluster;
+} AVIIndex;
+
+typedef struct {
+  int64_t riff_start, movi_list, odml_list;
+  int64_t frames_hdr_all;
+  int riff_id;
+} AVIContext;
+
+typedef struct  {
+  int64_t frames_hdr_strm;
+  int audio_strm_length;
+  int packet_count;
+  int entry;
+
+  AVIIndex indexes;
+} AVIStream ;
+
+
 #define FFF_KEY_FRAME	AV_PKT_FLAG_KEY
 
 // Export Functions
@@ -89,6 +118,10 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, setAudioTsOffset )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioTsOffset )
 
+        SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoStartTime )
+        SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoEndTime )
+
+
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
@@ -143,6 +176,9 @@ CFfContainer::CFfContainer()
 
 	m_vts_offset = 0;
 	m_ats_offset = 0;
+     
+        m_videoStartTime = -1;
+        m_videoEndTime   = -1;
 }
 
 void CFfContainer::Destroy()
@@ -185,6 +221,9 @@ void CFfContainer::Destroy()
 
 	m_vts_offset = 0;
 	m_ats_offset = 0;
+   
+        m_videoStartTime = -1;
+        m_videoEndTime   = -1;
 
 	m_sUrl.clear();
 }
@@ -197,14 +236,46 @@ int CFfContainer::getAudioSampleFmt()
 
 #	define CNVFMT( t, v ) case v : return oex::obj::t;
 	switch( m_pFormatContext->streams[ m_nAudioStream ]->codec->sample_fmt )
-	{	CNVFMT( tUInt8, AV_SAMPLE_FMT_U8 );
-		CNVFMT( tInt16, AV_SAMPLE_FMT_S16 );
-		CNVFMT( tInt32, AV_SAMPLE_FMT_S32 );
-		CNVFMT( tFloat, AV_SAMPLE_FMT_FLT );
+        {	CNVFMT( tUInt8 , AV_SAMPLE_FMT_U8  );
+                CNVFMT( tInt16 , AV_SAMPLE_FMT_S16 );
+                CNVFMT( tInt32 , AV_SAMPLE_FMT_S32 );
+                CNVFMT( tFloat , AV_SAMPLE_FMT_FLT );
 		CNVFMT( tDouble, AV_SAMPLE_FMT_DBL );
 		default : return 0;
 	} // end switch
 	return 0;
+}
+
+void CFfContainer::fixVideoFrameRate( AVFormatContext* s, int nSeconds, int nFrames )
+{ // check if this is an .avi container before proceeding!
+  if ( NULL == s )
+    return;
+  if ( NULL == s->oformat )
+    return;
+  if ( NULL == s->oformat->name )
+    return;
+  if ( strcmp( s->oformat->name, "avi" ) )
+    return;
+   
+        AVIOContext* pb = s->pb; 
+            int64_t  file_size;
+     AVCodecContext* stream;
+   
+  // Modeled from avi_write_trailer() http://ffmpeg.org/doxygen/1.2/avienc_8c_source.html#l00594
+  // Note that the AVIStream also seems to track nFrames in avist->packet_count
+  file_size = avio_tell(pb);
+  for ( int n = 0; n < s->nb_streams; n++ ) 
+    { AVIStream *avist= (AVIStream *)s->streams[n]->priv_data;
+      if ( 12 <= avist->frames_hdr_strm )
+        { stream = s->streams[n]->codec;
+          if ( stream->codec_type == AVMEDIA_TYPE_VIDEO ) // Fix all video streams
+            { avio_seek(pb, avist->frames_hdr_strm - 12, SEEK_SET);
+              avio_wl32(pb, nSeconds);
+              avio_wl32(pb, nFrames );
+            }
+        }
+    }
+  avio_seek(pb, file_size, SEEK_SET);
 }
 
 int CFfContainer::CloseStream()
@@ -216,6 +287,11 @@ int CFfContainer::CloseStream()
 
 	if ( !m_pFormatContext )
 		return 0;
+   
+        if (( 0 < m_videoStartTime )
+         && ( m_videoStartTime < m_videoEndTime )
+         && ( 0 < m_nFrames ))
+          fixVideoFrameRate( m_pFormatContext, m_videoEndTime - m_videoStartTime, m_nFrames );
 
 	// Close all open streams
 	for ( i = 0; i < m_pFormatContext->nb_streams; i++ )
