@@ -69,8 +69,8 @@ public:
 	/// Sets the current byte offset into the file, returns the final position
 	SQInteger setBytePos( SQInteger pos );
    
-        /// based on passed time and frames, resets video stream frame rates
-        void fixVideoFrameRate( AVFormatContext* s, int nSeconds, int nFrames );
+        /// resets video stream frame rates
+        void fixVideoFrameRate();
 
 	/// Returns video frame rate
 	double getFps()
@@ -303,6 +303,9 @@ public:
         /// Capture clock time when an .avi recording file is closed
         void setVideoEndTime( SQInteger t ) { m_videoEndTime = t; }
 
+        /// Returns diagnostics about the frame rate fixer
+        sqbind::stdString getFixVideoFrameRateDiag();
+
         /// Returns the audio time stamp offset
 	SQInteger getAudioTsOffset() { return m_ats_offset; }
 
@@ -311,25 +314,28 @@ public:
 private:
 
 	/// The current url
-	sqbind::stdString		m_sUrl;
+        sqbind::stdString m_sUrl;
 
-	/// Write ability?
-	int 					m_nWrite;
+        /// Diagnostic info about the frame rate fixer
+        sqbind::stdString m_sFfrDiag;
+
+        /// Write ability?
+        int m_nWrite;
 
 	/// Read ability?
-	int 					m_nRead;
+        int m_nRead;
 
 	/// Output container context
-	AVFormatContext			*m_pFormatContext;
+        AVFormatContext *m_pFormatContext;
 
 	/// Codec context
-	AVCodecContext			*m_pCodecContext;
+        AVCodecContext *m_pCodecContext;
 
 	/// AV Packet
-	AVPacket				m_pkt;
+        AVPacket m_pkt;
 
 	/// Decode frame
-	AVFrame					*m_pFrame;
+        AVFrame *m_pFrame;
 
 	/// Non-zero if key frame has been received
         int m_bKeyRxd;
@@ -344,7 +350,7 @@ private:
         int m_nAudioStream;
 
 	/// Left over packet data
-	sqbind::CSqBinary		m_buf;
+        sqbind::CSqBinary m_buf;
 
 	/// Number of frames that have been processed
         int m_nFrames;
