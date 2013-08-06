@@ -13,6 +13,8 @@
 #include "protocols/protocolmanager.h"
 #include "protocols/protocolfactorymanager.h"
 #include "protocols/defaultprotocolfactory.h"
+#include "protocols/liveflv/innetliveflvstream.h"
+#include "protocols/liveflv/inboundliveflvprotocol.h"
 #include "protocols/rtmp/basertmpappprotocolhandler.h"
 #include "application/baseclientapplication.h"
 #include "application/clientapplicationmanager.h"

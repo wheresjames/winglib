@@ -28,6 +28,7 @@ CRtmpServer::CRtmpServer()
 	m_pSa = 0;
 	m_pPf = 0;
 	m_pPh = 0;
+	m_pLs = 0;
 	m_pTcpAcceptor = 0;
 	m_nIoInit = 0;
 	m_nProtoInit = 0;
@@ -64,6 +65,11 @@ void CRtmpServer::Destroy()
 	if ( m_pPh )
 	{	delete m_pPh;
 		m_pPh = 0;
+	} // end if
+
+	if ( m_pLs )
+	{	delete m_pLs;
+		m_pLs = 0;
 	} // end if
 
 	if ( m_pTcpAcceptor )
@@ -132,9 +138,30 @@ oexEcho( "b" );
 	// Register RTMP protocol
 	m_pSa->RegisterAppProtocolHandler( PT_INBOUND_RTMP, m_pPh );
 	m_pSa->RegisterAppProtocolHandler( PT_INBOUND_RTMPS_DISC, m_pPh );
-	m_pSa->RegisterAppProtocolHandler( PT_OUTBOUND_RTMP, m_pPh );
+//	m_pSa->RegisterAppProtocolHandler( PT_OUTBOUND_RTMP, m_pPh );
+	m_pSa->RegisterAppProtocolHandler( PT_INBOUND_LIVE_FLV, m_pPh );
+
+	m_pLs = new CLiveStream();
+	if ( !m_pLs )
+	{	Destroy();
+		setLastErrorStr( "Unable to allcoate memory for live stream handler" );
+		return 0;
+	} // end if
+
+//
+//	GetApplication()->GetStreamsManager()->RegisterStream();
+
+//	m_pLs->InitializeStream( "livestream" );
+
+//	m_pSa->RegisterAppProtocolHandler( PT_INBOUND_LIVE_FLV, m_pLs );
+
+//	m_pSa->RegisterProtocol( m_pLs );
+//	m_pSa->GetStreamsManager()->RegisterStream( m_pLs );
+//	GetApplication()->GetStreamsManager()
 
 oexEcho( "c" );
+
+	// +++ register input class
 
 	// Create default protocol factory
 	m_pPf = new DefaultProtocolFactory();
@@ -215,12 +242,5 @@ int CRtmpServer::Run()
 sqbind::stdString CRtmpServer::getProtocolMap()
 {
 	return sqbind::StrCvt(ProtocolFactoryManager::Dump());
-}
-
-bool CRtmpServer::CRTMPAppProtocolHandler::OutboundConnectionEstablished( OutboundRTMPProtocol *pFrom )
-{
-	oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::OutboundConnectionEstablished()" );
-
-	return false;
 }
 

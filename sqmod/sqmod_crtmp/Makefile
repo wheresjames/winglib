@@ -16,7 +16,7 @@ PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff \
 			crtmp openssl_a openssl_b openssl_a openssl_b lua tinyxml zlib 
 PRJ_DEFS := NET_SELECT HAS_LUA LITTLE_ENDIAN_BYTE_ALIGNED \
-			HAS_PROTOCOL_TS HAS_PROTOCOL_RTMP
+			HAS_PROTOCOL_TS HAS_PROTOCOL_RTMP HAS_PROTOCOL_LIVEFLV
 PRJ_LIBP :=
 PRJ_OSLB := 
 PRJ_WINL := shlwapi

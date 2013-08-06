@@ -21,11 +21,23 @@ public:
 		~CRtmpServerApp()
 		{
 		}
+		
+		virtual void SignalStreamRegistered(BaseStream *pStream)
+		{
+			oexEcho( ">>> CRtmpServer::CRtmpServerApp::SignalStreamRegistered()" );
+			return BaseClientApplication::SignalStreamRegistered( pStream );
+		}
 
 		virtual bool PullExternalStream(Variant streamConfig)
 		{
-			oexEcho( "CRtmpServer::CRtmpServerApp::PullExternalStream()" );
-			return PullExternalStream( streamConfig);
+			oexEcho( ">>> CRtmpServer::CRtmpServerApp::PullExternalStream()" );
+			return BaseClientApplication::PullExternalStream( streamConfig );
+		}
+
+		virtual bool PushLocalStream(Variant streamConfig)
+		{
+			oexEcho( ">>> CRtmpServer::CRtmpServerApp::PushLocalStream()" );
+			return BaseClientApplication::PushLocalStream( streamConfig );
 		}
 
 //	private:
@@ -41,39 +53,62 @@ public:
 		CRTMPAppProtocolHandler(Variant &configuration)
 			: BaseRTMPAppProtocolHandler(configuration)
 		{
-			oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::CRTMPAppProtocolHandler()" );
+			oexEcho( ">>> CRtmpServer::CRTMPAppProtocolHandler::CRTMPAppProtocolHandler()" );
 		}
 		virtual ~CRTMPAppProtocolHandler()
 		{
-			oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::~CRTMPAppProtocolHandler()" );
+			oexEcho( ">>> CRtmpServer::CRTMPAppProtocolHandler::~CRTMPAppProtocolHandler()" );
 		}
 
 //		bool ProcessInvokeConnect(BaseRTMPProtocol *pFrom, Variant &request);
-		virtual bool OutboundConnectionEstablished(OutboundRTMPProtocol *pFrom);
+		virtual bool OutboundConnectionEstablished(OutboundRTMPProtocol *pFrom)
+		{
+			oexEcho( ">>> CRtmpServer::CRTMPAppProtocolHandler::OutboundConnectionEstablished()" );
 
+			return BaseRTMPAppProtocolHandler::OutboundConnectionEstablished( pFrom );
+		}
+
+		virtual bool ProcessInvokeCreateStream(BaseRTMPProtocol *pFrom, Variant &request)
+		{
+			oexEcho( ">>> CRtmpServer::CRTMPAppProtocolHandler::ProcessInvokeCreateStream()" );
+
+			return BaseRTMPAppProtocolHandler::ProcessInvokeCreateStream( pFrom, request );
+		}
+
+		
 //		+++ set breakpoint in the play function and see where it goes :)
 		
 		virtual bool PullExternalStream(URI uri, Variant streamConfig)
 		{
-			oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::PullExternalStream()" );
+			oexEcho( ">>> CRtmpServer::CRTMPAppProtocolHandler::PullExternalStream()" );
 			return BaseRTMPAppProtocolHandler::PullExternalStream( uri, streamConfig );
 		}
 
+		virtual bool PushLocalStream(Variant streamConfig)
+		{
+			oexEcho( ">>> CRtmpServer::CRTMPAppProtocolHandler::PushLocalStream()" );
+			return BaseRTMPAppProtocolHandler::PushLocalStream( streamConfig );
+		}
+
+//		virtual bool PullExternalStreams()
+//		virtual bool PullExternalStream(Variant streamConfig);
+//		virtual bool PushLocalStream(Variant streamConfig);
+
 		virtual bool AuthenticateInbound(BaseRTMPProtocol *pFrom, Variant &request, Variant &authState)
 		{
-			oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::AuthenticateInbound()" );
+			oexEcho( ">>> CRtmpServer::CRTMPAppProtocolHandler::AuthenticateInbound()" );
 			return BaseRTMPAppProtocolHandler::AuthenticateInbound( pFrom, request, authState );
 		}
 
 		virtual bool InboundMessageAvailable(BaseRTMPProtocol *pFrom, Header &header, IOBuffer &inputBuffer)
 		{
-			oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::InboundMessageAvailable1()" );
+			oexEcho( ">>> CRtmpServer::CRTMPAppProtocolHandler::InboundMessageAvailable1()" );
 			return BaseRTMPAppProtocolHandler::InboundMessageAvailable( pFrom, header, inputBuffer );
 		}
 
 		virtual bool InboundMessageAvailable(BaseRTMPProtocol *pFrom, Variant &request)
 		{
-			oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::InboundMessageAvailable2()" );
+			oexEcho( ">>> CRtmpServer::CRTMPAppProtocolHandler::InboundMessageAvailable2()" );
 			
 			string json;
 			request.SerializeToJSON(json);
@@ -84,10 +119,39 @@ public:
 
 		virtual bool ProcessInvokePlay(BaseRTMPProtocol *pFrom, Variant &request)
 		{
-			oexEcho( "CRtmpServer::CRTMPAppProtocolHandler::ProcessInvokePlay()" );
+			oexEcho( ">>> CRtmpServer::CRTMPAppProtocolHandler::ProcessInvokePlay()" );
 			return BaseRTMPAppProtocolHandler::ProcessInvokePlay( pFrom, request );
 		}
 
+	};
+	
+//	class CLiveStream : public InNetLiveFLVStream
+	class CLiveStream : public InboundLiveFLVProtocol
+	{
+		public:
+		
+//			CLiveStream() : InNetLiveFLVStream( 0, 0, "livestream" )
+			CLiveStream()
+			{
+				oexEcho( ">>> CRtmpServer::CLiveStream::CLiveStream()" );
+			}
+
+			~CLiveStream()
+			{
+				oexEcho( ">>> CRtmpServer::CLiveStream::~CLiveStream()" );
+			}
+/*
+			virtual bool FeedData(uint8_t *pData, uint32_t dataLength,
+								  uint32_t processedLength, uint32_t totalLength,
+								  double absoluteTimestamp, bool isAudio)
+			{
+				oexEcho( "CRtmpServer::CLiveStream::FeedData()" );
+				return InNetLiveFLVStream::FeedData( pData, dataLength, processedLength,
+													 totalLength, absoluteTimestamp, isAudio );
+			}
+*/
+		private:
+		
 	};
 
 public:
@@ -152,6 +216,9 @@ private:
 
 	/// Protocol handler
 	CRTMPAppProtocolHandler		*m_pPh;
+	
+	/// Live stream
+	CLiveStream					*m_pLs;
 
 	/// Accept TCP connections
 	TCPAcceptor 				*m_pTcpAcceptor;
