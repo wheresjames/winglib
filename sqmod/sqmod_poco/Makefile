@@ -16,7 +16,7 @@ PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib \
 			poco_a poco_b poco_a poco_b openssl_a openssl_b openssl_a openssl_b zlib
 PRJ_DEFS := HAVE_MEMMOVE POCO_NO_AUTOMATIC_LIBS XML_STATIC PCRE_STATIC POCO_STATIC
-PRJ_WINL := iphlpapi
+PRJ_WINL := iphlpapi crypt32
  
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 
