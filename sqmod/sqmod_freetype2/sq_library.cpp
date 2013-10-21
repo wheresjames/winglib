@@ -38,7 +38,7 @@ int CFtLibrary::LoadFile( CFtFace *pFace, const sqbind::stdString &sFile, int nI
 		return 0;
 
 	// Attempt to load font
-	m_last_error = FT_New_Face( m_library, oexStrWToMbPtr( sFile.c_str() ), nIndex, &pFace->Obj() );
+	m_last_error = FT_New_Face( m_library, oexStrToMbPtr( sFile.c_str() ), nIndex, &pFace->Obj() );
 
 	return m_last_error ? 0 : 1;
 }

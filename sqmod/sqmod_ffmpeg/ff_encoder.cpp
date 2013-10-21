@@ -172,11 +172,11 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 		// Set H264 codec params
 		av_opt_set( m_pCodecContext->priv_data, "profile",
-					( m && (*m)[ oexT( "profile" ) ].len() ) ? oexStrWToMbPtr( (*m)[ oexT( "profile" ) ].c_str() ) : "baseline", AV_OPT_SEARCH_CHILDREN );
+					( m && (*m)[ oexT( "profile" ) ].len() ) ? oexStrToMbPtr( (*m)[ oexT( "profile" ) ].c_str() ) : "baseline", AV_OPT_SEARCH_CHILDREN );
 		av_opt_set( m_pCodecContext->priv_data, "preset",
-					( m && (*m)[ oexT( "preset" ) ].len() ) ? oexStrWToMbPtr( (*m)[ oexT( "preset" ) ].c_str() ) : "ultrafast", AV_OPT_SEARCH_CHILDREN );
+					( m && (*m)[ oexT( "preset" ) ].len() ) ? oexStrToMbPtr( (*m)[ oexT( "preset" ) ].c_str() ) : "ultrafast", AV_OPT_SEARCH_CHILDREN );
 		av_opt_set( m_pCodecContext->priv_data, "tune",
-					( m && (*m)[ oexT( "tune" ) ].len() ) ? oexStrWToMbPtr( (*m)[ oexT( "tune" ) ].c_str() ) : "zerolatency", AV_OPT_SEARCH_CHILDREN );
+					( m && (*m)[ oexT( "tune" ) ].len() ) ? oexStrToMbPtr( (*m)[ oexT( "tune" ) ].c_str() ) : "zerolatency", AV_OPT_SEARCH_CHILDREN );
 //		av_opt_set( m_pCodecContext->priv_data, "x264opts",
 //					( m && (*m)[ "x264opts" ].len() ) ? (*m)[ "x264opts" ].c_str() : "no-mbtree:sliced-threads:sync-lookahead=0", 0 );
 

@@ -115,7 +115,11 @@ sqbind::stdString CAsioDrv::getDriverError()
 		return oexT( "Driver not loaded" );
 	char szMsg[ 256 ] = { 0 };
 	m_pDriver->getErrorMessage( szMsg );
+#if defined( oexUNICODE )
 	return sqbind::oex2std( oexMbToStr( szMsg ) );
+#else
+	return szMsg;
+#endif
 }
 
 
