@@ -42,6 +42,8 @@
 #include "import/sq_fifo_share.h"
 #include "import/sq_video_share.h"
 #include "import/sq_multi.h"
+//#include "import/sq_share_one2one.h"
+//#include "import/sq_share_one2many.h"
 #include "import/sq_file.h"
 #include "import/sq_time.h"
 #include "import/sq_socket.h"

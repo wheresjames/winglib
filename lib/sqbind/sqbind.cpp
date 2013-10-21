@@ -47,6 +47,8 @@ namespace sqbind
 		CSq3dVectord::Register( x_vm );
 		CSqColor::Register( x_vm );
 		CSqBinary::Register( x_vm );
+//		CSqShareOne2One::Register( x_vm );
+//		CSqShareOne2Many::Register( x_vm );
 		CSqBinaryShare::Register( x_vm );
 		CSqFifoShare::Register( x_vm );
 		CSqVideoShare::Register( x_vm );
