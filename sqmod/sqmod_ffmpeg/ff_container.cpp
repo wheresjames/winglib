@@ -121,6 +121,10 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
     SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoStartTime )
     SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoEndTime )
 
+#if !defined( oexUNICODE )
+	SQBIND_MEMBER_FUNCTION( CFfContainer, getFixVideoFrameRateDiag )
+#endif
+
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 
 	SQBIND_GLOBALCONST( FFF_KEY_FRAME )
@@ -281,8 +285,7 @@ void CFfContainer::fixVideoFrameRate()
   avio_seek(pb, file_size, SEEK_SET);
 }
 
-// +++ Remove?
-/*
+#if !defined( oexUNICODE )
 sqbind::stdString CFfContainer::getFixVideoFrameRateDiag()
 {
 #define LINE_SZ 64
@@ -336,7 +339,7 @@ sqbind::stdString CFfContainer::getFixVideoFrameRateDiag()
   m_sFfrDiag.assign( msg );
   return m_sFfrDiag;
 }
-*/
+#endif
 
 int CFfContainer::CloseStream()
 {_STT();

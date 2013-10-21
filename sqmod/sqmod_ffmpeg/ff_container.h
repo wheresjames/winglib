@@ -297,16 +297,18 @@ public:
 	/// Returns the audio time stamp offset
 	void setAudioTsOffset( SQInteger ts ) { m_ats_offset = ts; }
 
-        /// Capture clock time when an .avi file is opened for recording
-        void setVideoStartTime( SQInteger t ) { m_videoStartTime = t; }
+	/// Capture clock time when an .avi file is opened for recording
+	void setVideoStartTime( SQInteger t ) { m_videoStartTime = t; }
 
-        /// Capture clock time when an .avi recording file is closed
-        void setVideoEndTime( SQInteger t ) { m_videoEndTime = t; }
+	/// Capture clock time when an .avi recording file is closed
+	void setVideoEndTime( SQInteger t ) { m_videoEndTime = t; }
 
-        /// Returns diagnostics about the frame rate fixer
- //       sqbind::stdString getFixVideoFrameRateDiag();
+	/// Returns diagnostics about the frame rate fixer
+#if !defined( oexUNICODE )
+	sqbind::stdString getFixVideoFrameRateDiag();
+#endif
 
-        /// Returns the audio time stamp offset
+	/// Returns the audio time stamp offset
 	SQInteger getAudioTsOffset() { return m_ats_offset; }
 
 	/** @} */
