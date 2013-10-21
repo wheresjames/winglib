@@ -561,7 +561,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, st
 			return oex::oexFALSE;
 
 		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
-		oex::CPropertyBag &pb = ( key != "." ) ? m_pb.at( std2oex( key ) ) : m_pb;
+		oex::CPropertyBag &pb = ( key != oexT( "." ) ) ? m_pb.at( std2oex( key ) ) : m_pb;
 		if ( pb.Size() )
 			*pReply = oex2std( oex::CParser::Serialize( pb ) );
 		else
@@ -588,7 +588,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, st
 			return oex::oexFALSE;
 
 		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
-		oex::CPropertyBag &pb = ( key != "." ) ? m_pb.at( std2oex( key ) ) : m_pb;
+		oex::CPropertyBag &pb = ( key != oexT( "." ) ) ? m_pb.at( std2oex( key ) ) : m_pb;
 		*pReply = oex2std( oexMks( pb.Size() ) );
 	}
 
@@ -628,7 +628,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, st
 			return oex::oexFALSE;
 
 		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
-		oex::CPropertyBag &pb = ( key != "." ) ? m_pb.at( std2oex( key ) ) : m_pb;
+		oex::CPropertyBag &pb = ( key != oexT( "." ) ) ? m_pb.at( std2oex( key ) ) : m_pb;
 		if ( pb.Size() )
 			*pReply = oex2std( oex::CParser::Implode( oex::CParser::Keys( pb ), oexT( "," ) ) );
 
@@ -642,7 +642,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, st
 			return oex::oexFALSE;
 
 		sqbind::stdString &key = mapParams[ oexT( "key" ) ];
-		oex::CPropertyBag &pb = ( key != "." ) ? m_pb.at( std2oex( key ) ) : m_pb;
+		oex::CPropertyBag &pb = ( key != oexT( "." ) ) ? m_pb.at( std2oex( key ) ) : m_pb;
 		if ( pb.Size() )
 			*pReply = oex2std( oex::CParser::EncodeJSON( pb ) );
 		else

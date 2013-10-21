@@ -465,6 +465,9 @@ public:
 		/// Returns the file path to the current script
 		stdString build_path( const stdString &sS1,  const stdString &sS2 );
 
+		/// Returns non-zero if pattern matches string
+		int match_file_pattern( const stdString &sPattern, const stdString &sStr, int bIgnoreCase );
+		
 		/// Returns an ascii mandelbrot image
 		stdString mandelbrot( int w, int h, int x1, int y1, int x2, int y2 );
 

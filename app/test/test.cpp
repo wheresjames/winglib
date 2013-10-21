@@ -1138,7 +1138,7 @@ _TR();
 	b1.Destroy();
 
 _TR();
-	b1.setString( oexT( "Hello World!" ) );
+	b1.setString( "Hello World!" );
 
 _TR();
 	b1.setOffset( 6 );
@@ -1178,7 +1178,7 @@ _TR();
 	b1.Destroy();
 
 _TR();
-	b1.setString( oexT( "Hello World!" ) );
+	b1.setString( "Hello World!" );
 
 _TR();
 	if ( !oexVERIFY( ( 13 + 3 ) != b1.Insert( 3, 0 ) ) )
@@ -1597,15 +1597,15 @@ oex::oexRESULT TestLists()
 		if ( !oexVERIFY( itStr->Cmp( szStr2[ i ] ) ) )
 			return -13;
 
-	oex::oexCSTR pIni = oexT( "; This is a test INI file"			"\r\n"
-							"# [comment]"							"\r\n"
-							"val1=Hello"							"\r\n"
-							"val2=World"							"\r\n"
-							""										"\r\n"
-							"[group1]"								"\r\n"
-							"val1=yup"								"\r\n"
-							"val2=noreturn"
-						);
+	oex::oexCSTR pIni = 	oexTEXT( "; This is a test INI file\r\n" )
+							oexTEXT( "# [comment]\r\n" )
+							oexTEXT( "val1=Hello\r\n" )
+							oexTEXT( "val2=World\r\n" )
+							oexTEXT( "\r\n" )
+							oexTEXT( "[group1]\r\n" )
+							oexTEXT( "val1=yup\r\n" )
+							oexTEXT( "val2=noreturn" )
+						;
 
 	oex::CPropertyBag pb = oex::CParser::DecodeIni( pIni );
 	if ( !oexVERIFY(  pb[ oexT( "val1" ) ].ToString() == oexT( "Hello" ) ) )
@@ -1673,7 +1673,7 @@ oex::oexRESULT TestLists()
 	if ( !oexVERIFY(  pb2[ oexT( "val1" ) ].ToString() == oexT( "Hello" ) )
 		 || !oexVERIFY(  pb2[ oexT( "val2" ) ].ToString() == oexT( "yup" ) )
 		 || !oexVERIFY(  pb2[ oexT( "val3" ) ].ToString() == oexT( "noreturn" ) ) )
-	{	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::EncodeMIME( pb2, oexTRUE ) ), 0, 16, 128 ).Ptr() );
+	{	oexEcho( oexBinToAsciiHexStr( oex::CBin( oexStrToMb( oex::CParser::EncodeMIME( pb2, oexTRUE ) ) ), 0, 16, 128 ).Ptr() );
 		oexEcho( oex::CParser::EncodeMIME( pb2, oexTRUE ).Ptr() );
 //		oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::DecodeMIME( oex::CParser::EncodeMIME( pb2, oexTRUE ), oexTRUE ) ), 0, 16, 128 ).Ptr() );
 		return -31;
@@ -2341,13 +2341,13 @@ oex::oexRESULT TestResources()
 		return -10;
 	} // end if
 
-	oexResourceFn( testfn ) = oexGetResourceFn( "res/cii_test.htm" );
+	oexResourceFn( testfn ) = oexGetResourceFn( oexT( "res/cii_test.htm" ) );
 	if ( !oexVERIFY( testfn ) )
 		return -11;
 
 	oex::CPropertyBag in; oex::CStr out;
 	testfn( in, out );
-	if ( !oexVERIFY( out == "abcdefghijklmnopqrstuvwxyz") )
+	if ( !oexVERIFY( out == oexT( "abcdefghijklmnopqrstuvwxyz") ) )
 	{	oexSHOW( out );
 		return -12;
 	} // end if

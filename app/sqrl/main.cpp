@@ -23,22 +23,22 @@ int run( oex::CPropertyBag &pbCmdLine )
 
 	oex::oexBOOL bFile = oex::oexTRUE;
 	oex::CStr sCmd = pbCmdLine[ 0 ].ToString();
-	oex::oexBOOL bInline = pbCmdLine.IsKey( "i" );
+	oex::oexBOOL bInline = pbCmdLine.IsKey( oexT( "i" ) );
 
 	// Calculate a module name if not specified
 	if ( !sCmd.Length() )
 	{
 		// Raw script on the command line?
-		if ( pbCmdLine.IsKey( "s" ) )
-			bFile = oex::oexFALSE, sCmd = pbCmdLine[ "s" ].ToString();
+		if ( pbCmdLine.IsKey( oexT( "s" ) ) )
+			bFile = oex::oexFALSE, sCmd = pbCmdLine[ oexT( "s" ) ].ToString();
 		
 		// Base64 encoded script?
-		if ( pbCmdLine.IsKey( "b" ) )
-			bFile = oex::oexFALSE, sCmd = oex::CBase64::Decode( pbCmdLine[ "b" ].ToString() );
+		if ( pbCmdLine.IsKey( oexT( "b" ) ) )
+			bFile = oex::oexFALSE, sCmd = oexMbToStr( oex::CBase64::Decode( oexStrToMb( pbCmdLine[ oexT( "b" ) ].ToString() ) ) );
 
 		// Scrit?
-		else if ( pbCmdLine.IsKey( "script" ) )
-			bFile = oex::oexFALSE, sCmd = pbCmdLine[ "script" ].ToString();
+		else if ( pbCmdLine.IsKey( oexT( "script" ) ) )
+			bFile = oex::oexFALSE, sCmd = pbCmdLine[ oexT( "script" ) ].ToString();
 			
 		else
 		{	
@@ -200,19 +200,19 @@ int run(int argc, char* argv[])
 	oexNOTICE( 0, oexT( "Application startup" ) );
 
 	// Show command line input
-	if ( pbCmdLine.IsKey( "show" ) )
+	if ( pbCmdLine.IsKey( oexT( "show" ) ) )
 		oexEcho( pbCmdLine.PrintR().Ptr() );
 
 	// Pause before starting
-	if ( pbCmdLine.IsKey( "pause" ) )
-		oexSleep( pbCmdLine[ "pause" ].ToInt() );
+	if ( pbCmdLine.IsKey( oexT( "pause" ) ) )
+		oexSleep( pbCmdLine[ oexT( "pause" ) ].ToInt() );
 
 	// Run the app
 	int nRet = run( pbCmdLine );
 
 	// Wait at the end
-	if ( pbCmdLine.IsKey( "pause_end" ) )
-		oexSleep( pbCmdLine[ "pause_end" ].ToInt() );
+	if ( pbCmdLine.IsKey( oexT( "pause_end" ) ) )
+		oexSleep( pbCmdLine[ oexT( "pause_end" ) ].ToInt() );
 
 	oexNOTICE( 0, oexT( "Shutting down..." ) );
 

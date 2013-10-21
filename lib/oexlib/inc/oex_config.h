@@ -242,7 +242,7 @@
 #	define oexSTTSTR			oexCSTR8
 #else
 #	define oexFUNCTION			__FUNCTION__
-#	define oexPRETTYFUNCTION	__FUNCTION__ oexT( "()" )
+#	define oexPRETTYFUNCTION	__FUNCTION__ oexTEXT( "()" )
 #	define oexSTTFUNCTION		__FUNCTION__
 #	define oexSTTSTR			oexCSTR
 #endif
@@ -259,19 +259,19 @@
 
 #if defined( OEX_PROJECT_NAME )
 #	define oexAppNamePtr()			oexTEXT( OEX_PROJECT_NAME )
-#	define oexAppNameSPtr( s )		oexTEXT( OEX_PROJECT_NAME "_" s )
+#	define oexAppNameSPtr( s )		oexTEXT( OEX_PROJECT_NAME ) oexTEXT( "_" ) s
 #else
-#	define oexAppNamePtr()			oexT( "" )
-#	define oexAppNameSPtr( s )		oexT( "_" s )
+#	define oexAppNamePtr()			oexTEXT( "" )
+#	define oexAppNameSPtr( s )		oexTEXT( "_" ) s
 #endif
 
 #if defined( OEX_CPU_ARM )
-#	define OEX_PROC_STR				"arm"
+#	define OEX_PROC_STR				oexTEXT( "arm" )
 #else
 #	if defined( OEX_CPU_64 )
-#		define OEX_PROC_STR			"x64"
+#		define OEX_PROC_STR			oexTEXT( "x64" )
 #	else
-#		define OEX_PROC_STR			"x86"
+#		define OEX_PROC_STR			oexTEXT( "x86" )
 #	endif
 #endif
 
@@ -293,8 +293,8 @@
 #define oexAppDesc()				OEX_NAMESPACE::CStr( oexAppDescPtr() )
 #define oexAppLongName()			OEX_NAMESPACE::CStr( oexAppLongNamePtr() )
 
-#define oexBuild()					oexGetBuildTime().FormatTime( oexT( "%y.%C.%D.%G%m" ) )
-#define oexBuildPtr()				oexGetBuildTime().FormatTime( oexT( "%y.%C.%D.%G%m" ) ).Ptr()
+#define oexBuild()					oexGetBuildTime().FormatTime( oexTEXT( "%y.%C.%D.%G%m" ) )
+#define oexBuildPtr()				oexGetBuildTime().FormatTime( oexTEXT( "%y.%C.%D.%G%m" ) ).Ptr()
 
 #if defined( OEX_PROJECT_VERSION )
 #	define oexVersion()				OEX_NAMESPACE::CStr( oexTEXT( OEX_PROJECT_VERSION ) )

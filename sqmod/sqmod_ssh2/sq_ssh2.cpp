@@ -108,7 +108,7 @@ void CSqSsh2::Destroy()
 	if ( m_session )
 	{
 		// Close the session
-		libssh2_session_disconnect( m_session, oexT( "Normal Shutdown" ) );
+		libssh2_session_disconnect( m_session, "Normal Shutdown" );
 		libssh2_session_free( m_session );
 		m_session = oexNULL;
 
@@ -136,7 +136,7 @@ int CSqSsh2::Connect( sqbind::CSqSocket *x_pSock )
 
 	// Ensure valid socket
 	if ( !x_pSock || !x_pSock->isConnected() || !x_pSock->Ptr() )
-		return logerr( 0, 0, "Invalid socket" );
+		return logerr( 0, 0, oexT( "Invalid socket" ) );
 
 	// Steal the socket handle
 	m_socket = oexPtrToInt( x_pSock->Ptr()->GetSocketHandle() );
@@ -202,7 +202,12 @@ sqbind::stdString CSqSsh2::getAuthorizationMethods()
 	// Get the list
 	int nErr = 0;
 	char *pList = 0; // libssh2_userauth_list( m_session, m_sUsername.c_str(), m_sUsername.length() );
-	SQSSH2_RETRY2( nErr, pList, m_session, libssh2_userauth_list( m_session, m_sUsername.c_str(), m_sUsername.length() ) );
+#if !defined( oexUNICODE )
+	SQSSH2_RETRY2( nErr, pList, m_session, libssh2_userauth_list( m_session, oexStrToMbPtr( m_sUsername.c_str() ), m_sUsername.length() ) );
+#else
+	oex::CStr8 sUsername8 = sqbind::std2oex8( m_sUsername );
+	SQSSH2_RETRY2( nErr, pList, m_session, libssh2_userauth_list( m_session, sUsername8.Ptr(), sUsername8.Length() ) );
+#endif
 
 	if ( 0 > nErr ) 
 	{	logerr( 0, nErr, oexT( "libssh2_userauth_list() Failed" ) ); return oexT( "" ); }
@@ -348,10 +353,18 @@ int CSqSsh2::OpenChannel( const sqbind::stdString &sName, const sqbind::stdStrin
 	// Attempt ot open the channel
 	int nErr = 0;
 	LIBSSH2_CHANNEL *ch = 0;
+#if !defined( oexUNICODE )
 	SQSSH2_RETRY2( nErr, ch, m_session, libssh2_channel_open_ex( m_session, 
 																 sType.c_str(), sType.length(),
 																 nWindowSize, nPacketSize,
 																 pMsg->Ptr(), pMsg->getUsed() ) );
+#else
+	oex::CStr8 sType8 = sqbind::std2oex8( sType );
+	SQSSH2_RETRY2( nErr, ch, m_session, libssh2_channel_open_ex( m_session, 
+																 sType8.Ptr(), sType8.Length(),
+																 nWindowSize, nPacketSize,
+																 pMsg->Ptr(), pMsg->getUsed() ) );
+#endif
 	if ( !ch && 0 > nErr )
 		return logerr( 0, nErr, oexT( "libssh2_channel_direct_tcpip_ex() failed" ) );
 
@@ -391,9 +404,16 @@ int CSqSsh2::OpenChannelDirectTcpip( const sqbind::stdString &sName,
 	int nErr = 0;
 	LIBSSH2_CHANNEL *ch = 0;
 	
+#if !defined( oexUNICODE )
 	SQSSH2_RETRY2( nErr, ch, m_session, libssh2_channel_direct_tcpip_ex( m_session, 
 																		 sHost.c_str(), nPort,
 																		 sSHost.c_str(), nSPort ) );
+#else
+	oex::CStr8 sHost8 = sqbind::std2oex8( sHost ), sSHost8 = sqbind::std2oex8( sSHost );
+	SQSSH2_RETRY2( nErr, ch, m_session, libssh2_channel_direct_tcpip_ex( m_session, 
+																		 sHost8.Ptr(), nPort,
+																		 sSHost8.Ptr(), nSPort ) );
+#endif																		 
 	if ( 0 > nErr )
 		return logerr( 0, nErr, oexT( "libssh2_channel_direct_tcpip_ex() failed" ) );
 
@@ -449,9 +469,16 @@ int CSqSsh2::ChannelSetEnv( const sqbind::stdString &sChannel, const sqbind::std
 		return logerr( 0, 0, oexT( "Specified channel does not exist" ) );
 
 	// Set environment variable
+#if !defined( oexUNICODE )
 	int nErr = libssh2_channel_setenv_ex( it->second, 
 										  sName.c_str(), sName.length(),
 										  sValue.c_str(), sValue.length() );
+#else
+	oex::CStr8 sName8 = sqbind::std2oex8( sName ), sValue8 = sqbind::std2oex8( sValue );
+	int nErr = libssh2_channel_setenv_ex( it->second, 
+										  sName8.Ptr(), sName8.Length(),
+										  sValue8.Ptr(), sValue8.Length() );
+#endif
 
 	if ( nErr )
 		return logerr( 0, nErr, oexT( "libssh2_channel_setenv_ex() Failed" ) );

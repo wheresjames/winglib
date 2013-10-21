@@ -55,7 +55,7 @@ int CSqMysql::LogError( oex::oexCSTR pPrefix )
 	m_nLastError = mysql_errno( &m_db );
 
 	// Build string
-	if ( pErr && *pErr ) m_sLastError = oexMbToStr( pErr );
+	if ( pErr && *pErr ) m_sLastError = oexMbToStrPtr( pErr );
 	else m_sLastError = oexFmt( oexT( "%d (%x)" ), m_nLastError, m_nLastError ).Ptr();
 
 	// Log it
@@ -94,9 +94,9 @@ int CSqMysql::Connect(	const sqbind::stdString &sServer,
 	try
 	{
 		// Attempt to connect the database
-		if ( !mysql_real_connect( &m_db, sServer.c_str(), 
-								  sUser.c_str(), sPass.c_str(), 
-								  sDatabase.length() ? sDatabase.c_str() : NULL, 
+		if ( !mysql_real_connect( &m_db, oexStrToMbPtr( sServer.c_str() ), 
+								  oexStrToMbPtr( sUser.c_str() ), oexStrToMbPtr( sPass.c_str() ), 
+								  sDatabase.length() ? oexStrToMbPtr( sDatabase.c_str() ) : NULL, 
 								  nPort, NULL, 0 ) )
 		{	LogError( oexMks( oexT( "mysql_real_connect( " ),
 							  sServer.c_str(), oexT( ", " ),
@@ -166,11 +166,11 @@ sqbind::stdString CSqMysql::MakePairs( sqbind::CSqMulti *mInfo )
 		if ( s.length() )
 			s += oexT( "," );
 
-		s += "`";
+		s += oexT( "`" );
 		s += Escape( it->first );
-		s += "`='";
+		s += oexT( "`='" );
 		s += Escape( it->second );
-		s += "'"; 
+		s += oexT( "'" ); 
 
 	} // end for
 
@@ -189,9 +189,9 @@ sqbind::stdString CSqMysql::MakeInsert( sqbind::CSqMulti *mInfo )
 		if ( n++ )
 			s += oexT( "," );
 
-		s += "`";
+		s += oexT( "`" );
 		s += Escape( it->first );
-		s += "`";
+		s += oexT( "`" );
 
 	} // end for
 
@@ -203,13 +203,13 @@ sqbind::stdString CSqMysql::MakeInsert( sqbind::CSqMulti *mInfo )
 		if ( n++ )
 			s += oexT( "," );
 
-		s += "'";
+		s += oexT( "'" );
 		s += Escape( it->second );
-		s += "'"; 
+		s += oexT( "'" ); 
 
 	} // end for
 
-	s += ")"; 
+	s += oexT( ")" ); 
 
 	return s;
 }	
@@ -331,7 +331,7 @@ int CSqMysql::getRow( sqbind::CSqMulti *mRow )
 		sqbind::CSqMulti mFi;
 		for ( int i = 0; i < nFields; i++ )
 			if ( getFieldInfo( i, &mFi ) )
-				(*mRow)[ mFi[ "name" ] ] = row[ i ] ? oexMbToStrPtr( (const char*)row[ i ] ) : oexT( "" );
+				(*mRow)[ mFi[ oexT( "name" ) ] ] = row[ i ] ? oexMbToStrPtr( (const char*)row[ i ] ) : oexT( "" );
 
 	} // end try
 	catch( ... ) { oexERROR( 0, oexT( "Exception in reading row data from mysql_fetch_row()" ) ); return 0; }

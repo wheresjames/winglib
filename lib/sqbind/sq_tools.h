@@ -193,7 +193,7 @@ template < typename T >
 		// Get the source data
 		oex::CStr sSrc;
 		if ( bFile )
-			sSrc = oexFileGetContents( sScript.c_str() );
+			sSrc = oexMbToStr( oexFileGetContents( sScript.c_str() ) );
 		else
 			sSrc = std2oex( sScript );
 

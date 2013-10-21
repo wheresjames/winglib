@@ -116,7 +116,7 @@ int CSqXml::Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int 
 #if !defined( oexUNICODE )
 		if ( !xmlDoc.Parse( sData.c_str() ) )
 #else
-		if ( !xmlDoc.Parse( oexStrToMb( oex::std2oex( sData ) ).Ptr() ) )
+		if ( !xmlDoc.Parse( oexStrToMb( sqbind::std2oex( sData ) ).Ptr() ) )
 #endif
 			; // return 0;
 

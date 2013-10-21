@@ -264,11 +264,11 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 	CSysTime st; st.GetSystemTime();
 
 	// Add module header
-	sSt << oexT( oexNL8 oexNL8 )
-		<<         oexT( "===================================================" oexNL8 )
-		<<         oexT( "= Module  : " ) << ( pName ? pName : oexT( "N/A" ) ) << oexNL
-		<< oexFmt( oexT( "= Address : 0x%08x" oexNL8 ), oexPtrToInt( pAddress ) )
-		<<         oexT( "===================================================" oexNL8 );
+	sSt << oexTEXT( oexNL8 ) oexTEXT( oexNL8 )
+		<<         oexTEXT( "===================================================" ) oexTEXT( oexNL8 )
+		<<         oexTEXT( "= Module  : " ) << ( pName ? pName : oexTEXT( "N/A" ) ) << oexNL
+		<< oexFmt( oexTEXT( "= Address : 0x%08x" ) oexTEXT( oexNL8 ), oexPtrToInt( pAddress ) )
+		<<         oexTEXT( "===================================================" ) oexTEXT( oexNL8 );
 
 
 	// Add each thread stack
@@ -282,16 +282,16 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 
 			// Show the thread id
 			sSt << oexNL
-				<< oexT( "===================================================" oexNL8 )
+				<< oexTEXT( "===================================================" ) oexTEXT( oexNL8 )
 				<< ( p->GetThreadId() == uCurrentThreadId
-				   ? oexT( "***************************************************" oexNL8 )
-				   : oexT( "" ) )
-				<< oexFmt(        oexT( "Thread     : %d (0x%x)" oexNL8 ), p->GetThreadId(), p->GetThreadId() )
-				<< st.FormatTime( oexT( "Created    : %Y/%c/%d  %g:%m:%s GMT" oexNL8 ) )
-				<<                oexT( "Name       : " ) << p->GetName() << oexNL
-				<<                oexT( "Tag        : " ) << p->GetTag() << oexNL
-				<< oexFmt(        oexT( "CheckPoint : %d (0x%x)" oexNL8 ), p->GetCheckpoint(), p->GetCheckpoint() )
-				<< oexT( "---------------------------------------------------" oexNL8 );
+				   ? oexTEXT( "***************************************************" ) oexTEXT( oexNL8 )
+				   : oexTEXT( "" ) )
+				<< oexFmt(        oexTEXT( "Thread     : %d (0x%x)" ) oexTEXT( oexNL8 ), p->GetThreadId(), p->GetThreadId() )
+				<< st.FormatTime( oexTEXT( "Created    : %Y/%c/%d  %g:%m:%s GMT" ) oexTEXT( oexNL8 ) )
+				<<                oexTEXT( "Name       : " ) << p->GetName() << oexNL
+				<<                oexTEXT( "Tag        : " ) << p->GetTag() << oexNL
+				<< oexFmt(        oexTEXT( "CheckPoint : %d (0x%x)" ) oexTEXT( oexNL8 ), p->GetCheckpoint(), p->GetCheckpoint() )
+				<< oexTEXT( "---------------------------------------------------" ) oexTEXT( oexNL8 );
 			
 			// Add the stack
 			for ( oexUINT sp = 0; sp < p->GetStackPtr(); sp++ )
@@ -326,13 +326,13 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 
 	// Stack trace header
 	CStr sSt = oexNL;
-	sSt <<                oexT( "Module            : " ) << oexGetModuleFileName() << oexNL;
-	sSt <<                oexT( "Version           : " ) << oexVersion() << oexNL;
-	sSt <<                oexT( "Build             : " ) << oexBuild() << oexNL;
-	sSt <<        oexFmt( oexT( "Current Thread    : %d (0x%x)" oexNL8 ), uCurrentThreadId, uCurrentThreadId );
-	sSt << st.FormatTime( oexT( "Current Time      : %Y/%c/%d  %g:%m:%s GMT" oexNL8 ) );
-	sSt <<        oexFmt( oexT( "Stack Trace Slots : Using %d of %d" oexNL8 ), pSt->getUsedSlots(), pSt->getTotalSlots() );
-	sSt <<                oexNL << ( pEInfo ? pEInfo : oexT( "(No other information available)" ) ) << oexNL;
+	sSt <<                oexTEXT( "Module            : " ) << oexGetModuleFileName() << oexNL;
+	sSt <<                oexTEXT( "Version           : " ) << oexVersion() << oexNL;
+	sSt <<                oexTEXT( "Build             : " ) << oexBuild() << oexNL;
+	sSt <<        oexFmt( oexTEXT( "Current Thread    : %d (0x%x)" ) oexTEXT( oexNL8 ), uCurrentThreadId, uCurrentThreadId );
+	sSt << st.FormatTime( oexTEXT( "Current Time      : %Y/%c/%d  %g:%m:%s GMT" ) oexTEXT( oexNL8 ) );
+	sSt <<        oexFmt( oexTEXT( "Stack Trace Slots : Using %d of %d" ) oexTEXT( oexNL8 ), pSt->getUsedSlots(), pSt->getTotalSlots() );
+	sSt <<                oexNL << ( pEInfo ? pEInfo : oexTEXT( "(No other information available)" ) ) << oexNL;
 
 	// Create a stack report for the current stack
 	sSt << CreateStackReport( uCurrentThreadId, pSt, oexGetFileName( oexGetModuleFileName() ).Ptr(), oexGetInstanceHandle() );
@@ -357,13 +357,13 @@ void CDebug::CreateCrashReport( oexCSTR pUrl, oexCSTR pSub, oexCSTR pEInfo )
 }
 
 
-oexCHAR g_szUrl[ oexSTRSIZE ] = { 0 };
-oexCHAR g_szSub[ oexSTRSIZE ] = { 0 };
+oexTCHAR g_szUrl[ oexSTRSIZE ] = { 0 };
+oexTCHAR g_szSub[ oexSTRSIZE ] = { 0 };
 
 LONG WINAPI OexExceptionHandler( struct _EXCEPTION_POINTERS *pEp )
 {_STT();
 
-	oexEcho( oexFmt( oexT( "exception( 0x%08x )" oexNL8 ), pEp->ExceptionRecord->ExceptionCode ).Ptr() );
+	oexEcho( oexFmt( oexTEXT( "exception( 0x%08x )" ) oexNL, pEp->ExceptionRecord->ExceptionCode ).Ptr() );
 
 	// Don't recurse crash reporting
 	volatile static oexBOOL bCrashInProgress = oexFALSE;
@@ -375,9 +375,9 @@ LONG WINAPI OexExceptionHandler( struct _EXCEPTION_POINTERS *pEp )
 		// Create the report
 		CStr s;
 		if ( pEp && pEp->ExceptionRecord )
-			s << oexFmt( oexT( "Exception Code    : 0x%08x" oexNL8 ), pEp->ExceptionRecord->ExceptionCode )
-			  << oexFmt( oexT( "Exception Flags   : 0x%08x" oexNL8 ),  pEp->ExceptionRecord->ExceptionFlags )
-			  << oexFmt( oexT( "Exception Address : 0x%08x" oexNL8 ), pEp->ExceptionRecord->ExceptionAddress )
+			s << oexFmt( oexTEXT( "Exception Code    : 0x%08x" ) oexNL, pEp->ExceptionRecord->ExceptionCode )
+			  << oexFmt( oexTEXT( "Exception Flags   : 0x%08x" ) oexNL,  pEp->ExceptionRecord->ExceptionFlags )
+			  << oexFmt( oexTEXT( "Exception Address : 0x%08x" ) oexNL, pEp->ExceptionRecord->ExceptionAddress )
 			  << oexNL
 			  << CDebug::GetExceptionCodeName( pEp->ExceptionRecord->ExceptionCode )
 			  << oexT( " - " )

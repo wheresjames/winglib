@@ -71,13 +71,11 @@ stdString CSqEngineExport::getCompiler()
 
 #if defined( OEX_GCC )
 	return oexT( "gcc" );
-#endif
-
-#if defined( OEX_MSC )
+#elif defined( OEX_MSC )
 	return oexT( "msvc" );
+#else
+	return oexT( "" );
 #endif
-
-	return "";
 }
 
 stdString CSqEngineExport::getPlatform()
@@ -460,6 +458,11 @@ stdString CSqEngineExport::decorate( const stdString &sPath, int bExe, int bLib 
 stdString CSqEngineExport::build_path( const stdString &sS1,  const stdString &sS2 )
 {_STT();
 	return oex2std( std2oex( sS1 ).BuildPath( std2oex( sS2 ) ) );
+}
+
+int CSqEngineExport::match_file_pattern( const stdString &sPattern, const stdString &sStr, int bIgnoreCase )
+{_STT();
+	return std2oex( sStr ).MatchPattern( std2oex( sPattern ), bIgnoreCase );
 }
 
 stdString CSqEngineExport::root( const stdString &sPath )
@@ -1531,7 +1534,7 @@ stdString CSqEngineExport::sqexe_path()
 		oex::oexCSTR sKeys[] = 
 		{
 			// Check for an engine like us
-			oexT( "SOFTWARE\\" SQKEYNAME "_" SQKEYCPU "_" SQBUILD ),
+			oexTEXT( "SOFTWARE\\" ) oexTEXT( SQKEYNAME ) oexTEXT( "_" ) oexTEXT( SQKEYCPU ) oexTEXT( "_" ) oexTEXT( SQBUILD ),
 			
 			// +++ Really? wtf?
 			// Any engine will probably do...
@@ -1970,6 +1973,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, module_name )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, module_path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, build_path )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, match_file_pattern )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, decorate )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_sys_folder )
@@ -2311,7 +2315,7 @@ oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::CStr8 *pbScript,
 			m_script = m_vm.CompileScript( sFile.c_str() );
 
 		else if ( pbScript && pbScript->Length() )
-			m_script = m_vm.CompileBuffer( bInline ? prepare_inline( oex82std( *pbScript ), 0 ).c_str() : pbScript->Ptr() );
+			m_script = m_vm.CompileBuffer( bInline ? prepare_inline( oex82std( *pbScript ), 0 ).c_str() : oexMbToStr( *pbScript ).Ptr() );
 
 		else
 			m_script = m_vm.CompileBuffer( bInline ? prepare_inline( sScript, 0 ).c_str() : sScript.c_str() );
@@ -2391,7 +2395,7 @@ int CSqEngine::OnIncludeInline( const stdString &sScript )
 
 		// Check for pre-compiled script
 		if ( 2 <= sUseScript.length() && ( *(oex::oexUSHORT*)sUseScript.c_str() ) == SQ_BYTECODE_STREAM_TAG )
-		{	oex::CStr8 buf( sUseScript.c_str(), sUseScript.length() );
+		{	oex::CStr8 buf( oexStrToMb( oex::CStr( sUseScript.c_str(), sUseScript.length() ) ) );
 			SetCompiledScript( buf );
 		} // end if
 
@@ -2427,7 +2431,7 @@ int CSqEngine::OnRunInline( const stdString &sScript )
 	{
 		// Check for pre-compiled script
 		if ( 2 <= sScript.length() && ( *(oex::oexUSHORT*)sScript.c_str() ) == SQ_BYTECODE_STREAM_TAG )
-		{	oex::CStr8 buf( sScript.c_str(), sScript.length() );
+		{	oex::CStr8 buf( oexStrToMb( oex::CStr( sScript.c_str(), sScript.length() ) ) );
 			SetCompiledScript( buf );
 		} // end if
 
@@ -2472,7 +2476,7 @@ int CSqEngine::OnInclude( const stdString &sScript )
 
 		// Check for pre-compiled script
 		if ( 2 <= sUseScript.length() && ( *(oex::oexUSHORT*)sUseScript.c_str() ) == SQ_BYTECODE_STREAM_TAG )
-		{	oex::CStr8 buf( sUseScript.c_str(), sUseScript.length() );
+		{	oex::CStr8 buf( oexStrToMb( oex::CStr( sUseScript.c_str(), sUseScript.length() ) ) );
 			SetCompiledScript( buf );
 		} // end if
 

@@ -93,7 +93,7 @@ public:
 		{
 			// Separator?
 			if ( !str::CompareLen( &x_pStr[ i ], x_uSize, x_pSep, x_uSep, x_uSep ) )
-			{	lst << CStr( x_pStr, 0, i );
+			{	lst << TStr< T >( x_pStr, 0, i );
 				x_pStr = &x_pStr[ i + x_uSep ];
 				x_uSize -= x_uSep; i = 0;
 			} // end if
@@ -103,7 +103,7 @@ public:
 		} // end while
 
 		// Add last item
-		if ( i ) lst << CStr( x_pStr, 0, i );
+		if ( i ) lst << TStr< T >( x_pStr, 0, i );
 
 		return lst;
 	}
@@ -453,7 +453,8 @@ public:
 			} // end switch
 
 			// Generic encode
-			return oexMks( oexTT( T, "&#" ), (oexULONG)(oexUCHAR)x_ch, oexTT( T, ";" ) );
+			return TStr< T >().Mks( oexTT( T, "&#" ), (oexULONG)(oexUCHAR)x_ch, oexTT( T, ";" ) );
+			// return oexMks8( oexT( "&#" ), (oexULONG)(oexUCHAR)x_ch, oexT( ";" ) );
 		}
 
 	/// Encoded a string "<b>Hello World</b>" -> "&lt;b&gt;Hello&nbsp;World&lt;/b&gt;"
@@ -621,7 +622,7 @@ public:
 				} // end switch
 
 				// Generic encode
-				return oexFmt( oexTT( T, "\" \"\\x%x\" \"" ), (unsigned long)( 0xff & x_ch ) );
+				return TStr< T >().Fmt( oexTT( T, "\" \"\\x%x\" \"" ), (unsigned long)( 0xff & x_ch ) );
 			}
 
 		template< typename T >
@@ -684,19 +685,19 @@ public:
 					return *( x_str.Slice( 1 ) );
 
 				// Check for hex encode string
-				if ( x_str.Sub( 0, 5 ) == oexT( "\" \"\\x" ) )
+				if ( x_str.Sub( 0, 5 ) == "\" \"\\x" )
 				{	T ch = oexTC( T, ' ' );
 					TStr< T > sNum = x_str.ParseToken( "0123456789abcdefABCDEF" );
 					if ( sNum.Length() )
 						ch = sNum.ToLong();
-					if ( x_str.Sub( 0, 5 ) == oexT( "\" \"" ) )
+					if ( x_str.Sub( 0, 5 ) == "\" \"" )
 						x_str.Slice( 3 );
 					return ch;
 
 				} // end if
 
 				// Embedded version, we don't create this kind because it's unreliable ;)
-				else if ( x_str.Sub( 0, 2 ) == oexT( "\\x" ) )
+				else if ( x_str.Sub( 0, 2 ) == "\\x" )
 				{	T ch = oexTC( T, ' ' );
 					TStr< T > sNum = x_str.ParseToken( "0123456789abcdefABCDEF" );
 					if ( sNum.Length() )

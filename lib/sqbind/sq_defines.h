@@ -156,10 +156,13 @@ namespace sqbind { typedef script::VMCore VM; }
 namespace sqbind
 {
 	typedef oex::oexTCHAR stdChar;
+	typedef oex::oexCHAR stdByte;
     typedef oexStdTString( stdChar ) stdString;
+    typedef oexStdTString( stdByte ) stdString8;
     typedef oexStdTStream( stdChar ) stdStream;
-    typedef oexStdTIStream( stdChar ) stdIStream;
-    typedef oexStdTOStream( stdChar ) stdOStream;
+    typedef oexStdTStream( stdByte ) stdStream8;
+    typedef oexStdTIStream( stdByte ) stdIStream;
+    typedef oexStdTOStream( stdByte ) stdOStream;
 
 
 	class CSqParam
@@ -209,6 +212,10 @@ namespace sqbind
 		{	return sqbind::stdString( s.Ptr(), (sqbind::stdString::size_type)s.Length() ); }
 
 	template < typename T >
+		static sqbind::stdString8 oex2std8( const T &s )
+		{	return sqbind::stdString8( s.Ptr(), (sqbind::stdString::size_type)s.Length() ); }
+
+	template < typename T >
 		static sqbind::stdString oex82std( const T &s )
 		{	oex::CStr t = oexMbToStr( s );
 			return sqbind::stdString( t.Ptr(), (sqbind::stdString::size_type)t.Length() );
@@ -217,6 +224,10 @@ namespace sqbind
 	template < typename T >
 		static oex::CStr std2oex( const T &s )
 		{	return oex::CStr( s.c_str(), s.length() ); }
+
+	template < typename T >
+		static oex::CStr8 std82oex8( const T &s )
+		{	return oex::CStr8( s.c_str(), s.length() ); }
 
 	template < typename T >
 		static oex::CStr8 std2oex8( const T &s )

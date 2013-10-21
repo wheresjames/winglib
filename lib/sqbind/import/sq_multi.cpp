@@ -209,12 +209,12 @@ stdString CSqMulti::str_htmldec()
 
 stdString CSqMulti::str_compress()
 {_STT();
-	return oex2std( oexCompress( std2oex( m_val.str() ) ) );
+	return oex2std( oexMbToStr( oexCompress( oexStrToMb( std2oex( m_val.str() ) ) ) ) );
 }
 
 stdString CSqMulti::str_uncompress()
 {_STT();
-	return oex2std( oexUncompress( std2oex( m_val.str() ) ) );
+	return oex2std( oexMbToStr( oexUncompress( oexStrToMb( std2oex( m_val.str() ) ) ) ) );
 }
 
 stdString CSqMulti::str_json_encode()
@@ -229,22 +229,22 @@ stdString CSqMulti::str_json_decode()
 
 stdString CSqMulti::str_base16_encode()
 {_STT();
-	return oex2std( oexBase16Encode( std2oex( m_val.str() ) ) );
+	return oex2std( oexMbToStr( oexBase16Encode( oexStrToMb( std2oex( m_val.str() ) ) ) ) );
 }
 
 stdString CSqMulti::str_base16_decode()
 {_STT();
-	return oex2std( oexBase16Decode( std2oex( m_val.str() ) ) );
+	return oex2std( oexMbToStr( oexBase16Decode( oexStrToMb( std2oex( m_val.str() ) ) ) ) );
 }
 
 stdString CSqMulti::str_base64_encode()
 {_STT();
-	return oex2std( oexBase64Encode( std2oex( m_val.str() ) ) );
+	return oex2std( oexMbToStr( oexBase64Encode( oexStrToMb( std2oex( m_val.str() ) ) ) ) );
 }
 
 stdString CSqMulti::str_base64_decode()
 {_STT();
-	return oex2std( oexBase64Decode( std2oex( m_val.str() ) ) );
+	return oex2std( oexMbToStr( oexBase64Decode( oexStrToMb( std2oex( m_val.str() ) ) ) ) );
 }
 
 stdString CSqMulti::str_size( double dDiv, int nDigits, const stdString &sSuffix )
@@ -257,22 +257,22 @@ stdString CSqMulti::str_size( double dDiv, int nDigits, const stdString &sSuffix
 
 CSqBinary CSqMulti::bin_urlenc()
 {_STT();
-	CSqBinary bin( oexUrlEncode( std2oex( m_val.str() ) ) ); return bin;
+	CSqBinary bin( oexStrToMb( oexUrlEncode( std2oex( m_val.str() ) ) ) ); return bin;
 }
 
 CSqBinary CSqMulti::bin_urldec()
 {_STT();
-	CSqBinary bin( oexUrlDecode( std2oex( m_val.str() ) ) ); return bin;
+	CSqBinary bin( oexStrToMb( oexUrlDecode( std2oex( m_val.str() ) ) ) ); return bin;
 }
 
 CSqBinary CSqMulti::bin_htmlenc()
 {_STT();
-	CSqBinary bin( oexHtmlEncode( std2oex( m_val.str() ) ) ); return bin;
+	CSqBinary bin( oexStrToMb( oexHtmlEncode( std2oex( m_val.str() ) ) ) ); return bin;
 }
 
 CSqBinary CSqMulti::bin_htmldec()
 {_STT();
-	CSqBinary bin( oexHtmlDecode( std2oex( m_val.str() ) ) ); return bin;
+	CSqBinary bin( oexStrToMb( oexHtmlDecode( std2oex( m_val.str() ) ) ) ); return bin;
 }
 
 CSqBinary CSqMulti::bin_compress()

@@ -68,13 +68,13 @@ int memshare_open( URLContext *h, const char *filename, int flags )
 		return AVERROR( EINVAL );
 
 	// Parse the url
-	oex::CPropertyBag pb = oex::os::CIpAddress::ParseUrl( filename );
+	oex::CPropertyBag pb = oex::os::CIpAddress::ParseUrl( oexMbToStrPtr( filename ) );
 
 	// Get the real share name
 	long lSize = 1024 * 1024;
 	long lBuffers = 256;
 	long lMaxPacketSize = 0;
-	const char *pShare = pb[ "host" ].ToString().Ptr();
+	const oex::oexTCHAR *pShare = pb[ oexT( "host" ) ].ToString().Ptr();
 	if ( !*pShare )
 		return AVERROR( EINVAL );
 
@@ -92,23 +92,23 @@ int memshare_open( URLContext *h, const char *filename, int flags )
 		oex::CPropertyBag pbGet = oex::CParser::DecodeUrlParams( pb[ oexT( "extra" ) ].ToString() );
 
 		// Get user size
-		if ( pbGet.IsKey( "size" ) )
+		if ( pbGet.IsKey( oexT( "size" ) ) )
 			lSize = oex::cmn::Max( pbGet[ oexT( "size" ) ].ToLong(), 1024l );
 
 		// Get user buffers
-		if ( pbGet.IsKey( "buffers" ) )
+		if ( pbGet.IsKey( oexT( "buffers" ) ) )
 			lBuffers = oex::cmn::Max( pbGet[ oexT( "buffers" ) ].ToLong(), 8l );
 
 		// Get user max_packet
-		if ( pbGet.IsKey( "max_packet_size" ) )
+		if ( pbGet.IsKey( oexT( "max_packet_size" ) ) )
 			lMaxPacketSize = pbGet[ oexT( "max_packet_size" ) ].ToLong();
 
 		// Buffer name
-		if ( pbGet.IsKey( "buf_name" ) )
+		if ( pbGet.IsKey( oexT( "buf_name" ) ) )
 			sBufName = sqbind::oex2std( pbGet[ oexT( "buf_name" ) ].ToString() );
 
 		// Share headers
-		if ( pbGet.IsKey( "headers" ) )
+		if ( pbGet.IsKey( oexT( "headers" ) ) )
 			sHeaders = sqbind::oex2std( pbGet[ oexT( "headers" ) ].ToString() );
 
 	} // end if
@@ -164,7 +164,7 @@ int memshare_write( URLContext *h, const unsigned char *buf, int size )
 //oexSHOW( oexBinToAsciiHexStr( sqbind::CSqBinary( buf, size ), 0, 16, 16 ) );
 
 	// Write to the shared memory buffer
-	if ( !((sqbind::CSqFifoShare*)h->priv_data)->WritePtr( buf, size, "", 0, 0 ) )
+	if ( !((sqbind::CSqFifoShare*)h->priv_data)->WritePtr( buf, size, oexT( "" ), 0, 0 ) )
 		return AVERROR( ENOMEM );
 
 	return size;

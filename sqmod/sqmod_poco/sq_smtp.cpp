@@ -5,14 +5,13 @@
 
 #if defined( oexUNICODE )
 static sqbind::stdString StrToWStr( const std::string& s )
-{	sqbind::stdString temp( s.length(), L' ' );
-	std::copy( s.begin(), s.end(), temp.begin() );
-	return temp;
+{
+	return sqbind::oex82std( sqbind::std82oex8( s ) );
 }
 static std::string WStrToStr( const sqbind::stdString& s )
-{	std::string temp( s.length(), ' ' );
-	std::copy( s.begin(), s.end(), temp.begin() );
-	return temp;
+{
+	oex::CStr8 s8 = sqbind::std2oex8( s );
+	return std::string( s8.Ptr(), s8.Length() );
 }
 #else
 #	define StrToWStr( s )	s.c_str()
@@ -91,7 +90,7 @@ int CPoSmtp::Open( const sqbind::stdString &sUrl, int nSecure )
 				return 0;
 			} // end if		
 
-			m_pContext = OexAllocConstruct< Poco::Net::Context >( Poco::Net::Context::CLIENT_USE, oexT( "" ), oexT( "" ), oexT( "" ), Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH" );
+			m_pContext = OexAllocConstruct< Poco::Net::Context >( Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH" );
 			if ( !m_pContext )
 			{	m_sLastError = oexT( "Out of memory" );
 				Destroy();
@@ -142,7 +141,7 @@ int CPoSmtp::Login( const sqbind::stdString &sType, const sqbind::stdString &sUs
 		// TLS?
 		if ( m_pContext )
 		{
-			m_pSession->login( oexT( "SMTP" ) );
+			m_pSession->login( "SMTP" );
 
 			if ( !( (Poco::Net::SecureSMTPClientSession*)m_pSession)->startTLS( m_pContext ) )
 			{	m_sLastError = oexT( "Failed to start TLS" );

@@ -103,7 +103,7 @@ sqbind::CSqMulti CAsioDrv::getDevices()
 	for( long i = 0; i < nDrivers; i++ )
 		if ( !adl.asioGetDriverName( i, name, MAX_ASIO_DRIVER_NAME_LEN - 1 ) )
 			name[ MAX_ASIO_DRIVER_NAME_LEN - 1 ] = 0,
-			m[ sqbind::oex2std( oexMks( i ) ) ][ oexT( "name" ) ].set( name );
+			m[ sqbind::oex2std( oexMks( i ) ) ][ oexT( "name" ) ].set( oexMbToStrPtr( name ) );
 		else
 			i = nDrivers;
 
@@ -115,7 +115,7 @@ sqbind::stdString CAsioDrv::getDriverError()
 		return oexT( "Driver not loaded" );
 	char szMsg[ 256 ] = { 0 };
 	m_pDriver->getErrorMessage( szMsg );
-	return szMsg;
+	return sqbind::oex2std( oexMbToStr( szMsg ) );
 }
 
 
@@ -216,45 +216,45 @@ sqbind::CSqMulti CAsioDrv::getInfo()
 	sqbind::CSqMulti m;
 
 	// Fill in driver information
-	m[ "driver"][ "id" ].set( sqbind::ToStr( m_nId ) );
+	m[ oexT( "driver" ) ][ oexT( "id" ) ].set( sqbind::ToStr( m_nId ) );
 
 	long nVersion = m_pDriver->getDriverVersion();
-	m[ "driver"][ "version" ].set( sqbind::ToStr( m_pDriver->getDriverVersion() ) );
-	m[ "driver"][ "version_str" ].set( sqbind::ToStr( ( nVersion >> 24 ) & 0xff ) + oexT( "." )
+	m[ oexT( "driver" ) ][ oexT( "version" ) ].set( sqbind::ToStr( m_pDriver->getDriverVersion() ) );
+	m[ oexT( "driver" ) ][ oexT( "version_str" ) ].set( sqbind::ToStr( ( nVersion >> 24 ) & 0xff ) + oexT( "." )
 									   + sqbind::ToStr( ( nVersion >> 16 ) & 0xff ) + oexT( "." )
 									   + sqbind::ToStr( ( nVersion >> 8 ) & 0xff ) + oexT( "." )
 									   + sqbind::ToStr( nVersion & 0xff ) );
 
 	char name[ 256 ] = { 0 };
 	m_pDriver->getDriverName( name );
-	m[ "driver" ][ "name" ].set( name );
+	m[ oexT( "driver" ) ][ oexT( "name" ) ].set( oexMbToStrPtr( name ) );
 
 	// Get the driver sample rate
 	ASIOSampleRate sr;
 	if ( ASE_OK == m_pDriver->getSampleRate( &sr )  )
-		m[ "driver" ][ "sample_rate" ].set( sqbind::ToStr( *((double*)&sr) ) );
+		m[ oexT( "driver" ) ][ oexT( "sample_rate" ) ].set( sqbind::ToStr( *((double*)&sr) ) );
 	else
-		m[ "driver" ][ "err" ].set( getDriverError().c_str() );
+		m[ oexT( "driver" ) ][ oexT( "err" ) ].set( getDriverError().c_str() );
 
 	// Save the number of available channels
-	m[ "driver" ][ "input_channels" ].set( sqbind::ToStr( m_nInputs ) ),
-	m[ "driver" ][ "output_channels" ].set( sqbind::ToStr( m_nOutputs ) );
+	m[ oexT( "driver" ) ][ oexT( "input_channels" ) ].set( sqbind::ToStr( m_nInputs ) ),
+	m[ oexT( "driver" ) ][ oexT( "output_channels" ) ].set( sqbind::ToStr( m_nOutputs ) );
 
 	ASIOChannelInfo	ci;
 	for ( long i = 0; i < m_nInputs; i++ )
 	{
 		ci.channel = i; ci.isInput = ASIOTrue;
 		if ( ASE_OK == m_pDriver->getChannelInfo( &ci )  )
-		{	sqbind::CSqMulti &r = m[ "input" ][ sqbind::ToStr( i ) ];
-			r[ "channel" ].set( sqbind::ToStr( ci.channel ) );
-			r[ "is_input" ].set( sqbind::ToStr( ci.isInput ) );
-			r[ "is_active" ].set( sqbind::ToStr( ci.isActive ) );
-			r[ "channelGroup" ].set( sqbind::ToStr( ci.channelGroup ) );
-			r[ "type" ].set( sqbind::ToStr( ci.type ) );
-			r[ "name" ].set( sqbind::ToStr( ci.name ? ci.name : "" ) );
+		{	sqbind::CSqMulti &r = m[ oexT( "input" ) ][ sqbind::ToStr( i ) ];
+			r[ oexT( "channel" ) ].set( sqbind::ToStr( ci.channel ) );
+			r[ oexT( "is_input" ) ].set( sqbind::ToStr( ci.isInput ) );
+			r[ oexT( "is_active" ) ].set( sqbind::ToStr( ci.isActive ) );
+			r[ oexT( "channelGroup" ) ].set( sqbind::ToStr( ci.channelGroup ) );
+			r[ oexT( "type" ) ].set( sqbind::ToStr( ci.type ) );
+			r[ oexT( "name" ) ].set( sqbind::ToStr( ci.name ? oexMbToStrPtr( ci.name ) : oexT( "" ) ) );
 		} // end if
 		else
-			m[ "driver" ][ "err" ].set( getDriverError().c_str() );
+			m[ oexT( "driver" ) ][ oexT( "err") ].set( getDriverError().c_str() );
 
 	} // end for
 
@@ -262,40 +262,40 @@ sqbind::CSqMulti CAsioDrv::getInfo()
 	{
 		ci.channel = i; ci.isInput = ASIOFalse;
 		if ( ASE_OK == m_pDriver->getChannelInfo( &ci )  )
-		{	sqbind::CSqMulti &r = m[ "output" ][ sqbind::ToStr( i ) ];
-			r[ "channel" ].set( sqbind::ToStr( ci.channel ) );
-			r[ "is_input" ].set( sqbind::ToStr( ci.isInput ) );
-			r[ "is_active" ].set( sqbind::ToStr( ci.isActive ) );
-			r[ "channelGroup" ].set( sqbind::ToStr( ci.channelGroup ) );
-			r[ "type" ].set( sqbind::ToStr( ci.type ) );
-			r[ "name" ].set( sqbind::ToStr( ci.name ? ci.name : "" ) );
+		{	sqbind::CSqMulti &r = m[ oexT( "output" ) ][ sqbind::ToStr( i ) ];
+			r[ oexT( "channel" ) ].set( sqbind::ToStr( ci.channel ) );
+			r[ oexT( "is_input" ) ].set( sqbind::ToStr( ci.isInput ) );
+			r[ oexT( "is_active" ) ].set( sqbind::ToStr( ci.isActive ) );
+			r[ oexT( "channelGroup" ) ].set( sqbind::ToStr( ci.channelGroup ) );
+			r[ oexT( "type" ) ].set( sqbind::ToStr( ci.type ) );
+			r[ oexT( "name" ) ].set( sqbind::ToStr( ci.name ? oexMbToStrPtr( ci.name ) : oexT( "" ) ) );
 		} // end if
 		else
-			m[ "driver" ][ "err" ].set( getDriverError().c_str() );
+			m[ oexT( "driver" ) ][ oexT( "err" ) ].set( getDriverError().c_str() );
 
 	} // end for
 
 	// Read in buffer information
 	long lMin = 0, lMax = 0, lPref = 0, lGran = 0;
 	if ( ASE_OK == m_pDriver->getBufferSize( &lMin, &lMax, &lPref, &lGran )  )
-	{	m[ "buffer" ][ "min" ].set( sqbind::ToStr( lMin ) );
-		m[ "buffer" ][ "max" ].set( sqbind::ToStr( lMax ) );
-		m[ "buffer" ][ "preferred" ].set( sqbind::ToStr( lPref ) );
-		m[ "buffer" ][ "granulatity" ].set( sqbind::ToStr( lGran ) );
+	{	m[ oexT( "buffer" ) ][ oexT( "min" ) ].set( sqbind::ToStr( lMin ) );
+		m[ oexT( "buffer" ) ][ oexT( "max" ) ].set( sqbind::ToStr( lMax ) );
+		m[ oexT( "buffer" ) ][ oexT( "preferred" ) ].set( sqbind::ToStr( lPref ) );
+		m[ oexT( "buffer" ) ][ oexT( "granulatity" ) ].set( sqbind::ToStr( lGran ) );
 	} // end if
 	else
-		m[ "buffer" ][ "err" ].set( getDriverError().c_str() );
+		m[ oexT( "buffer" ) ][ oexT( "err" ) ].set( getDriverError().c_str() );
 
 	// Get the input and output latencies
 	// (input latency is the age of the first sample in the currently returned audio block)
 	// (output latency is the time the first sample in the currently returned audio block requires to get to the output)
 	long lInputLatency =0, lOutputLatency =0;
 	if ( ASE_OK == m_pDriver->getLatencies( &lInputLatency, &lOutputLatency) )
-	{	m[ "latency" ][ "input" ].set( sqbind::ToStr( lInputLatency ) );
-		m[ "latency" ][ "output" ].set( sqbind::ToStr( lOutputLatency ) );
+	{	m[ oexT( "latency" ) ][ oexT( "input" ) ].set( sqbind::ToStr( lInputLatency ) );
+		m[ oexT( "latency" ) ][ oexT( "output" ) ].set( sqbind::ToStr( lOutputLatency ) );
 	}
 	else
-		m[ "buffer" ][ "err" ].set( getDriverError().c_str() );
+		m[ oexT( "buffer" ) ][ oexT( "err" ) ].set( getDriverError().c_str() );
 
 	return m;
 }
@@ -839,7 +839,7 @@ ASIOTime* CAsioDrv::onBufferSwitchTimeInfo( ASIOTime* params, long doubleBufferI
 			if ( 0 <= nCh && eMaxChannels > nCh )
 			{	long nIdx = m_chmap[ nCh ];
 				if ( 0 <= nIdx && nIdx < m_nOpenChannels )
-					m_share[ nSh ].share.WritePtr( pAbi[ nIdx ].buffers[ doubleBufferIndex ], lBytes, "", 0, 0 );
+					m_share[ nSh ].share.WritePtr( pAbi[ nIdx ].buffers[ doubleBufferIndex ], lBytes, oexT( "" ), 0, 0 );
 			} // end if
 		} // end if
 
@@ -899,7 +899,7 @@ ASIOTime* CAsioDrv::onBufferSwitchTimeInfo( ASIOTime* params, long doubleBufferI
 #endif
 
 			// Write data to share
-			m_share[ nSh ].share.Write( &m_buf, "", 0, 0 );
+			m_share[ nSh ].share.Write( &m_buf, oexT( "" ), 0, 0 );
 
 		} // end else
 

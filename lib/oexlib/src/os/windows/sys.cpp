@@ -650,10 +650,11 @@ int CSys::Echo( oexCSTRW x_pFmt )
 {//_STT();
 	if ( !x_pFmt )
 		return 0;
-	CStr8 s = oexStrWToStr( x_pFmt );
 #if defined( oexUNICODE )
+	CStr8 s = oexStrToMb( x_pFmt );
 	CUtil::AddOutput( x_pFmt, s.Length(), oexTRUE );
 #else
+	CStr8 s = oexStrWToMb( x_pFmt );
 	CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
 #endif
 	return ::puts( s.Ptr() );
@@ -1079,7 +1080,7 @@ int CSys::Echo( oexCSTR8 x_pFmt, oexLONG x_lLen )
 #if !defined( oexUNICODE )
 		CUtil::AddOutput( x_pFmt, x_lLen, oexTRUE );
 #else
-		CStr s = oexStrToStrW( CStr8( x_pFmt, x_lLen ) );
+		CStr s = oexMbToStr( CStr8( x_pFmt, x_lLen ) );
 		CUtil::AddOutput( s.Ptr(), s.Length(), oexTRUE );
 #endif
 	} // end if
@@ -1203,7 +1204,7 @@ oexUINT CSys::StartProcess( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirec
 #if !defined( OEX_WINCE )
 
 	PROCESS_INFORMATION pi; oexZero( pi );
-	if ( !CreateProcess( x_pFile, (LPSTR)NULL, NULL, NULL, FALSE, 0, NULL, x_pDirectory, NULL, &pi ) )
+	if ( !CreateProcess( x_pFile, NULL, NULL, NULL, FALSE, 0, NULL, x_pDirectory, NULL, &pi ) )
 		return 0;
 
 	CloseHandle( pi.hThread );

@@ -304,7 +304,7 @@ public:
         void setVideoEndTime( SQInteger t ) { m_videoEndTime = t; }
 
         /// Returns diagnostics about the frame rate fixer
-        sqbind::stdString getFixVideoFrameRateDiag();
+ //       sqbind::stdString getFixVideoFrameRateDiag();
 
         /// Returns the audio time stamp offset
 	SQInteger getAudioTsOffset() { return m_ats_offset; }

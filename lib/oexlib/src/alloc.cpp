@@ -142,25 +142,25 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
 #endif
 
 		if( uSize )
-			os::CSys::StrFmt( pMsg, uBuf, oexT( "Total: %u, Block: %u, Protected: %u, Refs: %u, Flags: %u" oexNL8 ),
+			os::CSys::StrFmt( pMsg, uBuf, oexTEXT( "Total: %u, Block: %u, Protected: %u, Refs: %u, Flags: %u" ) oexTEXT( oexNL8 ),
 													  uSize, uBlockSize, pBh->uSize, pBh->uRef, pBh->uFlags );
 		else
-			os::CSys::StrFmt( pMsg, uBuf, oexT( "Block: %u, Protected: %u, Refs: %u, Flags: %u" oexNL8 ),
+			os::CSys::StrFmt( pMsg, uBuf, oexTEXT( "Block: %u, Protected: %u, Refs: %u, Flags: %u" ) oexTEXT ( oexNL8 ),
 												  uBlockSize, pBh->uSize, pBh->uRef, pBh->uFlags );
 // *
 // +++ This code crashes if pBh->ai[ xxx ].pFile was allocated from the heap of another module
 
 		if ( pBh->ai[ 0 ].pFile )
 			os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
-							  oexT( "%s(%u) : Allocated" oexNL8 ), pBh->ai[ 0 ].pFile, pBh->ai[ 0 ].uLine );
+							  oexTEXT( "%s(%u) : Allocated" ) oexTEXT( oexNL8 ), pBh->ai[ 0 ].pFile, pBh->ai[ 0 ].uLine );
 
 		if ( pBh->ai[ 1 ].pFile )
 			os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
-							  oexT( "%s(%u) : Resized" oexNL8 ), pBh->ai[ 1 ].pFile, pBh->ai[ 1 ].uLine );
+							  oexTEXT( "%s(%u) : Resized" ) oexTEXT( oexNL8 ), pBh->ai[ 1 ].pFile, pBh->ai[ 1 ].uLine );
 
 		if ( pBh->ai[ 2 ].pFile )
 			os::CSys::StrFmt( zstr::eos( pMsg ), uBuf - zstr::Length( pMsg ),
-							  oexT( "%s(%u) : Freed" oexNL8 ), pBh->ai[ 2 ].pFile, pBh->ai[ 2 ].uLine );
+							  oexTEXT( "%s(%u) : Freed" ) oexTEXT( oexNL8 ), pBh->ai[ 2 ].pFile, pBh->ai[ 2 ].uLine );
 // * /
 
 // +++ Replace with oexBinToAsciiStr()
@@ -208,7 +208,7 @@ oexBOOL CAlloc::GetBlockReport( oexCPVOID x_pMem, oexUINT uSize, oexSTR pMsg, oe
     } // end catch
 
 	os::CSys::StrFmt( pMsg, uBuf,
-		oexT( " Assert while trying to interpret memory block : %08x : %d bytes" oexNL8 ),
+		oexTEXT( " Assert while trying to interpret memory block : %08x : %d bytes" ) oexTEXT( oexNL8 ),
 		oexPtrToInt( x_pMem ), uSize );
 
 	return oexFALSE;

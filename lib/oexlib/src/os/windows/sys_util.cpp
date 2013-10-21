@@ -247,7 +247,7 @@ oexBOOL _DeleteRegSubKeys( HKEY hRoot, const CStr &x_sPath )
 {_STT();
 
 	HKEY		hKey = NULL;
-	char		szKey[ oexSTRSIZE ];
+	TCHAR		szKey[ oexSTRSIZE ];
 	DWORD		dwSize = oexSTRSIZE - 1;
 
 	// Open The Key
@@ -287,7 +287,7 @@ oexLONG _GetRegKeys( CPropertyBag &pb, HKEY hRoot, const CStr &x_sPath, oexBOOL 
 		return 0;
 
 	HKEY		hKey = NULL;
-	char		szKey[ oexSTRSIZE ];
+	TCHAR		szKey[ oexSTRSIZE ];
 	DWORD		dwSize = oexSTRSIZE - 1;
 
 	// Open The Key
@@ -415,7 +415,7 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 		return CPropertyBag();
 
 	CPropertyBag pb;
-	pb[ "drive" ] = x_sDrive;
+	pb[ oexT( "drive" ) ] = x_sDrive;
 	pb[ oexT( "drive_type" ) ] = GetDriveTypeStr( x_sDrive.Ptr() );
 
 	// See if a disk is loaded
@@ -427,15 +427,15 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 	{
 		// Get volume information
 		DWORD dwSn = 0, dwMax = 0, dwFlags = 0;
-		char szVolume[ 1024 * 8 ] = { 0 }, szFileSystem[ 1024 * 8 ] = { 0 };
+		TCHAR szVolume[ 1024 * 8 ] = { 0 }, szFileSystem[ 1024 * 8 ] = { 0 };
 		if ( GetVolumeInformation(	x_sDrive.Ptr(), szVolume, sizeof( szVolume ),
 									&dwSn, &dwMax, &dwFlags,
 									szFileSystem, sizeof( szFileSystem ) ) )
-		{	pb[ oexT( "volume" ) ] = oexMbToStrPtr( szVolume );
+		{	pb[ oexT( "volume" ) ] = szVolume;
 			pb[ oexT( "serial" ) ] = dwSn;
 			pb[ oexT( "max_filename" ) ] = dwMax;
 			pb[ oexT( "flags" ) ] = dwFlags;
-			pb[ oexT( "file_system" ) ] = oexMbToStrPtr( szFileSystem );
+			pb[ oexT( "file_system" ) ] = szFileSystem;
 		} // end if
 
 		// More disk info
@@ -463,18 +463,18 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 			{
 				// Available percentages
 				pb[ oexT( "percent_available" ) ]
-					= CStr().Fmt( "%.2f", (double)liFreeBytesAvailable.QuadPart / (double)liTotalNumberOfBytes.QuadPart * (double)100 );
+					= CStr().Fmt( oexT( "%.2f" ), (double)liFreeBytesAvailable.QuadPart / (double)liTotalNumberOfBytes.QuadPart * (double)100 );
 				if ( liTotalNumberOfBytes.QuadPart > liFreeBytesAvailable.QuadPart )
 					pb[ oexT( "percent_unavailable" ) ]
-						= CStr().Fmt( "%.2f", (double)( liTotalNumberOfBytes.QuadPart - liFreeBytesAvailable.QuadPart )
+						= CStr().Fmt( oexT( "%.2f" ), (double)( liTotalNumberOfBytes.QuadPart - liFreeBytesAvailable.QuadPart )
 												/ (double)liTotalNumberOfBytes.QuadPart * (double)100 );
 
 				// Used percentages
 				pb[ oexT( "percent_free" ) ]
-					= CStr().Fmt( "%.2f", (double)liTotalNumberOfBytesFree.QuadPart / (double)liTotalNumberOfBytes.QuadPart * (double)100 );
+					= CStr().Fmt( oexT( "%.2f" ), (double)liTotalNumberOfBytesFree.QuadPart / (double)liTotalNumberOfBytes.QuadPart * (double)100 );
 				if ( liTotalNumberOfBytes.QuadPart > liTotalNumberOfBytesFree.QuadPart )
 					pb[ oexT( "percent_used" ) ]
-						= CStr().Fmt( "%.2f", (double)( liTotalNumberOfBytes.QuadPart - liTotalNumberOfBytesFree.QuadPart )
+						= CStr().Fmt( oexT( "%.2f" ), (double)( liTotalNumberOfBytes.QuadPart - liTotalNumberOfBytesFree.QuadPart )
 												/ (double)liTotalNumberOfBytes.QuadPart * (double)100 );
 			} // en dif
 
@@ -729,15 +729,15 @@ oexINT CSysUtil::GetScreenCaptureInfo( CBin *x_pInf, CPropertyBag *pb )
 		return 0;
 
 	// Save important image information
-	(*pb)[ "w" ] = p->bmi.bmiHeader.biWidth;
-	(*pb)[ "h" ] = p->bmi.bmiHeader.biHeight;
-	(*pb)[ "bpp" ] = p->bmi.bmiHeader.biBitCount;
-	(*pb)[ "sz" ] = p->bmi.bmiHeader.biSizeImage;
-	(*pb)[ "cmp" ] = p->bmi.bmiHeader.biCompression;
-
-	(*pb)[ "fmt" ] = p->lFmt;
-	(*pb)[ "sw" ] = p->lScreenWidth;
-	(*pb)[ "sh" ] = p->lScreenHeight;
+	(*pb)[ oexT( "w" ) ] = p->bmi.bmiHeader.biWidth;
+	(*pb)[ oexT( "h" ) ] = p->bmi.bmiHeader.biHeight;
+	(*pb)[ oexT( "bpp" ) ] = p->bmi.bmiHeader.biBitCount;
+	(*pb)[ oexT( "sz" ) ] = p->bmi.bmiHeader.biSizeImage;
+	(*pb)[ oexT( "cmp" ) ] = p->bmi.bmiHeader.biCompression;
+           
+	(*pb)[ oexT( "fmt" ) ] = p->lFmt;
+	(*pb)[ oexT( "sw" ) ] = p->lScreenWidth;
+	(*pb)[ oexT( "sh" ) ] = p->lScreenHeight;
 
 	return pb->Size();
 }
@@ -781,10 +781,10 @@ static BOOL CALLBACK CSysUtil_GetScreenInfo( HMONITOR hMonitor, HDC hdcMonitor, 
 	CPropertyBag &r = (*pb)[ nIdx ];
 
 	if ( lprcMonitor )
-	{	r[ "draw" ][ "x" ] = lprcMonitor->left;
-		r[ "draw" ][ "y" ] = lprcMonitor->top;
-		r[ "draw" ][ "w" ] = lprcMonitor->right - lprcMonitor->left;
-		r[ "draw" ][ "h" ] = lprcMonitor->bottom - lprcMonitor->top;
+	{	r[ oexT( "draw" ) ][ oexT( "x" ) ] = lprcMonitor->left;
+		r[ oexT( "draw" ) ][ oexT( "y" ) ] = lprcMonitor->top;
+		r[ oexT( "draw" ) ][ oexT( "w" ) ] = lprcMonitor->right - lprcMonitor->left;
+		r[ oexT( "draw" ) ][ oexT( "h" ) ] = lprcMonitor->bottom - lprcMonitor->top;
 	} // end if
 
 	// Save information
@@ -793,19 +793,19 @@ static BOOL CALLBACK CSysUtil_GetScreenInfo( HMONITOR hMonitor, HDC hdcMonitor, 
 	if ( GetMonitorInfo( hMonitor, &mi ) )
 	{
 		// Total size
-		r[ "monitor" ][ "x" ] = mi.rcMonitor.left;
-		r[ "monitor" ][ "y" ] = mi.rcMonitor.top;
-		r[ "monitor" ][ "w" ] = mi.rcMonitor.right - mi.rcMonitor.left;
-		r[ "monitor" ][ "h" ] = mi.rcMonitor.bottom - mi.rcMonitor.top;
+		r[ oexT( "monitor" ) ][ oexT( "x" ) ] = mi.rcMonitor.left;
+		r[ oexT( "monitor" ) ][ oexT( "y" ) ] = mi.rcMonitor.top;
+		r[ oexT( "monitor" ) ][ oexT( "w" ) ] = mi.rcMonitor.right - mi.rcMonitor.left;
+		r[ oexT( "monitor" ) ][ oexT( "h" ) ] = mi.rcMonitor.bottom - mi.rcMonitor.top;
 
 		// Working size
-		r[ "work" ][ "x" ] = mi.rcWork.left;
-		r[ "work" ][ "y" ] = mi.rcWork.top;
-		r[ "work" ][ "w" ] = mi.rcWork.right - mi.rcWork.left;
-		r[ "work" ][ "h" ] = mi.rcWork.bottom - mi.rcWork.top;
+		r[ oexT( "work" ) ][ oexT( "x" ) ] = mi.rcWork.left;
+		r[ oexT( "work" ) ][ oexT( "y" ) ] = mi.rcWork.top;
+		r[ oexT( "work" ) ][ oexT( "w" ) ] = mi.rcWork.right - mi.rcWork.left;
+		r[ oexT( "work" ) ][ oexT( "h" ) ] = mi.rcWork.bottom - mi.rcWork.top;
 
-		r[ "flags" ] = mi.dwFlags;
-		r[ "name" ] = mi.szDevice;
+		r[ oexT( "flags" ) ] = mi.dwFlags;
+		r[ oexT( "name" ) ] = mi.szDevice;
 
 	} // end if
 
@@ -923,7 +923,7 @@ oexINT CSysUtil::GetMouseInfo( CPropertyBag *pb )
 
 	POINT pos;
 	if ( ::GetCursorPos( &pos ) )
-		(*pb)[ "x" ] = pos.x, (*pb)[ "y" ] = pos.y;
+		(*pb)[ oexT( "x" ) ] = pos.x, (*pb)[ oexT( "y" ) ] = pos.y;
 
 	return pb->Size();
 }
@@ -1090,9 +1090,9 @@ oexINT CSysUtil::GetProcessList( CPropertyBag *pb, bool bProcessInfo )
 		return -1;
 
 	// Load functions
-	pCreateToolhelp32Snapshot = (pfn_CreateToolhelp32Snapshot)GetProcAddress( hKernel32, oexT( "CreateToolhelp32Snapshot" ) );
-	pProcess32First = (pfn_Process32First)GetProcAddress( hKernel32, oexT( "Process32First" ) );
-	pProcess32Next = (pfn_Process32Next)GetProcAddress( hKernel32, oexT( "Process32Next" ) );
+	pCreateToolhelp32Snapshot = (pfn_CreateToolhelp32Snapshot)GetProcAddress( hKernel32, "CreateToolhelp32Snapshot" );
+	pProcess32First = (pfn_Process32First)GetProcAddress( hKernel32, "Process32First" );
+	pProcess32Next = (pfn_Process32Next)GetProcAddress( hKernel32, "Process32Next" );
 
 	// Ensure we got these functions
 	if ( !pCreateToolhelp32Snapshot || !pProcess32First || !pProcess32Next )
@@ -1116,15 +1116,15 @@ oexINT CSysUtil::GetProcessList( CPropertyBag *pb, bool bProcessInfo )
 //			if ( pe.th32ProcessID )
 			{
 				CPropertyBag &r = (*pb)[ i++ ];
-				r[ "pid" ] = pe.th32ProcessID;
-				r[ "threads" ] = pe.cntThreads;
-				r[ "parent" ] = pe.th32ParentProcessID;
-				r[ "base_priority" ] = pe.pcPriClassBase;
+				r[ oexT( "pid" ) ] = pe.th32ProcessID;
+				r[ oexT( "threads" ) ] = pe.cntThreads;
+				r[ oexT( "parent" ) ] = pe.th32ParentProcessID;
+				r[ oexT( "base_priority" ) ] = pe.pcPriClassBase;
 				if ( pe.szExeFile && *pe.szExeFile )
-					r[ "file" ] = pe.szExeFile;
+					r[ oexT( "file" ) ] = pe.szExeFile;
 
 				if ( bProcessInfo )
-					GetProcessInfo( pe.th32ProcessID, &r[ "info" ] );
+					GetProcessInfo( pe.th32ProcessID, &r[ oexT( "info" ) ] );
 
 				// Re init struct
 				oexZero( pe ); pe.dwSize = sizeof( t_PROCESSENTRY32 );
@@ -1158,21 +1158,21 @@ oexINT CSysUtil::GetProcessInfo( oexLONG lPid, CPropertyBag *pb )
 		return -2;
 
 	// Load extra functions
-	pGetProcessImageFileName = (pfn_GetProcessImageFileName)GetProcAddress( hKernel32, oexT( fnGetProcessImageFileName ) );
-	pGetModuleFileNameEx = (pfn_GetModuleFileNameEx)GetProcAddress( hKernel32, oexT( fnK32GetModuleFileNameEx ) );
-	pGetProcessMemoryInfo = (pfn_GetProcessMemoryInfo)GetProcAddress( hKernel32, oexT( "GetProcessMemoryInfo" ) );
-	pGetProcessTimes = (pfn_GetProcessTimes)GetProcAddress( hKernel32, oexT( "GetProcessTimes" ) );
+	pGetProcessImageFileName = (pfn_GetProcessImageFileName)GetProcAddress( hKernel32, fnGetProcessImageFileName );
+	pGetModuleFileNameEx = (pfn_GetModuleFileNameEx)GetProcAddress( hKernel32, fnK32GetModuleFileNameEx );
+	pGetProcessMemoryInfo = (pfn_GetProcessMemoryInfo)GetProcAddress( hKernel32, "GetProcessMemoryInfo" );
+	pGetProcessTimes = (pfn_GetProcessTimes)GetProcAddress( hKernel32, "GetProcessTimes" );
 
 	// Maybe they moved?
 	if ( !pGetProcessImageFileName || !pGetModuleFileNameEx || !pGetProcessMemoryInfo )
 	{	hPsapi = LoadLibrary( oexT( "psapi.dll" ) );
 		if ( hPsapi )
 		{	if ( !pGetProcessImageFileName )
-				pGetProcessImageFileName = (pfn_GetProcessImageFileName)GetProcAddress( hPsapi, oexT( fnGetProcessImageFileName ) );
+				pGetProcessImageFileName = (pfn_GetProcessImageFileName)GetProcAddress( hPsapi, fnGetProcessImageFileName );
 			if ( !pGetModuleFileNameEx )
-				pGetModuleFileNameEx = (pfn_GetModuleFileNameEx)GetProcAddress( hPsapi, oexT( fnGetModuleFileNameEx ) );
+				pGetModuleFileNameEx = (pfn_GetModuleFileNameEx)GetProcAddress( hPsapi, fnGetModuleFileNameEx );
 			if ( !pGetProcessMemoryInfo )
-				pGetProcessMemoryInfo = (pfn_GetProcessMemoryInfo)GetProcAddress( hPsapi, oexT( "GetProcessMemoryInfo" ) );
+				pGetProcessMemoryInfo = (pfn_GetProcessMemoryInfo)GetProcAddress( hPsapi, "GetProcessMemoryInfo" );
 		} // end if
 	} // end if
 
@@ -1206,19 +1206,19 @@ oexINT CSysUtil::GetProcessInfo( oexLONG lPid, CPropertyBag *pb )
 					if ( 0 < diff )
 					{
 						// Calculate kernel percent
-						oex::oexINT64 t = cpu[ "kernel" ].ToUInt64();
+						oex::oexINT64 t = cpu[ oexT( "kernel" ) ].ToUInt64();
 						if ( 0 < t )
 							cpu[ oexT( "diff_kernel" ) ] = FT2LL(tKernel) - t,
 							cpu[ oexT( "percent_kernel" ) ] = (double)( FT2LL(tKernel) - t ) * (double)100 / (double)diff;
 
 						// Calculate user percent
-						t = cpu[ "user" ].ToUInt64();
+						t = cpu[ oexT( "user" ) ].ToUInt64();
 						if ( 0 < t )
 							cpu[ oexT( "diff_user" ) ] = FT2LL(tUser) - t,
 							cpu[ oexT( "percent_user" ) ] = (double)( FT2LL(tUser) - t ) * (double)100 / (double)diff;
 
 						// Calculate user percent
-						t = cpu[ "total" ].ToUInt64();
+						t = cpu[ oexT( "total" ) ].ToUInt64();
 						if ( 0 < t )
 							cpu[ oexT( "diff_total" ) ] = FT2LL(tKernel) + FT2LL(tUser) - t,
 							cpu[ oexT( "percent_total" ) ] = (double)( FT2LL(tKernel) + FT2LL(tUser) - t ) * (double)100 / (double)diff;

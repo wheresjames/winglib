@@ -141,7 +141,7 @@ oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 				if ( uGmt > g_uNextTimestamp )
 				{	g_uNextTimestamp = uGmt + g_uTimestampFreq;
 					s << oexNL8 "   --- " << uGmt << " - "
-					  << oexStrToMb( oexLocalTimeStr( oexT( "%Y/%c/%d - %g:%m:%s.%l" oexNL8 ) ) );
+					  << oexStrToMb( oexLocalTimeStr( oexTEXT( "%Y/%c/%d - %g:%m:%s.%l" ) oexTEXT( oexNL8 ) ) );
 				} // end if
 			} // end if
 
@@ -246,7 +246,7 @@ CStr CUtil::Fingerprint( CBin *buf, oexINT w, oexINT h, oexINT frame )
 			else if ( !x || ( x + 1 ) == w )
 				p[ i++ ] = oexT( '|' );
 			else
-				p[ i++ ] = oexT( glyph[ 0 ] );
+				p[ i++ ] = glyph[ 0 ];
 
 		// Terminate
 		if ( y >= ( h - 1 ) )
@@ -811,14 +811,14 @@ oexBOOL CUtil::Graph( oexINT nSamples, oexINT nInterval, oexINT nType,
 			} // end if
 		} // end for
 
-		oexFLOAT fRange = pb[ "range" ].ToFloat();
+		oexFLOAT fRange = pb[ oexT( "range" ) ].ToFloat();
 		if ( !fRange )
 			fRange = fMax - fMin;
 		if ( !fRange )
 			return oexFALSE;
 
-		oexINT nMag = oex::cmn::Max( 0, pb[ "mag" ].ToInt() );
-		oexINT nHo = oex::cmn::Max( 0, pb[ "ho" ].ToInt() );
+		oexINT nMag = oex::cmn::Max( 0, pb[ oexT( "mag" ) ].ToInt() );
+		oexINT nHo = oex::cmn::Max( 0, pb[ oexT( "ho" ) ].ToInt() );
 		if ( 0 >= nMag ) nMag = 1;
 		if ( 0 >= nHo || nHo >= h ) nHo = 0;
 
@@ -899,7 +899,7 @@ CStr CUtil::ReadStdin( oexLONG lMax )
 			return s;
 
 		// Add to buffer
-		s.Append( buf, lRead );
+		s.Append( oexMbToStr( oex::CStr8( buf, lRead ) ) );
 		lTotal += lRead;
 
 	} while ( lTotal < lMax );
@@ -934,7 +934,7 @@ oexINT CUtil::GetCpuInfo( CPropertyBag *pb )
 	// CPU string
 	csi[ 0 ] = ci[ 1 ]; csi[ 1 ] = ci[ 3 ];
 	csi[ 2 ] = ci[ 2 ]; csi[ 3 ] = 0;
-	(*pb)[ oexT( "cpu" ) ] = CStr( cs ).TrimWhiteSpace();
+	(*pb)[ oexT( "cpu" ) ] = CStr( oexMbToStr( cs ) ).TrimWhiteSpace();
 
 	CPropertyBag *r;
 
@@ -1078,7 +1078,7 @@ oexINT CUtil::GetCpuInfo( CPropertyBag *pb )
 
 	csi[ 12 ] = 0;
 
-	(*pb)[ oexT( "brand" ) ] = oex::CStr( cs ).TrimWhiteSpace();
+	(*pb)[ oexT( "brand" ) ] = oex::CStr( oexMbToStr( cs ) ).TrimWhiteSpace();
 
 	os::CSysUtil::i_cpuid( ci, 0x80000004 );
 

@@ -151,7 +151,7 @@ public:
 		CFile::t_size	plast;
 
 		/// Key parameters
-		CPropertyBag	params;
+		CPropertyBag8	params;
 	};
 
 	struct SIterator
@@ -343,7 +343,7 @@ public:
 			if ( !vi.uSize ) 
 			{ s.Destroy(); return oexTRUE; }
 
-			oexSTR p = s.OexAllocate( vi.uSize );
+			oexSTR8 p = s.OexAllocate( vi.uSize );
 			if ( !p ) 
 				return oexFALSE;
 

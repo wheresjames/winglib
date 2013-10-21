@@ -403,8 +403,8 @@ static AVCodecTag g_ff_audio_codec_map[] =
 
 struct SFfAudioCodecInfo
 {
-	int			id;
-	const char 	*tag;
+	int						id;
+	const oex::oexTCHAR 	*tag;
 };
 
 static SFfAudioCodecInfo g_ff_audio_codec_info[] =
@@ -433,7 +433,7 @@ int CFfAudioDecoder::LookupCodecId( const sqbind::stdString &sCodec )
 			return g_ff_audio_codec_map[ i ].id;
 
 	// Extras by name
-	oex::CStr8 s = oexStrToStr8( sqbind::std2oex( sCodec ) );
+	oex::CStr s = sqbind::std2oex( sCodec );
 	for ( int i = 0; CODEC_ID_NONE != g_ff_audio_codec_info[ i ].id; i++ )
 		if ( !oex::str::ICompare( s.Ptr(), s.Length(),
 								  g_ff_audio_codec_info[ i ].tag,
@@ -465,7 +465,7 @@ sqbind::stdString CFfAudioDecoder::LookupCodecName( int nId )
 	// Find a codec with that id
 	for ( int i = 0; CODEC_ID_NONE != g_ff_audio_codec_info[ i ].id; i++ )
 		if ( g_ff_audio_codec_info[ i ].id == (CodecID)nId )
-			return oexMbToStrPtr( g_ff_audio_codec_info[ i ].tag );
+			return g_ff_audio_codec_info[ i ].tag;
 
 	return oexT( "" );
 }

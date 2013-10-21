@@ -572,8 +572,8 @@ CPropertyBag CDataLog::GetKeyList( t_time x_tTime )
 			// Read key name into property bag
 			if ( !ff.IsDirectory() )
 			{	CStr8 dat = CFile().OpenExisting( ( CStr( sRoot ).BuildPath( ff.GetFileName() ) ).Ptr() ).Read();
-				CStr name = CParser::Deserialize( dat )[ "name" ].ToString();
-				pb[ ff.GetFileName() ] = name.Length() ? name : oexMbToStr( dat );
+				CStr8 name = CParser::Deserialize( dat )[ "name" ].ToString();
+				pb[ ff.GetFileName() ] = name.Length() ? oexMbToStr( name ) : oexMbToStr( dat );
 			} // end if
 
 		} while ( ff.FindNext() );
@@ -612,7 +612,7 @@ oexBOOL CDataLog::OpenDb( oexBOOL x_bCreate, CStr x_sRoot, CStr x_sHash, t_time 
 	if ( x_pData )
 	{
 		// Data file path
-		CStr sData = x_sRoot; sData.BuildPath( "data.bin" );
+		CStr sData = x_sRoot; sData.BuildPath( oexT( "data.bin" ) );
 		oexBOOL bExists = oexExists( sData.Ptr() );
 		if ( !bExists && !x_bCreate )
 			return oexFALSE;
@@ -937,18 +937,18 @@ CPropertyBag CDataLog::GetLog( oexCSTR x_pKey, t_time x_tStart, t_time x_tEnd, t
 						it.sValue = it.vi.uSize;
 
 					if ( it.vi.uTimeMs )
-						pb[ oexFmt( oexT( "%u.%.3u" ), it.vi.uTime, it.vi.uTimeMs ) ].ToString() = it.sValue;
+						pb[ oexFmt( oexT( "%u.%.3u" ), it.vi.uTime, it.vi.uTimeMs ) ].ToString() = oexMbToStr( it.sValue );
 					else
-						pb[ it.vi.uTime ].ToString() = it.sValue;
+						pb[ it.vi.uTime ].ToString() = oexMbToStr( it.sValue );
 				} // end if
 
 			} // end if
 			
 			else if ( tTimeMs )
-				pb[ oexFmt( oexT( "%u.%.3u" ), tTime, tTimeMs ) ].ToString() = it.sValue;
+				pb[ oexFmt( oexT( "%u.%.3u" ), tTime, tTimeMs ) ].ToString() = oexMbToStr( it.sValue );
 
 			else
-				pb[ tTime ].ToString() = it.sValue;
+				pb[ tTime ].ToString() = oexMbToStr( it.sValue );
 
 		} // end if
 

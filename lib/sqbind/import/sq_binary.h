@@ -225,9 +225,17 @@ namespace sqbind
 			return stdString( s.Ptr(), (sqbind::stdString::size_type)s.Length() );
 		}
 
+		/// Returns a string representation of the data
+		stdString8 getString8()
+		{	return stdString8( (stdByte)m_bin.Ptr(), (sqbind::stdString8::size_type)m_bin.getUsed() ); }
+
 		/// Initializes the binary buffer from a string
 		t_size setString( const stdString &s )
 		{	return m_bin.setString( oexStrToMb( oex::CStr( s.c_str(), s.length() ) ) ); }
+
+		/// Initializes the binary buffer from a string
+		t_size setString8( const stdString8 &s )
+		{	return m_bin.setString( oex::CStr8( s.c_str(), s.length() ) ); }
 
 		/// Sets a sub string into the binary object
 		t_size setSubString( const stdString &s, int start, int len )
@@ -236,11 +244,25 @@ namespace sqbind
 		}
 
 		/// Sets a sub string into the binary object
+		t_size setSubString8( const stdString8 &s, int start, int len )
+		{	if ( start >= (int)s.length() || ( start + len ) > (int)s.length() ) { Free(); return 0; }
+			return m_bin.setString( oex::CStr8( &(s.c_str()[ start ]), len ) );
+		}
+
+		/// Gets a sub string into the binary object
 		stdString getSubString( int start, int len )
 		{	if ( start >= (int)m_bin.getUsed() ) return oexT( "" );
 			int max = m_bin.getUsed() - start;
 			if ( 0 >= len || len > max ) len = max;
-			return oex2std( oexStrToMb( oex::CStr8( m_bin.Ptr(), m_bin.getUsed(), start, len ) ) );
+			return oex2std( oexMbToStr( oex::CStr8( m_bin.Ptr(), m_bin.getUsed(), start, len ) ) );
+		}
+
+		/// Gets a sub string into the binary object
+		stdString8 getSubString8( int start, int len )
+		{	if ( start >= (int)m_bin.getUsed() ) return "";
+			int max = m_bin.getUsed() - start;
+			if ( 0 >= len || len > max ) len = max;
+			return oex2std8( oex::CStr8( m_bin.Ptr(), m_bin.getUsed(), start, len ) );
 		}
 
 		/// Appends the string data to the buffer

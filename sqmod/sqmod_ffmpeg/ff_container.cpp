@@ -118,12 +118,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, setAudioTsOffset )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioTsOffset )
 
-        SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoStartTime )
-        SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoEndTime )
-        SQBIND_MEMBER_FUNCTION( CFfContainer, getFixVideoFrameRateDiag )
+    SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoStartTime )
+    SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoEndTime )
 
-//	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
-//	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 
 	SQBIND_GLOBALCONST( FFF_KEY_FRAME )
@@ -284,6 +281,8 @@ void CFfContainer::fixVideoFrameRate()
   avio_seek(pb, file_size, SEEK_SET);
 }
 
+// +++ Remove?
+/*
 sqbind::stdString CFfContainer::getFixVideoFrameRateDiag()
 {
 #define LINE_SZ 64
@@ -337,6 +336,7 @@ sqbind::stdString CFfContainer::getFixVideoFrameRateDiag()
   m_sFfrDiag.assign( msg );
   return m_sFfrDiag;
 }
+*/
 
 int CFfContainer::CloseStream()
 {_STT();
@@ -857,7 +857,7 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	} // end if
 
 	else
-	{	oex::CStr sFName( m_pFormatContext->oformat->name );
+	{	oex::CStr sFName( oexMbToStr( m_pFormatContext->oformat->name ) );
 		if (  sFName == oexT( "3gp" ) || sFName == oexT( "mov" ) || sFName == oexT( "mp4" ) )
 			pcc->flags |= CODEC_FLAG_GLOBAL_HEADER;
 	} // end else
@@ -1280,7 +1280,7 @@ int CFfContainer::SeekFrame( int nStreamId, int nOffset, int nFlags, int nType,
 		if ( si == nStreamId )
 
 			// Do we have the frame we want?
-			if ( 100 > max && (*m)[ "pts" ].toint() > pts )
+			if ( 100 > max && (*m)[ oexT( "pts" ) ].toint() > pts )
 				return 1;
 
 			else
@@ -1351,7 +1351,7 @@ sqbind::CSqFifoShare* CFfContainer::getFifoShare()
 		return 0;
 
 	// Verify that the protocol is as we expect
-	if ( 11 > m_sUrl.length() || oex::zstr::CompareLen( "memshare://", 11, m_sUrl.c_str(), 11 ) )
+	if ( 11 > m_sUrl.length() || oex::zstr::CompareLen( oexT( "memshare://" ), 11, m_sUrl.c_str(), 11 ) )
 		return 0;
 
 	// Get url context

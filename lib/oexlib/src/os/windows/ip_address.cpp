@@ -135,8 +135,8 @@ CStr CIpAddress::GetDomainName( oexCSTR x_pServer )
 		return sRet;
 
 	// Get function pointers
-	pfn_NetApiBufferFree pNetApiBufferFree = (pfn_NetApiBufferFree)GetProcAddress( hLib, oexT( "NetApiBufferFree" ) );
-	pfn_NetWkstaGetInfo pNetWkstaGetInfo = (pfn_NetWkstaGetInfo)GetProcAddress( hLib, oexT( "NetWkstaGetInfo" ) );
+	pfn_NetApiBufferFree pNetApiBufferFree = (pfn_NetApiBufferFree)GetProcAddress( hLib, "NetApiBufferFree" );
+	pfn_NetWkstaGetInfo pNetWkstaGetInfo = (pfn_NetWkstaGetInfo)GetProcAddress( hLib, "NetWkstaGetInfo" );
 
 	// Attempt to read the domain name
 	WKSTA_INFO_100 *pwi100 = oexNULL;

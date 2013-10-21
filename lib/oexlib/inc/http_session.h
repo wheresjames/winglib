@@ -399,7 +399,7 @@ public:
 		for ( oex::CPropertyBag::iterator it; m_pMappedFolders->List().Next( it ); )
 		{
 			// Is this the correct folder?
-			if ( it.Node()->key == sName )
+			if ( it.Node()->key == oexMbToStr( sName ) )
 				for ( oex::CPropertyBag::iterator itF; it->List().Next( itF ); )
 				{
 					CStr sMapped = itF.Node()->key;
@@ -589,8 +589,8 @@ public:
 		m_pbRequest[ "REMOTE_ADDR" ] = sRemote;
 		m_pbRequest[ "REMOTE_PORT" ] = m_pPort->PeerAddress().GetPort();
 		m_pbRequest[ "IS_REMOTE" ] = ( sLocal != sRemote && sRemote != "127.0.0.1" ) ? "1" : "";
-		m_pbRequest[ "TRANSPORT_TYPE" ] = m_pPort->v_get_transport_type();
-		m_pbRequest[ "TRANSPORT_NAME" ] = m_pPort->v_get_transport_name();
+		m_pbRequest[ "TRANSPORT_TYPE" ] = oexStrToMb( m_pPort->v_get_transport_type() );
+		m_pbRequest[ "TRANSPORT_NAME" ] = oexStrToMb( m_pPort->v_get_transport_name() );
 		m_pbRequest[ "TRANSACTION" ] = GetTransactions();
 		m_pbRequest[ "TRANSACTION_ID" ] = GetTransactionId();
 	}
@@ -677,9 +677,9 @@ public:
 
 		// Set thread tag for debugging
 		_STT_SET_TAG( CStr() 
-					  << m_pbRequest[ "REMOTE_ADDR" ].ToString()
+					  << oexMbToStr( m_pbRequest[ "REMOTE_ADDR" ].ToString() )
 					  << oexT( " : " )
-					  << m_pbRequest[ "REQUEST_STRING" ].ToString()
+					  << oexMbToStr( m_pbRequest[ "REQUEST_STRING" ].ToString() )
 					);
 
 		// Attempt to restore session information

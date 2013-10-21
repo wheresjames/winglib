@@ -258,7 +258,7 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSq
 			
 			struct curl_slist *i = cookies;
 			while ( i )
-			{	m_sCookies += i->data;
+			{	m_sCookies += oexMbToStrPtr( i->data );
 				m_sCookies += oexT( "\r\n" );
 				i = i->next;
 			} // end while
@@ -367,7 +367,7 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, SQInteger lPort, const sqbi
 			
 			struct curl_slist *i = cookies;
 			while ( i )
-			{	m_sCookies += i->data;
+			{	m_sCookies += oexMbToStrPtr( i->data );
 				m_sCookies += oexT( "\r\n" );
 				i = i->next;
 			} // end while

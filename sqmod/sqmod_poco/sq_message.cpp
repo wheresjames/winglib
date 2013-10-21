@@ -108,7 +108,7 @@ int CPoMessage::Encode( sqbind::CSqBinary *pBin )
 	sqbind::stdOStream out;
 	m_pMsg->write( out );
 
-	pBin->setString( out.str() );
+	pBin->setString8( out.str() );
 	return pBin->getUsed();
 }
 
@@ -120,7 +120,11 @@ sqbind::stdString CPoMessage::EncodeStr()
 	sqbind::stdOStream out;
 	m_pMsg->write( out );
 
+#if defined oexUNICODE
+	return sqbind::oex2std( oexMbToStrW( oex::CStr8( out.str().c_str(), out.str().length() ) ) );
+#else
 	return out.str();
+#endif
 }
 
 int CPoMessage::Decode( sqbind::CSqBinary *pBin )
@@ -131,7 +135,7 @@ int CPoMessage::Decode( sqbind::CSqBinary *pBin )
 	if ( !m_pMsg )
 		return 0;
 
-	sqbind::stdIStream in( pBin->getString() );
+	sqbind::stdIStream in( pBin->getString8() );
 	m_pMsg->read( in );
 
 	return 1;
@@ -145,7 +149,11 @@ int CPoMessage::DecodeStr( const sqbind::stdString &s )
 	if ( !m_pMsg )
 		return 0;
 
+#if !defined( oexUNICODE )
 	sqbind::stdIStream in( s );
+#else
+	sqbind::stdIStream in( sqbind::oex2std8( sqbind::std2oex8( s ) ) );
+#endif
 	m_pMsg->read( in );
 
 	return 1;

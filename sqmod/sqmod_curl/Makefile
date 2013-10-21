@@ -13,7 +13,7 @@ PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 			curl/include openssl/include
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel curl cximage jpeg png tiff zlib \
-			openssl_a openssl_b openssl_a openssl_b
+			openssl_a openssl_b openssl_c openssl_a openssl_b openssl_c
 PRJ_DEFS := HAVE_CONFIG_H CURL_STATICLIB CURL_DISABLE_LDAP I386_ONLY OPENSSL_NO_ASM
  
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols

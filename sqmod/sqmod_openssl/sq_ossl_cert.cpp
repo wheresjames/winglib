@@ -95,7 +95,7 @@ sqbind::SQINT COsslCert::SetNameField( const sqbind::stdString &sField, const sq
 		return 0;
 
 	// Set specified field
-	X509_NAME_add_entry_by_txt( pName, sField.c_str(), MBSTRING_ASC, (const unsigned char *)sValue.c_str(), -1, -1, 0 );
+	X509_NAME_add_entry_by_txt( pName, oexStrToMbPtr( sField.c_str() ), MBSTRING_ASC, (const unsigned char *)oexStrToMbPtr( sValue.c_str() ), -1, -1, 0 );
 
 	// Set issuer name to be the same
 	X509_set_subject_name( m_pX509, pName ); 

@@ -234,7 +234,7 @@ CPropertyBag CBaseFile::GetFileInfo( oexCSTR x_pFile )
 		return pb;
 
 	// Save path
-	pb[ "full" ] = x_pFile;
+	pb[ oexT( "full" ) ] = x_pFile;
 
 	// Get file info
     WIN32_FILE_ATTRIBUTE_DATA   wfad; oexZero( wfad );	
@@ -242,25 +242,25 @@ CPropertyBag CBaseFile::GetFileInfo( oexCSTR x_pFile )
 		return pb;
 
 	// Save file info into structure
-	pb[ "os_flags" ] = wfad.dwFileAttributes;
+	pb[ oexT( "os_flags" ) ] = wfad.dwFileAttributes;
 	
 	static CBaseFile_ATTDESC ad[] = 
 	{
-		{ "archive",		FILE_ATTRIBUTE_ARCHIVE },
-		{ "compressed",		FILE_ATTRIBUTE_COMPRESSED },
-		{ "device",			FILE_ATTRIBUTE_DEVICE },
-		{ "directory",		FILE_ATTRIBUTE_DIRECTORY },
-		{ "encrypted",		FILE_ATTRIBUTE_ENCRYPTED },
-		{ "hidden",			FILE_ATTRIBUTE_HIDDEN },
-		{ "normal",			FILE_ATTRIBUTE_NORMAL },
-		{ "not_indexed",	FILE_ATTRIBUTE_NOT_CONTENT_INDEXED },
-		{ "offline",		FILE_ATTRIBUTE_OFFLINE },
-		{ "readonly",		FILE_ATTRIBUTE_READONLY },
-		{ "reparse_point",	FILE_ATTRIBUTE_REPARSE_POINT },
-		{ "sparse_file",	FILE_ATTRIBUTE_SPARSE_FILE },
-		{ "system",			FILE_ATTRIBUTE_SYSTEM },
-		{ "temporary",		FILE_ATTRIBUTE_TEMPORARY },
-//		{ "virtual",		FILE_ATTRIBUTE_VIRTUAL },
+		{ oexT( "archive" ),		FILE_ATTRIBUTE_ARCHIVE },
+		{ oexT( "compressed" ),		FILE_ATTRIBUTE_COMPRESSED },
+		{ oexT( "device" ),			FILE_ATTRIBUTE_DEVICE },
+		{ oexT( "directory" ),		FILE_ATTRIBUTE_DIRECTORY },
+		{ oexT( "encrypted" ),		FILE_ATTRIBUTE_ENCRYPTED },
+		{ oexT( "hidden" ),			FILE_ATTRIBUTE_HIDDEN },
+		{ oexT( "normal" ),			FILE_ATTRIBUTE_NORMAL },
+		{ oexT( "not_indexed" ),	FILE_ATTRIBUTE_NOT_CONTENT_INDEXED },
+		{ oexT( "offline" ),		FILE_ATTRIBUTE_OFFLINE },
+		{ oexT( "readonly" ),		FILE_ATTRIBUTE_READONLY },
+		{ oexT( "reparse_point" ),	FILE_ATTRIBUTE_REPARSE_POINT },
+		{ oexT( "sparse_file" ),	FILE_ATTRIBUTE_SPARSE_FILE },
+		{ oexT( "system" ),			FILE_ATTRIBUTE_SYSTEM },
+		{ oexT( "temporary" ),		FILE_ATTRIBUTE_TEMPORARY },
+//		{ oexT( "virtual" ),		FILE_ATTRIBUTE_VIRTUAL },
 		{ 0, 0 }
 	};
 
@@ -268,10 +268,10 @@ CPropertyBag CBaseFile::GetFileInfo( oexCSTR x_pFile )
 		if ( 0 != ( ad[ i ].dwFlag & wfad.dwFileAttributes ) )		 
 			pb[ ad[ i ].pName ] = oexT( "1" );
 
-	pb[ "ft_created" ] = CBaseFile_FT2INT64( wfad.ftCreationTime );
-	pb[ "ft_last_access" ] = CBaseFile_FT2INT64( wfad.ftLastAccessTime );
-	pb[ "ft_last_modified" ] = CBaseFile_FT2INT64( wfad.ftLastWriteTime );
-	pb[ "size" ] = (oexINT64)wfad.nFileSizeLow | ( (oexINT64)wfad.nFileSizeHigh << 32 );
+	pb[ oexT( "ft_created" ) ] = CBaseFile_FT2INT64( wfad.ftCreationTime );
+	pb[ oexT( "ft_last_access" ) ] = CBaseFile_FT2INT64( wfad.ftLastAccessTime );
+	pb[ oexT( "ft_last_modified" ) ] = CBaseFile_FT2INT64( wfad.ftLastWriteTime );
+	pb[ oexT( "size" ) ] = (oexINT64)wfad.nFileSizeLow | ( (oexINT64)wfad.nFileSizeHigh << 32 );
 
 	return pb;
 }

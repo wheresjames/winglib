@@ -322,30 +322,30 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 		{
 			// Generate multipart headers
 			oex::CPropertyBag8 pb;
-			pb[ "Content-type" ] = pMulti;
+			pb[ "Content-type" ] = oexStrToMb( pMulti );
 			sMulti = oex::CParser::EncodeMIME( pb, oex::oexTRUE );
 
 			// What will the boundary string be?
-			sBoundary = std2oex( mReply[ oexT( "boundary" ) ].str() );
+			sBoundary = oexStrToMb( std2oex( mReply[ oexT( "boundary" ) ].str() ) );
 			if ( !sBoundary.Length() )
-				sBoundary = oex::CStr( "--" ) << oexUnique();
+				sBoundary = oex::CStr8( "--" ) << oexStrToMb( oexUnique() );
 
 		} // end else
 
 		// Get MIME type
-		oex::CStr sType = mReply[ oexT( "mime" ) ].c_str();
+		oex::CStr8 sType = oexStrToMb( std2oex( mReply[ oexT( "mime" ) ] ) );
 		if ( !sType.Length() ) 
 		{
 			// Multipart?
 			if ( pMulti )
-				sType = oex::CStr( "multipart/x-mixed-replace; boundary=" ) << sBoundary;
+				sType = oex::CStr8( "multipart/x-mixed-replace; boundary=" ) << sBoundary;
 			else
-				sType = oexT( "application/octet-stream" );
+				sType = "application/octet-stream";
 
 		} // end if
 
 		// Set content type
-		x_pSession->SetContentMimeType( oexStrToMb( sType ) );
+		x_pSession->SetContentMimeType( sType );
 
 		// Send the headers
 		x_pSession->SendHeaders( -1 );

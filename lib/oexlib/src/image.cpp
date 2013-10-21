@@ -296,7 +296,7 @@ oexBOOL CImage::Load( oexCSTR x_pFile, oexCSTR x_pType )
 #else
 
 	// Load the file
-	oexBOOL bRet = pimg->Load( oexStrToMbPtr( x_pFile ), type );
+	oexBOOL bRet = pimg->Load( x_pFile, type );
 
 #endif
 
@@ -336,7 +336,7 @@ oexBOOL CImage::Save( oexCSTR x_pFile, oexCSTR x_pType )
 #else
 
 	// Load the file
-	return pimg->Save( oexStrToMbPtr( x_pFile ), type );
+	return pimg->Save( x_pFile, type );
 
 #endif
 
@@ -1763,7 +1763,7 @@ CStr CImage::GetUserImageStr()
 
 #if defined( OEX_WINDOWS ) && !defined( OEX_WINCE )
 
-	return oexT( "All Images ("	"" )
+	return oexTEXT( "All Images ("	)
 
 #if defined( CXIMAGE_SUPPORT_JPG ) && CXIMAGE_SUPPORT_JPG
 											oexT( "*.jpg;*.jpeg;" )

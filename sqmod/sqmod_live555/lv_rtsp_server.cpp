@@ -50,12 +50,12 @@ CClientSession::CClientSession( CLvRtspServer *pServer, RTSPServer *pRtspServer,
 	m_sId = sqbind::oex2std( socket.PeerAddress().GetId() );
 
 	// Root key
-	m_sRoot = sqbind::stdString( "streams." ) + m_sId;
+	m_sRoot = sqbind::stdString( oexT( "streams." ) ) + m_sId;
 
 	// We're connected
 	if ( m_sRoot.length() )
-		m_pServer->setParamStr( m_sRoot + ".connected", "1" ),
-		m_pServer->setParamStr( m_sRoot + ".remote", sqbind::oex2std( socket.PeerAddress().GetDotAddress() ) );
+		m_pServer->setParamStr( m_sRoot + oexT( ".connected" ), oexT( "1" ) ),
+		m_pServer->setParamStr( m_sRoot + oexT( ".remote" ), sqbind::oex2std( socket.PeerAddress().GetDotAddress() ) );
 
 }
 
@@ -69,7 +69,7 @@ CClientSession::~CClientSession()
 
 	// Remove our media session
 	if ( m_sId.length() )
-		m_pServer->Server()->removeServerMediaSession( m_sId.c_str() );
+		m_pServer->Server()->removeServerMediaSession( oexStrToMbPtr( m_sId.c_str() ) );
 }
 
 void CClientSession::handleCmd_DESCRIBE( char const *cseq, char const *urlPreSuffix,
@@ -80,40 +80,40 @@ void CClientSession::handleCmd_DESCRIBE( char const *cseq, char const *urlPreSuf
 	if ( !m_pServer || !m_pServer->isServer() )
 		return;
 
-	oex::CStr sFull( oex::CStr( m_pServer->Server()->rtspURLPrefix() ) << urlSuffix );
-	_STT_SET_TAG( sFull );
+	oex::CStr8 sFull( oex::CStr8( m_pServer->Server()->rtspURLPrefix() ) << urlSuffix );
+	_STT_SET_TAG( oexMbToStr( sFull ) );
 
 	// Parse the url
-	oex::CPropertyBag pb = oex::os::CIpAddress::ParseUrl( sFull.Ptr() );
+	oex::CPropertyBag pb = oex::os::CIpAddress::ParseUrl( oexMbToStrPtr( sFull.Ptr() ) );
 
 	// Stream Name
 	m_sName = sqbind::oex2std( oexUrlDecode( pb[ oexT( "path" ) ].ToString().LTrim( oexT( "/" ) ) ) );
 
 	// Read default source information
-	m_mParams = m_pServer->getParam( "sources." + m_sName );
+	m_mParams = m_pServer->getParam( sqbind::stdString( oexT( "sources.") ) + m_sName );
 
 	// Decode GET params
 	sqbind::CSqMulti m; m.urldecode( sqbind::oex2std( pb[ oexT( "extra" ) ].ToString() ) );
 	m_mParams.mmerge( &m );
 
 	// Use ffmpeg MPEG4 codec
-	sqbind::stdString sCodec = m_mParams[ "codec" ].str();
-	if ( sCodec == "MPG4" || sCodec == "MP42" || sCodec == "MPEG4" )
-		m_mParams[ "codec" ].set( "FMP4" );
+	sqbind::stdString sCodec = m_mParams[ oexT( "codec" ) ].str();
+	if ( sCodec == oexT( "MPG4" ) || sCodec == oexT( "MP42" ) || sCodec == oexT( "MPEG4" ) )
+		m_mParams[ oexT( "codec" ) ].set( oexT( "FMP4" ) );
 
 	// Add stream info
 	if ( m_sRoot.length() )
-		m_pServer->setParamStr( m_sRoot + ".name", m_sName ),
-		m_pServer->setParamStr( m_sRoot + ".share", m_sId ),
-		m_pServer->setParam( m_sRoot + ".params", &m_mParams );
+		m_pServer->setParamStr( m_sRoot + oexT( ".name" ), m_sName ),
+		m_pServer->setParamStr( m_sRoot + oexT( ".share" ), m_sId ),
+		m_pServer->setParam( m_sRoot + oexT( ".params" ), &m_mParams );
 
 	// Stream description
-	sqbind::stdString sDesc = m_pServer->getParamStr( sqbind::stdString( m_sName ) + ".desc" );
+	sqbind::stdString sDesc = m_pServer->getParamStr( sqbind::stdString( m_sName ) + oexT( ".desc" ) );
 	if ( !sDesc.length() )
 		sDesc = m_sName;
 
 	// Create media session
-	ServerMediaSession* pSms = ServerMediaSession::createNew( *m_pServer->Env(), m_sId.c_str(), m_sName.c_str(), sDesc.c_str() );
+	ServerMediaSession* pSms = ServerMediaSession::createNew( *m_pServer->Env(), oexStrToMbPtr( m_sId.c_str() ), oexStrToMbPtr( m_sName.c_str() ), oexStrToMbPtr( sDesc.c_str() ) );
 	if ( !pSms )
 	{	oexERROR( 0, oexMks( oexT( "ServerMediaSession::createNew() failed : " ), oexMbToStrPtr( m_pServer->Env()->getResultMsg() ) ) );
 		return;
@@ -129,12 +129,9 @@ void CClientSession::handleCmd_DESCRIBE( char const *cseq, char const *urlPreSuf
 	// Add session option to server
 	m_pServer->Server()->addServerMediaSession( pSms );
 
-	// Use id as name
-	urlSuffix = m_sId.c_str();
-
 	// Call the base class
 	RTSPServer::RTSPClientSession
-		::handleCmd_DESCRIBE( cseq, urlPreSuffix, urlSuffix, fullRequestStr );
+		::handleCmd_DESCRIBE( cseq, urlPreSuffix, oexStrToMbPtr( m_sId.c_str() ), fullRequestStr );
 }
 
 void CClientSession::handleCmd_SETUP( char const* cseq, char const* urlPreSuffix,
@@ -209,7 +206,7 @@ CMediaSource::CMediaSource( UsageEnvironment& env, CLvRtspServer *pServer,
 							const sqbind::stdString &sId, const sqbind::stdString &sName, sqbind::CSqMulti *m )
 	: m_pVs( 0 ), m_pServer( pServer ), m_sId( sId ), m_sName( sName ), m_mParams( m ),
 	  m_nNeedFrame( 0 ),
-	  m_sRoot( sqbind::stdString( "streams." ) + sId ),
+	  m_sRoot( sqbind::stdString( oexT( "streams." ) ) + sId ),
 	  FramedSource( env )
 {_STT();
 	m_nBytes = 0;
@@ -219,14 +216,14 @@ CMediaSource::CMediaSource( UsageEnvironment& env, CLvRtspServer *pServer,
 	// Look for user preferences on nal headers
 	if ( m )
 	{
-		if ( m->isset( "no_nal_strip" ) )
+		if ( m->isset( oexT( "no_nal_strip" ) ) )
 			m_bStripNal = 0;
 
-		else if ( m->isset( "force_nal_strip" ) )
+		else if ( m->isset( oexT( "force_nal_strip") ) )
 			m_bStripNal = 1;
 
 		else 
-			m_bStripNal = ( (*m)[ "codec" ].str() == oexT( "H264" ) ) ? 1 : 0;
+			m_bStripNal = ( (*m)[ oexT( "codec" ) ].str() == oexT( "H264" ) ) ? 1 : 0;
 
 	} // end if
 
@@ -273,12 +270,12 @@ void CMediaSource::doGetNextFrame()
 
 	// Add stream id
 	if ( m_sRoot.length() )
-		m_pServer->setParamStr( m_sRoot + ".run", "1" ),
+		m_pServer->setParamStr( m_sRoot + oexT( ".run" ), oexT( "1" ) ),
 
 	// Create a new video share
 	m_pVs = new sqbind::CSqFifoShare();
 	if ( !m_pVs )
-	{	m_pServer->setParamStr( m_sRoot + ".error", "Failed to create share object" );
+	{	m_pServer->setParamStr( m_sRoot + oexT( ".error" ), oexT( "Failed to create share object" ) );
 		return;
 	} // end if
 
@@ -301,12 +298,12 @@ int CMediaSource::Update()
 	if ( !m_pVs->isOpen() )
 	{
 		// Grab the share name
-		sqbind::stdString sShare = m_pServer->getParamStr( m_sRoot + ".share" );
+		sqbind::stdString sShare = m_pServer->getParamStr( m_sRoot + oexT( ".share" ) );
 
 		// Attempt to open share
 		if ( !m_pVs->Open( sShare ) )
-		{	m_pServer->setParamStr( m_sRoot + ".status", sqbind::stdString( "Waiting for memory share : " ) + sShare );
-			return m_pServer->getParamStr( m_sRoot + ".quit" ).length() ? 0 : 1;
+		{	m_pServer->setParamStr( m_sRoot + oexT( ".status" ), sqbind::stdString( oexT( "Waiting for memory share : " ) ) + sShare );
+			return m_pServer->getParamStr( m_sRoot + oexT( ".quit" ) ).length() ? 0 : 1;
 		} // end if
 
 	} // end if
@@ -324,7 +321,7 @@ int CMediaSource::Update()
 		return 1;
 
 	if ( !m_nFrames )
-		m_pServer->setParamStr( m_sRoot + ".status", "Running" );
+		m_pServer->setParamStr( m_sRoot + oexT( ".status" ), oexT( "Running" ) );
 
 	// Accumulate totals
 	m_nFrames++;
@@ -338,7 +335,7 @@ int CMediaSource::Update()
 		m_nSync = nTime;
 
 		// Check for cancel
-		if ( m_pServer->getParamStr( m_sRoot + ".quit" ).length() )
+		if ( m_pServer->getParamStr( m_sRoot + oexT( ".quit" ) ).length() )
 		{	fFrameSize = 0; fTo = 0;
 			fPresentationTime.tv_sec = 0;
 			fPresentationTime.tv_usec = 0;
@@ -347,8 +344,8 @@ int CMediaSource::Update()
 		} // end if
 
 		// Update status
-		m_pServer->setParamStr( m_sRoot + ".frames", sqbind::oex2std< oex::CStr >( m_nFrames ) );
-		m_pServer->setParamStr( m_sRoot + ".bytes", sqbind::oex2std< oex::CStr >( m_nBytes ) );
+		m_pServer->setParamStr( m_sRoot + oexT( ".frames" ), sqbind::oex2std< oex::CStr >( m_nFrames ) );
+		m_pServer->setParamStr( m_sRoot + oexT( ".bytes" ), sqbind::oex2std< oex::CStr >( m_nBytes ) );
 
 	} // end if
 
@@ -441,7 +438,7 @@ FramedSource* CMediaSubsession::createNewStreamSource( unsigned clientSessionId,
 		return 0;
 
 	// What codec are we using?
-	sqbind::stdString sCodec = m_mParams[ "codec" ].str();
+	sqbind::stdString sCodec = m_mParams[ oexT( "codec" ) ].str();
 
 	// Create a framer for the video stream
 	if ( sCodec == oexT( "H264" ) )
@@ -458,11 +455,11 @@ RTPSink* CMediaSubsession::createNewRTPSink( Groupsock* rtpGroupsock, unsigned c
 {_STT();
 
 	// Desired frame rate
-	int fps = m_mParams[ "fps" ].toint();
+	int fps = m_mParams[ oexT( "fps" ) ].toint();
 	if ( 0 >= fps || 60 < fps ) fps = 15;
 
 	// What codec are we using?
-	sqbind::stdString sCodec = m_mParams[ "codec" ].str();
+	sqbind::stdString sCodec = m_mParams[ oexT( "codec" ) ].str();
 
 	// Create proper video sink
 	if ( sCodec == oexT( "H264" ) )
@@ -676,10 +673,10 @@ int CLvRtspServer::ThreadOpen()
 	} // end if
 
 	// Save the url string
-	setParamStr( oexT( "url" ), m_pRtspServer->rtspURLPrefix() );
+	setParamStr( oexT( "url" ), oexMbToStrPtr( m_pRtspServer->rtspURLPrefix() ) );
 
 	// Set thread name
-	_STT_SET_NAME( m_pRtspServer->rtspURLPrefix() );
+	_STT_SET_NAME( oexMbToStrPtr( m_pRtspServer->rtspURLPrefix() ) );
 
 	// Remember tunneling port
 	setParamStr( oexT( "http_tunneling" ), sqbind::oex2std< oex::CStr >( m_nHttpTunnelPort ? m_nHttpTunnelPort : ( m_nPort + 1 ) ) );

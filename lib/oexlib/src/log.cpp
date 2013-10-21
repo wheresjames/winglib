@@ -218,9 +218,9 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT 
 
 			// Write out the time
 #if defined( OEX_NANOSECONDS )
-			sLog << oexLocalTimeStr( oexT( " -> Local: %Y/%c/%d - %g:%m:%s.%l.%u.%n" oexNL8 ) );
+			sLog << oexLocalTimeStr( oexTEXT( " -> Local: %Y/%c/%d - %g:%m:%s.%l.%u.%n" ) oexTEXT( oexNL8 ) );
 #else
-			sLog << oexLocalTimeStr( oexT( " -> Local Time  : %Y/%c/%d - %g:%m:%s.%l.%u" oexNL8 ) );
+			sLog << oexLocalTimeStr( oexTEXT( " -> Local Time  : %Y/%c/%d - %g:%m:%s.%l.%u" ) oexTEXT( oexNL8 ) );
 #endif
 
 #if defined( OEXLIB_STACK_TRACING )
@@ -237,7 +237,7 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT 
 #endif
 			// Add function name if available
 			if ( x_pFunction && *x_pFunction )
-				sLog << oexT(         " -> Function    : " ) << oexMbToStrPtr( x_pFunction ) << oexT( "()" oexNL8 );
+				sLog << oexT(         " -> Function    : " ) << oexMbToStrPtr( x_pFunction ) << oexTEXT( "()" ) oexTEXT( oexNL8 );
 
 			// Add error level
 			sLog << oexT(             " -> Level       : " ) << pLevel;
@@ -251,12 +251,12 @@ oexINT CLog::Log( oexCSTR x_pFile, oexINT x_nLine, oexCSTR8 x_pFunction, oexINT 
 
 			// Write out the user error string if available
 			if ( oexCHECK_PTR( x_pErr ) )
-				sLog << oexT( " -> " oexNL8 " -> " ) << CStr( x_pErr ).Replace( oexNL, oexT( "" oexNL8 " -> " ) ) << oexNL;
+				sLog << oexTEXT( " -> " ) oexTEXT( oexNL8 ) oexTEXT( " -> " ) << CStr( x_pErr ).Replace( oexNL, oexTEXT( "" ) oexTEXT( oexNL8 ) oexTEXT( " -> " ) ) << oexNL;
 
 #if defined( oexBACKTRACE_IN_LOG )
 			// Write out the backtrace
 			sLog << oexT( " -> " )
-				 << os::CTrace::GetBacktrace( x_uSkip ).Replace( oexNL, oexT( "" oexNL8 " -> " ) )
+				 << os::CTrace::GetBacktrace( x_uSkip ).Replace( oexNL, oexTEXT( "" ) oexTEXT( oexNL8 ) oexTEXT( " -> " ) )
 				 << oexNL;
 #endif
 

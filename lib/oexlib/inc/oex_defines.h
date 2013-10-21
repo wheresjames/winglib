@@ -248,14 +248,14 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexZeroMemory						OEX_NAMESPACE::os::CSys::Zero
 #define oexZero( o )						oexZeroMemory( &o, sizeof( o ) )
 
-#define oexEMPTY_STRING             		oexT( "" )
+#define oexEMPTY_STRING             		oexTEXT( "" )
 
 #if defined( OEX_WINDOWS )
-#	define oexNL							oexT( "\r\n" )
+#	define oexNL							oexTEXT( "\r\n" )
 #	define oexNL8							"\r\n"
 #	define oexNL_LEN						2
 #else
-#	define oexNL							oexT( "\n" )
+#	define oexNL							oexTEXT( "\n" )
 #	define oexNL8							"\n"
 #	define oexNL_LEN						1
 #endif
@@ -526,7 +526,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 
 #define oexSt						OEX_NAMESPACE::CMem::GetStackTrace
 #if defined( OEXLIB_STACK_TRACING )
-#	define _STT()					OEX_NAMESPACE::CLocalStackTrace _l_lst( oexSTTFUNCTION );
+#	define _STT()					OEX_NAMESPACE::CLocalStackTrace _l_lst( oexTEXT( oexSTTFUNCTION ) );
 #	define _STT_SET_NAME( v )		{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->SetName( v ) : 0 ); }
 #	define _STT_GET_NAME()			( oexSt().GetStack()->GetName() )
 #	define _STT_SET_TAG( v )		{ OEX_NAMESPACE::CStackTrace::CStack* p = oexSt().GetStack(); ( p ? p->SetTag( v ) : 0 ); }

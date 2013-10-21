@@ -83,14 +83,14 @@ oexINT CService::RunModule( CStr x_sModule, CStr x_sCommandLine, oexCPVOID x_pDa
 	} // end if
 
 	// Log information about the module
-	oexNOTICE( 0, CStr().Fmt( oexT( "Module Loaded:  '%s'\r\n"
-									"Command Line:   '%s'\r\n"
-								    "Name:           %s\r\n"
-								    "Version:        %d.%d\r\n"
-								    "Description:    %s\r\n"
-								    "Type:           %s\r\n"
-								    "ID:             %s\r\n"
-								    "Instance:       %s\r\n" ),
+	oexNOTICE( 0, CStr().Fmt( oexTEXT( "Module Loaded:  '%s'\r\n" )
+									oexTEXT( "Command Line:   '%s'\r\n" )
+								    oexTEXT( "Name:           %s\r\n" )
+								    oexTEXT( "Version:        %d.%d\r\n" )
+								    oexTEXT( "Description:    %s\r\n" )
+								    oexTEXT( "Type:           %s\r\n" )
+								    oexTEXT( "ID:             %s\r\n" )
+								    oexTEXT( "Instance:       %s\r\n" ),
 							   x_sModule.Ptr(),
 							   x_sCommandLine.Ptr(),
 							   oexMbToStrPtr( si.szName ),

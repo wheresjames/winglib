@@ -79,8 +79,8 @@ template < typename T >
 		static oex::oexTCHAR szHeader1[] = oexNL oexNL oexT( "static int f_" );
 		static oex::oexTCHAR szHeader2[] = oexT( "( oex::CPropertyBag &in, oex::CStr &out )" ) oexNL oexT( "{" ) oexNL;
 		static oex::oexTCHAR szFooter[] = oexNL oexT( "return 0; " ) oexNL oexT( "}" ) oexNL oexT( "};" );
-		static oex::oexTCHAR szOpenStr[] = oexNL oexT( "out << \"" );
-		static oex::oexTCHAR szCloseStr[] = oexT( "\";" ) oexNL;
+		static oex::oexTCHAR szOpenStr[] = oexNL oexT( "out << oexT( \"" );
+		static oex::oexTCHAR szCloseStr[] = oexT( "\" );" ) oexNL;
 		static oex::CStr::t_size nOverhead = (oex::CStr::t_size)
 												 sizeof( szHeader1 ) + sizeof( szHeader2 )
 												 + sName.Length() + sizeof( szFooter )
@@ -97,7 +97,7 @@ template < typename T >
 		// Get the source data
 		oex::CStr sSrc;
 		if ( bFile )
-			sSrc = oexFileGetContents( sScript.Ptr() );
+			sSrc = oexMbToStr( oexFileGetContents( sScript.Ptr() ) );
 		else
 			sSrc = sScript;
 
@@ -414,7 +414,7 @@ int create_res( oex::CStr sIn, oex::CStr sOut, oex::CStr sVar, oex::CStr sPre, o
 	// Inline c++ file?
 	else if ( oex::CParser::MatchPatterns( sIn, lstCii, oex::oexTRUE ) )
 	{	nType = 2;
-		sData = prepare_cpp( sVar, sIn, 1 );
+		sData = oexStrToMb( prepare_cpp( sVar, sIn, 1 ) );
 	} // end if
 
 	// Just serialize

@@ -359,7 +359,7 @@ public:
 		} // end try
 
 		catch( ... )
-		{	oexERROR( 0, "Assert while releasing capture window, check for misbehaving capture driver." );
+		{	oexERROR( 0, oexT( "Assert while releasing capture window, check for misbehaving capture driver." ) );
 		} // end catch
 
 		// Reset vars
@@ -415,7 +415,7 @@ public:
 //#endif
 
 		if ( !IsWnd() )
-		{	oexERROR( GetLastError(), "Unable to create capture window" );
+		{	oexERROR( GetLastError(), oexT( "Unable to create capture window" ) );
 			return oexFALSE;
 		} // end if
 
@@ -622,7 +622,7 @@ public:
 	{_STT();
 		if ( pName == NULL ) return FALSE;
 		if ( !capFileSetCaptureFile( m_hWnd, pName ) ) return FALSE;
-		strcpy( m_szCaptureFileName, pName );
+		zstr::Copy( m_szCaptureFileName, pName );
 		return TRUE;
 	}
 
@@ -632,7 +632,10 @@ public:
 	/// Returns the currently set capture filename
 	LPCTSTR GetCaptureFileName()
 	{_STT();
-		GetCaptureFileName( m_szCaptureFileName );
+	
+		char buf[ MAX_PATH ] = {0};
+		GetCaptureFileName( buf );
+		zstr::Copy( m_szCaptureFileName, oexMbToStrPtr( buf ) );
 		return m_szCaptureFileName;
 	}
 
@@ -938,7 +941,7 @@ public:
 		} // end try
 
 		catch( ... )
-		{	oexERROR( 0, "Assert in capGrabFrame()" );
+		{	oexERROR( 0, oexT( "Assert in capGrabFrame()" ) );
 			return FALSE;
 		} // end catch
 
@@ -965,7 +968,7 @@ public:
 		} // end try
 
 		catch( ... )
-		{	oexERROR( 0, "Assert in capGrabFrameNoStop()" );;
+		{	oexERROR( 0, oexT( "Assert in capGrabFrameNoStop()" ) ); 
 			return FALSE;
 		} // end catch
 
@@ -1231,7 +1234,7 @@ protected:
 		CVfwCap *pCap = (CVfwCap*)CVFWCAP_GetWindowLong( hWnd );
 		if ( pCap == NULL ) return 0;
 
-		return pCap->OnStatus( nID, lpStatusText );
+		return pCap->OnStatus( nID, oexMbToStrPtr( lpStatusText ) );
 	}
 
 	//==============================================================
@@ -1244,7 +1247,7 @@ protected:
 		CVfwCap *pCap = (CVfwCap*)CVFWCAP_GetWindowLong( hWnd );
 		if ( pCap == NULL ) return 0;
 
-		return pCap->OnError( nErrID, lpErrorText );
+		return pCap->OnError( nErrID, oexMbToStrPtr( lpErrorText ) );
 	}
 
 	//==============================================================
@@ -1908,13 +1911,13 @@ public:
 									0, &m_dwThreadId );
 
 		if ( INVALID_HANDLE_VALUE == m_hThread )
-		{	oexERROR( GetLastError(), "Error creating capture thread" );
+		{	oexERROR( GetLastError(), oexT( "Error creating capture thread" ) );
 			return oexFALSE;
 		} // end if
 
 		HANDLE hEvents[] = { m_hSuccess, m_hThread };
 		if ( WAIT_OBJECT_0 != ::WaitForMultipleObjects( 2, hEvents, FALSE, x_uTimeout ) )
-		{	oexERROR( 0, "Failed to open capture device" );
+		{	oexERROR( 0, oexT( "Failed to open capture device" ) );
 			Destroy();
 			return oexFALSE;
 		} // end if
@@ -2239,10 +2242,10 @@ public:
 		switch( x_uFormat )
 		{
 //			case oexFOURCC( 'Y', 'U', 'Y', 'V' ) :
-//				return "YUYV - Y, U (Cb) and V (Cr)";
+//				return oexT( "YUYV - Y, U (Cb) and V (Cr)" );
 
 			case oexFOURCC( 'R', 'G', 'B', '3' ) :
-				return "RGB3 - 24-bit / Red(8), Green(8), Blue(8)";
+				return oexT( "RGB3 - 24-bit / Red(8), Green(8), Blue(8)" );
 
 			default:
 				break;

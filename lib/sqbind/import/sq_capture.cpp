@@ -71,11 +71,11 @@ int CSqCapture::GetNextAvailableSystem( int i, sqbind::CSqMulti *inf )
 	if ( !pVsi )
 		return 0;
 
-	(*inf)[ "index" ].setstr( oexMks( pVsi->nIndex ) );
-	(*inf)[ "type" ].setstr( oexMks( pVsi->uType ) );
-	(*inf)[ "supported" ].setstr( oexMks( pVsi->bSupported ) );
-	if ( pVsi->pTag ) (*inf)[ "tag" ].setstr( pVsi->pTag );
-	if ( pVsi->pName ) (*inf)[ "name" ].setstr( pVsi->pName );
+	(*inf)[ oexT( "index" ) ].setstr( oexMks( pVsi->nIndex ) );
+	(*inf)[ oexT( "type" ) ].setstr( oexMks( pVsi->uType ) );
+	(*inf)[ oexT( "supported" ) ].setstr( oexMks( pVsi->bSupported ) );
+	if ( pVsi->pTag ) (*inf)[ oexT( "tag" ) ].setstr( pVsi->pTag );
+	if ( pVsi->pName ) (*inf)[ oexT( "name" ) ].setstr( pVsi->pName );
 
 	return 1;
 }

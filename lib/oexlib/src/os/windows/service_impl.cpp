@@ -289,7 +289,7 @@ int CServiceImpl::OnRunService( int argc, const char** argv, oexCSTR pName, oexC
 
 	if ( CommandLine().IsKey( oexT( "install" ) ) )
 	{
-		int nErr = InstallService( pName, ( CStr( pDesc ) << oexT( " " ) << OEX_PROC_STR ).Ptr(), oexNULL, getAutoRestart() );
+		int nErr = InstallService( pName, ( CStr( pDesc ) << oexTEXT( " " ) OEX_PROC_STR ).Ptr(), oexNULL, getAutoRestart() );
 		if ( 0 > nErr )
 		{	oexEcho( oexT( "Error installing service" ) );
 			return nErr;
@@ -845,7 +845,7 @@ oexINT CServiceImpl::RegisterServer( oexCSTR pID, oexCSTR pCLSID,
 	if ( bControl )
 		if ( ERROR_SUCCESS != REG_SetValue( HKEY_CLASSES_ROOT, 
 											( CStr() << sKey << oexT( "\\Control" ) ).Ptr(), 
-											NULL, "" ) )
+											NULL, oexT( "" ) ) )
 			return -8;
 
 	if ( pTypeLib )

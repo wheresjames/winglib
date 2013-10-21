@@ -206,10 +206,10 @@ CStrList COexResourceHelper::FindResource( CStr sName, oexBOOL bIgnoreCase )
 	CStrList l;
 	oexLONG i = 0;
 	while ( m_oexlib_resources_ptr[ i ].name )
-	{	if ( !str::MatchPattern( m_oexlib_resources_ptr[ i ].name, 
+	{	if ( !str::MatchPattern( oexMbToStrPtr( m_oexlib_resources_ptr[ i ].name ), 
 								 zstr::Length( m_oexlib_resources_ptr[ i ].name ),
 								 sName.Ptr(), sName.Length(), bIgnoreCase ) )
-			l << m_oexlib_resources_ptr[ i ].name;
+			l << oexMbToStrPtr( m_oexlib_resources_ptr[ i ].name );
 		i++;
 	} // end while
 	return l;

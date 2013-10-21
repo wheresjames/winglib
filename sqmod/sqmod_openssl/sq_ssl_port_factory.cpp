@@ -39,14 +39,14 @@ oex::oexBOOL CSqSSLPortFactory::CSqSSLPort::OnAttach()
 	// Create ssl object for this connection
 	m_ssl = SSL_new( m_ctx );
 	if ( !m_ssl )
-	{	m_sLastError = ERR_error_string( ERR_get_error(), 0 );
+	{	m_sLastError = oexMbToStrPtr( ERR_error_string( ERR_get_error(), 0 ) );
 //		oexSHOW( m_sLastError.c_str() );
 		return oex::oexFALSE;
 	} // end if
 
 	// Set socket handle
 	if ( !SSL_set_fd( m_ssl, oexPtrToInt( GetSocketHandle() ) ) )
-	{	m_sLastError = ERR_error_string( ERR_get_error(), 0 );
+	{	m_sLastError = oexMbToStrPtr( ERR_error_string( ERR_get_error(), 0 ) );
 		OnClose();
 //		oexSHOW( m_sLastError.c_str() );
 		return oex::oexFALSE;
@@ -226,14 +226,14 @@ int CSqSSLPortFactory::CPortFactory::CreateCtx()
 	// Describes which SSL protocol will be used
 	const SSL_METHOD *pMethod = SSLv23_server_method();
 	if ( !pMethod )
-	{	m_sLastError = ERR_error_string( ERR_get_error(), 0 );
+	{	m_sLastError = oexMbToStrPtr( ERR_error_string( ERR_get_error(), 0 ) );
 		return 0;
 	} // end if
 
 	// Create context
 	m_ctx = SSL_CTX_new( pMethod );
 	if ( !m_ctx )
-	{	m_sLastError = ERR_error_string( ERR_get_error(), 0 );
+	{	m_sLastError = oexMbToStrPtr( ERR_error_string( ERR_get_error(), 0 ) );
 		return 0;
 	} // end if
 
@@ -251,15 +251,15 @@ int CSqSSLPortFactory::CPortFactory::LoadCerts( const sqbind::stdString &sCertCh
 		return 0;
 
 	// Load certificate chain
-	if ( 0 >= SSL_CTX_use_certificate_chain_file( m_ctx, sCertChain.c_str() ) )
-	{	m_sLastError = ERR_error_string( ERR_get_error(), 0 );
+	if ( 0 >= SSL_CTX_use_certificate_chain_file( m_ctx, oexStrToMbPtr( sCertChain.c_str() ) ) )
+	{	m_sLastError = oexMbToStrPtr( ERR_error_string( ERR_get_error(), 0 ) );
 		m_sLastError += oexT( " : Failed to load certificate chain file" );
 		return 0;
 	} // end if
 
 	// Load private key
-  	if ( 0 >= SSL_CTX_use_PrivateKey_file( m_ctx, sPrivateKey.c_str(), SSL_FILETYPE_PEM ) )
-	{	m_sLastError = ERR_error_string( ERR_get_error(), 0 );
+  	if ( 0 >= SSL_CTX_use_PrivateKey_file( m_ctx, oexStrToMbPtr( sPrivateKey.c_str() ), SSL_FILETYPE_PEM ) )
+	{	m_sLastError = oexMbToStrPtr( ERR_error_string( ERR_get_error(), 0 ) );
 		m_sLastError += oexT( " : Failed to load private key file" );
 		return 0;
 	} // end if

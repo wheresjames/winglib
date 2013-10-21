@@ -242,7 +242,7 @@ public:
 		// Initialize COM
 		m_hrInitialized = ::CoInitialize( NULL );
 		if ( FAILED( m_hrInitialized ) )
-			return oexERROR( m_hrInitialized, "CoInitialize() failed" );
+			return oexERROR( m_hrInitialized, oexT( "CoInitialize() failed" ) );
 
 		return S_OK;
 	}
@@ -323,7 +323,7 @@ public:
 		} // end if
 
 		// Get the capture source
-		if ( FAILED( hr = AddFilter( m_cpCaptureSource, "Capture Device" ) ) )
+		if ( FAILED( hr = AddFilter( m_cpCaptureSource, oexT( "Capture Device" ) ) ) )
 		{	Destroy(); return oexERROR( hr, oexT( "Error adding capture filter to graph" ) ); 
 		} // end if
 
@@ -364,7 +364,7 @@ public:
 			m_pVideoRenderer->SetFrameCallback( cbfOnFrame, pUser );
 
 		// Add custom filter
-		if ( FAILED( hr = AddFilter( m_pVideoRenderer, "CVidRenderer" ) ) )
+		if ( FAILED( hr = AddFilter( m_pVideoRenderer, oexT( "CVidRenderer" ) ) ) )
 		{	Destroy(); return oexERROR( hr, oexT( "Error adding renderer to filter graph" ) );
 		} // end if
 
@@ -373,7 +373,7 @@ public:
 		{
 			// Create a color space converter
 			IBaseFilter *pColorSpaceConverter;
-			if FAILED( hr = AddFilter( CLSID_Colour, "Color Converter", &pColorSpaceConverter ) )
+			if FAILED( hr = AddFilter( CLSID_Colour, oexT( "Color Converter" ), &pColorSpaceConverter ) )
 			{	Destroy(); return oexERROR( hr, oexT( "Error Creating color space filter" ) ); 
 			} // end if
 
@@ -432,7 +432,7 @@ public:
 			m_pVideoRenderer->SetFrameCallback( cbfOnFrame, pUser );
 
 		// Add custom filter
-		if ( FAILED( hr = AddFilter( m_pVideoRenderer, "CDsRenderer" ) ) )
+		if ( FAILED( hr = AddFilter( m_pVideoRenderer, oexT( "CDsRenderer" ) ) ) )
 		{	Destroy(); return oexERROR( hr, CStr().Fmt( oexT( "Error adding renderer to filter graph; %s" ), oexStrToMbPtr( pFile ) ) ); 
 		} // end if
 
@@ -441,7 +441,7 @@ public:
 		{
 			// Create a color space converter
 			IBaseFilter *pColorSpaceConverter;
-			if FAILED( hr = AddFilter( CLSID_Colour, "Color Converter", &pColorSpaceConverter ) )
+			if FAILED( hr = AddFilter( CLSID_Colour, oexT( "Color Converter" ), &pColorSpaceConverter ) )
 			{	Destroy(); return oexERROR( hr, CStr().Fmt( oexT( "Error creating color space converter; %s" ), oexStrToMbPtr( pFile ) ) ); 
 			} // end if
 
@@ -509,7 +509,7 @@ public:
 
 		catch( ... ) 
 		{ 	ASSERT( 0 ); 
-			oexERROR( ERROR_ARENA_TRASHED, "Exception occured while enumerating capture devices.  Check for misbehaving capture device." );
+			oexERROR( ERROR_ARENA_TRASHED, oexT( "Exception occured while enumerating capture devices.  Check for misbehaving capture device." ) );
 			return ERROR_ARENA_TRASHED; 
 		} // end catch
 
@@ -561,7 +561,7 @@ public:
 
 				catch( ... ) 
 				{	
-					oexERROR( ERROR_ARENA_TRASHED, "Exception occured while enumerating capture devices.  Check for misbehaving capture device." );
+					oexERROR( ERROR_ARENA_TRASHED, oexT( "Exception occured while enumerating capture devices.  Check for misbehaving capture device." ) );
 				} // end catch
 
 			} // end while	
@@ -570,7 +570,7 @@ public:
 
 		catch( ... ) 
 		{	ASSERT( 0 ); 
-			oexERROR( ERROR_ARENA_TRASHED, "Exception occured while enumerating capture devices.  Check for misbehaving capture device." );
+			oexERROR( ERROR_ARENA_TRASHED, oexT( "Exception occured while enumerating capture devices.  Check for misbehaving capture device." ) );
 			return ERROR_ARENA_TRASHED; 
 		} // end catch
 
@@ -623,7 +623,7 @@ public:
 		if ( FAILED( hr = CoCreateInstance(	CLSID_FilterGraph, NULL, 
 											CLSCTX_INPROC, IID_IGraphBuilder, 
 											(void**)&cpGb ) ) ) 
-			return oexERROR( hr, "Creating filter graph" );
+			return oexERROR( hr, oexT( "Creating filter graph" ) );
 
 		// Create the Capture Graph Builder.
 		CComPtr< ICaptureGraphBuilder2 > cpCgb2;
@@ -632,12 +632,12 @@ public:
 								(void **)&cpCgb2 );
 
 		if ( FAILED( hr ) )
-			oexWARNING( hr, "Unable to create IID_ICaptureGraphBuilder2 interface" );
+			oexWARNING( hr, oexT( "Unable to create IID_ICaptureGraphBuilder2 interface" ) );
 
 		else
 			// Set the filter graph
 			if ( FAILED( hr = cpCgb2->SetFiltergraph( cpGb ) ) )
-				oexWARNING( hr, "SetFiltergraph( IID_ICaptureGraphBuilder2 ) failed" );
+				oexWARNING( hr, oexT( "SetFiltergraph( IID_ICaptureGraphBuilder2 ) failed" ) );
 
 		// Attach to the object
 		return Attach( cpGb.Detach(), cpCgb2.Detach() );
@@ -661,7 +661,7 @@ public:
 
 		// Ensure valid IGraphBuilder pointer
 		if ( pGraphBuilder == NULL ) 
-			oexERROR( ERROR_INVALID_PARAMETER, "Parameter pGraphBuilder is NULL" );
+			oexERROR( ERROR_INVALID_PARAMETER, oexT( "Parameter pGraphBuilder is NULL" ) );
 
 		// Attach to the graph builder interface
 		m_cpGraphBuilder.Attach( pGraphBuilder );
@@ -672,23 +672,23 @@ public:
 
 		hr = m_cpGraphBuilder->QueryInterface( IID_IMediaControl, (void**)& m_cpMediaControl );
 		if ( FAILED( hr ) ) 
-			oexERROR( hr, "Query IID_IMediaControl" );
+			oexERROR( hr, oexT( "Query IID_IMediaControl" ) );
 
 		hr = m_cpGraphBuilder->QueryInterface( IID_IFilterGraph2, (void**)&m_cpFilterGraph2 );
 		if ( FAILED( hr ) ) 
-			oexERROR( hr, "Query IID_IFilterGraph2" );
+			oexERROR( hr, oexT( "Query IID_IFilterGraph2" ) );
 
 		hr = m_cpGraphBuilder->QueryInterface( IID_IMediaPosition, (void**)& m_cpMediaPosition );
 		if ( FAILED( hr ) ) 
-			oexERROR( hr, "Query IID_IMediaPosition" );
+			oexERROR( hr, oexT( "Query IID_IMediaPosition" ) );
 
 		hr = m_cpGraphBuilder->QueryInterface( IID_IMediaEvent, (void**)&m_cpMediaEvent );
 		if ( FAILED( hr ) ) 
-			oexERROR( hr, "Query IID_IMediaEvent" );
+			oexERROR( hr, oexT( "Query IID_IMediaEvent" ) );
 
 		hr = m_cpGraphBuilder->QueryInterface( IID_IMediaFilter, (void**)&m_cpMediaFilter );
 		if ( FAILED( hr ) ) 
-			oexERROR( hr, "Query IID_IMediaFilter" );
+			oexERROR( hr, oexT( "Query IID_IMediaFilter" ) );
 
 #if defined ( oexDEBUG )
 		// Add to GraphEdit
@@ -720,13 +720,12 @@ public:
 		if ( FAILED( hr = GetRunningObjectTable( 0, &cpRot ) ) ) return hr;
 
 		// Name for ROT
-		WCHAR strw[ 256 ]; char str[ 256 ] = { 0 };
-		if ( pStr != NULL ) { strncpy( str, pStr, sizeof( str ) - 16 ); strcat( str, " - " ); }
-		wsprintfW( strw, L"%sFilterGraph 0x%x pid 0x%x", str, (DWORD_PTR)pUnkGraph, GetCurrentProcessId() );
-
+		CStrW full, name; if ( pStr ) { name = L" - "; name += oexStrToStrW( pStr ); }
+		full.Fmt( L"%sFilterGraph 0x%x pid 0x%x", name.Ptr(), (DWORD_PTR)pUnkGraph, GetCurrentProcessId() );
+		
 		// Add to Graph edit
 		CComPtr< IMoniker > cpMoniker;
-		if ( SUCCEEDED( hr = CreateItemMoniker( L"!", strw, &cpMoniker ) ) )
+		if ( SUCCEEDED( hr = CreateItemMoniker( L"!", full.Ptr(), &cpMoniker ) ) )
 			cpRot->Register( 0, pUnkGraph, cpMoniker, pdwRotId );
 
 		return hr;
@@ -776,7 +775,7 @@ public:
 		{
 			// Sanity check
 			if ( !ppSrcFilter) 
-				return oexERROR( ERROR_INVALID_PARAMETER, "Invalid parameter" );
+				return oexERROR( ERROR_INVALID_PARAMETER, oexT( "Invalid parameter" ) );
 
 			*ppSrcFilter = NULL;
 	  
@@ -784,19 +783,19 @@ public:
 			CComPtr< ICreateDevEnum > cpDevEnum;
 			if ( FAILED( hr = CoCreateInstance( CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC,
 												IID_ICreateDevEnum, (void **) &cpDevEnum ) ) )
-				return oexERROR( hr, "CoCreateInstance( CLSID_SystemDeviceEnum ) failed" );
+				return oexERROR( hr, oexT( "CoCreateInstance( CLSID_SystemDeviceEnum ) failed" ) );
 
 			// Create an enumerator for the video capture devices
 			CComPtr < IEnumMoniker > cpClassEnum;
 
 			if ( FAILED( hr = cpDevEnum->CreateClassEnumerator( CLSID_VideoInputDeviceCategory, 
 															   &cpClassEnum, 0 ) ) )
-				return oexERROR( hr, "CreateClassEnumerator( CLSID_VideoInputDeviceCategory ) failed" );
+				return oexERROR( hr, oexT( "CreateClassEnumerator( CLSID_VideoInputDeviceCategory ) failed" ) );
 
 			// If there are no enumerators for the requested type, then 
 			// CreateClassEnumerator will succeed, but pClassEnum will be NULL.
 			if ( cpClassEnum == NULL ) 
-				return oexERROR( -1, "CreateClassEnumerator( CLSID_VideoInputDeviceCategory ) returned NULL pointer" );
+				return oexERROR( -1, oexT( "CreateClassEnumerator( CLSID_VideoInputDeviceCategory ) returned NULL pointer" ) );
 
 			// Start with the first device
 			cpClassEnum->Reset();
@@ -815,7 +814,7 @@ public:
 
 			// Get the next device
 			if ( FAILED( hr = cpClassEnum->Next( 1, &cpMoniker, &cFetched ) ) )
-				return oexERROR( hr, "IEnumMoniker::Next() failed" );
+				return oexERROR( hr, oexT( "IEnumMoniker::Next() failed" ) );
 
 			if ( !cpMoniker ) 
 				return E_INVALIDARG; // no more devices
@@ -824,7 +823,7 @@ public:
 			// Bind Moniker to a filter object
 			CComPtr< IBaseFilter > cpSrc;
 			if ( FAILED( hr = cpMoniker->BindToObject( 0, 0, IID_IBaseFilter, (void**)&cpSrc ) ) )
-				return oexERROR( hr, "IMoniker::BindToObject() failed" );
+				return oexERROR( hr, oexT( "IMoniker::BindToObject() failed" ) );
 
 			// Save the pointer
 			*ppSrcFilter = cpSrc.Detach();
@@ -836,7 +835,7 @@ public:
 		} catch( ... ) {}
 
 		// Log the exception
-		oexERROR( ERROR_ARENA_TRASHED, "Exception occured while enumerating capture devices.  Check for misbehaving capture device." );
+		oexERROR( ERROR_ARENA_TRASHED, oexT( "Exception occured while enumerating capture devices.  Check for misbehaving capture device." ) );
 
 		return E_FAIL;
 	}
@@ -855,7 +854,7 @@ public:
 		// Create the filter
 		CComPtr< IBaseFilter > cpBf;
 		if ( FAILED( hr = cpBf.CoCreateInstance( clsid, NULL, CLSCTX_INPROC_SERVER ) ) )
-			return oexERROR( hr, "Failed to create filter" );
+			return oexERROR( hr, oexT( "Failed to create filter" ) );
 
 		// Add the filter to the graph
 		if ( FAILED( hr = AddFilter( cpBf, pName ) ) )
@@ -885,10 +884,10 @@ public:
 
 		// Ensure graph
 		if ( !IsGraph() ) 
-			return oexERROR( ERROR_BAD_ENVIRONMENT, "Graph Not Initialized" );
+			return oexERROR( ERROR_BAD_ENVIRONMENT, oexT( "Graph Not Initialized" ) );
 
 		// Add filter
-		if ( pName == NULL ) pName = "";
+		if ( pName == NULL ) pName = oexT( "" );
 		if ( FAILED( hr = m_cpGraphBuilder->AddFilter( pFilter, oexStrToStrWPtr( pName ) ) ) )
 			return oexERROR( hr, CStr().Fmt( oexT( "Adding Filter to Graph : %s" ), pName ) );
 
@@ -1129,7 +1128,7 @@ public:
 			return oexERROR( ERROR_INVALID_PARAMETER, CStr().Fmt( oexT( "Path is a directory, %s" ), pFile ) );
 
 		// Filter name
-		oexStdString sFilterName( "A/V File" );
+		oexStdString sFilterName( oexT( "A/V File" ) );
 
 		// Create source filter
 		CComPtr< IBaseFilter > cpBaseFilter;
@@ -1431,7 +1430,7 @@ public:
 	virtual oexBOOL Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexINT x_nHeight, oexUINT x_uFormat, oexFLOAT x_fFps, oexBOOL x_bInit )
 	{_STT();
 		if ( !oexCHECK_PTR( x_pFile ) )
-		{	oexERROR( ERROR_INVALID_PARAMETER, "Invalid pointer" );
+		{	oexERROR( ERROR_INVALID_PARAMETER, oexT( "Invalid pointer" ) );
 			return oexFALSE;
 		} // end if
 
@@ -1439,7 +1438,7 @@ public:
 
 		HRESULT hr = m_cap.Capture( x_pFile, CV4w2::_OnFrame, this );
 		if ( S_OK != hr )
-		{	oexERROR( hr, "Failed to open capture device" );
+		{	oexERROR( hr, oexT( "Failed to open capture device" ) );
 			return oexFALSE;
 		} // end if
 
@@ -1513,10 +1512,10 @@ public:
 		switch( x_uFormat )
 		{
 			case oexFOURCC( 'Y', 'U', 'Y', 'V' ) :
-				return "YUYV - Y, U (Cb) and V (Cr)";
+				return oexT( "YUYV - Y, U (Cb) and V (Cr)" );
 
 			case oexFOURCC( 'R', 'G', 'B', '3' ) :
-				return "RGB3 - 24-bit / Red(8), Green(8), Blue(8)";
+				return oexT( "RGB3 - 24-bit / Red(8), Green(8), Blue(8)" );
 
 			default:
 				break;

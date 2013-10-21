@@ -91,14 +91,14 @@ int CRtmpdSession::StartDebugLog( const sqbind::stdString &sFile )
 	oex::CStr8 s = oexStrToMb( sqbind::std2oex( sFile ) << oexT( ".dump.dat" ) );
 	netstackdump = fopen( s.Ptr(), "wb" );
 	if ( !netstackdump )
-	{	setLastErrorStr( sqbind::stdString( "Failed to open log file : " ) + sqbind::oex2std( s ) );
+	{	setLastErrorStr( sqbind::stdString( oexT( "Failed to open log file : " ) ) + sqbind::oex2std( oexMbToStr( s ) ) );
 		return 0;
 	} // end if
 
 	s = oexStrToMb( sqbind::std2oex( sFile ) << oexT( ".read.dat" ) );
 	netstackdump_read = fopen( s.Ptr(), "wb" );
 	if ( !netstackdump_read )
-	{	setLastErrorStr( sqbind::stdString( "Failed to open log file : " ) + sqbind::oex2std( s ) );
+	{	setLastErrorStr( sqbind::stdString( oexT( "Failed to open log file : " ) ) + sqbind::oex2std( oexMbToStr( s ) ) );
 		return 0;
 	} // end if
 
@@ -172,7 +172,7 @@ int CRtmpdSession::Init( sqbind::CSqSocket *pSocket )
 
 	// Unfortunately, this is a must for the debug version
 	if ( !netstackdump || !netstackdump_read )
-	{	setLastErrorStr( "You must call StartDebugLog() in debug versions" );
+	{	setLastErrorStr( oexT( "You must call StartDebugLog() in debug versions" ) );
 		return 0;
 	} // end if
 
@@ -180,7 +180,7 @@ int CRtmpdSession::Init( sqbind::CSqSocket *pSocket )
 
 	// Sanity check
 	if ( !pSocket || !pSocket->Ptr() )
-	{	setLastErrorStr( "Invalid socket" );
+	{	setLastErrorStr( oexT( "Invalid socket" ) );
 		return 0;
 	} // end if
 
@@ -202,7 +202,7 @@ int CRtmpdSession::Init( sqbind::CSqSocket *pSocket )
 
 	// Attempt handshake
 	if ( !RTMP_Serve( &m_session ) )
-	{	setLastErrorStr( "RTMP handshake failed" );
+	{	setLastErrorStr( oexT( "RTMP handshake failed" ) );
 		return 0;
 	} // end if
 
@@ -330,56 +330,56 @@ sqbind::CSqMulti CRtmpdSession::getPacket( int nMode )
 	switch ( m_packet.m_packetType )
 	{
 		case 0x01 :
-			m[ "type" ].set( oexT( "chunkSize" ) );
-			m[ "cmd" ].set( oexT( "chunkSize" ) );
+			m[ oexT( "type" ) ].set( oexT( "chunkSize" ) );
+			m[ oexT( "cmd" ) ].set( oexT( "chunkSize" ) );
 			break;
 
 		case 0x03 :
-			m[ "type" ].set( oexT( "readReport" ) );
-			m[ "cmd" ].set( oexT( "readReport" ) );
+			m[ oexT( "type" ) ].set( oexT( "readReport" ) );
+			m[ oexT( "cmd" ) ].set( oexT( "readReport" ) );
 			break;
 
 		case 0x04 :
-			m[ "type" ].set( oexT( "control" ) );
-			switch( m[ "0" ].toint() )
-			{	case 0 : m[ "cmd" ].set( oexT( "beginStream" ) ); break;
-				case 1 : m[ "cmd" ].set( oexT( "endStream" ) ); break;
-				case 3 : m[ "cmd" ].set( oexT( "setBufferLength" ) ); break;
+			m[ oexT( "type" ) ].set( oexT( "control" ) );
+			switch( m[ oexT( "0" ) ].toint() )
+			{	case 0 : m[ oexT( "cmd" ) ].set( oexT( "beginStream" ) ); break;
+				case 1 : m[ oexT( "cmd" ) ].set( oexT( "endStream" ) ); break;
+				case 3 : m[ oexT( "cmd" ) ].set( oexT( "setBufferLength" ) ); break;
 			} // end switch
 			break;
 
 		case 0x05 :
-			m[ "type" ].set( oexT( "setServerBandwidth" ) );
-			m[ "cmd" ].set( oexT( "setServerBandwidth" ) );
+			m[ oexT( "type" ) ].set( oexT( "setServerBandwidth" ) );
+			m[ oexT( "cmd" ) ].set( oexT( "setServerBandwidth" ) );
 			break;
 
 		case 0x06 :
-			m[ "type" ].set( oexT( "setClientBandwidth" ) );
-			m[ "cmd" ].set( oexT( "setClientBandwidth" ) );
+			m[ oexT( "type" ) ].set( oexT( "setClientBandwidth" ) );
+			m[ oexT( "cmd" ) ].set( oexT( "setClientBandwidth" ) );
 			break;
 
 		case 0x08 :
-			m[ "type" ].set( oexT( "audio" ) );
-			m[ "cmd" ].set( oexT( "audio" ) );
+			m[ oexT( "type" ) ].set( oexT( "audio" ) );
+			m[ oexT( "cmd" ) ].set( oexT( "audio" ) );
 			break;
 
 		case 0x09 :
-			m[ "type" ].set( oexT( "video" ) );
-			m[ "cmd" ].set( oexT( "video" ) );
+			m[ oexT( "type" ) ].set( oexT( "video" ) );
+			m[ oexT( "cmd" ) ].set( oexT( "video" ) );
 			break;
 
 		case 0x11 :
-			m[ "type" ].set( oexT( "AMF3" ) );
-			m[ "cmd" ].set( m[ "0" ].str() );
+			m[ oexT( "type" ) ].set( oexT( "AMF3" ) );
+			m[ oexT( "cmd" ) ].set( m[ oexT( "0" ) ].str() );
 			break;
 
 		case 0x14 :
-			m[ "type" ].set( oexT( "AMF0" ) );
-			m[ "cmd" ].set( m[ "0" ].str() );
+			m[ oexT( "type" ) ].set( oexT( "AMF0" ) );
+			m[ oexT( "cmd" ) ].set( m[ oexT( "0" ) ].str() );
 			break;
 
 		default :
-			m[ "type" ].set( oexT( "unknown" ) );
+			m[ oexT( "type" ) ].set( oexT( "unknown" ) );
 			break;
 
 	} // end swithc
@@ -418,7 +418,11 @@ int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength,
 			if ( ( p + l ) > e )
 				return p - s;
 			else
+#if !defined( oexUNICODE )
 				k.assign( p, l ), p += l;
+#else
+				k.assign( sqbind::oex2std( oexMbToStr( oex::CStr8( p, l ) ) ) ), p += l;
+#endif
 		} // end else
 
 		switch( *p++ )
@@ -432,8 +436,8 @@ int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength,
 					oex::oexINT64 n = *(oex::oexINT64*)p; p += 8;
 					oex::cmn::RevBytes( &n, sizeof( oex::oexINT64 ) );
 					if ( eFlagAllInfo & nMode )
-						(*m)[ k ][ "t" ].set( "double" ),
-						(*m)[ k ][ "v" ].set( sqbind::ToStr( *(double*)&n ) );
+						(*m)[ k ][ oexT( "t" ) ].set( oexT( "double" ) ),
+						(*m)[ k ][ oexT( "v" ) ].set( sqbind::ToStr( *(double*)&n ) );
 					else
 						(*m)[ k ].set( sqbind::ToStr( *(double*)&n ) );
 				} // end else
@@ -441,8 +445,8 @@ int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength,
 
 			case AMF_BOOLEAN :
 				if ( eFlagAllInfo & nMode )
-					(*m)[ k ][ "t" ].set( "bool" ),
-					(*m)[ k ][ "v" ].set( sqbind::ToStr( *p ? 1 : 0 ) );
+					(*m)[ k ][ oexT( "t" ) ].set( oexT( "bool" ) ),
+					(*m)[ k ][ oexT( "v" ) ].set( sqbind::ToStr( *p ? 1 : 0 ) );
 				else
 					(*m)[ k ].set( sqbind::ToStr( *p ? 1 : 0 ) );
 				p++;
@@ -455,10 +459,16 @@ int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength,
 				else
 				{
 					if ( eFlagAllInfo & nMode )
-						(*m)[ k ][ "t" ].set( "string" ),
-						(*m)[ k ][ "v" ].set( sqbind::stdString( p, l ) );
+						(*m)[ k ][ oexT( "t" ) ].set( oexT( "string" ) ),
+#if !defined( oexUNICODE )
+						(*m)[ k ][ oexT( "v" ) ].set( sqbind::stdString( p, l ) );
 					else
 						(*m)[ k ].set( sqbind::stdString( p, l ) );
+#else
+						(*m)[ k ][ oexT( "v" ) ].set( sqbind::oex2std( oexMbToStr( oex::CStr8( p, l ) ) ) );
+					else
+						(*m)[ k ].set( sqbind::oex2std( oexMbToStr( oex::CStr8( p, l ) ) ) );
+#endif
 					p += l;
 				} // end else
 				break;
@@ -473,8 +483,8 @@ int CRtmpdSession::ParsePacket( sqbind::CSqMulti *m, const char *p, int nLength,
 			{
 				int n = 0;
 				if ( eFlagAllInfo & nMode )
-					(*m)[ k ][ "t" ].set( "obj" ),
-					n = ParsePacket( &(*m)[ k ][ "v" ], p, e - p, 0, nMode | _IN_OBJECT );
+					(*m)[ k ][ oexT( "t" ) ].set( oexT( "obj" ) ),
+					n = ParsePacket( &(*m)[ k ][ oexT( "v" ) ], p, e - p, 0, nMode | _IN_OBJECT );
 				else
 					n = ParsePacket( &(*m)[ k ], p, e - p, 0, nMode | _IN_OBJECT );
 
@@ -529,10 +539,10 @@ int CRtmpdSession::SerializeValue( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, 
 		{
 			// Get array type flags
 			int nArrayType = 0;
-			if ( m->isset( "_arraytype" ) )
-			{	if ( (*m)[ "_arraytype" ].str() == "ecma" )
+			if ( m->isset( oexT( "_arraytype" ) ) )
+			{	if ( (*m)[ oexT( "_arraytype" ) ].str() == oexT( "ecma" ) )
 					nArrayType |= eFlagEmcaArray;
-				if ( (*m)[ "_arraytype" ].str() == "strict" )
+				if ( (*m)[ oexT( "_arraytype" ) ].str() == oexT( "strict" ) )
 					nArrayType |= eFlagStrictArray;
 			} // end if
 			else
@@ -565,7 +575,7 @@ int CRtmpdSession::SerializeValue( sqbind::CSqBinary *bin, sqbind::CSqMulti *m, 
 				nType = AMF_BOOLEAN;
 
 			// Does it only contain numbers?
-			else if ( sqbind::stdString::npos == m->str().find_first_not_of( "-.0123456789" ) )
+			else if ( sqbind::stdString::npos == m->str().find_first_not_of( oexT( "-.0123456789" ) ) )
 				nType = AMF_NUMBER;
 
 			// It's a string
@@ -748,7 +758,7 @@ int CRtmpdSession::SerializePacket( sqbind::CSqBinary *bin, sqbind::CSqMulti *m,
 int CRtmpdSession::SendPacket( sqbind::CSqMulti *m, int nQueue )
 {
 	// Sanity checks
-	if ( !m || !m->size() || !m->isset( "pkt" ) )
+	if ( !m || !m->size() || !m->isset( oexT( "pkt" ) ) )
 		return 0;
 
 	// Must have a session
@@ -756,10 +766,10 @@ int CRtmpdSession::SendPacket( sqbind::CSqMulti *m, int nQueue )
 		return 0;
 
 	// Go do the work
-	return SendPacket2( (*m)[ "pkt" ][ "format" ].toint(),
-						(*m)[ "pkt" ][ "chunk_stream_id" ].toint(),
-						(*m)[ "pkt" ][ "type_id" ].toint(),
-						(*m)[ "pkt" ][ "info" ].toint(),
+	return SendPacket2( (*m)[ oexT( "pkt" ) ][ oexT( "format" ) ].toint(),
+						(*m)[ oexT( "pkt" ) ][ oexT( "chunk_stream_id" ) ].toint(),
+						(*m)[ oexT( "pkt" ) ][ oexT( "type_id" ) ].toint(),
+						(*m)[ oexT( "pkt" ) ][ oexT( "info" ) ].toint(),
 						m, nQueue );
 }
 
@@ -810,8 +820,8 @@ int CRtmpdSession::SendPacket2( int format, int csi, int type, int ext, sqbind::
 		body.setUsed( RTMP_MAX_HEADER_SIZE );
 
 	// Is it a raw buffer?
-	if ( m->isset( "body" ) )
-		body.appendString( (*m)[ "body" ].str() );
+	if ( m->isset( oexT( "body" ) ) )
+		body.appendString( (*m)[ oexT( "body" ) ].str() );
 
 	// Serialize our data
 	else if ( !SerializePacket( &body, m, 0 ) )
@@ -934,7 +944,7 @@ int CRtmpdSession::ParseFlv( sqbind::CSqBinary *b, sqbind::CSqMulti *m )
 		SFlvHeader *pH = (SFlvHeader*)p;
 		if ( 'F' == pH->sig[ 0 ] && 'L' == pH->sig[ 1 ] && 'V' == pH->sig[ 2 ] && 1 == pH->ver
 			&& !pH->off[ 0 ] && !pH->off[ 1 ] && !pH->off[ 2 ] && 9 == pH->off[ 3 ] && !pH->tsz )
-			(*m)[ "header" ][ "flags" ].set( sqbind::ToStr( (int)pH->flg ) ),
+			(*m)[ oexT( "header" ) ][ oexT( "flags" ) ].set( sqbind::ToStr( (int)pH->flg ) ),
 			p += sizeof( SFlvHeader ), l -= sizeof( SFlvHeader );
 
 	} // end if
@@ -966,11 +976,11 @@ int CRtmpdSession::ParseFlv( sqbind::CSqBinary *b, sqbind::CSqMulti *m )
 
 		// Save header information
 		sqbind::CSqMulti &r = (*m)[ sqbind::ToStr( i++ ) ];
-		r[ "id" ].set( sqbind::ToStr( pTag->id ) );
-		r[ "ts" ].set( sqbind::ToStr( ts ) );
-		r[ "sid" ].set( sqbind::ToStr( sid ) );
-		r[ "dsz" ].set( sqbind::ToStr( len ) );
-		r[ "dat" ].set( sqbind::ToStr( b->getUsed() - l + sizeof( SFlvTag ) ) );
+		r[ oexT( "id" ) ].set( sqbind::ToStr( pTag->id ) );
+		r[ oexT( "ts" ) ].set( sqbind::ToStr( ts ) );
+		r[ oexT( "sid" ) ].set( sqbind::ToStr( sid ) );
+		r[ oexT( "dsz" ) ].set( sqbind::ToStr( len ) );
+		r[ oexT( "dat" ) ].set( sqbind::ToStr( b->getUsed() - l + sizeof( SFlvTag ) ) );
 
 		// Skip to next tag
 		p += sizeof( SFlvTag ) + len + 4;

@@ -152,7 +152,7 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 	if ( oexCHECK_PTR( pf ) )
 		return pf;
 
-	pf = (oexPVOID)::GetProcAddress( (HMODULE)m_hModule, x_pFunctionName );
+	pf = (oexPVOID)::GetProcAddress( (HMODULE)m_hModule, oexStrToMbPtr( x_pFunctionName ) );
 	if ( !oexCHECK_PTR( pf ) )
 	{	oexWARNING( GetLastError(), oexMks( oexT( "GetProcAddress() failed to load function : " ), x_pFunctionName ) );
 		return oexFALSE;

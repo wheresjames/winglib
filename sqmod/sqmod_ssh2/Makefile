@@ -13,7 +13,7 @@ PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 			libssh2/include openssl/include zlib
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib \
-			ssh2 openssl_a openssl_b openssl_a openssl_b
+			ssh2 openssl_a openssl_b openssl_c openssl_a openssl_b openssl_c
 PRJ_DEFS := LIBSSH2DEBUG_USERCALLBACK
 PRJ_WINL := strmiids winmm
 PRJ_VSLB := dshowbase

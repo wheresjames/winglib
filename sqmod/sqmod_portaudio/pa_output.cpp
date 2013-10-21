@@ -131,7 +131,7 @@ int CPaOutput::getDeviceInfo( int nDev, sqbind::CSqMulti *pInf )
 	if ( !pInf )
 		return 1;
 
-	(*pInf)[ oexT( "name" ) ].set( m_pdi->name );
+	(*pInf)[ oexT( "name" ) ].set( oexMbToStrPtr( m_pdi->name ) );
 	(*pInf)[ oexT( "ver" ) ].set( oexMks( m_pdi->structVersion ).Ptr() );
 	(*pInf)[ oexT( "max_input_channels" ) ].set( oexMks( m_pdi->maxInputChannels ).Ptr() );
 	(*pInf)[ oexT( "max_output_channels" ) ].set( oexMks( m_pdi->maxOutputChannels ).Ptr() );
