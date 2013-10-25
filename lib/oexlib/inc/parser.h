@@ -271,18 +271,18 @@ public:
 			key = UrlDecode( it->Parse( oexTT( T, "=" ) ) );
 			if ( key.Length() ) (*it)++;
 			val = UrlDecode( it.Obj() );
-
+			
 			// Key value pair
 			if ( key.Length() && val.Length() )
-				pb[ key ] = val;
+				pb.at< T >( key, oexTT( T, "[]" ) ) = val;
 
 			// NULL key assignment
 			else if ( key.Length() )
-				pb[ key ] = oexTT( T, "" );
+				pb.at< T >( key, oexTT( T, "[]" ) ) = oexTT( T, "" );
 
 			// Assume NULL key assignment
 			else if ( val.Length() )
-				pb[ val ] = oexTT( T, "" );
+				pb.at< T >( val, oexTT( T, "[]" ) ) = oexTT( T, "" );
 
 		} // end while
 
@@ -291,7 +291,7 @@ public:
 
 	/// Encodes url type params such as "a=b&c=d"
 	template< typename T >
-		static TStr< T > EncodeUrlParams( oexCONST TPropertyBag< TStr< T > > &x_pb )
+		static TStr< T > EncodeUrlParams( oexCONST TPropertyBag< TStr< T > > &x_pb, TStr< T > sRoot = oexTT( T, "" ) )
 	{
 		TStr< T > str;
 		TPropertyBag< TStr< T > > &pb = (TPropertyBag< TStr< T > >&)x_pb;
@@ -301,8 +301,22 @@ public:
 			if ( str.Length() )
 				str << oexTC( T, '&' );
 
-			str << UrlEncode( it.Node()->key ) << oexTT( T, "=" ) << UrlEncode( it->ToString() );
+			// Value?
+			oexBOOL bArray = it->IsArray();
+			if ( !bArray || it->ToString().Length() )
+			{	if ( !sRoot.Length() )
+					str << UrlEncode( it.Node()->key ) << oexTT( T, "=" ) << UrlEncode( it->ToString() );
+				
+				else
+					str << TStr< T >( sRoot ) << oexTT( T, "[" ) << UrlEncode( it.Node()->key ) << oexTT( T, "]" ) 
+							<< oexTT( T, "=" ) << UrlEncode( it->ToString() );
+			} // end if
 
+			// Array?
+			if ( bArray )
+				str += EncodeUrlParams( *it, !sRoot.Length()
+											 ? it.Node()->key
+											 : TStr< T >( sRoot ) << oexTT( T, "[" ) << UrlEncode( it.Node()->key ) << oexTT( T, "]" ) );
 		} // end for
 
 		return str;

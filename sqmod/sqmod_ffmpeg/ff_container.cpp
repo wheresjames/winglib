@@ -118,6 +118,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, setAudioTsOffset )
 	SQBIND_MEMBER_FUNCTION( CFfContainer, getAudioTsOffset )
 
+    SQBIND_MEMBER_FUNCTION( CFfContainer, enableFramerateFixup )
     SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoStartTime )
     SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoEndTime )
 
@@ -175,8 +176,9 @@ CFfContainer::CFfContainer()
 	m_vts_offset = 0;
 	m_ats_offset = 0;
      
-        m_videoStartTime = -1;
-        m_videoEndTime   = -1;
+	m_bFixupFrameRate = 0;
+	m_videoStartTime = -1;
+	m_videoEndTime   = -1;
 }
 
 void CFfContainer::Destroy()
@@ -219,10 +221,11 @@ void CFfContainer::Destroy()
 
 	m_vts_offset = 0;
 	m_ats_offset = 0;
-   
-        m_videoStartTime = -1;
-        m_videoEndTime   = -1;
 
+	m_bFixupFrameRate = 0;
+	m_videoStartTime = -1;
+	m_videoEndTime   = -1;
+	
 	m_sUrl.clear();
 }
 
@@ -249,7 +252,12 @@ int CFfContainer::getAudioSampleFmt()
 /// and especially avi_write_counters() http://ffmpeg.org/doxygen/1.2/avienc_8c_source.html#l00113
 /// Note that the AVIStream also seems to track nFrames in avist->packet_count
 void CFfContainer::fixVideoFrameRate()
-{ // Make sure framerate will be sensible
+{
+	// Is the fixup enabled?
+	if ( !m_bFixupFrameRate )
+		return;
+
+	// Make sure framerate will be sensible
   if ( 0 >= (m_videoEndTime - m_videoStartTime) )
     return;
   // Is the video stream number defined?
@@ -350,8 +358,10 @@ int CFfContainer::CloseStream()
 
 	if ( !m_pFormatContext )
 		return 0;
-   
-        fixVideoFrameRate();
+
+	// Do we want to do the frame rate fixup?
+	if ( m_bFixupFrameRate )
+		fixVideoFrameRate();
 
 	// Close all open streams
 	for ( i = 0; i < m_pFormatContext->nb_streams; i++ )
@@ -366,7 +376,6 @@ int CFfContainer::CloseStream()
 //		av_close_input_file( m_pFormatContext ),
 		avformat_close_input( &m_pFormatContext );          // calls avformat_free_context(), avio_close()
 //		avformat_free_context( m_pFormatContext );
-
 
 	else if ( m_nWrite )
 	{

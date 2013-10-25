@@ -1195,6 +1195,11 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 #endif
 }
 
+oexUINT CSys::GetProcessVersion( oexUINT uPid )
+{//_STT();
+	return ::GetProcessVersion( uPid ); 
+}
+
 oexUINT CSys::StartProcess( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 {//_STT();
 
@@ -1203,12 +1208,14 @@ oexUINT CSys::StartProcess( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirec
 
 #if !defined( OEX_WINCE )
 
+	STARTUPINFO si; oexZero( si ); si.cb = sizeof( si );
 	PROCESS_INFORMATION pi; oexZero( pi );
-	if ( !CreateProcess( x_pFile, NULL, NULL, NULL, FALSE, 0, NULL, x_pDirectory, NULL, &pi ) )
+	if ( !CreateProcess( CStr( x_pFile ).Ptr(), CStr( x_pParams )._Ptr(), NULL, NULL, FALSE, 0, NULL, 
+						 ( x_pDirectory && *x_pDirectory ) ? CStr( x_pDirectory ).Ptr() : NULL, &si, &pi ) )
 		return 0;
 
-	CloseHandle( pi.hThread );
-	CloseHandle( pi.hProcess );
+//	CloseHandle( pi.hThread );
+//	CloseHandle( pi.hProcess );
 
 	return (oexUINT)pi.dwProcessId;
 

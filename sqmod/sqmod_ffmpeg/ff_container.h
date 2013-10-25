@@ -303,6 +303,9 @@ public:
 	/// Capture clock time when an .avi recording file is closed
 	void setVideoEndTime( SQInteger t ) { m_videoEndTime = t; }
 
+	/// Set to non-zero to enable frame rate fixup
+	void enableFramerateFixup( int b ) { m_bFixupFrameRate = b; }
+	
 	/// Returns diagnostics about the frame rate fixer
 #if !defined( oexUNICODE )
 	sqbind::stdString getFixVideoFrameRateDiag();
@@ -316,60 +319,63 @@ public:
 private:
 
 	/// The current url
-        sqbind::stdString m_sUrl;
+	sqbind::stdString m_sUrl;
 
-        /// Diagnostic info about the frame rate fixer
-        sqbind::stdString m_sFfrDiag;
+	/// Diagnostic info about the frame rate fixer
+	sqbind::stdString m_sFfrDiag;
 
-        /// Write ability?
-        int m_nWrite;
+	/// Write ability?
+	int m_nWrite;
 
 	/// Read ability?
-        int m_nRead;
+	int m_nRead;
 
 	/// Output container context
-        AVFormatContext *m_pFormatContext;
+	AVFormatContext *m_pFormatContext;
 
 	/// Codec context
-        AVCodecContext *m_pCodecContext;
+	AVCodecContext *m_pCodecContext;
 
 	/// AV Packet
-        AVPacket m_pkt;
+	AVPacket m_pkt;
 
 	/// Decode frame
-        AVFrame *m_pFrame;
+	AVFrame *m_pFrame;
 
 	/// Non-zero if key frame has been received
-        int m_bKeyRxd;
+	int m_bKeyRxd;
 
 	/// Default key frame interval in frames
-        int m_nKeyFrameInterval;
+	int m_nKeyFrameInterval;
 
 	/// Video stream index
-        int m_nVideoStream;
+	int m_nVideoStream;
 
 	/// Audio stream index
-        int m_nAudioStream;
+	int m_nAudioStream;
 
 	/// Left over packet data
-        sqbind::CSqBinary m_buf;
+	sqbind::CSqBinary m_buf;
 
 	/// Number of frames that have been processed
-        int m_nFrames;
+	int m_nFrames;
 
 	/// Last frame flags
-        int m_nLastFrameFlags;
+	int m_nLastFrameFlags;
 
 	/// Last frames encoded size
-        int m_nLastFrameEncodedSize;
+	int m_nLastFrameEncodedSize;
 
-        /// Time when the video file is opened, used to correct frame rate upon close
-        int m_videoStartTime;
+	/// Time when the video file is opened, used to correct frame rate upon close
+	int m_videoStartTime;
 
-        /// Time when the video file is closed, used to correct frame rate
-        int m_videoEndTime;
+	/// Time when the video file is closed, used to correct frame rate
+	int m_videoEndTime;
+	
+	/// Fixup framerate
+	int m_bFixupFrameRate;
 
-        /// Audio decoder
+    /// Audio decoder
 	CFfAudioDecoder			m_audio_dec;
 
 	/// Extra codec data

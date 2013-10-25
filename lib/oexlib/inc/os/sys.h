@@ -546,6 +546,9 @@ public:
 	*/
 	static oexUINT StartProcess( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory );
 
+	/// Returns the specified process version
+	static oexUINT GetProcessVersion( oexUINT uPid );
+	
 	enum
 	{
 		/// Reboots the computer

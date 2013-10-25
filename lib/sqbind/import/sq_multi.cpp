@@ -556,12 +556,20 @@ CSqMulti* CSqMulti::mset( CSqMulti *m )
 	return this;
 }
 
+static void CSqMulti_mmerge( CSqMulti &dst, CSqMulti &src )
+{
+	for ( CSqMulti::iterator it = src.begin(); it != src.end(); it++ )
+		if ( !it->second.size() )
+			dst[ it->first ] = it->second.str();
+		else
+			CSqMulti_mmerge( dst[ it->first ], it->second );
+}
+
 CSqMulti* CSqMulti::mmerge( CSqMulti *m )
 {_STT();
 
 	if ( m )
-		for ( CSqMulti::iterator it = m->begin(); it != m->end(); it++ )
-			m_lst[ it->first ] = it->second.str();
+		CSqMulti_mmerge( *this, *m );
 		
 	return this;
 }
