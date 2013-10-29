@@ -227,7 +227,7 @@ namespace sqbind
 
 		/// Returns a string representation of the data
 		stdString8 getString8()
-		{	return stdString8( (stdByte)m_bin.Ptr(), (sqbind::stdString8::size_type)m_bin.getUsed() ); }
+		{	return stdString8( (stdByte*)m_bin.Ptr(), (sqbind::stdString8::size_type)m_bin.getUsed() ); }
 
 		/// Initializes the binary buffer from a string
 		t_size setString( const stdString &s )

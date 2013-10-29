@@ -1656,7 +1656,7 @@ oex::oexRESULT TestLists()
 		return -29;
 		
 	// Multi dimensional url decode
-	oex::CPropertyBag pb3 = oex::CParser::DecodeUrlParams( oex::CParser::EncodeUrlParams( pb ) );
+	oex::CPropertyBag pb3 = oex::CParser::DecodeUrlParams< oex::oexTCHAR >( oex::CParser::EncodeUrlParams( pb ) );
 	if ( !oexVERIFY(  pb3[ oexT( "val1" ) ].ToString() == oexT( "Hello" ) )
 		 || !oexVERIFY(  pb3[ oexT( "group1" ) ][ oexT( "val1" ) ].ToString() == oexT( "yup" ) )
 		 || !oexVERIFY(  pb3[ oexT( "group1" ) ][ oexT( "val2" ) ].ToString() == oexT( "noreturn" ) ) )
@@ -1852,14 +1852,14 @@ oex::oexRESULT TestPropertyBag()
 	if ( !oexVERIFY( oex::CParser::Implode( pb[ oexT( "1" ) ].List(), oexT( "," )) == oexT( "1a,1b,1c" ) ) )
 		return -4;
 
-	CStr s = pb.at( oexT( "1.a" ) ).ToString();
-	if ( !oexVERIFY( pb.at( oexT( "1.a" ) ).ToString() == oexT( "1a" ) ) )
+	CStr s = pb.at( oex::CStr( oexT( "1.a" ) ) ).ToString();
+	if ( !oexVERIFY( pb.at( oex::CStr( oexT( "1.a" ) ) ).ToString() == oexT( "1a" ) ) )
 		return -5;
 
 	if ( !oexVERIFY( pb.at( oex::CStr( oexT( "1/b" ) ), oex::CStr( oexT( "/" ) ) ) == oexT( "1b" ) ) )
 		return -6;
 
-	if ( !oexVERIFY( pb.at( oexT( "3.a.1" ) ) == oexT( "3a1" ) ) )
+	if ( !oexVERIFY( pb.at( oex::CStr( oexT( "3.a.1" ) ) ) == oexT( "3a1" ) ) )
 		return -7;
 
 	if ( !oexVERIFY( pb.at( oex::CStr( oexT( "3/a/1" ) ), oex::CStr( oexT( "/" ) ) ) == oexT( "3a1" ) ) )

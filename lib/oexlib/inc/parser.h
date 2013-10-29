@@ -262,6 +262,7 @@ public:
 		static TPropertyBag< TStr< T > > DecodeUrlParams( TStr< T > x_str )
 	{
 		TPropertyBag< TStr< T > > pb;
+//		typename TPropertyBag< TStr< T > >::t_key key, val;
 		TStr< T > key, val;
 
 		TList< TStr< T > > lst = CParser::Split< T >( x_str, oexTT( T, "&" ) );
@@ -272,6 +273,22 @@ public:
 			if ( key.Length() ) (*it)++;
 			val = UrlDecode( it.Obj() );
 			
+#if defined( __GNUC__ )
+			// Key value pair
+			if ( key.Length() && val.Length() )
+//				pb.at( key, oexTT( T, "[]" ) ) = val;
+				pb.at( key ) = val;
+
+			// NULL key assignment
+			else if ( key.Length() )
+//				pb.at( key, oexTT( T, "[]" ) ) = oexTT( T, "" );
+				pb.at( key ) = oexTT( T, "" );
+
+			// Assume NULL key assignment
+			else if ( val.Length() )
+//				pb.at( val, oexTT( T, "[]" ) ) = oexTT( T, "" );
+				pb.at( val ) = oexTT( T, "" );
+#else
 			// Key value pair
 			if ( key.Length() && val.Length() )
 				pb.at< T >( key, oexTT( T, "[]" ) ) = val;
@@ -283,7 +300,7 @@ public:
 			// Assume NULL key assignment
 			else if ( val.Length() )
 				pb.at< T >( val, oexTT( T, "[]" ) ) = oexTT( T, "" );
-
+#endif
 		} // end while
 
 		return pb;

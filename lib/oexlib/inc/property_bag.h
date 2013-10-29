@@ -208,13 +208,54 @@ public:
 
 		\see
 	*/
+	
+
 	template < typename T_CHAR >
-		TPropertyBag& at( TStr< T_CHAR > x_key, TStr< T_CHAR > x_sep = oexTT( T_CHAR, "." ) )
+		TPropertyBag& at( const TStr< T_CHAR > &x_key )
 		{
-			t_key p = x_key.Parse( x_sep.Ptr() );
-			x_key.Skip( x_sep.Ptr() );
+			const T_CHAR *sep = oexTT( T_CHAR, "." );
+			t_key key = x_key, p = key.Parse( sep );
+			key.Skip( sep );
+
+			if ( p.Length() && key.Length() )
+				return m_lstPb[ p ].at( key );
+
+			else if ( p.Length() )
+				return m_lstPb[ p ];
+
+			else if ( key.Length() )
+				return m_lstPb[ key ];
+
+			return *this;
+		}
+
+	template < typename T_CHAR >
+		TPropertyBag& at( const TStr< T_CHAR > &x_key, const TStr< T_CHAR > &x_sep )
+		{
+			t_key key = x_key, p = key.Parse( x_sep.Ptr() );
+			key.Skip( x_sep.Ptr() );
+
+			if ( p.Length() && key.Length() )
+				return m_lstPb[ p ].at( key, x_sep );
+
+			else if ( p.Length() )
+				return m_lstPb[ p ];
+
+			else if ( key.Length() )
+				return m_lstPb[ key ];
+
+			return *this;
+		}
+
+/*
+	template < typename T_CHAR >
+		TPropertyBag& at( TStr< T_CHAR > x_key, T_CHAR *x_sep = oexTT( T_CHAR, "." ) )
+		{
+			t_key p = x_key.Parse( x_sep );
+			x_key.Skip( x_sep );
 
 			if ( p.Length() && x_key.Length() )
+			
 				return m_lstPb[ p ].at( x_key, x_sep );
 
 			else if ( p.Length() )
@@ -225,7 +266,7 @@ public:
 
 			return *this;
 		}
-
+/ *
 	template < typename T_CHAR >
 		TPropertyBag& at( const T_CHAR *x_key, const T_CHAR *x_sep = oexTT( T_CHAR, "." ) )
 		{
@@ -249,7 +290,7 @@ public:
 
 			return *this;
 		}
-
+*/
 	//==============================================================
 	// find_at
 	//==============================================================
