@@ -709,6 +709,9 @@ public:
 		/// Retrieves info about a specific process
 		int get_process_info( SQInteger pid, CSqMulti *m );
 
+		/// Returns a list of reg keys
+		CSqMulti reg_get_keys( const stdString &sKey, const stdString &sPath, int bValues, int bSubKeys );
+
 		/// Returns non-zero if registry key exists
 		int reg_is_key( const stdString &sKey, const stdString &sPath, const stdString &sName );
 

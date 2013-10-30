@@ -579,6 +579,14 @@ CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nM
 			x_nFolderId = x_bShared ? CSIDL_COMMON_APPDATA : CSIDL_APPDATA;
 			break;
 
+		case eFidPrograms :
+			x_nFolderId = x_bShared ? CSIDL_COMMON_PROGRAMS : CSIDL_PROGRAMS;
+			break;
+
+		case eFidProgramFiles :
+			x_nFolderId = x_bShared ? CSIDL_PROGRAM_FILES_COMMON : CSIDL_PROGRAM_FILES;
+			break;
+
 		case eFidDesktop :
 			x_nFolderId = x_bShared ? CSIDL_COMMON_DESKTOPDIRECTORY : CSIDL_DESKTOPDIRECTORY;
 			break;

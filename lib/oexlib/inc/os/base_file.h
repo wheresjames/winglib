@@ -179,7 +179,11 @@ public:
 
 		eFidStartup,
 
-		eFidRecent
+		eFidRecent,
+		
+		eFidPrograms,
+		
+		eFidProgramFiles
 
 	};
 

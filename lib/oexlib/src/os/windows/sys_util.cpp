@@ -150,13 +150,13 @@ CStr CSysUtil::GetRegString( const CStr &x_sKey, const CStr &x_sPath, const CStr
 		return CStr();
 
 	HKEY hKey = NULL;
-	LONG lRes = RegCreateKeyEx( hRoot, x_sPath.Ptr(),
-								0, NULL, 0, KEY_READ | KEY_QUERY_VALUE, NULL, &hKey, NULL );
+	LONG lRes = RegOpenKeyEx( hRoot, x_sPath.Ptr(), 0, KEY_READ | KEY_QUERY_VALUE, &hKey );
 	if ( ERROR_SUCCESS != lRes || !hKey )
 	{	// iii This is expected to fail if key doesn't exist
-//		oexNOTICE( lRes, oexMks( oexT( "RegCreateKeyEx() failed : " ),
-//								x_sKey.Ptr(), oexT( " : " ),
-//								x_sPath.Ptr() ) );
+		if ( ERROR_FILE_NOT_FOUND != lRes && ERROR_PATH_NOT_FOUND != lRes )
+			oexNOTICE( lRes, oexMks( oexT( "RegCreateKeyEx() failed : " ),
+									x_sKey.Ptr(), oexT( " : " ),
+									x_sPath.Ptr() ) );
 		return CStr();
 	} // end if
 
@@ -166,10 +166,11 @@ CStr CSysUtil::GetRegString( const CStr &x_sKey, const CStr &x_sPath, const CStr
 	lRes = RegQueryValueEx( hKey, x_sName.Ptr(), 0, &dwType, 0, &dwSize );
 	if ( ERROR_SUCCESS != lRes )
 	{	// iii This is expected to fail if value doesn't exist
-//		oexNOTICE( lRes, oexMks( oexT( "RegQueryValueEx() failed : " ),
-//								x_sKey.Ptr(), oexT( " : " ),
-//								x_sPath.Ptr(), oexT( " : " ),
-//								x_sName.Ptr() ) );
+		if ( ERROR_FILE_NOT_FOUND != lRes && ERROR_PATH_NOT_FOUND != lRes )
+			oexNOTICE( lRes, oexMks( oexT( "RegQueryValueEx() failed : " ),
+									x_sKey.Ptr(), oexT( " : " ),
+									x_sPath.Ptr(), oexT( " : " ),
+									x_sName.Ptr() ) );
 		RegCloseKey( hKey );
 		return CStr();
 	} // end if
@@ -262,7 +263,8 @@ oexBOOL _DeleteRegSubKeys( HKEY hRoot, const CStr &x_sPath )
 		_DeleteRegSubKeys( hKey, szKey );
 
 		// Attempt to delete the key
-		RegDeleteKey( hKey, szKey );
+		if ( RegDeleteKey( hKey, szKey ) != ERROR_SUCCESS )
+			return oexFALSE;
 
 		// Reset size
 		dwSize = oexSTRSIZE - 1;
@@ -286,43 +288,54 @@ oexLONG _GetRegKeys( CPropertyBag &pb, HKEY hRoot, const CStr &x_sPath, oexBOOL 
 	if ( !hRoot )
 		return 0;
 
-	HKEY		hKey = NULL;
-	TCHAR		szKey[ oexSTRSIZE ];
-	DWORD		dwSize = oexSTRSIZE - 1;
-
 	// Open The Key
+	HKEY hKey = NULL;
 	if( RegOpenKeyEx( hRoot, x_sPath.Ptr(), 0, KEY_ALL_ACCESS, &hKey ) != ERROR_SUCCESS )
 		return 0;
 
-	// For each sub key
+	// Total item count
 	oexLONG lCount = 0;
-	while ( RegEnumKeyEx(	hKey, 0, szKey, &dwSize,
-							NULL, NULL, NULL, NULL ) == ERROR_SUCCESS )
+
+	// Add values if needed
+	if ( x_bValues )
 	{
-		lCount++;
-
-		if ( !x_bValues )
-			pb[ szKey ] = oexT( "" );
-
-		else
+		TCHAR szKey[ oexSTRSIZE ] = { 0 };
+		DWORD dwLen = oexSTRSIZE - 1, dwIndex = 0, dwType = 0, dwSize = 0;
+		while ( RegEnumValue( hKey, dwIndex++, szKey, &dwLen, 0, &dwType, 0, &dwSize ) == ERROR_SUCCESS )
 		{
+			lCount++;
+		
+			// Get value data
 			CBin buf;
-			DWORD dwType = 0, dwSize = 0;
-			if ( ERROR_SUCCESS == RegQueryValueEx( hKey, szKey, 0, &dwType, 0, &dwSize ) )
-				if ( buf.Allocate( dwSize ) )
-					if ( ERROR_SUCCESS == RegQueryValueEx( hKey, szKey, 0, &dwType, (LPBYTE)buf._Ptr(), &dwSize ) )
-						pb[ szKey ] = RegValueToString( dwType, buf._Ptr(), dwSize );
+			if ( buf.Allocate( dwSize ) )
+				if ( ERROR_SUCCESS == RegQueryValueEx( hKey, szKey, 0, &dwType, (LPBYTE)buf._Ptr(), &dwSize ) )
+					pb[ szKey ] = RegValueToString( dwType, buf._Ptr(), dwSize );
+		
+			// Reset key buffer length
+			dwLen = oexSTRSIZE - 1;
 
-		} // end if
+		} // end while
+	} // end if
 
-		// Add sub keys
-		if ( x_bSubKeys )
-			lCount += _GetRegKeys( pb[ szKey ], hKey, szKey, x_bValues, x_bSubKeys );
+	// Add subkeys if needed
+	if ( x_bSubKeys )
+	{
+		TCHAR szKey[ oexSTRSIZE ] = { 0 };
+		DWORD dwLen = oexSTRSIZE - 1, dwIndex = 0;
+		while ( RegEnumKeyEx(	hKey, dwIndex++, szKey, &dwLen,
+								NULL, NULL, NULL, NULL ) == ERROR_SUCCESS )
+		{
+			lCount++;
 
-		// Reset size
-		dwSize = oexSTRSIZE - 1;
+			// Add sub keys
+			lCount += _GetRegKeys( pb[ szKey ], hRoot, oexBuildPath( x_sPath, szKey, oexT( '\\' ) ), x_bValues, x_bSubKeys );
 
-	} // end while
+			// Reset key buffer length
+			dwLen = oexSTRSIZE - 1;
+
+		} // end while
+
+	} // end if
 
 	// Close the key
 	RegCloseKey( hKey );

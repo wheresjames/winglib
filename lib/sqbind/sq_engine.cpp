@@ -556,6 +556,12 @@ stdString CSqEngineExport::get_sys_folder( int bShared, const stdString &sId )
 
 		else if ( sId == oexT( "history" ) )
 			nId = oex::os::CBaseFile::eFidHistory;
+			
+		else if ( sId == oexT( "programs" ) )
+			nId = oex::os::CBaseFile::eFidPrograms;
+
+		else if ( sId == oexT( "program_files" ) )
+			nId = oex::os::CBaseFile::eFidProgramFiles;
 
 	} // end if
 
@@ -1350,6 +1356,13 @@ int CSqEngineExport::get_process_info( SQInteger pid, CSqMulti *m )
 	return ret;
 }
 
+CSqMulti CSqEngineExport::reg_get_keys( const stdString &sKey, const stdString &sPath, int bValues, int bSubKeys )
+{_STT();
+	CSqMulti m;
+	SQBIND_PropertyBagToMulti( oex::os::CSysUtil::GetRegKeys( std2oex( sKey ), std2oex( sPath ), bValues, bSubKeys ), m );
+	return m;
+}
+
 int CSqEngineExport::reg_is_key( const stdString &sKey, const stdString &sPath, const stdString &sName )
 {_STT();
 	return oex::os::CSysUtil::IsRegValue( std2oex( sKey ), std2oex( sPath ), std2oex( sName ) );
@@ -2051,6 +2064,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, enable_output_capture )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, enable_output_file_capture )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_output )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_get_keys )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_is_key )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_get_str )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reg_set_str )
