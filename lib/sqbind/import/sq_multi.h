@@ -77,6 +77,10 @@ namespace sqbind
 		CSqMulti* setMIME( const t_SqStr &s, int bCaseSensitive );
 		CSqMulti* mergeMIME( const t_SqStr &s, int bCaseSensitive );
 
+		t_SqStr getURL();
+		CSqMulti* setURL( const t_SqStr &s );
+		CSqMulti* mergeURL( const t_SqStr &s );
+
 	private:
 
 		/// List

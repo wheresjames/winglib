@@ -316,6 +316,9 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, setMIME )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, getMIME )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mergeMIME )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, setURL )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, getURL )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mergeURL )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, merge )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, mmerge )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, join )
@@ -477,6 +480,33 @@ CSqMulti* CSqMulti::mergeMIME( const CSqParam::t_SqStr &s, int bCaseSensitive )
 
 	// Deserialize data
 	oex::CPropertyBag pb = oex::CParser::DecodeMIME( std2oex( s ), bCaseSensitive );
+	SQBIND_PropertyBagToMulti( pb, m_lst );
+	return this;
+}
+
+CSqParam::t_SqStr CSqMulti::getURL()
+{_STT();
+	oex::CPropertyBag pb;
+	SQBIND_MultiToPropertyBag( m_lst, pb );
+	return oex2std( oex::CParser::EncodeUrlParams( pb ) );
+}
+
+CSqMulti* CSqMulti::setURL( const CSqParam::t_SqStr &s )
+{_STT();
+	// Lose old data
+	m_lst.clear();
+	mergeURL( s );
+	return this;
+}
+
+CSqMulti* CSqMulti::mergeURL( const CSqParam::t_SqStr &s )
+{_STT();
+
+	if ( !s.length() )
+		return this;
+
+	// Deserialize data
+	oex::CPropertyBag pb = oex::CParser::DecodeUrlParams( std2oex( s ) );
 	SQBIND_PropertyBagToMulti( pb, m_lst );
 	return this;
 }
