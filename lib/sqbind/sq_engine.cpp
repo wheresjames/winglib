@@ -1359,7 +1359,8 @@ int CSqEngineExport::get_process_info( SQInteger pid, CSqMulti *m )
 CSqMulti CSqEngineExport::reg_get_keys( const stdString &sKey, const stdString &sPath, int bValues, int bSubKeys )
 {_STT();
 	CSqMulti m;
-	SQBIND_PropertyBagToMulti( oex::os::CSysUtil::GetRegKeys( std2oex( sKey ), std2oex( sPath ), bValues, bSubKeys ), m );
+	oex::CPropertyBag pb = oex::os::CSysUtil::GetRegKeys( std2oex( sKey ), std2oex( sPath ), bValues, bSubKeys );
+	SQBIND_PropertyBagToMulti( pb, m );
 	return m;
 }
 
