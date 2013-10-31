@@ -539,8 +539,9 @@ public:
 									r[ oexT( "id" ) ] = oexStdString( (_bstr_t)pMonikerName ).c_str();
 									r[ oexT( "name" ) ] = oexStdString( (_bstr_t)var.bstrVal ).c_str();
 
+									// +++ Crashing sometimes???
 									// Free string
-									CoTaskMemFree( &var );
+//									CoTaskMemFree( &var );
 
 								} // end if
 
