@@ -924,6 +924,11 @@ stdString CSqEngineExport::uncompress( const stdString &sS )
 	return oex2std( oexUncompressStr( std2oex( sS ) ) );
 }
 
+int CSqEngineExport::kill_process( int nPid, int nTimeout, int nExit )
+{_STT();
+	return oex::os::CSys::KillProcess( nPid, nTimeout, nExit );	
+}
+
 int CSqEngineExport::spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile )
 {_STT();
 	CSqMsgQueue *q = queue();
@@ -1914,7 +1919,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, sleep )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, clock )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ticks )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kill_process )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, spawn )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, spawn2 )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tset )

@@ -577,6 +577,9 @@ public:
 		/// Returns a formated time string
 		stdString gmt_timestr( const stdString &fmt );
 
+		/// Kills the specified process
+		int kill_process( int nPid, int nTimeout, int nExit );
+		
 		/// Creates a thread
 		int spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
 

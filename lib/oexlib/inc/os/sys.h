@@ -586,6 +586,20 @@ public:
 	static oexINT CtrlComputer( int nCmd, int nForce, oexCSTR pMsg );
 
 	//==============================================================
+	// KillProcess()
+	//==============================================================
+	/// Kill the specified process
+	/**
+		@param [in] nPid		-	Process ID
+		@param [in] uTimeout	-	If not zero, the time in milliseconds
+									to wait for the process to exit.
+		@param [in] uExit		-	Exit code for the killed process
+
+		@return Non-zero if success
+	*/
+	static oexINT KillProcess( oexINT nPid, oexUINT uTimeout, oexUINT uExit );
+	
+	//==============================================================
 	// SetRoot()
 	//==============================================================
 	/// Switch to root or administrator

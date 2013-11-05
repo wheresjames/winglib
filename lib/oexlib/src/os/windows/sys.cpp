@@ -400,6 +400,28 @@ oexINT CSys::CtrlComputer( int nCmd, int nForce, oexCSTR pMsg )
 	return 1;
 }
 
+oexINT CSys::KillProcess( oexINT nPid, oexUINT uTimeout, oexUINT uExit )
+{
+	// Attempt to open a handle to the specified process id
+	HANDLE h = OpenProcess( PROCESS_TERMINATE, TRUE, (UINT)nPid );
+	if ( !h )
+		return 0;
+		
+	// Kill the process
+	BOOL bKilled = TerminateProcess( h, uExit );
+	
+	// Do we want to wait for the process to exit?
+	if ( !bKilled && 0 < uTimeout && WAIT_OBJECT_0 == WaitForSingleObject( h, uTimeout ) )
+		bKilled = TRUE;
+
+	// !!! Don't do this
+	// Close the process handle
+//	CloseHandle( h );
+
+	return bKilled ? 1 : 0;
+}
+
+
 // **** Multi-byte
 
 oexCSTR8 CSys::StrFmt( oexSTR8 x_pDst, oexUINT x_uMax, oexCSTR8 x_pFmt, ... )
