@@ -273,7 +273,7 @@ void CFfContainer::fixVideoFrameRate()
     return;
   if ( strcmp( s->oformat->name, "avi" ) )
     return;
-  \
+  
   AVIOContext* pb = s->pb;
   if ( !(pb->seekable) )
     return;

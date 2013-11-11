@@ -846,6 +846,22 @@ int CSqEngineExport::ifind( const stdString &sS, const stdString &sSub )
 	return std2oex( sS ).IMatch( sSub.c_str() );
 }
 
+stdString CSqEngineExport::parse( const stdString &sS, const stdString &sSub )
+{_STT();
+	int offset = std2oex( sS ).Match( sSub.c_str() );
+	if ( 0 > offset )
+		return stdString();
+	return stdString( sS, 0, offset );
+}
+
+stdString CSqEngineExport::iparse( const stdString &sS, const stdString &sSub )
+{_STT();
+	int offset = std2oex( sS ).IMatch( sSub.c_str() );
+	if ( 0 > offset )
+		return stdString();
+	return stdString( sS, 0, offset );
+}
+
 stdString CSqEngineExport::create_size_string( double d, double dDiv, int nDigits, const stdString &sSuffix )
 {_STT();
 	oex::CStr s = std2oex( sSuffix );	
@@ -2041,6 +2057,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, trimws )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, find )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ifind )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, parse )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, iparse )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, str_limit )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, replace )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ireplace )

@@ -504,6 +504,12 @@ public:
 		/// Finds sub string sSub in sS, returns offset or less than zero if not found
 		int ifind( const stdString &sS, const stdString &sSub );
 
+		/// Parses sub string sSub in sS, returns parsed string
+		stdString parse( const stdString &sS, const stdString &sSub );
+
+		/// Parses sub string sSub in sS, returns parsed string
+		stdString iparse( const stdString &sS, const stdString &sSub );
+		
 		/// Creates a size string like 1.3MB, 44.5GB, etc...
 		/**
 			@param [in] d		- Value
