@@ -87,9 +87,9 @@ namespace sqbind { typedef HSQUIRRELVM VM; }
 #   define _SQBIND_REGISTER_CLASS_END()       				; }
 #   define _SQBIND_EXPORT( vm, c )            				__SqReg_sqplus_##c( vm )
 #   define _SQBIND_MEMBER_FUNCTION( c, f )    				.func ( &c::f,        	  	oexT( #f ) )
-#   define _SQBIND_CONST( c, e )              				.enumInt ( (int)c::e,   	oexT( #e ) )
-#   define _SQBIND_GLOBALCONST( e )           				.enumInt ( (int)e,	  		oexT( #e ) )
-#   define _SQBIND_ENUM( e, s )		           				.enumInt ( (int)e,	  	  	oexT( #s ) )
+#   define _SQBIND_CONST( c, e )              				.enumInt ( (SQInteger)c::e,	oexT( #e ) )
+#   define _SQBIND_GLOBALCONST( e )           				.enumInt ( (SQInteger)e,	oexT( #e ) )
+#   define _SQBIND_ENUM( e, s )		           				.enumInt ( (SQInteger)e,	oexT( #s ) )
 #   define _SQBIND_MEMBER_VARIABLE( c, v )    				.var ( &c::v,         	  	oexT( #v ) )
 #   define _SQBIND_STATIC_FUNCTION( c, f )    				.staticFunc ( &c::f,      	oexT( #f ) )
 

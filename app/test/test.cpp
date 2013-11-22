@@ -1660,7 +1660,7 @@ oex::oexRESULT TestLists()
 	if ( !oexVERIFY(  pb3[ oexT( "val1" ) ].ToString() == oexT( "Hello" ) )
 		 || !oexVERIFY(  pb3[ oexT( "group1" ) ][ oexT( "val1" ) ].ToString() == oexT( "yup" ) )
 		 || !oexVERIFY(  pb3[ oexT( "group1" ) ][ oexT( "val2" ) ].ToString() == oexT( "noreturn" ) ) )
-	{	oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::EncodeUrlParams( pb ) ), 0, 16, 128 ).Ptr() );
+	{	oexEcho( oexBinToAsciiHexStr( oex::CBin( oexStrToMb( oex::CParser::EncodeUrlParams( pb ) ) ), 0, 16, 128 ).Ptr() );
 //		oexEcho( oexBinToAsciiHexStr( oex::CBin( oex::CParser::DecodeUrlParams( oex::CParser::EncodeUrlParams( pb ) ) ), 0, 16, 128 ).Ptr() );
 		return -30;
 	} // end if

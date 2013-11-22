@@ -2158,6 +2158,11 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_ENUM( oex::obj::tStr32,		tStr32 )
 	SQBIND_ENUM( oex::obj::tStr64,		tStr64 )
 	SQBIND_ENUM( oex::obj::tGuid,		tGuid )
+	
+	SQBIND_ENUM( (int)42,				INT_42 )
+	SQBIND_ENUM( (int)-42,				INT_NEG_42 )
+	SQBIND_ENUM( (long long)42,			INT64_42 )
+	SQBIND_ENUM( (long long)-42,		INT64_NEG_42 )
 
 SQBIND_REGISTER_CLASS_END()
 

@@ -286,6 +286,14 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 			x_pSession->SetHTTPReplyCode( code );
 	} // end if
 
+	// Has the mime type been set?
+	if ( mReply[ oexT( "mime" ) ].length() )
+		x_pSession->SetContentMimeType( oexStrToMb( std2oex( mReply[ oexT( "mime" ) ].str() ) ) );
+
+	// Set by file type?
+	else if ( mReply[ oexT( "filetype" ) ].length() )
+		x_pSession->SetContentType( oexStrToMb( std2oex( mReply[ oexT( "filetype" ) ].str() ) ) );
+
 	// Set the content
 	if ( mReply[ oexT( "content" ) ].length() )
 		x_pSession->Content() =
