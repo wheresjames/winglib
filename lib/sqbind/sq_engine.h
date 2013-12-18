@@ -520,6 +520,12 @@ public:
 		*/
 		stdString create_size_string( double d, double dDiv, int nDigits, const stdString &sSuffix );
 
+		/// Splits a string into an array
+		CSqMulti splitstr( const stdString &s, const stdString &seps );	
+		
+		/// Joins array components
+		stdString joinstr( CSqMulti *m, const stdString &sep );
+		
 		/// Returns a string clipped to the specified size
 		stdString str_limit( const stdString &sS, int maxchars, const stdString &sAppend );
 

@@ -502,7 +502,7 @@ oexBOOL CDataLog::Flush( t_time x_tTime )
 						// See if this block should go in the index
 						SValueIndex *pvi = (SValueIndex*)m_pLogs[ i ]->bin.Ptr();
 						t_time tI = ( pvi->uTime % m_tLogBase ) / m_tIndexStep;
-						if ( SIterator::c_Invalid == tLast || tLast < tI )
+						if ( (t_time)SIterator::c_Invalid == tLast || tLast < tI )
 						{
 							tLast = tI;
 
@@ -668,7 +668,7 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 	oexBOOL bNew = oexFALSE;
 
 	// Ensure we have the correct database open
-	if ( SIterator::c_Invalid == x_it.uB || _tB != x_it.uB )
+	if ( SIterator::c_Invalid == x_it.uB || _tB != (t_time)x_it.uB )
 	{	
 		// Save open db index
 		x_it.uB = _tB;
@@ -682,7 +682,7 @@ oexBOOL CDataLog::FindValue( SIterator &x_it, t_time x_tTime, t_time x_tTimeMs, 
 	} // end if
 
 	// Time to index?
-	if ( SIterator::c_Invalid == x_it.uI || _tI != x_it.uI )
+	if ( SIterator::c_Invalid == x_it.uI || _tI != (t_time)x_it.uI )
 	{
 		// Save index offset
 		x_it.uI = _tI;

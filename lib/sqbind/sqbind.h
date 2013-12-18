@@ -64,6 +64,15 @@
 
 // sqbind defines
 #include "sq_defines.h"
+
+// Register function pushes
+#ifdef SQBIND_SQPLUS
+namespace SqPlus
+{
+#	include "sqplus_reg.h"
+}
+#endif
+
 namespace sqbind
 {
 	// There will be a class called CSqMsgQueue

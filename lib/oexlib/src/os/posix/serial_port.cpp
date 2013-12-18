@@ -241,7 +241,7 @@ oexBOOL CSerialPort::ClearErrors()
 oexSIZE_T CSerialPort::GetReadBytes()
 {
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
-	if ( !pS || INVALID_HANDLE_VALUE == pS->hPort )
+	if ( !pS || 0 > pS->fd )
 		return 0;
 
 	return 0;
@@ -250,7 +250,7 @@ oexSIZE_T CSerialPort::GetReadBytes()
 oexSIZE_T CSerialPort::GetWriteBytes()
 {
 	SSerialPortSettings *pS = (SSerialPortSettings*)m_pSettings;
-	if ( !pS || INVALID_HANDLE_VALUE == pS->hPort )
+	if ( !pS || 0 > pS->fd)
 		return 0;
 
 	return 0;

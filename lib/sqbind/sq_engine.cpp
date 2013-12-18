@@ -870,6 +870,41 @@ stdString CSqEngineExport::create_size_string( double d, double dDiv, int nDigit
 	return oex2std( oex::CStr().AppendSizeString( d, dDiv, nDigits, suf ) );
 }
 
+CSqMulti CSqEngineExport::splitstr( const stdString &s, const stdString &seps )
+{
+    oex::CStrList lst = oex::CParser::Split( std2oex( s ), std2oex( seps ).Ptr() );
+    if ( !lst.Size() )
+        return CSqMulti();
+
+	int i = 0;
+	CSqMulti m;
+    for ( oex::CStrList8::iterator it; lst.Next( it ); )
+		m[ oex2std( oexMks( i++ ) ) ] = oex2std( *it );
+	
+	return m;
+}
+
+stdString CSqEngineExport::joinstr( CSqMulti *m, const stdString &sep )
+{_STT();
+
+	if ( !m )
+		return oexT( "" );
+	
+	int i = 0;
+	stdString s;
+	while ( m->isset( oex2std( oexMks( i ) ) ) )
+	{
+		if ( i )
+			s += sep;
+
+		s += (*m)[ oex2std( oexMks( i++ ) ) ].str();
+	
+	} // end while
+
+	return s;
+}
+
+
 stdString CSqEngineExport::replace( const stdString &sS, const stdString &sFind, const stdString &sReplace )
 {_STT();
 	return oex2std( std2oex( sS ).Replace( std2oex( sFind ), std2oex( sReplace ) ) );
@@ -2060,6 +2095,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, parse )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, iparse )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, str_limit )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, splitstr )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, joinstr )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, replace )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ireplace )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, create_size_string )	

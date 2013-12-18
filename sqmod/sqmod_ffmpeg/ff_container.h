@@ -69,8 +69,8 @@ public:
 	/// Sets the current byte offset into the file, returns the final position
 	SQInteger setBytePos( SQInteger pos );
    
-        /// resets video stream frame rates
-        void fixVideoFrameRate();
+	/// resets video stream frame rates
+	void fixVideoFrameRate();
 
 	/// Returns video frame rate
 	double getFps()

@@ -76,6 +76,7 @@ namespace sqbind { typedef HSQUIRRELVM VM; }
 
 #ifdef SQBIND_SQPLUS
 
+#	define SQPLUS_LATEREG
 #   include <sqplus.h>
 #   define _SQBIND_REGISTER_CLASS_BEGIN( c, s ) 			static void __SqReg_sqplus_##s( SquirrelVM *vm ) { \
 															oexASSERT_PTR( vm ); \
@@ -329,3 +330,4 @@ public:
 	}
 };
 #endif
+

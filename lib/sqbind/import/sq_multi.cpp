@@ -337,6 +337,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, first )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, last )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, copy )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, lshift )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_up )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_down )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, value )
@@ -771,6 +772,25 @@ int CSqMulti::erase_at( const CSqMulti::t_Obj &path )
 
 	// Next path
 	return m_lst[ path.substr( 0, p ) ].erase_at( path.substr( p + 1 ) );
+}
+
+CSqMulti CSqMulti::lshift()
+{_STT();
+
+	// Do we at least have a zero position?
+	t_Obj x = oexT( "0" ), y = oexT( "1" );
+	if ( m_lst.end() == m_lst.find( x ) )
+		return CSqMulti();
+
+	int i = 0;
+	CSqMulti m = m_lst[ x ];
+	while ( m_lst.end() != m_lst.find( y ) )
+		m_lst[ x ] = m_lst[ y ], x = y, y = oex2std( oexMks( ++i ) );
+
+	// Lose the last position
+	m_lst.erase( x );
+		
+	return m;	
 }
 
 void CSqMulti::move_up( const t_Obj &k )

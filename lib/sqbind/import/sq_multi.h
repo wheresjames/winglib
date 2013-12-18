@@ -383,6 +383,9 @@ namespace sqbind
 		// Moves the specified item down in the list
 		void move_down( const t_Obj &k );
 
+		// Left shifts an array returning the item shifted out
+		CSqMulti lshift();
+		
 		/// Displays the array in a human readable form
 		t_Obj print_r( int nShowVals );
 		

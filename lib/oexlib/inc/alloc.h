@@ -357,7 +357,7 @@ public:
         T* pPtr = (T*)Alloc( x_uSize * sizeof( T ), 0, 0, 0, x_bUseFullBlock );
 #endif
         if ( !pPtr )
-            return oexFALSE;
+            return (T*)0;
 
         // Save construction status if needed
         if ( x_bConstructed )

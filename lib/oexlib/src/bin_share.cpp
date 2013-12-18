@@ -484,7 +484,7 @@ CBin::t_size CBin::Randomize( int nStart, int nEnd )
 
 	if ( nEnd <= 0 )
 		nEnd = getUsed();
-	else if  ( nEnd > getUsed() )
+	else if  ( (t_size)nEnd > getUsed() )
 		nEnd = getUsed();
 
 	if ( nStart >= nEnd )

@@ -380,7 +380,7 @@ public:
 	*/
 	SAviIndexEntry* GetFrameInfo( oexINT64 llFrame, oexBOOL bForward = oexTRUE )
 	{	if ( !CacheFrame( llFrame, bForward ) )
-			return oexFALSE;
+			return (SAviIndexEntry*)0;
 		oexASSERT( llFrame >= m_llIndexBase && llFrame < ( m_llIndexBase + eIndexCacheSize ) );
 		return m_memAviIndex.Ptr( (oexUINT)( llFrame - m_llIndexBase ) );
 	}

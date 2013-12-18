@@ -436,7 +436,7 @@ public:
 	virtual oexPVOID GetBuffer()
 	{
 		if ( !oexCHECK_PTR( m_pDevice ) )
-			return oexFALSE;
+			return (oexPVOID)0;
 
 		return m_pDevice->GetBuffer();
 	}
@@ -454,7 +454,7 @@ public:
 	virtual oexINT GetBufferSize()
 	{
 		if ( !oexCHECK_PTR( m_pDevice ) )
-			return oexFALSE;
+			return 0;
 
 		return m_pDevice->GetBufferSize();
 	}
@@ -465,7 +465,7 @@ public:
 	virtual CImage* GetImage()
 	{
 		if ( !oexCHECK_PTR( m_pDevice ) )
-			return oexFALSE;
+			return (CImage*)0;
 
 		return m_pDevice->GetImage();
 	}
