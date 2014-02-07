@@ -53,6 +53,9 @@ public:
 	_SQBIND_CLASS_CTOR_BEGIN( CCellConnection )
 	_SQBIND_CLASS_CTOR_END( CCellConnection )
 
+	/// Registers the class
+	static void Register( sqbind::VM vm );
+		
 	/// Default constructor
 	CCellConnection();
 
@@ -197,3 +200,5 @@ private:
 	/// Set to non-zero if device quits responding
 	oex::oexBOOL				m_bNotResponding;
 };
+
+DECLARE_INSTANCE_TYPE( CCellConnection );

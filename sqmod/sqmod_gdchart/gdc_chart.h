@@ -34,7 +34,10 @@ public:
 
 	/// Destructor
 	virtual ~CGdcChart();
-
+	
+	/// Registers the class
+	static void Register( sqbind::VM vm );
+	
 	/** \addtogroup CGdcChart
 		@{
 	*/
@@ -64,3 +67,5 @@ private:
 	static oexLock				m_lock;
 
 };
+
+DECLARE_INSTANCE_TYPE( CGdcChart );

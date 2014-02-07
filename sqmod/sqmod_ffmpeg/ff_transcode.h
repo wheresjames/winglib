@@ -77,3 +77,5 @@ private:
 	sqbind::CSqBinary	m_tmp;
 
 };
+
+DECLARE_INSTANCE_TYPE( CFfTranscode );

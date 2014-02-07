@@ -191,3 +191,4 @@ private:
 	int						m_nFlags;
 
 };
+DECLARE_INSTANCE_TYPE( CFfDecoder );

@@ -28,7 +28,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfEncoder, CFfEncoder )
 	SQBIND_MEMBER_FUNCTION( CFfEncoder, getLevel )
 
 SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CFfEncoder );
 
 void CFfEncoder::Register( sqbind::VM vm )
 {_STT();

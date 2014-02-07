@@ -231,6 +231,9 @@ public:
 	/// Unlocks screen data
 	static oexINT UnlockScreen( CBin *x_pInf, CBin *x_pImg );
 
+	/// Return global memory usage info
+	static oexINT GetMemoryStatus( CPropertyBag *pb );
+	
 	/// Returns information about a processes
 	static oexINT GetProcessInfo( oexLONG lPid, CPropertyBag *pb );
 

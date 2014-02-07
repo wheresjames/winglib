@@ -217,3 +217,5 @@ private:
 	AVFormatContext			*m_pFormatContext;
 
 };
+
+DECLARE_INSTANCE_TYPE( CFfAudioEncoder );

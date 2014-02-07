@@ -3,6 +3,35 @@
 
 #include "stdafx.h"
 
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CCellConnection, CCellConnection )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, Connect )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, Destroy )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, IsConnected )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, IsResponding )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, GetIp )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, LoadTags )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, GetLastError )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, GetBackplaneData )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, ReadTag )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, tags )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, tmpl )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, VerifyTemplate )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, GetTypeName )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, GetTypeSize )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, GetTypeFromName )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, SetCacheLimit )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, GetCacheLimit )
+	SQBIND_MEMBER_FUNCTION( CCellConnection, DumpCache )
+
+SQBIND_REGISTER_CLASS_END()
+
+
+void CCellConnection::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CCellConnection );
+}
+
 CCellConnection::CCellConnection()
 {_STT();
 	m_nTagCacheLimit = eDefaultCacheLimit;

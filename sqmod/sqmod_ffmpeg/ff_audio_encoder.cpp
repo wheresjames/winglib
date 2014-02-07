@@ -34,7 +34,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfAudioEncoder, CFfAudioEncoder )
 //	SQBIND_MEMBER_FUNCTION( CFfAudioEncoder,  )
 
 SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CFfAudioEncoder );
 
 void CFfAudioEncoder::Register( sqbind::VM vm )
 {_STT();

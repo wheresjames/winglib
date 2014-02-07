@@ -913,7 +913,7 @@ oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMs
 //		oexPrintf( oexT( "ProcessMsg(): %s, To: %s, Caller: 0x%08x, Owner: 0x%08x\n" ), sMsg.c_str(), x_sPath.c_str(), (unsigned int)oexGetCurThreadId(), GetOwnerThreadId() );
 
 	// Is it bound for another computer
-	stdString::size_type pos = sPath.find_first_of( oexT( ":" ), (size_t)-1 );
+	stdString::size_type pos = sPath.find_first_of( oexT( ":" ), (stdString::size_type)-1 );
 	if ( stdString::npos != pos )
 	{
 		oexPrintf( "Remote routing not supported\n" );

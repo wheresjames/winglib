@@ -81,7 +81,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfConvert, CFfConvert )
 	SQBIND_GLOBALCONST( SWS_CS_DEFAULT )
 
 SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CFfConvert );
 
 void CFfConvert::Register( sqbind::VM vm )
 {_STT();

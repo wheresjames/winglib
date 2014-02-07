@@ -2,6 +2,22 @@
 
 #include "stdafx.h"
 
+// CFtLibrary
+SQBIND_REGISTER_CLASS_BEGIN( CFtLibrary, CFtLibrary )
+
+	SQBIND_MEMBER_FUNCTION( CFtLibrary, Destroy )
+	SQBIND_MEMBER_FUNCTION( CFtLibrary, getLastError )
+	SQBIND_MEMBER_FUNCTION( CFtLibrary, LoadFile )
+	SQBIND_MEMBER_FUNCTION( CFtLibrary, LoadFont )
+//	SQBIND_MEMBER_FUNCTION( CFtLibrary,  )
+//	SQBIND_MEMBER_FUNCTION( CFtLibrary,  )
+
+SQBIND_REGISTER_CLASS_END()
+
+void CFtLibrary::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CFtLibrary );
+}
 
 CFtLibrary::CFtLibrary()
 {_STT();

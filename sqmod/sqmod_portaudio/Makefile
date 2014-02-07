@@ -12,7 +12,7 @@ PRJ_DEPS := portaudio
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 			portaudio/include
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel jpeg png zlib tiff \
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel CxImage jpeg png zlib tiff \
 			portaudio
 PRJ_DEFS := 
  

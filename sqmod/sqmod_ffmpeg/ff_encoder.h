@@ -189,3 +189,4 @@ private:
 	sqbind::CSqBinary		m_header;
 
 };
+DECLARE_INSTANCE_TYPE( CFfEncoder );

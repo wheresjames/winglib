@@ -160,3 +160,5 @@ private:
 	oex::oexINT64				m_tsLast;
 	
 };
+
+DECLARE_INSTANCE_TYPE( CPaOutput );

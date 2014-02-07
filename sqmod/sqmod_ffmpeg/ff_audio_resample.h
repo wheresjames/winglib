@@ -72,3 +72,6 @@ private:
 	AVResampleContext		*m_ctx;
 
 };
+
+DECLARE_INSTANCE_TYPE( CFfAudioResample );
+

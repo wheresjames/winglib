@@ -111,3 +111,5 @@ private:
 	oex::CCircBuf			m_buf;
 
 };
+
+DECLARE_INSTANCE_TYPE( CPaInput );

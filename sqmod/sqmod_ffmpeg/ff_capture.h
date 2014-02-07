@@ -100,3 +100,5 @@ private:
 	int						m_bKeyRxd;
 
 };
+
+DECLARE_INSTANCE_TYPE( CFfCapture );

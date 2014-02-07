@@ -6,6 +6,20 @@
 #include "gdchart.h"
 #include "gd1.3/gd.h"
 
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CGdcChart, CGdcChart )
+
+	SQBIND_MEMBER_FUNCTION( CGdcChart, SaveChart )
+	SQBIND_MEMBER_FUNCTION( CGdcChart, CreateChart )
+	SQBIND_MEMBER_FUNCTION( CGdcChart, CreateChartBin )
+
+//	SQBIND_ENUM( CGdcChart::GDC_LINE, GDC_LINE )
+//	SQBIND_ENUM( CGdcChart::GDC_AREA, GDC_AREA )
+//	SQBIND_ENUM( CGdcChart::GDC_BAR, GDC_BAR )
+
+SQBIND_REGISTER_CLASS_END()
+
+
 #if defined( GD_CUSTOM_ALLOCATOR )
 extern "C"
 {
@@ -36,6 +50,11 @@ extern "C"
 
 /// Unfortunately, the gdchart library is not thread safe
 oexLock CGdcChart::m_lock;
+
+void CGdcChart::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CGdcChart );
+}
 
 CGdcChart::CGdcChart()
 {_STT();

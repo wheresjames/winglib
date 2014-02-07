@@ -39,7 +39,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfAudioDecoder, CFfAudioDecoder )
 	SQBIND_STATIC_FUNCTION( CFfAudioDecoder, LookupCodecName )
 
 SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CFfAudioDecoder );
 
 void CFfAudioDecoder::Register( sqbind::VM vm )
 {_STT();

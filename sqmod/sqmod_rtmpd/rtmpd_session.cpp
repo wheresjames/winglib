@@ -42,7 +42,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CRtmpdSession, CRtmpdSession )
 	SQBIND_ENUM( CRtmpdSession::eFlagEmcaArray, eFlagEmcaArray )
 
 SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CRtmpdSession );
 
 void CRtmpdSession::Register( sqbind::VM vm )
 {_STT();

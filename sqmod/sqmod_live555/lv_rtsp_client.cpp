@@ -64,7 +64,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CLvRtspClient, CLvRtspClient )
 //	SQBIND_MEMBER_FUNCTION( CLvRtspClient,  )
 
 SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CLvRtspClient );
 
 void CLvRtspClient::Register( sqbind::VM vm )
 {_STT();

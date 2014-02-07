@@ -121,3 +121,5 @@ private:
 	/// Color blue
 	int						m_blue;
 };
+
+DECLARE_INSTANCE_TYPE( CFtFace );

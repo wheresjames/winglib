@@ -55,7 +55,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfDecoder, CFfDecoder )
 
 
 SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CFfDecoder );
 
 void CFfDecoder::Register( sqbind::VM vm )
 {_STT();

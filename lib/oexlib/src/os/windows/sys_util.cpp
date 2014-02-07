@@ -1020,6 +1020,30 @@ oexINT CSysUtil::QueueInput( CPropertyBag *pb )
 	return 1;
 }
 
+oexINT CSysUtil::GetMemoryStatus( CPropertyBag *pb )
+{
+	if ( !pb )
+		return 0;
+
+	// Get memory info
+	MEMORYSTATUSEX msex; oexZero( msex );
+	msex.dwLength = sizeof( msex );
+	if ( !GlobalMemoryStatusEx( &msex ) )
+		return 0;
+		
+	// Copy into property bag
+	(*pb)[ oexT( "memory_load" ) ] = msex.dwMemoryLoad;
+	(*pb)[ oexT( "total_physical" ) ] = msex.ullTotalPhys;
+	(*pb)[ oexT( "avail_physical" ) ] = msex.ullAvailPhys;
+	(*pb)[ oexT( "total_page_file" ) ] = msex.ullTotalPageFile;
+	(*pb)[ oexT( "avail_page_file" ) ] = msex.ullAvailPageFile;
+	(*pb)[ oexT( "total_virtual" ) ] = msex.ullTotalVirtual;
+	(*pb)[ oexT( "avail_virtual" ) ] = msex.ullAvailVirtual;
+	(*pb)[ oexT( "avail_extended_virtual" ) ] = msex.ullAvailExtendedVirtual;
+		
+	return 1;
+}
+
 oexINT CSysUtil::i_cpuid( int *reg, oexINT i )
 {
 #if defined( OEX_NO_CPUID )

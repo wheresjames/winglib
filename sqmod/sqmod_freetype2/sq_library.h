@@ -44,3 +44,5 @@ private:
 	FT_Library				m_library;
 
 };
+
+DECLARE_INSTANCE_TYPE( CFtLibrary );

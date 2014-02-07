@@ -17,7 +17,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfCapture, CFfCapture )
 	SQBIND_MEMBER_FUNCTION( CFfCapture, getFrameCount )
 
 SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CFfCapture );
 
 void CFfCapture::Register( sqbind::VM vm )
 {_STT();

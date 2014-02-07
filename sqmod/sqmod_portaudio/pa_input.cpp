@@ -29,7 +29,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CPaInput, CPaInput )
 //	SQBIND_GLOBALCONST( paUInt8 )
 
 SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CPaInput );
 
 void CPaInput::Register( sqbind::VM vm )
 {_STT();

@@ -12,7 +12,7 @@ PRJ_DEPS := asio
 PRJ_TYPE := dll
 PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 			asio/common asio/host asio/host/pc
-PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff \
+PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib \
 			asio
 PRJ_DEFS := 
 PRJ_LIBP :=

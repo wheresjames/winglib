@@ -143,7 +143,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
 	SQBIND_GLOBALCONST( AVSEEK_FLAG_FRAME )
 
 SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CFfContainer );
 
 void CFfContainer::Register( sqbind::VM vm )
 {_STT();

@@ -139,3 +139,4 @@ private:
 
 };
 
+DECLARE_INSTANCE_TYPE( CRtmpdSession );

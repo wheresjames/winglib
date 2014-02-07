@@ -25,7 +25,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CLvRtspServer, CLvRtspServer )
 //	SQBIND_MEMBER_FUNCTION( CLvRtspServer,  )
 
 SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CLvRtspServer );
 
 void CLvRtspServer::Register( sqbind::VM vm )
 {_STT();

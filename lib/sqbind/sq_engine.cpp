@@ -872,7 +872,8 @@ stdString CSqEngineExport::create_size_string( double d, double dDiv, int nDigit
 
 CSqMulti CSqEngineExport::splitstr( const stdString &s, const stdString &seps )
 {
-    oex::CStrList lst = oex::CParser::Split( std2oex( s ), std2oex( seps ).Ptr() );
+//    oex::CStrList lst = oex::CParser::Split( std2oex( s ), std2oex( seps ).Ptr() );
+    oex::CStrList lst = oex::CParser::Split( &s[ 0 ], s.length(), &seps[ 0 ] );
     if ( !lst.Size() )
         return CSqMulti();
 
@@ -1398,6 +1399,18 @@ int CSqEngineExport::get_process_list( CSqMulti *m, int bProcessInfo )
 	int ret = oex::os::CSysUtil::GetProcessList( &pb, bProcessInfo );
 	SQBIND_PropertyBagToMulti( pb, *m );
 	return ret;
+}
+
+
+CSqMulti CSqEngineExport::get_memory_status()
+{_STT();
+
+	CSqMulti m;
+	oex::CPropertyBag pb;
+	SQBIND_MultiToPropertyBag( m, pb );
+	oex::os::CSysUtil::GetMemoryStatus( &pb );
+	SQBIND_PropertyBagToMulti( pb, m );
+	return m;
 }
 
 int CSqEngineExport::get_process_info( SQInteger pid, CSqMulti *m )
@@ -2146,7 +2159,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, queue_input )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_process_list )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_process_info )
-//	SQBIND_MEMBER_FUNCTION(  CSqEngineExport,  )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_memory_status )
 //	SQBIND_MEMBER_FUNCTION(  CSqEngineExport,  )
 //	SQBIND_MEMBER_FUNCTION(  CSqEngineExport,  )
 //	SQBIND_MEMBER_FUNCTION(  CSqEngineExport,  )

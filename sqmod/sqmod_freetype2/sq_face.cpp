@@ -2,7 +2,37 @@
 
 #include "stdafx.h"
 
+// CFtFace
+SQBIND_REGISTER_CLASS_BEGIN( CFtFace, CFtFace )
+
+	SQBIND_MEMBER_FUNCTION( CFtFace, Destroy )
+	SQBIND_MEMBER_FUNCTION( CFtFace, getLastError )
+	SQBIND_MEMBER_FUNCTION( CFtFace, LoadChar )
+	SQBIND_MEMBER_FUNCTION( CFtFace, DrawImg )	
+	SQBIND_MEMBER_FUNCTION( CFtFace, DrawBin )	
+	SQBIND_MEMBER_FUNCTION( CFtFace, setAngle )
+	SQBIND_MEMBER_FUNCTION( CFtFace, getAngle )
+	SQBIND_MEMBER_FUNCTION( CFtFace, setCharSize )
+	SQBIND_MEMBER_FUNCTION( CFtFace, setPen )
+	SQBIND_MEMBER_FUNCTION( CFtFace, setPenX )
+	SQBIND_MEMBER_FUNCTION( CFtFace, getPenX )
+	SQBIND_MEMBER_FUNCTION( CFtFace, setPenY )
+	SQBIND_MEMBER_FUNCTION( CFtFace, getPenY )
+	SQBIND_MEMBER_FUNCTION( CFtFace, CalcSize )
+	SQBIND_MEMBER_FUNCTION( CFtFace, Str2Ascii )
+	SQBIND_MEMBER_FUNCTION( CFtFace, setColor )
+//	SQBIND_MEMBER_FUNCTION( CFtFace,  )
+//	SQBIND_MEMBER_FUNCTION( CFtFace,  )
+
+SQBIND_REGISTER_CLASS_END()
+
+
 #define CFtFace_FONT_SCALE 0x10000L
+
+void CFtFace::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CFtFace );
+}
 
 CFtFace::CFtFace()
 {_STT();

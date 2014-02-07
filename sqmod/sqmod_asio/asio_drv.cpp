@@ -35,7 +35,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CAsioDrv, CAsioDrv )
 //	SQBIND_MEMBER_FUNCTION( CAsioDrv,  )
 
 SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CAsioDrv );
 
 void CAsioDrv::Register( sqbind::VM vm )
 {_STT();

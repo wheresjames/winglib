@@ -13,7 +13,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfAudioResample, CFfAudioResample )
 //	SQBIND_GLOBALCONST(  )
 
 SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CFfAudioResample );
 
 void CFfAudioResample::Register( sqbind::VM vm )
 {_STT();

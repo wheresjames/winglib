@@ -225,4 +225,5 @@ private:
 	int									m_nSignal;
 
 };
+SQBIND_DECLARE_INSTANCE( CAsioDrv, CAsioDrv );
 

@@ -654,6 +654,9 @@ public:
 
 		/// Returns information about the cpu
 		CSqMulti get_cpu_info();
+		
+		/// Returns information about global memory usage
+		CSqMulti get_memory_status();		
 
 		/// Amount of time in seconds, since the computer started
 		double boot_time();

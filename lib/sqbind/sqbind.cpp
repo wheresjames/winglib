@@ -36,6 +36,12 @@
 
 using namespace sqbind;
 
+namespace SqPlus
+{
+	template<> void Push<sqbind::stdString>(HSQUIRRELVM v,sqbind::stdString value)
+	{	sq_pushstring(v,value.c_str(),value.length()); }
+};
+
 namespace sqbind
 {
 	void SqBindAll( sqbind::VM x_vm )

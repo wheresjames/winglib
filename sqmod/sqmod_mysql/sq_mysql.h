@@ -105,3 +105,5 @@ private:
 	int						m_nLastError;
 
 };
+
+DECLARE_INSTANCE_TYPE( CSqMysql );

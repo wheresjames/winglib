@@ -95,3 +95,6 @@ private:
 
 
 };
+
+DECLARE_INSTANCE_TYPE( CFfConvert );
+

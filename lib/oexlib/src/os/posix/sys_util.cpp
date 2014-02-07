@@ -483,6 +483,11 @@ oexINT CSysUtil::QueueInput( CPropertyBag *pb )
 	return 0;
 }
 
+oexINT CSysUtil::GetMemoryStatus( CPropertyBag *pb )
+{
+	return 0;
+}
+
 oexINT CSysUtil::i_cpuid( int *reg, oexINT i )
 {
 #if defined( OEX_NO_CPUID )

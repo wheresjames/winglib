@@ -19,7 +19,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfTranscode, CFfTranscode )
 	SQBIND_MEMBER_FUNCTION( CFfTranscode, isValid )
 
 SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CFfTranscode );
 
 void CFfTranscode::Register( sqbind::VM vm )
 {_STT();

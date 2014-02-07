@@ -487,3 +487,4 @@ private:
 	int						m_nTunnelOverHTTPPort;
 };
 
+DECLARE_INSTANCE_TYPE( CLvRtspClient );

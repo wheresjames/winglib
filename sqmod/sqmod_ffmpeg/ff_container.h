@@ -399,3 +399,5 @@ private:
 	/// Audio time base scale
 	oex::oexINT64			m_audio_scale;
 };
+
+DECLARE_INSTANCE_TYPE( CFfContainer );

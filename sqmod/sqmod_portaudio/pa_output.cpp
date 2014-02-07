@@ -2,7 +2,6 @@
 
 #include "stdafx.h"
 
-
 // Export Functions
 SQBIND_REGISTER_CLASS_BEGIN( CPaOutput, CPaOutput )
 
@@ -34,7 +33,6 @@ SQBIND_REGISTER_CLASS_BEGIN( CPaOutput, CPaOutput )
 //	SQBIND_MEMBER_FUNCTION( CPaOutput,  )
 	
 SQBIND_REGISTER_CLASS_END()
-DECLARE_INSTANCE_TYPE( CPaOutput );
 
 void CPaOutput::Register( sqbind::VM vm )
 {_STT();

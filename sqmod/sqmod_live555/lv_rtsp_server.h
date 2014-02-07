@@ -376,3 +376,4 @@ private:
 	char									m_nEnd;
 };
 
+DECLARE_INSTANCE_TYPE( CLvRtspServer );

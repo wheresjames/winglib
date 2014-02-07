@@ -140,3 +140,5 @@ private:
 	sqbind::CSqBinary		m_sync;
 	
 };
+
+DECLARE_INSTANCE_TYPE( CFfAudioDecoder );

@@ -76,9 +76,18 @@ namespace sqbind { typedef HSQUIRRELVM VM; }
 
 #ifdef SQBIND_SQPLUS
 
+#define _SQPLUS_DEFINE_PUSH( c ) \
+	namespace SqPlus { \
+	template<> void Push<c*>(HSQUIRRELVM v,c * value) { if (!CreateNativeClassInstance(v,GetTypeName(*value),value,0)) throw SquirrelError(_T("Push(): could not create INSTANCE (check registration name)")); } \
+	template<> void Push<c>(HSQUIRRELVM v,c value) { if (!CreateCopyInstance(v,GetTypeName(value),value)) throw SquirrelError(_T("Push(): could not create INSTANCE copy (check registration name)")); } \
+	} 
+
+
+
 #	define SQPLUS_LATEREG
 #   include <sqplus.h>
-#   define _SQBIND_REGISTER_CLASS_BEGIN( c, s ) 			static void __SqReg_sqplus_##s( SquirrelVM *vm ) { \
+#   define _SQBIND_REGISTER_CLASS_BEGIN( c, s )				_SQPLUS_DEFINE_PUSH( c ) \
+															static void __SqReg_sqplus_##s( SquirrelVM *vm ) { \
 															oexASSERT_PTR( vm ); \
     	                                       				SqPlus::SQClassDef< c >( *vm, oexT( #s ) ) \
 															. staticFunc( &c::sq_construct_##s, oexT( "constructor" ) )
@@ -135,6 +144,7 @@ namespace sqbind { typedef HSQUIRRELVM VM; }
 #	define _SQBIND_CLASS_BIND_CTOR( c )				.staticFunc( &c::sq_construct_##c, oexT( "constructor" ) )
 
 #	define _SQBIND_DECLARE_INSTANCE( c, n )			DECLARE_INSTANCE_TYPE_NAME( c, n )
+													
 
 #	if !defined( SQBIND_SQBIND )
 namespace sqbind { typedef SquirrelVM *VM; }
