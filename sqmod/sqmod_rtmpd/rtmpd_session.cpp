@@ -37,6 +37,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CRtmpdSession, CRtmpdSession )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, ParseFlv )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, setNonBlockingMode )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, setTimeout )
+	SQBIND_MEMBER_FUNCTION( CRtmpdSession, getErrors )
 
 	SQBIND_ENUM( CRtmpdSession::eFlagAllInfo, eFlagAllInfo )
 	SQBIND_ENUM( CRtmpdSession::eFlagEmcaArray, eFlagEmcaArray )
@@ -992,3 +993,11 @@ int CRtmpdSession::ParseFlv( sqbind::CSqBinary *b, sqbind::CSqMulti *m )
 	return t - l;
 }
 
+extern oex::CStr8 _g_rtmpd_sErrors;
+sqbind::stdString CRtmpdSession::getErrors()
+{
+	oexAutoLock ll( _g_rtmpd_lock );
+	oex::CStr8 s = _g_rtmpd_sErrors;
+	_g_rtmpd_sErrors.clear();
+	return sqbind::oex2std( s );
+}

@@ -117,6 +117,9 @@ public:
 	/// Parses the packet data
 	int ParsePacket( sqbind::CSqMulti *m, const char *p, int nOffset, int i, int nMode );
 
+	/// Returns error strings (for all connections)
+	sqbind::stdString getErrors();
+	
 private:
 
 	/// RTMP session context

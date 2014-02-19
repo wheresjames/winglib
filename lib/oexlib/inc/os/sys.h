@@ -196,6 +196,12 @@ public:
 	/// Converts to double
 	static oexDOUBLE StrToDouble( oexCSTR8 pStr );
 
+	/// Format the string and pring to console
+	static int Print( oexCSTR8 x_pFmt, ... );
+
+	/// Format string and print to console
+	static int vPrint( oexCSTR8 x_pFmt, oexVaList pArgs );	
+	
 	/// printf function
 	static int Printf( oexCSTR8 x_pFmt, ... );
 
@@ -242,6 +248,12 @@ public:
 	static oexDOUBLE StrToDouble( oexCSTRW pStr );
 
 	// +++ Hmmm, probably shouldn't overload Printf(), could cause nasty errors
+
+	/// Format the string and pring to console
+	static int Print( oexCSTRW x_pFmt, ... );
+
+	/// Format string and print to console
+	static int vPrint( oexCSTRW x_pFmt, oexVaList pArgs );	
 
 	/// printf function
 	static int Printf( oexCSTRW x_pFmt, ... );

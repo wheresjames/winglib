@@ -179,5 +179,4 @@ int CSqSQLite::OnCallback( int argc, char **argv, char **azColName )
 	return 0;
 }
 
-
 #endif // defined( OEX_ENABLE_SQLITE )

@@ -668,6 +668,24 @@ int CSys::Printf( oexCSTRW x_pFmt, ... )
 	return ret;
 }
 
+int CSys::vPrint( oexCSTRW x_pFmt, oexVaList pArgs )
+{//_STT();
+	CStrW s;
+	s.vFmt( x_pFmt, pArgs );
+	Echo( s.Ptr() );
+	return s.Length();
+}
+
+int CSys::Print( oexCSTRW x_pFmt, ... )
+{//_STT();
+	CStrW s;
+	oexVaList ap; oexVaStart( ap, x_pFmt );
+	s.vFmt( x_pFmt, (va_list)ap );
+	oexVaEnd( ap );
+	Echo( s.Ptr() );
+	return s.Length();
+}
+
 int CSys::Echo( oexCSTRW x_pFmt )
 {//_STT();
 	if ( !x_pFmt )
@@ -1070,6 +1088,24 @@ int CSys::Printf( oexCSTR8 x_pFmt, ... )
 int CSys::vPrintf( oexCSTR8 x_pFmt, oexVaList pArgs )
 {//_STT();
 	return ::vprintf( x_pFmt, (va_list)pArgs );
+}
+
+int CSys::vPrint( oexCSTR8 x_pFmt, oexVaList pArgs )
+{//_STT();
+	CStr8 s;
+	s.vFmt( x_pFmt, pArgs );
+	Echo( s.Ptr() );
+	return s.Length();
+}
+
+int CSys::Print( oexCSTR8 x_pFmt, ... )
+{//_STT();
+	CStr8 s;
+	oexVaList ap; oexVaStart( ap, x_pFmt );
+	s.vFmt( x_pFmt, (va_list)ap );
+	oexVaEnd( ap );
+	Echo( s.Ptr() );
+	return s.Length();
 }
 
 int CSys::Echo( oexCSTR8 x_pFmt )

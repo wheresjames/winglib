@@ -94,7 +94,6 @@ public:
         m_mem.Share( buf );
 	}
 
-
 	TStr( oexCONST TStr &str )
 	{	m_nLength = 0;
         m_nOffset = 0;
@@ -103,7 +102,17 @@ public:
         m_uLine = 0;
 #endif
 		Set( str );
-//		if ( str.Length() ) Set( str.Ptr() );
+	}
+
+	TStr( oexCONST TStr *pstr )
+	{	m_nLength = 0;
+        m_nOffset = 0;
+#if defined( oexDEBUG ) || defined( OEX_ENABLE_RELEASE_MODE_MEM_CHECK )
+        m_pFile = oexNULL;
+        m_uLine = 0;
+#endif
+		if ( pstr )
+			Set( *pstr );
 	}
 
 	TStr( oexCONST T *pStr )
@@ -352,6 +361,12 @@ public:
 
 		return pMem;
     }
+	
+	/// STD compatible function
+	void reserve( t_size x_uSize )
+	{
+		Allocate( x_uSize );
+	}
 
 	/// Returns a const pointer to the internal string buffer
 	oexCONST T* Ptr() const
@@ -388,6 +403,12 @@ public:
 		return ( (TStr*)this )->m_mem.Ptr( x_uOffset + m_nOffset );
 	}
 
+	/// STD compatible function
+	oexCONST T* c_str() const
+	{
+		return Ptr();
+	}
+
 	/// Returns a writable pointer (use with care)
 	T* _Ptr() const
 	{	( (TStr*)this )->Unshare(); return (T*)Ptr(); }
@@ -396,6 +417,12 @@ public:
 	T* _Ptr( oexUINT x_uOffset ) const
 	{	( (TStr*)this )->Unshare(); return (T*)Ptr( x_uOffset ); }
 
+	/// STD compatible function
+	T* data()
+	{
+		return _Ptr();
+	}
+	
 	/// Returns the specified character
 	oexCONST T operator []( oexUINT x_uOffset ) const
 	{	return *Ptr( x_uOffset ); }
@@ -447,6 +474,12 @@ public:
 		return m_nLength - m_nOffset;
 	}
 
+	/// STD compatible length function
+	t_size length() oexCONST
+	{
+		return Length();
+	}
+	
     /// Manually sets the length
     /// !!! This allows NULL characters to be in the string.
     t_size SetLength( t_size x_nLength )
@@ -465,6 +498,18 @@ public:
         return m_nLength;
     }
 
+	/// STD compatible function
+	void resize( t_size x_nLength )
+	{
+		SetLength( x_nLength );
+	}
+
+	/// STD compatible function
+	void clear()
+	{
+		SetLength( 0 );
+	}
+	
     /// Manually sets the length
     /// This function is for buffer sharing
 	/// !!! This function may cause a non null terminated string
@@ -537,6 +582,14 @@ public:
 	TStr& operator += ( oexCONST TStr &str )
 	{	return Append( str ); }
 
+	/// Concatenation operator
+	TStr operator + ( oexCONST T* pStr )
+	{	return TStr( this ).Append( pStr ); }
+
+	/// Concatenation operator
+	TStr operator + ( oexCONST TStr &str )
+	{	return TStr( this ).Append( str ); }
+
 	TStr& operator = ( oexCONST oexINT nVal )
 	{	return SetNum( oexTT( T, "%i" ), (oexINT)nVal ); }
 
@@ -557,6 +610,33 @@ public:
 
 	TStr& operator = ( oexCONST oexUINT64 llStr )
 	{	return SetNum( oexTT( T, "%llu" ), (oexUINT64)llStr ); }
+
+	TStr operator + ( oexCONST oexINT nVal )
+	{	return TStr( this ).AppendNum( oexTT( T, "%i" ), (oexINT)nVal ); }
+
+	TStr operator + ( oexCONST oexUINT uVal )
+	{	return TStr( this ).AppendNum( oexTT( T, "%u" ), (oexUINT)uVal ); }
+
+	TStr operator + ( oexCONST oexLONG lVal )
+	{	return TStr( this ).AppendNum( oexTT( T, "%lld" ), (oexINT64)lVal ); }
+
+	TStr operator + ( oexCONST oexULONG ulVal )
+	{	return TStr( this ).AppendNum( oexTT( T, "%llu" ), (oexUINT64)ulVal ); }
+
+	TStr operator + ( oexCONST oexDOUBLE dVal )
+	{	return TStr( this ).AppendNumTrim( oexTT( T, "%f" ), oexNULL, oexTT( T, "0" ), (oexDOUBLE)dVal ); }
+
+	TStr operator + ( oexCONST oexUINT64 llVal )
+	{	return TStr( this ).AppendNum( oexTT( T, "%llu" ), (oexUINT64)llVal ); }
+
+	TStr operator + ( oexCONST oexINT64 llVal )
+	{	return TStr( this ).AppendNum( oexTT( T, "%lld" ), (oexINT64)llVal ); }
+
+	TStr operator + ( oexCONST T chVal )
+	{	return TStr( this ).Append( &chVal, 1 ); }
+
+	TStr operator + ( oexCONST oexGUID &guid )
+	{	return TStr( this ).Append( TStr().GuidToString( guid ) ); }	
 
 	TStr& operator += ( oexCONST oexINT nVal )
 	{	return AppendNum( oexTT( T, "%i" ), (oexINT)nVal ); }
@@ -585,6 +665,9 @@ public:
 	TStr& operator += ( oexCONST oexGUID &guid )
 	{	return Append( TStr().GuidToString( guid ) ); }
 
+	
+	
+	
 	TStr& operator << ( oexCONST oexINT nVal )
 	{	return AppendNum( oexTT( T, "%i" ), (oexINT)nVal ); }
 
