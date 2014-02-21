@@ -112,13 +112,19 @@ public:
 	/// Sets the socket timeout in milliseconds
 	int setTimeout( int nMs );
 
+	/// Returns error strings (for all connections)
+	sqbind::stdString getErrors();
+	
+	/// Returns non-zero if connection is encrypted
+	int isEncrypted() { return ( m_session.Link.protocol & RTMP_FEATURE_ENC ) ? 1 : 0; }
+
+	/// Returns non-zero if connection is using SSL
+	int isSSL() { return ( m_session.Link.protocol & RTMP_FEATURE_SSL ) ? 1 : 0; }
+
 	/** @} */
 
 	/// Parses the packet data
 	int ParsePacket( sqbind::CSqMulti *m, const char *p, int nOffset, int i, int nMode );
-
-	/// Returns error strings (for all connections)
-	sqbind::stdString getErrors();
 	
 private:
 

@@ -38,6 +38,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CRtmpdSession, CRtmpdSession )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, setNonBlockingMode )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, setTimeout )
 	SQBIND_MEMBER_FUNCTION( CRtmpdSession, getErrors )
+	SQBIND_MEMBER_FUNCTION( CRtmpdSession, isEncrypted )
+	SQBIND_MEMBER_FUNCTION( CRtmpdSession, isSSL )
 
 	SQBIND_ENUM( CRtmpdSession::eFlagAllInfo, eFlagAllInfo )
 	SQBIND_ENUM( CRtmpdSession::eFlagEmcaArray, eFlagEmcaArray )
