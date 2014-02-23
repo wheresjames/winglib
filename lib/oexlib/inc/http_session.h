@@ -697,6 +697,9 @@ public:
 		// Lose old header values
 		m_pbTxHeaders.Destroy();
 
+		// Add default server headers
+		m_pbTxHeaders = m_pbDefHeaders.Copy();
+		
 		// Set the server name
 		m_pbTxHeaders[ "Server" ] = "";
 
@@ -982,6 +985,9 @@ public:
 	CPropertyBag8& TxHeaders()
 	{	return m_pbTxHeaders; }
 
+	CPropertyBag8& DefHeaders()
+	{	return m_pbDefHeaders; }
+
 	CPropertyBag8& Get()
 	{	return m_pbGet; }
 
@@ -1219,6 +1225,9 @@ private:
 
     /// Outgoing HTTP headers
     CPropertyBag8     		  	m_pbTxHeaders;
+
+    /// Default outgoing HTTP headers
+    CPropertyBag8     		  	m_pbDefHeaders;
 
     /// Request information
     CPropertyBag8    		  	m_pbRequest;

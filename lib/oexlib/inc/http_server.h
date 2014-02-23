@@ -438,6 +438,9 @@ protected:
 		// Mapped folders
 		session.SetMappedFoldersList( &m_pbMappedFolders, &m_lockMappedFolders );
 
+		// Copy the default headers to the session
+		session.DefHeaders() = m_pbDefHeaders.Copy();
+		
 		// Enable sessions?
 		if ( m_bEnableSessions )
 			session.SetSessionObject( &m_pbSession, &m_lockSession );
@@ -780,6 +783,9 @@ public:
 	/// Gets the maximum connection queue size
 	oexUINT getMaxQueue() { return m_uMaxQueue; }
 
+	/// Returns a reference to the default server headers
+	CPropertyBag8& DefHeaders() { return m_pbDefHeaders; }
+	
 private:
 
 	/// The TCP port to listen
@@ -859,6 +865,9 @@ private:
 
 	/// List of mapped folders
 	CPropertyBag				m_pbMappedFolders;
+
+    /// Default outgoing HTTP headers
+    CPropertyBag8     		  	m_pbDefHeaders;
 
 	/// Manages port creation / destruction
 	CFactory					*m_pPortFactory;

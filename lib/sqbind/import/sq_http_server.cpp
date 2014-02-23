@@ -60,8 +60,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqHttpServer, CSqHttpServer )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, getMaxConn )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, setMaxQueue )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, getMaxQueue )
-//	SQBIND_MEMBER_FUNCTION( CSqHttpServer,  )
-//	SQBIND_MEMBER_FUNCTION( CSqHttpServer,  )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, setDefaultHeader )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, getDefaultHeader )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, getDefaultHeaders )
 //	SQBIND_MEMBER_FUNCTION( CSqHttpServer,  )
 
 SQBIND_REGISTER_CLASS_END()
@@ -69,6 +70,12 @@ SQBIND_REGISTER_CLASS_END()
 void CSqHttpServer::Register( VM vm )
 {_STT();
 	_SQBIND_EXPORT( vm, CSqHttpServer );
+}
+
+sqbind::CSqMulti CSqHttpServer::getDefaultHeaders()
+{	CSqMulti m;
+	SQBIND_PropertyBagToMulti( m_server.DefHeaders(), m );
+	return m;		
 }
 
 void CSqHttpServer::SetServerCallback( CSqMsgQueue *x_pMsgQueue, const stdString &sServer )
