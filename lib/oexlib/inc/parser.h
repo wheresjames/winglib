@@ -262,7 +262,7 @@ public:
 		static TPropertyBag< TStr< T > > DecodeUrlParams( TStr< T > x_str )
 	{
 		TPropertyBag< TStr< T > > pb;
-		TStr< T > key, val;
+		TStr< T > key, val, idx = oexTT( T, "[]" );
 
 		TList< TStr< T > > lst = CParser::Split< T >( x_str, oexTT( T, "&" ) );
 
@@ -275,15 +275,15 @@ public:
 #if defined( __GNUC__ )
 			// Key value pair
 			if ( key.Length() && val.Length() )
-				pb.at( key ) = val;
+				pb.at( key, idx ) = val;
 
 			// NULL key assignment
 			else if ( key.Length() )
-				pb.at( key ) = oexTT( T, "" );
+				pb.at( key, idx ) = oexTT( T, "" );
 
 			// Assume NULL key assignment
 			else if ( val.Length() )
-				pb.at( val ) = oexTT( T, "" );
+				pb.at( val, idx ) = oexTT( T, "" );
 #else
 			// Key value pair
 			if ( key.Length() && val.Length() )
