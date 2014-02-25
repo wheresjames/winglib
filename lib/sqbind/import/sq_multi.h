@@ -359,6 +359,12 @@ namespace sqbind
 		/// Gets last element after the skip count
 		CSqMulti* last( int skip );
 		
+		/// Gets the first key after the skip count
+		stdString first_key( int skip );
+		
+		/// Gets last key after the skip count
+		stdString last_key( int skip );
+		
 		/// Finds an element
 		t_Obj find_key( const t_Obj &k );
 

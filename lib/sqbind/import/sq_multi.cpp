@@ -336,6 +336,8 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, erase_at )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, first )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, last )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, first_key )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, last_key )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, copy )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, lshift )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, move_up )
@@ -724,6 +726,32 @@ CSqMulti* CSqMulti::last( int skip )
 	} // end if
 
 	return &it->second;
+}
+
+stdString CSqMulti::first_key( int skip )
+{_STT();
+
+	t_List::iterator it = m_lst.begin();
+	while ( 0 < skip && it != m_lst.end() ) 
+		skip--, it++;
+	
+	if ( it == m_lst.end() )
+		return stdString();
+
+	return it->first;
+}
+
+stdString CSqMulti::last_key( int skip )
+{_STT();
+
+	t_List::reverse_iterator it = m_lst.rbegin();
+	while ( 0 < skip && it != m_lst.rend() ) 
+		skip--, it++;
+
+	if ( it == m_lst.rend() )
+		return stdString();
+
+	return it->first;
 }
 
 
