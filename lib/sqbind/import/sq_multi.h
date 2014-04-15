@@ -298,6 +298,9 @@ namespace sqbind
 		/// Returns base64 decoded string
 		CSqBinary bin_base64_decode();
 
+		/// Returns non-zero if string value matches pattern
+		int match( const t_Obj &sPattern );
+		
 		/// Registers the vector class for use with Squirrel
 		static void Register( sqbind::VM vm );
 
@@ -352,6 +355,12 @@ namespace sqbind
 		
 		/// Erases the element at the specified path
 		int erase_at( const t_Obj &path );
+
+		/// Gets an element using a path
+		CSqMulti* ats( const t_Obj &path, const t_Obj &sep );
+		
+		/// Erases the element at the specified path
+		int erase_ats( const t_Obj &path, const t_Obj &sep );
 
 		/// Gets the first element after the skip count
 		CSqMulti* first( int skip );

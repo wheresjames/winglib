@@ -744,7 +744,7 @@ public:
 			}
 
 
-		/// Decodes an html string "&lt;b&gt;Hello&nbsp;World&lt;/b&gt;" -> "<b>Hello World</b>"
+		/// Decodes 
 		template< typename T >
 			static TStr< T > CppDecode( oexCONST T *x_pStr )
 			{   return CppDecode( TStr< T >( x_pStr ) ); }
@@ -775,6 +775,196 @@ public:
 			return ret;
 		}
 
+
+//------------------------------------------------------------------
+// Reg File encode / decode
+//------------------------------------------------------------------
+
+	template< typename T >
+		static TStr< T > RegEncodeChar( T x_ch )
+		{
+			switch( x_ch )
+			{
+				case oexTC( T, '"' ) :
+					return oexTT( T, "\\\"" );
+
+				case oexTC( T, '\'' ) :
+					return oexTT( T, "\\\\" );
+
+				case oexTC( T, '\t' ) :
+					return oexTT( T, "\\t" );
+
+				case oexTC( T, '\r' ) :
+					return oexTT( T, "\\r" );
+
+				case oexTC( T, '\n' ) :
+					return oexTT( T, "\\n" );
+
+			} // end switch
+
+			// Generic encode
+			return x_ch;
+		}
+
+	template< typename T >
+		static TStr< T > RegEncodeStr( TStr< T > x_str )
+		{
+			TStr< T > ret;
+			oexINT nLen = x_str.Length();
+
+			while ( 0 < nLen-- )
+			{
+				ret << RegEncodeChar( *x_str );
+
+				x_str++;
+
+			} // end while
+
+			return ret;
+		}
+
+	/// Encode INI File
+	template< typename T >
+		static TStr< T > RegEncode( TPropertyBag< TStr< T > > &x_pb, TStr< T > x_root = oexTT( T, "" ) )
+	{
+		TStr< T > str;
+		if ( !x_root.Length() )
+			str = oexT( "REGEDIT4\r\n\r\n" );
+
+		// Write out each value
+		for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+
+			if ( it.Node()->key.Length() )
+			{
+				if ( it->IsArray() )
+				{
+					TStr< T > sFull;
+					if ( x_root.Length() )
+						sFull = ( x_root ).BuildPath( it.Node()->key.TrimWhiteSpace() );
+					else
+						sFull = it.Node()->key.TrimWhiteSpace();
+					str << oexTT( T, "\r\n[" ) << sFull << oexTT( T, "]\r\n" );
+					str << RegEncode( *it, sFull );
+
+				} // end if
+
+				else
+					str << oexTT( T, "\"" ) << RegEncodeStr( it.Node()->key.TrimWhiteSpace() )
+					<< oexTT( T, "\"=\"" ) << RegEncodeStr( it->ToString().TrimWhiteSpace() ) << oexTT( T, "\"\r\n" );
+
+			} // end if
+
+		return str;
+	}
+
+	template< typename T >
+		static TStr< T > RegDecodeStr( oexCONST TStr< T > x_sStr )
+		{	typename TStr< T >::t_size len = x_sStr.Length();
+			TStr< T > ret; ret.OexAllocate( len );
+			for ( typename TStr< T >::t_size i = 0; i < len; i++ )
+				if ( x_sStr.IsMatchAt( i, oexTT( T, "0123456789abcdefABCDEF" ) ) )
+					ret << (oexTCHAR)ahtodw( x_sStr.Ptr( i ), 2 ), i++;
+			return ret;
+		}	
+	
+	/// Decode Reg File
+	template< typename T >
+		static TPropertyBag< TStr< T > > RegDecode( oexCONST T *x_pStr )
+		{   return RegDecode( TStr< T >( x_pStr ) ); }
+
+	/// Decode Reg File
+	template< typename T >
+		static TPropertyBag< TStr< T > > RegDecode( TStr< T > x_sStr )
+	{
+		TPropertyBag< TStr< T > > pb;
+		TStr< T > sGroup;
+		
+		// Join broken lines
+		x_sStr = x_sStr.Replace( oexTT( T, "\\\r\n" ), oexTT( T, "" ) )
+						.Replace( oexTT( T, "\\\n" ), oexTT( T, "" ) ) << oexTT( T, "\r\n" );
+		// Process line by line
+		while ( x_sStr.Length() )
+		{
+			x_sStr.SkipWhiteSpace();
+
+			// Comment
+			if ( oexTC( T, ';' ) == x_sStr[ 0 ] || oexTC( T, '#' ) == x_sStr[ 0 ] )
+				; // Ignore
+
+			// Group
+			else if ( oexTC( T, '[' ) == x_sStr[ 0 ] )
+			{
+				// Skip '['
+				x_sStr++;
+
+				// Switch groups
+				sGroup = x_sStr.Parse( oexTT( T, "]\r\n" ) ).TrimWhiteSpace();
+
+			} // end else if
+
+			// Values
+			else
+			{
+				TStr< T > sKey = x_sStr
+									.Parse( oexTT( T, "=\r\n" ) )
+										.TrimWhiteSpace()
+											.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) );
+				TStr< T > sVal;
+				if ( *x_sStr == oexTC( T, '=' ) ) 
+				{
+					x_sStr++;
+					x_sStr.SkipWhiteSpace();
+					
+					// STRING
+					if ( *x_sStr == oexTC( T, '\"' ) )
+						sVal << x_sStr
+									.Parse( oexTT( T, "\r\n" ) )
+										.TrimWhiteSpace()
+											.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) );
+
+					// DWORD
+					else if ( x_sStr.CmpLen( oexTT( T, "dword" ) ) )
+					{	x_sStr.Parse( oexTT( T, ":" ) );
+						if ( *x_sStr == oexTC( T, ':' ) )
+							x_sStr++, sVal = x_sStr.ToULong( 16 );					
+					} // end else
+
+					// QWORD
+					else if ( x_sStr.CmpLen( oexTT( T, "qword" ) ) )
+					{	x_sStr.Parse( oexTT( T, ":" ) );
+						if ( *x_sStr == oexTC( T, ':' ) )
+							x_sStr++, sVal = x_sStr.ToUInt64( 16 );					
+					} // end else
+					
+					// HEX
+					else if ( x_sStr.CmpLen( oexTT( T, "hex" ) ) )
+					{	x_sStr.Parse( oexTT( T, ":" ) );
+						if ( *x_sStr == oexTC( T, ':' ) )
+							sVal = RegDecodeStr( x_sStr.Parse( oexTT( T, "\r\n" ) ) );
+					} // end else
+
+				} // end if
+
+				// Ensure valid strings
+				if ( sKey.Length() && sVal.Length() )
+				{
+					if ( sGroup.Length() )
+						pb.at( sGroup, TStr< T >( oexTT( T, "\\/" ) ) )[ sKey ] = sVal;
+					else
+						pb[ sKey ] = sVal;
+
+				} // end if
+
+			} // end else
+
+			x_sStr.NextLine();
+
+		} // end while
+
+		return pb;
+	}
+
+	
 // --------------------------------------------------------------------------
 
 	/// Generic property bag deserializing

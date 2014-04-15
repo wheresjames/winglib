@@ -334,6 +334,8 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, get )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, at )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, erase_at )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, ats )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, erase_ats )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, first )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, last )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, first_key )
@@ -380,6 +382,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_base16_decode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_base64_encode )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin_base64_decode )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, match )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, unset )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, clear )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_key )
@@ -780,6 +783,10 @@ CSqMulti* CSqMulti::at( const CSqMulti::t_Obj &path )
 	if ( path.npos == p )
 		return &m_lst[ path ];
 
+	// Skip dead sep
+	else if ( !p )
+		return at( path.substr( p + 1 ) );
+
 	// Next path
 	return m_lst[ path.substr( 0, p ) ].at( path.substr( p + 1 ) );
 }
@@ -796,10 +803,59 @@ int CSqMulti::erase_at( const CSqMulti::t_Obj &path )
 	if ( path.npos == p )
 	{	unset( path );
 		return 1;
-	} // end dif
+	} // endd if
+
+	// Skip dead sep
+	else if ( !p )
+		return erase_at( path.substr( p + 1 ) );
 
 	// Next path
 	return m_lst[ path.substr( 0, p ) ].erase_at( path.substr( p + 1 ) );
+}
+
+CSqMulti* CSqMulti::ats( const CSqMulti::t_Obj &path, const CSqMulti::t_Obj &sep )
+{
+	if ( !path.length() )
+	{	if ( !m_def )
+			m_def = OexAllocConstruct< CSqMulti >();
+		return m_def;
+	} // end if
+
+	// Find separator
+	stdString::size_type p = path.find_first_of( sep );
+
+	// Is it us?
+	if ( path.npos == p )
+		return &m_lst[ path ];
+	
+	// Skip dead sep
+	else if ( !p )
+		return ats( path.substr( p + sep.length() ), sep );
+
+	// Next path
+	return m_lst[ path.substr( 0, p ) ].ats( path.substr( p + sep.length() ), sep );
+}
+
+int CSqMulti::erase_ats( const CSqMulti::t_Obj &path, const CSqMulti::t_Obj &sep )
+{
+	if ( !path.length() )
+		return 0;
+
+	// Find separator
+	stdString::size_type p = path.find_first_of( sep );
+
+	// Is it us?
+	if ( path.npos == p )
+	{	unset( path );
+		return 1;
+	} // end dif
+
+	// Skip dead sep
+	else if ( !p )
+		return erase_ats( path.substr( p + sep.length() ), sep );
+
+	// Next path
+	return m_lst[ path.substr( 0, p ) ].erase_ats( path.substr( p + sep.length() ), sep );
 }
 
 CSqMulti CSqMulti::lshift()
@@ -1053,6 +1109,11 @@ int CSqMulti::filter( const t_Obj &sFilter, int bInclude )
             m_lst.erase( it++ ), nErased++;
 
 	return nErased;
+}
+
+int CSqMulti::match( const t_Obj &sPattern )
+{
+	return match_pattern( str().c_str(), sPattern.c_str() ) ? 1 : 0;
 }
 
 /// Returns non-zero if pPattern matches pString

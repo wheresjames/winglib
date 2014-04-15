@@ -2193,7 +2193,7 @@ public:
 	oexBOOL ICmp( oexCONST T* pStr, t_size uSize ) const
     {   return !str::ICompare( Ptr(), Length(), pStr, uSize ); }
 
-	oexBOOL CmpLen( TStr &str, oexINT x_lLen = -1 )
+	oexBOOL CmpLen( oexCONST TStr &str, oexINT x_lLen = -1 )
 	{	if ( 0 > x_lLen ) x_lLen = str.Length();
         return CmpLen( str.Ptr(), str.Length(), x_lLen );
     }
@@ -2847,7 +2847,7 @@ public:
 		return str;
 	}
 
-	oexBOOL IsMatchAt( t_size i, oexCONST T* pChars )
+	oexBOOL IsMatchAt( t_size i, oexCONST T* pChars ) oexCONST
 	{	oexASSERT_PTR( pChars );
         return 0 <= str::FindCharacter( pChars, zstr::Length( pChars ), *Ptr( i ) );
 	}
