@@ -4,6 +4,8 @@
 #-------------------------------------------------------------------
 BUILDDIRS := $(BUILDDIRS) \
 			 app/hello \
+			 app/hello_android \
+			 app/webdroid \
 			 lib/oexlib \
 			 tools/resbld \
 			 tools/join \

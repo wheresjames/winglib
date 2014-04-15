@@ -35,6 +35,9 @@ public:
 	/// HTTP Post
 	int PostUrl( const sqbind::stdString &sUrl, SQInteger lPort, const sqbind::stdString &sPost, sqbind::CSqBinary *sData );
 
+	/// HTTP Multipart post
+	int PostMultipart( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSqBinary *sData );
+	
 	/// Downloads and includes the specified url
 	int urlInclude( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, const sqbind::stdString &sUrl );
 
@@ -86,6 +89,12 @@ public:
 	/// Adds the specified HTTP header to the output
 	void setHeader( const sqbind::stdString &sHeader );
 
+	/// Returns the content type
+	sqbind::stdString getContentType(){ return m_sContentType; }
+	
+	/// Add multipart
+	int addMultipart( const sqbind::stdString &sName, const sqbind::stdString &sFile, const sqbind::stdString &sMime, sqbind::CSqBinary *pData );
+	
 	/** @} */
 
 private:
@@ -98,12 +107,23 @@ private:
 
 private:
 
+
+	sqbind::stdString m_sFileStr;
+	sqbind::stdString m_sMimeStr;
+
+
 	/// Curl handle
 	CURL						*m_curl;
 
 	/// Custom headers
 	struct curl_slist 			*m_headers;
 	
+	/// Multipart head pointer
+	struct curl_httppost 		*m_multihead;
+	
+	/// Multipart tail pointer
+	struct curl_httppost		*m_multitail;
+		
 	/// String describing the last error
 	sqbind::stdString			m_sErr;
 
@@ -121,6 +141,9 @@ private:
 	
 	/// Session cookies
 	sqbind::stdString			m_sCookies;
+	
+	/// Content type
+	sqbind::stdString			m_sContentType;
 	
 	/// Non-zero if cookies are enabled
 	int							m_bEnableCookies;

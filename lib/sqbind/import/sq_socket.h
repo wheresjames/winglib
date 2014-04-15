@@ -91,12 +91,24 @@ namespace sqbind
 		/// Validates the address check sum
 		int ValidateAddress();
 
+		/// Returns the local machines arp table
+		CSqMulti GetArpTable();
+		
+		/// Lookup addresses associated with a particular DNS name
+		CSqMulti Lookup( const sqbind::stdString &sServer );		
+		
 		/// Look up specified url
 		int LookupUrl( const sqbind::stdString &sUrl, int nPort );
 
 		/// Look up specified host
 		int LookupHost( const sqbind::stdString &sHost, int nPort );
 
+		/// Lookup physical address using ipv4 address
+		SQInteger Arp( const sqbind::stdString &sDst, const sqbind::stdString &sSrc );
+		
+		/// Lookup physical address using ipv4 address
+		sqbind::stdString ArpStr( const sqbind::stdString &sDst, const sqbind::stdString &sSrc );
+		
 		/// Returns a reference the the wrapped object
 		oex::os::CIpAddress& Obj() { return m_address; }
 
