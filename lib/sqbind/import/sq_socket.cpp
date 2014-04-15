@@ -43,8 +43,12 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSockAddress, CSqSockAddress )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, SetDotAddress )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, SetRawAddress )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, ValidateAddress )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, GetArpTable )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, Lookup )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, LookupUrl )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, LookupHost )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, Arp )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, ArpStr )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, getPort )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSockAddress, getDotAddress )
 
@@ -105,6 +109,24 @@ int CSqSockAddress::ValidateAddress()
 	return m_address.ValidateAddress();
 }
 
+CSqMulti CSqSockAddress::Lookup( const sqbind::stdString &sServer )
+{_STT();
+
+	CSqMulti m;
+	oex::CPropertyBag pb = m_address.Lookup( sServer.c_str() );
+	SQBIND_PropertyBagToMulti( pb, m );
+	return m;	
+}
+
+CSqMulti CSqSockAddress::GetArpTable()
+{_STT();
+
+	CSqMulti m;
+	oex::CPropertyBag pb = m_address.GetArpTable();
+	SQBIND_PropertyBagToMulti( pb, m );
+	return m;	
+}
+
 int CSqSockAddress::LookupUrl( const sqbind::stdString &sUrl, int nPort )
 {_STT();
 	return m_address.LookupUrl( sUrl.c_str(), nPort );
@@ -113,6 +135,25 @@ int CSqSockAddress::LookupUrl( const sqbind::stdString &sUrl, int nPort )
 int CSqSockAddress::LookupHost( const sqbind::stdString &sHost, int nPort )
 {_STT();
 	return m_address.LookupHost( sHost.c_str(), nPort );
+}
+
+SQInteger CSqSockAddress::Arp( const sqbind::stdString &sDst, const sqbind::stdString &sSrc )
+{
+	oex::oexBYTE uAddr[ 8 ] = { 0 };
+	if ( !m_address.Arp( sDst.c_str(), sSrc.c_str(), uAddr ) )
+		return 0;
+	return *(oex::oexINT64*)uAddr;
+}
+
+sqbind::stdString CSqSockAddress::ArpStr( const sqbind::stdString &sDst, const sqbind::stdString &sSrc )
+{
+	oex::oexBYTE uAddr[ 8 ] = { 0 };
+	if ( !m_address.Arp( sDst.c_str(), sSrc.c_str(), uAddr ) )
+		return sqbind::stdString();
+		
+	return sqbind::oex2std( oex::CStr().Fmt( oexT( "%02X:%02X:%02X:%02X:%02X:%02X" ),
+										uAddr[ 0 ], uAddr[ 1 ], uAddr[ 2 ], 
+										uAddr[ 3 ],	uAddr[ 4 ], uAddr[ 5 ] ) );
 }
 
 int CSqSockAddress::getPort()

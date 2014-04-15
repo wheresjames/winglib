@@ -35,9 +35,12 @@
 #include "oexlib.h"
 #include "std_os.h"
 
+#if !defined( OEX_NOIPHLPAPI )
+#	include <iphlpapi.h>
+#endif
+
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
-
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -110,7 +113,7 @@ CStr CIpAddress::GetFullHostName()
 	return GetHostName();
 }
 
-#define NET_API_FUNCTION __stdcall
+#define d_NET_API_FUNCTION __stdcall
 typedef WCHAR* LMSTR;
 typedef DWORD NET_API_STATUS;
 typedef struct _WKSTA_INFO_100 
@@ -121,8 +124,8 @@ typedef struct _WKSTA_INFO_100
 	DWORD wki100_ver_minor;
 } WKSTA_INFO_100, *PWKSTA_INFO_100, *LPWKSTA_INFO_100;
 
-typedef NET_API_STATUS (NET_API_FUNCTION *pfn_NetWkstaGetInfo)( LPWSTR servername, DWORD level, LPBYTE *bufptr );
-typedef NET_API_STATUS (NET_API_FUNCTION *pfn_NetApiBufferFree)( LPVOID Buffer );
+typedef NET_API_STATUS (d_NET_API_FUNCTION *pfn_NetWkstaGetInfo)( LPWSTR servername, DWORD level, LPBYTE *bufptr );
+typedef NET_API_STATUS (d_NET_API_FUNCTION *pfn_NetApiBufferFree)( LPVOID Buffer );
 
 CStr CIpAddress::GetDomainName( oexCSTR x_pServer )
 {_STT();
@@ -549,3 +552,152 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
 #endif
 }
 
+CPropertyBag CIpAddress::Lookup( oexCSTR x_pServer )
+{_STT();
+#if defined( OEX_NOSOCKET2 )
+	return CSqMulti();
+#else
+
+	CStr sServer( x_pServer );
+	if ( !sServer.Length() )
+		sServer = GetHostName();
+
+    // Ensure we have a name
+    if ( !sServer.Length() )
+        return CPropertyBag();
+
+	// First try to interpret as dot address
+    LPHOSTENT pHe = gethostbyname( oexStrToStr8Ptr( x_pServer ) );
+
+	if ( !pHe )
+		return CPropertyBag();
+
+	CPropertyBag pb;
+	for ( int i = 0; pHe->h_addr_list[ i ]; i++ )
+	{		
+		LPIN_ADDR pia = (LPIN_ADDR)pHe->h_addr_list[ i ];
+		if ( oexVERIFY_PTR( pia ) )
+			pb[ oexMks( i ) ] = oexStr8ToStr( inet_ntoa( *pia ) );
+		
+    } // end for	
+
+    return pb;
+	
+#endif
+}
+
+typedef DWORD (WINAPI *pfn_SendARP)( oexUINT DestIP, oexUINT SrcIP, PULONG pMacAddr, PULONG PhyAddrLen );
+
+oexUINT CIpAddress::Arp( oexCSTR x_pDst, oexCSTR x_pSrc, oexBYTE *x_pAddr )
+{_STT();
+	if ( !x_pDst || !x_pAddr )
+		return 0;
+		
+	// Load netapi32.dll
+	HMODULE hLib = LoadLibrary( oexT( "iphlpapi.dll" ) );
+	if ( !hLib )
+		return 0;
+
+	// Get function pointers
+	ULONG res = 0, uLen = 6;
+	pfn_SendARP pSendARP = (pfn_SendARP)GetProcAddress( hLib, "SendARP" );
+	if ( pSendARP )
+		res = pSendARP( inet_addr( oexStrToMbPtr( x_pDst ) ), 
+						x_pSrc ? inet_addr( oexStrToMbPtr( x_pSrc ) ) : 0, 
+						(PULONG)x_pAddr, &uLen );
+		
+	FreeLibrary( hLib );
+	
+oexEcho( oexMks( res, " - ", x_pDst, " - ", (ULONG)inet_addr( oexStrToMbPtr( x_pDst ) ) ).Ptr() );
+
+	return ( NO_ERROR == res ) ? uLen : 0;
+}
+
+typedef struct _s_MIB_IPNETROW 
+{	DWORD	dwIndex;
+	DWORD	dwPhysAddrLen;
+	BYTE	bPhysAddr[ 8 ];
+	DWORD	dwAddr;
+	DWORD	dwType;
+} s_MIB_IPNETROW;
+
+typedef struct _s_MIB_IPNETTABLE
+{	DWORD			dwNumEntries;
+	s_MIB_IPNETROW	table[ 1 ];
+} s_MIB_IPNETTABLE;
+
+typedef DWORD (WINAPI *pfn_GetIpNetTable)( s_MIB_IPNETTABLE *pIpNetTable, PULONG pdwSize, BOOL bOrder );
+
+CPropertyBag CIpAddress::GetArpTable()
+{_STT();
+
+	// Load netapi32.dll
+	HMODULE hLib = LoadLibrary( oexT( "iphlpapi.dll" ) );
+	if ( !hLib )
+		return CPropertyBag();
+		
+	pfn_GetIpNetTable pGetIpNetTable = (pfn_GetIpNetTable)GetProcAddress( hLib, "GetIpNetTable" );
+	if ( !pGetIpNetTable )
+		return CPropertyBag();
+		
+	BYTE buf[ 64 * 1024 ];
+	DWORD dwSize = sizeof( buf );
+	if ( NO_ERROR != pGetIpNetTable( (s_MIB_IPNETTABLE*)buf, &dwSize, FALSE ) )
+		return CPropertyBag();
+		
+	CPropertyBag pb;
+	s_MIB_IPNETTABLE *pMint = (s_MIB_IPNETTABLE*)buf;
+	for ( DWORD i = 0; i < pMint->dwNumEntries; i++ )
+	{
+		// Valid physical address?
+		BYTE *pAddr = pMint->table[ i ].bPhysAddr;
+		if ( 6 == pMint->table[ i ].dwPhysAddrLen 
+			 && pAddr[ 0 ] && pAddr[ 1 ] && pAddr[ 2 ] 
+			 && pAddr[ 3 ] && pAddr[ 4 ] && pAddr[ 5 ] )
+		{
+			CStr ipv4 = oexMbToStr( inet_ntoa( *(in_addr*)&pMint->table[ i ].dwAddr ) );
+
+//			CPropertyBag &r = pb[ CStr( pMint->table[ i ].dwIndex ) ][ ipv4 ];
+			CPropertyBag &r = pb[ ipv4 ];
+			r[ oexT( "ipv4" ) ] = ipv4;
+			
+			DWORD mki = 0;
+			while ( r.IsKey( CStr( mki ) ) )
+				mki++;
+			CStr mk( mki );
+			
+			r[ mk ][ oexT( "adapter" ) ] = CStr( pMint->table[ i ].dwIndex );
+			r[ mk ][ oexT( "mac" ) ] = oex::CStr().Fmt( oexT( "%02X:%02X:%02X:%02X:%02X:%02X" ),
+														pAddr[ 0 ], pAddr[ 1 ], pAddr[ 2 ], 
+														pAddr[ 3 ],	pAddr[ 4 ], pAddr[ 5 ] );
+
+			switch( pMint->table[ i ].dwType )
+			{
+				case 1 :
+					r[ mk ][ oexT( "type" ) ] = oexT( "other" );
+					break;
+				
+				case 2 :
+					r[ mk ][ oexT( "type" ) ] = oexT( "invalid" );
+					break;
+				
+				case 3 :
+					r[ mk ][ oexT( "type" ) ] = oexT( "dynamic" );
+					break;
+				
+				case 4 :
+					r[ mk ][ oexT( "type" ) ] = oexT( "static" );
+					break;
+
+				default :
+					r[ mk ][ oexT( "type" ) ] = oexT( "unknown" );
+					break;
+				
+			} // end switch
+			
+		} // end if
+		
+	} // end for
+	
+	return pb;
+}

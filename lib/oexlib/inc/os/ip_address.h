@@ -137,6 +137,16 @@ public:
     /// Validates the address check sum
     oexBOOL ValidateAddress();
 
+	
+    //==============================================================
+    // Lookup()
+    //==============================================================
+    /// Gets url server address information from DNS server
+    /**
+	    \param [in] x_pServer	-	Server name
+    */
+	CPropertyBag Lookup( oexCSTR x_pServer );
+	
     //==============================================================
     // LookupUrl()
     //==============================================================
@@ -161,6 +171,23 @@ public:
     */
     oexBOOL LookupHost( oexCSTR x_pServer, oexINT32 uPort, oexINT32 uType = eAddrTypeIpv4 );
 
+    //==============================================================
+    // Arp()
+    //==============================================================
+    /// Resolves the destination address to a physical network address
+    /**
+	    \param [in] x_pDst		-	Address to lookup
+        \param [in] x_pSrc    	-   Optional source address, to
+									select the correct adapter.
+		\param [out]x_pAddr		-	Receives the physical address
+
+	    \return Returns non-zero if success.
+    */
+	oexUINT Arp( oexCSTR x_pDst, oexCSTR x_pSrc, oexBYTE *x_pAddr );
+	
+	/// Returns the local machines arp table
+	CPropertyBag GetArpTable();
+	
     /// Returns the binary ip address value
     oexINT64 GetIpv6()
     {   return m_llIpv6; }

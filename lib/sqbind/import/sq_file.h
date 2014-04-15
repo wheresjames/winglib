@@ -162,13 +162,16 @@ namespace sqbind
 		{	return oexExists( sFile.c_str() ); }
 
 		static stdString get_filename( const stdString &sFile )
-		{	return oexGetFileName( sFile.c_str() ).Ptr(); }
+		{	return oex2std( std2oex( sFile ).GetFileName() ); }
 
 		static stdString get_path( const stdString &sFile )
-		{	return oexGetPath( sFile.c_str() ).Ptr(); }
+		{	return oex2std( std2oex( sFile ).GetPath() ); }
 
 		static stdString get_extension( const stdString &sFile )
-		{	return oexGetFileExtension( sFile.c_str() ).Ptr(); }
+		{	return oex2std( std2oex( sFile ).GetFileExtension() ); }
+
+		static stdString strip_extension( const stdString &sFile )
+		{	return oex2std( std2oex( sFile ).RemoveFileExtension() ); }
 
 		static CSqMulti get_dirlist( const stdString &sDir, const stdString &sMask, int bFiles, int bDirs )
 		{
