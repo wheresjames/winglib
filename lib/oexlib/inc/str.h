@@ -361,7 +361,7 @@ public:
 
 		return pMem;
     }
-	
+
 	/// STD compatible function
 	void reserve( t_size x_uSize )
 	{
@@ -422,7 +422,7 @@ public:
 	{
 		return _Ptr();
 	}
-	
+
 	/// Returns the specified character
 	oexCONST T operator []( oexUINT x_uOffset ) const
 	{	return *Ptr( x_uOffset ); }
@@ -479,7 +479,7 @@ public:
 	{
 		return Length();
 	}
-	
+
     /// Manually sets the length
     /// !!! This allows NULL characters to be in the string.
     t_size SetLength( t_size x_nLength )
@@ -509,7 +509,7 @@ public:
 	{
 		SetLength( 0 );
 	}
-	
+
     /// Manually sets the length
     /// This function is for buffer sharing
 	/// !!! This function may cause a non null terminated string
@@ -636,7 +636,7 @@ public:
 	{	return TStr( this ).Append( &chVal, 1 ); }
 
 	TStr operator + ( oexCONST oexGUID &guid )
-	{	return TStr( this ).Append( TStr().GuidToString( guid ) ); }	
+	{	return TStr( this ).Append( TStr().GuidToString( guid ) ); }
 
 	TStr& operator += ( oexCONST oexINT nVal )
 	{	return AppendNum( oexTT( T, "%i" ), (oexINT)nVal ); }
@@ -665,9 +665,9 @@ public:
 	TStr& operator += ( oexCONST oexGUID &guid )
 	{	return Append( TStr().GuidToString( guid ) ); }
 
-	
-	
-	
+
+
+
 	TStr& operator << ( oexCONST oexINT nVal )
 	{	return AppendNum( oexTT( T, "%i" ), (oexINT)nVal ); }
 
@@ -2131,6 +2131,42 @@ public:
 		return *this;
 	}
 
+	TStr& BinToAscii()
+	{
+		TStr str;
+		t_size len = Length();
+		T* pSrc = Ptr();
+
+		// Allocate space for ascii string
+		T* pDst = str.OexAllocate( Length() * 2 );
+		if ( !pDst )
+			return TStr();
+
+		// Do the conversion
+		for ( t_size i = 0; i < len; i++ )
+			str::htoa( pDst[ i * 2 ], pSrc[ i ] );
+
+		return str;
+	}
+
+	TStr& AsciiToBin()
+	{
+		TStr str;
+		t_size len = Length() & ( ~1 );
+		T* pSrc = Ptr();
+
+		// Allocate space for ascii string
+		T* pDst = str.OexAllocate( Length() / 2 );
+		if ( !pDst )
+			return TStr();
+
+		// Do the conversion
+		for ( t_size i = 0; i < len; i += 2 )
+			str::atoh( pSrc[ i ], &pDst[ i /2 ], 2 );
+
+		return str;
+	}
+
 public:
 
     /// Converts to a number
@@ -2237,12 +2273,12 @@ public:
 
 	/// Appends a size formatted string ( 1.3KB, 44.75GB, etc...)
 	TStr& AppendSizeString( oexDOUBLE dSize, oexDOUBLE dDiv, oexINT nDigits, oexCONST T ** pSuffix = oexNULL )
-	{	
+	{
 		oexINT i = 0;
-		static oexCONST T *sizes[] = 
+		static oexCONST T *sizes[] =
 		{	oexTT( T, "" ), 			//
-			oexTT( T, "K" ), 			// Kilo				
-			oexTT( T, "M" ), 			// Mega			
+			oexTT( T, "K" ), 			// Kilo
+			oexTT( T, "M" ), 			// Mega
 			oexTT( T, "G" ), 			// Giga
 			oexTT( T, "T" ), 			// Tera
 			oexTT( T, "P" ),			// Peta
@@ -2257,15 +2293,15 @@ public:
 		// Use 1024 as the default divider
 		if ( 0 >= dDiv )
 			dDiv = double( 1024 );
-		
+
 		oexBOOL bNeg = 0 > dSize;
-		if ( bNeg ) 
+		if ( bNeg )
 			dSize = -dSize;
-		
+
 		// Use default suffixes if non provided
 		if ( !pSuffix || !*pSuffix || !**pSuffix )
 			pSuffix = sizes;
-		
+
 		// Which size to use?
 		while ( dSize > dDiv && pSuffix[ i + 1 ] )
 			i++, dSize /= dDiv;
@@ -2273,7 +2309,7 @@ public:
 		// Is the number negative?
 		if ( bNeg )
 			Append( oexTT( T, "-" ) );
-			
+
 		// Special formating?
 		if ( 0 > nDigits )
 			Append( dSize );
@@ -2281,14 +2317,14 @@ public:
 			Append( (oexLONG)dSize );
 		else
 			AppendNum( ( TStr( oexTT( T, "%." ) ) << nDigits << oexT( "f" ) ).Ptr(), dSize );
-			
+
 		// Build the string
 		Append( pSuffix[ i ] );
 
 		return *this;
 	}
-	
-	
+
+
 public:
 
 	/// Replaces single characters in a string
@@ -2746,22 +2782,22 @@ public:
 
 		return *this;
 	}
-	
+
 	/// Returns quoted string
 	TStr Quote( oexCONST T *pOpen, oexCONST T *pClose, oexCONST T pEscape )
 	{
 		TStr s;
 		T find[ 2 ] = { 0, 0 };
 		T escp[ 3 ] = { 0, pEscape, 0 };
-		
+
 		// Escape escape chars
 		find[ 0 ] = pEscape, escp[ 0 ] = pEscape, s = Replace( find, escp );
-		
+
 		// Escape open chars
 		if ( pOpen )
 			for ( oexINT i = 0; pOpen[ i ]; i++ )
 				find[ 0 ] = pOpen[ i ], escp[ 0 ] = pOpen[ i ], s = Replace( find, escp );
-		
+
 		// Escape close chars
 		if ( pClose )
 			for ( oexINT i = 0; pClose[ i ]; i++ )
@@ -3025,11 +3061,11 @@ public:
 
     /// Concatinates two strings into a path
     TStr& BuildPath( TStr x_sPath, T tSep = oexTCPathSep( T ) )
-    {   
-		if ( !x_sPath.Length() ) 
+    {
+		if ( !x_sPath.Length() )
 			return *this;
-			
-		if ( !Length() ) 
+
+		if ( !Length() )
 		{	*this = x_sPath;
 			return *this;
 		} // end if
@@ -3038,7 +3074,7 @@ public:
 		RTrim( oexTT( T, "\\/" ) );
         *this << tSep << x_sPath.LTrim( oexTT( T, "\\/" ) );
         RTrim( oexTT( T, "\\/" ) );
-		
+
         return *this;
     }
 

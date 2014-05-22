@@ -271,7 +271,7 @@ public:
 			key = UrlDecode( it->Parse( oexTT( T, "=" ) ) );
 			if ( key.Length() ) (*it)++;
 			val = UrlDecode( it.Obj() );
-			
+
 #if defined( __GNUC__ )
 			// Key value pair
 			if ( key.Length() && val.Length() )
@@ -319,9 +319,9 @@ public:
 			if ( !bArray || it->ToString().Length() )
 			{	if ( !sRoot.Length() )
 					str << UrlEncode( it.Node()->key ) << oexTT( T, "=" ) << UrlEncode( it->ToString() );
-				
+
 				else
-					str << TStr< T >( sRoot ) << oexTT( T, "[" ) << UrlEncode( it.Node()->key ) << oexTT( T, "]" ) 
+					str << TStr< T >( sRoot ) << oexTT( T, "[" ) << UrlEncode( it.Node()->key ) << oexTT( T, "]" )
 							<< oexTT( T, "=" ) << UrlEncode( it->ToString() );
 			} // end if
 
@@ -424,7 +424,7 @@ public:
 		switch( x_ch )
 		{
 			// case oexTC( T, ' ' ) :
-			case oexTC( T, '!' ) : case oexTC( T, '#' ) : 
+			case oexTC( T, '!' ) : case oexTC( T, '#' ) :
 			case oexTC( T, '$' ) : case oexTC( T, '%' ) :
 			case oexTC( T, '(' ) : case oexTC( T, ')' ) :
 			case oexTC( T, '*' ) : case oexTC( T, '+' ) :
@@ -458,7 +458,7 @@ public:
 
 				case oexTC( T, '\'' ) :
 					return oexTT( T, "&#39;" );
-					
+
 				case oexTC( T, '&' ) :
 					return oexTT( T, "&amp;" );
 
@@ -744,7 +744,7 @@ public:
 			}
 
 
-		/// Decodes 
+		/// Decodes
 		template< typename T >
 			static TStr< T > CppDecode( oexCONST T *x_pStr )
 			{   return CppDecode( TStr< T >( x_pStr ) ); }
@@ -823,7 +823,7 @@ public:
 			return ret;
 		}
 
-	/// Encode INI File
+	/// Encode Reg File
 	template< typename T >
 		static TStr< T > RegEncode( TPropertyBag< TStr< T > > &x_pb, TStr< T > x_root = oexTT( T, "" ) )
 	{
@@ -833,26 +833,168 @@ public:
 
 		// Write out each value
 		for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+		{
+			TStr< T > key = it.Node()->key.TrimWhiteSpace();
 
-			if ( it.Node()->key.Length() )
+			if ( key.Length() )
 			{
 				if ( it->IsArray() )
 				{
 					TStr< T > sFull;
 					if ( x_root.Length() )
-						sFull = ( x_root ).BuildPath( it.Node()->key.TrimWhiteSpace() );
+						sFull = ( x_root ).BuildPath( key );
 					else
-						sFull = it.Node()->key.TrimWhiteSpace();
+						sFull = key;
 					str << oexTT( T, "\r\n[" ) << sFull << oexTT( T, "]\r\n" );
 					str << RegEncode( *it, sFull );
 
 				} // end if
 
 				else
-					str << oexTT( T, "\"" ) << RegEncodeStr( it.Node()->key.TrimWhiteSpace() )
-					<< oexTT( T, "\"=\"" ) << RegEncodeStr( it->ToString().TrimWhiteSpace() ) << oexTT( T, "\"\r\n" );
+					str << oexTT( T, "\"" ) << RegEncodeStr( key )
+						<< oexTT( T, "\"=\"" )
+						<< RegEncodeStr( it->ToString().TrimWhiteSpace() )
+						<< oexTT( T, "\"\r\n" );
 
 			} // end if
+
+		} // end for
+
+		return str;
+	}
+
+	template< typename T >
+		static typename TStr< T >::t_size RegHexEncode( TStr< T > &x_dst, const TStr< T > &x_src )
+		{
+			// Hex encode
+			T ascii[ 4 ]; ascii[ 2 ] = 0;
+			const T* src = x_src.Ptr();
+			typename TStr< T >::t_size i, len = x_src.Length(), cnt = 20;
+			for ( i = 0; i < len; i++ )
+			{
+				// Encode character
+				str::htoa( ascii, src[ i ], 2 );
+
+				// Separator 
+				if ( !cnt-- )
+					cnt = 25, x_dst << oexTT( T, ",\\\r\n  " );
+				else if ( i )
+					x_dst << oexTT( T, "," );
+
+				// Append ASCII character
+				x_dst << ascii;
+
+			} // end for
+			
+			return len;
+		}
+
+	/// Encode Typed Reg File
+	template< typename T >
+		static TStr< T > RegEncodeTyped( TPropertyBag< TStr< T > > &x_pb, TPropertyBag< TStr< T > > &x_t, TStr< T > x_root = oexTT( T, "" ) )
+	{
+		TStr< T > str;
+		if ( !x_root.Length() )
+			str = oexT( "REGEDIT4\r\n\r\n" );
+
+		// Write out each value
+		for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
+		{
+			TStr< T > key = it.Node()->key.TrimWhiteSpace();
+			
+			// Type specified?
+			TStr< T > type;
+			if ( x_t.IsKey( key ) && x_t[ key ].ToString().Length() )
+				type = x_t[ key ].ToString();
+			else if ( x_t.IsKey( key ) )
+				if ( x_t[ key ].IsKey( oexTT( T, "*" ) ) )
+					if( x_t[ key ][ oexTT( T, "*" ) ].ToString().Length() )
+						type = x_t[ key ][ oexTT( T, "*" ) ].ToString();
+			
+			if ( key.Length() )
+			{
+				// Array?
+				if ( !type.Length() && it->IsArray() )
+				{
+
+					TStr< T > sFull;
+					if ( x_root.Length() )
+						sFull = ( x_root ).BuildPath( key );
+					else
+						sFull = key;
+					str << oexTT( T, "\r\n[" ) << sFull << oexTT( T, "]\r\n" );
+
+					str << RegEncodeTyped( *it, x_t.IsKey( key ) ? x_t[ key ] : TPropertyBag< TStr< T > >(), sFull );
+
+				} // end if
+
+				else
+				{
+					// No type?
+					if ( !type.Length() )
+						str << oexTT( T, "\"" ) << RegEncodeStr( key )
+							<< oexTT( T, "\"=\"" )
+							<< RegEncodeStr( it->ToString().TrimWhiteSpace() )
+							<< oexTT( T, "\"\r\n" );
+
+					// DWORD
+					else if ( type == oexTT( T, "dword" ) )
+					{
+						str << oexTT( T, "\"" ) << RegEncodeStr( key )
+							<< oexTT( T, "\"=dword:" )
+							<< TStr< T >().SetNum( oexTT( T, "%08x" ), (oexUINT)it->ToString().ToUInt() )
+							<< oexTT( T, "\r\n" );
+
+					} // end else if
+
+					// HEX
+					else if ( type == oexTT( T, "hex" ) )
+					{
+						str << oexTT( T, "\"" ) << RegEncodeStr( key )
+							<< oexTT( T, "\"=hex:" );
+
+						RegHexEncode( str, it->ToString() );
+						str << oexTT( T, "\r\n" );
+
+					} // end else if
+
+					else if ( type == oexTT( T, "reg" ) )
+						str << oexTT( T, "\"" ) << RegEncodeStr( key )
+							<< oexTT( T, "\"=\"" )
+							<< RegEncodeStr( RegEncodeTyped( *it, x_t[ key ].IsArray() ? x_t[ key ] : TPropertyBag< TStr< T > >() ) )
+							<< oexTT( T, "\"\r\n" );
+
+					else if ( type == oexTT( T, "reghex" ) )
+					{
+						str << oexTT( T, "\"" ) << RegEncodeStr( key )
+							<< oexTT( T, "\"=hex:" );
+						RegHexEncode( str, RegEncodeTyped( *it, x_t[ key ].IsArray() ? x_t[ key ] : TPropertyBag< TStr< T > >() ) );
+						str << oexTT( T, "\r\n" );
+					} // end else if
+
+					else if ( type == oexTT( T, "json" ) )
+						str << oexTT( T, "\"" ) << RegEncodeStr( key )
+							<< oexTT( T, "\"=\"" )
+							<< RegEncodeStr( EncodeJSON( *it ) )
+							<< oexTT( T, "\"\r\n" );
+
+					else if ( type == oexTT( T, "url" ) )
+						str << oexTT( T, "\"" ) << RegEncodeStr( key )
+							<< oexTT( T, "\"=\"" )
+							<< RegEncodeStr( EncodeUrlParams( *it ) )
+							<< oexTT( T, "\"\r\n" );
+
+					else
+						str << oexTT( T, "\"" ) << RegEncodeStr( key )
+							<< oexTT( T, "\"=\"" )
+							<< RegEncodeStr( it->ToString().TrimWhiteSpace() )
+							<< oexTT( T, "\"\r\n" );
+
+				} // end else
+
+			} // end if
+
+		} // end for
 
 		return str;
 	}
@@ -865,8 +1007,8 @@ public:
 				if ( x_sStr.IsMatchAt( i, oexTT( T, "0123456789abcdefABCDEF" ) ) )
 					ret << (oexTCHAR)ahtodw( x_sStr.Ptr( i ), 2 ), i++;
 			return ret;
-		}	
-	
+		}
+
 	/// Decode Reg File
 	template< typename T >
 		static TPropertyBag< TStr< T > > RegDecode( oexCONST T *x_pStr )
@@ -878,7 +1020,7 @@ public:
 	{
 		TPropertyBag< TStr< T > > pb;
 		TStr< T > sGroup;
-		
+
 		// Join broken lines
 		x_sStr = x_sStr.Replace( oexTT( T, "\\\r\n" ), oexTT( T, "" ) )
 						.Replace( oexTT( T, "\\\n" ), oexTT( T, "" ) ) << oexTT( T, "\r\n" );
@@ -910,11 +1052,11 @@ public:
 										.TrimWhiteSpace()
 											.ParseQuoted( oexTT( T, "\"" ), oexTT( T, "\"" ), oexTT( T, "\\" ) );
 				TStr< T > sVal;
-				if ( *x_sStr == oexTC( T, '=' ) ) 
+				if ( *x_sStr == oexTC( T, '=' ) )
 				{
 					x_sStr++;
 					x_sStr.SkipWhiteSpace();
-					
+
 					// STRING
 					if ( *x_sStr == oexTC( T, '\"' ) )
 						sVal << x_sStr
@@ -926,16 +1068,16 @@ public:
 					else if ( x_sStr.CmpLen( oexTT( T, "dword" ) ) )
 					{	x_sStr.Parse( oexTT( T, ":" ) );
 						if ( *x_sStr == oexTC( T, ':' ) )
-							x_sStr++, sVal = x_sStr.ToULong( 16 );					
+							x_sStr++, sVal = x_sStr.ToULong( 16 );
 					} // end else
 
 					// QWORD
 					else if ( x_sStr.CmpLen( oexTT( T, "qword" ) ) )
 					{	x_sStr.Parse( oexTT( T, ":" ) );
 						if ( *x_sStr == oexTC( T, ':' ) )
-							x_sStr++, sVal = x_sStr.ToUInt64( 16 );					
+							x_sStr++, sVal = x_sStr.ToUInt64( 16 );
 					} // end else
-					
+
 					// HEX
 					else if ( x_sStr.CmpLen( oexTT( T, "hex" ) ) )
 					{	x_sStr.Parse( oexTT( T, ":" ) );
@@ -946,7 +1088,7 @@ public:
 				} // end if
 
 				// Ensure valid strings
-				if ( sKey.Length() && sVal.Length() )
+				if ( sKey.Length() )
 				{
 					if ( sGroup.Length() )
 						pb.at( sGroup, TStr< T >( oexTT( T, "\\/" ) ) )[ sKey ] = sVal;
@@ -964,7 +1106,7 @@ public:
 		return pb;
 	}
 
-	
+
 // --------------------------------------------------------------------------
 
 	/// Generic property bag deserializing
@@ -1372,7 +1514,7 @@ public:
 			if ( !x_bCaseSensitive )
 				sKey.ToLower();
 
-			if ( *x_sStr == oexTC( T, ':' ) ) 
+			if ( *x_sStr == oexTC( T, ':' ) )
 				x_sStr++;
 
 			// Read value string
@@ -1892,7 +2034,7 @@ public:
 		// Need at least this much space
 		if ( !ret.OexAllocate( nLen ) )
 			return ret;
-		
+
 		while ( 0 < nLen-- )
 		{
 			switch( *x_str )
@@ -1910,7 +2052,7 @@ public:
 					else
 						ret << *x_str;
 					break;
-			
+
 			} // end switch
 
 			x_str++;
@@ -1951,8 +2093,8 @@ public:
 						case oexTC( T, 'r' ) : ret << oexTC( T, '\r' ); break;
 						case oexTC( T, 't' ) : ret << oexTC( T, '\t' ); break;
 						case oexTC( T, 'v' ) : ret << oexTC( T, '\v' ); break;
-						case oexTC( T, 'u' ) : 
-							if ( 4 <= nLen ) 
+						case oexTC( T, 'u' ) :
+							if ( 4 <= nLen )
 							{	x_str++;
 								ret << (T)x_str.ToNum( 4, 16 );
 								x_str.LTrim( 3 ); nLen -= 4;
@@ -1960,14 +2102,14 @@ public:
 							break;
 						default: break;
 					} // end switch
-					
+
 					x_str++;
-					
+
 				} // end if
 
 			} // end if
 
-			else 
+			else
 				ret << *x_str, x_str++;
 
 		} // end while

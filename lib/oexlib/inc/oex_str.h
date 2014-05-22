@@ -157,6 +157,69 @@ namespace str
             return ln_dst + Copy( dst, sz_dst, src, sz_src );
         }
 
+	/// 'Fast' hex number to ascii conversion
+    /**
+        \param [out] b	-   Destination buffer
+        \param [in] ch	-   Character to serialize
+		\param [in] fix	-	If greater than zero, fixes number to specified size
+    */
+	template< typename T, typename C, typename N >
+		void htoa( T *b, C ch, N fix = 0 )
+		{
+			T c;
+			N sz = sizeof( C ) * 2;
+
+			// Fixed size?
+			if ( 0 < fix && sz > fix )
+				sz = fix;
+
+			// For each nibble
+			for ( N i = 0; i < sz; i++ )
+			{
+				// Grab a nibble
+				c = (T)( ch & 0x0f );
+				ch >>= 4;
+
+				if ( 9 >= c )
+					b[ sz - i - 1 ] = oexTC( T, '0' ) + c;
+				else
+					b[ sz - i - 1 ] = oexTC( T, 'a' ) + ( c - 10 );
+
+			} // end for
+
+		}
+
+	/// 'Fast' ascii to hex number conversion
+    /**
+        \param [out] b	-   Source buffer
+        \param [in] n	-   Destination buffer
+		\param [in] sz	-	Number of characters to process
+    */
+	template< typename T, typename C, typename N >
+		C atoh( T *b, C *n, N sz )
+		{
+			// Initialize to zero
+			*n = 0;
+
+			// For each nibble
+			for ( N i = 0; i < sz; i++ )
+			{
+				*n <<= 4;
+
+				// Grab character
+				const T c = *b; b++;
+				if ( oexTC( T, '0' ) <= c && oexTC( T, '9' ) >= c )
+					*n |= c - oexTC( T, '0' );
+				else if ( oexTC( T, 'a' ) <= c && oexTC( T, 'f' ) >= c )
+					*n |= c - oexTC( T, 'a' ) + 10;
+				else if ( oexTC( T, 'A' ) <= c && oexTC( T, 'F' ) >= c )
+					*n |= c - oexTC( T, 'A' ) + 10;
+
+			} // end for
+
+			return *n;
+		}
+
 	/// Converts upper case letters to lower case
     /**
         \param [in] dst     -   String to modify

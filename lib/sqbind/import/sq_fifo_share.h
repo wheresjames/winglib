@@ -166,6 +166,9 @@ namespace sqbind
 		/// Decrements the read pointer
 		int decReadPtr();
 
+		/// Returns the number of buffered reads
+		int getMaxReads();
+
 		/// Writes data into the share buffer
 		/**
 			@param [in] pData	-	Pointer to CSqBinary object containing the data to write
