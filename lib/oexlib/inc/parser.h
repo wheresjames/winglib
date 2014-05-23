@@ -898,6 +898,7 @@ public:
 			str = oexT( "REGEDIT4\r\n\r\n" );
 
 		// Write out each value
+		TPropertyBag< TStr< T > > tmp;
 		for( typename TPropertyBag< TStr< T > >::iterator it; x_pb.List().Next( it ); )
 		{
 			TStr< T > key = it.Node()->key.TrimWhiteSpace();
@@ -924,7 +925,7 @@ public:
 						sFull = key;
 					str << oexTT( T, "\r\n[" ) << sFull << oexTT( T, "]\r\n" );
 
-					str << RegEncodeTyped( *it, x_t.IsKey( key ) ? x_t[ key ] : TPropertyBag< TStr< T > >(), sFull );
+					str << RegEncodeTyped( *it, x_t.IsKey( key ) ? x_t[ key ] : tmp, sFull );
 
 				} // end if
 
@@ -961,14 +962,14 @@ public:
 					else if ( type == oexTT( T, "reg" ) )
 						str << oexTT( T, "\"" ) << RegEncodeStr( key )
 							<< oexTT( T, "\"=\"" )
-							<< RegEncodeStr( RegEncodeTyped( *it, x_t[ key ].IsArray() ? x_t[ key ] : TPropertyBag< TStr< T > >() ) )
+							<< RegEncodeStr( RegEncodeTyped( *it, x_t[ key ].IsArray() ? x_t[ key ] : tmp ) )
 							<< oexTT( T, "\"\r\n" );
 
 					else if ( type == oexTT( T, "reghex" ) )
 					{
 						str << oexTT( T, "\"" ) << RegEncodeStr( key )
 							<< oexTT( T, "\"=hex:" );
-						RegHexEncode( str, RegEncodeTyped( *it, x_t[ key ].IsArray() ? x_t[ key ] : TPropertyBag< TStr< T > >() ) );
+						RegHexEncode( str, RegEncodeTyped( *it, x_t[ key ].IsArray() ? x_t[ key ] : tmp ) );
 						str << oexTT( T, "\r\n" );
 					} // end else if
 
