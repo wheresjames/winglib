@@ -72,7 +72,7 @@ public:
 
     /// Default constructor
     CVirtualFs() 
-    {   m_sRoot = "e:/nobck/vfs";
+    {   m_sRoot = "c:/vfs";
         m_fIndex.OpenAlways( oexStr8ToStr( m_sRoot ).Ptr() );
     }
 
@@ -130,7 +130,6 @@ public:
 
     /// Creates a folder
     oexBOOL MakeFolder( oexCSTR8 x_pFile );
-
 
 private:
 

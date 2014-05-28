@@ -180,6 +180,9 @@ namespace sqbind
 		/// Returns a string representation of the value
 		stdString& str();
 
+		/// Returns a string representation of the value, if empty, returns def
+		stdString def( const sqbind::stdString &k, const sqbind::stdString &def );
+
 		/// Returns a string representation of the value
 		stdString str_limit( int maxchars, const stdString &sAppend );
 

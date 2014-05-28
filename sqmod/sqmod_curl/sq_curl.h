@@ -36,8 +36,8 @@ public:
 	int PostUrl( const sqbind::stdString &sUrl, SQInteger lPort, const sqbind::stdString &sPost, sqbind::CSqBinary *sData );
 
 	/// HTTP Multipart post
-	int PostMultipart( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSqBinary *sData );
-	
+	int PostMultipart( const sqbind::stdString &sUrl, SQInteger lPort, const sqbind::stdString &sPost, sqbind::CSqBinary *sData );
+
 	/// Downloads and includes the specified url
 	int urlInclude( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, const sqbind::stdString &sUrl );
 
@@ -46,10 +46,10 @@ public:
 
 	/// Downloads and spawns the specified url
 	int urlSpawn( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, const sqbind::stdString &sName, const sqbind::stdString &sScriptName, const sqbind::stdString &sUrl );
-	
+
 	/// Downloads and executes the specified url in a separete process
 	int urlSqExe( sqbind::CSqMsgQueue *pQ, const sqbind::stdString &sPath, const sqbind::stdString &sDir, const sqbind::stdString &sUrl );
-	
+
 	/// Enable basic http authentication
 	int SetBasicAuth( const sqbind::stdString &sUsername, const sqbind::stdString &sPassword );
 
@@ -64,22 +64,22 @@ public:
 
 	/// Returns the name of the output file
 	sqbind::stdString getFile() { return m_sFile; }
-	
+
 	/// Sets the connect timeout
 	void setConnectTimeout( SQInteger to ) { m_nConnectTimeout = to; }
-	
+
 	/// Returns the current connect timeout
 	SQInteger getConnectTimeout() { return m_nConnectTimeout; }
 
 	/// Sets the overall transaction timeout
 	void setTimeout( SQInteger to ) { m_nTimeout = to; }
-	
+
 	/// Returns the overall transaction timeout
 	SQInteger getTimeout() { return m_nTimeout; }
-	
+
 	/// Returns the session cookies
 	sqbind::stdString getCookies() { return m_sCookies; }
-	
+
 	/// Returns the session cookies
 	void setCookies( const sqbind::stdString &s ) { m_sCookies = s; }
 
@@ -91,10 +91,13 @@ public:
 
 	/// Returns the content type
 	sqbind::stdString getContentType(){ return m_sContentType; }
-	
+
 	/// Add multipart
 	int addMultipart( const sqbind::stdString &sName, const sqbind::stdString &sFile, const sqbind::stdString &sMime, sqbind::CSqBinary *pData );
-	
+
+	/// Set progress callback function
+	void setProgressCallback( sqbind::CSqMsgQueue *x_pQ, const sqbind::stdString &sFn );
+
 	/** @} */
 
 private:
@@ -104,6 +107,7 @@ private:
 
 	static int StdFileWriter( char *data, size_t size, size_t nmemb, sqbind::CSqFile *file );
 
+	static int ProgressCallback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
 
 private:
 
@@ -111,19 +115,18 @@ private:
 	sqbind::stdString m_sFileStr;
 	sqbind::stdString m_sMimeStr;
 
-
 	/// Curl handle
 	CURL						*m_curl;
 
 	/// Custom headers
 	struct curl_slist 			*m_headers;
-	
+
 	/// Multipart head pointer
 	struct curl_httppost 		*m_multihead;
-	
+
 	/// Multipart tail pointer
 	struct curl_httppost		*m_multitail;
-		
+
 	/// String describing the last error
 	sqbind::stdString			m_sErr;
 
@@ -138,22 +141,28 @@ private:
 
 	/// Sets output file
 	sqbind::stdString			m_sFile;
-	
+
 	/// Session cookies
 	sqbind::stdString			m_sCookies;
-	
+
 	/// Content type
 	sqbind::stdString			m_sContentType;
-	
+
 	/// Non-zero if cookies are enabled
 	int							m_bEnableCookies;
-	
+
 	/// Sets the connect timeout CURLOPT_CONNECTTIMEOUT
 	SQInteger					m_nConnectTimeout;
 
 	/// Sets the transaction timeout CURLOPT_TIMEOUT
 	SQInteger					m_nTimeout;
-	
+
+	/// Progress callback queue
+	sqbind::CSqMsgQueue			*m_pProgressQ;
+
+	/// Progress callback function
+	sqbind::stdString			m_sProgressFn;
+
 };
 SQBIND_DECLARE_INSTANCE( CSqCurl, CSqCurl );
 

@@ -615,7 +615,7 @@ CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nM
 		case eFidDocuments :
 			// +++ CSIDL_COMMON_DOCUMENTS is broken?
 			if ( x_bShared ) trim = 1, sub = oexT( "Documents" );
-			x_nFolderId = x_bShared ? CSIDL_COMMON_DESKTOPDIRECTORY : CSIDL_MYDOCUMENTS;
+			x_nFolderId = x_bShared ? CSIDL_COMMON_DOCUMENTS : CSIDL_MYDOCUMENTS;
 			break;
 
 		case eFidMusic :

@@ -141,6 +141,14 @@ sqbind::stdString& CSqMulti::str()
 	return m_val.str();
 }
 
+sqbind::stdString CSqMulti::def(  const sqbind::stdString &k, const sqbind::stdString &def )
+{_STT();
+	t_List::iterator it = m_lst.find( k );
+	if ( m_lst.end() == it )
+		return def;
+	return it->second.str();
+}
+
 stdString CSqMulti::str_limit( int maxchars, const stdString &sAppend )
 {_STT();
 	return oex2std( std2oex( m_val.str() ).Clip( maxchars, std2oex( sAppend ) ) );
@@ -345,6 +353,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, value )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, bin )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, def )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_def )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, str_limit )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, toint )

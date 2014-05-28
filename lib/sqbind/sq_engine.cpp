@@ -460,6 +460,15 @@ stdString CSqEngineExport::build_path( const stdString &sS1,  const stdString &s
 	return oex2std( std2oex( sS1 ).BuildPath( std2oex( sS2 ) ) );
 }
 
+stdString CSqEngineExport::file_path( const stdString &sS1,  const stdString &sS2 )
+{_STT();
+#if defined( OEX_WINDOWS )
+	return oex2std( std2oex( sS1 ).BuildPath( std2oex( sS2 ), oexT( '\\' ) ) );
+#else
+	return oex2std( std2oex( sS1 ).BuildPath( std2oex( sS2 ) ) );
+#endif
+}
+
 int CSqEngineExport::match_file_pattern( const stdString &sPattern, const stdString &sStr, int bIgnoreCase )
 {_STT();
 	return std2oex( sStr ).MatchPattern( std2oex( sPattern ), bIgnoreCase );
@@ -1229,6 +1238,12 @@ int CSqEngineExport::resetlog( const stdString &sPath )
 {	CSqMsgQueue *q = queue();
 	if ( !q ) return 0;
 	return q->resetlog( sPath );
+}
+
+stdString CSqEngineExport::getid( const stdString &sPath )
+{	CSqMsgQueue *q = queue();
+	if ( !q ) return 0;
+	return q->getid( sPath );
 }
 
 int CSqEngineExport::shell( const stdString &sFile, const stdString &sParams, const stdString &sDirectory )
@@ -2008,6 +2023,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getlogbin )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, logbin )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, resetlog )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getid )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, run2 )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, prepare_inline )
@@ -2064,6 +2080,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, module_name )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, module_path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, build_path )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, file_path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, match_file_pattern )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, decorate )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, root )
