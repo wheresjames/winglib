@@ -750,6 +750,57 @@ stdString CSqEngineExport::base16_decode( const stdString &sStr )
 	return oex2std( oexMbToStr( oex::CBase16::Decode( oexStrToMb( std2oex( sStr ) ) ) ) );
 }
 
+sqbind::stdString CSqEngineExport::RegEncode( sqbind::CSqMulti *m )
+{
+	oex::CPropertyBag pb;
+	SQBIND_MultiToPropertyBag( *m, pb );
+	return sqbind::oex2std( oex::CParser::RegEncode( pb ) );
+}
+
+sqbind::stdString CSqEngineExport::RegEncodeTyped( sqbind::CSqMulti *m, sqbind::CSqMulti *t )
+{
+	oex::CPropertyBag pb, tb;
+	SQBIND_MultiToPropertyBag( *m, pb );
+	SQBIND_MultiToPropertyBag( *t, tb );
+	return sqbind::oex2std( oex::CParser::RegEncodeTyped( pb, tb ) );
+}
+
+sqbind::CSqMulti CSqEngineExport::RegDecode( const sqbind::stdString &s, int bExpandEmbeddedItems )
+{
+	sqbind::CSqMulti m;
+	oex::CPropertyBag pb = oex::CParser::RegDecode( sqbind::std2oex( s ) );
+	SQBIND_PropertyBagToMulti( pb, m );
+
+	// Expand embedded items if needed
+	if ( bExpandEmbeddedItems )
+		RegExpandEmbedded( &m );
+
+	return m;
+}
+
+int CSqEngineExport::RegExpandEmbedded( sqbind::CSqMulti *m )
+{
+	if ( !m )
+		return 0;
+
+	int nExpanded = 0;
+	for ( sqbind::CSqMulti::iterator it = m->begin(); m->end() != it; it++ )
+	{
+		// Does it need expanding?
+		if ( !it->second.size() && it->second.match( oexT( "REGEDIT4*" ) ) )
+			it->second.mset( &RegDecode( it->second.str(), 1 ) ),
+			it->second.str().clear(),
+			nExpanded++;
+
+		// Is it an array?
+		if ( it->second.size() )
+			RegExpandEmbedded( &it->second );
+
+	} // end if
+
+	return nExpanded;
+}
+
 stdString CSqEngineExport::md5( const stdString &sStr )
 {_STT();
 	return oex2std( oexMd5( std2oex( sStr ) ) );
@@ -2094,6 +2145,10 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base64_encode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base16_decode )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base16_encode )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, RegEncode )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, RegEncodeTyped )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, RegDecode )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, RegExpandEmbedded )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, unique )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, mandelbrot )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, local_time )

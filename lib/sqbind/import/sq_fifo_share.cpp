@@ -86,6 +86,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqFifoShare, CSqFifoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, ReadTsMax )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, incReadPtr )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, decReadPtr )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, getMaxReads )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, isRead )
 
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqFifoShare, Write )
@@ -609,6 +610,43 @@ int CSqFifoShare::incReadPtr()
 	m_cb.setUINT( 9, m_cb.getUINT( 9 ) + 1 );
 
 	return 1;
+}
+
+int CSqFifoShare::getMaxReads()
+{
+	// Ensure valid share
+	if ( !isValid() )
+		return 0;
+
+	// Get the current buffer pointer, and make sure it's valid
+	int i = getWritePtr();
+	if ( 0 > i )
+		return 0;
+
+	int nBlocks = getBlocks();
+	if ( 0 >= nBlocks )
+		return 0;
+
+	// Valid read pointer?
+	if ( 0 > m_iRead || m_iRead >= nBlocks )
+		m_iRead = 0;
+
+	// Valid write pointer?
+	if ( i == m_iRead || i >= nBlocks )
+		return 0;
+
+	// Count available reads
+	int sz = 0, r = m_iRead;
+	while ( sz < nBlocks && r != i )
+	{
+		if ( ++r >= nBlocks )
+			r = 0;
+
+		sz++;
+
+	} // end while
+
+	return sz;
 }
 
 int CSqFifoShare::decReadPtr()

@@ -60,6 +60,7 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqVideoShare, CSqVideoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getFps )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getFmt )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getReads )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getMaxReads )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getWrites )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getTs )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getImageSize )
@@ -477,6 +478,44 @@ int CSqVideoShare::incReadPtr()
 
 	// Return a wrapper to the image that's ready
 	return 1;
+}
+
+int CSqVideoShare::getMaxReads()
+{_STT();
+
+	if ( !m_cb.getUsed() || !m_buf.getUsed() )
+	{	m_sLastErr = oexT( "No open share" );
+		return 0;
+	} // end if
+
+	// Verify that writer is still connected
+	if ( m_cb.getUINT( 0 ) != m_uCbId || m_cb.getUINT( 11 ) != m_uTs )
+	{	m_sLastErr = oex2std( oexMks( oexT( "Writer has disconnected : " ), std2oex( m_sName ) ) );
+		Destroy(); 
+		return 0; 
+	} // end if
+
+	// Get the current image index
+	int i = m_cb.getINT( 1 );
+	int nBuffers = getBuffers();
+	
+	// Valid read pointer?
+	if ( 0 > m_iRead || m_iRead >= nBuffers  )
+		m_iRead = 0;
+
+	// Use zero if it's invalid
+	if ( 0 > i || i == m_iRead || i >= nBuffers )
+		return 0;
+
+	// Count buffers
+	int sz = 0, r = m_iRead;
+	while ( sz < nBuffers && r != i )
+	{	sz++;
+		if ( ++r >= nBuffers )
+			r = 0;
+	} // end while
+	
+	return sz;
 }
 
 sqbind::CSqBinary CSqVideoShare::getImg()

@@ -78,6 +78,7 @@ BUILDDIRS := $(BUILDDIRS) \
 			 sqmod/sqmod_ffmpeg \
 			 sqmod/sqmod_freetype2 \
 			 sqmod/sqmod_gdchart \
+			 sqmod/sqmod_gsoap \
 			 sqmod/sqmod_live555 \
 			 sqmod/sqmod_mysql \
 			 sqmod/sqmod_openssl \

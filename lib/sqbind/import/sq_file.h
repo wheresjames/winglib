@@ -161,6 +161,10 @@ namespace sqbind
 		static int exists( const stdString &sFile )
 		{	return oexExists( sFile.c_str() ); }
 
+		/// Returns the file path to the current script
+		static stdString build_path( const stdString &sS1,  const stdString &sS2 )
+		{	return oex2std( std2oex( sS1 ).BuildPath( std2oex( sS2 ) ) ); }
+
 		static stdString get_filename( const stdString &sFile )
 		{	return oex2std( std2oex( sFile ).GetFileName() ); }
 

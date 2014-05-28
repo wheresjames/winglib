@@ -465,6 +465,20 @@ public:
 		/// Base16 decodes a string
 		stdString base16_decode( const stdString &sStr );
 
+		/// Encode array into Registry file
+		sqbind::stdString RegEncode( sqbind::CSqMulti *m );
+
+		/// Typed encode array into Registry file
+		sqbind::stdString RegEncodeTyped( sqbind::CSqMulti *m, sqbind::CSqMulti *t );
+		
+		/// Decode Registry file
+		sqbind::CSqMulti RegDecode( const sqbind::stdString &s, int bExpandEmbeddedItems );
+
+		/// Expand embedded registry file items
+		int RegExpandEmbedded( sqbind::CSqMulti *m );
+
+		/// Returns the file path to the current script
+
 		/// Builds a path using the specified elements
 		stdString build_path( const stdString &sS1,  const stdString &sS2 );
 		
@@ -473,7 +487,7 @@ public:
 
 		/// Returns non-zero if pattern matches string
 		int match_file_pattern( const stdString &sPattern, const stdString &sStr, int bIgnoreCase );
-		
+
 		/// Returns an ascii mandelbrot image
 		stdString mandelbrot( int w, int h, int x1, int y1, int x2, int y2 );
 
@@ -515,7 +529,7 @@ public:
 
 		/// Parses sub string sSub in sS, returns parsed string
 		stdString iparse( const stdString &sS, const stdString &sSub );
-		
+
 		/// Creates a size string like 1.3MB, 44.5GB, etc...
 		/**
 			@param [in] d		- Value
@@ -527,11 +541,11 @@ public:
 		stdString create_size_string( double d, double dDiv, int nDigits, const stdString &sSuffix );
 
 		/// Splits a string into an array
-		CSqMulti splitstr( const stdString &s, const stdString &seps );	
-		
+		CSqMulti splitstr( const stdString &s, const stdString &seps );
+
 		/// Joins array components
 		stdString joinstr( CSqMulti *m, const stdString &sep );
-		
+
 		/// Returns a string clipped to the specified size
 		stdString str_limit( const stdString &sS, int maxchars, const stdString &sAppend );
 
@@ -597,7 +611,7 @@ public:
 
 		/// Kills the specified process
 		int kill_process( int nPid, int nTimeout, int nExit );
-		
+
 		/// Creates a thread
 		int spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile );
 
@@ -627,7 +641,7 @@ public:
 
 		/// Returns the specified process version
 		int get_process_version( int nPid );
-		
+
 		/// Returns the squirrel executable name
 		stdString sqexe_name();
 
@@ -660,9 +674,9 @@ public:
 
 		/// Returns information about the cpu
 		CSqMulti get_cpu_info();
-		
+
 		/// Returns information about global memory usage
-		CSqMulti get_memory_status();		
+		CSqMulti get_memory_status();
 
 		/// Amount of time in seconds, since the computer started
 		double boot_time();
