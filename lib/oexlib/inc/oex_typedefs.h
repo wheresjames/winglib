@@ -266,8 +266,8 @@ public:
     }
 
     /// GUID reference
-//    operator oexGUID& ()
-//    {   return *this; }
+//  operator oexGUID& ()
+//  {   return *this; }
 
     /// GUID pointer
     operator oexGUID* ()

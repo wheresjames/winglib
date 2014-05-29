@@ -562,11 +562,11 @@ SQInteger CSqFifoShare::CalculateTsRange( SQInteger *pMin, SQInteger *pMax )
 	while ( w != r )
 	{
 		// Track the minimum
-		if ( *pMin > pi[ r ].uTs )
+		if ( *pMin > (SQInteger)pi[ r ].uTs )
 			*pMin = pi[ r ].uTs;
 
 		// Track the maximum
-		if ( *pMax < pi[ r ].uTs )
+		if ( *pMax < (SQInteger)pi[ r ].uTs )
 			*pMax = pi[ r ].uTs;
 
 		if ( ++r >= nBlocks )

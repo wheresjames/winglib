@@ -263,6 +263,9 @@ public:
 
 		/// Resets the logger
 		int resetlog( const stdString &sPath );
+		
+		/// Returns the script id
+		stdString getid( const stdString &sPath );
 
 		/// Sets the specified timer
 		int set_timer( const stdString &sPath, int to, const stdString &sCallback );
@@ -475,7 +478,12 @@ public:
 		int RegExpandEmbedded( sqbind::CSqMulti *m );
 
 		/// Returns the file path to the current script
+
+		/// Builds a path using the specified elements
 		stdString build_path( const stdString &sS1,  const stdString &sS2 );
+		
+		/// Builds a file path using the specified elements
+		stdString file_path( const stdString &sS1,  const stdString &sS2 );
 
 		/// Returns non-zero if pattern matches string
 		int match_file_pattern( const stdString &sPattern, const stdString &sStr, int bIgnoreCase );

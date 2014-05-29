@@ -145,6 +145,14 @@ public:
 	/// Returns the script name
 	stdString GetName()
 	{	return m_sName; }
+	
+	/// Sets the script id
+	void SetId( stdString sId )
+	{	m_sId = sId; }
+
+	/// Returns the script id
+	stdString GetId()
+	{	return m_sId; }
 
 	/// Sets the root path in the engine
 	void SetRoot( const stdString &s ) { m_cSqEngine.SetRoot( s ); }
@@ -221,6 +229,9 @@ private:
 
 	/// List of child scripts
 	t_ScriptList					 	m_lstScript;
+
+	/// Script ID
+	stdString							m_sId;
 
 	/// Script to load
 	stdString							m_sName;

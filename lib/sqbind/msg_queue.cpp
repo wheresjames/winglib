@@ -608,3 +608,11 @@ int CSqMsgQueue::resetlog( const stdString &sPath )
 	return oexStrToLong( sRet.c_str() );
 }
 
+stdString CSqMsgQueue::getid( const stdString &sPath )
+{_STT();
+	stdString sRet;
+	CSqMulti params;
+	Msg( sPath, oexT( "get_id" ), &params, &sRet );
+	return sRet;
+}
+

@@ -69,24 +69,24 @@ void CScriptThread::SetAppInfo( oex::oexCSTR pName, oex::oexCSTR pNameProc, oex:
 	m_pAppDescription = pDesc;
 }
 
-oex::oexCSTR CScriptThread::getAppName() 
+oex::oexCSTR CScriptThread::getAppName()
 {
-	return m_pAppName; 
+	return m_pAppName;
 }
 
-oex::oexCSTR CScriptThread::getAppNameProc() 
+oex::oexCSTR CScriptThread::getAppNameProc()
 {
-	return m_pAppNameProc; 
+	return m_pAppNameProc;
 }
 
-oex::oexCSTR CScriptThread::getAppLongName() 
+oex::oexCSTR CScriptThread::getAppLongName()
 {
-	return m_pAppLongName; 
+	return m_pAppLongName;
 }
 
-oex::oexCSTR CScriptThread::getAppDescription() 
+oex::oexCSTR CScriptThread::getAppDescription()
 {
-	return m_pAppDescription; 
+	return m_pAppDescription;
 }
 
 void CScriptThread::Destroy()
@@ -135,9 +135,9 @@ oex::oexBOOL CScriptThread::InitEngine()
 	// Set script name for debugging
 	if ( m_cSqEngine.GetScriptName().length() && m_sName.length() && m_cSqEngine.GetScriptName() != m_sName )
 	{	_STT_SET_NAME( oex::CStr() << std2oex( m_cSqEngine.GetScriptName() ) << oexT( " : " ) <<  std2oex( m_sName ) ); }
-	else if ( m_sName.length() ) 
+	else if ( m_sName.length() )
 	{	_STT_SET_NAME( oex::CStr() << std2oex( m_sName ) ); }
-	else 
+	else
 	{	_STT_SET_NAME( oex::CStr() << std2oex( m_cSqEngine.GetScriptName() ) ); }
 
 	return oex::oexTRUE;
@@ -357,7 +357,7 @@ oex::oexINT CScriptThread::RunTimers()
 		// Timeout?
 		if ( it->second.uTimeout )
 		{	int nRet = 0;
-			if ( !uGmt ) 
+			if ( !uGmt )
 				uGmt = oexGetUnixTime();
 			if ( it->second.uTimeout < uGmt )
 			{	n++, m_cSqEngine.Execute( &nRet, it->second.sCallback.c_str() );
@@ -461,7 +461,7 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, st
 	if ( sMsg == oexT( "is_path" ) )
 		bRet = oex::oexTRUE;
 
-	// Terminate thread?  
+	// Terminate thread?
 	else if ( sMsg == oexT( "terminate_thread" ) )
 	{	if ( GetOwnerThreadId() == oexGetCurThreadId() ) EndThread( 0 );
 		RequestQuit();
@@ -892,6 +892,10 @@ oex::oexBOOL CScriptThread::ExecuteMsg( stdString &sMsg, CSqMulti &mapParams, st
 						  			  		   mapParams[ oexT( "cb" ) ] ) ) );
 
 	// Set time out command
+	else if ( sMsg == oexT( "get_id" ) )
+		*pReply = GetId();
+
+	// Set time out command
 	else if ( sMsg == oexT( "kill_timer" ) )
 		KillTimer( std2oex( mapParams[ oexT( "id" ) ] ).ToULong() );
 
@@ -948,7 +952,7 @@ oex::oexBOOL CScriptThread::ProcessMsg( const stdString &x_sPath, stdString &sMs
 		while ( sPath.length()
 				&& ( sPath[ 0 ] == oexT( '/' )
 					 || sPath[ 0 ] == oexT( '\\' )
-					 || sPath[ 0 ] == oexT( '.' ) 
+					 || sPath[ 0 ] == oexT( '.' )
 					) )
 			sPath = sPath.substr( 1 );
 
@@ -1172,39 +1176,39 @@ void CScriptThread::OnMsg( CSqMulti &mapParams, stdString *pReply )
 
 	// shell
 	else if ( mapParams[ oexT( "shell" ) ].length() )
-	{	ret = m_cSqEngine.shell( mapParams[ oexT( "shell" ) ].c_str(), 
+	{	ret = m_cSqEngine.shell( mapParams[ oexT( "shell" ) ].c_str(),
 								 mapParams[ oexT( "params" ) ].c_str(),
 								 mapParams[ oexT( "dir" ) ].c_str() );
-		if ( pReply ) 
+		if ( pReply )
 			*pReply = oex2std( oexMks( ret ) );
 	} // end if
 
 	// exec
 	else if ( mapParams[ oexT( "exec" ) ].length() )
-	{	ret = m_cSqEngine.exec( mapParams[ oexT( "exec" ) ].c_str(), 
+	{	ret = m_cSqEngine.exec( mapParams[ oexT( "exec" ) ].c_str(),
 								mapParams[ oexT( "params" ) ].c_str(),
 								mapParams[ oexT( "dir" ) ].c_str() );
-		if ( pReply ) 
+		if ( pReply )
 			*pReply = oex2std( oexMks( ret ) );
 	} // end if
 
 	// sqexe
 	else if ( mapParams[ oexT( "sqexe" ) ].length() )
-	{	ret = m_cSqEngine.sqexe( mapParams[ oexT( "sqexe" ) ].c_str(), 
+	{	ret = m_cSqEngine.sqexe( mapParams[ oexT( "sqexe" ) ].c_str(),
 								 mapParams[ oexT( "dir" ) ].c_str() );
-		if ( pReply ) 
+		if ( pReply )
 			*pReply = oex2std( oexMks( ret ) );
 	} // end if
-		
+
 	// sqexe_script
 	else if ( mapParams[ oexT( "sqexe_script" ) ].length() )
-	{	ret = m_cSqEngine.sqexe_script( mapParams[ oexT( "sqexe_script" ) ].c_str(), 
+	{	ret = m_cSqEngine.sqexe_script( mapParams[ oexT( "sqexe_script" ) ].c_str(),
 										mapParams[ oexT( "params" ) ].c_str(),
 										mapParams[ oexT( "dir" ) ].c_str() );
-		if ( pReply ) 
+		if ( pReply )
 			*pReply = oex2std( oexMks( ret ) );
 	} // end if
-		
+
 	// Execute function?
 	else if ( mapParams.isset( oexT( "execute" ) ) )
 		m_cSqEngine.Execute( pReply, mapParams[ oexT( "execute" ) ].c_str() );

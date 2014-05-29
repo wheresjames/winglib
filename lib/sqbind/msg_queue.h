@@ -259,6 +259,9 @@ public:
 	/// Resets the log file
 	int resetlog( const stdString &sPath );
 
+	/// Get script id
+	stdString getid( const stdString &sPath );
+
 	/// Return a reference to the message queue lock
 	oexLock& GetLock() { return m_cLock; }
 

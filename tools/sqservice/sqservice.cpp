@@ -12,6 +12,14 @@ sqbind::CScriptThread	*g_psqScriptThread = oexNULL;
 /// Pointer to module manager
 sqbind::CModuleManager	*g_psqModuleManager = oexNULL;
 
+/// App ID
+static const oex::oexCHAR SQBIND_APP_IID_BIN[]
+#ifdef SQBIND_APP_IID
+	= SQBIND_APP_IID;
+#else
+	= "398BBF52-373C-4DCE-97AD-833E42B6C494";
+#endif
+
 // Custom include script
 int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData, sqbind::stdString &sName )
 {_STT();
@@ -92,6 +100,9 @@ public:
 		// Set application information
 		sqbind::CScriptThread::SetAppInfo( oexAppNamePtr(), oexAppNameProcPtr(), oexAppLongNamePtr(), oexAppDescPtr() );
 
+		// Script id
+		g_psqScriptThread->SetId( sqbind::oex2std( oex::CStr( SQBIND_APP_IID_BIN ) ) );
+		
 		// Script name
 		g_psqScriptThread->SetScriptName( oexT( "embedded:main.nut" ) );
 
