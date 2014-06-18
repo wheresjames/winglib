@@ -67,7 +67,7 @@ int CSqEngineExport::isDebugBuild()
 }
 
 stdString CSqEngineExport::getCompiler()
-{_STT();
+{
 
 #if defined( OEX_GCC )
 	return oexT( "gcc" );
@@ -79,7 +79,7 @@ stdString CSqEngineExport::getCompiler()
 }
 
 stdString CSqEngineExport::getPlatform()
-{_STT();
+{
 
 #if defined( _WIN32_WCE ) || defined( _WIN64_WCE )
 	return oexT( "wince" );
@@ -97,7 +97,7 @@ stdString CSqEngineExport::getPlatform()
 }
 
 int CSqEngineExport::getCpuSize()
-{_STT();
+{
 #if defined( OEX_CPU_64 )
 	return 64;
 #else
@@ -106,7 +106,7 @@ int CSqEngineExport::getCpuSize()
 }
 
 stdString CSqEngineExport::getCpuType()
-{_STT();
+{
 
 #if defined( CPU_ARM )
 	return oexT( "arm" );
@@ -118,6 +118,26 @@ stdString CSqEngineExport::getCpuType()
 
 	return oexT( "x86" );
 
+}
+
+stdString CSqEngineExport::makeServiceName( const sqbind::stdString &s )
+{
+	#	if defined( OEX_GCC )
+	#		define SNBUILD "gcc"
+	#	elif defined( OEX_MSC )
+	#		define SNBUILD "vs"
+	#	else
+	#		define SNBUILD "unk"
+	#	endif
+
+	#	if defined( OEX_CPU_64 )
+	#		define SNKEYCPU "x64"
+	#	else
+	#		define SNKEYCPU "x86"
+	#	endif
+
+	// Check for an engine like us
+	return s + oexTEXT( "_" ) oexTEXT( SNKEYCPU ) oexTEXT( "_" ) oexTEXT( SNBUILD );
 }
 
 int CSqEngineExport::ctrl_computer( int nCmd, int nForce, const sqbind::stdString &sMsg )
@@ -309,7 +329,7 @@ int CSqEngineExport::kill_wait( const stdString &sPath, int nTimeout, int bTermi
 	// Wait for thread to shutdown
 	oex::oexUINT uStart = oexGetUnixTime() + nTimeout;
 	while ( is_path( sPath ) )
-	{ 
+	{
 		// Wait a bit
 		oexSleep( oexWAIT_RESOLUTION / 1000 );
 
@@ -565,7 +585,7 @@ stdString CSqEngineExport::get_sys_folder( int bShared, const stdString &sId )
 
 		else if ( sId == oexT( "history" ) )
 			nId = oex::os::CBaseFile::eFidHistory;
-			
+
 		else if ( sId == oexT( "programs" ) )
 			nId = oex::os::CBaseFile::eFidPrograms;
 
@@ -593,27 +613,27 @@ CSqMulti CSqEngineExport::find_resource( const stdString &sName, int bIgnoreCase
 	// Get a list of resources matching the pattern
 	oex::CStrList l = oexFindResource( std2oex( sName ), bIgnoreCase );
 	if ( l.Size() )
-	{	CSqMulti m; 
-		SQBIND_StrListToStd( l, m.list(), oexT( "f" ) );	
+	{	CSqMulti m;
+		SQBIND_StrListToStd( l, m.list(), oexT( "f" ) );
 		return m;
 	} // end if
-	
+
 	// If none, check file path
 	if ( !bFileOverrideOk )
 		return CSqMulti();
 
 	// Attempt to get the list from disk
 	stdString sSub = CSqFile::get_path( sName );
-	CSqMulti files = CSqFile::get_dirlist( path( build_path( oexT( ".." ), sSub ) ), 
+	CSqMulti files = CSqFile::get_dirlist( path( build_path( oexT( ".." ), sSub ) ),
 										   CSqFile::get_filename( sName ), 1, 0 );
 	if ( !files.size() )
 		return CSqMulti();
-		
+
 	// Make the paths look right
 	CSqMulti m;
 	for ( CSqMulti::iterator it = files.begin(); it != files.end(); it++ )
 		m[ build_path( sSub, it->first ) ] = it->second.str();
-	
+
 	return m;
 }
 
@@ -924,7 +944,7 @@ stdString CSqEngineExport::iparse( const stdString &sS, const stdString &sSub )
 
 stdString CSqEngineExport::create_size_string( double d, double dDiv, int nDigits, const stdString &sSuffix )
 {_STT();
-	oex::CStr s = std2oex( sSuffix );	
+	oex::CStr s = std2oex( sSuffix );
 	oexCONST oex::CStr::t_char *suf[ 128 ], sep[] = { oexT( ',' ) };
 	suf[ oex::str::InplaceSplit( s._Ptr(), s.Length(), suf, oexSizeOfArray( suf ), sep, sizeof( sep ) ) ] = 0;
 	return oex2std( oex::CStr().AppendSizeString( d, dDiv, nDigits, suf ) );
@@ -941,7 +961,7 @@ CSqMulti CSqEngineExport::splitstr( const stdString &s, const stdString &seps )
 	CSqMulti m;
     for ( oex::CStrList8::iterator it; lst.Next( it ); )
 		m[ oex2std( oexMks( i++ ) ) ] = oex2std( *it );
-	
+
 	return m;
 }
 
@@ -950,7 +970,7 @@ stdString CSqEngineExport::joinstr( CSqMulti *m, const stdString &sep )
 
 	if ( !m )
 		return oexT( "" );
-	
+
 	int i = 0;
 	stdString s;
 	while ( m->isset( oex2std( oexMks( i ) ) ) )
@@ -959,7 +979,7 @@ stdString CSqEngineExport::joinstr( CSqMulti *m, const stdString &sep )
 			s += sep;
 
 		s += (*m)[ oex2std( oexMks( i++ ) ) ].str();
-	
+
 	} // end while
 
 	return s;
@@ -1038,7 +1058,7 @@ stdString CSqEngineExport::uncompress( const stdString &sS )
 
 int CSqEngineExport::kill_process( int nPid, int nTimeout, int nExit )
 {_STT();
-	return oex::os::CSys::KillProcess( nPid, nTimeout, nExit );	
+	return oex::os::CSys::KillProcess( nPid, nTimeout, nExit );
 }
 
 int CSqEngineExport::spawn( int nRet, const stdString &sPath, const stdString &sName, const stdString &sScript, int bFile )
@@ -1346,14 +1366,14 @@ CSqMulti CSqEngineExport::get_system_drive_info( const stdString &sDrive )
 {_STT();
 	CSqMulti m;
 	oex::CPropertyBag pb;
-	
+
 	if ( sDrive.length() )
 		pb[ sqbind::std2oex( sDrive ) ] = oex::os::CSysUtil::GetDiskInfo( std2oex( sDrive ) );
 	else
 		pb = oex::os::CSysUtil::GetDisksInfo( oex::oexTRUE );
-		
+
 	SQBIND_PropertyBagToMulti( pb, m );
-	
+
 	return m;
 }
 
@@ -1685,11 +1705,11 @@ stdString CSqEngineExport::sqexe_path()
 		#	endif
 
 		// Posible squirrel engines
-		oex::oexCSTR sKeys[] = 
+		oex::oexCSTR sKeys[] =
 		{
 			// Check for an engine like us
 			oexTEXT( "SOFTWARE\\" ) oexTEXT( SQKEYNAME ) oexTEXT( "_" ) oexTEXT( SQKEYCPU ) oexTEXT( "_" ) oexTEXT( SQBUILD ),
-			
+
 			// +++ Really? wtf?
 			// Any engine will probably do...
 			oexT( "SOFTWARE\\SquirrelScript_x86" ),
@@ -1734,7 +1754,7 @@ int CSqEngineExport::sqexe( const stdString &sParams, const stdString &sDir )
 	stdString sFull = sqexe_path();
 	if ( !sFull.length() )
 		return -2;
-	
+
 	// Let's try and execute
 	return oexShell( sFull.c_str(), sParams.c_str(), sDir.length() ? sDir.c_str() : path( stdString() ).c_str() );
 }
@@ -2018,6 +2038,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getCompiler )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getCpuSize )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getCpuType )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, makeServiceName )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getPlatform )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, alert )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, print )
@@ -2184,7 +2205,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, joinstr )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, replace )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ireplace )
-	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, create_size_string )	
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, create_size_string )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, drop )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, drop_range )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, json_encode )
@@ -2280,7 +2301,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_ENUM( oex::obj::tStr32,		tStr32 )
 	SQBIND_ENUM( oex::obj::tStr64,		tStr64 )
 	SQBIND_ENUM( oex::obj::tGuid,		tGuid )
-	
+
 	SQBIND_ENUM( (int)42,				INT_42 )
 	SQBIND_ENUM( (int)-42,				INT_NEG_42 )
 	SQBIND_ENUM( (long long)42,			INT64_42 )
@@ -2666,7 +2687,7 @@ int CSqEngine::OnInclude( const stdString &sScript )
 			// Load the script
 			m_script = bFile ? m_vm.CompileScript( sFile.Ptr() )
 							 : m_vm.CompileBuffer( sUseScript.c_str() );
-							 
+
 		} // end else
 
 		// Run the script
@@ -2872,7 +2893,7 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 		// Check Install directory
 		if ( !sFull.Length() )
 		{
-		
+
 // Build type
 #	if defined( OEX_GCC )
 #		define SQBUILD "gcc"
