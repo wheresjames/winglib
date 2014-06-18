@@ -470,3 +470,42 @@ oexBOOL CIpAddress::LookupHost( oexCSTR x_pServer, oexINT32 x_uPort, oexINT32 x_
 
 }
 
+CPropertyBag CIpAddress::Lookup( oexCSTR x_pServer )
+{_STT();
+
+	CStr sServer( x_pServer );
+	if ( !sServer.Length() )
+		sServer = GetHostName();
+
+    // Ensure we have a name
+    if ( !sServer.Length() )
+        return CPropertyBag();
+
+	// First try to interpret as dot address
+    struct hostent *pHe = gethostbyname( oexStrToStr8Ptr( x_pServer ) );
+
+	if ( !pHe )
+		return CPropertyBag();
+
+	CPropertyBag pb;
+	for ( int i = 0; pHe->h_addr_list[ i ]; i++ )
+	{		
+		in_addr *pia = (in_addr*)pHe->h_addr_list[ i ];
+		if ( oexVERIFY_PTR( pia ) )
+			pb[ oexMks( i ) ] = oexStr8ToStr( inet_ntoa( *pia ) );
+		
+    } // end for	
+
+    return pb;
+}
+
+
+oexUINT CIpAddress::Arp( oexCSTR x_pDst, oexCSTR x_pSrc, oexBYTE *x_pAddr )
+{
+	return 0;
+}
+
+CPropertyBag CIpAddress::GetArpTable()
+{
+	return CPropertyBag();
+}

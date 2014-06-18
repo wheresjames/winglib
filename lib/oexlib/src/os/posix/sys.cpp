@@ -199,7 +199,7 @@ oexINT CSys::ShowMessageBox( oexCSTR x_pTitle, oexCSTR x_pStr )
 
 oexCPVOID CSys::GetInstanceHandle()
 {
-	return (oexCPVOID)getpid();
+	return (oexCPVOID)(oexLONG)getpid();
 }
 
 oexBOOL CSys::SetThreadPriority( oexINT x_nPriority )
@@ -572,7 +572,7 @@ int CSys::Print( oexCSTRW x_pFmt, ... )
 {
 	CStrW s;
 	oexVaList ap; oexVaStart( ap, x_pFmt );
-	s.vFmt( x_pFmt, (va_list)ap );
+	s.vFmt( x_pFmt, ap );
 	oexVaEnd( ap );
 	Echo( s.Ptr() );
 	return s.Length();
@@ -1061,7 +1061,7 @@ int CSys::Print( oexCSTR8 x_pFmt, ... )
 {
 	CStr8 s;
 	oexVaList ap; oexVaStart( ap, x_pFmt );
-	s.vFmt( x_pFmt, (va_list)ap );
+	s.vFmt( x_pFmt, ap );
 	oexVaEnd( ap );
 	Echo( s.Ptr() );
 	return s.Length();
@@ -1209,6 +1209,21 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 //	oexEcho( oexMks( oexT( "system() : " ), sCmd ).Ptr() );
 
 	return system( oexStrToMb( sCmd ).Ptr() ) ? oexTRUE : oexFALSE;
+}
+
+oexUINT CSys::GetCurrentProcessId()
+{
+	return 0;
+}
+
+oexUINT CSys::GetProcessVersion( oexUINT uPid )
+{
+	return 0; 
+}
+
+oexINT CSys::KillProcess( oexINT nPid, oexUINT uTimeout, oexUINT uExit )
+{
+	return 0;
 }
 
 oexUINT CSys::StartProcess( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
