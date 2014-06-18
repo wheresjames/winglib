@@ -1253,6 +1253,11 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 #endif
 }
 
+oexUINT CSys::GetCurrentProcessId()
+{//_STT();
+	return ::GetCurrentProcessId(); 
+}
+
 oexUINT CSys::GetProcessVersion( oexUINT uPid )
 {//_STT();
 	return ::GetProcessVersion( uPid ); 

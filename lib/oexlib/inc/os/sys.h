@@ -558,6 +558,9 @@ public:
 	*/
 	static oexUINT StartProcess( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory );
 
+	/// Returns the current process id
+	static oexUINT GetCurrentProcessId();
+	
 	/// Returns the specified process version
 	static oexUINT GetProcessVersion( oexUINT uPid );
 	

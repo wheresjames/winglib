@@ -659,7 +659,7 @@ int CServiceImpl::RemoveService( oexCSTR pName )
 
 	SC_HANDLE hService = OpenService( hSCManager, pName, DELETE );
 	if( !hService )
-	{	oexERROR( GetLastError(), oexT( "Could not delete service : OpenService() failed" ) );
+	{	//oexERROR( GetLastError(), oexT( "Could not delete service : OpenService() failed" ) );
 		return 0; // Probably, the service does not exist
 	} // end if
 

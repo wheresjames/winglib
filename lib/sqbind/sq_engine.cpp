@@ -1327,6 +1327,11 @@ int CSqEngineExport::exec( const stdString &sFile, const stdString &sParams, con
 	return oexExec( sFile.c_str(), sParams.c_str(), sDirectory.c_str() );
 }
 
+int CSqEngineExport::get_current_process_id()
+{_STT();
+	return oex::os::CSys::GetCurrentProcessId();
+}
+
 int CSqEngineExport::get_process_version( int nPid )
 {_STT();
 	return oex::os::CSys::GetProcessVersion( nPid );
@@ -2101,6 +2106,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, prepare_inline )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shell )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, exec )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_current_process_id )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_process_version )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reboot )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shutdown )

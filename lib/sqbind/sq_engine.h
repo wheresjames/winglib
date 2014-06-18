@@ -641,6 +641,9 @@ public:
 		int exec( const stdString &sFile, const stdString &sParams, const stdString &sDirectory );
 
 		/// Returns the specified process version
+		int get_current_process_id();
+
+		/// Returns the specified process version
 		int get_process_version( int nPid );
 
 		/// Returns the squirrel executable name
