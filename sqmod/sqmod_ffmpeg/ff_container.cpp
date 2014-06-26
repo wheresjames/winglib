@@ -292,9 +292,12 @@ void CFfContainer::fixVideoFrameRate()
   avio_seek(pb, file_size, SEEK_SET);
 }
 
-#if !defined( oexUNICODE )
 sqbind::stdString CFfContainer::getFixVideoFrameRateDiag()
 {
+	
+	return sqbind::stdString();
+	
+#if 0 // !defined( oexUNICODE )
 #define LINE_SZ 64
 #define MSG_SZ (LINE_SZ * 16)
   char msg[MSG_SZ];
@@ -345,8 +348,8 @@ sqbind::stdString CFfContainer::getFixVideoFrameRateDiag()
 
   m_sFfrDiag.assign( msg );
   return m_sFfrDiag;
-}
 #endif
+}
 
 int CFfContainer::CloseStream()
 {_STT();
