@@ -33,6 +33,10 @@ LOC_INC_def := inc
 LOC_SRC_def := src
 include $(PRJ_LIBROOT)/build.mk
 
+#export LOC_TAG := vid
+#LOC_SRC_vid := src/vid
+#include $(PRJ_LIBROOT)/build.mk
+
 export LOC_TAG := os
 LOC_INC_os := inc/os
 LOC_SRC_os := src/os/$(PLATFORM)

@@ -393,7 +393,7 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 					{
 						// Build multipart boundary and headers
 						oex::CStr8 mpb;
-						mpb << sBoundary << sMulti 
+						mpb << "\r\n" << sBoundary << sMulti 
 							<< "Content-Length: " << buf.getUsed()
 							<< "\r\n\r\n";
 
