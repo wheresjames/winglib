@@ -803,11 +803,11 @@ class CBinShare
 
 		/// Copy constructor
 		CBinHolder( const CBinHolder &c )
-			: bin( c.bin ), to( to ) {}
+			: bin( c.bin ), to( 0 ) {}
 
 		/// Assignment operator
 		CBinHolder& operator = ( const CBinHolder &c )
-		{	bin = c.bin; to = to; return *this; }
+		{	bin = c.bin; to = 0; return *this; }
 
 		/// Buffer
 		CBin			bin;

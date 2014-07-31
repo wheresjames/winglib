@@ -1,8 +1,12 @@
 
 #include "stdafx.h"
 
-#include <winsock2.h>
-#include <windows.h>
+#if defined( OEX_WINODWS )
+#	include <winsock2.h>
+#	include <windows.h>
+#else
+#	include <sys/socket.h>
+#endif
 
 #if defined( _DEBUG )
 	extern "C"
@@ -141,7 +145,7 @@ int CRtmpdSession::setTimeout( int nMs )
 		return 0;
 
 
-#if defined( _WIN32 )
+#if defined( OEX_WINDOWS )
 
 	// Set the recv and send timeouts
 	return ( setsockopt( m_session.m_sb.sb_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&nMs, sizeof( nMs ) )
@@ -198,9 +202,13 @@ int CRtmpdSession::Init( sqbind::CSqSocket *pSocket )
 	// Give the rtmpd object control of the socket handle
 	m_session.m_sb.sb_socket = oexPtrToInt( pSocket->Ptr()->Detach() );
 
+#if defined( OEX_WINDOWS )
+
 	// Disable Nagle's algorithm
 	int on = 1;
 	setsockopt( m_session.m_sb.sb_socket, IPPROTO_TCP, TCP_NODELAY, (char*)&on, sizeof( on ) );
+
+#endif
 
 	// Attempt handshake
 	if ( !RTMP_Serve( &m_session ) )

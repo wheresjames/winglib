@@ -37,10 +37,10 @@ ifeq ($(BUILD)-$(PROC),vs-x64)
 	include $(PRJ_LIBROOT)/unsupported.mk
 else
 
-ifeq ($(PLATFORM)-$(PROC),posix-x64)
-	UNSUPPORTED :=  $(PLATFORM)-$(PROC), for whatever stupid reason, this isn't working atm
-	include $(PRJ_LIBROOT)/unsupported.mk
-else
+#ifeq ($(PLATFORM)-$(PROC),posix-x64)
+#	UNSUPPORTED :=  $(PLATFORM)-$(PROC), for whatever stupid reason, this isn't working atm
+#	include $(PRJ_LIBROOT)/unsupported.mk
+#else
 
 ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),vs)
@@ -75,7 +75,7 @@ include $(PRJ_LIBROOT)/build.mk
 #-------------------------------------------------------------------
 include $(PRJ_LIBROOT)/go.mk
 
-endif
+#endif
 
 endif
 

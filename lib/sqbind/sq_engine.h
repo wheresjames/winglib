@@ -72,6 +72,9 @@ public:
 		/// Returns the platform name
 		stdString getPlatform();
 
+		/// Builds a service name with string
+		stdString makeServiceName( const sqbind::stdString &s );
+
 		/// Reboot or restart computer
 		/**
 			@param [in] nCmd	-	1 = Reboot
@@ -263,7 +266,7 @@ public:
 
 		/// Resets the logger
 		int resetlog( const stdString &sPath );
-		
+
 		/// Returns the script id
 		stdString getid( const stdString &sPath );
 
@@ -470,18 +473,16 @@ public:
 
 		/// Typed encode array into Registry file
 		sqbind::stdString RegEncodeTyped( sqbind::CSqMulti *m, sqbind::CSqMulti *t );
-		
+
 		/// Decode Registry file
 		sqbind::CSqMulti RegDecode( const sqbind::stdString &s, int bExpandEmbeddedItems );
 
 		/// Expand embedded registry file items
 		int RegExpandEmbedded( sqbind::CSqMulti *m );
 
-		/// Returns the file path to the current script
-
 		/// Builds a path using the specified elements
 		stdString build_path( const stdString &sS1,  const stdString &sS2 );
-		
+
 		/// Builds a file path using the specified elements
 		stdString file_path( const stdString &sS1,  const stdString &sS2 );
 

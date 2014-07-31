@@ -502,3 +502,13 @@ oexINT CSysUtil::i_cpuid( int *reg, oexINT i )
 	return 1;
 #endif
 }
+
+oexINT CSysUtil::GetProcessList( CPropertyBag *pb, bool bProcessInfo )
+{
+	return -1;
+}
+
+oexINT CSysUtil::GetProcessInfo( oexLONG lPid, CPropertyBag *pb )
+{
+	return -1;
+}
