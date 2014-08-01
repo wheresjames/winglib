@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#if defined( OEX_WINODWS )
+#if defined( OEX_WINDOWS )
 #	include <winsock2.h>
 #	include <windows.h>
 #else
