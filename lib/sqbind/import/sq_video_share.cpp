@@ -428,7 +428,7 @@ sqbind::CSqBinary CSqVideoShare::getNextImg()
 		return sqbind::CSqBinary();
 		
 	// Use the latest if we're skipping frames
-	if ( m_bAllowFrameSkipping ) 
+	if ( m_bAllowFrameSkipping || 0 > m_iRead ) 
 		m_iRead = i;
 		
 	// Return each frame in turn
