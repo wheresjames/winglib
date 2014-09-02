@@ -105,6 +105,11 @@ void CAviFile::Destroy()
 	m_bRefreshIndex = oexFALSE;
 }
 
+oexINT32 CAviFile::fourCC( oexCSTR pCodec )
+{
+	return MAKE_FOURCC( pCodec[ 0 ], pCodec[ 1 ], pCodec[ 2 ], pCodec[ 3 ] );
+}
+
 oexBOOL CAviFile::Create( oexCSTR pFile )
 {
 	// Lose current file
@@ -112,16 +117,60 @@ oexBOOL CAviFile::Create( oexCSTR pFile )
 
 	// Open new file
 	if ( !m_file.CreateAlways( pFile ).IsOpen() )
-	{	oexTRACE( oexT( " : %u" ), (unsigned long)m_file.GetLastError() );
+	{//	oexTRACE( oexT( "%s : %u" ), __FUNCTION__, (unsigned long)m_file.GetLastError() );
 		return oexFALSE;
 	} // end if
 
 	if ( !WriteAviHeaders() )
-	{	oexTRACE( oexT( "%s : Unable to write headers to file" ), __FUNCTION__ );
+	{//	oexTRACE( oexT( "%s : Unable to write headers to file" ), __FUNCTION__ );
 		return oexFALSE;
 	} // end if
 
 	return oexTRUE;
+}
+
+oexINT CAviFile::AddVideoStream( oexINT32 dwCodecId, oexINT nWidth, oexINT nHeight, oexFLOAT fFps )
+{
+	if ( !m_file.IsOpen() )
+		return -1;
+
+//	dwCodecId = MAKE_FOURCC( 'M', 'P', '4', '2' );
+		
+	// Set avi frame rate
+	SetFrameRate( fFps );
+
+	// Fill in main header
+	m_amh->dwWidth					= oexLittleEndian( nWidth );
+	m_amh->dwHeight					= oexLittleEndian( nHeight );
+	m_amh->dwStreams				= oexLittleEndian( 1 );
+	m_amh->dwTotalFrames			= oexLittleEndian( 0 );
+	m_amh->dwFlags					= oexLittleEndian( oex::vid::CAviFile::SAviMainHeader::eAmhTrustCkType );
+
+	// Stream header
+	m_ash->fccType					= oex::vid::CAviFile::SAviStreamHeader::eAshStreamTypeVideo;
+//	m_ash->fccHandler				= oexLittleEndian( MAKE_FOURCC( 'D', 'I', 'B', ' ' ) );
+//	m_ash->fccHandler				= oexLittleEndian( MAKE_FOURCC( 'M', 'P', '4', '2' ) );
+	m_ash->fccHandler				= oexLittleEndian( dwCodecId );
+	m_ash->dwLength					= oexLittleEndian( 0 );
+	m_ash->dwQuality				= oexLittleEndian( 0xffffffff );
+	m_ash->rcFrame.left				= 0;
+	m_ash->rcFrame.top				= 0;
+	m_ash->rcFrame.right			= oexLittleEndian( nWidth );
+	m_ash->rcFrame.bottom			= oexLittleEndian( nHeight );
+
+	// Bitmap info
+	m_bi->bmiHeader.biWidth			= oexLittleEndian( nWidth );
+	m_bi->bmiHeader.biHeight		= oexLittleEndian( nHeight );
+//	m_bi->bmiHeader.biCompression	= oexLittleEndian( MAKE_FOURCC( 'M', 'J', 'P', 'G' ) );
+//	m_bi->bmiHeader.biCompression	= oexLittleEndian( MAKE_FOURCC( 'M', 'P', '4', '2' ) );
+	m_bi->bmiHeader.biCompression	= oexLittleEndian( dwCodecId );
+	m_bi->bmiHeader.biPlanes		= oexLittleEndian( 1 );
+	m_bi->bmiHeader.biBitCount		= oexLittleEndian( 24 );
+	m_bi->bmiHeader.biSizeImage		= oexLittleEndian( oex::cmn::Align4( oex::cmn::Abs( nWidth ) )
+													   * oex::cmn::Abs( nHeight )
+													   * oex::cmn::FitTo( 24, 8 ) );
+
+	return 0;
 }
 
 oexBOOL CAviFile::Open( oexCSTR pFile, oexBOOL bAllowAppend )
@@ -131,47 +180,47 @@ oexBOOL CAviFile::Open( oexCSTR pFile, oexBOOL bAllowAppend )
 
 	// Attempt to open existing file
 	if ( !m_file.OpenExisting( pFile ).IsOpen() )
-	{	oexTRACE( oexT( "%s : %u" ), __FUNCTION__, (unsigned long)m_file.GetLastError() );
+	{//	oexTRACE( oexT( "%s : %u" ), __FUNCTION__, (unsigned long)m_file.GetLastError() );
 		return oexFALSE;
 	} // end if
 
 	if ( !m_file.Read( &m_rfh, sizeof( m_rfh ) ) )
-	{	oexTRACE( oexT( "%s : %u" ), __FUNCTION__, (unsigned long)m_file.GetLastError() );
+	{//	oexTRACE( oexT( "%s : %u" ), __FUNCTION__, (unsigned long)m_file.GetLastError() );
 		Destroy();
 		return oexFALSE;
 	} // end if
 
 	// Verify four cc
 	if ( eFccRiff != oexLittleEndian( m_rfh.fccRiff ) )
-	{	oexTRACE( oexT( "%s : File does not start with 'RIFF'" ), __FUNCTION__ );
+	{//	oexTRACE( oexT( "%s : File does not start with 'RIFF'" ), __FUNCTION__ );
 		Destroy();
 		return oexFALSE;
 	} // end if
 
 	// Verify four cc
 	if ( eFccAvi != oexLittleEndian( m_rfh.fccType ) )
-	{	oexTRACE( oexT( "%s : RIFF is not an 'AVI ' type" ), __FUNCTION__ );
+	{//	oexTRACE( oexT( "%s : RIFF is not an 'AVI ' type" ), __FUNCTION__ );
 		Destroy();
 		return oexFALSE;
 	} // end if
 
 	// Verify four cc
 	if ( !ReadAviHeaders() )
-	{	oexTRACE( oexT( "%s : Improper headers" ), __FUNCTION__ );
+	{//	oexTRACE( oexT( "%s : Improper headers" ), __FUNCTION__ );
 		Destroy();
 		return oexFALSE;
 	} // end if
 
 	// Find the stream index
 	if ( !FindIndex() )
-	{	oexTRACE( oexT( "%s : Stream index not found" ), __FUNCTION__ );
+	{//	oexTRACE( oexT( "%s : Stream index not found" ), __FUNCTION__ );
 		Destroy();
 		return oexFALSE;
 	} // end if
 
 	// Ensure there is a stream in the file
 	if ( !StartStream( 0, bAllowAppend ) )
-	{	oexTRACE( oexT( "%s : Data stream not found" ), __FUNCTION__ );
+	{//	oexTRACE( oexT( "%s : Data stream not found" ), __FUNCTION__ );
 		Destroy();
 		return oexFALSE;
 	} // end if
@@ -399,7 +448,7 @@ oexBOOL CAviFile::UpdateAviHeaders()
 			return oexFALSE;
 	} // end if
 
-	// Set pointer to start of file
+	// Set pointer to end of file
 	m_file.SetPtrPosEnd( 0 );
 	oexINT64 llEnd = m_file.GetPtrPos();
 
