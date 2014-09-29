@@ -44,10 +44,10 @@
 							)
 */
 #define MAKE_FOURCC( a, b, c, d )  (													  \
-								  ( ( (unsigned long)a ) << 24 ) \
+								  ( ( (unsigned long)a ) << 0 ) \
 								| ( ( (unsigned long)b ) <<  8 ) \
-								| ( ( (unsigned long)c ) >>  8 ) \
-								| ( ( (unsigned long)d ) >> 24 ) \
+								| ( ( (unsigned long)c ) <<  16 ) \
+								| ( ( (unsigned long)d ) << 24 ) \
 							)
 
 
@@ -98,7 +98,7 @@ public:
 
 // AVI structures are packed on word bounderies
 #ifndef OEX_NOPACK
-#	pragma pack( push, 2 )
+#	pragma pack( push, 1 )
 #endif
 
 	/// Riff file header
@@ -327,6 +327,9 @@ public:
 	/// Creates a new file
 	oexBOOL Create( oexCSTR pFile );
 
+	/// Initialize file for writing
+	oexINT AddVideoStream( oexINT32 dwCodecId, oexINT nWidth, oexINT nHeight, oexFLOAT fFps );
+
 	/// Opens an existing file
 	oexBOOL Open( oexCSTR pFile, oexBOOL bAllowAppend );
 
@@ -391,6 +394,7 @@ public:
 	/// Writes a new index into the file
 	oexBOOL WriteIndex();
 
+	/// Adds a frame of video to the file
 	template < typename T >
 		oexBOOL AddFrame( oexUINT x_uType, oexUINT x_uStream, oex::TStr< T > &x_sMem )
 		{	return AddFrame( x_uType, x_uStream, x_sMem.Ptr(), x_sMem.LengthInBytes() ); }
@@ -465,6 +469,11 @@ public:
 	oexBOOL IsOpen()
 	{	return m_file.IsOpen(); }
 
+public:
+
+	/// Creates codec id from string
+	static oexINT32 fourCC( oexCSTR pCodec );
+	
 private:
 
 	/// File handle

@@ -53,6 +53,7 @@
 #include "import/sq_http_server.h"
 #include "import/sq_data_log.h"
 #include "import/sq_gui.h"
+#include "import/sq_avi.h"
 
 #include "import/sq_sqlite.h"
 

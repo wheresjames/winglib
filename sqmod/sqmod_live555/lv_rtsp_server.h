@@ -127,8 +127,7 @@ public:
 										  char const* cseq, char const* fullRequestStr );
 
 	/// PLAY
-	virtual void handleCmd_PLAY( ServerMediaSubsession* subsession, char const* cseq,
-								 char const* fullRequestStr );
+	virtual void handleCmd_PLAY( ServerMediaSubsession* subsession, char const* cseq, char const* fullRequestStr );
 
 private:
 

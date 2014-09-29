@@ -353,7 +353,6 @@ int CLvRtspClient::setLastError( int e, sqbind::stdString s )
 	return e;
 }
 
-
 void CLvRtspClient::ThreadDestroy()
 {_STT();
 

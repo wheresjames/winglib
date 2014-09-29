@@ -152,8 +152,7 @@ void CClientSession::handleCmd_withinSession( char const* cmdName,
 
 }
 
-void CClientSession::handleCmd_PLAY( ServerMediaSubsession* subsession, char const* cseq,
-									 char const* fullRequestStr )
+void CClientSession::handleCmd_PLAY( ServerMediaSubsession* subsession, char const* cseq, char const* fullRequestStr )
 {_STT();
 
 	RTSPServer::RTSPClientSession
