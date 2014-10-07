@@ -32,7 +32,7 @@ UNSUPPORTED := PLATFORM=$(PLATFORM) not supported
 include $(PRJ_LIBROOT)/unsupported.mk
 else
 
-ifneq ($(DBG),)
+ifneq ($(DBG)$(NOINSTALL),)
 UNSUPPORTED := Not making installers for debug version
 include $(PRJ_LIBROOT)/unsupported.mk
 else

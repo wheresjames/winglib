@@ -126,7 +126,7 @@
 #	define oexVaList				        OEX_NAMESPACE::oexPVOID
 #	define oexVaStart( v, p )		        ( v = ( ( (OEX_NAMESPACE::oexPVOID*)&p ) + 1 ) )
 #	define oexVaEnd( v )
-#	define oexVaArg( v, t )			        ( (t)( v++ ) )
+#	define oexVaArg( v, t )			        ( *(t*)( v++ ) )
 #else
 // +++ Please fix this, don't want windows.h in the name space
 #if defined( OEX_WINCE )
