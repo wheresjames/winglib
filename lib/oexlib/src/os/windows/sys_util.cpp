@@ -304,13 +304,13 @@ oexLONG _GetRegKeys( CPropertyBag &pb, HKEY hRoot, const CStr &x_sPath, oexBOOL 
 		while ( RegEnumValue( hKey, dwIndex++, szKey, &dwLen, 0, &dwType, 0, &dwSize ) == ERROR_SUCCESS )
 		{
 			lCount++;
-		
+
 			// Get value data
 			CBin buf;
 			if ( buf.Allocate( dwSize ) )
 				if ( ERROR_SUCCESS == RegQueryValueEx( hKey, szKey, 0, &dwType, (LPBYTE)buf._Ptr(), &dwSize ) )
 					pb[ szKey ] = RegValueToString( dwType, buf._Ptr(), dwSize );
-		
+
 			// Reset key buffer length
 			dwLen = oexSTRSIZE - 1;
 
@@ -747,7 +747,7 @@ oexINT CSysUtil::GetScreenCaptureInfo( CBin *x_pInf, CPropertyBag *pb )
 	(*pb)[ oexT( "bpp" ) ] = p->bmi.bmiHeader.biBitCount;
 	(*pb)[ oexT( "sz" ) ] = p->bmi.bmiHeader.biSizeImage;
 	(*pb)[ oexT( "cmp" ) ] = p->bmi.bmiHeader.biCompression;
-           
+
 	(*pb)[ oexT( "fmt" ) ] = p->lFmt;
 	(*pb)[ oexT( "sw" ) ] = p->lScreenWidth;
 	(*pb)[ oexT( "sh" ) ] = p->lScreenHeight;
@@ -1030,7 +1030,7 @@ oexINT CSysUtil::GetMemoryStatus( CPropertyBag *pb )
 	msex.dwLength = sizeof( msex );
 	if ( !GlobalMemoryStatusEx( &msex ) )
 		return 0;
-		
+
 	// Copy into property bag
 	(*pb)[ oexT( "memory_load" ) ] = msex.dwMemoryLoad;
 	(*pb)[ oexT( "total_physical" ) ] = msex.ullTotalPhys;
@@ -1040,7 +1040,7 @@ oexINT CSysUtil::GetMemoryStatus( CPropertyBag *pb )
 	(*pb)[ oexT( "total_virtual" ) ] = msex.ullTotalVirtual;
 	(*pb)[ oexT( "avail_virtual" ) ] = msex.ullAvailVirtual;
 	(*pb)[ oexT( "avail_extended_virtual" ) ] = msex.ullAvailExtendedVirtual;
-		
+
 	return 1;
 }
 
@@ -1076,17 +1076,22 @@ typedef struct tag_t_PROCESSENTRY32
 } t_PROCESSENTRY32, *t_PPROCESSENTRY32;
 
 typedef struct t_tagPROCESS_MEMORY_COUNTERS {
-		DWORD		cb;
-		DWORD		PageFaultCount;
-		SIZE_T		PeakWorkingSetSize;
-		SIZE_T		WorkingSetSize;
-		SIZE_T		QuotaPeakPagedPoolUsage;
-		SIZE_T		QuotaPagedPoolUsage;
-		SIZE_T		QuotaPeakNonPagedPoolUsage;
-		SIZE_T		QuotaNonPagedPoolUsage;
-		SIZE_T		PagefileUsage;
-		SIZE_T		PeakPagefileUsage;
+	DWORD		cb;
+	DWORD		PageFaultCount;
+	SIZE_T		PeakWorkingSetSize;
+	SIZE_T		WorkingSetSize;
+	SIZE_T		QuotaPeakPagedPoolUsage;
+	SIZE_T		QuotaPagedPoolUsage;
+	SIZE_T		QuotaPeakNonPagedPoolUsage;
+	SIZE_T		QuotaNonPagedPoolUsage;
+	SIZE_T		PagefileUsage;
+	SIZE_T		PeakPagefileUsage;
 } t_PROCESS_MEMORY_COUNTERS, *t_PPROCESS_MEMORY_COUNTERS;
+
+typedef struct t_tagLANGANDCODEPAGE {
+	WORD wLanguage;
+	WORD wCodePage;
+} t_tagLANGANDCODEPAGE;
 
 #define def_TH32CS_SNAPPROCESS	0x00000002
 #define def_TH32CS_SNAPNOHEAPS	0x40000000
@@ -1098,6 +1103,9 @@ typedef DWORD (WINAPI *pfn_GetProcessImageFileName)( HANDLE hProcess, LPTSTR lpI
 typedef DWORD (WINAPI *pfn_GetModuleFileNameEx)( HANDLE hProcess, HMODULE hModule, LPTSTR lpFilename, DWORD nSize );
 typedef BOOL (WINAPI *pfn_GetProcessMemoryInfo)( HANDLE Process, t_PPROCESS_MEMORY_COUNTERS ppsmemCounters, DWORD cb );
 typedef BOOL (WINAPI *pfn_GetProcessTimes)( HANDLE hProcess, LPFILETIME lpCreationTime, LPFILETIME lpExitTime, LPFILETIME lpKernelTime, LPFILETIME lpUserTime );
+typedef DWORD (WINAPI *pfn_GetFileVersionInfoSize)( LPCTSTR lptstrFilename, LPDWORD lpdwHandle );
+typedef BOOL (WINAPI *pfn_GetFileVersionInfo)( LPCTSTR lptstrFilename, DWORD dwHandle, DWORD dwLen, LPVOID lpData );
+typedef BOOL (WINAPI *pfn_VerQueryValue)( LPCVOID pBlock, LPCTSTR lpSubBlock, LPVOID *lplpBuffer, PUINT puLen );
 
 #define FT2LL(ft)	(((oexUINT64)ft.dwHighDateTime << 32)|(oexUINT64)ft.dwLowDateTime)
 
@@ -1105,10 +1113,16 @@ typedef BOOL (WINAPI *pfn_GetProcessTimes)( HANDLE hProcess, LPFILETIME lpCreati
 #	define fnGetProcessImageFileName	"GetProcessImageFileNameW"
 #	define fnGetModuleFileNameEx		"GetModuleFileNameExW"
 #	define fnK32GetModuleFileNameEx		"K32GetModuleFileNameExW"
+#	define fnGetFileVersionInfoSize		"GetFileVersionInfoSizeW"
+#	define fnGetFileVersionInfo			"GetFileVersionInfoW"
+#	define fnVerQueryValue				"VerQueryValueW"
 #else
 #	define fnGetProcessImageFileName	"GetProcessImageFileNameA"
 #	define fnGetModuleFileNameEx		"GetModuleFileNameExA"
 #	define fnK32GetModuleFileNameEx		"K32GetModuleFileNameExA"
+#	define fnGetFileVersionInfoSize		"GetFileVersionInfoSizeA"
+#	define fnGetFileVersionInfo			"GetFileVersionInfoA"
+#	define fnVerQueryValue				"VerQueryValueA"
 #endif
 
 oexINT CSysUtil::GetProcessList( CPropertyBag *pb, bool bProcessInfo )
@@ -1225,6 +1239,40 @@ oexINT CSysUtil::GetProcessInfo( oexLONG lPid, CPropertyBag *pb )
 			ret = -4;
 		else
 		{
+			// Get process handle count
+			DWORD dwHandles = 0;
+			if ( GetProcessHandleCount( hProc, &dwHandles ) )
+				(*pb)[ oexT( "handles" ) ] = dwHandles;
+
+			// Get user and domain names
+			HANDLE hToken = 0;
+			if ( OpenProcessToken( hProc, TOKEN_QUERY, &hToken ) )
+			{
+				char buf[ 1024 ];
+				DWORD dwSize = sizeof( buf );
+				if( GetTokenInformation( hToken, TokenUser, (void*)buf, dwSize, &dwSize )
+					&& buf && dwSize >= sizeof( TOKEN_USER ) )
+				{
+					TOKEN_USER *ptu = (TOKEN_USER*)buf;
+					PSID sid = ptu->User.Sid;
+					TCHAR cbUser[ 256 ] = { 0 };
+					DWORD dwUser = sizeof( cbUser ) / sizeof( TCHAR );
+					TCHAR cbDomain[ 256 ] = { 0 };
+					DWORD dwDomain = sizeof( cbUser ) / sizeof( TCHAR );
+					SID_NAME_USE snu;
+
+					// Get account information
+					if ( LookupAccountSid( 0, sid, cbUser, &dwUser, cbDomain, &dwDomain, &snu) )
+					{	(*pb)[ oexT( "user" ) ] = CStr( cbUser, dwUser );
+						(*pb)[ oexT( "domain" ) ] = CStr( cbDomain, dwDomain );
+					} // end if
+
+				} // end if
+
+				CloseHandle( hToken );
+
+			} // end if
+
 			oex::oexUINT64 ts = (*pb)[ oexT( "ts" ) ].ToInt64(),
 						   now = oexGmtTime().GetUnixTimeUs() * 100;
 			oex::oexUINT64 diff = ( 0 < ts && ts < now ) ? ( now - ts ) : 0;
@@ -1288,6 +1336,89 @@ oexINT CSysUtil::GetProcessInfo( oexLONG lPid, CPropertyBag *pb )
 				if ( 0 < dwLen && sizeof( szFile ) > dwLen )
 				{	szFile[ dwLen ] = 0;
 					(*pb)[ oexT( "path" ) ] = szFile;
+
+					// Load version.dll
+					HMODULE hVersion = LoadLibrary( oexT( "version.dll" ) );
+					if ( hVersion )
+					{
+						// Load functions
+						pfn_GetFileVersionInfoSize
+							pGetFileVersionInfoSize
+								= (pfn_GetFileVersionInfoSize)GetProcAddress( hVersion, fnGetFileVersionInfoSize );
+						pfn_GetFileVersionInfo
+							pGetFileVersionInfo
+								= (pfn_GetFileVersionInfo)GetProcAddress( hVersion, fnGetFileVersionInfo );
+						pfn_VerQueryValue
+							pVerQueryValue
+								= (pfn_VerQueryValue)GetProcAddress( hVersion, fnVerQueryValue );
+								
+						if ( pGetFileVersionInfoSize && pGetFileVersionInfo && pVerQueryValue )
+						{	DWORD dwVisz = pGetFileVersionInfoSize( szFile, 0 );
+							if ( 0 < dwVisz )
+							{	char *buf = new char[ dwVisz * 2 ];
+								if ( buf && pGetFileVersionInfo( szFile, 0, dwVisz, buf ) )
+								{
+									UINT uLen = 0;
+									VS_FIXEDFILEINFO *pFfi = 0;
+									pVerQueryValue( buf , oexT("\\") , (LPVOID *)&pFfi , &uLen );
+									if ( pFfi )
+									{
+										CStr sVer;
+										sVer = HIWORD( pFfi->dwFileVersionMS );
+										sVer += oexT( "." );
+										sVer += LOWORD( pFfi->dwFileVersionMS );
+										sVer += oexT( "." );
+										sVer += HIWORD( pFfi->dwFileVersionLS );
+										sVer += oexT( "." );
+										sVer += LOWORD( pFfi->dwFileVersionLS );
+
+										(*pb)[ oexT( "version" ) ] = sVer;
+
+									} // end if
+									
+									uLen = 0;
+									t_tagLANGANDCODEPAGE *lacp;
+									pVerQueryValue( buf , oexT("\\VarFileInfo\\Translation") , (LPVOID *)&lacp , &uLen );
+									
+									static oexTCHAR *pStrings[] = 
+									{ 	oexT( "Comments" ),
+										oexT( "CompanyName" ),
+										oexT( "FileDescription" ),
+										oexT( "FileVersion" ),
+										oexT( "InternalName" ),
+										oexT( "LegalCopyright" ),
+										oexT( "LegalTrademarks" ),
+										oexT( "OriginalFilename" ),
+										oexT( "PrivateBuild" ),
+										oexT( "ProductName" ),
+										oexT( "ProductVersion" ),
+										oexT( "SpecialBuild" ),
+										0
+									};
+									
+									for ( long i = 0; i < ( uLen / sizeof( t_tagLANGANDCODEPAGE ) ); i++ )
+									{
+										CPropertyBag &r = (*pb)[ oexT( "Strings" ) ][ oexFmt( oexT( "%04x" ), lacp[ i ].wLanguage ) ];
+										for ( long s = 0; pStrings[ s ]; s++ )
+										{
+											CStr sSub = oexFmt( oexT( "\\StringFileInfo\\%04x%04x\\%s" ),
+																lacp[ i ].wLanguage, lacp[ i ].wCodePage, pStrings[ s ] );
+
+											oexTCHAR *pStr = 0;
+											if ( pVerQueryValue( buf, sSub.c_str(), (void**)&pStr, &uLen ) && 1 < uLen && pStr )
+												r[ pStrings[ s ] ] = CStr( pStr, uLen - 1 );
+	
+										} // end if
+									
+									} // end for
+									
+								} // end if
+								
+							} // end if
+						} // end if
+						
+					} // end if
+
 				} // end if
 			} // end if
 
