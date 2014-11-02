@@ -250,8 +250,13 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
 	// Read into a string object
     CStr str( pUrl, uMaxBufferSize );
 
+	// Find the scheme
+	oexINT nScheme = str.FindSubStr( oexT( "://" ), 3 );
+	if ( 0 <= nScheme && nScheme == str.FindSubStr( oexT( ":" ), 1 ) )
+		pb[ oexT( "scheme" ) ].ToString() = str.SubStr( 0, nScheme );
+	
 	// Read in the scheme
-	pb[ oexT( "scheme" ) ].ToString() = str.Parse( oexT( ":" ) );
+//	pb[ oexT( "scheme" ) ].ToString() = str.Parse( oexT( "://" ) );
 
 	// Trim off leading forward slashes
 	str.LTrim( oexT( ":" ) );
@@ -275,7 +280,7 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
 
 	} // end if
 
-	// Is there a username / password?
+	// Parse the host
 	tmp = str.Parse( oexT( "/" ) );
 	if ( tmp.Length() )
 	{
@@ -335,7 +340,14 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
 
 	// Whatever is left is the host if not yet parsed
 	else if ( !pb.IsKey( oexT( "host" ) ) )
-		pb[ oexT( "host" ) ].ToString() = str;
+	{	CStr s = str.Parse( oexT( ":" ) );
+		if ( s.Length () )
+		{	pb[ oexT( "host" ) ].ToString() = s;
+			str++; pb[ oexT( "port" ) ].ToString() = str;
+		} // end if
+		else
+			pb[ oexT( "host" ) ].ToString() = str;
+	} // end else if
 
 	// Then whatever is left is the path
 	else

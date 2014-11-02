@@ -1075,8 +1075,8 @@ typedef struct tag_t_PROCESSENTRY32
 	TCHAR		szExeFile[ MAX_PATH ];
 } t_PROCESSENTRY32, *t_PPROCESSENTRY32;
 
-typedef struct t_tagPROCESS_MEMORY_COUNTERS {
-	DWORD		cb;
+typedef struct t_tagPROCESS_MEMORY_COUNTERS 
+{	DWORD		cb;
 	DWORD		PageFaultCount;
 	SIZE_T		PeakWorkingSetSize;
 	SIZE_T		WorkingSetSize;
@@ -1088,10 +1088,58 @@ typedef struct t_tagPROCESS_MEMORY_COUNTERS {
 	SIZE_T		PeakPagefileUsage;
 } t_PROCESS_MEMORY_COUNTERS, *t_PPROCESS_MEMORY_COUNTERS;
 
-typedef struct t_tagLANGANDCODEPAGE {
-	WORD wLanguage;
-	WORD wCodePage;
+typedef struct t_tagLANGANDCODEPAGE 
+{	WORD 		wLanguage;
+	WORD 		wCodePage;
 } t_tagLANGANDCODEPAGE;
+
+typedef void* t_PPS_POST_PROCESS_INIT_ROUTINE;
+
+typedef struct t_tagUNICODE_STRING 
+{	USHORT 		Length;
+	USHORT 		MaximumLength;
+	PWSTR  		Buffer;
+} t_UNICODE_STRING;
+
+typedef struct t_tagPEB_LDR_DATA 
+{	BYTE       		Reserved1[ 8 ];
+	PVOID      		Reserved2[ 3 ];
+	LIST_ENTRY 		InMemoryOrderModuleList;
+} t_PEB_LDR_DATA;
+
+typedef struct t_tagRTL_USER_PROCESS_PARAMETERS 
+{	BYTE           		Reserved1[ 16 ];
+	PVOID          		Reserved2[ 10 ];
+	t_UNICODE_STRING 	ImagePathName;
+	t_UNICODE_STRING 	CommandLine;
+} t_RTL_USER_PROCESS_PARAMETERS;
+
+typedef struct t_tagPEB 
+{	BYTE                          	Reserved1[ 2 ];
+	BYTE                          	BeingDebugged;
+	BYTE                          	Reserved2[ 1 ];
+	PVOID                         	Reserved3[ 2 ];
+	t_PEB_LDR_DATA                	*Ldr;
+	t_RTL_USER_PROCESS_PARAMETERS 	*ProcessParameters;
+	BYTE                          	Reserved4[ 104 ];
+	PVOID                         	Reserved5[ 52 ];
+	t_PPS_POST_PROCESS_INIT_ROUTINE	*PostProcessInitRoutine;
+	BYTE                          	Reserved6[ 128 ];
+	PVOID                         	Reserved7[ 1 ];
+	ULONG                         	SessionId;
+} t_PEB;
+
+typedef struct t_tagPROCESS_BASIC_INFORMATION 
+{   PVOID 		Reserved1;
+    t_PEB		*PebBaseAddress;
+    PVOID 		Reserved2[ 2 ];
+    ULONG_PTR	UniqueProcessId;
+    PVOID 		Reserved3;
+} t_PROCESS_BASIC_INFORMATION;
+
+typedef enum et_PROCESSINFOCLASS 
+{    et_ProcessBasicInformation = 0
+} et_PROCESSINFOCLASS;
 
 #define def_TH32CS_SNAPPROCESS	0x00000002
 #define def_TH32CS_SNAPNOHEAPS	0x40000000
@@ -1106,6 +1154,7 @@ typedef BOOL (WINAPI *pfn_GetProcessTimes)( HANDLE hProcess, LPFILETIME lpCreati
 typedef DWORD (WINAPI *pfn_GetFileVersionInfoSize)( LPCTSTR lptstrFilename, LPDWORD lpdwHandle );
 typedef BOOL (WINAPI *pfn_GetFileVersionInfo)( LPCTSTR lptstrFilename, DWORD dwHandle, DWORD dwLen, LPVOID lpData );
 typedef BOOL (WINAPI *pfn_VerQueryValue)( LPCVOID pBlock, LPCTSTR lpSubBlock, LPVOID *lplpBuffer, PUINT puLen );
+typedef LONG (WINAPI *pfn_NtQueryInformationProcess)( HANDLE ProcessHandle, et_PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength );
 
 #define FT2LL(ft)	(((oexUINT64)ft.dwHighDateTime << 32)|(oexUINT64)ft.dwLowDateTime)
 
@@ -1116,6 +1165,7 @@ typedef BOOL (WINAPI *pfn_VerQueryValue)( LPCVOID pBlock, LPCTSTR lpSubBlock, LP
 #	define fnGetFileVersionInfoSize		"GetFileVersionInfoSizeW"
 #	define fnGetFileVersionInfo			"GetFileVersionInfoW"
 #	define fnVerQueryValue				"VerQueryValueW"
+#	define fnNtQueryInformationProcess	"NtQueryInformationProcess"
 #else
 #	define fnGetProcessImageFileName	"GetProcessImageFileNameA"
 #	define fnGetModuleFileNameEx		"GetModuleFileNameExA"
@@ -1123,6 +1173,7 @@ typedef BOOL (WINAPI *pfn_VerQueryValue)( LPCVOID pBlock, LPCTSTR lpSubBlock, LP
 #	define fnGetFileVersionInfoSize		"GetFileVersionInfoSizeA"
 #	define fnGetFileVersionInfo			"GetFileVersionInfoA"
 #	define fnVerQueryValue				"VerQueryValueA"
+#	define fnNtQueryInformationProcess	"NtQueryInformationProcess"
 #endif
 
 oexINT CSysUtil::GetProcessList( CPropertyBag *pb, bool bProcessInfo )
@@ -1227,16 +1278,60 @@ oexINT CSysUtil::GetProcessInfo( oexLONG lPid, CPropertyBag *pb )
 		} // end if
 	} // end if
 
+	(*pb)[ oexT( "error" ) ] = 0;		
+		
 	// Get file name
 	oexINT ret = 0;
 	HANDLE hProc = OpenProcess( PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, 0, lPid );
 	if ( INVALID_HANDLE_VALUE == hProc )
-		ret = -3;
+	{	ret = -3;
+		(*pb)[ oexT( "errpos" ) ] = ret;
+		(*pb)[ oexT( "error" ) ] = GetLastError();		
+	} // end if
 	else
 	{
+/*		// Load ntdll.dll
+		HMODULE hNtDll = LoadLibrary( oexT( "ntdll.dll" ) );
+		if ( hNtDll )
+		{		
+			// Load functions
+			pfn_NtQueryInformationProcess
+				pNtQueryInformationProcess
+					= (pfn_NtQueryInformationProcess)GetProcAddress( hNtDll, fnNtQueryInformationProcess );
+
+//oexSHOW( (long long)pNtQueryInformationProcess );
+//oexFlush_stdout();
+			if ( pNtQueryInformationProcess )
+			{
+				ULONG lSize = 0;
+				t_PROCESS_BASIC_INFORMATION pbi;
+				if ( 0 == pNtQueryInformationProcess( hProc, et_ProcessBasicInformation, &pbi, sizeof( pbi ), &lSize ) )
+				{
+//oexSHOW( (long long)pbi.PebBaseAddress );			
+//oexSHOW( (long long)pbi.PebBaseAddress->ProcessParameters );			
+//oexSHOW( (long long)pbi.PebBaseAddress )				
+// oexSHOW( pbi.PebBaseAddress->ProcessParameters->CommandLine.Length ); 
+// CStrW s( pbi.PebBaseAddress->ProcessParameters->CommandLine.Buffer );
+//oexFlush_stdout();
+
+					
+					
+				} // end if
+//oexM();
+//oexFlush_stdout();
+				
+			} // end if
+			
+		} // end if
+*/	
 		DWORD dwExitCode = 0;
 		if ( !GetExitCodeProcess( hProc, &dwExitCode ) || STILL_ACTIVE != dwExitCode )
+		{
 			ret = -4;
+			(*pb)[ oexT( "errpos" ) ] = ret;
+			(*pb)[ oexT( "exitcode" ) ] = dwExitCode;
+			(*pb)[ oexT( "error" ) ] = GetLastError();		
+		} // end if
 		else
 		{
 			// Get process handle count
@@ -1246,7 +1341,13 @@ oexINT CSysUtil::GetProcessInfo( oexLONG lPid, CPropertyBag *pb )
 
 			// Get user and domain names
 			HANDLE hToken = 0;
-			if ( OpenProcessToken( hProc, TOKEN_QUERY, &hToken ) )
+			if ( !OpenProcessToken( hProc, TOKEN_QUERY, &hToken ) )
+			{
+				ret = -5;
+				(*pb)[ oexT( "errpos" ) ] = ret;
+				(*pb)[ oexT( "error" ) ] = GetLastError();		
+			} // end if
+			else
 			{
 				char buf[ 1024 ];
 				DWORD dwSize = sizeof( buf );
