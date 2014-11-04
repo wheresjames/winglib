@@ -431,6 +431,12 @@ public:
 		/// Returns a guid representation of the md5 hash
 		stdString guid( const stdString &sStr );
 
+		/// Returns a guid as string
+		stdString guid2str( const stdString &sStr );
+	
+		/// Returns a string as guid
+		stdString str2guid( const stdString &sStr );
+	
 		/// Builds a url from components
 		stdString build_url( CSqMulti *pUrl );
 

@@ -831,6 +831,28 @@ stdString CSqEngineExport::guid( const stdString &sStr )
 	return oex2std( oexGuid( std2oex( sStr ) ) );
 }
 
+stdString CSqEngineExport::guid2str( const stdString &sStr )
+{_STT();
+
+	oex::CStr8 mb = oexStrToMb( std2oex( sStr ) );
+
+	if ( sizeof( oex::oexGUID ) > mb.length() )
+		return stdString();
+
+	return oex2std( oexGuidToString( (const oex::oexGUID*)mb.c_str() ) );
+}
+
+stdString CSqEngineExport::str2guid( const stdString &sStr )
+{_STT();
+
+	oex::oexGUID guid;
+	oex::CStr sGuid = std2oex( sStr );
+	if ( !sGuid.StringToGuid( &guid ) )
+		return stdString();
+		
+	return oex2std( sGuid );
+}
+
 // mandelbrot( 64, 16, 0, -15, 40, 15 );
 stdString CSqEngineExport::mandelbrot( int w, int h, int x1, int y1, int x2, int y2 )
 {_STT();
@@ -2166,6 +2188,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_sys_path )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, md5 )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, guid )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, str2guid )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, guid2str )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, parse_url )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, build_url )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, base64_decode )

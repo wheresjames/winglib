@@ -368,6 +368,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexGuid								OEX_NAMESPACE::CUtil::guid
 #define oexUnique							OEX_NAMESPACE::CStr().GuidToString
 #define oexGuidToString						OEX_NAMESPACE::CStr().GuidToString
+#define oexStringToGuid						OEX_NAMESPACE::CStr().StringToGuid
 #define oexUniqueGuid( g )					OEX_NAMESPACE::guid::StringToGuid( g, (OEX_NAMESPACE::oexCSTR)NULL, 0 )
 #ifndef OEX_NOSTRUCTINIT
 #	define oexINITGUID( n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11 ) \
