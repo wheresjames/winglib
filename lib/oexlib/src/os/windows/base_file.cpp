@@ -186,7 +186,7 @@ oexBOOL CBaseFile::Close( CBaseFile::t_HFILE x_hFile, oexINT *x_pnErr )
 oexBOOL CBaseFile::Write( CBaseFile::t_HFILE x_hFile, oexCPVOID x_pData, oexINT64 x_llSize, oexINT64 *x_pllWritten, oexINT *x_pnErr )
 {_STT();
 	DWORD dwWritten = 0;
-	oexBOOL bRet = ::WriteFile( x_hFile, x_pData, x_llSize, &dwWritten, NULL ) ? oexTRUE : oexFALSE;
+	oexBOOL bRet = ::WriteFile( x_hFile, x_pData, x_llSize, &dwWritten, 0 ) ? oexTRUE : oexFALSE;
 
 	if ( x_pllWritten )
 		*x_pllWritten = dwWritten;

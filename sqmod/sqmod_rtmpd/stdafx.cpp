@@ -30,8 +30,11 @@ static void _rtmp_log(int level, const char *format, va_list vl)
 // Export classes
 static void SQBIND_Export_rtmpd( sqbind::VM x_vm )
 {_STT();
+
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
+
+	oexAutoLock ll( _g_rtmpd_lock );
 
 	// This isn't thread safe, so do it now
 	RTMP_TLS_Init();

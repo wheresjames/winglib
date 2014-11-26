@@ -364,7 +364,13 @@ public:
 
 	/// Initializes all bytes in the memory block to zero
 	void Zero()
-	{	if ( _Ptr() && Size() ) oexZeroMemory( _Ptr(), Size() ); }
+	{	if ( m_buf.Ptr() && m_buf.Size() )
+			m_buf.Zero();
+		else if ( m_ptr && 0 < m_nUsed )
+			oexZeroMemory( m_ptr, m_nUsed );
+		else if ( _Ptr() && Size() ) 
+			oexZeroMemory( _Ptr(), Size() ); 
+	}
 
 	/// Copy another buffer
 	t_size Copy( CBin *x_p = oexNULL );

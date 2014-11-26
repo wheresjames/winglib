@@ -135,13 +135,16 @@ oexINT CDataLog::AddKey( oexCSTR x_pKey, oexUINT x_uType, t_time x_tTime, oexCST
 
 			// Allocate some initial space
 			m_pLogs[ i ]->bin.Allocate( eInitBuffer );
+			
+			// Initialize the data array
+			m_pLogs[ i ]->bin.Zero();
 
 			// Save key name
 			m_pLogs[ i ]->sName = x_pKey;
 
 			// Save key type
 			m_pLogs[ i ]->uType = x_uType;
-
+			
 			// Name hash, this will be the file names
 			CStr8 sMb = oexStrToMb( x_pKey );
 			m_pLogs[ i ]->sHash = oexMbToStr( CBase16::Encode( oss::CMd5::Transform( &m_pLogs[ i ]->hash, sMb.Ptr(), sMb.Length() ), sizeof( m_pLogs[ i ]->hash ) ) );
@@ -150,6 +153,8 @@ oexINT CDataLog::AddKey( oexCSTR x_pKey, oexUINT x_uType, t_time x_tTime, oexCST
 			m_pLogs[ i ]->valid = 0;			
 			m_pLogs[ i ]->plast = 0;
 			m_pLogs[ i ]->olast = 0;
+			m_pLogs[ i ]->uRi = 0; 
+			oexZero( m_pLogs[ i ]->changed );
 
 			if ( m_sRoot.Length() )
 			{ 	
@@ -238,7 +243,7 @@ oexBOOL CDataLog::Log( oexINT x_nKey, oexCPVOID x_pValue, oexUINT x_uSize, t_tim
 		tTime = oexGetUnixTime();
 
 	// First, determine if the data has changed since we last logged it
-	oexGUID hash;
+	oexGUID hash = { 0 };
 	oss::CMd5::Transform( &hash, x_pValue, x_uSize );
 	t_time uRi = ( x_tTime % m_tLogBase ) / m_tIndexStep;
 

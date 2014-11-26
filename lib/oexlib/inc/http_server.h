@@ -786,6 +786,21 @@ public:
 	/// Returns a reference to the default server headers
 	CPropertyBag8& DefHeaders() { return m_pbDefHeaders; }
 	
+	/// Enables / disables compression
+	int EnableCompression( oexBOOL b )
+	{
+#ifdef OEX_ENABLE_ZIP
+		m_bEnableCompression = b;
+#else
+		m_bEnableCompression = oexFALSE;
+#endif
+		return m_bEnableCompression;
+	}
+
+	/// Returns non-zero if compression is enabled
+	oexBOOL IsCompressionEnabled()
+	{	return m_bEnableCompression; }
+	
 private:
 
 	/// The TCP port to listen
@@ -835,6 +850,9 @@ private:
 
 	/// Enable sessions
 	oexBOOL						m_bEnableSessions;
+	
+	/// Non-zero to enable compression
+	oexBOOL						m_bEnableCompression;
 
 	/// Unique server id
 	CStr8						m_sServerId;

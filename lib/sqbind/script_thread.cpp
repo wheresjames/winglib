@@ -48,6 +48,7 @@ CScriptThread::CScriptThread()
 	m_uToElapsed = 0;
 	m_dToValue = 0;
 	m_uLogFreq = 1000;
+	m_sScript = oexT( "" );
 }
 
 CScriptThread::~CScriptThread()
@@ -273,6 +274,9 @@ oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 //	while ( CSqMsgQueue::GetLock().Wait( 100 ) )
 //		ProcessMsgs();
 
+	// Lock the property bag
+	oexAutoLock ll( m_lockPb );
+
 	// Let script cleanup
 	m_cSqEngine.Exit();
 
@@ -292,6 +296,9 @@ oex::oexINT CScriptThread::EndThread( oex::oexPVOID x_pData )
 	m_uToFreq = 100;
 
 	m_dToValue = 0;
+	
+	// Empty the property bag
+	m_pb.Destroy();
 
 	// Let the user know we're ending a thread
 //	oexPrintf( oexT( "Exiting : 0x%08x : %s\n" ),

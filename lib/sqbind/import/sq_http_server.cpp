@@ -48,6 +48,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqHttpServer, CSqHttpServer )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, EnableRemoteConnections )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, EnableSessions )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, EnableMultiThreading )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, EnableCompression )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, SetSessionTimeout )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, GetNumActiveClients )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, MapFolder )
@@ -437,7 +438,6 @@ void CSqHttpServer::EnableRemoteConnections( int bEnable )
 
 	// Enable/disable remote connections
 	m_server.EnableRemoteConnections( bEnable ? oex::oexTRUE : oex::oexFALSE );
-
 }
 
 void CSqHttpServer::EnableSessions( int bEnable )
@@ -445,8 +445,16 @@ void CSqHttpServer::EnableSessions( int bEnable )
 
 	// Enable/disable remote connections
 	m_server.EnableSessions( bEnable ? oex::oexTRUE : oex::oexFALSE );
-
 }
+
+int CSqHttpServer::EnableCompression( int bEnable )
+{_STT();
+
+	// Enable/disable remote connections
+	return m_server.EnableCompression( bEnable ? oex::oexTRUE : oex::oexFALSE );
+}
+
+
 void CSqHttpServer::SetSessionTimeout( int nTimeout )
 {_STT();
 
@@ -455,7 +463,6 @@ void CSqHttpServer::SetSessionTimeout( int nTimeout )
 
 	// Enable/disable remote connections
 	m_server.SetSessionTimeout( (oex::oexUINT)nTimeout );
-
 }
 
 void CSqHttpServer::EnableMultiThreading( int bEnable )

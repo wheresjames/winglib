@@ -863,7 +863,8 @@ public:
 		if ( m_bEnableCompression )
 		{
 			// Currently only supporting zlib/deflate
-			if ( 0 <= m_pbRxHeaders[ "accept-encoding" ].ToString().Match( "deflate" ) )
+			if ( 0 <= m_pbRxHeaders[ "accept-encoding" ].ToString().Match( "deflate" )
+				 && 0 > m_pbRxHeaders[ "user-agent" ].ToString().Match( "MSIE" ) )
 			{	m_pbTxHeaders[ "content-encoding" ] = "deflate";
 				sCompressed = oexCompress( m_sContent );
 				pSend = &sCompressed;
@@ -1117,13 +1118,14 @@ public:
 	CStr GetFileType() { return m_sFileType; }
 
 	/// Enables / disables compression
-	void EnableCompression( oexBOOL b )
+	int EnableCompression( oexBOOL b )
 	{
 #ifdef OEX_ENABLE_ZIP
 		m_bEnableCompression = b;
 #else
 		m_bEnableCompression = oexFALSE;
 #endif
+		return m_bEnableCompression;
 	}
 
 	/// Returns non-zero if compression is enabled

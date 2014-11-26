@@ -600,7 +600,7 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 	x_is.Destroy();
 
 	// Accept the connection
-	SOCKADDR saAddr; int iAddr = sizeof( saAddr );
+	SOCKADDR saAddr = { 0 }; int iAddr = sizeof( saAddr );
 
 	// Accept and encapsulate the socket
 	BOOL bSuccess = x_is.Attach( (t_SOCKET)accept( (SOCKET)m_hSocket, &saAddr, &iAddr ) );

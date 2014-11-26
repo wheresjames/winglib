@@ -1456,66 +1456,72 @@ oexINT CSysUtil::GetProcessInfo( oexLONG lPid, CPropertyBag *pb )
 						if ( pGetFileVersionInfoSize && pGetFileVersionInfo && pVerQueryValue )
 						{	DWORD dwVisz = pGetFileVersionInfoSize( szFile, 0 );
 							if ( 0 < dwVisz )
-							{	char *buf = new char[ dwVisz * 2 ];
-								if ( buf && pGetFileVersionInfo( szFile, 0, dwVisz, buf ) )
+							{	
+								TMem< char > buf;
+								if ( buf.OexNew( dwVisz * 2 ).Ptr() )
 								{
-									UINT uLen = 0;
-									VS_FIXEDFILEINFO *pFfi = 0;
-									pVerQueryValue( buf , oexT("\\") , (LPVOID *)&pFfi , &uLen );
-									if ( pFfi )
+									if ( pGetFileVersionInfo( szFile, 0, dwVisz, buf.Ptr() ) )
 									{
-										CStr sVer;
-										sVer = HIWORD( pFfi->dwFileVersionMS );
-										sVer += oexT( "." );
-										sVer += LOWORD( pFfi->dwFileVersionMS );
-										sVer += oexT( "." );
-										sVer += HIWORD( pFfi->dwFileVersionLS );
-										sVer += oexT( "." );
-										sVer += LOWORD( pFfi->dwFileVersionLS );
-
-										(*pb)[ oexT( "version" ) ] = sVer;
-
-									} // end if
-									
-									uLen = 0;
-									t_tagLANGANDCODEPAGE *lacp;
-									pVerQueryValue( buf , oexT("\\VarFileInfo\\Translation") , (LPVOID *)&lacp , &uLen );
-									
-									static oexTCHAR *pStrings[] = 
-									{ 	oexT( "Comments" ),
-										oexT( "CompanyName" ),
-										oexT( "FileDescription" ),
-										oexT( "FileVersion" ),
-										oexT( "InternalName" ),
-										oexT( "LegalCopyright" ),
-										oexT( "LegalTrademarks" ),
-										oexT( "OriginalFilename" ),
-										oexT( "PrivateBuild" ),
-										oexT( "ProductName" ),
-										oexT( "ProductVersion" ),
-										oexT( "SpecialBuild" ),
-										0
-									};
-									
-									for ( long i = 0; i < ( uLen / sizeof( t_tagLANGANDCODEPAGE ) ); i++ )
-									{
-										CPropertyBag &r = (*pb)[ oexT( "Strings" ) ][ oexFmt( oexT( "%04x" ), lacp[ i ].wLanguage ) ];
-										for ( long s = 0; pStrings[ s ]; s++ )
+										UINT uLen = 0;
+										VS_FIXEDFILEINFO *pFfi = 0;
+										pVerQueryValue( buf.Ptr(), oexT("\\") , (LPVOID *)&pFfi , &uLen );
+										if ( pFfi )
 										{
-											CStr sSub = oexFmt( oexT( "\\StringFileInfo\\%04x%04x\\%s" ),
-																lacp[ i ].wLanguage, lacp[ i ].wCodePage, pStrings[ s ] );
+											CStr sVer;
+											sVer = HIWORD( pFfi->dwFileVersionMS );
+											sVer += oexT( "." );
+											sVer += LOWORD( pFfi->dwFileVersionMS );
+											sVer += oexT( "." );
+											sVer += HIWORD( pFfi->dwFileVersionLS );
+											sVer += oexT( "." );
+											sVer += LOWORD( pFfi->dwFileVersionLS );
 
-											oexTCHAR *pStr = 0;
-											if ( pVerQueryValue( buf, sSub.c_str(), (void**)&pStr, &uLen ) && 1 < uLen && pStr )
-												r[ pStrings[ s ] ] = CStr( pStr, uLen - 1 );
-	
+											(*pb)[ oexT( "version" ) ] = sVer;
+
 										} // end if
-									
-									} // end for
-									
+										
+										uLen = 0;
+										t_tagLANGANDCODEPAGE *lacp;
+										pVerQueryValue( buf.Ptr(), oexT("\\VarFileInfo\\Translation") , (LPVOID *)&lacp , &uLen );
+										
+										static oexTCHAR *pStrings[] = 
+										{ 	oexT( "Comments" ),
+											oexT( "CompanyName" ),
+											oexT( "FileDescription" ),
+											oexT( "FileVersion" ),
+											oexT( "InternalName" ),
+											oexT( "LegalCopyright" ),
+											oexT( "LegalTrademarks" ),
+											oexT( "OriginalFilename" ),
+											oexT( "PrivateBuild" ),
+											oexT( "ProductName" ),
+											oexT( "ProductVersion" ),
+											oexT( "SpecialBuild" ),
+											0
+										};
+										
+										for ( long i = 0; i < ( uLen / sizeof( t_tagLANGANDCODEPAGE ) ); i++ )
+										{
+											CPropertyBag &r = (*pb)[ oexT( "Strings" ) ][ oexFmt( oexT( "%04x" ), lacp[ i ].wLanguage ) ];
+											for ( long s = 0; pStrings[ s ]; s++ )
+											{
+												CStr sSub = oexFmt( oexT( "\\StringFileInfo\\%04x%04x\\%s" ),
+																	lacp[ i ].wLanguage, lacp[ i ].wCodePage, pStrings[ s ] );
+
+												oexTCHAR *pStr = 0;
+												if ( pVerQueryValue( buf.Ptr(), sSub.c_str(), (void**)&pStr, &uLen ) && 1 < uLen && pStr )
+													r[ pStrings[ s ] ] = CStr( pStr, uLen - 1 );
+		
+											} // end if
+										
+										} // end for
+										
+									} // end if
+								
 								} // end if
 								
 							} // end if
+							
 						} // end if
 						
 					} // end if

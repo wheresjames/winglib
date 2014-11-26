@@ -107,6 +107,9 @@ namespace sqbind
 		/// Enable / Disable multi-threaded sessions
 		void EnableMultiThreading( int bEnable );
 
+		/// Enables / disables compression
+		int EnableCompression( int bEnable );
+
 		/// Non-zero to enable scripts to linger
 		void EnableScriptLinger( int bEnable );
 
