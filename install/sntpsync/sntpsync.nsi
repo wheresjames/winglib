@@ -1,3 +1,6 @@
+
+!include "MUI2.nsh"
+
 ; InstallWinglibScriptEngine.nsi
 ;
 ;--------------------------------
@@ -51,15 +54,17 @@ InstallDirRegKey HKLM "SOFTWARE\${APPKEY}" "Install_Dir"
 ;	ExecShell "open" "$INSTDIR/scripts"
 ;FunctionEnd
 
-Page license
-LicenseData "License.txt"
-Page components
-Page directory
-Page instfiles
+!define MUI_ABORTWARNING
 
+!insertmacro MUI_PAGE_LICENSE "License.txt"
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
 
-UninstPage uninstConfirm
-UninstPage instfiles
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+!insertmacro MUI_LANGUAGE "English"
 
 ;--------------------------------
 
