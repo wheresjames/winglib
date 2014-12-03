@@ -262,7 +262,7 @@ int CFfDecoder::BufferData( sqbind::CSqBinary *in, sqbind::CSqMulti *m )
 				return 0;
 
 			// Find an end nal header
-			int e = FindH264Nal( m_tmp.Ptr( s + 3 ), m_tmp.getUsed() - s + 3 );
+			int e = FindH264Nal( m_tmp.Ptr( s + 3 ), m_tmp.getUsed() - ( s + 3 ) );
 			if ( 0 > e )
 				return 0;
 
@@ -387,6 +387,10 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 	if ( !in || !out || !BufferData( in, m ) )
 		return 0;
 
+	// Do we have packet data?
+	if ( !m_pkt.data || !m_pkt.size )
+		return 0;
+		
 	// Allocate frame
 	if ( !m_pFrame )
 	{	m_pFrame = avcodec_alloc_frame();

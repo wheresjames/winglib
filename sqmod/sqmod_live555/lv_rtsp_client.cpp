@@ -455,7 +455,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	} // end if
 
 	// Ditch the options
-	delete [] pOptions;
+	delete pOptions;
 	pOptions = oexNULL;
 
 	char *pSdp = oexNULL;
@@ -478,7 +478,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	m_pSession = MediaSession::createNew( *m_pEnv, pSdp );
 
 	// Ditch the SDP description
-	delete [] pSdp;
+	delete pSdp;
 	pSdp = oexNULL;
 
 	if ( !m_pSession )
