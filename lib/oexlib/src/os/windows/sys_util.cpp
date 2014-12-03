@@ -1141,6 +1141,15 @@ typedef enum et_PROCESSINFOCLASS
 {    et_ProcessBasicInformation = 0
 } et_PROCESSINFOCLASS;
 
+typedef struct t_tagIO_COUNTERS {
+  ULONGLONG ReadOperationCount;
+  ULONGLONG WriteOperationCount;
+  ULONGLONG OtherOperationCount;
+  ULONGLONG ReadTransferCount;
+  ULONGLONG WriteTransferCount;
+  ULONGLONG OtherTransferCount;
+} t_IO_COUNTERS;
+
 #define def_TH32CS_SNAPPROCESS	0x00000002
 #define def_TH32CS_SNAPNOHEAPS	0x40000000
 
@@ -1155,6 +1164,7 @@ typedef DWORD (WINAPI *pfn_GetFileVersionInfoSize)( LPCTSTR lptstrFilename, LPDW
 typedef BOOL (WINAPI *pfn_GetFileVersionInfo)( LPCTSTR lptstrFilename, DWORD dwHandle, DWORD dwLen, LPVOID lpData );
 typedef BOOL (WINAPI *pfn_VerQueryValue)( LPCVOID pBlock, LPCTSTR lpSubBlock, LPVOID *lplpBuffer, PUINT puLen );
 typedef LONG (WINAPI *pfn_NtQueryInformationProcess)( HANDLE ProcessHandle, et_PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength );
+typedef BOOL (WINAPI *pfn_GetProcessIoCounters)( HANDLE hProcess, t_IO_COUNTERS *lpIoCounters );
 
 #define FT2LL(ft)	(((oexUINT64)ft.dwHighDateTime << 32)|(oexUINT64)ft.dwLowDateTime)
 
@@ -1253,6 +1263,7 @@ oexINT CSysUtil::GetProcessInfo( oexLONG lPid, CPropertyBag *pb )
 	pfn_GetModuleFileNameEx pGetModuleFileNameEx = 0;
 	pfn_GetProcessMemoryInfo pGetProcessMemoryInfo = 0;
 	pfn_GetProcessTimes pGetProcessTimes = 0;
+	pfn_GetProcessIoCounters pGetProcessIoCounters = 0;
 
 	// Load kernel32.dll
 	HMODULE hKernel32 = LoadLibrary( oexT( "kernel32.dll" ) ), hPsapi = 0;
@@ -1264,6 +1275,7 @@ oexINT CSysUtil::GetProcessInfo( oexLONG lPid, CPropertyBag *pb )
 	pGetModuleFileNameEx = (pfn_GetModuleFileNameEx)GetProcAddress( hKernel32, fnK32GetModuleFileNameEx );
 	pGetProcessMemoryInfo = (pfn_GetProcessMemoryInfo)GetProcAddress( hKernel32, "GetProcessMemoryInfo" );
 	pGetProcessTimes = (pfn_GetProcessTimes)GetProcAddress( hKernel32, "GetProcessTimes" );
+	pGetProcessIoCounters = (pfn_GetProcessIoCounters)GetProcAddress( hKernel32, "GetProcessIoCounters" );
 
 	// Maybe they moved?
 	if ( !pGetProcessImageFileName || !pGetModuleFileNameEx || !pGetProcessMemoryInfo )
@@ -1428,6 +1440,21 @@ oexINT CSysUtil::GetProcessInfo( oexLONG lPid, CPropertyBag *pb )
 				{	szFile[ dwLen ] = 0;
 					(*pb)[ oexT( "dos" ) ] = szFile;
 				} // end if
+			} // end if
+			
+			if ( pGetProcessIoCounters )
+			{
+				t_IO_COUNTERS ioc; oexZero( ioc );
+				if ( pGetProcessIoCounters( hProc, &ioc ) )
+				{	CPropertyBag &dio = (*pb)[ oexT( "diskio" ) ];
+					dio[ oexT( "ReadOperationCount" ) ] = ioc.ReadOperationCount;
+					dio[ oexT( "WriteOperationCount" ) ] = ioc.WriteOperationCount;
+					dio[ oexT( "OtherOperationCount" ) ] = ioc.OtherOperationCount;
+					dio[ oexT( "ReadTransferCount" ) ] = ioc.ReadTransferCount;
+					dio[ oexT( "WriteTransferCount" ) ] = ioc.WriteTransferCount;
+					dio[ oexT( "OtherTransferCount" ) ] = ioc.OtherTransferCount;
+				} // end if
+			
 			} // end if
 
 			if ( pGetModuleFileNameEx )
