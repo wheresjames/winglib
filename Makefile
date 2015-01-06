@@ -99,7 +99,8 @@ BUILDDIRS := $(BUILDDIRS) \
 			 sqmod/sqmod_test \
 			 sqmod/sqmod_usb \
 			 sqmod/sqmod_vmime \
-			 sqmod/sqmod_webkit
+			 sqmod/sqmod_webkit \
+			 sqmod/sqmod_webrtc
 endif
 #-------------------------------------------------------------------
 # WxWidgets

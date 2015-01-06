@@ -127,11 +127,11 @@ namespace sqbind
 
 		/// Sets the specified default header
 		void setDefaultHeader( const stdString &sName, const stdString &sValue )
-		{	m_server.DefHeaders()[ sqbind::std2oex( sName ) ] = sqbind::std2oex( sValue ); }
+		{	m_server.DefHeaders()[ oexStrToMb( sqbind::std2oex( sName ) ) ] = oexStrToMb( sqbind::std2oex( sValue ) ); }
 
 		/// Returns the value of the specified default header
 		sqbind::stdString getDefaultHeader( const stdString &sName )
-		{	return sqbind::oex2std( m_server.DefHeaders()[ sqbind::std2oex( sName ) ].ToString() ); }
+		{	return sqbind::oex2std( m_server.DefHeaders()[ oexStrToMb( sqbind::std2oex( sName ) ) ].ToString() ); }
 
 		/// Returns all the default headers
 		sqbind::CSqMulti getDefaultHeaders();

@@ -619,8 +619,6 @@ oexUINT CIpAddress::Arp( oexCSTR x_pDst, oexCSTR x_pSrc, oexBYTE *x_pAddr )
 						(PULONG)x_pAddr, &uLen );
 		
 	FreeLibrary( hLib );
-	
-oexEcho( oexMks( res, " - ", x_pDst, " - ", (ULONG)inet_addr( oexStrToMbPtr( x_pDst ) ) ).Ptr() );
 
 	return ( NO_ERROR == res ) ? uLen : 0;
 }

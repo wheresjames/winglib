@@ -109,7 +109,7 @@ oexINT COex::Init()
 #if defined( oexDEBUG )
 
 	// Create memory leak detector
-	GetMemLeak().Create();
+//	GetMemLeak().Create();
 
 #endif
 
@@ -219,7 +219,7 @@ oexINT COex::Uninit()
 
 	// Release stack traces
 	oexSt().Release();
-
+/*
 	// Freeze memory statistics
 	GetMemLeak().Freeze();
 
@@ -236,7 +236,7 @@ oexINT COex::Uninit()
 
 	// Drop the memory leak detector
 	GetMemLeak().Destroy();
-
+*/
 #endif
 
 	return m_nShutdownCode;

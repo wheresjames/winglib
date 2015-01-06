@@ -209,7 +209,7 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 		return 0;
 
 	// Allocate memory for destination image
-	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize ) )
+	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
 		return 0;
 
 	// Ensure source buffer is large enough
@@ -280,7 +280,7 @@ int CFfConvert::ResizeBB( int sw, int sh, sqbind::CSqBinary *src, int src_fmt, i
 		return 0;
 
 	// Allocate memory for destination image
-	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize ) )
+	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
 		return 0;
 
 	// Ensure source buffer is large enough
@@ -343,7 +343,7 @@ int CFfConvert::ConvertColorBB2( int width, int height, sqbind::CSqBinary *src, 
 		return 0;
 
 	// Allocate memory for destination image
-	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize ) )
+	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
 		return 0;
 
 	// Ensure source buffer is large enough
@@ -405,7 +405,7 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 		return 0;
 
 	// Allocate memory for destination image
-	if ( dst->Size() < nSize && !dst->Allocate( nSize ) )
+	if ( dst->Size() < nSize && !dst->Allocate( nSize + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
 		return 0;
 
 	// Fill in picture data
@@ -619,7 +619,7 @@ int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height
 
 	// Output size
 	oexSIZE_T nDstSize = CFfConvert::CalcImageSize( dst_fmt, width, height );
-	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize ) )
+	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
 		return 0;
 
 	oexSIZE_T nSrcSize = CFfConvert::CalcImageSize( src_fmt, width, height );
@@ -682,7 +682,7 @@ int CFfConvert::Rotate( int deg, sqbind::CSqBinary *src, int src_fmt, int width,
 
 		// Ensure destination buffer is large enough
 		if ( (int)dst->getUsed() < sz )
-		{	if ( !dst->Allocate( sz ) )
+		{	if ( !dst->Allocate( sz + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
 				return 0;
 			else
 				dst->setUsed( sz );
@@ -713,7 +713,7 @@ int CFfConvert::Rotate( int deg, sqbind::CSqBinary *src, int src_fmt, int width,
 
 		// Ensure destination buffer is large enough
 		if ( (int)dst->getUsed() < sz )
-		{	if ( !dst->Allocate( sz ) )
+		{	if ( !dst->Allocate( sz + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
 				return 0;
 			else
 				dst->setUsed( sz );
@@ -901,7 +901,7 @@ int CFfConvert::FlipVert( sqbind::CSqBinary *src, int src_fmt, int width, int he
 
 		// Ensure destination buffer is large enough
 		if ( (int)dst->getUsed() < sz )
-		{	if ( !dst->Allocate( sz ) )
+		{	if ( !dst->Allocate( sz + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
 				return 0;
 			else
 				dst->setUsed( sz );
@@ -924,7 +924,7 @@ int CFfConvert::FlipVert( sqbind::CSqBinary *src, int src_fmt, int width, int he
 
 		// Ensure destination buffer is large enough
 		if ( (int)dst->getUsed() < sz )
-		{	if ( !dst->Allocate( sz ) )
+		{	if ( !dst->Allocate( sz + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
 				return 0;
 			else
 				dst->setUsed( sz );

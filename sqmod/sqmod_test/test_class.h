@@ -48,6 +48,9 @@ public:
 	/// Construct class from string
 	CTestClass( const sqbind::stdString &sString ) : m_string( sString ) { x = y = 0; }
 
+	/// Copy
+	CTestClass( const CTestClass &r ) { }
+	CTestClass& operator = ( const CTestClass &r ) { return *this; }
 
 public:
 
@@ -67,3 +70,6 @@ private:
 	int						x, y;
 
 };
+
+SQBIND_DECLARE_INSTANCE( CTestClass, CTestClass );
+
