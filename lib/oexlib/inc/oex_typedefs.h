@@ -52,13 +52,13 @@ typedef long long			   		oexINT64;
 typedef unsigned long long		    oexUINT64;
 #endif
 
-#define oexMAXUINT16	( (oexUINT16) ~0 )
-#define oexMAXUINT32	( (oexUINT32) ~0 )
-#define oexMAXUINT64	( (oexUINT64) ~(0ULL) )
+#define oexMAXUINT16	( (OEX_NAMESPACE::oexUINT16) ~0 )
+#define oexMAXUINT32	( (OEX_NAMESPACE::oexUINT32) ~0 )
+#define oexMAXUINT64	( (OEX_NAMESPACE::oexUINT64) ~(0ULL) )
 
-#define oexMAXINT16		( (oexINT16) ( oexMAXUINT16 >> 1 ) )
-#define oexMAXINT32		( (oexINT32) ( oexMAXUINT32 >> 1 ) )
-#define oexMAXINT64		( (oexINT64) ( oexMAXUINT64 >> 1 ) )
+#define oexMAXINT16		( (OEX_NAMESPACE::oexINT16) ( oexMAXUINT16 >> 1 ) )
+#define oexMAXINT32		( (OEX_NAMESPACE::oexINT32) ( oexMAXUINT32 >> 1 ) )
+#define oexMAXINT64		( (OEX_NAMESPACE::oexINT64) ( oexMAXUINT64 >> 1 ) )
 
 typedef int							oexINT;
 typedef unsigned int				oexUINT;
@@ -73,25 +73,25 @@ typedef bool						oexBOOL;
 typedef char						oexCHAR;
 typedef unsigned char				oexUCHAR;
 
-#define oexMAXUSHORT	oexMAXUINT16
-#define oexMAXUINT		oexMAXUINT32
+#define oexMAXUSHORT				oexMAXUINT16
+#define oexMAXUINT					oexMAXUINT32
 
-#define oexMAXSHORT		oexMAXINT16
-#define oexMAXINT		oexMAXINT32
+#define oexMAXSHORT					oexMAXINT16
+#define oexMAXINT					oexMAXINT32
 
 #if defined( OEX_CPU_64 )
-#	define oexMAXULONG		oexMAXUINT64
-#	define oexMAXLONG		oexMAXINT64
+#	define oexMAXULONG				oexMAXUINT64
+#	define oexMAXLONG				oexMAXINT64
 #else
-#	define oexMAXULONG		oexMAXUINT32
-#	define oexMAXLONG		oexMAXINT32
+#	define oexMAXULONG				oexMAXUINT32
+#	define oexMAXLONG				oexMAXINT32
 #endif
 
-#define oexMINFLOAT			(1e-999)
-#define oexMAXFLOAT			(9.999999999999999e999)
+#define oexMINFLOAT					(1e-999)
+#define oexMAXFLOAT					(9.999999999999999e999)
 
-#define oexMINDOUBLE		(1e-999)
-#define oexMAXDOUBLE		(9.999999999999999e999)
+#define oexMINDOUBLE				(1e-999)
+#define oexMAXDOUBLE				(9.999999999999999e999)
 
 // String types
 typedef char                        oexCHAR8;
@@ -125,10 +125,10 @@ typedef oexBYTE*					oexPBYTE;
 typedef void*						oexTYPEOF_PTR;
 
 /// Position type
-typedef oexLONG		oexPos;
+typedef oexLONG						oexPos;
 
 /// Size type
-typedef oexULONG	oexSize;
+typedef oexULONG					oexSize;
 
 struct oexTime
 {

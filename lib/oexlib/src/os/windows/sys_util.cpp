@@ -217,7 +217,7 @@ oexBOOL CSysUtil::SetRegString( const CStr &x_sKey, const CStr &x_sPath, const C
 
 	// Set the value
 	CStr8 val = oexStrToMb( x_sValue );
-	lRes = RegSetValueEx( hKey, x_sName.Ptr(), 0, REG_SZ, (const BYTE *)val.Ptr(), val.Length() );
+	lRes = RegSetValueEx( hKey, x_sName.Ptr(), 0, REG_SZ, (const BYTE *)val.Ptr(), val.Length() + 1 );
 	if ( ERROR_SUCCESS != lRes )
 		oexERROR( lRes, oexMks( oexT( "RegSetValueEx() failed : " ),
 								x_sKey.Ptr(), oexT( " : " ),

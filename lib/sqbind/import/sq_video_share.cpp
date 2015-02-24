@@ -47,6 +47,8 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqVideoShare, CSqVideoShare )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, Create )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, Open )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getName )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getReadIdx )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, setReadIdx )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, setPrefix )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, getPrefix )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqVideoShare, setCbId )
@@ -415,7 +417,7 @@ sqbind::CSqBinary CSqVideoShare::getNextImg()
 	{	m_sLastErr = oex2std( oexMks( oexT( "Writer has disconnected : " ), std2oex( m_sName ) ) );
 		Destroy(); 
 		return sqbind::CSqBinary(); 
-	}
+	} // end if
 
 	// Get the current image index
 	int i = m_cb.getINT( 1 );

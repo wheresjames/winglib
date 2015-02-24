@@ -358,6 +358,12 @@ namespace sqbind
 		/// Returns non-zero if a share is open
 		int isOpen() { return ( m_cb.getUsed() && m_buf.getUsed() ); }
 
+		/// Returns the current read index
+		int getReadIdx() { return m_iRead; }
+
+		/// Returns the current read index
+		void setReadIdx( int i ) { if ( 0 < i && i < getBuffers() ) m_iRead = i; }
+		
 		/** @} */
 
 protected:

@@ -429,7 +429,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	} // end if
 
 #if defined( oexDEBUG )
-	int nVerbosity = 1;
+	int nVerbosity = 0;
 #else
 	int nVerbosity = 0;
 #endif

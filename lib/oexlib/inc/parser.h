@@ -2298,11 +2298,18 @@ public:
 					lMode = 1,
 					sKey = x_sStr.Parse( oexTT( T, ",:{}[]\r\n\t" ) ).TrimWhiteSpace();
 				else if ( lMode )
-					lItems++,
-					lMode = ( 1 == lMode ) ? 0 : lMode,
-					x_pb[ sKey ] = x_sStr.Parse( oexTT( T, ",:{}[]\r\n\t" ) ).TrimWhiteSpace();
+				{
+					lItems++;
+					lMode = ( 1 == lMode ) ? 0 : lMode;
+					TStr< T > val = x_sStr.Parse( oexTT( T, ",:{}[]\r\n\t" ) ).TrimWhiteSpace();
+					if ( val.ToLower() == oexTT( T, "null" ) )
+						x_pb[ sKey ] = oexTT( T, "" );
+					else
+						x_pb[ sKey ] = val;
+				} // end else if
 
-				x_sStr++;
+				if ( x_sStr[ 0 ] == oexTC( T, ',' ) )
+					x_sStr++;
 
 			} // end if
 
