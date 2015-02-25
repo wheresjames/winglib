@@ -52,13 +52,13 @@ typedef long long			   		oexINT64;
 typedef unsigned long long		    oexUINT64;
 #endif
 
-#define oexMAXUINT16	( (oexUINT16) ~0 )
-#define oexMAXUINT32	( (oexUINT32) ~0 )
-#define oexMAXUINT64	( (oexUINT64) ~(0ULL) )
+#define oexMAXUINT16	( (OEX_NAMESPACE::oexUINT16) ~0 )
+#define oexMAXUINT32	( (OEX_NAMESPACE::oexUINT32) ~0 )
+#define oexMAXUINT64	( (OEX_NAMESPACE::oexUINT64) ~(0ULL) )
 
-#define oexMAXINT16		( (oexINT16) ( oexMAXUINT16 >> 1 ) )
-#define oexMAXINT32		( (oexINT32) ( oexMAXUINT32 >> 1 ) )
-#define oexMAXINT64		( (oexINT64) ( oexMAXUINT64 >> 1 ) )
+#define oexMAXINT16		( (OEX_NAMESPACE::oexINT16) ( oexMAXUINT16 >> 1 ) )
+#define oexMAXINT32		( (OEX_NAMESPACE::oexINT32) ( oexMAXUINT32 >> 1 ) )
+#define oexMAXINT64		( (OEX_NAMESPACE::oexINT64) ( oexMAXUINT64 >> 1 ) )
 
 typedef int							oexINT;
 typedef unsigned int				oexUINT;
@@ -125,10 +125,10 @@ typedef oexBYTE*					oexPBYTE;
 typedef void*						oexTYPEOF_PTR;
 
 /// Position type
-typedef oexLONG		oexPos;
+typedef oexLONG						oexPos;
 
 /// Size type
-typedef oexULONG	oexSize;
+typedef oexULONG					oexSize;
 
 struct oexTime
 {
