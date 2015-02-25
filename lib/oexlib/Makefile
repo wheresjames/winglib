@@ -47,6 +47,11 @@ LOC_CXX_sqlite := c
 LOC_SRC_sqlite := oss/sqlite
 include $(PRJ_LIBROOT)/build.mk
 
+export LOC_TAG := ezdib
+LOC_CXX_ezdib := c
+LOC_SRC_ezdib := oss/ezdib
+include $(PRJ_LIBROOT)/build.mk
+
 #-------------------------------------------------------------------
 # Execute the build
 #-------------------------------------------------------------------

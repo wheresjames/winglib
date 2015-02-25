@@ -199,6 +199,9 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #	define oexT( s )				        L##s
 #	define oexTEXT( s )				        oexT( s )
 
+#	define oexS( s )						#s
+#	define oexTS( s )						oexS( s )
+
 #	define oexStrToMb( s )			        OEX_NAMESPACE::CStr8().ToMb( s )
 #	define oexStrToMbPtr( s )		        OEX_NAMESPACE::CStr8().ToMb( s ).Ptr()
 #   define oexStrToStr8( s )                OEX_NAMESPACE::CStr8().Cnv( s )

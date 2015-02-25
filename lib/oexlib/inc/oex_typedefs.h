@@ -73,25 +73,25 @@ typedef bool						oexBOOL;
 typedef char						oexCHAR;
 typedef unsigned char				oexUCHAR;
 
-#define oexMAXUSHORT	oexMAXUINT16
-#define oexMAXUINT		oexMAXUINT32
+#define oexMAXUSHORT				oexMAXUINT16
+#define oexMAXUINT					oexMAXUINT32
 
-#define oexMAXSHORT		oexMAXINT16
-#define oexMAXINT		oexMAXINT32
+#define oexMAXSHORT					oexMAXINT16
+#define oexMAXINT					oexMAXINT32
 
 #if defined( OEX_CPU_64 )
-#	define oexMAXULONG		oexMAXUINT64
-#	define oexMAXLONG		oexMAXINT64
+#	define oexMAXULONG				oexMAXUINT64
+#	define oexMAXLONG				oexMAXINT64
 #else
-#	define oexMAXULONG		oexMAXUINT32
-#	define oexMAXLONG		oexMAXINT32
+#	define oexMAXULONG				oexMAXUINT32
+#	define oexMAXLONG				oexMAXINT32
 #endif
 
-#define oexMINFLOAT			(1e-999)
-#define oexMAXFLOAT			(9.999999999999999e999)
+#define oexMINFLOAT					(1e-999)
+#define oexMAXFLOAT					(9.999999999999999e999)
 
-#define oexMINDOUBLE		(1e-999)
-#define oexMAXDOUBLE		(9.999999999999999e999)
+#define oexMINDOUBLE				(1e-999)
+#define oexMAXDOUBLE				(9.999999999999999e999)
 
 // String types
 typedef char                        oexCHAR8;

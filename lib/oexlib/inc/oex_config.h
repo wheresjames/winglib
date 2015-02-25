@@ -137,7 +137,7 @@
 #elif defined( OEX_MSC )
 #	define oexNORETURN		__declspec(noreturn)
 #else
-#	error Please defien oexNORETURN for this compiler
+#	error Please define oexNORETURN for this compiler
 #endif
 
 

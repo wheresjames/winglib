@@ -221,7 +221,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexUINT x_uDevice, oexUINT x_uSource, o
 			break;
 
 	} // end switch
-
+	
 	if ( !oexCHECK_PTR( m_pDevice ) )
 	{	Destroy();
 		return oexFALSE;
@@ -300,6 +300,7 @@ oexBOOL CCapture::Open( oexUINT x_uType, oexCSTR x_pFile, oexINT x_nWidth, oexIN
 	} // end if
 
 	return oexTRUE;
+
 #endif
 }
 

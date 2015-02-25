@@ -1200,6 +1200,13 @@ stdString CSqEngineExport::get( const stdString &sPath, const stdString &sKey )
 	return q->get( sPath, sKey );
 }
 
+stdString CSqEngineExport::swap( const stdString &sPath, const stdString &sKey, const stdString &sVal )
+{_STT();
+	CSqMsgQueue *q = queue();
+	if ( !q ) return stdString();
+	return q->swap( sPath, sKey, sVal );
+}
+
 void CSqEngineExport::jset( const stdString &sPath, const stdString &sKey, const stdString &sVal )
 {_STT();
 	CSqMsgQueue *q = queue();
@@ -1212,6 +1219,13 @@ stdString CSqEngineExport::jget( const stdString &sPath, const stdString &sKey )
 	CSqMsgQueue *q = queue();
 	if ( !q ) return stdString();
 	return q->jget( sPath, sKey );
+}
+
+stdString CSqEngineExport::jswap( const stdString &sPath, const stdString &sKey, const stdString &sVal )
+{_STT();
+	CSqMsgQueue *q = queue();
+	if ( !q ) return stdString();
+	return q->jswap( sPath, sKey, sVal );
 }
 
 int CSqEngineExport::asize( const stdString &sPath, const stdString &sKey )
@@ -1228,11 +1242,25 @@ void CSqEngineExport::aset( const stdString &sPath, const stdString &sKey, const
 		q->aset( sPath, sKey, sVal );
 }
 
+stdString CSqEngineExport::aswap( const stdString &sPath, const stdString &sKey, const stdString &sVal )
+{_STT();
+	CSqMsgQueue *q = queue();
+	if ( !q ) return stdString();
+	return q->aswap( sPath, sKey, sVal );
+}
+
 void CSqEngineExport::mset( const stdString &sPath, const stdString &sKey, const stdString &sVal )
 {_STT();
 	CSqMsgQueue *q = queue();
 	if ( q )
 		q->mset( sPath, sKey, sVal );
+}
+
+stdString CSqEngineExport::mswap( const stdString &sPath, const stdString &sKey, const stdString &sVal )
+{_STT();
+	CSqMsgQueue *q = queue();
+	if ( !q ) return stdString();
+	return q->mswap( sPath, sKey, sVal );
 }
 
 stdString CSqEngineExport::kget( const stdString &sPath, const stdString &sKey )
@@ -2102,13 +2130,17 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, spawn2 )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, set )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, swap )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, tset )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, jget )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, jset )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, jswap )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, kget )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, aset )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, aswap )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, asize )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, mset )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, mswap )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, isset )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, pb )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, addlog )

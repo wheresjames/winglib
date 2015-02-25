@@ -93,19 +93,22 @@ public:
 
 		// Reject the connection if this is not a video type
 		if( *pmt->FormatType() != FORMAT_VideoInfo )
-			return oexWARNING( ERROR_INVALID_PARAMETER, CStr().Fmt( oexT( "Unsupported video format type %s" ), 
-																  oexStrToMb( CStr().GuidToString( (oexGUID*)pmt->FormatType() ).Ptr() ) ) );
+			return ERROR_INVALID_PARAMETER;
+//			return oexWARNING( ERROR_INVALID_PARAMETER, CStr().Fmt( oexT( "Unsupported video format type %s" ), 
+//																  oexStrToMb( CStr().GuidToString( (oexGUID*)pmt->FormatType() ).Ptr() ) ) );
 
 		// Video only
 		pvi = (VIDEOINFO*)pmt->Format();
 		if( !IsEqualGUID( *pmt->Type(), MEDIATYPE_Video ) )
-			return oexWARNING( ERROR_INVALID_PARAMETER, CStr().Fmt( oexT( "Unsupported video type %s" ), 
-																  oexStrToMb( CStr().GuidToString( (oexGUID*)pmt->Type() ).Ptr() ) ) );
+			return ERROR_INVALID_PARAMETER;
+//			return oexWARNING( ERROR_INVALID_PARAMETER, CStr().Fmt( oexT( "Unsupported video type %s" ), 
+//																  oexStrToMb( CStr().GuidToString( (oexGUID*)pmt->Type() ).Ptr() ) ) );
 
 		// Only accept RGB24 video
 		if ( !IsEqualGUID( *pmt->Subtype(), MEDIASUBTYPE_RGB24 ) )
-			return oexWARNING( ERROR_INVALID_PARAMETER, CStr().Fmt( oexT( "RGB24 not supported, %s" ), 
-																  oexStrToMb( CStr().GuidToString( (oexGUID*)pmt->Type() ).Ptr() ) ) );
+			return ERROR_INVALID_PARAMETER;
+//			return oexWARNING( ERROR_INVALID_PARAMETER, CStr().Fmt( oexT( "RGB24 not supported, %s" ), 
+//																  oexStrToMb( CStr().GuidToString( (oexGUID*)pmt->Type() ).Ptr() ) ) );
 
 		// Save video parameters
 //		SetMediaType( pmt );

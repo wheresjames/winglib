@@ -60,6 +60,7 @@ namespace sqbind
 		CSqVideoShare::Register( x_vm );
 		CSqDataLog::Register( x_vm );
 		CSqString::Register( x_vm );
+		CSqPolygon::Register( x_vm );
 		CSqMulti::Register( x_vm );
 		CSqFile::Register( x_vm );
 		CSqTimeRange::Register( x_vm );
@@ -72,6 +73,7 @@ namespace sqbind
 		CSqHttpServer::Register( x_vm );
 		CSqGui::Register( x_vm );
 		CSqAviFile::Register( x_vm );
+		CSqEzdib::Register( x_vm );
 
 #if defined( OEX_ENABLE_SQLITE )
 		CSqSQLite::Register( x_vm );

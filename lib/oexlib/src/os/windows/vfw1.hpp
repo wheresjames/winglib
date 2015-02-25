@@ -270,9 +270,11 @@ public:
 #if defined( _MSC_VER )
 		__try {
 #endif
+oexEcho( __FILE__ " B1" );
 			// Attempt to connect to the specified driver
 			if ( !capDriverConnect( hWnd, i ) )
 				return FALSE;
+oexEcho( __FILE__ " B2" );
 
 #if defined( _MSC_VER )
 		} __except( err = GetExceptionCode() ) { return FALSE; }
@@ -303,17 +305,20 @@ public:
 		// Disconnect from old driver
 		Disconnect();
 
+oexEcho( __FILE__ " A1" );
 		// This basically checks driver existence
 		TCHAR szName[ oexSTRSIZE ] = { 0 }, szVer[ oexSTRSIZE ] = { 0 };
 		if ( !capGetDriverDescription( i, szName, oexSTRSIZE, szVer, oexSTRSIZE ) )
 			return FALSE;
 
+oexEcho( __FILE__ " A2" );
 		// Attempt connection
 		try	{
 			if ( !DriverConnect( m_hWnd, i ) )
 				return FALSE;
 		} catch( ... ) { return FALSE; }
 
+oexEcho( __FILE__ " A3" );
 		// We're connected
 		m_bConnected = oexTRUE;
 
@@ -404,20 +409,22 @@ public:
 					long x = 10, long y = 10, long width = 320, long height = 240,
 					int nID = 0 )
 	{_STT();
+	
 		// Lose old window
 		Close();
 
 		// Attempt to create a capture window
 //#if defined( oexDEBUG )
-//		m_hWnd = capCreateCaptureWindow( pTitle, dwStyle, 0, 0, 320, 240, hwndParent, nID );
+		m_hWnd = capCreateCaptureWindow( pTitle, dwStyle, 0, 0, 320, 240, hwndParent, nID );
 //#else
-		m_hWnd = capCreateCaptureWindow( pTitle, 0, 0, 0, 1, 1, hwndParent, nID );
+//		m_hWnd = capCreateCaptureWindow( pTitle, 0, 0, 0, 1, 1, hwndParent, nID );
 //#endif
 
 		if ( !IsWnd() )
 		{	oexERROR( GetLastError(), oexT( "Unable to create capture window" ) );
 			return oexFALSE;
 		} // end if
+oexEcho( __FILE__ " C1" );
 
 		m_nWidth = width;
 		m_nHeight = height;
@@ -1909,11 +1916,13 @@ public:
 		m_hThread = CreateThread(	(LPSECURITY_ATTRIBUTES)NULL, 0,
 									&CVfwCap::_CaptureThread, (LPVOID)this,
 									0, &m_dwThreadId );
+oexEcho( __FILE__ " A" );
 
 		if ( INVALID_HANDLE_VALUE == m_hThread )
 		{	oexERROR( GetLastError(), oexT( "Error creating capture thread" ) );
 			return oexFALSE;
 		} // end if
+oexEcho( __FILE__ " B" );
 
 		HANDLE hEvents[] = { m_hSuccess, m_hThread };
 		if ( WAIT_OBJECT_0 != ::WaitForMultipleObjects( 2, hEvents, FALSE, x_uTimeout ) )
@@ -1921,6 +1930,7 @@ public:
 			Destroy();
 			return oexFALSE;
 		} // end if
+oexEcho( __FILE__ " C" );
 
 		return oexTRUE;
 	}
@@ -2004,16 +2014,19 @@ private:
 		{	oexERROR( hr, oexT( "::CoInitialize() failed" ) );
 			return -1;
 		} // end if
+oexEcho( __FILE__ " 1" );
 
 		// Pump messages
 		MessagePump();
 
+oexEcho( __FILE__ " 2" );
 		CStr sTitle = oexFmt( oexT( "oex_vfw_%u" ), m_uDevice );
 		if ( FindWindowEx( NULL, NULL, NULL, sTitle.Ptr() ) )
 		{	oexERROR( -1, oexFmt( oexT( "Capture device is already open : %u" ), m_uDevice ) );
 			Close(); return -2;
 		} // end if
 
+oexEcho( __FILE__ " 3" );
 		// Create capture window
 		BOOL bRes = Create( sTitle.Ptr(), NULL, WS_VISIBLE | WS_OVERLAPPEDWINDOW,
 						    0, 0, m_nWidth, m_nHeight, 0 );
@@ -2022,18 +2035,21 @@ private:
 			Close(); return -3;
 		} // end if
 
+oexEcho( __FILE__ " 4" );
 		// Attempt to connect to specified device
 		if ( !Connect( m_uDevice ) )
 		{	oexERROR( GetLastError(), CStr().Fmt( oexT( "Unable to open specified device : %d" ), (int)m_uDevice ) );
 			Close(); return -4;
 		} // end if
 
+oexEcho( __FILE__ " 5" );
 		// Enable video callbacks
 		if ( !EnableCallbacks() )
 		{	oexERROR( GetLastError(), oexT( "Video callback unsupported" ) );
 			Close(); return -5;
 		} // end if
 
+oexEcho( __FILE__ " 6" );
 		// Set frame rate
 		if ( !SetPreviewRate( m_fFps ) )
 		{	oexERROR( GetLastError(), CStr().Fmt( oexT( "Unable to set frame rate : %d" ), (int)m_fFps ) );

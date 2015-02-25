@@ -193,11 +193,20 @@ public:
 	/// Sets the specified property array
 	void aset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
 
+	/// Swaps the specified property array
+	stdString aswap( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
 	/// Sets the specified property array
 	void mset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
 
+	/// Merges and returns the specified property array
+	stdString mswap( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
 	/// Gets the specified property
 	stdString get( const stdString &sPath, const stdString &sKey );
+
+	/// Swaps the specified property
+	stdString swap( const stdString &sPath, const stdString &sKey, const stdString &sVal );
 
 	/// Gets the specified property's keys
 	stdString kget( const stdString &sPath, const stdString &sKey );
@@ -210,6 +219,9 @@ public:
 
 	/// Gets the specified property
 	stdString jget( const stdString &sPath, const stdString &sKey );
+
+	/// Swaps the specified property
+	stdString jswap( const stdString &sPath, const stdString &sKey, const stdString &sVal );
 
 	/// Returns non-zero if the specified value exists
 	stdString isset( const stdString &sPath, const stdString &sKey );

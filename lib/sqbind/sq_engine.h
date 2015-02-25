@@ -210,11 +210,17 @@ public:
 		/// Gets the specified property
 		stdString get( const stdString &sPath, const stdString &sKey );
 
+		/// Swaps the specified property
+		stdString swap( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
 		/// Sets the specified property
 		void jset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
 
 		/// Gets the specified property
 		stdString jget( const stdString &sPath, const stdString &sKey );
+
+		/// Swap the specified property
+		stdString jswap( const stdString &sPath, const stdString &sKey, const stdString &sVal );
 
 		/// Returns the sizeof the current array
 		int asize( const stdString &sPath, const stdString &sKey );
@@ -226,7 +232,13 @@ public:
 		void aset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
 
 		/// Sets the specified property
+		stdString aswap( const stdString &sPath, const stdString &sKey, const stdString &sVal );		
+		
+		/// Sets the specified property
 		void mset( const stdString &sPath, const stdString &sKey, const stdString &sVal );
+
+		/// Sets the specified property
+		stdString mswap( const stdString &sPath, const stdString &sKey, const stdString &sVal );
 
 		/// Gets the specified property
 		stdString kget( const stdString &sPath, const stdString &sKey );

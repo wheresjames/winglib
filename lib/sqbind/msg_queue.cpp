@@ -400,6 +400,16 @@ void CSqMsgQueue::aset( const stdString &sPath, const stdString &sKey, const std
 	Msg( sPath, oexT( "pb_aset" ), &params, oexNULL );
 }
 
+stdString CSqMsgQueue::aswap( const stdString &sPath, const stdString &sKey, const stdString &sVal )
+{_STT();
+	stdString sRet;
+	CSqMulti params;
+	params[ oexT( "key" ) ] = sKey;
+	params[ oexT( "val" ) ] = sVal;
+	Msg( sPath, oexT( "pb_aswap" ), &params, &sRet );
+	return sRet;
+}
+
 void CSqMsgQueue::mset( const stdString &sPath, const stdString &sKey, const stdString &sVal )
 {_STT();
 	CSqMulti params;
@@ -408,12 +418,32 @@ void CSqMsgQueue::mset( const stdString &sPath, const stdString &sKey, const std
 	Msg( sPath, oexT( "pb_mset" ), &params, oexNULL );
 }
 
+stdString CSqMsgQueue::mswap( const stdString &sPath, const stdString &sKey, const stdString &sVal )
+{_STT();
+	stdString sRet;
+	CSqMulti params;
+	params[ oexT( "key" ) ] = sKey;
+	params[ oexT( "val" ) ] = sVal;
+	Msg( sPath, oexT( "pb_mswap" ), &params, &sRet );
+	return sRet;
+}
+
 stdString CSqMsgQueue::get( const stdString &sPath, const stdString &sKey )
 {_STT();
 	stdString sRet;
 	CSqMulti params;
 	params[ oexT( "key" ) ] = sKey;
 	Msg( sPath, oexT( "pb_get" ), &params, &sRet );
+	return sRet;
+}
+
+stdString CSqMsgQueue::swap( const stdString &sPath, const stdString &sKey, const stdString &sVal )
+{_STT();
+	stdString sRet;
+	CSqMulti params;
+	params[ oexT( "key" ) ] = sKey;
+	params[ oexT( "val" ) ] = sVal;
+	Msg( sPath, oexT( "pb_swap" ), &params, &sRet );
 	return sRet;
 }
 
@@ -487,6 +517,16 @@ void CSqMsgQueue::jset( const stdString &sPath, const stdString &sKey, const std
 	params[ oexT( "key" ) ] = sKey;
 	params[ oexT( "val" ) ] = sVal;
 	Msg( sPath, oexT( "pb_jset" ), &params, oexNULL );
+}
+
+stdString CSqMsgQueue::jswap( const stdString &sPath, const stdString &sKey, const stdString &sVal )
+{_STT();
+	stdString sRet;
+	CSqMulti params;
+	params[ oexT( "key" ) ] = sKey;
+	params[ oexT( "val" ) ] = sVal;
+	Msg( sPath, oexT( "pb_jswap" ), &params, &sRet );
+	return sRet;
 }
 
 int CSqMsgQueue::asize( const stdString &sPath, const stdString &sKey )
