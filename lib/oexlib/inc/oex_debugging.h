@@ -46,12 +46,12 @@ template < const int T > class oex_static_assert{};
 #	define oexSHOW( v )					oexPrintf( oexMks( oexTEXT( oexFILE ), oexT( "(" ), oexLINE, oexT( ") : " ), oexT( #v ), oexT( " = " ), ( v ), oexNL ).Ptr() )
 #	define oexSHOWL( v )				oexPrintf( oexMks( oexTEXT( oexFILE ), oexT( "(" ), oexLINE, oexT( ") : " ), oexT( #v ), oexT( " = " ), ( v ), oexNL ).Ptr() ), oexNOTICE( 0, oexMks( #v oexT( " = " ), ( v ) ) )
 #	define oexM()						oexPrintf( oexTEXT( "%s:(%d) : %s() : **** MARKER ****" ) oexNL, oexTEXT( oexFILE ), oexLINE, oexFUNCTION )
-#	define oexS( s )					OEX_NAMESPACE::os::CSys::Printf( oexTEXT( "%s:(%d) : %s() : (%u) : %s" ) oexNL, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, (oex::oexUINT)oexGetCurThreadId(), s ? s : oexT( "" ) )
+#	define oexSM( s )					OEX_NAMESPACE::os::CSys::Printf( oexTEXT( "%s:(%d) : %s() : (%u) : %s" ) oexNL, oexTEXT( oexFILE ), oexLINE, oexFUNCTION, (oex::oexUINT)oexGetCurThreadId(), s ? s : oexT( "" ) )
 #else
 #	define oexSHOW( v )					oexPrintf( oexMks( oexGetFileName( oexTEXT( oexFILE ) ).Ptr(), oexT( "(" ), oexLINE, oexT( ") : " ), oexT( #v ), oexT( " = " ), ( v ), oexNL ).Ptr() )
 #	define oexSHOWL( v )				oexPrintf( oexMks( oexGetFileName( oexTEXT( oexFILE ) ).Ptr(), oexT( "(" ), oexLINE, oexT( ") : " ), oexT( #v ), oexT( " = " ), ( v ), oexNL ).Ptr() ), oexNOTICE( 0, oexMks( #v oexT( " = " ), ( v ) ) )
 #	define oexM()						oexPrintf( oexTEXT( "%s:(%d) : %s() : **** MARKER ****" ) oexNL, oexGetFileName( oexTEXT( oexFILE ) ).Ptr(), oexLINE, oexFUNCTION )
-#	define oexS( s )					OEX_NAMESPACE::os::CSys::Printf( oexTEXT( "%s:(%d): %s() : (%u) : %s" ) oexNL, oexGetFileName( oexTEXT( oexFILE ) ).Ptr(), oexLINE, oexFUNCTION, (oex::oexUINT)oexGetCurThreadId(), s ? s : oexT( "" ) )
+#	define oexSM( s )					OEX_NAMESPACE::os::CSys::Printf( oexTEXT( "%s:(%d): %s() : (%u) : %s" ) oexNL, oexGetFileName( oexTEXT( oexFILE ) ).Ptr(), oexLINE, oexFUNCTION, (oex::oexUINT)oexGetCurThreadId(), s ? s : oexT( "" ) )
 #endif
 #define oexLM()							oexM(), oexNOTICE( 0, oexT( "**** MARKER ****" ) )
 #define oexSHOWVAL( v, t )				oexPrintf( oexTEXT( #v ) oexTEXT( " = " ) oexTEXT( t ) oexTEXT( oexNL8 ), ( v ) )

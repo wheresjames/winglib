@@ -101,10 +101,10 @@ int CSqCurl::ProgressCallback( void *clientp, double dltotal, double dlnow, doub
 		return 0;
 
 	sqbind::CSqMulti m;
-	m[ "dltotal" ] = sqbind::oex2std( oexMks( dltotal ) );
-	m[ "dlnow" ] = sqbind::oex2std( oexMks( dlnow ) );
-	m[ "ultotal" ] = sqbind::oex2std( oexMks( ultotal ) );
-	m[ "ulnow" ] = sqbind::oex2std( oexMks( ulnow ) );
+	m[ oexT( "dltotal" ) ] = sqbind::oex2std( oexMks( dltotal ) );
+	m[ oexT( "dlnow" ) ] = sqbind::oex2std( oexMks( dlnow ) );
+	m[ oexT( "ultotal" ) ] = sqbind::oex2std( oexMks( ultotal ) );
+	m[ oexT( "ulnow" ) ] = sqbind::oex2std( oexMks( ulnow ) );
 
 	// Make the callback
 	pCurl->m_pProgressQ->execute( 0, oexT( "." ), pCurl->m_sProgressFn, m.serialize() );
@@ -296,7 +296,7 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSq
 
 	char *pCt = 0;
 	if ( CURLE_OK == curl_easy_getinfo( m_curl, CURLINFO_CONTENT_TYPE, &pCt ) && pCt )
-		m_sContentType = oexMbToStr( pCt );
+		m_sContentType = sqbind::oex2std( oexMbToStr( pCt ) );
 
 	// Get cookies
 	if ( m_bEnableCookies )

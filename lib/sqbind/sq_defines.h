@@ -220,7 +220,7 @@ namespace sqbind
 
 	template < typename T >
 		static sqbind::stdString oex2std( const T &s )
-		{	return sqbind::stdString( s.Ptr(), (sqbind::stdString::size_type)s.Length() ); }
+		{	return sqbind::stdString( s.Ptr(), (typename sqbind::stdString::size_type)s.Length() ); }
 
 	template < typename T >
 		static sqbind::stdString8 oex2std8( const T &s )

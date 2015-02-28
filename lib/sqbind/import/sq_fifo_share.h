@@ -99,6 +99,9 @@ namespace sqbind
 		/// Assignment operator
 		CSqFifoShare& operator = ( const CSqFifoShare &r ) { return *this; }
 
+		/// Destructor
+		virtual ~CSqFifoShare();
+
 		/// Registers the class
 		static void Register( sqbind::VM vm );
 

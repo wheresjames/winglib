@@ -145,6 +145,12 @@ CSqFifoShare::CSqFifoShare( const CSqFifoShare &r )
 	m_nFlags = 0;
 }
 
+CSqFifoShare::~CSqFifoShare() 
+{
+	Destroy(); 
+}
+
+
 int CSqFifoShare::Cancel()
 {
 	// Is the share open?
@@ -169,7 +175,8 @@ void CSqFifoShare::Destroy()
 		m_cb.setUINT( 11, 0 );
 	} // end if
 
-	m_sName = oexT( "" );
+	m_sName.clear();
+	m_sLastErr.clear();
 
 	m_cb.Free();
 	m_buf.Free();
@@ -179,6 +186,7 @@ void CSqFifoShare::Destroy()
 
 	m_iRead = -1;
 	m_iWrite = 0;
+	
 }
 
 int CSqFifoShare::Create( const sqbind::stdString &sName, const sqbind::stdString &sBufName, int nBufSize, int nBlocks, const sqbind::stdString &sHeader )
@@ -232,8 +240,8 @@ int CSqFifoShare::Create( const sqbind::stdString &sName, const sqbind::stdStrin
 	{
 		// Is it still in use?
 		if ( m_cb.getUINT( 0 ) )
-		{	m_sLastErr = oex2std( oexMks( oexT( "Share control block already exists and is in use : " ), std2oex( m_sName ), oexT( " : " ), std2oex( sidName ) ) );
-			Destroy();
+		{	Destroy();
+			m_sLastErr = oex2std( oexMks( oexT( "Share control block already exists and is in use : " ), std2oex( m_sName ), oexT( " : " ), std2oex( sidName ) ) );
 			return 0;
 		} // end if
 
@@ -243,8 +251,8 @@ int CSqFifoShare::Create( const sqbind::stdString &sName, const sqbind::stdStrin
 		     || ( m_cb.getINT( 6 ) && m_cb.getINT( 6 ) != nBlocks )
 		     || ( m_cb.getINT( 7 ) && m_cb.getINT( 7 ) != nHeaderSize )
 		   )
-		{	m_sLastErr = oex2std( oexMks( oexT( "Share control block already exists, and has changed : " ), std2oex( m_sName ), oexT( " : " ), std2oex( sidName ) ) );
-			Destroy();
+		{	Destroy();
+			m_sLastErr = oex2std( oexMks( oexT( "Share control block already exists, and has changed : " ), std2oex( m_sName ), oexT( " : " ), std2oex( sidName ) ) );
 			return 0;
 		} // end if
 
@@ -278,15 +286,15 @@ int CSqFifoShare::Create( const sqbind::stdString &sName, const sqbind::stdStrin
 	// Attempt to allocate the buffer
 	int size = ( nBlocks * SQSFS_PTSIZE ) + nHeaderSize + nBufSize + m_nPadding;
 	if ( !m_buf.Allocate( size ) )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate buffer of " ), size, oexT( " bytes : " ), std2oex( ( bShareBuffer ? sBufName : sName ) ), oexT( " : " ), std2oex( sidBuffer ) ) );
-		Destroy();
+	{	Destroy();
+		m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate buffer of " ), size, oexT( " bytes : " ), std2oex( ( bShareBuffer ? sBufName : sName ) ), oexT( " : " ), std2oex( sidBuffer ) ) );
 		return 0;
 	} // end if
 
 	// If it is shared, it must exist
 	if ( bShareBuffer && !m_buf.Existing() )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Share buffer doesn't exist : " ), std2oex( sBufName ), oexT( " : " ), std2oex( sidBuffer ) ) );
-		Destroy();
+	{	Destroy();
+		m_sLastErr = oex2std( oexMks( oexT( "Share buffer doesn't exist : " ), std2oex( sBufName ), oexT( " : " ), std2oex( sidBuffer ) ) );
 		return 0;
 	} // end if
 
@@ -331,14 +339,14 @@ int CSqFifoShare::Open( const sqbind::stdString &sName )
 
 	// Attempt to open existing share
 	if ( !m_cb.Allocate( struct_size ) )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate control block of " ), struct_size, oexT( " bytes : " ), std2oex( sName ) ) );
-		Destroy();
+	{	Destroy();
+		m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate control block of " ), struct_size, oexT( " bytes : " ), std2oex( sName ) ) );
 		return 0;
 	} // end if
 
 	if ( !m_cb.Existing() )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Share control block does not exist : " ), std2oex( sName ) ) );
-		Destroy();
+	{	Destroy();
+		m_sLastErr = oex2std( oexMks( oexT( "Share control block does not exist : " ), std2oex( sName ) ) );
 		return 0;
 	} // end if
 
@@ -347,8 +355,8 @@ int CSqFifoShare::Open( const sqbind::stdString &sName )
 
 	// Verify control block id
 	if ( m_cb.getUINT( 0 ) != m_uCbId )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Invalid control block id : " ), m_cb.getUINT( 0 ), oexT( " != " ), m_uCbId ) );
-		Destroy();
+	{	Destroy();
+		m_sLastErr = oex2std( oexMks( oexT( "Invalid control block id : " ), m_cb.getUINT( 0 ), oexT( " != " ), m_uCbId ) );
 		return 0;
 	} // end if
 
@@ -359,12 +367,12 @@ int CSqFifoShare::Open( const sqbind::stdString &sName )
 
 	// Validate parameters
 	if ( 0 >= nBufSize || 0 >= nBlocks || 0 > nHeaderSize )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Invalid control block values : " ),
+	{	Destroy();
+		m_sLastErr = oex2std( oexMks( oexT( "Invalid control block values : " ),
 									  oexT( "nBufSize = " ), nBufSize,
 									  oexT( ", nBlocks = " ), nBlocks,
 									  oexT( ", nHeaderSize = " ), nHeaderSize
 									  ) );
-		Destroy();
 		return 0;
 	} // end if
 
@@ -382,15 +390,15 @@ int CSqFifoShare::Open( const sqbind::stdString &sName )
 	// Attempt to allocate the buffer
 	int size = ( nBlocks * SQSFS_PTSIZE ) + nHeaderSize + nBufSize + m_nPadding;
 	if ( !m_buf.Allocate( size ) )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate buffer of " ), size, oexT( " bytes : " ), std2oex( sName ), oexT( " : " ), std2oex( sidBuffer ) ) );
-		Destroy();
+	{	Destroy();
+		m_sLastErr = oex2std( oexMks( oexT( "Failed to allocate buffer of " ), size, oexT( " bytes : " ), std2oex( sName ), oexT( " : " ), std2oex( sidBuffer ) ) );
 		return 0;
 	} // end if
 
 	// Punt if it doesn't exist
 	if ( !m_buf.Existing() )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Share buffer does not exist : " ), std2oex( sName ), oexT( " : " ), std2oex( sidBuffer ) ) );
-		Destroy();
+	{	Destroy();
+		m_sLastErr = oex2std( oexMks( oexT( "Share buffer does not exist : " ), std2oex( sName ), oexT( " : " ), std2oex( sidBuffer ) ) );
 		return 0;
 	} // end if
 
@@ -415,8 +423,8 @@ int CSqFifoShare::isValid()
 
 	// Verify that writer is still connected
 	if ( m_cb.getUINT( 0 ) != m_uCbId || m_cb.getUINT( 3 ) != m_uTs )
-	{	m_sLastErr = oex2std( oexMks( oexT( "Writer has disconnected : " ), std2oex( m_sName ) ) );
-		Destroy();
+	{	Destroy();
+		m_sLastErr = oex2std( oexMks( oexT( "Writer has disconnected : " ), std2oex( m_sName ) ) );
 		return 0;
 	} // end if
 

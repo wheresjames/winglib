@@ -291,7 +291,7 @@ void CFfContainer::fixVideoFrameRate()
   avio_wl32(pb, avist->packet_count );
   avio_seek(pb, file_size, SEEK_SET);
 }
-
+/*
 sqbind::stdString CFfContainer::getFixVideoFrameRateDiag()
 {
 	
@@ -350,7 +350,7 @@ sqbind::stdString CFfContainer::getFixVideoFrameRateDiag()
   return m_sFfrDiag;
 #endif
 }
-
+*/
 int CFfContainer::CloseStream()
 {_STT();
     int i;

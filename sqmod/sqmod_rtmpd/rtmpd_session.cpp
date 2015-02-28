@@ -1009,5 +1009,5 @@ sqbind::stdString CRtmpdSession::getErrors()
 	oexAutoLock ll( _g_rtmpd_lock );
 	oex::CStr8 s = _g_rtmpd_sErrors;
 	_g_rtmpd_sErrors.clear();
-	return sqbind::oex2std( s );
+	return sqbind::oex2std( oexMbToStr( s ) );
 }
