@@ -981,7 +981,7 @@ CSqMulti CSqEngineExport::splitstr( const stdString &s, const stdString &seps )
 
 	int i = 0;
 	CSqMulti m;
-    for ( oex::CStrList8::iterator it; lst.Next( it ); )
+    for ( typename oex::CStrList::iterator it; lst.Next( it ); )
 		m[ oex2std( oexMks( i++ ) ) ] = oex2std( *it );
 
 	return m;
