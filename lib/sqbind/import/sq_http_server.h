@@ -131,7 +131,7 @@ namespace sqbind
 
 		/// Returns the value of the specified default header
 		sqbind::stdString getDefaultHeader( const stdString &sName )
-		{	return sqbind::oex2std( m_server.DefHeaders()[ oexStrToMb( sqbind::std2oex( sName ) ) ].ToString() ); }
+		{	return sqbind::oex2std( oexMbToStr( m_server.DefHeaders()[ oexStrToMb( sqbind::std2oex( sName ) ) ].ToString() ) ); }
 
 		/// Returns all the default headers
 		sqbind::CSqMulti getDefaultHeaders();

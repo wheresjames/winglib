@@ -107,27 +107,31 @@ class CClientSession : public RTSPServer::RTSPClientSession
 public:
 
 	/// Constructor
-	CClientSession( CLvRtspServer *pServer, RTSPServer *pRtspServer,
-					unsigned sessionId, int clientSocket, struct sockaddr_in clientAddr );
+    CClientSession( CLvRtspServer *pServer, RTSPServer& ourServer, u_int32_t sessionId );
+	
+//	CClientSession( CLvRtspServer *pServer, RTSPServer *pRtspServer,
+//					unsigned sessionId, int clientSocket, struct sockaddr_in clientAddr );
 
 	/// Destructor
 	~CClientSession();
 
 	/// DESCRIBE
-	virtual void handleCmd_DESCRIBE( char const *cseq, char const *urlPreSuffix,
-									 char const *urlSuffix, char const *fullRequestStr );
+//	virtual void handleCmd_DESCRIBE( char const *cseq, char const *urlPreSuffix,
+//									 char const *urlSuffix, char const *fullRequestStr );
 
 	/// SETUP
-	virtual void handleCmd_SETUP( char const* cseq, char const* urlPreSuffix,
+//	virtual void handleCmd_SETUP( char const* cseq, char const* urlPreSuffix,
+	virtual void handleCmd_SETUP( RTSPServer::RTSPClientConnection *ourClientConnection, char const* urlPreSuffix,
 								  char const* urlSuffix, char const* fullRequestStr );
 
 	/// CMD
-	virtual void handleCmd_withinSession( char const* cmdName,
+	virtual void handleCmd_withinSession( RTSPServer::RTSPClientConnection *ourClientConnection, char const* cmdName,
 										  char const* urlPreSuffix, char const* urlSuffix,
-										  char const* cseq, char const* fullRequestStr );
+										  char const* fullRequestStr );
 
 	/// PLAY
-	virtual void handleCmd_PLAY( ServerMediaSubsession* subsession, char const* cseq, char const* fullRequestStr );
+	virtual void handleCmd_PLAY( RTSPServer::RTSPClientConnection *ourClientConnection, 
+								 ServerMediaSubsession* subsession, char const* fullRequestStr );
 
 private:
 
@@ -172,7 +176,8 @@ protected:
 
 	/// Creates a new client session
 	virtual RTSPClientSession*
-		createNewClientSession( unsigned sessionId, int clientSocket, struct sockaddr_in clientAddr );
+		CRtspServer::createNewClientSession( u_int32_t sessionId );
+//		createNewClientSession( unsigned sessionId, int clientSocket, struct sockaddr_in clientAddr );
 
 public:
 

@@ -31,6 +31,7 @@
 //----------------------------------------------------------------*/
 
 #include "../stdafx.h"
+#include "math.h"
 
 using namespace sqbind;
 
@@ -82,7 +83,7 @@ int CSqPolygon::AddPoint( long x, long y )
 {	
 	// Resize array
 	if ( m_pts.Size() < ( m_lPts + 1 ) )
-		m_pts.Resize( ( m_lPts < 8 ) ? 8 : ( m_lPts * 2 ) );
+		m_pts.OexResize( ( m_lPts < 8 ) ? 8 : ( m_lPts * 2 ) );
 
 	// Set point
 	m_pts[ m_lPts ].x = x; 

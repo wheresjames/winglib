@@ -144,6 +144,9 @@ private:
 
 	/// Session cookies
 	sqbind::stdString			m_sCookies;
+#if defined( oexUNICODE )
+	oex::CStr8					m_sCookies8;
+#endif
 
 	/// Content type
 	sqbind::stdString			m_sContentType;

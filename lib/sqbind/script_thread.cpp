@@ -48,7 +48,7 @@ CScriptThread::CScriptThread()
 	m_uToElapsed = 0;
 	m_dToValue = 0;
 	m_uLogFreq = 1000;
-	m_sScript = oexT( "" );
+	m_sScript.clear();
 }
 
 CScriptThread::~CScriptThread()

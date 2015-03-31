@@ -45,6 +45,7 @@ BOOL WINAPI DllMain( HANDLE hinstDLL, DWORD dwReason, LPVOID lpvReserved ) { ret
 extern "C" oexDECLARE_SRV_FUNCTION( SRV_GetModuleInfo );
 extern "C" oex::oexRESULT SRV_GetModuleInfo( oex::os::service::SSrvInfo *pDi )
 {// _STT();
+
 	if ( !oexCHECK_PTR( pDi ) )
 	{	oexERROR( 0, oexT( "Invalid function argument" ) );
 		return 0;

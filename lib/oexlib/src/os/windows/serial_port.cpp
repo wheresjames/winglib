@@ -178,7 +178,7 @@ oexBOOL CSerialPort::SetStatus()
 	if ( !pS || INVALID_HANDLE_VALUE == pS->hPort )
 		return oexFALSE;
 
-	unsigned long ulCommErr;
+	DWORD ulCommErr = 0;
 	oexBOOL success = SetCommState( pS->hPort, &pS->dcb );
 	if ( !success )
 		oexERROR( GetLastError(), oexT( "SetCommState() failed" ) );		
@@ -280,7 +280,7 @@ oexBOOL CSerialPort::ClearErrors()
 	if ( !pS || INVALID_HANDLE_VALUE == pS->hPort )
 		return oexFALSE;
 
-	unsigned long ulCommErr;
+	DWORD ulCommErr = 0;
 
 	ClearCommBreak( pS->hPort );
 	ClearCommError( pS->hPort, &ulCommErr, NULL );

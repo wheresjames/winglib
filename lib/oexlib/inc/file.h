@@ -400,6 +400,11 @@ public:
 		return oex::CFile().OpenExisting( x_pFile ).Read();
 	}
 
+	/// Removes folder, folder must be empty
+    static oexBOOL RemoveFolder( oexCSTR x_pDir )
+	{	return os::CBaseFile::RemoveFolder( x_pDir );
+	}
+	
 	/// Writes the data to a file
 	static oexBOOL PutContents( oexCSTR x_pFile, const CStr8 &sData )
 	{	if ( !x_pFile || !*x_pFile ) return oexFALSE;

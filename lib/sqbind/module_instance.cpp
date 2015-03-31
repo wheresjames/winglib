@@ -76,6 +76,7 @@ void CModuleInstance::Destroy()
 
 oex::oexBOOL CModuleInstance::Load( oex::oexCSTR x_pFile )
 {_STT();
+
 	// Lose the old module
 	Destroy();
 
@@ -101,6 +102,7 @@ oex::oexBOOL CModuleInstance::Load( oex::oexCSTR x_pFile )
 
 oex::oexBOOL CModuleInstance::LoadFunctions()
 {_STT();
+
 	// Ensure module
 	if ( !IsLoaded() )
 		return oex::oexFALSE;

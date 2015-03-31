@@ -44,6 +44,7 @@
 #endif
 
 #if defined( SQBIND_STATIC_curl )
+		SQBIND_Init_curl();
 		SQBIND_Export_curl( x_vm );
 #endif
 
@@ -52,6 +53,7 @@
 #endif
 
 #if defined( SQBIND_STATIC_ffmpeg )
+		SQBIND_Init_ffmpeg();
 		SQBIND_Export_ffmpeg( x_vm );
 #endif
 

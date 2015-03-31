@@ -194,7 +194,7 @@ CStr CSysUtil::GetRegString( const CStr &x_sKey, const CStr &x_sPath, const CStr
 	RegCloseKey( hKey );
 
 	// Return the value as a string
-	return RegValueToString( dwType, buf._Ptr(), dwSize );
+	return RegValueToString( dwType, buf._Ptr(), dwSize / sizeof( oexTCHAR ) );
 }
 
 oexBOOL CSysUtil::SetRegString( const CStr &x_sKey, const CStr &x_sPath, const CStr &x_sName, const CStr &x_sValue )
@@ -216,8 +216,9 @@ oexBOOL CSysUtil::SetRegString( const CStr &x_sKey, const CStr &x_sPath, const C
 	// +++ Should we do mb/unicode here?
 
 	// Set the value
-	CStr8 val = oexStrToMb( x_sValue );
-	lRes = RegSetValueEx( hKey, x_sName.Ptr(), 0, REG_SZ, (const BYTE *)val.Ptr(), val.Length() + 1 );
+//	CStr8 val = oexStrToMb( x_sValue );
+//	lRes = RegSetValueEx( hKey, x_sName.Ptr(), 0, REG_SZ, (const BYTE *)val.Ptr(), val.Length() + 1 );
+	lRes = RegSetValueEx( hKey, x_sName.Ptr(), 0, REG_SZ, (const BYTE *)x_sValue.Ptr(), x_sValue.Length() * sizeof( oexTCHAR ) + sizeof( oexTCHAR ) );
 	if ( ERROR_SUCCESS != lRes )
 		oexERROR( lRes, oexMks( oexT( "RegSetValueEx() failed : " ),
 								x_sKey.Ptr(), oexT( " : " ),

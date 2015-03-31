@@ -197,23 +197,23 @@ CPropertyBag CSysUtil::GetDiskInfo(const CStr &x_sDrive)
 	pb[ oexT( "drive_mounted" ) ] = di.f_bsize ? 1 : 0;
 
 	// If there is storage, calculate percentages
-	if( di.f_bsize )
+	if( 0 < di.f_blocks )
 	{
 		// Available percentages
 		pb[ oexT( "percent_available" ) ] 
-			= CStr().Fmt( "%.2f", (double)di.f_bavail / (double)di.f_bsize * (double)100 );
-		if ( (fsblkcnt_t)di.f_bsize > di.f_bavail )
+			= CStr().Fmt( "%.2f", (double)di.f_bavail / (double)di.f_blocks * (double)100 );
+		if ( (fsblkcnt_t)di.f_blocks > di.f_bavail )
 			pb[ oexT( "percent_unavailable" ) ] 
-				= CStr().Fmt( "%.2f", (double)( di.f_bsize - di.f_bavail )
-										/ (double)di.f_bsize * (double)100 );
+				= CStr().Fmt( "%.2f", (double)( di.f_blocks - di.f_bavail )
+										/ (double)di.f_blocks * (double)100 );
 
 		// Used percentages
 		pb[ oexT( "percent_free" ) ] 
-			= CStr().Fmt( "%.2f", (double)di.f_bfree / (double)di.f_bsize * (double)100 );
-		if ( (fsblkcnt_t)di.f_bsize > di.f_bfree )
+			= CStr().Fmt( "%.2f", (double)di.f_bfree / (double)di.f_blocks * (double)100 );
+		if ( (fsblkcnt_t)di.f_blocks > di.f_bfree )
 			pb[ oexT( "percent_used" ) ] 
-				= CStr().Fmt( "%.2f", (double)( di.f_bsize - di.f_bfree )
-										/ (double)di.f_bsize * (double)100 );
+				= CStr().Fmt( "%.2f", (double)( di.f_blocks - di.f_bfree )
+										/ (double)di.f_blocks * (double)100 );
 	} // end if
  
 	return pb;

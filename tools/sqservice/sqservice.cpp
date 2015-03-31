@@ -101,7 +101,7 @@ public:
 		sqbind::CScriptThread::SetAppInfo( oexAppNamePtr(), oexAppNameProcPtr(), oexAppLongNamePtr(), oexAppDescPtr() );
 
 		// Script id
-		g_psqScriptThread->SetId( sqbind::oex2std( oex::CStr( SQBIND_APP_IID_BIN ) ) );
+		g_psqScriptThread->SetId( sqbind::oex2std( oexMbToStr( oex::CStr8( SQBIND_APP_IID_BIN ) ) ) );
 		
 		// Script name
 		g_psqScriptThread->SetScriptName( oexT( "embedded:main.nut" ) );

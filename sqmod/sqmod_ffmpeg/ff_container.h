@@ -308,7 +308,7 @@ public:
 	
 	/// Returns diagnostics about the frame rate fixer
 #if !defined( oexUNICODE )
-	sqbind::stdString getFixVideoFrameRateDiag();
+//	sqbind::stdString getFixVideoFrameRateDiag();
 #endif
 
 	/// Returns the audio time stamp offset

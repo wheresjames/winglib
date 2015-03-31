@@ -103,7 +103,7 @@ int CSqEzdib::Save( const stdString &sFile )
 	if ( !m_ezimg || !sFile.length() )
 		return 0;
 	
-	return oss::ezd_save( m_ezimg, sFile.c_str() );
+	return oss::ezd_save( m_ezimg, oexStrToMb( sqbind::std2oex( sFile ) ).c_str() );
 }
 
 int CSqEzdib::Fill( int col )

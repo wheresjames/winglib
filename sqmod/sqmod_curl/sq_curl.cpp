@@ -34,6 +34,8 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqCurl, CSqCurl )
 
 SQBIND_REGISTER_CLASS_END()
 
+extern oexLock _g_curl_lock;
+
 void CSqCurl::Register( sqbind::VM vm )
 {_STT();
 	SQBIND_EXPORT( vm, CSqCurl );
@@ -101,10 +103,10 @@ int CSqCurl::ProgressCallback( void *clientp, double dltotal, double dlnow, doub
 		return 0;
 
 	sqbind::CSqMulti m;
-	m[ "dltotal" ] = sqbind::oex2std( oexMks( dltotal ) );
-	m[ "dlnow" ] = sqbind::oex2std( oexMks( dlnow ) );
-	m[ "ultotal" ] = sqbind::oex2std( oexMks( ultotal ) );
-	m[ "ulnow" ] = sqbind::oex2std( oexMks( ulnow ) );
+	m[ oexT( "dltotal" ) ] = sqbind::oex2std( oexMks( dltotal ) );
+	m[ oexT( "dlnow" ) ] = sqbind::oex2std( oexMks( dlnow ) );
+	m[ oexT( "ultotal" ) ] = sqbind::oex2std( oexMks( ultotal ) );
+	m[ oexT( "ulnow" ) ] = sqbind::oex2std( oexMks( ulnow ) );
 
 	// Make the callback
 	pCurl->m_pProgressQ->execute( 0, oexT( "." ), pCurl->m_sProgressFn, m.serialize() );
@@ -222,11 +224,18 @@ int CSqCurl::Init()
 	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYPEER, 0 );
 	curl_easy_setopt( m_curl, CURLOPT_SSL_VERIFYHOST, 0 );
 	curl_easy_setopt( m_curl, CURLOPT_CERTINFO, 1 );
+	curl_easy_setopt( m_curl, CURLOPT_NOSIGNAL, 1 ); // Only matters on posix
+	curl_easy_setopt( m_curl, CURLOPT_DNS_USE_GLOBAL_CACHE, 1 ); // Not thread safe
 
 	if ( m_bEnableCookies )
-	{	curl_easy_setopt( m_curl, CURLOPT_COOKIEFILE, oexT( "" ) );
+	{	curl_easy_setopt( m_curl, CURLOPT_COOKIEFILE, "" );
 //		curl_easy_setopt( m_curl, CURLOPT_COOKIE, m_sCookies.c_str() );
+#if defined( oexUNICODE )
+		m_sCookies8 = oexStrToMb( sqbind::std2oex( m_sCookies ) );
+		curl_easy_setopt( m_curl, CURLOPT_COOKIELIST, m_sCookies8.c_str() );
+#else
 		curl_easy_setopt( m_curl, CURLOPT_COOKIELIST, m_sCookies.c_str() );
+#endif
 	} // end if
 
 	return 1;
@@ -235,35 +244,71 @@ int CSqCurl::Init()
 int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSqBinary *sData )
 {_STT();
 
+	oexAutoLock ll( _g_curl_lock );
+	if ( !ll.IsLocked() ) 
+		return 0;
+
+_STT_SET_CHECKPOINT( 0 );
+
 	if ( !sData && !m_sFile.length() )
 		return 0;
+
+_STT_SET_CHECKPOINT( 1 );
 
 	if ( sData )
 		sData->setUsed( 0 );
 
+_STT_SET_CHECKPOINT( 2 );
+
 	if ( !sUrl.length() )
 		return 0;
+
+_STT_SET_CHECKPOINT( 3 );
 
 	// Initialize
 	if ( !m_curl )
 		if ( !Init() )
 			return 0;
 
+_STT_SET_CHECKPOINT( 4 );
+
 	if ( m_sUsername.length() || m_sPassword.length() )
-	{	curl_easy_setopt( m_curl, CURLOPT_USERPWD,
-						  ( sqbind::stdString() + m_sUsername + oexT( ":" ) + m_sPassword ).c_str() );
+	{
+_STT_SET_CHECKPOINT( 5 );
+
 		curl_easy_setopt( m_curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC );
+#if defined( oexUNICODE )
+		oex::CStr8 sAuth8 = oexStrToMb( sqbind::std2oex( sqbind::stdString() + m_sUsername + oexT( ":" ) + m_sPassword ) ); 
+		curl_easy_setopt( m_curl, CURLOPT_USERPWD, sAuth8.c_str() );
+#else
+		curl_easy_setopt( m_curl, CURLOPT_USERPWD,
+						  ( sqbind::stdString() + m_sUsername + oexT( ":" ) + m_sPassword ).c_str() );
+#endif
 	} // end if
 	else
 		curl_easy_setopt( m_curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY );
 
+_STT_SET_CHECKPOINT( 6 );
+
 	char sErr[ CURL_ERROR_SIZE ] = { 0 };
 	curl_easy_setopt( m_curl, CURLOPT_ERRORBUFFER, &sErr[ 0 ] );
 
+_STT_SET_CHECKPOINT( 7 );
+
 	// The URL we want
+#if defined( oexUNICODE )
+	oex::CStr8 sUrl8 = oexStrToMb( sqbind::std2oex( sUrl ) );
+	curl_easy_setopt( m_curl, CURLOPT_URL, sUrl8.c_str() );
+#else
 	curl_easy_setopt( m_curl, CURLOPT_URL, sUrl.c_str() );
+#endif	
+
+_STT_SET_CHECKPOINT( 8 );
+
 	if ( lPort )
 		curl_easy_setopt( m_curl, CURLOPT_PORT, lPort );
+
+_STT_SET_CHECKPOINT( 9 );
 
 	// Setup output
 	sqbind::CSqFile fOut;
@@ -277,8 +322,12 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSq
 		curl_easy_setopt( m_curl, CURLOPT_WRITEFUNCTION, StdWriter );
 	} // end else
 
+_STT_SET_CHECKPOINT( 10 );
+
 	if ( m_headers )
 		curl_easy_setopt( m_curl, CURLOPT_HTTPHEADER, m_headers );
+
+_STT_SET_CHECKPOINT( 11 );
 
 	// Progress callback?
 	if ( m_pProgressQ && m_sProgressFn.length() )
@@ -286,17 +335,25 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSq
 		curl_easy_setopt( m_curl, CURLOPT_PROGRESSDATA, this ),
 		curl_easy_setopt( m_curl, CURLOPT_PROGRESSFUNCTION, &CSqCurl::ProgressCallback );
 
+_STT_SET_CHECKPOINT( 12 );
+
 	// Do the thing
 	CURLcode res = curl_easy_perform( m_curl );
+
+_STT_SET_CHECKPOINT( 13 );
 
 	if ( CURLE_OK != res )
 	{	m_sErr = oexMbToStrPtr( sErr );
 		return 0;
 	} // end if
 
+_STT_SET_CHECKPOINT( 14 );
+
 	char *pCt = 0;
 	if ( CURLE_OK == curl_easy_getinfo( m_curl, CURLINFO_CONTENT_TYPE, &pCt ) && pCt )
-		m_sContentType = oexMbToStr( pCt );
+		m_sContentType = sqbind::oex2std( oexMbToStr( oex::CStr8( pCt ) ) );
+
+_STT_SET_CHECKPOINT( 15 );
 
 	// Get cookies
 	if ( m_bEnableCookies )
@@ -318,6 +375,8 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSq
 		} // end if
 
 	} // end if
+
+_STT_SET_CHECKPOINT( 16 );
 
 	// See if there are certs
 	struct curl_certinfo *ci = 0;
@@ -345,11 +404,17 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSq
 
 				} // end for
 
+_STT_SET_CHECKPOINT( 17 );
+
 	return 1;
 }
 
 int CSqCurl::PostUrl( const sqbind::stdString &sUrl, SQInteger lPort, const sqbind::stdString &sPost, sqbind::CSqBinary *sData )
 {_STT();
+
+	oexAutoLock ll( _g_curl_lock );
+	if ( !ll.IsLocked() ) 
+		return 0;
 
 	if ( !sData && !m_sFile.length() )
 		return 0;
@@ -366,20 +431,39 @@ int CSqCurl::PostUrl( const sqbind::stdString &sUrl, SQInteger lPort, const sqbi
 			return 0;
 
 	curl_easy_setopt( m_curl, CURLOPT_POST, 1 );
+	
+	// Set post parameters
+#if defined( oexUNICODE )
+	oex::CStr8 sPost8 = oexStrToMb( sqbind::std2oex( sPost ) );
+	curl_easy_setopt( m_curl, CURLOPT_POSTFIELDS, sPost8.c_str() );
+	curl_easy_setopt( m_curl, CURLOPT_POSTFIELDSIZE, sPost8.length() );
+#else
 	curl_easy_setopt( m_curl, CURLOPT_POSTFIELDS, sPost.c_str() );
 	curl_easy_setopt( m_curl, CURLOPT_POSTFIELDSIZE, sPost.length() );
+#endif
 
 	if ( m_sUsername.length() || m_sPassword.length() )
-	{	curl_easy_setopt( m_curl, CURLOPT_USERPWD,
+	{	curl_easy_setopt( m_curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC );
+#if defined( oexUNICODE )
+		oex::CStr8 sAuth8 = oexStrToMb( sqbind::std2oex( sqbind::stdString() + m_sUsername + oexT( ":" ) + m_sPassword ) ); 
+		curl_easy_setopt( m_curl, CURLOPT_USERPWD, sAuth8.c_str() );
+#else
+	  curl_easy_setopt( m_curl, CURLOPT_USERPWD,
 						  ( sqbind::stdString() + m_sUsername + oexT( ":" ) + m_sPassword ).c_str() );
-		curl_easy_setopt( m_curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC );
+#endif
 	} // end if
 
 	char sErr[ CURL_ERROR_SIZE ] = { 0 };
 	curl_easy_setopt( m_curl, CURLOPT_ERRORBUFFER, &sErr[ 0 ] );
 
 	// The URL we want
+#if defined( oexUNICODE )
+	oex::CStr8 sUrl8 = oexStrToMb( sqbind::std2oex( sUrl ) );
+	curl_easy_setopt( m_curl, CURLOPT_URL, sUrl8.c_str() );
+#else
 	curl_easy_setopt( m_curl, CURLOPT_URL, sUrl.c_str() );
+#endif	
+	
 	if ( lPort )
 		curl_easy_setopt( m_curl, CURLOPT_PORT, lPort );
 
@@ -471,14 +555,14 @@ int CSqCurl::addMultipart( const sqbind::stdString &sName, const sqbind::stdStri
 		// Mime type specified?
 		if ( 0 < sMime.length() )
 			return ( CURLE_OK == curl_formadd( &m_multihead, &m_multitail,
-												CURLFORM_COPYNAME, sName.c_str(),
-												CURLFORM_CONTENTTYPE, m_sMimeStr.c_str(),
+												CURLFORM_COPYNAME, oexStrToMb( sqbind::std2oex( sName ) ).c_str(),
+												CURLFORM_CONTENTTYPE, oexStrToMb( sqbind::std2oex( m_sMimeStr ) ).c_str(),
 												CURLFORM_COPYCONTENTS, pData->Ptr(),
 												CURLFORM_CONTENTSLENGTH, (long)pData->getUsed(),
 												CURLFORM_END ) ) ? 1 : 0;
 		else
 			return ( CURLE_OK == curl_formadd( &m_multihead, &m_multitail,
-												CURLFORM_COPYNAME, sName.c_str(),
+												CURLFORM_COPYNAME, oexStrToMb( sqbind::std2oex( sName ) ).c_str(),
 												CURLFORM_COPYCONTENTS, pData->Ptr(),
 												CURLFORM_CONTENTSLENGTH, (long)pData->getUsed(),
 												CURLFORM_END ) ) ? 1 : 0;
@@ -486,9 +570,9 @@ int CSqCurl::addMultipart( const sqbind::stdString &sName, const sqbind::stdStri
 
 	// Add to list
 	return ( CURLE_OK == curl_formadd( &m_multihead, &m_multitail,
-										CURLFORM_COPYNAME, sName.c_str(),
-										CURLFORM_CONTENTTYPE, sMime.c_str(),
-										CURLFORM_BUFFER, sFile.c_str(),
+										CURLFORM_COPYNAME, oexStrToMb( sqbind::std2oex( sName ) ).c_str(),
+										CURLFORM_CONTENTTYPE, oexStrToMb( sqbind::std2oex( sMime ) ).c_str(),
+										CURLFORM_BUFFER, oexStrToMb( sqbind::std2oex( sFile ) ).c_str(),
 										CURLFORM_BUFFERPTR, pData->Ptr(),
 										CURLFORM_BUFFERLENGTH, (long)pData->getUsed(),
 										CURLFORM_END ) ) ? 1 : 0;
@@ -497,6 +581,10 @@ int CSqCurl::addMultipart( const sqbind::stdString &sName, const sqbind::stdStri
 
 int CSqCurl::PostMultipart( const sqbind::stdString &sUrl, SQInteger lPort, const sqbind::stdString &sPost, sqbind::CSqBinary *sData )
 {_STT();
+
+	oexAutoLock ll( _g_curl_lock );
+	if ( !ll.IsLocked() ) 
+		return 0;
 
 	if ( !sData && !m_sFile.length() )
 		return 0;
@@ -513,9 +601,14 @@ int CSqCurl::PostMultipart( const sqbind::stdString &sUrl, SQInteger lPort, cons
 			return 0;
 
 	if ( m_sUsername.length() || m_sPassword.length() )
-	{	curl_easy_setopt( m_curl, CURLOPT_USERPWD,
+	{	curl_easy_setopt( m_curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC );
+#if defined( oexUNICODE )
+		oex::CStr8 sAuth8 = oexStrToMb( sqbind::std2oex( sqbind::stdString() + m_sUsername + oexT( ":" ) + m_sPassword ) ); 
+		curl_easy_setopt( m_curl, CURLOPT_USERPWD, sAuth8.c_str() );
+#else
+	  curl_easy_setopt( m_curl, CURLOPT_USERPWD,
 						  ( sqbind::stdString() + m_sUsername + oexT( ":" ) + m_sPassword ).c_str() );
-		curl_easy_setopt( m_curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC );
+#endif
 	} // end if
 
 	char sErr[ CURL_ERROR_SIZE ] = { 0 };
@@ -528,7 +621,13 @@ int CSqCurl::PostMultipart( const sqbind::stdString &sUrl, SQInteger lPort, cons
 	} // end if
 
 	// The URL we want
+#if defined( oexUNICODE )
+	oex::CStr8 sUrl8 = oexStrToMb( sqbind::std2oex( sUrl ) );
+	curl_easy_setopt( m_curl, CURLOPT_URL, sUrl8.c_str() );
+#else
 	curl_easy_setopt( m_curl, CURLOPT_URL, sUrl.c_str() );
+#endif	
+	
 	if ( lPort )
 		curl_easy_setopt( m_curl, CURLOPT_PORT, lPort );
 
@@ -541,8 +640,7 @@ int CSqCurl::PostMultipart( const sqbind::stdString &sUrl, SQInteger lPort, cons
 	// Setup output
 	sqbind::CSqFile fOut;
 	if ( m_sFile.length() )
-	{	oexSHOW( m_sFile.c_str() );
-		if ( !fOut.OpenAlways( m_sFile ) ) return 0;
+	{	if ( !fOut.OpenAlways( m_sFile ) ) return 0;
 		curl_easy_setopt( m_curl, CURLOPT_WRITEDATA, &fOut );
 		curl_easy_setopt( m_curl, CURLOPT_WRITEFUNCTION, StdFileWriter );
 	} // endif

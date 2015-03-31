@@ -2118,7 +2118,6 @@ public:
 		return ret;
 	}
 
-
 	template< typename T >
 		static TStr< T > EncodeJSON( TPropertyBag< TStr< T > > &x_pb, oexLONG x_depth = 0 )
 	{
@@ -2294,6 +2293,8 @@ public:
 			// Parse token
 			else
 			{
+				oexULONG l = x_sStr.Length();
+				
 				if ( !lMode )
 					lMode = 1,
 					sKey = x_sStr.Parse( oexTT( T, ",:{}[]\r\n\t" ) ).TrimWhiteSpace();
@@ -2308,7 +2309,7 @@ public:
 						x_pb[ sKey ] = val;
 				} // end else if
 
-				if ( x_sStr[ 0 ] == oexTC( T, ',' ) )
+				if ( x_sStr[ 0 ] == oexTC( T, ',' ) || x_sStr.Length() == l )
 					x_sStr++;
 
 			} // end if

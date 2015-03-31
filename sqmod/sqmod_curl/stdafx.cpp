@@ -8,23 +8,37 @@
 //#include <openssl/engine.h>
 #include <openssl/err.h>
 
+oexLock _g_curl_lock;
+
 // Export classes
 static void SQBIND_Export_curl( sqbind::VM x_vm )
 {_STT();
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
 
+	CSqCurl::Register( x_vm );
+}
+
+static void SQBIND_Init_curl()
+{
+	oexAutoLock ll( _g_curl_lock );
+	if ( !ll.IsLocked() ) 
+		return;
+	
 	// Initialize SSL
 	SSL_library_init();
 
 	// Initialize curl
 	curl_global_init( CURL_GLOBAL_ALL );
 		
-	CSqCurl::Register( x_vm );
 }
 
-static void SQBIND_module_cleanup()
+static void SQBIND_Exit_curl()
 {
+	oexAutoLock ll( _g_curl_lock );
+	if ( !ll.IsLocked() ) 
+		return;
+	
 	// Cleanup curl
 	curl_global_cleanup();
 
@@ -38,7 +52,8 @@ static void SQBIND_module_cleanup()
 }
 
 // Cleanup
-#define SQBIND_Exit SQBIND_module_cleanup();
+#define SQBIND_Init SQBIND_Init_curl();
+#define SQBIND_Exit SQBIND_Exit_curl();
 
 #if defined( SQBIND_STATIC )
 	#include "sq_curl.cpp"

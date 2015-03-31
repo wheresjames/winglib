@@ -10,6 +10,7 @@
 int main(int argc, char* argv[])
 {
 	printf( "Hello World!\n" );
+	fflush( stdout );
 
 #	if defined( ANDROID )
 	exit( 0 );

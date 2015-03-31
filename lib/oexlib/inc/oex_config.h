@@ -198,7 +198,7 @@
 //#define OEXLIB_EXTRA_POINTER_CHECK
 
 // Define to generate stack traces
-#if !defined( OEX_ANDROID )
+#if !defined( OEX_ANDROID ) && ( !defined( OEX_GCC ) || !defined( oexUNICODE ) )
 #	define OEXLIB_STACK_TRACING
 //#	define OEXLIB_STACK_HISTORY
 //#	define OEXLIB_STACK_KEEP_INACTIVE_TRACES
@@ -241,10 +241,17 @@
 #	define oexSTTFUNCTION		__PRETTY_FUNCTION__
 #	define oexSTTSTR			oexCSTR8
 #else
-#	define oexFUNCTION			__FUNCTION__
-#	define oexPRETTYFUNCTION	__FUNCTION__ oexTEXT( "()" )
-#	define oexSTTFUNCTION		__FUNCTION__
-#	define oexSTTSTR			oexCSTR
+#	if defined( OEX_GCC )
+#		define oexFUNCTION			__FUNCTION__
+#		define oexPRETTYFUNCTION	__FUNCTION__ oexTEXT( "()" )
+#		define oexSTTFUNCTION		__FUNCTION__
+#		define oexSTTSTR			oexCSTR
+#	else
+#		define oexFUNCTION			__FUNCTION__
+#		define oexPRETTYFUNCTION	__FUNCTION__ oexTEXT( "()" )
+#		define oexSTTFUNCTION		__FUNCTION__
+#		define oexSTTSTR			oexCSTR
+#	endif
 #endif
 
 #define oexDATE					__DATE__

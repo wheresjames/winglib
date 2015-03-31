@@ -116,7 +116,7 @@ public:
 	// Destroy()
 	//==============================================================
 	/// Releases all memory resources and prepares class for reuse.
-	void Destroy() { m_lstPb.Destroy(); }
+	void Destroy() { m_lstPb.Destroy(); m_t.Destroy(); m_flags = 0; }
 
 	//==============================================================
 	// List()

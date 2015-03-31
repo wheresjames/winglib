@@ -10,6 +10,7 @@ BUILDDIRS := $(BUILDDIRS) \
 			 tools/resbld \
 			 tools/join \
 			 app/test \
+			 app/wrtc
 
 ifdef PETS
 BUILDDIRS := $(BUILDDIRS) \
@@ -87,7 +88,8 @@ BUILDDIRS := $(BUILDDIRS) \
 			 sqmod/sqmod_portaudio \
 			 sqmod/sqmod_rtmpd \
 			 sqmod/sqmod_ssh2 \
-			 sqmod/sqmod_tinyxml
+			 sqmod/sqmod_tinyxml \
+			 sqmod/sqmod_webrtc
 
 ifdef PETS
 BUILDDIRS := $(BUILDDIRS) \

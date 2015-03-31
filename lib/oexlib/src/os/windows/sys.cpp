@@ -740,7 +740,7 @@ void CSys::Sleep( oexUINT uMilliseconds, oexUINT uSeconds )
 	::Sleep( uMilliseconds + ( uSeconds * 1000 ) );
 }
 
-static timeval  g_tv_microsleep_socket;
+static TIMEVAL  g_tv_microsleep_socket;
 static fd_set   g_fd_set_microsleep_socket;
 static oexINT   g_microsleep_socket_init = -1;
 static SOCKET   g_microsleep_socket = INVALID_SOCKET;
@@ -905,12 +905,12 @@ oexINT CSys::WaitForMultipleObjects( oexUINT x_uObjects, CSys::t_WAITABLE *x_pHa
 
 oexLONG CSys::increment( oexLONG *x_puVal )
 {//_STT();
-	return ::InterlockedIncrement( x_puVal );
+	return ::InterlockedIncrement( (unsigned long volatile*)x_puVal );
 }
 
 oexLONG CSys::decrement( oexLONG *x_puVal )
 {//_STT();
-	return ::InterlockedDecrement( x_puVal );
+	return ::InterlockedDecrement( (unsigned long volatile*)x_puVal );
 }
 
 void CSys_SystemTimeToSTime( SYSTEMTIME &st, CSys::STime &t )

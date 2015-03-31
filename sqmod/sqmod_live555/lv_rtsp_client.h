@@ -3,6 +3,10 @@
 class CLvRtspClient : oex::CThread
 {
 public:
+	
+	typedef oexStdMap( void*, CLvRtspClient* )	t_PtrMap;
+	
+public:
 
 	class CVideoSink : public MediaSink
 	{
@@ -10,7 +14,7 @@ public:
 
 		enum
 		{
-            eDefaultBufferSize = 2000000
+            eDefaultBufferSize = 4 * 1000000
 		};
 
 	public:
@@ -352,10 +356,19 @@ public:
 	/// Sets the rx buffer size
 	void setRxBufferSize( int n ) { m_nRxBufferSize = n; }
 
+	/// Enable / disable debug information output
+	void EnableDebugInfo( int n ) { m_nDebug = n; }
+	
 	/** @} */
 
 	/// Idle processing static function
 	static void _OnIdle( void *pData );
+
+	/// Response handler
+	static void _OnResponseHandler( RTSPClient *rtspClient, int resultCode, char *resultString );
+	
+	/// Response handler
+	void OnResponseHandler( int resultCode, char *resultString );
 
 	/// Idle processing
 	void OnIdle();
@@ -387,9 +400,15 @@ protected:
 
 private:
 
+	/// Debug level
+	int						m_nDebug;
+
 	/// Flag to end loop
 	char					m_nEnd;
 
+	/// Flag indicating loop should run
+	char					m_nLoop;
+	
 	/// Url to open
 	sqbind::stdString		m_sUrl;
 
@@ -485,6 +504,27 @@ private:
 
 	/// Non-zero to specify the HTTP port used to tunnel
 	int						m_nTunnelOverHTTPPort;
+	
+	/// Signaled when callback is complete
+	oexEvent				m_pevtCallbackDone;
+	
+	/// Non-zero if authentication is needed
+	int						m_bAuthenticate;
+	
+	/// Authenticator
+	Authenticator 			m_authenticator;
+	
+	/// Callback result int
+	int						m_nCallbackResult;
+	
+	/// Callback result string
+	oex::CStr8				m_sCallbackResult;
+	
+	/// Lock the callback array
+	static oexLock			m_lockCallbackPtrMap;
+	
+	/// Map RTSPClient Pointers to CLvRtspClient pointers, damn callback
+	static t_PtrMap			m_mCallbackPtrMap;
 };
 
 DECLARE_INSTANCE_TYPE( CLvRtspClient );

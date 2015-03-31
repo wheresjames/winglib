@@ -196,7 +196,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 
 #if defined( oexUNICODE )
 
-#	define oexT( s )				        L##s
+#	define oexT( s )				        L ##s
 #	define oexTEXT( s )				        oexT( s )
 
 #	define oexS( s )						#s
@@ -309,6 +309,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexMksW								OEX_NAMESPACE::CStrW().Mks
 
 // File functions
+#define oexRemoveFolder						OEX_NAMESPACE::CFile::RemoveFolder
 #define oexDeletePath						OEX_NAMESPACE::CFile::DeletePath
 #define oexCreatePath						OEX_NAMESPACE::CFile::CreatePath
 #define oexDelete							OEX_NAMESPACE::CFile::Delete

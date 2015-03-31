@@ -83,16 +83,16 @@ template < typename T >
 		static oex::oexTCHAR szCloseStr[] = oexT( "\" );" ) oexNL;
 		static oex::CStr::t_size nOverhead = (oex::CStr::t_size)
 												 sizeof( szHeader1 ) + sizeof( szHeader2 )
-												 + sName.Length() + sizeof( szFooter )
-												 + sizeof( szOpenStr ) + sizeof( szCloseStr );
+												 + sName.Length() * sizeof( oex::oexTCHAR ) 
+												 + sizeof( szFooter ) + sizeof( szOpenStr ) + sizeof( szCloseStr );
 
 		// Global name space
 		T sInc, sGlobal, sEnd;
 		sGlobal << oexNL << oexT( "#include \"oexres.h\"" ) << oexNL
 				<< oexT( "#include \"oexlib.h\"" ) << oexNL
 				<< oexT( "namespace ns_" ) << sName << oexT( " {" ) << oexNL;
-		sEnd << oexNL << oexT( "void* fn_") << sName <<
-						 oexNL << oexT( "\t = (void*)&ns_" ) << sName << oexT( "::f_" ) << sName << oexT( ";" ) << oexNL;
+		sEnd << oexNL << oexT( "void* fn_") << sName 
+			 << oexNL << oexT( "\t = (void*)&ns_" ) << sName << oexT( "::f_" ) << sName << oexT( ";" ) << oexNL;
 
 		// Get the source data
 		oex::CStr sSrc;
@@ -101,6 +101,8 @@ template < typename T >
 		else
 			sSrc = sScript;
 
+//oexEcho( sSrc.Ptr() );		
+		
 		// Did we get anything
 		oex::oexCSTR pSrc = sSrc.Ptr();
 		oex::CStr::t_size szSrc = sSrc.Length(), nPos = 0, nStart = 0;
@@ -110,21 +112,21 @@ template < typename T >
 		// Allocate space for output
 		oex::CStr sDst;
 		oex::CStr::t_size nDst = 0;
-		oex::oexSTR pDst = sDst.OexAllocate( ( szSrc * 3 ) + nOverhead );
+		oex::oexSTR pDst = sDst.OexAllocate( ( szSrc * 3 * sizeof( oex::oexTCHAR ) ) + nOverhead );
 		if ( !pDst )
 			return oexT( "" );
 
 		// Copy header into buffer
 		oexMemCpy( &pDst[ nDst ], szHeader1, sizeof( szHeader1 ) - sizeof( oex::oexTCHAR ) );
-		nDst += sizeof( szHeader1 ) - sizeof( oex::oexTCHAR );
+		nDst += ( sizeof( szHeader1 ) / sizeof( oex::oexTCHAR ) ) - 1;
 
 		// Copy function name
-		oexMemCpy( &pDst[ nDst ], sName.Ptr(), sName.Length() );
+		oexMemCpy( &pDst[ nDst ], sName.Ptr(), sName.Length() * sizeof( oex::oexTCHAR ) );
 		nDst += sName.Length();
 
 		// Copy header into buffer
 		oexMemCpy( &pDst[ nDst ], szHeader2, sizeof( szHeader2 ) - sizeof( oex::oexTCHAR ) );
-		nDst += sizeof( szHeader2 ) - sizeof( oex::oexTCHAR );
+		nDst += ( sizeof( szHeader2 ) / sizeof( oex::oexTCHAR ) ) - 1;
 
 		// Open close positions
 		oex::CStr::t_size nOpen = 0, nClose = 0, nSkip = 0;
@@ -152,8 +154,8 @@ template < typename T >
 		while ( ( nPos + szOpenG + szClose ) < szSrc )
 		{
 			// Ensure we have space
-			if ( ( sDst.Size() - nDst ) < ( ( szSrc - nPos ) * 3 ) + nOverhead )
-				pDst = sDst.OexAllocate( sDst.Size() * 3 );
+//			if ( ( sDst.Size() - nDst ) < ( ( szSrc - nPos ) * 3 * sizeof( oex::oexTCHAR ) ) + nOverhead )
+//				pDst = sDst.OexAllocate( sDst.Size() * 3 * sizeof( oex::oexTCHAR ) );
 
 			// Initialize
 			nStart = nPos;
@@ -161,17 +163,18 @@ template < typename T >
 
 			// Attempt to find an open bracket
 			while ( nOpen == szSrc && ( nPos + szOpen + szClose ) < szSrc )
-				if ( !oexMemCmp( &pSrc[ nPos ], tcOpenI, szOpenI ) )
+				if ( !oexMemCmp( &pSrc[ nPos ], tcOpenI, szOpenI * sizeof( oex::oexTCHAR ) ) )
 					nOpen = nPos;
 				else
 					nPos++;
 
 			// Find a closing bracket
-			while ( nClose == szSrc && ( nPos + szClose ) < szSrc )
-				if ( !oexMemCmp( &pSrc[ nPos ], tcClose, szClose ) )
-					nClose = nPos;
-				else
-					nPos++;
+			if ( nOpen < szSrc )
+				while ( nClose == szSrc && ( nPos + szClose ) < szSrc )
+					if ( !oexMemCmp( &pSrc[ nPos ], tcClose, szClose * sizeof( oex::oexTCHAR ) ) )
+						nClose = nPos;
+					else
+						nPos++;
 
 			// Did we find embedded code?
 			if ( nOpen < szSrc && nClose < szSrc )
@@ -196,8 +199,8 @@ template < typename T >
 		while ( ( nPos + szOpenG + szClose ) < szSrc )
 		{
 			// Ensure we have space
-			if ( ( sDst.Size() - nDst ) < ( ( szSrc - nPos ) * 3 ) + nOverhead )
-				pDst = sDst.OexAllocate( sDst.Size() * 3 );
+//			if ( ( sDst.Size() - nDst ) < ( ( szSrc - nPos ) * 3 * sizeof( oex::oexTCHAR ) ) + nOverhead )
+//				pDst = sDst.OexAllocate( sDst.Size() * 3 * sizeof( oex::oexTCHAR ) );
 
 			// Initialize
 			nStart = nPos;
@@ -205,17 +208,18 @@ template < typename T >
 
 			// Attempt to find an open bracket
 			while ( nOpen == szSrc && ( nPos + szOpen + szClose ) < szSrc )
-				if ( !oexMemCmp( &pSrc[ nPos ], tcOpenG, szOpenG ) )
+				if ( !oexMemCmp( &pSrc[ nPos ], tcOpenG, szOpenG * sizeof( oex::oexTCHAR ) ) )
 					nOpen = nPos;
 				else
 					nPos++;
 
 			// Find a closing bracket
-			while ( nClose == szSrc && ( nPos + szClose ) < szSrc )
-				if ( !oexMemCmp( &pSrc[ nPos ], tcClose, szClose ) )
-					nClose = nPos;
-				else
-					nPos++;
+			if ( nOpen < szSrc )
+				while ( nClose == szSrc && ( nPos + szClose ) < szSrc )
+					if ( !oexMemCmp( &pSrc[ nPos ], tcClose, szClose * sizeof( oex::oexTCHAR ) ) )
+						nClose = nPos;
+					else
+						nPos++;
 
 			// Did we find embedded code?
 			if ( nOpen < szSrc && nClose < szSrc )
@@ -240,8 +244,8 @@ template < typename T >
 		while ( ( nPos + szOpen + szClose ) < szSrc )
 		{
 			// Ensure we have space
-			if ( ( sDst.Size() - nDst ) < ( ( szSrc - nPos ) * 2 ) + nOverhead )
-				pDst = sDst.OexAllocate( sDst.Size() * 2 );
+			if ( ( sDst.Size() - nDst ) < ( ( szSrc - nPos ) * 3 * sizeof( oex::oexTCHAR ) ) + nOverhead )
+				pDst = sDst.OexAllocate( sDst.Size() * 3 * sizeof( oex::oexTCHAR ) + nOverhead );
 
 			// Initialize
 			nStart = nPos;
@@ -249,36 +253,45 @@ template < typename T >
 
 			// Attempt to find an open bracket
 			while ( nOpen == szSrc && ( nPos + szOpen + szClose ) < szSrc )
-				if ( !oexMemCmp( &pSrc[ nPos ], tcOpen, szOpen ) )
+				if ( !oexMemCmp( &pSrc[ nPos ], tcOpen, szOpen * sizeof( oex::oexTCHAR ) ) )
 					nOpen = nPos, nType = 0, nSkip = szOpen;
-				else if ( !oexMemCmp( &pSrc[ nPos ], tcOpenI, szOpenI ) )
+				else if ( ( nPos + szOpenI + szClose ) < szSrc && !oexMemCmp( &pSrc[ nPos ], tcOpenI, szOpenI * sizeof( oex::oexTCHAR ) ) )
 					nOpen = nPos, nType = 1, nSkip = szOpenI;
-				else if ( !oexMemCmp( &pSrc[ nPos ], tcOpenG, szOpenG ) )
+				else if ( ( nPos + szOpenG + szClose ) < szSrc && !oexMemCmp( &pSrc[ nPos ], tcOpenG, szOpenG * sizeof( oex::oexTCHAR ) ) )
 					nOpen = nPos, nType = 2, nSkip = szOpenG;
 				else
 					nPos++;
 
 			// Find a closing bracket
-			while ( nClose == szSrc && ( nPos + szClose ) < szSrc )
-				if ( !oexMemCmp( &pSrc[ nPos ], tcClose, szClose ) )
-					nClose = nPos;
-				else
-					nPos++;
+			if ( nOpen < szSrc )
+			{
+				// Skip open bracket
+				nPos += nSkip;
+				
+				// Find close bracket
+				while ( nClose == szSrc && ( nPos + szClose ) < szSrc )
+					if ( !oexMemCmp( &pSrc[ nPos ], tcClose, szClose * sizeof( oex::oexTCHAR ) ) )
+						nClose = nPos;
+					else
+						nPos++;
+
+			} // end if
 
 			// Did we find embedded code?
 			if ( nOpen < szSrc && nClose < szSrc )
 			{
 				// Text data to be copied?
 				if ( nStart < nOpen )
-				{	oexMemCpy( &pDst[ nDst ], szOpenStr, sizeof( szOpenStr ) - sizeof( oex::oexTCHAR ) );
-					nDst += sizeof( szOpenStr ) - sizeof( oex::oexTCHAR );
-
+				{
+					oexMemCpy( &pDst[ nDst ], szOpenStr, sizeof( szOpenStr ) - sizeof( oex::oexTCHAR ) );
+					nDst += ( sizeof( szOpenStr ) / sizeof( oex::oexTCHAR ) ) - 1;
+					
 					T s = oexCppEncode( T( &pSrc[ nStart ], nOpen - nStart ) );
-					oexMemCpy( &pDst[ nDst ], s.Ptr(), s.Length() );
+					oexMemCpy( &pDst[ nDst ], s.Ptr(), s.Length() * sizeof( oex::oexTCHAR ) );
 					nDst += s.Length(); nStart += nOpen - nStart;
 
 					oexMemCpy( &pDst[ nDst ], szCloseStr, sizeof( szCloseStr ) - sizeof( oex::oexTCHAR ) );
-					nDst += sizeof( szCloseStr ) - sizeof( oex::oexTCHAR );
+					nDst += ( sizeof( szCloseStr ) / sizeof( oex::oexTCHAR ) ) - 1;
 
 				} // end if
 
@@ -288,10 +301,10 @@ template < typename T >
 				{
 					// Add new line
 					oexMemCpy( &pDst[ nDst ], oexNL, sizeof( oexNL ) - sizeof( oex::oexTCHAR ) );
-					nDst += sizeof( oexNL ) - sizeof( oex::oexTCHAR );
+					nDst += ( sizeof( oexNL ) / sizeof( oex::oexTCHAR ) ) - 1;
 
 					// Copy the code
-					oexMemCpy( &pDst[ nDst ], &pSrc[ nOpen ], nClose - nOpen );
+					oexMemCpy( &pDst[ nDst ], &pSrc[ nOpen ], ( nClose - nOpen ) * sizeof( oex::oexTCHAR ) );
 					nDst += nClose - nOpen;
 
 					// Close statement, just in case
@@ -310,21 +323,21 @@ template < typename T >
 		// Copy whatever remains
 		if ( nStart < szSrc )
 		{	oexMemCpy( &pDst[ nDst ], szOpenStr, sizeof( szOpenStr ) - sizeof( oex::oexTCHAR ) );
-			nDst += sizeof( szOpenStr ) - sizeof( oex::oexTCHAR );
+			nDst += ( sizeof( szOpenStr ) / sizeof( oex::oexTCHAR ) ) - 1;
 			T s = oexCppEncode( T( &pSrc[ nStart ], szSrc - nStart ) );
-			oexMemCpy( &pDst[ nDst ], s.Ptr(), s.Length() );
+			oexMemCpy( &pDst[ nDst ], s.Ptr(), s.Length() * sizeof( oex::oexTCHAR ) );
 			nDst += s.Length(); nStart += szSrc - nStart;
 			oexMemCpy( &pDst[ nDst ], szCloseStr, sizeof( szCloseStr ) - sizeof( oex::oexTCHAR ) );
-			nDst += sizeof( szCloseStr ) - sizeof( oex::oexTCHAR );
+			nDst += ( sizeof( szCloseStr ) / sizeof( oex::oexTCHAR ) ) - 1;
 		} // end if
 
 		// Copy footer into buffer
 		oexMemCpy( &pDst[ nDst ], szFooter, sizeof( szFooter ) - sizeof( oex::oexTCHAR ) );
-		nDst += sizeof( szFooter ) - sizeof( oex::oexTCHAR );
+		nDst += ( sizeof( szFooter ) / sizeof( oex::oexTCHAR ) ) - 1;
 
-		// Set the number of bytes in the string
+		// Set the number of characters in the string
 		sDst.SetLength( nDst );
-
+		
 		// Build the full thing and return
 		return sInc << sGlobal << sDst << sEnd;
 	}

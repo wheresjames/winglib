@@ -36,25 +36,27 @@ void CLvRtspServer::Register( sqbind::VM vm )
 // *** CClientSession
 //------------------------------------------------------------------
 
-CClientSession::CClientSession( CLvRtspServer *pServer, RTSPServer *pRtspServer,
-								unsigned sessionId, int clientSocket, struct sockaddr_in clientAddr )
+//CClientSession::CClientSession( CLvRtspServer *pServer, RTSPServer *pRtspServer,
+//								unsigned sessionId, int clientSocket, struct sockaddr_in clientAddr )
+CClientSession::CClientSession( CLvRtspServer *pServer, RTSPServer& ourServer, u_int32_t sessionId )
 	: m_pServer( pServer ),
-	  RTSPServer::RTSPClientSession( *pRtspServer, sessionId, clientSocket, clientAddr )
+	  RTSPServer::RTSPClientSession( ourServer, sessionId )
 {_STT();
 
 	// Wrap socket handle
-	oex::os::CIpSocket socket( (oex::os::CIpSocket::t_SOCKET)clientSocket, oex::oexFALSE );
+//	oex::os::CIpSocket socket( (oex::os::CIpSocket::t_SOCKET)clientSocket, oex::oexFALSE );
 
 	// Parse the url
-	m_sId = sqbind::oex2std( socket.PeerAddress().GetId() );
+//	m_sId = sqbind::oex2std( socket.PeerAddress().GetId() );
+	m_sId = sqbind::oex2std( oexMks( sessionId ) );
 
 	// Root key
 	m_sRoot = sqbind::stdString( oexT( "streams." ) ) + m_sId;
 
 	// We're connected
 	if ( m_sRoot.length() )
-		m_pServer->setParamStr( m_sRoot + oexT( ".connected" ), oexT( "1" ) ),
-		m_pServer->setParamStr( m_sRoot + oexT( ".remote" ), sqbind::oex2std( socket.PeerAddress().GetDotAddress() ) );
+		m_pServer->setParamStr( m_sRoot + oexT( ".connected" ), oexT( "1" ) );//,
+		//m_pServer->setParamStr( m_sRoot + oexT( ".remote" ), sqbind::oex2std( socket.PeerAddress().GetDotAddress() ) );
 
 }
 
@@ -71,8 +73,10 @@ CClientSession::~CClientSession()
 		m_pServer->Server()->removeServerMediaSession( oexStrToMbPtr( m_sId.c_str() ) );
 }
 
-void CClientSession::handleCmd_DESCRIBE( char const *cseq, char const *urlPreSuffix,
-										 char const *urlSuffix, char const *fullRequestStr )
+//void CClientSession::handleCmd_DESCRIBE( char const *cseq, char const *urlPreSuffix,
+//										 char const *urlSuffix, char const *fullRequestStr )
+void CClientSession::handleCmd_SETUP( RTSPServer::RTSPClientConnection *ourClientConnection, char const *urlPreSuffix,
+									  char const *urlSuffix, char const *fullRequestStr )
 {_STT();
 
 	// Sanity checks, (I blame live555)
@@ -130,9 +134,9 @@ void CClientSession::handleCmd_DESCRIBE( char const *cseq, char const *urlPreSuf
 
 	// Call the base class
 	RTSPServer::RTSPClientSession
-		::handleCmd_DESCRIBE( cseq, urlPreSuffix, oexStrToMbPtr( m_sId.c_str() ), fullRequestStr );
+		::handleCmd_SETUP( ourClientConnection, urlPreSuffix, oexStrToMbPtr( m_sId.c_str() ), fullRequestStr );
 }
-
+/*
 void CClientSession::handleCmd_SETUP( char const* cseq, char const* urlPreSuffix,
 									  char const* urlSuffix, char const* fullRequestStr )
 {_STT();
@@ -141,22 +145,23 @@ void CClientSession::handleCmd_SETUP( char const* cseq, char const* urlPreSuffix
 		::handleCmd_SETUP( cseq, urlPreSuffix, urlSuffix, fullRequestStr );
 
 }
-
-void CClientSession::handleCmd_withinSession( char const* cmdName,
+*/
+void CClientSession::handleCmd_withinSession( RTSPServer::RTSPClientConnection *ourClientConnection, char const* cmdName,
 											  char const* urlPreSuffix, char const* urlSuffix,
-											  char const* cseq, char const* fullRequestStr )
+											  char const* fullRequestStr )
 {_STT();
 
 	RTSPServer::RTSPClientSession
-		::handleCmd_withinSession( cmdName, urlPreSuffix, urlSuffix, cseq, fullRequestStr );
+		::handleCmd_withinSession( ourClientConnection, cmdName, urlPreSuffix, urlSuffix, fullRequestStr );
 
 }
 
-void CClientSession::handleCmd_PLAY( ServerMediaSubsession* subsession, char const* cseq, char const* fullRequestStr )
+void CClientSession::handleCmd_PLAY( RTSPServer::RTSPClientConnection *ourClientConnection, 
+									 ServerMediaSubsession* subsession, char const* fullRequestStr )
 {_STT();
 
 	RTSPServer::RTSPClientSession
-		::handleCmd_PLAY( subsession, cseq, fullRequestStr );
+		::handleCmd_PLAY( ourClientConnection, subsession, fullRequestStr );
 }
 
 //------------------------------------------------------------------
@@ -185,11 +190,18 @@ CRtspServer::~CRtspServer()
 }
 
 RTSPServer::RTSPClientSession*
+	CRtspServer::createNewClientSession( u_int32_t sessionId )
+{_STT();
+	return new CClientSession( m_pServer, *this, sessionId );
+}
+
+/*
+RTSPServer::RTSPClientSession*
 	CRtspServer::createNewClientSession( unsigned sessionId, int clientSocket, struct sockaddr_in clientAddr )
 {_STT();
 	return new CClientSession( m_pServer, this, sessionId, clientSocket, clientAddr );
 }
-
+*/
 
 ServerMediaSession* CRtspServer::lookupServerMediaSession( char const* streamName )
 {_STT();

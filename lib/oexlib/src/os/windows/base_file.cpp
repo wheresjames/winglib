@@ -684,9 +684,15 @@ CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nM
 		return CStr();
 
 	// Load functions
+#if defined( OEX_GCC )
+	pSHGetMalloc = (pfn_SHGetMalloc)GetProcAddress( hShell32, "SHGetMalloc" );
+	pSHGetPathFromIDList = (pfn_SHGetPathFromIDList)GetProcAddress( hShell32, "SHGetPathFromIDList" );
+	pSHGetSpecialFolderLocation = (pfn_SHGetSpecialFolderLocation)GetProcAddress( hShell32, "SHGetSpecialFolderLocation" );
+#else
 	pSHGetMalloc = (pfn_SHGetMalloc)GetProcAddress( hShell32, oexT( "SHGetMalloc" ) );
 	pSHGetPathFromIDList = (pfn_SHGetPathFromIDList)GetProcAddress( hShell32, oexT( "SHGetPathFromIDList" ) );
 	pSHGetSpecialFolderLocation = (pfn_SHGetSpecialFolderLocation)GetProcAddress( hShell32, oexT( "SHGetSpecialFolderLocation" ) );
+#endif
 
 	// Did we get the functions?
 	if ( !pSHGetMalloc || !pSHGetPathFromIDList || !pSHGetSpecialFolderLocation )

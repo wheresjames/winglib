@@ -403,7 +403,11 @@ int CSqEngineExport::set_thread_tag( const stdString &tag )
 
 stdString CSqEngineExport::get_thread_tag()
 {
+#if defined( OEXLIB_STACK_TRACING )
 	return oex2std( _STT_GET_TAG() );
+#else
+	return oexT( "" );
+#endif
 }
 
 int CSqEngineExport::get_key()
@@ -981,7 +985,7 @@ CSqMulti CSqEngineExport::splitstr( const stdString &s, const stdString &seps )
 
 	int i = 0;
 	CSqMulti m;
-    for ( typename oex::CStrList::iterator it; lst.Next( it ); )
+    for ( oex::CStrList::iterator it; lst.Next( it ); )
 		m[ oex2std( oexMks( i++ ) ) ] = oex2std( *it );
 
 	return m;
@@ -2981,11 +2985,11 @@ int CSqEngine::OnLoadModule( const stdString &sModule, const stdString &sPath )
 #		define SQKEYCPU "x86"
 #	endif
 
-			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "SOFTWARE\\" SQKEYNAME "_" SQKEYCPU "_" SQBUILD ), oexT( "Install_Dir" ) );
+			oex::CStr sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "SOFTWARE\\" ) oexTEXT( SQKEYNAME ) oexT( "_" ) oexTEXT( SQKEYCPU ) oexT( "_" ) oexTEXT( SQBUILD ), oexT( "Install_Dir" ) );
 			if ( sInstallRoot.Length() )
 				sFull = FindFile( sInstallRoot, lstSubs, sFile );
 			else
-			{	sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "SOFTWARE\\" SQKEYNAME "_" SQKEYCPU ), oexT( "Install_Dir" ) );
+			{	sInstallRoot = oex::os::CSysUtil::GetRegString( oexT( "HKLM" ), oexT( "SOFTWARE\\" ) oexTEXT( SQKEYNAME ) oexT( "_" ) oexTEXT( SQKEYCPU ), oexT( "Install_Dir" ) );
 				if ( sInstallRoot.Length() )
 					sFull = FindFile( sInstallRoot, lstSubs, sFile );
 				else

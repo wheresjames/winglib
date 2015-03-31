@@ -235,7 +235,7 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 	CFfContainer::Register( x_vm );
 }
 
-static void SQBIND_module_Init()
+static void SQBIND_Init_ffmpeg()
 {
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) 
@@ -265,7 +265,7 @@ static void SQBIND_module_Init()
 //	av_register_protocol2( &memshare_protocol, sizeof( memshare_protocol ) );
 }
 
-static void SQBIND_module_Exit()
+static void SQBIND_Exit_ffmpeg()
 {
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) 
@@ -288,19 +288,21 @@ static void SQBIND_module_Exit()
 	CRYPTO_cleanup_all_ex_data();
 }
 
-// Cleanup
-#define SQBIND_Init SQBIND_module_Init();
-#define SQBIND_Exit SQBIND_module_Exit();
-
 #if defined( SQBIND_STATIC )
 	#include "ff_decoder.cpp"
 	#include "ff_encoder.cpp"
 	#include "ff_audio_decoder.cpp"
+	#include "ff_audio_encoder.cpp"
+	#include "ff_audio_resample.cpp"
 	#include "ff_convert.cpp"
 	#include "ff_container.cpp"
 	#include "ff_transcode.cpp"
-	#include "ff_captuer.cpp"
+	#include "ff_capture.cpp"
 #else
+
+// Cleanup
+#define SQBIND_Init SQBIND_Init_ffmpeg();
+#define SQBIND_Exit SQBIND_Exit_ffmpeg();
 
 	static void SQBIND_Export( sqbind::VM x_vm )
 	{_STT(); SQBIND_Export_ffmpeg( x_vm ); }

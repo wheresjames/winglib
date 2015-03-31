@@ -16,7 +16,7 @@ PRJ_INCS := winglib/lib/oexlib winglib/lib/sqbind SqPlus/include SqPlus/sqplus \
 PRJ_LIBS := sqbind oexlib sqplus sqstdlib squirrel cximage jpeg png tiff zlib \
 			openssl_a openssl_b openssl_c openssl_a openssl_b openssl_c
 			
-PRJ_DEFS := OPENSSL_NO_ERR I386_ONLY OPENSSL_NO_ASM
+PRJ_DEFS := OPENSSL_NO_ERR I386_ONLY OPENSSL_NO_ASM _WINSOCKAPI_
 
 PRJ_EXPORTS := SRV_GetModuleInfo SRV_Start SRV_Stop SQBIND_Export_Symbols
 

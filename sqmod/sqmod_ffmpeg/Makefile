@@ -44,6 +44,7 @@ else
 
 ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),vs)
+		CFG_LFLAGS := $(CFG_LFLAGS) /FORCE
 		PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/windows/vs xlibs $(PRJ_INCS)
 		PRJ_PLIB := ffa ffb ffc ffd rtmpd x264 lame openssl_a openssl_b openssl_c
 		ifeq ($(OS),win64)

@@ -67,7 +67,7 @@ namespace sqbind
 		int Size() { return m_f.Size(); }
 
 		int Write( const stdString &sData )
-		{	return m_f.Write( oexStrToBinPtr( sData.c_str() ), sData.length() ); }
+		{	return m_f.Write( sqbind::std2oex( sData ) ); }
 
 		int WriteBin( CSqBinary *sData )
 		{	if ( !sData ) return 0;
@@ -112,7 +112,7 @@ namespace sqbind
 		{	CSqFile f; if ( !f.OpenExisting( sFile ) ) return CSqBinary(); return f.ReadBin( nBytes ); }
 
 		static int put_contents( const stdString &sFile, const stdString &sData )
-		{	return oex::CFile().CreateAlways( sFile.c_str() ).Write( sData.c_str(), sData.length() ); }
+		{	return oex::CFile().CreateAlways( sFile.c_str() ).Write( sqbind::std2oex( sData ) ); }
 
 		static int put_contents_bin( const stdString &sFile, CSqBinary *sData )
 		{	if ( !sData ) return 0;
@@ -125,7 +125,7 @@ namespace sqbind
 			if ( !f.OpenAlways( sFile.c_str() ).IsOpen() )
 				return 0;
 			f.SetPtrPosEnd( 0 );
-			return f.Write( sData.c_str(), sData.length() );
+			return f.Write( sqbind::std2oex( sData ) );
 		}
 
 		static int append_contents_bin( const stdString &sFile, CSqBinary *sData )
@@ -141,7 +141,7 @@ namespace sqbind
 		{	return oexCreatePath( sDir.c_str() ); }
 
 		static int rmdir( const stdString &sDir )
-		{	return oexDeletePath( sDir.c_str() ); }
+		{	return oexRemoveFolder( sDir.c_str() ); }
 
 		static int unlink( const stdString &sPath )
 		{	return oexDelete( sPath.c_str() ); }

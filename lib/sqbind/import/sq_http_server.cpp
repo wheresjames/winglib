@@ -75,7 +75,7 @@ void CSqHttpServer::Register( VM vm )
 
 sqbind::CSqMulti CSqHttpServer::getDefaultHeaders()
 {	CSqMulti m;
-	SQBIND_PropertyBagToMulti( m_server.DefHeaders(), m );
+	SQBIND_PropertyBag8ToMulti( m_server.DefHeaders(), m );
 	return m;		
 }
 

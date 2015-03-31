@@ -60,10 +60,14 @@ SQBIND_REGISTER_CLASS_BEGIN( CLvRtspClient, CLvRtspClient )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getUrl )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, getRxBufferSize )
 	SQBIND_MEMBER_FUNCTION( CLvRtspClient, setRxBufferSize )
+	SQBIND_MEMBER_FUNCTION( CLvRtspClient, EnableDebugInfo )
 //	SQBIND_MEMBER_FUNCTION( CLvRtspClient,  )
 //	SQBIND_MEMBER_FUNCTION( CLvRtspClient,  )
 
 SQBIND_REGISTER_CLASS_END()
+
+oexLock 					CLvRtspClient::m_lockCallbackPtrMap;
+CLvRtspClient::t_PtrMap 	CLvRtspClient::m_mCallbackPtrMap;
 
 void CLvRtspClient::Register( sqbind::VM vm )
 {_STT();
@@ -149,6 +153,7 @@ void CLvRtspClient::CVideoSink::afterGettingFrame( void* clientData, unsigned fr
 #if defined( oexDEBUG )
 //	oexSHOW( frameSize );
 //	oexEcho( oexBinToAsciiHexStr( m_buf.Mem(), 0, 16, 16 ).Ptr() );
+//	oexFlush_stdout();
 #endif
 
 	// Copy time stamps
@@ -293,10 +298,9 @@ int CLvRtspClient::CAudioSink::UnlockFrame()
 	return 1;
 }
 
-
-
 CLvRtspClient::CLvRtspClient()
 {_STT();
+	m_nDebug = 0;
 	m_nFrames = 0;
 	m_pEnv = oexNULL;
 	m_pRtspClient = oexNULL;
@@ -319,6 +323,7 @@ CLvRtspClient::CLvRtspClient()
 	m_bBlindLogin = 1;
 	m_nLastError = 0;
 	m_nRxBufferSize = 2000000;
+	m_bAuthenticate = 0;
 }
 
 void CLvRtspClient::Destroy()
@@ -340,6 +345,9 @@ void CLvRtspClient::Destroy()
 
 	m_nLastError = 0;
 	m_sLastError = oexT( "" );
+
+	m_bAuthenticate = 0;
+	m_authenticator.reset();
 }
 
 int CLvRtspClient::setLastError( int e, sqbind::stdString s )
@@ -357,7 +365,8 @@ void CLvRtspClient::ThreadDestroy()
 {_STT();
 
 	if ( m_pRtspClient && m_pSession )
-		m_pRtspClient->teardownMediaSession( *m_pSession );
+//		m_pRtspClient->teardownMediaSession( *m_pSession );
+		m_pSession = oexNULL;
 
 	if ( m_pVs )
 		delete m_pVs, m_pVs = oexNULL;
@@ -366,7 +375,17 @@ void CLvRtspClient::ThreadDestroy()
 		delete m_pAs, m_pAs = oexNULL;
 
 	if ( m_pRtspClient )
+	{
+		oexAutoLock ll( m_lockCallbackPtrMap );
+		if ( ll.IsLocked() )
+		{	t_PtrMap::iterator it = m_mCallbackPtrMap.find( m_pRtspClient );
+			if ( m_mCallbackPtrMap.end() != it )
+				m_mCallbackPtrMap.erase( it );
+		} // end if
+
 		m_pRtspClient->close( m_pSession );
+
+	} // end if
 
 	if ( m_pEnv )
 		m_pEnv->reclaim();
@@ -405,6 +424,43 @@ int CLvRtspClient::Open( const sqbind::stdString &sUrl, int bVideo, int bAudio, 
 	return 1;
 }
 
+void CLvRtspClient::_OnResponseHandler( RTSPClient *rtspClient, int resultCode, char *resultString )
+{
+	// Look up object pointer
+	CLvRtspClient *pRc = 0;
+	{ // Scope
+		oexAutoLock ll( m_lockCallbackPtrMap );
+		if ( ll.IsLocked() )
+		{	t_PtrMap::iterator it = m_mCallbackPtrMap.find( rtspClient );
+			if ( m_mCallbackPtrMap.end()!= it && it->second )
+				pRc = it->second;
+		} // end if
+	} // end scope
+
+	if ( !pRc )
+		return;
+
+	pRc->OnResponseHandler( resultCode, resultString );
+}
+
+void CLvRtspClient::OnResponseHandler( int resultCode, char *resultString )
+{
+	// Save result
+	m_nCallbackResult = resultCode;
+
+	if ( resultString )
+		m_sCallbackResult = resultString;
+	else
+		m_sCallbackResult.clear();
+
+	// Callback complete
+	m_pevtCallbackDone.Signal();
+	
+	m_nLoop = 1;
+
+}
+
+
 int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bAudio, sqbind::CSqMulti *m )
 {_STT();
 
@@ -428,19 +484,52 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 		return 0;
 	} // end if
 
-#if defined( oexDEBUG )
-	int nVerbosity = 0;
-#else
-	int nVerbosity = 0;
-#endif
-
 	// Create rtsp client
-	m_pRtspClient = RTSPClient::createNew( *m_pEnv, nVerbosity, "CLvRtspClient", m_nTunnelOverHTTPPort );
+//	m_pRtspClient = RTSPClient::createNew( *m_pEnv, m_nDebug, "CLvRtspClient", m_nTunnelOverHTTPPort );
+	m_pRtspClient = RTSPClient::createNew( *m_pEnv, sUrl.c_str(), m_nDebug, "CLvRtspClient", m_nTunnelOverHTTPPort );
 	if ( !m_pRtspClient )
 	{	setLastError( -3, sqbind::oex2std( oexMks( oexT( "RTSPClient::createNew() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg()) ) ) );
 		return 0;
 	} // end if
 
+	// Set class pointer for callback
+	{ // Scope
+		oexAutoLock ll( m_lockCallbackPtrMap );
+		if ( ll.IsLocked() )
+			m_mCallbackPtrMap[ m_pRtspClient ] = this;
+	} // end scope
+
+	// Do we need to authenticate?
+	if ( m_bBlindLogin && m && m->isset( oexT( "username" ) ) )
+		m_bAuthenticate = 1,
+		m_authenticator.setUsernameAndPassword( (char*)oexStrToMbPtr( (*m)[ oexT( "username" ) ].str().c_str() ),
+												(char*)oexStrToMbPtr( (*m)[ oexT( "password" ) ].str().c_str() ) );
+
+
+	unsigned uRes = 0;
+
+	// Send options command
+	m_pevtCallbackDone.Reset();
+	uRes = m_pRtspClient->sendOptionsCommand( _OnResponseHandler, m_bAuthenticate ? &m_authenticator : 0 );
+	if ( !uRes )
+	{	setLastError( -4, sqbind::oex2std( oexMks( oexT( "sendOptionsCommand() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+		return 0;
+	} // end if
+
+	m_nLoop = 0;
+	m_pEnv->taskScheduler().doEventLoop( &m_nLoop );
+		
+	if ( m_pevtCallbackDone.Wait( GetStopEvent(), 0 ) )
+	{	setLastError( -5, sqbind::oex2std( oexMks( oexT( "sendOptionsCommand() timed out : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+		return 0;
+	} // end if
+
+	if ( m_nCallbackResult )
+	{	setLastError( -6, sqbind::oex2std( oexMks( oexT( "sendOptionsCommand() Callback Failed : " ), m_nCallbackResult ) ) );
+		return 0;
+	} // end if
+
+/*
 	char *pOptions = oexNULL;
 	if ( m_bBlindLogin && m && m->isset( oexT( "username" ) ) )
 		pOptions = m_pRtspClient->sendOptionsCmd( oexStrToMbPtr( sUrl.c_str() ),
@@ -457,7 +546,9 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	// Ditch the options
 	delete pOptions;
 	pOptions = oexNULL;
+*/
 
+/*
 	char *pSdp = oexNULL;
 	if ( m && m->isset( oexT( "username" ) ) )
 		pSdp = m_pRtspClient->describeWithPassword( oexStrToMbPtr( sUrl.c_str() ),
@@ -470,7 +561,36 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	{	setLastError( -5, sqbind::oex2std( oexMks( oexT( "describeURL() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
 		return 0;
 	} // end if
+*/
 
+	// Send options command
+	m_pevtCallbackDone.Reset();
+	uRes = m_pRtspClient->sendDescribeCommand( _OnResponseHandler, m_bAuthenticate ? &m_authenticator : 0 );
+	if ( !uRes )
+	{	setLastError( 7, sqbind::oex2std( oexMks( oexT( "sendDescribeCommand() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+		return 0;
+	} // end if
+
+	m_nLoop = 0;
+	m_pEnv->taskScheduler().doEventLoop( &m_nLoop );
+		
+	// Wait for callback
+	if ( 0 > m_pevtCallbackDone.Wait( GetStopEvent(), 0 ) )
+	{	setLastError( -8, sqbind::oex2std( oexMks( oexT( "sendDescribeCommand() timed out : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+		return 0;
+	} // end if
+
+	if ( m_nCallbackResult )
+	{	setLastError( -9, sqbind::oex2std( oexMks( oexT( "sendDescribeCommand() Callback Failed : " ), m_nCallbackResult ) ) );
+		return 0;
+	} // end if
+
+	const char *pSdp = m_sCallbackResult.Ptr();
+	if ( !pSdp )
+	{	setLastError( -10, sqbind::oex2std( oexMks( oexT( "sendDescribeCommand() returned null SDP" ) ) ) );
+		return 0;
+	} // end if
+	
 	// Parse params
 	m_mSdp.parse( oexMbToStrPtr( pSdp ), oexT( "\r\n" ), oexT( ":" ), 1 );
 
@@ -478,7 +598,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	m_pSession = MediaSession::createNew( *m_pEnv, pSdp );
 
 	// Ditch the SDP description
-	delete pSdp;
+//	delete pSdp;
 	pSdp = oexNULL;
 
 	if ( !m_pSession )
@@ -604,14 +724,35 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 	if ( pss->codecName() )
 		m_sVideoCodec = oexMbToStrPtr( pss->codecName() );
 
-	if ( !m_pRtspClient->setupMediaSubsession( *pss, m_bStreamOverTCP, False ) )
-	{	setLastError( -103, sqbind::oex2std( oexMks( oexT( "setupMediaSubsession() failed, Codec : " ), m_sVideoCodec.c_str(), oexT( " : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+//	if ( !m_pRtspClient->setupMediaSubsession( *pss, m_bStreamOverTCP, False ) )
+//	{	setLastError( -103, sqbind::oex2std( oexMks( oexT( "setupMediaSubsession() failed, Codec : " ), m_sVideoCodec.c_str(), oexT( " : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+//		return 0;
+//	} // end if
+
+	m_pevtCallbackDone.Reset();
+	unsigned uRes = m_pRtspClient->sendSetupCommand( *pss, _OnResponseHandler, False, m_bStreamOverTCP, False, m_bAuthenticate ? &m_authenticator : 0 );
+	if ( !uRes )
+	{	setLastError( -105, sqbind::oex2std( oexMks( oexT( "video: sendSetupCommand() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+		return 0;
+	} // end if
+
+	m_nLoop = 0;
+	m_pEnv->taskScheduler().doEventLoop( &m_nLoop );
+		
+	// Wait for callback
+	if ( 0 > m_pevtCallbackDone.Wait( GetStopEvent(), 0 ) )
+	{	setLastError( -106, sqbind::oex2std( oexMks( oexT( "video: sendSetupCommand() timed out : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+		return 0;
+	} // end if
+
+	if ( m_nCallbackResult )
+	{	setLastError( -107, sqbind::oex2std( oexMks( oexT( "video: sendSetupCommand() Callback Failed : " ), m_nCallbackResult ) ) );
 		return 0;
 	} // end if
 
 	m_pVs = new CVideoSink( *m_pEnv );
 	if ( !m_pVs )
-	{	setLastError( -104, sqbind::oex2std( oexMks( oexT( "CVideoSink::createNew() failed" ), oexT( " : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+	{	setLastError( -108, sqbind::oex2std( oexMks( oexT( "CVideoSink::createNew() failed" ), oexT( " : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
 		return 0;
 	} // end if
 
@@ -696,10 +837,32 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 	if ( pss->codecName() )
 		m_sAudioCodec = oexMbToStrPtr( pss->codecName() );
 
-	if ( !m_pRtspClient->setupMediaSubsession( *pss, False, False ) )
-	{	setLastError( -205, sqbind::oex2std( oexMks( oexT( "setupMediaSubsession() failed : " ), oexT( " : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+//	if ( !m_pRtspClient->setupMediaSubsession( *pss, False, False ) )
+//	{	setLastError( -205, sqbind::oex2std( oexMks( oexT( "setupMediaSubsession() failed : " ), oexT( " : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+//		return 0;
+//	} // end if
+
+	m_pevtCallbackDone.Reset();
+	unsigned uRes = m_pRtspClient->sendSetupCommand( *pss, _OnResponseHandler, False, m_bStreamOverTCP, False, m_bAuthenticate ? &m_authenticator : 0 );
+	if ( !uRes )
+	{	setLastError( -205, sqbind::oex2std( oexMks( oexT( "audio: sendSetupCommand() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
 		return 0;
 	} // end if
+
+	m_nLoop = 0;
+	m_pEnv->taskScheduler().doEventLoop( &m_nLoop );
+		
+	// Wait for callback
+	if ( 0 > m_pevtCallbackDone.Wait( GetStopEvent(), 0 ) )
+	{	setLastError( -206, sqbind::oex2std( oexMks( oexT( "audio: sendSetupCommand() timed out : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+		return 0;
+	} // end if
+
+	if ( m_nCallbackResult )
+	{	setLastError( -207, sqbind::oex2std( oexMks( oexT( "audio: sendSetupCommand() Callback Failed : " ), m_nCallbackResult ) ) );
+		return 0;
+	} // end if
+
 
 	// Save away important audio parameters
 	m_nAudioNumChannels = pss->numChannels();
@@ -708,7 +871,7 @@ int CLvRtspClient::InitAudio( MediaSubsession *pss )
 
 	m_pAs = new CAudioSink( *m_pEnv );
 	if ( !m_pAs )
-	{	setLastError( -206, sqbind::oex2std( oexMks( oexT( "CAudioSink::createNew() failed : " ), oexT( " : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+	{	setLastError( -208, sqbind::oex2std( oexMks( oexT( "CAudioSink::createNew() failed : " ), oexT( " : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
 		return 0;
 	} // end if
 
@@ -805,7 +968,29 @@ oex::oexBOOL CLvRtspClient::DoThread( oex::oexPVOID x_pData )
 		} // end if
 
 	// Let's go...
-	m_pRtspClient->playMediaSession( *m_pSession, 0.f, -1.f, 1.f );
+//	m_pRtspClient->playMediaSession( *m_pSession, 0.f, -1.f, 1.f );
+
+	// Send options command
+	m_pevtCallbackDone.Reset();
+	unsigned uRes = m_pRtspClient->sendPlayCommand( *m_pSession, _OnResponseHandler, 0.f, -1.f, 1.f, m_bAuthenticate ? &m_authenticator : 0 );
+	if ( !uRes )
+	{	setLastError( -502, sqbind::oex2std( oexMks( oexT( "sendPlayCommand() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+		return 0;
+	} // end if
+
+	m_nLoop = 0;
+	m_pEnv->taskScheduler().doEventLoop( &m_nLoop );
+		
+	// Wait for callback
+	if ( 0 > m_pevtCallbackDone.Wait( GetStopEvent(), 8000 ) )
+	{	setLastError( -503, sqbind::oex2std( oexMks( oexT( "sendPlayCommand() timed out : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+		return 0;
+	} // end if
+
+	if ( m_nCallbackResult )
+	{	setLastError( -504, sqbind::oex2std( oexMks( oexT( "sendPlayCommand() Callback Failed : " ), m_nCallbackResult ) ) );
+		return 0;
+	} // end if
 
 	// Schedule idle processing
 	m_pEnv->taskScheduler().scheduleDelayedTask( 1000, (TaskFunc*)CLvRtspClient::_OnIdle, this );
