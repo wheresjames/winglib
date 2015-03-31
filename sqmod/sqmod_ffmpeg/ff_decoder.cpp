@@ -183,7 +183,7 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 	// +++ H264 crashes sometimes if you don't lead in with a key frame
 	if ( CODEC_ID_H264 == x_nCodec )
-		m_nWaitKeyFrame = 1;
+		m_nWaitKeyFrame = m_nFps;
 
 	return 1;
 }
@@ -404,7 +404,9 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 			 || 0 == GetH264FrameType( m_pkt.data, m_pkt.size ) )
 			m_nWaitKeyFrame = 0;
 		else
+		{	m_nWaitKeyFrame--;
 			return 0;
+		} // end else
 	} // end if
 
 	int gpp = 0, used = 0;
