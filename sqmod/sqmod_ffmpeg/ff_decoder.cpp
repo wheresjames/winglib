@@ -469,7 +469,9 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 			 || 0 == GetH264FrameType( m_pkt.data, m_pkt.size ) )
 			m_nWaitKeyFrame = 0;
 		else
+		{	m_nWaitKeyFrame--;
 			return 0;
+		} // end else
 	} // end if
 
 	int gpp = 0, used = 0;
