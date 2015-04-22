@@ -9,8 +9,7 @@ BUILDDIRS := $(BUILDDIRS) \
 			 lib/oexlib \
 			 tools/resbld \
 			 tools/join \
-			 app/test \
-			 app/wrtc
+			 app/test
 
 ifdef PETS
 BUILDDIRS := $(BUILDDIRS) \
@@ -82,14 +81,12 @@ BUILDDIRS := $(BUILDDIRS) \
 			 sqmod/sqmod_gsoap \
 			 sqmod/sqmod_live555 \
 			 sqmod/sqmod_mysql \
-			 sqmod/sqmod_opencv \
 			 sqmod/sqmod_openssl \
 			 sqmod/sqmod_poco \
 			 sqmod/sqmod_portaudio \
 			 sqmod/sqmod_rtmpd \
 			 sqmod/sqmod_ssh2 \
-			 sqmod/sqmod_tinyxml \
-			 sqmod/sqmod_webrtc
+			 sqmod/sqmod_tinyxml
 
 ifdef PETS
 BUILDDIRS := $(BUILDDIRS) \

@@ -459,7 +459,7 @@ namespace os
 namespace os
 {
 #   include "inc/os/sys.h"
-#	include "inc/os/math.h"
+#	include "inc/os/mathsys.h"
 #	include "inc/os/resource.h"
 #   include "inc/os/fmap.h"
 #   include "inc/os/tls.h"
