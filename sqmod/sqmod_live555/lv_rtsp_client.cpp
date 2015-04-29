@@ -486,7 +486,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 
 	// Create rtsp client
 //	m_pRtspClient = RTSPClient::createNew( *m_pEnv, m_nDebug, "CLvRtspClient", m_nTunnelOverHTTPPort );
-	m_pRtspClient = RTSPClient::createNew( *m_pEnv, sUrl.c_str(), m_nDebug, "CLvRtspClient", m_nTunnelOverHTTPPort );
+	m_pRtspClient = RTSPClient::createNew( *m_pEnv, oexStrToMb( sqbind::std2oex( sUrl ) ).c_str(), m_nDebug, "CLvRtspClient", m_nTunnelOverHTTPPort );
 	if ( !m_pRtspClient )
 	{	setLastError( -3, sqbind::oex2std( oexMks( oexT( "RTSPClient::createNew() failed : " ), oexMbToStrPtr( m_pEnv->getResultMsg()) ) ) );
 		return 0;

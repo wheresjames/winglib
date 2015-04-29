@@ -1196,7 +1196,7 @@ public:
             return *this;
         } // end if
 
-        // Get length of in comming string in bytes
+        // Get length of incoming string in bytes
         t_size uConv = os::CSys::MbsToWcs( oexNULL, 0, x_sStr.Ptr(), uLen );
 
         // Allocate enough space
@@ -1204,17 +1204,17 @@ public:
             return *this;
 
 		// Do the conversion
-		uConv = os::CSys::MbsToWcs( _Ptr(), uConv, x_sStr.Ptr(), uLen );
+		t_size uConv2 = os::CSys::MbsToWcs( _Ptr(), uConv, x_sStr.Ptr(), uLen );
 
 		// Length may not be the same
-		if ( !oexCHECK( 0 <= uConv ) )
+		if ( !oexCHECK( 0 <= uConv ) || uConv != uConv2 )
 		{
 			Destroy();
 			return *this;
 		}
 
         // Save length
-        m_nLength = uConv;
+        m_nLength = uConv2;
 
         return *this;
     }
@@ -1231,25 +1231,25 @@ public:
             return *this;
         } // end if
 
-        // Get length of in comming string in bytes
-        oexINT uConv = os::CSys::WcsToMbs( oexNULL, 0, x_sStr.Ptr(), uLen );
+        // Get length of incoming string in bytes
+        t_size uConv = os::CSys::WcsToMbs( oexNULL, 0, x_sStr.Ptr(), uLen );
 
         // Allocate enough space
         if ( !OexAllocate( uConv ) )
             return *this;
 
 		// Do the conversion
-		uConv = os::CSys::WcsToMbs( _Ptr(), uConv, x_sStr.Ptr(), uLen );
+		t_size uConv2 = os::CSys::WcsToMbs( _Ptr(), uConv, x_sStr.Ptr(), uLen );
 
 		// Actually, it may not be the same length
-		if ( !oexCHECK( 0 <= uConv ) )
+		if ( !oexCHECK( 0 <= uConv ) || uConv != uConv2 )
 		{
 			Destroy();
 			return *this;
 		}
 
         // Save length
-        m_nLength = uConv;
+        m_nLength = uConv2;
 
         return *this;
     }
@@ -2538,7 +2538,7 @@ public:
 
 			// Are we done?
 			else if ( ls )
-				oexMemCpy( pDst, pSrc, ls ),
+				oexMemCpy( pDst, pSrc, ls * sizeof( T ) ),
 				pDst += ls, ls = 0;
 
 		} // end while

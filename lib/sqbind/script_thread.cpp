@@ -1224,11 +1224,12 @@ void CScriptThread::OnSpawn( CSqMulti &mapParams, stdString *pReply )
 			// Custom include engine?
 			else if ( m_cSqEngine.GetIncludeScriptFunction() )
 			{
-				stdString sData, sName;
+				stdString sName;
+				oex::CStr8 sData;
 				if ( m_cSqEngine.GetIncludeScriptFunction()( mapParams[ oexT( "script" ) ], sData, sName ) )
 					*pReply = oexT( "FAILED" );
 				else
-					pSt->SetScript( std2oex8( sData ), 0 );
+					pSt->SetScript( sData, 0 );
 
 				// Set the script name
 				pSt->SetScriptName( sName );

@@ -221,7 +221,7 @@ namespace sqbind
 
 		/// Returns a string representation of the data
 		stdString getString()
-		{	oex::CStr s = oexMbToStr( m_bin.getString() );
+		{	oex::CStr s = oexMbToStr( m_bin.getSafeString() );
 			return stdString( s.Ptr(), (sqbind::stdString::size_type)s.Length() );
 		}
 

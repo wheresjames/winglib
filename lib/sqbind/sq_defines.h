@@ -220,16 +220,16 @@ namespace sqbind
 
 	template < typename T >
 		static sqbind::stdString oex2std( const T &s )
-		{	return sqbind::stdString( s.Ptr(), (typename sqbind::stdString::size_type)s.Length() ); }
+		{	return sqbind::stdString( s.c_str(), (typename sqbind::stdString::size_type)s.length() ); }
 
 	template < typename T >
 		static sqbind::stdString8 oex2std8( const T &s )
-		{	return sqbind::stdString8( s.Ptr(), (sqbind::stdString::size_type)s.Length() ); }
+		{	return sqbind::stdString8( s.c_str(), (sqbind::stdString::size_type)s.length() ); }
 
 	template < typename T >
 		static sqbind::stdString oex82std( const T &s )
 		{	oex::CStr t = oexMbToStr( s );
-			return sqbind::stdString( t.Ptr(), (sqbind::stdString::size_type)t.Length() );
+			return sqbind::stdString( t.c_str(), (sqbind::stdString::size_type)t.length() );
 		}
 
 	template < typename T >

@@ -104,9 +104,7 @@ namespace sqbind
 		}
 
 		static stdString get_contents( const stdString &sFile )
-		{	oex::CStr data = oexBinToStr( oex::CFile().OpenExisting( sFile.c_str() ).Read() );
-			return stdString( data.Ptr(), (sqbind::stdString::size_type)data.Length() );
-		}
+		{	return oex2std( oexBinToStr( oex::CFile().OpenExisting( sFile.c_str() ).Read() ) ); }
 
 		static CSqBinary get_contents_bin( const stdString &sFile, int nBytes )
 		{	CSqFile f; if ( !f.OpenExisting( sFile ) ) return CSqBinary(); return f.ReadBin( nBytes ); }

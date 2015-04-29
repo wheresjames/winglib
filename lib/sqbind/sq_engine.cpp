@@ -2590,7 +2590,18 @@ oex::oexBOOL CSqEngine::Load( const stdString &sScript, oex::CStr8 *pbScript,
 	_oexCATCH( SScriptErrorInfo &e )
 	{	return LogError( oex::oexFALSE, e ); }
 	_oexCATCH( SquirrelError &e )
-	{	return LogErrorM( oex::oexFALSE, e.desc );
+	{	
+		oexSHOW( bFile );
+		oexSHOW( sScript.length() );
+		oexSHOW( (long)pbScript );
+		if ( pbScript )
+			oexSHOW( pbScript->length() ),
+			oexEcho( oexBinToAsciiHexStr( oex::CBin( *pbScript ), 0, 16, 99 ).Ptr() );
+		oexEcho( sScript.c_str() );
+		oexFlush_stdout();
+
+
+		return LogErrorM( oex::oexFALSE, e.desc );
 	} // end catch
 
 	if ( bStart )
@@ -2635,10 +2646,11 @@ int CSqEngine::OnIncludeInline( const stdString &sScript )
 
 	// Push script name
 	int nRet = 0;
-	stdString sScriptName = m_sScriptName;
+//	stdString sScriptName = m_sScriptName;
 	oex::oexBOOL bFile = oex::oexTRUE;
-	stdString sData;
-	stdString sUseScript = sScript;
+	oex::CStr8 sData;
+//	stdString sData;
+//	stdString sUseScript = sScript;
 
 	_oexTRY
 	{
@@ -2648,21 +2660,24 @@ int CSqEngine::OnIncludeInline( const stdString &sScript )
 			if ( m_fIncludeScript( sScript, sData, m_sScriptName ) || !sData.length() )
 				return -1;
 
-			sUseScript = sData;
+//			sUseScript = sData;
 			bFile = oex::oexFALSE;
 
 		} // end if
-
+		
+		else
+			sData = oexStrToMb( std2oex( sScript ) );
+		
 		// Check for pre-compiled script
-		if ( 2 <= sUseScript.length() && ( *(oex::oexUSHORT*)sUseScript.c_str() ) == SQ_BYTECODE_STREAM_TAG )
-		{	oex::CStr8 buf( oexStrToMb( oex::CStr( sUseScript.c_str(), sUseScript.length() ) ) );
-			SetCompiledScript( buf );
-		} // end if
+		if ( 2 <= sData.length() && ( *(oex::oexUSHORT*)sData.c_str() ) == SQ_BYTECODE_STREAM_TAG )
+			SetCompiledScript( sData );
 
 		else
+		{
 			m_script = m_vm.CompileBuffer( bFile
-										   ? prepare_inline( std2oex( m_sRoot ).BuildPath( std2oex( sUseScript ) ).Ptr(), 1 ).c_str()
-										   : prepare_inline( sUseScript.c_str(), 0 ).c_str() );
+										   ? prepare_inline( std2oex( m_sRoot ).BuildPath( oexMbToStr( sData ) ).Ptr(), 1 ).c_str()
+										   : prepare_inline( oexMbToStr( sData ).c_str(), 0 ).c_str() );
+		} // end else
 
 		m_sReturnData = obj2str( m_vm.RunScript( m_script ) );
 
@@ -2719,7 +2734,8 @@ int CSqEngine::OnInclude( const stdString &sScript )
 	int nRet = 0;
 	stdString sScriptName = m_sScriptName;
 	oex::oexBOOL bFile = oex::oexTRUE;
-	stdString sData, sUseScript = sScript;
+//	stdString sData, sUseScript = sScript;
+	oex::CStr8 sData;
 
 	_oexTRY
 	{
@@ -2729,30 +2745,31 @@ int CSqEngine::OnInclude( const stdString &sScript )
 			if ( m_fIncludeScript( sScript, sData, m_sScriptName ) || !sData.length() )
 				return -1;
 
-			sUseScript = sData;
+//			sUseScript = sData;
 			bFile = oex::oexFALSE;
 
 		} // end if
+		
+		else
+			sData = oexStrToMb( std2oex( sScript ) );
 
 		// Check for pre-compiled script
-		if ( 2 <= sUseScript.length() && ( *(oex::oexUSHORT*)sUseScript.c_str() ) == SQ_BYTECODE_STREAM_TAG )
-		{	oex::CStr8 buf( oexStrToMb( oex::CStr( sUseScript.c_str(), sUseScript.length() ) ) );
-			SetCompiledScript( buf );
-		} // end if
+		if ( 2 <= sData.length() && ( *(oex::oexUSHORT*)sData.c_str() ) == SQ_BYTECODE_STREAM_TAG )
+			SetCompiledScript( sData );
 
 		else
 		{
 			// Don't return an error if the file simply doesn't exist
 			oex::CStr sFile;
 			if ( bFile )
-			{	sFile = std2oex( m_sRoot ).BuildPath( std2oex( sUseScript ) );
+			{	sFile = std2oex( m_sRoot ).BuildPath( oexMbToStr( sData ) );
 				if ( !oexExists( sFile.Ptr() ) )
 					return -1;
 			} // end if
 
 			// Load the script
 			m_script = bFile ? m_vm.CompileScript( sFile.Ptr() )
-							 : m_vm.CompileBuffer( sUseScript.c_str() );
+							 : m_vm.CompileBuffer( oexMbToStr( sData ).c_str() );
 
 		} // end else
 

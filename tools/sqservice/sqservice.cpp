@@ -21,14 +21,14 @@ static const oex::oexCHAR SQBIND_APP_IID_BIN[]
 #endif
 
 // Custom include script
-int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData, sqbind::stdString &sName )
+int IncludeScript( const sqbind::stdString &sScript, oex::CStr8 &sData, sqbind::stdString &sName )
 {_STT();
 	// Sanity checks
 	if ( !sScript.length() )
 		return -1;
 
 	// Data container
-	oex::CStr s;
+	oex::CStr8 s;
 
 	// Possible script override folders
 	oex::oexCSTR szSub[] = { oexT( "config" ), oexT( "scripts" ), oexT( "sq" ), 0 };
@@ -38,20 +38,20 @@ int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData, s
 	for ( int i = 0; !s.Length() && szSub[ i ]; i++ )
 	{	oex::CStr sSub = oexBuildPath( sRoot, oexBuildPath( szSub[ i ], sScript.c_str() ) );
 		if ( oexExists( sSub.Ptr() ) )
-		{	s = oexMbToStr( oexFileGetContents( sSub.Ptr() ) );
+		{	s = oexFileGetContents( sSub.Ptr() );
 			sName.assign( sSub.Ptr(), sSub.Length() );
 		} // end if
 	} // end for
 
 	// Embedded version?
 	if ( !s.Length() )
-	{	s = oexMbToStr( oexGetResource( oexBuildPath( oexT( "sq" ), sScript.c_str() ) ) );
+	{	s = oexGetResource( oexBuildPath( oexT( "sq" ), sScript.c_str() ) );
 		sName = ( oexGetModuleFileName().GetFileName() << oexT( ":" ) << sScript.c_str() ).Ptr();
 	} // end if
 
 	// Assign data if any
 	if ( s.Length() )
-		sData.assign( s.Ptr(), s.Length() );
+		sData = s; //assign( s.Ptr(), s.Length() );
 
 	return 0;
 }

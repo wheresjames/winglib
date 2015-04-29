@@ -81,12 +81,14 @@ BUILDDIRS := $(BUILDDIRS) \
 			 sqmod/sqmod_gsoap \
 			 sqmod/sqmod_live555 \
 			 sqmod/sqmod_mysql \
+			 sqmod/sqmod_opencv \
 			 sqmod/sqmod_openssl \
 			 sqmod/sqmod_poco \
 			 sqmod/sqmod_portaudio \
 			 sqmod/sqmod_rtmpd \
 			 sqmod/sqmod_ssh2 \
-			 sqmod/sqmod_tinyxml
+			 sqmod/sqmod_tinyxml \
+			 sqmod/sqmod_webrtc
 
 ifdef PETS
 BUILDDIRS := $(BUILDDIRS) \

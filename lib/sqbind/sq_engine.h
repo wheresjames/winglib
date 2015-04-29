@@ -960,7 +960,7 @@ public:
 	};
 
 	/// Callback function for custom script source
-	typedef int (*t_IncludeScript)( const stdString &sScript, stdString &sData, stdString &sName );
+	typedef int (*t_IncludeScript)( const stdString &sScript, oex::CStr8 &sData, stdString &sName );
 
 	/// Include script cache type
 	typedef oexStdMap( sqbind::stdString, oex::oexUINT ) t_IncludeScriptCache;

@@ -208,8 +208,8 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #   define oexStrToStr8Ptr( s )             OEX_NAMESPACE::CStr8().Cnv( s ).Ptr()
 #   define oexStrToStrW( s )                ( s )
 #   define oexStrToStrWPtr( s )             ( s )
-#   define oexStrToBin( s )                 OEX_NAMESPACE::CStr8().Bin( s )
-#   define oexStrToBinPtr( s )              OEX_NAMESPACE::CStr8().Bin( s ).Ptr()
+#   define oexStrToBin( s )                 OEX_NAMESPACE::CStr8().Cnv( s )
+#   define oexStrToBinPtr( s )              OEX_NAMESPACE::CStr8().Cnv( s ).Ptr()
 
 #	define oexMbToStr( s )			        OEX_NAMESPACE::CStrW().ToWc( s )
 #	define oexMbToStrPtr( s )		        OEX_NAMESPACE::CStrW().ToWc( s ).Ptr()
@@ -217,8 +217,8 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #   define oexStr8ToStrPtr( s )             OEX_NAMESPACE::CStr().Cnv( s ).Ptr()
 #   define oexStrWToStr( s )                ( s )
 #   define oexStrWToStrPtr( s )             ( s )
-#   define oexBinToStr( s )                 OEX_NAMESPACE::CStr().Bin( s )
-#   define oexBinToStrPtr( s )              OEX_NAMESPACE::CStr().Bin( s ).Ptr()
+#   define oexBinToStr( s )                 OEX_NAMESPACE::CStr().Cnv( s )
+#   define oexBinToStrPtr( s )              OEX_NAMESPACE::CStr().Cnv( s ).Ptr()
 
 #else
 
