@@ -324,7 +324,7 @@ public:
 
 		// Do we have all the data?
 		oexLONG lContentLength = m_pbRxHeaders[ "content-length" ].ToLong();
-		if ( 0 < lContentLength && lContentLength > (long)Rx().GetMaxRead() )
+		if ( 0 < lContentLength && lContentLength > (oexLONG)Rx().GetMaxRead() )
 			return 0;
 
 		// Set default headers

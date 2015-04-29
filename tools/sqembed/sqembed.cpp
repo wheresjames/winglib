@@ -13,37 +13,32 @@ sqbind::CScriptThread	*g_psqScriptThread = oexNULL;
 sqbind::CModuleManager	*g_psqModuleManager = oexNULL;
 
 // Custom include script
-int IncludeScript( const sqbind::stdString &sScript, sqbind::stdString &sData, sqbind::stdString &sName )
+int IncludeScript( const sqbind::stdString &sScript, oex::CStr8 &sData, sqbind::stdString &sName )
 {_STT();
 	// Sanity checks
 	if ( !sScript.length() )
 		return -1;
 
-	// Data container
-	oex::CStr s;
-
+	sData.clear();
+	
 	// Possible script override folders
 	oex::oexCSTR szSub[] = { oexT( "config" ), oexT( "scripts" ), oexT( "sq" ), 0 };
 
 	// Is there an override script?
 	oex::CStr sRoot = oexGetModulePath();
-	for ( int i = 0; !s.Length() && szSub[ i ]; i++ )
+	for ( int i = 0; !sData.Length() && szSub[ i ]; i++ )
 	{	oex::CStr sSub = oexBuildPath( sRoot, oexBuildPath( szSub[ i ], sScript.c_str() ) );
 		if ( oexExists( sSub.Ptr() ) )
-		{	s = oexMbToStr( oexFileGetContents( sSub.Ptr() ) );
+		{	sData = oexFileGetContents( sSub.Ptr() );
 			sName.assign( sSub.Ptr(), sSub.Length() );
 		} // end if
 	} // end for
 
 	// Embedded version?
-	if ( !s.Length() )
-	{	s = oexMbToStr( oexGetResource( oexBuildPath( oexT( "sq" ), sScript.c_str() ) ) );
+	if ( !sData.Length() )
+	{	sData = oexGetResource( oexBuildPath( oexT( "sq" ), sScript.c_str() ) );
 		sName = ( oexGetModuleFileName().GetFileName() << oexT( ":" ) << sScript.c_str() ).Ptr();
 	} // end if
-
-	// Assign data if any
-	if ( s.Length() )
-		sData.assign( s.Ptr(), s.Length() );
 
 	return 0;
 }

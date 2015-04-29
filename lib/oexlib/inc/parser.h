@@ -399,7 +399,7 @@ public:
 				x_str++;
 
 				if ( x_str.IsMatchAt( 0, oexTT( T, "0123456789abcdefABCDEF" ) ) )
-					ret << ( (oexTCHAR)num.Sub( x_str, 0, 2 ).ToLong( 16 ) ), x_str++, nLen -= 2;
+					ret << ( (T)num.Sub( x_str, 0, 2 ).ToLong( 16 ) ), x_str++, nLen -= 2;
 
 				else
 					ret << *x_str;
@@ -1006,7 +1006,7 @@ public:
 			TStr< T > ret; ret.OexAllocate( len );
 			for ( typename TStr< T >::t_size i = 0; i < len; i++ )
 				if ( x_sStr.IsMatchAt( i, oexTT( T, "0123456789abcdefABCDEF" ) ) )
-					ret << (oexTCHAR)ahtodw( x_sStr.Ptr( i ), 2 ), i++;
+					ret << (T)ahtodw( x_sStr.Ptr( i ), 2 ), i++;
 			return ret;
 		}
 
