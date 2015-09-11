@@ -425,7 +425,8 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 	} // end if
 
 	// +++ Holy crap this function can be slow
-	res = av_find_stream_info( m_pFormatContext );
+//	res = av_find_stream_info( m_pFormatContext );
+	res = avformat_find_stream_info( m_pFormatContext, 0 );
 	if ( 0 > res )
 	{	oexERROR( res, oexT( "av_find_stream_info() failed" ) );
 		Destroy();
@@ -479,7 +480,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 			if( pCodec->capabilities & CODEC_CAP_TRUNCATED )
 				m_pCodecContext->flags |= CODEC_FLAG_TRUNCATED;
 
-			if ( 0 > avcodec_open( m_pCodecContext, pCodec ) )
+			if ( 0 > avcodec_open2( m_pCodecContext, pCodec, 0 ) )
 				m_pCodecContext = oexNULL;
 
 			if ( m_pCodecContext->extradata && m_pCodecContext->extradata_size )
@@ -508,7 +509,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 			if( pCodec->capabilities & CODEC_CAP_TRUNCATED )
 				pcc->flags |= CODEC_FLAG_TRUNCATED;
 
-			if ( 0 > avcodec_open( pcc, pCodec ) )
+			if ( 0 > avcodec_open2( pcc, pCodec, 0 ) )
 				pcc = oexNULL;
 
 			if ( pcc->extradata && pcc->extradata_size )
@@ -598,7 +599,8 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 		return -1;
 
 	if ( !m_pFrame )
-		m_pFrame = avcodec_alloc_frame();
+		m_pFrame = av_frame_alloc();
+		//m_pFrame = avcodec_alloc_frame();
 	if ( !m_pFrame )
 		return -1;
 
@@ -657,7 +659,7 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 	pkt.size = in->getUsed();
 
 	if ( !m_pFrame )
-		m_pFrame = avcodec_alloc_frame();
+		m_pFrame = av_frame_alloc();
 	if ( !m_pFrame )
 		return -1;
 
@@ -830,8 +832,9 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	if ( 0 >= width || 0 >= height || 0 >= fps )
 		return -1;
 
-	AVStream *pst = avformat_new_stream( m_pFormatContext, avcodec_find_encoder( (CodecID)codec_id ) );
+	AVStream *pst = avformat_new_stream( m_pFormatContext, avcodec_find_encoder( (AVCodecID)codec_id ) );
 //	AVStream *pst = av_new_stream( m_pFormatContext, 0 );
+//	AVStream *pst = avformat_new_stream( m_pFormatContext, 0 );
 	if ( !pst )
 		return -1;
 
@@ -843,18 +846,22 @@ int CFfContainer::AddVideoStream( int codec_id, int width, int height, int fps )
 	m_nVideoStream = pst->index;
 
 	// Get defaults
-	avcodec_get_context_defaults2( pcc, AVMEDIA_TYPE_VIDEO );
+	// avcodec_get_context_defaults2( pcc, AVMEDIA_TYPE_VIDEO );
+	avcodec_get_context_defaults3( pcc, pcc->codec );
 
 	// Fill in codec info
-	pcc->codec_id = (CodecID)codec_id;
+	pcc->codec_id = (AVCodecID)codec_id;
 	pcc->codec_type = AVMEDIA_TYPE_VIDEO;
 	pcc->bit_rate = width * height * fps / 3;
 	pcc->width = width;
 	pcc->height = height;
 //	pcc->pix_fmt = PIX_FMT_YUV420P;
 
-	pcc->time_base.num = 1;
-	pcc->time_base.den = ( 0 < m_time_base ) ? m_time_base : fps;
+//	pcc->time_base.num = 1;
+//	pcc->time_base.den = ( 0 < m_time_base ) ? m_time_base : fps;
+
+	pst->time_base.num = 1;
+	pst->time_base.den = ( 0 < m_time_base ) ? m_time_base : fps;
 
 	pcc->gop_size = ( 0 < m_nKeyFrameInterval ) ? m_nKeyFrameInterval : fps;
 
@@ -994,8 +1001,8 @@ int CFfContainer::WriteVideoFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 
 	else if ( pStream && pStream->codec
 			  &&
-				( CODEC_ID_H264 == pStream->codec->codec_id
-				  || CODEC_ID_MPEG4 == pStream->codec->codec_id
+				( AV_CODEC_ID_H264 == pStream->codec->codec_id
+				  || AV_CODEC_ID_MPEG4 == pStream->codec->codec_id
 				)
 			)
 		pkt.flags |= ( !getVopType( dat->Ptr(), dat->getUsed() ) ? AV_PKT_FLAG_KEY : 0 );
@@ -1080,7 +1087,7 @@ int CFfContainer::AddAudioStream( int codec_id, int fmt, int channels, int sampl
 	if ( 0 <= m_nAudioStream )
 		return m_nAudioStream;
 
-	AVStream *pst = av_new_stream( m_pFormatContext, 1 );
+	AVStream *pst = avformat_new_stream( m_pFormatContext, 0 );
 	if ( !pst )
 		return -1;
 
@@ -1090,10 +1097,11 @@ int CFfContainer::AddAudioStream( int codec_id, int fmt, int channels, int sampl
 	if ( !pcc )
 		return -1;
 
-	avcodec_get_context_defaults2( pcc, AVMEDIA_TYPE_AUDIO );
+//	avcodec_get_context_defaults2( pcc, AVMEDIA_TYPE_AUDIO );
+	avcodec_get_context_defaults3( pcc, pcc->codec );
 
 	// Fill in codec info
-	pcc->codec_id = (CodecID)codec_id;
+	pcc->codec_id = (AVCodecID)codec_id;
 	pcc->codec_type = AVMEDIA_TYPE_AUDIO;
 
     pcc->channels = channels;
@@ -1102,7 +1110,8 @@ int CFfContainer::AddAudioStream( int codec_id, int fmt, int channels, int sampl
 
 	// Custom time base?
 	if ( 0 < m_time_base )
-		pcc->time_base.num = 1, pcc->time_base.den = m_time_base;
+		pst->time_base.num = 1, pst->time_base.den = m_time_base;
+//		pcc->time_base.num = 1, pcc->time_base.den = m_time_base;
 
 #	define CNVTYPE( t, v ) case oex::obj::t : pcc->sample_fmt = v; break;
 	switch( fmt )

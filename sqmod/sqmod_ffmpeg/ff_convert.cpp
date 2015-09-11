@@ -17,34 +17,34 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfConvert, CFfConvert )
 	SQBIND_STATIC_FUNCTION( CFfConvert, FmtEquiv )
 
 	// Format tyeps
-	SQBIND_GLOBALCONST( PIX_FMT_RGB24 )
-	SQBIND_GLOBALCONST( PIX_FMT_BGR24 )
-	SQBIND_GLOBALCONST( PIX_FMT_RGB32 )
-	SQBIND_GLOBALCONST( PIX_FMT_BGR32 )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_RGB24 )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_BGR24 )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_RGB32 )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_BGR32 )
 
-	SQBIND_GLOBALCONST( PIX_FMT_MONOWHITE )
-	SQBIND_GLOBALCONST( PIX_FMT_MONOBLACK )
-	SQBIND_GLOBALCONST( PIX_FMT_GRAY8 )
-	SQBIND_GLOBALCONST( PIX_FMT_GRAY16LE )
-	SQBIND_GLOBALCONST( PIX_FMT_GRAY16BE )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_MONOWHITE )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_MONOBLACK )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_GRAY8 )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_GRAY16LE )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_GRAY16BE )
 
-	SQBIND_GLOBALCONST( PIX_FMT_YUV410P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUV411P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUV420P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUV422P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUV440P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUV444P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUV410P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUV411P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUV420P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUV422P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUV440P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUV444P )
 
-	SQBIND_GLOBALCONST( PIX_FMT_YUYV422 )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUYV422 )
 
-	SQBIND_GLOBALCONST( PIX_FMT_YUVJ420P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUVJ422P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUVJ444P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUVJ440P )
-	SQBIND_GLOBALCONST( PIX_FMT_YUVA420P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUVJ420P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUVJ422P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUVJ444P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUVJ440P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUVA420P )
 
-	SQBIND_GLOBALCONST( PIX_FMT_UYVY422 )
-	SQBIND_GLOBALCONST( PIX_FMT_UYYVYY411 )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_UYVY422 )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_UYYVYY411 )
 
 	// Processing types
 	SQBIND_GLOBALCONST( SWS_FAST_BILINEAR )
@@ -66,11 +66,11 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfConvert, CFfConvert )
 	SQBIND_GLOBALCONST( SWS_FULL_CHR_H_INP )
 	SQBIND_GLOBALCONST( SWS_DIRECT_BGR )
 	SQBIND_GLOBALCONST( SWS_ACCURATE_RND )
-	SQBIND_GLOBALCONST( SWS_CPU_CAPS_MMX )
-	SQBIND_GLOBALCONST( SWS_CPU_CAPS_MMX2 )
-	SQBIND_GLOBALCONST( SWS_CPU_CAPS_3DNOW )
-	SQBIND_GLOBALCONST( SWS_CPU_CAPS_ALTIVEC )
-	SQBIND_GLOBALCONST( SWS_CPU_CAPS_BFIN )
+//	SQBIND_GLOBALCONST( SWS_CPU_CAPS_MMX )
+//	SQBIND_GLOBALCONST( SWS_CPU_CAPS_MMX2 )
+//	SQBIND_GLOBALCONST( SWS_CPU_CAPS_3DNOW )
+//	SQBIND_GLOBALCONST( SWS_CPU_CAPS_ALTIVEC )
+//	SQBIND_GLOBALCONST( SWS_CPU_CAPS_BFIN )
 	SQBIND_GLOBALCONST( SWS_MAX_REDUCE_CUTOFF )
 	SQBIND_GLOBALCONST( SWS_CS_ITU709 )
 	SQBIND_GLOBALCONST( SWS_CS_FCC )
@@ -93,7 +93,7 @@ CFfConvert::CFfConvert()
 
 int CFfConvert::CalcImageSize( int fmt, int width, int height )
 {_STT();
-	return avpicture_get_size( (PixelFormat)fmt, width, height );
+	return avpicture_get_size( (AVPixelFormat)fmt, width, height );
 }
 
 int CFfConvert::FillAVPicture( AVPicture *pPic, int fmt, int width, int height, void *buf )
@@ -105,7 +105,7 @@ int CFfConvert::FillAVPicture( AVPicture *pPic, int fmt, int width, int height, 
 	oexZeroMemory( pPic, sizeof( AVPicture ) );
 
 	// Fill in the picture data
-	int nSize = avpicture_fill( pPic, (uint8_t*)buf, (PixelFormat)fmt, width, height );
+	int nSize = avpicture_fill( pPic, (uint8_t*)buf, (AVPixelFormat)fmt, width, height );
 	if ( 0 >= nSize )
 		return 0;
 
@@ -120,9 +120,13 @@ int CFfConvert::FillAVFrame( AVFrame *pAv, int fmt, int width, int height, void 
 	AVPicture avPic;
 	oexZero( avPic );
 
-	int nSize = avpicture_fill( &avPic, (uint8_t*)buf, (PixelFormat)fmt, width, height );
+	int nSize = avpicture_fill( &avPic, (uint8_t*)buf, (AVPixelFormat)fmt, width, height );
 	if ( 0 >= nSize )
 		return 0;
+		
+	pAv->format = fmt;
+	pAv->width = width;
+	pAv->height = height;
 
 	for( int i = 0; i < (int)oexSizeOfArray( avPic.data ); i++ )
 		pAv->data[ i ] = avPic.data[ i ];
@@ -137,9 +141,9 @@ int CFfConvert::FmtEquiv( int fmt )
 {
 	// Seems to be issues with J FMTS
 	switch( fmt )
-	{	case PIX_FMT_YUVJ420P : return PIX_FMT_YUV420P;
-		case PIX_FMT_YUVJ422P : return PIX_FMT_YUV422P;
-		case PIX_FMT_YUVJ444P : return PIX_FMT_YUV444P;
+	{	case AV_PIX_FMT_YUVJ420P : return AV_PIX_FMT_YUV420P;
+		case AV_PIX_FMT_YUVJ422P : return AV_PIX_FMT_YUV422P;
+		case AV_PIX_FMT_YUVJ444P : return AV_PIX_FMT_YUV444P;
 		default : return fmt;
 	} // end switch
 }
@@ -160,18 +164,18 @@ int CFfConvert::Flip( int fmt, int h, AVPicture *p )
 
 	switch( fmt )
 	{
-		case PIX_FMT_YUV410P :
-		case PIX_FMT_YUV411P :
-		case PIX_FMT_YUV420P :
-		case PIX_FMT_YUV422P :
-		case PIX_FMT_YUV440P :
-		case PIX_FMT_YUV444P :
-		case PIX_FMT_YUYV422 :
-		case PIX_FMT_YUVJ420P :
-		case PIX_FMT_YUVJ422P :
-		case PIX_FMT_YUVJ444P :
-		case PIX_FMT_YUVJ440P :
-		case PIX_FMT_YUVA420P :
+		case AV_PIX_FMT_YUV410P :
+		case AV_PIX_FMT_YUV411P :
+		case AV_PIX_FMT_YUV420P :
+		case AV_PIX_FMT_YUV422P :
+		case AV_PIX_FMT_YUV440P :
+		case AV_PIX_FMT_YUV444P :
+		case AV_PIX_FMT_YUYV422 :
+		case AV_PIX_FMT_YUVJ420P :
+		case AV_PIX_FMT_YUVJ422P :
+		case AV_PIX_FMT_YUVJ444P :
+		case AV_PIX_FMT_YUVJ440P :
+		case AV_PIX_FMT_YUVA420P :
 			FLIP_AVLINE( p, 1, h / 2 );
 			FLIP_AVLINE( p, 2, h / 2 );
 			break;
@@ -227,8 +231,8 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 		Flip( src_fmt, height, &apSrc );
 
 	// Create conversion
-	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
-										width, height, (PixelFormat)dst_fmt,
+	SwsContext *psc = sws_getContext(	width, height, (AVPixelFormat)src_fmt,
+										width, height, (AVPixelFormat)dst_fmt,
 										alg, NULL, NULL, NULL );
 
 	if ( !psc )
@@ -298,8 +302,8 @@ int CFfConvert::ResizeBB( int sw, int sh, sqbind::CSqBinary *src, int src_fmt, i
 		Flip( src_fmt, sh, &apSrc );
 
 	// Create conversion
-	SwsContext *psc = sws_getContext(	sw, sh, (PixelFormat)src_fmt,
-										dw, dh, (PixelFormat)dst_fmt,
+	SwsContext *psc = sws_getContext(	sw, sh, (AVPixelFormat)src_fmt,
+										dw, dh, (AVPixelFormat)dst_fmt,
 										alg, NULL, NULL, NULL );
 
 	if ( !psc )
@@ -362,8 +366,8 @@ int CFfConvert::ConvertColorBB2( int width, int height, sqbind::CSqBinary *src, 
 		Flip( src_fmt, height, &apSrc );
 
 	// Create conversion
-	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
-										dst_width, dst_height, (PixelFormat)dst_fmt,
+	SwsContext *psc = sws_getContext(	width, height, (AVPixelFormat)src_fmt,
+										dst_width, dst_height, (AVPixelFormat)dst_fmt,
 										alg, NULL, NULL, NULL );
 	if ( !psc )
 		return 0;
@@ -393,7 +397,7 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 	if ( !img )
 		return 0;
 
-	PixelFormat src_fmt = PIX_FMT_BGR24;
+	AVPixelFormat src_fmt = AV_PIX_FMT_BGR24;
 	int width = img->getWidth();
 	int height = img->getHeight();
 	if ( !img->Obj().GetBits() || 0 >= width || 0 >= height )
@@ -432,7 +436,7 @@ int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, i
 
 	// Create conversion
 	SwsContext *psc = sws_getContext(	width, height, src_fmt,
-										width, height, (PixelFormat)dst_fmt,
+										width, height, (AVPixelFormat)dst_fmt,
 										alg, NULL, NULL, NULL );
 
 	if ( !psc )
@@ -465,7 +469,7 @@ int CFfConvert::ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, 
 	if ( 0 > height ) { flip = 1; height = -height; }
 
 	// Image format
-	PixelFormat dst_fmt = PIX_FMT_BGR24;
+	AVPixelFormat dst_fmt = AV_PIX_FMT_BGR24;
 
 	// Do we need to allocate destination image?
 	if ( img->getWidth() != width || img->getHeight() != height )
@@ -483,7 +487,7 @@ int CFfConvert::ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, 
 		Flip( src_fmt, height, &apSrc );
 
 	// Create conversion
-	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
+	SwsContext *psc = sws_getContext(	width, height, (AVPixelFormat)src_fmt,
 										width, height, dst_fmt,
 										alg, NULL, NULL, NULL );
 	if ( !psc )
@@ -514,7 +518,7 @@ int CFfConvert::ConvertColorRI( void *buf, int src_fmt, int width, int height, s
 	if ( 0 > height ) { flip = 1; height = -height; }
 
 	// Image format
-	PixelFormat dst_fmt = PIX_FMT_BGR24;
+	AVPixelFormat dst_fmt = AV_PIX_FMT_BGR24;
 
 	// Do we need to allocate destination image?
 	if ( img->getWidth() != width || img->getHeight() != height )
@@ -532,7 +536,7 @@ int CFfConvert::ConvertColorRI( void *buf, int src_fmt, int width, int height, s
 		Flip( src_fmt, height, &apSrc );
 
 	// Create conversion
-	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
+	SwsContext *psc = sws_getContext(	width, height, (AVPixelFormat)src_fmt,
 										width, height, dst_fmt,
 										alg, NULL, NULL, NULL );
 	if ( !psc )
@@ -563,7 +567,7 @@ int CFfConvert::ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height
 	if ( 0 > height ) { flip = 1; height = -height; }
 
 	// Image format
-	PixelFormat dst_fmt = PIX_FMT_BGR24;
+	AVPixelFormat dst_fmt = AV_PIX_FMT_BGR24;
 
 	// Do we need to allocate destination image?
 	if ( img->getWidth() != width || img->getHeight() != height )
@@ -586,7 +590,7 @@ int CFfConvert::ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height
 		Flip( src_fmt, height, &apSrc );
 		
 	// Create conversion
-	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
+	SwsContext *psc = sws_getContext(	width, height, (AVPixelFormat)src_fmt,
 										width, height, dst_fmt,
 										alg, NULL, NULL, NULL );
 	if ( !psc )
@@ -642,8 +646,8 @@ int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height
 		Flip( src_fmt, height, &apSrc );
 
 	// Create conversion
-	SwsContext *psc = sws_getContext(	width, height, (PixelFormat)src_fmt,
-										width, height, (PixelFormat)dst_fmt,
+	SwsContext *psc = sws_getContext(	width, height, (AVPixelFormat)src_fmt,
+										width, height, (AVPixelFormat)dst_fmt,
 										alg, NULL, NULL, NULL );
 	if ( !psc )
 		return 0;
@@ -670,8 +674,8 @@ int CFfConvert::Rotate( int deg, sqbind::CSqBinary *src, int src_fmt, int width,
 		return 0;
 
 	// RGB24
-	if ( ( PIX_FMT_BGR24 == src_fmt || PIX_FMT_RGB24 == src_fmt )
-		 && ( PIX_FMT_BGR24 == dst_fmt || PIX_FMT_RGB24 == dst_fmt ) )
+	if ( ( AV_PIX_FMT_BGR24 == src_fmt || AV_PIX_FMT_RGB24 == src_fmt )
+		 && ( AV_PIX_FMT_BGR24 == dst_fmt || AV_PIX_FMT_RGB24 == dst_fmt ) )
 	{
 		int sw = oex::CImage::GetScanWidth( width, 24 );
 		int sz = sw * height;
@@ -701,8 +705,8 @@ int CFfConvert::Rotate( int deg, sqbind::CSqBinary *src, int src_fmt, int width,
 	} // end if
 
 	// RGB32
-	else if ( ( PIX_FMT_BGR32 == src_fmt || PIX_FMT_RGB32 == src_fmt )
-			  && ( PIX_FMT_BGR32 == dst_fmt || PIX_FMT_RGB32 == dst_fmt ) )
+	else if ( ( AV_PIX_FMT_BGR32 == src_fmt || AV_PIX_FMT_RGB32 == src_fmt )
+			  && ( AV_PIX_FMT_BGR32 == dst_fmt || AV_PIX_FMT_RGB32 == dst_fmt ) )
 	{
 		int sw = oex::CImage::GetScanWidth( width, 32 );
 		int sz = sw * height;
@@ -889,8 +893,8 @@ int CFfConvert::FlipVert( sqbind::CSqBinary *src, int src_fmt, int width, int he
 		return 0;
 
 	// RGB24
-	if ( ( PIX_FMT_BGR24 == src_fmt || PIX_FMT_RGB24 == src_fmt )
-		 && ( PIX_FMT_BGR24 == dst_fmt || PIX_FMT_RGB24 == dst_fmt ) )
+	if ( ( AV_PIX_FMT_BGR24 == src_fmt || AV_PIX_FMT_RGB24 == src_fmt )
+		 && ( AV_PIX_FMT_BGR24 == dst_fmt || AV_PIX_FMT_RGB24 == dst_fmt ) )
 	{
 		int sw = oex::CImage::GetScanWidth( width, 24 );
 		int sz = sw * height;
@@ -912,8 +916,8 @@ int CFfConvert::FlipVert( sqbind::CSqBinary *src, int src_fmt, int width, int he
 	} // end if
 
 	// RGB32
-	else if ( ( PIX_FMT_BGR32 == src_fmt || PIX_FMT_RGB32 == src_fmt )
-			  && ( PIX_FMT_BGR32 == dst_fmt || PIX_FMT_RGB32 == dst_fmt ) )
+	else if ( ( AV_PIX_FMT_BGR32 == src_fmt || AV_PIX_FMT_RGB32 == src_fmt )
+			  && ( AV_PIX_FMT_BGR32 == dst_fmt || AV_PIX_FMT_RGB32 == dst_fmt ) )
 	{
 		int sw = oex::CImage::GetScanWidth( width, 32 );
 		int sz = sw * height;

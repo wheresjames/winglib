@@ -47,7 +47,8 @@ void CFfCapture::Destroy()
 		avcodec_close( m_pCodecContext );
 
 	if ( m_pFormatContext )
-		av_close_input_file( m_pFormatContext );
+		avformat_close_input( &m_pFormatContext );
+		// av_close_input_file( m_pFormatContext );
 
 	m_pFormatContext = oexNULL;
 	m_pCodecContext = oexNULL;

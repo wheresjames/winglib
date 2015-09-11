@@ -114,7 +114,7 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	// Lose previous codec
 	Destroy();
 
-	m_pCodec = avcodec_find_decoder( (CodecID)x_nCodec );
+	m_pCodec = avcodec_find_decoder( (AVCodecID)x_nCodec );
 	if ( !m_pCodec )
 	{	oexERROR( 0, oexT( "avcodec_find_decoder() failed" ) );
 		return 0;
@@ -124,7 +124,8 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 //	avcodec_parse_frame
 
 	// Allocate context
-	m_pCodecContext = avcodec_alloc_context();
+//	m_pCodecContext = avcodec_alloc_context();
+	m_pCodecContext = avcodec_alloc_context3( m_pCodec );
 	if ( !m_pCodecContext )
 	{	oexERROR( 0, oexT( "avcodec_alloc_context() failed" ) );
 		Destroy();
@@ -135,9 +136,10 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 //	ff_p->fmt->max_delay = 100000;
 
 //	avcodec_get_context_defaults( m_pCodecContext );
-	avcodec_get_context_defaults2( m_pCodecContext, AVMEDIA_TYPE_VIDEO );
+//	avcodec_get_context_defaults2( m_pCodecContext, AVMEDIA_TYPE_VIDEO );
+	avcodec_get_context_defaults3( m_pCodecContext, m_pCodec );
 
-    m_pCodecContext->codec_id = (CodecID)x_nCodec;
+    m_pCodecContext->codec_id = (AVCodecID)x_nCodec;
     m_pCodecContext->codec_type = AVMEDIA_TYPE_VIDEO;
     m_pCodecContext->bit_rate = brate;
     m_pCodecContext->width = width; // ( 0 < width ) ? width : 320;
@@ -145,7 +147,7 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
     m_pCodecContext->time_base.den = fps; // ( 0 < fps ) ? fps : 30;
     m_pCodecContext->time_base.num = 1;
     m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
-	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
+	m_pCodecContext->pix_fmt = (AVPixelFormat)fmt;
 //	m_pCodecContext->max_delay = 1000000;
 
 	// Truncated data
@@ -162,10 +164,10 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	} // end if
 
 	// Can we go ahead and open the codec?
-	if ( CODEC_ID_H264 != x_nCodec || 3 == ( 3 & m_nFlags ) )
+	if ( AV_CODEC_ID_H264 != x_nCodec || 3 == ( 3 & m_nFlags ) )
 	{
 		// Open the codec
-		int res = avcodec_open( m_pCodecContext, m_pCodec );
+		int res = avcodec_open2( m_pCodecContext, m_pCodec, 0 );
 		if ( 0 > res )
 		{	oexERROR( res, oexT( "avcodec_open() failed" ) );
 			m_pCodecContext = oexNULL;
@@ -182,7 +184,7 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	m_nFps = fps;
 
 	// +++ H264 crashes sometimes if you don't lead in with a key frame
-	if ( CODEC_ID_H264 == x_nCodec )
+	if ( AV_CODEC_ID_H264 == x_nCodec )
 		m_nWaitKeyFrame = m_nFps;
 
 	return 1;
@@ -202,7 +204,7 @@ int CFfDecoder::FindStreamInfo( sqbind::CSqBinary *in )
 	if ( !m_pFormatContext )
 		return 0;
 
-	if ( 0 > av_find_stream_info( m_pFormatContext ) )
+	if ( 0 > avformat_find_stream_info( m_pFormatContext, 0 ) )
 	{	av_free( m_pFormatContext );
 		m_pFormatContext = oexNULL;
 		return 0;
@@ -249,7 +251,7 @@ int CFfDecoder::BufferData( sqbind::CSqBinary *in, sqbind::CSqMulti *m )
 	} // end if
 
 	// Ensure we have SEI headers if needed
-	if ( CODEC_ID_H264 == m_pCodecContext->codec_id && 3 > m_nFlags )
+	if ( AV_CODEC_ID_H264 == m_pCodecContext->codec_id && 3 > m_nFlags )
 	{
 		// While we need headers
 		while ( 3 != ( 3 & m_nFlags ) )
@@ -322,7 +324,7 @@ int CFfDecoder::ReadSEI( const void *p, int len )
 		return 0;
 
 	// Currently, this only applies to H264
-	if ( CODEC_ID_H264 != m_pCodecContext->codec_id || 3 == ( 3 & m_nFlags ) )
+	if ( AV_CODEC_ID_H264 != m_pCodecContext->codec_id || 3 == ( 3 & m_nFlags ) )
 		return 1;
 
 #if defined( DEBUG )
@@ -361,7 +363,7 @@ int CFfDecoder::ReadSEI( const void *p, int len )
 		if ( !ll.IsLocked() ) return 0;
 
 		// Attempt to open the codec
-		int res = avcodec_open( m_pCodecContext, m_pCodec );
+		int res = avcodec_open2( m_pCodecContext, m_pCodec, 0 );
 		if ( 0 > res )
 		{	oexERROR( res, oexT( "avcodec_open() failed" ) );
 			m_pCodecContext = oexNULL;
@@ -393,14 +395,14 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 		
 	// Allocate frame
 	if ( !m_pFrame )
-	{	m_pFrame = avcodec_alloc_frame();
+	{	m_pFrame = av_frame_alloc();
 		if ( !m_pFrame )
 			return 0;
 	} // end if
 
 	// Waiting for key frame?
 	if ( m_nWaitKeyFrame )
-	{	if ( CODEC_ID_H264 != m_pCodecContext->codec_id
+	{	if ( AV_CODEC_ID_H264 != m_pCodecContext->codec_id
 			 || 0 == GetH264FrameType( m_pkt.data, m_pkt.size ) )
 			m_nWaitKeyFrame = 0;
 		else
@@ -458,14 +460,14 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 
 	// Allocate frame
 	if ( !m_pFrame )
-	{	m_pFrame = avcodec_alloc_frame();
+	{	m_pFrame = av_frame_alloc();
 		if ( !m_pFrame )
 			return 0;
 	} // end if
 
 	// Waiting for key frame?
 	if ( m_nWaitKeyFrame )
-	{	if ( CODEC_ID_H264 != m_pCodecContext->codec_id
+	{	if ( AV_CODEC_ID_H264 != m_pCodecContext->codec_id
 			 || 0 == GetH264FrameType( m_pkt.data, m_pkt.size ) )
 			m_nWaitKeyFrame = 0;
 		else
@@ -508,10 +510,10 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 
 static AVCodecTag g_ff_codec_map[] =
 {
-    { CODEC_ID_MPEG4,			MKTAG('M', 'P', 'G', '4') },
-    { CODEC_ID_MPEG4,			MKTAG('M', 'P', '4', 'V') },
+    { AV_CODEC_ID_MPEG4,		MKTAG('M', 'P', 'G', '4') },
+    { AV_CODEC_ID_MPEG4,		MKTAG('M', 'P', '4', 'V') },
 
-	{ CODEC_ID_NONE,			0 }
+	{ AV_CODEC_ID_NONE,			0 }
 };
 
 struct SFfVideoCodecInfo
@@ -523,10 +525,10 @@ struct SFfVideoCodecInfo
 /*
 static SFfVideoCodecInfo g_ff_video_codec_info[] =
 {
-	{ CODEC_ID_H263P,			oexT( "H263-2000" ) },
-	{ CODEC_ID_H263P,			oexT( "H263-1998" ) },
+	{ AV_CODEC_ID_H263P,		oexT( "H263-2000" ) },
+	{ AV_CODEC_ID_H263P,		oexT( "H263-1998" ) },
 
-	{ CODEC_ID_NONE,			0 }
+	{ AV_CODEC_ID_NONE,			0 }
 };
 */
 
@@ -535,7 +537,7 @@ int CFfDecoder::LookupCodecId( const sqbind::stdString &sCodec )
 /*
 	// Extras by name
 	oex::CStr8 s = oexStrToStr8( sqbind::std2oex( sCodec ) );
-	for ( int i = 0; CODEC_ID_NONE != g_ff_video_codec_info[ i ].id; i++ )
+	for ( int i = 0; AV_CODEC_ID_NONE != g_ff_video_codec_info[ i ].id; i++ )
 		if ( !oex::str::ICompare( s.Ptr(), s.Length(),
 								  g_ff_video_codec_info[ i ].tag,
 								  oex::zstr::Length( g_ff_video_codec_info[ i ].tag ) ) )
@@ -546,12 +548,12 @@ int CFfDecoder::LookupCodecId( const sqbind::stdString &sCodec )
 		c[ i ] = (char)sCodec[ i ];
 
 	// Find a codec with that name
-	for ( int i = 0; CODEC_ID_NONE != ff_codec_bmp_tags[ i ].id; i++ )
+	for ( int i = 0; AV_CODEC_ID_NONE != ff_codec_bmp_tags[ i ].id; i++ )
 		if ( *(oex::oexUINT32*)c == ff_codec_bmp_tags[ i ].tag )
 			return ff_codec_bmp_tags[ i ].id;
 
 	// Extras
-	for ( int i = 0; CODEC_ID_NONE != g_ff_codec_map[ i ].id; i++ )
+	for ( int i = 0; AV_CODEC_ID_NONE != g_ff_codec_map[ i ].id; i++ )
 		if ( *(oex::oexUINT32*)c == g_ff_codec_map[ i ].tag )
 			return g_ff_codec_map[ i ].id;
 
@@ -562,21 +564,21 @@ sqbind::stdString CFfDecoder::LookupCodecName( int nId )
 {_STT();
 /*
 	// Find a codec with that id
-	for ( int i = 0; CODEC_ID_NONE != g_ff_video_codec_info[ i ].id; i++ )
-		if ( g_ff_video_codec_info[ i ].id == (CodecID)nId )
+	for ( int i = 0; AV_CODEC_ID_NONE != g_ff_video_codec_info[ i ].id; i++ )
+		if ( g_ff_video_codec_info[ i ].id == (AVCodecID)nId )
 			return oexMbToStrPtr( g_ff_video_codec_info[ i ].tag );
 */
 	// Find a codec with that id
-	for ( int i = 0; CODEC_ID_NONE != ff_codec_bmp_tags[ i ].id; i++ )
-		if ( ff_codec_bmp_tags[ i ].id == (CodecID)nId )
+	for ( int i = 0; AV_CODEC_ID_NONE != ff_codec_bmp_tags[ i ].id; i++ )
+		if ( ff_codec_bmp_tags[ i ].id == (AVCodecID)nId )
 		{	char b[ 5 ] = { 0, 0, 0, 0, 0 };
 			*(oex::oexUINT32*)b = ff_codec_bmp_tags[ i ].tag;
 			return oexMbToStrPtr( b );
 		} // end if
 
 	// Find a codec with that id
-	for ( int i = 0; CODEC_ID_NONE != g_ff_codec_map[ i ].id; i++ )
-		if ( g_ff_codec_map[ i ].id == (CodecID)nId )
+	for ( int i = 0; AV_CODEC_ID_NONE != g_ff_codec_map[ i ].id; i++ )
+		if ( g_ff_codec_map[ i ].id == (AVCodecID)nId )
 		{	char b[ 5 ] = { 0, 0, 0, 0, 0 };
 			*(oex::oexUINT32*)b = g_ff_codec_map[ i ].tag;
 			return oexMbToStrPtr( b );

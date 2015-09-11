@@ -71,23 +71,32 @@ public:
 
 	/// Returns the Decode Time Stamp
 	SQInteger getPktDts()
-	{	if ( !m_pCodecContext && m_pCodecContext->coded_frame )
-			return 0;
-		return m_pCodecContext->coded_frame->pkt_dts;
+	{
+		// +++ Deprecated
+		return 0;
+//		if ( !m_pCodecContext && m_pCodecContext->coded_frame )
+//			return 0;
+//		return m_pCodecContext->coded_frame->pkt_dts;
 	}
 
 	/// Returns the Presentation Time Stamp
 	SQInteger getPktPts()
-	{	if ( !m_pCodecContext && m_pCodecContext->coded_frame )
-			return 0;
-		return m_pCodecContext->coded_frame->pkt_pts;
+	{
+		// +++ Deprecated
+		return 0;
+//		if ( !m_pCodecContext && m_pCodecContext->coded_frame )
+//			return 0;
+//		return m_pCodecContext->coded_frame->pkt_pts;
 	}
 
 	/// Returns the Presentation Time Stamp
 	SQInteger getPts()
-	{	if ( !m_pCodecContext && m_pCodecContext->coded_frame )
-			return 0;
-		return m_pCodecContext->coded_frame->pts;
+	{
+		// +++ Deprecated
+		return 0;
+//		if ( !m_pCodecContext && m_pCodecContext->coded_frame )
+//			return 0;
+//		return m_pCodecContext->coded_frame->pts;
 	}
 
 	/// Returns codec level

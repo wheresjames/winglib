@@ -60,7 +60,7 @@ ifeq ($(PLATFORM),windows)
 	endif
 else
 	PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/posix $(PRJ_INCS)
-	PRJ_LIBS := $(PRJ_LIBS) ffa ffb ffc ffd ffa ffb ffc ffd rtmpd x264 lame \
+	PRJ_LIBS := $(PRJ_LIBS) ffa ffb ffc ffd ffa ffb ffc ffd rtmpd vpx x264 lame \
 							openssl_a openssl_b openssl_c openssl_a openssl_b openssl_c zlib
 	PRJ_OSLB := $(PRJ_OSLB)
 endif

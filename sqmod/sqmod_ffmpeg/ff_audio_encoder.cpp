@@ -100,25 +100,26 @@ int CFfAudioEncoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 	if ( 0 >= x_nChannels || 0 >= x_nSampleRate )
 		return 0;
 
-	m_pCodec = avcodec_find_encoder( (CodecID)x_nCodec );
+	m_pCodec = avcodec_find_encoder( (AVCodecID)x_nCodec );
 	if ( !m_pCodec )
 	{	// oexERROR( 0, oexMks( oexT( "avcodec_find_encoder() failed to find codec for id : " ), (int)x_nCodec ) );
 		return 0;
 	} // end if
 
-	m_pCodecContext = avcodec_alloc_context();
+//	m_pCodecContext = avcodec_alloc_context();
+	m_pCodecContext = avcodec_alloc_context3( m_pCodec );
 	if ( !m_pCodecContext )
 	{	oexERROR( 0, oexT( "avcodec_alloc_context() failed" ) );
 		Destroy();
 		return 0;
 	} // end if
 
-	avcodec_get_context_defaults( m_pCodecContext );
+	avcodec_get_context_defaults3( m_pCodecContext, m_pCodec );
 
 //	MAX_AUDIO_PACKET_SIZE
 //	AVCODEC_MAX_AUDIO_FRAME_SIZE
 
-	m_pCodecContext->codec_id = (CodecID)x_nCodec;
+	m_pCodecContext->codec_id = (AVCodecID)x_nCodec;
 	m_pCodecContext->codec_type = AVMEDIA_TYPE_AUDIO;
 
 #	define CNVTYPE( t, v ) case oex::obj::t : m_pCodecContext->sample_fmt = v; break;
@@ -153,7 +154,7 @@ int CFfAudioEncoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 	m_pCodecContext->time_base.den = nTimeBase;
 
 	// Check profile for aac
-	if ( CODEC_ID_AAC == x_nCodec )
+	if ( AV_CODEC_ID_AAC == x_nCodec )
 		m_pCodecContext->profile = FF_PROFILE_AAC_LOW, // _AAC_LOW _AAC_MAIN _AAC_SSR _AAC_LTP
 		m_pCodecContext->bit_rate = m_pCodecContext->sample_rate * ( x_nFmt & 0xf ) * m_pCodecContext->channels;
 
@@ -181,7 +182,7 @@ int CFfAudioEncoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 	} // end if
 
 	// Open the codec
-	int res = avcodec_open( m_pCodecContext, m_pCodec );
+	int res = avcodec_open2( m_pCodecContext, m_pCodec, 0 );
 	if ( 0 > res )
 	{	oexERROR( res, oexT( "avcodec_open() failed" ) );
 		av_free( m_pCodecContext );
@@ -204,7 +205,7 @@ int CFfAudioEncoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 		m_pCodecContext->time_base.den = getFrameSize();
 
 		// Open it again
-		int res = avcodec_open( m_pCodecContext, m_pCodec );
+		int res = avcodec_open2( m_pCodecContext, m_pCodec, 0 );
 		if ( 0 > res )
 		{	oexERROR( res, oexT( "avcodec_open() failed" ) );
 			av_free( m_pCodecContext );
@@ -371,7 +372,13 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 
 		// Encode a frame
 		int gop = 0;
-		int nBytes = avcodec_encode_audio2( m_pCodecContext, &m_pkt, pDst, &gop );
+//		int nBytes = avcodec_encode_audio2( m_pCodecContext, &m_pkt, pDst, &gop );
+
+		AVPacket output_packet;
+		init_packet( &output_packet );
+
+//		int nBytes = avcodec_encode_audio2( m_pCodecContext, &m_pkt, pDst, &gop );
+		int nBytes = -1;
 		if ( 0 > nBytes )
 		{	oexERROR( nBytes, oexT( "avcodec_encode_audio2() failed" ) );
 			return 0;
@@ -391,7 +398,8 @@ int CFfAudioEncoder::Encode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 //oexSHOW( m_pCodecContext->coded_frame->pts );
 
 		// Encode audio frame
-		int nBytes = avcodec_encode_audio( m_pCodecContext, &pOut[ nOutPtr ], nOut - nOutPtr, (const short*)m_pkt.data );
+//		int nBytes = avcodec_encode_audio( m_pCodecContext, &pOut[ nOutPtr ], nOut - nOutPtr, (const short*)m_pkt.data );
+		int nBytes = -1;
 		if ( 0 > nBytes )
 		{	oexERROR( nBytes, oexT( "avcodec_encode_audio() failed" ) );
 			return 0;

@@ -261,7 +261,8 @@ static void SQBIND_Init_ffmpeg()
 	avformat_network_init();
 	
 	// Register the oexshare protocol
-	ffurl_register_protocol( &memshare_protocol, sizeof( memshare_protocol ) );
+	ffurl_register_protocol( &memshare_protocol );
+//	ffurl_register_protocol( &memshare_protocol, sizeof( memshare_protocol ) );
 //	av_register_protocol2( &memshare_protocol, sizeof( memshare_protocol ) );
 }
 

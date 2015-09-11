@@ -104,14 +104,14 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 		return 0;
 
 	// Find an encoder
-	m_pCodec = avcodec_find_encoder( (CodecID)x_nCodec );
+	m_pCodec = avcodec_find_encoder( (AVCodecID)x_nCodec );
 	if ( !m_pCodec )
 	{	// oexERROR( 0, oexMks( oexT( "avcodec_find_encoder() failed to find codec for id : " ), (int)x_nCodec ) );
 		return 0;
 	} // end if
 
 	// Initialize codec context
-	m_pCodecContext = avcodec_alloc_context();
+	m_pCodecContext = avcodec_alloc_context3( m_pCodec );
 	if ( !m_pCodecContext )
 	{	oexERROR( 0, oexT( "avcodec_alloc_context() failed" ) );
 		Destroy();
@@ -123,14 +123,14 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	if ( 0 >= brate )
 		brate = width * height * fps / 3;
 
-	avcodec_get_context_defaults( m_pCodecContext );
+	avcodec_get_context_defaults3( m_pCodecContext, m_pCodec );
 
 	// Get time base
 	oex::oexINT64 nTimeBase = m_nTimeBase;
 	if ( 0 >= nTimeBase )
 		nTimeBase = fps;
 
-	m_pCodecContext->codec_id = (CodecID)x_nCodec;
+	m_pCodecContext->codec_id = (AVCodecID)x_nCodec;
 	m_pCodecContext->codec_type = AVMEDIA_TYPE_VIDEO;
 	m_pCodecContext->bit_rate = brate;
 	m_pCodecContext->bit_rate_tolerance = brate / 5;
@@ -141,14 +141,14 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 	m_pCodecContext->time_base.num = 1;
 //	m_pCodecContext->me_method = 1;
 	m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
-	m_pCodecContext->pix_fmt = (PixelFormat)fmt;
+	m_pCodecContext->pix_fmt = (AVPixelFormat)fmt;
 
 	// Global headers?
 	if ( m && (*m)[ oexT( "global_headers" ) ].toint() )
 		m_pCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
 
 	// Special h264 defaults
-	if ( CODEC_ID_H264 == m_pCodecContext->codec_id )
+	if ( AV_CODEC_ID_H264 == m_pCodecContext->codec_id )
 	{
 		// 'Real time'
 //		m_pCodecContext->max_b_frames = 0;
@@ -212,7 +212,7 @@ int CFfEncoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 
 	} // end if
 
-	int res = avcodec_open( m_pCodecContext, m_pCodec );
+	int res = avcodec_open2( m_pCodecContext, m_pCodec, 0 );
 	if ( 0 > res )
 	{	oexERROR( res, oexT( "avcodec_open() failed" ) );
 		av_free( m_pCodecContext );
@@ -258,7 +258,7 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 		return 0;
 
 	if ( !m_pFrame )
-		m_pFrame = avcodec_alloc_frame();
+		m_pFrame = av_frame_alloc();
 	if ( !m_pFrame )
 		return 0;
 
@@ -303,13 +303,23 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 	if ( 0 < nHeader )
 		out->Copy( &m_header );
 
+	AVPacket pkt;
+	av_init_packet( &pkt );
+	pkt.data = (uint8_t*)out->_Ptr( nHeader );
+	pkt.size = out->Size() - nHeader;	
+		
 	// Encode the video frame
-	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->_Ptr( nHeader ), out->Size() - nHeader, m_pFrame );
+//	int nBytes = avcodec_encode_video( m_pCodecContext, (uint8_t*)out->_Ptr( nHeader ), out->Size() - nHeader, m_pFrame );
+	int gop = 0;
+	int nBytes = avcodec_encode_video2( m_pCodecContext, &pkt, m_pFrame, &gop );
 	if ( 0 > nBytes )
 	{	oexERROR( nBytes, oexT( "avcodec_encode_video() failed" ) );
 		out->setUsed( 0 );
 		return 0;
 	} // end if
+	
+	if ( !gop )
+		return 0;
 
 	if ( m )
 	{
@@ -331,8 +341,11 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 
 	} // end if
 
+	nBytes = pkt.size;
 	out->setUsed( nBytes );
 
+	av_free_packet( &pkt );
+	
 	// Count a frame
 	m_nFrame++;
 
@@ -373,8 +386,8 @@ int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, sqbi
 		return 0;
 
 	// Do we need to convert the colorspace?
-	if ( PIX_FMT_BGR24 == m_nFmt )
-		return EncodeRaw( PIX_FMT_BGR24, img->getWidth(), img->getHeight(), img->Obj().GetBits(), img->Obj().GetImageSize(), out, m );
+	if ( AV_PIX_FMT_BGR24 == m_nFmt )
+		return EncodeRaw( AV_PIX_FMT_BGR24, img->getWidth(), img->getHeight(), img->Obj().GetBits(), img->Obj().GetImageSize(), out, m );
 
 	// Must convert to input format
 	if ( !CFfConvert::ConvertColorIB( img, &m_tmp, m_nFmt, SWS_FAST_BILINEAR, 1 ) )

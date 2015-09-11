@@ -54,13 +54,13 @@ int CFfTranscode::Init( int width, int height, int fps, int brate, int src_codec
 		return 1;
 
 	// Attempt to create a decoder
-	if ( !m_dec.Create( m_dec_id, PIX_FMT_YUV420P, width, height, fps, brate, 0 ) )
+	if ( !m_dec.Create( m_dec_id, AV_PIX_FMT_YUV420P, width, height, fps, brate, 0 ) )
 	{	Destroy();
 		return 0;
 	} // end if
 
 	// Create encoder
-	if ( !m_enc.Create( m_enc_id, PIX_FMT_YUV420P, width, height, fps, brate, 0 ) )
+	if ( !m_enc.Create( m_enc_id, AV_PIX_FMT_YUV420P, width, height, fps, brate, 0 ) )
 	{	Destroy();
 		return 0;
 	} // end if
@@ -83,11 +83,11 @@ int CFfTranscode::Transcode( sqbind::CSqBinary *src, sqbind::CSqBinary *dst, sqb
 	} // end if
 
 	// Decode incoming
-	if ( !m_dec.Decode( src, PIX_FMT_YUV420P, &m_tmp, fi, flip ) )
+	if ( !m_dec.Decode( src, AV_PIX_FMT_YUV420P, &m_tmp, fi, flip ) )
 		return 0;
 
 	// Encode in new format
-	if ( !m_enc.Encode( PIX_FMT_YUV420P, m_dec.getWidth(), m_dec.getHeight(), &m_tmp, dst, fi ) )
+	if ( !m_enc.Encode( AV_PIX_FMT_YUV420P, m_dec.getWidth(), m_dec.getHeight(), &m_tmp, dst, fi ) )
 		return 0;
 
 	return 1;
@@ -109,6 +109,6 @@ int CFfTranscode::GetImage( sqbind::CSqImage *img )
 		return 0;
 
 	// Convert to image format
-	return CFfConvert::ConvertColorBI( &m_tmp, PIX_FMT_YUV420P, m_dec.getWidth(), m_dec.getHeight(), img, SWS_FAST_BILINEAR, 1 );
+	return CFfConvert::ConvertColorBI( &m_tmp, AV_PIX_FMT_YUV420P, m_dec.getWidth(), m_dec.getHeight(), img, SWS_FAST_BILINEAR, 1 );
 }
 

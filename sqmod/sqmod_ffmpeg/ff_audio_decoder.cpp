@@ -107,7 +107,7 @@ int CFfAudioDecoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 	// Lose previous codec
 	Destroy();
 
-	m_pCodec = avcodec_find_decoder( (CodecID)x_nCodec );
+	m_pCodec = avcodec_find_decoder( (AVCodecID)x_nCodec );
 	if ( !m_pCodec )
 	{	oexERROR( 0, oexMks( oexT( "avcodec_find_decoder() failed : " ),
 					 (int)x_nCodec, oexT( " - " ), LookupCodecName( x_nCodec ).c_str() ) );
@@ -115,7 +115,7 @@ int CFfAudioDecoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 	} // end if
 
 	// Allocate context
-	m_pCodecContext = avcodec_alloc_context();
+	m_pCodecContext = avcodec_alloc_context3( m_pCodec );
 	if ( !m_pCodecContext )
 	{	oexERROR( 0, oexT( "avcodec_alloc_context() failed" ) );
 		Destroy();
@@ -123,9 +123,11 @@ int CFfAudioDecoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 	} // end if
 
 //	avcodec_get_context_defaults( m_pCodecContext );
-	avcodec_get_context_defaults2( m_pCodecContext, AVMEDIA_TYPE_AUDIO );
+//	avcodec_get_context_defaults2( m_pCodecContext, AVMEDIA_TYPE_AUDIO );
+	AVCodec c = {0}; c.type = AVMEDIA_TYPE_AUDIO;
+	avcodec_get_context_defaults3( m_pCodecContext, &c );
 
-    m_pCodecContext->codec_id = (CodecID)x_nCodec;
+    m_pCodecContext->codec_id = (AVCodecID)x_nCodec;
     m_pCodecContext->codec_type = AVMEDIA_TYPE_AUDIO;
 
 #	define CNVTYPE( t, v ) case oex::obj::t : m_pCodecContext->sample_fmt = v; break;
@@ -156,7 +158,7 @@ int CFfAudioDecoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 		m_pCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
 	} // end if
 
-	int res = avcodec_open( m_pCodecContext, m_pCodec );
+	int res = avcodec_open2( m_pCodecContext, m_pCodec, 0 );
 	if ( 0 > res )
 	{	oexERROR( res, oexT( "avcodec_open() failed" ) );
 		m_pCodecContext = oexNULL;
@@ -181,7 +183,8 @@ int CFfAudioDecoder::FindStreamInfo( sqbind::CSqBinary *in )
 	if ( !m_pFormatContext )
 		return 0;
 
-	if ( 0 > av_find_stream_info( m_pFormatContext ) )
+//	if ( 0 > av_find_stream_info( m_pFormatContext ) )
+	if ( 0 > avformat_find_stream_info( m_pFormatContext, 0 ) )
 	{	av_free( m_pFormatContext );
 		m_pFormatContext = oexNULL;
 		return 0;
@@ -321,6 +324,10 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 
 	// While we have input data
 	int nOutFrame = 1;
+	
+	// +++ Needs to be released
+	AVFrame *decoded_frame = 0;
+	
 	while ( nIn >= bs && 0 < nOutFrame )
 	{
 		// Ensure a reasonable output buffer
@@ -333,9 +340,24 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 			return 0;
 		} // end if
 
+		if ( !decoded_frame ) 
+		{
+			decoded_frame = av_frame_alloc();
+			if ( !decoded_frame )
+			{	oexERROR( nOut, oexT( "Memory allocation failed: decoded_frame buffer" ) );
+				return 0;
+			} // end if
+		} // end if
+
+		// Initialize frame buffer
+		// avcodec_get_frame_defaults( decoded_frame );
+		av_frame_unref( decoded_frame );
+		
 		// Decode a frame
 		nOutFrame = nOut - nOutPtr;
-		int nBytes = avcodec_decode_audio3( m_pCodecContext, (int16_t*)&pOut[ nOutPtr ], &nOutFrame, &m_pkt );
+//		int nBytes = avcodec_decode_audio3( m_pCodecContext, (int16_t*)&pOut[ nOutPtr ], &nOutFrame, &m_pkt );
+//		int nBytes = avcodec_decode_audio4( m_pCodecContext, decoded_frame, &nOutFrame, &m_pkt );
+		int nBytes = -1;
 		if ( 0 > nBytes )
 		{	oexERROR( nBytes, oexT( "avcodec_decode_audio3() failed" ) );
 			return 0;
@@ -343,13 +365,26 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 
 		// Add bytes
 		if ( 0 < nOutFrame )
-			nOutPtr += nOutFrame;
+		{
+			// +++ Needs to be checked
+			int data_size = av_get_bytes_per_sample( m_pCodecContext->sample_fmt );
+			for ( int i = 0; i < decoded_frame->nb_samples; i++ )
+				for ( int ch = 0; ch < m_pCodecContext->channels; ch++ )
+					memcpy( pOut[ nOutPtr ], decoded_frame->data[ ch ] + data_size * i, data_size ), 
+					nOutPtr += data_size;
+					
+			//nOutPtr += nBytes;
+			
+		} // end if
 
 		// Unbuffer used data
 		nIn = UnbufferData( nBytes );
 
 	} // end while
 
+	if ( decoded_frame )
+		av_frame_unref( decoded_frame );
+	
 	// Set total bytes in the output queue
 	out->setUsed( nOutPtr );
 
@@ -371,33 +406,33 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 
 static AVCodecTag g_ff_audio_codec_map[] =
 {
-	{ CODEC_ID_AAC,			MKTAG('A', 'A', 'C', ' ') },
-	{ CODEC_ID_AAC,			MKTAG('A', 'M', 'R', ' ') },
-	{ CODEC_ID_AMR_NB,		MKTAG('A', 'M', 'R', ' ') },
-	{ CODEC_ID_AMR_WB,		MKTAG('A', 'M', 'R', ' ') },
-	{ CODEC_ID_MP2,			MKTAG('M', 'P', '2', ' ') },
-	{ CODEC_ID_MP3,			MKTAG('M', 'P', '3', ' ') },
-	{ CODEC_ID_AC3,			MKTAG('A', 'C', '3', ' ') },
+	{ AV_CODEC_ID_AAC,			MKTAG('A', 'A', 'C', ' ') },
+	{ AV_CODEC_ID_AAC,			MKTAG('A', 'M', 'R', ' ') },
+	{ AV_CODEC_ID_AMR_NB,		MKTAG('A', 'M', 'R', ' ') },
+	{ AV_CODEC_ID_AMR_WB,		MKTAG('A', 'M', 'R', ' ') },
+	{ AV_CODEC_ID_MP2,			MKTAG('M', 'P', '2', ' ') },
+	{ AV_CODEC_ID_MP3,			MKTAG('M', 'P', '3', ' ') },
+	{ AV_CODEC_ID_AC3,			MKTAG('A', 'C', '3', ' ') },
 
-	{ CODEC_ID_ADPCM_G722,	MKTAG('G', '7', '2', '2') },
-	{ CODEC_ID_AAC_LATM,	MKTAG('L', 'A', 'T', 'M') },
-	{ CODEC_ID_MP2,			MKTAG('M', 'P', '-', '2') },
-	{ CODEC_ID_MP3,			MKTAG('M', 'P', '-', '3') },
-	{ CODEC_ID_AC3,			MKTAG('A', 'C', '-', '3') },
+	{ AV_CODEC_ID_ADPCM_G722,	MKTAG('G', '7', '2', '2') },
+	{ AV_CODEC_ID_AAC_LATM,	MKTAG('L', 'A', 'T', 'M') },
+	{ AV_CODEC_ID_MP2,			MKTAG('M', 'P', '-', '2') },
+	{ AV_CODEC_ID_MP3,			MKTAG('M', 'P', '-', '3') },
+	{ AV_CODEC_ID_AC3,			MKTAG('A', 'C', '-', '3') },
 
-	{ CODEC_ID_PCM_MULAW,	MKTAG('P', 'C', 'M', 'U') },
-	{ CODEC_ID_PCM_ALAW,	MKTAG('P', 'C', 'M', 'A') },
+	{ AV_CODEC_ID_PCM_MULAW,	MKTAG('P', 'C', 'M', 'U') },
+	{ AV_CODEC_ID_PCM_ALAW,	MKTAG('P', 'C', 'M', 'A') },
 
 	// +++ I'm not sure if anything is 'correct' for vorbis
-	{ CODEC_ID_VORBIS,		MKTAG('V', 'O', 'R', 'B') },
-/*	{ (CodecID)0x674f,		MKTAG('V', 'O', 'R', '1') },
-	{ (CodecID)0x6750,		MKTAG('V', 'O', 'R', '2') },
-	{ (CodecID)0x6751,		MKTAG('V', 'O', 'R', '3') },
-	{ (CodecID)0x676f,		MKTAG('V', 'O', '1', '+') },
-	{ (CodecID)0x6770,		MKTAG('V', 'O', '2', '+') },
-	{ (CodecID)0x6771,		MKTAG('V', 'O', '3', '+') },
+	{ AV_CODEC_ID_VORBIS,		MKTAG('V', 'O', 'R', 'B') },
+/*	{ (AVCodecID)0x674f,		MKTAG('V', 'O', 'R', '1') },
+	{ (AVCodecID)0x6750,		MKTAG('V', 'O', 'R', '2') },
+	{ (AVCodecID)0x6751,		MKTAG('V', 'O', 'R', '3') },
+	{ (AVCodecID)0x676f,		MKTAG('V', 'O', '1', '+') },
+	{ (AVCodecID)0x6770,		MKTAG('V', 'O', '2', '+') },
+	{ (AVCodecID)0x6771,		MKTAG('V', 'O', '3', '+') },
 */
-	{ CODEC_ID_NONE,		0 }
+	{ AV_CODEC_ID_NONE,		0 }
 };
 
 struct SFfAudioCodecInfo
@@ -408,10 +443,10 @@ struct SFfAudioCodecInfo
 
 static SFfAudioCodecInfo g_ff_audio_codec_info[] =
 {
-	{ CODEC_ID_AAC,				oexT( "MP4A-LATM" ) },
-	{ CODEC_ID_AAC,				oexT( "MPEG4-GENERIC" ) },
+	{ AV_CODEC_ID_AAC,				oexT( "MP4A-LATM" ) },
+	{ AV_CODEC_ID_AAC,				oexT( "MPEG4-GENERIC" ) },
 
-	{ CODEC_ID_NONE,			0 }
+	{ AV_CODEC_ID_NONE,			0 }
 };
 
 
@@ -422,18 +457,18 @@ int CFfAudioDecoder::LookupCodecId( const sqbind::stdString &sCodec )
 		c[ i ] = (char)sCodec[ i ];
 
 	// Find a codec with that name
-	for ( int i = 0; CODEC_ID_NONE != ff_codec_wav_tags[ i ].id; i++ )
+	for ( int i = 0; AV_CODEC_ID_NONE != ff_codec_wav_tags[ i ].id; i++ )
 		if ( *(oex::oexUINT32*)c == ff_codec_wav_tags[ i ].tag )
 			return ff_codec_wav_tags[ i ].id;
 
 	// Extras
-	for ( int i = 0; CODEC_ID_NONE != g_ff_audio_codec_map[ i ].id; i++ )
+	for ( int i = 0; AV_CODEC_ID_NONE != g_ff_audio_codec_map[ i ].id; i++ )
 		if ( *(oex::oexUINT32*)c == g_ff_audio_codec_map[ i ].tag )
 			return g_ff_audio_codec_map[ i ].id;
 
 	// Extras by name
 	oex::CStr s = sqbind::std2oex( sCodec );
-	for ( int i = 0; CODEC_ID_NONE != g_ff_audio_codec_info[ i ].id; i++ )
+	for ( int i = 0; AV_CODEC_ID_NONE != g_ff_audio_codec_info[ i ].id; i++ )
 		if ( !oex::str::ICompare( s.Ptr(), s.Length(),
 								  g_ff_audio_codec_info[ i ].tag,
 								  oex::zstr::Length( g_ff_audio_codec_info[ i ].tag ) ) )
@@ -446,24 +481,24 @@ sqbind::stdString CFfAudioDecoder::LookupCodecName( int nId )
 {_STT();
 
 	// Find a codec with that id
-	for ( int i = 0; CODEC_ID_NONE != ff_codec_wav_tags[ i ].id; i++ )
-		if ( ff_codec_wav_tags[ i ].id == (CodecID)nId )
+	for ( int i = 0; AV_CODEC_ID_NONE != ff_codec_wav_tags[ i ].id; i++ )
+		if ( ff_codec_wav_tags[ i ].id == (AVCodecID)nId )
 		{	char b[ 5 ] = { 0, 0, 0, 0, 0 };
 			*(oex::oexUINT32*)b = ff_codec_wav_tags[ i ].tag;
 			return oexMbToStrPtr( b );
 		} // end if
 
 	// Find a codec with that id
-	for ( int i = 0; CODEC_ID_NONE != g_ff_audio_codec_map[ i ].id; i++ )
-		if ( g_ff_audio_codec_map[ i ].id == (CodecID)nId )
+	for ( int i = 0; AV_CODEC_ID_NONE != g_ff_audio_codec_map[ i ].id; i++ )
+		if ( g_ff_audio_codec_map[ i ].id == (AVCodecID)nId )
 		{	char b[ 5 ] = { 0, 0, 0, 0, 0 };
 			*(oex::oexUINT32*)b = g_ff_audio_codec_map[ i ].tag;
 			return oexMbToStrPtr( b );
 		} // end if
 
 	// Find a codec with that id
-	for ( int i = 0; CODEC_ID_NONE != g_ff_audio_codec_info[ i ].id; i++ )
-		if ( g_ff_audio_codec_info[ i ].id == (CodecID)nId )
+	for ( int i = 0; AV_CODEC_ID_NONE != g_ff_audio_codec_info[ i ].id; i++ )
+		if ( g_ff_audio_codec_info[ i ].id == (AVCodecID)nId )
 			return g_ff_audio_codec_info[ i ].tag;
 
 	return oexT( "" );
