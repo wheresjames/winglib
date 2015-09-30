@@ -65,7 +65,7 @@ p[ "encoder_params" ][ "preset"  ] <- "ultrafast";   // "ultrafast";
 p[ "encoder_params" ][ "tune"    ] <- "zerolatency"; // "zerolatency";
 
 local venc = CFfEncoder();
-if ( !venc.Create( CFfDecoder().LookupCodecId( vcodec ), CFfConvert().PIX_FMT_YUV420P,
+if ( !venc.Create( CFfDecoder().LookupCodecId( vcodec ), CFfConvert().AV_PIX_FMT_YUV420P,
 				  w, h, fps, 0, p ) )
 {	_self.echo( "!!! Failed to create video encoder" );
 	return;

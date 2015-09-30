@@ -57,7 +57,7 @@ while ( 1 )
 				else if ( !rec_avi.InitWrite() )
 					_self.echo( "Failed to initiailze avi" );
 
-				else if ( !rec_enc.Create( rec_avi.getVideoCodecId(), CFfConvert().PIX_FMT_YUV420P,
+				else if ( !rec_enc.Create( rec_avi.getVideoCodecId(), CFfConvert().AV_PIX_FMT_YUV420P,
 										   width, height, fps, 1000000, CSqMulti() ) )
 					_self.echo( "Failed to create encoder" );
 

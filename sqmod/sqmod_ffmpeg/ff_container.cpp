@@ -393,7 +393,7 @@ int CFfContainer::CloseStream()
 				avio_close( m_pFormatContext->pb );
 		} // end if
 
-		avformat_free_context(m_pFormatContext);
+		avformat_free_context( m_pFormatContext );
 
 	} // end else if
 

@@ -161,7 +161,7 @@ function OnDraw() : ( _g )
 			local video = _g.fn.getVideo( vidx );
 			if ( buffer.getUsed() )
 				_g.cnv.ConvertColorBB( _g.fn.getVideoWidth(), _g.fn.getVideoHeight(),
-									   video, CFfConvert().PIX_FMT_RGB24, buffer, CFfConvert().PIX_FMT_RGB32, 
+									   video, CFfConvert().AV_PIX_FMT_RGB24, buffer, CFfConvert().AV_PIX_FMT_RGB32, 
 									   CFfConvert().SWS_FAST_BILINEAR ),
 				_g.vtex.Unlock();
 
@@ -191,9 +191,9 @@ function OnDraw() : ( _g )
 			depth.Threshold( _self.tUInt16, 0, 0, 1, 8000., 10000. 0. 0. );
 			if ( buffer.getUsed() )
 				_g.cnv.ConvertColorBB2( _g.fn.getDepthWidth(), _g.fn.getDepthHeight(),
-									    depth, CFfConvert().PIX_FMT_GRAY16LE, 
+									    depth, CFfConvert().AV_PIX_FMT_GRAY16LE, 
 										_g.fn.getDepthWidth() / 10, _g.fn.getDepthHeight() / 10,
-										buffer, CFfConvert().PIX_FMT_RGB32, 
+										buffer, CFfConvert().AV_PIX_FMT_RGB32, 
 									    CFfConvert().SWS_FAST_BILINEAR ),
 				_g.dtex.Unlock();
 
@@ -222,7 +222,7 @@ function RecordToFile( file ) : ( _g )
 	else if ( !_g.rec_avi.InitWrite() )
 		_self.echo( "Failed to initiailze avi" );
 
-	else if ( !_g.rec_enc.Create( _g.rec_avi.getVideoCodecId(), CFfConvert().PIX_FMT_YUV420P, 
+	else if ( !_g.rec_enc.Create( _g.rec_avi.getVideoCodecId(), CFfConvert().AV_PIX_FMT_YUV420P, 
 								  width, height, 10, 2000000, CSqMulti() ) )
 		_self.echo( "Failed to create encoder" );
 
@@ -239,7 +239,7 @@ function RenderFile() : ( _g )
 	{
 		local inf = CSqMulti();
 		
-		if ( !_g.rec_enc.Encode( CFfConvert().PIX_FMT_BGR32, 
+		if ( !_g.rec_enc.Encode( CFfConvert().AV_PIX_FMT_BGR32, 
 								 _g.irr.getWidth(), -_g.irr.getHeight(),
 								 img, _g.rec_frame, inf ) )
 			_self.echo( "Failed to encode frame" );

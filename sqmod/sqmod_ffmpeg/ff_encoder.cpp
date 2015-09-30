@@ -305,6 +305,8 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 
 	AVPacket pkt;
 	av_init_packet( &pkt );
+//	pkt.pts = m_pFrame->pts;
+//	pkt.dts = m_pFrame->dts;
 	pkt.data = (uint8_t*)out->_Ptr( nHeader );
 	pkt.size = out->Size() - nHeader;	
 		
@@ -313,7 +315,7 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 	int gop = 0;
 	int nBytes = avcodec_encode_video2( m_pCodecContext, &pkt, m_pFrame, &gop );
 	if ( 0 > nBytes )
-	{	oexERROR( nBytes, oexT( "avcodec_encode_video() failed" ) );
+	{	oexERROR( nBytes, oexT( "avcodec_encode_video2() failed" ) );
 		out->setUsed( 0 );
 		return 0;
 	} // end if
@@ -326,14 +328,18 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 		// Save key frame information
 		int flags = (*m)[ oexT( "flags" ) ].toint();
 		(*m)[ oexT( "flags" ) ]
-			.set( sqbind::oex2std( oexMks( ( m_pCodecContext->coded_frame->key_frame )
+			.set( sqbind::oex2std( oexMks( ( m_pFrame->key_frame )
 										  ? ( flags | AV_PKT_FLAG_KEY )
 										  : ( flags & ~AV_PKT_FLAG_KEY ) ) ) );
 										  
-		if ( 0 < m_pCodecContext->coded_frame->pts )
-			(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pts ) ) );
-		else
+//		if ( 0 < m_pCodecContext->pts )
+//			(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->pts ) ) );
+//		else
 			(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pFrame->pts ) ) );
+
+// oexSHOW( m_pFrame->pts );
+//oexSHOW( m_pCodecContext->pts );
+			
 //		(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_dts ) ) );
 //		if ( m_pCodecContext->pkt )
 //			(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->pkt->pts ) ) ),

@@ -164,8 +164,8 @@ function StartStream( params ) : ( _g )
 
 	// Codec
 	local fmt = p[ "codec" ].str();
-	local pix = CFfConvert().PIX_FMT_YUV420P;
-	if ( fmt == "MJPG" ) pix = CFfConvert().PIX_FMT_YUVJ420P;
+	local pix = CFfConvert().AV_PIX_FMT_YUV420P;
+	if ( fmt == "MJPG" ) pix = CFfConvert().AV_PIX_FMT_YUVJ420P;
 	else if ( fmt == "MPG4" ) fmt = "FMP4";
 
 	// Create the encoder
@@ -358,7 +358,7 @@ function Run() : ( _g )
 			// Attempt to encode the frame
 			local inf = CSqMulti();
 			if ( _g.aenc ) inf[ "pts" ] <- _g.aenc.getPts().tostring();
-			if ( 0 >= _g.enc.Encode( CFfConvert().PIX_FMT_BGR24,
+			if ( 0 >= _g.enc.Encode( CFfConvert().AV_PIX_FMT_BGR24,
 									 _g.w, -_g.h, _g.pix, _g.frame, inf ) )
 			{	_self.echo( "??? = " + inf[ "pts" ].toint() );
 				return 0;
@@ -381,7 +381,7 @@ function Run() : ( _g )
 	else if ( _g.share )
 	{
 		// Attempt to encode the video frame
-		if ( 0 >= _g.enc.Encode( CFfConvert().PIX_FMT_BGR24,
+		if ( 0 >= _g.enc.Encode( CFfConvert().AV_PIX_FMT_BGR24,
 								 _g.w, -_g.h, _g.pix, _g.frame, inf ) )
 		{	_self.echo( "??? = " + inf[ "pts" ].toint() );
 			return 0;

@@ -124,8 +124,7 @@ int CFfAudioDecoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 
 //	avcodec_get_context_defaults( m_pCodecContext );
 //	avcodec_get_context_defaults2( m_pCodecContext, AVMEDIA_TYPE_AUDIO );
-	AVCodec c = {0}; c.type = AVMEDIA_TYPE_AUDIO;
-	avcodec_get_context_defaults3( m_pCodecContext, &c );
+	avcodec_get_context_defaults3( m_pCodecContext, m_pCodec );
 
     m_pCodecContext->codec_id = (AVCodecID)x_nCodec;
     m_pCodecContext->codec_type = AVMEDIA_TYPE_AUDIO;
@@ -160,7 +159,7 @@ int CFfAudioDecoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
 
 	int res = avcodec_open2( m_pCodecContext, m_pCodec, 0 );
 	if ( 0 > res )
-	{	oexERROR( res, oexT( "avcodec_open() failed" ) );
+	{	oexERROR( res, oexT( "avcodec_open2() failed" ) );
 		m_pCodecContext = oexNULL;
 		Destroy();
 		return 0;
@@ -325,14 +324,16 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 	// While we have input data
 	int nOutFrame = 1;
 	
-	// +++ Needs to be released
+	// Decoded frame
 	AVFrame *decoded_frame = 0;
 	
-	while ( nIn >= bs && 0 < nOutFrame )
+	while ( 0 < nIn /*>= bs*/ && 0 < nOutFrame )
 	{
+//		int bs2 = 8 * 1024;
+	
 		// Ensure a reasonable output buffer
 		while ( ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
-			nOut <<= 1, out->Resize( nOut );
+			nOut <<= 1, out->Resize( nOut ), pOut = (uint8_t*)out->_Ptr();
 
 		// Check for memory issue
 		if ( out->Size() < nOut || nOut <= nOutPtr || ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
@@ -354,10 +355,9 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 		av_frame_unref( decoded_frame );
 		
 		// Decode a frame
-		nOutFrame = nOut - nOutPtr;
+		nOutFrame = 0;
 //		int nBytes = avcodec_decode_audio3( m_pCodecContext, (int16_t*)&pOut[ nOutPtr ], &nOutFrame, &m_pkt );
-//		int nBytes = avcodec_decode_audio4( m_pCodecContext, decoded_frame, &nOutFrame, &m_pkt );
-		int nBytes = -1;
+		int nBytes = avcodec_decode_audio4( m_pCodecContext, decoded_frame, &nOutFrame, &m_pkt );
 		if ( 0 > nBytes )
 		{	oexERROR( nBytes, oexT( "avcodec_decode_audio3() failed" ) );
 			return 0;
@@ -366,25 +366,34 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 		// Add bytes
 		if ( 0 < nOutFrame )
 		{
-			// +++ Needs to be checked
+			// Data element size
 			int data_size = av_get_bytes_per_sample( m_pCodecContext->sample_fmt );
-			for ( int i = 0; i < decoded_frame->nb_samples; i++ )
-				for ( int ch = 0; ch < m_pCodecContext->channels; ch++ )
-					memcpy( pOut[ nOutPtr ], decoded_frame->data[ ch ] + data_size * i, data_size ), 
-					nOutPtr += data_size;
-					
-			//nOutPtr += nBytes;
+
+			// Calculate required space
+			bs = m_pCodecContext->channels * decoded_frame->nb_samples * data_size;
+
+			// Ensure a reasonable output buffer
+			while ( ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
+				nOut <<= 1, out->Resize( nOut ), pOut = (uint8_t*)out->_Ptr();
+
+			// Check for memory issue
+			if ( out->Size() < nOut || nOut <= nOutPtr || ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
+			{	oexERROR( nOut, oexT( "Memory allocation failed" ) );
+				return 0;
+			} // end if
+
+			// Copy audio data
+			for ( int ch = 0; ch < m_pCodecContext->channels; ch++ )
+				memcpy( &pOut[ nOutPtr ], decoded_frame->data[ ch ], decoded_frame->nb_samples * data_size ),
+				nOutPtr += decoded_frame->nb_samples * data_size;
 			
 		} // end if
 
 		// Unbuffer used data
 		nIn = UnbufferData( nBytes );
-
+		
 	} // end while
 
-	if ( decoded_frame )
-		av_frame_unref( decoded_frame );
-	
 	// Set total bytes in the output queue
 	out->setUsed( nOutPtr );
 
@@ -393,14 +402,17 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 		// Save key frame information
 		int flags = (*m)[ oexT( "flags" ) ].toint();
 		(*m)[ oexT( "flags" ) ]
-			.set( sqbind::oex2std( oexMks( ( m_pCodecContext->coded_frame->key_frame )
+			.set( sqbind::oex2std( oexMks( ( decoded_frame->key_frame )
 										  ? ( flags | AV_PKT_FLAG_KEY )
 										  : ( flags & ~AV_PKT_FLAG_KEY ) ) ) );
-		(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_pts ) ) );
-		(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( m_pCodecContext->coded_frame->pkt_dts ) ) );
+		(*m)[ oexT( "pts" ) ].set( sqbind::oex2std( oexMks( decoded_frame->pkt_pts ) ) );
+		(*m)[ oexT( "dts" ) ].set( sqbind::oex2std( oexMks( decoded_frame->pkt_dts ) ) );
 
 	} // end if
 
+	if ( decoded_frame )
+		av_frame_unref( decoded_frame );
+	
 	return nOutPtr;
 }
 

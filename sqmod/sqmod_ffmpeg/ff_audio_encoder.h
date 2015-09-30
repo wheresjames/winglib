@@ -58,6 +58,7 @@ public:
 	{	if ( !m_pCodecContext )
 			return 0;
 		return m_pCodecContext->bits_per_coded_sample;
+		// return 8 * av_get_bytes_per_sample( m_pCodecContext->sample_fmt );
 	}
 
 	/// Returns the bit rate

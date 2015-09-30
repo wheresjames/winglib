@@ -92,7 +92,7 @@ function create_clip( root, name, devs, w, h, fps, fmt, tone, afmt, sec, font, h
 	if ( !avi.InitWrite() )
 	{	_self.echo( "Failed to initiailze avi" ); return; }
 
-	if ( !enc.Create( avi.getVideoCodecId(), CFfConvert().PIX_FMT_YUV420P,
+	if ( !enc.Create( avi.getVideoCodecId(), CFfConvert().AV_PIX_FMT_YUV420P,
 					  w, h, fps, 1000000, CSqMulti() ) )
 		_self.echo( "Failed to create encoder" );
 

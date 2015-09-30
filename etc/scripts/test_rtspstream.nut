@@ -136,7 +136,7 @@ class CRtspStream
 			dec = CFfDecoder();
 			dec.setExtraData( rtsp.getExtraVideoData() );
 			if ( !dec.Create( CFfDecoder().LookupCodecId( rtsp.getVideoCodecName() ),
-							  CFfConvert().PIX_FMT_YUV420P,
+							  CFfConvert().AV_PIX_FMT_YUV420P,
 							  w, h, fps,
 							  2000000, CSqMulti( "cmp=-2" ) ) )
 			{	::_self.echo( "!!! Failed to create decoder for " + rtsp.getVideoCodecName() );
@@ -180,7 +180,10 @@ class CRtspStream
 				{
 					pa = CPaOutput();
 					pa.setGlitchDetection( 0 );
-					local fmt = ::_self.tInt16;
+					// local fmt = ::_self.tInt8;
+					// local fmt = ::_self.tInt16;
+					// local fmt = ::_self.tUInt32;
+					local fmt = ::_self.tFloat;
 					local fsize = ::_self.type_size( fmt );
 
 					if ( !pa.Open( 0, pa.getDefaultOutputDevice(), rtsp.getNumAudioChannels(),
@@ -242,8 +245,12 @@ class CRtspStream
 						::_self.echo( "!!! Failed to write audio frame" );
 
 				while ( 0 < adec.Decode( aframe, araw, CSqMulti() ) )
+				{
+//					::_self.echo( "DECODED AUDIO BYTES : " + araw.getUsed() + ", pts = " + rtsp.getAudioPts() );
+//					::_self.flush();
+				
 					if ( pa && araw.getUsed() )
-					{
+					{					
 						if ( pa.getBufferedBytes() > max_audio_buffer )
 							::_self.echo( "dropping audio : " + pa.getBufferedBytes() );
 
@@ -251,9 +258,13 @@ class CRtspStream
 											   rtsp.getAudioPts() ) )
 							::_self.echo( "Failed to write audio data" );
 
-						aframe.setUsed( 0 );
+						araw.setUsed( 0 );
 
 					} // end if
+					
+					aframe.setUsed( 0 );
+					
+				} // end while
 
 			} // end if
 
@@ -334,7 +345,7 @@ class CRtspStream
 		// Just draw it if we're not syncing to audio
 		if ( !vb )
 		{	if ( 0 >= dec.getBufferSize() ) return 0;
-			return dec.Decode( CSqBinary(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
+			return dec.Decode( CSqBinary(), CFfConvert().AV_PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
 		} // end if
 
 		// Show error if more than a second off
@@ -350,11 +361,11 @@ class CRtspStream
 		if
 //		while
 		 ( vb.isRead() && vb.ReadTsMin() < ( pa.getTs() - video_offset ) )
-			dec.Decode( vb.ReadData(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 ), vb.incReadPtr();
+			dec.Decode( vb.ReadData(), CFfConvert().AV_PIX_FMT_RGB32, buffer, CSqMulti(), 0 ), vb.incReadPtr();
 
 		// Catchup and show, haha, can't do this, must decode every frame, duh
 //		while ( vb.isRead() && vb.ReadTs() < ( pa.getTs() - video_offset ) ) vb.incReadPtr()
-//		if ( vb.isRead() ) dec.Decode( vb.ReadData(), CFfConvert().PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
+//		if ( vb.isRead() ) dec.Decode( vb.ReadData(), CFfConvert().AV_PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
 
 		return 1;
 	}
@@ -398,7 +409,7 @@ class CGlobal
 		yt1			= [ "yt1",	"rtsp://v1.cache7.c.youtube.com/CjgLENy73wIaLwmY52udh9o1TRMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNgyeWI3OSQoshPDA==/0/0/0/video.3gp" ],
 		//yt1			= [ "yt1",	"rtsp://v8.cache1.c.youtube.com/CjgLENy73wIaLwlnoDu0pt7zDRMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNgnLTe56Djt-FNDA==/0/0/0/video.3gp" ],
 		yt2			= [ "yt2",	"rtsp://v4.cache8.c.youtube.com/CjgLENy73wIaLwkU67OEyLSkyBMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNgzoOa_IDtxOFNDA==/0/0/0/video.3gp" ],
-		yt3			= [ "yt3",	"rtsp://v1.cache7.c.youtube.com/CjgLENy73wIaLwmY52udh9o1TRMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNghbzo27OzxJ1ODA==/0/0/0/video.3gp" ],
+		yt3			= [ "yt3",	"rtsp://v1.cache7.c.youtube.com/CjgLENy73wIaLwmY52udh9o1TRMYESARFEIJbXYtZ29vZ2xlSARSB3Jlc3VsdHNghbzo27OzxJ1ODA==/0/0/0/video.3gp" ]
 	};
 
 	quit = 0;
@@ -437,10 +448,10 @@ function _init() : ( _g )
     _g.cube = _g.irr.AddGrid( 40., 30., 1, 1, 0., 2, CSqirrColor( 255, 255, 255 ), 2 );
 	_g.cube.SetPosition( CSqirrVector3d( -20, -15, -10 ) );
 
-	_self.echo( "...adding cube...\n" );
+//	_self.echo( "...adding cube...\n" );
 //	_g.cube = _g.irr.AddCube( 10. );
 
-	_self.echo( "...adding animator...\n" );
+//	_self.echo( "...adding animator...\n" );
 //	local ani = _g.irr.AddRotateAnimator( CSqirrVector3d( 0, 0.4, 0 ) );
 //	_g.cube.AddAnimator( ani );
 

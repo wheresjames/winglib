@@ -154,7 +154,7 @@ function UpdateVideo() : ( _g )
 	{
 		_self.echo( "Creating video decoder for " + _g.rtsp.getVideoCodecName() );
 		_g.dec = CFfDecoder();
-		if ( !_g.dec.Create( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ), CFfConvert().PIX_FMT_YUV420P,
+		if ( !_g.dec.Create( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ), CFfConvert().AV_PIX_FMT_YUV420P,
 							 _g.w, _g.h, 5, 2000000, CSqMulti( "cmp=-2" ) ) )
 			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getVideoCodecName() ), _g.quit = 1;
 
@@ -165,7 +165,7 @@ function UpdateVideo() : ( _g )
 		_self.echo( "Creating audio decoder for " + _g.rtsp.getAudioCodecName() );
 
 		_g.adec = CFfAudioDecoder();
-		if ( !_g.adec.Create( CFfAudioDecoder().LookupCodecId( _g.rtsp.getAudioCodecName() ), CFfConvert().PIX_FMT_YUV420P,
+		if ( !_g.adec.Create( CFfAudioDecoder().LookupCodecId( _g.rtsp.getAudioCodecName() ), CFfConvert().AV_PIX_FMT_YUV420P,
 							 0, 0, 0 ) )
 			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getAudioCodecName() ), _g.quit = 1;
 
@@ -206,7 +206,7 @@ function UpdateVideo() : ( _g )
 		if ( !_g.tex )
 		{
 			// Decode a frame to get the width / height
-			_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, CSqBinary(), CSqMulti() );
+			_g.dec.Decode( frame, CFfConvert().AV_PIX_FMT_RGB32, CSqBinary(), CSqMulti() );
 			if ( 0 < _g.dec.getWidth() && 0 < _g.dec.getHeight() )
 			{	_g.tex = _g.irr.CreateTexture( _g.dec.getWidth(), _g.dec.getHeight(), 0 );
 				_g.video.SetTexture( 0, _g.tex );
@@ -227,11 +227,11 @@ function UpdateVideo() : ( _g )
 					_self.echo( "Not a video frame" );
 
 				else
-					if ( !_g.ffmpeg.DecodeFrameBin( _g.frame, CFfConvert().PIX_FMT_RGB32, tex, inf ) )
+					if ( !_g.ffmpeg.DecodeFrameBin( _g.frame, CFfConvert().AV_PIX_FMT_RGB32, tex, inf ) )
 						_self.echo( "Error decoding frame" );
 
 				// dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808,size=165698,stream_index=0
-//				if ( !_g.dec.Decode( frame, CFfConvert().PIX_FMT_RGB32, tex, CSqMulti( "dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808" ) ) )
+//				if ( !_g.dec.Decode( frame, CFfConvert().AV_PIX_FMT_RGB32, tex, CSqMulti( "dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808" ) ) )
 //					_self.echo( "failed to decode frame" );
 
 				_g.tex.Unlock();
