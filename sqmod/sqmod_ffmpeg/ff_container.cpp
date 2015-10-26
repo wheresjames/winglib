@@ -121,10 +121,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
     SQBIND_MEMBER_FUNCTION( CFfContainer, enableFramerateFixup )
     SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoStartTime )
     SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoEndTime )
-
-#if !defined( oexUNICODE )
-//	SQBIND_MEMBER_FUNCTION( CFfContainer, getFixVideoFrameRateDiag )
-#endif
+	
+    SQBIND_MEMBER_FUNCTION( CFfContainer, setFixedVideoTime )
+    SQBIND_MEMBER_FUNCTION( CFfContainer, CalculateTrueFrameRate )
 
 //	SQBIND_MEMBER_FUNCTION( CFfContainer,  )
 
@@ -178,6 +177,8 @@ CFfContainer::CFfContainer()
 	m_bFixupFrameRate = 0;
 	m_videoStartTime = -1;
 	m_videoEndTime   = -1;
+	
+	m_fixed_file_time = 0;
 }
 
 void CFfContainer::Destroy()
@@ -250,107 +251,58 @@ int CFfContainer::getAudioSampleFmt()
 /// Modeled from avi_write_trailer() http://ffmpeg.org/doxygen/1.2/avienc_8c_source.html#l00594
 /// and especially avi_write_counters() http://ffmpeg.org/doxygen/1.2/avienc_8c_source.html#l00113
 /// Note that the AVIStream also seems to track nFrames in avist->packet_count
-void CFfContainer::fixVideoFrameRate()
+int CFfContainer::CalculateTrueFrameRate()
 {
 	// Is the fixup enabled?
 	if ( !m_bFixupFrameRate )
-		return;
+		return 0;
 
+	// Calculate timespan
+	int nTimeSpan = m_videoEndTime - m_videoStartTime;
+	
 	// Make sure framerate will be sensible
-  if ( 0 >= (m_videoEndTime - m_videoStartTime) )
-    return;
-  // Is the video stream number defined?
-  if ( 0 > m_nVideoStream )
-    return;
-  // check if this is an .avi container before proceeding
-  AVFormatContext* s = m_pFormatContext;
-  if ( NULL == s )
-    return;
-  if ( NULL == s->oformat )
-    return;
-  if ( NULL == s->oformat->name )
-    return;
-  if ( strcmp( s->oformat->name, "avi" ) )
-    return;
-  
-  AVIOContext* pb = s->pb;
-  if ( !(pb->seekable) )
-    return;
-
-  int64_t file_size = avio_tell(pb);
-  AVIStream *avist= (AVIStream *)(s->streams[m_nVideoStream]->priv_data);
-  if ( 12 > avist->frames_hdr_strm )
-    return;
-  if ( file_size <= avist->frames_hdr_strm )
-    return;
-  if ( 0 >= avist->packet_count )
-    return;
-
-  avio_seek(pb, avist->frames_hdr_strm - 12, SEEK_SET);
-  avio_wl32(pb, m_videoEndTime - m_videoStartTime );
-  avio_wl32(pb, avist->packet_count );
-  avio_seek(pb, file_size, SEEK_SET);
-}
-/*
-sqbind::stdString CFfContainer::getFixVideoFrameRateDiag()
-{
+	if ( 0 >= nTimeSpan )
+		return 0;
 	
-	return sqbind::stdString();
+	// Is the video stream number defined?
+	if ( 0 > m_nVideoStream )
+		return 0;
 	
-#if 0 // !defined( oexUNICODE )
-#define LINE_SZ 64
-#define MSG_SZ (LINE_SZ * 16)
-  char msg[MSG_SZ];
-  char format[LINE_SZ];
-  char seek[LINE_SZ];
-  char pktc[LINE_SZ * 2];
+	// check if this is an .avi container before proceeding
+	AVFormatContext* s = m_pFormatContext;
+	if ( NULL == s )
+		return 0;
+	if ( NULL == s->oformat )
+		return 0;
+	if ( NULL == s->oformat->name )
+		return 0;
+	if ( strcmp( s->oformat->name, "avi" ) )
+		return 0;
 
-  if ( NULL == m_pFormatContext )
-    _snprintf( format, LINE_SZ, "m_pFormatContext = NULL\n");
-   else if ( NULL == m_pFormatContext->oformat )
-    _snprintf( format, LINE_SZ, "m_pFormatContext->oformat = NULL\n");
-   else if ( NULL == m_pFormatContext->oformat->name )
-    _snprintf( format, LINE_SZ, "m_pFormatContext->oformat->name = NULL\n");
-   else
-    _snprintf( format, LINE_SZ, "m_pFormatContext->oformat->name = '%s'\n", m_pFormatContext->oformat->name );
+	AVIOContext* pb = s->pb;
+	if ( !(pb->seekable) )
+		return 0;
 
-  if ( m_pFormatContext )
-    { AVIOContext* pb = m_pFormatContext->pb;
-      if ( pb->seekable )
-        _snprintf( seek, LINE_SZ, "AVIOContext is seekable\n" );
-       else
-        _snprintf( seek, LINE_SZ, "AVIOContext is NOT seekable\n" );
-    }
-   else
-    seek[0] = NULL;
+	int64_t file_size = avio_tell( pb );
+	AVIStream *avist= (AVIStream *)( s->streams[m_nVideoStream]->priv_data );
+	if ( 12 > avist->frames_hdr_strm )
+		return 0;
+	if ( file_size <= avist->frames_hdr_strm )
+		return 0;
+	if ( 0 >= avist->packet_count )
+		return 0;
 
-  if ( 0 <= m_nVideoStream )
-    { AVIStream *avist= (AVIStream *)(m_pFormatContext->streams[m_nVideoStream]->priv_data);
-      _snprintf( pktc, LINE_SZ * 2, "avist->packet_count    : %d\n"
-                                    "avist->frames_hdr_strm : %d\n",
-                                     avist->packet_count,
-                                     avist->frames_hdr_strm );
-    }
-   else
-    pktc[0] = NULL;
-
-  _snprintf( msg, MSG_SZ,
-            "fixVideoFrameRate:\n"
-            "m_videoEndTime   : %d\n"
-            "m_videoStartTime : %d\n"
-            "m_nVideoStream   : %d\n"
-            "%s%s%s\n",
-             m_videoEndTime,
-             m_videoStartTime,
-             m_nVideoStream,
-             format, seek, pktc
-          );
-
-  m_sFfrDiag.assign( msg );
-  return m_sFfrDiag;
-#endif
+	avio_seek( pb, avist->frames_hdr_strm - 12, SEEK_SET );
+	avio_wl32( pb, m_videoEndTime - m_videoStartTime );
+	avio_wl32( pb, avist->packet_count );
+	avio_seek( pb, file_size, SEEK_SET );
+	
+	// Don't do it again
+	m_bFixupFrameRate = 0;
+	
+	return avist->packet_count / nTimeSpan;
 }
-*/
+
 int CFfContainer::CloseStream()
 {_STT();
     int i;
@@ -360,10 +312,17 @@ int CFfContainer::CloseStream()
 
 	if ( !m_pFormatContext )
 		return 0;
+	
+	// Fixed time length?
+	if ( 0 < m_fixed_file_time )
+	{	m_videoStartTime = 0;
+		m_videoEndTime = m_fixed_file_time;
+		CalculateTrueFrameRate();
+	} // end if
 
 	// Do we want to do the frame rate fixup?
-	if ( m_bFixupFrameRate )
-		fixVideoFrameRate();
+	else if ( m_bFixupFrameRate )
+		CalculateTrueFrameRate();
 
 	// Close all open streams
 	for ( i = 0; i < m_pFormatContext->nb_streams; i++ )
@@ -393,7 +352,7 @@ int CFfContainer::CloseStream()
 				avio_close( m_pFormatContext->pb );
 		} // end if
 
-		avformat_free_context( m_pFormatContext );
+		avformat_free_context(m_pFormatContext);
 
 	} // end else if
 
@@ -631,13 +590,15 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 	m_nLastFrameFlags = m_pkt.flags;
 	m_nLastFrameEncodedSize = m_pkt.size;
 
+	// +++ This is not the correct way to get the data pointer
 	// Is it already the right format?
-	if ( fmt == (int)m_pCodecContext->pix_fmt )
+/*	if ( fmt == (int)m_pCodecContext->pix_fmt )
 	{	int nSize = CFfConvert::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
 		dat->setBuffer( (sqbind::CSqBinary::t_byte*)m_pFrame->data[ 0 ], nSize, 0, 0 );
 		m_nFrames++;
 		return m_pkt.stream_index;
 	} // end if
+*/
 
 	// Do colorspace conversion
 	if ( !CFfConvert::ConvertColorFB( m_pFrame, m_pCodecContext->pix_fmt,
@@ -702,13 +663,15 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 	m_nLastFrameFlags = m_pkt.flags;
 	m_nLastFrameEncodedSize = m_pkt.size;
 
+	// +++ This is not the correct way to get the data pointer
 	// Is it already the right format?
-	if ( fmt == (int)m_pCodecContext->pix_fmt )
+/*	if ( fmt == (int)m_pCodecContext->pix_fmt )
 	{	int nSize = CFfConvert::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
 		out->setBuffer( (sqbind::CSqBinary::t_byte*)m_pFrame->data[ 0 ], nSize, 0, 0 );
 		m_nFrames++;
 		return m_pkt.stream_index;
 	} // end if
+*/
 
 	// Do colorspace conversion
 	if ( !CFfConvert::ConvertColorFB( m_pFrame, m_pCodecContext->pix_fmt,

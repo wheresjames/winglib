@@ -69,8 +69,8 @@ public:
 	/// Sets the current byte offset into the file, returns the final position
 	SQInteger setBytePos( SQInteger pos );
    
-	/// resets video stream frame rates
-	void fixVideoFrameRate();
+	/// resets video stream frame rates, returns the frame rate
+	int CalculateTrueFrameRate();
 
 	/// Returns video frame rate
 	double getFps()
@@ -306,6 +306,9 @@ public:
 	/// Set to non-zero to enable frame rate fixup
 	void enableFramerateFixup( int b ) { m_bFixupFrameRate = b; }
 	
+	/// Set fixed video file time length
+	void setFixedVideoTime( SQInteger t ) { m_fixed_file_time = t; }
+	
 	/// Returns diagnostics about the frame rate fixer
 #if !defined( oexUNICODE )
 //	sqbind::stdString getFixVideoFrameRateDiag();
@@ -398,6 +401,9 @@ private:
 
 	/// Audio time base scale
 	oex::oexINT64			m_audio_scale;
+	
+	/// Set fixed file time
+	oex::oexINT64			m_fixed_file_time;
 };
 
 DECLARE_INSTANCE_TYPE( CFfContainer );

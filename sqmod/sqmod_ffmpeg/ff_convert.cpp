@@ -578,6 +578,7 @@ int CFfConvert::ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height
 	AVPicture apSrc, apDst;
 
 	// Copy source information
+	oexZero( apSrc );
 	for ( int i = 0; i < (int)oexSizeOfArray( apSrc.linesize ); i++ )
 		apSrc.data[ i ] = pAf->data[ i ],
 		apSrc.linesize[ i ] = pAf->linesize[ i ];
@@ -634,6 +635,7 @@ int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height
 	AVPicture apSrc, apDst;
 
 	// Copy source information
+	oexZero( apSrc );
 	for ( int i = 0; i < (int)oexSizeOfArray( apSrc.linesize ); i++ )
 		apSrc.data[ i ] = pAf->data[ i ],
 		apSrc.linesize[ i ] = pAf->linesize[ i ];

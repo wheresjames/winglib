@@ -58,9 +58,14 @@ extern "C"
 
 // Custom read write protocol
 int memshare_open( URLContext *h, const char *filename, int flags )
+// int memshare_open( URLContext *h )
 {
+	if ( !h )
+		return AVERROR( EINVAL );
+	
 	// Sanity check
-	if ( !h || !filename || !*filename )
+//	const char *filename = h->filename;
+	if ( !filename || !*filename )
 		return AVERROR( EINVAL );
 
 	// Verify that the protocol is as we expect
@@ -123,6 +128,7 @@ int memshare_open( URLContext *h, const char *filename, int flags )
 
 	// Only write supported at the moment
 	if ( !flags )
+//	if ( !h->flags )
 		return AVERROR( ENOSYS );
 
 	// Allow flushing
@@ -141,6 +147,7 @@ int memshare_open( URLContext *h, const char *filename, int flags )
 }
 
 int memshare_read( URLContext *h, unsigned char *buf, int size )
+// int memshare_read( URLContext *h )
 {
 //	return AVERROR( ENOENT );
 	return AVERROR( ENOSYS );
@@ -212,10 +219,13 @@ URLProtocol memshare_protocol = {
     "memshare",
     memshare_open,
 	0,
+	0,
+	0,
     memshare_read,
     memshare_write,
     memshare_seek,
-    memshare_close
+    memshare_close,
+	0
 };
 
 // Export classes

@@ -25,6 +25,10 @@ ifneq ($(PLATFORM),windows)
 	PRJ_DEFS := $(PRJ_DEFS) OEX_NO_CPUID
 endif
 
+ifeq ($(PLATFORM)-$(BUILD),windows-vs)
+	PRJ_INCS := $(PRJ_INCS) dshowbase
+endif
+
 #-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------
