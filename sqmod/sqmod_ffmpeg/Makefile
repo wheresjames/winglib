@@ -32,7 +32,8 @@ UNSUPPORTED := PROC=$(PROC) is not supported
 include $(PRJ_LIBROOT)/unsupported.mk
 else
 
-ifeq ($(BUILD)-$(PROC),vs-x64)
+#ifeq ($(BUILD)-$(PROC),vs-x64)
+ifeq ($(BUILD),vs)
 	UNSUPPORTED := PROC=$(PROC) + BUILD=$(BUILD) is not supported
 	include $(PRJ_LIBROOT)/unsupported.mk
 else
@@ -44,7 +45,7 @@ else
 
 ifeq ($(PLATFORM),windows)
 	ifeq ($(BUILD),vs)
-		CFG_LFLAGS := $(CFG_LFLAGS) /FORCE
+#		CFG_LFLAGS := $(CFG_LFLAGS) /FORCE
 		PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/windows/vs xlibs $(PRJ_INCS)
 		PRJ_PLIB := ffa ffb ffc ffd ffe vpx rtmpd x264 lame openssl_a openssl_b openssl_c
 		# PRJ_DEFS := $(PRJ_DEFS)
@@ -52,7 +53,11 @@ ifeq ($(PLATFORM),windows)
 			PRJ_LIBP := $(PRJ_LIBP) $(CFG_LIBROOT)/xlibs/x64
 		else
 			PRJ_LIBP := $(PRJ_LIBP) $(CFG_LIBROOT)/xlibs/x86
-			PRJ_WINX := libgcc.a libmingwex.a
+			PRJ_WINX := $(PRJ_WINX) libgcc.a libmingwex.a
+#			PRJ_WINX := $(PRJ_WINX) libmingwex.a
+#			PRJ_WINX := $(PRJ_WINX) libpthread.a
+#			PRJ_WINX := $(PRJ_WINX) libiconv.a
+#			PRJ_WINX := $(PRJ_WINX) libmsvcrt.a
 #			PRJ_WINX := libgcc.a libmingw32.a libmingwex.a libpthread.a libiconv.a libmsvcrt.a
 		endif
 	else
