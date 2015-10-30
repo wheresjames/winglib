@@ -261,7 +261,7 @@ public:
 	static oexBOOL Flush( t_HFILE x_hFile );
 
 	/// Returns the path to the specified folder
-	static CStr GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nMaxLength = oexSTRSIZE );
+	static CStr GetSysFolder( oexBOOL x_bShared, oexCONST oexINT x_nFolderId, oexINT x_nMaxLength = oexSTRSIZE );
 
 	/// Returns the size of the named file
 	static oexINT64 GetFileSize( oexCSTR x_pFile );

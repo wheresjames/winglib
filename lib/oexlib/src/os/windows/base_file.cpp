@@ -511,27 +511,50 @@ oexBOOL CBaseFile::Copy( oexCSTR x_pOld, oexCSTR x_pNew )
 
 #if defined( OEX_USE_DYNAMIC_SHELL32 )
 	
-	// SH Types
-	typedef IMalloc* t_LPMALLOC;
-	typedef struct { USHORT cb; BYTE abID[ 1 ]; } t_SHITEMID;
-	typedef struct { t_SHITEMID mkid; } t_ITEMIDLIST, *t_LPITEMIDLIST;
+#	if defined( OEX_USE_OLD_SHFUNCS )
 	
-	// SH Functions
-	typedef HRESULT (*pfn_SHGetMalloc)( t_LPMALLOC *ppMalloc );
-	typedef BOOL (*pfn_SHGetPathFromIDList)( t_LPITEMIDLIST pidl, LPTSTR pszPath );
-	typedef HRESULT (*pfn_SHGetSpecialFolderLocation)( HWND hwndOwner, int nFolder, t_LPITEMIDLIST *ppidl );
+		// SH Types
+		typedef IMalloc* t_LPMALLOC;
+		typedef struct { USHORT cb; BYTE abID[ 1 ]; } t_SHITEMID;
+		typedef struct { t_SHITEMID mkid; } t_ITEMIDLIST, *t_LPITEMIDLIST;
+		
+		// SH Functions
+		typedef HRESULT (*pfn_SHGetMalloc)( t_LPMALLOC *ppMalloc );
+		typedef BOOL (*pfn_SHGetPathFromIDList)( t_LPITEMIDLIST pidl, LPTSTR pszPath );
+		typedef HRESULT (*pfn_SHGetSpecialFolderLocation)( HWND hwndOwner, int nFolder, t_LPITEMIDLIST *ppidl );
+
+#	else	
+	
+#		define INITGUID
+
+#		include <knownfolders.h>
+
+		typedef const GUID& t_REFKNOWNFOLDERID;
+		typedef HRESULT (*pfn_SHGetKnownFolderPath)( t_REFKNOWNFOLDERID rfid, DWORD dwFlags, HANDLE hToken, PWSTR *ppszPath );	
+
+#	endif
 
 #else
 
-#	define t_LPMALLOC LPMALLOC
-#	define t_LPITEMIDLIST LPITEMIDLIST
-#	define pSHGetMalloc SHGetMalloc
-#	define pSHGetPathFromIDList SHGetPathFromIDList
-#	define pSHGetSpecialFolderLocation SHGetSpecialFolderLocation
+#	if defined( OEX_USE_OLD_SHFUNCS )
+
+#		define t_LPMALLOC 					LPMALLOC
+#		define t_LPITEMIDLIST 				LPITEMIDLIST
+#		define pSHGetMalloc 				SHGetMalloc
+#		define pSHGetPathFromIDList 		SHGetPathFromIDList
+#		define pSHGetSpecialFolderLocation 	SHGetSpecialFolderLocation
+#		define pSHGetKnownFolderPath 		SHGetKnownFolderPath
+
+#	else
+
+#		define t_REFKNOWNFOLDERID			REFKNOWNFOLDERID
+#		define pSHGetKnownFolderPath		SHGetKnownFolderPath
+
+#	endif
 
 #endif
 
-CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nMaxLength )
+CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexCONST oexINT x_nFolderId, oexINT x_nMaxLength )
 {
 	// Ensure at least MAX_PATH bytes
 	if ( MAX_PATH > x_nMaxLength )
@@ -544,6 +567,13 @@ CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nM
 		
 	// NULL Terminate
 	*s._Ptr() = 0;
+
+//------------------------------------------------------------------
+// SHGetSpecialFolderLocation()
+//------------------------------------------------------------------
+#if defined( OEX_USE_OLD_SHFUNCS )
+	
+	oexINT nFolderId = 0;
 
 	// Get the folder
 	switch( x_nFolderId )
@@ -572,98 +602,98 @@ CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nM
 			return s;
 
 		case eFidRoot :
-			x_nFolderId = CSIDL_DRIVES;
+			nFolderId = CSIDL_DRIVES;
 			break;
 
 		case eFidSettings :
-			x_nFolderId = x_bShared ? CSIDL_COMMON_APPDATA : CSIDL_APPDATA;
+			nFolderId = x_bShared ? CSIDL_COMMON_APPDATA : CSIDL_APPDATA;
 			break;
 
 		case eFidPrograms :
-			x_nFolderId = x_bShared ? CSIDL_COMMON_PROGRAMS : CSIDL_PROGRAMS;
+			nFolderId = x_bShared ? CSIDL_COMMON_PROGRAMS : CSIDL_PROGRAMS;
 			break;
 
 		case eFidProgramFiles :
-			x_nFolderId = x_bShared ? CSIDL_PROGRAM_FILES_COMMON : CSIDL_PROGRAM_FILES;
+			nFolderId = x_bShared ? CSIDL_PROGRAM_FILES_COMMON : CSIDL_PROGRAM_FILES;
 			break;
 
 		case eFidDesktop :
-			x_nFolderId = x_bShared ? CSIDL_COMMON_DESKTOPDIRECTORY : CSIDL_DESKTOPDIRECTORY;
+			nFolderId = x_bShared ? CSIDL_COMMON_DESKTOPDIRECTORY : CSIDL_DESKTOPDIRECTORY;
 			break;
 
 		case eFidDownloads :
 			// +++ CSIDL_COMMON_DOCUMENTS is broken?
 			trim = x_bShared ? 1 : 0;
-			x_nFolderId = x_bShared ? CSIDL_COMMON_DESKTOPDIRECTORY : CSIDL_MYDOCUMENTS;
+			nFolderId = x_bShared ? CSIDL_COMMON_DESKTOPDIRECTORY : CSIDL_MYDOCUMENTS;
 			sub = oexT( "Downloads" );
 			break;
 
 		case eFidRecycle :
-			x_nFolderId = CSIDL_BITBUCKET;
+			nFolderId = CSIDL_BITBUCKET;
 			break;
 
 		case eFidTemplates :
-			x_nFolderId = x_bShared ? CSIDL_COMMON_TEMPLATES : CSIDL_TEMPLATES;
+			nFolderId = x_bShared ? CSIDL_COMMON_TEMPLATES : CSIDL_TEMPLATES;
 			break;
 
 		case eFidPublic :
 			// +++ CSIDL_COMMON_DOCUMENTS is broken?
 			trim = 1; sub = oexT( "Public" );
-			x_nFolderId = x_bShared ? CSIDL_COMMON_DESKTOPDIRECTORY : CSIDL_DESKTOPDIRECTORY;
+			nFolderId = x_bShared ? CSIDL_COMMON_DESKTOPDIRECTORY : CSIDL_DESKTOPDIRECTORY;
 			break;
 
 		case eFidDocuments :
 			// +++ CSIDL_COMMON_DOCUMENTS is broken?
 			if ( x_bShared ) trim = 1, sub = oexT( "Documents" );
-			x_nFolderId = x_bShared ? CSIDL_COMMON_DOCUMENTS : CSIDL_MYDOCUMENTS;
+			nFolderId = x_bShared ? CSIDL_COMMON_DOCUMENTS : CSIDL_MYDOCUMENTS;
 			break;
 
 		case eFidMusic :
-			x_nFolderId = x_bShared ? CSIDL_COMMON_MUSIC : CSIDL_MYMUSIC;
+			nFolderId = x_bShared ? CSIDL_COMMON_MUSIC : CSIDL_MYMUSIC;
 			break;
 
 		case eFidPictures :
-			x_nFolderId = x_bShared ? CSIDL_COMMON_PICTURES : CSIDL_MYPICTURES;
+			nFolderId = x_bShared ? CSIDL_COMMON_PICTURES : CSIDL_MYPICTURES;
 			break;
 
 		case eFidVideo :
-			x_nFolderId = x_bShared ? CSIDL_COMMON_VIDEO : CSIDL_MYVIDEO;
+			nFolderId = x_bShared ? CSIDL_COMMON_VIDEO : CSIDL_MYVIDEO;
 			break;
 
 		case eFidFavorites :
-			x_nFolderId = x_bShared ? CSIDL_COMMON_FAVORITES : CSIDL_FAVORITES;
+			nFolderId = x_bShared ? CSIDL_COMMON_FAVORITES : CSIDL_FAVORITES;
 			break;
 
 		case eFidStartMenu :
-			x_nFolderId = x_bShared ? CSIDL_COMMON_STARTMENU : CSIDL_STARTMENU;
+			nFolderId = x_bShared ? CSIDL_COMMON_STARTMENU : CSIDL_STARTMENU;
 			break;
 
 		case eFidStartup :
-			x_nFolderId = x_bShared ? CSIDL_COMMON_STARTUP : CSIDL_STARTUP;
+			nFolderId = x_bShared ? CSIDL_COMMON_STARTUP : CSIDL_STARTUP;
 			break;
 
 		case eFidCookies :
-			x_nFolderId = CSIDL_COOKIES;
+			nFolderId = CSIDL_COOKIES;
 			break;
 
 		case eFidNetwork :
-			x_nFolderId = CSIDL_NETWORK;
+			nFolderId = CSIDL_NETWORK;
 			break;
 
 		case eFidPrinters :
-			x_nFolderId = CSIDL_PRINTERS;
+			nFolderId = CSIDL_PRINTERS;
 			break;
 
 		case eFidRecent :
-			x_nFolderId = CSIDL_RECENT;
+			nFolderId = CSIDL_RECENT;
 			break;
 
 		case eFidHistory :
-			x_nFolderId = CSIDL_HISTORY;
+			nFolderId = CSIDL_HISTORY;
 			break;
 
 		case eFidFonts :
-			x_nFolderId = CSIDL_FONTS;
+			nFolderId = CSIDL_FONTS;
 			break;
 
 		default :
@@ -671,12 +701,12 @@ CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nM
 
 	} // end switch
 
-#if defined( OEX_USE_DYNAMIC_SHELL32 )
+#	if defined( OEX_USE_DYNAMIC_SHELL32 )
 
 	// Functions
-	pfn_SHGetMalloc pSHGetMalloc = NULL;
-	pfn_SHGetPathFromIDList pSHGetPathFromIDList = NULL;
-	pfn_SHGetSpecialFolderLocation pSHGetSpecialFolderLocation = NULL;
+	pfn_SHGetMalloc pSHGetMalloc = 0;
+	pfn_SHGetPathFromIDList pSHGetPathFromIDList = 0;
+	pfn_SHGetSpecialFolderLocation pSHGetSpecialFolderLocation = 0;
 
 	// Load shell32.dll
 	HMODULE hShell32 = LoadLibrary( oexT( "shell32.dll" ) );
@@ -684,15 +714,15 @@ CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nM
 		return CStr();
 
 	// Load functions
-#if defined( OEX_GCC )
+#	if defined( OEX_GCC )
 	pSHGetMalloc = (pfn_SHGetMalloc)GetProcAddress( hShell32, "SHGetMalloc" );
 	pSHGetPathFromIDList = (pfn_SHGetPathFromIDList)GetProcAddress( hShell32, "SHGetPathFromIDList" );
 	pSHGetSpecialFolderLocation = (pfn_SHGetSpecialFolderLocation)GetProcAddress( hShell32, "SHGetSpecialFolderLocation" );
-#else
+#	else
 	pSHGetMalloc = (pfn_SHGetMalloc)GetProcAddress( hShell32, oexT( "SHGetMalloc" ) );
 	pSHGetPathFromIDList = (pfn_SHGetPathFromIDList)GetProcAddress( hShell32, oexT( "SHGetPathFromIDList" ) );
 	pSHGetSpecialFolderLocation = (pfn_SHGetSpecialFolderLocation)GetProcAddress( hShell32, oexT( "SHGetSpecialFolderLocation" ) );
-#endif
+#	endif
 
 	// Did we get the functions?
 	if ( !pSHGetMalloc || !pSHGetPathFromIDList || !pSHGetSpecialFolderLocation )
@@ -700,12 +730,10 @@ CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nM
 		return CStr();
 	} // end if
 
-#endif
-
-	// +++ Add support for SHGetKnownFolderPath()
+#	endif
 
 	t_LPITEMIDLIST pidl = NULL;
-	if ( pSHGetSpecialFolderLocation( NULL, x_nFolderId, &pidl ) == NOERROR && pidl )
+	if ( pSHGetSpecialFolderLocation( NULL, nFolderId, &pidl ) == NOERROR && pidl )
 	{
 		// Get the path name
 		if ( !pSHGetPathFromIDList( pidl, s._Ptr() ) )
@@ -719,10 +747,182 @@ CStr CBaseFile::GetSysFolder( oexBOOL x_bShared, oexINT x_nFolderId, oexINT x_nM
 	} // end if
 
 
-#if defined( OEX_USE_DYNAMIC_SHELL32 )
+#	if defined( OEX_USE_DYNAMIC_SHELL32 )
 
 	// Unload shell lib
 	FreeLibrary( hShell32 );
+
+#	endif
+
+//------------------------------------------------------------------
+// SHGetKnownFolderPath()
+//------------------------------------------------------------------
+#else
+
+	const GUID *pkid = 0;
+	
+	// Get the folder
+	switch( x_nFolderId )
+	{
+		case eFidNone :
+			return CStr();
+
+		case eFidTemp :
+			s.SetLength( ::GetTempPath( x_nMaxLength, s._Ptr() ) );
+			return s;
+
+		case eFidSystem :
+			s.SetLength( ::GetSystemDirectory( s._Ptr(), x_nMaxLength ) );
+			return s;
+
+		case eFidUserOs :
+			s.SetLength( ::GetWindowsDirectory( s._Ptr(), x_nMaxLength ) );
+			return s;
+
+		case eFidCurrent :
+			s.SetLength( ::GetCurrentDirectory( x_nMaxLength, s._Ptr() ) );
+			return s;
+
+		case eFidDefDrive :
+			s.SetLength( cmn::Min( (UINT)3, ::GetWindowsDirectory( s._Ptr(), x_nMaxLength ) ) );
+			return s;
+
+		case eFidRoot :
+			pkid = &FOLDERID_ComputerFolder;
+			break;
+
+		case eFidSettings :
+			pkid = x_bShared ? &FOLDERID_ProgramData : &FOLDERID_LocalAppData;
+			break;
+
+		case eFidPrograms :
+			pkid = x_bShared ? &FOLDERID_CommonPrograms : &FOLDERID_Programs;
+			break;
+
+		case eFidProgramFiles :
+			pkid = x_bShared ? &FOLDERID_ProgramFiles : &FOLDERID_ProgramFiles;
+			break;
+
+		case eFidDesktop :
+			pkid = x_bShared ? &FOLDERID_PublicDesktop : &FOLDERID_Desktop;
+			break;
+
+		case eFidDownloads :
+			pkid = x_bShared ? &FOLDERID_PublicDownloads : &FOLDERID_Downloads;
+			break;
+
+		case eFidRecycle :
+			pkid = &FOLDERID_RecycleBinFolder;
+			break;
+
+		case eFidTemplates :
+			pkid = x_bShared ? &FOLDERID_CommonTemplates : &FOLDERID_Templates;
+			break;
+
+		case eFidPublic :
+			pkid = &FOLDERID_Public;
+			break;
+
+		case eFidDocuments :
+			pkid = x_bShared ? &FOLDERID_PublicDocuments : &FOLDERID_Documents;
+			break;
+
+		case eFidMusic :
+			pkid = x_bShared ? &FOLDERID_PublicMusic : &FOLDERID_Music;
+			break;
+
+		case eFidPictures :
+			pkid = x_bShared ? &FOLDERID_PublicPictures : &FOLDERID_Pictures;
+			break;
+
+		case eFidVideo :
+			pkid = x_bShared ? &FOLDERID_PublicVideos : &FOLDERID_Videos;
+			break;
+
+		case eFidFavorites :
+			pkid = x_bShared ? &FOLDERID_Favorites : &FOLDERID_Favorites;
+			break;
+
+		case eFidStartMenu :
+			pkid = x_bShared ? &FOLDERID_CommonStartup : &FOLDERID_StartMenu;
+			break;
+
+		case eFidStartup :
+			pkid = x_bShared ? &FOLDERID_CommonStartMenu : &FOLDERID_Startup;
+			break;
+
+		case eFidCookies :
+			pkid = &FOLDERID_Cookies;
+			break;
+
+		case eFidNetwork :
+			pkid = &FOLDERID_NetworkFolder;
+			break;
+
+		case eFidPrinters :
+			pkid = &FOLDERID_PrintersFolder;
+			break;
+
+		case eFidRecent :
+			pkid = &FOLDERID_Recent;
+			break;
+
+		case eFidHistory :
+			pkid = &FOLDERID_History;
+			break;
+
+		case eFidFonts :
+			pkid = &FOLDERID_Fonts;
+			break;
+
+		default :
+			break;
+
+	} // end switch
+
+	if ( !pkid )
+		return CStr();
+	
+#	if defined( OEX_USE_DYNAMIC_SHELL32 )
+
+	// Functions
+	pfn_SHGetKnownFolderPath pSHGetKnownFolderPath = 0;
+
+	// Load shell32.dll
+	HMODULE hShell32 = LoadLibrary( oexT( "shell32.dll" ) );
+	if ( !hShell32 )
+		return CStr();
+
+	// Load functions
+#	if defined( OEX_GCC )
+	pSHGetKnownFolderPath = (pfn_SHGetKnownFolderPath)GetProcAddress( hShell32, "SHGetKnownFolderPath" );
+#	else
+	pSHGetKnownFolderPath = (pfn_SHGetKnownFolderPath)GetProcAddress( hShell32, oexT( "SHGetKnownFolderPath" ) );
+#	endif
+
+	// Did we get the functions?
+	if ( !pSHGetKnownFolderPath )
+	{	FreeLibrary( hShell32 );
+		return CStr();
+	} // end if
+
+#	endif
+
+	LPWSTR wszPath = 0;
+	DWORD dwFlags = 0x00008000; // KF_FLAG_CREATE
+	if ( S_OK != pSHGetKnownFolderPath( *pkid, dwFlags, 0, &wszPath ) || !wszPath )
+		return CStr();
+	
+	s = oexStrWToStr( CStrW( (oexCSTRW)wszPath ) );
+	
+	CoTaskMemFree( wszPath );
+	
+#	if defined( OEX_USE_DYNAMIC_SHELL32 )
+
+	// Unload shell lib
+	FreeLibrary( hShell32 );
+
+#	endif
 
 #endif
 
