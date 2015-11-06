@@ -56,6 +56,18 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfDecoder, CFfDecoder )
 
 SQBIND_REGISTER_CLASS_END()
 
+static AVHWAccel *find_hwaccel(enum AVCodecID codec_id,
+                               enum AVPixelFormat pix_fmt)
+{
+	AVHWAccel *hwaccel = NULL;
+	while ((hwaccel = av_hwaccel_next(hwaccel)))
+	{	if (hwaccel->id == codec_id
+			&& hwaccel->pix_fmt == pix_fmt)
+			return hwaccel;
+	}
+	return NULL;
+}
+
 void CFfDecoder::Register( sqbind::VM vm )
 {_STT();
 	SQBIND_EXPORT( vm, CFfDecoder );
@@ -163,6 +175,11 @@ int CFfDecoder::Create( int x_nCodec, int fmt, int width, int height, int fps, i
 		m_pCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
 	} // end if
 
+	// Get a hardware accelerator
+	m_pCodecContext->hwaccel = find_hwaccel( m_pCodecContext->codec_id, m_pCodecContext->pix_fmt );
+	if ( m_pCodecContext->hwaccel )
+		oexEcho( "*** Hardware Acceleration enabled" );
+	
 	// Can we go ahead and open the codec?
 	if ( AV_CODEC_ID_H264 != x_nCodec || 3 == ( 3 & m_nFlags ) )
 	{
@@ -260,7 +277,7 @@ int CFfDecoder::BufferData( sqbind::CSqBinary *in, sqbind::CSqMulti *m )
 			int s = FindH264Nal( m_tmp.Ptr(), m_tmp.getUsed() );
 
 			// Do we have enough data?
-			if ( 0 > s || ( s + 3 ) >=  m_tmp.getUsed() )
+			if ( 0 > s || (unsigned)( s + 3 ) >=  m_tmp.getUsed() )
 				return 0;
 
 			// Find an end nal header

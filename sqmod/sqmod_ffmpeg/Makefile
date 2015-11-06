@@ -67,11 +67,17 @@ ifeq ($(PLATFORM),windows)
 		PRJ_LIBS := $(PRJ_LIBS) ffa ffb ffc ffd ffe ffa ffb ffc ffd ffe rtmpd x264 lame vpx \
 								openssl_a openssl_b openssl_c openssl_a openssl_b openssl_c zlib
 	endif
+	PRJ_DEFS := $(PRJ_DEFS) USEDXVA=1
 else
 	PRJ_INCS := $(CFG_LIB2BLD)/dep/etc/ffmpeg/inc/posix $(PRJ_INCS)
 	PRJ_LIBS := $(PRJ_LIBS) ffa ffb ffc ffd ffe ffa ffb ffc ffd ffe rtmpd vpx x264 lame \
 							openssl_a openssl_b openssl_c openssl_a openssl_b openssl_c zlib
 	PRJ_OSLB := $(PRJ_OSLB)
+endif
+
+ifeq ($(BUILD),gcc)
+	CFG_CFLAGS := $(CFG_CFLAGS) -Wno-unused-function -Wno-attributes -Wno-unused-local-typedefs \
+								-Wno-parentheses -Wno-switch -Wno-pointer-sign
 endif
 
 #-------------------------------------------------------------------
