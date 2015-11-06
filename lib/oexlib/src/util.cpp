@@ -126,6 +126,8 @@ oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 
 	if ( !x_uSize )
 		return oexFALSE;
+	
+	CStr8 sStr8 = oexStrToMb( CStr( x_pStr, x_uSize ) );
 
 	// Write to file?
 	if ( g_szFile[ 0 ] )
@@ -146,7 +148,7 @@ oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 			} // end if
 
 			// Sux that it doesn't have a lf at the end
-			s << oexStrToMb( CStr( x_pStr, x_uSize ) ) << oexNL8;
+			s << sStr8 << oexNL8;
 
 			// Write to file
 			f.Write( s );
@@ -156,7 +158,7 @@ oexBOOL CUtil::AddOutput( oexCSTR x_pStr, oexUINT x_uSize, oexBOOL x_bNewLine )
 
 	// Write the data to the buffer
 	if ( g_pFifoSync )
-		g_pFifoSync->Write( x_pStr, x_uSize * sizeof( x_pStr[ 0 ] ) );
+		g_pFifoSync->Write( sStr8.c_str(), sStr8.length() ); // x_uSize * sizeof( x_pStr[ 0 ] ) );
 
 	return oexTRUE;
 }

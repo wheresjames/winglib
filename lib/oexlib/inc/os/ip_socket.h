@@ -551,6 +551,18 @@ public:
         return m_addrLocal;
     }
 
+	/// Set peer address object
+	void SetPeerAddress( CIpAddress *pAddr )
+	{	if ( pAddr )
+			m_addrPeer = *pAddr;
+	}
+	
+	/// Set local address object
+	void SetLocalAddress( CIpAddress *pAddr )
+	{	if ( pAddr )
+			m_addrLocal = *pAddr;
+	}
+	
 public:
 
 	//==============================================================
@@ -565,6 +577,20 @@ public:
 		\see Create(), Listen(), Connect()
 	*/
 	oexBOOL Bind( oexUINT x_uPort );
+
+	//==============================================================
+	// BindTo()
+	//==============================================================
+	/// Binds the open socket to the specified address and Port
+	/**
+		\param [in] x_pAddress	-	Address to bind to.
+		\param [in] x_uPort		-	Port to bind to.
+
+		\return Returns non-zero if success.
+
+		\see Create(), Listen(), Connect()
+	*/
+	oexBOOL BindTo( oexCSTR x_pAddress, oexUINT x_uPort );
 
 	//==============================================================
 	// Listen()
@@ -602,6 +628,17 @@ public:
 	*/
 	oexBOOL Connect( CIpAddress &x_rIpAddress );
 
+	/// Add multicast address to socket
+	/**
+		\param [in] x_pAddress	-	Address to add
+		\param [in] x_pAdapter	-	Addapter
+	
+	*/
+	oexBOOL AddMulticastAddr( oexCSTR x_pAddress, oexCSTR x_pAdapter );
+	
+	/// Set socket options that take an integer parameter
+	int setsockint( int optname, int opt );
+	
 public:
 
 	//==============================================================

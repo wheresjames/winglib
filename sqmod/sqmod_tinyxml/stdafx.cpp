@@ -2,19 +2,13 @@
 
 #include "stdafx.h"
 
-// Export Functions
-SQBIND_REGISTER_CLASS_BEGIN( CSqXml, CSqXml )
-	SQBIND_STATIC_FUNCTION( CSqXml, Encode )
-	SQBIND_STATIC_FUNCTION( CSqXml, Decode )
-SQBIND_REGISTER_CLASS_END()
-
 // Export classes
 static void SQBIND_Export_tinyxml( sqbind::VM x_vm )
 {
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
 
-    SQBIND_EXPORT( x_vm, CSqXml );
+    CSqXml::Register( x_vm );
 }
 
 #if defined( SQBIND_STATIC )

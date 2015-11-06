@@ -99,8 +99,8 @@ void* CSys::CThunk::CDecl2This( const void *pThis, void *pFun, long lCleanup )
 
 void CSys::CThunk::Release()
 {
-	if ( p )
-		free( p ), p = 0;
+	if ( m_p )
+		free( m_p ), m_p = 0;
 }
 
 #endif
@@ -1497,6 +1497,23 @@ oexUINT CSys::InjectException( oexPVOID hThread, oexINT nError )
 {
 	s_last_error = nError;
 
+	return -1;
+}
+
+oexLONG CSys::IsProcessAdmin()
+{
+	return -1;
+}
+
+oexLONG CSys::IsUserAdmin()
+{
+	return -1;
+}
+
+
+
+oexLONG CSys::SwitchToAdmin()
+{
 	return -1;
 }
 

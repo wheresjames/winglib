@@ -170,7 +170,7 @@
 #	define OEX_ENABLE_VIDEO
 #endif
 
-#if defined( OEX_WIN32 )
+#if defined( OEX_WIN32 ) && !defined( OEX_GCC )
 #	define oexCDECL	_cdecl
 #else
 #	define oexCDECL

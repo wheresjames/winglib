@@ -250,17 +250,17 @@ CPropertyBag CIpAddress::ParseUrl( oexCSTR pUrl, oexUINT uMaxBufferSize )
 	// Read into a string object
     CStr str( pUrl, uMaxBufferSize );
 
-	// Find the scheme
-	oexINT nScheme = str.FindSubStr( oexT( "://" ), 3 );
-	if ( 0 <= nScheme && nScheme == str.FindSubStr( oexT( ":" ), 1 ) )
-		pb[ oexT( "scheme" ) ].ToString() = str.SubStr( 0, nScheme );
-	
-	// Read in the scheme
 //	pb[ oexT( "scheme" ) ].ToString() = str.Parse( oexT( "://" ) );
 
+	// Read in the scheme
+	oexINT nScheme = str.FindSubStr( oexT( "://" ), 3 );
+	if ( 0 <= nScheme && nScheme == str.FindSubStr( oexT( ":" ), 1 ) )
+		pb[ oexT( "scheme" ) ].ToString() = str.SubStr( 0, nScheme ),
+		str.LTrim( nScheme + 3 );
+
 	// Trim off leading forward slashes
-	str.LTrim( oexT( ":" ) );
-	str.LTrim( oexT( "/" ) );
+//	str.LTrim( oexT( ":" ) );
+//	str.LTrim( oexT( "/" ) );
 
 	// Is there a username / password?
 	CStr tmp = str.Parse( oexT( "@" ) );

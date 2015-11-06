@@ -299,6 +299,9 @@ public:
 
 		/// Displays a message box containing string
 		int alert( const stdString &sMsg );
+		
+		/// Displays a message box
+		int message_box( const stdString &sTitle, const stdString &sMsg );		
 
 		/// Sends data to STDOUT
 		int print( const stdString &sMsg );
@@ -690,6 +693,15 @@ public:
 
 		/// Restarts a service
 		int service_restart( const stdString &sName );
+		
+		/// Check to see if the process is running as admin
+		int is_process_admin();
+		
+		/// Check to see if current user is admin
+		int is_user_admin();
+		
+		/// Attempt to relaunch application as administrator
+		int switch_to_admin();
 
 		/// Returns the current cpu load
 		double get_cpu_load();

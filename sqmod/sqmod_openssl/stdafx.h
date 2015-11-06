@@ -24,6 +24,7 @@
 #include <openssl/ssl.h>
 #include <openssl/conf.h>
 
+#include "sq_hash.h"
 #include "sq_ossl_key.h"
 #include "sq_ossl_cert.h"
 #include "sq_openssl.h"

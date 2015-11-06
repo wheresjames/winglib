@@ -91,6 +91,9 @@ public:
 
 	/// Returns the content type
 	sqbind::stdString getContentType(){ return m_sContentType; }
+	
+	/// Sets the content type
+	void setContentType( const sqbind::stdString &s ) { m_sContentType = s; }
 
 	/// Add multipart
 	int addMultipart( const sqbind::stdString &sName, const sqbind::stdString &sFile, const sqbind::stdString &sMime, sqbind::CSqBinary *pData );

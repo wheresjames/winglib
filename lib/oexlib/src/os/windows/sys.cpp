@@ -406,10 +406,10 @@ oexINT CSys::KillProcess( oexINT nPid, oexUINT uTimeout, oexUINT uExit )
 	HANDLE h = OpenProcess( PROCESS_TERMINATE, TRUE, (UINT)nPid );
 	if ( !h )
 		return 0;
-		
+
 	// Kill the process
 	BOOL bKilled = TerminateProcess( h, uExit );
-	
+
 	// Do we want to wait for the process to exit?
 	if ( !bKilled && 0 < uTimeout && WAIT_OBJECT_0 == WaitForSingleObject( h, uTimeout ) )
 		bKilled = TRUE;
@@ -905,12 +905,20 @@ oexINT CSys::WaitForMultipleObjects( oexUINT x_uObjects, CSys::t_WAITABLE *x_pHa
 
 oexLONG CSys::increment( oexLONG *x_puVal )
 {//_STT();
+#if !defined( OEX_GCC ) || defined( OEX_CPU_64 )
 	return ::InterlockedIncrement( (unsigned long volatile*)x_puVal );
+#else
+	return ::InterlockedIncrement( (long volatile*)x_puVal );
+#endif
 }
 
 oexLONG CSys::decrement( oexLONG *x_puVal )
 {//_STT();
+#if !defined( OEX_GCC ) || defined( OEX_CPU_64 )
 	return ::InterlockedDecrement( (unsigned long volatile*)x_puVal );
+#else
+	return ::InterlockedDecrement( (long volatile*)x_puVal );
+#endif
 }
 
 void CSys_SystemTimeToSTime( SYSTEMTIME &st, CSys::STime &t )
@@ -1255,12 +1263,12 @@ oexBOOL CSys::Shell( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
 
 oexUINT CSys::GetCurrentProcessId()
 {//_STT();
-	return ::GetCurrentProcessId(); 
+	return ::GetCurrentProcessId();
 }
 
 oexUINT CSys::GetProcessVersion( oexUINT uPid )
 {//_STT();
-	return ::GetProcessVersion( uPid ); 
+	return ::GetProcessVersion( uPid );
 }
 
 oexUINT CSys::StartProcess( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirectory )
@@ -1273,7 +1281,7 @@ oexUINT CSys::StartProcess( oexCSTR x_pFile, oexCSTR x_pParams, oexCSTR x_pDirec
 
 	STARTUPINFO si; oexZero( si ); si.cb = sizeof( si );
 	PROCESS_INFORMATION pi; oexZero( pi );
-	if ( !CreateProcess( CStr( x_pFile ).Ptr(), CStr( x_pParams )._Ptr(), NULL, NULL, FALSE, 0, NULL, 
+	if ( !CreateProcess( CStr( x_pFile ).Ptr(), CStr( x_pParams )._Ptr(), NULL, NULL, FALSE, 0, NULL,
 						 ( x_pDirectory && *x_pDirectory ) ? CStr( x_pDirectory ).Ptr() : NULL, &si, &pi ) )
 		return 0;
 
@@ -1407,3 +1415,138 @@ oexUINT CSys::InjectException( oexPVOID hThread, oexINT nError )
 	return nRet;
 }
 
+oexLONG CSys::IsProcessAdmin()
+{
+	BOOL bFlag = FALSE;
+	oexLONG lError = 0;
+    PSID pSid = 0;
+
+    SID_IDENTIFIER_AUTHORITY NtAuthority = SECURITY_NT_AUTHORITY;
+    if ( !AllocateAndInitializeSid( &NtAuthority, 2, SECURITY_BUILTIN_DOMAIN_RID,
+									DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &pSid ) )
+		lError = -1;
+
+	else if ( !CheckTokenMembership( 0, pSid, &bFlag ) )
+		lError -2;
+
+    if ( pSid )
+        FreeSid( pSid );
+
+    return lError ? lError : ( bFlag ? 1 : 0 );
+}
+
+oexLONG CSys::IsUserAdmin()
+{
+#if !defined( OEX_GCC )	
+	
+	LONG 	lError = 0;
+	DWORD 	cbSize = 0;
+	HANDLE	hTokenToCheck = 0;
+	BOOL 	fInAdminGroup = FALSE;
+
+    // Open process token
+    HANDLE hToken = 0;
+    OSVERSIONINFO osver; osver.dwOSVersionInfoSize = sizeof( osver );
+    if ( !OpenProcessToken( GetCurrentProcess(), TOKEN_QUERY | TOKEN_DUPLICATE, &hToken ) )
+		lError = -1;
+
+    else if ( !GetVersionEx( &osver ) )
+		lError = -2;
+
+    else if ( 6 <= osver.dwMajorVersion )
+    {
+        TOKEN_ELEVATION_TYPE elevType;
+        if ( !GetTokenInformation( hToken, TokenElevationType, &elevType, sizeof( elevType ), &cbSize ) )
+			lError = -3;
+
+        // If limited, get the linked elevated token for further check.
+        else if ( TokenElevationTypeLimited == elevType )
+            if ( !GetTokenInformation( hToken, TokenLinkedToken, &hTokenToCheck, sizeof( hTokenToCheck ), &cbSize ) )
+				lError = -4;
+
+    } // end else if
+
+	// Must have duplicated token
+    if ( !lError && !hTokenToCheck )
+        if ( !DuplicateToken( hToken, SecurityIdentification, &hTokenToCheck ) )
+			lError = -5;
+
+	if ( !lError )
+	{
+		// Admin group SID
+		BYTE adminSID[ SECURITY_MAX_SID_SIZE ] = { 0 }; cbSize = sizeof( adminSID );
+		if ( !CreateWellKnownSid( WinBuiltinAdministratorsSid, 0, &adminSID, &cbSize ) )
+			lError = -6;
+
+		else if ( !CheckTokenMembership( hTokenToCheck, &adminSID, &fInAdminGroup ) )
+			lError = -7;
+
+	} // end if
+
+	// +++ Cleanup code crashes sometimes???
+	
+//    if ( hTokenToCheck )
+//        CloseHandle( hTokenToCheck );
+
+//    if ( hToken )
+//       CloseHandle( hToken );
+
+    return lError ? lError : ( fInAdminGroup ? 1 : 0 );
+	
+#else
+	
+	// +++ GCC implementation
+
+	return -1;
+	
+#endif
+
+}
+
+
+
+oexLONG CSys::SwitchToAdmin()
+{
+	// Are we already an admin?
+	oexLONG lIsAdmin = IsProcessAdmin();
+	if ( lIsAdmin )
+		return lIsAdmin;
+
+	oexTCHAR szPath[ MAX_PATH ] = { 0 };
+	if ( !GetModuleFileName( 0, szPath, sizeof( szPath ) / sizeof( oexTCHAR ) ) )
+		return -10;
+
+	// Sux, but we need to put arguments in the right format for ShellExecute()
+	LPCTSTR pCmdLine = GetCommandLine();
+	if ( pCmdLine )
+	{
+		while( *pCmdLine && oexT( ' ' ) != *pCmdLine )
+			pCmdLine++;
+		
+		if ( *pCmdLine )
+			pCmdLine++;
+		
+	} // end if
+		
+	// Prepare to run our executable elevated
+	SHELLEXECUTEINFO sei = { sizeof(sei) };
+	sei.lpVerb = oexT( "runas" );
+	sei.lpFile = szPath;
+	sei.lpParameters = ( pCmdLine && *pCmdLine ) ? pCmdLine : 0;
+	sei.hwnd = 0;
+	sei.nShow = SW_NORMAL;
+
+	// Attempt elevation
+	if ( !ShellExecuteEx( &sei ) )
+	{
+		// Did the user cancel
+		DWORD dwError = GetLastError();
+		if ( dwError == ERROR_CANCELLED )
+			return 0;
+
+		return -11;
+
+	} // end if
+
+	return 1;
+}

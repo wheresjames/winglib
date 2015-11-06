@@ -88,6 +88,12 @@ BUILDDIRS := $(BUILDDIRS) \
 			 sqmod/sqmod_ssh2 \
 			 sqmod/sqmod_tinyxml
 
+ifdef XMODS
+BUILDDIRS := $(BUILDDIRS) \
+			 sqmod/sqmod_opencv \
+			 sqmod/sqmod_webrtc
+endif
+			 
 ifdef PETS
 BUILDDIRS := $(BUILDDIRS) \
 			 sqmod/sqmod_freenect \
@@ -99,8 +105,7 @@ BUILDDIRS := $(BUILDDIRS) \
 			 sqmod/sqmod_test \
 			 sqmod/sqmod_usb \
 			 sqmod/sqmod_vmime \
-			 sqmod/sqmod_webkit \
-			 sqmod/sqmod_webrtc
+			 sqmod/sqmod_webkit
 endif
 #-------------------------------------------------------------------
 # WxWidgets

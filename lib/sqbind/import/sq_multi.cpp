@@ -394,6 +394,7 @@ _SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqMulti, CSqMulti )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, match )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, unset )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, clear )
+	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, search )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_key )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_value )
 	_SQBIND_MEMBER_FUNCTION(  sqbind::CSqMulti, find_obj )
@@ -718,6 +719,8 @@ CSqMulti* CSqMulti::first( int skip )
 	if ( it == m_lst.end() )
 	{	if ( !m_def )
 			m_def = OexAllocConstruct< CSqMulti >();
+		else
+			m_def->clear();
 		return m_def;
 	} // end if
 
@@ -734,6 +737,8 @@ CSqMulti* CSqMulti::last( int skip )
 	if ( it == m_lst.rend() )
 	{	if ( !m_def )
 			m_def = OexAllocConstruct< CSqMulti >();
+		else
+			m_def->clear();
 		return m_def;
 	} // end if
 
@@ -772,6 +777,8 @@ CSqMulti* CSqMulti::get( const CSqMulti::t_Obj &k )
 	if ( !k.length() )
 	{	if ( !m_def )
 			m_def = OexAllocConstruct< CSqMulti >();
+		else
+			m_def->clear();
 		return m_def;
 	} // end if
 	return &m_lst[ k ];
@@ -782,6 +789,8 @@ CSqMulti* CSqMulti::at( const CSqMulti::t_Obj &path )
 	if ( !path.length() )
 	{	if ( !m_def )
 			m_def = OexAllocConstruct< CSqMulti >();
+		else
+			m_def->clear();
 		return m_def;
 	} // end if
 
@@ -827,6 +836,8 @@ CSqMulti* CSqMulti::ats( const CSqMulti::t_Obj &path, const CSqMulti::t_Obj &sep
 	if ( !path.length() )
 	{	if ( !m_def )
 			m_def = OexAllocConstruct< CSqMulti >();
+		else
+			m_def->clear();
 		return m_def;
 	} // end if
 
@@ -918,7 +929,29 @@ void CSqMulti::move_down( const t_Obj &k )
 	itB->second.list() = t;
 }
 
+CSqMulti* CSqMulti::search( const t_Obj &pat )
+{_STT();
 
+    // For each item
+    for ( t_List::iterator it = m_lst.begin();
+          m_lst.end() != it;
+          it++ )
+
+        // Is the sub string in the key?
+        if ( match_pattern( it->first.c_str(), pat.c_str() ) )
+            return &it->second;
+
+	// Ensure default object
+	if ( !m_def )
+		m_def = OexAllocConstruct< CSqMulti >();
+	else
+		m_def->clear();
+		
+	// Return the default object
+	return m_def;
+}
+
+		
 CSqMulti::t_Obj CSqMulti::find_key( const CSqMulti::t_Obj &k )
 {_STT();
 
@@ -964,6 +997,8 @@ CSqMulti* CSqMulti::find_obj( const CSqMulti::t_Obj &k, const CSqMulti::t_Obj &v
 	// Ensure default object
 	if ( !m_def )
 		m_def = OexAllocConstruct< CSqMulti >();
+	else
+		m_def->clear();
 		
 	// Return the default object
 	return m_def;
@@ -1111,11 +1146,13 @@ int CSqMulti::filter( const t_Obj &sFilter, int bInclude )
     // For each item
     for ( t_List::iterator it = m_lst.begin();
           m_lst.end() != it;
-          it++ )
+         )
 
 		// Is the sub string in the key?
 		if ( ( bInclude ? 0 : 1 ) == ( match_pattern( it->first.c_str(), sFilter.c_str() ) ? 0 : 1 ) )
             m_lst.erase( it++ ), nErased++;
+		else
+			it++;
 
 	return nErased;
 }

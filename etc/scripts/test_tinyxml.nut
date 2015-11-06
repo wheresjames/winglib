@@ -28,13 +28,13 @@ function _init()
 
 	// Keyed
 	local keyed = CSqMulti();
-	local found = xml.Decode( data, keyed, 0 )	
+	local found = xml.Decode( data, keyed, 0, 0 )	
 	_self.echo( "\r\n === Keyed Elements found : " + found  );
 	if ( found ) _self.echo( "\r\n" + keyed.print_r( 1 ) );
 
 	// Indexed
 	local indexed = CSqMulti();
-	found = xml.Decode( data, indexed, 1 )
+	found = xml.Decode( data, indexed, 1, 0 )
 	_self.echo( "\r\n === Indexed Elements found : " + found  );
 	if ( found ) _self.echo( "\r\n" + indexed.print_r( 1 ) );
 

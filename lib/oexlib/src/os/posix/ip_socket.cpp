@@ -475,6 +475,20 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 	return IsSocket();
 }
 
+int CIpSocket::setsockint( int optname, int opt )
+{
+	// Punt if not initialized
+	if ( !IsInitialized() )
+		return oexFALSE;
+
+	// Create socket if there is none
+	if ( !IsSocket() )
+		return oexFALSE;
+	
+	// Set socket int
+	return setsockopt( oexPtrToInt( m_hSocket ), SOL_SOCKET, optname, (const char *)&opt, sizeof( opt ) );
+}
+
 oexBOOL CIpSocket::Bind( oexUINT x_uPort )
 {
 	// Punt if not initialized
@@ -541,6 +555,100 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
     // Return the result
 	return !nRet;
 }
+
+oexBOOL CIpSocket::BindTo( oexCSTR x_pAddress, oexUINT x_uPort )
+{_STT();
+	// Punt if not initialized
+	if ( !IsInitialized() )
+		return oexFALSE;
+
+	// Create socket if there is none
+	if ( !IsSocket() && !Create() )
+	{	Destroy();
+		m_uConnectState |= eCsError;
+		return oexFALSE;
+	} // end if
+	
+	// Save address type
+	if ( x_pAddress && *x_pAddress )
+		m_addrPeer.SetDotAddress( x_pAddress, x_uPort );
+	
+	sockaddr_in sai;
+	oexZero( sai );
+	sai.sin_family = PF_INET;
+	sai.sin_port = htons( (uint16_t)x_uPort );
+	
+	if ( x_pAddress && *x_pAddress )
+		sai.sin_addr.s_addr = inet_addr( oexStrToMbPtr( x_pAddress ) );
+	else
+		sai.sin_addr.s_addr = htonl( INADDR_ANY );
+
+	// Attempt to bind the socket
+	int nRet = bind( oexPtrToInt( m_hSocket ), (sockaddr*)&sai, sizeof( sockaddr_in ) );
+
+	// Save the last error code
+	m_uLastError = errno;
+
+	// Check result
+	if ( -1 == nRet && EINPROGRESS != m_uLastError )
+	{	m_uConnectState |= eCsError;
+    	m_uLastError = errno;
+		oexERROR( errno, oexT( "setsockopt() failed" ) );
+		return oexFALSE;
+	} // end if
+
+	m_uLastError = 0;
+
+	// Grab the address
+	CIpSocket_GetAddressInfo( &m_addrLocal, &sai );
+
+	return oexTRUE;
+}
+
+
+oexBOOL CIpSocket::AddMulticastAddr( oexCSTR x_pAddress, oexCSTR x_pAdapter )
+{
+	// Punt if not initialized
+	if ( !IsInitialized() )
+		return oexFALSE;
+
+	// Create socket if there is none
+	if ( !IsSocket())
+		return oexFALSE;
+
+	struct ip_mreq_source imr;
+	oexZero( imr );	
+
+	// Set address
+	if ( x_pAddress && *x_pAddress )
+		imr.imr_multiaddr.s_addr = inet_addr( oexStrToMbPtr( x_pAddress ) );
+	else
+		imr.imr_multiaddr.s_addr = htonl( INADDR_ANY );
+		
+	// Set adapter
+	if ( x_pAdapter && *x_pAdapter )
+		imr.imr_interface.s_addr = inet_addr( oexStrToMbPtr( x_pAdapter ) );
+	else
+		imr.imr_interface.s_addr = htonl( INADDR_ANY );
+
+	int nRet = setsockopt( oexPtrToInt( m_hSocket ), IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char*)&imr, sizeof( imr ) );
+	
+	// Save the last error code
+	m_uLastError = errno;
+
+	// Check result
+	if ( -1 == nRet && EINPROGRESS != m_uLastError )
+	{	m_uConnectState |= eCsError;
+    	m_uLastError = errno;
+		oexERROR( errno, oexT( "setsockopt() failed" ) );
+		return oexFALSE;
+	} // end if
+
+	m_uLastError = 0;
+
+	return oexTRUE;
+}
+
 
 oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
 {

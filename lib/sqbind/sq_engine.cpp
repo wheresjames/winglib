@@ -140,6 +140,21 @@ stdString CSqEngineExport::makeServiceName( const sqbind::stdString &s )
 	return s + oexTEXT( "_" ) oexTEXT( SNKEYCPU ) oexTEXT( "_" ) oexTEXT( SNBUILD );
 }
 
+int CSqEngineExport::is_process_admin()
+{_STT();
+	return oexIsProcessAdmin();
+}
+
+int CSqEngineExport::is_user_admin()
+{_STT();
+	return oexIsUserAdmin();
+}
+
+int CSqEngineExport::switch_to_admin()
+{_STT();
+	return oexSwitchToAdmin();
+}
+
 int CSqEngineExport::ctrl_computer( int nCmd, int nForce, const sqbind::stdString &sMsg )
 {_STT();
 	return oexCtrlComputer( nCmd, nForce, sMsg.c_str() );
@@ -173,6 +188,11 @@ int CSqEngineExport::is_root()
 int CSqEngineExport::alert( const stdString &sMsg )
 {_STT();
 	return oex::os::CSys::ShowMessageBox( oexT( "Script Message" ), sMsg.c_str() );
+}
+
+int CSqEngineExport::message_box( const stdString &sTitle, const stdString &sMsg )
+{_STT();
+	return oex::os::CSys::ShowMessageBox( sTitle.c_str(), sMsg.c_str() );
 }
 
 int CSqEngineExport::print( const stdString &sMsg )
@@ -2100,6 +2120,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, makeServiceName )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, getPlatform )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, alert )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, message_box )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, print )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, echo )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, read_stdin )
@@ -2169,6 +2190,9 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqEngineExport, CSqEngineExport )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, reboot )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, shutdown )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, logoff )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_process_admin )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, is_user_admin )
+	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, switch_to_admin )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, ctrl_computer )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_total_thread_count )
 	SQBIND_MEMBER_FUNCTION(  CSqEngineExport, get_running_thread_count )

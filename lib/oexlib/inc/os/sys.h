@@ -672,6 +672,44 @@ public:
 	//==============================================================
 	/// Seeds the random number generator
 	static void RandSeed( oexUINT uSeed );
+	
+	
+	//==============================================================
+	// IsProcessAdmin()
+	//==============================================================
+	/** Checks to see if calling process is an administrator
+		
+		@return
+			< 0		=	Error code
+			0		=	Not Administrator
+			1		=	Administrator
+	*/
+	static oexLONG IsProcessAdmin();
+	
+	//==============================================================
+	// IsUserAdmin()
+	//==============================================================
+	/** Checks to see if current user is an administrator
+		
+		@return
+			< 0		=	Error code
+			0		=	Not Administrator
+			1		=	Administrator
+	*/
+	static oexLONG IsUserAdmin();
+	
+	//==============================================================
+	// SwitchToAdmin()
+	//==============================================================
+	/** Attempts to relaunch the current executable as administrator
+		
+		@return
+			< 0		=	Error code
+			0		=	User canceled operation
+			1		=	Elevation launched
+	*/
+	static oexLONG SwitchToAdmin();
+	
 };
 
 //==================================================================

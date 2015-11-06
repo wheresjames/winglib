@@ -21,6 +21,17 @@ PRJ_VSLB := dshowbase
 include $(PRJ_LIBROOT)/config.mk
 
 #-------------------------------------------------------------------
+# Add resources
+#-------------------------------------------------------------------
+ifeq ($(PLATFORM),windows)
+export LOC_TAG := rc
+LOC_CXX_rc := rc
+LOC_BLD_rc := rc
+LOC_SRC_rc := res
+include $(PRJ_LIBROOT)/build.mk
+endif
+
+#-------------------------------------------------------------------
 # File locations
 #-------------------------------------------------------------------
 export LOC_TAG := def

@@ -174,8 +174,10 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSocket, CSqSocket )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, CreateUDP )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, setBlockingMode )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Bind )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, BindTo )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Listen )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Accept )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, AddMulticastAddr )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Share )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, WaitEvent )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, Read )
@@ -187,8 +189,10 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSocket, CSqSocket )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, WriteBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, ReadFromBin )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, SendToBin )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, SetSockInt )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, getPeerAddress )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, setPeerAddress )
+	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, setPeerDotAddress )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, getLocalAddress )
 	SQBIND_MEMBER_FUNCTION(  sqbind::CSqSocket, setLocalAddress )
 
@@ -217,6 +221,13 @@ SQBIND_REGISTER_CLASS_BEGIN( sqbind::CSqSocket, CSqSocket )
 	SQBIND_ENUM( oex::os::CIpSocket::eCloseEvent,		EVT_CLOSE )
 	SQBIND_ENUM( oex::os::CIpSocket::eAcceptEvent,		EVT_ACCEPT )
 
+	SQBIND_ENUM( 0x0004, SO_REUSEADDR )
+	SQBIND_ENUM( 0x0008, SO_KEEPALIVE )
+	SQBIND_ENUM( 0x0020, SO_BROADCAST )
+	SQBIND_ENUM( 0x0040, SO_USELOOPBACK )	
+	SQBIND_ENUM( 0x0080, SO_LINGER )	
+	SQBIND_ENUM( 0x0100, SO_OOBINLINE )	
+	
 SQBIND_REGISTER_CLASS_END()
 
 void CSqSocket::Register( sqbind::VM vm )
@@ -262,6 +273,17 @@ int CSqSocket::Bind( int nPort )
 	return m_socket->Bind( nPort );
 }
 
+int CSqSocket::BindTo( const sqbind::stdString &sAddr, int nPort )
+{_STT();
+	return m_socket->BindTo( sAddr.length() ? sAddr.c_str() : 0, nPort );
+}
+
+
+int CSqSocket::AddMulticastAddr( const sqbind::stdString &sAddr, const sqbind::stdString &sAdpt )
+{_STT();
+	return m_socket->AddMulticastAddr( sAddr.c_str(), sAdpt.c_str() );
+}
+
 int CSqSocket::Listen( int nMax )
 {_STT();
 	return m_socket->Listen( nMax );
@@ -274,6 +296,13 @@ int CSqSocket::Accept( CSqSocket *pSocket )
 
 	return m_socket->Accept( *pSocket->Ptr() );
 }
+
+int CSqSocket::SetSockInt( int optname, int opt )
+{_STT();
+	
+	return m_socket->setsockint( optname, opt );
+}	
+
 
 int CSqSocket::Share( CSqSocket *pSocket )
 {_STT();
@@ -377,7 +406,19 @@ int CSqSocket::setPeerAddress( CSqSockAddress *pAddr )
 	if ( !pAddr )
 		return 0;
 
-	m_socket->PeerAddress() = pAddr->Obj();
+	m_socket->SetPeerAddress( &pAddr->Obj() );
+
+	return 1;
+}
+
+int CSqSocket::setPeerDotAddress( const sqbind::stdString &sAddr, int nPort )
+{_STT();
+	if ( !sAddr.length() )
+		return 0;
+
+	oex::os::CIpAddress addr;
+	addr.SetDotAddress( sAddr.c_str(), nPort );
+	m_socket->SetPeerAddress( &addr );
 
 	return 1;
 }
@@ -387,7 +428,7 @@ int CSqSocket::setLocalAddress( CSqSockAddress *pAddr )
 	if ( !pAddr )
 		return 0;
 
-	m_socket->LocalAddress() = pAddr->Obj();
+	m_socket->SetLocalAddress( &pAddr->Obj() );
 
 	return 1;
 }
@@ -427,7 +468,11 @@ sqbind::stdString CSqSocket::ReadFrom( int nMax )
 
 int CSqSocket::SendTo( const sqbind::stdString &s, int nMax )
 {_STT();
-	return m_socket->SendTo( oexStrToMb( oex::CStr( s.c_str(), nMax ) ) ); 
+
+	if ( 0 >= nMax )
+		nMax = s.length();
+	
+	return m_socket->SendTo( oexStrToMb( sqbind::std2oex( s ) ), nMax );
 }
 
 int CSqSocket::ReadBin( sqbind::CSqBinary *pBin, int nMax )

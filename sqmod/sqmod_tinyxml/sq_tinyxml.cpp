@@ -3,6 +3,17 @@
 
 #include "stdafx.h"
 
+// Export Functions
+SQBIND_REGISTER_CLASS_BEGIN( CSqXml, CSqXml )
+	SQBIND_STATIC_FUNCTION( CSqXml, Encode )
+	SQBIND_STATIC_FUNCTION( CSqXml, Decode )
+SQBIND_REGISTER_CLASS_END()
+
+void CSqXml::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CSqXml );
+}
+
 CSqXml::CSqXml()
 {_STT();
 }
@@ -16,7 +27,7 @@ void CSqXml::Destroy()
 {_STT();
 }
 
-static int _Decode( sqbind::CSqMulti *out, TiXmlElement *in, int bIndexed, int nDepth = 0 )
+static int _Decode( sqbind::CSqMulti *out, TiXmlElement *in, int bIndexed, int nCaseI, int nDepth = 0 )
 {_STT();
 
 	// Sanity check
@@ -40,8 +51,16 @@ static int _Decode( sqbind::CSqMulti *out, TiXmlElement *in, int bIndexed, int n
 		const char *pName = in->Value();
 		sqbind::stdString sName;
 		if ( pName && *pName )
-			sName = oexMbToStrPtr( pName );
+		{
+			oex::CStr sT = oexMbToStr( pName );
 
+			if ( nCaseI )
+				sT.ToLower();
+			
+			sName = sqbind::oex2std( sT );
+			
+		} // end if
+		
 		sqbind::CSqMulti *r = oexNULL;
 		if ( bIndexed )
 		{
@@ -50,7 +69,7 @@ static int _Decode( sqbind::CSqMulti *out, TiXmlElement *in, int bIndexed, int n
 
 			// Save name if valid
 			if ( sName.length() )
-				(*r)[ oexT( "$" ) ].set( oexMbToStrPtr( pName ) );
+				(*r)[ oexT( "$" ) ] = sqbind::oex2std( oexMbToStr( oex::CStr8( pName ) ) );
 
 		} // end if
 
@@ -76,9 +95,12 @@ static int _Decode( sqbind::CSqMulti *out, TiXmlElement *in, int bIndexed, int n
 			const char *pAtt = pAttrib->Name();
 			const char *pValue = pAttrib->Value();
 			if ( pAtt && *pAtt && pValue && *pValue )
-			{	sqbind::stdString sAtt = oexMbToStrPtr( pAtt );
+			{	oex::CStr sT = oexMbToStr( pAtt );
+				if ( nCaseI )
+					sT.ToLower();	
+				sqbind::stdString sAtt = sqbind::oex2std( sT );
 				if ( !r->isset( sAtt ) )
-					nDecoded++, (*r)[ sAtt ].set( oexMbToStrPtr( pValue ) );
+					nDecoded++, (*r)[ sAtt ] = sqbind::oex2std( oexMbToStr( oex::CStr8( pValue ) ) );
 			} // end if
 
 			// Next attribute
@@ -95,14 +117,14 @@ static int _Decode( sqbind::CSqMulti *out, TiXmlElement *in, int bIndexed, int n
 
 		// Child elements?
 		if ( in->FirstChildElement() )
-			nDecoded += _Decode( r, in->FirstChildElement(), bIndexed, nDepth + 1 );
+			nDecoded += _Decode( r, in->FirstChildElement(), bIndexed, nCaseI, nDepth + 1 );
 
 	} while ( ( in = in->NextSiblingElement() ) );
 
 	return nDecoded;
 }
 
-int CSqXml::Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int bIndexed )
+int CSqXml::Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int bIndexed, int nCaseI )
 {_STT();
 
 	if ( !sData.length() || !pOut )
@@ -121,7 +143,7 @@ int CSqXml::Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int 
 			; // return 0;
 
 		// Decode into array
-		return _Decode( pOut, xmlDoc.FirstChildElement(), bIndexed );
+		return _Decode( pOut, xmlDoc.FirstChildElement(), bIndexed, nCaseI );
 
 	}
 	catch( ... )

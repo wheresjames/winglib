@@ -96,7 +96,11 @@ CSqBinaryShare::CSqBinaryShare()
 	m_sPrefix = SQSBS_PREFIX;
 	m_uCbId = SQSBS_CBID;
 	m_iRead = -1;
+#if defined( OEX_WINDOWS )
 	m_bGlobal = 1;
+#else
+	m_bGlobal = 0;
+#endif
 	m_bWrite = 0;
 	m_nPadding = SQSBS_PADDING;
 	m_uTs = 0;
@@ -227,7 +231,7 @@ int CSqBinaryShare::Create( const sqbind::stdString &sName, const sqbind::stdStr
 	m_cb.setUINT(	10, oexPtrToInt( oex::os::CSys::GetInstanceHandle() ) );
 	m_cb.setUINT(	11, ( m_uTs = oexGetUnixTime() ) );
 	m_cb.setUINT(	12, SQSBS_HEADERSIZE );
-	m_cb.setUINT(	13, 0 );
+	m_cb.setUINT(	13, 0 );	
 	m_cb.setUINT(	14, guidBuffer.u1 );
 	m_cb.setUINT(	15, guidBuffer.u2 );
 	m_cb.setUINT(	16, guidBuffer.u3 );

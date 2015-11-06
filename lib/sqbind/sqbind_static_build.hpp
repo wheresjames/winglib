@@ -73,6 +73,11 @@
 		SQBIND_Export_webkit( x_vm );
 #endif
 
+#if defined( SQBIND_STATIC_webrtc )
+		SQBIND_Init_webrtc();
+		SQBIND_Export_webrtc( x_vm );
+#endif
+
 		return 0;
 	}
 

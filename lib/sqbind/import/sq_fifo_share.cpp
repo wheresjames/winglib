@@ -111,7 +111,11 @@ CSqFifoShare::CSqFifoShare()
 	m_uCbId = SQSFS_CBID;
 	m_iRead = -1;
 	m_iWrite = 0;
+#if defined( OEX_WINDOWS )
 	m_bGlobal = 1;
+#else
+	m_bGlobal = 0;
+#endif
 	m_bWrite = 0;
 	m_nPadding = SQSFS_PADDING;
 	m_uTs = 0;

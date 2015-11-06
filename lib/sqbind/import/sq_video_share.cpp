@@ -107,7 +107,11 @@ CSqVideoShare::CSqVideoShare()
 	m_uCbId = SQSVS_CBID;
 	m_sPrefix = SQSVS_PREFIX;
 	m_iRead = 0;
+#if defined( OEX_WINDOWS )
 	m_bGlobal = 1;
+#else
+	m_bGlobal = 0;
+#endif
 	m_bWrite = 0;
 	m_nPadding = SQSVS_PADDING;
 	m_bAllowFrameSkipping = 0;

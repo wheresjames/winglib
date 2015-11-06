@@ -35,6 +35,8 @@
 #include "oexlib.h"
 #include "std_os.h"
 
+#include <ws2tcpip.h>
+
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
@@ -102,7 +104,7 @@ static oexBOOL CIpSocket_SetAddressInfo( CIpAddress *x_pIa, SOCKADDR_IN *x_pSai 
 		return oexFALSE;
 
 	// Set the ip address
-	*(DWORD*)&x_pSai->sin_addr.S_un.S_addr = htonl( (DWORD)x_pIa->GetIpv4() );
+	*(DWORD*)&x_pSai->sin_addr.s_addr = htonl( (DWORD)x_pIa->GetIpv4() );
 
 	// Set the port
 	x_pSai->sin_port = htons( (short)x_pIa->GetPort() );
@@ -291,7 +293,7 @@ void CIpSocket::Destroy()
 
 	m_uConnectState = 0;
 	m_uEventState = 0;
-	os::CSys::Zero( &m_uEventStatus, sizeof( m_uEventStatus ) );
+	oexZero( m_uEventStatus );
 
 	m_uSocketFamily = 0;
 	m_uSocketType = 0;
@@ -425,6 +427,20 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 	return IsSocket();
 }
 
+int CIpSocket::setsockint( int optname, int opt )
+{
+	// Punt if not initialized
+	if ( !IsInitialized() )
+		return oexFALSE;
+
+	// Create socket if there is none
+	if ( !IsSocket() )
+		return oexFALSE;
+	
+	// Set socket int
+	return setsockopt( (SOCKET)m_hSocket, SOL_SOCKET, optname, (const char *)&opt, sizeof( opt ) );
+}
+
 oexBOOL CIpSocket::Bind( oexUINT x_uPort )
 {_STT();
 	// Punt if not initialized
@@ -459,6 +475,104 @@ oexBOOL CIpSocket::Bind( oexUINT x_uPort )
 		return oexFALSE;
 	} // end if
 
+	return oexTRUE;
+}
+
+oexBOOL CIpSocket::BindTo( oexCSTR x_pAddress, oexUINT x_uPort )
+{_STT();
+	// Punt if not initialized
+	if ( !IsInitialized() )
+		return oexFALSE;
+
+	// Create socket if there is none
+	if ( !IsSocket() && !Create() )
+	{	Destroy();
+		m_uConnectState |= eCsError;
+		return oexFALSE;
+	} // end if
+	
+	// Save address type
+	if ( x_pAddress && *x_pAddress )
+		m_addrPeer.SetDotAddress( x_pAddress, x_uPort );
+	
+	sockaddr_in sai;
+	ZeroMemory( &sai, sizeof( sai ) );
+	sai.sin_family = PF_INET;
+	sai.sin_port = htons( (WORD)x_uPort );
+	
+	if ( x_pAddress && *x_pAddress )
+		sai.sin_addr.s_addr = inet_addr( oexStrToMbPtr( x_pAddress ) );
+	else
+		sai.sin_addr.s_addr = htonl( INADDR_ANY );
+
+	// Attempt to bind the socket
+	int nRet = bind( (SOCKET)m_hSocket, (sockaddr*)&sai, sizeof( sockaddr_in ) );
+
+	// Save the last error code
+	m_uLastError = WSAGetLastError();
+	if ( WSAEWOULDBLOCK == m_uLastError )
+		m_uLastError = 0, nRet = 0;
+
+	// Grab the address
+	CIpSocket_GetAddressInfo( &m_addrLocal, &sai );
+
+	if ( nRet )
+	{	m_uConnectState |= eCsError;
+		return oexFALSE;
+	} // end if
+
+	return oexTRUE;
+}
+
+/*
+	struct ip_mreq_source imr;
+	ZeroMemory( &imr, sizeof( imr ) );	
+	imr.imr_interface.s_addr = htonl( INADDR_ANY );
+	
+    setsockopt( (SOCKET)m_hSocket, IPPROTO_IP, IP_MULTICAST_IF,
+				(char *)&imr.imr_interface.s_addr,
+				sizeof( imr.imr_interface.s_addr ) );	
+
+*/
+
+
+// +++ Add IP_DROP_MEMBERSHIP
+
+oexBOOL CIpSocket::AddMulticastAddr( oexCSTR x_pAddress, oexCSTR x_pAdapter )
+{
+	// Punt if not initialized
+	if ( !IsInitialized() )
+		return oexFALSE;
+
+	// Create socket if there is none
+	if ( !IsSocket())
+		return oexFALSE;
+
+	struct ip_mreq_source imr;
+	ZeroMemory( &imr, sizeof( imr ) );	
+
+	// Set address
+	if ( x_pAddress && *x_pAddress )
+		imr.imr_multiaddr.s_addr = inet_addr( oexStrToMbPtr( x_pAddress ) );
+	else
+		imr.imr_multiaddr.s_addr = htonl( INADDR_ANY );
+		
+	// Set adapter
+	if ( x_pAdapter && *x_pAdapter )
+		imr.imr_interface.s_addr = inet_addr( oexStrToMbPtr( x_pAdapter ) );
+	else
+		imr.imr_interface.s_addr = htonl( INADDR_ANY );
+
+	int nRet = setsockopt( (SOCKET)m_hSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char*)&imr, sizeof( imr ) );
+	
+	// Save the last error code
+	m_uLastError = WSAGetLastError();
+	if ( WSAEWOULDBLOCK == m_uLastError )
+		m_uLastError = 0, nRet = 0;
+
+	if ( nRet )
+		return oexFALSE;
+	
 	return oexTRUE;
 }
 
@@ -1045,7 +1159,7 @@ int CIpSocket::v_recvfrom( int socket, void *buffer, int length, int flags )
 	int nSize = sizeof( si );
 	os::CSys::Zero( &si, sizeof( si ) );
 	si.sin_family = m_uSocketFamily;
-
+	
 	// Receive data from socket
 	int res = recvfrom( socket, (char*)buffer, length, flags, (LPSOCKADDR)&si, &nSize );
 
@@ -1113,7 +1227,7 @@ CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
 	{
 		// Allocate buffer
 		CStr8 sBuf;
-		if ( sBuf.Allocate( x_uMax ) )
+		if ( sBuf.OexAllocate( x_uMax ) )
 		{
 			// Attempt to read data
 			oexUINT uRead = RecvFrom( sBuf._Ptr(), x_uMax, oexNULL, x_uFlags );
@@ -1127,21 +1241,29 @@ CStr8 CIpSocket::RecvFrom( oexUINT x_uMax, oexUINT x_uFlags )
 
 	} // end if
 
+	// Buffer size needs to be large for UDP packets
+	x_uMax = 16 * 1024;
+	
 	// Allocate buffer
 	CStr8 sBuf;
 	oexUINT uRead = 0, uOffset = 0;
-
+	
 	// Allocate space
-	if ( !sBuf.OexAllocate( oexSTRSIZE ) )
+	if ( !sBuf.OexAllocate( x_uMax ) )
 		return sBuf;
 
+	// +++ Perhaps this shouldn't loop for UDP?
+	
 	// Read all available data
-	while ( 0 < ( uRead = RecvFrom( sBuf._Ptr( uOffset ), oexSTRSIZE, oexNULL, x_uFlags ) )
-			&& uRead >= (oexUINT)oexSTRSIZE )
+	while ( 0 < ( uRead = RecvFrom( sBuf._Ptr( uOffset ), x_uMax, oexNULL, x_uFlags ) )
+			&& uRead >= (oexUINT)x_uMax )
 	{
+		if ( uRead > (oexUINT)x_uMax )
+			uRead = x_uMax;
+		
 		// Allocate more space
 		uOffset += uRead;
-		if ( !sBuf.Allocate( uOffset + oexSTRSIZE ) )
+		if ( !sBuf.OexAllocate( uOffset + x_uMax ) )
 			return sBuf;
 
 	} // end while
@@ -1210,12 +1332,13 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 
 CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
 {_STT();
+
 	// Do we have a size limit?
 	if ( x_uMax )
 	{
 		// Allocate buffer
 		CStr8 sBuf;
-		if ( sBuf.Allocate( x_uMax ) )
+		if ( sBuf.OexAllocate( x_uMax ) )
 		{
 			// Attempt to read data
 			oexUINT uRead = Recv( sBuf._Ptr(), x_uMax, oexNULL, x_uFlags );
@@ -1229,24 +1352,29 @@ CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
 
 	} // end if
 
+	// Buffer size needs to be large for UDP packets
+	x_uMax = 16 * 1024;
+	
 	// Allocate buffer
 	CStr8 sBuf;
 	oexUINT uRead = 0, uOffset = 0;
 
 	// Allocate space
-	if ( !sBuf.OexAllocate( oexSTRSIZE ) )
+	if ( !sBuf.OexAllocate( x_uMax ) )
 		return sBuf;
 
+	// +++ Perhaps this shouldn't loop for UDP
+	
 	// Read all available data
-	while ( 0 < ( uRead = Recv( sBuf._Ptr( uOffset ), oexSTRSIZE, oexNULL, x_uFlags ) )
-			&& uRead >= (oexUINT)oexSTRSIZE )
+	while ( 0 < ( uRead = Recv( sBuf._Ptr( uOffset ), x_uMax, oexNULL, x_uFlags ) )
+			&& uRead >= (oexUINT)x_uMax )
 	{
-		if ( uRead > (oexUINT)oexSTRSIZE )
-			uRead = oexSTRSIZE;
+		if ( uRead > (oexUINT)x_uMax )
+			uRead = x_uMax;
 
 		// Allocate more space
 		uOffset += uRead;
-		if ( !sBuf.Allocate( uOffset + oexSTRSIZE ) )
+		if ( !sBuf.OexAllocate( uOffset + x_uMax ) )
 			return sBuf;
 
 	} // end while
@@ -1261,13 +1389,13 @@ CStr8 CIpSocket::Recv( oexUINT x_uMax, oexUINT x_uFlags )
 int CIpSocket::v_sendto(int socket, const void *message, int length, int flags )
 {
 	// Use the peer address
-	SOCKADDR_IN si;
-	os::CSys::Zero( &si, sizeof( si ) );
+	struct sockaddr_in si;
+	oexZero( si );
 	si.sin_family = m_uSocketFamily;
 	CIpSocket_SetAddressInfo( &m_addrPeer, &si );
 
 	// Send the data
-	return sendto( socket, (const char*)message, length, flags, (LPSOCKADDR)&si, sizeof( si ) );
+	return sendto( socket, (const char*)message, length, flags, (struct sockaddr*)&si, sizeof( si ) );
 }
 
 

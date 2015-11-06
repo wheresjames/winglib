@@ -31,6 +31,9 @@ public:
 	/// Destructor
 	~CSqXml();
 
+	/// Registers the class
+	static void Register( sqbind::VM vm );
+	
 	/** \addtogroup CSqXml
 		@{
 
@@ -114,7 +117,7 @@ public:
 									 const sqbind::stdString &sTab, int bIndexed );
 
 	/// Decodes XML data
-	static int Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int bIndexed );
+	static int Decode( const sqbind::stdString &sData, sqbind::CSqMulti *pOut, int bIndexed, int nCaseI );
 
 	/** @} */
 

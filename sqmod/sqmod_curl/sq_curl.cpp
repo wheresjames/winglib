@@ -29,6 +29,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqCurl, CSqCurl )
 	SQBIND_MEMBER_FUNCTION( CSqCurl, enableCookies )
 	SQBIND_MEMBER_FUNCTION( CSqCurl, setHeader )
 	SQBIND_MEMBER_FUNCTION( CSqCurl, getContentType )
+	SQBIND_MEMBER_FUNCTION( CSqCurl, setContentType )
 	SQBIND_MEMBER_FUNCTION( CSqCurl, setProgressCallback )
 //	SQBIND_MEMBER_FUNCTION( CSqCurl,  )
 
@@ -61,6 +62,10 @@ CSqCurl::~CSqCurl()
 void CSqCurl::Destroy()
 {_STT();
 
+	oexAutoLock ll( _g_curl_lock );
+	if ( !ll.IsLocked() ) 
+		return;
+
 	m_sErr = oexT( "" );
 
 	// Lose certs
@@ -84,6 +89,8 @@ void CSqCurl::Destroy()
 
 	m_multihead = oexNULL;
 	m_multitail = oexNULL;
+	
+	m_sContentType = oexT( "" );
 
 }
 
@@ -205,6 +212,10 @@ void CSqCurl::setHeader( const sqbind::stdString &sHeader )
 int CSqCurl::Init()
 {_STT();
 
+	oexAutoLock ll( _g_curl_lock );
+	if ( !ll.IsLocked() ) 
+		return 0;
+
 	// Lose old thing
 	Destroy();
 
@@ -244,9 +255,9 @@ int CSqCurl::Init()
 int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSqBinary *sData )
 {_STT();
 
-	oexAutoLock ll( _g_curl_lock );
-	if ( !ll.IsLocked() ) 
-		return 0;
+//	oexAutoLock ll( _g_curl_lock );
+//	if ( !ll.IsLocked() ) 
+//		return 0;
 
 _STT_SET_CHECKPOINT( 0 );
 
@@ -412,9 +423,9 @@ _STT_SET_CHECKPOINT( 17 );
 int CSqCurl::PostUrl( const sqbind::stdString &sUrl, SQInteger lPort, const sqbind::stdString &sPost, sqbind::CSqBinary *sData )
 {_STT();
 
-	oexAutoLock ll( _g_curl_lock );
-	if ( !ll.IsLocked() ) 
-		return 0;
+//	oexAutoLock ll( _g_curl_lock );
+//	if ( !ll.IsLocked() ) 
+//		return 0;
 
 	if ( !sData && !m_sFile.length() )
 		return 0;
@@ -582,9 +593,9 @@ int CSqCurl::addMultipart( const sqbind::stdString &sName, const sqbind::stdStri
 int CSqCurl::PostMultipart( const sqbind::stdString &sUrl, SQInteger lPort, const sqbind::stdString &sPost, sqbind::CSqBinary *sData )
 {_STT();
 
-	oexAutoLock ll( _g_curl_lock );
-	if ( !ll.IsLocked() ) 
-		return 0;
+//	oexAutoLock ll( _g_curl_lock );
+//	if ( !ll.IsLocked() ) 
+//		return 0;
 
 	if ( !sData && !m_sFile.length() )
 		return 0;

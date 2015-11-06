@@ -105,7 +105,7 @@ namespace sqbind
 	public:
 
 		SQBIND_CLASS_CTOR_BEGIN( CSqBinary )
-			_SQBIND_CLASS_CTOR1( CSqBinary, OT_STRING ) ( (t_byte*)sa.GetString( 2 ), sq_getsize( x_v, 2 ) )
+			_SQBIND_CLASS_CTOR1( CSqBinary, OT_STRING ) ( stdString( sa.GetString( 2 ), sq_getsize( x_v, 2 ) ) )
 			_SQBIND_CLASS_CTOR1( CSqBinary, OT_INTEGER ) ( sa.GetInt( 2 ) )
 			_SQBIND_CLASS_CTOR2( CSqBinary, OT_INTEGER, OT_INTEGER ) ( sa.GetInt( 2 ), sa.GetInt( 3 ) )
 		SQBIND_CLASS_CTOR_END( CSqBinary )
@@ -121,7 +121,9 @@ namespace sqbind
 		CSqBinary( const CSqBinary &r ) : m_bin( r.m_bin ) { }
 
 		/// Construct from string
-		CSqBinary( const stdString &s ) { m_bin.MemCpy( s.data(), s.length() ); }
+		CSqBinary( const stdString &s ) 
+		{ 	m_bin.setString( oexStrToMb( oex::CStr( s.c_str(), s.length() ) ) ); 
+		}
 
 		/// Rvalue Copy constructor
 //#if defined( OEX_CPP0X )

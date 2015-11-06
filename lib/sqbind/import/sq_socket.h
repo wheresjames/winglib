@@ -166,6 +166,12 @@ namespace sqbind
 
 		/// Binds the socket to a port
 		int Bind( int nPort );
+		
+		/// Binds the socket to an address and port
+		int BindTo( const sqbind::stdString &sAddr, int nPort );
+		
+		/// Add multicast address to socket
+		int AddMulticastAddr( const sqbind::stdString &sAddr, const sqbind::stdString &sAdpt );
 
 		/// Listens for incomming connections
 		int Listen( int nMax );
@@ -173,6 +179,9 @@ namespace sqbind
 		/// Accepts in incomming connection with the specified socket
 		int Accept( CSqSocket *pSocket );
 
+		/// Sets socket options that take integer parameters
+		int SetSockInt( int optname, int opt );		
+		
 		/// Share the socket with another class
 		int Share( CSqSocket *pSocket );
 
@@ -256,6 +265,9 @@ namespace sqbind
 
 		/// Gets the peer address
 		int setPeerAddress( CSqSockAddress *pAddr );
+		
+		/// Gets the peer address
+		int setPeerDotAddress( const sqbind::stdString &sAddr, int nPort );
 
 		/// Gets the local address
 		int setLocalAddress( CSqSockAddress *pAddr );

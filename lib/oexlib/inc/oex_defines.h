@@ -366,6 +366,9 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #define oexCtrlComputer						OEX_NAMESPACE::os::CSys::CtrlComputer
 #define oexIsRoot							OEX_NAMESPACE::os::CSys::IsRoot
 #define oexSetRoot							OEX_NAMESPACE::os::CSys::SetRoot
+#define oexIsProcessAdmin					OEX_NAMESPACE::os::CSys::IsProcessAdmin
+#define oexIsUserAdmin						OEX_NAMESPACE::os::CSys::IsUserAdmin
+#define oexSwitchToAdmin					OEX_NAMESPACE::os::CSys::SwitchToAdmin
 
 
 #define oexMd5								OEX_NAMESPACE::CUtil::md5
@@ -546,8 +549,8 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 #	define _STT_GET_NAME()
 #	define _STT_SET_TAG( v )
 #	define _STT_GET_TAG()
-#	define _STT_SET_CHECKPOINT( v )
-#	define _STT_GET_CHECKPOINT()
+#	define _STT_SET_CHECKPOINT( v )	( 0 )
+#	define _STT_GET_CHECKPOINT()	( 0 )
 #endif
 
 #define oexRUN_SERVICE( cType )													\
