@@ -31,7 +31,7 @@ int run( oex::CPropertyBag &pbCmdLine )
 		// Raw script on the command line?
 		if ( pbCmdLine.IsKey( oexT( "s" ) ) )
 			bFile = oex::oexFALSE, sCmd = pbCmdLine[ oexT( "s" ) ].ToString();
-		
+
 		// Base64 encoded script?
 		if ( pbCmdLine.IsKey( oexT( "b" ) ) )
 			bFile = oex::oexFALSE, sCmd = oexMbToStr( oex::CBase64::Decode( oexStrToMb( pbCmdLine[ oexT( "b" ) ].ToString() ) ) );
@@ -39,9 +39,9 @@ int run( oex::CPropertyBag &pbCmdLine )
 		// Scrit?
 		else if ( pbCmdLine.IsKey( oexT( "script" ) ) )
 			bFile = oex::oexFALSE, sCmd = pbCmdLine[ oexT( "script" ) ].ToString();
-			
+
 		else
-		{	
+		{
 			// Look for a .cfg file
 			oex::CStr sSettings = oexGetModuleFileName() << oexT( ".cfg" );
 			if ( oex::CFile::Exists( sSettings.Ptr() ) )
@@ -70,7 +70,7 @@ int run( oex::CPropertyBag &pbCmdLine )
 				} // end if
 
 			} // end else
-			
+
 		} // end else
 
 	} // end if
@@ -99,7 +99,7 @@ int run( oex::CPropertyBag &pbCmdLine )
 	// Check for inline type
 	if ( bFile && sCmd.GetFileExtension().ToLower() == oexT( "squ" ) )
 		bInline = oex::oexTRUE;
-	
+
 	// Create objects
 	g_psqScriptThread = OexAllocConstruct< sqbind::CScriptThread >();
 	if ( !oexCHECK_PTR( g_psqScriptThread ) )
@@ -150,8 +150,8 @@ int run( oex::CPropertyBag &pbCmdLine )
 	if ( bInline )
 	{	sqbind::stdString sRet = g_psqScriptThread->GetEngine()->pop_stack();
 		oexEcho( sRet.c_str(), sRet.length() );
-	} // end if	
-	
+	} // end if
+
 	oexNOTICE( 0, oexT( "Script thread has terminated" ) );
 
 	if ( oexCHECK_PTR( g_psqScriptThread ) )
@@ -174,20 +174,20 @@ int run(int argc, char* argv[])
 
 	// Check for version request
 	if ( pbCmdLine.IsKey( oexT( "version" ) ) )
-	{	oexEcho( oexVersion().Ptr() );		
+	{	oexEcho( oexVersion().Ptr() );
 		pbCmdLine.Destroy();
 	    oexUNINIT();
-		return 0;					  
+		return 0;
 	} // end if
 
 	// Check for version request
 	else if ( pbCmdLine.IsKey( oexT( "build" ) ) )
-	{	oexEcho( oexBuild().Ptr() );		
+	{	oexEcho( oexBuild().Ptr() );
 		pbCmdLine.Destroy();
 	    oexUNINIT();
-		return 0;					  
+		return 0;
 	} // end if
-	
+
 	// Enable crash reporting
 	_STT_SET_NAME( oexT( "Main Thread" ) );
 	oexEnableCrashReporting( oexNULL, oexT( "logs" ) );

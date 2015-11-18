@@ -428,6 +428,10 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 		} // end else
 	} // end if
 
+	// +++ What is going on here
+	if ( 100 > m_pkt.size )
+		return 0;
+
 	int gpp = 0, used = 0;
 #if defined( FFSQ_VIDEO2 )
 	used = avcodec_decode_video2( m_pCodecContext, m_pFrame, &gpp, &m_pkt );

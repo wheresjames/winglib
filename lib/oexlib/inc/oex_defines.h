@@ -157,7 +157,7 @@ typedef oex_no_ret_type_struct* oexNoRetType;
 //#endif
 
 // +++ Figure out if mingw is going to change to match vc...
-#if defined( __MINGW64__ )
+#if defined( OEX_CPU_64 )
 #define oexPtrType OEX_NAMESPACE::oexUINT64
 #else
 #define oexPtrType OEX_NAMESPACE::oexULONG
