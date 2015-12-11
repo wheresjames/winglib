@@ -262,7 +262,9 @@ int CSqCurl::GetUrl( const sqbind::stdString &sUrl, SQInteger lPort, sqbind::CSq
 _STT_SET_CHECKPOINT( 0 );
 
 	if ( !sData && !m_sFile.length() )
+	{	m_sErr = oexT( "Data object or data file must be provided" );
 		return 0;
+	} // end if
 
 _STT_SET_CHECKPOINT( 1 );
 
@@ -272,14 +274,18 @@ _STT_SET_CHECKPOINT( 1 );
 _STT_SET_CHECKPOINT( 2 );
 
 	if ( !sUrl.length() )
+	{	m_sErr = oexT( "URL has zero length" );
 		return 0;
+	} // end if
 
 _STT_SET_CHECKPOINT( 3 );
 
 	// Initialize
 	if ( !m_curl )
 		if ( !Init() )
+		{	m_sErr = oexT( "Failed to initialize curl" );
 			return 0;
+		} // end if
 
 _STT_SET_CHECKPOINT( 4 );
 

@@ -375,10 +375,10 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 	oexAutoLock ll( _g_ffmpeg_lock );
 	if ( !ll.IsLocked() ) return 0;
 
-	m_pFormatContext = avformat_alloc_context();
-	int res = avformat_open_input( &m_pFormatContext, oexStrToMbPtr( sUrl.c_str() ), 0, 0 );
+	m_pFormatContext = 0; // avformat_alloc_context();
+	int res = avformat_open_input( &m_pFormatContext, oexStrToMb( sqbind::std2oex( sUrl ) ).c_str(), 0, 0 );
 	if ( res )
-	{	oexERROR( res, oexT( "avio_open() failed" ) );
+	{	oexERROR( res, oex::CStr( oexT( "avformat_open_input() failed : " ) ) + sUrl.c_str() );
 		Destroy();
 		return 0;
 	} // end if
@@ -387,7 +387,7 @@ int CFfContainer::Open( const sqbind::stdString &sUrl, sqbind::CSqMulti *m )
 //	res = av_find_stream_info( m_pFormatContext );
 	res = avformat_find_stream_info( m_pFormatContext, 0 );
 	if ( 0 > res )
-	{	oexERROR( res, oexT( "av_find_stream_info() failed" ) );
+	{	oexERROR( res, oexT( "avformat_find_stream_info() failed" ) );
 		Destroy();
 		return 0;
 	} // end if

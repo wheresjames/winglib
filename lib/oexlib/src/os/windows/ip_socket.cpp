@@ -153,7 +153,7 @@ void CIpSocket::Construct()
 	m_uActivityTimeout = eActivityTimeout;
 
 	m_hSocket = c_InvalidSocket;
-
+	
 	m_hSocketEvent = c_InvalidEvent;
 
 	m_uLastError = 0;
@@ -258,7 +258,7 @@ CIpSocket::t_SOCKET CIpSocket::Detach()
 
 	// We won't be freeing the socket
 	m_hSocket = c_InvalidSocket;
-	
+
 	// Free whatever else is left
 	Destroy();
 
@@ -312,12 +312,12 @@ void CIpSocket::Destroy()
 	// Ensure valid socket handle
 	if ( INVALID_SOCKET == hSocket )
 		return;
-
+	
 	if ( IsInitialized() )
 	{
 		// Turn off non-blocking
 //		int flags = fcntl( oexPtrToInt( hSocket ), F_GETFL, 0 );
-//		fcntl( oexPtrToInt( m_hSocket ), F_SETFL, flags & ~O_NONBLOCK );
+//		fcntl( oexPtrToInt( hSocket ), F_SETFL, flags & ~O_NONBLOCK );
 
 		struct linger lopt;
 
@@ -691,7 +691,7 @@ oexBOOL CIpSocket::Attach( t_SOCKET x_hSocket, oexBOOL x_bFree )
 
 	// Save socket handle
     m_hSocket = x_hSocket;
-
+	
 	// Should we free the socket?
 	m_bFree = x_bFree;
 

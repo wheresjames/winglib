@@ -175,8 +175,7 @@ protected:
 	virtual ServerMediaSession* lookupServerMediaSession( char const* streamName );
 
 	/// Creates a new client session
-	virtual RTSPClientSession*
-		CRtspServer::createNewClientSession( u_int32_t sessionId );
+	virtual RTSPClientSession* createNewClientSession( u_int32_t sessionId );
 //		createNewClientSession( unsigned sessionId, int clientSocket, struct sockaddr_in clientAddr );
 
 public:
