@@ -365,8 +365,17 @@ void CLvRtspClient::ThreadDestroy()
 {_STT();
 
 	if ( m_pRtspClient && m_pSession )
-//		m_pRtspClient->teardownMediaSession( *m_pSession );
-		m_pSession = oexNULL;
+	{
+		m_pevtCallbackDone.Reset();
+		m_pRtspClient->sendTeardownCommand( *m_pSession, _OnResponseHandler );
+		
+		if ( m_pevtCallbackDone.Wait( GetStopEvent(), 0 ) )
+			if ( m_pEnv )
+				setLastError( -1, sqbind::oex2std( oexMks( oexT( "teardownMediaSession() timed out : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
+
+//		m_pSession = oexNULL;
+		
+	} // end if
 
 	if ( m_pVs )
 		delete m_pVs, m_pVs = oexNULL;
@@ -383,12 +392,20 @@ void CLvRtspClient::ThreadDestroy()
 				m_mCallbackPtrMap.erase( it );
 		} // end if
 
-		m_pRtspClient->close( m_pSession );
+		if ( m_pSession )
+			m_pRtspClient->close( m_pSession );
+		
+		Medium::close( m_pRtspClient );
 
 	} // end if
 
 	if ( m_pEnv )
+	{
 		m_pEnv->reclaim();
+		
+//		Medium::close( m_pEnv );
+		
+	} // end if
 
 	m_nFrames = 0;
 	m_pEnv = oexNULL;

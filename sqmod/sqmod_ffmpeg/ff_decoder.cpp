@@ -383,7 +383,10 @@ int CFfDecoder::ReadSEI( const void *p, int len )
 		int res = avcodec_open2( m_pCodecContext, m_pCodec, 0 );
 		if ( 0 > res )
 		{	oexERROR( res, oexT( "avcodec_open2() failed" ) );
-			m_pCodecContext = oexNULL;
+	
+			// +++ ??? What was this ???
+//			m_pCodecContext = oexNULL;
+
 			Destroy();
 			return 0;
 		} // end if
