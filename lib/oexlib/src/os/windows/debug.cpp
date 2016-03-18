@@ -267,7 +267,7 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 	sSt << oexTEXT( oexNL8 ) oexTEXT( oexNL8 )
 		<<         oexTEXT( "===================================================" ) oexTEXT( oexNL8 )
 		<<         oexTEXT( "= Module  : " ) << ( pName ? pName : oexTEXT( "N/A" ) ) << oexNL
-		<< oexFmt( oexTEXT( "= Address : 0x%08x" ) oexTEXT( oexNL8 ), oexPtrToInt( pAddress ) )
+		<< oexFmt( oexTEXT( "= Address : 0x%08x" ) oexTEXT( oexNL8 ), oexPtrToLong( pAddress ) )
 		<<         oexTEXT( "===================================================" ) oexTEXT( oexNL8 );
 
 
@@ -301,7 +301,7 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 		} // end try
 		catch( ... )
 		{
-			sSt << oexT( "!!! ASSERT at on address : " ) << oexPtrToInt( p ) << oexNL;
+			sSt << oexT( "!!! ASSERT at on address : " ) << oexPtrToLong( p ) << oexNL;
 
 		} // end catch
 

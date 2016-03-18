@@ -124,7 +124,7 @@ oexPVOID oex_realloc( oexPVOID x_ptr, oexNEWSIZE_T x_nSize )
 	void *ptr = *( (void**)x_ptr - 1 );
 
 	// Ensure it's sane
-	oexASSERT( (oexULONG)cmn::Dif( oexPtrToInt( ptr ), oexPtrToInt( x_ptr ) ) <= OEX_ALIGNEDMEM + sizeof( void* ) + sizeof( oexNEWSIZE_T ) );
+	oexASSERT( (oexULONG)cmn::Dif( oexPtrToLong( ptr ), oexPtrToLong( x_ptr ) ) <= OEX_ALIGNEDMEM + sizeof( void* ) + sizeof( oexNEWSIZE_T ) );
 
 	// Get original size
 	oexNEWSIZE_T osize = *(oexNEWSIZE_T*)ptr;
@@ -208,11 +208,24 @@ void oex_free( oexPVOID x_ptr )
 
 	// Get original pointer
 	void *ptr = *( (void**)x_ptr - 1 );
+	if ( !ptr )
+	{	oexSHOW( oexPtrToULong( ptr ) );
+		oexERROR( 0, oexT( "Invalid pointer passed to oex_free()" ) );
+		return;
+	} // end if
 
+	// Sanity check on pointer size
+	oexULONG hsz = OEX_ALIGNEDMEM + sizeof( void* ) + sizeof( oexNEWSIZE_T );
+	oexULONG diff = cmn::Dif( oexPtrToLong( ptr ), oexPtrToLong( x_ptr ) );
+	if ( hsz < diff )
+	{	oexERROR( 0, oexT( "Pointer passed to oex_free() has invalid size" ) );
+		return;
+	} // end if
+	
 	// Ensure it's sane
-	oexASSERT( (oexULONG)cmn::Dif( oexPtrToInt( ptr ), oexPtrToInt ( x_ptr ) ) <= OEX_ALIGNEDMEM + sizeof( void* ) + sizeof( oexNEWSIZE_T ) );
+//	oexASSERT( (oexULONG)cmn::Dif( oexPtrToLong( ptr ), oexPtrToLong ( x_ptr ) ) <= OEX_ALIGNEDMEM + sizeof( void* ) + sizeof( oexNEWSIZE_T ) );
 
-	return free( ptr );
+	free( ptr );
 }
 
 #endif

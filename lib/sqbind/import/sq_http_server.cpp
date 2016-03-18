@@ -45,6 +45,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CSqHttpServer, CSqHttpServer )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, SetAuthenticationCallback )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, SetServerCallback )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, SetLogFile )
+	SQBIND_MEMBER_FUNCTION( CSqHttpServer, GetLogFile )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, EnableRemoteConnections )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, EnableSessions )
 	SQBIND_MEMBER_FUNCTION( CSqHttpServer, EnableMultiThreading )
@@ -431,6 +432,11 @@ oex::oexINT CSqHttpServer::OnSessionCallback( oex::oexPVOID x_pData, oex::THttpS
 int CSqHttpServer::SetLogFile( const stdString &sFile )
 {_STT();
 	return m_server.SetLogFile( sFile.c_str() );
+}
+
+sqbind::stdString CSqHttpServer::GetLogFile()
+{_STT();
+	return sqbind::oex2std( m_server.GetLogFile() );
 }
 
 void CSqHttpServer::EnableRemoteConnections( int bEnable )

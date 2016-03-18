@@ -628,6 +628,8 @@ struct SRandomSeeds
 {	oexPVOID		pFunction;
 	oexPVOID		pHeap;
 	oexINT64		nCount;
+	CSysTime		st;
+	oexGUID			guid;
 };
 
 // +++ Probably be nice to have a bit stronger randomizer here.
@@ -637,27 +639,26 @@ oexGUID * CSys::CreateGuid( oexGUID *pGuid )
 		return oexNULL;
 
 	oexGUID guid = IID_ZEROS;
-	oss::CMd5::Transform( &guid, &g_random, sizeof( g_random ) );
-
-	// Use time to randomize guid
-	CSysTime st( CSysTime::eGmtTime );
-	oss::CMd5::Transform( &guid, &st, sizeof( st ) );
 
 	// Use other random sources
-	SRandomSeeds rs =
-	{	(oexPVOID)&CreateGuid,
-		CMem::GetRawAllocator().fMalloc( 4 ),
-		g_int++
-	};
+	SRandomSeeds rs;
+	rs.pFunction = (oexPVOID)&CreateGuid;
+//	rs.pHeap = CMem::GetRawAllocator().fMalloc( 16 );
+	rs.nCount = g_int++;
+	rs.st.GetSystemTime();
+	oexMemCpy( &rs.guid, &g_random, sizeof( rs.guid ) );
 
 	oss::CMd5::Transform( &guid, &rs, sizeof( rs ) );
-	CMem::GetRawAllocator().fFree( rs.pHeap );
+//	CMem::GetRawAllocator().fFree( rs.pHeap );
 
 	// Add existing random data
 	guid::CopyGuid( pGuid, &guid );
 	guid::XorGuid( pGuid, &g_random );
 	guid::XorGuid( &g_random, &guid );
-
+	
+	// Indicate random GUID
+	pGuid->ucBuf[ 7 ] = 0x40 | ( pGuid->ucBuf[ 7 ] & 0x0f );
+	
     return pGuid;
 }
 

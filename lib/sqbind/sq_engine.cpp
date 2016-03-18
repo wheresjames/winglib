@@ -852,7 +852,16 @@ stdString CSqEngineExport::md5( const stdString &sStr )
 
 stdString CSqEngineExport::guid( const stdString &sStr )
 {_STT();
-	return oex2std( oexGuid( std2oex( sStr ) ) );
+
+	oex::CStr sGuid = oex::CBase16::Decode( std2oex( sStr ) );
+	if ( 16 > sGuid.length() )
+		return stdString();
+	
+//	oexSHOW( sStr.c_str() );
+//	oexSHOW( sGuid.length() );
+//	oexEcho( oexBinToAsciiHexStr( oex::CBin( sGuid ), 0, 16, 99 ).Ptr() );	
+	
+	return oex2std( oex::CStr( *(oex::oexGUID*)sGuid.Ptr() ) );
 }
 
 stdString CSqEngineExport::guid2str( const stdString &sStr )
@@ -883,10 +892,9 @@ stdString CSqEngineExport::mandelbrot( int w, int h, int x1, int y1, int x2, int
 	return oex2std( oexMandelbrot( w, h, x1, y1, x2, y2 ) );
 }
 
-
 stdString CSqEngineExport::unique()
 {_STT();
-	oex::oexGUID hash;
+	oex::oexGUID hash = { 0 };
 	return oex2std( oexMbToStr( oex::CBase16::Encode( oexUniqueGuid( &hash ), sizeof( hash ) ) ) );
 }
 

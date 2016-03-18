@@ -171,6 +171,9 @@ public:
     */
     oexBOOL LookupHost( oexCSTR x_pServer, oexINT32 uPort, oexINT32 uType = eAddrTypeIpv4 );
 
+	/// Return the local host name
+	CStr GetName();
+	
     //==============================================================
     // Arp()
     //==============================================================
@@ -238,6 +241,10 @@ public:
     oexBOOL operator != ( CIpAddress &rIa )
     {   return !Cmp( rIa ); }
 
+	/// Return name of AF protocol type
+	static oexCHAR* GetAfTypeName( long type );
+	
+	
 private:
 
 // No padding

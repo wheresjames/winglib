@@ -163,14 +163,14 @@ oexPVOID CModule::AddFunction( oexCSTR x_pFunctionName )
 		// Attempt to find function entry point
 		pf = dlsym( m_hModule, oexStrToMbPtr( x_pFunctionName ) );
 		if ( !oexCHECK_PTR( pf ) )
-		{	oexERROR( errno, CStr().Fmt( oexT( "dlsym( %d, '%s' )" ), oexPtrToInt( m_hModule ), oexStrToMbPtr( x_pFunctionName ) ) );
+		{	oexERROR( errno, CStr().Fmt( oexT( "dlsym( %d, '%s' )" ), oexPtrToLong( m_hModule ), oexStrToMbPtr( x_pFunctionName ) ) );
 			return oexNULL;
 		} // end if
 	} // end try
 
 	_oexCATCH( ... )
 	{	oexERROR( errno, CStr().Fmt( oexT( "Exception!!! dlsym( '%s', %s )\r\n: %s" ), oexStrToMbPtr( m_sFile.Ptr() ), oexStrToMbPtr( x_pFunctionName ), dlerror() ) );
-		return oexFALSE;
+		return oexNULL;
 	} // end catch
 
 	// Save index

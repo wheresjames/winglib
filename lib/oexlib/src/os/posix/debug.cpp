@@ -97,8 +97,8 @@ void CDebug::Break( oexINT x_nType, oexCSTR x_pFile, oexUINT x_uLine, oexCSTR8 x
 	if ( x_nErr )
 		str << oexT( "Error Code : " ) << x_nErr << oexT( " sys:\"" ) << os::CTrace::GetErrorMsg( x_nErr ).Replace( oexT( "%" ), oexT( "%%" ) ).Ptr() << oexT( "\"" ) << oexNL;
 
-	puts( oexStrToMbPtr( str.Ptr() ) );
-	oexERROR( 0, str.Ptr() );
+//	puts( oexStrToMbPtr( str.Ptr() ) );
+//	oexERROR( 0, str.Ptr() );
 
 #ifdef oexBACKTRACE_IN_LOG
 	oexPrintf( oexStrToMbPtr( os::CTrace::GetBacktrace( 0 ).Ptr() ) );
@@ -201,7 +201,7 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 	sSt << 		oexNL << oexNL
 		<<         oexT( "===================================================" oexNL8 )
 		<<         oexT( "= Module  : " ) << ( pName ? pName : oexT( "N/A" ) ) << oexNL
-                << oexFmt( oexT( "= Address : 0x%08x" oexNL8 ), oexPtrToInt( pAddress ) )
+                << oexFmt( oexT( "= Address : 0x%08x" oexNL8 ), oexPtrToLong( pAddress ) )
 		<<         oexT( "===================================================" oexNL8 );
 
 
@@ -235,7 +235,7 @@ static CStr CreateStackReport( oexUINT uCurrentThreadId, CStackTrace *pSt, oexCS
 			} // end try
 			_oexCATCH_ALL()
 			{
-                                sSt << oexT( "!!! ASSERT at on address : " ) << oexPtrToInt( p ) << oexNL;
+                                sSt << oexT( "!!! ASSERT at on address : " ) << oexPtrToLong( p ) << oexNL;
 
 			} // end catch
 

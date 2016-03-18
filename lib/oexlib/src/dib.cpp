@@ -77,7 +77,7 @@ oexBOOL CDib::Create( oexCSTR x_pShared, os::CFMap::t_HFILEMAP x_hShared, oexINT
 	// Allocate memory for the shared memory
 	if ( !m_image.OexNew( sizeof( SImageData ) + lImageSize ).Ptr() )
 	{	oexERROR( 0, oexMks( oexT( "Error allocating image data : s=" ), x_pShared,
-							 oexT( ", fm=" ), oexPtrToInt( x_hShared ),
+							 oexT( ", fm=" ), oexPtrToLong( x_hShared ),
 							 oexT( ", w=" ), x_lWidth,
 							 oexT( ", h=" ), x_lHeight,
 							 oexT( ", bpp=" ), x_lBpp ) );
@@ -90,7 +90,7 @@ oexBOOL CDib::Create( oexCSTR x_pShared, os::CFMap::t_HFILEMAP x_hShared, oexINT
 		SImageData *pId = Image();
 		if ( !oexCHECK_PTR( pId ) )
 	{	oexERROR( 0, oexMks( oexT( "Error allocating image data : s=" ), x_pShared,
-							 oexT( ", fm=" ), oexPtrToInt( x_hShared ),
+							 oexT( ", fm=" ), oexPtrToLong( x_hShared ),
 							 oexT( ", w=" ), x_lWidth,
 							 oexT( ", h=" ), x_lHeight,
 							 oexT( ", bpp=" ), x_lBpp ) );

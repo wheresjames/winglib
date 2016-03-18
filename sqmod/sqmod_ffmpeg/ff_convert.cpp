@@ -188,12 +188,18 @@ int CFfConvert::Flip( int fmt, int h, AVPicture *p )
 int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, int src_fmt, sqbind::CSqBinary *dst, int dst_fmt, int alg )
 {_STT();
 
+_STT_SET_CHECKPOINT( 1 );
+
 	// Fix broken formats
 	src_fmt = FmtEquiv( src_fmt );
 	dst_fmt = FmtEquiv( dst_fmt );
 
+_STT_SET_CHECKPOINT( 2 );
+
 	if ( !dst )
 		return 0;
+
+_STT_SET_CHECKPOINT( 3 );
 
 	int flip = 0;
 	if ( 0 > height ) 
@@ -212,14 +218,20 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	if ( !nDstSize )
 		return 0;
 
+_STT_SET_CHECKPOINT( 4 );
+
 	// Allocate memory for destination image
 	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
 		return 0;
+
+_STT_SET_CHECKPOINT( 5 );
 
 	// Ensure source buffer is large enough
 	oexSIZE_T nSrcSize = CalcImageSize( src_fmt, width, height );
 	if ( src->getUsed() < nSrcSize )
 		return 0;
+
+_STT_SET_CHECKPOINT( 6 );
 
 	// Fill in picture data
 	AVPicture apSrc, apDst;
@@ -227,8 +239,12 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	     || !FillAVPicture( &apDst, dst_fmt, width, height, dst->_Ptr() ) )
 		return 0;
 
+_STT_SET_CHECKPOINT( 7 );
+
 	if ( flip )
 		Flip( src_fmt, height, &apSrc );
+
+_STT_SET_CHECKPOINT( 8 );
 
 	// Create conversion
 	SwsContext *psc = sws_getContext(	width, height, (AVPixelFormat)src_fmt,
@@ -238,10 +254,16 @@ int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, i
 	if ( !psc )
 		return 0;
 
+_STT_SET_CHECKPOINT( 9 );
+
 	int nRet = sws_scale(	psc, apSrc.data, apSrc.linesize, 0, height,
 							apDst.data, apDst.linesize );
 
+_STT_SET_CHECKPOINT( 10 );
+
 	sws_freeContext( psc );
+
+_STT_SET_CHECKPOINT( 11 );
 
 	if ( 0 >= nRet )
 		return 0;
@@ -612,9 +634,13 @@ int CFfConvert::ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height
 int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height, int dst_fmt, sqbind::CSqBinary *dst, int alg, int flip )
 {_STT();
 
+_STT_SET_CHECKPOINT( 1 );
+
 	// Fix broken formats
 	src_fmt = FmtEquiv( src_fmt );
 	dst_fmt = FmtEquiv( dst_fmt );
+
+_STT_SET_CHECKPOINT( 2 );
 
 	// Sanity checks
 	if ( !dst || 0 >= width || 0 == height || !pAf )
@@ -622,10 +648,14 @@ int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height
 
 	if ( 0 > height ) { flip = 1; height = -height; }
 
+_STT_SET_CHECKPOINT( 3 );
+
 	// Output size
 	oexSIZE_T nDstSize = CFfConvert::CalcImageSize( dst_fmt, width, height );
 	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
 		return 0;
+
+_STT_SET_CHECKPOINT( 4 );
 
 	oexSIZE_T nSrcSize = CFfConvert::CalcImageSize( src_fmt, width, height );
 	if ( !nSrcSize )
@@ -634,34 +664,52 @@ int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height
 	// Fill in picture data
 	AVPicture apSrc, apDst;
 
+_STT_SET_CHECKPOINT( 5 );
+
 	// Copy source information
 	oexZero( apSrc );
 	for ( int i = 0; i < (int)oexSizeOfArray( apSrc.linesize ); i++ )
 		apSrc.data[ i ] = pAf->data[ i ],
 		apSrc.linesize[ i ] = pAf->linesize[ i ];
 
+_STT_SET_CHECKPOINT( 6 );
+
 	if ( !FillAVPicture( &apDst, dst_fmt, width, height, dst->_Ptr() ) )
 		return 0;
+
+_STT_SET_CHECKPOINT( 7 );
 
 	// Flip?
 	if ( flip )
 		Flip( src_fmt, height, &apSrc );
 
+_STT_SET_CHECKPOINT( 8 );
+
 	// Create conversion
 	SwsContext *psc = sws_getContext(	width, height, (AVPixelFormat)src_fmt,
 										width, height, (AVPixelFormat)dst_fmt,
 										alg, NULL, NULL, NULL );
+_STT_SET_CHECKPOINT( 9 );
+
 	if ( !psc )
 		return 0;
+
+_STT_SET_CHECKPOINT( 10 );
 
 	// Do the conversion
 	int nRet = sws_scale( psc, apSrc.data, apSrc.linesize, 0, height,
 			   			  apDst.data, apDst.linesize );
 
+_STT_SET_CHECKPOINT( 11 );
+
 	sws_freeContext( psc );
+
+_STT_SET_CHECKPOINT( 12 );
 
 	if ( 0 >= nRet )
 		return 0;
+
+_STT_SET_CHECKPOINT( 13 );
 
 	dst->setUsed( nDstSize );
 

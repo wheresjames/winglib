@@ -727,6 +727,11 @@ public:
 	{	m_sLog = x_pLog;
 		return oexTRUE;
 	}
+	
+	/// Returns the log file
+	CStr GetLogFile()
+	{	return m_sLog;
+	}
 
 	/// Returns reference to port object
 	T_SPORT& Port() { return m_server; }

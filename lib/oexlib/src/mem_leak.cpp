@@ -128,7 +128,7 @@ oexINT CMemLeak::Add( oexCPVOID p )
 		return -1;
 
 	// Calculate starting offset
-	t_size uOffset = ( oexPtrToInt( p ) >> 4 ) & m_nPoolMask;
+	t_size uOffset = ( oexPtrToLong( p ) >> 4 ) & m_nPoolMask;
 	t_size uStart = uOffset;
 
 	do
@@ -199,7 +199,7 @@ oexINT CMemLeak::Check( oexCPVOID p )
 		return -1;
 
 	// Calculate starting offset
-	t_size uOffset = ( oexPtrToInt( p ) >> 4 ) & m_nPoolMask;
+	t_size uOffset = ( oexPtrToLong( p ) >> 4 ) & m_nPoolMask;
 
 	t_size uStart = uOffset;
 	do
@@ -223,7 +223,7 @@ oexINT CMemLeak::Remove( oexCPVOID p )
 		return -1;
 
 	// Calculate starting offset
-	t_size uOffset = ( oexPtrToInt( p ) >> 4 ) & m_nPoolMask;
+	t_size uOffset = ( oexPtrToLong( p ) >> 4 ) & m_nPoolMask;
 
 	t_size uStart = uOffset;
 	do
@@ -288,11 +288,11 @@ CStr CMemLeak::Report( t_size *pLeaks )
 
 			// Get the block report
 			if ( !CAlloc::GetBlockReport( m_pPool[ uOffset ], 0, szMsg, sizeof( szMsg ) ) )
-				s << oexFmt( oexT( "0x%x : <unrecognized block>" ), oexPtrToInt( m_pPool[ uOffset ] ) );
+				s << oexFmt( oexT( "0x%x : <unrecognized block>" ), oexPtrToLong( m_pPool[ uOffset ] ) );
 
 			// Append to string
 			else
-				s << oexFmt( oexT( "0x%x : " ), oexPtrToInt( m_pPool[ uOffset ] ) ) << szMsg << oexNL;
+				s << oexFmt( oexT( "0x%x : " ), oexPtrToLong( m_pPool[ uOffset ] ) ) << szMsg << oexNL;
 
 			// Track number of leaks
 			if ( pLeaks )

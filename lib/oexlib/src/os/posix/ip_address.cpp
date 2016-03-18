@@ -39,6 +39,10 @@
 #	include <sys/utsname.h>
 #endif
 
+#include <ifaddrs.h>
+#include <net/if.h>
+//#include <netinet/in.h>
+
 OEX_USING_NAMESPACE
 using namespace OEX_NAMESPACE::os;
 
@@ -494,7 +498,8 @@ CPropertyBag CIpAddress::Lookup( oexCSTR x_pServer )
         return CPropertyBag();
 
 	// First try to interpret as dot address
-    struct hostent *pHe = gethostbyname( oexStrToStr8Ptr( x_pServer ) );
+//    struct hostent *pHe = gethostbyname( oexStrToStr8Ptr( x_pServer ) );
+    struct hostent *pHe = gethostbyname( oexStrToStr8( sServer ).Ptr() );
 
 	if ( !pHe )
 		return CPropertyBag();
@@ -517,7 +522,125 @@ oexUINT CIpAddress::Arp( oexCSTR x_pDst, oexCSTR x_pSrc, oexBYTE *x_pAddr )
 	return 0;
 }
 
-CPropertyBag CIpAddress::GetArpTable()
+oexSTR CIpAddress::GetAfTypeName( long type )
 {
-	return CPropertyBag();
+	switch( type )
+	{
+		default: return oexT( "UNKNOWN" );
+		case AF_UNSPEC: return oexT( "UNSPEC" );
+		case AF_UNIX: return oexT( "UNIX" );
+		case AF_INET: return oexT( "INET" );
+		case AF_AX25: return oexT( "AX25" );
+		case AF_IPX: return oexT( "IPX" );
+		case AF_APPLETALK: return oexT( "APPLETALK" );
+		case AF_NETROM: return oexT( "NETROM" );
+		case AF_BRIDGE: return oexT( "BRIDGE" );
+		case AF_ATMPVC: return oexT( "ATMPVC" );
+		case AF_X25: return oexT( "X25" );
+		case AF_INET6: return oexT( "INET6" );
+		case AF_ROSE: return oexT( "ROSE" );
+		case AF_DECnet: return oexT( "AF_DECnet" );
+		case AF_NETBEUI: return oexT( "NETBEUI" );
+		case AF_SECURITY: return oexT( "SECURITY" );
+		case AF_KEY: return oexT( "KEY" );
+//		case AF_NETLINK: return oexT( "NETLINK" );
+		case AF_ROUTE: return oexT( "ROUTE" );
+		case AF_PACKET: return oexT( "PACKET" );
+		case AF_BLUETOOTH: return oexT( "BLUETOOTH" );
+		case AF_ISDN: return oexT( "ISDN" );
+
+	} // end switch
+	
+	return oexT( "UNKNOWN" );
+	
+}
+
+CPropertyBag CIpAddress::GetArpTable()
+{	
+	ifaddrs* pAdapters = 0;
+	if ( getifaddrs( &pAdapters ) || !pAdapters )
+	   return CPropertyBag();
+
+	long i = 0;
+	CPropertyBag pb;
+	for ( ifaddrs* pa = pAdapters; pa; pa = pa->ifa_next )
+	{
+		CPropertyBag &r = pb[ CStr( i++ ) ];
+		r[ oexT( "name" ) ] = oexMbToStr( pa->ifa_name );
+		r[ oexT( "flags" ) ] = pa->ifa_flags;
+
+		if ( pa->ifa_addr )
+		{
+			r[ oexT( "addrtype" ) ] = GetAfTypeName( pa->ifa_addr->sa_family );
+			r[ oexT( "addrnumb" ) ] = (long)pa->ifa_addr->sa_family;
+
+			char buf[ INET_ADDRSTRLEN + INET6_ADDRSTRLEN ] = { 0 };
+			if ( AF_INET == pa->ifa_addr->sa_family )
+				r[ oexT( "addr" ) ] = oexMbToStr( inet_ntop( pa->ifa_addr->sa_family, &((struct sockaddr_in*)pa->ifa_addr)->sin_addr, buf, sizeof( buf ) ) );
+			else if ( AF_INET6 == pa->ifa_addr->sa_family )
+				r[ oexT( "addr" ) ] = oexMbToStr( inet_ntop( pa->ifa_addr->sa_family, &((struct sockaddr_in6*)pa->ifa_addr)->sin6_addr, buf, sizeof( buf ) ) );
+			
+		} // end if
+
+		if ( pa->ifa_netmask )
+		{
+			r[ oexT( "masktype" ) ] = GetAfTypeName( pa->ifa_netmask->sa_family );
+			r[ oexT( "masknumb" ) ] = (long)pa->ifa_netmask->sa_family;
+
+			char buf[ INET_ADDRSTRLEN + INET6_ADDRSTRLEN ] = { 0 };
+			if ( AF_INET == pa->ifa_addr->sa_family )
+				r[ oexT( "mask" ) ] = oexMbToStr( inet_ntop( pa->ifa_netmask->sa_family, &((struct sockaddr_in*)pa->ifa_netmask)->sin_addr, buf, sizeof( buf ) ) );
+			else if ( AF_INET6 == pa->ifa_addr->sa_family )
+				r[ oexT( "mask" ) ] = oexMbToStr( inet_ntop( pa->ifa_netmask->sa_family, &((struct sockaddr_in6*)pa->ifa_netmask)->sin6_addr, buf, sizeof( buf ) ) );
+			
+		} // end if
+
+		if ( ( pa->ifa_flags & IFF_POINTOPOINT ) && pa->ifa_dstaddr )
+		{
+			r[ oexT( "desttype" ) ] = GetAfTypeName( pa->ifa_dstaddr->sa_family );
+			r[ oexT( "destnumb" ) ] = (long)pa->ifa_dstaddr->sa_family;
+
+			char buf[ INET_ADDRSTRLEN + INET6_ADDRSTRLEN ] = { 0 };
+			if ( AF_INET == pa->ifa_addr->sa_family )
+				r[ oexT( "dest" ) ] = oexMbToStr( inet_ntop( pa->ifa_dstaddr->sa_family, &((struct sockaddr_in*)pa->ifa_dstaddr)->sin_addr, buf, sizeof( buf ) ) );
+			else if ( AF_INET6 == pa->ifa_addr->sa_family )
+				r[ oexT( "dest" ) ] = oexMbToStr( inet_ntop( pa->ifa_dstaddr->sa_family, &((struct sockaddr_in6*)pa->ifa_dstaddr)->sin6_addr, buf, sizeof( buf ) ) );
+			
+		} // end if
+		
+		else if ( pa->ifa_broadaddr )
+		{
+			r[ oexT( "bcasttype" ) ] = GetAfTypeName( pa->ifa_broadaddr->sa_family );
+			r[ oexT( "bcastnumb" ) ] = (long)pa->ifa_broadaddr->sa_family;
+
+			char buf[ INET_ADDRSTRLEN + INET6_ADDRSTRLEN ] = { 0 };
+			if ( AF_INET == pa->ifa_addr->sa_family )
+				r[ oexT( "bcast" ) ] = oexMbToStr( inet_ntop( pa->ifa_broadaddr->sa_family, &((struct sockaddr_in*)pa->ifa_broadaddr)->sin_addr, buf, sizeof( buf ) ) );
+			else if ( AF_INET6 == pa->ifa_addr->sa_family )
+				r[ oexT( "bcast" ) ] = oexMbToStr( inet_ntop( pa->ifa_broadaddr->sa_family, &((struct sockaddr_in6*)pa->ifa_broadaddr)->sin6_addr, buf, sizeof( buf ) ) );
+			
+		} // end if
+
+	} // end for
+	
+	freeifaddrs( pAdapters );
+
+	return pb;
+}
+
+CStr CIpAddress::GetName()
+{
+    struct sockaddr_in sa;
+    char host[ 1024 ] = { 0 };
+
+    sa.sin_family = AF_INET;
+    sa.sin_port = 0;
+    sa.sin_addr.s_addr = inet_addr( "127.0.0.1" );
+
+    if ( getnameinfo( (struct sockaddr *)&sa, sizeof sa, 
+						host, sizeof host, 
+					    NULL, 0, NI_NAMEREQD | NI_NOFQDN ) )
+		return CStr();
+	
+	return oexStr8ToStr( host );
 }

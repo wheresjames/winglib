@@ -147,8 +147,8 @@ CBaseFile::t_HFILE CBaseFile::Create( oexCSTR x_pFile, oexUINT x_eDisposition, o
 	// No data should be left in the file
 	if ( ( eDisCreateAlways == x_eDisposition || eDisCreateNew == x_eDisposition )
 		 && CBaseFile::c_Invalid != hFile )
-		if ( -1 == ftruncate( oexPtrToInt( hFile ), 0 ) )
-			oexWARNING( errno, oexMks( oexT( "ftruncate( " ), oexPtrToInt( hFile ), oexT( ", '" ), x_pFile, oexT( "' ) failed" ) ) );
+		if ( -1 == ftruncate( oexPtrToLong( hFile ), 0 ) )
+			oexWARNING( errno, oexMks( oexT( "ftruncate( " ), oexPtrToLong( hFile ), oexT( ", '" ), x_pFile, oexT( "' ) failed" ) ) );
 
 	return hFile;
 }
@@ -158,7 +158,7 @@ oexBOOL CBaseFile::Close( CBaseFile::t_HFILE x_hFile, oexINT *x_pnErr )
     if ( CBaseFile::c_Invalid == x_hFile )
         return oexFALSE;
 
-    oexBOOL bRet = close( oexPtrToInt( x_hFile ) ) ? oexFALSE : oexTRUE;
+    oexBOOL bRet = close( oexPtrToLong( x_hFile ) ) ? oexFALSE : oexTRUE;
 
     if ( x_pnErr )
     {
@@ -177,7 +177,7 @@ oexBOOL CBaseFile::Write( CBaseFile::t_HFILE x_hFile, oexCPVOID x_pData, CBaseFi
 	if ( c_Invalid == x_hFile )
 		return oexFALSE;
 
-	CBaseFile::t_size llWritten = write( oexPtrToInt( x_hFile ), x_pData, x_llSize );
+	CBaseFile::t_size llWritten = write( oexPtrToLong( x_hFile ), x_pData, x_llSize );
 
     if ( x_pllWritten )
         *x_pllWritten = llWritten;
@@ -199,7 +199,7 @@ oexBOOL CBaseFile::Read( CBaseFile::t_HFILE x_hFile, oexPVOID x_pData, CBaseFile
 	if ( c_Invalid == x_hFile )
 		return oexFALSE;
 
-	CBaseFile::t_size llRead = read( oexPtrToInt( x_hFile ), x_pData, x_llSize );
+	CBaseFile::t_size llRead = read( oexPtrToLong( x_hFile ), x_pData, x_llSize );
 
 	if ( 0 > llRead )
 	{
@@ -222,7 +222,7 @@ oexBOOL CBaseFile::Flush( t_HFILE x_hFile )
 	if ( c_Invalid == x_hFile )
 		return oexFALSE;
 
-	return !fsync( oexPtrToInt( x_hFile ) );
+	return !fsync( oexPtrToLong( x_hFile ) );
 }
 
 typedef struct { const char *pName; int dwFlag; } CBaseFile_ATTDESC;
@@ -343,7 +343,7 @@ CBaseFile::t_size CBaseFile::Size( t_HFILE x_hFile )
 #if defined( OEX_NOSTAT64 )
 
 	struct stat s;
-	if ( fstat( oexPtrToInt( x_hFile ), &s ) )
+	if ( fstat( oexPtrToLong( x_hFile ), &s ) )
 		return 0;
 
 	return s.st_size;
@@ -353,7 +353,7 @@ CBaseFile::t_size CBaseFile::Size( t_HFILE x_hFile )
 	struct stat64 s64;
 
 	// +++ Ensure this works correctly
-	if ( fstat64( oexPtrToInt( x_hFile ), &s64 ) )
+	if ( fstat64( oexPtrToLong( x_hFile ), &s64 ) )
 		return 0;
 
 	return s64.st_size;
@@ -374,7 +374,7 @@ CBaseFile::t_size CBaseFile::SetPointer( t_HFILE x_hFile, CBaseFile::t_size llMo
     else return -1;
 
     // Set new file position
-	CBaseFile::t_size llPos = lseek( oexPtrToInt( x_hFile ), llMove, nOrigin );
+	CBaseFile::t_size llPos = lseek( oexPtrToLong( x_hFile ), llMove, nOrigin );
 
 	if ( 0 > llPos )
 		return 0;

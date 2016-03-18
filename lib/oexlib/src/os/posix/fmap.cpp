@@ -51,7 +51,7 @@ CFMap::t_HFILEMAP CFMap::Create( CFMap::t_HFILEMAP x_hFile, oexPVOID *x_pMem, oe
         return CFMap::c_Failed;
 	} // end if
 
-	int fd = oexPtrToInt( x_hFile );
+	int fd = oexPtrToLong( x_hFile );
 //	int fd = dup( (int)x_hFile );
 	if ( 0 > fd )
 	{	oexERROR( -1, oexT( "dup() returned error : unable to duplicate file handle" ) );
@@ -145,11 +145,11 @@ CFMap::t_HFILEMAP CFMap::Create( oexCSTR x_pFile, oexPVOID *x_pMem, oexFILESIZE_
 
 	// Attempt to open existing file
 	int fd = shm_open( sPath.Ptr(), O_RDWR, 0777 );
-	if ( oexPtrToInt( c_Failed ) == fd )
+	if ( oexPtrToLong( c_Failed ) == fd )
 	{
 		// Create file
 		fd = shm_open( sPath.Ptr(), O_RDWR | O_CREAT, 0777 );
-		if ( oexPtrToInt( c_Failed ) == fd )
+		if ( oexPtrToLong( c_Failed ) == fd )
 		{	oexERROR( errno, CStr().Fmt( oexT( "shm_open failed : %s" ), sPath.Ptr() ) );
 			return CFMap::c_Failed;
 		} // end if
@@ -231,17 +231,17 @@ oexBOOL CFMap::Release( CFMap::t_HFILEMAP x_hFileMap, oexPVOID x_pMem, oexFILESI
 
     // Lock the list
     oexAutoLock ll( g_lstFileMappingInfoLock );
-    if ( ll.IsLocked() && g_lstFileMappingInfo.IsKey( oexPtrToInt( x_hFileMap ) ) )
+    if ( ll.IsLocked() && g_lstFileMappingInfo.IsKey( oexPtrToLong( x_hFileMap ) ) )
     {
         // Attempt to retrieve path
-        CStr8 sPath = g_lstFileMappingInfo[ oexPtrToInt( x_hFileMap ) ];
+        CStr8 sPath = g_lstFileMappingInfo[ oexPtrToLong( x_hFileMap ) ];
 
         // Unlink this name
         if ( sPath.Length() )
             shm_unlink( sPath.Ptr() );
 
         // Lose this mapping
-        g_lstFileMappingInfo.Unset( oexPtrToInt( x_hFileMap ) );
+        g_lstFileMappingInfo.Unset( oexPtrToLong( x_hFileMap ) );
 
     } // end if
 

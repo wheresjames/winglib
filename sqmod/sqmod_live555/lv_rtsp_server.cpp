@@ -620,6 +620,9 @@ oex::oexBOOL CLvRtspServer::DoThread( oex::oexPVOID x_pData )
 
 oex::oexINT CLvRtspServer::EndThread( oex::oexPVOID x_pData )
 {_STT();
+
+	ThreadDestroy();
+
 	return oex::oexTRUE;
 }
 

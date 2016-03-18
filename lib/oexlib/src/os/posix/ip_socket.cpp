@@ -382,27 +382,27 @@ void CIpSocket::Destroy()
 	if ( IsInitialized() )
 	{
 		// Turn off non-blocking
-//		int flags = fcntl( oexPtrToInt( hSocket ), F_GETFL, 0 );
-//		fcntl( oexPtrToInt( hSocket ), F_SETFL, flags & ~O_NONBLOCK );
+//		int flags = fcntl( oexPtrToLong( hSocket ), F_GETFL, 0 );
+//		fcntl( oexPtrToLong( hSocket ), F_SETFL, flags & ~O_NONBLOCK );
 
 		struct linger lopt;
 		lopt.l_onoff = 1;
 		lopt.l_linger = 60;
 
-		if ( -1 == setsockopt( oexPtrToInt( hSocket ), SOL_SOCKET, SO_LINGER, &lopt, sizeof( lopt ) ) )
+		if ( -1 == setsockopt( oexPtrToLong( hSocket ), SOL_SOCKET, SO_LINGER, &lopt, sizeof( lopt ) ) )
 		{	m_uLastError = errno;
 			oexERROR( errno, oexT( "setsockopt() failed" ) );
 		} // end if
 
 		// Shutdown the socket
-//		if ( -1 == shutdown( oexPtrToInt( hSocket ), SHUT_RDWR ) )
+//		if ( -1 == shutdown( oexPtrToLong( hSocket ), SHUT_RDWR ) )
 //		{	m_uLastError = errno;
 //			if ( ENOTCONN != errno )
 //				oexERROR( errno, oexT( "shutdown() failed" ) );
 //		} // end if
 
 		// Close the socket
-		if ( -1 == close( oexPtrToInt( hSocket ) ) )
+		if ( -1 == close( oexPtrToLong( hSocket ) ) )
 		{	m_uLastError = errno;
 			oexERROR( errno, oexT( "close() failed" ) );
 		} // end if
@@ -417,7 +417,7 @@ oexBOOL CIpSocket::Shutdown()
         return oexFALSE;
 
     // Shut down the socket
-    if ( -1 == shutdown( oexPtrToInt( m_hSocket ), SHUT_RDWR ) )
+    if ( -1 == shutdown( oexPtrToLong( m_hSocket ), SHUT_RDWR ) )
     {	m_uLastError = errno;
 		oexERROR( errno, oexT( "shutdown() failed" ) );
 	} // end if
@@ -448,8 +448,8 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
 	struct timeval tv;
 	tv.tv_sec = ( oexDEFAULT_WAIT_TIMEOUT / 1000 );
 	tv.tv_usec = ( oexDEFAULT_WAIT_TIMEOUT % 1000 ) * 1000;
-	setsockopt( oexPtrToInt( m_hSocket ), SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof( tv ) );
-	setsockopt( oexPtrToInt( m_hSocket ), SOL_SOCKET, SO_SNDTIMEO, (const char *)&tv, sizeof( tv ) );
+	setsockopt( oexPtrToLong( m_hSocket ), SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof( tv ) );
+	setsockopt( oexPtrToLong( m_hSocket ), SOL_SOCKET, SO_SNDTIMEO, (const char *)&tv, sizeof( tv ) );
 
 	// Process socket creation
 	if ( !OnAttach() )
@@ -465,7 +465,7 @@ oexBOOL CIpSocket::Create( oexINT x_af, oexINT x_type, oexINT x_protocol )
     m_uSocketProtocol = x_protocol;
 
 	int set = 1;
-	if ( -1 == setsockopt( oexPtrToInt( m_hSocket ), SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set) ) )
+	if ( -1 == setsockopt( oexPtrToLong( m_hSocket ), SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set) ) )
 		oexWARNING( errno, oexT( "socket interface does not support SO_REUSEADDR" ) );
 
 	// Capture all events
@@ -486,7 +486,7 @@ int CIpSocket::setsockint( int optname, int opt )
 		return oexFALSE;
 	
 	// Set socket int
-	return setsockopt( oexPtrToInt( m_hSocket ), SOL_SOCKET, optname, (const char *)&opt, sizeof( opt ) );
+	return setsockopt( oexPtrToLong( m_hSocket ), SOL_SOCKET, optname, (const char *)&opt, sizeof( opt ) );
 }
 
 oexBOOL CIpSocket::Bind( oexUINT x_uPort )
@@ -505,7 +505,7 @@ oexBOOL CIpSocket::Bind( oexUINT x_uPort )
 	sai.sin_port = htons( (oexUSHORT)x_uPort );
 
 	// Attempt to bind the socket
-	int nRet = bind( oexPtrToInt( m_hSocket ), (sockaddr*)&sai, sizeof( sockaddr_in ) );
+	int nRet = bind( oexPtrToLong( m_hSocket ), (sockaddr*)&sai, sizeof( sockaddr_in ) );
 
 	if ( -1 == nRet )
     {	m_uLastError = errno;
@@ -538,7 +538,7 @@ oexBOOL CIpSocket::Listen( oexUINT x_uMaxConnections )
         x_uMaxConnections = SOMAXCONN;
 
 	// Start the socket listening
-	int nRet = listen( oexPtrToInt( m_hSocket ), (int)x_uMaxConnections );
+	int nRet = listen( oexPtrToLong( m_hSocket ), (int)x_uMaxConnections );
 
 	if ( -1 == nRet )
     {	m_uLastError = errno;
@@ -584,7 +584,7 @@ oexBOOL CIpSocket::BindTo( oexCSTR x_pAddress, oexUINT x_uPort )
 		sai.sin_addr.s_addr = htonl( INADDR_ANY );
 
 	// Attempt to bind the socket
-	int nRet = bind( oexPtrToInt( m_hSocket ), (sockaddr*)&sai, sizeof( sockaddr_in ) );
+	int nRet = bind( oexPtrToLong( m_hSocket ), (sockaddr*)&sai, sizeof( sockaddr_in ) );
 
 	// Save the last error code
 	m_uLastError = errno;
@@ -631,7 +631,7 @@ oexBOOL CIpSocket::AddMulticastAddr( oexCSTR x_pAddress, oexCSTR x_pAdapter )
 	else
 		imr.imr_interface.s_addr = htonl( INADDR_ANY );
 
-	int nRet = setsockopt( oexPtrToInt( m_hSocket ), IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char*)&imr, sizeof( imr ) );
+	int nRet = setsockopt( oexPtrToLong( m_hSocket ), IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char*)&imr, sizeof( imr ) );
 	
 	// Save the last error code
 	m_uLastError = errno;
@@ -676,7 +676,7 @@ oexBOOL CIpSocket::Connect( CIpAddress &x_rIpAddress )
     CIpSocket_SetAddressInfo( &m_addrPeer, &si );
 
     // Attempt to connect
-    int nRet = connect( oexPtrToInt( m_hSocket ), (sockaddr*)&si, sizeof( si ) );
+    int nRet = connect( oexPtrToLong( m_hSocket ), (sockaddr*)&si, sizeof( si ) );
 
 	m_uLastError = errno;
 
@@ -753,7 +753,7 @@ oexBOOL CIpSocket::Accept( CIpSocket &x_is )
 	socklen_t iAddr = sizeof( saAddr );
 
 	// Accept and encapsulate the socket
-	oexBOOL bSuccess = x_is.Attach( (t_SOCKET)accept( oexPtrToInt( m_hSocket ), &saAddr, &iAddr ) );
+	oexBOOL bSuccess = x_is.Attach( (t_SOCKET)accept( oexPtrToLong( m_hSocket ), &saAddr, &iAddr ) );
 
 	if ( !bSuccess && EAGAIN != errno )
     {	m_uLastError = errno;
@@ -794,7 +794,7 @@ oexBOOL CIpSocket::CreateEventHandle()
 	// Create an event handle
 	m_hSocketEvent = (oexPVOID)epoll_create( eMaxEvents );
 
-	if ( -1 == oexPtrToInt( m_hSocketEvent ) )
+	if ( -1 == oexPtrToLong( m_hSocketEvent ) )
     {	m_uLastError = errno;
 		oexERROR( errno, oexT( "epoll_create() failed" ) );
 	} // end if
@@ -825,11 +825,11 @@ void CIpSocket::CloseEventHandle()
 				m_bEventsHooked = oexFALSE;
 
 				epoll_event ev; oexZero( ev );
-				ev.data.fd = oexPtrToInt( m_hSocket );
+				ev.data.fd = oexPtrToLong( m_hSocket );
 				ev.events = 0;
 
 				// Set the event masks
-				int nRes = epoll_ctl( oexPtrToInt( m_hSocketEvent ), EPOLL_CTL_DEL, oexPtrToInt( m_hSocket ), &ev );
+				int nRes = epoll_ctl( oexPtrToLong( m_hSocketEvent ), EPOLL_CTL_DEL,oexPtrToLong( m_hSocket ), &ev );
 
 				if ( -1 == nRes )
 				{	m_uLastError = errno;
@@ -839,7 +839,7 @@ void CIpSocket::CloseEventHandle()
 			} // end if
 
 			// Close event handle
-			if ( -1 == close( oexPtrToInt( m_hSocketEvent ) ) )
+			if ( -1 == close( oexPtrToLong( m_hSocketEvent ) ) )
 			{	m_uLastError = errno;
 				oexERROR( errno, oexT( "close() failed" ) );
 			} // end if
@@ -848,15 +848,15 @@ void CIpSocket::CloseEventHandle()
 				m_uLastError = 0;
 
 			// Make socket blocking again
-			int flags = fcntl( oexPtrToInt( m_hSocket ), F_GETFL, 0 );
-			fcntl( oexPtrToInt( m_hSocket ), F_SETFL, flags & ( ~O_NONBLOCK ) );
+			int flags = fcntl( oexPtrToLong( m_hSocket ), F_GETFL, 0 );
+			fcntl( oexPtrToLong( m_hSocket ), F_SETFL, flags & ( ~O_NONBLOCK ) );
 
 			// Restore socket timeout defaults
 			struct timeval tv;
 			tv.tv_sec = ( oexDEFAULT_WAIT_TIMEOUT / 1000 );
 			tv.tv_usec = ( oexDEFAULT_WAIT_TIMEOUT % 1000 ) * 1000;
-			setsockopt( oexPtrToInt( m_hSocket ), SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof( tv ) );
-			setsockopt( oexPtrToInt( m_hSocket ), SOL_SOCKET, SO_SNDTIMEO, (const char *)&tv, sizeof( tv ) );
+			setsockopt( oexPtrToLong( m_hSocket ), SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof( tv ) );
+			setsockopt( oexPtrToLong( m_hSocket ), SOL_SOCKET, SO_SNDTIMEO, (const char *)&tv, sizeof( tv ) );
 
 		} // end if
 
@@ -883,8 +883,8 @@ oexBOOL CIpSocket::EventSelect( oexLONG x_lEvents )
 		return oexFALSE;
 
 	// Enable non-blocking mode
-	int flags = fcntl( oexPtrToInt( m_hSocket ), F_GETFL, 0 );
-	fcntl( oexPtrToInt( m_hSocket ), F_SETFL, flags | O_NONBLOCK );
+	int flags = fcntl( oexPtrToLong( m_hSocket ), F_GETFL, 0 );
+	fcntl( oexPtrToLong( m_hSocket ), F_SETFL, flags | O_NONBLOCK );
 
     // Must have event handle
     if ( !IsEventHandle() || !m_pEventObject )
@@ -895,13 +895,13 @@ oexBOOL CIpSocket::EventSelect( oexLONG x_lEvents )
 
 	epoll_event ev;
 	oexZeroMemory( &ev, sizeof( ev ) );
-	ev.data.fd = oexPtrToInt( m_hSocket );
+	ev.data.fd = oexPtrToLong( m_hSocket );
 	ev.events = EPOLLERR | FlagWinToNix( x_lEvents );
 
 	// Set the event masks
-	int nRes = epoll_ctl( oexPtrToInt( m_hSocketEvent ),
+	int nRes = epoll_ctl( oexPtrToLong( m_hSocketEvent ),
 						  m_bEventsHooked ? EPOLL_CTL_MOD : EPOLL_CTL_ADD,
-						  oexPtrToInt( m_hSocket ), &ev );
+						  oexPtrToLong( m_hSocket ), &ev );
 
 	if ( -1 == nRes )
     {	m_uLastError = errno;
@@ -953,7 +953,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
         {
 			// Wait for events
 			oexINT nRes;
-			do { nRes = epoll_wait( oexPtrToInt( m_hSocketEvent ), pev, eMaxEvents, x_uTimeout );
+			do { nRes = epoll_wait( oexPtrToLong( m_hSocketEvent ), pev, eMaxEvents, x_uTimeout );
 			} while ( -1 == nRes && EINTR == errno );
 
 			if ( -1 == nRes )
@@ -961,7 +961,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 				// Log error
 				m_uLastError = errno;
 
-				oexERROR( m_uLastError, oexMks( oexT( "epoll_wait() failed : m_hSocketEvent = " ), oexPtrToInt( m_hSocketEvent ) ) );
+				oexERROR( m_uLastError, oexMks( oexT( "epoll_wait() failed : m_hSocketEvent = " ), oexPtrToLong( m_hSocketEvent ) ) );
 
 				// Disconnected?
 				m_uConnectState |= eCsError;
@@ -981,7 +981,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 					oexUINT uFlags = FlagNixToWin( pev[ i ].events );
 
 					// Save the status of all events
-					if ( pev[ i ].data.fd == oexPtrToInt( m_hSocket ) )
+					if ( pev[ i ].data.fd == oexPtrToLong( m_hSocket ) )
 					{	pev[ i ].events = 0;
 						for ( oexUINT uMask = 1; uMask < eAllEvents; uMask <<= 1 )
 							if ( uFlags & uMask )
@@ -1000,7 +1000,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 									// use getpeername() to check for errors
 									sockaddr_in sai; oexZero( sai );
 									socklen_t len = sizeof( sai );
-									if ( -1 == getpeername( oexPtrToInt( m_hSocket ), (sockaddr*)&sai, &len ) )
+									if ( -1 == getpeername( oexPtrToLong( m_hSocket ), (sockaddr*)&sai, &len ) )
 									{	m_uLastError = errno;
 										m_uEventStatus[ uOffset ] = errno;
 										m_uConnectState |= eCsError;
@@ -1008,7 +1008,7 @@ oexUINT CIpSocket::WaitEvent( oexLONG x_lEventId, oexUINT x_uTimeout )
 */
 /* +++ gives error : Resource temporarily unavailable
 									char buf[ 1 ];
-									if ( -1 == recv( oexPtrToInt( m_hSocket ), buf, 0, 0 ) )
+									if ( -1 == recv( oexPtrToLong( m_hSocket ), buf, 0, 0 ) )
 									{	m_uLastError = errno;
 										m_uEventStatus[ uOffset ] = errno;
 										m_uConnectState |= eCsError;
@@ -1193,7 +1193,7 @@ oexUINT CIpSocket::RecvFrom( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRea
 
 	// Receive data from socket
 	x_uFlags |= MSG_NOSIGNAL;
-	int nRes = v_recvfrom( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
+	int nRes = v_recvfrom( oexPtrToLong( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uLastError = errno;
 
@@ -1294,7 +1294,7 @@ oexUINT CIpSocket::Recv( oexPVOID x_pData, oexUINT x_uSize, oexUINT *x_puRead, o
 
 	// Receive data from socket
 	x_uFlags |= MSG_NOSIGNAL;
-	int nRes = v_recv( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
+	int nRes = v_recv( oexPtrToLong( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uLastError = errno;
 
@@ -1407,7 +1407,7 @@ oexUINT CIpSocket::SendTo( oexCONST oexPVOID x_pData, oexUINT x_uSize, oexUINT *
 
     // Send the data
 	x_uFlags |= MSG_NOSIGNAL;
-    int nRes = v_sendto( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
+    int nRes = v_sendto( oexPtrToLong( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uLastError = errno;
 
@@ -1458,7 +1458,7 @@ oexUINT CIpSocket::Send( oexCPVOID x_pData, oexUINT x_uSize, oexUINT *x_puSent, 
 
 	// Attempt to send the data
 	x_uFlags |= MSG_NOSIGNAL;
-	int nRes = v_send( oexPtrToInt( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
+	int nRes = v_send( oexPtrToLong( m_hSocket ), x_pData, (int)x_uSize, (int)x_uFlags );
 
 	m_uLastError = errno;
 
@@ -1510,7 +1510,7 @@ oexBOOL CIpSocket::GetPeerAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
 	socklen_t len = sizeof( sai );
 
 	// Get the socket info
-	if ( -1 == getpeername( oexPtrToInt( x_hSocket ), (sockaddr*)&sai, &len ) )
+	if ( -1 == getpeername( oexPtrToLong( x_hSocket ), (sockaddr*)&sai, &len ) )
 		if ( ENOTCONN != errno )
 			oexERROR( errno, oexT( "getpeername() failed" ) );
 
@@ -1537,7 +1537,7 @@ oexBOOL CIpSocket::GetLocalAddress( t_SOCKET x_hSocket, CIpAddress *x_pIa )
 	socklen_t len = sizeof( sai );
 
 	// Get the socket info
-	if ( -1 == getsockname( oexPtrToInt( x_hSocket ), (sockaddr*)&sai, &len ) )
+	if ( -1 == getsockname( oexPtrToLong( x_hSocket ), (sockaddr*)&sai, &len ) )
 		oexERROR( errno, oexT( "getsockname() failed" ) );
 
     // Format the info

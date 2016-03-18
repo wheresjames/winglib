@@ -94,6 +94,9 @@ namespace sqbind
 
 		/// Starts web logging
 		int SetLogFile( const stdString &sFile );
+		
+		/// Returns the log file
+		sqbind::stdString GetLogFile();
 
 		/// Enable / Disable remote connections
 		void EnableRemoteConnections( int bEnable );

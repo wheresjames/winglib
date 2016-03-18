@@ -316,8 +316,8 @@ void CIpSocket::Destroy()
 	if ( IsInitialized() )
 	{
 		// Turn off non-blocking
-//		int flags = fcntl( oexPtrToInt( hSocket ), F_GETFL, 0 );
-//		fcntl( oexPtrToInt( hSocket ), F_SETFL, flags & ~O_NONBLOCK );
+//		int flags = fcntl( oexPtrToLong( hSocket ), F_GETFL, 0 );
+//		fcntl( oexPtrToLong( hSocket ), F_SETFL, flags & ~O_NONBLOCK );
 
 		struct linger lopt;
 

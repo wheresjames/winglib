@@ -13,11 +13,12 @@ sqbind::CScriptThread	*g_psqScriptThread = oexNULL;
 sqbind::CModuleManager	*g_psqModuleManager = oexNULL;
 
 /// App ID
+#define SQBIND_DEFAULT_APP_IID_BIN "398BBF52-373C-4DCE-97AD-833E42B6C494"
 static const oex::oexCHAR SQBIND_APP_IID_BIN[]
 #ifdef SQBIND_APP_IID
 	= SQBIND_APP_IID;
 #else
-	= "398BBF52-373C-4DCE-97AD-833E42B6C494";
+	= SQBIND_DEFAULT_APP_IID_BIN;
 #endif
 
 // Custom include script

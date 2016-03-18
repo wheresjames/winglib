@@ -187,7 +187,7 @@
 
 // Define to include backtraces for log entries
 #if defined( oexDEBUG )
-#	define oexBACKTRACE_IN_LOG
+//#	define oexBACKTRACE_IN_LOG
 #endif
 
 // Define to have log entries printed to the command line

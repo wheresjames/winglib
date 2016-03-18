@@ -76,6 +76,9 @@ namespace sqbind
 		/// Sets the raw address values
 		int SetRawAddress( int nAddr, int nPort );
 
+		/// Returns the local host name
+		sqbind::stdString getName();
+
 		/// Returns the current host name
 		sqbind::stdString getHostName();
 

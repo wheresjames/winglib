@@ -121,7 +121,7 @@ SQBIND_REGISTER_CLASS_BEGIN( CFfContainer, CFfContainer )
     SQBIND_MEMBER_FUNCTION( CFfContainer, enableFramerateFixup )
     SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoStartTime )
     SQBIND_MEMBER_FUNCTION( CFfContainer, setVideoEndTime )
-	
+
     SQBIND_MEMBER_FUNCTION( CFfContainer, setFixedVideoTime )
     SQBIND_MEMBER_FUNCTION( CFfContainer, CalculateTrueFrameRate )
 
@@ -173,11 +173,11 @@ CFfContainer::CFfContainer()
 
 	m_vts_offset = 0;
 	m_ats_offset = 0;
-     
+
 	m_bFixupFrameRate = 0;
 	m_videoStartTime = -1;
 	m_videoEndTime   = -1;
-	
+
 	m_fixed_file_time = 0;
 }
 
@@ -199,7 +199,7 @@ void CFfContainer::Destroy()
 	if ( m_pkt.data )
 		av_free_packet( &m_pkt );
 
-	if ( m_pFrame ) 
+	if ( m_pFrame )
 		av_free( m_pFrame );
 	m_pFrame = oexNULL;
 
@@ -225,12 +225,12 @@ void CFfContainer::Destroy()
 	m_bFixupFrameRate = 0;
 	m_videoStartTime = -1;
 	m_videoEndTime   = -1;
-	
+
 	m_sUrl.clear();
 }
 
 int CFfContainer::getAudioSampleFmt()
-{	
+{
 	if ( !m_pFormatContext || 0 > m_nAudioStream
 		 || !m_pFormatContext->streams[ m_nAudioStream ]->codec )
 		return 0;
@@ -259,15 +259,15 @@ int CFfContainer::CalculateTrueFrameRate()
 
 	// Calculate timespan
 	int nTimeSpan = m_videoEndTime - m_videoStartTime;
-	
+
 	// Make sure framerate will be sensible
 	if ( 0 >= nTimeSpan )
 		return 0;
-	
+
 	// Is the video stream number defined?
 	if ( 0 > m_nVideoStream )
 		return 0;
-	
+
 	// check if this is an .avi container before proceeding
 	AVFormatContext* s = m_pFormatContext;
 	if ( NULL == s )
@@ -296,10 +296,10 @@ int CFfContainer::CalculateTrueFrameRate()
 	avio_wl32( pb, m_videoEndTime - m_videoStartTime );
 	avio_wl32( pb, avist->packet_count );
 	avio_seek( pb, file_size, SEEK_SET );
-	
+
 	// Don't do it again
 	m_bFixupFrameRate = 0;
-	
+
 	return avist->packet_count / nTimeSpan;
 }
 
@@ -312,7 +312,7 @@ int CFfContainer::CloseStream()
 
 	if ( !m_pFormatContext )
 		return 0;
-	
+
 	// Fixed time length?
 	if ( 0 < m_fixed_file_time )
 	{	m_videoStartTime = 0;
@@ -340,7 +340,7 @@ int CFfContainer::CloseStream()
 
 	else if ( m_nWrite )
 	{
-		if ( 1 < m_nWrite ) 
+		if ( 1 < m_nWrite )
 		{
 			// Write the rest of the file
 			av_write_trailer( m_pFormatContext );
@@ -707,7 +707,7 @@ int CFfContainer::Create( const sqbind::stdString &sUrl, const sqbind::stdString
 		pOut = av_guess_format( 0, oexStrToMbPtr( sUrl.c_str() ), 0 );
 
 	if ( !pOut )
-	{	oexERROR( 0, oexMks( oexT( "guess_format() failed : " ), sUrl.c_str(), oexT( " : " ), sType.c_str() ) );
+	{	oexERROR( 0, oexMks( oexT( "av_guess_format() failed : " ), sUrl.c_str(), oexT( " : " ), sType.c_str() ) );
 		Destroy();
 		return 0;
 	} // end if
@@ -1173,7 +1173,7 @@ int CFfContainer::WriteAudioFrame( sqbind::CSqBinary *dat, SQInteger nPts, SQInt
 
 
 //	if ( 0 > m_nVideoStream )
-//	{	
+//	{
 		if ( av_write_frame( m_pFormatContext, &pkt ) )
 			return 0;
 /*

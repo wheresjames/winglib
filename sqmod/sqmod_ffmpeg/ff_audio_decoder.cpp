@@ -83,7 +83,7 @@ void CFfAudioDecoder::Destroy()
 }
 
 int CFfAudioDecoder::getSampleFmt()
-{ 
+{
 	if ( !m_pCodecContext->sample_fmt )
 		return 0;
 #	define CNVFMT( t, v ) case v : return oex::obj::t;
@@ -145,7 +145,7 @@ int CFfAudioDecoder::Create( int x_nCodec, int x_nFmt, int x_nChannels, int x_nS
     m_pCodecContext->bit_rate = m_pCodecContext->sample_rate * m_pCodecContext->channels * 8;
     m_pCodecContext->block_align = 0;
 
-//    m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
+//  m_pCodecContext->strict_std_compliance = ( ( m && m->isset( oexT( "cmp" ) ) ) ? (*m)[ oexT( "cmp" ) ].toint() : 0 );
 
 	if( 0 != ( m_pCodec->capabilities & CODEC_CAP_TRUNCATED ) )
 		m_pCodecContext->flags |= CODEC_FLAG_TRUNCATED;
@@ -323,14 +323,14 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 
 	// While we have input data
 	int nOutFrame = 1;
-	
+
 	// Decoded frame
 	AVFrame *decoded_frame = 0;
-	
+
 	while ( 0 < nIn /*>= bs*/ && 0 < nOutFrame )
 	{
 //		int bs2 = 8 * 1024;
-	
+
 		// Ensure a reasonable output buffer
 		while ( ( nOut - nOutPtr ) < ( bs + FF_MIN_BUFFER_SIZE ) )
 			nOut <<= 1, out->Resize( nOut ), pOut = (uint8_t*)out->_Ptr();
@@ -341,7 +341,7 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 			return 0;
 		} // end if
 
-		if ( !decoded_frame ) 
+		if ( !decoded_frame )
 		{
 			decoded_frame = av_frame_alloc();
 			if ( !decoded_frame )
@@ -353,7 +353,7 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 		// Initialize frame buffer
 		// avcodec_get_frame_defaults( decoded_frame );
 		av_frame_unref( decoded_frame );
-		
+
 		// Decode a frame
 		nOutFrame = 0;
 //		int nBytes = avcodec_decode_audio3( m_pCodecContext, (int16_t*)&pOut[ nOutPtr ], &nOutFrame, &m_pkt );
@@ -386,12 +386,12 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 			for ( int ch = 0; ch < m_pCodecContext->channels; ch++ )
 				memcpy( &pOut[ nOutPtr ], decoded_frame->data[ ch ], decoded_frame->nb_samples * data_size ),
 				nOutPtr += decoded_frame->nb_samples * data_size;
-			
+
 		} // end if
 
 		// Unbuffer used data
 		nIn = UnbufferData( nBytes );
-		
+
 	} // end while
 
 	// Set total bytes in the output queue
@@ -412,7 +412,7 @@ int CFfAudioDecoder::Decode( sqbind::CSqBinary *in, sqbind::CSqBinary *out, sqbi
 
 	if ( decoded_frame )
 		av_frame_unref( decoded_frame );
-	
+
 	return nOutPtr;
 }
 
