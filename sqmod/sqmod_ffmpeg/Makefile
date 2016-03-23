@@ -32,11 +32,22 @@ UNSUPPORTED := PROC=$(PROC) is not supported
 include $(PRJ_LIBROOT)/unsupported.mk
 else
 
-#ifeq ($(BUILD)-$(PROC),vs-x64)
-ifeq ($(BUILD),vs)
-	UNSUPPORTED := PROC=$(PROC) + BUILD=$(BUILD) is not supported
-	include $(PRJ_LIBROOT)/unsupported.mk
+ifneq ($(BUILD),gcc)
+    ifeq ($(findstring msvs14,$(TGT)),)
+	NOTSUPPORTED := 1
+    endif
+endif
+
+ifneq ($(NOTSUPPORTED),)
+UNSUPPORTED := $(BUILD)-$(TGT) is invalid for ffmpeg
+include $(PRJ_LIBROOT)/unsupported.mk
 else
+
+#ifeq ($(BUILD)-$(PROC),vs-x64)
+#ifeq ($(BUILD),vs)
+#	UNSUPPORTED := PROC=$(PROC) + BUILD=$(BUILD) is not supported
+#	include $(PRJ_LIBROOT)/unsupported.mk
+#else
 
 #ifeq ($(PLATFORM)-$(PROC),posix-x64)
 #	UNSUPPORTED :=  $(PLATFORM)-$(PROC), for whatever stupid reason, this isn't working atm
@@ -76,8 +87,10 @@ else
 endif
 
 ifeq ($(BUILD),gcc)
-	CFG_CFLAGS := $(CFG_CFLAGS) -Wno-unused-function -Wno-attributes -Wno-unused-local-typedefs \
-								-Wno-parentheses -Wno-switch -Wno-pointer-sign
+    CFG_CFLAGS := $(CFG_CFLAGS) -Wno-unused-function -Wno-attributes -Wno-unused-local-typedefs \
+				-Wno-parentheses -Wno-switch -Wno-pointer-sign
+else
+    CFG_LFLAGS := $(CFG_LFLAGS) /FORCE:UNRESOLVED
 endif
 
 #-------------------------------------------------------------------
