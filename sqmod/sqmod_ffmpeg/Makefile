@@ -64,7 +64,7 @@ ifeq ($(PLATFORM),windows)
 			PRJ_LIBP := $(PRJ_LIBP) $(CFG_LIBROOT)/xlibs/x64
 		else
 			PRJ_LIBP := $(PRJ_LIBP) $(CFG_LIBROOT)/xlibs/x86
-			PRJ_WINX := $(PRJ_WINX) libgcc.a libmingwex.a
+#			PRJ_WINX := $(PRJ_WINX) libgcc.a libmingwex.a
 #			PRJ_WINX := $(PRJ_WINX) libmingwex.a
 #			PRJ_WINX := $(PRJ_WINX) libpthread.a
 #			PRJ_WINX := $(PRJ_WINX) libiconv.a
