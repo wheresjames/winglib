@@ -68,7 +68,7 @@ function StartServer() : ( _g )
 
 	else
 	{
-		if ( !_g.enc.Create( CFfDecoder().LookupCodecId( "FMP4" ), CFfConvert().AV_PIX_FMT_YUV420P,
+		if ( !_g.enc.Create( CFfDecoder().LookupCodecId( "FMP4" ), CFfFmt().AV_PIX_FMT_YUV420P,
 							 _g.cap.getWidth(), _g.cap.getHeight(), _g.fps, _g.brate, CSqMulti() ) )
 		{	_self.echo( "failed to create encoder" ); return 0; }
 

@@ -76,6 +76,8 @@ private:
 	/// Intermediate image used in transcode
 	sqbind::CSqBinary	m_tmp;
 
+	/// Image converter
+	CFfConvert			m_cvt;
 };
 
 DECLARE_INSTANCE_TYPE( CFfTranscode );

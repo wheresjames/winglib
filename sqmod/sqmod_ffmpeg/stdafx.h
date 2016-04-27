@@ -24,12 +24,13 @@ extern "C"
 // FFMPEG is not quite thread safe
 extern "C" oexLock _g_ffmpeg_lock;
 
+#include "ff_fmt.h"
+#include "ff_convert.h"
 #include "ff_decoder.h"
 #include "ff_encoder.h"
 #include "ff_audio_decoder.h"
 #include "ff_audio_encoder.h"
 #include "ff_audio_resample.h"
-#include "ff_convert.h"
 #include "ff_container.h"
 #include "ff_transcode.h"
 #include "ff_capture.h"

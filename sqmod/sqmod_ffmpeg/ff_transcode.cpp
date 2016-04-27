@@ -37,6 +37,7 @@ void CFfTranscode::Destroy()
 	m_enc_id = 0;
 	m_enc.Destroy();
 	m_dec.Destroy();
+	m_cvt.Destroy();
 }
 
 int CFfTranscode::Init( int width, int height, int fps, int brate, int src_codec, int dst_codec )
@@ -108,7 +109,17 @@ int CFfTranscode::GetImage( sqbind::CSqImage *img )
 	if ( !img || !m_tmp.getUsed() || !isValid() )
 		return 0;
 
-	// Convert to image format
-	return CFfConvert::ConvertColorBI( &m_tmp, AV_PIX_FMT_YUV420P, m_dec.getWidth(), m_dec.getHeight(), img, SWS_FAST_BILINEAR, 1 );
+	// Create converter if needed
+	if ( m_cvt.getSrcWidth() != getWidth() || m_cvt.getSrcHeight() != getHeight() 
+		 || m_cvt.getDstWidth() != getWidth() || m_cvt.getDstHeight() != getHeight()
+		 || m_cvt.getSrcFmt() != AV_PIX_FMT_YUV420P || m_cvt.getDstFmt() != AV_PIX_FMT_BGR24 )
+		if ( !m_cvt.Create( getWidth(), getHeight(), AV_PIX_FMT_YUV420P, 
+							getWidth(), getHeight(), AV_PIX_FMT_BGR24, SWS_FAST_BILINEAR, 0 ) )
+			return 0;
+	
+	if ( !m_cvt.ConvertBI( &m_tmp, img ) )
+		return 0;
+	
+	return 1;
 }
 

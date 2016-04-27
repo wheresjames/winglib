@@ -202,6 +202,8 @@ void CFfContainer::Destroy()
 	if ( m_pFrame )
 		av_free( m_pFrame );
 	m_pFrame = oexNULL;
+	
+	m_cvt.Destroy();
 
 	m_pCodecContext = oexNULL;
 	m_buf.Free();
@@ -593,17 +595,23 @@ int CFfContainer::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbi
 	// +++ This is not the correct way to get the data pointer
 	// Is it already the right format?
 /*	if ( fmt == (int)m_pCodecContext->pix_fmt )
-	{	int nSize = CFfConvert::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
+	{	int nSize = CFfFmt::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
 		dat->setBuffer( (sqbind::CSqBinary::t_byte*)m_pFrame->data[ 0 ], nSize, 0, 0 );
 		m_nFrames++;
 		return m_pkt.stream_index;
 	} // end if
 */
 
-	// Do colorspace conversion
-	if ( !CFfConvert::ConvertColorFB( m_pFrame, m_pCodecContext->pix_fmt,
-									  m_pCodecContext->width, m_pCodecContext->height,
-									  fmt, dat, SWS_FAST_BILINEAR, flip ) )
+	// Create converter if needed
+	if ( m_cvt.getSrcWidth() != m_pCodecContext->width || m_cvt.getSrcHeight() != m_pCodecContext->height 
+		 || m_cvt.getDstWidth() != m_pCodecContext->width || m_cvt.getDstHeight() != m_pCodecContext->height
+		 || m_cvt.getSrcFmt() != m_pCodecContext->pix_fmt || m_cvt.getDstFmt() != fmt )
+		if ( !m_cvt.Create( m_pCodecContext->width, m_pCodecContext->height, m_pCodecContext->pix_fmt,
+						    m_pCodecContext->width, m_pCodecContext->height, fmt, SWS_FAST_BILINEAR, flip ) )
+			return 0;
+		
+	// Must convert to input format
+	if ( !m_cvt.ConvertFB( m_pFrame, dat ) )
 		return -1;
 
 	// Frame
@@ -666,19 +674,25 @@ int CFfContainer::DecodeFrameBin( sqbind::CSqBinary *in, int fmt, sqbind::CSqBin
 	// +++ This is not the correct way to get the data pointer
 	// Is it already the right format?
 /*	if ( fmt == (int)m_pCodecContext->pix_fmt )
-	{	int nSize = CFfConvert::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
+	{	int nSize = CFfFmt::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
 		out->setBuffer( (sqbind::CSqBinary::t_byte*)m_pFrame->data[ 0 ], nSize, 0, 0 );
 		m_nFrames++;
 		return m_pkt.stream_index;
 	} // end if
 */
 
-	// Do colorspace conversion
-	if ( !CFfConvert::ConvertColorFB( m_pFrame, m_pCodecContext->pix_fmt,
-									  m_pCodecContext->width, m_pCodecContext->height,
-									  fmt, out, SWS_FAST_BILINEAR, flip ) )
+	// Create converter if needed
+	if ( m_cvt.getSrcWidth() != m_pCodecContext->width || m_cvt.getSrcHeight() != m_pCodecContext->height 
+		 || m_cvt.getDstWidth() != m_pCodecContext->width || m_cvt.getDstHeight() != m_pCodecContext->height
+		 || m_cvt.getSrcFmt() != m_pCodecContext->pix_fmt || m_cvt.getDstFmt() != fmt )
+		if ( !m_cvt.Create( m_pCodecContext->width, m_pCodecContext->height, m_pCodecContext->pix_fmt,
+						    m_pCodecContext->width, m_pCodecContext->height, fmt, SWS_FAST_BILINEAR, flip ) )
+			return 0;
+		
+	// Must convert to input format
+	if ( !m_cvt.ConvertFB( m_pFrame, out ) )
 		return -1;
-
+	
 	// Frame
 	m_nFrames++;
 

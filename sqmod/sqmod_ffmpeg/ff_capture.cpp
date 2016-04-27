@@ -297,7 +297,7 @@ int CFfCapture::DecodeFrame( int stream, int fmt, sqbind::CSqBinary *dat, sqbind
 
 	// Is it already the right format?
 	if ( fmt == (int)m_pCodecContext->pix_fmt )
-	{	int nSize = CFfConvert::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
+	{	int nSize = CFfFmt::CalcImageSize( fmt, m_pCodecContext->width, m_pCodecContext->height );
 		dat->setBuffer( (sqbind::CSqBinary::t_byte*)m_pFrame->data[ 0 ], nSize, 0 );
 		m_nFrames++;
 		return m_pkt.stream_index;

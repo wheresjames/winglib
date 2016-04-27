@@ -196,6 +196,9 @@ private:
 
 	/// Optional packet header
 	sqbind::CSqBinary		m_header;
+	
+	/// Image converter
+	CFfConvert				m_cvt;
 
 };
 DECLARE_INSTANCE_TYPE( CFfEncoder );

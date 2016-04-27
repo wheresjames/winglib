@@ -74,10 +74,10 @@ void CLvRtspClient::Register( sqbind::VM vm )
 	SQBIND_EXPORT( vm, CLvRtspClient );
 }
 
-CLvRtspClient::CVideoSink::CVideoSink( UsageEnvironment& rEnv ) :
+CLvRtspClient::CVideoSink::CVideoSink( UsageEnvironment& rEnv, oexLock *plock ) :
 	MediaSink( rEnv )
 {_STT();
-
+	m_plock = plock;
 	m_pevtData = 0;
 	m_nFrameReady = 0;
 	m_nFrameGrabbing = 0;
@@ -85,6 +85,7 @@ CLvRtspClient::CVideoSink::CVideoSink( UsageEnvironment& rEnv ) :
 
 CLvRtspClient::CVideoSink::~CVideoSink()
 {_STT();
+	m_plock = 0;
 	m_pevtData = 0;
 	m_nFrameReady = 0;
 	m_nFrameGrabbing = 0;
@@ -93,9 +94,6 @@ CLvRtspClient::CVideoSink::~CVideoSink()
 
 void CLvRtspClient::CVideoSink::setHeader( sqbind::CSqBinary *header )
 {_STT();
-	oexAutoLock ll( m_lock );
-	if ( !ll.IsLocked() )
-		return;
 	if ( header )
 		m_header = *header;
 }
@@ -111,7 +109,7 @@ Boolean CLvRtspClient::CVideoSink::continuePlaying()
 	{
 		m_buf.Mem().Mem().OexNew( eDefaultBufferSize );
 
-		oexAutoLock ll( m_lock );
+		oexAutoLock ll( *m_plock );
 		if ( ll.IsLocked() )
 		{
 			m_buf.MemCpyAt( &m_header, 0 );
@@ -335,6 +333,9 @@ void CLvRtspClient::Destroy()
 	// Stop the thread
 	Stop();
 
+	// Attempt lock
+	oexAutoLock ll( m_lock );
+
 	// Verify things shutdown smoothly
 	if ( m_pRtspClient || m_pSession || m_pVs || m_pAs || m_pEnv )
 	{	setLastError( -999, oexT( "RTSP Client failed to shutdown correctly" ) );
@@ -363,6 +364,10 @@ int CLvRtspClient::setLastError( int e, sqbind::stdString s )
 
 void CLvRtspClient::ThreadDestroy()
 {_STT();
+
+	oexAutoLock ll( m_lock );
+	if ( !ll.IsLocked() )
+		return;
 
 	if ( m_pRtspClient && m_pSession )
 	{
@@ -485,6 +490,10 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	// Lose old container
 	ThreadDestroy();
 
+	oexAutoLock ll( m_lock );
+	if ( !ll.IsLocked() )
+		return 0;
+
 	// Did we get a valid string?
 	if ( !sUrl.length() )
 		return 0;
@@ -518,7 +527,7 @@ int CLvRtspClient::ThreadOpen( const sqbind::stdString &sUrl, int bVideo, int bA
 	} // end scope
 
 	// Do we need to authenticate?
-	if ( m_bBlindLogin && m && m->isset( oexT( "username" ) ) )
+	if ( m_bBlindLogin && m && m->isset( oexT( "username" ) ) && (*m)[ oexT( "username" ) ].length() )
 		m_bAuthenticate = 1,
 		m_authenticator.setUsernameAndPassword( (char*)oexStrToMbPtr( (*m)[ oexT( "username" ) ].str().c_str() ),
 												(char*)oexStrToMbPtr( (*m)[ oexT( "password" ) ].str().c_str() ) );
@@ -768,7 +777,7 @@ int CLvRtspClient::InitVideo( MediaSubsession *pss )
 		return 0;
 	} // end if
 
-	m_pVs = new CVideoSink( *m_pEnv );
+	m_pVs = new CVideoSink( *m_pEnv, &m_lock );
 	if ( !m_pVs )
 	{	setLastError( -108, sqbind::oex2std( oexMks( oexT( "CVideoSink::createNew() failed" ), oexT( " : " ), oexMbToStrPtr( m_pEnv->getResultMsg() ) ) ) );
 		return 0;
@@ -909,6 +918,13 @@ int CLvRtspClient::LockVideo( sqbind::CSqBinary *dat, int to )
 	if ( to )
 		m_evtData.Wait( to );
 
+	oexAutoLock ll( m_lock );
+	if ( !ll.IsLocked() )
+		return 0;
+
+	if ( !m_pVs )
+		return 0;
+
 	// Attempt to lock a frame
 	return m_pVs->LockFrame( dat, to );
 }
@@ -918,9 +934,16 @@ int CLvRtspClient::UnlockVideo()
 	if ( !m_pVs )
 		return 0;
 
+	oexAutoLock ll( m_lock );
+	if ( !ll.IsLocked() )
+		return 0;
+
 	// Reset data signal
 	m_evtData.Reset();
 
+	if ( !m_pVs )
+		return 0;
+	
 	return m_pVs->UnlockFrame();
 }
 
@@ -929,10 +952,17 @@ int CLvRtspClient::LockAudio( sqbind::CSqBinary *dat, int to )
 	if ( !m_bAudio || !m_pAs )
 		return 0;
 
+	oexAutoLock ll( m_lock );
+	if ( !ll.IsLocked() )
+		return 0;
+
 	// Wait for data?
 	if ( to )
 		m_evtData.Wait( to );
 
+	if ( !m_pAs )
+		return 0;
+	
 	return m_pAs->LockFrame( dat, to );
 }
 
@@ -941,8 +971,15 @@ int CLvRtspClient::UnlockAudio()
 	if ( !m_pAs )
 		return 0;
 
+	oexAutoLock ll( m_lock );
+	if ( !ll.IsLocked() )
+		return 0;
+
 	// Reset data signal
 	m_evtData.Reset();
+
+	if ( !m_pAs )
+		return 0;
 
 	return m_pAs->UnlockFrame();
 }

@@ -36,32 +36,32 @@ void CLvRtspServer::Register( sqbind::VM vm )
 // *** CClientSession
 //------------------------------------------------------------------
 
-//CClientSession::CClientSession( CLvRtspServer *pServer, RTSPServer *pRtspServer,
-//								unsigned sessionId, int clientSocket, struct sockaddr_in clientAddr )
-CClientSession::CClientSession( CLvRtspServer *pServer, RTSPServer& ourServer, u_int32_t sessionId )
+CClientSession::CClientSession( CLvRtspServer *pServer, RTSPServer& ourServer, int clientSocket, struct sockaddr_in clientAddr )
 	: m_pServer( pServer ),
-	  RTSPServer::RTSPClientSession( ourServer, sessionId )
+	  RTSPServerSupportingHTTPStreaming::RTSPClientConnectionSupportingHTTPStreaming( ourServer, clientSocket, clientAddr )
 {_STT();
 
 	// Wrap socket handle
-//	oex::os::CIpSocket socket( (oex::os::CIpSocket::t_SOCKET)clientSocket, oex::oexFALSE );
+	oex::os::CIpSocket socket( (oex::os::CIpSocket::t_SOCKET)clientSocket, oex::oexFALSE );
 
 	// Parse the url
-//	m_sId = sqbind::oex2std( socket.PeerAddress().GetId() );
-	m_sId = sqbind::oex2std( oexMks( sessionId ) );
+	m_sId = sqbind::oex2std( socket.PeerAddress().GetId() );
 
 	// Root key
 	m_sRoot = sqbind::stdString( oexT( "streams." ) ) + m_sId;
 
 	// We're connected
 	if ( m_sRoot.length() )
-		m_pServer->setParamStr( m_sRoot + oexT( ".connected" ), oexT( "1" ) );//,
-		//m_pServer->setParamStr( m_sRoot + oexT( ".remote" ), sqbind::oex2std( socket.PeerAddress().GetDotAddress() ) );
+		m_pServer->setParamStr( m_sRoot + oexT( ".connected" ), oexT( "1" ) ),
+		m_pServer->setParamStr( m_sRoot + oexT( ".remote" ), sqbind::oex2std( socket.PeerAddress().GetDotAddress() ) );
 
 }
 
 CClientSession::~CClientSession()
 {_STT();
+
+	if ( !m_pServer )
+		return;
 
 	// Clear stream information
 	if ( m_sRoot.length() )
@@ -71,13 +71,15 @@ CClientSession::~CClientSession()
 	// Remove our media session
 	if ( m_sId.length() )
 		m_pServer->Server()->removeServerMediaSession( oexStrToMbPtr( m_sId.c_str() ) );
+
+	m_pServer = 0;
 }
 
-//void CClientSession::handleCmd_DESCRIBE( char const *cseq, char const *urlPreSuffix,
-//										 char const *urlSuffix, char const *fullRequestStr )
-void CClientSession::handleCmd_SETUP( RTSPServer::RTSPClientConnection *ourClientConnection, char const *urlPreSuffix,
-									  char const *urlSuffix, char const *fullRequestStr )
+void CClientSession::handleCmd_DESCRIBE( char const* urlPreSuffix, char const* urlSuffix, char const* fullRequestStr )
 {_STT();
+
+	if ( !fullRequestStr )
+		return;
 
 	// Sanity checks, (I blame live555)
 	if ( !m_pServer || !m_pServer->isServer() )
@@ -91,7 +93,7 @@ void CClientSession::handleCmd_SETUP( RTSPServer::RTSPClientConnection *ourClien
 
 	// Stream Name
 	m_sName = sqbind::oex2std( oexUrlDecode( pb[ oexT( "path" ) ].ToString().LTrim( oexT( "/" ) ) ) );
-
+	
 	// Read default source information
 	m_mParams = m_pServer->getParam( sqbind::stdString( oexT( "sources.") ) + m_sName );
 
@@ -116,7 +118,7 @@ void CClientSession::handleCmd_SETUP( RTSPServer::RTSPClientConnection *ourClien
 		sDesc = m_sName;
 
 	// Create media session
-	ServerMediaSession* pSms = ServerMediaSession::createNew( *m_pServer->Env(), oexStrToMbPtr( m_sId.c_str() ), oexStrToMbPtr( m_sName.c_str() ), oexStrToMbPtr( sDesc.c_str() ) );
+	ServerMediaSession* pSms = ServerMediaSession::createNew(*m_pServer->Env(), oexStrToMbPtr(m_sId.c_str()), oexStrToMbPtr(m_sName.c_str()), oexStrToMbPtr(sDesc.c_str()));
 	if ( !pSms )
 	{	oexERROR( 0, oexMks( oexT( "ServerMediaSession::createNew() failed : " ), oexMbToStrPtr( m_pServer->Env()->getResultMsg() ) ) );
 		return;
@@ -133,35 +135,8 @@ void CClientSession::handleCmd_SETUP( RTSPServer::RTSPClientConnection *ourClien
 	m_pServer->Server()->addServerMediaSession( pSms );
 
 	// Call the base class
-	RTSPServer::RTSPClientSession
-		::handleCmd_SETUP( ourClientConnection, urlPreSuffix, oexStrToMbPtr( m_sId.c_str() ), fullRequestStr );
-}
-/*
-void CClientSession::handleCmd_SETUP( char const* cseq, char const* urlPreSuffix,
-									  char const* urlSuffix, char const* fullRequestStr )
-{_STT();
-
-	RTSPServer::RTSPClientSession
-		::handleCmd_SETUP( cseq, urlPreSuffix, urlSuffix, fullRequestStr );
-
-}
-*/
-void CClientSession::handleCmd_withinSession( RTSPServer::RTSPClientConnection *ourClientConnection, char const* cmdName,
-											  char const* urlPreSuffix, char const* urlSuffix,
-											  char const* fullRequestStr )
-{_STT();
-
-	RTSPServer::RTSPClientSession
-		::handleCmd_withinSession( ourClientConnection, cmdName, urlPreSuffix, urlSuffix, fullRequestStr );
-
-}
-
-void CClientSession::handleCmd_PLAY( RTSPServer::RTSPClientConnection *ourClientConnection, 
-									 ServerMediaSubsession* subsession, char const* fullRequestStr )
-{_STT();
-
-	RTSPServer::RTSPClientSession
-		::handleCmd_PLAY( ourClientConnection, subsession, fullRequestStr );
+	RTSPServerSupportingHTTPStreaming::RTSPClientConnectionSupportingHTTPStreaming
+		::handleCmd_DESCRIBE( urlPreSuffix, m_sId.c_str(), fullRequestStr );
 }
 
 //------------------------------------------------------------------
@@ -189,21 +164,13 @@ CRtspServer::~CRtspServer()
 {_STT();
 }
 
-RTSPServer::RTSPClientSession*
-	CRtspServer::createNewClientSession( u_int32_t sessionId )
+GenericMediaServer::ClientConnection* CRtspServer::createNewClientConnection( int clientSocket, struct sockaddr_in clientAddr )
 {_STT();
-	return new CClientSession( m_pServer, *this, sessionId );
+
+	return  new CClientSession( m_pServer, *this, clientSocket, clientAddr );
 }
 
-/*
-RTSPServer::RTSPClientSession*
-	CRtspServer::createNewClientSession( unsigned sessionId, int clientSocket, struct sockaddr_in clientAddr )
-{_STT();
-	return new CClientSession( m_pServer, this, sessionId, clientSocket, clientAddr );
-}
-*/
-
-ServerMediaSession* CRtspServer::lookupServerMediaSession( char const* streamName )
+ServerMediaSession* CRtspServer::lookupServerMediaSession( char const* streamName, Boolean isFirstLookupInSession )
 {_STT();
 	return RTSPServer::lookupServerMediaSession( streamName );
 }
@@ -631,7 +598,7 @@ void CLvRtspServer::ThreadDestroy()
 
 	if ( m_pRtspServer )
 	{	m_pRtspServer->close( m_pRtspServer );
-		delete m_pRtspServer;
+//		delete m_pRtspServer;
 		m_pRtspServer = oexNULL;
 	} // end if
 

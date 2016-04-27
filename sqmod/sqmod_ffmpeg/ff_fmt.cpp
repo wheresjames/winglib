@@ -1,0 +1,141 @@
+// ff_fmt.cpp
+
+#include "stdafx.h"
+
+SQBIND_REGISTER_CLASS_BEGIN( CFfFmt, CFfFmt )
+
+	SQBIND_STATIC_FUNCTION( CFfFmt, FmtEquiv )
+	SQBIND_STATIC_FUNCTION( CFfFmt, CalcImageSize )
+
+	// Format tyeps
+	SQBIND_GLOBALCONST( AV_PIX_FMT_RGB24 )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_BGR24 )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_RGB32 )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_BGR32 )
+
+	SQBIND_GLOBALCONST( AV_PIX_FMT_MONOWHITE )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_MONOBLACK )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_GRAY8 )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_GRAY16LE )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_GRAY16BE )
+
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUV410P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUV411P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUV420P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUV422P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUV440P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUV444P )
+
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUYV422 )
+
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUVJ420P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUVJ422P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUVJ444P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUVJ440P )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_YUVA420P )
+
+	SQBIND_GLOBALCONST( AV_PIX_FMT_UYVY422 )
+	SQBIND_GLOBALCONST( AV_PIX_FMT_UYYVYY411 )
+
+	// Processing types
+	SQBIND_GLOBALCONST( SWS_FAST_BILINEAR )
+	SQBIND_GLOBALCONST( SWS_BILINEAR )
+	SQBIND_GLOBALCONST( SWS_BICUBIC )
+	SQBIND_GLOBALCONST( SWS_X )
+	SQBIND_GLOBALCONST( SWS_POINT )
+	SQBIND_GLOBALCONST( SWS_AREA )
+	SQBIND_GLOBALCONST( SWS_BICUBLIN )
+	SQBIND_GLOBALCONST( SWS_GAUSS )
+	SQBIND_GLOBALCONST( SWS_SINC )
+	SQBIND_GLOBALCONST( SWS_LANCZOS )
+	SQBIND_GLOBALCONST( SWS_SPLINE )
+	SQBIND_GLOBALCONST( SWS_SRC_V_CHR_DROP_MASK )
+	SQBIND_GLOBALCONST( SWS_SRC_V_CHR_DROP_SHIFT )
+	SQBIND_GLOBALCONST( SWS_PARAM_DEFAULT )
+	SQBIND_GLOBALCONST( SWS_PRINT_INFO )
+	SQBIND_GLOBALCONST( SWS_FULL_CHR_H_INT )
+	SQBIND_GLOBALCONST( SWS_FULL_CHR_H_INP )
+	SQBIND_GLOBALCONST( SWS_DIRECT_BGR )
+	SQBIND_GLOBALCONST( SWS_ACCURATE_RND )
+//	SQBIND_GLOBALCONST( SWS_CPU_CAPS_MMX )
+//	SQBIND_GLOBALCONST( SWS_CPU_CAPS_MMX2 )
+//	SQBIND_GLOBALCONST( SWS_CPU_CAPS_3DNOW )
+//	SQBIND_GLOBALCONST( SWS_CPU_CAPS_ALTIVEC )
+//	SQBIND_GLOBALCONST( SWS_CPU_CAPS_BFIN )
+	SQBIND_GLOBALCONST( SWS_MAX_REDUCE_CUTOFF )
+	SQBIND_GLOBALCONST( SWS_CS_ITU709 )
+	SQBIND_GLOBALCONST( SWS_CS_FCC )
+	SQBIND_GLOBALCONST( SWS_CS_ITU601 )
+	SQBIND_GLOBALCONST( SWS_CS_ITU624 )
+	SQBIND_GLOBALCONST( SWS_CS_SMPTE170M )
+	SQBIND_GLOBALCONST( SWS_CS_SMPTE240M )
+	SQBIND_GLOBALCONST( SWS_CS_DEFAULT )
+
+SQBIND_REGISTER_CLASS_END()
+
+void CFfFmt::Register( sqbind::VM vm )
+{_STT();
+	SQBIND_EXPORT( vm, CFfFmt );
+}
+
+CFfFmt::CFfFmt()
+{_STT();
+}
+
+int CFfFmt::CalcImageSize( int fmt, int width, int height )
+{_STT();
+	return avpicture_get_size( (AVPixelFormat)fmt, width, height );
+}
+
+int CFfFmt::FillAVPicture( AVPicture *pPic, int fmt, int width, int height, void *buf )
+{_STT();
+	if ( !pPic || !buf )
+		return 0;
+
+	// Initialize structure
+	oexZeroMemory( pPic, sizeof( AVPicture ) );
+
+	// Fill in the picture data
+	int nSize = avpicture_fill( pPic, (uint8_t*)buf, (AVPixelFormat)fmt, width, height );
+	if ( 0 >= nSize )
+		return 0;
+
+	return nSize;
+}
+
+int CFfFmt::FillAVFrame( AVFrame *pAv, int fmt, int width, int height, void *buf )
+{_STT();
+	if ( !pAv || !buf )
+		return 0;
+
+	AVPicture avPic;
+	oexZero( avPic );
+
+	int nSize = avpicture_fill( &avPic, (uint8_t*)buf, (AVPixelFormat)fmt, width, height );
+	if ( 0 >= nSize )
+		return 0;
+		
+	pAv->format = fmt;
+	pAv->width = width;
+	pAv->height = height;
+
+	for( int i = 0; i < (int)oexSizeOfArray( avPic.data ); i++ )
+		pAv->data[ i ] = avPic.data[ i ];
+
+	for( int i = 0; i < (int)oexSizeOfArray( avPic.linesize ); i++ )
+		pAv->linesize[ i ] = avPic.linesize[ i ];
+
+	return nSize;
+}
+
+int CFfFmt::FmtEquiv( int fmt )
+{
+	// Seems to be issues with J FMTS
+	switch( fmt )
+	{	case AV_PIX_FMT_YUVJ420P : return AV_PIX_FMT_YUV420P;
+		case AV_PIX_FMT_YUVJ422P : return AV_PIX_FMT_YUV422P;
+		case AV_PIX_FMT_YUVJ444P : return AV_PIX_FMT_YUV444P;
+		default : return fmt;
+	} // end switch
+}
+

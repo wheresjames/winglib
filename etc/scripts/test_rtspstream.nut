@@ -136,7 +136,7 @@ class CRtspStream
 			dec = CFfDecoder();
 			dec.setExtraData( rtsp.getExtraVideoData() );
 			if ( !dec.Create( CFfDecoder().LookupCodecId( rtsp.getVideoCodecName() ),
-							  CFfConvert().AV_PIX_FMT_YUV420P,
+							  CFfFmt().AV_PIX_FMT_YUV420P,
 							  w, h, fps,
 							  2000000, CSqMulti( "cmp=-2" ) ) )
 			{	::_self.echo( "!!! Failed to create decoder for " + rtsp.getVideoCodecName() );
@@ -345,7 +345,7 @@ class CRtspStream
 		// Just draw it if we're not syncing to audio
 		if ( !vb )
 		{	if ( 0 >= dec.getBufferSize() ) return 0;
-			return dec.Decode( CSqBinary(), CFfConvert().AV_PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
+			return dec.Decode( CSqBinary(), CFfFmt().AV_PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
 		} // end if
 
 		// Show error if more than a second off
@@ -361,11 +361,11 @@ class CRtspStream
 		if
 //		while
 		 ( vb.isRead() && vb.ReadTsMin() < ( pa.getTs() - video_offset ) )
-			dec.Decode( vb.ReadData(), CFfConvert().AV_PIX_FMT_RGB32, buffer, CSqMulti(), 0 ), vb.incReadPtr();
+			dec.Decode( vb.ReadData(), CFfFmt().AV_PIX_FMT_RGB32, buffer, CSqMulti(), 0 ), vb.incReadPtr();
 
 		// Catchup and show, haha, can't do this, must decode every frame, duh
 //		while ( vb.isRead() && vb.ReadTs() < ( pa.getTs() - video_offset ) ) vb.incReadPtr()
-//		if ( vb.isRead() ) dec.Decode( vb.ReadData(), CFfConvert().AV_PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
+//		if ( vb.isRead() ) dec.Decode( vb.ReadData(), CFfFmt().AV_PIX_FMT_RGB32, buffer, CSqMulti(), 0 );
 
 		return 1;
 	}

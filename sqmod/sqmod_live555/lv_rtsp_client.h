@@ -20,7 +20,7 @@ public:
 	public:
 
 		/// Constructor
-		CVideoSink( UsageEnvironment &rEnv );
+		CVideoSink( UsageEnvironment &rEnv, oexLock *plock );
 		virtual ~CVideoSink();
 
 		/// Returns non-zero if new frame is needed
@@ -76,7 +76,7 @@ public:
 		int						m_nFrameGrabbing;
 
 		/// Data lock
-		oexLock					m_lock;
+		oexLock					*m_plock;
 
 		/// Timestamp
 		oex::oexTime			m_ts;
@@ -286,8 +286,19 @@ public:
 	sqbind::CSqBinary getExtraAudioData() { return m_extraAudio; }
 
 	/// Sets the video header
-	void setVideoHeader( sqbind::CSqBinary *header )
-	{	if ( m_pVs ) m_pVs->setHeader( header );
+	int setVideoHeader( sqbind::CSqBinary *header )
+	{	
+		oexAutoLock ll( m_lock );
+		if ( !ll.IsLocked() )
+			return 0;
+		
+		if ( !m_pVs )
+			return 0;
+		
+		m_pVs->setHeader( header );
+		
+		return 1;
+		
 	} // end
 
 	/// Signal start
@@ -516,6 +527,9 @@ private:
 	
 	/// Callback result int
 	int						m_nCallbackResult;
+	
+	/// Access lock
+	oexLock					m_lock;	
 	
 	/// Callback result string
 	oex::CStr8				m_sCallbackResult;

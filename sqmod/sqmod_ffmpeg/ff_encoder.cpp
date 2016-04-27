@@ -78,6 +78,9 @@ void CFfEncoder::Destroy()
 		av_free( m_pCodecContext );
 		m_pCodecContext = oexNULL;
 	} // end if
+	
+	// Lose the image converter
+	m_cvt.Destroy();
 
 	m_nFmt = 0;
 	m_nFrame = 0;
@@ -248,7 +251,7 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 	{	flip = 1; height = -height; }
 
 	// Validate buffer size
-	int nSize = CFfConvert::CalcImageSize( fmt, width, height );
+	int nSize = CFfFmt::CalcImageSize( fmt, width, height );
 	if ( nSize > sz_in )
 		return 0;
 
@@ -262,7 +265,7 @@ int CFfEncoder::EncodeRaw( int fmt, int width, int height, const void *in, int s
 	if ( !m_pFrame )
 		return 0;
 
-	if ( !CFfConvert::FillAVFrame( m_pFrame, fmt, width, height, (void*)in ) )
+	if ( !CFfFmt::FillAVFrame( m_pFrame, fmt, width, height, (void*)in ) )
 		return 0;
 
 	// Assume key frame
@@ -373,8 +376,15 @@ int CFfEncoder::Encode( int fmt, int width, int height, sqbind::CSqBinary *in, s
 	if ( !flip && fmt == m_nFmt )
 		return EncodeRaw( fmt, width, height, in->Ptr(), in->getUsed(), out, m );
 
+	// Create converter if needed
+	if ( m_cvt.getSrcWidth() != width || m_cvt.getSrcHeight() != height 
+		 || m_cvt.getDstWidth() != width || m_cvt.getDstHeight() != height
+		 || m_cvt.getSrcFmt() != fmt || m_cvt.getDstFmt() != m_nFmt )
+		if ( !m_cvt.Create( width, height, fmt, width, height, m_nFmt, SWS_FAST_BILINEAR, flip ) )
+			return 0;
+		
 	// Must convert to input format
-	if ( !CFfConvert::ConvertColorBB( width, height, in, fmt, &m_tmp, m_nFmt, SWS_FAST_BILINEAR ) )
+	if ( !m_cvt.ConvertBB( in, &m_tmp ) )
 		return 0;
 
 	// Do the conversion
@@ -395,10 +405,18 @@ int CFfEncoder::EncodeImage( sqbind::CSqImage *img, sqbind::CSqBinary *out, sqbi
 	if ( AV_PIX_FMT_BGR24 == m_nFmt )
 		return EncodeRaw( AV_PIX_FMT_BGR24, img->getWidth(), img->getHeight(), img->Obj().GetBits(), img->Obj().GetImageSize(), out, m );
 
-	// Must convert to input format
-	if ( !CFfConvert::ConvertColorIB( img, &m_tmp, m_nFmt, SWS_FAST_BILINEAR, 1 ) )
+	// Create converter if needed
+	int fmt = AV_PIX_FMT_BGR24;
+	if ( m_cvt.getSrcWidth() != img->getWidth() || m_cvt.getSrcHeight() != img->getHeight() 
+		 || m_cvt.getDstWidth() != img->getWidth() || m_cvt.getDstHeight() != img->getHeight()
+		 || m_cvt.getSrcFmt() != fmt || m_cvt.getDstFmt() != m_nFmt )
+		if ( !m_cvt.Create( img->getWidth(), img->getHeight(), fmt, 
+							img->getWidth(), img->getHeight(), m_nFmt, SWS_FAST_BILINEAR, 0 ) )
+			return 0;
+	
+	if ( !m_cvt.ConvertIB( img, &m_tmp ) )
 		return 0;
-
+	
 	// Do the conversion
 	return EncodeRaw( m_nFmt, img->getWidth(), img->getHeight(), m_tmp.Ptr(), m_tmp.getUsed(), out, m );
 }

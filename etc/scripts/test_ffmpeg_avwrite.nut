@@ -45,7 +45,7 @@ function create_clip( fname, fmt, w, h, fps, hz, sps, secs, font )
 	// *** VIDEO ***
 
 	local venc = CFfEncoder();
-	if ( !venc.Create( avi.getVideoCodecId(), CFfConvert().AV_PIX_FMT_YUV420P,
+	if ( !venc.Create( avi.getVideoCodecId(), CFfFmt().AV_PIX_FMT_YUV420P,
 					  w, h, fps, 1000000, CSqMulti() ) )
 		_self.echo( "Failed to create video encoder" );
 

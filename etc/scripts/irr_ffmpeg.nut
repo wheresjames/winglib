@@ -114,7 +114,7 @@ function UpdateVideo() : ( _g )
 
 //			_self.echo( _g.frame.AsciiHexStr( 16, 16 ) );
 
-			if ( !_g.ffmpeg.DecodeFrameBin( _g.frame, CFfConvert().AV_PIX_FMT_RGB32, buf, inf ) )
+			if ( !_g.ffmpeg.DecodeFrameBin( _g.frame, CFfFmt().AV_PIX_FMT_RGB32, buf, inf ) )
 				_self.echo( "Error decoding frame" );
 
 		} // end else

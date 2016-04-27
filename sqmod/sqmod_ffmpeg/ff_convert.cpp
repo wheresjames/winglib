@@ -4,19 +4,24 @@
 
 SQBIND_REGISTER_CLASS_BEGIN( CFfConvert, CFfConvert )
 
-	SQBIND_STATIC_FUNCTION( CFfConvert, CalcImageSize )
-	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorBB )
-	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorBB2 )
-	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorIB )
-	SQBIND_STATIC_FUNCTION( CFfConvert, ConvertColorBI )
+	SQBIND_MEMBER_FUNCTION( CFfConvert, ConvertBB )
+	SQBIND_MEMBER_FUNCTION( CFfConvert, ConvertIB )
+	SQBIND_MEMBER_FUNCTION( CFfConvert, ConvertBI )
+	SQBIND_MEMBER_FUNCTION( CFfConvert, ConvertII )
 
-	SQBIND_STATIC_FUNCTION( CFfConvert, ResizeBB )
+	SQBIND_MEMBER_FUNCTION( CFfConvert, getSrcWidth )
+	SQBIND_MEMBER_FUNCTION( CFfConvert, getSrcHeight )
+	SQBIND_MEMBER_FUNCTION( CFfConvert, getSrcSize )
+	SQBIND_MEMBER_FUNCTION( CFfConvert, getSrcFmt )
+	SQBIND_MEMBER_FUNCTION( CFfConvert, getDstWidth )
+	SQBIND_MEMBER_FUNCTION( CFfConvert, getDstHeight )
+	SQBIND_MEMBER_FUNCTION( CFfConvert, getDstSize )
+	SQBIND_MEMBER_FUNCTION( CFfConvert, getDstFmt )
 
 	SQBIND_STATIC_FUNCTION( CFfConvert, Rotate )
 	SQBIND_STATIC_FUNCTION( CFfConvert, FlipVert )
-	SQBIND_STATIC_FUNCTION( CFfConvert, FmtEquiv )
 
-	// Format tyeps
+	// Format types
 	SQBIND_GLOBALCONST( AV_PIX_FMT_RGB24 )
 	SQBIND_GLOBALCONST( AV_PIX_FMT_BGR24 )
 	SQBIND_GLOBALCONST( AV_PIX_FMT_RGB32 )
@@ -89,63 +94,42 @@ void CFfConvert::Register( sqbind::VM vm )
 
 CFfConvert::CFfConvert()
 {_STT();
+
+	m_psc = 0;
+	m_src_width = 0;
+	m_src_height = 0;
+	m_src_size = 0;
+	m_src_fmt = 0;
+	m_dst_width = 0;
+	m_dst_height = 0;
+	m_dst_size = 0;
+	m_dst_fmt = 0;
+	m_flip = 0;
+
 }
 
-int CFfConvert::CalcImageSize( int fmt, int width, int height )
-{_STT();
-	return avpicture_get_size( (AVPixelFormat)fmt, width, height );
-}
-
-int CFfConvert::FillAVPicture( AVPicture *pPic, int fmt, int width, int height, void *buf )
-{_STT();
-	if ( !pPic || !buf )
-		return 0;
-
-	// Initialize structure
-	oexZeroMemory( pPic, sizeof( AVPicture ) );
-
-	// Fill in the picture data
-	int nSize = avpicture_fill( pPic, (uint8_t*)buf, (AVPixelFormat)fmt, width, height );
-	if ( 0 >= nSize )
-		return 0;
-
-	return nSize;
-}
-
-int CFfConvert::FillAVFrame( AVFrame *pAv, int fmt, int width, int height, void *buf )
-{_STT();
-	if ( !pAv || !buf )
-		return 0;
-
-	AVPicture avPic;
-	oexZero( avPic );
-
-	int nSize = avpicture_fill( &avPic, (uint8_t*)buf, (AVPixelFormat)fmt, width, height );
-	if ( 0 >= nSize )
-		return 0;
-		
-	pAv->format = fmt;
-	pAv->width = width;
-	pAv->height = height;
-
-	for( int i = 0; i < (int)oexSizeOfArray( avPic.data ); i++ )
-		pAv->data[ i ] = avPic.data[ i ];
-
-	for( int i = 0; i < (int)oexSizeOfArray( avPic.linesize ); i++ )
-		pAv->linesize[ i ] = avPic.linesize[ i ];
-
-	return nSize;
-}
-
-int CFfConvert::FmtEquiv( int fmt )
+CFfConvert::~CFfConvert()
 {
-	// Seems to be issues with J FMTS
-	switch( fmt )
-	{	case AV_PIX_FMT_YUVJ420P : return AV_PIX_FMT_YUV420P;
-		case AV_PIX_FMT_YUVJ422P : return AV_PIX_FMT_YUV422P;
-		case AV_PIX_FMT_YUVJ444P : return AV_PIX_FMT_YUV444P;
-		default : return fmt;
-	} // end switch
+	Destroy();
+}
+
+void CFfConvert::Destroy()
+{_STT();
+
+	if ( m_psc )
+	{	sws_freeContext( m_psc );
+		m_psc = 0;
+	} // end if
+	
+	m_src_width = 0;
+	m_src_height = 0;
+	m_src_size = 0;
+	m_src_fmt = 0;
+	m_dst_width = 0;
+	m_dst_height = 0;
+	m_dst_size = 0;
+	m_dst_fmt = 0;
+	m_flip = 0;
 }
 
 #define FLIP_AVLINE( p, i, h ) \
@@ -185,533 +169,389 @@ int CFfConvert::Flip( int fmt, int h, AVPicture *p )
 	return 1;
 }
 
-int CFfConvert::ConvertColorBB( int width, int height, sqbind::CSqBinary *src, int src_fmt, sqbind::CSqBinary *dst, int dst_fmt, int alg )
+int CFfConvert::Create( int src_width, int src_height, int src_fmt, int dst_width, int dst_height, int dst_fmt, int alg, int flip )
 {_STT();
 
+	// Lose the old transform
+	Destroy();
+	
 _STT_SET_CHECKPOINT( 1 );
 
+	// Sanity check
+	if ( !src_width || ( src_width & 3 ) || !src_height || !dst_width || ( dst_width & 3 ) || !dst_height )
+		return 0;
+	
 	// Fix broken formats
-	src_fmt = FmtEquiv( src_fmt );
-	dst_fmt = FmtEquiv( dst_fmt );
+	src_fmt = CFfFmt::FmtEquiv( src_fmt );
+	dst_fmt = CFfFmt::FmtEquiv( dst_fmt );
 
+	m_flip = flip ? 1 : 0;
+	
+	if ( 0 > src_height ) 
+	{ 	m_flip = m_flip ? 0 : 1; 
+		src_height = -src_height; 
+	} // end if
+	
+	if ( 0 > dst_height ) 
+	{ 	m_flip = m_flip ? 0 : 1;
+		dst_height = -dst_height; 
+	} // end if
+
+	// How big is the source image?
+	m_src_size = CFfFmt::CalcImageSize( src_fmt, src_width, src_height );
+	if ( !m_src_size )
+	{	Destroy();
+		return 0;
+	} // end if
+
+	// How big is the destination image
+	m_dst_size = CFfFmt::CalcImageSize( dst_fmt, dst_width, dst_height );
+	if ( !m_dst_size )
+	{	Destroy();
+		return 0;
+	} // end if
+	
 _STT_SET_CHECKPOINT( 2 );
 
-	if ( !dst )
-		return 0;
+	// Create conversion
+	m_psc = sws_getContext(	src_width, src_height, (AVPixelFormat)src_fmt,
+							dst_width, dst_height, (AVPixelFormat)dst_fmt,
+							alg, NULL, NULL, NULL );
 
 _STT_SET_CHECKPOINT( 3 );
 
-	int flip = 0;
-	if ( 0 > height ) 
-	{ 	flip = 1; 
-		height = -height; 
+	if ( !m_psc )
+	{	Destroy();
+		return 0;
 	} // end if
+	
+	m_src_width = src_width;
+	m_src_height = src_height;
+	m_src_fmt = src_fmt; 
 
-	if ( 0 >= width || 0 >= height || ( width % 4 ) )
+	m_dst_width = dst_width;
+	m_dst_height = dst_height;
+	m_dst_fmt = dst_fmt;
+
+	return 1;
+}
+
+int CFfConvert::ConvertBB( sqbind::CSqBinary *src, sqbind::CSqBinary *dst )
+{_STT();
+
+	if ( !m_psc )
 		return 0;
-
-	if ( !src || !src->getUsed() )
-		return 0;
-
-	// How big is the destination image?
-	oexSIZE_T nDstSize = CalcImageSize( dst_fmt, width, height );
-	if ( !nDstSize )
-		return 0;
-
-_STT_SET_CHECKPOINT( 4 );
-
-	// Allocate memory for destination image
-	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
-		return 0;
-
-_STT_SET_CHECKPOINT( 5 );
-
-	// Ensure source buffer is large enough
-	oexSIZE_T nSrcSize = CalcImageSize( src_fmt, width, height );
-	if ( src->getUsed() < nSrcSize )
-		return 0;
-
-_STT_SET_CHECKPOINT( 6 );
-
-	// Fill in picture data
-	AVPicture apSrc, apDst;
-	if ( !FillAVPicture( &apSrc, src_fmt, width, height, src->_Ptr() )
-	     || !FillAVPicture( &apDst, dst_fmt, width, height, dst->_Ptr() ) )
-		return 0;
-
-_STT_SET_CHECKPOINT( 7 );
-
-	if ( flip )
-		Flip( src_fmt, height, &apSrc );
-
-_STT_SET_CHECKPOINT( 8 );
-
-	// Create conversion
-	SwsContext *psc = sws_getContext(	width, height, (AVPixelFormat)src_fmt,
-										width, height, (AVPixelFormat)dst_fmt,
-										alg, NULL, NULL, NULL );
-
-	if ( !psc )
-		return 0;
-
-_STT_SET_CHECKPOINT( 9 );
-
-	int nRet = sws_scale(	psc, apSrc.data, apSrc.linesize, 0, height,
-							apDst.data, apDst.linesize );
-
+	
 _STT_SET_CHECKPOINT( 10 );
 
-	sws_freeContext( psc );
-
-_STT_SET_CHECKPOINT( 11 );
-
-	if ( 0 >= nRet )
-		return 0;
-
-	dst->setUsed( nDstSize );
-
-	return 1;
-}
-
-int CFfConvert::ResizeBB( int sw, int sh, sqbind::CSqBinary *src, int src_fmt, int dw, int dh, sqbind::CSqBinary *dst, int dst_fmt, int alg )
-{_STT();
-
-	// Fix broken formats
-	src_fmt = FmtEquiv( src_fmt );
-	dst_fmt = FmtEquiv( dst_fmt );
-
-	if ( !dst )
-		return 0;
-
-	int flip = 0;
-	if ( 0 > sh ) 
-	{ 	flip = 1; 
-		sh = -sh; 
-	} // end if
-
-	if ( 0 > dh ) 
-	{ 	flip = flip ? 0 : 1;
-		dh = -dh; 
-	} // end if
-
-	if ( 0 >= sw || 0 >= sh || 0 >= dw || 0 >= dh || ( sw % 4 ) || ( dw % 4 ) )
-		return 0;
-
-	if ( !src || !src->getUsed() )
-		return 0;
-
-	// How big is the destination image?
-	oexSIZE_T nDstSize = CalcImageSize( dst_fmt, dw, dh );
-	if ( !nDstSize )
-		return 0;
-
-	// Allocate memory for destination image
-	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
-		return 0;
-
 	// Ensure source buffer is large enough
-	oexSIZE_T nSrcSize = CalcImageSize( src_fmt, sw, sh );
-	if ( src->getUsed() < nSrcSize )
-		return 0;
-
-	// Fill in picture data
-	AVPicture apSrc, apDst;
-	if ( !FillAVPicture( &apSrc, src_fmt, sw, sh, src->_Ptr() )
-	     || !FillAVPicture( &apDst, dst_fmt, dw, dh, dst->_Ptr() ) )
-		return 0;
-
-	if ( flip )
-		Flip( src_fmt, sh, &apSrc );
-
-	// Create conversion
-	SwsContext *psc = sws_getContext(	sw, sh, (AVPixelFormat)src_fmt,
-										dw, dh, (AVPixelFormat)dst_fmt,
-										alg, NULL, NULL, NULL );
-
-	if ( !psc )
-		return 0;
-
-	int nRet = sws_scale(	psc, apSrc.data, apSrc.linesize, 0, sh,
-							apDst.data, apDst.linesize );
-
-	sws_freeContext( psc );
-
-	if ( 0 >= nRet )
-		return 0;
-
-	dst->setUsed( nDstSize );
-
-	return 1;
-}
-
-int CFfConvert::ConvertColorBB2( int width, int height, sqbind::CSqBinary *src, int src_fmt, int dst_width, int dst_height, sqbind::CSqBinary *dst, int dst_fmt, int alg )
-{_STT();
-
-	// Fix broken formats
-	src_fmt = FmtEquiv( src_fmt );
-	dst_fmt = FmtEquiv( dst_fmt );
-
-	if ( !dst )
-		return 0;
-
-	int flip = 0;
-	if ( 0 > height ) { flip = 1; height = -height; }
-
-	if ( 0 >= width || 0 >= height || ( width % 4 ) )
-		return 0;
-
-	if ( !src || !src->getUsed() )
-		return 0;
-
-	// How big is the destination image?
-	oexSIZE_T nDstSize = CalcImageSize( dst_fmt, dst_width, dst_height );
-	if ( !nDstSize )
+	if ( src->getUsed() < m_src_size )
 		return 0;
 
 	// Allocate memory for destination image
-	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
+	if ( dst->Size() < ( m_dst_size + FF_INPUT_BUFFER_PADDING_SIZE * 2 )
+		 && !dst->Allocate( m_dst_size + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
 		return 0;
-
-	// Ensure source buffer is large enough
-	oexSIZE_T nSrcSize = CalcImageSize( src_fmt, width, height );
-	if ( src->getUsed() < nSrcSize )
-		return 0;
-
-	// Fill in picture data
-	AVPicture apSrc, apDst;
-	if ( !FillAVPicture( &apSrc, src_fmt, width, height, src->_Ptr() )
-	     || !FillAVPicture( &apDst, dst_fmt, dst_width, dst_height, dst->_Ptr() ) )
-		return 0;
-
-	// Flip?
-	if ( flip )
-		Flip( src_fmt, height, &apSrc );
-
-	// Create conversion
-	SwsContext *psc = sws_getContext(	width, height, (AVPixelFormat)src_fmt,
-										dst_width, dst_height, (AVPixelFormat)dst_fmt,
-										alg, NULL, NULL, NULL );
-	if ( !psc )
-		return 0;
-
-	int nRet = sws_scale(	psc, apSrc.data, apSrc.linesize, 0, height,
-							apDst.data, apDst.linesize );
-
-	sws_freeContext( psc );
-
-	if ( 0 >= nRet )
-		return 0;
-
-	dst->setUsed( nDstSize );
-
-	return 1;
-}
-
-int CFfConvert::ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, int dst_fmt, int alg, int flip )
-{_STT();
-
-	// Fix broken formats
-	dst_fmt = FmtEquiv( dst_fmt );
-
-	if ( !dst )
-		return 0;
-
-	if ( !img )
-		return 0;
-
-	AVPixelFormat src_fmt = AV_PIX_FMT_BGR24;
-	int width = img->getWidth();
-	int height = img->getHeight();
-	if ( !img->Obj().GetBits() || 0 >= width || 0 >= height )
-		return 0;
-
-	// How big is the destination image?
-	oexSIZE_T nSize = CalcImageSize( dst_fmt, width, height );
-	if ( !nSize )
-		return 0;
-
-	// Allocate memory for destination image
-	if ( dst->Size() < nSize && !dst->Allocate( nSize + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
-		return 0;
-
-	// Fill in picture data
-	AVPicture apSrc, apDst;
-	if ( !FillAVPicture( &apSrc, src_fmt, width, height, img->Obj().GetBits() )
-	     || !FillAVPicture( &apDst, dst_fmt, width, height, dst->_Ptr() ) )
-		return 0;
-
-	// Flip?
-	if ( flip )
-		Flip( src_fmt, height, &apSrc );
-
-/*	More overhead has been added to colorspace conversion
-
-	// Convert the image
-	if ( img_convert( &apDst, dst_fmt, &apSrc, src_fmt, width, height ) )
-		return 0;
-
-	// Save the number of bytes used in the output buffer
-	dst->setUsed( nSize );
-
-	return 1;
-*/
-
-	// Create conversion
-	SwsContext *psc = sws_getContext(	width, height, src_fmt,
-										width, height, (AVPixelFormat)dst_fmt,
-										alg, NULL, NULL, NULL );
-
-	if ( !psc )
-		return 0;
-
-	// Do the conversion
-	int nRet = sws_scale( psc, apSrc.data, apSrc.linesize, 0, height,
-			   			  apDst.data, apDst.linesize );
-
-	sws_freeContext( psc );
-
-	if ( 0 >= nRet )
-		return 0;
-
-	dst->setUsed( nSize );
-
-	return 1;
-}
-
-int CFfConvert::ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip )
-{_STT();
-
-	// Fix broken formats
-	src_fmt = FmtEquiv( src_fmt );
-
-	// Sanity checks
-	if ( !img || 0 >= width || 0 == height || !src || !src->getUsed() )
-		return 0;
-
-	if ( 0 > height ) { flip = 1; height = -height; }
-
-	// Image format
-	AVPixelFormat dst_fmt = AV_PIX_FMT_BGR24;
-
-	// Do we need to allocate destination image?
-	if ( img->getWidth() != width || img->getHeight() != height )
-		if ( !img->Create( width, height ) )
-			return 0;
-
-	// Fill in picture data
-	AVPicture apSrc, apDst;
-	if ( !FillAVPicture( &apSrc, src_fmt, width, height, src->_Ptr() )
-	     || !FillAVPicture( &apDst, dst_fmt, width, height, img->Obj().GetBits() ) )
-		return 0;
-
-	// Flip?
-	if ( flip )
-		Flip( src_fmt, height, &apSrc );
-
-	// Create conversion
-	SwsContext *psc = sws_getContext(	width, height, (AVPixelFormat)src_fmt,
-										width, height, dst_fmt,
-										alg, NULL, NULL, NULL );
-	if ( !psc )
-		return 0;
-
-	// Do the conversion
-	int nRet = sws_scale( psc, apSrc.data, apSrc.linesize, 0, height,
-			   			  apDst.data, apDst.linesize );
-
-	sws_freeContext( psc );
-
-	if ( 0 >= nRet )
-		return 0;
-
-	return 1;
-}
-
-int CFfConvert::ConvertColorRI( void *buf, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip )
-{_STT();
-
-	// Fix broken formats
-	src_fmt = FmtEquiv( src_fmt );
-
-	// Sanity checks
-	if ( !img || 0 >= width || 0 == height || !buf )
-		return 0;
-
-	if ( 0 > height ) { flip = 1; height = -height; }
-
-	// Image format
-	AVPixelFormat dst_fmt = AV_PIX_FMT_BGR24;
-
-	// Do we need to allocate destination image?
-	if ( img->getWidth() != width || img->getHeight() != height )
-		if ( !img->Create( width, height ) )
-			return 0;
-
-	// Fill in picture data
-	AVPicture apSrc, apDst;
-	if ( !FillAVPicture( &apSrc, src_fmt, width, height, buf )
-	     || !FillAVPicture( &apDst, dst_fmt, width, height, img->Obj().GetBits() ) )
-		return 0;
-
-	// Flip?
-	if ( flip )
-		Flip( src_fmt, height, &apSrc );
-
-	// Create conversion
-	SwsContext *psc = sws_getContext(	width, height, (AVPixelFormat)src_fmt,
-										width, height, dst_fmt,
-										alg, NULL, NULL, NULL );
-	if ( !psc )
-		return 0;
-
-	// Do the conversion
-	int nRet = sws_scale( psc, apSrc.data, apSrc.linesize, 0, height,
-			   			  apDst.data, apDst.linesize );
-
-	sws_freeContext( psc );
-
-	if ( 0 >= nRet )
-		return 0;
-
-	return 1;
-}
-
-int CFfConvert::ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip )
-{_STT();
-
-	// Fix broken formats
-	src_fmt = FmtEquiv( src_fmt );
-
-	// Sanity checks
-	if ( !img || 0 >= width || 0 == height || !pAf )
-		return 0;
-
-	if ( 0 > height ) { flip = 1; height = -height; }
-
-	// Image format
-	AVPixelFormat dst_fmt = AV_PIX_FMT_BGR24;
-
-	// Do we need to allocate destination image?
-	if ( img->getWidth() != width || img->getHeight() != height )
-		if ( !img->Create( width, height ) )
-			return 0;
-
-	// Fill in picture data
-	AVPicture apSrc, apDst;
-
-	// Copy source information
-	oexZero( apSrc );
-	for ( int i = 0; i < (int)oexSizeOfArray( apSrc.linesize ); i++ )
-		apSrc.data[ i ] = pAf->data[ i ],
-		apSrc.linesize[ i ] = pAf->linesize[ i ];
-
-	if ( !FillAVPicture( &apDst, dst_fmt, width, height, img->Obj().GetBits() ) )
-		return 0;
-
-	// Flip?
-	if ( flip )
-		Flip( src_fmt, height, &apSrc );
 		
-	// Create conversion
-	SwsContext *psc = sws_getContext(	width, height, (AVPixelFormat)src_fmt,
-										width, height, dst_fmt,
-										alg, NULL, NULL, NULL );
-	if ( !psc )
-		return 0;
-
-	// Do the conversion
-	int nRet = sws_scale( psc, apSrc.data, apSrc.linesize, 0, height,
-			   			  apDst.data, apDst.linesize );
-
-	sws_freeContext( psc );
-
-	if ( 0 >= nRet )
-		return 0;
-
-	return 1;
-}
-
-int CFfConvert::ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height, int dst_fmt, sqbind::CSqBinary *dst, int alg, int flip )
-{_STT();
-
-_STT_SET_CHECKPOINT( 1 );
-
-	// Fix broken formats
-	src_fmt = FmtEquiv( src_fmt );
-	dst_fmt = FmtEquiv( dst_fmt );
-
-_STT_SET_CHECKPOINT( 2 );
-
-	// Sanity checks
-	if ( !dst || 0 >= width || 0 == height || !pAf )
-		return 0;
-
-	if ( 0 > height ) { flip = 1; height = -height; }
-
-_STT_SET_CHECKPOINT( 3 );
-
-	// Output size
-	oexSIZE_T nDstSize = CFfConvert::CalcImageSize( dst_fmt, width, height );
-	if ( dst->Size() < nDstSize && !dst->Allocate( nDstSize + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
-		return 0;
-
-_STT_SET_CHECKPOINT( 4 );
-
-	oexSIZE_T nSrcSize = CFfConvert::CalcImageSize( src_fmt, width, height );
-	if ( !nSrcSize )
-		return 0;
+_STT_SET_CHECKPOINT( 11 );
 
 	// Fill in picture data
 	AVPicture apSrc, apDst;
-
-_STT_SET_CHECKPOINT( 5 );
-
-	// Copy source information
-	oexZero( apSrc );
-	for ( int i = 0; i < (int)oexSizeOfArray( apSrc.linesize ); i++ )
-		apSrc.data[ i ] = pAf->data[ i ],
-		apSrc.linesize[ i ] = pAf->linesize[ i ];
-
-_STT_SET_CHECKPOINT( 6 );
-
-	if ( !FillAVPicture( &apDst, dst_fmt, width, height, dst->_Ptr() ) )
+	if ( !CFfFmt::FillAVPicture( &apSrc, m_src_fmt, m_src_width, m_src_height, src->_Ptr() )
+	     || !CFfFmt::FillAVPicture( &apDst, m_dst_fmt, m_dst_width, m_dst_height, dst->_Ptr() ) )
 		return 0;
-
-_STT_SET_CHECKPOINT( 7 );
-
-	// Flip?
-	if ( flip )
-		Flip( src_fmt, height, &apSrc );
-
-_STT_SET_CHECKPOINT( 8 );
-
-	// Create conversion
-	SwsContext *psc = sws_getContext(	width, height, (AVPixelFormat)src_fmt,
-										width, height, (AVPixelFormat)dst_fmt,
-										alg, NULL, NULL, NULL );
-_STT_SET_CHECKPOINT( 9 );
-
-	if ( !psc )
-		return 0;
-
-_STT_SET_CHECKPOINT( 10 );
-
-	// Do the conversion
-	int nRet = sws_scale( psc, apSrc.data, apSrc.linesize, 0, height,
-			   			  apDst.data, apDst.linesize );
-
-_STT_SET_CHECKPOINT( 11 );
-
-	sws_freeContext( psc );
 
 _STT_SET_CHECKPOINT( 12 );
 
-	if ( 0 >= nRet )
-		return 0;
+	if ( m_flip )
+		Flip( m_src_fmt, m_src_height, &apSrc );
 
 _STT_SET_CHECKPOINT( 13 );
 
-	dst->setUsed( nDstSize );
+	int nRet = sws_scale(	m_psc, apSrc.data, apSrc.linesize, 0, m_src_height,
+							apDst.data, apDst.linesize );
+
+_STT_SET_CHECKPOINT( 14 );
+
+	if ( 0 >= nRet )
+		return 0;
+
+	dst->setUsed( m_dst_size );
+
+	return 1;
+}
+
+
+int CFfConvert::ConvertIB( sqbind::CSqImage *src, sqbind::CSqBinary *dst )
+{_STT();
+
+	if ( !m_psc )
+		return 0;
+	
+_STT_SET_CHECKPOINT( 10 );
+
+	// Ensure source buffer is large enough
+	if ( src->getUsed() < m_src_size || src->getWidth() != m_src_width || src->getHeight() != m_src_height )
+		return 0;
+
+	// Allocate memory for destination image
+	if ( dst->Size() < ( m_dst_size + FF_INPUT_BUFFER_PADDING_SIZE * 2 )
+		 && !dst->Allocate( m_dst_size + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
+		return 0;
+		
+_STT_SET_CHECKPOINT( 11 );
+
+	// Fill in picture data
+	AVPicture apSrc, apDst;
+	if ( !CFfFmt::FillAVPicture( &apSrc, m_src_fmt, m_src_width, m_src_height, src->Obj().GetBits() )
+	     || !CFfFmt::FillAVPicture( &apDst, m_dst_fmt, m_dst_width, m_dst_height, dst->_Ptr() ) )
+		return 0;
+
+_STT_SET_CHECKPOINT( 12 );
+
+	if ( m_flip )
+		Flip( m_src_fmt, m_src_height, &apSrc );
+
+_STT_SET_CHECKPOINT( 13 );
+
+	int nRet = sws_scale(	m_psc, apSrc.data, apSrc.linesize, 0, m_src_height,
+							apDst.data, apDst.linesize );
+
+_STT_SET_CHECKPOINT( 14 );
+
+	if ( 0 >= nRet )
+		return 0;
+
+	dst->setUsed( m_dst_size );
+
+	return 1;
+}
+
+int CFfConvert::ConvertBI( sqbind::CSqBinary *src, sqbind::CSqImage *dst )
+{_STT();
+
+	if ( !m_psc )
+		return 0;
+	
+_STT_SET_CHECKPOINT( 10 );
+
+	// Ensure source buffer is large enough
+	if ( src->getUsed() < m_src_size )
+		return 0;
+
+	// Do we need to allocate destination image?
+	if ( dst->getWidth() != m_dst_width || dst->getHeight() != m_dst_height )
+		if ( !dst->Create( m_dst_width, m_dst_height ) )
+			return 0;
+		
+_STT_SET_CHECKPOINT( 11 );
+
+	// Fill in picture data
+	AVPicture apSrc, apDst;
+	if ( !CFfFmt::FillAVPicture( &apSrc, m_src_fmt, m_src_width, m_src_height, src->_Ptr() )
+	     || !CFfFmt::FillAVPicture( &apDst, m_dst_fmt, m_dst_width, m_dst_height, dst->Obj().GetBits() ) )
+		return 0;
+
+_STT_SET_CHECKPOINT( 12 );
+
+	if ( m_flip )
+		Flip( m_src_fmt, m_src_height, &apSrc );
+
+_STT_SET_CHECKPOINT( 13 );
+
+	int nRet = sws_scale(	m_psc, apSrc.data, apSrc.linesize, 0, m_src_height,
+							apDst.data, apDst.linesize );
+
+_STT_SET_CHECKPOINT( 14 );
+
+	if ( 0 >= nRet )
+		return 0;
+
+	return 1;
+}
+
+int CFfConvert::ConvertII( sqbind::CSqImage *src, sqbind::CSqImage *dst )
+{_STT();
+
+	if ( !m_psc )
+		return 0;
+	
+_STT_SET_CHECKPOINT( 10 );
+
+	// Ensure source buffer is large enough
+	if ( src->getUsed() < m_src_size || src->getWidth() != m_src_width || src->getHeight() != m_src_height )
+		return 0;
+
+	// Do we need to allocate destination image?
+	if ( dst->getWidth() != m_dst_width || dst->getHeight() != m_dst_height )
+		if ( !dst->Create( m_dst_width, m_dst_height ) )
+			return 0;
+		
+_STT_SET_CHECKPOINT( 11 );
+
+	// Fill in picture data
+	AVPicture apSrc, apDst;
+	if ( !CFfFmt::FillAVPicture( &apSrc, m_src_fmt, m_src_width, m_src_height, src->Obj().GetBits() )
+	     || !CFfFmt::FillAVPicture( &apDst, m_dst_fmt, m_dst_width, m_dst_height, dst->Obj().GetBits() ) )
+		return 0;
+
+_STT_SET_CHECKPOINT( 12 );
+
+	if ( m_flip )
+		Flip( m_src_fmt, m_src_height, &apSrc );
+
+_STT_SET_CHECKPOINT( 13 );
+
+	int nRet = sws_scale(	m_psc, apSrc.data, apSrc.linesize, 0, m_src_height,
+							apDst.data, apDst.linesize );
+
+_STT_SET_CHECKPOINT( 14 );
+
+	if ( 0 >= nRet )
+		return 0;
+
+	return 1;
+}
+
+int CFfConvert::ConvertRI( void *src, sqbind::CSqImage *dst )
+{_STT();
+
+	if ( !m_psc )
+		return 0;
+	
+_STT_SET_CHECKPOINT( 10 );
+
+	// Ensure source buffer is large enough
+	if ( !src )
+		return 0;
+
+	// Do we need to allocate destination image?
+	if ( dst->getWidth() != m_dst_width || dst->getHeight() != m_dst_height )
+		if ( !dst->Create( m_dst_width, m_dst_height ) )
+			return 0;
+		
+_STT_SET_CHECKPOINT( 11 );
+
+	// Fill in picture data
+	AVPicture apSrc, apDst;
+	if ( !CFfFmt::FillAVPicture( &apSrc, m_src_fmt, m_src_width, m_src_height, src )
+	     || !CFfFmt::FillAVPicture( &apDst, m_dst_fmt, m_dst_width, m_dst_height, dst->Obj().GetBits() ) )
+		return 0;
+
+_STT_SET_CHECKPOINT( 12 );
+
+	if ( m_flip )
+		Flip( m_src_fmt, m_src_height, &apSrc );
+
+_STT_SET_CHECKPOINT( 13 );
+
+	int nRet = sws_scale(	m_psc, apSrc.data, apSrc.linesize, 0, m_src_height,
+							apDst.data, apDst.linesize );
+
+_STT_SET_CHECKPOINT( 14 );
+
+	if ( 0 >= nRet )
+		return 0;
+
+	return 1;
+}
+
+int CFfConvert::ConvertFI( AVFrame* src, sqbind::CSqImage *dst )
+{_STT();
+
+	if ( !m_psc )
+		return 0;
+	
+_STT_SET_CHECKPOINT( 10 );
+
+	// Ensure source buffer is large enough
+	if ( !src )
+		return 0;
+
+	// Do we need to allocate destination image?
+	if ( dst->getWidth() != m_dst_width || dst->getHeight() != m_dst_height )
+		if ( !dst->Create( m_dst_width, m_dst_height ) )
+			return 0;
+		
+_STT_SET_CHECKPOINT( 11 );
+
+	// Fill in picture data
+	AVPicture apSrc, apDst;
+
+	// Copy source information
+	oexZero( apSrc );
+	for ( int i = 0; i < (int)oexSizeOfArray( apSrc.linesize ); i++ )
+		apSrc.data[ i ] = src->data[ i ],
+		apSrc.linesize[ i ] = src->linesize[ i ];
+	
+	if ( !CFfFmt::FillAVPicture( &apDst, m_dst_fmt, m_dst_width, m_dst_height, dst->Obj().GetBits() ) )
+		return 0;
+
+_STT_SET_CHECKPOINT( 12 );
+
+	if ( m_flip )
+		Flip( m_src_fmt, m_src_height, &apSrc );
+
+_STT_SET_CHECKPOINT( 13 );
+
+	int nRet = sws_scale(	m_psc, apSrc.data, apSrc.linesize, 0, m_src_height,
+							apDst.data, apDst.linesize );
+
+_STT_SET_CHECKPOINT( 14 );
+
+	if ( 0 >= nRet )
+		return 0;
+
+	return 1;
+}
+
+int CFfConvert::ConvertFB( AVFrame* src, sqbind::CSqBinary *dst )
+{_STT();
+
+	if ( !m_psc )
+		return 0;
+	
+_STT_SET_CHECKPOINT( 10 );
+
+	// Ensure source buffer is large enough
+	if ( !src )
+		return 0;
+
+	// Allocate memory for destination image
+	if ( dst->Size() < ( m_dst_size + FF_INPUT_BUFFER_PADDING_SIZE * 2 )
+		 && !dst->Allocate( m_dst_size + FF_INPUT_BUFFER_PADDING_SIZE * 2 ) )
+		return 0;
+				
+_STT_SET_CHECKPOINT( 11 );
+
+	// Fill in picture data
+	AVPicture apSrc, apDst;
+	
+	// Copy source information
+	oexZero( apSrc );
+	for ( int i = 0; i < (int)oexSizeOfArray( apSrc.linesize ); i++ )
+		apSrc.data[ i ] = src->data[ i ],
+		apSrc.linesize[ i ] = src->linesize[ i ];
+	
+	if ( !CFfFmt::FillAVPicture( &apDst, m_dst_fmt, m_dst_width, m_dst_height, dst->_Ptr() ) )
+		return 0;
+
+_STT_SET_CHECKPOINT( 12 );
+
+	if ( m_flip )
+		Flip( m_src_fmt, m_src_height, &apSrc );
+
+_STT_SET_CHECKPOINT( 13 );
+
+	int nRet = sws_scale(	m_psc, apSrc.data, apSrc.linesize, 0, m_src_height,
+							apDst.data, apDst.linesize );
+
+_STT_SET_CHECKPOINT( 14 );
+
+	if ( 0 >= nRet )
+		return 0;
+
+	dst->setUsed( m_dst_size );
 
 	return 1;
 }

@@ -63,7 +63,7 @@ function StripJpegs( in_file, out_file, fps, jpg )
 					else if ( !rec_avi.InitWrite() )
 						_self.echo( "Failed to initiailze avi" );
 
-					else if ( !rec_enc.Create( rec_avi.getVideoCodecId(), CFfConvert().AV_PIX_FMT_YUV420P,
+					else if ( !rec_enc.Create( rec_avi.getVideoCodecId(), CFfFmt().AV_PIX_FMT_YUV420P,
 											   width, height, fps, 1000000, CSqMulti() ) )
 						_self.echo( "Failed to create encoder" );
 

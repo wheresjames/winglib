@@ -10,6 +10,9 @@ public:
 
 	/// Default constructor
 	CFfConvert();
+	
+	/// Destructor
+	~CFfConvert();
 
 	/// Registers the class
 	static void Register( sqbind::VM vm );
@@ -18,26 +21,39 @@ public:
 		@{
 	*/
 
-	/// Patches broken formats
-	static int FmtEquiv( int fmt );
-
-	/// Calculate image buffer size for specified format
-	static int CalcImageSize( int fmt, int width, int height );
-
-	/// Converts image colorspace
-	static int ConvertColorBB( int width, int height, sqbind::CSqBinary *src, int src_fmt, sqbind::CSqBinary *dst, int dst_fmt, int alg );
+	/// Release resources and ready object for reuse
+	void Destroy();
+	
+	int getSrcWidth() { return m_src_width; }
+	
+	int getSrcHeight() { return m_src_height; }
+	
+	int getSrcSize() { return m_src_size; }
+	
+	int getSrcFmt() { return m_src_fmt; } 
+	
+	int getDstWidth() { return m_dst_width; }
+	
+	int getDstHeight() { return m_dst_height; }
+	       
+	int getDstSize() { return m_dst_size; }
+	       
+	int getDstFmt() { return m_dst_fmt; } 
+	
+	/// Creates the image transformation context
+	int Create( int src_width, int src_height, int src_fmt, int dst_width, int dst_height, int dst_fmt, int alg, int flip );
+	
+	/// Converts image colorspace and size
+	int ConvertBB( sqbind::CSqBinary *src, sqbind::CSqBinary *dst );
 
 	/// Converts image colorspace and size
-	static int ConvertColorBB2( int width, int height, sqbind::CSqBinary *src, int src_fmt, int dst_width, int dst_height, sqbind::CSqBinary *dst, int dst_fmt, int alg );
+	int ConvertIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst );
 
-	/// Converts image colorspace
-	static int ConvertColorIB( sqbind::CSqImage *img, sqbind::CSqBinary *dst, int dst_fmt, int alg, int flip );
+	/// Converts image colorspace and size
+	int ConvertBI( sqbind::CSqBinary *src, sqbind::CSqImage *dst );
 
-	/// Converts image colorspace
-	static int ConvertColorBI( sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip );
-
-	/// Resizes image with colorspace conversion
-	static int ResizeBB( int sw, int sh, sqbind::CSqBinary *src, int src_fmt, int dw, int dh, sqbind::CSqBinary *dst, int dst_fmt, int alg );
+	/// Converts image colorspace and size
+	int ConvertII( sqbind::CSqImage *src, sqbind::CSqImage *dst );
 
 	/// Rotates an image
 	static int Rotate( int deg, sqbind::CSqBinary *src, int src_fmt, int width, int height, sqbind::CSqBinary *dst, int dst_fmt );
@@ -47,26 +63,52 @@ public:
 
 	/** @} */
 
+private:
+
+	SwsContext 			*m_psc;
+	
+	/// Source Width
+	int					m_src_width;
+	
+	/// Source height
+	int					m_src_height;
+	
+	/// Source image size
+	int					m_src_size;
+	
+	/// Source image format
+	int					m_src_fmt;
+	
+	/// Destination width
+	int					m_dst_width;
+	
+	/// Destination height
+	int					m_dst_height;
+	
+	/// Destination image size
+	int					m_dst_size;
+	
+	/// Destination image format
+	int					m_dst_fmt;
+	
+	/// Non zero if image should be flipped
+	int					m_flip;
+	
 public:
+
+	/// Convert AVFrame to image
+	int ConvertFI( AVFrame* src, sqbind::CSqImage *dst );
+
+	/// Convert AVFrame
+	int ConvertFB( AVFrame* src, sqbind::CSqBinary *dst );
+	
+	/// Convert raw buffer to image
+	int ConvertRI( void *src, sqbind::CSqImage *dst );
+
 
 	// Flips the information in an AVPicture structure
 	static int Flip( int fmt, int h, AVPicture *p );
 	
-	/// Fills in frame data for specified format
-	static int FillAVFrame( AVFrame *pAv, int fmt, int width, int height, void *buf );
-
-	/// Fills in the picture structure for the specified format
-	static int FillAVPicture( AVPicture *pPic, int fmt, int width, int height, void *buf );
-	
-	/// Convert AVFrame to image
-	static int ConvertColorFI( AVFrame* pAf, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip );
-
-	/// Convert AVFrame
-	static int ConvertColorFB( AVFrame* pAf, int src_fmt, int width, int height, int dst_fmt, sqbind::CSqBinary *dst, int alg, int flip );
-	
-	/// Convert raw buffer to image
-	static int ConvertColorRI( void *buf, int src_fmt, int width, int height, sqbind::CSqImage *img, int alg, int flip );
-
 	/// Rotates an image 90 degrees
 	static int Rotate90_3( void *src, void *dst, int width, int height );
 

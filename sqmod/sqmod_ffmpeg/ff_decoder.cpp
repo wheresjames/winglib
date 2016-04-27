@@ -107,6 +107,8 @@ void CFfDecoder::Destroy()
 	{	av_free( m_pFormatContext );
 		m_pFormatContext = oexNULL;
 	} // end if
+	
+	m_cvt.Destroy();
 
 	m_nFmt = 0;
 	m_nFps = 0;
@@ -457,11 +459,17 @@ int CFfDecoder::Decode( sqbind::CSqBinary *in, int fmt, sqbind::CSqBinary *out, 
 	if ( 0 >= m_pCodecContext->width || 0 >= m_pCodecContext->height )
 		return 0;
 
-	// Convert
-	int res = CFfConvert::ConvertColorFB( m_pFrame, m_nFmt, m_pCodecContext->width, m_pCodecContext->height, fmt, out, SWS_FAST_BILINEAR, flip );
-	if ( !res )
+	// Create converter if needed
+	if ( m_cvt.getSrcWidth() != m_pCodecContext->width || m_cvt.getSrcHeight() != m_pCodecContext->height 
+		 || m_cvt.getDstWidth() != m_pCodecContext->width || m_cvt.getDstHeight() != m_pCodecContext->height
+		 || m_cvt.getSrcFmt() != m_nFmt || m_cvt.getDstFmt() != fmt )
+		if ( !m_cvt.Create( m_pCodecContext->width, m_pCodecContext->height, m_nFmt, 
+							m_pCodecContext->width, m_pCodecContext->height, fmt, SWS_FAST_BILINEAR, flip ) )
+			return 0;
+	
+	if ( !m_cvt.ConvertFB( m_pFrame, out ) )
 		return 0;
-
+	
 	// Count a frame
 	m_nFrame++;
 
@@ -521,11 +529,18 @@ int CFfDecoder::DecodeImage( sqbind::CSqBinary *in, sqbind::CSqImage *img, sqbin
 	if ( 0 >= m_pCodecContext->width || 0 >= m_pCodecContext->height )
 		return 0;
 
-	// Convert
-	int res = CFfConvert::ConvertColorFI( m_pFrame, m_nFmt, m_pCodecContext->width, m_pCodecContext->height, img, SWS_FAST_BILINEAR, flip );
-	if ( !res )
+	// Create converter if needed
+	int fmt = AV_PIX_FMT_BGR24;
+	if ( m_cvt.getSrcWidth() != m_pCodecContext->width || m_cvt.getSrcHeight() != m_pCodecContext->height 
+		 || m_cvt.getDstWidth() != m_pCodecContext->width || m_cvt.getDstHeight() != m_pCodecContext->height
+		 || m_cvt.getSrcFmt() != m_nFmt || m_cvt.getDstFmt() != fmt )
+		if ( !m_cvt.Create( m_pCodecContext->width, m_pCodecContext->height, m_nFmt, 
+							m_pCodecContext->width, m_pCodecContext->height, fmt, SWS_FAST_BILINEAR, flip ) )
+			return 0;
+	
+	if ( !m_cvt.ConvertFI( m_pFrame, img ) )
 		return 0;
-
+	
 	// Count a frame
 	m_nFrame++;
 

@@ -106,7 +106,7 @@ function RecordToFile( file ) : ( _g )
 	else if ( !_g.rec_avi.InitWrite() )
 		_self.echo( "Failed to initiailze avi" );
 
-	else if ( !_g.rec_enc.Create( _g.rec_avi.getVideoCodecId(), CFfConvert().AV_PIX_FMT_YUV420P, 
+	else if ( !_g.rec_enc.Create( _g.rec_avi.getVideoCodecId(), CFfFmt().AV_PIX_FMT_YUV420P, 
 								  width, height, 10, 800000, CSqMulti() ) )
 		_self.echo( "Failed to create encoder" );
 
@@ -123,7 +123,7 @@ function RenderFile() : ( _g )
 	{
 		local inf = CSqMulti();
 		
-		if ( !_g.rec_enc.Encode( CFfConvert().AV_PIX_FMT_BGR32, 
+		if ( !_g.rec_enc.Encode( CFfFmt().AV_PIX_FMT_BGR32, 
 								 _g.irr.getWidth(), -_g.irr.getHeight(),
 								 img, _g.rec_frame, inf ) )
 			_self.echo( "Failed to encode frame" );

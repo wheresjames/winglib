@@ -133,14 +133,14 @@ function UpdateVideo() : ( _g )
 		_self.echo( "Creating video decoder for " + _g.rtsp.getVideoCodecName() );
 		_g.dec = CFfDecoder();
 		_g.dec.setExtraData( _g.rtsp.getExtraVideoData() );
-		if ( !_g.dec.Create( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ), CFfConvert().AV_PIX_FMT_YUV420P,
+		if ( !_g.dec.Create( CFfDecoder().LookupCodecId( _g.rtsp.getVideoCodecName() ), CFfFmt().AV_PIX_FMT_YUV420P,
 							 _g.rtsp.getWidth(), _g.rtsp.getHeight(), 5, 2000000, CSqMulti( "cmp=-2" ) ) )
 			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getVideoCodecName() ), _g.quit = 1;
 
 		_self.echo( " !!! STARTING RTSP STREAM !!!" );
 		_g.rtsp.Play();
 
-//		_g.dec.Decode( _g.rtsp.getExtraVideoData(), CFfConvert().AV_PIX_FMT_RGB32, CSqBinary(), CSqMulti() );
+//		_g.dec.Decode( _g.rtsp.getExtraVideoData(), CFfFmt().AV_PIX_FMT_RGB32, CSqBinary(), CSqMulti() );
 
 	} // end if
 
@@ -149,7 +149,7 @@ function UpdateVideo() : ( _g )
 		_self.echo( "Creating audio decoder for " + _g.rtsp.getAudioCodecName() );
 
 		_g.adec = CFfAudioDecoder();
-		if ( !_g.adec.Create( CFfAudioDecoder().LookupCodecId( _g.rtsp.getAudioCodecName() ), CFfConvert().AV_PIX_FMT_YUV420P,
+		if ( !_g.adec.Create( CFfAudioDecoder().LookupCodecId( _g.rtsp.getAudioCodecName() ), CFfFmt().AV_PIX_FMT_YUV420P,
 							 0, 0, 0 ) )
 			_self.echo( "!!! Failed to create decoder for " + _g.rtsp.getAudioCodecName() ), _g.quit = 1;
 
@@ -198,7 +198,7 @@ function UpdateVideo() : ( _g )
 
 	} // end if
 
-	//	if ( _g.dec.Decode( CSqBinary(), CFfConvert().AV_PIX_FMT_RGB32, CSqBinary(), CSqMulti(), 0 ) )
+	//	if ( _g.dec.Decode( CSqBinary(), CFfFmt().AV_PIX_FMT_RGB32, CSqBinary(), CSqMulti(), 0 ) )
 		if ( 0 < _g.dec.getBufferSize() )
 		{
 //			::_self.echo( "buffered : " + _g.dec.getBufferSize() );
@@ -206,7 +206,7 @@ function UpdateVideo() : ( _g )
 			if ( !_g.tex )
 			{
 				// Decode a frame to get the width / height
-				_g.dec.Decode( CSqBinary(), CFfConvert().AV_PIX_FMT_RGB32, CSqBinary(), CSqMulti(), 0 );
+				_g.dec.Decode( CSqBinary(), CFfFmt().AV_PIX_FMT_RGB32, CSqBinary(), CSqMulti(), 0 );
 				if ( 0 < _g.dec.getWidth() && 0 < _g.dec.getHeight() )
 				{	_g.tex = _g.irr.CreateTexture( _g.dec.getWidth(), _g.dec.getHeight(), 0 );
 					_g.video.SetTexture( 0, _g.tex );
@@ -222,9 +222,9 @@ function UpdateVideo() : ( _g )
 				if ( tex.getUsed() )
 				{
 					// dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808,size=165698,stream_index=0
-//					if ( !_g.dec.Decode( frame, CFfConvert().AV_PIX_FMT_RGB32, tex, CSqMulti( "dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808" ) ) )
-//					if ( !_g.dec.Decode( frame, CFfConvert().AV_PIX_FMT_RGB32, tex, CSqMulti(), 0 ) )
-					if ( !_g.dec.Decode( CSqBinary(), CFfConvert().AV_PIX_FMT_RGB32, tex, CSqMulti(), 0 ) )
+//					if ( !_g.dec.Decode( frame, CFfFmt().AV_PIX_FMT_RGB32, tex, CSqMulti( "dts=-9223372036854775808,duration=0,flags=1,pos=-1,pts=-9223372036854775808" ) ) )
+//					if ( !_g.dec.Decode( frame, CFfFmt().AV_PIX_FMT_RGB32, tex, CSqMulti(), 0 ) )
+					if ( !_g.dec.Decode( CSqBinary(), CFfFmt().AV_PIX_FMT_RGB32, tex, CSqMulti(), 0 ) )
 						;
 //						_self.echo( "failed to decode frame" );
 

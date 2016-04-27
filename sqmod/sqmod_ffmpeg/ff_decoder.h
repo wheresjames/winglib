@@ -189,6 +189,8 @@ private:
 	
 	/// Custom codec flags
 	int						m_nFlags;
-
+	
+	/// Image converter
+	CFfConvert				m_cvt;
 };
 DECLARE_INSTANCE_TYPE( CFfDecoder );

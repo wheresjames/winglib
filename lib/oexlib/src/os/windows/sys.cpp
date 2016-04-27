@@ -856,7 +856,8 @@ oexBOOL CSys::Uninit()
 
 void CSys::CloseHandle( t_WAITABLE x_pHandle )
 {//_STT();
-	if ( x_pHandle ) CloseHandle( (HANDLE)x_pHandle );
+	if ( x_pHandle ) 
+		::CloseHandle( (HANDLE)x_pHandle );
 }
 
 CSys::t_WAITABLE CSys::DuplicateHandle( t_WAITABLE x_pHandle )

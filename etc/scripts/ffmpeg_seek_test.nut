@@ -33,7 +33,7 @@ _self.echo( frame_info.print_r( 1 ) );
 
 // Decode frame
 local decframe = CSqBinary();
-if ( !avi.DecodeFrameBin( frame, CFfConvert().AV_PIX_FMT_BGR24, decframe, frame_info, 1 ) )
+if ( !avi.DecodeFrameBin( frame, CFfFmt().AV_PIX_FMT_BGR24, decframe, frame_info, 1 ) )
 {	_self.echo( "Failed to decode frame : " + link );
 	return 0;
 } // end if

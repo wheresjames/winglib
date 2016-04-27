@@ -22,29 +22,29 @@ function _init()
 	_self.echo( "Loaded picture " + img.getWidth() + "x" + img.getHeight() );
 
 	run_test( ffmpeg_root, "MJPEG", img, CFfDecoder().LookupCodecId( "MJPG" ), -1,
-			  CFfConvert().AV_PIX_FMT_YUV420P );
+			  CFfFmt().AV_PIX_FMT_YUV420P );
 
 //	run_test( ffmpeg_root, "WMV1", img, CFfEncoder().CODEC_ID_WMV1, 0,
-//			  CFfConvert().AV_PIX_FMT_YUV420P );
+//			  CFfFmt().AV_PIX_FMT_YUV420P );
 
 //	run_test( ffmpeg_root, "WMV2", img, CFfEncoder().CODEC_ID_WMV2, 0,
-//			  CFfConvert().AV_PIX_FMT_YUV420P );
+//			  CFfFmt().AV_PIX_FMT_YUV420P );
 
 	run_test( ffmpeg_root, "MSMPEG4V2", img, CFfDecoder().LookupCodecId( "MP42" ), 0,
-			  CFfConvert().AV_PIX_FMT_YUV420P );
+			  CFfFmt().AV_PIX_FMT_YUV420P );
 
 	run_test( ffmpeg_root, "MPEG4", img, CFfDecoder().LookupCodecId( "MP4V" ), 0,
-			  CFfConvert().AV_PIX_FMT_YUV420P );
+			  CFfFmt().AV_PIX_FMT_YUV420P );
 
 	run_test( ffmpeg_root, "FLV1", img, CFfDecoder().LookupCodecId( "FLV1" ), 0,
-			  CFfConvert().AV_PIX_FMT_YUV420P );
+			  CFfFmt().AV_PIX_FMT_YUV420P );
 
 	img.Resample( 352, 288, 0 );
 	run_test( ffmpeg_root, "H263", img, CFfDecoder().LookupCodecId( "H263" ), 0,
-			  CFfConvert().AV_PIX_FMT_YUV420P );
+			  CFfFmt().AV_PIX_FMT_YUV420P );
 
 //	run_test( ffmpeg_root, "H264", img, CFfDecoder().LookupCodecId( "H264" ), 0,
-//			  CFfConvert().AV_PIX_FMT_YUV420P );
+//			  CFfFmt().AV_PIX_FMT_YUV420P );
 
 	// **************************************************
 	// AVI test
@@ -172,7 +172,7 @@ function test_avi_write( root, file )
 		return;
 	} // end if
 
-	local enc = CFfEncoder();
+	local enc = CFfFmt();
 	if ( !enc.Create( vid.getVideoCodecId(), CFfConvert().AV_PIX_FMT_YUV420P,
 					  img.getWidth(), img.getHeight(), 15, 2000000, CSqMulti() ) )
 	{	_self.echo( "failed to create encoder" );

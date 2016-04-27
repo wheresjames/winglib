@@ -344,6 +344,9 @@ private:
 
 	/// Decode frame
 	AVFrame *m_pFrame;
+	
+	/// Image converter
+	CFfConvert m_cvt;
 
 	/// Non-zero if key frame has been received
 	int m_bKeyRxd;

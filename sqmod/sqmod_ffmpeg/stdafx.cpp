@@ -234,6 +234,7 @@ static void SQBIND_Export_ffmpeg( sqbind::VM x_vm )
 	if ( !oexCHECK_PTR( x_vm ) )
 		return;
 
+	CFfFmt::Register( x_vm );
 	CFfDecoder::Register( x_vm );
 	CFfEncoder::Register( x_vm );
 	CFfAudioDecoder::Register( x_vm );
