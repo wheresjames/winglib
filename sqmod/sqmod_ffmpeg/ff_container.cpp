@@ -15,31 +15,72 @@ extern "C"
 
 // typedefs from avienc.c http://ffmpeg.org/doxygen/1.2/avienc_8c_source.html#l00039
 // note that AVIStream is defined completely differently in avidec.c
-typedef struct AVIIentry {
+/*
+typedef struct 
+{
   unsigned int flags, pos, len;
-} AVIIentry;
+} SFfAVIIentry;
 
-typedef struct AVIIndex {
+typedef struct 
+{
   int64_t     indx_start;
   int         entry;
   int         ents_allocated;
-  AVIIentry** cluster;
-} AVIIndex;
+  SFfAVIIentry** cluster;
+} SFfAVIIndex;
 
-typedef struct {
+typedef struct 
+{
   int64_t riff_start, movi_list, odml_list;
   int64_t frames_hdr_all;
   int riff_id;
-} AVIContext;
+} SFfAVIContext;
 
-typedef struct  {
+typedef struct  
+{
   int64_t frames_hdr_strm;
   int audio_strm_length;
   int packet_count;
   int entry;
 
-  AVIIndex indexes;
-} AVIStream ;
+  SFfAVIIndex indexes;
+
+} SFfAVIStream ;
+*/
+
+typedef struct SFfAVIIentry {
+	unsigned int flags, pos, len;
+} SFfAVIIentry;
+
+#define AVI_INDEX_CLUSTER_SIZE 16384
+
+typedef struct SFfAVIIndex {
+	int64_t     indx_start;
+	int64_t     audio_strm_offset;
+	int         entry;
+	int         ents_allocated;
+	int         master_odml_riff_id_base;
+	SFfAVIIentry** cluster;
+} SFfAVIIndex;
+
+typedef struct SFfAVIContext {
+	int64_t riff_start, movi_list, odml_list;
+	int64_t frames_hdr_all;
+	int riff_id;
+} SFfAVIContext;
+
+typedef struct SFfAVIStream {
+	int64_t frames_hdr_strm;
+	int64_t audio_strm_length;
+	int packet_count;
+	int entry;
+	int max_size;
+	int sample_requested;
+
+	int64_t last_dts;
+
+	SFfAVIIndex indexes;
+} SFfAVIStream;
 
 
 #define FFF_KEY_FRAME	AV_PKT_FLAG_KEY
@@ -286,7 +327,7 @@ int CFfContainer::CalculateTrueFrameRate()
 		return 0;
 
 	int64_t file_size = avio_tell( pb );
-	AVIStream *avist= (AVIStream *)( s->streams[m_nVideoStream]->priv_data );
+	SFfAVIStream *avist= (SFfAVIStream *)( s->streams[m_nVideoStream]->priv_data );
 	if ( 12 > avist->frames_hdr_strm )
 		return 0;
 	if ( file_size <= avist->frames_hdr_strm )
