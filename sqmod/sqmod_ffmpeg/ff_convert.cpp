@@ -4,6 +4,8 @@
 
 SQBIND_REGISTER_CLASS_BEGIN( CFfConvert, CFfConvert )
 
+	SQBIND_MEMBER_FUNCTION( CFfConvert, Create )
+	
 	SQBIND_MEMBER_FUNCTION( CFfConvert, ConvertBB )
 	SQBIND_MEMBER_FUNCTION( CFfConvert, ConvertIB )
 	SQBIND_MEMBER_FUNCTION( CFfConvert, ConvertBI )
